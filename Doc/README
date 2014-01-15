@@ -1,0 +1,89 @@
+!
+! Copyright (C) 2013 Andrea Dal Corso
+! This file is distributed under the terms of the
+! GNU General Public License. See the file `License'
+! in the root directory of the present distribution,
+! or http://www.gnu.org/copyleft/gpl.txt .
+!
+
+Thermo_pw is a driver for the calculation of thermodynamic quantities,
+using the harmonic and/or quasiharmonic approximation and the
+plane waves pseudopotential method. At low level it uses the QE routines
+to perform the calculations. The calculations made by thermo_pw can be
+done by using bash scripts or other scripting languages. 
+The advantage of writing the scripts in fortran is that the calculations 
+can be parallelized among different images that are sent asyncrounously 
+and controlled by the master image. 
+It reads the input of pwscf and an input that specifies
+which calculations to do and the parameters for these calculations.
+It checks the scratch directories to see what has been already
+calculated. The info for the quantities that have been already
+calculated is read inside the code. The others tasks are scheduled,
+their priorities determined, and distributed to the image driver.
+If there are several available images the different tasks are
+carried out in parallel. This driver can carry out a scf 
+calculation, a non scf calculation to determine the band structure,
+or a linear response calculation at a given q and for a given
+representation. Finally the root image can carry out several
+post processing tasks. The task currently implemented are:
+
+scf           : a single scf calculation to determine the total energy.
+scf_bands     : a band structure calculation after a scf calculation.
+scf_ph        : a phonon at a single q after a scf run.
+scf_disp      : a phonon dispersion calculation after a scf run.
+                This option can calculate the vibrational energy, free energy,
+                entropy, and constant volume specific heat after the phonon 
+                calculation.
+mur_lc        : equilibrium lattice constant via murnaghan equation.
+mur_lc_bands  : a band structure calculation at the minimum or the
+                murnaghan
+mur_lc_ph     : a phonon calculation at a single q at the minimum of the 
+                murmaghan.
+mur_lc_disp   : a dispersion calculation at the minimum of the murnaghan with 
+                the possibility to compute harmonic thermodynamical quantities
+mur_lc_t      : lattice constant and bulk modulus as a function of temperature 
+                within the quasiharmonic approximation
+  
+Input variables of thermo_pw:
+
+what :  one of the above string that specify the type of calculation.
+ngeo :  the number of geometries to use for murnaghan equation.
+
+emin_input : minimum energy for the band dispersion plot
+emax_input : maximum energy for the band dispersion plot
+             (these ranges are with respect to the shifted bands)
+             In metals the Fermi level is at zero, in insulator the
+             last valence band of the first k point.
+nbnd_bands : the number of bands in the band calculation
+
+tmin    : minimum temperature
+tmax    : maximum temperature
+deltat  : interval between two temperatures
+ntemp   : number of temperatures
+
+freqmin : minimum frequency for phonon dos plot
+freqmax : maximum frequency for phonon dos plot
+ndos    : number of dos points in the frequency interval
+deltafreq : frequency interval for phonon dos plot
+nq1_d, nq2_d, nq3_d : thick mesh for phonon dos calculation
+zasr : type of acoustic sum rule applied to the ifc
+
+flpband   : file where the electronic bands are written
+flfrc     : file where the interatomic force constants are written.
+flfrq     : file where matdyn writes the interpolated frequencies 
+fldos     : file where the phonon dos is written
+fltherm   : file where the harmonic thermodynamic quantities are written
+flanhar   : file where the anharmonic thermodynamic quantities are written
+flevdat   : file where the murneghan equation is written
+
+flgnuplot : name of the files where gnuplot scripts are written
+flpsband  : postscript file of the electronic band structure
+flpsdisp  : postscript file of the phonon dispersions
+flpsdos   : postscript file of the phonon dos
+flpstherm : postscript file of the harmonic thermodynamic quantities
+flpsanhar : postscript file of the anharmonic quantities
+
+q2d              : the q or k vectors are specified in a plane
+q_in_band_form   : the q or k are given along paths
+q_in_cryst_coord : the q or k are given in crystal coordinates
+point_label_type : the label definition (see the BZ manual)
