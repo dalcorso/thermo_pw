@@ -84,14 +84,8 @@ $ECHO " done"
 cat > si.scf_bands.in << EOF
  &INPUT_THERMO
   what='scf_bands',
-  q_in_band_form=.true.,
-  filband='si.bands',
-  flpband='si.plot',
-  flgnuplot='gnuplot.tmp',
-  flpsband='si.bands.ps',
   emax_input=5,
   nbnd_bands=12,
-  ngeo=1,
  /
  6
   gG              40
@@ -101,22 +95,21 @@ cat > si.scf_bands.in << EOF
   gG              40
   L                1
  &control
-    calculation = 'scf'
-    restart_mode='from_scratch',
-    prefix='silicon',
-    tstress = .true.
-    tprnfor = .true.
-    pseudo_dir = '$PSEUDO_DIR/',
-    outdir='$TMP_DIR/'
+  calculation = 'scf'
+  restart_mode='from_scratch',
+  prefix='silicon',
+  pseudo_dir = '$PSEUDO_DIR/',
+  outdir='$TMP_DIR/'
  /
  &system
-    ibrav=  2, celldm(1) =10.20, nat=  2, ntyp= 1,
-    ecutwfc =18.0,
+  ibrav=  2, 
+  celldm(1) =10.20, 
+  nat=  2, 
+  ntyp= 1,
+  ecutwfc =18.0,
  /
  &electrons
-    mixing_mode = 'plain'
-    mixing_beta = 0.7
-    conv_thr =  1.0d-8
+  conv_thr =  1.0d-8
  /
 ATOMIC_SPECIES
  Si  28.086  Si.pz-vbc.UPF
@@ -134,12 +127,11 @@ $ECHO " done"
 if [ "$GP_COMMAND" = "" ]; then
     break
 else
-$ECHO "  creating the postscript file si.bands.ps...\c"
+$ECHO "  creating the postscript file output_band.ps...\c"
 $GP_COMMAND gnuplot.tmp
 check_failure $?
 $ECHO " done"
 fi
-
 
 $ECHO
 $ECHO "$EXAMPLE_DIR : done"

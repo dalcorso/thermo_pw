@@ -81,25 +81,21 @@ $ECHO " done"
 cat > si.mur_lc.in << EOF
  &INPUT_THERMO
   what='mur_lc',
-  ngeo=9,
-  file_ev_dat='si.dat'
  /
  &control
-    calculation = 'scf'
-    restart_mode='from_scratch',
-    prefix='silicon',
-    tstress = .true.
-    tprnfor = .true.
-    pseudo_dir = '$PSEUDO_DIR/',
-    outdir='$TMP_DIR/'
+   calculation = 'scf'
+   prefix='silicon',
+   pseudo_dir = '$PSEUDO_DIR/',
+   outdir='$TMP_DIR/'
  /
  &system
-    ibrav=  2, celldm(1) =10.20, nat=  2, ntyp= 1,
-    ecutwfc =24.0,
+   ibrav=  2, 
+   celldm(1) =10.20, 
+   nat=  2, 
+   ntyp= 1,
+   ecutwfc =24.0,
  /
  &electrons
-    mixing_mode = 'plain'
-    mixing_beta = 0.7
     conv_thr =  1.0d-8
  /
 ATOMIC_SPECIES

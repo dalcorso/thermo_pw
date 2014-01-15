@@ -47,43 +47,77 @@ mur_lc_t      : lattice constant and bulk modulus as a function of temperature
 Input variables of thermo_pw:
 
 what :  one of the above string that specify the type of calculation.
+        Mandatory.
 ngeo :  the number of geometries to use for murnaghan equation.
+        Default: 1 with scf_*, 9 with mur_lc_*
 
 emin_input : minimum energy for the band dispersion plot
+             Default: determined from the bands
 emax_input : maximum energy for the band dispersion plot
              (these ranges are with respect to the shifted bands)
              In metals the Fermi level is at zero, in insulator the
              last valence band of the first k point.
+             Default: determined from the bands
 nbnd_bands : the number of bands in the band calculation
+             Default: nbnd given in pw input.
 
 tmin    : minimum temperature
+          Default: 1 K
 tmax    : maximum temperature
+          Default: 800 K
 deltat  : interval between two temperatures
+          Default: 2 K
 ntemp   : number of temperatures
+          Default: determined from previous data
 
 freqmin : minimum frequency for phonon dos plot
+          Default: determined from phonon
 freqmax : maximum frequency for phonon dos plot
-ndos    : number of dos points in the frequency interval
+          Default: determined from phonon
 deltafreq : frequency interval for phonon dos plot
+          Default: 1 cm^{-1}
+ndos    : number of dos points in the frequency interval
+          Default: determined from previous data
 nq1_d, nq2_d, nq3_d : thick mesh for phonon dos calculation
+          Default: 16, 16, 16
 zasr : type of acoustic sum rule applied to the ifc
+          Default: 'Simple'
 
-flpband   : file where the electronic bands are written
-flfrc     : file where the interatomic force constants are written.
+filband   : file where electronic bands and representations are written
+            Default: output_band.dat
+flpband   : file where plottable electronic bands are written
+            Default: output_pband.dat
+flfrc     : file where the interatomic force constants are written
+            Default: output_frc.dat
 flfrq     : file where matdyn writes the interpolated frequencies 
+            Default: output_frq.dat
 fldos     : file where the phonon dos is written
+            Default: output_dos.dat
 fltherm   : file where the harmonic thermodynamic quantities are written
+            Default: output_therm.dat
 flanhar   : file where the anharmonic thermodynamic quantities are written
+            Default: output_anhar.dat
 flevdat   : file where the murneghan equation is written
+            Default: output_ev.dat
 
 flgnuplot : name of the files where gnuplot scripts are written
+            Default: gnuplot.tmp
 flpsband  : postscript file of the electronic band structure
+            Default: output_band.ps
 flpsdisp  : postscript file of the phonon dispersions
+            Default: output_disp.ps
 flpsdos   : postscript file of the phonon dos
+            Default: output_dos.ps
 flpstherm : postscript file of the harmonic thermodynamic quantities
+            Default: output_therm.ps
 flpsanhar : postscript file of the anharmonic quantities
+            Default: output_anhar.ps
 
 q2d              : the q or k vectors are specified in a plane
+                 Default: .FALSE.
 q_in_band_form   : the q or k are given along paths
+                 Default: .TRUE.
 q_in_cryst_coord : the q or k are given in crystal coordinates
+                 Default: .FALSE.
 point_label_type : the label definition (see the BZ manual)
+                 Default: SC

@@ -11,7 +11,7 @@ $ECHO
 $ECHO "$EXAMPLE_DIR : starting"
 $ECHO
 $ECHO "This example shows how to use thermo_pw.x to calculate the "
-$ECHO "band structure of Si."
+$ECHO "band structure of Si at the equilibrium lattice constant."
 
 # set the needed environment variables
 . ../../../environment_variables
@@ -83,15 +83,9 @@ $ECHO " done"
 
 cat > si.scf_bands.in << EOF
  &INPUT_THERMO
-  what='mur_lc_b',
-  q_in_band_form=.true.,
-  filband='si.bands',
-  flpband='si.plot',
-  flgnuplot='gnuplot.tmp',
-  flpsgnuplot='si.bands.ps',
+  what='mur_lc_bands',
   emax_input=5,
   nbnd_bands=12,
-  ngeo=9,
  /
  6
   gG              40
@@ -101,22 +95,20 @@ cat > si.scf_bands.in << EOF
   gG              40
   L                1
  &control
-    calculation = 'scf'
-    restart_mode='from_scratch',
-    prefix='silicon',
-    tstress = .true.
-    tprnfor = .true.
-    pseudo_dir = '$PSEUDO_DIR/',
-    outdir='$TMP_DIR/'
+   calculation = 'scf'
+   prefix='silicon',
+   pseudo_dir = '$PSEUDO_DIR/',
+   outdir='$TMP_DIR/'
  /
  &system
-    ibrav=  2, celldm(1) =10.20, nat=  2, ntyp= 1,
-    ecutwfc =18.0,
+   ibrav=  2, 
+   celldm(1) =10.20, 
+   nat=  2, 
+   ntyp= 1,
+   ecutwfc =18.0,
  /
  &electrons
-    mixing_mode = 'plain'
-    mixing_beta = 0.7
-    conv_thr =  1.0d-8
+   conv_thr =  1.0d-8
  /
 ATOMIC_SPECIES
  Si  28.086  Si.pz-vbc.UPF
@@ -139,7 +131,6 @@ $GP_COMMAND gnuplot.tmp
 check_failure $?
 $ECHO " done"
 fi
-
 
 $ECHO
 $ECHO "$EXAMPLE_DIR : done"

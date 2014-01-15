@@ -11,7 +11,7 @@ $ECHO
 $ECHO "$EXAMPLE_DIR : starting"
 $ECHO
 $ECHO "This example shows how to use thermo_pw.x to calculate the "
-$ECHO "lattice constant of Si."
+$ECHO "phonon frequencies at X of Silicon."
 
 # set the needed environment variables
 . ../../../environment_variables
@@ -81,7 +81,6 @@ $ECHO " done"
 cat > si.scf_ph.in << EOF
  &INPUT_THERMO
   what='scf_ph',
-  ngeo=1,
  /
  &control
     calculation = 'scf'
@@ -121,7 +120,6 @@ $ECHO "  running the thermo scf_ph calculation for Si...\c"
 $THERMO_PW_COMMAND < si.scf_ph.in > si.scf_ph.out
 check_failure $?
 $ECHO " done"
-
 
 $ECHO
 $ECHO "$EXAMPLE_DIR : done"
