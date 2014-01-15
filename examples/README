@@ -1,0 +1,94 @@
+The examples in this directory illustrate the use of thermo_pw to make the 
+following calculations:
+
+example01: 
+what = scf       : a single scf calculation to determine the total energy.
+ngeo = 1           If calculated with several images, only the root image
+                   does the calculation. The others remain idle.
+
+example02: 
+what = scf_bands : a band structure calculation after a scf calculation.
+ngeo = 1           This calculation produces a band structure plot.
+                   If calculated with several images, only the root image
+                   does the calculation. The others remain idle.
+
+example03:
+what = scf_ph    : a phonon calculation at a single q after a scf run.
+ngeo = 1           This calculation computes only the frequencies and
+                   displacements
+                   If calculated with several images, only the root image
+                   does the scf calculation. All the images run asyncronously
+                   and cooperate to calculate the phonon. The maximum number
+                   of images used is the number representations.
+
+example04:
+what = scf_disp  : a phonon dispersion calculation after a scf run.
+ngeo = 1           This calculation produces a plot of the phonon dispersions,
+                   a plot of the phonon density of states, and plots of 
+                   the vibrational energy, free energy, entropy, and constant 
+                   volume specific heat. 
+                   If calculated with several images, only the root image
+                   does the scf calculation. All the images run asyncronously
+                   and cooperate to calculate the phonon. The maximum number
+                   of images used is the total number representations
+                   (adding on all the q).
+
+example05:
+what = mur_lc    : equilibrium lattice constant via murnaghan equation.
+ngeo = # of geom.  Presently only celldm(1) is changed. All the ratios and
+                   angles are kept constant.
+                   This calculation produces a plot of the energy as a 
+                   function of the volume and a plot of the volume as a 
+                   function of pressure.
+                   The equilibrium T=0 lattice constant and bulk modulus 
+                   are written on output.
+                   If calculated with several images all the images run 
+                   asyncronously and cooperate to calculate each geometry.
+
+example06:
+what = mur_lc_b  : This example computes all as above and produces a
+ngeo = # of geom.  plot of the band structure at the equilibrium lattice 
+                   constant.
+                   If calculated with several images each image run 
+                   asyncronously and calculate a different geometry.
+
+example07:
+what = mur_lc_ph : This example computes all as in example05 and produces also
+ngeo = # of geom.  the frequencies and displacements at a single q at the 
+                   minimum of the murmaghan.
+                   If calculated with several images each image runs 
+                   asyncronously and calculate a different geometry.
+                   Then the root image computes the lattice constant at the
+                   equilibrium geometry and finally all the images run again
+                   asyncronously each one computing a different representation.
+
+example08:
+what = mur_lc_disp : This examples computes all as in example05 and
+ngeo = # of geom.    a phonon dispersion at the minimum of the murnaghan. 
+                     The vibrational energy, free energy, entropy, and 
+                     constant volume specific heat can be ploted at the
+                     minimum of the murnaghan.
+                     If calculated with several images each image runs 
+                     asyncronously and calculates a different geometry.
+                     Then the root image computes the lattice constant at the
+                     equilibrium geometry and finally all the images run again
+                     asyncronously each one computing a different representation.
+
+example09:
+what = mur_lc_t  : This example computes a phonon dispersion at each lattice
+ngeo = # of geom.  constant and allows the calculation of the zero-point 
+                   energy contribution to the lattice constant and to the 
+                   bulk modulus and, using the quasiharmonic approximation,
+                   their dependence on the temperature. 
+                   The outputs are: Dispersions at each geometry.
+                   Vibrational free energy, energy, entropy, and constant
+                   volume specific heat at each geometry.
+                   Lattice constant and bulk modulus as a function of the 
+                   temperature. 
+                   If calculated with several images each image runs 
+                   asyncronously and calculates the ground state of 
+                   a different geometry. Then all images are resyncronized 
+                   before computing the phonon dispersions. The latter 
+                   are calculated asyncronously, but the different geometries
+                   are calculate sequentially and all the images are 
+                   resyncronized before changing geometry.
