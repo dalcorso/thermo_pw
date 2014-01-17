@@ -15,12 +15,13 @@ SUBROUTINE thermo_readin()
   !
   USE kinds,                ONLY : DP
   USE thermo_mod,           ONLY : what
-  USE control_thermo,       ONLY : outdir_thermo, file_ev_dat,    &
+  USE control_thermo,       ONLY : outdir_thermo, flevdat,    &
                                    flfrc, flfrq, fldos, fltherm,  &
-                                   flanhar, filband, spin_component
+                                   flanhar, filband
   USE thermodynamics,       ONLY : ngeo, tmin, tmax, deltat, ntemp
-  USE ifc,                  ONLY : nq1_d, nq2_d, nq3_d, ndos, deltae, zasr, &
-                                   disp_q, disp_wq, disp_nqs
+  USE ifc,                  ONLY : nq1_d, nq2_d, nq3_d, ndos, deltafreq, zasr, &
+                                   disp_q, disp_wq, disp_nqs, freqmin_input, &
+                                   freqmax_input
   USE input_parameters,     ONLY : outdir
   USE read_input,           ONLY : read_input_file
   USE command_line_options, ONLY : input_file_ 
@@ -55,15 +56,15 @@ SUBROUTINE thermo_readin()
                             flanhar, filband,             &
                             nq1_d, nq2_d, nq3_d,          &
                             tmin, tmax, deltat, ntemp,    &
-                            ndos, deltae,                 &
+                            freqmin_input, freqmax_input, &
+                            ndos, deltafreq,              &
                             q2d, q_in_band_form,          &
                             q_in_cryst_coord,             &
                             point_label_type,             &
-                            spin_component,               &
                             nbnd_bands,                   &
-                            file_ev_dat,                  &
+                            flevdat,                      &
                             flpband,                      &
-                            flgnuplot, flpsband, flpsdisp,&
+                            flgnuplot, flpsband,          &
                             flpsdisp, flpsdos, flpstherm, &
                             flpsanhar,                    &
                             emin_input, emax_input
@@ -71,39 +72,48 @@ SUBROUTINE thermo_readin()
   !  First read the input of thermo. Only one node reads
   !
   what=' '
-  ngeo=1
-  zasr='no'
-  flfrc=' '
-  flfrq=' '
-  fldos=' '
-  fltherm=' '
-  flanhar=' '
-  filband=' '
-  flpband=' '
-  nq1_d=1
-  nq2_d=1
-  nq3_d=1
+  ngeo=0
+
+  filband='output_band.dat'
+  flpband='output_pband.dat'
+  flfrc='output_frc.dat'
+  flfrq='output_frq.dat'
+  fldos='output_dos.dat'
+  fltherm='output_therm.dat'
+  flanhar='output_anhar.dat'
+  flevdat='output_ev.dat'
+
+  nq1_d=16
+  nq2_d=16
+  nq3_d=16
+  zasr='simple'
+  freqmin_input=0.0_DP
+  freqmax_input=0.0_DP
+  deltafreq=1.0_DP
+  ndos=1
+
   tmin=1.0_DP
   tmax=800.0_DP
   deltat=2.0_DP
   ntemp=1
-  ndos=1
-  deltae=1.0_DP
-  q2d=.FALSE.
-  spin_component=1
-  nbnd_bands=1
+
+  nbnd_bands=0
   emin_input=0.0_DP
   emax_input=0.0_DP
-  q_in_band_form=.FALSE.
+
+  flgnuplot='gnuplot.tmp'
+  flpsband='output_band.ps'
+  flpsdisp='output_disp.ps'
+  flpsdos='output_dos.ps'
+  flpstherm='output_therm.ps'
+  flpsanhar='output_anhar.ps'
+
+
+  q2d=.FALSE.
+  q_in_band_form=.TRUE.
   q_in_cryst_coord=.FALSE.
   point_label_type='SC'
-  file_ev_dat='ev_input.dat'
-  flgnuplot='gnuplot.tmp'
-  flpsband='gnuplot.band.ps'
-  flpsdisp='gnuplot.band.ps'
-  flpsdos='gnuplot.phdos.ps'
-  flpstherm='gnuplot.therm.ps'
-  flpsanhar='gnuplot.anhar.ps'
+
   IF (meta_ionode) READ( 5, input_thermo, IOSTAT = ios )
   CALL mp_bcast(ios, meta_ionode_id, world_comm )
   CALL errore( 'thermo_readin', 'reading input_thermo namelist', ABS( ios ) )
@@ -111,7 +121,14 @@ SUBROUTINE thermo_readin()
   CALL bcast_thermo_input()
   !
   read_paths=( what=='scf_bands' .OR. what=='scf_disp' .OR. &
-               what=='mur_lc_b' .OR. what=='mur_lc_disp' .OR. what=='mur_lc_t')
+               what=='mur_lc_bands' .OR. what=='mur_lc_disp' .OR. &
+               what=='mur_lc_t')
+
+  IF ( ngeo==0 ) THEN
+     IF (what(1:4) == 'scf_') ngeo=1
+     IF (what(1:6) == 'mur_lc') ngeo=9
+  END IF
+
   nqaux=0
   IF ( read_paths ) THEN
 

@@ -71,7 +71,7 @@ SUBROUTINE do_ev()
 !
 USE kinds, ONLY : DP
 USE thermo_mod, ONLY : vmin, b0, emin
-USE control_thermo, ONLY : file_ev_dat
+USE control_thermo, ONLY : flevdat
 USE io_global, ONLY : meta_ionode_id, stdout
 USE mp_world, ONLY : world_comm
 USE mp, ONLY : mp_bcast
@@ -79,7 +79,7 @@ USE mp, ONLY : mp_bcast
 IMPLICIT NONE
 CHARACTER(LEN=256) :: file_dat
 
-  file_dat=TRIM(file_ev_dat)
+  file_dat=TRIM(flevdat)
   CALL write_ev_input(file_dat)
   CALL ev_sub(vmin, b0, emin)
   CALL mp_bcast(vmin, meta_ionode_id, world_comm)
@@ -100,7 +100,7 @@ SUBROUTINE do_ev_t(itemp)
 !
 USE kinds, ONLY : DP
 USE thermo_mod, ONLY : alat_geo, energy_geo, vmin_t, b0_t, free_e_min_t
-USE control_thermo, ONLY : file_ev_dat
+USE control_thermo, ONLY : flevdat
 USE io_global, ONLY : meta_ionode_id, stdout,  meta_ionode
 USE mp_images, ONLY : my_image_id, root_image
 USE mp_world, ONLY : world_comm
@@ -120,7 +120,7 @@ REAL(DP) :: free_e, vm, b0
   IF (.NOT.ALLOCATED(b0_t)) ALLOCATE(b0_t(ntemp))
   IF (.NOT.ALLOCATED(free_e_min_t)) ALLOCATE(free_e_min_t(ntemp))
   
-  file_dat=TRIM(file_ev_dat)//TRIM(int_to_char(itemp))
+  file_dat=TRIM(flevdat)//TRIM(int_to_char(itemp))
   CALL write_ev_driver(file_dat)
 
   IF (meta_ionode) THEN
@@ -153,43 +153,3 @@ REAL(DP) :: free_e, vm, b0
 
 END SUBROUTINE do_ev_t
 
-SUBROUTINE write_anharmonic()
-USE kinds, ONLY : DP
-USE thermodynamics, ONLY : ntemp, temp
-USE thermo_mod,     ONLY : vmin_t, b0_t
-USE control_thermo, ONLY : flanhar
-USE io_global,      ONLY : ionode
-USE mp_images,      ONLY : my_image_id, root_image
-
-IMPLICIT NONE
-INTEGER :: itemp, iu_therm
-REAL(DP) :: a0, a_t
-
-IF (my_image_id /= root_image) RETURN
-
-IF (ionode) THEN
-   iu_therm=2
-   OPEN(UNIT=iu_therm, FILE=TRIM(flanhar), STATUS='UNKNOWN', FORM='FORMATTED')
-   WRITE(iu_therm,'("#   T (K)       V(T) (a.u.)^3      a(T) (a.u.)  &
-                   &  alpha (10^(-6))    B (T) (kbar)" )' )
-   DO itemp = 1, ntemp-1
-      a_t=(vmin_t(itemp)*4.0_DP)**(1.0_DP/3.0_DP)
-      IF (itemp==1) THEN
-         a0=(vmin_t(itemp)*4.0_DP)**(1.0_DP/3.0_DP)
-         WRITE(iu_therm, '(5e15.7)') temp(itemp,1), vmin_t(itemp), &
-                                  a_t, (a_t-a0)*1.d6/a0/temp(itemp,1), b0_t(itemp)
-      ELSEIF (itemp==2) THEN
-         WRITE(iu_therm, '(5e15.7)') temp(itemp,1), vmin_t(itemp), &
-          a_t, (vmin_t(itemp)-vmin_t(itemp-1))/(temp(itemp,1)-temp(itemp-1,1))/ &
-                3.D-6/ vmin_t(itemp),  b0_t(itemp)
-      ELSE
-         WRITE(iu_therm, '(5e15.7)') temp(itemp,1), vmin_t(itemp), &
-          a_t, (vmin_t(itemp+1)-vmin_t(itemp-1))/ &
-           (temp(itemp+1,1)-temp(itemp-1,1))/3.D-6/vmin_t(itemp), b0_t(itemp)
-      END IF
-   END DO
-   CLOSE(iu_therm)
-END IF
-
-RETURN
-END SUBROUTINE write_anharmonic

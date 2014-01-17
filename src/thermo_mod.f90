@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2013 Andrea Dal Corso
+! Copyright (C) 2013 - 2014 Andrea Dal Corso
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -38,13 +38,23 @@ MODULE thermodynamics
   REAL(DP), ALLOCATABLE :: ph_free_ener(:,:) ! phonon free_energy, T, geometry
   REAL(DP), ALLOCATABLE :: ph_entropy(:,:)   ! phonon entropy, T, geometry
   REAL(DP), ALLOCATABLE :: ph_cv(:,:)        ! phonon specific heat, T, geometry
-  REAL(DP), ALLOCATABLE :: ph_cp(:,:)        ! phonon specific heat, T, geometry
+  REAL(DP), ALLOCATABLE :: omegav(:)         ! volume (geometry)
   REAL(DP) :: tmin, tmax                ! maximum and minimum temperature (K)
   REAL(DP) :: deltat                    ! delta T
   INTEGER  :: ntemp                     ! number of temperatures
   INTEGER  :: ngeo                      ! number of geometries used for
                                         ! computing anharmonic properties
 END MODULE thermodynamics
+
+MODULE anharmonic
+  USE kinds, ONLY: DP
+  REAL(DP), ALLOCATABLE :: cp_t(:)     ! isobaric specific heat (T)
+  REAL(DP), ALLOCATABLE :: cv_t(:)     ! isocoric specific heat (T)
+  REAL(DP), ALLOCATABLE :: b0_s(:)     ! constant entropy bulk modulus
+  REAL(DP), ALLOCATABLE :: alpha_t(:)  ! linear thermal expansion coefficient
+  REAL(DP), ALLOCATABLE :: beta_t(:)   ! volume thermal expansion coefficient
+
+END MODULE anharmonic
 
 MODULE ifc
   !
@@ -64,12 +74,14 @@ MODULE ifc
   INTEGER :: disp_nqs
   REAL(DP), ALLOCATABLE :: disp_q(:,:), disp_wq(:)  ! q path for interpolated
                                                     ! phonon
-  INTEGER :: nq1_d, nq2_d, nq3_d     ! grid for phonon dos
-  INTEGER :: ndos                    ! number of points in the dos plot
-  REAL(DP) :: emin_dos, emax_dos     ! dos minimum and maximun frequency can 
-                                     ! be given as input (in cm^{-1})
-  REAL(DP) :: deltae                 ! delta energy in the dos plot. (in cm^{-1})
-  CHARACTER(LEN=10) :: zasr          ! the type of asr
+  INTEGER :: nq1_d, nq2_d, nq3_d ! grid for phonon dos
+  INTEGER :: ndos                ! number of points in the dos plot
+  REAL(DP) :: freqmin, freqmax   ! dos minimum and maximun frequency 
+                                 ! at this geometry
+  REAL(DP) :: freqmin_input, freqmax_input   ! dos minimum and maximun frequency 
+                                 ! be given as input (in cm^{-1})
+  REAL(DP) :: deltafreq          ! delta frequency in the dos plot. (in cm^{-1})
+  CHARACTER(LEN=10) :: zasr      ! the type of asr
   ! 
 END MODULE ifc
 
@@ -113,7 +125,7 @@ MODULE control_thermo
   LOGICAL :: lmatdyn     ! if .true. the phonon are interpolated
   
   CHARACTER(LEN=256) :: outdir_thermo, fildyn_thermo, flfrc, &
-                        flfrq, fldos, fltherm, flanhar, file_ev_dat, &
+                        flfrq, fldos, fltherm, flanhar, flevdat, &
                         filband
   INTEGER :: spin_component
   !
@@ -170,6 +182,5 @@ MODULE control_gnuplot
                                   ! thermodynamic quantities
   CHARACTER(LEN=256) :: flpsanhar ! the name of the postscript file with 
                                   ! anharmonic quantities
-  INTEGER :: ncount=0             ! the filenames are flgnuplot//ncount
 
 END MODULE control_gnuplot

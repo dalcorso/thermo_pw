@@ -130,7 +130,7 @@ END SUBROUTINE gnuplot_xlabel
 
 SUBROUTINE gnuplot_unset_xticks()
 IMPLICIT NONE
-   WRITE(iun_gnuplot,'("unset xtics")') 
+   IF (ionode) WRITE(iun_gnuplot,'("unset xtics")') 
 RETURN
 END SUBROUTINE gnuplot_unset_xticks
 

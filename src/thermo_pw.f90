@@ -30,7 +30,7 @@ PROGRAM thermo_pw
   ! ...   scf_ph    : a phonon at a single q after a scf run
   ! ...   scf_disp  : a phonon dispersion calculation after a scf run
   ! ...   mur_lc    : lattice constant via murnaghan equation
-  ! ...   mur_lc_b  : a band structure calculation at the minimum or the
+  ! ...   mur_lc_bands  : a band structure calculation at the minimum or the
   ! ...               murnaghan
   ! ...   mur_lc_ph : a phonon calculation at the minimum of the murmaghan
   ! ...   mur_lc_disp : a dispersion calculation at the minimum of the
@@ -52,11 +52,13 @@ PROGRAM thermo_pw
   USE control_thermo,   ONLY : lev_syn_1, lev_syn_2, lpwscf_syn_1, &
                                lbands_syn_1, lph, outdir_thermo, lq2r, &
                                lmatdyn, ldos, ltherm, flfrc, flfrq, fldos, &
-                               fltherm
-  USE ifc,              ONLY : emin_dos, emax_dos
+                               fltherm, spin_component, flevdat
+  USE ifc,              ONLY : freqmin, freqmax
   USE control_paths,    ONLY : nqaux, nbnd_bands
-  USE control_gnuplot,  ONLY : flpsdos
+  USE control_gnuplot,  ONLY : flpsdos, flgnuplot, flpstherm, flpsdisp
+  USE control_bands,    ONLY : flpband
   USE wvfct,            ONLY : nbnd
+  USE lsda_mod,         ONLY : nspin
   USE thermodynamics,   ONLY : phdos_save, ngeo, ntemp
   USE phdos_module,     ONLY : destroy_phdos
   USE input_parameters, ONLY : ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
@@ -74,12 +76,15 @@ PROGRAM thermo_pw
   INTEGER :: iq, irr, ierr
   CHARACTER (LEN=9)   :: code = 'THERMO_PW'
   CHARACTER (LEN=256) :: auxdyn=' '
+  CHARACTER (LEN=256) :: diraux=' '
   CHARACTER(LEN=6) :: int_to_char
-  INTEGER :: part, nwork, igeom, itemp
+  INTEGER :: part, nwork, igeom, itemp, nspin0
   LOGICAL :: all_done_asyn
   LOGICAL  :: exst, parallelfs
-  CHARACTER(LEN=256) :: fildyn_thermo, flfrc_thermo, flfrq_thermo, fldos_thermo, &
-                        fltherm_thermo
+  CHARACTER(LEN=256) :: fildyn_thermo, flfrc_thermo, flfrq_thermo, &
+                        fldos_thermo, fltherm_thermo, flpband_thermo, &
+                        flpsdos_thermo, flpstherm_thermo, flgnuplot_thermo, &
+                        flpsdisp_thermo
   !
   ! Initialize MPI, clocks, print initial messages
   !
@@ -143,8 +148,12 @@ PROGRAM thermo_pw
            CALL set_k_points()
            IF (nbnd_bands > nbnd) nbnd = nbnd_bands
            CALL do_pwscf(.FALSE.)
-           CALL bands_sub()
-           CALL plotband_sub(1)
+           nspin0=nspin
+           IF (nspin==4) nspin0=1
+           DO spin_component = 1, nspin0
+              CALL bands_sub()
+              CALL plotband_sub(1,1)
+           ENDDO
         ENDIF
      ENDIF
   END IF
@@ -170,12 +179,24 @@ PROGRAM thermo_pw
         IF (igeom==1) flfrc_thermo=TRIM(flfrc)
         IF (igeom==1) flfrq_thermo=TRIM(flfrq)
         IF (igeom==1) fldos_thermo=TRIM(fldos)
+        IF (igeom==1) flpsdos_thermo=TRIM(flpsdos)
         IF (igeom==1) fltherm_thermo=TRIM(fltherm)
+        IF (igeom==1) flpstherm_thermo=TRIM(flpstherm)
+        IF (igeom==1) flpband_thermo=TRIM(flpband)
+        IF (igeom==1) flgnuplot_thermo=TRIM(flgnuplot)
+        IF (igeom==1) flpsdisp_thermo=TRIM(flpsdisp)
+
         fildyn=TRIM(fildyn_thermo)//'.g'//TRIM(int_to_char(igeom))//'.'
         flfrc=TRIM(flfrc_thermo)//'.g'//TRIM(int_to_char(igeom))
         flfrq=TRIM(flfrq_thermo)//'.g'//TRIM(int_to_char(igeom))
         fldos=TRIM(fldos_thermo)//'.g'//TRIM(int_to_char(igeom))
+        flpsdos=TRIM(flpsdos_thermo)//'.g'//TRIM(int_to_char(igeom))
         fltherm=TRIM(fltherm_thermo)//'.g'//TRIM(int_to_char(igeom))
+        flpstherm=TRIM(flpstherm_thermo)//'.g'//TRIM(int_to_char(igeom))
+        flpband=TRIM(flpband_thermo)//'.g'//TRIM(int_to_char(igeom))
+        flgnuplot=TRIM(flgnuplot_thermo)//'.g'//TRIM(int_to_char(igeom))
+        flpsdisp=TRIM(flpsdisp_thermo)//'.g'//TRIM(int_to_char(igeom))
+
         IF (nqaux > 0) CALL set_paths_disp()
         !
         ! ... Checking the status of the calculation and if necessary initialize
@@ -203,7 +224,7 @@ PROGRAM thermo_pw
 !
            IF (lmatdyn) THEN
               CALL matdyn_sub(.FALSE., igeom)
-              CALL plotband_sub(2)
+              CALL plotband_sub(2,igeom)
            ENDIF
 !
 !    computes phonon dos
@@ -211,8 +232,8 @@ PROGRAM thermo_pw
            IF (lmatdyn.AND.ldos) THEN
               IF (.NOT.ALLOCATED(phdos_save)) ALLOCATE(phdos_save(ngeo))
               CALL matdyn_sub(.TRUE.,igeom)
-              CALL simple_plot(fldos, flpsdos, 'frequency (cm^{-1})', 'DOS', &
-                       'red', emin_dos, emax_dos, 0.0_DP, 0.0_DP)
+              CALL simple_plot('_dos', fldos, flpsdos, 'frequency (cm^{-1})', &
+                       'DOS', 'red', freqmin, freqmax, 0.0_DP, 0.0_DP)
            ENDIF
 !
 !    computes the thermodynamical properties
@@ -233,12 +254,17 @@ PROGRAM thermo_pw
         CALL destroy_status_run()
         CALL deallocate_part()
      ENDDO
+     flgnuplot=TRIM(flgnuplot_thermo)
 
      IF (lev_syn_2) THEN
+        diraux='evdir'
+        CALL check_tempdir ( diraux, exst, parallelfs )
+        flevdat=TRIM(diraux)//'/'//TRIM(flevdat)
         DO itemp = 1, ntemp
            IF (lev_syn_2) CALL do_ev_t(itemp)
         ENDDO
         CALL write_anharmonic()
+        CALL plot_anhar() 
      ENDIF
 
      IF (lmatdyn.AND.ldos) THEN

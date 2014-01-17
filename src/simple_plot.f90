@@ -5,7 +5,7 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-SUBROUTINE simple_plot(data_filename, psfilename, xlabel, ylabel, &
+SUBROUTINE simple_plot(ext, data_filename, psfilename, xlabel, ylabel, &
                        colore, xmin, xmax, ymin, ymax)
 !
 !  This is a simple routine which write a gnuplot script in flgnuplot,
@@ -13,21 +13,24 @@ SUBROUTINE simple_plot(data_filename, psfilename, xlabel, ylabel, &
 !  in a postscript file called psfilename.
 !
 USE kinds,           ONLY : DP
-USE control_gnuplot, ONLY : flgnuplot, ncount
-USE gnuplot,       ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
-                          gnuplot_write_file_data, gnuplot_ylabel, &
-                          gnuplot_xlabel, &
-                          gnuplot_write_vertical_line, gnuplot_write_label
+USE control_gnuplot, ONLY : flgnuplot
+USE gnuplot,         ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
+                            gnuplot_write_file_data, gnuplot_ylabel, &
+                            gnuplot_xlabel, &
+                            gnuplot_write_vertical_line, gnuplot_write_label
+USE mp_images,       ONLY : root_image, my_image_id
+
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: xmin, xmax, ymin, ymax
 CHARACTER(LEN=*), INTENT(IN) :: data_filename, psfilename, xlabel, ylabel
 
 CHARACTER(LEN=256) :: filename
-CHARACTER(LEN=*) :: colore
+CHARACTER(LEN=*) :: colore, ext
 CHARACTER(LEN=6), EXTERNAL :: int_to_char
 
-ncount=ncount+1
-filename=TRIM(flgnuplot)//TRIM(int_to_char(ncount))
+IF ( my_image_id /= root_image ) RETURN
+
+filename=TRIM(flgnuplot)//TRIM(ext)
 CALL gnuplot_start(filename)
 
 filename=TRIM(psfilename)

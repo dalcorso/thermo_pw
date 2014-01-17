@@ -5,7 +5,7 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-SUBROUTINE plotband_sub(icode)
+SUBROUTINE plotband_sub(icode,igeom)
   !
   ! reads data files produced by "bands_sub", produces
   ! * data file ready for plotting with gnuplot, xmgr or the like
@@ -27,12 +27,13 @@ SUBROUTINE plotband_sub(icode)
   USE constants,     ONLY : rytoev
   USE ener,          ONLY : ef
   USE klist,         ONLY : degauss, nelec
+  USE ifc,           ONLY : freqmin, freqmax
   USE mp,            ONLY : mp_bcast
   USE io_global,     ONLY : stdout, ionode, ionode_id
   USE mp_images,     ONLY : intra_image_comm, root_image, my_image_id
 
   IMPLICIT NONE
-  INTEGER, INTENT(IN) :: icode
+  INTEGER, INTENT(IN) :: icode, igeom
   REAL(DP), ALLOCATABLE :: e(:,:), k(:,:), e_in(:), kx(:)
   REAL(DP), ALLOCATABLE :: e_rap(:,:), k_rap(:,:)
   REAL(DP) :: k1(3), k2(3), ps
@@ -56,8 +57,9 @@ SUBROUTINE plotband_sub(icode)
   IF ( my_image_id /= root_image ) RETURN
 
   IF (flpband == ' ') RETURN
-  IF (icode==1) filedata=TRIM(filband)
-  IF (icode==2) filedata=TRIM(flfrq)
+
+  IF (icode==1) filedata = TRIM(filband)
+  IF (icode==2) filedata = TRIM(flfrq)
 
   IF (ionode) &
      OPEN(UNIT=1,FILE=TRIM(filedata),FORM='formatted',STATUS='OLD',ERR=10,&
@@ -247,17 +249,19 @@ SUBROUTINE plotband_sub(icode)
            IF (e(ibnd,1) > eref) eref=e(ibnd,1)
         END DO
      END IF
+     IF (emin_input /= 0.0_DP) emin=emin_input + eref
+     IF (emax_input /= 0.0_DP) emax=emax_input + eref
   ELSE IF (icode==2) THEN
 !
 !   no shift for phonon
 !
      eref=0.0_DP
+     IF (freqmin /= 0.0_DP ) emin = freqmin
+     IF (freqmax /= 0.0_DP ) emax = freqmax
   ELSE
      CALL errore('plotband_sub','Problem with icode',1)
   ENDIF
 
-  IF (emin_input /= 0.0_DP) emin=emin_input + eref
-  IF (emax_input /= 0.0_DP) emax=emax_input + eref
 !
 !  Since the minimum and maximum energies are given in input we can
 !  sign the bands that are completely outside this range.
@@ -480,7 +484,7 @@ SUBROUTINE plotband_sub(icode)
   END IF
 
   CALL write_gnuplot_file(kx, e, nks, nbnd, emin, emax, eref, nlines, nrap, &
-                          has_points, point, icode, exist_rap)
+                          has_points, point, icode, exist_rap, igeom)
 
 
   DEALLOCATE(point)
@@ -507,7 +511,7 @@ SUBROUTINE plotband_sub(icode)
 END SUBROUTINE plotband_sub
 
 SUBROUTINE write_gnuplot_file(kx, e, nks, nbnd, emin, emax, eref, nlines, &
-                              nrap, has_points, point, icode, exist_rap)
+                              nrap, has_points, point, icode, exist_rap, igeom)
 USE kinds,           ONLY : DP
 USE control_bands,   ONLY : flpband
 USE control_paths,   ONLY : nqaux, label_disp_q, letter_path
@@ -517,7 +521,7 @@ USE gnuplot,       ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
                           gnuplot_write_vertical_line, gnuplot_write_label, &
                           gnuplot_set_eref, gnuplot_unset_xticks
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: nks, nbnd, nlines, icode
+INTEGER, INTENT(IN) :: nks, nbnd, nlines, icode, igeom
 INTEGER, INTENT(IN) :: point(nks), nrap(nks)
 REAL(DP), INTENT(IN) :: kx(nks), e(nbnd,nks)
 REAL(DP), INTENT(IN) :: emin, emax, eref 
@@ -530,7 +534,12 @@ CHARACTER(LEN=256) :: filename
 CHARACTER(LEN=30) :: colore(12)
 CHARACTER(LEN=6), EXTERNAL :: int_to_char
 
-filename=TRIM(flgnuplot)
+IF (icode==1) THEN
+   filename=TRIM(flgnuplot)//'_band'
+ELSEIF (icode==2) THEN
+   filename=TRIM(flgnuplot)//'_disp'
+ENDIF
+
 CALL gnuplot_start(filename)
 
 IF (icode==1) THEN
@@ -538,6 +547,7 @@ IF (icode==1) THEN
 ELSEIF (icode==2) THEN
    filename=TRIM(flpsdisp)
 ENDIF
+IF (igeom > 1) filename=filename//TRIM(int_to_char(igeom))
 
 CALL gnuplot_write_header(filename, kx(1), kx(nks), emin, emax ) 
 CALL gnuplot_unset_xticks() 

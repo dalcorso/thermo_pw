@@ -73,7 +73,8 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
 
   USE ifc,        ONLY : frc, atm, zeu, tau_blk, ityp_blk, m_loc, &
                          disp_q, disp_nqs, nq1_d, nq2_d, &
-                         nq3_d, deltae, emin_dos, emax_dos, ndos, zasr
+                         nq3_d, deltafreq, freqmin, freqmax, ndos, zasr, &
+                         freqmin_input, freqmax_input
  
   USE thermodynamics, ONLY : phdos_save
   USE control_thermo, ONLY : flfrc, flfrq, fldos, ldos
@@ -426,28 +427,30 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
            emax = MAX (emax, freq(i,n))
         END DO
      END DO
-     IF (emin_dos > 0.0_DP) THEN
-        emin=emin_dos
+     IF (freqmin_input > 0.0_DP) THEN
+        emin=freqmin_input
+        freqmin=emin
      ELSE
-        emin_dos=emin
+        freqmin=emin
      ENDIF
-     IF (emax_dos > 0.0_DP) THEN
-        emax=emax_dos
+     IF (freqmax_input > 0.0_DP) THEN
+        emax=freqmax_input
+        freqmax=emax
      ELSE
-        emax_dos=emax
+        freqmax=emax
      ENDIF
      !
      IF (ndos > 1) THEN
-        deltae = (emax - emin)/(ndos-1)
+        deltafreq = (emax - emin)/(ndos-1)
      ELSE
-        ndos = NINT ( (emax - emin) / deltae + 1.51d0 )
+        ndos = NINT ( (emax - emin) / deltafreq + 1.51d0 )
      END IF
 
-     CALL set_phdos(phdos_save(igeom),ndos,deltae)
+     CALL set_phdos(phdos_save(igeom),ndos,deltafreq)
 
      IF (ionode) OPEN (unit=2,file=fldos,status='unknown',form='formatted')
      DO n= 1, ndos
-        e = emin + (n - 1) * deltae
+        e = emin + (n - 1) * deltafreq
         CALL dos_t(freq, 1, 3*nat, nq, ntetra, tetra, e, dosofe)
         !
         ! The factor 0.5 corrects for the factor 2 in dos_t,

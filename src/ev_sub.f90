@@ -184,10 +184,13 @@ SUBROUTINE ev_sub(vmin,b0,emin_out)
     ELSE IF ( ierr == 12 ) THEN
        CALL errore( 'write_evdata_xml', 'error opening the xml file ', ierr )
     ENDIF
+    CALL mp_bcast(par, ionode_id, intra_image_comm)
+    CALL mp_bcast(emin, ionode_id, intra_image_comm)
     
     vmin=par(1)
     b0=par(2)
     emin_out=emin
+    
 
     RETURN
 

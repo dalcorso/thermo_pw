@@ -12,12 +12,12 @@ SUBROUTINE bcast_thermo_input()
   !  This routine broadcasts to all the images the input of thermo_pw.
   !
   USE thermo_mod,      ONLY : what
-  USE control_thermo,  ONLY : outdir_thermo, file_ev_dat,    &
+  USE control_thermo,  ONLY : outdir_thermo, flevdat,    &
                               flfrc, flfrq, fldos, fltherm, flanhar, &
-                              filband, spin_component
+                              filband
   USE thermodynamics,  ONLY : ngeo, tmin, tmax, deltat, ntemp
-  USE ifc,             ONLY : nq1_d, nq2_d, nq3_d, ndos, deltae, zasr
-  USE control_thermo,  ONLY : file_ev_dat
+  USE ifc,             ONLY : nq1_d, nq2_d, nq3_d, ndos, deltafreq, zasr, &
+                              freqmin_input, freqmax_input
   USE control_paths,   ONLY : q_in_band_form, q_in_cryst_coord, q2d, &
                               point_label_type, nbnd_bands
   USE control_bands,   ONLY : flpband, emin_input, emax_input
@@ -41,8 +41,10 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( nq1_d, meta_ionode_id, world_comm )
   CALL mp_bcast( nq2_d, meta_ionode_id, world_comm )
   CALL mp_bcast( nq3_d, meta_ionode_id, world_comm )
+  CALL mp_bcast( freqmin_input, meta_ionode_id, world_comm )
+  CALL mp_bcast( freqmax_input, meta_ionode_id, world_comm )
   CALL mp_bcast( ndos, meta_ionode_id, world_comm )
-  CALL mp_bcast( deltae, meta_ionode_id, world_comm )
+  CALL mp_bcast( deltafreq, meta_ionode_id, world_comm )
   CALL mp_bcast( nbnd_bands, meta_ionode_id, world_comm )
   CALL mp_bcast( tmin, meta_ionode_id, world_comm )
   CALL mp_bcast( tmax, meta_ionode_id, world_comm )
@@ -55,10 +57,9 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( flpsdos, meta_ionode_id, world_comm )
   CALL mp_bcast( flpstherm, meta_ionode_id, world_comm )
   CALL mp_bcast( flpsanhar, meta_ionode_id, world_comm )
-  CALL mp_bcast( spin_component, meta_ionode_id, world_comm )
   CALL mp_bcast( emin_input, meta_ionode_id, world_comm )
   CALL mp_bcast( emax_input, meta_ionode_id, world_comm )
-  CALL mp_bcast( file_ev_dat, meta_ionode_id, world_comm )
+  CALL mp_bcast( flevdat, meta_ionode_id, world_comm )
   CALL mp_bcast( q_in_band_form, meta_ionode_id, world_comm )
   CALL mp_bcast( q_in_cryst_coord, meta_ionode_id, world_comm )
   CALL mp_bcast( point_label_type, meta_ionode_id, world_comm )

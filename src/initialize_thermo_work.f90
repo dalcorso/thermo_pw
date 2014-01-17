@@ -15,7 +15,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   !
   USE kinds,      ONLY : DP
   USE thermo_mod, ONLY : what, alat_geo, energy_geo
-  USE thermodynamics, ONLY : ngeo
+  USE thermodynamics, ONLY : ngeo, omegav
   USE control_thermo, ONLY : lpwscf, lbands, lphonon, lev_syn_1, lev_syn_2,&
                              lph, lpwscf_syn_1, lbands_syn_1, ldos, lq2r, &
                              lmatdyn, ltherm
@@ -47,7 +47,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               ltherm = .TRUE.
            ENDIF
            IF (what=='scf_bands') lbands_syn_1=.TRUE.
-        CASE ('mur_lc', 'mur_lc_b', 'mur_lc_ph', 'mur_lc_disp')
+        CASE ('mur_lc', 'mur_lc_bands', 'mur_lc_ph', 'mur_lc_disp')
            nwork=ngeo
            ALLOCATE(alat_geo(ngeo))
            ALLOCATE(energy_geo(ngeo))
@@ -64,13 +64,15 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               lmatdyn = .TRUE.
               ltherm = .TRUE.
            ENDIF
-           IF (what=='mur_lc_b') lbands_syn_1=.TRUE.
+           IF (what=='mur_lc_bands') lbands_syn_1=.TRUE.
         CASE ('mur_lc_t')
            nwork=ngeo
            ALLOCATE(alat_geo(ngeo))
            ALLOCATE(energy_geo(ngeo))
+           ALLOCATE(omegav(ngeo))
            DO igeom = 1, ngeo
-              alat_geo(igeom)=alat+(igeom-(ngeo+1.0_DP)/2.0_DP)*0.1_DP
+              alat_geo(igeom) = alat + (igeom-(ngeo+1.0_DP)/2.0_DP)*0.1_DP
+              omegav(igeom) = alat_geo(igeom)**3 / 4.0_DP
            ENDDO
            energy_geo=0.0_DP
            lph = .TRUE.
@@ -109,7 +111,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   IF (part == 1) THEN
      SELECT CASE (TRIM(what))
         CASE ('scf', 'scf_bands', 'scf_ph', 'scf_disp')
-        CASE ('mur_lc', 'mur_lc_b', 'mur_lc_ph', 'mur_lc_disp','mur_lc_t')
+        CASE ('mur_lc', 'mur_lc_bands', 'mur_lc_ph', 'mur_lc_disp','mur_lc_t')
            lpwscf(1:ngeo)=.TRUE.
         CASE DEFAULT
           CALL errore('initialize_thermo_work','unknown what',1)

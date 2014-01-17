@@ -37,7 +37,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
      SELECT CASE (TRIM(what))
         CASE ('scf', 'scf_ph', 'scf_disp')
         CASE ('scf_bands')
-        CASE ('mur_lc','mur_lc_b','mur_lc_ph','mur_lc_disp','mur_lc_t')
+        CASE ('mur_lc','mur_lc_bands','mur_lc_ph','mur_lc_disp','mur_lc_t')
            celldm(1)=alat_geo(iwork)
            CALL cell_base_init ( ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
                          trd_ht, rd_ht, cell_units )
