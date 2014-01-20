@@ -139,7 +139,7 @@ SUBROUTINE run_thermo_asyncronously(nwork, part, igeom, auxdyn)
                  WRITE(6,'(5x,"I am image ", i5, " and now I do bands", i5)') &
                                                  my_image_id
               ELSE IF (lphonon(iwork)) THEN
-                 WRITE(stdout,'(5x,"I am image ",i5,"and now I do point", i5,  &
+                 WRITE(stdout,'(5x,"I am image ",i5," and now I do point", i5,  &
                   & " irrep", i5, " of geometry", i5 )') my_image_id, iq, irr, &
                                                          igeom
               END IF
