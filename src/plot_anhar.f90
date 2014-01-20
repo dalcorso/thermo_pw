@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2014 Quantum ESPRESSO group
+! Copyright (C) 2014 Andrea Dal Corso 
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -35,29 +35,40 @@ filename=TRIM(flgnuplot)//'_anhar'
 CALL gnuplot_start(filename)
 
 filename=TRIM(flpsanhar)
-CALL gnuplot_write_header(filename, tmin, tmax, 0.0_DP, 0.0_DP ) 
+IF (tmin /= 1.0_DP) THEN
+   CALL gnuplot_write_header(filename, tmin, tmax, 0.0_DP, 0.0_DP ) 
+ELSE
+   CALL gnuplot_write_header(filename, 0.0_DP, tmax, 0.0_DP, 0.0_DP ) 
+ENDIF
 
 CALL gnuplot_xlabel('T (K)') 
-CALL gnuplot_ylabel('Lattice constant (a.u.)') 
+CALL gnuplot_ylabel('Volume ((a.u.)^3)') 
 CALL gnuplot_write_file_mul_data(flanhar,1,2,'red',.TRUE.,.TRUE.)
 
-CALL gnuplot_ylabel('Thermal expansion ({/Symbol a} x 10^{6})') 
-CALL gnuplot_write_file_mul_data(flanhar,1,3,'red',.TRUE.,.TRUE.)
+CALL gnuplot_ylabel('Thermal expansion ({/Symbol b} x 10^{6})') 
+CALL gnuplot_write_file_mul_data(flanhar,1,3,'blue',.TRUE.,.TRUE.)
 
 CALL gnuplot_ylabel('Bulk modulus (kbar)') 
 CALL gnuplot_write_file_mul_data(flanhar,1,4,'red',.TRUE.,.TRUE.)
 
 CALL gnuplot_set_fact(1313313.0_DP)
-CALL gnuplot_ylabel('Heat capacity C_p (J * N / K / mol)') 
+CALL gnuplot_ylabel('Heat capacity C_v (J / K / N / mol)') 
 CALL gnuplot_write_file_mul_data(flanhar,1,5,'blue',.TRUE.,.TRUE.)
 
-CALL gnuplot_set_fact(1313313.0_DP)
-CALL gnuplot_ylabel('C_p - C_v (J * N / K / mol)') 
-CALL gnuplot_write_file_mul_data(flanhar,1,6,'blue',.TRUE.,.TRUE.)
+
+filename=TRIM(flanhar)//'.aux'
+CALL gnuplot_ylabel('Heat capacity C_p (J / K / N / mol)') 
+CALL gnuplot_write_file_mul_data(filename,1,3,'red',.TRUE.,.TRUE.)
+
+CALL gnuplot_ylabel('C_p - C_v (J / K / N / mol)') 
+CALL gnuplot_write_file_mul_data(filename,1,4,'blue',.TRUE.,.TRUE.)
 
 CALL gnuplot_set_fact(1.0_DP)
+CALL gnuplot_ylabel('{/Symbol g}') 
+CALL gnuplot_write_file_mul_data(filename,1,2,'red',.TRUE.,.TRUE.)
+
 CALL gnuplot_ylabel('B_S - B_T (kbar)') 
-CALL gnuplot_write_file_mul_data(flanhar,1,7,'blue',.TRUE.,.TRUE.)
+CALL gnuplot_write_file_mul_data(filename,1,5,'blue',.TRUE.,.TRUE.)
 
 CALL gnuplot_end()
 

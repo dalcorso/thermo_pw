@@ -17,11 +17,15 @@ MODULE thermo_mod
   SAVE
 
   CHARACTER(LEN=30) :: what             ! the type of calculation. See README.
-  REAL(DP)          :: vmin, b0, emin   ! the minimum of the murnaghan
+  REAL(DP)          :: vmin, b0, b01, emin   ! the minimum of the murnaghan
   REAL(DP), ALLOCATABLE :: vmin_t(:), b0_t(:), free_e_min_t(:) ! the minimum 
                                       ! of the murnaghan at each temperature
                                       !
   REAL(DP), ALLOCATABLE :: alat_geo(:), energy_geo(:)
+  REAL(DP) :: vmin_input, vmax_input, deltav   ! plot the fitted total energy
+                                               ! and pressure from vmin_input
+                                               ! to mnax_input
+  INTEGER :: nvol
   !
 END MODULE thermo_mod
 
@@ -53,6 +57,7 @@ MODULE anharmonic
   REAL(DP), ALLOCATABLE :: b0_s(:)     ! constant entropy bulk modulus
   REAL(DP), ALLOCATABLE :: alpha_t(:)  ! linear thermal expansion coefficient
   REAL(DP), ALLOCATABLE :: beta_t(:)   ! volume thermal expansion coefficient
+  REAL(DP), ALLOCATABLE :: gamma_t(:)  ! average gruneisen parameter
 
 END MODULE anharmonic
 
@@ -75,7 +80,7 @@ MODULE ifc
   REAL(DP), ALLOCATABLE :: disp_q(:,:), disp_wq(:)  ! q path for interpolated
                                                     ! phonon
   INTEGER :: nq1_d, nq2_d, nq3_d ! grid for phonon dos
-  INTEGER :: ndos                ! number of points in the dos plot
+  INTEGER :: ndos_input          ! number of points in the dos plot
   REAL(DP) :: freqmin, freqmax   ! dos minimum and maximun frequency 
                                  ! at this geometry
   REAL(DP) :: freqmin_input, freqmax_input   ! dos minimum and maximun frequency 
@@ -117,6 +122,8 @@ MODULE control_thermo
                                   ! for scf calculation
   LOGICAL :: lbands_syn_1=.FALSE. ! if .true. must calculate the syncronous pw
                                   ! for nscf calculation
+  LOGICAL :: lconv_ke_test=.FALSE.! if .true. this writes the ke test on file
+  LOGICAL :: lconv_nk_test=.FALSE.! if .true. this writes the k-point on file
   LOGICAL :: lph=.FALSE. ! if .true. must calculate phonon
   LOGICAL :: ldos        ! if .true. the phonon dos is calculated
   LOGICAL :: ltherm      ! if .true. the thermodynamical properties are
@@ -126,10 +133,32 @@ MODULE control_thermo
   
   CHARACTER(LEN=256) :: outdir_thermo, fildyn_thermo, flfrc, &
                         flfrq, fldos, fltherm, flanhar, flevdat, &
-                        filband
+                        filband, flkeconv, flnkconv
   INTEGER :: spin_component
   !
 END MODULE control_thermo
+
+MODULE control_conv
+  USE kinds,  ONLY : DP
+  !
+  ! ... The variables needed to describe the control of convergence
+  !
+  SAVE
+
+  REAL(DP), ALLOCATABLE :: ke(:)    ! the kinetic energy that are tested
+  REAL(DP), ALLOCATABLE :: keden(:) ! the kinetic energy of the charge
+  REAL(DP), ALLOCATABLE :: sigma_test(:) ! the smearing value
+  INTEGER,  ALLOCATABLE :: nk_test(:) ! the nk to calculate
+  REAL(DP) :: deltake               ! the interval between kinetic energies
+  INTEGER  :: nke                   ! the number of kinetic energies
+  REAL(DP) :: deltakeden            ! the interval for kinetic energy for density
+  INTEGER  :: nkeden                ! the number of kinetic energies for densiy
+  INTEGER  :: nnk                   ! the number of nk values to test k points
+  INTEGER  :: deltank               ! the step between nk values to test k points
+  INTEGER  :: nsigma                ! the number of smearing values to test
+  REAL(DP) :: deltasigma            ! the step between smaring values
+
+END MODULE control_conv
 
 MODULE control_paths
   USE kinds,  ONLY : DP
@@ -175,6 +204,7 @@ MODULE control_gnuplot
   SAVE
 
   CHARACTER(LEN=256) :: flgnuplot ! the name of file with the gnuplot script
+  CHARACTER(LEN=256) :: flpsmur   ! the name of the postscript file with E(V)
   CHARACTER(LEN=256) :: flpsband  ! the name of the output postscript file
   CHARACTER(LEN=256) :: flpsdisp  ! the name of the output postscript file
   CHARACTER(LEN=256) :: flpsdos ! the name of the postscript file with dos
@@ -182,5 +212,9 @@ MODULE control_gnuplot
                                   ! thermodynamic quantities
   CHARACTER(LEN=256) :: flpsanhar ! the name of the postscript file with 
                                   ! anharmonic quantities
+  CHARACTER(LEN=256) :: flpskeconv! the name of the postscript file with 
+                                  ! total energy at different cut-offs
+  CHARACTER(LEN=256) :: flpsnkconv! the name of the postscript file with 
+                                  ! total energy at different k points
 
 END MODULE control_gnuplot

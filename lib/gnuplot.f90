@@ -19,7 +19,8 @@ MODULE gnuplot
            gnuplot_write_label, gnuplot_write_file_data, gnuplot_start, &
            gnuplot_set_eref, gnuplot_set_fact, gnuplot_xlabel, gnuplot_ylabel, &
            gnuplot_unset_xticks, gnuplot_unset_yticks, &
-           gnuplot_write_file_mul_data, gnuplot_end
+           gnuplot_write_file_mul_data, gnuplot_write_file_mul_point, &
+           gnuplot_end
 
 CONTAINS
 
@@ -84,8 +85,8 @@ CHARACTER(LEN=*) :: color, pos
 
 IF (ionode) &
 WRITE(iun_gnuplot,'("set arrow from xmin,", f12.4, " to xmax,", &
-                    & f12.4,"nohead ",a," lw ",i3," lc rgb ",a )') &
-                            ycoord, TRIM(pos), linewidth, TRIM(color)
+                    & f12.4," nohead ",a," lw ",i3," lc rgb """,a,"""")') &
+                            ycoord, ycoord, TRIM(pos), linewidth, TRIM(color)
 
 RETURN
 END SUBROUTINE gnuplot_write_horizontal_line
@@ -208,6 +209,29 @@ IF (ionode) &
 RETURN
 END SUBROUTINE gnuplot_write_file_mul_data
 
+SUBROUTINE gnuplot_write_file_mul_point(data_file,col1,col2,color,start,last)
+IMPLICIT NONE
+
+INTEGER, INTENT(IN) :: col1, col2
+CHARACTER(LEN=*), INTENT(IN) :: color
+LOGICAL, INTENT(IN) :: start, last
+
+CHARACTER(LEN=*) :: data_file
+CHARACTER(LEN=256) :: string
+CHARACTER(LEN=6) :: int_to_char
+
+string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//"):($"// &
+              TRIM(int_to_char(col2)) &
+            //"*fact-eref) w p pt 82 lc rgb """//TRIM(color)//""""
+
+IF (start) string="plot "//TRIM(string)
+IF (.NOT.last) string=TRIM(string)//", \"
+
+IF (ionode) &
+   WRITE(iun_gnuplot,'(a)') TRIM(string)
+
+RETURN
+END SUBROUTINE gnuplot_write_file_mul_point
 
 SUBROUTINE gnuplot_start(filename_gnu)
 IMPLICIT NONE

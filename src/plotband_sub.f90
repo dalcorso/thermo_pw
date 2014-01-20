@@ -253,9 +253,12 @@ SUBROUTINE plotband_sub(icode,igeom)
      IF (emax_input /= 0.0_DP) emax=emax_input + eref
   ELSE IF (icode==2) THEN
 !
-!   no shift for phonon
+!   no shift for phonon, but take the maximum energy slightly above the 
+!   dispersion and an integer value
 !
      eref=0.0_DP
+     emax=NINT(emax*1.05_DP)
+     emin=NINT(emin)
      IF (freqmin /= 0.0_DP ) emin = freqmin
      IF (freqmax /= 0.0_DP ) emax = freqmax
   ELSE

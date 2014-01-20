@@ -56,7 +56,7 @@ SUBROUTINE q2r_sub(fildyn)
                          read_dyn_mat, read_dyn_mat_tail, &
                          write_dyn_mat_header, write_ifc
   USE control_thermo, ONLY : ldos, flfrc
-  USE control_ph, ONLY : ldisp
+  USE control_ph, ONLY : ldisp, xmldyn
   !
   IMPLICIT NONE
   !
@@ -69,7 +69,7 @@ SUBROUTINE q2r_sub(fildyn)
   CHARACTER(len=3)   :: atm(ntypx)
   CHARACTER(LEN=6), EXTERNAL :: int_to_char
   !
-  LOGICAL :: lq, lrigid, lrigid1, xmldyn
+  LOGICAL :: lq, lrigid, lrigid1
   INTEGER :: m1, m2, m3, m(3), i, j, j1, j2, na1, na2, ipol, nn
   INTEGER :: nat, nq, ntyp, iq, icar, nfile, ifile, nqs, nq_log
   INTEGER :: na, nt
@@ -84,8 +84,6 @@ SUBROUTINE q2r_sub(fildyn)
   REAL(DP) :: q(3,48), omega, xq, amass(ntypx), resi
   REAL(DP) :: epsil(3,3)
   !
-  LOGICAL, EXTERNAL :: has_xml
-  !
   ! Only one image run this routine 
   !
   IF ( my_image_id /= root_image ) RETURN
@@ -96,8 +94,6 @@ SUBROUTINE q2r_sub(fildyn)
   WRITE(stdout,'(5x,"Writing on file ",a)') TRIM(flfrc)
   WRITE(stdout,'(2x,76("+"),/)')
   !
-  xmldyn=has_xml(fildyn)
-
   IF (ionode) OPEN (unit=1, file=TRIM(fildyn)//'0', status='old', &
                     form='formatted', iostat=ierr)
   CALL mp_bcast(ierr, ionode_id, intra_image_comm)

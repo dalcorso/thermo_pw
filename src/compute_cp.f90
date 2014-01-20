@@ -16,18 +16,13 @@ SUBROUTINE compute_cp()
 !  cv_t and cp_t in Ry / K / cell
 !  b0_t and b0_t in kbar
 !
-USE anharmonic,     ONLY : cp_t, cv_t, beta_t, b0_s
+USE anharmonic,     ONLY : cp_t, cv_t, beta_t, gamma_t, b0_s
 USE thermodynamics, ONLY : temp, ph_cv, ntemp, ngeo, omegav
 USE thermo_mod,     ONLY : vmin_t, b0_t
 USE constants,      ONLY : ry_kbar
 
 IMPLICIT NONE
 INTEGER :: itemp, igeo, igeo1, igeo2
-
-
-IF ( .NOT. ALLOCATED (cp_t) ) ALLOCATE( cp_t (ntemp) )
-IF ( .NOT. ALLOCATED (cv_t) ) ALLOCATE( cv_t (ntemp) )
-IF ( .NOT. ALLOCATED (b0_s) ) ALLOCATE( b0_s (ntemp) )
 
 DO itemp=1,ntemp
 !
@@ -54,6 +49,9 @@ DO itemp=1,ntemp
    b0_s(itemp) = b0_t(itemp) + temp(itemp,1) * vmin_t(itemp) * &
                            beta_t(itemp)**2 * b0_t(itemp)**2 / cp_t(itemp) &
                            / ry_kbar
+
+   gamma_t(itemp) =  beta_t(itemp) * b0_t(itemp) * vmin_t(itemp) / ry_kbar / cv_t(itemp)
+
 END DO
 
 RETURN

@@ -15,13 +15,13 @@ SUBROUTINE thermo_readin()
   !
   USE kinds,                ONLY : DP
   USE thermo_mod,           ONLY : what
-  USE control_thermo,       ONLY : outdir_thermo, flevdat,    &
+  USE control_thermo,       ONLY : outdir_thermo, flevdat,        &
                                    flfrc, flfrq, fldos, fltherm,  &
-                                   flanhar, filband
+                                   flanhar, filband, flkeconv, flnkconv
   USE thermodynamics,       ONLY : ngeo, tmin, tmax, deltat, ntemp
-  USE ifc,                  ONLY : nq1_d, nq2_d, nq3_d, ndos, deltafreq, zasr, &
-                                   disp_q, disp_wq, disp_nqs, freqmin_input, &
-                                   freqmax_input
+  USE ifc,                  ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq, &
+                                   zasr, disp_q, disp_wq, disp_nqs, &
+                                   freqmin_input, freqmax_input
   USE input_parameters,     ONLY : outdir
   USE read_input,           ONLY : read_input_file
   USE command_line_options, ONLY : input_file_ 
@@ -30,8 +30,12 @@ SUBROUTINE thermo_readin()
                                    q_in_cryst_coord, q2d, point_label_type, &
                                    nbnd_bands, label_disp_q, letter_path
   USE control_gnuplot,      ONLY : flgnuplot, flpsband, flpsdisp, &
-                                   flpsdos, flpstherm, flpsanhar 
+                                   flpsmur, flpsdos, flpstherm, flpsanhar, &
+                                   flpskeconv, flpsnkconv
   USE control_bands,        ONLY : flpband, emin_input, emax_input
+  USE control_conv,         ONLY : nke, deltake, nkeden, deltakeden, &
+                                   nnk, deltank, nsigma, deltasigma
+  USE thermo_mod,           ONLY : vmin_input, vmax_input, deltav, nvol
   USE mp_world,             ONLY : world_comm
   USE mp_images,            ONLY : nimage, my_image_id, root_image
   USE parser,               ONLY : read_line
@@ -51,37 +55,35 @@ SUBROUTINE thermo_readin()
   LOGICAL :: tend, terr, read_paths
   CHARACTER(LEN=256) :: input_line, buffer
   !
-  NAMELIST / input_thermo / what, ngeo, zasr,             &
-                            flfrc, flfrq, fldos, fltherm, &
-                            flanhar, filband,             &
-                            nq1_d, nq2_d, nq3_d,          &
-                            tmin, tmax, deltat, ntemp,    &
-                            freqmin_input, freqmax_input, &
-                            ndos, deltafreq,              &
-                            q2d, q_in_band_form,          &
-                            q_in_cryst_coord,             &
-                            point_label_type,             &
-                            nbnd_bands,                   &
-                            flevdat,                      &
-                            flpband,                      &
-                            flgnuplot, flpsband,          &
-                            flpsdisp, flpsdos, flpstherm, &
-                            flpsanhar,                    &
-                            emin_input, emax_input
+  NAMELIST / input_thermo / what, ngeo, zasr,               &
+                            flfrc, flfrq, fldos, fltherm,   &
+                            flanhar, filband, flkeconv,     &
+                            flnkconv,                       &
+                            nq1_d, nq2_d, nq3_d,            &
+                            tmin, tmax, deltat, ntemp,      &
+                            freqmin_input, freqmax_input,   &
+                            ndos_input, deltafreq,          &
+                            q2d, q_in_band_form,            &
+                            q_in_cryst_coord,               &
+                            point_label_type,               &
+                            nbnd_bands,                     &
+                            flevdat,                        &
+                            flpband,                        &
+                            flgnuplot, flpsband,            &
+                            flpsdisp, flpsdos, flpstherm,   &
+                            flpsanhar, flpsmur, flpskeconv, &
+                            flpsnkconv,                     &
+                            emin_input, emax_input,         &
+                            vmin_input, vmax_input, deltav, &
+                            nvol, nke, deltake,             &
+                            nnk, deltank, nsigma, deltasigma, &
+                            nkeden, deltakeden
   !
   !  First read the input of thermo. Only one node reads
   !
   what=' '
   ngeo=0
 
-  filband='output_band.dat'
-  flpband='output_pband.dat'
-  flfrc='output_frc.dat'
-  flfrq='output_frq.dat'
-  fldos='output_dos.dat'
-  fltherm='output_therm.dat'
-  flanhar='output_anhar.dat'
-  flevdat='output_ev.dat'
 
   nq1_d=16
   nq2_d=16
@@ -90,7 +92,7 @@ SUBROUTINE thermo_readin()
   freqmin_input=0.0_DP
   freqmax_input=0.0_DP
   deltafreq=1.0_DP
-  ndos=1
+  ndos_input=1
 
   tmin=1.0_DP
   tmax=800.0_DP
@@ -101,12 +103,41 @@ SUBROUTINE thermo_readin()
   emin_input=0.0_DP
   emax_input=0.0_DP
 
+  vmin_input=0.0_DP
+  vmax_input=0.0_DP
+  deltav=0.0_DP
+  nvol=1
+
+  nke=5
+  deltake=10.0_DP
+  nkeden=1
+  deltakeden=100.0_DP
+
+  nnk=5
+  deltank=2 
+  nsigma=1  
+  deltasigma=0.005 
+
+  filband='output_band.dat'
+  flpband='output_pband.dat'
+  flfrc='output_frc.dat'
+  flfrq='output_frq.dat'
+  fldos='output_dos.dat'
+  flkeconv='output_keconv.dat'
+  flnkconv='output_nkconv.dat'
+  fltherm='output_therm.dat'
+  flanhar='output_anhar.dat'
+  flevdat='output_ev.dat'
+
   flgnuplot='gnuplot.tmp'
+  flpsmur='output_mur.ps'
   flpsband='output_band.ps'
   flpsdisp='output_disp.ps'
   flpsdos='output_dos.ps'
   flpstherm='output_therm.ps'
   flpsanhar='output_anhar.ps'
+  flpskeconv='output_keconv.ps'
+  flpsnkconv='output_nkconv.ps'
 
 
   q2d=.FALSE.

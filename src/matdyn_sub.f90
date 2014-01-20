@@ -73,9 +73,10 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
 
   USE ifc,        ONLY : frc, atm, zeu, tau_blk, ityp_blk, m_loc, &
                          disp_q, disp_nqs, nq1_d, nq2_d, &
-                         nq3_d, deltafreq, freqmin, freqmax, ndos, zasr, &
+                         nq3_d, deltafreq, freqmin, freqmax, ndos_input, zasr, &
                          freqmin_input, freqmax_input
  
+  USE control_ph, ONLY : xmldyn
   USE thermodynamics, ONLY : phdos_save
   USE control_thermo, ONLY : flfrc, flfrq, fldos, ldos
   USE ions_base, ONLY : amass
@@ -129,7 +130,7 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   COMPLEX(DP), ALLOCATABLE :: f_of_q(:,:,:,:)
   INTEGER :: location(1), isig
   CHARACTER(LEN=6) :: int_to_char
-  INTEGER            :: npk_label, nch
+  INTEGER            :: npk_label, nch, ndos
   CHARACTER(LEN=3), ALLOCATABLE :: letter(:)
   INTEGER, ALLOCATABLE :: label_list(:)
   LOGICAL :: tend, terr, dos
@@ -165,7 +166,7 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   ! read force constants
   !
   ntyp_blk = ntypx ! avoids fake out-of-bound error
-  xmlifc=has_xml(TRIM(flfrc))
+  xmlifc=xmldyn
   IF (xmlifc) THEN
      CALL read_dyn_mat_param(flfrc,ntyp_blk,nat_blk)
      ALLOCATE (m_loc(3,nat_blk))
@@ -427,21 +428,24 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
            emax = MAX (emax, freq(i,n))
         END DO
      END DO
+     !
      IF (freqmin_input > 0.0_DP) THEN
         emin=freqmin_input
         freqmin=emin
      ELSE
         freqmin=emin
      ENDIF
+     !
      IF (freqmax_input > 0.0_DP) THEN
         emax=freqmax_input
-        freqmax=emax
+        freqmax=NINT(emax*1.05_DP)
      ELSE
-        freqmax=emax
+        freqmax=NINT(emax*1.05_DP)
      ENDIF
      !
-     IF (ndos > 1) THEN
-        deltafreq = (emax - emin)/(ndos-1)
+     IF (ndos_input > 1) THEN
+        deltafreq = (emax - emin)/(ndos_input-1)
+        ndos = ndos_input
      ELSE
         ndos = NINT ( (emax - emin) / deltafreq + 1.51d0 )
      END IF
@@ -458,7 +462,7 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
         !
         !WRITE (2, '(F15.10,F15.2,F15.6,F20.5)') &
         !     E, E*RY_TO_CMM1, E*RY_TO_THZ, 0.5d0*DOSofE(1)
-        IF (ionode) WRITE (2, '(ES12.4,ES12.4)') e, 0.5d0*dosofe(1)
+        IF (ionode) WRITE (2, '(ES20.10,ES20.10)') e, 0.5d0*dosofe(1)
         phdos_save(igeom)%nu(n) = e
         phdos_save(igeom)%phdos(n) = 0.5d0*dosofe(1)
      END DO

@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2014 Quantum ESPRESSO group
+! Copyright (C) 2014 Andrea Dal Corso 
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -31,21 +31,25 @@ IF ( my_image_id /= root_image ) RETURN
 filename=TRIM(flgnuplot)//'_therm'
 CALL gnuplot_start(filename)
 
-CALL gnuplot_write_header(flpstherm, tmin, tmax, 0.0_DP, 0.0_DP ) 
-
+IF (tmin ==1._DP) THEN
+   CALL gnuplot_write_header(flpstherm, 0.0_DP, tmax, 0.0_DP, 0.0_DP ) 
+ELSE
+   CALL gnuplot_write_header(flpstherm, tmin, tmax, 0.0_DP, 0.0_DP ) 
+ENDIF
 CALL gnuplot_xlabel('T (K)') 
-CALL gnuplot_ylabel('Vibrational energy (J * N / mol)') 
-CALL gnuplot_set_fact(1313313.0_DP) 
+CALL gnuplot_ylabel('Vibrational energy (kJ / N / mol)') 
+CALL gnuplot_set_fact(1313.3130_DP) 
 
 CALL gnuplot_write_file_mul_data(fltherm,1,2,'red',.TRUE.,.TRUE.)
 
-CALL gnuplot_ylabel('Vibrational free energy (J * N / mol)') 
+CALL gnuplot_ylabel('Vibrational free energy (kJ / N / mol)') 
 CALL gnuplot_write_file_mul_data(fltherm,1,3,'red',.TRUE.,.TRUE.)
 
-CALL gnuplot_ylabel('Entropy (J * N / K / mol)') 
+CALL gnuplot_set_fact(1313313.0_DP) 
+CALL gnuplot_ylabel('Entropy (J / K / N / mol))') 
 CALL gnuplot_write_file_mul_data(fltherm,1,4,'blue',.TRUE.,.TRUE.)
 
-CALL gnuplot_ylabel('Specific heat C_v (J * N / K / mol)') 
+CALL gnuplot_ylabel('Heat capacity C_v (J / K / N / mol)') 
 CALL gnuplot_write_file_mul_data(fltherm,1,5,'blue',.TRUE.,.TRUE.)
 
 CALL gnuplot_end()

@@ -18,7 +18,14 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   USE thermodynamics, ONLY : ngeo, omegav
   USE control_thermo, ONLY : lpwscf, lbands, lphonon, lev_syn_1, lev_syn_2,&
                              lph, lpwscf_syn_1, lbands_syn_1, ldos, lq2r, &
-                             lmatdyn, ltherm
+                             lmatdyn, ltherm, lconv_ke_test, lconv_nk_test
+  USE control_conv,   ONLY : nke, ke, deltake, nkeden, deltakeden, keden, &
+                             nnk, nk_test, deltank, nsigma, sigma_test, &  
+                             deltasigma
+  USE wvfct,          ONLY : ecutwfc
+  USE gvect,          ONLY : ecutrho
+  USE input_parameters, ONLY : nk1, nk2, nk3
+  USE klist,          ONLY : degauss
   USE cell_base,  ONLY : alat
   USE grid_irr_iq, ONLY : irr_iq
   USE disp, ONLY : nqs
@@ -26,7 +33,8 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   IMPLICIT NONE
   INTEGER, INTENT(OUT) :: nwork
   INTEGER, INTENT(IN) :: part
-  INTEGER :: igeom, iq, irr
+  INTEGER :: igeom, iq, irr, ike
+  INTEGER :: iden, icount, ink, isigma
   !
   nwork=0
 !
@@ -47,12 +55,44 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               ltherm = .TRUE.
            ENDIF
            IF (what=='scf_bands') lbands_syn_1=.TRUE.
+        CASE ( 'scf_ke') 
+           nwork= nke * nkeden
+           ALLOCATE(ke(nwork))
+           ALLOCATE(keden(nwork))
+           ALLOCATE(energy_geo(nwork))
+           icount=0
+           DO iden=1, nkeden
+              DO ike = 1, nke
+                 icount = icount + 1
+                 ke(icount) = ecutwfc + (ike-1) * deltake
+                 keden(icount) = ecutrho + (iden-1) * deltakeden
+              ENDDO
+           ENDDO
+           energy_geo=0.0_DP
+           lconv_ke_test=.TRUE.
+        CASE ( 'scf_nk' ) 
+           nwork= nnk * nsigma
+           ALLOCATE(nk_test(nwork))
+           ALLOCATE(sigma_test(nwork))
+           ALLOCATE(energy_geo(nwork))
+           icount=0
+           DO isigma=1, nsigma
+              DO ink = 1, nnk
+                 icount = icount + 1
+                 nk_test(icount)=nk1 + (ink - 1) * deltank
+                 sigma_test(icount) = degauss + (isigma - 1) * deltasigma
+              ENDDO
+           ENDDO
+           energy_geo=0.0_DP
+           lconv_nk_test=.TRUE.
         CASE ('mur_lc', 'mur_lc_bands', 'mur_lc_ph', 'mur_lc_disp')
            nwork=ngeo
            ALLOCATE(alat_geo(ngeo))
            ALLOCATE(energy_geo(ngeo))
+           ALLOCATE(omegav(ngeo))
            DO igeom = 1, ngeo
               alat_geo(igeom)=alat+(igeom-(ngeo+1.0_DP)/2.0_DP)*0.05_DP
+              omegav(igeom) = alat_geo(igeom)**3 / 4.0_DP
            ENDDO
            energy_geo=0.0_DP
            lev_syn_1=.TRUE.
@@ -113,6 +153,8 @@ SUBROUTINE initialize_thermo_work(nwork, part)
         CASE ('scf', 'scf_bands', 'scf_ph', 'scf_disp')
         CASE ('mur_lc', 'mur_lc_bands', 'mur_lc_ph', 'mur_lc_disp','mur_lc_t')
            lpwscf(1:ngeo)=.TRUE.
+        CASE ( 'scf_ke', 'scf_nk' )
+           lpwscf(1:nwork)=.TRUE.
         CASE DEFAULT
           CALL errore('initialize_thermo_work','unknown what',1)
      END SELECT

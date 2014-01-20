@@ -5,7 +5,7 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-SUBROUTINE ev_sub(vmin,b0,emin_out)
+SUBROUTINE ev_sub(vmin,b0,b01,emin_out)
 !
 !      fit of E(v) to an equation of state (EOS)
 !
@@ -59,7 +59,7 @@ SUBROUTINE ev_sub(vmin,b0,emin_out)
       USE mp_images, ONLY : my_image_id, root_image, intra_image_comm
 
       IMPLICIT NONE
-      REAL(DP), INTENT(OUT)  :: vmin, b0, emin_out
+      REAL(DP), INTENT(OUT)  :: vmin, b0, b01, emin_out
       INTEGER, PARAMETER:: nmaxpar=4, nmaxpt=100, nseek=10000, nmin=4
       INTEGER :: npar,npt,istat, ierr
       CHARACTER :: bravais*3, au_unit*3, filin*256
@@ -189,6 +189,7 @@ SUBROUTINE ev_sub(vmin,b0,emin_out)
     
     vmin=par(1)
     b0=par(2)
+    b01=par(3)
     emin_out=emin
     
 

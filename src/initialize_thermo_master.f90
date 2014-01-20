@@ -25,8 +25,8 @@ SUBROUTINE initialize_thermo_master(nwork, part)
   !
   IF ( part==1 ) THEN
      SELECT CASE (TRIM(what))
-        CASE ('scf', 'scf_bands', 'scf_ph', 'scf_disp', 'mur_lc', &
-              'mur_lc_bands', 'mur_lc_ph', 'mur_lc_disp', 'mur_lc_t')
+        CASE ('scf', 'scf_ke', 'scf_nk', 'scf_bands', 'scf_ph', 'scf_disp', &
+              'mur_lc', 'mur_lc_bands', 'mur_lc_ph', 'mur_lc_disp', 'mur_lc_t')
            max_priority=1
         CASE DEFAULT
            CALL errore('initialize_thermo_master','unknown what',1)

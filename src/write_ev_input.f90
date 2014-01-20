@@ -70,7 +70,7 @@ SUBROUTINE do_ev()
 !  This subroutine compute the equilibrium volume and bulk modulus
 !
 USE kinds, ONLY : DP
-USE thermo_mod, ONLY : vmin, b0, emin
+USE thermo_mod, ONLY : vmin, b0, b01, emin
 USE control_thermo, ONLY : flevdat
 USE io_global, ONLY : meta_ionode_id, stdout
 USE mp_world, ONLY : world_comm
@@ -81,9 +81,10 @@ CHARACTER(LEN=256) :: file_dat
 
   file_dat=TRIM(flevdat)
   CALL write_ev_input(file_dat)
-  CALL ev_sub(vmin, b0, emin)
+  CALL ev_sub(vmin, b0, b01, emin)
   CALL mp_bcast(vmin, meta_ionode_id, world_comm)
   CALL mp_bcast(b0, meta_ionode_id, world_comm)
+  CALL mp_bcast(b01, meta_ionode_id, world_comm)
   CALL mp_bcast(emin, meta_ionode_id, world_comm)
   !
   WRITE(stdout,'(/,2x,76("+"))')
@@ -112,7 +113,7 @@ INTEGER, INTENT(IN) :: itemp
 INTEGER :: igeom, iu_ev
 CHARACTER(LEN=256) :: file_dat
 CHARACTER(LEN=6) :: int_to_char
-REAL(DP) :: free_e, vm, b0
+REAL(DP) :: free_e, vm, b0, b01
 
   IF (my_image_id /= root_image) RETURN
 
@@ -135,7 +136,7 @@ REAL(DP) :: free_e, vm, b0
      !
   END IF
 
-  CALL ev_sub(vm, b0, free_e)
+  CALL ev_sub(vm, b0, b01, free_e)
   vmin_t(itemp)=vm
   b0_t(itemp)=b0
   free_e_min_t(itemp)=free_e

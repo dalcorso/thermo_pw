@@ -52,7 +52,9 @@ PROGRAM thermo_pw
   USE control_thermo,   ONLY : lev_syn_1, lev_syn_2, lpwscf_syn_1, &
                                lbands_syn_1, lph, outdir_thermo, lq2r, &
                                lmatdyn, ldos, ltherm, flfrc, flfrq, fldos, &
-                               fltherm, spin_component, flevdat
+                               fltherm, spin_component, flevdat, &
+                               lconv_ke_test, lconv_nk_test
+
   USE ifc,              ONLY : freqmin, freqmax
   USE control_paths,    ONLY : nqaux, nbnd_bands
   USE control_gnuplot,  ONLY : flpsdos, flgnuplot, flpstherm, flpsdisp
@@ -63,7 +65,7 @@ PROGRAM thermo_pw
   USE phdos_module,     ONLY : destroy_phdos
   USE input_parameters, ONLY : ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
                                trd_ht, rd_ht, cell_units, outdir
-  USE thermo_mod,       ONLY : vmin, what, energy_geo
+  USE thermo_mod,       ONLY : vmin, what, energy_geo, b0, b01, emin
   USE ph_restart,       ONLY : destroy_status_run
   USE save_ph,          ONLY : clean_input_variables
   USE output,           ONLY : fildyn
@@ -113,7 +115,19 @@ PROGRAM thermo_pw
   !
   CALL mp_sum(energy_geo, world_comm)
   energy_geo=energy_geo / nproc_image
-  IF (lev_syn_1) CALL do_ev()
+  IF (lconv_ke_test) THEN
+     CALL write_e_ke()
+     CALL plot_e_ke()
+  ENDIF
+  IF (lconv_nk_test) THEN
+     CALL write_e_nk()
+     CALL plot_e_nk()
+  ENDIF
+  IF (lev_syn_1) THEN
+     CALL do_ev()
+     CALL mur(vmin,b0,b01,emin)
+     CALL plot_mur()
+  ENDIF
   !
   CALL deallocate_asyn()
   ! 
@@ -233,13 +247,14 @@ PROGRAM thermo_pw
               IF (.NOT.ALLOCATED(phdos_save)) ALLOCATE(phdos_save(ngeo))
               CALL matdyn_sub(.TRUE.,igeom)
               CALL simple_plot('_dos', fldos, flpsdos, 'frequency (cm^{-1})', &
-                       'DOS', 'red', freqmin, freqmax, 0.0_DP, 0.0_DP)
+                       'DOS (states / cm^{-1} / cell)', 'red', freqmin, freqmax, &
+                            0.0_DP, 0.0_DP)
            ENDIF
 !
 !    computes the thermodynamical properties
 !
            IF (ldos.AND.ltherm) THEN
-              CALL compute_thermo(igeom)
+              CALL write_thermo(igeom)
               CALL plot_thermo(igeom)
            ENDIF
 !
