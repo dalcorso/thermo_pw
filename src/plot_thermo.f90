@@ -15,7 +15,6 @@ USE control_gnuplot, ONLY : flgnuplot, flpstherm
 USE gnuplot,         ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
                             gnuplot_ylabel, &
                             gnuplot_xlabel, gnuplot_write_file_mul_data, &
-                            gnuplot_write_vertical_line, &
                             gnuplot_set_fact
 USE control_thermo,  ONLY : fltherm
 USE thermodynamics,  ONLY : tmin, tmax
@@ -36,21 +35,21 @@ IF (tmin ==1._DP) THEN
 ELSE
    CALL gnuplot_write_header(flpstherm, tmin, tmax, 0.0_DP, 0.0_DP ) 
 ENDIF
-CALL gnuplot_xlabel('T (K)') 
-CALL gnuplot_ylabel('Vibrational energy (kJ / N / mol)') 
-CALL gnuplot_set_fact(1313.3130_DP) 
+CALL gnuplot_xlabel('T (K)', .FALSE.) 
+CALL gnuplot_ylabel('Vibrational energy (kJ / N / mol)',.FALSE.) 
+CALL gnuplot_set_fact(1313.3130_DP, .FALSE.) 
 
-CALL gnuplot_write_file_mul_data(fltherm,1,2,'red',.TRUE.,.TRUE.)
+CALL gnuplot_write_file_mul_data(fltherm,1,2,'red',.TRUE.,.TRUE.,.FALSE.)
 
-CALL gnuplot_ylabel('Vibrational free energy (kJ / N / mol)') 
-CALL gnuplot_write_file_mul_data(fltherm,1,3,'red',.TRUE.,.TRUE.)
+CALL gnuplot_ylabel('Vibrational free energy (kJ / N / mol)', .FALSE.) 
+CALL gnuplot_write_file_mul_data(fltherm,1,3,'red',.TRUE.,.TRUE., .FALSE.)
 
-CALL gnuplot_set_fact(1313313.0_DP) 
-CALL gnuplot_ylabel('Entropy (J / K / N / mol))') 
-CALL gnuplot_write_file_mul_data(fltherm,1,4,'blue',.TRUE.,.TRUE.)
+CALL gnuplot_set_fact(1313313.0_DP, .FALSE.) 
+CALL gnuplot_ylabel('Entropy (J / K / N / mol))',.FALSE.) 
+CALL gnuplot_write_file_mul_data(fltherm,1,4,'blue',.TRUE.,.TRUE.,.FALSE.)
 
-CALL gnuplot_ylabel('Heat capacity C_v (J / K / N / mol)') 
-CALL gnuplot_write_file_mul_data(fltherm,1,5,'blue',.TRUE.,.TRUE.)
+CALL gnuplot_ylabel('Heat capacity C_v (J / K / N / mol)',.FALSE.) 
+CALL gnuplot_write_file_mul_data(fltherm,1,5,'blue',.TRUE.,.TRUE.,.FALSE.)
 
 CALL gnuplot_end()
 

@@ -62,108 +62,145 @@ ENDIF
 RETURN
 END SUBROUTINE gnuplot_write_header
 
-SUBROUTINE gnuplot_write_vertical_line(xcoord, linewidth, pos, color)
+SUBROUTINE gnuplot_write_vertical_line(xcoord, linewidth, pos, color, comment)
 IMPLICIT NONE
 REAL(DP) :: xcoord, ycoord
 INTEGER  :: linewidth
 CHARACTER(LEN=3) :: label
 CHARACTER(LEN=*) :: color, pos
+CHARACTER(LEN=256) :: frt
+LOGICAL :: comment
 
+frt='("set arrow from", f12.4, ",ymin to ", f12.4,&
+                 & ",ymax nohead ",a," lw ",i3, " lc rgb """,a,"""")'
+IF (comment) frt = '# ' // TRIM(frt)
 IF (ionode) &
-WRITE(iun_gnuplot, '("set arrow from", f12.4, ",ymin to ", f12.4,&
-                 & ",ymax nohead ",a," lw ",i3, " lc rgb """,a,"""")') &
-                          xcoord, xcoord, TRIM(pos), linewidth, TRIM(color)
+WRITE( iun_gnuplot, frt ) xcoord, xcoord, TRIM(pos), linewidth, TRIM(color)
 
 RETURN
 END SUBROUTINE gnuplot_write_vertical_line
 
-SUBROUTINE gnuplot_write_horizontal_line(ycoord, linewidth, pos, color)
+SUBROUTINE gnuplot_write_horizontal_line(ycoord, linewidth, pos, color, comment)
 IMPLICIT NONE
 REAL(DP) :: ycoord
 INTEGER  :: linewidth
 CHARACTER(LEN=*) :: color, pos
+CHARACTER(LEN=256) :: frt
+LOGICAL :: comment
 
+frt='("set arrow from xmin,", f12.4, " to xmax,", &
+             & f12.4," nohead ",a," lw ",i3," lc rgb """,a,"""")'
+IF (comment) frt = '# ' // TRIM(frt)
 IF (ionode) &
-WRITE(iun_gnuplot,'("set arrow from xmin,", f12.4, " to xmax,", &
-                    & f12.4," nohead ",a," lw ",i3," lc rgb """,a,"""")') &
-                            ycoord, ycoord, TRIM(pos), linewidth, TRIM(color)
+WRITE(iun_gnuplot, frt) ycoord, ycoord, TRIM(pos), linewidth, TRIM(color)
 
 RETURN
 END SUBROUTINE gnuplot_write_horizontal_line
  
-SUBROUTINE gnuplot_write_label(xcoord, ycoord, label)
+SUBROUTINE gnuplot_write_label(xcoord, ycoord, label, comment)
 IMPLICIT NONE
 REAL(DP) :: xcoord, ycoord
 CHARACTER(LEN=3) :: label
 CHARACTER(LEN=20) :: ws
+CHARACTER(LEN=256) :: frt
+LOGICAL :: comment
 
 IF (label(1:1)=='g') THEN
     ws="{/Symbol "//label(2:3)//"}"
 ELSE
     ws=label
 ENDIF
-IF (ionode) &
-   WRITE(iun_gnuplot,'("set label """,a,""" at ", f12.4,",",f12.4," center")') &
-                     TRIM(ws), xcoord, ycoord
+frt='("set label """,a,""" at ", f12.4,",",f12.4," center")'
+IF (comment) frt = '# ' // TRIM(frt)
+
+IF (ionode) WRITE(iun_gnuplot, frt)  TRIM(ws), xcoord, ycoord
 
 RETURN
 END SUBROUTINE gnuplot_write_label
 
-SUBROUTINE gnuplot_ylabel(label)
+SUBROUTINE gnuplot_ylabel(label, comment)
 IMPLICIT NONE
 CHARACTER(LEN=*), INTENT(IN) :: label
+CHARACTER(LEN=256) :: frt
+LOGICAL :: comment
 
-IF (ionode.AND. label /=' ') &
-   WRITE(iun_gnuplot,'("set ylabel """,a,"""")') TRIM(label)
+frt = '("set ylabel """,a,"""")'
+IF (comment) frt = '# ' // TRIM(frt)
+
+IF (ionode.AND. label /=' ') WRITE(iun_gnuplot, frt) TRIM(label)
 
 RETURN
 END SUBROUTINE gnuplot_ylabel
 
-SUBROUTINE gnuplot_xlabel(label)
+SUBROUTINE gnuplot_xlabel(label, comment)
 IMPLICIT NONE
 CHARACTER(LEN=*), INTENT(IN) :: label
+CHARACTER(LEN=256) :: frt
+LOGICAL :: comment
 
-IF (ionode.AND. label /=' ') &
-   WRITE(iun_gnuplot,'("set xlabel """,a,"""")') TRIM(label)
+frt='("set xlabel """,a,"""")'
+IF (comment) frt = '# ' // TRIM(frt)
+
+IF (ionode.AND. label /=' ') WRITE(iun_gnuplot, frt) TRIM(label)
 
 RETURN
 END SUBROUTINE gnuplot_xlabel
 
-SUBROUTINE gnuplot_unset_xticks()
+SUBROUTINE gnuplot_unset_xticks(comment)
 IMPLICIT NONE
-   IF (ionode) WRITE(iun_gnuplot,'("unset xtics")') 
+CHARACTER(LEN=256) :: frt
+LOGICAL :: comment
+
+frt = '("unset xtics")'
+IF (comment) frt = '# ' // TRIM(frt)
+
+IF (ionode) WRITE(iun_gnuplot, frt) 
+
 RETURN
 END SUBROUTINE gnuplot_unset_xticks
 
-SUBROUTINE gnuplot_unset_yticks()
+SUBROUTINE gnuplot_unset_yticks(comment)
 IMPLICIT NONE
-   WRITE(iun_gnuplot,'("unset ytics")') 
+CHARACTER(LEN=256) :: frt
+LOGICAL :: comment
+
+frt = '("unset ytics")'
+IF (comment) frt = '# ' // TRIM(frt)
+
+IF (ionode) WRITE(iun_gnuplot, frt) 
+
 RETURN
 END SUBROUTINE gnuplot_unset_yticks
 
-
-SUBROUTINE gnuplot_set_eref(eref)
+SUBROUTINE gnuplot_set_eref(eref, comment)
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: eref
+CHARACTER(LEN=256) :: frt
+LOGICAL :: comment
 
-IF (ionode) &
-   WRITE(iun_gnuplot,'("eref=", e20.8)') eref
+frt = '("eref=", e20.8)'
+IF (comment) frt = '# ' // TRIM(frt)
+
+IF (ionode) WRITE(iun_gnuplot, frt) eref
 
 RETURN
 END SUBROUTINE gnuplot_set_eref
 
-SUBROUTINE gnuplot_set_fact(fact)
+SUBROUTINE gnuplot_set_fact(fact, comment)
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: fact
+CHARACTER(LEN=256) :: frt
+LOGICAL :: comment
 
-IF (ionode) &
-   WRITE(iun_gnuplot,'("fact=", e20.8)') fact
+frt = '("fact=", e20.8)'
+IF (comment) frt = '# ' // TRIM(frt)
+
+IF (ionode) WRITE(iun_gnuplot, frt) fact
 
 RETURN
 END SUBROUTINE gnuplot_set_fact
 
-
-SUBROUTINE gnuplot_write_file_data(data_file,color,start,last)
+SUBROUTINE gnuplot_write_file_data(data_file,color,start,last, comment)
 IMPLICIT NONE
 
 CHARACTER(LEN=*), INTENT(IN) :: color
@@ -172,12 +209,14 @@ LOGICAL, INTENT(IN) :: start, last
 CHARACTER(LEN=*) :: data_file
 CHARACTER(LEN=256) :: string
 CHARACTER(LEN=6) :: int_to_char
+LOGICAL :: comment
 
 string=" """//TRIM(data_file)//""" u 1:($2" &
             //"*fact-eref) w l lw 3 lc rgb """//TRIM(color)//""""
 
 IF (start) string="plot "//TRIM(string)
 IF (.NOT.last) string=TRIM(string)//", \"
+IF (comment) string = '# ' // TRIM(string)
 
 IF (ionode) &
    WRITE(iun_gnuplot,'(a)') TRIM(string)
@@ -185,7 +224,8 @@ IF (ionode) &
 RETURN
 END SUBROUTINE gnuplot_write_file_data
 
-SUBROUTINE gnuplot_write_file_mul_data(data_file,col1,col2,color,start,last)
+SUBROUTINE gnuplot_write_file_mul_data(data_file, col1, col2, color, start, &
+                                       last, comment)
 IMPLICIT NONE
 
 INTEGER, INTENT(IN) :: col1, col2
@@ -195,6 +235,7 @@ LOGICAL, INTENT(IN) :: start, last
 CHARACTER(LEN=*) :: data_file
 CHARACTER(LEN=256) :: string
 CHARACTER(LEN=6) :: int_to_char
+LOGICAL :: comment
 
 string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//"):($"// &
               TRIM(int_to_char(col2)) &
@@ -202,6 +243,7 @@ string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//"):($"// &
 
 IF (start) string="plot "//TRIM(string)
 IF (.NOT.last) string=TRIM(string)//", \"
+IF (comment) string = '# ' // TRIM(string)
 
 IF (ionode) &
    WRITE(iun_gnuplot,'(a)') TRIM(string)
@@ -209,7 +251,8 @@ IF (ionode) &
 RETURN
 END SUBROUTINE gnuplot_write_file_mul_data
 
-SUBROUTINE gnuplot_write_file_mul_point(data_file,col1,col2,color,start,last)
+SUBROUTINE gnuplot_write_file_mul_point(data_file, col1, col2, color, start, &
+                                        last, comment)
 IMPLICIT NONE
 
 INTEGER, INTENT(IN) :: col1, col2
@@ -219,6 +262,7 @@ LOGICAL, INTENT(IN) :: start, last
 CHARACTER(LEN=*) :: data_file
 CHARACTER(LEN=256) :: string
 CHARACTER(LEN=6) :: int_to_char
+LOGICAL :: comment
 
 string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//"):($"// &
               TRIM(int_to_char(col2)) &
@@ -226,6 +270,7 @@ string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//"):($"// &
 
 IF (start) string="plot "//TRIM(string)
 IF (.NOT.last) string=TRIM(string)//", \"
+IF (comment) string = '# ' // TRIM(string)
 
 IF (ionode) &
    WRITE(iun_gnuplot,'(a)') TRIM(string)

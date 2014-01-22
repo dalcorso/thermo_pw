@@ -553,22 +553,24 @@ ENDIF
 IF (igeom > 1) filename=filename//TRIM(int_to_char(igeom))
 
 CALL gnuplot_write_header(filename, kx(1), kx(nks), emin, emax ) 
-CALL gnuplot_unset_xticks() 
+CALL gnuplot_unset_xticks(.FALSE.) 
 IF (icode==1) THEN
-   CALL gnuplot_ylabel('Energy (eV)') 
+   CALL gnuplot_ylabel('Energy (eV)',.FALSE.) 
 ELSE
-   CALL gnuplot_ylabel('Frequency (cm^{-1})') 
+   CALL gnuplot_ylabel('Frequency (cm^{-1})',.FALSE.) 
 ENDIF
 ypos= emin - (emax-emin) / 40.0_DP
 DO ilines = 2, nlines
-   CALL gnuplot_write_vertical_line(kx(point(ilines)), 2, 'front', 'black')
+   CALL gnuplot_write_vertical_line(kx(point(ilines)), 2, 'front', 'black', &
+                                     .FALSE.)
 END DO
-CALL gnuplot_set_eref(eref)   
+CALL gnuplot_set_eref(eref,.FALSE.)   
 
 DO n=1, nqaux
    IF (n /= 1 .AND. n /= nqaux ) &
-      CALL gnuplot_write_vertical_line(kx(label_disp_q(n)), 1, 'front', 'black')
-   CALL gnuplot_write_label(kx(label_disp_q(n)), ypos, letter_path(n))
+      CALL gnuplot_write_vertical_line(kx(label_disp_q(n)), 1, 'front', &
+                                       'black', .FALSE.)
+   CALL gnuplot_write_label(kx(label_disp_q(n)), ypos, letter_path(n),.FALSE.)
 ENDDO
 
 colore(1)='red'
@@ -585,18 +587,21 @@ colore(12)='orange'
 
 IF (.NOT.exist_rap) THEN
    filename=TRIM(flpband)
-   CALL gnuplot_write_file_data(filename,'red',.TRUE.,.TRUE.)
+   CALL gnuplot_write_file_data(filename,'red',.TRUE.,.TRUE.,.FALSE.)
 ELSE
    DO ilines = 1, nlines
       IF (nrap(ilines)==0) THEN
          filename=TRIM(flpband) // "." // TRIM(int_to_char(ilines))
          IF (has_points(ilines,1)) THEN
             IF (ilines==1) THEN
-               CALL gnuplot_write_file_data(filename,'red',.TRUE.,.FALSE.)
+               CALL gnuplot_write_file_data(filename,'red',.TRUE.,.FALSE.,&
+                                                     .FALSE.)
             ELSEIF (ilines==nlines) THEN
-               CALL gnuplot_write_file_data(filename,'red',.FALSE.,.TRUE.)
+               CALL gnuplot_write_file_data(filename,'red',.FALSE.,.TRUE.,&
+                                                     .FALSE.)
             ELSE
-               CALL gnuplot_write_file_data(filename,'red',.FALSE.,.FALSE.)
+               CALL gnuplot_write_file_data(filename,'red',.FALSE.,.FALSE.,&
+                                                     .FALSE.)
             END IF
          END IF
       ELSE
@@ -606,13 +611,13 @@ ELSE
             IF (has_points(ilines,irap)) THEN
                IF (ilines==1.AND.irap==1) THEN
                   CALL gnuplot_write_file_data(filename,colore(irap),&
-                                                            .TRUE.,.FALSE.)
+                                              .TRUE.,.FALSE.,.FALSE.)
                ELSEIF (ilines==nlines.AND.irap==nrap(nlines)) THEN
                   CALL gnuplot_write_file_data(filename,colore(irap),&
-                                                             .FALSE.,.TRUE.)
+                                              .FALSE.,.TRUE.,.FALSE.)
                ELSE
                   CALL gnuplot_write_file_data(filename,colore(irap),&
-                                   .FALSE.,.FALSE.)
+                                              .FALSE.,.FALSE.,.FALSE.)
                ENDIF
             ENDIF
          ENDDO

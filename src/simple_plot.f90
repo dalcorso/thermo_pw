@@ -16,8 +16,7 @@ USE kinds,           ONLY : DP
 USE control_gnuplot, ONLY : flgnuplot
 USE gnuplot,         ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
                             gnuplot_write_file_data, gnuplot_ylabel, &
-                            gnuplot_xlabel, &
-                            gnuplot_write_vertical_line, gnuplot_write_label
+                            gnuplot_xlabel
 USE mp_images,       ONLY : root_image, my_image_id
 
 IMPLICIT NONE
@@ -36,10 +35,10 @@ CALL gnuplot_start(filename)
 filename=TRIM(psfilename)
 CALL gnuplot_write_header(filename, xmin, xmax, ymin, ymax ) 
 
-CALL gnuplot_ylabel(TRIM(ylabel)) 
-CALL gnuplot_xlabel(TRIM(xlabel)) 
+CALL gnuplot_ylabel(TRIM(ylabel), .FALSE.) 
+CALL gnuplot_xlabel(TRIM(xlabel), .FALSE.) 
 
-CALL gnuplot_write_file_data(data_filename,colore,.TRUE.,.TRUE.)
+CALL gnuplot_write_file_data(data_filename,colore,.TRUE.,.TRUE., .FALSE.)
 
 CALL gnuplot_end()
 
