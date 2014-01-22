@@ -85,7 +85,6 @@ $ECHO " done"
 cat > si.scf_disp.in << EOF
  &INPUT_THERMO
   what='scf_disp',
-  emax_input=600,
   nq1_d=6, 
   nq2_d=6, 
   nq3_d=6,
@@ -125,9 +124,8 @@ ciao
  &inputph
   tr2_ph=1.0d-12,
   prefix='silicon',
-  fildyn='si.dyn',
+  fildyn='si.dyn.xml',
   ldisp=.TRUE.
-  fildyn='si.dyn',
   nq1=2, nq2=2, nq3=2,
 /
 EOF
@@ -139,8 +137,8 @@ $ECHO " done"
 if [ "$GP_COMMAND" = "" ]; then
     break
 else
-$ECHO "  creating the postscript file si.dispersion.ps...\c"
-$GP_COMMAND gnuplot.tmp
+$ECHO "  creating the postscript file output_disp.ps.g1...\c"
+$GP_COMMAND gnuplot.tmp.g1_disp
 check_failure $?
 $ECHO " done"
 fi
@@ -148,8 +146,8 @@ fi
 if [ "$GP_COMMAND" = "" ]; then
     break
 else
-$ECHO "  generating plot of phonon_dos in the file si.phdos.ps...\c"
-$GP_COMMAND  gnuplot.tmp1
+$ECHO "  generating plot of phonon_dos in the file output_dos.ps.g1...\c"
+$GP_COMMAND  gnuplot.tmp.g1_dos
 check_failure $?
 $ECHO " done"
 fi
@@ -157,8 +155,8 @@ fi
 if [ "$GP_COMMAND" = "" ]; then
     break
 else
-$ECHO "  creating the postscript file si.therm.ps...\c"
-$GP_COMMAND gnuplot.tmp2
+$ECHO "  creating the postscript file output_therm.ps.g1...\c"
+$GP_COMMAND gnuplot.tmp.g1_therm
 check_failure $?
 $ECHO " done"
 fi

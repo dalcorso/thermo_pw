@@ -92,3 +92,20 @@ ngeo = # of geom.  constant and allows the calculation of the zero-point
                    are calculated asyncronously, but the different geometries
                    are calculate sequentially and all the images are 
                    resyncronized before changing geometry.
+
+example10:
+what = scf_ke  : this example computes the total energy for several values
+ngeo=1           of the kinetic energy cut-off of the wavefunctions and of the
+                 charge density. The two can be specified independently or
+                 a calculation at fixed dual or for several dual can be
+                 specified. If images are used the each kinetic energy
+                 is calculated asyncronously from the others in different
+                 images.
+
+example11:
+what = scf_nk  : this example computes the total energy for several values
+                 of the k point mesh. One can specify the number of nk, and
+                 the step between the first nk written on the input of pw.x
+                 and the others. If this is a metal also the number of values
+                 of sigma can be specified.
+

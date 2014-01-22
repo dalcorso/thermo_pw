@@ -128,7 +128,7 @@ if [ "$GP_COMMAND" = "" ]; then
     break
 else
 $ECHO "  creating the postscript file output_band.ps...\c"
-$GP_COMMAND gnuplot.tmp
+$GP_COMMAND gnuplot.tmp_band
 check_failure $?
 $ECHO " done"
 fi

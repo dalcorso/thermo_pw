@@ -21,13 +21,17 @@ calculated. The info for the quantities that have been already
 calculated is read inside the code. The others tasks are scheduled,
 their priorities determined, and distributed to the image driver.
 If there are several available images the different tasks are
-carried out in parallel. This driver can carry out a scf 
+carried out in parallel when possible. This driver can carry out a scf 
 calculation, a non scf calculation to determine the band structure,
 or a linear response calculation at a given q and for a given
 representation. Finally the root image can carry out several
 post processing tasks. The task currently implemented are:
 
 scf           : a single scf calculation to determine the total energy.
+scf_ke        : test of the dependence of the energy on the wavefunctions
+                and density cut-off energy.
+scf_nk        : test of the dependence of the energy on the k point sampling
+                and on the smearing.  
 scf_bands     : a band structure calculation after a scf calculation.
 scf_ph        : a phonon at a single q after a scf run.
 scf_disp      : a phonon dispersion calculation after a scf run.
@@ -36,13 +40,13 @@ scf_disp      : a phonon dispersion calculation after a scf run.
                 calculation.
 mur_lc        : equilibrium lattice constant via murnaghan equation.
 mur_lc_bands  : a band structure calculation at the minimum or the
-                murnaghan
+                murnaghan.
 mur_lc_ph     : a phonon calculation at a single q at the minimum of the 
-                murmaghan.
+                murnaghan.
 mur_lc_disp   : a dispersion calculation at the minimum of the murnaghan with 
-                the possibility to compute harmonic thermodynamical quantities
+                the possibility to compute harmonic thermodynamical quantities.
 mur_lc_t      : lattice constant and bulk modulus as a function of temperature 
-                within the quasiharmonic approximation
+                within the quasiharmonic approximation.
   
 Input variables of thermo_pw:
 
@@ -60,6 +64,38 @@ emax_input : maximum energy for the band dispersion plot
              Default: determined from the bands
 nbnd_bands : the number of bands in the band calculation
              Default: nbnd given in pw input.
+
+vmin_input : minimum volume for Murnaghan plot
+             Default: 0.98 times the volume of the first geometry
+
+vmax_input : maximum volume for Murnaghan plot
+             Default: 1.02 times the volume of the last geometry
+
+deltav     : distance between two volumes in Murnaghan plot
+             Default: calculated from nvol
+
+nvol       : number of volumes in Murnaghan plot
+             Default : 51
+
+nke        : number of kinetic energies tested in the wavefunctions
+             kinetic energy test.
+             Default: 5
+deltake    : delta of wavefunctions kinetic energy in Ry.
+             Default: 10 Ry
+nkeden     : number of kinetic energies tested in the charge density
+             kinetic energy test.
+             Default: 1
+deltakeden : delta of density kinetic energy.
+             Default: 100
+
+nnk        : the number of different nk to test
+             Default: 5
+deltank    : the step in nk
+             Default: 2
+nsigma     : the number of intervals of smearing
+             Default: 1 (no test)
+deltasigma : the distance between different smearing values.
+             Default: 0.005 Ry
 
 tmin    : minimum temperature
           Default: 1 K
@@ -99,9 +135,15 @@ flanhar   : file where the anharmonic thermodynamic quantities are written
             Default: output_anhar.dat
 flevdat   : file where the murneghan equation is written
             Default: output_ev.dat
+flkeconv  : file where the data with the kinetic energy convergence is written
+            Default: output_keconv.dat
+flnkconv  : file where the data with the k point convergence is written
+            Default: 'output_nkconv.dat'
 
 flgnuplot : name of the files where gnuplot scripts are written
             Default: gnuplot.tmp
+flpsmur   : postscript file of the Murnaghan plot
+            Default: output_mur.ps
 flpsband  : postscript file of the electronic band structure
             Default: output_band.ps
 flpsdisp  : postscript file of the phonon dispersions
@@ -112,6 +154,11 @@ flpstherm : postscript file of the harmonic thermodynamic quantities
             Default: output_therm.ps
 flpsanhar : postscript file of the anharmonic quantities
             Default: output_anhar.ps
+flpskeconv : postscript file with the kinetic energy convergence
+            Default: output_keconv.ps
+flpsnkconv : postscript file with the k points convergence
+            Default: output_nkconv.ps
+
 
 q2d              : the q or k vectors are specified in a plane
                  Default: .FALSE.

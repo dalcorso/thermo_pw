@@ -73,12 +73,10 @@ $ECHO " done"
 
 # how to run executables
 THERMO_PW_COMMAND="$PARA_IMAGE_PREFIX $BIN_DIR/thermo_pw.x $PARA_IMAGE_POSTFIX"
-PLOTBAND_COMMAND="$BIN_DIR/plotband.x"
 # check for gnuplot
 GP_COMMAND=`which gnuplot 2>/dev/null`
 $ECHO
 $ECHO "  running thermo_pw.x as: $THERMO_PW_COMMAND"
-$ECHO "  running plotband.x as: $PLOTBAND_COMMAND"
 $ECHO "  running gnuplot as: $GP_COMMAND"
 $ECHO
 
@@ -89,42 +87,31 @@ $ECHO " done"
 cat > si.mur_lc_t.in << EOF
  &INPUT_THERMO
   what='mur_lc_t',
-  flfrc='sifc.222.dat'
-  flfrq='si.freq'
-  fldos='si.phdos'
-  fltherm='si.therm' 
-  flanhar='si.anharm.dat'
-  q_in_band_form=.true.,
-  zasr='simple'
-  nq1_d=16, nq2_d=16, nq3_d=16,
-  ngeo=9,
-  tmin=1.,
-  tmax=800.,
-  deltat=2.,
+  nq1_d=32, nq2_d=32, nq3_d=32,
+  ngeo=9
+  deltat=2.
  /
  6
-  0.000 0.0 0.0   40
-  1.0   0.0 0.0   20
-  1.0   0.5 0.0   20
-  1.0   1.0 0.0   40
-  0.00  0.0 0.0   40
-  0.5   0.5 0.5    1
+  gG              40
+  X               20
+  W               20
+  1.0   1.0 0.0   40  'X'
+  gG              40
+  L                1
  &control
-    calculation = 'scf'
-    restart_mode='from_scratch',
-    prefix='silicon',
-    tstress = .true.
-    tprnfor = .true.
-    pseudo_dir = '$PSEUDO_DIR/',
-    outdir='$TMP_DIR/'
+   calculation = 'scf'
+   prefix='silicon',
+   pseudo_dir = '$PSEUDO_DIR/',
+   outdir='$TMP_DIR/'
  /
  &system
-    ibrav=  2, celldm(1) =10.20, nat=  2, ntyp= 1,
-    ecutwfc =24.0,
+   ibrav= 2, 
+   celldm(1)= 10.20, 
+   nat=2, 
+   ntyp=1,
+   ecutwfc=24.0,
  /
  &electrons
-    mixing_mode = 'plain'
-    mixing_beta = 0.7
     conv_thr =  1.0d-8
  /
 ATOMIC_SPECIES
@@ -133,7 +120,7 @@ ATOMIC_POSITIONS
  Si 0.00 0.00 0.00
  Si 0.25 0.25 0.25
 K_POINTS AUTOMATIC
-4 4 4 1 1 1 
+8 8 8 1 1 1 
 ---
 ciao
  &inputph
@@ -141,8 +128,7 @@ ciao
   prefix='silicon',
   fildyn='si.dyn',
   ldisp=.TRUE.
-  fildyn='si.dyn',
-  nq1=4, nq2=4, nq3=4,
+  nq1=8, nq2=8, nq3=8,
 /
 EOF
 $ECHO "  running the thermo mur_lc_t calculation for Si...\c"
@@ -150,51 +136,15 @@ $THERMO_PW_COMMAND < si.mur_lc_t.in > si.mur_lc_t.out
 check_failure $?
 $ECHO " done"
 
-cat > plotband.in <<EOF
-si.freq.g1
-0 600
-freq.plot
-freq.ps
-0.0
-50.0 0.0
-EOF
-
-$ECHO "  writing the phonon dispersions in freq.plot...\c"
-$PLOTBAND_COMMAND < plotband.in > /dev/null
-check_failure $?
-$ECHO " done"
-
 if [ "$GP_COMMAND" = "" ]; then
     break
 else
-cat > gnuplot.tmp <<EOF
-set encoding iso_8859_15
-set terminal postscript enhanced solid color "Helvetica" 20
-set output "si.dispersions.ps"
-#
-set key off
-
-set xrange [0:4.280239]
-dim=600
-set yrange [0:dim]
-set arrow from 1,0. to 1,dim nohead  lw 2
-set arrow from 2,0. to 2,dim nohead  lw 2
-set arrow from 1.5,0. to 1.5,dim nohead  lw 2
-set arrow from 3.4142,0. to 3.4142,dim nohead  lw 2
-set ylabel "frequency (cm^{-1})"
-unset xtics
-lpos=-15
-set label "{/Symbol G}" at -0.05,lpos
-set label "X" at 0.95,lpos
-set label "W" at 1.45,lpos
-set label "X" at 1.95,lpos
-set label "{/Symbol G}" at 3.37,lpos
-set label "L" at 4.1897,lpos
-
-plot "freq.plot" u 1:2 w l lw 3  
-EOF
-$ECHO "  creating the postscript file si.dispersion.ps...\c"
-$GP_COMMAND gnuplot.tmp
+$ECHO "  creating the postscript file output_disp.ps...\c"
+$GP_COMMAND gnuplot.tmp.g1_disp
+$GP_COMMAND gnuplot.tmp.g2_disp
+$GP_COMMAND gnuplot.tmp.g3_disp
+$GP_COMMAND gnuplot.tmp.g4_disp
+$GP_COMMAND gnuplot.tmp.g5_disp
 check_failure $?
 $ECHO " done"
 fi
@@ -202,19 +152,12 @@ fi
 if [ "$GP_COMMAND" = "" ]; then
     break
 else
-cat > gnuplot1.tmp <<EOF
-set encoding iso_8859_15
-set terminal postscript enhanced solid color "Helvetica" 20
-set output "si.phdos.ps"
-#
-set key off
-set xrange [0:600]
-set xlabel "frequency (cm^{-1})"
-set ylabel "DOS"
-plot 'si.phdos.g1' u 1:2 w l lw 3 
-EOF
-$ECHO "  generating plot of phonon_dos in the file si.phdos.ps...\c"
-$GP_COMMAND  gnuplot1.tmp
+$ECHO "  generating plot of phonon_dos in the file output_dos.ps...\c"
+$GP_COMMAND  gnuplot.tmp.g1_dos
+$GP_COMMAND  gnuplot.tmp.g2_dos
+$GP_COMMAND  gnuplot.tmp.g3_dos
+$GP_COMMAND  gnuplot.tmp.g4_dos
+$GP_COMMAND  gnuplot.tmp.g5_dos
 check_failure $?
 $ECHO " done"
 fi
@@ -222,48 +165,12 @@ fi
 if [ "$GP_COMMAND" = "" ]; then
     break
 else
-cat > gnuplot2.tmp <<EOF
-set encoding iso_8859_15
-set terminal postscript enhanced solid color "Helvetica" 20
-set output "si.therm.ps"
-#
-set key off
-
-set xrange [0:450]
-
-dim0=8000
-dim=22000
-set yrange [dim0:dim]
-set xlabel "T (K)"
-set ylabel "Vibrational energy (J / mol)"
-
-plot "si.therm.g1" u 1:(\$2*1313313) w l lw 3  
-
-dim0=0
-dim=12000
-set yrange [dim0:dim]
-set xlabel "T (K)"
-set ylabel "Vibrational free energy (J / mol)"
-
-plot "si.therm.g1" u 1:(\$3*1313313) w l lw 3  
-
-dim=70
-set yrange [0:dim]
-set xlabel "T (K)"
-set ylabel "Entropy (J / K / mol)"
-
-plot "si.therm.g1" u 1:(\$4*1313313) w l lw 3  
-
-dim=50
-set yrange [0:dim]
-set xlabel "T (K)"
-set ylabel "C_v (J / T / mol)"
-
-plot "si.therm.g1" u 1:(\$5*1313313) w l lw 3  
-
-EOF
-$ECHO "  creating the postscript file si.therm.ps...\c"
-$GP_COMMAND gnuplot2.tmp
+$ECHO "  creating the postscript file output_therm.ps...\c"
+$GP_COMMAND gnuplot.tmp.g1_therm
+$GP_COMMAND gnuplot.tmp.g2_therm
+$GP_COMMAND gnuplot.tmp.g3_therm
+$GP_COMMAND gnuplot.tmp.g4_therm
+$GP_COMMAND gnuplot.tmp.g5_therm
 check_failure $?
 $ECHO " done"
 fi
@@ -288,34 +195,8 @@ EOF
 if [ "$GP_COMMAND" = "" ]; then
     break
 else
-cat > gnuplot3.tmp <<EOF
-set encoding iso_8859_15
-set terminal postscript enhanced solid color "Helvetica" 20
-set output "si.anharmonic.ps"
-#
-set key off
-
-set xrange [0:850]
-
-set xlabel "T (K)"
-set ylabel "Lattice constant (a.u.)"
-
-plot "si.anharm.dat" u 1:3 w l lw 3  
-
-set xlabel "T (K)"
-set ylabel "Thermal expansion ({/Symbol a} x 10^{-6})"
-
-plot "si.anharm.dat" u 1:4 w l lw 3  
-replot "si.exp" u 1:4 w p pt 65  
-
-set xlabel "T (K)"
-set ylabel "Bulk modulus (kbar)"
-
-plot "si.anharm.dat" u 1:5 w l lw 3  
-EOF
-
-$ECHO "  creating the postscript file si.anharmonic.ps...\c"
-$GP_COMMAND gnuplot3.tmp
+$ECHO "  creating the postscript file output_anhar.ps...\c"
+$GP_COMMAND gnuplot.tmp_anhar
 check_failure $?
 $ECHO " done"
 fi
