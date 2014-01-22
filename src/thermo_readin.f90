@@ -52,7 +52,7 @@ SUBROUTINE thermo_readin()
   INTEGER :: iq, ipol, i, j, k
 
   INTEGER            :: nch
-  LOGICAL :: tend, terr, read_paths
+  LOGICAL :: tend, terr, read_paths, set_internal_path
   CHARACTER(LEN=256) :: input_line, buffer
   !
   NAMELIST / input_thermo / what, ngeo, zasr,               &
@@ -76,14 +76,13 @@ SUBROUTINE thermo_readin()
                             emin_input, emax_input,         &
                             vmin_input, vmax_input, deltav, &
                             nvol, nke, deltake,             &
-                            nnk, deltank, nsigma, deltasigma, &
-                            nkeden, deltakeden
+                            nkeden, deltakeden,             &
+                            nnk, deltank, nsigma, deltasigma
   !
   !  First read the input of thermo. Only one node reads
   !
   what=' '
   ngeo=0
-
 
   nq1_d=16
   nq2_d=16
@@ -161,12 +160,16 @@ SUBROUTINE thermo_readin()
   END IF
 
   nqaux=0
+  set_internal_path=.FALSE.
   IF ( read_paths ) THEN
 
-     IF (meta_ionode) READ (5, *, iostat = ios) nqaux
+     IF (meta_ionode) READ (5, *, err=200, iostat = ios) nqaux
 
-     CALL mp_bcast(ios, meta_ionode_id, world_comm )
-     CALL errore ('thermo_readin', 'reading the number of q points', ABS (ios) )
+200  CALL mp_bcast(ios, meta_ionode_id, world_comm )
+     IF ( ios /= 0) THEN 
+        set_internal_path=.TRUE.
+        goto 70
+     ENDIF
      CALL mp_bcast(nqaux, meta_ionode_id, world_comm )
 
      ALLOCATE(xqaux(3,nqaux))
@@ -239,7 +242,8 @@ SUBROUTINE thermo_readin()
            ENDIF
         ENDDO
      ENDDO
-  END IF
+  ENDIF
+70  CONTINUE
   !
   !  Then open an input for each image and copy the input file
   !
@@ -257,6 +261,7 @@ SUBROUTINE thermo_readin()
              FORM='FORMATTED', ERR=30, IOSTAT=ios )
      ENDDO
      dummy=' '
+     REWIND(5)
      DO WHILE ( .TRUE. )
         READ (5,fmt='(A512)',END=20) dummy
         DO image=1,nimage
@@ -279,6 +284,8 @@ SUBROUTINE thermo_readin()
   input_file_=input(my_image_id+1)
   DEALLOCATE(input)
   DEALLOCATE(iun_image)
+
+  IF (set_internal_path) CALL set_bz_path()
 
   RETURN
 END SUBROUTINE thermo_readin

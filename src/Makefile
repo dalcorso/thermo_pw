@@ -13,7 +13,6 @@ bands_sub.o \
 bcast_thermo_input.o \
 collect_everything.o \
 compute_cp.o \
-compute_thermo.o  \
 deallocate_asyn.o \
 deallocate_thermo.o \
 deallocate_thermo.o \
@@ -23,11 +22,16 @@ ev_xml.o \
 initialize_thermo_work.o \
 initialize_thermo_master.o \
 matdyn_sub.o \
+mur.o \
 plot_anhar.o \
 plotband_sub.o \
+plot_e_ke.o \
+plot_e_nk.o \
 plot_thermo.o \
+plot_mur.o \
 q2r_sub.o \
 run_thermo_asyncronously.o \
+set_bz_path.o \
 set_k_points.o \
 set_paths_disp.o \
 set_thermo_work_todo.o \
@@ -38,7 +42,10 @@ thermo_mod.o \
 thermo_readin.o \
 thermo_pw.o \
 write_anhar.o \
-write_ev_input.o 
+write_e_nk.o \
+write_e_ke.o  \
+write_ev_input.o \
+write_thermo.o 
              
 
 PWOBJS = ../../PHonon/PH/libph.a ../../PP/src/libpp.a ../../PW/src/libpw.a 

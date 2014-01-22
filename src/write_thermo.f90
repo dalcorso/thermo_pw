@@ -1,4 +1,11 @@
-SUBROUTINE compute_thermo(igeom)
+!
+! Copyright (C) 2014 Andrea Dal Corso
+! This file is distributed under the terms of the
+! GNU General Public License. See the file `License'
+! in the root directory of the present distribution,
+! or http://www.gnu.org/copyleft/gpl.txt .
+!
+SUBROUTINE write_thermo(igeom)
 
 USE kinds,          ONLY : DP
 USE phdos_module,   ONLY : phdos_type, read_phdos_data, zero_point_energy, &
@@ -61,25 +68,24 @@ IF (ionode) THEN
    iu_therm=2
    OPEN (UNIT=iu_therm, FILE=TRIM(fltherm), STATUS='unknown',&
                                                      FORM='formatted')
-   WRITE(iu_therm,'("# Zero point energy is:", f15.5, " Ry / cell", f15.5, &
-                    &" kJ * N / mol", f15.5, "kcal * N / mol")') e0, &
+   WRITE(iu_therm,'("# Zero point energy is:", f9.5, " Ry/cell,", f9.5, &
+                    &" kJ*N/mol,", f9.5, " kcal*N/mol")') e0, &
                        e0 * 1313.313_DP, e0 * 313.7545_DP 
-   WRITE(iu_therm,'("# Total number of states is:", f15.5)') tot_states
+   WRITE(iu_therm,'("# Total number of states is:", f15.5,",")') tot_states
    WRITE(iu_therm,'("# Temperature T in K, ")')
    WRITE(iu_therm,'("# Energy and free energy in Ry/cell,")')
-   WRITE(iu_therm,'("# Entropy in Ry / (cell K)")')
-   WRITE(iu_therm,'("# Specific heat Cv in Ry / (cell K)")')
+   WRITE(iu_therm,'("# Entropy in Ry/cell/K,")')
+   WRITE(iu_therm,'("# Heat capacity Cv in Ry/cell/K.")')
    WRITE(iu_therm,'("# Multiply by 13.6058 to have energies in &
-                       & eV / cell etc.")')
+                       &eV/cell etc..")')
    WRITE(iu_therm,'("# Multiply by 13.6058 x 23060.35 = 313 754.5 to have &
-                  & energies in cal * N / mol")')
-   WRITE(iu_therm,'("# assuming that N_A cells contain N moles &
-                  & (N_A is the Avogadro")')
-   WRITE(iu_therm,'("# number). For instance in ")')
-   WRITE(iu_therm,'("# silicon N=2. Divide by N to have energies in &
-                  & cal / mol etc. ")')
+                  &energies in cal*N/mol.")')
+   WRITE(iu_therm,'("# We assume that N_A cells contain N moles &
+                  &(N_A is the Avogadro number).")')
+   WRITE(iu_therm,'("# For instance in silicon N=2. Divide by N to have &
+                   &energies in cal/mol etc. ")')
    WRITE(iu_therm,'("# Multiply by 13.6058 x 96526.0 = 1 313 313 to &
-                  & have energies in J / mol")')
+                  &have energies in J/mol.")')
    WRITE(iu_therm,'("#",5x,"   T  ", 7x, " energy ", 4x, "  free energy ",&
                   & 4x, " entropy ", 7x, " Cv ")') 
 
@@ -93,4 +99,4 @@ IF (ionode) THEN
 END IF
 
 RETURN
-END SUBROUTINE compute_thermo
+END SUBROUTINE write_thermo
