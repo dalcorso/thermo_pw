@@ -60,7 +60,7 @@ SUBROUTINE ev_sub(vmin,b0,b01,emin_out)
 
       IMPLICIT NONE
       REAL(DP), INTENT(OUT)  :: vmin, b0, b01, emin_out
-      INTEGER, PARAMETER:: nmaxpar=4, nmaxpt=100, nseek=10000, nmin=4
+      INTEGER, PARAMETER:: nmaxpar=4, nmaxpt=100, nseek=10000, nmin=8
       INTEGER :: npar,npt,istat, ierr
       CHARACTER :: bravais*3, au_unit*3, filin*256
       REAL(DP) :: par(nmaxpar), deltapar(nmaxpar), parmin(nmaxpar), &
