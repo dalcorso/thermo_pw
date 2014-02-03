@@ -13,6 +13,7 @@ bands_sub.o \
 bcast_thermo_input.o \
 collect_everything.o \
 compute_cp.o \
+compute_gruneisen.o \
 deallocate_asyn.o \
 deallocate_thermo.o \
 deallocate_thermo.o \
@@ -23,6 +24,7 @@ initialize_thermo_work.o \
 initialize_thermo_master.o \
 matdyn_sub.o \
 mur.o \
+polifit.o \
 plot_anhar.o \
 plotband_sub.o \
 plot_e_ke.o \
@@ -35,6 +37,7 @@ set_bz_path.o \
 set_k_points.o \
 set_paths_disp.o \
 set_thermo_work_todo.o \
+simple_nonanal.o \
 simple_plot.o \
 solve_linter.o \
 sym_band_sub.o \
@@ -45,6 +48,7 @@ write_anhar.o \
 write_e_nk.o \
 write_e_ke.o  \
 write_ev_input.o \
+write_gruneisen_band.o \
 write_thermo.o 
              
 
@@ -55,7 +59,7 @@ LIBOBJS	= ../lib/thermo_lib.a ../../PHonon/PH/libph.a ../../flib/ptools.a ../../
 
 TLDEPS= bindir mods libs pw
 
-all : libthermo_pw.a thermo_pw.x 
+all : libthermo_pw.a thermo_pw.x thermo_red.x
 
 libs-ph : libph.a libphaux.a
 
@@ -63,7 +67,13 @@ thermo_pw.x : thermo_pw.o libthermo_pw.a $(PWOBJS) $(LIBOBJS)
 	$(LD) $(LDFLAGS) -o $@ thermo_pw.o ../../PHonon/PH/rigid.o \
                  ../../PHonon/PH/write_eigenvectors.o libthermo_pw.a \
 		 $(PWOBJS) $(QEMODS) $(LIBOBJS) $(LIBS)
-	- ( cd ../../bin ; ln -fs ../THERMO_PW/src/ph.x . )
+	- ( cd ../../bin ; ln -fs ../THERMO_PW/src/thermo_pw.x . )
+
+thermo_red.x : thermo_red.o libthermo_pw.a $(PWOBJS) $(LIBOBJS)
+	$(LD) $(LDFLAGS) -o $@ thermo_red.o ../../PHonon/PH/rigid.o \
+                 ../../PHonon/PH/write_eigenvectors.o libthermo_pw.a \
+		 $(PWOBJS) $(QEMODS) $(LIBOBJS) $(LIBS)
+	- ( cd ../../bin ; ln -fs ../THERMO_PW/src/thermo_red.x . )
 
 libthermo_pw.a : $(THERMOOBJS) 
 	$(AR) $(ARFLAGS) $@ $?
@@ -71,7 +81,7 @@ libthermo_pw.a : $(THERMOOBJS)
 
 clean :
 	- /bin/rm -f *.x *.o *.a *~ *.F90 *.d *.mod *.i *.L
-	- /bin/rm -rf ../../bin/thermo_pw.x
+	- /bin/rm -rf ../../bin/thermo_pw.x ../../bin/thermo_red.x
 
 include make.depend
 # DO NOT DELETE
