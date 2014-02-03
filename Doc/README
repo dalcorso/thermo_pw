@@ -168,3 +168,9 @@ q_in_cryst_coord : the q or k are given in crystal coordinates
                  Default: .FALSE.
 point_label_type : the label definition (see the BZ manual)
                  Default: SC
+
+lgnuplot         : if .TRUE. gnuplot is called from within the program
+                 and the postscripts files are immediately available
+                 Default: .TRUE.
+gnuplot_command  : the command used to call gnuplot.
+                 Default: gnuplot

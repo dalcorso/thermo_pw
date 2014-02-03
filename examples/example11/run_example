@@ -116,21 +116,11 @@ ATOMIC_POSITIONS
 K_POINTS AUTOMATIC
 4 4 4 1 1 1 
 EOF
-$ECHO "  running the scf calculation checking the k-point sampling...\c"
+$ECHO "  running the scf calculation checking the k-point sampling and"
+$ECHO "  creating the postscript file output_nkconv.ps...\c"
 $THERMO_PW_COMMAND < cu.scf_nk.in > cu.scf_nk.out
 check_failure $?
 $ECHO " done"
-
-if [ "$GP_COMMAND" = "" ]; then
-    break
-else
-$ECHO "  creating the postscript file output_keconv.ps...\c"
-$GP_COMMAND gnuplot.tmp_nkconv
-check_failure $?
-$ECHO " done"
-fi
-
-
 
 $ECHO
 $ECHO "$EXAMPLE_DIR : done"

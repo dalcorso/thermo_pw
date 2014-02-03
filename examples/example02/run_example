@@ -87,16 +87,8 @@ cat > si.scf_bands.in << EOF
   emax_input=5,
   nbnd_bands=12,
  /
- 6
-  gG              40
-  X               20
-  W               20
-  1.0 1.0 0.0     40  'X'
-  gG              40
-  L                1
  &control
   calculation = 'scf'
-  restart_mode='from_scratch',
   prefix='silicon',
   pseudo_dir = '$PSEUDO_DIR/',
   outdir='$TMP_DIR/'
@@ -119,19 +111,11 @@ ATOMIC_POSITIONS
 K_POINTS AUTOMATIC
 4 4 4 1 1 1 
 EOF
-$ECHO "  running the scf_bands calculation for Si...\c"
+$ECHO "  running the scf_bands calculation for Si..."
+$ECHO "  and creating the postscript file output_band.ps...\c"
 $THERMO_PW_COMMAND < si.scf_bands.in > si.scf_bands.out
 check_failure $?
 $ECHO " done"
-
-if [ "$GP_COMMAND" = "" ]; then
-    break
-else
-$ECHO "  creating the postscript file output_band.ps...\c"
-$GP_COMMAND gnuplot.tmp_band
-check_failure $?
-$ECHO " done"
-fi
 
 $ECHO
 $ECHO "$EXAMPLE_DIR : done"

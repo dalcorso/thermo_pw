@@ -87,7 +87,7 @@ $ECHO " done"
 cat > si.mur_lc_disp.in << EOF
  &INPUT_THERMO
   what='mur_lc_disp',
-  nq1_d=6, nq2_d=6, nq3_d=6,
+  nq1_d=32, nq2_d=32, nq3_d=32,
  /
  &control
    calculation = 'scf'
@@ -119,40 +119,16 @@ ciao
   prefix='silicon',
   fildyn='si.dyn.xml',
   ldisp=.TRUE.
-  nq1=2, nq2=2, nq3=2,
+  nq1=4, nq2=4, nq3=4,
 /
 EOF
-$ECHO "  running the thermo mur_lc_ph calculation for Si...\c"
+$ECHO "  running the thermo mur_lc_disp calculation for Si,"
+$ECHO "  creating the postscript file output_disp.ps,"
+$ECHO "  generating plot of phonon_dos in the file output_dos.ps,"
+$ECHO "  and creating the postscript file output_therm.ps...\c"
 $THERMO_PW_COMMAND < si.mur_lc_disp.in > si.mur_lc_disp.out
 check_failure $?
 $ECHO " done"
-
-if [ "$GP_COMMAND" = "" ]; then
-    break
-else
-$ECHO "  creating the postscript file output_disp.ps...\c"
-$GP_COMMAND gnuplot.tmp.g1_disp
-check_failure $?
-$ECHO " done"
-fi
-
-if [ "$GP_COMMAND" = "" ]; then
-    break
-else
-$ECHO "  generating plot of phonon_dos in the file output_dos.ps...\c"
-$GP_COMMAND  gnuplot.tmp.g1_dos
-check_failure $?
-$ECHO " done"
-fi
-
-if [ "$GP_COMMAND" = "" ]; then
-    break
-else
-$ECHO "  creating the postscript file output_therm.ps...\c"
-$GP_COMMAND gnuplot.tmp.g1_therm
-check_failure $?
-$ECHO " done"
-fi
 
 $ECHO
 $ECHO "$EXAMPLE_DIR: done"
