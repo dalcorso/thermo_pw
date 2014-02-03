@@ -8,7 +8,8 @@ MODFLAGS= $(MOD_FLAG)../iotk/src $(MOD_FLAG)../../Modules $(MOD_FLAG).
 MODULES = \
 gnuplot.o \
 mp_asyn.o \
-phdos_module.o 
+phdos_module.o \
+ph_freq_module.o
 
 all : thermo_lib.a
 
