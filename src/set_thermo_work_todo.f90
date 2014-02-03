@@ -78,7 +78,8 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
            tmp_dir = TRIM ( outdir )
            wfc_dir = tmp_dir
            CALL check_tempdir ( tmp_dir, exst, parallelfs )
-        CASE ('mur_lc','mur_lc_bands','mur_lc_ph','mur_lc_disp','mur_lc_t')
+        CASE ('mur_lc', 'mur_lc_bands', 'mur_lc_ph', 'mur_lc_disp', &
+              'mur_lc_t')
            celldm(1)=alat_geo(iwork)
            CALL cell_base_init ( ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
                          trd_ht, rd_ht, cell_units )

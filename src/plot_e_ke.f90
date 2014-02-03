@@ -11,7 +11,7 @@ SUBROUTINE plot_e_ke()
 !  
 !
 USE kinds,           ONLY : DP
-USE control_gnuplot, ONLY : flgnuplot, flpskeconv
+USE control_gnuplot, ONLY : flgnuplot, flpskeconv, lgnuplot, gnuplot_command
 USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
                             gnuplot_write_header,        &
                             gnuplot_ylabel,              &
@@ -20,17 +20,18 @@ USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
 USE control_thermo,  ONLY : flkeconv
 USE control_conv,    ONLY : ke, nke, nkeden
 USE mp_images,       ONLY : my_image_id, root_image
+USE io_global,       ONLY : ionode
 
 IMPLICIT NONE
 
-CHARACTER(LEN=256) :: filename
+CHARACTER(LEN=256) :: gnu_filename, filename
 CHARACTER(LEN=6), EXTERNAL :: int_to_char
-INTEGER :: iden
+INTEGER :: iden, ierr
 
 IF ( my_image_id /= root_image ) RETURN
 
-filename=TRIM(flgnuplot)//'_keconv'
-CALL gnuplot_start(filename)
+gnu_filename=TRIM(flgnuplot)//'_keconv'
+CALL gnuplot_start(gnu_filename)
 
 filename=TRIM(flpskeconv)
 CALL gnuplot_write_header(filename, ke(1), ke(nke), 0.0_DP, 0.0_DP ) 
@@ -59,6 +60,9 @@ DO iden=1,nkeden
 ENDDO
 
 CALL gnuplot_end()
+
+IF (lgnuplot.AND.ionode) &
+   ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
 
 RETURN
 END SUBROUTINE plot_e_ke

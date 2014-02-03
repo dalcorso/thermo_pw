@@ -17,9 +17,9 @@ SUBROUTINE set_paths_disp()
   USE control_paths, ONLY : nqaux, xqaux, wqaux, npk_label, letter, &
                             label_list, nqaux, q_in_band_form, &
                             q_in_cryst_coord, q2d, point_label_type, &
-                            label_disp_q
+                            label_disp_q, disp_nqs, disp_q, disp_wq
+
   USE cell_base,     ONLY : ibrav, celldm, bg
-  USE ifc,           ONLY : disp_nqs, disp_q, disp_wq
   USE bz_form,       ONLY : transform_label_coord
 
   IMPLICIT NONE

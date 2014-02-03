@@ -11,7 +11,7 @@ SUBROUTINE plot_mur()
 !  
 !
 USE kinds,           ONLY : DP
-USE control_gnuplot, ONLY : flgnuplot, flpsmur
+USE control_gnuplot, ONLY : flgnuplot, flpsmur, lgnuplot, gnuplot_command
 USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
                             gnuplot_write_header,        &
                             gnuplot_ylabel,              &
@@ -20,17 +20,19 @@ USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
                             gnuplot_write_file_mul_data, &
                             gnuplot_write_file_mul_point
 USE control_thermo,  ONLY : flevdat
-USE thermo_mod,      ONLY : vmin_input, vmax_input
+USE control_mur,     ONLY : vmin_input, vmax_input
 USE mp_images,       ONLY : my_image_id, root_image
+USE io_global,       ONLY : ionode
 
 IMPLICIT NONE
 
-CHARACTER(LEN=256) :: filename, filename1, filename2
+CHARACTER(LEN=256) :: filename, filename1, filename2, gnu_filename
+INTEGER :: ierr
 
 IF ( my_image_id /= root_image ) RETURN
 
-filename=TRIM(flgnuplot)//'_mur'
-CALL gnuplot_start(filename)
+gnu_filename=TRIM(flgnuplot)//'_mur'
+CALL gnuplot_start(gnu_filename)
 
 filename=TRIM(flpsmur)
 CALL gnuplot_write_header(filename, vmin_input, vmax_input, 0.0_DP, 0.0_DP ) 
@@ -47,6 +49,9 @@ CALL gnuplot_write_horizontal_line(0.0_DP, 2, 'front', 'black',.FALSE.)
 CALL gnuplot_write_file_mul_data(filename1,1,3,'red',.TRUE.,.TRUE.,.FALSE.)
 
 CALL gnuplot_end()
+
+IF (lgnuplot.AND.ionode) &
+   ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
 
 RETURN
 END SUBROUTINE plot_mur

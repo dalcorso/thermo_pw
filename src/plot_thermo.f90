@@ -11,48 +11,57 @@ SUBROUTINE plot_thermo(igeom)
 !  
 !
 USE kinds,           ONLY : DP
-USE control_gnuplot, ONLY : flgnuplot, flpstherm
+USE control_gnuplot, ONLY : flgnuplot, flpstherm, gnuplot_command, lgnuplot
 USE gnuplot,         ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
                             gnuplot_ylabel, &
                             gnuplot_xlabel, gnuplot_write_file_mul_data, &
                             gnuplot_set_fact
 USE control_thermo,  ONLY : fltherm
-USE thermodynamics,  ONLY : tmin, tmax
+USE temperature,     ONLY : tmin, tmax
 USE mp_images,       ONLY : root_image, my_image_id
+USE io_global,       ONLY : ionode
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: igeom
-CHARACTER(LEN=256) :: filename
+CHARACTER(LEN=256) :: gnu_filename, filename
 CHARACTER(LEN=6), EXTERNAL :: int_to_char
+INTEGER :: ierr
 
 IF ( my_image_id /= root_image ) RETURN
 
-filename=TRIM(flgnuplot)//'_therm'
-CALL gnuplot_start(filename)
+gnu_filename=TRIM(flgnuplot)//'_therm'
+CALL gnuplot_start(gnu_filename)
 
 IF (tmin ==1._DP) THEN
    CALL gnuplot_write_header(flpstherm, 0.0_DP, tmax, 0.0_DP, 0.0_DP ) 
 ELSE
    CALL gnuplot_write_header(flpstherm, tmin, tmax, 0.0_DP, 0.0_DP ) 
 ENDIF
+filename=TRIM(fltherm)//'_ph'
 CALL gnuplot_xlabel('T (K)', .FALSE.) 
 CALL gnuplot_ylabel('Vibrational energy (kJ / N / mol)',.FALSE.) 
 CALL gnuplot_set_fact(1313.3130_DP, .FALSE.) 
 
-CALL gnuplot_write_file_mul_data(fltherm,1,2,'red',.TRUE.,.TRUE.,.FALSE.)
+CALL gnuplot_write_file_mul_data(fltherm,1,2,'red',.TRUE.,.FALSE.,.FALSE.)
+CALL gnuplot_write_file_mul_data(filename,1,2,'blue',.FALSE.,.TRUE.,.FALSE.)
 
 CALL gnuplot_ylabel('Vibrational free energy (kJ / N / mol)', .FALSE.) 
-CALL gnuplot_write_file_mul_data(fltherm,1,3,'red',.TRUE.,.TRUE., .FALSE.)
+CALL gnuplot_write_file_mul_data(fltherm,1,3,'red',.TRUE.,.FALSE., .FALSE.)
+CALL gnuplot_write_file_mul_data(filename,1,3,'blue',.FALSE.,.TRUE., .FALSE.)
 
 CALL gnuplot_set_fact(1313313.0_DP, .FALSE.) 
 CALL gnuplot_ylabel('Entropy (J / K / N / mol))',.FALSE.) 
-CALL gnuplot_write_file_mul_data(fltherm,1,4,'blue',.TRUE.,.TRUE.,.FALSE.)
+CALL gnuplot_write_file_mul_data(fltherm,1,4,'red',.TRUE.,.FALSE.,.FALSE.)
+CALL gnuplot_write_file_mul_data(filename,1,4,'blue',.FALSE.,.TRUE.,.FALSE.)
 
 CALL gnuplot_ylabel('Heat capacity C_v (J / K / N / mol)',.FALSE.) 
-CALL gnuplot_write_file_mul_data(fltherm,1,5,'blue',.TRUE.,.TRUE.,.FALSE.)
+CALL gnuplot_write_file_mul_data(fltherm,1,5,'red',.TRUE.,.FALSE.,.FALSE.)
+CALL gnuplot_write_file_mul_data(filename,1,5,'blue',.FALSE.,.TRUE.,.FALSE.)
 
 CALL gnuplot_end()
 
+IF (lgnuplot.AND.ionode) &
+   ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+
 RETURN
 END SUBROUTINE plot_thermo
-

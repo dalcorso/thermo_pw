@@ -26,6 +26,8 @@ PROGRAM thermo_pw
   ! ... post processing tasks. The task currently implemented are:
   ! ... 
   ! ...   scf       : a single scf calculation to determine the total energy.
+  ! ...   scf_ke    : many scf calculations at different cut-offs
+  ! ...   scf_nk    : many scf calculations at different number of k points
   ! ...   scf_bands : a band structure calculation after a scf calcul.
   ! ...   scf_ph    : a phonon at a single q after a scf run
   ! ...   scf_disp  : a phonon dispersion calculation after a scf run
@@ -54,18 +56,20 @@ PROGRAM thermo_pw
                                lmatdyn, ldos, ltherm, flfrc, flfrq, fldos, &
                                fltherm, spin_component, flevdat, &
                                lconv_ke_test, lconv_nk_test
-
   USE ifc,              ONLY : freqmin, freqmax
-  USE control_paths,    ONLY : nqaux, nbnd_bands
+  USE control_paths,    ONLY : nqaux
   USE control_gnuplot,  ONLY : flpsdos, flgnuplot, flpstherm, flpsdisp
-  USE control_bands,    ONLY : flpband
+  USE control_bands,    ONLY : flpband, nbnd_bands
   USE wvfct,            ONLY : nbnd
   USE lsda_mod,         ONLY : nspin
-  USE thermodynamics,   ONLY : phdos_save, ngeo, ntemp
+  USE thermodynamics,   ONLY : phdos_save
+  USE ph_freq_thermodynamics, ONLY: ph_freq_save
+  USE temperature,      ONLY : ntemp
   USE phdos_module,     ONLY : destroy_phdos
   USE input_parameters, ONLY : ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
                                trd_ht, rd_ht, cell_units, outdir
-  USE thermo_mod,       ONLY : vmin, what, energy_geo, b0, b01, emin
+  USE control_mur,      ONLY : vmin, b0, b01, emin
+  USE thermo_mod,       ONLY : what, ngeo, energy_geo
   USE ph_restart,       ONLY : destroy_status_run
   USE save_ph,          ONLY : clean_input_variables
   USE output,           ONLY : fildyn
@@ -115,14 +119,24 @@ PROGRAM thermo_pw
   !
   CALL mp_sum(energy_geo, world_comm)
   energy_geo=energy_geo / nproc_image
+!
+!  In the kinetic energy test write the results
+!
   IF (lconv_ke_test) THEN
      CALL write_e_ke()
      CALL plot_e_ke()
   ENDIF
+!
+! In the k-point test write the results
+!
   IF (lconv_nk_test) THEN
      CALL write_e_nk()
      CALL plot_e_nk()
   ENDIF
+!
+!  In a murnaghan equation calculation determine the lattice constant,
+!  bulk modulus and its derivative and write the results
+!
   IF (lev_syn_1) THEN
      CALL do_ev()
      CALL mur(vmin,b0,b01,emin)
@@ -131,6 +145,10 @@ PROGRAM thermo_pw
   !
   CALL deallocate_asyn()
   ! 
+  !  This part is syncronized, only the first image makes a scf calculation
+  !  and a band structure calculation, at the equilibrium lattice constant
+  !  found previously.
+  !
   IF (lpwscf_syn_1) THEN
      IF (lev_syn_1) THEN
         celldm(1)=( vmin * 4.0_DP )**( 1.0_DP / 3.0_DP )
@@ -166,26 +184,30 @@ PROGRAM thermo_pw
            IF (nspin==4) nspin0=1
            DO spin_component = 1, nspin0
               CALL bands_sub()
-              CALL plotband_sub(1,1)
+              CALL plotband_sub(1,1,' ')
            ENDDO
         ENDIF
      ENDIF
   END IF
   
-  IF (what /= 'mur_lc_t') ngeo=1
-
+  IF (what(1:8) /= 'mur_lc_t') ngeo=1
+!
+!   This part makes now one or several phonon calculations, using the
+!   image feature of this code and running asyncronously the images
+!   different geometries are made in sequence. This should be improved,
+!   there should be no need to resyncronize after each geometry
+!
   IF (lph) THEN
      !
      ! ... reads the phonon input
-     !
      !
      wai=with_asyn_images
      always_run=.TRUE.
      CALL start_clock( 'PHONON' )
      DO igeom=1,ngeo
-        write(6,*) '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
-        write(6,*) 'Computing geometry ', igeom
-        write(6,*) '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
+        write(6,'(/,5x,40("%"))') 
+        write(6,'(5x,"Computing geometry ", i5)') igeom
+        write(6,'(5x,40("%"),/)') 
         outdir=TRIM(outdir_thermo)//'g'//TRIM(int_to_char(igeom))//'/'
         !
         CALL thermo_ph_readin()
@@ -237,15 +259,20 @@ PROGRAM thermo_pw
 !    compute interpolated dispersions
 !
            IF (lmatdyn) THEN
-              CALL matdyn_sub(.FALSE., igeom)
-              CALL plotband_sub(2,igeom)
+              CALL matdyn_sub(0, igeom)
+              CALL plotband_sub(2,igeom,' ')
            ENDIF
 !
 !    computes phonon dos
 !
            IF (lmatdyn.AND.ldos) THEN
+!
+!    the phonon dos is calculated and the frequencies saved on the ph_freq_save 
+!    structure
+!
               IF (.NOT.ALLOCATED(phdos_save)) ALLOCATE(phdos_save(ngeo))
-              CALL matdyn_sub(.TRUE.,igeom)
+              IF (.NOT.ALLOCATED(ph_freq_save)) ALLOCATE(ph_freq_save(ngeo))
+              CALL matdyn_sub(1,igeom)
               CALL simple_plot('_dos', fldos, flpsdos, 'frequency (cm^{-1})', &
                        'DOS (states / cm^{-1} / cell)', 'red', freqmin, freqmax, &
                             0.0_DP, 0.0_DP)
@@ -254,13 +281,13 @@ PROGRAM thermo_pw
 !    computes the thermodynamical properties
 !
            IF (ldos.AND.ltherm) THEN
+!
+!    first from phonon dos
+!
               CALL write_thermo(igeom)
+              CALL write_thermo_ph(igeom)
               CALL plot_thermo(igeom)
            ENDIF
-!
-!     Per ogni temperatura bisogna settare l'input di ev.x e chiamare ev.x
-!     poi raccogliere a e B per ogni T e scriverli in output
-!
         ENDIF
         CALL deallocate_asyn()
         CALL clean_pw(.TRUE.)
@@ -270,15 +297,36 @@ PROGRAM thermo_pw
         CALL deallocate_part()
      ENDDO
      flgnuplot=TRIM(flgnuplot_thermo)
-
+!
+!     Here the Helmholtz free energy at each lattice constant is available.
+!     We can write on file the free energy as a function of the volume at
+!     any temperature. For each temperature we call the murnaghan equation
+!     to fit the data. We save the minimum volume, the bulk modulus and its
+!     pressure derivative for each temperature.
+!
      IF (lev_syn_2) THEN
         diraux='evdir'
         CALL check_tempdir ( diraux, exst, parallelfs )
         flevdat=TRIM(diraux)//'/'//TRIM(flevdat)
         DO itemp = 1, ntemp
-           IF (lev_syn_2) CALL do_ev_t(itemp)
+           CALL do_ev_t(itemp)
+           CALL do_ev_t_ph(itemp)
         ENDDO
+!
+!    here we calculate and plot the gruneisen parameters along the given path.
+!
+        CALL write_gruneisen_band(flfrq_thermo)
+        CALL plotband_sub(3,1,flfrq_thermo)
+!
+!    here we compute the gruneisen parameters on the uniform mesh
+!
+        CALL compute_gruneisen()
+!
+!    here we calculate several anharmonic quantities and plot them.
+!
         CALL write_anharmonic()
+        CALL write_ph_freq_anharmonic()
+        CALL write_grun_anharmonic()
         CALL plot_anhar() 
      ENDIF
 

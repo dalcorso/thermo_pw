@@ -7,51 +7,121 @@
 !
 !----------------------------------------------------------------------------
 !
-! ... Common variables for the phonon program
+! ... Common variables for the thermo_pw program
 !
 MODULE thermo_mod
   USE kinds,  ONLY : DP
   !
-  ! ... The variables needed to describe the type of calculations to do
+  ! ... The variables needed to describe the type of calculations to do,
+  ! ... the number of geometries and the parameters of each geometry
+  ! ... Some space to save the results of pw.x at each geometry
   !
   SAVE
 
   CHARACTER(LEN=30) :: what             ! the type of calculation. See README.
-  REAL(DP)          :: vmin, b0, b01, emin   ! the minimum of the murnaghan
-  REAL(DP), ALLOCATABLE :: vmin_t(:), b0_t(:), free_e_min_t(:) ! the minimum 
-                                      ! of the murnaghan at each temperature
-                                      !
-  REAL(DP), ALLOCATABLE :: alat_geo(:), energy_geo(:)
+
+  INTEGER  :: ngeo                      ! number of different geometries 
+                                        ! calculated in this run
+
+  REAL(DP), ALLOCATABLE :: alat_geo(:),     &   ! the lattice constant at
+                                                ! each geometry
+                           omega_geo(:),    &   ! volume (geometry)
+                           celldm_geo(:,:), &   ! The celldm for each geometry
+                           energy_geo(:),   &   ! The total energy at each
+                                                ! geometry
+                           forces_geo(:,:,:), & ! the forces on atoms at each
+                                                ! geometry
+                           stress_geo(:,:,:)    ! the stress at each 
+                                                ! geometry
+END MODULE thermo_mod
+
+MODULE temperature
+  USE kinds,  ONLY : DP
+  !
+  ! ... The variables needed to control the temperature
+  !
+  SAVE
+
+  REAL(DP), ALLOCATABLE :: temp(:)      ! temperature (K), n
+
+  REAL(DP) :: tmin, tmax                ! maximum and minimum temperature (K)
+  REAL(DP) :: deltat                    ! delta T
+  INTEGER  :: ntemp                     ! number of temperatures
+
+END MODULE temperature
+
+MODULE control_mur
+  USE kinds,  ONLY : DP
+  !
+  ! ... The variables needed to control the calculation of the murnaghan
+  !     equation
+  !
+  SAVE
+  REAL(DP)     :: vmin, b0, b01, emin   ! the minimum of the murnaghan at T=0
   REAL(DP) :: vmin_input, vmax_input, deltav   ! plot the fitted total energy
                                                ! and pressure from vmin_input
-                                               ! to mnax_input
-  INTEGER :: nvol
-  !
-END MODULE thermo_mod
+                                               ! to vnax_input in steps of i
+                                               ! deltav
+  INTEGER :: nvol                              ! the number of volumes for
+                                               ! the plot
+END MODULE control_mur
 
 MODULE thermodynamics
   !
   USE kinds, ONLY: DP
   USE phdos_module, ONLY : phdos_type
+  !
+  ! ... The variables needed to save the thermodynmac quantities 
+  !     calculated from the phonon dos
+  !
   SAVE
 
   TYPE(phdos_type), ALLOCATABLE :: phdos_save(:) ! phdos for each geometry
+                                             ! geometry on a uniform mesh
 
-  REAL(DP), ALLOCATABLE :: temp(:,:)         ! temperature (K), n, geometry
   REAL(DP), ALLOCATABLE :: ph_ener(:,:)      ! phonon total energy, T, geometry
   REAL(DP), ALLOCATABLE :: ph_free_ener(:,:) ! phonon free_energy, T, geometry
   REAL(DP), ALLOCATABLE :: ph_entropy(:,:)   ! phonon entropy, T, geometry
   REAL(DP), ALLOCATABLE :: ph_cv(:,:)        ! phonon specific heat, T, geometry
-  REAL(DP), ALLOCATABLE :: omegav(:)         ! volume (geometry)
-  REAL(DP) :: tmin, tmax                ! maximum and minimum temperature (K)
-  REAL(DP) :: deltat                    ! delta T
-  INTEGER  :: ntemp                     ! number of temperatures
-  INTEGER  :: ngeo                      ! number of geometries used for
-                                        ! computing anharmonic properties
+
 END MODULE thermodynamics
 
-MODULE anharmonic
+MODULE ph_freq_thermodynamics
+  !
   USE kinds, ONLY: DP
+  USE ph_freq_module, ONLY : ph_freq_type
+  !
+  ! ... The variables needed to save the thermodynmac quantities 
+  !     calculated directly from the phonon frequencies and eigenvectors
+  !     the f indicates that the quantities has been calculated 
+  !     directly from phonon frequencies
+  !
+  SAVE
+
+  TYPE(ph_freq_type), ALLOCATABLE :: ph_freq_save(:) ! frequencies for each 
+
+  REAL(DP), ALLOCATABLE :: phf_ener(:,:)      ! phonon total energy, T, geometry
+  REAL(DP), ALLOCATABLE :: phf_free_ener(:,:) ! phonon free_energy, T, geometry
+  REAL(DP), ALLOCATABLE :: phf_entropy(:,:)   ! phonon entropy, T, geometry
+  REAL(DP), ALLOCATABLE :: phf_cv(:,:)        ! phonon specific heat, T, geometry
+
+  REAL(DP), ALLOCATABLE :: vminf_t(:), b0f_t(:), b01f_t(:), free_e_minf_t(:) 
+                           ! the parameters of the minimum of the  
+                           ! free energy at each temperature
+
+END MODULE ph_freq_thermodynamics
+
+MODULE anharmonic
+!
+!   The variables needed to describe the anharmonic quantities calculated
+!   from the minimum of the free energy fitted by the Murnaghan
+!
+  USE kinds, ONLY: DP
+  SAVE
+!
+!   here all the quantities obtained from the free energy calculated from
+!   the phonon dos
+!
   REAL(DP), ALLOCATABLE :: cp_t(:)     ! isobaric specific heat (T)
   REAL(DP), ALLOCATABLE :: cv_t(:)     ! isocoric specific heat (T)
   REAL(DP), ALLOCATABLE :: b0_s(:)     ! constant entropy bulk modulus
@@ -59,26 +129,64 @@ MODULE anharmonic
   REAL(DP), ALLOCATABLE :: beta_t(:)   ! volume thermal expansion coefficient
   REAL(DP), ALLOCATABLE :: gamma_t(:)  ! average gruneisen parameter
 
+  REAL(DP), ALLOCATABLE :: vmin_t(:), b0_t(:), b01_t(:), free_e_min_t(:) 
+                           ! the parameters of the minimum of the  
+                           ! free energy calculated from dos at each temperature
 END MODULE anharmonic
+
+MODULE ph_freq_anharmonic
+!
+!   The variables needed to describe the anharmonic quantities calculated
+!   from the minimum of the free energy fitted by the Murnaghan
+!
+  USE kinds, ONLY: DP
+  SAVE
+!
+!   here all the quantities obtained from the free energy calculated from
+!   the frequencies 
+!
+  REAL(DP), ALLOCATABLE :: cpf_t(:)     ! isobaric specific heat (T)
+  REAL(DP), ALLOCATABLE :: cvf_t(:)     ! isocoric specific heat (T)
+  REAL(DP), ALLOCATABLE :: b0f_s(:)     ! constant entropy bulk modulus
+  REAL(DP), ALLOCATABLE :: alphaf_t(:)  ! linear thermal expansion coefficient
+  REAL(DP), ALLOCATABLE :: betaf_t(:)   ! volume thermal expansion coefficient
+  REAL(DP), ALLOCATABLE :: gammaf_t(:)  ! average gruneisen parameter
+
+  REAL(DP), ALLOCATABLE :: vminf_t(:), b0f_t(:), b01f_t(:), free_e_minf_t(:) 
+                           ! the parameters of the minimum of the  
+                           ! free energy  
+
+END MODULE ph_freq_anharmonic
+
+MODULE grun_anharmonic
+  USE kinds, ONLY: DP
+  USE ph_freq_module, ONLY : ph_freq_type
+  !
+  !  This module contains all the quantities calculated from the gruneisen
+  !  parameters
+  !
+  SAVE
+  TYPE(ph_freq_type) :: ph_grun        ! the gruneisen parameters
+                                       ! on a mesh
+  REAL(DP), ALLOCATABLE :: betab(:)    ! volume thermal expansion multiplied
+                                       ! by the bulk modulus
+  REAL(DP), ALLOCATABLE :: grun_gamma_t(:)  ! average gruneisen parameter
+
+END MODULE grun_anharmonic
 
 MODULE ifc
   !
   USE kinds, ONLY: DP
   SAVE
-  REAL(DP), ALLOCATABLE :: frc(:,:,:,:,:,:,:), tau_blk(:,:),  zeu(:,:,:), &
+  REAL(DP), ALLOCATABLE :: frc(:,:,:,:,:,:,:), zeu(:,:,:), &
                m_loc(:,:)
   ! frc : interatomic force constants in real space
-  ! tau_blk : atomic positions for the original cell
+  ! tau : atomic positions for the original cell
   ! zeu : effective charges for the original cell
   ! m_loc: the magnetic moments of each atom
-  INTEGER, ALLOCATABLE  :: ityp_blk(:)
-  ! ityp_blk : atomic types for each atom of the original cell
   !
   CHARACTER(LEN=3), ALLOCATABLE :: atm(:)
   !
-  INTEGER :: disp_nqs
-  REAL(DP), ALLOCATABLE :: disp_q(:,:), disp_wq(:)  ! q path for interpolated
-                                                    ! phonon
   INTEGER :: nq1_d, nq2_d, nq3_d ! grid for phonon dos
   INTEGER :: ndos_input          ! number of points in the dos plot
   REAL(DP) :: freqmin, freqmax   ! dos minimum and maximun frequency 
@@ -117,23 +225,25 @@ MODULE control_thermo
 
   LOGICAL :: read_paths      ! the paths for dispersion are read from input
   LOGICAL :: lev_syn_1=.FALSE. ! if .true. must calculate the murnaghan
+                               ! at T=0
   LOGICAL :: lev_syn_2=.FALSE. ! if .true. must calculate the murnaghan
+                               ! at all T
   LOGICAL :: lpwscf_syn_1=.FALSE. ! if .true. must calculate the syncronous pw
                                   ! for scf calculation
   LOGICAL :: lbands_syn_1=.FALSE. ! if .true. must calculate the syncronous pw
                                   ! for nscf calculation
   LOGICAL :: lconv_ke_test=.FALSE.! if .true. this writes the ke test on file
   LOGICAL :: lconv_nk_test=.FALSE.! if .true. this writes the k-point on file
-  LOGICAL :: lph=.FALSE. ! if .true. must calculate phonon
-  LOGICAL :: ldos        ! if .true. the phonon dos is calculated
-  LOGICAL :: ltherm      ! if .true. the thermodynamical properties are
-                         ! calculated
-  LOGICAL :: lq2r        ! if .true. the interatomic force constants are calculated
-  LOGICAL :: lmatdyn     ! if .true. the phonon are interpolated
+  LOGICAL :: lph=.FALSE.    ! if .true. must calculate phonon
+  LOGICAL :: ldos=.FALSE.   ! if .true. the phonon dos is calculated
+  LOGICAL :: ltherm=.FALSE. ! if .true. the thermodynamical properties are
+                            ! calculated
+  LOGICAL :: lq2r=.FALSE.   ! if .true. the interatomic force constants are calculated
+  LOGICAL :: lmatdyn=.FALSE.     ! if .true. the phonon are interpolated
   
   CHARACTER(LEN=256) :: outdir_thermo, fildyn_thermo, flfrc, &
                         flfrq, fldos, fltherm, flanhar, flevdat, &
-                        filband, flkeconv, flnkconv
+                        filband, flkeconv, flnkconv, flgrun
   INTEGER :: spin_component
   !
 END MODULE control_thermo
@@ -168,7 +278,9 @@ MODULE control_paths
   SAVE
   !
   REAL(DP), ALLOCATABLE :: xqaux(:,:)     ! the initial and final points 
-  INTEGER, ALLOCATABLE :: wqaux(:)        ! the number of points per line
+  INTEGER, ALLOCATABLE  :: wqaux(:)       ! the number of points per line
+  INTEGER               :: disp_nqs       ! total number of points to compute
+  REAL(DP), ALLOCATABLE :: disp_q(:,:), disp_wq(:)  ! q path for interpolated
   INTEGER            :: npk_label         ! number of label points
   INTEGER            :: nqaux             ! number of auxiliary points
   CHARACTER(LEN=3), ALLOCATABLE :: letter(:) ! the labels
@@ -179,7 +291,7 @@ MODULE control_paths
   LOGICAL :: q_in_band_form
   LOGICAL :: q_in_cryst_coord
   LOGICAL :: q2d
-  INTEGER :: nbnd_bands                   ! number of bands for band calculation
+                                                    ! phonon
   !
 END MODULE control_paths
 
@@ -190,11 +302,27 @@ MODULE control_bands
   !
   SAVE
   !
+  INTEGER :: nbnd_bands                   ! number of bands for band calculation
+  !
   CHARACTER(LEN=256) :: flpband ! the name of the output file
   REAL(DP) :: emin_input     ! minimum energy of the plot (eV)
   REAL(DP) :: emax_input     ! maximum energy of the plot (eV)
 
 END MODULE control_bands
+
+MODULE control_grun
+
+  USE kinds, ONLY: DP
+  SAVE
+
+  CHARACTER(LEN=256) :: flpgrun ! the name of the output file with the 
+                                ! gruneisen parameters in a format 
+                                ! readable by gnuplot
+                                !
+  REAL(DP) :: grunmin_input, &  ! minimum value for gruneisen plot
+              grunmax_input     ! maximum value for gruneisen plot
+
+END MODULE control_grun
 
 MODULE control_gnuplot
   USE kinds,  ONLY : DP
@@ -216,5 +344,10 @@ MODULE control_gnuplot
                                   ! total energy at different cut-offs
   CHARACTER(LEN=256) :: flpsnkconv! the name of the postscript file with 
                                   ! total energy at different k points
+  CHARACTER(LEN=256) :: flpsgrun  ! the name of the postscript file with 
+                                  ! the gruneisen parameters
+  CHARACTER(LEN=256) :: gnuplot_command ! the gnuplot command
+
+  LOGICAL :: lgnuplot    ! set to false not to use gnuplot
 
 END MODULE control_gnuplot

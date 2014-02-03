@@ -13,24 +13,26 @@ SUBROUTINE simple_plot(ext, data_filename, psfilename, xlabel, ylabel, &
 !  in a postscript file called psfilename.
 !
 USE kinds,           ONLY : DP
-USE control_gnuplot, ONLY : flgnuplot
+USE control_gnuplot, ONLY : flgnuplot, gnuplot_command, lgnuplot
 USE gnuplot,         ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
                             gnuplot_write_file_data, gnuplot_ylabel, &
                             gnuplot_xlabel
 USE mp_images,       ONLY : root_image, my_image_id
+USE io_global,       ONLY : ionode
 
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: xmin, xmax, ymin, ymax
 CHARACTER(LEN=*), INTENT(IN) :: data_filename, psfilename, xlabel, ylabel
 
-CHARACTER(LEN=256) :: filename
+INTEGER :: ierr
+CHARACTER(LEN=256) :: gnu_filename, filename
 CHARACTER(LEN=*) :: colore, ext
 CHARACTER(LEN=6), EXTERNAL :: int_to_char
 
 IF ( my_image_id /= root_image ) RETURN
 
-filename=TRIM(flgnuplot)//TRIM(ext)
-CALL gnuplot_start(filename)
+gnu_filename=TRIM(flgnuplot)//TRIM(ext)
+CALL gnuplot_start(gnu_filename)
 
 filename=TRIM(psfilename)
 CALL gnuplot_write_header(filename, xmin, xmax, ymin, ymax ) 
@@ -41,6 +43,9 @@ CALL gnuplot_xlabel(TRIM(xlabel), .FALSE.)
 CALL gnuplot_write_file_data(data_filename,colore,.TRUE.,.TRUE., .FALSE.)
 
 CALL gnuplot_end()
+
+IF (lgnuplot.AND.ionode) &
+   ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
 
 RETURN
 END SUBROUTINE simple_plot

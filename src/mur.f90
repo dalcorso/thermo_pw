@@ -12,9 +12,9 @@ SUBROUTINE mur(omega0, b0in, b01, emin)
 !
 USE kinds,          ONLY : DP
 USE control_thermo, ONLY : flevdat
-USE thermo_mod,     ONLY : vmin_input, vmax_input, deltav, nvol, energy_geo
+USE thermo_mod,     ONLY : ngeo, omega_geo, energy_geo
+USE control_mur,    ONLY : nvol, vmin_input, vmax_input, deltav
 USE mp_images,      ONLY : root_image, my_image_id
-USE thermodynamics, ONLY : omegav, ngeo
 USE constants,      ONLY : ry_kbar
 USE io_global,      ONLY : ionode
 
@@ -30,8 +30,8 @@ IF (my_image_id /= root_image) RETURN
 filename=TRIM(flevdat)//'_mur'
 filename1=TRIM(flevdat)//'_mur1'
 b0 = b0in / ry_kbar
-IF (vmin_input == 0.0_DP) vmin_input=omegav(1) * 0.98_DP
-IF (vmax_input == 0.0_DP) vmax_input=omegav(ngeo) * 1.02_DP
+IF (vmin_input == 0.0_DP) vmin_input=omega_geo(1) * 0.98_DP
+IF (vmax_input == 0.0_DP) vmax_input=omega_geo(ngeo) * 1.02_DP
 IF (nvol > 1) THEN
    deltav = (vmax_input - vmin_input)/(nvol-1)
 ELSE
@@ -57,7 +57,7 @@ IF (ionode) THEN
    CLOSE(UNIT=iu_mur, STATUS='KEEP')
    OPEN(UNIT=iu_mur, FILE=TRIM(filename1), STATUS='UNKNOWN', FORM='FORMATTED')
    DO i=1,ngeo
-      WRITE(iu_mur,'(2f20.10)') omegav(i), energy_geo(i)
+      WRITE(iu_mur,'(2f20.10)') omega_geo(i), energy_geo(i)
    ENDDO
    CLOSE(UNIT=iu_mur, STATUS='KEEP')
 END IF

@@ -5,7 +5,7 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-SUBROUTINE plotband_sub(icode,igeom)
+SUBROUTINE plotband_sub(icode,igeom,file_disp)
   !
   ! reads data files produced by "bands_sub", produces
   ! * data file ready for plotting with gnuplot, xmgr or the like
@@ -17,27 +17,30 @@ SUBROUTINE plotband_sub(icode,igeom)
   !
   ! 1   band structure plot
   ! 2   phonon dispersion plot
-  !          
+  ! 3   gruneisen parameters plot         
   ! 
   USE kinds, ONLY : DP
-  USE control_thermo, ONLY : filband, flfrq
+  USE control_thermo, ONLY : filband, flfrq, flgrun
   USE control_bands, ONLY : emin_input, emax_input, flpband
+  USE control_grun,  ONLY : flpgrun, grunmin_input, grunmax_input
   USE control_paths, ONLY : letter_path, label_list, label_disp_q, npk_label, &
                             nqaux
+  USE thermo_mod,    ONLY : ngeo
   USE constants,     ONLY : rytoev
   USE ener,          ONLY : ef
   USE klist,         ONLY : degauss, nelec
-  USE ifc,           ONLY : freqmin, freqmax
+  USE ifc,           ONLY : freqmin_input, freqmax_input
   USE mp,            ONLY : mp_bcast
   USE io_global,     ONLY : stdout, ionode, ionode_id
   USE mp_images,     ONLY : intra_image_comm, root_image, my_image_id
 
   IMPLICIT NONE
+  CHARACTER(LEN=*), INTENT(IN) :: file_disp
   INTEGER, INTENT(IN) :: icode, igeom
   REAL(DP), ALLOCATABLE :: e(:,:), k(:,:), e_in(:), kx(:)
   REAL(DP), ALLOCATABLE :: e_rap(:,:), k_rap(:,:)
   REAL(DP) :: k1(3), k2(3), ps
-  REAL(DP) :: emin = 1.d10, emax =-1.d10, eps=1.d-4
+  REAL(DP) :: emin, emax, eps=1.d-4
   REAL(DP) :: mine, dxmod, dxmod_save, eref
   INTEGER, ALLOCATABLE :: nbnd_rapk(:), rap(:,:)
   INTEGER, ALLOCATABLE :: npoints(:)
@@ -48,7 +51,7 @@ SUBROUTINE plotband_sub(icode,igeom)
   LOGICAL, ALLOCATABLE :: high_symmetry(:), is_in_range(:), &
                           is_in_range_rap(:), todo(:,:), has_points(:,:)
   LOGICAL :: exist_rap
-  CHARACTER(LEN=256) :: filename, filedata
+  CHARACTER(LEN=256) :: filename, filedata, fileout
   CHARACTER(LEN=6), EXTERNAL :: int_to_char
 
   NAMELIST /plot/ nks, nbnd
@@ -56,10 +59,16 @@ SUBROUTINE plotband_sub(icode,igeom)
 
   IF ( my_image_id /= root_image ) RETURN
 
-  IF (flpband == ' ') RETURN
-
+  IF (icode==1.OR.icode==2) THEN
+    IF (flpband == ' ') RETURN
+    fileout=TRIM(flpband)
+  ELSEIF (icode==3) THEN
+    IF (flpgrun == ' ') RETURN
+    fileout=TRIM(flpgrun)
+  ENDIF
   IF (icode==1) filedata = TRIM(filband)
   IF (icode==2) filedata = TRIM(flfrq)
+  IF (icode==3) filedata = TRIM(flgrun)
 
   IF (ionode) &
      OPEN(UNIT=1,FILE=TRIM(filedata),FORM='formatted',STATUS='OLD',ERR=10,&
@@ -79,7 +88,11 @@ SUBROUTINE plotband_sub(icode,igeom)
      WRITE(stdout, '("Reading ",i4," bands at ",i6," k-points")') nbnd, nks
   ENDIF
 
-  filename=TRIM(filedata)//".rap"
+  IF (icode==3) THEN
+     filename = TRIM(file_disp)//'.g'//TRIM(int_to_char(ngeo/2+1))//".rap"
+  ELSE
+     filename=TRIM(filedata)//".rap"
+  ENDIF
   exist_rap=.TRUE.
   IF (ionode) OPEN(UNIT=21, FILE=TRIM(filename), FORM='formatted', &
                    STATUS='old', ERR=100, IOSTAT=ios)
@@ -230,6 +243,8 @@ SUBROUTINE plotband_sub(icode,igeom)
      ENDIF
   ENDDO
 
+  emin=1.d10
+  emax=-1.d10
   DO n=1,nks
      DO i=1,nbnd
         emin = min(emin, e(i,n))
@@ -259,8 +274,22 @@ SUBROUTINE plotband_sub(icode,igeom)
      eref=0.0_DP
      emax=NINT(emax*1.05_DP)
      emin=NINT(emin)
-     IF (freqmin /= 0.0_DP ) emin = freqmin
-     IF (freqmax /= 0.0_DP ) emax = freqmax
+     IF (freqmin_input /= 0.0_DP ) emin = freqmin_input
+     IF (freqmax_input /= 0.0_DP ) emax = freqmax_input
+  ELSEIF (icode==3) THEN
+!
+!  no shift for gruneisen parameters, and slightly enlarge the maximum 
+!  and minimum values, or set the input values.
+!
+     eref=0.0_DP
+     emax=emax*1.05_DP
+     IF (emin < 0.0_DP) THEN
+        emin=emin*1.05_DP
+     ELSE
+        emin=emin*0.95_DP
+     ENDIF
+     IF (grunmin_input /= 0.0_DP ) emin = grunmin_input
+     IF (grunmax_input /= 0.0_DP ) emax = grunmax_input
   ELSE
      CALL errore('plotband_sub','Problem with icode',1)
   ENDIF
@@ -330,7 +359,7 @@ SUBROUTINE plotband_sub(icode,igeom)
 !  on output. The odd one from left to right, the even one from right to
 !  left.
 !
-     IF (ionode) OPEN (UNIT=2, FILE=TRIM(flpband), FORM='formatted',&
+     IF (ionode) OPEN (UNIT=2, FILE=TRIM(fileout), FORM='formatted',&
                  STATUS='unknown', IOSTAT=ios)
      CALL mp_bcast(ios, ionode_id, intra_image_comm)
      CALL errore('plotband_sub','opening file'//TRIM(flpband),ABS(ios))
@@ -374,7 +403,7 @@ SUBROUTINE plotband_sub(icode,igeom)
 !   Along this line the symmetry decomposition has not been done.
 !   Plot all the bands as in the standard case
 !
-           filename=TRIM(flpband) // "." // TRIM(int_to_char(ilines))
+           filename=TRIM(fileout) // "." // TRIM(int_to_char(ilines))
 
            IF (ionode) OPEN(UNIT=2, FILE=TRIM(filename), FORM='formatted',&
                STATUS='unknown', IOSTAT=ios)
@@ -400,7 +429,7 @@ SUBROUTINE plotband_sub(icode,igeom)
 !
 !     open a file
 !
-           filename=TRIM(flpband) // "." // TRIM(int_to_char(ilines)) &
+           filename=TRIM(fileout) // "." // TRIM(int_to_char(ilines)) &
                                    //  "." // TRIM(int_to_char(irap))
            IF (ionode) OPEN (UNIT=2, FILE=TRIM(filename), FORM='formatted', &
                        STATUS='unknown', IOSTAT=ios)
@@ -487,7 +516,7 @@ SUBROUTINE plotband_sub(icode,igeom)
   END IF
 
   CALL write_gnuplot_file(kx, e, nks, nbnd, emin, emax, eref, nlines, nrap, &
-                          has_points, point, icode, exist_rap, igeom)
+                  has_points, point, icode, exist_rap, igeom, fileout)
 
 
   DEALLOCATE(point)
@@ -514,16 +543,19 @@ SUBROUTINE plotband_sub(icode,igeom)
 END SUBROUTINE plotband_sub
 
 SUBROUTINE write_gnuplot_file(kx, e, nks, nbnd, emin, emax, eref, nlines, &
-                              nrap, has_points, point, icode, exist_rap, igeom)
+                  nrap, has_points, point, icode, exist_rap, igeom, fileout)
 USE kinds,           ONLY : DP
-USE control_bands,   ONLY : flpband
 USE control_paths,   ONLY : nqaux, label_disp_q, letter_path
-USE control_gnuplot, ONLY : flgnuplot, flpsband, flpsdisp
+USE control_gnuplot, ONLY : flgnuplot, flpsband, flpsdisp, &
+                            flpsgrun, gnuplot_command, lgnuplot
 USE gnuplot,       ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
                           gnuplot_write_file_data, gnuplot_ylabel, &
                           gnuplot_write_vertical_line, gnuplot_write_label, &
                           gnuplot_set_eref, gnuplot_unset_xticks
+USE io_global,     ONLY : ionode
+
 IMPLICIT NONE
+CHARACTER(LEN=*), INTENT(IN) :: fileout
 INTEGER, INTENT(IN) :: nks, nbnd, nlines, icode, igeom
 INTEGER, INTENT(IN) :: point(nks), nrap(nks)
 REAL(DP), INTENT(IN) :: kx(nks), e(nbnd,nks)
@@ -531,24 +563,29 @@ REAL(DP), INTENT(IN) :: emin, emax, eref
 LOGICAL, INTENT(IN) :: has_points(nlines,12)
 LOGICAL, INTENT(IN) :: exist_rap
 
-INTEGER :: ilines, irap, n
+INTEGER :: ilines, irap, n, ierr
+INTEGER :: system
 REAL(DP) :: ypos
-CHARACTER(LEN=256) :: filename
+CHARACTER(LEN=256) :: gnu_filename, filename
 CHARACTER(LEN=30) :: colore(12)
 CHARACTER(LEN=6), EXTERNAL :: int_to_char
 
 IF (icode==1) THEN
-   filename=TRIM(flgnuplot)//'_band'
+   gnu_filename=TRIM(flgnuplot)//'_band'
 ELSEIF (icode==2) THEN
-   filename=TRIM(flgnuplot)//'_disp'
+   gnu_filename=TRIM(flgnuplot)//'_disp'
+ELSEIF (icode==3) THEN
+   gnu_filename=TRIM(flgnuplot)//'_grun'
 ENDIF
 
-CALL gnuplot_start(filename)
+CALL gnuplot_start(gnu_filename)
 
 IF (icode==1) THEN
    filename=TRIM(flpsband)
 ELSEIF (icode==2) THEN
    filename=TRIM(flpsdisp)
+ELSEIF (icode==3) THEN
+   filename=TRIM(flpsgrun)
 ENDIF
 IF (igeom > 1) filename=filename//TRIM(int_to_char(igeom))
 
@@ -556,8 +593,10 @@ CALL gnuplot_write_header(filename, kx(1), kx(nks), emin, emax )
 CALL gnuplot_unset_xticks(.FALSE.) 
 IF (icode==1) THEN
    CALL gnuplot_ylabel('Energy (eV)',.FALSE.) 
-ELSE
+ELSEIF (icode==2) THEN
    CALL gnuplot_ylabel('Frequency (cm^{-1})',.FALSE.) 
+ELSEIF (icode==3) THEN
+   CALL gnuplot_ylabel('{/Symbol g}_{/Symbol n}({/Helvetica-Bold q})',.FALSE.) 
 ENDIF
 ypos= emin - (emax-emin) / 40.0_DP
 DO ilines = 2, nlines
@@ -586,12 +625,12 @@ colore(11)='light-blue'
 colore(12)='orange'
 
 IF (.NOT.exist_rap) THEN
-   filename=TRIM(flpband)
+   filename=TRIM(fileout)
    CALL gnuplot_write_file_data(filename,'red',.TRUE.,.TRUE.,.FALSE.)
 ELSE
    DO ilines = 1, nlines
       IF (nrap(ilines)==0) THEN
-         filename=TRIM(flpband) // "." // TRIM(int_to_char(ilines))
+         filename=TRIM(fileout) // "." // TRIM(int_to_char(ilines))
          IF (has_points(ilines,1)) THEN
             IF (ilines==1) THEN
                CALL gnuplot_write_file_data(filename,'red',.TRUE.,.FALSE.,&
@@ -606,7 +645,7 @@ ELSE
          END IF
       ELSE
          DO irap=1, nrap(ilines)
-            filename=TRIM(flpband) // "." // TRIM(int_to_char(ilines)) &
+            filename=TRIM(fileout) // "." // TRIM(int_to_char(ilines)) &
                                  //  "." // TRIM(int_to_char(irap))
             IF (has_points(ilines,irap)) THEN
                IF (ilines==1.AND.irap==1) THEN
@@ -624,7 +663,11 @@ ELSE
       ENDIF  
    ENDDO
 ENDIF
+
 CALL gnuplot_end()
+
+IF (lgnuplot.AND.ionode) &
+   ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
 
 RETURN
 END SUBROUTINE write_gnuplot_file

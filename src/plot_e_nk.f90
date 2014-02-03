@@ -10,7 +10,8 @@ SUBROUTINE plot_e_nk()
 !  This is a driver to plot the quantities written inside flnkconv
 !
 USE kinds,           ONLY : DP
-USE control_gnuplot, ONLY : flgnuplot, flpsnkconv
+USE control_gnuplot, ONLY : flgnuplot, flpsnkconv, lgnuplot, &
+                            gnuplot_command
 USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
                             gnuplot_write_header,        &
                             gnuplot_ylabel,              &
@@ -21,18 +22,19 @@ USE thermo_mod,      ONLY : energy_geo
 USE control_thermo,  ONLY : flnkconv
 USE control_conv,    ONLY : nk_test, nnk, nsigma
 USE mp_images,       ONLY : my_image_id, root_image
+USE io_global,       ONLY : ionode
 
 IMPLICIT NONE
 
-CHARACTER(LEN=256) :: filename
+CHARACTER(LEN=256) :: gnu_filename, filename
 CHARACTER(LEN=6), EXTERNAL :: int_to_char
-INTEGER :: isigma
+INTEGER :: isigma, ierr
 REAL(DP) :: xmin, xmax
 
 IF ( my_image_id /= root_image ) RETURN
 
-filename=TRIM(flgnuplot)//'_nkconv'
-CALL gnuplot_start(filename)
+gnu_filename=TRIM(flgnuplot)//'_nkconv'
+CALL gnuplot_start(gnu_filename)
 
 filename=TRIM(flpsnkconv)
 xmin = nk_test(1)
@@ -63,6 +65,9 @@ DO isigma=1,nsigma
 ENDDO
 
 CALL gnuplot_end()
+
+IF (lgnuplot.AND.ionode) &
+   ierr=system(TRIM(gnuplot_command)//' '// TRIM(gnu_filename))
 
 RETURN
 END SUBROUTINE plot_e_nk

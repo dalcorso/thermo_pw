@@ -10,7 +10,7 @@ SUBROUTINE set_k_points()
 !  This subroutine copy the k points for dispersion in the kpoints of
 !  the pw.x code.
 !
-  USE ifc,           ONLY : disp_nqs, disp_q, disp_wq
+  USE control_paths,    ONLY : disp_nqs, disp_q, disp_wq
   USE input_parameters, ONLY : k_points
   USE start_k,       ONLY : init_start_k
   IMPLICIT NONE

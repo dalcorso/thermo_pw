@@ -14,28 +14,31 @@ SUBROUTINE thermo_readin()
   !  and written and the variables of the calculations.
   !
   USE kinds,                ONLY : DP
-  USE thermo_mod,           ONLY : what
+  USE thermo_mod,           ONLY : what, ngeo
   USE control_thermo,       ONLY : outdir_thermo, flevdat,        &
                                    flfrc, flfrq, fldos, fltherm,  &
-                                   flanhar, filband, flkeconv, flnkconv
-  USE thermodynamics,       ONLY : ngeo, tmin, tmax, deltat, ntemp
+                                   flanhar, filband, flkeconv,    &
+                                   flnkconv, flgrun
+  USE temperature,          ONLY : tmin, tmax, deltat, ntemp
   USE ifc,                  ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq, &
-                                   zasr, disp_q, disp_wq, disp_nqs, &
-                                   freqmin_input, freqmax_input
+                                   zasr, freqmin_input, freqmax_input
   USE input_parameters,     ONLY : outdir
   USE read_input,           ONLY : read_input_file
   USE command_line_options, ONLY : input_file_ 
   USE control_paths,        ONLY : xqaux, wqaux, npk_label, letter, &
                                    label_list, nqaux, q_in_band_form, &
                                    q_in_cryst_coord, q2d, point_label_type, &
-                                   nbnd_bands, label_disp_q, letter_path
+                                   disp_q, disp_wq, disp_nqs, &
+                                   label_disp_q, letter_path
   USE control_gnuplot,      ONLY : flgnuplot, flpsband, flpsdisp, &
                                    flpsmur, flpsdos, flpstherm, flpsanhar, &
-                                   flpskeconv, flpsnkconv
-  USE control_bands,        ONLY : flpband, emin_input, emax_input
+                                   flpskeconv, flpsnkconv, flpsgrun,   &
+                                   lgnuplot, gnuplot_command
+  USE control_bands,        ONLY : flpband, emin_input, emax_input, nbnd_bands
+  USE control_grun,         ONLY : flpgrun, grunmin_input, grunmax_input
   USE control_conv,         ONLY : nke, deltake, nkeden, deltakeden, &
                                    nnk, deltank, nsigma, deltasigma
-  USE thermo_mod,           ONLY : vmin_input, vmax_input, deltav, nvol
+  USE control_mur,          ONLY : vmin_input, vmax_input, deltav, nvol
   USE mp_world,             ONLY : world_comm
   USE mp_images,            ONLY : nimage, my_image_id, root_image
   USE parser,               ONLY : read_line
@@ -68,16 +71,18 @@ SUBROUTINE thermo_readin()
                             point_label_type,               &
                             nbnd_bands,                     &
                             flevdat,                        &
-                            flpband,                        &
+                            flpband, flpgrun,               &
                             flgnuplot, flpsband,            &
                             flpsdisp, flpsdos, flpstherm,   &
                             flpsanhar, flpsmur, flpskeconv, &
-                            flpsnkconv,                     &
+                            flpsnkconv, flgrun,             &
                             emin_input, emax_input,         &
                             vmin_input, vmax_input, deltav, &
+                            grunmin_input, grunmax_input,   &
                             nvol, nke, deltake,             &
                             nkeden, deltakeden,             &
-                            nnk, deltank, nsigma, deltasigma
+                            nnk, deltank, nsigma, deltasigma, &
+                            lgnuplot, gnuplot_command
   !
   !  First read the input of thermo. Only one node reads
   !
@@ -117,8 +122,12 @@ SUBROUTINE thermo_readin()
   nsigma=1  
   deltasigma=0.005 
 
+  grunmin_input=0.0_DP
+  grunmax_input=0.0_DP
+
   filband='output_band.dat'
   flpband='output_pband.dat'
+  flpgrun='output_pgrun.dat'
   flfrc='output_frc.dat'
   flfrq='output_frq.dat'
   fldos='output_dos.dat'
@@ -126,6 +135,7 @@ SUBROUTINE thermo_readin()
   flnkconv='output_nkconv.dat'
   fltherm='output_therm.dat'
   flanhar='output_anhar.dat'
+  flgrun='output_grun.dat'
   flevdat='output_ev.dat'
 
   flgnuplot='gnuplot.tmp'
@@ -137,12 +147,14 @@ SUBROUTINE thermo_readin()
   flpsanhar='output_anhar.ps'
   flpskeconv='output_keconv.ps'
   flpsnkconv='output_nkconv.ps'
-
+  flpsgrun='output_grun.ps'
 
   q2d=.FALSE.
   q_in_band_form=.TRUE.
   q_in_cryst_coord=.FALSE.
   point_label_type='SC'
+  lgnuplot=.TRUE.
+  gnuplot_command='gnuplot'
 
   IF (meta_ionode) READ( 5, input_thermo, IOSTAT = ios )
   CALL mp_bcast(ios, meta_ionode_id, world_comm )

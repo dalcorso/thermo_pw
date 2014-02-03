@@ -14,8 +14,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   !  information.
   !
   USE kinds,      ONLY : DP
-  USE thermo_mod, ONLY : what, alat_geo, energy_geo
-  USE thermodynamics, ONLY : ngeo, omegav
+  USE thermo_mod, ONLY : what, alat_geo, energy_geo, ngeo, omega_geo
   USE control_thermo, ONLY : lpwscf, lbands, lphonon, lev_syn_1, lev_syn_2,&
                              lph, lpwscf_syn_1, lbands_syn_1, ldos, lq2r, &
                              lmatdyn, ltherm, lconv_ke_test, lconv_nk_test
@@ -89,10 +88,10 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            nwork=ngeo
            ALLOCATE(alat_geo(ngeo))
            ALLOCATE(energy_geo(ngeo))
-           ALLOCATE(omegav(ngeo))
+           ALLOCATE(omega_geo(ngeo))
            DO igeom = 1, ngeo
               alat_geo(igeom)=alat+(igeom-(ngeo+1.0_DP)/2.0_DP)*0.05_DP
-              omegav(igeom) = alat_geo(igeom)**3 / 4.0_DP
+              omega_geo(igeom) = alat_geo(igeom)**3 / 4.0_DP
            ENDDO
            energy_geo=0.0_DP
            lev_syn_1=.TRUE.
@@ -109,10 +108,10 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            nwork=ngeo
            ALLOCATE(alat_geo(ngeo))
            ALLOCATE(energy_geo(ngeo))
-           ALLOCATE(omegav(ngeo))
+           ALLOCATE(omega_geo(ngeo))
            DO igeom = 1, ngeo
-              alat_geo(igeom) = alat + (igeom-(ngeo+1.0_DP)/2.0_DP)*0.1_DP
-              omegav(igeom) = alat_geo(igeom)**3 / 4.0_DP
+              alat_geo(igeom) = alat + (igeom-(ngeo+1.0_DP)/2.0_DP)*0.05_DP
+              omega_geo(igeom) = alat_geo(igeom)**3 / 4.0_DP
            ENDDO
            energy_geo=0.0_DP
            lph = .TRUE.
@@ -151,7 +150,8 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   IF (part == 1) THEN
      SELECT CASE (TRIM(what))
         CASE ('scf', 'scf_bands', 'scf_ph', 'scf_disp')
-        CASE ('mur_lc', 'mur_lc_bands', 'mur_lc_ph', 'mur_lc_disp','mur_lc_t')
+        CASE ('mur_lc', 'mur_lc_bands', 'mur_lc_ph', 'mur_lc_disp', &
+              'mur_lc_t' )
            lpwscf(1:ngeo)=.TRUE.
         CASE ( 'scf_ke', 'scf_nk' )
            lpwscf(1:nwork)=.TRUE.

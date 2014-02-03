@@ -12,19 +12,20 @@ SUBROUTINE deallocate_thermo()
   !  This routine deallocates the variables that control the thermo calculation
   !
   USE kinds,          ONLY : DP
-  USE thermo_mod,     ONLY : alat_geo, energy_geo, vmin_t, b0_t, free_e_min_t
+  USE thermo_mod,     ONLY : alat_geo, energy_geo, omega_geo
+  USE anharmonic,     ONLY : vmin_t, b0_t, free_e_min_t, &
+                             alpha_t, beta_t, gamma_t, cv_t, cp_t, b0_s
+  USE ph_freq_anharmonic, ONLY : vminf_t, b0f_t, free_e_minf_t, &
+                             alphaf_t, betaf_t, gammaf_t, cvf_t, cpf_t, b0f_s
   USE control_paths,  ONLY : xqaux, wqaux, letter, label_list, letter_path, &
-                             label_disp_q
+                             label_disp_q, disp_q, disp_wq
   USE control_conv,   ONLY : ke, keden, nk_test, sigma_test
-  USE anharmonic,     ONLY : alpha_t, beta_t, gamma_t, cv_t, cp_t, b0_s
-  USE thermodynamics, ONLY : omegav
-  USE ifc,            ONLY : disp_q, disp_wq
 
   IMPLICIT NONE
   !
   IF ( ALLOCATED (alat_geo) )        DEALLOCATE(alat_geo)
   IF ( ALLOCATED (energy_geo) )      DEALLOCATE(energy_geo)
-  IF ( ALLOCATED (omegav) )          DEALLOCATE(omegav) 
+  IF ( ALLOCATED (omega_geo) )       DEALLOCATE(omega_geo) 
   IF ( ALLOCATED (vmin_t) )          DEALLOCATE(vmin_t) 
   IF ( ALLOCATED (ke) )              DEALLOCATE(ke) 
   IF ( ALLOCATED (keden) )           DEALLOCATE(keden) 
@@ -38,6 +39,14 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (beta_t) )          DEALLOCATE(beta_t) 
   IF ( ALLOCATED (gamma_t) )         DEALLOCATE(gamma_t) 
   IF ( ALLOCATED (free_e_min_t) )    DEALLOCATE(free_e_min_t) 
+  IF ( ALLOCATED (b0f_t) )           DEALLOCATE(b0f_t) 
+  IF ( ALLOCATED (b0f_s) )           DEALLOCATE(b0f_s) 
+  IF ( ALLOCATED (cvf_t) )           DEALLOCATE(cvf_t) 
+  IF ( ALLOCATED (cpf_t) )           DEALLOCATE(cpf_t) 
+  IF ( ALLOCATED (alphaf_t) )        DEALLOCATE(alphaf_t) 
+  IF ( ALLOCATED (betaf_t) )         DEALLOCATE(betaf_t) 
+  IF ( ALLOCATED (gammaf_t) )        DEALLOCATE(gammaf_t) 
+  IF ( ALLOCATED (free_e_minf_t) )   DEALLOCATE(free_e_minf_t) 
   IF ( ALLOCATED (xqaux) )           DEALLOCATE(xqaux)
   IF ( ALLOCATED (wqaux) )           DEALLOCATE(wqaux)
   IF ( ALLOCATED (letter) )          DEALLOCATE(letter)
