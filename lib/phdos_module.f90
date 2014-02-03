@@ -192,7 +192,7 @@ ndiv=phdos%number_of_points
 DO i=1,ndiv
    nu=phdos%nu(i)
    arg= kb1 * nu * temp1
-   IF (nu > 0.d0 .AND. arg < 700._DP) ener = ener + phdos%phdos(i)* nu /  & 
+   IF (nu > 0.d0 .AND. arg < 650._DP) ener = ener + phdos%phdos(i)* nu /  & 
                                            ( EXP( arg ) - 1.0_DP )
 ENDDO
 ener = ener * phdos%de / ry_to_cmm1
