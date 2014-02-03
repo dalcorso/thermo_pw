@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2013-2014 A. Dal Corso 
+! Copyright (C) 2013-2014 Andrea Dal Corso 
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -203,10 +203,10 @@ END SUBROUTINE gnuplot_set_fact
 SUBROUTINE gnuplot_write_file_data(data_file,color,start,last, comment)
 IMPLICIT NONE
 
+CHARACTER(LEN=*), INTENT(IN) :: data_file
 CHARACTER(LEN=*), INTENT(IN) :: color
 LOGICAL, INTENT(IN) :: start, last
 
-CHARACTER(LEN=*) :: data_file
 CHARACTER(LEN=256) :: string
 CHARACTER(LEN=6) :: int_to_char
 LOGICAL :: comment
@@ -228,11 +228,11 @@ SUBROUTINE gnuplot_write_file_mul_data(data_file, col1, col2, color, start, &
                                        last, comment)
 IMPLICIT NONE
 
+CHARACTER(LEN=*), INTENT(IN) :: data_file
 INTEGER, INTENT(IN) :: col1, col2
 CHARACTER(LEN=*), INTENT(IN) :: color
 LOGICAL, INTENT(IN) :: start, last
 
-CHARACTER(LEN=*) :: data_file
 CHARACTER(LEN=256) :: string
 CHARACTER(LEN=6) :: int_to_char
 LOGICAL :: comment
@@ -255,11 +255,11 @@ SUBROUTINE gnuplot_write_file_mul_point(data_file, col1, col2, color, start, &
                                         last, comment)
 IMPLICIT NONE
 
+CHARACTER(LEN=*), INTENT(IN) :: data_file
 INTEGER, INTENT(IN) :: col1, col2
 CHARACTER(LEN=*), INTENT(IN) :: color
 LOGICAL, INTENT(IN) :: start, last
 
-CHARACTER(LEN=*) :: data_file
 CHARACTER(LEN=256) :: string
 CHARACTER(LEN=6) :: int_to_char
 LOGICAL :: comment
