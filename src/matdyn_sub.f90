@@ -23,7 +23,7 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   !               It is the same as in the input of q2r.x (+ the .xml extension
   !               if the dynamical matrices produced by ph.x were in xml
   !               format). No default value: must be specified.
-  !      asr      (character) indicates the type of Acoustic Sum Rule imposed
+  !      zasr     (character) indicates the type of Acoustic Sum Rule imposed
   !               - 'no': no Acoustic Sum Rules imposed (default)
   !               - 'simple':  previous implementation of the asr used
   !                  (3 translational asr imposed by correction of
@@ -66,68 +66,60 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   USE io_global,  ONLY : ionode, ionode_id, stdout
   USE io_dyn_mat, ONLY : read_dyn_mat_param, read_dyn_mat_header, &
                          read_ifc_param, read_ifc
+  USE ions_base,  ONLY : tau, ityp
   USE cell_base,  ONLY : at, bg, celldm
   USE constants,  ONLY : RY_TO_THZ, RY_TO_CMM1, amu_ry
   USE symm_base,  ONLY : set_sym
   USE rap_point_group,  ONLY : code_group
 
-  USE ifc,        ONLY : frc, atm, zeu, tau_blk, ityp_blk, m_loc, &
-                         disp_q, disp_nqs, nq1_d, nq2_d, &
+  USE ifc,        ONLY : frc, atm, zeu, m_loc, &
+                         nq1_d, nq2_d, &
                          nq3_d, deltafreq, freqmin, freqmax, ndos_input, zasr, &
                          freqmin_input, freqmax_input
  
   USE control_ph, ONLY : xmldyn
+  USE control_paths, ONLY : disp_q, disp_nqs
   USE thermodynamics, ONLY : phdos_save
+  USE ph_freq_thermodynamics, ONLY : ph_freq_save
   USE control_thermo, ONLY : flfrc, flfrq, fldos, ldos
   USE ions_base, ONLY : amass
   USE phdos_module, ONLY : set_phdos
+  USE ph_freq_module, ONLY : init_ph_freq, init_ph_rap
   !
   IMPLICIT NONE
   !
-  ! variables *_blk refer to the original cell, other variables
-  ! to the (super)cell (which may coincide with the original cell)
-  !
-  LOGICAL, INTENT(IN) :: do_dos
+  INTEGER, INTENT(IN) :: do_dos
   INTEGER, INTENT(IN) :: igeom
-  INTEGER :: nax, nax_blk
-  INTEGER, PARAMETER:: ntypx=10, nrwsx=200
+  INTEGER, PARAMETER:: nrwsx=200
   REAL(DP), PARAMETER :: eps=1.0d-6
-  INTEGER :: nr1, nr2, nr3, nsc, ntetra, ibrav
+  INTEGER :: nr1, nr2, nr3, ntetra, ibrav
+  INTEGER :: iq, imode, counter
   CHARACTER(LEN=256) :: flvec, filename
-  CHARACTER(LEN=10)  :: asr
   LOGICAL :: has_zstar
-  COMPLEX(DP), ALLOCATABLE :: dyn(:,:,:,:), dyn_blk(:,:,:,:), frc_ifc(:,:,:,:)
+  COMPLEX(DP), ALLOCATABLE :: dyn(:,:,:,:)
   COMPLEX(DP), ALLOCATABLE :: z(:,:)
-  REAL(DP), ALLOCATABLE:: tau(:,:), q(:,:), w2(:,:), freq(:,:)
-  INTEGER, ALLOCATABLE:: tetra(:,:), ityp(:), itau_blk(:)
-  REAL(DP) ::     omega,alat, &! cell parameters and volume
-                  at_blk(3,3), bg_blk(3,3),  &! original cell
-                  omega_blk,                 &! original cell volume
-                  epsil(3,3),                &! dielectric tensor
-                  amass_blk(ntypx),          &! original atomic masses
+  REAL(DP), ALLOCATABLE:: q(:,:), wq(:), w2(:,:), freq(:,:)
+  INTEGER, ALLOCATABLE:: tetra(:,:)
+  REAL(DP) ::     omega,  alat,   &! cell parameters and volume
+                  epsil(3,3),     &! dielectric tensor
                   atws(3,3),      &! lattice vector for WS initialization
                   rws(0:3,nrwsx)   ! nearest neighbor list, rws(0,*) = norm^2
   !
-  INTEGER :: nat, nat_blk, ntyp, ntyp_blk, &
+  INTEGER :: nat, ntyp,  &
              nrws,                         & ! number of nearest neighbor
              code_group_old
 
   INTEGER :: nspin_mag, nqs, ios
   !
-  LOGICAL :: xmlifc, lo_to_split, na_ifc, fd
+  LOGICAL :: xmlifc, lo_to_split
   !
   REAL(DP) :: qhat(3), qh, e, emin, emax, dosofe(2), qq
-  REAL(DP) :: delta, pathL
-  REAL(DP), ALLOCATABLE :: xqaux(:,:)
-  INTEGER, ALLOCATABLE :: nqb(:)
-  INTEGER :: n, i, j, it, nq, nqx, na, nb, iout, nqtot
+  INTEGER :: n, i, j, k, it, nq, nqx, na, nb, iout, nqtot
   LOGICAL, EXTERNAL :: has_xml
   CHARACTER(LEN=15), ALLOCATABLE :: name_rap_mode(:)
   INTEGER, ALLOCATABLE :: num_rap_mode(:,:)
   LOGICAL, ALLOCATABLE :: high_sym(:)
-  LOGICAL :: q_in_band_form
   ! .... variables for band plotting based on similarity of eigenvalues
-  COMPLEX(DP), ALLOCATABLE :: f_of_q(:,:,:,:)
   INTEGER :: location(1), isig
   CHARACTER(LEN=6) :: int_to_char
   INTEGER            :: npk_label, nch, ndos
@@ -135,13 +127,9 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   INTEGER, ALLOCATABLE :: label_list(:)
   LOGICAL :: tend, terr, dos
   !
-!  NAMELIST /input/ flfrc, amass,  at,   &
-!       &           ntyp,  &
-!       &           na_ifc
-  !
   IF ( my_image_id /= root_image ) RETURN
 
-  dos = do_dos .AND. ldos
+  dos = (do_dos == 1) .AND. ldos
   WRITE(stdout,'(/,2x,76("+"))')
   WRITE(stdout,'(5x,"Interpolating the dynamical matrices")')
   IF (dos) THEN
@@ -155,131 +143,67 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   !
   ! set namelist default
   !
-  asr  = zasr
   flvec='matdyn.modes'
-  amass_blk(:) =0.d0
-  at(:,:) = 0.d0
-  ntyp = 0
-  na_ifc=.FALSE.
-  fd=.FALSE.
   !
   ! read force constants
   !
-  ntyp_blk = ntypx ! avoids fake out-of-bound error
   xmlifc=xmldyn
   IF (xmlifc) THEN
-     CALL read_dyn_mat_param(flfrc,ntyp_blk,nat_blk)
-     ALLOCATE (m_loc(3,nat_blk))
-     ALLOCATE (tau_blk(3,nat_blk))
-     ALLOCATE (ityp_blk(nat_blk))
-     ALLOCATE (atm(ntyp_blk))
-     ALLOCATE (zeu(3,3,nat_blk))
-     CALL read_dyn_mat_header(ntyp_blk, nat_blk, ibrav, nspin_mag, &
-               celldm, at_blk, bg_blk, omega_blk, atm, amass_blk, &
-               tau_blk, ityp_blk,  m_loc, nqs, has_zstar, epsil, zeu )
+     CALL read_dyn_mat_param(flfrc,ntyp,nat)
+     ALLOCATE (m_loc(3,nat))
+     ALLOCATE (atm(ntyp))
+     ALLOCATE (zeu(3,3,nat))
+     CALL read_dyn_mat_header(ntyp, nat, ibrav, nspin_mag, &
+               celldm, at, bg, omega, atm, amass, &
+               tau, ityp, m_loc, nqs, has_zstar, epsil, zeu )
      alat=celldm(1)
-     call volume(alat,at_blk(1,1),at_blk(1,2),at_blk(1,3),omega_blk)
+     call volume(alat,at(1,1),at(1,2),at(1,3),omega)
      CALL read_ifc_param(nr1,nr2,nr3)
-     ALLOCATE(frc(nr1,nr2,nr3,3,3,nat_blk,nat_blk))
-     CALL read_ifc(nr1,nr2,nr3,nat_blk,frc)
+     ALLOCATE(frc(nr1,nr2,nr3,3,3,nat,nat))
+     CALL read_ifc(nr1,nr2,nr3,nat,frc)
   ELSE
-     CALL readfc ( flfrc, nr1, nr2, nr3, epsil, nat_blk, &
-          ibrav, alat, at_blk, ntyp_blk, &
-          amass_blk, omega_blk, has_zstar)
+     CALL readfc ( flfrc, nr1, nr2, nr3, epsil, nat, ibrav, alat, at, ntyp, &
+          amass, omega, has_zstar)
   ENDIF
   !
-  CALL recips ( at_blk(1,1),at_blk(1,2),at_blk(1,3),  &
-       bg_blk(1,1),bg_blk(1,2),bg_blk(1,3) )
-  !
-  ! set up (super)cell
-  !
-  if (ntyp < 0) then
-     call errore ('matdyn','wrong ntyp ', abs(ntyp))
-  else if (ntyp == 0) then
-     ntyp=ntyp_blk
-  end if
-  !
-  ! masses (for mass approximation)
-  !
-  DO it=1,ntyp
-     IF (amass(it) < 0.d0) THEN
-        CALL errore ('matdyn','wrong mass in the namelist',it)
-     ELSE IF (amass(it) == 0.d0) THEN
-        IF (it.LE.ntyp_blk) THEN
-           WRITE (stdout,'(a,i3,a,a)') ' mass for atomic type ',it,      &
-                &                     ' not given; uses mass from file ',flfrc
-           amass(it) = amass_blk(it)
-        ELSE
-           CALL errore ('matdyn','missing mass in the namelist',it)
-        END IF
-     END IF
-  END DO
-  !
-  ! lattice vectors
-  !
-  IF (SUM(ABS(at(:,:))) == 0.d0) THEN
-     at(:,1) = at_blk(:,1)
-     at(:,2) = at_blk(:,2)
-     at(:,3) = at_blk(:,3)
-  END IF
-  !
-  CALL check_at(at,bg_blk,alat,omega)
-  !
-  ! the supercell contains "nsc" times the original unit cell
-  !
-  nsc = NINT(omega/omega_blk)
-  IF (ABS(omega/omega_blk-nsc) > eps) &
-        CALL errore ('matdyn', 'volume ratio not integer', 1)
-  !
-  ! read/generate atomic positions of the (super)cell
-  !
-  nat = nat_blk * nsc
-  nax = nat
-  nax_blk = nat_blk
-  !
-  ALLOCATE ( tau (3, nat), ityp(nat), itau_blk(nat) )
-  !
-  CALL set_tau  &
-       (nat, nat_blk, at, at_blk, tau, tau_blk, ityp, ityp_blk, itau_blk)
-  !
-  !
-  ! reciprocal lattice vectors
-  !
-  CALL recips (at(1,1),at(1,2),at(1,3),bg(1,1),bg(1,2),bg(1,3))
+  CALL recips ( at(1,1),at(1,2),at(1,3), bg(1,1),bg(1,2),bg(1,3) )
   !
   ! build the WS cell corresponding to the force constant grid
   !
-  atws(:,1) = at_blk(:,1)*DBLE(nr1)
-  atws(:,2) = at_blk(:,2)*DBLE(nr2)
-  atws(:,3) = at_blk(:,3)*DBLE(nr3)
+  atws(:,1) = at(:,1)*DBLE(nr1)
+  atws(:,2) = at(:,2)*DBLE(nr2)
+  atws(:,3) = at(:,3)*DBLE(nr3)
   ! initialize WS r-vectors
   CALL wsinit(rws,nrwsx,nrws,atws)
   !
-  ! end of (super)cell setup
+  !  generate the q points or copy them on the local variables
   !
   IF (dos) THEN
      ntetra = 6 * nq1_d * nq2_d * nq3_d
      nqx = nq1_d * nq2_d * nq3_d
-     ALLOCATE ( tetra(4,ntetra), q(3,nqx) )
+     ALLOCATE ( tetra(4,ntetra)) 
+     ALLOCATE ( q(3,nqx) )
+     ALLOCATE ( wq(nqx) )
      CALL gen_qpoints (ibrav, at, bg, nat, tau, ityp, nq1_d, nq2_d, nq3_d, &
-             ntetra, nqx, nq, q, tetra)
+             ntetra, nqx, nq, q, wq)
+     nqtot=nq
   ELSE
      !
      ! read q-point list
      !
      nqtot=disp_nqs
      ALLOCATE( q(3,nqtot) )
+     ALLOCATE( wq(1) )
      ALLOCATE( tetra(1,1) )
      q(:,:)=disp_q(:,:)
      nq=nqtot
      ! 
   END IF
   !
-  IF (asr /= 'no') THEN
-     CALL set_asr (asr, nr1, nr2, nr3, frc, zeu, nat_blk, ibrav, tau_blk)
-  END IF
+  IF (zasr /= 'no') &
+     CALL set_asr (zasr, nr1, nr2, nr3, frc, zeu, nat, ibrav, tau)
   !
-  IF (flvec.EQ.' '.OR. dos) THEN
+  IF (flvec.EQ.' '.OR. dos ) THEN
      iout=0
   ELSE
      iout=4
@@ -287,41 +211,30 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   END IF
 
 
-  ALLOCATE ( dyn(3,3,nat,nat), dyn_blk(3,3,nat_blk,nat_blk) )
-  ALLOCATE ( z(3*nat,3*nat), w2(3*nat,nq), f_of_q(3,3,nat,nat) )
+  ALLOCATE ( dyn(3,3,nat,nat) )
+  ALLOCATE ( z(3*nat,3*nat) )
+  ALLOCATE ( w2(3*nat,nq) )
+  ALLOCATE ( num_rap_mode(3*nat,nq) )
+  ALLOCATE ( high_sym(nq) )
 
-  IF (xmlifc) CALL set_sym(nat, tau, ityp, nspin_mag, m_loc, 6, 6, 6 )
+  IF (xmlifc) CALL set_sym(nat, tau, ityp, nspin_mag, m_loc, 2, 2, 2 )
 
-  ALLOCATE(num_rap_mode(3*nat,nq))
-  ALLOCATE(high_sym(nq))
   num_rap_mode=-1
   high_sym=.TRUE.
 
   DO n=1, nq
+     IF ( MOD(n,1000) == 0 .AND. ionode ) WRITE(stdout, '(5x,"Computing q ",&
+                         &   i8, " Total q ", i8 )') n, nq 
+
      dyn(:,:,:,:) = (0.d0, 0.d0)
-
      lo_to_split=.FALSE.
-     f_of_q(:,:,:,:)=CMPLX(0.d0,0.d0)
-
-     IF (na_ifc) THEN
-
-        qq=sqrt(q(1,n)**2+q(2,n)**2+q(3,n)**3)
-        if (qq == 0.0_DP) qq=1.0_DP
-        qhat(1)=q(1,n)/qq
-        qhat(2)=q(2,n)/qq
-        qhat(3)=q(3,n)/qq
-
-        CALL nonanal_ifc (nat,nat_blk,itau_blk,epsil,qhat,zeu,omega,dyn, &
-                           nr1, nr2, nr3, f_of_q)
-     END IF
-
-     CALL setupmat (q(1,n), dyn, nat, at, bg, tau, itau_blk, nsc, alat, &
-          dyn_blk, nat_blk, at_blk, bg_blk, tau_blk, omega_blk,  &
-          epsil, zeu, frc, nr1,nr2,nr3, has_zstar, rws, nrws, na_ifc,f_of_q,fd)
+     CALL setupmat_simple (q(1,n),dyn,nat,at,bg,tau,omega,alat, &
+     &                 epsil,zeu,frc,nr1,nr2,nr3,has_zstar,rws,nrws)
 
      qhat(1) = q(1,n)*at(1,1)+q(2,n)*at(2,1)+q(3,n)*at(3,1)
      qhat(2) = q(1,n)*at(1,2)+q(2,n)*at(2,2)+q(3,n)*at(3,2)
      qhat(3) = q(1,n)*at(1,3)+q(2,n)*at(2,3)+q(3,n)*at(3,3)
+
      IF ( ABS( qhat(1) - NINT (qhat(1) ) ) <= eps .AND. &
           ABS( qhat(2) - NINT (qhat(2) ) ) <= eps .AND. &
           ABS( qhat(3) - NINT (qhat(3) ) ) <= eps ) THEN
@@ -359,7 +272,7 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
            lo_to_split=.TRUE.
         ENDIF
         !
-        CALL nonanal (nat, nat_blk, itau_blk, epsil, qhat, zeu, omega, dyn)
+        CALL simple_nonanal (nat, epsil, qhat, zeu, omega, dyn)
         !
      END IF
 
@@ -368,9 +281,9 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
      ! Cannot use the small group of \Gamma to analize the symmetry
      ! of the mode if there is an electric field.
      !
-     IF (xmlifc.AND..NOT.lo_to_split) THEN
+     IF (xmlifc.AND..NOT.lo_to_split.AND..NOT.dos) THEN
         ALLOCATE(name_rap_mode(3*nat))
-        WRITE(stdout,'(10x,"xq=",3F8.4)') q(:,n)
+!        WRITE(stdout,'(10x,"xq=",3F8.4)') q(:,n)
         CALL find_representations_mode_q(nat,ntyp,q(:,n), &
                     w2(:,n),z,tau,ityp,amass,name_rap_mode, &
                     num_rap_mode(:,n), nspin_mag)
@@ -382,7 +295,7 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
      IF (ionode.AND.iout.NE.0) CALL writemodes(nat,q(1,n),w2(1,n),z,iout)
   END DO  !nq
   !
-  IF(iout .NE. 0.and.ionode) CLOSE(unit=iout)
+  IF(iout.NE.0.AND.ionode) CLOSE(unit=iout)
   !
   ALLOCATE (freq(3*nat, nq))
   DO n=1,nq
@@ -393,8 +306,10 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
      END DO
   END DO
   !
-  IF (flfrq.NE.' '.AND.ionode.AND..NOT.dos) THEN
-     OPEN (unit=2,file=flfrq ,status='unknown',form='formatted')
+  IF (flfrq.NE.' '.AND.ionode) THEN
+     filename=TRIM(flfrq)
+     IF (dos) filename=TRIM(flfrq)//'_ph'
+     OPEN (unit=2,file=filename ,status='unknown',form='formatted')
      WRITE(2, '(" &plot nbnd=",i4,", nks=",i4," /")') 3*nat, nq
      DO n=1, nq
         WRITE(2, '(10x,3f10.6)')  q(1,n), q(2,n), q(3,n)
@@ -406,8 +321,9 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   !  If the force constants are in the xml format we write also
   !  the file with the representations of each mode
   !
-  IF (flfrq.NE.' '.AND.xmlifc.AND.ionode.AND..NOT.dos) THEN
+  IF (flfrq.NE.' '.AND.xmlifc.AND.ionode) THEN
      filename=TRIM(flfrq)//'.rap'
+     IF (dos) filename=TRIM(flfrq)//'_ph'//'.rap'
      OPEN (unit=2,file=filename ,status='unknown',form='formatted')
      WRITE(2, '(" &plot_rap nbnd_rap=",i4,", nks_rap=",i4," /")') 3*nat, nq
      DO n=1, nq
@@ -428,6 +344,7 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
            emax = MAX (emax, freq(i,n))
         END DO
      END DO
+     emax=emax*1.02_DP
      !
      IF (freqmin_input > 0.0_DP) THEN
         emin=freqmin_input
@@ -448,43 +365,55 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
         ndos = ndos_input
      ELSE
         ndos = NINT ( (emax - emin) / deltafreq + 1.51d0 )
+        ndos_input = ndos
      END IF
 
      CALL set_phdos(phdos_save(igeom),ndos,deltafreq)
 
      IF (ionode) OPEN (unit=2,file=fldos,status='unknown',form='formatted')
      DO n= 1, ndos
+        IF (MOD(n,30)==0) WRITE(6,*) 'computing ndos', n
+        CALL flush(6)
         e = emin + (n - 1) * deltafreq
-        CALL dos_t(freq, 1, 3*nat, nq, ntetra, tetra, e, dosofe)
+!        CALL dos_t(freq, 1, 3*nat, nq, ntetra, tetra, e, dosofe)
+        CALL dos_g(freq, 1, 3*nat, nq, wq, 2.0_DP, 0, e, dosofe)
         !
         ! The factor 0.5 corrects for the factor 2 in dos_t,
         ! that accounts for the spin in the electron DOS.
         !
         !WRITE (2, '(F15.10,F15.2,F15.6,F20.5)') &
         !     E, E*RY_TO_CMM1, E*RY_TO_THZ, 0.5d0*DOSofE(1)
-        IF (ionode) WRITE (2, '(ES20.10,ES20.10)') e, 0.5d0*dosofe(1)
+        IF (ionode) WRITE (2, '(ES20.10,ES20.10)') e, dosofe(1)
         phdos_save(igeom)%nu(n) = e
-        phdos_save(igeom)%phdos(n) = 0.5d0*dosofe(1)
+        phdos_save(igeom)%phdos(n) = dosofe(1)
      END DO
      IF (ionode) CLOSE(unit=2)
+!
+!   save the frequencies
+!
+     CALL init_ph_freq(ph_freq_save(igeom), nat, nq1_d, nq2_d, nq3_d, nq)
+     CALL init_ph_rap(ph_freq_save(igeom))
+     DO iq=1, nq
+        ph_freq_save(igeom)%wg(iq)=wq(iq)
+        DO imode=1, 3*nat
+           ph_freq_save(igeom)%nu(imode,iq)=freq(imode,iq)
+           ph_freq_save(igeom)%rap(imode,iq)=num_rap_mode(imode,iq)
+        ENDDO
+     ENDDO
   END IF  !dos
+
   !
   DEALLOCATE (z) 
   DEALLOCATE (w2) 
   DEALLOCATE (dyn) 
-  DEALLOCATE (dyn_blk)
   DEALLOCATE (freq)
   DEALLOCATE (num_rap_mode)
   DEALLOCATE (high_sym)
-  DEALLOCATE (tau)
-  DEALLOCATE (ityp)
-  DEALLOCATE (itau_blk)
-  DEALLOCATE(q)
-  DEALLOCATE(tetra)
-  DEALLOCATE(tau_blk)
-  DEALLOCATE(ityp_blk)
-  DEALLOCATE(zeu)
-  DEALLOCATE(frc)
+  DEALLOCATE (q)
+  DEALLOCATE (wq)
+  DEALLOCATE (tetra)
+  DEALLOCATE (zeu)
+  DEALLOCATE (frc)
   IF (xmlifc) THEN
      DEALLOCATE(m_loc)
      DEALLOCATE(atm)
@@ -494,12 +423,13 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
 END SUBROUTINE matdyn_sub
 !
 !-----------------------------------------------------------------------
-SUBROUTINE readfc ( flfrc, nr1, nr2, nr3, epsil, nat,    &
+SUBROUTINE readfc ( flfrc, nr1, nr2, nr3, epsil, nat,  &
                     ibrav, alat, at, ntyp, amass, omega, has_zstar )
   !-----------------------------------------------------------------------
   !
   USE kinds,      ONLY : DP
-  USE ifc,        ONLY : tau => tau_blk, ityp => ityp_blk, frc, zeu
+  USE ions_base,  ONLY : tau, ityp
+  USE ifc,        ONLY : frc, zeu
   USE cell_base,  ONLY : celldm
   USE io_global,  ONLY : ionode, ionode_id, stdout
   USE mp,         ONLY : mp_bcast 
@@ -509,12 +439,12 @@ SUBROUTINE readfc ( flfrc, nr1, nr2, nr3, epsil, nat,    &
   IMPLICIT NONE
   ! I/O variable
   CHARACTER(LEN=256) :: flfrc
-  INTEGER :: ibrav, nr1,nr2,nr3,nat, ntyp
+  INTEGER :: ibrav, nr1, nr2, nr3, nat, ntyp
   REAL(DP) :: alat, at(3,3), epsil(3,3)
   LOGICAL :: has_zstar
   ! local variables
   INTEGER :: i, j, na, nb, m1,m2,m3
-  INTEGER :: ibid, jbid, nabid, nbbid, m1bid,m2bid,m3bid
+  INTEGER :: ibid, jbid, nabid, nbbid, m1bid, m2bid, m3bid
   REAL(DP) :: amass(ntyp), amass_from_file, omega
   INTEGER :: nt
   CHARACTER(LEN=3) :: atm
@@ -556,7 +486,7 @@ SUBROUTINE readfc ( flfrc, nr1, nr2, nr3, epsil, nat,    &
      END IF
   END DO
   !
-  ALLOCATE (tau(3,nat), ityp(nat), zeu(3,3,nat))
+  ALLOCATE (zeu(3,3,nat))
   !
   DO na=1,nat
      IF (ionode) READ(1,*) i,ityp(na),(tau(j,na),j=1,3)
@@ -622,7 +552,7 @@ SUBROUTINE readfc ( flfrc, nr1, nr2, nr3, epsil, nat,    &
 END SUBROUTINE readfc
 !
 !-----------------------------------------------------------------------
-SUBROUTINE frc_blk(dyn,q,tau,nat,nr1,nr2,nr3,frc,at,bg,rws,nrws,f_of_q,fd)
+SUBROUTINE frc_blk(dyn,q,tau,nat,nr1,nr2,nr3,frc,at,bg,rws,nrws)
   !-----------------------------------------------------------------------
   ! calculates the dynamical matrix at q from the (short-range part of the)
   ! force constants
@@ -632,17 +562,16 @@ SUBROUTINE frc_blk(dyn,q,tau,nat,nr1,nr2,nr3,frc,at,bg,rws,nrws,f_of_q,fd)
   USE io_global,  ONLY : stdout
   !
   IMPLICIT NONE
-  INTEGER nr1, nr2, nr3, nat, n1, n2, n3, &
-          ipol, jpol, na, nb, m1, m2, m3, nint, i,j, nrws, nax
-  COMPLEX(DP) dyn(3,3,nat,nat), f_of_q(3,3,nat,nat)
-  REAL(DP) frc(nr1,nr2,nr3,3,3,nat,nat), tau(3,nat), q(3), arg, &
+  INTEGER :: nr1, nr2, nr3, nat, n1, n2, n3, &
+             ipol, jpol, na, nb, m1, m2, m3, i,j, nrws
+  COMPLEX(DP) :: dyn(3,3,nat,nat)
+  REAL(DP) :: frc(nr1,nr2,nr3,3,3,nat,nat), tau(3,nat), q(3), arg, &
                at(3,3), bg(3,3), r(3), weight, r_ws(3),  &
                total_weight, rws(0:3,nrws), alat
   REAL(DP), EXTERNAL :: wsweight
-  REAL(DP),SAVE,ALLOCATABLE :: wscache(:,:,:,:,:)
-  REAL(DP), ALLOCATABLE :: ttt(:,:,:,:,:), tttx(:,:)
+  REAL(DP), SAVE, ALLOCATABLE :: wscache(:,:,:,:,:)
+  COMPLEX(DP) :: phase
   LOGICAL,SAVE :: first=.true.
-  LOGICAL :: fd
   !
   FIRST_TIME : IF (first) THEN
     first=.false.
@@ -657,7 +586,6 @@ SUBROUTINE frc_blk(dyn,q,tau,nat,nr1,nr2,nr3,frc,at,bg,rws,nrws,f_of_q,fd)
                    DO i=1, 3
                       r(i) = n1*at(i,1)+n2*at(i,2)+n3*at(i,3)
                       r_ws(i) = r(i) + tau(i,na)-tau(i,nb)
-                      if (fd) r_ws(i) = r(i) + tau(i,nb)-tau(i,na)
                    END DO
                    wscache(n3,n2,n1,nb,na) = wsweight(r_ws,rws,nrws)
                 ENDDO
@@ -667,9 +595,6 @@ SUBROUTINE frc_blk(dyn,q,tau,nat,nr1,nr2,nr3,frc,at,bg,rws,nrws,f_of_q,fd)
     ENDDO
   ENDIF FIRST_TIME
   !
-  ALLOCATE(ttt(3,nat,nr1,nr2,nr3))
-  ALLOCATE(tttx(3,nat*nr1*nr2*nr3))
-  ttt(:,:,:,:,:)=0.d0
 
   DO na=1, nat
      DO nb=1, nat
@@ -699,18 +624,14 @@ SUBROUTINE frc_blk(dyn,q,tau,nat,nr1,nr2,nr3,frc,at,bg,rws,nrws,f_of_q,fd)
                     !
                     ! FOURIER TRANSFORM
                     !
-                    do i=1,3
-                       ttt(i,na,m1,m2,m3)=tau(i,na)+m1*at(i,1)+m2*at(i,2)+m3*at(i,3)
-                       ttt(i,nb,m1,m2,m3)=tau(i,nb)+m1*at(i,1)+m2*at(i,2)+m3*at(i,3)
-                    end do
-
                     arg = tpi*(q(1)*r(1) + q(2)*r(2) + q(3)*r(3))
+                    phase = CMPLX(COS(arg),-SIN(arg),kind=DP)
                     DO ipol=1, 3
                        DO jpol=1, 3
                           dyn(ipol,jpol,na,nb) =                 &
                                dyn(ipol,jpol,na,nb) +            &
-                               (frc(m1,m2,m3,ipol,jpol,na,nb)+f_of_q(ipol,jpol,na,nb))     &
-                               *CMPLX(COS(arg),-SIN(arg),kind=DP)*weight
+                               (frc(m1,m2,m3,ipol,jpol,na,nb))     &
+                               *phase*weight
                        END DO
                     END DO
                  END IF
@@ -724,112 +645,10 @@ SUBROUTINE frc_blk(dyn,q,tau,nat,nr1,nr2,nr3,frc,at,bg,rws,nrws,f_of_q,fd)
         END IF
      END DO
   END DO
-  !
-!  alat=10.2
-!  nax=0
-!  DO n1=1,nr1
-!     DO n2=1,nr2
-!        DO n3=1,nr3
-!           do na=1,nat
-!              nax=nax+1
-!              do i=1,3
-!                 tttx(i,nax)=ttt(i,na,n1,n2,n3)*alat*0.529177
-!              end do
-!           end do
-!        end do
-!     end do
-!  end do
 !
-!  do nb=1,nat
-!     write(6,'(3(f15.9,1x))') tau(1,nb),tau(2,nb),tau(3,nb)
-!  enddo
-!  print*, '========='
-!  do nb=1,nat*nr1*nr2*nr3
-!     write(6,'(3(f15.9,1x))') tttx(1,nb),tttx(2,nb),tttx(3,nb)
-!  enddo
 ! 
   RETURN
 END SUBROUTINE frc_blk
-!
-!-----------------------------------------------------------------------
-SUBROUTINE setupmat (q,dyn,nat,at,bg,tau,itau_blk,nsc,alat, &
-     &         dyn_blk,nat_blk,at_blk,bg_blk,tau_blk,omega_blk, &
-     &                 epsil,zeu,frc,nr1,nr2,nr3,has_zstar,rws,nrws,na_ifc,f_of_q,fd)
-  !-----------------------------------------------------------------------
-  ! compute the dynamical matrix (the analytic part only)
-  !
-  USE kinds,      ONLY : DP
-  USE constants,  ONLY : tpi
-  !
-  IMPLICIT NONE
-  !
-  ! I/O variables
-  !
-  INTEGER:: nr1, nr2, nr3, nat, nat_blk, nsc, nrws, itau_blk(nat)
-  REAL(DP) :: q(3), tau(3,nat), at(3,3), bg(3,3), alat,      &
-                  epsil(3,3), zeu(3,3,nat_blk), rws(0:3,nrws),   &
-                  frc(nr1,nr2,nr3,3,3,nat_blk,nat_blk)
-  REAL(DP) :: tau_blk(3,nat_blk), at_blk(3,3), bg_blk(3,3), omega_blk
-  COMPLEX(DP) dyn_blk(3,3,nat_blk,nat_blk), f_of_q(3,3,nat,nat)
-  COMPLEX(DP) ::  dyn(3,3,nat,nat)
-  LOGICAL :: has_zstar, na_ifc, fd
-  !
-  ! local variables
-  !
-  REAL(DP) :: arg
-  COMPLEX(DP) :: cfac(nat)
-  INTEGER :: i,j,k, na,nb, na_blk, nb_blk, iq
-  REAL(DP) :: qp(3), qbid(3,nsc) ! automatic array
-  !
-  !
-  CALL q_gen(nsc,qbid,at_blk,bg_blk,at,bg)
-  !
-  DO iq=1,nsc
-     !
-     DO k=1,3
-        qp(k)= q(k) + qbid(k,iq)
-     END DO
-     !
-     dyn_blk(:,:,:,:) = (0.d0,0.d0)
-     CALL frc_blk (dyn_blk,qp,tau_blk,nat_blk,              &
-          &              nr1,nr2,nr3,frc,at_blk,bg_blk,rws,nrws,f_of_q,fd)
-      IF (has_zstar .and. .not.na_ifc) &
-           CALL rgd_blk(nr1,nr2,nr3,nat_blk,dyn_blk,qp,tau_blk,   &
-                        epsil,zeu,bg_blk,omega_blk,+1.d0)
-     !
-     DO na=1,nat
-        na_blk = itau_blk(na)
-        DO nb=1,nat
-           nb_blk = itau_blk(nb)
-           !
-           arg=tpi* ( qp(1) * ( (tau(1,na)-tau_blk(1,na_blk)) -   &
-                                (tau(1,nb)-tau_blk(1,nb_blk)) ) + &
-                      qp(2) * ( (tau(2,na)-tau_blk(2,na_blk)) -   &
-                                (tau(2,nb)-tau_blk(2,nb_blk)) ) + &
-                      qp(3) * ( (tau(3,na)-tau_blk(3,na_blk)) -   &
-                                (tau(3,nb)-tau_blk(3,nb_blk)) ) )
-           !
-           cfac(nb) = CMPLX(COS(arg),SIN(arg),kind=DP)/nsc
-           !
-        END DO ! nb
-        !
-        DO i=1,3
-           DO j=1,3
-              !
-              DO nb=1,nat
-                 nb_blk = itau_blk(nb)
-                 dyn(i,j,na,nb) = dyn(i,j,na,nb) + cfac(nb) * &
-                      dyn_blk(i,j,na_blk,nb_blk)
-              END DO ! nb
-              !
-           END DO ! j
-        END DO ! i
-     END DO ! na
-     !
-  END DO ! iq
-  !
-  RETURN
-END SUBROUTINE setupmat
 !
 !
 !----------------------------------------------------------------------
@@ -1430,182 +1249,8 @@ subroutine sp3(u,v,i,na,nr1,nr2,nr3,nat,scal)
 end subroutine sp3
 !
 !-----------------------------------------------------------------------
-SUBROUTINE q_gen(nsc,qbid,at_blk,bg_blk,at,bg)
-  !-----------------------------------------------------------------------
-  ! generate list of q (qbid) that are G-vectors of the supercell
-  ! but not of the bulk
-  !
-  USE kinds,      ONLY : DP
-  !
-  IMPLICIT NONE
-  INTEGER :: nsc
-  REAL(DP) qbid(3,nsc), at_blk(3,3), bg_blk(3,3), at(3,3), bg(3,3)
-  !
-  INTEGER, PARAMETER:: nr1=4, nr2=4, nr3=4, &
-                       nrm=(2*nr1+1)*(2*nr2+1)*(2*nr3+1)
-  REAL(DP), PARAMETER:: eps=1.0d-7
-  INTEGER :: i, j, k,i1, i2, i3, idum(nrm), iq
-  REAL(DP) :: qnorm(nrm), qbd(3,nrm) ,qwork(3), delta
-  LOGICAL lbho
-  !
-  i = 0
-  DO i1=-nr1,nr1
-     DO i2=-nr2,nr2
-        DO i3=-nr3,nr3
-           i = i + 1
-           DO j=1,3
-              qwork(j) = i1*bg(j,1) + i2*bg(j,2) + i3*bg(j,3)
-           END DO ! j
-           !
-           qnorm(i)  = qwork(1)**2 + qwork(2)**2 + qwork(3)**2
-           !
-           DO j=1,3
-              !
-              qbd(j,i) = at_blk(1,j)*qwork(1) + &
-                         at_blk(2,j)*qwork(2) + &
-                         at_blk(3,j)*qwork(3)
-           END DO ! j
-           !
-           idum(i) = 1
-           !
-        END DO ! i3
-     END DO ! i2
-  END DO ! i1
-  !
-  DO i=1,nrm-1
-     IF (idum(i).EQ.1) THEN
-        DO j=i+1,nrm
-           IF (idum(j).EQ.1) THEN
-              lbho=.TRUE.
-              DO k=1,3
-                 delta = qbd(k,i)-qbd(k,j)
-                 lbho = lbho.AND. (ABS(NINT(delta)-delta).LT.eps)
-              END DO ! k
-              IF (lbho) THEN
-                 IF(qnorm(i).GT.qnorm(j)) THEN
-                    qbd(1,i) = qbd(1,j)
-                    qbd(2,i) = qbd(2,j)
-                    qbd(3,i) = qbd(3,j)
-                    qnorm(i) = qnorm(j)
-                 END IF
-                 idum(j) = 0
-              END IF
-           END IF
-        END DO ! j
-     END IF
-  END DO ! i
-  !
-  iq = 0
-  DO i=1,nrm
-     IF (idum(i).EQ.1) THEN
-        iq=iq+1
-        qbid(1,iq)= bg_blk(1,1)*qbd(1,i) +  &
-                    bg_blk(1,2)*qbd(2,i) +  &
-                    bg_blk(1,3)*qbd(3,i)
-        qbid(2,iq)= bg_blk(2,1)*qbd(1,i) +  &
-                    bg_blk(2,2)*qbd(2,i) +  &
-                    bg_blk(2,3)*qbd(3,i)
-        qbid(3,iq)= bg_blk(3,1)*qbd(1,i) +  &
-                    bg_blk(3,2)*qbd(2,i) +  &
-                    bg_blk(3,3)*qbd(3,i)
-     END IF
-  END DO ! i
-  !
-  IF (iq.NE.nsc) CALL errore('q_gen',' probably nr1,nr2,nr3 too small ', iq)
-  RETURN
-END SUBROUTINE q_gen
-!
-!-----------------------------------------------------------------------
-SUBROUTINE check_at(at,bg_blk,alat,omega)
-  !-----------------------------------------------------------------------
-  !
-  USE kinds,      ONLY : DP
-  USE io_global,  ONLY : stdout
-  !
-  IMPLICIT NONE
-  !
-  REAL(DP) :: at(3,3), bg_blk(3,3), alat, omega
-  REAL(DP) :: work(3,3)
-  INTEGER :: i,j
-  REAL(DP), PARAMETER :: small=1.d-6
-  !
-  work(:,:) = at(:,:)
-  CALL cryst_to_cart(3,work,bg_blk,-1)
-  !
-  DO j=1,3
-     DO i =1,3
-        IF ( ABS(work(i,j)-NINT(work(i,j))) > small) THEN
-           WRITE (stdout,'(3f9.4)') work(:,:)
-           CALL errore ('check_at','at not multiple of at_blk',1)
-        END IF
-     END DO
-  END DO
-  !
-  omega =alat**3 * ABS(at(1,1)*(at(2,2)*at(3,3)-at(3,2)*at(2,3))- &
-                       at(1,2)*(at(2,1)*at(3,3)-at(2,3)*at(3,1))+ &
-                       at(1,3)*(at(2,1)*at(3,2)-at(2,2)*at(3,1)))
-  !
-  RETURN
-END SUBROUTINE check_at
-!
-!-----------------------------------------------------------------------
-SUBROUTINE set_tau (nat, nat_blk, at, at_blk, tau, tau_blk, &
-     ityp, ityp_blk, itau_blk)
-  !-----------------------------------------------------------------------
-  !
-  USE kinds,      ONLY : DP
-  !
-  IMPLICIT NONE
-  INTEGER nat, nat_blk,ityp(nat),ityp_blk(nat_blk), itau_blk(nat)
-  REAL(DP) at(3,3),at_blk(3,3),tau(3,nat),tau_blk(3,nat_blk)
-  !
-  REAL(DP) bg(3,3), r(3) ! work vectors
-  INTEGER i,i1,i2,i3,na,na_blk
-  REAL(DP) small
-  INTEGER NN1,NN2,NN3
-  PARAMETER (NN1=8, NN2=8, NN3=8, small=1.d-8)
-  !
-  CALL recips (at(1,1),at(1,2),at(1,3),bg(1,1),bg(1,2),bg(1,3))
-  !
-  na = 0
-  !
-  DO i1 = -NN1,NN1
-     DO i2 = -NN2,NN2
-        DO i3 = -NN3,NN3
-           r(1) = i1*at_blk(1,1) + i2*at_blk(1,2) + i3*at_blk(1,3)
-           r(2) = i1*at_blk(2,1) + i2*at_blk(2,2) + i3*at_blk(2,3)
-           r(3) = i1*at_blk(3,1) + i2*at_blk(3,2) + i3*at_blk(3,3)
-           CALL cryst_to_cart(1,r,bg,-1)
-           !
-           IF ( r(1).GT.-small .AND. r(1).LT.1.d0-small .AND.          &
-                r(2).GT.-small .AND. r(2).LT.1.d0-small .AND.          &
-                r(3).GT.-small .AND. r(3).LT.1.d0-small ) THEN
-              CALL cryst_to_cart(1,r,at,+1)
-              !
-              DO na_blk=1, nat_blk
-                 na = na + 1
-                 IF (na.GT.nat) CALL errore('set_tau','too many atoms',na)
-                 tau(1,na)    = tau_blk(1,na_blk) + r(1)
-                 tau(2,na)    = tau_blk(2,na_blk) + r(2)
-                 tau(3,na)    = tau_blk(3,na_blk) + r(3)
-                 ityp(na)     = ityp_blk(na_blk)
-                 itau_blk(na) = na_blk
-              END DO
-              !
-           END IF
-           !
-        END DO
-     END DO
-  END DO
-  !
-  IF (na.NE.nat) CALL errore('set_tau','too few atoms: increase NNs',na)
-  !
-  RETURN
-END SUBROUTINE set_tau
-!
-!-----------------------------------------------------------------------
 SUBROUTINE gen_qpoints (ibrav, at_, bg_, nat, tau, ityp, nk1, nk2, nk3, &
-     ntetra, nqx, nq, q, tetra)
+     ntetra, nqx, nq, q, wq)
   !-----------------------------------------------------------------------
   !
   USE kinds,      ONLY : DP
@@ -1619,9 +1264,9 @@ SUBROUTINE gen_qpoints (ibrav, at_, bg_, nat, tau, ityp, nk1, nk2, nk3, &
   REAL(DP) :: at_(3,3), bg_(3,3), tau(3,nat)
   ! output
   INTEGER :: nqx, nq, tetra(4,ntetra)
-  REAL(DP) :: q(3,nqx)
+  REAL(DP) :: q(3,nqx), wq(nqx)
   ! local
-  REAL(DP) :: xqq(3), wk(nqx), mdum(3,nat)
+  REAL(DP) :: xqq(3), mdum(3,nat)
   LOGICAL :: magnetic_sym=.FALSE., skip_equivalence=.FALSE.
   !
   time_reversal = .true.
@@ -1631,19 +1276,29 @@ SUBROUTINE gen_qpoints (ibrav, at_, bg_, nat, tau, ityp, nk1, nk2, nk3, &
   bg = bg_
   CALL set_sym_bl ( )
   !
+  write(6,*) 'kpoint grid ', nqx
+  call flush(6)
   CALL kpoint_grid ( nrot, time_reversal, skip_equivalence, s, t_rev, bg, nqx, &
-                           0,0,0, nk1,nk2,nk3, nq, q, wk)
+                           0,0,0, nk1,nk2,nk3, nq, q, wq)
+  write(6,*) 'kpoint grid wq', SUM(ABS(wq(1:nq))), nq, nqx
   !
+  write(6,*) 'find_sym'
+  call flush(6)
   CALL find_sym ( nat, tau, ityp, 6, 6, 6, .not.time_reversal, mdum )
   !
+  write(6,*) 'irreducible bz'
+  call flush(6)
   CALL irreducible_BZ (nrot, s, nsym, time_reversal, magnetic_sym, &
-                       at, bg, nqx, nq, q, wk, t_rev)
+                       at, bg, nqx, nq, q, wq, t_rev)
+  write(6,*) 'wq', SUM(ABS(wq(1:nq)))
   !
-  IF (ntetra /= 6 * nk1 * nk2 * nk3) &
-       CALL errore ('gen_qpoints','inconsistent ntetra',1)
+!  IF (ntetra /= 6 * nk1 * nk2 * nk3) &
+!       CALL errore ('gen_qpoints','inconsistent ntetra',1)
   !
-  CALL tetrahedra (nsym, s, time_reversal, t_rev, at, bg, nqx, 0, 0, 0, &
-       nk1, nk2, nk3, nq, q, wk, ntetra, tetra)
+!  write(6,*) 'tetrahedra'
+!  call flush(6)
+!  CALL tetrahedra (nsym, s, time_reversal, t_rev, at, bg, nqx, 0, 0, 0, &
+!       nk1, nk2, nk3, nq, q, wk, ntetra, tetra)
   !
   RETURN
 END SUBROUTINE gen_qpoints
@@ -1707,3 +1362,35 @@ SUBROUTINE find_representations_mode_q ( nat, ntyp, xq, w2, u, tau, ityp, &
   ENDIF
   RETURN
   END SUBROUTINE find_representations_mode_q
+
+!-----------------------------------------------------------------------
+SUBROUTINE setupmat_simple (q,dyn,nat,at,bg,tau,omega,alat, &
+     &                 epsil,zeu,frc,nr1,nr2,nr3,has_zstar,rws,nrws)
+  !-----------------------------------------------------------------------
+  ! compute the dynamical matrix (the analytic part only)
+  !
+  USE kinds,      ONLY : DP
+  USE constants,  ONLY : tpi
+  !
+  IMPLICIT NONE
+  !
+  ! I/O variables
+  !
+  INTEGER:: nr1, nr2, nr3, nat, nrws
+  REAL(DP) :: q(3), tau(3,nat), at(3,3), bg(3,3), alat,      &
+              epsil(3,3), zeu(3,3,nat), rws(0:3,nrws),       &
+              frc(nr1,nr2,nr3,3,3,nat,nat), omega 
+
+  COMPLEX(DP) ::  dyn(3,3,nat,nat)
+  LOGICAL :: has_zstar
+  !
+  ! local variables
+  !
+  !
+  dyn(:,:,:,:) = (0.d0,0.d0)
+  CALL frc_blk (dyn,q,tau,nat,nr1,nr2,nr3,frc,at,bg,rws,nrws)
+  IF (has_zstar) &
+     CALL rgd_blk(nr1,nr2,nr3,nat,dyn,q,tau,epsil,zeu,bg,omega,+1.d0)
+  !
+  RETURN
+END SUBROUTINE setupmat_simple
