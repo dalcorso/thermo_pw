@@ -116,19 +116,11 @@ ATOMIC_POSITIONS
 K_POINTS AUTOMATIC
 4 4 4 1 1 1 
 EOF
-$ECHO "  running the scf calculation checking the ke cut-off...\c"
+$ECHO "  running the scf calculation checking the ke cut-off and"
+$ECHO "  creating the postscript file output_keconv.ps...\c"
 $THERMO_PW_COMMAND < si.scf_ke.in > si.scf_ke.out
 check_failure $?
 $ECHO " done"
-
-if [ "$GP_COMMAND" = "" ]; then
-    break
-else
-$ECHO "  creating the postscript file output_keconv.ps...\c"
-$GP_COMMAND gnuplot.tmp_keconv
-check_failure $?
-$ECHO " done"
-fi
 
 $ECHO
 $ECHO "$EXAMPLE_DIR : done"
