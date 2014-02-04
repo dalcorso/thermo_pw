@@ -103,6 +103,8 @@ PROGRAM thermo_pw
   !
   CALL thermo_readin()
   !
+  CALL set_temperature()
+  !
   CALL check_stop_init()
   !
   part = 1
@@ -339,8 +341,6 @@ PROGRAM thermo_pw
   ENDIF
   !
   CALL deallocate_thermo()
-  !
-  CALL stop_clock( 'PWSCF' )
   !
   CALL environment_end( 'THERMO_PW' )
   !
