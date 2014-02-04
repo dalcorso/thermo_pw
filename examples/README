@@ -15,11 +15,13 @@ ngeo = 1           This calculation produces a band structure plot.
 example03:
 what = scf_ph    : a phonon calculation at a single q after a scf run.
 ngeo = 1           This calculation computes only the frequencies and
-                   displacements
-                   If calculated with several images, only the root image
+                   displacements at a given q.
+                   When calculated with several images, only the root image
                    does the scf calculation. All the images run asyncronously
                    and cooperate to calculate the phonon. The maximum number
-                   of images used is the number representations.
+                   of working images is the number representations, the others
+                   remain idle. 
+                   
 
 example04:
 what = scf_disp  : a phonon dispersion calculation after a scf run.
@@ -29,9 +31,9 @@ ngeo = 1           This calculation produces a plot of the phonon dispersions,
                    volume specific heat. 
                    If calculated with several images, only the root image
                    does the scf calculation. All the images run asyncronously
-                   and cooperate to calculate the phonon. The maximum number
-                   of images used is the total number representations
-                   (adding on all the q).
+                   and cooperate to calculate the phonons. The maximum number
+                   of working images is the total number representations
+                   (adding on all q).
 
 example05:
 what = mur_lc    : equilibrium lattice constant via murnaghan equation.
@@ -50,7 +52,8 @@ what = mur_lc_b  : This example computes all as above and produces a
 ngeo = # of geom.  plot of the band structure at the equilibrium lattice 
                    constant.
                    If calculated with several images each image run 
-                   asyncronously and calculate a different geometry.
+                   asyncronously and calculates a different geometry.
+                   The bands are calculated by only one image.
 
 example07:
 what = mur_lc_ph : This example computes all as in example05 and produces also
@@ -81,10 +84,14 @@ ngeo = # of geom.  constant and allows the calculation of the zero-point
                    bulk modulus and, using the quasiharmonic approximation,
                    their dependence on the temperature. 
                    The outputs are: Dispersions at each geometry.
+                   Density of states at each geometry.
                    Vibrational free energy, energy, entropy, and constant
-                   volume specific heat at each geometry.
-                   Lattice constant and bulk modulus as a function of the 
-                   temperature. 
+                   volume heat capacity at each geometry.
+                   Gruneisen parameters. Lattice constant and bulk modulus 
+                   as a function of the temperature. Average Gruneisen 
+                   parameters as a function of temperature. Isobaric heat
+                   capacity as a function of temperature, isoentropic bulk
+                   modulus as a function of temperature.
                    If calculated with several images each image runs 
                    asyncronously and calculates the ground state of 
                    a different geometry. Then all images are resyncronized 
@@ -98,7 +105,7 @@ what = scf_ke  : this example computes the total energy for several values
 ngeo=1           of the kinetic energy cut-off of the wavefunctions and of the
                  charge density. The two can be specified independently or
                  a calculation at fixed dual or for several dual can be
-                 specified. If images are used the each kinetic energy
+                 specified. When images are used, each kinetic energy
                  is calculated asyncronously from the others in different
                  images.
 
@@ -107,5 +114,4 @@ what = scf_nk  : this example computes the total energy for several values
                  of the k point mesh. One can specify the number of nk, and
                  the step between the first nk written on the input of pw.x
                  and the others. If this is a metal also the number of values
-                 of sigma can be specified.
-
+                 of the smearing degauss can be specified.
