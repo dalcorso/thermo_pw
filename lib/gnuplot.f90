@@ -17,7 +17,8 @@ MODULE gnuplot
     PUBLIC iun_gnuplot, gnuplot_write_header, &
            gnuplot_write_vertical_line, gnuplot_write_horizontal_line, &
            gnuplot_write_label, gnuplot_write_file_data, gnuplot_start, &
-           gnuplot_set_eref, gnuplot_set_fact, gnuplot_xlabel, gnuplot_ylabel, &
+           gnuplot_set_eref, gnuplot_set_fact, gnuplot_set_gfact, &
+           gnuplot_xlabel, gnuplot_ylabel, &
            gnuplot_unset_xticks, gnuplot_unset_yticks, &
            gnuplot_write_file_mul_data, gnuplot_write_file_mul_point, &
            gnuplot_end
@@ -57,6 +58,7 @@ IF (ionode) THEN
    WRITE(iun_gnuplot,'("set border lw 2")') 
    WRITE(iun_gnuplot,'("eref=0.0")') 
    WRITE(iun_gnuplot,'("fact=1.0")') 
+   WRITE(iun_gnuplot,'("gfact=1.0")') 
 ENDIF
 
 RETURN
@@ -186,6 +188,20 @@ IF (ionode) WRITE(iun_gnuplot, frt) eref
 RETURN
 END SUBROUTINE gnuplot_set_eref
 
+SUBROUTINE gnuplot_set_gfact(gfact, comment)
+IMPLICIT NONE
+REAL(DP), INTENT(IN) :: gfact
+CHARACTER(LEN=256) :: frt
+LOGICAL :: comment
+
+frt = '("gfact=", e20.8)'
+IF (comment) frt = '# ' // TRIM(frt)
+
+IF (ionode) WRITE(iun_gnuplot, frt) gfact
+
+RETURN
+END SUBROUTINE gnuplot_set_gfact
+
 SUBROUTINE gnuplot_set_fact(fact, comment)
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: fact
@@ -212,7 +228,7 @@ CHARACTER(LEN=6) :: int_to_char
 LOGICAL :: comment
 
 string=" """//TRIM(data_file)//""" u 1:($2" &
-            //"*fact-eref) w l lw 3 lc rgb """//TRIM(color)//""""
+            //"*fact-eref)*gfact w l lw 3 lc rgb """//TRIM(color)//""""
 
 IF (start) string="plot "//TRIM(string)
 IF (.NOT.last) string=TRIM(string)//", \"
@@ -239,7 +255,7 @@ LOGICAL :: comment
 
 string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//"):($"// &
               TRIM(int_to_char(col2)) &
-            //"*fact-eref) w l lw 3 lc rgb """//TRIM(color)//""""
+            //"*fact-eref)*gfact w l lw 3 lc rgb """//TRIM(color)//""""
 
 IF (start) string="plot "//TRIM(string)
 IF (.NOT.last) string=TRIM(string)//", \"
@@ -266,7 +282,7 @@ LOGICAL :: comment
 
 string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//"):($"// &
               TRIM(int_to_char(col2)) &
-            //"*fact-eref) w p pt 82 lc rgb """//TRIM(color)//""""
+            //"*fact-eref)*gfact w p pt 82 lc rgb """//TRIM(color)//""""
 
 IF (start) string="plot "//TRIM(string)
 IF (.NOT.last) string=TRIM(string)//", \"
