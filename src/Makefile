@@ -9,6 +9,7 @@ MODFLAGS= $(MOD_FLAG)../../iotk/src $(MOD_FLAG)../../Modules \
 IFLAGS=
 
 THERMOOBJS = \
+allocate_thermo.o \
 bands_sub.o \
 bcast_thermo_input.o \
 collect_everything.o \
@@ -36,6 +37,7 @@ run_thermo_asyncronously.o \
 set_bz_path.o \
 set_k_points.o \
 set_paths_disp.o \
+set_temperature.o \
 set_thermo_work_todo.o \
 simple_nonanal.o \
 simple_plot.o \
