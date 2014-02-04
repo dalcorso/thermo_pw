@@ -78,11 +78,13 @@ $ECHO "  cleaning $TMP_DIR...\c"
 rm -rf $TMP_DIR/silicon*
 $ECHO " done"
 
-cat > si.scf.in << EOF
+cat > thermo_control << EOF
  &INPUT_THERMO
   what='scf',
-  ngeo=1,
  /
+EOF
+
+cat > si.scf.in << EOF
  &control
     calculation = 'scf'
     restart_mode='from_scratch',

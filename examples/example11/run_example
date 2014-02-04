@@ -70,17 +70,15 @@ $ECHO " done"
 
 # how to run executables
 THERMO_PW_COMMAND="$PARA_IMAGE_PREFIX $BIN_DIR/thermo_pw.x $PARA_IMAGE_POSTFIX"
-GP_COMMAND=`which gnuplot 2>/dev/null`
 $ECHO
 $ECHO "  running thermo_pw.x as: $THERMO_PW_COMMAND"
-$ECHO "  running gnuplot as: $GP_COMMAND"
 $ECHO
 
 $ECHO "  cleaning $TMP_DIR...\c"
-rm -rf $TMP_DIR/silicon*
+rm -rf $TMP_DIR/copper*
 $ECHO " done"
 
-cat > cu.scf_nk.in << EOF
+cat > thermo_control << EOF
  &INPUT_THERMO
   what='scf_nk',
   deltank=4,
@@ -88,6 +86,9 @@ cat > cu.scf_nk.in << EOF
   deltasigma=0.02,
   nsigma=3
  /
+EOF
+
+cat > cu.scf_nk.in << EOF
  &control
     calculation = 'scf'
     restart_mode='from_scratch',

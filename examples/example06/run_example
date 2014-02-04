@@ -70,21 +70,22 @@ $ECHO " done"
 
 # how to run executables
 THERMO_PW_COMMAND="$PARA_IMAGE_PREFIX $BIN_DIR/thermo_pw.x $PARA_IMAGE_POSTFIX"
-# check for gnuplot
 $ECHO
 $ECHO "  running thermo_pw.x as: $THERMO_PW_COMMAND"
 $ECHO
 
 $ECHO "  cleaning $TMP_DIR...\c"
-rm -rf $TMP_DIR/*
+rm -rf $TMP_DIR/silicon*
 $ECHO " done"
 
-cat > si.scf_bands.in << EOF
+cat > thermo_control << EOF
  &INPUT_THERMO
   what='mur_lc_bands',
   emax_input=5,
   nbnd_bands=12,
  /
+EOF
+cat > si.scf_bands.in << EOF
  &control
    calculation = 'scf'
    prefix='silicon',

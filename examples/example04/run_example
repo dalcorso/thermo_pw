@@ -79,16 +79,18 @@ $ECHO "  running gnuplot as: $GP_COMMAND"
 $ECHO
 
 $ECHO "  cleaning $TMP_DIR...\c"
-rm -rf $TMP_DIR/*
+rm -rf $TMP_DIR/silicon*
 $ECHO " done"
 
-cat > si.scf_disp.in << EOF
+cat > thermo_control << EOF
  &INPUT_THERMO
   what='scf_disp',
   nq1_d=128, 
   nq2_d=128, 
   nq3_d=128,
  /
+EOF
+cat > si.scf_disp.in << EOF
  &control
    calculation = 'scf'
    prefix='silicon',
@@ -112,8 +114,9 @@ ATOMIC_POSITIONS
  Si 0.25 0.25 0.25
 K_POINTS AUTOMATIC
 4 4 4 1 1 1 
----
-ciao
+EOF
+cat > ph_control << EOF
+
  &inputph
   tr2_ph=1.0d-12,
   prefix='silicon',

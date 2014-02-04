@@ -74,21 +74,22 @@ $ECHO " done"
 # how to run executables
 THERMO_PW_COMMAND="$PARA_IMAGE_PREFIX $BIN_DIR/thermo_pw.x $PARA_IMAGE_POSTFIX"
 # check for gnuplot
-GP_COMMAND=`which gnuplot 2>/dev/null`
 $ECHO
 $ECHO "  running thermo_pw.x as: $THERMO_PW_COMMAND"
-$ECHO "  running gnuplot as: $GP_COMMAND"
 $ECHO
 
 $ECHO "  cleaning $TMP_DIR...\c"
-rm -rf $TMP_DIR/*
+rm -rf $TMP_DIR/silicon*
 $ECHO " done"
 
-cat > si.mur_lc_disp.in << EOF
+cat > thermo_control << EOF
  &INPUT_THERMO
   what='mur_lc_disp',
-  nq1_d=32, nq2_d=32, nq3_d=32,
+  nq1_d=128, nq2_d=128, nq3_d=128,
  /
+EOF
+
+cat > si.mur_lc_disp.in << EOF
  &control
    calculation = 'scf'
    prefix='silicon',
@@ -112,7 +113,9 @@ ATOMIC_POSITIONS
  Si 0.25 0.25 0.25
 K_POINTS AUTOMATIC
 4 4 4 1 1 1 
----
+EOF
+
+cat > ph_control << EOF
 ciao
  &inputph
   tr2_ph=1.0d-12,

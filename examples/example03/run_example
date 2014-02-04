@@ -75,13 +75,16 @@ $ECHO "  running thermo_pw.x as: $THERMO_PW_COMMAND"
 $ECHO
 
 $ECHO "  cleaning $TMP_DIR...\c"
-rm -rf $TMP_DIR/*
+rm -rf $TMP_DIR/silicon*
 $ECHO " done"
 
-cat > si.scf_ph.in << EOF
+cat > thermo_control << EOF
  &INPUT_THERMO
   what='scf_ph',
  /
+EOF
+
+cat > si.scf_ph.in << EOF
  &control
     calculation = 'scf'
     restart_mode='from_scratch',
@@ -107,7 +110,9 @@ ATOMIC_POSITIONS
  Si 0.25 0.25 0.25
 K_POINTS AUTOMATIC
 4 4 4 1 1 1 
----
+EOF
+
+cat > ph_control << EOF
 ciao
  &inputph
   tr2_ph=1.0d-12,
@@ -116,6 +121,7 @@ ciao
 /
 1.0 0.0 0.0 1.
 EOF
+
 $ECHO "  running the thermo scf_ph calculation for Si...\c"
 $THERMO_PW_COMMAND < si.scf_ph.in > si.scf_ph.out
 check_failure $?

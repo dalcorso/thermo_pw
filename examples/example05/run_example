@@ -74,14 +74,16 @@ $ECHO "  running thermo_pw.x as: $THERMO_PW_COMMAND"
 $ECHO
 
 $ECHO "  cleaning $TMP_DIR...\c"
-rm -rf $TMP_DIR/*
+rm -rf $TMP_DIR/silicon*
 $ECHO " done"
 
-cat > si.mur_lc.in << EOF
+cat > thermo_control << EOF
  &INPUT_THERMO
   what='mur_lc',
   ngeo=11
  /
+EOF
+cat > si.mur_lc.in << EOF
  &control
    calculation = 'scf'
    prefix='silicon',
