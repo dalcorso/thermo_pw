@@ -1,7 +1,3 @@
- &INPUT_THERMO
-  what='scf',
-  ngeo=1,
- /
  &control
     calculation = 'scf'
     restart_mode='from_scratch',
