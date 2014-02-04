@@ -14,15 +14,16 @@ MODULE ph_freq_module
 !
 !
 USE kinds, ONLY : DP
+USE constants, ONLY : k_boltzmann_ry, ry_to_cmm1
 USE mp_images, ONLY : intra_image_comm
 USE mp, ONLY : mp_sum
 IMPLICIT NONE
 SAVE
 PRIVATE
-REAL(DP), PARAMETER :: kb=8.6173324d-5/13.6058d0 ! Boltzmann constant in Ry/K
-REAL(DP), PARAMETER :: ry_to_cmm1= 8065.5d0 * 13.6058d0
-REAL(DP), PARAMETER :: kb1=1.0d0/8065.5d0/8.6173324d-5 ! inverse Boltzmann 
-                                                       ! constant in cm^{-1}/K
+
+REAL(DP), PARAMETER :: kb=k_boltzmann_ry ! Boltzmann constant in Ry/K
+REAL(DP), PARAMETER :: kb1=1.0_DP/kb/ry_to_cmm1 ! inverse Boltzmann 
+                                                ! constant in cm^{-1}/K
 
 TYPE ph_freq_type
    INTEGER :: number_of_points        ! the total number of frequencies
@@ -147,7 +148,6 @@ DO iq=startq,lastq
       ELSEIF (nu > 1.D-3) THEN
          free_ener = free_ener+kb*temp*wg*(-arg + LOG( arg + arg**2*0.5_DP + &
                                                          arg**3 * onesixth )) 
-         write(6,*) 'free_energy, using asymptote', temp, nu, arg
       ENDIF
    ENDDO
 ENDDO
@@ -187,7 +187,6 @@ DO iq=startq,lastq
         IF (arg < 650._DP) ener = ener +  wg * nu / ( EXP( arg ) - 1.0_DP ) 
       ELSEIF ( nu > 1.D-3 ) THEN
          ener = ener +  wg * nu / ( arg + arg**2*0.5_DP + arg**3 * onesixth )
-         write(6,*) 'energy using asymptote', temp, nu, arg
       ENDIF
    ENDDO
 ENDDO
@@ -231,7 +230,7 @@ TYPE(ph_freq_type), INTENT(IN) :: ph_freq
 REAL(DP), INTENT(IN) :: temp
 REAL(DP), INTENT(OUT) :: cv
 
-INTEGER :: nq, iq, imode, nat, startq, lastq, icount
+INTEGER :: nq, iq, imode, nat, startq, lastq
 REAL(DP) :: nu, temp1, arg, wg, onesixth
 
 cv=0.0_DP
@@ -241,7 +240,6 @@ temp1 = 1.0_DP / temp
 nq=ph_freq%nq
 nat=ph_freq%nat
 CALL divide(intra_image_comm, nq, startq, lastq)
-icount=0
 DO iq=startq,lastq
    wg=ph_freq%wg(iq)
    DO imode=1,3*nat
@@ -251,20 +249,15 @@ DO iq=startq,lastq
          IF (arg < 650._DP) THEN
               cv = cv + wg * EXP(arg) * &
                                      ( arg / ( EXP( arg ) - 1.0_DP ) ) ** 2 
-         icount=icount+1
          ENDIF
       ELSEIF (nu >1.D-3) THEN
-           write(6,*) 'cv using expansion ', temp, nu, arg
              cv = cv + wg * EXP(arg) *  &
                   (arg /( arg + arg**2*0.5_DP + arg**3 * onesixth ))**2
-         icount=icount+1
       ENDIF
    ENDDO
 ENDDO
 cv = cv * kb
 CALL mp_sum(cv, intra_image_comm)
-CALL mp_sum(icount, intra_image_comm)
-WRITE(6,*) icount, ' phonons out of ', nq*3*nat, ' for specific heat at T', temp
 
 RETURN
 END SUBROUTINE specific_heat_cv_ph
@@ -282,7 +275,7 @@ TYPE(ph_freq_type), INTENT(IN) :: ph_freq, ph_grun
 REAL(DP), INTENT(IN)  :: temp
 REAL(DP), INTENT(OUT) :: betab
 
-INTEGER :: nq, iq, imode, nat, startq, lastq, icount
+INTEGER :: nq, iq, imode, nat, startq, lastq
 REAL(DP) :: nu, temp1, arg, gamman, wg, onesixth
 
 betab=0.0_DP
@@ -292,7 +285,6 @@ temp1 = 1.0_DP / temp
 nq=ph_freq%nq
 nat=ph_freq%nat
 CALL divide(intra_image_comm, nq, startq, lastq)
-icount=0
 DO iq=startq,lastq
    wg=ph_freq%wg(iq)
    DO imode=1, 3*nat
@@ -300,23 +292,17 @@ DO iq=startq,lastq
       gamman=ph_grun%nu(imode,iq) 
       arg= kb1 * nu * temp1
       IF (arg > 1.D-6 ) THEN
-         IF (arg < 650._DP) THEN
+         IF (arg < 650._DP) &
             betab = betab + wg * gamman &
                             * EXP(arg) * ( arg / ( EXP( arg ) - 1.0_DP )) ** 2 
-            icount=icount+1
-         ENDIF
       ELSEIF (nu > 1.D-3) THEN
-         write(6,*) 'te using expansion ', temp, nu, arg
          betab = betab + wg * gamman * EXP(arg) *  &
                        (arg /( arg + arg**2*0.5_DP + arg**3 * onesixth ))**2
-         icount=icount+1
       ENDIF
    ENDDO
 ENDDO
 betab = betab * kb
 CALL mp_sum(betab, intra_image_comm)
-CALL mp_sum(icount, intra_image_comm)
-WRITE(6,*) icount, ' phonons out of ', nq*3*nat, ' for specific beta at T', temp
 
 RETURN
 END SUBROUTINE thermal_expansion_ph

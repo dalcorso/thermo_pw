@@ -24,13 +24,14 @@ MODULE phdos_module
 ! USE kinds, ONLY : dp
 !
 USE kinds, ONLY : DP
+USE constants, ONLY :  k_boltzmann_ry, ry_to_cmm1
 IMPLICIT NONE
 SAVE
 PRIVATE
-REAL(DP), PARAMETER :: kb=8.6173324d-5/13.6058d0 ! Boltzmann constant in Ry/K
-REAL(DP), PARAMETER :: ry_to_cmm1= 8065.5d0 * 13.6058d0
-REAL(DP), PARAMETER :: kb1=1.0d0/8065.5d0/8.6173324d-5 ! inverse Boltzmann 
-                                                       ! constant in cm^{-1}/K
+
+REAL(DP), PARAMETER :: kb=k_boltzmann_ry ! Boltzmann constant in Ry/K
+REAL(DP), PARAMETER :: kb1=1.0_DP/kb/ry_to_cmm1 ! inverse Boltzmann 
+                                                ! constant in cm^{-1}/K
 
 TYPE phdos_type
    INTEGER :: number_of_points    ! rhe number of points
