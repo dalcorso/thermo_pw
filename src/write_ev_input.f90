@@ -116,11 +116,6 @@ REAL(DP) :: free_e, vm, b0, b01
 
   IF (my_image_id /= root_image) RETURN
 
-  IF (.NOT.ALLOCATED(vmin_t)) ALLOCATE(vmin_t(ntemp))
-  IF (.NOT.ALLOCATED(b0_t)) ALLOCATE(b0_t(ntemp))
-  IF (.NOT.ALLOCATED(b01_t)) ALLOCATE(b01_t(ntemp))
-  IF (.NOT.ALLOCATED(free_e_min_t)) ALLOCATE(free_e_min_t(ntemp))
-  
   file_dat=TRIM(flevdat)//TRIM(int_to_char(itemp))
   CALL write_ev_driver(file_dat)
 
@@ -173,11 +168,6 @@ REAL(DP) :: free_e, vm, b0, b01
 
   IF (my_image_id /= root_image) RETURN
 
-  IF (.NOT.ALLOCATED(vminf_t)) ALLOCATE(vminf_t(ntemp))
-  IF (.NOT.ALLOCATED(b0f_t)) ALLOCATE(b0f_t(ntemp))
-  IF (.NOT.ALLOCATED(b01f_t)) ALLOCATE(b01f_t(ntemp))
-  IF (.NOT.ALLOCATED(free_e_minf_t)) ALLOCATE(free_e_minf_t(ntemp))
-  
   file_dat=TRIM(flevdat)//'_ph'//TRIM(int_to_char(itemp))
   CALL write_ev_driver(file_dat)
 

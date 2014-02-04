@@ -10,6 +10,7 @@ USE kinds,          ONLY : DP
 USE constants,      ONLY : ry_kbar
 USE thermo_mod,     ONLY : ngeo
 USE temperature,    ONLY : ntemp, temp
+USE thermodynamics, ONLY : ph_cv
 USE anharmonic,     ONLY : alpha_t, beta_t, gamma_t, cp_t, cv_t, b0_s, &
                            vmin_t, b0_t
 USE control_thermo, ONLY : flanhar
@@ -22,13 +23,6 @@ INTEGER :: itemp, iu_therm
 
 IF (my_image_id /= root_image) RETURN
 
-IF ( .NOT. ALLOCATED (alpha_t) ) ALLOCATE( alpha_t(ntemp) )
-IF ( .NOT. ALLOCATED (beta_t) )  ALLOCATE( beta_t(ntemp) )
-IF ( .NOT. ALLOCATED (gamma_t) ) ALLOCATE( gamma_t(ntemp) )
-IF ( .NOT. ALLOCATED (cp_t) ) ALLOCATE( cp_t (ntemp) )
-IF ( .NOT. ALLOCATED (cv_t) ) ALLOCATE( cv_t (ntemp) )
-IF ( .NOT. ALLOCATED (b0_s) ) ALLOCATE( b0_s (ntemp) )
-
 DO itemp = 2, ntemp-1
    beta_t(itemp) = (vmin_t(itemp+1)-vmin_t(itemp-1)) / &
                    (temp(itemp+1)-temp(itemp-1)) / vmin_t(itemp)
@@ -36,7 +30,7 @@ END DO
 
 alpha_t = beta_t / 3.0_DP
 
-CALL compute_cp()
+CALL compute_cp(beta_t, vmin_t, b0_t, ph_cv, cv_t, cp_t, b0_s, gamma_t)
 
 IF (ionode) THEN
 !
@@ -79,6 +73,7 @@ USE kinds,          ONLY : DP
 USE constants,      ONLY : ry_kbar
 USE thermo_mod,     ONLY : ngeo
 USE temperature,    ONLY : ntemp, temp
+USE ph_freq_thermodynamics, ONLY : phf_cv
 USE ph_freq_anharmonic, ONLY : alphaf_t, betaf_t, gammaf_t, cpf_t, cvf_t, &
                         b0f_s, vminf_t, b0f_t
 USE control_thermo, ONLY : flanhar
@@ -91,21 +86,13 @@ INTEGER :: itemp, iu_therm
 
 IF (my_image_id /= root_image) RETURN
 
-IF ( .NOT. ALLOCATED (alphaf_t) ) ALLOCATE( alphaf_t(ntemp) )
-IF ( .NOT. ALLOCATED (betaf_t) )  ALLOCATE( betaf_t(ntemp) )
-IF ( .NOT. ALLOCATED (gammaf_t) ) ALLOCATE( gammaf_t(ntemp) )
-IF ( .NOT. ALLOCATED (cpf_t) ) ALLOCATE( cpf_t (ntemp) )
-IF ( .NOT. ALLOCATED (cvf_t) ) ALLOCATE( cvf_t (ntemp) )
-IF ( .NOT. ALLOCATED (b0f_s) ) ALLOCATE( b0f_s (ntemp) )
-
-
 DO itemp = 2, ntemp-1
    betaf_t(itemp) = (vminf_t(itemp+1)-vminf_t(itemp-1)) / &
                     (temp(itemp+1)-temp(itemp-1)) / vminf_t(itemp)
 END DO
 alphaf_t = betaf_t / 3.0_DP
 
-CALL compute_ph_freq_cp()
+CALL compute_cp(betaf_t, vminf_t, b0f_t, phf_cv, cvf_t, cpf_t, b0f_s, gammaf_t)
 
 IF (ionode) THEN
 !
@@ -163,7 +150,6 @@ INTEGER :: itemp, iu_therm
 
 IF (my_image_id /= root_image) RETURN
 
-IF ( .NOT. ALLOCATED (betab) ) ALLOCATE( betab (ntemp) )
 !
 !  compute thermal expansion from gruneisen parameters. 
 !  NB: betab is multiplied by the bulk modulus
