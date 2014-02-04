@@ -1,5 +1,5 @@
 
-     Program THERMO_PW v.5.0.2 starts on 17Jan2014 at 18:43: 0 
+     Program THERMO_PW v.5.0.2 starts on  4Feb2014 at 16:53:58 
 
      This program is part of the open-source Quantum ESPRESSO suite
      for quantum simulation of materials; please cite
@@ -16,17 +16,11 @@
      DEPRECATED: no units specified in ATOMIC_POSITIONS card
      Message from routine read_cards :
      ATOMIC_POSITIONS: units set to alat
-Warning: card --- ignored
-Warning: card CIAO ignored
-Warning: card  &INPUTPH ignored
-Warning: card   TR2_PH=1.0D-12, ignored
-Warning: card   PREFIX='SILICON', ignored
-Warning: card   FILDYN='SI.DYN', ignored
-Warning: card / ignored
-Warning: card 1.0 0.0 0.0 1. ignored
- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- Computing geometry            1
- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+     Computing geometry     1
+     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
      Message from routine read_xml_file:
      file /scratch/dalcorso_sissa/espresso_jan_2014/tempdir/g1/silicon.save not guaranteed to be safe for post-processing
 
@@ -49,7 +43,7 @@ Warning: card 1.0 0.0 0.0 1. ignored
 
 
   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-     I am image     1and now I do point    1 irrep    1 of geometry    1
+     I am image     1 and now I do point    1 irrep    1 of geometry    1
   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
@@ -458,23 +452,23 @@ Warning: card 1.0 0.0 0.0 1. ignored
      Compute atoms:     1,    2,
 
 
-     PHONON       :      6.19s CPU      6.28s WALL (       1 calls)
+     PHONON       :      6.27s CPU      6.36s WALL (       1 calls)
 
 
      Representation #  1 modes #   1  2
 
      Self-consistent Calculation
 
-      iter #   1 total cpu time :     7.2 secs   av.it.:   4.5
+      iter #   1 total cpu time :     7.3 secs   av.it.:   4.5
       thresh= 1.000E-02 alpha_mix =  0.700 |ddv_scf|^2 =  7.584E-09
 
-      iter #   2 total cpu time :     8.7 secs   av.it.:   9.7
+      iter #   2 total cpu time :     8.8 secs   av.it.:   9.7
       thresh= 8.708E-06 alpha_mix =  0.700 |ddv_scf|^2 =  3.872E-10
 
-      iter #   3 total cpu time :    10.6 secs   av.it.:   9.1
+      iter #   3 total cpu time :    10.3 secs   av.it.:   9.1
       thresh= 1.968E-06 alpha_mix =  0.700 |ddv_scf|^2 =  1.307E-11
 
-      iter #   4 total cpu time :    12.4 secs   av.it.:   9.2
+      iter #   4 total cpu time :    11.7 secs   av.it.:   9.2
       thresh= 3.615E-07 alpha_mix =  0.700 |ddv_scf|^2 =  1.482E-14
 
      End of self-consistent calculation
@@ -482,6 +476,5 @@ Warning: card 1.0 0.0 0.0 1. ignored
      Convergence has been achieved 
 
      Not diagonalizing because representation    0 is not done
-stop_clock: clock #  2 for        PWSCF not running
-     THERMO_PW    :    11.57s CPU        12.45s WALL
+     THERMO_PW    :    11.42s CPU        11.76s WALL
 

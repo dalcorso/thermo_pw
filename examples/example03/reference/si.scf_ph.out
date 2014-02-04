@@ -1,5 +1,5 @@
 
-     Program THERMO_PW v.5.0.2 starts on 17Jan2014 at 18:43: 0 
+     Program THERMO_PW v.5.0.2 starts on  4Feb2014 at 16:53:58 
 
      This program is part of the open-source Quantum ESPRESSO suite
      for quantum simulation of materials; please cite
@@ -16,14 +16,6 @@
      DEPRECATED: no units specified in ATOMIC_POSITIONS card
      Message from routine read_cards :
      ATOMIC_POSITIONS: units set to alat
-Warning: card --- ignored
-Warning: card CIAO ignored
-Warning: card  &INPUTPH ignored
-Warning: card   TR2_PH=1.0D-12, ignored
-Warning: card   PREFIX='SILICON', ignored
-Warning: card   FILDYN='SI.DYN', ignored
-Warning: card / ignored
-Warning: card 1.0 0.0 0.0 1. ignored
 
      Subspace diagonalization in iterative solution of the eigenvalue problem:
      a serial algorithm will be used
@@ -146,7 +138,7 @@ Warning: card 1.0 0.0 0.0 1. ignored
      Davidson diagonalization with overlap
      ethr =  7.73E-04,  avg # of iterations =  1.0
 
-     total cpu time spent up to now is        0.4 secs
+     total cpu time spent up to now is        0.5 secs
 
      total energy              =     -15.85036179 Ry
      Harris-Foulkes estimate   =     -15.85066154 Ry
@@ -186,7 +178,7 @@ Warning: card 1.0 0.0 0.0 1. ignored
      Davidson diagonalization with overlap
      ethr =  1.13E-09,  avg # of iterations =  2.7
 
-     total cpu time spent up to now is        0.9 secs
+     total cpu time spent up to now is        1.0 secs
 
      End of self-consistent calculation
 
@@ -262,9 +254,11 @@ Warning: card 1.0 0.0 0.0 1. ignored
 
 
      Writing output data file silicon.save
- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- Computing geometry            1
- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+     Computing geometry     1
+     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
      Message from routine read_xml_file:
      file /scratch/dalcorso_sissa/espresso_jan_2014/tempdir/g1/silicon.save not guaranteed to be safe for post-processing
 
@@ -698,7 +692,7 @@ Warning: card 1.0 0.0 0.0 1. ignored
 
 
      Alpha used in Ewald sum =   1.0000
-     PHONON       :      2.70s CPU      2.81s WALL (       1 calls)
+     PHONON       :      2.76s CPU      2.86s WALL (       1 calls)
 
      Not diagonalizing because representation    1 is not done
 
@@ -835,7 +829,7 @@ Warning: card 1.0 0.0 0.0 1. ignored
 
      ethr =  1.25E-10,  avg # of iterations = 11.9
 
-     total cpu time spent up to now is        5.9 secs
+     total cpu time spent up to now is        6.0 secs
 
      End of band structure calculation
 
@@ -1110,7 +1104,7 @@ Warning: card 1.0 0.0 0.0 1. ignored
      Representation     3      2 modes -  Done
 
 
-     PHONON       :     16.26s CPU     16.49s WALL (       2 calls)
+     PHONON       :     16.60s CPU     16.82s WALL (       2 calls)
 
      Number of q in the star =    3
      List of q in the star:
@@ -1130,12 +1124,11 @@ Warning: card 1.0 0.0 0.0 1. ignored
      freq (    5) =      13.711402 [THz] =     457.363151 [cm-1]
      freq (    6) =      13.711402 [THz] =     457.363151 [cm-1]
  **************************************************************************
-stop_clock: clock #  2 for        PWSCF not running
 
-     THERMO_PW    :    17.34s CPU        17.61s WALL
+     THERMO_PW    :    17.71s CPU        17.97s WALL
 
 
-   This run was terminated on:  18:43:18  17Jan2014            
+   This run was terminated on:  16:54:16   4Feb2014            
 
 =------------------------------------------------------------------------------=
    JOB DONE.

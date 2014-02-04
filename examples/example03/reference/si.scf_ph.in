@@ -1,6 +1,3 @@
- &INPUT_THERMO
-  what='scf_ph',
- /
  &control
     calculation = 'scf'
     restart_mode='from_scratch',
@@ -26,11 +23,3 @@ ATOMIC_POSITIONS
  Si 0.25 0.25 0.25
 K_POINTS AUTOMATIC
 4 4 4 1 1 1 
----
-ciao
- &inputph
-  tr2_ph=1.0d-12,
-  prefix='silicon',
-  fildyn='si.dyn',
-/
-1.0 0.0 0.0 1.

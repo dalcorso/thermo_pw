@@ -1,0 +1,7 @@
+ciao
+ &inputph
+  tr2_ph=1.0d-12,
+  prefix='silicon',
+  fildyn='si.dyn',
+/
+1.0 0.0 0.0 1.
