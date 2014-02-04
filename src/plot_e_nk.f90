@@ -17,6 +17,7 @@ USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
                             gnuplot_ylabel,              &
                             gnuplot_xlabel,              &
                             gnuplot_set_eref,            &
+                            gnuplot_set_gfact,           &
                             gnuplot_write_file_mul_data
 USE thermo_mod,      ONLY : energy_geo
 USE control_thermo,  ONLY : flnkconv
@@ -42,8 +43,9 @@ xmax = nk_test(nnk)
 CALL gnuplot_write_header(filename, xmin, xmax, 0.0_DP, 0.0_DP ) 
 
 CALL gnuplot_xlabel(' nk ',.FALSE.) 
-CALL gnuplot_ylabel('Total energy (Ry)',.FALSE.) 
+CALL gnuplot_ylabel('Total energy error (mRy)',.FALSE.) 
 CALL gnuplot_set_eref(energy_geo(nnk),.FALSE.) 
+CALL gnuplot_set_gfact(1000._DP,.FALSE.) 
 
 DO isigma=1,nsigma
    IF (nsigma > 1) THEN
