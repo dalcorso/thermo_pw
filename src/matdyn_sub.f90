@@ -223,7 +223,7 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   high_sym=.TRUE.
 
   DO n=1, nq
-     IF ( MOD(n,1000) == 0 .AND. ionode ) WRITE(stdout, '(5x,"Computing q ",&
+     IF ( MOD(n,20000) == 0 .AND. ionode ) WRITE(stdout, '(5x,"Computing q ",&
                          &   i8, " Total q ", i8 )') n, nq 
 
      dyn(:,:,:,:) = (0.d0, 0.d0)
@@ -283,7 +283,6 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
      !
      IF (xmlifc.AND..NOT.lo_to_split.AND..NOT.dos) THEN
         ALLOCATE(name_rap_mode(3*nat))
-!        WRITE(stdout,'(10x,"xq=",3F8.4)') q(:,n)
         CALL find_representations_mode_q(nat,ntyp,q(:,n), &
                     w2(:,n),z,tau,ityp,amass,name_rap_mode, &
                     num_rap_mode(:,n), nspin_mag)
@@ -372,8 +371,6 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
 
      IF (ionode) OPEN (unit=2,file=fldos,status='unknown',form='formatted')
      DO n= 1, ndos
-        IF (MOD(n,30)==0) WRITE(6,*) 'computing ndos', n
-        CALL flush(6)
         e = emin + (n - 1) * deltafreq
 !        CALL dos_t(freq, 1, 3*nat, nq, ntetra, tetra, e, dosofe)
         CALL dos_g(freq, 1, 3*nat, nq, wq, 2.0_DP, 0, e, dosofe)
@@ -1276,21 +1273,13 @@ SUBROUTINE gen_qpoints (ibrav, at_, bg_, nat, tau, ityp, nk1, nk2, nk3, &
   bg = bg_
   CALL set_sym_bl ( )
   !
-  write(6,*) 'kpoint grid ', nqx
-  call flush(6)
   CALL kpoint_grid ( nrot, time_reversal, skip_equivalence, s, t_rev, bg, nqx, &
                            0,0,0, nk1,nk2,nk3, nq, q, wq)
-  write(6,*) 'kpoint grid wq', SUM(ABS(wq(1:nq))), nq, nqx
   !
-  write(6,*) 'find_sym'
-  call flush(6)
   CALL find_sym ( nat, tau, ityp, 6, 6, 6, .not.time_reversal, mdum )
   !
-  write(6,*) 'irreducible bz'
-  call flush(6)
   CALL irreducible_BZ (nrot, s, nsym, time_reversal, magnetic_sym, &
                        at, bg, nqx, nq, q, wq, t_rev)
-  write(6,*) 'wq', SUM(ABS(wq(1:nq)))
   !
 !  IF (ntetra /= 6 * nk1 * nk2 * nk3) &
 !       CALL errore ('gen_qpoints','inconsistent ntetra',1)
