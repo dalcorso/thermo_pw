@@ -50,10 +50,12 @@ filename2=TRIM(flanhar)//'.aux_ph'
 filename3=TRIM(flanhar)//'.aux_grun'
 
 CALL gnuplot_xlabel('T (K)',.FALSE.) 
+CALL gnuplot_set_fact(1.0_DP,.FALSE.)
 CALL gnuplot_ylabel('Volume ((a.u.)^3)',.FALSE.) 
 CALL gnuplot_write_file_mul_data(flanhar,1,2,'red',.TRUE.,.FALSE.,.FALSE.)
 CALL gnuplot_write_file_mul_data(filename,1,2,'blue',.FALSE.,.TRUE.,.FALSE.)
 
+CALL gnuplot_set_fact(1.0_DP,.FALSE.)
 CALL gnuplot_ylabel('Thermal expansion ({/Symbol b} x 10^{6})',.FALSE.) 
 CALL gnuplot_write_file_mul_data(flanhar,1,3,'red',.TRUE.,.FALSE.,.FALSE.)
 CALL gnuplot_write_file_mul_data(filename,1,3,'blue',.FALSE.,.FALSE.,.FALSE.)
@@ -64,6 +66,7 @@ CALL gnuplot_write_file_mul_data(filename3,1,2,'green',.FALSE.,.TRUE.,.FALSE.)
 CALL gnuplot_write_file_mul_data(filename3,1,2,'green',.FALSE.,.FALSE.,.TRUE.)
 CALL gnuplot_write_file_mul_point('anhar.exp',1,2,'red',.FALSE.,.TRUE.,.TRUE.)
 
+CALL gnuplot_set_fact(1.0_DP,.FALSE.)
 CALL gnuplot_ylabel('Bulk modulus (kbar)',.FALSE.) 
 CALL gnuplot_write_file_mul_data(flanhar,1,4,'red',.TRUE.,.FALSE.,.FALSE.)
 CALL gnuplot_write_file_mul_data(filename,1,4,'blue',.FALSE.,.TRUE.,.FALSE.)
@@ -74,14 +77,17 @@ CALL gnuplot_write_file_mul_data(flanhar,1,5,'red',.TRUE.,.FALSE.,.FALSE.)
 CALL gnuplot_write_file_mul_data(filename,1,5,'blue',.FALSE.,.FALSE.,.FALSE.)
 CALL gnuplot_write_file_mul_data(filename3,1,5,'green',.FALSE.,.TRUE.,.FALSE.)
 
+CALL gnuplot_set_fact(1313313.0_DP,.FALSE.)
 CALL gnuplot_ylabel('Heat capacity C_p (J / K / N / mol)',.FALSE.) 
 CALL gnuplot_write_file_mul_data(filename1,1,3,'red',.TRUE.,.FALSE.,.FALSE.)
 CALL gnuplot_write_file_mul_data(filename2,1,3,'blue',.FALSE.,.TRUE.,.FALSE.)
 
+CALL gnuplot_set_fact(1313313.0_DP,.FALSE.)
 CALL gnuplot_ylabel('C_p - C_v (J / K / N / mol)',.FALSE.) 
 CALL gnuplot_write_file_mul_data(filename1,1,4,'red',.TRUE.,.FALSE.,.FALSE.)
 CALL gnuplot_write_file_mul_data(filename2,1,4,'blue',.FALSE.,.TRUE.,.FALSE.)
 
+CALL gnuplot_set_fact(1._DP,.FALSE.)
 CALL gnuplot_ylabel('B_S - B_T (kbar)',.FALSE.) 
 CALL gnuplot_write_file_mul_data(filename1,1,5,'red',.TRUE.,.FALSE.,.FALSE.)
 CALL gnuplot_write_file_mul_data(filename2,1,5,'blue',.FALSE.,.TRUE.,.FALSE.)
