@@ -335,13 +335,13 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
            npoints(nlines) = 1
            point(nlines)=n
         ENDIF
-        IF (n==1) THEN
-           WRITE( stdout,'("high-symmetry point: ",3f7.4,&
-                         &"   x coordinate   0.0000")') (k(i,n),i=1,3)
-        ELSE
-           WRITE( stdout,'("high-symmetry point: ",3f7.4,&
-                         &"   x coordinate",f9.4)') (k(i,n),i=1,3), kx(n)
-        ENDIF
+!        IF (n==1) THEN
+!           WRITE( stdout,'("high-symmetry point: ",3f7.4,&
+!                         &"   x coordinate   0.0000")') (k(i,n),i=1,3)
+!        ELSE
+!           WRITE( stdout,'("high-symmetry point: ",3f7.4,&
+!                         &"   x coordinate",f9.4)') (k(i,n),i=1,3), kx(n)
+!        ENDIF
      ELSE
 !
 !   This k is not an high symmetry line so we just increase the number of
@@ -501,7 +501,8 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
         ENDDO
      ENDDO
   ENDIF
-  WRITE(6,'("bands in xmgr format written to file ",a)') flpband
+
+  WRITE(stdout,'("bands in xmgr format written to file ",a)') flpband
   !
   IF (emin_input /= 0.0_DP) THEN
      emin=emin_input
