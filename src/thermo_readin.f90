@@ -42,7 +42,7 @@ SUBROUTINE thermo_readin()
   USE mp_world,             ONLY : world_comm
   USE mp_images,            ONLY : nimage, my_image_id, root_image
   USE parser,               ONLY : read_line
-  USE io_global,            ONLY : meta_ionode, meta_ionode_id
+  USE io_global,            ONLY : ionode, meta_ionode, meta_ionode_id
   USE mp,                   ONLY : mp_bcast
   !
   IMPLICIT NONE
@@ -53,9 +53,10 @@ SUBROUTINE thermo_readin()
   INTEGER, ALLOCATABLE :: iun_image(:)
   INTEGER :: image
   INTEGER :: iq, ipol, i, j, k
+  INTEGER :: iun_thermo
 
   INTEGER            :: nch
-  LOGICAL :: tend, terr, read_paths, set_internal_path
+  LOGICAL :: tend, terr, read_paths, set_internal_path, exst
   CHARACTER(LEN=256) :: input_line, buffer
   !
   NAMELIST / input_thermo / what, ngeo, zasr,               &
@@ -84,8 +85,16 @@ SUBROUTINE thermo_readin()
                             nnk, deltank, nsigma, deltasigma, &
                             lgnuplot, gnuplot_command
   !
-  !  First read the input of thermo. Only one node reads
+  !  First read the input of thermo. This input should be in a file
+  !  called thermo_control
   !
+  iun_thermo=2
+  IF (meta_ionode) &
+     OPEN(UNIT=iun_thermo,FILE='thermo_control',STATUS='OLD', &
+                               FORM='FORMATTED', ERR=10, IOSTAT=ios )
+10  CALL mp_bcast(ios, meta_ionode_id, world_comm )
+    CALL errore( 'thermo_readin', 'opening thermo_control file', ABS( ios ) )
+
   what=' '
   ngeo=0
 
@@ -156,7 +165,7 @@ SUBROUTINE thermo_readin()
   lgnuplot=.TRUE.
   gnuplot_command='gnuplot'
 
-  IF (meta_ionode) READ( 5, input_thermo, IOSTAT = ios )
+  IF (meta_ionode) READ( iun_thermo, input_thermo, IOSTAT = ios )
   CALL mp_bcast(ios, meta_ionode_id, world_comm )
   CALL errore( 'thermo_readin', 'reading input_thermo namelist', ABS( ios ) )
   !
@@ -175,7 +184,7 @@ SUBROUTINE thermo_readin()
   set_internal_path=.FALSE.
   IF ( read_paths ) THEN
 
-     IF (meta_ionode) READ (5, *, err=200, iostat = ios) nqaux
+     IF (meta_ionode) READ (iun_thermo, *, err=200, iostat = ios) nqaux
 
 200  CALL mp_bcast(ios, meta_ionode_id, world_comm )
      IF ( ios /= 0) THEN 
@@ -256,6 +265,7 @@ SUBROUTINE thermo_readin()
      ENDDO
   ENDIF
 70  CONTINUE
+  IF (meta_ionode) CLOSE( UNIT = iun_thermo, STATUS = 'KEEP' )
   !
   !  Then open an input for each image and copy the input file
   !
@@ -273,7 +283,6 @@ SUBROUTINE thermo_readin()
              FORM='FORMATTED', ERR=30, IOSTAT=ios )
      ENDDO
      dummy=' '
-     REWIND(5)
      DO WHILE ( .TRUE. )
         READ (5,fmt='(A512)',END=20) dummy
         DO image=1,nimage
@@ -282,7 +291,7 @@ SUBROUTINE thermo_readin()
      END DO
      !
 20   DO image=1,nimage 
-        CLOSE ( UNIT=iun_image(image), STATUS='keep' )
+        CLOSE ( UNIT=iun_image(image), STATUS='KEEP' )
      END DO
   END IF 
 30  CALL mp_bcast(ios, meta_ionode_id, world_comm)
@@ -294,6 +303,16 @@ SUBROUTINE thermo_readin()
   outdir_thermo=outdir
   CALL iosys()
   input_file_=input(my_image_id+1)
+  IF (ionode) THEN
+     INQUIRE( FILE=TRIM(input(my_image_id+1)), EXIST = exst )
+     IF (exst) THEN
+        OPEN(UNIT=iun_image(my_image_id+1),FILE=TRIM(input(my_image_id+1)), &
+               STATUS='UNKNOWN', FORM='FORMATTED', ERR=40, IOSTAT=ios )
+        CLOSE( UNIT = iun_image(my_image_id+1), STATUS = 'DELETE' )
+40      CONTINUE
+     ENDIF
+  ENDIF
+
   DEALLOCATE(input)
   DEALLOCATE(iun_image)
 
@@ -330,20 +349,11 @@ SUBROUTINE thermo_ph_readin()
   IF ( what == 'scf_ph' .OR. what== 'scf_disp' .OR. what == 'mur_lc_ph' &
      .OR. what== 'mur_lc_disp' .OR. what == 'mur_lc_t') THEN
 
-     IF (meta_ionode) OPEN(unit=5, FILE=TRIM(input_file_), STATUS='OLD', &
+     IF (meta_ionode) OPEN(unit=5, FILE='ph_control', STATUS='OLD', &
                  FORM='FORMATTED', ERR=20, IOSTAT=ios )
 20   CALL mp_bcast(ios, meta_ionode_id, world_comm)
-     CALL errore('thermo_ph_readin','error opening file'//TRIM(input_file_),&
+     CALL errore('thermo_ph_readin','error opening file'//'ph_control',&
                                                                      ABS(ios))
-     IF (meta_ionode) REWIND(5)
-     dummy=' '
-     IF (meta_ionode) THEN
-        DO WHILE( TRIM(dummy) /= '---' )
-           READ(5, '(A512)', END=40, IOSTAT=ios) dummy
-        ENDDO
-     END IF
-40   CALL mp_bcast(ios, meta_ionode_id, world_comm)
-     CALL errore('thermo_readin', 'phonon input not found', ios)
 !
 !    be sure that pw variables are completely deallocated
 !
