@@ -52,6 +52,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               ldos = .TRUE.
               lmatdyn = .TRUE.
               ltherm = .TRUE.
+              CALL allocate_thermodynamics()
            ENDIF
            IF (what=='scf_bands') lbands_syn_1=.TRUE.
         CASE ( 'scf_ke') 
@@ -102,6 +103,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               ldos = .TRUE.
               lmatdyn = .TRUE.
               ltherm = .TRUE.
+              CALL allocate_thermodynamics()
            ENDIF
            IF (what=='mur_lc_bands') lbands_syn_1=.TRUE.
         CASE ('mur_lc_t')
@@ -120,6 +122,8 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            ltherm = .TRUE.
            lmatdyn = .TRUE.
            lev_syn_2=.TRUE.
+           CALL allocate_thermodynamics()
+           CALL allocate_anharmonic()
      END SELECT
   ELSE IF (part == 2 ) THEN
 !
