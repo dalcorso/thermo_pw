@@ -1,0 +1,5 @@
+ &INPUT_THERMO
+  what='scf_bands',
+  emax_input=5,
+  nbnd_bands=12,
+ /

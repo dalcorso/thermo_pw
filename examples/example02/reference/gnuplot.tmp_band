@@ -6,38 +6,39 @@ set key off
 xmin=       0.000000
 xmax=       4.280239
 set xrange [xmin:xmax]
-ymin=     -11.897000
+ymin=     -11.936000
 ymax=       5.000000
 set yrange [ymin:ymax]
 set border lw 2
 eref=0.0
 fact=1.0
+gfact=1.0
 unset xtics
 set ylabel "Energy (eV)"
 set arrow from      1.0000,ymin to       1.0000,ymax nohead front lw   2 lc rgb "black"
 set arrow from      1.5000,ymin to       1.5000,ymax nohead front lw   2 lc rgb "black"
 set arrow from      2.0000,ymin to       2.0000,ymax nohead front lw   2 lc rgb "black"
 set arrow from      3.4142,ymin to       3.4142,ymax nohead front lw   2 lc rgb "black"
-eref=      0.56710000E+01
-set label "{/Symbol G }" at       0.0000,    -12.3194 center
+eref=      0.60520000E+01
+set label "{/Symbol G }" at       0.0000,    -12.3594 center
 set arrow from      1.0000,ymin to       1.0000,ymax nohead front lw   1 lc rgb "black"
-set label "X" at       1.0000,    -12.3194 center
+set label "X" at       1.0000,    -12.3594 center
 set arrow from      1.5000,ymin to       1.5000,ymax nohead front lw   1 lc rgb "black"
-set label "W" at       1.5000,    -12.3194 center
+set label "W" at       1.5000,    -12.3594 center
 set arrow from      2.0000,ymin to       2.0000,ymax nohead front lw   1 lc rgb "black"
-set label "X" at       2.0000,    -12.3194 center
+set label "X" at       2.0000,    -12.3594 center
 set arrow from      3.4142,ymin to       3.4142,ymax nohead front lw   1 lc rgb "black"
-set label "{/Symbol G }" at       3.4142,    -12.3194 center
-set label "L" at       4.2802,    -12.3194 center
-plot  "output_pband.dat.1.1" u 1:($2*fact-eref) w l lw 3 lc rgb "red", \
- "output_pband.dat.1.2" u 1:($2*fact-eref) w l lw 3 lc rgb "green", \
- "output_pband.dat.1.4" u 1:($2*fact-eref) w l lw 3 lc rgb "cyan", \
- "output_pband.dat.1.5" u 1:($2*fact-eref) w l lw 3 lc rgb "magenta", \
- "output_pband.dat.2" u 1:($2*fact-eref) w l lw 3 lc rgb "red", \
- "output_pband.dat.3" u 1:($2*fact-eref) w l lw 3 lc rgb "red", \
- "output_pband.dat.4.1" u 1:($2*fact-eref) w l lw 3 lc rgb "red", \
- "output_pband.dat.4.2" u 1:($2*fact-eref) w l lw 3 lc rgb "green", \
- "output_pband.dat.4.3" u 1:($2*fact-eref) w l lw 3 lc rgb "blue", \
- "output_pband.dat.4.4" u 1:($2*fact-eref) w l lw 3 lc rgb "cyan", \
- "output_pband.dat.5.1" u 1:($2*fact-eref) w l lw 3 lc rgb "red", \
- "output_pband.dat.5.3" u 1:($2*fact-eref) w l lw 3 lc rgb "blue"
+set label "{/Symbol G }" at       3.4142,    -12.3594 center
+set label "L" at       4.2802,    -12.3594 center
+plot  "output_pband.dat.1.1" u 1:($2*fact-eref)*gfact w l lw 3 lc rgb "red", \
+ "output_pband.dat.1.2" u 1:($2*fact-eref)*gfact w l lw 3 lc rgb "green", \
+ "output_pband.dat.1.4" u 1:($2*fact-eref)*gfact w l lw 3 lc rgb "cyan", \
+ "output_pband.dat.1.5" u 1:($2*fact-eref)*gfact w l lw 3 lc rgb "magenta", \
+ "output_pband.dat.2" u 1:($2*fact-eref)*gfact w l lw 3 lc rgb "red", \
+ "output_pband.dat.3" u 1:($2*fact-eref)*gfact w l lw 3 lc rgb "red", \
+ "output_pband.dat.4.1" u 1:($2*fact-eref)*gfact w l lw 3 lc rgb "red", \
+ "output_pband.dat.4.2" u 1:($2*fact-eref)*gfact w l lw 3 lc rgb "green", \
+ "output_pband.dat.4.3" u 1:($2*fact-eref)*gfact w l lw 3 lc rgb "blue", \
+ "output_pband.dat.4.4" u 1:($2*fact-eref)*gfact w l lw 3 lc rgb "cyan", \
+ "output_pband.dat.5.1" u 1:($2*fact-eref)*gfact w l lw 3 lc rgb "red", \
+ "output_pband.dat.5.3" u 1:($2*fact-eref)*gfact w l lw 3 lc rgb "blue"

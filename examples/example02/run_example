@@ -98,10 +98,10 @@ cat > si.scf_bands.in << EOF
  /
  &system
   ibrav=  2, 
-  celldm(1) =10.20, 
+  celldm(1) =10.26, 
   nat=  2, 
   ntyp= 1,
-  ecutwfc =18.0,
+  ecutwfc =24.0,
  /
  &electrons
   conv_thr =  1.0d-8
