@@ -19,15 +19,15 @@ SUBROUTINE allocate_thermodynamics()
 
   IMPLICIT NONE
 
-  IF (.NOT.ALLOCATED(ph_free_ener)) ALLOCATE(ph_free_ener(ntemp,ngeo))
-  IF (.NOT.ALLOCATED(ph_ener)) ALLOCATE(ph_ener(ntemp,ngeo))
-  IF (.NOT.ALLOCATED(ph_entropy)) ALLOCATE(ph_entropy(ntemp,ngeo))
-  IF (.NOT.ALLOCATED(ph_cv)) ALLOCATE(ph_cv(ntemp,ngeo))
+  IF (.NOT.ALLOCATED(ph_free_ener))  ALLOCATE(ph_free_ener(ntemp,ngeo))
+  IF (.NOT.ALLOCATED(ph_ener))       ALLOCATE(ph_ener(ntemp,ngeo))
+  IF (.NOT.ALLOCATED(ph_entropy))    ALLOCATE(ph_entropy(ntemp,ngeo))
+  IF (.NOT.ALLOCATED(ph_cv))         ALLOCATE(ph_cv(ntemp,ngeo))
 
   IF (.NOT.ALLOCATED(phf_free_ener)) ALLOCATE(phf_free_ener(ntemp,ngeo))
-  IF (.NOT.ALLOCATED(phf_ener)) ALLOCATE(phf_ener(ntemp,ngeo))
-  IF (.NOT.ALLOCATED(phf_entropy)) ALLOCATE(phf_entropy(ntemp,ngeo))
-  IF (.NOT.ALLOCATED(phf_cv)) ALLOCATE(phf_cv(ntemp,ngeo))
+  IF (.NOT.ALLOCATED(phf_ener))      ALLOCATE(phf_ener(ntemp,ngeo))
+  IF (.NOT.ALLOCATED(phf_entropy))   ALLOCATE(phf_entropy(ntemp,ngeo))
+  IF (.NOT.ALLOCATED(phf_cv))        ALLOCATE(phf_cv(ntemp,ngeo))
 
   RETURN
   !
@@ -55,7 +55,7 @@ SUBROUTINE allocate_anharmonic()
   IF (.NOT. ALLOCATED (beta_t) )        ALLOCATE(beta_t(ntemp)) 
   IF (.NOT. ALLOCATED (gamma_t) )       ALLOCATE(gamma_t(ntemp)) 
 
-  IF (.NOT. ALLOCATED (vmin_t) )        ALLOCATE(vminf_t(ntemp)) 
+  IF (.NOT. ALLOCATED (vminf_t) )        ALLOCATE(vminf_t(ntemp)) 
   IF (.NOT. ALLOCATED (b0f_t) )         ALLOCATE(b0f_t(ntemp)) 
   IF (.NOT. ALLOCATED (b01f_t) )        ALLOCATE(b01f_t(ntemp)) 
   IF (.NOT. ALLOCATED (free_e_minf_t) ) ALLOCATE(free_e_minf_t(ntemp)) 

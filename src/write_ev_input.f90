@@ -137,12 +137,13 @@ REAL(DP) :: free_e, vm, b0, b01
   b01_t(itemp)=b01
   free_e_min_t(itemp)=free_e
   !
-  WRITE(stdout,'(/,2x,76("+"))')
+  WRITE(stdout,'(/,2x,76("-"))')
   WRITE(stdout,'(5x, "The equilibrium lattice constant at T=",f12.4, &
-       & " is ",f12.4," a.u.")') temp(itemp), &
+       & " is ",f12.6," a.u.")') temp(itemp), &
                                  (vmin_t(itemp)*4.0_DP)**(1.0_DP/3.0_DP)
-  WRITE(stdout,'(5x, "The bulk modulus is ",15x,f12.2," kbar")')  b0_t(itemp)
-  WRITE(stdout,'(2x,76("+"),/)')
+  WRITE(stdout,'(5x, "The bulk modulus is ",15x,f12.4," kbar")')  b0_t(itemp)
+  WRITE(stdout,'(5x, "The bulk modulus derivative is ",15x,f12.4," kbar")')  b01_t(itemp)
+  WRITE(stdout,'(2x,76("-"),/)')
 
 END SUBROUTINE do_ev_t
 
@@ -192,10 +193,10 @@ REAL(DP) :: free_e, vm, b0, b01
   WRITE(stdout,'(/,2x,76("+"))')
   WRITE(stdout,'(5x, "ph_freq free energy")')
   WRITE(stdout,'(5x, "The equilibrium lattice constant at T=",f12.4, &
-       & " is ",f12.4," a.u.")') temp(itemp), &
+       & " is ",f12.6," a.u.")') temp(itemp), &
                                  (vminf_t(itemp)*4.0_DP)**(1.0_DP/3.0_DP)
-  WRITE(stdout,'(5x, "The bulk modulus is ",15x,f12.2," kbar")')  b0f_t(itemp)
-  WRITE(stdout,'(5x, "The bulk modulus derivative is ",15x,f12.2," kbar")')  b01f_t(itemp)
+  WRITE(stdout,'(5x, "The bulk modulus is ",15x,f12.4," kbar")')  b0f_t(itemp)
+  WRITE(stdout,'(5x, "The bulk modulus derivative is ",15x,f12.4," kbar")')  b01f_t(itemp)
   WRITE(stdout,'(2x,76("+"),/)')
 
 END SUBROUTINE do_ev_t_ph

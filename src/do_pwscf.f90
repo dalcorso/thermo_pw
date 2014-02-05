@@ -6,7 +6,7 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !----------------------------------------------------------------------------
-SUBROUTINE do_pwscf (lscf) 
+SUBROUTINE do_pwscf (lscf_) 
   !----------------------------------------------------------------------------
   !
   ! ... Run an instance of the Plane Wave Self-Consistent Field code 
@@ -15,10 +15,23 @@ SUBROUTINE do_pwscf (lscf)
   ! ... does only electronic scf or nscf run
   !
   USE force_mod,        ONLY : lforce, lstres, sigma, force
+  USE control_flags,    ONLY : lscf
+  USE basis,            ONLY : starting_pot, startingconfig
   !
   IMPLICIT NONE
-  LOGICAL, INTENT(IN) :: lscf
+  LOGICAL, INTENT(IN) :: lscf_
   !
+  !
+  IF (lscf_) THEN
+     starting_pot ='atomic'
+     startingconfig='input'
+     lscf=.TRUE.
+  ELSE
+     starting_pot ='file'
+     startingconfig='file'
+     lscf=.FALSE.
+  ENDIF
+  
   CALL setup ()
   !
   CALL init_run(.TRUE.)
