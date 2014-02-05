@@ -309,7 +309,7 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
      filename=TRIM(flfrq)
      IF (dos) filename=TRIM(flfrq)//'_ph'
      OPEN (unit=2,file=filename ,status='unknown',form='formatted')
-     WRITE(2, '(" &plot nbnd=",i4,", nks=",i4," /")') 3*nat, nq
+     WRITE(2, '(" &plot nbnd=",i6,", nks=",i6," /")') 3*nat, nq
      DO n=1, nq
         WRITE(2, '(10x,3f10.6)')  q(1,n), q(2,n), q(3,n)
         WRITE(2,'(6f10.4)') (freq(i,n), i=1,3*nat)
@@ -324,7 +324,7 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
      filename=TRIM(flfrq)//'.rap'
      IF (dos) filename=TRIM(flfrq)//'_ph'//'.rap'
      OPEN (unit=2,file=filename ,status='unknown',form='formatted')
-     WRITE(2, '(" &plot_rap nbnd_rap=",i4,", nks_rap=",i4," /")') 3*nat, nq
+     WRITE(2, '(" &plot_rap nbnd_rap=",i6,", nks_rap=",i6," /")') 3*nat, nq
      DO n=1, nq
         WRITE(2,'(10x,3f10.6,l6)')  q(1,n), q(2,n), q(3,n), high_sym(n)
         WRITE(2,'(6i10)') (num_rap_mode(i,n), i=1,3*nat)
