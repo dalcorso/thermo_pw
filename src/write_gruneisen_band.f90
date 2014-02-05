@@ -14,6 +14,7 @@ SUBROUTINE write_gruneisen_band(file_disp)
   USE kinds,          ONLY : DP
   USE control_thermo, ONLY : flgrun
   USE thermo_mod,     ONLY : ngeo, omega_geo
+  USE ph_freq_anharmonic, ONLY : vminf_t
   USE mp,             ONLY : mp_bcast
   USE io_global,      ONLY : stdout, ionode, ionode_id
   USE mp_images,      ONLY : intra_image_comm, root_image, my_image_id
@@ -22,7 +23,7 @@ SUBROUTINE write_gruneisen_band(file_disp)
 
   CHARACTER(LEN=256), INTENT(IN) :: file_disp
 
-  INTEGER, PARAMETER :: m1 = 2   ! number of polynomial coefficients
+  INTEGER, PARAMETER :: m1 = 3   ! number of polynomial coefficients
   REAL(DP) :: alpha(m1)          ! the polynomial coefficients
 
   REAL(DP), ALLOCATABLE :: freq_geo(:,:,:), k(:,:)
@@ -129,11 +130,12 @@ SUBROUTINE write_gruneisen_band(file_disp)
 !  Part two: Compute the Gruneisen parameters
 !
   copy_before=.FALSE.
-  geo=ngeo/2-1
   IF (mod(ngeo,2)==0) THEN
-     use_geo=2
+     use_geo=4
+     geo=ngeo/2-2
   ELSE
      use_geo=3
+     geo=ngeo/2-1
   ENDIF
   DO n = 1,nks
      IF (is_gamma(n)) THEN
@@ -160,7 +162,7 @@ SUBROUTINE write_gruneisen_band(file_disp)
 !   there are several representation files, we choose to order the
 !   Gruneisen parameters on file as those of the central geometry
 !
-           irap=rap_geo(ibnd,n,ngeo/2+1)
+           irap=rap_geo(ibnd,n,geo+2)
             
            IF (irap == -1) THEN
               DO igeo=1,use_geo
@@ -193,7 +195,8 @@ SUBROUTINE write_gruneisen_band(file_disp)
            ENDIF
 
            CALL polifit( omega_geo(geo+1), frequences, use_geo, alpha, m1 )
-           gruneisen(ibnd,n) = - alpha(2) * omega / freq
+           gruneisen(ibnd,n) = - (alpha(2) + 2.0_DP * alpha(3) * &
+                                              vminf_t(1)) * omega / freq
            IF (copy_before) gruneisen(ibnd,n-1)=gruneisen(ibnd,n)
         ENDDO
         copy_before=.FALSE.
