@@ -1,0 +1,47 @@
+set encoding iso_8859_15
+set terminal postscript enhanced solid color "Helvetica" 20
+set output "output_disp.ps.g5"
+
+set key off
+xmin=       0.000000
+xmax=       4.280239
+set xrange [xmin:xmax]
+ymin=       0.000000
+ymax=     533.000000
+set yrange [ymin:ymax]
+set border lw 2
+eref=0.0
+fact=1.0
+gfact=1.0
+unset xtics
+set ylabel "Frequency (cm^{-1})"
+set arrow from      1.0000,ymin to       1.0000,ymax nohead front lw   2 lc rgb "black"
+set arrow from      1.5000,ymin to       1.5000,ymax nohead front lw   2 lc rgb "black"
+set arrow from      2.0000,ymin to       2.0000,ymax nohead front lw   2 lc rgb "black"
+set arrow from      3.4142,ymin to       3.4142,ymax nohead front lw   2 lc rgb "black"
+set arrow from      3.4142,ymin to       3.4142,ymax nohead front lw   2 lc rgb "black"
+eref=      0.00000000E+00
+set label "{/Symbol G }" at       0.0000,    -13.3250 center
+set arrow from      1.0000,ymin to       1.0000,ymax nohead front lw   1 lc rgb "black"
+set label "X" at       1.0000,    -13.3250 center
+set arrow from      1.5000,ymin to       1.5000,ymax nohead front lw   1 lc rgb "black"
+set label "W" at       1.5000,    -13.3250 center
+set arrow from      2.0000,ymin to       2.0000,ymax nohead front lw   1 lc rgb "black"
+set label "X" at       2.0000,    -13.3250 center
+set arrow from      3.4142,ymin to       3.4142,ymax nohead front lw   1 lc rgb "black"
+set label "{/Symbol G }" at       3.4142,    -13.3250 center
+set arrow from      3.4142,ymin to       3.4142,ymax nohead front lw   1 lc rgb "black"
+set label "{/Symbol G }" at       3.4142,    -13.3250 center
+set label "L" at       4.2586,    -13.3250 center
+plot  "output_pband.dat.g5.1.1" u 1:($2*fact-eref)*gfact w l lw 3 lc rgb "red", \
+ "output_pband.dat.g5.1.3" u 1:($2*fact-eref)*gfact w l lw 3 lc rgb "blue", \
+ "output_pband.dat.g5.1.4" u 1:($2*fact-eref)*gfact w l lw 3 lc rgb "cyan", \
+ "output_pband.dat.g5.2.1" u 1:($2*fact-eref)*gfact w l lw 3 lc rgb "red", \
+ "output_pband.dat.g5.2.2" u 1:($2*fact-eref)*gfact w l lw 3 lc rgb "green", \
+ "output_pband.dat.g5.3.1" u 1:($2*fact-eref)*gfact w l lw 3 lc rgb "red", \
+ "output_pband.dat.g5.3.2" u 1:($2*fact-eref)*gfact w l lw 3 lc rgb "green", \
+ "output_pband.dat.g5.4.1" u 1:($2*fact-eref)*gfact w l lw 3 lc rgb "red", \
+ "output_pband.dat.g5.4.2" u 1:($2*fact-eref)*gfact w l lw 3 lc rgb "green", \
+ "output_pband.dat.g5.5" u 1:($2*fact-eref)*gfact w l lw 3 lc rgb "red", \
+ "output_pband.dat.g5.6.1" u 1:($2*fact-eref)*gfact w l lw 3 lc rgb "red", \
+ "output_pband.dat.g5.6.3" u 1:($2*fact-eref)*gfact w l lw 3 lc rgb "blue"

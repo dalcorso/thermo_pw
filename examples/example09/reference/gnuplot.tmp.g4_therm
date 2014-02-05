@@ -1,0 +1,27 @@
+set encoding iso_8859_15
+set terminal postscript enhanced solid color "Helvetica" 20
+set output "output_therm.ps.g4"
+
+set key off
+xmin=       0.000000
+xmax=     800.000000
+set xrange [xmin:xmax]
+set border lw 2
+eref=0.0
+fact=1.0
+gfact=1.0
+set xlabel "T (K)"
+set ylabel "Vibrational energy (kJ / N / mol)"
+fact=      0.13133130E+04
+plot  "output_therm.dat.g4" u ($1):($2*fact-eref)*gfact w l lw 3 lc rgb "red", \
+ "output_therm.dat.g4_ph" u ($1):($2*fact-eref)*gfact w l lw 3 lc rgb "blue"
+set ylabel "Vibrational free energy (kJ / N / mol)"
+plot  "output_therm.dat.g4" u ($1):($3*fact-eref)*gfact w l lw 3 lc rgb "red", \
+ "output_therm.dat.g4_ph" u ($1):($3*fact-eref)*gfact w l lw 3 lc rgb "blue"
+fact=      0.13133130E+07
+set ylabel "Entropy (J / K / N / mol))"
+plot  "output_therm.dat.g4" u ($1):($4*fact-eref)*gfact w l lw 3 lc rgb "red", \
+ "output_therm.dat.g4_ph" u ($1):($4*fact-eref)*gfact w l lw 3 lc rgb "blue"
+set ylabel "Heat capacity C_v (J / K / N / mol)"
+plot  "output_therm.dat.g4" u ($1):($5*fact-eref)*gfact w l lw 3 lc rgb "red", \
+ "output_therm.dat.g4_ph" u ($1):($5*fact-eref)*gfact w l lw 3 lc rgb "blue"
