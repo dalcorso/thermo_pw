@@ -17,6 +17,7 @@ USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
                             gnuplot_ylabel,              &
                             gnuplot_xlabel,              &
                             gnuplot_write_file_mul_data, &
+                            gnuplot_write_file_mul_data_sum, &
                             gnuplot_write_file_mul_point,  &
                             gnuplot_write_horizontal_line, &
                             gnuplot_set_fact
@@ -56,9 +57,19 @@ CALL gnuplot_write_file_mul_data(flanhar,1,2,'red',.TRUE.,.FALSE.,.FALSE.)
 CALL gnuplot_write_file_mul_data(filename,1,2,'blue',.FALSE.,.TRUE.,.FALSE.)
 
 CALL gnuplot_set_fact(1.0_DP,.FALSE.)
-CALL gnuplot_ylabel('Thermal expansion ({/Symbol b} x 10^{6})',.FALSE.) 
+CALL gnuplot_ylabel('Bulk modulus (kbar)',.FALSE.) 
 CALL gnuplot_write_file_mul_data(flanhar,1,3,'red',.TRUE.,.FALSE.,.FALSE.)
-CALL gnuplot_write_file_mul_data(filename,1,3,'blue',.FALSE.,.FALSE.,.FALSE.)
+CALL gnuplot_write_file_mul_data(filename,1,3,'blue',.FALSE.,.TRUE.,.FALSE.)
+
+CALL gnuplot_set_fact(1.0_DP,.FALSE.)
+CALL gnuplot_ylabel('d B / d p',.FALSE.) 
+CALL gnuplot_write_file_mul_data(flanhar,1,4,'red',.TRUE.,.FALSE.,.FALSE.)
+CALL gnuplot_write_file_mul_data(filename,1,4,'blue',.FALSE.,.TRUE.,.FALSE.)
+
+CALL gnuplot_set_fact(1.0_DP,.FALSE.)
+CALL gnuplot_ylabel('Thermal expansion ({/Symbol b} x 10^{6})',.FALSE.) 
+CALL gnuplot_write_file_mul_data(flanhar,1,5,'red',.TRUE.,.FALSE.,.FALSE.)
+CALL gnuplot_write_file_mul_data(filename,1,5,'blue',.FALSE.,.FALSE.,.FALSE.)
 CALL gnuplot_write_file_mul_data(filename3,1,2,'green',.FALSE.,.TRUE.,.FALSE.)
 !
 !  put as a comment the possibility to plot also the experimental data
@@ -66,21 +77,20 @@ CALL gnuplot_write_file_mul_data(filename3,1,2,'green',.FALSE.,.TRUE.,.FALSE.)
 CALL gnuplot_write_file_mul_data(filename3,1,2,'green',.FALSE.,.FALSE.,.TRUE.)
 CALL gnuplot_write_file_mul_point('anhar.exp',1,2,'red',.FALSE.,.TRUE.,.TRUE.)
 
-CALL gnuplot_set_fact(1.0_DP,.FALSE.)
-CALL gnuplot_ylabel('Bulk modulus (kbar)',.FALSE.) 
-CALL gnuplot_write_file_mul_data(flanhar,1,4,'red',.TRUE.,.FALSE.,.FALSE.)
-CALL gnuplot_write_file_mul_data(filename,1,4,'blue',.FALSE.,.TRUE.,.FALSE.)
-
 CALL gnuplot_set_fact(1313313.0_DP,.FALSE.)
 CALL gnuplot_ylabel('Heat capacity C_v (J / K / N / mol)',.FALSE.) 
-CALL gnuplot_write_file_mul_data(flanhar,1,5,'red',.TRUE.,.FALSE.,.FALSE.)
-CALL gnuplot_write_file_mul_data(filename,1,5,'blue',.FALSE.,.FALSE.,.FALSE.)
-CALL gnuplot_write_file_mul_data(filename3,1,5,'green',.FALSE.,.TRUE.,.FALSE.)
+CALL gnuplot_write_file_mul_data(filename1,1,3,'red',.TRUE.,.FALSE.,.FALSE.)
+CALL gnuplot_write_file_mul_data(filename2,1,3,'blue',.FALSE.,.TRUE.,.FALSE.)
 
 CALL gnuplot_set_fact(1313313.0_DP,.FALSE.)
 CALL gnuplot_ylabel('Heat capacity C_p (J / K / N / mol)',.FALSE.) 
-CALL gnuplot_write_file_mul_data(filename1,1,3,'red',.TRUE.,.FALSE.,.FALSE.)
-CALL gnuplot_write_file_mul_data(filename2,1,3,'blue',.FALSE.,.TRUE.,.FALSE.)
+CALL gnuplot_write_file_mul_data_sum(filename1,1,3,4,'red',.TRUE.,.FALSE.,.FALSE.)
+CALL gnuplot_write_file_mul_data_sum(filename2,1,3,4,'blue',.FALSE.,.TRUE.,.FALSE.)
+!
+!  put as a comment the possibility to plot also the experimental data
+!
+CALL gnuplot_write_file_mul_data_sum(filename2,1,3,4,'blue',.FALSE.,.FALSE.,.TRUE.)
+CALL gnuplot_write_file_mul_point('cv.exp',1,2,'red',.FALSE.,.TRUE.,.TRUE.)
 
 CALL gnuplot_set_fact(1313313.0_DP,.FALSE.)
 CALL gnuplot_ylabel('C_p - C_v (J / K / N / mol)',.FALSE.) 
