@@ -58,9 +58,6 @@ ph : bindir mods libs pw
 thermo_pw : bindir mods libs pw ph 
 	( cd install ; $(MAKE) -f plugins_makefile thermo_pw || exit 1 )
 
-thermo_red : bindir mods libs pw ph 
-	( cd install ; $(MAKE) -f plugins_makefile thermo_red || exit 1 )
-
 neb : bindir mods libs pw
 	( cd install ; $(MAKE) -f plugins_makefile $@ || exit 1 )
 

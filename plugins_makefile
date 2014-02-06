@@ -139,11 +139,6 @@ thermo_pw:
 	cd ../thermo_pw; $(MAKE) all || exit 1; cd ../bin; \
 	ln -fs ../thermo_pw/src/thermo_pw.x . ; \
 	fi
-thermo_red:  
-	if test -d ../thermo_pw; then \
-	cd ../thermo_pw; $(MAKE) all || exit 1; cd ../bin; \
-	ln -fs ../thermo_pw/src/thermo_red.x . ; \
-	fi
 
 uncompress-phonon: touch-dummy
 	@(if test ! -s ../archive/$(PHONON).tar.gz && test ! -d ../PHonon ; then \

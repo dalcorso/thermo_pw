@@ -4,10 +4,7 @@ sinclude ../make.sys
 default: all
 
 #all: phonon phgamma_only third_order third_order_q
-all: thermo_pw thermo_red
-
-thermo_red: thermo_lib
-	( cd src ; $(MAKE) all || exit 1 )
+all: thermo_pw 
 
 thermo_pw: thermo_lib
 	( cd src ; $(MAKE) all || exit 1 )
