@@ -1,41 +1,59 @@
 !
-! Copyright (C) 2013 Andrea Dal Corso
+! Copyright (C) 2013 - 2014 Andrea Dal Corso
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 
-Thermo_pw is a driver for the calculation of thermodynamic quantities,
-using the harmonic and/or quasiharmonic approximation and the
-plane waves pseudopotential method. At low level it uses the QE routines
-to perform the calculations. The calculations made by thermo_pw can be
-done by using bash scripts or other scripting languages. 
-The advantage of writing the scripts in fortran is that the calculations 
-can be parallelized among different images that are sent asyncrounously 
-and controlled by the master image. 
-It reads the input of pwscf and an input that specifies
-which calculations to do and the parameters for these calculations.
-It checks the scratch directories to see what has been already
-calculated. The info for the quantities that have been already
-calculated is read inside the code. The others tasks are scheduled,
-their priorities determined, and distributed to the image driver.
-If there are several available images the different tasks are
-carried out in parallel when possible. This driver can carry out a scf 
-calculation, a non scf calculation to determine the band structure,
-or a linear response calculation at a given q and for a given
-representation. Finally the root image can carry out several
-post processing tasks. The task currently implemented are:
+Thermo_pw is a fortran driver for the calculation of thermodynamic quantities,
+using the harmonic and/or the quasiharmonic approximation and the plane waves 
+pseudopotential method. At low level it uses the QE routines to perform the 
+calculations. Thermo_pw reads the input of pw.x, the input of ph.x
+and a file called thermo_control that specifies which calculations to do 
+and the parameters that control these calculations. If there are several 
+available images the different tasks are carried out in parallel when 
+possible. The type of tasks currently implemented in thermo_pw are:
+
+1) Computation of the total energy.
+2) Total energy as a function of the kinetic energy cut-off.
+3) Total energy as a function of k points and smearing.
+4) Band structure calculation at fixed geometry.
+5) Phonon frequencies at one q at fixed geometry.
+6) Phonon dispersions at fixed geometry and computation of the harmonic
+   thermodynamical properties: vibrational energy, vibrational free energy,
+   vibrational entropy, constant volume molar heat capacity.
+7) Murnaghan fit of the total energy as function of the lattice parameter.
+8) Band structure at the Murnaghan minimum.
+9) Phonon frequencies at one q at the Murnaghan minimum.
+10) Phonon dispersions and harmonic vibrational thermodynamic quantities 
+  at the Murnaghan minimum.
+11) Phonon dispersions at several geometries and calculation of the
+   anharmonic vibrational properties: lattice parameter, bulk modulus,
+   pressure derivative of the bulk modulus as a function of temperature.
+   Thermal expansion as a function of temperature.
+   Isobaric molar heat capacity as a function of temperature.
+   Isoentropic bulk modulus as a function of temperature.
+   Average Gruneisen parameter as a function of temperature.
+
+The input of thermo_pw in the file thermo_control is in the form:
+
+ &INPUT_THERMO
+  what=' ',
+  ... 
+ /
+
+where the possible values of what are:
 
 scf           : a single scf calculation to determine the total energy.
 scf_ke        : test of the dependence of the energy on the wavefunctions
-                and density cut-off energy.
+                and density kinetic energy cut-off.
 scf_nk        : test of the dependence of the energy on the k point sampling
-                and on the smearing.  
-scf_bands     : a band structure calculation after a scf calculation.
+                and on smearing.  
+scf_bands     : a band structure calculation after an scf calculation.
 scf_ph        : a phonon at a single q after a scf run.
 scf_disp      : a phonon dispersion calculation after a scf run.
-                This option can calculate the vibrational energy, free energy,
+                This option calculates also the vibrational energy, free energy,
                 entropy, and constant volume specific heat after the phonon 
                 calculation.
 mur_lc        : equilibrium lattice constant via murnaghan equation.
@@ -43,17 +61,27 @@ mur_lc_bands  : a band structure calculation at the minimum or the
                 murnaghan.
 mur_lc_ph     : a phonon calculation at a single q at the minimum of the 
                 murnaghan.
-mur_lc_disp   : a dispersion calculation at the minimum of the murnaghan with 
-                the possibility to compute harmonic thermodynamical quantities.
+mur_lc_disp   : a dispersion calculation at the minimum of the murnaghan  
+                and the harmonic thermodynamical quantities.
 mur_lc_t      : lattice constant and bulk modulus as a function of temperature 
-                within the quasiharmonic approximation.
+                within the quasiharmonic approximation. Grunaisen parameters
+                interpolated in the three central geometries and calculated
+                at the T=0 equilibrium volume (keeping zero point effects
+                into account).
   
-Input variables of thermo_pw:
+The namelist INPUT_THERMO may contain the following variables:
 
-what :  one of the above string that specify the type of calculation.
-        Mandatory.
-ngeo :  the number of geometries to use for murnaghan equation.
-        Default: 1 with scf_*, 9 with mur_lc_*
+what : one of the above strings that specifies the type of calculation.
+       Mandatory.
+
+ngeo : the number of geometries to use.
+       Default: 1 for what=scf_*, 9  for what=mur_lc_*.
+       The lattice constant of these geometries is calculated from the
+       input of pw.x. The celldm(1) of this input is used in the central 
+       geometries. For the others celldm(1) is changed in steps of step_ngeo.
+
+step_ngeo : The step between the lattice constant at different geometries.
+       Default: 0.05 a.u.
 
 emin_input : minimum energy for the band dispersion plot
              Default: determined from the bands
@@ -67,15 +95,13 @@ nbnd_bands : the number of bands in the band calculation
 
 vmin_input : minimum volume for Murnaghan plot
              Default: 0.98 times the volume of the first geometry
-
 vmax_input : maximum volume for Murnaghan plot
              Default: 1.02 times the volume of the last geometry
-
 deltav     : distance between two volumes in Murnaghan plot
              Default: calculated from nvol
-
 nvol       : number of volumes in Murnaghan plot
              Default : 51
+
 
 nke        : number of kinetic energies tested in the wavefunctions
              kinetic energy test.
@@ -102,7 +128,7 @@ tmin    : minimum temperature
 tmax    : maximum temperature
           Default: 800 K
 deltat  : interval between two temperatures
-          Default: 2 K
+          Default: 3 K
 ntemp   : number of temperatures
           Default: determined from previous data
 
@@ -118,6 +144,7 @@ nq1_d, nq2_d, nq3_d : thick mesh for phonon dos calculation
           Default: 16, 16, 16
 zasr : type of acoustic sum rule applied to the ifc
           Default: 'Simple'
+
 
 filband   : file where electronic bands and representations are written
             Default: output_band.dat
@@ -170,7 +197,7 @@ point_label_type : the label definition (see the BZ manual)
                  Default: SC
 
 lgnuplot         : if .TRUE. gnuplot is called from within the program
-                 and the postscripts files are immediately available
+                 and the postscript files are immediately available
                  Default: .TRUE.
 gnuplot_command  : the command used to call gnuplot.
                  Default: gnuplot
