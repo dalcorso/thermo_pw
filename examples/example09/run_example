@@ -79,7 +79,7 @@ $ECHO "  running thermo_pw.x as: $THERMO_PW_COMMAND"
 $ECHO
 
 $ECHO "  cleaning $TMP_DIR...\c"
-rm -rf $TMP_DIR/*
+rm -rf $TMP_DIR/silicon*
 $ECHO " done"
 
 cat > thermo_control << EOF
