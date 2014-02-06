@@ -69,13 +69,13 @@ thermo_pw.x : thermo_pw.o libthermo_pw.a $(PWOBJS) $(LIBOBJS)
 	$(LD) $(LDFLAGS) -o $@ thermo_pw.o ../../PHonon/PH/rigid.o \
                  ../../PHonon/PH/write_eigenvectors.o libthermo_pw.a \
 		 $(PWOBJS) $(QEMODS) $(LIBOBJS) $(LIBS)
-	- ( cd ../../bin ; ln -fs ../THERMO_PW/src/thermo_pw.x . )
+	- ( cd ../../bin ; ln -fs ../thermo_pw/src/thermo_pw.x . )
 
 thermo_red.x : thermo_red.o libthermo_pw.a $(PWOBJS) $(LIBOBJS)
 	$(LD) $(LDFLAGS) -o $@ thermo_red.o ../../PHonon/PH/rigid.o \
                  ../../PHonon/PH/write_eigenvectors.o libthermo_pw.a \
 		 $(PWOBJS) $(QEMODS) $(LIBOBJS) $(LIBS)
-	- ( cd ../../bin ; ln -fs ../THERMO_PW/src/thermo_red.x . )
+	- ( cd ../../bin ; ln -fs ../thermo_pw/src/thermo_red.x . )
 
 libthermo_pw.a : $(THERMOOBJS) 
 	$(AR) $(ARFLAGS) $@ $?

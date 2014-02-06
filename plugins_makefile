@@ -135,14 +135,14 @@ phonon:  uncompress-phonon
 	touch make-phonon
 
 thermo_pw:  
-	if test -d ../THERMO_PW; then \
-	cd ../THERMO_PW; $(MAKE) all || exit 1; cd ../bin; \
-	ln -fs ../THERMO_PW/src/thermo_pw.x . ; \
+	if test -d ../thermo_pw; then \
+	cd ../thermo_pw; $(MAKE) all || exit 1; cd ../bin; \
+	ln -fs ../thermo_pw/src/thermo_pw.x . ; \
 	fi
 thermo_red:  
-	if test -d ../THERMO_PW; then \
-	cd ../THERMO_PW; $(MAKE) all || exit 1; cd ../bin; \
-	ln -fs ../THERMO_PW/src/thermo_red.x . ; \
+	if test -d ../thermo_pw; then \
+	cd ../thermo_pw; $(MAKE) all || exit 1; cd ../bin; \
+	ln -fs ../thermo_pw/src/thermo_red.x . ; \
 	fi
 
 uncompress-phonon: touch-dummy
