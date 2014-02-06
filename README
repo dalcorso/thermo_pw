@@ -20,7 +20,7 @@ a much reduced number of information from the user.
 Installation instructions:
    Put the thermo_pw directory inside the QE main directory. 
    Enter in the thermo_pw directory and give the following commands
-   cp ./Makefile ../
+   cp ./main_Makefile ../Makefile
    cp ./plugins_makefile ../install
    cd ..
    make thermo_pw
