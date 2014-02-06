@@ -14,7 +14,7 @@ SUBROUTINE thermo_readin()
   !  and written and the variables of the calculations.
   !
   USE kinds,                ONLY : DP
-  USE thermo_mod,           ONLY : what, ngeo
+  USE thermo_mod,           ONLY : what, ngeo, step_ngeo
   USE control_thermo,       ONLY : outdir_thermo, flevdat,        &
                                    flfrc, flfrq, fldos, fltherm,  &
                                    flanhar, filband, flkeconv,    &
@@ -63,6 +63,7 @@ SUBROUTINE thermo_readin()
                             flfrc, flfrq, fldos, fltherm,   &
                             flanhar, filband, flkeconv,     &
                             flnkconv,                       &
+                            step_ngeo,                      &
                             nq1_d, nq2_d, nq3_d,            &
                             tmin, tmax, deltat, ntemp,      &
                             freqmin_input, freqmax_input,   &
@@ -97,6 +98,7 @@ SUBROUTINE thermo_readin()
 
   what=' '
   ngeo=0
+  step_ngeo=0.05_DP
 
   nq1_d=16
   nq2_d=16
@@ -109,7 +111,7 @@ SUBROUTINE thermo_readin()
 
   tmin=1.0_DP
   tmax=800.0_DP
-  deltat=2.0_DP
+  deltat=3.0_DP
   ntemp=1
 
   nbnd_bands=0

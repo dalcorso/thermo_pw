@@ -33,6 +33,9 @@ MODULE thermo_mod
                                                 ! geometry
                            stress_geo(:,:,:)    ! the stress at each 
                                                 ! geometry
+  REAL(DP) ::              step_ngeo            ! the difference of alat among
+                                                ! different geometries.
+
 END MODULE thermo_mod
 
 MODULE temperature

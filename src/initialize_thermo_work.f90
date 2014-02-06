@@ -14,7 +14,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   !  information.
   !
   USE kinds,      ONLY : DP
-  USE thermo_mod, ONLY : what, alat_geo, energy_geo, ngeo, omega_geo
+  USE thermo_mod, ONLY : what, alat_geo, step_ngeo, energy_geo, ngeo, omega_geo
   USE control_thermo, ONLY : lpwscf, lbands, lphonon, lev_syn_1, lev_syn_2,&
                              lph, lpwscf_syn_1, lbands_syn_1, ldos, lq2r, &
                              lmatdyn, ltherm, lconv_ke_test, lconv_nk_test
@@ -91,7 +91,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            ALLOCATE(energy_geo(ngeo))
            ALLOCATE(omega_geo(ngeo))
            DO igeom = 1, ngeo
-              alat_geo(igeom)=alat+(igeom-(ngeo+1.0_DP)/2.0_DP)*0.05_DP
+              alat_geo(igeom)=alat+(igeom-(ngeo+1.0_DP)/2.0_DP)*step_ngeo
               omega_geo(igeom) = alat_geo(igeom)**3 / 4.0_DP
            ENDDO
            energy_geo=0.0_DP
@@ -112,7 +112,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            ALLOCATE(energy_geo(ngeo))
            ALLOCATE(omega_geo(ngeo))
            DO igeom = 1, ngeo
-              alat_geo(igeom) = alat + (igeom-(ngeo+1.0_DP)/2.0_DP)*0.05_DP
+              alat_geo(igeom) = alat + (igeom-(ngeo+1.0_DP)/2.0_DP)*step_ngeo
               omega_geo(igeom) = alat_geo(igeom)**3 / 4.0_DP
            ENDDO
            energy_geo=0.0_DP
