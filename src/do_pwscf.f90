@@ -15,7 +15,7 @@ SUBROUTINE do_pwscf (lscf_)
   ! ... does only electronic scf or nscf run
   !
   USE force_mod,        ONLY : lforce, lstres, sigma, force
-  USE control_flags,    ONLY : lscf
+  USE control_flags,    ONLY : lscf, lbands
   USE basis,            ONLY : starting_pot, startingconfig
   !
   IMPLICIT NONE
@@ -30,6 +30,7 @@ SUBROUTINE do_pwscf (lscf_)
      starting_pot ='file'
      startingconfig='file'
      lscf=.FALSE.
+     lbands=.TRUE.
   ENDIF
   
   CALL setup ()
@@ -54,7 +55,6 @@ SUBROUTINE do_pwscf (lscf_)
   CALL close_files(.TRUE.)
   !
   CALL clean_pw( .FALSE. )
-
   !
   RETURN
   !
