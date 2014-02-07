@@ -257,7 +257,7 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
 !   bands can be shifted
 !
      eref=-1d20
-     IF (degauss/=0.0_DP) THEN
+     IF (degauss > 0.0_DP) THEN
         eref=ef * rytoev
      ELSE
         DO ibnd=1, NINT(nelec/2)
@@ -293,7 +293,6 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
   ELSE
      CALL errore('plotband_sub','Problem with icode',1)
   ENDIF
-
 !
 !  Since the minimum and maximum energies are given in input we can
 !  sign the bands that are completely outside this range.
@@ -546,12 +545,14 @@ END SUBROUTINE plotband_sub
 SUBROUTINE write_gnuplot_file(kx, e, nks, nbnd, emin, emax, eref, nlines, &
                   nrap, has_points, point, icode, exist_rap, igeom, fileout)
 USE kinds,           ONLY : DP
+USE klist,           ONLY : degauss
 USE control_paths,   ONLY : nqaux, label_disp_q, letter_path
 USE control_gnuplot, ONLY : flgnuplot, flpsband, flpsdisp, &
                             flpsgrun, gnuplot_command, lgnuplot
 USE gnuplot,       ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
                           gnuplot_write_file_data, gnuplot_ylabel, &
                           gnuplot_write_vertical_line, gnuplot_write_label, &
+                          gnuplot_write_horizontal_line, &
                           gnuplot_set_eref, gnuplot_unset_xticks
 USE io_global,     ONLY : ionode
 
@@ -594,6 +595,8 @@ CALL gnuplot_write_header(filename, kx(1), kx(nks), emin, emax )
 CALL gnuplot_unset_xticks(.FALSE.) 
 IF (icode==1) THEN
    CALL gnuplot_ylabel('Energy (eV)',.FALSE.) 
+   IF (degauss > 0.0_DP) CALL gnuplot_write_horizontal_line(0.0_DP, 2, &
+                                         'front', 'black', .FALSE.)
 ELSEIF (icode==2) THEN
    CALL gnuplot_ylabel('Frequency (cm^{-1})',.FALSE.) 
 ELSEIF (icode==3) THEN
