@@ -48,7 +48,7 @@ PROGRAM thermo_pw
   USE environment,      ONLY : environment_start, environment_end
   USE mp_world,         ONLY : world_comm
   USE mp_asyn,          ONLY : with_asyn_images
-  USE control_ph,       ONLY : wai => with_ext_images, always_run
+  USE control_ph,       ONLY : wai => with_asyn_images, always_run
   USE io_global,        ONLY : ionode, stdout
   USE mp,               ONLY : mp_sum
   USE control_thermo,   ONLY : lev_syn_1, lev_syn_2, lpwscf_syn_1, &
