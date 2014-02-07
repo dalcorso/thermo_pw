@@ -41,7 +41,7 @@ SUBROUTINE thermo_readin()
   USE control_mur,          ONLY : vmin_input, vmax_input, deltav, nvol
   USE mp_world,             ONLY : world_comm
   USE mp_images,            ONLY : nimage, my_image_id, root_image
-  USE parser,               ONLY : read_line
+  USE parser,               ONLY : read_line, parse_unit
   USE io_global,            ONLY : ionode, meta_ionode, meta_ionode_id
   USE mp,                   ONLY : mp_bcast
   !
@@ -53,7 +53,7 @@ SUBROUTINE thermo_readin()
   INTEGER, ALLOCATABLE :: iun_image(:)
   INTEGER :: image
   INTEGER :: iq, ipol, i, j, k
-  INTEGER :: iun_thermo
+  INTEGER :: iun_thermo, parse_unit_save
 
   INTEGER            :: nch
   LOGICAL :: tend, terr, read_paths, set_internal_path, exst
@@ -90,6 +90,8 @@ SUBROUTINE thermo_readin()
   !  called thermo_control
   !
   iun_thermo=2
+  parse_unit_save=parse_unit
+  parse_unit=iun_thermo
   IF (meta_ionode) &
      OPEN(UNIT=iun_thermo,FILE='thermo_control',STATUS='OLD', &
                                FORM='FORMATTED', ERR=10, IOSTAT=ios )
@@ -268,6 +270,7 @@ SUBROUTINE thermo_readin()
   ENDIF
 70  CONTINUE
   IF (meta_ionode) CLOSE( UNIT = iun_thermo, STATUS = 'KEEP' )
+  parse_unit=parse_unit_save
   !
   !  Then open an input for each image and copy the input file
   !
