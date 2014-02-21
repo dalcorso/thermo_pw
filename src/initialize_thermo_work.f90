@@ -137,7 +137,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            IF ( ALLOCATED(energy_geo) ) THEN
               compute_lc=.FALSE.
               alat_new=alat_geo(ngeo/2+1)*( vmin / omega_geo(ngeo/2+1) ) &
-                                         ** (1.0_DP /3.0_DP)
+                                         ** (1.0_DP/3.0_DP)
               IF ( ABS(alat_geo(ngeo/2+1)-alat_new) > step_ngeo ) THEN
                  alat=alat_new
                  compute_lc=.TRUE.
@@ -158,6 +158,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               ldos = .TRUE.
               ltherm = .TRUE.
               lmatdyn = .TRUE.
+              lev_syn_1=.TRUE.
               lev_syn_2=.TRUE.
               CALL allocate_thermodynamics()
               CALL allocate_anharmonic()
