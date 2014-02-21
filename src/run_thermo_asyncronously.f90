@@ -170,7 +170,6 @@ SUBROUTINE run_thermo_asyncronously(nwork, part, igeom, auxdyn)
               energy_geo(iwork)=etot
            END IF
            IF (lbands(iwork)) CALL do_pwscf('bands')
-           write(6,*) 'doing work', iwork, nwork, lphonon(iwork)
            IF (lphonon(iwork)) CALL do_phonon(auxdyn)
         END DO
      END IF

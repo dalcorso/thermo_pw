@@ -6,11 +6,11 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 
-Thermo_pw is a fortran driver for the calculation of thermodynamic quantities,
+Thermo_pw is a fortran driver for the calculation of material properties,
 using the harmonic and/or the quasiharmonic approximation and the plane waves 
-pseudopotential method. At low level it uses the QE routines to perform the 
+pseudopotential method. At low level it uses QE routines to perform the 
 calculations. Thermo_pw reads the input of pw.x, the input of ph.x
-and a file called thermo_control that specifies which calculations to do 
+and a file called thermo_control that tells the code the calculation to do 
 and the parameters that control these calculations. If there are several 
 available images the different tasks are carried out in parallel when 
 possible. The type of tasks currently implemented in thermo_pw are:
@@ -31,10 +31,28 @@ possible. The type of tasks currently implemented in thermo_pw are:
 11) Phonon dispersions at several geometries and calculation of the
    anharmonic vibrational properties: lattice parameter, bulk modulus,
    pressure derivative of the bulk modulus as a function of temperature.
+   Gruneisen parameters.
    Thermal expansion as a function of temperature.
    Isobaric molar heat capacity as a function of temperature.
    Isoentropic bulk modulus as a function of temperature.
    Average Gruneisen parameter as a function of temperature.
+
+The code has a minimal form of recover. Each routine checks if in the running 
+directory there is a file with the same name of the file that it should
+produce. The routine is skipped when this file is found. For instance if
+all the dynamical matrices of a given geometry are already in the running
+directory the code does not recalculate the phonon dipesions of that geometry. 
+This form of recover cannot be disabled from input. You must remove
+the files in the running directory to recompute them.
+Due to the image parallelization the presence of a few dynamical matrices
+of a given geometry is not sufficient to recover that geometry which
+is entirely recalculated. You can try to use the recover feature in the ph.x 
+input (but this requires an uncorrupted outdir directory).
+If the energies for each geometry are saved on file the Murnaghan equation
+is not recalculated. 
+The scf calculation at the minimum lattice constant and the band structure 
+are always recalculated.
+The postscript files are always regenerated.
 
 The input of thermo_pw in the file thermo_control is in the form:
 
@@ -47,10 +65,10 @@ where the possible values of what are:
 
 scf           : a single scf calculation to determine the total energy.
 scf_ke        : test of the dependence of the energy on the wavefunctions
-                and density kinetic energy cut-off.
+                and charge density kinetic energy cut-off.
 scf_nk        : test of the dependence of the energy on the k point sampling
                 and on smearing.  
-scf_bands     : a band structure calculation after an scf calculation.
+scf_bands     : a band structure calculation after a scf calculation.
 scf_ph        : a phonon at a single q after a scf run.
 scf_disp      : a phonon dispersion calculation after a scf run.
                 This option calculates also the vibrational energy, free energy,
@@ -78,10 +96,15 @@ ngeo : the number of geometries to use.
        Default: 1 for what=scf_*, 9  for what=mur_lc_*.
        The lattice constant of these geometries is calculated from the
        input of pw.x. The celldm(1) of this input is used in the central 
-       geometries. For the others celldm(1) is changed in steps of step_ngeo.
+       geometry. For the others celldm(1) is changed in steps of step_ngeo.
 
 step_ngeo : The step between the lattice constant at different geometries.
        Default: 0.05 a.u.
+
+ntry : If the equilibrium lattice constant is not close to the central 
+       geometry recalculates the Murnaghan equation centering the geometries
+       on the new minimum. This is repeated up to ntry times.
+       Default: 3
 
 emin_input : minimum energy for the band dispersion plot
              Default: determined from the bands
@@ -107,20 +130,24 @@ nke        : number of kinetic energies tested in the wavefunctions
              kinetic energy test.
              Default: 5
 deltake    : delta of wavefunctions kinetic energy in Ry.
+             The starting kinetic energy is the one given in the input of pw.x.
              Default: 10 Ry
 nkeden     : number of kinetic energies tested in the charge density
              kinetic energy test.
              Default: 1
-deltakeden : delta of density kinetic energy.
+deltakeden : delta of charge density kinetic energy.
+             The starting kinetic energy is the one given in the input of pw.x.
              Default: 100
 
 nnk        : the number of different nk to test
              Default: 5
-deltank    : the step in nk
+deltank    : the step in nk.
+             The starting mesh is the one given in the input of pw.x.
              Default: 2
 nsigma     : the number of intervals of smearing
              Default: 1 (no test)
 deltasigma : the distance between different smearing values.
+             The starting smearing is the one given in the input of pw.x.
              Default: 0.005 Ry
 
 tmin    : minimum temperature
@@ -146,26 +173,26 @@ zasr : type of acoustic sum rule applied to the ifc
           Default: 'Simple'
 
 
-filband   : file where electronic bands and representations are written
-            Default: output_band.dat
-flpband   : file where plottable electronic bands are written
-            Default: output_pband.dat
-flfrc     : file where the interatomic force constants are written
-            Default: output_frc.dat
-flfrq     : file where matdyn writes the interpolated frequencies 
-            Default: output_frq.dat
-fldos     : file where the phonon dos is written
-            Default: output_dos.dat
-fltherm   : file where the harmonic thermodynamic quantities are written
-            Default: output_therm.dat
-flanhar   : file where the anharmonic thermodynamic quantities are written
-            Default: output_anhar.dat
-flevdat   : file where the murneghan equation is written
-            Default: output_ev.dat
-flkeconv  : file where the data with the kinetic energy convergence is written
-            Default: output_keconv.dat
-flnkconv  : file where the data with the k point convergence is written
-            Default: 'output_nkconv.dat'
+filband : file where electronic bands and representations are written
+          Default: output_band.dat
+flpband : file where plottable electronic bands are written
+          Default: output_pband.dat
+flfrc   : file where the interatomic force constants are written
+          Default: output_frc.dat
+flfrq   : file where matdyn writes the interpolated frequencies 
+          Default: output_frq.dat
+fldos   : file where the phonon dos is written
+          Default: output_dos.dat
+fltherm : file where the harmonic thermodynamic quantities are written
+          Default: output_therm.dat
+flanhar : file where the anharmonic thermodynamic quantities are written
+          Default: output_anhar.dat
+flevdat : file where the murneghan equation is written
+          Default: output_ev.dat
+flkeconv : file where the data with the kinetic energy convergence is written
+           Default: output_keconv.dat
+flnkconv : file where the data with the k point convergence is written
+           Default: 'output_nkconv.dat'
 
 flgnuplot : name of the files where gnuplot scripts are written
             Default: gnuplot.tmp
@@ -186,7 +213,6 @@ flpskeconv : postscript file with the kinetic energy convergence
 flpsnkconv : postscript file with the k points convergence
             Default: output_nkconv.ps
 
-
 q2d              : the q or k vectors are specified in a plane
                  Default: .FALSE.
 q_in_band_form   : the q or k are given along paths
@@ -196,8 +222,8 @@ q_in_cryst_coord : the q or k are given in crystal coordinates
 point_label_type : the label definition (see the BZ manual)
                  Default: SC
 
-lgnuplot         : if .TRUE. gnuplot is called from within the program
-                 and the postscript files are immediately available
-                 Default: .TRUE.
+lgnuplot    : if .TRUE. gnuplot is called from within the program
+              and the postscript files are immediately available
+              Default: .TRUE.
 gnuplot_command  : the command used to call gnuplot.
-                 Default: gnuplot
+              Default: gnuplot
