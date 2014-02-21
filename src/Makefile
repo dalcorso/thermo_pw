@@ -12,9 +12,11 @@ THERMOOBJS = \
 allocate_thermo.o \
 bands_sub.o \
 bcast_thermo_input.o \
+check_file_exists.o \
 collect_everything.o \
 compute_cp.o \
 compute_gruneisen.o \
+compute_omega_geo.o \
 deallocate_asyn.o \
 deallocate_thermo.o \
 deallocate_thermo.o \
@@ -51,8 +53,8 @@ write_e_nk.o \
 write_e_ke.o  \
 write_ev_input.o \
 write_gruneisen_band.o \
+write_read_energy.o \
 write_thermo.o 
-             
 
 PWOBJS = ../../PHonon/PH/libph.a ../../PP/src/libpp.a ../../PW/src/libpw.a 
 QEMODS = ../../Modules/libqemod.a
@@ -69,7 +71,7 @@ thermo_pw.x : thermo_pw.o libthermo_pw.a $(PWOBJS) $(LIBOBJS)
 	$(LD) $(LDFLAGS) -o $@ thermo_pw.o ../../PHonon/PH/rigid.o \
                  ../../PHonon/PH/write_eigenvectors.o libthermo_pw.a \
 		 $(PWOBJS) $(QEMODS) $(LIBOBJS) $(LIBS)
-	- ( cd ../../bin ; ln -fs ../thermo_pw/src/thermo_pw.x . )
+	- ( cd ../../bin ; ln -fs ../THERMO_PW/src/thermo_pw.x . )
 
 libthermo_pw.a : $(THERMOOBJS) 
 	$(AR) $(ARFLAGS) $@ $?
@@ -77,7 +79,7 @@ libthermo_pw.a : $(THERMOOBJS)
 
 clean :
 	- /bin/rm -f *.x *.o *.a *~ *.F90 *.d *.mod *.i *.L
-	- /bin/rm -rf ../../bin/thermo_pw.x ../../bin/thermo_red.x
+	- /bin/rm -rf ../../bin/thermo_pw.x 
 
 include make.depend
 # DO NOT DELETE
