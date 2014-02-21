@@ -25,13 +25,15 @@ INTEGER  :: i, ios
 REAL(DP) :: e0, tot_states
 INTEGER  :: itemp
 INTEGER  :: iu_therm
+LOGICAL  :: check_file_exists
 !
+IF ( check_file_exists(fltherm) ) RETURN
 IF (my_image_id /= root_image) RETURN
 
 IF ( igeom < 1 .OR. igeom > ngeo ) CALL errore('print_thermo', & 
                                                'Too many geometries',1)
 WRITE(stdout,'(/,2x,76("+"))')
-WRITE(stdout,'(5x,"Computing the thermodynamical properties")')
+WRITE(stdout,'(5x,"Computing the thermodynamical properties from phonon dos")')
 WRITE(stdout,'(5x,"Writing on file ",a)') TRIM(fltherm)
 WRITE(stdout,'(2x,76("+"),/)')
 
@@ -104,19 +106,24 @@ USE control_thermo,   ONLY : fltherm
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: igeom
+CHARACTER(LEN=256) :: filename
+LOGICAL :: check_file_exists
 
 INTEGER  :: i, ios
 REAL(DP) :: e0
 INTEGER  :: itemp
 INTEGER  :: iu_therm
 !
+filename=TRIM(fltherm)//'_ph'
+IF ( check_file_exists(filename) ) RETURN
+
 IF (my_image_id /= root_image) RETURN
 
 IF ( igeom < 1 .OR. igeom > ngeo ) CALL errore('print_thermo', & 
                                                'Too many geometries',1)
 WRITE(stdout,'(/,2x,76("+"))')
 WRITE(stdout,'(5x,"Computing the thermodynamical properties from frequencies")')
-WRITE(stdout,'(5x,"Writing on file ",a)') TRIM(fltherm)//'_ph'
+WRITE(stdout,'(5x,"Writing on file ",a)') TRIM(filename)
 WRITE(stdout,'(2x,76("+"),/)')
 
 !
@@ -139,7 +146,7 @@ phf_entropy(:,igeom)=(phf_ener(:, igeom) - phf_free_ener(:, igeom))/  &
                         temp(:)
 IF (ionode) THEN
    iu_therm=2
-   OPEN (UNIT=iu_therm, FILE=TRIM(fltherm)//'_ph', STATUS='unknown',&
+   OPEN (UNIT=iu_therm, FILE=TRIM(filename), STATUS='unknown',&
                                                      FORM='formatted')
    WRITE(iu_therm,'("# Zero point energy is:", f9.5, " Ry/cell,", f9.5, &
                     &" kJ*N/mol,", f9.5, " kcal*N/mol")') e0, &
