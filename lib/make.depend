@@ -1,0 +1,12 @@
+gnuplot.o : ../../Modules/io_global.o
+gnuplot.o : ../../Modules/kind.o
+ph_freq_module.o : ../../Modules/constants.o
+ph_freq_module.o : ../../Modules/io_global.o
+ph_freq_module.o : ../../Modules/kind.o
+ph_freq_module.o : ../../Modules/mp.o
+ph_freq_module.o : ../../Modules/mp_images.o
+phdos_module.o : ../../Modules/constants.o
+phdos_module.o : ../../Modules/io_global.o
+phdos_module.o : ../../Modules/kind.o
+phdos_module.o : ../../Modules/mp.o
+phdos_module.o : ../../Modules/mp_images.o

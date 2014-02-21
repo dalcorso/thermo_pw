@@ -15,6 +15,18 @@ thermo_pw: thermo_lib
 thermo_lib: 
 	( cd lib ; $(MAKE) all || exit 1 )
 
+join_qe:
+	mv ../Makefile Makefile_qe
+	mv main_Makefile ../Makefile
+	mv ../install/plugins_makefile plugins_makefile_qe
+	mv plugins_makefile ../install
+
+leave_qe:
+	mv ../Makefile main_Makefile
+	mv Makefile_qe ../Makefile
+	mv ../install/plugins_makefile .
+	mv plugins_makefile_qe ../install/plugins_makefile
+
 clean: thermo_pw_clean
 
 thermo_pw_clean:
