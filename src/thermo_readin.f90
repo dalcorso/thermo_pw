@@ -14,7 +14,7 @@ SUBROUTINE thermo_readin()
   !  and written and the variables of the calculations.
   !
   USE kinds,                ONLY : DP
-  USE thermo_mod,           ONLY : what, ngeo, step_ngeo
+  USE thermo_mod,           ONLY : what, ngeo, step_ngeo, ntry
   USE control_thermo,       ONLY : outdir_thermo, flevdat,        &
                                    flfrc, flfrq, fldos, fltherm,  &
                                    flanhar, filband, flkeconv,    &
@@ -72,6 +72,7 @@ SUBROUTINE thermo_readin()
                             q_in_cryst_coord,               &
                             point_label_type,               &
                             nbnd_bands,                     &
+                            ntry,                           &
                             flevdat,                        &
                             flpband, flpgrun,               &
                             flgnuplot, flpsband,            &
@@ -101,6 +102,7 @@ SUBROUTINE thermo_readin()
   what=' '
   ngeo=0
   step_ngeo=0.05_DP
+  ntry=2
 
   nq1_d=16
   nq2_d=16

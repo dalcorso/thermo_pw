@@ -15,12 +15,14 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   !
   USE kinds,      ONLY : DP
   USE thermo_mod, ONLY : what, alat_geo, step_ngeo, energy_geo, ngeo, omega_geo
-  USE control_thermo, ONLY : lpwscf, lbands, lphonon, lev_syn_1, lev_syn_2,&
-                             lph, lpwscf_syn_1, lbands_syn_1, ldos, lq2r, &
-                             lmatdyn, ltherm, lconv_ke_test, lconv_nk_test
+  USE control_thermo, ONLY : lpwscf, lbands, lphonon, lev_syn_1, lev_syn_2, &
+                             lph, lpwscf_syn_1, lbands_syn_1, ldos, lq2r,   &
+                             lmatdyn, ltherm, lconv_ke_test, lconv_nk_test, &
+                             compute_lc
   USE control_conv,   ONLY : nke, ke, deltake, nkeden, deltakeden, keden, &
                              nnk, nk_test, deltank, nsigma, sigma_test, &  
                              deltasigma
+  USE control_mur,    ONLY : vmin
   USE wvfct,          ONLY : ecutwfc
   USE gvect,          ONLY : ecutrho
   USE input_parameters, ONLY : nk1, nk2, nk3
@@ -34,96 +36,132 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   INTEGER, INTENT(IN) :: part
   INTEGER :: igeom, iq, irr, ike
   INTEGER :: iden, icount, ink, isigma
+  REAL(DP) :: alat_new
+  REAL(DP) :: compute_omega_geo
   !
   nwork=0
 !
 !  In this part we do: all calculations for murnaghan
 !
+  compute_lc=.TRUE.
   IF (part == 1) THEN
      SELECT CASE (TRIM(what))
         CASE ( 'scf', 'scf_bands', 'scf_ph', 'scf_disp' )
-           ALLOCATE(alat_geo(ngeo))
-           ALLOCATE(energy_geo(ngeo))
-           lpwscf_syn_1=.TRUE.
-           lev_syn_1=.FALSE.
-           IF ( TRIM(what)=='scf_ph'.OR. TRIM(what)=='scf_disp' ) lph=.TRUE.
-           IF ( TRIM(what)=='scf_disp' ) THEN 
-              lq2r = .TRUE.
-              ldos = .TRUE.
-              lmatdyn = .TRUE.
-              ltherm = .TRUE.
-              CALL allocate_thermodynamics()
+           IF (ALLOCATED(energy_geo)) compute_lc=.FALSE.
+           IF (compute_lc) THEN
+              ALLOCATE(alat_geo(ngeo))
+              ALLOCATE(energy_geo(ngeo))
+              lpwscf_syn_1=.TRUE.
+              lev_syn_1=.FALSE.
+              IF ( TRIM(what)=='scf_ph'.OR. TRIM(what)=='scf_disp' ) lph=.TRUE.
+              IF ( TRIM(what)=='scf_disp' ) THEN 
+                 lq2r = .TRUE.
+                 ldos = .TRUE.
+                 lmatdyn = .TRUE.
+                 ltherm = .TRUE.
+                 CALL allocate_thermodynamics()
+              ENDIF
+              IF (what=='scf_bands') lbands_syn_1=.TRUE.
            ENDIF
-           IF (what=='scf_bands') lbands_syn_1=.TRUE.
         CASE ( 'scf_ke') 
            nwork= nke * nkeden
-           ALLOCATE(ke(nwork))
-           ALLOCATE(keden(nwork))
-           ALLOCATE(energy_geo(nwork))
-           icount=0
-           DO iden=1, nkeden
-              DO ike = 1, nke
-                 icount = icount + 1
-                 ke(icount) = ecutwfc + (ike-1) * deltake
-                 keden(icount) = ecutrho + (iden-1) * deltakeden
+           IF (ALLOCATED(energy_geo)) compute_lc=.FALSE.
+           IF (compute_lc) THEN
+              ALLOCATE(ke(nwork))
+              ALLOCATE(keden(nwork))
+              ALLOCATE(energy_geo(nwork))
+              icount=0
+              DO iden=1, nkeden
+                 DO ike = 1, nke
+                    icount = icount + 1
+                    ke(icount) = ecutwfc + (ike-1) * deltake
+                    keden(icount) = ecutrho + (iden-1) * deltakeden
+                 ENDDO
               ENDDO
-           ENDDO
-           energy_geo=0.0_DP
-           lconv_ke_test=.TRUE.
-        CASE ( 'scf_nk' ) 
+              energy_geo=0.0_DP
+              lconv_ke_test=.TRUE.
+           ENDIF
+         CASE ( 'scf_nk' ) 
            nwork= nnk * nsigma
-           ALLOCATE(nk_test(nwork))
-           ALLOCATE(sigma_test(nwork))
-           ALLOCATE(energy_geo(nwork))
-           icount=0
-           DO isigma=1, nsigma
-              DO ink = 1, nnk
-                 icount = icount + 1
-                 nk_test(icount)=nk1 + (ink - 1) * deltank
-                 sigma_test(icount) = degauss + (isigma - 1) * deltasigma
+           IF (ALLOCATED(energy_geo)) compute_lc=.FALSE.
+           IF (compute_lc) THEN
+              ALLOCATE(nk_test(nwork))
+              ALLOCATE(sigma_test(nwork))
+              ALLOCATE(energy_geo(nwork))
+              icount=0
+              DO isigma=1, nsigma
+                 DO ink = 1, nnk
+                    icount = icount + 1
+                    nk_test(icount)=nk1 + (ink - 1) * deltank
+                    sigma_test(icount) = degauss + (isigma - 1) * deltasigma
+                 ENDDO
               ENDDO
-           ENDDO
-           energy_geo=0.0_DP
-           lconv_nk_test=.TRUE.
+              energy_geo=0.0_DP
+              lconv_nk_test=.TRUE.
+           ENDIF
         CASE ('mur_lc', 'mur_lc_bands', 'mur_lc_ph', 'mur_lc_disp')
            nwork=ngeo
-           ALLOCATE(alat_geo(ngeo))
-           ALLOCATE(energy_geo(ngeo))
-           ALLOCATE(omega_geo(ngeo))
-           DO igeom = 1, ngeo
-              alat_geo(igeom)=alat+(igeom-(ngeo+1.0_DP)/2.0_DP)*step_ngeo
-              omega_geo(igeom) = alat_geo(igeom)**3 / 4.0_DP
-           ENDDO
-           energy_geo=0.0_DP
-           lev_syn_1=.TRUE.
-           IF ( TRIM(what)/='mur_lc' ) lpwscf_syn_1=.TRUE.
-           IF ( TRIM(what)=='mur_lc_ph' .OR. TRIM(what)=='mur_lc_disp') lph=.TRUE.
-           IF ( TRIM(what)=='mur_lc_disp' ) THEN
-              lq2r = .TRUE.
-              ldos = .TRUE.
-              lmatdyn = .TRUE.
-              ltherm = .TRUE.
-              CALL allocate_thermodynamics()
+           IF ( ALLOCATED(energy_geo) ) THEN
+              compute_lc=.FALSE.
+              alat_new=alat_geo(ngeo/2+1)*( vmin / omega_geo(ngeo/2+1) ) &
+                                         ** (1.0_DP /3.0_DP)
+              IF ( ABS(alat_geo(ngeo/2+1)-alat_new) > step_ngeo ) THEN
+                 alat=alat_new
+                 compute_lc=.TRUE.
+              ENDIF
+           ELSE
+              ALLOCATE(alat_geo(ngeo))
+              ALLOCATE(energy_geo(ngeo))
+              ALLOCATE(omega_geo(ngeo))
            ENDIF
-           IF (what=='mur_lc_bands') lbands_syn_1=.TRUE.
+           IF (compute_lc) THEN
+              DO igeom = 1, ngeo
+                alat_geo(igeom)=alat+(igeom-(ngeo+1.0_DP)/2.0_DP)*step_ngeo
+                omega_geo(igeom)=compute_omega_geo(alat_geo(igeom))
+              ENDDO
+              energy_geo=0.0_DP
+              lev_syn_1=.TRUE.
+              IF ( TRIM(what)/='mur_lc' ) lpwscf_syn_1=.TRUE.
+              IF ( TRIM(what)=='mur_lc_ph' .OR. TRIM(what)=='mur_lc_disp') lph=.TRUE.
+              IF ( TRIM(what)=='mur_lc_disp' ) THEN
+                 lq2r = .TRUE.
+                 ldos = .TRUE.
+                 lmatdyn = .TRUE.
+                 ltherm = .TRUE.
+                 CALL allocate_thermodynamics()
+              ENDIF
+              IF (what=='mur_lc_bands') lbands_syn_1=.TRUE.
+           ENDIF
         CASE ('mur_lc_t')
            nwork=ngeo
-           ALLOCATE(alat_geo(ngeo))
-           ALLOCATE(energy_geo(ngeo))
-           ALLOCATE(omega_geo(ngeo))
-           DO igeom = 1, ngeo
-              alat_geo(igeom) = alat + (igeom-(ngeo+1.0_DP)/2.0_DP)*step_ngeo
-              omega_geo(igeom) = alat_geo(igeom)**3 / 4.0_DP
-           ENDDO
-           energy_geo=0.0_DP
-           lph = .TRUE.
-           lq2r = .TRUE.
-           ldos = .TRUE.
-           ltherm = .TRUE.
-           lmatdyn = .TRUE.
-           lev_syn_2=.TRUE.
-           CALL allocate_thermodynamics()
-           CALL allocate_anharmonic()
+           IF ( ALLOCATED(energy_geo) ) THEN
+              compute_lc=.FALSE.
+              alat_new=alat_geo(ngeo/2+1)*( vmin / omega_geo(ngeo/2+1) ) &
+                                         ** (1.0_DP /3.0_DP)
+              IF ( ABS(alat_geo(ngeo/2+1)-alat_new) > step_ngeo ) THEN
+                 alat=alat_new
+                 compute_lc=.TRUE.
+              ENDIF
+           ELSE
+              ALLOCATE(alat_geo(ngeo))
+              ALLOCATE(energy_geo(ngeo))
+              ALLOCATE(omega_geo(ngeo))
+           ENDIF
+           IF (compute_lc) THEN
+              DO igeom = 1, ngeo
+                 alat_geo(igeom) = alat + (igeom-(ngeo+1.0_DP)/2.0_DP)*step_ngeo
+                 omega_geo(igeom)=compute_omega_geo(alat_geo(igeom))
+              ENDDO
+              energy_geo=0.0_DP
+              lph = .TRUE.
+              lq2r = .TRUE.
+              ldos = .TRUE.
+              ltherm = .TRUE.
+              lmatdyn = .TRUE.
+              lev_syn_2=.TRUE.
+              CALL allocate_thermodynamics()
+              CALL allocate_anharmonic()
+           ENDIF
      END SELECT
   ELSE IF (part == 2 ) THEN
 !
@@ -142,7 +180,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
      CALL errore('initialize_thermo_work','unknown part',1)
   END IF
 
-  IF ( nwork == 0 ) RETURN
+  IF ( nwork == 0 .OR. .NOT. compute_lc ) RETURN
 
   ALLOCATE( lpwscf(nwork) )
   ALLOCATE( lbands(nwork) )

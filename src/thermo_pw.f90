@@ -55,7 +55,7 @@ PROGRAM thermo_pw
                                lbands_syn_1, lph, outdir_thermo, lq2r, &
                                lmatdyn, ldos, ltherm, flfrc, flfrq, fldos, &
                                fltherm, spin_component, flevdat, &
-                               lconv_ke_test, lconv_nk_test
+                               lconv_ke_test, lconv_nk_test, compute_lc
   USE ifc,              ONLY : freqmin, freqmax
   USE control_paths,    ONLY : nqaux
   USE control_gnuplot,  ONLY : flpsdos, flgnuplot, flpstherm, flpsdisp
@@ -69,7 +69,7 @@ PROGRAM thermo_pw
   USE input_parameters, ONLY : ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
                                trd_ht, rd_ht, cell_units, outdir
   USE control_mur,      ONLY : vmin, b0, b01, emin
-  USE thermo_mod,       ONLY : what, ngeo, energy_geo
+  USE thermo_mod,       ONLY : what, ngeo, alat_geo, omega_geo, energy_geo, ntry
   USE ph_restart,       ONLY : destroy_status_run
   USE save_ph,          ONLY : clean_input_variables
   USE output,           ONLY : fildyn
@@ -84,13 +84,15 @@ PROGRAM thermo_pw
   CHARACTER (LEN=256) :: auxdyn=' '
   CHARACTER (LEN=256) :: diraux=' '
   CHARACTER(LEN=6) :: int_to_char
-  INTEGER :: part, nwork, igeom, itemp, nspin0
+  INTEGER :: part, nwork, igeom, itemp, nspin0, itry
+  REAL(DP) :: compute_alat_geo
   LOGICAL :: all_done_asyn
   LOGICAL  :: exst, parallelfs
+  LOGICAL :: check_file_exists, check_dyn_file_exists
   CHARACTER(LEN=256) :: fildyn_thermo, flfrc_thermo, flfrq_thermo, &
                         fldos_thermo, fltherm_thermo, flpband_thermo, &
                         flpsdos_thermo, flpstherm_thermo, flgnuplot_thermo, &
-                        flpsdisp_thermo
+                        flpsdisp_thermo, file_dat
   !
   ! Initialize MPI, clocks, print initial messages
   !
@@ -107,45 +109,54 @@ PROGRAM thermo_pw
   !
   CALL check_stop_init()
   !
-  part = 1
-  !
-  CALL initialize_thermo_work(nwork, part)
-  !
-  !  In this part the images work asyncronously. No communication is
-  !  allowed except though the master-workers mechanism
-  !
-  CALL run_thermo_asyncronously(nwork, part, 1, auxdyn)
-  !
-  !  In this part all images are syncronized and can communicate their results
-  !  thought the world_comm communicator
-  !
-  CALL mp_sum(energy_geo, world_comm)
-  energy_geo=energy_geo / nproc_image
+  DO itry = 1, ntry
+     part = 1
+     !
+     CALL initialize_thermo_work(nwork, part)
+     IF (.NOT. compute_lc) CYCLE
+     !
+     !  In this part the images work asyncronously. No communication is
+     !  allowed except though the master-workers mechanism
+     !
+     file_dat='save_energy' // TRIM(int_to_char(itry))
+     IF ( .NOT. check_file_exists(file_dat) ) THEN
+        CALL run_thermo_asyncronously(nwork, part, 1, auxdyn)
+        !
+        !  In this part all images are syncronized and can communicate 
+        !  their results thought the world_comm communicator
+        !
+        CALL mp_sum(energy_geo, world_comm)
+        energy_geo=energy_geo / nproc_image
+        CALL write_energy(nwork, file_dat)
+     ELSE
+        CALL read_energy(nwork, file_dat)
+     ENDIF
 !
 !  In the kinetic energy test write the results
 !
-  IF (lconv_ke_test) THEN
-     CALL write_e_ke()
-     CALL plot_e_ke()
-  ENDIF
+     IF (lconv_ke_test) THEN
+        CALL write_e_ke()
+        CALL plot_e_ke()
+     ENDIF
 !
 ! In the k-point test write the results
 !
-  IF (lconv_nk_test) THEN
-     CALL write_e_nk()
-     CALL plot_e_nk()
-  ENDIF
+     IF (lconv_nk_test) THEN
+        CALL write_e_nk()
+        CALL plot_e_nk()
+     ENDIF
 !
 !  In a murnaghan equation calculation determine the lattice constant,
 !  bulk modulus and its derivative and write the results
 !
-  IF (lev_syn_1) THEN
-     CALL do_ev()
-     CALL mur(vmin,b0,b01,emin)
-     CALL plot_mur()
-  ENDIF
-  !
-  CALL deallocate_asyn()
+     IF (lev_syn_1) THEN
+        CALL do_ev(itry)
+        CALL mur(vmin,b0,b01,emin)
+        CALL plot_mur()
+     ENDIF
+     !
+     CALL deallocate_asyn()
+  END DO
   ! 
   !  This part is syncronized, only the first image makes a scf calculation
   !  and a band structure calculation, at the equilibrium lattice constant
@@ -153,7 +164,8 @@ PROGRAM thermo_pw
   !
   IF (lpwscf_syn_1) THEN
      IF (lev_syn_1) THEN
-        celldm(1)=( vmin * 4.0_DP )**( 1.0_DP / 3.0_DP )
+        celldm(1)=compute_alat_geo(vmin, alat_geo(ngeo/2+1), &
+                                                 omega_geo(ngeo/2+1))
         CALL cell_base_init ( ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
                          trd_ht, rd_ht, cell_units )
         dfftp%nr1=0
@@ -240,21 +252,25 @@ PROGRAM thermo_pw
         ! ... Checking the status of the calculation and if necessary initialize
         ! ... the q mesh and all the representations
         !
+        !
         CALL check_initial_status(auxdyn)
-
-        part=2
-        CALL initialize_thermo_work(nwork, part)
         !
-        !  Asyncronous work starts again. No communication is
-        !  allowed except though the master workers mechanism
-        !
-        CALL run_thermo_asyncronously(nwork, part, igeom, auxdyn)
-        !  
-        !   return to syncronous work. Collect the work of all images and
-        !   writes the dynamical matrix
-        !
-        CALL collect_everything(auxdyn)
-        !
+        IF ( .NOT. check_dyn_file_exists(auxdyn)) THEN
+           !
+           part=2
+           CALL initialize_thermo_work(nwork, part)
+           !
+           !  Asyncronous work starts again. No communication is
+           !  allowed except though the master workers mechanism
+           !
+           CALL run_thermo_asyncronously(nwork, part, igeom, auxdyn)
+           !  
+           !   return to syncronous work. Collect the work of all images and
+           !   writes the dynamical matrix
+           !
+           CALL collect_everything(auxdyn)
+           !
+        END IF
         IF (lq2r) THEN
            CALL q2r_sub(auxdyn) 
 !
