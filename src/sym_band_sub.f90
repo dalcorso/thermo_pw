@@ -178,13 +178,19 @@ SUBROUTINE sym_band_sub(filband, spin_component)
 !
 !    When the symmetry changes the point must be considered a high
 !    symmetry point. If the previous point was also high_symmetry, there
-!    are two possibilities. The two points are distant and in this case
-!    both of them must be considered high symmetry. If they are close only
+!    are three possibilities. The two points are distant and in this case
+!    both of them must be considered high symmetry. The two points coincide
+!    and in this case they have both the same symmetry. If they are close only
 !    the first point is a high symmetry point. First compute the distance
 !
            dxk(:) = xk(:,ik) - xk(:,ik-1)
            dkmod= sqrt( dxk(1)**2 + dxk(2)**2 + dxk(3)**2 )
-           IF (dkmod < 5.0_DP * dkmod_save) THEN
+           IF (dkmod < 1.D-6) THEN
+              !
+              !   In this case is_high_sym does not change because the point
+              !   is the same
+              !
+           ELSE IF (dkmod < 5.0_DP * dkmod_save) THEN
 !
 !    In this case the two points are considered close
 !
