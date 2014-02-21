@@ -42,7 +42,7 @@ END TYPE phdos_type
 
 PUBLIC :: phdos_type, read_phdos_data, zero_point_energy, free_energy, &
           vib_energy, vib_entropy, specific_heat_cv, &
-          integrated_dos, set_phdos, destroy_phdos
+          integrated_dos, set_phdos, destroy_phdos, find_minimum_maximum
           
 CONTAINS
 
@@ -75,6 +75,10 @@ SUBROUTINE read_phdos_data(phdos, filename)
 !  This subroutine reads the phdos from a file. It allocates space,
 !  opens and closes the phdos file.
 !
+USE mp_images, ONLY : intra_image_comm
+USE io_global, ONLY : ionode_id, ionode
+USE mp,        ONLY : mp_bcast
+IMPLICIT NONE
 TYPE(phdos_type), INTENT(INOUT) :: phdos
 CHARACTER(LEN=256), INTENT(IN) :: filename
 INTEGER :: iunit, ios
@@ -84,32 +88,40 @@ REAL(DP) :: de, de_
 INTEGER :: i, ndiv
 
 iunit=65
-OPEN(file=TRIM(filename), unit=iunit, status='old', form='formatted',  &
-     err=100, iostat=ios)
-100 IF (ios /= 0) STOP 'opening file'
+IF (ionode) OPEN(file=TRIM(filename), unit=iunit, status='old', &
+       form='formatted', err=100, iostat=ios)
+100 CALL mp_bcast(ios, ionode_id, intra_image_comm)
+IF (ios /= 0) CALL errore('read_phdos_data', &
+                          'opening file'//TRIM(filename), ABS(ios))
 
 ALLOCATE(nu(ndivx))
 ALLOCATE(dos(ndivx))
 de = 0d0
-DO i=1,ndivx
-     ! nu(i) = frequencies (cm^{-1}), dos(i) in states/cm^{-1} 
-   READ(iunit, *, END=20, ERR=10, IOSTAT=ios) nu(i),dos(i)
-   IF ( nu(i) < -1.d0 ) THEN
-      STOP ' wrong grid: omega < 0'
-   ELSE IF ( nu(i) < 0.d0 ) THEN
-      nu(i) = 0.d0
-   END IF
-   IF ( i > 1 ) THEN
-      de = nu(i) - nu(i-1)
-      IF ( i > 2 ) THEN
-         de_ = nu(i) - nu(i-1)
-         IF ( ABS(de - de_) > 1.0d-4 ) STOP ' wrong grid: not uniform'
+IF (ionode) THEN
+   DO i=1,ndivx
+       ! nu(i) = frequencies (cm^{-1}), dos(i) in states/cm^{-1} 
+      READ(iunit, *, END=20, ERR=10, IOSTAT=ios) nu(i),dos(i)
+      IF ( nu(i) < -1.d0 ) THEN
+         write(6,*) i, nu(i), dos(i)
+         CALL errore('read_phdos_data','negative frequencies',1)
+      ELSE IF ( nu(i) < 0.d0 ) THEN
+         nu(i) = 0.d0
       END IF
-   END IF
-   ndiv=i
-ENDDO
-10 IF (ios /= 0 ) STOP 'problem reading phdos'
+      IF ( i ==2 ) de_ = nu(2) - nu(1)
+      IF (i > 2) THEN
+         de = nu(i) - nu(i-1)
+         IF ( ABS(de - de_) > 1.0d-4 ) &
+            CALL errore('read_phdos_data','nonuniform grid',1)
+      END IF
+      ndiv=i
+   ENDDO
+10 IF (ios /= 0 ) CALL errore('read_phdos_data', 'problem reading phdos', 1)
 20 continue
+ENDIF
+CALL mp_bcast(ndiv,ionode_id,intra_image_comm)
+CALL mp_bcast(de,ionode_id,intra_image_comm)
+CALL mp_bcast(nu,ionode_id,intra_image_comm)
+CALL mp_bcast(dos,ionode_id,intra_image_comm)
 
 phdos%number_of_points=ndiv
 phdos%de=de
@@ -120,7 +132,7 @@ phdos%phdos(:) = dos(1:ndiv)
 
 DEALLOCATE(nu)
 DEALLOCATE(dos)
-CLOSE(iunit)
+IF (ionode) CLOSE(iunit)
 
 RETURN
 END SUBROUTINE read_phdos_data
@@ -274,5 +286,21 @@ ENDDO
 tot_dos = tot_dos * phdos%de
 RETURN
 END SUBROUTINE integrated_dos
+
+SUBROUTINE find_minimum_maximum(phdos, freqmin, freqmax)
+!
+!  find the range of the phdos frequencies
+!
+IMPLICIT NONE
+TYPE(phdos_type), INTENT(IN) :: phdos
+REAL(DP), INTENT(OUT) :: freqmin, freqmax
+INTEGER :: ndiv
+
+ndiv=phdos%number_of_points
+freqmin=phdos%nu(1)
+freqmax=phdos%nu(ndiv)
+
+RETURN
+END SUBROUTINE find_minimum_maximum
 
 END MODULE phdos_module

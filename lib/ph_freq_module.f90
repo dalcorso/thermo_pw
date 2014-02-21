@@ -40,7 +40,8 @@ END TYPE ph_freq_type
 
 PUBLIC :: ph_freq_type, zero_point_energy_ph, free_energy_ph, vib_energy_ph, &
           vib_entropy_ph, specific_heat_cv_ph, init_ph_freq, destroy_ph_freq, &
-          init_ph_rap, thermal_expansion_ph
+          init_ph_rap, thermal_expansion_ph, read_ph_freq_data, &
+          write_ph_freq_data
 
 CONTAINS
 
@@ -88,6 +89,113 @@ IF (ALLOCATED(ph_freq%rap)) DEALLOCATE(ph_freq%rap)
 
 RETURN
 END SUBROUTINE destroy_ph_freq
+
+SUBROUTINE read_ph_freq_data(ph_freq, filename)
+!
+!  This subroutine reads the ph_freq data from a file. It allocates space
+!  for the frequencies
+!
+USE io_global, ONLY : ionode, ionode_id
+USE mp_images, ONLY : intra_image_comm
+USE mp,        ONLY : mp_bcast
+IMPLICIT NONE
+TYPE(ph_freq_type), INTENT(INOUT) :: ph_freq
+CHARACTER(LEN=256), INTENT(IN) :: filename
+INTEGER :: iunit, ios
+REAL(DP), ALLOCATABLE :: nu(:), dos(:)
+INTEGER :: nat, nq1, nq2, nq3, nq
+INTEGER :: iq, imode, ndiv, nqtot
+
+iunit=65
+IF (ionode) OPEN(file=TRIM(filename), unit=iunit, status='old', &
+     form='formatted', err=100, iostat=ios)
+100  CALL mp_bcast(ios, ionode_id, intra_image_comm)
+    IF (ios /= 0) CALL errore('read_ph_freq_data','opening file',ios)
+
+IF (ionode) READ(iunit, *) nat, nq1, nq2, nq3, nq
+
+CALL mp_bcast(nat, ionode_id, intra_image_comm)
+CALL mp_bcast(nq1, ionode_id, intra_image_comm)
+CALL mp_bcast(nq2, ionode_id, intra_image_comm)
+CALL mp_bcast(nq3, ionode_id, intra_image_comm)
+CALL mp_bcast(nq, ionode_id, intra_image_comm)
+
+nqtot = nq1 * nq2 * nq3
+ph_freq%nqtot=nqtot
+ph_freq%nq=nq
+ph_freq%number_of_points = 3 * nat * nqtot
+ph_freq%nq1 = nq1
+ph_freq%nq2 = nq2
+ph_freq%nq3 = nq3
+ph_freq%nat = nat
+ndiv = ph_freq%number_of_points
+ALLOCATE(ph_freq%nu(3*nat, nq))
+ALLOCATE(ph_freq%wg(nq))
+ALLOCATE(ph_freq%rap(3*nat,nq))
+
+IF (ionode) THEN
+   DO iq=1,nq
+      READ(iunit, *, END=20, ERR=10, IOSTAT=ios) ph_freq%wg(iq)
+      DO imode=1,3*nat
+         ! nu(i) = frequencies (cm^{-1}), dos(i) in states/cm^{-1} 
+         READ(iunit, *, END=20, ERR=10, IOSTAT=ios) ph_freq%nu(imode, iq)
+      END DO
+   END DO
+ENDIF
+20 CONTINUE
+   ios=0
+10 CALL mp_bcast( ios, ionode_id, intra_image_comm )
+   IF (ios /= 0 ) CALL errore('read_phdos_data', 'problem reading phdos', 1)
+   CALL mp_bcast( ph_freq%wg, ionode_id, intra_image_comm )
+   CALL mp_bcast( ph_freq%nu, ionode_id, intra_image_comm )
+
+   IF (ionode) CLOSE(iunit)
+
+RETURN
+END SUBROUTINE read_ph_freq_data
+
+SUBROUTINE write_ph_freq_data(ph_freq, filename)
+!
+!  This subroutine writes the ph_freq data from a file. It allocates space
+!  for the frequencies
+!
+USE io_global, ONLY : ionode, ionode_id
+USE mp_images, ONLY : intra_image_comm
+USE mp,        ONLY : mp_bcast
+IMPLICIT NONE
+TYPE(ph_freq_type), INTENT(INOUT) :: ph_freq
+CHARACTER(LEN=256), INTENT(IN) :: filename
+INTEGER :: iunit, ios
+REAL(DP), ALLOCATABLE :: nu(:), dos(:)
+INTEGER :: nat, nq
+INTEGER :: iq, imode
+
+iunit=65
+IF (ionode) OPEN(FILE=TRIM(filename), UNIT=iunit, STATUS='unknown', &
+     FORM='formatted', ERR=100, IOSTAT=ios)
+100  CALL mp_bcast(ios, ionode_id, intra_image_comm)
+    IF (ios /= 0) CALL errore('write_ph_freq_data','opening file',ios)
+
+IF (ionode) WRITE(iunit, '(5i10)') ph_freq%nat, ph_freq%nq1, ph_freq%nq2, &
+                                   ph_freq%nq3, ph_freq%nq
+nq = ph_freq%nq
+nat = ph_freq%nat
+IF (ionode) THEN
+   DO iq=1,nq
+      WRITE(iunit, '(E30.15)', ERR=10, IOSTAT=ios) ph_freq%wg(iq)
+      DO imode=1,3*nat
+         ! nu(i) = frequencies (cm^{-1}), dos(i) in states/cm^{-1} 
+         WRITE(iunit,'(E30.15)',ERR=10,IOSTAT=ios) ph_freq%nu(imode, iq)
+      END DO
+   END DO
+END IF
+10 CALL mp_bcast( ios, ionode_id, intra_image_comm )
+IF (ios /= 0 ) CALL errore('write_phdos_data', 'problem reading phdos', 1)
+
+IF (ionode) CLOSE(iunit)
+
+RETURN
+END SUBROUTINE write_ph_freq_data
 
 SUBROUTINE zero_point_energy_ph(ph_freq, ener)
 !
