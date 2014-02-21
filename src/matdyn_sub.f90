@@ -83,8 +83,9 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   USE ph_freq_thermodynamics, ONLY : ph_freq_save
   USE control_thermo, ONLY : flfrc, flfrq, fldos, ldos
   USE ions_base, ONLY : amass
-  USE phdos_module, ONLY : set_phdos
-  USE ph_freq_module, ONLY : init_ph_freq, init_ph_rap
+  USE phdos_module, ONLY : set_phdos, read_phdos_data, find_minimum_maximum
+  USE ph_freq_module, ONLY : init_ph_freq, init_ph_rap, read_ph_freq_data, &
+                             write_ph_freq_data
   !
   IMPLICIT NONE
   !
@@ -113,7 +114,8 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   !
   LOGICAL :: xmlifc, lo_to_split
   !
-  REAL(DP) :: qhat(3), qh, e, emin, emax, dosofe(2), qq
+  REAL(DP) :: qhat(3), qh, e, emin, emax, dosofe(2), qq, dq(3), dqmod, &
+              dqmod_save
   INTEGER :: n, i, j, k, it, nq, nqx, na, nb, iout, nqtot
   LOGICAL, EXTERNAL :: has_xml
   CHARACTER(LEN=15), ALLOCATABLE :: name_rap_mode(:)
@@ -125,11 +127,25 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   INTEGER            :: npk_label, nch, ndos
   CHARACTER(LEN=3), ALLOCATABLE :: letter(:)
   INTEGER, ALLOCATABLE :: label_list(:)
-  LOGICAL :: tend, terr, dos
+  LOGICAL :: tend, terr, dos, check_file_exists
   !
-  IF ( my_image_id /= root_image ) RETURN
 
   dos = (do_dos == 1) .AND. ldos
+  filename='save_frequencies.'//TRIM(int_to_char(igeom))
+  IF (dos) THEN
+     IF ( check_file_exists(fldos) .AND. check_file_exists(filename) ) THEN
+        IF ( my_image_id /= root_image ) RETURN
+        CALL read_phdos_data(phdos_save(igeom),fldos)
+        CALL find_minimum_maximum(phdos_save(igeom), freqmin, freqmax)
+        CALL read_ph_freq_data(ph_freq_save(igeom),filename)
+        RETURN
+     END IF
+  ELSE
+     IF (check_file_exists(flfrq)) RETURN
+  END IF
+
+  IF ( my_image_id /= root_image ) RETURN
+
   WRITE(stdout,'(/,2x,76("+"))')
   WRITE(stdout,'(5x,"Interpolating the dynamical matrices")')
   IF (dos) THEN
@@ -281,13 +297,41 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
      ! Cannot use the small group of \Gamma to analize the symmetry
      ! of the mode if there is an electric field.
      !
+     IF (n==1) THEN
+        high_sym(n)=.TRUE.
+        dq(:) = q(:,2) - q(:,1)
+        dqmod_save = sqrt( dq(1)**2 + dq(2)**2 + dq(3)**2 )
+        code_group_old=0
+     ENDIF
+
      IF (xmlifc.AND..NOT.lo_to_split.AND..NOT.dos) THEN
         ALLOCATE(name_rap_mode(3*nat))
         CALL find_representations_mode_q(nat,ntyp,q(:,n), &
                     w2(:,n),z,tau,ityp,amass,name_rap_mode, &
                     num_rap_mode(:,n), nspin_mag)
-        IF (code_group==code_group_old.OR.high_sym(n-1)) high_sym(n)=.FALSE.
-        code_group_old=code_group
+        IF (n==1) THEN
+           code_group_old=code_group
+        ELSE
+           dq(:) = q(:,n) - q(:,n-1)
+           dqmod= sqrt( dq(1)**2 + dq(2)**2 + dq(3)**2 )
+           IF (dqmod < 1.D-6) THEN
+              !
+              !   In this case is_high_sym does not change because the point
+              !   is the same
+              high_sym(n)=high_sym(n-1)
+              !
+           ELSE IF (dqmod < 5.0_DP * dqmod_save) THEN
+!
+!    In this case the two points are considered close
+!
+              high_sym(n)= ((code_group/=code_group_old).AND..NOT. &
+                                                        high_sym(n-1))
+              IF (dqmod > 1.d-3) dqmod_save=dqmod
+           ELSE
+              high_sym(n)=.TRUE.
+           ENDIF
+           code_group_old=code_group
+        ENDIF
         DEALLOCATE(name_rap_mode)
      ENDIF
 
@@ -305,9 +349,8 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
      END DO
   END DO
   !
-  IF (flfrq.NE.' '.AND.ionode) THEN
+  IF (flfrq.NE.' '.AND..NOT.dos.AND.ionode) THEN
      filename=TRIM(flfrq)
-     IF (dos) filename=TRIM(flfrq)//'_ph'
      OPEN (unit=2,file=filename ,status='unknown',form='formatted')
      WRITE(2, '(" &plot nbnd=",i6,", nks=",i6," /")') 3*nat, nq
      DO n=1, nq
@@ -320,9 +363,8 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   !  If the force constants are in the xml format we write also
   !  the file with the representations of each mode
   !
-  IF (flfrq.NE.' '.AND.xmlifc.AND.ionode) THEN
+  IF (flfrq.NE.' '.AND.xmlifc.AND..NOT.dos.AND.ionode) THEN
      filename=TRIM(flfrq)//'.rap'
-     IF (dos) filename=TRIM(flfrq)//'_ph'//'.rap'
      OPEN (unit=2,file=filename ,status='unknown',form='formatted')
      WRITE(2, '(" &plot_rap nbnd_rap=",i6,", nks_rap=",i6," /")') 3*nat, nq
      DO n=1, nq
@@ -380,7 +422,7 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
         !
         !WRITE (2, '(F15.10,F15.2,F15.6,F20.5)') &
         !     E, E*RY_TO_CMM1, E*RY_TO_THZ, 0.5d0*DOSofE(1)
-        IF (ionode) WRITE (2, '(ES20.10,ES20.10)') e, dosofe(1)
+        IF (ionode) WRITE (2, '(ES30.15, ES30.15)') e, dosofe(1)
         phdos_save(igeom)%nu(n) = e
         phdos_save(igeom)%phdos(n) = dosofe(1)
      END DO
@@ -397,6 +439,7 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
            ph_freq_save(igeom)%rap(imode,iq)=num_rap_mode(imode,iq)
         ENDDO
      ENDDO
+     CALL write_ph_freq_data(ph_freq_save(igeom),filename)
   END IF  !dos
 
   !
@@ -1383,3 +1426,4 @@ SUBROUTINE setupmat_simple (q,dyn,nat,at,bg,tau,omega,alat, &
   !
   RETURN
 END SUBROUTINE setupmat_simple
+
