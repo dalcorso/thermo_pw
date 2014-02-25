@@ -28,7 +28,7 @@
 \def\SissaImage{./sissa.pdf}
 
 \title{
-  \includegraphics[width=6cm]{\SissaImage}\\
+%  \includegraphics[width=6cm]{\SissaImage}\\
   \vskip 1cm
   \Huge User's Guide for the \thermo\ package \smallskip
   \Large (version \version)
@@ -51,10 +51,9 @@ for \PHonon\ in \texttt{PHonon/Doc/}, or consult the web site:
 
 \thermo\ is a set of drivers to compute material properties. 
 The same calculations can be done by using the \qe\ package, but they would 
-require several steps and the passage of data from one program to the other.
-These tasks are usually carried out by bash scripts that require
-some time to be prepared. \thermo\ allows to speed up this part of the 
-work for the most common material properties. It can be considered as a set 
+require several steps. These tasks are usually carried out by \texttt{bash}
+scripts. \thermo\ allows to avoid the writing of complex \texttt{bash}
+scripts for the most common material properties. It can be considered as a set 
 of scripts written in \texttt{FORTRAN}. At low level \thermo\ uses the \qe\ 
 routines and writes the same files. If needed, these files could be read
 by the codes of the \qe\ package. 
@@ -109,8 +108,8 @@ the \qe\ package. On top of that \thermo\ can be run using several images.
 The image parallelization is used when possible in an asyncronous way.
 One processor takes the role of master and distributes the work 
 to all the images that carry it out independently. Presently 
-several geometries are calculated independently, and in parallel if there
-are several images, for computing the total energy for a Murnaghan fit.  
+the total energies of several geometries for a Murnaghan fit are
+calculated independently, and in parallel if there are several images.  
 The phonon calculation is carried out in parallel, each image doing 
 a single representation.
 
@@ -140,11 +139,11 @@ main \qe\ directory.
 %can download the file \texttt{thermo\_pw.tar.gz} and copy it in the
 %main \qe\ directory. The command \texttt{tar -xzvf thermo\_pw.tar.gz}
 %creates the \texttt{thermo\_pw} directory.
-Presently \texttt{thermo\_pw} works only with the SVN version of \qe, there
-is no version that works with the current 5.0.3 version of \qe.
-The \texttt{thermo\_pw} directory can be downloaded with the command 
-\texttt{cvs -d :ext:anonymous@qeforge.qe-forge.org:}
-\texttt{/cvsroot/thermo\_pw co thermo\_pw}. 
+Presently \texttt{thermo\_pw} works only with the SVN version of \qe, 
+it is not compatible with the current 5.0.3 version.
+The \texttt{thermo\_pw} directory can be downloaded as described at
+the web page: \texttt{http://www.qe-forge.org/gf/project/thermo\_pw/scmcvs/?}
+\texttt{action=AccessInfo}.
 
 \subsection{Compiling}
 
@@ -155,8 +154,11 @@ the files contained in \texttt{thermo\_pw} with those of the \qe\ package.
 Typing \texttt{make thermo\_pw} from the root \qe\ directory, or \texttt{make} 
 from the \texttt{thermo\_pw}\ directory, produces the executable
 \texttt{THERMO\_PW/src/thermo\_pw.x} that is linked in the 
-\qe\ \texttt{bin/} directory. Note that you need to compile \texttt{pw.x}
-and \texttt{ph.x} before \texttt{thermo\_pw}
+\qe\ \texttt{bin/} directory. Note that you need to compile \texttt{pw.x},
+\texttt{ph.x}, and \texttt{pp.x} before \texttt{thermo\_pw}.
+\thermo\ has been written on a PC with Linux operative system using the
+\texttt{gfortran} compiler with \texttt{openMPI} parallelization. Any other
+combination of computer/operative system has not been tested.
 
 \subsection{Uninstalling}
 
@@ -236,7 +238,7 @@ flgnuplot   : initial part of the name of the files where gnuplot scripts
 \end{verbatim}
 If you are running \thermo\ on a system that has not \texttt{gnuplot}
 you can disable the production of the postscript files and use some other
-graphical tools to produce the plots from the output data.
+graphical tools to produce the plots from the output data. 
 
 \subsection{\texttt{what='scf'}}
 With this option the code computes only the total energy. This is a single
@@ -245,9 +247,9 @@ No other input variable is necessary.
 An example of the use of this option can be found in \texttt{example01}.
 
 \subsection{\texttt{what='scf\_ke'}}
-This option makes several self-consistent calculations, in parallel on several
-images, varying the kinetic energy cut-off for the wavefunctions and for the 
-charge density. 
+With this option the code makes several self-consistent calculations, 
+in parallel on several images, varying the kinetic energy cut-off for 
+the wavefunctions and for the charge density. 
 In the input of \texttt{pw.x} one specifies the minimum values for these two 
 cut-offs. These values are then increased in fixed intervals controlled by the 
 following variables. The energy is then plotted as a function of the 
@@ -274,13 +276,13 @@ flpskeconv : name of the postscript file with the plot of the total energy as
 An example of the use of this option can be found in \texttt{example10}.
 
 \subsection{\texttt{what='scf\_nk'}}
-This option makes several self-consistent calculations, in parallel on several
-images, varying the size of the {\bf k}-point grid, and optionally for metals
-the smearing parameter \texttt{degauss}. In the input of \texttt{pw.x} 
-the minimum value of these parameters is given and these values are 
-increased in fixed intervals controlled by the following variables. On output 
-the energy is plotted as a function of the mesh size, one curve for each 
-smearing parameter.
+With this option the code makes several self-consistent calculations, 
+in parallel on several images, varying the size of the {\bf k}-point grid, 
+and optionally for metals the smearing parameter \texttt{degauss}. In the 
+input of \texttt{pw.x} the minimum value of these parameters is given and 
+these values are increased in fixed intervals controlled by the following 
+variables. On output the energy is plotted as a function of the mesh size, 
+one curve for each smearing parameter.
 
 \begin{verbatim}
 nnk        : the number of different values of nk to test
@@ -299,7 +301,7 @@ flpsnkconv : name of the postscript file with the k points convergence plot.
 An example of the use of this option can be found in \texttt{example11}.
 
 \subsection{\texttt{what='scf\_bands'}}
-With these options the code makes a self-consistent calculation followed 
+With this option the code makes a self-consistent calculation followed 
 by a band structure calculation. The output of the band structure calculation
 is further processed in order to produce a plot of the band structure.
 A minimal control of the plot can be obtained with the following variables.
@@ -332,27 +334,27 @@ point_label_type : the label definition (see the BZ manual)
 An example of the use of this option can be found in \texttt{example02}.
 
 \subsection{\texttt{what='scf\_ph'}}
-A phonon calculation is made at a single {\bf q} point or on a mesh of {\bf q}
-points, as specified in the input of the \texttt{ph.x} code after a 
-self-consistent \texttt{pw.x} calculation. No additional calculation is done 
-by the \thermo\ code. The different representations are calculated in 
-parallel when several images are available.
-No other input variable is necessary. The output of this calculation
-are the dynamical matrices files.
+With this option the code makes a phonon calculation at a single {\bf q} 
+point or on a mesh of {\bf q} points, as specified in the input of 
+the \texttt{ph.x} code after a self-consistent \texttt{pw.x} calculation. 
+The different representations are calculated in parallel when several images 
+are available. No other input variable is necessary. The outputs of this 
+calculation are the dynamical matrices files.
 An example of the use of this option can be found in \texttt{example03}.
 
 \subsection{\texttt{what='scf\_disp'}}
-A phonon dispersion calculation is made after the self-consistent run at
-a fixed geometry. The geometry is given in the input of \texttt{pw.x}. 
-The dynamical matrices are used to calculate the interatomic force
-constants and to interpolate the phonon dispersions along a path in the
-Brillouin zone. The path can be generated automatically on the basis of
-the Bravais lattice index or given in input as in a band structure
-calculation (see above \texttt{what='scf\_bands'}). The code then interpolates
-the phonon on a uniform mesh of {\bf q} points and computes the density
-of vibrational states with a smearing approach. The density of states is 
-used to calculate the harmonic thermodynamical properties: vibrational energy,
-vibrational free energy, vibrational entropy, and isochoric heat capacity.
+With this option the code makes a phonon dispersion calculation after the 
+self-consistent run at a fixed geometry. The geometry is given in the 
+input of \texttt{pw.x}. The dynamical matrices are used to calculate 
+the interatomic force constants and to interpolate the phonon dispersions 
+along a path in the Brillouin zone. The path can be generated automatically 
+on the basis of the Bravais lattice index or given in input as in a band 
+structure calculation (see above \texttt{what='scf\_bands'}). The code then 
+interpolates the phonon on a uniform mesh of {\bf q} points and computes the 
+density of vibrational states with a smearing approach. The density of 
+states is used to calculate the harmonic thermodynamical properties: 
+vibrational energy, vibrational free energy, vibrational entropy, and 
+isochoric heat capacity.
 The plotted numerical values are per moles in an Avogadro number of unit 
 cells. The same thermodynamical quantities are calculated also by direct 
 integration over the Brillouin zone and compared in the plots.
@@ -443,11 +445,12 @@ flpsmur    : postscript file of the Murnaghan plot
 An example of the use of this option can be found in \texttt{example05}.
 
 \subsection{\texttt{what='mur\_lc\_bands'}}
-This option computes the band structure at the geometry obtained from the
-minimum of the Murnaghan equation. See the options \texttt{what='scf\_bands'} 
-and \texttt{what='mur\_lc'} for a list of the variables that control these
-two options. They are used in the same way with the present option.
-An example of the use of this option can be found in \texttt{example06}.
+With this option the code computes the band structure at the geometry 
+obtained from the minimum of the Murnaghan equation. See the options 
+\texttt{what='scf\_bands'} and \texttt{what='mur\_lc'} for a list of 
+the variables that control these two options. They are used in the same 
+way with the present option. An example of the use of this option can be 
+found in \texttt{example06}.
 
 \subsection{\texttt{what='mur\_lc\_ph'}}
 This option is similar to \texttt{what='scf\_ph'} but the phonon calculation
@@ -466,7 +469,7 @@ They are used in the same way with the present option.
 An example of the use of this option can be found in \texttt{example08}.
 
 \subsection{\texttt{what='mur\_lc\_t'}}
-Using this option the \thermo\ code calculates the anharmonic vibrational
+With this option the code calculates the anharmonic vibrational
 properties of the system within the quasi-harmonic approximation. The
 outputs of the code are the lattice constant, bulk modulus, and pressure
 derivative of the bulk modulus as a function of temperature. Moreover
