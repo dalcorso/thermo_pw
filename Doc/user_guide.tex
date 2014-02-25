@@ -146,12 +146,6 @@ The \texttt{thermo\_pw} directory can be downloaded with the command
 \texttt{cvs -d :ext:anonymous@qeforge.qe-forge.org:}
 \texttt{/cvsroot/thermo\_pw co thermo\_pw}. 
 
-\subsection{Uninstalling}
-
-In order to remove \thermo\ from your \qe\ distribution, just enter in the
-\texttt{thermo\_pw} directory and give the command \texttt{make leave\_qe}.
-Then just remove the \texttt{thermo\_pw} directory.
-
 \subsection{Compiling}
 
 In order to compile \thermo\ the main \texttt{Makefile} and a few other
@@ -161,7 +155,14 @@ the files contained in \texttt{thermo\_pw} with those of the \qe\ package.
 Typing \texttt{make thermo\_pw} from the root \qe\ directory, or \texttt{make} 
 from the \texttt{thermo\_pw}\ directory, produces the executable
 \texttt{THERMO\_PW/src/thermo\_pw.x} that is linked in the 
-\qe\ \texttt{bin/} directory.
+\qe\ \texttt{bin/} directory. Note that you need to compile \texttt{pw.x}
+and \texttt{ph.x} before \texttt{thermo\_pw}
+
+\subsection{Uninstalling}
+
+In order to remove \thermo\ from your \qe\ distribution, just enter in the
+\texttt{thermo\_pw} directory and give the command \texttt{make leave\_qe}.
+Then just remove the \texttt{thermo\_pw} directory.
    
 \subsection{Running \thermo}
 

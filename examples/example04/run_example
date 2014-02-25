@@ -17,7 +17,7 @@ $ECHO "phonon dispersions and the harmonic thermodynamical properties of Si."
 . ../../../environment_variables
 
 # required executables and pseudopotentials
-BIN_LIST="thermo_pw.x plotband.x"
+BIN_LIST="thermo_pw.x"
 PSEUDO_LIST="Si.pz-vbc.UPF"
 
 $ECHO
