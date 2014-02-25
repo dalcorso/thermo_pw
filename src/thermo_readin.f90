@@ -22,7 +22,7 @@ SUBROUTINE thermo_readin()
   USE temperature,          ONLY : tmin, tmax, deltat, ntemp
   USE ifc,                  ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq, &
                                    zasr, freqmin_input, freqmax_input
-  USE input_parameters,     ONLY : outdir
+  USE input_parameters,     ONLY : outdir, ibrav
   USE read_input,           ONLY : read_input_file
   USE command_line_options, ONLY : input_file_ 
   USE control_paths,        ONLY : xqaux, wqaux, npk_label, letter, &
@@ -320,6 +320,9 @@ SUBROUTINE thermo_readin()
      ENDIF
   ENDIF
 
+  IF (ibrav > 3 .AND. what=='mur_lc_t') CALL errore('thermo_pw','option not &
+              & available for noncubic systems',1)
+     
   DEALLOCATE(input)
   DEALLOCATE(iun_image)
 
