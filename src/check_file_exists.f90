@@ -24,7 +24,6 @@ IF (meta_ionode) INQUIRE(FILE=TRIM(filename),EXIST=exst)
 CALL mp_bcast(exst, meta_ionode_id, world_comm)
 
 check_file_exists=exst
-write(6,*) 'file ', TRIM(filename), ' exists', exst
 
 RETURN
 END FUNCTION check_file_exists
@@ -63,7 +62,6 @@ DO iq=1,nqs
 END DO
 
 check_dyn_file_exists=exst_all
-write(6,*) 'file ', TRIM(filename), ' exists', exst_all
 
 RETURN
 END FUNCTION check_dyn_file_exists

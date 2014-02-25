@@ -26,7 +26,7 @@ SUBROUTINE run_thermo_asyncronously(nwork, part, igeom, auxdyn)
 
   INTEGER :: iq, irr
   INTEGER, ALLOCATABLE :: proc_num(:)
-  INTEGER :: proc_per_image, iwork, image
+  INTEGER :: proc_per_image, iwork, image, exit_status
   LOGICAL :: all_done_asyn
   !
   IF ( nwork == 0 ) RETURN
@@ -96,10 +96,10 @@ SUBROUTINE run_thermo_asyncronously(nwork, part, igeom, auxdyn)
                  END IF
                  WRITE(stdout,'(2x,76("+"),/)')
                  IF (lpwscf(iwork)) THEN
-                    CALL do_pwscf(.TRUE.)
+                    CALL do_pwscf(exit_status, .TRUE.)
                     energy_geo(iwork)=etot
                  ENDIF
-                 IF (lbands(iwork)) CALL do_pwscf(.FALSE.)
+                 IF (lbands(iwork)) CALL do_pwscf(exit_status, .FALSE.)
                  IF (lphonon(iwork)) CALL do_phonon(auxdyn) 
               ENDIF
            ENDIF
@@ -145,10 +145,10 @@ SUBROUTINE run_thermo_asyncronously(nwork, part, igeom, auxdyn)
               WRITE(stdout,'(2x,76("+"),/)')
  
               IF (lpwscf(iwork)) THEN
-                 CALL do_pwscf(.TRUE.)
+                 CALL do_pwscf(exit_status, .TRUE.)
                  energy_geo(iwork)=etot
               END IF
-              IF (lbands(iwork)) CALL do_pwscf(.FALSE.)
+              IF (lbands(iwork)) CALL do_pwscf(exit_status, .FALSE.)
               IF (lphonon(iwork)) THEN
                  CALL do_phonon(auxdyn) 
                  CALL collect_grid_files()
@@ -166,10 +166,10 @@ SUBROUTINE run_thermo_asyncronously(nwork, part, igeom, auxdyn)
         DO iwork = 1, nwork
            CALL set_thermo_work_todo(iwork, part, iq, irr, igeom)
            IF (lpwscf(iwork)) THEN
-              CALL do_pwscf(.TRUE.)
+              CALL do_pwscf(exit_status, .TRUE.)
               energy_geo(iwork)=etot
            END IF
-           IF (lbands(iwork)) CALL do_pwscf('bands')
+           IF (lbands(iwork)) CALL do_pwscf(exit_status, 'bands')
            IF (lphonon(iwork)) CALL do_phonon(auxdyn)
         END DO
      END IF

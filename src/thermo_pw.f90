@@ -48,7 +48,7 @@ PROGRAM thermo_pw
   USE environment,      ONLY : environment_start, environment_end
   USE mp_world,         ONLY : world_comm
   USE mp_asyn,          ONLY : with_asyn_images
-  USE control_ph,       ONLY : wai => with_ext_images, always_run
+  USE control_ph,       ONLY : wai => with_asyn_images, always_run
   USE io_global,        ONLY : ionode, stdout
   USE mp,               ONLY : mp_sum
   USE control_thermo,   ONLY : lev_syn_1, lev_syn_2, lpwscf_syn_1, &
@@ -84,7 +84,7 @@ PROGRAM thermo_pw
   CHARACTER (LEN=256) :: auxdyn=' '
   CHARACTER (LEN=256) :: diraux=' '
   CHARACTER(LEN=6) :: int_to_char
-  INTEGER :: part, nwork, igeom, itemp, nspin0, itry
+  INTEGER :: part, nwork, igeom, itemp, nspin0, itry, exit_status
   REAL(DP) :: compute_alat_geo
   LOGICAL :: all_done_asyn
   LOGICAL  :: exst, parallelfs
@@ -185,7 +185,7 @@ PROGRAM thermo_pw
 !
 !   do the self consistent calculation at the new lattice constant
 !
-        CALL do_pwscf(.TRUE.)
+        CALL do_pwscf(exit_status, .TRUE.)
         IF (lbands_syn_1) THEN
 !
 !   do the band calculation after setting the path
@@ -193,7 +193,7 @@ PROGRAM thermo_pw
            CALL set_paths_disp()
            CALL set_k_points()
            IF (nbnd_bands > nbnd) nbnd = nbnd_bands
-           CALL do_pwscf(.FALSE.)
+           CALL do_pwscf(exit_status, .FALSE.)
            nspin0=nspin
            IF (nspin==4) nspin0=1
            DO spin_component = 1, nspin0
