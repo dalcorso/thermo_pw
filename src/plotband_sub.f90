@@ -553,6 +553,7 @@ USE gnuplot,       ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
                           gnuplot_write_file_data, gnuplot_ylabel, &
                           gnuplot_write_vertical_line, gnuplot_write_label, &
                           gnuplot_write_horizontal_line, &
+                          gnuplot_write_label_yl, gnuplot_write_command, &
                           gnuplot_set_eref, gnuplot_unset_xticks
 USE io_global,     ONLY : ionode
 
@@ -567,8 +568,8 @@ LOGICAL, INTENT(IN) :: exist_rap
 
 INTEGER :: ilines, irap, n, ierr
 INTEGER :: system
-REAL(DP) :: ypos
-CHARACTER(LEN=256) :: gnu_filename, filename
+REAL(DP) :: shift
+CHARACTER(LEN=256) :: gnu_filename, filename, command
 CHARACTER(LEN=30) :: colore(12)
 CHARACTER(LEN=6), EXTERNAL :: int_to_char
 
@@ -602,18 +603,22 @@ ELSEIF (icode==2) THEN
 ELSEIF (icode==3) THEN
    CALL gnuplot_ylabel('{/Symbol g}_{/Symbol n}({/Helvetica-Bold q})',.FALSE.) 
 ENDIF
-ypos= emin - (emax-emin) / 40.0_DP
 DO ilines = 2, nlines
    CALL gnuplot_write_vertical_line(kx(point(ilines)), 2, 'front', 'black', &
                                      .FALSE.)
 END DO
 CALL gnuplot_set_eref(eref,.FALSE.)   
+!
+!  The letters are below the minimum of this quantity
+!
+command="shift=-(ymax - ymin)/40."
+CALL gnuplot_write_command(TRIM(command), .FALSE.)
 
 DO n=1, nqaux
    IF (n /= 1 .AND. n /= nqaux ) &
       CALL gnuplot_write_vertical_line(kx(label_disp_q(n)), 1, 'front', &
                                        'black', .FALSE.)
-   CALL gnuplot_write_label(kx(label_disp_q(n)), ypos, letter_path(n),.FALSE.)
+   CALL gnuplot_write_label_yl(kx(label_disp_q(n)), ' ymin + shift ', letter_path(n),.FALSE.)
 ENDDO
 
 colore(1)='red'

@@ -18,10 +18,10 @@ MODULE gnuplot
            gnuplot_write_vertical_line, gnuplot_write_horizontal_line, &
            gnuplot_write_label, gnuplot_write_file_data, gnuplot_start, &
            gnuplot_set_eref, gnuplot_set_fact, gnuplot_set_gfact, &
-           gnuplot_xlabel, gnuplot_ylabel, &
+           gnuplot_xlabel, gnuplot_ylabel, gnuplot_write_label_yl, &
            gnuplot_unset_xticks, gnuplot_unset_yticks, &
            gnuplot_write_file_mul_data, gnuplot_write_file_mul_point, &
-           gnuplot_write_file_mul_data_sum, &
+           gnuplot_write_file_mul_data_sum, gnuplot_write_command, &
            gnuplot_end
 
 CONTAINS
@@ -121,6 +121,33 @@ IF (ionode) WRITE(iun_gnuplot, frt)  TRIM(ws), xcoord, ycoord
 RETURN
 END SUBROUTINE gnuplot_write_label
 
+SUBROUTINE gnuplot_write_label_yl(xcoord, ylabel, label, comment)
+!
+!   This subroutine puts a label in a y position calculated by the
+!   gnuplot script
+!
+IMPLICIT NONE
+REAL(DP), INTENT(IN) :: xcoord
+CHARACTER(LEN=*), INTENT(IN) :: ylabel
+CHARACTER(LEN=3) :: label
+CHARACTER(LEN=20) :: ws
+CHARACTER(LEN=256) :: frt
+LOGICAL :: comment
+
+IF (label(1:1)=='g') THEN
+    ws="{/Symbol "//label(2:3)//"}"
+ELSE
+    ws=label
+ENDIF
+
+frt='("set label """,a,""" at ", f12.4,",",a," center")'
+IF (comment) frt = '# ' // TRIM(frt)
+
+IF (ionode) WRITE(iun_gnuplot, frt)  TRIM(ws), xcoord, TRIM(ylabel)
+
+RETURN
+END SUBROUTINE gnuplot_write_label_yl
+
 SUBROUTINE gnuplot_ylabel(label, comment)
 IMPLICIT NONE
 CHARACTER(LEN=*), INTENT(IN) :: label
@@ -134,6 +161,7 @@ IF (ionode.AND. label /=' ') WRITE(iun_gnuplot, frt) TRIM(label)
 
 RETURN
 END SUBROUTINE gnuplot_ylabel
+
 
 SUBROUTINE gnuplot_xlabel(label, comment)
 IMPLICIT NONE
@@ -322,7 +350,27 @@ IF (ionode) &
 RETURN
 END SUBROUTINE gnuplot_write_file_mul_point
 
+SUBROUTINE gnuplot_write_command(command, comment)
+!
+!   this subroutine writes a command in a gnuplot script
+!
+IMPLICIT NONE
+CHARACTER(LEN=*), INTENT(IN) :: command
+CHARACTER(LEN=256) :: frt
+LOGICAL :: comment
+
+frt = TRIM(command)
+IF (comment) frt = '# ' // TRIM(frt)
+
+IF (ionode.AND. command /=' ') WRITE(iun_gnuplot, '(a)') TRIM(frt) 
+
+RETURN
+END SUBROUTINE gnuplot_write_command
+
 SUBROUTINE gnuplot_start(filename_gnu)
+!
+!  This routine opens the gnuplot script file
+!
 IMPLICIT NONE
 CHARACTER(LEN=*) :: filename_gnu
 
@@ -335,6 +383,9 @@ RETURN
 END SUBROUTINE gnuplot_start
 
 SUBROUTINE gnuplot_end
+!
+!  This routine closes the gnuplot script file
+!
 IMPLICIT NONE
 
 IF (ionode) CLOSE(UNIT=iun_gnuplot, STATUS='KEEP') 
