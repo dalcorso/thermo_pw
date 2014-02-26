@@ -320,6 +320,7 @@ MODULE control_bands
   CHARACTER(LEN=256) :: flpband ! the name of the output file
   REAL(DP) :: emin_input     ! minimum energy of the plot (eV)
   REAL(DP) :: emax_input     ! maximum energy of the plot (eV)
+  LOGICAL  :: lsym           ! if .TRUE. does the symmetry analysis of the bands
 
 END MODULE control_bands
 

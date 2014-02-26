@@ -34,7 +34,8 @@ SUBROUTINE thermo_readin()
                                    flpsmur, flpsdos, flpstherm, flpsanhar, &
                                    flpskeconv, flpsnkconv, flpsgrun,   &
                                    lgnuplot, gnuplot_command
-  USE control_bands,        ONLY : flpband, emin_input, emax_input, nbnd_bands
+  USE control_bands,        ONLY : flpband, emin_input, emax_input, nbnd_bands,&
+                                   lsym 
   USE control_grun,         ONLY : flpgrun, grunmin_input, grunmax_input
   USE control_conv,         ONLY : nke, deltake, nkeden, deltakeden, &
                                    nnk, deltank, nsigma, deltasigma
@@ -72,6 +73,7 @@ SUBROUTINE thermo_readin()
                             q_in_cryst_coord,               &
                             point_label_type,               &
                             nbnd_bands,                     &
+                            lsym,                           &
                             ntry,                           &
                             flevdat,                        &
                             flpband, flpgrun,               &
@@ -121,6 +123,7 @@ SUBROUTINE thermo_readin()
   nbnd_bands=0
   emin_input=0.0_DP
   emax_input=0.0_DP
+  lsym=.TRUE.
 
   vmin_input=0.0_DP
   vmax_input=0.0_DP

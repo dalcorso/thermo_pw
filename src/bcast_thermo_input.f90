@@ -21,7 +21,7 @@ SUBROUTINE bcast_thermo_input()
                               freqmin_input, freqmax_input
   USE control_paths,   ONLY : q_in_band_form, q_in_cryst_coord, q2d, &
                               point_label_type
-  USE control_bands,   ONLY : flpband, emin_input, emax_input, nbnd_bands
+  USE control_bands,   ONLY : flpband, emin_input, emax_input, nbnd_bands, lsym
   USE control_grun,    ONLY : flpgrun
   USE control_gnuplot, ONLY : flgnuplot, flpsband, flpsdisp, &
                               flpsdisp, flpsdos, flpstherm, &
@@ -58,6 +58,7 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( ndos_input, meta_ionode_id, world_comm )
   CALL mp_bcast( deltafreq, meta_ionode_id, world_comm )
   CALL mp_bcast( nbnd_bands, meta_ionode_id, world_comm )
+  CALL mp_bcast( lsym, meta_ionode_id, world_comm )
   CALL mp_bcast( vmin_input, meta_ionode_id, world_comm )
   CALL mp_bcast( vmax_input, meta_ionode_id, world_comm )
   CALL mp_bcast( deltav, meta_ionode_id, world_comm )

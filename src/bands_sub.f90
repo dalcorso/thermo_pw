@@ -12,14 +12,12 @@ SUBROUTINE bands_sub()
   USE control_thermo,   ONLY : filband, spin_component
   USE control_paths,    ONLY : q2d
   USE control_flags,    ONLY : gamma_only
+  USE control_bands,    ONLY : lsym
   USE klist,            ONLY : two_fermi_energies
   USE noncollin_module, ONLY : i_cons
   !
   IMPLICIT NONE
   !
-  LOGICAL :: lsym
-
-  lsym=.TRUE.
   IF (q2d) lsym=.FALSE.
 
   CALL clean_pw(.TRUE.)
@@ -37,7 +35,7 @@ SUBROUTINE bands_sub()
      CALL punch_band_2d(filband, spin_component)
   ELSE
      CALL write_bands(filband, spin_component)
-     CALL sym_band_sub(filband,spin_component)
+     IF (lsym) CALL sym_band_sub(filband,spin_component)
   END IF
   CALL clean_pw(.FALSE.)
   !
