@@ -26,12 +26,14 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   ! ..      to return a different value for different reasons)
   ! ... Will be eventually merged with NEB
   !
+  USE kinds,            ONLY : DP
   USE io_global,        ONLY : stdout, ionode, ionode_id
   USE parameters,       ONLY : ntypx, npk, lmaxx
   USE cell_base,        ONLY : fix_volume, fix_area
   USE basis,            ONLY : starting_pot, startingconfig
-  USE control_flags,    ONLY : conv_elec, gamma_only, lscf, lbands
-  USE control_flags,    ONLY : conv_ions, istep, nstep, restart, lmd, lbfgs
+  USE control_flags,    ONLY : conv_elec, gamma_only, lscf, lbands, ethr, &
+                               conv_ions, istep, nstep, restart, lmd, lbfgs
+  USE input_parameters, ONLY : diago_thr_init
   USE force_mod,        ONLY : lforce, lstres, sigma, force
   USE check_stop,       ONLY : check_stop_init, check_stop_now
   USE mp_images,        ONLY : intra_image_comm
@@ -56,6 +58,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
      lscf=.FALSE.
      lbands=.TRUE.
   ENDIF
+  ethr=diago_thr_init
   !
   CALL check_stop_init()
   !
