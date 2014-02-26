@@ -1,13 +1,13 @@
 This is the distribution of the thermo_pw package. This program is
-a driver to compute rapidly the physical properties of materials, 
+a driver to compute rapidly the most common physical properties of materials, 
 using the Quantum ESPRESSO (QE) (see http://www.quantum-espresso.org)
-routines as the underlying electronic structure code.
-Almost all quantities calculated here can be calculated also by the
+routines as the underlying engine.
+All quantities calculated by thermo_pw can be calculated also by the
 QE package. Thermo_pw decreases the number of steps necessary to obtain 
-a postscript picture of some quantities. See the Doc/README file for a list
-of the quantities presently available in thermo_pw. The package is optimized
-for parallel machines. In addition to the standard QE parallelization schemes
-thermo_pw uses, in many cases, the image parallelization to parallelize as 
+a postscript picture of some quantities. See the Doc/user_guide.pdf file 
+for a list of the quantities presently available in thermo_pw. The package 
+can run on parallel machines. In addition to the standard QE parallelization 
+schemes thermo_pw can use the image parallelization to parallelize as 
 much as possible the different tasks, but it can also run with a single
 image.
 Thermo_pw is much less flexible than QE and probably after using it
@@ -17,25 +17,7 @@ dispersions, or for the calculation of the thermodynamical properties of
 materials, thermo_pw can be much easier to learn and faster to use, requiring
 a much reduced number of information from the user.
 
-Installation instructions:
-   Put the thermo_pw directory inside the QE main directory. 
-   Enter in the thermo_pw directory and give the following commands
-   cp ./main_Makefile ../Makefile
-   cp ./plugins_makefile ../install
-   cd ..
-   make thermo_pw
-
-The executable thermo_pw.x will be found in the bin directory of QE.
-Note that the main Makefile and the file plugin-install of the QE distribution
-are modified by these instuctions, so you may want to save them before 
-installing thermo_pw.
-
-Please see the Doc directory for a description of the package and of its
-capabilities and the examples directory to find some scripts that illustrate
-the use of the code.
-
-To uninstall the package, just remove the thermo_pw directory and restore
-the QE Makefile and plugins_makefile.
+Installation instructions: See the Doc/user_guide.pdf.
 
 All the material included in this distribution is free software;
 you can redistribute it and/or modify it under the terms of the GNU
@@ -50,5 +32,3 @@ for more details.
 You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 675 Mass Ave, Cambridge, MA 02139, USA.
-
-
