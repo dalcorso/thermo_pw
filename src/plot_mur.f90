@@ -27,6 +27,7 @@ USE io_global,       ONLY : ionode
 IMPLICIT NONE
 
 CHARACTER(LEN=256) :: filename, filename1, filename2, gnu_filename
+INTEGER :: system
 INTEGER :: ierr
 
 IF ( my_image_id /= root_image ) RETURN

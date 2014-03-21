@@ -31,6 +31,7 @@ IMPLICIT NONE
 
 CHARACTER(LEN=256) :: gnu_filename, filename, filename1, filename2, filename3
 CHARACTER(LEN=6), EXTERNAL :: int_to_char
+INTEGER :: system
 INTEGER :: ierr
 
 IF ( my_image_id /= root_image ) RETURN

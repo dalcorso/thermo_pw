@@ -29,6 +29,7 @@ IMPLICIT NONE
 
 CHARACTER(LEN=256) :: gnu_filename, filename
 CHARACTER(LEN=6), EXTERNAL :: int_to_char
+INTEGER :: system
 INTEGER :: isigma, ierr
 REAL(DP) :: xmin, xmax
 
