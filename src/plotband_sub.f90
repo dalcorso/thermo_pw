@@ -20,6 +20,8 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
   ! 3   gruneisen parameters plot         
   ! 
   USE kinds, ONLY : DP
+  USE klist, ONLY : two_fermi_energies
+  USE noncollin_module, ONLY : noncolin
   USE control_thermo, ONLY : filband, flfrq, flgrun
   USE control_bands, ONLY : emin_input, emax_input, flpband
   USE control_grun,  ONLY : flpgrun, grunmin_input, grunmax_input
@@ -48,6 +50,7 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
   INTEGER :: nks = 0, nbnd = 0, nlines
   INTEGER :: nks_rap = 0, nbnd_rap = 0
   INTEGER :: ilines, irap, ibnd, ipoint, jnow, ios, i, j, n, ierr
+  INTEGER :: nbnd_occ
   LOGICAL, ALLOCATABLE :: high_symmetry(:), is_in_range(:), &
                           is_in_range_rap(:), todo(:,:), has_points(:,:)
   LOGICAL :: exist_rap
@@ -219,7 +222,7 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
      dxmod=sqrt ( (k(1,n)-k(1,n-1))**2 + &
                   (k(2,n)-k(2,n-1))**2 + &
                   (k(3,n)-k(3,n-1))**2 )
-     IF (dxmod > 5*dxmod_save) THEN
+     IF (dxmod > 8.0_DP*dxmod_save) THEN
 !
 !   A big jump in dxmod is a sign that the point k(:,n) and k(:,n-1)
 !   are quite distant and belong to two different lines. We put them on
@@ -260,7 +263,14 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
      IF (degauss > 0.0_DP) THEN
         eref=ef * rytoev
      ELSE
-        DO ibnd=1, NINT(nelec/2)
+        IF (noncolin) THEN
+           nbnd_occ=nelec
+        ELSE
+           IF (two_fermi_energies) CALL errore('plotband_sub',&
+                                'two fermi energies not implemented',1)
+           nbnd_occ=nelec/2
+        ENDIF
+        DO ibnd=1, nbnd_occ
            IF (e(ibnd,1) > eref) eref=e(ibnd,1)
         END DO
      END IF
