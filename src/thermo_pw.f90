@@ -48,15 +48,20 @@ PROGRAM thermo_pw
   USE environment,      ONLY : environment_start, environment_end
   USE mp_world,         ONLY : world_comm
   USE mp_asyn,          ONLY : with_asyn_images
-  USE control_ph,       ONLY : wai => with_ext_images, always_run
+  USE control_ph,       ONLY : with_ext_images, always_run
   USE io_global,        ONLY : ionode, stdout
   USE mp,               ONLY : mp_sum
   USE control_thermo,   ONLY : lev_syn_1, lev_syn_2, lpwscf_syn_1, &
                                lbands_syn_1, lph, outdir_thermo, lq2r, &
                                lmatdyn, ldos, ltherm, flfrc, flfrq, fldos, &
                                fltherm, spin_component, flevdat, &
-                               lconv_ke_test, lconv_nk_test, compute_lc
+                               lconv_ke_test, lconv_nk_test, compute_lc, &
+                               lelastic_const
   USE ifc,              ONLY : freqmin, freqmax
+  USE elastic_constants, ONLY : print_elastic_constants, &
+                                compute_elastic_constants, epsilon_geo, &
+                                sigma_geo
+  USE control_elastic_constants, ONLY : ibrav_save
   USE control_paths,    ONLY : nqaux
   USE control_gnuplot,  ONLY : flpsdos, flgnuplot, flpstherm, flpsdisp
   USE control_bands,    ONLY : flpband, nbnd_bands
@@ -69,6 +74,7 @@ PROGRAM thermo_pw
   USE input_parameters, ONLY : ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
                                trd_ht, rd_ht, cell_units, outdir
   USE control_mur,      ONLY : vmin, b0, b01, emin
+  USE control_flags,    ONLY : tstress
   USE thermo_mod,       ONLY : what, ngeo, alat_geo, omega_geo, energy_geo, ntry
   USE ph_restart,       ONLY : destroy_status_run
   USE save_ph,          ONLY : clean_input_variables
@@ -128,6 +134,11 @@ PROGRAM thermo_pw
         CALL mp_sum(energy_geo, world_comm)
         energy_geo=energy_geo / nproc_image
         CALL write_energy(nwork, file_dat)
+        IF (tstress) THEN
+           CALL mp_sum(sigma_geo, world_comm)
+           sigma_geo=sigma_geo / nproc_image
+           CALL write_stress(nwork, file_dat)
+        ENDIF
      ELSE
         CALL read_energy(nwork, file_dat)
      ENDIF
@@ -154,6 +165,15 @@ PROGRAM thermo_pw
         CALL mur(vmin,b0,b01,emin)
         CALL plot_mur()
      ENDIF
+!
+!  If this is an elastic constant calculations, the elastic constants
+!  are calculated here
+!
+     IF (lelastic_const) THEN
+        CALL compute_elastic_constants(sigma_geo, epsilon_geo, nwork, ngeo, &
+                                       ibrav_save)
+        CALL print_elastic_constants(what)
+     ENDIF
      !
      CALL deallocate_asyn()
   END DO
@@ -168,12 +188,8 @@ PROGRAM thermo_pw
                                                  omega_geo(ngeo/2+1))
         CALL cell_base_init ( ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
                          trd_ht, rd_ht, cell_units )
-        dfftp%nr1=0
-        dfftp%nr2=0
-        dfftp%nr3=0
-        dffts%nr1=0
-        dffts%nr2=0
-        dffts%nr3=0
+        CALL clean_dfft()
+
      END IF
 
      outdir=TRIM(outdir_thermo)//'g1/'
@@ -215,7 +231,7 @@ PROGRAM thermo_pw
      !
      ! ... reads the phonon input
      !
-     wai=with_asyn_images
+     with_ext_images=with_asyn_images
      always_run=.TRUE.
      CALL start_clock( 'PHONON' )
      DO igeom=1,ngeo

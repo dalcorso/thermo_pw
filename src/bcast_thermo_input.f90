@@ -30,6 +30,7 @@ SUBROUTINE bcast_thermo_input()
                               lgnuplot, gnuplot_command
   USE control_conv,    ONLY : nke, deltake, nkeden, deltakeden, &
                               nnk, deltank, nsigma, deltasigma
+  USE control_elastic_constants, ONLY : delta_epsilon
   USE mp_world,        ONLY : world_comm
   USE mp,              ONLY : mp_bcast
   USE io_global,       ONLY : meta_ionode_id
@@ -67,6 +68,7 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( deltake, meta_ionode_id, world_comm )
   CALL mp_bcast( nkeden, meta_ionode_id, world_comm )
   CALL mp_bcast( deltakeden, meta_ionode_id, world_comm )
+  CALL mp_bcast( delta_epsilon, meta_ionode_id, world_comm )
   CALL mp_bcast( nnk, meta_ionode_id, world_comm )
   CALL mp_bcast( deltank, meta_ionode_id, world_comm )
   CALL mp_bcast( nsigma, meta_ionode_id, world_comm )

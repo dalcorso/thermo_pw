@@ -101,6 +101,8 @@ Gruneisen parameters. Thermal expansion as a function of temperature.
 Isobaric molar heat capacity as a function of temperature.
 Isoentropic bulk modulus as a function of temperature.
 Average Gruneisen parameter as a function of temperature.
+
+\item Frozen ions and real elastic constants.
 \end{itemize}
 
 \thermo\ can run in parallel using all the parallel modes available in
@@ -505,4 +507,22 @@ flpsanhar     : postscript file of the anharmonic quantities.
 The output file corresponding to different geometries can be identified
 by the presence of the letters \texttt{g1}, \texttt{g2}, ... in the filename.
 An example of the use of this option can be found in \texttt{example09}.
+
+\subsection{\texttt{what='elastic\_constants'}}
+With this option the code calculates the elastic constants of the solid.
+Depending on the Laue class, it calculates the stress tensor for a set of 
+strains of the lattice. For each strain, it relaxes the ions to their 
+equilibrium positions. Finally it computes the elastic constants from
+the numerical derivatives of the stress with respect to strain.
+The number of independent strains is \texttt{ngeo}. The input variables
+that control this option are:
+\begin{verbatim}
+delta_epsilon : the interval of strain values between two geometries.
+                The central geometry has zero strain (ngeo must be odd).
+\end{verbatim}
+
+\subsection{\texttt{what='fi\_elastic\_constants'}}
+As \texttt{what='elastic\_constants'} but the ionic positions are not 
+relaxed, but only strained according to each strain.
+
 \end{document}

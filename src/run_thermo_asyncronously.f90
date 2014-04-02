@@ -16,8 +16,10 @@ SUBROUTINE run_thermo_asyncronously(nwork, part, igeom, auxdyn)
                               asyn_master_work, with_asyn_images
   USE thermo_priority, ONLY : npriority, priority, max_priority
   USE thermo_mod,      ONLY : alat_geo, energy_geo, ngeo
-  USE control_thermo,  ONLY : lpwscf, lbands, lphonon
+  USE control_thermo,  ONLY : lpwscf, lstress, lbands, lphonon
+  USE elastic_constants, ONLY : sigma_geo
   USE ener,            ONLY : etot
+  USE force_mod,       ONLY : sigma
   !
   IMPLICIT NONE
   !
@@ -98,6 +100,9 @@ SUBROUTINE run_thermo_asyncronously(nwork, part, igeom, auxdyn)
                  IF (lpwscf(iwork)) THEN
                     CALL do_pwscf(exit_status, .TRUE.)
                     energy_geo(iwork)=etot
+                    IF (lstress(iwork)) THEN
+                       sigma_geo(:,:,iwork)=sigma(:,:)
+                    ENDIF
                  ENDIF
                  IF (lbands(iwork)) CALL do_pwscf(exit_status, .FALSE.)
                  IF (lphonon(iwork)) CALL do_phonon(auxdyn) 
@@ -147,6 +152,9 @@ SUBROUTINE run_thermo_asyncronously(nwork, part, igeom, auxdyn)
               IF (lpwscf(iwork)) THEN
                  CALL do_pwscf(exit_status, .TRUE.)
                  energy_geo(iwork)=etot
+                 IF (lstress(iwork)) THEN
+                    sigma_geo(:,:,iwork)=sigma(:,:)
+                 ENDIF
               END IF
               IF (lbands(iwork)) CALL do_pwscf(exit_status, .FALSE.)
               IF (lphonon(iwork)) THEN
@@ -168,6 +176,9 @@ SUBROUTINE run_thermo_asyncronously(nwork, part, igeom, auxdyn)
            IF (lpwscf(iwork)) THEN
               CALL do_pwscf(exit_status, .TRUE.)
               energy_geo(iwork)=etot
+              IF (lstress(iwork)) THEN
+                 sigma_geo(:,:,iwork)=sigma(:,:)
+              ENDIF
            END IF
            IF (lbands(iwork)) CALL do_pwscf(exit_status, 'bands')
            IF (lphonon(iwork)) CALL do_phonon(auxdyn)

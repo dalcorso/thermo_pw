@@ -49,7 +49,7 @@ END SUBROUTINE read_energy
 SUBROUTINE write_energy(nwork, filename)
   !-----------------------------------------------------------------------
   !
-  !  This routine reads the energy at each lattice constant if this is
+  !  This routine writes the energy at each lattice constant if this is
   !  already on file. It must be called by all processors, only the
   !  meta_ionode reads the data and sends them to all the others
   !
@@ -83,3 +83,46 @@ SUBROUTINE write_energy(nwork, filename)
   RETURN
   !
 END SUBROUTINE write_energy
+
+!-------------------------------------------------------------------------
+SUBROUTINE write_stress(nwork, filename)
+  !-----------------------------------------------------------------------
+  !
+  !  This routine writes the stress at each lattice constant if this is
+  !  already on file. It must be called by all processors, only the
+  !  meta_ionode reads the data and sends them to all the others
+  !
+  !
+  USE kinds,      ONLY : DP
+  USE elastic_constants, ONLY : sigma_geo
+  USE io_global,  ONLY : meta_ionode, meta_ionode_id
+  USE mp_world,   ONLY : world_comm
+  USE mp,         ONLY : mp_bcast
+
+  IMPLICIT NONE
+  INTEGER, INTENT(IN) :: nwork
+  CHARACTER(LEN=256), INTENT(IN) :: filename
+  INTEGER :: iu_ev, iwork, ipol, jpol, ios
+  !
+  IF (meta_ionode) THEN
+     iu_ev=2
+     OPEN(UNIT=iu_ev, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED', &
+         ERR=20, IOSTAT=ios)
+     DO iwork=1,nwork
+        DO ipol=1,3
+           WRITE(iu_ev,'(3e25.15)', ERR=20, IOSTAT=ios) &
+                      (sigma_geo(ipol,jpol,iwork), jpol=1,3)
+        ENDDO
+        WRITE(iu_ev, *)
+     ENDDO
+     !
+     CLOSE(iu_ev)
+     !
+  END IF
+  !
+20 CALL mp_bcast(ios, meta_ionode_id, world_comm)
+  IF (ios /= 0 ) CALL errore('write_ev_dat','opening or writing output file',1)
+  !
+  RETURN
+  !
+END SUBROUTINE write_stress

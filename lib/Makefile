@@ -6,6 +6,7 @@ include ../../make.sys
 MODFLAGS= $(MOD_FLAG)../iotk/src $(MOD_FLAG)../../Modules $(MOD_FLAG).
 
 MODULES = \
+elastic_const.o \
 gnuplot.o \
 mp_asyn.o \
 phdos_module.o \

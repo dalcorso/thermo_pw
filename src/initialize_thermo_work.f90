@@ -18,7 +18,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   USE control_thermo, ONLY : lpwscf, lbands, lphonon, lev_syn_1, lev_syn_2, &
                              lph, lpwscf_syn_1, lbands_syn_1, ldos, lq2r,   &
                              lmatdyn, ltherm, lconv_ke_test, lconv_nk_test, &
-                             compute_lc
+                             compute_lc, lstress, lelastic_const
   USE control_conv,   ONLY : nke, ke, deltake, nkeden, deltakeden, keden, &
                              nnk, nk_test, deltank, nsigma, sigma_test, &  
                              deltasigma
@@ -137,7 +137,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            IF ( ALLOCATED(energy_geo) ) THEN
               compute_lc=.FALSE.
               alat_new=alat_geo(ngeo/2+1)*( vmin / omega_geo(ngeo/2+1) ) &
-                                         ** (1.0_DP/3.0_DP)
+                                         ** (1.0_DP /3.0_DP)
               IF ( ABS(alat_geo(ngeo/2+1)-alat_new) > step_ngeo ) THEN
                  alat=alat_new
                  compute_lc=.TRUE.
@@ -163,6 +163,16 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               CALL allocate_thermodynamics()
               CALL allocate_anharmonic()
            ENDIF
+        CASE ('elastic_constants', 'fi_elastic_constants')
+           IF ( ALLOCATED(energy_geo) ) THEN
+              compute_lc=.FALSE.
+           ELSE
+              CALL set_elastic_cons_work(nwork, ngeo) 
+              ALLOCATE(alat_geo(nwork))
+              ALLOCATE(energy_geo(nwork))
+              ALLOCATE(omega_geo(nwork))
+              lelastic_const=.TRUE.
+           ENDIF
      END SELECT
   ELSE IF (part == 2 ) THEN
 !
@@ -184,11 +194,13 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   IF ( nwork == 0 .OR. .NOT. compute_lc ) RETURN
 
   ALLOCATE( lpwscf(nwork) )
+  ALLOCATE( lstress(nwork) )
   ALLOCATE( lbands(nwork) )
   ALLOCATE( lphonon(nwork) )
-  lpwscf=.FALSE.
-  lbands=.FALSE.
-  lphonon=.FALSE.
+  lpwscf  = .FALSE.
+  lstress = .FALSE.
+  lbands  = .FALSE.
+  lphonon = .FALSE.
 
   IF (part == 1) THEN
      SELECT CASE (TRIM(what))
@@ -196,8 +208,10 @@ SUBROUTINE initialize_thermo_work(nwork, part)
         CASE ('mur_lc', 'mur_lc_bands', 'mur_lc_ph', 'mur_lc_disp', &
               'mur_lc_t' )
            lpwscf(1:ngeo)=.TRUE.
-        CASE ( 'scf_ke', 'scf_nk' )
+        CASE ( 'scf_ke', 'scf_nk', 'elastic_constants', 'fi_elastic_constants' )
            lpwscf(1:nwork)=.TRUE.
+           IF (what=='elastic_constants' .OR. what=='fi_elastic_constants') &
+              lstress(1:nwork)=.TRUE.
         CASE DEFAULT
           CALL errore('initialize_thermo_work','unknown what',1)
      END SELECT

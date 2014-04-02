@@ -40,6 +40,10 @@ SUBROUTINE thermo_readin()
   USE control_conv,         ONLY : nke, deltake, nkeden, deltakeden, &
                                    nnk, deltank, nsigma, deltasigma
   USE control_mur,          ONLY : vmin_input, vmax_input, deltav, nvol
+  USE control_elastic_constants, ONLY : at_save, tau_save, delta_epsilon, &
+                                        ibrav_save
+  USE cell_base,            ONLY : at
+  USE ions_base,            ONLY : tau, nat
   USE mp_world,             ONLY : world_comm
   USE mp_images,            ONLY : nimage, my_image_id, root_image
   USE parser,               ONLY : read_line, parse_unit
@@ -84,6 +88,7 @@ SUBROUTINE thermo_readin()
                             emin_input, emax_input,         &
                             vmin_input, vmax_input, deltav, &
                             grunmin_input, grunmax_input,   &
+                            delta_epsilon,                  &
                             nvol, nke, deltake,             &
                             nkeden, deltakeden,             &
                             nnk, deltank, nsigma, deltasigma, &
@@ -138,7 +143,8 @@ SUBROUTINE thermo_readin()
   nnk=5
   deltank=2 
   nsigma=1  
-  deltasigma=0.005 
+  deltasigma=0.005_DP
+  delta_epsilon=0.005_DP
 
   grunmin_input=0.0_DP
   grunmax_input=0.0_DP
@@ -186,6 +192,7 @@ SUBROUTINE thermo_readin()
 
   IF ( ngeo==0 ) THEN
      IF (what(1:4) == 'scf_') ngeo=1
+     IF (what(1:4) == 'elas' .OR. what(1:4)=='fi_e') ngeo=5
      IF (what(1:6) == 'mur_lc') ngeo=9
   END IF
 
@@ -312,6 +319,10 @@ SUBROUTINE thermo_readin()
   CALL read_input_file('PW',TRIM(input(my_image_id+1)))
   outdir_thermo=outdir
   CALL iosys()
+  at_save = at
+  ALLOCATE(tau_save(3,nat))
+  tau_save=tau
+  ibrav_save=ibrav
   input_file_=input(my_image_id+1)
   IF (ionode) THEN
      INQUIRE( FILE=TRIM(input(my_image_id+1)), EXIST = exst )

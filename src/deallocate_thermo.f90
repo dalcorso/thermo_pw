@@ -23,6 +23,7 @@ SUBROUTINE deallocate_thermo()
   USE control_paths,    ONLY : xqaux, wqaux, letter, label_list, letter_path, &
                                label_disp_q, disp_q, disp_wq
   USE control_conv,     ONLY : ke, keden, nk_test, sigma_test
+  USE elastic_constants, ONLY : epsilon_geo, sigma_geo, epsilon_voigt
 
   IMPLICIT NONE
   !
@@ -69,6 +70,10 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (label_disp_q) )    DEALLOCATE(label_disp_q)
   IF ( ALLOCATED (disp_q) )          DEALLOCATE(disp_q)
   IF ( ALLOCATED (disp_wq) )         DEALLOCATE(disp_wq)
+
+  IF ( ALLOCATED (epsilon_voigt) )   DEALLOCATE(epsilon_voigt)
+  IF ( ALLOCATED (epsilon_geo) )     DEALLOCATE(epsilon_geo)
+  IF ( ALLOCATED (sigma_geo) )      DEALLOCATE(sigma_geo)
   ! 
   RETURN
   !

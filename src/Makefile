@@ -13,6 +13,7 @@ allocate_thermo.o \
 bands_sub.o \
 bcast_thermo_input.o \
 check_file_exists.o \
+clean_dfft.o \
 collect_everything.o \
 compute_cp.o \
 compute_gruneisen.o \
@@ -37,6 +38,7 @@ plot_mur.o \
 q2r_sub.o \
 run_thermo_asyncronously.o \
 set_bz_path.o \
+set_elastic_cons_work.o \
 set_k_points.o \
 set_paths_disp.o \
 set_temperature.o \

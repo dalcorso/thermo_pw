@@ -232,6 +232,7 @@ MODULE control_thermo
   !
   LOGICAL, ALLOCATABLE :: lpwscf(:),  & ! if .true. this work requires a scf calc.
                           lbands(:),  & ! if .true. this work requires a band
+                          lstress(:), & ! if .true. this work computes stress
                           lphonon(:)    ! if .true. this work requires a phonon
 
   LOGICAL :: read_paths      ! the paths for dispersion are read from input
@@ -245,6 +246,7 @@ MODULE control_thermo
                                   ! for nscf calculation
   LOGICAL :: lconv_ke_test=.FALSE.! if .true. this writes the ke test on file
   LOGICAL :: lconv_nk_test=.FALSE.! if .true. this writes the k-point on file
+  LOGICAL :: lelastic_const=.FALSE. ! if .true. compute elastic constants
   LOGICAL :: lph=.FALSE.    ! if .true. must calculate phonon
   LOGICAL :: ldos=.FALSE.   ! if .true. the phonon dos is calculated
   LOGICAL :: ltherm=.FALSE. ! if .true. the thermodynamical properties are
@@ -261,6 +263,20 @@ MODULE control_thermo
   !
 END MODULE control_thermo
 
+MODULE control_elastic_constants
+  USE kinds,  ONLY : DP
+  !
+  ! ... The variables needed to control the calculation of the elastic 
+  !     constants
+  !
+  SAVE
+  REAL(DP) :: delta_epsilon
+  REAL(DP) :: at_save(3,3)
+  REAL(DP), ALLOCATABLE :: tau_save(:,:)
+  INTEGER :: ibrav_save
+
+END MODULE control_elastic_constants
+  !
 MODULE control_conv
   USE kinds,  ONLY : DP
   !
