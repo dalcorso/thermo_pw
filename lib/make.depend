@@ -1,3 +1,6 @@
+elastic_const.o : ../../Modules/constants.o
+elastic_const.o : ../../Modules/io_global.o
+elastic_const.o : ../../Modules/kind.o
 gnuplot.o : ../../Modules/io_global.o
 gnuplot.o : ../../Modules/kind.o
 ph_freq_module.o : ../../Modules/constants.o

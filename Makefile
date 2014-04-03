@@ -20,12 +20,16 @@ join_qe:
 	mv main_Makefile ../Makefile
 	mv ../install/plugins_makefile plugins_makefile_qe
 	mv plugins_makefile ../install
+	mv ../install/makedeps.sh makedeps.sh_qe
+	mv makedeps.sh ../install/
 
 leave_qe:
 	mv ../Makefile main_Makefile
 	mv Makefile_qe ../Makefile
 	mv ../install/plugins_makefile .
 	mv plugins_makefile_qe ../install/plugins_makefile
+	mv ../install/makedeps.sh .
+	mv makedeps.sh_qe ../install/makedeps.sh
 
 clean: thermo_pw_clean
 
