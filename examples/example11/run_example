@@ -112,7 +112,7 @@ cat > cu.scf_nk.in << EOF
  /
 ATOMIC_SPECIES
  Cu  0.0  Cu.pz-dn-kjpaw_psl.0.2.UPF
-ATOMIC_POSITIONS
+ATOMIC_POSITIONS (alat)
  Cu 0.00 0.00 0.00
 K_POINTS AUTOMATIC
 4 4 4 1 1 1 
