@@ -13,7 +13,7 @@ SUBROUTINE deallocate_asyn()
   !
   USE kinds, ONLY : DP
   USE thermo_priority, ONLY : npriority, priority
-  USE control_thermo, ONLY : lpwscf, lbands, lphonon
+  USE control_thermo, ONLY : lpwscf, lbands, lphonon, lstress
   IMPLICIT NONE
   !
   IF (ALLOCATED(npriority))  DEALLOCATE(npriority)
@@ -21,6 +21,7 @@ SUBROUTINE deallocate_asyn()
   IF (ALLOCATED(lpwscf))     DEALLOCATE(lpwscf) 
   IF (ALLOCATED(lbands))     DEALLOCATE(lbands) 
   IF (ALLOCATED(lphonon))    DEALLOCATE(lphonon) 
+  IF (ALLOCATED(lstress))    DEALLOCATE(lstress) 
   ! 
   RETURN
   !
