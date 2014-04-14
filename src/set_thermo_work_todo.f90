@@ -24,7 +24,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
   USE control_elastic_constants, ONLY : at_save, tau_save
   USE elastic_constants, ONLY : epsilon_geo, apply_strain
   USE control_flags, ONLY : gamma_only, tstress, tprnfor, lbfgs, nstep
-  USE force_mod, ONLY : lforce
+  USE force_mod, ONLY : lforce, lstres
   USE relax,            ONLY : epse, epsf
   USE input_parameters, ONLY : calculation, etot_conv_thr, forc_conv_thr
   USE io_files,    ONLY : tmp_dir, wfc_dir, prefix, seqopn
@@ -95,18 +95,19 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
               CALL apply_strain(at_save(1,i), at(1,i), epsilon_geo(1,1,iwork))
            ENDDO
            DO ia=1,nat
-              write(6,*) 'straing atom', ia
               CALL apply_strain(tau_save(1,ia), tau(1,ia), epsilon_geo(1,1,iwork))
            ENDDO
            IF (what=='elastic_constants') THEN
               calculation='relax'
               lforce=.TRUE.
+              lstres=.TRUE.
               lbfgs = .TRUE.
               nstep = 10
               epse = etot_conv_thr
               epsf = forc_conv_thr
            ELSE
               calculation='scf'
+              lstres=.TRUE.
               lbfgs=.FALSE.
            ENDIF
            rd_ht = TRANSPOSE( at ) 

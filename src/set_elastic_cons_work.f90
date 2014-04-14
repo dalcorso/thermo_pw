@@ -17,8 +17,7 @@ INTEGER, INTENT(OUT) :: nwork
 REAL(DP) :: epsilon_min
 INTEGER :: igeo, iwork
 
-write(6,*) 'ibrav', ibrav, ngeo
-!IF (ibrav==1 .OR. ibrav==2 .OR. ibrav==3) THEN
+IF (ibrav==1 .OR. ibrav==2 .OR. ibrav==3) THEN
    nwork = 2 * ngeo
    ALLOCATE( epsilon_geo(3, 3, nwork) ) 
    ALLOCATE( sigma_geo(3, 3, nwork) )
@@ -33,12 +32,13 @@ write(6,*) 'ibrav', ibrav, ngeo
       epsilon_voigt(5, ngeo + igeo) = epsilon_voigt(4, ngeo + igeo)
       epsilon_voigt(6, ngeo + igeo) = epsilon_voigt(4, ngeo + igeo)
    ENDDO
-   write(6,*) 'arrived here', nwork, ngeo
    DO iwork = 1, nwork
       CALL trans_epsilon(epsilon_voigt(1,iwork), epsilon_geo(1,1,iwork), 1)
    ENDDO
-   write(6,*) 'arrived here'
-!ENDIF
+ELSE
+   CALL errore('set_elastic_cons_work', & 
+               'elastic constants for this ibrav not implemented', 1)
+ENDIF
 
 RETURN
 END SUBROUTINE set_elastic_cons_work
