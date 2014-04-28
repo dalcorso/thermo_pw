@@ -42,7 +42,7 @@ SUBROUTINE thermo_readin()
                                    nnk, deltank, nsigma, deltasigma
   USE control_mur,          ONLY : vmin_input, vmax_input, deltav, nvol
   USE control_elastic_constants, ONLY : at_save, tau_save, delta_epsilon, &
-                                        ibrav_save
+                                        ibrav_save, ngeo_strain, frozen_ions
   USE cell_base,            ONLY : at, bg, celldm
   USE ions_base,            ONLY : tau, nat
   USE mp_world,             ONLY : world_comm
@@ -94,7 +94,8 @@ SUBROUTINE thermo_readin()
                             emin_input, emax_input,         &
                             vmin_input, vmax_input, deltav, &
                             grunmin_input, grunmax_input,   &
-                            delta_epsilon,                  &
+                            delta_epsilon, ngeo_strain,     &
+                            frozen_ions,                    &
                             nvol, nke, deltake,             &
                             nkeden, deltakeden,             &
                             nnk, deltank, nsigma, deltasigma, &
@@ -152,6 +153,8 @@ SUBROUTINE thermo_readin()
   deltasigma=0.005_DP
 
   delta_epsilon=0.005_DP
+  ngeo_strain=4
+  frozen_ions=.FALSE.
 
   grunmin_input=0.0_DP
   grunmax_input=0.0_DP

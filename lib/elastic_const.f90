@@ -72,15 +72,15 @@ ENDIF
 RETURN
 END SUBROUTINE trans_epsilon
 
-SUBROUTINE print_elastic_constants(what)
+SUBROUTINE print_elastic_constants(frozen_ions)
 !
 !  This routine writes on output the elastic constants
 !
 IMPLICIT NONE
-CHARACTER(LEN=*) :: what
+LOGICAL, INTENT(IN) :: frozen_ions
 INTEGER :: i, j
 
-IF (what(1:3)=='fi_') THEN
+IF (frozen_ions) THEN
    WRITE(stdout, '(/,5x,"Frozen ions")')
 ELSE
    WRITE(stdout, *)
@@ -115,7 +115,9 @@ INTEGER :: i, j, igeo
 el_con=0.0_DP
 IF (ibrav==1.OR.ibrav==2.OR.ibrav==3) THEN
 !
-!  These relationships are true for cubic solids
+!  cubic case
+!
+!  c_11 = c_22 = c_33
 !
    DO igeo=1,ngeo
       x(igeo)=epsil_geo(3,3,igeo)
@@ -125,19 +127,23 @@ IF (ibrav==1.OR.ibrav==2.OR.ibrav==3) THEN
    el_con(1,1) = -alpha(2)
    el_con(2,2) = el_con(1,1)
    el_con(3,3) = el_con(1,1)
+!
+! c_12 = c_13 = c_23
+!
    DO igeo=1,ngeo
       x(igeo)=epsil_geo(3,3,igeo)
       y(igeo)=sigma_geo(1,1,igeo)
    ENDDO
    CALL polifit( x, y, ngeo, alpha, m1 ) 
    el_con(1,2) = -alpha(2)
+   el_con(2,1) = el_con(1,2)
    el_con(1,3) = el_con(1,2)
+   el_con(3,1) = el_con(1,3)
    el_con(2,3) = el_con(1,2)
-   DO i=1,3
-      DO j=1,i-1
-         el_con(i,j)=el_con(j,i)
-      ENDDO
-   ENDDO
+   el_con(3,2) = el_con(2,3)
+!
+! c_44 = c_55 = c_66
+!
    DO igeo=1,ngeo
       x(igeo)=epsil_geo(2,3,ngeo+igeo)
       y(igeo)=sigma_geo(2,3,ngeo+igeo)
@@ -146,6 +152,521 @@ IF (ibrav==1.OR.ibrav==2.OR.ibrav==3) THEN
    el_con(4,4)=-alpha(2) * 0.5_DP
    el_con(5,5)=el_con(4,4)
    el_con(6,6)=el_con(4,4)
+!
+ELSEIF (ibrav==4) THEN
+!
+!  hexagonal case
+!
+!  c_11 = c_22
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(1,1,igeo)
+      y(igeo)=sigma_geo(1,1,igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 ) 
+   el_con(1,1) = -alpha(2)
+   el_con(2,2) = el_con(1,1)
+!
+!  c_12
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(1,1,igeo)
+      y(igeo)=sigma_geo(2,2,igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 ) 
+   el_con(1,2) = -alpha(2)
+   el_con(2,1) = el_con(1,2)
+!
+!  c_13
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(1,1,igeo)
+      y(igeo)=sigma_geo(3,3,igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 ) 
+   el_con(1,3) = -alpha(2)
+   el_con(3,1) = el_con(1,3)
+   el_con(2,3) = el_con(1,3)
+   el_con(3,2) = el_con(2,3)
+!
+!  c_33
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(3,3,ngeo+igeo)
+      y(igeo)=sigma_geo(3,3,ngeo+igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 ) 
+   el_con(3,3)=-alpha(2) 
+!
+!  c_44
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(2,3,2*ngeo+igeo)
+      y(igeo)=sigma_geo(2,3,2*ngeo+igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 ) 
+   el_con(4,4)=-alpha(2) * 0.5_DP
+   el_con(5,5)=el_con(4,4) 
+   el_con(6,6)=0.5_DP*(el_con(1,1)-el_con(1,2))
+ELSEIF (ibrav==5) THEN
+!
+!  trigonal case. We consider only the lowest symmetry class and calculate
+!  c_15 in all cases
+!
+!
+!  c_11 = c_22
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(1,1,igeo)
+      y(igeo)=sigma_geo(1,1,igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(1,1) = -alpha(2)
+   el_con(2,2) = el_con(1,1)
+!
+!  c_12 
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(1,1,igeo)
+      y(igeo)=sigma_geo(2,2,igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(1,2) = -alpha(2)
+   el_con(2,1) = el_con(1,2)
+!
+!  c_13 
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(1,1,igeo)
+      y(igeo)=sigma_geo(3,3,igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(1,3) = -alpha(2)
+   el_con(3,1) = el_con(1,3)
+!
+!  c_14 
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(1,1,igeo)
+      y(igeo)=sigma_geo(2,3,igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(1,4) = -alpha(2)
+   el_con(4,1) = el_con(1,4)
+   el_con(2,4) = -el_con(1,4)
+   el_con(4,2) = el_con(2,4)
+   el_con(5,6) = el_con(1,4)
+   el_con(6,5) = el_con(5,6)
+!
+!  c_15 
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(1,1,igeo)
+      y(igeo)=sigma_geo(1,3,igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(1,5) = -alpha(2)
+   el_con(5,1) = el_con(1,5)
+   el_con(2,5) = -el_con(1,5)
+   el_con(5,2) = el_con(2,5)
+   el_con(4,6) = el_con(2,5)
+   el_con(6,4) = el_con(4,6)
+!
+!  c_33 
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(3,3,ngeo+igeo)
+      y(igeo)=sigma_geo(3,3,ngeo+igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(3,3) = -alpha(2)
+!
+!  c_44 = c_55
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(2,3,2*ngeo+igeo)
+      y(igeo)=sigma_geo(2,3,2*ngeo+igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(4,4) = -alpha(2) * 0.5_DP
+   el_con(5,5) = el_con(4,4)
+
+   el_con(6,6) = 0.5_DP * ( el_con(1,1) - el_con(1,2) )
+
+ELSEIF (ibrav==6 .OR. ibrav==7) THEN
+!
+!  tetragonal case. Do not distinguish the two different classes. Computes
+!  all elements, in some cases c_16=-c_26 will be zero, but we compute it
+!  in any case.
+!
+!  c_11 = c_22
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(1,1,igeo)
+      y(igeo)=sigma_geo(1,1,igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(1,1) = -alpha(2)
+   el_con(2,2) = el_con(1,1)
+!
+!  c_12 
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(1,1,igeo)
+      y(igeo)=sigma_geo(2,2,igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(1,2) = -alpha(2)
+   el_con(2,1) = el_con(1,2)
+!
+! c_13
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(1,1,igeo)
+      y(igeo)=sigma_geo(3,3,igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(3,1) = -alpha(2)
+   el_con(1,3) = el_con(3,1)
+   el_con(2,3) = el_con(3,1)
+   el_con(3,2) = el_con(3,1)
+!
+! c_16, c_26
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(1,1,igeo)
+      y(igeo)=sigma_geo(1,2,igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(1,6) = -alpha(2)
+   el_con(6,1) = el_con(1,6)
+   el_con(2,6) = - el_con(1,6)
+   el_con(6,2) = el_con(2,6)
+!
+! c_33
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(3,3,ngeo+igeo)
+      y(igeo)=sigma_geo(3,3,ngeo+igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(3,3) = -alpha(2)
+!
+! c_44 = c_55
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(2,3,2*ngeo+igeo)
+      y(igeo)=sigma_geo(2,3,2*ngeo+igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(4,4) = -alpha(2) * 0.5_DP
+   el_con(5,5) = el_con(4,4)
+!
+! c_66 
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(1,2,3*ngeo+igeo)
+      y(igeo)=sigma_geo(1,2,3*ngeo+igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(6,6) = -alpha(2) * 0.5_DP
+
+ELSEIF (ibrav==8 .OR. ibrav==9 .OR. ibrav==10 .OR. ibrav==11) THEN
+!
+!  orthorombic case
+!
+!  c_11 
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(1,1,igeo)
+      y(igeo)=sigma_geo(1,1,igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(1,1) = -alpha(2)
+!
+!  c_12
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(1,1,igeo)
+      y(igeo)=sigma_geo(2,2,igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(1,2) = -alpha(2)
+   el_con(2,1) = el_con(1,2)
+!
+! c_13
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(1,1,igeo)
+      y(igeo)=sigma_geo(3,3,igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(3,1) = -alpha(2)
+   el_con(1,3) = el_con(3,1)
+!
+! c_22
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(2,2,ngeo+igeo)
+      y(igeo)=sigma_geo(2,2,ngeo+igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(2,2) = -alpha(2)
+!
+! c_23
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(2,2,ngeo+igeo)
+      y(igeo)=sigma_geo(3,3,ngeo+igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(2,3) = -alpha(2)
+   el_con(3,2) = el_con(2,3)
+!
+! c_33
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(3,3,2*ngeo+igeo)
+      y(igeo)=sigma_geo(3,3,2*ngeo+igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(3,3) = -alpha(2)
+!
+! c_44
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(2,3,3*ngeo+igeo)
+      y(igeo)=sigma_geo(2,3,3*ngeo+igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(4,4) = -alpha(2) * 0.5_DP
+!
+! c_55
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(1,3,4*ngeo+igeo)
+      y(igeo)=sigma_geo(1,3,4*ngeo+igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(5,5) = -alpha(2) * 0.5_DP
+!
+! c_66
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(1,2,5*ngeo+igeo)
+      y(igeo)=sigma_geo(1,2,5*ngeo+igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(6,6) = -alpha(2) * 0.5_DP
+ELSE
+!
+!  generic implementation, quite slow but should work with any lattice.
+!  Computes all the elements of the elastic constants matrix, requires
+!  6 * ngeo_strain self consistent calculations
+!
+!  c_11 
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(1,1,igeo)
+      y(igeo)=sigma_geo(1,1,igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(1,1) = -alpha(2)
+!
+!  c_12 
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(1,1,igeo)
+      y(igeo)=sigma_geo(2,2,igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(1,2) = -alpha(2)
+   el_con(2,1) = el_con(1,2)
+!
+!  c_13 
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(1,1,igeo)
+      y(igeo)=sigma_geo(3,3,igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(1,3) = -alpha(2)
+   el_con(3,1) = el_con(1,3)
+!
+!  c_14 
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(1,1,igeo)
+      y(igeo)=sigma_geo(2,3,igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(1,4) = -alpha(2)
+   el_con(4,1) = el_con(1,4)
+!
+!  c_15 
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(1,1,igeo)
+      y(igeo)=sigma_geo(1,3,igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(1,5) = -alpha(2)
+   el_con(5,1) = el_con(1,5)
+!
+!  c_16 
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(1,1,igeo)
+      y(igeo)=sigma_geo(1,2,igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(1,6) = -alpha(2)
+   el_con(6,1) = el_con(1,6)
+!
+!  c_22 
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(2,2,ngeo+igeo)
+      y(igeo)=sigma_geo(2,2,ngeo+igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(2,2) = -alpha(2)
+!
+!  c_23 
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(2,2,ngeo+igeo)
+      y(igeo)=sigma_geo(3,3,ngeo+igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(2,3) = -alpha(2)
+   el_con(3,2) = el_con(2,3)
+!  
+!  c_24 
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(2,2,ngeo+igeo)
+      y(igeo)=sigma_geo(2,3,ngeo+igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(2,4) = -alpha(2)
+   el_con(4,2) = el_con(2,4)
+!  
+!  c_25 
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(2,2,ngeo+igeo)
+      y(igeo)=sigma_geo(1,3,ngeo+igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(2,5) = -alpha(2)
+   el_con(5,2) = el_con(2,5)
+!  
+!  c_26 
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(2,2,ngeo+igeo)
+      y(igeo)=sigma_geo(1,2,ngeo+igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(2,6) = -alpha(2)
+   el_con(6,2) = el_con(2,6)
+!  
+!  c_33 
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(3,3,2*ngeo+igeo)
+      y(igeo)=sigma_geo(3,3,2*ngeo+igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(3,3) = -alpha(2)
+!  
+!  c_34 
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(3,3,2*ngeo+igeo)
+      y(igeo)=sigma_geo(2,3,2*ngeo+igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(3,4) = -alpha(2)
+   el_con(4,3) = el_con(3,4)
+!  
+!  c_35 
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(3,3,2*ngeo+igeo)
+      y(igeo)=sigma_geo(1,3,2*ngeo+igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(3,5) = -alpha(2)
+   el_con(5,3) = el_con(3,5)
+!  
+!  c_36 
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(3,3,2*ngeo+igeo)
+      y(igeo)=sigma_geo(1,2,2*ngeo+igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(3,6) = -alpha(2)
+   el_con(6,3) = el_con(3,6)
+!  
+!  c_44
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(2,3,3*ngeo+igeo)
+      y(igeo)=sigma_geo(2,3,3*ngeo+igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(4,4) = -alpha(2) * 0.5_DP
+!  
+!  c_45 
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(2,3,3*ngeo+igeo)
+      y(igeo)=sigma_geo(1,3,3*ngeo+igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(4,5) = -alpha(2) * 0.5_DP
+   el_con(5,4) = el_con(4,5)
+!  
+!  c_46 
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(2,3,3*ngeo+igeo)
+      y(igeo)=sigma_geo(1,2,3*ngeo+igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(4,6) = -alpha(2) * 0.5_DP
+   el_con(6,4) = el_con(4,6)
+!  
+!  c_55 
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(1,3,4*ngeo+igeo)
+      y(igeo)=sigma_geo(1,3,4*ngeo+igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(5,5) = -alpha(2) * 0.5_DP
+!  
+!  c_56 
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(1,3,4*ngeo+igeo)
+      y(igeo)=sigma_geo(1,2,4*ngeo+igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(5,6) = -alpha(2) * 0.5_DP
+   el_con(6,5) = el_con(5,6)
+!  
+!  c_66 
+!
+   DO igeo=1,ngeo
+      x(igeo)=epsil_geo(1,2,5*ngeo+igeo)
+      y(igeo)=sigma_geo(1,2,5*ngeo+igeo)
+   ENDDO
+   CALL polifit( x, y, ngeo, alpha, m1 )
+   el_con(6,6) = -alpha(2) * 0.5_DP
 ENDIF
 el_con = el_con * ry_kbar
 

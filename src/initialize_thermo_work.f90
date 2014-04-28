@@ -99,7 +99,8 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               energy_geo=0.0_DP
               lconv_nk_test=.TRUE.
            ENDIF
-        CASE ('mur_lc', 'mur_lc_bands', 'mur_lc_ph', 'mur_lc_disp')
+        CASE ('mur_lc', 'mur_lc_bands', 'mur_lc_ph', 'mur_lc_disp', &
+              'mur_lc_elastic_constants')
            nwork=ngeo
            IF ( ALLOCATED(energy_geo) ) THEN
               compute_lc=.FALSE.
@@ -121,7 +122,8 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               ENDDO
               energy_geo=0.0_DP
               lev_syn_1=.TRUE.
-              IF ( TRIM(what)/='mur_lc' ) lpwscf_syn_1=.TRUE.
+              IF (TRIM(what)/='mur_lc'.AND.&
+                  TRIM(what)/='mur_lc_elastic_constants') lpwscf_syn_1=.TRUE.
               IF ( TRIM(what)=='mur_lc_ph' .OR. TRIM(what)=='mur_lc_disp') lph=.TRUE.
               IF ( TRIM(what)=='mur_lc_disp' ) THEN
                  lq2r = .TRUE.
@@ -163,16 +165,13 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               CALL allocate_thermodynamics()
               CALL allocate_anharmonic()
            ENDIF
-        CASE ('elastic_constants', 'fi_elastic_constants')
-           IF ( ALLOCATED(energy_geo) ) THEN
-              compute_lc=.FALSE.
-           ELSE
-              CALL set_elastic_cons_work(nwork, ngeo) 
-              ALLOCATE(alat_geo(nwork))
-              ALLOCATE(energy_geo(nwork))
-              ALLOCATE(omega_geo(nwork))
-              lelastic_const=.TRUE.
-           ENDIF
+        CASE ('elastic_constants') 
+!
+!   in part 1 this case does nothing
+!
+             compute_lc=.FALSE.
+        CASE DEFAULT
+            CALL errore('initialize_thermo_work','what not recognized',1)
      END SELECT
   ELSE IF (part == 2 ) THEN
 !
@@ -186,6 +185,15 @@ SUBROUTINE initialize_thermo_work(nwork, part)
                  nwork=nwork+1
               ENDDO
            ENDDO
+        CASE ('elastic_constants', 'mur_lc_elastic_constants')
+           IF (ALLOCATED(alat_geo)) DEALLOCATE(alat_geo)
+           IF (ALLOCATED(energy_geo)) DEALLOCATE(energy_geo)
+           IF (ALLOCATED(omega_geo)) DEALLOCATE(omega_geo)
+           CALL set_elastic_cons_work(nwork) 
+           ALLOCATE(alat_geo(nwork))
+           ALLOCATE(energy_geo(nwork))
+           ALLOCATE(omega_geo(nwork))
+           lelastic_const=.TRUE.
      END SELECT
   ELSE
      CALL errore('initialize_thermo_work','unknown part',1)
@@ -204,14 +212,10 @@ SUBROUTINE initialize_thermo_work(nwork, part)
 
   IF (part == 1) THEN
      SELECT CASE (TRIM(what))
-        CASE ('scf', 'scf_bands', 'scf_ph', 'scf_disp')
+        CASE ('scf', 'scf_bands', 'scf_ph', 'scf_disp', 'elastic_constants')
         CASE ('mur_lc', 'mur_lc_bands', 'mur_lc_ph', 'mur_lc_disp', &
-              'mur_lc_t' )
+              'mur_lc_t', 'mur_lc_elastic_constants' )
            lpwscf(1:ngeo)=.TRUE.
-        CASE ( 'scf_ke', 'scf_nk', 'elastic_constants', 'fi_elastic_constants' )
-           lpwscf(1:nwork)=.TRUE.
-           IF (what=='elastic_constants' .OR. what=='fi_elastic_constants') &
-              lstress(1:nwork)=.TRUE.
         CASE DEFAULT
           CALL errore('initialize_thermo_work','unknown what',1)
      END SELECT
@@ -219,6 +223,9 @@ SUBROUTINE initialize_thermo_work(nwork, part)
      SELECT CASE (TRIM(what))
         CASE ('scf_ph', 'scf_disp', 'mur_lc_ph', 'mur_lc_disp','mur_lc_t')
            lphonon(1:nwork)=.TRUE.
+        CASE ('elastic_constants', 'mur_lc_elastic_constants')
+           lpwscf(1:nwork)=.TRUE.
+           lstress(1:nwork)=.TRUE.
      END SELECT
   END IF
 

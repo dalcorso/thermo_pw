@@ -21,7 +21,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
   USE input_parameters, ONLY : k_points, xk, wk, nk1, nk2, nk3,  &
                                k1, k2, k3, nkstot
   USE control_conv, ONLY : ke, keden, nk_test, sigma_test
-  USE control_elastic_constants, ONLY : at_save, tau_save
+  USE control_elastic_constants, ONLY : at_save, tau_save, frozen_ions
   USE elastic_constants, ONLY : epsilon_geo, apply_strain
   USE control_flags, ONLY : gamma_only, tstress, tprnfor, lbfgs, nstep
   USE force_mod, ONLY : lforce, lstres
@@ -77,7 +77,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
            wfc_dir = tmp_dir
            CALL check_tempdir ( tmp_dir, exst, parallelfs )
         CASE ('mur_lc', 'mur_lc_bands', 'mur_lc_ph', 'mur_lc_disp', &
-              'mur_lc_t')
+              'mur_lc_t', 'mur_lc_elastic_constants')
            celldm(1)=alat_geo(iwork)
            CALL cell_base_init ( ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
                          trd_ht, rd_ht, cell_units )
@@ -86,50 +86,6 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
            tmp_dir = TRIM ( outdir )
            wfc_dir = tmp_dir
            CALL check_tempdir ( tmp_dir, exst, parallelfs )
-        CASE ('elastic_constants', 'fi_elastic_constants')
-           ibrav=0
-           CALL clean_dfft()
-           tstress=.TRUE.
-           tprnfor=.TRUE.
-           DO i=1, 3
-              CALL apply_strain(at_save(1,i), at(1,i), epsilon_geo(1,1,iwork))
-           ENDDO
-           DO ia=1,nat
-              CALL apply_strain(tau_save(1,ia), tau(1,ia), epsilon_geo(1,1,iwork))
-           ENDDO
-           IF (what=='elastic_constants') THEN
-              calculation='relax'
-              lforce=.TRUE.
-              lstres=.TRUE.
-              lbfgs = .TRUE.
-              nstep = 10
-              epse = etot_conv_thr
-              epsf = forc_conv_thr
-           ELSE
-              calculation='scf'
-              lstres=.TRUE.
-              lbfgs=.FALSE.
-           ENDIF
-           rd_ht = TRANSPOSE( at ) 
-           trd_ht=.TRUE.
-           cell_units='alat'
-           CALL cell_base_init ( ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
-                         trd_ht, rd_ht, cell_units )
-           outdir=TRIM(outdir_thermo)//'g'//TRIM(int_to_char(iwork))//'/'
-           tmp_dir = TRIM ( outdir )
-           wfc_dir = tmp_dir
-           CALL check_tempdir ( tmp_dir, exst, parallelfs )
-           IF ( what=='elastic_constants' .AND. ionode) THEN
-              !
-              !  clean the bfgs history
-              !
-              iunupdate=2
-              CALL seqopn( iunupdate, 'update', 'FORMATTED', exst )
-              CLOSE(iunupdate, STATUS='DELETE')
-              filename = TRIM( tmp_dir ) // TRIM( prefix ) // '.bfgs'
-              OPEN( iunupdate, FILE=TRIM(filename), FORM='FORMATTED')
-              CLOSE(iunupdate, STATUS='DELETE')
-            END IF
         CASE DEFAULT
            CALL errore('set_thermo_work','unknown what',1)
      END SELECT
@@ -150,6 +106,50 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
                  ENDIF
               ENDDO
            ENDDO
+        CASE ('elastic_constants','mur_lc_elastic_constants')
+           ibrav=0
+           tstress=.TRUE.
+           tprnfor=.TRUE.
+           DO i=1, 3
+              CALL apply_strain(at_save(1,i), at(1,i), epsilon_geo(1,1,iwork))
+           ENDDO
+           DO ia=1,nat
+              CALL apply_strain(tau_save(1,ia), tau(1,ia), epsilon_geo(1,1,iwork))
+           ENDDO
+           IF (frozen_ions) THEN
+              calculation='scf'
+              lstres=.TRUE.
+              lbfgs=.FALSE.
+           ELSE
+              calculation='relax'
+              lforce=.TRUE.
+              lstres=.TRUE.
+              lbfgs = .TRUE.
+              nstep = 10
+              epse = etot_conv_thr
+              epsf = forc_conv_thr
+           ENDIF
+           rd_ht = TRANSPOSE( at ) 
+           trd_ht=.TRUE.
+           cell_units='alat'
+           CALL cell_base_init ( ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
+                         trd_ht, rd_ht, cell_units )
+           CALL clean_dfft()
+           outdir=TRIM(outdir_thermo)//'g'//TRIM(int_to_char(iwork))//'/'
+           tmp_dir = TRIM ( outdir )
+           wfc_dir = tmp_dir
+           CALL check_tempdir ( tmp_dir, exst, parallelfs )
+           IF (.NOT.frozen_ions .AND. ionode) THEN
+              !
+              !  clean the bfgs history
+              !
+              iunupdate=2
+              CALL seqopn( iunupdate, 'update', 'FORMATTED', exst )
+              CLOSE(iunupdate, STATUS='DELETE')
+              filename = TRIM( tmp_dir ) // TRIM( prefix ) // '.bfgs'
+              OPEN( iunupdate, FILE=TRIM(filename), FORM='FORMATTED')
+              CLOSE(iunupdate, STATUS='DELETE')
+            END IF
      END SELECT
   ELSE
      CALL errore('set_thermo_work','unknown part',1)

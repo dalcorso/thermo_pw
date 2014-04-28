@@ -274,7 +274,11 @@ MODULE control_elastic_constants
   REAL(DP) :: at_save(3,3)
   REAL(DP), ALLOCATABLE :: tau_save(:,:)
   INTEGER :: ibrav_save
+  INTEGER :: ngeo_strain        ! number of strain configurations
 
+  LOGICAL :: frozen_ions        ! if .true. compute the elastic constant 
+                                ! keeping the ions frozen at the strained
+                                ! positions
 END MODULE control_elastic_constants
   !
 MODULE control_conv
@@ -397,4 +401,3 @@ MODULE control_asy
                         ! code
 
 END MODULE control_asy
-

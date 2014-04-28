@@ -28,9 +28,10 @@ SUBROUTINE bcast_thermo_input()
                               flpsanhar, flpsmur, flpskeconv, flpsnkconv, &
                               flpsgrun, &
                               lgnuplot, gnuplot_command
+  USE control_asy,     ONLY : flasy, lasymptote, asymptote_command
   USE control_conv,    ONLY : nke, deltake, nkeden, deltakeden, &
                               nnk, deltank, nsigma, deltasigma
-  USE control_elastic_constants, ONLY : delta_epsilon
+  USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, frozen_ions
   USE mp_world,        ONLY : world_comm
   USE mp,              ONLY : mp_bcast
   USE io_global,       ONLY : meta_ionode_id
@@ -69,6 +70,8 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( nkeden, meta_ionode_id, world_comm )
   CALL mp_bcast( deltakeden, meta_ionode_id, world_comm )
   CALL mp_bcast( delta_epsilon, meta_ionode_id, world_comm )
+  CALL mp_bcast( frozen_ions, meta_ionode_id, world_comm )
+  CALL mp_bcast( ngeo_strain, meta_ionode_id, world_comm )
   CALL mp_bcast( nnk, meta_ionode_id, world_comm )
   CALL mp_bcast( deltank, meta_ionode_id, world_comm )
   CALL mp_bcast( nsigma, meta_ionode_id, world_comm )
@@ -97,6 +100,9 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( q2d, meta_ionode_id, world_comm )
   CALL mp_bcast( lgnuplot, meta_ionode_id, world_comm )
   CALL mp_bcast( gnuplot_command, meta_ionode_id, world_comm )
+  CALL mp_bcast( lasymptote, meta_ionode_id, world_comm )
+  CALL mp_bcast( asymptote_command, meta_ionode_id, world_comm )
+  CALL mp_bcast( flasy, meta_ionode_id, world_comm )
 
   RETURN
 END SUBROUTINE bcast_thermo_input

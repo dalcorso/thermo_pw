@@ -61,7 +61,7 @@ PROGRAM thermo_pw
   USE elastic_constants, ONLY : print_elastic_constants, &
                                 compute_elastic_constants, epsilon_geo, &
                                 sigma_geo
-  USE control_elastic_constants, ONLY : ibrav_save
+  USE control_elastic_constants, ONLY : ibrav_save, ngeo_strain, frozen_ions
   USE control_paths,    ONLY : nqaux
   USE control_gnuplot,  ONLY : flpsdos, flgnuplot, flpstherm, flpsdisp
   USE control_bands,    ONLY : flpband, nbnd_bands
@@ -74,7 +74,7 @@ PROGRAM thermo_pw
   USE input_parameters, ONLY : ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
                                trd_ht, rd_ht, cell_units, outdir
   USE control_mur,      ONLY : vmin, b0, b01, emin
-  USE control_flags,    ONLY : tstress
+  USE force_mod,        ONLY : lstres
   USE thermo_mod,       ONLY : what, ngeo, alat_geo, omega_geo, energy_geo, ntry
   USE ph_restart,       ONLY : destroy_status_run
   USE save_ph,          ONLY : clean_input_variables
@@ -134,11 +134,6 @@ PROGRAM thermo_pw
         CALL mp_sum(energy_geo, world_comm)
         energy_geo=energy_geo / nproc_image
         CALL write_energy(nwork, file_dat)
-        IF (tstress) THEN
-           CALL mp_sum(sigma_geo, world_comm)
-           sigma_geo=sigma_geo / nproc_image
-           CALL write_stress(nwork, file_dat)
-        ENDIF
      ELSE
         CALL read_energy(nwork, file_dat)
      ENDIF
@@ -165,15 +160,6 @@ PROGRAM thermo_pw
         CALL mur(vmin,b0,b01,emin)
         CALL plot_mur()
      ENDIF
-!
-!  If this is an elastic constant calculations, the elastic constants
-!  are calculated here
-!
-     IF (lelastic_const) THEN
-        CALL compute_elastic_constants(sigma_geo, epsilon_geo, nwork, ngeo, &
-                                       ibrav_save)
-        CALL print_elastic_constants(what)
-     ENDIF
      !
      CALL deallocate_asyn()
   END DO
@@ -182,16 +168,17 @@ PROGRAM thermo_pw
   !  and a band structure calculation, at the equilibrium lattice constant
   !  found previously.
   !
+  !  set the lattice constant at the computed minimum of the Murnaghan
+  !
+  IF (lev_syn_1) THEN
+     celldm(1)=compute_alat_geo(vmin, alat_geo(ngeo/2+1), &
+                                              omega_geo(ngeo/2+1))
+     CALL cell_base_init ( ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
+                      trd_ht, rd_ht, cell_units )
+     CALL clean_dfft()
+  END IF
+
   IF (lpwscf_syn_1) THEN
-     IF (lev_syn_1) THEN
-        celldm(1)=compute_alat_geo(vmin, alat_geo(ngeo/2+1), &
-                                                 omega_geo(ngeo/2+1))
-        CALL cell_base_init ( ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
-                         trd_ht, rd_ht, cell_units )
-        CALL clean_dfft()
-
-     END IF
-
      outdir=TRIM(outdir_thermo)//'g1/'
      tmp_dir = TRIM ( outdir )
      wfc_dir = tmp_dir
@@ -370,6 +357,36 @@ PROGRAM thermo_pw
         ENDDO
         DEALLOCATE(phdos_save)
      ENDIF
+  ELSE
+!
+!   here the second part does not use the phonon code. This is for the
+!   calculation of elastic constants
+!
+     part=2
+     CALL initialize_thermo_work(nwork, part)
+     !
+     !  Asyncronous work starts again. No communication is
+     !  allowed except though the master workers mechanism
+     !
+     CALL run_thermo_asyncronously(nwork, part, igeom, auxdyn)
+!
+!   save the stress tensors calculated by all images
+!
+     IF (lstres) THEN
+        CALL mp_sum(sigma_geo, world_comm)
+        sigma_geo=sigma_geo / nproc_image
+!        CALL write_stress(nwork, file_dat)
+     ENDIF
+!
+!  the elastic constants  are calculated here
+!
+     IF (lelastic_const) THEN
+        CALL compute_elastic_constants(sigma_geo, epsilon_geo, nwork, &
+                               ngeo_strain, ibrav_save)
+        CALL print_elastic_constants(frozen_ions)
+     ENDIF
+     !
+     CALL deallocate_asyn()
   ENDIF
   !
   CALL deallocate_thermo()

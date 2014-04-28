@@ -26,7 +26,7 @@ SUBROUTINE initialize_thermo_master(nwork, part)
      SELECT CASE (TRIM(what))
         CASE ('scf', 'scf_ke', 'scf_nk', 'scf_bands', 'scf_ph', 'scf_disp', &
               'mur_lc', 'mur_lc_bands', 'mur_lc_ph', 'mur_lc_disp', &
-              'mur_lc_t','elastic_constants', 'fi_elastic_constants')
+              'mur_lc_t','mur_lc_elastic_constants')
            max_priority=1
         CASE DEFAULT
            CALL errore('initialize_thermo_master','unknown what',1)
@@ -34,7 +34,8 @@ SUBROUTINE initialize_thermo_master(nwork, part)
   ELSE IF ( part==2 ) THEN
      SELECT CASE (TRIM(what))
         CASE ('scf_ph', 'scf_bands', 'scf_disp', 'mur_lc', 'mur_lc_bands', &
-              'mur_lc_ph', 'mur_lc_t')
+              'mur_lc_ph', 'mur_lc_t', 'elastic_constants',&
+                                       'mur_lc_elastic_constants' )
            max_priority=1
      END SELECT
   ELSE
@@ -54,7 +55,8 @@ SUBROUTINE initialize_thermo_master(nwork, part)
   ELSE IF ( part == 2) THEN
      SELECT CASE (TRIM(what))
         CASE ('scf', 'scf_ph', 'scf_disp', 'mur_lc', 'mur_lc_ph', &
-              'mur_lc_disp', 'mur_lc_t')
+              'mur_lc_disp', 'mur_lc_t', 'elastic_constants', &
+                             'mur_lc_elastic_constants')
         CASE DEFAULT
            CALL errore('initialize_thermo_master','unknown what',1)
      END SELECT
