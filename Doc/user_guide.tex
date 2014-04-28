@@ -242,6 +242,7 @@ If you are running \thermo\ on a system that has not \texttt{gnuplot}
 you can disable the production of the postscript files and use some other
 graphical tools to produce the plots from the output data. 
 
+
 \subsection{\texttt{what='scf'}}
 With this option the code computes only the total energy. This is a single
 calculation as if running \texttt{pw.x} with the given input.
@@ -336,6 +337,26 @@ point_label_type : the label definition (see the BZ manual)
                  Default: SC
 \end{verbatim}
 An example of the use of this option can be found in \texttt{example02}.
+
+\subsection{\texttt{what='plot\_bz'}}
+With this option the code writes a script to make a three dimensional plot
+of the Brillouin zone and of its default path. If the input contains a path
+after the \texttt{THERMO\_PW} namelist this path is shown in the figure. 
+The script must be read by the \texttt{asymptote} code, available at 
+\texttt{http://asymptote.sourceforge.net/}. In many Linux distributions
+this code is available as a separate package, but it is not installed by
+default. The following variables control the plot:
+\begin{verbatim}
+lasymptote  : if .TRUE. asymptote is called from within the program
+              and the pdf file with a plot of the BZ is produced
+              Default: logical .FALSE.
+flasy       : initial part of the name of the files where gnuplot scripts 
+              are written, and of the name of the pdf file.
+              Default: character(len=*) 'asy.tmp'
+asymptote_command  : the command used to produce the pdf file of the BZ.
+              Default: character(len=*) 'asy -config="" -f pdf -noprc flasy.asy'
+\end{verbatim}
+
 
 \subsection{\texttt{what='scf\_ph'}}
 With this option the code makes a phonon calculation at a single {\bf q} 
@@ -512,18 +533,27 @@ An example of the use of this option can be found in \texttt{example09}.
 With this option the code calculates the elastic constants of the solid.
 Depending on the Laue class, it calculates the stress tensor for a set of 
 strains of the lattice. For each strain, it relaxes the ions to their 
-equilibrium positions. Finally it computes the elastic constants from
-the numerical derivatives of the stress with respect to strain.
-The number of independent strains is \texttt{ngeo}. The input variables
+equilibrium positions if \texttt{frozen\_ions=.false.} or keep them
+in the strained positions if \texttt{frozen\_ions=.true.}. 
+Finally it computes the elastic constants from the numerical derivatives 
+of the stress with respect to strain.
+The number of independent strains is \texttt{ngeo\_strain}. The input variables
 that control this option are:
 \begin{verbatim}
-delta_epsilon : the interval of strain values between two geometries.
-                The central geometry has zero strain (ngeo must be odd).
+frozen_ions: if .true. the elastic constants are calculated 
+             keeping the ions frozen in the strained positions. 
+             Default: logical .false.
+ngeo_strain: the number of strained configurations used. 
+             Default: integer 4
+delta_epsilon: the interval of strain values between two geometries.
+               To avoid a zero strain geometry that might have a
+               different symmetry ngeo_strain must be even.
+               Default: real 0.002
 \end{verbatim}
-Presently only the cubic case (simple cubic, fcc, and bcc) is implemented.
 
-\subsection{\texttt{what='fi\_elastic\_constants'}}
-As \texttt{what='elastic\_constants'} but the ionic positions are not 
-relaxed, but only strained according to each strain.
+\subsection{\texttt{what='mur\_lc\_elastic\_constants'}}
+As \texttt{what='elastic\_constants'} but the calculation is made at the
+geometry that corresponds to the minimum of the Murnaghan equation. The
+Murnaghan minimization is made as described for \texttt{what='mur\_lc'}.
 
 \end{document}

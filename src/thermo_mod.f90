@@ -381,3 +381,20 @@ MODULE control_gnuplot
   LOGICAL :: lgnuplot    ! set to false not to use gnuplot
 
 END MODULE control_gnuplot
+
+MODULE control_asy
+  USE kinds,  ONLY : DP
+  !
+  ! ... The variables needed to control the band plot
+  !
+  SAVE
+
+  CHARACTER(LEN=256) :: flasy ! the name of file with the gnuplot script
+
+  CHARACTER(LEN=256) :: asymptote_command ! the asymptote command
+
+  LOGICAL :: lasymptote ! if .true. asymptote is called within the thermo_pw
+                        ! code
+
+END MODULE control_asy
+

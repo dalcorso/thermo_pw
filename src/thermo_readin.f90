@@ -34,6 +34,7 @@ SUBROUTINE thermo_readin()
                                    flpsmur, flpsdos, flpstherm, flpsanhar, &
                                    flpskeconv, flpsnkconv, flpsgrun,   &
                                    lgnuplot, gnuplot_command
+  USE control_asy,          ONLY : flasy, lasymptote, asymptote_command
   USE control_bands,        ONLY : flpband, emin_input, emax_input, nbnd_bands,&
                                    lsym 
   USE control_grun,         ONLY : flpgrun, grunmin_input, grunmax_input
@@ -42,11 +43,13 @@ SUBROUTINE thermo_readin()
   USE control_mur,          ONLY : vmin_input, vmax_input, deltav, nvol
   USE control_elastic_constants, ONLY : at_save, tau_save, delta_epsilon, &
                                         ibrav_save
-  USE cell_base,            ONLY : at
+  USE cell_base,            ONLY : at, bg, celldm
   USE ions_base,            ONLY : tau, nat
   USE mp_world,             ONLY : world_comm
   USE mp_images,            ONLY : nimage, my_image_id, root_image
   USE parser,               ONLY : read_line, parse_unit
+  USE environment,          ONLY : environment_end
+  USE mp_global,            ONLY : mp_global_end
   USE io_global,            ONLY : ionode, meta_ionode, meta_ionode_id
   USE mp,                   ONLY : mp_bcast
   !
@@ -55,12 +58,13 @@ SUBROUTINE thermo_readin()
   CHARACTER(LEN=6) :: int_to_char
   CHARACTER(LEN=512) :: dummy
   CHARACTER(LEN=256), ALLOCATABLE :: input(:)
+  CHARACTER(LEN=256) :: asy_filename
   INTEGER, ALLOCATABLE :: iun_image(:)
   INTEGER :: image
   INTEGER :: iq, ipol, i, j, k
   INTEGER :: iun_thermo, parse_unit_save
 
-  INTEGER            :: nch
+  INTEGER :: nch, ierr
   LOGICAL :: tend, terr, read_paths, set_internal_path, exst
   CHARACTER(LEN=256) :: input_line, buffer
   !
@@ -85,6 +89,8 @@ SUBROUTINE thermo_readin()
                             flpsdisp, flpsdos, flpstherm,   &
                             flpsanhar, flpsmur, flpskeconv, &
                             flpsnkconv, flgrun,             &
+                            flasy, asymptote_command,       &
+                            lasymptote,                     &
                             emin_input, emax_input,         &
                             vmin_input, vmax_input, deltav, &
                             grunmin_input, grunmax_input,   &
@@ -144,6 +150,7 @@ SUBROUTINE thermo_readin()
   deltank=2 
   nsigma=1  
   deltasigma=0.005_DP
+
   delta_epsilon=0.005_DP
 
   grunmin_input=0.0_DP
@@ -173,6 +180,10 @@ SUBROUTINE thermo_readin()
   flpsnkconv='output_nkconv.ps'
   flpsgrun='output_grun.ps'
 
+  flasy='asy_tmp'
+  lasymptote=.FALSE.
+  asymptote_command='asy -f pdf -noprc'
+
   q2d=.FALSE.
   q_in_band_form=.TRUE.
   q_in_cryst_coord=.FALSE.
@@ -186,14 +197,14 @@ SUBROUTINE thermo_readin()
   !
   CALL bcast_thermo_input()
   !
-  read_paths=( what=='scf_bands' .OR. what=='scf_disp' .OR. &
+  read_paths=( what=='scf_bands'.OR.what=='scf_disp'.OR.what=='plot_bz'.OR. &
                what=='mur_lc_bands' .OR. what=='mur_lc_disp' .OR. &
                what=='mur_lc_t')
 
   IF ( ngeo==0 ) THEN
      IF (what(1:4) == 'scf_') ngeo=1
-     IF (what(1:4) == 'elas' .OR. what(1:4)=='fi_e') ngeo=5
      IF (what(1:6) == 'mur_lc') ngeo=9
+     IF (what(1:4) == 'elas') ngeo=1
   END IF
 
   nqaux=0
@@ -278,6 +289,7 @@ SUBROUTINE thermo_readin()
               EXIT
            ENDIF
         ENDDO
+
      ENDDO
   ENDIF
 70  CONTINUE
@@ -342,6 +354,25 @@ SUBROUTINE thermo_readin()
 
   IF (set_internal_path) CALL set_bz_path()
 
+  IF (what=='plot_bz') THEN
+
+     asy_filename=TRIM(flasy)//'.asy'
+     IF ( my_image_id==root_image ) THEN
+        CALL plot_bz(ibrav, celldm, at, bg, point_label_type, &
+                   xqaux, wqaux, nqaux, letter, letter_path, npk_label, &
+                   label_list, asy_filename)
+
+        IF (lasymptote.AND.ionode) &
+           ierr=system(TRIM(asymptote_command)//' '//TRIM(asy_filename))
+     ENDIF
+     CALL summarize_kpt(xqaux, wqaux, nqaux, letter_path)
+
+     CALL environment_end( 'THERMO_PW' )
+     !
+     CALL mp_global_end ()
+     CALL do_stop( 0 )
+  ENDIF
+
   RETURN
 END SUBROUTINE thermo_readin
 
@@ -396,3 +427,35 @@ SUBROUTINE thermo_ph_readin()
   RETURN
   !
 END SUBROUTINE thermo_ph_readin
+
+SUBROUTINE summarize_kpt(xqaux, wqaux, nqaux, letter_path )
+  USE kinds, ONLY : DP
+  USE io_global, ONLY : stdout
+  IMPLICIT NONE
+  
+  INTEGER, INTENT(IN) :: nqaux
+  REAL(DP), INTENT(IN) :: xqaux(3,nqaux)
+  INTEGER, INTENT(IN) :: wqaux(nqaux)
+  CHARACTER(LEN=3), INTENT(IN) :: letter_path(nqaux)
+
+  INTEGER :: ik
+  
+  WRITE(stdout,'(/,5x, "k points coordinates (2 pi / alat)")') 
+  DO ik=1, nqaux
+     WRITE(stdout, '(a3, 3f15.8,i5)') letter_path(ik), xqaux(:,ik), &
+                                      wqaux(ik)
+  ENDDO
+  WRITE(stdout,*)
+  WRITE(stdout,'(5x, "Input path: ")') 
+  WRITE(stdout,'(i5)') nqaux
+  DO ik=1, nqaux
+     IF (letter_path(ik) == '   ') THEN
+         WRITE(stdout, '(3x, 3f15.8,i5)')  xqaux(:,ik), wqaux(ik)
+     ELSE
+         WRITE(stdout, '(a3, i8)') letter_path(ik), wqaux(ik)
+     ENDIF
+  ENDDO
+  WRITE(stdout,*)
+
+RETURN
+END SUBROUTINE summarize_kpt

@@ -3,9 +3,11 @@
 include ../../make.sys
 
 # location of needed modules
-MODFLAGS= $(MOD_FLAG)../iotk/src $(MOD_FLAG)../../Modules $(MOD_FLAG).
+MODFLAGS= $(MOD_FLAG)../../Modules $(MOD_FLAG).
 
 MODULES = \
+asy.o \
+bz_asy.o \
 elastic_const.o \
 gnuplot.o \
 mp_asyn.o \

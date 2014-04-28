@@ -29,6 +29,7 @@ initialize_thermo_master.o \
 matdyn_sub.o \
 mur.o \
 polifit.o \
+plot_bz.o \
 plot_anhar.o \
 plotband_sub.o \
 plot_e_ke.o \
