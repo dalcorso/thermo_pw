@@ -369,18 +369,17 @@ PROGRAM thermo_pw
      !  allowed except though the master workers mechanism
      !
      CALL run_thermo_asyncronously(nwork, part, igeom, auxdyn)
+
+     IF (lelastic_const) THEN
 !
 !   save the stress tensors calculated by all images
 !
-     IF (lstres) THEN
         CALL mp_sum(sigma_geo, world_comm)
         sigma_geo=sigma_geo / nproc_image
 !        CALL write_stress(nwork, file_dat)
-     ENDIF
 !
 !  the elastic constants  are calculated here
 !
-     IF (lelastic_const) THEN
         CALL compute_elastic_constants(sigma_geo, epsilon_geo, nwork, &
                                ngeo_strain, ibrav_save)
         CALL print_elastic_constants(frozen_ions)
