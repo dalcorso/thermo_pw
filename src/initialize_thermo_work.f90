@@ -213,9 +213,9 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   IF (part == 1) THEN
      SELECT CASE (TRIM(what))
         CASE ('scf', 'scf_bands', 'scf_ph', 'scf_disp', 'elastic_constants')
-        CASE ('mur_lc', 'mur_lc_bands', 'mur_lc_ph', 'mur_lc_disp', &
-              'mur_lc_t', 'mur_lc_elastic_constants' )
-           lpwscf(1:ngeo)=.TRUE.
+        CASE ('scf_ke', 'scf_nk', 'mur_lc', 'mur_lc_bands', 'mur_lc_ph', &
+              'mur_lc_disp', 'mur_lc_t', 'mur_lc_elastic_constants' )
+           lpwscf(1:nwork)=.TRUE.
         CASE DEFAULT
           CALL errore('initialize_thermo_work','unknown what',1)
      END SELECT

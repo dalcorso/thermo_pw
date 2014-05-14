@@ -279,8 +279,12 @@ MODULE control_elastic_constants
   LOGICAL :: frozen_ions        ! if .true. compute the elastic constant 
                                 ! keeping the ions frozen at the strained
                                 ! positions
+
+  CHARACTER(LEN=256) :: fl_el_cons ! the file where the elastic constants are
+                                   ! written
+
 END MODULE control_elastic_constants
-  !
+
 MODULE control_conv
   USE kinds,  ONLY : DP
   !
@@ -316,6 +320,7 @@ MODULE control_paths
   REAL(DP), ALLOCATABLE :: disp_q(:,:), disp_wq(:)  ! q path for interpolated
   INTEGER            :: npk_label         ! number of label points
   INTEGER            :: nqaux             ! number of auxiliary points
+  INTEGER            :: npx               ! supercell size for BZ search
   CHARACTER(LEN=3), ALLOCATABLE :: letter(:) ! the labels
   CHARACTER(LEN=3), ALLOCATABLE :: letter_path(:) ! the optional labels
   INTEGER, ALLOCATABLE :: label_list(:)   ! correspondence label xqaux list
@@ -389,10 +394,10 @@ END MODULE control_gnuplot
 MODULE control_asy
   USE kinds,  ONLY : DP
   !
-  ! ... The variables needed to control the band plot
+  ! ... The variables needed to control the brillouin zone plot
   !
   SAVE
-
+  !
   CHARACTER(LEN=256) :: flasy ! the name of file with the gnuplot script
 
   CHARACTER(LEN=256) :: asymptote_command ! the asymptote command
@@ -401,3 +406,18 @@ MODULE control_asy
                         ! code
 
 END MODULE control_asy
+
+MODULE thermo_sym
+  USE kinds,  ONLY : DP
+  !
+  ! ... The variables needed to control the symmetry plot
+  !
+  SAVE
+  !
+  INTEGER :: laue    ! The laue class of the solid
+  INTEGER :: code_group_save ! the code of the point group of the unperturbed
+                             ! solid
+  LOGICAL :: ibrav_group_consistent ! if .true., point group and bravais lattice are
+                                    ! consistent 
+
+END MODULE thermo_sym

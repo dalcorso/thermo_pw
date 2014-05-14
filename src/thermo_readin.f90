@@ -48,8 +48,6 @@ SUBROUTINE thermo_readin()
   USE mp_world,             ONLY : world_comm
   USE mp_images,            ONLY : nimage, my_image_id, root_image
   USE parser,               ONLY : read_line, parse_unit
-  USE environment,          ONLY : environment_end
-  USE mp_global,            ONLY : mp_global_end
   USE io_global,            ONLY : ionode, meta_ionode, meta_ionode_id
   USE mp,                   ONLY : mp_bcast
   !
@@ -356,25 +354,6 @@ SUBROUTINE thermo_readin()
   DEALLOCATE(iun_image)
 
   IF (set_internal_path) CALL set_bz_path()
-
-  IF (what=='plot_bz') THEN
-
-     asy_filename=TRIM(flasy)//'.asy'
-     IF ( my_image_id==root_image ) THEN
-        CALL plot_bz(ibrav, celldm, at, bg, point_label_type, &
-                   xqaux, wqaux, nqaux, letter, letter_path, npk_label, &
-                   label_list, asy_filename)
-
-        IF (lasymptote.AND.ionode) &
-           ierr=system(TRIM(asymptote_command)//' '//TRIM(asy_filename))
-     ENDIF
-     CALL summarize_kpt(xqaux, wqaux, nqaux, letter_path)
-
-     CALL environment_end( 'THERMO_PW' )
-     !
-     CALL mp_global_end ()
-     CALL do_stop( 0 )
-  ENDIF
 
   RETURN
 END SUBROUTINE thermo_readin

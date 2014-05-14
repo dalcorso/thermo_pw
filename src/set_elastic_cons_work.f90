@@ -11,56 +11,62 @@ USE cell_base, ONLY : ibrav
 USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain
 USE elastic_constants, ONLY : epsilon_voigt, epsilon_geo, sigma_geo, &
                               trans_epsilon
+USE thermo_sym, ONLY : laue
 IMPLICIT NONE
 INTEGER, INTENT(OUT) :: nwork
-REAL(DP) :: epsilon_min
+REAL(DP) :: epsilon_min, epsilon_min_off
 INTEGER :: igeo, iwork, i, j
 
 epsilon_min= - delta_epsilon * (ngeo_strain - 1 ) / 2.0_DP
-IF (ibrav==1 .OR. ibrav==2 .OR. ibrav==3) THEN
+epsilon_min_off= - delta_epsilon * (ngeo_strain - 1 ) 
+SELECT CASE (laue) 
+   CASE(29,32)
 !
 !  cubic case
 !
-   nwork = 2 * ngeo_strain
-   ALLOCATE( epsilon_voigt(6, nwork) )
-   epsilon_voigt=0.0_DP
-   DO igeo=1,ngeo_strain
-      epsilon_voigt(3, igeo) = epsilon_min + delta_epsilon * ( igeo - 1 ) 
-      epsilon_voigt(4, ngeo_strain + igeo) = epsilon_min + &
-                                             delta_epsilon * ( igeo - 1 )
-!      epsilon_voigt(5, ngeo_strain + igeo) = &
-!                     epsilon_voigt(4, ngeo_strain + igeo)
-!      epsilon_voigt(6, ngeo_strain + igeo) = &
-!                     epsilon_voigt(4, ngeo_strain + igeo)
-   ENDDO
-ELSEIF (ibrav == 4 .OR. ibrav==5) THEN
+      nwork = 2 * ngeo_strain
+      ALLOCATE( epsilon_voigt(6, nwork) )
+      epsilon_voigt=0.0_DP
+      DO igeo=1,ngeo_strain
+         epsilon_voigt(3, igeo) = epsilon_min + delta_epsilon * ( igeo - 1 ) 
+         epsilon_voigt(4, ngeo_strain + igeo) = epsilon_min_off + &
+                                       2.0_DP * delta_epsilon * ( igeo - 1 )
+!        epsilon_voigt(5, ngeo_strain + igeo) = &
+!                       epsilon_voigt(4, ngeo_strain + igeo)
+!        epsilon_voigt(6, ngeo_strain + igeo) = &
+!                       epsilon_voigt(4, ngeo_strain + igeo)
+      ENDDO
+   CASE(19,23,25,27)
 !
-!  hexagonal or trigonal case
+!  hexagonal or trigonal cases
 !
-   nwork = 3 * ngeo_strain
-   ALLOCATE( epsilon_voigt(6, nwork) )
-   epsilon_voigt=0.0_DP
-   DO igeo=1,ngeo_strain
-      epsilon_voigt(1, igeo) = epsilon_min + delta_epsilon * ( igeo - 1 ) 
-      epsilon_voigt(3, ngeo_strain+igeo) = epsilon_min + &
-                                             delta_epsilon * ( igeo - 1 ) 
-      epsilon_voigt(4, 2*ngeo_strain + igeo) = epsilon_min + &
+      nwork = 3 * ngeo_strain
+      ALLOCATE( epsilon_voigt(6, nwork) )
+      epsilon_voigt=0.0_DP
+      DO igeo=1,ngeo_strain
+         epsilon_voigt(1, igeo) = epsilon_min + delta_epsilon * ( igeo - 1 ) 
+         epsilon_voigt(3, ngeo_strain+igeo) = epsilon_min + &
+                                              delta_epsilon * ( igeo - 1 ) 
+         epsilon_voigt(4, 2*ngeo_strain + igeo) = epsilon_min_off + &
+                                      2.0_DP * delta_epsilon * ( igeo - 1 )
+      ENDDO
+   CASE(18,22)
+!
+!  tetragonal case
+!
+      nwork = 4 * ngeo_strain
+      ALLOCATE( epsilon_voigt(6, nwork) )
+      epsilon_voigt=0.0_DP
+      DO igeo=1,ngeo_strain
+         epsilon_voigt(1, igeo) = epsilon_min + delta_epsilon * ( igeo - 1 )
+         epsilon_voigt(3, ngeo_strain+igeo) = epsilon_min + &
                                              delta_epsilon * ( igeo - 1 )
-   ENDDO
-ELSEIF (ibrav==6 .OR. ibrav==7) THEN
-   nwork = 4 * ngeo_strain
-   ALLOCATE( epsilon_voigt(6, nwork) )
-   epsilon_voigt=0.0_DP
-   DO igeo=1,ngeo_strain
-      epsilon_voigt(1, igeo) = epsilon_min + delta_epsilon * ( igeo - 1 )
-      epsilon_voigt(3, ngeo_strain+igeo) = epsilon_min + &
-                                             delta_epsilon * ( igeo - 1 )
-      epsilon_voigt(4, 2*ngeo_strain + igeo) = epsilon_min + &
-                                             delta_epsilon * ( igeo - 1 )
-      epsilon_voigt(6, 3*ngeo_strain + igeo) = epsilon_min + &
-                                             delta_epsilon * ( igeo - 1 )
-   ENDDO
-ELSE
+         epsilon_voigt(4, 2*ngeo_strain + igeo) = epsilon_min_off + &
+                                       2.0_DP * delta_epsilon * ( igeo - 1 )
+         epsilon_voigt(6, 3*ngeo_strain + igeo) = epsilon_min_off + &
+                                       2.0_DP * delta_epsilon * ( igeo - 1 )
+      ENDDO
+CASE DEFAULT
 !
 !   generic case, used when ibrav=0 or for triclinic, monoclinic, and 
 !   orthorombic systems, no information is deduced from symmetry 
@@ -69,7 +75,6 @@ ELSE
 !   Requires 6 * ngeo_strain self consistent calculations. In the monoclinic
 !   and orthorombic case, some elements vanish by symmetry, but we need to
 !   make six independent strains in any case.
-! 
 !
    nwork = 6 * ngeo_strain
    ALLOCATE( epsilon_voigt(6, nwork) )
@@ -80,14 +85,14 @@ ELSE
                                              delta_epsilon * ( igeo - 1 )
       epsilon_voigt(3, 2*ngeo_strain+igeo) = epsilon_min + &
                                              delta_epsilon * ( igeo - 1 )
-      epsilon_voigt(4, 3*ngeo_strain + igeo) = epsilon_min + &
-                                             delta_epsilon * ( igeo - 1 )
-      epsilon_voigt(5, 4*ngeo_strain + igeo) = epsilon_min + &
-                                             delta_epsilon * ( igeo - 1 )
-      epsilon_voigt(6, 5*ngeo_strain + igeo) = epsilon_min + &
-                                             delta_epsilon * ( igeo - 1 )
+      epsilon_voigt(4, 3*ngeo_strain + igeo) = epsilon_min_off + &
+                                        2.0_DP * delta_epsilon * ( igeo - 1 )
+      epsilon_voigt(5, 4*ngeo_strain + igeo) = epsilon_min_off + &
+                                        2.0_DP * delta_epsilon * ( igeo - 1 )
+      epsilon_voigt(6, 5*ngeo_strain + igeo) = epsilon_min_off + &
+                                        2.0_DP * delta_epsilon * ( igeo - 1 )
    ENDDO
-ENDIF
+END SELECT
 
 ALLOCATE( sigma_geo(3, 3, nwork) )
 ALLOCATE( epsilon_geo(3, 3, nwork) )

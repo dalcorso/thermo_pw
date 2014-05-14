@@ -40,7 +40,11 @@ PROGRAM thermo_pw
   ! ...               thermodynamical quantities
   ! ...   mur_lc_t  : lattice constant and bulk modulus as a function 
   ! ...               of temperature within the quasiharmonic approximation
-
+  ! ...   elastic_constants : elastic constants at zero temperature 
+  ! ...   mur_lc_elastic_constants : elastic constants at zero temperature 
+  ! ...               at the minimum of the Murnaghan equation 
+  ! ...
+  ! ...
   USE kinds,            ONLY : DP
   USE check_stop,       ONLY : check_stop_init
   USE mp_global,        ONLY : mp_startup, mp_global_end
@@ -49,22 +53,27 @@ PROGRAM thermo_pw
   USE mp_world,         ONLY : world_comm
   USE mp_asyn,          ONLY : with_asyn_images
   USE control_ph,       ONLY : with_ext_images, always_run
-  USE io_global,        ONLY : ionode, stdout
-  USE mp,               ONLY : mp_sum
-  USE control_thermo,   ONLY : lev_syn_1, lev_syn_2, lpwscf_syn_1, &
-                               lbands_syn_1, lph, outdir_thermo, lq2r, &
+  USE io_global,        ONLY : ionode, stdout, meta_ionode_id
+  USE mp,               ONLY : mp_sum, mp_bcast
+  USE control_thermo,   ONLY : lev_syn_1, lev_syn_2, lpwscf_syn_1,         &
+                               lbands_syn_1, lph, outdir_thermo, lq2r,     &
                                lmatdyn, ldos, ltherm, flfrc, flfrq, fldos, &
-                               fltherm, spin_component, flevdat, &
-                               lconv_ke_test, lconv_nk_test, compute_lc, &
-                               lelastic_const
+                               fltherm, spin_component, flevdat,           &
+                               lconv_ke_test, lconv_nk_test, compute_lc,   &
+                               lelastic_const 
   USE ifc,              ONLY : freqmin, freqmax
   USE elastic_constants, ONLY : print_elastic_constants, &
                                 compute_elastic_constants, epsilon_geo, &
-                                sigma_geo
-  USE control_elastic_constants, ONLY : ibrav_save, ngeo_strain, frozen_ions
+                                sigma_geo, el_con, el_compliances, &
+                                compute_elastic_compliances, &
+                                print_elastic_compliances, read_elastic, &
+                                write_elastic
+  USE control_elastic_constants, ONLY : ibrav_save, ngeo_strain, frozen_ions, &
+                                 fl_el_cons
   USE control_paths,    ONLY : nqaux
   USE control_gnuplot,  ONLY : flpsdos, flgnuplot, flpstherm, flpsdisp
   USE control_bands,    ONLY : flpband, nbnd_bands
+  USE thermo_sym,       ONLY : laue, code_group_save
   USE wvfct,            ONLY : nbnd
   USE lsda_mod,         ONLY : nspin
   USE thermodynamics,   ONLY : phdos_save
@@ -74,7 +83,6 @@ PROGRAM thermo_pw
   USE input_parameters, ONLY : ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
                                trd_ht, rd_ht, cell_units, outdir
   USE control_mur,      ONLY : vmin, b0, b01, emin
-  USE force_mod,        ONLY : lstres
   USE thermo_mod,       ONLY : what, ngeo, alat_geo, omega_geo, energy_geo, ntry
   USE ph_restart,       ONLY : destroy_status_run
   USE save_ph,          ONLY : clean_input_variables
@@ -91,7 +99,7 @@ PROGRAM thermo_pw
   CHARACTER (LEN=256) :: diraux=' '
   CHARACTER(LEN=6) :: int_to_char
   INTEGER :: part, nwork, igeom, itemp, nspin0, itry, exit_status
-  REAL(DP) :: compute_alat_geo
+  REAL(DP) :: compute_alat_geo, fact
   LOGICAL :: all_done_asyn
   LOGICAL  :: exst, parallelfs
   LOGICAL :: check_file_exists, check_dyn_file_exists
@@ -112,6 +120,8 @@ PROGRAM thermo_pw
   CALL thermo_readin()
   !
   CALL set_temperature()
+  !
+  CALL thermo_summary()
   !
   CALL check_stop_init()
   !
@@ -378,11 +388,20 @@ PROGRAM thermo_pw
         sigma_geo=sigma_geo / nproc_image
 !        CALL write_stress(nwork, file_dat)
 !
-!  the elastic constants  are calculated here
+!  the elastic constants are calculated here
 !
         CALL compute_elastic_constants(sigma_geo, epsilon_geo, nwork, &
-                               ngeo_strain, ibrav_save)
+                               ngeo_strain, ibrav_save, laue)
         CALL print_elastic_constants(frozen_ions)
+!
+!  now compute the elastic compliances and prints them
+!
+        CALL compute_elastic_compliances(el_con,el_compliances)
+        CALL print_elastic_compliances(frozen_ions)
+!
+!  save elastic constants and compliances on file
+!
+        IF (my_image_id==root_image) CALL write_elastic(fl_el_cons)
      ENDIF
      !
      CALL deallocate_asyn()
