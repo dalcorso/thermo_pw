@@ -155,19 +155,19 @@ IF (ionode) THEN
    maxdx=max(xk(1),xk(2))
    maxdx=max(maxdx,xk(3))
    WRITE(asyu,'("draw(G--M1,dotted);")')
-   WRITE(asyu,'("draw(M1--M1+(",f10.6,",0,0),Arrow3);")') 0.55_DP*maxdx
+   WRITE(asyu,'("draw(M1--M1+(",f10.6,",0.0,0.0),Arrow3);")') 0.55_DP*maxdx
 
    WRITE(asyu,'("draw(G--M2,dotted);")')
-   WRITE(asyu,'("draw(M2--M2+(0,",f10.6,",0),Arrow3);")') 0.45_DP*maxdx
+   WRITE(asyu,'("draw(M2--M2+(0.0,",f10.6,",0.0),Arrow3);")') 0.45_DP*maxdx
 
    WRITE(asyu,'("draw(G--M3,dotted);")')
-   WRITE(asyu,'("draw(M3--M3+(0,0,",f10.6,"),Arrow3);")') 0.55_DP*maxdx
+   WRITE(asyu,'("draw(M3--M3+(0.0,0.0,",f10.6,"),Arrow3);")') 0.55_DP*maxdx
    WRITE(asyu,*)
    WRITE(asyu,'("label(scale(1.9)*""$k_x$"",M1+(",f10.6,",0.0,0.0),NW);")') &
                                                          0.55_DP*maxdx
-   WRITE(asyu,'("label(scale(1.9)*""$k_y$"",M2+(0,",f10.6,",0.0),N);")') &
-                                                         0.55_DP*maxdx
-   WRITE(asyu,'("label(scale(1.9)*""$k_z$"",M3+(0,0.02,",f10.6,"),SE);")') &
+   WRITE(asyu,'("label(scale(1.9)*""$k_y$"",M2+(0.0,",f10.6,",0.0),N);")') &
+                                                         0.45_DP*maxdx
+   WRITE(asyu,'("label(scale(1.9)*""$k_z$"",M3+(0.0,0.02,",f10.6,"),SE);")') &
                                                          0.55_DP*maxdx
    WRITE(asyu,*)
 ENDIF
