@@ -315,6 +315,7 @@ MODULE control_paths
   SAVE
   !
   REAL(DP), ALLOCATABLE :: xqaux(:,:)     ! the initial and final points 
+  REAL(DP), ALLOCATABLE :: wqauxr(:)      ! the weight for normal paths
   INTEGER, ALLOCATABLE  :: wqaux(:)       ! the number of points per line
   INTEGER               :: disp_nqs       ! total number of points to compute
   REAL(DP), ALLOCATABLE :: disp_q(:,:), disp_wq(:)  ! q path for interpolated

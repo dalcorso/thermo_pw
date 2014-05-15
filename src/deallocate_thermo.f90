@@ -20,7 +20,8 @@ SUBROUTINE deallocate_thermo()
   USE ph_freq_anharmonic, ONLY : vminf_t, b0f_t, free_e_minf_t, &
                              alphaf_t, betaf_t, gammaf_t, cvf_t, cpf_t, b0f_s
   USE grun_anharmonic,  ONLY : betab
-  USE control_paths,    ONLY : xqaux, wqaux, letter, label_list, letter_path, &
+  USE control_paths,    ONLY : xqaux, wqaux, wqauxr, letter, label_list, &
+                               letter_path, &
                                label_disp_q, disp_q, disp_wq
   USE control_conv,     ONLY : ke, keden, nk_test, sigma_test
   USE elastic_constants, ONLY : epsilon_geo, sigma_geo, epsilon_voigt
@@ -64,6 +65,7 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (free_e_minf_t) )   DEALLOCATE(free_e_minf_t) 
   IF ( ALLOCATED (xqaux) )           DEALLOCATE(xqaux)
   IF ( ALLOCATED (wqaux) )           DEALLOCATE(wqaux)
+  IF ( ALLOCATED (wqauxr) )          DEALLOCATE(wqauxr)
   IF ( ALLOCATED (letter) )          DEALLOCATE(letter)
   IF ( ALLOCATED (letter_path) )     DEALLOCATE(letter_path)
   IF ( ALLOCATED (label_list) )      DEALLOCATE(label_list)

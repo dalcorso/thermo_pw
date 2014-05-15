@@ -546,7 +546,8 @@ SUBROUTINE write_gnuplot_file(kx, e, nks, nbnd, emin, emax, eref, nlines, &
                   nrap, has_points, point, icode, exist_rap, igeom, fileout)
 USE kinds,           ONLY : DP
 USE klist,           ONLY : degauss
-USE control_paths,   ONLY : nqaux, label_disp_q, letter_path
+USE control_paths,   ONLY : nqaux, label_disp_q, letter_path, &
+                            q_in_band_form
 USE control_gnuplot, ONLY : flgnuplot, flpsband, flpsdisp, &
                             flpsgrun, gnuplot_command, lgnuplot
 USE gnuplot,       ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
@@ -614,12 +615,20 @@ CALL gnuplot_set_eref(eref,.FALSE.)
 command="shift=-(ymax - ymin)/40."
 CALL gnuplot_write_command(TRIM(command), .FALSE.)
 
-DO n=1, nqaux
-   IF (n /= 1 .AND. n /= nqaux ) &
-      CALL gnuplot_write_vertical_line(kx(label_disp_q(n)), 1, 'front', &
+IF (q_in_band_form) THEN
+   DO n=1, nqaux
+      IF (n /= 1 .AND. n /= nqaux ) &
+         CALL gnuplot_write_vertical_line(kx(label_disp_q(n)), 1, 'front', &
                                        'black', .FALSE.)
    CALL gnuplot_write_label_yl(kx(label_disp_q(n)), ' ymin + shift ', letter_path(n),.FALSE.)
-ENDDO
+   ENDDO
+ELSE
+   DO n=1, nqaux
+      IF (letter_path(n) /='') &
+         CALL gnuplot_write_label_yl(kx(label_disp_q(n)), &
+                          ' ymin + shift ', letter_path(n),.FALSE.)
+   END DO
+END IF
 
 colore(1)='red'
 colore(2)='green'

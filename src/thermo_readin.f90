@@ -25,7 +25,7 @@ SUBROUTINE thermo_readin()
   USE input_parameters,     ONLY : outdir, ibrav
   USE read_input,           ONLY : read_input_file
   USE command_line_options, ONLY : input_file_ 
-  USE control_paths,        ONLY : xqaux, wqaux, npk_label, letter, &
+  USE control_paths,        ONLY : xqaux, wqaux, wqauxr, npk_label, letter, &
                                    label_list, nqaux, q_in_band_form, &
                                    q_in_cryst_coord, q2d, point_label_type, &
                                    disp_q, disp_wq, disp_nqs, &
@@ -63,6 +63,7 @@ SUBROUTINE thermo_readin()
   INTEGER :: iun_thermo, parse_unit_save
 
   INTEGER :: nch, ierr
+  REAL(DP) :: wq0
   LOGICAL :: tend, terr, read_paths, set_internal_path, exst
   CHARACTER(LEN=256) :: input_line, buffer
   !
@@ -227,6 +228,8 @@ SUBROUTINE thermo_readin()
      ALLOCATE(letter_path(nqaux))
      ALLOCATE(label_list(nqaux))
      ALLOCATE(label_disp_q(nqaux))
+     IF (.NOT.q_in_band_form) ALLOCATE(wqauxr(nqaux))
+
 
      npk_label=0
      letter_path='   '
@@ -249,7 +252,14 @@ SUBROUTINE thermo_readin()
 !   k point. We read it and exit from the loop on characters
 !
               READ(input_line,*) xqaux(1,iq), xqaux(2,iq), &
-                                 xqaux(3,iq), wqaux(iq)
+                                 xqaux(3,iq), wq0
+
+              IF (q_in_band_form) THEN
+                 wqaux(iq)=NINT(wq0)
+              ELSE
+                 wqauxr(iq)=wq0
+                 wqaux(iq)=1
+              ENDIF
 !
 !   search for a possible optional letter
 !

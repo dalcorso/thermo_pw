@@ -14,7 +14,7 @@ SUBROUTINE set_paths_disp()
 !  should be given as letters to be computed here with the correct
 !  geometry.
 !
-  USE control_paths, ONLY : nqaux, xqaux, wqaux, npk_label, letter, &
+  USE control_paths, ONLY : nqaux, xqaux, wqaux, wqauxr, npk_label, letter, &
                             label_list, nqaux, q_in_band_form, &
                             q_in_cryst_coord, q2d, point_label_type, &
                             label_disp_q, disp_nqs, disp_q, disp_wq
@@ -62,8 +62,9 @@ SUBROUTINE set_paths_disp()
       disp_nqs=nqaux
       ALLOCATE(disp_q(3,disp_nqs))
       ALLOCATE(disp_wq(disp_nqs))
-      disp_wq(:)=wqaux(:)
+      disp_wq(:)=wqauxr(:)
       disp_q(:,1:disp_nqs)=xqaux(:,1:disp_nqs)
+      
       DO i=1,nqaux
          label_disp_q(i)=i
       ENDDO
