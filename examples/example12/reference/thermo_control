@@ -1,0 +1,4 @@
+ &INPUT_THERMO
+  what='plot_bz',
+  lasymptote=.FALSE.
+ /

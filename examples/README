@@ -110,8 +110,16 @@ ngeo=1           of the kinetic energy cut-off of the wavefunctions and of the
                  images.
 
 example11:
-what = scf_nk  : this example computes the total energy for several values
-                 of the k point mesh. One can specify the number of nk, and
-                 the step between the first nk written on the input of pw.x
-                 and the others. If this is a metal also the number of values
-                 of the smearing degauss can be specified.
+what = scf_nk : this example computes the total energy for several values
+                of the k point mesh. One can specify the number of nk, and
+                the step between the first nk written on the input of pw.x
+                and the others. If this is a metal also the number of values
+                of the smearing degauss can be specified.
+
+example12:
+what=plot_bz : this example plots the Brillouin zone of Si and the standard
+               path. It produces only the asymptote script. If you have the
+               asymptote package installed, use lasymptote=.true. to produce 
+               the pdf file. Or give the command asy -V asy_tmp.asy to see 
+               the Brillouin zone on the screen.
+
