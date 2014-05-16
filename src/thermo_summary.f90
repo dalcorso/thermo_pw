@@ -248,7 +248,7 @@ SUBROUTINE thermo_summary()
      CALL errore('thermo_summary','ibrav not programmed',1)
   END SELECT
 
-   WRITE( stdout, '(5X, &
+   WRITE( stdout, '(/,5x, &
        &     "crystal axes: (cart. coord. in units of alat)",/, &
        &       3(15x,"a(",i1,") = (",3f11.6," )  ",/ ) )')  (jpol,  &
        (at (ipol, jpol) , ipol = 1, 3) , jpol = 1, 3)
@@ -269,8 +269,9 @@ SUBROUTINE thermo_summary()
   ibrav_group_consistent=check_group_ibrav(code_group, ibrav)
 
   IF ( ibrav_group_consistent ) THEN
-     WRITE(stdout,'(/,5x,"The point group is compatible with the&
-                                    & Bravais lattice")')
+     WRITE(stdout,'(/,5x,"The point group, ",a,", is compatible with the&
+                                    & Bravais lattice.")') TRIM(group_name &
+                                                               (code_group))
 !
 !  first rank tensors
 !
@@ -282,31 +283,31 @@ SUBROUTINE thermo_summary()
 !   cubic
 !
               IF (code_group==29.OR. code_group==32) THEN
-                 WRITE(stdout,'(/,5x, "This solid has inversion symmetry,")')
-                 WRITE(stdout,'(5x, "in insulators, there is no spontaneous &
-                                                            &polarization")')
-               ELSEIF (code_group==28.OR.code_group==30.OR.code_group==31) THEN
+                 WRITE(stdout,'(/,5x, "This solid has inversion symmetry.")')
+                 WRITE(stdout,'(5x, "First-rank tensors, such as the &
+                                 &spontaneous polarization, vanish.")')
+              ELSEIF (code_group==28.OR.code_group==30.OR.code_group==31) THEN
                  WRITE(stdout,'(/,5x, "This solid has not inversion but, &
-                                                    &in insulators, ")')
-                 WRITE(stdout,'(5x, "the spontaneous polarization vanishes")')
+                                       &first-rank tensors, such as ")')
+                 WRITE(stdout,'(5x, "the spontaneous polarization, vanish.")')
               ENDIF
            CASE(4,5,6,7)  
 !
 !  hexagonal, trigonal, tetragonal
 !
               IF (code_group==18.OR. code_group==22) THEN
-                 WRITE(stdout,'(/,5x, "This solid has inversion symmetry,")')
-                 WRITE(stdout,'(5x, "in insulators, there is no spontaneous &
-                                                            &polarization")')
+                 WRITE(stdout,'(/,5x, "This solid has inversion symmetry.")')
+                 WRITE(stdout,'(5x, "First-rank tensors, such as the &
+                                 &spontaneous polarization, vanish.")')
               ELSEIF (code_group==9.OR.code_group==10.OR.code_group==17.OR. &
                       code_group==21.OR.code_group==24.OR.code_group==26 ) THEN
-                 WRITE(stdout,'(/,5x, "This solid has not inversion symmetry but,")')
-                 WRITE(stdout,'(5x, "in insulators, the spontaneous polarization &
-                                                   &vanishes")')
+                 WRITE(stdout,'(/,5x, "This solid has not inversion but, &
+                                       &first-rank tensors, such as ")')
+                 WRITE(stdout,'(5x, "the spontaneous polarization, vanish.")')
               ELSEIF (code_group==5.OR.code_group==6.OR.code_group==7.OR. &
                       code_group==13.OR.code_group==14.OR.code_group==15) THEN
-                 WRITE(stdout,'(/,5x, "Insulators with this point group can have a &
-                                        &spontaneous polatization of the form:")')
+                 WRITE(stdout,'(/,5x, "First-rank tensors, such as the &
+                               &spontaneous polarization, have the form:")')
                  WRITE(stdout,'(/,5x, "(  .   .   p3 )")')
               ENDIF
            CASE(8,9,10,11)  
@@ -314,16 +315,16 @@ SUBROUTINE thermo_summary()
 !  orthorombic
 !
               IF (code_group==20) THEN
-                 WRITE(stdout,'(/,5x, "This solid has inversion symmetry,")')
-                 WRITE(stdout,'(5x, "in insulators, there is no spontaneous &
-                                                            &polarization")')
+                 WRITE(stdout,'(/,5x, "This solid has inversion symmetry.")')
+                 WRITE(stdout,'(5x, "First-rank tensors, such as the &
+                                 &spontaneous polarization, vanish.")')
               ELSEIF (code_group==8) THEN
-                 WRITE(stdout,'(/,5x, "This solid has not inversion symmetry but,")')
-                 WRITE(stdout,'(5x, "in insulators, the spontaneous polarization &
-                                                   &vanishes")')
+                 WRITE(stdout,'(/,5x, "This solid has not inversion but, &
+                                       &first-rank tensors, such as ")')
+                 WRITE(stdout,'(5x, "the spontaneous polarization, vanish.")')
               ELSEIF (code_group==12) THEN
-                 WRITE(stdout,'(/,5x, "Insulators with this point group can have a &
-                                        &spontaneous polatization of the form:")')
+                 WRITE(stdout,'(/,5x, "First-rank tensors, such as the &
+                               &spontaneous polarization, have the form:")')
                  WRITE(stdout,'(/,5x, "(  .   .   p3 )")')
               ENDIF
            CASE(12,13)  
@@ -331,16 +332,16 @@ SUBROUTINE thermo_summary()
 !   monoclinic c orientation
 !
               IF (code_group==12) THEN
-                 WRITE(stdout,'(/,5x, "This solid has inversion symmetry,")')
-                 WRITE(stdout,'(5x, "in insulators, there is no spontaneous &
-                                                            &polarization")')
+                 WRITE(stdout,'(/,5x, "This solid has inversion symmetry.")')
+                 WRITE(stdout,'(5x, "First-rank tensors, such as the &
+                                 &spontaneous polarization, vanish.")')
               ELSEIF (code_group==4) THEN
-                 WRITE(stdout,'(/,5x, "Insulators with this point group can have a &
-                                        &spontaneous polatization of the form:")')
+                 WRITE(stdout,'(/,5x, "First-rank tensors, such as the &
+                               &spontaneous polarization, have the form:")')
                  WRITE(stdout,'(/,5x, "(  .   .   p3 )")')
               ELSEIF (code_group==3) THEN
-                 WRITE(stdout,'(/,5x, "Insulators with this point group can have a &
-                                        &spontaneous polatization of the form:")')
+                 WRITE(stdout,'(/,5x, "First-rank tensors, such as the &
+                               &spontaneous polarization, have the form:")')
                  WRITE(stdout,'(/,5x, "( p1   p2   . )")')
               ENDIF
            CASE(-12)  
@@ -348,16 +349,16 @@ SUBROUTINE thermo_summary()
 !   monoclinic b orientation
 !
               IF (code_group==12) THEN
-                 WRITE(stdout,'(/,5x, "This solid has inversion symmetry,")')
-                 WRITE(stdout,'(5x, "in insulators, there is no spontaneous &
-                                                           &polarization")')
+                 WRITE(stdout,'(/,5x, "This solid has inversion symmetry.")')
+                 WRITE(stdout,'(5x, "First-rank tensors, such as the &
+                                 &spontaneous polarization, vanish.")')
               ELSEIF (code_group==4) THEN
-                 WRITE(stdout,'(/,5x, "Insulators with this point group can have a &
-                                       &spontaneous polatization of the form:")')
+                 WRITE(stdout,'(/,5x, "First-rank tensors, such as the &
+                               &spontaneous polarization, have the form:")')
                  WRITE(stdout,'(/,5x, "(  .   p2   .  )")')
               ELSEIF (code_group==3) THEN
-                 WRITE(stdout,'(/,5x, "Insulators with this point group can have a &
-                                       &spontaneous polatization of the form:")')
+                 WRITE(stdout,'(/,5x, "First-rank tensors, such as the &
+                               &spontaneous polarization, have the form:")')
                  WRITE(stdout,'(/,5x, "(  p1   .   p3 )")')
               ENDIF
            CASE(14)  
@@ -365,12 +366,12 @@ SUBROUTINE thermo_summary()
 !  triclinc 
 !
               IF (code_group==2) THEN
-                 WRITE(stdout,'(/,5x, "This solid has inversion symmetry,")')
-                 WRITE(stdout,'(5x, "in insulators, there is no spontaneous &
-                                                            &polarization")')
+                 WRITE(stdout,'(/,5x, "This solid has inversion symmetry.")')
+                 WRITE(stdout,'(5x, "First-rank tensors, such as the &
+                                 &spontaneous polarization, vanish.")')
               ELSEIF (code_group==1) THEN
-                 WRITE(stdout,'(/,5x, "Insulators with this point group can have a &
-                                        &spontaneous polatization of the form:")')
+                 WRITE(stdout,'(/,5x, "First-rank tensors, such as the &
+                               &spontaneous polarization, have the form:")')
                  WRITE(stdout,'(/,5x, "( p1   p2   p3 )")')
               ENDIF
            CASE DEFAULT 
@@ -385,8 +386,8 @@ SUBROUTINE thermo_summary()
 !
 !   cubic
 !
-              WRITE(stdout,'(/,5x, "Second order tensors such as the dielectric")')
-              WRITE(stdout,'(5x, "tensor or the thermal expansion have the form")')
+              WRITE(stdout,'(/,5x, "Second-rank tensors, such as the dielectric")')
+              WRITE(stdout,'(5x, "tensor or the thermal expansion, have the form")')
               WRITE(stdout,'(/,5x, "( e11   .    .  )")')
               WRITE(stdout,'(5x, "(  .   e11   .  )")')
               WRITE(stdout,'(5x, "(  .    .   e11 )")')
@@ -394,8 +395,8 @@ SUBROUTINE thermo_summary()
 !
 !  hexagonal, trigonal, tetragonal
 !
-              WRITE(stdout,'(/,5x, "Second order tensors such as the dielectric")')
-              WRITE(stdout,'(5x, "tensor or the thermal expansion have the form")')
+              WRITE(stdout,'(/,5x, "Second-rank tensors, such as the dielectric")')
+              WRITE(stdout,'(5x, "tensor or the thermal expansion, have the form")')
               WRITE(stdout,'(/,5x, "( e11   .    .  )")')
               WRITE(stdout,'(5x, "(  .   e11   .  )")')
               WRITE(stdout,'(5x, "(  .    .   e33 )")')
@@ -403,8 +404,8 @@ SUBROUTINE thermo_summary()
 !
 !  orthorombic
 !
-              WRITE(stdout,'(/,5x, "Second order tensors such as the dielectric")')
-              WRITE(stdout,'(5x, "tensor or the thermal expansion have the form")')
+              WRITE(stdout,'(/,5x, "Second-rank tensors, such as the dielectric")')
+              WRITE(stdout,'(5x, "tensor or the thermal expansion, have the form")')
               WRITE(stdout,'(/,5x, "( e11   .    .  )")')
               WRITE(stdout,'(5x, "(  .   e22   .  )")')
               WRITE(stdout,'(5x, "(  .    .   e33 )")')
@@ -412,8 +413,8 @@ SUBROUTINE thermo_summary()
 !
 !   monoclinic c orientation
 !
-              WRITE(stdout,'(/,5x, "Second order tensors such as the dielectric")')
-              WRITE(stdout,'(5x, "tensor or the thermal expansion have the form")')
+              WRITE(stdout,'(/,5x, "Second-rank tensors, such as the dielectric")')
+              WRITE(stdout,'(5x, "tensor or the thermal expansion, have the form")')
               WRITE(stdout,'(/,5x, "( e11  e12   .  )")')
               WRITE(stdout,'(5x, "( e12  e22   .  )")')
               WRITE(stdout,'(5x, "(  .    .   e33 )")')
@@ -421,8 +422,8 @@ SUBROUTINE thermo_summary()
 !
 !   monoclinic b orientation
 !
-              WRITE(stdout,'(/,5x, "Second order tensors such as the dielectric")')
-              WRITE(stdout,'(5x, "tensor or the thermal expansion have the form")')
+              WRITE(stdout,'(/,5x, "Second-rank tensors, such as the dielectric")')
+              WRITE(stdout,'(5x, "tensor or the thermal expansion, have the form")')
               WRITE(stdout,'(/,5x, "( e11   .   e13 )")')
               WRITE(stdout,'(5x, "(  .   e22   .  )")')
               WRITE(stdout,'(5x, "( e13   .   e33 )")')
@@ -430,8 +431,8 @@ SUBROUTINE thermo_summary()
 !
 !  triclinc 
 !
-              WRITE(stdout,'(/,5x, "Second order tensors such as the dielectric")')
-              WRITE(stdout,'(5x, "tensor or the thermal expansion have the form")')
+              WRITE(stdout,'(/,5x, "Second-rank tensors, such as the dielectric")')
+              WRITE(stdout,'(5x, "tensor or the thermal expansion, have the form")')
               WRITE(stdout,'(/,5x, "( e11  e12  e13 )")')
               WRITE(stdout,'(5x, "( e12  e22  e23 )")')
               WRITE(stdout,'(5x, "( e13  e23  e33 )")')
@@ -442,12 +443,14 @@ SUBROUTINE thermo_summary()
 !  third rank tensor, such as the piezoelectric tensor
 !
      IF ( lpiezo .OR. what=='plot_bz') THEN
-        WRITE(stdout,'(/,5x,"We compute the piezoelectric tensor that gives")')
-        WRITE(stdout,'(5x,"polarization as a function of strain with E=0")')
+        WRITE(stdout,'(/,5x,"The piezoelectric tensor is the derivative &
+                          &of the polarization ")')
+        WRITE(stdout,'(5x,"with respect to strain (in zero electric field).")')
         SELECT CASE (code_group) 
           CASE(2,16,18,19,20,22,23,25,27,29,32) 
-             WRITE(stdout,'(/,5x,"Solid with inversion symmetry. The &
-                             &piezoelectic tensor vanishes")')
+             WRITE(stdout,'(/,5x,"Solid with inversion symmetry.")') 
+             WRITE(stdout,'(5x,"Third-rank tensors, such as the piezoelectic&
+                         & tensor, vanish.")')
           CASE(3)
 !
 !  C_s   Monoclinic
@@ -473,7 +476,7 @@ SUBROUTINE thermo_summary()
 !  C_2   Monoclinic
 !
              WRITE(stdout,'(/,5x,"With this point group the piezoelectric &
-                                                          &tensor is")')
+                                                          &tensor is:")')
              IF (ibrav==-12) THEN
                 WRITE(stdout,'(/,5x,"(  .    .    .   g14   .   g16 )")') 
                 WRITE(stdout,'(5x,"( g21  g22  g23   .   g25   .  )")') 
@@ -670,7 +673,7 @@ SUBROUTINE thermo_summary()
     WRITE(stdout,'(/,5x,"The Laue class is ", a)') group_name(laue)
 
     IF (lelc.OR.what=='plot_bz') THEN
-       WRITE(stdout,'(/,5x,"In this class the elastic constants are")') 
+       WRITE(stdout,'(/,5x,"In this class the elastic tensor is")') 
        SELECT CASE (laue) 
           CASE (16)
 !
@@ -831,7 +834,7 @@ SUBROUTINE thermo_summary()
     laue=0
 
     IF ( what=='polarization'.OR. what=='mur_lc_polarization'&
-                              .OR. what=='plot_bz') THEN
+                             .OR. what=='plot_bz') THEN
 !
 !  for first rank tensor one can still check for the existence
 !  of inversion symmetry
@@ -839,7 +842,7 @@ SUBROUTINE thermo_summary()
        SELECT CASE (code_group) 
           CASE(2,16,18,19,20,22,23,25,27,29,32) 
              WRITE(stdout,'(/,5x,"Solid with inversion symmetry. In insulators &
-                           &there is no spontaneous polarization")')
+                           &there is no spontaneous polarization.")')
           CASE DEFAULT
              WRITE(stdout,'(/,5x,"Solid without inversion symmetry.")')
        END SELECT
@@ -863,8 +866,8 @@ SUBROUTINE thermo_summary()
     IF ( lpiezo .OR. what=='plot_bz') THEN
        SELECT CASE (code_group) 
           CASE(2,16,18,19,20,22,23,25,27,29,32) 
-             WRITE(stdout,'(/,5x,"Solid with inversion symmetry. In insulators &
-                           &the piezoelectric tensor vanishes")')
+             WRITE(stdout,'(/,5x,"Solid with inversion symmetry. Third-rank  &
+                         &tensors, such as the piezoelectic tensor, vanish.")')
           CASE DEFAULT
 
              WRITE(stdout,'(/,5x,"I will take a piezoelectric tensor of the &
@@ -959,8 +962,8 @@ WRITE(stdout,'(5x,70("-"))')
      asy_filename=TRIM(flasy)//'.asy'
      IF ( my_image_id==root_image ) THEN
         CALL plot_bz(ibrav, celldm, at, bg, point_label_type, &
-                   xqaux, wqaux, nqaux, letter, letter_path, npk_label, &
-                   label_list, asy_filename)
+                xqaux, wqaux, nqaux, letter, letter_path, npk_label, &
+                label_list, asy_filename)
 
         IF (lasymptote.AND.ionode) &
            ierr=system(TRIM(asymptote_command)//' '//TRIM(asy_filename))
