@@ -120,6 +120,11 @@ example12:
 what=plot_bz : this example plots the Brillouin zone of Si and the standard
                path. It produces only the asymptote script. If you have the
                asymptote package installed, use lasymptote=.true. to produce 
-               the pdf file. Or give the command asy -V asy_tmp.asy to see 
+               the pdf file, or give the command asy -V asy_tmp.asy to see 
                the Brillouin zone on the screen.
+
+example13:
+what=mur_lc_elastic_constants : this example computes the elastic constants 
+               of silicon at the minimum of the Murnaghan equation. The
+               atoms are relaxed for e44 strains.
 
