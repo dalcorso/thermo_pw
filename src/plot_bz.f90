@@ -79,6 +79,7 @@ USE asy, ONLY : asy_openplot, asy_closeplot, asy_writepoint, asy_writesurface, &
                 asy_plotaxis, asy_join, asy_putlabel
 USE bz_form, ONLY : bz, find_letter_coordinate
 USE bz_asy_mod, ONLY : bz_asy, find_letter_position
+USE control_paths, ONLY : q_in_band_form 
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: npkt, npk_label
@@ -124,6 +125,16 @@ DO ik=2, npkt
       IF (wk(ik-1)/=0) CALL asy_join(xk(:,ik), xk(:,ik-1), 'red')
    ENDIF
 ENDDO
+
+IF (.NOT.q_in_band_form) THEN
+   DO ik=1, npkt
+      IF (letter_path(ik) /= '') THEN
+         CALL find_letter_position(bz_struc, bz_asy_struc, letter_path(ik), &
+                                   let_pos)
+         CALL asy_putlabel(letter_path(ik), xk(:,ik), let_pos)
+      END IF
+   END DO
+END IF
 !
 !  find where the coordinate axis intercept the BZ
 !
