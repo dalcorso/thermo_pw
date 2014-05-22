@@ -22,7 +22,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   USE control_conv,   ONLY : nke, ke, deltake, nkeden, deltakeden, keden, &
                              nnk, nk_test, deltank, nsigma, sigma_test, &  
                              deltasigma
-  USE control_mur,    ONLY : vmin
+  USE control_mur,    ONLY : vmin, vmin_input, vmax_input
   USE wvfct,          ONLY : ecutwfc
   USE gvect,          ONLY : ecutrho
   USE input_parameters, ONLY : nk1, nk2, nk3
@@ -109,6 +109,12 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               IF ( ABS(alat_geo(ngeo/2+1)-alat_new) > step_ngeo ) THEN
                  alat=alat_new
                  compute_lc=.TRUE.
+!
+!   The Murnaghan plot must be redone centered in new minimum. The input
+!   values are recalculated here.
+!
+                 vmin_input=0.0_DP
+                 vmax_input=0.0_DP
               ENDIF
            ELSE
               ALLOCATE(alat_geo(ngeo))
