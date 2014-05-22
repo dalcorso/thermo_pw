@@ -482,13 +482,13 @@ SELECT CASE (laue)
 !
 !  c_12
 !
-      CALL el_cons_ij(1, 2, ngeo, epsil_geo, sigma_geo)
-      el_con(2,1) = el_con(1,2)
+      CALL el_cons_ij(2, 1, ngeo, epsil_geo, sigma_geo)
+      el_con(1,2) = el_con(2,1)
 !
 !  c_13
 !
-      CALL el_cons_ij(1, 3, ngeo, epsil_geo, sigma_geo)
-      el_con(3,1) = el_con(1,3)
+      CALL el_cons_ij(3, 1, ngeo, epsil_geo, sigma_geo)
+      el_con(1,3) = el_con(3,1)
       el_con(2,3) = el_con(1,3)
       el_con(3,2) = el_con(2,3)
 !
