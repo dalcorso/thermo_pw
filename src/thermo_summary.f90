@@ -295,7 +295,8 @@ SUBROUTINE thermo_summary()
 !
 !  hexagonal, trigonal, tetragonal
 !
-              IF (code_group==18.OR. code_group==22) THEN
+              IF (code_group==18.OR.code_group==22.OR.code_group==23&
+                                .OR.code_group==25) THEN
                  WRITE(stdout,'(/,5x, "This solid has inversion symmetry.")')
                  WRITE(stdout,'(5x, "First-rank tensors, such as the &
                                  &spontaneous polarization, vanish.")')
@@ -443,7 +444,7 @@ SUBROUTINE thermo_summary()
 !  third rank tensor, such as the piezoelectric tensor
 !
      IF ( lpiezo .OR. what=='plot_bz') THEN
-        WRITE(stdout,'(/,5x,"The piezoelectric tensor is the derivative &
+        WRITE(stdout,'(/,5x,"The piezoelectric tensor is defined as the derivative &
                           &of the polarization ")')
         WRITE(stdout,'(5x,"with respect to strain (in zero electric field).")')
         SELECT CASE (code_group) 
@@ -841,8 +842,9 @@ SUBROUTINE thermo_summary()
 !
        SELECT CASE (code_group) 
           CASE(2,16,18,19,20,22,23,25,27,29,32) 
-             WRITE(stdout,'(/,5x,"Solid with inversion symmetry. In insulators &
-                           &there is no spontaneous polarization.")')
+             WRITE(stdout,'(/,5x,"Solid with inversion symmetry.")')
+             WRITE(stdout,'(5x,"First-rank tensors, such as the spontaneous &
+                           &polarization, vanish.")')
           CASE DEFAULT
              WRITE(stdout,'(/,5x,"Solid without inversion symmetry.")')
        END SELECT
@@ -866,8 +868,9 @@ SUBROUTINE thermo_summary()
     IF ( lpiezo .OR. what=='plot_bz') THEN
        SELECT CASE (code_group) 
           CASE(2,16,18,19,20,22,23,25,27,29,32) 
-             WRITE(stdout,'(/,5x,"Solid with inversion symmetry. Third-rank  &
-                         &tensors, such as the piezoelectic tensor, vanish.")')
+             WRITE(stdout,'(/,5x,"Solid with inversion symmetry.")')
+             WRITE(stdout,'(5x,"Third-rank tensors, such as the piezoelectic &
+                                &tensor, vanish.")')
           CASE DEFAULT
 
              WRITE(stdout,'(/,5x,"I will take a piezoelectric tensor of the &
