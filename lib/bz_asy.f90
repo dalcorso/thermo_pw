@@ -664,27 +664,12 @@ ELSEIF (ibz==16) THEN
 !
 !  simple monoclinic bz
 !
-!   bz_asy_struc%visible(3)=.FALSE.
-!   bz_asy_struc%visible(4)=.FALSE.
-!   bz_asy_struc%visible(5)=.FALSE.
-!   bz_asy_struc%visible(8)=.FALSE.
-
-   bz_asy_struc%letter_position(2)=' D1'
-   bz_asy_struc%letter_position(3)=' M2'
-   bz_asy_struc%letter_position(4)=' H2'
-   bz_asy_struc%letter_position(5)=' Y1'
-   bz_asy_struc%letter_position(6)=' A '
-   bz_asy_struc%letter_position(7)=' X '
-   bz_asy_struc%letter_position(8)=' M1'
-   bz_asy_struc%letter_position(9)=' H1'
-   bz_asy_struc%letter_position(10)=' E '
-   bz_asy_struc%letter_position(11)=' C '
-   bz_asy_struc%letter_position(12)=' M '
-   bz_asy_struc%letter_position(13)=' H '
-   bz_asy_struc%letter_position(14)=' D '
-   bz_asy_struc%letter_position(15)=' Y '
-   bz_asy_struc%letter_position(16)=' Z '
-!
+   bz_asy_struc%letter_position(1)='SE'
+   bz_asy_struc%letter_position(2)='NW'
+   bz_asy_struc%letter_position(3)='NE'
+   bz_asy_struc%letter_position(4)='NE'
+   bz_asy_struc%letter_position(5)='NE'
+   bz_asy_struc%letter_position(6)='NE'
 ELSE
    WRITE(6,'("Brillouin zone type not available init_bz")')
    STOP

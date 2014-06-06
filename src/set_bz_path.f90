@@ -52,8 +52,10 @@ CASE (14)
      npk_label=12
 CASE (15) 
      npk_label=7
+CASE (16) 
+     npk_label=7
 END SELECT
-IF (npk_label==0) CALL errore('set_bz_type','bz_type not supported',1)
+IF (npk_label==0) CALL errore('set_bz_path','bz_type not supported',1)
 nqaux=npk_label
 !
 !  Allocate the points and label necessary to specify this path
@@ -335,6 +337,19 @@ CASE (15)
 !
    letter(1:npk_label) = (/ 'gG', 'P ', 'P1', 'Q1', 'Q ', 'Z ', 'gG' /)
    wqaux(1:npk_label) =  (/  30,   30,   30,    30,   30,  30, 1 /)
+   label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
+   letter_path=letter
+CASE (16) 
+!
+!  simple monoclinic lattice
+!
+   IF (ibrav==12) THEN
+      letter(1:npk_label) = (/ 'gG', 'X ', 'A ', 'Z ', 'D ', 'Y ', 'gG' /)
+      wqaux(1:npk_label) =  (/  30,    30,   30,   30,   30,  30,    1 /)
+   ELSE
+      letter(1:npk_label) = (/ 'gG', 'X ', 'A ', 'Y ', 'D ', 'Z ', 'gG' /)
+      wqaux(1:npk_label) =  (/  30,    30,   30,   30,   30,  30,    1 /)
+   ENDIF
    label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
    letter_path=letter
 END SELECT
