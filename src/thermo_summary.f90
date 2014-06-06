@@ -49,7 +49,7 @@ SUBROUTINE thermo_summary()
   INTEGER :: laue_class
   INTEGER :: it, ia, ipol, jpol
   LOGICAL :: read_path, lelc, lpiezo, ltherm_expansion, lmur
-  INTEGER :: ierr
+  INTEGER :: ierr, system
   LOGICAL :: check_group_ibrav
 
   read_path=.FALSE.

@@ -28,6 +28,7 @@ INTEGER :: ierr
 CHARACTER(LEN=256) :: gnu_filename, filename
 CHARACTER(LEN=*) :: colore, ext
 CHARACTER(LEN=6), EXTERNAL :: int_to_char
+INTEGER :: system
 
 IF ( my_image_id /= root_image ) RETURN
 
