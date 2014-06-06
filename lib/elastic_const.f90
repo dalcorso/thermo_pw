@@ -344,8 +344,8 @@ SELECT CASE (laue)
 !
 ! c_23
 !
-      CALL el_cons_ij(2, 3, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1))
-      el_con(3,2) = el_con(2,3)
+      CALL el_cons_ij(3, 2, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1))
+      el_con(2,3) = el_con(3,2)
 !
 ! c_33
 !
@@ -378,13 +378,13 @@ SELECT CASE (laue)
 !
 !  c_12 
 !
-      CALL el_cons_ij(1, 2, ngeo, epsil_geo, sigma_geo)
-      el_con(2,1) = el_con(1,2)
+      CALL el_cons_ij(2, 1, ngeo, epsil_geo, sigma_geo)
+      el_con(1,2) = el_con(2,1)
 !
 ! c_13
 !
-      CALL el_cons_ij(1, 3, ngeo, epsil_geo, sigma_geo)
-      el_con(3,1) = el_con(1,3)
+      CALL el_cons_ij(3, 1, ngeo, epsil_geo, sigma_geo)
+      el_con(1,3) = el_con(3,1)
       el_con(2,3) = el_con(3,1)
       el_con(3,2) = el_con(3,1)
 !
@@ -409,8 +409,8 @@ SELECT CASE (laue)
 !
 ! c_16, c_26
 !
-         CALL el_cons_ij(1, 6, ngeo, epsil_geo, sigma_geo )
-         el_con(6,1) = el_con(1,6)
+         CALL el_cons_ij(6, 1, ngeo, epsil_geo, sigma_geo )
+         el_con(1,6) = el_con(6,1)
          el_con(2,6) = - el_con(1,6)
          el_con(6,2) = el_con(2,6)
      END IF
@@ -426,18 +426,18 @@ SELECT CASE (laue)
 !
 !  c_12 
 !
-      CALL el_cons_ij(1, 2, ngeo, epsil_geo, sigma_geo )
-      el_con(2,1) = el_con(1,2)
+      CALL el_cons_ij(2, 1, ngeo, epsil_geo, sigma_geo )
+      el_con(1,2) = el_con(2,1)
 !
 !  c_13 
 !
-      CALL el_cons_ij(1, 3, ngeo, epsil_geo, sigma_geo )
-      el_con(3,1) = el_con(1,3)
+      CALL el_cons_ij(3, 1, ngeo, epsil_geo, sigma_geo )
+      el_con(1,3) = el_con(3,1)
 !
 !  c_14 
 !
-      CALL el_cons_ij(1, 4, ngeo, epsil_geo, sigma_geo )
-      el_con(4,1) = el_con(1,4)
+      CALL el_cons_ij(4, 1, ngeo, epsil_geo, sigma_geo )
+      el_con(1,4) = el_con(4,1)
       el_con(2,4) = -el_con(1,4)
       el_con(4,2) = el_con(2,4)
       el_con(5,6) = el_con(1,4)
@@ -450,7 +450,7 @@ SELECT CASE (laue)
 !
 !  c_44 = c_55
 !
-      CALL el_cons_ij(1, 5, ngeo, epsil_geo(1,1,2*ngeo+1), &
+      CALL el_cons_ij(4, 4, ngeo, epsil_geo(1,1,2*ngeo+1), &
                                   sigma_geo(1,1,2*ngeo+1) )
       el_con(5,5) = el_con(4,4)
 
@@ -540,28 +540,28 @@ SELECT CASE (laue)
 !
 !  c_12 
 !
-      CALL el_cons_ij(1, 2, ngeo, epsil_geo, sigma_geo)
-      el_con(2,1) = el_con(1,2)
+      CALL el_cons_ij(2, 1, ngeo, epsil_geo, sigma_geo)
+      el_con(1,2) = el_con(2,1)
 !
 !  c_13 
 !
-      CALL el_cons_ij(1, 3, ngeo, epsil_geo, sigma_geo)
-      el_con(3,1) = el_con(1,3)
+      CALL el_cons_ij(3, 1, ngeo, epsil_geo, sigma_geo)
+      el_con(1,3) = el_con(3,1)
 !
 !  c_14 
 !
-      CALL el_cons_ij(1, 4, ngeo, epsil_geo, sigma_geo)
-      el_con(4,1) = el_con(1,4)
+      CALL el_cons_ij(4, 1, ngeo, epsil_geo, sigma_geo)
+      el_con(1,4) = el_con(4,1)
 !
 !  c_15 
 !
-      CALL el_cons_ij(1, 5, ngeo, epsil_geo, sigma_geo)
-      el_con(5,1) = el_con(1,5)
+      CALL el_cons_ij(5, 1, ngeo, epsil_geo, sigma_geo)
+      el_con(1,5) = el_con(5,1)
 !
 !  c_16 
 !
-      CALL el_cons_ij(1, 6, ngeo, epsil_geo, sigma_geo)
-      el_con(6,1) = el_con(1,6)
+      CALL el_cons_ij(6, 1, ngeo, epsil_geo, sigma_geo)
+      el_con(1,6) = el_con(6,1)
 !
 !  c_22 
 !
@@ -569,23 +569,23 @@ SELECT CASE (laue)
 !
 !  c_23 
 !
-      CALL el_cons_ij(2, 3, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1))
-      el_con(3,2) = el_con(2,3)
+      CALL el_cons_ij(3, 2, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1))
+      el_con(2,3) = el_con(3,2)
 !  
 !  c_24 
 !
-      CALL el_cons_ij(2, 4, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1))
-      el_con(4,2) = el_con(2,4)
+      CALL el_cons_ij(4, 2, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1))
+      el_con(2,4) = el_con(4,2)
 !  
 !  c_25 
 !
-      CALL el_cons_ij(2, 5, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1))
-      el_con(5,2) = el_con(2,5)
+      CALL el_cons_ij(5, 2, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1))
+      el_con(2,5) = el_con(5,2)
 !  
 !  c_26 
 !
-      CALL el_cons_ij( 2, 6, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1))
-      el_con(6,2) = el_con(2,6)
+      CALL el_cons_ij( 6, 2, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1))
+      el_con(2,6) = el_con(6,2)
 !  
 !  c_33 
 !
@@ -594,21 +594,21 @@ SELECT CASE (laue)
 !  
 !  c_34 
 !
-      CALL el_cons_ij(3, 4, ngeo, epsil_geo(1,1,2*ngeo+1), &
+      CALL el_cons_ij(4, 3, ngeo, epsil_geo(1,1,2*ngeo+1), &
                                   sigma_geo(1,1,2*ngeo+1))
-      el_con(4,3) = el_con(3,4)
+      el_con(3,4) = el_con(4,3)
 !  
 !  c_35 
 !
-      CALL el_cons_ij(3, 5, ngeo, epsil_geo(1,1,2*ngeo+1), &
+      CALL el_cons_ij(5, 3, ngeo, epsil_geo(1,1,2*ngeo+1), &
                                   sigma_geo(1,1,2*ngeo+1))
-      el_con(5,3) = el_con(3,5)
+      el_con(3,5) = el_con(5,3)
 !  
 !  c_36 
 !
-      CALL el_cons_ij(3, 6, ngeo, epsil_geo(1,1,2*ngeo+1), &
+      CALL el_cons_ij(6, 3, ngeo, epsil_geo(1,1,2*ngeo+1), &
                                   sigma_geo(1,1,2*ngeo+1))
-      el_con(6,3) = el_con(3,6)
+      el_con(3,6) = el_con(6,3)
 !  
 !  c_44
 !
@@ -617,15 +617,15 @@ SELECT CASE (laue)
 !  
 !  c_45 
 !
-      CALL el_cons_ij(4, 5, ngeo, epsil_geo(1,1,3*ngeo+1), &
+      CALL el_cons_ij(5, 4, ngeo, epsil_geo(1,1,3*ngeo+1), &
                                 sigma_geo(1,1,3*ngeo+1))
-      el_con(5,4) = el_con(4,5)
+      el_con(4,5) = el_con(5,4)
 !  
 !  c_46 
 !
-      CALL el_cons_ij(4, 6, ngeo, epsil_geo(1,1,3*ngeo+1), &
+      CALL el_cons_ij(6, 4, ngeo, epsil_geo(1,1,3*ngeo+1), &
                                   sigma_geo(1,1,3*ngeo+1))
-      el_con(6,4) = el_con(4,6)
+      el_con(4,6) = el_con(6,4)
 !  
 !  c_55 
 !
@@ -634,9 +634,9 @@ SELECT CASE (laue)
 !  
 !  c_56 
 !
-      CALL el_cons_ij(5, 6, ngeo, epsil_geo(1,1,4*ngeo+1), &
+      CALL el_cons_ij(6, 5, ngeo, epsil_geo(1,1,4*ngeo+1), &
                                   sigma_geo(1,1,4*ngeo+1))
-      el_con(6,5) = el_con(5,6)
+      el_con(5,6) = el_con(6,5)
 !  
 !  c_66 
 !
