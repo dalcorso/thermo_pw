@@ -17,16 +17,17 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
   USE thermo_mod,       ONLY : what, alat_geo
   USE control_thermo,   ONLY : outdir_thermo
   USE input_parameters, ONLY : ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
-                               trd_ht, rd_ht, cell_units, outdir
-  USE input_parameters, ONLY : k_points, xk, wk, nk1, nk2, nk3,  &
-                               k1, k2, k3, nkstot
+                               trd_ht, rd_ht, cell_units, outdir, &
+                               electron_maxstep, &
+                               k_points, xk, wk, nk1, nk2, nk3,  &
+                               k1, k2, k3, nkstot, &
+                               calculation, etot_conv_thr, forc_conv_thr
   USE control_conv, ONLY : ke, keden, nk_test, sigma_test
   USE control_elastic_constants, ONLY : at_save, tau_save, frozen_ions
-  USE elastic_constants, ONLY : epsilon_geo, apply_strain
-  USE control_flags, ONLY : gamma_only, tstress, tprnfor, lbfgs, nstep
+  USE elastic_constants, ONLY : epsilon_geo, apply_strain, print_strain
+  USE control_flags, ONLY : gamma_only, tstress, tprnfor, lbfgs, nstep, niter
   USE force_mod, ONLY : lforce, lstres
-  USE relax,            ONLY : epse, epsf
-  USE input_parameters, ONLY : calculation, etot_conv_thr, forc_conv_thr
+  USE relax,       ONLY : epse, epsf
   USE io_files,    ONLY : tmp_dir, wfc_dir, prefix, seqopn
   USE io_global,   ONLY : ionode
   USE cell_base,   ONLY : cell_base_init, at
@@ -39,6 +40,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
   USE gvecs,       ONLY : dual
   USE grid_irr_iq, ONLY : irr_iq, comp_irr_iq
   USE disp,        ONLY : nqs, comp_iq
+  USE io_global,   ONLY : stdout
   !
   IMPLICIT NONE
   INTEGER, INTENT(OUT) :: iwork, iq_point, irr_value
@@ -77,7 +79,8 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
            wfc_dir = tmp_dir
            CALL check_tempdir ( tmp_dir, exst, parallelfs )
         CASE ('mur_lc', 'mur_lc_bands', 'mur_lc_ph', 'mur_lc_disp', &
-              'mur_lc_t', 'mur_lc_elastic_constants')
+              'mur_lc_t', 'mur_lc_elastic_constants', &
+              'mur_lc_piezoelectric_tensor', 'mur_lc_polarization')
            celldm(1)=alat_geo(iwork)
            CALL cell_base_init ( ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
                          trd_ht, rd_ht, cell_units )
@@ -106,16 +109,20 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
                  ENDIF
               ENDDO
            ENDDO
-        CASE ('elastic_constants','mur_lc_elastic_constants')
+        CASE ('elastic_constants', 'mur_lc_elastic_constants', &
+              'piezoelectric_tensor', 'mur_lc_piezoelectric_tensor')
            ibrav=0
            tstress=.TRUE.
            tprnfor=.TRUE.
+           niter = electron_maxstep
            DO i=1, 3
               CALL apply_strain(at_save(1,i), at(1,i), epsilon_geo(1,1,iwork))
            ENDDO
            DO ia=1,nat
               CALL apply_strain(tau_save(1,ia), tau(1,ia), epsilon_geo(1,1,iwork))
            ENDDO
+           WRITE(stdout,'(/,2x,76("-"))')
+           CALL print_strain(epsilon_geo(:,:,iwork))
            IF (frozen_ions) THEN
               calculation='scf'
               lstres=.TRUE.
@@ -150,6 +157,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
               OPEN( iunupdate, FILE=TRIM(filename), FORM='FORMATTED')
               CLOSE(iunupdate, STATUS='DELETE')
             END IF
+        CASE ('polarization','mur_lc_polarization')
      END SELECT
   ELSE
      CALL errore('set_thermo_work','unknown part',1)

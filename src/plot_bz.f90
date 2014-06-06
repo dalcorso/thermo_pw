@@ -30,6 +30,7 @@ USE kinds, ONLY : DP
 USE bz_form, ONLY : bz, init_bz, allocate_bz, find_letter_coordinate, &
                     find_bz_type, set_label_type
 USE bz_asy_mod, ONLY : bz_asy, allocate_bz_asy, init_bz_asy
+USE control_paths, ONLY : npx
 USE io_global, ONLY : stdout
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: npkt, npk_label
@@ -55,6 +56,7 @@ WRITE(stdout,'(/,5x,"Brillouin zone type",i5,/)') bzt
 !
 CALL set_label_type(bz_struc, point_type)
 CALL allocate_bz(ibrav, bzt, bz_struc, celldm, at, bg)
+IF (npx > bz_struc%npx) bz_struc%npx=npx
 CALL init_bz(bz_struc)
 !
 !   allocate the variables to generate the asymptote script

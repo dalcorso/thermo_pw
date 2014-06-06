@@ -16,8 +16,9 @@ SUBROUTINE run_thermo_asyncronously(nwork, part, igeom, auxdyn)
                               asyn_master_work, with_asyn_images
   USE thermo_priority, ONLY : npriority, priority, max_priority
   USE thermo_mod,      ONLY : alat_geo, energy_geo, ngeo
-  USE control_thermo,  ONLY : lpwscf, lstress, lbands, lphonon
+  USE control_thermo,  ONLY : lpwscf, lstress, lbands, lphonon, lberry
   USE elastic_constants, ONLY : sigma_geo
+  USE piezoelectric_tensor, ONLY : polar_geo, nppl
   USE ener,            ONLY : etot
   USE force_mod,       ONLY : sigma
   !
@@ -105,6 +106,8 @@ SUBROUTINE run_thermo_asyncronously(nwork, part, igeom, auxdyn)
                     ENDIF
                  ENDIF
                  IF (lbands(iwork)) CALL do_pwscf(exit_status, .FALSE.)
+                 IF (lberry(iwork)) CALL do_berry(exit_status, &
+                                       polar_geo(1,iwork),nppl)
                  IF (lphonon(iwork)) CALL do_phonon(auxdyn) 
               ENDIF
            ENDIF
@@ -157,6 +160,8 @@ SUBROUTINE run_thermo_asyncronously(nwork, part, igeom, auxdyn)
                  ENDIF
               END IF
               IF (lbands(iwork)) CALL do_pwscf(exit_status, .FALSE.)
+              IF (lberry(iwork)) CALL do_berry(exit_status, &
+                                       polar_geo(1,iwork), nppl)
               IF (lphonon(iwork)) THEN
                  CALL do_phonon(auxdyn) 
                  CALL collect_grid_files()
@@ -180,7 +185,9 @@ SUBROUTINE run_thermo_asyncronously(nwork, part, igeom, auxdyn)
                  sigma_geo(:,:,iwork)=sigma(:,:)
               ENDIF
            END IF
-           IF (lbands(iwork)) CALL do_pwscf(exit_status, 'bands')
+           IF (lbands(iwork)) CALL do_pwscf(exit_status, .FALSE.)
+           IF (lberry(iwork)) CALL do_berry(exit_status, &
+                                            polar_geo(1,iwork), nppl)
            IF (lphonon(iwork)) CALL do_phonon(auxdyn)
         END DO
      END IF

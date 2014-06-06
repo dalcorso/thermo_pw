@@ -18,10 +18,12 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   USE control_thermo, ONLY : lpwscf, lbands, lphonon, lev_syn_1, lev_syn_2, &
                              lph, lpwscf_syn_1, lbands_syn_1, ldos, lq2r,   &
                              lmatdyn, ltherm, lconv_ke_test, lconv_nk_test, &
-                             compute_lc, lstress, lelastic_const
+                             compute_lc, lstress, lelastic_const, &
+                             lpiezoelectric_tensor, lberry, lpolarization
   USE control_conv,   ONLY : nke, ke, deltake, nkeden, deltakeden, keden, &
                              nnk, nk_test, deltank, nsigma, sigma_test, &  
                              deltasigma
+  USE piezoelectric_tensor, ONLY : polar_geo
   USE control_mur,    ONLY : vmin, vmin_input, vmax_input
   USE wvfct,          ONLY : ecutwfc
   USE gvect,          ONLY : ecutrho
@@ -100,7 +102,8 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               lconv_nk_test=.TRUE.
            ENDIF
         CASE ('mur_lc', 'mur_lc_bands', 'mur_lc_ph', 'mur_lc_disp', &
-              'mur_lc_elastic_constants')
+              'mur_lc_elastic_constants', 'mur_lc_piezoelectric_tensor', &
+              'mur_lc_polarization')
            nwork=ngeo
            IF ( ALLOCATED(energy_geo) ) THEN
               compute_lc=.FALSE.
@@ -129,7 +132,9 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               energy_geo=0.0_DP
               lev_syn_1=.TRUE.
               IF (TRIM(what)/='mur_lc'.AND.&
-                  TRIM(what)/='mur_lc_elastic_constants') lpwscf_syn_1=.TRUE.
+                  TRIM(what)/='mur_lc_elastic_constants'.AND.&
+                  TRIM(what)/='mur_lc_piezoelectric_tensor'.AND.&
+                  TRIM(what)/='mur_lc_polarization') lpwscf_syn_1=.TRUE.
               IF ( TRIM(what)=='mur_lc_ph' .OR. TRIM(what)=='mur_lc_disp') lph=.TRUE.
               IF ( TRIM(what)=='mur_lc_disp' ) THEN
                  lq2r = .TRUE.
@@ -171,7 +176,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               CALL allocate_thermodynamics()
               CALL allocate_anharmonic()
            ENDIF
-        CASE ('elastic_constants') 
+        CASE ('elastic_constants', 'piezoelectric_tensor', 'polarization') 
 !
 !   in part 1 this case does nothing
 !
@@ -200,6 +205,26 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            ALLOCATE(energy_geo(nwork))
            ALLOCATE(omega_geo(nwork))
            lelastic_const=.TRUE.
+        CASE ('piezoelectric_tensor', 'mur_lc_piezoelectric_tensor')
+           IF (ALLOCATED(alat_geo)) DEALLOCATE(alat_geo)
+           IF (ALLOCATED(energy_geo)) DEALLOCATE(energy_geo)
+           IF (ALLOCATED(omega_geo)) DEALLOCATE(omega_geo)
+           CALL set_piezo_tensor_work(nwork) 
+           ALLOCATE(alat_geo(nwork))
+           ALLOCATE(energy_geo(nwork))
+           ALLOCATE(omega_geo(nwork))
+           lpiezoelectric_tensor=.TRUE.
+        CASE ('polarization', 'mur_lc_polarization')
+           IF (ALLOCATED(alat_geo)) DEALLOCATE(alat_geo)
+           IF (ALLOCATED(energy_geo)) DEALLOCATE(energy_geo)
+           IF (ALLOCATED(omega_geo)) DEALLOCATE(omega_geo)
+           nwork=1
+           lpolarization=.TRUE.
+           ALLOCATE(polar_geo(3,nwork))
+           ALLOCATE(alat_geo(nwork))
+           ALLOCATE(energy_geo(nwork))
+           ALLOCATE(omega_geo(nwork))
+           polar_geo=0.0_DP
      END SELECT
   ELSE
      CALL errore('initialize_thermo_work','unknown part',1)
@@ -210,17 +235,22 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   ALLOCATE( lpwscf(nwork) )
   ALLOCATE( lstress(nwork) )
   ALLOCATE( lbands(nwork) )
+  ALLOCATE( lberry(nwork) )
   ALLOCATE( lphonon(nwork) )
   lpwscf  = .FALSE.
   lstress = .FALSE.
   lbands  = .FALSE.
+  lberry  = .FALSE.
   lphonon = .FALSE.
 
   IF (part == 1) THEN
      SELECT CASE (TRIM(what))
-        CASE ('scf', 'scf_bands', 'scf_ph', 'scf_disp', 'elastic_constants')
+        CASE ('scf', 'scf_bands', 'scf_ph', 'scf_disp', 'elastic_constants', &
+                             'piezoelectric_tensor','polarization')
         CASE ('scf_ke', 'scf_nk', 'mur_lc', 'mur_lc_bands', 'mur_lc_ph', &
-              'mur_lc_disp', 'mur_lc_t', 'mur_lc_elastic_constants' )
+              'mur_lc_disp', 'mur_lc_t', 'mur_lc_elastic_constants', &
+                          'mur_lc_piezoelectric_tensor', &
+                          'mur_lc_polarization' )
            lpwscf(1:nwork)=.TRUE.
         CASE DEFAULT
           CALL errore('initialize_thermo_work','unknown what',1)
@@ -232,6 +262,10 @@ SUBROUTINE initialize_thermo_work(nwork, part)
         CASE ('elastic_constants', 'mur_lc_elastic_constants')
            lpwscf(1:nwork)=.TRUE.
            lstress(1:nwork)=.TRUE.
+        CASE ('piezoelectric_tensor', 'mur_lc_piezoelectric_tensor',&
+              'polarization', 'mur_lc_polarization')
+           lpwscf(1:nwork)=.TRUE.
+           lberry(1:nwork)=.TRUE.
      END SELECT
   END IF
 

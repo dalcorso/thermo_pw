@@ -232,6 +232,8 @@ MODULE control_thermo
   !
   LOGICAL, ALLOCATABLE :: lpwscf(:),  & ! if .true. this work requires a scf calc.
                           lbands(:),  & ! if .true. this work requires a band
+                          lberry(:),  & ! if .true. this work requires 
+                                        ! a berry_phase calculation
                           lstress(:), & ! if .true. this work computes stress
                           lphonon(:)    ! if .true. this work requires a phonon
 
@@ -247,6 +249,9 @@ MODULE control_thermo
   LOGICAL :: lconv_ke_test=.FALSE.! if .true. this writes the ke test on file
   LOGICAL :: lconv_nk_test=.FALSE.! if .true. this writes the k-point on file
   LOGICAL :: lelastic_const=.FALSE. ! if .true. compute elastic constants
+  LOGICAL :: lpiezoelectric_tensor=.FALSE. ! if .true. compute the piezoelectric 
+                                  ! tensor
+  LOGICAL :: lpolarization=.FALSE. ! if .true. compute the piezoelectric 
   LOGICAL :: lph=.FALSE.    ! if .true. must calculate phonon
   LOGICAL :: ldos=.FALSE.   ! if .true. the phonon dos is calculated
   LOGICAL :: ltherm=.FALSE. ! if .true. the thermodynamical properties are
@@ -285,6 +290,18 @@ MODULE control_elastic_constants
 
 END MODULE control_elastic_constants
 
+MODULE control_piezoelectric_tensor
+  USE kinds,  ONLY : DP
+  !
+  ! ... The variables needed to control the calculation of the elastic 
+  !     constants
+  !
+  SAVE
+
+  LOGICAL :: nosym_save
+  !
+END MODULE control_piezoelectric_tensor
+  !
 MODULE control_conv
   USE kinds,  ONLY : DP
   !

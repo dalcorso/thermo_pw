@@ -43,6 +43,9 @@ PROGRAM thermo_pw
   ! ...   elastic_constants : elastic constants at zero temperature 
   ! ...   mur_lc_elastic_constants : elastic constants at zero temperature 
   ! ...               at the minimum of the Murnaghan equation 
+  ! ...   piezoelectric_tensor : piezoelectric tensor at zero temperature
+  ! ...   mur_lc_piezoelectric_tensor : piezoelectric tensor at zero temperature
+  ! ...               at the minimum of the Murnaghan equation 
   ! ...
   ! ...
   USE kinds,            ONLY : DP
@@ -60,7 +63,8 @@ PROGRAM thermo_pw
                                lmatdyn, ldos, ltherm, flfrc, flfrq, fldos, &
                                fltherm, spin_component, flevdat,           &
                                lconv_ke_test, lconv_nk_test, compute_lc,   &
-                               lelastic_const 
+                               lelastic_const, lpiezoelectric_tensor,      &
+                               lpolarization
   USE ifc,              ONLY : freqmin, freqmax
   USE elastic_constants, ONLY : print_elastic_constants, &
                                 compute_elastic_constants, epsilon_geo, &
@@ -68,6 +72,10 @@ PROGRAM thermo_pw
                                 compute_elastic_compliances, &
                                 print_elastic_compliances, read_elastic, &
                                 write_elastic
+  USE piezoelectric_tensor, ONLY : compute_piezo_tensor, &
+                                 compute_d_piezo_tensor, &
+                                 polar_geo, g_piezo_tensor, d_piezo_tensor, &
+                                 print_d_piezo_tensor, print_g_piezo_tensor
   USE control_elastic_constants, ONLY : ibrav_save, ngeo_strain, frozen_ions, &
                                  fl_el_cons
   USE control_paths,    ONLY : nqaux
@@ -402,6 +410,32 @@ PROGRAM thermo_pw
 !  save elastic constants and compliances on file
 !
         IF (my_image_id==root_image) CALL write_elastic(fl_el_cons)
+     ENDIF
+
+     IF (lpiezoelectric_tensor) THEN
+        CALL mp_sum(polar_geo, world_comm)
+        polar_geo=polar_geo / nproc_image
+!
+!  the elastic constants are calculated here
+!
+        CALL compute_piezo_tensor(polar_geo, epsilon_geo, nwork, &
+                               ngeo_strain, ibrav_save, code_group_save)
+        CALL print_g_piezo_tensor(frozen_ions)
+
+        IF (my_image_id==root_image) CALL read_elastic(fl_el_cons, exst)
+        CALL mp_bcast(exst, meta_ionode_id, world_comm)
+        IF (exst) THEN
+           CALL mp_bcast(el_con, meta_ionode_id, world_comm)
+           CALL mp_bcast(el_compliances, meta_ionode_id, world_comm)
+           CALL compute_d_piezo_tensor(el_compliances)
+           CALL print_d_piezo_tensor(frozen_ions)
+        ENDIF
+     END IF
+
+     IF (lpolarization) THEN
+        CALL mp_sum(polar_geo, world_comm)
+        polar_geo=polar_geo / nproc_image
+        CALL print_polarization(polar_geo(:,1), .TRUE. )
      ENDIF
      !
      CALL deallocate_asyn()

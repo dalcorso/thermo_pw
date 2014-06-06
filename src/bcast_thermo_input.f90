@@ -20,7 +20,7 @@ SUBROUTINE bcast_thermo_input()
   USE ifc,             ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq, zasr, &
                               freqmin_input, freqmax_input
   USE control_paths,   ONLY : q_in_band_form, q_in_cryst_coord, q2d, &
-                              point_label_type
+                              point_label_type, npx
   USE control_bands,   ONLY : flpband, emin_input, emax_input, nbnd_bands, lsym
   USE control_grun,    ONLY : flpgrun
   USE control_gnuplot, ONLY : flgnuplot, flpsband, flpsdisp, &
@@ -32,6 +32,7 @@ SUBROUTINE bcast_thermo_input()
   USE control_conv,    ONLY : nke, deltake, nkeden, deltakeden, &
                               nnk, deltank, nsigma, deltasigma
   USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, frozen_ions
+  USE piezoelectric_tensor, ONLY : nppl
   USE mp_world,        ONLY : world_comm
   USE mp,              ONLY : mp_bcast
   USE io_global,       ONLY : meta_ionode_id
@@ -80,6 +81,8 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( tmax, meta_ionode_id, world_comm )
   CALL mp_bcast( deltat, meta_ionode_id, world_comm )
   CALL mp_bcast( ntemp, meta_ionode_id, world_comm )
+  CALL mp_bcast( nppl, meta_ionode_id, world_comm )
+  CALL mp_bcast( npx, meta_ionode_id, world_comm )
   CALL mp_bcast( flpband, meta_ionode_id, world_comm )
   CALL mp_bcast( filband, meta_ionode_id, world_comm )
   CALL mp_bcast( flgnuplot, meta_ionode_id, world_comm )

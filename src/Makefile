@@ -22,6 +22,7 @@ deallocate_asyn.o \
 deallocate_thermo.o \
 deallocate_thermo.o \
 do_pwscf.o \
+do_berry.o \
 ev_sub.o \
 ev_xml.o \
 initialize_thermo_work.o \
@@ -36,12 +37,14 @@ plot_e_ke.o \
 plot_e_nk.o \
 plot_thermo.o \
 plot_mur.o \
+print_polarization.o \
 q2r_sub.o \
 run_thermo_asyncronously.o \
 set_bz_path.o \
 set_elastic_cons_work.o \
 set_k_points.o \
 set_paths_disp.o \
+set_piezo_tensor_work.o \
 set_temperature.o \
 set_thermo_work_todo.o \
 simple_nonanal.o \

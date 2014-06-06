@@ -76,8 +76,6 @@ The \thermo\ package can perform the following types of calculations:
 
 \item Total energy as a function of {\bf k}-points and smearing.
 
-\item Plot of the Brillouin zone and of high symmetry paths.
-
 \item Band structure calculation at fixed geometry.
 
 \item Phonon frequencies at fixed geometry.
@@ -104,7 +102,9 @@ Isobaric molar heat capacity as a function of temperature.
 Isoentropic bulk modulus as a function of temperature.
 Average Gruneisen parameter as a function of temperature.
 
-\item Frozen ions and real elastic constants.
+\item Frozen ions and total elastic constants.
+
+\item Frozen ions and total piezoelectric tensor.
 \end{itemize}
 
 \thermo\ can run in parallel using all the parallel modes available in
@@ -193,6 +193,10 @@ are the output of the \thermo\ code. It produces also files with the data of
 the plot and scripts for the \texttt{gnuplot} program. 
 Normally, the user does not need to modify these files, but they allow 
 the improvement of the figures if needed.
+The plot of the Brillouin zone (BZ) is done with the help of the 
+\texttt{asymptote} code. \texttt{Thermo\_pw} produces a script of commands
+for the \texttt{asymptote} code and can also run it to produce the pdf
+file of the BZ.
 
 The \thermo\ code has a minimal recovery feature. It does not recalculate
 the quantities contained in files that are already in the working
@@ -339,6 +343,10 @@ point_label_type : the label definition (see the BZ manual)
                  Default: SC
 \end{verbatim}
 An example of the use of this option can be found in \texttt{example02}.
+If you give explicitely the path, be careful with options that require
+geometry changes (see below). Only automatic paths, or path given through 
+letter labels are easily recalculated. The other paths could turn out 
+to be correct only for one geometry.
 
 \subsection{\texttt{what='plot\_bz'}}
 With this option the code writes a script to make a three dimensional plot
@@ -352,11 +360,16 @@ default. The following variables control the plot:
 lasymptote  : if .TRUE. asymptote is called from within the program
               and the pdf file with a plot of the BZ is produced
               Default: logical .FALSE.
-flasy       : initial part of the name of the files where gnuplot scripts 
-              are written, and of the name of the pdf file.
-              Default: character(len=*) 'asy.tmp'
-asymptote_command  : the command used to produce the pdf file of the BZ.
-              Default: character(len=*) 'asy -config="" -f pdf -noprc flasy.asy'
+flasy       : initial part of the name of the files where asymptore script
+              is written, and of the name of the pdf file.
+              Default: character(len=*) 'asy_tmp'
+asymptote_command  : the command that invokes asymptote and produces the 
+              pdf file of the BZ.
+              Default: character(len=*) 'asy -f pdf -noprc flasy.asy'
+npx         : maximum size of the supercell used to plot the Brillouin
+              zone. Used only in the monoclinic case. If the code stops asking
+              to double it increase the default until the error disappears.
+              Default: integer 8
 \end{verbatim}
 
 
@@ -551,10 +564,66 @@ delta_epsilon: the interval of strain values between two geometries.
                To avoid a zero strain geometry that might have a
                different symmetry ngeo_strain must be even.
                Default: real 0.002
+fl_el_cons: the name of the file that contains the elastic constants
+            Default: character(len=*) 'output_el_con.dat'
+
 \end{verbatim}
 
 \subsection{\texttt{what='mur\_lc\_elastic\_constants'}}
 As \texttt{what='elastic\_constants'} but the calculation is made at the
+geometry that corresponds to the minimum of the Murnaghan equation. The
+Murnaghan minimization is made as described for \texttt{what='mur\_lc'}.
+
+\subsection{\texttt{what='piezoelectric\_tensor'}}
+With this option the code calculates the piezoelectric tensor 
+($g_{\alpha,m}$ $\alpha=1,3\ m=1,6$) of the solid.
+Depending on the point group, it calculates the polarization of the
+solid for a set of strains of the lattice. For each strain, it relaxes 
+the ions to their equilibrium positions when \texttt{frozen\_ions=.false.} 
+or keep them in the strained positions when \texttt{frozen\_ions=.true.}. 
+Finally it computes the piezoelectic tensor from the numerical derivatives 
+of the polarization with respect to strain.
+The number of independent strains is \texttt{ngeo\_strain}. The input variables
+that control this option the same as those used for the elastic constant:
+\begin{verbatim}
+frozen_ions: if .true. the piezoelectric tensor is calculated 
+             keeping the ions frozen in the strained positions. 
+             Default: logical .false.
+ngeo_strain: the number of strained configurations used. 
+             Default: integer 4
+nppl:        the number of k-points per line in Berry phase calculations
+             Default: integer 51
+delta_epsilon: the interval of strain values between two geometries.
+               To avoid a zero strain geometry that might have a
+               different symmetry ngeo_strain must be even.
+               Default: real 0.002
+\end{verbatim}
+If a file with the elastic constants is found on disk, the code computes also
+the direct piezoelectric tensor $d_{\alpha,m}$ which describes
+the polarization induced by an external stress, as $d_{\alpha,m}=
+\sum_n g_{\alpha,n} C_{nm}^{-1}$. All these quantities are calculated 
+for a vanishing electric field.
+
+\subsection{\texttt{what='mur\_lc\_piezoelectric\_tensor'}}
+As \texttt{what='piezoelectic\_tensor'} but the calculation is made at the
+geometry that corresponds to the minimum of the Murnaghan equation. The
+Murnaghan minimization is made as described for \texttt{what='mur\_lc'}.
+
+\subsection{\texttt{what='polarization'}}
+With this option the code calculates the spontaneous polarization.
+The code makes a self-consistent calculation followed by three Berry
+phase calculations in which the polarization is calculated in the
+direction parallel to the three primitive Bravais lattice vectors and 
+prints the spontaneous polarization in cartesian coordinates.
+The input variables that control this option is:
+\begin{verbatim}
+nppl: the number of k points per string. In the perpendicular plane the
+      number of k-point is that given as input of the pw.x code.
+      Default: integer 51
+\end{verbatim}
+
+\subsection{\texttt{what='mur\_lc\_polarization'}}
+As \texttt{what='polarization'} but the calculation is made at the
 geometry that corresponds to the minimum of the Murnaghan equation. The
 Murnaghan minimization is made as described for \texttt{what='mur\_lc'}.
 

@@ -9,6 +9,7 @@ MODULES = \
 asy.o \
 bz_asy.o \
 elastic_const.o \
+piezoelectric_tensor.o \
 gnuplot.o \
 mp_asyn.o \
 phdos_module.o \

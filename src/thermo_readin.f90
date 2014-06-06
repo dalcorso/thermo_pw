@@ -22,13 +22,13 @@ SUBROUTINE thermo_readin()
   USE temperature,          ONLY : tmin, tmax, deltat, ntemp
   USE ifc,                  ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq, &
                                    zasr, freqmin_input, freqmax_input
-  USE input_parameters,     ONLY : outdir, ibrav
+  USE input_parameters,     ONLY : outdir, ibrav, forc_conv_thr
   USE read_input,           ONLY : read_input_file
   USE command_line_options, ONLY : input_file_ 
   USE control_paths,        ONLY : xqaux, wqaux, wqauxr, npk_label, letter, &
                                    label_list, nqaux, q_in_band_form, &
                                    q_in_cryst_coord, q2d, point_label_type, &
-                                   disp_q, disp_wq, disp_nqs, &
+                                   disp_q, disp_wq, disp_nqs, npx, &
                                    label_disp_q, letter_path
   USE control_gnuplot,      ONLY : flgnuplot, flpsband, flpsdisp, &
                                    flpsmur, flpsdos, flpstherm, flpsanhar, &
@@ -42,13 +42,19 @@ SUBROUTINE thermo_readin()
                                    nnk, deltank, nsigma, deltasigma
   USE control_mur,          ONLY : vmin_input, vmax_input, deltav, nvol
   USE control_elastic_constants, ONLY : at_save, tau_save, delta_epsilon, &
-                                        ibrav_save, ngeo_strain, frozen_ions
-  USE cell_base,            ONLY : at, bg, celldm
-  USE ions_base,            ONLY : tau, nat
+                                        ibrav_save, ngeo_strain, frozen_ions, &
+                                        fl_el_cons
+  USE control_piezoelectric_tensor, ONLY : nosym_save
+  USE piezoelectric_tensor, ONLY : nppl
+  USE cell_base,            ONLY : at
+  USE ions_base,            ONLY : nat, tau
+  USE symm_base,            ONLY : nosym
   USE mp_world,             ONLY : world_comm
   USE mp_images,            ONLY : nimage, my_image_id, root_image
   USE parser,               ONLY : read_line, parse_unit
-  USE io_global,            ONLY : ionode, meta_ionode, meta_ionode_id
+  USE environment,          ONLY : environment_end
+  USE mp_global,            ONLY : mp_global_end
+  USE io_global,            ONLY : ionode, meta_ionode, meta_ionode_id, stdout
   USE mp,                   ONLY : mp_bcast
   !
   IMPLICIT NONE
@@ -63,9 +69,9 @@ SUBROUTINE thermo_readin()
   INTEGER :: iun_thermo, parse_unit_save
 
   INTEGER :: nch, ierr
-  REAL(DP) :: wq0
   LOGICAL :: tend, terr, read_paths, set_internal_path, exst
   CHARACTER(LEN=256) :: input_line, buffer
+  REAL(DP) :: wq0
   !
   NAMELIST / input_thermo / what, ngeo, zasr,               &
                             flfrc, flfrq, fldos, fltherm,   &
@@ -80,14 +86,17 @@ SUBROUTINE thermo_readin()
                             q_in_cryst_coord,               &
                             point_label_type,               &
                             nbnd_bands,                     &
+                            nppl,                           &
                             lsym,                           &
                             ntry,                           &
+                            npx,                            &
                             flevdat,                        &
                             flpband, flpgrun,               &
                             flgnuplot, flpsband,            &
                             flpsdisp, flpsdos, flpstherm,   &
                             flpsanhar, flpsmur, flpskeconv, &
                             flpsnkconv, flgrun,             &
+                            fl_el_cons,                     &
                             flasy, asymptote_command,       &
                             lasymptote,                     &
                             emin_input, emax_input,         &
@@ -155,6 +164,10 @@ SUBROUTINE thermo_readin()
   ngeo_strain=4
   frozen_ions=.FALSE.
 
+  nppl=51
+
+  npx=8
+
   grunmin_input=0.0_DP
   grunmax_input=0.0_DP
 
@@ -170,6 +183,7 @@ SUBROUTINE thermo_readin()
   flanhar='output_anhar.dat'
   flgrun='output_grun.dat'
   flevdat='output_ev.dat'
+  fl_el_cons='output_el_cons.dat'
 
   flgnuplot='gnuplot.tmp'
   flpsmur='output_mur.ps'
@@ -207,6 +221,8 @@ SUBROUTINE thermo_readin()
      IF (what(1:4) == 'scf_') ngeo=1
      IF (what(1:6) == 'mur_lc') ngeo=9
      IF (what(1:4) == 'elas') ngeo=1
+     IF (what(1:4) == 'piez') ngeo=1
+     IF (what(1:4) == 'pola') ngeo=1
   END IF
 
   nqaux=0
@@ -221,7 +237,9 @@ SUBROUTINE thermo_readin()
         goto 70
      ENDIF
      CALL mp_bcast(nqaux, meta_ionode_id, world_comm )
-
+!
+!    Reads on input the k points
+!
      ALLOCATE(xqaux(3,nqaux))
      ALLOCATE(wqaux(nqaux))
      ALLOCATE(letter(nqaux))
@@ -229,7 +247,6 @@ SUBROUTINE thermo_readin()
      ALLOCATE(label_list(nqaux))
      ALLOCATE(label_disp_q(nqaux))
      IF (.NOT.q_in_band_form) ALLOCATE(wqauxr(nqaux))
-
 
      npk_label=0
      letter_path='   '
@@ -253,7 +270,6 @@ SUBROUTINE thermo_readin()
 !
               READ(input_line,*) xqaux(1,iq), xqaux(2,iq), &
                                  xqaux(3,iq), wq0
-
               IF (q_in_band_form) THEN
                  wqaux(iq)=NINT(wq0)
               ELSE
@@ -267,9 +283,9 @@ SUBROUTINE thermo_readin()
                  IF (ICHAR(input_line(k:k)) == 39) THEN
                     letter_path(iq)(1:1) = input_line(k+1:k+1)
                     IF (ICHAR(input_line(k+2:k+2)) /= 39) &
-                          letter_path(iq)(2:2) = input_line(k+2:k+2)
+                       letter_path(iq)(2:2) = input_line(k+2:k+2)
                     IF (ICHAR(input_line(k+3:k+3)) /= 39) &
-                          letter_path(iq)(3:3) = input_line(k+3:k+3)
+                       letter_path(iq)(3:3) = input_line(k+3:k+3)
                     EXIT
                  ENDIF
               ENDDO
@@ -300,7 +316,6 @@ SUBROUTINE thermo_readin()
               EXIT
            ENDIF
         ENDDO
-
      ENDDO
   ENDIF
 70  CONTINUE
@@ -346,6 +361,7 @@ SUBROUTINE thermo_readin()
   ALLOCATE(tau_save(3,nat))
   tau_save=tau
   ibrav_save=ibrav
+  nosym_save=nosym
   input_file_=input(my_image_id+1)
   IF (ionode) THEN
      INQUIRE( FILE=TRIM(input(my_image_id+1)), EXIST = exst )
@@ -359,6 +375,16 @@ SUBROUTINE thermo_readin()
 
   IF (ibrav > 3 .AND. what=='mur_lc_t') CALL errore('thermo_pw','option not &
               & available for noncubic systems',1)
+
+  IF (what=='piezoelectric_tensor' .OR. what=='mur_lc_piezoelectric_tensor') &
+                                                                     THEN
+     IF (.NOT.frozen_ions .AND. (forc_conv_thr > 5.d-5)) THEN
+        WRITE(stdout,'(/,5x,"Force_conv_thr is too large for computing the &
+                          &piezoelectric tensor ")')
+        WRITE(stdout,'(5x,"5.d-5 or lower is required")')
+        CALL errore('thermo_readin','Force_conv_thr too large',1) 
+     ENDIF
+  ENDIF
      
   DEALLOCATE(input)
   DEALLOCATE(iun_image)
@@ -399,7 +425,7 @@ SUBROUTINE thermo_ph_readin()
      IF (meta_ionode) OPEN(unit=5, FILE='ph_control', STATUS='OLD', &
                  FORM='FORMATTED', ERR=20, IOSTAT=ios )
 20   CALL mp_bcast(ios, meta_ionode_id, world_comm)
-     CALL errore('thermo_ph_readin','error opening file'//'ph_control',&
+     CALL errore('thermo_ph_readin','error opening file '//'ph_control',&
                                                                      ABS(ios))
 !
 !    be sure that pw variables are completely deallocated
