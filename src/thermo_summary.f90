@@ -45,9 +45,10 @@ SUBROUTINE thermo_summary()
   CHARACTER(LEN=11) :: group_name
   REAL(DP) :: total_mass, total_expected_mass, current_mass, expected_mass, fact
   REAL(DP) :: atom_weight
+  REAL(DP), ALLOCATABLE :: xau(:,:)
   INTEGER  :: atomic_number
   INTEGER :: laue_class
-  INTEGER :: it, ia, ipol, jpol
+  INTEGER :: it, ia, na, ipol, jpol
   LOGICAL :: read_path, lelc, lpiezo, ltherm_expansion, lmur
   INTEGER :: ierr, system
   LOGICAL :: check_group_ibrav
@@ -248,16 +249,46 @@ SUBROUTINE thermo_summary()
      CALL errore('thermo_summary','ibrav not programmed',1)
   END SELECT
 
-   WRITE( stdout, '(/,5x, &
-       &     "crystal axes: (cart. coord. in units of alat)",/, &
-       &       3(15x,"a(",i1,") = (",3f11.6," )  ",/ ) )')  (jpol,  &
-       (at (ipol, jpol) , ipol = 1, 3) , jpol = 1, 3)
-   !
-   WRITE( stdout, '(5x, &
-       &   "reciprocal axes: (cart. coord. in units 2 pi/alat)",/, &
-       &            3(15x,"b(",i1,") = (",3f10.6," )  ",/ ) )')  (jpol,&
-       &  (bg (ipol, jpol) , ipol = 1, 3) , jpol = 1, 3)
+  WRITE( stdout, '(/,5x, &
+      &     "crystal axes: (cart. coord. in units of alat)",/, &
+      &       3(15x,"a(",i1,") = (",3f11.6," )  ",/ ) )')  (jpol,  &
+      (at (ipol, jpol) , ipol = 1, 3) , jpol = 1, 3)
+  !
+  WRITE( stdout, '(5x, &
+      &   "reciprocal axes: (cart. coord. in units 2 pi/alat)",/, &
+      &            3(15x,"b(",i1,") = (",3f10.6," )  ",/ ) )')  (jpol,&
+      &  (bg (ipol, jpol) , ipol = 1, 3) , jpol = 1, 3)
 
+  WRITE( stdout, '(/,3x,"Cartesian axes")')
+  WRITE( stdout, '(/,5x,"site n.     atom                  positions (alat units)")')
+
+  WRITE( stdout, '(6x,i4,8x,a6," tau(",i4,") = (",3f12.7,"  )")') &
+             (na, atm(ityp(na)), na, (tau(ipol,na), ipol=1,3), na=1,nat)
+  !
+  !   allocate work space
+  !
+  ALLOCATE (xau(3,nat))
+  !
+  !     Compute the coordinates of each atom in the basis of the
+  !     direct lattice vectors
+  !
+  DO na = 1, nat
+     DO ipol = 1, 3
+        xau(ipol,na) = bg(1,ipol)*tau(1,na) + bg(2,ipol)*tau(2,na) + &
+                       bg(3,ipol)*tau(3,na)
+     ENDDO
+  ENDDO
+
+  WRITE( stdout, '(/,3x,"Crystallographic axes")')
+  WRITE( stdout, '(/,5x,"site n.     atom        ", &
+       &             "          positions (cryst. coord.)")')
+
+  WRITE( stdout, '(6x,i4,8x,a6," tau(",i4,") = (",3f11.7,"  )")') &
+        (na, atm(ityp(na)), na,  (xau(ipol,na), ipol=1,3), na=1,nat)
+!
+!   deallocate work space
+!
+  DEALLOCATE(xau)
 !
 ! ----------------------------------------------------------------------
 !  Information on the symmetry and the form of the physical quantities
