@@ -280,7 +280,7 @@ CASE (12)
 !  One phase centered orthorombic
 !
    IF (what=='mur_lc_t') THEN
-      IF (celldm(2) > 1.0_DP) THEN
+      IF (celldm(2) >= 1.0_DP) THEN
          letter(1:npk_label)= (/ 'gG', 'X ', 'S ', 'R ', 'A ', 'Z ', 'gG', &
                                  'gG', 'Y ', 'X1', 'A1', 'T ', 'Y ' /)  
       ELSE
@@ -291,7 +291,7 @@ CASE (12)
                                  0,   30,   30,   30,   30,    1  /)
       label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
    ELSE
-      IF (celldm(2) > 1.0_DP) THEN
+      IF (celldm(2) >= 1.0_DP) THEN
          letter(1:npk_label)= (/ 'gG', 'X ', 'S ', 'R ', 'A ', 'Z ',    &
                                  'gG', 'Y ', 'X1', 'A1', 'T ', 'Y ' /)  
       ELSE
