@@ -126,9 +126,9 @@ SUBROUTINE thermo_readin()
   step_ngeo=0.05_DP
   ntry=2
 
-  nq1_d=16
-  nq2_d=16
-  nq3_d=16
+  nq1_d=128
+  nq2_d=128
+  nq3_d=128
   zasr='simple'
   freqmin_input=0.0_DP
   freqmax_input=0.0_DP
