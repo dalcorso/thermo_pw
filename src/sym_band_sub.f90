@@ -44,11 +44,12 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   INTEGER :: iunout, igroup, irap, dim_rap, ios
   INTEGER :: sk(3,3,48), ftauk(3,48), gk(3,48), sk_is(3,3,48), &
        gk_is(3,48), t_revk(48), nsymk, isym, ipol, jpol
-  LOGICAL :: is_complex, is_complex_so, is_symmorphic, is_high_sym, search_sym
+  LOGICAL :: is_complex, is_complex_so, is_symmorphic, search_sym
+  LOGICAL, ALLOCATABLE :: high_symmetry(:)
   REAL(DP), PARAMETER :: accuracy=1.d-4
   COMPLEX(DP) :: d_spink(2,2,48), d_spin_is(2,2,48), zdotc
   COMPLEX(DP),ALLOCATABLE :: times(:,:,:)
-  REAL(DP) :: dxk(3), dkmod, dkmod_save
+  REAL(DP) :: dxk(3), dkmod, dkmod_save, k1(3), k2(3), modk1, modk2, ps
   INTEGER, ALLOCATABLE :: rap_et(:,:), code_group_k(:)
   INTEGER, ALLOCATABLE :: ngroup(:), istart(:,:)
   CHARACTER(len=11) :: group_name
@@ -65,6 +66,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   ALLOCATE(times(nbnd,24,nkstot))
   ALLOCATE(ngroup(nkstot))
   ALLOCATE(istart(nbnd+1,nkstot))
+  ALLOCATE(high_symmetry(nkstot))
 
   code_group_k=0
   rap_et=-1
@@ -116,20 +118,19 @@ SUBROUTINE sym_band_sub(filband, spin_component)
      !
      IF (noncolin) THEN
         IF (domag) THEN
-           CALL find_band_sym_so(evc,et(1,ik),at,nbnd,npw,nsym_is, &
-                ngm,sk_is,ftau_is,d_spin_is,gk_is,xk(1,ik),igk,nl,dfftp%nr1,dfftp%nr2,&
-                dfftp%nr3,dfftp%nr1x,dfftp%nr2x,dfftp%nr3x,dfftp%nnr,npwx,rap_et(1,ik),times(1,1,ik), &
+           CALL find_band_sym_so(evc,et(1,ik),nsym_is, &
+                sk_is,ftau_is,d_spin_is,gk_is,&
+                rap_et(1,ik),times(1,1,ik), &
                 ngroup(ik),istart(1,ik),accuracy)
         ELSE
-           CALL find_band_sym_so(evc,et(1,ik),at,nbnd,npw,nsymk,ngm, &
-                sk,ftauk,d_spink,gk,xk(1,ik),igk,nl,dfftp%nr1,dfftp%nr2,dfftp%nr3,dfftp%nr1x, &
-                dfftp%nr2x,dfftp%nr3x,dfftp%nnr,npwx,rap_et(1,ik),times(1,1,ik),ngroup(ik),&
+           CALL find_band_sym_so(evc,et(1,ik),nsymk, &
+                sk,ftauk,d_spink,gk, &
+                rap_et(1,ik),times(1,1,ik),ngroup(ik),&
                 istart(1,ik),accuracy)
         ENDIF
      ELSE
-        CALL find_band_sym (evc, et(1,ik), at, nbnd, npw, nsymk, ngm, &
-             sk, ftauk, gk, xk(1,ik), igk, nl, dfftp%nr1, dfftp%nr2, dfftp%nr3, dfftp%nr1x, &
-             dfftp%nr2x, dfftp%nr3x, dfftp%nnr, npwx, rap_et(1,ik), times(1,1,ik), ngroup(ik),&
+        CALL find_band_sym (evc, et(1,ik),  nsymk, sk, ftauk, gk, &
+             rap_et(1,ik), times(1,1,ik), ngroup(ik), &
              istart(1,ik),accuracy)
      ENDIF
 
@@ -148,7 +149,26 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   CALL ipoolrecover(istart,nbnd+1,nkstot,nks)
 #endif
   IF (ionode) THEN
-     is_high_sym=.false.
+     high_symmetry=.FALSE.
+     DO ik=1,nkstot
+        IF (ik==1.OR.ik==nkstot) THEN
+           high_symmetry(ik) = .TRUE.
+        ELSE
+           k1(:) = xk(:,ik) - xk(:,ik-1)
+           k2(:) = xk(:,ik+1) - xk(:,ik)
+           modk1=sqrt( k1(1)*k1(1) + k1(2)*k1(2) + k1(3)*k1(3) )
+           modk2=sqrt( k2(1)*k2(1) + k2(2)*k2(2) + k2(3)*k2(3) )
+           IF (modk1 <1.d-6 .OR. modk2 < 1.d-6) CYCLE
+           ps = ( k1(1)*k2(1) + k1(2)*k2(2) + k1(3)*k2(3) ) / &
+                modk1 / modk2
+           high_symmetry(ik) = (ABS(ps-1.d0) >1.0d-4)
+!
+!  The gamma point is a high symmetry point
+!
+           IF (xk(1,ik)**2+xk(2,ik)**2+xk(3,ik)**2 < 1.0d-9) &
+                             high_symmetry(ik)=.TRUE.
+        END IF 
+     END DO
      DO ik=1, nkstot
         CALL smallgk (xk(1,ik), at, bg, s, ftau, t_rev, sname, &
              nsym, sk, ftauk, gk, t_revk, snamek, nsymk)
@@ -169,7 +189,6 @@ SUBROUTINE sym_band_sub(filband, spin_component)
            WRITE (iunout, '(" &plot_rap nbnd_rap=",i4,", nks_rap=",i4," /")') &
                 nbnd, nkstot
            IF (search_sym) CALL write_group_info(.true.)
-           is_high_sym=.true.
            dxk(:) = xk(:,2) - xk(:,1)
            dkmod_save = sqrt( dxk(1)**2 + dxk(2)**2 + dxk(3)**2 )
         ELSE
@@ -189,23 +208,27 @@ SUBROUTINE sym_band_sub(filband, spin_component)
               !
               !   In this case is_high_sym does not change because the point
               !   is the same
+              high_symmetry(ik)=high_symmetry(ik-1)
               !
            ELSE IF (dkmod < 5.0_DP * dkmod_save) THEN
 !
 !    In this case the two points are considered close
 !
-              is_high_sym= ((code_group_k(ik)/=code_group_k(ik-1)) &
-                 .and..not.is_high_sym) 
+              IF (.NOT. high_symmetry(ik-1)) &
+                 high_symmetry(ik) = code_group_k(ik) /= code_group_k(ik-1) &
+                                  .OR. high_symmetry(ik)
+
               IF (dkmod > 1.d-3) dkmod_save=dkmod
            ELSE
 !
 !    Points are distant. They are all high symmetry
 !
-              is_high_sym= .TRUE.
+              high_symmetry(ik)= .TRUE.
            ENDIF
         ENDIF
+
         WRITE (iunout, '(10x,3f10.6,l5)') xk(1,ik),xk(2,ik),xk(3,ik), &
-             is_high_sym
+             high_symmetry(ik)
         WRITE (iunout, '(10i8)') (rap_et(ibnd,ik), ibnd=1,nbnd)
         IF (.not.search_sym) CYCLE
         IF (noncolin) THEN
@@ -288,6 +311,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   DEALLOCATE(code_group_k)
   DEALLOCATE(rap_et)
   DEALLOCATE(ngroup)
+  DEALLOCATE(high_symmetry)
   DEALLOCATE(istart)
   !
   RETURN
