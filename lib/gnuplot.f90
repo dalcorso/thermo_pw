@@ -106,13 +106,28 @@ REAL(DP) :: xcoord, ycoord
 CHARACTER(LEN=3) :: label
 CHARACTER(LEN=20) :: ws
 CHARACTER(LEN=256) :: frt
+INTEGER :: lens
 LOGICAL :: comment
 
-IF (label(1:1)=='g') THEN
-    ws="{/Symbol "//label(2:3)//"}"
+lens=LEN_TRIM(label)
+IF (label=='gG ') THEN
+   ws="{/Symbol G}"
+ELSEIF (label=='gS ') THEN
+   ws="{/Symbol S}"
+ELSEIF (label=='gS0') THEN
+   ws="{/Symbol S_0}"
+ELSEIF (label=='gS1') THEN
+   ws="{/Symbol S_1}"
+ELSEIF (label=='gD0') THEN
+   ws="{/Symbol D_0}"
+ELSEIF (label=='gL0') THEN
+   ws="{/Symbol L_0}"
+ELSEIF (lens>1.AND.TRIM(label(lens:lens))/=' ') THEN
+   ws=label(lens-1:lens-1)//"_"//label(lens:lens)
 ELSE
-    ws=label
+   ws=label
 ENDIF
+
 frt='("set label """,a,""" at ", f12.4,",",f12.4," center")'
 IF (comment) frt = '# ' // TRIM(frt)
 
