@@ -34,9 +34,9 @@ CASE (2)
 CASE (4, 7, 12, 13) 
      npk_label=12
      IF (what=='mur_lc_t') npk_label=13
-CASE (5,10) 
-     npk_label=10
-     IF (what=='mur_lc_t') npk_label=11
+CASE (5)
+     npk_label=9
+     IF (what=='mur_lc_t') npk_label=10
 CASE (6) 
      npk_label=10
 CASE (8) 
@@ -45,6 +45,9 @@ CASE (8)
 CASE (9) 
      npk_label=14
      IF (what=='mur_lc_t') npk_label=15
+CASE (10)
+     npk_label=10
+     IF (what=='mur_lc_t') npk_label=11
 CASE (11) 
      npk_label=15
      IF (what=='mur_lc_t') npk_label=16
@@ -139,15 +142,15 @@ CASE (5)
 !
    IF (what=='mur_lc_t') THEN
       letter(1:npk_label)= (/ 'gG', 'X ', 'M ', 'gG', 'gG', 'Z ', 'P ',  &
-                              'N ', 'Z1', 'M ', 'P ' /)  
+                              'N ', 'Z1', 'M ' /)  
       wqaux(1:npk_label) =  (/  30,   30,   30,  0,  30,   30,  30, &
-                                30,   30,   30,  1   /)
+                                30,   30,    1   /)
       label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
    ELSE
       letter(1:npk_label)= (/ 'gG', 'X ', 'M ', 'gG', 'Z ', 'P ',  &
-                              'N ', 'Z1', 'M ', 'P ' /)  
+                              'N ', 'Z1', 'M ' /)  
       wqaux(1:npk_label) =  (/  30,   30,   30,   30,   30,   30,  &
-                                30,   30,   30,    1 /)
+                                30,   30,    1 /)
       label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
    ENDIF
    letter_path=letter
