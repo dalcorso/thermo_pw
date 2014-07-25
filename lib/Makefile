@@ -13,6 +13,7 @@ piezoelectric_tensor.o \
 gnuplot.o \
 mp_asyn.o \
 phdos_module.o \
+space_groups.o \
 ph_freq_module.o
 
 all : thermo_lib.a
