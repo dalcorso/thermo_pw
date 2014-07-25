@@ -1,0 +1,2 @@
+group_name.o : ../../thermo_pw/lib/space_groups.o
+group_number.o : ../../thermo_pw/lib/space_groups.o
