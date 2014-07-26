@@ -14,7 +14,7 @@ then
     dirs=" Modules clib PW/src CPV/src flib PW/tools upftools PP/src PWCOND/src\
            PHonon/Gamma PHonon/PH PHonon/D3 PHonon/FD atomic/src XSpectra/src \
            ACDFT NEB/src TDDFPT/src GIPAW/src GWW/pw4gww GWW/gww GWW/head \
-           thermo_pw/src thermo_pw/lib" 
+           thermo_pw/src thermo_pw/lib thermo_pw/tools" 
           
 elif
     test $1 = "-addson" 
@@ -89,6 +89,9 @@ for dir in $dirs; do
  	     DEPENDS="$LEVEL2/include $LEVEL2/iotk/src $LEVEL2/Modules \
                       $LEVEL2/PW/src $LEVEL2/PHonon/PH " ;;
  	thermo_pw/src )
+ 	     DEPENDS="$LEVEL2/include $LEVEL2/iotk/src $LEVEL2/Modules \
+                      $LEVEL2/PW/src $LEVEL2/PHonon/PH $LEVEL2/thermo_pw/lib" ;;
+ 	thermo_pw/tools )
  	     DEPENDS="$LEVEL2/include $LEVEL2/iotk/src $LEVEL2/Modules \
                       $LEVEL2/PW/src $LEVEL2/PHonon/PH $LEVEL2/thermo_pw/lib" ;;
     *)
