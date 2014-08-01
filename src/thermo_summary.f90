@@ -15,21 +15,25 @@ SUBROUTINE thermo_summary()
   !
   USE kinds,                ONLY : DP
   USE thermo_mod,           ONLY : what, ngeo
-  USE thermo_sym,           ONLY : laue, code_group_save, ibrav_group_consistent
+  USE thermo_sym,           ONLY : laue, code_group_save, fft_fact, &
+                                   ibrav_group_consistent
   USE input_parameters,     ONLY : ibrav
   USE control_paths,        ONLY : xqaux, wqaux, npk_label, letter, &
                                    label_list, nqaux, point_label_type, &
                                    letter_path
   USE control_asy,          ONLY : flasy, lasymptote, asymptote_command
   USE control_elastic_constants, ONLY : frozen_ions, ngeo_strain
+  USE space_groups,         ONLY : sg_name, find_space_group, set_fft_fact
+  USE control_pwrun,        ONLY : nr1_save, nr2_save, nr3_save
   USE ktetra,               ONLY : tetra, ltetra
   USE control_flags,        ONLY : iverbosity
   USE noncollin_module,     ONLY : noncolin, m_loc
+  USE fft_base,             ONLY : dfftp, dffts
   USE spin_orb,             ONLY : domag
   USE rap_point_group,      ONLY : code_group
   USE cell_base,            ONLY : at, bg, celldm, omega
   USE ions_base,            ONLY : tau, nat, ityp, amass, atm
-  USE symm_base,            ONLY : irt
+  USE symm_base,            ONLY : irt, nsym, s, sr, ftau
   USE constants,            ONLY : amu_si, bohr_radius_si
   USE mp_world,             ONLY : world_comm
   USE mp_images,            ONLY : nimage, my_image_id, root_image
@@ -46,12 +50,14 @@ SUBROUTINE thermo_summary()
   REAL(DP) :: total_mass, total_expected_mass, current_mass, expected_mass, fact
   REAL(DP) :: atom_weight
   REAL(DP), ALLOCATABLE :: xau(:,:)
-  INTEGER  :: atomic_number
+  INTEGER :: atomic_number
   INTEGER :: laue_class
-  INTEGER :: it, ia, na, ipol, jpol
+  INTEGER :: it, ia, na, ipol, jpol, unique, trig
   LOGICAL :: read_path, lelc, lpiezo, ltherm_expansion, lmur
-  INTEGER :: ierr, system
+  INTEGER :: ierr, system, sg_number
   LOGICAL :: check_group_ibrav
+  CHARACTER(LEN=12) :: spaceg_name
+  CHARACTER(LEN=11) :: gname
 
   read_path=.FALSE.
   lelc = .FALSE.
@@ -149,12 +155,39 @@ SUBROUTINE thermo_summary()
      CASE DEFAULT
         CALL errore('themo_summary','what not programmed',1)
   END SELECT
-
 !
 !  We now check the point group and find the Laue class, so we write
 !  on output the form of the tensor that is calculated
 !
-  CALL setup()
+  dfftp%nr1=288
+  dfftp%nr2=288
+  dfftp%nr3=288
+  fft_fact=1
+  CALL find_symmetry(fft_fact)
+  CALL find_group(nsym,sr,gname,code_group)
+  ibrav_group_consistent=check_group_ibrav(code_group, ibrav)
+
+  IF ( ibrav_group_consistent ) THEN
+     CALL find_space_group(sg_number, ibrav, code_group, nsym, s, sr, ftau, &
+                              at, dfftp%nr1, dfftp%nr2, dfftp%nr3)
+
+     IF (sg_number > 0) THEN
+        unique=0
+        trig=0
+        IF (ibrav==-12.OR.ibrav==-13) unique=1
+        IF (ibrav==5) trig=1
+        CALL set_fft_fact(sg_number, unique, trig, fft_fact)
+        CALL clean_dfft()
+        CALL find_symmetry(fft_fact)
+     ENDIF
+  ENDIF
+  CALL set_fft_mesh()
+
+  WRITE(stdout,'(/,5x,"FFT mesh: (",i5,",",i5,",",i5," )")') dfftp%nr1, &
+                                              dfftp%nr2, dfftp%nr3
+  nr1_save=dfftp%nr1
+  nr2_save=dfftp%nr2
+  nr3_save=dfftp%nr3
 
   CALL print_symmetries ( 1, noncolin, domag )
   code_group_save=code_group
@@ -172,77 +205,71 @@ SUBROUTINE thermo_summary()
          WRITE(stdout,'(/,5x, "ibrav=4 Hexagonal lattice")')
          IF (ltherm_expansion) &
             CALL errore('thermo_summary','Thermal expansion not available',1)
-         IF (lmur) &
-            WRITE(stdout, '(/,5x,"Murnaghan minimization at fixed c/a")')
      CASE(5)  
          WRITE(stdout,'(/,5x, "ibrav=5 Trigonal lattice")')
          IF (ltherm_expansion) &
             CALL errore('thermo_summary','Thermal expansion not available',1)
-         IF (lmur) &
-            WRITE(stdout,'(/,5x,"Murnaghan minimization at fixed angle")')
      CASE(6)  
          WRITE(stdout,'(/,5x, "ibrav=6 Simple tetragonal lattice")')
          IF (ltherm_expansion) &
             CALL errore('thermo_summary','Thermal expansion not available',1)
-         IF (lmur) &
-            WRITE(stdout,'(/,5x,"Murnaghan minimization at fixed c/a")')
      CASE(7)  
          WRITE(stdout,'(/,5x, "ibrav=7 Centered tetragonal lattice")')
          IF (ltherm_expansion) &
             CALL errore('thermo_summary','Thermal expansion not available',1)
-         IF (lmur) &
-            WRITE(stdout,'(/,5x,"Murnaghan minimization at fixed c/a")')
      CASE(8)  
          WRITE(stdout,'(/,5x, "ibrav=8 Simple orthorombic lattice")')
          IF (ltherm_expansion) &
             CALL errore('thermo_summary','Thermal expansion not available',1)
-         IF (lmur) &
-            WRITE(stdout,'(/,5x,"Murnaghan minimization at fixed b/a and c/a")')
      CASE(9, -9)  
-         WRITE(stdout,'(/,5x, "ibrav=9 One face centered orthorombic lattice")')
+         WRITE(stdout,'(/,5x, "ibrav=9 One face (C) centered orthorombic lattice")')
          IF (ltherm_expansion) &
             CALL errore('thermo_summary','Thermal expansion not available',1)
-         IF (lmur) &
-            WRITE(stdout,'(/,5x,"Murnaghan minimization at fixed b/a and c/a")')
+     CASE(91)  
+         WRITE(stdout,'(/,5x, "ibrav=91 One face (A) centered orthorombic lattice")')
+         IF (ltherm_expansion) &
+            CALL errore('thermo_summary','Thermal expansion not available',1)
      CASE(10)  
          WRITE(stdout,'(/,5x, "ibrav=10 Face centered orthorombic lattice")')
          IF (ltherm_expansion) &
             CALL errore('thermo_summary','Thermal expansion not available',1)
-         IF (lmur) &
-            WRITE(stdout,'(/,5x,"Murnaghan minimization at fixed b/a and c/a")')
      CASE(11)  
          WRITE(stdout,'(/,5x, "ibrav=11 Body centered orthorombic lattice")')
          IF (ltherm_expansion) &
             CALL errore('thermo_summary','Thermal expansion not available',1)
-         IF (lmur) &
-            WRITE(stdout,'(/,5x,"Murnaghan minimization at fixed b/a and c/a")')
      CASE(12,-12)  
-         WRITE(stdout,'(/,5x, "ibrav=12 Monoclinic lattice")')
+         IF (ibrav==12) THEN
+            WRITE(stdout,'(/,5x, "ibrav=12 Monoclinic lattice (c unique)")')
+         ELSE
+            WRITE(stdout,'(/,5x, "ibrav=12 Monoclinic lattice (b unique)")')
+         ENDIF
          IF (ltherm_expansion) &
             CALL errore('thermo_summary','Thermal expansion not available',1)
-         IF (lmur) &
-            WRITE(stdout,'(/,5x,"Murnaghan minimization at fixed b/a, c/a &
-                                                         &and angle")')
-     CASE(13)  
-         WRITE(stdout,'(/,5x, "ibrav=13 Centered monoclinic lattice")')
+     CASE(13, -13)  
+         IF (ibrav==13) THEN
+            WRITE(stdout,'(/,5x, "ibrav=13 Centered monoclinic lattice &
+                          &(c unique)")')
+         ELSE
+            WRITE(stdout,'(/,5x, "ibrav=-13 Centered monoclinic lattice &
+                          &(b unique)")')
+         ENDIF
          IF (read_path) &
          WRITE(stdout,'(/,5x, "No Brillouin Zone support. You must provide the path ")')
          IF (ltherm_expansion) &
             CALL errore('thermo_summary','Thermal expansion not available',1)
-         IF (lmur) &
-            WRITE(stdout,'(/,5x,"Murnaghan minimization at fixed b/a, c/a &
-                                                               &and angle")')
      CASE(14)  
          WRITE(stdout,'(/,5x, "ibrav=14 Triclinic lattice")')
          IF (read_path) &
-         WRITE(stdout,'(/,5x, "No Brillouin Zone support, user provided path ")')
+         WRITE(stdout,'(/,5x, "No Brillouin Zone support. You must provide &
+                               &the path ")')
          IF (ltherm_expansion) &
             CALL errore('thermo_summary','Thermal expansion not available',1)
      CASE(0)  
          WRITE(stdout,'(/,5x, "ibrav=0 user provided cell")')
          WRITE(stdout,'(/,5x, "Be careful many options do not work with ibrav=0")')
          IF (read_path) &
-            WRITE(stdout,'(/,5x, "No Brillouin Zone support, user provided path ")')
+            WRITE(stdout,'(/,5x, "No Brillouin Zone support. You must provide&
+                          & the path ")')
          IF (ltherm_expansion) &
             CALL errore('thermo_summary','Thermal expansion not available',1)
   CASE DEFAULT
@@ -303,6 +330,16 @@ SUBROUTINE thermo_summary()
      WRITE(stdout,'(/,5x,"The point group, ",a,", is compatible with the&
                                     & Bravais lattice.")') TRIM(group_name &
                                                                (code_group))
+     CALL find_space_group(sg_number, ibrav, code_group, nsym, s, sr, ftau, &
+                              at, dfftp%nr1, dfftp%nr2, dfftp%nr3)
+     CALL sg_name(sg_number, spaceg_name)
+     IF (sg_number > 0) THEN
+        WRITE(stdout,'(/,5x,"Space group ",a,"   (group number",i4, ").")') &
+                            TRIM(spaceg_name), sg_number
+     ELSE
+        WRITE(stdout,'(/,5x,"Unknown space group.")') 
+     ENDIF
+
 !
 !  first rank tensors
 !
@@ -933,7 +970,7 @@ END IF
 
 IF (what(1:6)=='mur_lc') &
    WRITE(stdout,'(5x,"The Murnaghan relaxation will require", &
-                     &i3, " scf calculations")') ngeo 
+                     &i3, " scf calculations")') ngeo
 
 WRITE(stdout,'(/,5x,70("-"))')
 IF (frozen_ions) THEN
@@ -995,12 +1032,16 @@ WRITE(stdout,'(5x,70("-"))')
   IF (what=='plot_bz') THEN
      asy_filename=TRIM(flasy)//'.asy'
      IF ( my_image_id==root_image ) THEN
-        CALL plot_bz(ibrav, celldm, at, bg, point_label_type, &
+        IF (ibrav /= 13 .AND. ibrav /= -13 .AND. ibrav /=91 .AND. &
+                        ibrav /=14 .AND. ibrav /=0) &
+           THEN 
+           CALL plot_bz(ibrav, celldm, at, bg, point_label_type, &
                 xqaux, wqaux, nqaux, letter, letter_path, npk_label, &
                 label_list, asy_filename)
 
-        IF (lasymptote.AND.ionode) &
-           ierr=system(TRIM(asymptote_command)//' '//TRIM(asy_filename))
+           IF (lasymptote.AND.ionode) &
+               ierr=system(TRIM(asymptote_command)//' '//TRIM(asy_filename))
+        ENDIF
      ENDIF
      CALL summarize_kpt(xqaux, wqaux, nqaux, letter_path)
 
@@ -1009,13 +1050,6 @@ WRITE(stdout,'(5x,70("-"))')
      CALL mp_global_end ()
      CALL do_stop( 0 )
   ENDIF
-  !
-  !  setup allocate a certain number of quantities. Since setup is recalculated
-  !  later, we have to deallocate what has been allocated.
-  !
-  DEALLOCATE(m_loc)
-  IF (ltetra) DEALLOCATE(tetra)
-  DEALLOCATE(irt)
 
   RETURN
 END SUBROUTINE thermo_summary
@@ -1031,7 +1065,7 @@ USE io_global, ONLY : stdout
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: code_group, ibrav
 
-INTEGER :: is_compatible(32,5)
+INTEGER :: is_compatible(32,6)
 LOGICAL :: check_group_ibrav
 INTEGER :: i
 CHARACTER(LEN=40) :: latt_name
@@ -1050,9 +1084,11 @@ is_compatible(2,1)=14
 is_compatible(3,1)=12
 is_compatible(3,2)=13
 is_compatible(3,3)=-12
+is_compatible(3,4)=-13
 is_compatible(4,1)=12
 is_compatible(4,2)=13
 is_compatible(4,3)=-12
+is_compatible(4,4)=-13
 !
 !   C_3, trigonal or hexagonal
 !
@@ -1076,6 +1112,7 @@ is_compatible(8,2)=9
 is_compatible(8,3)=10
 is_compatible(8,4)=11
 is_compatible(8,5)=-9
+is_compatible(8,6)=91
 !
 !   D_3 trigonal or hexagonal
 !
@@ -1099,6 +1136,7 @@ is_compatible(12,2)=9
 is_compatible(12,3)=10
 is_compatible(12,4)=11
 is_compatible(12,5)=-9
+is_compatible(12,6)=91
 !
 !   C_3v hexagonal or trigonal
 !
@@ -1120,6 +1158,7 @@ is_compatible(15,1)=4
 is_compatible(16,1)=12
 is_compatible(16,2)=13
 is_compatible(16,3)=-12
+is_compatible(16,4)=-13
 !
 !  C_3h hexagonal
 !
@@ -1141,6 +1180,7 @@ is_compatible(20,2)=9
 is_compatible(20,3)=10
 is_compatible(20,4)=11
 is_compatible(20,5)=-9
+is_compatible(20,6)=91
 !
 !  D_3h hexagonal
 !
@@ -1211,14 +1251,14 @@ IF (ibrav==0) THEN
    WRITE(stdout,'(5x,"ibrav=0, many features are not implemented")')
    WRITE(stdout,'(5x,"The point group ",a11," is compatible with:")') &
                                                       group_name(code_group)
-   DO i=1,5
+   DO i=1,6
       IF (is_compatible(code_group,i) /=0) THEN
          CALL lattice_name(is_compatible(code_group,i),latt_name)
          WRITE(stdout,'(5x,a)') TRIM(latt_name)
       ENDIF
    ENDDO
 ELSE
-   DO i=1,5
+   DO i=1,6
       IF (is_compatible(code_group,i) == ibrav) THEN
          check_group_ibrav=.TRUE.
          GOTO 100
@@ -1229,17 +1269,18 @@ ELSE
                       & a," Bravais lattice")') &
                       TRIM(group_name(code_group)), TRIM(latt_name)
    WRITE(stdout,'(5x,"It is compatible with the ")') 
-   DO i=1,5
+   DO i=1,6
       IF (is_compatible(code_group,i) /=0) THEN
          CALL lattice_name(is_compatible(code_group,i),latt_name)
          WRITE(stdout,'(5x,a," Bravais lattice; ibrav=",i5)') TRIM(latt_name), &
                    is_compatible(code_group,i)
       ENDIF
    ENDDO
-   WRITE(stdout,'(/,5x,"You might want to change the Bravais lattice before &
-                      continuing")') 
-   WRITE(stdout,'(5x,"The point group or the Laue class are used to reduce the&
-                      & number of ")')
+   WRITE(stdout,'(/,5x,"You might want to change the Bravais lattice or to")') 
+   WRITE(stdout,'(/,5x,"understand why some symmetries are not found before&
+                      &continuing")') 
+   WRITE(stdout,'(5x,"The point group or the Laue class are not used to &
+                      &reduce the number of ")')
    WRITE(stdout,'(5x,"computed tensor components")') 
 100 CONTINUE
 END IF
@@ -1275,16 +1316,22 @@ SELECT CASE (ibrav)
         latt_name='centered tetragonal'
     CASE(8)
         latt_name='simple orthorombic'
-    CASE(9,-9)
-        latt_name='one face centered orthorombic'
+    CASE(9, -9)
+        latt_name='one face centered orthorombic (C)'
+    CASE(91)
+        latt_name='one face centered orthorombic (A)'
     CASE(10)
         latt_name='face centered orthorombic'
     CASE(11)
         latt_name='body centered orthorombic'
-    CASE(12,-12)
-        latt_name='monoclinic'
+    CASE(12)
+        latt_name='monoclinic (c unique)'
+    CASE(-12)
+        latt_name='monoclinic (b unique)'
     CASE(13)
-        latt_name='base centered monoclinic'
+        latt_name='base centered monoclinic (c unique)'
+    CASE(-13)
+        latt_name='base centered monoclinic (b unique)'
     CASE(14)
         latt_name='triclinic'
 CASE DEFAULT

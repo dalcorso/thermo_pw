@@ -381,6 +381,16 @@ MODULE control_grun
 
 END MODULE control_grun
 
+MODULE control_pwrun
+
+  USE kinds, ONLY: DP
+  SAVE
+
+  INTEGER :: nr1_save, nr2_save, nr3_save  ! save the fft dimensions
+
+END MODULE control_pwrun
+
+
 MODULE control_gnuplot
   USE kinds,  ONLY : DP
   !
@@ -437,5 +447,6 @@ MODULE thermo_sym
                              ! solid
   LOGICAL :: ibrav_group_consistent ! if .true., point group and bravais lattice are
                                     ! consistent 
+  INTEGER :: fft_fact(3)     ! the factors that must be inside the fft
 
 END MODULE thermo_sym

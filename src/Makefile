@@ -25,6 +25,7 @@ do_pwscf.o \
 do_berry.o \
 ev_sub.o \
 ev_xml.o \
+find_symmetry.o \
 initialize_thermo_work.o \
 initialize_thermo_master.o \
 matdyn_sub.o \
@@ -42,6 +43,7 @@ q2r_sub.o \
 run_thermo_asyncronously.o \
 set_bz_path.o \
 set_elastic_cons_work.o \
+set_fft_mesh.o \
 set_k_points.o \
 set_paths_disp.o \
 set_piezo_tensor_work.o \

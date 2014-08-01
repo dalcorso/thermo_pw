@@ -78,6 +78,7 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
                          freqmin_input, freqmax_input
  
   USE control_ph, ONLY : xmldyn
+  USE control_pwrun, ONLY : nr1_save, nr2_save, nr3_save
   USE control_paths, ONLY : disp_q, disp_nqs
   USE thermodynamics, ONLY : phdos_save
   USE ph_freq_thermodynamics, ONLY : ph_freq_save
@@ -233,7 +234,8 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   ALLOCATE ( num_rap_mode(3*nat,nq) )
   ALLOCATE ( high_sym(nq) )
 
-  IF (xmlifc) CALL set_sym(nat, tau, ityp, nspin_mag, m_loc, 2, 2, 2 )
+  IF (xmlifc) CALL set_sym(nat, tau, ityp, nspin_mag, m_loc, nr1_save, &
+                                                      nr2_save, nr3_save )
 
   num_rap_mode=-1
   high_sym=.TRUE.
@@ -1297,6 +1299,7 @@ SUBROUTINE gen_qpoints (ibrav, at_, bg_, nat, tau, ityp, nk1, nk2, nk3, &
   USE cell_base,  ONLY : at, bg
   USE symm_base,  ONLY : set_sym_bl, find_sym, s, irt, nsym, &
                          nrot, t_rev, time_reversal,  sname
+  USE control_pwrun, ONLY : nr1_save, nr2_save, nr3_save
   !
   IMPLICIT NONE
   ! input
@@ -1319,7 +1322,8 @@ SUBROUTINE gen_qpoints (ibrav, at_, bg_, nat, tau, ityp, nk1, nk2, nk3, &
   CALL kpoint_grid ( nrot, time_reversal, skip_equivalence, s, t_rev, bg, nqx, &
                            0,0,0, nk1,nk2,nk3, nq, q, wq)
   !
-  CALL find_sym ( nat, tau, ityp, 6, 6, 6, .not.time_reversal, mdum )
+  CALL find_sym ( nat, tau, ityp, nr1_save, nr2_save, nr3_save, &
+                                                     .NOT.time_reversal, mdum )
   !
   CALL irreducible_BZ (nrot, s, nsym, time_reversal, magnetic_sym, &
                        at, bg, nqx, nq, q, wq, t_rev)
@@ -1390,6 +1394,8 @@ SUBROUTINE find_representations_mode_q ( nat, ntyp, xq, w2, u, tau, ityp, &
      CALL sgam_ph_new (at, bg, nsym, s, irt, tau, rtau, nat)
      CALL find_mode_sym_new (u, w2, tau, nat, nsymq, sr, irt, xq,    &
              rtau, amass, ntyp, ityp, 1, .FALSE., .FALSE., num_rap_mode, ierr)
+
+     CALL print_mode_sym(w2, num_rap_mode, .FALSE.)
 
   ENDIF
   RETURN
