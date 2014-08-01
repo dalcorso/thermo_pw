@@ -15,7 +15,7 @@ SUBROUTINE run_thermo_asyncronously(nwork, part, igeom, auxdyn)
                               asyn_close, asyn_master, asyn_worker, &
                               asyn_master_work, with_asyn_images
   USE thermo_priority, ONLY : npriority, priority, max_priority
-  USE thermo_mod,      ONLY : alat_geo, energy_geo, ngeo
+  USE thermo_mod,      ONLY : energy_geo
   USE control_thermo,  ONLY : lpwscf, lstress, lbands, lphonon, lberry
   USE elastic_constants, ONLY : sigma_geo
   USE piezoelectric_tensor, ONLY : polar_geo, nppl

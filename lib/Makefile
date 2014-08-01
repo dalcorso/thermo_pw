@@ -9,12 +9,13 @@ MODULES = \
 asy.o \
 bz_asy.o \
 elastic_const.o \
-piezoelectric_tensor.o \
+latgen_2d.o \
 gnuplot.o \
 mp_asyn.o \
 phdos_module.o \
-space_groups.o \
-ph_freq_module.o
+ph_freq_module.o \
+piezoelectric_tensor.o \
+space_groups.o 
 
 all : thermo_lib.a
 

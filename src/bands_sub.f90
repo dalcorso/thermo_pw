@@ -20,6 +20,7 @@ SUBROUTINE bands_sub()
   !
   IF (q2d) lsym=.FALSE.
 
+  CALL start_clock('bands')
   CALL clean_pw(.TRUE.)
   CALL read_file()
   !
@@ -38,6 +39,9 @@ SUBROUTINE bands_sub()
      IF (lsym) CALL sym_band_sub(filband,spin_component)
   END IF
   CALL clean_pw(.FALSE.)
+
+  CALL print_clock('bands')
+  CALL stop_clock('bands')
   !
   RETURN
 END SUBROUTINE bands_sub
