@@ -15,7 +15,7 @@ LIBOBJS	= ../lib/thermo_lib.a ../../PHonon/PH/libph.a ../../flib/ptools.a ../../
 
 TLDEPS= bindir mods libs pw
 
-all : group_name.x group_number.x
+all : group_name.x group_number.x gener_2d_slab.x gener_nanowire.x
 
 libs-ph : libph.a libphaux.a
 
@@ -28,6 +28,17 @@ group_number.x : group_number.o $(PWOBJS) $(LIBOBJS)
 	$(LD) $(LDFLAGS) -o $@ group_number.o \
 		 $(LIBOBJS) $(PWOBJS) $(QEMODS) $(LIBOBJS) $(PWOBJS) $(LIBS)
 	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/group_number.x . )
+
+
+gener_2d_slab.x : gener_2d_slab.o $(PWOBJS) $(LIBOBJS)
+	$(LD) $(LDFLAGS) -o $@ gener_2d_slab.o \
+		 $(LIBOBJS) $(PWOBJS) $(QEMODS) $(LIBOBJS) $(PWOBJS) $(LIBS)
+	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/gener_2d_slab.x . )
+
+gener_nanowire.x : gener_nanowire.o $(PWOBJS) $(LIBOBJS)
+	$(LD) $(LDFLAGS) -o $@ gener_nanowire.o \
+		 $(LIBOBJS) $(PWOBJS) $(QEMODS) $(LIBOBJS) $(PWOBJS) $(LIBS)
+	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/gener_nanowire.x . )
 
 clean :
 	- /bin/rm -f *.x *.o *.a *~ *.F90 *.d *.mod *.i *.L
