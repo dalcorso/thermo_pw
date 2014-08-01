@@ -14,15 +14,21 @@ MODULE gnuplot
     SAVE
     INTEGER :: iun_gnuplot       ! unit where this module writes
 
+    INTEGER :: contour_counter=0
+    INTEGER :: contour_max
+    CHARACTER(LEN=20), ALLOCATABLE :: contour_color(:)
+
     PUBLIC iun_gnuplot, gnuplot_write_header, &
            gnuplot_write_vertical_line, gnuplot_write_horizontal_line, &
            gnuplot_write_label, gnuplot_write_file_data, gnuplot_start, &
            gnuplot_set_eref, gnuplot_set_fact, gnuplot_set_gfact, &
            gnuplot_xlabel, gnuplot_ylabel, gnuplot_write_label_yl, &
            gnuplot_unset_xticks, gnuplot_unset_yticks, &
+           gnuplot_set_xticks, gnuplot_set_yticks,    &
            gnuplot_write_file_mul_data, gnuplot_write_file_mul_point, &
            gnuplot_write_file_mul_data_sum, gnuplot_write_command, &
-           gnuplot_end
+           gnuplot_end, gnuplot_do_2dplot, gnuplot_start_2dplot, &
+           gnuplot_set_contour
 
 CONTAINS
 
@@ -205,6 +211,34 @@ IF (ionode) WRITE(iun_gnuplot, frt)
 RETURN
 END SUBROUTINE gnuplot_unset_xticks
 
+SUBROUTINE gnuplot_set_xticks(xstart,delta,xend,comment)
+IMPLICIT NONE
+REAL(DP), INTENT(IN) :: xstart, delta, xend
+LOGICAL, INTENT(IN) :: comment
+CHARACTER(LEN=256) :: frt
+
+WRITE(frt, '("set xtics ",f11.6,",",f11.6,",",f11.6)') xstart, delta, xend 
+IF (comment) frt = '# ' // TRIM(frt)
+
+IF (ionode) WRITE(iun_gnuplot, '(a)') TRIM(frt) 
+
+RETURN
+END SUBROUTINE gnuplot_set_xticks
+
+SUBROUTINE gnuplot_set_yticks(ystart,delta,yend,comment)
+IMPLICIT NONE
+REAL(DP), INTENT(IN) :: ystart, delta, yend
+LOGICAL, INTENT(IN) :: comment
+CHARACTER(LEN=256) :: frt
+
+WRITE(frt, '("set ytics ",f8.2,",",f8.6,",",f8.2)') ystart, delta, yend 
+IF (comment) frt = '# ' // TRIM(frt)
+
+IF (ionode) WRITE(iun_gnuplot, '(a)') TRIM(frt) 
+
+RETURN
+END SUBROUTINE gnuplot_set_yticks
+
 SUBROUTINE gnuplot_unset_yticks(comment)
 IMPLICIT NONE
 CHARACTER(LEN=256) :: frt
@@ -381,6 +415,117 @@ IF (ionode.AND. command /=' ') WRITE(iun_gnuplot, '(a)') TRIM(frt)
 
 RETURN
 END SUBROUTINE gnuplot_write_command
+
+SUBROUTINE gnuplot_initialize_contour_counter(max_contours)
+
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: max_contours
+
+contour_counter=0
+contour_max=max_contours
+ALLOCATE(contour_color(contour_max))
+
+RETURN
+END SUBROUTINE gnuplot_initialize_contour_counter
+
+SUBROUTINE gnuplot_set_contour(file2d_dat,levr,color)
+!
+!  This routine gives the commands to search a contour levr in a file with a 2d
+!  function and write it in a table file. It assumes that gnuplot_start_2dplot
+!  has been already called
+!
+IMPLICIT NONE
+REAL(DP), INTENT(IN) :: levr
+CHARACTER(LEN=*),INTENT(IN) :: file2d_dat, color
+CHARACTER(LEN=256) :: filename
+CHARACTER(LEN=6) :: int_to_char
+
+contour_counter=contour_counter+1
+IF (contour_counter > contour_max) CALL errore('gnuplot_set_contour',&
+                                                 'too many contours',1)
+contour_color(contour_counter) = color
+IF (ionode) THEN
+   WRITE(iun_gnuplot,'("set cntrparam levels discrete",f12.6)') levr
+   filename='table_'//TRIM(int_to_char(contour_counter))//'.dat'
+   WRITE(iun_gnuplot,'("set output """,a,"""")') TRIM(filename)
+   WRITE(iun_gnuplot,'("splot ''",a,"'' using 1:2:3 w l")') TRIM(file2d_dat)
+ENDIF
+
+END SUBROUTINE gnuplot_set_contour
+
+SUBROUTINE gnuplot_start_2dplot(max_contours, nx, ny)
+!
+!  this soubroutine initialize a 2d plot on a file with nx, ny grid of points
+!
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: max_contours
+INTEGER, INTENT(IN) :: nx, ny
+
+IF (ionode) THEN
+   WRITE(iun_gnuplot, '("nyp=",i5)') ny
+   WRITE(iun_gnuplot, '("nxp=",i5)') nx
+   WRITE(iun_gnuplot, '("set view map")')
+   WRITE(iun_gnuplot, '("set size square")')
+   WRITE(iun_gnuplot, '("unset surface")')
+   WRITE(iun_gnuplot, '("unset clabel")')
+   WRITE(iun_gnuplot, '("set contour")')
+   WRITE(iun_gnuplot, '("set dgrid3d nyp,nxp")')
+   WRITE(iun_gnuplot, '("set cntrparam cubicspline")')
+   WRITE(iun_gnuplot, '("set table")')
+ENDIF
+
+CALL gnuplot_initialize_contour_counter(max_contours)
+
+RETURN
+END SUBROUTINE gnuplot_start_2dplot
+
+SUBROUTINE gnuplot_do_2dplot(filename, xmin, xmax, ymin, ymax)
+
+IMPLICIT NONE
+REAL(DP), INTENT(IN) :: xmin, xmax, ymin, ymax
+CHARACTER(LEN=*), INTENT(IN) :: filename
+CHARACTER(LEN=256) :: filename1
+CHARACTER(LEN=6) :: int_to_char
+INTEGER :: iplot
+
+IF (ionode) WRITE(iun_gnuplot,'("unset table")')
+
+CALL gnuplot_write_header(filename, xmin, xmax, ymin, ymax)
+
+IF (ionode) THEN
+   WRITE(iun_gnuplot,'("set size ratio",f15.7)') (ymax-ymin)/(xmax-xmin)
+   DO iplot=1, contour_counter
+      filename1='table_'//TRIM(int_to_char(iplot))//'.dat'
+      IF (iplot==1.AND.contour_counter>1) THEN
+         WRITE(iun_gnuplot,'("plot """,a,""" u 1:2 w l lw 4 lc rgb """,a,""",\")') & 
+                  TRIM(filename1), TRIM(contour_color(iplot))
+      ELSEIF (iplot==contour_counter.AND.contour_counter>1) THEN
+         WRITE(iun_gnuplot,'("""",a,""" u 1:2 w l lw 4 lc rgb """,a,"""")') & 
+                  TRIM(filename1), TRIM(contour_color(iplot))
+      ELSEIF (contour_counter==1) THEN
+         WRITE(iun_gnuplot,'("plot """,a,""" u 1:2 w l lw 4 lc rgb """,a,"""")') & 
+                  TRIM(filename1), TRIM(contour_color(iplot))
+      ELSE
+         WRITE(iun_gnuplot,'("""",a,""" u 1:2 w l lw 4 lc rgb """,a,""",\")') & 
+                  TRIM(filename1), TRIM(contour_color(iplot))
+      ENDIF
+   ENDDO
+ENDIF
+
+CALL gnuplot_stop_2dplot()
+
+RETURN
+END SUBROUTINE gnuplot_do_2dplot
+
+SUBROUTINE gnuplot_stop_2dplot()
+
+IMPLICIT NONE
+
+DEALLOCATE(contour_color)
+
+RETURN
+END SUBROUTINE gnuplot_stop_2dplot
+
 
 SUBROUTINE gnuplot_start(filename_gnu)
 !
