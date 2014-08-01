@@ -193,7 +193,7 @@ PROGRAM thermo_pw
                                               omega_geo(ngeo/2+1))
      CALL cell_base_init ( ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
                       trd_ht, rd_ht, cell_units )
-     CALL clean_dfft()
+     CALL set_fft_mesh()
   END IF
 
   IF (lpwscf_syn_1) THEN
