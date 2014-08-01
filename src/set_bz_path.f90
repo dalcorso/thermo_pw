@@ -17,6 +17,11 @@ IMPLICIT NONE
 
 INTEGER :: bzt, i
 !
+!  skip unsupported ibrav
+!
+IF (ibrav==91 .OR. ibrav==-13 .OR. ibrav==13 .OR. ibrav==14 .OR. ibrav==0) &
+                                               RETURN
+!
 !  first select the Brillouin zone type
 !
 CALL find_bz_type(ibrav, celldm, bzt)
