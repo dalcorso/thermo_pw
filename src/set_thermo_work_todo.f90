@@ -60,7 +60,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
            ecutwfc = ke(iwork)
            ecutrho = keden(iwork)
            dual = ecutrho / ecutwfc
-           CALL clean_dfft()
+           CALL set_fft_mesh()
            outdir=TRIM(outdir_thermo)//'ke'//TRIM(int_to_char(iwork))//'/'
            tmp_dir = TRIM ( outdir )
            wfc_dir = tmp_dir
@@ -72,7 +72,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
            nk3=nk1
            CALL init_start_k ( nk1, nk2, nk3, k1, k2, k3, k_points, &
                                nkstot, xk, wk )
-           CALL clean_dfft()
+           CALL set_fft_mesh()
            gamma_only = ( k_points == 'gamma' )
            outdir=TRIM(outdir_thermo)//'ke'//TRIM(int_to_char(iwork))//'/'
            tmp_dir = TRIM ( outdir )
@@ -84,7 +84,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
            celldm(1)=alat_geo(iwork)
            CALL cell_base_init ( ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
                          trd_ht, rd_ht, cell_units )
-           CALL clean_dfft()
+           CALL set_fft_mesh()
            outdir=TRIM(outdir_thermo)//'g'//TRIM(int_to_char(iwork))//'/'
            tmp_dir = TRIM ( outdir )
            wfc_dir = tmp_dir
@@ -141,7 +141,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
            cell_units='alat'
            CALL cell_base_init ( ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
                          trd_ht, rd_ht, cell_units )
-           CALL clean_dfft()
+           CALL set_fft_mesh()
            outdir=TRIM(outdir_thermo)//'g'//TRIM(int_to_char(iwork))//'/'
            tmp_dir = TRIM ( outdir )
            wfc_dir = tmp_dir
