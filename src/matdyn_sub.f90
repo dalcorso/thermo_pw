@@ -1348,6 +1348,7 @@ SUBROUTINE find_representations_mode_q ( nat, ntyp, xq, w2, u, tau, ityp, &
   USE symm_base,  ONLY : find_sym, s, sr, ftau, irt, nsym, &
                          nrot, t_rev, time_reversal, sname, copy_sym, &
                          s_axis_to_cart
+  USE rap_point_group, ONLY : code_group, gname
 
   IMPLICIT NONE
   INTEGER, INTENT(IN) :: nat, ntyp, nspin_mag
@@ -1397,7 +1398,10 @@ SUBROUTINE find_representations_mode_q ( nat, ntyp, xq, w2, u, tau, ityp, &
 
      CALL print_mode_sym(w2, num_rap_mode, .FALSE.)
 
+  ELSE
+     CALL find_group(nsymq,sr,gname,code_group)
   ENDIF
+
   RETURN
   END SUBROUTINE find_representations_mode_q
 
