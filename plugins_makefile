@@ -133,13 +133,6 @@ phonon:  uncompress-phonon
 	ln -fs ../PHonon/D3/d3.x . ; \
 	fi
 	touch make-phonon
-
-thermo_pw:  
-	if test -d ../thermo_pw; then \
-	cd ../thermo_pw; $(MAKE) all || exit 1; cd ../bin; \
-	ln -fs ../thermo_pw/src/thermo_pw.x . ; \
-	fi
-
 uncompress-phonon: touch-dummy
 	@(if test ! -s ../archive/$(PHONON).tar.gz && test ! -d ../PHonon ; then \
 	wget -O ../archive/$(PHONON).tar.gz $(PHONON_URL) > /dev/null 2>&1; \
@@ -153,6 +146,14 @@ uncompress-phonon: touch-dummy
 	if test ! -d ../PHonon; then \
 	(gzip -dc ../archive/$(PHONON).tar.gz | (cd ../ ; tar -xvf -)) ; fi
 	touch uncompress-phonon
+##########################################################
+#   Thermo_pw
+##########################################################
+thermo_pw:  
+	if test -d ../thermo_pw; then \
+	cd ../thermo_pw; $(MAKE) all || exit 1; cd ../bin; \
+	ln -fs ../thermo_pw/src/thermo_pw.x . ; \
+	fi
 ##########################################################
 # GIPAW
 ###########################################################
@@ -178,6 +179,7 @@ configure-gipaw: touch-dummy
 	cd ../GIPAW ; \
 	./configure --with-qe-source=${TOPDIR}
 	touch ./configure-gipaw
+
 ##########################################################
 # EPW
 ###########################################################
@@ -237,15 +239,15 @@ uncompress-want: touch-dummy
 	exit 1 ; fi ; fi ; fi) 
 	if test ! -d ../WANT; then \
 	(gzip -dc ../archive/$(WANT)-base.tar.gz | (cd ../ ; tar -xvf -)) ; \
-	(cd ../ ; ln -s $(WANT) WANT) ; fi 
+	(cd ../ ; ln -sf $(WANT) WANT) ; fi 
 	touch uncompress-want
 
 configure-want: touch-dummy
 	cd ../WANT ; \
-	./conf/configure \
+	./configure \
 	--with-external-iotk \
-	IOTK_LIBS="-L../../S3DE/iotk/src -liotk" \
-	IOTK_INCLUDE="$(MOD_FLAG)../../S3DE/iotk/src" \
+	IOTK_LIBS="-L../../../S3DE/iotk/src -liotk" \
+	IOTK_INCLUDE="$(MOD_FLAG)../../../S3DE/iotk/src" \
 	CC="$(CC)" \
 	F90="$(F90)" \
 	MPIF90="$(MPIF90)" \
