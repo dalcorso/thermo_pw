@@ -115,16 +115,6 @@ K_POINTS AUTOMATIC
 4 4 4 1 1 1
 EOF
 
-cat > ph_control << EOF
- &inputph
-  tr2_ph=1.0d-12,
-  prefix='aluminum',
-  fildyn='al.dyn.xml',
-  ldisp=.TRUE.
-  nq1=2, nq2=2, nq3=2,
-/
-EOF
-
 $ECHO "  running the scf calculation for Al...\c"
 $THERMO_PW_COMMAND < al.scf.in > al.scf.out
 check_failure $?

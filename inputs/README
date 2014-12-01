@@ -21,6 +21,8 @@ List of presently available structures and examples:
 struct. crystal fun  bz  bands  mur  phonon  el_const  piezo  thermal_exp  
 
 A1       fcc-Al  pz  *    *            *                ---                
+A4       C           *                                   0
+
 
 NB: this directory uses the pseudopotentials of pslibrary.1.0.0. In order
 to use it, you must change the PSEUDO_DIR variable (inside the 
