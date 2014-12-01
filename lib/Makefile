@@ -7,6 +7,7 @@ MODFLAGS= $(MOD_FLAG)../../Modules $(MOD_FLAG).
 
 MODULES = \
 asy.o \
+bz_2d_form.o \
 bz_asy.o \
 elastic_const.o \
 latgen_2d.o \
@@ -15,6 +16,7 @@ mp_asyn.o \
 phdos_module.o \
 ph_freq_module.o \
 piezoelectric_tensor.o \
+point_group.o \
 space_groups.o 
 
 all : thermo_lib.a
