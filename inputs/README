@@ -18,13 +18,12 @@ variable in the thermo_pw input inside the script.
 
 List of presently available structures and examples:
 
-struct.  crystal  bz  bands  mur  phonon  el_const  piezo_tensor  thermal_exp  
+struct. crystal fun  bz  bands  mur  phonon  el_const  piezo  thermal_exp  
 
-A1       fcc-Al    *    *     *     *        *          ---           *    
+A1       fcc-Al  pz  *    *            *                ---                
 
 NB: this directory uses the pseudopotentials of pslibrary.1.0.0. In order
 to use it, you must change the PSEUDO_DIR variable (inside the 
 environment_variables file in the main QE directory) to point to the 
-directory that contains the UPF files of the pseudopotentials for the pbe 
-functional.
-
+directory that contains the UPF files of the pseudopotentials for the pz 
+or pbe functional. 

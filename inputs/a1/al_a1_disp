@@ -35,12 +35,12 @@ for DIR in "$BIN_DIR" "$PSEUDO_DIR" ; do
         exit 1
     fi
 done
-for DIR in "$TMP_DIR" "$EXAMPLE_DIR/bz" ; do
+for DIR in "$TMP_DIR" "$EXAMPLE_DIR/disp" ; do
     if test ! -d $DIR ; then
         mkdir $DIR
     fi
 done
-cd $EXAMPLE_DIR/bz
+cd $EXAMPLE_DIR/disp
 
 # check for executables
 for FILE in $BIN_LIST ; do
@@ -80,7 +80,7 @@ $ECHO " done"
 
 cat > thermo_control << EOF
  &INPUT_THERMO
-  what='plot_bz',
+  what='scf_disp',
  /
 EOF
 
@@ -112,7 +112,7 @@ Al  0.0   Al.pz-n-kjpaw_psl.1.0.0.UPF
 ATOMIC_POSITIONS alat
 Al  0.0000000   0.00000000   0.0
 K_POINTS AUTOMATIC
-4 4 4 1 1 1
+8 8 8 1 1 1
 EOF
 
 cat > ph_control << EOF
@@ -121,7 +121,7 @@ cat > ph_control << EOF
   prefix='aluminum',
   fildyn='al.dyn.xml',
   ldisp=.TRUE.
-  nq1=2, nq2=2, nq3=2,
+  nq1=4, nq2=4, nq3=4,
 /
 EOF
 

@@ -1,12 +1,11 @@
 The A1 structure has the face centered cubic Bravais lattice and one
 atom per cell.
 
-The reference directory show the outputs obtained with the following what
+The reference directory contains the outputs or postscript files: 
 
 bz :  Plot of the Brillouin zone and of the structure
 
 bands : plot of the band structure
 
 disp : plot of the phonon dispersion. Note that the experimental data
-      al.exp are read by modifying the file gnuplot.tmp.g1_disp
-
+       are read by modifying the file gnuplot.tmp.g1_disp
