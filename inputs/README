@@ -21,6 +21,7 @@ List of presently available structures and examples:
 struct. crystal fun  bz  bands  mur  phonon  el_const  piezo  thermal_exp  
 
 A1       fcc-Al  pz  *    *      *     *                ---                
+A2       bcc-Nb  pz  *                                  ---
 A3       hcp-Be  pz  *                                  ---
 A4       C       pz  *    *      *                       0
 
