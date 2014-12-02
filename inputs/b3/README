@@ -1,0 +1,4 @@
+The b3 structure is the zinc blende structure. 
+It has a face-centered cubic Bravais lattice and two atoms per cell. 
+When one atom is in the origin, the other is at (1/4,1/4,1/4) in 
+cartesian coordinates and units of alat.
