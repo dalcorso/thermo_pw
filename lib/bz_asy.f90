@@ -9,6 +9,7 @@ MODULE bz_asy_mod
     !
     USE kinds, ONLY : DP
     USE bz_form, ONLY : bz
+    USE bz_2d_form, ONLY : bz_2d
     IMPLICIT NONE
     PRIVATE
     SAVE
@@ -21,13 +22,13 @@ TYPE bz_asy
                                        ! plot
 END TYPE
    
-    PUBLIC bz_asy, allocate_bz_asy, init_bz_asy, find_letter_position
+    PUBLIC bz_asy, allocate_bz_asy, init_bz_asy, find_letter_position, &
+           allocate_2d_bz_asy, init_2d_bz_asy, find_2d_letter_position
 
 CONTAINS
 
 SUBROUTINE allocate_bz_asy( bz_struc, bz_asy_struc )
 IMPLICIT NONE
-INTEGER, PARAMETER :: DP=8
 TYPE(bz), INTENT(INOUT) :: bz_struc
 TYPE(bz_asy), INTENT(INOUT) :: bz_asy_struc
 !
@@ -36,6 +37,17 @@ ALLOCATE(bz_asy_struc%letter_position(bz_struc%nlett))
 !
 RETURN
 END SUBROUTINE allocate_bz_asy
+
+SUBROUTINE allocate_2d_bz_asy( bz_2d_struc, bz_asy_struc )
+IMPLICIT NONE
+TYPE(bz_2d), INTENT(INOUT) :: bz_2d_struc
+TYPE(bz_asy), INTENT(INOUT) :: bz_asy_struc
+!
+ALLOCATE(bz_asy_struc%visible(bz_2d_struc%nvertices))
+ALLOCATE(bz_asy_struc%letter_position(bz_2d_struc%nlett))
+!
+RETURN
+END SUBROUTINE allocate_2d_bz_asy
 
 SUBROUTINE init_bz_asy(bz_struc, bz_asy_struc)
 USE asy, ONLY : asy_proj
@@ -671,12 +683,82 @@ ELSEIF (ibz==16) THEN
    bz_asy_struc%letter_position(5)='NE'
    bz_asy_struc%letter_position(6)='NE'
 ELSE
-   WRITE(6,'("Brillouin zone type not available init_bz")')
-   STOP
+   CALL errore('init_2d_bz_asy', &
+                       ' 2d Brillouin zone type not available',1)
 ENDIF
 
 RETURN
 END SUBROUTINE init_bz_asy
+
+SUBROUTINE init_2d_bz_asy(bz_2d_struc, bz_asy_struc, ibrav_2d, celldm_2d)
+IMPLICIT NONE
+TYPE(bz_2d), INTENT(IN) :: bz_2d_struc
+TYPE(bz_asy), INTENT(INOUT) :: bz_asy_struc
+INTEGER, INTENT(IN) :: ibrav_2d
+REAL(DP), INTENT(IN) :: celldm_2d(3)
+
+bz_asy_struc%visible(:)=.TRUE.
+bz_asy_struc%letter_position(:)='N'
+!
+!
+IF (ibrav_2d==1) THEN
+!
+!  oblique lattice
+!
+   bz_asy_struc%letter_position(1)='S '
+   bz_asy_struc%letter_position(2)='S '
+   bz_asy_struc%letter_position(3)='S '
+   bz_asy_struc%letter_position(4)='N '
+!
+ELSEIF (ibrav_2d==2) THEN
+!
+!  rectangular lattice
+!
+   bz_asy_struc%letter_position(1)='S '
+   bz_asy_struc%letter_position(2)='SE'
+   bz_asy_struc%letter_position(3)='NE'
+   bz_asy_struc%letter_position(4)='N'
+!
+ELSEIF (ibrav_2d==3) THEN
+!
+!  centered rectangular lattice
+!
+   bz_asy_struc%letter_position(1)='S '
+   IF (celldm_2d(2) < 1.0_DP) THEN
+      bz_asy_struc%letter_position(2)='SE'
+      bz_asy_struc%letter_position(3)='SE'
+      bz_asy_struc%letter_position(4)='NE'
+      bz_asy_struc%letter_position(5)='NE'
+   ELSE
+      bz_asy_struc%letter_position(2)='N'
+      bz_asy_struc%letter_position(3)='SE'
+      bz_asy_struc%letter_position(4)='NE'
+      bz_asy_struc%letter_position(5)='NE'
+   END IF
+
+ELSEIF (ibrav_2d==4) THEN
+!
+!  square lattice
+!
+   bz_asy_struc%letter_position(1)='S '
+   bz_asy_struc%letter_position(2)='NE'
+   bz_asy_struc%letter_position(3)='SE'
+
+ELSEIF (ibrav_2d==5) THEN
+!
+!  hexagonal lattice
+!
+   bz_asy_struc%letter_position(1)='S '
+   bz_asy_struc%letter_position(2)='SE'
+   bz_asy_struc%letter_position(3)='NE'
+
+ELSE
+   CALL errore('init_2d_bz_asy', &
+                       ' 2d Brillouin zone type not available',1)
+ENDIF
+
+RETURN
+END SUBROUTINE init_2d_bz_asy
 
 SUBROUTINE find_letter_position(bz_struc, bz_asy_struc, letter, let_pos)
 !
@@ -706,6 +788,35 @@ CALL errore('find_letter_position','Letter not recognized '//TRIM(letter),1)
 
 RETURN
 END SUBROUTINE find_letter_position
+
+SUBROUTINE find_2d_letter_position(bz_2d_struc, bz_asy_struc, letter, let_pos)
+!
+!  This routine checks if among the labels of special points defined
+!  for each BZ there is the label letter and in that case it 
+!  returns the position of that label on the asy plot. It stops
+!  if the letter is not recognized.
+!
+IMPLICIT NONE
+TYPE(bz_2d), INTENT(IN) :: bz_2d_struc
+TYPE(bz_asy), INTENT(IN) :: bz_asy_struc
+CHARACTER(LEN=3), INTENT(OUT) :: let_pos
+CHARACTER(LEN=3), INTENT(IN) :: letter
+
+INTEGER :: i
+
+DO i=1, bz_2d_struc%nlett
+   IF ((letter(1:2) == bz_2d_struc%letter_list(i)(2:3) .AND. &
+         bz_2d_struc%letter_list(i)(1:1)/='g') .OR. &
+        (letter(1:3) == bz_2d_struc%letter_list(i)(1:3) )) THEN
+         let_pos = bz_asy_struc%letter_position(i)
+         RETURN
+   ENDIF
+ENDDO
+
+CALL errore('find_2d_letter_position','Letter not recognized '//TRIM(letter),1)
+
+RETURN
+END SUBROUTINE find_2d_letter_position
 
 
 END MODULE bz_asy_mod
