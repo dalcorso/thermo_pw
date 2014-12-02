@@ -1,0 +1,4 @@
+The b1 structure is the rock salt structure. 
+It has a fcc Bravais lattice and two atoms per cell. When one atom
+is in the origin, the other is in the center of the cubic
+cell (1/2,1/2,1/2) in cartesian coordinates and in units of alat.
