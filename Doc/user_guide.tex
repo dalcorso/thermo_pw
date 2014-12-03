@@ -173,8 +173,11 @@ combination of computer/operating system has not been tested.
 
 In order to remove \thermo\ from your \qe\ distribution, just enter in the
 \texttt{thermo\_pw} directory and give the command \texttt{make leave\_qe}.
-Then just remove the \texttt{thermo\_pw} directory.
-   
+Then just remove the \texttt{thermo\_pw} directory. Please be careful, the
+command \texttt{make leave\_qe} can be given only if you have already
+given the command \texttt{make join\_qe} otherwise it might scramble the
+\texttt{Makefiles} of \texttt{QE}.
+
 \subsection{Running \thermo}
 
 In order to use the \thermo\ code you need to create a file called

@@ -95,6 +95,10 @@ find_symmetry.o : ../../Modules/noncol.o
 find_symmetry.o : ../../Modules/recvec.o
 find_symmetry.o : ../../PW/src/pwcom.o
 find_symmetry.o : ../../PW/src/symm_base.o
+generate_k_along_lines_kz.o : ../../Modules/cell_base.o
+generate_k_along_lines_kz.o : ../../Modules/kind.o
+generate_k_along_lines_kz.o : ../../thermo_pw/lib/point_group.o
+generate_k_along_lines_kz.o : thermo_mod.o
 initialize_thermo_master.o : ../../Modules/kind.o
 initialize_thermo_master.o : thermo_mod.o
 initialize_thermo_work.o : ../../Modules/cell_base.o
@@ -192,13 +196,17 @@ plot_thermo.o : ../../Modules/kind.o
 plot_thermo.o : ../../Modules/mp_images.o
 plot_thermo.o : ../../thermo_pw/lib/gnuplot.o
 plot_thermo.o : thermo_mod.o
+plotband_sub.o : ../../Modules/cell_base.o
 plotband_sub.o : ../../Modules/constants.o
 plotband_sub.o : ../../Modules/io_global.o
+plotband_sub.o : ../../Modules/ions_base.o
 plotband_sub.o : ../../Modules/kind.o
 plotband_sub.o : ../../Modules/mp.o
 plotband_sub.o : ../../Modules/mp_images.o
+plotband_sub.o : ../../Modules/noncol.o
 plotband_sub.o : ../../PW/src/pwcom.o
 plotband_sub.o : ../../thermo_pw/lib/gnuplot.o
+plotband_sub.o : ../../thermo_pw/lib/point_group.o
 plotband_sub.o : thermo_mod.o
 polifit.o : ../../Modules/kind.o
 print_polarization.o : ../../Modules/cell_base.o
@@ -339,6 +347,8 @@ sym_band_sub.o : ../../Modules/wavefunctions.o
 sym_band_sub.o : ../../PW/src/buffers.o
 sym_band_sub.o : ../../PW/src/pwcom.o
 sym_band_sub.o : ../../PW/src/symm_base.o
+sym_band_sub.o : ../../thermo_pw/lib/point_group.o
+sym_band_sub.o : thermo_mod.o
 thermo_mod.o : ../../Modules/kind.o
 thermo_mod.o : ../../thermo_pw/lib/ph_freq_module.o
 thermo_mod.o : ../../thermo_pw/lib/phdos_module.o
@@ -397,6 +407,7 @@ thermo_summary.o : ../../Modules/mp_world.o
 thermo_summary.o : ../../Modules/noncol.o
 thermo_summary.o : ../../PW/src/pwcom.o
 thermo_summary.o : ../../PW/src/symm_base.o
+thermo_summary.o : ../../thermo_pw/lib/bz_2d_form.o
 thermo_summary.o : ../../thermo_pw/lib/space_groups.o
 thermo_summary.o : thermo_mod.o
 write_anhar.o : ../../Modules/constants.o
