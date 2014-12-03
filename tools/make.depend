@@ -1,2 +1,3 @@
+gener_2d_slab.o : ../../Modules/kind.o
 group_name.o : ../../thermo_pw/lib/space_groups.o
 group_number.o : ../../thermo_pw/lib/space_groups.o

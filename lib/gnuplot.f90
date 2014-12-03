@@ -28,7 +28,7 @@ MODULE gnuplot
            gnuplot_write_file_mul_data, gnuplot_write_file_mul_point, &
            gnuplot_write_file_mul_data_sum, gnuplot_write_command, &
            gnuplot_end, gnuplot_do_2dplot, gnuplot_start_2dplot, &
-           gnuplot_set_contour
+           gnuplot_set_contour, gnuplot_polygon, gnuplot_line 
 
 CONTAINS
 
@@ -525,6 +525,66 @@ DEALLOCATE(contour_color)
 
 RETURN
 END SUBROUTINE gnuplot_stop_2dplot
+
+SUBROUTINE gnuplot_line(x, y, lw, front, color)
+!
+!  write a line from (x(1), y(1)) to (x(2),y(2))
+!
+IMPLICIT NONE
+REAL(DP), INTENT(IN) :: x(2), y(2)
+CHARACTER(LEN=*), INTENT(IN) :: color, lw, front
+
+IF (ionode) THEN
+   IF (TRIM(front)=='front') THEN
+      WRITE(iun_gnuplot, &
+        '("set arrow from ",f12.6,"*xscale-xshift,",f12.6," to ",f12.6,"*xscale-xshift,",f12.6,&
+            &" nohead front lw ",a," lc rgb ",a)') x(1), y(1), x(2), y(2), &
+                              TRIM(lw), TRIM(color)
+   ELSE
+      WRITE(iun_gnuplot, &
+     '("set arrow from ",f12.6,"*xscale-xshift,",f12.6," to ",f12.6,"*xscale-xshift,",f12.6,&
+            &" nohead back lw ",a," lc rgb ",a)') x(1), y(1), x(2), y(2), &
+                               TRIM(lw), TRIM(color)
+   ENDIF
+ENDIF
+RETURN
+END SUBROUTINE gnuplot_line
+
+SUBROUTINE gnuplot_circle(x, y, radius, opacity, color)
+IMPLICIT NONE
+REAL(DP), INTENT(IN) :: x, y
+CHARACTER(LEN=*), INTENT(IN) :: radius, opacity, color
+
+IF (ionode) &
+   WRITE(iun_gnuplot, &
+     '("set obj circle at ",f12.6,"*xscale-xshift,",f12.6, " size ", a, &
+                     &" front fs solid ",a," noborder fc rgb ",a)') x, y, &
+                                        TRIM(radius), TRIM(opacity), TRIM(color)
+RETURN
+END SUBROUTINE gnuplot_circle
+
+
+SUBROUTINE gnuplot_polygon(n, x, y, opacity, color)
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: n
+REAL(DP), INTENT(IN) :: x(n), y(n)
+CHARACTER(LEN=*), INTENT(IN) :: opacity, color
+CHARACTER(LEN=512) :: fmt_str, aux
+INTEGER :: i
+fmt_str="set obj polygon from "
+DO i=1,n
+   WRITE(aux,'(f12.6,"*xscale-xshift,",f12.6," to")') x(i), y(i)
+   fmt_str=TRIM(fmt_str) // TRIM(aux)
+ENDDO
+WRITE(aux,'(f12.6,"*xscale-xshift,",f12.6, " behind fs solid ",a," noborder fc rgb ", a)') &
+                                             x(1), y(1), TRIM(opacity), TRIM(color)
+fmt_str=TRIM(fmt_str) // TRIM(aux)
+
+IF (ionode)  WRITE(iun_gnuplot, '(a)') TRIM(fmt_str)
+
+RETURN
+END SUBROUTINE gnuplot_polygon
+
 
 
 SUBROUTINE gnuplot_start(filename_gnu)

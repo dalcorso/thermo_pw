@@ -9,6 +9,7 @@ MODFLAGS= $(MOD_FLAG)../../iotk/src $(MOD_FLAG)../../Modules \
 IFLAGS=
 
 THERMOOBJS = \
+addusdens1d_so.o \
 allocate_thermo.o \
 bands_sub.o \
 bcast_thermo_input.o \
@@ -28,19 +29,25 @@ ev_xml.o \
 find_symmetry.o \
 initialize_thermo_work.o \
 initialize_thermo_master.o \
+local_dos1d_so.o \
 matdyn_sub.o \
 mur.o \
-polifit.o \
+plan_avg_sub.o \
 plot_bz.o \
 plot_anhar.o \
 plotband_sub.o \
+plot_2d_bz.o \
 plot_e_ke.o \
 plot_e_nk.o \
 plot_thermo.o \
 plot_mur.o \
+polifit.o \
 print_polarization.o \
+proj_band_structure.o \
 q2r_sub.o \
+read_state_densities.o \
 run_thermo_asyncronously.o \
+set_2d_bz_path.o \
 set_bz_path.o \
 set_elastic_cons_work.o \
 set_fft_mesh.o \

@@ -334,6 +334,12 @@ MODULE control_paths
   REAL(DP), ALLOCATABLE :: xqaux(:,:)     ! the initial and final points 
   REAL(DP), ALLOCATABLE :: wqauxr(:)      ! the weight for normal paths
   INTEGER, ALLOCATABLE  :: wqaux(:)       ! the number of points per line
+  INTEGER, ALLOCATABLE  :: nrap_plot_in(:)! the number of representations 
+                                          ! per line 
+  INTEGER, ALLOCATABLE :: rap_plot_in(:,:)! which representations per line
+  INTEGER, ALLOCATABLE :: nrap_plot(:)    ! number of representations per k
+                                          ! point
+  INTEGER, ALLOCATABLE :: rap_plot(:,:)   ! which representation per k point
   INTEGER               :: disp_nqs       ! total number of points to compute
   REAL(DP), ALLOCATABLE :: disp_q(:,:), disp_wq(:)  ! q path for interpolated
   INTEGER            :: npk_label         ! number of label points
@@ -366,6 +372,42 @@ MODULE control_bands
   LOGICAL  :: lsym           ! if .TRUE. does the symmetry analysis of the bands
 
 END MODULE control_bands
+
+MODULE control_2d_bands
+  USE kinds,  ONLY : DP
+  !
+  ! ... The variables needed to control the two dimensional band structure
+  !
+  SAVE
+
+  LOGICAL :: lprojpbs, &  ! if .TRUE. plot the projected band structure (PBS)
+             sym_divide, & ! if .TRUE. the bands belonging to different 
+                         ! irreps are ploted in different panels
+             identify_sur, & ! if .TRUE. identify the surface states
+             only_bands_plot ! if .TRUE. does not recalculate the bands
+
+  INTEGER :: nkz         ! the number of values of k_z used for the PBS
+  INTEGER :: sur_layers  ! number of surface layers
+  INTEGER :: nlayers     ! number of layers identified by the code
+  INTEGER :: surface1, surface2 ! tha surface layers
+  REAL(DP) :: gap_thr, & ! energy gap in the PBS
+              sur_thr    ! minimum percentage of charge to be a surface state
+
+  INTEGER, ALLOCATABLE  :: aux_ind_sur(:,:)
+  REAL(DP), ALLOCATABLE :: averag(:,:,:,:)      ! charge density on each layer 
+  REAL(DP), ALLOCATABLE :: vacuum(:,:,:)        ! charge on vacuum
+  LOGICAL, ALLOCATABLE  :: lsurface_state(:,:)  ! if .TRUE. a given state is 
+                                                ! a surface state
+  LOGICAL, ALLOCATABLE  :: lsurface_state_rap(:,:)  ! the same info but
+                                                ! divided for the different
+                                                ! representations 
+  LOGICAL :: force_bands ! if .TRUE. the bands are plotted in all cases
+  LOGICAL :: dump_states ! if .TRUE. dumps the planar average on each state
+                         !  on file
+  LOGICAL :: subtract_vacuum ! if .TRUE. the charge density of each state
+                         ! on vacuum is subtracted
+END MODULE control_2d_bands
+
 
 MODULE control_grun
 
@@ -413,6 +455,11 @@ MODULE control_gnuplot
                                   ! total energy at different k points
   CHARACTER(LEN=256) :: flpsgrun  ! the name of the postscript file with 
                                   ! the gruneisen parameters
+  CHARACTER(LEN=256) :: flpbs     ! the name of the file with the pbs
+
+  CHARACTER(LEN=256) :: flprojlayer ! the name of the file with the projections
+                                  ! of the wavefunctions on each layer
+
   CHARACTER(LEN=256) :: gnuplot_command ! the gnuplot command
 
   LOGICAL :: lgnuplot    ! set to false not to use gnuplot
