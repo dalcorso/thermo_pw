@@ -70,6 +70,7 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   USE cell_base,  ONLY : at, bg, celldm
   USE constants,  ONLY : RY_TO_THZ, RY_TO_CMM1, amu_ry
   USE symm_base,  ONLY : set_sym
+  USE thermo_sym, ONLY : code_group_save
   USE rap_point_group,  ONLY : code_group
 
   USE ifc,        ONLY : frc, atm, zeu, m_loc, &
@@ -127,7 +128,7 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   CHARACTER(LEN=6) :: int_to_char
   INTEGER            :: npk_label, nch, ndos
   CHARACTER(LEN=3), ALLOCATABLE :: letter(:)
-  INTEGER, ALLOCATABLE :: label_list(:)
+  INTEGER, ALLOCATABLE :: label_list(:), qcode_group(:), aux_ind(:)
   LOGICAL :: tend, terr, dos, check_file_exists
   !
 
@@ -233,6 +234,7 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   ALLOCATE ( w2(3*nat,nq) )
   ALLOCATE ( num_rap_mode(3*nat,nq) )
   ALLOCATE ( high_sym(nq) )
+  ALLOCATE ( qcode_group(nq) )
 
   IF (xmlifc) CALL set_sym(nat, tau, ityp, nspin_mag, m_loc, nr1_save, &
                                                       nr2_save, nr3_save )
@@ -311,6 +313,7 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
         CALL find_representations_mode_q(nat,ntyp,q(:,n), &
                     w2(:,n),z,tau,ityp,amass,name_rap_mode, &
                     num_rap_mode(:,n), nspin_mag)
+        qcode_group(n)=code_group
         IF (n==1) THEN
            code_group_old=code_group
         ELSE
@@ -328,13 +331,16 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
 !
               high_sym(n)= ((code_group/=code_group_old).AND..NOT. &
                                                         high_sym(n-1))
-              IF (dqmod > 1.d-3) dqmod_save=dqmod
+              dqmod_save= MAX(dqmod_save * 0.5_DP, dqmod)
            ELSE
               high_sym(n)=.TRUE.
            ENDIF
            code_group_old=code_group
         ENDIF
         DEALLOCATE(name_rap_mode)
+        write(6,'(2i5, 3f15.5,l5)') n, qcode_group(n), q(:,n), high_sym(n)
+     ELSEIF (lo_to_split) THEN
+        qcode_group(n)=code_group_save
      ENDIF
 
      IF (ionode.AND.iout.NE.0) CALL writemodes(nat,q(1,n),w2(1,n),z,iout)
@@ -365,15 +371,32 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   !  If the force constants are in the xml format we write also
   !  the file with the representations of each mode
   !
-  IF (flfrq.NE.' '.AND.xmlifc.AND..NOT.dos.AND.ionode) THEN
-     filename=TRIM(flfrq)//'.rap'
-     OPEN (unit=2,file=filename ,status='unknown',form='formatted')
-     WRITE(2, '(" &plot_rap nbnd_rap=",i6,", nks_rap=",i6," /")') 3*nat, nq
-     DO n=1, nq
-        WRITE(2,'(10x,3f10.6,l6)')  q(1,n), q(2,n), q(3,n), high_sym(n)
-        WRITE(2,'(6i10)') (num_rap_mode(i,n), i=1,3*nat)
-     END DO
-     CLOSE(unit=2)
+  IF (flfrq.NE.' '.AND.xmlifc.AND..NOT.dos) THEN
+     
+     ALLOCATE(aux_ind(nq))
+     aux_ind=0
+     CALL find_aux_ind_xk(q(1,1), q(1,2), aux_ind(2))
+     CALL find_aux_ind_xk(q(1,nq), q(1,nq-1), aux_ind(nq-1))
+     DO n=2,nq-1
+        write(6,'(3f15.5,3l5)') q(:,n), high_sym(n-1), high_sym(n), high_sym(n+1)
+        IF (high_sym(n).AND..NOT.high_sym(n+1)) &
+           CALL find_aux_ind_xk(q(1,n), q(1,n+1), aux_ind(n+1))
+        IF (high_sym(n).AND..NOT.high_sym(n-1)) &
+           CALL find_aux_ind_xk(q(1,n), q(1,n-1), aux_ind(n-1))
+     ENDDO
+
+     IF (ionode) THEN
+        filename=TRIM(flfrq)//'.rap'
+        OPEN (unit=2,file=filename ,status='unknown',form='formatted')
+        WRITE(2, '(" &plot_rap nbnd_rap=",i6,", nks_rap=",i6," /")') 3*nat, nq
+        DO n=1, nq
+           WRITE(2,'(10x,3f10.6,l6,2i6)') q(1,n), q(2,n), q(3,n), high_sym(n),&
+                       qcode_group(n), aux_ind(n)                   
+           WRITE(2,'(6i10)') (num_rap_mode(i,n), i=1,3*nat)
+        END DO
+        CLOSE(unit=2)
+     ENDIF
+     DEALLOCATE(aux_ind)
   END IF
   !
   !  write the dos file
@@ -449,7 +472,8 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   DEALLOCATE (w2) 
   DEALLOCATE (dyn) 
   DEALLOCATE (freq)
-  DEALLOCATE (num_rap_mode)
+  IF (ALLOCATED(num_rap_mode)) DEALLOCATE (num_rap_mode)
+  IF (ALLOCATED(qcode_group)) DEALLOCATE (qcode_group)
   DEALLOCATE (high_sym)
   DEALLOCATE (q)
   DEALLOCATE (wq)
@@ -1348,7 +1372,7 @@ SUBROUTINE find_representations_mode_q ( nat, ntyp, xq, w2, u, tau, ityp, &
   USE symm_base,  ONLY : find_sym, s, sr, ftau, irt, nsym, &
                          nrot, t_rev, time_reversal, sname, copy_sym, &
                          s_axis_to_cart
-  USE rap_point_group, ONLY : code_group, gname
+  USE rap_point_group,  ONLY : code_group, gname
 
   IMPLICIT NONE
   INTEGER, INTENT(IN) :: nat, ntyp, nspin_mag
@@ -1401,7 +1425,6 @@ SUBROUTINE find_representations_mode_q ( nat, ntyp, xq, w2, u, tau, ityp, &
   ELSE
      CALL find_group(nsymq,sr,gname,code_group)
   ENDIF
-
   RETURN
   END SUBROUTINE find_representations_mode_q
 
