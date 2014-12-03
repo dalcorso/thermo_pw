@@ -48,7 +48,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   compute_lc=.TRUE.
   IF (part == 1) THEN
      SELECT CASE (TRIM(what))
-        CASE ( 'scf', 'scf_bands', 'scf_ph', 'scf_disp' )
+        CASE ( 'scf', 'scf_bands', 'scf_2d_bands', 'scf_ph', 'scf_disp' )
            IF (ALLOCATED(energy_geo)) compute_lc=.FALSE.
            IF (compute_lc) THEN
               ALLOCATE(alat_geo(ngeo))
@@ -63,7 +63,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
                  ltherm = .TRUE.
                  CALL allocate_thermodynamics()
               ENDIF
-              IF (what=='scf_bands') lbands_syn_1=.TRUE.
+              IF (what=='scf_bands'.OR.what=='scf_2d_bands') lbands_syn_1=.TRUE.
            ENDIF
         CASE ( 'scf_ke') 
            nwork= nke * nkeden
@@ -245,8 +245,8 @@ SUBROUTINE initialize_thermo_work(nwork, part)
 
   IF (part == 1) THEN
      SELECT CASE (TRIM(what))
-        CASE ('scf', 'scf_bands', 'scf_ph', 'scf_disp', 'elastic_constants', &
-                             'piezoelectric_tensor','polarization')
+        CASE ('scf', 'scf_bands', 'scf_2d_bands', 'scf_ph', 'scf_disp', &
+            'elastic_constants', 'piezoelectric_tensor','polarization')
         CASE ('scf_ke', 'scf_nk', 'mur_lc', 'mur_lc_bands', 'mur_lc_ph', &
               'mur_lc_disp', 'mur_lc_t', 'mur_lc_elastic_constants', &
                           'mur_lc_piezoelectric_tensor', &

@@ -31,10 +31,13 @@ leave_qe:
 	mv ../install/makedeps.sh .
 	mv makedeps.sh_qe ../install/makedeps.sh
 
-clean: thermo_pw_clean
+clean: thermo_tools_clean thermo_pw_clean example_clean doc_clean
 
 thermo_pw_clean:
 	( cd src ; $(MAKE) clean )
+
+thermo_tools_clean:
+	( cd tools ; $(MAKE) clean )
 
 examples_clean:
 	if test -d examples ; then \

@@ -27,6 +27,7 @@ do_berry.o \
 ev_sub.o \
 ev_xml.o \
 find_symmetry.o \
+generate_k_along_lines_kz.o \
 initialize_thermo_work.o \
 initialize_thermo_master.o \
 local_dos1d_so.o \

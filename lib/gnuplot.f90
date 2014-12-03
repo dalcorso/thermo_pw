@@ -46,7 +46,7 @@ REAL(DP), INTENT(IN) :: xmin, xmax, ymin, ymax
 
 IF (ionode) THEN
    WRITE(iun_gnuplot,'("set encoding iso_8859_15")')
-   WRITE(iun_gnuplot,'("set terminal postscript enhanced solid color ""Helvetica"" 20")')
+   WRITE(iun_gnuplot,'("set terminal postscript enhanced solid color ""AvantGarde-Book"" 20")')
    WRITE(iun_gnuplot,'("set output """, a, """")') TRIM(filename) 
    WRITE(iun_gnuplot,*)
    WRITE(iun_gnuplot,'("set key off")')

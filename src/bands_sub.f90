@@ -36,8 +36,9 @@ SUBROUTINE bands_sub()
      CALL punch_band_2d(filband, spin_component)
   ELSE
      CALL write_bands(filband, spin_component)
-     IF (lsym) CALL sym_band_sub(filband,spin_component)
+     CALL sym_band_sub(filband,spin_component)
   END IF
+  CALL close_files(.TRUE.)
   CALL clean_pw(.FALSE.)
 
   CALL print_clock('bands')

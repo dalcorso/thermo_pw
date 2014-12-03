@@ -46,7 +46,10 @@ PROGRAM thermo_pw
   ! ...   piezoelectric_tensor : piezoelectric tensor at zero temperature
   ! ...   mur_lc_piezoelectric_tensor : piezoelectric tensor at zero temperature
   ! ...               at the minimum of the Murnaghan equation 
-  ! ...
+  ! ...   scf_2d_bands : this is as scf_bands, but the cell is assumed to be 
+  ! ...                  a slab and  the default path is chosen in the 2d 
+  ! ...                  Brillouin zone. This option can be used also to 
+  ! ...                  calculate the projected bulk band structure.
   ! ...
   USE kinds,            ONLY : DP
   USE check_stop,       ONLY : check_stop_init

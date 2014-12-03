@@ -21,7 +21,10 @@ SUBROUTINE deallocate_thermo()
                              alphaf_t, betaf_t, gammaf_t, cvf_t, cpf_t, b0f_s
   USE grun_anharmonic,  ONLY : betab
   USE control_paths,    ONLY : xqaux, wqaux, letter, label_list, letter_path, &
-                               label_disp_q, disp_q, disp_wq
+                               label_disp_q, disp_q, disp_wq, nrap_plot_in,   &
+                               rap_plot_in, nrap_plot, rap_plot
+  USE control_2d_bands, ONLY : averag, vacuum, aux_ind_sur
+
   USE control_conv,     ONLY : ke, keden, nk_test, sigma_test
   USE elastic_constants, ONLY : epsilon_geo, sigma_geo, epsilon_voigt
 
@@ -70,6 +73,15 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (label_disp_q) )    DEALLOCATE(label_disp_q)
   IF ( ALLOCATED (disp_q) )          DEALLOCATE(disp_q)
   IF ( ALLOCATED (disp_wq) )         DEALLOCATE(disp_wq)
+
+  IF ( ALLOCATED (nrap_plot_in) )    DEALLOCATE(nrap_plot_in)
+  IF ( ALLOCATED (rap_plot_in) )     DEALLOCATE(rap_plot_in)
+  IF ( ALLOCATED (nrap_plot) )       DEALLOCATE(nrap_plot)
+  IF ( ALLOCATED (rap_plot) )        DEALLOCATE(rap_plot)
+
+  IF ( ALLOCATED (averag) )          DEALLOCATE(averag)
+  IF ( ALLOCATED (vacuum) )          DEALLOCATE(vacuum)
+  IF ( ALLOCATED (aux_ind_sur) )     DEALLOCATE(aux_ind_sur)
 
   IF ( ALLOCATED (epsilon_voigt) )   DEALLOCATE(epsilon_voigt)
   IF ( ALLOCATED (epsilon_geo) )     DEALLOCATE(epsilon_geo)

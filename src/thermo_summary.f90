@@ -159,9 +159,9 @@ SUBROUTINE thermo_summary()
 !  We now check the point group and find the Laue class, so we write
 !  on output the form of the tensor that is calculated
 !
-  dfftp%nr1=288
-  dfftp%nr2=288
-  dfftp%nr3=288
+  dfftp%nr1=1024
+  dfftp%nr2=1024
+  dfftp%nr3=1024
   fft_fact=1
   CALL find_symmetry(fft_fact)
   CALL find_group(nsym,sr,gname,code_group)
