@@ -322,7 +322,7 @@ PROGRAM thermo_pw
               IF (.NOT.ALLOCATED(ph_freq_save)) ALLOCATE(ph_freq_save(ngeo))
               CALL matdyn_sub(1,igeom)
               CALL simple_plot('_dos', fldos, flpsdos, 'frequency (cm^{-1})', &
-                       'DOS (states / cm^{-1} / cell)', 'red', freqmin, freqmax, &
+                       'DOS (states / cm^{-1} / cell)', '"red"', freqmin, freqmax, &
                             0.0_DP, 0.0_DP)
            ENDIF
 !

@@ -13,7 +13,7 @@ SUBROUTINE plot_thermo(igeom)
 USE kinds,           ONLY : DP
 USE control_gnuplot, ONLY : flgnuplot, flpstherm, gnuplot_command, lgnuplot
 USE gnuplot,         ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
-                            gnuplot_ylabel, &
+                            gnuplot_ylabel, gnuplot_write_command, &
                             gnuplot_xlabel, gnuplot_write_file_mul_data, &
                             gnuplot_set_fact
 USE control_thermo,  ONLY : fltherm
@@ -43,21 +43,24 @@ CALL gnuplot_xlabel('T (K)', .FALSE.)
 CALL gnuplot_ylabel('Vibrational energy (kJ / N / mol)',.FALSE.) 
 CALL gnuplot_set_fact(1313.3130_DP, .FALSE.) 
 
-CALL gnuplot_write_file_mul_data(fltherm,1,2,'red',.TRUE.,.FALSE.,.FALSE.)
-CALL gnuplot_write_file_mul_data(filename,1,2,'blue',.FALSE.,.TRUE.,.FALSE.)
+CALL gnuplot_write_command('color_red="red"',.FALSE.)
+CALL gnuplot_write_command('color_blue="blue"',.FALSE.)
+
+CALL gnuplot_write_file_mul_data(fltherm,1,2,'color_red',.TRUE.,.FALSE.,.FALSE.)
+CALL gnuplot_write_file_mul_data(filename,1,2,'color_blue',.FALSE.,.TRUE.,.FALSE.)
 
 CALL gnuplot_ylabel('Vibrational free energy (kJ / N / mol)', .FALSE.) 
-CALL gnuplot_write_file_mul_data(fltherm,1,3,'red',.TRUE.,.FALSE., .FALSE.)
-CALL gnuplot_write_file_mul_data(filename,1,3,'blue',.FALSE.,.TRUE., .FALSE.)
+CALL gnuplot_write_file_mul_data(fltherm,1,3,'color_red',.TRUE.,.FALSE., .FALSE.)
+CALL gnuplot_write_file_mul_data(filename,1,3,'color_blue',.FALSE.,.TRUE., .FALSE.)
 
 CALL gnuplot_set_fact(1313313.0_DP, .FALSE.) 
 CALL gnuplot_ylabel('Entropy (J / K / N / mol))',.FALSE.) 
-CALL gnuplot_write_file_mul_data(fltherm,1,4,'red',.TRUE.,.FALSE.,.FALSE.)
-CALL gnuplot_write_file_mul_data(filename,1,4,'blue',.FALSE.,.TRUE.,.FALSE.)
+CALL gnuplot_write_file_mul_data(fltherm,1,4,'color_red',.TRUE.,.FALSE.,.FALSE.)
+CALL gnuplot_write_file_mul_data(filename,1,4,'color_blue',.FALSE.,.TRUE.,.FALSE.)
 
 CALL gnuplot_ylabel('Heat capacity C_v (J / K / N / mol)',.FALSE.) 
-CALL gnuplot_write_file_mul_data(fltherm,1,5,'red',.TRUE.,.FALSE.,.FALSE.)
-CALL gnuplot_write_file_mul_data(filename,1,5,'blue',.FALSE.,.TRUE.,.FALSE.)
+CALL gnuplot_write_file_mul_data(fltherm,1,5,'color_red',.TRUE.,.FALSE.,.FALSE.)
+CALL gnuplot_write_file_mul_data(filename,1,5,'color_blue',.FALSE.,.TRUE.,.FALSE.)
 
 CALL gnuplot_end()
 
