@@ -85,7 +85,7 @@ SUBROUTINE deallocate_thermo()
 
   IF ( ALLOCATED (epsilon_voigt) )   DEALLOCATE(epsilon_voigt)
   IF ( ALLOCATED (epsilon_geo) )     DEALLOCATE(epsilon_geo)
-  IF ( ALLOCATED (sigma_geo) )      DEALLOCATE(sigma_geo)
+  IF ( ALLOCATED (sigma_geo) )       DEALLOCATE(sigma_geo)
   ! 
   RETURN
   !

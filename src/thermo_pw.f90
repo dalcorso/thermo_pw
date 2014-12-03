@@ -95,6 +95,7 @@ PROGRAM thermo_pw
                                trd_ht, rd_ht, cell_units, outdir
   USE control_mur,      ONLY : vmin, b0, b01, emin
   USE thermo_mod,       ONLY : what, ngeo, alat_geo, omega_geo, energy_geo, ntry
+  USE control_2d_bands, ONLY : only_bands_plot
   USE ph_restart,       ONLY : destroy_status_run
   USE save_ph,          ONLY : clean_input_variables
   USE output,           ONLY : fildyn
@@ -209,21 +210,26 @@ PROGRAM thermo_pw
 !
 !   do the self consistent calculation at the new lattice constant
 !
-        CALL do_pwscf(exit_status, .TRUE.)
+        IF (.NOT.only_bands_plot) CALL do_pwscf(exit_status, .TRUE.)
         IF (lbands_syn_1) THEN
 !
 !   do the band calculation after setting the path
 !
-           CALL set_paths_disp()
-           CALL set_k_points()
-           IF (nbnd_bands > nbnd) nbnd = nbnd_bands
-           CALL do_pwscf(exit_status, .FALSE.)
-           nspin0=nspin
-           IF (nspin==4) nspin0=1
-           DO spin_component = 1, nspin0
-              CALL bands_sub()
+           IF (.NOT.only_bands_plot) THEN
+              CALL set_paths_disp()
+              CALL set_k_points()
+              IF (nbnd_bands > nbnd) nbnd = nbnd_bands
+              CALL do_pwscf(exit_status, .FALSE.)
+              nspin0=nspin
+              IF (nspin==4) nspin0=1
+              DO spin_component = 1, nspin0
+                 CALL bands_sub()
+                 CALL plotband_sub(1,1,' ')
+              ENDDO
+           ELSE
+              CALL read_minimal_info(.TRUE.)
               CALL plotband_sub(1,1,' ')
-           ENDDO
+           ENDIF
         ENDIF
      ENDIF
   END IF
