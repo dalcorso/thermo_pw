@@ -59,17 +59,22 @@ routines and writes the same files. If needed, these files could be read
 by the codes of the \qe\ package. 
 
 \thermo\ has the following directory structure, contained in a subdirectory 
-\texttt{THERMO\_PW/} of the main \qe\ tree:
+\texttt{thermo\_pw/} that should be put in the main directory of the \qe\ tree:
 
 \begin{tabular}{ll}
-\texttt{Doc/}      & : contains the user\_guide and input data description \\
+\texttt{Doc/}      & : contains this user\_guide \\
 \texttt{examples/} & : some running examples \\
-\texttt{lib/}      & : source files for modules used by \thermo\ calculations \\
-\texttt{src/}      & : source files for \thermo\ calculations \\
+\texttt{inputs/}   & : a collection of useful inputs \\
+\texttt{lib/}      & : source files for modules used by \thermo\ \\
+\texttt{src/}      & : source files for \thermo\ \\
+\texttt{tools/}    & : source files for auxiliary tools \\
 \end{tabular}\\
 
 The \thermo\ package can perform the following types of calculations:
 \begin{itemize}
+\item Plot of the Brillouin zone (the structure can be seen by reading the
+input of \thermo\ by the \texttt{XCrysDens} program).
+
 \item Computation of the total energy.
 
 \item Total energy as a function of the kinetic energy cut-off.
@@ -105,6 +110,9 @@ Average Gruneisen parameter as a function of temperature.
 \item Frozen ions and total elastic constants.
 
 \item Frozen ions and total piezoelectric tensor.
+
+\item Surface band structure identification and plot of the projected bulk
+band structure.
 \end{itemize}
 
 \thermo\ can run in parallel using all the parallel modes available in
@@ -137,17 +145,14 @@ Once \qe\ is correctly configured, you need to download the \PHonon\
 package. This can be done automatically just typing \texttt{make ph}, from 
 the main \qe\ directory.
 
-Then you need to create the directory \texttt{thermo\_pw} in the
-main \qe\ directory. 
-%If available for the version of QE that you are using you
-%can download the file \texttt{thermo\_pw.tar.gz} and copy it in the
-%main \qe\ directory. The command \texttt{tar -xzvf thermo\_pw.tar.gz}
-%creates the \texttt{thermo\_pw} directory.
-Presently \texttt{thermo\_pw} works only with the SVN version of \qe, 
-it is not compatible with the current 5.0.3 version.
-The \texttt{thermo\_pw} directory can be downloaded as described at
-the web page: \texttt{http://www.qe-forge.org/gf/project/thermo\_pw/scmcvs/?}
-\texttt{action=AccessInfo}.
+\texttt{Thermo\_pw.0.1.0.tar.gz} can be downloaded from the 
+\texttt{qe-forge} website at \texttt{http://www.qe-} \texttt{forge.org/gf/project/thermo\_pw/frs/}. This version is compatible with \qe\ 5.1.1
+but there is no version of \texttt{thermo\_pw} compatible with previous
+versions.
+The CVS version of the \texttt{thermo\_pw} directory can be downloaded as 
+described at
+the web page: \texttt{http://www.qe-} \texttt{forge.org/gf/project/thermo\_pw/scmcvs/?action=AccessInfo}.
+The CVS version of \texttt{thermo\_pw} works only with the SVN version of \qe. 
 
 \subsection{Compiling}
 
@@ -157,7 +162,7 @@ directory and give the command \texttt{make join\_qe}. This command exchanges
 the files contained in \texttt{thermo\_pw} with those of the \qe\ package.
 Typing \texttt{make thermo\_pw} from the root \qe\ directory, or \texttt{make} 
 from the \texttt{thermo\_pw}\ directory, produces the executable
-\texttt{THERMO\_PW/src/thermo\_pw.x} that is linked in the 
+\texttt{thermo\_pw/src/thermo\_pw.x} that is linked in the 
 \qe\ \texttt{bin/} directory. Note that you need to compile \texttt{pw.x},
 \texttt{ph.x}, and \texttt{pp.x} before \texttt{thermo\_pw}.
 \thermo\ has been written on a PC with Linux operating system using the
@@ -360,7 +365,7 @@ default. The following variables control the plot:
 lasymptote  : if .TRUE. asymptote is called from within the program
               and the pdf file with a plot of the BZ is produced
               Default: logical .FALSE.
-flasy       : initial part of the name of the files where asymptore script
+flasy       : initial part of the name of the files where asymptote script
               is written, and of the name of the pdf file.
               Default: character(len=*) 'asy_tmp'
 asymptote_command  : the command that invokes asymptote and produces the 
@@ -371,7 +376,15 @@ npx         : maximum size of the supercell used to plot the Brillouin
               to double it increase the default until the error disappears.
               Default: integer 8
 \end{verbatim}
-
+The structure of the solid can be seen using the \texttt{xcrysden} code
+that can read the input file of \texttt{pw.x}. You can find the code at
+{http://www.xcrysden.org/}. \thermo\ produces also a file in the
+\texttt{xsf} format called \texttt{prefix.xsf}, where the variable 
+\texttt{prefix}
+is given in the input of \texttt{pw.x}. This can be useful when
+the nonequivalents atomic positions and the space group are given in the input
+of \texttt{pw.x}. To see an \texttt{xsf} file, give the command
+\texttt{xcrysden --xsf file.xsf}.
 
 \subsection{\texttt{what='scf\_ph'}}
 With this option the code makes a phonon calculation at a single {\bf q} 
