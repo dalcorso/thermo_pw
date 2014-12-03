@@ -28,7 +28,8 @@ MODULE gnuplot
            gnuplot_write_file_mul_data, gnuplot_write_file_mul_point, &
            gnuplot_write_file_mul_data_sum, gnuplot_write_command, &
            gnuplot_end, gnuplot_do_2dplot, gnuplot_start_2dplot, &
-           gnuplot_set_contour, gnuplot_polygon, gnuplot_line 
+           gnuplot_set_contour, gnuplot_polygon, gnuplot_line,   &
+           gnuplot_put_label
 
 CONTAINS
 
@@ -141,6 +142,33 @@ IF (ionode) WRITE(iun_gnuplot, frt)  TRIM(ws), xcoord, ycoord
 
 RETURN
 END SUBROUTINE gnuplot_write_label
+
+SUBROUTINE gnuplot_put_label(xcoord, ycoord, tag, label, comment, where_lab)
+!
+!  this routine writes only the label, without any transformation
+!
+IMPLICIT NONE
+REAL(DP) :: xcoord, ycoord
+INTEGER, INTENT(IN) :: tag
+CHARACTER(LEN=*), OPTIONAL :: where_lab
+CHARACTER(LEN=*) :: label
+CHARACTER(LEN=256) :: frt, whel
+INTEGER :: lens
+LOGICAL :: comment
+
+lens=LEN_TRIM(label)
+IF (PRESENT(where_lab)) THEN
+   whel=' '//TRIM(where_lab)
+ELSE
+   whel=' center'
+ENDIF
+frt='("set label ",i7," """,a,""" at ", f12.4,"*xscale-xshift,",f12.4,a)'
+IF (comment) frt = '# ' // TRIM(frt)
+
+IF (ionode) WRITE(iun_gnuplot, frt)  tag, TRIM(label),  xcoord, ycoord, TRIM(whel)
+
+RETURN
+END SUBROUTINE gnuplot_put_label
 
 SUBROUTINE gnuplot_write_label_yl(xcoord, ylabel, label, comment)
 !
