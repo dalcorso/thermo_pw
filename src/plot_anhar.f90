@@ -41,9 +41,9 @@ CALL gnuplot_start(gnu_filename)
 
 filename=TRIM(flpsanhar)
 IF (tmin /= 1.0_DP) THEN
-   CALL gnuplot_write_header(filename, tmin, tmax, 0.0_DP, 0.0_DP ) 
+   CALL gnuplot_write_header(filename, tmin, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
 ELSE
-   CALL gnuplot_write_header(filename, 0.0_DP, tmax, 0.0_DP, 0.0_DP ) 
+   CALL gnuplot_write_header(filename, 0.0_DP, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
 ENDIF
 
 filename=TRIM(flanhar)//'_ph'

@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2014 Andrea Dal Corso group
+! Copyright (C) 2014 Andrea Dal Corso 
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -16,7 +16,7 @@ USE kinds,           ONLY : DP
 USE control_gnuplot, ONLY : flgnuplot, gnuplot_command, lgnuplot
 USE gnuplot,         ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
                             gnuplot_write_file_data, gnuplot_ylabel, &
-                            gnuplot_xlabel
+                            gnuplot_xlabel, gnuplot_write_command
 USE mp_images,       ONLY : root_image, my_image_id
 USE io_global,       ONLY : ionode
 
@@ -36,12 +36,13 @@ gnu_filename=TRIM(flgnuplot)//TRIM(ext)
 CALL gnuplot_start(gnu_filename)
 
 filename=TRIM(psfilename)
-CALL gnuplot_write_header(filename, xmin, xmax, ymin, ymax ) 
+CALL gnuplot_write_header(filename, xmin, xmax, ymin, ymax, 1.0_DP ) 
 
 CALL gnuplot_ylabel(TRIM(ylabel), .FALSE.) 
 CALL gnuplot_xlabel(TRIM(xlabel), .FALSE.) 
+CALL gnuplot_write_command('plot_width=2',.FALSE.)
 
-CALL gnuplot_write_file_data(data_filename,colore,.TRUE.,.TRUE., .FALSE.)
+CALL gnuplot_write_file_data(data_filename,'plot_width',colore,.TRUE.,.TRUE., .FALSE.)
 
 CALL gnuplot_end()
 

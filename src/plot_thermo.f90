@@ -34,9 +34,9 @@ gnu_filename=TRIM(flgnuplot)//'_therm'
 CALL gnuplot_start(gnu_filename)
 
 IF (tmin ==1._DP) THEN
-   CALL gnuplot_write_header(flpstherm, 0.0_DP, tmax, 0.0_DP, 0.0_DP ) 
+   CALL gnuplot_write_header(flpstherm, 0.0_DP, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
 ELSE
-   CALL gnuplot_write_header(flpstherm, tmin, tmax, 0.0_DP, 0.0_DP ) 
+   CALL gnuplot_write_header(flpstherm, tmin, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
 ENDIF
 filename=TRIM(fltherm)//'_ph'
 CALL gnuplot_xlabel('T (K)', .FALSE.) 

@@ -38,7 +38,7 @@ gnu_filename=TRIM(flgnuplot)//'_keconv'
 CALL gnuplot_start(gnu_filename)
 
 filename=TRIM(flpskeconv)
-CALL gnuplot_write_header(filename, ke(1), ke(nke), 0.0_DP, 0.0_DP ) 
+CALL gnuplot_write_header(filename, ke(1), ke(nke), 0.0_DP, 0.0_DP, 1.0_DP ) 
 
 CALL gnuplot_xlabel('Kinetic energy (Ry)',.FALSE.) 
 CALL gnuplot_ylabel('Total energy (mRy)',.FALSE.) 

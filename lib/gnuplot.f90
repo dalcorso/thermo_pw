@@ -28,22 +28,25 @@ MODULE gnuplot
            gnuplot_write_file_mul_data, gnuplot_write_file_mul_point, &
            gnuplot_write_file_mul_data_sum, gnuplot_write_command, &
            gnuplot_end, gnuplot_do_2dplot, gnuplot_start_2dplot, &
-           gnuplot_set_contour, gnuplot_polygon, gnuplot_line,   &
-           gnuplot_put_label
+           gnuplot_set_contour, gnuplot_polygon, &
+           gnuplot_put_label, gnuplot_circle, &
+           gnuplot_line, gnuplot_print_objects
 
 CONTAINS
 
-SUBROUTINE gnuplot_write_header(filename, xmin, xmax, ymin, ymax)
+SUBROUTINE gnuplot_write_header(filename, xmin, xmax, ymin, ymax, xscale)
 !
 !  This routine sets the dimensions of the plot. It recives:
 !  filename : the name of the postscript file where the gnuplot script writes
 !  xmin, xmax : the minimum and maximum x values of the plot
 !  ymin, ymax : the minimum and maximum y values of the plot
-!  
+!  xscale : an optional multiplicative factor for all the x coordinate,
+!           to change the units. It is a comment, must be activated in the
+!           script 
 !
 IMPLICIT NONE
 CHARACTER(LEN=*) :: filename
-REAL(DP), INTENT(IN) :: xmin, xmax, ymin, ymax
+REAL(DP), INTENT(IN) :: xmin, xmax, ymin, ymax, xscale
 
 IF (ionode) THEN
    WRITE(iun_gnuplot,'("set encoding iso_8859_15")')
@@ -51,11 +54,14 @@ IF (ionode) THEN
    WRITE(iun_gnuplot,'("set output """, a, """")') TRIM(filename) 
    WRITE(iun_gnuplot,*)
    WRITE(iun_gnuplot,'("set key off")')
+   WRITE(iun_gnuplot,'("#xscale=",f15.6)') xscale
+   WRITE(iun_gnuplot,'("xscale=1.0")') 
+   WRITE(iun_gnuplot,'("xshift=0.0")') 
 
    IF (xmin /= xmax) THEN
       WRITE(iun_gnuplot,'("xmin=",f15.6)') xmin
       WRITE(iun_gnuplot,'("xmax=",f15.6)') xmax
-      WRITE(iun_gnuplot,'("set xrange [xmin:xmax]")') 
+      WRITE(iun_gnuplot,'("set xrange [xmin*xscale-xshift:xmax*xscale-xshift]")') 
    ENDIF
    IF (ymin /= ymax) THEN
       WRITE(iun_gnuplot,'("ymin=",f15.6)') ymin
@@ -81,8 +87,8 @@ CHARACTER(LEN=*) :: color, pos
 CHARACTER(LEN=256) :: frt
 LOGICAL :: comment
 
-frt='("set arrow from", f12.4, ",ymin to ", f12.4,&
-                 & ",ymax nohead ",a," lw ",i3, " lc rgb """,a,"""")'
+frt='("set arrow from", f12.4, "*xscale-xshift,ymin to ", f12.4,&
+                 & "*xscale-xshift,ymax nohead ",a," lw ",i3, " lc rgb """,a,"""")'
 IF (comment) frt = '# ' // TRIM(frt)
 IF (ionode) &
 WRITE( iun_gnuplot, frt ) xcoord, xcoord, TRIM(pos), linewidth, TRIM(color)
@@ -98,7 +104,7 @@ CHARACTER(LEN=*) :: color, pos
 CHARACTER(LEN=256) :: frt
 LOGICAL :: comment
 
-frt='("set arrow from xmin,", f12.4, " to xmax,", &
+frt='("set arrow from xmin*xscale-xshift,", f12.4, " to xmax*xscale-xshift,", &
              & f12.4," nohead ",a," lw ",i3," lc rgb """,a,"""")'
 IF (comment) frt = '# ' // TRIM(frt)
 IF (ionode) &
@@ -135,7 +141,7 @@ ELSE
    ws=label
 ENDIF
 
-frt='("set label """,a,""" at ", f12.4,",",f12.4," center")'
+frt='("set label """,a,""" at ", f12.4,"*xscale-xshift,",f12.4," center")'
 IF (comment) frt = '# ' // TRIM(frt)
 
 IF (ionode) WRITE(iun_gnuplot, frt)  TRIM(ws), xcoord, ycoord
@@ -218,8 +224,12 @@ CHARACTER(LEN=*), INTENT(IN) :: label
 CHARACTER(LEN=256) :: frt
 LOGICAL :: comment
 
-frt='("set xlabel """,a,"""")'
-IF (comment) frt = '# ' // TRIM(frt)
+frt='set xlabel """,a,"""")'
+IF (comment) THEN
+   frt = '("# ' // TRIM(frt)
+ELSE
+   frt = '(" ' // TRIM(frt)
+ENDIF
 
 IF (ionode.AND. label /=' ') WRITE(iun_gnuplot, frt) TRIM(label)
 
@@ -244,8 +254,7 @@ IMPLICIT NONE
 REAL(DP), INTENT(IN) :: xstart, delta, xend
 LOGICAL, INTENT(IN) :: comment
 CHARACTER(LEN=256) :: frt
-
-WRITE(frt, '("set xtics ",f11.6,",",f11.6,",",f11.6)') xstart, delta, xend 
+WRITE(frt, '("set xtics ",f11.6,"*xscale-xshift,",f11.6,"*xscale,",f11.6,"*xscale-xshift")') xstart, delta, xend 
 IF (comment) frt = '# ' // TRIM(frt)
 
 IF (ionode) WRITE(iun_gnuplot, '(a)') TRIM(frt) 
@@ -259,7 +268,7 @@ REAL(DP), INTENT(IN) :: ystart, delta, yend
 LOGICAL, INTENT(IN) :: comment
 CHARACTER(LEN=256) :: frt
 
-WRITE(frt, '("set ytics ",f8.2,",",f8.6,",",f8.2)') ystart, delta, yend 
+WRITE(frt, '("set ytics ",f10.5,",",f10.5,",",f10.5)') ystart, delta, yend 
 IF (comment) frt = '# ' // TRIM(frt)
 
 IF (ionode) WRITE(iun_gnuplot, '(a)') TRIM(frt) 
@@ -322,19 +331,19 @@ IF (ionode) WRITE(iun_gnuplot, frt) fact
 RETURN
 END SUBROUTINE gnuplot_set_fact
 
-SUBROUTINE gnuplot_write_file_data(data_file,color,start,last, comment)
+SUBROUTINE gnuplot_write_file_data(data_file,lw,color,start,last, comment)
 IMPLICIT NONE
 
 CHARACTER(LEN=*), INTENT(IN) :: data_file
-CHARACTER(LEN=*), INTENT(IN) :: color
+CHARACTER(LEN=*), INTENT(IN) :: lw, color
 LOGICAL, INTENT(IN) :: start, last
 
 CHARACTER(LEN=256) :: string
 CHARACTER(LEN=6) :: int_to_char
 LOGICAL :: comment
 
-string=" """//TRIM(data_file)//""" u 1:($2" &
-            //"*fact-eref)*gfact w l lw 3 lc rgb """//TRIM(color)//""""
+string=" """//TRIM(data_file)//""" u ($1*xscale-xshift):($2" &
+            //"*fact-eref)*gfact w l lw "//TRIM(lw)//" lc rgb "//TRIM(color)
 
 IF (start) string="plot "//TRIM(string)
 IF (.NOT.last) string=TRIM(string)//", \"
@@ -359,9 +368,9 @@ CHARACTER(LEN=256) :: string
 CHARACTER(LEN=6) :: int_to_char
 LOGICAL :: comment
 
-string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//"):(($"// &
+string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//"*xscale-xshift):(($"// &
               TRIM(int_to_char(col2)) //"+ $"//TRIM(int_to_char(col3)) &
-            //")*fact-eref)*gfact w l lw 3 lc rgb """//TRIM(color)//""""
+            //")*fact-eref)*gfact w l lw 3 lc rgb "//TRIM(color)
 
 IF (start) string="plot "//TRIM(string)
 IF (.NOT.last) string=TRIM(string)//", \"
@@ -386,9 +395,9 @@ CHARACTER(LEN=256) :: string
 CHARACTER(LEN=6) :: int_to_char
 LOGICAL :: comment
 
-string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//"):($"// &
-              TRIM(int_to_char(col2)) &
-            //"*fact-eref)*gfact w l lw 3 lc rgb """//TRIM(color)//""""
+string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//&
+                     "*xscale-xshift):($"//TRIM(int_to_char(col2)) &
+            //"*fact-eref)*gfact w l lw 3 lc rgb "//TRIM(color)
 
 IF (start) string="plot "//TRIM(string)
 IF (.NOT.last) string=TRIM(string)//", \"
@@ -413,9 +422,9 @@ CHARACTER(LEN=256) :: string
 CHARACTER(LEN=6) :: int_to_char
 LOGICAL :: comment
 
-string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//"):($"// &
+string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//"*xscale-xshift):($"// &
               TRIM(int_to_char(col2)) &
-            //"*fact-eref)*gfact w p pt 82 lc rgb """//TRIM(color)//""""
+            //"*fact-eref)*gfact w p pt 82 lc rgb "//TRIM(color)
 
 IF (start) string="plot "//TRIM(string)
 IF (.NOT.last) string=TRIM(string)//", \"
@@ -518,7 +527,7 @@ INTEGER :: iplot
 
 IF (ionode) WRITE(iun_gnuplot,'("unset table")')
 
-CALL gnuplot_write_header(filename, xmin, xmax, ymin, ymax)
+CALL gnuplot_write_header(filename, xmin, xmax, ymin, ymax, 1.0_DP)
 
 IF (ionode) THEN
    WRITE(iun_gnuplot,'("set size ratio",f15.7)') (ymax-ymin)/(xmax-xmin)
@@ -544,15 +553,6 @@ CALL gnuplot_stop_2dplot()
 
 RETURN
 END SUBROUTINE gnuplot_do_2dplot
-
-SUBROUTINE gnuplot_stop_2dplot()
-
-IMPLICIT NONE
-
-DEALLOCATE(contour_color)
-
-RETURN
-END SUBROUTINE gnuplot_stop_2dplot
 
 SUBROUTINE gnuplot_line(x, y, lw, front, color)
 !
@@ -613,6 +613,23 @@ IF (ionode)  WRITE(iun_gnuplot, '(a)') TRIM(fmt_str)
 RETURN
 END SUBROUTINE gnuplot_polygon
 
+SUBROUTINE gnuplot_print_objects()
+
+IMPLICIT NONE
+
+IF (ionode)  WRITE(iun_gnuplot, '("plot x+1e6" )') 
+
+RETURN
+END SUBROUTINE gnuplot_print_objects
+
+SUBROUTINE gnuplot_stop_2dplot()
+
+IMPLICIT NONE
+
+DEALLOCATE(contour_color)
+
+RETURN
+END SUBROUTINE gnuplot_stop_2dplot
 
 
 SUBROUTINE gnuplot_start(filename_gnu)

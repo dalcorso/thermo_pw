@@ -41,7 +41,7 @@ CALL gnuplot_start(gnu_filename)
 filename=TRIM(flpsnkconv)
 xmin = nk_test(1)
 xmax = nk_test(nnk)
-CALL gnuplot_write_header(filename, xmin, xmax, 0.0_DP, 0.0_DP ) 
+CALL gnuplot_write_header(filename, xmin, xmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
 
 CALL gnuplot_xlabel(' nk ',.FALSE.) 
 CALL gnuplot_ylabel('Total energy error (mRy)',.FALSE.) 
