@@ -29,11 +29,17 @@ SUBROUTINE thermo_readin()
                                    label_list, nqaux, q_in_band_form, &
                                    q_in_cryst_coord, q2d, point_label_type, &
                                    disp_q, disp_wq, disp_nqs, npx, &
-                                   label_disp_q, letter_path
+                                   label_disp_q, letter_path, nrap_plot_in, &
+                                   rap_plot_in
   USE control_gnuplot,      ONLY : flgnuplot, flpsband, flpsdisp, &
                                    flpsmur, flpsdos, flpstherm, flpsanhar, &
-                                   flpskeconv, flpsnkconv, flpsgrun,   &
-                                   lgnuplot, gnuplot_command
+                                   flpskeconv, flpsnkconv, flpsgrun,       &
+                                   lgnuplot,           &
+                                   flpbs, flprojlayer, gnuplot_command
+  USE control_2d_bands,     ONLY : lprojpbs, nkz, gap_thr, sym_divide, &
+                                   identify_sur, sur_layers, sur_thr, &
+                                   force_bands, only_bands_plot, dump_states, &
+                                   subtract_vacuum
   USE control_asy,          ONLY : flasy, lasymptote, asymptote_command
   USE control_bands,        ONLY : flpband, emin_input, emax_input, nbnd_bands,&
                                    lsym 
@@ -46,7 +52,7 @@ SUBROUTINE thermo_readin()
                                         fl_el_cons
   USE control_piezoelectric_tensor, ONLY : nosym_save
   USE piezoelectric_tensor, ONLY : nppl
-  USE cell_base,            ONLY : at
+  USE cell_base,            ONLY : at, bg, celldm
   USE ions_base,            ONLY : nat, tau
   USE symm_base,            ONLY : nosym
   USE mp_world,             ONLY : world_comm
@@ -65,11 +71,11 @@ SUBROUTINE thermo_readin()
   CHARACTER(LEN=256) :: asy_filename
   INTEGER, ALLOCATABLE :: iun_image(:)
   INTEGER :: image
-  INTEGER :: iq, ipol, i, j, k
+  INTEGER :: iq, ipol, i, j, k, igeo, icont
   INTEGER :: iun_thermo, parse_unit_save
 
-  INTEGER :: nch, ierr
-  LOGICAL :: tend, terr, read_paths, set_internal_path, exst
+  INTEGER :: nch, nrp, ierr
+  LOGICAL :: tend, terr, read_paths, set_internal_path, set_2d_path, exst
   CHARACTER(LEN=256) :: input_line, buffer
   REAL(DP) :: wq0
   !
@@ -90,6 +96,13 @@ SUBROUTINE thermo_readin()
                             lsym,                           &
                             ntry,                           &
                             npx,                            &
+                            lprojpbs, nkz, gap_thr,         &
+                            only_bands_plot,                &
+                            sur_thr, sur_layers,            &
+                            sym_divide, identify_sur,       &
+                            subtract_vacuum,                &
+                            force_bands,                    &
+                            dump_states,                    &
                             flevdat,                        &
                             flpband, flpgrun,               &
                             flgnuplot, flpsband,            &
@@ -123,7 +136,7 @@ SUBROUTINE thermo_readin()
 
   what=' '
   ngeo=0
-  step_ngeo=0.05_DP
+  step_ngeo = 0.05_DP
   ntry=2
 
   nq1_d=128
@@ -168,6 +181,18 @@ SUBROUTINE thermo_readin()
 
   npx=8
 
+  lprojpbs = .TRUE.
+  nkz = 1 
+  gap_thr = 0.1_DP
+  sym_divide = .FALSE.
+  identify_sur =.FALSE.
+  sur_layers=0
+  sur_thr=0.0_DP
+  subtract_vacuum=.TRUE.
+  force_bands=.FALSE.
+  only_bands_plot=.FALSE.
+  dump_states=.FALSE.
+
   grunmin_input=0.0_DP
   grunmax_input=0.0_DP
 
@@ -184,6 +209,8 @@ SUBROUTINE thermo_readin()
   flgrun='output_grun.dat'
   flevdat='output_ev.dat'
   fl_el_cons='output_el_cons.dat'
+  flpbs='output_pbs'
+  flprojlayer='output_projlayer'
 
   flgnuplot='gnuplot.tmp'
   flpsmur='output_mur.ps'
@@ -213,9 +240,14 @@ SUBROUTINE thermo_readin()
   !
   CALL bcast_thermo_input()
   !
+  IF (what /= 'scf_2d_bands') THEN
+     nkz=1
+     lprojpbs=.FALSE.
+  ENDIF
+
   read_paths=( what=='scf_bands'.OR.what=='scf_disp'.OR.what=='plot_bz'.OR. &
                what=='mur_lc_bands' .OR. what=='mur_lc_disp' .OR. &
-               what=='mur_lc_t')
+               what=='mur_lc_t' .OR. what=='scf_2d_bands')
 
   IF ( ngeo==0 ) THEN
      IF (what(1:4) == 'scf_') ngeo=1
@@ -227,13 +259,18 @@ SUBROUTINE thermo_readin()
 
   nqaux=0
   set_internal_path=.FALSE.
+  set_2d_path=.FALSE.
   IF ( read_paths ) THEN
 
      IF (meta_ionode) READ (iun_thermo, *, err=200, iostat = ios) nqaux
 
 200  CALL mp_bcast(ios, meta_ionode_id, world_comm )
-     IF ( ios /= 0) THEN 
-        set_internal_path=.TRUE.
+     IF (ios /= 0) THEN 
+        IF (what=='scf_2d_bands') THEN
+           set_2d_path=.TRUE.
+        ELSE
+           set_internal_path=.TRUE.
+        ENDIF
         goto 70
      ENDIF
      CALL mp_bcast(nqaux, meta_ionode_id, world_comm )
@@ -247,6 +284,10 @@ SUBROUTINE thermo_readin()
      ALLOCATE(label_list(nqaux))
      ALLOCATE(label_disp_q(nqaux))
      IF (.NOT.q_in_band_form) ALLOCATE(wqauxr(nqaux))
+     ALLOCATE(nrap_plot_in(nqaux))
+     ALLOCATE(rap_plot_in(12,nqaux))
+     nrap_plot_in=0
+     rap_plot_in=0
 
      npk_label=0
      letter_path='   '
@@ -268,8 +309,19 @@ SUBROUTINE thermo_readin()
 !   This is a digit, therefore this line contains the coordinates of the
 !   k point. We read it and exit from the loop on characters
 !
-              READ(input_line,*) xqaux(1,iq), xqaux(2,iq), &
-                                 xqaux(3,iq), wq0
+              IF (sym_divide) THEN
+                 READ(input_line,*) xqaux(1,iq), xqaux(2,iq), &
+                                    xqaux(3,iq), wq0, nrap_plot_in(iq)
+                 IF (nrap_plot_in(iq)>0) THEN
+                    nrp=nrap_plot_in(iq)
+                    READ(input_line,*) xqaux(1,iq), xqaux(2,iq), &
+                          xqaux(3,iq), wq0, nrap_plot_in(iq), &
+                          (rap_plot_in(i,iq), i=1,nrp)
+                 END IF   
+              ELSE              
+                 READ(input_line,*) xqaux(1,iq), xqaux(2,iq), &
+                                    xqaux(3,iq), wq0
+              ENDIF
               IF (q_in_band_form) THEN
                  wqaux(iq)=NINT(wq0)
               ELSE
@@ -310,7 +362,18 @@ SUBROUTINE thermo_readin()
               IF ( ICHAR(input_line(j+1:j+1))==32 .OR. &
                    ICHAR(input_line(j+2:j+2))==32 ) nch=2
               buffer=input_line(j+nch:)
-              READ(buffer,*,err=50,iostat=ios) wqaux(iq)
+              IF (sym_divide) THEN
+                 READ(buffer,*,err=50,iostat=ios) wqaux(iq), &
+                                      nrap_plot_in(iq)
+
+                 IF (nrap_plot_in(iq)>0) THEN
+                    nrp=nrap_plot_in(iq)
+                    READ(buffer,*,err=50,iostat=ios) wqaux(iq), &
+                          nrap_plot_in(iq), (rap_plot_in(i,iq), i=1,nrp)
+                 END IF
+              ELSE
+                 READ(buffer,*,err=50,iostat=ios) wqaux(iq)
+              ENDIF
 50            IF (ios /=0) CALL errore('thermo_readin',&
                                      'problem reading number of points',1)
               EXIT
@@ -360,6 +423,11 @@ SUBROUTINE thermo_readin()
   at_save = at
   ALLOCATE(tau_save(3,nat))
   tau_save=tau
+!
+!  bring tau_save in crystal coordinates. In strained geometries tau_save
+!  is kept constant.
+!
+  CALL cryst_to_cart( nat, tau_save, bg, -1 )
   ibrav_save=ibrav
   nosym_save=nosym
   input_file_=input(my_image_id+1)
@@ -385,11 +453,20 @@ SUBROUTINE thermo_readin()
         CALL errore('thermo_readin','Force_conv_thr too large',1) 
      ENDIF
   ENDIF
+
+  IF (what=='scf_2d_bands'.AND.identify_sur) THEN
+     IF (sur_layers==0) THEN
+        sur_layers=MIN(2, nat/2)
+     ENDIF
+  ENDIF
+     
+
      
   DEALLOCATE(input)
   DEALLOCATE(iun_image)
 
   IF (set_internal_path) CALL set_bz_path()
+  IF (set_2d_path) CALL set_2d_bz_path()
 
   RETURN
 END SUBROUTINE thermo_readin

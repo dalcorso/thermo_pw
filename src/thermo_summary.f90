@@ -23,6 +23,7 @@ SUBROUTINE thermo_summary()
                                    letter_path
   USE control_asy,          ONLY : flasy, lasymptote, asymptote_command
   USE control_elastic_constants, ONLY : frozen_ions, ngeo_strain
+  USE control_2d_bands,     ONLY : lprojpbs
   USE space_groups,         ONLY : sg_name, find_space_group, set_fft_fact
   USE control_pwrun,        ONLY : nr1_save, nr2_save, nr3_save
   USE ktetra,               ONLY : tetra, ltetra
@@ -35,6 +36,7 @@ SUBROUTINE thermo_summary()
   USE ions_base,            ONLY : tau, nat, ityp, amass, atm
   USE symm_base,            ONLY : irt, nsym, s, sr, ftau
   USE constants,            ONLY : amu_si, bohr_radius_si
+  USE bz_2d_form,           ONLY : bz_2d, allocate_2d_bz, init_2d_bz
   USE mp_world,             ONLY : world_comm
   USE mp_images,            ONLY : nimage, my_image_id, root_image
   USE environment,          ONLY : environment_end
@@ -48,7 +50,7 @@ SUBROUTINE thermo_summary()
   CHARACTER(LEN=256) :: asy_filename
   CHARACTER(LEN=11) :: group_name
   REAL(DP) :: total_mass, total_expected_mass, current_mass, expected_mass, fact
-  REAL(DP) :: atom_weight
+  REAL(DP) :: atom_weight, celldm_2d(3)
   REAL(DP), ALLOCATABLE :: xau(:,:)
   INTEGER :: atomic_number
   INTEGER :: laue_class
@@ -58,6 +60,8 @@ SUBROUTINE thermo_summary()
   LOGICAL :: check_group_ibrav
   CHARACTER(LEN=12) :: spaceg_name
   CHARACTER(LEN=11) :: gname
+  TYPE(bz_2d) :: bz_2d_struc
+  INTEGER :: ibz, i
 
   read_path=.FALSE.
   lelc = .FALSE.
@@ -152,8 +156,11 @@ SUBROUTINE thermo_summary()
      CASE ('scf_ke')
           WRITE(stdout,'(5x,"Testing the total energy convergence with kinetic &
                          &energy cutoff ")')
+     CASE ('scf_2d_bands') 
+          WRITE(stdout,'(5x,"Plotting the surface band structure")')
+          IF (lprojpbs) WRITE(stdout,'(5x,"Only projected band structure")')
      CASE DEFAULT
-        CALL errore('themo_summary','what not programmed',1)
+        CALL errore('thermo_summary','what not programmed',1)
   END SELECT
 !
 !  We now check the point group and find the Laue class, so we write
@@ -325,6 +332,8 @@ SUBROUTINE thermo_summary()
 ! of independent components of tensors
 !
   ibrav_group_consistent=check_group_ibrav(code_group, ibrav)
+
+  IF (what=='scf_2d_band') GOTO 1000
 
   IF ( ibrav_group_consistent ) THEN
      WRITE(stdout,'(/,5x,"The point group, ",a,", is compatible with the&
@@ -1029,6 +1038,7 @@ WRITE(stdout,'(5x,70("-"))')
 !  ----------------------------------------------------------------------
 !  Brillouin zone plot
 !
+1000  CONTINUE
   IF (what=='plot_bz') THEN
      asy_filename=TRIM(flasy)//'.asy'
      IF ( my_image_id==root_image ) THEN
@@ -1049,6 +1059,19 @@ WRITE(stdout,'(5x,70("-"))')
      !
      CALL mp_global_end ()
      CALL do_stop( 0 )
+  ELSEIF (what=='scf_2d_bands') THEN
+     !
+     asy_filename=TRIM(flasy)//'.asy'
+     IF ( my_image_id==root_image ) THEN
+
+        CALL plot_2d_bz(ibrav, celldm, at, bg, xqaux, wqaux, nqaux, &
+             letter, letter_path, npk_label, label_list, asy_filename)
+
+        IF (lasymptote.AND.ionode) &
+           ierr=system(TRIM(asymptote_command)//' '//TRIM(asy_filename))
+
+     ENDIF
+     !
   ENDIF
 
   RETURN

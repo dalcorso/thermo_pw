@@ -17,22 +17,25 @@ SUBROUTINE bcast_thermo_input()
                               flfrc, flfrq, fldos, fltherm, flanhar, &
                               filband, flkeconv, flnkconv, flgrun
   USE temperature,     ONLY : tmin, tmax, deltat, ntemp
-  USE ifc,             ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq, zasr, &
-                              freqmin_input, freqmax_input
+  USE ifc,             ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq, &
+                              zasr, freqmin_input, freqmax_input
   USE control_paths,   ONLY : q_in_band_form, q_in_cryst_coord, q2d, &
                               point_label_type, npx
   USE control_bands,   ONLY : flpband, emin_input, emax_input, nbnd_bands, lsym
   USE control_grun,    ONLY : flpgrun
   USE control_gnuplot, ONLY : flgnuplot, flpsband, flpsdisp, &
-                              flpsdisp, flpsdos, flpstherm, &
+                              flpsdisp, flpsdos, flpstherm,  &
                               flpsanhar, flpsmur, flpskeconv, flpsnkconv, &
-                              flpsgrun, &
-                              lgnuplot, gnuplot_command
+                              flpsgrun, flpbs, &
+                              flprojlayer, lgnuplot, gnuplot_command
   USE control_asy,     ONLY : flasy, lasymptote, asymptote_command
   USE control_conv,    ONLY : nke, deltake, nkeden, deltakeden, &
                               nnk, deltank, nsigma, deltasigma
   USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, frozen_ions
   USE piezoelectric_tensor, ONLY : nppl
+  USE control_2d_bands,     ONLY : lprojpbs, nkz, sym_divide, identify_sur, &
+                                   gap_thr, sur_layers, sur_thr, force_bands, &
+                                   only_bands_plot, dump_states, subtract_vacuum
   USE mp_world,        ONLY : world_comm
   USE mp,              ONLY : mp_bcast
   USE io_global,       ONLY : meta_ionode_id
@@ -83,6 +86,17 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( ntemp, meta_ionode_id, world_comm )
   CALL mp_bcast( nppl, meta_ionode_id, world_comm )
   CALL mp_bcast( npx, meta_ionode_id, world_comm )
+  CALL mp_bcast( lprojpbs, meta_ionode_id, world_comm )
+  CALL mp_bcast( nkz, meta_ionode_id, world_comm )
+  CALL mp_bcast( gap_thr, meta_ionode_id, world_comm )
+  CALL mp_bcast( sym_divide, meta_ionode_id, world_comm )
+  CALL mp_bcast( identify_sur, meta_ionode_id, world_comm )
+  CALL mp_bcast( sur_thr, meta_ionode_id, world_comm )
+  CALL mp_bcast( sur_layers, meta_ionode_id, world_comm )
+  CALL mp_bcast( subtract_vacuum, meta_ionode_id, world_comm )
+  CALL mp_bcast( force_bands, meta_ionode_id, world_comm )
+  CALL mp_bcast( dump_states, meta_ionode_id, world_comm )
+  CALL mp_bcast( only_bands_plot, meta_ionode_id, world_comm )
   CALL mp_bcast( flpband, meta_ionode_id, world_comm )
   CALL mp_bcast( filband, meta_ionode_id, world_comm )
   CALL mp_bcast( flgnuplot, meta_ionode_id, world_comm )
@@ -94,6 +108,8 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( flpskeconv, meta_ionode_id, world_comm )
   CALL mp_bcast( flpsnkconv, meta_ionode_id, world_comm )
   CALL mp_bcast( flpsgrun, meta_ionode_id, world_comm )
+  CALL mp_bcast( flpbs, meta_ionode_id, world_comm )
+  CALL mp_bcast( flprojlayer, meta_ionode_id, world_comm )
   CALL mp_bcast( emin_input, meta_ionode_id, world_comm )
   CALL mp_bcast( emax_input, meta_ionode_id, world_comm )
   CALL mp_bcast( flevdat, meta_ionode_id, world_comm )
