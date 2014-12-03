@@ -117,7 +117,7 @@ band structure.
 
 \thermo\ can run in parallel using all the parallel modes available in
 the \qe\ package. On top of that \thermo\ can be run using several images.
-The image parallelization is used when possible in an asyncronous way.
+The image parallelization is used when possible in an asynchronous way.
 One processor takes the role of master and distributes the work 
 to all the images that carry it out independently. Presently 
 the total energies of several geometries for a Murnaghan fit are
@@ -348,7 +348,7 @@ point_label_type : the label definition (see the BZ manual)
                  Default: SC
 \end{verbatim}
 An example of the use of this option can be found in \texttt{example02}.
-If you give explicitely the path, be careful with options that require
+If you give explicitly the path, be careful with options that require
 geometry changes (see below). Only automatic paths, or path given through 
 letter labels are easily recalculated. The other paths could turn out 
 to be correct only for one geometry.
@@ -594,7 +594,7 @@ Depending on the point group, it calculates the polarization of the
 solid for a set of strains of the lattice. For each strain, it relaxes 
 the ions to their equilibrium positions when \texttt{frozen\_ions=.false.} 
 or keep them in the strained positions when \texttt{frozen\_ions=.true.}. 
-Finally it computes the piezoelectic tensor from the numerical derivatives 
+Finally it computes the piezoelectric tensor from the numerical derivatives 
 of the polarization with respect to strain.
 The number of independent strains is \texttt{ngeo\_strain}. The input variables
 that control this option the same as those used for the elastic constant:
@@ -618,7 +618,7 @@ the polarization induced by an external stress, as $d_{\alpha,m}=
 for a vanishing electric field.
 
 \subsection{\texttt{what='mur\_lc\_piezoelectric\_tensor'}}
-As \texttt{what='piezoelectic\_tensor'} but the calculation is made at the
+As \texttt{what='piezoelectric\_tensor'} but the calculation is made at the
 geometry that corresponds to the minimum of the Murnaghan equation. The
 Murnaghan minimization is made as described for \texttt{what='mur\_lc'}.
 
