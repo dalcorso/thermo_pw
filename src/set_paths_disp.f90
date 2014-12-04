@@ -33,6 +33,8 @@ SUBROUTINE set_paths_disp()
 
   IF ( ALLOCATED(disp_q) ) DEALLOCATE (disp_q)
   IF ( ALLOCATED(disp_wq) ) DEALLOCATE (disp_wq)
+  IF ( ALLOCATED(nrap_plot) ) DEALLOCATE (nrap_plot)
+  IF ( ALLOCATED(rap_plot) ) DEALLOCATE (rap_plot)
 
   IF (q_in_cryst_coord) k_points='crystal'
 
