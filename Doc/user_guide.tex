@@ -1,5 +1,5 @@
 \documentclass[12pt,a4paper]{article}
-\def\version{0.1.0}
+\def\version{0.2.0}
 \def\qe{{\sc Quantum ESPRESSO}}
 
 \usepackage{html}
@@ -73,7 +73,7 @@ by the codes of the \qe\ package.
 The \thermo\ package can perform the following types of calculations:
 \begin{itemize}
 \item Plot of the Brillouin zone (the structure can be seen by reading the
-input of \thermo\ by the \texttt{XCrysDens} program).
+input of \thermo\ by the \texttt{XCrySDen} program).
 
 \item Computation of the total energy.
 
@@ -167,7 +167,8 @@ from the \texttt{thermo\_pw}\ directory, produces the executable
 \texttt{ph.x}, and \texttt{pp.x} before \texttt{thermo\_pw}.
 \thermo\ has been written on a PC with Linux operating system using the
 \texttt{gfortran} compiler with \texttt{openMPI} parallelization. Any other
-combination of computer/operating system has not been tested.
+combination of computer/operating system has not been tested, but usually
+\thermo\ runs on the same systems where \qe\ runs.
 
 \subsection{Uninstalling}
 
@@ -319,11 +320,13 @@ An example of the use of this option can be found in \texttt{example11}.
 
 \subsection{\texttt{what='scf\_bands'}}
 With this option the code makes a self-consistent calculation followed 
-by a band structure calculation. The output of the band structure calculation
-is further processed in order to produce a plot of the band structure.
-A minimal control of the plot can be obtained with the following variables.
+by a band structure calculation. There is no image parallelization and no
+advantage to use more than one image. The output of the band structure 
+calculation is further processed in order to produce a plot of the band 
+structure.
 In insulators the zero of the bands is at the highest valence band in the
 first {\bf k} point, in metals at the Fermi energy. 
+A minimal control of the plot can be obtained with the following variables.
 
 \begin{verbatim}
 emin_input : minimum energy for the band dispersion plot.
@@ -334,6 +337,8 @@ nbnd_bands : the number of bands in the band calculation
              Default: integer nbnd given in pw.x input.
 lsym       : if .TRUE. does the symmetry analysis of the bands
              Default: .TRUE.
+flpsband   : postscript file of the electronic band structure
+             Default: character(len=*) 'output_band.ps'
 \end{verbatim}
 
 The path for the bands is determined automatically by the code on the basis
@@ -344,6 +349,8 @@ self-consistent calculation. The following variables control how the path
 is given:
 \begin{verbatim}
 q_in_band_form   : only the first and last point of each k path are given.
+                 The weight of each k point is an integer, the number of 
+                 point in the line that start at this k point.
                  Default: .TRUE.
 q_in_cryst_coord : the k - points are given in crystal coordinates.
                  Default: .FALSE.
@@ -358,8 +365,8 @@ to be correct only for one geometry.
 
 \subsection{\texttt{what='plot\_bz'}}
 With this option the code writes a script to make a three dimensional plot
-of the Brillouin zone and of its default path. If the input contains a path
-after the \texttt{THERMO\_PW} namelist this path is shown in the figure. 
+of the Brillouin zone and of the path (the default one or the one given in 
+input). 
 The script must be read by the \texttt{asymptote} code, available at 
 \texttt{http://asymptote.sourceforge.net/}. In many Linux distributions
 this code is available as a separate package, but it is not installed by
@@ -368,8 +375,8 @@ default. The following variables control the plot:
 lasymptote  : if .TRUE. asymptote is called from within the program
               and the pdf file with a plot of the BZ is produced
               Default: logical .FALSE.
-flasy       : initial part of the name of the files where asymptote script
-              is written, and of the name of the pdf file.
+flasy       : initial part of the name of the file where the asymptote script
+              is written and of the name of the pdf file.
               Default: character(len=*) 'asy_tmp'
 asymptote_command  : the command that invokes asymptote and produces the 
               pdf file of the BZ.
@@ -379,13 +386,13 @@ npx         : maximum size of the supercell used to plot the Brillouin
               to double it increase the default until the error disappears.
               Default: integer 8
 \end{verbatim}
-The structure of the solid can be seen using the \texttt{xcrysden} code
+The structure of the solid can be seen using the \texttt{XCrySDen} code
 that can read the input file of \texttt{pw.x}. You can find the code at
-{http://www.xcrysden.org/}. \thermo\ produces also a file in the
+\texttt{http://www.xcrysden.org/}. \thermo\ produces also a file in the
 \texttt{xsf} format called \texttt{prefix.xsf}, where the variable 
 \texttt{prefix}
 is given in the input of \texttt{pw.x}. This can be useful when
-the nonequivalents atomic positions and the space group are given in the input
+the inequivalent atomic positions and the space group are given in the input
 of \texttt{pw.x}. To see an \texttt{xsf} file, give the command
 \texttt{xcrysden --xsf file.xsf}.
 
@@ -448,8 +455,6 @@ fldos         : file where the phonon dos is written
                 Default: character(len=*) 'output_dos.dat.g1'
 fltherm       : file where the harmonic thermodynamic quantities are written
                 Default: character(len=*) 'output_therm.dat.g1'
-flpsband      : postscript file of the electronic band structure
-                Default: character(len=*) 'output_band.ps'
 flpsdisp      : postscript file of the phonon dispersions
                 Default: character(len=*) 'output_disp.ps'
 flpsdos       : postscript file of the phonon dos
@@ -504,16 +509,14 @@ An example of the use of this option can be found in \texttt{example05}.
 With this option the code computes the band structure at the geometry 
 obtained from the minimum of the Murnaghan equation. See the options 
 \texttt{what='scf\_bands'} and \texttt{what='mur\_lc'} for a list of 
-the variables that control these two options. They are used in the same 
-way with the present option. An example of the use of this option can be 
-found in \texttt{example06}.
+the variables that control these two options. An example of the use of 
+this option can be found in \texttt{example06}.
 
 \subsection{\texttt{what='mur\_lc\_ph'}}
 This option is similar to \texttt{what='scf\_ph'} but the phonon calculation
 is made at the geometry obtained from the minimum of the Murnaghan equation.
 See the options \texttt{what='scf\_ph'} and \texttt{what='mur\_lc'} for a
-list of the variables that control these two options. They are used in
-the same way with the present option.
+list of the variables that control these two options. 
 An example of the use of this option can be found in \texttt{example07}.
 
 \subsection{\texttt{what='mur\_lc\_disp'}}
@@ -521,7 +524,6 @@ This option is similar to \texttt{what='scf\_disp'} but the phonon calculation
 is made at the geometry obtained from the minimum of the Murnaghan equation.
 See the options \texttt{what='scf\_disp'} and \texttt{what='mur\_lc'} for a
 list of the variables that control these two options. 
-They are used in the same way with the present option.
 An example of the use of this option can be found in \texttt{example08}.
 
 \subsection{\texttt{what='mur\_lc\_t'}}
@@ -563,13 +565,13 @@ An example of the use of this option can be found in \texttt{example09}.
 \subsection{\texttt{what='elastic\_constants'}}
 With this option the code calculates the elastic constants of the solid.
 Depending on the Laue class, it calculates the stress tensor for a set of 
-strains of the lattice. For each strain, it relaxes the ions to their 
+strains. For each strain, it relaxes the ions to their 
 equilibrium positions if \texttt{frozen\_ions=.false.} or keep them
 in the strained positions if \texttt{frozen\_ions=.true.}. 
 Finally it computes the elastic constants from the numerical derivatives 
 of the stress with respect to strain.
-The number of independent strains is \texttt{ngeo\_strain}. The input variables
-that control this option are:
+The number of strains used to calculate each derivative 
+is \texttt{ngeo\_strain}. The input variables that control this option are:
 \begin{verbatim}
 frozen_ions: if .true. the elastic constants are calculated 
              keeping the ions frozen in the strained positions. 
@@ -589,18 +591,19 @@ fl_el_cons: the name of the file that contains the elastic constants
 As \texttt{what='elastic\_constants'} but the calculation is made at the
 geometry that corresponds to the minimum of the Murnaghan equation. The
 Murnaghan minimization is made as described for \texttt{what='mur\_lc'}.
+An example of the use of this option can be found in \texttt{example13}.
 
 \subsection{\texttt{what='piezoelectric\_tensor'}}
 With this option the code calculates the piezoelectric tensor 
-($g_{\alpha,m}$ $\alpha=1,3\ m=1,6$) of the solid.
+($g_{\alpha,m}$ $\alpha=1,3,\ m=1,6$) of the solid.
 Depending on the point group, it calculates the polarization of the
 solid for a set of strains of the lattice. For each strain, it relaxes 
 the ions to their equilibrium positions when \texttt{frozen\_ions=.false.} 
 or keep them in the strained positions when \texttt{frozen\_ions=.true.}. 
 Finally it computes the piezoelectric tensor from the numerical derivatives 
 of the polarization with respect to strain.
-The number of independent strains is \texttt{ngeo\_strain}. The input variables
-that control this option the same as those used for the elastic constant:
+The number of strains used to compute each derivative is \texttt{ngeo\_strain}. The input variables
+that control this option are the same as those used for the elastic constant:
 \begin{verbatim}
 frozen_ions: if .true. the piezoelectric tensor is calculated 
              keeping the ions frozen in the strained positions. 
@@ -629,9 +632,9 @@ Murnaghan minimization is made as described for \texttt{what='mur\_lc'}.
 With this option the code calculates the spontaneous polarization.
 The code makes a self-consistent calculation followed by three Berry
 phase calculations in which the polarization is calculated in the
-direction parallel to the three primitive Bravais lattice vectors and 
+direction parallel to the three primitive reciprocal lattice vectors and 
 prints the spontaneous polarization in cartesian coordinates.
-The input variables that control this option is:
+The input variable that control this option is:
 \begin{verbatim}
 nppl: the number of k points per string. In the perpendicular plane the
       number of k-point is that given as input of the pw.x code.
@@ -646,10 +649,10 @@ Murnaghan minimization is made as described for \texttt{what='mur\_lc'}.
 \subsection{\texttt{what='scf\_2d\_bands'}}
 With this option the code calculates the bands after a self consistent 
 calculation as with the option \texttt{what='scf\_bands'}, but it assumes 
-that the cell is a two-dimensional slab, whose
-normal is the $z$ direction. Therefore the two dimensional
-Bravais lattice of the surface is identified and the default path is chosen 
-on the two-dimensional Brillouin zone. 
+that the cell contains a slab with surfaces perpendicular to the $z$ 
+direction. Therefore the two-dimensional Bravais lattice of the surface 
+is identified and the default path is chosen on the two-dimensional 
+Brillouin zone. 
 There are three options: Plot of the projected band structure (PBS); 
 plot of the bands of the slab; plot of the bands of the slab above the
 projected band structure (the Fermi energies are aligned). In the first 
@@ -687,8 +690,9 @@ identify_sur: When .TRUE. the surface bands are searched and identified on the
      surface band structure. 
      Default : logical .FALSE.
 dump_states: If .TRUE. and identify_sur is .TRUE. dump on the file 
-     'dump/state_k_#' the planar averages of each state. One file for each 
-     k point is produced and # is the number of the k point.
+     'dump/state_k_#' the planar averages of the density (and in the 
+     noncollinear case also of the magnetization density) of each state. 
+     One file for each k point is produced and # is the number of the k points.
      (Use with a small number of k points or it might create quite large files).
      Default: logical .FALSE.
 sur_layers: The number of surface layers on which we add the charge density of 
@@ -704,26 +708,27 @@ subtract_vacuum: if .TRUE. the charge density of each state on vacuum is
 force_bands: when .TRUE. the bands are plotted in any case.
      Used to plot the bulk bands on top of the PBS, mainly for debugging.
      Default: logical .FALSE.
-only_band_plot: if the file with the bands, the representations, the pbs
+only_bands_plot: if the files with the bands, the representations, the pbs
      and the projections are already on files, this option allows to change
      the parameters of the plot (such as the maximum energy or sur_thr) and
-     do another plot without any additional calculation.
+     do another plot without any additional calculation. If the files are
+     missing and this variable is .TRUE. an error occurs.
      Default: logical .FALSE.
 flpbs : the name of the file that contains the information on the projected
      band structure.
-     Default: character(len=*) output_pbs
+     Default: character(len=*) 'output_pbs'
 flprojlayer : the name of the file that contains the information of the
      projection of the charge density of each state on each layer.
      Calculated only when identify_sur is .TRUE..
-     Default: character(len=*) output_projlayer
+     Default: character(len=*) 'output_projlayer'
 \end{verbatim}
 The bands and the gnuplot scripts are saved on the same files that would
 be used with the option \texttt{what='scf\_bands'}.
+
 By default the symmetry separation is not carried out. The code plots the
 bands of the slab on the same panel with a different color for each 
 representation as in the bulk band structure plot (color refer to the 
 representations of the slab small group of {\bf k}). 
-
 In order to plot in different panels the different representations
 the user can specify \texttt{sym\_divide=} \texttt{.TRUE.}.
 By default this option is disabled and its use is rather tricky.
@@ -734,7 +739,7 @@ starting point of a given line you must indicate the number of
 representations for that line ($0$ means all representations) and which ones.
 For instance for a $(111)$ surface of an fcc metal you may
 want to plot separately the even and odd states in the direction 
-$\Gamma-M$. In order to do so you can specify the path as follows:
+$\bar \Gamma-\bar M$. In order to do so you can specify the path as follows:
 \begin{verbatim}
 5
 gG   30  0
@@ -769,15 +774,15 @@ It is the user responsibility to specify the same number of panels
 for the PBS and for the slab calculation and to assure that the
 representations plotted in each panel correspond to each other.
 Returning to the example of the $(111)$ surface of an fcc, in the direction
-$\Gamma-K$ the slab has $C_2$ symmetry about the $x$-axis, a symmetry
+$\bar \Gamma-\bar K$ the slab has $C_2$ symmetry about the $x$-axis, a symmetry
 that the surface has not. Therefore you can plot with two different colors
 the bands that belong to the $A$ or $B$ representations of the slab,
-(states even or odd with respect to and $180$ degrees rotation about
+(states even or odd with respect to and $180^\circ$  rotation about
 the $x$ axis, an operation that exchanges the two surfaces)
-but you cannot separate the PBS along the $\Gamma-K$ direction into
+but you cannot separate the PBS along the $\bar \Gamma-\bar K$ direction into
 even or odd. You might specify two different panels with the
 $A$ or $B$ bands in each, but the PBS in the two panels will be the same. 
-On the contrary, along the $\Gamma-M$ direction, both the slab and 
+On the contrary, along the $\bar \Gamma-\bar M$ direction, both the slab and 
 the surface have $C_s$ symmetry, so you can separate both the PBS 
 and the surface states in two different panels.
 
@@ -814,7 +819,7 @@ ${\bf T}$ is perpendicular to ${\bf C}$.
 \item \texttt{gener\_2d\_slab.x} a small tool that reads a two dimensional 
 Bravais lattice index and atomic coordinates an generates an infinite ribbon
 perpendicular to ${\bf G} = m {\bf b}_1 + n {\bf b}_2$, where 
-${\bf b}_1$ and ${\bf b}_2$ are the primitive reciprocal lattice vectors 
+${\bf b}_1$ and ${\bf b}_2$ are the primitive Bravais lattice vectors 
 of the 2D Bravais lattice. The number of rows of the ribbon, and the number of
 atoms per row are given as an input variables.
 

@@ -26,7 +26,7 @@ A3       hcp-Be  pz  *                                  ---
 A4       C       pz  *    *      *                       0
 
 B1       NaCl    pz  *    *      *                       0
-B3       SiC     pz  *                                   0
+B3       SiC     pz  *                                    
 
 
 NB: this directory uses the pseudopotentials of pslibrary.1.0.0. In order
