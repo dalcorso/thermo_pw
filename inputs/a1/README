@@ -9,3 +9,5 @@ bands : plot of the band structure
 
 disp : plot of the phonon dispersion. Note that the experimental data
        are read by modifying the file gnuplot.tmp.g1_disp
+
+anhar : plot of the anharmonic quantities.
