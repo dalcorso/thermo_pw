@@ -3362,11 +3362,11 @@ CONTAINS
         sub_table(3,1,3,3)=2
         sub_table(3,1,4,1)=3
         sub_table(3,1,4,2)=1
-        sub_table(3,1,4,3)=1
+        sub_table(3,1,4,3)=2
         sub_table(3,1,4,4)=2
         sub_table(3,1,5,1)=3
         sub_table(3,1,5,2)=1
-        sub_table(3,1,5,3)=2
+        sub_table(3,1,5,3)=1
         sub_table(3,1,5,4)=2
 
         sub_table(4,1,1,1)=1
@@ -3425,11 +3425,11 @@ CONTAINS
         sub_table(12,1,3,2)=1
         sub_table(12,1,3,3)=2
         sub_table(12,1,4,1)=3
-        sub_table(12,1,4,2)=1
-        sub_table(12,1,4,3)=2
-        sub_table(12,1,4,4)=3
+        sub_table(12,1,4,2)=2
+        sub_table(12,1,4,3)=3
+        sub_table(12,1,4,4)=4
         sub_table(12,1,5,1)=3
-        sub_table(12,1,5,2)=2
+        sub_table(12,1,5,2)=1
         sub_table(12,1,5,3)=3
         sub_table(12,1,5,4)=4
 
@@ -3441,11 +3441,11 @@ CONTAINS
         sub_table(13,1,3,2)=3
         sub_table(13,1,3,3)=3
         sub_table(13,1,4,1)=3
-        sub_table(13,1,4,2)=1
+        sub_table(13,1,4,2)=2
         sub_table(13,1,4,3)=3
         sub_table(13,1,4,4)=3
         sub_table(13,1,5,1)=3
-        sub_table(13,1,5,2)=2
+        sub_table(13,1,5,2)=1
         sub_table(13,1,5,3)=3
         sub_table(13,1,5,4)=3
 
