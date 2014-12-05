@@ -197,6 +197,12 @@ where \texttt{np} is the number of processors and \texttt{ni} is the number
 of images. The dots indicate the other parallelization options that
 you can find in the \qe\ manual.
 
+Note that it is very easy to waste a lot of resources if the number of 
+images is too large. Some options do not use the image feature, so you have
+to know how the calculation is divided and the number of images must not
+be larger than the number of tasks (see below an indication of this number
+for each option).
+
 One or more \texttt{postscript} files with plots of the material properties
 are the output of the \thermo\ code. It produces also files with the data of 
 the plot and scripts for the \texttt{gnuplot} program. 
@@ -262,7 +268,8 @@ graphical tools to produce the plots from the output data.
 With this option the code computes only the total energy. This is a single
 calculation as if running \texttt{pw.x} with the given input.
 No other input variable is necessary.
-An example of the use of this option can be found in \texttt{example01}.
+An example of the use of this option can be found in \texttt{example01}. \\
+Number of tasks for this option: \texttt{1}.
 
 \subsection{\texttt{what='scf\_ke'}}
 With this option the code makes several self-consistent calculations, 
@@ -291,7 +298,8 @@ flpskeconv : name of the postscript file with the plot of the total energy as
              a function of the kinetic energy cut-off.
              Default: character(len=*) 'output_keconv.ps'
 \end{verbatim}
-An example of the use of this option can be found in \texttt{example10}.
+An example of the use of this option can be found in \texttt{example10}. \\
+Number of tasks for this option: \texttt{nke * nkedens}.
 
 \subsection{\texttt{what='scf\_nk'}}
 With this option the code makes several self-consistent calculations, 
@@ -316,7 +324,8 @@ flnkconv   : file where the data with the k point convergence is written
 flpsnkconv : name of the postscript file with the k points convergence plot.
              Default: character(len=*) 'output_nkconv.ps'
 \end{verbatim}
-An example of the use of this option can be found in \texttt{example11}.
+An example of the use of this option can be found in \texttt{example11}. \\
+Number of tasks for this option: \texttt{nnk * nsigma}.
 
 \subsection{\texttt{what='scf\_bands'}}
 With this option the code makes a self-consistent calculation followed 
@@ -340,6 +349,7 @@ lsym       : if .TRUE. does the symmetry analysis of the bands
 flpsband   : postscript file of the electronic band structure
              Default: character(len=*) 'output_band.ps'
 \end{verbatim}
+Number of tasks for this option: \texttt{1}.
 
 The path for the bands is determined automatically by the code on the basis
 of the Bravais lattice index, but it can also be given at the end of
@@ -403,7 +413,10 @@ the \texttt{ph.x} code after a self-consistent \texttt{pw.x} calculation.
 The different representations are calculated in parallel when several images 
 are available. No other input variable is necessary. The outputs of this 
 calculation are the dynamical matrices files.
-An example of the use of this option can be found in \texttt{example03}.
+An example of the use of this option can be found in \texttt{example03}. \\
+Number of tasks for this option: number of parallelizable tasks of the 
+phonon code (smaller but of the order of number of ${\bf q}$ points times 
+$3 N_{at}$, where $N_{at}$ is the number of atoms in the unit cell).
 
 \subsection{\texttt{what='scf\_disp'}}
 With this option the code makes a phonon dispersion calculation after the 
@@ -462,7 +475,10 @@ flpsdos       : postscript file of the phonon dos
 flpstherm     : postscript file of the harmonic thermodynamic quantities
                 Default: character(len=*) 'output_therm.ps'
 \end{verbatim}
-An example of the use of this option can be found in \texttt{example04}.
+An example of the use of this option can be found in \texttt{example04}. \\
+Number of tasks for this option: number of parallelizable tasks of the 
+phonon code (smaller but of the order of number of ${\bf q}$ points times 
+$3 N_{at}$, where $N_{at}$ is the number of atoms in the unit cell).
 
 \subsection{\texttt{what='mur\_lc'}}
 With this option the code runs several self-consistent calculations
@@ -503,28 +519,34 @@ flevdat    : file where the Murnaghan equation is written. The results of the
 flpsmur    : postscript file of the Murnaghan plot
              Default: character(len=*) 'output_mur.ps'
 \end{verbatim}
-An example of the use of this option can be found in \texttt{example05}.
+An example of the use of this option can be found in \texttt{example05}.\\
+Number of tasks for this option: \texttt{ngeo}.
 
 \subsection{\texttt{what='mur\_lc\_bands'}}
 With this option the code computes the band structure at the geometry 
 obtained from the minimum of the Murnaghan equation. See the options 
 \texttt{what='scf\_bands'} and \texttt{what='mur\_lc'} for a list of 
 the variables that control these two options. An example of the use of 
-this option can be found in \texttt{example06}.
+this option can be found in \texttt{example06}. \\
+Number of tasks for this option: \texttt{ngeo}.
 
 \subsection{\texttt{what='mur\_lc\_ph'}}
 This option is similar to \texttt{what='scf\_ph'} but the phonon calculation
 is made at the geometry obtained from the minimum of the Murnaghan equation.
 See the options \texttt{what='scf\_ph'} and \texttt{what='mur\_lc'} for a
 list of the variables that control these two options. 
-An example of the use of this option can be found in \texttt{example07}.
+An example of the use of this option can be found in \texttt{example07}. \\
+Number of tasks for this option: Maximum between \texttt{ngeo} and the number
+of tasks of the phonon code (see above the option \texttt{what='scf\_ph'}).
 
 \subsection{\texttt{what='mur\_lc\_disp'}}
 This option is similar to \texttt{what='scf\_disp'} but the phonon calculation
 is made at the geometry obtained from the minimum of the Murnaghan equation.
 See the options \texttt{what='scf\_disp'} and \texttt{what='mur\_lc'} for a
 list of the variables that control these two options. 
-An example of the use of this option can be found in \texttt{example08}.
+An example of the use of this option can be found in \texttt{example08}. \\
+Number of tasks for this option: Maximum between \texttt{ngeo} and the number
+of tasks of the phonon code (see above the option \texttt{what='scf\_ph'}).
 
 \subsection{\texttt{what='mur\_lc\_t'}}
 With this option the code calculates the anharmonic vibrational
@@ -560,7 +582,10 @@ flpsanhar     : postscript file of the anharmonic quantities.
 \end{verbatim}
 The output file corresponding to different geometries can be identified
 by the presence of the letters \texttt{g1}, \texttt{g2}, ... in the filename.
-An example of the use of this option can be found in \texttt{example09}.
+An example of the use of this option can be found in \texttt{example09}. \\
+Number of tasks for this option: Maximum between \texttt{ngeo} and the number
+of tasks of the phonon code (see above the option \texttt{what='scf\_ph'}). \\
+This option is implemented only for isotropic solids.
 
 \subsection{\texttt{what='elastic\_constants'}}
 With this option the code calculates the elastic constants of the solid.
@@ -576,7 +601,8 @@ is \texttt{ngeo\_strain}. The input variables that control this option are:
 frozen_ions: if .true. the elastic constants are calculated 
              keeping the ions frozen in the strained positions. 
              Default: logical .false.
-ngeo_strain: the number of strained configurations used. 
+ngeo_strain: the number of strained configurations used to calculate each
+             derivative. 
              Default: integer 4
 delta_epsilon: the interval of strain values between two geometries.
                To avoid a zero strain geometry that might have a
@@ -586,12 +612,16 @@ fl_el_cons: the name of the file that contains the elastic constants
             Default: character(len=*) 'output_el_con.dat'
 
 \end{verbatim}
+Number of tasks for this option: \texttt{ngeo\_strain} times the number of
+required independent strains.
 
 \subsection{\texttt{what='mur\_lc\_elastic\_constants'}}
 As \texttt{what='elastic\_constants'} but the calculation is made at the
 geometry that corresponds to the minimum of the Murnaghan equation. The
 Murnaghan minimization is made as described for \texttt{what='mur\_lc'}.
-An example of the use of this option can be found in \texttt{example13}.
+An example of the use of this option can be found in \texttt{example13}. \\
+Number of tasks for this option: maximum between \texttt{ngeo} and
+\texttt{ngeo\_strain} times the number of required independent strains.
 
 \subsection{\texttt{what='piezoelectric\_tensor'}}
 With this option the code calculates the piezoelectric tensor 
@@ -621,12 +651,14 @@ If a file with the elastic constants is found on disk, the code computes also
 the direct piezoelectric tensor $d_{\alpha,m}$ which describes
 the polarization induced by an external stress, as $d_{\alpha,m}=
 \sum_n g_{\alpha,n} C_{nm}^{-1}$. All these quantities are calculated 
-for a vanishing electric field.
+for a vanishing electric field. \\
+This feature is still uncomplete and experimental.
 
 \subsection{\texttt{what='mur\_lc\_piezoelectric\_tensor'}}
 As \texttt{what='piezoelectric\_tensor'} but the calculation is made at the
 geometry that corresponds to the minimum of the Murnaghan equation. The
-Murnaghan minimization is made as described for \texttt{what='mur\_lc'}.
+Murnaghan minimization is made as described for \texttt{what='mur\_lc'}. \\
+This feature is still uncomplete and experimental.
 
 \subsection{\texttt{what='polarization'}}
 With this option the code calculates the spontaneous polarization.
@@ -640,11 +672,13 @@ nppl: the number of k points per string. In the perpendicular plane the
       number of k-point is that given as input of the pw.x code.
       Default: integer 51
 \end{verbatim}
+This feature is still uncomplete and experimental.
 
 \subsection{\texttt{what='mur\_lc\_polarization'}}
 As \texttt{what='polarization'} but the calculation is made at the
 geometry that corresponds to the minimum of the Murnaghan equation. The
-Murnaghan minimization is made as described for \texttt{what='mur\_lc'}.
+Murnaghan minimization is made as described for \texttt{what='mur\_lc'}.\\
+This feature is still uncomplete and experimental.
 
 \subsection{\texttt{what='scf\_2d\_bands'}}
 With this option the code calculates the bands after a self consistent 
@@ -723,7 +757,9 @@ flprojlayer : the name of the file that contains the information of the
      Default: character(len=*) 'output_projlayer'
 \end{verbatim}
 The bands and the gnuplot scripts are saved on the same files that would
-be used with the option \texttt{what='scf\_bands'}.
+be used with the option \texttt{what='scf\_bands'}. \\
+Number of tasks for this option: \texttt{1}. Image parallelization is
+not useful with this option. 
 
 By default the symmetry separation is not carried out. The code plots the
 bands of the slab on the same panel with a different color for each 
