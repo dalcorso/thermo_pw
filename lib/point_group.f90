@@ -8,18 +8,23 @@
 
 MODULE point_group
 !
-!  This module contains variables and routines to deal with the point group
-!  symmetry. It complements the routines that are in find_group.f90,
+!  This module contains variables and routines to deal with the crystallographic
+!  point group symmetry. It complements the routines in find_group.f90,
 !  divide_class.f90 and divide_class_so.f90 in the PW/src directory of the
 !  QE package.
 !  The conventions, such as the code group, the symmetry operation types,
 !  the irreducible representations etc. are the same.
 !  Presently it has routines to perform the following task:
-!  Given two point group, the second a subgroup of the first,
+!  Given two point groups, the second a subgroup of the first,
 !  an a list of representations of the first point group, it
-!  transform it in a list of representations of the second point group.
-!  Double groups are supported.
-!
+!  transform it in a list of representations of the second group.
+!  Given two point groups, the second a subgroup of the first, 
+!  find which type it is. The different cases are discussed in the point-group
+!  manual in the thermo_pw/Doc directory. The routine find_aux_ind_two_groups,
+!  receives the rotation matrices of the two group and gives an index that
+!  correspond to the case.
+!  Double groups are supported, however in this case the distinction between
+!  different subgroup cases is irrelevant and not used.
 !
   USE kinds,      ONLY : DP
   !
@@ -96,7 +101,7 @@ CONTAINS
   INTEGER, INTENT(IN) :: group_in, group_out, aux_ind, rap
   INTEGER, INTENT(OUT) :: ndeg, rap_list(3)
   INTEGER :: sub_table(32, 6, 12, 4)
-  INTEGER :: ideg
+  INTEGER :: ideg, iax, ibx
 
   sub_table=0
 !
@@ -115,6 +120,9 @@ CONTAINS
 !
 !  C_4
 !
+        !
+        ! and C_2
+        !
         sub_table(4,1,1,1)=1
         sub_table(4,1,1,2)=1
         sub_table(4,1,2,1)=1
@@ -128,6 +136,9 @@ CONTAINS
 !
 !  C_6
 !
+        !
+        ! and C_2
+        !
         sub_table(4,1,1,1)=1
         sub_table(4,1,1,2)=1
         sub_table(4,1,2,1)=1
@@ -140,7 +151,9 @@ CONTAINS
         sub_table(4,1,5,2)=1
         sub_table(4,1,6,1)=1
         sub_table(4,1,6,2)=1
-
+        !
+        ! and C_3
+        !
         sub_table(5,1,1,1)=1
         sub_table(5,1,1,2)=1
         sub_table(5,1,2,1)=1
@@ -150,45 +163,51 @@ CONTAINS
         sub_table(5,1,4,1)=1
         sub_table(5,1,4,2)=3
         sub_table(5,1,5,1)=1
-        sub_table(5,1,5,2)=2
+        sub_table(5,1,5,2)=3
         sub_table(5,1,6,1)=1
-        sub_table(5,1,6,2)=3
+        sub_table(5,1,6,2)=2
 
      CASE(8)
 !
 ! D_2
 !
-        sub_table(3,1,1,1)=1
-        sub_table(3,1,1,2)=1
-        sub_table(3,1,2,1)=1
-        sub_table(3,1,2,2)=1
-        sub_table(3,1,3,1)=1
-        sub_table(3,1,3,2)=2
-        sub_table(3,1,4,1)=1
-        sub_table(3,1,4,2)=2
+        !
+        ! and C_2
+        !
+        sub_table(4,1,1,1)=1
+        sub_table(4,1,1,2)=1
+        sub_table(4,1,2,1)=1
+        sub_table(4,1,2,2)=1
+        sub_table(4,1,3,1)=1
+        sub_table(4,1,3,2)=2
+        sub_table(4,1,4,1)=1
+        sub_table(4,1,4,2)=2
 
-        sub_table(3,2,1,1)=1
-        sub_table(3,2,1,2)=1
-        sub_table(3,2,2,1)=1
-        sub_table(3,2,2,2)=2
-        sub_table(3,2,3,1)=1
-        sub_table(3,2,3,2)=1
-        sub_table(3,2,4,1)=1
-        sub_table(3,2,4,2)=2
+        sub_table(4,2,1,1)=1
+        sub_table(4,2,1,2)=1
+        sub_table(4,2,2,1)=1
+        sub_table(4,2,2,2)=2
+        sub_table(4,2,3,1)=1
+        sub_table(4,2,3,2)=1
+        sub_table(4,2,4,1)=1
+        sub_table(4,2,4,2)=2
 
-        sub_table(3,3,1,1)=1
-        sub_table(3,3,1,2)=1
-        sub_table(3,3,2,1)=1
-        sub_table(3,3,2,2)=2
-        sub_table(3,3,3,1)=1
-        sub_table(3,3,3,2)=2
-        sub_table(3,3,4,1)=1
-        sub_table(3,3,4,2)=1
+        sub_table(4,3,1,1)=1
+        sub_table(4,3,1,2)=1
+        sub_table(4,3,2,1)=1
+        sub_table(4,3,2,2)=2
+        sub_table(4,3,3,1)=1
+        sub_table(4,3,3,2)=2
+        sub_table(4,3,4,1)=1
+        sub_table(4,3,4,2)=1
 
      CASE(9)
 !
 ! D_3
 !
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=1
         sub_table(4,1,1,2)=1
         sub_table(4,1,2,1)=1
@@ -196,7 +215,9 @@ CONTAINS
         sub_table(4,1,3,1)=2
         sub_table(4,1,3,2)=1
         sub_table(4,1,3,3)=2
-
+        !
+        !  with C_3
+        !
         sub_table(5,1,1,1)=1
         sub_table(5,1,1,2)=1
         sub_table(5,1,2,1)=1
@@ -209,6 +230,9 @@ CONTAINS
 !
 !  D_4
 !
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=1
         sub_table(4,1,1,2)=1
         sub_table(4,1,2,1)=1
@@ -244,7 +268,9 @@ CONTAINS
         sub_table(4,3,5,1)=2
         sub_table(4,3,5,2)=1
         sub_table(4,3,5,3)=2
-
+        !
+        !  with C_4
+        !
         sub_table(6,1,1,1)=1
         sub_table(6,1,1,2)=1
         sub_table(6,1,2,1)=1
@@ -256,7 +282,9 @@ CONTAINS
         sub_table(6,1,5,1)=2
         sub_table(6,1,5,2)=3
         sub_table(6,1,5,3)=4
-
+        !
+        !  with D_2
+        !
         sub_table(8,1,1,1)=1
         sub_table(8,1,1,2)=1
         sub_table(8,1,2,1)=1
@@ -281,10 +309,37 @@ CONTAINS
         sub_table(8,2,5,2)=3
         sub_table(8,2,5,3)=4
 
+        sub_table(8,3,1,1)=1
+        sub_table(8,3,1,2)=1
+        sub_table(8,3,2,1)=1
+        sub_table(8,3,2,2)=3
+        sub_table(8,3,3,1)=1
+        sub_table(8,3,3,2)=1
+        sub_table(8,3,4,1)=1
+        sub_table(8,3,4,2)=3
+        sub_table(8,3,5,1)=2
+        sub_table(8,3,5,2)=2
+        sub_table(8,3,5,3)=4
+
+        sub_table(8,4,1,1)=1
+        sub_table(8,4,1,2)=1
+        sub_table(8,4,2,1)=1
+        sub_table(8,4,2,2)=4
+        sub_table(8,4,3,1)=1
+        sub_table(8,4,3,2)=1
+        sub_table(8,4,4,1)=1
+        sub_table(8,4,4,2)=4
+        sub_table(8,4,5,1)=2
+        sub_table(8,4,5,2)=2
+        sub_table(8,4,5,3)=3
+
      CASE(11)
 !
 !  D_6
 !
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=1
         sub_table(4,1,1,2)=1
         sub_table(4,1,2,1)=1
@@ -329,7 +384,9 @@ CONTAINS
         sub_table(4,3,6,1)=2
         sub_table(4,3,6,2)=1
         sub_table(4,3,6,3)=2
-
+        !
+        !  with C_3
+        !
         sub_table(5,1,1,1)=1
         sub_table(5,1,1,2)=1
         sub_table(5,1,2,1)=1
@@ -344,7 +401,9 @@ CONTAINS
         sub_table(5,1,6,1)=2
         sub_table(5,1,6,2)=2
         sub_table(5,1,6,3)=3
-
+        !
+        !  with C_6
+        !
         sub_table(7,1,1,1)=1
         sub_table(7,1,1,2)=1
         sub_table(7,1,2,1)=1
@@ -359,7 +418,26 @@ CONTAINS
         sub_table(7,1,6,1)=2
         sub_table(7,1,6,2)=5
         sub_table(7,1,6,3)=6
-
+        !
+        !  with D_2
+        !
+        sub_table(8,1,1,1)=1
+        sub_table(8,1,1,2)=1
+        sub_table(8,1,2,1)=1
+        sub_table(8,1,2,2)=2
+        sub_table(8,1,3,1)=1
+        sub_table(8,1,3,2)=3
+        sub_table(8,1,4,1)=1
+        sub_table(8,1,4,2)=4
+        sub_table(8,1,5,1)=2
+        sub_table(8,1,5,2)=3
+        sub_table(8,1,5,3)=4
+        sub_table(8,1,6,1)=2
+        sub_table(8,1,6,2)=1
+        sub_table(8,1,6,3)=2
+        !
+        !  with D_3
+        !
         sub_table(9,1,1,1)=1
         sub_table(9,1,1,2)=1
         sub_table(9,1,2,1)=1
@@ -420,7 +498,7 @@ CONTAINS
         sub_table(4,1,1,1)=1
         sub_table(4,1,1,2)=1
         sub_table(4,1,2,1)=1
-        sub_table(4,1,2,2)=2
+        sub_table(4,1,2,2)=1
         sub_table(4,1,3,1)=1
         sub_table(4,1,3,2)=2
         sub_table(4,1,4,1)=1
@@ -430,6 +508,9 @@ CONTAINS
 !
 !   C_3v
 !
+        !
+        !  with C_s
+        !
         sub_table(3,1,1,1)=1
         sub_table(3,1,1,2)=1
         sub_table(3,1,2,1)=1
@@ -437,20 +518,24 @@ CONTAINS
         sub_table(3,1,3,1)=2
         sub_table(3,1,3,2)=1
         sub_table(3,1,3,3)=2
-
+        !
+        !  with C_3v
+        !
         sub_table(5,1,1,1)=1
         sub_table(5,1,1,2)=1
         sub_table(5,1,2,1)=1
         sub_table(5,1,2,2)=1
         sub_table(5,1,3,1)=2
         sub_table(5,1,3,2)=2
-        sub_table(5,1,3,3)=2
-
+        sub_table(5,1,3,3)=3
 
      CASE(14)
 !
 !   C_4v
 !
+        !
+        !  with C_s
+        !
         sub_table(3,1,1,1)=1
         sub_table(3,1,1,2)=1
         sub_table(3,1,2,1)=1
@@ -474,7 +559,9 @@ CONTAINS
         sub_table(3,2,5,1)=2
         sub_table(3,2,5,2)=1
         sub_table(3,2,5,3)=2
-
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=1
         sub_table(4,1,1,2)=1
         sub_table(4,1,2,1)=1
@@ -486,7 +573,9 @@ CONTAINS
         sub_table(4,1,5,1)=2
         sub_table(4,1,5,2)=2
         sub_table(4,1,5,3)=2
-
+        !
+        !  with C_4
+        !
         sub_table(6,1,1,1)=1
         sub_table(6,1,1,2)=1
         sub_table(6,1,2,1)=1
@@ -498,7 +587,9 @@ CONTAINS
         sub_table(6,1,5,1)=2
         sub_table(6,1,5,2)=3
         sub_table(6,1,5,3)=4
-
+        !
+        !  with C_2v
+        !
         sub_table(12,1,1,1)=1
         sub_table(12,1,1,2)=1
         sub_table(12,1,2,1)=1
@@ -527,6 +618,9 @@ CONTAINS
 !
 !   C_6v
 !
+        !
+        !  with C_s
+        !
         sub_table(3,1,1,1)=1
         sub_table(3,1,1,2)=1
         sub_table(3,1,2,1)=1
@@ -556,7 +650,9 @@ CONTAINS
         sub_table(3,2,6,1)=2
         sub_table(3,2,6,2)=1
         sub_table(3,2,6,3)=2
-
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=1
         sub_table(4,1,1,2)=1
         sub_table(4,1,2,1)=1
@@ -566,12 +662,14 @@ CONTAINS
         sub_table(4,1,4,1)=1
         sub_table(4,1,4,2)=2
         sub_table(4,1,5,1)=2
-        sub_table(4,1,5,2)=1
-        sub_table(4,1,5,3)=1
+        sub_table(4,1,5,2)=2
+        sub_table(4,1,5,3)=2
         sub_table(4,1,6,1)=2
-        sub_table(4,1,6,2)=2
-        sub_table(4,1,6,3)=2
-
+        sub_table(4,1,6,2)=1
+        sub_table(4,1,6,3)=1
+        !
+        !  with C_3
+        !
         sub_table(5,1,1,1)=1
         sub_table(5,1,1,2)=1
         sub_table(5,1,2,1)=1
@@ -586,7 +684,9 @@ CONTAINS
         sub_table(5,1,6,1)=2
         sub_table(5,1,6,2)=2
         sub_table(5,1,6,3)=3
-
+        !
+        !  with C_6
+        !
         sub_table(7,1,1,1)=1
         sub_table(7,1,1,2)=1
         sub_table(7,1,2,1)=1
@@ -601,7 +701,9 @@ CONTAINS
         sub_table(7,1,6,1)=2
         sub_table(7,1,6,2)=5
         sub_table(7,1,6,3)=6
-
+        !
+        !  with C_2v
+        !
         sub_table(12,1,1,1)=1
         sub_table(12,1,1,2)=1
         sub_table(12,1,2,1)=1
@@ -616,7 +718,9 @@ CONTAINS
         sub_table(12,1,6,1)=2
         sub_table(12,1,6,2)=1
         sub_table(12,1,6,3)=2
-
+        !
+        !  with C_3v
+        !
         sub_table(13,1,1,1)=1
         sub_table(13,1,1,2)=1
         sub_table(13,1,2,1)=1
@@ -651,6 +755,9 @@ CONTAINS
 !
 ! C_2h
 !
+        !
+        !  with C_i
+        !
         sub_table(2,1,1,1)=1
         sub_table(2,1,1,2)=1
         sub_table(2,1,2,1)=1
@@ -659,7 +766,9 @@ CONTAINS
         sub_table(2,1,3,2)=2
         sub_table(2,1,4,1)=1
         sub_table(2,1,4,2)=2
-
+        !
+        !  with C_s
+        !
         sub_table(3,1,1,1)=1
         sub_table(3,1,1,2)=1
         sub_table(3,1,2,1)=1
@@ -668,7 +777,9 @@ CONTAINS
         sub_table(3,1,3,2)=2
         sub_table(3,1,4,1)=1
         sub_table(3,1,4,2)=1
-
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=1
         sub_table(4,1,1,2)=1
         sub_table(4,1,2,1)=1
@@ -682,6 +793,9 @@ CONTAINS
 !
 ! C_3h
 !
+        !
+        !  with C_s
+        !
         sub_table(3,1,1,1)=1
         sub_table(3,1,1,2)=1
         sub_table(3,1,2,1)=1
@@ -694,7 +808,9 @@ CONTAINS
         sub_table(3,1,5,2)=2
         sub_table(3,1,6,1)=1
         sub_table(3,1,6,2)=2
-
+        !
+        !  with C_3
+        !
         sub_table(5,1,1,1)=1
         sub_table(5,1,1,2)=1
         sub_table(5,1,2,1)=1
@@ -712,6 +828,9 @@ CONTAINS
 !
 !   C_4h
 !
+        !
+        !  with C_i
+        !
         sub_table(2,1,1,1)=1
         sub_table(2,1,1,2)=1
         sub_table(2,1,2,1)=1
@@ -728,7 +847,9 @@ CONTAINS
         sub_table(2,1,7,2)=2
         sub_table(2,1,8,1)=1
         sub_table(2,1,8,2)=2
-
+        !
+        !  with C_s
+        !
         sub_table(3,1,1,1)=1
         sub_table(3,1,1,2)=1
         sub_table(3,1,2,1)=1
@@ -745,7 +866,9 @@ CONTAINS
         sub_table(3,1,7,2)=1
         sub_table(3,1,8,1)=1
         sub_table(3,1,8,2)=1
-
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=1
         sub_table(4,1,1,2)=1
         sub_table(4,1,2,1)=1
@@ -762,7 +885,9 @@ CONTAINS
         sub_table(4,1,7,2)=2
         sub_table(4,1,8,1)=1
         sub_table(4,1,8,2)=2
-
+        !
+        !  with C_4
+        !
         sub_table(6,1,1,1)=1
         sub_table(6,1,1,2)=1
         sub_table(6,1,2,1)=1
@@ -779,7 +904,9 @@ CONTAINS
         sub_table(6,1,7,2)=3
         sub_table(6,1,8,1)=1
         sub_table(6,1,8,2)=4
-
+        !
+        !  with C_2h
+        !
         sub_table(16,1,1,1)=1
         sub_table(16,1,1,2)=1
         sub_table(16,1,2,1)=1
@@ -796,7 +923,9 @@ CONTAINS
         sub_table(16,1,7,2)=4
         sub_table(16,1,8,1)=1
         sub_table(16,1,8,2)=4
-
+        !
+        !  with S_4
+        !
         sub_table(26,1,1,1)=1
         sub_table(26,1,1,2)=1
         sub_table(26,1,2,1)=1
@@ -818,6 +947,9 @@ CONTAINS
 !
 !  C_6h
 !
+        !
+        !  with C_i
+        !
         sub_table(2,1,1,1)=1
         sub_table(2,1,1,2)=1
         sub_table(2,1,2,1)=1
@@ -842,7 +974,9 @@ CONTAINS
         sub_table(2,1,11,2)=2
         sub_table(2,1,12,1)=1
         sub_table(2,1,12,2)=2
-
+        !
+        !  with C_s
+        !
         sub_table(3,1,1,1)=1
         sub_table(3,1,1,2)=1
         sub_table(3,1,2,1)=1
@@ -867,7 +1001,9 @@ CONTAINS
         sub_table(3,1,11,2)=2
         sub_table(3,1,12,1)=1
         sub_table(3,1,12,2)=2
-
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=1
         sub_table(4,1,1,2)=1
         sub_table(4,1,2,1)=1
@@ -892,7 +1028,9 @@ CONTAINS
         sub_table(4,1,11,2)=1
         sub_table(4,1,12,1)=1
         sub_table(4,1,12,2)=1
-
+        !
+        !  with C_3
+        !
         sub_table(5,1,1,1)=1
         sub_table(5,1,1,2)=1
         sub_table(5,1,2,1)=1
@@ -902,9 +1040,9 @@ CONTAINS
         sub_table(5,1,4,1)=1
         sub_table(5,1,4,2)=3
         sub_table(5,1,5,1)=1
-        sub_table(5,1,5,2)=2
+        sub_table(5,1,5,2)=3
         sub_table(5,1,6,1)=1
-        sub_table(5,1,6,2)=3
+        sub_table(5,1,6,2)=2
         sub_table(5,1,7,1)=1
         sub_table(5,1,7,2)=1
         sub_table(5,1,8,1)=1
@@ -914,10 +1052,12 @@ CONTAINS
         sub_table(5,1,10,1)=1
         sub_table(5,1,10,2)=3
         sub_table(5,1,11,1)=1
-        sub_table(5,1,11,2)=2
+        sub_table(5,1,11,2)=3
         sub_table(5,1,12,1)=1
-        sub_table(5,1,12,2)=3
-
+        sub_table(5,1,12,2)=2
+        !
+        !  with C_6
+        !
         sub_table(7,1,1,1)=1
         sub_table(7,1,1,2)=1
         sub_table(7,1,2,1)=1
@@ -942,7 +1082,9 @@ CONTAINS
         sub_table(7,1,11,2)=5
         sub_table(7,1,12,1)=1
         sub_table(7,1,12,2)=6
-
+        !
+        !  with C_2h
+        !
         sub_table(16,1,1,1)=1
         sub_table(16,1,1,2)=1
         sub_table(16,1,2,1)=1
@@ -967,7 +1109,9 @@ CONTAINS
         sub_table(16,1,11,2)=3
         sub_table(16,1,12,1)=1
         sub_table(16,1,12,2)=3
-
+        !
+        !  with C_3h
+        !
         sub_table(17,1,1,1)=1
         sub_table(17,1,1,2)=1
         sub_table(17,1,2,1)=1
@@ -977,9 +1121,9 @@ CONTAINS
         sub_table(17,1,4,1)=1
         sub_table(17,1,4,2)=6
         sub_table(17,1,5,1)=1
-        sub_table(17,1,5,2)=2
+        sub_table(17,1,5,2)=3
         sub_table(17,1,6,1)=1
-        sub_table(17,1,6,2)=3
+        sub_table(17,1,6,2)=2
         sub_table(17,1,7,1)=1
         sub_table(17,1,7,2)=4
         sub_table(17,1,8,1)=1
@@ -989,10 +1133,12 @@ CONTAINS
         sub_table(17,1,10,1)=1
         sub_table(17,1,10,2)=3
         sub_table(17,1,11,1)=1
-        sub_table(17,1,11,2)=5
+        sub_table(17,1,11,2)=6
         sub_table(17,1,12,1)=1
-        sub_table(17,1,12,2)=6
-
+        sub_table(17,1,12,2)=5
+        !
+        !  with S_6
+        !
         sub_table(27,1,1,1)=1
         sub_table(27,1,1,2)=1
         sub_table(27,1,2,1)=1
@@ -1002,9 +1148,9 @@ CONTAINS
         sub_table(27,1,4,1)=1
         sub_table(27,1,4,2)=3
         sub_table(27,1,5,1)=1
-        sub_table(27,1,5,2)=2
+        sub_table(27,1,5,2)=3
         sub_table(27,1,6,1)=1
-        sub_table(27,1,6,2)=3
+        sub_table(27,1,6,2)=2
         sub_table(27,1,7,1)=1
         sub_table(27,1,7,2)=4
         sub_table(27,1,8,1)=1
@@ -1014,14 +1160,17 @@ CONTAINS
         sub_table(27,1,10,1)=1
         sub_table(27,1,10,2)=6
         sub_table(27,1,11,1)=1
-        sub_table(27,1,11,2)=5
+        sub_table(27,1,11,2)=6
         sub_table(27,1,12,1)=1
-        sub_table(27,1,12,2)=6
+        sub_table(27,1,12,2)=5
  
      CASE(20)
 !
 !  D_2h
 !
+        !
+        !  with C_i
+        !
         sub_table(2,1,1,1)=1
         sub_table(2,1,1,2)=1
         sub_table(2,1,2,1)=1
@@ -1038,23 +1187,25 @@ CONTAINS
         sub_table(2,1,7,2)=2
         sub_table(2,1,8,1)=1
         sub_table(2,1,8,2)=2
-
+        !
+        !  with C_s
+        !
         sub_table(3,1,1,1)=1
         sub_table(3,1,1,2)=1
         sub_table(3,1,2,1)=1
-        sub_table(3,1,2,2)=2
+        sub_table(3,1,2,2)=1
         sub_table(3,1,3,1)=1
         sub_table(3,1,3,2)=2
         sub_table(3,1,4,1)=1
-        sub_table(3,1,4,2)=1
+        sub_table(3,1,4,2)=2
         sub_table(3,1,5,1)=1
         sub_table(3,1,5,2)=2
         sub_table(3,1,6,1)=1
-        sub_table(3,1,6,2)=1
+        sub_table(3,1,6,2)=2
         sub_table(3,1,7,1)=1
         sub_table(3,1,7,2)=1
         sub_table(3,1,8,1)=1
-        sub_table(3,1,8,2)=2
+        sub_table(3,1,8,2)=1
 
         sub_table(3,2,1,1)=1
         sub_table(3,2,1,2)=1
@@ -1076,34 +1227,36 @@ CONTAINS
         sub_table(3,3,1,1)=1
         sub_table(3,3,1,2)=1
         sub_table(3,3,2,1)=1
-        sub_table(3,3,2,2)=1
+        sub_table(3,3,2,2)=2
         sub_table(3,3,3,1)=1
         sub_table(3,3,3,2)=2
         sub_table(3,3,4,1)=1
-        sub_table(3,3,4,2)=2
+        sub_table(3,3,4,2)=1
         sub_table(3,3,5,1)=1
         sub_table(3,3,5,2)=2
         sub_table(3,3,6,1)=1
-        sub_table(3,3,6,2)=2
+        sub_table(3,3,6,2)=1
         sub_table(3,3,7,1)=1
         sub_table(3,3,7,2)=1
         sub_table(3,3,8,1)=1
-        sub_table(3,3,8,2)=1
-
+        sub_table(3,3,8,2)=2
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=1
         sub_table(4,1,1,2)=1
         sub_table(4,1,2,1)=1
-        sub_table(4,1,2,2)=2
+        sub_table(4,1,2,2)=1
         sub_table(4,1,3,1)=1
         sub_table(4,1,3,2)=2
         sub_table(4,1,4,1)=1
-        sub_table(4,1,4,2)=1
+        sub_table(4,1,4,2)=2
         sub_table(4,1,5,1)=1
-        sub_table(4,1,5,2)=1
+        sub_table(4,1,5,2)=2
         sub_table(4,1,6,1)=1
         sub_table(4,1,6,2)=2
         sub_table(4,1,7,1)=1
-        sub_table(4,1,7,2)=2
+        sub_table(4,1,7,2)=1
         sub_table(4,1,8,1)=1
         sub_table(4,1,8,2)=1
 
@@ -1116,31 +1269,33 @@ CONTAINS
         sub_table(4,2,4,1)=1
         sub_table(4,2,4,2)=2
         sub_table(4,2,5,1)=1
-        sub_table(4,2,5,2)=1
+        sub_table(4,2,5,2)=2
         sub_table(4,2,6,1)=1
-        sub_table(4,2,6,2)=2
+        sub_table(4,2,6,2)=1
         sub_table(4,2,7,1)=1
-        sub_table(4,2,7,2)=1
+        sub_table(4,2,7,2)=2
         sub_table(4,2,8,1)=1
-        sub_table(4,2,8,2)=2
+        sub_table(4,2,8,2)=1
 
         sub_table(4,3,1,1)=1
         sub_table(4,3,1,2)=1
         sub_table(4,3,2,1)=1
-        sub_table(4,3,2,2)=1
+        sub_table(4,3,2,2)=2
         sub_table(4,3,3,1)=1
         sub_table(4,3,3,2)=2
         sub_table(4,3,4,1)=1
-        sub_table(4,3,4,2)=2
+        sub_table(4,3,4,2)=1
         sub_table(4,3,5,1)=1
         sub_table(4,3,5,2)=1
         sub_table(4,3,6,1)=1
-        sub_table(4,3,6,2)=1
+        sub_table(4,3,6,2)=2
         sub_table(4,3,7,1)=1
         sub_table(4,3,7,2)=2
         sub_table(4,3,8,1)=1
-        sub_table(4,3,8,2)=2
-
+        sub_table(4,3,8,2)=1
+        !
+        !  with D_2
+        !
         sub_table(8,1,1,1)=1
         sub_table(8,1,1,2)=1
         sub_table(8,1,2,1)=1
@@ -1157,7 +1312,9 @@ CONTAINS
         sub_table(8,1,7,2)=3
         sub_table(8,1,8,1)=1
         sub_table(8,1,8,2)=4
-
+        !
+        !  with C_2v
+        !
         sub_table(12,1,1,1)=1
         sub_table(12,1,1,2)=1
         sub_table(12,1,2,1)=1
@@ -1209,22 +1366,75 @@ CONTAINS
         sub_table(12,3,8,1)=1
         sub_table(12,3,8,2)=1
 
+        sub_table(12,4,1,1)=1
+        sub_table(12,4,1,2)=1
+        sub_table(12,4,2,1)=1
+        sub_table(12,4,2,2)=3
+        sub_table(12,4,3,1)=1
+        sub_table(12,4,3,2)=4
+        sub_table(12,4,4,1)=1
+        sub_table(12,4,4,2)=2
+        sub_table(12,4,5,1)=1
+        sub_table(12,4,5,2)=2
+        sub_table(12,4,6,1)=1
+        sub_table(12,4,6,2)=4
+        sub_table(12,4,7,1)=1
+        sub_table(12,4,7,2)=3
+        sub_table(12,4,8,1)=1
+        sub_table(12,4,8,2)=1
+
+        sub_table(12,5,1,1)=1
+        sub_table(12,5,1,2)=1
+        sub_table(12,5,2,1)=1
+        sub_table(12,5,2,2)=4
+        sub_table(12,5,3,1)=1
+        sub_table(12,5,3,2)=2
+        sub_table(12,5,4,1)=1
+        sub_table(12,5,4,2)=3
+        sub_table(12,5,5,1)=1
+        sub_table(12,5,5,2)=2
+        sub_table(12,5,6,1)=1
+        sub_table(12,5,6,2)=3
+        sub_table(12,5,7,1)=1
+        sub_table(12,5,7,2)=1
+        sub_table(12,5,8,1)=1
+        sub_table(12,5,8,2)=4
+
+        sub_table(12,6,1,1)=1
+        sub_table(12,6,1,2)=1
+        sub_table(12,6,2,1)=1
+        sub_table(12,6,2,2)=4
+        sub_table(12,6,3,1)=1
+        sub_table(12,6,3,2)=3
+        sub_table(12,6,4,1)=1
+        sub_table(12,6,4,2)=2
+        sub_table(12,6,5,1)=1
+        sub_table(12,6,5,2)=2
+        sub_table(12,6,6,1)=1
+        sub_table(12,6,6,2)=3
+        sub_table(12,6,7,1)=1
+        sub_table(12,6,7,2)=4
+        sub_table(12,6,8,1)=1
+        sub_table(12,6,8,2)=1
+        !
+        !  with C_2h
+        !
         sub_table(16,1,1,1)=1
         sub_table(16,1,1,2)=1
         sub_table(16,1,2,1)=1
-        sub_table(16,1,2,2)=2
+        sub_table(16,1,2,2)=1
         sub_table(16,1,3,1)=1
         sub_table(16,1,3,2)=2
         sub_table(16,1,4,1)=1
-        sub_table(16,1,4,2)=1
+        sub_table(16,1,4,2)=2
         sub_table(16,1,5,1)=1
         sub_table(16,1,5,2)=3
         sub_table(16,1,6,1)=1
-        sub_table(16,1,6,2)=4
+        sub_table(16,1,6,2)=3
         sub_table(16,1,7,1)=1
         sub_table(16,1,7,2)=4
         sub_table(16,1,8,1)=1
-        sub_table(16,1,8,2)=3
+        sub_table(16,1,8,2)=4
 
         sub_table(16,2,1,1)=1
         sub_table(16,2,1,2)=1
@@ -1246,24 +1456,27 @@ CONTAINS
         sub_table(16,3,1,1)=1
         sub_table(16,3,1,2)=1
         sub_table(16,3,2,1)=1
-        sub_table(16,3,2,2)=1
+        sub_table(16,3,2,2)=2
         sub_table(16,3,3,1)=1
         sub_table(16,3,3,2)=2
         sub_table(16,3,4,1)=1
-        sub_table(16,3,4,2)=2
+        sub_table(16,3,4,2)=1
         sub_table(16,3,5,1)=1
         sub_table(16,3,5,2)=3
         sub_table(16,3,6,1)=1
-        sub_table(16,3,6,2)=3
+        sub_table(16,3,6,2)=4
         sub_table(16,3,7,1)=1
         sub_table(16,3,7,2)=4
         sub_table(16,3,8,1)=1
-        sub_table(16,3,8,2)=4
+        sub_table(16,3,8,2)=3
 
      CASE(21)
 !
 !  D_3h
 !
+        !
+        !  with C_s
+        !
         sub_table(3,1,1,1)=1
         sub_table(3,1,1,2)=1
         sub_table(3,1,2,1)=1
@@ -1293,7 +1506,9 @@ CONTAINS
         sub_table(3,2,6,1)=2
         sub_table(3,2,6,2)=1
         sub_table(3,2,6,3)=2
-
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=1
         sub_table(4,1,1,2)=1
         sub_table(4,1,2,1)=1
@@ -1308,7 +1523,9 @@ CONTAINS
         sub_table(4,1,6,1)=2
         sub_table(4,1,6,2)=1
         sub_table(4,1,6,3)=2
-
+        !
+        !  with C_3
+        !
         sub_table(5,1,1,1)=1
         sub_table(5,1,1,2)=1
         sub_table(5,1,2,1)=1
@@ -1323,7 +1540,9 @@ CONTAINS
         sub_table(5,1,6,1)=2
         sub_table(5,1,6,2)=2
         sub_table(5,1,6,3)=3
-
+        !
+        !  with D_3
+        !
         sub_table(9,1,1,1)=1
         sub_table(9,1,1,2)=1
         sub_table(9,1,2,1)=1
@@ -1338,7 +1557,9 @@ CONTAINS
         sub_table(9,1,6,1)=2
         sub_table(9,1,6,2)=3
         sub_table(9,1,6,3)=3
-
+        !
+        !  with C_2v
+        !
         sub_table(12,1,1,1)=1
         sub_table(12,1,1,2)=1
         sub_table(12,1,2,1)=1
@@ -1354,6 +1575,23 @@ CONTAINS
         sub_table(12,1,6,2)=2
         sub_table(12,1,6,3)=4
 
+        sub_table(12,2,1,1)=1
+        sub_table(12,2,1,2)=1
+        sub_table(12,2,2,1)=1
+        sub_table(12,2,2,2)=4
+        sub_table(12,2,3,1)=2
+        sub_table(12,2,3,2)=1
+        sub_table(12,2,3,3)=4
+        sub_table(12,2,4,1)=1
+        sub_table(12,2,4,2)=2
+        sub_table(12,2,5,1)=1
+        sub_table(12,2,5,2)=3
+        sub_table(12,2,6,1)=2
+        sub_table(12,2,6,2)=2
+        sub_table(12,2,6,3)=3
+        !
+        !  with C_3v
+        !
         sub_table(13,1,1,1)=1
         sub_table(13,1,1,2)=1
         sub_table(13,1,2,1)=1
@@ -1368,7 +1606,9 @@ CONTAINS
         sub_table(13,1,6,1)=2
         sub_table(13,1,6,2)=3
         sub_table(13,1,6,3)=3
-
+        !
+        !  with C_3h
+        !
         sub_table(17,1,1,1)=1
         sub_table(17,1,1,2)=1
         sub_table(17,1,2,1)=1
@@ -1388,6 +1628,9 @@ CONTAINS
 !
 !  D_4h
 !
+        !
+        !  with C_i
+        !
         sub_table(2,1,1,1)=1
         sub_table(2,1,1,2)=1
         sub_table(2,1,2,1)=1
@@ -1410,7 +1653,9 @@ CONTAINS
         sub_table(2,1,10,1)=2
         sub_table(2,1,10,2)=2
         sub_table(2,1,10,3)=2
-
+        !
+        !  with C_s
+        !
         sub_table(3,1,1,1)=1
         sub_table(3,1,1,2)=1
         sub_table(3,1,2,1)=1
@@ -1479,7 +1724,9 @@ CONTAINS
         sub_table(3,3,10,1)=2
         sub_table(3,3,10,2)=1
         sub_table(3,3,10,3)=2
-
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=1
         sub_table(4,1,1,2)=1
         sub_table(4,1,2,1)=1
@@ -1548,7 +1795,9 @@ CONTAINS
         sub_table(4,3,10,1)=2
         sub_table(4,3,10,2)=1
         sub_table(4,3,10,3)=2
-
+        !
+        !  with C_4
+        !
         sub_table(6,1,1,1)=1
         sub_table(6,1,1,2)=1
         sub_table(6,1,2,1)=1
@@ -1571,7 +1820,9 @@ CONTAINS
         sub_table(6,1,10,1)=2
         sub_table(6,1,10,2)=3
         sub_table(6,1,10,3)=4
-
+        !
+        !  with D_2
+        !
         sub_table(8,1,1,1)=1
         sub_table(8,1,1,2)=1
         sub_table(8,1,2,1)=1
@@ -1617,7 +1868,9 @@ CONTAINS
         sub_table(8,2,10,1)=2
         sub_table(8,2,10,2)=3
         sub_table(8,2,10,3)=4
-
+        !
+        !  with D_4
+        !
         sub_table(10,1,1,1)=1
         sub_table(10,1,1,2)=1
         sub_table(10,1,2,1)=1
@@ -1641,7 +1894,7 @@ CONTAINS
         sub_table(10,1,10,2)=5
         sub_table(10,1,10,3)=5
         !
-        !  C_2v four types
+        !  with C_2v 
         !
         sub_table(12,1,1,1)=1
         sub_table(12,1,1,2)=1
@@ -1715,72 +1968,51 @@ CONTAINS
         sub_table(12,4,1,1)=1
         sub_table(12,4,1,2)=1
         sub_table(12,4,2,1)=1
-        sub_table(12,4,2,2)=3
+        sub_table(12,4,2,2)=4
         sub_table(12,4,3,1)=1
-        sub_table(12,4,3,2)=3
+        sub_table(12,4,3,2)=1
         sub_table(12,4,4,1)=1
-        sub_table(12,4,4,2)=1
+        sub_table(12,4,4,2)=4
         sub_table(12,4,5,1)=2
         sub_table(12,4,5,2)=2
-        sub_table(12,4,5,3)=4
+        sub_table(12,4,5,3)=3
         sub_table(12,4,6,1)=1
         sub_table(12,4,6,2)=2
         sub_table(12,4,7,1)=1
-        sub_table(12,4,7,2)=4
+        sub_table(12,4,7,2)=3
         sub_table(12,4,8,1)=1
-        sub_table(12,4,8,2)=4
+        sub_table(12,4,8,2)=2
         sub_table(12,4,9,1)=1
-        sub_table(12,4,9,2)=2
+        sub_table(12,4,9,2)=3
         sub_table(12,4,10,1)=2
         sub_table(12,4,10,2)=1
-        sub_table(12,4,10,3)=3
+        sub_table(12,4,10,3)=4
 
         sub_table(12,5,1,1)=1
         sub_table(12,5,1,2)=1
         sub_table(12,5,2,1)=1
-        sub_table(12,5,2,2)=4
+        sub_table(12,5,2,2)=3
         sub_table(12,5,3,1)=1
-        sub_table(12,5,3,2)=1
+        sub_table(12,5,3,2)=3
         sub_table(12,5,4,1)=1
-        sub_table(12,5,4,2)=4
+        sub_table(12,5,4,2)=1
         sub_table(12,5,5,1)=2
         sub_table(12,5,5,2)=2
-        sub_table(12,5,5,3)=3
+        sub_table(12,5,5,3)=4
         sub_table(12,5,6,1)=1
         sub_table(12,5,6,2)=2
         sub_table(12,5,7,1)=1
-        sub_table(12,5,7,2)=3
+        sub_table(12,5,7,2)=4
         sub_table(12,5,8,1)=1
-        sub_table(12,5,8,2)=2
+        sub_table(12,5,8,2)=4
         sub_table(12,5,9,1)=1
-        sub_table(12,5,9,2)=3
+        sub_table(12,5,9,2)=2
         sub_table(12,5,10,1)=2
         sub_table(12,5,10,2)=1
-        sub_table(12,5,10,3)=4
-
-        sub_table(12,6,1,1)=1
-        sub_table(12,6,1,2)=1
-        sub_table(12,6,2,1)=1
-        sub_table(12,6,2,2)=4
-        sub_table(12,6,3,1)=1
-        sub_table(12,6,3,2)=4
-        sub_table(12,6,4,1)=1
-        sub_table(12,6,4,2)=1
-        sub_table(12,6,5,1)=2
-        sub_table(12,6,5,2)=2
-        sub_table(12,6,5,3)=3
-        sub_table(12,6,6,1)=1
-        sub_table(12,6,6,2)=2
-        sub_table(12,6,7,1)=1
-        sub_table(12,6,7,2)=3
-        sub_table(12,6,8,1)=1
-        sub_table(12,6,8,2)=2
-        sub_table(12,6,9,1)=1
-        sub_table(12,6,9,2)=3
-        sub_table(12,6,10,1)=2
-        sub_table(12,6,10,2)=1
-        sub_table(12,6,10,3)=4
-
+        sub_table(12,5,10,3)=3
+        !
+        !  with C_4v 
+        !
         sub_table(14,1,1,1)=1
         sub_table(14,1,1,2)=1
         sub_table(14,1,2,1)=1
@@ -1803,7 +2035,9 @@ CONTAINS
         sub_table(14,1,10,1)=2
         sub_table(14,1,10,2)=5
         sub_table(14,1,10,3)=5
-
+        !
+        !  with C_2h 
+        !
         sub_table(16,1,1,1)=1
         sub_table(16,1,1,2)=1
         sub_table(16,1,2,1)=1
@@ -1872,7 +2106,9 @@ CONTAINS
         sub_table(16,3,10,1)=2
         sub_table(16,3,10,2)=3
         sub_table(16,3,10,3)=4
-
+        !
+        !  with C_4h 
+        !
         sub_table(18,1,1,1)=1
         sub_table(18,1,1,2)=1
         sub_table(18,1,2,1)=1
@@ -1895,7 +2131,9 @@ CONTAINS
         sub_table(18,1,10,1)=2
         sub_table(18,1,10,2)=7
         sub_table(18,1,10,3)=8
-
+        !
+        !  with D_2h 
+        !
         sub_table(20,1,1,1)=1
         sub_table(20,1,1,2)=1
         sub_table(20,1,2,1)=1
@@ -1941,7 +2179,9 @@ CONTAINS
         sub_table(20,2,10,1)=2
         sub_table(20,2,10,2)=7
         sub_table(20,2,10,3)=8
-
+        !
+        !  with D_2d 
+        !
         sub_table(24,1,1,1)=1
         sub_table(24,1,1,2)=1
         sub_table(24,1,2,1)=1
@@ -1987,7 +2227,9 @@ CONTAINS
         sub_table(24,2,10,1)=2
         sub_table(24,2,10,2)=5
         sub_table(24,2,10,3)=5
-
+        !
+        !  with S_4 
+        !
         sub_table(26,1,1,1)=1
         sub_table(26,1,1,2)=1
         sub_table(26,1,2,1)=1
@@ -2015,6 +2257,9 @@ CONTAINS
 !
 ! D_6h
 !
+        !
+        !  with C_i
+        !
         sub_table(2,1,1,1)=1
         sub_table(2,1,1,2)=1
         sub_table(2,1,2,1)=1
@@ -2043,7 +2288,9 @@ CONTAINS
         sub_table(2,1,12,1)=2
         sub_table(2,1,12,2)=2
         sub_table(2,1,12,3)=2
-
+        !
+        !  with C_s
+        !
         sub_table(3,1,1,1)=1
         sub_table(3,1,1,2)=1
         sub_table(3,1,2,1)=1
@@ -2130,7 +2377,9 @@ CONTAINS
         sub_table(3,3,12,1)=2
         sub_table(3,3,12,2)=1
         sub_table(3,3,12,3)=2
-
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=1
         sub_table(4,1,1,2)=1
         sub_table(4,1,2,1)=1
@@ -2217,7 +2466,9 @@ CONTAINS
         sub_table(4,3,12,1)=2
         sub_table(4,3,12,2)=1
         sub_table(4,3,12,3)=2
-
+        !
+        !  with C_3
+        !
         sub_table(5,1,1,1)=1
         sub_table(5,1,1,2)=1
         sub_table(5,1,2,1)=1
@@ -2246,7 +2497,9 @@ CONTAINS
         sub_table(5,1,12,1)=2
         sub_table(5,1,12,2)=2
         sub_table(5,1,12,3)=3
-
+        !
+        !  with C_6
+        !
         sub_table(7,1,1,1)=1
         sub_table(7,1,1,2)=1
         sub_table(7,1,2,1)=1
@@ -2275,7 +2528,9 @@ CONTAINS
         sub_table(7,1,12,1)=2
         sub_table(7,1,12,2)=5
         sub_table(7,1,12,3)=6
-
+        !
+        !  with D_2
+        !
         sub_table(8,1,1,1)=1
         sub_table(8,1,1,2)=1
         sub_table(8,1,2,1)=1
@@ -2304,7 +2559,9 @@ CONTAINS
         sub_table(8,1,12,1)=2
         sub_table(8,1,12,2)=1
         sub_table(8,1,12,3)=2
-
+        !
+        !  with D_3
+        !
         sub_table(9,1,1,1)=1
         sub_table(9,1,1,2)=1
         sub_table(9,1,2,1)=1
@@ -2362,7 +2619,9 @@ CONTAINS
         sub_table(9,2,12,1)=2
         sub_table(9,2,12,2)=3
         sub_table(9,2,12,3)=3
-
+        !
+        !  with D_6
+        !
         sub_table(11,1,1,1)=1
         sub_table(11,1,1,2)=1
         sub_table(11,1,2,1)=1
@@ -2391,7 +2650,9 @@ CONTAINS
         sub_table(11,1,12,1)=2
         sub_table(11,1,12,2)=6
         sub_table(11,1,12,3)=6
-
+        !
+        !  with C_2v
+        !
         sub_table(12,1,1,1)=1
         sub_table(12,1,1,2)=1
         sub_table(12,1,2,1)=1
@@ -2411,11 +2672,11 @@ CONTAINS
         sub_table(12,1,8,1)=1
         sub_table(12,1,8,2)=1
         sub_table(12,1,9,1)=1
-        sub_table(12,1,9,2)=4
+        sub_table(12,1,9,2)=3
         sub_table(12,1,10,1)=1
-        sub_table(12,1,10,2)=3
+        sub_table(12,1,10,2)=4
         sub_table(12,1,11,1)=2
-        sub_table(11,1,11,2)=3
+        sub_table(12,1,11,2)=3
         sub_table(12,1,11,3)=4
         sub_table(12,1,12,1)=2
         sub_table(12,1,12,2)=1
@@ -2444,7 +2705,7 @@ CONTAINS
         sub_table(12,2,10,1)=1
         sub_table(12,2,10,2)=3
         sub_table(12,2,11,1)=2
-        sub_table(11,2,11,2)=1
+        sub_table(12,2,11,2)=1
         sub_table(12,2,11,3)=3
         sub_table(12,2,12,1)=2
         sub_table(12,2,12,2)=2
@@ -2453,40 +2714,71 @@ CONTAINS
         sub_table(12,3,1,1)=1
         sub_table(12,3,1,2)=1
         sub_table(12,3,2,1)=1
-        sub_table(12,3,2,2)=3
+        sub_table(12,3,2,2)=4
         sub_table(12,3,3,1)=1
-        sub_table(12,3,3,2)=4
+        sub_table(12,3,3,2)=2
         sub_table(12,3,4,1)=1
-        sub_table(12,3,4,2)=2
+        sub_table(12,3,4,2)=3
         sub_table(12,3,5,1)=2
         sub_table(12,3,5,2)=2
-        sub_table(12,3,5,3)=4
+        sub_table(12,3,5,3)=3
         sub_table(12,3,6,1)=2
         sub_table(12,3,6,2)=1
-        sub_table(12,3,6,3)=3
+        sub_table(12,3,6,3)=4
         sub_table(12,3,7,1)=1
         sub_table(12,3,7,2)=2
         sub_table(12,3,8,1)=1
-        sub_table(12,3,8,2)=4
+        sub_table(12,3,8,2)=3
         sub_table(12,3,9,1)=1
-        sub_table(12,3,9,2)=3
+        sub_table(12,3,9,2)=1
         sub_table(12,3,10,1)=1
-        sub_table(12,3,10,2)=1
+        sub_table(12,3,10,2)=4
         sub_table(12,3,11,1)=2
-        sub_table(11,3,11,2)=1
-        sub_table(12,3,11,3)=3
+        sub_table(12,3,11,2)=1
+        sub_table(12,3,11,3)=4
         sub_table(12,3,12,1)=2
         sub_table(12,3,12,2)=2
-        sub_table(12,3,12,3)=4
+        sub_table(12,3,12,3)=3
 
+        sub_table(12,4,1,1)=1
+        sub_table(12,4,1,2)=1
+        sub_table(12,4,2,1)=1
+        sub_table(12,4,2,2)=3
+        sub_table(12,4,3,1)=1
+        sub_table(12,4,3,2)=4
+        sub_table(12,4,4,1)=1
+        sub_table(12,4,4,2)=2
+        sub_table(12,4,5,1)=2
+        sub_table(12,4,5,2)=2
+        sub_table(12,4,5,3)=4
+        sub_table(12,4,6,1)=2
+        sub_table(12,4,6,2)=1
+        sub_table(12,4,6,3)=3
+        sub_table(12,4,7,1)=1
+        sub_table(12,4,7,2)=2
+        sub_table(12,4,8,1)=1
+        sub_table(12,4,8,2)=4
+        sub_table(12,4,9,1)=1
+        sub_table(12,4,9,2)=3
+        sub_table(12,4,10,1)=1
+        sub_table(12,4,10,2)=1
+        sub_table(12,4,11,1)=2
+        sub_table(12,4,11,2)=1
+        sub_table(12,4,11,3)=3
+        sub_table(12,4,12,1)=2
+        sub_table(12,4,12,2)=2
+        sub_table(12,4,12,3)=4
+        !
+        !  with C_3v
+        !
         sub_table(13,1,1,1)=1
         sub_table(13,1,1,2)=1
         sub_table(13,1,2,1)=1
         sub_table(13,1,2,2)=2
         sub_table(13,1,3,1)=1
-        sub_table(13,1,3,2)=1
+        sub_table(13,1,3,2)=2
         sub_table(13,1,4,1)=1
-        sub_table(13,1,4,2)=2
+        sub_table(13,1,4,2)=1
         sub_table(13,1,5,1)=2
         sub_table(13,1,5,2)=3
         sub_table(13,1,5,3)=3
@@ -2498,9 +2790,9 @@ CONTAINS
         sub_table(13,1,8,1)=1
         sub_table(13,1,8,2)=1
         sub_table(13,1,9,1)=1
-        sub_table(13,1,9,2)=2
+        sub_table(13,1,9,2)=1
         sub_table(13,1,10,1)=1
-        sub_table(13,1,10,2)=1
+        sub_table(13,1,10,2)=2
         sub_table(13,1,11,1)=2
         sub_table(13,1,11,2)=3
         sub_table(13,1,11,3)=3
@@ -2513,9 +2805,9 @@ CONTAINS
         sub_table(13,2,2,1)=1
         sub_table(13,2,2,2)=2
         sub_table(13,2,3,1)=1
-        sub_table(13,2,3,2)=2
+        sub_table(13,2,3,2)=1
         sub_table(13,2,4,1)=1
-        sub_table(13,2,4,2)=1
+        sub_table(13,2,4,2)=2
         sub_table(13,2,5,1)=2
         sub_table(13,2,5,2)=3
         sub_table(13,2,5,3)=3
@@ -2527,24 +2819,26 @@ CONTAINS
         sub_table(13,2,8,1)=1
         sub_table(13,2,8,2)=1
         sub_table(13,2,9,1)=1
-        sub_table(13,2,9,2)=1
+        sub_table(13,2,9,2)=2
         sub_table(13,2,10,1)=1
-        sub_table(13,2,10,2)=2
+        sub_table(13,2,10,2)=1
         sub_table(13,2,11,1)=2
         sub_table(13,2,11,2)=3
         sub_table(13,2,11,3)=3
         sub_table(13,2,12,1)=2
         sub_table(13,2,12,2)=3
         sub_table(13,2,12,3)=3
-
+        !
+        !  with C_6v
+        !
         sub_table(15,1,1,1)=1
         sub_table(15,1,1,2)=1
         sub_table(15,1,2,1)=1
         sub_table(15,1,2,2)=2
         sub_table(15,1,3,1)=1
-        sub_table(15,1,3,2)=3
+        sub_table(15,1,3,2)=4
         sub_table(15,1,4,1)=1
-        sub_table(15,1,4,2)=4
+        sub_table(15,1,4,2)=3
         sub_table(15,1,5,1)=2
         sub_table(15,1,5,2)=5
         sub_table(15,1,5,3)=5
@@ -2556,16 +2850,18 @@ CONTAINS
         sub_table(15,1,8,1)=1
         sub_table(15,1,8,2)=1
         sub_table(15,1,9,1)=1
-        sub_table(15,1,9,2)=4
+        sub_table(15,1,9,2)=3
         sub_table(15,1,10,1)=1
-        sub_table(15,1,10,2)=3
+        sub_table(15,1,10,2)=4
         sub_table(15,1,11,1)=2
         sub_table(15,1,11,2)=5
         sub_table(15,1,11,3)=5
         sub_table(15,1,12,1)=2
         sub_table(15,1,12,2)=6
         sub_table(15,1,12,3)=6
-
+        !
+        !  with C_2h
+        !
         sub_table(16,1,1,1)=1
         sub_table(16,1,1,2)=1
         sub_table(16,1,2,1)=1
@@ -2643,16 +2939,18 @@ CONTAINS
         sub_table(16,3,8,1)=1
         sub_table(16,3,8,2)=4
         sub_table(16,3,9,1)=1
-        sub_table(16,3,9,2)=3
+        sub_table(16,3,9,2)=4
         sub_table(16,3,10,1)=1
-        sub_table(16,3,10,2)=4
+        sub_table(16,3,10,2)=3
         sub_table(16,3,11,1)=2
         sub_table(16,3,11,2)=3
         sub_table(16,3,11,3)=4
         sub_table(16,3,12,1)=2
         sub_table(16,3,12,2)=3
         sub_table(16,3,12,3)=4
- 
+        !
+        !  with C_3h
+        !
         sub_table(17,1,1,1)=1
         sub_table(17,1,1,2)=1
         sub_table(17,1,2,1)=1
@@ -2681,7 +2979,9 @@ CONTAINS
         sub_table(17,1,12,1)=2
         sub_table(17,1,12,2)=5
         sub_table(17,1,12,3)=6
- 
+        !
+        !  with C_6h
+        !
         sub_table(19,1,1,1)=1
         sub_table(19,1,1,2)=1
         sub_table(19,1,2,1)=1
@@ -2710,7 +3010,9 @@ CONTAINS
         sub_table(19,1,12,1)=2
         sub_table(19,1,12,2)=11
         sub_table(19,1,12,3)=12
-
+        !
+        !  with D_2h
+        !
         sub_table(20,1,1,1)=1
         sub_table(20,1,1,2)=1
         sub_table(20,1,2,1)=1
@@ -2739,7 +3041,9 @@ CONTAINS
         sub_table(20,1,12,1)=2
         sub_table(20,1,12,2)=5
         sub_table(20,1,12,3)=6
-
+        !
+        !  with D_3h
+        !
         sub_table(21,1,1,1)=1
         sub_table(21,1,1,2)=1
         sub_table(21,1,2,1)=1
@@ -2797,7 +3101,9 @@ CONTAINS
         sub_table(21,2,12,1)=2
         sub_table(21,2,12,2)=6
         sub_table(21,2,12,3)=6
-
+        !
+        !  with D_3d
+        !
         sub_table(25,1,1,1)=1
         sub_table(25,1,1,2)=1
         sub_table(25,1,2,1)=1
@@ -2856,10 +3162,42 @@ CONTAINS
         sub_table(25,2,12,2)=6
         sub_table(25,2,12,3)=6
 
+        sub_table(27,1,1,1)=1
+        sub_table(27,1,1,2)=1
+        sub_table(27,1,2,1)=1
+        sub_table(27,1,2,2)=1
+        sub_table(27,1,3,1)=1
+        sub_table(27,1,3,2)=1
+        sub_table(27,1,4,1)=1
+        sub_table(27,1,4,2)=1
+        sub_table(27,1,5,1)=2
+        sub_table(27,1,5,2)=2
+        sub_table(27,1,5,3)=3
+        sub_table(27,1,6,1)=2
+        sub_table(27,1,6,2)=2
+        sub_table(27,1,6,3)=3
+        sub_table(27,1,7,1)=1
+        sub_table(27,1,7,2)=4
+        sub_table(27,1,8,1)=1
+        sub_table(27,1,8,2)=4
+        sub_table(27,1,9,1)=1
+        sub_table(27,1,9,2)=4
+        sub_table(27,1,10,1)=1
+        sub_table(27,1,10,2)=4
+        sub_table(27,1,11,1)=2
+        sub_table(27,1,11,2)=5
+        sub_table(27,1,11,3)=6
+        sub_table(27,1,12,1)=2
+        sub_table(27,1,12,2)=5
+        sub_table(27,1,12,3)=6
+
      CASE(24)
 !
 ! D_2d
 !
+        !
+        !  with C_s
+        !
         sub_table(3,1,1,1)=1
         sub_table(3,1,1,2)=1
         sub_table(3,1,2,1)=1
@@ -2871,7 +3209,9 @@ CONTAINS
         sub_table(3,1,5,1)=2
         sub_table(3,1,5,2)=1
         sub_table(3,1,5,3)=2
-
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=1
         sub_table(4,1,1,2)=1
         sub_table(4,1,2,1)=1
@@ -2895,7 +3235,9 @@ CONTAINS
         sub_table(4,2,5,1)=2
         sub_table(4,2,5,2)=1
         sub_table(4,2,5,3)=2
-
+        !
+        !  with D_2
+        !
         sub_table(8,1,1,1)=1
         sub_table(8,1,1,2)=1
         sub_table(8,1,2,1)=1
@@ -2908,6 +3250,32 @@ CONTAINS
         sub_table(8,1,5,2)=3
         sub_table(8,1,5,3)=4
 
+        sub_table(8,2,1,1)=1
+        sub_table(8,2,1,2)=1
+        sub_table(8,2,2,1)=1
+        sub_table(8,2,2,2)=3
+        sub_table(8,2,3,1)=1
+        sub_table(8,2,3,2)=1
+        sub_table(8,2,4,1)=1
+        sub_table(8,2,4,2)=3
+        sub_table(8,2,5,1)=2
+        sub_table(8,2,5,2)=1
+        sub_table(8,2,5,3)=4
+
+        sub_table(8,3,1,1)=1
+        sub_table(8,3,1,2)=1
+        sub_table(8,3,2,1)=1
+        sub_table(8,3,2,2)=4
+        sub_table(8,3,3,1)=1
+        sub_table(8,3,3,2)=1
+        sub_table(8,3,4,1)=1
+        sub_table(8,3,4,2)=4
+        sub_table(8,3,5,1)=2
+        sub_table(8,3,5,2)=2
+        sub_table(8,3,5,3)=3
+        !
+        !  with C_2v
+        !
         sub_table(12,1,1,1)=1
         sub_table(12,1,1,2)=1
         sub_table(12,1,2,1)=1
@@ -2919,7 +3287,9 @@ CONTAINS
         sub_table(12,1,5,1)=2
         sub_table(12,1,5,2)=3
         sub_table(12,1,5,3)=4
-
+        !
+        !  with S_4
+        !
         sub_table(26,1,1,1)=1
         sub_table(26,1,1,2)=1
         sub_table(26,1,2,1)=1
@@ -2936,6 +3306,9 @@ CONTAINS
 !
 !  D_3d
 !
+        !
+        !  with C_i
+        !
         sub_table(2,1,1,1)=1
         sub_table(2,1,1,2)=1
         sub_table(2,1,2,1)=1
@@ -2950,7 +3323,9 @@ CONTAINS
         sub_table(2,1,6,1)=2
         sub_table(2,1,6,2)=2
         sub_table(2,1,6,3)=2
-
+        !
+        !  with C_s
+        !
         sub_table(3,1,1,1)=1
         sub_table(3,1,1,2)=1
         sub_table(3,1,2,1)=1
@@ -2965,7 +3340,9 @@ CONTAINS
         sub_table(3,1,6,1)=2
         sub_table(3,1,6,2)=1
         sub_table(3,1,6,3)=2
-
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=1
         sub_table(4,1,1,2)=1
         sub_table(4,1,2,1)=1
@@ -2980,7 +3357,9 @@ CONTAINS
         sub_table(4,1,6,1)=2
         sub_table(4,1,6,2)=1
         sub_table(4,1,6,3)=2
-
+        !
+        !  with C_3
+        !
         sub_table(5,1,1,1)=1
         sub_table(5,1,1,2)=1
         sub_table(5,1,2,1)=1
@@ -2995,7 +3374,9 @@ CONTAINS
         sub_table(5,1,6,1)=2
         sub_table(5,1,6,2)=2
         sub_table(5,1,6,3)=3
-
+        !
+        !  with D_3
+        !
         sub_table(9,1,1,1)=1
         sub_table(9,1,1,2)=1
         sub_table(9,1,2,1)=1
@@ -3010,7 +3391,9 @@ CONTAINS
         sub_table(9,1,6,1)=2
         sub_table(9,1,6,2)=3
         sub_table(9,1,6,3)=3
-
+        !
+        !  with C_3v
+        !
         sub_table(13,1,1,1)=1
         sub_table(13,1,1,2)=1
         sub_table(13,1,2,1)=1
@@ -3025,7 +3408,9 @@ CONTAINS
         sub_table(13,1,6,1)=2
         sub_table(13,1,6,2)=3
         sub_table(13,1,6,3)=3
-
+        !
+        !  with C_2h
+        !
         sub_table(16,1,1,1)=1
         sub_table(16,1,1,2)=1
         sub_table(16,1,2,1)=1
@@ -3040,7 +3425,9 @@ CONTAINS
         sub_table(16,1,6,1)=2
         sub_table(16,1,6,2)=3
         sub_table(16,1,6,3)=4
-
+        !
+        !  with S_6
+        !
         sub_table(27,1,1,1)=1
         sub_table(27,1,1,2)=1
         sub_table(27,1,2,1)=1
@@ -3060,6 +3447,9 @@ CONTAINS
 !
 !  S_4
 !
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=1
         sub_table(4,1,1,2)=1
         sub_table(4,1,2,1)=1
@@ -3068,10 +3458,14 @@ CONTAINS
         sub_table(4,1,3,2)=2
         sub_table(4,1,4,1)=1
         sub_table(4,1,4,2)=2
+
      CASE(27)
 !
 !  S_6
 !
+        !
+        !  with C_i
+        !
         sub_table(2,1,1,1)=1
         sub_table(2,1,1,2)=1
         sub_table(2,1,2,1)=1
@@ -3084,7 +3478,9 @@ CONTAINS
         sub_table(2,1,5,2)=2
         sub_table(2,1,6,1)=1
         sub_table(2,1,6,2)=2
-
+        !
+        !  with C_3
+        !
         sub_table(5,1,1,1)=1
         sub_table(5,1,1,2)=1
         sub_table(5,1,2,1)=1
@@ -3102,6 +3498,9 @@ CONTAINS
 !
 !  T
 !
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=1
         sub_table(4,1,1,2)=1
         sub_table(4,1,2,1)=1
@@ -3112,18 +3511,22 @@ CONTAINS
         sub_table(4,1,4,2)=1
         sub_table(4,1,4,3)=2
         sub_table(4,1,4,4)=2
-
+        !
+        !  with C_3
+        !
         sub_table(5,1,1,1)=1
         sub_table(5,1,1,2)=1
         sub_table(5,1,2,1)=1
-        sub_table(5,1,2,2)=3
+        sub_table(5,1,2,2)=2
         sub_table(5,1,3,1)=1
-        sub_table(5,1,3,2)=2
+        sub_table(5,1,3,2)=3
         sub_table(5,1,4,1)=3
         sub_table(5,1,4,2)=1
         sub_table(5,1,4,3)=2
         sub_table(5,1,4,4)=3
-
+        !
+        !  with D_2
+        !
         sub_table(8,1,1,1)=1
         sub_table(8,1,1,2)=1
         sub_table(8,1,2,1)=1
@@ -3139,6 +3542,9 @@ CONTAINS
 !
 !  T_h
 !
+        !
+        !  with C_i
+        !
         sub_table(2,1,1,1)=1
         sub_table(2,1,1,2)=1
         sub_table(2,1,2,1)=1
@@ -3159,7 +3565,9 @@ CONTAINS
         sub_table(2,1,8,2)=2
         sub_table(2,1,8,3)=2
         sub_table(2,1,8,4)=2
-
+        !
+        !  with C_s
+        !
         sub_table(3,1,1,1)=1
         sub_table(3,1,1,2)=1
         sub_table(3,1,2,1)=1
@@ -3180,7 +3588,9 @@ CONTAINS
         sub_table(3,1,8,2)=1
         sub_table(3,1,8,3)=1
         sub_table(3,1,8,4)=2
-
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=1
         sub_table(4,1,1,2)=1
         sub_table(4,1,2,1)=1
@@ -3201,13 +3611,15 @@ CONTAINS
         sub_table(4,1,8,2)=1
         sub_table(4,1,8,3)=2
         sub_table(4,1,8,4)=2
-
+        !
+        !  with C_3
+        !
         sub_table(5,1,1,1)=1
         sub_table(5,1,1,2)=1
         sub_table(5,1,2,1)=1
-        sub_table(5,1,2,2)=3
+        sub_table(5,1,2,2)=2
         sub_table(5,1,3,1)=1
-        sub_table(5,1,3,2)=2
+        sub_table(5,1,3,2)=3
         sub_table(5,1,4,1)=3
         sub_table(5,1,4,2)=1
         sub_table(5,1,4,3)=2
@@ -3215,14 +3627,16 @@ CONTAINS
         sub_table(5,1,5,1)=1
         sub_table(5,1,5,2)=1
         sub_table(5,1,6,1)=1
-        sub_table(5,1,6,2)=3
+        sub_table(5,1,6,2)=2
         sub_table(5,1,7,1)=1
-        sub_table(5,1,7,2)=2
+        sub_table(5,1,7,2)=3
         sub_table(5,1,8,1)=3
         sub_table(5,1,8,2)=1
         sub_table(5,1,8,3)=2
         sub_table(5,1,8,4)=3
-
+        !
+        !  with D_2
+        !
         sub_table(8,1,1,1)=1
         sub_table(8,1,1,2)=1
         sub_table(8,1,2,1)=1
@@ -3243,7 +3657,9 @@ CONTAINS
         sub_table(8,1,8,2)=2
         sub_table(8,1,8,3)=3
         sub_table(8,1,8,4)=4
-
+        !
+        !  with C_2v
+        !
         sub_table(12,1,1,1)=1
         sub_table(12,1,1,2)=1
         sub_table(12,1,2,1)=1
@@ -3264,7 +3680,9 @@ CONTAINS
         sub_table(12,1,8,2)=1
         sub_table(12,1,8,3)=3
         sub_table(12,1,8,4)=4
- 
+        !
+        !  with C_2h
+        !
         sub_table(16,1,1,1)=1
         sub_table(16,1,1,2)=1
         sub_table(16,1,2,1)=1
@@ -3285,7 +3703,9 @@ CONTAINS
         sub_table(16,1,8,2)=3
         sub_table(16,1,8,3)=4
         sub_table(16,1,8,4)=4
-
+        !
+        !  with D_2h
+        !
         sub_table(20,1,1,1)=1
         sub_table(20,1,1,2)=1
         sub_table(20,1,2,1)=1
@@ -3306,13 +3726,15 @@ CONTAINS
         sub_table(20,1,8,2)=6
         sub_table(20,1,8,3)=7
         sub_table(20,1,8,4)=8
-
+        !
+        !  with S_6
+        !
         sub_table(27,1,1,1)=1
         sub_table(27,1,1,2)=1
         sub_table(27,1,2,1)=1
-        sub_table(27,1,2,2)=3
+        sub_table(27,1,2,2)=2
         sub_table(27,1,3,1)=1
-        sub_table(27,1,3,2)=2
+        sub_table(27,1,3,2)=3
         sub_table(27,1,4,1)=3
         sub_table(27,1,4,2)=1
         sub_table(27,1,4,3)=2
@@ -3320,14 +3742,16 @@ CONTAINS
         sub_table(27,1,5,1)=1
         sub_table(27,1,5,2)=4
         sub_table(27,1,6,1)=1
-        sub_table(27,1,6,2)=6
+        sub_table(27,1,6,2)=5
         sub_table(27,1,7,1)=1
-        sub_table(27,1,7,2)=5
+        sub_table(27,1,7,2)=6
         sub_table(27,1,8,1)=3
         sub_table(27,1,8,2)=4
         sub_table(27,1,8,3)=5
         sub_table(27,1,8,4)=6
-
+        !
+        !  with T
+        !
         sub_table(28,1,1,1)=1
         sub_table(28,1,1,2)=1
         sub_table(28,1,2,1)=1
@@ -3353,6 +3777,9 @@ CONTAINS
 !
 !  T_d
 !
+        !
+        !  with C_s
+        !
         sub_table(3,1,1,1)=1
         sub_table(3,1,1,2)=1
         sub_table(3,1,2,1)=1
@@ -3368,7 +3795,9 @@ CONTAINS
         sub_table(3,1,5,2)=1
         sub_table(3,1,5,3)=1
         sub_table(3,1,5,4)=2
-
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=1
         sub_table(4,1,1,2)=1
         sub_table(4,1,2,1)=1
@@ -3384,7 +3813,9 @@ CONTAINS
         sub_table(4,1,5,2)=1
         sub_table(4,1,5,3)=2
         sub_table(4,1,5,4)=2
-
+        !
+        !  with C_3
+        !
         sub_table(5,1,1,1)=1
         sub_table(5,1,1,2)=1
         sub_table(5,1,2,1)=1
@@ -3400,7 +3831,9 @@ CONTAINS
         sub_table(5,1,5,2)=1
         sub_table(5,1,5,3)=2
         sub_table(5,1,5,4)=3
-
+        !
+        !  with D_2
+        !
         sub_table(8,1,1,1)=1
         sub_table(8,1,1,2)=1
         sub_table(8,1,2,1)=1
@@ -3416,7 +3849,9 @@ CONTAINS
         sub_table(8,1,5,2)=2
         sub_table(8,1,5,3)=3
         sub_table(8,1,5,4)=4
-
+        !
+        !  with C_2v
+        !
         sub_table(12,1,1,1)=1
         sub_table(12,1,1,2)=1
         sub_table(12,1,2,1)=1
@@ -3432,7 +3867,9 @@ CONTAINS
         sub_table(12,1,5,2)=1
         sub_table(12,1,5,3)=3
         sub_table(12,1,5,4)=4
-
+        !
+        !  with C_3v
+        !
         sub_table(13,1,1,1)=1
         sub_table(13,1,1,2)=1
         sub_table(13,1,2,1)=1
@@ -3448,7 +3885,9 @@ CONTAINS
         sub_table(13,1,5,2)=1
         sub_table(13,1,5,3)=3
         sub_table(13,1,5,4)=3
-
+        !
+        !  with D_2d
+        !
         sub_table(24,1,1,1)=1
         sub_table(24,1,1,2)=1
         sub_table(24,1,2,1)=1
@@ -3457,14 +3896,16 @@ CONTAINS
         sub_table(24,1,3,2)=1
         sub_table(24,1,3,3)=3
         sub_table(24,1,4,1)=3
-        sub_table(24,1,4,2)=4
+        sub_table(24,1,4,2)=2
         sub_table(24,1,4,3)=5
         sub_table(24,1,4,4)=5
         sub_table(24,1,5,1)=3
-        sub_table(24,1,5,2)=2
+        sub_table(24,1,5,2)=4
         sub_table(24,1,5,3)=5
         sub_table(24,1,5,4)=5
-
+        !
+        !  with S_4
+        !
         sub_table(26,1,1,1)=1
         sub_table(26,1,1,2)=1
         sub_table(26,1,2,1)=1
@@ -3473,14 +3914,16 @@ CONTAINS
         sub_table(26,1,3,2)=1
         sub_table(26,1,3,3)=2
         sub_table(26,1,4,1)=3
-        sub_table(26,1,4,2)=2
+        sub_table(26,1,4,2)=1
         sub_table(26,1,4,3)=3
         sub_table(26,1,4,4)=4
         sub_table(26,1,5,1)=3
-        sub_table(26,1,5,2)=1
+        sub_table(26,1,5,2)=2
         sub_table(26,1,5,3)=3
         sub_table(26,1,5,4)=4
-
+        !
+        !  with T
+        !
         sub_table(28,1,1,1)=1
         sub_table(28,1,1,2)=1
         sub_table(28,1,2,1)=1
@@ -3501,6 +3944,9 @@ CONTAINS
 !
 !  O
 !
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=1
         sub_table(4,1,1,2)=1
         sub_table(4,1,2,1)=1
@@ -3532,7 +3978,9 @@ CONTAINS
         sub_table(4,2,5,2)=1
         sub_table(4,2,5,3)=1
         sub_table(4,2,5,4)=2
-
+        !
+        !  with C_3
+        !
         sub_table(5,1,1,1)=1
         sub_table(5,1,1,2)=1
         sub_table(5,1,2,1)=1
@@ -3548,7 +3996,9 @@ CONTAINS
         sub_table(5,1,5,2)=1
         sub_table(5,1,5,3)=2
         sub_table(5,1,5,4)=3
-
+        !
+        !  with C_4
+        !
         sub_table(6,1,1,1)=1
         sub_table(6,1,1,2)=1
         sub_table(6,1,2,1)=1
@@ -3564,7 +4014,9 @@ CONTAINS
         sub_table(6,1,5,2)=2
         sub_table(6,1,5,3)=3
         sub_table(6,1,5,4)=4
-
+        !
+        !  with D_2
+        !
         sub_table(8,1,1,1)=1
         sub_table(8,1,1,2)=1
         sub_table(8,1,2,1)=1
@@ -3596,7 +4048,9 @@ CONTAINS
         sub_table(8,2,5,2)=1
         sub_table(8,2,5,3)=3
         sub_table(8,2,5,4)=4
-
+        !
+        !  with D_3
+        !
         sub_table(9,1,1,1)=1
         sub_table(9,1,1,2)=1
         sub_table(9,1,2,1)=1
@@ -3612,7 +4066,9 @@ CONTAINS
         sub_table(9,1,5,2)=1
         sub_table(9,1,5,3)=3
         sub_table(9,1,5,4)=3
-
+        !
+        !  with D_4
+        !
         sub_table(10,1,1,1)=1
         sub_table(10,1,1,2)=1
         sub_table(10,1,2,1)=1
@@ -3622,13 +4078,15 @@ CONTAINS
         sub_table(10,1,3,3)=3
         sub_table(10,1,4,1)=3
         sub_table(10,1,4,2)=2
-        sub_table(10,1,4,3)=4
-        sub_table(10,1,4,4)=4
+        sub_table(10,1,4,3)=5
+        sub_table(10,1,4,4)=5
         sub_table(10,1,5,1)=3
-        sub_table(10,1,5,2)=3
-        sub_table(10,1,5,3)=4
-        sub_table(10,1,5,4)=4
-
+        sub_table(10,1,5,2)=4
+        sub_table(10,1,5,3)=5
+        sub_table(10,1,5,4)=5
+        !
+        !  with T
+        !
         sub_table(28,1,1,1)=1
         sub_table(28,1,1,2)=1
         sub_table(28,1,2,1)=1
@@ -3649,6 +4107,9 @@ CONTAINS
 !
 !  O_h
 !
+        !
+        !  with C_i
+        !
         sub_table(2,1,1,1)=1
         sub_table(2,1,1,2)=1
         sub_table(2,1,2,1)=1
@@ -3679,7 +4140,9 @@ CONTAINS
         sub_table(2,1,10,2)=2
         sub_table(2,1,10,3)=2
         sub_table(2,1,10,4)=2
-
+        !
+        !  with C_s
+        !
         sub_table(3,1,1,1)=1
         sub_table(3,1,1,2)=1
         sub_table(3,1,2,1)=1
@@ -3711,6 +4174,39 @@ CONTAINS
         sub_table(3,1,10,3)=1
         sub_table(3,1,10,4)=2
 
+        sub_table(3,2,1,1)=1
+        sub_table(3,2,1,2)=1
+        sub_table(3,2,2,1)=1
+        sub_table(3,2,2,2)=2
+        sub_table(3,2,3,1)=2
+        sub_table(3,2,3,2)=1
+        sub_table(3,2,3,3)=2
+        sub_table(3,2,4,1)=3
+        sub_table(3,2,4,2)=1
+        sub_table(3,2,4,3)=2
+        sub_table(3,2,4,4)=2
+        sub_table(3,2,5,1)=3
+        sub_table(3,2,5,2)=1
+        sub_table(3,2,5,3)=1
+        sub_table(3,2,5,4)=2
+        sub_table(3,2,6,1)=1
+        sub_table(3,2,6,2)=2
+        sub_table(3,2,7,1)=1
+        sub_table(3,2,7,2)=1
+        sub_table(3,2,8,1)=2
+        sub_table(3,2,8,2)=1
+        sub_table(3,2,8,3)=2
+        sub_table(3,2,9,1)=3
+        sub_table(3,2,9,2)=1
+        sub_table(3,2,9,3)=1
+        sub_table(3,2,9,4)=2
+        sub_table(3,2,10,1)=3
+        sub_table(3,2,10,2)=1
+        sub_table(3,2,10,3)=2
+        sub_table(3,2,10,4)=2
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=1
         sub_table(4,1,1,2)=1
         sub_table(4,1,2,1)=1
@@ -3742,6 +4238,39 @@ CONTAINS
         sub_table(4,1,10,3)=2
         sub_table(4,1,10,4)=2
 
+        sub_table(4,2,1,1)=1
+        sub_table(4,2,1,2)=1
+        sub_table(4,2,2,1)=1
+        sub_table(4,2,2,2)=2
+        sub_table(4,2,3,1)=2
+        sub_table(4,2,3,2)=1
+        sub_table(4,2,3,3)=2
+        sub_table(4,2,4,1)=3
+        sub_table(4,2,4,2)=1
+        sub_table(4,2,4,3)=2
+        sub_table(4,2,4,4)=2
+        sub_table(4,2,5,1)=3
+        sub_table(4,2,5,2)=1
+        sub_table(4,2,5,3)=1
+        sub_table(4,2,5,4)=2
+        sub_table(4,2,6,1)=1
+        sub_table(4,2,6,2)=1
+        sub_table(4,2,7,1)=1
+        sub_table(4,2,7,2)=2
+        sub_table(4,2,8,1)=2
+        sub_table(4,2,8,2)=1
+        sub_table(4,2,8,3)=2
+        sub_table(4,2,9,1)=3
+        sub_table(4,2,9,2)=1
+        sub_table(4,2,9,3)=2
+        sub_table(4,2,9,4)=2
+        sub_table(4,2,10,1)=3
+        sub_table(4,2,10,2)=1
+        sub_table(4,2,10,3)=1
+        sub_table(4,2,10,4)=2
+        !
+        !  with C_3
+        !
         sub_table(5,1,1,1)=1
         sub_table(5,1,1,2)=1
         sub_table(5,1,2,1)=1
@@ -3772,7 +4301,9 @@ CONTAINS
         sub_table(5,1,10,2)=1
         sub_table(5,1,10,3)=2
         sub_table(5,1,10,4)=3
-
+        !
+        !  with C_4
+        !
         sub_table(6,1,1,1)=1
         sub_table(6,1,1,2)=1
         sub_table(6,1,2,1)=1
@@ -3803,7 +4334,9 @@ CONTAINS
         sub_table(6,1,10,2)=2
         sub_table(6,1,10,3)=3
         sub_table(6,1,10,4)=4
-
+        !
+        !  with D_2
+        !
         sub_table(8,1,1,1)=1
         sub_table(8,1,1,2)=1
         sub_table(8,1,2,1)=1
@@ -3835,6 +4368,39 @@ CONTAINS
         sub_table(8,1,10,3)=3
         sub_table(8,1,10,4)=4
 
+        sub_table(8,2,1,1)=1
+        sub_table(8,2,1,2)=1
+        sub_table(8,2,2,1)=1
+        sub_table(8,2,2,2)=2
+        sub_table(8,2,3,1)=2
+        sub_table(8,2,3,2)=1
+        sub_table(8,2,3,3)=2
+        sub_table(8,2,4,1)=3
+        sub_table(8,2,4,2)=2
+        sub_table(8,2,4,3)=3
+        sub_table(8,2,4,4)=4
+        sub_table(8,2,5,1)=3
+        sub_table(8,2,5,2)=1
+        sub_table(8,2,5,3)=3
+        sub_table(8,2,5,4)=4
+        sub_table(8,2,6,1)=1
+        sub_table(8,2,6,2)=1
+        sub_table(8,2,7,1)=1
+        sub_table(8,2,7,2)=2
+        sub_table(8,2,8,1)=2
+        sub_table(8,2,8,2)=1
+        sub_table(8,2,8,3)=2
+        sub_table(8,2,9,1)=3
+        sub_table(8,2,9,2)=2
+        sub_table(8,2,9,3)=3
+        sub_table(8,2,9,4)=4
+        sub_table(8,2,10,1)=3
+        sub_table(8,2,10,2)=1
+        sub_table(8,2,10,3)=3
+        sub_table(8,2,10,4)=4
+        !
+        !  with D_3
+        !
         sub_table(9,1,1,1)=1
         sub_table(9,1,1,2)=1
         sub_table(9,1,2,1)=1
@@ -3843,11 +4409,11 @@ CONTAINS
         sub_table(9,1,3,2)=3
         sub_table(9,1,3,3)=3
         sub_table(9,1,4,1)=3
-        sub_table(9,1,4,2)=2
+        sub_table(9,1,4,2)=1
         sub_table(9,1,4,3)=3
         sub_table(9,1,4,4)=3
         sub_table(9,1,5,1)=3
-        sub_table(9,1,5,2)=1
+        sub_table(9,1,5,2)=2
         sub_table(9,1,5,3)=3
         sub_table(9,1,5,4)=3
         sub_table(9,1,6,1)=1
@@ -3858,14 +4424,16 @@ CONTAINS
         sub_table(9,1,8,2)=3
         sub_table(9,1,8,3)=3
         sub_table(9,1,9,1)=3
-        sub_table(9,1,9,2)=2
+        sub_table(9,1,9,2)=1
         sub_table(9,1,9,3)=3
         sub_table(9,1,9,4)=3
         sub_table(9,1,10,1)=3
-        sub_table(9,1,10,2)=1
+        sub_table(9,1,10,2)=2
         sub_table(9,1,10,3)=3
         sub_table(9,1,10,4)=3
-
+        !
+        !  with D_4
+        !
         sub_table(10,1,1,1)=1
         sub_table(10,1,1,2)=1
         sub_table(10,1,2,1)=1
@@ -3896,7 +4464,9 @@ CONTAINS
         sub_table(10,1,10,2)=4
         sub_table(10,1,10,3)=5
         sub_table(10,1,10,4)=5
-
+        !
+        !  with C_2v
+        !
         sub_table(12,1,1,1)=1
         sub_table(12,1,1,2)=1
         sub_table(12,1,2,1)=1
@@ -3940,7 +4510,7 @@ CONTAINS
         sub_table(12,2,4,3)=3
         sub_table(12,2,4,4)=4
         sub_table(12,2,5,1)=3
-        sub_table(12,2,5,2)=2
+        sub_table(12,2,5,2)=1
         sub_table(12,2,5,3)=3
         sub_table(12,2,5,4)=4
         sub_table(12,2,6,1)=1
@@ -3955,7 +4525,7 @@ CONTAINS
         sub_table(12,2,9,3)=3
         sub_table(12,2,9,4)=4
         sub_table(12,2,10,1)=3
-        sub_table(12,2,10,2)=1
+        sub_table(12,2,10,2)=2
         sub_table(12,2,10,3)=3
         sub_table(12,2,10,4)=4
 
@@ -3989,7 +4559,9 @@ CONTAINS
         sub_table(12,3,10,2)=1
         sub_table(12,3,10,3)=2
         sub_table(12,3,10,4)=3
-
+        !
+        !  with C_3v
+        !
         sub_table(13,1,1,1)=1
         sub_table(13,1,1,2)=1
         sub_table(13,1,2,1)=1
@@ -4020,7 +4592,9 @@ CONTAINS
         sub_table(13,1,10,2)=2
         sub_table(13,1,10,3)=3
         sub_table(13,1,10,4)=3
-
+        !
+        !  with C_4v
+        !
         sub_table(14,1,1,1)=1
         sub_table(14,1,1,2)=1
         sub_table(14,1,2,1)=1
@@ -4051,7 +4625,9 @@ CONTAINS
         sub_table(14,1,10,2)=3
         sub_table(14,1,10,3)=5
         sub_table(14,1,10,4)=5
-
+        !
+        !  with C_2h
+        !
         sub_table(16,1,1,1)=1
         sub_table(16,1,1,2)=1
         sub_table(16,1,2,1)=1
@@ -4113,7 +4689,9 @@ CONTAINS
         sub_table(16,2,10,2)=3
         sub_table(16,2,10,3)=3
         sub_table(16,2,10,4)=4
-
+        !
+        !  with C_4h
+        !
         sub_table(18,1,1,1)=1
         sub_table(18,1,1,2)=1
         sub_table(18,1,2,1)=1
@@ -4144,7 +4722,9 @@ CONTAINS
         sub_table(18,1,10,2)=6
         sub_table(18,1,10,3)=7
         sub_table(18,1,10,4)=8
-
+        !
+        !  with D_2h
+        !
         sub_table(20,1,1,1)=1
         sub_table(20,1,1,2)=1
         sub_table(20,1,2,1)=1
@@ -4184,29 +4764,31 @@ CONTAINS
         sub_table(20,2,3,2)=1
         sub_table(20,2,3,3)=2
         sub_table(20,2,4,1)=3
-        sub_table(20,2,4,2)=3
-        sub_table(20,2,4,3)=4
-        sub_table(20,2,4,4)=5
+        sub_table(20,2,4,2)=2
+        sub_table(20,2,4,3)=3
+        sub_table(20,2,4,4)=4
         sub_table(20,2,5,1)=3
-        sub_table(20,2,5,2)=3
-        sub_table(20,2,5,3)=4
-        sub_table(20,2,5,4)=5
+        sub_table(20,2,5,2)=1
+        sub_table(20,2,5,3)=3
+        sub_table(20,2,5,4)=4
         sub_table(20,2,6,1)=1
-        sub_table(20,2,6,2)=6
+        sub_table(20,2,6,2)=5
         sub_table(20,2,7,1)=1
-        sub_table(20,2,7,2)=7
+        sub_table(20,2,7,2)=6
         sub_table(20,2,8,1)=2
-        sub_table(20,2,8,2)=6
-        sub_table(20,2,8,3)=7
+        sub_table(20,2,8,2)=5
+        sub_table(20,2,8,3)=6
         sub_table(20,2,9,1)=3
-        sub_table(20,2,9,2)=8
-        sub_table(20,2,9,3)=9
-        sub_table(20,2,9,4)=10
+        sub_table(20,2,9,2)=6
+        sub_table(20,2,9,3)=7
+        sub_table(20,2,9,4)=8
         sub_table(20,2,10,1)=3
-        sub_table(20,2,10,2)=8
-        sub_table(20,2,10,3)=9
-        sub_table(20,2,10,4)=10
-
+        sub_table(20,2,10,2)=5
+        sub_table(20,2,10,3)=7
+        sub_table(20,2,10,4)=8
+        !
+        !  with D_4h
+        !
         sub_table(22,1,1,1)=1
         sub_table(22,1,1,2)=1
         sub_table(22,1,2,1)=1
@@ -4237,7 +4819,9 @@ CONTAINS
         sub_table(22,1,10,2)=9
         sub_table(22,1,10,3)=10
         sub_table(22,1,10,4)=10
-
+        !
+        !  with D_2d
+        !
         sub_table(24,1,1,1)=1
         sub_table(24,1,1,2)=1
         sub_table(24,1,2,1)=1
@@ -4269,6 +4853,39 @@ CONTAINS
         sub_table(24,1,10,3)=5
         sub_table(24,1,10,4)=5
 
+        sub_table(24,2,1,1)=1
+        sub_table(24,2,1,2)=1
+        sub_table(24,2,2,1)=1
+        sub_table(24,2,2,2)=4
+        sub_table(24,2,3,1)=2
+        sub_table(24,2,3,2)=1
+        sub_table(24,2,3,3)=4
+        sub_table(24,2,4,1)=3
+        sub_table(24,2,4,2)=2
+        sub_table(24,2,4,3)=5
+        sub_table(24,2,4,4)=5
+        sub_table(24,2,5,1)=3
+        sub_table(24,2,5,2)=3
+        sub_table(24,2,5,3)=5
+        sub_table(24,2,5,4)=5
+        sub_table(24,2,6,1)=1
+        sub_table(24,2,6,2)=3
+        sub_table(24,2,7,1)=1
+        sub_table(24,2,7,2)=2
+        sub_table(24,2,8,1)=2
+        sub_table(24,2,8,2)=2
+        sub_table(24,2,8,3)=3
+        sub_table(24,2,9,1)=3
+        sub_table(24,2,9,2)=4
+        sub_table(24,2,9,3)=5
+        sub_table(24,2,9,4)=5
+        sub_table(24,2,10,1)=3
+        sub_table(24,2,10,2)=1
+        sub_table(24,2,10,3)=5
+        sub_table(24,2,10,4)=5
+        !
+        !  with D_3d
+        !
         sub_table(25,1,1,1)=1
         sub_table(25,1,1,2)=1
         sub_table(25,1,2,1)=1
@@ -4299,7 +4916,9 @@ CONTAINS
         sub_table(25,1,10,2)=4
         sub_table(25,1,10,3)=6
         sub_table(25,1,10,4)=6
-
+        !
+        !  with S_4
+        !
         sub_table(26,1,1,1)=1
         sub_table(26,1,1,2)=1
         sub_table(26,1,2,1)=1
@@ -4330,7 +4949,9 @@ CONTAINS
         sub_table(26,1,10,2)=1
         sub_table(26,1,10,3)=3
         sub_table(26,1,10,4)=4
-
+        !
+        !  with S_6
+        !
         sub_table(27,1,1,1)=1
         sub_table(27,1,1,2)=1
         sub_table(27,1,2,1)=1
@@ -4361,7 +4982,9 @@ CONTAINS
         sub_table(27,1,10,2)=4
         sub_table(27,1,10,3)=5
         sub_table(27,1,10,4)=6
-
+        !
+        !  with T
+        !
         sub_table(28,1,1,1)=1
         sub_table(28,1,1,2)=1
         sub_table(28,1,2,1)=1
@@ -4392,7 +5015,9 @@ CONTAINS
         sub_table(28,1,10,2)=4
         sub_table(28,1,10,3)=4
         sub_table(28,1,10,4)=4
-
+        !
+        !  with T_h
+        !
         sub_table(29,1,1,1)=1
         sub_table(29,1,1,2)=1
         sub_table(29,1,2,1)=1
@@ -4423,13 +5048,15 @@ CONTAINS
         sub_table(29,1,10,2)=8
         sub_table(29,1,10,3)=8
         sub_table(29,1,10,4)=8
-
+        !
+        !  with T_d
+        !
         sub_table(30,1,1,1)=1
         sub_table(30,1,1,2)=1
         sub_table(30,1,2,1)=1
         sub_table(30,1,2,2)=2
         sub_table(30,1,3,1)=2
-        sub_table(30,1,3,2)=2
+        sub_table(30,1,3,2)=3
         sub_table(30,1,3,3)=3
         sub_table(30,1,4,1)=3
         sub_table(30,1,4,2)=4
@@ -4454,7 +5081,9 @@ CONTAINS
         sub_table(30,1,10,2)=4
         sub_table(30,1,10,3)=4
         sub_table(30,1,10,4)=4
-
+        !
+        !  with O
+        !
         sub_table(31,1,1,1)=1
         sub_table(31,1,1,2)=1
         sub_table(31,1,2,1)=1
@@ -4485,7 +5114,6 @@ CONTAINS
         sub_table(31,1,10,2)=5
         sub_table(31,1,10,3)=5
         sub_table(31,1,10,4)=5
-
      CASE DEFAULT 
         CALL errore('convert_one_rap','Input point group uncorrect',1)
   END SELECT
@@ -4516,7 +5144,7 @@ CONTAINS
 !  The third index is rap, and the fourth index contains in the first position
 !  the degeneracy of the rappresentation (1, 2, 3, 4) and in the four
 !  following positions the indices of the representations.
-!  The first part of the routine set the information for all
+!  The first part of the routine sets the information for all
 !  the representations of group_in,
 !  and the final instructions copy in ndeg and rap_list only the
 !  information for the required representation.
@@ -4553,6 +5181,9 @@ CONTAINS
 !
 !  C_4
 !
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=1
         sub_table(4,1,1,2)=1
         sub_table(4,1,2,1)=1
@@ -4566,6 +5197,9 @@ CONTAINS
 !
 !  C_6
 !
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=1
         sub_table(4,1,1,2)=1
         sub_table(4,1,2,1)=1
@@ -4575,10 +5209,13 @@ CONTAINS
         sub_table(4,1,4,1)=1
         sub_table(4,1,4,2)=1
         sub_table(4,1,5,1)=1
-        sub_table(4,1,5,2)=1
+        sub_table(4,1,5,2)=2
         sub_table(4,1,6,1)=1
-        sub_table(4,1,6,2)=2
+        sub_table(4,1,6,2)=1
 
+        !
+        !  with C_3
+        !
         sub_table(5,1,1,1)=1
         sub_table(5,1,1,2)=1
         sub_table(5,1,2,1)=1
@@ -4596,14 +5233,20 @@ CONTAINS
 !
 ! D_2
 !
-        sub_table(3,1,1,1)=2
-        sub_table(3,1,1,2)=1
-        sub_table(3,1,1,3)=2
+        !
+        !  with C_2
+        !
+        sub_table(4,1,1,1)=2
+        sub_table(4,1,1,2)=1
+        sub_table(4,1,1,3)=2
 
      CASE(9)
 !
 ! D_3
 !
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=2
         sub_table(4,1,1,2)=1
         sub_table(4,1,1,3)=2
@@ -4611,7 +5254,9 @@ CONTAINS
         sub_table(4,1,2,2)=1
         sub_table(4,1,3,1)=1
         sub_table(4,1,3,2)=2
-
+        !
+        !  with C_3
+        !
         sub_table(5,1,1,1)=2
         sub_table(5,1,1,2)=1
         sub_table(5,1,1,3)=2
@@ -4625,20 +5270,27 @@ CONTAINS
 !
 !  D_4
 !
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=2
         sub_table(4,1,1,2)=1
         sub_table(4,1,1,3)=2
         sub_table(4,1,2,1)=2
         sub_table(4,1,2,2)=1
         sub_table(4,1,2,3)=2
-
+        !
+        !  with C_4
+        !
         sub_table(6,1,1,1)=2
         sub_table(6,1,1,2)=1
         sub_table(6,1,1,3)=2
         sub_table(6,1,2,1)=2
         sub_table(6,1,2,2)=3
         sub_table(6,1,2,3)=4
-
+        !
+        !  with D_2
+        !
         sub_table(8,1,1,1)=2
         sub_table(8,1,1,2)=1
         sub_table(8,1,1,3)=1
@@ -4646,11 +5298,13 @@ CONTAINS
         sub_table(8,1,2,2)=1
         sub_table(8,1,2,3)=1
 
-
      CASE(11)
 !
 !  D_6
 !
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=2
         sub_table(4,1,1,2)=1
         sub_table(4,1,1,3)=2
@@ -4660,7 +5314,9 @@ CONTAINS
         sub_table(4,1,3,1)=2
         sub_table(4,1,3,2)=1
         sub_table(4,1,3,3)=2
-
+        !
+        !  with C_3
+        !
         sub_table(5,1,1,1)=2
         sub_table(5,1,1,2)=1
         sub_table(5,1,1,3)=2
@@ -4670,35 +5326,56 @@ CONTAINS
         sub_table(5,1,3,1)=2
         sub_table(5,1,3,2)=3
         sub_table(5,1,3,3)=3
-
+        !
+        !  with C_6
+        !
         sub_table(7,1,1,1)=2
         sub_table(7,1,1,2)=1
         sub_table(7,1,1,3)=2
         sub_table(7,1,2,1)=2
-        sub_table(7,1,2,2)=5
-        sub_table(7,1,2,3)=6
+        sub_table(7,1,2,2)=3
+        sub_table(7,1,2,3)=4
         sub_table(7,1,3,1)=2
-        sub_table(7,1,3,2)=3
-        sub_table(7,1,3,3)=4
-
+        sub_table(7,1,3,2)=5
+        sub_table(7,1,3,3)=6
+        !
+        !  with D_2
+        !
+        sub_table(8,1,1,1)=2
+        sub_table(8,1,1,2)=1
+        sub_table(8,1,1,3)=1
+        sub_table(8,1,2,1)=2
+        sub_table(8,1,2,2)=1
+        sub_table(8,1,2,3)=1
+        sub_table(8,1,3,1)=2
+        sub_table(8,1,3,2)=1
+        sub_table(8,1,3,3)=1
+        !
+        !  with D_3
+        !
         sub_table(9,1,1,1)=2
         sub_table(9,1,1,2)=1
-        sub_table(9,1,1,3)=2
+        sub_table(9,1,1,3)=1
         sub_table(9,1,2,1)=2
         sub_table(9,1,2,2)=1
-        sub_table(9,1,2,3)=2
+        sub_table(9,1,2,3)=1
         sub_table(9,1,3,1)=2
-        sub_table(9,1,3,2)=3
+        sub_table(9,1,3,2)=2
         sub_table(9,1,3,3)=3
 
      CASE(12)
 !
 !   C_2v
 !
+        !
+        !  with C_s
+        !
         sub_table(3,1,1,1)=2
         sub_table(3,1,1,2)=1
         sub_table(3,1,1,3)=2
-        
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=2
         sub_table(4,1,1,2)=1
         sub_table(4,1,1,3)=2
@@ -4707,6 +5384,9 @@ CONTAINS
 !
 !   C_3v
 !
+        !
+        !  with C_s
+        !
         sub_table(3,1,1,1)=2
         sub_table(3,1,1,2)=1
         sub_table(3,1,1,3)=2
@@ -4714,7 +5394,9 @@ CONTAINS
         sub_table(3,1,2,2)=1
         sub_table(3,1,3,1)=1
         sub_table(3,1,3,2)=2
-
+        !
+        !  with C_3
+        !
         sub_table(5,1,1,1)=2
         sub_table(5,1,1,2)=1
         sub_table(5,1,1,3)=2
@@ -4723,32 +5405,40 @@ CONTAINS
         sub_table(5,1,3,1)=1
         sub_table(5,1,3,2)=3
 
-
      CASE(14)
 !
 !   C_4v
 !
+        !
+        !  with C_3
+        !
         sub_table(3,1,1,1)=2
         sub_table(3,1,1,2)=1
         sub_table(3,1,1,3)=2
         sub_table(3,1,2,1)=2
         sub_table(3,1,2,2)=1
         sub_table(3,1,2,3)=2
-
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=2
         sub_table(4,1,1,2)=1
         sub_table(4,1,1,3)=2
         sub_table(4,1,2,1)=2
         sub_table(4,1,2,2)=1
         sub_table(4,1,2,3)=2
-
+        !
+        !  with C_4
+        !
         sub_table(6,1,1,1)=2
         sub_table(6,1,1,2)=1
         sub_table(6,1,1,3)=2
         sub_table(6,1,2,1)=2
         sub_table(6,1,2,2)=3
         sub_table(6,1,2,3)=4
-
+        !
+        !  with C_2v
+        !
         sub_table(12,1,1,1)=2
         sub_table(12,1,1,2)=1
         sub_table(12,1,1,3)=1
@@ -4760,6 +5450,9 @@ CONTAINS
 !
 !   C_6v
 !
+        !
+        !  with C_s
+        !
         sub_table(3,1,1,1)=2
         sub_table(3,1,1,2)=1
         sub_table(3,1,1,3)=2
@@ -4769,7 +5462,9 @@ CONTAINS
         sub_table(3,1,3,1)=2
         sub_table(3,1,3,2)=1
         sub_table(3,1,3,3)=2
-
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=2
         sub_table(4,1,1,2)=1
         sub_table(4,1,1,3)=2
@@ -4779,7 +5474,9 @@ CONTAINS
         sub_table(4,1,3,1)=2
         sub_table(4,1,3,2)=1
         sub_table(4,1,3,3)=2
-
+        !
+        !  with C_3
+        !
         sub_table(5,1,1,1)=2
         sub_table(5,1,1,2)=1
         sub_table(5,1,1,3)=2
@@ -4789,17 +5486,21 @@ CONTAINS
         sub_table(5,1,3,1)=2
         sub_table(5,1,3,2)=3
         sub_table(5,1,3,3)=3
- 
+        !
+        !  with C_6
+        !
         sub_table(7,1,1,1)=2
         sub_table(7,1,1,2)=1
         sub_table(7,1,1,3)=2
         sub_table(7,1,2,1)=2
-        sub_table(7,1,2,2)=5
-        sub_table(7,1,2,3)=6
+        sub_table(7,1,2,2)=3
+        sub_table(7,1,2,3)=4
         sub_table(7,1,3,1)=2
-        sub_table(7,1,3,2)=3
-        sub_table(7,1,3,3)=4
-
+        sub_table(7,1,3,2)=5
+        sub_table(7,1,3,3)=6
+        !
+        !  with C_2v
+        !
         sub_table(12,1,1,1)=2
         sub_table(12,1,1,2)=1
         sub_table(12,1,1,3)=1
@@ -4809,7 +5510,9 @@ CONTAINS
         sub_table(12,1,3,1)=2
         sub_table(12,1,3,2)=1
         sub_table(12,1,3,3)=1
-
+        !
+        !  with C_3v
+        !
         sub_table(13,1,1,1)=2
         sub_table(13,1,1,2)=1
         sub_table(13,1,1,3)=1
@@ -4824,6 +5527,9 @@ CONTAINS
 !
 ! C_2h
 !
+        !
+        !  with C_i
+        !
         sub_table(2,1,1,1)=1
         sub_table(2,1,1,2)=1
         sub_table(2,1,2,1)=1
@@ -4832,7 +5538,9 @@ CONTAINS
         sub_table(2,1,3,2)=2
         sub_table(2,1,4,1)=1
         sub_table(2,1,4,2)=2
-
+        !
+        !  with C_s
+        !
         sub_table(3,1,1,1)=1
         sub_table(3,1,1,2)=1
         sub_table(3,1,2,1)=1
@@ -4841,7 +5549,9 @@ CONTAINS
         sub_table(3,1,3,2)=2
         sub_table(3,1,4,1)=1
         sub_table(3,1,4,2)=1
-
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=1
         sub_table(4,1,1,2)=1
         sub_table(4,1,2,1)=1
@@ -4855,6 +5565,9 @@ CONTAINS
 !
 ! C_3h
 !
+        !
+        !  with C_s
+        !
         sub_table(3,1,1,1)=1
         sub_table(3,1,1,2)=1
         sub_table(3,1,2,1)=1
@@ -4864,10 +5577,12 @@ CONTAINS
         sub_table(3,1,4,1)=1
         sub_table(3,1,4,2)=1
         sub_table(3,1,5,1)=1
-        sub_table(3,1,5,2)=1
+        sub_table(3,1,5,2)=2
         sub_table(3,1,6,1)=1
-        sub_table(3,1,6,2)=2
-
+        sub_table(3,1,6,2)=1
+        !
+        !  with C_3
+        !
         sub_table(5,1,1,1)=1
         sub_table(5,1,1,2)=1
         sub_table(5,1,2,1)=1
@@ -4885,6 +5600,9 @@ CONTAINS
 !
 !   C_4h
 !
+        !
+        !  with C_i
+        !
         sub_table(2,1,1,1)=1
         sub_table(2,1,1,2)=1
         sub_table(2,1,2,1)=1
@@ -4901,7 +5619,9 @@ CONTAINS
         sub_table(2,1,7,2)=2
         sub_table(2,1,8,1)=1
         sub_table(2,1,8,2)=2
-
+        !
+        !  with C_s
+        !
         sub_table(3,1,1,1)=1
         sub_table(3,1,1,2)=1
         sub_table(3,1,2,1)=1
@@ -4918,7 +5638,9 @@ CONTAINS
         sub_table(3,1,7,2)=2
         sub_table(3,1,8,1)=1
         sub_table(3,1,8,2)=1
-
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=1
         sub_table(4,1,1,2)=1
         sub_table(4,1,2,1)=1
@@ -4935,7 +5657,9 @@ CONTAINS
         sub_table(4,1,7,2)=1
         sub_table(4,1,8,1)=1
         sub_table(4,1,8,2)=2
-
+        !
+        !  with C_4
+        !
         sub_table(6,1,1,1)=1
         sub_table(6,1,1,2)=1
         sub_table(6,1,2,1)=1
@@ -4952,7 +5676,9 @@ CONTAINS
         sub_table(6,1,7,2)=3
         sub_table(6,1,8,1)=1
         sub_table(6,1,8,2)=4
-
+        !
+        !  with C_2h
+        !
         sub_table(16,1,1,1)=1
         sub_table(16,1,1,2)=1
         sub_table(16,1,2,1)=1
@@ -4964,12 +5690,14 @@ CONTAINS
         sub_table(16,1,5,1)=1
         sub_table(16,1,5,2)=3
         sub_table(16,1,6,1)=1
-        sub_table(16,1,6,2)=3
+        sub_table(16,1,6,2)=4
         sub_table(16,1,7,1)=1
-        sub_table(16,1,7,2)=4
+        sub_table(16,1,7,2)=3
         sub_table(16,1,8,1)=1
         sub_table(16,1,8,2)=4
-
+        !
+        !  with S_4
+        !
         sub_table(26,1,1,1)=1
         sub_table(26,1,1,2)=1
         sub_table(26,1,2,1)=1
@@ -4991,6 +5719,9 @@ CONTAINS
 !
 !  C_6h
 !
+        !
+        !  with C_i
+        !
         sub_table(2,1,1,1)=1
         sub_table(2,1,1,2)=1
         sub_table(2,1,2,1)=1
@@ -5015,7 +5746,9 @@ CONTAINS
         sub_table(2,1,11,2)=2
         sub_table(2,1,12,1)=1
         sub_table(2,1,12,2)=2
-
+        !
+        !  with C_s
+        !
         sub_table(3,1,1,1)=1
         sub_table(3,1,1,2)=1
         sub_table(3,1,2,1)=1
@@ -5025,9 +5758,9 @@ CONTAINS
         sub_table(3,1,4,1)=1
         sub_table(3,1,4,2)=1
         sub_table(3,1,5,1)=1
-        sub_table(3,1,5,2)=1
+        sub_table(3,1,5,2)=2
         sub_table(3,1,6,1)=1
-        sub_table(3,1,6,2)=2
+        sub_table(3,1,6,2)=1
         sub_table(3,1,7,1)=1
         sub_table(3,1,7,2)=2
         sub_table(3,1,8,1)=1
@@ -5037,10 +5770,12 @@ CONTAINS
         sub_table(3,1,10,1)=1
         sub_table(3,1,10,2)=2
         sub_table(3,1,11,1)=1
-        sub_table(3,1,11,2)=2
+        sub_table(3,1,11,2)=1
         sub_table(3,1,12,1)=1
-        sub_table(3,1,12,2)=1
-
+        sub_table(3,1,12,2)=2
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=1
         sub_table(4,1,1,2)=1
         sub_table(4,1,2,1)=1
@@ -5050,9 +5785,9 @@ CONTAINS
         sub_table(4,1,4,1)=1
         sub_table(4,1,4,2)=1
         sub_table(4,1,5,1)=1
-        sub_table(4,1,5,2)=1
+        sub_table(4,1,5,2)=2
         sub_table(4,1,6,1)=1
-        sub_table(4,1,6,2)=2
+        sub_table(4,1,6,2)=1
         sub_table(4,1,7,1)=1
         sub_table(4,1,7,2)=1
         sub_table(4,1,8,1)=1
@@ -5062,10 +5797,12 @@ CONTAINS
         sub_table(4,1,10,1)=1
         sub_table(4,1,10,2)=1
         sub_table(4,1,11,1)=1
-        sub_table(4,1,11,2)=1
+        sub_table(4,1,11,2)=2
         sub_table(4,1,12,1)=1
-        sub_table(4,1,12,2)=2
-
+        sub_table(4,1,12,2)=1
+        !
+        !  with C_3
+        !
         sub_table(5,1,1,1)=1
         sub_table(5,1,1,2)=1
         sub_table(5,1,2,1)=1
@@ -5090,32 +5827,36 @@ CONTAINS
         sub_table(5,1,11,2)=3
         sub_table(5,1,12,1)=1
         sub_table(5,1,12,2)=3
-
+        !
+        !  with C_6
+        !
         sub_table(7,1,1,1)=1
         sub_table(7,1,1,2)=1
         sub_table(7,1,2,1)=1
         sub_table(7,1,2,2)=2
         sub_table(7,1,3,1)=1
-        sub_table(7,1,3,2)=5
+        sub_table(7,1,3,2)=3
         sub_table(7,1,4,1)=1
-        sub_table(7,1,4,2)=6
+        sub_table(7,1,4,2)=4
         sub_table(7,1,5,1)=1
-        sub_table(7,1,5,2)=4
+        sub_table(7,1,5,2)=5
         sub_table(7,1,6,1)=1
-        sub_table(7,1,6,2)=3
+        sub_table(7,1,6,2)=6
         sub_table(7,1,7,1)=1
         sub_table(7,1,7,2)=1
         sub_table(7,1,8,1)=1
         sub_table(7,1,8,2)=2
         sub_table(7,1,9,1)=1
-        sub_table(7,1,9,2)=5
+        sub_table(7,1,9,2)=3
         sub_table(7,1,10,1)=1
-        sub_table(7,1,10,2)=6
+        sub_table(7,1,10,2)=4
         sub_table(7,1,11,1)=1
-        sub_table(7,1,11,2)=4
+        sub_table(7,1,11,2)=5
         sub_table(7,1,12,1)=1
-        sub_table(7,1,12,2)=3
-
+        sub_table(7,1,12,2)=6
+        !
+        !  with C_2h
+        !
         sub_table(16,1,1,1)=1
         sub_table(16,1,1,2)=1
         sub_table(16,1,2,1)=1
@@ -5125,9 +5866,9 @@ CONTAINS
         sub_table(16,1,4,1)=1
         sub_table(16,1,4,2)=1
         sub_table(16,1,5,1)=1
-        sub_table(16,1,5,2)=1
+        sub_table(16,1,5,2)=2
         sub_table(16,1,6,1)=1
-        sub_table(16,1,6,2)=2
+        sub_table(16,1,6,2)=1
         sub_table(16,1,7,1)=1
         sub_table(16,1,7,2)=3
         sub_table(16,1,8,1)=1
@@ -5137,10 +5878,12 @@ CONTAINS
         sub_table(16,1,10,1)=1
         sub_table(16,1,10,2)=3
         sub_table(16,1,11,1)=1
-        sub_table(16,1,11,2)=3
+        sub_table(16,1,11,2)=4
         sub_table(16,1,12,1)=1
-        sub_table(16,1,12,2)=4
-
+        sub_table(16,1,12,2)=3
+        !
+        !  with C_3h
+        !
         sub_table(17,1,1,1)=1
         sub_table(17,1,1,2)=1
         sub_table(17,1,2,1)=1
@@ -5165,7 +5908,9 @@ CONTAINS
         sub_table(17,1,11,2)=6
         sub_table(17,1,12,1)=1
         sub_table(17,1,12,2)=5
-
+        !
+        !  with S_6
+        !
         sub_table(27,1,1,1)=1
         sub_table(27,1,1,2)=1
         sub_table(27,1,2,1)=1
@@ -5195,41 +5940,54 @@ CONTAINS
 !
 !  D_2h
 !
+        !
+        !  with C_i
+        !
         sub_table(2,1,1,1)=2
         sub_table(2,1,1,2)=1
         sub_table(2,1,1,3)=1
         sub_table(2,1,2,1)=2
         sub_table(2,1,2,2)=2
         sub_table(2,1,2,3)=2
-
+        !
+        !  with C_s
+        !
         sub_table(3,1,1,1)=2
         sub_table(3,1,1,2)=1
         sub_table(3,1,1,3)=2
         sub_table(3,1,2,1)=2
         sub_table(3,1,2,2)=1
         sub_table(3,1,2,3)=2
-
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=2
         sub_table(4,1,1,2)=1
         sub_table(4,1,1,3)=2
         sub_table(4,1,2,1)=2
         sub_table(4,1,2,2)=1
         sub_table(4,1,2,3)=2
-
+        !
+        !  with D_2
+        !
         sub_table(8,1,1,1)=2
         sub_table(8,1,1,2)=1
         sub_table(8,1,1,3)=1
         sub_table(8,1,2,1)=2
         sub_table(8,1,2,2)=1
         sub_table(8,1,2,3)=1
-
+        !
+        !  with C_2v
+        !
         sub_table(12,1,1,1)=2
         sub_table(12,1,1,2)=1
         sub_table(12,1,1,3)=1
         sub_table(12,1,2,1)=2
         sub_table(12,1,2,2)=1
         sub_table(12,1,2,3)=1
-
+        !
+        !  with C_2h
+        !
         sub_table(16,1,1,1)=2
         sub_table(16,1,1,2)=1
         sub_table(16,1,1,3)=2
@@ -5241,6 +5999,9 @@ CONTAINS
 !
 !  D_3h
 !
+        !
+        !  with C_s
+        !
         sub_table(3,1,1,1)=2
         sub_table(3,1,1,2)=1
         sub_table(3,1,1,3)=2
@@ -5250,7 +6011,9 @@ CONTAINS
         sub_table(3,1,3,1)=2
         sub_table(3,1,3,2)=1
         sub_table(3,1,3,3)=2
-
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=2
         sub_table(4,1,1,2)=1
         sub_table(4,1,1,3)=2
@@ -5260,7 +6023,9 @@ CONTAINS
         sub_table(4,1,3,1)=2
         sub_table(4,1,3,2)=1
         sub_table(4,1,3,3)=2
-
+        !
+        !  with C_3
+        !
         sub_table(5,1,1,1)=2
         sub_table(5,1,1,2)=1
         sub_table(5,1,1,3)=2
@@ -5270,7 +6035,9 @@ CONTAINS
         sub_table(5,1,3,1)=2
         sub_table(5,1,3,2)=3
         sub_table(5,1,3,3)=3
-
+        !
+        !  with D_3
+        !
         sub_table(9,1,1,1)=2
         sub_table(9,1,1,2)=1
         sub_table(9,1,1,3)=1
@@ -5280,7 +6047,9 @@ CONTAINS
         sub_table(9,1,3,1)=2
         sub_table(9,1,3,2)=2
         sub_table(9,1,3,3)=3
-
+        !
+        !  with C_2v
+        !
         sub_table(12,1,1,1)=2
         sub_table(12,1,1,2)=1
         sub_table(12,1,1,3)=1
@@ -5290,7 +6059,9 @@ CONTAINS
         sub_table(12,1,3,1)=2
         sub_table(12,1,3,2)=1
         sub_table(12,1,3,3)=1
-
+        !
+        !  with C_3v
+        !
         sub_table(13,1,1,1)=2
         sub_table(13,1,1,2)=1
         sub_table(13,1,1,3)=1
@@ -5300,7 +6071,9 @@ CONTAINS
         sub_table(13,1,3,1)=2
         sub_table(13,1,3,2)=2
         sub_table(13,1,3,3)=3
-
+        !
+        !  with C_3h
+        !
         sub_table(17,1,1,1)=2
         sub_table(17,1,1,2)=1
         sub_table(17,1,1,3)=2
@@ -5311,11 +6084,13 @@ CONTAINS
         sub_table(17,1,3,2)=5
         sub_table(17,1,3,3)=6
 
- 
      CASE(22)
 !
 !  D_4h
 !
+        !
+        !  with C_i
+        !
         sub_table(2,1,1,1)=2
         sub_table(2,1,1,2)=1
         sub_table(2,1,1,3)=1
@@ -5328,7 +6103,9 @@ CONTAINS
         sub_table(2,1,4,1)=2
         sub_table(2,1,4,2)=2
         sub_table(2,1,4,3)=2
-
+        !
+        !  with C_s
+        !
         sub_table(3,1,1,1)=2
         sub_table(3,1,1,2)=1
         sub_table(3,1,1,3)=2
@@ -5341,7 +6118,9 @@ CONTAINS
         sub_table(3,1,4,1)=2
         sub_table(3,1,4,2)=1
         sub_table(3,1,4,3)=2
-
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=2
         sub_table(4,1,1,2)=1
         sub_table(4,1,1,3)=2
@@ -5354,7 +6133,9 @@ CONTAINS
         sub_table(4,1,4,1)=2
         sub_table(4,1,4,2)=1
         sub_table(4,1,4,3)=2
-
+        !
+        !  with C_4
+        !
         sub_table(6,1,1,1)=2
         sub_table(6,1,1,2)=1
         sub_table(6,1,1,3)=2
@@ -5367,7 +6148,9 @@ CONTAINS
         sub_table(6,1,4,1)=2
         sub_table(6,1,4,2)=3
         sub_table(6,1,4,3)=4
-
+        !
+        !  with D_2
+        !
         sub_table(8,1,1,1)=2
         sub_table(8,1,1,2)=1
         sub_table(8,1,1,3)=1
@@ -5380,7 +6163,9 @@ CONTAINS
         sub_table(8,1,4,1)=2
         sub_table(8,1,4,2)=1
         sub_table(8,1,4,3)=1
-
+        !
+        !  with D_4
+        !
         sub_table(10,1,1,1)=2
         sub_table(10,1,1,2)=1
         sub_table(10,1,1,3)=1
@@ -5393,7 +6178,9 @@ CONTAINS
         sub_table(10,1,4,1)=2
         sub_table(10,1,4,2)=2
         sub_table(10,1,4,3)=2
-
+        !
+        !  with C_2v
+        !
         sub_table(12,1,1,1)=2
         sub_table(12,1,1,2)=1
         sub_table(12,1,1,3)=1
@@ -5406,7 +6193,9 @@ CONTAINS
         sub_table(12,1,4,1)=2
         sub_table(12,1,4,2)=1
         sub_table(12,1,4,3)=1
-
+        !
+        !  with C_4v
+        !
         sub_table(14,1,1,1)=2
         sub_table(14,1,1,2)=1
         sub_table(14,1,1,3)=1
@@ -5419,7 +6208,9 @@ CONTAINS
         sub_table(14,1,4,1)=2
         sub_table(14,1,4,2)=2
         sub_table(14,1,4,3)=2
-
+        !
+        !  with C_2h
+        !
         sub_table(16,1,1,1)=2
         sub_table(16,1,1,2)=1
         sub_table(16,1,1,3)=2
@@ -5432,7 +6223,9 @@ CONTAINS
         sub_table(16,1,4,1)=2
         sub_table(16,1,4,2)=3
         sub_table(16,1,4,3)=4
-
+        !
+        !  with C_4h
+        !
         sub_table(18,1,1,1)=2
         sub_table(18,1,1,2)=1
         sub_table(18,1,1,3)=2
@@ -5445,7 +6238,9 @@ CONTAINS
         sub_table(18,1,4,1)=2
         sub_table(18,1,4,2)=7
         sub_table(18,1,4,3)=8
-
+        !
+        !  with D_2h
+        !
         sub_table(20,1,1,1)=2
         sub_table(20,1,1,2)=1
         sub_table(20,1,1,3)=1
@@ -5458,7 +6253,9 @@ CONTAINS
         sub_table(20,1,4,1)=2
         sub_table(20,1,4,2)=2
         sub_table(20,1,4,3)=2
-
+        !
+        !  with D_2d
+        !
         sub_table(24,1,1,1)=2
         sub_table(24,1,1,2)=1
         sub_table(24,1,1,3)=1
@@ -5471,7 +6268,9 @@ CONTAINS
         sub_table(24,1,4,1)=2
         sub_table(24,1,4,2)=1
         sub_table(24,1,4,3)=1
-
+        !
+        !  with S_4
+        !
         sub_table(26,1,1,1)=2
         sub_table(26,1,1,2)=1
         sub_table(26,1,1,3)=2
@@ -5489,6 +6288,9 @@ CONTAINS
 !
 ! D_6h
 !
+        !
+        !  with C_i
+        !
         sub_table(2,1,1,1)=2
         sub_table(2,1,1,2)=1
         sub_table(2,1,1,3)=1
@@ -5507,7 +6309,9 @@ CONTAINS
         sub_table(2,1,6,1)=2
         sub_table(2,1,6,2)=2
         sub_table(2,1,6,3)=2
-
+        !
+        !  with C_s
+        !
         sub_table(3,1,1,1)=2
         sub_table(3,1,1,2)=1
         sub_table(3,1,1,3)=2
@@ -5526,7 +6330,9 @@ CONTAINS
         sub_table(3,1,6,1)=2
         sub_table(3,1,6,2)=1
         sub_table(3,1,6,3)=2
-
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=2
         sub_table(4,1,1,2)=1
         sub_table(4,1,1,3)=2
@@ -5545,7 +6351,9 @@ CONTAINS
         sub_table(4,1,6,1)=2
         sub_table(4,1,6,2)=1
         sub_table(4,1,6,3)=2
-
+        !
+        !  with C_3
+        !
         sub_table(5,1,1,1)=2
         sub_table(5,1,1,2)=1
         sub_table(5,1,1,3)=2
@@ -5564,26 +6372,30 @@ CONTAINS
         sub_table(5,1,6,1)=2
         sub_table(5,1,6,2)=3
         sub_table(5,1,6,3)=3
-
+        !
+        !  with C_6
+        !
         sub_table(7,1,1,1)=2
         sub_table(7,1,1,2)=1
         sub_table(7,1,1,3)=2
         sub_table(7,1,2,1)=2
-        sub_table(7,1,2,2)=5
-        sub_table(7,1,2,3)=6
+        sub_table(7,1,2,2)=3
+        sub_table(7,1,2,3)=4
         sub_table(7,1,3,1)=2
-        sub_table(7,1,3,2)=4
-        sub_table(7,1,3,3)=3
+        sub_table(7,1,3,2)=5
+        sub_table(7,1,3,3)=6
         sub_table(7,1,4,1)=2
         sub_table(7,1,4,2)=1
         sub_table(7,1,4,3)=2
         sub_table(7,1,5,1)=2
-        sub_table(7,1,5,2)=5
-        sub_table(7,1,5,3)=6
+        sub_table(7,1,5,2)=3
+        sub_table(7,1,5,3)=4
         sub_table(7,1,6,1)=2
-        sub_table(7,1,6,2)=3
-        sub_table(7,1,6,3)=4
-
+        sub_table(7,1,6,2)=5
+        sub_table(7,1,6,3)=6
+        !
+        !  with D_2
+        !
         sub_table(8,1,1,1)=2
         sub_table(8,1,1,2)=1
         sub_table(8,1,1,3)=1
@@ -5602,7 +6414,9 @@ CONTAINS
         sub_table(8,1,6,1)=2
         sub_table(8,1,6,2)=1
         sub_table(8,1,6,3)=1
-
+        !
+        !  with D_3
+        !
         sub_table(9,1,1,1)=2
         sub_table(9,1,1,2)=1
         sub_table(9,1,1,3)=1
@@ -5621,7 +6435,9 @@ CONTAINS
         sub_table(9,1,6,1)=2
         sub_table(9,1,6,2)=2
         sub_table(9,1,6,3)=3
-
+        !
+        !  with D_6
+        !
         sub_table(11,1,1,1)=2
         sub_table(11,1,1,2)=1
         sub_table(11,1,1,3)=1
@@ -5640,7 +6456,9 @@ CONTAINS
         sub_table(11,1,6,1)=2
         sub_table(11,1,6,2)=3
         sub_table(11,1,6,3)=3
-
+        !
+        !  with C_2v
+        !
         sub_table(12,1,1,1)=2
         sub_table(12,1,1,2)=1
         sub_table(12,1,1,3)=1
@@ -5659,7 +6477,9 @@ CONTAINS
         sub_table(12,1,6,1)=2
         sub_table(12,1,6,2)=1
         sub_table(12,1,6,3)=1
-
+        !
+        !  with C_3v
+        !
         sub_table(13,1,1,1)=2
         sub_table(13,1,1,2)=1
         sub_table(13,1,1,3)=1
@@ -5678,7 +6498,9 @@ CONTAINS
         sub_table(13,1,6,1)=2
         sub_table(13,1,6,2)=2
         sub_table(13,1,6,3)=3
-
+        !
+        !  with C_6v
+        !
         sub_table(15,1,1,1)=2
         sub_table(15,1,1,2)=1
         sub_table(15,1,1,3)=1
@@ -5697,7 +6519,9 @@ CONTAINS
         sub_table(15,1,6,1)=2
         sub_table(15,1,6,2)=3
         sub_table(15,1,6,3)=3
-
+        !
+        !  with C_2h
+        !
         sub_table(16,1,1,1)=2
         sub_table(16,1,1,2)=1
         sub_table(16,1,1,3)=2
@@ -5716,7 +6540,9 @@ CONTAINS
         sub_table(16,1,6,1)=2
         sub_table(16,1,6,2)=3
         sub_table(16,1,6,3)=4
-
+        !
+        !  with C_3h
+        !
         sub_table(17,1,1,1)=2
         sub_table(17,1,1,2)=1
         sub_table(17,1,1,3)=2
@@ -5735,26 +6561,30 @@ CONTAINS
         sub_table(17,1,6,1)=2
         sub_table(17,1,6,2)=5
         sub_table(17,1,6,3)=6
-
+        !
+        !  with C_6h
+        !
         sub_table(19,1,1,1)=2
         sub_table(19,1,1,2)=1
         sub_table(19,1,1,3)=2
         sub_table(19,1,2,1)=2
-        sub_table(19,1,2,2)=5
-        sub_table(19,1,2,3)=6
+        sub_table(19,1,2,2)=3
+        sub_table(19,1,2,3)=4
         sub_table(19,1,3,1)=2
-        sub_table(19,1,3,2)=3
-        sub_table(19,1,3,3)=4
+        sub_table(19,1,3,2)=5
+        sub_table(19,1,3,3)=6
         sub_table(19,1,4,1)=2
         sub_table(19,1,4,2)=7
         sub_table(19,1,4,3)=8
         sub_table(19,1,5,1)=2
-        sub_table(19,1,5,2)=11
-        sub_table(19,1,5,3)=12
+        sub_table(19,1,5,2)=9
+        sub_table(19,1,5,3)=10
         sub_table(19,1,6,1)=2
-        sub_table(19,1,6,2)=9
-        sub_table(19,1,6,3)=10
-
+        sub_table(19,1,6,2)=11
+        sub_table(19,1,6,3)=12
+        !
+        !  with D_2h
+        !
         sub_table(20,1,1,1)=2
         sub_table(20,1,1,2)=1
         sub_table(20,1,1,3)=1
@@ -5773,7 +6603,9 @@ CONTAINS
         sub_table(20,1,6,1)=2
         sub_table(20,1,6,2)=2
         sub_table(20,1,6,3)=2
-
+        !
+        !  with D_3h
+        !
         sub_table(21,1,1,1)=2
         sub_table(21,1,1,2)=1
         sub_table(21,1,1,3)=1
@@ -5784,67 +6616,100 @@ CONTAINS
         sub_table(21,1,3,2)=3
         sub_table(21,1,3,3)=3
         sub_table(21,1,4,1)=2
-        sub_table(21,1,4,2)=1
-        sub_table(21,1,4,3)=1
+        sub_table(21,1,4,2)=2
+        sub_table(21,1,4,3)=2
         sub_table(21,1,5,1)=2
-        sub_table(21,1,5,2)=2
-        sub_table(21,1,5,3)=2
+        sub_table(21,1,5,2)=1
+        sub_table(21,1,5,3)=1
         sub_table(21,1,6,1)=2
         sub_table(21,1,6,2)=3
         sub_table(21,1,6,3)=3
-
+        !
+        !  with D_3d
+        !
         sub_table(25,1,1,1)=2
         sub_table(25,1,1,2)=1
-        sub_table(25,1,1,3)=2
+        sub_table(25,1,1,3)=1
         sub_table(25,1,2,1)=2
         sub_table(25,1,2,2)=1
-        sub_table(25,1,2,3)=2
+        sub_table(25,1,2,3)=1
         sub_table(25,1,3,1)=2
-        sub_table(25,1,3,2)=3
+        sub_table(25,1,3,2)=2
         sub_table(25,1,3,3)=3
         sub_table(25,1,4,1)=2
         sub_table(25,1,4,2)=4
-        sub_table(25,1,4,3)=5
+        sub_table(25,1,4,3)=4
         sub_table(25,1,5,1)=2
         sub_table(25,1,5,2)=4
-        sub_table(25,1,5,3)=5
+        sub_table(25,1,5,3)=4
         sub_table(25,1,6,1)=2
-        sub_table(25,1,6,2)=6
+        sub_table(25,1,6,2)=5
         sub_table(25,1,6,3)=6
-
+        !
+        !  with S_6
+        !
+        sub_table(27,1,1,1)=2
+        sub_table(27,1,1,2)=1
+        sub_table(27,1,1,3)=2
+        sub_table(27,1,2,1)=2
+        sub_table(27,1,2,2)=1
+        sub_table(27,1,2,3)=2
+        sub_table(27,1,3,1)=2
+        sub_table(27,1,3,2)=3
+        sub_table(27,1,3,3)=3
+        sub_table(27,1,4,1)=2
+        sub_table(27,1,4,2)=4
+        sub_table(27,1,4,3)=5
+        sub_table(27,1,5,1)=2
+        sub_table(27,1,5,2)=4
+        sub_table(27,1,5,3)=5
+        sub_table(27,1,6,1)=2
+        sub_table(27,1,6,2)=6
+        sub_table(27,1,6,3)=6
 
      CASE(24)
 !
 ! D_2d
 !
+        !
+        !  with C_s
+        !
         sub_table(3,1,1,1)=2
         sub_table(3,1,1,2)=1
         sub_table(3,1,1,3)=2
         sub_table(3,1,2,1)=2
         sub_table(3,1,2,2)=1
         sub_table(3,1,2,3)=2
-
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=2
         sub_table(4,1,1,2)=1
         sub_table(4,1,1,3)=2
         sub_table(4,1,2,1)=2
         sub_table(4,1,2,2)=1
         sub_table(4,1,2,3)=2
-
+        !
+        !  with D_2
+        !
         sub_table(8,1,1,1)=2
         sub_table(8,1,1,2)=1
         sub_table(8,1,1,3)=1
         sub_table(8,1,2,1)=2
         sub_table(8,1,2,2)=1
         sub_table(8,1,2,3)=1
-
+        !
+        !  with C_2v
+        !
         sub_table(12,1,1,1)=2
         sub_table(12,1,1,2)=1
         sub_table(12,1,1,3)=1
         sub_table(12,1,2,1)=2
         sub_table(12,1,2,2)=1
         sub_table(12,1,2,3)=1
-
+        !
+        !  with S_4
+        !
         sub_table(26,1,1,1)=2
         sub_table(26,1,1,2)=1
         sub_table(26,1,1,3)=2
@@ -5856,6 +6721,9 @@ CONTAINS
 !
 !  D_3d
 !
+        !
+        !  with C_i
+        !
         sub_table(2,1,1,1)=2
         sub_table(2,1,1,2)=1
         sub_table(2,1,1,3)=1
@@ -5870,7 +6738,9 @@ CONTAINS
         sub_table(2,1,5,2)=2
         sub_table(2,1,6,1)=1
         sub_table(2,1,6,2)=2
-
+        !
+        !  with C_s
+        !
         sub_table(3,1,1,1)=2
         sub_table(3,1,1,2)=1
         sub_table(3,1,1,3)=2
@@ -5885,7 +6755,9 @@ CONTAINS
         sub_table(3,1,5,2)=2
         sub_table(3,1,6,1)=1
         sub_table(3,1,6,2)=1
-
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=2
         sub_table(4,1,1,2)=1
         sub_table(4,1,1,3)=2
@@ -5900,7 +6772,9 @@ CONTAINS
         sub_table(4,1,5,2)=1
         sub_table(4,1,6,1)=1
         sub_table(4,1,6,2)=2
-
+        !
+        !  with C_3
+        !
         sub_table(5,1,1,1)=2
         sub_table(5,1,1,2)=1
         sub_table(5,1,1,3)=2
@@ -5915,7 +6789,9 @@ CONTAINS
         sub_table(5,1,5,2)=3
         sub_table(5,1,6,1)=1
         sub_table(5,1,6,2)=3
-
+        !
+        !  with D_3
+        !
         sub_table(9,1,1,1)=2
         sub_table(9,1,1,2)=1
         sub_table(9,1,1,3)=1
@@ -5930,7 +6806,9 @@ CONTAINS
         sub_table(9,1,5,2)=2
         sub_table(9,1,6,1)=1
         sub_table(9,1,6,2)=3
-
+        !
+        !  with C_3v
+        !
         sub_table(13,1,1,1)=2
         sub_table(13,1,1,2)=1
         sub_table(13,1,1,3)=1
@@ -5945,7 +6823,9 @@ CONTAINS
         sub_table(13,1,5,2)=3
         sub_table(13,1,6,1)=1
         sub_table(13,1,6,2)=2
-
+        !
+        !  with C_2h
+        !
         sub_table(16,1,1,1)=2
         sub_table(16,1,1,2)=1
         sub_table(16,1,1,3)=2
@@ -5960,7 +6840,9 @@ CONTAINS
         sub_table(16,1,5,2)=3
         sub_table(16,1,6,1)=1
         sub_table(16,1,6,2)=4
-
+        !
+        !  with S_6
+        !
         sub_table(27,1,1,1)=2
         sub_table(27,1,1,2)=1
         sub_table(27,1,1,3)=2
@@ -5980,6 +6862,9 @@ CONTAINS
 !
 !  S_4
 !
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=1
         sub_table(4,1,1,2)=1
         sub_table(4,1,2,1)=1
@@ -5993,6 +6878,9 @@ CONTAINS
 !
 !  S_6
 !
+        !
+        !  with C_i
+        !
         sub_table(2,1,1,1)=1
         sub_table(2,1,1,2)=1
         sub_table(2,1,2,1)=1
@@ -6005,7 +6893,9 @@ CONTAINS
         sub_table(2,1,5,2)=2
         sub_table(2,1,6,1)=1
         sub_table(2,1,6,2)=2
-
+        !
+        !  with C_3
+        !
         sub_table(5,1,1,1)=1
         sub_table(5,1,1,2)=1
         sub_table(5,1,2,1)=1
@@ -6023,6 +6913,9 @@ CONTAINS
 !
 !  T
 !
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=2
         sub_table(4,1,1,2)=1
         sub_table(4,1,1,3)=2
@@ -6032,18 +6925,21 @@ CONTAINS
         sub_table(4,1,3,1)=2
         sub_table(4,1,3,2)=1
         sub_table(4,1,3,3)=2
-
+        !
+        !  with C_3
+        !
         sub_table(5,1,1,1)=2
         sub_table(5,1,1,2)=1
         sub_table(5,1,1,3)=2
         sub_table(5,1,2,1)=2
-        sub_table(5,1,2,2)=3
-        sub_table(5,1,2,3)=1
+        sub_table(5,1,2,2)=1
+        sub_table(5,1,2,3)=3
         sub_table(5,1,3,1)=2
-        sub_table(5,1,3,2)=3
-        sub_table(5,1,3,3)=2
-
-
+        sub_table(5,1,3,2)=2
+        sub_table(5,1,3,3)=3
+        !
+        !  with D_2
+        !
         sub_table(8,1,1,1)=2
         sub_table(8,1,1,2)=1
         sub_table(8,1,1,3)=1
@@ -6054,12 +6950,13 @@ CONTAINS
         sub_table(8,1,3,2)=1
         sub_table(8,1,3,3)=1
 
-
      CASE(29)
 !
 !  T_h
 !
-
+        !
+        !  with C_i
+        !
         sub_table(2,1,1,1)=2
         sub_table(2,1,1,2)=1
         sub_table(2,1,1,3)=1
@@ -6078,7 +6975,9 @@ CONTAINS
         sub_table(2,1,6,1)=2
         sub_table(2,1,6,2)=2
         sub_table(2,1,6,3)=2
-
+        !
+        !  with C_s
+        !
         sub_table(3,1,1,1)=2
         sub_table(3,1,1,2)=1
         sub_table(3,1,1,3)=2
@@ -6097,7 +6996,9 @@ CONTAINS
         sub_table(3,1,6,1)=2
         sub_table(3,1,6,2)=1
         sub_table(3,1,6,3)=2
-
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=2
         sub_table(4,1,1,2)=1
         sub_table(4,1,1,3)=2
@@ -6116,7 +7017,9 @@ CONTAINS
         sub_table(4,1,6,1)=2
         sub_table(4,1,6,2)=1
         sub_table(4,1,6,3)=2
-
+        !
+        !  with C_3
+        !
         sub_table(5,1,1,1)=2
         sub_table(5,1,1,2)=1
         sub_table(5,1,1,3)=2
@@ -6124,7 +7027,7 @@ CONTAINS
         sub_table(5,1,2,2)=1
         sub_table(5,1,2,3)=3
         sub_table(5,1,3,1)=2
-        sub_table(5,1,3,2)=1
+        sub_table(5,1,3,2)=2
         sub_table(5,1,3,3)=3
         sub_table(5,1,4,1)=2
         sub_table(5,1,4,2)=1
@@ -6133,9 +7036,11 @@ CONTAINS
         sub_table(5,1,5,2)=1
         sub_table(5,1,5,3)=3
         sub_table(5,1,6,1)=2
-        sub_table(5,1,6,2)=3
-        sub_table(5,1,6,3)=2
-
+        sub_table(5,1,6,2)=2
+        sub_table(5,1,6,3)=3
+        !
+        !  with D_2
+        !
         sub_table(8,1,1,1)=2
         sub_table(8,1,1,2)=1
         sub_table(8,1,1,3)=1
@@ -6154,7 +7059,9 @@ CONTAINS
         sub_table(8,1,6,1)=2
         sub_table(8,1,6,2)=1
         sub_table(8,1,6,3)=1
-
+        !
+        !  with C_2v
+        !
         sub_table(12,1,1,1)=2
         sub_table(12,1,1,2)=1
         sub_table(12,1,1,3)=1
@@ -6173,7 +7080,9 @@ CONTAINS
         sub_table(12,1,6,1)=2
         sub_table(12,1,6,2)=1
         sub_table(12,1,6,3)=1
-
+        !
+        !  with C_2h
+        !
         sub_table(16,1,1,1)=2
         sub_table(16,1,1,2)=1
         sub_table(16,1,1,3)=2
@@ -6192,7 +7101,9 @@ CONTAINS
         sub_table(16,1,6,1)=2
         sub_table(16,1,6,2)=3
         sub_table(16,1,6,3)=4
-
+        !
+        !  with D_2h
+        !
         sub_table(20,1,1,1)=2
         sub_table(20,1,1,2)=1
         sub_table(20,1,1,3)=1
@@ -6211,7 +7122,9 @@ CONTAINS
         sub_table(20,1,6,1)=2
         sub_table(20,1,6,2)=2
         sub_table(20,1,6,3)=2
-
+        !
+        !  with S_6
+        !
         sub_table(27,1,1,1)=2
         sub_table(27,1,1,2)=1
         sub_table(27,1,1,3)=2
@@ -6230,7 +7143,9 @@ CONTAINS
         sub_table(27,1,6,1)=2
         sub_table(27,1,6,2)=4
         sub_table(27,1,6,3)=6
-
+        !
+        !  with T
+        !
         sub_table(28,1,1,1)=2
         sub_table(28,1,1,2)=1
         sub_table(28,1,1,3)=1
@@ -6255,6 +7170,9 @@ CONTAINS
 !
 !  T_d
 !
+        !
+        !  with C_s
+        !
         sub_table(3,1,1,1)=2
         sub_table(3,1,1,2)=1
         sub_table(3,1,1,3)=2
@@ -6266,7 +7184,9 @@ CONTAINS
         sub_table(3,1,3,3)=1
         sub_table(3,1,3,4)=2
         sub_table(3,1,3,5)=2
-
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=2
         sub_table(4,1,1,2)=1
         sub_table(4,1,1,3)=2
@@ -6278,7 +7198,9 @@ CONTAINS
         sub_table(4,1,3,3)=1
         sub_table(4,1,3,4)=2
         sub_table(4,1,3,5)=2
-
+        !
+        !  with C_3
+        !
         sub_table(5,1,1,1)=2
         sub_table(5,1,1,2)=1
         sub_table(5,1,1,3)=2
@@ -6290,7 +7212,9 @@ CONTAINS
         sub_table(5,1,3,3)=2
         sub_table(5,1,3,4)=3
         sub_table(5,1,3,5)=3
-
+        !
+        !  with D_2
+        !
         sub_table(8,1,1,1)=2
         sub_table(8,1,1,2)=1
         sub_table(8,1,1,3)=1
@@ -6302,8 +7226,9 @@ CONTAINS
         sub_table(8,1,3,3)=1
         sub_table(8,1,3,4)=1
         sub_table(8,1,3,5)=1
-
-
+        !
+        !  with C_2v
+        !
         sub_table(12,1,1,1)=2
         sub_table(12,1,1,2)=1
         sub_table(12,1,1,3)=1
@@ -6315,7 +7240,9 @@ CONTAINS
         sub_table(12,1,3,3)=1
         sub_table(12,1,3,4)=1
         sub_table(12,1,3,5)=1
-
+        !
+        !  with C_3v
+        !
         sub_table(13,1,1,1)=2
         sub_table(13,1,1,2)=1
         sub_table(13,1,1,3)=1
@@ -6327,7 +7254,9 @@ CONTAINS
         sub_table(13,1,3,3)=1
         sub_table(13,1,3,4)=2
         sub_table(13,1,3,5)=3
-
+        !
+        !  with D_2d
+        !
         sub_table(24,1,1,1)=2
         sub_table(24,1,1,2)=1
         sub_table(24,1,1,3)=1
@@ -6339,7 +7268,9 @@ CONTAINS
         sub_table(24,1,3,3)=1
         sub_table(24,1,3,4)=2
         sub_table(24,1,3,5)=2
-
+        !
+        !  with S_4
+        !
         sub_table(26,1,1,1)=2
         sub_table(26,1,1,2)=1
         sub_table(26,1,1,3)=2
@@ -6351,7 +7282,9 @@ CONTAINS
         sub_table(26,1,3,3)=2
         sub_table(26,1,3,4)=3
         sub_table(26,1,3,5)=4
-
+        !
+        !  with T
+        !
         sub_table(28,1,1,1)=2
         sub_table(28,1,1,2)=1
         sub_table(28,1,1,3)=1
@@ -6368,18 +7301,23 @@ CONTAINS
 !
 !  O
 !
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=2
         sub_table(4,1,1,2)=1
         sub_table(4,1,1,3)=2
         sub_table(4,1,2,1)=2
         sub_table(4,1,2,2)=1
         sub_table(4,1,2,3)=2
-        sub_table(4,1,3,1)=2
-        sub_table(4,1,3,2)=4
+        sub_table(4,1,3,1)=4
+        sub_table(4,1,3,2)=1
         sub_table(4,1,3,3)=1
         sub_table(4,1,3,4)=2
         sub_table(4,1,3,5)=2
-
+        !
+        !  with C_3
+        !
         sub_table(5,1,1,1)=2
         sub_table(5,1,1,2)=1
         sub_table(5,1,1,3)=2
@@ -6390,8 +7328,10 @@ CONTAINS
         sub_table(5,1,3,2)=1
         sub_table(5,1,3,3)=2
         sub_table(5,1,3,4)=3
-        sub_table(5,1,3,5)=4
-
+        sub_table(5,1,3,5)=3
+        !
+        !  with C_4
+        !
         sub_table(6,1,1,1)=2
         sub_table(6,1,1,2)=1
         sub_table(6,1,1,3)=2
@@ -6403,7 +7343,9 @@ CONTAINS
         sub_table(6,1,3,3)=2
         sub_table(6,1,3,4)=3
         sub_table(6,1,3,5)=4
-
+        !
+        !  with D_2
+        !
         sub_table(8,1,1,1)=2
         sub_table(8,1,1,2)=1
         sub_table(8,1,1,3)=1
@@ -6415,7 +7357,9 @@ CONTAINS
         sub_table(8,1,3,3)=1
         sub_table(8,1,3,4)=1
         sub_table(8,1,3,5)=1
-
+        !
+        !  with D_3
+        !
         sub_table(9,1,1,1)=2
         sub_table(9,1,1,2)=1
         sub_table(9,1,1,3)=1
@@ -6427,7 +7371,9 @@ CONTAINS
         sub_table(9,1,3,3)=1
         sub_table(9,1,3,4)=2
         sub_table(9,1,3,5)=3
-
+        !
+        !  with D_4
+        !
         sub_table(10,1,1,1)=2
         sub_table(10,1,1,2)=1
         sub_table(10,1,1,3)=1
@@ -6439,7 +7385,9 @@ CONTAINS
         sub_table(10,1,3,3)=1
         sub_table(10,1,3,4)=2
         sub_table(10,1,3,5)=2
-
+        !
+        !  with T
+        !
         sub_table(28,1,1,1)=2
         sub_table(28,1,1,2)=1
         sub_table(28,1,1,3)=1
@@ -6452,11 +7400,13 @@ CONTAINS
         sub_table(28,1,3,4)=3
         sub_table(28,1,3,5)=3
 
-
      CASE(32)
 !
 !  O_h
 !
+        !
+        !  with C_i
+        !
         sub_table(2,1,1,1)=2
         sub_table(2,1,1,2)=1
         sub_table(2,1,1,3)=1
@@ -6479,7 +7429,9 @@ CONTAINS
         sub_table(2,1,6,3)=2
         sub_table(2,1,6,4)=2
         sub_table(2,1,6,5)=2
-
+        !
+        !  with C_s
+        !
         sub_table(3,1,1,1)=2
         sub_table(3,1,1,2)=1
         sub_table(3,1,1,3)=2
@@ -6502,7 +7454,9 @@ CONTAINS
         sub_table(3,1,6,3)=1
         sub_table(3,1,6,4)=2
         sub_table(3,1,6,5)=2
-
+        !
+        !  with C_2
+        !
         sub_table(4,1,1,1)=2
         sub_table(4,1,1,2)=1
         sub_table(4,1,1,3)=2
@@ -6525,7 +7479,9 @@ CONTAINS
         sub_table(4,1,6,3)=1
         sub_table(4,1,6,4)=2
         sub_table(4,1,6,5)=2
-
+        !
+        !  with C_3
+        !
         sub_table(5,1,1,1)=2
         sub_table(5,1,1,2)=1
         sub_table(5,1,1,3)=2
@@ -6536,7 +7492,7 @@ CONTAINS
         sub_table(5,1,3,2)=1
         sub_table(5,1,3,3)=2
         sub_table(5,1,3,4)=3
-        sub_table(5,1,3,5)=4
+        sub_table(5,1,3,5)=3
         sub_table(5,1,4,1)=2
         sub_table(5,1,4,2)=1
         sub_table(5,1,4,3)=2
@@ -6547,8 +7503,10 @@ CONTAINS
         sub_table(5,1,6,2)=1
         sub_table(5,1,6,3)=2
         sub_table(5,1,6,4)=3
-        sub_table(5,1,6,5)=4
-
+        sub_table(5,1,6,5)=3
+        !
+        !  with C_4
+        !
         sub_table(6,1,1,1)=2
         sub_table(6,1,1,2)=1
         sub_table(6,1,1,3)=2
@@ -6571,7 +7529,9 @@ CONTAINS
         sub_table(6,1,6,3)=2
         sub_table(6,1,6,4)=3
         sub_table(6,1,6,5)=4
-
+        !
+        !  with D_2
+        !
         sub_table(8,1,1,1)=2
         sub_table(8,1,1,2)=1
         sub_table(8,1,1,3)=1
@@ -6594,7 +7554,9 @@ CONTAINS
         sub_table(8,1,6,3)=1
         sub_table(8,1,6,4)=1
         sub_table(8,1,6,5)=1
-
+        !
+        !  with D_3
+        !
         sub_table(9,1,1,1)=2
         sub_table(9,1,1,2)=1
         sub_table(9,1,1,3)=1
@@ -6617,7 +7579,9 @@ CONTAINS
         sub_table(9,1,6,3)=1
         sub_table(9,1,6,4)=2
         sub_table(9,1,6,5)=3
-
+        !
+        !  with D_4
+        !
         sub_table(10,1,1,1)=2
         sub_table(10,1,1,2)=1
         sub_table(10,1,1,3)=1
@@ -6640,7 +7604,9 @@ CONTAINS
         sub_table(10,1,6,3)=1
         sub_table(10,1,6,4)=2
         sub_table(10,1,6,5)=2
-
+        !
+        !  with C_2v
+        !
         sub_table(12,1,1,1)=2
         sub_table(12,1,1,2)=1
         sub_table(12,1,1,3)=1
@@ -6663,7 +7629,9 @@ CONTAINS
         sub_table(12,1,6,3)=1
         sub_table(12,1,6,4)=1
         sub_table(12,1,6,5)=1
- 
+        !
+        !  with C_3v
+        !
         sub_table(13,1,1,1)=2
         sub_table(13,1,1,2)=1
         sub_table(13,1,1,3)=1
@@ -6686,7 +7654,9 @@ CONTAINS
         sub_table(13,1,6,3)=1
         sub_table(13,1,6,4)=2
         sub_table(13,1,6,5)=3
-
+        !
+        !  with C_4v
+        !
         sub_table(14,1,1,1)=2
         sub_table(14,1,1,2)=1
         sub_table(14,1,1,3)=1
@@ -6709,7 +7679,9 @@ CONTAINS
         sub_table(14,1,6,3)=1
         sub_table(14,1,6,4)=2
         sub_table(14,1,6,5)=2
-
+        !
+        !  with C_2h
+        !
         sub_table(16,1,1,1)=2
         sub_table(16,1,1,2)=1
         sub_table(16,1,1,3)=2
@@ -6732,7 +7704,9 @@ CONTAINS
         sub_table(16,1,6,3)=3
         sub_table(16,1,6,4)=4
         sub_table(16,1,6,5)=4
- 
+        !
+        !  with C_4h
+        !
         sub_table(18,1,1,1)=2
         sub_table(18,1,1,2)=1
         sub_table(18,1,1,3)=2
@@ -6755,7 +7729,9 @@ CONTAINS
         sub_table(18,1,6,3)=6
         sub_table(18,1,6,4)=7
         sub_table(18,1,6,5)=8
-
+        !
+        !  with D_2h
+        !
         sub_table(20,1,1,1)=2
         sub_table(20,1,1,2)=1
         sub_table(20,1,1,3)=1
@@ -6778,7 +7754,9 @@ CONTAINS
         sub_table(20,1,6,3)=2
         sub_table(20,1,6,4)=2
         sub_table(20,1,6,5)=2
-
+        !
+        !  with D_4h
+        !
         sub_table(22,1,1,1)=2
         sub_table(22,1,1,2)=1
         sub_table(22,1,1,3)=1
@@ -6801,7 +7779,9 @@ CONTAINS
         sub_table(22,1,6,3)=3
         sub_table(22,1,6,4)=4
         sub_table(22,1,6,5)=4
-
+        !
+        !  with D_2d
+        !
         sub_table(24,1,1,1)=2
         sub_table(24,1,1,2)=1
         sub_table(24,1,1,3)=1
@@ -6824,7 +7804,9 @@ CONTAINS
         sub_table(24,1,6,3)=1
         sub_table(24,1,6,4)=2
         sub_table(24,1,6,5)=2
-
+        !
+        !  with D_3d
+        !
         sub_table(25,1,1,1)=2
         sub_table(25,1,1,2)=1
         sub_table(25,1,1,3)=1
@@ -6847,7 +7829,9 @@ CONTAINS
         sub_table(25,1,6,3)=4
         sub_table(25,1,6,4)=5
         sub_table(25,1,6,5)=6
-
+        !
+        !  with S_4
+        !
         sub_table(26,1,1,1)=2
         sub_table(26,1,1,2)=1
         sub_table(26,1,1,3)=2
@@ -6870,7 +7854,9 @@ CONTAINS
         sub_table(26,1,6,3)=2
         sub_table(26,1,6,4)=3
         sub_table(26,1,6,5)=4
-
+        !
+        !  with S_6
+        !
         sub_table(27,1,1,1)=2
         sub_table(27,1,1,2)=1
         sub_table(27,1,1,3)=2
@@ -6893,7 +7879,9 @@ CONTAINS
         sub_table(27,1,6,3)=5
         sub_table(27,1,6,4)=6
         sub_table(27,1,6,5)=6
-
+        !
+        !  with T
+        !
         sub_table(28,1,1,1)=2
         sub_table(28,1,1,2)=1
         sub_table(28,1,1,3)=1
@@ -6909,14 +7897,16 @@ CONTAINS
         sub_table(28,1,4,2)=1
         sub_table(28,1,4,3)=1
         sub_table(28,1,5,1)=2
-        sub_table(28,1,5,2)=2
-        sub_table(28,1,5,3)=2
+        sub_table(28,1,5,2)=1
+        sub_table(28,1,5,3)=1
         sub_table(28,1,6,1)=4
-        sub_table(28,1,6,2)=3
-        sub_table(28,1,6,3)=3
-        sub_table(28,1,6,4)=4
-        sub_table(28,1,6,5)=4
-
+        sub_table(28,1,6,2)=2
+        sub_table(28,1,6,3)=2
+        sub_table(28,1,6,4)=3
+        sub_table(28,1,6,5)=3
+        !
+        !  with T_h
+        !
         sub_table(29,1,1,1)=2
         sub_table(29,1,1,2)=1
         sub_table(29,1,1,3)=1
@@ -6939,7 +7929,9 @@ CONTAINS
         sub_table(29,1,6,3)=5
         sub_table(29,1,6,4)=6
         sub_table(29,1,6,5)=6
-
+        !
+        !  with T_d
+        !
         sub_table(30,1,1,1)=2
         sub_table(30,1,1,2)=1
         sub_table(30,1,1,3)=1
@@ -6962,7 +7954,9 @@ CONTAINS
         sub_table(30,1,6,3)=3
         sub_table(30,1,6,4)=3
         sub_table(30,1,6,5)=3
-
+        !
+        !  with O
+        !
         sub_table(31,1,1,1)=2
         sub_table(31,1,1,2)=1
         sub_table(31,1,1,3)=1
@@ -7042,8 +8036,8 @@ CONTAINS
 !  9 D_3 : (3)
 !  C_1, C_2, C_3
 !
-!  10 D_4 : (7)
-!  C_1, C_2_1, C_2_2, C_2_3, D_2_1, D_2_2, C_4
+!  10 D_4 : (9)
+!  C_1, C_2_1, C_2_2, C_2_3, C_4, D_2_1, D_2_2, D_2_3, D_2_4
 !
 !  11 D_6 : (8)
 !  C_1, C_2_1, C_2_2, C_2_3, C_3, C_6, D_3_1, D_3_2
@@ -7129,11 +8123,13 @@ CONTAINS
   REAL(DP), INTENT(IN) :: at(3,3), bg(3,3)
   REAL(DP) :: angle, prod
 
-  REAL(DP) :: sr_a(3,3,nsym_a), sr_b(3,3,nsym_b), ax(3), bx(3), saxis(3,3)
+  REAL(DP) :: sr_a(3,3,nsym_a), sr_b(3,3,nsym_b), ax(3), bx(3), cx(3), saxis(3,3)
   LOGICAL :: equal
-  INTEGER :: isym, ipol, jpol, imirror, iaxis, four_axis
+  INTEGER :: isym, ipol, jpol, imirror, iaxis, four_axis, iax, ibx, icx, id2
+  INTEGER :: imax, imbx, imcx, ic4, is4
+  INTEGER :: ic2, ic21, ic211, isv, isv1, ts, ind2(3)
   INTEGER :: xaxis, yaxis, zaxis, naxis, isave
-  LOGICAL :: is_parallel
+  LOGICAL :: is_parallel, isok, isok1
   INTEGER :: tipo_sym
 
   IF (group_b==1) THEN
@@ -7164,7 +8160,7 @@ CONTAINS
            CASE (2)
               aux_ind=1
            CASE DEFAULT
-                CALL errore('find_aux_ind_two_groups',' group not available',1)
+              CALL errore('find_aux_ind_two_groups',' group not available',1)
         END SELECT   
      CASE(7)
 !
@@ -7180,6 +8176,19 @@ CONTAINS
 !
 !  D_2
 !
+!
+!   first determine the type of D_2: 1 axes parallel to x,y,z; 2 some axis parallel
+!   to some other C_2 axis
+!
+        id2=1
+        DO isym=1,nsym_a
+           IF (id2==1.AND. tipo_sym(sr_a(1,1,isym))==4) THEN
+              CALL versor(sr_a(1,1,isym),ax)
+              CALL which_c2(ax, iax)
+              IF (iax > 3) id2=2
+           ENDIF
+        ENDDO 
+
         SELECT CASE (group_b)
            CASE(2)
       !
@@ -7187,25 +8196,39 @@ CONTAINS
       !
               DO isym=1,nsym_b
 !
-!   find the axis of order 2 and check to which axis it is parallel
+!   find the axis of order 2 of C_2 and check to which axis it is parallel
 !
                 IF (tipo_sym(sr_b(1,1,isym))==4) THEN
                    CALL versor(sr_b(1,1,isym),ax)
-                   IF (is_axis(ax,1)) THEN
-                      aux_ind=3
-                   ELSEIF (is_axis(ax,2)) THEN
-                      aux_ind=2
-                   ELSEIF (is_axis(ax,3)) THEN
-                      aux_ind=1
-                   ENDIF
+                   CALL which_c2(ax, iax)
+                   SELECT CASE (iax)
+!
+!   See point group manual for the different possibilities.
+!
+                      CASE (1)
+                         aux_ind=1
+                      CASE (2)
+                         IF (id2==1) THEN
+                           aux_ind=2
+                         ELSE
+                           aux_ind=1
+                         ENDIF
+                      CASE (3)
+                         IF (id2==1) THEN
+                           aux_ind=3
+                         ELSE
+                           aux_ind=1
+                         ENDIF
+                      CASE (4,6,8,10,11) 
+                         aux_ind=2
+                      CASE (5,7,9,12,13) 
+                         aux_ind=3
+                   END SELECT
                 ENDIF
              ENDDO
-
-             
            CASE DEFAULT
                 CALL errore('find_aux_ind_two_groups',' group not available',1)
         END SELECT   
-
      CASE(9)
 !
 !  D_3
@@ -7223,18 +8246,30 @@ CONTAINS
 !
 !  D_4
 !
+!
+!   find the axis C_4 of D_4
+!
+        DO isym=1,nsym_a
+           IF (tipo_sym(sr_a(1,1,isym))==3) THEN
+              CALL versor(sr_a(1,1,isym),ax)
+              CALL which_c2(ax, iax)
+              IF (iax > 3) CALL errore('find_aux_ind_two_groups','wrong C_4',1)
+           ENDIF
+        ENDDO
+             
         SELECT CASE (group_b)
-           CASE(2)
+           CASE(4)
               DO isym=1,nsym_b
 !
-!   find the axis of order 2 and check to which axis it is parallel
+!   find the axis of order 2 and check if it is parallel to the C_4 axis of D_4
+!   (case 1), to x,y, or z axes (case 2) or to another axis (case 3)
 !
                  IF (tipo_sym(sr_b(1,1,isym))==4) THEN
                     CALL versor(sr_b(1,1,isym),ax)
-                    IF (is_axis(ax,1).OR.is_axis(ax,2)) THEN
-                       aux_ind=2
-                    ELSEIF (is_axis(ax,3)) THEN
+                    IF (is_axis(ax,iax)) THEN
                        aux_ind=1
+                    ELSEIF (is_axis(ax,1).OR.is_axis(ax,2).OR.is_axis(ax,3)) THEN
+                       aux_ind=2
                     ELSE
                        aux_ind=3
                     ENDIF
@@ -7249,18 +8284,38 @@ CONTAINS
       !
       !  D_2
       !
-              aux_ind = 1
-              DO isym = 1, nsym_b
-      !
-      !   check if there is an axis not parallel to x, y, or z, in this case
-      !   it is of type 2
-      !
-                 IF (tipo_sym(sr_b(1,1,isym))==4) THEN
-                    CALL versor(sr_b(1,1,isym),ax)
-                    IF (.NOT.( is_axis(ax,1) .OR. is_axis(ax,2) &
-                                             .OR. is_axis(ax,3) )) aux_ind=2
-                 END IF
-              END DO
+!
+!   first determine the type of D_2: 1 all axes parallel to x,y,z; 
+!   2 some axis parallel to some other C_2 axis
+!
+              id2=1
+              DO isym=1,nsym_b
+                 IF (id2==1.AND. tipo_sym(sr_b(1,1,isym))==4) THEN
+                   CALL versor(sr_b(1,1,isym),bx)
+                   CALL which_c2(bx, ibx)
+                   IF (ibx > 3) id2=2
+                 ENDIF
+              ENDDO
+              IF (id2==1) THEN
+!
+!  In this case we have only to check which axis of D_2 coincides
+!  with C_4 of D_4. If C_4 is x it is C_2'', if C_4 is y it is C_2', if C_4 is
+!  z it is C_2.
+!
+                 IF (iax==1) THEN
+                    aux_ind=4
+                 ELSEIF (iax==2) THEN
+                    aux_ind=3
+                 ELSEIF (iax==3) THEN
+                    aux_ind=1
+                 ENDIF
+              ELSE
+!
+!   In this case C_2 of D_2 coincides with C_4 of D_4 and C_2' and C_2'' of D_2
+!   coincide with C_2'' of D_4
+!
+                 aux_ind=2
+              ENDIF
            CASE DEFAULT
                 CALL errore('find_aux_ind_two_groups',' group not available',1)
         END SELECT   
@@ -7270,31 +8325,32 @@ CONTAINS
 !  D_6
 !
         SELECT CASE (group_b)
-           CASE(2)
+           CASE(4)
+      !
+      !    C_2
+      !
               DO isym=1,nsym_b
 !
 !   find the axis of order 2 and check to which axis it is parallel
 !
                  IF (tipo_sym(sr_b(1,1,isym))==4) THEN
                     CALL versor(sr_b(1,1,isym),ax)
-                    IF (is_axis(ax,3)) THEN
+                    CALL which_c2(ax, iax)
+                    IF (iax==3) THEN
                        aux_ind=1
+                    ELSEIF (iax==1.OR.iax==10.OR.iax==11) THEN
+                       aux_ind=2
+                    ELSEIF (iax==2.OR.iax==12.OR.iax==13) THEN
+                       aux_ind=3
                     ELSE
-                       angle=ACOS(ax(1))*180.0_DP / pi
-                       IF (MOD(NINT(angle), 60)==0) THEN
-                          aux_ind=2
-                       ELSEIF (MOD(NINT(angle), 30)==0) THEN
-                          aux_ind=3
-                       ELSE
-                          CALL errore('find_aux_ind_two_groups',&
+                       CALL errore('find_aux_ind_two_groups',&
                                       ' Problem with axis direction ',1)
-                       ENDIF
                     ENDIF
                  ENDIF
               ENDDO
-           CASE(5,7)
+           CASE(5,7,8)
       !
-      !    C_3, C_6
+      !    C_3, C_6, D_2
       !
               aux_ind=1
            CASE(9)
@@ -7307,10 +8363,10 @@ CONTAINS
 !
                  IF (tipo_sym(sr_b(1,1,isym))==4) THEN
                     CALL versor(sr_b(1,1,isym),ax)
-                    angle=ACOS(ax(1))*180.0_DP / pi
-                    IF (MOD(NINT(angle), 60)==0) THEN
+                    CALL which_c2(ax, iax)
+                    IF (iax==1.OR.iax==10.OR.iax==11) THEN
                        aux_ind=1
-                    ELSEIF (MOD(NINT(angle), 30)==0) THEN
+                    ELSEIF (iax==2.OR.iax==12.OR.iax==13) THEN
                        aux_ind=2
                     ELSE
                        CALL errore('find_aux_ind_two_groups',&
@@ -7327,34 +8383,76 @@ CONTAINS
 !
         SELECT CASE (group_b)
            CASE (3)
-      !
-      !  C_s, there is no way to distinguish the two mirrors. We assume
-      !  aux_ind=1 if the first mirror of group a is the same as the C_s mirror.
-      !
+              !
+              !  with C_s
+              !
+              !  In ibx and icx the two perpendiculars of the two mirrors of C_2v
+              !
+              ibx=0
               DO isym=1, nsym_a
                  IF (tipo_sym(sr_a(1,1,isym))==5) THEN
-                    imirror = isym
-                    EXIT
+                    CALL mirror_axis(sr_a(1,1,isym),ax)
+                    IF (ibx==0) THEN
+                       CALL which_c2(ax, ibx)
+                    ELSE
+                       CALL which_c2(ax, icx)
+                    ENDIF
                  ENDIF
               ENDDO
-              equal=.TRUE.
-              DO ipol=1,3
-                 DO jpol=1,3
-                    equal=equal.AND.sk_a(ipol,jpol,imirror)==sk_b(ipol,jpol,2)
-                 ENDDO
+              !
+              !  In iax the perpendicular to the C_s mirror
+              !
+              DO isym=1, nsym_b
+                 IF (tipo_sym(sr_b(1,1,isym))==5) THEN
+                    CALL mirror_axis(sr_b(1,1,isym),ax)
+                    CALL which_c2(ax, iax)
+                 ENDIF
               ENDDO
-              IF (equal) THEN
-                 aux_ind=1
+              imirror=0
+              IF (ibx==iax) imirror=icx 
+              IF (icx==iax) imirror=ibx 
+              IF (imirror==0) CALL errore('find_aux_ind_two_groups',&
+                                           'C_2v and C_s have no common mirror',1)
+
+              IF (iax==1 .OR. iax==5 .OR. iax==7 .OR. iax==9 .OR. iax==10 .OR. &
+                                                                  iax==11) THEN
+                  aux_ind=2
+              ELSEIF (iax==2) THEN
+                  aux_ind=1
+              ELSEIF (iax==3) THEN
+                  IF (imirror==2) THEN
+                     aux_ind=2
+                  ELSE
+                     aux_ind=1
+                  ENDIF
+              ELSEIF (iax==4) THEN
+                  IF (imirror==1) THEN
+                     aux_ind=2
+                  ELSE
+                     aux_ind=1
+                  ENDIF
+              ELSEIF (iax==6) THEN
+                  IF (imirror==2) THEN
+                     aux_ind=2
+                  ELSE
+                     aux_ind=1
+                  ENDIF
+              ELSEIF (iax==8.OR.iax==12.OR.iax==13) THEN
+                  IF (imirror==3) THEN
+                     aux_ind=2
+                  ELSE
+                     aux_ind=1
+                  ENDIF
               ELSE
-                 aux_ind=2
-              ENDIF
+                 CALL errore('find_aux_ind_two_groups','C_2v/C_s problem with axis',1)
+              ENDIF 
            CASE (4)
       !
-      !    C_2
+      !   with C_2
       !
               aux_ind=1
            CASE DEFAULT
-                CALL errore('find_aux_ind_two_groups',' group not available',1)
+              CALL errore('find_aux_ind_two_groups',' group not available',1)
         END SELECT   
      CASE(13)
 !
@@ -7367,7 +8465,7 @@ CONTAINS
       !
               aux_ind=1
            CASE DEFAULT
-                CALL errore('find_aux_ind_two_groups',' group not available',1)
+              CALL errore('find_aux_ind_two_groups',' group not available',1)
         END SELECT   
      CASE(14)
 !
@@ -7424,10 +8522,10 @@ CONTAINS
       !    C_s
       !
               CALL mirror_axis(sr_b(1,1,2),bx)
-              angle=ACOS(bx(1))*180.0_DP / pi
-              IF (MOD(NINT(angle), 60)==0) THEN
+              CALL which_c2(bx, ibx)
+              IF ( ibx==2 .OR. ibx==12 .OR. ibx==13 ) THEN
                  aux_ind=1
-              ELSEIF (MOD(NINT(angle), 30)==0) THEN
+              ELSEIF ( ibx==1 .OR. ibx==10 .OR. ibx==11 ) THEN
                  aux_ind=2
               ELSE
                  CALL errore('find_aux_ind_two_groups',&
@@ -7447,10 +8545,10 @@ CONTAINS
                  IF (tipo_sym(sr_b(1,1,isym))==5) imirror=isym
               ENDDO
               CALL mirror_axis(sr_b(1,1,imirror),bx)
-              angle=ACOS(bx(1))*180.0_DP / pi
-              IF (MOD(NINT(angle), 60)==0) THEN
+              CALL which_c2(bx, ibx)
+              IF ( ibx==2 .OR. ibx==12 .OR. ibx==13 ) THEN
                  aux_ind=1
-              ELSEIF (MOD(NINT(angle), 30)==0) THEN
+              ELSEIF ( ibx==1 .OR. ibx==10 .OR. ibx==11 ) THEN
                  aux_ind=2
               ELSE
                  CALL errore('find_aux_ind_two_groups',&
@@ -7516,6 +8614,55 @@ CONTAINS
 !
 !  D_2h
 !
+!
+!      First analyze D_2h and determine C_2, C_2', and C_2''
+!
+        iax=0
+        ibx=0
+        icx=0
+        imax=0
+        imbx=0
+        imcx=0
+        DO isym=2,nsym_a
+           ts=tipo_sym(sr_a(1,1,isym))
+           IF (ts==4) THEN
+              CALL versor(sr_a(1,1,isym),ax)
+              IF (iax==0) THEN
+                 CALL which_c2(ax, iax)
+              ELSEIF (ibx==0) THEN
+                 CALL which_c2(ax, ibx)
+              ELSEIF (icx==0) THEN
+                 CALL which_c2(ax, icx)
+              ELSE
+                 CALL errore('find_aux_ind_two_groups','D_2h too many C_2 axis',1)
+              ENDIF
+           ELSEIF (ts==5) THEN
+              CALL mirror_axis(sr_a(1,1,isym),ax)
+              IF (imax==0) THEN
+                 CALL which_c2(ax, imax)
+              ELSEIF (imbx==0) THEN
+                 CALL which_c2(ax, imbx)
+              ELSEIF (imcx==0) THEN
+                 CALL which_c2(ax, imcx)
+              ELSE
+                 CALL errore('find_aux_ind_two_groups','D_2h too many mirrors',1)
+              ENDIF
+           ELSEIF (ts /= 2) THEN
+              CALL errore('find_aux_ind_two_groups','D_2h operation not recognized',1)
+           ENDIF
+        ENDDO
+        CALL is_d2(iax, ibx, icx, ind2)
+
+        IF (ind2(1)==1) ic2=iax
+        IF (ind2(1)==2) ic2=ibx
+        IF (ind2(1)==3) ic2=icx
+        IF (ind2(2)==1) ic21=iax
+        IF (ind2(2)==2) ic21=ibx
+        IF (ind2(2)==3) ic21=icx
+        IF (ind2(3)==1) ic211=iax
+        IF (ind2(3)==2) ic211=ibx
+        IF (ind2(3)==3) ic211=icx
+
        SELECT CASE (group_b)
           CASE(2)
              aux_ind=1
@@ -7524,23 +8671,25 @@ CONTAINS
 !   find the mirror normal
 !
              CALL mirror_axis(sr_b(1,1,2),bx)
-             IF (is_axis(bx,1)) THEN
+             CALL which_c2(bx, ibx)
+             IF (ibx==ic2) THEN
                 aux_ind=1
-             ELSEIF (is_axis(bx,2)) THEN
+             ELSEIF (ibx==ic21) THEN
                 aux_ind=2
-             ELSEIF (is_axis(bx,3)) THEN
+             ELSEIF (ibx==ic211) THEN
                 aux_ind=3
              ENDIF
           CASE(4)
 !
 !   find the C_2 axis normal
 !
-             CALL versor(sr_b(1,1,2),ax)
-             IF (is_axis(ax,1)) THEN
+             CALL versor(sr_b(1,1,2),bx)
+             CALL which_c2(bx, ibx)
+             IF (ibx==ic2) THEN
                 aux_ind=1
-             ELSEIF (is_axis(ax,2)) THEN
+             ELSEIF (ibx==ic21) THEN
                 aux_ind=2
-             ELSEIF (is_axis(ax,3)) THEN
+             ELSEIF (ibx==ic211) THEN
                 aux_ind=3
              ENDIF
           CASE (8)
@@ -7549,82 +8698,77 @@ CONTAINS
        !
        !  C_2v
        !
-       !
-       !  Find three axis of order 2 of D_2h
-       !
-              naxis=0
-              xaxis=0
-              yaxis=0
-              zaxis=0
-              DO isym=1,nsym_a
-                 IF (tipo_sym(sr_a(1,1,isym))==4) THEN
-                    CALL versor(sr_a(1,1,isym),ax)
-                    naxis=naxis+1
-                    IF (naxis > 3) CALL errore('find_aux_ind_two_groups',&
-                                               'two many axis',1)
-                    saxis(:,naxis)=ax(:)
-                    IF (is_axis(ax,1)) xaxis=naxis
-                    IF (is_axis(ax,2)) yaxis=naxis
-                    IF (is_axis(ax,3)) zaxis=naxis
-                 ENDIF
-              ENDDO
-              IF (naxis /=3 ) CALL errore('find_aux_ind_two_groups',&
-                                               'missing axis',1)
-              IF (zaxis ==0 ) CALL errore('find_aux_ind_two_groups',&
-                                               'missing z axis',1)
-              
-              write(6,*) 'xaxis,yaxis,zaxis', xaxis, yaxis, zaxis
-              IF (xaxis==0.OR.yaxis==0) THEN
-                 IF (zaxis==1) THEN
-                    xaxis=2
-                    yaxis=3
-                 ELSEIF (zaxis==2) THEN
-                    xaxis=3
-                    yaxis=1
-                 ELSEIF (zaxis==3) THEN
-                    xaxis=1
-                    yaxis=2
-                 ENDIF
-                 IF (is_right_oriented(saxis(1,xaxis), saxis(1,yaxis), &
-                                             saxis(1,zaxis) ) ) THEN
-                    isave=xaxis
-                    xaxis=yaxis
-                    yaxis=isave
-                 ENDIF
-              ENDIF
-              write(6,*) 'xaxis,yaxis,zaxis', xaxis, yaxis, zaxis
-              write(6,*) 'xaxis,', saxis(:,xaxis)
-              write(6,*) 'yaxis,', saxis(:,yaxis)
-              write(6,*) 'zaxis,', saxis(:,zaxis)
-                 
+              iax=0
+              ibx=0
+              icx=0
               DO isym=1,nsym_b
 !
-!   find the axis of order 2 and check to which axis it is parallel
+!   find the axis of order 2 and the two mirrors of C_2v
 !
-                IF (tipo_sym(sr_b(1,1,isym))==4) THEN
-                   CALL versor(sr_b(1,1,isym),ax)
-                   WRITE(6,*) ax(:)
-                   IF (is_parallel(ax,saxis(1,xaxis))) THEN
-                      aux_ind=3
-                   ELSEIF (is_parallel(ax,saxis(1,yaxis))) THEN
-                      aux_ind=2
-                   ELSEIF (is_parallel(ax,saxis(1,zaxis))) THEN
-                      aux_ind=1
-                   ENDIF 
-                ENDIF
-             ENDDO
+                 IF (tipo_sym(sr_b(1,1,isym))==4) THEN
+                    CALL versor(sr_b(1,1,isym),ax)
+                    CALL which_c2(ax, iax)
+                 ELSEIF (tipo_sym(sr_b(1,1,isym))==5) THEN
+                    CALL mirror_axis(sr_b(1,1,isym),ax)
+                    IF (ibx==0) THEN
+                       CALL which_c2(ax, ibx)
+                    ELSEIF (icx==0) THEN
+                       CALL which_c2(ax, icx)
+                    ENDIF
+                 ENDIF
+              ENDDO
+              CALL is_c2v(iax, ibx, icx, isok)
+              IF (isok) THEN
+                 isv=ibx
+                 isv1=icx
+              ELSE
+                 CALL is_c2v(iax, icx, ibx, isok1)
+                 IF (.NOT. isok1) CALL errore('find_aux_ind_two_groups',&
+                                               'problem D_2h C_2v',1)
+                 isv=icx
+                 isv1=ibx
+              ENDIF
+
+              IF (iax==ic2) THEN
+                 IF (isv==ic21 .AND. isv1==ic211) THEN
+                    aux_ind=1
+                 ELSEIF (isv==ic211 .AND. isv1==ic21) THEN
+                    aux_ind=4
+                 ELSE
+                    CALL errore('find_aux_ind_two_groups','problem D_2h C_2v',2)
+                 ENDIF
+              ELSEIF (iax==ic21) THEN
+                 IF (isv==ic2 .AND. isv1==ic211) THEN
+                    aux_ind=2
+                 ELSEIF (isv==ic211 .AND. isv1==ic2) THEN
+                    aux_ind=5
+                 ELSE
+                    CALL errore('find_aux_ind_two_groups','problem D_2h C_2v',3)
+                 ENDIF
+              ELSEIF (iax==ic211) THEN
+                 IF (isv==ic2 .AND. isv1==ic21) THEN
+                    aux_ind=3
+                 ELSEIF (isv==ic21 .AND. isv1==ic2) THEN
+                    aux_ind=6
+                 ELSE
+                    CALL errore('find_aux_ind_two_groups','problem D_2h C_2v',4)
+                 ENDIF
+              ELSE
+                 CALL errore('find_aux_ind_two_groups','problem of C_2 D_2h C_2v',5)
+              ENDIF
          CASE(16)
 !
 !   find the C_2 axis and check with which axis it is parallel
 !
              DO isym=1,nsym_b
                 IF (tipo_sym(sr_b(1,1,isym))==4) THEN
-                   CALL versor(sr_b(1,1,isym),ax)
-                   IF (is_axis(ax,1)) THEN
+                   CALL versor(sr_b(1,1,isym),bx)
+                   CALL which_c2(bx,ibx)
+                   IF ( ibx==ic2 ) THEN
                       aux_ind=1
-                   ELSEIF (is_axis(ax,2)) THEN
+                   ELSEIF ( ibx==ic21 ) THEN
                       aux_ind=2
-                   ELSEIF (is_axis(ax,3)) THEN
+                   ELSEIF ( ibx==ic211 ) THEN
                       aux_ind=3
                    ENDIF
                 ENDIF
@@ -7648,11 +8792,50 @@ CONTAINS
               ELSE
                  aux_ind=2
               ENDIF
-           CASE(4,5,9,12,13,17)
+           CASE(4,5,9,13,17)
       !
       !    C_2, C_3, D_3, C_2v, C_3v, C_3h
       !
               aux_ind=1
+           CASE(12)
+             iax=0
+             ibx=0
+             icx=0
+             DO isym=1,nsym_b
+!
+!   find the axis of order 2 and the two mirrors of C_2v
+!
+                IF (tipo_sym(sr_b(1,1,isym))==4) THEN
+                   CALL versor(sr_b(1,1,isym),ax)
+                   CALL which_c2(ax, iax)
+                ELSEIF (tipo_sym(sr_b(1,1,isym))==5) THEN
+                   CALL mirror_axis(sr_b(1,1,isym),ax)
+                   IF (ibx==0) THEN
+                      CALL which_c2(ax, ibx)
+                   ELSEIF (icx==0) THEN
+                      CALL which_c2(ax, icx)
+                   ENDIF
+                ENDIF
+             ENDDO
+             CALL is_c2v(iax, ibx, icx, isok)
+             IF (isok) THEN
+                isv=ibx
+                isv1=icx
+             ELSE
+                CALL is_c2v(iax, icx, ibx, isok1)
+                IF (.NOT. isok1) CALL errore('find_aux_ind_two_groups',&
+                                              'problem D_2h C_2v',1)
+                isv=icx
+                isv1=ibx
+             ENDIF
+             IF (isv==3) THEN
+                aux_ind=1
+             ELSEIF (isv1==3) THEN
+                aux_ind=2
+             ELSE
+                CALL errore('find_aux_ind_two_groups',&
+                                              'problem D_2h C_2v',2)
+             ENDIF
            CASE DEFAULT
                 CALL errore('find_aux_ind_two_groups',' group not available',1)
         END SELECT   
@@ -7660,15 +8843,30 @@ CONTAINS
 !
 !   D_4h
 !
+!
+!   first find the axis C_4 of D_4h
+!
+       iax=0
+       DO isym=2,nsym_a
+          ts=tipo_sym(sr_a(1,1,isym))
+          IF (ts==3) THEN
+             CALL versor(sr_a(1,1,isym),ax)
+             CALL which_c2(ax, iax)
+          ENDIF
+       ENDDO
+       IF (iax > 3) CALL errore('find_aux_ind_two_groups','problem with D_4h',1)
+       ic4=iax
+
        SELECT CASE (group_b)
           CASE(3)
           !
           !  C_s
           !
              CALL mirror_axis(sr_b(1,1,2),bx)
-             IF (is_axis(bx,3)) THEN
+             CALL which_c2(bx, ibx)
+             IF (ibx==ic4) THEN
                 aux_ind=1
-             ELSEIF (is_axis(bx,1).OR.is_axis(bx,2)) THEN
+             ELSEIF ( ibx < 4 ) THEN
                 aux_ind=2
              ELSE
                 aux_ind=3
@@ -7677,17 +8875,24 @@ CONTAINS
           !
           !  C_2
           !
-             CALL versor(sr_b(1,1,2),ax)
-             IF (is_axis(ax,3)) THEN
+             CALL versor(sr_b(1,1,2),bx)
+             CALL which_c2(bx, ibx)
+             IF (ibx==ic4) THEN
                 aux_ind=1
-             ELSEIF (is_axis(ax,1).OR.is_axis(ax,2)) THEN
+             ELSEIF (ibx < 4) THEN
                 aux_ind=2
              ELSE
                 aux_ind=3
              ENDIF
-          CASE (2,6)
+          CASE (2,6,10)
+          !
+          ! C_i, C_4, D_4
+          !
              aux_ind=1
           CASE (8)
+          !
+          !  D_2
+          !
              aux_ind=1
              DO isym=1,nsym_b
                 IF (tipo_sym(sr_b(1,1,isym))==4) THEN
@@ -7696,98 +8901,71 @@ CONTAINS
                       aux_ind=2
                 END IF
              ENDDO
-          CASE (10)
-             aux_ind=1
           CASE (12)
        !
        !  C_2v
        !
-             DO isym=1,nsym_a
-!
-!   find the direction of the axis of order 4 in D_4h
-!
-                IF (tipo_sym(sr_a(1,1,isym))==3) iaxis=isym
-             END DO
-             CALL versor(sr_a(1,1,iaxis),ax)
-             four_axis=0
-             IF (is_axis(ax,1)) four_axis=1
-             IF (is_axis(ax,2)) four_axis=2
-             IF (is_axis(ax,3)) four_axis=3
-             WRITE(6,*) 'four_axis', four_axis
-             IF (four_axis==0) CALL errore('find_aux_ind_two_groups',  &
-                                       'problem with fourfold axis',1)
-             
-
+             iax=0
+             ibx=0
+             icx=0
              DO isym=1,nsym_b
 !
-!   find the axis of order 2 and one of the mirrors.
+!   find the axis of order 2 and the two mirrors of C_2v
 !
-                IF (tipo_sym(sr_b(1,1,isym))==4) iaxis=isym
-                IF (tipo_sym(sr_b(1,1,isym))==5) imirror=isym
+                IF (tipo_sym(sr_b(1,1,isym))==4) THEN
+                   CALL versor(sr_b(1,1,isym),ax)
+                   CALL which_c2(ax, iax)
+                ELSEIF (tipo_sym(sr_b(1,1,isym))==5) THEN
+                   CALL mirror_axis(sr_b(1,1,isym),ax)
+                   IF (ibx==0) THEN
+                      CALL which_c2(ax, ibx)
+                   ELSEIF (icx==0) THEN
+                      CALL which_c2(ax, icx)
+                   ENDIF
+                ENDIF
              ENDDO
-             CALL versor(sr_b(1,1,iaxis),ax)
-             CALL mirror_axis(sr_b(1,1,imirror),bx)
-
-
-             IF (is_axis(ax,four_axis)) THEN
+             CALL is_c2v(iax, ibx, icx, isok)
+             IF (isok) THEN
+                isv=ibx
+                isv1=icx
+             ELSE
+                CALL is_c2v(iax, icx, ibx, isok1)
+                IF (.NOT. isok1) CALL errore('find_aux_ind_two_groups',&
+                                              'problem D_2h C_2v',1)
+                isv=icx
+                isv1=ibx
+             ENDIF
+             IF (iax==ic4) THEN
 !
 !   aux_num 1 and 2 the twofold axis is the z axis and in 1 the mirror
 !   are perpendicular to the x and y axis, in 2 the mirror are perpendicular
 !   to the 110 and 1-10 directions.
 !
 
-                IF (is_axis(bx,1) .OR. is_axis(bx,2)) THEN
+                IF ( isv < 4 ) THEN
                    aux_ind=1
                 ELSE
                    aux_ind=2
                 ENDIF
-             ELSEIF (is_axis(ax,1).OR.is_axis(ax,2).OR.is_axis(ax,3)) THEN
+             ELSEIF (iax < 4) THEN
 !
-!  aux_num 3 or 5 when the axis is parallel to x or y
+!  aux_num 3 when the axis is parallel to x,y or z
 !
-                IF (four_axis==1) THEN
-                   IF (is_axis(ax,2)) THEN
-                      aux_ind=3
-                   ELSE
-                      aux_ind=5
-                   ENDIF
-                ELSEIF (four_axis==2) THEN
-                   IF (is_axis(ax,1)) THEN
-                      aux_ind=5
-                   ELSE
-                      aux_ind=3
-                   ENDIF
+                IF (isv==ic4) THEN
+                   aux_ind=3
+                ELSEIF (isv1==ic4) THEN
+                   aux_ind=4
                 ELSE
-                   IF (is_axis(ax,1)) THEN
-                      aux_ind=3
-                   ELSE
-                      aux_ind=3
-                   ENDIF
+                   CALL errore('find_aux_ind_two_groups', &
+                               'D_4h problem with sigma_h',1)
                 ENDIF
              ELSE
 !
-!  aux_num 4 or 6 when the twofold axis is parallel to 110 or 1-10 directions
+!  aux_num 5 when the axis of C_2v is not parallel to x,y or z
 !
-                IF (four_axis==1) THEN
-                   IF (ABS(ax(3)-ax(2))<1.d-6) THEN
-                      aux_ind=4
-                   ELSE 
-                      aux_ind=6
-                   ENDIF
-                ELSEIF (four_axis==2) THEN
-                   IF (ABS(ax(1)-ax(3))<1.d-6) THEN
-                      aux_ind=6
-                   ELSE 
-                      aux_ind=4
-                   ENDIF
-                ELSE
-                   IF (ABS(ax(1)-ax(2))<1.d-6) THEN
-                      aux_ind=4
-                   ELSE 
-                      aux_ind=6
-                   ENDIF
-                ENDIF
+                aux_ind=5
              END IF
+
           CASE (16)
              DO isym=1,nsym_b
 !
@@ -7795,10 +8973,11 @@ CONTAINS
 !
                 IF (tipo_sym(sr_b(1,1,isym))==4) iaxis=isym
              ENDDO
-             CALL versor(sr_b(1,1,iaxis),ax)
-             IF (is_axis(ax,3)) THEN
+             CALL versor(sr_b(1,1,iaxis),bx)
+             CALL which_c2(bx, ibx)
+             IF ( ibx==ic4 ) THEN
                 aux_ind=1
-             ELSEIF(is_axis(ax,1).OR.is_axis(ax,2)) THEN
+             ELSEIF(ibx < 4) THEN
                 aux_ind=2
              ELSE
                 aux_ind=3
@@ -7812,21 +8991,26 @@ CONTAINS
        !
        !  D_2h, D_2d
        !
-             aux_ind=1
+             iaxis=0
              DO isym=1,nsym_b
-                IF (tipo_sym(sr_b(1,1,isym))==4) THEN
-                   CALL versor(sr_b(1,1,isym),ax)
-                   IF (.NOT.(is_axis(ax,1).OR.is_axis(ax,2).OR.is_axis(ax,3))) &
-                      aux_ind=2
-                END IF
+                IF (iaxis==0 .AND. tipo_sym(sr_b(1,1,isym))==4) THEN
+                   CALL versor(sr_b(1,1,iaxis),bx)
+                   CALL which_c2(bx, ibx)
+                   IF (ibx /= ic4) iaxis=ibx
+                ENDIF
              ENDDO
+             IF (iaxis < 4) THEN
+                aux_ind=1
+             ELSE
+                aux_ind=2
+             ENDIF
           CASE(26)
        !
        !  S_4
        ! 
              aux_ind=1
           CASE DEFAULT
-             CALL errore('find_aux_ind_two_groups','This is not a subgroup',1)
+             CALL errore('find_aux_ind_two_groups','D_4h this is not a subgroup',1)
        END SELECT 
      CASE(23)
 !
@@ -7843,40 +9027,36 @@ CONTAINS
         !  C_s
         ! 
               CALL mirror_axis(sr_b(1,1,2),bx)
-              IF (is_axis(bx,3)) THEN
+              CALL which_c2(bx, ibx)
+              IF ( ibx==3 ) THEN
                  aux_ind=1
+              ELSEIF (ibx==1 .OR. ibx==10 .OR. ibx==11) THEN
+                 aux_ind=2
+              ELSEIF (ibx==2 .OR. ibx==12 .OR. ibx==13) THEN
+                 aux_ind=3
               ELSE
-                 angle=ACOS(bx(1))*180.0_DP / pi
-                 IF (MOD(NINT(angle), 60)==0) THEN
-                    aux_ind=2
-                 ELSEIF (MOD(NINT(angle), 30)==0) THEN
-                    aux_ind=3
-                 ELSE
-                    CALL errore('find_aux_ind_two_groups',&
+                 CALL errore('find_aux_ind_two_groups',&
                                       ' Problem with axis direction ',1)
-                 ENDIF
               END IF
            CASE(4)
         !
         !  C_2
         ! 
               CALL versor(sr_b(1,1,2),bx)
-              IF (is_axis(bx,3)) THEN
+              CALL which_c2(bx, ibx)
+              IF ( ibx==3 ) THEN
                  aux_ind=1
+              ELSEIF (ibx==1 .OR. ibx==10 .OR. ibx==11) THEN
+                 aux_ind=2
+              ELSEIF (ibx==2 .OR. ibx==12 .OR. ibx==13) THEN
+                 aux_ind=3
               ELSE
-                 angle=ACOS(bx(1))*180.0_DP / pi
-                 IF (MOD(NINT(angle), 60)==0) THEN
-                    aux_ind=2
-                 ELSEIF (MOD(NINT(angle), 30)==0) THEN
-                    aux_ind=3
-                 ELSE
-                    CALL errore('find_aux_ind_two_groups',&
+                 CALL errore('find_aux_ind_two_groups',&
                                       ' Problem with axis direction ',1)
-                 ENDIF
               END IF
-           CASE(5,7)
+           CASE(5,7,8)
       !
-      !  C_3, C_6 
+      !  C_3, C_6, D_2
       !
                aux_ind=1
            CASE(9)
@@ -7896,26 +9076,26 @@ CONTAINS
                     CALL errore('find_aux_ind_two_groups',&
                                       ' Problem with axis direction ',1)
               ENDIF
-           CASE(12,16)
+           CASE(12)
       !
-      !    C_2v, C_2h
+      !    C_2v
       !
               DO isym=1,nsym_b
                  IF (tipo_sym(sr_b(1,1,isym))==4) iaxis=isym
               END DO
               CALL versor(sr_b(1,1,iaxis),ax)
-              IF (is_axis(ax,3)) THEN
+              CALL which_c2(ax, iax)
+              IF (iax==3) THEN
                  aux_ind=1
+              ELSEIF (iax==1) THEN
+                 aux_ind=3
+              ELSEIF (iax==10 .OR. iax==11) THEN
+                 aux_ind=2
+              ELSEIF (iax==2 .OR. iax==12 .OR. iax==13) THEN
+                 aux_ind=4
               ELSE
-                 angle=ACOS(ax(1))*180.0_DP / pi
-                 IF (MOD(NINT(angle), 60)==0) THEN
-                    aux_ind=2
-                 ELSEIF (MOD(NINT(angle), 30)==0) THEN
-                    aux_ind=3
-                 ELSE
                        CALL errore('find_aux_ind_two_groups',&
                                       ' Problem with axis direction ',1)
-                 ENDIF
               ENDIF
            CASE(13)
       !
@@ -7924,14 +9104,33 @@ CONTAINS
               DO isym=1,nsym_b
                  IF (tipo_sym(sr_b(1,1,isym))==5) imirror=isym
               END DO
-              CALL versor(sr_b(1,1,imirror),bx)
-              angle=ACOS(bx(1))*180.0_DP / pi
-              IF (MOD(NINT(angle), 60)==0) THEN
-                 aux_ind=1
-              ELSEIF (MOD(NINT(angle), 30)==0) THEN
+              CALL mirror_axis(sr_b(1,1,imirror),ax)
+              CALL which_c2(ax, iax) 
+              IF (iax==1 .OR. iax==10 .OR. iax==11) THEN
                  aux_ind=2
+              ELSEIF (iax==2 .OR. iax==12 .OR. iax==13) THEN
+                 aux_ind=1
               ELSE
                  CALL errore('find_aux_ind_two_groups',&
+                                      ' Problem with axis direction ',1)
+              ENDIF
+          CASE(16)
+      !
+      !   C_2h
+      !
+              DO isym=1,nsym_b
+                 IF (tipo_sym(sr_b(1,1,isym))==4) iaxis=isym
+              END DO
+              CALL versor(sr_b(1,1,iaxis),ax)
+              CALL which_c2(ax, iax)
+              IF (iax==3) THEN
+                 aux_ind=1
+              ELSEIF (iax==1 .OR. iax==10 .OR. iax==11) THEN
+                 aux_ind=2
+              ELSEIF (iax==2 .OR. iax==12 .OR. iax==13) THEN
+                 aux_ind=3
+              ELSE
+                       CALL errore('find_aux_ind_two_groups',&
                                       ' Problem with axis direction ',1)
               ENDIF
            CASE(21)
@@ -7968,9 +9167,9 @@ CONTAINS
                  CALL errore('find_aux_ind_two_groups',&
                                       ' Problem with axis direction ',1)
               ENDIF
-           CASE(8,11,15,17,19,20)
+           CASE(11,15,17,19,20,27)
       !
-      !     D_2, D_6, C_6v, C_3h, C_6h, D_2h
+      !      D_6, C_6v, C_3h, C_6h, D_2h, S_6
       !
               aux_ind=1
 
@@ -7981,6 +9180,12 @@ CONTAINS
 !
 !  D_2d
 !
+        DO isym=1,nsym_a
+           IF (tipo_sym(sr_a(1,1,isym))==6)  &
+              CALL versor(sr_a(1,1,isym),bx)
+        ENDDO
+        CALL which_c2(bx, is4)
+
         SELECT CASE (group_b)
            CASE(3)
               aux_ind=1
@@ -7990,20 +9195,62 @@ CONTAINS
 !   If they are perpendicular the subgroup C_2 is of aux_ind=2
 !
               CALL versor(sr_b(1,1,2),ax)
-              DO isym=1,nsym_a
-                 IF (tipo_sym(sr_a(1,1,isym))==6)  &
-                    CALL versor(sr_a(1,1,isym),bx)
-              ENDDO
               prod = ax(1)*bx(1) + ax(2)*bx(2) + ax(3)*bx(3)
               IF (prod > 1.d-6) THEN
                  aux_ind=1
               ELSE
                  aux_ind=2
               ENDIF
+           CASE (8)
+        !
+        !    D_2
+        !
+!
+!   determine the three axes of D_2
+!
 
-           CASE(8,12,26)
+              iax=0
+              ibx=0
+              icx=0
+              DO isym=2,nsym_b
+                 ts=tipo_sym(sr_b(1,1,isym))
+                 IF (ts==4) THEN
+                    CALL versor(sr_b(1,1,isym),ax)
+                    IF (iax==0) THEN
+                       CALL which_c2(ax, iax)
+                    ELSEIF (ibx==0) THEN
+                       CALL which_c2(ax, ibx)
+                    ELSEIF (icx==0) THEN
+                       CALL which_c2(ax, icx)
+                    ELSE
+                      CALL errore('find_aux_ind_two_groups','D_2 problem C_2 axis',1)
+                    ENDIF
+                 ENDIF
+              ENDDO
+              CALL is_d2(iax,ibx,icx,ind2)
+
+              IF (ind2(1)==1) ic2=iax
+              IF (ind2(1)==2) ic21=iax
+              IF (ind2(1)==3) ic211=iax
+              IF (ind2(2)==1) ic2=ibx
+              IF (ind2(2)==2) ic21=ibx
+              IF (ind2(2)==3) ic211=ibx
+              IF (ind2(3)==1) ic2=icx
+              IF (ind2(3)==2) ic21=icx
+              IF (ind2(3)==3) ic211=icx
+              IF (ic2==is4) THEN
+                 aux_ind=1
+              ELSEIF (ic21==is4) THEN 
+                 aux_ind=2
+              ELSEIF (ic211==is4) THEN
+                 aux_ind=3
+              ELSE
+                 CALL errore('find_aux_ind_two_groups','problem D_2d and D_2',1)
+              ENDIF
+
+           CASE(12,26)
       !
-      !     C_s, D_2, C_2v, S_4
+      !      C_2v, S_4
       !
               aux_ind=1
 
@@ -8053,6 +9300,9 @@ CONTAINS
                 CALL errore('find_aux_ind_two_groups',' group not available',1)
         END SELECT   
      CASE(28)
+!
+!   T
+!
         SELECT CASE(group_b)
            CASE (4,5,8)
        !
@@ -8064,6 +9314,9 @@ CONTAINS
                 CALL errore('find_aux_ind_two_groups',' group not available',1)
         END SELECT   
      CASE(29)
+!
+!   T_h
+!
         SELECT CASE(group_b)
            CASE (2,3,4,5,8,12,16,20,27,28)
        !
@@ -8075,6 +9328,9 @@ CONTAINS
                 CALL errore('find_aux_ind_two_groups',' group not available',1)
         END SELECT   
      CASE(30)
+!
+!   T_d
+!
         SELECT CASE(group_b)
            CASE (3,4,5,8,12,13,24,26,28)
        !
@@ -8086,6 +9342,9 @@ CONTAINS
                 CALL errore('find_aux_ind_two_groups',' group not available',1)
         END SELECT   
      CASE(31)
+!
+!   O
+!
         SELECT CASE(group_b)
            CASE (4)
        !
@@ -8123,11 +9382,63 @@ CONTAINS
 !  O_h
 !
         SELECT CASE (group_b)
-           CASE(2,3,4,5,6,8,9,10)
+           CASE(2,5,6,9,10)
       !
-      !   C_i, C_s, C_2, C_3, C_4, D_2, D_3, D_4
+      !   C_i, C_3, C_4, D_3, D_4
       !
                aux_ind = 1 
+           CASE(3)
+      !
+      !  C_s
+      !
+              CALL mirror_axis(sr_b(1,1,2),ax)
+              CALL which_c2(ax, iax)
+              IF (iax < 4) THEN
+                 aux_ind=1
+              ELSE
+                 aux_ind=2
+              ENDIF
+           CASE(4)
+      !
+      !  C_2
+      !
+              CALL versor(sr_b(1,1,2),ax)
+              CALL which_c2(ax, iax)
+              IF (iax < 4) THEN
+                 aux_ind=1
+              ELSE
+                 aux_ind=2
+              ENDIF
+
+           CASE(8)
+!
+!   Find the three axis of D_2
+!
+              iax=0
+              ibx=0
+              icx=0
+              DO isym=2,nsym_b
+                 ts=tipo_sym(sr_b(1,1,isym))
+                 IF (ts==4) THEN
+                    CALL versor(sr_b(1,1,isym),ax)
+                    IF (iax==0) THEN
+                       CALL which_c2(ax, iax)
+                    ELSEIF (ibx==0) THEN
+                       CALL which_c2(ax, ibx)
+                    ELSEIF (icx==0) THEN
+                       CALL which_c2(ax, icx)
+                    ELSE
+                      CALL errore('find_aux_ind_two_groups','D_2 problem C_2 axis',1)
+                    ENDIF
+                 ENDIF
+              ENDDO
+
+              IF (iax < 4 .AND. ibx < 4 .AND. icx < 4) THEN
+                 aux_ind=1
+              ELSE
+                 aux_ind=2
+              ENDIF
+
            CASE(12)
       !
       !     C_2v  to choose between 1 2 or 3

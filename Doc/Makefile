@@ -3,7 +3,7 @@ HELPDOC=../../dev-tools/helpdoc
 LATEX   = pdflatex
 LATEX2HTML = latex2html
 
-PDFS = user_guide.pdf
+PDFS = user_guide.pdf point_groups.pdf
 AUXS = $(PDFS:.pdf=.aux)
 LOGS = $(PDFS:.pdf=.log)
 OUTS = $(PDFS:.pdf=.out)
@@ -13,7 +13,7 @@ TOCS = $(PDFS:.pdf=.toc)
 doc:  all
 all:  pdf html
 pdf: $(PDFS)
-html: user_guide
+html: user_guide 
 
 $(PDFS): %.pdf: %.tex
 	$(LATEX)  $<
