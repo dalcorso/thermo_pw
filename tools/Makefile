@@ -34,6 +34,10 @@ supercell.x : supercell.o $(PWOBJS) $(LIBOBJS)
 		 $(LIBOBJS) $(PWOBJS) $(QEMODS) $(LIBOBJS) $(PWOBJS) $(LIBS)
 	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/supercell.x . )
 
+translate.x : translate.o $(PWOBJS) $(LIBOBJS)
+	$(LD) $(LDFLAGS) -o $@ translate.o \
+	         $(LIBOBJS) $(PWOBJS) $(QEMODS) $(LIBOBJS) $(PWOBJS) $(LIBS)
+	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/translate.x . )
 
 gener_2d_slab.x : gener_2d_slab.o $(PWOBJS) $(LIBOBJS)
 	$(LD) $(LDFLAGS) -o $@ gener_2d_slab.o \
