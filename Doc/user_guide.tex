@@ -842,6 +842,17 @@ space group that correspond to a given space group number.
 that corresponds to a given space group name. It also lists many equivalent
 names of the same group.
 
+\item \texttt{supercell.x} a small tool that reads a three dimensional
+Bravais lattice index and the atomic coordinates of the atoms inside a unit
+cell and produces a supercell with $n1 \times n2 \times n3$ cells of the original
+unit cell. For centered cells there is the option to consider $n1$, $n2$,
+and $n3$ in the conventional or in the centered cell.
+The input unit cell can be specified also by giving the space group and
+the coordinates of the nonequivalents atoms.
+It can be useful to study defects or as a small tool to calculate all the 
+atomic positions starting from the space-group and the 
+inequivalent positions.
+
 \item \texttt{gener\_nanowire.x} a small tool that reads a two dimensional (2D)
 Bravais lattice index and atomic coordinates an generates a sheet of type
 $(m,n)$. A sheet contained between the two vectors 
