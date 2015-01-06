@@ -28,7 +28,7 @@ MODULE gnuplot
            gnuplot_write_file_mul_data, gnuplot_write_file_mul_point, &
            gnuplot_write_file_mul_data_sum, gnuplot_write_command, &
            gnuplot_end, gnuplot_do_2dplot, gnuplot_start_2dplot, &
-           gnuplot_set_contour, gnuplot_polygon, &
+           gnuplot_set_contour, gnuplot_rectangle, gnuplot_polygon, &
            gnuplot_put_label, gnuplot_circle, &
            gnuplot_line, gnuplot_print_objects
 
@@ -73,6 +73,21 @@ IF (ionode) THEN
    WRITE(iun_gnuplot,'("eref=0.0")') 
    WRITE(iun_gnuplot,'("fact=1.0")') 
    WRITE(iun_gnuplot,'("gfact=1.0")') 
+
+   CALL gnuplot_write_command('color_red="red"',.FALSE.)
+   CALL gnuplot_write_command('color_green="green"',.FALSE.)
+   CALL gnuplot_write_command('color_blue="blue"',.FALSE.)
+   CALL gnuplot_write_command('color_cyan="cyan"',.FALSE.)
+   CALL gnuplot_write_command('color_magenta="magenta"',.FALSE.)
+   CALL gnuplot_write_command('color_gold="gold"',.FALSE.)
+   CALL gnuplot_write_command('color_pink="pink"',.FALSE.)
+   CALL gnuplot_write_command('color_black="black"',.FALSE.)
+   CALL gnuplot_write_command('color_olive="olive"',.FALSE.)
+   CALL gnuplot_write_command('color_brown="brown"',.FALSE.)
+   CALL gnuplot_write_command('color_gray="gray"',.FALSE.)
+   CALL gnuplot_write_command('color_light_blue="light-blue"',.FALSE.)
+   CALL gnuplot_write_command('color_orange="orange"',.FALSE.)
+
 ENDIF
 
 RETURN
@@ -135,6 +150,10 @@ ELSEIF (label=='gD0') THEN
    ws="{/Symbol D_0}"
 ELSEIF (label=='gL0') THEN
    ws="{/Symbol L_0}"
+ELSEIF (label=='Y1') THEN
+   ws="Y_1"
+ELSEIF (label=='Z1') THEN
+   ws="Z_1"
 ELSEIF (lens>1.AND.TRIM(label(lens:lens))/=' ') THEN
    ws=label(lens-1:lens-1)//"_"//label(lens:lens)
 ELSE
@@ -189,7 +208,35 @@ CHARACTER(LEN=20) :: ws
 CHARACTER(LEN=256) :: frt
 LOGICAL :: comment
 
-IF (label(1:1)=='g') THEN
+IF (label=='gG ') THEN
+   ws="{/Symbol G}"
+ELSEIF (label=='gS ') THEN
+   ws="{/Symbol S}"
+ELSEIF (label=='gS0') THEN
+   ws="{/Symbol S_0}"
+ELSEIF (label=='gS1') THEN
+   ws="{/Symbol S_1}"
+ELSEIF (label=='gD0') THEN
+   ws="{/Symbol D_0}"
+ELSEIF (label=='gL0') THEN
+   ws="{/Symbol L_0}"
+ELSEIF (label=='A1') THEN
+   ws="A_1"
+ELSEIF (label=='B1') THEN
+   ws="B_1"
+ELSEIF (label=='L1') THEN
+   ws="L_1"
+ELSEIF (label=='P1') THEN
+   ws="P_1"
+ELSEIF (label=='P2') THEN
+   ws="P_2"
+ELSEIF (label=='X1') THEN
+   ws="X_1"
+ELSEIF (label=='Y1') THEN
+   ws="Y_1"
+ELSEIF (label=='Z1') THEN
+   ws="Z_1"
+ELSEIF (label(1:1)=='g') THEN
     ws="{/Symbol "//label(2:3)//"}"
 ELSE
     ws=label
@@ -577,6 +624,19 @@ IF (ionode) THEN
 ENDIF
 RETURN
 END SUBROUTINE gnuplot_line
+
+SUBROUTINE gnuplot_rectangle(x, y, opacity, color)
+IMPLICIT NONE
+REAL(DP), INTENT(IN) :: x(4), y(4)
+CHARACTER(LEN=*), INTENT(IN) :: opacity, color
+
+IF (ionode) &
+   WRITE(iun_gnuplot, &
+     '("set obj rect from ",f12.6,"*xscale-xshift,",f12.6," to ",f12.6,"*xscale-shift,",f12.6,&
+                     &" behind fs solid ",a," noborder fc rgb ",a)') x(1), y(1), &
+                                     x(3), y(3), TRIM(opacity), TRIM(color)
+RETURN
+END SUBROUTINE gnuplot_rectangle
 
 SUBROUTINE gnuplot_circle(x, y, radius, opacity, color)
 IMPLICIT NONE

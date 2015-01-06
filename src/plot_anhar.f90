@@ -20,7 +20,6 @@ USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
                             gnuplot_write_file_mul_data_sum, &
                             gnuplot_write_file_mul_point,  &
                             gnuplot_write_horizontal_line, &
-                            gnuplot_write_command,         &
                             gnuplot_set_fact
 USE control_thermo,  ONLY : flanhar
 USE temperature,     ONLY : tmin, tmax
@@ -46,10 +45,6 @@ IF (tmin /= 1.0_DP) THEN
 ELSE
    CALL gnuplot_write_header(filename, 0.0_DP, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
 ENDIF
-
-CALL gnuplot_write_command('color_red="red"',.FALSE.)
-CALL gnuplot_write_command('color_blue="blue"',.FALSE.)
-CALL gnuplot_write_command('color_green="green"',.FALSE.)
 
 filename=TRIM(flanhar)//'_ph'
 filename1=TRIM(flanhar)//'.aux'
@@ -110,7 +105,7 @@ CALL gnuplot_write_file_mul_data(filename2,1,5,'color_blue',.FALSE.,.TRUE.,.FALS
 
 CALL gnuplot_set_fact(1.0_DP,.FALSE.)
 CALL gnuplot_ylabel('{/Symbol g}',.FALSE.) 
-CALL gnuplot_write_horizontal_line(0.0_DP, 2, 'front', 'black', .FALSE.)
+CALL gnuplot_write_horizontal_line(0.0_DP, 2, 'front', 'color_black', .FALSE.)
 CALL gnuplot_write_file_mul_data(filename1,1,2,'color_red',.TRUE.,.FALSE.,.FALSE.)
 CALL gnuplot_write_file_mul_data(filename2,1,2,'color_blue',.FALSE.,.FALSE.,.FALSE.)
 CALL gnuplot_write_file_mul_data(filename3,1,3,'color_green',.FALSE.,.TRUE.,.FALSE.)

@@ -28,8 +28,9 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
   USE control_2d_bands, ONLY : nkz, aux_ind_sur, identify_sur, lprojpbs, &
                                sym_divide, lsurface_state, lsurface_state_rap
   USE thermo_mod,    ONLY : ngeo
+  USE thermo_sym,    ONLY : code_group_save
   USE constants,     ONLY : rytoev
-  USE point_group,   ONLY : convert_rap
+  USE point_group,   ONLY : convert_rap, has_sigma_h
   USE ions_base,     ONLY : nat
   USE ener,          ONLY : ef
   USE klist,         ONLY : degauss, nelec
@@ -64,7 +65,7 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
   LOGICAL, ALLOCATABLE :: high_symmetry(:), is_in_range(:), &
                           is_in_range_rap(:), has_points(:,:), &
                           lsurface_state_eff(:,:)
-  LOGICAL :: exist_rap
+  LOGICAL :: exist_rap, type1
   CHARACTER(LEN=256) :: filename, filedata, fileout
   CHARACTER(LEN=6), EXTERNAL :: int_to_char
 
@@ -217,10 +218,11 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
   nks_= nks / nkz
   IF (exist_rap) THEN
       IF (nkz > 1 .AND. lprojpbs .AND. sym_divide) THEN
-         IF (MOD(nkz,2)==0) THEN
-            ishift=0
-         ELSE
+         type1=has_sigma_h(code_group_save)
+         IF (type1) THEN
             ishift=nks_
+         ELSE
+            ishift=0
          ENDIF
          DO ikz=1,nkz
             DO ik = 1, nks_
@@ -804,7 +806,7 @@ LOGICAL, INTENT(IN) :: has_points(nlines,12)
 LOGICAL, INTENT(IN) :: exist_rap
 
 INTEGER :: ilines, irap, n, nks_, ierr
-INTEGER :: nrapp, ir, first_rap, last_rap
+INTEGER :: nrapp, ir, first_rap, last_rap, first_line, last_line
 INTEGER :: system
 REAL(DP) :: shift, xscale
 LOGICAL, ALLOCATABLE :: dorap(:,:)
@@ -878,24 +880,14 @@ colore(2)='color_green'
 colore(3)='color_blue'
 colore(4)='color_cyan'
 colore(5)='color_magenta'
-colore(6)='color_yellow'
+colore(6)='color_gold'
 colore(7)='color_pink'
 colore(8)='color_black'
-colore(10)='color_gray'
+colore(9)='color_olive'
+colore(10)='color_brown'
 colore(11)='color_light_blue'
 colore(12)='color_orange'
 
-CALL gnuplot_write_command('color_red="red"',.FALSE.)
-CALL gnuplot_write_command('color_green="green"',.FALSE.)
-CALL gnuplot_write_command('color_blue="blue"',.FALSE.)
-CALL gnuplot_write_command('color_cyan="cyan"',.FALSE.)
-CALL gnuplot_write_command('color_magenta="magenta"',.FALSE.)
-CALL gnuplot_write_command('color_yellow="yellow"',.FALSE.)
-CALL gnuplot_write_command('color_pink="pink"',.FALSE.)
-CALL gnuplot_write_command('color_black="black"',.FALSE.)
-CALL gnuplot_write_command('color_gray="gray"',.FALSE.)
-CALL gnuplot_write_command('color_light_blue="light-blue"',.FALSE.)
-CALL gnuplot_write_command('color_orange="orange"',.FALSE.)
 CALL gnuplot_write_command('band_lw=2',.FALSE.)
 
 IF (lprojpbs) CALL proj_band_structure(kx, e, nks, nbnd, emin, emax, eref, &
@@ -920,6 +912,9 @@ IF ( nkz == 1 .OR. ( nkz > 1 .AND. .NOT. lprojpbs) .OR. force_bands ) THEN
    ELSE
       ALLOCATE(dorap(nlines,12))
       first_rap=0
+      first_line=1
+      last_rap=0
+      last_line=1
       DO ilines=1, nlines
          DO irap=1, nrap(ilines)
             dorap(ilines,irap)=.TRUE.
@@ -932,21 +927,26 @@ IF ( nkz == 1 .OR. ( nkz > 1 .AND. .NOT. lprojpbs) .OR. force_bands ) THEN
                END DO
                IF (nrapp==0) dorap(ilines,irap)=.TRUE.
             END IF
-            IF (dorap(ilines,irap).AND.has_points(ilines,irap)&
-                                         .AND.first_rap==0 ) first_rap=irap 
-            IF (ilines==nlines.AND.has_points(ilines,irap)&
-                              .AND.dorap(ilines,irap)) last_rap=irap 
+            IF (dorap(ilines,irap).AND.has_points(ilines,irap) &
+                            .AND.first_rap==0 ) THEN
+               first_rap=irap 
+               first_line=ilines
+            ENDIF
+            IF (has_points(ilines,irap).AND.dorap(ilines,irap)) THEN
+               last_rap=irap 
+               last_line=ilines
+            ENDIF
          END DO
       END DO
+
       DO ilines = 1, nlines
          IF (nrap(ilines)==1) THEN
             filename=TRIM(fileout) // "." // TRIM(int_to_char(ilines))
             IF (has_points(ilines,1)) THEN
-               IF (first_rap /= 0 ) THEN
-                  first_rap=0
+               IF (first_line==ilines .AND. first_rap==1 ) THEN
                   CALL gnuplot_write_file_data(filename,'band_lw','color_red',&
                                             .TRUE.,.FALSE.,.FALSE.)
-               ELSEIF (ilines==nlines) THEN
+               ELSEIF (last_line==ilines.AND.last_rap==1) THEN
                   CALL gnuplot_write_file_data(filename,'band_lw','color_red',&
                                             .FALSE.,.TRUE.,.FALSE.)
                ELSE
@@ -959,11 +959,10 @@ IF ( nkz == 1 .OR. ( nkz > 1 .AND. .NOT. lprojpbs) .OR. force_bands ) THEN
                filename=TRIM(fileout) // "." // TRIM(int_to_char(ilines)) &
                                     //  "." // TRIM(int_to_char(irap))
                IF (has_points(ilines,irap).AND.dorap(ilines,irap)) THEN
-                  IF (irap==first_rap) THEN
-                     first_rap=0
+                  IF (first_line==ilines .AND. irap==first_rap) THEN
                      CALL gnuplot_write_file_data(filename,'band_lw',&
                                     colore(irap),.TRUE.,.FALSE.,.FALSE.)
-                  ELSEIF (ilines==nlines.AND.irap==last_rap) THEN
+                  ELSEIF (last_line==ilines .AND. irap==last_rap) THEN
                      CALL gnuplot_write_file_data(filename,'band_lw',&
                               colore(irap),.FALSE.,.TRUE.,.FALSE.)
                   ELSE
@@ -1138,7 +1137,6 @@ CALL gnuplot_write_command('surface_state_color="blue"',.FALSE.)
 CALL gnuplot_write_command('surface_state_radius=0.002*xscale',.FALSE.)
 
 DO ilines=1, nlines
-!   DO ik=start_point(ilines),last_point(ilines)-1
    DO ik=start_point(ilines),last_point(ilines)
       IF (lsym) THEN
          DO irap=1,nrap(ilines)
@@ -1152,35 +1150,17 @@ DO ilines=1, nlines
                IF (nrapp==0) dorap=.TRUE.
             END IF
             IF (dorap) THEN
-!               DO jbnd=1, MIN(nbnd_rapk(irap,ik), nbnd_rapk(irap,ik+1))
                DO jbnd=1, nbnd_rapk(irap,ik)
                   ibnd=start_rapk(irap,ik)+jbnd-1
-!                  ibnd1=start_rapk(irap,ik+1)+jbnd-1
-!                  IF (lsurface_state_rap(ibnd,ik).AND.&
-!                      lsurface_state_rap(ibnd1,ik+1))THEN
                   IF (lsurface_state_rap(ibnd,ik)) THEN
                      x(1)=kx(ik)
-!                     x(2)=kx(ik+1)
                      ys(1)=e_rap(ibnd,ik) - eref
-!                     ys(2)=e_rap(ibnd1,ik+1) - eref
                      y(1)=MIN(emax, ys(1))
-!                     y(2)=MIN(emax, ys(2))
                      y(1)=MAX(emin, y(1))
-!                     y(2)=MAX(emin, y(2))
-!                     IF (.NOT.((y(1) == emax .AND. y(2) == emax) &
-!                          .OR. (y(1) == emin .AND. y(2) == emin))) THEN
-                      IF (.NOT.(y(1)==emax .OR. y(1)==emin) ) THEN
-!                        delta=(x(2) - x(1) ) / (ys(2) - ys(1))
-!                        IF (y(1)==emax) x(1)=delta * (emax-ys(1)) + x(1)
-!                        IF (y(2)==emax) x(2)=delta * (emax-ys(1)) + x(1)
-!                        IF (y(1)==emin) x(1)=delta * (emin-ys(1)) + x(1)
-!                        IF (y(2)==emin) x(2)=delta * (emin-ys(1)) + x(1)
+                     IF (.NOT.(y(1)==emax .OR. y(1)==emin) ) THEN
                         CALL gnuplot_circle(x(1),y(1),'surface_state_radius',&
                                        '2', &
                                        'surface_state_color')
-!                        CALL gnuplot_line(x,y,'surface_state_width',&
-!                                           'front', &
-!                                           'surface_state_color')
                      ENDIF
                   ENDIF
                ENDDO
@@ -1188,25 +1168,12 @@ DO ilines=1, nlines
          ENDDO
       ELSE
          DO ibnd=1, nbnd
-!            IF (lsurface_state_rap(ibnd,ik).AND.&
-!               lsurface_state_rap(ibnd,ik+1))THEN
             IF (lsurface_state_rap(ibnd,ik)) THEN
                x(1)=kx(ik)
-!               x(2)=kx(ik+1)
                ys(1)=e_rap(ibnd,ik) - eref
-!               ys(2)=e_rap(ibnd,ik+1) - eref
                y(1)=MIN(emax, ys(1))
-!               y(2)=MIN(emax, ys(2))
                y(1)=MAX(emin, y(1))
-!               y(2)=MAX(emin, y(2))
                IF (.NOT.(y(1)==emax .OR. y(1)==emin) ) THEN
-!               IF (.NOT.((y(1) == emax .AND. y(2) == emax) &
-!                    .OR. (y(1) == emin .AND. y(2) == emin))) THEN
-!                   delta=(x(2) - x(1) ) / (ys(2) - ys(1))
-!                   IF (y(1)==emax) x(1)=delta * (emax-ys(1)) + x(1)
-!                   IF (y(2)==emax) x(2)=delta * (emax-ys(1)) + x(1)
-!                   IF (y(1)==emin) x(1)=delta * (emin-ys(1)) + x(1)
-!                   IF (y(2)==emin) x(2)=delta * (emin-ys(1)) + x(1)
                    CALL gnuplot_circle(x(1),y(1),'surface_state_radius',&
                                        '2', &
                                        'surface_state_color')

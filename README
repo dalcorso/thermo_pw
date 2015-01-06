@@ -33,7 +33,7 @@ you can run the examples.
 Complete installation instructions and short description of the
 functionalities: See the Doc/user_guide.pdf.
 
-Disinstallation:
+Uninstal:
 Enter in this directory and type
 make leave_qe
 Then remove this directory.

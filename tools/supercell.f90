@@ -49,7 +49,7 @@ CHARACTER(LEN=3), ALLOCATABLE :: label(:), label_tau(:), label_tau_new(:), &
                                  ineq_label(:)
 REAL(DP) :: celldm(6), omega, at(3,3), bg(3,3), a, cg
 REAL(DP), PARAMETER :: onet = 1.0_DP / 3.0_DP, twot = 2.0_DP * onet
-INTEGER, ALLOCATABLE :: ityp(:), ineq_ityp(:)
+INTEGER, ALLOCATABLE :: ityp(:), ineq_ityp(:), if_pos(:,:)
 LOGICAL :: uniqueb, rhombohedral, found
 INTEGER :: n1, n2, n3, nb, ntyp, ibrav, which_input, units
 INTEGER :: i1, i2, i3, iconv, nat_new, ibrav_sg, origin_choice
@@ -88,6 +88,7 @@ IF (which_input==1) THEN
    ALLOCATE(label(ineq_nat))
    ALLOCATE(ineq_ityp(ineq_nat))
    ALLOCATE(rd_for(3,ineq_nat))
+   ALLOCATE(if_pos(3,ineq_nat))
 
    DO na=1, ineq_nat
       READ(5,*) label(na), ineq_tau(1,na), ineq_tau(2,na), ineq_tau(3,na)
@@ -113,8 +114,10 @@ IF (which_input==1) THEN
    rhombohedral=(trig==1)
    origin_choice=or
    rd_for=0.0_DP
+   if_pos=0
 
-   CALL sup_spacegroup(ineq_tau,ineq_ityp,rd_for,space_group_code,ineq_nat,uniqueb,&
+   CALL sup_spacegroup(ineq_tau,ineq_ityp,rd_for,if_pos,&
+                                     space_group_code,ineq_nat,uniqueb,&
      rhombohedral,origin_choice,ibrav)
 
    nat=nattot
