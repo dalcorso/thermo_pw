@@ -1,3 +1,10 @@
+%!
+%! Copyright (C) 2014-2015 Andrea Dal Corso 
+%! This file is distributed under the terms of the
+%! GNU General Public License. See the file `License'
+%! in the root directory of the present distribution,
+%! or http://www.gnu.org/copyleft/gpl.txt .
+%!
 \documentclass[12pt,a4paper]{article}
 \def\version{0.2.0}
 \def\qe{{\sc Quantum ESPRESSO}}
@@ -128,7 +135,7 @@ a single representation.
 \section{People}
 The \thermo\ code has been developed and is maintained by Andrea Dal Corso 
 (SISSA). It is mainly an experimental tool to test new ideas for \qe\ 
-organization. It is an open source code distributed, as it is, within the GPL 
+organization. It is an open source code distributed, as is, within the GPL 
 licence.  
 
 \section{Installing, Compiling, and Running}
@@ -353,14 +360,14 @@ Number of tasks for this option: \texttt{1}.
 
 The path for the bands is determined automatically by the code on the basis
 of the Bravais lattice index, but it can also be given at the end of
-the \texttt{THERMO\_PW} namelist with the same format as in the \texttt{pw.x}
+the \texttt{INPUT\_THERMO} namelist with the same format as in the \texttt{pw.x}
 input. In the input of \texttt{pw.x} the {\bf k} points are those of the
 self-consistent calculation. The following variables control how the path
 is given:
 \begin{verbatim}
 q_in_band_form   : only the first and last point of each k path are given.
                  The weight of each k point is an integer, the number of 
-                 point in the line that start at this k point.
+                 points in the line that starts at this k point.
                  Default: .TRUE.
 q_in_cryst_coord : the k - points are given in crystal coordinates.
                  Default: .FALSE.
@@ -813,7 +820,7 @@ Returning to the example of the $(111)$ surface of an fcc, in the direction
 $\bar \Gamma-\bar K$ the slab has $C_2$ symmetry about the $x$-axis, a symmetry
 that the surface has not. Therefore you can plot with two different colors
 the bands that belong to the $A$ or $B$ representations of the slab,
-(states even or odd with respect to and $180^\circ$  rotation about
+(states even or odd with respect to a $180^\circ$ rotation about
 the $x$ axis, an operation that exchanges the two surfaces)
 but you cannot separate the PBS along the $\bar \Gamma-\bar K$ direction into
 even or odd. You might specify two different panels with the
