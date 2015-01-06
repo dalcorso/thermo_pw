@@ -176,7 +176,7 @@ SUBROUTINE thermo_summary()
 
   IF ( ibrav_group_consistent ) THEN
      CALL find_space_group(sg_number, ibrav, code_group, nsym, s, sr, ftau, &
-                              at, dfftp%nr1, dfftp%nr2, dfftp%nr3)
+                              at, dfftp%nr1, dfftp%nr2, dfftp%nr3,.FALSE.)
 
      IF (sg_number > 0) THEN
         unique=0
@@ -187,8 +187,10 @@ SUBROUTINE thermo_summary()
         CALL clean_dfft()
         CALL find_symmetry(fft_fact)
      ENDIF
+  ELSE
+     CALL clean_dfft()
+     CALL find_symmetry(fft_fact)
   ENDIF
-  CALL set_fft_mesh()
 
   WRITE(stdout,'(/,5x,"FFT mesh: (",i5,",",i5,",",i5," )")') dfftp%nr1, &
                                               dfftp%nr2, dfftp%nr3
@@ -340,7 +342,7 @@ SUBROUTINE thermo_summary()
                                     & Bravais lattice.")') TRIM(group_name &
                                                                (code_group))
      CALL find_space_group(sg_number, ibrav, code_group, nsym, s, sr, ftau, &
-                              at, dfftp%nr1, dfftp%nr2, dfftp%nr3)
+                              at, dfftp%nr1, dfftp%nr2, dfftp%nr3,.TRUE.)
      CALL sg_name(sg_number, spaceg_name)
      IF (sg_number > 0) THEN
         WRITE(stdout,'(/,5x,"Space group ",a,"   (group number",i4, ").")') &

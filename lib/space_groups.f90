@@ -16,7 +16,7 @@ MODULE space_groups
 !
 !  Given the space group number it provides the factors that must be
 !  contained in the fft grid to have a mesh compatible with the
-!  fractionary translations.
+!  fractional translations.
 !
 !  Given the space group name, it returns the space group number
 !  Given the space group number, it returns all the space groups names
@@ -24,13 +24,14 @@ MODULE space_groups
 !  In the case of orthorombic groups it gives the rotation needed to
 !  transform the group to the one found in the ITA tables.
 !
-!  Present limitations: in symmorphic groups all fractional translations
-!  are supposed to vanish. If the origin is in a arbitrary position, the
-!  space group found is uncorrect.
-!  
 !  The point group and the Bravais lattice must be compatible, otherwise
 !  this routine will not work.
 !
+!  Limitation : there are still problems with origin shifts. The routine 
+!               should recognize the space group if the origin coincides 
+!               with that used on the ITA tables, but a shifted origin 
+!               might still confuse the routine in particular space groups. 
+!               
 !
   USE kinds,      ONLY : DP
   !
@@ -1018,7 +1019,7 @@ MODULE space_groups
 !
 ! This routine recives as input the code of a space group and gives as
 ! output the factor that should be contained in the dimensions of the
-! fft to accomodate the fractionary translations of that space group.
+! fft to accomodate the fractional translations of that space group.
 !
   IMPLICIT NONE
   INTEGER, INTENT(IN) :: code, unique, trig
@@ -1123,18 +1124,21 @@ MODULE space_groups
   END SUBROUTINE set_fft_fact
 
   SUBROUTINE find_space_group(sg_number, ibrav, code_group, nsym, s, sr, ftau, &
-                              at, nr1, nr2, nr3)
+                              at, nr1, nr2, nr3, verbosity)
   !
   !  This routine receives as input: 
   !  the bravais lattice, the point group, the number of symmetries, the
   !  rotation matrices in crystal and in carthesian coordinates, the
-  !  fractionary translations in number of fft points, the fft mesh nr1, nr2, nr3
+  !  fractional translations in number of fft points, the fft mesh nr1, nr2, nr3
   !  and gives as output the space group number.
+  !  if verbosity .true. the routine writes informations on the symmetries
   !  ibrav=0 is not supported
   !
+  USE io_global, ONLY : stdout
   IMPLICIT NONE
   INTEGER, INTENT(IN) :: ibrav, code_group, nsym, nr1, nr2, nr3
   INTEGER, INTENT(IN) :: s(3,3,nsym), ftau(3,nsym)
+  LOGICAL, INTENT(IN) :: verbosity
   REAL(DP) :: sr(3,3,nsym), at(3,3) ! rotation matrices in cartesian coordinates
   INTEGER, INTENT(OUT) :: sg_number
   LOGICAL :: is_symmorphic
@@ -1143,10 +1147,10 @@ MODULE space_groups
   INTEGER :: idir, irot180, type_group, nsp, nsa, nmir, ncomp, jsym, nmp, ipa
   INTEGER :: ft1(3), ft2(3), sp1, sp2, axis_dir(3), mirr_sym(3), idir1, idir2
   REAL(DP) :: ax(3), bx(3), angle, fact, ft(3), sp, ftrs1(3), ftrs2(3), &
-              ftrs3(3)
-  REAL(DP), PARAMETER :: pi = 3.14159265358979323846_DP
+              ftrs3(3), ashift(3), acryshift(3), ashift_mod
+  REAL(DP), PARAMETER :: pi = 3.14159265358979323846_DP, eps=1.D-8
   LOGICAL :: is_axis
-  INTEGER :: tipo_sym
+  INTEGER :: tipo_sym, ts
   REAL(DP) :: angle_rot
   
   IF (ibrav==0) THEN
@@ -1154,7 +1158,30 @@ MODULE space_groups
      RETURN
   ENDIF
 
-  is_symmorphic=.NOT.(ANY(ftau(:,1:nsym) /= 0))
+  IF (verbosity) THEN
+     WRITE(stdout,'(/,5x,"Space group identification, ",i3," symmetries:")') nsym
+     WRITE(stdout,'(5x,"(Optional origin shifts are indicated for C2, mirrors,")')
+     WRITE(stdout,'(5x,"and inversion symmetries)",/)')
+  ENDIF
+  is_symmorphic=.TRUE.
+  DO isym=1, nsym
+     ts=tipo_sym_sg(sr(1,1,isym), ftau(1,isym), at, nr1, nr2, nr3, ashift, acryshift)
+     ashift_mod=SQRT(ashift(1)**2 + ashift(2)**2 + ashift(3)**2 )
+     IF (verbosity) THEN
+        WRITE(stdout,'(5x,i5,"  ",a)') isym, TRIM(label_sg(ts))
+        IF (ts < 17 .AND. ashift_mod > eps) THEN
+           WRITE(stdout,'(11x,"The origin is not a fixed point of this operation")')
+           WRITE(6,'(11x,"To center it on the origin add to all atomic positions")')
+           WRITE(6,'(11x,"(alat units)")')
+           WRITE(6,'(11x,"(",3f15.10,")",/)') ashift(:)
+           WRITE(6,'(11x,"(cryst. coord.)")')
+           WRITE(6,'(11x,"(",3f15.10,")",/)') acryshift(:)
+        ENDIF
+     ENDIF
+     is_symmorphic = (is_symmorphic .AND. ts < 17 )
+  ENDDO
+
+!  is_symmorphic=.NOT.(ANY(ftau(:,1:nsym) /= 0))
   sg_number=0
   SELECT CASE (code_group)
       CASE(1)
@@ -1515,7 +1542,7 @@ MODULE space_groups
             ENDIF
          ENDDO
 
-!   find if there is a component of the fractionary translation perpendicular
+!   find if there is a component of the fractional translation perpendicular
 !   to the two fold axis
 !
          IF ( irot180 == 0 ) CALL errore('find_space_group',&
@@ -1529,7 +1556,7 @@ MODULE space_groups
                sg_number=25
             ELSE
 !
-!   identify the two mirrors and save the projection of the fractionary
+!   identify the two mirrors and save the projection of the fractional
 !   translation in the plane of the mirror
 !
                imirror1=0
@@ -1539,7 +1566,7 @@ MODULE space_groups
                         imirror1=isym
                         CALL mirror_axis(sr(1,1,isym),ax)
 !
-!    find only the fractionary translation component parallel to the mirror
+!    find only the fractional translation component parallel to the mirror
 !
                         ft1(:)=ftau(:,isym)
                         DO ipol=1,3
@@ -1547,7 +1574,7 @@ MODULE space_groups
                         ENDDO
                      ELSE
 
-!    find only the fractionary translation component parallel to the mirror
+!    find only the fractional translation component parallel to the mirror
 !
                         imirror2=isym
                         CALL mirror_axis(sr(1,1,isym),ax)
@@ -1563,7 +1590,7 @@ MODULE space_groups
                IF ( imirror2 == 0 ) CALL errore('find_space_group',&
                                                  'C_2v: one missing mirror',1)
 !
-!   find if there is a component of the fractionary translation perpendicular
+!   find if there is a component of the fractional translation perpendicular
 !   to the two fold axis
 !
                sp1=0
@@ -1690,7 +1717,7 @@ MODULE space_groups
                                             'C_2v: no mirror found',1)
 
 !
-!  bring the fractionary translation in the orthorombic axis
+!  bring the fractional translation in the orthorombic axis
 !
                   ftrs1(:) = ftau(1,imirror2)*at(:,1) / nr1 +  &
                              ftau(2,imirror2)*at(:,2) / nr2 +  &
@@ -1755,7 +1782,7 @@ MODULE space_groups
                                          'C_2v: second mirror not found',1)
 
 !
-!  bring the fractionary translation in the orthorombic axis
+!  bring the fractional translation in the orthorombic axis
 !
                ftrs1(:) = ftau(1,imirror1)*at(:,1) / nr1 +  &
                           ftau(2,imirror1)*at(:,2) / nr2 +  &
@@ -2455,7 +2482,7 @@ MODULE space_groups
                sg_number=139
             ELSE
 !
-!    Bring the fractionary translation associated with the fourfold rotation
+!    Bring the fractional translation associated with the fourfold rotation
 !    to cartesian axis
 !
                ftrs1(:) = ftau(1,irot90)*at(:,1) / nr1 + &
@@ -2770,7 +2797,7 @@ MODULE space_groups
              ELSE
 !
 !          find the 90 degree rotation about the x axis and check its
-!          fractionary translation along the axis.
+!          fractional translation along the axis.
 !
                 irot90=0
                 DO isym=2,nsym
@@ -2831,8 +2858,8 @@ MODULE space_groups
                IF ( imirror == 0 ) CALL errore('find_space_group',&
                                               'O_h: no mirror found',1)
 !
-!  First check if the axis of order 4 has fractionary translation, if not
-!  the group is 222, if yes we check the fractionary translation of the
+!  First check if the axis of order 4 has fractional translation, if not
+!  the group is 222, if yes we check the fractional translation of the
 !  mirror perpendicular to the x axis. In 224 this mirror is a glide plane,
 !  in 223 no.
 !
@@ -2875,8 +2902,8 @@ MODULE space_groups
                                               'O_h: no mirror found',1)
 
 !
-!  First check if the axis of order 4 has fractionary translation, if not
-!  the group is 226, if yes we check the fractionary translation of the
+!  First check if the axis of order 4 has fractional translation, if not
+!  the group is 226, if yes we check the fractional translation of the
 !  mirror perpendicular to the axis of order 2 (x=y). 
 !  In 228 this mirror is a glide plane, in 227 no.
 !
@@ -2892,7 +2919,7 @@ MODULE space_groups
                   sg_number=226
                ELSE
 !
-!  put the fractionary translation of the mirror in cartesian coordinates
+!  put the fractional translation of the mirror in cartesian coordinates
 !
                   fact= ftrs2(1) + ftrs2(2)  
 !
@@ -2903,7 +2930,7 @@ MODULE space_groups
                   ftrs2(2)=ftrs2(2) - fact / 2.0_DP
                   sp = ftrs2(1)**2 + ftrs2(2)**2 + ftrs2(3)**2 
 !
-!  if the fractionary translation vanishes it is 227, ortherwise 228
+!  if the fractional translation vanishes it is 227, ortherwise 228
 !
                   IF (sp<1.d-6) THEN
                      sg_number=227
@@ -3110,7 +3137,7 @@ MODULE space_groups
 
   SUBROUTINE find_space_group_number(sgroup_name, group_code)
 !
-!  This routine return the space group number of a given group_name if
+!  This routine returns the space group number of a given group_name if
 !  the name is recognized or zero if it is not.
 !
   IMPLICIT NONE
@@ -3169,5 +3196,398 @@ MODULE space_groups
   CALL errore('sg_name','group_code unknown',1)
   RETURN
   END SUBROUTINE sg_name
+
+  INTEGER FUNCTION tipo_sym_sg(sr, ftau, at, nr1, nr2, nr3, ashift, acryshift)
+!
+!   This subroutine receives as input a rotation matrix in cartesian coordinates,
+!   and a fractinal translation as three integer values on an fft mesh, the direct
+!   and reciprocal lattice vectors and the fft mesh and gives as output a code 
+!   with the symmetry type. 1-16 are the operations of symmorphic space group,
+!   non symmorphic groups have at least one of the operation 17-41.
+!   
+!   1   identity
+!   2   inversion
+!   3   mirror
+!   4   rotation of 60  degrees 6
+!   5   rotation of 90  degrees 4
+!   6   rotation of 120 degrees 3
+!   7   rotation of 180 degrees 2
+!   8   rotation of 240 degrees 3^2
+!   9   rotation of 270 degrees 4^3
+!  10   rotation of 300 degrees 6^5
+!  11   rotation of 60  degrees multiplied by inversion 6
+!  12   rotation of 90  degrees multiplied by inversion 4
+!  13   rotation of 120 degrees multiplied by inversion 3
+!  14   rotation of 240 degrees multiplied by inversion 3^2
+!  15   rotation of 270 degrees multiplied by inversion 4^3
+!  16   rotation of 300 degrees multiplied by inversion 6^5
+!
+!  Non symmorphic space groups have some operations of the following types:
+!
+!  17  screw rotation 180 degrees C2 (2)     (axis 2_1) 
+!  18  screw rotation 120 degrees C3 (3)     (axis 3_1) 
+!  19  screw rotation 240 degrees C3^2 (3^2) (axis 3_1) 
+!  20  screw rotation 120 degrees C3 (3)     (axis 3_2) 
+!  21  screw rotation 240 degrees C3^2 (3)   (axis 3_2) 
+!  22  screw rotation  90 degrees C4 (4)     (axis 4_1) 
+!  23  screw rotation 270 degrees C4^3 (4^3) (axis 4_1) 
+!  24  screw rotation  90 degrees C4 (4)     (axis 4_2) 
+!  25  screw rotation 270 degrees C4^3 (4^3) (axis 4_2) 
+!  26  screw rotation  90 degrees C4 (4)     (axis 4_3) 
+!  27  screw rotation 270 degrees C4^3 (4^3) (axis 4_3) 
+!  28  screw rotation  60 degrees C6 (6)     (axis 6_1) 
+!  29  screw rotation 300 degrees C6^5 (6^5) (axis 6_1) 
+!  30  screw rotation  60 degrees C6 (6)     (axis 6_2) 
+!  31  screw rotation 300 degrees C6^5 (6^5) (axis 6_2) 
+!  32  screw rotation  60 degrees C6 (6)     (axis 6_3) 
+!  33  screw rotation 300 degrees C6^5 (6^5) (axis 6_3) 
+!  34  screw rotation  60 degrees C6 (6)     (axis 6_4) 
+!  35  screw rotation 300 degrees C6^5 (6^5) (axis 6_4) 
+!  36  screw rotation  60 degrees C6 (6)     (axis 6_5) 
+!  37  screw rotation 300 degrees C6^5 (6^5) (axis 6_5) 
+!  38  glide plane a
+!  39  glide plane b
+!  40  glide plane c
+!  41  glide plane 
+!
+  USE kinds, ONLY : DP
+  IMPLICIT NONE
+  REAL(DP), INTENT(IN) :: sr(3,3), at(3,3)
+  REAL(DP), INTENT(OUT) :: ashift(3), acryshift(3)
+  INTEGER, INTENT(IN) :: ftau(3), nr1, nr2, nr3
+
+  REAL(DP) :: fcart(3), angle, ps, fmod, ax(3), fcrys(3), bg(3,3)
+  REAL(DP), PARAMETER :: f43=4.0_DP / 3.0_DP, eps=1.D-8
+  REAL(DP) :: angle_rot, angle_rot_s
+
+  INTEGER :: ts, tip_sym
+  INTEGER :: tipo_sym
+  
+  CALL recips(at(1,1), at(1,2), at(1,3), bg(1,1), bg(1,2), bg(1,3))
+  ts=tipo_sym(sr)
+  fcart(:) = ftau(1) * at(:,1) / nr1 +   &
+             ftau(2) * at(:,2) / nr2 +   &
+             ftau(3) * at(:,3) / nr3 
+  ashift=0.0_DP
+
+  SELECT CASE (ts)
+     CASE(1)
+!
+!    identity
+!
+         tipo_sym_sg=1
+     CASE(2)
+!
+!    inversion
+!
+         tipo_sym_sg=2
+         fmod=SQRT(fcart(1)**2 + fcart(2)**2 + fcart(3)**3)
+         ashift(:) = fcart(:) * 0.5_DP
+     CASE(3)
+!
+!    proper rotation not 180
+!
+        angle=angle_rot(sr)
+        CALL versor(sr, ax)
+        ps = ax(1) * fcart(1) + ax(2) * fcart(2) + ax(3) * fcart(3) 
+        IF (ABS(ps) < eps) THEN
+           IF (ABS(angle-60.0_DP) < eps) THEN
+              tipo_sym_sg=4
+           ELSEIF (ABS(angle-90.0_DP) < eps) THEN
+              tipo_sym_sg=5
+           ELSEIF (ABS(angle-120.0_DP) < eps) THEN
+              tipo_sym_sg=6
+           ELSEIF (ABS(angle-240.0_DP) < eps) THEN
+              tipo_sym_sg=8
+           ELSEIF (ABS(angle-270.0_DP) < eps) THEN
+              tipo_sym_sg=9
+           ELSEIF (ABS(angle-300.0_DP) < eps) THEN
+              tipo_sym_sg=10
+           ELSE
+              CALL errore('tipo_sym_sg','angle not recognized',1)
+           ENDIF 
+        ELSE
+           IF (ABS(angle-60.0_DP) < eps) THEN
+              fcart =  ps * ax
+              fcrys(:)= fcart(1)*bg(1,:) + fcart(2)*bg(2,:) + fcart(3)*bg(3,:)
+              IF (ABS(1.2_DP * fcrys(1) - NINT(1.2_DP * fcrys(1)) ) < eps .AND. &
+                  ABS(1.2_DP * fcrys(2) - NINT(1.2_DP * fcrys(2)) ) < eps .AND. &
+                  ABS(1.2_DP * fcrys(3) - NINT(1.2_DP * fcrys(3)) ) < eps ) THEN
+                 tipo_sym_sg=36
+              ELSEIF (ABS(1.5_DP * fcrys(1) - NINT(1.5_DP * fcrys(1)) ) < eps .AND. &
+                 ABS(1.5_DP * fcrys(2) - NINT(1.5_DP * fcrys(2)) ) < eps .AND. &
+                 ABS(1.5_DP * fcrys(3) - NINT(1.5_DP * fcrys(3)) ) < eps ) THEN
+                 tipo_sym_sg=34
+              ELSEIF (ABS(2.0_DP * fcrys(1) - NINT(2.0_DP * fcrys(1)) ) < eps .AND. &
+                 ABS(2.0_DP * fcrys(2) - NINT(2.0_DP * fcrys(2)) ) < eps .AND. &
+                 ABS(2.0_DP * fcrys(3) - NINT(2.0_DP * fcrys(3)) ) < eps ) THEN
+                 tipo_sym_sg=32
+              ELSEIF (ABS(3.0_DP * fcrys(1) - NINT(3.0_DP * fcrys(1)) ) < eps .AND. &
+                 ABS(3.0_DP * fcrys(2) - NINT(3.0_DP * fcrys(2)) ) < eps .AND. &
+                 ABS(3.0_DP * fcrys(3) - NINT(3.0_DP * fcrys(3)) ) < eps ) THEN
+                 tipo_sym_sg=30
+              ELSEIF (ABS(6.0_DP * fcrys(1) - NINT(6.0_DP * fcrys(1)) ) < eps .AND. &
+                 ABS(6.0_DP * fcrys(2) - NINT(6.0_DP * fcrys(2)) ) < eps .AND. &
+                 ABS(6.0_DP * fcrys(3) - NINT(6.0_DP * fcrys(3)) ) < eps ) THEN
+                 tipo_sym_sg=28
+              ELSE
+                 CALL errore('tipo_sym_sg','fractional translation wrong',1)
+              END IF
+           ELSEIF (ABS(angle-90.0_DP) < eps) THEN
+              fcart =  ps * ax
+              fcrys(:)= fcart(1)*bg(1,:) + fcart(2)*bg(2,:) + fcart(3)*bg(3,:)
+              IF (ABS(f43 * fcrys(1) - NINT(f43 * fcrys(1)) ) < eps .AND. &
+                 ABS(f43 * fcrys(2) - NINT(f43 * fcrys(2)) ) < eps .AND. &
+                 ABS(f43 * fcrys(3) - NINT(f43 * fcrys(3)) ) < eps ) THEN
+                 tipo_sym_sg=26
+              ELSEIF (ABS(2.0_DP * fcrys(1) - NINT(2.0_DP * fcrys(1)) ) < eps .AND. &
+                 ABS(2.0_DP * fcrys(2) - NINT(2.0_DP * fcrys(2)) ) < eps .AND. &
+                 ABS(2.0_DP * fcrys(3) - NINT(2.0_DP * fcrys(3)) ) < eps ) THEN
+                 tipo_sym_sg=24
+              ELSEIF (ABS(4.0_DP * fcrys(1) - NINT(4.0_DP * fcrys(1)) ) < eps .AND. &
+                 ABS(4.0_DP * fcrys(2) - NINT(4.0_DP * fcrys(2)) ) < eps .AND. &
+                 ABS(4.0_DP * fcrys(3) - NINT(4.0_DP * fcrys(3)) ) < eps ) THEN
+                 tipo_sym_sg=22
+              ELSE
+                 CALL errore('tipo_sym_sg','fractional translation wrong',2)
+              END IF
+           ELSEIF (ABS(angle-120.0_DP) < eps) THEN
+              fcart =  ps * ax
+              fcrys(:)= fcart(1)*bg(1,:) + fcart(2)*bg(2,:) + fcart(3)*bg(3,:)
+              IF (ABS(1.5_DP * fcrys(1) - NINT(1.5_DP * fcrys(1)) ) < eps .AND. &
+                 ABS(1.5_DP * fcrys(2) - NINT(1.5_DP * fcrys(2)) ) < eps .AND. &
+                 ABS(1.5_DP * fcrys(3) - NINT(1.5_DP * fcrys(3)) ) < eps ) THEN
+                 tipo_sym_sg=20
+              ELSEIF (ABS(3.0_DP * fcrys(1) - NINT(3.0_DP * fcrys(1)) ) < eps .AND. &
+                 ABS(3.0_DP * fcrys(2) - NINT(3.0_DP * fcrys(2)) ) < eps .AND. &
+                 ABS(3.0_DP * fcrys(3) - NINT(3.0_DP * fcrys(3)) ) < eps ) THEN
+                 tipo_sym_sg=18
+              ELSE
+                 CALL errore('tipo_sym_sg','fractional translation wrong',3)
+              END IF
+           ELSEIF (ABS(angle-240.0_DP) < eps) THEN
+              fcart =  ps * ax
+              fcrys(:)= fcart(1)*bg(1,:) + fcart(2)*bg(2,:) + fcart(3)*bg(3,:)
+              IF (ABS(1.5_DP * fcrys(1) - NINT(1.5_DP * fcrys(1)) ) < eps .AND. &
+                 ABS(1.5_DP * fcrys(2) - NINT(1.5_DP * fcrys(2)) ) < eps .AND. &
+                 ABS(1.5_DP * fcrys(3) - NINT(1.5_DP * fcrys(3)) ) < eps ) THEN
+                 tipo_sym_sg=21
+              ELSEIF (ABS(3.0_DP * fcrys(1) - NINT(3.0_DP * fcrys(1)) ) < eps .AND. &
+                 ABS(3.0_DP * fcrys(2) - NINT(3.0_DP * fcrys(2)) ) < eps .AND. &
+                 ABS(3.0_DP * fcrys(3) - NINT(3.0_DP * fcrys(3)) ) < eps ) THEN
+                 tipo_sym_sg=19
+              ELSE
+                 CALL errore('tipo_sym_sg','fractional translation wrong',4)
+              END IF
+           ELSEIF (ABS(angle-270.0_DP) < eps) THEN
+              fcart =  ps * ax
+              fcrys(:)= fcart(1)*bg(1,:) + fcart(2)*bg(2,:) + fcart(3)*bg(3,:)
+              IF (ABS(f43 * fcrys(1) - NINT(f43 * fcrys(1)) ) < eps .AND. &
+                 ABS(f43 * fcrys(2) - NINT(f43 * fcrys(2)) ) < eps .AND. &
+                 ABS(f43 * fcrys(3) - NINT(f43 * fcrys(3)) ) < eps ) THEN
+                 tipo_sym_sg=27
+              ELSEIF (ABS(2.0_DP * fcrys(1) - NINT(2.0_DP * fcrys(1)) ) < eps .AND. &
+                 ABS(2.0_DP * fcrys(2) - NINT(2.0_DP * fcrys(2)) ) < eps .AND. &
+                 ABS(2.0_DP * fcrys(3) - NINT(2.0_DP * fcrys(3)) ) < eps ) THEN
+                 tipo_sym_sg=25
+              ELSEIF (ABS(4.0_DP * fcrys(1) - NINT(4.0_DP * fcrys(1)) ) < eps .AND. &
+                 ABS(4.0_DP * fcrys(2) - NINT(4.0_DP * fcrys(2)) ) < eps .AND. &
+                 ABS(4.0_DP * fcrys(3) - NINT(4.0_DP * fcrys(3)) ) < eps ) THEN
+                 tipo_sym_sg=23
+              ELSE
+                 CALL errore('tipo_sym_sg','fractional translation wrong',5)
+              END IF
+           ELSEIF (ABS(angle-300.0_DP) < eps) THEN
+              fcart =  ps * ax
+              fcrys(:)= fcart(1)*bg(1,:) + fcart(2)*bg(2,:) + fcart(3)*bg(3,:)
+              IF (ABS(1.2_DP * fcrys(1) - NINT(1.2_DP * fcrys(1)) ) < eps .AND. &
+                 ABS(1.2_DP * fcrys(2) - NINT(1.2_DP * fcrys(2)) ) < eps .AND. &
+                 ABS(1.2_DP * fcrys(3) - NINT(1.2_DP * fcrys(3)) ) < eps ) THEN
+                 tipo_sym_sg=37
+              ELSEIF (ABS(1.5_DP * fcrys(1) - NINT(1.5_DP * fcrys(1)) ) < eps .AND. &
+                 ABS(1.5_DP * fcrys(2) - NINT(1.5_DP * fcrys(2)) ) < eps .AND. &
+                 ABS(1.5_DP * fcrys(3) - NINT(1.5_DP * fcrys(3)) ) < eps ) THEN
+                 tipo_sym_sg=35
+              ELSEIF (ABS(2.0_DP * fcrys(1) - NINT(2.0_DP * fcrys(1)) ) < eps .AND. &
+                 ABS(2.0_DP * fcrys(2) - NINT(2.0_DP * fcrys(2)) ) < eps .AND. &
+                 ABS(2.0_DP * fcrys(3) - NINT(2.0_DP * fcrys(3)) ) < eps ) THEN
+                 tipo_sym_sg=33
+              ELSEIF (ABS(3.0_DP * fcrys(1) - NINT(3.0_DP * fcrys(1)) ) < eps .AND. &
+                 ABS(3.0_DP * fcrys(2) - NINT(3.0_DP * fcrys(2)) ) < eps .AND. &
+                 ABS(3.0_DP * fcrys(3) - NINT(3.0_DP * fcrys(3)) ) < eps ) THEN
+                 tipo_sym_sg=31
+              ELSEIF (ABS(6.0_DP * fcrys(1) - NINT(6.0_DP * fcrys(1)) ) < eps .AND. &
+                 ABS(6.0_DP * fcrys(2) - NINT(6.0_DP * fcrys(2)) ) < eps .AND. &
+                 ABS(6.0_DP * fcrys(3) - NINT(6.0_DP * fcrys(3)) ) < eps ) THEN
+                 tipo_sym_sg=29
+              ELSE
+                 CALL errore('tipo_sym_sg','fractional translation wrong',6)
+              END IF
+           ELSE
+              CALL errore('tipo_sym_sg','rotation angle wrong',1)
+           END IF
+        END IF
+     CASE(4)
+!
+!    proper rotation 180
+!
+         CALL versor(sr, ax)
+         ps = ax(1) * fcart(1) + ax(2) * fcart(2) + ax(3) * fcart(3) 
+         IF (ABS(ps) < eps) THEN
+            tipo_sym_sg=7
+            ashift = 0.5_DP*fcart 
+         ELSE
+            WRITE(6,*) 'fcart orig', fcart(:)
+            ashift = 0.5_DP*(fcart - ps*ax)
+            fcart(:)=2.0_DP*ps*ax(:)
+            fcrys(:)= fcart(1)*bg(1,:) + fcart(2)*bg(2,:) + fcart(3)*bg(3,:)
+            WRITE(6,*) 'fcart', fcart(:)*0.5_DP
+            WRITE(6,*) 'fcrys', fcrys(:)*0.5_DP
+            IF ( ABS( fcrys(1) - NINT(fcrys(1)) ) < eps .AND. &
+                 ABS( fcrys(2) - NINT(fcrys(2)) ) < eps .AND. &
+                 ABS( fcrys(3) - NINT(fcrys(3)) ) < eps ) THEN
+                tipo_sym_sg=17
+            ELSE
+               CALL errore('tipo_sym_sg','fractional translation wrong',7)
+            ENDIF
+         ENDIF
+     CASE(5)
+!
+!    mirror
+!
+        CALL mirror_axis(sr, ax)
+        ps = ax(1) * fcart(1) + ax(2) * fcart(2) + ax(3) * fcart(3) 
+        ashift(:)= ps * ax(:) * 0.5_DP
+!
+!    fcart is projected in the direction parallel to the mirror
+!
+        fcart(:)=fcart(:)-ps*ax(:)
+        fmod=SQRT(fcart(1)**2 + fcart(2)**2 + fcart(3)**2)
+        IF (ABS(fmod) < eps) THEN
+           tipo_sym_sg=3
+        ELSE
+           fcart(:) = 2.0_DP * fcart(:)
+           fcrys(:)= fcart(1)*bg(1,:) + fcart(2)*bg(2,:) + fcart(3)*bg(3,:)
+          WRITE(6,*) 'fcart', fcart(:)
+          WRITE(6,*) 'fcrys', fcrys(:)
+          IF  ( ABS(fcrys(1)-NINT(fcrys(1))) < eps .AND. &
+                ABS(fcrys(2)) < eps .AND. ABS(fcrys(3)) < eps ) THEN
+              tipo_sym_sg=38
+          ELSEIF ( ABS(fcrys(2)-NINT(fcrys(2))) < eps .AND. &
+                 ABS(fcrys(1)) < eps .AND. ABS(fcrys(3)) < eps ) THEN
+              tipo_sym_sg=39
+          ELSEIF ( ABS(fcrys(3)-NINT(fcrys(3))) < eps .AND. &
+                 ABS(fcrys(1)) < eps .AND. ABS(fcrys(2)) < eps ) THEN
+              tipo_sym_sg=40
+          ELSEIF ((ABS(fcrys(1)-NINT(fcrys(1)))<eps.AND. &
+                   ABS(fcrys(2)-NINT(fcrys(2)))<eps.AND.ABS(fcrys(3))<eps).OR. &
+                  (ABS(fcrys(1)-NINT(fcrys(1)))<eps.AND. &
+                   ABS(fcrys(3)-NINT(fcrys(3)))<eps.AND.ABS(fcrys(2)) < eps ).OR. &
+                  (ABS(fcrys(2)-NINT(fcrys(2)))<eps.AND. &
+                   ABS(fcrys(3)-NINT(fcrys(3)))<eps.AND.ABS(fcrys(1)) < eps ).OR. &
+                  (ABS(fcrys(1)-NINT(fcrys(1)))<eps.AND. & 
+                   ABS(fcrys(2)-NINT(fcrys(2)))<eps.AND. &
+                   ABS(fcrys(3)-NINT(fcrys(3)))<eps) ) THEN
+               tipo_sym_sg=41
+           ELSEIF ((ABS(2.0_DP*fcrys(1)-NINT(2.0_DP*fcrys(1)))<eps.AND. &
+                    ABS(2.0_DP*fcrys(2)-NINT(2.0_DP*fcrys(2)))<eps.AND. &
+                    ABS(fcrys(3))<eps).OR. &
+                   (ABS(2.0_DP*fcrys(1)-NINT(2.0_DP*fcrys(1)))<eps.AND. &
+                    ABS(2.0_DP*fcrys(3)-NINT(2.0_DP*fcrys(3)))<eps.AND. &
+                    ABS(fcrys(2)) < eps ).OR. &
+                   (ABS(2.0_DP*fcrys(2)-NINT(2.0_DP*fcrys(2)))<eps.AND. &
+                    ABS(2.0_DP*fcrys(3)-NINT(2.0_DP*fcrys(3)))<eps.AND. &
+                    ABS(fcrys(1)) < eps ) .OR. &
+                   (ABS(2.0_DP*fcrys(1)-NINT(2.0_DP*fcrys(1)))<eps.AND. &
+                    ABS(2.0_DP*fcrys(2)-NINT(2.0_DP*fcrys(2)))<eps.AND. &
+                    ABS(2.0_DP*fcrys(3)-NINT(2.0_DP*fcrys(3)))<eps )) THEN
+              tipo_sym_sg=42
+           ELSE
+              CALL errore('tipo_sym_sg','fractional translation wrong',1)
+           ENDIF
+        ENDIF
+     CASE(6)
+!
+!   here the fractionary translation is not relevant to identify the space
+!   group, we give only the type of the rotation
+!
+        angle=angle_rot(sr)
+        IF (ABS(angle-60.0_DP) < eps) THEN
+           tipo_sym_sg=11
+        ELSEIF (ABS(angle-90.0_DP) < eps) THEN
+           tipo_sym_sg=12
+        ELSEIF (ABS(angle-120.0_DP) < eps) THEN
+           tipo_sym_sg=13
+        ELSEIF (ABS(angle-240.0_DP) < eps) THEN
+           tipo_sym_sg=14
+        ELSEIF (ABS(angle-270.0_DP) < eps) THEN
+           tipo_sym_sg=15
+        ELSEIF (ABS(angle-300.0_DP) < eps) THEN
+           tipo_sym_sg=16
+        ELSE
+           CALL errore('tipo_sym_sg','angle not recognized',1)
+        ENDIF
+     CASE DEFAULT 
+          CALL errore('tipo_sym_sg',' symmetry type not available',1)
+     END SELECT
+     acryshift(:)= ashift(1)*bg(1,:) + ashift(2)*bg(2,:) + ashift(3)*bg(3,:)
+  RETURN
+  END FUNCTION tipo_sym_sg 
+
+  CHARACTER(LEN=65) FUNCTION label_sg(ts)
+
+  IMPLICIT NONE
+  INTEGER, INTENT(IN) :: ts
+  CHARACTER(LEN=65) :: label(41)
+
+  IF (ts < 1 .OR. ts > 41) CALL errore('label_sg','unknown symmetry type',1 )
+
+  label(1)='identity  E'
+  label(2)='inversion i'
+  label(3)='mirror    s'
+  label(4)='rotation of 60  degrees    C6    (6)'
+  label(5)='rotation of 90  degrees    C4    (4)'
+  label(6)='rotation of 120 degrees    C3    (3)'
+  label(7)='rotation of 180 degrees    C2    (2)'
+  label(8)='rotation of 240 degrees    C3^2 (3^2)'
+  label(9)='rotation of 270 degrees    C4^3 (4^3)'
+  label(10)='rotation of 300 degrees    C6^5 (6^5)'
+  label(11)='rotation of 60  degrees multiplied by inversion S3^5 (-6)'
+  label(12)='rotation of 90  degrees multiplied by inversion S4^3 (-4)'
+  label(13)='rotation of 120 degrees multiplied by inversion S6^5 (-3)'
+  label(14)='rotation of 240 degrees multiplied by inversion S6  (-3^2)'
+  label(15)='rotation of 270 degrees multiplied by inversion S4  (-4^3)'
+  label(16)='rotation of 300 degrees multiplied by inversion S3  (-6^5)'
+  label(17)='screw rotation 180 degrees C2    (2)  (axis 2_1)'
+  label(18)='screw rotation 120 degrees C3    (3)  (axis 3_1)'
+  label(19)='screw rotation 240 degrees C3^2 (3^2) (axis 3_1)'
+  label(20)='screw rotation 120 degrees C3    (3)  (axis 3_2)'
+  label(21)='screw rotation 240 degrees C3^2  (3)  (axis 3_2)'
+  label(22)='screw rotation  90 degrees C4    (4)  (axis 4_1)'
+  label(23)='screw rotation 270 degrees C4^3 (4^3) (axis 4_1)'
+  label(24)='screw rotation  90 degrees C4    (4)  (axis 4_2)'
+  label(25)='screw rotation 270 degrees C4^3 (4^3) (axis 4_2)'
+  label(26)='screw rotation  90 degrees C4    (4)  (axis 4_3)'
+  label(27)='screw rotation 270 degrees C4^3 (4^3) (axis 4_3)'
+  label(28)='screw rotation  60 degrees C6    (6)  (axis 6_1)'
+  label(29)='screw rotation 300 degrees C6^5 (6^5) (axis 6_1)'
+  label(30)='screw rotation  60 degrees C6    (6)  (axis 6_2)'
+  label(31)='screw rotation 300 degrees C6^5 (6^5) (axis 6_2)'
+  label(32)='screw rotation  60 degrees C6    (6)  (axis 6_3)'
+  label(33)='screw rotation 300 degrees C6^5 (6^5) (axis 6_3)'
+  label(34)='screw rotation  60 degrees C6    (6)  (axis 6_4)'
+  label(35)='screw rotation 300 degrees C6^5 (6^5) (axis 6_4)'
+  label(36)='screw rotation  60 degrees C6    (6)  (axis 6_5)'
+  label(37)='screw rotation 300 degrees C6^5 (6^5) (axis 6_5)'
+  label(38)='glide plane a'
+  label(39)='glide plane b'
+  label(40)='glide plane c'
+  label(41)='glide plane'
+   
+  label_sg=label(ts)
+
+  RETURN
+  END FUNCTION label_sg
+
 !
 END MODULE space_groups
