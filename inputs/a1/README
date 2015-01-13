@@ -11,3 +11,5 @@ disp : plot of the phonon dispersion. Note that the experimental data
        are read by modifying the file gnuplot.tmp.g1_disp
 
 anhar : plot of the anharmonic quantities.
+
+al.el_const.out : an example of the output of the elastic constants run.
