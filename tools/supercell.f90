@@ -110,8 +110,13 @@ IF (which_input==1) THEN
       ENDIF
    ENDDO
 
-   uniqueb=(unb==1)
-   rhombohedral=(trig==1)
+   uniqueb=.FALSE.
+   rhombohedral=.FALSE.
+   IF (space_group_code > 2 .AND. space_group_code < 16 ) THEN 
+      uniqueb=(unb==1)
+   ELSEIF ( space_group_code > 142 .AND. space_group_code < 168) THEN
+      rhombohedral=(trig==1)
+   ENDIF
    origin_choice=or
    rd_for=0.0_DP
    if_pos=0
