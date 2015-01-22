@@ -26,6 +26,16 @@ PROGRAM supercell_pos
 !     origin, unique axis, trigonal or hexagonal, integers: origin choice,
 !                           unique axis b or c for monoclinic lattices,
 !                           trigonal or or hexagonal coordinates      
+!
+!  NB: For the trigonal groups the coordinates can be given in the 
+!      rhombohedral or hexagonal basis and the celldm must correspond to
+!      the coordinates. So coordinates in rhombohedral axes require celldm(1)
+!      and celldm(4), coordinates in hexagonal axes, celldm(1) and celldm(3).
+!      On output the code will give the coordinates in the trigonal cell
+!      if iconv=0 or in the hexagonal cell if iconv=1. 
+!      The hexagonal cell contains three times more atoms. 
+!      
+!
 !  If which_input=2
 !     ibrav, integer    : bravais lattice index
 !     units             : 1 alat units, 2 crystal coordinates
@@ -46,12 +56,12 @@ INTEGER :: ineq_nat           ! the number of inequivalent atoms
 REAL(DP), ALLOCATABLE :: ineq_tau(:,:), tau(:,:), tau_new(:,:), rd_for(:,:)
 INTEGER :: na, iat, ia, natoms, nat, or, unb, trig
 CHARACTER(LEN=3), ALLOCATABLE :: label(:), label_tau(:), label_tau_new(:), &
-                                 ineq_label(:)
+                                 atm(:)
 REAL(DP) :: celldm(6), omega, at(3,3), bg(3,3), a, cg
 REAL(DP), PARAMETER :: onet = 1.0_DP / 3.0_DP, twot = 2.0_DP * onet
-INTEGER, ALLOCATABLE :: ityp(:), ineq_ityp(:), if_pos(:,:)
+INTEGER, ALLOCATABLE :: ityp(:), ineq_ityp(:), ityp_new(:), if_pos(:,:)
 LOGICAL :: uniqueb, rhombohedral, found
-INTEGER :: n1, n2, n3, nb, ntyp, ibrav, which_input, units
+INTEGER :: n1, n2, n3, nt, nb, ntyp, ibrav, which_input, units, iuout
 INTEGER :: i1, i2, i3, iconv, nat_new, ibrav_sg, origin_choice
 
 WRITE(6,'(5x," Space group (1) or standard coordinates (2)? ")')
@@ -84,11 +94,10 @@ IF (which_input==1) THEN
    READ(5,*) ineq_nat
 
    ALLOCATE(ineq_tau(3,ineq_nat))
-   ALLOCATE(ineq_label(ineq_nat))
    ALLOCATE(label(ineq_nat))
    ALLOCATE(ineq_ityp(ineq_nat))
-   ALLOCATE(rd_for(3,ineq_nat))
    ALLOCATE(if_pos(3,ineq_nat))
+   ALLOCATE(rd_for(3,ineq_nat))
 
    DO na=1, ineq_nat
       READ(5,*) label(na), ineq_tau(1,na), ineq_tau(2,na), ineq_tau(3,na)
@@ -106,10 +115,18 @@ IF (which_input==1) THEN
       IF (found) THEN
          ntyp=ntyp+1
          ineq_ityp(na)=ntyp
-         ineq_label(ntyp)=label(na)
       ENDIF
    ENDDO
 
+   ALLOCATE(atm(ntyp))
+   DO nt=1,ntyp
+      DO na=1,ineq_nat
+         IF (ineq_ityp(na)==nt) THEN
+            atm(nt)=label(na)
+         ENDIF
+      ENDDO
+   ENDDO
+   
    uniqueb=.FALSE.
    rhombohedral=.FALSE.
    IF (space_group_code > 2 .AND. space_group_code < 16 ) THEN 
@@ -119,11 +136,9 @@ IF (which_input==1) THEN
    ENDIF
    origin_choice=or
    rd_for=0.0_DP
-   if_pos=0
 
-   CALL sup_spacegroup(ineq_tau,ineq_ityp,rd_for,if_pos,&
-                                     space_group_code,ineq_nat,uniqueb,&
-     rhombohedral,origin_choice,ibrav)
+   CALL sup_spacegroup(ineq_tau, ineq_ityp, rd_for, if_pos, space_group_code, &
+        ineq_nat, uniqueb, rhombohedral, origin_choice, ibrav)
 
    nat=nattot
    ALLOCATE(tau(3,nat))
@@ -135,15 +150,47 @@ IF (which_input==1) THEN
    CALL clean_spacegroup()
 
    DO na=1,nat
-      label_tau(na)=ineq_label(ityp(na))
+      label_tau(na)=atm(ityp(na))
    ENDDO
-   DEALLOCATE(ityp)
+
+   DEALLOCATE(if_pos)
+   DEALLOCATE(rd_for)
 ELSE
+   uniqueb=.FALSE.
+   rhombohedral = (ibrav==5)
    READ(5,*) nat
    ALLOCATE(tau(3,nat))
+   ALLOCATE(ityp(nat))
    ALLOCATE(label_tau(nat))
    DO na=1, nat
       READ(5,*) label_tau(na), tau(1,na), tau(2,na), tau(3,na)
+   ENDDO
+!
+!   count the number of types and set ityp
+!
+  
+   ntyp=0
+   DO na=1, nat
+      found=.TRUE.
+      DO nb=1, na-1
+         IF (label_tau(na) == label_tau(nb)) THEN
+            found=.FALSE.
+            ityp(na)=ityp(nb)
+         ENDIF
+      ENDDO
+      IF (found) THEN
+         ntyp=ntyp+1
+         ityp(na)=ntyp
+      ENDIF
+   ENDDO
+
+   ALLOCATE(atm(ntyp))
+   DO nt=1,ntyp
+      DO na=1,nat
+         IF (ityp(na)==nt) THEN
+            atm(nt)=label_tau(na)
+         ENDIF
+      ENDDO
    ENDDO
    !
    !  If coordinates are in alat units, transform to crystal coordinates
@@ -156,6 +203,18 @@ ELSE
    END IF 
 ENDIF
 
+IF (ibrav==5 .AND. .NOT. rhombohedral) THEN
+!
+!  the hexagonal celldm have been given, transform to  rhombohedral
+!
+   a = celldm(1) * SQRT(3.0_DP+celldm(3)**2) / 3.0_DP
+   cg = ( celldm(3)**2 - 1.5_DP ) / ( celldm(3)**2 + 3.0_DP )
+   celldm(1)=a
+   celldm(3)=0.0_DP
+   celldm(4)=cg
+
+ENDIF
+
 IF (iconv==1) THEN
    SELECT CASE(ibrav)
       CASE(2)
@@ -163,6 +222,7 @@ IF (iconv==1) THEN
         CALL transform_fcc_cubic(tau,nat) 
         nat_new = 4 * nat
         ALLOCATE(tau_new(3,nat_new))
+        ALLOCATE(ityp_new(nat_new))
         ALLOCATE(label_tau_new(nat_new))
         tau_new(:,1:nat)=tau(:,1:nat)
         tau_new(1,nat+1:2*nat)=tau(1,1:nat) 
@@ -174,6 +234,10 @@ IF (iconv==1) THEN
         tau_new(1,3*nat+1:4*nat)=tau(1,1:nat) + 0.5_DP
         tau_new(2,3*nat+1:4*nat)=tau(2,1:nat) + 0.5_DP
         tau_new(3,3*nat+1:4*nat)=tau(3,1:nat) 
+        ityp_new(1:nat)=ityp(1:nat)
+        ityp_new(nat+1:2*nat)=ityp(1:nat)
+        ityp_new(2*nat+1:3*nat)=ityp(1:nat)
+        ityp_new(3*nat+1:4*nat)=ityp(1:nat)
         label_tau_new(1:nat)=label_tau(1:nat)
         label_tau_new(nat+1:2*nat)=label_tau(1:nat)
         label_tau_new(2*nat+1:3*nat)=label_tau(1:nat)
@@ -183,11 +247,14 @@ IF (iconv==1) THEN
         CALL transform_bcc_cubic(tau,nat) 
         nat_new = 2 * nat
         ALLOCATE(tau_new(3,nat_new))
+        ALLOCATE(ityp_new(nat_new))
         ALLOCATE(label_tau_new(nat_new))
         tau_new(:,1:nat)=tau(:,1:nat)
         tau_new(1,nat+1:2*nat)=tau(1,1:nat) + 0.5_DP
         tau_new(2,nat+1:2*nat)=tau(2,1:nat) + 0.5_DP
         tau_new(3,nat+1:2*nat)=tau(3,1:nat) + 0.5_DP
+        ityp_new(1:nat)=ityp(1:nat)
+        ityp_new(nat+1:2*nat)=ityp(1:nat)
         label_tau_new(1:nat)=label_tau(1:nat)
         label_tau_new(nat+1:2*nat)=label_tau(1:nat)
       CASE(5)
@@ -195,6 +262,7 @@ IF (iconv==1) THEN
         CALL transform_trig_hex(tau,nat) 
         nat_new = 3 * nat
         ALLOCATE(tau_new(3,nat_new))
+        ALLOCATE(ityp_new(nat_new))
         ALLOCATE(label_tau_new(nat_new))
         tau_new(:,1:nat)=tau(:,1:nat)
         tau_new(1,nat+1:2*nat)=tau(1,1:nat) + twot
@@ -203,6 +271,9 @@ IF (iconv==1) THEN
         tau_new(1,2*nat+1:3*nat)=tau(1,1:nat) + onet
         tau_new(2,2*nat+1:3*nat)=tau(2,1:nat) + twot
         tau_new(3,2*nat+1:3*nat)=tau(3,1:nat) + twot
+        ityp_new(1:nat)=ityp(1:nat)
+        ityp_new(nat+1:2*nat)=ityp(1:nat)
+        ityp_new(2*nat+1:3*nat)=ityp(1:nat)
         label_tau_new(1:nat)=label_tau(1:nat)
         label_tau_new(nat+1:2*nat)=label_tau(1:nat)
         label_tau_new(2*nat+1:3*nat)=label_tau(1:nat)
@@ -216,11 +287,14 @@ IF (iconv==1) THEN
         CALL transform_ct_tet(tau,nat) 
         nat_new = 2 * nat
         ALLOCATE(tau_new(3,nat_new))
+        ALLOCATE(ityp_new(nat_new))
         ALLOCATE(label_tau_new(nat_new))
         tau_new(:,1:nat)=tau(:,1:nat)
         tau_new(1,nat+1:2*nat)=tau(1,1:nat) + 0.5_DP
         tau_new(2,nat+1:2*nat)=tau(2,1:nat) + 0.5_DP
         tau_new(3,nat+1:2*nat)=tau(3,1:nat) + 0.5_DP
+        ityp_new(1:nat)=ityp(1:nat)
+        ityp_new(nat+1:2*nat)=ityp(1:nat)
         label_tau_new(1:nat)=label_tau(1:nat)
         label_tau_new(nat+1:2*nat)=label_tau(1:nat)
       CASE(9)
@@ -228,11 +302,14 @@ IF (iconv==1) THEN
         CALL transform_ofco_orth_c(tau,nat) 
         nat_new = 2 * nat
         ALLOCATE(tau_new(3,nat_new))
+        ALLOCATE(ityp_new(nat_new))
         ALLOCATE(label_tau_new(nat_new))
         tau_new(:,1:nat)=tau(:,1:nat)
         tau_new(1,nat+1:2*nat)=tau(1,1:nat) + 0.5_DP
         tau_new(2,nat+1:2*nat)=tau(2,1:nat) + 0.5_DP
         tau_new(3,nat+1:2*nat)=tau(3,1:nat) 
+        ityp_new(1:nat)=ityp(1:nat)
+        ityp_new(nat+1:2*nat)=ityp(1:nat)
         label_tau_new(1:nat)=label_tau(1:nat)
         label_tau_new(nat+1:2*nat)=label_tau(1:nat)
       CASE(91)
@@ -240,11 +317,14 @@ IF (iconv==1) THEN
         CALL transform_ofco_orth_a(tau,nat) 
         nat_new = 2 * nat
         ALLOCATE(tau_new(3,nat_new))
+        ALLOCATE(ityp_new(nat_new))
         ALLOCATE(label_tau_new(nat_new))
         tau_new(:,1:nat)=tau(:,1:nat)
         tau_new(1,nat+1:2*nat)=tau(1,1:nat) 
         tau_new(2,nat+1:2*nat)=tau(2,1:nat) + 0.5_DP
         tau_new(3,nat+1:2*nat)=tau(3,1:nat) + 0.5_DP
+        ityp_new(1:nat)=ityp(1:nat)
+        ityp_new(nat+1:2*nat)=ityp(1:nat)
         label_tau_new(1:nat)=label_tau(1:nat)
         label_tau_new(nat+1:2*nat)=label_tau(1:nat)
       CASE(10)
@@ -252,6 +332,7 @@ IF (iconv==1) THEN
         CALL transform_fco_orth(tau,nat) 
         nat_new = 4 * nat
         ALLOCATE(tau_new(3,nat_new))
+        ALLOCATE(ityp_new(nat_new))
         ALLOCATE(label_tau_new(nat_new))
         tau_new(:,1:nat)=tau(:,1:nat)
         tau_new(1,nat+1:2*nat)=tau(1,1:nat) 
@@ -263,6 +344,10 @@ IF (iconv==1) THEN
         tau_new(1,3*nat+1:4*nat)=tau(1,1:nat) + 0.5_DP
         tau_new(2,3*nat+1:4*nat)=tau(2,1:nat) + 0.5_DP
         tau_new(3,3*nat+1:4*nat)=tau(3,1:nat) 
+        ityp_new(1:nat)=ityp(1:nat)
+        ityp_new(nat+1:2*nat)=ityp(1:nat)
+        ityp_new(2*nat+1:3*nat)=ityp(1:nat)
+        ityp_new(3*nat+1:4*nat)=ityp(1:nat)
         label_tau_new(1:nat)=label_tau(1:nat)
         label_tau_new(nat+1:2*nat)=label_tau(1:nat)
         label_tau_new(2*nat+1:3*nat)=label_tau(1:nat)
@@ -272,11 +357,14 @@ IF (iconv==1) THEN
         CALL transform_bco_orth(tau,nat) 
         nat_new = 2 * nat
         ALLOCATE(tau_new(3,nat_new))
+        ALLOCATE(ityp_new(nat_new))
         ALLOCATE(label_tau_new(nat_new))
         tau_new(:,1:nat)=tau(:,1:nat)
         tau_new(1,nat+1:2*nat)=tau(1,1:nat) + 0.5_DP
         tau_new(2,nat+1:2*nat)=tau(2,1:nat) + 0.5_DP
         tau_new(3,nat+1:2*nat)=tau(3,1:nat) + 0.5_DP
+        ityp_new(1:nat)=ityp(1:nat)
+        ityp_new(nat+1:2*nat)=ityp(1:nat)
         label_tau_new(1:nat)=label_tau(1:nat)
         label_tau_new(nat+1:2*nat)=label_tau(1:nat)
       CASE(13)
@@ -284,11 +372,14 @@ IF (iconv==1) THEN
         CALL transform_ofc_mon_uniq_c(tau,nat) 
         nat_new = 2 * nat
         ALLOCATE(tau_new(3,nat_new))
+        ALLOCATE(ityp_new(nat_new))
         ALLOCATE(label_tau_new(nat_new))
         tau_new(:,1:nat)=tau(:,1:nat)
         tau_new(1,nat+1:2*nat)=tau(1,1:nat) + 0.5_DP
         tau_new(2,nat+1:2*nat)=tau(2,1:nat) 
         tau_new(3,nat+1:2*nat)=tau(3,1:nat) + 0.5_DP
+        ityp_new(1:nat)=ityp(1:nat)
+        ityp_new(nat+1:2*nat)=ityp(1:nat)
         label_tau_new(1:nat)=label_tau(1:nat)
         label_tau_new(nat+1:2*nat)=label_tau(1:nat)
       CASE(-13)
@@ -296,41 +387,48 @@ IF (iconv==1) THEN
         CALL transform_ofc_mon_uniq_b(tau,nat) 
         nat_new = 2 * nat
         ALLOCATE(tau_new(3,nat_new))
+        ALLOCATE(ityp_new(nat_new))
         ALLOCATE(label_tau_new(nat_new))
         tau_new(:,1:nat)=tau(:,1:nat)
         tau_new(1,nat+1:2*nat)=tau(1,1:nat) + 0.5_DP
         tau_new(2,nat+1:2*nat)=tau(2,1:nat) + 0.5_DP
         tau_new(3,nat+1:2*nat)=tau(3,1:nat) 
+        ityp_new(1:nat)=ityp(1:nat)
+        ityp_new(nat+1:2*nat)=ityp(1:nat)
         label_tau_new(1:nat)=label_tau(1:nat)
         label_tau_new(nat+1:2*nat)=label_tau(1:nat)
       CASE DEFAULT
         nat_new=nat
         ALLOCATE(tau_new(3,nat_new))
+        ALLOCATE(ityp_new(nat_new))
         ALLOCATE(label_tau_new(nat_new))
+        ityp_new(:)=ityp(:)
         tau_new(:,:)=tau(:,:)
         label_tau_new(1:nat)=label_tau(1:nat)
    END SELECT
 ELSE
    nat_new=nat
    ALLOCATE(tau_new(3,nat_new))
+   ALLOCATE(ityp_new(nat_new))
    ALLOCATE(label_tau_new(nat_new))
    tau_new(:,:)=tau(:,:)
+   ityp_new(:)=ityp(:)
    label_tau_new(1:nat)=label_tau(1:nat)
 ENDIF
 
 CALL latgen(ibrav, celldm, at(1,1), at(1,2), at(1,3), omega)
 
-WRITE(6,'(5x, "celldm(1)= ",f12.6)') celldm(1) * n1
+WRITE(6,'(5x, "celldm(1)= ",f15.9)') celldm(1) * n1
 IF (celldm(2) > 0.0_DP ) &
-   WRITE(6,'(5x, "celldm(2)= ",f12.6)') (celldm(2) * n2) / n1
+   WRITE(6,'(5x, "celldm(2)= ",f15.9)') (celldm(2) * n2) / n1
 IF (celldm(3) > 0.0_DP ) &
-   WRITE(6,'(5x, "celldm(3)= ",f12.6)') (celldm(3) * n3) / n1
+   WRITE(6,'(5x, "celldm(3)= ",f15.9)') (celldm(3) * n3) / n1
 IF (celldm(4) /= 0.0_DP ) &
-   WRITE(6,'(5x, "celldm(4)= ",f12.6)') celldm(4) 
+   WRITE(6,'(5x, "celldm(4)= ",f15.9)') celldm(4) 
 IF (celldm(5) /= 0.0_DP ) &
-   WRITE(6,'(5x, "celldm(5)= ",f12.6)') celldm(5) 
+   WRITE(6,'(5x, "celldm(5)= ",f15.9)') celldm(5) 
 IF (celldm(6) /= 0.0_DP ) &
-   WRITE(6,'(5x, "celldm(6)= ",f12.6)') celldm(6) 
+   WRITE(6,'(5x, "celldm(6)= ",f15.9)') celldm(6) 
 
 WRITE(6,'(5x,"ibrav= ",i3)') ibrav
 WRITE(6,'(5x,"nat= ",i5)') nat_new * n1 * n2 * n3
@@ -347,10 +445,25 @@ DO i1=-(n1-1)/2, n1/2
    ENDDO
 ENDDO
 
+iuout=35
+OPEN(unit=iuout, file='supercell.xsf', status='unknown', &
+                                              form='formatted')
+
+at=at/celldm(1)
+CALL cryst_to_cart( nat_new, tau_new, at, 1 )
+
+CALL xsf_struct (celldm(1), at, nat_new, tau_new, atm, ityp_new, iuout)
+
+CLOSE(iuout)
+
+
 DEALLOCATE(ineq_tau)
 DEALLOCATE(label)
+DEALLOCATE(atm)
+DEALLOCATE(ityp)
 DEALLOCATE(tau)
 DEALLOCATE(tau_new)
+DEALLOCATE(ityp_new)
 DEALLOCATE(label_tau)
 END PROGRAM supercell_pos
 
@@ -403,7 +516,7 @@ tau_new=tau
 DO na=1,nat
    tau(1,na) = onet*( tau_new(1,na) + tau_new(2,na) - 2.0_DP * tau_new(3,na) )
    tau(2,na) = onet*(-tau_new(1,na) + 2.0_DP * tau_new(2,na) - tau_new(3,na) )
-   tau(3,na) = onet*( tau_new(1,na) + tau_new(2,na) + tau_new(3,na) )
+   tau(3,na) = onet*(-tau_new(1,na) - tau_new(2,na) - tau_new(3,na) )
 END DO
 
 RETURN
