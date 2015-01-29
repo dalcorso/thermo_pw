@@ -3257,7 +3257,7 @@ MODULE space_groups
   INTEGER, INTENT(IN) :: ftau(3), nr1, nr2, nr3
 
   REAL(DP) :: fcart(3), angle, ps, fmod, ax(3), fcrys(3), bg(3,3)
-  REAL(DP), PARAMETER :: f43=4.0_DP / 3.0_DP, eps=1.D-8
+  REAL(DP), PARAMETER :: f43=4.0_DP / 3.0_DP, eps=1.D-7
   REAL(DP) :: angle_rot, angle_rot_s
 
   INTEGER :: ts, tip_sym
@@ -3437,12 +3437,9 @@ MODULE space_groups
             tipo_sym_sg=7
             ashift = 0.5_DP*fcart 
          ELSE
-            WRITE(6,*) 'fcart orig', fcart(:)
             ashift = 0.5_DP*(fcart - ps*ax)
             fcart(:)=2.0_DP*ps*ax(:)
             fcrys(:)= fcart(1)*bg(1,:) + fcart(2)*bg(2,:) + fcart(3)*bg(3,:)
-            WRITE(6,*) 'fcart', fcart(:)*0.5_DP
-            WRITE(6,*) 'fcrys', fcrys(:)*0.5_DP
             IF ( ABS( fcrys(1) - NINT(fcrys(1)) ) < eps .AND. &
                  ABS( fcrys(2) - NINT(fcrys(2)) ) < eps .AND. &
                  ABS( fcrys(3) - NINT(fcrys(3)) ) < eps ) THEN
