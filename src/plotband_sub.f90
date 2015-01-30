@@ -230,7 +230,6 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
                ik2 = ik + ishift
                IF (gcodek(ike) /= gcodek(ik2)) THEN
                   rapin(:)=rap(:,ike)
-                  write(6,*) 'gcodek ike ik2', gcodek(ike), gcodek(ik2)
                   CALL convert_rap(nbnd,rapin,rap(1,ike),&
                        gcodek(ike), gcodek(ik2), aux_ind_sur(ik,ikz),lspinorb)
                   gcodek(ike)=gcodek(ik2)
@@ -325,7 +324,6 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
   ENDDO
   WRITE(stdout,'(5x,"Number of lines:", i4, " Total number of points:",i8)') &
                                         nlines, tot_points
-  
 
   ALLOCATE (kx(tot_points)) 
   ALLOCATE (k_eff(3,tot_points)) 
@@ -563,7 +561,6 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
 !   that carry the information about the group subgroup relationship
 !   (aux_ind)
 !
-             write(6,*) 'convert rap', n, gcodek_eff(n), code_group_line
              IF (n==spe) THEN
                 rapin(:)=rap_eff(:,n)
                 CALL convert_rap(nbnd,rapin,rap_eff(1,n),gcodek_eff(n), &
@@ -580,11 +577,11 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
 !
 !  check if the first and last point have representations or not
 !
-       start_shift=1 
-       last_shift=1 
+       start_shift=0 
+       last_shift=0 
        DO i=1,nbnd
-          IF (rap_eff(i,spe) > 0) start_shift=0
-          IF (rap_eff(i,lpe) > 0) last_shift=0
+          IF (rap_eff(i,spe) <= 0) start_shift=1
+          IF (rap_eff(i,lpe) <= 0) last_shift=1
        ENDDO
 !
 !   If the point at line border has not the representations 
