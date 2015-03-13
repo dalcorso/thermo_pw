@@ -1,7 +1,15 @@
 New in version 0.2.0:
     Started a collection of interesting inputs for the thermo_pw package.
 
-Bugs fixed in version 0.2.0:
+    Introduced the group-subgroup relation to join the bands at the
+    edges of the path.
+    Written a small manual to intepret the color codes of the bands and
+    of the phonon dispersions.
+
+    Introduced the possibility to plot the surface band structure.
+
+    Introduced some tools to work with space groups and to generate
+    supercells, slabs, and ribbons.
 
 
 28/11/2014    Version 0.1.0 of thermo_pw is now frozen.

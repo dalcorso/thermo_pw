@@ -3469,8 +3469,6 @@ MODULE space_groups
         ELSE
            fcart(:) = 2.0_DP * fcart(:)
            fcrys(:)= fcart(1)*bg(1,:) + fcart(2)*bg(2,:) + fcart(3)*bg(3,:)
-          WRITE(6,*) 'fcart', fcart(:)
-          WRITE(6,*) 'fcrys', fcrys(:)
           IF  ( ABS(fcrys(1)-NINT(fcrys(1))) < eps .AND. &
                 ABS(fcrys(2)) < eps .AND. ABS(fcrys(3)) < eps ) THEN
               tipo_sym_sg=38
