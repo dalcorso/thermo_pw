@@ -7,7 +7,7 @@
 !
 SUBROUTINE set_bz_path()
 USE kinds,            ONLY : DP
-USE input_parameters, ONLY : ibrav, celldm
+USE cell_base,        ONLY : ibrav, celldm
 USE control_paths,    ONLY : xqaux, wqaux, npk_label, letter,     &
                              label_list, nqaux, point_label_type, &
                              label_disp_q, letter_path
@@ -68,6 +68,13 @@ nqaux=npk_label
 !
 !  Allocate the points and label necessary to specify this path
 !
+IF (ALLOCATED(xqaux)) DEALLOCATE(xqaux)
+IF (ALLOCATED(wqaux)) DEALLOCATE(wqaux)
+IF (ALLOCATED(letter)) DEALLOCATE(letter)
+IF (ALLOCATED(letter_path)) DEALLOCATE(letter_path)
+IF (ALLOCATED(label_list)) DEALLOCATE(label_list)
+IF (ALLOCATED(label_disp_q)) DEALLOCATE(label_disp_q)
+
 ALLOCATE(xqaux(3,nqaux))
 ALLOCATE(wqaux(nqaux))
 ALLOCATE(letter(nqaux))
@@ -93,6 +100,7 @@ CASE (1)
       label_list(1:npk_label)=(/ ( i, i=1,npk_label) /)
    ENDIF
    letter_path=letter
+   point_label_type='SC'
 CASE (2) 
 !
 !  fcc bz
@@ -123,6 +131,7 @@ CASE (3)
       label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
    ENDIF
    letter_path=letter
+   point_label_type='SC'
 CASE (4)
 !
 ! simple tetragonal lattice
@@ -141,6 +150,7 @@ CASE (4)
       label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
    ENDIF
    letter_path=letter
+   point_label_type='SC'
 CASE (5) 
 !
 !   bct c < a
@@ -159,6 +169,7 @@ CASE (5)
       label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
    ENDIF
    letter_path=letter
+   point_label_type='SC'
 CASE (6) 
 !
 !   bct c > a
@@ -169,6 +180,7 @@ CASE (6)
                       30,   30,   30,     1 /)
    label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
    letter_path=letter
+   point_label_type='SC'
 CASE (7) 
 !
 !  Simple orthorombic lattice
@@ -187,6 +199,7 @@ CASE (7)
       label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
    ENDIF
    letter_path=letter
+   point_label_type='SC'
 CASE (8) 
 !
 !  Face centered Orthorombic case 1
@@ -205,6 +218,7 @@ CASE (8)
       label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
    ENDIF
    letter_path=letter
+   point_label_type='SC'
 CASE (9) 
 !
 !  Face centered orthorombic case 2
@@ -223,6 +237,7 @@ CASE (9)
       label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
    ENDIF
    letter_path=letter
+   point_label_type='SC'
 CASE (10) 
 !
 !  Face centered orthorombic case 3
@@ -241,6 +256,7 @@ CASE (10)
       label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
    ENDIF
    letter_path=letter
+   point_label_type='SC'
 CASE (11) 
 !
 !  Body centered orthorombic
@@ -283,6 +299,7 @@ CASE (11)
       label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
    ENDIF
    letter_path=letter
+   point_label_type='SC'
 CASE (12)
 !
 !  One phase centered orthorombic
@@ -311,6 +328,7 @@ CASE (12)
       label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
    ENDIF
    letter_path=letter
+   point_label_type='SC'
 CASE (13) 
 !
 !  simple hexagonal bz
@@ -329,6 +347,7 @@ CASE (13)
       label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
    ENDIF
    letter_path=letter
+   point_label_type='SC'
 CASE (14) 
 !
 !  rombohedral (or trigonal) lattice  alpha < 90
@@ -339,6 +358,7 @@ CASE (14)
                       30,   30,   40,    30,   30,  1 /)
    label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
    letter_path=letter
+   point_label_type='SC'
 CASE (15) 
 !
 !  rombohedral (or trigonal) lattice  alpha > 90
@@ -347,6 +367,7 @@ CASE (15)
    wqaux(1:npk_label) =  (/  30,   30,   30,    30,   30,  30, 1 /)
    label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
    letter_path=letter
+   point_label_type='SC'
 CASE (16) 
 !
 !  simple monoclinic lattice
@@ -360,6 +381,7 @@ CASE (16)
    ENDIF
    label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
    letter_path=letter
+   point_label_type='SC'
 END SELECT
 
 RETURN

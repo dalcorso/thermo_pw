@@ -8115,6 +8115,7 @@ CONTAINS
 
   USE kinds, ONLY : DP
   USE constants, ONLY : pi
+  USE io_global, ONLY : stdout
   IMPLICIT NONE
   INTEGER, INTENT(IN) :: nsym_a, nsym_b, group_a, group_b
   INTEGER, INTENT(IN) :: sk_a(3,3,nsym_a), sk_b(3,3,nsym_b)
@@ -8150,7 +8151,9 @@ CONTAINS
 !
         SELECT CASE (group_b)
            CASE DEFAULT
-                CALL errore('find_aux_ind_two_groups',' group not available',1)
+              WRITE(stdout,'(5x,"Group a",i3," Group b", i3)') group_a, &
+                                                               group_b
+              CALL errore('find_aux_ind_two_groups',' group not available',1)
         END SELECT   
      CASE(6)
 !
@@ -8160,7 +8163,9 @@ CONTAINS
            CASE (2)
               aux_ind=1
            CASE DEFAULT
-              CALL errore('find_aux_ind_two_groups',' group not available',1)
+              WRITE(stdout,'(5x,"Group a",i3," Group b", i3)') group_a, &
+                                                               group_b
+              CALL errore('find_aux_ind_two_groups',' group not available',2)
         END SELECT   
      CASE(7)
 !
@@ -8170,7 +8175,9 @@ CONTAINS
            CASE(4,5)
               aux_ind=1
            CASE DEFAULT
-                CALL errore('find_aux_ind_two_groups',' group not available',1)
+              WRITE(stdout,'(5x,"Group a",i3," Group b", i3)') group_a, &
+                                                               group_b
+              CALL errore('find_aux_ind_two_groups',' group not available',3)
         END SELECT   
      CASE(8)
 !
@@ -8227,7 +8234,9 @@ CONTAINS
                 ENDIF
              ENDDO
            CASE DEFAULT
-                CALL errore('find_aux_ind_two_groups',' group not available',1)
+              WRITE(stdout,'(5x,"Group a",i3," Group b", i3)') group_a, &
+                                                               group_b
+              CALL errore('find_aux_ind_two_groups',' group not available',4)
         END SELECT   
      CASE(9)
 !
@@ -8240,7 +8249,9 @@ CONTAINS
       !
               aux_ind=1
            CASE DEFAULT
-                CALL errore('find_aux_ind_two_groups',' group not available',1)
+              WRITE(stdout,'(5x,"Group a",i3," Group b", i3)') group_a, &
+                                                               group_b
+              CALL errore('find_aux_ind_two_groups',' group not available',5)
         END SELECT   
      CASE(10)
 !
@@ -8317,7 +8328,9 @@ CONTAINS
                  aux_ind=2
               ENDIF
            CASE DEFAULT
-                CALL errore('find_aux_ind_two_groups',' group not available',1)
+              WRITE(stdout,'(5x,"Group a",i3," Group b", i3)') group_a, &
+                                                               group_b
+              CALL errore('find_aux_ind_two_groups',' group not available',6)
         END SELECT   
 
      CASE(11)
@@ -8375,7 +8388,9 @@ CONTAINS
                  ENDIF
               ENDDO
            CASE DEFAULT
-                CALL errore('find_aux_ind_two_groups',' group not available',1)
+              WRITE(stdout,'(5x,"Group a",i3," Group b", i3)') group_a, &
+                                                               group_b
+              CALL errore('find_aux_ind_two_groups',' group not available',7)
         END SELECT   
      CASE(12)
 !
@@ -8452,7 +8467,9 @@ CONTAINS
       !
               aux_ind=1
            CASE DEFAULT
-              CALL errore('find_aux_ind_two_groups',' group not available',1)
+              WRITE(stdout,'(5x,"Group a",i3," Group b", i3)') group_a, &
+                                                               group_b
+              CALL errore('find_aux_ind_two_groups',' group not available',8)
         END SELECT   
      CASE(13)
 !
@@ -8465,7 +8482,9 @@ CONTAINS
       !
               aux_ind=1
            CASE DEFAULT
-              CALL errore('find_aux_ind_two_groups',' group not available',1)
+              WRITE(stdout,'(5x,"Group a",i3," Group b", i3)') group_a, &
+                                                               group_b
+              CALL errore('find_aux_ind_two_groups',' group not available',9)
         END SELECT   
      CASE(14)
 !
@@ -8510,7 +8529,9 @@ CONTAINS
                  aux_ind=2
               ENDIF
            CASE DEFAULT
-                CALL errore('find_aux_ind_two_groups',' group not available',1)
+              WRITE(stdout,'(5x,"Group a",i3," Group b", i3)') group_a, &
+                                                               group_b
+              CALL errore('find_aux_ind_two_groups',' group not available',10)
         END SELECT   
      CASE(15)
 !
@@ -8555,7 +8576,9 @@ CONTAINS
                                       ' Problem with axis direction ',1)
               ENDIF
            CASE DEFAULT
-                CALL errore('find_aux_ind_two_groups',' group not available',1)
+              WRITE(stdout,'(5x,"Group a",i3," Group b", i3)') group_a, &
+                                                               group_b
+              CALL errore('find_aux_ind_two_groups',' group not available',11)
         END SELECT   
      CASE(16)
 !
@@ -8568,7 +8591,9 @@ CONTAINS
       !
               aux_ind=1
            CASE DEFAULT
-                CALL errore('find_aux_ind_two_groups',' group not available',1)
+              WRITE(stdout,'(5x,"Group a",i3," Group b", i3)') group_a, &
+                                                               group_b
+              CALL errore('find_aux_ind_two_groups',' group not available',12)
         END SELECT   
      CASE(17)
 !
@@ -8581,7 +8606,9 @@ CONTAINS
       !
               aux_ind=1
            CASE DEFAULT
-                CALL errore('find_aux_ind_two_groups',' group not available',1)
+              WRITE(stdout,'(5x,"Group a",i3," Group b", i3)') group_a, &
+                                                               group_b
+              CALL errore('find_aux_ind_two_groups',' group not available',13)
         END SELECT   
      CASE(18)
 !
@@ -8594,7 +8621,9 @@ CONTAINS
       !
               aux_ind=1
            CASE DEFAULT
-                CALL errore('find_aux_ind_two_groups',' group not available',1)
+              WRITE(stdout,'(5x,"Group a",i3," Group b", i3)') group_a, &
+                                                               group_b
+              CALL errore('find_aux_ind_two_groups',' group not available',14)
         END SELECT   
      CASE(19)
 !
@@ -8608,7 +8637,9 @@ CONTAINS
               aux_ind=1
 
            CASE DEFAULT
-                CALL errore('find_aux_ind_two_groups',' group not available',1)
+              WRITE(stdout,'(5x,"Group a",i3," Group b", i3)') group_a, &
+                                                               group_b
+              CALL errore('find_aux_ind_two_groups',' group not available',15)
         END SELECT   
      CASE(20)
 !
@@ -8774,7 +8805,9 @@ CONTAINS
                 ENDIF
              ENDDO
           CASE DEFAULT
-             CALL errore('find_aux_ind_two_groups','This is not a subgroup',1)
+             WRITE(stdout,'(5x,"Group a",i3," Group b", i3)') group_a, &
+                                                              group_b
+             CALL errore('find_aux_ind_two_groups','Group not available',16)
        END SELECT 
 
      CASE(21)
@@ -8837,7 +8870,9 @@ CONTAINS
                                               'problem D_2h C_2v',2)
              ENDIF
            CASE DEFAULT
-                CALL errore('find_aux_ind_two_groups',' group not available',1)
+             WRITE(stdout,'(5x,"Group a",i3," Group b", i3)') group_a, &
+                                                              group_b
+             CALL errore('find_aux_ind_two_groups',' group not available',17)
         END SELECT   
      CASE(22)
 !
@@ -9010,7 +9045,9 @@ CONTAINS
        ! 
              aux_ind=1
           CASE DEFAULT
-             CALL errore('find_aux_ind_two_groups','D_4h this is not a subgroup',1)
+             WRITE(stdout,'(5x,"Group a",i3," Group b", i3)') group_a, &
+                                                              group_b
+             CALL errore('find_aux_ind_two_groups','Group not available',17)
        END SELECT 
      CASE(23)
 !
@@ -9174,7 +9211,9 @@ CONTAINS
               aux_ind=1
 
            CASE DEFAULT
-                CALL errore('find_aux_ind_two_groups',' group not available',1)
+              WRITE(stdout,'(5x,"Group a",i3," Group b", i3)') group_a, &
+                                                              group_b
+              CALL errore('find_aux_ind_two_groups',' Group not available',18)
         END SELECT   
      CASE(24)
 !
@@ -9255,7 +9294,9 @@ CONTAINS
               aux_ind=1
 
            CASE DEFAULT
-                CALL errore('find_aux_ind_two_groups',' group not available',1)
+              WRITE(stdout,'(5x,"Group a",i3," Group b", i3)') group_a, &
+                                                              group_b
+              CALL errore('find_aux_ind_two_groups','Group not available',19)
         END SELECT   
      CASE(25)
 !
@@ -9269,7 +9310,9 @@ CONTAINS
               aux_ind=1
 
            CASE DEFAULT
-                CALL errore('find_aux_ind_two_groups',' group not available',1)
+              WRITE(stdout,'(5x,"Group a",i3," Group b", i3)') group_a, &
+                                                               group_b
+              CALL errore('find_aux_ind_two_groups','Group not available',20)
         END SELECT   
      CASE(26)
 !
@@ -9283,7 +9326,9 @@ CONTAINS
               aux_ind=1
 
            CASE DEFAULT
-                CALL errore('find_aux_ind_two_groups',' group not available',1)
+              WRITE(stdout,'(5x,"Group a",i3," Group b", i3)') group_a, &
+                                                               group_b
+              CALL errore('find_aux_ind_two_groups','Group not available',21)
         END SELECT   
      CASE(27)
 !
@@ -9297,7 +9342,9 @@ CONTAINS
               aux_ind=1
 
            CASE DEFAULT
-                CALL errore('find_aux_ind_two_groups',' group not available',1)
+              WRITE(stdout,'(5x,"Group a",i3," Group b", i3)') group_a, &
+                                                               group_b
+              CALL errore('find_aux_ind_two_groups','Group not available',22)
         END SELECT   
      CASE(28)
 !
@@ -9311,7 +9358,9 @@ CONTAINS
               aux_ind=1
 
            CASE DEFAULT
-                CALL errore('find_aux_ind_two_groups',' group not available',1)
+              WRITE(stdout,'(5x,"Group a",i3," Group b", i3)') group_a, &
+                                                               group_b
+              CALL errore('find_aux_ind_two_groups','Group not available',23)
         END SELECT   
      CASE(29)
 !
@@ -9325,7 +9374,9 @@ CONTAINS
               aux_ind=1
 
            CASE DEFAULT
-                CALL errore('find_aux_ind_two_groups',' group not available',1)
+              WRITE(stdout,'(5x,"Group a",i3," Group b", i3)') group_a, &
+                                                               group_b
+              CALL errore('find_aux_ind_two_groups','Group not available',24)
         END SELECT   
      CASE(30)
 !
@@ -9339,7 +9390,9 @@ CONTAINS
               aux_ind=1
 
            CASE DEFAULT
-                CALL errore('find_aux_ind_two_groups',' group not available',1)
+              WRITE(stdout,'(5x,"Group a",i3," Group b", i3)') group_a, &
+                                                               group_b
+              CALL errore('find_aux_ind_two_groups',' group not available',25)
         END SELECT   
      CASE(31)
 !
@@ -9375,7 +9428,9 @@ CONTAINS
               aux_ind=1
 
            CASE DEFAULT
-                CALL errore('find_aux_ind_two_groups',' group not available',1)
+              WRITE(stdout,'(5x,"Group a",i3," Group b", i3)') group_a, &
+                                                               group_b
+              CALL errore('find_aux_ind_two_groups','group not available',26)
         END SELECT   
      CASE(32)
 !
@@ -9498,9 +9553,12 @@ CONTAINS
               aux_ind=1
 
            CASE DEFAULT
-                CALL errore('find_aux_ind_two_groups',' group not available',1)
+              WRITE(stdout,'(5x,"Group a",i3," Group b", i3)') group_a, &
+                                                               group_b
+              CALL errore('find_aux_ind_two_groups','group not available',27)
         END SELECT   
      CASE DEFAULT
+
        CALL errore('find_aux_ind_two_groups',' group not available',1)
   END SELECT
 

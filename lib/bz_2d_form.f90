@@ -128,14 +128,14 @@ ibz=bz_struc%ind
 
 
 WRITE(stdout,'(/,5x,"2D direct lattice vectors for ibz:",i5)')  ibz
-write(6,'(5x,"(",2(f16.8,","),f16.8,")")') bz_struc%at(:,1)
-write(6,'(5x,"(",2(f16.8,","),f16.8,")")') bz_struc%at(:,2)
-write(6,'(5x,"(",2(f16.8,","),f16.8,")")') bz_struc%at(:,3)
+write(stdout,'(5x,"(",2(f16.8,","),f16.8,")")') bz_struc%at(:,1)
+write(stdout,'(5x,"(",2(f16.8,","),f16.8,")")') bz_struc%at(:,2)
+write(stdout,'(5x,"(",2(f16.8,","),f16.8,")")') bz_struc%at(:,3)
 
 WRITE(stdout,'(/,5x,"2D reciprocal lattice vectors")')  
-write(6,'(5x,"(",2(f16.8,","),f16.8,")")') bz_struc%bg(:,1)
-write(6,'(5x,"(",2(f16.8,","),f16.8,")")') bz_struc%bg(:,2)
-write(6,'(5x,"(",2(f16.8,","),f16.8,")")') bz_struc%bg(:,3)
+write(stdout,'(5x,"(",2(f16.8,","),f16.8,")")') bz_struc%bg(:,1)
+write(stdout,'(5x,"(",2(f16.8,","),f16.8,")")') bz_struc%bg(:,2)
+write(stdout,'(5x,"(",2(f16.8,","),f16.8,")")') bz_struc%bg(:,3)
 
 IF (ibz ==1) THEN
 !
@@ -263,12 +263,6 @@ ELSEIF (ibz==4) THEN
    bz_struc%indsur(:,4) = (/ 2, 3, 4 /)
 
    CALL find_2d_vertices(bz_struc) 
-
-   DO ivert = 1, bz_struc%nvertices
-      WRITE(6,*) ivert, bz_struc%ivertex(1,ivert)
-      WRITE(6,*) ivert, bz_struc%ivertex(2,ivert)
-   ENDDO
-
 
    CALL compute_vertices(bz_struc) 
 
