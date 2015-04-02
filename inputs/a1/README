@@ -3,8 +3,7 @@ atom per cell.
 
 The reference directory contains the outputs or postscript files: 
 
-asy_tmp.asy : asymptote script to plot of the Brillouin zone and of the 
-              structure
+asy_tmp.asy : asymptote script to plot the Brillouin zone  
 
 output_bands.ps : plot of the band structure
 
