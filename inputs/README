@@ -31,3 +31,5 @@ to use it, you must change the PSEUDO_DIR variable (inside the
 environment_variables file in the main QE directory) to point to the 
 directory that contains the UPF files of the pseudopotentials for the pz 
 or pbe functional. 
+You can find pslibrary.1.0.0 at the web page:
+http://www.qe-forge.org/gf/project/pslibrary/
