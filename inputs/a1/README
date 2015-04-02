@@ -12,4 +12,9 @@ output_disp.ps.g1 : plot of the phonon dispersion. Note that the
 
 output_anhar.ps : plot of the anharmonic quantities.
 
+output_murn.ps: a plot of the energy as a function of the volume at T=0
+                and a Murnaghan fit. Pressure as a function of volume.
+
+al.scf.out: The output of the calculation of the equilibrium volume at T=0.
+
 al.el_const.out : an example of the output of the elastic constants run.
