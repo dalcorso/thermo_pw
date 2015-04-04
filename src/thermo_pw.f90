@@ -74,7 +74,7 @@ PROGRAM thermo_pw
                                 sigma_geo, el_con, el_compliances, &
                                 compute_elastic_compliances, &
                                 print_elastic_compliances, read_elastic, &
-                                write_elastic
+                                write_elastic, print_macro_elasticity
   USE piezoelectric_tensor, ONLY : compute_piezo_tensor, &
                                  compute_d_piezo_tensor, &
                                  polar_geo, g_piezo_tensor, d_piezo_tensor, &
@@ -415,6 +415,8 @@ PROGRAM thermo_pw
 !
         CALL compute_elastic_compliances(el_con,el_compliances)
         CALL print_elastic_compliances(frozen_ions)
+        CALL print_macro_elasticity( ibrav_save, code_group_save, el_con, &
+                                     el_compliances)
 !
 !  save elastic constants and compliances on file
 !

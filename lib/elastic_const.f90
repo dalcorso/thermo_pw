@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2014 Andrea Dal Corso 
+! Copyright (C) 2014-2015 Andrea Dal Corso 
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -32,7 +32,8 @@ MODULE elastic_constants
   PUBLIC trans_epsilon, el_con, sigma_geo, epsilon_geo, apply_strain, &
          epsilon_voigt, compute_elastic_constants, print_elastic_constants, &
          el_compliances, compute_elastic_compliances, voigt_index, &
-         print_elastic_compliances, print_strain, write_elastic, read_elastic
+         print_elastic_compliances, print_strain, write_elastic, read_elastic,&
+         macro_elasticity, print_macro_elasticity
 
 CONTAINS
 !
@@ -775,5 +776,88 @@ IF (m /= n) el_con(pq, mn) = el_con(pq, mn) * 0.5_DP
 
 RETURN
 END SUBROUTINE el_cons_ij
+
+SUBROUTINE macro_elasticity( ibrav, code_group, cmn, smn, b0,  &
+                             e0v, g0v, nuv, e0r, g0r, nur )
+!
+!  This routine collects some relationships that link the elastic constants 
+!  to the parameters of the macroscopic elasticity and to
+!  the polycristalline averages.
+!  
+!  It receives as input the elastic constants and compliances and gives
+!  as output:
+!
+!  b0 : the bulk modulus
+!  e0v : The Voigt average Young modulus
+!  g0v : The Voigt average Shear modulus
+!  nuv : The Voigt average Poisson ratio 
+!  e0r : The Reuss average Young modulus
+!  g0r : The Reuss average Shear modulus
+!  nur : The Reuss average Poisson ratio 
+!  
+USE kinds, ONLY : DP
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ibrav, code_group
+REAL(DP), INTENT(IN) :: cmn(6,6), smn(6,6)
+REAL(DP), INTENT(OUT) :: b0, e0v, g0v, nuv, e0r, g0r, nur
+REAL(DP) :: c11v, c12v, c44v
+
+b0=1.0_DP/(smn(1,1) + smn(2,2) + smn(3,3) + 2.0_DP*smn(1,2) + 2.0_DP*smn(1,3)+ &
+                                        2.0_DP*smn(2,3))
+
+c11v= (3.0_DP / 15.0_DP)*(cmn(1,1) + cmn(2,2) + cmn(3,3)) +   &
+      (2.0_DP / 15.0_DP)*(cmn(1,2) + cmn(2,3) + cmn(1,3)) +   &
+      (4.0_DP / 15.0_DP)*(cmn(4,4) + cmn(5,5) + cmn(6,6)) 
+c12v= (1.0_DP / 15.0_DP)*(cmn(1,1) + cmn(2,2) + cmn(3,3)) +   &
+      (4.0_DP / 15.0_DP)*(cmn(1,2) + cmn(2,3) + cmn(1,3)) -   &
+      (2.0_DP / 15.0_DP)*(cmn(4,4) + cmn(5,5) + cmn(6,6)) 
+c44v= (c11v-c12v)*0.5_DP
+e0v = (c11v - c12v)*(c11v+2.0_DP*c12v) / (c11v+c12v)
+g0v = c44v
+nuv = e0v/ (2.0_DP * g0v) - 1.0_DP
+e0r = 15.0_DP /( 3.0_DP *(smn(1,1) + smn(2,2) + smn(3,3)) +  &
+                 2.0_DP *(smn(1,2) + smn(2,3) + smn(1,3)) +  &
+                         (smn(4,4) + smn(5,5) + smn(6,6)) )
+g0r = 15.0_DP /( 4.0_DP *(smn(1,1) + smn(2,2) + smn(3,3)) - &
+                 4.0_DP *(smn(1,2) + smn(2,3) + smn(1,3)) + &
+                 3.0_DP *(smn(4,4) + smn(5,5) + smn(6,6)) )
+nur = e0r/ (2.0_DP * g0r) - 1.0_DP
+
+RETURN
+END SUBROUTINE macro_elasticity
+
+SUBROUTINE print_macro_elasticity(ibrav, code_group, cmn, smn)
+USE kinds, ONLY : DP
+IMPLICIT NONE
+REAL(DP), INTENT(IN) :: cmn(6,6), smn(6,6)
+INTEGER, INTENT(IN) :: ibrav, code_group
+REAL(DP) :: b0, e0v, g0v, nuv, e0r, g0r, nur
+
+CALL macro_elasticity( ibrav, code_group, cmn, smn, b0, &
+                             e0v, g0v, nuv, e0r, g0r, nur )
+
+WRITE(stdout,'(/,20x,40("-"),/)')
+WRITE(stdout, '(5x, "Bulk modulus  B = ",f12.5," kbar")') b0
+
+WRITE(stdout, '(/,5x, "Voigt approximation:")') 
+
+WRITE(stdout, '(5x, "Young modulus E = ",f12.5," kbar")') e0v
+WRITE(stdout, '(5x, "Shear modulus G = ",f12.5," kbar")') g0v
+WRITE(stdout, '(5x,"Poisson Ratio n = ",f12.5)') nuv
+
+WRITE(stdout, '(/,5x, "Reuss approximation:")') 
+WRITE(stdout, '(5x, "Young modulus E = ",f12.5," kbar")') e0r
+WRITE(stdout, '(5x, "Shear modulus G = ",f12.5," kbar")') g0r
+WRITE(stdout, '(5x,"Poisson Ratio n = ",f12.5)') nur
+
+WRITE(stdout, '(/,5x, "Voigt-Reuss-Hill average of the two approximations:")') 
+WRITE(stdout, '(5x, "Young modulus E = ",f12.5," kbar")') (e0v+e0r)*0.5_DP
+WRITE(stdout, '(5x, "Shear modulus G = ",f12.5," kbar")') (g0v+g0r)*0.5_DP
+WRITE(stdout, '(5x,"Poisson Ratio n = ",f12.5)') (e0v+e0r)/    &
+                                                 (2.d0*(g0v+g0r))-1.0_DP
+
+RETURN
+END SUBROUTINE print_macro_elasticity
+
 
 END MODULE elastic_constants
