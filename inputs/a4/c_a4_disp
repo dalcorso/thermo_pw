@@ -35,12 +35,12 @@ for DIR in "$BIN_DIR" "$PSEUDO_DIR" ; do
         exit 1
     fi
 done
-for DIR in "$TMP_DIR" "$EXAMPLE_DIR/bands" ; do
+for DIR in "$TMP_DIR" "$EXAMPLE_DIR/disp" ; do
     if test ! -d $DIR ; then
         mkdir $DIR
     fi
 done
-cd $EXAMPLE_DIR/bands
+cd $EXAMPLE_DIR/disp
 
 # check for executables
 for FILE in $BIN_LIST ; do
@@ -80,8 +80,7 @@ $ECHO " done"
 
 cat > thermo_control << EOF
  &INPUT_THERMO
-  what='scf_bands',
-  nbnd_bands=8
+  what='scf_disp',
  /
 EOF
 
@@ -111,6 +110,17 @@ C  0.25000000   0.25000000   0.25000000
 K_POINTS AUTOMATIC
 8 8 8 1 1 1
 EOF
+
+cat > ph_control << EOF
+ &inputph
+  tr2_ph=1.0d-16,
+  prefix='carbon',
+  fildyn='c.dyn.xml',
+  ldisp=.TRUE.
+  nq1=4, nq2=4, nq3=4,
+/
+EOF
+
 
 $ECHO "  running the scf calculation for C with diamond structure...\c"
 $THERMO_PW_COMMAND < c.scf.in > c.scf.out

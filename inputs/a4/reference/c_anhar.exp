@@ -1,0 +1,18 @@
+#
+#  Data from G.A. Slack and F. Bartram, Jour. App. Phys. 46, 89 (1975).
+#  Table IX. This is the linear thermal expansion multiplied by 10^6, 
+#  in the plot we have the volume thermal expansion.
+#
+0     0.0
+100   0.0
+200   0.45
+300   1.05
+400   1.79
+500   2.70
+600   3.17
+700   3.81
+800   4.38
+1000  4.38
+1200  4.93
+1400  5.43
+1600  5.87
