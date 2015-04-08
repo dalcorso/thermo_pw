@@ -35,12 +35,12 @@ for DIR in "$BIN_DIR" "$PSEUDO_DIR" ; do
         exit 1
     fi
 done
-for DIR in "$TMP_DIR" "$EXAMPLE_DIR/murn" ; do
+for DIR in "$TMP_DIR" "$EXAMPLE_DIR/ke" ; do
     if test ! -d $DIR ; then
         mkdir $DIR
     fi
 done
-cd $EXAMPLE_DIR/murn
+cd $EXAMPLE_DIR/ke
 
 # check for executables
 for FILE in $BIN_LIST ; do
@@ -80,7 +80,7 @@ $ECHO " done"
 
 cat > thermo_control << EOF
  &INPUT_THERMO
-  what='mur_lc',
+  what='scf_ke',
  /
 EOF
 
@@ -99,8 +99,8 @@ cat > al.scf.in << EOF
    occupations='smearing',
    smearing='mp',
    degauss=0.02,
-   ecutwfc =30,
-   ecutrho =200,
+   ecutwfc =20,
+   ecutrho =400,
  /
  &electrons
     conv_thr =  1.0d-10
@@ -110,7 +110,7 @@ Al  0.0   Al.pz-n-kjpaw_psl.1.0.0.UPF
 ATOMIC_POSITIONS alat
 Al  0.0000000   0.00000000   0.0
 K_POINTS AUTOMATIC
-16 16 16 1 1 1
+8 8 8 1 1 1
 EOF
 
 $ECHO "  running the scf calculation for Al...\c"

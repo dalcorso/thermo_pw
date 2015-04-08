@@ -96,8 +96,6 @@ cat > al.scf.in << EOF
    celldm(1) =7.528, 
    nat=  1, 
    ntyp= 1,
-   noncolin=.false.,
-   lspinorb=.false.,
    occupations='smearing',
    smearing='mp',
    degauss=0.02,
