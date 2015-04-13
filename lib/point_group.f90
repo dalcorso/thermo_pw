@@ -9558,7 +9558,8 @@ CONTAINS
               CALL errore('find_aux_ind_two_groups','group not available',27)
         END SELECT   
      CASE DEFAULT
-
+       WRITE(stdout,'(5x,"Group a",i3," Group b", i3)') group_a, &
+                                                        group_b
        CALL errore('find_aux_ind_two_groups',' group not available',1)
   END SELECT
 

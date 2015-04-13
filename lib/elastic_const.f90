@@ -676,7 +676,7 @@ USE kinds, ONLY : DP
 IMPLICIT NONE
 
 REAL(DP), INTENT(IN) :: cmn(6,6)
-REAL(DP), INTENT(OUT) :: smn(6,6)
+REAL(DP), INTENT(INOUT) :: smn(6,6)
 REAL(DP) :: da ! not used
 
 CALL invmat(6, cmn, smn, da)
