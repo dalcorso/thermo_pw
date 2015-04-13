@@ -97,14 +97,14 @@ IF (frozen_ions) THEN
 ELSE
    WRITE(stdout, *)
 ENDIF
-WRITE(stdout,'(5x,"Elastic constants C_ij (Kbar) ")')
+WRITE(stdout,'(5x,"Elastic constants C_ij (kbar) ")')
 WRITE(stdout,'(4x,"i j=",i9,5i12)') (i, i=1,6)
 
 DO i=1,6
    WRITE(stdout,'(i5, 6f12.5)') i, (elc(i,j), j=1,6)
 ENDDO
 
-WRITE(stdout,'(/,5x,"1 bar = 10^5 Pa; 10 Kbar = 1 GPa; 1 atm = 1.01325 bar;&
+WRITE(stdout,'(/,5x,"1 bar = 10^5 Pa; 10 kbar = 1 GPa; 1 atm = 1.01325 bar;&
              & 1 Pa = 1 N/m^2")')
 WRITE(stdout,'(5x,"1 Pa = 10 dyn/cm^2; 1 Mbar = 10^11 Pa")')
 WRITE(stdout,'(5x,"1 torr = 1 mm Hg = 1/760 bar = 7.5006 x 10^-3 Pa",/)')

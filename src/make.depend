@@ -72,6 +72,7 @@ do_pwscf.o : ../../Modules/mp_images.o
 do_pwscf.o : ../../Modules/parameters.o
 do_pwscf.o : ../../PW/src/atomic_wfc_mod.o
 do_pwscf.o : ../../PW/src/pwcom.o
+do_pwscf.o : thermo_mod.o
 ev_sub.o : ../../Modules/constants.o
 ev_sub.o : ../../Modules/io_global.o
 ev_sub.o : ../../Modules/kind.o
@@ -252,7 +253,7 @@ set_2d_bz_path.o : ../../Modules/kind.o
 set_2d_bz_path.o : ../../thermo_pw/lib/bz_2d_form.o
 set_2d_bz_path.o : thermo_mod.o
 set_bz_path.o : ../../Modules/bz_form.o
-set_bz_path.o : ../../Modules/input_parameters.o
+set_bz_path.o : ../../Modules/cell_base.o
 set_bz_path.o : ../../Modules/kind.o
 set_bz_path.o : thermo_mod.o
 set_elastic_cons_work.o : ../../Modules/cell_base.o
@@ -272,6 +273,7 @@ set_k_points.o : ../../PW/src/start_k.o
 set_k_points.o : thermo_mod.o
 set_paths_disp.o : ../../Modules/bz_form.o
 set_paths_disp.o : ../../Modules/cell_base.o
+set_paths_disp.o : ../../thermo_pw/lib/bz_2d_form.o
 set_paths_disp.o : thermo_mod.o
 set_piezo_tensor_work.o : ../../Modules/cell_base.o
 set_piezo_tensor_work.o : ../../Modules/kind.o

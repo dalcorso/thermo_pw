@@ -17,6 +17,7 @@ phdos_module.o \
 ph_freq_module.o \
 piezoelectric_tensor.o \
 point_group.o \
+quadratic_surfaces.o \
 rotate.o \
 space_groups.o \
 strain.o

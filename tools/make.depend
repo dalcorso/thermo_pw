@@ -1,3 +1,8 @@
 gener_2d_slab.o : ../../Modules/kind.o
+gener_3d_slab.o : ../../Modules/kind.o
+gener_3d_slab.o : ../../PW/src/wyckoff.o
 group_name.o : ../../thermo_pw/lib/space_groups.o
 group_number.o : ../../thermo_pw/lib/space_groups.o
+supercell.o : ../../Modules/kind.o
+supercell.o : ../../PW/src/wyckoff.o
+translate.o : ../../Modules/kind.o
