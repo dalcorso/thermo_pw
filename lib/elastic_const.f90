@@ -777,6 +777,44 @@ IF (m /= n) el_con(pq, mn) = el_con(pq, mn) * 0.5_DP
 RETURN
 END SUBROUTINE el_cons_ij
 
+SUBROUTINE el_cons_voigt(elconv, elcon, flag)
+!
+!  This routine transform an elastic constant tensor in the 6x6 Voigt
+!  form into a four index tensor 3x3x3x3 (flag=.false.) or viceversa 
+!  (flag=.true.)
+!
+USE kinds, ONLY : DP
+IMPLICIT NONE
+
+REAL(DP), INTENT(INOUT) :: elcon(3,3,3,3)
+REAL(DP), INTENT(INOUT) :: elconv(6,6)
+LOGICAL, INTENT(IN) :: flag
+
+INTEGER :: ij, mn, i, j, m, n
+
+IF (flag) THEN
+   elconv=0.0_DP
+   DO ij=1,6
+      CALL voigt_index(i,j,ij,.FALSE.)
+      DO mn=1,6
+         CALL voigt_index(m,n,mn,.FALSE.)
+         elconv(ij,mn) = elcon(i,j,m,n) 
+      ENDDO
+   ENDDO
+ELSE
+   elcon=0.0_DP
+   DO ij=1,6
+      CALL voigt_index(i,j,ij,.FALSE.)
+      DO mn=1,6
+         CALL voigt_index(m,n,mn,.FALSE.)
+         elcon(i,j,m,n) = elconv(ij,mn)
+      ENDDO
+   ENDDO
+ENDIF
+
+RETURN
+END SUBROUTINE el_cons_voigt
+
 SUBROUTINE macro_elasticity( ibrav, code_group, cmn, smn, b0,  &
                              e0v, g0v, nuv, e0r, g0r, nur )
 !
