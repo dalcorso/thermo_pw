@@ -210,10 +210,6 @@ USE constants, ONLY : ry_kbar
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: sigma_geo(3,3,nwork), epsil_geo(3,3,nwork)
 INTEGER, INTENT(IN) :: nwork, ngeo, ibrav, laue
-INTEGER, PARAMETER :: m1 = 3   ! number of polynomial coefficients
-REAL(DP) :: alpha(m1)          ! the polynomial coefficients
-REAL(DP) :: x(ngeo), y(ngeo)
-INTEGER :: i, j, igeo
 
 el_con=0.0_DP
 SELECT CASE (laue)
