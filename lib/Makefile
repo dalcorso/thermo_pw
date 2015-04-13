@@ -17,7 +17,9 @@ phdos_module.o \
 ph_freq_module.o \
 piezoelectric_tensor.o \
 point_group.o \
-space_groups.o 
+rotate.o \
+space_groups.o \
+strain.o
 
 all : thermo_lib.a
 
