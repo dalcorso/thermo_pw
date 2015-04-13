@@ -264,7 +264,7 @@ SELECT CASE (laue)
 !
 !  c15
 !
-      IF (ibrav==-12.OR.ibrav=-13) THEN
+      IF (ibrav==-12.OR.ibrav==-13) THEN
 !
 !  monoclinic case unique axis b
 !
