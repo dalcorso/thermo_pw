@@ -16,6 +16,7 @@ MODULE gnuplot
 
     INTEGER :: contour_counter=0
     INTEGER :: contour_max
+    INTEGER :: counterv=0
     CHARACTER(LEN=20), ALLOCATABLE :: contour_color(:)
 
     PUBLIC iun_gnuplot, gnuplot_write_header, &
@@ -29,8 +30,8 @@ MODULE gnuplot
            gnuplot_write_file_mul_data_sum, gnuplot_write_command, &
            gnuplot_end, gnuplot_do_2dplot, gnuplot_start_2dplot, &
            gnuplot_set_contour, gnuplot_rectangle, gnuplot_polygon, &
-           gnuplot_put_label, gnuplot_circle, &
-           gnuplot_line, gnuplot_print_objects
+           gnuplot_put_label, gnuplot_circle, gnuplot_line_v, &
+           gnuplot_line, gnuplot_print_objects, gnuplot_close_2dplot_prep
 
 CONTAINS
 
@@ -103,7 +104,7 @@ CHARACTER(LEN=256) :: frt
 LOGICAL :: comment
 
 frt='("set arrow from", f12.4, "*xscale-xshift,ymin to ", f12.4,&
-                 & "*xscale-xshift,ymax nohead ",a," lw ",i3, " lc rgb """,a,"""")'
+                 & "*xscale-xshift,ymax nohead ",a," lw ",i3, " lc rgb ",a)'
 IF (comment) frt = '# ' // TRIM(frt)
 IF (ionode) &
 WRITE( iun_gnuplot, frt ) xcoord, xcoord, TRIM(pos), linewidth, TRIM(color)
@@ -120,7 +121,7 @@ CHARACTER(LEN=256) :: frt
 LOGICAL :: comment
 
 frt='("set arrow from xmin*xscale-xshift,", f12.4, " to xmax*xscale-xshift,", &
-             & f12.4," nohead ",a," lw ",i3," lc rgb """,a,"""")'
+             & f12.4," nohead ",a," lw ",i3," lc rgb ",a)'
 IF (comment) frt = '# ' // TRIM(frt)
 IF (ionode) &
 WRITE(iun_gnuplot, frt) ycoord, ycoord, TRIM(pos), linewidth, TRIM(color)
@@ -563,34 +564,73 @@ CALL gnuplot_initialize_contour_counter(max_contours)
 RETURN
 END SUBROUTINE gnuplot_start_2dplot
 
-SUBROUTINE gnuplot_do_2dplot(filename, xmin, xmax, ymin, ymax)
+SUBROUTINE gnuplot_line_v( v_x, v_y, x_0, y_0, start)
+USE kinds, ONLY : DP
+IMPLICIT NONE
+REAL(DP), INTENT(IN) :: v_x, v_y, x_0, y_0
+LOGICAL, INTENT(IN) :: start
+CHARACTER(LEN=10) :: avx, avy, ax0, ay0
+CHARACTER(LEN=6) :: int_to_char
+
+counterv=counterv+1
+
+avx='v_x_'//TRIM(int_to_char(counterv))
+avy='v_y_'//TRIM(int_to_char(counterv))
+ax0='x_0_'//TRIM(int_to_char(counterv))
+ay0='y_0_'//TRIM(int_to_char(counterv))
+IF (ionode) THEN
+   WRITE(iun_gnuplot,'(a,"=",f15.8)') avx, v_x
+   WRITE(iun_gnuplot,'(a,"=",f15.8)') avy, v_y
+   WRITE(iun_gnuplot,'(a,"=",f15.8)') ax0, x_0
+   WRITE(iun_gnuplot,'(a,"=",f15.8)') ay0, y_0
+
+   IF (start) THEN
+      WRITE(iun_gnuplot,'("plot ",a,"/",a,"*(x-",a,")+",a," lw 2 lc rgb ""red""")')  avy, avx, ax0, ay0
+   ELSE
+      WRITE(iun_gnuplot,'("replot ",a,"/",a,"*(x-",a,")+",a," lw 2 lc rgb ""red""")')  avy, avx, ax0, ay0
+   ENDIF
+ENDIF
+RETURN
+END SUBROUTINE gnuplot_line_v
+
+SUBROUTINE gnuplot_close_2dplot_prep
+
+IMPLICIT NONE
+IF (ionode) WRITE(iun_gnuplot,'("unset table")')
+
+RETURN
+END SUBROUTINE gnuplot_close_2dplot_prep
+
+SUBROUTINE gnuplot_do_2dplot(filename, xmin, xmax, ymin, ymax, xlabel, ylabel)
 
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: xmin, xmax, ymin, ymax
-CHARACTER(LEN=*), INTENT(IN) :: filename
+CHARACTER(LEN=*), INTENT(IN) :: filename, xlabel, ylabel
 CHARACTER(LEN=256) :: filename1
 CHARACTER(LEN=6) :: int_to_char
 INTEGER :: iplot
 
-IF (ionode) WRITE(iun_gnuplot,'("unset table")')
-
 CALL gnuplot_write_header(filename, xmin, xmax, ymin, ymax, 1.0_DP)
+CALL gnuplot_xlabel(xlabel,.FALSE.)
+CALL gnuplot_ylabel(ylabel,.FALSE.)
 
 IF (ionode) THEN
+  IF ((xmax-xmin) < 2.0_DP*(ymax-ymin)) &
+     CALL gnuplot_set_xticks(xmin,(xmax-xmin)/4.0_DP,xmax,.FALSE.)
    WRITE(iun_gnuplot,'("set size ratio",f15.7)') (ymax-ymin)/(xmax-xmin)
    DO iplot=1, contour_counter
       filename1='table_'//TRIM(int_to_char(iplot))//'.dat'
       IF (iplot==1.AND.contour_counter>1) THEN
-         WRITE(iun_gnuplot,'("plot """,a,""" u 1:2 w l lw 4 lc rgb """,a,""",\")') & 
+         WRITE(iun_gnuplot,'("plot """,a,""" u 1:2 w l lw 4 lc rgb ",a,",\")') & 
                   TRIM(filename1), TRIM(contour_color(iplot))
       ELSEIF (iplot==contour_counter.AND.contour_counter>1) THEN
-         WRITE(iun_gnuplot,'("""",a,""" u 1:2 w l lw 4 lc rgb """,a,"""")') & 
+         WRITE(iun_gnuplot,'("""",a,""" u 1:2 w l lw 4 lc rgb ",a)') & 
                   TRIM(filename1), TRIM(contour_color(iplot))
       ELSEIF (contour_counter==1) THEN
-         WRITE(iun_gnuplot,'("plot """,a,""" u 1:2 w l lw 4 lc rgb """,a,"""")') & 
+         WRITE(iun_gnuplot,'("plot """,a,""" u 1:2 w l lw 4 lc rgb ",a)') & 
                   TRIM(filename1), TRIM(contour_color(iplot))
       ELSE
-         WRITE(iun_gnuplot,'("""",a,""" u 1:2 w l lw 4 lc rgb """,a,""",\")') & 
+         WRITE(iun_gnuplot,'("""",a,""" u 1:2 w l lw 4 lc rgb ",a,",\")') & 
                   TRIM(filename1), TRIM(contour_color(iplot))
       ENDIF
    ENDDO
