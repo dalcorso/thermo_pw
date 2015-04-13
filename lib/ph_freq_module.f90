@@ -25,6 +25,17 @@ REAL(DP), PARAMETER :: kb=k_boltzmann_ry ! Boltzmann constant in Ry/K
 REAL(DP), PARAMETER :: kb1=1.0_DP/kb/ry_to_cmm1 ! inverse Boltzmann 
                                                 ! constant in cm^{-1}/K
 
+REAL(DP), PARAMETER :: thr_ph=1.D-3   ! a phonon with frequency smaller than
+                                      ! this is considered of zero frequency.
+!
+! NB: we need this threshold to decide which are the three acoustic 
+! frequencies. For numerical reason they are never exactly 0 and if 
+! introduced in the formulas of this module they give large errors 
+! in the average Gruneisen parameters at small temperature.
+! All phonon frequencies smaller than thr_ph are removed from the calculation
+! A warning is written on output if they are more then 3. 
+!
+
 TYPE ph_freq_type
    INTEGER :: number_of_points        ! the total number of frequencies
    INTEGER :: nqtot                   ! the total number of q points
@@ -93,7 +104,7 @@ END SUBROUTINE destroy_ph_freq
 SUBROUTINE read_ph_freq_data(ph_freq, filename)
 !
 !  This subroutine reads the ph_freq data from a file. It allocates space
-!  for the frequencies
+!  for the frequencies and their representation
 !
 USE io_global, ONLY : ionode, ionode_id
 USE mp_images, ONLY : intra_image_comm
@@ -137,7 +148,7 @@ IF (ionode) THEN
    DO iq=1,nq
       READ(iunit, *, END=20, ERR=10, IOSTAT=ios) ph_freq%wg(iq)
       DO imode=1,3*nat
-         ! nu(i) = frequencies (cm^{-1}), dos(i) in states/cm^{-1} 
+         ! nu(i) = frequencies (cm^{-1})
          READ(iunit, *, END=20, ERR=10, IOSTAT=ios) ph_freq%nu(imode, iq), &
                                                     ph_freq%rap(imode, iq)
       END DO
@@ -186,7 +197,7 @@ IF (ionode) THEN
    DO iq=1,nq
       WRITE(iunit, '(E30.15)', ERR=10, IOSTAT=ios) ph_freq%wg(iq)
       DO imode=1,3*nat
-         ! nu(i) = frequencies (cm^{-1}), dos(i) in states/cm^{-1} 
+         ! nu(i) = frequencies (cm^{-1}) 
          WRITE(iunit,'(E30.15,i30)',ERR=10,IOSTAT=ios) ph_freq%nu(imode, iq), &
                                                        ph_freq%rap(imode, iq)
       END DO
@@ -208,7 +219,7 @@ SUBROUTINE zero_point_energy_ph(ph_freq, ener)
 !
 TYPE(ph_freq_type), INTENT(IN) :: ph_freq
 REAL(DP), INTENT(OUT) :: ener
-REAL(DP) :: wg
+REAL(DP) :: wg, nu
 INTEGER :: nq, iq, imode, nat
 
 nq=ph_freq%nq
@@ -218,7 +229,8 @@ ener=0.0_DP
 DO iq=1, nq
    wg= ph_freq%wg(iq)
    DO imode=1, 3*nat
-      ener = ener + 0.5_DP * ph_freq%nu(imode, iq) * wg
+      nu=ph_freq%nu(imode, iq)
+      IF (nu > thr_ph) ener = ener + 0.5_DP * nu * wg
    ENDDO
 ENDDO
 ! result is in cm^{-1}, bring it to Ry
@@ -256,7 +268,7 @@ DO iq=startq,lastq
       IF (arg > 1.d-5) THEN
          IF (arg < 650_DP) &
             free_ener = free_ener +kb*temp*wg*(-arg + LOG(EXP(arg)-1.0_DP))
-      ELSEIF (nu > 1.D-3) THEN
+      ELSEIF (nu > thr_ph) THEN
          free_ener = free_ener+kb*temp*wg*(-arg + LOG( arg + arg**2*0.5_DP + &
                                                          arg**3 * onesixth )) 
       ENDIF
@@ -296,7 +308,7 @@ DO iq=startq,lastq
       arg= kb1 * nu * temp1
       IF (arg > 1.d-5) THEN
         IF (arg < 650._DP) ener = ener +  wg * nu / ( EXP( arg ) - 1.0_DP ) 
-      ELSEIF ( nu > 1.D-3 ) THEN
+      ELSEIF ( nu > thr_ph ) THEN
          ener = ener +  wg * nu / ( arg + arg**2*0.5_DP + arg**3 * onesixth )
       ENDIF
    ENDDO
@@ -361,7 +373,7 @@ DO iq=startq,lastq
               cv = cv + wg * EXP(arg) * &
                                      ( arg / ( EXP( arg ) - 1.0_DP ) ) ** 2 
          ENDIF
-      ELSEIF (nu >1.D-3) THEN
+      ELSEIF (nu > thr_ph) THEN
              cv = cv + wg * EXP(arg) *  &
                   (arg /( arg + arg**2*0.5_DP + arg**3 * onesixth ))**2
       ENDIF
@@ -406,7 +418,7 @@ DO iq=startq,lastq
          IF (arg < 650._DP) &
             betab = betab + wg * gamman &
                             * EXP(arg) * ( arg / ( EXP( arg ) - 1.0_DP )) ** 2 
-      ELSEIF (nu > 1.D-3) THEN
+      ELSEIF (nu > thr_ph) THEN
          betab = betab + wg * gamman * EXP(arg) *  &
                        (arg /( arg + arg**2*0.5_DP + arg**3 * onesixth ))**2
       ENDIF
