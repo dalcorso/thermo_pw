@@ -138,7 +138,8 @@ IF (ionode) THEN
       READ(iunit, *, END=20, ERR=10, IOSTAT=ios) ph_freq%wg(iq)
       DO imode=1,3*nat
          ! nu(i) = frequencies (cm^{-1}), dos(i) in states/cm^{-1} 
-         READ(iunit, *, END=20, ERR=10, IOSTAT=ios) ph_freq%nu(imode, iq)
+         READ(iunit, *, END=20, ERR=10, IOSTAT=ios) ph_freq%nu(imode, iq), &
+                                                    ph_freq%rap(imode, iq)
       END DO
    END DO
 ENDIF
@@ -148,6 +149,7 @@ ENDIF
    IF (ios /= 0 ) CALL errore('read_phdos_data', 'problem reading phdos', 1)
    CALL mp_bcast( ph_freq%wg, ionode_id, intra_image_comm )
    CALL mp_bcast( ph_freq%nu, ionode_id, intra_image_comm )
+   CALL mp_bcast( ph_freq%rap, ionode_id, intra_image_comm )
 
    IF (ionode) CLOSE(iunit)
 
@@ -185,7 +187,8 @@ IF (ionode) THEN
       WRITE(iunit, '(E30.15)', ERR=10, IOSTAT=ios) ph_freq%wg(iq)
       DO imode=1,3*nat
          ! nu(i) = frequencies (cm^{-1}), dos(i) in states/cm^{-1} 
-         WRITE(iunit,'(E30.15)',ERR=10,IOSTAT=ios) ph_freq%nu(imode, iq)
+         WRITE(iunit,'(E30.15,i30)',ERR=10,IOSTAT=ios) ph_freq%nu(imode, iq), &
+                                                       ph_freq%rap(imode, iq)
       END DO
    END DO
 END IF
