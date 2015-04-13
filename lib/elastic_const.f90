@@ -78,11 +78,12 @@ ENDIF
 RETURN
 END SUBROUTINE trans_epsilon
 
-SUBROUTINE print_elastic_constants(frozen_ions)
+SUBROUTINE print_elastic_constants(elc, frozen_ions)
 !
 !  This routine writes on output the elastic constants
 !
 IMPLICIT NONE
+REAL(DP), INTENT(IN) :: elc(6,6)
 LOGICAL, INTENT(IN) :: frozen_ions
 INTEGER :: i, j
 
@@ -96,7 +97,7 @@ WRITE(stdout,'(5x,"Elastic constants C_ij (Kbar) ")')
 WRITE(stdout,'(4x,"i j=",i9,5i12)') (i, i=1,6)
 
 DO i=1,6
-   WRITE(stdout,'(i5, 6f12.5)') i, (el_con(i,j), j=1,6)
+   WRITE(stdout,'(i5, 6f12.5)') i, (elc(i,j), j=1,6)
 ENDDO
 
 WRITE(stdout,'(/,5x,"1 bar = 10^5 Pa; 10 Kbar = 1 GPa; 1 atm = 1.01325 bar;&
@@ -107,11 +108,12 @@ WRITE(stdout,'(5x,"1 torr = 1 mm Hg = 1/760 bar = 7.5006 x 10^-3 Pa",/)')
 RETURN
 END SUBROUTINE print_elastic_constants
 
-SUBROUTINE print_elastic_compliances(frozen_ions)
+SUBROUTINE print_elastic_compliances(els, frozen_ions)
 !
 !  This routine writes on output the elastic compliances
 !
 IMPLICIT NONE
+REAL(DP), INTENT(IN) :: els(6,6)
 LOGICAL, INTENT(IN) :: frozen_ions
 INTEGER :: i, j
 
@@ -125,7 +127,7 @@ WRITE(stdout,'(5x,"Elastic compliances  S_ij (1/Mbar) ")')
 WRITE(stdout,'(4x,"i j=",i9,5i12)') (i, i=1,6)
 
 DO i=1,6
-   WRITE(stdout,'(i5, 6f12.5)') i, (el_compliances(i,j)*1.E3_DP, j=1,6)
+   WRITE(stdout,'(i5, 6f12.5)') i, (els(i,j)*1.E3_DP, j=1,6)
 ENDDO
 WRITE(stdout,'(/,5x,"1/Mbar = 1/10^{11} Pa; 1 Pa = 1 N/m^2")')
 

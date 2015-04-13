@@ -409,12 +409,12 @@ PROGRAM thermo_pw
 !
         CALL compute_elastic_constants(sigma_geo, epsilon_geo, nwork, &
                                ngeo_strain, ibrav_save, laue)
-        CALL print_elastic_constants(frozen_ions)
+        CALL print_elastic_constants(el_con, frozen_ions)
 !
 !  now compute the elastic compliances and prints them
 !
         CALL compute_elastic_compliances(el_con,el_compliances)
-        CALL print_elastic_compliances(frozen_ions)
+        CALL print_elastic_compliances(el_compliances, frozen_ions)
         CALL print_macro_elasticity( ibrav_save, code_group_save, el_con, &
                                      el_compliances)
 !
