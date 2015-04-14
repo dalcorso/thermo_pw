@@ -218,6 +218,7 @@ clean : doc_clean
 		ACFDT COUPLE GWW XSpectra \
 		clib flib pwtools upftools \
 		dev-tools extlibs Environ \
+		thermo_pw \
 	; do \
 	    if test -d $$dir ; then \
 		( cd $$dir ; \
