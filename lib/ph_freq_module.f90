@@ -15,6 +15,7 @@ MODULE ph_freq_module
 !
 USE kinds, ONLY : DP
 USE constants, ONLY : k_boltzmann_ry, ry_to_cmm1
+USE io_global, ONLY : stdout
 USE mp_images, ONLY : intra_image_comm
 USE mp, ONLY : mp_sum
 IMPLICIT NONE
@@ -33,7 +34,7 @@ REAL(DP), PARAMETER :: thr_ph=1.D-3   ! a phonon with frequency smaller than
 ! introduced in the formulas of this module they give large errors 
 ! in the average Gruneisen parameters at small temperature.
 ! All phonon frequencies smaller than thr_ph are removed from the calculation
-! A warning is written on output if they are more then 3. 
+! A warning is written on output if they are more or less than 3. 
 !
 
 TYPE ph_freq_type
@@ -250,7 +251,7 @@ TYPE(ph_freq_type), INTENT(IN) :: ph_freq
 REAL(DP), INTENT(IN) :: temp
 REAL(DP), INTENT(OUT) :: free_ener
 
-INTEGER :: nq, iq, nat, imode, startq, lastq
+INTEGER :: nq, iq, nat, imode, startq, lastq, counter
 REAL(DP) :: nu, arg, wg, temp1, onesixth
 
 free_ener=0.0_DP
@@ -260,21 +261,29 @@ nq=ph_freq%nq
 nat=ph_freq%nat
 onesixth=1.0_DP / 6.0_DP
 CALL divide (intra_image_comm, nq, startq, lastq)
+counter=0
 DO iq=startq,lastq
    wg=ph_freq%wg(iq)
    DO imode=1,3*nat
       nu=ph_freq%nu(imode,iq)
       arg= kb1 * nu * temp1
       IF (arg > 1.d-5) THEN
-         IF (arg < 650_DP) &
-            free_ener = free_ener +kb*temp*wg*(-arg + LOG(EXP(arg)-1.0_DP))
+         free_ener = free_ener +kb*temp*wg*(LOG(1.0_DP-EXP(-arg)))
       ELSEIF (nu > thr_ph) THEN
-         free_ener = free_ener+kb*temp*wg*(-arg + LOG( arg + arg**2*0.5_DP + &
+         free_ener = free_ener+kb*temp*wg*(LOG( arg - arg**2*0.5_DP + &
                                                          arg**3 * onesixth )) 
+      ELSE 
+         counter=counter+1
       ENDIF
    ENDDO
 ENDDO
 CALL mp_sum(free_ener, intra_image_comm)
+CALL mp_sum(counter, intra_image_comm)
+IF (counter > 3) THEN
+   WRITE(stdout,'(5x,"WARNING: Too many acoustic modes")')
+ELSEIF (counter<3) THEN
+   WRITE(stdout,'(5x,"WARNING: Too few acoustic modes")')
+ENDIF
 
 RETURN
 END SUBROUTINE free_energy_ph
@@ -292,7 +301,7 @@ REAL(DP), INTENT(IN) :: temp
 REAL(DP), INTENT(OUT) :: ener
 
 INTEGER :: nq, iq, imode, nat, startq, lastq
-REAL(DP) :: nu, temp1, arg, wg, onesixth
+REAL(DP) :: nu, temp1, arg, wg, onesixth, earg
 
 ener=0.0_DP
 IF (temp <= 1.E-9_DP) RETURN
@@ -306,10 +315,11 @@ DO iq=startq,lastq
    DO imode=1, 3*nat
       nu=ph_freq%nu(imode,iq)
       arg= kb1 * nu * temp1
+      earg = EXP(-arg)
       IF (arg > 1.d-5) THEN
-        IF (arg < 650._DP) ener = ener +  wg * nu / ( EXP( arg ) - 1.0_DP ) 
+        ener = ener +  wg*nu*earg / ( 1.0_DP - earg ) 
       ELSEIF ( nu > thr_ph ) THEN
-         ener = ener +  wg * nu / ( arg + arg**2*0.5_DP + arg**3 * onesixth )
+         ener = ener +  wg*nu*earg/(arg-arg**2*0.5_DP+arg**3*onesixth)
       ENDIF
    ENDDO
 ENDDO
@@ -354,7 +364,7 @@ REAL(DP), INTENT(IN) :: temp
 REAL(DP), INTENT(OUT) :: cv
 
 INTEGER :: nq, iq, imode, nat, startq, lastq
-REAL(DP) :: nu, temp1, arg, wg, onesixth
+REAL(DP) :: nu, temp1, arg, wg, onesixth, earg
 
 cv=0.0_DP
 IF (temp <= 1.E-9_DP) RETURN
@@ -368,14 +378,12 @@ DO iq=startq,lastq
    DO imode=1,3*nat
       nu=ph_freq%nu(imode,iq)
       arg= kb1 * nu * temp1
+      earg=EXP(-arg)
       IF (arg > 1.D-6 ) THEN
-         IF (arg < 650._DP) THEN
-              cv = cv + wg * EXP(arg) * &
-                                     ( arg / ( EXP( arg ) - 1.0_DP ) ) ** 2 
-         ENDIF
+          cv = cv + wg * earg * ( arg / ( 1.0_DP - earg  ) ) ** 2 
       ELSEIF (nu > thr_ph) THEN
-             cv = cv + wg * EXP(arg) *  &
-                  (arg /( arg + arg**2*0.5_DP + arg**3 * onesixth ))**2
+             cv = cv + wg * earg *  &
+                  (arg /( arg - arg**2*0.5_DP + arg**3 * onesixth ))**2
       ENDIF
    ENDDO
 ENDDO
@@ -399,7 +407,7 @@ REAL(DP), INTENT(IN)  :: temp
 REAL(DP), INTENT(OUT) :: betab
 
 INTEGER :: nq, iq, imode, nat, startq, lastq
-REAL(DP) :: nu, temp1, arg, gamman, wg, onesixth
+REAL(DP) :: nu, temp1, arg, gamman, wg, onesixth, earg
 
 betab=0.0_DP
 IF (temp <= 1.E-9_DP) RETURN
@@ -414,13 +422,13 @@ DO iq=startq,lastq
       nu=ph_freq%nu(imode,iq)
       gamman=ph_grun%nu(imode,iq) 
       arg= kb1 * nu * temp1
+      earg=EXP(-arg)
       IF (arg > 1.D-6 ) THEN
-         IF (arg < 650._DP) &
-            betab = betab + wg * gamman &
-                            * EXP(arg) * ( arg / ( EXP( arg ) - 1.0_DP )) ** 2 
+          betab = betab + wg * gamman &
+                            * earg * ( arg / ( 1.0_DP - earg )) ** 2 
       ELSEIF (nu > thr_ph) THEN
-         betab = betab + wg * gamman * EXP(arg) *  &
-                       (arg /( arg + arg**2*0.5_DP + arg**3 * onesixth ))**2
+         betab = betab + wg * gamman * earg *  &
+                       (arg /( arg - arg**2*0.5_DP + arg**3 * onesixth ))**2
       ENDIF
    ENDDO
 ENDDO

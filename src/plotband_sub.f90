@@ -839,7 +839,7 @@ CALL gnuplot_unset_xticks(.FALSE.)
 IF (icode==1) THEN
    CALL gnuplot_ylabel('Energy (eV)',.FALSE.) 
    IF (degauss > 0.0_DP) CALL gnuplot_write_horizontal_line(0.0_DP, 2, &
-                                         'front', 'black', .FALSE.)
+                                         'front', 'color_black', .FALSE.)
 ELSEIF (icode==2) THEN
    CALL gnuplot_ylabel('Frequency (cm^{-1})',.FALSE.) 
 ELSEIF (icode==3) THEN
@@ -847,7 +847,7 @@ ELSEIF (icode==3) THEN
 ENDIF
 DO ilines = 2, nlines
    CALL gnuplot_write_vertical_line(kx(start_point(ilines)), 2, 'front', &
-                      'black', .FALSE.)
+                      'color_black', .FALSE.)
 END DO
 CALL gnuplot_set_eref(eref,.FALSE.)   
 !
@@ -860,7 +860,7 @@ IF (q_in_band_form) THEN
    DO n=1, nqaux
       IF (n /= 1 .AND. n /= nqaux ) &
          CALL gnuplot_write_vertical_line(kx(label_disp_q(n)), 1, 'front', &
-                                       'black', .FALSE.)
+                                       'color_black', .FALSE.)
       CALL gnuplot_write_label_yl(kx(label_disp_q(n)), ' ymin + shift ', &
              letter_path(n),.FALSE.)
    ENDDO

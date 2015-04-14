@@ -167,7 +167,8 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            ENDIF
            IF (compute_lc) THEN
               DO igeom = 1, ngeo
-                 alat_geo(igeom) = alat + (igeom-(ngeo+1.0_DP)/2.0_DP)*step_ngeo
+                 alat_geo(igeom) = celldm_save(1) + &
+                                   (igeom-(ngeo+1.0_DP)/2.0_DP)*step_ngeo
                  celldm=0.0_DP
                  celldm(1)=alat_geo(igeom)
                  omega_geo(igeom)=compute_omega_geo(ibrav_save,celldm)

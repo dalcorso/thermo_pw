@@ -51,7 +51,7 @@ CALL gnuplot_write_file_mul_data(filename1,1,2,'color_red',.TRUE.,.FALSE.,.FALSE
 CALL gnuplot_write_file_mul_point(filename2,1,2,'color_red',.FALSE.,.TRUE.,.FALSE.)
 
 CALL gnuplot_ylabel('Pressure (kbar)',.FALSE.) 
-CALL gnuplot_write_horizontal_line(0.0_DP, 2, 'front', 'black',.FALSE.)
+CALL gnuplot_write_horizontal_line(0.0_DP, 2, 'front', 'color_black',.FALSE.)
 CALL gnuplot_write_file_mul_data(filename1,1,3,'color_red',.TRUE.,.TRUE.,.FALSE.)
 
 CALL gnuplot_end()

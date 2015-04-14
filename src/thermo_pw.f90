@@ -202,7 +202,6 @@ PROGRAM thermo_pw
                       trd_ht, rd_ht, cell_units )
      CALL set_fft_mesh()
      omega0=omega
-     WRITE(6,*) 'omega0', omega0
   END IF
 
   IF (lpwscf_syn_1) THEN
@@ -427,7 +426,6 @@ PROGRAM thermo_pw
            CALL compute_elastic_constants_adv(sigma_geo, epsilon_geo, &
                                nwork, ngeo_strain, ibrav_save, laue, rot_mat)
         ELSE IF (elastic_algorithm=='energy') THEN
-     WRITE(6,*) 'omega0 before', omega0
            CALL compute_elastic_constants_ene(energy_geo, epsilon_geo, &
                                nwork, ngeo_strain, ibrav_save, laue, omega0)
         END IF
