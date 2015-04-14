@@ -6,7 +6,7 @@
 %! or http://www.gnu.org/copyleft/gpl.txt .
 %!
 \documentclass[12pt,a4paper]{article}
-\def\version{0.2.0}
+\def\version{0.3.0}
 \def\qe{{\sc Quantum ESPRESSO}}
 
 \usepackage{html}
@@ -37,7 +37,7 @@
 \title{
 %  \includegraphics[width=6cm]{\SissaImage}\\
   \vskip 1cm
-  \Huge User's Guide for the \thermo\ package \smallskip
+  \Huge \thermo\ User's Guide \smallskip \\
   \Large (version \version)
 }
 
@@ -48,22 +48,17 @@
 \section{Introduction}
 
 This guide covers the usage and installation of the \thermo\ package. 
-It assumes that you know the contents of the general User's Guide for \qe\ 
-and of the User's Guide for \PWscf\ and for \PHonon. 
-If not, please locate the general User's Guide in directory 
-\texttt{Doc/} of your \qe\ distribution,
-the User's Guide for \PWscf\ in \texttt{PW/Doc/} and the User's Guide
-for \PHonon\ in \texttt{PHonon/Doc/}, or consult the web site:
-\texttt{http://www.quantum-espresso.org}.
+It assumes that you have some familiarity with the \qe\ package. 
+If not please consult the web site: \texttt{http://www.quantum-espresso.org}.
 
-\thermo\ is a set of drivers to compute material properties. 
-The same calculations can be done by using the \qe\ package, but they would 
-require several steps. These tasks are usually carried out by \texttt{bash}
-scripts. \thermo\ allows to avoid the writing of complex \texttt{bash}
-scripts for the most common material properties. It can be considered as a set 
-of scripts written in \texttt{FORTRAN}. At low level \thermo\ uses the \qe\ 
-routines and writes the same files. If needed, these files could be read
-by the codes of the \qe\ package. 
+\thermo\ is a set of drivers to compute material properties
+and, for the most common tasks,  allows to avoid the writing of 
+complex \texttt{bash} scripts that call the \qe\ program.
+It can be considered as a set of scripts written in \texttt{FORTRAN}. 
+At low level \thermo\ uses the \qe\ routines but it also adds a
+set of post-processing tools to convert the output of these routines
+into plots of material properties that can be directly 
+compared with experiment.
 
 \thermo\ has the following directory structure, contained in a subdirectory 
 \texttt{thermo\_pw/} that should be put in the main directory of the \qe\ tree:
@@ -94,7 +89,7 @@ input of \thermo\ by the \texttt{XCrySDen} program).
 
 \item Phonon dispersions at fixed geometry and computation of the harmonic
 thermodynamical properties: vibrational energy, vibrational free energy,
-vibrational entropy, and constant volume molar heat capacity as a function
+vibrational entropy, and constant volume heat capacity as a function
 of temperature.
 
 \item Murnaghan fit of the total energy as function of the lattice parameter.
@@ -116,8 +111,6 @@ Average Gruneisen parameter as a function of temperature.
 Presently this option is limited to cubic solids.
 \item Frozen ions and total elastic constants.
 
-\item Frozen ions and total piezoelectric tensor.
-
 \item Surface band structure identification and plot of the projected bulk
 band structure.
 \end{itemize}
@@ -134,8 +127,7 @@ a single representation.
 
 \section{People}
 The \thermo\ code has been developed and is maintained by Andrea Dal Corso 
-(SISSA). It is mainly an experimental tool to test new ideas for \qe\ 
-organization. It is an open source code distributed, as is, within the GPL 
+(SISSA). It is an open source code distributed, as is, within the GPL
 licence.  
 
 \section{Installing, Compiling, and Running}
@@ -145,21 +137,26 @@ licence.
 \thermo\ is a package tightly bound to \qe. It cannot be compiled without
 the \qe\ routines. For instruction on how to download and compile \qe, please 
 refer to the general User's Guide, available in file \texttt{Doc/user\_guide.pdf}
-under the main \qe\ directory, or in web site \\
+under the main \qe\ directory, or in the web site \\
 \texttt{http://www.quantum-espresso.org}.
 
 Once \qe\ is correctly configured, you need to download the \PHonon\ 
 package. This can be done automatically just typing \texttt{make ph}, from 
 the main \qe\ directory.
 
-\texttt{Thermo\_pw.0.1.0.tar.gz} can be downloaded from the 
-\texttt{qe-forge} website at \texttt{http://www.qe-} \texttt{forge.org/gf/project/thermo\_pw/frs/}. This version is compatible with \qe\ 5.1.1
-but there is no version of \texttt{thermo\_pw} compatible with previous
-versions.
+\texttt{Thermo\_pw.0.2.0.tar.gz} can be downloaded from the 
+\texttt{qe-forge} website at \texttt{http://www.qe-} 
+\texttt{forge.org/gf/project/thermo\_pw/frs/}. This version is 
+compatible with \qe\ 5.1.2. There is also \texttt{Thermo\_pw.0.1.0.tar.gz}
+compatible with \qe\ 5.1.1 but there is no version of \texttt{thermo\_pw} 
+compatible with previous versions of \qe.
 The CVS version of the \texttt{thermo\_pw} directory can be downloaded as 
 described at
 the web page: \texttt{http://www.qe-} \texttt{forge.org/gf/project/thermo\_pw/scmcvs/?action=AccessInfo}.
 The CVS version of \texttt{thermo\_pw} works only with the SVN version of \qe. 
+Check also the web page:
+\texttt{http://people.sissa.it/\textasciitilde dalcorso/thermo\_pw\_help.html} if you
+have problems to download the CVS version.
 
 \subsection{Compiling}
 
@@ -169,7 +166,7 @@ directory and give the command \texttt{make join\_qe}. This command exchanges
 the files contained in \texttt{thermo\_pw} with those of the \qe\ package.
 Typing \texttt{make thermo\_pw} from the root \qe\ directory, or \texttt{make} 
 from the \texttt{thermo\_pw}\ directory, produces the executable
-\texttt{thermo\_pw/src/thermo\_pw.x} that is linked in the 
+\texttt{thermo\_pw/src/ther-} \texttt{mo\_pw.x} that is linked in the 
 \qe\ \texttt{bin/} directory. Note that you need to compile \texttt{pw.x},
 \texttt{ph.x}, and \texttt{pp.x} before \texttt{thermo\_pw}.
 \thermo\ has been written on a PC with Linux operating system using the
@@ -596,14 +593,34 @@ This option is implemented only for isotropic solids.
 
 \subsection{\texttt{what='elastic\_constants'}}
 With this option the code calculates the elastic constants of the solid.
-Depending on the Laue class, it calculates the stress tensor for a set of 
-strains. For each strain, it relaxes the ions to their 
-equilibrium positions if \texttt{frozen\_ions=.false.} or keep them
-in the strained positions if \texttt{frozen\_ions=.true.}. 
-Finally it computes the elastic constants from the numerical derivatives 
+There are three different algorithms that at convergence should give the
+same results. In two of them, depending on the Laue class, the code 
+calculates the nonzero components of the stress tensor for a set of strains
+and obtains the elastic constants from the numerical first derivative
 of the stress with respect to strain.
-The number of strains used to calculate each derivative 
-is \texttt{ngeo\_strain}. The input variables that control this option are:
+The two algorithms \texttt{standard} and \texttt{advanced} differ
+only in the choice of the unit cell. In the \texttt{standard} method the
+code applies the strain to the primitive vectors of the unstrained solid
+and uses \texttt{ibrav=0} and the strained vectors to compute the stress
+tensor.
+The second method, available only for selected Bravais lattices, try to
+optimize the calculation by choosing strains for which the number
+of needed {\bf k}-points is reduced. Moreover it identifies the 
+Bravais lattice of the strained solid and regenerate the primitive
+vectors with the conventions of \qe.
+The third algorithm is called \texttt{energy}.
+Using the \texttt{energy} algorithm the elastic constants are calculated 
+from the quadratic fit of the total energy as a function of strain
+without computing stress (this option is available only for selected 
+lattices and usually requires more independent strain). \\
+For all methods the number of independent strains is \texttt{ngeo\_strain}
+for each indipendent strain. 
+For each strain, the code relaxes the ions to their equilibrium 
+positions if \texttt{frozen\_ions=.false.} or keeps them
+in the strained positions if \texttt{frozen\_ions=.true.}. 
+At finite pressure all methods give the elastic constants that
+relate linearly stress and strain. \\
+The input variables that control this option are:
 \begin{verbatim}
 frozen_ions: if .true. the elastic constants are calculated 
              keeping the ions frozen in the strained positions. 
@@ -611,16 +628,17 @@ frozen_ions: if .true. the elastic constants are calculated
 ngeo_strain: the number of strained configurations used to calculate each
              derivative. 
              Default: integer 4
+elastic_algorithm: 'standard', 'advanced' or 'energy'. See discussion above.
+             Default: character 'standard
 delta_epsilon: the interval of strain values between two geometries.
-               To avoid a zero strain geometry that might have a
-               different symmetry ngeo_strain must be even.
-               Default: real 0.002
-fl_el_cons: the name of the file that contains the elastic constants
-            Default: character(len=*) 'output_el_con.dat'
-
+             To avoid a zero strain geometry that might have a
+             different symmetry ngeo_strain must be even.
+             Default: real 0.002
+fl_el_cons:  the name of the file that contains the elastic constants
+             Default: character(len=*) 'output_el_con.dat'
 \end{verbatim}
 Number of tasks for this option: \texttt{ngeo\_strain} times the number of
-required independent strains.
+independent strains.
 
 \subsection{\texttt{what='mur\_lc\_elastic\_constants'}}
 As \texttt{what='elastic\_constants'} but the calculation is made at the

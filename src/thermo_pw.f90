@@ -74,17 +74,20 @@ PROGRAM thermo_pw
                                 sigma_geo, el_con, el_compliances, &
                                 compute_elastic_compliances, &
                                 print_elastic_compliances, read_elastic, &
-                                write_elastic, print_macro_elasticity
+                                write_elastic, print_macro_elasticity, &
+                                compute_elastic_constants_adv, &
+                                compute_elastic_constants_ene
   USE piezoelectric_tensor, ONLY : compute_piezo_tensor, &
                                  compute_d_piezo_tensor, &
                                  polar_geo, g_piezo_tensor, d_piezo_tensor, &
                                  print_d_piezo_tensor, print_g_piezo_tensor
   USE control_elastic_constants, ONLY : ibrav_save, ngeo_strain, frozen_ions, &
-                                 fl_el_cons
+                                 fl_el_cons, elastic_algorithm, rot_mat, omega0
   USE control_paths,    ONLY : nqaux
   USE control_gnuplot,  ONLY : flpsdos, flgnuplot, flpstherm, flpsdisp
   USE control_bands,    ONLY : flpband, nbnd_bands
   USE thermo_sym,       ONLY : laue, code_group_save
+  USE cell_base,        ONLY : omega
   USE wvfct,            ONLY : nbnd
   USE lsda_mod,         ONLY : nspin
   USE thermodynamics,   ONLY : phdos_save
@@ -198,6 +201,8 @@ PROGRAM thermo_pw
      CALL cell_base_init ( ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
                       trd_ht, rd_ht, cell_units )
      CALL set_fft_mesh()
+     omega0=omega
+     WRITE(6,*) 'omega0', omega0
   END IF
 
   IF (lpwscf_syn_1) THEN
@@ -398,17 +403,34 @@ PROGRAM thermo_pw
      CALL run_thermo_asyncronously(nwork, part, igeom, auxdyn)
 
      IF (lelastic_const) THEN
+       IF (elastic_algorithm == 'energy') THEN
+!
+!   save the energy calculated by all images
+!
+          CALL mp_sum(energy_geo, world_comm)
+          energy_geo=energy_geo / nproc_image
+       ELSE
 !
 !   save the stress tensors calculated by all images
 !
-        CALL mp_sum(sigma_geo, world_comm)
-        sigma_geo=sigma_geo / nproc_image
-!        CALL write_stress(nwork, file_dat)
+          CALL mp_sum(sigma_geo, world_comm)
+          sigma_geo=sigma_geo / nproc_image
+!         CALL write_stress(nwork, file_dat)
+      ENDIF
 !
 !  the elastic constants are calculated here
 !
-        CALL compute_elastic_constants(sigma_geo, epsilon_geo, nwork, &
+        IF (elastic_algorithm=='standard') THEN
+           CALL compute_elastic_constants(sigma_geo, epsilon_geo, nwork, &
                                ngeo_strain, ibrav_save, laue)
+        ELSE IF (elastic_algorithm=='advanced') THEN
+           CALL compute_elastic_constants_adv(sigma_geo, epsilon_geo, &
+                               nwork, ngeo_strain, ibrav_save, laue, rot_mat)
+        ELSE IF (elastic_algorithm=='energy') THEN
+     WRITE(6,*) 'omega0 before', omega0
+           CALL compute_elastic_constants_ene(energy_geo, epsilon_geo, &
+                               nwork, ngeo_strain, ibrav_save, laue, omega0)
+        END IF
         CALL print_elastic_constants(el_con, frozen_ions)
 !
 !  now compute the elastic compliances and prints them

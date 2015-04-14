@@ -35,6 +35,8 @@ MODULE thermo_mod
                                                 ! geometry
   REAL(DP) ::              step_ngeo            ! the difference of alat among
                                                 ! different geometries.
+  INTEGER, ALLOCATABLE :: ibrav_geo(:)          ! the Bravais lattice at
+                                                ! each geometry
   INTEGER  ::              ntry                 ! Maximum number of trials
                                                 ! to calculate the lattice
                                                 ! constat. The code retry the
@@ -279,6 +281,18 @@ MODULE control_elastic_constants
   REAL(DP) :: at_save(3,3)
   REAL(DP), ALLOCATABLE :: tau_save(:,:)
   INTEGER :: ibrav_save
+  REAL(DP), ALLOCATABLE :: rot_mat(:,:,:) ! rotation matrix between the
+                                          ! cartesian coordinates of the
+                                          ! strained and unstrained cell  
+  REAL(DP), ALLOCATABLE :: aap_mat(:,:,:) ! possible change of the definition
+                                          ! of the direct lattice vectors
+                                          ! a (old) in terms of a' (new)
+  REAL(DP), ALLOCATABLE :: apa_mat(:,:,:) ! possible change of the definition
+                                          ! of the direct lattice vectors
+                                          ! a' (new) in terms of a (old)
+  REAL(DP) :: omega0            ! for elastic constants not dependent 
+                                ! on temperature this is the unperturbed 
+                                ! volume
   INTEGER :: ngeo_strain        ! number of strain configurations
 
   LOGICAL :: frozen_ions        ! if .true. compute the elastic constant 
@@ -287,6 +301,9 @@ MODULE control_elastic_constants
 
   CHARACTER(LEN=256) :: fl_el_cons ! the file where the elastic constants are
                                    ! written
+  CHARACTER(LEN=12) :: elastic_algorithm ! can be standard, advanced or energy
+                                ! it chooses the routines to use to 
+                                ! calculate elastic constants.
 
 END MODULE control_elastic_constants
 
@@ -429,6 +446,8 @@ MODULE control_pwrun
   SAVE
 
   INTEGER :: nr1_save, nr2_save, nr3_save  ! save the fft dimensions
+
+  REAL(DP) :: celldm_save(6)
 
 END MODULE control_pwrun
 

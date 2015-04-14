@@ -6,26 +6,28 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !-----------------------------------------------------------------------
-FUNCTION compute_omega_geo(current_alat)
+FUNCTION compute_omega_geo(ibrav, celldm_)
   !-----------------------------------------------------------------------
   !
-  !  This routine receives the lattice constant and computes the
-  !  volume, using ibrav and celldm read from input.
+  !  This routine receives the celldm and computes the
+  !  volume, using ibrav read from input. The celldm read from input is
+  !  kept.
   !
   USE kinds,            ONLY : DP
-  USE input_parameters, ONLY : ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
+  USE input_parameters, ONLY : celldm, a, b, c, cosab, cosac, cosbc, &
                                trd_ht, rd_ht, cell_units
-  USE cell_base,        ONLY : cell_base_init, omega, alat
+  USE cell_base,        ONLY : at, cell_base_init, omega, alat
   !
   IMPLICIT NONE
-  REAL(DP) :: compute_omega_geo, alat_save
-  REAL(DP), INTENT(IN) :: current_alat
+  INTEGER, INTENT(IN) :: ibrav
+  REAL(DP), INTENT(IN) :: celldm_(6)
+  REAL(DP) :: compute_omega_geo, celldm_save(6)
   !
-  celldm(1)=current_alat
-  alat_save=alat
+  celldm_save=celldm
+  celldm=celldm_
   CALL cell_base_init ( ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
                         trd_ht, rd_ht, cell_units )
-  alat=alat_save
+  celldm=celldm_save
   compute_omega_geo = omega
 
   RETURN

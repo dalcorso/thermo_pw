@@ -1365,3 +1365,54 @@ END SELECT
 
 RETURN
 END SUBROUTINE lattice_name
+
+SUBROUTINE find_fft_fact()
+!
+!  this routine finds the fft_fact that correspond to the space group
+!  of the solid. It assumes that the tau and celldm are already known
+!  It sets also the dimension of the fft that correspond to the cut-off.
+!
+USE kinds,            ONLY : DP
+USE fft_base,         ONLY : dfftp
+USE cell_base,        ONLY : ibrav, at
+USE thermo_sym,       ONLY : fft_fact, ibrav_group_consistent
+USE rap_point_group,  ONLY : code_group
+USE space_groups,     ONLY : find_space_group, set_fft_fact
+USE symm_base,        ONLY : nsym, s, sr, ftau
+
+IMPLICIT NONE
+INTEGER :: sg_number
+INTEGER :: unique, trig
+LOGICAL :: check_group_ibrav
+CHARACTER(LEN=12) :: spaceg_name
+CHARACTER(LEN=11) :: gname
+
+
+  dfftp%nr1=1536
+  dfftp%nr2=1536
+  dfftp%nr3=1536
+  fft_fact=1
+  CALL find_symmetry(fft_fact)
+  CALL find_group(nsym,sr,gname,code_group)
+  ibrav_group_consistent=check_group_ibrav(code_group, ibrav)
+
+  IF ( ibrav_group_consistent ) THEN
+     CALL find_space_group(sg_number, ibrav, code_group, nsym, s, sr, ftau, &
+                              at, dfftp%nr1, dfftp%nr2, dfftp%nr3, .FALSE.)
+
+     IF (sg_number > 0) THEN
+        unique=0
+        trig=0
+        IF (ibrav==-12.OR.ibrav==-13) unique=1
+        IF (ibrav==5) trig=1
+        CALL set_fft_fact(sg_number, unique, trig, fft_fact)
+        CALL clean_dfft()
+        CALL find_symmetry(fft_fact)
+     ENDIF
+  ELSE
+     CALL clean_dfft()
+     CALL find_symmetry(fft_fact)
+  ENDIF
+
+  RETURN
+END SUBROUTINE find_fft_fact

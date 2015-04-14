@@ -31,7 +31,8 @@ SUBROUTINE bcast_thermo_input()
   USE control_asy,     ONLY : flasy, lasymptote, asymptote_command
   USE control_conv,    ONLY : nke, deltake, nkeden, deltakeden, &
                               nnk, deltank, nsigma, deltasigma
-  USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, frozen_ions
+  USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, &
+                              frozen_ions, elastic_algorithm
   USE piezoelectric_tensor, ONLY : nppl
   USE control_2d_bands,     ONLY : lprojpbs, nkz, sym_divide, identify_sur, &
                                    gap_thr, sur_layers, sur_thr, force_bands, &
@@ -75,6 +76,7 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( deltakeden, meta_ionode_id, world_comm )
   CALL mp_bcast( delta_epsilon, meta_ionode_id, world_comm )
   CALL mp_bcast( frozen_ions, meta_ionode_id, world_comm )
+  CALL mp_bcast( elastic_algorithm, meta_ionode_id, world_comm )
   CALL mp_bcast( ngeo_strain, meta_ionode_id, world_comm )
   CALL mp_bcast( nnk, meta_ionode_id, world_comm )
   CALL mp_bcast( deltank, meta_ionode_id, world_comm )

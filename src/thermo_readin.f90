@@ -49,9 +49,10 @@ SUBROUTINE thermo_readin()
   USE control_mur,          ONLY : vmin_input, vmax_input, deltav, nvol
   USE control_elastic_constants, ONLY : at_save, tau_save, delta_epsilon, &
                                         ibrav_save, ngeo_strain, frozen_ions, &
-                                        fl_el_cons
+                                        fl_el_cons, elastic_algorithm
   USE control_piezoelectric_tensor, ONLY : nosym_save
   USE piezoelectric_tensor, ONLY : nppl
+  USE control_pwrun,        ONLY : celldm_save
   USE cell_base,            ONLY : at, bg, celldm
   USE ions_base,            ONLY : nat, tau
   USE symm_base,            ONLY : nosym
@@ -114,6 +115,7 @@ SUBROUTINE thermo_readin()
                             lasymptote,                     &
                             emin_input, emax_input,         &
                             vmin_input, vmax_input, deltav, &
+                            elastic_algorithm,              &
                             grunmin_input, grunmax_input,   &
                             delta_epsilon, ngeo_strain,     &
                             frozen_ions,                    &
@@ -176,6 +178,7 @@ SUBROUTINE thermo_readin()
   delta_epsilon=0.005_DP
   ngeo_strain=4
   frozen_ions=.FALSE.
+  elastic_algorithm='standard'
 
   nppl=51
 
@@ -421,6 +424,7 @@ SUBROUTINE thermo_readin()
   outdir_thermo=outdir
   CALL iosys()
   at_save = at
+  celldm_save=celldm
   ALLOCATE(tau_save(3,nat))
   tau_save=tau
 !

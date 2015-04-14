@@ -14,7 +14,8 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   !  information.
   !
   USE kinds,      ONLY : DP
-  USE thermo_mod, ONLY : what, alat_geo, step_ngeo, energy_geo, ngeo, omega_geo
+  USE thermo_mod, ONLY : what, alat_geo, step_ngeo, energy_geo, ngeo, &
+                         celldm_geo, omega_geo, ibrav_geo
   USE control_thermo, ONLY : lpwscf, lbands, lphonon, lev_syn_1, lev_syn_2, &
                              lph, lpwscf_syn_1, lbands_syn_1, ldos, lq2r,   &
                              lmatdyn, ltherm, lconv_ke_test, lconv_nk_test, &
@@ -23,7 +24,9 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   USE control_conv,   ONLY : nke, ke, deltake, nkeden, deltakeden, keden, &
                              nnk, nk_test, deltank, nsigma, sigma_test, &  
                              deltasigma
+  USE control_pwrun,  ONLY : celldm_save
   USE piezoelectric_tensor, ONLY : polar_geo
+  USE control_elastic_constants, ONLY : elastic_algorithm, omega0, ibrav_save
   USE control_mur,    ONLY : vmin, vmin_input, vmax_input
   USE wvfct,          ONLY : ecutwfc
   USE gvect,          ONLY : ecutrho
@@ -38,7 +41,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   INTEGER, INTENT(IN) :: part
   INTEGER :: igeom, iq, irr, ike
   INTEGER :: iden, icount, ink, isigma
-  REAL(DP) :: alat_new
+  REAL(DP) :: alat_new, celldm(6)
   REAL(DP) :: compute_omega_geo
   !
   nwork=0
@@ -127,7 +130,9 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            IF (compute_lc) THEN
               DO igeom = 1, ngeo
                 alat_geo(igeom)=alat+(igeom-(ngeo+1.0_DP)/2.0_DP)*step_ngeo
-                omega_geo(igeom)=compute_omega_geo(alat_geo(igeom))
+                celldm=0.0_DP
+                celldm(1)=alat_geo(igeom)
+                omega_geo(igeom)=compute_omega_geo(ibrav_save,celldm)
               ENDDO
               energy_geo=0.0_DP
               lev_syn_1=.TRUE.
@@ -163,7 +168,9 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            IF (compute_lc) THEN
               DO igeom = 1, ngeo
                  alat_geo(igeom) = alat + (igeom-(ngeo+1.0_DP)/2.0_DP)*step_ngeo
-                 omega_geo(igeom)=compute_omega_geo(alat_geo(igeom))
+                 celldm=0.0_DP
+                 celldm(1)=alat_geo(igeom)
+                 omega_geo(igeom)=compute_omega_geo(ibrav_save,celldm)
               ENDDO
               energy_geo=0.0_DP
               lph = .TRUE.
@@ -200,10 +207,31 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            IF (ALLOCATED(alat_geo)) DEALLOCATE(alat_geo)
            IF (ALLOCATED(energy_geo)) DEALLOCATE(energy_geo)
            IF (ALLOCATED(omega_geo)) DEALLOCATE(omega_geo)
-           CALL set_elastic_cons_work(nwork) 
+           IF (elastic_algorithm=='standard') THEN
+              CALL set_elastic_cons_work(nwork)
+              ALLOCATE(celldm_geo(6,nwork))
+              ALLOCATE(ibrav_geo(nwork))
+           ELSEIF (elastic_algorithm=='advanced'.OR. &
+                                       elastic_algorithm=='energy') THEN
+!
+!      celldm_geo and ibrav_geo are allocated inside the routine
+!
+              CALL set_elastic_cons_work_adv(nwork)
+           ELSE
+              CALL errore('initialize_thermo_work',&
+                                        'elastic_algorithm unknown',1)
+           ENDIF
            ALLOCATE(alat_geo(nwork))
            ALLOCATE(energy_geo(nwork))
            ALLOCATE(omega_geo(nwork))
+           energy_geo=0.0_DP
+           IF (elastic_algorithm=='energy') THEN
+              DO igeom = 1, nwork
+                 omega_geo(igeom)=compute_omega_geo(ibrav_geo(igeom),&
+                                                    celldm_geo(1,igeom))
+              ENDDO
+              omega0 = compute_omega_geo(ibrav_save, celldm_save)
+           ENDIF
            lelastic_const=.TRUE.
         CASE ('piezoelectric_tensor', 'mur_lc_piezoelectric_tensor')
            IF (ALLOCATED(alat_geo)) DEALLOCATE(alat_geo)
