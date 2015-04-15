@@ -37,13 +37,6 @@ MODULE thermo_mod
                                                 ! different geometries.
   INTEGER, ALLOCATABLE :: ibrav_geo(:)          ! the Bravais lattice at
                                                 ! each geometry
-  INTEGER  ::              ntry                 ! Maximum number of trials
-                                                ! to calculate the lattice
-                                                ! constat. The code retry the
-                                                ! murneghan until the 
-                                                ! equilibrium lattice constant
-                                                ! is close to the central 
-                                                ! ngeom/2+1. 
                                                    
 
 END MODULE thermo_mod
@@ -261,8 +254,6 @@ MODULE control_thermo
   LOGICAL :: lq2r=.FALSE.   ! if .true. the interatomic force constants are calculated
   LOGICAL :: lmatdyn=.FALSE.     ! if .true. the phonon are interpolated
 
-  LOGICAL :: compute_lc=.TRUE.   ! if .true. run the first part
-  
   CHARACTER(LEN=256) :: outdir_thermo, fildyn_thermo, flfrc, &
                         flfrq, fldos, fltherm, flanhar, flevdat, &
                         filband, flkeconv, flnkconv, flgrun

@@ -11,7 +11,7 @@ SUBROUTINE bcast_thermo_input()
   !
   !  This routine broadcasts to all the images the input of thermo_pw.
   !
-  USE thermo_mod,      ONLY : what, ngeo, step_ngeo, ntry
+  USE thermo_mod,      ONLY : what, ngeo, step_ngeo
   USE control_mur,     ONLY : vmin_input, vmax_input, deltav, nvol
   USE control_thermo,  ONLY : outdir_thermo, flevdat,    &
                               flfrc, flfrq, fldos, fltherm, flanhar, &
@@ -45,7 +45,6 @@ SUBROUTINE bcast_thermo_input()
   !
   CALL mp_bcast( what, meta_ionode_id, world_comm )
   CALL mp_bcast( ngeo, meta_ionode_id, world_comm )
-  CALL mp_bcast( ntry, meta_ionode_id, world_comm )
   CALL mp_bcast( step_ngeo, meta_ionode_id, world_comm )
   CALL mp_bcast( zasr, meta_ionode_id, world_comm )
   CALL mp_bcast( flfrc, meta_ionode_id, world_comm )

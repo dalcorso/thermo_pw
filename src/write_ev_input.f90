@@ -64,7 +64,7 @@ ENDIF
 RETURN
 END SUBROUTINE write_ev_driver
 
-SUBROUTINE do_ev(itry)
+SUBROUTINE do_ev()
 !
 !  This subroutine compute the equilibrium volume and bulk modulus
 !
@@ -77,12 +77,10 @@ USE mp_world, ONLY : world_comm
 USE mp, ONLY : mp_bcast
 
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: itry
 CHARACTER(LEN=256) :: file_dat
-CHARACTER(LEN=6) :: int_to_char
 REAL(DP) :: compute_alat_geo
 
-  file_dat=TRIM(flevdat) // TRIM(int_to_char(itry))
+  file_dat=TRIM(flevdat) 
   CALL write_ev_input(file_dat)
   CALL ev_sub(vmin, b0, b01, emin)
   CALL mp_bcast(vmin, meta_ionode_id, world_comm)
