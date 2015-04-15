@@ -503,11 +503,6 @@ ngeo       : the number of geometries to use.
              Default: integer 1 for what=scf_*, 9 for what=mur_lc_*.
 step_ngeo  : The step between the lattice constant at different geometries.
              Default: real 0.05 a.u.
-ntry       : When the equilibrium lattice constant differs from the lattice 
-             constant of the central geometry more than step_ngeo, the code 
-             recalculates the Murnaghan equation centering the geometries on 
-             the new minimum. This procedure is repeated up to ntry times.
-             Default: integer 3
 vmin_input : minimum volume for the plot of the energy as a function of volume.
              Default: real 0.98 times the volume of the first geometry.
 vmax_input : maximum volume for the plot of the energy as a function of volume.
@@ -612,12 +607,16 @@ The third algorithm is called \texttt{energy}.
 Using the \texttt{energy} algorithm the elastic constants are calculated 
 from the quadratic fit of the total energy as a function of strain
 without computing stress (this option is available only for selected 
-lattices and usually requires more independent strain). \\
+lattices and usually requires more independent strains). \\
 For all methods the number of strains is \texttt{ngeo\_strain}
-for each indipendent strain type. 
+for each indipendent strain. 
 For each strain, the code relaxes the ions to their equilibrium 
 positions if \texttt{frozen\_ions=.false.} or keeps them
 in the strained positions if \texttt{frozen\_ions=.true.}. 
+Note that elastic constant calculations with \texttt{frozen\_ions=.false.}
+might require smaller force convergence threshold than standard calculations. 
+The default value of \texttt{forc\_conv\_thr} must be changed in the 
+\texttt{pw.x} input.
 At finite pressure all methods give the elastic constants that
 relate linearly stress and strain. \\
 The input variables that control this option are:
@@ -629,7 +628,7 @@ ngeo_strain: the number of strained configurations used to calculate each
              derivative. 
              Default: integer 4
 elastic_algorithm: 'standard', 'advanced' or 'energy'. See discussion above.
-             Default: character 'standard
+             Default: character 'standard' 
 delta_epsilon: the interval of strain values between two geometries.
              To avoid a zero strain geometry that might have a
              different symmetry ngeo_strain must be even.
@@ -638,7 +637,12 @@ fl_el_cons:  the name of the file that contains the elastic constants
              Default: character(len=*) 'output_el_con.dat'
 \end{verbatim}
 Number of tasks for this option: \texttt{ngeo\_strain} times the number of
-independent strains.
+independent strains. \\
+%As a rule the user is not supposed to change the elastic algorithm.
+%The code will choose the one more suited to the given lattice. The variable
+%\texttt{elastic\_algorithm} is used for tests or when the stress is 
+%not available for a given functional. The latter case can be dealt with by
+%the algorithm \texttt{energy} when it is available for the given lattice.
 
 \subsection{\texttt{what='mur\_lc\_elastic\_constants'}}
 As \texttt{what='elastic\_constants'} but the calculation is made at the
