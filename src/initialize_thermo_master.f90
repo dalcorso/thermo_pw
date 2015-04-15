@@ -13,7 +13,7 @@ SUBROUTINE initialize_thermo_master(nwork, part)
   !  the priority of the different jobs
   !
   USE kinds,      ONLY : DP
-  USE thermo_mod, ONLY : what, ngeo
+  USE thermo_mod, ONLY : what
   USE thermo_priority, ONLY : npriority, priority, max_priority
   !
   IMPLICIT NONE

@@ -19,13 +19,13 @@ SUBROUTINE compute_cp(beta_t, vmin_t, b0_t, ph_cv, cv_t, cp_t, b0_s, gamma_t)
 !  gamma_t adimensional
 !
 USE kinds,          ONLY : DP
-USE thermo_mod,     ONLY : ngeo, omega_geo
+USE thermo_mod,     ONLY : tot_ngeo, omega_geo
 USE temperature,    ONLY : temp, ntemp
 USE constants,      ONLY : ry_kbar
 
 IMPLICIT NONE
 REAL(DP), INTENT(IN)  :: beta_t(ntemp), vmin_t(ntemp), b0_t(ntemp), &
-                         ph_cv(ntemp, ngeo)
+                         ph_cv(ntemp, tot_ngeo)
 REAL(DP), INTENT(OUT) :: cv_t(ntemp), cp_t(ntemp), b0_s(ntemp), gamma_t(ntemp)
 INTEGER :: itemp, igeo, igeo1, igeo2
 
@@ -35,7 +35,7 @@ DO itemp=1,ntemp
 !
    igeo1=1
    igeo2=2
-   DO igeo = 1, ngeo-1
+   DO igeo = 1, tot_ngeo-1
       IF ( vmin_t(itemp) > omega_geo(igeo) ) THEN
          igeo1=igeo
          igeo2=igeo1+1

@@ -250,9 +250,14 @@ SUBROUTINE thermo_readin()
                what=='mur_lc_bands' .OR. what=='mur_lc_disp' .OR. &
                what=='mur_lc_t' .OR. what=='scf_2d_bands')
 
-  IF ( ngeo==0 ) THEN
+  IF ( ngeo(1)==0 ) THEN
      IF (what(1:4) == 'scf_') ngeo=1
-     IF (what(1:6) == 'mur_lc') ngeo=9
+     IF (what(1:6) == 'mur_lc') THEN
+        ngeo(1)=9
+        DO igeo=2,6
+           IF (ngeo(igeo)==0) ngeo(igeo)=1
+        ENDDO
+     ENDIF
      IF (what(1:4) == 'elas') ngeo=1
      IF (what(1:4) == 'piez') ngeo=1
      IF (what(1:4) == 'pola') ngeo=1

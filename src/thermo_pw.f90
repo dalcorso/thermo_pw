@@ -97,7 +97,8 @@ PROGRAM thermo_pw
   USE input_parameters, ONLY : ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
                                trd_ht, rd_ht, cell_units, outdir
   USE control_mur,      ONLY : vmin, b0, b01, emin
-  USE thermo_mod,       ONLY : what, ngeo, alat_geo, omega_geo, energy_geo
+  USE thermo_mod,       ONLY : what, ngeo, alat_geo, omega_geo, energy_geo, &
+                               tot_ngeo
   USE control_2d_bands, ONLY : only_bands_plot
   USE ph_restart,       ONLY : destroy_status_run
   USE save_ph,          ONLY : clean_input_variables
@@ -193,8 +194,8 @@ PROGRAM thermo_pw
   !  set the lattice constant at the computed minimum of the Murnaghan
   !
   IF (lev_syn_1) THEN
-     celldm(1)=compute_alat_geo(vmin, alat_geo(ngeo/2+1), &
-                                              omega_geo(ngeo/2+1))
+     celldm(1)=compute_alat_geo(vmin, alat_geo(ngeo(1)/2+1), &
+                                              omega_geo(ngeo(1)/2+1))
      CALL cell_base_init ( ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
                       trd_ht, rd_ht, cell_units )
      CALL set_fft_mesh()
@@ -249,7 +250,7 @@ PROGRAM thermo_pw
      with_ext_images=with_asyn_images
      always_run=.TRUE.
      CALL start_clock( 'PHONON' )
-     DO igeom=1,ngeo
+     DO igeom=1,tot_ngeo
         write(6,'(/,5x,40("%"))') 
         write(6,'(5x,"Computing geometry ", i5)') igeom
         write(6,'(5x,40("%"),/)') 
@@ -319,8 +320,8 @@ PROGRAM thermo_pw
 !    the phonon dos is calculated and the frequencies saved on the ph_freq_save 
 !    structure
 !
-              IF (.NOT.ALLOCATED(phdos_save)) ALLOCATE(phdos_save(ngeo))
-              IF (.NOT.ALLOCATED(ph_freq_save)) ALLOCATE(ph_freq_save(ngeo))
+              IF (.NOT.ALLOCATED(phdos_save)) ALLOCATE(phdos_save(tot_ngeo))
+              IF (.NOT.ALLOCATED(ph_freq_save)) ALLOCATE(ph_freq_save(tot_ngeo))
               CALL matdyn_sub(1,igeom)
               CALL simple_plot('_dos', fldos, flpsdos, 'frequency (cm^{-1})', &
                        'DOS (states / cm^{-1} / cell)', '"red"', freqmin, freqmax, &
@@ -380,7 +381,7 @@ PROGRAM thermo_pw
      ENDIF
 
      IF (lmatdyn.AND.ldos) THEN
-        DO igeom=1,ngeo
+        DO igeom=1,tot_ngeo
            CALL destroy_phdos(phdos_save(igeom))
         ENDDO
         DEALLOCATE(phdos_save)

@@ -13,7 +13,7 @@ SUBROUTINE write_gruneisen_band(file_disp)
   ! 
   USE kinds,          ONLY : DP
   USE control_thermo, ONLY : flgrun
-  USE thermo_mod,     ONLY : ngeo, omega_geo
+  USE thermo_mod,     ONLY : tot_ngeo, omega_geo
   USE ph_freq_anharmonic, ONLY : vminf_t
   USE mp,             ONLY : mp_bcast
   USE io_global,      ONLY : stdout, ionode, ionode_id
@@ -48,10 +48,10 @@ SUBROUTINE write_gruneisen_band(file_disp)
 
   IF (flgrun == ' ') RETURN
 
-  IF ( .NOT. ALLOCATED( level ) ) ALLOCATE (level(12,ngeo))
-  IF ( .NOT. ALLOCATED( frequences ) ) ALLOCATE (frequences(ngeo))
+  IF ( .NOT. ALLOCATED( level ) ) ALLOCATE (level(12,tot_ngeo))
+  IF ( .NOT. ALLOCATED( frequences ) ) ALLOCATE (frequences(tot_ngeo))
 
-  DO igeo = 1, ngeo
+  DO igeo = 1, tot_ngeo
 
      filedata = TRIM(file_disp)//'.g'//TRIM(int_to_char(igeo))
 
@@ -90,8 +90,8 @@ SUBROUTINE write_gruneisen_band(file_disp)
         CALL errore('write_gruneisen_band','("file with representations &
                        & not compatible with bands")')
      !
-     IF ( .NOT. ALLOCATED( freq_geo ) )  ALLOCATE (freq_geo(nbnd,nks,ngeo))
-     IF ( .NOT. ALLOCATED( rap_geo ) )   ALLOCATE (rap_geo(nbnd,nks,ngeo))
+     IF ( .NOT. ALLOCATED( freq_geo ) )  ALLOCATE (freq_geo(nbnd,nks,tot_ngeo))
+     IF ( .NOT. ALLOCATED( rap_geo ) )   ALLOCATE (rap_geo(nbnd,nks,tot_ngeo))
      IF ( .NOT. ALLOCATED( k ) )         ALLOCATE (k(3,nks)) 
      IF ( .NOT. ALLOCATED( k_rap ) )     ALLOCATE (k_rap(3,nks))
      IF ( .NOT. ALLOCATED( high_symmetry ) ) ALLOCATE (high_symmetry(nks))
@@ -130,12 +130,12 @@ SUBROUTINE write_gruneisen_band(file_disp)
 !  Part two: Compute the Gruneisen parameters
 !
   copy_before=.FALSE.
-  IF (mod(ngeo,2)==0) THEN
+  IF (mod(tot_ngeo,2)==0) THEN
      use_geo=4
-     geo=ngeo/2-2
+     geo=tot_ngeo/2-2
   ELSE
      use_geo=3
-     geo=ngeo/2-1
+     geo=tot_ngeo/2-1
   ENDIF
   DO n = 1,nks
      IF (is_gamma(n)) THEN
@@ -186,12 +186,13 @@ SUBROUTINE write_gruneisen_band(file_disp)
 !    an odd number of geometries, or the average of the two central
 !    geometries if there is an even number
 !
-           IF (mod(ngeo,2)==0) THEN
-              omega = 0.5_DP * (omega_geo(ngeo/2) + omega_geo(ngeo/2+1))
-              freq  = 0.5_DP*(freq_geo(ibnd,n,ngeo/2)+freq_geo(ibnd,n,ngeo/2+1))
+           IF (mod(tot_ngeo,2)==0) THEN
+              omega = 0.5_DP * (omega_geo(tot_ngeo/2) + omega_geo(tot_ngeo/2+1))
+              freq  = 0.5_DP*(freq_geo(ibnd,n,tot_ngeo/2)+freq_geo(ibnd,n,&
+                                              tot_ngeo/2+1))
            ELSE
-              omega = omega_geo(ngeo/2+1)
-              freq = freq_geo(ibnd,n,ngeo/2+1)
+              omega = omega_geo(tot_ngeo/2+1)
+              freq = freq_geo(ibnd,n,tot_ngeo/2+1)
            ENDIF
 
            CALL polifit( omega_geo(geo+1), frequences, use_geo, alpha, m1 )

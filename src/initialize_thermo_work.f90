@@ -15,7 +15,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   !
   USE kinds,      ONLY : DP
   USE thermo_mod, ONLY : what, alat_geo, step_ngeo, energy_geo, ngeo, &
-                         celldm_geo, omega_geo, ibrav_geo
+                         celldm_geo, omega_geo, ibrav_geo, tot_ngeo
   USE control_thermo, ONLY : lpwscf, lbands, lphonon, lev_syn_1, lev_syn_2, &
                              lph, lpwscf_syn_1, lbands_syn_1, ldos, lq2r,   &
                              lmatdyn, ltherm, lconv_ke_test, lconv_nk_test, &
@@ -51,11 +51,15 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   IF (part == 1) THEN
      SELECT CASE (TRIM(what))
         CASE ( 'scf', 'scf_bands', 'scf_2d_bands', 'scf_ph', 'scf_disp' )
-           ALLOCATE(alat_geo(ngeo))
-           ALLOCATE(energy_geo(ngeo))
+           ALLOCATE(alat_geo(1))
+           ALLOCATE(energy_geo(1))
+           tot_ngeo=0
            lpwscf_syn_1=.TRUE.
            lev_syn_1=.FALSE.
-           IF ( TRIM(what)=='scf_ph'.OR. TRIM(what)=='scf_disp' ) lph=.TRUE.
+           IF ( TRIM(what)=='scf_ph'.OR. TRIM(what)=='scf_disp' ) THEN
+              lph=.TRUE.
+              tot_ngeo=1
+           ENDIF
            IF ( TRIM(what)=='scf_disp' ) THEN 
               lq2r = .TRUE.
               ldos = .TRUE.
@@ -69,6 +73,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            ALLOCATE(ke(nwork))
            ALLOCATE(keden(nwork))
            ALLOCATE(energy_geo(nwork))
+           tot_ngeo=0
            icount=0
            DO iden=1, nkeden
               DO ike = 1, nke
@@ -84,6 +89,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            ALLOCATE(nk_test(nwork))
            ALLOCATE(sigma_test(nwork))
            ALLOCATE(energy_geo(nwork))
+           tot_ngeo=0
            icount=0
            DO isigma=1, nsigma
               DO ink = 1, nnk
@@ -97,12 +103,13 @@ SUBROUTINE initialize_thermo_work(nwork, part)
         CASE ('mur_lc', 'mur_lc_bands', 'mur_lc_ph', 'mur_lc_disp', &
               'mur_lc_elastic_constants', 'mur_lc_piezoelectric_tensor', &
               'mur_lc_polarization')
-           nwork=ngeo
-           ALLOCATE(alat_geo(ngeo))
-           ALLOCATE(energy_geo(ngeo))
-           ALLOCATE(omega_geo(ngeo))
-           DO igeom = 1, ngeo
-              alat_geo(igeom)=celldm_save(1)+(igeom-(ngeo+1.0_DP)/2.0_DP)*step_ngeo
+           nwork=ngeo(1)
+           ALLOCATE(alat_geo(nwork))
+           ALLOCATE(energy_geo(nwork))
+           ALLOCATE(omega_geo(nwork))
+           tot_ngeo=1
+           DO igeom = 1, nwork
+              alat_geo(igeom)=celldm_save(1)+(igeom-(ngeo(1)+1.0_DP)/2.0_DP)*step_ngeo
               celldm=0.0_DP
               celldm(1)=alat_geo(igeom)
               omega_geo(igeom)=compute_omega_geo(ibrav_save,celldm)
@@ -113,8 +120,10 @@ SUBROUTINE initialize_thermo_work(nwork, part)
                TRIM(what)/='mur_lc_elastic_constants'.AND.&
                TRIM(what)/='mur_lc_piezoelectric_tensor'.AND.&
                TRIM(what)/='mur_lc_polarization') lpwscf_syn_1=.TRUE.
-           IF ( TRIM(what)=='mur_lc_ph' .OR. TRIM(what)=='mur_lc_disp') &
-                                                                  lph=.TRUE.
+           IF ( TRIM(what)=='mur_lc_ph' .OR. TRIM(what)=='mur_lc_disp') THEN
+              lph=.TRUE.
+              tot_ngeo=1
+           ENDIF
            IF ( TRIM(what)=='mur_lc_disp' ) THEN
               lq2r = .TRUE.
               ldos = .TRUE.
@@ -124,13 +133,14 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            ENDIF
            IF (what=='mur_lc_bands') lbands_syn_1=.TRUE.
         CASE ('mur_lc_t')
-           nwork=ngeo
-           ALLOCATE(alat_geo(ngeo))
-           ALLOCATE(energy_geo(ngeo))
-           ALLOCATE(omega_geo(ngeo))
-           DO igeom = 1, ngeo
+           nwork=ngeo(1)
+           ALLOCATE(alat_geo(nwork))
+           ALLOCATE(energy_geo(nwork))
+           ALLOCATE(omega_geo(nwork))
+           tot_ngeo=nwork
+           DO igeom = 1, ngeo(1)
               alat_geo(igeom) = celldm_save(1) + &
-                                (igeom-(ngeo+1.0_DP)/2.0_DP)*step_ngeo
+                                (igeom-(ngeo(1)+1.0_DP)/2.0_DP)*step_ngeo
               celldm=0.0_DP
               celldm(1)=alat_geo(igeom)
               omega_geo(igeom)=compute_omega_geo(ibrav_save,celldm)

@@ -20,8 +20,12 @@ MODULE thermo_mod
 
   CHARACTER(LEN=30) :: what             ! the type of calculation. See README.
 
-  INTEGER  :: ngeo                      ! number of different geometries 
-                                        ! calculated in this run
+  INTEGER  :: ngeo(6)                   ! number of different geometries 
+                                        ! per celldm parameter
+
+  INTEGER :: tot_ngeo                   ! total number of geometries for
+                                        ! which we calculate the phonon
+                                        ! dispersions
 
   REAL(DP), ALLOCATABLE :: alat_geo(:),     &   ! the lattice constant at
                                                 ! each geometry
@@ -37,8 +41,6 @@ MODULE thermo_mod
                                                 ! different geometries.
   INTEGER, ALLOCATABLE :: ibrav_geo(:)          ! the Bravais lattice at
                                                 ! each geometry
-                                                   
-
 END MODULE thermo_mod
 
 MODULE temperature
@@ -63,7 +65,7 @@ MODULE control_mur
   !     equation
   !
   SAVE
-  REAL(DP)     :: vmin, b0, b01, emin   ! the minimum of the murnaghan at T=0
+  REAL(DP) :: vmin, b0, b01, emin   ! the minimum of the murnaghan at T=0
   REAL(DP) :: vmin_input, vmax_input, deltav   ! plot the fitted total energy
                                                ! and pressure from vmin_input
                                                ! to vnax_input in steps of i

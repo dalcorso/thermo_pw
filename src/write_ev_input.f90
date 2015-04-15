@@ -32,7 +32,7 @@ SUBROUTINE write_ev_input(file_dat)
   IF (ionode) THEN
      iu_ev=2
      OPEN(UNIT=iu_ev, FILE=TRIM(file_dat), STATUS='UNKNOWN', FORM='FORMATTED')
-     DO igeom=1,ngeo
+     DO igeom=1,ngeo(1)
         WRITE(iu_ev,'(2e30.15)') omega_geo(igeom), energy_geo(igeom)
      ENDDO
      !
@@ -90,7 +90,7 @@ REAL(DP) :: compute_alat_geo
   !
   WRITE(stdout,'(/,2x,76("+"))')
   WRITE(stdout,'(5x, "The equilibrium lattice constant is ",f12.4," a.u.")') &
-               compute_alat_geo(vmin, alat_geo(ngeo/2+1), omega_geo(ngeo/2+1))
+           compute_alat_geo(vmin, alat_geo(ngeo(1)/2+1), omega_geo(ngeo(1)/2+1))
   WRITE(stdout,'(5x, "The bulk modulus is ",15x,f12.2," kbar")')  b0
   WRITE(stdout,'(2x,76("+"),/)')
 
@@ -125,7 +125,7 @@ REAL(DP) :: free_e, vm, b0, b01
   IF (meta_ionode) THEN
      iu_ev=2
      OPEN(UNIT=iu_ev, FILE=TRIM(file_dat), STATUS='UNKNOWN', FORM='FORMATTED')
-     DO igeom=1,ngeo
+     DO igeom=1,ngeo(1)
         WRITE(iu_ev,'(2f20.10)') omega_geo(igeom), energy_geo(igeom) + &
                                             ph_free_ener(itemp,igeom)
      ENDDO
@@ -143,7 +143,8 @@ REAL(DP) :: free_e, vm, b0, b01
   WRITE(stdout,'(/,2x,76("-"))')
   WRITE(stdout,'(5x, "phdos free energy, at T= ", f12.6)') temp(itemp)
   WRITE(stdout,'(5x, "The equilibrium lattice constant is ",f12.6," a.u.")') &
-      compute_alat_geo(vmin_t(itemp), alat_geo(ngeo/2+1), omega_geo(ngeo/2+1))
+      compute_alat_geo(vmin_t(itemp), alat_geo(ngeo(1)/2+1), &
+                                           omega_geo(ngeo(1)/2+1))
   WRITE(stdout,'(5x, "The bulk modulus is ",15x,f12.4," kbar")')  b0_t(itemp)
   WRITE(stdout,'(5x, "The bulk modulus derivative is ",15x,f12.4)')  b01_t(itemp)
   WRITE(stdout,'(2x,76("-"),/)')
@@ -179,7 +180,7 @@ REAL(DP) :: compute_alat_geo
   IF (meta_ionode) THEN
      iu_ev=2
      OPEN(UNIT=iu_ev, FILE=TRIM(file_dat), STATUS='UNKNOWN', FORM='FORMATTED')
-     DO igeom=1,ngeo
+     DO igeom=1,ngeo(1)
         WRITE(iu_ev,'(2f20.10)') omega_geo(igeom), energy_geo(igeom) + &
                                             phf_free_ener(itemp,igeom)
      ENDDO
@@ -197,7 +198,7 @@ REAL(DP) :: compute_alat_geo
   WRITE(stdout,'(/,2x,76("+"))')
   WRITE(stdout,'(5x, "ph_freq free energy at T=",f12.4)') temp(itemp)
   WRITE(stdout,'(5x, "The equilibrium lattice constant is ",f12.6," a.u.")') &
-      compute_alat_geo(vminf_t(itemp), alat_geo(ngeo/2+1), omega_geo(ngeo/2+1))
+      compute_alat_geo(vminf_t(itemp), alat_geo(ngeo(1)/2+1), omega_geo(ngeo(1)/2+1))
   WRITE(stdout,'(5x, "The bulk modulus is ",15x,f12.4," kbar")')  b0f_t(itemp)
   WRITE(stdout,'(5x, "The bulk modulus derivative is ",15x,f12.4)')  b01f_t(itemp)
   WRITE(stdout,'(2x,76("+"),/)')

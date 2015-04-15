@@ -27,7 +27,7 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
                             nqaux, nrap_plot, rap_plot
   USE control_2d_bands, ONLY : nkz, aux_ind_sur, identify_sur, lprojpbs, &
                                sym_divide, lsurface_state, lsurface_state_rap
-  USE thermo_mod,    ONLY : ngeo
+  USE thermo_mod,    ONLY : tot_ngeo
   USE thermo_sym,    ONLY : code_group_save
   USE constants,     ONLY : rytoev
   USE point_group,   ONLY : convert_rap, has_sigma_h
@@ -105,7 +105,7 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
   ENDIF
 
   IF (icode==3) THEN
-     filename = TRIM(file_disp)//'.g'//TRIM(int_to_char(ngeo/2+1))//".rap"
+     filename = TRIM(file_disp)//'.g'//TRIM(int_to_char(tot_ngeo/2+1))//".rap"
   ELSE
      filename=TRIM(filedata)//".rap"
   ENDIF

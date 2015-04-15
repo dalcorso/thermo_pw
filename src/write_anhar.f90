@@ -8,7 +8,6 @@
 SUBROUTINE write_anharmonic()
 USE kinds,          ONLY : DP
 USE constants,      ONLY : ry_kbar
-USE thermo_mod,     ONLY : ngeo
 USE temperature,    ONLY : ntemp, temp
 USE thermodynamics, ONLY : ph_cv
 USE anharmonic,     ONLY : alpha_t, beta_t, gamma_t, cp_t, cv_t, b0_s, &
@@ -71,7 +70,6 @@ END SUBROUTINE write_anharmonic
 SUBROUTINE write_ph_freq_anharmonic()
 USE kinds,          ONLY : DP
 USE constants,      ONLY : ry_kbar
-USE thermo_mod,     ONLY : ngeo
 USE temperature,    ONLY : ntemp, temp
 USE ph_freq_thermodynamics, ONLY : phf_cv
 USE ph_freq_anharmonic, ONLY : alphaf_t, betaf_t, gammaf_t, cpf_t, cvf_t, &
@@ -155,7 +153,7 @@ IF (my_image_id /= root_image) RETURN
 !  NB: betab is multiplied by the bulk modulus
 !
 DO itemp = 1, ntemp
-   CALL thermal_expansion_ph(ph_freq_save(ngeo/2+1), ph_grun, &
+   CALL thermal_expansion_ph(ph_freq_save(ngeo(1)/2+1), ph_grun, &
                              temp(itemp), betab(itemp))
 END DO
 
@@ -172,7 +170,7 @@ IF (ionode) THEN
    DO itemp = 1, ntemp
       WRITE(iu_therm, '(e13.6,4e16.8)') temp(itemp), &
               betab(itemp)*1.D6*ry_kbar/b0f_t(itemp), &
-              betab(itemp)*omega_geo(ngeo/2+1)/phf_cv(itemp,ngeo/2+1), &
+              betab(itemp)*omega_geo(ngeo(1)/2+1)/phf_cv(itemp,ngeo(1)/2+1), &
               betab(itemp)*1.D6*ry_kbar*vminf_t(1)/vminf_t(itemp)/b0f_t(1), &
               cvf_t(itemp)
    END DO

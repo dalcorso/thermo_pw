@@ -11,7 +11,7 @@ USE kinds,          ONLY : DP
 USE phdos_module,   ONLY : phdos_type, read_phdos_data, zero_point_energy, &
                            free_energy, vib_energy, vib_entropy, &
                            specific_heat_cv, integrated_dos
-USE thermo_mod,     ONLY : ngeo
+USE thermo_mod,     ONLY : tot_ngeo
 USE temperature,    ONLY : tmin, tmax, deltat, ntemp, temp
 USE thermodynamics, ONLY : ph_ener, ph_free_ener, ph_entropy, ph_cv, phdos_save
 USE mp_images,      ONLY : root_image, my_image_id
@@ -30,7 +30,7 @@ LOGICAL  :: check_file_exists
 IF ( check_file_exists(fltherm) ) RETURN
 IF (my_image_id /= root_image) RETURN
 
-IF ( igeom < 1 .OR. igeom > ngeo ) CALL errore('print_thermo', & 
+IF ( igeom < 1 .OR. igeom > tot_ngeo ) CALL errore('print_thermo', & 
                                                'Too many geometries',1)
 WRITE(stdout,'(/,2x,76("+"))')
 WRITE(stdout,'(5x,"Computing the thermodynamical properties from phonon dos")')
@@ -99,7 +99,7 @@ USE ph_freq_module,   ONLY : ph_freq_type, zero_point_energy_ph, &
 USE temperature,      ONLY : tmin, tmax, deltat, ntemp, temp
 USE ph_freq_thermodynamics, ONLY : phf_ener, phf_free_ener, phf_entropy, &
                            phf_cv, ph_freq_save
-USE thermo_mod,       ONLY : ngeo
+USE thermo_mod,       ONLY : tot_ngeo
 USE mp_images,        ONLY : root_image, my_image_id
 USE io_global,        ONLY : ionode, stdout
 USE control_thermo,   ONLY : fltherm
@@ -119,7 +119,7 @@ IF ( check_file_exists(filename) ) RETURN
 
 IF (my_image_id /= root_image) RETURN
 
-IF ( igeom < 1 .OR. igeom > ngeo ) CALL errore('print_thermo', & 
+IF ( igeom < 1 .OR. igeom > tot_ngeo ) CALL errore('print_thermo', & 
                                                'Too many geometries',1)
 WRITE(stdout,'(/,2x,76("+"))')
 WRITE(stdout,'(5x,"Computing the thermodynamical properties from frequencies")')

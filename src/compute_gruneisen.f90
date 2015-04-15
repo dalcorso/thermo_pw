@@ -17,7 +17,7 @@ SUBROUTINE compute_gruneisen()
   !
   ! 
   USE kinds,                  ONLY : DP
-  USE thermo_mod,             ONLY : ngeo, omega_geo
+  USE thermo_mod,             ONLY : tot_ngeo, omega_geo
   USE ions_base,              ONLY : nat
   USE ph_freq_thermodynamics, ONLY : ph_freq_save
   USE ph_freq_anharmonic,     ONLY : vminf_t
@@ -40,16 +40,16 @@ SUBROUTINE compute_gruneisen()
 
   IF ( my_image_id /= root_image ) RETURN
 
-  IF ( .NOT. ALLOCATED( level ) ) ALLOCATE (level(12,ngeo))
-  IF ( .NOT. ALLOCATED( frequences ) ) ALLOCATE (frequences(ngeo))
+  IF ( .NOT. ALLOCATED( level ) ) ALLOCATE (level(12,tot_ngeo))
+  IF ( .NOT. ALLOCATED( frequences ) ) ALLOCATE (frequences(tot_ngeo))
 !
 !  allocate space for the gruneisen parameters
 !
 !
 !  Compute the Gruneisen parameters
 !
-  geo=ngeo/2-1
-  IF (mod(ngeo,2)==0) THEN
+  geo=tot_ngeo/2-1
+  IF (mod(tot_ngeo,2)==0) THEN
      use_geo=2
   ELSE
      use_geo=3
@@ -89,18 +89,18 @@ SUBROUTINE compute_gruneisen()
 !    an odd number of geometries, or the average of the two central
 !    geometries if there is an even number
 !
-        IF (mod(ngeo,2)==0) THEN
-           freq  = 0.5_DP * ( ph_freq_save(ngeo/2)%nu(ibnd,n) + &
-                              ph_freq_save(ngeo/2+1)%nu(ibnd,n) )
+        IF (mod(tot_ngeo,2)==0) THEN
+           freq  = 0.5_DP * ( ph_freq_save(tot_ngeo/2)%nu(ibnd,n) + &
+                              ph_freq_save(tot_ngeo/2+1)%nu(ibnd,n) )
         ELSE
-           freq = ph_freq_save(ngeo/2+1)%nu(ibnd,n)
+           freq = ph_freq_save(tot_ngeo/2+1)%nu(ibnd,n)
         ENDIF
         CALL polifit( omega_geo(geo+1), frequences, use_geo, alpha, m1 )
         IF ( freq > 1.d-4 ) THEN
            freq = alpha(1) + alpha(2) * vminf_t(1) + alpha(3) * vminf_t(1)**2
            ph_grun%nu(ibnd,n) = - (alpha(2) + 2.0_DP * alpha(3) * &
                                               vminf_t(1)) / freq
-           ph_freq_save(ngeo/2+1)%nu(ibnd,n) = freq
+           ph_freq_save(tot_ngeo/2+1)%nu(ibnd,n) = freq
         ELSE
            ph_grun%nu(ibnd,n) = 0.0_DP
         END IF

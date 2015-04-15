@@ -31,7 +31,7 @@ filename=TRIM(flevdat)//'_mur'
 filename1=TRIM(flevdat)//'_mur1'
 b0 = b0in / ry_kbar
 IF (vmin_input == 0.0_DP) vmin_input=omega_geo(1) * 0.98_DP
-IF (vmax_input == 0.0_DP) vmax_input=omega_geo(ngeo) * 1.02_DP
+IF (vmax_input == 0.0_DP) vmax_input=omega_geo(ngeo(1)) * 1.02_DP
 IF (nvol > 1) THEN
    deltav = (vmax_input - vmin_input)/(nvol-1)
 ELSE
@@ -56,7 +56,7 @@ IF (ionode) THEN
    ENDDO 
    CLOSE(UNIT=iu_mur, STATUS='KEEP')
    OPEN(UNIT=iu_mur, FILE=TRIM(filename1), STATUS='UNKNOWN', FORM='FORMATTED')
-   DO i=1,ngeo
+   DO i=1,ngeo(1)
       WRITE(iu_mur,'(2f20.10)') omega_geo(i), energy_geo(i)
    ENDDO
    CLOSE(UNIT=iu_mur, STATUS='KEEP')

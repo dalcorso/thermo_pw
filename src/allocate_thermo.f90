@@ -12,22 +12,22 @@ SUBROUTINE allocate_thermodynamics()
   !  This routine deallocates the variables that control the thermo calculation
   !
   USE kinds,          ONLY : DP
-  USE thermo_mod,     ONLY : ngeo
+  USE thermo_mod,     ONLY : tot_ngeo
   USE temperature,    ONLY : ntemp
   USE thermodynamics, ONLY : ph_free_ener, ph_ener, ph_entropy, ph_cv
   USE ph_freq_thermodynamics, ONLY : phf_free_ener, phf_ener, phf_entropy, phf_cv
 
   IMPLICIT NONE
 
-  IF (.NOT.ALLOCATED(ph_free_ener))  ALLOCATE(ph_free_ener(ntemp,ngeo))
-  IF (.NOT.ALLOCATED(ph_ener))       ALLOCATE(ph_ener(ntemp,ngeo))
-  IF (.NOT.ALLOCATED(ph_entropy))    ALLOCATE(ph_entropy(ntemp,ngeo))
-  IF (.NOT.ALLOCATED(ph_cv))         ALLOCATE(ph_cv(ntemp,ngeo))
+  IF (.NOT.ALLOCATED(ph_free_ener))  ALLOCATE(ph_free_ener(ntemp,tot_ngeo))
+  IF (.NOT.ALLOCATED(ph_ener))       ALLOCATE(ph_ener(ntemp,tot_ngeo))
+  IF (.NOT.ALLOCATED(ph_entropy))    ALLOCATE(ph_entropy(ntemp,tot_ngeo))
+  IF (.NOT.ALLOCATED(ph_cv))         ALLOCATE(ph_cv(ntemp,tot_ngeo))
 
-  IF (.NOT.ALLOCATED(phf_free_ener)) ALLOCATE(phf_free_ener(ntemp,ngeo))
-  IF (.NOT.ALLOCATED(phf_ener))      ALLOCATE(phf_ener(ntemp,ngeo))
-  IF (.NOT.ALLOCATED(phf_entropy))   ALLOCATE(phf_entropy(ntemp,ngeo))
-  IF (.NOT.ALLOCATED(phf_cv))        ALLOCATE(phf_cv(ntemp,ngeo))
+  IF (.NOT.ALLOCATED(phf_free_ener)) ALLOCATE(phf_free_ener(ntemp,tot_ngeo))
+  IF (.NOT.ALLOCATED(phf_ener))      ALLOCATE(phf_ener(ntemp,tot_ngeo))
+  IF (.NOT.ALLOCATED(phf_entropy))   ALLOCATE(phf_entropy(ntemp,tot_ngeo))
+  IF (.NOT.ALLOCATED(phf_cv))        ALLOCATE(phf_cv(ntemp,tot_ngeo))
 
   RETURN
   !
