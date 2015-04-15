@@ -137,7 +137,12 @@ SUBROUTINE thermo_readin()
 
   what=' '
   ngeo=0
-  step_ngeo = 0.05_DP
+  step_ngeo(1) = 0.05_DP
+  step_ngeo(2) = 0.01_DP
+  step_ngeo(3) = 0.01_DP
+  step_ngeo(4) = 0.5
+  step_ngeo(5) = 0.5
+  step_ngeo(6) = 0.5
 
   nq1_d=128
   nq2_d=128

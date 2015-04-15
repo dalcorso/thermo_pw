@@ -109,7 +109,8 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            ALLOCATE(omega_geo(nwork))
            tot_ngeo=1
            DO igeom = 1, nwork
-              alat_geo(igeom)=celldm_save(1)+(igeom-(ngeo(1)+1.0_DP)/2.0_DP)*step_ngeo
+              alat_geo(igeom)=celldm_save(1)+(igeom-(ngeo(1)+1.0_DP)/2.0_DP)&
+                                 *step_ngeo(1)
               celldm=0.0_DP
               celldm(1)=alat_geo(igeom)
               omega_geo(igeom)=compute_omega_geo(ibrav_save,celldm)
@@ -140,7 +141,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            tot_ngeo=nwork
            DO igeom = 1, ngeo(1)
               alat_geo(igeom) = celldm_save(1) + &
-                                (igeom-(ngeo(1)+1.0_DP)/2.0_DP)*step_ngeo
+                                (igeom-(ngeo(1)+1.0_DP)/2.0_DP)*step_ngeo(1)
               celldm=0.0_DP
               celldm(1)=alat_geo(igeom)
               omega_geo(igeom)=compute_omega_geo(ibrav_save,celldm)

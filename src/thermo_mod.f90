@@ -37,7 +37,8 @@ MODULE thermo_mod
                                                 ! geometry
                            stress_geo(:,:,:)    ! the stress at each 
                                                 ! geometry
-  REAL(DP) ::              step_ngeo            ! the difference of alat among
+  REAL(DP) ::              step_ngeo(6)         ! the difference of 
+                                                ! parameters among
                                                 ! different geometries.
   INTEGER, ALLOCATABLE :: ibrav_geo(:)          ! the Bravais lattice at
                                                 ! each geometry
