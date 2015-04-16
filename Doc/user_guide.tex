@@ -525,7 +525,7 @@ ngeo(1),...,ngeo(6) : the number of geometries to use for each celldm parameter.
              each Bravais lattice are actually changed.
              Default: integer 1,1,1,1,1,1 for what=scf_*, 9,1,1,1,1,1 for 
              what=mur_lc_*.
-step_ngeo(1),...,step_ngeo(6)  : The step between the lattice constants at 
+step_ngeo(1),...,step_ngeo(6) : The step between the lattice constants at 
              different geometries. step_ngeo(1) is, in atomic units, the change
              of a, step_ngeo(2), step_ngeo(3) are adimensional and are the
              changes of the ratios b/a, c/a, step_ngeo(4), step_ngeo(5), &
@@ -560,9 +560,31 @@ flevdat    : file where the Murnaghan equation is written. The results of the
              Default: character(len=*) 'output_ev.dat'
 flpsmur    : postscript file of the Murnaghan plot
              Default: character(len=*) 'output_mur.ps'
+ncontours  : the number of contours in the energy plot. These levels can
+             be determined automatically by the code or defined by the user.
+             The energy levels can be defined after the INPUT_THERMO namelist 
+             but before the path, as a list
+             energy_level(1)      color(1)
+             ...
+             energy_level(ncontours)   color(ncontours) 
+             Color is a string of the type color_red, color_green, etc.
+             The list of available colors is at the beginning of each gnuplot
+             script.
+             energy_level is in Ry units.
+             Default: integer 9
+flenergy   : name of the file that contains the energy in a form that
+             can be used by gnuplot to make contour plots.
+             Defaults: character(len=*) 'output_energy'
+flpsenergy : file with the contour plots of the energy as a function of the
+             crystal parameters.
+             Default: character(len=*) 'output_energy.ps'
 \end{verbatim}
 An example of the use of this option can be found in \texttt{example05}.\\
-Number of tasks for this option: \texttt{ngeo}.
+Number of tasks for this option: 
+\texttt{ngeo(1)} when \texttt{lmurn=.TRUE.}, \\
+\texttt{ngeo(1)*ngeo(2)*ngeo(3)*ngeo(4)*ngeo(5)*ngeo(6)} when
+\texttt{lmurn=.FALSE.}.
+
 
 \subsection{\texttt{what='mur\_lc\_bands'}}
 With this option the code computes the band structure at the geometry 
