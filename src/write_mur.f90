@@ -5,7 +5,7 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-SUBROUTINE mur(omega0, b0in, b01, emin)
+SUBROUTINE write_mur(omega0, b0in, b01, emin)
 !
 ! in input emin in Ry, omega0 in (a.u.)**3, b0in in kbar
 ! in output omega in (a.u.)**3, p in kbar, e in Ry
@@ -63,4 +63,4 @@ IF (ionode) THEN
 END IF
 
 RETURN
-END SUBROUTINE mur
+END SUBROUTINE write_mur

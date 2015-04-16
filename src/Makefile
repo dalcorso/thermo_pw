@@ -32,7 +32,6 @@ initialize_thermo_work.o \
 initialize_thermo_master.o \
 local_dos1d_so.o \
 matdyn_sub.o \
-mur.o \
 plan_avg_sub.o \
 plot_bz.o \
 plot_anhar.o \
@@ -73,6 +72,7 @@ write_e_ke.o  \
 write_ev_input.o \
 write_gruneisen_band.o \
 write_gnuplot_energy.o \
+write_mur.o \
 write_read_energy.o \
 write_thermo.o 
 

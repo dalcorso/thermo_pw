@@ -182,7 +182,7 @@ PROGRAM thermo_pw
   IF (lev_syn_1) THEN
      IF (lmurn) THEN
         CALL do_ev()
-        CALL mur(vmin,b0,b01,emin)
+        CALL write_mur(vmin,b0,b01,emin)
         CALL plot_mur()
         central_geo=(ngeo(1)+1)/2
         CALL compute_celldm_geo(vmin, celldm0, &
