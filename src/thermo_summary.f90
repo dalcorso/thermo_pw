@@ -111,7 +111,7 @@ SUBROUTINE thermo_summary()
           WRITE(stdout,'(5x,"modulus as a function of temperature ")')
           read_path=.TRUE.
           ltherm_expansion = .TRUE.
-     CASE ('elastic_constants') 
+     CASE ('scf_elastic_constants') 
           IF (frozen_ions) THEN
              WRITE(stdout,'(5x,"Computing the frozen ions elastic constants ")')
           ELSE
@@ -128,7 +128,7 @@ SUBROUTINE thermo_summary()
           ENDIF
           lelc = .TRUE.
           lmur=.TRUE.
-     CASE ('piezoelectric_tensor') 
+     CASE ('scf_piezoelectric_tensor') 
           IF (frozen_ions) THEN
              WRITE(stdout,'(5x,"Computing the frozen ions piezoelectric tensor")')
           ELSE
@@ -145,7 +145,7 @@ SUBROUTINE thermo_summary()
           ENDIF
           lpiezo=.TRUE.
           lmur=.TRUE.
-     CASE ('polarization') 
+     CASE ('scf_polarization') 
           WRITE(stdout,'(5x,"Computing the spontaneous polarization")')
      CASE ('mur_lc_polarization') 
           WRITE(stdout,'(5x,"Computing the spontaneous polarization at the &

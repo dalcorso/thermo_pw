@@ -109,7 +109,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
                  ENDIF
               ENDDO
            ENDDO
-        CASE ('elastic_constants', 'mur_lc_elastic_constants')
+        CASE ('scf_elastic_constants', 'mur_lc_elastic_constants')
            tstress=.TRUE.
            tprnfor=.TRUE.
            niter = electron_maxstep
@@ -127,7 +127,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
               epsf = forc_conv_thr
            ENDIF
            CALL set_work_for_elastic_const(iwork)
-        CASE ('piezoelectric_tensor', 'mur_lc_piezoelectric_tensor')
+        CASE ('scf_piezoelectric_tensor', 'mur_lc_piezoelectric_tensor')
            ibrav=0
            tstress=.TRUE.
            tprnfor=.TRUE.
@@ -174,7 +174,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
               OPEN( iunupdate, FILE=TRIM(filename), FORM='FORMATTED')
               CLOSE(iunupdate, STATUS='DELETE')
             END IF
-        CASE ('polarization','mur_lc_polarization')
+        CASE ('scf_polarization','mur_lc_polarization')
      END SELECT
   ELSE
      CALL errore('set_thermo_work','unknown part',1)

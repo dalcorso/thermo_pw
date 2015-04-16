@@ -152,7 +152,8 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            lev_syn_2=.TRUE.
            CALL allocate_thermodynamics()
            CALL allocate_anharmonic()
-        CASE ('elastic_constants', 'piezoelectric_tensor', 'polarization') 
+        CASE ('scf_elastic_constants', 'scf_piezoelectric_tensor', &
+                                                        'scf_polarization') 
 !
 !   in part 1 this case does nothing
 !
@@ -171,7 +172,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
                  nwork=nwork+1
               ENDDO
            ENDDO
-        CASE ('elastic_constants', 'mur_lc_elastic_constants')
+        CASE ('scf_elastic_constants', 'mur_lc_elastic_constants')
            IF (ALLOCATED(alat_geo)) DEALLOCATE(alat_geo)
            IF (ALLOCATED(energy_geo)) DEALLOCATE(energy_geo)
            IF (ALLOCATED(omega_geo)) DEALLOCATE(omega_geo)
@@ -201,7 +202,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               omega0 = compute_omega_geo(ibrav_save, celldm_save)
            ENDIF
            lelastic_const=.TRUE.
-        CASE ('piezoelectric_tensor', 'mur_lc_piezoelectric_tensor')
+        CASE ('scf_piezoelectric_tensor', 'mur_lc_piezoelectric_tensor')
            IF (ALLOCATED(alat_geo)) DEALLOCATE(alat_geo)
            IF (ALLOCATED(energy_geo)) DEALLOCATE(energy_geo)
            IF (ALLOCATED(omega_geo)) DEALLOCATE(omega_geo)
@@ -210,7 +211,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            ALLOCATE(energy_geo(nwork))
            ALLOCATE(omega_geo(nwork))
            lpiezoelectric_tensor=.TRUE.
-        CASE ('polarization', 'mur_lc_polarization')
+        CASE ('scf_polarization', 'mur_lc_polarization')
            IF (ALLOCATED(alat_geo)) DEALLOCATE(alat_geo)
            IF (ALLOCATED(energy_geo)) DEALLOCATE(energy_geo)
            IF (ALLOCATED(omega_geo)) DEALLOCATE(omega_geo)
@@ -242,7 +243,8 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   IF (part == 1) THEN
      SELECT CASE (TRIM(what))
         CASE ('scf', 'scf_bands', 'scf_2d_bands', 'scf_ph', 'scf_disp', &
-            'elastic_constants', 'piezoelectric_tensor','polarization')
+            'scf_elastic_constants', 'scf_piezoelectric_tensor',&
+                                                           'scf_polarization')
         CASE ('scf_ke', 'scf_nk', 'mur_lc', 'mur_lc_bands', 'mur_lc_ph', &
               'mur_lc_disp', 'mur_lc_t', 'mur_lc_elastic_constants', &
                           'mur_lc_piezoelectric_tensor', &
@@ -255,11 +257,11 @@ SUBROUTINE initialize_thermo_work(nwork, part)
      SELECT CASE (TRIM(what))
         CASE ('scf_ph', 'scf_disp', 'mur_lc_ph', 'mur_lc_disp','mur_lc_t')
            lphonon(1:nwork)=.TRUE.
-        CASE ('elastic_constants', 'mur_lc_elastic_constants')
+        CASE ('scf_elastic_constants', 'mur_lc_elastic_constants')
            lpwscf(1:nwork)=.TRUE.
            lstress(1:nwork)=.TRUE.
-        CASE ('piezoelectric_tensor', 'mur_lc_piezoelectric_tensor',&
-              'polarization', 'mur_lc_polarization')
+        CASE ('scf_piezoelectric_tensor', 'mur_lc_piezoelectric_tensor',&
+              'scf_polarization', 'mur_lc_polarization')
            lpwscf(1:nwork)=.TRUE.
            lberry(1:nwork)=.TRUE.
      END SELECT

@@ -651,7 +651,7 @@ Number of tasks for this option: Maximum between \texttt{ngeo} and the number
 of tasks of the phonon code (see above the option \texttt{what='scf\_ph'}). \\
 This option is implemented only for isotropic solids.
 
-\subsection{\texttt{what='elastic\_constants'}}
+\subsection{\texttt{what='scf\_elastic\_constants'}}
 With this option the code calculates the elastic constants of the solid.
 There are three different algorithms that at convergence should give the
 same results. In two of them, depending on the Laue class, the code 
@@ -710,14 +710,14 @@ independent strains. \\
 %the algorithm \texttt{energy} when it is available for the given lattice.
 
 \subsection{\texttt{what='mur\_lc\_elastic\_constants'}}
-As \texttt{what='elastic\_constants'} but the calculation is made at the
+As \texttt{what='scf\_elastic\_constants'} but the calculation is made at the
 geometry that corresponds to the minimum of the Murnaghan equation. The
 Murnaghan minimization is made as described for \texttt{what='mur\_lc'}.
 An example of the use of this option can be found in \texttt{example13}. \\
 Number of tasks for this option: maximum between \texttt{ngeo} and
 \texttt{ngeo\_strain} times the number of required independent strains.
 
-\subsection{\texttt{what='piezoelectric\_tensor'}}
+\subsection{\texttt{what='scf\_piezoelectric\_tensor'}}
 With this option the code calculates the piezoelectric tensor 
 ($g_{\alpha,m}$ $\alpha=1,3,\ m=1,6$) of the solid.
 Depending on the point group, it calculates the polarization of the
@@ -749,12 +749,12 @@ for a vanishing electric field. \\
 This feature is still uncomplete and experimental.
 
 \subsection{\texttt{what='mur\_lc\_piezoelectric\_tensor'}}
-As \texttt{what='piezoelectric\_tensor'} but the calculation is made at the
+As \texttt{what='scf\_piezoelectric\_tensor'} but the calculation is made at the
 geometry that corresponds to the minimum of the Murnaghan equation. The
 Murnaghan minimization is made as described for \texttt{what='mur\_lc'}. \\
 This feature is still uncomplete and experimental.
 
-\subsection{\texttt{what='polarization'}}
+\subsection{\texttt{what='scf\_polarization'}}
 With this option the code calculates the spontaneous polarization.
 The code makes a self-consistent calculation followed by three Berry
 phase calculations in which the polarization is calculated in the
@@ -769,7 +769,7 @@ nppl: the number of k points per string. In the perpendicular plane the
 This feature is still uncomplete and experimental.
 
 \subsection{\texttt{what='mur\_lc\_polarization'}}
-As \texttt{what='polarization'} but the calculation is made at the
+As \texttt{what='scf\_polarization'} but the calculation is made at the
 geometry that corresponds to the minimum of the Murnaghan equation. The
 Murnaghan minimization is made as described for \texttt{what='mur\_lc'}.\\
 This feature is still uncomplete and experimental.

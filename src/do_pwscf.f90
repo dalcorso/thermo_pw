@@ -147,7 +147,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   ! ... save final data file
   !
   IF ( .not. lmd) CALL pw2casino()
-  IF ( what /='elastic_constants' .AND. what /='mur_lc_elastic_constants') &
+  IF ( what /='scf_elastic_constants' .AND. what /='mur_lc_elastic_constants') &
           CALL punch('all')
   !
   IF ( .NOT. conv_ions )  exit_status =  3

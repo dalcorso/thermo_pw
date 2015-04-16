@@ -274,9 +274,6 @@ SUBROUTINE thermo_readin()
            IF (ngeo(igeo)==0) ngeo(igeo)=1
         ENDDO
      ENDIF
-     IF (what(1:4) == 'elas') ngeo=1
-     IF (what(1:4) == 'piez') ngeo=1
-     IF (what(1:4) == 'pola') ngeo=1
   END IF
 
   IF (what(1:6)=='mur_lc') THEN
