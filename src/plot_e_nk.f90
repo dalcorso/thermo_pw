@@ -52,18 +52,18 @@ DO isigma=1,nsigma
    IF (nsigma > 1) THEN
       filename=TRIM(flnkconv)//TRIM(int_to_char(isigma))//'/'//TRIM(flnkconv)
       IF (isigma==1) THEN
-         CALL gnuplot_write_file_mul_data(filename,1,2,'"red"',.TRUE.,.FALSE.,&
+         CALL gnuplot_write_file_mul_data(filename,1,2,'color_red',.TRUE.,.FALSE.,&
                                                              .FALSE.)
       ELSEIF (isigma==nsigma) THEN
-         CALL gnuplot_write_file_mul_data(filename,1,2,'"blue"',.FALSE.,.TRUE.,&
+         CALL gnuplot_write_file_mul_data(filename,1,2,'color_blue',.FALSE.,.TRUE.,&
                                           .FALSE.)
       ELSE
-         CALL gnuplot_write_file_mul_data(filename,1,2,'"green"',.FALSE.,.FALSE.,&
+         CALL gnuplot_write_file_mul_data(filename,1,2,'color_green',.FALSE.,.FALSE.,&
                                   .FALSE.)
       ENDIF
    ELSE
       filename=TRIM(flnkconv)
-      CALL gnuplot_write_file_mul_data(filename,1,2,'"red"',.TRUE.,.TRUE.,.FALSE.)
+      CALL gnuplot_write_file_mul_data(filename,1,2,'color_red',.TRUE.,.TRUE.,.FALSE.)
    END IF
 ENDDO
 

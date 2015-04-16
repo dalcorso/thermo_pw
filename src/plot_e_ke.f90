@@ -49,18 +49,18 @@ DO iden=1,nkeden
    IF (nkeden > 1) THEN
       filename=TRIM(flkeconv)//TRIM(int_to_char(iden))//'/'//TRIM(flkeconv)
       IF (iden==1) THEN
-         CALL gnuplot_write_file_mul_data(filename,1,2,'"red"',.TRUE.,&
+         CALL gnuplot_write_file_mul_data(filename,1,2,'color_red',.TRUE.,&
                                           .FALSE.,.FALSE.)
       ELSEIF (iden==nkeden) THEN
-         CALL gnuplot_write_file_mul_data(filename,1,2,'"blue"',.FALSE.,&
+         CALL gnuplot_write_file_mul_data(filename,1,2,'color_blue',.FALSE.,&
                                           .TRUE.,.FALSE.)
       ELSE
-         CALL gnuplot_write_file_mul_data(filename,1,2,'"green"',.FALSE.,&
+         CALL gnuplot_write_file_mul_data(filename,1,2,'color_green',.FALSE.,&
                                           .FALSE.,.FALSE.)
       ENDIF
    ELSE
       filename=TRIM(flkeconv)
-      CALL gnuplot_write_file_mul_data(filename,1,2,'"red"',.TRUE.,.TRUE.,&
+      CALL gnuplot_write_file_mul_data(filename,1,2,'color_red',.TRUE.,.TRUE.,&
                                                  .FALSE.)
    END IF
 ENDDO
