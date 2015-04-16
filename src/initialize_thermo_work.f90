@@ -40,7 +40,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   INTEGER, INTENT(OUT) :: nwork
   INTEGER, INTENT(IN) :: part
   INTEGER :: igeom, iq, irr, ike
-  INTEGER :: iden, icount, ink, isigma
+  INTEGER :: iden, icount, ink, isigma, compute_nwork
   REAL(DP) :: alat_new, celldm(6)
   REAL(DP) :: compute_omega_geo
   !
@@ -103,17 +103,15 @@ SUBROUTINE initialize_thermo_work(nwork, part)
         CASE ('mur_lc', 'mur_lc_bands', 'mur_lc_ph', 'mur_lc_disp', &
               'mur_lc_elastic_constants', 'mur_lc_piezoelectric_tensor', &
               'mur_lc_polarization')
-           nwork=ngeo(1)
-           ALLOCATE(alat_geo(nwork))
+           CALL clean_ngeo(ngeo,ibrav_save)
+           nwork=compute_nwork()
+           ALLOCATE(celldm_geo(6,nwork))
            ALLOCATE(energy_geo(nwork))
            ALLOCATE(omega_geo(nwork))
            tot_ngeo=1
+           CALL set_celldm_geo()
            DO igeom = 1, nwork
-              alat_geo(igeom)=celldm_save(1)+(igeom-(ngeo(1)+1.0_DP)/2.0_DP)&
-                                 *step_ngeo(1)
-              celldm=0.0_DP
-              celldm(1)=alat_geo(igeom)
-              omega_geo(igeom)=compute_omega_geo(ibrav_save,celldm)
+              omega_geo(igeom)=compute_omega_geo(ibrav_save,celldm_geo(:,igeom))
            ENDDO
            energy_geo=0.0_DP
            lev_syn_1=.TRUE.
@@ -134,17 +132,15 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            ENDIF
            IF (what=='mur_lc_bands') lbands_syn_1=.TRUE.
         CASE ('mur_lc_t')
-           nwork=ngeo(1)
-           ALLOCATE(alat_geo(nwork))
+           CALL clean_ngeo(ngeo,ibrav_save)
+           nwork=compute_nwork()
+           ALLOCATE(celldm_geo(6,nwork))
            ALLOCATE(energy_geo(nwork))
            ALLOCATE(omega_geo(nwork))
            tot_ngeo=nwork
+           CALL set_celldm_geo()
            DO igeom = 1, ngeo(1)
-              alat_geo(igeom) = celldm_save(1) + &
-                                (igeom-(ngeo(1)+1.0_DP)/2.0_DP)*step_ngeo(1)
-              celldm=0.0_DP
-              celldm(1)=alat_geo(igeom)
-              omega_geo(igeom)=compute_omega_geo(ibrav_save,celldm)
+              omega_geo(igeom)=compute_omega_geo(ibrav_save,celldm_geo(1,igeom))
            ENDDO
            energy_geo=0.0_DP
            lph = .TRUE.
@@ -271,3 +267,142 @@ SUBROUTINE initialize_thermo_work(nwork, part)
 
   RETURN
 END SUBROUTINE initialize_thermo_work
+
+SUBROUTINE clean_ngeo(ngeo,ibrav)
+
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ibrav
+INTEGER, INTENT(INOUT) :: ngeo(6)
+INTEGER :: ngeo_aux(6)
+
+ngeo_aux=1
+ngeo_aux(1)=ngeo(1)
+SELECT CASE (ibrav)
+   CASE(1,2,3)
+   CASE (4,6,7)
+      ngeo_aux(3)=ngeo(3)
+   CASE (5)
+      ngeo_aux(4)=ngeo(4)
+   CASE(8,9,-9,91,10,11)
+      ngeo_aux(2)=ngeo(2)
+      ngeo_aux(3)=ngeo(3)
+   CASE(12,13)
+      ngeo_aux(2)=ngeo(2)
+      ngeo_aux(3)=ngeo(3)
+      ngeo_aux(4)=ngeo(4)
+   CASE(-12,-13)   
+      ngeo_aux(2)=ngeo(2)
+      ngeo_aux(3)=ngeo(3)
+      ngeo_aux(5)=ngeo(5)
+CASE DEFAULT
+!
+!  If the Bravais lattice is unkown, 14 or 0 we let the user choose
+!
+      ngeo_aux=ngeo
+END SELECT
+ngeo=ngeo_aux
+RETURN
+END SUBROUTINE clean_ngeo
+
+SUBROUTINE set_celldm_geo()
+!
+!   This routine sets the celldm to a grid of points.
+!
+USE kinds, ONLY : DP
+USE thermo_mod, ONLY : what, step_ngeo, ngeo, celldm_geo, reduced_grid
+USE control_pwrun, ONLY : celldm_save
+IMPLICIT NONE
+INTEGER :: igeo1, igeo2, igeo3, igeo4, igeo5, igeo6
+INTEGER :: iwork, igeo, jgeo, i
+REAL(DP) :: angle1, angle2, angle3, angle
+
+iwork=0
+celldm_geo=0.0_DP
+IF (reduced_grid) then
+   iwork=1
+   celldm_geo(:,iwork)=celldm_save(:)
+   DO i=1,3
+      IF (ngeo(i)>1) THEN
+         DO igeo=1,ngeo(i)
+            jgeo=NINT(igeo-(ngeo(i)+1.0_DP)/2.0_DP)
+            IF (jgeo /= 0) THEN
+               iwork=iwork+1
+               celldm_geo(:,iwork) = celldm_save(:)
+               celldm_geo(i,iwork) = celldm_save(i) + jgeo * step_ngeo(i)
+            END IF
+         END DO
+      END IF
+   END DO
+
+   DO i=4,6
+      IF (ngeo(i)>1) THEN
+         DO igeo=1,ngeo(i)
+            jgeo=NINT(igeo-(ngeo(i)+1.0_DP)/2.0_DP)
+            IF (jgeo /= 0) THEN
+               iwork = iwork+1
+               angle = ACOS(celldm_save(i)) + jgeo * step_ngeo(i)
+               celldm_geo(:,iwork) = celldm_save(:)
+               celldm_geo(i,iwork) = COS(angle)
+            END IF
+         END DO
+      END IF
+   END DO
+ELSE
+   DO igeo6 = 1, ngeo(6)
+      angle3 = ACOS(celldm_save(6)) +  &
+               (igeo6-(ngeo(6)+1.0_DP)/2.0_DP)*step_ngeo(6)
+      DO igeo5 = 1, ngeo(5)
+         angle2 = ACOS(celldm_save(5)) +  &
+                (igeo5-(ngeo(5)+1.0_DP)/2.0_DP)*step_ngeo(5)
+         DO igeo4 = 1, ngeo(4)
+            angle1 = ACOS(celldm_save(4)) +  &
+                 (igeo4-(ngeo(4)+1.0_DP)/2.0_DP)*step_ngeo(4)
+            DO igeo3 = 1, ngeo(3)
+               DO igeo2 = 1, ngeo(2)
+                  DO igeo1 = 1, ngeo(1)
+                     iwork=iwork+1
+                     celldm_geo(1,iwork)=celldm_save(1)+&
+                           (igeo1-(ngeo(1)+1.0_DP)/2.0_DP)*step_ngeo(1)
+                     celldm_geo(2,iwork)=celldm_save(2)+&
+                           (igeo2-(ngeo(2)+1.0_DP)/2.0_DP)*step_ngeo(2)
+                     celldm_geo(3,iwork)=celldm_save(3)+&
+                           (igeo3-(ngeo(3)+1.0_DP)/2.0_DP)*step_ngeo(3)
+                     celldm_geo(4,iwork)= COS(angle1)
+                     celldm_geo(5,iwork)= COS(angle2)
+                     celldm_geo(6,iwork)= COS(angle3)
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDDO
+ENDIF
+
+RETURN
+END SUBROUTINE set_celldm_geo
+
+
+INTEGER FUNCTION compute_nwork()
+
+USE thermo_mod, ONLY : ngeo, reduced_grid
+USE control_mur, ONLY : lmurn
+IMPLICIT NONE
+INTEGER :: iwork
+
+IF (reduced_grid) THEN
+   iwork= ngeo(1) + ngeo(2) + ngeo(3) + ngeo(4) + ngeo(5) + ngeo(6)
+   IF (MOD(ngeo(1),2) /= 0) iwork = iwork - 1
+   IF (MOD(ngeo(2),2) /= 0) iwork = iwork - 1
+   IF (MOD(ngeo(3),2) /= 0) iwork = iwork - 1
+   IF (MOD(ngeo(4),2) /= 0) iwork = iwork - 1
+   IF (MOD(ngeo(5),2) /= 0) iwork = iwork - 1
+   IF (MOD(ngeo(6),2) /= 0) iwork = iwork - 1
+   compute_nwork=iwork + 1
+ELSE
+   compute_nwork=ngeo(1)*ngeo(2)*ngeo(3)*ngeo(4)*ngeo(5)*ngeo(6)
+ENDIF
+IF (lmurn) compute_nwork=ngeo(1)
+
+RETURN
+END FUNCTION compute_nwork
+

@@ -96,9 +96,9 @@ PROGRAM thermo_pw
   USE phdos_module,     ONLY : destroy_phdos
   USE input_parameters, ONLY : ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
                                trd_ht, rd_ht, cell_units, outdir
-  USE control_mur,      ONLY : vmin, b0, b01, emin
+  USE control_mur,      ONLY : vmin, b0, b01, emin, celldm0, lmurn
   USE thermo_mod,       ONLY : what, ngeo, alat_geo, omega_geo, energy_geo, &
-                               tot_ngeo
+                               tot_ngeo, reduced_grid, celldm_geo
   USE control_2d_bands, ONLY : only_bands_plot
   USE ph_restart,       ONLY : destroy_status_run
   USE save_ph,          ONLY : clean_input_variables
@@ -114,7 +114,7 @@ PROGRAM thermo_pw
   CHARACTER (LEN=256) :: auxdyn=' '
   CHARACTER (LEN=256) :: diraux=' '
   CHARACTER(LEN=6) :: int_to_char
-  INTEGER :: part, nwork, igeom, itemp, nspin0, exit_status
+  INTEGER :: part, nwork, igeom, itemp, nspin0, exit_status, central_geo
   REAL(DP) :: compute_alat_geo, fact
   LOGICAL :: all_done_asyn
   LOGICAL  :: exst, parallelfs
@@ -180,27 +180,27 @@ PROGRAM thermo_pw
 !  bulk modulus and its derivative and write the results
 !
   IF (lev_syn_1) THEN
-     CALL do_ev()
-     CALL mur(vmin,b0,b01,emin)
-     CALL plot_mur()
-  ENDIF
-     !
-  CALL deallocate_asyn()
-  ! 
-  !  This part is syncronized, only the first image makes a scf calculation
-  !  and a band structure calculation, at the equilibrium lattice constant
-  !  found previously.
-  !
-  !  set the lattice constant at the computed minimum of the Murnaghan
-  !
-  IF (lev_syn_1) THEN
-     celldm(1)=compute_alat_geo(vmin, alat_geo(ngeo(1)/2+1), &
-                                              omega_geo(ngeo(1)/2+1))
-     CALL cell_base_init ( ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
+     IF (lmurn) THEN
+        CALL do_ev()
+        CALL mur(vmin,b0,b01,emin)
+        CALL plot_mur()
+        central_geo=(ngeo(1)+1)/2
+        CALL compute_celldm_geo(vmin, celldm0, &
+                   celldm_geo(1,central_geo), omega_geo(central_geo))
+     ELSE
+        CALL write_gnuplot_energy(nwork)
+        CALL quadratic_fit()
+        IF (.NOT. reduced_grid) CALL plot_multi_energy()
+        WRITE(stdout,'(5x,"The minimum energy is obtained for celldm")')
+        WRITE(stdout,'(5x,6f12.5)') celldm0
+     ENDIF
+     CALL cell_base_init ( ibrav, celldm0, a, b, c, cosab, cosac, cosbc, &
                       trd_ht, rd_ht, cell_units )
      CALL set_fft_mesh()
      omega0=omega
   END IF
+
+  CALL deallocate_asyn()
 
   IF (lpwscf_syn_1) THEN
      outdir=TRIM(outdir_thermo)//'g1/'

@@ -11,8 +11,8 @@ SUBROUTINE bcast_thermo_input()
   !
   !  This routine broadcasts to all the images the input of thermo_pw.
   !
-  USE thermo_mod,      ONLY : what, ngeo, step_ngeo
-  USE control_mur,     ONLY : vmin_input, vmax_input, deltav, nvol
+  USE thermo_mod,      ONLY : what, ngeo, step_ngeo, reduced_grid
+  USE control_mur,     ONLY : vmin_input, vmax_input, deltav, nvol, lmurn
   USE control_thermo,  ONLY : outdir_thermo, flevdat,    &
                               flfrc, flfrq, fldos, fltherm, flanhar, &
                               filband, flkeconv, flnkconv, flgrun
@@ -26,7 +26,7 @@ SUBROUTINE bcast_thermo_input()
   USE control_gnuplot, ONLY : flgnuplot, flpsband, flpsdisp, &
                               flpsdisp, flpsdos, flpstherm,  &
                               flpsanhar, flpsmur, flpskeconv, flpsnkconv, &
-                              flpsgrun, flpbs, &
+                              flpsgrun, flpbs, flenergy, flpsenergy, &
                               flprojlayer, lgnuplot, gnuplot_command
   USE control_asy,     ONLY : flasy, lasymptote, asymptote_command
   USE control_conv,    ONLY : nke, deltake, nkeden, deltakeden, &
@@ -46,6 +46,7 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( what, meta_ionode_id, world_comm )
   CALL mp_bcast( ngeo, meta_ionode_id, world_comm )
   CALL mp_bcast( step_ngeo, meta_ionode_id, world_comm )
+  CALL mp_bcast( reduced_grid, meta_ionode_id, world_comm )
   CALL mp_bcast( zasr, meta_ionode_id, world_comm )
   CALL mp_bcast( flfrc, meta_ionode_id, world_comm )
   CALL mp_bcast( flfrq, meta_ionode_id, world_comm )
@@ -69,6 +70,7 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( vmax_input, meta_ionode_id, world_comm )
   CALL mp_bcast( deltav, meta_ionode_id, world_comm )
   CALL mp_bcast( nvol, meta_ionode_id, world_comm )
+  CALL mp_bcast( lmurn, meta_ionode_id, world_comm )
   CALL mp_bcast( nke, meta_ionode_id, world_comm )
   CALL mp_bcast( deltake, meta_ionode_id, world_comm )
   CALL mp_bcast( nkeden, meta_ionode_id, world_comm )
@@ -111,6 +113,8 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( flpsgrun, meta_ionode_id, world_comm )
   CALL mp_bcast( flpbs, meta_ionode_id, world_comm )
   CALL mp_bcast( flprojlayer, meta_ionode_id, world_comm )
+  CALL mp_bcast( flenergy, meta_ionode_id, world_comm )
+  CALL mp_bcast( flpsenergy, meta_ionode_id, world_comm )
   CALL mp_bcast( emin_input, meta_ionode_id, world_comm )
   CALL mp_bcast( emax_input, meta_ionode_id, world_comm )
   CALL mp_bcast( flevdat, meta_ionode_id, world_comm )

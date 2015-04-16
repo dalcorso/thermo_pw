@@ -34,19 +34,22 @@ FUNCTION compute_omega_geo(ibrav, celldm_)
 END FUNCTION compute_omega_geo
 
 !-----------------------------------------------------------------------
-FUNCTION compute_alat_geo(omega, alat1, omega1)
+SUBROUTINE compute_celldm_geo(omega, celldm, celldm1, omega1)
   !-----------------------------------------------------------------------
   !
-  !  This routine receives the volume, the lattice constant alat1 corresponding 
+  !  This routine receives the volume, the celldm1 corresponding 
   !  to omega1 and computes the lattice constant corresponding to omega.
+  !  It assumes that celldm(2) ... celldm(6) remain constant.
   !
   USE kinds,            ONLY : DP
   !
   IMPLICIT NONE
-  REAL(DP) :: compute_alat_geo
-  REAL(DP), INTENT(IN) :: omega, alat1, omega1
+  REAL(DP), INTENT(OUT) :: celldm(6)
+  REAL(DP), INTENT(IN) :: omega, celldm1(6), omega1
   !
-  compute_alat_geo = alat1 * ( omega / omega1 ) ** ( 1.0_DP / 3.0_DP )
+  celldm=celldm1
+  celldm(1) = celldm1(1) * ( omega / omega1 ) ** ( 1.0_DP / 3.0_DP )
   !
   RETURN
-END FUNCTION compute_alat_geo
+END SUBROUTINE compute_celldm_geo
+

@@ -14,7 +14,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
   !  performing the actual calculation.
   !
   USE kinds,            ONLY : DP
-  USE thermo_mod,       ONLY : what, alat_geo, celldm_geo
+  USE thermo_mod,       ONLY : what, celldm_geo
   USE control_thermo,   ONLY : outdir_thermo
   USE input_parameters, ONLY : ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
                                trd_ht, rd_ht, cell_units, outdir, &
@@ -81,7 +81,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
         CASE ('mur_lc', 'mur_lc_bands', 'mur_lc_ph', 'mur_lc_disp', &
               'mur_lc_t', 'mur_lc_elastic_constants', &
               'mur_lc_piezoelectric_tensor', 'mur_lc_polarization')
-           celldm(1)=alat_geo(iwork)
+           celldm(:)=celldm_geo(:,iwork)
            CALL cell_base_init ( ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
                          trd_ht, rd_ht, cell_units )
            CALL set_fft_mesh()

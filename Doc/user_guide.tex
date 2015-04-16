@@ -487,22 +487,65 @@ $3 N_{at}$, where $N_{at}$ is the number of atoms in the unit cell).
 \subsection{\texttt{what='mur\_lc'}}
 With this option the code runs several self-consistent calculations
 at different volumes. The runs can be done in parallel when several images 
-are available. The total energy as a function of the volume is then 
-interpolated with a Murnaghan equation and a plot of the energy
-as a function of the volume and of the pressure as a function of the volume is
-produced. Presently the volume is changed only by changing \texttt{celldm(1)},
-all the other ratios and angles remain fixed at the values given in
-the input of \texttt{pw.x}. 
+are available. This option has two working modes controlled by the 
+logical variable \texttt{lmurn}. When \texttt{lmurn=.TRUE.} the total energy as 
+a function of the volume is interpolated by a Murnaghan equation and 
+a plot of the energy as a function of the volume and of the pressure 
+as a function of the volume is produced. The volume is changed by 
+changing only \texttt{celldm(1)}. \texttt{celldm(2)...celldm(6)} remain fixed
+at the values given as input of \texttt{pw.x}.
+When \texttt{lmurn=.FALSE.} the energy is calculated in a uniform
+grid of parameters composed of \texttt{ngeo(1) x ngeo(2)...x ngeo(6)} points.
+All the energies are fitted with a quadratic polynomial of
+$N_k$ variables, where $N_k$ is the number of independent crystal
+parameters for the given crystal system. A plot of the energy as 
+a function of the lattice constant is produced for cubic systems.
+For solids of the hexagonal, tetragonal, and trigonal systems
+countour plots of the energy as a function of the two crystal parameters
+are plotted. For orthorombic systems contour plots of the energy as a function
+of $a$ and $b/a$ are plotted for each value of $c/a$. 
+Presently no graphical tool is implemented to plot the energy
+for monoclinic and triclinic crystal systems. 
+When \texttt{lmurn=.FALSE.} the bulk modulus
+is not calculated. To obtain it, you can calculate the elastic constants at the
+minimum geometry (see the option \texttt{what='elastic\_constants'}). 
+Note that for anisotropic solids, the equilibrium crystal parameters
+can be calculated also with the \texttt{vc-relax} option of \texttt{pw.x} 
+(using \texttt{what='scf'}).
+The present option should be used starting from the minimum found by
+\texttt{vc-relax}. \\
 This option can be controlled by the following variables:
 \begin{verbatim}
-ngeo       : the number of geometries to use.
+ngeo(1),...,ngeo(6) : the number of geometries to use for each celldm parameter.
              The lattice constant of these geometries is calculated from the
-             input of pw.x. celldm(1) of this input is used for the central
-             geometry. For the others celldm(1) is changed in steps of 
-             step_ngeo. ngeo must be odd.
-             Default: integer 1 for what=scf_*, 9 for what=mur_lc_*.
-step_ngeo  : The step between the lattice constant at different geometries.
-             Default: real 0.05 a.u.
+             input of pw.x. celldm(1),...,celldm(6) of this input is used 
+             for the central geometry. For the others celldm(1),...,celldm(6),
+             are changed in steps of step_ngeo(1),...,step_ngeo(6). 
+             ngeo(1) must be odd. Only the values of celldm relevant for
+             each Bravais lattice are actually changed.
+             Default: integer 1,1,1,1,1,1 for what=scf_*, 9,1,1,1,1,1 for 
+             what=mur_lc_*.
+step_ngeo(1),...,step_ngeo(6)  : The step between the lattice constants at 
+             different geometries. step_ngeo(1) is, in atomic units, the change
+             of a, step_ngeo(2), step_ngeo(3) are adimensional and are the
+             changes of the ratios b/a, c/a, step_ngeo(4), step_ngeo(5), &
+             step_ngeo(6) are the changes in degree of the angles alpha,
+             beta, and gamma. The cosine of the angle is calculated by the
+             program.
+             Default: real 0.05 a.u., 0.01, 0.01, 0.5, 0.5, 0.5
+lmurn       : if .TRUE. the Murnaghan fit is done. Only ngeo(1) values of
+             the energy are fitted, the other values of ngeo are not used. 
+             if .FALSE. use a quadratic function to interpolate the energy 
+             as a function of all celldm parameters. The number of 
+             self-consistent calculations is ngeo(1) x ngeo(2) x ngeo(3)
+             x ngeo(4) x ngeo(5) x ngeo(6). In this case only the 
+             minimum energy and the optimal celldm are given in output. 
+             Default: .TRUE. 
+reduced_grid: if .TRUE. the number of energies used for the quadratic fit 
+             are reduced in such a way that only one among celldm(1) ... 
+             celldm(6) is changed in each run. This option is used only 
+             when lmurn=.FALSE.
+             Default: .FALSE.
 vmin_input : minimum volume for the plot of the energy as a function of volume.
              Default: real 0.98 times the volume of the first geometry.
 vmax_input : maximum volume for the plot of the energy as a function of volume.

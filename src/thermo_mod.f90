@@ -42,6 +42,9 @@ MODULE thermo_mod
                                                 ! different geometries.
   INTEGER, ALLOCATABLE :: ibrav_geo(:)          ! the Bravais lattice at
                                                 ! each geometry
+  LOGICAL :: reduced_grid                       ! if .TRUE. use a reduced
+                                                ! grid to interpolate the
+                                                ! geometry
 END MODULE thermo_mod
 
 MODULE temperature
@@ -73,6 +76,13 @@ MODULE control_mur
                                                ! deltav
   INTEGER :: nvol                              ! the number of volumes for
                                                ! the plot
+  LOGICAL :: lmurn             ! if .TRUE. makes a Murnaghan
+                               ! fit of the energy as a function of the volume
+                               ! otherwise makes a fit of the energy as a 
+                               ! function of the celldm parameters, with a
+                               ! quadratic function of dimension up to 6
+  REAL(DP) :: celldm0(6)  ! the minimum celldm
+
 END MODULE control_mur
 
 MODULE thermodynamics
@@ -445,6 +455,32 @@ MODULE control_pwrun
 
 END MODULE control_pwrun
 
+MODULE control_energy
+
+  USE kinds, ONLY: DP
+  SAVE
+
+  INTEGER :: ncontours
+  REAL(DP), ALLOCATABLE :: ene_levels(:)
+  CHARACTER(LEN=12), ALLOCATABLE :: color_levels(:)
+
+END MODULE control_energy
+
+MODULE control_quadratic_energy
+
+  USE kinds, ONLY: DP
+  SAVE
+
+  INTEGER :: degree              ! number of degrees of freedom
+  INTEGER :: nvar                ! number of variables of the polynomial fit
+  REAL(DP), ALLOCATABLE :: hessian_v(:,:), &   ! hessian eigenvectors
+                           hessian_e(:),   &   ! hessian eigenvalues
+                           x_pos_min(:),   &   ! coordinates of the minimum
+                           coeff(:),       &   ! coefficients of quadratic fit
+                           coeff_t(:,:)        ! coefficients at each
+                                               ! temperature
+
+END MODULE control_quadratic_energy
 
 MODULE control_gnuplot
   USE kinds,  ONLY : DP
@@ -468,6 +504,10 @@ MODULE control_gnuplot
                                   ! total energy at different k points
   CHARACTER(LEN=256) :: flpsgrun  ! the name of the postscript file with 
                                   ! the gruneisen parameters
+  CHARACTER(LEN=256) :: flenergy  ! the name of the file with the energy
+                                  ! suited for gnuplot contour plots
+  CHARACTER(LEN=256) :: flpsenergy  ! the name of the postscript file with 
+                                  ! the energy contours
   CHARACTER(LEN=256) :: flpbs     ! the name of the file with the pbs
 
   CHARACTER(LEN=256) :: flprojlayer ! the name of the file with the projections

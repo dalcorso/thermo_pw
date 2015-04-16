@@ -66,10 +66,10 @@ END SUBROUTINE write_ev_driver
 
 SUBROUTINE do_ev()
 !
-!  This subroutine compute the equilibrium volume and bulk modulus
+!  This subroutine computes the equilibrium volume and bulk modulus
 !
 USE kinds, ONLY : DP
-USE thermo_mod, ONLY : omega_geo, alat_geo, ngeo
+USE thermo_mod, ONLY : omega_geo, celldm_geo, ngeo
 USE control_mur, ONLY : vmin, b0, b01, emin
 USE control_thermo, ONLY : flevdat
 USE io_global, ONLY : meta_ionode_id, stdout
@@ -78,7 +78,8 @@ USE mp, ONLY : mp_bcast
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: file_dat
-REAL(DP) :: compute_alat_geo
+INTEGER :: central_geo
+REAL(DP) :: celldm_(6)
 
   file_dat=TRIM(flevdat) 
   CALL write_ev_input(file_dat)
@@ -88,10 +89,15 @@ REAL(DP) :: compute_alat_geo
   CALL mp_bcast(b01, meta_ionode_id, world_comm)
   CALL mp_bcast(emin, meta_ionode_id, world_comm)
   !
+  central_geo=ngeo(1)/2+1
+  CALL compute_celldm_geo(vmin, celldm_, celldm_geo(1,central_geo), &
+                                         omega_geo(central_geo))
   WRITE(stdout,'(/,2x,76("+"))')
   WRITE(stdout,'(5x, "The equilibrium lattice constant is ",f12.4," a.u.")') &
-           compute_alat_geo(vmin, alat_geo(ngeo(1)/2+1), omega_geo(ngeo(1)/2+1))
+                celldm_(1)
   WRITE(stdout,'(5x, "The bulk modulus is ",15x,f12.2," kbar")')  b0
+  WRITE(stdout,'(5x, "The pressure derivative of the bulk modulus is ",&
+                            &7x,f12.2," kbar")')  b01
   WRITE(stdout,'(2x,76("+"),/)')
 
 END SUBROUTINE do_ev
@@ -101,7 +107,7 @@ SUBROUTINE do_ev_t(itemp)
 !  This subroutine compute the equilibrium volume and bulk modulus
 !
 USE kinds,          ONLY : DP
-USE thermo_mod,     ONLY : ngeo, alat_geo, omega_geo, energy_geo
+USE thermo_mod,     ONLY : ngeo, omega_geo, energy_geo, celldm_geo
 USE thermodynamics, ONLY : ph_free_ener
 USE anharmonic,     ONLY : vmin_t, b0_t, b01_t, free_e_min_t
 USE temperature,    ONLY : ntemp, temp
@@ -114,8 +120,8 @@ INTEGER, INTENT(IN) :: itemp
 INTEGER :: igeom, iu_ev
 CHARACTER(LEN=256) :: file_dat
 CHARACTER(LEN=6) :: int_to_char
-REAL(DP) :: compute_alat_geo
-REAL(DP) :: free_e, vm, b0, b01
+REAL(DP) :: free_e, vm, b0, b01, celldm_(6)
+INTEGER :: central_geo
 
   IF (my_image_id /= root_image) RETURN
 
@@ -140,11 +146,13 @@ REAL(DP) :: free_e, vm, b0, b01
   b01_t(itemp)=b01
   free_e_min_t(itemp)=free_e
   !
+  central_geo=ngeo(1)/2+1
+  CALL compute_celldm_geo(vmin_t(itemp), celldm_, celldm_geo(1,central_geo), &
+                                         omega_geo(central_geo))
   WRITE(stdout,'(/,2x,76("-"))')
   WRITE(stdout,'(5x, "phdos free energy, at T= ", f12.6)') temp(itemp)
   WRITE(stdout,'(5x, "The equilibrium lattice constant is ",f12.6," a.u.")') &
-      compute_alat_geo(vmin_t(itemp), alat_geo(ngeo(1)/2+1), &
-                                           omega_geo(ngeo(1)/2+1))
+              celldm_(1)
   WRITE(stdout,'(5x, "The bulk modulus is ",15x,f12.4," kbar")')  b0_t(itemp)
   WRITE(stdout,'(5x, "The bulk modulus derivative is ",15x,f12.4)')  b01_t(itemp)
   WRITE(stdout,'(2x,76("-"),/)')
@@ -156,7 +164,7 @@ SUBROUTINE do_ev_t_ph(itemp)
 !  This subroutine compute the equilibrium volume and bulk modulus
 !
 USE kinds,          ONLY : DP
-USE thermo_mod,     ONLY : ngeo, alat_geo, omega_geo, energy_geo
+USE thermo_mod,     ONLY : ngeo, omega_geo, energy_geo, celldm_geo
 USE ph_freq_thermodynamics, ONLY : phf_free_ener
 USE ph_freq_anharmonic,     ONLY : vminf_t, b0f_t, b01f_t, free_e_minf_t
 USE temperature,    ONLY : ntemp, temp
@@ -169,8 +177,8 @@ INTEGER, INTENT(IN) :: itemp
 INTEGER :: igeom, iu_ev
 CHARACTER(LEN=256) :: file_dat
 CHARACTER(LEN=6) :: int_to_char
-REAL(DP) :: free_e, vm, b0, b01
-REAL(DP) :: compute_alat_geo
+REAL(DP) :: free_e, vm, b0, b01, celldm_(6)
+INTEGER :: central_geo
 
   IF (my_image_id /= root_image) RETURN
 
@@ -195,10 +203,13 @@ REAL(DP) :: compute_alat_geo
   b01f_t(itemp)=b01
   free_e_minf_t(itemp)=free_e
   !
+  central_geo=ngeo(1)/2+1
+  CALL compute_celldm_geo(vminf_t(itemp), celldm_, celldm_geo(1,central_geo), &
+                                         omega_geo(central_geo))
   WRITE(stdout,'(/,2x,76("+"))')
   WRITE(stdout,'(5x, "ph_freq free energy at T=",f12.4)') temp(itemp)
   WRITE(stdout,'(5x, "The equilibrium lattice constant is ",f12.6," a.u.")') &
-      compute_alat_geo(vminf_t(itemp), alat_geo(ngeo(1)/2+1), omega_geo(ngeo(1)/2+1))
+                 celldm_(1)
   WRITE(stdout,'(5x, "The bulk modulus is ",15x,f12.4," kbar")')  b0f_t(itemp)
   WRITE(stdout,'(5x, "The bulk modulus derivative is ",15x,f12.4)')  b01f_t(itemp)
   WRITE(stdout,'(2x,76("+"),/)')

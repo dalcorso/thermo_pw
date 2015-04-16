@@ -14,7 +14,7 @@ SUBROUTINE thermo_readin()
   !  and written and the variables of the calculations.
   !
   USE kinds,                ONLY : DP
-  USE thermo_mod,           ONLY : what, ngeo, step_ngeo
+  USE thermo_mod,           ONLY : what, ngeo, step_ngeo, reduced_grid
   USE control_thermo,       ONLY : outdir_thermo, flevdat,        &
                                    flfrc, flfrq, fldos, fltherm,  &
                                    flanhar, filband, flkeconv,    &
@@ -34,7 +34,7 @@ SUBROUTINE thermo_readin()
   USE control_gnuplot,      ONLY : flgnuplot, flpsband, flpsdisp, &
                                    flpsmur, flpsdos, flpstherm, flpsanhar, &
                                    flpskeconv, flpsnkconv, flpsgrun,       &
-                                   lgnuplot,           &
+                                   lgnuplot, flenergy, flpsenergy,         &
                                    flpbs, flprojlayer, gnuplot_command
   USE control_2d_bands,     ONLY : lprojpbs, nkz, gap_thr, sym_divide, &
                                    identify_sur, sur_layers, sur_thr, &
@@ -46,11 +46,12 @@ SUBROUTINE thermo_readin()
   USE control_grun,         ONLY : flpgrun, grunmin_input, grunmax_input
   USE control_conv,         ONLY : nke, deltake, nkeden, deltakeden, &
                                    nnk, deltank, nsigma, deltasigma
-  USE control_mur,          ONLY : vmin_input, vmax_input, deltav, nvol
+  USE control_mur,          ONLY : vmin_input, vmax_input, deltav, nvol, lmurn
   USE control_elastic_constants, ONLY : at_save, tau_save, delta_epsilon, &
                                         ibrav_save, ngeo_strain, frozen_ions, &
                                         fl_el_cons, elastic_algorithm
   USE control_piezoelectric_tensor, ONLY : nosym_save
+  USE control_energy,       ONLY : ncontours, color_levels, ene_levels 
   USE piezoelectric_tensor, ONLY : nppl
   USE control_pwrun,        ONLY : celldm_save
   USE cell_base,            ONLY : at, bg, celldm
@@ -97,23 +98,28 @@ SUBROUTINE thermo_readin()
                             lsym,                           &
                             npx,                            &
                             lprojpbs, nkz, gap_thr,         &
+                            reduced_grid,                   &
                             only_bands_plot,                &
                             sur_thr, sur_layers,            &
                             sym_divide, identify_sur,       &
                             subtract_vacuum,                &
                             force_bands,                    &
                             dump_states,                    &
+                            ncontours,                      &
                             flevdat,                        &
                             flpband, flpgrun,               &
                             flgnuplot, flpsband,            &
                             flpsdisp, flpsdos, flpstherm,   &
                             flpsanhar, flpsmur, flpskeconv, &
                             flpsnkconv, flgrun,             &
+                            flpsenergy,                     &
+                            flenergy,                       &
                             fl_el_cons,                     &
                             flasy, asymptote_command,       &
                             lasymptote,                     &
                             emin_input, emax_input,         &
                             vmin_input, vmax_input, deltav, &
+                            lmurn,                          &
                             elastic_algorithm,              &
                             grunmin_input, grunmax_input,   &
                             delta_epsilon, ngeo_strain,     &
@@ -143,6 +149,7 @@ SUBROUTINE thermo_readin()
   step_ngeo(4) = 0.5
   step_ngeo(5) = 0.5
   step_ngeo(6) = 0.5
+  reduced_grid =.FALSE.
 
   nq1_d=128
   nq2_d=128
@@ -167,6 +174,7 @@ SUBROUTINE thermo_readin()
   vmax_input=0.0_DP
   deltav=0.0_DP
   nvol=1
+  lmurn=.TRUE.
 
   nke=5
   deltake=10.0_DP
@@ -184,6 +192,7 @@ SUBROUTINE thermo_readin()
   elastic_algorithm='standard'
 
   nppl=51
+  ncontours=0
 
   npx=8
 
@@ -217,6 +226,7 @@ SUBROUTINE thermo_readin()
   fl_el_cons='output_el_cons.dat'
   flpbs='output_pbs'
   flprojlayer='output_projlayer'
+  flenergy='output_energy'
 
   flgnuplot='gnuplot.tmp'
   flpsmur='output_mur.ps'
@@ -228,6 +238,7 @@ SUBROUTINE thermo_readin()
   flpskeconv='output_keconv.ps'
   flpsnkconv='output_nkconv.ps'
   flpsgrun='output_grun.ps'
+  flpsenergy='output_energy.ps'
 
   flasy='asy_tmp'
   lasymptote=.FALSE.
@@ -266,6 +277,30 @@ SUBROUTINE thermo_readin()
      IF (what(1:4) == 'elas') ngeo=1
      IF (what(1:4) == 'piez') ngeo=1
      IF (what(1:4) == 'pola') ngeo=1
+  END IF
+
+  IF (what(1:6)=='mur_lc') THEN
+     IF (ncontours==0) THEN
+        ncontours=9
+        ALLOCATE(ene_levels(ncontours))
+        ALLOCATE(color_levels(ncontours))
+        ene_levels=-1000.0_DP
+        color_levels='color_black'
+     ELSE
+        ALLOCATE(ene_levels(ncontours))
+        ALLOCATE(color_levels(ncontours))
+        ene_levels=-1000.0_DP
+        color_levels='color_black'
+        IF (meta_ionode) THEN
+           DO icont=1,ncontours
+              READ (iun_thermo, *, err=400, iostat = ios) ene_levels(icont), &
+                                                          color_levels(icont)
+           ENDDO
+400        CONTINUE
+        ENDIF
+        CALL mp_bcast(ene_levels, meta_ionode_id, world_comm)
+        CALL mp_bcast(color_levels, meta_ionode_id, world_comm)
+     END IF
   END IF
 
   nqaux=0

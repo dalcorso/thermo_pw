@@ -40,12 +40,14 @@ plotband_sub.o \
 plot_2d_bz.o \
 plot_e_ke.o \
 plot_e_nk.o \
+plot_multi_energy.o \
 plot_thermo.o \
 plot_mur.o \
 polifit.o \
 print_polarization.o \
 proj_band_structure.o \
 q2r_sub.o \
+quadratic_fit.o \
 read_state_densities.o \
 run_thermo_asyncronously.o \
 set_2d_bz_path.o \
@@ -70,6 +72,7 @@ write_e_nk.o \
 write_e_ke.o  \
 write_ev_input.o \
 write_gruneisen_band.o \
+write_gnuplot_energy.o \
 write_read_energy.o \
 write_thermo.o 
 
