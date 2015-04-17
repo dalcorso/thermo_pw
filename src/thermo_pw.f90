@@ -355,9 +355,6 @@ PROGRAM thermo_pw
 !     pressure derivative for each temperature.
 !
      IF (lev_syn_2) THEN
-        diraux='evdir'
-        CALL check_tempdir ( diraux, exst, parallelfs )
-        flevdat=TRIM(diraux)//'/'//TRIM(flevdat)
         DO itemp = 1, ntemp
            CALL do_ev_t(itemp)
            CALL do_ev_t_ph(itemp)

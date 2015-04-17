@@ -107,7 +107,9 @@ SUBROUTINE do_ev_t(itemp)
 !  This subroutine compute the equilibrium volume and bulk modulus
 !
 USE kinds,          ONLY : DP
+USE constants,      ONLY : ry_kbar
 USE thermo_mod,     ONLY : ngeo, omega_geo, energy_geo, celldm_geo
+USE control_mur,    ONLY : vmin, b0, b01
 USE thermodynamics, ONLY : ph_free_ener
 USE anharmonic,     ONLY : vmin_t, b0_t, b01_t, free_e_min_t
 USE temperature,    ONLY : ntemp, temp
@@ -118,33 +120,40 @@ USE mp_images,      ONLY : my_image_id, root_image
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: itemp
 INTEGER :: igeom, iu_ev
-CHARACTER(LEN=256) :: file_dat
-CHARACTER(LEN=6) :: int_to_char
-REAL(DP) :: free_e, vm, b0, b01, celldm_(6)
+REAL(DP) :: free_e, vm, celldm_(6)
 INTEGER :: central_geo
+INTEGER, PARAMETER :: m1=4
+INTEGER :: idata, ndata, i1
+REAL(DP) :: a(m1), x(ngeo(1)), y(ngeo(1)), aux, aux1
+
 
   IF (my_image_id /= root_image) RETURN
 
-  file_dat=TRIM(flevdat)//TRIM(int_to_char(itemp))
-  CALL write_ev_driver(file_dat)
+!  WRITE(stdout,*) 
+  ndata=ngeo(1)
+  DO idata=1,ndata
+     x(idata)=omega_geo(idata)
+     y(idata)=ph_free_ener(itemp,idata) 
+!     WRITE(stdout,'(2f25.14)') x(idata), y(idata)
+  ENDDO
+  CALL polifit(x, y, ndata, a, m1)
 
-  IF (meta_ionode) THEN
-     iu_ev=2
-     OPEN(UNIT=iu_ev, FILE=TRIM(file_dat), STATUS='UNKNOWN', FORM='FORMATTED')
-     DO igeom=1,ngeo(1)
-        WRITE(iu_ev,'(2f20.10)') omega_geo(igeom), energy_geo(igeom) + &
-                                            ph_free_ener(itemp,igeom)
-     ENDDO
-     !
-     CLOSE(iu_ev)
-     !
-  END IF
+  CALL find_min_mur_pol(vmin, b0 / ry_kbar, b01, a, m1, vm)
+  aux = (vmin / vm)**b01 * b0
+  DO i1=3,m1
+     aux=aux+ (i1-2.0_DP) * (i1 - 1.0_DP) * a(i1) * vm ** (i1-2) * ry_kbar
+  ENDDO
+  aux1= b0 * b01 / aux * ( vmin / vm )** b01
+  DO i1=3,m1
+     aux1=aux1- (i1-2.0_DP)**2*(i1 - 1.0_DP) * a(i1) * vm ** (i1-2) * ry_kbar &
+                                 / aux
+  ENDDO
 
-  CALL ev_sub(vm, b0, b01, free_e)
   vmin_t(itemp)=vm
-  b0_t(itemp)=b0
-  b01_t(itemp)=b01
-  free_e_min_t(itemp)=free_e
+  b0_t(itemp)=aux
+  b01_t(itemp)=aux1
+
+!  free_e_min_t(itemp)=free_e
   !
   central_geo=ngeo(1)/2+1
   CALL compute_celldm_geo(vmin_t(itemp), celldm_, celldm_geo(1,central_geo), &
@@ -165,8 +174,10 @@ SUBROUTINE do_ev_t_ph(itemp)
 !
 USE kinds,          ONLY : DP
 USE thermo_mod,     ONLY : ngeo, omega_geo, energy_geo, celldm_geo
+USE constants,      ONLY : ry_kbar
 USE ph_freq_thermodynamics, ONLY : phf_free_ener
 USE ph_freq_anharmonic,     ONLY : vminf_t, b0f_t, b01f_t, free_e_minf_t
+USE control_mur,    ONLY : vmin, b0, b01
 USE temperature,    ONLY : ntemp, temp
 USE control_thermo, ONLY : flevdat
 USE io_global,      ONLY : meta_ionode_id, stdout,  meta_ionode
@@ -175,33 +186,41 @@ USE mp_images,      ONLY : my_image_id, root_image
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: itemp
 INTEGER :: igeom, iu_ev
-CHARACTER(LEN=256) :: file_dat
 CHARACTER(LEN=6) :: int_to_char
-REAL(DP) :: free_e, vm, b0, b01, celldm_(6)
+REAL(DP) :: free_e, vm, celldm_(6)
 INTEGER :: central_geo
+INTEGER, PARAMETER :: m1=4
+INTEGER :: idata, ndata, i1
+REAL(DP) :: a(m1), x(ngeo(1)), y(ngeo(1)), aux, aux1
+
 
   IF (my_image_id /= root_image) RETURN
 
-  file_dat=TRIM(flevdat)//'_ph'//TRIM(int_to_char(itemp))
-  CALL write_ev_driver(file_dat)
+!  WRITE(stdout,*) 
+  ndata=ngeo(1)
+  DO idata=1,ndata
+     x(idata)=omega_geo(idata)
+     y(idata)=phf_free_ener(itemp,idata) 
+!     WRITE(stdout,'(2f25.14)') x(idata), y(idata)
+  ENDDO
+  CALL polifit(x, y, ndata, a, m1)
 
-  IF (meta_ionode) THEN
-     iu_ev=2
-     OPEN(UNIT=iu_ev, FILE=TRIM(file_dat), STATUS='UNKNOWN', FORM='FORMATTED')
-     DO igeom=1,ngeo(1)
-        WRITE(iu_ev,'(2f20.10)') omega_geo(igeom), energy_geo(igeom) + &
-                                            phf_free_ener(itemp,igeom)
-     ENDDO
-     !
-     CLOSE(iu_ev)
-     !
-  END IF
+  CALL find_min_mur_pol(vmin, b0 / ry_kbar, b01, a, m1, vm)
+  aux = (vmin / vm)**b01 * b0
+  DO i1=3,m1
+     aux=aux+ (i1-2.0_DP) * (i1 - 1.0_DP) * a(i1) * vm ** (i1-2) * ry_kbar
+  ENDDO
+  aux1= b0 * b01 / aux * ( vmin / vm )** b01
+  DO i1=3,m1
+     aux1=aux1- (i1-2.0_DP)**2*(i1 - 1.0_DP) * a(i1) * vm ** (i1-2) * ry_kbar &
+                                 / aux
+  ENDDO
 
-  CALL ev_sub(vm, b0, b01, free_e)
   vminf_t(itemp)=vm
-  b0f_t(itemp)=b0
-  b01f_t(itemp)=b01
-  free_e_minf_t(itemp)=free_e
+  b0f_t(itemp)=aux
+  b01f_t(itemp)=aux1
+
+!  free_e_minf_t(itemp)=free_e
   !
   central_geo=ngeo(1)/2+1
   CALL compute_celldm_geo(vminf_t(itemp), celldm_, celldm_geo(1,central_geo), &
@@ -216,3 +235,65 @@ INTEGER :: central_geo
 
 END SUBROUTINE do_ev_t_ph
 
+SUBROUTINE find_min_mur_pol(v0, b0, b01, a, m1, vm)
+!
+!  This routine minimizes a function equal to the Murnaghan equation
+!  with parameters v0, b0 and b01 and a polynomial of degree m1-1 of
+!  the form a(1) + a(2) * v + a(3) * v**2 +... a(m1) * v**(m1-1)
+!  NB: b0 must be in atomic units not kbar.
+!
+USE kinds, ONLY : DP 
+USE io_global, ONLY : stdout
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: m1
+REAL(DP), INTENT(IN) :: v0, b0, b01, a(m1)
+REAL(DP), INTENT(OUT) :: vm
+REAL(DP), PARAMETER :: tol=1.D-11
+INTEGER, PARAMETER :: maxstep=100
+REAL(DP) :: fx, f1, f2, vx, v1, v2
+REAL(DP) :: compute_fun
+INTEGER :: istep
+
+v1=v0*0.8_DP
+v2=v0*1.3_DP
+f1= compute_fun(v1, v0, b0, b01, a, m1)
+f2= compute_fun(v2, v0, b0, b01, a, m1)
+IF (f1 * f2 > 0.0_DP) CALL errore('find_min_mur_pol','problem finding minimum',1)
+DO istep=1,maxstep
+   vx= ( v1+v2 ) * 0.5_DP
+   fx= compute_fun(vx, v0, b0, b01, a, m1)
+   IF (fx * f1 < 0.0_DP) THEN
+      v2=vx
+   ELSE
+      v1=vx
+   END IF
+   IF (ABS(v1-v2) < tol) GOTO 100
+!   WRITE(stdout,'("V1", f20.12, " V2 ", f20.12)') v1, v2
+ENDDO
+CALL errore('find_min_mur_pol','minimum not found',1)
+100 CONTINUE
+vm=(v1+v2)*0.5_DP
+!WRITE(stdout,'("Vmin", 3f20.12)') vm
+
+RETURN
+END SUBROUTINE find_min_mur_pol
+
+FUNCTION compute_fun(v, v0, b0, b01, a, m1)
+
+USE kinds, ONLY : DP 
+IMPLICIT NONE
+REAL(DP) :: compute_fun
+INTEGER, INTENT(IN) :: m1
+REAL(DP), INTENT(IN) :: v, v0, b0, b01, a(m1)
+REAL(DP) :: aux
+INTEGER :: i1
+
+aux=v0*b0 * ( 1.0_DP / v0  - (v0 / v ) **( b01-1.0_DP) / v) / b01 + a(2)
+
+DO i1=3, m1
+   aux = aux + (i1-1.0_DP) * a(i1) * v**(i1-2)
+ENDDO
+
+compute_fun=aux
+RETURN
+END FUNCTION compute_fun
