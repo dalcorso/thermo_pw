@@ -14,8 +14,9 @@ USE phdos_module,   ONLY : phdos_type, read_phdos_data, zero_point_energy, &
 USE thermo_mod,     ONLY : tot_ngeo
 USE temperature,    ONLY : tmin, tmax, deltat, ntemp, temp
 USE thermodynamics, ONLY : ph_ener, ph_free_ener, ph_entropy, ph_cv, phdos_save
-USE mp_images,      ONLY : root_image, my_image_id
-USE io_global,      ONLY : ionode, stdout
+USE mp_images,      ONLY : root_image, my_image_id, intra_image_comm
+USE mp,             ONLY : mp_bcast
+USE io_global,      ONLY : ionode, ionode_id, stdout
 USE control_thermo, ONLY : fltherm
 
 IMPLICIT NONE
@@ -24,11 +25,35 @@ INTEGER, INTENT(IN) :: igeom
 INTEGER  :: i, ios
 REAL(DP) :: e0, tot_states
 INTEGER  :: itemp
-INTEGER  :: iu_therm
-LOGICAL  :: check_file_exists
+INTEGER  :: iu_therm, idum
+LOGICAL  :: check_file_exists, do_read
 !
-IF ( check_file_exists(fltherm) ) RETURN
+do_read=.FALSE.
+IF ( check_file_exists(fltherm) ) do_read=.TRUE.
 IF (my_image_id /= root_image) RETURN
+
+IF (do_read) THEN
+   IF (ionode) THEN
+      iu_therm=2
+      OPEN (UNIT=iu_therm, FILE=TRIM(fltherm), STATUS='unknown',&
+                                                     FORM='formatted')
+      DO idum=1,12
+         READ(iu_therm,*)
+      ENDDO
+      DO itemp = 1, ntemp
+         READ(iu_therm, '(5e16.8)') temp(itemp), &
+                    ph_ener(itemp,igeom), ph_free_ener(itemp,igeom), &
+                    ph_entropy(itemp,igeom), ph_cv(itemp,igeom)
+      END DO
+      CLOSE(iu_therm)
+   END IF
+   CALL mp_bcast(ph_ener(:,igeom), ionode_id, intra_image_comm)
+   CALL mp_bcast(ph_free_ener(:,igeom), ionode_id, intra_image_comm)
+   CALL mp_bcast(ph_entropy(:,igeom), ionode_id, intra_image_comm)
+   CALL mp_bcast(ph_cv(:,igeom), ionode_id, intra_image_comm)
+   RETURN
+END IF
+
 
 IF ( igeom < 1 .OR. igeom > tot_ngeo ) CALL errore('print_thermo', & 
                                                'Too many geometries',1)
@@ -100,24 +125,49 @@ USE temperature,      ONLY : tmin, tmax, deltat, ntemp, temp
 USE ph_freq_thermodynamics, ONLY : phf_ener, phf_free_ener, phf_entropy, &
                            phf_cv, ph_freq_save
 USE thermo_mod,       ONLY : tot_ngeo
-USE mp_images,        ONLY : root_image, my_image_id
-USE io_global,        ONLY : ionode, stdout
+USE mp_images,        ONLY : root_image, my_image_id, intra_image_comm
+USE mp,               ONLY : mp_bcast
+USE io_global,        ONLY : ionode, ionode_id, stdout
 USE control_thermo,   ONLY : fltherm
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: igeom
 CHARACTER(LEN=256) :: filename
-LOGICAL :: check_file_exists
+LOGICAL :: check_file_exists, do_read
 
 INTEGER  :: i, ios
 REAL(DP) :: e0
 INTEGER  :: itemp
-INTEGER  :: iu_therm
+INTEGER  :: iu_therm, idum
 !
+do_read=.FALSE.
 filename=TRIM(fltherm)//'_ph'
-IF ( check_file_exists(filename) ) RETURN
+IF ( check_file_exists(filename) ) do_read=.TRUE.
 
 IF (my_image_id /= root_image) RETURN
+
+IF (do_read) THEN
+   IF (ionode) THEN
+      iu_therm=2
+      OPEN (UNIT=iu_therm, FILE=TRIM(filename), STATUS='old',&
+                                                     FORM='formatted')
+      DO idum=1,11
+         READ(iu_therm,*)
+      ENDDO
+      DO itemp = 1, ntemp
+         READ(iu_therm, '(5e16.8)') temp(itemp), &
+                    phf_ener(itemp,igeom), phf_free_ener(itemp,igeom), &
+                    phf_entropy(itemp,igeom), phf_cv(itemp,igeom)
+      END DO
+      CLOSE(iu_therm)
+   END IF
+   CALL mp_bcast(phf_ener(:,igeom), ionode_id, intra_image_comm)
+   CALL mp_bcast(phf_free_ener(:,igeom), ionode_id, intra_image_comm)
+   CALL mp_bcast(phf_entropy(:,igeom), ionode_id, intra_image_comm)
+   CALL mp_bcast(phf_cv(:,igeom), ionode_id, intra_image_comm)
+   RETURN
+END IF
+
 
 IF ( igeom < 1 .OR. igeom > tot_ngeo ) CALL errore('print_thermo', & 
                                                'Too many geometries',1)
