@@ -58,7 +58,7 @@ PROGRAM thermo_pw
   USE environment,      ONLY : environment_start, environment_end
   USE mp_world,         ONLY : world_comm
   USE mp_asyn,          ONLY : with_asyn_images
-  USE control_ph,       ONLY : with_ext_images, always_run
+  USE control_ph,       ONLY : with_ext_images, always_run, ldisp
   USE io_global,        ONLY : ionode, stdout, meta_ionode_id
   USE mp,               ONLY : mp_sum, mp_bcast
   USE control_thermo,   ONLY : lev_syn_1, lev_syn_2, lpwscf_syn_1,         &
@@ -66,6 +66,7 @@ PROGRAM thermo_pw
                                lmatdyn, ldos, ltherm, flfrc, flfrq, fldos, &
                                fltherm, spin_component, flevdat,           &
                                lconv_ke_test, lconv_nk_test,               &
+                               after_disp,                                 &
                                lelastic_const, lpiezoelectric_tensor,      &
                                lpolarization
   USE ifc,              ONLY : freqmin, freqmax
@@ -256,7 +257,8 @@ PROGRAM thermo_pw
         write(6,'(5x,40("%"),/)') 
         outdir=TRIM(outdir_thermo)//'g'//TRIM(int_to_char(igeom))//'/'
         !
-        CALL thermo_ph_readin()
+        IF (.NOT. after_disp) CALL thermo_ph_readin()
+        IF (after_disp) ldisp=.TRUE.
         IF (igeom==1) fildyn_thermo=TRIM(fildyn)
         IF (igeom==1) flfrc_thermo=TRIM(flfrc)
         IF (igeom==1) flfrq_thermo=TRIM(flfrq)
@@ -284,10 +286,11 @@ PROGRAM thermo_pw
         ! ... Checking the status of the calculation and if necessary initialize
         ! ... the q mesh and all the representations
         !
-        !
-        CALL check_initial_status(auxdyn)
-        !
+        auxdyn=fildyn
+
         IF ( .NOT. check_dyn_file_exists(auxdyn)) THEN
+
+           CALL check_initial_status(auxdyn)
            !
            part=2
            CALL initialize_thermo_work(nwork, part)
@@ -340,11 +343,13 @@ PROGRAM thermo_pw
            ENDIF
         ENDIF
         CALL deallocate_asyn()
-        CALL clean_pw(.TRUE.)
-        CALL close_phq(.FALSE.)
-        CALL clean_input_variables()
-        CALL destroy_status_run()
-        CALL deallocate_part()
+        IF (.NOT. after_disp) THEN
+           CALL clean_pw(.TRUE.)
+           CALL close_phq(.FALSE.)
+           CALL clean_input_variables()
+           CALL destroy_status_run()
+           CALL deallocate_part()
+        ENDIF
      ENDDO
      flgnuplot=TRIM(flgnuplot_thermo)
 !

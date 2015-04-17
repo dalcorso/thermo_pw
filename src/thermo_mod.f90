@@ -264,6 +264,9 @@ MODULE control_thermo
   LOGICAL :: ldos=.FALSE.   ! if .true. the phonon dos is calculated
   LOGICAL :: ltherm=.FALSE. ! if .true. the thermodynamical properties are
                             ! calculated
+  LOGICAL :: after_disp=.FALSE. ! if .true. dynamical matrix files are supposed
+                            ! to be already on disk. fildyn must be read
+                            ! from thermo_control.
   LOGICAL :: lq2r=.FALSE.   ! if .true. the interatomic force constants are calculated
   LOGICAL :: lmatdyn=.FALSE.     ! if .true. the phonon are interpolated
 

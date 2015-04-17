@@ -450,6 +450,17 @@ ndos          : number of frequency points in the dos plot.
                 Default: determined from previous data
 nq1_d, nq2_d, nq3_d : thick mesh for phonon dos calculation.
                 Default: integer 128, 128, 128
+after_disp    : if .true. the dynamical matrices are supposed to be already
+                available in files in the current directory. This option
+                is needed to restart when the outdir directory has been
+                erased and ph.x cannot be run without redoing the scf 
+                calculation. The exact restart point depends on the files
+                already available on the current directory.
+                Default: logical .FALSE.
+fildyn        : the name of the dynamical matrix file, as would be 
+                specified in the input of ph. 
+                To be used when after_disp is .true.. 
+                Default: character ' '
 zasr          : type of acoustic sum rule applied to the ifc.
                 Default: character(len=*) 'Simple'
 tmin          : minimum temperature.

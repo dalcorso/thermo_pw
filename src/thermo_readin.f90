@@ -18,7 +18,7 @@ SUBROUTINE thermo_readin()
   USE control_thermo,       ONLY : outdir_thermo, flevdat,        &
                                    flfrc, flfrq, fldos, fltherm,  &
                                    flanhar, filband, flkeconv,    &
-                                   flnkconv, flgrun
+                                   flnkconv, flgrun, after_disp
   USE temperature,          ONLY : tmin, tmax, deltat, ntemp
   USE ifc,                  ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq, &
                                    zasr, freqmin_input, freqmax_input
@@ -54,6 +54,8 @@ SUBROUTINE thermo_readin()
   USE control_energy,       ONLY : ncontours, color_levels, ene_levels 
   USE piezoelectric_tensor, ONLY : nppl
   USE control_pwrun,        ONLY : celldm_save
+  USE control_ph,           ONLY : xmldyn
+  USE output,               ONLY : fildyn
   USE cell_base,            ONLY : at, bg, celldm
   USE ions_base,            ONLY : nat, tau
   USE symm_base,            ONLY : nosym
@@ -78,6 +80,7 @@ SUBROUTINE thermo_readin()
 
   INTEGER :: nch, nrp, ierr
   LOGICAL :: tend, terr, read_paths, set_internal_path, set_2d_path, exst
+  LOGICAL :: has_xml
   CHARACTER(LEN=256) :: input_line, buffer
   REAL(DP) :: wq0
   !
@@ -106,6 +109,8 @@ SUBROUTINE thermo_readin()
                             force_bands,                    &
                             dump_states,                    &
                             ncontours,                      &
+                            after_disp,                     &
+                            fildyn,                         &
                             flevdat,                        &
                             flpband, flpgrun,               &
                             flgnuplot, flpsband,            &
@@ -175,6 +180,9 @@ SUBROUTINE thermo_readin()
   deltav=0.0_DP
   nvol=1
   lmurn=.TRUE.
+
+  after_disp=.TRUE.
+  fildyn=' '
 
   nke=5
   deltake=10.0_DP
@@ -261,6 +269,8 @@ SUBROUTINE thermo_readin()
      nkz=1
      lprojpbs=.FALSE.
   ENDIF
+
+  IF (after_disp) xmldyn=has_xml(fildyn)
 
   read_paths=( what=='scf_bands'.OR.what=='scf_disp'.OR.what=='plot_bz'.OR. &
                what=='mur_lc_bands' .OR. what=='mur_lc_disp' .OR. &

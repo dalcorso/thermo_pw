@@ -15,7 +15,7 @@ SUBROUTINE bcast_thermo_input()
   USE control_mur,     ONLY : vmin_input, vmax_input, deltav, nvol, lmurn
   USE control_thermo,  ONLY : outdir_thermo, flevdat,    &
                               flfrc, flfrq, fldos, fltherm, flanhar, &
-                              filband, flkeconv, flnkconv, flgrun
+                              filband, flkeconv, flnkconv, flgrun, after_disp
   USE temperature,     ONLY : tmin, tmax, deltat, ntemp
   USE ifc,             ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq, &
                               zasr, freqmin_input, freqmax_input
@@ -37,6 +37,7 @@ SUBROUTINE bcast_thermo_input()
   USE control_2d_bands,     ONLY : lprojpbs, nkz, sym_divide, identify_sur, &
                                    gap_thr, sur_layers, sur_thr, force_bands, &
                                    only_bands_plot, dump_states, subtract_vacuum
+  USE output,          ONLY : fildyn
   USE mp_world,        ONLY : world_comm
   USE mp,              ONLY : mp_bcast
   USE io_global,       ONLY : meta_ionode_id
@@ -57,6 +58,8 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( flnkconv, meta_ionode_id, world_comm )
   CALL mp_bcast( flgrun, meta_ionode_id, world_comm )
   CALL mp_bcast( flpgrun, meta_ionode_id, world_comm )
+  CALL mp_bcast( after_disp, meta_ionode_id, world_comm )
+  CALL mp_bcast( fildyn, meta_ionode_id, world_comm )
   CALL mp_bcast( nq1_d, meta_ionode_id, world_comm )
   CALL mp_bcast( nq2_d, meta_ionode_id, world_comm )
   CALL mp_bcast( nq3_d, meta_ionode_id, world_comm )
