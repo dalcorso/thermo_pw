@@ -40,7 +40,7 @@ SUBROUTINE allocate_anharmonic()
                                   alpha_t, beta_t, gamma_t, cv_t, cp_t, b0_s
   USE ph_freq_anharmonic,  ONLY : vminf_t, b0f_t, b01f_t, free_e_minf_t, &
                                   alphaf_t, betaf_t, gammaf_t, cvf_t, cpf_t, b0f_s
-  USE grun_anharmonic,     ONLY : betab
+  USE grun_anharmonic,     ONLY : betab, grun_gamma_t
 
   IMPLICIT NONE
 
@@ -66,6 +66,7 @@ SUBROUTINE allocate_anharmonic()
   IF (.NOT. ALLOCATED (betaf_t) )       ALLOCATE(betaf_t(ntemp)) 
   IF (.NOT. ALLOCATED (gammaf_t) )      ALLOCATE(gammaf_t(ntemp)) 
   IF (.NOT. ALLOCATED (betab) )         ALLOCATE(betab(ntemp))
+  IF (.NOT. ALLOCATED (grun_gamma_t) )  ALLOCATE(grun_gamma_t(ntemp)) 
 
   RETURN
   !

@@ -185,11 +185,15 @@ MODULE grun_anharmonic
   !  parameters
   !
   SAVE
-  TYPE(ph_freq_type) :: ph_grun        ! the gruneisen parameters
-                                       ! on a mesh
   REAL(DP), ALLOCATABLE :: betab(:)    ! volume thermal expansion multiplied
                                        ! by the bulk modulus
   REAL(DP), ALLOCATABLE :: grun_gamma_t(:)  ! average gruneisen parameter
+
+  REAL(DP), ALLOCATABLE :: poly_grun(:,:,:) ! For each band and each q point
+                                        ! these are the coefficients of 
+                                        ! polynomial which fit the frequency
+                                        ! as a function of volume
+  INTEGER :: poly_order                 ! order of the polynomial + 1 
 
 END MODULE grun_anharmonic
 
@@ -444,6 +448,17 @@ MODULE control_grun
                                 !
   REAL(DP) :: grunmin_input, &  ! minimum value for gruneisen plot
               grunmax_input     ! maximum value for gruneisen plot
+
+  REAL(DP), ALLOCATABLE :: betab(:)    ! volume thermal expansion multiplied
+                                       ! by the bulk modulus
+  REAL(DP), ALLOCATABLE :: grun_gamma_t(:)  ! average gruneisen parameter
+                                       ! computed from gruneisen parameters
+
+  REAL(DP), ALLOCATABLE :: poly_grun(:,:,:) ! For each band and each q point
+                                        ! these are the coefficients of 
+                                        ! polynomial which fit the frequency
+                                        ! as a function of volume
+  INTEGER :: poly_order                 ! order of the polynomial + 1 
 
 END MODULE control_grun
 

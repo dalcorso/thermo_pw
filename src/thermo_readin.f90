@@ -156,9 +156,9 @@ SUBROUTINE thermo_readin()
   step_ngeo(6) = 0.5
   reduced_grid =.FALSE.
 
-  nq1_d=128
-  nq2_d=128
-  nq3_d=128
+  nq1_d=192
+  nq2_d=192
+  nq3_d=192
   zasr='simple'
   freqmin_input=0.0_DP
   freqmax_input=0.0_DP

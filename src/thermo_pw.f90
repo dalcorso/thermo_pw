@@ -360,26 +360,31 @@ PROGRAM thermo_pw
 !     pressure derivative for each temperature.
 !
      IF (lev_syn_2) THEN
-        DO itemp = 1, ntemp
-           CALL do_ev_t(itemp)
-           CALL do_ev_t_ph(itemp)
-        ENDDO
+        IF (lmurn) THEN
+           DO itemp = 1, ntemp
+              CALL do_ev_t(itemp)
+              CALL do_ev_t_ph(itemp)
+           ENDDO
+!
+!    here we calculate several anharmonic quantities 
+!
+           CALL write_anharmonic()
+           CALL write_ph_freq_anharmonic()
 !
 !    here we calculate and plot the gruneisen parameters along the given path.
 !
-        CALL write_gruneisen_band(flfrq_thermo)
-        CALL plotband_sub(3,1,flfrq_thermo)
+           CALL write_gruneisen_band(flfrq_thermo)
+           CALL plotband_sub(3,1,flfrq_thermo)
 !
 !    here we compute the gruneisen parameters on the uniform mesh
 !
-        CALL compute_gruneisen()
+           CALL compute_gruneisen()
 !
 !    here we calculate several anharmonic quantities and plot them.
 !
-        CALL write_anharmonic()
-        CALL write_ph_freq_anharmonic()
-        CALL write_grun_anharmonic()
-        CALL plot_anhar() 
+           CALL write_grun_anharmonic()
+           CALL plot_anhar() 
+        ENDIF
      ENDIF
 
      IF (lmatdyn.AND.ldos) THEN

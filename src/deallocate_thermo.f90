@@ -19,7 +19,7 @@ SUBROUTINE deallocate_thermo()
                              alpha_t, beta_t, gamma_t, cv_t, cp_t, b0_s
   USE ph_freq_anharmonic, ONLY : vminf_t, b0f_t, free_e_minf_t, &
                              alphaf_t, betaf_t, gammaf_t, cvf_t, cpf_t, b0f_s
-  USE grun_anharmonic,  ONLY : betab
+  USE grun_anharmonic,  ONLY : betab, grun_gamma_t
   USE control_paths,    ONLY : xqaux, wqaux, letter, label_list, letter_path, &
                                label_disp_q, disp_q, disp_wq, nrap_plot_in,   &
                                rap_plot_in, nrap_plot, rap_plot
@@ -64,6 +64,7 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (betaf_t) )         DEALLOCATE(betaf_t) 
   IF ( ALLOCATED (gammaf_t) )        DEALLOCATE(gammaf_t) 
   IF ( ALLOCATED (betab) )           DEALLOCATE(betab) 
+  IF ( ALLOCATED (grun_gamma_t) )    DEALLOCATE(grun_gamma_t) 
   IF ( ALLOCATED (free_e_minf_t) )   DEALLOCATE(free_e_minf_t) 
   IF ( ALLOCATED (xqaux) )           DEALLOCATE(xqaux)
   IF ( ALLOCATED (wqaux) )           DEALLOCATE(wqaux)

@@ -17,97 +17,96 @@ SUBROUTINE compute_gruneisen()
   !
   ! 
   USE kinds,                  ONLY : DP
-  USE thermo_mod,             ONLY : tot_ngeo, omega_geo
+  USE thermo_mod,             ONLY : ngeo, omega_geo
   USE ions_base,              ONLY : nat
   USE ph_freq_thermodynamics, ONLY : ph_freq_save
-  USE ph_freq_anharmonic,     ONLY : vminf_t
-  USE grun_anharmonic,        ONLY : ph_grun
-  USE ph_freq_module,         ONLY : init_ph_freq
-  USE ifc,                    ONLY : nq1_d, nq2_d, nq3_d
+  USE grun_anharmonic,        ONLY : poly_grun, poly_order
   USE mp_images,              ONLY : root_image, my_image_id
 
   IMPLICIT NONE
 
-
-  INTEGER, PARAMETER :: m1 = 3   ! number of polynomial coefficients
-  REAL(DP) :: alpha(m1)          ! the polynomial coefficients
-  REAL(DP), ALLOCATABLE :: frequences(:)
-
-  REAL(DP) :: freq
-  INTEGER, ALLOCATABLE :: level(:,:)
-  INTEGER :: ibnd, jbnd, n, ipos, jpos, irap, igeo
-  INTEGER :: geo, use_geo, nq
+  REAL(DP), ALLOCATABLE :: freq_geo(:,:)
+  INTEGER, ALLOCATABLE :: rap_geo(:,:)
+  INTEGER :: n, igeo, nq
 
   IF ( my_image_id /= root_image ) RETURN
+!
+!  allocate space for the fit of the frequencies with respect to the
+!  volume
+!
+  nq=ph_freq_save(1)%nq
+  poly_order=3
 
-  IF ( .NOT. ALLOCATED( level ) ) ALLOCATE (level(12,tot_ngeo))
-  IF ( .NOT. ALLOCATED( frequences ) ) ALLOCATE (frequences(tot_ngeo))
-!
-!  allocate space for the gruneisen parameters
-!
-!
-!  Compute the Gruneisen parameters
-!
-  geo=tot_ngeo/2-1
-  IF (mod(tot_ngeo,2)==0) THEN
-     use_geo=2
-  ELSE
-     use_geo=3
-  ENDIF
-  nq=ph_freq_save(geo+2)%nq
-  CALL init_ph_freq(ph_grun, nat, nq1_d, nq2_d, nq3_d, nq)
-  DO n = 1, ph_grun%nq
-     level=1
-     DO ibnd=1, 3*nat
+  IF ( .NOT. ALLOCATED( poly_grun ) ) ALLOCATE(poly_grun(poly_order,3*nat,nq))
+
+  ALLOCATE(freq_geo(3*nat,ngeo(1)))
+  ALLOCATE(rap_geo(3*nat,ngeo(1)))
+
+  DO n = 1, nq
+     DO igeo=1,ngeo(1)
+        freq_geo(1:3*nat,igeo)=ph_freq_save(igeo)%nu(1:3*nat,n)
+        rap_geo(1:3*nat,igeo)=ph_freq_save(igeo)%rap(1:3*nat,n)
+     ENDDO
+     CALL compute_freq_derivative(ngeo(1),freq_geo,rap_geo,omega_geo,&
+                                         poly_order,poly_grun(1,1,n))
+  ENDDO
+  DEALLOCATE ( freq_geo )
+  DEALLOCATE ( rap_geo )
+
+  RETURN
+END SUBROUTINE compute_gruneisen
+
+SUBROUTINE compute_freq_derivative(ngeo,freq_geo,rap_geo,omega_geo,&
+                                                        poly_order,poly_grun)
+USE kinds, ONLY : DP
+USE ions_base, ONLY : nat
+IMPLICIT NONE
+INTEGER,  INTENT(IN) :: ngeo, poly_order
+INTEGER,  INTENT(IN) :: rap_geo(3*nat,ngeo)
+REAL(DP), INTENT(IN) :: freq_geo(3*nat,ngeo), omega_geo(ngeo)
+REAL(DP), INTENT(INOUT) :: poly_grun(poly_order,3*nat)
+
+REAL(DP), ALLOCATABLE :: frequences(:)
+INTEGER,  ALLOCATABLE :: level(:,:)
+INTEGER :: ibnd, jbnd, igeo, irap, central_geo
+
+ALLOCATE (level(12,ngeo))
+ALLOCATE (frequences(ngeo))
+
+central_geo=ngeo/2+1
+level=1
+DO ibnd=1, 3*nat
 !
 !   there are several representation files, we choose to order the
 !   Gruneisen parameters on file as those of the central geometry
 !
-        ipos = ibnd + (n-1) * 3 * nat
-        irap = ph_freq_save(geo+2)%rap(ibnd,n)
-          
-        IF (irap == -1) THEN
-           DO igeo=1,use_geo
-              frequences(igeo)=ph_freq_save(geo+igeo)%nu(ibnd,n)
-           END DO
-        ELSE
-           DO igeo=1,use_geo
-              DO jbnd=level(irap,igeo), 3*nat
-                 jpos = jbnd + (n-1) * 3 * nat
-                 IF (ph_freq_save(geo+igeo)%rap(jbnd,n)==irap) THEN
-                    frequences(igeo)=ph_freq_save(geo+igeo)%nu(jbnd,n)
-                    level(irap,igeo)=jbnd+1
-                    GOTO 20
-                 ENDIF
-              ENDDO
-              CALL errore('compute_gruneisen','representation not found',1)
-20            CONTINUE
-           ENDDO
-        ENDIF
-!
-!    Use the frequencies of the central geometry if there is 
-!    an odd number of geometries, or the average of the two central
-!    geometries if there is an even number
-!
-        IF (mod(tot_ngeo,2)==0) THEN
-           freq  = 0.5_DP * ( ph_freq_save(tot_ngeo/2)%nu(ibnd,n) + &
-                              ph_freq_save(tot_ngeo/2+1)%nu(ibnd,n) )
-        ELSE
-           freq = ph_freq_save(tot_ngeo/2+1)%nu(ibnd,n)
-        ENDIF
-        CALL polifit( omega_geo(geo+1), frequences, use_geo, alpha, m1 )
-        IF ( freq > 1.d-4 ) THEN
-           freq = alpha(1) + alpha(2) * vminf_t(1) + alpha(3) * vminf_t(1)**2
-           ph_grun%nu(ibnd,n) = - (alpha(2) + 2.0_DP * alpha(3) * &
-                                              vminf_t(1)) / freq
-           ph_freq_save(tot_ngeo/2+1)%nu(ibnd,n) = freq
-        ELSE
-           ph_grun%nu(ibnd,n) = 0.0_DP
-        END IF
-     ENDDO
-  ENDDO
-  DEALLOCATE ( level )
-  DEALLOCATE ( frequences )
+   irap = rap_geo(ibnd,central_geo)
 
-   RETURN
-END SUBROUTINE compute_gruneisen
+   IF (irap == -1) THEN
+      DO igeo=1,ngeo
+         frequences(igeo)=freq_geo(ibnd,igeo)
+      END DO
+   ELSE
+      DO igeo=1,ngeo
+         DO jbnd=level(irap,igeo), 3*nat
+            IF (rap_geo(jbnd,igeo)==irap) THEN
+               frequences(igeo)=freq_geo(jbnd,igeo)
+               level(irap,igeo)=jbnd+1
+               GOTO 20
+            ENDIF
+         ENDDO
+         CALL errore('compute_freq_derivative','representation not found',1)
+20       CONTINUE
+      ENDDO
+   ENDIF
+!
+!    Fit the frequencies as a function of the volume
+!
+   CALL polifit( omega_geo, frequences, ngeo,  &
+                                     poly_grun(:,ibnd), poly_order )
+ENDDO
+
+DEALLOCATE ( level )
+DEALLOCATE ( frequences )
+RETURN
+END SUBROUTINE compute_freq_derivative
