@@ -36,6 +36,12 @@ REAL(DP), PARAMETER :: thr_ph=1.D-3   ! a phonon with frequency smaller than
 ! All phonon frequencies smaller than thr_ph are removed from the calculation
 ! A warning is written on output if they are more or less than 3. 
 !
+REAL(DP), PARAMETER :: thr_taylor=1.D-3   ! When the argument of the functions
+                                          ! is smaller than this threshold use
+                                          ! a Taylor expansion expression 
+                                          ! to avoid the numerical error due
+                                          ! to the calculation of 
+                                          ! 1.0-(1.0-epsilon) 
 
 TYPE ph_freq_type
    INTEGER :: number_of_points        ! the total number of frequencies
@@ -252,7 +258,7 @@ REAL(DP), INTENT(IN) :: temp
 REAL(DP), INTENT(OUT) :: free_ener
 
 INTEGER :: nq, iq, nat, imode, startq, lastq, counter
-REAL(DP) :: nu, arg, wg, temp1, onesixth
+REAL(DP) :: nu, arg, wg, temp1, onesixth, one24
 
 free_ener=0.0_DP
 IF (temp <= 1.E-9_DP) RETURN
@@ -260,6 +266,7 @@ temp1 = 1.0_DP / temp
 nq=ph_freq%nq
 nat=ph_freq%nat
 onesixth=1.0_DP / 6.0_DP
+one24=1.0_DP /24.0_DP
 CALL divide (intra_image_comm, nq, startq, lastq)
 counter=0
 DO iq=startq,lastq
@@ -267,11 +274,11 @@ DO iq=startq,lastq
    DO imode=1,3*nat
       nu=ph_freq%nu(imode,iq)
       arg= kb1 * nu * temp1
-      IF (arg > 1.d-5) THEN
+      IF (arg > thr_taylor) THEN
          free_ener = free_ener +kb*temp*wg*(LOG(1.0_DP-EXP(-arg)))
       ELSEIF (nu > thr_ph) THEN
          free_ener = free_ener+kb*temp*wg*(LOG( arg - arg**2*0.5_DP + &
-                                                         arg**3 * onesixth )) 
+                                          arg**3 * onesixth - arg**4 * one24 )) 
       ELSE 
          counter=counter+1
       ENDIF
@@ -301,12 +308,13 @@ REAL(DP), INTENT(IN) :: temp
 REAL(DP), INTENT(OUT) :: ener
 
 INTEGER :: nq, iq, imode, nat, startq, lastq
-REAL(DP) :: nu, temp1, arg, wg, onesixth, earg
+REAL(DP) :: nu, temp1, arg, wg, onesixth, one24, earg
 
 ener=0.0_DP
 IF (temp <= 1.E-9_DP) RETURN
 temp1 = 1.0_DP / temp
 onesixth=1.0_DP / 6.0_DP
+one24=1.0_DP /24.0_DP
 nq=ph_freq%nq
 nat=ph_freq%nat
 CALL divide(intra_image_comm, nq, startq, lastq)
@@ -316,10 +324,11 @@ DO iq=startq,lastq
       nu=ph_freq%nu(imode,iq)
       arg= kb1 * nu * temp1
       earg = EXP(-arg)
-      IF (arg > 1.d-5) THEN
+      IF (arg > thr_taylor) THEN
         ener = ener +  wg*nu*earg / ( 1.0_DP - earg ) 
       ELSEIF ( nu > thr_ph ) THEN
-         ener = ener +  wg*nu*earg/(arg-arg**2*0.5_DP+arg**3*onesixth)
+         ener = ener +  wg*nu*earg/(arg-arg**2*0.5_DP+arg**3*onesixth &
+                                                    - arg**4 * one24)
       ENDIF
    ENDDO
 ENDDO
@@ -364,11 +373,12 @@ REAL(DP), INTENT(IN) :: temp
 REAL(DP), INTENT(OUT) :: cv
 
 INTEGER :: nq, iq, imode, nat, startq, lastq
-REAL(DP) :: nu, temp1, arg, wg, onesixth, earg
+REAL(DP) :: nu, temp1, arg, wg, onesixth, one24, earg
 
 cv=0.0_DP
 IF (temp <= 1.E-9_DP) RETURN
 onesixth=1.0_DP / 6.0_DP
+one24 = 1.0_DP / 24.0_DP
 temp1 = 1.0_DP / temp
 nq=ph_freq%nq
 nat=ph_freq%nat
@@ -379,11 +389,12 @@ DO iq=startq,lastq
       nu=ph_freq%nu(imode,iq)
       arg= kb1 * nu * temp1
       earg=EXP(-arg)
-      IF (arg > 1.D-6 ) THEN
+      IF (arg > thr_taylor ) THEN
           cv = cv + wg * earg * ( arg / ( 1.0_DP - earg  ) ) ** 2 
       ELSEIF (nu > thr_ph) THEN
              cv = cv + wg * earg *  &
-                  (arg /( arg - arg**2*0.5_DP + arg**3 * onesixth ))**2
+                  (arg /( arg - arg**2*0.5_DP + arg**3 * onesixth &
+                             - arg**4 * one24))**2
       ENDIF
    ENDDO
 ENDDO
@@ -407,11 +418,12 @@ REAL(DP), INTENT(IN)  :: temp
 REAL(DP), INTENT(OUT) :: betab
 
 INTEGER :: nq, iq, imode, nat, startq, lastq
-REAL(DP) :: nu, temp1, arg, gamman, wg, onesixth, earg
+REAL(DP) :: nu, temp1, arg, gamman, wg, onesixth, one24, earg
 
 betab=0.0_DP
 IF (temp <= 1.E-9_DP) RETURN
 onesixth=1.0_DP/6.0_DP
+one24=1.0_DP/24.0_DP
 temp1 = 1.0_DP / temp
 nq=ph_freq%nq
 nat=ph_freq%nat
@@ -423,12 +435,13 @@ DO iq=startq,lastq
       gamman=ph_grun%nu(imode,iq) 
       arg= kb1 * nu * temp1
       earg=EXP(-arg)
-      IF (arg > 1.D-6 ) THEN
+      IF (arg > thr_taylor ) THEN
           betab = betab + wg * gamman &
                             * earg * ( arg / ( 1.0_DP - earg )) ** 2 
       ELSEIF (nu > thr_ph) THEN
          betab = betab + wg * gamman * earg *  &
-                       (arg /( arg - arg**2*0.5_DP + arg**3 * onesixth ))**2
+                       (arg /( arg - arg**2*0.5_DP + arg**3*onesixth - &
+                        arg**4 * one24))**2
       ENDIF
    ENDDO
 ENDDO
