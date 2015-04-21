@@ -76,7 +76,7 @@ SUBROUTINE read_phdos_data(phdos, filename)
 !  opens and closes the phdos file.
 !
 USE mp_images, ONLY : intra_image_comm
-USE io_global, ONLY : ionode_id, ionode
+USE io_global, ONLY : ionode_id, ionode, stdout
 USE mp,        ONLY : mp_bcast
 IMPLICIT NONE
 TYPE(phdos_type), INTENT(INOUT) :: phdos
@@ -102,7 +102,7 @@ IF (ionode) THEN
        ! nu(i) = frequencies (cm^{-1}), dos(i) in states/cm^{-1} 
       READ(iunit, *, END=20, ERR=10, IOSTAT=ios) nu(i),dos(i)
       IF ( nu(i) < -1.d0 ) THEN
-         write(6,*) i, nu(i), dos(i)
+         write(stdout,*) i, nu(i), dos(i)
          CALL errore('read_phdos_data','negative frequencies',1)
       ELSE IF ( nu(i) < 0.d0 ) THEN
          nu(i) = 0.d0
@@ -167,7 +167,7 @@ REAL(DP), INTENT(IN) :: temp
 REAL(DP), INTENT(OUT) :: ener
 
 INTEGER :: ndiv, i
-REAL(DP) :: nu, arg, temp1
+REAL(DP) :: nu, arg, temp1, earg
 
 ener=0.0_DP
 IF (temp <= 1.E-9_DP) RETURN
@@ -176,8 +176,9 @@ ndiv=phdos%number_of_points
 DO i=1,ndiv
    nu=phdos%nu(i)
    arg= kb1 * nu * temp1
-   IF (nu > 0.0_DP) &
-      ener = ener + phdos%phdos(i)* kb * temp * LOG( 1.0_DP - EXP( - arg ) )
+   earg = EXP( - arg )
+   IF (nu >  0.0_DP) &
+      ener = ener + phdos%phdos(i)* kb * temp * LOG( 1.0_DP - earg )
 ENDDO
 ener = ener*phdos%de
 
@@ -196,7 +197,7 @@ REAL(DP), INTENT(IN) :: temp
 REAL(DP), INTENT(OUT) :: ener
 
 INTEGER :: ndiv, i
-REAL(DP) :: nu, temp1, arg
+REAL(DP) :: nu, temp1, arg, earg
 
 ener=0.0_DP
 IF (temp <= 1.E-9_DP) RETURN
@@ -205,8 +206,9 @@ ndiv=phdos%number_of_points
 DO i=1,ndiv
    nu=phdos%nu(i)
    arg= kb1 * nu * temp1
-   IF (nu > 0.d0 .AND. arg < 650._DP) ener = ener + phdos%phdos(i)* nu /  & 
-                                           ( EXP( arg ) - 1.0_DP )
+   earg = EXP( -arg )
+   IF (nu > 0.d0) ener = ener + phdos%phdos(i)* nu * earg/  & 
+                                           ( 1.0_DP - earg ) 
 ENDDO
 ener = ener * phdos%de / ry_to_cmm1
 
@@ -247,7 +249,7 @@ REAL(DP), INTENT(IN) :: temp
 REAL(DP), INTENT(OUT) :: cv
 
 INTEGER :: ndiv, i
-REAL(DP) :: nu, temp1, arg
+REAL(DP) :: nu, temp1, arg, earg
 
 cv=0.0_DP
 IF (temp <= 1.E-9_DP) RETURN
@@ -256,8 +258,9 @@ ndiv=phdos%number_of_points
 DO i=1,ndiv
    nu=phdos%nu(i)
    arg= kb1 * nu * temp1
-   IF (nu > 0.d0 .AND. arg < 650._DP) cv = cv + phdos%phdos(i) * EXP(arg) * &
-                                        ( arg / ( EXP( arg ) - 1.0_DP )) ** 2 
+   earg = EXP( - arg )
+   IF (nu > 0.d0 ) cv = cv + phdos%phdos(i) * earg * &
+                                        ( arg / ( 1.0_DP - earg )) ** 2 
 ENDDO
 cv = cv * phdos%de * kb
 
