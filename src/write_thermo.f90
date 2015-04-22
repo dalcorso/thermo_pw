@@ -41,7 +41,7 @@ IF (do_read) THEN
          READ(iu_therm,*)
       ENDDO
       DO itemp = 1, ntemp
-         READ(iu_therm, '(5e16.8)') temp(itemp), &
+         READ(iu_therm, '(e16.8,4e20.12)') temp(itemp), &
                     ph_ener(itemp,igeom), ph_free_ener(itemp,igeom), &
                     ph_entropy(itemp,igeom), ph_cv(itemp,igeom)
       END DO
@@ -104,7 +104,7 @@ IF (ionode) THEN
                   & 4x, " entropy ", 7x, " Cv ")') 
 
    DO itemp = 1, ntemp
-      WRITE(iu_therm, '(5e16.8)') temp(itemp), &
+      WRITE(iu_therm, '(e16.8,4e20.12)') temp(itemp), &
                     ph_ener(itemp,igeom), ph_free_ener(itemp,igeom), &
                     ph_entropy(itemp,igeom), ph_cv(itemp,igeom)
    END DO
@@ -155,7 +155,7 @@ IF (do_read) THEN
          READ(iu_therm,*)
       ENDDO
       DO itemp = 1, ntemp
-         READ(iu_therm, '(5e16.8)') temp(itemp), &
+         READ(iu_therm, '(e16.8,4e20.12)') temp(itemp), &
                     phf_ener(itemp,igeom), phf_free_ener(itemp,igeom), &
                     phf_entropy(itemp,igeom), phf_cv(itemp,igeom)
       END DO
@@ -219,7 +219,7 @@ IF (ionode) THEN
                   & 4x, " entropy ", 7x, " Cv ")') 
 
    DO itemp = 1, ntemp
-      WRITE(iu_therm, '(5e16.8)') temp(itemp), &
+      WRITE(iu_therm, '(e16.8,4e20.12)') temp(itemp), &
                     phf_ener(itemp,igeom), phf_free_ener(itemp,igeom), &
                     phf_entropy(itemp,igeom), phf_cv(itemp,igeom)
    END DO
