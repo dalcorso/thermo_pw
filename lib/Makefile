@@ -10,6 +10,7 @@ asy.o \
 bz_2d_form.o \
 bz_asy.o \
 elastic_const.o \
+isoentropic.o \
 latgen_2d.o \
 gnuplot.o \
 mp_asyn.o \
