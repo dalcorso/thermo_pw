@@ -132,13 +132,14 @@ SUBROUTINE write_gruneisen_band(file_disp)
   ALLOCATE(gruneisen(nbnd,nks))
   frequency(:,:)= 0.0_DP
   gruneisen(:,:)= 0.0_DP
+
   IF (volume_ph==0.0_DP) THEN
      CALL evaluate_vm(temp_ph, vm, ntemp, temp, vminf_t)
   ELSE
      vm=volume_ph
   ENDIF
 
-  WRITE(stdout,'(5x,"Plotting Gruneisen parameters at volume",f17.8)') vm
+  WRITE(stdout,'(/,5x,"Plotting Gruneisen parameters at volume",f17.8)') vm
   IF (volume_ph==0.0_DP) &
             WRITE(stdout,'(5x,"Corresponding to T=",f17.8)') temp_ph
 
@@ -172,7 +173,7 @@ SUBROUTINE write_gruneisen_band(file_disp)
                                    omega_geo,poly_order,poly_grun)
       
 !
-!  frequencies and gruneisen parameters are calculated ad the chosen
+!  frequencies and gruneisen parameters are calculated at the chosen
 !  volume
 !
         DO ibnd=1,nbnd
@@ -218,8 +219,8 @@ IF (ionode) &
          IF (n == 1 ) &
             WRITE (iu_grun, '(" &plot nbnd=",i4,", nks=",i4," /")') &
                   nbnd, nks
-         WRITE (iu_grun, '(10x,3f10.6)') k(1,n),k(2,n),k(3,n)
-         WRITE (iu_grun, '(10f8.3)') (gruneisen(ibnd,n), ibnd = 1, nbnd)
+         WRITE (iu_grun, '(10x,3f13.7)') k(1,n),k(2,n),k(3,n)
+         WRITE (iu_grun, '(6f13.7)') (gruneisen(ibnd,n), ibnd = 1, nbnd)
       ENDDO
       CLOSE(iu_grun)
    ENDIF
@@ -238,8 +239,8 @@ IF (ionode) &
          IF (n == 1 ) &
             WRITE (iu_grun, '(" &plot nbnd=",i4,", nks=",i4," /")') &
                   nbnd, nks
-         WRITE (iu_grun, '(10x,3f10.6)') k(1,n),k(2,n),k(3,n)
-         WRITE (iu_grun, '(10f8.3)') (frequency(ibnd,n), ibnd = 1, nbnd)
+         WRITE (iu_grun, '(10x,3f13.7)') k(1,n),k(2,n),k(3,n)
+         WRITE (iu_grun, '(6f13.7)') (frequency(ibnd,n), ibnd = 1, nbnd)
       ENDDO
       CLOSE(iu_grun)
    ENDIF
