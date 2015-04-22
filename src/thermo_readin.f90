@@ -43,7 +43,8 @@ SUBROUTINE thermo_readin()
   USE control_asy,          ONLY : flasy, lasymptote, asymptote_command
   USE control_bands,        ONLY : flpband, emin_input, emax_input, nbnd_bands,&
                                    lsym 
-  USE control_grun,         ONLY : flpgrun, grunmin_input, grunmax_input
+  USE control_grun,         ONLY : flpgrun, grunmin_input, grunmax_input, &
+                                   temp_ph, volume_ph
   USE control_conv,         ONLY : nke, deltake, nkeden, deltakeden, &
                                    nnk, deltank, nsigma, deltasigma
   USE control_mur,          ONLY : vmin_input, vmax_input, deltav, nvol, lmurn
@@ -109,6 +110,7 @@ SUBROUTINE thermo_readin()
                             force_bands,                    &
                             dump_states,                    &
                             ncontours,                      &
+                            temp_ph, volume_ph,             &
                             after_disp,                     &
                             fildyn,                         &
                             flevdat,                        &
@@ -218,6 +220,8 @@ SUBROUTINE thermo_readin()
 
   grunmin_input=0.0_DP
   grunmax_input=0.0_DP
+  temp_ph=0.0_DP
+  volume_ph=0.0_DP
 
   filband='output_band.dat'
   flpband='output_pband.dat'
@@ -309,6 +313,8 @@ SUBROUTINE thermo_readin()
         CALL mp_bcast(color_levels, meta_ionode_id, world_comm)
      END IF
   END IF
+
+  IF (volume_ph==0.0_DP.AND.temp_ph==0.0_DP) temp_ph=tmin
 
   nqaux=0
   set_internal_path=.FALSE.

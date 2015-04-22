@@ -645,6 +645,14 @@ grunmin_input : minimum y coordinate for the Gruneisen parameter plot.
                 Default: real, calculated from the Gruneisen parameters.
 grunmax_input : maximum y coordinate for the Gruneisen parameter plot.
                 Default: real, calculated from the Gruneisen parameters.
+volume_ph     : The frequencies and gruneisen parameters interpolated 
+                at this volume are plotted on a postscript file. 
+                When volume_ph=0.0_DP the volume is calculated from temp_ph.
+                Default : 0.0_DP (in (a.u.)**3)
+temp_ph       : The frequencies and gruneisen parameters interpolated at 
+                the volume that corresponds to this temperature are plotted 
+                on a postscript file (only when volume_ph=0.0_DP).
+                Default : real tmin (in K)
 flpgrun       : file where the values of the Gruneisen parameters are written. 
                 Default: character(len=*) 'output_pgrun.dat'
 flgrun        : file where the Gruneisen parameters in a plotable form are

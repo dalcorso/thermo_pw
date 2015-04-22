@@ -445,21 +445,16 @@ MODULE control_grun
   CHARACTER(LEN=256) :: flpgrun ! the name of the output file with the 
                                 ! gruneisen parameters in a format 
                                 ! readable by gnuplot
-                                !
+                                 
   REAL(DP) :: grunmin_input, &  ! minimum value for gruneisen plot
               grunmax_input     ! maximum value for gruneisen plot
 
-  REAL(DP), ALLOCATABLE :: betab(:)    ! volume thermal expansion multiplied
-                                       ! by the bulk modulus
-  REAL(DP), ALLOCATABLE :: grun_gamma_t(:)  ! average gruneisen parameter
-                                       ! computed from gruneisen parameters
+  REAL(DP) :: volume_ph         ! volume at which the phonon frequencies
+                                ! and the Gruneisen parameters are 
+                                ! interpolated
 
-  REAL(DP), ALLOCATABLE :: poly_grun(:,:,:) ! For each band and each q point
-                                        ! these are the coefficients of 
-                                        ! polynomial which fit the frequency
-                                        ! as a function of volume
-  INTEGER :: poly_order                 ! order of the polynomial + 1 
-
+  REAL(DP) :: temp_ph           ! when volume_ph=0.0_DP we use the volume
+                                ! corresponding to this temperature
 END MODULE control_grun
 
 MODULE control_pwrun

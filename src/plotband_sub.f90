@@ -18,6 +18,8 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
   ! 1   band structure plot
   ! 2   phonon dispersion plot
   ! 3   gruneisen parameters plot         
+  ! 4   phonon dispersion plot of interpolated frequencies
+  !
   ! 
   USE kinds, ONLY : DP
   USE control_thermo, ONLY : filband, flfrq, flgrun
@@ -61,7 +63,7 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
   INTEGER :: nks_rap = 0, nbnd_rap = 0
   INTEGER :: ilines, irap, ibnd, ipoint, jnow, ios, i, j, n, ik, ikz, &
              ike, ik2, spe, lpe, nbc, iq, tot_points, ishift, ierr
-  INTEGER :: start_shift, last_shift
+  INTEGER :: start_shift, last_shift, central_geo
   LOGICAL, ALLOCATABLE :: high_symmetry(:), is_in_range(:), &
                           is_in_range_rap(:), has_points(:,:), &
                           lsurface_state_eff(:,:)
@@ -81,10 +83,15 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
   ELSEIF (icode==3) THEN
     IF (flpgrun == ' ') RETURN
     fileout=TRIM(flpgrun)
+  ELSEIF (icode==4) THEN
+    IF (flpgrun == ' ') RETURN
+    fileout=TRIM(flpgrun)//'_freq'
   ENDIF
   IF (icode==1) filedata = TRIM(filband)
   IF (icode==2) filedata = TRIM(flfrq)
   IF (icode==3) filedata = TRIM(flgrun)
+  IF (icode==4) filedata = TRIM(flgrun)//'_freq'
+
 
   IF (ionode) &
      OPEN(UNIT=1,FILE=TRIM(filedata),FORM='formatted',STATUS='OLD',ERR=10,&
@@ -104,8 +111,10 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
      WRITE(stdout, '(/,5x,"Reading ",i4," bands at ",i6," k-points")') nbnd, nks
   ENDIF
 
-  IF (icode==3) THEN
-     filename = TRIM(file_disp)//'.g'//TRIM(int_to_char(tot_ngeo/2+1))//".rap"
+  IF (icode==3.OR.icode==4) THEN
+     central_geo=tot_ngeo/2
+     IF (MOD(tot_ngeo,2)==1) central_geo=central_geo+1
+     filename = TRIM(file_disp)//'.g'//TRIM(int_to_char(central_geo))//".rap"
   ELSE
      filename=TRIM(filedata)//".rap"
   ENDIF
@@ -465,7 +474,7 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
      END IF
      IF (emin_input /= 0.0_DP) emin=emin_input + eref
      IF (emax_input /= 0.0_DP) emax=emax_input + eref
-  ELSE IF (icode==2) THEN
+  ELSE IF (icode==2.OR.icode==4) THEN
 !
 !   no shift for phonon, but take the maximum energy slightly above the 
 !   dispersion and an integer value
@@ -817,6 +826,8 @@ ELSEIF (icode==2) THEN
    gnu_filename=TRIM(flgnuplot)//'_disp'
 ELSEIF (icode==3) THEN
    gnu_filename=TRIM(flgnuplot)//'_grun'
+ELSEIF (icode==4) THEN
+   gnu_filename=TRIM(flgnuplot)//'_grun_freq'
 ENDIF
 
 CALL gnuplot_start(gnu_filename)
@@ -827,6 +838,8 @@ ELSEIF (icode==2) THEN
    filename=TRIM(flpsdisp)
 ELSEIF (icode==3) THEN
    filename=TRIM(flpsgrun)
+ELSEIF (icode==4) THEN
+   filename=TRIM(flpsgrun)//'_freq'
 ENDIF
 IF (igeom > 1) filename=filename//TRIM(int_to_char(igeom))
 
@@ -840,7 +853,7 @@ IF (icode==1) THEN
    CALL gnuplot_ylabel('Energy (eV)',.FALSE.) 
    IF (degauss > 0.0_DP) CALL gnuplot_write_horizontal_line(0.0_DP, 2, &
                                          'front', 'color_black', .FALSE.)
-ELSEIF (icode==2) THEN
+ELSEIF (icode==2.OR.icode==4) THEN
    CALL gnuplot_ylabel('Frequency (cm^{-1})',.FALSE.) 
 ELSEIF (icode==3) THEN
    CALL gnuplot_ylabel('{/Symbol g}_{/Symbol n}({/Helvetica-Bold q})',.FALSE.) 

@@ -73,7 +73,8 @@ INTEGER :: ibnd, jbnd, igeo, irap, central_geo
 ALLOCATE (level(12,ngeo))
 ALLOCATE (frequences(ngeo))
 
-central_geo=ngeo/2+1
+central_geo=ngeo/2
+IF (MOD(ngeo,2)==1) central_geo=central_geo+1
 level=1
 DO ibnd=1, 3*nat
 !

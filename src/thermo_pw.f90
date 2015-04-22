@@ -375,6 +375,7 @@ PROGRAM thermo_pw
 !
            CALL write_gruneisen_band(flfrq_thermo)
            CALL plotband_sub(3,1,flfrq_thermo)
+           CALL plotband_sub(4,1,flfrq_thermo)
 !
 !    here we compute the gruneisen parameters on the uniform mesh
 !
