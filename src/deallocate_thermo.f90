@@ -16,9 +16,11 @@ SUBROUTINE deallocate_thermo()
   USE thermodynamics, ONLY : ph_free_ener, ph_ener, ph_entropy, ph_cv
   USE ph_freq_thermodynamics, ONLY : phf_free_ener, phf_ener, phf_entropy, phf_cv
   USE anharmonic,     ONLY : vmin_t, b0_t, free_e_min_t, &
-                             alpha_t, beta_t, gamma_t, cv_t, cp_t, b0_s
+                             alpha_t, beta_t, gamma_t, cv_t, cp_t, b0_s, &
+                             celldm_t, alpha_anis_t
   USE ph_freq_anharmonic, ONLY : vminf_t, b0f_t, free_e_minf_t, &
-                             alphaf_t, betaf_t, gammaf_t, cvf_t, cpf_t, b0f_s
+                             alphaf_t, betaf_t, gammaf_t, cvf_t, cpf_t, b0f_s, &
+                             celldmf_t, alphaf_anis_t
   USE grun_anharmonic,  ONLY : betab, grun_gamma_t
   USE control_paths,    ONLY : xqaux, wqaux, letter, label_list, letter_path, &
                                label_disp_q, disp_q, disp_wq, nrap_plot_in,   &
@@ -55,6 +57,8 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (alpha_t) )         DEALLOCATE(alpha_t) 
   IF ( ALLOCATED (beta_t) )          DEALLOCATE(beta_t) 
   IF ( ALLOCATED (gamma_t) )         DEALLOCATE(gamma_t) 
+  IF ( ALLOCATED (celldm_t) )        DEALLOCATE(celldm_t) 
+  IF ( ALLOCATED (alpha_anis_t) )    DEALLOCATE(alpha_anis_t) 
   IF ( ALLOCATED (free_e_min_t) )    DEALLOCATE(free_e_min_t) 
   IF ( ALLOCATED (b0f_t) )           DEALLOCATE(b0f_t) 
   IF ( ALLOCATED (b0f_s) )           DEALLOCATE(b0f_s) 
@@ -63,6 +67,8 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (alphaf_t) )        DEALLOCATE(alphaf_t) 
   IF ( ALLOCATED (betaf_t) )         DEALLOCATE(betaf_t) 
   IF ( ALLOCATED (gammaf_t) )        DEALLOCATE(gammaf_t) 
+  IF ( ALLOCATED (celldmf_t) )       DEALLOCATE(celldmf_t) 
+  IF ( ALLOCATED (alphaf_anis_t) )   DEALLOCATE(alphaf_anis_t) 
   IF ( ALLOCATED (betab) )           DEALLOCATE(betab) 
   IF ( ALLOCATED (grun_gamma_t) )    DEALLOCATE(grun_gamma_t) 
   IF ( ALLOCATED (free_e_minf_t) )   DEALLOCATE(free_e_minf_t) 

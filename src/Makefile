@@ -67,6 +67,7 @@ thermo_readin.o \
 thermo_pw.o \
 thermo_summary.o \
 write_anhar.o \
+write_anhar_anis.o \
 write_e_nk.o \
 write_e_ke.o  \
 write_ev_input.o \

@@ -385,6 +385,14 @@ PROGRAM thermo_pw
 !
            CALL write_grun_anharmonic()
            CALL plot_anhar() 
+        ELSE
+!
+!    Anisotropic solid. Compute only the thermal expansion tensor
+!
+           DO itemp = 1, ntemp
+              CALL quadratic_fit_t(itemp)
+           ENDDO
+           CALL write_anhar_anis()
         ENDIF
      ENDIF
 
