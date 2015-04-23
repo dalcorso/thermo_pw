@@ -2,3 +2,22 @@ The A4 structure has the face centered cubic Bravais lattice and two
 atoms per cell. Putting one atom in the origin, the other is in 
 (1/4, 1/4, 1/4) in alat units.
 It is the structure of diamond.
+
+The reference directory contains the outputs or postscript files:
+
+asy_tmp.asy : asymptote script to plot the Brillouin zone
+
+output_keconv.ps: plot of the convergence of the total energy with the
+                  kinetic energy cut-off.
+
+output_mur.ps: a plot of the energy as a function of the volume at T=0
+               and a Murnaghan fit. Pressure as a function of volume.
+
+output_bands.ps : plot of the band structure
+
+output_disp.ps.g1 : plot of the phonon dispersion. Note that the
+       experimental data are read by modifying the file gnuplot.tmp.g1_disp
+
+c_ph.exp : experimental phonon frequencies
+
+c_anharm.exp : experimental thermal expansion.

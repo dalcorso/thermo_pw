@@ -1,11 +1,14 @@
 The b1 structure is the rock salt structure. 
 It has a fcc Bravais lattice and two atoms per cell. When one atom
 is in the origin, the other is in the center of the cubic
-cell (1/2,1/2,1/2) in cartesian coordinates and in units of alat.
+cell (1/2,1/2,1/2) in units of alat.
 
 The reference directory contains the outputs or postscript files:
 
 asy_tmp.asy :  An asymptote script to plot the Brillouin zone
 
 output_bands.ps : plot of the band structure
+
+output_keconv.ps: plot of the convergence of the total energy with the
+                kinetic energy cut-off.
 
