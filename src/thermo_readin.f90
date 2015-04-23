@@ -183,7 +183,7 @@ SUBROUTINE thermo_readin()
   nvol=1
   lmurn=.TRUE.
 
-  after_disp=.TRUE.
+  after_disp=.FALSE.
   fildyn=' '
 
   nke=5

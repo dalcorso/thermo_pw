@@ -100,8 +100,8 @@ IF (ionode) THEN
                    &energies in cal/mol etc. ")')
    WRITE(iu_therm,'("# Multiply by 13.6058 x 96526.0 = 1 313 313 to &
                   &have energies in J/mol.")')
-   WRITE(iu_therm,'("#",5x,"   T  ", 7x, " energy ", 4x, "  free energy ",&
-                  & 4x, " entropy ", 7x, " Cv ")') 
+   WRITE(iu_therm,'("#",5x,"   T  ",10x, " energy ", 9x, "  free energy ",&
+                  & 9x, " entropy ", 11x, " Cv ")')
 
    DO itemp = 1, ntemp
       WRITE(iu_therm, '(e16.8,4e20.12)') temp(itemp), &
@@ -215,8 +215,8 @@ IF (ionode) THEN
                    &energies in cal/mol etc. ")')
    WRITE(iu_therm,'("# Multiply by 13.6058 x 96526.0 = 1 313 313 to &
                   &have energies in J/mol.")')
-   WRITE(iu_therm,'("#",5x,"   T  ", 7x, " energy ", 4x, "  free energy ",&
-                  & 4x, " entropy ", 7x, " Cv ")') 
+   WRITE(iu_therm,'("#",5x,"   T  ",10x, " energy ", 9x, "  free energy ",&
+                  & 9x, " entropy ", 11x, " Cv ")') 
 
    DO itemp = 1, ntemp
       WRITE(iu_therm, '(e16.8,4e20.12)') temp(itemp), &
