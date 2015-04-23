@@ -29,25 +29,25 @@ PROGRAM thermo_pw
   ! ...   scf_ke    : many scf calculations at different cut-offs
   ! ...   scf_nk    : many scf calculations at different number of k points
   ! ...   scf_bands : a band structure calculation after a scf calcul.
-  ! ...   scf_ph    : a phonon at a single q after a scf run
+  ! ...   scf_ph    : a phonon calculation after an scf run
   ! ...   scf_disp  : a phonon dispersion calculation after a scf run
   ! ...   mur_lc    : lattice constant via murnaghan equation
   ! ...   mur_lc_bands  : a band structure calculation at the minimum or the
   ! ...               murnaghan
   ! ...   mur_lc_ph : a phonon calculation at the minimum of the murmaghan
   ! ...   mur_lc_disp : a dispersion calculation at the minimum of the
-  ! ...               murnaghan with possibility to compute harmonic
+  ! ...               murnaghan with the possibility to compute harmonic
   ! ...               thermodynamical quantities
   ! ...   mur_lc_t  : lattice constant and bulk modulus as a function 
   ! ...               of temperature within the quasiharmonic approximation
-  ! ...   elastic_constants : elastic constants at zero temperature 
+  ! ...   scf_elastic_constants : elastic constants at zero temperature 
   ! ...   mur_lc_elastic_constants : elastic constants at zero temperature 
   ! ...               at the minimum of the Murnaghan equation 
-  ! ...   piezoelectric_tensor : piezoelectric tensor at zero temperature
+  ! ...   scf_piezoelectric_tensor : piezoelectric tensor at zero temperature
   ! ...   mur_lc_piezoelectric_tensor : piezoelectric tensor at zero temperature
   ! ...               at the minimum of the Murnaghan equation 
   ! ...   scf_2d_bands : this is as scf_bands, but the cell is assumed to be 
-  ! ...                  a slab and  the default path is chosen in the 2d 
+  ! ...                  a slab and the default path is chosen in the 2d 
   ! ...                  Brillouin zone. This option can be used also to 
   ! ...                  calculate the projected bulk band structure.
   ! ...

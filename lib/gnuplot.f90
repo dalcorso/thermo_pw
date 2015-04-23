@@ -564,11 +564,12 @@ CALL gnuplot_initialize_contour_counter(max_contours)
 RETURN
 END SUBROUTINE gnuplot_start_2dplot
 
-SUBROUTINE gnuplot_line_v( v_x, v_y, x_0, y_0, start)
+SUBROUTINE gnuplot_line_v( v_x, v_y, x_0, y_0, start, color)
 USE kinds, ONLY : DP
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: v_x, v_y, x_0, y_0
 LOGICAL, INTENT(IN) :: start
+CHARACTER(LEN=*),INTENT(IN) :: color
 CHARACTER(LEN=10) :: avx, avy, ax0, ay0
 CHARACTER(LEN=6) :: int_to_char
 
@@ -585,9 +586,11 @@ IF (ionode) THEN
    WRITE(iun_gnuplot,'(a,"=",f15.8)') ay0, y_0
 
    IF (start) THEN
-      WRITE(iun_gnuplot,'("plot ",a,"/",a,"*(x-",a,")+",a," lw 2 lc rgb ""red""")')  avy, avx, ax0, ay0
+      WRITE(iun_gnuplot,'("plot ",a,"/",a,"*(x-",a,")+",a," lw 2 lc rgb ",a)')&
+             avy, avx, ax0, ay0, TRIM(color)
    ELSE
-      WRITE(iun_gnuplot,'("replot ",a,"/",a,"*(x-",a,")+",a," lw 2 lc rgb ""red""")')  avy, avx, ax0, ay0
+      WRITE(iun_gnuplot,'("replot ",a,"/",a,"*(x-",a,")+",a," lw 2 lc rgb ",a)')&
+            avy, avx, ax0, ay0, TRIM(color)
    ENDIF
 ENDIF
 RETURN
@@ -615,8 +618,10 @@ CALL gnuplot_xlabel(xlabel,.FALSE.)
 CALL gnuplot_ylabel(ylabel,.FALSE.)
 
 IF (ionode) THEN
-  IF ((xmax-xmin) < 2.0_DP*(ymax-ymin)) &
+   IF ((xmax-xmin) < 2.0_DP*(ymax-ymin)) &
      CALL gnuplot_set_xticks(xmin,(xmax-xmin)/4.0_DP,xmax,.FALSE.)
+   IF ((ymax-ymin) < 2.0_DP*(xmax-xmin)) &
+     CALL gnuplot_set_yticks(ymin,(ymax-ymin)/4.0_DP,ymax,.FALSE.)
    WRITE(iun_gnuplot,'("set size ratio",f15.7)') (ymax-ymin)/(xmax-xmin)
    DO iplot=1, contour_counter
       filename1='table_'//TRIM(int_to_char(iplot))//'.dat'

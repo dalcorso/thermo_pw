@@ -151,8 +151,8 @@ SUBROUTINE thermo_readin()
   what=' '
   ngeo=0
   step_ngeo(1) = 0.05_DP
-  step_ngeo(2) = 0.01_DP
-  step_ngeo(3) = 0.01_DP
+  step_ngeo(2) = 0.02_DP
+  step_ngeo(3) = 0.02_DP
   step_ngeo(4) = 0.5
   step_ngeo(5) = 0.5
   step_ngeo(6) = 0.5
@@ -283,10 +283,17 @@ SUBROUTINE thermo_readin()
   IF ( ngeo(1)==0 ) THEN
      IF (what(1:4) == 'scf_') ngeo=1
      IF (what(1:6) == 'mur_lc') THEN
-        ngeo(1)=9
-        DO igeo=2,6
-           IF (ngeo(igeo)==0) ngeo(igeo)=1
-        ENDDO
+        IF (lmurn) THEN
+           ngeo(1)=9
+           DO igeo=2,6
+              IF (ngeo(igeo)==0) ngeo(igeo)=1
+           ENDDO
+        ELSE
+!
+!   The default mesh is 5 in each crystallographic relevant direction.
+!
+           ngeo=5
+        ENDIF
      ENDIF
   END IF
 
@@ -520,7 +527,7 @@ SUBROUTINE thermo_readin()
      ENDIF
   ENDIF
      
-
+  CALL clean_ngeo()
      
   DEALLOCATE(input)
   DEALLOCATE(iun_image)

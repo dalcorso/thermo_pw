@@ -120,9 +120,9 @@ SUBROUTINE plot_multi_energy()
 
   IF (degree==2) THEN
      CALL gnuplot_line_v(hessian_v(1,1), hessian_v(2,1), x_pos_min(1),  &
-                                       x_pos_min(2),.FALSE.)
+                                       x_pos_min(2),.FALSE.,'color_blue')
      CALL gnuplot_line_v(hessian_v(1,2), hessian_v(2,2), x_pos_min(1),  &
-                                       x_pos_min(2),.FALSE.)
+                                       x_pos_min(2),.FALSE.,'color_blue')
   ENDIF
   CALL gnuplot_end()
 
