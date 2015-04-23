@@ -10,7 +10,7 @@ if test "`echo -e`" = "-e" ; then ECHO=echo ; else ECHO="echo -e" ; fi
 $ECHO
 $ECHO "$EXAMPLE_DIR : starting"
 $ECHO
-$ECHO "This example applies thermo_pw.x to sic a solid with the b3 structure"
+$ECHO "This example applies thermo_pw.x to SiC a solid with the b3 structure"
 $ECHO
 
 # set the needed environment variables
@@ -113,7 +113,7 @@ ATOMIC_POSITIONS alat
 Si  0.0000      0.000000    0.000000
 C   0.2500000   0.2500000   0.2500000
 K_POINTS AUTOMATIC
-4 4 4 1 1 1
+8 8 8 1 1 1
 EOF
 
 $ECHO "  running the scf calculation for SiC...\c"

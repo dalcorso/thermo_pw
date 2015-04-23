@@ -17,20 +17,28 @@ List of presently available structures and examples:
 
 struct. crystal fun  bz    ke   bands   murn   disp  el_cons   anhar
 
-
 A1       fcc-Al  pz  *      *     *      *      *       *        *         
 A2       bcc-Nb  pz  *                                 
 A3       hcp-Be  pz  *                                 
 A4       C       pz  *      *     *      *      *                
 
 B1       NaCl    pz  *      *     *      *                    
-B3       SiC     pz  *      *     *      *                          
+B3       SiC     pz  *      *     *      *      *                       
 
 
-NB: this directory uses the pseudopotentials of pslibrary.1.0.0. In order
+This directory uses the pseudopotentials of pslibrary.1.0.0. In order
 to use it, you must change the PSEUDO_DIR variable (inside the 
 environment_variables file in the main QE directory) to point to the 
 directory that contains the UPF files of the pseudopotentials for the pz 
-or pbe functional. 
-You can find pslibrary.1.0.0 at the web page:
+functional. You can find pslibrary.1.0.0 at the web page:
 http://www.qe-forge.org/gf/project/pslibrary/
+
+Note also that the scripts in this directory use the variables
+PARA_IMAGE_PREFIX and PARA_IMAGE_POSTFIX to launch thermo_pw.x. 
+You have to change these variables in the environment_variables file
+to set the number of processors and the number of images used in your run.
+
+The inputs in this directory are supposed to give reasonably representative 
+results. Therefore, some of them, expecially dispersions or calculation of 
+anharmonic properties, might require a significant amount of CPU time to run.
+Some results have been obtained using parallel machines.

@@ -10,7 +10,7 @@ if test "`echo -e`" = "-e" ; then ECHO=echo ; else ECHO="echo -e" ; fi
 $ECHO
 $ECHO "$EXAMPLE_DIR : starting"
 $ECHO
-$ECHO "This example applies thermo_pw.x to sic a solid with the b3 structure"
+$ECHO "This example applies thermo_pw.x to SiC a solid with the b3 structure"
 $ECHO
 
 # set the needed environment variables
