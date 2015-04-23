@@ -15,16 +15,16 @@ xcrysden --pwi pw_input_file
 
 List of presently available structures and examples:
 
-struct. crystal fun  bz  ke   bands   murn   disp  el_cons   anhar
+struct. crystal fun  bz    ke   bands   murn   disp  el_cons   anhar
 
 
-A1       fcc-Al  pz  *         *      *       *       *        *         
+A1       fcc-Al  pz  *      *     *      *      *       *        *         
 A2       bcc-Nb  pz  *                                 
 A3       hcp-Be  pz  *                                 
-A4       C       pz  *   *     *      *       *                
+A4       C       pz  *      *     *      *      *                
 
-B1       NaCl    pz  *         *      *                    
-B3       SiC     pz  *         *                                
+B1       NaCl    pz  *      *     *      *                    
+B3       SiC     pz  *      *     *      *                          
 
 
 NB: this directory uses the pseudopotentials of pslibrary.1.0.0. In order

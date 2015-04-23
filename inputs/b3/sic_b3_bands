@@ -92,11 +92,10 @@ cat > sic.scf.in << EOF
     prefix='sic',
     pseudo_dir = '$PSEUDO_DIR',
     outdir='$TMP_DIR'
-    forc_conv_thr=5d-5
  /
  &system
    ibrav=  2, 
-   celldm(1) =8.18, 
+   celldm(1) =8.1831, 
    nat= 2, 
    ntyp=2,
    noncolin=.false.,
