@@ -1,0 +1,17 @@
+#
+#  Linear thermal expansion of fcc-Al
+#  Data extrapolated from fig. 3 of 
+#  F.C. Nix and D. MacNair, Phys. Rev. 60, 597 (1941)
+#
+100  12
+150  17.45
+200  20.
+250  22.2
+300  23.3
+350  24.7
+400  25.3
+450  26.2
+500  26.9
+550  27.4
+600  28.
+650  28.8
