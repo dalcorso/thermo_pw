@@ -81,10 +81,28 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
         CASE ('mur_lc', 'mur_lc_bands', 'mur_lc_ph', 'mur_lc_disp', &
               'mur_lc_t', 'mur_lc_elastic_constants', &
               'mur_lc_piezoelectric_tensor', 'mur_lc_polarization')
+           IF (frozen_ions) THEN
+              calculation='scf'
+              lbfgs=.FALSE.
+           ELSE
+              calculation='relax'
+              lforce=.TRUE.
+              lstres=.TRUE.
+              lbfgs = .TRUE.
+              nstep = 10
+              epse = etot_conv_thr
+              epsf = forc_conv_thr
+           ENDIF
            celldm(:)=celldm_geo(:,iwork)
            CALL cell_base_init ( ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
                          trd_ht, rd_ht, cell_units )
            CALL set_fft_mesh()
+!
+! strain uniformly the coordinates to the new celldm
+!
+           tau=tau_save
+           CALL cryst_to_cart( nat, tau, at, 1 )
+
            outdir=TRIM(outdir_thermo)//'g'//TRIM(int_to_char(iwork))//'/'
            tmp_dir = TRIM ( outdir )
            wfc_dir = tmp_dir

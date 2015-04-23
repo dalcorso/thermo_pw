@@ -1,6 +1,6 @@
 This directory contains a collection of inputs of the thermo_pw code.
 It is divided in subdirectories. The name of each subdirectory should suggest
-its content, but see also below some information.  
+its content, but see also some information below.  
 
 After running the script provided in each example, you can see the Brillouin 
 zone with the asymptote package (http://asymptote.sourceforge.net/) running
