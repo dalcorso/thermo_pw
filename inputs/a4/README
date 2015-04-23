@@ -1,0 +1,4 @@
+The A4 structure has the face centered cubic Bravais lattice and two
+atoms per cell. Putting one atom in the origin, the other is in 
+(1/4, 1/4, 1/4) in alat units.
+It is the structure of diamond.
