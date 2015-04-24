@@ -55,7 +55,7 @@ IF (do_read) THEN
 END IF
 
 
-IF ( igeom < 1 .OR. igeom > tot_ngeo ) CALL errore('print_thermo', & 
+IF ( igeom < 1 .OR. igeom > tot_ngeo ) CALL errore('write_thermo', & 
                                                'Too many geometries',1)
 WRITE(stdout,'(/,2x,76("+"))')
 WRITE(stdout,'(5x,"Computing the thermodynamical properties from phonon dos")')
@@ -169,7 +169,7 @@ IF (do_read) THEN
 END IF
 
 
-IF ( igeom < 1 .OR. igeom > tot_ngeo ) CALL errore('print_thermo', & 
+IF ( igeom < 1 .OR. igeom > tot_ngeo ) CALL errore('write_thermo', & 
                                                'Too many geometries',1)
 WRITE(stdout,'(/,2x,76("+"))')
 WRITE(stdout,'(5x,"Computing the thermodynamical properties from frequencies")')
