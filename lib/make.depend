@@ -17,6 +17,12 @@ elastic_const.o : quadratic_surfaces.o
 elastic_const.o : rotate.o
 gnuplot.o : ../../Modules/io_global.o
 gnuplot.o : ../../Modules/kind.o
+isoentropic.o : ../../Modules/constants.o
+isoentropic.o : ../../Modules/io_global.o
+isoentropic.o : ../../Modules/kind.o
+isoentropic.o : ../../Modules/mp.o
+isoentropic.o : ../../Modules/mp_images.o
+isoentropic.o : elastic_const.o
 latgen_2d.o : ../../Modules/kind.o
 ph_freq_module.o : ../../Modules/constants.o
 ph_freq_module.o : ../../Modules/io_global.o
