@@ -1,3 +1,8 @@
+#
+#  Experimental Be phonon frequencies in THz, at 80 K from 
+#  R. Stedman, Z. Amilius, R. Pauli, and O. Sundin
+#  J. Phys. F: Metal Phys. 6, 157 (1976).
+#
 0.0           0.0      0.0      0.0     13.75      13.75      20.28
 0.06666667    2.5      2.7     3.72     13.75      13.75      20.2
 0.13333333    4.5      5.0     7.0      13.75      14.00      20.00
