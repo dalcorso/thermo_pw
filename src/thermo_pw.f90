@@ -195,6 +195,7 @@ PROGRAM thermo_pw
         WRITE(stdout,'(5x,"The minimum energy is obtained for celldm")')
         WRITE(stdout,'(5x,6f12.5)') celldm0
      ENDIF
+     CALL mp_bcast(celldm0, meta_ionode_id, world_comm)
      CALL cell_base_init ( ibrav, celldm0, a, b, c, cosab, cosac, cosbc, &
                       trd_ht, rd_ht, cell_units )
      CALL set_fft_mesh()
