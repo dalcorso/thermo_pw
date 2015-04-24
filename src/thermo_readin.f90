@@ -274,6 +274,9 @@ SUBROUTINE thermo_readin()
      lprojpbs=.FALSE.
   ENDIF
 
+  IF (lmurn.AND.reduced_grid) CALL errore('thermo_readin',&
+                             'lmurn and reduced_grid cannot be both .TRUE.',1)
+
   IF (after_disp) xmldyn=has_xml(fildyn)
 
   read_paths=( what=='scf_bands'.OR.what=='scf_disp'.OR.what=='plot_bz'.OR. &
