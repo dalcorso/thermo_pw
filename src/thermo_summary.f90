@@ -22,7 +22,8 @@ SUBROUTINE thermo_summary()
                                    label_list, nqaux, point_label_type, &
                                    letter_path
   USE control_asy,          ONLY : flasy, lasymptote, asymptote_command
-  USE control_elastic_constants, ONLY : frozen_ions, ngeo_strain
+  USE control_elastic_constants, ONLY : frozen_ions, ngeo_strain, &
+                                  elastic_algorithm
   USE control_2d_bands,     ONLY : lprojpbs
   USE space_groups,         ONLY : sg_name, find_space_group, set_fft_fact
   USE control_pwrun,        ONLY : nr1_save, nr2_save, nr3_save
@@ -780,9 +781,12 @@ SUBROUTINE thermo_summary()
                 WRITE(stdout,'(5x,"(  .    .    .    .   c55   .  )")') 
                 WRITE(stdout,'(5x,"( c15  c25  c36  c46   .   c66 )")') 
              ENDIF 
-             WRITE(stdout,'(/,5x,"It requires all six strains")') 
-             WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
+             IF (elastic_algorithm=='standard'.OR. &
+                                    elastic_algorithm=='advanced') THEN
+                WRITE(stdout,'(/,5x,"It requires all six strains")') 
+                WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
                           6*ngeo_strain 
+             ENDIF
           CASE (20)
 !
 !  orthorombic D_2h (mmm)
@@ -793,9 +797,12 @@ SUBROUTINE thermo_summary()
              WRITE(stdout,'(5x,"(  .    .    .   c44   .    .  )")') 
              WRITE(stdout,'(5x,"(  .    .    .    .   c55   .  )")') 
              WRITE(stdout,'(5x,"(  .    .    .    .    .   c66 )")') 
-             WRITE(stdout,'(/,5x,"It requires all six strains")') 
-             WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
+             IF (elastic_algorithm=='standard'.OR. &
+                                    elastic_algorithm=='advanced') THEN
+                WRITE(stdout,'(/,5x,"It requires all six strains")') 
+                WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
                           6*ngeo_strain 
+             ENDIF
           CASE (18)
 !
 !  tetragonal C_4h (4/m)
@@ -806,9 +813,12 @@ SUBROUTINE thermo_summary()
              WRITE(stdout,'(5x,"(  .    .    .   c44   .    .  )")') 
              WRITE(stdout,'(5x,"(  .    .    .    .   c44   .  )")') 
              WRITE(stdout,'(5x,"( c16 -c16   .    .    .   c66 )")') 
+             IF (elastic_algorithm=='standard'.OR. &
+                                    elastic_algorithm=='advanced') THEN
              WRITE(stdout,'(/,5x,"It requires four strains: e1, e3, e4, e6")') 
              WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
                           4*ngeo_strain 
+             ENDIF
 
           CASE (22)
 !
@@ -820,10 +830,13 @@ SUBROUTINE thermo_summary()
              WRITE(stdout,'(5x,"(  .    .    .   c44   .    .  )")') 
              WRITE(stdout,'(5x,"(  .    .    .    .   c44   .  )")') 
              WRITE(stdout,'(5x,"(  .    .    .    .    .   c66 )")') 
-             WRITE(stdout,'(/,5x,"It requires four strains: e1, e3, e4, e6")') 
-             WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
+             IF (elastic_algorithm=='standard'.OR. &
+                                    elastic_algorithm=='advanced') THEN
+                WRITE(stdout,'(/,5x,"It requires four strains: e1, e3, &
+                                                &e4, e6")') 
+                WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
                           4*ngeo_strain 
-
+             ENDIF
           CASE (27)
 !
 !  trigonal S_6 (-3)
@@ -835,10 +848,13 @@ SUBROUTINE thermo_summary()
              WRITE(stdout,'(5x,"( c15 -c15   .    .   c44  c14 )")') 
              WRITE(stdout,'(5x,"(  .    .    .  -c1   c14   X  )")') 
              WRITE(stdout,'(5x,"X=(c11-c12)/2")') 
-             WRITE(stdout,'(/,5x,"It requires three strains: e1, e3, and e4")') 
-             WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
+             IF (elastic_algorithm=='standard'.OR. &
+                                    elastic_algorithm=='advanced') THEN
+                WRITE(stdout,'(/,5x,"It requires three strains: e1, e3, &
+                                                             &and e4")') 
+                WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
                           3*ngeo_strain 
-
+             ENDIF
           CASE (25)
 !
 !  trigonal D_3d (-3m)
@@ -851,9 +867,13 @@ SUBROUTINE thermo_summary()
              WRITE(stdout,'(5x,"(  .    .    .    .   c44  c14 )")') 
              WRITE(stdout,'(5x,"(  .    .    .    .   c14   X  )")') 
              WRITE(stdout,'(5x,"X=(c11-c12)/2")') 
-             WRITE(stdout,'(/,5x,"It requires three strains: e1, e3, and e4")') 
-             WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
+             IF (elastic_algorithm=='standard'.OR. &
+                                    elastic_algorithm=='advanced') THEN
+                WRITE(stdout,'(/,5x,"It requires three strains: e1, e3, &
+                                                          &and e4")') 
+                WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
                           3*ngeo_strain 
+             ENDIF
 
           CASE (19,23)
 !
@@ -867,10 +887,13 @@ SUBROUTINE thermo_summary()
              WRITE(stdout,'(5x,"(  .    .    .    .   c44   . )")') 
              WRITE(stdout,'(5x,"(  .    .    .    .    .    X )")') 
              WRITE(stdout,'(5x,"X=(c11-c12)/2")') 
-             WRITE(stdout,'(/,5x,"It requires three strains: e1, e3, and e4")') 
-             WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
+             IF (elastic_algorithm=='standard'.OR. &
+                                    elastic_algorithm=='advanced') THEN
+                WRITE(stdout,'(/,5x,"It requires three strains: e1, e3, &
+                                                                   and e4")') 
+                WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
                           3*ngeo_strain 
-
+             END IF
           CASE (29,32)
 !
 !  cubic T_h (m-3), O_h (m-3m)
@@ -881,9 +904,12 @@ SUBROUTINE thermo_summary()
              WRITE(stdout,'(5x,"(  .    .    .   c44   .    .  )")') 
              WRITE(stdout,'(5x,"(  .    .    .    .   c44   .  )")') 
              WRITE(stdout,'(5x,"(  .    .    .    .    .   c44 )")') 
-             WRITE(stdout,'(/,5x,"It requires two strains: e1 and e4")') 
-             WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
+             IF (elastic_algorithm=='standard'.OR. &
+                                    elastic_algorithm=='advanced') THEN
+                WRITE(stdout,'(/,5x,"It requires two strains: e1 and e4")') 
+                WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
                           2*ngeo_strain 
+             ENDIF
           CASE DEFAULT
              IF (laue /=2) &
                 WRITE(stdout,'(5x,"Laue class not programmed using C_i")')   
@@ -893,9 +919,12 @@ SUBROUTINE thermo_summary()
              WRITE(stdout,'(5x,"( c14  c24  c34  c44  c45  c46 )")') 
              WRITE(stdout,'(5x,"( c15  c25  c35  c45  c55  c56 )")') 
              WRITE(stdout,'(5x,"( c16  c26  c36  c46  c56  c66 )")') 
-             WRITE(stdout,'(/,5x,"It requires all six strains")') 
-             WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
+             IF (elastic_algorithm=='standard'.OR. &
+                                    elastic_algorithm=='advanced') THEN
+                WRITE(stdout,'(/,5x,"It requires all six strains")') 
+                WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
                           6*ngeo_strain 
+             ENDIF
        END SELECT
     ENDIF
  ELSE
@@ -973,15 +1002,19 @@ SUBROUTINE thermo_summary()
        WRITE(stdout,'(5x,"( c14  c24  c34  c44  c45  c46 )")') 
        WRITE(stdout,'(5x,"( c15  c25  c35  c45  c55  c56 )")') 
        WRITE(stdout,'(5x,"( c16  c26  c36  c46  c56  c66 )")') 
-       WRITE(stdout,'(/,5x,"It requires all six strains")') 
-       WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
+       IF (elastic_algorithm=='standard'.OR. &
+                                    elastic_algorithm=='advanced') THEN
+          WRITE(stdout,'(/,5x,"It requires all six strains")') 
+          WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
              6*ngeo_strain 
+       END IF
     ENDIF
 END IF
 
 IF (what(1:6)=='mur_lc') &
    WRITE(stdout,'(5x,"The Murnaghan relaxation will require", &
-                     &i3, " scf calculations")') ngeo
+                     &i3, " scf calculations")') ngeo(1)*ngeo(2)*ngeo(3)* &
+                            ngeo(4)*ngeo(5)*ngeo(6)
 
 WRITE(stdout,'(/,5x,70("-"))')
 IF (frozen_ions) THEN
@@ -1302,7 +1335,7 @@ ELSE
       ENDIF
    ENDDO
    WRITE(stdout,'(/,5x,"You might want to change the Bravais lattice or to")') 
-   WRITE(stdout,'(/,5x,"understand why some symmetries are not found before&
+   WRITE(stdout,'(/,5x,"understand why the symmetries are wrong before&
                       &continuing")') 
    WRITE(stdout,'(5x,"The point group or the Laue class are not used to &
                       &reduce the number of ")')
