@@ -15,6 +15,7 @@ then
            PHonon/Gamma PHonon/PH PHonon/D3 PHonon/FD atomic/src XSpectra/src \
            ACDFT NEB/src TDDFPT/src GIPAW/src GWW/pw4gww GWW/gww GWW/head \
            thermo_pw/src thermo_pw/lib thermo_pw/tools"
+          
 elif
     test $1 = "-addson" 
 then
@@ -79,13 +80,18 @@ for dir in $dirs; do
 	TDDFPT/src )
              DEPENDS="$LEVEL2/include $LEVEL2/iotk/src $LEVEL2/Modules \
                       $LEVEL2/PW/src $LEVEL2/PHonon/PH" ;;
-        thermo_pw/lib )
+	thermo_pw/lib )
              DEPENDS="$LEVEL2/include $LEVEL2/iotk/src $LEVEL2/Modules \
                       $LEVEL2/PW/src $LEVEL2/PHonon/PH " ;;
-        thermo_pw/src )
+	thermo_pw/qe )
              DEPENDS="$LEVEL2/include $LEVEL2/iotk/src $LEVEL2/Modules \
-                      $LEVEL2/PW/src $LEVEL2/PHonon/PH $LEVEL2/thermo_pw/lib" ;;
-        thermo_pw/tools )
+                      $LEVEL2/PW/src $LEVEL2/PHonon/PH \ 
+                      $LEVEL2/thermo_pw/lib " ;;
+	thermo_pw/src )
+             DEPENDS="$LEVEL2/include $LEVEL2/iotk/src $LEVEL2/Modules \
+                      $LEVEL2/PW/src $LEVEL2/PHonon/PH $LEVEL2/PP/src \
+                      $LEVEL2/thermo_pw/lib $LEVEL2/thermo_pw/qe " ;;
+	thermo_pw/tools )
              DEPENDS="$LEVEL2/include $LEVEL2/iotk/src $LEVEL2/Modules \
                       $LEVEL2/PW/src $LEVEL2/PHonon/PH $LEVEL2/thermo_pw/lib" ;;
     *)
@@ -109,8 +115,8 @@ for dir in $dirs; do
 
         if test "$DIR" = "Modules"
         then
-            sed '/@mpi@/d' make.depend > make.depend.tmp
-            sed '/@elpa1@/d' make.depend.tmp > make.depend
+            sed '/@mpi@/d;/@elpa1@/d' make.depend > make.depend.tmp
+            sed '/@mkl_dfti/d' make.depend.tmp > make.depend
         fi
 
         if test "$DIR" = "clib"
@@ -121,14 +127,8 @@ for dir in $dirs; do
 
         if test "$DIR" = "PW/src" || test "$DIR" = "TDDFPT/src"
         then
-            sed '/@environ_base@/d'  make.depend > make.depend.tmp
-            sed '/@environ_input@/d' make.depend.tmp > make.depend
-            sed '/@environ_info@/d'  make.depend > make.depend.tmp
-            sed '/@environ_init@/d'  make.depend.tmp > make.depend
-            sed '/@environ_main@/d'  make.depend > make.depend.tmp
-            sed '/@environ_mp@/d'    make.depend.tmp > make.depend
-            sed '/@solvent_tddfpt@/d' make.depend > make.depend.tmp
-            mv make.depend.tmp make.depend
+            sed '/@environ_/d'  make.depend > make.depend.tmp
+            sed '/@solvent_tddfpt@/d' make.depend.tmp > make.depend
         fi
 
         rm -f make.depend.tmp
