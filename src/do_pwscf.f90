@@ -34,6 +34,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   USE basis,            ONLY : starting_pot, startingconfig
   USE control_flags,    ONLY : conv_elec, gamma_only, lscf, lbands, ethr, &
                                conv_ions, istep, nstep, restart, lmd, lbfgs
+  USE force_mod, ONLY : lforce, lstres
   USE input_parameters, ONLY : diago_thr_init
   USE force_mod,        ONLY : lforce, lstres, sigma, force
   USE check_stop,       ONLY : check_stop_init, check_stop_now
@@ -58,6 +59,9 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
      startingconfig='file'
      lscf=.FALSE.
      lbands=.TRUE.
+     lbfgs=.FALSE.
+     lforce=.FALSE.
+     lstres=.FALSE.
   ENDIF
   ethr=diago_thr_init
   istep=0
