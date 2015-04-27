@@ -5,7 +5,7 @@ include ../../make.sys
 # location of needed modules and included files (if any)
 MODFLAGS= $(MOD_FLAG)../../iotk/src $(MOD_FLAG)../../Modules \
           $(MOD_FLAG)../../PW/src $(MOD_FLAG)../../PHonon/PH \
-          $(MOD_FLAG)../lib $(MOD_FLAG).
+          $(MOD_FLAG)../lib $(MOD_FLAG)../qe $(MOD_FLAG).
 IFLAGS=
 
 THERMOOBJS = \
@@ -60,7 +60,6 @@ set_temperature.o \
 set_thermo_work_todo.o \
 simple_nonanal.o \
 simple_plot.o \
-solve_linter.o \
 sym_band_sub.o \
 thermo_mod.o \
 thermo_readin.o \
@@ -80,13 +79,11 @@ write_thermo.o
 PWOBJS = ../../PHonon/PH/libph.a ../../PP/src/libpp.a ../../PW/src/libpw.a 
 QEMODS = ../../Modules/libqemod.a
 
-LIBOBJS	= ../lib/thermo_lib.a ../../PHonon/PH/libph.a ../../flib/ptools.a ../../flib/flib.a ../../clib/clib.a ../../iotk/src/libiotk.a
-
-TLDEPS= bindir mods libs pw
+LIBOBJS	= ../lib/thermo_lib.a ../qe/thermo_qe.a ../../PHonon/PH/libph.a ../../flib/ptools.a ../../flib/flib.a ../../clib/clib.a ../../iotk/src/libiotk.a
 
 all : libthermo_pw.a thermo_pw.x 
 
-libs-ph : libph.a libphaux.a
+libs-ph : libph.a 
 
 thermo_pw.x : thermo_pw.o libthermo_pw.a $(PWOBJS) $(LIBOBJS)
 	$(LD) $(LDFLAGS) -o $@ thermo_pw.o ../../PHonon/PH/rigid.o \

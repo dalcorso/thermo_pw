@@ -7,7 +7,7 @@
 !
 !
 !-----------------------------------------------------------------------
-SUBROUTINE solve_linter (irr, imode0, npe, drhoscf)
+SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   !-----------------------------------------------------------------------
   !
   !    Driver routine for the solution of the linear system which
@@ -145,7 +145,6 @@ SUBROUTINE solve_linter (irr, imode0, npe, drhoscf)
 !  This routine is task group aware
 !
   IF ( ntask_groups > 1 ) dffts%have_task_groups=.TRUE.
-
   allocate (dvscfin ( dfftp%nnr , nspin_mag , npe))
   if (doublegrid) then
      allocate (dvscfins (dffts%nnr , nspin_mag , npe))
@@ -615,56 +614,4 @@ SUBROUTINE solve_linter (irr, imode0, npe, drhoscf)
   dffts%have_task_groups=.FALSE.
 
   call stop_clock ('solve_linter')
-END SUBROUTINE solve_linter
-
-
-SUBROUTINE setmixout(in1, in2, mix, dvscfout, dbecsum, ndim, flag )
-USE kinds, ONLY : DP
-USE mp_bands, ONLY : intra_bgrp_comm
-USE mp, ONLY : mp_sum
-IMPLICIT NONE
-INTEGER :: in1, in2, flag, ndim, startb, lastb
-COMPLEX(DP) :: mix(in1+in2), dvscfout(in1), dbecsum(in2)
-
-CALL divide (intra_bgrp_comm, in2, startb, lastb)
-ndim=lastb-startb+1
-
-IF (flag==-1) THEN
-   mix(1:in1)=dvscfout(1:in1)
-   mix(in1+1:in1+ndim)=dbecsum(startb:lastb)
-ELSE
-   dvscfout(1:in1)=mix(1:in1)
-   dbecsum=(0.0_DP,0.0_DP)
-   dbecsum(startb:lastb)=mix(in1+1:in1+ndim)
-   CALL mp_sum(dbecsum, intra_bgrp_comm)
-ENDIF
-END SUBROUTINE setmixout
-
-SUBROUTINE check_all_convt(convt)
-  USE mp,        ONLY : mp_sum
-  USE mp_images, ONLY : nproc_image, me_image, intra_image_comm
-  IMPLICIT NONE
-  LOGICAL,INTENT(in) :: convt
-  INTEGER,ALLOCATABLE :: convt_check(:)
-  !
-  IF(nproc_image==1) RETURN
-  !
-  ALLOCATE(convt_check(nproc_image+1))
-  !
-  convt_check = 1
-  IF(convt) convt_check(me_image+1) = 0
-  !
-  CALL mp_sum(convt_check, intra_image_comm)
-  !CALL mp_sum(ios, inter_pool_comm)
-  !CALL mp_sum(ios, intra_bgrp_comm)
-  !
-!  convt = ALL(convt_check==0)
-  IF(ANY(convt_check==0).and..not.ALL(convt_check==0) ) THEN
-    CALL errore('check_all_convt', 'Only some processors converged: '&
-               &' something is wrong with solve_linter', 1)
-  ENDIF
-  !
-  DEALLOCATE(convt_check)
-  RETURN
-  !
-END SUBROUTINE
+END SUBROUTINE solve_linter_tpw
