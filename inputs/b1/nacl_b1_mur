@@ -35,12 +35,12 @@ for DIR in "$BIN_DIR" "$PSEUDO_DIR" ; do
         exit 1
     fi
 done
-for DIR in "$TMP_DIR" "$EXAMPLE_DIR/bands" ; do
+for DIR in "$TMP_DIR" "$EXAMPLE_DIR/murn" ; do
     if test ! -d $DIR ; then
         mkdir $DIR
     fi
 done
-cd $EXAMPLE_DIR/bands
+cd $EXAMPLE_DIR/murn
 
 # check for executables
 for FILE in $BIN_LIST ; do
@@ -80,10 +80,7 @@ $ECHO " done"
 
 cat > thermo_control << EOF
  &INPUT_THERMO
-  what='scf_bands',
-  emax_input=10.,
-  emin_input=-13.,
-  nbnd_bands=16,
+  what='mur_lc',
  /
 EOF
 
@@ -96,7 +93,7 @@ cat > nacl.scf.in << EOF
  /
  &system
    ibrav=  2, 
-   celldm(1) =10.3295, 
+   celldm(1) =10.330, 
    nat= 2, 
    ntyp=2,
    ecutwfc =80,
@@ -112,7 +109,7 @@ ATOMIC_POSITIONS alat
 Na  0.0000000   0.00000000   0.0
 Cl  0.5000000   0.50000000   0.5
 K_POINTS AUTOMATIC
-4 4 4 1 1 1
+8 8 8 1 1 1
 EOF
 
 $ECHO "  running the scf calculation for NaCl...\c"

@@ -12,3 +12,4 @@ output_bands.ps : plot of the band structure
 output_keconv.ps: plot of the convergence of the total energy with the
                 kinetic energy cut-off.
 
+output_mur.ps : a plot of the Murnaghan equation.
