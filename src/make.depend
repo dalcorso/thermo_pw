@@ -36,6 +36,7 @@ collect_everything.o : ../../Modules/io_global.o
 collect_everything.o : ../../Modules/mp_images.o
 collect_everything.o : ../../PHonon/PH/ph_restart.o
 collect_everything.o : ../../PHonon/PH/phcom.o
+collect_everything.o : ../../thermo_pw/qe/control_qe.o
 compute_cp.o : ../../Modules/constants.o
 compute_cp.o : ../../Modules/kind.o
 compute_cp.o : ../../thermo_pw/lib/isoentropic.o

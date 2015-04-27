@@ -14,6 +14,7 @@ SUBROUTINE collect_everything(auxdyn)
 USE mp_images,   ONLY : my_image_id, root_image, nimage
 USE io_global,   ONLY : stdout
 USE control_ph,  ONLY : recover
+USE control_qe,  ONLY : tcollect_all
 USE disp,        ONLY : comp_iq
 USE grid_irr_iq, ONLY : comp_irr_iq
 USE ph_restart,  ONLY : check_directory_phsave
@@ -34,8 +35,11 @@ WRITE(stdout,'(2x,76("+"),/)')
 comp_irr_iq=.TRUE.
 comp_iq=.TRUE.
 recover=.TRUE.
+tcollect_all=.TRUE.
 
-CALL do_phonon(auxdyn)
+CALL do_phonon_tpw(auxdyn)
+
+tcollect_all=.TRUE.
 
 RETURN
 END SUBROUTINE collect_everything

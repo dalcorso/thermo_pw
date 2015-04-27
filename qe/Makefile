@@ -8,8 +8,10 @@ MODFLAGS= $(MOD_FLAG)../../iotk/src $(MOD_FLAG)../../Modules \
           $(MOD_FLAG)../lib  $(MOD_FLAG).
 
 MODULES = \
+control_qe.o \
 do_phonon.o \
 phqscf.o \
+prepare_q.o \
 solve_linter.o 
 
 all : thermo_qe.a

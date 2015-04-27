@@ -345,7 +345,6 @@ SUBROUTINE sym_band_sub(filband, spin_component)
            ik2 = ik + ishift
            DO ikz = 1, nkz
               ike = ik + nks_ * (ikz - 1)
-              write(6,*) 'ik2, ike', ik2, ike
               CALL find_aux_ind_xk(xk(1,ike),xk(1,ik2),aux_ind_sur(ik,ikz))
            END DO
         END DO
@@ -439,7 +438,6 @@ CALL find_info_group(nsymk1, sk1, t_revk1, ftauk1, d_spink1, gk1,&
 group_b=code_group
 
 IF (group_b /= group_a) THEN
-   write(6,*) 'group_a, group_b', group_a, group_b
    CALL find_aux_ind_two_groups(nsymk, nsymk1, sk, sk1, at, bg, &
                                 group_a, group_b, aux_ind)
 ELSE

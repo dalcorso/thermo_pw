@@ -43,7 +43,7 @@ SUBROUTINE do_phonon_tpw(auxdyn)
   !
   DO iq = 1, nqs
      !
-     CALL prepare_q(auxdyn, do_band, do_iq, setup_pw, iq)
+     CALL prepare_q_tpw(auxdyn, do_band, do_iq, setup_pw, iq)
      !
      !  If this q is not done in this run, cycle
      !

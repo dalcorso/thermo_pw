@@ -338,7 +338,7 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
            code_group_old=code_group
         ENDIF
         DEALLOCATE(name_rap_mode)
-        write(6,'(2i5, 3f15.5,l5)') n, qcode_group(n), q(:,n), high_sym(n)
+!        write(6,'(2i5, 3f15.5,l5)') n, qcode_group(n), q(:,n), high_sym(n)
      ELSEIF (lo_to_split) THEN
         qcode_group(n)=code_group_save
      ENDIF
@@ -378,7 +378,7 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
      CALL find_aux_ind_xk(q(1,1), q(1,2), aux_ind(2))
      CALL find_aux_ind_xk(q(1,nq), q(1,nq-1), aux_ind(nq-1))
      DO n=2,nq-1
-        write(6,'(3f15.5,3l5)') q(:,n), high_sym(n-1), high_sym(n), high_sym(n+1)
+!        write(6,'(3f15.5,3l5)') q(:,n), high_sym(n-1), high_sym(n), high_sym(n+1)
         IF (high_sym(n).AND..NOT.high_sym(n+1)) &
            CALL find_aux_ind_xk(q(1,n), q(1,n+1), aux_ind(n+1))
         IF (high_sym(n).AND..NOT.high_sym(n-1)) &

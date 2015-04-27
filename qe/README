@@ -8,4 +8,9 @@ solve_linter_tpw: contains a call to asyn_master to have the master check for
 
 phqscf_tpw : call solve_linter_tpw instead of solve_linter
 
-do_phonon_tpw : call phqscf_tpw instead of phqscf.
+prepare_q_tpw: use the variable tcollect_all to avoid the calculation of
+the bands in the final run that collects all the dynamical matrices.
+
+do_phonon_tpw : call phqscf_tpw instead of phqscf and prepare_q_tpw instead
+            of prepare_q.
+
