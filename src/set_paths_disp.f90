@@ -77,6 +77,7 @@ SUBROUTINE set_paths_disp()
       label_disp_q(1)=1
       DO i=2,nqaux
          label_disp_q(i)=label_disp_q(i-1)+wqaux(i-1)
+         IF (wqaux(i-1)==0) label_disp_q(i)=label_disp_q(i)+1
       ENDDO
    ELSE
       disp_nqs=nqaux
