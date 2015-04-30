@@ -35,6 +35,7 @@ matdyn_sub.o \
 plan_avg_sub.o \
 plot_bz.o \
 plot_anhar.o \
+plot_anhar_anis.o \
 plotband_sub.o \
 plot_2d_bz.o \
 plot_e_ke.o \

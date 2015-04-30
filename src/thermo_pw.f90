@@ -388,12 +388,15 @@ PROGRAM thermo_pw
            CALL plot_anhar() 
         ELSE
 !
-!    Anisotropic solid. Compute only the thermal expansion tensor
+!    Anisotropic solid. Compute only the crystal parameters as a function
+!    of temperature and the thermal expansion tensor
 !
            DO itemp = 1, ntemp
               CALL quadratic_fit_t(itemp)
            ENDDO
            CALL write_anhar_anis()
+           CALL write_ph_freq_anhar_anis()
+           CALL plot_anhar_anis()
         ENDIF
      ENDIF
 
