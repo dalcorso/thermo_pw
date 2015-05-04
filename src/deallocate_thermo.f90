@@ -12,7 +12,7 @@ SUBROUTINE deallocate_thermo()
   !  This routine deallocates the variables that control the thermo calculation
   !
   USE kinds,          ONLY : DP
-  USE thermo_mod,     ONLY : alat_geo, energy_geo, omega_geo
+  USE thermo_mod,     ONLY : celldm_geo, energy_geo, omega_geo
   USE thermodynamics, ONLY : ph_free_ener, ph_ener, ph_entropy, ph_cv
   USE ph_freq_thermodynamics, ONLY : phf_free_ener, phf_ener, phf_entropy, phf_cv
   USE anharmonic,     ONLY : vmin_t, b0_t, free_e_min_t, &
@@ -32,8 +32,8 @@ SUBROUTINE deallocate_thermo()
 
   IMPLICIT NONE
   !
-  IF ( ALLOCATED (alat_geo) )        DEALLOCATE(alat_geo)
   IF ( ALLOCATED (energy_geo) )      DEALLOCATE(energy_geo)
+  IF ( ALLOCATED (celldm_geo) )      DEALLOCATE(celldm_geo) 
   IF ( ALLOCATED (omega_geo) )       DEALLOCATE(omega_geo) 
   IF ( ALLOCATED (vmin_t) )          DEALLOCATE(vmin_t) 
   IF ( ALLOCATED (ke) )              DEALLOCATE(ke) 

@@ -11,12 +11,13 @@ SUBROUTINE plot_thermo(igeom)
 !  
 !
 USE kinds,           ONLY : DP
-USE control_gnuplot, ONLY : flgnuplot, flpstherm, gnuplot_command, lgnuplot
+USE control_gnuplot, ONLY : flgnuplot, gnuplot_command, lgnuplot
+USE postscript_files, ONLY : flpstherm
 USE gnuplot,         ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
                             gnuplot_ylabel, gnuplot_write_command, &
                             gnuplot_xlabel, gnuplot_write_file_mul_data, &
                             gnuplot_set_fact
-USE control_thermo,  ONLY : fltherm
+USE data_files,      ONLY : fltherm
 USE temperature,     ONLY : tmin, tmax
 USE mp_images,       ONLY : root_image, my_image_id
 USE io_global,       ONLY : ionode

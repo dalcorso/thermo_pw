@@ -14,7 +14,7 @@ SUBROUTINE write_gruneisen_band(file_disp)
   ! that corresponds to the temperature given in input.
   ! 
   USE kinds,          ONLY : DP
-  USE control_thermo, ONLY : flgrun
+  USE data_files,     ONLY : flgrun
   USE thermo_mod,     ONLY : ngeo, omega_geo
   USE ph_freq_anharmonic, ONLY : vminf_t
   USE control_grun,   ONLY : temp_ph, volume_ph
@@ -48,6 +48,7 @@ SUBROUTINE write_gruneisen_band(file_disp)
 
   IF (flgrun == ' ') RETURN
 
+  WRITE(stdout,*)
   DO igeo = 1, ngeo(1)
 
      filedata = TRIM(file_disp)//'.g'//TRIM(int_to_char(igeo))
@@ -67,7 +68,7 @@ SUBROUTINE write_gruneisen_band(file_disp)
      IF (nks <= 0 .or. nbnd <= 0) THEN
         CALL errore('write_gruneisen_band','reading plot namelist',ABS(ios))
      ELSE
-        WRITE(stdout, '("Reading ",i4," dispersions at ",i6," k-points for&
+        WRITE(stdout, '(5x,"Reading ",i4," dispersions at ",i6," k-points for&
                        & geometry",i4)') nbnd, nks, igeo
      ENDIF
 

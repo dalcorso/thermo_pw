@@ -27,7 +27,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   ! ... Will be eventually merged with NEB
   !
   USE kinds,            ONLY : DP
-  USE thermo_mod,       ONLY : what
+  USE control_pwrun,    ONLY : do_punch
   USE io_global,        ONLY : stdout, ionode, ionode_id
   USE parameters,       ONLY : ntypx, npk, lmaxx
   USE cell_base,        ONLY : fix_volume, fix_area
@@ -151,8 +151,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   ! ... save final data file
   !
   IF ( .not. lmd) CALL pw2casino()
-  IF ( what /='scf_elastic_constants' .AND. what /='mur_lc_elastic_constants') &
-          CALL punch('all')
+  IF ( do_punch ) CALL punch('all')
   !
   IF ( .NOT. conv_ions )  exit_status =  3
   !

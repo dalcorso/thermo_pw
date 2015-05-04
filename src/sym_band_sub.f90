@@ -33,7 +33,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
                                    sym_divide, nlayers, identify_sur, &
                                    surface1, surface2
   USE control_bands,        ONLY : lsym
-  USE control_gnuplot,      ONLY : flprojlayer
+  USE data_files,           ONLY : flprojlayer
   USE uspp,                 ONLY : nkb, vkb
   USE spin_orb,             ONLY : domag
   USE noncollin_module,     ONLY : noncolin

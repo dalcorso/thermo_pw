@@ -11,7 +11,8 @@ SUBROUTINE plot_e_ke()
 !  
 !
 USE kinds,           ONLY : DP
-USE control_gnuplot, ONLY : flgnuplot, flpskeconv, lgnuplot, gnuplot_command
+USE control_gnuplot, ONLY : flgnuplot, lgnuplot, gnuplot_command
+USE postscript_files, ONLY :flpskeconv
 USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
                             gnuplot_write_header,        &
                             gnuplot_set_gfact,           &
@@ -19,7 +20,7 @@ USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
                             gnuplot_ylabel,              &
                             gnuplot_xlabel,              &
                             gnuplot_write_file_mul_data
-USE control_thermo,  ONLY : flkeconv
+USE data_files,      ONLY : flkeconv
 USE control_conv,    ONLY : ke, nke, nkeden
 USE thermo_mod,      ONLY : energy_geo
 USE mp_images,       ONLY : my_image_id, root_image

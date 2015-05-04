@@ -39,7 +39,7 @@ tcollect_all=.TRUE.
 
 CALL do_phonon_tpw(auxdyn)
 
-tcollect_all=.TRUE.
+tcollect_all=.FALSE.
 
 RETURN
 END SUBROUTINE collect_everything

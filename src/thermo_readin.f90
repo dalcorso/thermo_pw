@@ -15,10 +15,12 @@ SUBROUTINE thermo_readin()
   !
   USE kinds,                ONLY : DP
   USE thermo_mod,           ONLY : what, ngeo, step_ngeo, reduced_grid
-  USE control_thermo,       ONLY : outdir_thermo, flevdat,        &
-                                   flfrc, flfrq, fldos, fltherm,  &
-                                   flanhar, filband, flkeconv,    &
-                                   flnkconv, flgrun, after_disp
+  USE control_thermo,       ONLY : outdir_thermo, after_disp
+  USE data_files,           ONLY : flevdat, flfrc, flfrq, fldos, fltherm,  &
+                                   flanhar, filband, flkeconv,             &
+                                   flenergy, flpbs, flprojlayer,           &
+                                   flnkconv, flgrun, flpgrun, fl_el_cons,  &
+                                   flpband 
   USE temperature,          ONLY : tmin, tmax, deltat, ntemp
   USE ifc,                  ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq, &
                                    zasr, freqmin_input, freqmax_input
@@ -31,30 +33,28 @@ SUBROUTINE thermo_readin()
                                    disp_q, disp_wq, disp_nqs, npx, &
                                    label_disp_q, letter_path, nrap_plot_in, &
                                    rap_plot_in
-  USE control_gnuplot,      ONLY : flgnuplot, flpsband, flpsdisp, &
-                                   flpsmur, flpsdos, flpstherm, flpsanhar, &
-                                   flpskeconv, flpsnkconv, flpsgrun,       &
-                                   lgnuplot, flenergy, flpsenergy,         &
-                                   flpbs, flprojlayer, gnuplot_command
+  USE control_gnuplot,      ONLY : flgnuplot, gnuplot_command, lgnuplot
+  USE postscript_files,     ONLY : flpsband, flpsdisp, flpsmur, flpsdos, &
+                                   flpstherm, flpsanhar, flpskeconv, &
+                                   flpsnkconv, flpsgrun,  flpsenergy
   USE control_2d_bands,     ONLY : lprojpbs, nkz, gap_thr, sym_divide, &
                                    identify_sur, sur_layers, sur_thr, &
                                    force_bands, only_bands_plot, dump_states, &
                                    subtract_vacuum
   USE control_asy,          ONLY : flasy, lasymptote, asymptote_command
-  USE control_bands,        ONLY : flpband, emin_input, emax_input, nbnd_bands,&
-                                   lsym 
-  USE control_grun,         ONLY : flpgrun, grunmin_input, grunmax_input, &
+  USE control_bands,        ONLY : emin_input, emax_input, nbnd_bands, lsym 
+  USE control_grun,         ONLY : grunmin_input, grunmax_input, &
                                    temp_ph, volume_ph
   USE control_conv,         ONLY : nke, deltake, nkeden, deltakeden, &
                                    nnk, deltank, nsigma, deltasigma
   USE control_mur,          ONLY : vmin_input, vmax_input, deltav, nvol, lmurn
   USE control_elastic_constants, ONLY : at_save, tau_save, delta_epsilon, &
-                                        ibrav_save, ngeo_strain, frozen_ions, &
-                                        fl_el_cons, elastic_algorithm
+                                        ngeo_strain, frozen_ions, &
+                                        elastic_algorithm
   USE control_piezoelectric_tensor, ONLY : nosym_save
-  USE control_energy,       ONLY : ncontours, color_levels, ene_levels 
+  USE control_energy_plot,  ONLY : ncontours, color_levels, ene_levels 
   USE piezoelectric_tensor, ONLY : nppl
-  USE control_pwrun,        ONLY : celldm_save
+  USE control_pwrun,        ONLY : celldm_save, ibrav_save
   USE control_ph,           ONLY : xmldyn
   USE output,               ONLY : fildyn
   USE cell_base,            ONLY : at, bg, celldm

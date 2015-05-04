@@ -12,7 +12,7 @@ USE kinds,             ONLY : DP
 USE ions_base,         ONLY : nat
 USE control_2d_bands,  ONLY : averag, vacuum, nlayers, identify_sur, &
                               surface1, surface2
-USE control_gnuplot,   ONLY : flprojlayer
+USE data_files,        ONLY : flprojlayer
 USE io_global,         ONLY : ionode, ionode_id
 USE mp_images,         ONLY : intra_image_comm
 USE mp,                ONLY : mp_bcast

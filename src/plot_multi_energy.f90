@@ -17,9 +17,10 @@ SUBROUTINE plot_multi_energy()
   USE kinds,                ONLY : DP
   USE thermo_mod,           ONLY : ngeo, celldm_geo, energy_geo, omega_geo
   USE input_parameters,     ONLY : ibrav
-  USE control_gnuplot,      ONLY : flgnuplot, flenergy, flpsenergy, &
-                                   gnuplot_command, lgnuplot
-  USE control_energy,       ONLY : ncontours, ene_levels, color_levels
+  USE control_gnuplot,      ONLY : flgnuplot, gnuplot_command, lgnuplot
+  USE data_files,           ONLY : flenergy 
+  USE postscript_files,     ONLY : flpsenergy
+  USE control_energy_plot,  ONLY : ncontours, ene_levels, color_levels
   USE control_mur,          ONLY : lmurn, celldm0
   USE control_quadratic_energy, ONLY : x_pos_min, hessian_v, degree
   USE mp_images,            ONLY : my_image_id, root_image
@@ -30,6 +31,7 @@ SUBROUTINE plot_multi_energy()
                                    gnuplot_set_xticks, gnuplot_xlabel,     &
                                    gnuplot_ylabel, gnuplot_close_2dplot_prep, &
                                    gnuplot_line_v
+
   IMPLICIT NONE
   CHARACTER(LEN=256) :: gnu_filename, fileout
   CHARACTER(LEN=6) :: int_to_char

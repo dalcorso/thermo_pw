@@ -9,7 +9,7 @@ SUBROUTINE write_e_ke()
 USE kinds,          ONLY : DP
 USE control_conv,   ONLY : nke, ke, nkeden
 USE thermo_mod,     ONLY : energy_geo
-USE control_thermo, ONLY : flkeconv
+USE data_files,     ONLY : flkeconv
 USE io_global,      ONLY : ionode
 USE mp_images,      ONLY : my_image_id, root_image
 

@@ -17,7 +17,7 @@ USE thermodynamics, ONLY : ph_ener, ph_free_ener, ph_entropy, ph_cv, phdos_save
 USE mp_images,      ONLY : root_image, my_image_id, intra_image_comm
 USE mp,             ONLY : mp_bcast
 USE io_global,      ONLY : ionode, ionode_id, stdout
-USE control_thermo, ONLY : fltherm
+USE data_files,     ONLY : fltherm
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: igeom
@@ -128,7 +128,7 @@ USE thermo_mod,       ONLY : tot_ngeo
 USE mp_images,        ONLY : root_image, my_image_id, intra_image_comm
 USE mp,               ONLY : mp_bcast
 USE io_global,        ONLY : ionode, ionode_id, stdout
-USE control_thermo,   ONLY : fltherm
+USE data_files,       ONLY : fltherm
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: igeom

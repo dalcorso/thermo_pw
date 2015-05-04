@@ -83,7 +83,8 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   USE control_paths, ONLY : disp_q, disp_nqs
   USE thermodynamics, ONLY : phdos_save
   USE ph_freq_thermodynamics, ONLY : ph_freq_save
-  USE control_thermo, ONLY : flfrc, flfrq, fldos, ldos
+  USE control_thermo, ONLY : ldos
+  USE data_files,     ONLY : flfrc, flfrq, fldos 
   USE ions_base, ONLY : amass
   USE phdos_module, ONLY : set_phdos, read_phdos_data, find_minimum_maximum
   USE ph_freq_module, ONLY : init_ph_freq, init_ph_rap, read_ph_freq_data, &

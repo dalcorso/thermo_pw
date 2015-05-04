@@ -16,9 +16,9 @@ USE temperature,    ONLY : ntemp, temp
 USE thermodynamics, ONLY : ph_cv
 USE anharmonic,     ONLY : alpha_anis_t, vmin_t, b0_t, celldm_t, beta_t
 USE control_quadratic_energy, ONLY : nvar, degree, coeff_t
-USE control_elastic_constants, ONLY : ibrav_save
+USE control_pwrun,  ONLY : ibrav_save
 USE cell_base,      ONLY : ibrav
-USE control_thermo, ONLY : flanhar
+USE data_files,     ONLY : flanhar
 USE io_global,      ONLY : ionode
 USE mp_images,      ONLY : my_image_id, root_image
 
@@ -208,9 +208,9 @@ USE ph_freq_thermodynamics, ONLY : phf_cv
 USE ph_freq_anharmonic, ONLY : alphaf_anis_t, vminf_t, b0f_t, celldmf_t, &
                                betaf_t
 USE control_quadratic_energy, ONLY : nvar, degree, coeff_t
-USE control_elastic_constants, ONLY : ibrav_save
+USE control_pwrun,  ONLY : ibrav_save
 USE cell_base,      ONLY : ibrav
-USE control_thermo, ONLY : flanhar
+USE data_files,     ONLY : flanhar
 USE io_global,      ONLY : ionode
 USE mp_images,      ONLY : my_image_id, root_image
 

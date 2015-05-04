@@ -1,5 +1,5 @@
-!
-! Copyright (C) 2013 Andrea Dal Corso
+
+! Copyright (C) 2013-2015 Andrea Dal Corso
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -27,29 +27,35 @@ PROGRAM thermo_pw
   ! ... 
   ! ...   scf       : a single scf calculation to determine the total energy.
   ! ...   scf_ke    : many scf calculations at different cut-offs
-  ! ...   scf_nk    : many scf calculations at different number of k points
+  ! ...   scf_nk    : many scf calculations at different numbers of k points
   ! ...   scf_bands : a band structure calculation after a scf calcul.
-  ! ...   scf_ph    : a phonon calculation after an scf run
-  ! ...   scf_disp  : a phonon dispersion calculation after a scf run
-  ! ...   mur_lc    : lattice constant via murnaghan equation
-  ! ...   mur_lc_bands  : a band structure calculation at the minimum or the
-  ! ...               murnaghan
-  ! ...   mur_lc_ph : a phonon calculation at the minimum of the murmaghan
-  ! ...   mur_lc_disp : a dispersion calculation at the minimum of the
-  ! ...               murnaghan with the possibility to compute harmonic
-  ! ...               thermodynamical quantities
-  ! ...   mur_lc_t  : lattice constant and bulk modulus as a function 
-  ! ...               of temperature within the quasiharmonic approximation
-  ! ...   scf_elastic_constants : elastic constants at zero temperature 
-  ! ...   mur_lc_elastic_constants : elastic constants at zero temperature 
-  ! ...               at the minimum of the Murnaghan equation 
-  ! ...   scf_piezoelectric_tensor : piezoelectric tensor at zero temperature
-  ! ...   mur_lc_piezoelectric_tensor : piezoelectric tensor at zero temperature
-  ! ...               at the minimum of the Murnaghan equation 
   ! ...   scf_2d_bands : this is as scf_bands, but the cell is assumed to be 
   ! ...                  a slab and the default path is chosen in the 2d 
   ! ...                  Brillouin zone. This option can be used also to 
   ! ...                  calculate the projected bulk band structure.
+  ! ...   scf_ph    : a phonon calculation after an scf run
+  ! ...   scf_disp  : a phonon dispersion calculation after a scf run
+  ! ...   scf_elastic_constants : elastic constants at zero temperature 
+  ! ...   scf_piezoelectric_tensor : piezoelectric tensor at zero temperature
+  ! ...
+  ! ...   mur_lc    : lattice constant via Murnaghan equation or 
+  ! ...               quadratic interpolation of the equation of state
+  ! ...   mur_lc_bands  : a band structure calculation at the minimum or the
+  ! ...               Murnaghan 
+  ! ...   mur_lc_ph : a phonon calculation at the minimum of the Murnaghan
+  ! ...   mur_lc_disp : a dispersion calculation at the minimum of the
+  ! ...               Murnaghan with the possibility to compute the harmonic
+  ! ...               thermodynamical quantities
+  ! ...   mur_lc_elastic_constants : elastic constants at zero temperature 
+  ! ...               at the minimum of the Murnaghan equation 
+  ! ...   mur_lc_piezoelectric_tensor : piezoelectric tensor at zero temperature
+  ! ...               at the minimum of the Murnaghan equation 
+  ! ...
+  ! ...   mur_lc_t  : lattice constant and bulk modulus as a function 
+  ! ...               of temperature within the quasiharmonic approximation
+  ! ...               for cubic systems or crystal parameters as a function
+  ! ...               of temperature for tetragonal, hexagonal, trigonal,
+  ! ...               and orthorombic systems. 
   ! ...
   USE kinds,            ONLY : DP
   USE check_stop,       ONLY : check_stop_init
@@ -63,13 +69,12 @@ PROGRAM thermo_pw
   USE mp,               ONLY : mp_sum, mp_bcast
   USE control_thermo,   ONLY : lev_syn_1, lev_syn_2, lpwscf_syn_1,         &
                                lbands_syn_1, lph, outdir_thermo, lq2r,     &
-                               lmatdyn, ldos, ltherm, flfrc, flfrq, fldos, &
-                               fltherm, spin_component, flevdat,           &
+                               lmatdyn, ldos, ltherm,                      &
                                lconv_ke_test, lconv_nk_test,               &
-                               after_disp,                                 &
-                               lelastic_const, lpiezoelectric_tensor,      &
-                               lpolarization
-  USE ifc,              ONLY : freqmin, freqmax
+                               spin_component, after_disp, lelastic_const, &
+                               lpiezoelectric_tensor, lpolarization, lpart2_pw
+  USE postscript_files, ONLY : flpstherm, flpsdisp, flpsdos
+  USE data_files,        ONLY : flevdat, fl_el_cons
   USE elastic_constants, ONLY : print_elastic_constants, &
                                 compute_elastic_constants, epsilon_geo, &
                                 sigma_geo, el_con, el_compliances, &
@@ -79,14 +84,16 @@ PROGRAM thermo_pw
                                 compute_elastic_constants_adv, &
                                 compute_elastic_constants_ene
   USE piezoelectric_tensor, ONLY : compute_piezo_tensor, &
-                                 compute_d_piezo_tensor, &
-                                 polar_geo, g_piezo_tensor, d_piezo_tensor, &
-                                 print_d_piezo_tensor, print_g_piezo_tensor
-  USE control_elastic_constants, ONLY : ibrav_save, ngeo_strain, frozen_ions, &
-                                 fl_el_cons, elastic_algorithm, rot_mat, omega0
+                                compute_d_piezo_tensor, &
+                                polar_geo, g_piezo_tensor, d_piezo_tensor, &
+                                print_d_piezo_tensor, print_g_piezo_tensor
+  USE control_elastic_constants, ONLY : ngeo_strain, frozen_ions, &
+                                elastic_algorithm, rot_mat, omega0
+  USE internal_files_names,  ONLY : flfrq_thermo
   USE control_paths,    ONLY : nqaux
-  USE control_gnuplot,  ONLY : flpsdos, flgnuplot, flpstherm, flpsdisp
-  USE control_bands,    ONLY : flpband, nbnd_bands
+  USE control_gnuplot,  ONLY : flgnuplot
+  USE control_bands,    ONLY : nbnd_bands
+  USE control_pwrun,    ONLY : ibrav_save, do_punch
   USE thermo_sym,       ONLY : laue, code_group_save
   USE cell_base,        ONLY : omega
   USE wvfct,            ONLY : nbnd
@@ -98,15 +105,16 @@ PROGRAM thermo_pw
   USE input_parameters, ONLY : ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
                                trd_ht, rd_ht, cell_units, outdir
   USE control_mur,      ONLY : vmin, b0, b01, emin, celldm0, lmurn
-  USE thermo_mod,       ONLY : what, ngeo, alat_geo, omega_geo, energy_geo, &
-                               tot_ngeo, reduced_grid, celldm_geo
+  USE thermo_mod,       ONLY : what, ngeo, omega_geo, energy_geo, &
+                               tot_ngeo, reduced_grid, ibrav_geo, celldm_geo, &
+                               central_geo
+  USE cell_base,        ONLY : ibrav_ => ibrav, celldm_ => celldm
   USE control_2d_bands, ONLY : only_bands_plot
   USE ph_restart,       ONLY : destroy_status_run
   USE save_ph,          ONLY : clean_input_variables
   USE output,           ONLY : fildyn
   USE io_files,         ONLY : tmp_dir, wfc_dir
   USE cell_base,        ONLY : cell_base_init
-  USE fft_base,         ONLY : dfftp, dffts
   !
   IMPLICIT NONE
   !
@@ -115,16 +123,10 @@ PROGRAM thermo_pw
   CHARACTER (LEN=256) :: auxdyn=' '
   CHARACTER (LEN=256) :: diraux=' '
   CHARACTER(LEN=6) :: int_to_char
-  INTEGER :: part, nwork, igeom, itemp, nspin0, exit_status, central_geo
-  REAL(DP) :: compute_alat_geo, fact
-  LOGICAL :: all_done_asyn
+  INTEGER :: part, nwork, igeom, itemp, nspin0, exit_status
   LOGICAL  :: exst, parallelfs
   LOGICAL :: check_file_exists, check_dyn_file_exists
-  CHARACTER(LEN=256) :: fildyn_thermo, flfrc_thermo, flfrq_thermo, &
-                        fldos_thermo, fltherm_thermo, flpband_thermo, &
-                        flpsdos_thermo, flpstherm_thermo, flgnuplot_thermo, &
-                        flpsdisp_thermo, file_dat
-  !
+  CHARACTER(LEN=256) :: file_dat
   ! Initialize MPI, clocks, print initial messages
   !
   CALL mp_startup ( start_images=.true. )
@@ -140,7 +142,7 @@ PROGRAM thermo_pw
   !
   CALL thermo_summary()
   !
-  CALL check_stop_init()
+  IF (my_image_id /= root_image) CALL check_stop_init()
   !
   part = 1
   !
@@ -185,7 +187,6 @@ PROGRAM thermo_pw
         CALL do_ev()
         CALL write_mur(vmin,b0,b01,emin)
         CALL plot_mur()
-        central_geo=(ngeo(1)+1)/2
         CALL compute_celldm_geo(vmin, celldm0, &
                    celldm_geo(1,central_geo), omega_geo(central_geo))
      ELSE
@@ -196,6 +197,7 @@ PROGRAM thermo_pw
         WRITE(stdout,'(5x,6f12.5)') celldm0
      ENDIF
      CALL mp_bcast(celldm0, meta_ionode_id, world_comm)
+     celldm=celldm0
      CALL cell_base_init ( ibrav, celldm0, a, b, c, cosab, cosac, cosbc, &
                       trd_ht, rd_ht, cell_units )
      CALL set_fft_mesh()
@@ -214,7 +216,13 @@ PROGRAM thermo_pw
 !
 !   do the self consistent calculation at the new lattice constant
 !
-        IF (.NOT.only_bands_plot) CALL do_pwscf(exit_status, .TRUE.)
+        do_punch=.TRUE.
+        IF (.NOT.only_bands_plot) THEN
+           WRITE(stdout,'(/,2x,76("+"))')
+           WRITE(6,'(5x,"Doing a self-consistent calculation", i5)') 
+           WRITE(stdout,'(2x,76("+"),/)')
+           CALL do_pwscf(exit_status, .TRUE.)
+        ENDIF
         IF (lbands_syn_1) THEN
 !
 !   do the band calculation after setting the path
@@ -223,6 +231,9 @@ PROGRAM thermo_pw
               CALL set_paths_disp()
               CALL set_k_points()
               IF (nbnd_bands > nbnd) nbnd = nbnd_bands
+              WRITE(stdout,'(/,2x,76("+"))')
+              WRITE(6,'(5x,"Doing a non self-consistent calculation", i5)') 
+              WRITE(stdout,'(2x,76("+"),/)')
               CALL do_pwscf(exit_status, .FALSE.)
               nspin0=nspin
               IF (nspin==4) nspin0=1
@@ -237,176 +248,8 @@ PROGRAM thermo_pw
         ENDIF
      ENDIF
   END IF
-  
-  IF (what(1:8) /= 'mur_lc_t') ngeo=1
-!
-!   This part makes now one or several phonon calculations, using the
-!   image feature of this code and running asyncronously the images
-!   different geometries are made in sequence. This should be improved,
-!   there should be no need to resyncronize after each geometry
-!
-  IF (lph) THEN
      !
-     ! ... reads the phonon input
-     !
-     with_ext_images=with_asyn_images
-     always_run=.TRUE.
-     CALL start_clock( 'PHONON' )
-     DO igeom=1,tot_ngeo
-        write(6,'(/,5x,40("%"))') 
-        write(6,'(5x,"Computing geometry ", i5)') igeom
-        write(6,'(5x,40("%"),/)') 
-        outdir=TRIM(outdir_thermo)//'g'//TRIM(int_to_char(igeom))//'/'
-        !
-        IF (.NOT. after_disp) CALL thermo_ph_readin()
-        IF (after_disp) ldisp=.TRUE.
-        IF (igeom==1) fildyn_thermo=TRIM(fildyn)
-        IF (igeom==1) flfrc_thermo=TRIM(flfrc)
-        IF (igeom==1) flfrq_thermo=TRIM(flfrq)
-        IF (igeom==1) fldos_thermo=TRIM(fldos)
-        IF (igeom==1) flpsdos_thermo=TRIM(flpsdos)
-        IF (igeom==1) fltherm_thermo=TRIM(fltherm)
-        IF (igeom==1) flpstherm_thermo=TRIM(flpstherm)
-        IF (igeom==1) flpband_thermo=TRIM(flpband)
-        IF (igeom==1) flgnuplot_thermo=TRIM(flgnuplot)
-        IF (igeom==1) flpsdisp_thermo=TRIM(flpsdisp)
-
-        fildyn=TRIM(fildyn_thermo)//'.g'//TRIM(int_to_char(igeom))//'.'
-        flfrc=TRIM(flfrc_thermo)//'.g'//TRIM(int_to_char(igeom))
-        flfrq=TRIM(flfrq_thermo)//'.g'//TRIM(int_to_char(igeom))
-        fldos=TRIM(fldos_thermo)//'.g'//TRIM(int_to_char(igeom))
-        flpsdos=TRIM(flpsdos_thermo)//'.g'//TRIM(int_to_char(igeom))
-        fltherm=TRIM(fltherm_thermo)//'.g'//TRIM(int_to_char(igeom))
-        flpstherm=TRIM(flpstherm_thermo)//'.g'//TRIM(int_to_char(igeom))
-        flpband=TRIM(flpband_thermo)//'.g'//TRIM(int_to_char(igeom))
-        flgnuplot=TRIM(flgnuplot_thermo)//'.g'//TRIM(int_to_char(igeom))
-        flpsdisp=TRIM(flpsdisp_thermo)//'.g'//TRIM(int_to_char(igeom))
-
-        IF (nqaux > 0) CALL set_paths_disp()
-        !
-        ! ... Checking the status of the calculation and if necessary initialize
-        ! ... the q mesh and all the representations
-        !
-        auxdyn=fildyn
-
-        IF ( .NOT. check_dyn_file_exists(auxdyn)) THEN
-
-           CALL check_initial_status(auxdyn)
-           !
-           part=2
-           CALL initialize_thermo_work(nwork, part)
-           !
-           !  Asyncronous work starts again. No communication is
-           !  allowed except though the master workers mechanism
-           !
-           CALL run_thermo_asyncronously(nwork, part, igeom, auxdyn)
-           !  
-           !   return to syncronous work. Collect the work of all images and
-           !   writes the dynamical matrix
-           !
-           CALL collect_everything(auxdyn)
-           !
-        END IF
-        IF (lq2r) THEN
-           CALL q2r_sub(auxdyn) 
-!
-!    compute interpolated dispersions
-!
-           IF (lmatdyn) THEN
-              CALL matdyn_sub(0, igeom)
-              CALL plotband_sub(2,igeom,' ')
-           ENDIF
-!
-!    computes phonon dos
-!
-           IF (lmatdyn.AND.ldos) THEN
-!
-!    the phonon dos is calculated and the frequencies saved on the ph_freq_save 
-!    structure
-!
-              IF (.NOT.ALLOCATED(phdos_save)) ALLOCATE(phdos_save(tot_ngeo))
-              IF (.NOT.ALLOCATED(ph_freq_save)) ALLOCATE(ph_freq_save(tot_ngeo))
-              CALL matdyn_sub(1,igeom)
-              CALL simple_plot('_dos', fldos, flpsdos, 'frequency (cm^{-1})', &
-                       'DOS (states / cm^{-1} / cell)', '"red"', freqmin, freqmax, &
-                            0.0_DP, 0.0_DP)
-           ENDIF
-!
-!    computes the thermodynamical properties
-!
-           IF (ldos.AND.ltherm) THEN
-!
-!    first from phonon dos
-!
-              CALL write_thermo(igeom)
-              CALL write_thermo_ph(igeom)
-              CALL plot_thermo(igeom)
-           ENDIF
-        ENDIF
-        CALL deallocate_asyn()
-        IF (.NOT. after_disp) THEN
-           CALL clean_pw(.TRUE.)
-           CALL close_phq(.FALSE.)
-           CALL clean_input_variables()
-           CALL destroy_status_run()
-           CALL deallocate_part()
-        ENDIF
-     ENDDO
-     flgnuplot=TRIM(flgnuplot_thermo)
-!
-!     Here the Helmholtz free energy at each lattice constant is available.
-!     We can write on file the free energy as a function of the volume at
-!     any temperature. For each temperature we call the murnaghan equation
-!     to fit the data. We save the minimum volume, the bulk modulus and its
-!     pressure derivative for each temperature.
-!
-     IF (lev_syn_2) THEN
-        IF (lmurn) THEN
-           DO itemp = 1, ntemp
-              CALL do_ev_t(itemp)
-              CALL do_ev_t_ph(itemp)
-           ENDDO
-!
-!    here we calculate several anharmonic quantities 
-!
-           CALL write_anharmonic()
-           CALL write_ph_freq_anharmonic()
-!
-!    here we calculate and plot the gruneisen parameters along the given path.
-!
-           CALL write_gruneisen_band(flfrq_thermo)
-           CALL plotband_sub(3,1,flfrq_thermo)
-           CALL plotband_sub(4,1,flfrq_thermo)
-!
-!    here we compute the gruneisen parameters on the uniform mesh
-!
-           CALL compute_gruneisen()
-!
-!    here we calculate several anharmonic quantities and plot them.
-!
-           CALL write_grun_anharmonic()
-           CALL plot_anhar() 
-        ELSE
-!
-!    Anisotropic solid. Compute only the crystal parameters as a function
-!    of temperature and the thermal expansion tensor
-!
-           DO itemp = 1, ntemp
-              CALL quadratic_fit_t(itemp)
-           ENDDO
-           CALL write_anhar_anis()
-           CALL write_ph_freq_anhar_anis()
-           CALL plot_anhar_anis()
-        ENDIF
-     ENDIF
-
-     IF (lmatdyn.AND.ldos) THEN
-        DO igeom=1,tot_ngeo
-           CALL destroy_phdos(phdos_save(igeom))
-        ENDDO
-        DEALLOCATE(phdos_save)
-     ENDIF
-  ELSE
+  IF (lpart2_pw) THEN
 !
 !   here the second part does not use the phonon code. This is for the
 !   calculation of elastic constants
@@ -418,6 +261,10 @@ PROGRAM thermo_pw
      !  allowed except though the master workers mechanism
      !
      CALL run_thermo_asyncronously(nwork, part, igeom, auxdyn)
+     !
+     ! here we return syncronized and calculate the elastic constants 
+     ! from energy or stress 
+     !
 
      IF (lelastic_const) THEN
        IF (elastic_algorithm == 'energy') THEN
@@ -480,14 +327,179 @@ PROGRAM thermo_pw
            CALL print_d_piezo_tensor(frozen_ions)
         ENDIF
      END IF
-
      IF (lpolarization) THEN
         CALL mp_sum(polar_geo, world_comm)
         polar_geo=polar_geo / nproc_image
         CALL print_polarization(polar_geo(:,1), .TRUE. )
      ENDIF
-     !
+
      CALL deallocate_asyn()
+  ENDIF
+
+  IF (what(1:8) /= 'mur_lc_t') ngeo=1
+!
+!   This part makes now one or several phonon calculations, using the
+!   image feature of this code and running asyncronously the images
+!   different geometries are made in sequence. This should be improved,
+!   there should be no need to resyncronize after each geometry
+!
+  IF (lph) THEN
+     !
+     ! ... reads the phonon input
+     !
+     with_ext_images=with_asyn_images
+     always_run=.TRUE.
+     CALL start_clock( 'PHONON' )
+     DO igeom=1,tot_ngeo
+        write(6,'(/,5x,40("%"))') 
+        write(6,'(5x,"Computing geometry ", i5)') igeom
+        write(6,'(5x,40("%"),/)') 
+        outdir=TRIM(outdir_thermo)//'g'//TRIM(int_to_char(igeom))//'/'
+        !
+        IF (.NOT. after_disp) CALL thermo_ph_readin()
+        IF (after_disp) ldisp=.TRUE.
+        CALL set_files_names(igeom)
+
+        IF (after_disp.AND.what=='mur_lc_t') THEN
+!
+!  The geometry is read by thermo_ph_readin from the output files of pw.x,
+!  except in the case where after_disp=.TRUE.. In this case we have to
+!  set it here.
+!
+           ibrav_=ibrav_geo(igeom)
+           celldm_(:)=celldm_geo(:,igeom)
+           CALL set_bz_path()
+        ENDIF
+!
+!  Set the BZ path for the present geometry
+!
+        IF (nqaux > 0) CALL set_paths_disp()
+        !
+        ! ... Checking the status of the calculation and if necessary initialize
+        ! ... the q mesh and all the representations
+        !
+        auxdyn=fildyn
+
+        IF ( .NOT. check_dyn_file_exists(auxdyn)) THEN
+
+           CALL check_initial_status(auxdyn)
+           !
+           part=2
+           CALL initialize_thermo_work(nwork, part)
+           !
+           !  Asyncronous work starts again. No communication is
+           !  allowed except though the master workers mechanism
+           !
+           CALL run_thermo_asyncronously(nwork, part, igeom, auxdyn)
+           !  
+           !   return to syncronous work. Collect the work of all images and
+           !   writes the dynamical matrix
+           !
+           CALL collect_everything(auxdyn)
+           !
+        END IF
+        IF (lq2r) THEN
+!
+!   Compute the interatomic force constants from the dynamical matrices
+!   written on file
+!
+           CALL q2r_sub(auxdyn) 
+!
+!    compute interpolated dispersions
+!
+           IF (lmatdyn) THEN
+              CALL matdyn_sub(0, igeom)
+              CALL plotband_sub(2,igeom,' ')
+           ENDIF
+!
+!    compute phonon dos
+!
+           IF (lmatdyn.AND.ldos) THEN
+!
+!    the phonon dos is calculated and the frequencies saved on the ph_freq_save 
+!    structure
+!
+              IF (.NOT.ALLOCATED(phdos_save)) ALLOCATE(phdos_save(tot_ngeo))
+              IF (.NOT.ALLOCATED(ph_freq_save)) ALLOCATE(ph_freq_save(tot_ngeo))
+              CALL matdyn_sub(1,igeom)
+              CALL plot_phdos()
+           ENDIF
+!
+!    computes the thermodynamical properties
+!
+           IF (ldos.AND.ltherm) THEN
+!
+!    first from phonon dos
+!
+              CALL write_thermo(igeom)
+              CALL write_thermo_ph(igeom)
+              CALL plot_thermo(igeom)
+           ENDIF
+        ENDIF
+        CALL deallocate_asyn()
+        IF (.NOT. after_disp) THEN
+           CALL clean_pw(.TRUE.)
+           CALL close_phq(.FALSE.)
+           CALL clean_input_variables()
+           CALL destroy_status_run()
+           CALL deallocate_part()
+        ENDIF
+     ENDDO
+
+     CALL restore_files_names()
+!
+!     Here the Helmholtz free energy at each lattice constant is available.
+!     We can write on file the free energy as a function of the volume at
+!     any temperature. For each temperature we call the murnaghan equation
+!     to fit the data. We save the minimum volume, the bulk modulus and its
+!     pressure derivative for each temperature.
+!
+     IF (lev_syn_2) THEN
+        IF (lmurn) THEN
+           DO itemp = 1, ntemp
+              CALL do_ev_t(itemp)
+              CALL do_ev_t_ph(itemp)
+           ENDDO
+!
+!    here we calculate several anharmonic quantities 
+!
+           CALL write_anharmonic()
+           CALL write_ph_freq_anharmonic()
+!
+!    here we calculate and plot the gruneisen parameters along the given path.
+!
+           CALL write_gruneisen_band(flfrq_thermo)
+           CALL plotband_sub(3,1,flfrq_thermo)
+           CALL plotband_sub(4,1,flfrq_thermo)
+!
+!    here we compute the gruneisen parameters on the uniform mesh
+!
+           CALL compute_gruneisen()
+!
+!    here we calculate several anharmonic quantities and plot them.
+!
+           CALL write_grun_anharmonic()
+           CALL plot_anhar() 
+        ELSE
+!
+!    Anisotropic solid. Compute only the crystal parameters as a function
+!    of temperature and the thermal expansion tensor
+!
+           DO itemp = 1, ntemp
+              CALL quadratic_fit_t(itemp)
+           ENDDO
+           CALL write_anhar_anis()
+           CALL write_ph_freq_anhar_anis()
+           CALL plot_anhar_anis()
+        ENDIF
+     ENDIF
+
+     IF (lmatdyn.AND.ldos) THEN
+        DO igeom=1,tot_ngeo
+           CALL destroy_phdos(phdos_save(igeom))
+        ENDDO
+        DEALLOCATE(phdos_save)
+     ENDIF
   ENDIF
   !
   CALL deallocate_thermo()
@@ -499,3 +511,4 @@ PROGRAM thermo_pw
   STOP
   !
 END PROGRAM thermo_pw
+

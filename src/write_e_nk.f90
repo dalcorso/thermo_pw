@@ -9,7 +9,7 @@ SUBROUTINE write_e_nk()
 USE kinds,          ONLY : DP
 USE control_conv,   ONLY : nnk, nk_test, nsigma
 USE thermo_mod,     ONLY : energy_geo
-USE control_thermo, ONLY : flnkconv
+USE data_files,     ONLY : flnkconv
 USE io_global,      ONLY : ionode
 USE mp_images,      ONLY : my_image_id, root_image
 

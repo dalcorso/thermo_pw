@@ -13,21 +13,21 @@ SUBROUTINE bcast_thermo_input()
   !
   USE thermo_mod,      ONLY : what, ngeo, step_ngeo, reduced_grid
   USE control_mur,     ONLY : vmin_input, vmax_input, deltav, nvol, lmurn
-  USE control_thermo,  ONLY : outdir_thermo, flevdat,    &
-                              flfrc, flfrq, fldos, fltherm, flanhar, &
-                              filband, flkeconv, flnkconv, flgrun, after_disp
+  USE control_thermo,  ONLY : outdir_thermo, after_disp
+  USE data_files,      ONLY : flevdat, flfrc, flfrq, fldos, fltherm, flanhar, &
+                              filband, flkeconv, flnkconv, flgrun, flpband,   &
+                              flpgrun, flenergy, flprojlayer, flpbs
+  USE postscript_files, ONLY : flpsband, flpsdisp, flpsdisp, flpsdos, &
+                              flpstherm,  flpsanhar, flpsmur, flpskeconv, &
+                              flpsnkconv, flpsgrun, flpsenergy
   USE temperature,     ONLY : tmin, tmax, deltat, ntemp
   USE ifc,             ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq, &
                               zasr, freqmin_input, freqmax_input
   USE control_paths,   ONLY : q_in_band_form, q_in_cryst_coord, q2d, &
                               point_label_type, npx
-  USE control_bands,   ONLY : flpband, emin_input, emax_input, nbnd_bands, lsym
-  USE control_grun,    ONLY : flpgrun, temp_ph, volume_ph
-  USE control_gnuplot, ONLY : flgnuplot, flpsband, flpsdisp, &
-                              flpsdisp, flpsdos, flpstherm,  &
-                              flpsanhar, flpsmur, flpskeconv, flpsnkconv, &
-                              flpsgrun, flpbs, flenergy, flpsenergy, &
-                              flprojlayer, lgnuplot, gnuplot_command
+  USE control_bands,   ONLY : emin_input, emax_input, nbnd_bands, lsym
+  USE control_grun,    ONLY : temp_ph, volume_ph
+  USE control_gnuplot, ONLY : flgnuplot, lgnuplot, gnuplot_command
   USE control_asy,     ONLY : flasy, lasymptote, asymptote_command
   USE control_conv,    ONLY : nke, deltake, nkeden, deltakeden, &
                               nnk, deltank, nsigma, deltasigma

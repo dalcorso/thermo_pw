@@ -10,12 +10,12 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
   !-----------------------------------------------------------------------
   !
   !  This routine receives from the asyncronous driver the work to do in
-  !  the integer iwork and sets the variables dependent from iwork before 
-  !  performing the actual calculation.
+  !  the integer iwork and sets the input variables of pwscf or of the
+  !  phonon according to iwork before performing the actual calculation.
   !
   USE kinds,            ONLY : DP
   USE thermo_mod,       ONLY : what, celldm_geo
-  USE control_thermo,   ONLY : outdir_thermo
+  USE control_thermo,   ONLY : outdir_thermo, lstress
   USE input_parameters, ONLY : ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
                                trd_ht, rd_ht, cell_units, outdir, &
                                electron_maxstep, &
@@ -55,7 +55,16 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
 
   IF (part == 1) THEN
      SELECT CASE (TRIM(what))
-        CASE ('scf', 'scf_bands', 'scf_ph', 'scf_disp')
+!
+!  first the cases where there is nothing to do
+!
+        CASE ('scf',              &
+              'scf_bands',        &
+              'scf_ph',           &
+              'scf_disp')
+!
+!  then the cases in which we set the kinetic energy and the k points
+!
         CASE ('scf_ke')
            ecutwfc = ke(iwork)
            ecutrho = keden(iwork)
@@ -78,9 +87,19 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
            tmp_dir = TRIM ( outdir )
            wfc_dir = tmp_dir
            CALL check_tempdir ( tmp_dir, exst, parallelfs )
-        CASE ('mur_lc', 'mur_lc_bands', 'mur_lc_ph', 'mur_lc_disp', &
-              'mur_lc_t', 'mur_lc_elastic_constants', &
-              'mur_lc_piezoelectric_tensor', 'mur_lc_polarization')
+!
+!   then all the cases that require a many energies calculations at
+!   different geometries. The geometry is set here in the pwscf variables
+!
+        CASE ('mur_lc',                      &
+              'mur_lc_bands',                &
+              'mur_lc_ph',                   &
+              'mur_lc_disp',                 &
+              'mur_lc_t',                    &
+              'mur_lc_elastic_constants',    &
+              'mur_lc_piezoelectric_tensor', &
+              'mur_lc_polarization')
+
            IF (frozen_ions) THEN
               calculation='scf'
               lbfgs=.FALSE.
@@ -93,9 +112,16 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
               epse = etot_conv_thr
               epsf = forc_conv_thr
            ENDIF
+!
+!   now set the celldm. Both the input parameters and the variables in 
+!   cell_base module
+!
            celldm(:)=celldm_geo(:,iwork)
            CALL cell_base_init ( ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
                          trd_ht, rd_ht, cell_units )
+!
+!
+!
            CALL set_fft_mesh()
 !
 ! strain uniformly the coordinates to the new celldm
@@ -108,11 +134,19 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
            wfc_dir = tmp_dir
            CALL check_tempdir ( tmp_dir, exst, parallelfs )
         CASE DEFAULT
-           CALL errore('set_thermo_work','unknown what',1)
+           CALL errore('set_thermo_work_todo','unknown what',1)
      END SELECT
   ELSE IF (part==2) THEN
      SELECT CASE (TRIM(what))
-        CASE ('scf_ph', 'scf_disp','mur_lc_ph','mur_lc_disp','mur_lc_t')
+!
+!   here we set the representation and the q point to calculate in the
+!   phonon calculation for the present geometry
+!
+        CASE ('scf_ph',         &
+              'scf_disp',       &
+              'mur_lc_ph',      &
+              'mur_lc_disp',    &
+              'mur_lc_t')
            comp_irr_iq=.FALSE.
            comp_iq=.FALSE.
            jwork=0
@@ -127,18 +161,21 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
                  ENDIF
               ENDDO
            ENDDO
+!
+!    Here the elastic constant calculation
+!
         CASE ('scf_elastic_constants', 'mur_lc_elastic_constants')
            tstress=.TRUE.
            tprnfor=.TRUE.
            niter = electron_maxstep
            IF (frozen_ions) THEN
               calculation='scf'
-              lstres=.TRUE.
+              lstres=lstress(iwork)
               lbfgs=.FALSE.
            ELSE
               calculation='relax'
               lforce=.TRUE.
-              lstres=.TRUE.
+              lstres=lstress(iwork)
               lbfgs = .TRUE.
               nstep = 10
               epse = etot_conv_thr
@@ -195,13 +232,12 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
         CASE ('scf_polarization','mur_lc_polarization')
      END SELECT
   ELSE
-     CALL errore('set_thermo_work','unknown part',1)
+     CALL errore('set_thermo_work_todo','unknown part',1)
   END IF
   !
   RETURN
   !
 END SUBROUTINE set_thermo_work_todo
-!
 !
 !
 SUBROUTINE set_work_for_elastic_const(iwork)
@@ -237,10 +273,6 @@ SUBROUTINE set_work_for_elastic_const(iwork)
 !
    IF (elastic_algorithm=='advanced' .OR. &
                               elastic_algorithm=='energy') THEN
-      WRITE(6,*) 'at save'
-      DO i=1,3
-         WRITE(6,'(3f16.7)') at_save(1,i), at_save(2,i), at_save(3,i)
-      ENDDO
       atp=0.0_DP
       DO ipol=1,3
          DO jpol=1,3
@@ -256,7 +288,6 @@ SUBROUTINE set_work_for_elastic_const(iwork)
 
    DO i=1, 3
       CALL apply_strain(atp(1,i), at(1,i), epsilon_geo(1,1,iwork))
-      WRITE(6,'(3f16.7)') at(1,i), at(2,i), at(3,i)
    ENDDO
 !
 !  tau save are in crystal coordinates. A uniform strain of these coordinates
@@ -281,10 +312,6 @@ SUBROUTINE set_work_for_elastic_const(iwork)
 !  bring tau to cartesian coordinates
 !
    CALL cryst_to_cart( nat, tau, at, 1 )
-   WRITE(6,*) 'tau after strain'
-   DO na=1,nat
-      WRITE(6,*) tau(1,na), tau(2,na), tau(3,na)
-   ENDDO
 
    IF (elastic_algorithm=='standard') THEN
       ibrav=0

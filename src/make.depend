@@ -169,6 +169,12 @@ plot_anhar.o : ../../Modules/kind.o
 plot_anhar.o : ../../Modules/mp_images.o
 plot_anhar.o : ../../thermo_pw/lib/gnuplot.o
 plot_anhar.o : thermo_mod.o
+plot_anhar_anis.o : ../../Modules/constants.o
+plot_anhar_anis.o : ../../Modules/io_global.o
+plot_anhar_anis.o : ../../Modules/kind.o
+plot_anhar_anis.o : ../../Modules/mp_images.o
+plot_anhar_anis.o : ../../thermo_pw/lib/gnuplot.o
+plot_anhar_anis.o : thermo_mod.o
 plot_bz.o : ../../Modules/bz_form.o
 plot_bz.o : ../../Modules/io_global.o
 plot_bz.o : ../../Modules/kind.o
@@ -196,6 +202,8 @@ plot_mur.o : ../../Modules/kind.o
 plot_mur.o : ../../Modules/mp_images.o
 plot_mur.o : ../../thermo_pw/lib/gnuplot.o
 plot_mur.o : thermo_mod.o
+plot_phdos.o : ../../Modules/kind.o
+plot_phdos.o : thermo_mod.o
 plot_thermo.o : ../../Modules/io_global.o
 plot_thermo.o : ../../Modules/kind.o
 plot_thermo.o : ../../Modules/mp_images.o
@@ -279,6 +287,8 @@ set_fft_mesh.o : ../../Modules/kind.o
 set_fft_mesh.o : ../../Modules/recvec.o
 set_fft_mesh.o : ../../PW/src/pwcom.o
 set_fft_mesh.o : thermo_mod.o
+set_files_names.o : ../../PHonon/PH/phcom.o
+set_files_names.o : thermo_mod.o
 set_k_points.o : ../../Modules/input_parameters.o
 set_k_points.o : ../../PW/src/start_k.o
 set_k_points.o : thermo_mod.o
@@ -340,7 +350,6 @@ thermo_mod.o : ../../thermo_pw/lib/phdos_module.o
 thermo_pw.o : ../../Modules/cell_base.o
 thermo_pw.o : ../../Modules/check_stop.o
 thermo_pw.o : ../../Modules/environment.o
-thermo_pw.o : ../../Modules/fft_base.o
 thermo_pw.o : ../../Modules/input_parameters.o
 thermo_pw.o : ../../Modules/io_files.o
 thermo_pw.o : ../../Modules/io_global.o

@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2013 Andrea Dal Corso
+! Copyright (C) 2013-2015 Andrea Dal Corso
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -14,27 +14,25 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   !  information.
   !
   USE kinds,      ONLY : DP
-  USE thermo_mod, ONLY : what, alat_geo, step_ngeo, energy_geo, ngeo, &
+  USE thermo_mod, ONLY : what, step_ngeo, energy_geo, ngeo, &
                          celldm_geo, omega_geo, ibrav_geo, tot_ngeo
   USE control_thermo, ONLY : lpwscf, lbands, lphonon, lev_syn_1, lev_syn_2, &
                              lph, lpwscf_syn_1, lbands_syn_1, ldos, lq2r,   &
                              lmatdyn, ltherm, lconv_ke_test, lconv_nk_test, &
-                             lstress, lelastic_const, &
-                             lpiezoelectric_tensor, lberry, lpolarization
+                             lstress, lelastic_const, lpiezoelectric_tensor,&
+                             lberry, lpolarization, lpart2_pw
   USE control_conv,   ONLY : nke, ke, deltake, nkeden, deltakeden, keden, &
                              nnk, nk_test, deltank, nsigma, sigma_test, &  
                              deltasigma
-  USE control_pwrun,  ONLY : celldm_save
+  USE control_pwrun,  ONLY : celldm_save, ibrav_save, do_punch
   USE piezoelectric_tensor, ONLY : polar_geo
-  USE control_elastic_constants, ONLY : elastic_algorithm, omega0, ibrav_save
+  USE control_elastic_constants, ONLY : elastic_algorithm, omega0
   USE control_mur,    ONLY : vmin, vmin_input, vmax_input
   USE wvfct,          ONLY : ecutwfc
   USE gvect,          ONLY : ecutrho
   USE input_parameters, ONLY : nk1, nk2, nk3
   USE klist,          ONLY : degauss
   USE cell_base,  ONLY : alat
-  USE grid_irr_iq, ONLY : irr_iq
-  USE disp, ONLY : nqs
   !
   IMPLICIT NONE
   INTEGER, INTENT(OUT) :: nwork
@@ -45,35 +43,45 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   REAL(DP) :: compute_omega_geo
   !
   nwork=0
-!
-!  In this part we do: all calculations for murnaghan
-!
   IF (part == 1) THEN
      SELECT CASE (TRIM(what))
-        CASE ( 'scf', 'scf_bands', 'scf_2d_bands', 'scf_ph', 'scf_disp' )
-           ALLOCATE(alat_geo(1))
+!
+!   In these case we do not make any asyncronous work in the first part
+!
+        CASE ( 'scf') 
            ALLOCATE(energy_geo(1))
-           tot_ngeo=0
            lpwscf_syn_1=.TRUE.
-           lev_syn_1=.FALSE.
-           IF ( TRIM(what)=='scf_ph'.OR. TRIM(what)=='scf_disp' ) THEN
-              lph=.TRUE.
-              tot_ngeo=1
-           ENDIF
-           IF ( TRIM(what)=='scf_disp' ) THEN 
-              lq2r = .TRUE.
-              ldos = .TRUE.
-              lmatdyn = .TRUE.
-              ltherm = .TRUE.
-              CALL allocate_thermodynamics()
-           ENDIF
-           IF (what=='scf_bands'.OR.what=='scf_2d_bands') lbands_syn_1=.TRUE.
+        CASE ('scf_bands') 
+           ALLOCATE(energy_geo(1))
+           lpwscf_syn_1=.TRUE.
+           lbands_syn_1=.TRUE.
+        CASE ('scf_2d_bands')
+           ALLOCATE(energy_geo(1))
+           lpwscf_syn_1=.TRUE.
+           lbands_syn_1=.TRUE.
+        CASE ('scf_ph') 
+           ALLOCATE(energy_geo(1))
+           lpwscf_syn_1=.TRUE.
+           lph=.TRUE.
+           tot_ngeo=1
+        CASE ('scf_disp')
+           ALLOCATE(energy_geo(1))
+           lpwscf_syn_1=.TRUE.
+           lph=.TRUE.
+           tot_ngeo=1
+           lq2r = .TRUE.
+           lmatdyn = .TRUE.
+           ldos = .TRUE.
+           ltherm = .TRUE.
+           CALL allocate_thermodynamics()
+!
+!   In these cases we make asyncronous work in the first part
+!
         CASE ( 'scf_ke') 
            nwork= nke * nkeden
            ALLOCATE(ke(nwork))
            ALLOCATE(keden(nwork))
            ALLOCATE(energy_geo(nwork))
-           tot_ngeo=0
            icount=0
            DO iden=1, nkeden
               DO ike = 1, nke
@@ -84,7 +92,8 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            ENDDO
            energy_geo=0.0_DP
            lconv_ke_test=.TRUE.
-         CASE ( 'scf_nk' ) 
+           do_punch=.FALSE.
+        CASE ( 'scf_nk' ) 
            nwork= nnk * nsigma
            ALLOCATE(nk_test(nwork))
            ALLOCATE(sigma_test(nwork))
@@ -100,97 +109,111 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            ENDDO
            energy_geo=0.0_DP
            lconv_nk_test=.TRUE.
-        CASE ('mur_lc', 'mur_lc_bands', 'mur_lc_ph', 'mur_lc_disp', &
-              'mur_lc_elastic_constants', 'mur_lc_piezoelectric_tensor', &
-              'mur_lc_polarization')
-           CALL clean_ngeo(ngeo,ibrav_save)
-           nwork=compute_nwork()
-           ALLOCATE(celldm_geo(6,nwork))
-           ALLOCATE(energy_geo(nwork))
-           ALLOCATE(omega_geo(nwork))
+           do_punch=.FALSE.
+!
+!   in part 1 these cases do nothing
+!
+        CASE ('scf_elastic_constants') 
+           lpart2_pw=.TRUE.
+        CASE ('scf_piezoelectric_tensor')
+           lpart2_pw=.TRUE.
+        CASE ('scf_polarization') 
+           lpart2_pw=.TRUE.
+!
+!   here all the cases that require the determination of the minimization
+!   of the energy to find the equilibrium crystal parameters
+!
+        CASE ('mur_lc')
+           CALL initialize_mur(nwork)
+           do_punch=.FALSE.
+        CASE ('mur_lc_bands') 
+           CALL initialize_mur(nwork)
+           do_punch=.FALSE.
+           lpwscf_syn_1=.TRUE.
+           lbands_syn_1=.TRUE.
+        CASE ('mur_lc_ph') 
+           CALL initialize_mur(nwork)
+           do_punch=.FALSE.
+           lpwscf_syn_1=.TRUE.
+           lph=.TRUE.
            tot_ngeo=1
-           CALL set_celldm_geo()
-           DO igeom = 1, nwork
-              omega_geo(igeom)=compute_omega_geo(ibrav_save,celldm_geo(:,igeom))
-           ENDDO
-           energy_geo=0.0_DP
-           lev_syn_1=.TRUE.
-           IF (TRIM(what)/='mur_lc'.AND.&
-               TRIM(what)/='mur_lc_elastic_constants'.AND.&
-               TRIM(what)/='mur_lc_piezoelectric_tensor'.AND.&
-               TRIM(what)/='mur_lc_polarization') lpwscf_syn_1=.TRUE.
-           IF ( TRIM(what)=='mur_lc_ph' .OR. TRIM(what)=='mur_lc_disp') THEN
-              lph=.TRUE.
-              tot_ngeo=1
-           ENDIF
-           IF ( TRIM(what)=='mur_lc_disp' ) THEN
-              lq2r = .TRUE.
-              ldos = .TRUE.
-              lmatdyn = .TRUE.
-              ltherm = .TRUE.
-              CALL allocate_thermodynamics()
-           ENDIF
-           IF (what=='mur_lc_bands') lbands_syn_1=.TRUE.
+        CASE ('mur_lc_disp')
+           CALL initialize_mur(nwork)
+           do_punch=.FALSE.
+           lpwscf_syn_1=.TRUE.
+           lph=.TRUE.
+           tot_ngeo=1
+           lq2r = .TRUE.
+           ldos = .TRUE.
+           lmatdyn = .TRUE.
+           ltherm = .TRUE.
+           CALL allocate_thermodynamics()
+        CASE ('mur_lc_elastic_constants') 
+           CALL initialize_mur(nwork)
+           lpart2_pw=.TRUE.
+           do_punch=.FALSE.
+        CASE ('mur_lc_piezoelectric_tensor') 
+           CALL initialize_mur(nwork)
+           lpart2_pw=.TRUE.
+           do_punch=.FALSE.
+        CASE ('mur_lc_polarization')
+           CALL initialize_mur(nwork)
+           lpart2_pw=.TRUE.
+           do_punch=.FALSE.
+!
+!    Here all the cases that compute the free energy and minimize it
+!
+
         CASE ('mur_lc_t')
-           CALL clean_ngeo(ngeo,ibrav_save)
-           nwork=compute_nwork()
-           ALLOCATE(celldm_geo(6,nwork))
-           ALLOCATE(energy_geo(nwork))
-           ALLOCATE(omega_geo(nwork))
-           tot_ngeo=nwork
-           CALL set_celldm_geo()
-           DO igeom = 1, ngeo(1)
-              omega_geo(igeom)=compute_omega_geo(ibrav_save,celldm_geo(1,igeom))
-           ENDDO
-           energy_geo=0.0_DP
+           CALL initialize_mur(nwork)
            lph = .TRUE.
+           tot_ngeo=nwork
            lq2r = .TRUE.
            ldos = .TRUE.
            ltherm = .TRUE.
            lmatdyn = .TRUE.
-           lev_syn_1=.TRUE.
            lev_syn_2=.TRUE.
            CALL allocate_thermodynamics()
            CALL allocate_anharmonic()
-        CASE ('scf_elastic_constants', 'scf_piezoelectric_tensor', &
-                                                        'scf_polarization') 
-!
-!   in part 1 this case does nothing
-!
         CASE DEFAULT
            CALL errore('initialize_thermo_work','what not recognized',1)
      END SELECT
-  ELSE IF (part == 2 ) THEN
+!
+!  part 2
+!
+  ELSEIF (part == 2 ) THEN
 !
 !  In this part we do the phonon calculations
 !
      SELECT CASE (TRIM(what))
-        CASE ( 'scf_ph', 'scf_disp', 'mur_lc_ph', 'mur_lc_disp', 'mur_lc_t' )
-           nwork=0
-           DO iq=1,nqs
-              DO irr=0, irr_iq(iq)
-                 nwork=nwork+1
-              ENDDO
-           ENDDO
+        CASE ('scf_ph')
+           CALL initialize_ph_work(nwork)
+        CASE ('scf_disp') 
+           CALL initialize_ph_work(nwork)
+        CASE ('mur_lc_ph') 
+           CALL initialize_ph_work(nwork)
+        CASE ('mur_lc_disp') 
+           CALL initialize_ph_work(nwork)
+        CASE ('mur_lc_t')
+           CALL initialize_ph_work(nwork)
         CASE ('scf_elastic_constants', 'mur_lc_elastic_constants')
-           IF (ALLOCATED(alat_geo)) DEALLOCATE(alat_geo)
+           IF (ALLOCATED(ibrav_geo))  DEALLOCATE(ibrav_geo)
+           IF (ALLOCATED(celldm_geo)) DEALLOCATE(celldm_geo)
            IF (ALLOCATED(energy_geo)) DEALLOCATE(energy_geo)
-           IF (ALLOCATED(omega_geo)) DEALLOCATE(omega_geo)
+           IF (ALLOCATED(omega_geo))  DEALLOCATE(omega_geo)
+!
+!     set_elastic_constant_work or set_elastic_constants_work_adv 
+!     allocate ibrav_geo and celldm_geo
+!
            IF (elastic_algorithm=='standard') THEN
               CALL set_elastic_cons_work(nwork)
-              ALLOCATE(celldm_geo(6,nwork))
-              ALLOCATE(ibrav_geo(nwork))
            ELSEIF (elastic_algorithm=='advanced'.OR. &
                                        elastic_algorithm=='energy') THEN
-!
-!      celldm_geo and ibrav_geo are allocated inside the routine
-!
               CALL set_elastic_cons_work_adv(nwork)
            ELSE
               CALL errore('initialize_thermo_work',&
                                         'elastic_algorithm unknown',1)
            ENDIF
-           ALLOCATE(alat_geo(nwork))
            ALLOCATE(energy_geo(nwork))
            ALLOCATE(omega_geo(nwork))
            energy_geo=0.0_DP
@@ -202,26 +225,25 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               omega0 = compute_omega_geo(ibrav_save, celldm_save)
            ENDIF
            lelastic_const=.TRUE.
+           do_punch=.FALSE.
         CASE ('scf_piezoelectric_tensor', 'mur_lc_piezoelectric_tensor')
-           IF (ALLOCATED(alat_geo)) DEALLOCATE(alat_geo)
            IF (ALLOCATED(energy_geo)) DEALLOCATE(energy_geo)
            IF (ALLOCATED(omega_geo)) DEALLOCATE(omega_geo)
            CALL set_piezo_tensor_work(nwork) 
-           ALLOCATE(alat_geo(nwork))
            ALLOCATE(energy_geo(nwork))
            ALLOCATE(omega_geo(nwork))
            lpiezoelectric_tensor=.TRUE.
+           do_punch=.TRUE.
         CASE ('scf_polarization', 'mur_lc_polarization')
-           IF (ALLOCATED(alat_geo)) DEALLOCATE(alat_geo)
            IF (ALLOCATED(energy_geo)) DEALLOCATE(energy_geo)
            IF (ALLOCATED(omega_geo)) DEALLOCATE(omega_geo)
            nwork=1
            lpolarization=.TRUE.
            ALLOCATE(polar_geo(3,nwork))
-           ALLOCATE(alat_geo(nwork))
            ALLOCATE(energy_geo(nwork))
            ALLOCATE(omega_geo(nwork))
            polar_geo=0.0_DP
+           do_punch=.TRUE.
      END SELECT
   ELSE
      CALL errore('initialize_thermo_work','unknown part',1)
@@ -230,37 +252,71 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   IF ( nwork == 0 ) RETURN
 
   ALLOCATE( lpwscf(nwork) )
-  ALLOCATE( lstress(nwork) )
   ALLOCATE( lbands(nwork) )
+  ALLOCATE( lstress(nwork) )
   ALLOCATE( lberry(nwork) )
   ALLOCATE( lphonon(nwork) )
   lpwscf  = .FALSE.
-  lstress = .FALSE.
   lbands  = .FALSE.
+  lstress = .FALSE.
   lberry  = .FALSE.
   lphonon = .FALSE.
 
   IF (part == 1) THEN
      SELECT CASE (TRIM(what))
-        CASE ('scf', 'scf_bands', 'scf_2d_bands', 'scf_ph', 'scf_disp', &
-            'scf_elastic_constants', 'scf_piezoelectric_tensor',&
-                                                           'scf_polarization')
-        CASE ('scf_ke', 'scf_nk', 'mur_lc', 'mur_lc_bands', 'mur_lc_ph', &
-              'mur_lc_disp', 'mur_lc_t', 'mur_lc_elastic_constants', &
-                          'mur_lc_piezoelectric_tensor', &
-                          'mur_lc_polarization' )
+!
+!  First the cases in which there is no asynchronous work in the first part
+!
+        CASE ( 'scf',                        &
+               'scf_bands',                  &
+               'scf_2d_bands',               &
+               'scf_ph',                     & 
+               'scf_disp',                   &
+               'scf_elastic_constants',      &
+               'scf_piezoelectric_tensor',   &
+               'scf_polarization' )
+!
+!  Then the cases in which there is pwscf asynchronous work in the first part
+!
+        CASE ('scf_ke',                      &
+              'scf_nk',                      &
+              'mur_lc',                      &
+              'mur_lc_bands',                &
+              'mur_lc_ph',                   &
+              'mur_lc_disp',                 &
+              'mur_lc_t',                    &
+              'mur_lc_elastic_constants',    &
+              'mur_lc_piezoelectric_tensor', &
+              'mur_lc_polarization' )
            lpwscf(1:nwork)=.TRUE.
         CASE DEFAULT
           CALL errore('initialize_thermo_work','unknown what',1)
      END SELECT
-  ELSE IF ( part == 2 ) THEN
+  ENDIF 
+
+  IF ( part == 2 ) THEN
      SELECT CASE (TRIM(what))
-        CASE ('scf_ph', 'scf_disp', 'mur_lc_ph', 'mur_lc_disp','mur_lc_t')
+!
+!   Here the cases in which there are phonon calculations in the second part
+! 
+        CASE ('scf_ph',           &
+              'scf_disp',         &
+              'mur_lc_ph',        &
+              'mur_lc_disp',      &
+              'mur_lc_t')
            lphonon(1:nwork)=.TRUE.
+!
+!  Here the cases in which there are pwscf calculation in the second part
+!
         CASE ('scf_elastic_constants', 'mur_lc_elastic_constants')
            lpwscf(1:nwork)=.TRUE.
-           lstress(1:nwork)=.TRUE.
-        CASE ('scf_piezoelectric_tensor', 'mur_lc_piezoelectric_tensor',&
+           IF (elastic_algorithm=='standard'.OR.elastic_algorithm=='advanced')&
+              lstress(1:nwork)=.TRUE.
+!
+!  Here the cases in which there are pwscf and berry phase calculation 
+!  in the second part
+!
+        CASE ('scf_piezoelectric_tensor', 'mur_lc_piezoelectric_tensor', &
               'scf_polarization', 'mur_lc_polarization')
            lpwscf(1:nwork)=.TRUE.
            lberry(1:nwork)=.TRUE.
@@ -386,7 +442,7 @@ END SUBROUTINE set_celldm_geo
 
 INTEGER FUNCTION compute_nwork()
 
-USE thermo_mod, ONLY : ngeo, reduced_grid
+USE thermo_mod, ONLY : ngeo, reduced_grid, central_geo
 USE control_mur, ONLY : lmurn
 IMPLICIT NONE
 INTEGER :: iwork
@@ -404,7 +460,57 @@ ELSE
    compute_nwork=ngeo(1)*ngeo(2)*ngeo(3)*ngeo(4)*ngeo(5)*ngeo(6)
 ENDIF
 IF (lmurn) compute_nwork=ngeo(1)
+central_geo=compute_nwork/2
+IF (MOD(compute_nwork,2)==1) central_geo=central_geo+1
 
 RETURN
 END FUNCTION compute_nwork
 
+SUBROUTINE initialize_mur(nwork)
+USE kinds, ONLY : DP
+USE thermo_mod, ONLY : ngeo, ibrav_geo, celldm_geo, energy_geo, omega_geo
+USE control_pwrun, ONLY : ibrav_save
+USE control_thermo, ONLY : lev_syn_1
+
+IMPLICIT NONE
+INTEGER, INTENT(OUT) :: nwork
+INTEGER :: igeom
+INTEGER :: compute_nwork
+REAL(DP) :: compute_omega_geo
+
+   CALL clean_ngeo(ngeo,ibrav_save)
+   nwork=compute_nwork()
+   ALLOCATE(ibrav_geo(nwork))
+   ALLOCATE(celldm_geo(6,nwork))
+   ALLOCATE(energy_geo(nwork))
+   ALLOCATE(omega_geo(nwork))
+   CALL set_celldm_geo()
+   DO igeom = 1, nwork
+      omega_geo(igeom)=compute_omega_geo(ibrav_save,celldm_geo(:,igeom))
+   ENDDO
+   energy_geo=0.0_DP
+   ibrav_geo=ibrav_save
+   lev_syn_1=.TRUE.
+
+RETURN
+END SUBROUTINE initialize_mur
+
+SUBROUTINE initialize_ph_work(nwork)
+USE kinds, ONLY : DP
+USE grid_irr_iq, ONLY : irr_iq
+USE disp, ONLY : nqs
+
+IMPLICIT NONE
+INTEGER, INTENT(OUT) :: nwork
+
+INTEGER :: iq, irr
+
+   nwork=0
+   DO iq=1,nqs
+      DO irr=0, irr_iq(iq)
+         nwork=nwork+1
+      ENDDO
+   ENDDO
+
+RETURN
+END SUBROUTINE initialize_ph_work

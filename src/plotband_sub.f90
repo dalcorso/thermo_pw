@@ -22,9 +22,9 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
   !
   ! 
   USE kinds, ONLY : DP
-  USE control_thermo, ONLY : filband, flfrq, flgrun
-  USE control_bands, ONLY : emin_input, emax_input, flpband
-  USE control_grun,  ONLY : flpgrun, grunmin_input, grunmax_input
+  USE control_bands, ONLY : emin_input, emax_input 
+  USE control_grun,  ONLY : grunmin_input, grunmax_input
+  USE data_files,    ONLY : flpgrun, flpband, filband, flfrq, flgrun
   USE control_paths, ONLY : letter_path, label_list, label_disp_q, npk_label, &
                             nqaux, nrap_plot, rap_plot
   USE control_2d_bands, ONLY : nkz, aux_ind_sur, identify_sur, lprojpbs, &
@@ -70,6 +70,7 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
   LOGICAL :: exist_rap, type1
   CHARACTER(LEN=256) :: filename, filedata, fileout
   CHARACTER(LEN=6), EXTERNAL :: int_to_char
+  CHARACTER(LEN=11) :: group_name
 
   NAMELIST /plot/ nks, nbnd
   NAMELIST /plot_rap/ nks_rap, nbnd_rap
@@ -611,7 +612,8 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
        ENDDO
        IF (nrap(ilines) > 12) CALL errore("plotband_sub",&
                                            "Too many representations",1)
-       WRITE(stdout,'(5x,"line ",i7, " nrap",i7)') ilines, nrap(ilines)
+       WRITE(stdout,'(5x,"line ",i7, " nrap",i7,a11)') ilines, nrap(ilines), &
+                                         TRIM(group_name(code_group_line))
 
        IF (nrap(ilines)==1) THEN
 !
@@ -710,7 +712,17 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
     ENDDO
   ENDIF
 
-  WRITE(stdout,'(5x,"bands in xmgr format written to file ",a)') flpband
+  IF (icode==1) THEN
+     WRITE(stdout,'(5x,"Bands in gnuplot format written to file ",a)') flpband
+  ELSEIF (icode==2) THEN
+     WRITE(stdout,'(5x,"Phonons in gnuplot format written to file ",a)') flpband
+  ELSEIF (icode==3) THEN
+     WRITE(stdout,'(5x,"Gruneisen parameters in gnuplot format written &
+                                            &to file ",a)') flpband
+  ELSEIF (icode==4) THEN
+     WRITE(stdout,'(5x,"Interpolated phonons in gnuplot format written &
+                                            &to file ",a)') flpband
+  ENDIF
   !
   IF (emin_input /= 0.0_DP) THEN
      emin=emin_input
@@ -784,9 +796,10 @@ USE ions_base,       ONLY : nat
 USE cell_base,       ONLY : tpiba
 USE klist,           ONLY : degauss
 USE control_paths,   ONLY : nqaux, letter_path, q_in_band_form
-USE control_gnuplot, ONLY : flgnuplot, flpsband, flpsdisp, &
-                            flpsgrun, gnuplot_command, lgnuplot
-USE control_2d_bands, ONLY : nkz, lprojpbs, identify_sur, sym_divide, force_bands
+USE postscript_files, ONLY : flpsband, flpsdisp, flpsgrun
+USE control_gnuplot, ONLY : flgnuplot, gnuplot_command, lgnuplot
+USE control_2d_bands, ONLY : nkz, lprojpbs, identify_sur, sym_divide, &
+                          force_bands
 USE gnuplot,       ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
                           gnuplot_write_file_data, gnuplot_ylabel, &
                           gnuplot_write_vertical_line, gnuplot_write_label, &

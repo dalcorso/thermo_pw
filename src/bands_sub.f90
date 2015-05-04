@@ -9,7 +9,8 @@
 SUBROUTINE bands_sub()
   !-----------------------------------------------------------------------
   !
-  USE control_thermo,   ONLY : filband, spin_component
+  USE control_thermo,   ONLY : spin_component
+  USE data_files,       ONLY : filband
   USE control_paths,    ONLY : q2d
   USE control_flags,    ONLY : gamma_only
   USE control_bands,    ONLY : lsym

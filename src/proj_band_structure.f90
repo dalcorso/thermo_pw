@@ -65,7 +65,7 @@
 !
 USE kinds, ONLY : DP
 USE control_2d_bands, ONLY : nkz, gap_thr, sym_divide
-USE control_gnuplot, ONLY : flpbs
+USE data_files, ONLY : flpbs
 USE gnuplot,  ONLY : gnuplot_polygon, gnuplot_line, gnuplot_write_command
 USE point_group, ONLY : convert_rap
 USE spin_orb, ONLY : lspinorb

@@ -27,9 +27,7 @@ MODULE thermo_mod
                                         ! which we calculate the phonon
                                         ! dispersions
 
-  REAL(DP), ALLOCATABLE :: alat_geo(:),     &   ! the lattice constant at
-                                                ! each geometry
-                           omega_geo(:),    &   ! volume (geometry)
+  REAL(DP), ALLOCATABLE :: omega_geo(:),    &   ! volume (geometry)
                            celldm_geo(:,:), &   ! The celldm for each geometry
                            energy_geo(:),   &   ! The total energy at each
                                                 ! geometry
@@ -42,6 +40,7 @@ MODULE thermo_mod
                                                 ! different geometries.
   INTEGER, ALLOCATABLE :: ibrav_geo(:)          ! the Bravais lattice at
                                                 ! each geometry
+  INTEGER :: central_geo                        ! a reference geometry
   LOGICAL :: reduced_grid                       ! if .TRUE. use a reduced
                                                 ! grid to interpolate the
                                                 ! geometry
@@ -265,6 +264,8 @@ MODULE control_thermo
                                   ! for scf calculation
   LOGICAL :: lbands_syn_1=.FALSE. ! if .true. must calculate the syncronous pw
                                   ! for nscf calculation
+  LOGICAL :: lpart2_pw=.FALSE.    ! if .true. in the second part makes
+                                  ! also pw calculations           
   LOGICAL :: lconv_ke_test=.FALSE.! if .true. this writes the ke test on file
   LOGICAL :: lconv_nk_test=.FALSE.! if .true. this writes the k-point on file
   LOGICAL :: lelastic_const=.FALSE. ! if .true. compute elastic constants
@@ -278,13 +279,13 @@ MODULE control_thermo
   LOGICAL :: after_disp=.FALSE. ! if .true. dynamical matrix files are supposed
                             ! to be already on disk. fildyn must be read
                             ! from thermo_control.
-  LOGICAL :: lq2r=.FALSE.   ! if .true. the interatomic force constants are calculated
-  LOGICAL :: lmatdyn=.FALSE.     ! if .true. the phonon are interpolated
+  LOGICAL :: lq2r=.FALSE.   ! if .true. the interatomic force constants 
+                            ! are calculated
+  LOGICAL :: lmatdyn=.FALSE.  ! if .true. the phonon are interpolated
 
-  CHARACTER(LEN=256) :: outdir_thermo, fildyn_thermo, flfrc, &
-                        flfrq, fldos, fltherm, flanhar, flevdat, &
-                        filband, flkeconv, flnkconv, flgrun
   INTEGER :: spin_component
+  !
+  CHARACTER(LEN=256) :: outdir_thermo ! the outdir read from the input
   !
 END MODULE control_thermo
 
@@ -298,7 +299,6 @@ MODULE control_elastic_constants
   REAL(DP) :: delta_epsilon
   REAL(DP) :: at_save(3,3)
   REAL(DP), ALLOCATABLE :: tau_save(:,:)
-  INTEGER :: ibrav_save
   REAL(DP), ALLOCATABLE :: rot_mat(:,:,:) ! rotation matrix between the
                                           ! cartesian coordinates of the
                                           ! strained and unstrained cell  
@@ -317,8 +317,6 @@ MODULE control_elastic_constants
                                 ! keeping the ions frozen at the strained
                                 ! positions
 
-  CHARACTER(LEN=256) :: fl_el_cons ! the file where the elastic constants are
-                                   ! written
   CHARACTER(LEN=12) :: elastic_algorithm ! can be standard, advanced or energy
                                 ! it chooses the routines to use to 
                                 ! calculate elastic constants.
@@ -401,7 +399,6 @@ MODULE control_bands
   !
   INTEGER :: nbnd_bands                   ! number of bands for band calculation
   !
-  CHARACTER(LEN=256) :: flpband ! the name of the output file
   REAL(DP) :: emin_input     ! minimum energy of the plot (eV)
   REAL(DP) :: emax_input     ! maximum energy of the plot (eV)
   LOGICAL  :: lsym           ! if .TRUE. does the symmetry analysis of the bands
@@ -449,9 +446,6 @@ MODULE control_grun
   USE kinds, ONLY: DP
   SAVE
 
-  CHARACTER(LEN=256) :: flpgrun ! the name of the output file with the 
-                                ! gruneisen parameters in a format 
-                                ! readable by gnuplot
                                  
   REAL(DP) :: grunmin_input, &  ! minimum value for gruneisen plot
               grunmax_input     ! maximum value for gruneisen plot
@@ -469,13 +463,16 @@ MODULE control_pwrun
   USE kinds, ONLY: DP
   SAVE
 
-  INTEGER :: nr1_save, nr2_save, nr3_save  ! save the fft dimensions
+  INTEGER  :: nr1_save, nr2_save, nr3_save  ! save the fft dimensions
 
-  REAL(DP) :: celldm_save(6)
+  REAL(DP) :: celldm_save(6)   ! save the crystal parameters
+  INTEGER  :: ibrav_save       ! save the Bravais lattice
+  LOGICAL  :: do_punch=.TRUE.  ! set this variable to .FALSE. if pw has
+                               ! not to save the punch files.
 
 END MODULE control_pwrun
 
-MODULE control_energy
+MODULE control_energy_plot
 
   USE kinds, ONLY: DP
   SAVE
@@ -484,7 +481,7 @@ MODULE control_energy
   REAL(DP), ALLOCATABLE :: ene_levels(:)
   CHARACTER(LEN=12), ALLOCATABLE :: color_levels(:)
 
-END MODULE control_energy
+END MODULE control_energy_plot
 
 MODULE control_quadratic_energy
 
@@ -505,15 +502,65 @@ END MODULE control_quadratic_energy
 MODULE control_gnuplot
   USE kinds,  ONLY : DP
   !
-  ! ... The variables needed to control the band plot
+  ! ... The variables needed to control the gnuplot. The files that
+  !     contains the gnuplot scripts
   !
   SAVE
 
   CHARACTER(LEN=256) :: flgnuplot ! the name of file with the gnuplot script
+  CHARACTER(LEN=256) :: gnuplot_command ! the gnuplot command
+
+  LOGICAL :: lgnuplot    ! set to false not to use gnuplot
+
+END MODULE control_gnuplot
+
+MODULE data_files
+  USE kinds,  ONLY : DP
+  !
+  ! ... The names of the files that contains the data. These files are
+  !     usually readable and can be plotted directly by gnuplot, or
+  !     can be read by the code plotband.f90 of QE and transformed in
+  !     a format readable by gnuplot, or contains data saved by thermo_pw
+  !     and must be read by this code.
+  !
+  SAVE
+
+  CHARACTER(LEN=256) :: flfrc   ! file with the force constants
+  CHARACTER(LEN=256) :: flfrq   ! file with the frequencies 
+  CHARACTER(LEN=256) :: fldos   ! file with the phonon dos
+  CHARACTER(LEN=256) :: fltherm ! file with the harmonic thermodynamic 
+  CHARACTER(LEN=256) :: flanhar ! file with the anharmonic quantities
+  CHARACTER(LEN=256) :: flevdat ! file with data for ev.x 
+  CHARACTER(LEN=256) :: flenergy  ! the name of the file with the energy
+                                  ! suited for gnuplot contour plots
+  CHARACTER(LEN=256) :: filband ! file with the bands, readable by plotband 
+  CHARACTER(LEN=256) :: flpband ! the name of the file with the bands in 
+                                ! a format readable by gnuplot
+  CHARACTER(LEN=256) :: flkeconv ! file with the ke cut-off convergence
+  CHARACTER(LEN=256) :: flnkconv ! file the k point convergence
+  CHARACTER(LEN=256) :: flgrun   ! file with Gruneisen parameters
+  CHARACTER(LEN=256) :: flpgrun  ! the name of the output file with the 
+                                 ! gruneisen parameters in a format 
+                                 ! readable by gnuplot
+  CHARACTER(LEN=256) :: flpbs    ! the name of the file with the pbs
+  CHARACTER(LEN=256) :: flprojlayer ! the name of the file with the projections
+                                  ! of the wavefunctions on each layer
+  CHARACTER(LEN=256) :: fl_el_cons ! the file where the elastic constants are
+                                   ! written
+
+END MODULE data_files
+
+MODULE postscript_files
+  USE kinds,  ONLY : DP
+  !
+  ! ... The names of the postscript files
+  !
+  SAVE
+
   CHARACTER(LEN=256) :: flpsmur   ! the name of the postscript file with E(V)
   CHARACTER(LEN=256) :: flpsband  ! the name of the output postscript file
   CHARACTER(LEN=256) :: flpsdisp  ! the name of the output postscript file
-  CHARACTER(LEN=256) :: flpsdos ! the name of the postscript file with dos
+  CHARACTER(LEN=256) :: flpsdos   ! the name of the postscript file with dos
   CHARACTER(LEN=256) :: flpstherm ! the name of the postscript file with 
                                   ! thermodynamic quantities
   CHARACTER(LEN=256) :: flpsanhar ! the name of the postscript file with 
@@ -524,20 +571,31 @@ MODULE control_gnuplot
                                   ! total energy at different k points
   CHARACTER(LEN=256) :: flpsgrun  ! the name of the postscript file with 
                                   ! the gruneisen parameters
-  CHARACTER(LEN=256) :: flenergy  ! the name of the file with the energy
-                                  ! suited for gnuplot contour plots
   CHARACTER(LEN=256) :: flpsenergy  ! the name of the postscript file with 
                                   ! the energy contours
-  CHARACTER(LEN=256) :: flpbs     ! the name of the file with the pbs
+END MODULE postscript_files
 
-  CHARACTER(LEN=256) :: flprojlayer ! the name of the file with the projections
-                                  ! of the wavefunctions on each layer
+MODULE internal_files_names
+  USE kinds,  ONLY : DP
+  !
+  ! ... The names of the files before adding the geometry information
+  !
+  SAVE
 
-  CHARACTER(LEN=256) :: gnuplot_command ! the gnuplot command
+  CHARACTER(LEN=256) :: fildyn_thermo    ! dynamical matrix file
+  CHARACTER(LEN=256) :: flfrc_thermo     ! interatomic force constants file
+  CHARACTER(LEN=256) :: flfrq_thermo     ! frequencies files
+  CHARACTER(LEN=256) :: fldos_thermo     ! dos file
+  CHARACTER(LEN=256) :: fltherm_thermo   ! thermodynamical quantities files
+  CHARACTER(LEN=256) :: flpband_thermo   ! dispersions in gnuplot format
 
-  LOGICAL :: lgnuplot    ! set to false not to use gnuplot
+  CHARACTER(LEN=256) :: flgnuplot_thermo  ! file with gnuplot script
 
-END MODULE control_gnuplot
+  CHARACTER(LEN=256) :: flpsdisp_thermo   ! postscript file with dispersions
+  CHARACTER(LEN=256) :: flpsdos_thermo    ! postscript file with dos
+  CHARACTER(LEN=256) :: flpstherm_thermo  ! postscript file with thermodynamical
+                                          ! quantities
+END MODULE internal_files_names
 
 MODULE control_asy
   USE kinds,  ONLY : DP
@@ -546,7 +604,7 @@ MODULE control_asy
   !
   SAVE
   !
-  CHARACTER(LEN=256) :: flasy ! the name of file with the gnuplot script
+  CHARACTER(LEN=256) :: flasy ! the name of file with the asymptote script
 
   CHARACTER(LEN=256) :: asymptote_command ! the asymptote command
 

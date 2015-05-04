@@ -20,7 +20,7 @@ SUBROUTINE write_gnuplot_energy(nwork)
   USE thermo_mod, ONLY : energy_geo, ngeo, celldm_geo, omega_geo
   USE cell_base,  ONLY : ibrav
   USE control_mur, ONLY : lmurn
-  USE control_gnuplot, ONLY : flenergy
+  USE data_files, ONLY : flenergy
   USE io_global,  ONLY : stdout, meta_ionode, meta_ionode_id
   USE mp_world,   ONLY : world_comm
   USE mp,         ONLY : mp_bcast

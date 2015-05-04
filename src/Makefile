@@ -41,8 +41,9 @@ plot_2d_bz.o \
 plot_e_ke.o \
 plot_e_nk.o \
 plot_multi_energy.o \
-plot_thermo.o \
 plot_mur.o \
+plot_phdos.o \
+plot_thermo.o \
 polifit.o \
 print_polarization.o \
 proj_band_structure.o \
@@ -53,6 +54,7 @@ run_thermo_asyncronously.o \
 set_2d_bz_path.o \
 set_bz_path.o \
 set_elastic_cons_work.o \
+set_files_names.o \
 set_fft_mesh.o \
 set_k_points.o \
 set_paths_disp.o \

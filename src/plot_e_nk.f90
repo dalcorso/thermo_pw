@@ -10,8 +10,8 @@ SUBROUTINE plot_e_nk()
 !  This is a driver to plot the quantities written inside flnkconv
 !
 USE kinds,           ONLY : DP
-USE control_gnuplot, ONLY : flgnuplot, flpsnkconv, lgnuplot, &
-                            gnuplot_command
+USE control_gnuplot, ONLY : flgnuplot, lgnuplot, gnuplot_command
+USE postscript_files, ONLY : flpsnkconv
 USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
                             gnuplot_write_header,        &
                             gnuplot_ylabel,              &
@@ -20,7 +20,7 @@ USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
                             gnuplot_set_gfact,           &
                             gnuplot_write_file_mul_data
 USE thermo_mod,      ONLY : energy_geo
-USE control_thermo,  ONLY : flnkconv
+USE data_files,      ONLY : flnkconv
 USE control_conv,    ONLY : nk_test, nnk, nsigma
 USE mp_images,       ONLY : my_image_id, root_image
 USE io_global,       ONLY : ionode

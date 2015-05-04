@@ -58,7 +58,7 @@ SUBROUTINE run_thermo_asyncronously(nwork, part, igeom, auxdyn)
   !
         CALL initialize_thermo_master(nwork, part)
   !
-  !    and initialize the asyncronous communication
+  !    and initialize the asynchronous communication
   !
         IF (ionode) CALL asyn_master_init_with_priority(nimage, nwork, &
                          proc_num, npriority, priority, max_priority, world_comm)
@@ -177,6 +177,17 @@ SUBROUTINE run_thermo_asyncronously(nwork, part, igeom, auxdyn)
      IF (my_image_id == root_image) THEN
         CALL initialize_thermo_master(nwork, part)
         DO iwork = 1, nwork
+           WRITE(stdout,'(/,2x,76("+"))')
+           IF (lpwscf(iwork)) THEN
+              WRITE(6,'(5x,"Doing geometry", i5)') iwork
+           ELSE IF (lbands(iwork)) THEN
+              WRITE(6,'(5x,"Doing bands", i5)') 
+           ELSE IF (lphonon(iwork)) THEN
+              WRITE(stdout,'(5x,"Doing point", i5,  &
+               & " irrep", i5, " of geometry", i5 )') iq, irr, igeom
+           END IF
+           WRITE(stdout,'(2x,76("+"),/)')
+            
            CALL set_thermo_work_todo(iwork, part, iq, irr, igeom)
            IF (lpwscf(iwork)) THEN
               CALL do_pwscf(exit_status, .TRUE.)

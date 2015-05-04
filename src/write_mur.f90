@@ -11,7 +11,7 @@ SUBROUTINE write_mur(omega0, b0in, b01, emin)
 ! in output omega in (a.u.)**3, p in kbar, e in Ry
 !
 USE kinds,          ONLY : DP
-USE control_thermo, ONLY : flevdat
+USE data_files,     ONLY : flevdat
 USE thermo_mod,     ONLY : ngeo, omega_geo, energy_geo
 USE control_mur,    ONLY : nvol, vmin_input, vmax_input, deltav
 USE mp_images,      ONLY : root_image, my_image_id

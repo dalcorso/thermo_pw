@@ -55,7 +55,8 @@ SUBROUTINE q2r_sub(fildyn)
   USE io_dyn_mat, ONLY : read_dyn_mat_param, read_dyn_mat_header, &
                          read_dyn_mat, read_dyn_mat_tail, &
                          write_dyn_mat_header, write_ifc
-  USE control_thermo, ONLY : ldos, flfrc
+  USE control_thermo, ONLY : ldos
+  USE data_files,     ONLY : flfrc
   USE control_ph, ONLY : ldisp, xmldyn
   !
   IMPLICIT NONE

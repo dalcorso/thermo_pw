@@ -11,7 +11,8 @@ SUBROUTINE plot_anhar()
 !  
 !
 USE kinds,           ONLY : DP
-USE control_gnuplot, ONLY : flgnuplot, flpsanhar, gnuplot_command, lgnuplot
+USE control_gnuplot, ONLY : flgnuplot, gnuplot_command, lgnuplot
+USE postscript_files, ONLY : flpsanhar
 USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
                             gnuplot_write_header,        &
                             gnuplot_ylabel,              &
@@ -21,7 +22,7 @@ USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
                             gnuplot_write_file_mul_point,  &
                             gnuplot_write_horizontal_line, &
                             gnuplot_set_fact
-USE control_thermo,  ONLY : flanhar
+USE data_files,      ONLY : flanhar
 USE temperature,     ONLY : tmin, tmax
 USE constants,       ONLY : ry_kbar
 USE mp_images,       ONLY : my_image_id, root_image

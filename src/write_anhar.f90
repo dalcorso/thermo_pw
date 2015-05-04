@@ -13,7 +13,7 @@ USE thermodynamics, ONLY : ph_cv
 USE anharmonic,     ONLY : alpha_t, beta_t, gamma_t, cp_t, cv_t, b0_s, &
                            vmin_t, b0_t, b01_t
 USE thermo_mod,     ONLY : omega_geo
-USE control_thermo, ONLY : flanhar
+USE data_files,     ONLY : flanhar
 USE io_global,      ONLY : ionode
 USE mp_images,      ONLY : my_image_id, root_image
 
@@ -73,7 +73,7 @@ USE ph_freq_thermodynamics, ONLY : phf_cv
 USE ph_freq_anharmonic, ONLY : alphaf_t, betaf_t, gammaf_t, cpf_t, cvf_t, &
                         b0f_s, vminf_t, b0f_t, b01f_t
 USE thermo_mod,     ONLY : omega_geo
-USE control_thermo, ONLY : flanhar
+USE data_files,     ONLY : flanhar
 USE io_global,      ONLY : ionode
 USE mp_images,      ONLY : my_image_id, root_image
 
@@ -138,7 +138,7 @@ USE grun_anharmonic, ONLY : betab, grun_gamma_t, poly_grun, poly_order
 USE ph_freq_module, ONLY : thermal_expansion_ph, ph_freq_type,  &
                            destroy_ph_freq, init_ph_freq
 USE ifc,            ONLY : nq1_d, nq2_d, nq3_d
-USE control_thermo, ONLY : flanhar
+USE data_files,     ONLY : flanhar
 USE io_global,      ONLY : ionode
 USE mp_images,      ONLY : my_image_id, root_image
 

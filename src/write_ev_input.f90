@@ -9,21 +9,18 @@
 SUBROUTINE write_ev_input(file_dat)
   !-----------------------------------------------------------------------
   !
-  !  This routine receives the summary of the lattice constants and of
-  !  the energy at each lattice constant and writes the input file 
+  !  This routine receives the summary of the cell volumes and of
+  !  the energy at each volume and writes the input file 
   !  for the ev_sub subroutine.
   !
   !
   USE kinds, ONLY : DP
   USE mp_images, ONLY : my_image_id, root_image, nproc_image
-  USE mp_world,  ONLY : world_comm
   USE thermo_mod, ONLY : omega_geo, energy_geo, ngeo
   USE io_global, ONLY : ionode
   IMPLICIT NONE
   CHARACTER(LEN=256) :: file_dat
   INTEGER :: iu_ev, igeom
-  !
-  !  First collect the results from all images
   !
   IF (my_image_id /= root_image) RETURN
   !
@@ -69,16 +66,15 @@ SUBROUTINE do_ev()
 !  This subroutine computes the equilibrium volume and bulk modulus
 !
 USE kinds, ONLY : DP
-USE thermo_mod, ONLY : omega_geo, celldm_geo, ngeo
+USE thermo_mod, ONLY : omega_geo, celldm_geo, ngeo, central_geo
 USE control_mur, ONLY : vmin, b0, b01, emin
-USE control_thermo, ONLY : flevdat
+USE data_files, ONLY : flevdat
 USE io_global, ONLY : meta_ionode_id, stdout
 USE mp_world, ONLY : world_comm
 USE mp, ONLY : mp_bcast
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: file_dat
-INTEGER :: central_geo
 REAL(DP) :: celldm_(6)
 
   file_dat=TRIM(flevdat) 
@@ -89,15 +85,14 @@ REAL(DP) :: celldm_(6)
   CALL mp_bcast(b01, meta_ionode_id, world_comm)
   CALL mp_bcast(emin, meta_ionode_id, world_comm)
   !
-  central_geo=ngeo(1)/2+1
   CALL compute_celldm_geo(vmin, celldm_, celldm_geo(1,central_geo), &
                                          omega_geo(central_geo))
   WRITE(stdout,'(/,2x,76("+"))')
-  WRITE(stdout,'(5x, "The equilibrium lattice constant is ",f12.4," a.u.")') &
-                celldm_(1)
-  WRITE(stdout,'(5x, "The bulk modulus is ",15x,f12.2," kbar")')  b0
+  WRITE(stdout,'(5x, "The equilibrium lattice constant is ",9x,f12.4,&
+                                 &" a.u.")') celldm_(1)
+  WRITE(stdout,'(5x, "The bulk modulus is ",24x,f12.3,"  kbar")')  b0
   WRITE(stdout,'(5x, "The pressure derivative of the bulk modulus is ",&
-                            &7x,f12.2," kbar")')  b01
+                               &f9.3)')  b01
   WRITE(stdout,'(2x,76("+"),/)')
 
 END SUBROUTINE do_ev
@@ -108,12 +103,12 @@ SUBROUTINE do_ev_t(itemp)
 !
 USE kinds,          ONLY : DP
 USE constants,      ONLY : ry_kbar
-USE thermo_mod,     ONLY : ngeo, omega_geo, energy_geo, celldm_geo
+USE thermo_mod,     ONLY : ngeo, omega_geo, energy_geo, celldm_geo, central_geo
 USE control_mur,    ONLY : vmin, b0, b01
 USE thermodynamics, ONLY : ph_free_ener
 USE anharmonic,     ONLY : vmin_t, b0_t, b01_t, free_e_min_t
 USE temperature,    ONLY : ntemp, temp
-USE control_thermo, ONLY : flevdat
+USE data_files,     ONLY : flevdat
 USE io_global,      ONLY : meta_ionode_id, stdout,  meta_ionode
 USE mp_images,      ONLY : my_image_id, root_image
 
@@ -121,7 +116,6 @@ IMPLICIT NONE
 INTEGER, INTENT(IN) :: itemp
 INTEGER :: igeom, iu_ev
 REAL(DP) :: free_e, vm, celldm_(6)
-INTEGER :: central_geo
 INTEGER, PARAMETER :: m1=4
 INTEGER :: idata, ndata, i1
 REAL(DP) :: a(m1), x(ngeo(1)), y(ngeo(1)), aux, aux1
@@ -155,15 +149,15 @@ REAL(DP) :: a(m1), x(ngeo(1)), y(ngeo(1)), aux, aux1
 
 !  free_e_min_t(itemp)=free_e
   !
-  central_geo=ngeo(1)/2+1
   CALL compute_celldm_geo(vmin_t(itemp), celldm_, celldm_geo(1,central_geo), &
                                          omega_geo(central_geo))
   WRITE(stdout,'(/,2x,76("-"))')
   WRITE(stdout,'(5x, "phdos free energy, at T= ", f12.6)') temp(itemp)
-  WRITE(stdout,'(5x, "The equilibrium lattice constant is ",f12.6," a.u.")') &
-              celldm_(1)
-  WRITE(stdout,'(5x, "The bulk modulus is ",15x,f12.4," kbar")')  b0_t(itemp)
-  WRITE(stdout,'(5x, "The bulk modulus derivative is ",15x,f12.4)')  b01_t(itemp)
+  WRITE(stdout,'(5x, "The equilibrium lattice constant is ",9x,f12.4,&
+                                 &" a.u.")') celldm_(1)
+  WRITE(stdout,'(5x, "The bulk modulus is ",24x,f12.3,"  kbar")')  b0_t(itemp)
+  WRITE(stdout,'(5x, "The pressure derivative of the bulk modulus is ",&
+                               &f9.3)')  b01_t(itemp)
   WRITE(stdout,'(2x,76("-"),/)')
 
 END SUBROUTINE do_ev_t
@@ -173,13 +167,13 @@ SUBROUTINE do_ev_t_ph(itemp)
 !  This subroutine compute the equilibrium volume and bulk modulus
 !
 USE kinds,          ONLY : DP
-USE thermo_mod,     ONLY : ngeo, omega_geo, energy_geo, celldm_geo
+USE thermo_mod,     ONLY : ngeo, omega_geo, energy_geo, celldm_geo, central_geo
 USE constants,      ONLY : ry_kbar
 USE ph_freq_thermodynamics, ONLY : phf_free_ener
 USE ph_freq_anharmonic,     ONLY : vminf_t, b0f_t, b01f_t, free_e_minf_t
 USE control_mur,    ONLY : vmin, b0, b01
 USE temperature,    ONLY : ntemp, temp
-USE control_thermo, ONLY : flevdat
+USE data_files,     ONLY : flevdat
 USE io_global,      ONLY : meta_ionode_id, stdout,  meta_ionode
 USE mp_images,      ONLY : my_image_id, root_image
 
@@ -188,7 +182,6 @@ INTEGER, INTENT(IN) :: itemp
 INTEGER :: igeom, iu_ev
 CHARACTER(LEN=6) :: int_to_char
 REAL(DP) :: free_e, vm, celldm_(6)
-INTEGER :: central_geo
 INTEGER, PARAMETER :: m1=4
 INTEGER :: idata, ndata, i1
 REAL(DP) :: a(m1), x(ngeo(1)), y(ngeo(1)), aux, aux1
@@ -222,15 +215,16 @@ REAL(DP) :: a(m1), x(ngeo(1)), y(ngeo(1)), aux, aux1
 
 !  free_e_minf_t(itemp)=free_e
   !
-  central_geo=ngeo(1)/2+1
   CALL compute_celldm_geo(vminf_t(itemp), celldm_, celldm_geo(1,central_geo), &
                                          omega_geo(central_geo))
   WRITE(stdout,'(/,2x,76("+"))')
   WRITE(stdout,'(5x, "ph_freq free energy at T=",f12.4)') temp(itemp)
-  WRITE(stdout,'(5x, "The equilibrium lattice constant is ",f12.6," a.u.")') &
-                 celldm_(1)
-  WRITE(stdout,'(5x, "The bulk modulus is ",15x,f12.4," kbar")')  b0f_t(itemp)
-  WRITE(stdout,'(5x, "The bulk modulus derivative is ",15x,f12.4)')  b01f_t(itemp)
+  WRITE(stdout,'(5x, "The equilibrium lattice constant is ",16x,f12.4,&
+                                 &" a.u.")') celldm_(1)
+  WRITE(stdout,'(5x, "The bulk modulus is ",31x,f12.3,"  kbar")')  b0f_t(itemp)
+  WRITE(stdout,'(5x, "The pressure derivative of the bulk modulus is ",5x,&
+                               &f11.3)')  b01f_t(itemp)
+
   WRITE(stdout,'(2x,76("+"),/)')
 
 END SUBROUTINE do_ev_t_ph

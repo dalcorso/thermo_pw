@@ -7,6 +7,7 @@
 !
 SUBROUTINE set_elastic_cons_work( nwork )
 USE kinds, ONLY : DP
+USE thermo_mod, ONLY : ibrav_geo, celldm_geo
 USE cell_base, ONLY : ibrav
 USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain
 USE elastic_constants, ONLY : epsilon_voigt, epsilon_geo, sigma_geo, &
@@ -101,6 +102,8 @@ epsilon_geo=0.0_DP
 DO iwork = 1, nwork
    CALL trans_epsilon(epsilon_voigt(1,iwork), epsilon_geo(1,1,iwork), 1)
 ENDDO
+ALLOCATE( ibrav_geo(nwork) )
+ALLOCATE( celldm_geo(6,nwork) )
 
 RETURN
 END SUBROUTINE set_elastic_cons_work
@@ -117,10 +120,10 @@ SUBROUTINE set_elastic_cons_work_adv( nwork )
 USE kinds, ONLY : DP
 USE thermo_mod, ONLY : ibrav_geo, celldm_geo
 USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, rot_mat, &
-                              aap_mat, apa_mat, ibrav_save, elastic_algorithm
+                              aap_mat, apa_mat, elastic_algorithm
 USE elastic_constants, ONLY : epsilon_voigt, sigma_geo, epsilon_geo, &
                               trans_epsilon
-USE control_pwrun, ONLY : celldm_save
+USE control_pwrun, ONLY : celldm_save, ibrav_save
 USE thermo_sym, ONLY : laue
 USE strain_mod, ONLY : apply_strain_adv
 IMPLICIT NONE

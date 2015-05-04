@@ -11,7 +11,8 @@ SUBROUTINE plot_mur()
 !  
 !
 USE kinds,           ONLY : DP
-USE control_gnuplot, ONLY : flgnuplot, flpsmur, lgnuplot, gnuplot_command
+USE control_gnuplot, ONLY : flgnuplot, lgnuplot, gnuplot_command
+USE postscript_files, ONLY : flpsmur
 USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
                             gnuplot_write_header,        &
                             gnuplot_ylabel,              &
@@ -20,7 +21,7 @@ USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
                             gnuplot_write_file_mul_data, &
                             gnuplot_write_file_mul_point, &
                             gnuplot_write_command
-USE control_thermo,  ONLY : flevdat
+USE data_files,      ONLY : flevdat
 USE control_mur,     ONLY : vmin_input, vmax_input
 USE mp_images,       ONLY : my_image_id, root_image
 USE io_global,       ONLY : ionode
