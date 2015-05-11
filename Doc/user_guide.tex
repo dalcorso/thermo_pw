@@ -8,6 +8,7 @@
 \documentclass[12pt,a4paper]{article}
 \def\version{0.3.0}
 \def\qe{{\sc Quantum ESPRESSO}}
+\def\tpw{{\sc THERMO\_PW}}
 
 \usepackage{html}
 
@@ -37,7 +38,7 @@
 \title{
 %  \includegraphics[width=6cm]{\SissaImage}\\
   \vskip 1cm
-  \Huge \thermo\ User's Guide \smallskip \\
+  \Huge \tpw\ User's Guide \\
   \Large (version \version)
 }
 
@@ -52,7 +53,7 @@ It assumes that you have some familiarity with the \qe\ package.
 If not please consult the web site: \texttt{http://www.quantum-espresso.org}.
 
 \thermo\ is a set of drivers to compute material properties
-and, for the most common tasks,  allows to avoid the writing of 
+and, for the most common tasks, allows to avoid the writing of 
 complex \texttt{bash} scripts that call the \qe\ program.
 It can be considered as a set of scripts written in \texttt{FORTRAN}. 
 At low level \thermo\ uses the \qe\ routines but it also adds a
@@ -89,30 +90,33 @@ input of \thermo\ by the \texttt{XCrySDen} program).
 
 \item Phonon dispersions at fixed geometry and computation of the harmonic
 thermodynamical properties: vibrational energy, vibrational free energy,
-vibrational entropy, and constant volume heat capacity as a function
-of temperature.
+vibrational entropy, and constant volume heat capacity as a function of
+temperature.
 
-\item Murnaghan fit of the total energy as function of the lattice parameter.
+\item Frozen ions and total elastic constants at fixed geometry.
 
-\item Band structure at the Murnaghan minimum.
+\item Fit of the total energy as a function of the lattice parameters with
+a quadratic polynomial and determination of equilibrium lattice parameters.
+Murnaghan fit for cubic systems.
 
-\item Phonon frequencies at the Murnaghan minimum.
+\item Band structure at the minimum of the total energy.
+
+\item Phonon frequencies at the minimum of the total energy.
 
 \item Phonon dispersions and harmonic vibrational thermodynamic quantities
-at the Murnaghan minimum.
+at the minimum of the total energy.
 
-\item Phonon dispersions at several geometries and calculation of the
-anharmonic vibrational properties: lattice parameter, bulk modulus,
-pressure derivative of the bulk modulus as a function of temperature.
-Gruneisen parameters. Thermal expansion as a function of temperature.
-Isobaric molar heat capacity as a function of temperature.
-Isoentropic bulk modulus as a function of temperature.
-Average Gruneisen parameter as a function of temperature.
-Presently this option is limited to cubic solids.
-\item Frozen ions and total elastic constants.
+\item Phonon dispersions on a mesh of lattice parameters and calculation of the
+anharmonic vibrational properties: lattice parameters, 
+isochoric heat capacity and thermal expansion as a function of temperature
+(limited to cubic, tetragonal, orthorombic, and hexagonal systems).
+Bulk modulus and pressure derivative of the bulk modulus, isobaric heat 
+capacity, isoentropic bulk modulus and average Gr\"uneisen parameters as 
+a function of temperature (limited to cubic systems).
 
 \item Surface band structure identification and plot of the projected bulk
 band structure.
+
 \end{itemize}
 
 \thermo\ can run in parallel using all the parallel modes available in
@@ -534,7 +538,7 @@ ngeo(1),...,ngeo(6) : the number of geometries to use for each celldm parameter.
              are changed in steps of step_ngeo(1),...,step_ngeo(6). 
              ngeo(1) must be odd. Only the values of celldm relevant for
              each Bravais lattice are actually changed.
-             Default: integer 1 1 1 1 1 1 for what=scf_*, 9,1,1,1,1,1 for 
+             Default: integer 1,1,1,1,1,1 for what=scf_*, 9,1,1,1,1,1 for 
              what=mur_lc_* and lmurn=.TRUE., 5 on all the relevant celldm 
              parameters when lmurn=.FALSE..
 step_ngeo(1),...,step_ngeo(6) : The step between the lattice constants at 
@@ -627,17 +631,32 @@ of tasks of the phonon code (see above the option \texttt{what='scf\_ph'}).
 \subsection{\texttt{what='mur\_lc\_t'}}
 With this option the code calculates the anharmonic vibrational
 properties of the system within the quasi-harmonic approximation. The
-outputs of the code are the lattice constant, bulk modulus, and pressure
-derivative of the bulk modulus as a function of temperature. Moreover
-the isobaric specific heat, the isoentropic bulk modulus, and the average 
-Gruneisen parameter are calculated as a function of temperature. Separate
-plots of the phonon dispersion along a path specified as described above,
-are obtained for all the geometries used in this calculation. For each
-geometry the code produces also a plot of the phonon density of states
-and of the harmonic thermodynamical quantities. Finally the Gruneisen
-parameters interpolated from the three central geometries are
-shown on the same path used for the phonon dispersions. The input variables
-that control these plot are those described in the option
+output of the code are the values of celldm as a function of
+temperature. This calculation is done by computing the
+phonon dispersions on all the geometries specified as in
+\texttt{what='mur\_lc'} and minimizing the Helmholtz free energy.
+Separate plots of the phonon dispersions along a path specified as
+described above are obtained for all the geometries.
+For each geometry the code produces also plots of the phonon density
+of states and of the harmonic thermodynamic quantities.
+Finally, the Gr\"uneisen parameters interpolated from quadratic fits
+of the frequencies as a function of the crystal parameters
+are shown on the same path used for the phonon
+dispersions. The input variables that control these plots are those
+described in the option \texttt{what='mur\_lc'} and 
+\texttt{what='mur\_lc\_disp'}.
+From celldm as a function of temperature the code computes the thermal
+expansion tensor and the volume thermal expansion. \\
+This option is implemented only for tetragonal, hexagonal, trigonal
+and orthorombic systems.
+For cubic systems, the Murnaghan equation is used to interpolate the
+free energy and in addition to the lattice constant as a function of
+temperature, the code computes also the bulk modulus and the
+pressure derivative of the bulk modulus as a function 
+of temperature. Moreover the isobaric specific heat, the isoentropic 
+bulk modulus, and the average Gr\"uneisen parameter are calculated as 
+a function of temperature. \\
+The input variables that control these plot are those described in the option
 \texttt{what='mur\_lc'} and \texttt{what='mur\_disp'} in addition to the 
 following:
 
@@ -646,11 +665,19 @@ grunmin_input : minimum y coordinate for the Gruneisen parameter plot.
                 Default: real, calculated from the Gruneisen parameters.
 grunmax_input : maximum y coordinate for the Gruneisen parameter plot.
                 Default: real, calculated from the Gruneisen parameters.
-volume_ph     : The frequencies and gruneisen parameters interpolated 
+volume_ph     : The frequencies and Gruneisen parameters interpolated 
                 at this volume are plotted on a postscript file. 
                 When volume_ph=0.0_DP the volume is calculated from temp_ph.
                 Default : 0.0_DP (in (a.u.)**3)
-temp_ph       : The frequencies and gruneisen parameters interpolated at 
+celldm_ph     : The frequencies and Gruneisen parameters interpolated 
+                at this crystal parameters are plotted on a postscript file. 
+                If this is 0.0_DP the celldm are calculated from temp_ph.
+                To have accurate Gruneisen parameters and intepolated
+                frequencies set the central geometry as close as possible 
+                to celldm_ph. The central geometry is the one given in the
+                input of pw.x.
+                Default : 0.0_DP (celldm(1) in a.u., celldm(2-6) adimensional)
+temp_ph       : The frequencies and Gruneisen parameters interpolated at 
                 the volume that corresponds to this temperature are plotted 
                 on a postscript file (only when volume_ph=0.0_DP).
                 Default : real tmin (in K)
@@ -669,7 +696,6 @@ by the presence of the letters \texttt{g1}, \texttt{g2}, ... in the filename.
 An example of the use of this option can be found in \texttt{example09}. \\
 Number of tasks for this option: Maximum between \texttt{ngeo} and the number
 of tasks of the phonon code (see above the option \texttt{what='scf\_ph'}). \\
-This option is implemented only for isotropic solids.
 
 \subsection{\texttt{what='scf\_elastic\_constants'}}
 With this option the code calculates the elastic constants of the solid.
