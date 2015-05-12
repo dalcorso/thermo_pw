@@ -45,7 +45,7 @@ SUBROUTINE compute_gruneisen()
   DO n = 1, nq
      DO igeo=1,ngeo(1)
         freq_geo(1:3*nat,igeo)=ph_freq_save(igeo)%nu(1:3*nat,n)
-        rap_geo(1:3*nat,igeo)=ph_freq_save(igeo)%rap(1:3*nat,n)
+        rap_geo(1:3*nat,igeo)=-1
      ENDDO
      CALL compute_freq_derivative(ngeo(1),freq_geo,rap_geo,omega_geo,&
                                          poly_order,poly_grun(1,1,n))

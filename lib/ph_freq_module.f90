@@ -52,13 +52,12 @@ TYPE ph_freq_type
    INTEGER :: nat                     ! the number of atoms
    REAL(DP), ALLOCATABLE :: nu(:,:)   ! the frequencies (cm-1)
    REAL(DP), ALLOCATABLE :: wg(:)     ! the weight of each point
-   INTEGER, ALLOCATABLE :: rap(:,:)   ! the number of the representation
 END TYPE ph_freq_type
 
 
 PUBLIC :: ph_freq_type, zero_point_energy_ph, free_energy_ph, vib_energy_ph, &
           vib_entropy_ph, specific_heat_cv_ph, init_ph_freq, destroy_ph_freq, &
-          init_ph_rap, thermal_expansion_ph, read_ph_freq_data, &
+          thermal_expansion_ph, read_ph_freq_data, &
           write_ph_freq_data
 
 CONTAINS
@@ -85,25 +84,12 @@ ALLOCATE(ph_freq%wg(nq))
 RETURN
 END SUBROUTINE init_ph_freq
 
-SUBROUTINE init_ph_rap(ph_freq)
-IMPLICIT NONE
-TYPE(ph_freq_type), INTENT(INOUT) :: ph_freq
-INTEGER :: nq, nat
-
-nq = ph_freq%nq 
-nat = ph_freq%nat
-ALLOCATE(ph_freq%rap(3*nat,nq))
-
-RETURN
-END SUBROUTINE init_ph_rap
-
 SUBROUTINE destroy_ph_freq(ph_freq)
 IMPLICIT NONE
 TYPE(ph_freq_type), INTENT(INOUT) :: ph_freq
 
 IF (ALLOCATED(ph_freq%nu)) DEALLOCATE(ph_freq%nu)
 IF (ALLOCATED(ph_freq%wg)) DEALLOCATE(ph_freq%wg)
-IF (ALLOCATED(ph_freq%rap)) DEALLOCATE(ph_freq%rap)
 
 RETURN
 END SUBROUTINE destroy_ph_freq
@@ -149,25 +135,22 @@ ph_freq%nat = nat
 ndiv = ph_freq%number_of_points
 ALLOCATE(ph_freq%nu(3*nat, nq))
 ALLOCATE(ph_freq%wg(nq))
-ALLOCATE(ph_freq%rap(3*nat,nq))
 
 IF (ionode) THEN
    DO iq=1,nq
       READ(iunit, *, END=20, ERR=10, IOSTAT=ios) ph_freq%wg(iq)
       DO imode=1,3*nat
          ! nu(i) = frequencies (cm^{-1})
-         READ(iunit, *, END=20, ERR=10, IOSTAT=ios) ph_freq%nu(imode, iq), &
-                                                    ph_freq%rap(imode, iq)
+         READ(iunit, *, END=20, ERR=10, IOSTAT=ios) ph_freq%nu(imode, iq)
       END DO
    END DO
 ENDIF
 20 CONTINUE
    ios=0
 10 CALL mp_bcast( ios, ionode_id, intra_image_comm )
-   IF (ios /= 0 ) CALL errore('read_phdos_data', 'problem reading phdos', 1)
+   IF (ios /= 0 ) CALL errore('read_ph_freq_data', 'problem reading phdos', 1)
    CALL mp_bcast( ph_freq%wg, ionode_id, intra_image_comm )
    CALL mp_bcast( ph_freq%nu, ionode_id, intra_image_comm )
-   CALL mp_bcast( ph_freq%rap, ionode_id, intra_image_comm )
 
    IF (ionode) CLOSE(iunit)
 
@@ -205,13 +188,12 @@ IF (ionode) THEN
       WRITE(iunit, '(E30.15)', ERR=10, IOSTAT=ios) ph_freq%wg(iq)
       DO imode=1,3*nat
          ! nu(i) = frequencies (cm^{-1}) 
-         WRITE(iunit,'(E30.15,i30)',ERR=10,IOSTAT=ios) ph_freq%nu(imode, iq), &
-                                                       ph_freq%rap(imode, iq)
+         WRITE(iunit,'(E30.15)',ERR=10,IOSTAT=ios) ph_freq%nu(imode, iq)
       END DO
    END DO
 END IF
 10 CALL mp_bcast( ios, ionode_id, intra_image_comm )
-IF (ios /= 0 ) CALL errore('write_phdos_data', 'problem reading phdos', 1)
+IF (ios /= 0 ) CALL errore('write_ph_freq_data', 'problem reading phdos', 1)
 
 IF (ionode) CLOSE(iunit)
 

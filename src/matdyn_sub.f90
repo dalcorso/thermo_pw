@@ -87,7 +87,7 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   USE data_files,     ONLY : flfrc, flfrq, fldos 
   USE ions_base, ONLY : amass
   USE phdos_module, ONLY : set_phdos, read_phdos_data, find_minimum_maximum
-  USE ph_freq_module, ONLY : init_ph_freq, init_ph_rap, read_ph_freq_data, &
+  USE ph_freq_module, ONLY : init_ph_freq, read_ph_freq_data, &
                              write_ph_freq_data
   !
   IMPLICIT NONE
@@ -457,12 +457,10 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
 !   save the frequencies
 !
      CALL init_ph_freq(ph_freq_save(igeom), nat, nq1_d, nq2_d, nq3_d, nq)
-     CALL init_ph_rap(ph_freq_save(igeom))
      DO iq=1, nq
         ph_freq_save(igeom)%wg(iq)=wq(iq)
         DO imode=1, 3*nat
            ph_freq_save(igeom)%nu(imode,iq)=freq(imode,iq)
-           ph_freq_save(igeom)%rap(imode,iq)=num_rap_mode(imode,iq)
         ENDDO
      ENDDO
      CALL write_ph_freq_data(ph_freq_save(igeom),filename)
