@@ -74,6 +74,7 @@ IF (ionode) THEN
    WRITE(iun_gnuplot,'("eref=0.0")') 
    WRITE(iun_gnuplot,'("fact=1.0")') 
    WRITE(iun_gnuplot,'("gfact=1.0")') 
+   WRITE(iun_gnuplot,'("point_size=1.0")') 
 
    CALL gnuplot_write_command('color_red="red"',.FALSE.)
    CALL gnuplot_write_command('color_green="green"',.FALSE.)
@@ -472,7 +473,7 @@ LOGICAL :: comment
 
 string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//"*xscale-xshift):($"// &
               TRIM(int_to_char(col2)) &
-            //"*fact-eref)*gfact w p pt 82 lc rgb "//TRIM(color)
+            //"*fact-eref)*gfact w p pt 82 ps point_size lc rgb "//TRIM(color)
 
 IF (start) string="plot "//TRIM(string)
 IF (.NOT.last) string=TRIM(string)//", \"
