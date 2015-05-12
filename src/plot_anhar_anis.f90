@@ -76,7 +76,7 @@ ELSEIF (ibrav_save==8.OR.ibrav_save==9.OR.ibrav_save==10.OR.ibrav_save==11) THEN
                                                               .TRUE.,.FALSE.)
 
 ENDIF
-CALL gnuplot_ylabel('alpha (x10^6)',.FALSE.) 
+CALL gnuplot_ylabel('Linear thermal expansion {/Symbol a} x 10^6 (K^{-1})',.FALSE.) 
 IF (ibrav_save==4.OR.ibrav_save==5.OR.ibrav_save==6.OR.ibrav_save==7) THEN
    CALL gnuplot_write_file_mul_data(filename1,1,4,'color_red',.TRUE.,.FALSE.,&
                                                                 .FALSE.)
@@ -94,7 +94,8 @@ END IF
 CALL gnuplot_ylabel('Volume ((a.u.)^3)',.FALSE.) 
 CALL gnuplot_write_file_mul_data(filename,1,1,'color_red',.TRUE.,.FALSE.,&
                                                                .FALSE.)
-CALL gnuplot_ylabel('beta (x10^6)',.FALSE.) 
+CALL gnuplot_ylabel('Volume thermal expansion {/Symbol b} x 10^6 (K^{-1})',&
+                                                               .FALSE.) 
 CALL gnuplot_write_file_mul_data(filename,1,3,'color_red',.TRUE.,.FALSE.,&
                                                                .FALSE.)
 

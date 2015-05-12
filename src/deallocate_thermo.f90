@@ -26,9 +26,12 @@ SUBROUTINE deallocate_thermo()
                                label_disp_q, disp_q, disp_wq, nrap_plot_in,   &
                                rap_plot_in, nrap_plot, rap_plot
   USE control_2d_bands, ONLY : averag, vacuum, aux_ind_sur
+  USE temperature,      ONLY : temp
 
   USE control_conv,     ONLY : ke, keden, nk_test, sigma_test
   USE elastic_constants, ONLY : epsilon_geo, sigma_geo, epsilon_voigt
+  USE control_elastic_constants, ONLY : rot_mat, aap_mat, apa_mat
+
 
   IMPLICIT NONE
   !
@@ -81,6 +84,8 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (disp_q) )          DEALLOCATE(disp_q)
   IF ( ALLOCATED (disp_wq) )         DEALLOCATE(disp_wq)
 
+  IF ( ALLOCATED (temp) )            DEALLOCATE(temp)
+
   IF ( ALLOCATED (nrap_plot_in) )    DEALLOCATE(nrap_plot_in)
   IF ( ALLOCATED (rap_plot_in) )     DEALLOCATE(rap_plot_in)
   IF ( ALLOCATED (nrap_plot) )       DEALLOCATE(nrap_plot)
@@ -93,6 +98,9 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (epsilon_voigt) )   DEALLOCATE(epsilon_voigt)
   IF ( ALLOCATED (epsilon_geo) )     DEALLOCATE(epsilon_geo)
   IF ( ALLOCATED (sigma_geo) )       DEALLOCATE(sigma_geo)
+  IF ( ALLOCATED (rot_mat) )         DEALLOCATE(rot_mat)
+  IF ( ALLOCATED (aap_mat) )         DEALLOCATE(aap_mat)
+  IF ( ALLOCATED (apa_mat) )         DEALLOCATE(apa_mat)
   ! 
   RETURN
   !

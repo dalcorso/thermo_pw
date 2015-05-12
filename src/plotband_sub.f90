@@ -137,7 +137,7 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
            exist_rap=.FALSE.
         ENDIF
      ELSE
-        WRITE(6,'("Problem reading representation file")')
+        WRITE(stdout,'("Problem reading representation file")')
         exist_rap=.FALSE.
      ENDIF
   ENDIF
@@ -165,8 +165,10 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
                                       gcodek(n), aux_ind(n)
            READ(21,*,end=221,err=221) (rap(i,n),i=1,nbnd)
            IF (abs(k(1,n)-k_rap(1,n))+abs(k(2,n)-k_rap(2,n))+  &
-               abs(k(3,n)-k_rap(3,n))  > eps ) THEN
+               abs(k(3,n)-k_rap(3,n))  > eps .AND. icode /=3 &
+                                                  .AND. icode /=4 ) THEN
                WRITE(stdout,'("Incompatible k points in rap file")')
+               CLOSE(unit=21)
                exist_rap=.false.
            ENDIF
         ENDIF

@@ -135,10 +135,10 @@ INTEGER, INTENT(IN) :: igeom
 CHARACTER(LEN=256) :: filename
 LOGICAL :: check_file_exists, do_read
 
-INTEGER  :: i, ios
+INTEGER  :: i, ios, idum
 REAL(DP) :: e0
 INTEGER  :: itemp
-INTEGER  :: iu_therm, idum
+INTEGER  :: iu_therm
 !
 do_read=.FALSE.
 filename=TRIM(fltherm)//'_ph'

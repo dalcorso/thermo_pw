@@ -69,7 +69,7 @@ CALL gnuplot_write_file_mul_data(flanhar,1,4,'color_red',.TRUE.,.FALSE.,.FALSE.)
 CALL gnuplot_write_file_mul_data(filename,1,4,'color_blue',.FALSE.,.TRUE.,.FALSE.)
 
 CALL gnuplot_set_fact(1.0_DP,.FALSE.)
-CALL gnuplot_ylabel('Thermal expansion ({/Symbol b} x 10^{6})',.FALSE.) 
+CALL gnuplot_ylabel('Thermal expansion ({/Symbol b} x 10^{6}) (K^{-1})',.FALSE.) 
 CALL gnuplot_write_file_mul_data(flanhar,1,5,'color_red',.TRUE.,.FALSE.,.FALSE.)
 CALL gnuplot_write_file_mul_data(filename,1,5,'color_blue',.FALSE.,.FALSE.,.FALSE.)
 CALL gnuplot_write_file_mul_data(filename3,1,2,'color_green',.FALSE.,.TRUE.,.FALSE.)
@@ -105,7 +105,7 @@ CALL gnuplot_write_file_mul_data(filename1,1,5,'color_red',.TRUE.,.FALSE.,.FALSE
 CALL gnuplot_write_file_mul_data(filename2,1,5,'color_blue',.FALSE.,.TRUE.,.FALSE.)
 
 CALL gnuplot_set_fact(1.0_DP,.FALSE.)
-CALL gnuplot_ylabel('{/Symbol g}',.FALSE.) 
+CALL gnuplot_ylabel('Gr\374neisen parameter ({/Symbol g})',.FALSE.) 
 CALL gnuplot_write_horizontal_line(0.0_DP, 2, 'front', 'color_black', .FALSE.)
 CALL gnuplot_write_file_mul_data(filename1,1,2,'color_red',.TRUE.,.FALSE.,.FALSE.)
 CALL gnuplot_write_file_mul_data(filename2,1,2,'color_blue',.FALSE.,.FALSE.,.FALSE.)
