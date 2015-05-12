@@ -668,6 +668,8 @@ grunmax_input : maximum y coordinate for the Gruneisen parameter plot.
 volume_ph     : The frequencies and Gruneisen parameters interpolated 
                 at this volume are plotted on a postscript file. 
                 When volume_ph=0.0_DP the volume is calculated from temp_ph.
+                This option is available only for cubic solids. Otherwise
+                use celldm_ph.
                 Default : 0.0_DP (in (a.u.)**3)
 celldm_ph     : The frequencies and Gruneisen parameters interpolated 
                 at this crystal parameters are plotted on a postscript file. 
@@ -686,6 +688,10 @@ flpgrun       : file where the values of the Gruneisen parameters are written.
 flgrun        : file where the Gruneisen parameters in a plotable form are
                 written.
                 Default: character(len=*) 'output_grun.dat'
+flpsgrun      : name of the postscript file with the Gruneisen parameters plot.
+                The frequencies are written in the file with the same name 
+                plus the string _freq.
+                Default: character(len=*) 'output_grun.ps'
 flanhar       : file where the anharmonic thermodynamic quantities are written.
                 Default: character(len=*) 'output_anhar.dat'
 flpsanhar     : postscript file of the anharmonic quantities.
@@ -738,7 +744,7 @@ frozen_ions: if .true. the elastic constants are calculated
 ngeo_strain: the number of strained configurations used to calculate each
              derivative. 
              Default: integer 4
-elastic_algorithm: 'standard', 'advanced' or 'energy'. See discussion above.
+elastic_algorithm: 'standard', 'advanced', or 'energy'. See discussion above.
              Default: character 'standard' 
 delta_epsilon: the interval of strain values between two geometries.
              To avoid a zero strain geometry that might have a
@@ -806,7 +812,7 @@ The code makes a self-consistent calculation followed by three Berry
 phase calculations in which the polarization is calculated in the
 direction parallel to the three primitive reciprocal lattice vectors and 
 prints the spontaneous polarization in cartesian coordinates.
-The input variable that control this option is:
+The input variable that controls this option is:
 \begin{verbatim}
 nppl: the number of k points per string. In the perpendicular plane the
       number of k-point is that given as input of the pw.x code.
@@ -956,7 +962,7 @@ the bands that belong to the $A$ or $B$ representations of the slab,
 (states even or odd with respect to a $180^\circ$ rotation about
 the $x$ axis, an operation that exchanges the two surfaces)
 but you cannot separate the PBS along the $\bar \Gamma-\bar K$ direction into
-even or odd. You might specify two different panels with the
+even or odd states. You might specify two different panels with the
 $A$ or $B$ bands in each, but the PBS in the two panels will be the same. 
 On the contrary, along the $\bar \Gamma-\bar M$ direction, both the slab and 
 the surface have $C_s$ symmetry, so you can separate both the PBS 
