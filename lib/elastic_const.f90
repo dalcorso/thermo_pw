@@ -97,6 +97,12 @@ IF (frozen_ions) THEN
 ELSE
    WRITE(stdout, *)
 ENDIF
+
+IF (press /= 0.0_DP) THEN
+   WRITE(stdout,'(5x,"Estimated pressure (kbar) ",f14.5)') press * ry_kbar
+   WRITE(stdout,'(5x,"Elastic constants defined from stress-strain",f14.5)')
+END IF
+
 WRITE(stdout,'(5x,"Elastic constants C_ij (kbar) ")')
 WRITE(stdout,'(4x,"i j=",i9,5i12)') (i, i=1,6)
 
