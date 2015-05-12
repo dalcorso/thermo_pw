@@ -456,7 +456,8 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
 !
 !   save the frequencies
 !
-     CALL init_ph_freq(ph_freq_save(igeom), nat, nq1_d, nq2_d, nq3_d, nq)
+     CALL init_ph_freq(ph_freq_save(igeom), nat, nq1_d, nq2_d, nq3_d, nq, &
+                                                              .FALSE.)
      DO iq=1, nq
         ph_freq_save(igeom)%wg(iq)=wq(iq)
         DO imode=1, 3*nat

@@ -50,23 +50,29 @@ TYPE ph_freq_type
    INTEGER :: nq1, nq2, nq3           ! the number of points in the three
                                       ! reciprocal lattice directions
    INTEGER :: nat                     ! the number of atoms
+   LOGICAL :: with_eigen              ! if true allocate and save the
+                                      ! eigenvectors
    REAL(DP), ALLOCATABLE :: nu(:,:)   ! the frequencies (cm-1)
+   COMPLEX(DP), ALLOCATABLE :: displa(:,:,:)  ! the displacements
    REAL(DP), ALLOCATABLE :: wg(:)     ! the weight of each point
 END TYPE ph_freq_type
 
 
 PUBLIC :: ph_freq_type, zero_point_energy_ph, free_energy_ph, vib_energy_ph, &
           vib_entropy_ph, specific_heat_cv_ph, init_ph_freq, destroy_ph_freq, &
-          thermal_expansion_ph, read_ph_freq_data, &
-          write_ph_freq_data
+          thermal_expansion_ph, read_ph_freq_data, write_ph_freq_data
 
 CONTAINS
 
-SUBROUTINE init_ph_freq(ph_freq, nat, nq1, nq2, nq3, nq)
+SUBROUTINE init_ph_freq(ph_freq, nat, nq1, nq2, nq3, nq, flag)
+!
+!  If flag is true save also the eigenvectors
+!
 IMPLICIT NONE
 
 TYPE(ph_freq_type), INTENT(INOUT) :: ph_freq
 INTEGER, INTENT(IN) :: nq1, nq2, nq3, nat, nq
+LOGICAL, INTENT(IN) :: flag
 INTEGER :: ndiv, nqtot
 
 nqtot = nq1 * nq2 * nq3
@@ -77,8 +83,10 @@ ph_freq%nq1 = nq1
 ph_freq%nq2 = nq2
 ph_freq%nq3 = nq3
 ph_freq%nat = nat
+ph_freq%with_eigen=flag
 ndiv = ph_freq%number_of_points 
 ALLOCATE(ph_freq%nu(3*nat, nq))
+IF (flag) ALLOCATE(ph_freq%displa(3*nat, 3*nat, nq))
 ALLOCATE(ph_freq%wg(nq))
 
 RETURN
@@ -90,6 +98,7 @@ TYPE(ph_freq_type), INTENT(INOUT) :: ph_freq
 
 IF (ALLOCATED(ph_freq%nu)) DEALLOCATE(ph_freq%nu)
 IF (ALLOCATED(ph_freq%wg)) DEALLOCATE(ph_freq%wg)
+IF (ALLOCATED(ph_freq%displa)) DEALLOCATE(ph_freq%displa)
 
 RETURN
 END SUBROUTINE destroy_ph_freq
@@ -108,7 +117,8 @@ CHARACTER(LEN=256), INTENT(IN) :: filename
 INTEGER :: iunit, ios
 REAL(DP), ALLOCATABLE :: nu(:), dos(:)
 INTEGER :: nat, nq1, nq2, nq3, nq
-INTEGER :: iq, imode, ndiv, nqtot
+INTEGER :: iq, imode, jmode, ndiv, nqtot
+LOGICAL :: with_eigen
 
 iunit=65
 IF (ionode) OPEN(file=TRIM(filename), unit=iunit, status='old', &
@@ -117,12 +127,14 @@ IF (ionode) OPEN(file=TRIM(filename), unit=iunit, status='old', &
     IF (ios /= 0) CALL errore('read_ph_freq_data','opening file',ios)
 
 IF (ionode) READ(iunit, *) nat, nq1, nq2, nq3, nq
+IF (ionode) READ(iunit, *) with_eigen
 
 CALL mp_bcast(nat, ionode_id, intra_image_comm)
 CALL mp_bcast(nq1, ionode_id, intra_image_comm)
 CALL mp_bcast(nq2, ionode_id, intra_image_comm)
 CALL mp_bcast(nq3, ionode_id, intra_image_comm)
 CALL mp_bcast(nq, ionode_id, intra_image_comm)
+CALL mp_bcast(with_eigen, ionode_id, intra_image_comm)
 
 nqtot = nq1 * nq2 * nq3
 ph_freq%nqtot=nqtot
@@ -132,8 +144,10 @@ ph_freq%nq1 = nq1
 ph_freq%nq2 = nq2
 ph_freq%nq3 = nq3
 ph_freq%nat = nat
+ph_freq%with_eigen=with_eigen
 ndiv = ph_freq%number_of_points
 ALLOCATE(ph_freq%nu(3*nat, nq))
+IF (with_eigen) ALLOCATE(ph_freq%displa(3*nat, 3*nat, nq))
 ALLOCATE(ph_freq%wg(nq))
 
 IF (ionode) THEN
@@ -142,15 +156,22 @@ IF (ionode) THEN
       DO imode=1,3*nat
          ! nu(i) = frequencies (cm^{-1})
          READ(iunit, *, END=20, ERR=10, IOSTAT=ios) ph_freq%nu(imode, iq)
+         IF (with_eigen) THEN
+            READ(iunit, '(6F13.7)', END=20, ERR=10, IOSTAT=ios) &
+                    (ph_freq%displa(jmode,imode,iq), jmode=1,3*nat)
+         ENDIF
       END DO
    END DO
 ENDIF
 20 CONTINUE
    ios=0
 10 CALL mp_bcast( ios, ionode_id, intra_image_comm )
-   IF (ios /= 0 ) CALL errore('read_ph_freq_data', 'problem reading phdos', 1)
+   IF (ios /= 0 ) CALL errore('read_ph_freq_data', 'problem reading phonon &
+                                                             &frequencies', 1)
    CALL mp_bcast( ph_freq%wg, ionode_id, intra_image_comm )
    CALL mp_bcast( ph_freq%nu, ionode_id, intra_image_comm )
+   IF (with_eigen) CALL mp_bcast( ph_freq%displa, ionode_id, intra_image_comm )
+   CALL mp_bcast( ph_freq%with_eigen, ionode_id, intra_image_comm )
 
    IF (ionode) CLOSE(iunit)
 
@@ -171,7 +192,7 @@ CHARACTER(LEN=256), INTENT(IN) :: filename
 INTEGER :: iunit, ios
 REAL(DP), ALLOCATABLE :: nu(:), dos(:)
 INTEGER :: nat, nq
-INTEGER :: iq, imode
+INTEGER :: iq, imode, jmode
 
 iunit=65
 IF (ionode) OPEN(FILE=TRIM(filename), UNIT=iunit, STATUS='unknown', &
@@ -181,6 +202,7 @@ IF (ionode) OPEN(FILE=TRIM(filename), UNIT=iunit, STATUS='unknown', &
 
 IF (ionode) WRITE(iunit, '(5i10)') ph_freq%nat, ph_freq%nq1, ph_freq%nq2, &
                                    ph_freq%nq3, ph_freq%nq
+IF (ionode) WRITE(iunit, '(l10)') ph_freq%with_eigen
 nq = ph_freq%nq
 nat = ph_freq%nat
 IF (ionode) THEN
@@ -188,7 +210,10 @@ IF (ionode) THEN
       WRITE(iunit, '(E30.15)', ERR=10, IOSTAT=ios) ph_freq%wg(iq)
       DO imode=1,3*nat
          ! nu(i) = frequencies (cm^{-1}) 
-         WRITE(iunit,'(E30.15)',ERR=10,IOSTAT=ios) ph_freq%nu(imode, iq)
+         WRITE(iunit,'(E20.13)',ERR=10,IOSTAT=ios) ph_freq%nu(imode, iq)
+         IF (ph_freq%with_eigen) &
+            WRITE(iunit, '(6F13.7)', ERR=10, IOSTAT=ios) &
+                    (ph_freq%displa(jmode, imode,iq),jmode=1,3*nat)
       END DO
    END DO
 END IF

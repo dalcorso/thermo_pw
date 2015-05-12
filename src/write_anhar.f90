@@ -159,9 +159,8 @@ IF (my_image_id /= root_image) RETURN
 !  NB: betab is multiplied by the bulk modulus
 !
 nq=ph_freq_save(1)%nq
-write(6,*) 'nq', nq
-CALL init_ph_freq(ph_grun, nat, nq1_d, nq2_d, nq3_d, nq)
-CALL init_ph_freq(ph_freq, nat, nq1_d, nq2_d, nq3_d, nq)
+CALL init_ph_freq(ph_grun, nat, nq1_d, nq2_d, nq3_d, nq, .FALSE.)
+CALL init_ph_freq(ph_freq, nat, nq1_d, nq2_d, nq3_d, nq, .FALSE.)
 DO itemp = 1, ntemp
    vm=vminf_t(itemp)
    ph_freq%nu= 0.0_DP
