@@ -5,7 +5,7 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-SUBROUTINE write_gruneisen_band(file_disp)
+SUBROUTINE write_gruneisen_band(file_disp, file_vec)
   !
   ! read data files produced by "bands_sub" for ngeo geometries, writes
   ! a file with the gruneisen parameters: the derivatives of the phonon 
@@ -14,6 +14,8 @@ SUBROUTINE write_gruneisen_band(file_disp)
   ! that corresponds to the temperature given in input.
   ! 
   USE kinds,          ONLY : DP
+  USE ions_base,      ONLY : nat, ntyp => nsp, ityp, amass, ityp
+  USE control_thermo, ONLY : with_eigen
   USE data_files,     ONLY : flgrun
   USE thermo_mod,     ONLY : ngeo, omega_geo
   USE ph_freq_anharmonic, ONLY : vminf_t
@@ -29,16 +31,17 @@ SUBROUTINE write_gruneisen_band(file_disp)
 
   REAL(DP) :: eps=1.d-4
   REAL(DP), ALLOCATABLE :: freq_geo(:,:,:), k(:,:), k_rap(:,:)
+  COMPLEX(DP), ALLOCATABLE :: displa_geo(:,:,:,:)
   INTEGER, ALLOCATABLE :: rap_geo(:,:,:)
   INTEGER :: nks, nbnd, nks_rap, nbnd_rap 
   INTEGER :: ibnd, jbnd, irap, ios, i, n, ierr, igeo
-  INTEGER :: iu_grun
+  INTEGER :: iu_grun, iumode
   INTEGER :: poly_order
   REAL(DP), ALLOCATABLE :: poly_grun(:,:), frequency(:,:), gruneisen(:,:)
   REAL(DP) :: vm
   LOGICAL, ALLOCATABLE :: high_symmetry(:), is_gamma(:)
   LOGICAL :: copy_before
-  CHARACTER(LEN=256) :: filename, filedata
+  CHARACTER(LEN=256) :: filename, filedata, file_vec
   CHARACTER(LEN=6), EXTERNAL :: int_to_char
 
   NAMELIST /plot/ nks, nbnd
@@ -48,6 +51,7 @@ SUBROUTINE write_gruneisen_band(file_disp)
 
   IF (flgrun == ' ') RETURN
 
+  iumode=23
   WRITE(stdout,*)
   DO igeo = 1, ngeo(1)
 
@@ -87,8 +91,17 @@ SUBROUTINE write_gruneisen_band(file_disp)
      IF ( nks_rap/=nks .OR. nbnd_rap/=nbnd ) &
         CALL errore('write_gruneisen_band','("file with representations &
                        & not compatible with bands")')
+
+     filename=TRIM(file_vec)//".g"//TRIM(int_to_char(igeo))
+     IF (ionode) OPEN(UNIT=iumode, FILE=TRIM(filename), FORM='formatted', &
+                   STATUS='old', ERR=210, IOSTAT=ios)
+210  CALL mp_bcast(ios, ionode_id, intra_image_comm)
+     CALL errore('write_gruneisen_band','modes are needed',ABS(ios))
+
      !
      IF ( .NOT. ALLOCATED( freq_geo ) )  ALLOCATE (freq_geo(nbnd,ngeo(1),nks))
+     IF ( .NOT. ALLOCATED( displa_geo ) .AND. with_eigen )  &
+                                  ALLOCATE (displa_geo(nbnd,nbnd,ngeo(1),nks))
      IF ( .NOT. ALLOCATED( rap_geo ) )   ALLOCATE (rap_geo(nbnd,ngeo(1),nks))
      IF ( .NOT. ALLOCATED( k ) )         ALLOCATE (k(3,nks)) 
      IF ( .NOT. ALLOCATED( k_rap ) )     ALLOCATE (k_rap(3,nks))
@@ -108,20 +121,26 @@ SUBROUTINE write_gruneisen_band(file_disp)
                        '("Incompatible k points in rap file")',1)
            is_gamma(n) = (( k(1,n)**2 + k(2,n)**2 + k(3,n)**2) < 1.d-12)
         ENDDO
+        IF (with_eigen) &
+           CALL readmodes(nat,nks,k,displa_geo,ngeo(1),igeo,ntyp,ityp,  &
+                                                                 amass,iumode)
+
         CLOSE(UNIT=1, STATUS='KEEP')
         CLOSE(UNIT=21, STATUS='KEEP')
+        CLOSE(UNIT=iumode, STATUS='KEEP')
         GOTO 222
 220     ierr=1
         GOTO 222
      ENDIF
 222  CALL mp_bcast(ierr, ionode_id, intra_image_comm)
-     IF (ierr==1) CALL errore('plotband_sub','problem reading data',1)
+     IF (ierr==1) CALL errore('write_gruneisen_band','problem reading data',1)
   ENDDO
   CALL mp_bcast(k, ionode_id, intra_image_comm)
   CALL mp_bcast(k_rap, ionode_id, intra_image_comm)
   CALL mp_bcast(is_gamma, ionode_id, intra_image_comm)
   CALL mp_bcast(high_symmetry, ionode_id, intra_image_comm)
   CALL mp_bcast(freq_geo, ionode_id, intra_image_comm)
+  IF (with_eigen) CALL mp_bcast(displa_geo, ionode_id, intra_image_comm)
   CALL mp_bcast(rap_geo, ionode_id, intra_image_comm)
 !
 !  Part two: Compute the Gruneisen parameters
@@ -133,7 +152,6 @@ SUBROUTINE write_gruneisen_band(file_disp)
   ALLOCATE(gruneisen(nbnd,nks))
   frequency(:,:)= 0.0_DP
   gruneisen(:,:)= 0.0_DP
-
   IF (volume_ph==0.0_DP) THEN
      CALL evaluate_vm(temp_ph, vm, ntemp, temp, vminf_t)
   ELSE
@@ -145,6 +163,7 @@ SUBROUTINE write_gruneisen_band(file_disp)
             WRITE(stdout,'(5x,"Corresponding to T=",f17.8)') temp_ph
 
   DO n = 1,nks
+     WRITE(6,*) 'kpoint=', n
      IF (is_gamma(n)) THEN
 !
 !    In the gamma point the Gruneisen parameters are not defined.
@@ -170,9 +189,14 @@ SUBROUTINE write_gruneisen_band(file_disp)
            ENDDO
         ENDIF
      ELSE
-        CALL compute_freq_derivative(ngeo,freq_geo(1,1,n),rap_geo(1,1,n), &
+        IF (with_eigen) THEN
+           CALL compute_freq_derivative_eigen(ngeo(1),freq_geo(1,1,n),   &
+                        omega_geo, displa_geo(1,1,1,n),poly_order,poly_grun)
+        ELSE 
+           CALL compute_freq_derivative(ngeo,freq_geo(1,1,n),rap_geo(1,1,n), &
                                    omega_geo,poly_order,poly_grun)
-      
+        ENDIF
+
 !
 !  frequencies and gruneisen parameters are calculated at the chosen
 !  volume
@@ -251,6 +275,7 @@ IF (ionode) &
    DEALLOCATE ( k_rap )
    DEALLOCATE ( k ) 
    DEALLOCATE ( rap_geo )
+   IF (with_eigen) DEALLOCATE ( displa_geo )
    DEALLOCATE ( freq_geo )
    DEALLOCATE ( poly_grun )
    DEALLOCATE ( frequency )

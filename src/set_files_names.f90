@@ -7,12 +7,12 @@
 SUBROUTINE set_files_names(igeom)
 
 USE postscript_files,  ONLY : flpstherm, flpsdisp, flpsdos
-USE data_files,        ONLY : fltherm, flfrc, flfrq, fldos, flpband
+USE data_files,        ONLY : fltherm, flfrc, flfrq, fldos, flpband, flvec
 USE control_gnuplot,   ONLY : flgnuplot
 USE internal_files_names, ONLY : fildyn_thermo, flfrc_thermo, flfrq_thermo, &
                        fldos_thermo, fltherm_thermo, flpband_thermo,       &
                        flpsdos_thermo, flpstherm_thermo, flgnuplot_thermo, &
-                       flpsdisp_thermo
+                       flpsdisp_thermo, flvec_thermo
 USE output,            ONLY : fildyn
   !
 IMPLICIT NONE
@@ -22,6 +22,7 @@ CHARACTER(LEN=6) :: int_to_char
 IF (igeom==1) fildyn_thermo=TRIM(fildyn)
 IF (igeom==1) flfrc_thermo=TRIM(flfrc)
 IF (igeom==1) flfrq_thermo=TRIM(flfrq)
+IF (igeom==1) flvec_thermo=TRIM(flvec)
 IF (igeom==1) fldos_thermo=TRIM(fldos)
 IF (igeom==1) fltherm_thermo=TRIM(fltherm)
 IF (igeom==1) flpband_thermo=TRIM(flpband)

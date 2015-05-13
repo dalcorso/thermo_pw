@@ -49,6 +49,7 @@ print_polarization.o \
 proj_band_structure.o \
 q2r_sub.o \
 quadratic_fit.o \
+readmodes.o \
 read_state_densities.o \
 run_thermo_asyncronously.o \
 set_2d_bz_path.o \

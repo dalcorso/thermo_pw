@@ -20,7 +20,7 @@ SUBROUTINE thermo_readin()
                                    flanhar, filband, flkeconv,             &
                                    flenergy, flpbs, flprojlayer,           &
                                    flnkconv, flgrun, flpgrun, fl_el_cons,  &
-                                   flpband 
+                                   flpband, flvec
   USE temperature,          ONLY : tmin, tmax, deltat, ntemp
   USE ifc,                  ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq, &
                                    zasr, freqmin_input, freqmax_input
@@ -122,6 +122,7 @@ SUBROUTINE thermo_readin()
                             flpsenergy,                     &
                             flenergy,                       &
                             fl_el_cons,                     &
+                            flvec,                          &
                             flasy, asymptote_command,       &
                             lasymptote,                     &
                             emin_input, emax_input,         &
@@ -229,6 +230,7 @@ SUBROUTINE thermo_readin()
   flfrc='output_frc.dat'
   flfrq='output_frq.dat'
   fldos='output_dos.dat'
+  flvec='matdyn.modes'
   flkeconv='output_keconv.dat'
   flnkconv='output_nkconv.dat'
   fltherm='output_therm.dat'

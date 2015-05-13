@@ -89,7 +89,7 @@ PROGRAM thermo_pw
                                 print_d_piezo_tensor, print_g_piezo_tensor
   USE control_elastic_constants, ONLY : ngeo_strain, frozen_ions, &
                                 elastic_algorithm, rot_mat, omega0
-  USE internal_files_names,  ONLY : flfrq_thermo
+  USE internal_files_names,  ONLY : flfrq_thermo, flvec_thermo
   USE control_paths,    ONLY : nqaux
   USE control_gnuplot,  ONLY : flgnuplot
   USE control_bands,    ONLY : nbnd_bands
@@ -468,7 +468,7 @@ PROGRAM thermo_pw
 !
 !    here we calculate and plot the gruneisen parameters along the given path.
 !
-           CALL write_gruneisen_band(flfrq_thermo)
+           CALL write_gruneisen_band(flfrq_thermo,flvec_thermo)
            CALL plotband_sub(3,1,flfrq_thermo)
            CALL plotband_sub(4,1,flfrq_thermo)
 !

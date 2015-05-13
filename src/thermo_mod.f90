@@ -545,6 +545,7 @@ MODULE data_files
                                  ! gruneisen parameters in a format 
                                  ! readable by gnuplot
   CHARACTER(LEN=256) :: flpbs    ! the name of the file with the pbs
+  CHARACTER(LEN=256) :: flvec    ! the name of the file with the eigenvectors
   CHARACTER(LEN=256) :: flprojlayer ! the name of the file with the projections
                                   ! of the wavefunctions on each layer
   CHARACTER(LEN=256) :: fl_el_cons ! the file where the elastic constants are
@@ -597,6 +598,8 @@ MODULE internal_files_names
   CHARACTER(LEN=256) :: flpsdos_thermo    ! postscript file with dos
   CHARACTER(LEN=256) :: flpstherm_thermo  ! postscript file with thermodynamical
                                           ! quantities
+  CHARACTER(LEN=256) :: flvec_thermo      ! the name of the file with the eigenvectors
+
 END MODULE internal_files_names
 
 MODULE control_asy

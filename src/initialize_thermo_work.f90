@@ -38,15 +38,14 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   INTEGER, INTENT(OUT) :: nwork
   INTEGER, INTENT(IN) :: part
   INTEGER :: igeom, iq, irr, ike
-  INTEGER :: iden, icount, ink, isigma, compute_nwork
-  REAL(DP) :: alat_new, celldm(6)
+  INTEGER :: iden, icount, ink, isigma
   REAL(DP) :: compute_omega_geo
   !
   nwork=0
   IF (part == 1) THEN
      SELECT CASE (TRIM(what))
 !
-!   In these case we do not make any asyncronous work in the first part
+!   In these cases we do not do any asyncronous work in the first part
 !
         CASE ( 'scf') 
            ALLOCATE(energy_geo(1))

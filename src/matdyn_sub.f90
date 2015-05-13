@@ -83,8 +83,8 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   USE control_paths, ONLY : disp_q, disp_nqs
   USE thermodynamics, ONLY : phdos_save
   USE ph_freq_thermodynamics, ONLY : ph_freq_save
-  USE control_thermo, ONLY : ldos
-  USE data_files,     ONLY : flfrc, flfrq, fldos 
+  USE control_thermo, ONLY : ldos, with_eigen
+  USE data_files,     ONLY : flfrc, flfrq, fldos, flvec
   USE ions_base, ONLY : amass
   USE phdos_module, ONLY : set_phdos, read_phdos_data, find_minimum_maximum
   USE ph_freq_module, ONLY : init_ph_freq, read_ph_freq_data, &
@@ -98,7 +98,7 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   REAL(DP), PARAMETER :: eps=1.0d-6
   INTEGER :: nr1, nr2, nr3, ntetra, ibrav
   INTEGER :: iq, imode, counter
-  CHARACTER(LEN=256) :: flvec, filename
+  CHARACTER(LEN=256) :: filename
   LOGICAL :: has_zstar
   COMPLEX(DP), ALLOCATABLE :: dyn(:,:,:,:)
   COMPLEX(DP), ALLOCATABLE :: z(:,:)
@@ -157,12 +157,6 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
      WRITE(stdout,'(5x,"Frequencies written on file ",a)') TRIM(flfrq)
   ENDIF
   WRITE(stdout,'(2x,76("+"),/)')
-  !
-  ! ... all calculations are done by the first cpu
-  !
-  ! set namelist default
-  !
-  flvec='matdyn.modes'
   !
   ! read force constants
   !
@@ -226,7 +220,8 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
      iout=0
   ELSE
      iout=4
-     IF (ionode) OPEN (unit=iout,file=flvec,status='unknown',form='formatted')
+     IF (ionode) OPEN (unit=iout,file=TRIM(flvec),status='unknown', &
+                                                          form='formatted')
   END IF
 
 
