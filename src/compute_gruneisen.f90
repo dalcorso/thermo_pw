@@ -9,11 +9,11 @@ SUBROUTINE compute_gruneisen()
   !
   ! use the phonon frequencies calculated for a uniform mesh at ngeo 
   ! geometries and computes the derivatives of the phonon dispersions 
-  ! with respect to the volume (gruneisen parameters) on the same mesh.
+  ! with respect to the volume (Gruneisen parameters) on the same mesh.
   ! Only three geometries are used if ngeo is odd or two if ngeo is
   ! even.
   ! NB: we do not multiply by the volume, so these are actualy the
-  ! gruneisen parameters divided by the cell volume (in (a.u.)^3). 
+  ! Gruneisen parameters divided by the cell volume (in (a.u.)^3). 
   !
   ! 
   USE kinds,                  ONLY : DP

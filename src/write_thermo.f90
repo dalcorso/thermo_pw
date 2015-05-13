@@ -22,10 +22,10 @@ USE data_files,     ONLY : fltherm
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: igeom
 
-INTEGER  :: i, ios
+INTEGER  :: i, ios, idum
 REAL(DP) :: e0, tot_states
 INTEGER  :: itemp
-INTEGER  :: iu_therm, idum
+INTEGER  :: iu_therm
 LOGICAL  :: check_file_exists, do_read
 !
 do_read=.FALSE.
@@ -62,10 +62,6 @@ WRITE(stdout,'(5x,"Computing the thermodynamical properties from phonon dos")')
 WRITE(stdout,'(5x,"Writing on file ",a)') TRIM(fltherm)
 WRITE(stdout,'(2x,76("+"),/)')
 
-!
-!  Allocate thermodynamic quantities
-!
-
 CALL zero_point_energy(phdos_save(igeom), e0)
 CALL integrated_dos(phdos_save(igeom), tot_states)
 
@@ -100,8 +96,8 @@ IF (ionode) THEN
                    &energies in cal/mol etc. ")')
    WRITE(iu_therm,'("# Multiply by 13.6058 x 96526.0 = 1 313 313 to &
                   &have energies in J/mol.")')
-   WRITE(iu_therm,'("#",5x,"   T  ",10x, " energy ", 9x, "  free energy ",&
-                  & 9x, " entropy ", 11x, " Cv ")')
+   WRITE(iu_therm,'("#",5x,"   T  ", 10x, " energy ", 9x, "  free energy ",&
+                  & 9x, " entropy ", 12x, " Cv ")')
 
    DO itemp = 1, ntemp
       WRITE(iu_therm, '(e16.8,4e20.12)') temp(itemp), &
@@ -215,8 +211,8 @@ IF (ionode) THEN
                    &energies in cal/mol etc. ")')
    WRITE(iu_therm,'("# Multiply by 13.6058 x 96526.0 = 1 313 313 to &
                   &have energies in J/mol.")')
-   WRITE(iu_therm,'("#",5x,"   T  ",10x, " energy ", 9x, "  free energy ",&
-                  & 9x, " entropy ", 11x, " Cv ")') 
+   WRITE(iu_therm,'("#",5x,"   T  ", 10x, " energy ", 9x, "  free energy ",&
+                  & 9x, " entropy ", 12x, " Cv ")') 
 
    DO itemp = 1, ntemp
       WRITE(iu_therm, '(e16.8,4e20.12)') temp(itemp), &

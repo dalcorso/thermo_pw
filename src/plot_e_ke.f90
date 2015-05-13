@@ -12,7 +12,7 @@ SUBROUTINE plot_e_ke()
 !
 USE kinds,           ONLY : DP
 USE control_gnuplot, ONLY : flgnuplot, lgnuplot, gnuplot_command
-USE postscript_files, ONLY :flpskeconv
+USE postscript_files, ONLY : flpskeconv
 USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
                             gnuplot_write_header,        &
                             gnuplot_set_gfact,           &

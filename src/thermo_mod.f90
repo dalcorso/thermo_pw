@@ -266,6 +266,8 @@ MODULE control_thermo
                                   ! for nscf calculation
   LOGICAL :: lpart2_pw=.FALSE.    ! if .true. in the second part makes
                                   ! also pw calculations           
+  LOGICAL :: with_eigen=.FALSE.   ! save phonon frequencies and eigenvectors
+                               !
   LOGICAL :: lconv_ke_test=.FALSE.! if .true. this writes the ke test on file
   LOGICAL :: lconv_nk_test=.FALSE.! if .true. this writes the k-point on file
   LOGICAL :: lelastic_const=.FALSE. ! if .true. compute elastic constants

@@ -15,7 +15,7 @@ LIBOBJS	= ../lib/thermo_lib.a ../../PHonon/PH/libph.a ../../flib/ptools.a ../../
 
 TLDEPS= bindir mods libs pw
 
-all : group_name.x group_number.x gener_2d_slab.x gener_3d_slab.x gener_nanowire.x supercell.x plot_sur_states.x
+all : group_name.x group_number.x gener_2d_slab.x gener_3d_slab.x gener_nanowire.x supercell.x plot_sur_states.x translate.x
 
 libs-ph : libph.a libphaux.a
 

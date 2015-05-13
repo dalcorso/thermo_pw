@@ -153,9 +153,9 @@ SUBROUTINE thermo_readin()
   step_ngeo(1) = 0.05_DP
   step_ngeo(2) = 0.02_DP
   step_ngeo(3) = 0.02_DP
-  step_ngeo(4) = 0.5
-  step_ngeo(5) = 0.5
-  step_ngeo(6) = 0.5
+  step_ngeo(4) = 0.5_DP
+  step_ngeo(5) = 0.5_DP
+  step_ngeo(6) = 0.5_DP
   reduced_grid =.FALSE.
 
   nq1_d=192
