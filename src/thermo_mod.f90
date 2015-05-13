@@ -208,11 +208,12 @@ MODULE ifc
   USE kinds, ONLY: DP
   SAVE
   REAL(DP), ALLOCATABLE :: frc(:,:,:,:,:,:,:), zeu(:,:,:), &
-               m_loc(:,:)
+               m_loc(:,:), wscache(:,:,:,:,:)
   ! frc : interatomic force constants in real space
   ! tau : atomic positions for the original cell
   ! zeu : effective charges for the original cell
   ! m_loc: the magnetic moments of each atom
+  ! wscache: the weight of each q point 
   !
   CHARACTER(LEN=3), ALLOCATABLE :: atm(:)
   !

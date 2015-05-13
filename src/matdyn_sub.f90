@@ -75,8 +75,8 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
 
   USE ifc,        ONLY : frc, atm, zeu, m_loc, &
                          nq1_d, nq2_d, &
-                         nq3_d, deltafreq, freqmin, freqmax, ndos_input, zasr, &
-                         freqmin_input, freqmax_input
+                         nq3_d, deltafreq, freqmin, freqmax, ndos_input, &
+                         zasr, freqmin_input, freqmax_input, wscache
  
   USE control_ph, ONLY : xmldyn
   USE control_pwrun, ONLY : nr1_save, nr2_save, nr3_save
@@ -130,7 +130,7 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   INTEGER            :: npk_label, nch, ndos
   CHARACTER(LEN=3), ALLOCATABLE :: letter(:)
   INTEGER, ALLOCATABLE :: label_list(:), qcode_group(:), aux_ind(:)
-  LOGICAL :: tend, terr, dos, check_file_exists
+  LOGICAL :: tend, terr, dos, do_init, check_file_exists
   !
 
   dos = (do_dos == 1) .AND. ldos
@@ -237,6 +237,7 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
 
   num_rap_mode=-1
   high_sym=.TRUE.
+  do_init=.TRUE.
 
   DO n=1, nq
      IF ( MOD(n,20000) == 0 .AND. ionode ) WRITE(stdout, '(5x,"Computing q ",&
@@ -245,7 +246,8 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
      dyn(:,:,:,:) = (0.d0, 0.d0)
      lo_to_split=.FALSE.
      CALL setupmat_simple (q(1,n),dyn,nat,at,bg,tau,omega,alat, &
-     &                 epsil,zeu,frc,nr1,nr2,nr3,has_zstar,rws,nrws)
+     &                 epsil,zeu,frc,nr1,nr2,nr3,has_zstar,rws,nrws,do_init)
+     do_init=.FALSE.
 
      qhat(1) = q(1,n)*at(1,1)+q(2,n)*at(2,1)+q(3,n)*at(3,1)
      qhat(2) = q(1,n)*at(1,2)+q(2,n)*at(2,2)+q(3,n)*at(3,2)
@@ -475,6 +477,7 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   DEALLOCATE (tetra)
   DEALLOCATE (zeu)
   DEALLOCATE (frc)
+  IF (ALLOCATED(wscache)) DEALLOCATE(wscache)
   IF (xmlifc) THEN
      DEALLOCATE(m_loc)
      DEALLOCATE(atm)
@@ -613,29 +616,29 @@ SUBROUTINE readfc ( flfrc, nr1, nr2, nr3, epsil, nat,  &
 END SUBROUTINE readfc
 !
 !-----------------------------------------------------------------------
-SUBROUTINE frc_blk(dyn,q,tau,nat,nr1,nr2,nr3,frc,at,bg,rws,nrws)
+SUBROUTINE frc_blk(dyn,q,tau,nat,nr1,nr2,nr3,frc,at,bg,rws,nrws,do_init)
   !-----------------------------------------------------------------------
   ! calculates the dynamical matrix at q from the (short-range part of the)
   ! force constants
   !
   USE kinds,      ONLY : DP
   USE constants,  ONLY : tpi
+  USE ifc,        ONLY : wscache
   USE io_global,  ONLY : stdout
   !
   IMPLICIT NONE
   INTEGER :: nr1, nr2, nr3, nat, n1, n2, n3, &
              ipol, jpol, na, nb, m1, m2, m3, i,j, nrws
+  LOGICAL :: do_init
   COMPLEX(DP) :: dyn(3,3,nat,nat)
   REAL(DP) :: frc(nr1,nr2,nr3,3,3,nat,nat), tau(3,nat), q(3), arg, &
                at(3,3), bg(3,3), r(3), weight, r_ws(3),  &
                total_weight, rws(0:3,nrws), alat
   REAL(DP), EXTERNAL :: wsweight
-  REAL(DP), SAVE, ALLOCATABLE :: wscache(:,:,:,:,:)
   COMPLEX(DP) :: phase
-  LOGICAL,SAVE :: first=.true.
   !
-  FIRST_TIME : IF (first) THEN
-    first=.false.
+  FIRST_TIME : IF (do_init) THEN
+    IF (ALLOCATED(wscache)) DEALLOCATE(wscache)
     ALLOCATE( wscache(-2*nr3:2*nr3, -2*nr2:2*nr2, -2*nr1:2*nr1, nat,nat) )
     DO na=1, nat
        DO nb=1, nat
@@ -1425,7 +1428,7 @@ SUBROUTINE find_representations_mode_q ( nat, ntyp, xq, w2, u, tau, ityp, &
 
 !-----------------------------------------------------------------------
 SUBROUTINE setupmat_simple (q,dyn,nat,at,bg,tau,omega,alat, &
-     &                 epsil,zeu,frc,nr1,nr2,nr3,has_zstar,rws,nrws)
+     &                 epsil,zeu,frc,nr1,nr2,nr3,has_zstar,rws,nrws,do_init)
   !-----------------------------------------------------------------------
   ! compute the dynamical matrix (the analytic part only)
   !
@@ -1442,13 +1445,13 @@ SUBROUTINE setupmat_simple (q,dyn,nat,at,bg,tau,omega,alat, &
               frc(nr1,nr2,nr3,3,3,nat,nat), omega 
 
   COMPLEX(DP) ::  dyn(3,3,nat,nat)
-  LOGICAL :: has_zstar
+  LOGICAL :: has_zstar, do_init
   !
   ! local variables
   !
   !
   dyn(:,:,:,:) = (0.d0,0.d0)
-  CALL frc_blk (dyn,q,tau,nat,nr1,nr2,nr3,frc,at,bg,rws,nrws)
+  CALL frc_blk (dyn,q,tau,nat,nr1,nr2,nr3,frc,at,bg,rws,nrws,do_init)
   IF (has_zstar) &
      CALL rgd_blk(nr1,nr2,nr3,nat,dyn,q,tau,epsil,zeu,bg,omega,+1.d0)
   !
