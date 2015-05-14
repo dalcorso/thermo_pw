@@ -277,7 +277,7 @@ MODULE control_thermo
   LOGICAL :: lpolarization=.FALSE. ! if .true. compute the piezoelectric 
   LOGICAL :: lph=.FALSE.    ! if .true. must calculate phonon
   LOGICAL :: ldos=.FALSE.   ! if .true. the phonon dos is calculated
-  LOGICAL :: ltherm=.FALSE. ! if .true. the thermodynamical properties are
+  LOGICAL :: ltherm=.FALSE. ! if .true. the thermodynamic properties are
                             ! calculated
   LOGICAL :: after_disp=.FALSE. ! if .true. dynamical matrix files are supposed
                             ! to be already on disk. fildyn must be read
@@ -592,14 +592,14 @@ MODULE internal_files_names
   CHARACTER(LEN=256) :: flfrc_thermo     ! interatomic force constants file
   CHARACTER(LEN=256) :: flfrq_thermo     ! frequencies files
   CHARACTER(LEN=256) :: fldos_thermo     ! dos file
-  CHARACTER(LEN=256) :: fltherm_thermo   ! thermodynamical quantities files
+  CHARACTER(LEN=256) :: fltherm_thermo   ! thermodynamic quantities files
   CHARACTER(LEN=256) :: flpband_thermo   ! dispersions in gnuplot format
 
   CHARACTER(LEN=256) :: flgnuplot_thermo  ! file with gnuplot script
 
   CHARACTER(LEN=256) :: flpsdisp_thermo   ! postscript file with dispersions
   CHARACTER(LEN=256) :: flpsdos_thermo    ! postscript file with dos
-  CHARACTER(LEN=256) :: flpstherm_thermo  ! postscript file with thermodynamical
+  CHARACTER(LEN=256) :: flpstherm_thermo  ! postscript file with thermodynamic
                                           ! quantities
   CHARACTER(LEN=256) :: flvec_thermo      ! the name of the file with the eigenvectors
 

@@ -58,7 +58,7 @@ END IF
 IF ( igeom < 1 .OR. igeom > tot_ngeo ) CALL errore('write_thermo', & 
                                                'Too many geometries',1)
 WRITE(stdout,'(/,2x,76("+"))')
-WRITE(stdout,'(5x,"Computing the thermodynamical properties from phonon dos")')
+WRITE(stdout,'(5x,"Computing the thermodynamic properties from phonon dos")')
 WRITE(stdout,'(5x,"Writing on file ",a)') TRIM(fltherm)
 WRITE(stdout,'(2x,76("+"),/)')
 
@@ -168,7 +168,7 @@ END IF
 IF ( igeom < 1 .OR. igeom > tot_ngeo ) CALL errore('write_thermo', & 
                                                'Too many geometries',1)
 WRITE(stdout,'(/,2x,76("+"))')
-WRITE(stdout,'(5x,"Computing the thermodynamical properties from frequencies")')
+WRITE(stdout,'(5x,"Computing the thermodynamic properties from frequencies")')
 WRITE(stdout,'(5x,"Writing on file ",a)') TRIM(filename)
 WRITE(stdout,'(2x,76("+"),/)')
 

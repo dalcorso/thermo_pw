@@ -13,11 +13,12 @@ image.
 Thermo_pw is much less flexible than QE and probably after using it
 you may want to pass to QE for the more sophisticated tasks, but for the most
 common tasks, such as the calculation of band structures, of phonon
-dispersions, or for the calculation of the thermodynamical properties of
+dispersions, or for the calculation of the thermodynamic properties of
 materials, thermo_pw can be much easier to learn and faster to use, requiring
 a much reduced number of information from the user.
 Note that this software is still very experimental and quite limited.
-Thermal anharmonic properties are implemented only for cubic solids.
+Thermal anharmonic properties are implemented only for cubic solids and
+there is only limited support for other crystal systems.
 
 Quick installation instructions:
 

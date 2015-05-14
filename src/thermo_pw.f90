@@ -45,7 +45,7 @@ PROGRAM thermo_pw
   ! ...   mur_lc_ph : a phonon calculation at the minimum of the Murnaghan
   ! ...   mur_lc_disp : a dispersion calculation at the minimum of the
   ! ...               Murnaghan with the possibility to compute the harmonic
-  ! ...               thermodynamical quantities
+  ! ...               thermodynamic quantities
   ! ...   mur_lc_elastic_constants : elastic constants at zero temperature 
   ! ...               at the minimum of the Murnaghan equation 
   ! ...   mur_lc_piezoelectric_tensor : piezoelectric tensor at zero temperature
@@ -425,7 +425,7 @@ PROGRAM thermo_pw
               CALL plot_phdos()
            ENDIF
 !
-!    computes the thermodynamical properties
+!    computes the thermodynamic properties
 !
            IF (ldos.AND.ltherm) THEN
 !
