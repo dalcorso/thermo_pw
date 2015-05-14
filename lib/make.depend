@@ -44,6 +44,9 @@ point_group.o : ../../Modules/io_global.o
 point_group.o : ../../Modules/kind.o
 quadratic_surfaces.o : ../../Modules/io_global.o
 quadratic_surfaces.o : ../../Modules/kind.o
+quartic_surfaces.o : ../../Modules/io_global.o
+quartic_surfaces.o : ../../Modules/kind.o
+quartic_surfaces.o : quadratic_surfaces.o
 rotate.o : ../../Modules/kind.o
 space_groups.o : ../../Modules/io_global.o
 space_groups.o : ../../Modules/kind.o
