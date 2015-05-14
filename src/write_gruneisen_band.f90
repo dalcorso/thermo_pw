@@ -128,7 +128,7 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
 
         CLOSE(UNIT=1, STATUS='KEEP')
         CLOSE(UNIT=21, STATUS='KEEP')
-        CLOSE(UNIT=iumode, STATUS='KEEP')
+        IF (with_eigen) CLOSE(UNIT=iumode, STATUS='KEEP')
         GOTO 222
 220     ierr=1
         GOTO 222
