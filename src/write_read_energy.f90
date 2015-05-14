@@ -38,7 +38,7 @@ SUBROUTINE read_energy(nwork, filename)
   END IF
 
 20 CALL mp_bcast(ios, meta_ionode_id, world_comm)
-  IF (ios /= 0 ) CALL errore('read_ev_dat','opening or reading input file',1)
+  IF (ios /= 0 ) CALL errore('read_energy','opening or reading input file',1)
   CALL mp_bcast(energy_geo, meta_ionode_id, world_comm)
   !
   RETURN
@@ -78,7 +78,7 @@ SUBROUTINE write_energy(nwork, filename)
   END IF
   !
 20 CALL mp_bcast(ios, meta_ionode_id, world_comm)
-  IF (ios /= 0 ) CALL errore('write_ev_dat','opening or writing output file',1)
+  IF (ios /= 0 ) CALL errore('write_energy','opening or writing output file',1)
   !
   RETURN
   !
@@ -121,7 +121,7 @@ SUBROUTINE write_stress(nwork, filename)
   END IF
   !
 20 CALL mp_bcast(ios, meta_ionode_id, world_comm)
-  IF (ios /= 0 ) CALL errore('write_ev_dat','opening or writing output file',1)
+  IF (ios /= 0 ) CALL errore('write_stress','opening or writing output file',1)
   !
   RETURN
   !

@@ -205,7 +205,7 @@ ELSE
       READ(iun, '(3i5,f12.6)') nbnd, nks, nlines, eref
    ENDIF
 200 CALL mp_bcast(ios,ionode_id,intra_image_comm)
-   IF (ios /=0) CALL errore('plot_band_structure','opening file',ABS(ios))
+   IF (ios /=0) CALL errore('proj_band_structure','opening file',ABS(ios))
    CALL mp_bcast(nbnd,ionode_id,intra_image_comm)
    CALL mp_bcast(nks,ionode_id,intra_image_comm)
    CALL mp_bcast(nlines,ionode_id,intra_image_comm)

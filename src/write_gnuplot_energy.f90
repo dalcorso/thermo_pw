@@ -91,7 +91,8 @@ SUBROUTINE write_gnuplot_energy(nwork)
   END IF
   !
 20 CALL mp_bcast(ios, meta_ionode_id, world_comm)
-  IF (ios /= 0 ) CALL errore('write_ev_dat','opening or writing output file',1)
+  IF (ios /= 0 ) CALL errore('write_gnuplot_energy',&
+                                  'opening or writing output file',1)
   !
   RETURN
   !

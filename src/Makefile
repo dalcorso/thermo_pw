@@ -18,6 +18,7 @@ clean_dfft.o \
 collect_everything.o \
 compute_cp.o \
 compute_gruneisen.o \
+compute_gruneisen_anis.o \
 compute_omega_geo.o \
 deallocate_asyn.o \
 deallocate_thermo.o \
@@ -40,6 +41,7 @@ plotband_sub.o \
 plot_2d_bz.o \
 plot_e_ke.o \
 plot_e_nk.o \
+plot_gruneisen_band_anis.o \
 plot_multi_energy.o \
 plot_mur.o \
 plot_phdos.o \
@@ -75,6 +77,7 @@ write_e_nk.o \
 write_e_ke.o  \
 write_ev_input.o \
 write_gruneisen_band.o \
+write_gruneisen_band_anis.o \
 write_gnuplot_energy.o \
 write_mur.o \
 write_read_energy.o \

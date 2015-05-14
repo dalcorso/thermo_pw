@@ -43,6 +43,7 @@ SUBROUTINE allocate_anharmonic()
                                   alphaf_t, betaf_t, gammaf_t, cvf_t, cpf_t, &
                                   b0f_s, celldmf_t, alphaf_anis_t
   USE grun_anharmonic,     ONLY : betab, grun_gamma_t
+  USE control_quadratic_energy, ONLY : nvar, coeff_t
 
   IMPLICIT NONE
 
@@ -58,6 +59,7 @@ SUBROUTINE allocate_anharmonic()
   IF (.NOT. ALLOCATED (gamma_t) )       ALLOCATE(gamma_t(ntemp)) 
   IF (.NOT. ALLOCATED (celldm_t) )      ALLOCATE(celldm_t(6,ntemp)) 
   IF (.NOT. ALLOCATED (alpha_anis_t) )  ALLOCATE(alpha_anis_t(6,ntemp)) 
+  IF (.NOT. ALLOCATED (coeff_t) )       ALLOCATE(coeff_t(nvar,ntemp)) 
 
   IF (.NOT. ALLOCATED (vminf_t) )        ALLOCATE(vminf_t(ntemp)) 
   IF (.NOT. ALLOCATED (b0f_t) )         ALLOCATE(b0f_t(ntemp)) 

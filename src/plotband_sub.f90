@@ -371,7 +371,7 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
   DO ilines=1,nlines
      DO n=start_point(ilines), last_point(ilines)
         ik=ik+1
-        IF (ik>tot_points) CALL errore('sym_band_sub','problem with points',1)
+        IF (ik>tot_points) CALL errore('plotband_sub','problem with points',1)
         k_eff(:,ik)=k(:,n)
         e_eff(:,ik)=e(:,n)
         rap_eff(:,ik)=rap(:,n)
@@ -401,7 +401,7 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
         ENDDO
      END DO
   END DO
-  IF (ik /= tot_points) CALL errore('sym_band_sub','Missing points',1)
+  IF (ik /= tot_points) CALL errore('plotband_sub','Missing points',1)
 !
 !  now compute the x coordinate on the plot, but use the effective k
 !  points
@@ -808,6 +808,7 @@ USE gnuplot,       ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
                           gnuplot_write_horizontal_line, &
                           gnuplot_write_label_yl, gnuplot_write_command, &
                           gnuplot_set_eref, gnuplot_unset_xticks,   &
+                          gnuplot_write_file_mul_point,             &
                           gnuplot_xlabel,  &
                           gnuplot_print_objects, gnuplot_write_command
 USE io_global,     ONLY : ionode
@@ -831,6 +832,7 @@ INTEGER :: nrapp, ir, first_rap, last_rap, first_line, last_line
 INTEGER :: system
 REAL(DP) :: shift, xscale
 LOGICAL, ALLOCATABLE :: dorap(:,:)
+LOGICAL :: with_lines
 CHARACTER(LEN=256) :: gnu_filename, filename, command
 CHARACTER(LEN=30) :: colore(12), xlabel
 CHARACTER(LEN=6), EXTERNAL :: int_to_char
@@ -844,15 +846,21 @@ ELSEIF (icode==3) THEN
 ELSEIF (icode==4) THEN
    gnu_filename=TRIM(flgnuplot)//'_grun_freq'
 ENDIF
+!
+!  The Gruneisen parameters of dispersions that do not have representations
+!  must be plotted with points
+!
 
 CALL gnuplot_start(gnu_filename)
 
+with_lines=.TRUE.
 IF (icode==1) THEN
    filename=TRIM(flpsband)
 ELSEIF (icode==2) THEN
    filename=TRIM(flpsdisp)
 ELSEIF (icode==3) THEN
    filename=TRIM(flpsgrun)
+   with_lines=.FALSE.
 ELSEIF (icode==4) THEN
    filename=TRIM(flpsgrun)//'_freq'
 ENDIF
@@ -871,7 +879,9 @@ IF (icode==1) THEN
 ELSEIF (icode==2.OR.icode==4) THEN
    CALL gnuplot_ylabel('Frequency (cm^{-1})',.FALSE.) 
 ELSEIF (icode==3) THEN
-   CALL gnuplot_ylabel('{/Symbol g}_{/Symbol n}({/Helvetica-Bold q})',.FALSE.) 
+   CALL gnuplot_ylabel('Gr\374neisen parameter  {/Symbol g}_{/Symbol n}&
+                 &({/Helvetica-Bold q})',.FALSE.) 
+   CALL gnuplot_write_command('point_size=0.3', .FALSE.)
 ENDIF
 DO ilines = 2, nlines
    CALL gnuplot_write_vertical_line(kx(start_point(ilines)), 2, 'front', &
@@ -969,14 +979,29 @@ IF ( nkz == 1 .OR. ( nkz > 1 .AND. .NOT. lprojpbs) .OR. force_bands ) THEN
             filename=TRIM(fileout) // "." // TRIM(int_to_char(ilines))
             IF (has_points(ilines,1)) THEN
                IF (first_line==ilines .AND. first_rap==1 ) THEN
-                  CALL gnuplot_write_file_data(filename,'band_lw','color_red',&
-                                            .TRUE.,.FALSE.,.FALSE.)
+                  IF (with_lines) THEN
+                     CALL gnuplot_write_file_data(filename,'band_lw', &
+                                       'color_red', .TRUE.,.FALSE.,.FALSE.)
+                  ELSE
+                     CALL gnuplot_write_file_mul_point(filename, 1, 2, &
+                                         'color_red', .TRUE., .FALSE., .FALSE.)
+                  ENDIF
                ELSEIF (last_line==ilines.AND.last_rap==1) THEN
-                  CALL gnuplot_write_file_data(filename,'band_lw','color_red',&
-                                            .FALSE.,.TRUE.,.FALSE.)
+                 IF (with_lines) THEN
+                     CALL gnuplot_write_file_data(filename,'band_lw',&
+                                         'color_red',.FALSE.,.TRUE.,.FALSE.)
+                  ELSE
+                     CALL gnuplot_write_file_mul_point(filename, 1, 2, &
+                                         'color_red', .FALSE., .TRUE., .FALSE.)
+                  ENDIF
                ELSE
-                  CALL gnuplot_write_file_data(filename,'band_lw','color_red',&
-                                          .FALSE.,.FALSE.,.FALSE.)
+                 IF (with_lines) THEN
+                     CALL gnuplot_write_file_data(filename,'band_lw',&
+                                  'color_red', .FALSE.,.FALSE.,.FALSE.)
+                  ELSE
+                     CALL gnuplot_write_file_mul_point(filename, 1, 2, &
+                                         'color_red', .FALSE., .FALSE., .FALSE.)
+                  ENDIF
                END IF
             END IF
          ELSE

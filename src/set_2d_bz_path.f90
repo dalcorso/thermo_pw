@@ -42,7 +42,7 @@ CASE (4)
 CASE (5) 
      npk_label=4
 END SELECT
-IF (npk_label==0) CALL errore('set_bz_path','bz_type not supported',1)
+IF (npk_label==0) CALL errore('set_2d_bz_path','bz_type not supported',1)
 nqaux=npk_label
 !
 !  Allocate the points and label necessary to specify this path

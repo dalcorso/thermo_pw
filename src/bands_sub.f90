@@ -189,7 +189,7 @@ SUBROUTINE write_bands (filband, spin_component)
   !
   CALL mp_bcast( ios, ionode_id, intra_image_comm )
   IF ( ios /= 0 ) &
-     CALL errore ('punch_band', 'Opening filband file', abs(ios) )
+     CALL errore ('write_bands', 'Opening filband file', abs(ios) )
   !
   !
   IF ( spin_component/=1 .AND. nspin/=2 ) &

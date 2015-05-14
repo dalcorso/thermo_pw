@@ -176,13 +176,13 @@ SUBROUTINE ev_sub(vmin,b0,b01,emin_out)
     ENDIF
 99  CALL mp_bcast ( ierr, ionode_id, intra_image_comm )
     IF ( ierr == 1) THEN
-       CALL errore( 'ev', 'file '//trim(filin)//' cannot be opened', ierr )
+       CALL errore( 'ev_sub', 'file '//trim(filin)//' cannot be opened', ierr )
     ELSE IF ( ierr == 2 ) THEN
-       CALL errore( 'ev', 'file '//trim(fileout)//' cannot be opened', ierr )
+       CALL errore( 'ev_sub', 'file '//trim(fileout)//' cannot be opened', ierr )
     ELSE IF ( ierr == 11 ) THEN
-       CALL errore( 'write_evdata_xml', 'no free units to write ', ierr )
+       CALL errore( 'ev_sub', 'no free units to write ', ierr )
     ELSE IF ( ierr == 12 ) THEN
-       CALL errore( 'write_evdata_xml', 'error opening the xml file ', ierr )
+       CALL errore( 'ev_sub', 'error opening the xml file ', ierr )
     ENDIF
     CALL mp_bcast(par, ionode_id, intra_image_comm)
     CALL mp_bcast(emin, ionode_id, intra_image_comm)

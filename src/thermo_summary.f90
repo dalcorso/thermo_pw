@@ -213,40 +213,26 @@ SUBROUTINE thermo_summary()
          WRITE(stdout,'(/,5x, "ibrav=3 Body centered cubic lattice")')
      CASE(4)  
          WRITE(stdout,'(/,5x, "ibrav=4 Hexagonal lattice")')
-         IF (ltherm_expansion) &
-            CALL errore('thermo_summary','Thermal expansion not available',1)
      CASE(5)  
          WRITE(stdout,'(/,5x, "ibrav=5 Trigonal lattice")')
          IF (ltherm_expansion) &
             CALL errore('thermo_summary','Thermal expansion not available',1)
      CASE(6)  
          WRITE(stdout,'(/,5x, "ibrav=6 Simple tetragonal lattice")')
-         IF (ltherm_expansion) &
-            CALL errore('thermo_summary','Thermal expansion not available',1)
      CASE(7)  
          WRITE(stdout,'(/,5x, "ibrav=7 Centered tetragonal lattice")')
-         IF (ltherm_expansion) &
-            CALL errore('thermo_summary','Thermal expansion not available',1)
      CASE(8)  
          WRITE(stdout,'(/,5x, "ibrav=8 Simple orthorombic lattice")')
-         IF (ltherm_expansion) &
-            CALL errore('thermo_summary','Thermal expansion not available',1)
      CASE(9, -9)  
          WRITE(stdout,'(/,5x, "ibrav=9 One face (C) centered orthorombic lattice")')
-         IF (ltherm_expansion) &
-            CALL errore('thermo_summary','Thermal expansion not available',1)
      CASE(91)  
          WRITE(stdout,'(/,5x, "ibrav=91 One face (A) centered orthorombic lattice")')
          IF (ltherm_expansion) &
             CALL errore('thermo_summary','Thermal expansion not available',1)
      CASE(10)  
          WRITE(stdout,'(/,5x, "ibrav=10 Face centered orthorombic lattice")')
-         IF (ltherm_expansion) &
-            CALL errore('thermo_summary','Thermal expansion not available',1)
      CASE(11)  
          WRITE(stdout,'(/,5x, "ibrav=11 Body centered orthorombic lattice")')
-         IF (ltherm_expansion) &
-            CALL errore('thermo_summary','Thermal expansion not available',1)
      CASE(12,-12)  
          IF (ibrav==12) THEN
             WRITE(stdout,'(/,5x, "ibrav=12 Monoclinic lattice (c unique)")')

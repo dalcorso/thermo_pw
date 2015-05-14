@@ -61,15 +61,15 @@ CALL gnuplot_xlabel('T (K)',.FALSE.)
 CALL gnuplot_set_fact(1.0_DP,.FALSE.)
 CALL gnuplot_ylabel('a (a.u.)',.FALSE.) 
 CALL gnuplot_write_file_mul_data(filename1,1,2,'color_red',.TRUE., &
-                                                      .FALSE.,.FALSE.)
+                                                      .TRUE.,.FALSE.)
 
 IF (ibrav_save==4.OR.ibrav_save==5.OR.ibrav_save==6.OR.ibrav_save==7) THEN
    CALL gnuplot_ylabel('c/a ',.FALSE.) 
-   CALL gnuplot_write_file_mul_data(filename1,1,3,'color_blue',.FALSE., &
+   CALL gnuplot_write_file_mul_data(filename1,1,3,'color_blue',.TRUE., &
                                                               .TRUE.,.FALSE.)
 ELSEIF (ibrav_save==8.OR.ibrav_save==9.OR.ibrav_save==10.OR.ibrav_save==11) THEN
    CALL gnuplot_ylabel('b/a ',.FALSE.) 
-   CALL gnuplot_write_file_mul_data(filename1,1,3,'color_green',.FALSE., &
+   CALL gnuplot_write_file_mul_data(filename1,1,3,'color_green',.TRUE., &
                                                               .FALSE.,.FALSE.)
    CALL gnuplot_ylabel('c/a ',.FALSE.) 
    CALL gnuplot_write_file_mul_data(filename1,1,4,'color_green',.FALSE., &
@@ -92,11 +92,11 @@ ELSEIF (ibrav_save==8.OR.ibrav_save==9.OR.ibrav_save==10.OR.ibrav_save==11) THEN
 END IF
 
 CALL gnuplot_ylabel('Volume ((a.u.)^3)',.FALSE.) 
-CALL gnuplot_write_file_mul_data(filename,1,1,'color_red',.TRUE.,.FALSE.,&
+CALL gnuplot_write_file_mul_data(filename,1,2,'color_red',.TRUE.,.TRUE.,&
                                                                .FALSE.)
 CALL gnuplot_ylabel('Volume thermal expansion {/Symbol b} x 10^6 (K^{-1})',&
                                                                .FALSE.) 
-CALL gnuplot_write_file_mul_data(filename,1,3,'color_red',.TRUE.,.FALSE.,&
+CALL gnuplot_write_file_mul_data(filename,1,3,'color_red',.TRUE.,.TRUE.,&
                                                                .FALSE.)
 
 CALL gnuplot_end()

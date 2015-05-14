@@ -44,7 +44,7 @@ SUBROUTINE thermo_readin()
   USE control_asy,          ONLY : flasy, lasymptote, asymptote_command
   USE control_bands,        ONLY : emin_input, emax_input, nbnd_bands, lsym 
   USE control_grun,         ONLY : grunmin_input, grunmax_input, &
-                                   temp_ph, volume_ph
+                                   temp_ph, volume_ph, celldm_ph
   USE control_conv,         ONLY : nke, deltake, nkeden, deltakeden, &
                                    nnk, deltank, nsigma, deltasigma
   USE control_mur,          ONLY : vmin_input, vmax_input, deltav, nvol, lmurn
@@ -110,7 +110,7 @@ SUBROUTINE thermo_readin()
                             force_bands,                    &
                             dump_states,                    &
                             ncontours,                      &
-                            temp_ph, volume_ph,             &
+                            temp_ph, volume_ph, celldm_ph,  &
                             after_disp,                     &
                             with_eigen,                     &
                             fildyn,                         &
@@ -225,6 +225,7 @@ SUBROUTINE thermo_readin()
   grunmax_input=0.0_DP
   temp_ph=0.0_DP
   volume_ph=0.0_DP
+  celldm_ph=0.0_DP
 
   filband='output_band.dat'
   flpband='output_pband.dat'
@@ -328,7 +329,8 @@ SUBROUTINE thermo_readin()
      END IF
   END IF
 
-  IF (volume_ph==0.0_DP.AND.temp_ph==0.0_DP) temp_ph=tmin
+  IF (volume_ph==0.0_DP.AND.celldm_ph(1)==0.0_DP.AND.temp_ph==0.0_DP) &
+                                         temp_ph=tmin
 
   nqaux=0
   set_internal_path=.FALSE.
@@ -505,6 +507,7 @@ SUBROUTINE thermo_readin()
   ibrav_save=ibrav
   nosym_save=nosym
   input_file_=input(my_image_id+1)
+  with_eigen=with_eigen.AND.(ibrav==1.OR.ibrav==2.OR.ibrav==3)
 
   IF (ionode) THEN
      INQUIRE( FILE=TRIM(input(my_image_id+1)), EXIST = exst )
@@ -515,9 +518,6 @@ SUBROUTINE thermo_readin()
 40      CONTINUE
      ENDIF
   ENDIF
-
-  IF (ibrav > 3 .AND. what=='mur_lc_t') CALL errore('thermo_pw','option not &
-              & available for noncubic systems',1)
 
   IF (what=='piezoelectric_tensor' .OR. what=='mur_lc_piezoelectric_tensor') &
                                                                      THEN

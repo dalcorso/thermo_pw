@@ -16,7 +16,7 @@ INTEGER  :: itemp
 !
 !  Allocate thermodynamic quantities
 !
-IF (deltat <= 0.0_8) CALL errore('print_thermo','Negative deltat',1)
+IF (deltat <= 0.0_8) CALL errore('set_temperature','Negative deltat',1)
 ntemp=1+NINT((tmax-tmin)/deltat)
 
 IF (.NOT.ALLOCATED(temp)) ALLOCATE(temp(ntemp))

@@ -655,12 +655,15 @@ temperature, the code computes also the bulk modulus and the
 pressure derivative of the bulk modulus as a function 
 of temperature. Moreover the isobaric specific heat, the isoentropic 
 bulk modulus, and the average Gr\"uneisen parameter are calculated as 
-a function of temperature. 
+a function of temperature. \\
 The mode Gr\"uneisen parameters are calculated with cubic interpolations of the
 phonon frequencies. Using the variable \texttt{with\_eigen} one can 
 calculate these parameters as derivatives of the phonon frequencies 
 (default) or as expectation values of the derivatives of the dynamical 
 matrix on the central geometry eigenvectors (might require a lot of RAM). \\
+For anisotropic solids derivatives of the frequencies are calculated always
+with \texttt{with\_eigen=.TRUE.}, but presently they are not used to calculate 
+anharmonic properties.
 The input variables that control these plot are those described in the option
 \texttt{what='mur\_lc'} and \texttt{what='mur\_disp'} in addition to the 
 following:
@@ -689,7 +692,10 @@ temp_ph       : The frequencies and Gruneisen parameters interpolated at
                 on a postscript file (only when volume_ph=0.0_DP).
                 Default : real tmin (in K)
 with_eigen    : if .TRUE. use the eigenvectors of the dynamical matrix to
-                calculate the Gruneisen parameters.
+                calculate the Gruneisen parameters. For anisotropic solids
+                this option cannot be changed. It is .TRUE. for the plotted
+                Gruneisen bands, but Gruneisen parameters are not used to
+                calculate anharmonic properties.
                 Default: logical .FALSE. 
 flpgrun       : file where the values of the Gruneisen parameters are written. 
                 Default: character(len=*) 'output_pgrun.dat'

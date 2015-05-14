@@ -456,7 +456,9 @@ MODULE control_grun
   REAL(DP) :: volume_ph         ! volume at which the phonon frequencies
                                 ! and the Gruneisen parameters are 
                                 ! interpolated
-
+  REAL(DP) :: celldm_ph(6)      ! cell parameters at which the phonon
+                                ! frequencies and the Gruneisen parameter
+                                ! are interpolated.
   REAL(DP) :: temp_ph           ! when volume_ph=0.0_DP we use the volume
                                 ! corresponding to this temperature
 END MODULE control_grun

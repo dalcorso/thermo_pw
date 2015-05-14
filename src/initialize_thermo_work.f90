@@ -30,6 +30,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   USE control_mur,    ONLY : vmin, vmin_input, vmax_input
   USE wvfct,          ONLY : ecutwfc
   USE gvect,          ONLY : ecutrho
+  USE control_quadratic_energy, ONLY : nvar, degree
   USE input_parameters, ONLY : nk1, nk2, nk3
   USE klist,          ONLY : degauss
   USE cell_base,  ONLY : alat
@@ -172,6 +173,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            ltherm = .TRUE.
            lmatdyn = .TRUE.
            lev_syn_2=.TRUE.
+           CALL compute_degree(ibrav_save, degree, nvar)
            CALL allocate_thermodynamics()
            CALL allocate_anharmonic()
         CASE DEFAULT

@@ -26,7 +26,7 @@ SUBROUTINE bcast_thermo_input()
   USE control_paths,   ONLY : q_in_band_form, q_in_cryst_coord, q2d, &
                               point_label_type, npx
   USE control_bands,   ONLY : emin_input, emax_input, nbnd_bands, lsym
-  USE control_grun,    ONLY : temp_ph, volume_ph
+  USE control_grun,    ONLY : temp_ph, volume_ph, celldm_ph
   USE control_gnuplot, ONLY : flgnuplot, lgnuplot, gnuplot_command
   USE control_asy,     ONLY : flasy, lasymptote, asymptote_command
   USE control_conv,    ONLY : nke, deltake, nkeden, deltakeden, &
@@ -60,6 +60,7 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( flpgrun, meta_ionode_id, world_comm )
   CALL mp_bcast( temp_ph, meta_ionode_id, world_comm )
   CALL mp_bcast( volume_ph, meta_ionode_id, world_comm )
+  CALL mp_bcast( celldm_ph, meta_ionode_id, world_comm )
   CALL mp_bcast( after_disp, meta_ionode_id, world_comm )
   CALL mp_bcast( with_eigen, meta_ionode_id, world_comm )
   CALL mp_bcast( fildyn, meta_ionode_id, world_comm )

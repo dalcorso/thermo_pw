@@ -91,7 +91,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   ENDIF
 
   CALL mp_bcast ( ios, ionode_id, intra_image_comm )
-  IF ( ios /= 0) CALL errore ('sym_band_suc', 'Opening filband file', abs (ios) )
+  IF ( ios /= 0) CALL errore ('sym_band_sub', 'Opening filband file', abs (ios) )
 
   DO ik = 1, nks
      !
@@ -184,7 +184,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
              sk_is,d_spin_is,gk_is, &
              is_symmorphic,search_sym)
         IF (code_group_k(ik) /= code_group) &
-             CALL errore('sym_band','problem with code_group',1)
+             CALL errore('sym_band_sub','problem with code_group',1)
         WRITE(stdout, '(/,1x,74("*"))')
         WRITE(stdout, '(/,20x,"xk=(",2(f10.5,","),f10.5,"  )")') &
              xk(1,ik), xk(2,ik), xk(3,ik)

@@ -36,7 +36,7 @@ IF (identify_sur) THEN
            READ(iun, '(5i8)') nat, nlayers, nbnd_, nkstot_, nspin     
         ENDIF
 300     CALL mp_bcast(ios,ionode_id,intra_image_comm)
-        IF (ios /= 0) CALL errore('sym_band_sub','problems with flprojlayer',ABS(ios))
+        IF (ios /= 0) CALL errore('read_state_densities','problems with flprojlayer',ABS(ios))
         CALL mp_bcast(nat, ionode_id, intra_image_comm)
         CALL mp_bcast(nlayers, ionode_id, intra_image_comm)
         CALL mp_bcast(nbnd_, ionode_id, intra_image_comm)

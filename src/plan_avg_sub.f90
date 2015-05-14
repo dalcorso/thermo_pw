@@ -66,7 +66,7 @@ SUBROUTINE plan_avg_sub(averag, vacuum, nat_, nbnd_, nks_, ninter, &
   IF (nat_ /= nat .OR. nbnd_ /= nbnd) &
                      CALL errore('plan_avg_sub','some problems',1)
   !
-  IF (gamma_only) CALL errore ('plan_avg', &
+  IF (gamma_only) CALL errore ('plan_avg_sub', &
        ' planar average with gamma tricks not yet implemented',2)
   !
   CALL openfil_pp ( )
