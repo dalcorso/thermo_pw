@@ -13,7 +13,7 @@ SUBROUTINE bcast_thermo_input()
   !
   USE thermo_mod,      ONLY : what, ngeo, step_ngeo, reduced_grid
   USE control_mur,     ONLY : vmin_input, vmax_input, deltav, nvol, lmurn
-  USE control_thermo,  ONLY : outdir_thermo, after_disp
+  USE control_thermo,  ONLY : outdir_thermo, after_disp, with_eigen
   USE data_files,      ONLY : flevdat, flfrc, flfrq, fldos, fltherm, flanhar, &
                               filband, flkeconv, flnkconv, flgrun, flpband,   &
                               flpgrun, flenergy, flprojlayer, flpbs, flvec
@@ -61,6 +61,7 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( temp_ph, meta_ionode_id, world_comm )
   CALL mp_bcast( volume_ph, meta_ionode_id, world_comm )
   CALL mp_bcast( after_disp, meta_ionode_id, world_comm )
+  CALL mp_bcast( with_eigen, meta_ionode_id, world_comm )
   CALL mp_bcast( fildyn, meta_ionode_id, world_comm )
   CALL mp_bcast( nq1_d, meta_ionode_id, world_comm )
   CALL mp_bcast( nq2_d, meta_ionode_id, world_comm )

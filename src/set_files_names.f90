@@ -36,6 +36,7 @@ IF (igeom==1) flpsdisp_thermo=TRIM(flpsdisp)
 fildyn=TRIM(fildyn_thermo)//'.g'//TRIM(int_to_char(igeom))//'.'
 flfrc=TRIM(flfrc_thermo)//'.g'//TRIM(int_to_char(igeom))
 flfrq=TRIM(flfrq_thermo)//'.g'//TRIM(int_to_char(igeom))
+flvec=TRIM(flvec_thermo)//'.g'//TRIM(int_to_char(igeom))
 fldos=TRIM(fldos_thermo)//'.g'//TRIM(int_to_char(igeom))
 fltherm=TRIM(fltherm_thermo)//'.g'//TRIM(int_to_char(igeom))
 flpband=TRIM(flpband_thermo)//'.g'//TRIM(int_to_char(igeom))

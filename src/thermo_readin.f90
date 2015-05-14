@@ -15,7 +15,7 @@ SUBROUTINE thermo_readin()
   !
   USE kinds,                ONLY : DP
   USE thermo_mod,           ONLY : what, ngeo, step_ngeo, reduced_grid
-  USE control_thermo,       ONLY : outdir_thermo, after_disp
+  USE control_thermo,       ONLY : outdir_thermo, after_disp, with_eigen
   USE data_files,           ONLY : flevdat, flfrc, flfrq, fldos, fltherm,  &
                                    flanhar, filband, flkeconv,             &
                                    flenergy, flpbs, flprojlayer,           &
@@ -112,6 +112,7 @@ SUBROUTINE thermo_readin()
                             ncontours,                      &
                             temp_ph, volume_ph,             &
                             after_disp,                     &
+                            with_eigen,                     &
                             fildyn,                         &
                             flevdat,                        &
                             flpband, flpgrun,               &
@@ -185,6 +186,7 @@ SUBROUTINE thermo_readin()
   lmurn=.TRUE.
 
   after_disp=.FALSE.
+  with_eigen=.FALSE.
   fildyn=' '
 
   nke=5
@@ -503,6 +505,7 @@ SUBROUTINE thermo_readin()
   ibrav_save=ibrav
   nosym_save=nosym
   input_file_=input(my_image_id+1)
+
   IF (ionode) THEN
      INQUIRE( FILE=TRIM(input(my_image_id+1)), EXIST = exst )
      IF (exst) THEN

@@ -101,7 +101,7 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   CHARACTER(LEN=256) :: filename
   LOGICAL :: has_zstar
   COMPLEX(DP), ALLOCATABLE :: dyn(:,:,:,:)
-  COMPLEX(DP), ALLOCATABLE :: z(:,:)
+  COMPLEX(DP), ALLOCATABLE :: z(:,:), save_z(:,:,:)
   REAL(DP), ALLOCATABLE:: q(:,:), wq(:), w2(:,:), freq(:,:)
   INTEGER, ALLOCATABLE:: tetra(:,:)
   REAL(DP) ::     omega,  alat,   &! cell parameters and volume
@@ -113,12 +113,12 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
              nrws,                         & ! number of nearest neighbor
              code_group_old
 
-  INTEGER :: nspin_mag, nqs, ios
+  INTEGER :: nspin_mag, nqs, nta, ipol, ios
   !
   LOGICAL :: xmlifc, lo_to_split
   !
   REAL(DP) :: qhat(3), qh, e, emin, emax, dosofe(2), qq, dq(3), dqmod, &
-              dqmod_save
+              dqmod_save, masst
   INTEGER :: n, i, j, k, it, nq, nqx, na, nb, iout, nqtot
   LOGICAL, EXTERNAL :: has_xml
   CHARACTER(LEN=15), ALLOCATABLE :: name_rap_mode(:)
@@ -128,20 +128,27 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   INTEGER :: location(1), isig
   CHARACTER(LEN=6) :: int_to_char
   INTEGER            :: npk_label, nch, ndos
+  INTEGER ::  jmode
   CHARACTER(LEN=3), ALLOCATABLE :: letter(:)
   INTEGER, ALLOCATABLE :: label_list(:), qcode_group(:), aux_ind(:)
-  LOGICAL :: tend, terr, dos, do_init, check_file_exists
+  LOGICAL :: tend, terr, dos, do_init, check_file_exists, done_dos
   !
 
   dos = (do_dos == 1) .AND. ldos
   filename='save_frequencies.'//TRIM(int_to_char(igeom))
+  done_dos=.FALSE.
   IF (dos) THEN
-     IF ( check_file_exists(fldos) .AND. check_file_exists(filename) ) THEN
-        IF ( my_image_id /= root_image ) RETURN
-        CALL read_phdos_data(phdos_save(igeom),fldos)
-        CALL find_minimum_maximum(phdos_save(igeom), freqmin, freqmax)
-        CALL read_ph_freq_data(ph_freq_save(igeom),filename)
-        RETURN
+     IF ( check_file_exists(fldos) ) THEN
+        IF ( my_image_id == root_image ) THEN
+           CALL read_phdos_data(phdos_save(igeom),fldos)
+           CALL find_minimum_maximum(phdos_save(igeom), freqmin, freqmax)
+           done_dos=.TRUE.
+        END IF
+        IF (.NOT.with_eigen .AND. check_file_exists(filename)) THEN
+           IF ( my_image_id /= root_image ) RETURN
+           CALL read_ph_freq_data(ph_freq_save(igeom),filename)
+           RETURN
+        END IF
      END IF
   ELSE
      IF (check_file_exists(flfrq)) RETURN
@@ -231,6 +238,7 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   ALLOCATE ( num_rap_mode(3*nat,nq) )
   ALLOCATE ( high_sym(nq) )
   ALLOCATE ( qcode_group(nq) )
+  IF (with_eigen) ALLOCATE ( save_z(3*nat,3*nat,nq) )
 
   IF (xmlifc) CALL set_sym(nat, tau, ityp, nspin_mag, m_loc, nr1_save, &
                                                       nr2_save, nr3_save )
@@ -295,6 +303,17 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
      END IF
 
      CALL dyndiag(nat,ntyp,amass,ityp,dyn,w2(1,n),z)
+     !
+     IF (ldos.AND.with_eigen) THEN
+        DO na = 1,nat
+           nta = ityp(na)
+           masst=SQRT(amu_ry*amass(nta))
+           DO ipol = 1,3
+              jmode=(na-1)*3+ipol
+              save_z(jmode,:,n) = z(jmode,:) * masst
+           END DO
+        END DO
+     END IF
      !
      ! Cannot use the small group of \Gamma to analize the symmetry
      ! of the mode if there is an electric field.
@@ -399,7 +418,7 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   !
   !  write the dos file
   !
-  IF (dos) THEN
+  IF (dos.AND..NOT.done_dos) THEN
      emin = 0.0d0
      emax = 0.0d0
      DO n=1,nq
@@ -450,22 +469,32 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
         phdos_save(igeom)%phdos(n) = dosofe(1)
      END DO
      IF (ionode) CLOSE(unit=2)
+  END IF
+  IF (dos) THEN
 !
 !   save the frequencies
 !
      CALL init_ph_freq(ph_freq_save(igeom), nat, nq1_d, nq2_d, nq3_d, nq, &
-                                                              .FALSE.)
+                                                              with_eigen)
      DO iq=1, nq
         ph_freq_save(igeom)%wg(iq)=wq(iq)
-        DO imode=1, 3*nat
-           ph_freq_save(igeom)%nu(imode,iq)=freq(imode,iq)
-        ENDDO
+        ph_freq_save(igeom)%nu(:,iq)=freq(:,iq)
      ENDDO
-     CALL write_ph_freq_data(ph_freq_save(igeom),filename)
+     IF (with_eigen) THEN
+!
+!  The eigenvectors are not saved on disk. They are recalculated each time.
+!
+         DO iq=1, nq
+            ph_freq_save(igeom)%displa(:,:,iq)=save_z(:,:,iq)
+         ENDDO
+      ELSE
+         CALL write_ph_freq_data(ph_freq_save(igeom),filename)
+     END IF
   END IF  !dos
 
   !
   DEALLOCATE (z) 
+  IF (ALLOCATED(save_z)) DEALLOCATE (save_z)
   DEALLOCATE (w2) 
   DEALLOCATE (dyn) 
   DEALLOCATE (freq)

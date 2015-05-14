@@ -92,12 +92,13 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
         CALL errore('write_gruneisen_band','("file with representations &
                        & not compatible with bands")')
 
-     filename=TRIM(file_vec)//".g"//TRIM(int_to_char(igeo))
-     IF (ionode) OPEN(UNIT=iumode, FILE=TRIM(filename), FORM='formatted', &
+     IF (with_eigen) THEN
+        filename=TRIM(file_vec)//".g"//TRIM(int_to_char(igeo))
+        IF (ionode) OPEN(UNIT=iumode, FILE=TRIM(filename), FORM='formatted', &
                    STATUS='old', ERR=210, IOSTAT=ios)
-210  CALL mp_bcast(ios, ionode_id, intra_image_comm)
-     CALL errore('write_gruneisen_band','modes are needed',ABS(ios))
-
+210     CALL mp_bcast(ios, ionode_id, intra_image_comm)
+        CALL errore('write_gruneisen_band','modes are needed',ABS(ios))
+     END IF
      !
      IF ( .NOT. ALLOCATED( freq_geo ) )  ALLOCATE (freq_geo(nbnd,ngeo(1),nks))
      IF ( .NOT. ALLOCATED( displa_geo ) .AND. with_eigen )  &
@@ -163,7 +164,6 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
             WRITE(stdout,'(5x,"Corresponding to T=",f17.8)') temp_ph
 
   DO n = 1,nks
-     WRITE(6,*) 'kpoint=', n
      IF (is_gamma(n)) THEN
 !
 !    In the gamma point the Gruneisen parameters are not defined.

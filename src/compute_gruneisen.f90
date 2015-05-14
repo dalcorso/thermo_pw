@@ -22,6 +22,7 @@ SUBROUTINE compute_gruneisen()
   USE grun_anharmonic,        ONLY : poly_grun, poly_order
   USE control_thermo,         ONLY : with_eigen
   USE mp_images,              ONLY : root_image, my_image_id
+  USE io_global,              ONLY : stdout
 
   IMPLICIT NONE
 
@@ -43,11 +44,14 @@ SUBROUTINE compute_gruneisen()
   ALLOCATE(freq_geo(3*nat,ngeo(1)))
   ALLOCATE(rap_geo(3*nat,ngeo(1)))
   IF (with_eigen) ALLOCATE(displa_geo(3*nat,3*nat,ngeo(1)))
+!
+!  representations are not used here
+!
+  rap_geo=-1
 
   DO n = 1, nq
      DO igeo=1,ngeo(1)
         freq_geo(1:3*nat,igeo)=ph_freq_save(igeo)%nu(1:3*nat,n)
-        rap_geo(1:3*nat,igeo)=-1
         IF (with_eigen) displa_geo(1:3*nat, 1:3*nat, igeo)= &
                              ph_freq_save(igeo)%displa(1:3*nat,1:3*nat,n)
      ENDDO
@@ -149,11 +153,15 @@ DO ibnd=1, 3*nat
       IF (igeo /= central_geo) THEN
 !
 !   It can be shown that the frequency function defined below has the same 
-!   derivatives of the real frequency exactly at the central geometry.
-!   The more distant you go from the central geometry the larger
-!   are these differences, so be careful when you plot the
-!   Gruneisen parameters for volumes too far from the
-!   central geometry. 
+!   derivatives of the real frequency at the central geometry.
+!   For other geometries these frequencies often differ from the real 
+!   frequencies for a term quadratic in the difference between the 
+!   central geometry and the actual geometry, so be careful when you 
+!   plot the Gruneisen parameters for volumes too far from the central 
+!   geometry. In some particular points the difference can be larger.
+!   Gruneisen parameters calculated using this formula should be the
+!   same as those calculated as the expectation value of the derivative 
+!   of the dynamical matrix on the central geometry eigenvectors.
 !
          DO jmode=1,3*nat
             overlap=ABS(ZDOTC(3*nat,displa_geo(1,jmode,igeo),1,&
