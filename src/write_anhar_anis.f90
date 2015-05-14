@@ -387,7 +387,7 @@ IF (ionode) THEN
 !  In this case we write nothing but do not stop
 !
    ELSE
-      CALL errore('write_anhar_anis','ibrav not programmed',1)
+      CALL errore('write_ph_freq_anhar_anis','ibrav not programmed',1)
    END IF
    CLOSE(iu_therm)
 END IF

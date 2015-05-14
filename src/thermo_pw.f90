@@ -487,9 +487,10 @@ PROGRAM thermo_pw
 !
            DO itemp = 1, ntemp
               CALL quadratic_fit_t(itemp)
+              CALL quadratic_fit_t_ph(itemp)
            ENDDO
            CALL write_anhar_anis()
-!           CALL write_ph_freq_anhar_anis()
+           CALL write_ph_freq_anhar_anis()
            CALL plot_anhar_anis()
 !
 !    here we calculate and plot the gruneisen parameters along the given path.
