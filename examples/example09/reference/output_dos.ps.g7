@@ -1,7 +1,7 @@
 %!PS-Adobe-2.0
 %%Title: output_dos.ps.g7
-%%Creator: gnuplot 4.4 patchlevel 0
-%%CreationDate: Tue Feb  4 18:51:59 2014
+%%Creator: gnuplot 4.2 patchlevel 6 
+%%CreationDate: Fri May 15 10:42:04 2015
 %%DocumentFonts: (atend)
 %%BoundingBox: 50 50 554 770
 %%Orientation: Landscape
@@ -11,8 +11,8 @@
 /gnudict 256 dict def
 gnudict begin
 %
-% The following true/false flags may be edited by hand if desired.
-% The unit line width and grayscale image gamma correction may also be changed.
+% The following 6 true/false flags may be edited by hand if required
+% The unit line width may also be changed
 %
 /Color true def
 /Blacktext false def
@@ -21,11 +21,9 @@ gnudict begin
 /Landscape true def
 /Level1 false def
 /Rounded false def
-/ClipToBoundingBox false def
 /TransparentPatterns false def
 /gnulinewidth 5.000 def
 /userlinewidth gnulinewidth def
-/Gamma 1.0 def
 %
 /vshift -66 def
 /dl1 {
@@ -48,24 +46,56 @@ systemdict /pdfmark known not {
 SDict begin [
   /Title (output_dos.ps.g7)
   /Subject (gnuplot plot)
-  /Creator (gnuplot 4.4 patchlevel 0)
-  /Author (dalcorso)
+  /Creator (gnuplot 4.2 patchlevel 6 )
+  /Author (espresso)
 %  /Producer (gnuplot)
 %  /Keywords ()
-  /CreationDate (Tue Feb  4 18:51:59 2014)
+  /CreationDate (Fri May 15 10:42:04 2015)
   /DOCINFO pdfmark
 end
 } ifelse
-/doclip {
-  ClipToBoundingBox {
-    newpath 50 50 moveto 554 50 lineto 554 770 lineto 50 770 lineto closepath
-    clip
-  } if
+/reencodeISO15 {
+dup dup findfont dup length dict begin
+{ 1 index /FID ne { def }{ pop pop } ifelse } forall
+currentdict /CharStrings known {
+	CharStrings /Idieresis known {
+		/Encoding ISOLatin15Encoding def } if
+} if
+currentdict end definefont
 } def
+/ISOLatin15Encoding [
+/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
+/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
+/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
+/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
+/space/exclam/quotedbl/numbersign/dollar/percent/ampersand/quoteright
+/parenleft/parenright/asterisk/plus/comma/minus/period/slash
+/zero/one/two/three/four/five/six/seven/eight/nine/colon/semicolon
+/less/equal/greater/question/at/A/B/C/D/E/F/G/H/I/J/K/L/M/N
+/O/P/Q/R/S/T/U/V/W/X/Y/Z/bracketleft/backslash/bracketright
+/asciicircum/underscore/quoteleft/a/b/c/d/e/f/g/h/i/j/k/l/m
+/n/o/p/q/r/s/t/u/v/w/x/y/z/braceleft/bar/braceright/asciitilde
+/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
+/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
+/.notdef/dotlessi/grave/acute/circumflex/tilde/macron/breve
+/dotaccent/dieresis/.notdef/ring/cedilla/.notdef/hungarumlaut
+/ogonek/caron/space/exclamdown/cent/sterling/Euro/yen/Scaron
+/section/scaron/copyright/ordfeminine/guillemotleft/logicalnot
+/hyphen/registered/macron/degree/plusminus/twosuperior/threesuperior
+/Zcaron/mu/paragraph/periodcentered/zcaron/onesuperior/ordmasculine
+/guillemotright/OE/oe/Ydieresis/questiondown
+/Agrave/Aacute/Acircumflex/Atilde/Adieresis/Aring/AE/Ccedilla
+/Egrave/Eacute/Ecircumflex/Edieresis/Igrave/Iacute/Icircumflex
+/Idieresis/Eth/Ntilde/Ograve/Oacute/Ocircumflex/Otilde/Odieresis
+/multiply/Oslash/Ugrave/Uacute/Ucircumflex/Udieresis/Yacute
+/Thorn/germandbls/agrave/aacute/acircumflex/atilde/adieresis
+/aring/ae/ccedilla/egrave/eacute/ecircumflex/edieresis/igrave
+/iacute/icircumflex/idieresis/eth/ntilde/ograve/oacute/ocircumflex
+/otilde/odieresis/divide/oslash/ugrave/uacute/ucircumflex/udieresis
+/yacute/thorn/ydieresis
+] def
 %
-% Gnuplot Prolog Version 4.4 (January 2010)
-%
-%/SuppressPDFMark true def
+% Gnuplot Prolog Version 4.2 (August 2006)
 %
 /M {moveto} bind def
 /L {lineto} bind def
@@ -75,7 +105,6 @@ end
 /Z {closepath} bind def
 /C {setrgbcolor} bind def
 /f {rlineto fill} bind def
-/Gshow {show} def   % May be redefined later in the file to support UTF-8
 /vpt2 vpt 2 mul def
 /hpt2 hpt 2 mul def
 /Lshow {currentpoint stroke M 0 vshift R 
@@ -433,66 +462,22 @@ Level1 {Level1PatternFill} {Level2PatternFill} ifelse
 /Symbol-Oblique /Symbol findfont [1 0 .167 1 0 0] makefont
 dup length dict begin {1 index /FID eq {pop pop} {def} ifelse} forall
 currentdict end definefont pop
-%
-% Encoding for ISO-8859-15 (also called Latin9)
-%
-/reencodeISO15 {
-dup dup findfont dup length dict begin
-{ 1 index /FID ne { def }{ pop pop } ifelse } forall
-currentdict /CharStrings known {
-	CharStrings /Idieresis known {
-		/Encoding ISOLatin15Encoding def } if
-} if
-currentdict end definefont
-} def
-/ISOLatin15Encoding [
-/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
-/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
-/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
-/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
-/space/exclam/quotedbl/numbersign/dollar/percent/ampersand/quoteright
-/parenleft/parenright/asterisk/plus/comma/minus/period/slash
-/zero/one/two/three/four/five/six/seven/eight/nine/colon/semicolon
-/less/equal/greater/question/at/A/B/C/D/E/F/G/H/I/J/K/L/M/N
-/O/P/Q/R/S/T/U/V/W/X/Y/Z/bracketleft/backslash/bracketright
-/asciicircum/underscore/quoteleft/a/b/c/d/e/f/g/h/i/j/k/l/m
-/n/o/p/q/r/s/t/u/v/w/x/y/z/braceleft/bar/braceright/asciitilde
-/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
-/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
-/.notdef/dotlessi/grave/acute/circumflex/tilde/macron/breve
-/dotaccent/dieresis/.notdef/ring/cedilla/.notdef/hungarumlaut
-/ogonek/caron/space/exclamdown/cent/sterling/Euro/yen/Scaron
-/section/scaron/copyright/ordfeminine/guillemotleft/logicalnot
-/hyphen/registered/macron/degree/plusminus/twosuperior/threesuperior
-/Zcaron/mu/paragraph/periodcentered/zcaron/onesuperior/ordmasculine
-/guillemotright/OE/oe/Ydieresis/questiondown
-/Agrave/Aacute/Acircumflex/Atilde/Adieresis/Aring/AE/Ccedilla
-/Egrave/Eacute/Ecircumflex/Edieresis/Igrave/Iacute/Icircumflex
-/Idieresis/Eth/Ntilde/Ograve/Oacute/Ocircumflex/Otilde/Odieresis
-/multiply/Oslash/Ugrave/Uacute/Ucircumflex/Udieresis/Yacute
-/Thorn/germandbls/agrave/aacute/acircumflex/atilde/adieresis
-/aring/ae/ccedilla/egrave/eacute/ecircumflex/edieresis/igrave
-/iacute/icircumflex/idieresis/eth/ntilde/ograve/oacute/ocircumflex
-/otilde/odieresis/divide/oslash/ugrave/uacute/ucircumflex/udieresis
-/yacute/thorn/ydieresis
-] def
 /MFshow {
    { dup 5 get 3 ge
      { 5 get 3 eq {gsave} {grestore} ifelse }
      {dup dup 0 get findfont exch 1 get scalefont setfont
      [ currentpoint ] exch dup 2 get 0 exch R dup 5 get 2 ne {dup dup 6
-     get exch 4 get {Gshow} {stringwidth pop 0 R} ifelse }if dup 5 get 0 eq
+     get exch 4 get {show} {stringwidth pop 0 R} ifelse }if dup 5 get 0 eq
      {dup 3 get {2 get neg 0 exch R pop} {pop aload pop M} ifelse} {dup 5
      get 1 eq {dup 2 get exch dup 3 get exch 6 get stringwidth pop -2 div
      dup 0 R} {dup 6 get stringwidth pop -2 div 0 R 6 get
      show 2 index {aload pop M neg 3 -1 roll neg R pop pop} {pop pop pop
      pop aload pop M} ifelse }ifelse }ifelse }
      ifelse }
-   forall} def
-/Gswidth {dup type /stringtype eq {stringwidth} {pop (n) stringwidth} ifelse} def
+   forall} bind def
 /MFwidth {0 exch { dup 5 get 3 ge { 5 get 3 eq { 0 } { pop } ifelse }
  {dup 3 get{dup dup 0 get findfont exch 1 get scalefont setfont
-     6 get Gswidth pop add} {pop} ifelse} ifelse} forall} def
+     6 get stringwidth pop add} {pop} ifelse} ifelse} forall} bind def
 /MLshow { currentpoint stroke M
   0 exch R
   Blacktext {gsave 0 setgray MFshow grestore} {MFshow} ifelse } bind def
@@ -504,746 +489,742 @@ currentdict end definefont
   Blacktext {gsave 0 setgray MFshow grestore} {MFshow} ifelse } bind def
 /XYsave    { [( ) 1 2 true false 3 ()] } bind def
 /XYrestore { [( ) 1 2 true false 4 ()] } bind def
-/Helvetica reencodeISO15 def
+/AvantGarde-Book reencodeISO15 def
 end
 %%EndProlog
 %%Page: 1 1
 gnudict begin
 gsave
-doclip
 50 50 translate
 0.100 0.100 scale
 90 rotate
 0 -5040 translate
 0 setgray
 newpath
-(Helvetica) findfont 200 scalefont setfont
+(AvantGarde-Book) findfont 200 scalefont setfont
 2.000 UL
 LTb
-1220 840 M
+1340 840 M
 63 0 V
-5616 0 R
+5497 0 R
 -63 0 V
 stroke
-1100 840 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 0)]
+1220 840 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0)]
 ] -66.7 MRshow
 2.000 UL
 LTb
+1340 1500 M
+63 0 V
+5497 0 R
+-63 0 V
+stroke
 1220 1500 M
-63 0 V
-5616 0 R
--63 0 V
-stroke
-1100 1500 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 0.01)]
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0.01)]
 ] -66.7 MRshow
 2.000 UL
 LTb
+1340 2160 M
+63 0 V
+5497 0 R
+-63 0 V
+stroke
 1220 2160 M
-63 0 V
-5616 0 R
--63 0 V
-stroke
-1100 2160 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 0.02)]
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0.02)]
 ] -66.7 MRshow
 2.000 UL
 LTb
+1340 2820 M
+63 0 V
+5497 0 R
+-63 0 V
+stroke
 1220 2820 M
-63 0 V
-5616 0 R
--63 0 V
-stroke
-1100 2820 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 0.03)]
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0.03)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1220 3479 M
+1340 3480 M
 63 0 V
-5616 0 R
+5497 0 R
 -63 0 V
 stroke
-1100 3479 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 0.04)]
+1220 3480 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0.04)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1220 4139 M
+1340 4140 M
 63 0 V
-5616 0 R
+5497 0 R
 -63 0 V
 stroke
-1100 4139 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 0.05)]
+1220 4140 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0.05)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1220 4799 M
+1340 4800 M
 63 0 V
-5616 0 R
+5497 0 R
 -63 0 V
 stroke
-1100 4799 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 0.06)]
+1220 4800 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0.06)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1220 840 M
+1340 840 M
 0 63 V
-0 3896 R
+0 3897 R
 0 -63 V
 stroke
-1220 640 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 0)]
+1340 640 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-2294 840 M
+2391 840 M
 0 63 V
-0 3896 R
+0 3897 R
 0 -63 V
 stroke
-2294 640 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 100)]
+2391 640 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 100)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-3367 840 M
+3442 840 M
 0 63 V
-0 3896 R
+0 3897 R
 0 -63 V
 stroke
-3367 640 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 200)]
+3442 640 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 200)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-4441 840 M
+4493 840 M
 0 63 V
-0 3896 R
+0 3897 R
 0 -63 V
 stroke
-4441 640 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 300)]
+4493 640 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 300)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-5514 840 M
+5544 840 M
 0 63 V
-0 3896 R
+0 3897 R
 0 -63 V
 stroke
-5514 640 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 400)]
+5544 640 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 400)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-6588 840 M
+6595 840 M
 0 63 V
-0 3896 R
+0 3897 R
 0 -63 V
 stroke
-6588 640 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 500)]
+6595 640 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 500)]
 ] -66.7 MCshow
 2.000 UL
 LTb
 2.000 UL
 LTb
-1220 4799 N
-0 -3959 V
-5679 0 V
-0 3959 V
--5679 0 V
+1340 4800 N
+0 -3960 V
+5560 0 V
+0 3960 V
+-5560 0 V
 Z stroke
 LCb setrgbcolor
-280 2819 M
-currentpoint gsave translate -270 rotate 0 0 moveto
-[ [(Helvetica) 200.0 0.0 true true 0 (DOS \(states / cm)]
-[(Helvetica) 160.0 100.0 true true 0 (-1)]
-[(Helvetica) 200.0 0.0 true true 0 ( / cell\))]
+400 2820 M
+currentpoint gsave translate 90 rotate 0 0 moveto
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 (DOS \(states / cm)]
+[(AvantGarde-Book) 160.0 100.0 true true 0 (-1)]
+[(AvantGarde-Book) 200.0 0.0 true true 0 ( / cell\))]
 ] -86.7 MCshow
 grestore
 LTb
 LCb setrgbcolor
-4059 340 M
-[ [(Helvetica) 200.0 0.0 true true 0 (frequency \(cm)]
-[(Helvetica) 160.0 100.0 true true 0 (-1)]
-[(Helvetica) 200.0 0.0 true true 0 (\))]
+4120 340 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 (frequency \(cm)]
+[(AvantGarde-Book) 160.0 100.0 true true 0 (-1)]
+[(AvantGarde-Book) 200.0 0.0 true true 0 (\))]
 ] -86.7 MCshow
 LTb
 1.000 UP
 2.000 UL
 LTb
-% Begin plot #1
-3.000 UL
+2.000 UL
 LT0
-1.00 0.00 0.00 C /Helvetica findfont 200 scalefont setfont
-1220 840 M
-10 0 V
-10 0 V
+1.00 0.00 0.00 C /AvantGarde-Book findfont 200 scalefont setfont
+1340 840 M
 10 0 V
 9 0 V
-10 1 V
 10 0 V
 10 0 V
-10 1 V
+9 1 V
 10 0 V
 10 0 V
-10 1 V
-9 0 V
-10 1 V
-10 1 V
+9 1 V
 10 0 V
-10 1 V
-10 1 V
+10 0 V
+9 1 V
+10 0 V
 10 1 V
 9 1 V
-10 1 V
 10 0 V
-10 1 V
-10 1 V
-10 2 V
-10 1 V
 10 1 V
 9 1 V
 10 1 V
 10 1 V
-10 2 V
+9 1 V
+10 0 V
 10 1 V
-10 2 V
+9 1 V
 10 1 V
 10 2 V
 9 1 V
-10 2 V
-10 2 V
 10 1 V
-10 2 V
+10 1 V
+9 1 V
 10 2 V
 10 1 V
 9 2 V
+10 1 V
+9 2 V
+10 1 V
+10 2 V
+9 2 V
+10 1 V
+10 2 V
+9 1 V
 10 2 V
 10 2 V
+9 2 V
 10 2 V
 10 2 V
+9 2 V
 10 2 V
 10 2 V
+9 2 V
 10 2 V
-9 3 V
-10 2 V
-10 2 V
-10 2 V
-10 2 V
+10 3 V
+9 1 V
 10 3 V
 10 2 V
 9 3 V
 10 2 V
+10 3 V
+9 2 V
 10 2 V
 10 3 V
-10 3 V
-10 3 V
-10 3 V
-10 2 V
 9 3 V
 10 3 V
 10 3 V
+9 2 V
+10 3 V
+10 3 V
+9 3 V
+10 3 V
+10 3 V
+9 3 V
 10 3 V
 10 4 V
+9 4 V
 10 3 V
-10 2 V
+10 3 V
+9 4 V
+10 3 V
+10 4 V
 9 4 V
 10 4 V
-10 3 V
-10 3 V
 10 4 V
-10 4 V
-10 3 V
-10 4 V
-9 5 V
-10 4 V
-10 3 V
-10 4 V
-10 5 V
-10 5 V
+9 4 V
 10 4 V
 10 4 V
 9 5 V
 10 5 V
+10 4 V
+9 5 V
 10 5 V
 10 5 V
+9 5 V
 10 6 V
 10 5 V
-10 5 V
+9 5 V
+10 6 V
+10 6 V
+9 7 V
+10 6 V
 9 6 V
 10 7 V
-10 6 V
-10 6 V
-10 6 V
-10 7 V
-10 8 V
 10 7 V
 9 8 V
 10 8 V
-stroke 2246 1120 M
-10 9 V
 10 8 V
-10 9 V
+stroke 2345 1120 M
+9 8 V
+10 8 V
+10 10 V
+9 10 V
 10 11 V
 10 10 V
 9 11 V
-10 11 V
-10 12 V
-10 14 V
-10 14 V
-10 16 V
+10 13 V
+10 13 V
+9 15 V
+10 15 V
 10 17 V
-10 18 V
-9 21 V
-10 25 V
-10 29 V
+9 18 V
+10 21 V
+10 24 V
+9 29 V
 10 35 V
-10 47 V
-10 66 V
-10 94 V
-9 113 V
-10 105 V
-10 70 V
-10 33 V
-10 9 V
+10 45 V
+9 65 V
+10 92 V
+10 113 V
+9 107 V
+10 73 V
+10 35 V
+9 10 V
 10 -1 V
 10 -2 V
-10 -1 V
 9 -1 V
 10 -1 V
-10 1 V
+10 -1 V
+9 0 V
 10 2 V
-10 1 V
-10 1 V
+10 2 V
+9 1 V
 10 2 V
 10 4 V
-9 4 V
+9 3 V
 10 3 V
 10 4 V
+9 5 V
 10 5 V
-10 4 V
 10 5 V
-10 7 V
 9 6 V
+10 6 V
 10 5 V
-10 7 V
+9 7 V
 10 8 V
 10 8 V
-10 7 V
-10 9 V
+9 8 V
+10 8 V
 10 9 V
 9 10 V
 10 10 V
 10 11 V
-10 11 V
+9 11 V
 10 12 V
 10 13 V
-10 14 V
-9 16 V
+9 14 V
+10 16 V
 10 15 V
-10 15 V
+9 15 V
 10 20 V
-10 21 V
+9 21 V
 10 20 V
 10 23 V
-10 28 V
-9 28 V
-10 33 V
-10 39 V
+9 27 V
+10 29 V
+10 32 V
+9 39 V
 10 48 V
-10 59 V
-10 74 V
+10 58 V
+9 74 V
 10 75 V
-9 32 V
-10 -40 V
-10 -95 V
-10 -107 V
-10 -89 V
-10 -66 V
-10 -50 V
-10 -41 V
-9 -36 V
+10 35 V
+9 -37 V
+10 -94 V
+10 -106 V
+9 -91 V
+10 -67 V
+10 -51 V
+9 -41 V
+10 -36 V
 10 -29 V
-10 -27 V
+9 -27 V
 10 -25 V
 10 -22 V
-10 -18 V
+9 -19 V
 10 -19 V
 10 -18 V
 9 -15 V
 10 -14 V
 10 -14 V
-10 -13 V
+9 -13 V
 10 -12 V
 10 -12 V
-10 -10 V
 9 -10 V
 10 -10 V
 10 -10 V
+9 -10 V
 10 -8 V
 10 -8 V
-10 -9 V
+9 -9 V
 10 -7 V
 10 -7 V
-stroke 3273 1809 M
+stroke 3350 1810 M
+9 -8 V
+10 -7 V
+10 -6 V
 9 -7 V
-10 -7 V
-10 -7 V
 10 -6 V
 10 -6 V
+9 -6 V
+10 -5 V
 10 -6 V
-10 -7 V
 9 -5 V
 10 -6 V
 10 -5 V
-10 -5 V
-10 -5 V
-10 -5 V
-10 -5 V
+9 -5 V
+10 -4 V
 10 -5 V
 9 -4 V
 10 -4 V
-10 -3 V
 10 -4 V
-10 -2 V
+9 -3 V
+10 -3 V
 10 -1 V
-10 0 V
-9 2 V
-10 5 V
+9 0 V
+10 2 V
+9 5 V
 10 9 V
 10 11 V
-10 13 V
-10 15 V
+9 14 V
+10 14 V
 10 12 V
-10 3 V
-9 -17 V
-10 -44 V
-10 -67 V
+9 4 V
+10 -17 V
+10 -43 V
+9 -67 V
 10 -75 V
 10 -70 V
-10 -65 V
-10 -62 V
-10 -65 V
+9 -65 V
+10 -63 V
+10 -64 V
 9 -69 V
-10 -74 V
+10 -75 V
 10 -71 V
-10 -54 V
-10 -30 V
+9 -54 V
+10 -31 V
 10 -11 V
-10 -2 V
+9 -2 V
+10 2 V
+10 2 V
 9 2 V
-10 2 V
-10 2 V
-10 3 V
-10 3 V
-10 2 V
 10 3 V
 10 3 V
 9 2 V
 10 3 V
 10 3 V
+9 2 V
 10 3 V
+10 3 V
+9 3 V
 10 2 V
 10 4 V
-10 3 V
-9 2 V
+9 3 V
+10 2 V
 10 4 V
-10 3 V
+9 3 V
 10 3 V
 10 4 V
-10 3 V
+9 3 V
 10 3 V
 10 4 V
 9 4 V
 10 3 V
 10 4 V
-10 4 V
+9 4 V
 10 3 V
 10 4 V
+9 5 V
+10 3 V
 10 5 V
-9 3 V
-10 5 V
+9 4 V
 10 4 V
-10 4 V
-10 5 V
-10 4 V
-10 5 V
 10 5 V
 9 5 V
 10 4 V
 10 5 V
-10 6 V
+9 5 V
 10 5 V
 10 5 V
-10 6 V
+9 5 V
+10 5 V
 9 5 V
 10 6 V
-10 6 V
-10 6 V
-10 6 V
-10 6 V
-10 6 V
-10 7 V
+10 5 V
 9 6 V
+10 6 V
+10 6 V
+9 6 V
+10 6 V
+10 6 V
+9 7 V
+10 6 V
+10 7 V
+9 7 V
 10 7 V
 10 7 V
-10 7 V
-10 7 V
-10 8 V
-stroke 4299 1252 M
+9 8 V
+stroke 4354 1252 M
 10 7 V
 10 8 V
 9 8 V
 10 8 V
 10 9 V
-10 8 V
+9 8 V
 10 9 V
 10 9 V
-10 9 V
+9 9 V
+10 10 V
+10 10 V
 9 10 V
 10 10 V
-10 10 V
 10 11 V
-10 10 V
-10 11 V
+9 11 V
 10 12 V
 10 12 V
 9 12 V
 10 13 V
 10 14 V
-10 14 V
+9 14 V
 10 15 V
 10 15 V
+9 17 V
 10 17 V
-9 18 V
-10 18 V
-10 21 V
-10 22 V
-10 25 V
-10 27 V
-10 33 V
+10 19 V
+9 20 V
+10 23 V
+10 24 V
+9 28 V
+10 32 V
 10 39 V
 9 51 V
 10 67 V
-10 81 V
-10 75 V
-10 34 V
-10 -29 V
-10 -77 V
-9 -93 V
+10 82 V
+9 74 V
+10 35 V
+10 -28 V
+9 -78 V
+10 -93 V
 10 -82 V
-10 -64 V
-10 -50 V
-10 -41 V
-10 -36 V
+9 -64 V
+10 -49 V
+10 -42 V
+9 -36 V
 10 -32 V
 10 -30 V
-9 -29 V
-10 -26 V
+9 -28 V
 10 -27 V
-10 -25 V
-10 -25 V
-10 -22 V
+9 -26 V
+10 -26 V
+10 -24 V
+9 -23 V
 10 -20 V
 10 -15 V
 9 -10 V
 10 -6 V
 10 -2 V
-10 2 V
+9 2 V
 10 6 V
 10 12 V
-10 18 V
-9 26 V
-10 38 V
-10 48 V
-10 51 V
+9 18 V
+10 27 V
+10 37 V
+9 48 V
+10 52 V
 10 43 V
-10 28 V
+9 27 V
 10 16 V
 10 9 V
 9 7 V
-10 5 V
 10 6 V
-10 4 V
-10 4 V
+10 5 V
+9 5 V
 10 4 V
 10 3 V
 9 3 V
-10 1 V
+10 3 V
 10 2 V
+9 2 V
+10 0 V
 10 1 V
-10 1 V
+9 0 V
 10 0 V
 10 -1 V
-10 -1 V
-9 -1 V
+9 -2 V
 10 -2 V
 10 -2 V
-10 -3 V
+9 -3 V
 10 -4 V
 10 -4 V
-10 -5 V
 9 -5 V
+10 -5 V
+10 -6 V
+9 -7 V
 10 -6 V
 10 -7 V
-10 -6 V
-10 -7 V
-10 -10 V
+9 -10 V
 10 -11 V
 10 -13 V
 9 -13 V
 10 -11 V
 10 -9 V
-10 -10 V
-stroke 5325 1490 M
+9 -10 V
+stroke 5359 1490 M
 10 -6 V
 10 -7 V
-10 -8 V
-10 -6 V
-9 -4 V
-10 -7 V
-10 -6 V
-10 -3 V
-10 -6 V
-10 -6 V
-10 -3 V
-9 -4 V
-10 -7 V
-10 -2 V
-10 -3 V
-10 -7 V
-10 -3 V
-10 -1 V
-10 -6 V
-9 -4 V
-10 -1 V
+9 -8 V
 10 -5 V
-10 -4 V
+10 -5 V
+9 -7 V
+10 -6 V
+10 -3 V
+9 -6 V
+10 -6 V
+9 -2 V
+10 -5 V
+10 -7 V
+9 -2 V
+10 -3 V
+10 -7 V
+9 -2 V
+10 -2 V
+10 -6 V
+9 -4 V
+10 0 V
+10 -6 V
+9 -4 V
 10 0 V
 10 -4 V
-10 -5 V
-9 0 V
+9 -5 V
+10 0 V
 10 -2 V
-10 -5 V
+9 -5 V
 10 -1 V
-10 -1 V
-10 -4 V
-10 -1 V
+10 0 V
+9 -4 V
+10 -2 V
 10 0 V
 9 -2 V
 10 -2 V
 10 1 V
+9 -1 V
 10 -1 V
-10 -1 V
-10 1 V
-10 3 V
-9 6 V
+10 2 V
+9 2 V
+10 6 V
 10 39 V
-10 139 V
-10 345 V
-10 602 V
-10 735 V
-10 622 V
-10 341 V
+9 139 V
+10 346 V
+10 603 V
+9 736 V
+10 621 V
+10 340 V
 9 73 V
-10 -65 V
-10 -89 V
 10 -66 V
+10 -89 V
+9 -66 V
 10 -46 V
 10 -32 V
-10 -23 V
+9 -23 V
 10 -16 V
-9 -11 V
-10 -7 V
+10 -11 V
+9 -7 V
 10 -4 V
 10 -1 V
-10 1 V
-10 2 V
-10 4 V
-9 5 V
-10 6 V
-10 6 V
+9 1 V
+10 3 V
+10 3 V
+9 6 V
+10 5 V
+10 7 V
+9 7 V
 10 7 V
 10 8 V
-10 7 V
+9 8 V
 10 8 V
 10 8 V
 9 7 V
-10 8 V
 10 7 V
-10 6 V
-10 6 V
+10 7 V
+9 6 V
 10 4 V
-10 2 V
-9 0 V
+9 2 V
+10 0 V
 10 -3 V
-10 -7 V
-10 -11 V
-10 -18 V
-10 -28 V
+9 -6 V
+10 -12 V
+10 -17 V
+9 -29 V
 10 -58 V
-10 -120 V
-9 -211 V
+10 -121 V
+9 -214 V
 10 -286 V
-10 -293 V
-10 -245 V
+10 -294 V
+9 -243 V
 10 -182 V
 10 -136 V
-10 -107 V
-9 -89 V
+9 -107 V
+10 -89 V
 10 -76 V
-10 -67 V
-10 -59 V
+9 -66 V
+10 -60 V
 10 -53 V
-10 -49 V
+9 -48 V
 10 -44 V
 10 -41 V
 9 -38 V
 10 -36 V
-stroke 6351 1744 M
+stroke 6364 1744 M
 10 -33 V
-10 -32 V
+9 -32 V
 10 -30 V
 10 -29 V
+9 -27 V
 10 -27 V
-10 -27 V
-9 -26 V
-10 -25 V
+10 -26 V
+9 -25 V
 10 -25 V
 10 -24 V
-10 -23 V
+9 -23 V
 10 -24 V
 10 -25 V
-9 -35 V
-10 -63 V
+9 -36 V
+10 -62 V
 10 -104 V
-10 -129 V
+9 -129 V
 10 -115 V
 10 -69 V
-10 -29 V
+9 -29 V
 10 -8 V
-9 -2 V
+10 -2 V
+9 0 V
 10 0 V
 10 0 V
+9 0 V
 10 0 V
 10 0 V
-10 0 V
-10 0 V
-% End plot #1
 stroke
-2.000 UL
 LTb
-1220 4799 N
-0 -3959 V
-5679 0 V
-0 3959 V
--5679 0 V
+1340 4800 N
+0 -3960 V
+5560 0 V
+0 3960 V
+-5560 0 V
 Z stroke
 1.000 UP
 2.000 UL
@@ -1253,5 +1234,5 @@ grestore
 end
 showpage
 %%Trailer
-%%DocumentFonts: Helvetica
+%%DocumentFonts: AvantGarde-Book
 %%Pages: 1

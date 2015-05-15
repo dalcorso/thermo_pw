@@ -1,7 +1,7 @@
 %!PS-Adobe-2.0
 %%Title: output_anhar.ps
-%%Creator: gnuplot 4.4 patchlevel 0
-%%CreationDate: Wed Feb  5 10:06:01 2014
+%%Creator: gnuplot 4.2 patchlevel 6 
+%%CreationDate: Fri May 15 10:53:37 2015
 %%DocumentFonts: (atend)
 %%BoundingBox: 50 50 554 770
 %%Orientation: Landscape
@@ -11,8 +11,8 @@
 /gnudict 256 dict def
 gnudict begin
 %
-% The following true/false flags may be edited by hand if desired.
-% The unit line width and grayscale image gamma correction may also be changed.
+% The following 6 true/false flags may be edited by hand if required
+% The unit line width may also be changed
 %
 /Color true def
 /Blacktext false def
@@ -21,11 +21,9 @@ gnudict begin
 /Landscape true def
 /Level1 false def
 /Rounded false def
-/ClipToBoundingBox false def
 /TransparentPatterns false def
 /gnulinewidth 5.000 def
 /userlinewidth gnulinewidth def
-/Gamma 1.0 def
 %
 /vshift -66 def
 /dl1 {
@@ -48,24 +46,56 @@ systemdict /pdfmark known not {
 SDict begin [
   /Title (output_anhar.ps)
   /Subject (gnuplot plot)
-  /Creator (gnuplot 4.4 patchlevel 0)
-  /Author (dalcorso)
+  /Creator (gnuplot 4.2 patchlevel 6 )
+  /Author (espresso)
 %  /Producer (gnuplot)
 %  /Keywords ()
-  /CreationDate (Wed Feb  5 10:06:01 2014)
+  /CreationDate (Fri May 15 10:53:37 2015)
   /DOCINFO pdfmark
 end
 } ifelse
-/doclip {
-  ClipToBoundingBox {
-    newpath 50 50 moveto 554 50 lineto 554 770 lineto 50 770 lineto closepath
-    clip
-  } if
+/reencodeISO15 {
+dup dup findfont dup length dict begin
+{ 1 index /FID ne { def }{ pop pop } ifelse } forall
+currentdict /CharStrings known {
+	CharStrings /Idieresis known {
+		/Encoding ISOLatin15Encoding def } if
+} if
+currentdict end definefont
 } def
+/ISOLatin15Encoding [
+/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
+/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
+/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
+/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
+/space/exclam/quotedbl/numbersign/dollar/percent/ampersand/quoteright
+/parenleft/parenright/asterisk/plus/comma/minus/period/slash
+/zero/one/two/three/four/five/six/seven/eight/nine/colon/semicolon
+/less/equal/greater/question/at/A/B/C/D/E/F/G/H/I/J/K/L/M/N
+/O/P/Q/R/S/T/U/V/W/X/Y/Z/bracketleft/backslash/bracketright
+/asciicircum/underscore/quoteleft/a/b/c/d/e/f/g/h/i/j/k/l/m
+/n/o/p/q/r/s/t/u/v/w/x/y/z/braceleft/bar/braceright/asciitilde
+/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
+/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
+/.notdef/dotlessi/grave/acute/circumflex/tilde/macron/breve
+/dotaccent/dieresis/.notdef/ring/cedilla/.notdef/hungarumlaut
+/ogonek/caron/space/exclamdown/cent/sterling/Euro/yen/Scaron
+/section/scaron/copyright/ordfeminine/guillemotleft/logicalnot
+/hyphen/registered/macron/degree/plusminus/twosuperior/threesuperior
+/Zcaron/mu/paragraph/periodcentered/zcaron/onesuperior/ordmasculine
+/guillemotright/OE/oe/Ydieresis/questiondown
+/Agrave/Aacute/Acircumflex/Atilde/Adieresis/Aring/AE/Ccedilla
+/Egrave/Eacute/Ecircumflex/Edieresis/Igrave/Iacute/Icircumflex
+/Idieresis/Eth/Ntilde/Ograve/Oacute/Ocircumflex/Otilde/Odieresis
+/multiply/Oslash/Ugrave/Uacute/Ucircumflex/Udieresis/Yacute
+/Thorn/germandbls/agrave/aacute/acircumflex/atilde/adieresis
+/aring/ae/ccedilla/egrave/eacute/ecircumflex/edieresis/igrave
+/iacute/icircumflex/idieresis/eth/ntilde/ograve/oacute/ocircumflex
+/otilde/odieresis/divide/oslash/ugrave/uacute/ucircumflex/udieresis
+/yacute/thorn/ydieresis
+] def
 %
-% Gnuplot Prolog Version 4.4 (January 2010)
-%
-%/SuppressPDFMark true def
+% Gnuplot Prolog Version 4.2 (August 2006)
 %
 /M {moveto} bind def
 /L {lineto} bind def
@@ -75,7 +105,6 @@ end
 /Z {closepath} bind def
 /C {setrgbcolor} bind def
 /f {rlineto fill} bind def
-/Gshow {show} def   % May be redefined later in the file to support UTF-8
 /vpt2 vpt 2 mul def
 /hpt2 hpt 2 mul def
 /Lshow {currentpoint stroke M 0 vshift R 
@@ -433,66 +462,22 @@ Level1 {Level1PatternFill} {Level2PatternFill} ifelse
 /Symbol-Oblique /Symbol findfont [1 0 .167 1 0 0] makefont
 dup length dict begin {1 index /FID eq {pop pop} {def} ifelse} forall
 currentdict end definefont pop
-%
-% Encoding for ISO-8859-15 (also called Latin9)
-%
-/reencodeISO15 {
-dup dup findfont dup length dict begin
-{ 1 index /FID ne { def }{ pop pop } ifelse } forall
-currentdict /CharStrings known {
-	CharStrings /Idieresis known {
-		/Encoding ISOLatin15Encoding def } if
-} if
-currentdict end definefont
-} def
-/ISOLatin15Encoding [
-/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
-/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
-/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
-/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
-/space/exclam/quotedbl/numbersign/dollar/percent/ampersand/quoteright
-/parenleft/parenright/asterisk/plus/comma/minus/period/slash
-/zero/one/two/three/four/five/six/seven/eight/nine/colon/semicolon
-/less/equal/greater/question/at/A/B/C/D/E/F/G/H/I/J/K/L/M/N
-/O/P/Q/R/S/T/U/V/W/X/Y/Z/bracketleft/backslash/bracketright
-/asciicircum/underscore/quoteleft/a/b/c/d/e/f/g/h/i/j/k/l/m
-/n/o/p/q/r/s/t/u/v/w/x/y/z/braceleft/bar/braceright/asciitilde
-/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
-/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
-/.notdef/dotlessi/grave/acute/circumflex/tilde/macron/breve
-/dotaccent/dieresis/.notdef/ring/cedilla/.notdef/hungarumlaut
-/ogonek/caron/space/exclamdown/cent/sterling/Euro/yen/Scaron
-/section/scaron/copyright/ordfeminine/guillemotleft/logicalnot
-/hyphen/registered/macron/degree/plusminus/twosuperior/threesuperior
-/Zcaron/mu/paragraph/periodcentered/zcaron/onesuperior/ordmasculine
-/guillemotright/OE/oe/Ydieresis/questiondown
-/Agrave/Aacute/Acircumflex/Atilde/Adieresis/Aring/AE/Ccedilla
-/Egrave/Eacute/Ecircumflex/Edieresis/Igrave/Iacute/Icircumflex
-/Idieresis/Eth/Ntilde/Ograve/Oacute/Ocircumflex/Otilde/Odieresis
-/multiply/Oslash/Ugrave/Uacute/Ucircumflex/Udieresis/Yacute
-/Thorn/germandbls/agrave/aacute/acircumflex/atilde/adieresis
-/aring/ae/ccedilla/egrave/eacute/ecircumflex/edieresis/igrave
-/iacute/icircumflex/idieresis/eth/ntilde/ograve/oacute/ocircumflex
-/otilde/odieresis/divide/oslash/ugrave/uacute/ucircumflex/udieresis
-/yacute/thorn/ydieresis
-] def
 /MFshow {
    { dup 5 get 3 ge
      { 5 get 3 eq {gsave} {grestore} ifelse }
      {dup dup 0 get findfont exch 1 get scalefont setfont
      [ currentpoint ] exch dup 2 get 0 exch R dup 5 get 2 ne {dup dup 6
-     get exch 4 get {Gshow} {stringwidth pop 0 R} ifelse }if dup 5 get 0 eq
+     get exch 4 get {show} {stringwidth pop 0 R} ifelse }if dup 5 get 0 eq
      {dup 3 get {2 get neg 0 exch R pop} {pop aload pop M} ifelse} {dup 5
      get 1 eq {dup 2 get exch dup 3 get exch 6 get stringwidth pop -2 div
      dup 0 R} {dup 6 get stringwidth pop -2 div 0 R 6 get
      show 2 index {aload pop M neg 3 -1 roll neg R pop pop} {pop pop pop
      pop aload pop M} ifelse }ifelse }ifelse }
      ifelse }
-   forall} def
-/Gswidth {dup type /stringtype eq {stringwidth} {pop (n) stringwidth} ifelse} def
+   forall} bind def
 /MFwidth {0 exch { dup 5 get 3 ge { 5 get 3 eq { 0 } { pop } ifelse }
  {dup 3 get{dup dup 0 get findfont exch 1 get scalefont setfont
-     6 get Gswidth pop add} {pop} ifelse} ifelse} forall} def
+     6 get stringwidth pop add} {pop} ifelse} ifelse} forall} bind def
 /MLshow { currentpoint stroke M
   0 exch R
   Blacktext {gsave 0 setgray MFshow grestore} {MFshow} ifelse } bind def
@@ -504,789 +489,784 @@ currentdict end definefont
   Blacktext {gsave 0 setgray MFshow grestore} {MFshow} ifelse } bind def
 /XYsave    { [( ) 1 2 true false 3 ()] } bind def
 /XYrestore { [( ) 1 2 true false 4 ()] } bind def
-/Helvetica reencodeISO15 def
+/AvantGarde-Book reencodeISO15 def
 end
 %%EndProlog
 %%Page: 1 1
 gnudict begin
 gsave
-doclip
 50 50 translate
 0.100 0.100 scale
 90 rotate
 0 -5040 translate
 0 setgray
 newpath
-(Helvetica) findfont 200 scalefont setfont
+(AvantGarde-Book) findfont 200 scalefont setfont
 2.000 UL
 LTb
-1340 640 M
+1460 640 M
 63 0 V
-5496 0 R
+5377 0 R
 -63 0 V
 stroke
-1220 640 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 268.6)]
+1340 640 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 268.6)]
 ] -66.7 MRshow
 2.000 UL
 LTb
+1460 1102 M
+63 0 V
+5377 0 R
+-63 0 V
+stroke
 1340 1102 M
-63 0 V
-5496 0 R
--63 0 V
-stroke
-1220 1102 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 268.8)]
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 268.8)]
 ] -66.7 MRshow
 2.000 UL
 LTb
+1460 1564 M
+63 0 V
+5377 0 R
+-63 0 V
+stroke
 1340 1564 M
-63 0 V
-5496 0 R
--63 0 V
-stroke
-1220 1564 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 269)]
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 269)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1340 2026 M
+1460 2027 M
 63 0 V
-5496 0 R
+5377 0 R
 -63 0 V
 stroke
-1220 2026 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 269.2)]
+1340 2027 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 269.2)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1340 2488 M
+1460 2489 M
 63 0 V
-5496 0 R
+5377 0 R
 -63 0 V
 stroke
-1220 2488 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 269.4)]
+1340 2489 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 269.4)]
 ] -66.7 MRshow
 2.000 UL
 LTb
+1460 2951 M
+63 0 V
+5377 0 R
+-63 0 V
+stroke
 1340 2951 M
-63 0 V
-5496 0 R
--63 0 V
-stroke
-1220 2951 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 269.6)]
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 269.6)]
 ] -66.7 MRshow
 2.000 UL
 LTb
+1460 3413 M
+63 0 V
+5377 0 R
+-63 0 V
+stroke
 1340 3413 M
-63 0 V
-5496 0 R
--63 0 V
-stroke
-1220 3413 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 269.8)]
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 269.8)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1340 3875 M
+1460 3876 M
 63 0 V
-5496 0 R
+5377 0 R
 -63 0 V
 stroke
-1220 3875 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 270)]
+1340 3876 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 270)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1340 4337 M
+1460 4338 M
 63 0 V
-5496 0 R
+5377 0 R
 -63 0 V
 stroke
-1220 4337 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 270.2)]
+1340 4338 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 270.2)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1340 4799 M
+1460 4800 M
 63 0 V
-5496 0 R
+5377 0 R
 -63 0 V
 stroke
-1220 4799 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 270.4)]
+1340 4800 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 270.4)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1340 640 M
+1460 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-1340 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 0)]
+1460 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-2035 640 M
+2140 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-2035 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 100)]
+2140 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 100)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-2730 640 M
+2820 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-2730 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 200)]
+2820 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 200)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-3425 640 M
+3500 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-3425 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 300)]
+3500 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 300)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-4120 640 M
+4180 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-4120 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 400)]
+4180 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 400)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-4814 640 M
+4860 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-4814 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 500)]
+4860 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 500)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-5509 640 M
+5540 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-5509 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 600)]
+5540 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 600)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-6204 640 M
+6220 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-6204 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 700)]
+6220 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 700)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-6899 640 M
+6900 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-6899 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 800)]
+6900 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 800)]
 ] -66.7 MCshow
 2.000 UL
 LTb
 2.000 UL
 LTb
-1340 4799 N
-0 -4159 V
-5559 0 V
-0 4159 V
--5559 0 V
+1460 4800 N
+0 -4160 V
+5440 0 V
+0 4160 V
+-5440 0 V
 Z stroke
 LCb setrgbcolor
-280 2719 M
-currentpoint gsave translate -270 rotate 0 0 moveto
-[ [(Helvetica) 200.0 0.0 true true 0 (Volume \(\(a.u.\))]
-[(Helvetica) 160.0 100.0 true true 0 (3)]
-[(Helvetica) 200.0 0.0 true true 0 (\))]
+400 2720 M
+currentpoint gsave translate 90 rotate 0 0 moveto
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 (Volume \(\(a.u.\))]
+[(AvantGarde-Book) 160.0 100.0 true true 0 (3)]
+[(AvantGarde-Book) 200.0 0.0 true true 0 (\))]
 ] -86.7 MCshow
 grestore
 LTb
 LCb setrgbcolor
-4119 140 M
-[ [(Helvetica) 200.0 0.0 true true 0 (T \(K\))]
+4180 140 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 (T \(K\))]
 ] -66.7 MCshow
 LTb
 1.000 UP
 2.000 UL
 LTb
-% Begin plot #1
 3.000 UL
 LT0
-1.00 0.00 0.00 C /Helvetica findfont 200 scalefont setfont
-1368 742 M
+1.00 0.00 0.00 C /AvantGarde-Book findfont 200 scalefont setfont
+1487 745 M
+21 0 V
+20 0 V
+20 0 V
 21 0 V
 20 0 V
 21 0 V
-21 0 V
-21 0 V
-21 -1 V
-21 0 V
-21 0 V
 20 -1 V
+20 0 V
 21 -1 V
-21 -1 V
-21 -1 V
+20 0 V
 21 -2 V
+20 -1 V
+20 -2 V
 21 -2 V
 20 -2 V
-21 -3 V
 21 -2 V
+20 -3 V
+20 -3 V
 21 -3 V
+20 -3 V
 21 -4 V
-21 -3 V
-21 -3 V
+20 -3 V
 20 -4 V
-21 -3 V
-21 -4 V
-21 -4 V
-21 -3 V
 21 -4 V
 20 -3 V
 21 -4 V
+20 -3 V
+20 -4 V
 21 -3 V
+20 -3 V
+21 -4 V
+20 -2 V
+20 -3 V
 21 -3 V
-21 -3 V
-21 -3 V
-21 -2 V
 20 -2 V
 21 -2 V
-21 -2 V
-21 -2 V
+20 -1 V
+20 -2 V
 21 -1 V
-21 -1 V
+20 -1 V
+21 0 V
+20 0 V
 20 0 V
 21 0 V
-21 0 V
-21 0 V
-21 1 V
-21 1 V
+20 1 V
 21 1 V
 20 2 V
-21 2 V
+20 1 V
 21 3 V
-21 2 V
+20 2 V
+21 3 V
+20 3 V
+20 3 V
 21 4 V
-21 3 V
 20 4 V
-21 4 V
-21 4 V
 21 5 V
-21 5 V
-21 5 V
+20 4 V
+20 5 V
+21 6 V
+20 5 V
 21 6 V
 20 6 V
-21 6 V
-21 6 V
+20 7 V
 21 7 V
-21 7 V
+20 7 V
 21 7 V
 20 8 V
+20 8 V
 21 8 V
-21 8 V
-21 8 V
-21 9 V
-21 9 V
+20 8 V
 21 9 V
 20 9 V
+20 9 V
+21 9 V
+20 10 V
 21 10 V
-21 10 V
-21 10 V
-21 10 V
+20 10 V
+20 10 V
 21 11 V
 20 10 V
 21 11 V
+20 11 V
+20 12 V
 21 11 V
-21 12 V
-21 11 V
-21 12 V
-21 12 V
 20 12 V
 21 12 V
+20 12 V
+20 12 V
 21 12 V
-21 13 V
-21 13 V
-21 13 V
 20 13 V
 21 13 V
+20 13 V
+20 13 V
 21 13 V
-21 14 V
-21 14 V
-21 14 V
+20 13 V
 21 14 V
 20 14 V
+20 13 V
 21 14 V
-21 15 V
+20 15 V
 21 14 V
-21 15 V
-stroke 3536 1191 M
-21 15 V
+20 14 V
+20 15 V
+21 14 V
+stroke 3609 1195 M
 20 15 V
 21 15 V
-21 15 V
-21 15 V
+20 15 V
+20 15 V
 21 16 V
-21 15 V
+20 15 V
+21 16 V
+20 15 V
+20 16 V
 21 16 V
 20 16 V
 21 16 V
-21 16 V
-21 16 V
-21 16 V
-21 16 V
+20 16 V
+20 16 V
+21 17 V
+20 16 V
+21 17 V
 20 17 V
-21 16 V
+20 16 V
 21 17 V
+20 17 V
 21 17 V
-21 17 V
-21 16 V
-21 17 V
-20 18 V
-21 17 V
-21 17 V
-21 17 V
+20 17 V
+20 17 V
 21 18 V
-21 17 V
+20 17 V
 21 18 V
+20 17 V
 20 18 V
 21 18 V
-21 17 V
+20 17 V
 21 18 V
-21 18 V
-21 19 V
+20 18 V
 20 18 V
 21 18 V
-21 18 V
+20 18 V
 21 19 V
-21 18 V
+20 18 V
+20 18 V
 21 19 V
-21 18 V
+20 18 V
+21 19 V
+20 18 V
 20 19 V
 21 19 V
-21 19 V
-21 19 V
-21 18 V
-21 20 V
 20 19 V
 21 19 V
+20 19 V
+20 19 V
 21 19 V
+20 19 V
 21 19 V
-21 20 V
-21 19 V
-21 19 V
+20 19 V
 20 20 V
 21 19 V
+20 19 V
 21 20 V
-21 20 V
-21 20 V
-21 19 V
+20 19 V
 20 20 V
 21 20 V
+20 19 V
 21 20 V
+20 20 V
+20 20 V
 21 20 V
+20 20 V
 21 20 V
+20 20 V
+20 20 V
 21 20 V
+20 20 V
+21 20 V
+20 21 V
+20 20 V
 21 20 V
 20 21 V
 21 20 V
-21 20 V
+20 21 V
+20 20 V
 21 21 V
+20 21 V
 21 20 V
+20 21 V
+20 21 V
 21 21 V
 20 20 V
 21 21 V
-21 20 V
-21 21 V
-21 21 V
-21 21 V
-21 20 V
 20 21 V
-21 21 V
-21 21 V
-21 21 V
-21 21 V
+20 21 V
 21 21 V
 20 21 V
 21 22 V
+20 21 V
+20 21 V
 21 21 V
-21 21 V
-21 21 V
+20 21 V
 21 22 V
-21 21 V
+20 21 V
+20 21 V
+21 22 V
+20 21 V
+21 22 V
+20 21 V
 20 22 V
-21 21 V
+stroke 5730 3160 M
 21 22 V
-21 21 V
-21 22 V
-21 21 V
-20 22 V
-21 22 V
-21 22 V
-21 22 V
-21 21 V
-stroke 5704 3170 M
-21 22 V
+20 21 V
 21 22 V
 20 22 V
-21 22 V
-21 22 V
-21 22 V
-21 23 V
+20 21 V
 21 22 V
 20 22 V
 21 22 V
-21 22 V
-21 23 V
-21 22 V
-21 23 V
+20 22 V
+20 22 V
 21 22 V
 20 22 V
-21 23 V
-21 23 V
 21 22 V
-21 23 V
+20 22 V
+20 22 V
+21 22 V
+20 22 V
+21 22 V
+20 23 V
+20 22 V
+21 22 V
+20 23 V
+21 22 V
+20 22 V
+20 23 V
+21 22 V
+20 23 V
+21 22 V
+20 23 V
+20 23 V
 21 22 V
 20 23 V
 21 23 V
-21 23 V
-21 22 V
-21 23 V
-21 23 V
+20 22 V
+20 23 V
 21 23 V
 20 23 V
 21 23 V
+20 22 V
+20 23 V
 21 23 V
+20 23 V
 21 23 V
+20 23 V
+20 23 V
+21 24 V
+20 23 V
 21 23 V
+20 23 V
+20 23 V
+21 24 V
+20 23 V
 21 23 V
 20 24 V
+20 23 V
 21 23 V
-21 23 V
-21 23 V
-21 24 V
-21 23 V
-21 23 V
-20 24 V
-21 23 V
-21 24 V
-21 23 V
-21 24 V
-21 23 V
-20 24 V
-21 24 V
-21 23 V
-21 24 V
-21 24 V
-21 24 V
-21 23 V
-20 24 V
-21 24 V
-% End plot #1
-% Begin plot #2
 stroke
 LT1
-0.00 0.00 1.00 C /Helvetica findfont 200 scalefont setfont
-1368 742 M
+0.00 0.00 1.00 C /AvantGarde-Book findfont 200 scalefont setfont
+1487 745 M
+21 0 V
+20 0 V
+20 0 V
 21 0 V
 20 0 V
 21 0 V
-21 0 V
-21 0 V
-21 -1 V
-21 0 V
-21 0 V
 20 -1 V
+20 0 V
 21 -1 V
-21 -1 V
-21 -1 V
+20 0 V
 21 -2 V
+20 -1 V
+20 -2 V
 21 -2 V
 20 -2 V
-21 -3 V
 21 -2 V
+20 -3 V
+20 -3 V
 21 -3 V
+20 -3 V
 21 -4 V
-21 -3 V
-21 -3 V
+20 -3 V
 20 -4 V
-21 -3 V
-21 -4 V
-21 -4 V
-21 -3 V
 21 -4 V
 20 -3 V
 21 -4 V
+20 -3 V
+20 -4 V
 21 -3 V
-21 -3 V
-21 -3 V
-21 -3 V
-21 -2 V
+20 -3 V
+21 -4 V
 20 -2 V
+20 -3 V
 21 -2 V
+20 -3 V
 21 -2 V
-21 -2 V
+20 -1 V
+20 -2 V
 21 -1 V
-21 -1 V
+20 -1 V
+21 0 V
+20 0 V
 20 0 V
 21 0 V
-21 0 V
-21 0 V
-21 1 V
-21 1 V
-21 2 V
 20 1 V
-21 2 V
+21 1 V
+20 2 V
+20 1 V
 21 3 V
+20 2 V
 21 3 V
-21 3 V
-21 3 V
+20 3 V
+20 3 V
+21 4 V
 20 4 V
-21 4 V
-21 4 V
 21 5 V
-21 5 V
-21 5 V
+20 4 V
+20 5 V
+21 6 V
+20 5 V
 21 6 V
 20 6 V
-21 6 V
-21 6 V
+20 7 V
 21 7 V
-21 7 V
+20 7 V
 21 7 V
 20 8 V
+20 8 V
 21 8 V
-21 8 V
-21 8 V
-21 9 V
-21 9 V
+20 8 V
 21 9 V
 20 9 V
+20 9 V
+21 9 V
+20 10 V
 21 10 V
-21 10 V
-21 10 V
-21 10 V
+20 10 V
+20 10 V
 21 11 V
 20 10 V
 21 11 V
+20 11 V
+20 12 V
 21 11 V
-21 12 V
-21 11 V
-21 12 V
-21 12 V
 20 12 V
 21 12 V
+20 12 V
+20 12 V
 21 12 V
-21 13 V
-21 13 V
-21 13 V
 20 13 V
 21 13 V
-21 14 V
+20 13 V
+20 13 V
 21 13 V
-21 14 V
-21 14 V
+20 13 V
 21 14 V
 20 14 V
+20 14 V
+21 13 V
+20 15 V
 21 14 V
-21 15 V
-21 14 V
-21 15 V
-stroke 3536 1191 M
-21 15 V
+20 14 V
 20 15 V
 21 15 V
+stroke 3609 1196 M
+20 14 V
 21 15 V
+20 15 V
+20 16 V
 21 15 V
+20 15 V
 21 16 V
-21 15 V
+20 15 V
+20 16 V
 21 16 V
 20 16 V
 21 16 V
-21 16 V
-21 16 V
-21 16 V
-21 16 V
+20 16 V
 20 17 V
 21 16 V
+20 16 V
 21 17 V
-21 17 V
-21 17 V
-21 17 V
+20 17 V
+20 16 V
 21 17 V
 20 17 V
 21 17 V
+20 17 V
+20 18 V
 21 17 V
+20 17 V
 21 18 V
-21 17 V
-21 18 V
-21 17 V
+20 17 V
 20 18 V
 21 18 V
-21 18 V
-21 18 V
-21 18 V
+20 17 V
 21 18 V
 20 18 V
+20 18 V
 21 18 V
-21 18 V
+20 18 V
 21 19 V
-21 18 V
+20 18 V
+20 18 V
 21 19 V
-21 18 V
-20 19 V
-21 19 V
-21 19 V
-21 19 V
-21 19 V
+20 18 V
 21 19 V
 20 19 V
+20 18 V
 21 19 V
+20 19 V
 21 19 V
+20 19 V
+20 19 V
 21 19 V
+20 19 V
+21 19 V
+20 19 V
+20 20 V
+21 19 V
+20 19 V
 21 20 V
-21 19 V
+20 19 V
+20 20 V
 21 20 V
 20 19 V
 21 20 V
-21 19 V
-21 20 V
-21 20 V
-21 19 V
+20 20 V
 20 20 V
 21 20 V
-21 20 V
-21 20 V
-21 20 V
-21 20 V
-21 21 V
 20 20 V
 21 20 V
-21 20 V
-21 21 V
-21 20 V
-21 21 V
 20 20 V
-21 21 V
+20 20 V
 21 20 V
-21 21 V
-21 21 V
-21 21 V
+20 20 V
 21 20 V
 20 21 V
+20 20 V
+21 20 V
+20 21 V
+21 20 V
+20 21 V
+20 20 V
 21 21 V
+20 21 V
+21 20 V
+20 21 V
+20 21 V
 21 21 V
-21 21 V
-21 21 V
+20 21 V
+21 20 V
+20 21 V
+20 21 V
 21 21 V
 20 22 V
 21 21 V
-21 21 V
-21 21 V
-21 22 V
-21 21 V
+20 21 V
+20 21 V
 21 21 V
 20 22 V
 21 21 V
-21 22 V
+20 21 V
+20 22 V
 21 21 V
+20 21 V
 21 22 V
+20 21 V
+20 22 V
+stroke 5730 3160 M
 21 22 V
 20 21 V
 21 22 V
-21 22 V
-21 22 V
-21 22 V
-stroke 5704 3171 M
+20 22 V
+20 22 V
 21 21 V
+20 22 V
+21 22 V
+20 22 V
+20 22 V
 21 22 V
 20 22 V
 21 22 V
-21 22 V
-21 23 V
-21 22 V
-21 22 V
+20 22 V
 20 22 V
 21 22 V
+20 22 V
 21 23 V
-21 22 V
-21 22 V
-21 23 V
+20 22 V
+20 22 V
 21 22 V
 20 23 V
 21 22 V
-21 23 V
+20 23 V
+20 22 V
 21 22 V
-21 23 V
+20 23 V
 21 23 V
 20 22 V
-21 23 V
-21 23 V
-21 23 V
+20 23 V
 21 22 V
+20 23 V
 21 23 V
+20 22 V
+20 23 V
 21 23 V
 20 23 V
 21 23 V
+20 23 V
+20 23 V
 21 23 V
+20 23 V
 21 23 V
+20 23 V
+20 23 V
 21 23 V
+20 23 V
 21 23 V
+20 23 V
 20 24 V
 21 23 V
-21 23 V
-21 23 V
-21 24 V
-21 23 V
+20 23 V
 21 23 V
 20 24 V
-21 23 V
+20 23 V
 21 24 V
-21 23 V
-21 24 V
-21 23 V
-20 24 V
-21 24 V
-21 23 V
-21 24 V
-21 24 V
-21 24 V
-21 23 V
-20 24 V
-21 24 V
-% End plot #2
 stroke
 2.000 UL
 LTb
-1340 4799 N
-0 -4159 V
-5559 0 V
-0 4159 V
--5559 0 V
+1460 4800 N
+0 -4160 V
+5440 0 V
+0 4160 V
+-5440 0 V
 Z stroke
 1.000 UP
 2.000 UL
@@ -1298,1060 +1278,776 @@ showpage
 %%Page: 2 2
 gnudict begin
 gsave
-doclip
 50 50 translate
 0.100 0.100 scale
 90 rotate
 0 -5040 translate
 0 setgray
 newpath
-(Helvetica) findfont 200 scalefont setfont
+(AvantGarde-Book) findfont 200 scalefont setfont
 2.000 UL
 LTb
-980 640 M
+1220 640 M
 63 0 V
-5856 0 R
+5617 0 R
 -63 0 V
 stroke
-860 640 M
-[ [(Helvetica) 200.0 0.0 true true 0 (-2)]
+1100 640 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 880)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-980 1102 M
+1220 1102 M
 63 0 V
-5856 0 R
+5617 0 R
 -63 0 V
 stroke
-860 1102 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 0)]
+1100 1102 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 890)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-980 1564 M
+1220 1564 M
 63 0 V
-5856 0 R
+5617 0 R
 -63 0 V
 stroke
-860 1564 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 2)]
+1100 1564 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 900)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-980 2026 M
+1220 2027 M
 63 0 V
-5856 0 R
+5617 0 R
 -63 0 V
 stroke
-860 2026 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 4)]
+1100 2027 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 910)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-980 2488 M
+1220 2489 M
 63 0 V
-5856 0 R
+5617 0 R
 -63 0 V
 stroke
-860 2488 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 6)]
+1100 2489 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 920)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-980 2951 M
+1220 2951 M
 63 0 V
-5856 0 R
+5617 0 R
 -63 0 V
 stroke
-860 2951 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 8)]
+1100 2951 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 930)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-980 3413 M
+1220 3413 M
 63 0 V
-5856 0 R
+5617 0 R
 -63 0 V
 stroke
-860 3413 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 10)]
+1100 3413 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 940)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-980 3875 M
+1220 3876 M
 63 0 V
-5856 0 R
+5617 0 R
 -63 0 V
 stroke
-860 3875 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 12)]
+1100 3876 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 950)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-980 4337 M
+1220 4338 M
 63 0 V
-5856 0 R
+5617 0 R
 -63 0 V
 stroke
-860 4337 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 14)]
+1100 4338 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 960)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-980 4799 M
+1220 4800 M
 63 0 V
-5856 0 R
+5617 0 R
 -63 0 V
 stroke
-860 4799 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 16)]
+1100 4800 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 970)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-980 640 M
+1220 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-980 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 0)]
+1220 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-1720 640 M
+1930 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-1720 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 100)]
+1930 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 100)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-2460 640 M
+2640 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-2460 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 200)]
+2640 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 200)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-3200 640 M
+3350 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-3200 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 300)]
+3350 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 300)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-3940 640 M
+4060 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-3940 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 400)]
+4060 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 400)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-4679 640 M
+4770 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-4679 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 500)]
+4770 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 500)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-5419 640 M
+5480 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-5419 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 600)]
+5480 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 600)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-6159 640 M
+6190 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-6159 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 700)]
+6190 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 700)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-6899 640 M
+6900 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-6899 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 800)]
+6900 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 800)]
 ] -66.7 MCshow
 2.000 UL
 LTb
 2.000 UL
 LTb
-980 4799 N
-980 640 L
-5919 0 V
-0 4159 V
--5919 0 V
+1220 4800 N
+0 -4160 V
+5680 0 V
+0 4160 V
+-5680 0 V
 Z stroke
 LCb setrgbcolor
-280 2719 M
-currentpoint gsave translate -270 rotate 0 0 moveto
-[ [(Helvetica) 200.0 0.0 true true 0 (Thermal expansion \()]
-/Symbol reencodeISO15 def
-[(Symbol) 200.0 0.0 true true 0 (b)]
-[(Helvetica) 200.0 0.0 true true 0 ( x 10)]
-[(Helvetica) 160.0 100.0 true true 0 (6)]
-[(Helvetica) 200.0 0.0 true true 0 (\))]
-] -86.7 MCshow
+400 2720 M
+currentpoint gsave translate 90 rotate 0 0 moveto
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 (Bulk modulus \(kbar\))]
+] -66.7 MCshow
 grestore
 LTb
 LCb setrgbcolor
-3939 140 M
-[ [(Helvetica) 200.0 0.0 true true 0 (T \(K\))]
+4060 140 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 (T \(K\))]
 ] -66.7 MCshow
 LTb
 1.000 UP
 2.000 UL
 LTb
-% Begin plot #1
 3.000 UL
 LT0
-1.00 0.00 0.00 C /Helvetica findfont 200 scalefont setfont
-1010 1102 M
+1.00 0.00 0.00 C /AvantGarde-Book findfont 200 scalefont setfont
+1248 4376 M
+22 0 V
+21 0 V
+21 0 V
+22 0 V
+21 -1 V
+21 0 V
 22 -1 V
+21 -1 V
+21 -1 V
+21 -2 V
 22 -2 V
-22 -2 V
-22 -4 V
-23 -8 V
-22 -12 V
-22 -16 V
-22 -22 V
-22 -26 V
-23 -31 V
-22 -33 V
-22 -35 V
-22 -35 V
-22 -34 V
-23 -33 V
-22 -31 V
-22 -29 V
-22 -25 V
-22 -22 V
-23 -18 V
-22 -14 V
-22 -11 V
-22 -6 V
+21 -2 V
+21 -3 V
 22 -3 V
-23 1 V
-22 5 V
-22 9 V
-22 12 V
-22 15 V
-22 19 V
-23 21 V
-22 24 V
-22 26 V
-22 29 V
-22 30 V
-23 33 V
-22 34 V
-22 35 V
-22 37 V
-22 38 V
-23 39 V
-22 39 V
-22 40 V
-22 40 V
-22 41 V
-23 41 V
-22 42 V
-22 41 V
-22 41 V
-22 41 V
-23 42 V
-22 40 V
-22 41 V
-22 40 V
-22 39 V
-23 40 V
-22 39 V
-22 38 V
-22 38 V
-22 37 V
-23 37 V
-22 36 V
-22 36 V
-22 35 V
-22 34 V
-23 34 V
-22 33 V
-22 33 V
-22 32 V
-22 32 V
-23 31 V
-22 30 V
-22 30 V
-22 29 V
-22 29 V
-23 28 V
-22 27 V
-22 27 V
-22 27 V
-22 26 V
-22 25 V
-23 25 V
-22 25 V
-22 23 V
-22 24 V
-22 23 V
-23 23 V
-22 22 V
-22 21 V
-22 22 V
-22 21 V
-23 20 V
-22 20 V
-22 20 V
-22 19 V
-22 19 V
-23 19 V
-22 18 V
-22 18 V
-22 17 V
-22 18 V
-23 16 V
-22 17 V
-22 16 V
-stroke 3318 2933 M
-22 16 V
-22 16 V
-23 15 V
-22 16 V
-22 14 V
-22 15 V
-22 14 V
-23 14 V
-22 14 V
-22 14 V
-22 13 V
-22 14 V
-23 12 V
-22 13 V
-22 13 V
-22 12 V
-22 12 V
-23 12 V
-22 12 V
-22 11 V
-22 12 V
-22 11 V
-23 11 V
-22 11 V
-22 11 V
-22 10 V
-22 10 V
-23 11 V
-22 10 V
-22 10 V
-22 9 V
-22 10 V
-22 10 V
-23 9 V
-22 9 V
-22 9 V
-22 9 V
-22 9 V
-23 9 V
-22 9 V
-22 8 V
-22 9 V
-22 8 V
-23 8 V
-22 8 V
-22 8 V
-22 8 V
-22 8 V
-23 8 V
-22 7 V
-22 8 V
-22 7 V
-22 8 V
-23 7 V
-22 7 V
-22 8 V
-22 7 V
-22 7 V
-23 6 V
-22 7 V
-22 7 V
-22 7 V
-22 7 V
-23 6 V
-22 6 V
-22 7 V
-22 7 V
-22 6 V
-23 6 V
-22 6 V
-22 6 V
-22 7 V
-22 6 V
-23 6 V
-22 6 V
-22 5 V
-22 6 V
-22 6 V
-23 6 V
-22 6 V
-22 5 V
-22 6 V
-22 5 V
-22 6 V
-23 6 V
-22 5 V
-22 5 V
-22 6 V
-22 5 V
-23 5 V
-22 6 V
-22 5 V
-22 5 V
-22 5 V
-23 5 V
-22 6 V
-22 5 V
-22 5 V
-22 5 V
-23 5 V
-22 5 V
-22 5 V
-22 4 V
-22 5 V
-stroke 5626 3806 M
-23 5 V
-22 5 V
-22 5 V
-22 5 V
-22 4 V
-23 5 V
-22 5 V
-22 4 V
-22 5 V
-22 5 V
-23 4 V
-22 5 V
-22 5 V
-22 4 V
-22 5 V
-23 4 V
-22 5 V
-22 4 V
-22 5 V
-22 4 V
-23 4 V
-22 5 V
-22 4 V
-22 5 V
-22 4 V
-23 4 V
-22 5 V
-22 4 V
-22 5 V
-22 4 V
-22 4 V
-23 4 V
-22 5 V
-22 4 V
-22 4 V
-22 4 V
-23 5 V
-22 4 V
-22 4 V
-22 4 V
-22 4 V
-23 5 V
-22 4 V
-22 4 V
-22 4 V
-22 4 V
-23 4 V
-22 5 V
-22 4 V
-22 4 V
-22 4 V
-23 4 V
-22 4 V
-22 4 V
-22 4 V
-22 4 V
-% End plot #1
-% Begin plot #2
+21 -4 V
+21 -4 V
+22 -4 V
+21 -5 V
+21 -5 V
+21 -5 V
+22 -6 V
+21 -6 V
+21 -6 V
+22 -7 V
+21 -7 V
+21 -7 V
+22 -7 V
+21 -8 V
+21 -8 V
+21 -8 V
+22 -9 V
+21 -8 V
+21 -9 V
+22 -9 V
+21 -10 V
+21 -9 V
+22 -10 V
+21 -10 V
+21 -10 V
+21 -10 V
+22 -10 V
+21 -11 V
+21 -10 V
+22 -11 V
+21 -11 V
+21 -11 V
+22 -11 V
+21 -12 V
+21 -11 V
+21 -11 V
+22 -12 V
+21 -12 V
+21 -12 V
+22 -11 V
+21 -12 V
+21 -12 V
+22 -12 V
+21 -13 V
+21 -12 V
+21 -12 V
+22 -12 V
+21 -13 V
+21 -12 V
+22 -13 V
+21 -12 V
+21 -13 V
+22 -13 V
+21 -12 V
+21 -13 V
+21 -13 V
+22 -13 V
+21 -13 V
+21 -13 V
+22 -13 V
+21 -13 V
+21 -13 V
+22 -13 V
+21 -13 V
+21 -13 V
+21 -13 V
+22 -14 V
+21 -13 V
+21 -13 V
+22 -14 V
+21 -13 V
+21 -13 V
+22 -14 V
+21 -13 V
+21 -14 V
+21 -13 V
+22 -14 V
+21 -13 V
+21 -14 V
+22 -14 V
+21 -13 V
+21 -14 V
+22 -14 V
+21 -13 V
+21 -14 V
+21 -14 V
+22 -14 V
+21 -14 V
+21 -13 V
+22 -14 V
+stroke 3464 3358 M
+21 -14 V
+21 -14 V
+22 -14 V
+21 -14 V
+21 -14 V
+21 -14 V
+22 -14 V
+21 -14 V
+21 -15 V
+22 -14 V
+21 -14 V
+21 -14 V
+22 -14 V
+21 -15 V
+21 -14 V
+21 -14 V
+22 -14 V
+21 -15 V
+21 -14 V
+22 -15 V
+21 -14 V
+21 -14 V
+22 -15 V
+21 -14 V
+21 -15 V
+21 -15 V
+22 -14 V
+21 -15 V
+21 -14 V
+22 -15 V
+21 -15 V
+21 -14 V
+22 -15 V
+21 -15 V
+21 -15 V
+21 -14 V
+22 -15 V
+21 -15 V
+21 -15 V
+22 -15 V
+21 -15 V
+21 -15 V
+22 -15 V
+21 -15 V
+21 -15 V
+21 -15 V
+22 -15 V
+21 -15 V
+21 -16 V
+22 -15 V
+21 -15 V
+21 -15 V
+22 -15 V
+21 -16 V
+21 -15 V
+21 -15 V
+22 -16 V
+21 -15 V
+21 -16 V
+22 -15 V
+21 -16 V
+21 -15 V
+22 -16 V
+21 -15 V
+21 -16 V
+21 -16 V
+22 -15 V
+21 -16 V
+21 -16 V
+22 -15 V
+21 -16 V
+21 -16 V
+22 -16 V
+21 -16 V
+21 -16 V
+21 -15 V
+22 -16 V
+21 -16 V
+21 -16 V
+22 -17 V
+21 -16 V
+21 -16 V
+22 -16 V
+21 -16 V
+21 -16 V
+21 -16 V
+22 -17 V
+21 -16 V
+21 -16 V
+22 -17 V
+21 -16 V
+21 -16 V
+22 -17 V
+21 -16 V
+21 -17 V
+21 -16 V
+22 -17 V
+21 -16 V
+21 -17 V
+22 -16 V
+21 -17 V
+21 -17 V
+22 -17 V
+21 -16 V
+stroke 5679 1768 M
+21 -17 V
+21 -17 V
+22 -17 V
+21 -17 V
+21 -17 V
+22 -17 V
+21 -17 V
+21 -17 V
+22 -17 V
+21 -17 V
+21 -17 V
+21 -17 V
+22 -17 V
+21 -17 V
+21 -17 V
+22 -18 V
+21 -17 V
+21 -17 V
+22 -18 V
+21 -17 V
+21 -17 V
+21 -18 V
+22 -17 V
+21 -18 V
+21 -17 V
+22 -18 V
+21 -18 V
+21 -17 V
+22 -18 V
+21 -18 V
+21 -17 V
+21 -18 V
+22 -18 V
+21 -18 V
+21 -18 V
+22 -18 V
+21 -18 V
+21 -18 V
+22 -17 V
+21 -19 V
+21 -18 V
+21 -18 V
+22 -18 V
+21 -18 V
+21 -18 V
+22 -18 V
+21 -19 V
+21 -18 V
+22 -18 V
+21 -19 V
+21 -18 V
+21 -19 V
+22 -18 V
+21 -19 V
+21 -18 V
+22 -19 V
 stroke
 LT1
-0.00 0.00 1.00 C /Helvetica findfont 200 scalefont setfont
-1010 1102 M
-22 -1 V
-22 -2 V
-22 -2 V
-22 -5 V
-23 -7 V
-22 -12 V
-22 -16 V
-22 -22 V
-22 -26 V
-23 -31 V
-22 -33 V
-22 -34 V
-22 -35 V
-22 -35 V
-23 -33 V
-22 -31 V
-22 -28 V
-22 -26 V
-22 -21 V
-23 -19 V
-22 -14 V
-22 -11 V
-22 -6 V
-22 -3 V
-23 2 V
-22 4 V
-22 9 V
-22 12 V
-22 16 V
-22 18 V
-23 21 V
-22 24 V
-22 26 V
-22 29 V
-22 31 V
-23 32 V
-22 34 V
-22 35 V
-22 37 V
-22 38 V
-23 39 V
-22 39 V
-22 40 V
-22 41 V
-22 40 V
-23 41 V
-22 42 V
-22 41 V
-22 41 V
-22 42 V
-23 41 V
-22 40 V
-22 41 V
-22 40 V
-22 40 V
-23 39 V
-22 39 V
-22 38 V
-22 38 V
-22 37 V
-23 37 V
-22 36 V
-22 36 V
-22 35 V
-22 34 V
-23 34 V
-22 33 V
-22 33 V
-22 32 V
-22 32 V
-23 31 V
-22 30 V
-22 30 V
-22 29 V
-22 29 V
-23 28 V
-22 27 V
-22 27 V
-22 27 V
-22 26 V
-22 25 V
-23 25 V
-22 25 V
-22 24 V
-22 23 V
-22 23 V
-23 23 V
-22 22 V
-22 22 V
-22 21 V
-22 21 V
-23 20 V
-22 20 V
-22 20 V
-22 19 V
-22 19 V
-23 19 V
-22 18 V
-22 18 V
-22 17 V
-22 18 V
-23 17 V
-22 16 V
-22 16 V
-stroke 3318 2933 M
-22 16 V
-22 16 V
-23 16 V
-22 15 V
-22 14 V
-22 15 V
-22 14 V
-23 15 V
-22 13 V
-22 14 V
-22 13 V
-22 13 V
-23 13 V
-22 13 V
-22 13 V
-22 12 V
-22 12 V
-23 12 V
-22 12 V
-22 11 V
-22 12 V
-22 11 V
-23 11 V
-22 11 V
-22 11 V
-22 10 V
-22 10 V
-23 11 V
-22 10 V
-22 10 V
-22 9 V
-22 10 V
-22 10 V
-23 9 V
-22 9 V
-22 9 V
-22 9 V
-22 9 V
-23 9 V
-22 9 V
-22 8 V
-22 9 V
-22 8 V
-23 8 V
-22 8 V
-22 8 V
-22 8 V
-22 8 V
-23 8 V
-22 7 V
-22 8 V
-22 8 V
-22 7 V
-23 7 V
-22 7 V
-22 7 V
-22 8 V
-22 7 V
-23 7 V
-22 6 V
-22 7 V
-22 7 V
-22 7 V
-23 6 V
-22 7 V
-22 6 V
-22 7 V
-22 6 V
-23 6 V
-22 6 V
-22 7 V
-22 6 V
-22 6 V
-23 6 V
-22 6 V
-22 5 V
-22 6 V
-22 6 V
-23 6 V
-22 6 V
-22 5 V
-22 6 V
-22 6 V
-22 5 V
-23 6 V
-22 5 V
-22 6 V
-22 5 V
-22 5 V
-23 5 V
-22 6 V
-22 5 V
-22 5 V
-22 5 V
-23 5 V
-22 6 V
-22 5 V
-22 5 V
-22 5 V
-23 5 V
-22 5 V
-22 5 V
-22 4 V
-22 5 V
-stroke 5626 3806 M
-23 5 V
-22 5 V
-22 5 V
-22 5 V
-22 4 V
-23 5 V
-22 5 V
-22 4 V
-22 5 V
-22 5 V
-23 4 V
-22 5 V
-22 5 V
-22 4 V
-22 5 V
-23 4 V
-22 5 V
-22 4 V
-22 5 V
-22 4 V
-23 5 V
-22 4 V
-22 4 V
-22 5 V
-22 4 V
-23 4 V
-22 5 V
-22 4 V
-22 5 V
-22 4 V
-22 4 V
-23 4 V
-22 5 V
-22 4 V
-22 4 V
-22 4 V
-23 5 V
-22 4 V
-22 4 V
-22 4 V
-22 4 V
-23 5 V
-22 4 V
-22 4 V
-22 4 V
-22 4 V
-23 4 V
-22 5 V
-22 4 V
-22 4 V
-22 4 V
-23 4 V
-22 4 V
-22 4 V
-22 4 V
-22 4 V
-% End plot #2
-% Begin plot #3
-stroke
-LT2
-0.00 1.00 0.00 C /Helvetica findfont 200 scalefont setfont
-987 1102 M
-23 0 V
-22 1 V
-22 1 V
-22 2 V
-22 2 V
-23 1 V
+0.00 0.00 1.00 C /AvantGarde-Book findfont 200 scalefont setfont
+1248 4376 M
 22 0 V
+21 0 V
+21 0 V
+22 0 V
+21 -1 V
+21 0 V
+22 -1 V
+21 -1 V
+21 -1 V
+21 -2 V
+22 -2 V
+21 -2 V
+21 -3 V
 22 -3 V
+21 -4 V
+21 -4 V
+22 -4 V
+21 -5 V
+21 -5 V
+21 -5 V
 22 -6 V
-22 -9 V
-23 -12 V
-22 -13 V
-22 -14 V
-22 -15 V
-22 -14 V
-23 -13 V
-22 -12 V
-22 -10 V
+21 -6 V
+21 -6 V
 22 -7 V
-22 -5 V
-23 -2 V
-22 1 V
-22 4 V
-22 8 V
-22 10 V
-23 14 V
-22 17 V
-22 19 V
-22 23 V
-22 25 V
-22 28 V
-23 31 V
-22 32 V
-22 35 V
-22 36 V
-22 38 V
-23 40 V
-22 41 V
-22 42 V
-22 43 V
-22 43 V
-23 45 V
-22 45 V
-22 45 V
-22 45 V
-22 46 V
-23 46 V
-22 45 V
-22 46 V
-22 45 V
-22 45 V
-23 45 V
-22 44 V
-22 44 V
-22 44 V
-22 43 V
-23 42 V
-22 42 V
-22 41 V
-22 41 V
-22 39 V
-23 40 V
-22 38 V
-22 38 V
-22 38 V
-22 36 V
-23 36 V
-22 36 V
-22 34 V
-22 34 V
-22 33 V
-23 33 V
-22 32 V
-22 32 V
-22 30 V
-22 30 V
-23 30 V
-22 29 V
-22 28 V
-22 28 V
-22 27 V
-22 27 V
-23 26 V
-22 25 V
-22 25 V
-22 25 V
-22 24 V
-23 23 V
-22 23 V
-22 23 V
-22 22 V
-22 22 V
-23 21 V
-22 21 V
-22 20 V
-22 20 V
-22 19 V
-23 20 V
-22 18 V
-22 19 V
-22 18 V
-22 18 V
-23 17 V
-22 17 V
-stroke 3296 3537 M
-22 17 V
-22 16 V
-22 16 V
-23 16 V
-22 15 V
-22 16 V
-22 14 V
-22 15 V
-23 14 V
-22 14 V
-22 14 V
-22 14 V
-22 13 V
-23 13 V
-22 13 V
-22 13 V
-22 12 V
-22 13 V
-23 12 V
-22 11 V
-22 12 V
-22 11 V
-22 12 V
-23 11 V
-22 11 V
-22 10 V
-22 11 V
-22 10 V
-23 10 V
-22 10 V
-22 10 V
-22 10 V
-22 9 V
-22 10 V
-23 9 V
-22 9 V
-22 9 V
-22 9 V
-22 9 V
-23 9 V
-22 8 V
-22 8 V
-22 9 V
-22 8 V
-23 8 V
-22 8 V
-22 8 V
-22 7 V
-22 8 V
-23 7 V
-22 8 V
-22 7 V
-22 7 V
-22 8 V
-23 7 V
-22 7 V
-22 6 V
-22 7 V
-22 7 V
-23 7 V
-22 6 V
-22 7 V
-22 6 V
-22 6 V
-23 7 V
-22 6 V
-22 6 V
-22 6 V
-22 6 V
-23 6 V
-22 6 V
-22 5 V
-22 6 V
-22 6 V
-23 5 V
-22 6 V
-22 5 V
-22 6 V
-22 5 V
-23 6 V
-22 5 V
-22 5 V
-22 5 V
-22 5 V
-22 6 V
-23 5 V
-22 5 V
-22 5 V
-22 4 V
-22 5 V
-23 5 V
-22 5 V
-22 5 V
-22 4 V
-22 5 V
-23 5 V
-22 4 V
-22 5 V
-22 4 V
-22 5 V
-23 4 V
-22 5 V
-22 4 V
-22 5 V
-stroke 5604 4402 M
-22 4 V
-23 4 V
-22 5 V
-22 4 V
-22 4 V
-22 4 V
-23 4 V
-22 4 V
-22 5 V
-22 4 V
-22 4 V
-23 4 V
-22 4 V
-22 4 V
-22 4 V
-22 4 V
-23 4 V
-22 3 V
-22 4 V
-22 4 V
-22 4 V
-23 4 V
-22 4 V
-22 3 V
-22 4 V
-22 4 V
-23 4 V
-22 3 V
-22 4 V
-22 4 V
-22 3 V
-22 4 V
-23 3 V
-22 4 V
-22 4 V
-22 3 V
-22 4 V
-23 3 V
-22 4 V
-22 3 V
-22 4 V
-22 3 V
-23 4 V
-22 3 V
-22 4 V
-22 3 V
-22 4 V
-23 3 V
-22 3 V
-22 4 V
-22 3 V
-22 4 V
-23 3 V
-22 3 V
-22 4 V
-22 3 V
-22 3 V
-23 4 V
-% End plot #3
+21 -7 V
+21 -7 V
+22 -7 V
+21 -8 V
+21 -8 V
+21 -8 V
+22 -9 V
+21 -8 V
+21 -9 V
+22 -9 V
+21 -10 V
+21 -9 V
+22 -10 V
+21 -10 V
+21 -10 V
+21 -10 V
+22 -10 V
+21 -11 V
+21 -10 V
+22 -11 V
+21 -11 V
+21 -11 V
+22 -11 V
+21 -12 V
+21 -11 V
+21 -11 V
+22 -12 V
+21 -12 V
+21 -11 V
+22 -12 V
+21 -12 V
+21 -12 V
+22 -12 V
+21 -12 V
+21 -13 V
+21 -12 V
+22 -12 V
+21 -13 V
+21 -12 V
+22 -13 V
+21 -12 V
+21 -13 V
+22 -13 V
+21 -12 V
+21 -13 V
+21 -13 V
+22 -13 V
+21 -13 V
+21 -13 V
+22 -13 V
+21 -13 V
+21 -13 V
+22 -13 V
+21 -13 V
+21 -13 V
+21 -13 V
+22 -13 V
+21 -14 V
+21 -13 V
+22 -13 V
+21 -14 V
+21 -13 V
+22 -14 V
+21 -13 V
+21 -14 V
+21 -13 V
+22 -14 V
+21 -13 V
+21 -14 V
+22 -13 V
+21 -14 V
+21 -14 V
+22 -13 V
+21 -14 V
+21 -14 V
+21 -14 V
+22 -13 V
+21 -14 V
+21 -14 V
+22 -14 V
+stroke 3464 3358 M
+21 -14 V
+21 -14 V
+22 -14 V
+21 -14 V
+21 -14 V
+21 -14 V
+22 -14 V
+21 -14 V
+21 -14 V
+22 -14 V
+21 -15 V
+21 -14 V
+22 -14 V
+21 -14 V
+21 -15 V
+21 -14 V
+22 -14 V
+21 -14 V
+21 -15 V
+22 -14 V
+21 -15 V
+21 -14 V
+22 -15 V
+21 -14 V
+21 -15 V
+21 -14 V
+22 -15 V
+21 -14 V
+21 -15 V
+22 -15 V
+21 -14 V
+21 -15 V
+22 -15 V
+21 -15 V
+21 -14 V
+21 -15 V
+22 -15 V
+21 -15 V
+21 -15 V
+22 -15 V
+21 -15 V
+21 -15 V
+22 -15 V
+21 -15 V
+21 -15 V
+21 -15 V
+22 -15 V
+21 -15 V
+21 -15 V
+22 -15 V
+21 -16 V
+21 -15 V
+22 -15 V
+21 -15 V
+21 -16 V
+21 -15 V
+22 -15 V
+21 -16 V
+21 -15 V
+22 -16 V
+21 -15 V
+21 -16 V
+22 -15 V
+21 -16 V
+21 -16 V
+21 -15 V
+22 -16 V
+21 -16 V
+21 -15 V
+22 -16 V
+21 -16 V
+21 -16 V
+22 -15 V
+21 -16 V
+21 -16 V
+21 -16 V
+22 -16 V
+21 -16 V
+21 -16 V
+22 -16 V
+21 -16 V
+21 -16 V
+22 -16 V
+21 -16 V
+21 -17 V
+21 -16 V
+22 -16 V
+21 -16 V
+21 -17 V
+22 -16 V
+21 -16 V
+21 -17 V
+22 -16 V
+21 -17 V
+21 -16 V
+21 -17 V
+22 -16 V
+21 -17 V
+21 -16 V
+22 -17 V
+21 -17 V
+21 -16 V
+22 -17 V
+21 -17 V
+stroke 5679 1768 M
+21 -17 V
+21 -16 V
+22 -17 V
+21 -17 V
+21 -17 V
+22 -17 V
+21 -17 V
+21 -17 V
+22 -17 V
+21 -17 V
+21 -17 V
+21 -17 V
+22 -17 V
+21 -18 V
+21 -17 V
+22 -17 V
+21 -17 V
+21 -18 V
+22 -17 V
+21 -17 V
+21 -18 V
+21 -17 V
+22 -18 V
+21 -17 V
+21 -18 V
+22 -17 V
+21 -18 V
+21 -18 V
+22 -17 V
+21 -18 V
+21 -18 V
+21 -18 V
+22 -17 V
+21 -18 V
+21 -18 V
+22 -18 V
+21 -18 V
+21 -18 V
+22 -18 V
+21 -18 V
+21 -18 V
+21 -18 V
+22 -18 V
+21 -18 V
+21 -19 V
+22 -18 V
+21 -18 V
+21 -18 V
+22 -19 V
+21 -18 V
+21 -18 V
+21 -19 V
+22 -18 V
+21 -19 V
+21 -18 V
+22 -19 V
 stroke
 2.000 UL
 LTb
-980 4799 N
-980 640 L
-5919 0 V
-0 4159 V
--5919 0 V
+1220 4800 N
+0 -4160 V
+5680 0 V
+0 4160 V
+-5680 0 V
 Z stroke
 1.000 UP
 2.000 UL
@@ -2363,781 +2059,746 @@ showpage
 %%Page: 3 3
 gnudict begin
 gsave
-doclip
 50 50 translate
 0.100 0.100 scale
 90 rotate
 0 -5040 translate
 0 setgray
 newpath
-(Helvetica) findfont 200 scalefont setfont
+(AvantGarde-Book) findfont 200 scalefont setfont
 2.000 UL
 LTb
+1220 640 M
+63 0 V
+5617 0 R
+-63 0 V
+stroke
 1100 640 M
-63 0 V
-5736 0 R
--63 0 V
-stroke
-980 640 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 870)]
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 1)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1100 1102 M
+1220 1333 M
 63 0 V
-5736 0 R
+5617 0 R
 -63 0 V
 stroke
-980 1102 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 880)]
+1100 1333 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 1.5)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1100 1564 M
+1220 2027 M
 63 0 V
-5736 0 R
+5617 0 R
 -63 0 V
 stroke
-980 1564 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 890)]
+1100 2027 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 2)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1100 2026 M
+1220 2720 M
 63 0 V
-5736 0 R
+5617 0 R
 -63 0 V
 stroke
-980 2026 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 900)]
+1100 2720 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 2.5)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1100 2488 M
+1220 3413 M
 63 0 V
-5736 0 R
+5617 0 R
 -63 0 V
 stroke
-980 2488 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 910)]
-] -66.7 MRshow
-2.000 UL
-LTb
-1100 2951 M
-63 0 V
-5736 0 R
--63 0 V
-stroke
-980 2951 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 920)]
-] -66.7 MRshow
-2.000 UL
-LTb
 1100 3413 M
-63 0 V
-5736 0 R
--63 0 V
-stroke
-980 3413 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 930)]
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 3)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1100 3875 M
+1220 4107 M
 63 0 V
-5736 0 R
+5617 0 R
 -63 0 V
 stroke
-980 3875 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 940)]
+1100 4107 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 3.5)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1100 4337 M
+1220 4800 M
 63 0 V
-5736 0 R
+5617 0 R
 -63 0 V
 stroke
-980 4337 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 950)]
+1100 4800 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 4)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1100 4799 M
-63 0 V
-5736 0 R
--63 0 V
-stroke
-980 4799 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 960)]
-] -66.7 MRshow
-2.000 UL
-LTb
-1100 640 M
+1220 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-1100 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 0)]
+1220 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-1825 640 M
+1930 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-1825 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 100)]
+1930 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 100)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-2550 640 M
+2640 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-2550 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 200)]
+2640 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 200)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-3275 640 M
+3350 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-3275 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 300)]
+3350 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 300)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-4000 640 M
+4060 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-4000 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 400)]
+4060 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 400)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-4724 640 M
+4770 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-4724 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 500)]
+4770 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 500)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-5449 640 M
+5480 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-5449 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 600)]
+5480 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 600)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-6174 640 M
+6190 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-6174 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 700)]
+6190 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 700)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-6899 640 M
+6900 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-6899 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 800)]
+6900 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 800)]
 ] -66.7 MCshow
 2.000 UL
 LTb
 2.000 UL
 LTb
-1100 4799 N
-0 -4159 V
-5799 0 V
-0 4159 V
--5799 0 V
+1220 4800 N
+0 -4160 V
+5680 0 V
+0 4160 V
+-5680 0 V
 Z stroke
 LCb setrgbcolor
-280 2719 M
-currentpoint gsave translate -270 rotate 0 0 moveto
-[ [(Helvetica) 200.0 0.0 true true 0 (Bulk modulus \(kbar\))]
+400 2720 M
+currentpoint gsave translate 90 rotate 0 0 moveto
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 (d B / d p)]
 ] -66.7 MCshow
 grestore
 LTb
 LCb setrgbcolor
-3999 140 M
-[ [(Helvetica) 200.0 0.0 true true 0 (T \(K\))]
+4060 140 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 (T \(K\))]
 ] -66.7 MCshow
 LTb
 1.000 UP
 2.000 UL
 LTb
-% Begin plot #1
 3.000 UL
 LT0
-1.00 0.00 0.00 C /Helvetica findfont 200 scalefont setfont
-1129 4763 M
-22 -1 V
+1.00 0.00 0.00 C /AvantGarde-Book findfont 200 scalefont setfont
+1248 1329 M
+22 0 V
 21 0 V
-22 0 V
-22 0 V
-22 0 V
-21 -1 V
-22 0 V
-22 -2 V
-22 -1 V
-21 -2 V
-22 -2 V
-22 -3 V
-22 -3 V
-21 -3 V
-22 -4 V
-22 -5 V
-22 -4 V
-21 -6 V
-22 -5 V
-22 -6 V
-22 -6 V
-21 -7 V
-22 -7 V
-22 -8 V
-22 -7 V
-21 -8 V
-22 -8 V
-22 -9 V
-22 -9 V
-21 -9 V
-22 -9 V
-22 -10 V
-22 -10 V
-21 -10 V
-22 -10 V
-22 -11 V
-22 -11 V
-21 -11 V
-22 -11 V
-22 -11 V
-22 -11 V
-21 -12 V
-22 -12 V
-22 -12 V
-22 -12 V
-21 -12 V
-22 -13 V
-22 -12 V
-22 -13 V
-21 -12 V
-22 -13 V
-22 -13 V
-22 -13 V
-21 -14 V
-22 -13 V
-22 -13 V
-22 -14 V
-21 -13 V
-22 -14 V
-22 -14 V
-22 -13 V
-21 -14 V
-22 -14 V
-22 -14 V
-22 -14 V
-21 -14 V
-22 -14 V
-22 -15 V
-21 -14 V
-22 -14 V
-22 -15 V
-22 -14 V
-21 -14 V
-22 -15 V
-22 -15 V
-22 -14 V
-21 -15 V
-22 -15 V
-22 -14 V
-22 -15 V
-21 -15 V
-22 -15 V
-22 -15 V
-22 -15 V
-21 -15 V
-22 -15 V
-22 -15 V
-22 -15 V
-21 -15 V
-22 -16 V
-22 -15 V
-22 -15 V
-21 -15 V
-22 -16 V
-22 -15 V
-22 -16 V
-21 -15 V
-22 -16 V
-22 -15 V
-22 -16 V
-21 -15 V
-22 -16 V
-22 -16 V
-22 -15 V
-stroke 3391 3625 M
-21 -16 V
-22 -16 V
-22 -15 V
-22 -16 V
-21 -16 V
-22 -16 V
-22 -16 V
-22 -16 V
-21 -16 V
-22 -16 V
-22 -16 V
-22 -16 V
-21 -16 V
-22 -16 V
-22 -17 V
-22 -16 V
-21 -16 V
-22 -16 V
-22 -17 V
-22 -16 V
-21 -16 V
-22 -17 V
-22 -16 V
-22 -17 V
-21 -16 V
-22 -17 V
-22 -16 V
-22 -17 V
-21 -16 V
-22 -17 V
-22 -17 V
-21 -17 V
-22 -16 V
-22 -17 V
-22 -17 V
-21 -17 V
-22 -17 V
-22 -17 V
-22 -17 V
-21 -17 V
-22 -17 V
-22 -17 V
-22 -17 V
-21 -17 V
-22 -17 V
-22 -17 V
-22 -17 V
-21 -18 V
-22 -17 V
-22 -17 V
-22 -18 V
-21 -17 V
-22 -17 V
-22 -18 V
-22 -17 V
-21 -18 V
-22 -17 V
-22 -18 V
-22 -18 V
-21 -17 V
-22 -18 V
-22 -18 V
-22 -17 V
-21 -18 V
-22 -18 V
-22 -18 V
-22 -18 V
-21 -18 V
-22 -18 V
-22 -17 V
-22 -19 V
-21 -18 V
-22 -18 V
-22 -18 V
-22 -18 V
-21 -18 V
-22 -18 V
-22 -19 V
-22 -18 V
-21 -18 V
-22 -19 V
-22 -18 V
-22 -18 V
-21 -19 V
-22 -18 V
-22 -19 V
-22 -18 V
-21 -19 V
-22 -19 V
-22 -18 V
-22 -19 V
-21 -19 V
-22 -19 V
-22 -18 V
-21 -19 V
-22 -19 V
-22 -19 V
-22 -19 V
-21 -19 V
-22 -19 V
-22 -19 V
-22 -19 V
-21 -19 V
-22 -19 V
-stroke 5652 1814 M
-22 -20 V
-22 -19 V
-21 -19 V
-22 -19 V
-22 -20 V
-22 -19 V
-21 -20 V
-22 -19 V
-22 -20 V
-22 -19 V
-21 -20 V
-22 -19 V
-22 -20 V
-22 -19 V
-21 -20 V
-22 -20 V
-22 -20 V
-22 -19 V
-21 -20 V
-22 -20 V
-22 -20 V
-22 -20 V
-21 -20 V
-22 -20 V
-22 -20 V
-22 -20 V
-21 -20 V
-22 -21 V
-22 -20 V
-22 -20 V
-21 -20 V
-22 -21 V
-22 -20 V
-22 -20 V
-21 -21 V
-22 -20 V
-22 -21 V
-22 -20 V
-21 -21 V
-22 -20 V
-22 -21 V
-22 -21 V
-21 -20 V
-22 -21 V
-22 -21 V
-22 -21 V
-21 -21 V
-22 -21 V
-22 -21 V
-22 -21 V
-21 -21 V
-22 -21 V
-22 -21 V
-22 -21 V
-21 -21 V
-22 -21 V
-% End plot #1
-% Begin plot #2
+21 0 V
+22 1 V
+21 0 V
+21 1 V
+22 2 V
+21 1 V
+21 3 V
+21 2 V
+22 3 V
+21 3 V
+21 3 V
+22 4 V
+21 5 V
+21 4 V
+22 5 V
+21 5 V
+21 6 V
+21 6 V
+22 6 V
+21 6 V
+21 7 V
+22 7 V
+21 7 V
+21 7 V
+22 7 V
+21 8 V
+21 8 V
+21 8 V
+22 8 V
+21 8 V
+21 9 V
+22 8 V
+21 9 V
+21 9 V
+22 9 V
+21 9 V
+21 9 V
+21 9 V
+22 9 V
+21 10 V
+21 9 V
+22 10 V
+21 10 V
+21 9 V
+22 10 V
+21 10 V
+21 10 V
+21 10 V
+22 10 V
+21 10 V
+21 11 V
+22 10 V
+21 10 V
+21 11 V
+22 10 V
+21 11 V
+21 10 V
+21 11 V
+22 11 V
+21 10 V
+21 11 V
+22 11 V
+21 11 V
+21 11 V
+22 11 V
+21 11 V
+21 11 V
+21 11 V
+22 11 V
+21 11 V
+21 11 V
+22 11 V
+21 12 V
+21 11 V
+22 11 V
+21 12 V
+21 11 V
+21 11 V
+22 12 V
+21 11 V
+21 12 V
+22 11 V
+21 12 V
+21 12 V
+22 11 V
+21 12 V
+21 12 V
+21 11 V
+22 12 V
+21 12 V
+21 12 V
+22 12 V
+21 11 V
+21 12 V
+22 12 V
+21 12 V
+21 12 V
+21 12 V
+22 12 V
+21 12 V
+21 12 V
+22 13 V
+stroke 3464 2247 M
+21 12 V
+21 12 V
+22 12 V
+21 12 V
+21 12 V
+21 13 V
+22 12 V
+21 12 V
+21 13 V
+22 12 V
+21 12 V
+21 13 V
+22 12 V
+21 13 V
+21 12 V
+21 13 V
+22 12 V
+21 13 V
+21 12 V
+22 13 V
+21 12 V
+21 13 V
+22 12 V
+21 13 V
+21 13 V
+21 12 V
+22 13 V
+21 13 V
+21 13 V
+22 12 V
+21 13 V
+21 13 V
+22 13 V
+21 13 V
+21 13 V
+21 13 V
+22 12 V
+21 13 V
+21 13 V
+22 13 V
+21 13 V
+21 13 V
+22 13 V
+21 13 V
+21 14 V
+21 13 V
+22 13 V
+21 13 V
+21 13 V
+22 13 V
+21 13 V
+21 14 V
+22 13 V
+21 13 V
+21 13 V
+21 14 V
+22 13 V
+21 13 V
+21 14 V
+22 13 V
+21 13 V
+21 14 V
+22 13 V
+21 14 V
+21 13 V
+21 14 V
+22 13 V
+21 14 V
+21 13 V
+22 14 V
+21 13 V
+21 14 V
+22 14 V
+21 13 V
+21 14 V
+21 13 V
+22 14 V
+21 14 V
+21 14 V
+22 13 V
+21 14 V
+21 14 V
+22 14 V
+21 14 V
+21 13 V
+21 14 V
+22 14 V
+21 14 V
+21 14 V
+22 14 V
+21 14 V
+21 14 V
+22 14 V
+21 14 V
+21 14 V
+21 14 V
+22 14 V
+21 14 V
+21 14 V
+22 14 V
+21 15 V
+21 14 V
+22 14 V
+21 14 V
+stroke 5679 3620 M
+21 14 V
+21 15 V
+22 14 V
+21 14 V
+21 15 V
+22 14 V
+21 14 V
+21 15 V
+22 14 V
+21 14 V
+21 15 V
+21 14 V
+22 15 V
+21 14 V
+21 15 V
+22 14 V
+21 15 V
+21 15 V
+22 14 V
+21 15 V
+21 14 V
+21 15 V
+22 15 V
+21 15 V
+21 14 V
+22 15 V
+21 15 V
+21 15 V
+22 14 V
+21 15 V
+21 15 V
+21 15 V
+22 15 V
+21 15 V
+21 15 V
+22 15 V
+21 15 V
+21 15 V
+22 15 V
+21 15 V
+21 15 V
+21 15 V
+22 15 V
+21 15 V
+21 15 V
+22 16 V
+21 15 V
+21 15 V
+22 15 V
+21 15 V
+21 16 V
+21 15 V
+22 15 V
+21 16 V
+21 15 V
+22 16 V
 stroke
 LT1
-0.00 0.00 1.00 C /Helvetica findfont 200 scalefont setfont
-1129 4763 M
-22 -1 V
+0.00 0.00 1.00 C /AvantGarde-Book findfont 200 scalefont setfont
+1248 1329 M
+22 0 V
 21 0 V
-22 0 V
-22 0 V
-22 0 V
-21 -1 V
-22 0 V
-22 -2 V
-22 -1 V
-21 -2 V
-22 -2 V
-22 -3 V
-22 -3 V
-21 -3 V
-22 -4 V
-22 -5 V
-22 -4 V
-21 -6 V
-22 -5 V
-22 -6 V
-22 -6 V
-21 -7 V
-22 -7 V
-22 -8 V
-22 -7 V
-21 -8 V
-22 -8 V
-22 -9 V
-22 -9 V
-21 -9 V
-22 -9 V
-22 -10 V
-22 -10 V
-21 -10 V
-22 -10 V
-22 -11 V
-22 -10 V
-21 -11 V
-22 -12 V
-22 -11 V
-22 -11 V
-21 -12 V
-22 -12 V
-22 -12 V
-22 -12 V
-21 -12 V
-22 -12 V
-22 -13 V
-22 -13 V
-21 -12 V
-22 -13 V
-22 -13 V
-22 -13 V
-21 -13 V
-22 -14 V
-22 -13 V
-22 -14 V
-21 -13 V
-22 -14 V
-22 -13 V
-22 -14 V
-21 -14 V
-22 -14 V
-22 -14 V
-22 -14 V
-21 -14 V
-22 -14 V
-22 -14 V
-21 -15 V
-22 -14 V
-22 -14 V
-22 -15 V
-21 -14 V
-22 -15 V
-22 -14 V
-22 -15 V
-21 -15 V
-22 -14 V
-22 -15 V
-22 -15 V
-21 -15 V
-22 -15 V
-22 -15 V
-22 -15 V
-21 -15 V
-22 -15 V
-22 -15 V
-22 -15 V
-21 -15 V
-22 -15 V
-22 -16 V
-22 -15 V
-21 -15 V
-22 -16 V
-22 -15 V
-22 -15 V
-21 -16 V
-22 -15 V
-22 -16 V
-22 -15 V
-21 -16 V
-22 -16 V
-22 -15 V
-22 -16 V
-stroke 3391 3625 M
-21 -16 V
-22 -15 V
-22 -16 V
-22 -16 V
-21 -16 V
-22 -16 V
-22 -16 V
-22 -16 V
-21 -16 V
-22 -16 V
-22 -16 V
-22 -16 V
-21 -16 V
-22 -16 V
-22 -16 V
-22 -16 V
-21 -17 V
-22 -16 V
-22 -16 V
-22 -17 V
-21 -16 V
-22 -16 V
-22 -17 V
-22 -16 V
-21 -17 V
-22 -16 V
-22 -17 V
-22 -16 V
-21 -17 V
-22 -17 V
-22 -16 V
-21 -17 V
-22 -17 V
-22 -17 V
-22 -17 V
-21 -16 V
-22 -17 V
-22 -17 V
-22 -17 V
-21 -17 V
-22 -17 V
-22 -17 V
-22 -17 V
-21 -17 V
-22 -18 V
-22 -17 V
-22 -17 V
-21 -17 V
-22 -17 V
-22 -18 V
-22 -17 V
-21 -18 V
-22 -17 V
-22 -17 V
-22 -18 V
-21 -17 V
-22 -18 V
-22 -17 V
-22 -18 V
-21 -18 V
-22 -17 V
-22 -18 V
-22 -18 V
-21 -18 V
-22 -17 V
-22 -18 V
-22 -18 V
-21 -18 V
-22 -18 V
-22 -18 V
-22 -18 V
-21 -18 V
-22 -18 V
-22 -18 V
-22 -18 V
-21 -19 V
-22 -18 V
-22 -18 V
-22 -18 V
-21 -19 V
-22 -18 V
-22 -18 V
-22 -19 V
-21 -18 V
-22 -19 V
-22 -18 V
-22 -19 V
-21 -19 V
-22 -18 V
-22 -19 V
-22 -19 V
-21 -18 V
-22 -19 V
-22 -19 V
-21 -19 V
-22 -19 V
-22 -18 V
-22 -19 V
-21 -19 V
-22 -19 V
-22 -19 V
-22 -20 V
-21 -19 V
-22 -19 V
-stroke 5652 1814 M
-22 -19 V
-22 -19 V
-21 -20 V
-22 -19 V
-22 -19 V
-22 -20 V
-21 -19 V
-22 -19 V
-22 -20 V
-22 -19 V
-21 -20 V
-22 -20 V
-22 -19 V
-22 -20 V
-21 -20 V
-22 -19 V
-22 -20 V
-22 -20 V
-21 -20 V
-22 -20 V
-22 -19 V
-22 -20 V
-21 -20 V
-22 -20 V
-22 -20 V
-22 -21 V
-21 -20 V
-22 -20 V
-22 -20 V
-22 -20 V
-21 -21 V
-22 -20 V
-22 -20 V
-22 -21 V
-21 -20 V
-22 -20 V
-22 -21 V
-22 -20 V
-21 -21 V
-22 -21 V
-22 -20 V
-22 -21 V
-21 -21 V
-22 -20 V
-22 -21 V
-22 -21 V
-21 -21 V
-22 -21 V
-22 -21 V
-22 -21 V
-21 -21 V
-22 -21 V
-22 -21 V
-22 -21 V
-21 -21 V
-22 -21 V
-% End plot #2
+21 0 V
+22 1 V
+21 0 V
+21 1 V
+22 2 V
+21 1 V
+21 2 V
+21 3 V
+22 3 V
+21 3 V
+21 3 V
+22 4 V
+21 5 V
+21 4 V
+22 5 V
+21 5 V
+21 6 V
+21 6 V
+22 6 V
+21 6 V
+21 7 V
+22 7 V
+21 7 V
+21 7 V
+22 7 V
+21 8 V
+21 8 V
+21 8 V
+22 8 V
+21 8 V
+21 9 V
+22 8 V
+21 9 V
+21 9 V
+22 8 V
+21 10 V
+21 9 V
+21 9 V
+22 9 V
+21 10 V
+21 9 V
+22 10 V
+21 9 V
+21 10 V
+22 10 V
+21 10 V
+21 10 V
+21 10 V
+22 10 V
+21 10 V
+21 10 V
+22 11 V
+21 10 V
+21 11 V
+22 10 V
+21 10 V
+21 11 V
+21 11 V
+22 10 V
+21 11 V
+21 11 V
+22 11 V
+21 10 V
+21 11 V
+22 11 V
+21 11 V
+21 11 V
+21 11 V
+22 11 V
+21 12 V
+21 11 V
+22 11 V
+21 11 V
+21 12 V
+22 11 V
+21 11 V
+21 12 V
+21 11 V
+22 12 V
+21 11 V
+21 12 V
+22 11 V
+21 12 V
+21 11 V
+22 12 V
+21 12 V
+21 11 V
+21 12 V
+22 12 V
+21 12 V
+21 11 V
+22 12 V
+21 12 V
+21 12 V
+22 12 V
+21 12 V
+21 12 V
+21 12 V
+22 12 V
+21 12 V
+21 12 V
+22 12 V
+stroke 3464 2246 M
+21 12 V
+21 12 V
+22 13 V
+21 12 V
+21 12 V
+21 12 V
+22 13 V
+21 12 V
+21 12 V
+22 13 V
+21 12 V
+21 12 V
+22 13 V
+21 12 V
+21 13 V
+21 12 V
+22 13 V
+21 12 V
+21 13 V
+22 12 V
+21 13 V
+21 12 V
+22 13 V
+21 13 V
+21 12 V
+21 13 V
+22 13 V
+21 12 V
+21 13 V
+22 13 V
+21 13 V
+21 13 V
+22 12 V
+21 13 V
+21 13 V
+21 13 V
+22 13 V
+21 13 V
+21 13 V
+22 13 V
+21 13 V
+21 13 V
+22 13 V
+21 13 V
+21 13 V
+21 13 V
+22 13 V
+21 13 V
+21 13 V
+22 14 V
+21 13 V
+21 13 V
+22 13 V
+21 14 V
+21 13 V
+21 13 V
+22 13 V
+21 14 V
+21 13 V
+22 13 V
+21 14 V
+21 13 V
+22 14 V
+21 13 V
+21 13 V
+21 14 V
+22 13 V
+21 14 V
+21 14 V
+22 13 V
+21 14 V
+21 13 V
+22 14 V
+21 13 V
+21 14 V
+21 14 V
+22 13 V
+21 14 V
+21 14 V
+22 14 V
+21 13 V
+21 14 V
+22 14 V
+21 14 V
+21 14 V
+21 14 V
+22 13 V
+21 14 V
+21 14 V
+22 14 V
+21 14 V
+21 14 V
+22 14 V
+21 14 V
+21 14 V
+21 14 V
+22 14 V
+21 14 V
+21 15 V
+22 14 V
+21 14 V
+21 14 V
+22 14 V
+21 14 V
+stroke 5679 3619 M
+21 15 V
+21 14 V
+22 14 V
+21 14 V
+21 15 V
+22 14 V
+21 14 V
+21 15 V
+22 14 V
+21 15 V
+21 14 V
+21 15 V
+22 14 V
+21 15 V
+21 14 V
+22 15 V
+21 14 V
+21 15 V
+22 14 V
+21 15 V
+21 15 V
+21 14 V
+22 15 V
+21 15 V
+21 14 V
+22 15 V
+21 15 V
+21 15 V
+22 14 V
+21 15 V
+21 15 V
+21 15 V
+22 15 V
+21 15 V
+21 15 V
+22 15 V
+21 15 V
+21 15 V
+22 15 V
+21 15 V
+21 15 V
+21 15 V
+22 15 V
+21 15 V
+21 15 V
+22 15 V
+21 16 V
+21 15 V
+22 15 V
+21 15 V
+21 16 V
+21 15 V
+22 15 V
+21 16 V
+21 15 V
+22 15 V
 stroke
 2.000 UL
 LTb
-1100 4799 N
-0 -4159 V
-5799 0 V
-0 4159 V
--5799 0 V
+1220 4800 N
+0 -4160 V
+5680 0 V
+0 4160 V
+-5680 0 V
 Z stroke
 1.000 UP
 2.000 UL
@@ -3149,1067 +2810,1158 @@ showpage
 %%Page: 4 4
 gnudict begin
 gsave
-doclip
 50 50 translate
 0.100 0.100 scale
 90 rotate
 0 -5040 translate
 0 setgray
 newpath
-(Helvetica) findfont 200 scalefont setfont
+(AvantGarde-Book) findfont 200 scalefont setfont
 2.000 UL
 LTb
+1100 640 M
+63 0 V
+5737 0 R
+-63 0 V
+stroke
 980 640 M
-63 0 V
-5856 0 R
--63 0 V
-stroke
-860 640 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 0)]
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 (-2)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-980 1056 M
+1100 1160 M
 63 0 V
-5856 0 R
+5737 0 R
 -63 0 V
 stroke
-860 1056 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 5)]
+980 1160 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-980 1472 M
+1100 1680 M
 63 0 V
-5856 0 R
+5737 0 R
 -63 0 V
 stroke
-860 1472 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 10)]
+980 1680 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 2)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-980 1888 M
+1100 2200 M
 63 0 V
-5856 0 R
+5737 0 R
 -63 0 V
 stroke
-860 1888 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 15)]
+980 2200 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 4)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-980 2304 M
+1100 2720 M
 63 0 V
-5856 0 R
+5737 0 R
 -63 0 V
 stroke
-860 2304 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 20)]
-] -66.7 MRshow
-2.000 UL
-LTb
 980 2720 M
-63 0 V
-5856 0 R
--63 0 V
-stroke
-860 2720 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 25)]
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 6)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-980 3135 M
+1100 3240 M
 63 0 V
-5856 0 R
+5737 0 R
 -63 0 V
 stroke
-860 3135 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 30)]
+980 3240 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 8)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-980 3551 M
+1100 3760 M
 63 0 V
-5856 0 R
+5737 0 R
 -63 0 V
 stroke
-860 3551 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 35)]
+980 3760 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 10)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-980 3967 M
+1100 4280 M
 63 0 V
-5856 0 R
+5737 0 R
 -63 0 V
 stroke
-860 3967 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 40)]
+980 4280 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 12)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-980 4383 M
+1100 4800 M
 63 0 V
-5856 0 R
+5737 0 R
 -63 0 V
 stroke
-860 4383 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 45)]
+980 4800 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 14)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-980 4799 M
-63 0 V
-5856 0 R
--63 0 V
-stroke
-860 4799 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 50)]
-] -66.7 MRshow
-2.000 UL
-LTb
-980 640 M
+1100 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-980 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 0)]
+1100 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-1720 640 M
+1825 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-1720 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 100)]
+1825 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 100)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-2460 640 M
+2550 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-2460 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 200)]
+2550 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 200)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-3200 640 M
+3275 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-3200 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 300)]
+3275 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 300)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-3940 640 M
+4000 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-3940 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 400)]
+4000 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 400)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-4679 640 M
+4725 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-4679 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 500)]
+4725 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 500)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-5419 640 M
+5450 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-5419 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 600)]
+5450 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 600)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-6159 640 M
+6175 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-6159 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 700)]
+6175 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 700)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-6899 640 M
+6900 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-6899 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 800)]
+6900 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 800)]
 ] -66.7 MCshow
 2.000 UL
 LTb
 2.000 UL
 LTb
-980 4799 N
-980 640 L
-5919 0 V
-0 4159 V
--5919 0 V
+1100 4800 N
+0 -4160 V
+5800 0 V
+0 4160 V
+-5800 0 V
 Z stroke
 LCb setrgbcolor
-280 2719 M
-currentpoint gsave translate -270 rotate 0 0 moveto
-[ [(Helvetica) 200.0 0.0 true true 0 (Heat capacity C)]
-[(Helvetica) 160.0 -60.0 true true 0 (v)]
-[(Helvetica) 200.0 0.0 true true 0 ( \(J / K / N / mol\))]
-] -46.7 MCshow
+400 2720 M
+currentpoint gsave translate 90 rotate 0 0 moveto
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 (Thermal expansion \()]
+/Symbol reencodeISO15 def
+[(Symbol) 200.0 0.0 true true 0 (b)]
+[(AvantGarde-Book) 200.0 0.0 true true 0 ( x 10)]
+[(AvantGarde-Book) 160.0 100.0 true true 0 (6)]
+[(AvantGarde-Book) 200.0 0.0 true true 0 (\) \(K)]
+[(AvantGarde-Book) 160.0 100.0 true true 0 (-1)]
+[(AvantGarde-Book) 200.0 0.0 true true 0 (\))]
+] -86.7 MCshow
 grestore
 LTb
 LCb setrgbcolor
-3939 140 M
-[ [(Helvetica) 200.0 0.0 true true 0 (T \(K\))]
+4000 140 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 (T \(K\))]
 ] -66.7 MCshow
 LTb
 1.000 UP
 2.000 UL
 LTb
-% Begin plot #1
 3.000 UL
 LT0
-1.00 0.00 0.00 C /Helvetica findfont 200 scalefont setfont
-1010 640 M
-22 1 V
-22 1 V
-22 3 V
+1.00 0.00 0.00 C /AvantGarde-Book findfont 200 scalefont setfont
+1129 1160 M
+22 -1 V
+22 -2 V
+21 -3 V
+22 -5 V
+22 -9 V
+22 -13 V
+21 -18 V
+22 -25 V
+22 -30 V
+22 -34 V
+21 -37 V
+22 -38 V
+22 -40 V
+22 -38 V
+21 -37 V
+22 -35 V
+22 -31 V
+22 -29 V
+21 -24 V
+22 -20 V
+22 -16 V
+22 -12 V
+21 -7 V
+22 -3 V
+22 2 V
 22 6 V
-23 8 V
+21 10 V
 22 13 V
-22 19 V
-22 26 V
-22 31 V
-23 36 V
-22 41 V
+22 18 V
+22 20 V
+21 24 V
+22 27 V
+22 30 V
+22 32 V
+21 35 V
+22 37 V
+22 38 V
+22 40 V
+21 41 V
+22 43 V
+22 43 V
 22 45 V
+21 45 V
+22 45 V
+22 46 V
 22 47 V
-22 49 V
-23 51 V
-22 52 V
-22 52 V
-22 52 V
-22 52 V
-23 52 V
-22 53 V
-22 52 V
-22 51 V
-22 52 V
-23 52 V
-22 51 V
-22 52 V
-22 51 V
-22 52 V
-22 51 V
-23 51 V
-22 51 V
-22 50 V
-22 51 V
-22 50 V
-23 50 V
-22 50 V
-22 49 V
-22 48 V
-22 48 V
-23 48 V
-22 47 V
+21 46 V
+22 46 V
 22 47 V
 22 46 V
+21 46 V
+22 46 V
 22 45 V
-23 44 V
+22 45 V
+21 45 V
+22 44 V
 22 44 V
 22 43 V
+21 42 V
 22 42 V
-22 42 V
-23 41 V
-22 40 V
+22 41 V
+22 41 V
+21 40 V
 22 39 V
 22 39 V
+22 38 V
+21 37 V
 22 37 V
-23 37 V
 22 36 V
-22 36 V
+22 35 V
+21 35 V
 22 34 V
-22 34 V
-23 33 V
 22 33 V
+22 33 V
+21 32 V
 22 31 V
 22 31 V
-22 31 V
-23 29 V
+22 30 V
+21 30 V
 22 29 V
 22 28 V
 22 28 V
-22 27 V
-23 26 V
+21 28 V
 22 26 V
+22 27 V
 22 25 V
+21 26 V
 22 24 V
-22 24 V
-23 23 V
+22 25 V
+22 23 V
+21 24 V
+22 22 V
 22 23 V
 22 22 V
-22 22 V
+21 21 V
 22 21 V
 22 21 V
-23 20 V
+22 20 V
+21 20 V
 22 20 V
 22 19 V
-22 19 V
 22 18 V
-23 18 V
+21 19 V
 22 18 V
+stroke 3391 3216 M
+22 18 V
+22 17 V
+21 17 V
 22 17 V
 22 16 V
 22 17 V
-23 16 V
+21 16 V
 22 15 V
 22 15 V
+22 16 V
+21 14 V
 22 15 V
-22 15 V
-23 14 V
 22 14 V
+22 14 V
+21 14 V
 22 14 V
 22 13 V
 22 13 V
-23 13 V
+21 13 V
+22 13 V
 22 12 V
+22 13 V
+21 12 V
 22 12 V
-stroke 3318 4033 M
+22 11 V
 22 12 V
-22 12 V
-23 11 V
+21 11 V
 22 11 V
 22 11 V
 22 11 V
+21 11 V
+22 11 V
 22 10 V
-23 11 V
+22 10 V
+21 10 V
+22 10 V
+22 10 V
+22 10 V
+21 9 V
 22 10 V
 22 9 V
-22 10 V
 22 9 V
-23 10 V
+21 9 V
 22 9 V
 22 9 V
-22 8 V
 22 9 V
-23 8 V
+21 8 V
+22 9 V
 22 8 V
 22 8 V
+21 9 V
 22 8 V
 22 8 V
-23 7 V
+22 7 V
+21 8 V
 22 8 V
+22 8 V
+22 7 V
+21 8 V
 22 7 V
 22 7 V
 22 7 V
-23 7 V
+21 7 V
+22 8 V
+22 6 V
+22 7 V
+21 7 V
+22 7 V
+22 7 V
+22 6 V
+21 7 V
 22 6 V
 22 7 V
 22 6 V
+21 6 V
 22 7 V
 22 6 V
-23 6 V
+22 6 V
+21 6 V
 22 6 V
 22 6 V
 22 6 V
+21 6 V
+22 6 V
+22 6 V
 22 5 V
-23 6 V
+21 6 V
+22 6 V
+22 5 V
+22 6 V
+21 5 V
+22 6 V
+22 5 V
+22 6 V
+21 5 V
 22 5 V
 22 6 V
 22 5 V
+21 5 V
 22 5 V
-23 5 V
+22 6 V
+22 5 V
+21 5 V
+22 5 V
+stroke 5653 4163 M
+22 5 V
+22 5 V
+21 5 V
+22 5 V
+22 5 V
+22 4 V
+21 5 V
 22 5 V
 22 5 V
 22 5 V
+21 4 V
 22 5 V
-23 4 V
 22 5 V
-22 4 V
 22 5 V
-22 4 V
-23 4 V
+21 4 V
 22 5 V
 22 4 V
+22 5 V
+21 5 V
+22 4 V
+22 5 V
+22 4 V
+21 5 V
 22 4 V
 22 4 V
-23 4 V
+22 5 V
+21 4 V
+22 5 V
 22 4 V
-22 3 V
+22 4 V
+21 5 V
 22 4 V
 22 4 V
-23 3 V
+22 5 V
+21 4 V
 22 4 V
-22 3 V
+22 5 V
 22 4 V
-22 3 V
-23 4 V
-22 3 V
-22 3 V
-22 3 V
-22 3 V
-23 4 V
-22 3 V
-22 3 V
-22 3 V
-22 3 V
-23 2 V
-22 3 V
-22 3 V
-22 3 V
-22 2 V
-22 3 V
-23 3 V
-22 2 V
-22 3 V
-22 2 V
-22 3 V
-23 2 V
-22 3 V
-22 2 V
-22 2 V
-22 3 V
-23 2 V
-22 2 V
-22 2 V
-22 3 V
-22 2 V
-23 2 V
-22 2 V
-22 2 V
-22 2 V
-22 2 V
-stroke 5626 4574 M
-23 2 V
-22 2 V
-22 2 V
-22 2 V
-22 2 V
-23 2 V
-22 1 V
-22 2 V
-22 2 V
-22 2 V
-23 1 V
-22 2 V
-22 2 V
-22 2 V
-22 1 V
-23 2 V
-22 1 V
-22 2 V
-22 2 V
-22 1 V
-23 2 V
-22 1 V
-22 2 V
-22 1 V
-22 2 V
-23 1 V
-22 2 V
-22 1 V
-22 1 V
-22 2 V
-22 1 V
-23 1 V
-22 2 V
-22 1 V
-22 1 V
-22 2 V
-23 1 V
-22 1 V
-22 1 V
-22 2 V
-22 1 V
-23 1 V
-22 1 V
-22 1 V
-22 1 V
-22 2 V
-23 1 V
-22 1 V
-22 1 V
-22 1 V
-22 1 V
-23 1 V
-22 1 V
-22 1 V
-22 1 V
-22 1 V
-% End plot #1
-% Begin plot #2
+21 4 V
+22 4 V
+22 4 V
+22 5 V
+21 4 V
+22 4 V
+22 4 V
+22 4 V
+21 4 V
+22 4 V
+22 5 V
+22 4 V
+21 4 V
+22 4 V
+22 4 V
+22 4 V
+21 4 V
+22 4 V
 stroke
 LT1
-0.00 0.00 1.00 C /Helvetica findfont 200 scalefont setfont
-1010 640 M
-22 1 V
-22 1 V
-22 3 V
-22 5 V
-23 9 V
+0.00 0.00 1.00 C /AvantGarde-Book findfont 200 scalefont setfont
+1129 1160 M
+22 -1 V
+22 -2 V
+21 -3 V
+22 -5 V
+22 -9 V
+22 -13 V
+21 -18 V
+22 -25 V
+22 -29 V
+22 -34 V
+21 -37 V
+22 -39 V
+22 -39 V
+22 -39 V
+21 -37 V
+22 -35 V
+22 -31 V
+22 -28 V
+21 -25 V
+22 -20 V
+22 -16 V
+22 -12 V
+21 -7 V
+22 -3 V
+22 2 V
+22 6 V
+21 10 V
 22 13 V
-22 19 V
-22 26 V
-22 31 V
-23 36 V
-22 41 V
-22 44 V
-22 48 V
-22 49 V
-23 51 V
-22 52 V
-22 52 V
-22 52 V
-22 52 V
-23 52 V
-22 53 V
-22 52 V
-22 51 V
-22 52 V
-23 52 V
-22 51 V
-22 52 V
-22 51 V
-22 52 V
-22 51 V
-23 51 V
-22 51 V
-22 50 V
-22 51 V
-22 50 V
-23 50 V
-22 50 V
-22 49 V
-22 48 V
-22 48 V
-23 48 V
+22 18 V
+22 21 V
+21 24 V
+22 27 V
+22 29 V
+22 33 V
+21 34 V
+22 37 V
+22 38 V
+22 40 V
+21 41 V
+22 43 V
+22 43 V
+22 45 V
+21 45 V
+22 45 V
+22 46 V
 22 47 V
+21 46 V
+22 46 V
 22 47 V
 22 46 V
+21 46 V
+22 46 V
 22 45 V
-23 44 V
+22 45 V
+21 45 V
+22 44 V
 22 44 V
 22 43 V
+21 42 V
 22 42 V
-22 42 V
-23 41 V
-22 40 V
+22 41 V
+22 41 V
+21 40 V
 22 39 V
 22 39 V
+22 38 V
+21 37 V
 22 37 V
-23 37 V
 22 36 V
-22 36 V
+22 35 V
+21 35 V
 22 34 V
-22 34 V
-23 33 V
 22 33 V
+22 33 V
+21 32 V
 22 31 V
 22 31 V
-22 31 V
-23 29 V
+22 30 V
+21 30 V
 22 29 V
-22 28 V
-22 28 V
+22 29 V
 22 27 V
-23 26 V
+21 28 V
+22 27 V
 22 26 V
+22 26 V
+21 25 V
+22 24 V
 22 25 V
-22 24 V
-22 24 V
-23 23 V
+22 23 V
+21 24 V
+22 22 V
 22 23 V
 22 22 V
-22 22 V
+21 21 V
 22 21 V
 22 21 V
-23 20 V
+22 20 V
+21 20 V
 22 20 V
 22 19 V
 22 19 V
+21 18 V
 22 18 V
-23 18 V
+stroke 3391 3216 M
 22 18 V
+22 17 V
+21 17 V
+22 17 V
 22 17 V
 22 16 V
-22 17 V
-23 16 V
+21 16 V
 22 15 V
+22 16 V
 22 15 V
+21 14 V
 22 15 V
-22 15 V
-23 14 V
 22 14 V
+22 14 V
+21 14 V
 22 14 V
 22 13 V
 22 13 V
-23 13 V
+21 13 V
+22 13 V
 22 12 V
+22 13 V
+21 12 V
 22 12 V
-stroke 3318 4033 M
-22 12 V
-22 12 V
-23 11 V
 22 11 V
+22 12 V
+21 11 V
 22 11 V
+22 12 V
+22 10 V
+21 11 V
 22 11 V
 22 10 V
-23 11 V
+22 10 V
+21 10 V
+22 10 V
+22 10 V
+22 10 V
+21 9 V
 22 10 V
 22 9 V
-22 10 V
 22 9 V
-23 10 V
+21 9 V
 22 9 V
 22 9 V
-22 8 V
 22 9 V
-23 8 V
+21 8 V
+22 9 V
+22 8 V
+22 8 V
+21 9 V
 22 8 V
 22 8 V
 22 8 V
+21 7 V
 22 8 V
-23 7 V
 22 8 V
 22 7 V
+21 8 V
 22 7 V
 22 7 V
-23 7 V
+22 7 V
+21 8 V
+22 7 V
+22 7 V
+22 6 V
+21 7 V
+22 7 V
+22 7 V
+22 6 V
+21 7 V
 22 6 V
 22 7 V
 22 6 V
-22 7 V
-22 6 V
-23 6 V
+21 7 V
 22 6 V
 22 6 V
 22 6 V
+21 6 V
+22 6 V
+22 6 V
+22 6 V
+21 6 V
+22 6 V
+22 6 V
 22 5 V
-23 6 V
+21 6 V
+22 6 V
 22 5 V
+22 6 V
+21 5 V
+22 6 V
+22 5 V
+22 6 V
+21 5 V
 22 6 V
 22 5 V
 22 5 V
-23 5 V
+21 5 V
+22 5 V
+22 6 V
+22 5 V
+21 5 V
+22 5 V
+stroke 5653 4163 M
+22 5 V
+22 5 V
+21 5 V
 22 5 V
 22 5 V
 22 5 V
+21 4 V
 22 5 V
-23 4 V
+22 5 V
+22 5 V
+21 4 V
+22 5 V
+22 5 V
+22 5 V
+21 4 V
 22 5 V
 22 4 V
 22 5 V
+21 5 V
 22 4 V
-23 4 V
+22 5 V
+22 4 V
+21 5 V
+22 4 V
+22 5 V
+22 4 V
+21 4 V
 22 5 V
 22 4 V
 22 4 V
-22 4 V
-23 4 V
-22 4 V
-22 3 V
+21 5 V
 22 4 V
 22 4 V
-23 3 V
+22 5 V
+21 4 V
 22 4 V
-22 3 V
+22 5 V
 22 4 V
-22 3 V
-23 4 V
-22 3 V
-22 3 V
-22 3 V
+21 4 V
 22 4 V
-23 3 V
-22 3 V
-22 3 V
-22 3 V
-22 3 V
-23 2 V
-22 3 V
-22 3 V
-22 3 V
-22 2 V
-22 3 V
-23 3 V
-22 2 V
-22 3 V
-22 2 V
-22 3 V
-23 2 V
-22 3 V
-22 2 V
-22 2 V
-22 3 V
-23 2 V
-22 2 V
-22 2 V
-22 3 V
-22 2 V
-23 2 V
-22 2 V
-22 2 V
-22 2 V
-22 2 V
-stroke 5626 4574 M
-23 2 V
-22 2 V
-22 2 V
-22 2 V
-22 2 V
-23 2 V
-22 1 V
-22 2 V
-22 2 V
-22 2 V
-23 2 V
-22 1 V
-22 2 V
-22 2 V
-22 1 V
-23 2 V
-22 1 V
-22 2 V
-22 2 V
-22 1 V
-23 2 V
-22 1 V
-22 2 V
-22 1 V
-22 2 V
-23 1 V
-22 2 V
-22 1 V
-22 1 V
-22 2 V
-22 1 V
-23 1 V
-22 2 V
-22 1 V
-22 1 V
-22 2 V
-23 1 V
-22 1 V
-22 1 V
-22 2 V
-22 1 V
-23 1 V
-22 1 V
-22 1 V
-22 1 V
-22 2 V
-23 1 V
-22 1 V
-22 1 V
-22 1 V
-22 1 V
-23 1 V
-22 1 V
-22 1 V
-22 1 V
-22 1 V
-% End plot #2
-% Begin plot #3
+22 4 V
+22 5 V
+21 4 V
+22 4 V
+22 4 V
+22 4 V
+21 4 V
+22 4 V
+22 5 V
+22 4 V
+21 4 V
+22 4 V
+22 4 V
+22 4 V
+21 4 V
+22 4 V
 stroke
 LT2
-0.00 1.00 0.00 C /Helvetica findfont 200 scalefont setfont
-987 640 M
-23 0 V
-22 1 V
-22 1 V
-22 3 V
-22 5 V
-23 9 V
-22 13 V
+0.00 1.00 0.00 C /AvantGarde-Book findfont 200 scalefont setfont
+1129 1160 M
+22 0 V
+22 -1 V
+21 -1 V
+22 -2 V
+22 -5 V
+22 -9 V
+21 -15 V
+22 -20 V
+22 -25 V
+22 -30 V
+21 -33 V
+22 -34 V
+22 -36 V
+22 -34 V
+21 -33 V
+22 -31 V
+22 -29 V
+22 -25 V
+21 -21 V
+22 -17 V
+22 -14 V
+22 -9 V
+21 -4 V
+22 -1 V
+22 4 V
+22 8 V
+21 11 V
+22 16 V
 22 19 V
-22 26 V
+22 22 V
+21 26 V
+22 29 V
 22 31 V
-23 36 V
+22 33 V
+21 36 V
+22 38 V
+22 40 V
 22 41 V
+21 42 V
 22 44 V
-22 48 V
-22 49 V
-23 51 V
-22 52 V
-22 52 V
-22 52 V
-22 52 V
-23 52 V
-22 53 V
-22 52 V
-22 51 V
-22 52 V
-23 52 V
-22 51 V
-22 52 V
-22 51 V
-22 52 V
-22 51 V
-23 51 V
-22 51 V
-22 50 V
-22 51 V
-22 50 V
-23 50 V
-22 50 V
-22 49 V
-22 48 V
-22 48 V
-23 48 V
-22 47 V
-22 47 V
+22 44 V
 22 46 V
+21 45 V
+22 47 V
+22 47 V
+22 47 V
+21 47 V
+22 47 V
+22 47 V
+22 47 V
+21 47 V
+22 46 V
+22 46 V
+22 46 V
+21 45 V
 22 45 V
-23 44 V
 22 44 V
-22 43 V
+22 44 V
+21 43 V
 22 42 V
 22 42 V
-23 41 V
+22 41 V
+21 40 V
 22 40 V
 22 39 V
-22 39 V
+22 38 V
+21 38 V
 22 37 V
-23 37 V
 22 36 V
-22 36 V
-22 34 V
-22 34 V
-23 33 V
+22 35 V
+21 35 V
+22 35 V
 22 33 V
+22 33 V
+21 32 V
+22 32 V
 22 31 V
-22 31 V
-22 31 V
-23 29 V
+22 30 V
+21 30 V
+22 29 V
 22 29 V
 22 28 V
-22 28 V
+21 27 V
 22 27 V
-23 26 V
-22 26 V
+22 27 V
+22 25 V
+21 26 V
 22 25 V
 22 24 V
 22 24 V
-23 23 V
+21 23 V
 22 23 V
 22 22 V
 22 22 V
+21 22 V
 22 21 V
-22 21 V
-23 20 V
 22 20 V
+22 21 V
+21 20 V
 22 19 V
 22 19 V
+22 19 V
+21 18 V
 22 18 V
-23 18 V
+stroke 3391 3338 M
 22 18 V
+22 17 V
+21 17 V
+22 17 V
 22 17 V
 22 16 V
-22 17 V
-23 16 V
+21 16 V
 22 15 V
 22 15 V
 22 15 V
-22 15 V
-23 14 V
+21 15 V
 22 14 V
+22 15 V
+22 14 V
+21 13 V
 22 14 V
 22 13 V
 22 13 V
-23 13 V
+21 13 V
 22 12 V
-stroke 3296 4021 M
+22 13 V
 22 12 V
+21 12 V
 22 12 V
-22 12 V
-23 11 V
 22 11 V
+22 11 V
+21 12 V
 22 11 V
 22 11 V
 22 10 V
-23 11 V
+21 11 V
+22 10 V
+22 10 V
+22 10 V
+21 10 V
+22 10 V
 22 10 V
 22 9 V
-22 10 V
-22 9 V
-23 10 V
+21 10 V
 22 9 V
 22 9 V
+22 9 V
+21 9 V
 22 8 V
 22 9 V
-23 8 V
+22 8 V
+21 9 V
 22 8 V
 22 8 V
 22 8 V
+21 8 V
 22 8 V
-23 7 V
 22 8 V
 22 7 V
+21 8 V
+22 7 V
+22 8 V
+22 7 V
+21 7 V
 22 7 V
 22 7 V
-23 7 V
-22 6 V
+22 7 V
+21 7 V
 22 7 V
 22 6 V
 22 7 V
+21 6 V
+22 7 V
 22 6 V
-23 6 V
+22 7 V
+21 6 V
 22 6 V
 22 6 V
 22 6 V
+21 6 V
+22 6 V
+22 6 V
+22 6 V
+21 6 V
 22 5 V
-23 6 V
+22 6 V
+22 6 V
+21 5 V
+22 6 V
+22 5 V
+22 6 V
+21 5 V
 22 5 V
 22 6 V
 22 5 V
-22 5 V
-23 5 V
-22 5 V
+21 5 V
 22 5 V
 22 5 V
 22 5 V
-23 4 V
+21 5 V
+22 5 V
+22 5 V
+22 5 V
+21 5 V
+22 5 V
 22 5 V
 22 4 V
+21 5 V
+22 5 V
+stroke 5653 4261 M
+22 4 V
+22 5 V
+21 5 V
+22 4 V
 22 5 V
 22 4 V
-23 4 V
+21 5 V
+22 4 V
+22 4 V
+22 5 V
+21 4 V
+22 4 V
 22 5 V
 22 4 V
+21 4 V
+22 4 V
+22 5 V
+22 4 V
+21 4 V
 22 4 V
 22 4 V
-23 4 V
+22 4 V
+21 4 V
+22 4 V
+22 4 V
+22 4 V
+21 4 V
+22 4 V
+22 4 V
+22 4 V
+21 4 V
+22 4 V
+22 4 V
+22 3 V
+21 4 V
+22 4 V
+22 4 V
+22 4 V
+21 3 V
+22 4 V
+22 4 V
+22 4 V
+21 3 V
+22 4 V
+22 4 V
+22 3 V
+21 4 V
 22 4 V
 22 3 V
 22 4 V
+21 3 V
 22 4 V
-23 3 V
-22 4 V
-22 3 V
 22 4 V
 22 3 V
-23 4 V
+21 4 V
 22 3 V
-22 3 V
-22 3 V
-22 3 V
-23 4 V
-22 3 V
-22 3 V
-22 3 V
-22 3 V
-23 2 V
-22 3 V
-22 3 V
-22 3 V
-22 2 V
-22 3 V
-23 3 V
-22 2 V
-22 3 V
-22 2 V
-22 3 V
-23 2 V
-22 3 V
-22 2 V
-22 2 V
-22 3 V
-23 2 V
-22 2 V
-22 2 V
-22 3 V
-22 2 V
-23 2 V
-22 2 V
-22 2 V
-22 2 V
-stroke 5604 4572 M
-22 2 V
-23 2 V
-22 2 V
-22 2 V
-22 2 V
-22 2 V
-23 2 V
-22 1 V
-22 2 V
-22 2 V
-22 2 V
-23 2 V
-22 1 V
-22 2 V
-22 2 V
-22 1 V
-23 2 V
-22 1 V
-22 2 V
-22 2 V
-22 1 V
-23 2 V
-22 1 V
-22 2 V
-22 1 V
-22 2 V
-23 1 V
-22 2 V
-22 1 V
-22 1 V
-22 2 V
-22 1 V
-23 1 V
-22 2 V
-22 1 V
-22 1 V
-22 2 V
-23 1 V
-22 1 V
-22 1 V
-22 2 V
-22 1 V
-23 1 V
-22 1 V
-22 1 V
-22 1 V
-22 2 V
-23 1 V
-22 1 V
-22 1 V
-22 1 V
-22 1 V
-23 1 V
-22 1 V
-22 1 V
-22 1 V
-22 1 V
-23 1 V
-% End plot #3
+1.000 UP
 stroke
+1.000 UL
+LT3
+1.00 0.00 0.00 C /AvantGarde-Book findfont 200 scalefont setfont
+1198 1161 CircleF
+1202 1161 CircleF
+1212 1161 CircleF
+1219 1161 CircleF
+1227 1160 CircleF
+1230 1160 CircleF
+1240 1159 CircleF
+1245 1158 CircleF
+1259 1154 CircleF
+1274 1148 CircleF
+1289 1141 CircleF
+1303 1131 CircleF
+1314 1122 CircleF
+1321 1115 CircleF
+1342 1094 CircleF
+1375 1052 CircleF
+1413 1000 CircleF
+1452 946 CircleF
+1489 898 CircleF
+1502 883 CircleF
+1536 848 CircleF
+1560 827 CircleF
+1584 811 CircleF
+1605 800 CircleF
+1628 793 CircleF
+1653 789 CircleF
+1681 792 CircleF
+1688 795 CircleF
+1694 797 CircleF
+1702 797 CircleF
+1709 799 CircleF
+1716 802 CircleF
+1724 809 CircleF
+1731 813 CircleF
+1738 817 CircleF
+1745 821 CircleF
+1753 825 CircleF
+1769 836 CircleF
+1781 848 CircleF
+1796 863 CircleF
+1811 879 CircleF
+1822 892 CircleF
+1834 905 CircleF
+1862 946 CircleF
+1898 996 CircleF
+1934 1054 CircleF
+1970 1116 CircleF
+2006 1137 CircleF
+2042 1253 CircleF
+2077 1323 CircleF
+2111 1388 CircleF
+2149 1467 CircleF
+2187 1547 CircleF
+2223 1621 CircleF
+2260 1699 CircleF
+2301 1781 CircleF
+2332 1844 CircleF
+2368 1915 CircleF
+2405 1989 CircleF
+2443 2059 CircleF
+2477 2123 CircleF
+2514 2192 CircleF
+2550 2255 CircleF
+2586 2319 CircleF
+2622 2381 CircleF
+2659 2425 CircleF
+2695 2499 CircleF
+2731 2552 CircleF
+2768 2606 CircleF
+2804 2661 CircleF
+2840 2709 CircleF
+2876 2755 CircleF
+2912 2805 CircleF
+2949 2851 CircleF
+2985 2895 CircleF
+3021 2933 CircleF
+3058 2977 CircleF
+3094 3018 CircleF
+3130 3058 CircleF
+3166 3094 CircleF
+3203 3131 CircleF
+3239 3166 CircleF
+3268 3202 CircleF
+3311 3233 CircleF
+3348 3262 CircleF
+3384 3294 CircleF
+3420 3321 CircleF
+3456 3347 CircleF
+3493 3378 CircleF
+3529 3403 CircleF
+3564 3428 CircleF
+1825 896 CircleF
+1970 1116 CircleF
+2115 1399 CircleF
+2260 1697 CircleF
+2405 1988 CircleF
+2550 2257 CircleF
+2695 2498 CircleF
+2840 2709 CircleF
+2985 2894 CircleF
+3130 3057 CircleF
+3275 3200 CircleF
+3420 3322 CircleF
+3565 3429 CircleF
+3710 3532 CircleF
+3855 3619 CircleF
+4000 3697 CircleF
+4725 3979 CircleF
+5450 4157 CircleF
+6175 4292 CircleF
+6900 4398 CircleF
 2.000 UL
 LTb
-980 4799 N
-980 640 L
-5919 0 V
-0 4159 V
--5919 0 V
+1100 4800 N
+0 -4160 V
+5800 0 V
+0 4160 V
+-5800 0 V
 Z stroke
 1.000 UP
 2.000 UL
@@ -4221,793 +3973,788 @@ showpage
 %%Page: 5 5
 gnudict begin
 gsave
-doclip
 50 50 translate
 0.100 0.100 scale
 90 rotate
 0 -5040 translate
 0 setgray
 newpath
-(Helvetica) findfont 200 scalefont setfont
+(AvantGarde-Book) findfont 200 scalefont setfont
 2.000 UL
 LTb
-980 640 M
+1100 640 M
 63 0 V
-5856 0 R
+5737 0 R
 -63 0 V
 stroke
-860 640 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 0)]
+980 640 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0)]
 ] -66.7 MRshow
 2.000 UL
 LTb
+1100 1056 M
+63 0 V
+5737 0 R
+-63 0 V
+stroke
 980 1056 M
-63 0 V
-5856 0 R
--63 0 V
-stroke
-860 1056 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 5)]
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 5)]
 ] -66.7 MRshow
 2.000 UL
 LTb
+1100 1472 M
+63 0 V
+5737 0 R
+-63 0 V
+stroke
 980 1472 M
-63 0 V
-5856 0 R
--63 0 V
-stroke
-860 1472 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 10)]
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 10)]
 ] -66.7 MRshow
 2.000 UL
 LTb
+1100 1888 M
+63 0 V
+5737 0 R
+-63 0 V
+stroke
 980 1888 M
-63 0 V
-5856 0 R
--63 0 V
-stroke
-860 1888 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 15)]
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 15)]
 ] -66.7 MRshow
 2.000 UL
 LTb
+1100 2304 M
+63 0 V
+5737 0 R
+-63 0 V
+stroke
 980 2304 M
-63 0 V
-5856 0 R
--63 0 V
-stroke
-860 2304 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 20)]
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 20)]
 ] -66.7 MRshow
 2.000 UL
 LTb
+1100 2720 M
+63 0 V
+5737 0 R
+-63 0 V
+stroke
 980 2720 M
-63 0 V
-5856 0 R
--63 0 V
-stroke
-860 2720 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 25)]
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 25)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-980 3135 M
+1100 3136 M
 63 0 V
-5856 0 R
+5737 0 R
 -63 0 V
 stroke
-860 3135 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 30)]
+980 3136 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 30)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-980 3551 M
+1100 3552 M
 63 0 V
-5856 0 R
+5737 0 R
 -63 0 V
 stroke
-860 3551 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 35)]
+980 3552 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 35)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-980 3967 M
+1100 3968 M
 63 0 V
-5856 0 R
+5737 0 R
 -63 0 V
 stroke
-860 3967 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 40)]
+980 3968 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 40)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-980 4383 M
+1100 4384 M
 63 0 V
-5856 0 R
+5737 0 R
 -63 0 V
 stroke
-860 4383 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 45)]
+980 4384 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 45)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-980 4799 M
+1100 4800 M
 63 0 V
-5856 0 R
+5737 0 R
 -63 0 V
 stroke
-860 4799 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 50)]
+980 4800 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 50)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-980 640 M
+1100 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-980 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 0)]
+1100 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-1720 640 M
+1825 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-1720 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 100)]
+1825 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 100)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-2460 640 M
+2550 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-2460 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 200)]
+2550 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 200)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-3200 640 M
+3275 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-3200 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 300)]
+3275 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 300)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-3940 640 M
+4000 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-3940 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 400)]
+4000 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 400)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-4679 640 M
+4725 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-4679 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 500)]
+4725 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 500)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-5419 640 M
+5450 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-5419 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 600)]
+5450 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 600)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-6159 640 M
+6175 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-6159 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 700)]
+6175 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 700)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-6899 640 M
+6900 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-6899 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 800)]
+6900 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 800)]
 ] -66.7 MCshow
 2.000 UL
 LTb
 2.000 UL
 LTb
-980 4799 N
-980 640 L
-5919 0 V
-0 4159 V
--5919 0 V
+1100 4800 N
+0 -4160 V
+5800 0 V
+0 4160 V
+-5800 0 V
 Z stroke
 LCb setrgbcolor
-280 2719 M
-currentpoint gsave translate -270 rotate 0 0 moveto
-[ [(Helvetica) 200.0 0.0 true true 0 (Heat capacity C)]
-[(Helvetica) 160.0 -60.0 true true 0 (p)]
-[(Helvetica) 200.0 0.0 true true 0 ( \(J / K / N / mol\))]
+400 2720 M
+currentpoint gsave translate 90 rotate 0 0 moveto
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 (Heat capacity C)]
+[(AvantGarde-Book) 160.0 -60.0 true true 0 (v)]
+[(AvantGarde-Book) 200.0 0.0 true true 0 ( \(J / K / N / mol\))]
 ] -46.7 MCshow
 grestore
 LTb
 LCb setrgbcolor
-3939 140 M
-[ [(Helvetica) 200.0 0.0 true true 0 (T \(K\))]
+4000 140 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 (T \(K\))]
 ] -66.7 MCshow
 LTb
 1.000 UP
 2.000 UL
 LTb
-% Begin plot #1
 3.000 UL
 LT0
-1.00 0.00 0.00 C /Helvetica findfont 200 scalefont setfont
-1010 640 M
+1.00 0.00 0.00 C /AvantGarde-Book findfont 200 scalefont setfont
+1129 640 M
 22 1 V
 22 1 V
-22 3 V
+21 3 V
 22 6 V
-23 8 V
+22 8 V
 22 13 V
-22 19 V
-22 26 V
+21 20 V
+22 25 V
 22 31 V
-23 36 V
-22 41 V
+22 36 V
+21 41 V
 22 45 V
 22 47 V
+22 50 V
+21 50 V
+22 52 V
+22 52 V
+22 52 V
+21 53 V
+22 52 V
+22 52 V
+22 52 V
+21 52 V
+22 52 V
+22 51 V
+22 52 V
+21 52 V
+22 51 V
+22 51 V
+22 51 V
+21 52 V
+22 50 V
+22 51 V
+22 51 V
+21 50 V
+22 50 V
 22 49 V
-23 51 V
-22 52 V
-22 52 V
-22 52 V
-22 52 V
-23 53 V
-22 52 V
-22 52 V
-22 52 V
-22 51 V
-23 52 V
-22 51 V
-22 52 V
-22 51 V
-22 52 V
-22 51 V
-23 51 V
-22 51 V
-22 50 V
-22 51 V
-22 50 V
-23 50 V
-22 50 V
 22 49 V
+21 49 V
 22 48 V
 22 48 V
-23 48 V
 22 47 V
-22 47 V
+21 46 V
 22 46 V
 22 45 V
-23 44 V
-22 44 V
+22 45 V
+21 44 V
 22 43 V
 22 42 V
 22 42 V
-23 41 V
+21 41 V
 22 40 V
 22 39 V
-22 39 V
+22 38 V
+21 38 V
 22 37 V
-23 37 V
-22 37 V
-22 35 V
-22 35 V
+22 36 V
+22 36 V
+21 34 V
 22 34 V
-23 33 V
-22 32 V
-22 32 V
+22 33 V
+22 33 V
+21 31 V
 22 31 V
-22 30 V
-23 30 V
+22 31 V
 22 29 V
+21 29 V
 22 28 V
 22 28 V
 22 27 V
-23 26 V
-22 26 V
+21 26 V
 22 25 V
-22 24 V
-22 24 V
-23 23 V
+22 25 V
+22 25 V
+21 24 V
 22 23 V
 22 23 V
-22 21 V
 22 22 V
+21 22 V
+22 21 V
+22 21 V
 22 20 V
-23 21 V
+21 20 V
 22 19 V
-22 20 V
 22 19 V
 22 18 V
-23 18 V
+21 18 V
+22 17 V
 22 18 V
-22 17 V
-22 17 V
 22 16 V
-23 16 V
+21 17 V
 22 16 V
 22 15 V
 22 15 V
+21 15 V
 22 15 V
-23 14 V
 22 14 V
 22 14 V
+21 14 V
 22 13 V
 22 13 V
-23 13 V
 22 13 V
+21 12 V
 22 12 V
-stroke 3318 4037 M
+stroke 3391 4034 M
 22 12 V
 22 12 V
-23 11 V
-22 12 V
+21 11 V
+22 11 V
+22 11 V
+22 11 V
+21 10 V
 22 11 V
 22 10 V
-22 11 V
-23 10 V
+22 9 V
+21 10 V
+22 9 V
 22 10 V
-22 10 V
-22 10 V
 22 9 V
-23 10 V
-22 9 V
-22 9 V
+21 9 V
+22 8 V
 22 9 V
 22 8 V
-23 9 V
+21 8 V
 22 8 V
 22 8 V
 22 8 V
+21 7 V
 22 8 V
-23 7 V
-22 8 V
 22 7 V
 22 7 V
-22 7 V
-23 7 V
-22 7 V
+21 7 V
 22 7 V
 22 6 V
 22 7 V
-22 6 V
-23 6 V
-22 6 V
-22 6 V
+21 6 V
+22 7 V
 22 6 V
 22 6 V
-23 6 V
+21 6 V
+22 6 V
+22 6 V
+22 5 V
+21 6 V
 22 5 V
 22 6 V
 22 5 V
-22 5 V
-23 6 V
-22 5 V
+21 5 V
 22 5 V
 22 5 V
-22 4 V
-23 5 V
 22 5 V
-22 5 V
-22 4 V
-22 4 V
-23 5 V
-22 4 V
-22 4 V
+21 5 V
 22 5 V
 22 4 V
-23 4 V
+22 5 V
+21 4 V
+22 5 V
+22 4 V
+22 4 V
+21 5 V
 22 4 V
 22 4 V
 22 4 V
-22 3 V
-23 4 V
-22 4 V
+21 4 V
 22 3 V
 22 4 V
-22 3 V
-23 4 V
+22 4 V
+21 4 V
 22 3 V
 22 4 V
 22 3 V
+21 4 V
 22 3 V
-23 3 V
 22 4 V
 22 3 V
+21 3 V
 22 3 V
 22 3 V
-23 3 V
-22 3 V
+22 4 V
+21 3 V
 22 3 V
 22 3 V
 22 2 V
+21 3 V
 22 3 V
-23 3 V
 22 3 V
+22 3 V
+21 2 V
+22 3 V
+22 3 V
+22 2 V
+21 3 V
 22 2 V
 22 3 V
 22 2 V
-23 3 V
-22 3 V
-22 2 V
-22 2 V
-22 3 V
-23 2 V
-22 3 V
-22 2 V
-22 2 V
-22 3 V
-23 2 V
-22 2 V
+21 3 V
 22 2 V
 22 2 V
 22 3 V
-stroke 5626 4590 M
-23 2 V
+21 2 V
+22 2 V
+22 2 V
+22 3 V
+21 2 V
 22 2 V
 22 2 V
 22 2 V
+21 2 V
 22 2 V
-23 2 V
+stroke 5653 4575 M
 22 2 V
 22 2 V
-22 2 V
-22 1 V
-23 2 V
-22 2 V
+21 2 V
 22 2 V
 22 2 V
 22 2 V
-23 1 V
+21 1 V
 22 2 V
 22 2 V
-22 1 V
 22 2 V
-23 2 V
-22 1 V
+21 1 V
 22 2 V
 22 2 V
-22 1 V
-23 2 V
-22 1 V
+22 2 V
+21 1 V
 22 2 V
 22 1 V
 22 2 V
-22 1 V
-23 2 V
-22 1 V
-22 2 V
-22 1 V
-22 2 V
-23 1 V
+21 2 V
 22 1 V
 22 2 V
 22 1 V
-22 1 V
-23 2 V
-22 1 V
+21 2 V
 22 1 V
 22 2 V
 22 1 V
-23 1 V
+21 1 V
+22 2 V
+22 1 V
+22 2 V
+21 1 V
 22 1 V
 22 2 V
 22 1 V
-22 1 V
-23 1 V
-22 1 V
+21 1 V
 22 2 V
 22 1 V
 22 1 V
-% End plot #1
-% Begin plot #2
+21 1 V
+22 2 V
+22 1 V
+22 1 V
+21 1 V
+22 1 V
+22 1 V
+22 2 V
+21 1 V
+22 1 V
+22 1 V
+22 1 V
+21 1 V
+22 1 V
+22 1 V
+22 1 V
+21 1 V
+22 1 V
 stroke
 LT1
-0.00 0.00 1.00 C /Helvetica findfont 200 scalefont setfont
-1010 640 M
+0.00 0.00 1.00 C /AvantGarde-Book findfont 200 scalefont setfont
+1129 640 M
 22 1 V
 22 1 V
-22 3 V
-22 5 V
-23 9 V
+21 3 V
+22 6 V
+22 8 V
 22 13 V
-22 19 V
+21 19 V
 22 26 V
 22 31 V
-23 36 V
-22 41 V
-22 44 V
-22 48 V
-22 49 V
-23 51 V
-22 52 V
-22 52 V
-22 52 V
-22 52 V
-23 52 V
-22 53 V
-22 52 V
-22 51 V
-22 52 V
-23 52 V
-22 51 V
-22 52 V
-22 51 V
-22 52 V
-22 51 V
-23 51 V
-22 51 V
-22 50 V
-22 51 V
-22 50 V
-23 50 V
-22 50 V
-22 49 V
-22 48 V
-22 48 V
-23 48 V
+22 36 V
+21 41 V
+22 45 V
 22 47 V
+22 50 V
+21 50 V
+22 52 V
+22 52 V
+22 52 V
+21 53 V
+22 52 V
+22 52 V
+22 52 V
+21 52 V
+22 52 V
+22 51 V
+22 52 V
+21 51 V
+22 52 V
+22 51 V
+22 51 V
+21 51 V
+22 51 V
+22 51 V
+22 51 V
+21 50 V
+22 50 V
+22 49 V
+22 49 V
+21 49 V
+22 48 V
+22 48 V
 22 47 V
+21 46 V
 22 46 V
 22 45 V
-23 44 V
-22 44 V
+22 45 V
+21 44 V
 22 43 V
 22 42 V
 22 42 V
-23 41 V
+21 41 V
 22 40 V
 22 39 V
-22 39 V
+22 38 V
+21 38 V
 22 37 V
-23 37 V
-22 37 V
-22 35 V
-22 35 V
+22 36 V
+22 36 V
+21 34 V
 22 34 V
-23 33 V
-22 32 V
-22 32 V
+22 33 V
+22 33 V
+21 31 V
 22 31 V
-22 30 V
-23 30 V
+22 31 V
 22 29 V
+21 29 V
 22 28 V
 22 28 V
 22 27 V
-23 26 V
-22 26 V
+21 26 V
 22 25 V
-22 24 V
-22 24 V
-23 23 V
+22 25 V
+22 25 V
+21 24 V
 22 23 V
 22 23 V
-22 21 V
 22 22 V
+21 22 V
+22 21 V
+22 21 V
 22 20 V
-23 21 V
+21 20 V
 22 19 V
-22 20 V
 22 19 V
 22 18 V
-23 18 V
+21 18 V
+22 17 V
 22 18 V
-22 17 V
-22 17 V
 22 16 V
-23 16 V
+21 17 V
 22 16 V
 22 15 V
 22 15 V
+21 15 V
 22 15 V
-23 14 V
 22 14 V
 22 14 V
+21 14 V
 22 13 V
 22 13 V
-23 13 V
 22 13 V
+21 12 V
 22 12 V
-stroke 3318 4037 M
+stroke 3391 4034 M
 22 12 V
 22 12 V
-23 11 V
-22 12 V
+21 11 V
+22 11 V
+22 11 V
+22 11 V
+21 10 V
 22 11 V
 22 10 V
-22 11 V
-23 10 V
+22 9 V
+21 10 V
+22 9 V
 22 10 V
-22 10 V
-22 10 V
 22 9 V
-23 10 V
-22 9 V
-22 9 V
+21 9 V
+22 8 V
 22 9 V
 22 8 V
-23 9 V
+21 8 V
 22 8 V
 22 8 V
 22 8 V
+21 7 V
 22 8 V
-23 7 V
-22 8 V
 22 7 V
 22 7 V
-22 7 V
-23 7 V
-22 7 V
+21 7 V
 22 7 V
 22 6 V
 22 7 V
-22 6 V
-23 6 V
-22 6 V
-22 6 V
+21 6 V
+22 7 V
 22 6 V
 22 6 V
-23 6 V
+21 6 V
+22 6 V
+22 6 V
+22 5 V
+21 6 V
 22 5 V
 22 6 V
 22 5 V
-22 5 V
-23 6 V
-22 5 V
+21 5 V
 22 5 V
 22 5 V
-22 4 V
-23 5 V
 22 5 V
-22 5 V
-22 4 V
-22 4 V
-23 5 V
-22 4 V
-22 4 V
+21 5 V
 22 5 V
 22 4 V
-23 4 V
+22 5 V
+21 4 V
+22 5 V
+22 4 V
+22 4 V
+21 5 V
 22 4 V
 22 4 V
 22 4 V
-22 3 V
-23 4 V
-22 4 V
+21 4 V
 22 3 V
 22 4 V
-22 3 V
-23 4 V
+22 4 V
+21 4 V
 22 3 V
 22 4 V
 22 3 V
+21 4 V
 22 3 V
-23 3 V
 22 4 V
 22 3 V
+21 3 V
 22 3 V
 22 3 V
-23 3 V
-22 3 V
+22 4 V
+21 3 V
 22 3 V
 22 3 V
 22 2 V
+21 3 V
 22 3 V
-23 3 V
 22 3 V
+22 3 V
+21 2 V
+22 3 V
+22 3 V
+22 2 V
+21 3 V
 22 2 V
 22 3 V
 22 2 V
-23 3 V
-22 3 V
-22 2 V
-22 2 V
-22 3 V
-23 2 V
-22 3 V
-22 2 V
-22 2 V
-22 3 V
-23 2 V
-22 2 V
+21 3 V
 22 2 V
 22 2 V
 22 3 V
-stroke 5626 4590 M
-23 2 V
+21 2 V
+22 2 V
+22 2 V
+22 3 V
+21 2 V
 22 2 V
 22 2 V
 22 2 V
+21 2 V
 22 2 V
-23 2 V
+stroke 5653 4575 M
 22 2 V
 22 2 V
-22 2 V
-22 1 V
-23 2 V
-22 2 V
+21 2 V
 22 2 V
 22 2 V
 22 2 V
-23 1 V
+21 1 V
 22 2 V
 22 2 V
-22 1 V
 22 2 V
-23 2 V
-22 1 V
+21 1 V
 22 2 V
 22 2 V
-22 1 V
-23 2 V
-22 1 V
+22 2 V
+21 1 V
 22 2 V
 22 1 V
 22 2 V
-22 1 V
-23 2 V
-22 1 V
-22 2 V
-22 1 V
-22 2 V
-23 1 V
+21 2 V
 22 1 V
 22 2 V
 22 1 V
-22 1 V
-23 2 V
-22 1 V
+21 2 V
 22 1 V
 22 2 V
 22 1 V
-23 1 V
+21 1 V
+22 2 V
+22 1 V
+22 2 V
+21 1 V
 22 1 V
 22 2 V
 22 1 V
-22 1 V
-23 1 V
-22 1 V
+21 1 V
 22 2 V
 22 1 V
 22 1 V
-% End plot #2
+21 1 V
+22 2 V
+22 1 V
+22 1 V
+21 1 V
+22 1 V
+22 1 V
+22 2 V
+21 1 V
+22 1 V
+22 1 V
+22 1 V
+21 1 V
+22 1 V
+22 1 V
+22 1 V
+21 1 V
+22 1 V
 stroke
 2.000 UL
 LTb
-980 4799 N
-980 640 L
-5919 0 V
-0 4159 V
--5919 0 V
+1100 4800 N
+0 -4160 V
+5800 0 V
+0 4160 V
+-5800 0 V
 Z stroke
 1.000 UP
 2.000 UL
@@ -5019,755 +4766,788 @@ showpage
 %%Page: 6 6
 gnudict begin
 gsave
-doclip
 50 50 translate
 0.100 0.100 scale
 90 rotate
 0 -5040 translate
 0 setgray
 newpath
-(Helvetica) findfont 200 scalefont setfont
+(AvantGarde-Book) findfont 200 scalefont setfont
 2.000 UL
 LTb
-1220 640 M
-63 0 V
-5616 0 R
--63 0 V
-stroke
 1100 640 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 0)]
+63 0 V
+5737 0 R
+-63 0 V
+stroke
+980 640 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1220 1333 M
+1100 1056 M
 63 0 V
-5616 0 R
+5737 0 R
 -63 0 V
 stroke
-1100 1333 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 0.05)]
+980 1056 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 5)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1220 2026 M
+1100 1472 M
 63 0 V
-5616 0 R
+5737 0 R
 -63 0 V
 stroke
-1100 2026 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 0.1)]
+980 1472 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 10)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1220 2720 M
+1100 1888 M
 63 0 V
-5616 0 R
+5737 0 R
 -63 0 V
 stroke
+980 1888 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 15)]
+] -66.7 MRshow
+2.000 UL
+LTb
+1100 2304 M
+63 0 V
+5737 0 R
+-63 0 V
+stroke
+980 2304 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 20)]
+] -66.7 MRshow
+2.000 UL
+LTb
 1100 2720 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 0.15)]
-] -66.7 MRshow
-2.000 UL
-LTb
-1220 3413 M
 63 0 V
-5616 0 R
+5737 0 R
 -63 0 V
 stroke
-1100 3413 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 0.2)]
+980 2720 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 25)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1220 4106 M
+1100 3136 M
 63 0 V
-5616 0 R
+5737 0 R
 -63 0 V
 stroke
-1100 4106 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 0.25)]
+980 3136 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 30)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1220 4799 M
+1100 3552 M
 63 0 V
-5616 0 R
+5737 0 R
 -63 0 V
 stroke
-1100 4799 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 0.3)]
+980 3552 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 35)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1220 640 M
+1100 3968 M
+63 0 V
+5737 0 R
+-63 0 V
+stroke
+980 3968 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 40)]
+] -66.7 MRshow
+2.000 UL
+LTb
+1100 4384 M
+63 0 V
+5737 0 R
+-63 0 V
+stroke
+980 4384 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 45)]
+] -66.7 MRshow
+2.000 UL
+LTb
+1100 4800 M
+63 0 V
+5737 0 R
+-63 0 V
+stroke
+980 4800 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 50)]
+] -66.7 MRshow
+2.000 UL
+LTb
+1100 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-1220 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 0)]
+1100 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-1930 640 M
+1825 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-1930 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 100)]
+1825 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 100)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-2640 640 M
+2550 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-2640 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 200)]
+2550 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 200)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-3350 640 M
+3275 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-3350 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 300)]
+3275 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 300)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-4060 640 M
+4000 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-4060 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 400)]
+4000 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 400)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-4769 640 M
+4725 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-4769 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 500)]
+4725 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 500)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-5479 640 M
+5450 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-5479 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 600)]
+5450 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 600)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-6189 640 M
+6175 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-6189 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 700)]
+6175 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 700)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-6899 640 M
+6900 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-6899 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 800)]
+6900 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 800)]
 ] -66.7 MCshow
 2.000 UL
 LTb
 2.000 UL
 LTb
-1220 4799 N
-0 -4159 V
-5679 0 V
-0 4159 V
--5679 0 V
+1100 4800 N
+0 -4160 V
+5800 0 V
+0 4160 V
+-5800 0 V
 Z stroke
 LCb setrgbcolor
-280 2719 M
-currentpoint gsave translate -270 rotate 0 0 moveto
-[ [(Helvetica) 200.0 0.0 true true 0 (C)]
-[(Helvetica) 160.0 -60.0 true true 0 (p)]
-[(Helvetica) 200.0 0.0 true true 0 ( - C)]
-[(Helvetica) 160.0 -60.0 true true 0 (v)]
-[(Helvetica) 200.0 0.0 true true 0 ( \(J / K / N / mol\))]
+400 2720 M
+currentpoint gsave translate 90 rotate 0 0 moveto
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 (Heat capacity C)]
+[(AvantGarde-Book) 160.0 -60.0 true true 0 (p)]
+[(AvantGarde-Book) 200.0 0.0 true true 0 ( \(J / K / N / mol\))]
 ] -46.7 MCshow
 grestore
 LTb
 LCb setrgbcolor
-4059 140 M
-[ [(Helvetica) 200.0 0.0 true true 0 (T \(K\))]
+4000 140 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 (T \(K\))]
 ] -66.7 MCshow
 LTb
 1.000 UP
 2.000 UL
 LTb
-% Begin plot #1
 3.000 UL
 LT0
-1.00 0.00 0.00 C /Helvetica findfont 200 scalefont setfont
-1248 640 M
-22 0 V
-21 0 V
-21 0 V
-22 0 V
-21 0 V
-21 0 V
-21 0 V
-22 0 V
-21 0 V
-21 0 V
+1.00 0.00 0.00 C /AvantGarde-Book findfont 200 scalefont setfont
+1129 640 M
 22 1 V
-21 0 V
-21 0 V
 22 1 V
-21 1 V
-21 0 V
-21 1 V
-22 1 V
-21 1 V
-21 1 V
-22 1 V
-21 0 V
-21 1 V
-22 0 V
-21 1 V
-21 0 V
-21 0 V
-22 0 V
-21 -1 V
-21 0 V
-22 -1 V
-21 -1 V
-21 -1 V
-21 -1 V
-22 -1 V
-21 -1 V
-21 0 V
-22 -1 V
-21 -1 V
-21 0 V
-22 -1 V
-21 0 V
-21 0 V
-21 0 V
-22 1 V
-21 1 V
-21 1 V
-22 2 V
-21 2 V
-21 2 V
-22 3 V
 21 3 V
-21 4 V
-21 4 V
-22 4 V
-21 5 V
-21 5 V
 22 6 V
-21 6 V
-21 6 V
-21 7 V
-22 7 V
-21 8 V
-21 8 V
 22 8 V
-21 9 V
-21 9 V
-22 10 V
-21 9 V
-21 10 V
-21 11 V
-22 11 V
-21 11 V
-21 11 V
-22 11 V
-21 12 V
-21 12 V
 22 13 V
-21 12 V
-21 13 V
-21 13 V
-22 13 V
-21 14 V
-21 14 V
-22 13 V
-21 15 V
-21 14 V
-21 14 V
+21 20 V
+22 25 V
+22 31 V
+22 36 V
+21 41 V
+22 45 V
+22 47 V
+22 50 V
+21 50 V
+22 52 V
+22 52 V
+22 52 V
+21 53 V
+22 52 V
+22 52 V
+22 52 V
+21 52 V
+22 52 V
+22 52 V
+22 51 V
+21 52 V
+22 51 V
+22 51 V
+22 51 V
+21 52 V
+22 50 V
+22 51 V
+22 51 V
+21 50 V
+22 50 V
+22 49 V
+22 49 V
+21 49 V
+22 48 V
+22 48 V
+22 47 V
+21 46 V
+22 46 V
+22 45 V
+22 45 V
+21 44 V
+22 43 V
+22 42 V
+22 42 V
+21 41 V
+22 40 V
+22 39 V
+22 39 V
+21 37 V
+22 37 V
+22 36 V
+22 36 V
+21 35 V
+22 33 V
+22 34 V
+22 32 V
+21 32 V
+22 31 V
+22 30 V
+22 30 V
+21 29 V
+22 28 V
+22 27 V
+22 27 V
+21 27 V
+22 25 V
+22 26 V
+22 24 V
+21 24 V
+22 23 V
+22 23 V
+22 22 V
+21 22 V
+22 21 V
+22 21 V
+22 21 V
+21 19 V
+22 20 V
+22 19 V
+22 18 V
+21 18 V
+22 18 V
+22 17 V
+22 17 V
+21 16 V
+22 16 V
+22 16 V
 22 15 V
 21 15 V
-21 15 V
 22 15 V
-21 15 V
-21 15 V
-22 16 V
-21 15 V
-21 16 V
-21 16 V
-22 16 V
-21 16 V
-21 16 V
-22 16 V
-21 17 V
-21 16 V
-stroke 3463 1257 M
-22 17 V
-21 16 V
-21 17 V
-21 17 V
-22 17 V
-21 17 V
-21 17 V
-22 17 V
-21 17 V
-21 17 V
-21 18 V
-22 17 V
-21 18 V
-21 17 V
-22 18 V
-21 17 V
-21 18 V
-22 18 V
-21 17 V
-21 18 V
-21 18 V
-22 18 V
-21 18 V
-21 18 V
-22 18 V
-21 18 V
-21 18 V
-22 18 V
-21 18 V
-21 18 V
-21 19 V
-22 18 V
-21 18 V
-21 19 V
-22 18 V
-21 18 V
-21 19 V
-21 18 V
-22 19 V
-21 18 V
-21 19 V
-22 18 V
-21 19 V
-21 19 V
-22 18 V
-21 19 V
-21 19 V
-21 19 V
-22 18 V
-21 19 V
-21 19 V
-22 19 V
-21 19 V
-21 19 V
-21 19 V
-22 19 V
-21 19 V
-21 19 V
-22 19 V
-21 19 V
-21 19 V
-22 19 V
-21 19 V
-21 19 V
-21 19 V
-22 20 V
-21 19 V
-21 19 V
-22 20 V
-21 19 V
-21 20 V
-22 19 V
-21 20 V
-21 19 V
-21 19 V
-22 20 V
-21 19 V
-21 20 V
-22 20 V
-21 19 V
-21 20 V
-21 20 V
-22 19 V
-21 20 V
-21 20 V
-22 20 V
-21 20 V
-21 20 V
-22 19 V
-21 20 V
-21 20 V
-21 20 V
-22 20 V
-21 20 V
-21 21 V
-22 20 V
-21 20 V
-21 20 V
-22 20 V
-21 21 V
-21 20 V
-21 20 V
-22 21 V
-21 20 V
-stroke 5678 3211 M
-21 20 V
-22 21 V
-21 21 V
-21 20 V
-21 21 V
-22 20 V
-21 21 V
-21 20 V
-22 21 V
-21 21 V
-21 21 V
-22 21 V
-21 21 V
-21 21 V
-21 21 V
-22 20 V
-21 22 V
-21 21 V
-22 21 V
-21 21 V
-21 21 V
-22 21 V
-21 22 V
-21 21 V
-21 21 V
-22 22 V
-21 21 V
-21 22 V
-22 21 V
-21 22 V
-21 21 V
-21 22 V
-22 22 V
-21 22 V
-21 21 V
-22 22 V
-21 22 V
-21 22 V
-22 22 V
-21 22 V
-21 22 V
-21 22 V
-22 22 V
-21 23 V
-21 22 V
-22 22 V
-21 23 V
-21 22 V
-22 22 V
-21 23 V
-21 22 V
-21 23 V
-22 23 V
-21 23 V
-21 22 V
-22 23 V
-% End plot #1
-% Begin plot #2
-stroke
-LT1
-0.00 0.00 1.00 C /Helvetica findfont 200 scalefont setfont
-1248 640 M
-22 0 V
-21 0 V
-21 0 V
-22 0 V
-21 0 V
-21 0 V
-21 0 V
-22 0 V
-21 0 V
-21 0 V
-22 1 V
-21 0 V
-21 0 V
-22 1 V
-21 1 V
-21 0 V
-21 1 V
-22 1 V
-21 1 V
-21 1 V
-22 1 V
-21 0 V
-21 1 V
-22 0 V
-21 1 V
-21 0 V
-21 0 V
-22 0 V
-21 -1 V
-21 0 V
-22 -1 V
-21 -1 V
-21 -1 V
-21 -1 V
-22 -1 V
-21 -1 V
-21 0 V
-22 -1 V
-21 -1 V
-21 0 V
-22 -1 V
-21 0 V
-21 0 V
-21 0 V
-22 1 V
-21 1 V
-21 1 V
-22 2 V
-21 2 V
-21 2 V
-22 3 V
-21 3 V
-21 4 V
-21 4 V
-22 4 V
-21 5 V
-21 5 V
-22 6 V
-21 6 V
-21 6 V
-21 7 V
-22 7 V
-21 8 V
-21 8 V
-22 8 V
-21 9 V
-21 9 V
-22 10 V
-21 9 V
-21 11 V
-21 10 V
-22 11 V
-21 11 V
-21 11 V
-22 11 V
-21 12 V
-21 12 V
-22 13 V
-21 12 V
-21 13 V
-21 13 V
-22 13 V
-21 14 V
-21 14 V
+22 14 V
 22 14 V
 21 14 V
-21 14 V
-21 14 V
+22 13 V
+22 13 V
+22 13 V
+21 13 V
+22 12 V
+stroke 3391 4038 M
+22 12 V
+22 12 V
+21 11 V
+22 11 V
+22 11 V
+22 11 V
+21 11 V
+22 10 V
+22 10 V
+22 10 V
+21 10 V
+22 9 V
+22 10 V
+22 9 V
+21 9 V
+22 9 V
+22 8 V
+22 9 V
+21 8 V
+22 8 V
+22 8 V
+22 8 V
+21 7 V
+22 8 V
+22 7 V
+22 7 V
+21 7 V
+22 7 V
+22 7 V
+22 7 V
+21 6 V
+22 7 V
+22 6 V
+22 6 V
+21 6 V
+22 6 V
+22 6 V
+22 6 V
+21 6 V
+22 5 V
+22 6 V
+22 5 V
+21 5 V
+22 5 V
+22 6 V
+22 5 V
+21 5 V
+22 4 V
+22 5 V
+22 5 V
+21 4 V
+22 5 V
+22 4 V
+22 5 V
+21 4 V
+22 4 V
+22 4 V
+22 5 V
+21 4 V
+22 4 V
+22 4 V
+22 3 V
+21 4 V
+22 4 V
+22 4 V
+22 3 V
+21 4 V
+22 3 V
+22 4 V
+22 3 V
+21 3 V
+22 4 V
+22 3 V
+22 3 V
+21 3 V
+22 4 V
+22 3 V
+22 3 V
+21 3 V
+22 3 V
+22 2 V
+22 3 V
+21 3 V
+22 3 V
+22 3 V
+22 2 V
+21 3 V
+22 3 V
+22 2 V
+22 3 V
+21 2 V
+22 3 V
+22 2 V
+22 3 V
+21 2 V
+22 2 V
+22 3 V
+22 2 V
+21 2 V
+22 3 V
+22 2 V
+22 2 V
+21 2 V
+22 2 V
+stroke 5653 4590 M
+22 2 V
+22 2 V
+21 2 V
+22 2 V
+22 2 V
+22 2 V
+21 2 V
+22 2 V
+22 2 V
+22 2 V
+21 2 V
+22 2 V
+22 2 V
+22 1 V
+21 2 V
+22 2 V
+22 2 V
+22 1 V
+21 2 V
+22 2 V
+22 1 V
+22 2 V
+21 2 V
+22 1 V
+22 2 V
+22 1 V
+21 2 V
+22 1 V
+22 2 V
+22 1 V
+21 2 V
+22 1 V
+22 2 V
+22 1 V
+21 2 V
+22 1 V
+22 1 V
+22 2 V
+21 1 V
+22 2 V
+22 1 V
+22 1 V
+21 1 V
+22 2 V
+22 1 V
+22 1 V
+21 2 V
+22 1 V
+22 1 V
+22 1 V
+21 1 V
+22 2 V
+22 1 V
+22 1 V
+21 1 V
+22 1 V
+stroke
+LT1
+0.00 0.00 1.00 C /AvantGarde-Book findfont 200 scalefont setfont
+1129 640 M
+22 1 V
+22 1 V
+21 3 V
+22 6 V
+22 8 V
+22 13 V
+21 19 V
+22 26 V
+22 31 V
+22 36 V
+21 41 V
+22 45 V
+22 47 V
+22 50 V
+21 50 V
+22 52 V
+22 52 V
+22 52 V
+21 53 V
+22 52 V
+22 52 V
+22 52 V
+21 52 V
+22 52 V
+22 51 V
+22 52 V
+21 52 V
+22 51 V
+22 51 V
+22 51 V
+21 52 V
+22 50 V
+22 51 V
+22 51 V
+21 50 V
+22 50 V
+22 49 V
+22 49 V
+21 49 V
+22 48 V
+22 48 V
+22 47 V
+21 46 V
+22 46 V
+22 45 V
+22 45 V
+21 44 V
+22 43 V
+22 42 V
+22 42 V
+21 41 V
+22 40 V
+22 39 V
+22 39 V
+21 37 V
+22 37 V
+22 36 V
+22 36 V
+21 35 V
+22 33 V
+22 34 V
+22 32 V
+21 32 V
+22 31 V
+22 30 V
+22 30 V
+21 29 V
+22 28 V
+22 27 V
+22 27 V
+21 27 V
+22 25 V
+22 26 V
+22 24 V
+21 24 V
+22 23 V
+22 23 V
+22 22 V
+21 22 V
+22 21 V
+22 21 V
+22 21 V
+21 19 V
+22 20 V
+22 19 V
+22 18 V
+21 18 V
+22 18 V
+22 17 V
+22 17 V
+21 16 V
+22 16 V
+22 16 V
 22 15 V
 21 15 V
-21 15 V
 22 15 V
-21 15 V
-21 15 V
-22 16 V
-21 15 V
-21 16 V
-21 16 V
-22 16 V
-21 16 V
-21 16 V
-22 16 V
-21 17 V
-21 16 V
-stroke 3463 1257 M
-22 17 V
-21 17 V
-21 16 V
-21 17 V
-22 17 V
-21 17 V
-21 17 V
-22 17 V
-21 17 V
-21 18 V
-21 17 V
-22 17 V
-21 18 V
-21 17 V
-22 18 V
-21 17 V
-21 18 V
-22 18 V
-21 17 V
-21 18 V
-21 18 V
-22 18 V
-21 18 V
-21 18 V
-22 18 V
-21 18 V
-21 18 V
-22 18 V
-21 18 V
-21 18 V
-21 19 V
-22 18 V
-21 18 V
-21 19 V
-22 18 V
-21 18 V
-21 19 V
-21 18 V
-22 19 V
-21 18 V
-21 19 V
-22 18 V
-21 19 V
-21 19 V
-22 18 V
-21 19 V
-21 19 V
-21 19 V
-22 18 V
-21 19 V
-21 19 V
-22 19 V
-21 19 V
-21 19 V
-21 19 V
-22 19 V
-21 19 V
-21 19 V
-22 19 V
-21 19 V
-21 19 V
-22 19 V
-21 19 V
-21 20 V
-21 19 V
-22 19 V
-21 19 V
-21 20 V
-22 19 V
-21 19 V
-21 20 V
-22 19 V
-21 19 V
-21 20 V
-21 20 V
-22 19 V
-21 20 V
-21 19 V
-22 20 V
-21 20 V
-21 19 V
-21 20 V
-22 20 V
-21 19 V
-21 20 V
-22 20 V
-21 20 V
-21 20 V
-22 20 V
-21 20 V
-21 20 V
-21 20 V
-22 20 V
-21 20 V
-21 20 V
-22 20 V
-21 20 V
-21 20 V
-22 20 V
-21 21 V
-21 20 V
-21 21 V
-22 20 V
-21 20 V
-stroke 5678 3211 M
-21 21 V
-22 20 V
-21 21 V
-21 20 V
-21 21 V
-22 20 V
-21 21 V
-21 21 V
-22 20 V
-21 21 V
-21 21 V
-22 21 V
-21 21 V
-21 21 V
-21 21 V
-22 21 V
-21 21 V
-21 21 V
-22 21 V
-21 21 V
-21 21 V
-22 22 V
-21 21 V
-21 21 V
-21 21 V
-22 22 V
-21 21 V
-21 22 V
-22 21 V
-21 22 V
-21 22 V
-21 21 V
-22 22 V
-21 22 V
-21 21 V
-22 22 V
-21 22 V
-21 22 V
-22 22 V
-21 22 V
-21 22 V
-21 22 V
-22 22 V
-21 23 V
-21 22 V
-22 22 V
-21 23 V
-21 22 V
-22 22 V
-21 23 V
-21 23 V
-21 22 V
-22 23 V
-21 23 V
-21 22 V
-22 23 V
-% End plot #2
+22 14 V
+22 14 V
+21 14 V
+22 13 V
+22 13 V
+22 13 V
+21 13 V
+22 12 V
+stroke 3391 4038 M
+22 12 V
+22 12 V
+21 11 V
+22 11 V
+22 11 V
+22 11 V
+21 11 V
+22 10 V
+22 10 V
+22 10 V
+21 10 V
+22 9 V
+22 10 V
+22 9 V
+21 9 V
+22 9 V
+22 8 V
+22 9 V
+21 8 V
+22 8 V
+22 8 V
+22 8 V
+21 7 V
+22 8 V
+22 7 V
+22 7 V
+21 7 V
+22 7 V
+22 7 V
+22 7 V
+21 6 V
+22 7 V
+22 6 V
+22 6 V
+21 6 V
+22 6 V
+22 6 V
+22 6 V
+21 6 V
+22 5 V
+22 6 V
+22 5 V
+21 5 V
+22 5 V
+22 6 V
+22 5 V
+21 5 V
+22 4 V
+22 5 V
+22 5 V
+21 4 V
+22 5 V
+22 4 V
+22 5 V
+21 4 V
+22 4 V
+22 4 V
+22 5 V
+21 4 V
+22 4 V
+22 4 V
+22 3 V
+21 4 V
+22 4 V
+22 4 V
+22 3 V
+21 4 V
+22 3 V
+22 4 V
+22 3 V
+21 3 V
+22 4 V
+22 3 V
+22 3 V
+21 3 V
+22 4 V
+22 3 V
+22 3 V
+21 3 V
+22 3 V
+22 2 V
+22 3 V
+21 3 V
+22 3 V
+22 3 V
+22 2 V
+21 3 V
+22 3 V
+22 2 V
+22 3 V
+21 2 V
+22 3 V
+22 2 V
+22 3 V
+21 2 V
+22 2 V
+22 3 V
+22 2 V
+21 2 V
+22 3 V
+22 2 V
+22 2 V
+21 2 V
+22 2 V
+stroke 5653 4590 M
+22 2 V
+22 2 V
+21 2 V
+22 2 V
+22 2 V
+22 2 V
+21 2 V
+22 2 V
+22 2 V
+22 2 V
+21 2 V
+22 2 V
+22 2 V
+22 1 V
+21 2 V
+22 2 V
+22 2 V
+22 1 V
+21 2 V
+22 2 V
+22 1 V
+22 2 V
+21 2 V
+22 1 V
+22 2 V
+22 1 V
+21 2 V
+22 1 V
+22 2 V
+22 1 V
+21 2 V
+22 1 V
+22 2 V
+22 1 V
+21 2 V
+22 1 V
+22 1 V
+22 2 V
+21 1 V
+22 2 V
+22 1 V
+22 1 V
+21 2 V
+22 1 V
+22 1 V
+22 1 V
+21 2 V
+22 1 V
+22 1 V
+22 1 V
+21 1 V
+22 2 V
+22 1 V
+22 1 V
+21 1 V
+22 1 V
 stroke
 2.000 UL
 LTb
-1220 4799 N
-0 -4159 V
-5679 0 V
-0 4159 V
--5679 0 V
+1100 4800 N
+0 -4160 V
+5800 0 V
+0 4160 V
+-5800 0 V
 Z stroke
 1.000 UP
 2.000 UL
@@ -5779,795 +5559,750 @@ showpage
 %%Page: 7 7
 gnudict begin
 gsave
-doclip
 50 50 translate
 0.100 0.100 scale
 90 rotate
 0 -5040 translate
 0 setgray
 newpath
-(Helvetica) findfont 200 scalefont setfont
+(AvantGarde-Book) findfont 200 scalefont setfont
 2.000 UL
 LTb
-1100 640 M
+1340 640 M
 63 0 V
-5736 0 R
+5497 0 R
 -63 0 V
 stroke
-980 640 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 0)]
+1220 640 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1100 1056 M
+1340 1333 M
 63 0 V
-5736 0 R
+5497 0 R
 -63 0 V
 stroke
-980 1056 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 0.5)]
+1220 1333 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0.05)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1100 1472 M
+1340 2027 M
 63 0 V
-5736 0 R
+5497 0 R
 -63 0 V
 stroke
-980 1472 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 1)]
+1220 2027 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0.1)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1100 1888 M
+1340 2720 M
 63 0 V
-5736 0 R
+5497 0 R
 -63 0 V
 stroke
-980 1888 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 1.5)]
+1220 2720 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0.15)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1100 2304 M
+1340 3413 M
 63 0 V
-5736 0 R
+5497 0 R
 -63 0 V
 stroke
-980 2304 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 2)]
+1220 3413 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0.2)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1100 2720 M
+1340 4107 M
 63 0 V
-5736 0 R
+5497 0 R
 -63 0 V
 stroke
-980 2720 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 2.5)]
+1220 4107 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0.25)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1100 3135 M
+1340 4800 M
 63 0 V
-5736 0 R
+5497 0 R
 -63 0 V
 stroke
-980 3135 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 3)]
+1220 4800 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0.3)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1100 3551 M
-63 0 V
-5736 0 R
--63 0 V
-stroke
-980 3551 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 3.5)]
-] -66.7 MRshow
-2.000 UL
-LTb
-1100 3967 M
-63 0 V
-5736 0 R
--63 0 V
-stroke
-980 3967 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 4)]
-] -66.7 MRshow
-2.000 UL
-LTb
-1100 4383 M
-63 0 V
-5736 0 R
--63 0 V
-stroke
-980 4383 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 4.5)]
-] -66.7 MRshow
-2.000 UL
-LTb
-1100 4799 M
-63 0 V
-5736 0 R
--63 0 V
-stroke
-980 4799 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 5)]
-] -66.7 MRshow
-2.000 UL
-LTb
-1100 640 M
+1340 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-1100 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 0)]
+1340 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-1825 640 M
+2035 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-1825 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 100)]
+2035 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 100)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-2550 640 M
+2730 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-2550 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 200)]
+2730 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 200)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-3275 640 M
+3425 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-3275 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 300)]
+3425 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 300)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-4000 640 M
+4120 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-4000 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 400)]
+4120 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 400)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-4724 640 M
+4815 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-4724 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 500)]
+4815 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 500)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-5449 640 M
+5510 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-5449 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 600)]
+5510 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 600)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-6174 640 M
+6205 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-6174 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 700)]
+6205 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 700)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-6899 640 M
+6900 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-6899 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 800)]
+6900 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 800)]
 ] -66.7 MCshow
 2.000 UL
 LTb
 2.000 UL
 LTb
-1100 4799 N
-0 -4159 V
-5799 0 V
-0 4159 V
--5799 0 V
+1340 4800 N
+0 -4160 V
+5560 0 V
+0 4160 V
+-5560 0 V
 Z stroke
 LCb setrgbcolor
-280 2719 M
-currentpoint gsave translate -270 rotate 0 0 moveto
-[ [(Helvetica) 200.0 0.0 true true 0 (B)]
-[(Helvetica) 160.0 -60.0 true true 0 (S)]
-[(Helvetica) 200.0 0.0 true true 0 ( - B)]
-[(Helvetica) 160.0 -60.0 true true 0 (T)]
-[(Helvetica) 200.0 0.0 true true 0 ( \(kbar\))]
+400 2720 M
+currentpoint gsave translate 90 rotate 0 0 moveto
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 (C)]
+[(AvantGarde-Book) 160.0 -60.0 true true 0 (p)]
+[(AvantGarde-Book) 200.0 0.0 true true 0 ( - C)]
+[(AvantGarde-Book) 160.0 -60.0 true true 0 (v)]
+[(AvantGarde-Book) 200.0 0.0 true true 0 ( \(J / K / N / mol\))]
 ] -46.7 MCshow
 grestore
 LTb
 LCb setrgbcolor
-3999 140 M
-[ [(Helvetica) 200.0 0.0 true true 0 (T \(K\))]
+4120 140 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 (T \(K\))]
 ] -66.7 MCshow
 LTb
 1.000 UP
 2.000 UL
 LTb
-% Begin plot #1
 3.000 UL
 LT0
-1.00 0.00 0.00 C /Helvetica findfont 200 scalefont setfont
-1129 640 M
-22 0 V
+1.00 0.00 0.00 C /AvantGarde-Book findfont 200 scalefont setfont
+1368 640 M
 21 0 V
-22 0 V
-22 0 V
-22 1 V
-21 1 V
-22 1 V
-22 2 V
-22 2 V
-21 3 V
-22 4 V
-22 4 V
-22 5 V
-21 4 V
-22 5 V
-22 5 V
-22 4 V
-21 4 V
-22 3 V
-22 2 V
-22 2 V
-21 1 V
-22 0 V
-22 0 V
-22 -2 V
-21 -2 V
-22 -3 V
-22 -3 V
-22 -3 V
-21 -4 V
-22 -4 V
-22 -5 V
-22 -4 V
-21 -4 V
-22 -4 V
-22 -4 V
-22 -3 V
-21 -3 V
-22 -2 V
-22 -1 V
-22 -2 V
 21 0 V
-22 0 V
-22 1 V
-22 2 V
+20 0 V
+21 0 V
+21 0 V
+21 0 V
+21 0 V
+21 0 V
+20 0 V
+21 0 V
+21 1 V
+21 0 V
+21 0 V
+21 1 V
+21 1 V
+20 0 V
+21 1 V
+21 1 V
+21 1 V
+21 1 V
+21 0 V
+21 1 V
+20 1 V
+21 0 V
+21 1 V
+21 0 V
+21 0 V
+21 -1 V
+20 0 V
+21 -1 V
+21 0 V
+21 -1 V
+21 -1 V
+21 -1 V
+21 -1 V
+20 -1 V
+21 0 V
+21 -1 V
+21 -1 V
+21 -1 V
+21 0 V
+21 0 V
+20 0 V
+21 0 V
+21 1 V
+21 1 V
+21 1 V
 21 2 V
-22 3 V
-22 4 V
-22 4 V
+20 2 V
+21 3 V
+21 2 V
+21 4 V
+21 3 V
+21 4 V
 21 5 V
-22 6 V
-22 6 V
-22 7 V
+20 5 V
+21 5 V
+21 6 V
+21 6 V
+21 6 V
+21 7 V
+21 7 V
+20 8 V
 21 8 V
-22 8 V
-22 9 V
-22 10 V
+21 8 V
+21 9 V
+21 9 V
 21 10 V
-22 10 V
-22 11 V
-22 12 V
+20 9 V
+21 10 V
 21 11 V
-22 13 V
-22 13 V
-22 13 V
+21 11 V
+21 11 V
+21 11 V
+21 12 V
+20 11 V
+21 12 V
 21 13 V
-22 14 V
-22 15 V
+21 12 V
+21 13 V
+21 13 V
 21 14 V
-22 15 V
-22 15 V
-22 16 V
+20 13 V
+21 14 V
+21 14 V
+21 14 V
+21 14 V
+21 14 V
+20 15 V
 21 15 V
-22 16 V
-22 17 V
-22 16 V
+21 15 V
+21 15 V
+21 15 V
+21 15 V
+21 15 V
+20 16 V
+21 16 V
+21 15 V
+21 16 V
+21 16 V
+21 16 V
 21 17 V
-22 16 V
-22 17 V
-22 18 V
+20 16 V
+21 16 V
+stroke 3536 1257 M
 21 17 V
-22 18 V
-22 17 V
-22 18 V
+21 16 V
+21 17 V
+21 17 V
+20 17 V
+21 16 V
+21 17 V
+21 17 V
+21 17 V
+21 17 V
 21 18 V
-22 18 V
-22 18 V
-22 19 V
+20 17 V
+21 17 V
+21 17 V
 21 18 V
-22 18 V
-22 19 V
-22 19 V
+21 17 V
 21 18 V
-22 19 V
-22 19 V
-22 19 V
+21 17 V
+20 18 V
+21 17 V
+21 18 V
+21 18 V
+21 17 V
+21 18 V
+20 18 V
+21 18 V
+21 18 V
+21 18 V
+21 18 V
+21 17 V
+21 18 V
+20 18 V
 21 19 V
-22 19 V
-22 19 V
-22 19 V
-21 20 V
-22 19 V
-22 19 V
-22 20 V
-stroke 3391 1488 M
+21 18 V
+21 18 V
+21 18 V
+21 18 V
+21 18 V
+20 18 V
 21 19 V
-22 19 V
-22 20 V
-22 19 V
-21 20 V
-22 19 V
-22 20 V
-22 19 V
-21 20 V
-22 19 V
-22 20 V
-22 20 V
+21 18 V
+21 18 V
+21 18 V
 21 19 V
-22 20 V
-22 20 V
-22 19 V
-21 20 V
-22 20 V
-22 19 V
-22 20 V
-21 20 V
-22 20 V
-22 19 V
-22 20 V
-21 20 V
-22 19 V
-22 20 V
-22 20 V
-21 20 V
-22 19 V
-22 20 V
-21 20 V
-22 20 V
-22 20 V
-22 19 V
-21 20 V
-22 20 V
-22 20 V
-22 19 V
-21 20 V
-22 20 V
-22 20 V
-22 19 V
-21 20 V
-22 20 V
-22 20 V
-22 20 V
+20 18 V
+21 18 V
 21 19 V
-22 20 V
-22 20 V
-22 20 V
-21 20 V
-22 19 V
-22 20 V
-22 20 V
-21 20 V
-22 20 V
-22 19 V
-22 20 V
-21 20 V
-22 20 V
-22 20 V
-22 20 V
+21 18 V
 21 19 V
-22 20 V
-22 20 V
-22 20 V
+21 18 V
+21 19 V
+20 18 V
+21 19 V
+21 18 V
+21 19 V
+21 18 V
+21 19 V
+21 18 V
+20 19 V
+21 19 V
+21 18 V
+21 19 V
+21 19 V
+21 18 V
+20 19 V
+21 19 V
+21 19 V
+21 19 V
+21 18 V
+21 19 V
+21 19 V
+20 19 V
+21 19 V
+21 19 V
+21 19 V
+21 19 V
+21 19 V
+21 19 V
+20 19 V
+21 19 V
+21 19 V
+21 19 V
+21 19 V
+21 19 V
+20 20 V
+21 19 V
+21 19 V
+21 19 V
 21 20 V
-22 20 V
-22 20 V
-22 19 V
+21 19 V
+21 19 V
+20 19 V
 21 20 V
-22 20 V
-22 20 V
-22 20 V
+21 19 V
 21 20 V
-22 20 V
-22 20 V
-22 20 V
+21 19 V
+21 19 V
 21 20 V
-22 20 V
-22 20 V
-22 19 V
+20 19 V
 21 20 V
-22 20 V
-22 20 V
-22 20 V
+21 20 V
+21 19 V
+21 20 V
+21 19 V
+stroke 5705 3169 M
+20 20 V
+21 20 V
+21 19 V
+21 20 V
+21 20 V
+21 20 V
+21 19 V
+20 20 V
+21 20 V
+21 20 V
+21 20 V
+21 20 V
+21 20 V
+21 20 V
+20 20 V
+21 20 V
+21 20 V
+21 20 V
+21 20 V
 21 21 V
-22 19 V
-22 20 V
-22 21 V
+20 20 V
 21 20 V
-22 20 V
-22 20 V
 21 20 V
-22 20 V
-22 20 V
-22 20 V
+21 21 V
 21 20 V
-22 20 V
-22 21 V
-22 20 V
 21 20 V
-22 20 V
-stroke 5652 3549 M
-22 20 V
-22 20 V
 21 21 V
-22 20 V
-22 20 V
-22 21 V
+20 20 V
+21 21 V
 21 20 V
-22 20 V
-22 20 V
-22 21 V
+21 21 V
 21 20 V
-22 21 V
-22 20 V
-22 20 V
 21 21 V
-22 20 V
-22 21 V
-22 20 V
-21 21 V
-22 20 V
-22 20 V
-22 21 V
-21 21 V
-22 20 V
-22 21 V
-22 21 V
 21 20 V
-22 21 V
-22 20 V
-22 21 V
+20 21 V
 21 21 V
-22 21 V
-22 20 V
-22 21 V
 21 21 V
-22 21 V
-22 20 V
-22 21 V
+21 20 V
 21 21 V
-22 21 V
-22 21 V
-22 21 V
 21 21 V
-22 21 V
-22 21 V
-22 21 V
+20 21 V
 21 21 V
-22 21 V
-22 21 V
-22 21 V
+21 21 V
+21 21 V
+21 21 V
+21 21 V
+21 21 V
+20 21 V
+21 21 V
+21 21 V
 21 22 V
-22 21 V
-22 21 V
-22 21 V
+21 21 V
+21 21 V
 21 22 V
-22 21 V
-% End plot #1
-% Begin plot #2
+20 21 V
+21 22 V
 stroke
 LT1
-0.00 0.00 1.00 C /Helvetica findfont 200 scalefont setfont
-1129 640 M
-22 0 V
+0.00 0.00 1.00 C /AvantGarde-Book findfont 200 scalefont setfont
+1368 640 M
 21 0 V
-22 0 V
-22 0 V
-22 1 V
-21 1 V
-22 1 V
-22 2 V
-22 2 V
-21 3 V
-22 4 V
-22 4 V
-22 5 V
-21 4 V
-22 5 V
-22 5 V
-22 4 V
-21 4 V
-22 3 V
-22 2 V
-22 2 V
-21 1 V
-22 0 V
-22 0 V
-22 -2 V
-21 -2 V
-22 -3 V
-22 -3 V
-22 -3 V
-21 -4 V
-22 -4 V
-22 -5 V
-22 -4 V
-21 -4 V
-22 -4 V
-22 -4 V
-22 -3 V
-21 -3 V
-22 -2 V
-22 -1 V
-22 -2 V
 21 0 V
-22 0 V
-22 1 V
-22 2 V
+20 0 V
+21 0 V
+21 0 V
+21 0 V
+21 0 V
+21 0 V
+20 0 V
+21 0 V
+21 1 V
+21 0 V
+21 0 V
+21 1 V
+21 1 V
+20 0 V
+21 1 V
+21 1 V
+21 1 V
+21 1 V
+21 0 V
+21 1 V
+20 1 V
+21 0 V
+21 1 V
+21 0 V
+21 0 V
+21 -1 V
+20 0 V
+21 -1 V
+21 0 V
+21 -1 V
+21 -1 V
+21 -1 V
+21 -1 V
+20 -1 V
+21 0 V
+21 -1 V
+21 -1 V
+21 -1 V
+21 0 V
+21 0 V
+20 0 V
+21 0 V
+21 1 V
+21 1 V
+21 1 V
 21 2 V
-22 3 V
-22 4 V
-22 4 V
+20 2 V
+21 3 V
+21 2 V
+21 4 V
+21 3 V
+21 4 V
 21 5 V
-22 6 V
-22 6 V
-22 7 V
+20 5 V
+21 5 V
+21 6 V
+21 6 V
+21 6 V
+21 7 V
+21 7 V
+20 8 V
 21 8 V
-22 8 V
-22 9 V
-22 10 V
+21 8 V
+21 9 V
+21 9 V
 21 10 V
-22 10 V
-22 11 V
-22 12 V
+20 9 V
+21 10 V
 21 11 V
-22 13 V
-22 13 V
-22 13 V
+21 11 V
+21 11 V
+21 11 V
+21 12 V
+20 11 V
+21 12 V
 21 13 V
-22 14 V
-22 15 V
+21 12 V
+21 13 V
+21 13 V
 21 14 V
-22 15 V
-22 15 V
-22 16 V
+20 13 V
+21 14 V
+21 14 V
+21 14 V
+21 14 V
+21 14 V
+20 15 V
 21 15 V
-22 16 V
-22 17 V
-22 16 V
+21 15 V
+21 15 V
+21 15 V
+21 15 V
+21 15 V
+20 16 V
+21 16 V
+21 16 V
+21 15 V
+21 16 V
 21 17 V
-22 17 V
-22 17 V
-22 17 V
+21 16 V
+20 16 V
+21 16 V
+stroke 3536 1257 M
 21 17 V
-22 18 V
-22 17 V
-22 18 V
+21 16 V
+21 17 V
+21 17 V
+20 17 V
+21 16 V
+21 17 V
+21 17 V
+21 17 V
 21 18 V
-22 18 V
-22 18 V
-22 19 V
+21 17 V
+20 17 V
+21 17 V
 21 18 V
-22 19 V
-22 18 V
-22 19 V
+21 17 V
+21 17 V
 21 18 V
-22 19 V
-22 19 V
-22 19 V
+21 17 V
+20 18 V
+21 17 V
+21 18 V
+21 18 V
+21 18 V
+21 17 V
+20 18 V
+21 18 V
+21 18 V
+21 18 V
+21 18 V
+21 18 V
+21 18 V
+20 18 V
+21 18 V
+21 18 V
+21 18 V
+21 18 V
+21 18 V
+21 18 V
+20 18 V
 21 19 V
-22 19 V
-22 19 V
-22 19 V
-21 20 V
-22 19 V
-22 19 V
-22 20 V
-stroke 3391 1488 M
+21 18 V
+21 18 V
+21 18 V
 21 19 V
-22 19 V
-22 20 V
-22 19 V
-21 20 V
-22 19 V
-22 20 V
-22 19 V
-21 20 V
-22 20 V
-22 19 V
-22 20 V
+20 18 V
+21 18 V
 21 19 V
-22 20 V
-22 20 V
-22 19 V
-21 20 V
-22 20 V
-22 19 V
-22 20 V
-21 20 V
-22 20 V
-22 19 V
-22 20 V
-21 20 V
-22 20 V
-22 19 V
-22 20 V
-21 20 V
-22 20 V
-22 19 V
-21 20 V
-22 20 V
-22 20 V
-22 19 V
-21 20 V
-22 20 V
-22 20 V
-22 19 V
-21 20 V
-22 20 V
-22 20 V
-22 20 V
+21 18 V
 21 19 V
-22 20 V
-22 20 V
-22 20 V
-21 20 V
-22 19 V
-22 20 V
-22 20 V
-21 20 V
-22 20 V
-22 19 V
-22 20 V
-21 20 V
-22 20 V
-22 20 V
-22 19 V
-21 20 V
-22 20 V
-22 20 V
-22 20 V
-21 20 V
-22 19 V
-22 20 V
-22 20 V
-21 20 V
-22 20 V
-22 20 V
-22 20 V
+21 18 V
 21 19 V
-22 20 V
-22 20 V
-22 20 V
-21 20 V
-22 20 V
-22 20 V
-22 20 V
-21 20 V
-22 20 V
-22 20 V
-22 20 V
-21 20 V
-22 20 V
-22 20 V
-22 20 V
+20 18 V
 21 19 V
-22 21 V
-22 20 V
-22 20 V
+21 18 V
+21 19 V
+21 18 V
+21 19 V
+21 18 V
+20 19 V
+21 19 V
+21 18 V
+21 19 V
+21 19 V
+21 19 V
+20 18 V
+21 19 V
+21 19 V
+21 19 V
+21 19 V
+21 18 V
+21 19 V
+20 19 V
+21 19 V
+21 19 V
+21 19 V
+21 19 V
+21 19 V
+21 19 V
+20 19 V
+21 19 V
+21 19 V
+21 19 V
+21 19 V
 21 20 V
-22 20 V
-22 20 V
+20 19 V
+21 19 V
+21 19 V
+21 19 V
 21 20 V
-22 20 V
-22 20 V
-22 20 V
+21 19 V
+21 19 V
+20 20 V
+21 19 V
+21 19 V
 21 20 V
-22 20 V
-22 21 V
-22 20 V
+21 19 V
 21 20 V
-22 20 V
-stroke 5652 3549 M
-22 20 V
-22 21 V
+21 19 V
+20 20 V
+21 19 V
 21 20 V
-22 20 V
-22 20 V
-22 21 V
+21 19 V
 21 20 V
-22 20 V
-22 21 V
-22 20 V
+21 19 V
+stroke 5705 3169 M
+20 20 V
 21 20 V
-22 21 V
-22 20 V
-22 21 V
+21 19 V
 21 20 V
-22 20 V
-22 21 V
-22 20 V
+21 20 V
+21 20 V
+21 20 V
+20 19 V
+21 20 V
+21 20 V
+21 20 V
+21 20 V
+21 20 V
+21 20 V
+20 20 V
+21 20 V
+21 20 V
+21 20 V
+21 20 V
 21 21 V
-22 20 V
-22 21 V
-22 20 V
-21 21 V
-22 20 V
-22 21 V
-22 21 V
+20 20 V
 21 20 V
-22 21 V
-22 21 V
-22 20 V
+21 20 V
 21 21 V
-22 21 V
-22 21 V
-22 20 V
+21 20 V
+21 20 V
 21 21 V
-22 21 V
-22 21 V
-22 21 V
+20 20 V
 21 21 V
-22 21 V
-22 20 V
-22 21 V
+21 20 V
 21 21 V
-22 21 V
-22 21 V
-22 21 V
+21 20 V
 21 21 V
-22 22 V
-22 21 V
-22 21 V
 21 21 V
-22 21 V
-22 21 V
-22 21 V
+20 20 V
+21 21 V
+21 21 V
+21 20 V
+21 21 V
+21 21 V
+20 21 V
+21 21 V
+21 21 V
+21 21 V
+21 21 V
+21 21 V
+21 21 V
+20 21 V
+21 21 V
 21 22 V
-22 21 V
-% End plot #2
+21 21 V
+21 21 V
+21 21 V
+21 22 V
+20 21 V
+21 22 V
 stroke
 2.000 UL
 LTb
-1100 4799 N
-0 -4159 V
-5799 0 V
-0 4159 V
--5799 0 V
+1340 4800 N
+0 -4160 V
+5560 0 V
+0 4160 V
+-5560 0 V
 Z stroke
 1.000 UP
 2.000 UL
@@ -6579,1051 +6314,1819 @@ showpage
 %%Page: 8 8
 gnudict begin
 gsave
-doclip
 50 50 translate
 0.100 0.100 scale
 90 rotate
 0 -5040 translate
 0 setgray
 newpath
-(Helvetica) findfont 200 scalefont setfont
+(AvantGarde-Book) findfont 200 scalefont setfont
 2.000 UL
 LTb
+1220 640 M
+63 0 V
+5617 0 R
+-63 0 V
+stroke
 1100 640 M
-63 0 V
-5736 0 R
--63 0 V
-stroke
-980 640 M
-[ [(Helvetica) 200.0 0.0 true true 0 (-3)]
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1100 1160 M
+1220 1056 M
 63 0 V
-5736 0 R
+5617 0 R
 -63 0 V
 stroke
-980 1160 M
-[ [(Helvetica) 200.0 0.0 true true 0 (-2.5)]
+1100 1056 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0.5)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1100 1680 M
+1220 1472 M
 63 0 V
-5736 0 R
+5617 0 R
 -63 0 V
 stroke
-980 1680 M
-[ [(Helvetica) 200.0 0.0 true true 0 (-2)]
+1100 1472 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 1)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1100 2200 M
+1220 1888 M
 63 0 V
-5736 0 R
+5617 0 R
 -63 0 V
 stroke
-980 2200 M
-[ [(Helvetica) 200.0 0.0 true true 0 (-1.5)]
+1100 1888 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 1.5)]
 ] -66.7 MRshow
 2.000 UL
 LTb
+1220 2304 M
+63 0 V
+5617 0 R
+-63 0 V
+stroke
+1100 2304 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 2)]
+] -66.7 MRshow
+2.000 UL
+LTb
+1220 2720 M
+63 0 V
+5617 0 R
+-63 0 V
+stroke
 1100 2720 M
-63 0 V
-5736 0 R
--63 0 V
-stroke
-980 2720 M
-[ [(Helvetica) 200.0 0.0 true true 0 (-1)]
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 2.5)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1100 3239 M
+1220 3136 M
 63 0 V
-5736 0 R
+5617 0 R
 -63 0 V
 stroke
-980 3239 M
-[ [(Helvetica) 200.0 0.0 true true 0 (-0.5)]
+1100 3136 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 3)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1100 3759 M
+1220 3552 M
 63 0 V
-5736 0 R
+5617 0 R
 -63 0 V
 stroke
-980 3759 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 0)]
+1100 3552 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 3.5)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1100 4279 M
+1220 3968 M
 63 0 V
-5736 0 R
+5617 0 R
 -63 0 V
 stroke
-980 4279 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 0.5)]
+1100 3968 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 4)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1100 4799 M
+1220 4384 M
 63 0 V
-5736 0 R
+5617 0 R
 -63 0 V
 stroke
-980 4799 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 1)]
+1100 4384 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 4.5)]
 ] -66.7 MRshow
 2.000 UL
 LTb
-1100 640 M
+1220 4800 M
+63 0 V
+5617 0 R
+-63 0 V
+stroke
+1100 4800 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 5)]
+] -66.7 MRshow
+2.000 UL
+LTb
+1220 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-1100 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 0)]
+1220 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-1825 640 M
+1930 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-1825 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 100)]
+1930 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 100)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-2550 640 M
+2640 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-2550 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 200)]
+2640 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 200)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-3275 640 M
+3350 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-3275 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 300)]
+3350 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 300)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-4000 640 M
+4060 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-4000 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 400)]
+4060 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 400)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-4724 640 M
+4770 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-4724 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 500)]
+4770 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 500)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-5449 640 M
+5480 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-5449 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 600)]
+5480 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 600)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-6174 640 M
+6190 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-6174 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 700)]
+6190 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 700)]
 ] -66.7 MCshow
 2.000 UL
 LTb
-6899 640 M
+6900 640 M
 0 63 V
-0 4096 R
+0 4097 R
 0 -63 V
 stroke
-6899 440 M
-[ [(Helvetica) 200.0 0.0 true true 0 ( 800)]
+6900 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 800)]
 ] -66.7 MCshow
 2.000 UL
 LTb
 2.000 UL
 LTb
-1100 4799 N
-0 -4159 V
-5799 0 V
-0 4159 V
--5799 0 V
+1220 4800 N
+0 -4160 V
+5680 0 V
+0 4160 V
+-5680 0 V
 Z stroke
 LCb setrgbcolor
-280 2719 M
-currentpoint gsave translate -270 rotate 0 0 moveto
-[ [(Symbol) 200.0 0.0 true true 0 (g)]
+400 2720 M
+currentpoint gsave translate 90 rotate 0 0 moveto
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 (B)]
+[(AvantGarde-Book) 160.0 -60.0 true true 0 (S)]
+[(AvantGarde-Book) 200.0 0.0 true true 0 ( - B)]
+[(AvantGarde-Book) 160.0 -60.0 true true 0 (T)]
+[(AvantGarde-Book) 200.0 0.0 true true 0 ( \(kbar\))]
+] -46.7 MCshow
+grestore
+LTb
+LCb setrgbcolor
+4060 140 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 (T \(K\))]
+] -66.7 MCshow
+LTb
+1.000 UP
+2.000 UL
+LTb
+3.000 UL
+LT0
+1.00 0.00 0.00 C /AvantGarde-Book findfont 200 scalefont setfont
+1248 640 M
+22 0 V
+21 0 V
+21 0 V
+22 0 V
+21 1 V
+21 1 V
+22 1 V
+21 2 V
+21 2 V
+21 3 V
+22 4 V
+21 4 V
+21 5 V
+22 4 V
+21 5 V
+21 5 V
+22 4 V
+21 3 V
+21 4 V
+21 2 V
+22 2 V
+21 1 V
+21 0 V
+22 -1 V
+21 -1 V
+21 -2 V
+22 -3 V
+21 -3 V
+21 -4 V
+21 -4 V
+22 -4 V
+21 -4 V
+21 -4 V
+22 -4 V
+21 -4 V
+21 -4 V
+22 -3 V
+21 -3 V
+21 -2 V
+21 -2 V
+22 -1 V
+21 0 V
+21 0 V
+22 1 V
+21 2 V
+21 2 V
+22 3 V
+21 4 V
+21 5 V
+21 5 V
+22 6 V
+21 6 V
+21 7 V
+22 8 V
+21 8 V
+21 9 V
+22 10 V
+21 10 V
+21 11 V
+21 11 V
+22 11 V
+21 12 V
+21 13 V
+22 13 V
+21 13 V
+21 13 V
+22 14 V
+21 15 V
+21 15 V
+21 14 V
+22 16 V
+21 15 V
+21 16 V
+22 16 V
+21 16 V
+21 17 V
+22 17 V
+21 17 V
+21 17 V
+21 17 V
+22 17 V
+21 18 V
+21 18 V
+22 18 V
+21 18 V
+21 18 V
+22 18 V
+21 18 V
+21 19 V
+21 18 V
+22 19 V
+21 18 V
+21 19 V
+22 19 V
+21 19 V
+21 19 V
+22 19 V
+21 19 V
+21 19 V
+21 19 V
+22 20 V
+21 19 V
+21 19 V
+22 19 V
+stroke 3464 1491 M
+21 20 V
+21 19 V
+22 20 V
+21 19 V
+21 20 V
+21 19 V
+22 20 V
+21 19 V
+21 20 V
+22 19 V
+21 20 V
+21 19 V
+22 20 V
+21 20 V
+21 19 V
+21 20 V
+22 19 V
+21 20 V
+21 20 V
+22 19 V
+21 20 V
+21 20 V
+22 19 V
+21 20 V
+21 19 V
+21 20 V
+22 20 V
+21 19 V
+21 20 V
+22 20 V
+21 19 V
+21 20 V
+22 20 V
+21 19 V
+21 20 V
+21 20 V
+22 19 V
+21 20 V
+21 19 V
+22 20 V
+21 20 V
+21 19 V
+22 20 V
+21 19 V
+21 20 V
+21 20 V
+22 19 V
+21 20 V
+21 20 V
+22 19 V
+21 20 V
+21 19 V
+22 20 V
+21 20 V
+21 19 V
+21 20 V
+22 19 V
+21 20 V
+21 19 V
+22 20 V
+21 20 V
+21 19 V
+22 20 V
+21 19 V
+21 20 V
+21 20 V
+22 19 V
+21 20 V
+21 19 V
+22 20 V
+21 19 V
+21 20 V
+22 20 V
+21 19 V
+21 20 V
+21 19 V
+22 20 V
+21 20 V
+21 19 V
+22 20 V
+21 19 V
+21 20 V
+22 20 V
+21 19 V
+21 20 V
+21 20 V
+22 19 V
+21 20 V
+21 19 V
+22 20 V
+21 20 V
+21 19 V
+22 20 V
+21 20 V
+21 19 V
+21 20 V
+22 20 V
+21 19 V
+21 20 V
+22 20 V
+21 20 V
+21 19 V
+22 20 V
+21 20 V
+stroke 5679 3531 M
+21 20 V
+21 19 V
+22 20 V
+21 20 V
+21 20 V
+22 19 V
+21 20 V
+21 20 V
+22 20 V
+21 20 V
+21 19 V
+21 20 V
+22 20 V
+21 20 V
+21 20 V
+22 20 V
+21 20 V
+21 20 V
+22 19 V
+21 20 V
+21 20 V
+21 20 V
+22 20 V
+21 20 V
+21 20 V
+22 20 V
+21 20 V
+21 20 V
+22 20 V
+21 20 V
+21 20 V
+21 20 V
+22 21 V
+21 20 V
+21 20 V
+22 20 V
+21 20 V
+21 20 V
+22 20 V
+21 21 V
+21 20 V
+21 20 V
+22 20 V
+21 21 V
+21 20 V
+22 20 V
+21 20 V
+21 21 V
+22 20 V
+21 20 V
+21 21 V
+21 20 V
+22 21 V
+21 20 V
+21 21 V
+22 20 V
+stroke
+LT1
+0.00 0.00 1.00 C /AvantGarde-Book findfont 200 scalefont setfont
+1248 640 M
+22 0 V
+21 0 V
+21 0 V
+22 0 V
+21 1 V
+21 1 V
+22 1 V
+21 2 V
+21 2 V
+21 3 V
+22 4 V
+21 4 V
+21 5 V
+22 4 V
+21 5 V
+21 5 V
+22 4 V
+21 3 V
+21 3 V
+21 3 V
+22 2 V
+21 1 V
+21 0 V
+22 -1 V
+21 -1 V
+21 -2 V
+22 -3 V
+21 -3 V
+21 -4 V
+21 -4 V
+22 -4 V
+21 -4 V
+21 -4 V
+22 -4 V
+21 -4 V
+21 -4 V
+22 -3 V
+21 -3 V
+21 -2 V
+21 -2 V
+22 -1 V
+21 0 V
+21 0 V
+22 1 V
+21 2 V
+21 2 V
+22 3 V
+21 4 V
+21 5 V
+21 5 V
+22 6 V
+21 6 V
+21 7 V
+22 8 V
+21 8 V
+21 9 V
+22 10 V
+21 10 V
+21 11 V
+21 11 V
+22 11 V
+21 12 V
+21 13 V
+22 13 V
+21 13 V
+21 14 V
+22 14 V
+21 14 V
+21 15 V
+21 15 V
+22 15 V
+21 15 V
+21 16 V
+22 16 V
+21 16 V
+21 17 V
+22 17 V
+21 17 V
+21 17 V
+21 17 V
+22 17 V
+21 18 V
+21 18 V
+22 18 V
+21 18 V
+21 18 V
+22 18 V
+21 18 V
+21 19 V
+21 18 V
+22 19 V
+21 19 V
+21 18 V
+22 19 V
+21 19 V
+21 19 V
+22 19 V
+21 19 V
+21 19 V
+21 19 V
+22 20 V
+21 19 V
+21 19 V
+22 20 V
+stroke 3464 1492 M
+21 19 V
+21 19 V
+22 20 V
+21 19 V
+21 20 V
+21 19 V
+22 20 V
+21 19 V
+21 20 V
+22 19 V
+21 20 V
+21 19 V
+22 20 V
+21 20 V
+21 19 V
+21 20 V
+22 19 V
+21 20 V
+21 20 V
+22 19 V
+21 20 V
+21 20 V
+22 19 V
+21 20 V
+21 20 V
+21 19 V
+22 20 V
+21 20 V
+21 19 V
+22 20 V
+21 19 V
+21 20 V
+22 20 V
+21 19 V
+21 20 V
+21 20 V
+22 19 V
+21 20 V
+21 20 V
+22 19 V
+21 20 V
+21 19 V
+22 20 V
+21 20 V
+21 19 V
+21 20 V
+22 19 V
+21 20 V
+21 20 V
+22 19 V
+21 20 V
+21 19 V
+22 20 V
+21 20 V
+21 19 V
+21 20 V
+22 19 V
+21 20 V
+21 20 V
+22 19 V
+21 20 V
+21 19 V
+22 20 V
+21 20 V
+21 19 V
+21 20 V
+22 19 V
+21 20 V
+21 19 V
+22 20 V
+21 20 V
+21 19 V
+22 20 V
+21 19 V
+21 20 V
+21 20 V
+22 19 V
+21 20 V
+21 19 V
+22 20 V
+21 20 V
+21 19 V
+22 20 V
+21 19 V
+21 20 V
+21 20 V
+22 19 V
+21 20 V
+21 20 V
+22 19 V
+21 20 V
+21 20 V
+22 19 V
+21 20 V
+21 20 V
+21 19 V
+22 20 V
+21 20 V
+21 19 V
+22 20 V
+21 20 V
+21 19 V
+22 20 V
+21 20 V
+stroke 5679 3531 M
+21 20 V
+21 19 V
+22 20 V
+21 20 V
+21 20 V
+22 20 V
+21 19 V
+21 20 V
+22 20 V
+21 20 V
+21 20 V
+21 19 V
+22 20 V
+21 20 V
+21 20 V
+22 20 V
+21 20 V
+21 20 V
+22 20 V
+21 20 V
+21 19 V
+21 20 V
+22 20 V
+21 20 V
+21 20 V
+22 20 V
+21 20 V
+21 20 V
+22 20 V
+21 21 V
+21 20 V
+21 20 V
+22 20 V
+21 20 V
+21 20 V
+22 20 V
+21 20 V
+21 20 V
+22 21 V
+21 20 V
+21 20 V
+21 20 V
+22 21 V
+21 20 V
+21 20 V
+22 20 V
+21 21 V
+21 20 V
+22 20 V
+21 21 V
+21 20 V
+21 20 V
+22 21 V
+21 20 V
+21 21 V
+22 20 V
+stroke
+2.000 UL
+LTb
+1220 4800 N
+0 -4160 V
+5680 0 V
+0 4160 V
+-5680 0 V
+Z stroke
+1.000 UP
+2.000 UL
+LTb
+stroke
+grestore
+end
+showpage
+%%Page: 9 9
+gnudict begin
+gsave
+50 50 translate
+0.100 0.100 scale
+90 rotate
+0 -5040 translate
+0 setgray
+newpath
+(AvantGarde-Book) findfont 200 scalefont setfont
+2.000 UL
+LTb
+1220 640 M
+63 0 V
+5617 0 R
+-63 0 V
+stroke
+1100 640 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 (-2)]
+] -66.7 MRshow
+2.000 UL
+LTb
+1220 1333 M
+63 0 V
+5617 0 R
+-63 0 V
+stroke
+1100 1333 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 (-1.5)]
+] -66.7 MRshow
+2.000 UL
+LTb
+1220 2027 M
+63 0 V
+5617 0 R
+-63 0 V
+stroke
+1100 2027 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 (-1)]
+] -66.7 MRshow
+2.000 UL
+LTb
+1220 2720 M
+63 0 V
+5617 0 R
+-63 0 V
+stroke
+1100 2720 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 (-0.5)]
+] -66.7 MRshow
+2.000 UL
+LTb
+1220 3413 M
+63 0 V
+5617 0 R
+-63 0 V
+stroke
+1100 3413 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0)]
+] -66.7 MRshow
+2.000 UL
+LTb
+1220 4107 M
+63 0 V
+5617 0 R
+-63 0 V
+stroke
+1100 4107 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0.5)]
+] -66.7 MRshow
+2.000 UL
+LTb
+1220 4800 M
+63 0 V
+5617 0 R
+-63 0 V
+stroke
+1100 4800 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 1)]
+] -66.7 MRshow
+2.000 UL
+LTb
+1220 640 M
+0 63 V
+0 4097 R
+0 -63 V
+stroke
+1220 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0)]
+] -66.7 MCshow
+2.000 UL
+LTb
+1930 640 M
+0 63 V
+0 4097 R
+0 -63 V
+stroke
+1930 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 100)]
+] -66.7 MCshow
+2.000 UL
+LTb
+2640 640 M
+0 63 V
+0 4097 R
+0 -63 V
+stroke
+2640 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 200)]
+] -66.7 MCshow
+2.000 UL
+LTb
+3350 640 M
+0 63 V
+0 4097 R
+0 -63 V
+stroke
+3350 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 300)]
+] -66.7 MCshow
+2.000 UL
+LTb
+4060 640 M
+0 63 V
+0 4097 R
+0 -63 V
+stroke
+4060 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 400)]
+] -66.7 MCshow
+2.000 UL
+LTb
+4770 640 M
+0 63 V
+0 4097 R
+0 -63 V
+stroke
+4770 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 500)]
+] -66.7 MCshow
+2.000 UL
+LTb
+5480 640 M
+0 63 V
+0 4097 R
+0 -63 V
+stroke
+5480 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 600)]
+] -66.7 MCshow
+2.000 UL
+LTb
+6190 640 M
+0 63 V
+0 4097 R
+0 -63 V
+stroke
+6190 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 700)]
+] -66.7 MCshow
+2.000 UL
+LTb
+6900 640 M
+0 63 V
+0 4097 R
+0 -63 V
+stroke
+6900 440 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 800)]
+] -66.7 MCshow
+2.000 UL
+LTb
+2.000 UL
+LTb
+1220 4800 N
+0 -4160 V
+5680 0 V
+0 4160 V
+-5680 0 V
+Z stroke
+LCb setrgbcolor
+400 2720 M
+currentpoint gsave translate 90 rotate 0 0 moveto
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 (Grüneisen parameter \()]
+[(Symbol) 200.0 0.0 true true 0 (g)]
+[(AvantGarde-Book) 200.0 0.0 true true 0 (\))]
 ] -66.7 MCshow
 grestore
 LTb
 LCb setrgbcolor
-3999 140 M
-[ [(Helvetica) 200.0 0.0 true true 0 (T \(K\))]
+4060 140 M
+[ [(AvantGarde-Book) 200.0 0.0 true true 0 (T \(K\))]
 ] -66.7 MCshow
 LTb
 1.000 UP
 2.000 UL
 LTb
-% Begin plot #1
 3.000 UL
 LT0
-1.00 0.00 0.00 C /Helvetica findfont 200 scalefont setfont
-1129 1062 M
-22 1580 V
-21 183 V
-22 98 V
-22 50 V
-22 15 V
-21 9 V
-22 5 V
-22 1 V
-22 8 V
+1.00 0.00 0.00 C /AvantGarde-Book findfont 200 scalefont setfont
+1248 1288 M
+22 618 V
+21 220 V
+21 124 V
+22 74 V
+21 41 V
+21 19 V
+22 10 V
 21 8 V
-22 9 V
-22 12 V
+21 9 V
+21 12 V
 22 15 V
-21 16 V
-22 16 V
-22 19 V
-22 20 V
-21 22 V
+21 17 V
+21 19 V
 22 22 V
-22 24 V
+21 23 V
+21 25 V
+22 27 V
+21 29 V
+21 30 V
+21 32 V
+22 33 V
+21 35 V
+21 35 V
+22 37 V
+21 37 V
+21 37 V
+22 38 V
+21 38 V
+21 37 V
+21 38 V
+22 37 V
+21 36 V
+21 35 V
+22 35 V
+21 33 V
+21 33 V
+22 32 V
+21 31 V
+21 29 V
+21 29 V
+22 28 V
+21 26 V
+21 26 V
 22 25 V
-21 26 V
-22 26 V
-22 28 V
-22 27 V
-21 28 V
-22 29 V
-22 28 V
-22 28 V
-21 28 V
-22 28 V
-22 27 V
-22 26 V
-21 26 V
-22 26 V
-22 24 V
-22 24 V
+21 23 V
 21 23 V
 22 22 V
-22 22 V
-22 21 V
 21 20 V
-22 19 V
+21 21 V
+21 19 V
 22 18 V
-22 18 V
+21 18 V
 21 17 V
 22 16 V
-22 16 V
-22 15 V
+21 16 V
 21 15 V
-22 13 V
 22 14 V
-22 12 V
+21 14 V
 21 13 V
-22 11 V
-22 11 V
-22 11 V
+21 13 V
+22 12 V
+21 12 V
 21 11 V
+22 11 V
+21 10 V
+21 10 V
 22 10 V
-22 9 V
-22 9 V
 21 9 V
-22 9 V
+21 9 V
+21 9 V
 22 8 V
-22 8 V
+21 8 V
+21 8 V
+22 7 V
+21 7 V
 21 7 V
 22 7 V
-22 7 V
+21 6 V
 21 7 V
+21 6 V
 22 6 V
-22 7 V
-22 6 V
+21 5 V
 21 6 V
 22 5 V
-22 6 V
-22 5 V
+21 5 V
 21 5 V
 22 5 V
-22 4 V
-22 5 V
+21 5 V
 21 4 V
-22 5 V
-22 4 V
+21 5 V
 22 4 V
 21 4 V
-22 3 V
+21 4 V
 22 4 V
-22 4 V
+21 4 V
+21 4 V
+22 3 V
+21 4 V
+21 3 V
+21 4 V
+22 3 V
+21 3 V
 21 3 V
 22 3 V
-22 4 V
-22 3 V
+stroke 3464 4019 M
 21 3 V
-22 3 V
-22 3 V
-22 2 V
-21 3 V
-22 3 V
-22 2 V
-22 3 V
-21 2 V
-22 3 V
-22 2 V
-22 2 V
-stroke 3391 4212 M
 21 3 V
 22 2 V
-22 2 V
+21 3 V
+21 3 V
+21 2 V
+22 3 V
+21 2 V
+21 3 V
 22 2 V
 21 2 V
+21 3 V
 22 2 V
+21 2 V
+21 2 V
+21 2 V
 22 2 V
+21 2 V
+21 2 V
 22 2 V
+21 2 V
 21 1 V
 22 2 V
-22 2 V
-22 2 V
+21 2 V
+21 2 V
 21 1 V
 22 2 V
-22 1 V
-22 2 V
 21 1 V
-22 2 V
-22 1 V
-22 2 V
-21 1 V
-22 2 V
-22 1 V
-22 1 V
 21 2 V
 22 1 V
-22 1 V
+21 2 V
+21 1 V
+22 2 V
+21 1 V
+21 2 V
+21 1 V
 22 1 V
 21 2 V
-22 1 V
-22 1 V
 21 1 V
 22 1 V
-22 1 V
-22 1 V
+21 2 V
 21 1 V
 22 1 V
-22 1 V
+21 1 V
+21 1 V
+21 2 V
 22 1 V
 21 1 V
-22 1 V
-22 1 V
-22 1 V
 21 1 V
 22 1 V
-22 1 V
-22 1 V
+21 1 V
 21 1 V
 22 1 V
-22 0 V
-22 1 V
+21 1 V
+21 1 V
 21 1 V
 22 1 V
-22 1 V
-22 0 V
+21 1 V
 21 1 V
 22 1 V
+21 1 V
+21 1 V
 22 1 V
+21 1 V
+21 1 V
+21 1 V
 22 1 V
 21 0 V
-22 1 V
-22 1 V
-22 0 V
 21 1 V
 22 1 V
-22 1 V
-22 0 V
+21 1 V
 21 1 V
 22 0 V
-22 1 V
+21 1 V
+21 1 V
+21 1 V
 22 1 V
 21 0 V
-22 1 V
-22 1 V
-22 0 V
 21 1 V
 22 1 V
-22 0 V
-22 1 V
+21 1 V
 21 0 V
 22 1 V
-22 0 V
+21 1 V
+21 0 V
+21 1 V
 22 1 V
 21 1 V
-22 0 V
-22 1 V
-22 0 V
-21 1 V
-22 0 V
-22 1 V
-22 0 V
-21 1 V
-22 0 V
-22 1 V
-21 1 V
-22 0 V
-22 1 V
-22 0 V
-21 1 V
-22 0 V
-22 1 V
-22 0 V
 21 0 V
 22 1 V
-stroke 5652 4314 M
-22 0 V
-22 1 V
+21 1 V
 21 0 V
 22 1 V
-22 0 V
-22 1 V
 21 0 V
-22 1 V
-22 0 V
-22 1 V
-21 0 V
-22 0 V
-22 1 V
-22 0 V
+21 1 V
 21 1 V
 22 0 V
-22 1 V
-22 0 V
+21 1 V
 21 1 V
 22 0 V
-22 0 V
-22 1 V
+21 1 V
 21 0 V
 22 1 V
-22 0 V
-22 0 V
+21 1 V
+stroke 5679 4151 M
+21 0 V
 21 1 V
 22 0 V
-22 1 V
-22 0 V
-21 0 V
-22 1 V
-22 0 V
-22 1 V
-21 0 V
-22 0 V
-22 1 V
-22 0 V
+21 1 V
 21 1 V
 22 0 V
-22 0 V
-22 1 V
+21 1 V
 21 0 V
 22 1 V
-22 0 V
-22 0 V
+21 0 V
 21 1 V
-22 0 V
-22 0 V
-22 1 V
 21 0 V
 22 1 V
-22 0 V
-22 0 V
+21 1 V
+21 0 V
+22 1 V
+21 0 V
 21 1 V
 22 0 V
-% End plot #1
-% Begin plot #2
+21 1 V
+21 0 V
+21 1 V
+22 0 V
+21 1 V
+21 0 V
+22 1 V
+21 0 V
+21 1 V
+22 0 V
+21 1 V
+21 0 V
+21 1 V
+22 0 V
+21 1 V
+21 0 V
+22 1 V
+21 0 V
+21 1 V
+22 0 V
+21 0 V
+21 1 V
+21 0 V
+22 1 V
+21 0 V
+21 1 V
+22 0 V
+21 1 V
+21 0 V
+22 1 V
+21 0 V
+21 1 V
+21 0 V
+22 0 V
+21 1 V
+21 0 V
+22 1 V
 stroke
 LT1
-0.00 0.00 1.00 C /Helvetica findfont 200 scalefont setfont
-1129 1816 M
-22 678 V
-21 300 V
-22 129 V
-22 47 V
-22 22 V
-21 6 V
-22 4 V
-22 5 V
-22 5 V
-21 6 V
-22 10 V
-22 13 V
-22 14 V
-21 15 V
-22 17 V
-22 19 V
-22 20 V
-21 22 V
-22 22 V
-22 24 V
-22 25 V
-21 26 V
-22 26 V
-22 28 V
-22 28 V
-21 28 V
-22 28 V
-22 28 V
-22 28 V
-21 28 V
-22 28 V
-22 27 V
-22 27 V
-21 25 V
-22 26 V
-22 24 V
-22 24 V
-21 23 V
-22 23 V
-22 21 V
-22 21 V
-21 20 V
-22 19 V
-22 18 V
-22 18 V
-21 17 V
-22 16 V
-22 16 V
-22 15 V
-21 15 V
-22 13 V
-22 14 V
-22 12 V
-21 13 V
-22 11 V
-22 12 V
-22 10 V
-21 11 V
-22 10 V
-22 9 V
-22 9 V
-21 9 V
-22 9 V
-22 8 V
-22 8 V
-21 7 V
-22 7 V
-22 7 V
-21 7 V
-22 7 V
-22 6 V
-22 6 V
-21 6 V
-22 5 V
-22 6 V
-22 5 V
-21 5 V
-22 5 V
-22 4 V
-22 5 V
-21 4 V
-22 5 V
-22 4 V
-22 4 V
-21 4 V
-22 4 V
-22 3 V
-22 4 V
-21 3 V
-22 3 V
-22 4 V
-22 3 V
-21 3 V
-22 3 V
-22 3 V
-22 3 V
-21 2 V
-22 3 V
-22 2 V
-22 3 V
-21 2 V
-22 3 V
-22 2 V
-22 2 V
-stroke 3391 4212 M
-21 3 V
-22 2 V
-22 2 V
-22 2 V
-21 2 V
-22 2 V
-22 2 V
-22 2 V
-21 1 V
-22 2 V
-22 2 V
-22 2 V
-21 1 V
-22 2 V
-22 1 V
-22 2 V
-21 2 V
-22 1 V
-22 1 V
-22 2 V
-21 1 V
-22 2 V
-22 1 V
-22 1 V
-21 2 V
-22 1 V
-22 1 V
-22 1 V
-21 2 V
-22 1 V
-22 1 V
-21 1 V
-22 1 V
-22 1 V
-22 1 V
-21 1 V
-22 1 V
-22 1 V
-22 1 V
-21 1 V
-22 1 V
-22 1 V
-22 1 V
-21 1 V
-22 1 V
-22 1 V
-22 1 V
-21 1 V
-22 1 V
-22 0 V
-22 1 V
-21 1 V
-22 1 V
-22 1 V
-22 0 V
-21 1 V
-22 1 V
-22 1 V
-22 1 V
-21 0 V
-22 1 V
-22 1 V
-22 0 V
-21 1 V
-22 1 V
-22 1 V
-22 0 V
-21 1 V
-22 1 V
-22 0 V
-22 1 V
-21 0 V
-22 1 V
-22 1 V
-22 0 V
-21 1 V
-22 1 V
-22 0 V
-22 1 V
-21 0 V
-22 1 V
-22 0 V
-22 1 V
-21 1 V
-22 0 V
-22 1 V
-22 0 V
-21 1 V
-22 0 V
-22 1 V
-22 0 V
-21 1 V
-22 1 V
-22 0 V
-21 1 V
-22 0 V
-22 1 V
-22 0 V
-21 1 V
-22 0 V
-22 1 V
-22 0 V
-21 0 V
-22 1 V
-stroke 5652 4314 M
-22 0 V
-22 1 V
-21 0 V
-22 1 V
-22 0 V
-22 1 V
-21 0 V
-22 1 V
-22 0 V
-22 1 V
-21 0 V
-22 0 V
-22 1 V
-22 0 V
-21 1 V
-22 0 V
-22 1 V
-22 0 V
-21 1 V
-22 0 V
-22 0 V
-22 1 V
-21 0 V
-22 1 V
-22 0 V
-22 0 V
-21 1 V
-22 0 V
-22 1 V
-22 0 V
-21 1 V
-22 0 V
-22 0 V
-22 1 V
-21 0 V
-22 0 V
-22 1 V
-22 0 V
-21 1 V
-22 0 V
-22 0 V
-22 1 V
-21 0 V
-22 1 V
-22 0 V
-22 0 V
-21 1 V
-22 0 V
-22 1 V
-22 0 V
-21 0 V
-22 1 V
-22 0 V
-22 0 V
-21 1 V
-22 0 V
-% End plot #2
-% Begin plot #3
-stroke
-LT2
-0.00 1.00 0.00 C /Helvetica findfont 200 scalefont setfont
-1107 4213 M
-22 196 V
-22 -14 V
-21 -30 V
-22 -60 V
-22 -106 V
-22 -136 V
-21 -134 V
-22 -110 V
-22 -85 V
-22 -62 V
-21 -44 V
-22 -31 V
-22 -21 V
-22 -13 V
-21 -7 V
-22 -2 V
-22 1 V
-22 5 V
-21 7 V
-22 10 V
-22 12 V
-22 14 V
-21 16 V
-22 17 V
-22 18 V
-22 19 V
+0.00 0.00 1.00 C /AvantGarde-Book findfont 200 scalefont setfont
+1248 1319 M
+22 606 V
+21 211 V
+21 119 V
+22 73 V
+21 39 V
 21 19 V
-22 21 V
-22 20 V
-22 21 V
-21 21 V
-22 21 V
-22 20 V
-22 21 V
-21 20 V
-22 20 V
-22 19 V
-22 18 V
-21 19 V
-22 17 V
-22 17 V
-22 17 V
-21 16 V
-22 15 V
-22 15 V
-22 14 V
-21 13 V
-22 13 V
-22 13 V
-22 12 V
-21 11 V
-22 12 V
-22 10 V
-22 10 V
-21 10 V
-22 9 V
-22 9 V
 22 9 V
 21 8 V
+21 9 V
+21 12 V
+22 15 V
+21 17 V
+21 19 V
+22 21 V
+21 23 V
+21 26 V
+22 26 V
+21 29 V
+21 30 V
+21 32 V
+22 33 V
+21 35 V
+21 36 V
+22 36 V
+21 37 V
+21 38 V
+22 37 V
+21 38 V
+21 38 V
+21 37 V
+22 37 V
+21 36 V
+21 35 V
+22 35 V
+21 34 V
+21 32 V
+22 32 V
+21 31 V
+21 30 V
+21 28 V
+22 28 V
+21 26 V
+21 26 V
+22 25 V
+21 23 V
+21 23 V
+22 22 V
+21 21 V
+21 20 V
+21 19 V
+22 18 V
+21 18 V
+21 17 V
+22 16 V
+21 16 V
+21 15 V
+22 14 V
+21 14 V
+21 13 V
+21 13 V
+22 12 V
+21 12 V
+21 11 V
+22 11 V
+21 10 V
+21 10 V
+22 10 V
+21 9 V
+21 9 V
+21 9 V
 22 8 V
-22 8 V
+21 8 V
+21 8 V
 22 7 V
 21 7 V
-22 7 V
-22 6 V
+21 7 V
 22 7 V
 21 6 V
-22 5 V
+21 7 V
+21 6 V
 22 6 V
 21 5 V
-22 5 V
-22 5 V
+21 6 V
 22 5 V
 21 5 V
-22 4 V
-22 4 V
+21 5 V
+22 5 V
+21 5 V
+21 4 V
+21 5 V
 22 4 V
 21 4 V
+21 4 V
 22 4 V
-22 4 V
-22 3 V
+21 4 V
 21 4 V
 22 3 V
-22 3 V
-22 3 V
 21 4 V
-22 2 V
-22 3 V
+21 3 V
+21 4 V
 22 3 V
 21 3 V
-22 2 V
+21 3 V
 22 3 V
+stroke 3464 4019 M
+21 3 V
+21 3 V
 22 2 V
+21 3 V
+21 3 V
 21 2 V
 22 3 V
-22 2 V
+21 2 V
+21 3 V
 22 2 V
 21 2 V
-22 2 V
-22 2 V
-22 2 V
-21 2 V
-22 1 V
-22 2 V
-stroke 3369 4359 M
+21 3 V
 22 2 V
 21 2 V
-22 1 V
+21 2 V
+21 2 V
 22 2 V
-22 1 V
+21 2 V
+21 2 V
+22 2 V
+21 2 V
+21 1 V
+22 2 V
+21 2 V
+21 2 V
+21 1 V
+22 2 V
+21 1 V
+21 2 V
+22 2 V
+21 1 V
 21 2 V
 22 1 V
-22 2 V
-22 1 V
+21 1 V
+21 2 V
 21 1 V
 22 2 V
-22 1 V
-22 1 V
+21 1 V
 21 1 V
 22 1 V
+21 2 V
+21 1 V
+22 1 V
+21 1 V
+21 2 V
+21 1 V
+22 1 V
+21 1 V
+21 1 V
+22 1 V
+21 1 V
+21 1 V
+22 1 V
+21 1 V
+21 1 V
+21 1 V
+22 1 V
+21 1 V
+21 1 V
+22 1 V
+21 1 V
+21 1 V
+22 1 V
+21 1 V
+21 1 V
+21 1 V
+22 1 V
+21 0 V
+21 1 V
+22 1 V
+21 1 V
+21 1 V
+22 0 V
+21 1 V
+21 1 V
+21 1 V
+22 1 V
+21 0 V
+21 1 V
+22 1 V
+21 1 V
+21 0 V
+22 1 V
+21 1 V
+21 0 V
+21 1 V
+22 1 V
+21 1 V
+21 0 V
+22 1 V
+21 1 V
+21 0 V
+22 1 V
+21 1 V
+21 0 V
+21 1 V
+22 0 V
+21 1 V
+21 1 V
+22 0 V
+21 1 V
+21 0 V
+22 1 V
+21 1 V
+stroke 5679 4151 M
+21 0 V
+21 1 V
+22 0 V
+21 1 V
+21 1 V
+22 0 V
+21 1 V
+21 0 V
+22 1 V
+21 0 V
+21 1 V
+21 0 V
+22 1 V
+21 1 V
+21 0 V
+22 1 V
+21 0 V
+21 1 V
+22 0 V
+21 1 V
+21 0 V
+21 1 V
+22 0 V
+21 1 V
+21 0 V
+22 1 V
+21 0 V
+21 1 V
+22 0 V
+21 1 V
+21 0 V
+21 1 V
+22 0 V
+21 1 V
+21 0 V
+22 1 V
+21 0 V
+21 1 V
+22 0 V
+21 1 V
+21 0 V
+21 0 V
+22 1 V
+21 0 V
+21 1 V
+22 0 V
+21 1 V
+21 0 V
+22 1 V
+21 0 V
+21 1 V
+21 0 V
+22 0 V
+21 1 V
+21 0 V
+22 1 V
+stroke
+LT2
+0.00 1.00 0.00 C /AvantGarde-Book findfont 200 scalefont setfont
+1248 3040 M
+22 20 V
+21 14 V
+21 -8 V
+22 -51 V
+21 -86 V
+21 -91 V
+22 -76 V
+21 -56 V
+21 -37 V
+21 -22 V
+22 -11 V
+21 -3 V
+21 4 V
+22 9 V
+21 13 V
+21 17 V
+22 20 V
+21 22 V
+21 25 V
+21 28 V
+22 29 V
+21 30 V
+21 32 V
+22 34 V
+21 34 V
+21 34 V
+22 36 V
+21 35 V
+21 35 V
+21 35 V
+22 35 V
+21 34 V
+21 34 V
+22 33 V
+21 32 V
+21 31 V
+22 31 V
+21 29 V
+21 28 V
+21 28 V
+22 26 V
+21 26 V
+21 24 V
+22 24 V
+21 23 V
+21 21 V
+22 21 V
+21 20 V
+21 20 V
+21 18 V
+22 18 V
+21 17 V
+21 16 V
+22 16 V
+21 15 V
+21 14 V
+22 14 V
+21 13 V
+21 13 V
+21 12 V
+22 12 V
+21 11 V
+21 11 V
+22 10 V
+21 10 V
+21 10 V
+22 9 V
+21 9 V
+21 9 V
+21 8 V
+22 8 V
+21 8 V
+21 7 V
+22 7 V
+21 7 V
+21 7 V
+22 6 V
+21 7 V
+21 6 V
+21 5 V
+22 6 V
+21 5 V
+21 6 V
+22 5 V
+21 5 V
+21 4 V
+22 5 V
+21 5 V
+21 4 V
+21 4 V
+22 4 V
+21 4 V
+21 4 V
+22 4 V
+21 3 V
+21 4 V
+22 3 V
+21 4 V
+21 3 V
+21 3 V
+22 3 V
+21 3 V
+21 3 V
+22 3 V
+stroke 3464 4055 M
+21 3 V
+21 2 V
+22 3 V
+21 3 V
+21 2 V
+21 3 V
 22 2 V
+21 2 V
+21 2 V
+22 3 V
+21 2 V
+21 2 V
+22 2 V
+21 2 V
+21 2 V
+21 2 V
+22 2 V
+21 2 V
+21 1 V
+22 2 V
+21 2 V
+21 1 V
+22 2 V
+21 2 V
+21 1 V
+21 2 V
+22 1 V
+21 2 V
+21 1 V
+22 2 V
+21 1 V
+21 1 V
+22 2 V
+21 1 V
+21 1 V
+21 2 V
 22 1 V
 21 1 V
-22 1 V
-22 1 V
-22 1 V
 21 1 V
 22 1 V
-22 1 V
-22 1 V
-21 1 V
-22 0 V
-22 1 V
-22 1 V
+21 2 V
 21 1 V
 22 1 V
-22 1 V
-21 0 V
-22 1 V
-22 1 V
-22 0 V
+21 1 V
+21 1 V
 21 1 V
 22 1 V
-22 1 V
-22 0 V
+21 1 V
 21 1 V
 22 1 V
-22 0 V
+21 1 V
+21 1 V
+22 1 V
+21 1 V
+21 1 V
+21 1 V
 22 1 V
 21 0 V
+21 1 V
 22 1 V
+21 1 V
+21 1 V
 22 1 V
-22 0 V
+21 0 V
+21 1 V
+21 1 V
+22 1 V
+21 0 V
+21 1 V
+22 1 V
+21 1 V
+21 0 V
+22 1 V
+21 1 V
+21 0 V
+21 1 V
+22 1 V
+21 0 V
+21 1 V
+22 1 V
+21 0 V
 21 1 V
 22 0 V
+21 1 V
+21 1 V
+21 0 V
 22 1 V
-22 0 V
+21 0 V
 21 1 V
 22 0 V
-22 1 V
-22 0 V
+21 1 V
 21 1 V
 22 0 V
-22 1 V
-22 0 V
+21 1 V
+21 0 V
 21 1 V
 22 0 V
-22 0 V
-22 1 V
+21 1 V
 21 0 V
 22 1 V
-22 0 V
-22 0 V
+21 0 V
 21 1 V
 22 0 V
-22 1 V
-22 0 V
+21 1 V
+stroke 5679 4175 M
 21 0 V
-22 1 V
-22 0 V
-22 0 V
 21 1 V
 22 0 V
-22 0 V
-22 1 V
+21 1 V
 21 0 V
-22 0 V
-22 1 V
-22 0 V
-21 0 V
-22 0 V
-22 1 V
-22 0 V
-21 0 V
-22 1 V
-22 0 V
-22 0 V
-21 0 V
-22 1 V
-22 0 V
-21 0 V
-22 0 V
-22 1 V
-22 0 V
-21 0 V
-22 0 V
-22 0 V
-22 1 V
-21 0 V
-stroke 5630 4427 M
-22 0 V
-22 0 V
-22 1 V
-21 0 V
-22 0 V
-22 0 V
 22 0 V
 21 1 V
-22 0 V
-22 0 V
-22 0 V
 21 0 V
 22 1 V
-22 0 V
-22 0 V
 21 0 V
-22 0 V
-22 0 V
-22 1 V
-21 0 V
-22 0 V
-22 0 V
-22 0 V
+21 1 V
 21 0 V
 22 1 V
-22 0 V
-22 0 V
 21 0 V
-22 0 V
-22 0 V
-22 0 V
+21 0 V
+22 1 V
+21 0 V
 21 1 V
 22 0 V
-22 0 V
-22 0 V
 21 0 V
-22 0 V
-22 0 V
+21 1 V
+21 0 V
 22 1 V
 21 0 V
-22 0 V
-22 0 V
-22 0 V
 21 0 V
-22 0 V
-22 0 V
 22 1 V
 21 0 V
-22 0 V
-22 0 V
-22 0 V
 21 0 V
-22 0 V
-22 0 V
+22 1 V
+21 0 V
+21 1 V
+21 0 V
 22 0 V
 21 1 V
+21 0 V
 22 0 V
+21 1 V
+21 0 V
 22 0 V
-% End plot #3
+21 1 V
+21 0 V
+21 0 V
+22 1 V
+21 0 V
+21 0 V
+22 1 V
+21 0 V
+21 0 V
+22 1 V
+21 0 V
+21 0 V
+21 1 V
+22 0 V
+21 0 V
+21 1 V
+22 0 V
 stroke
 2.000 UL
 LTb
-1100 4799 N
-0 -4159 V
-5799 0 V
-0 4159 V
--5799 0 V
+1220 4800 N
+0 -4160 V
+5680 0 V
+0 4160 V
+-5680 0 V
 Z stroke
 1.000 UP
 2.000 UL
 LTb
-0.00 0.00 0.00 C 1100 3759 M
-5799 0 V
+0.00 0.00 0.00 C 1220 3413 M
+5680 0 V
 stroke
 LTb
 stroke
@@ -7631,5 +8134,5 @@ grestore
 end
 showpage
 %%Trailer
-%%DocumentFonts: Symbol Helvetica
-%%Pages: 8
+%%DocumentFonts: Symbol AvantGarde-Book
+%%Pages: 9
