@@ -118,7 +118,7 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   LOGICAL :: xmlifc, lo_to_split
   !
   REAL(DP) :: qhat(3), qh, e, emin, emax, dosofe(2), qq, dq(3), dqmod, &
-              dqmod_save, masst
+              dqmod_save, masst, ps, q1(3), q2(3), modq1, modq2
   INTEGER :: n, i, j, k, it, nq, nqx, na, nb, iout, nqtot
   LOGICAL, EXTERNAL :: has_xml
   CHARACTER(LEN=15), ALLOCATABLE :: name_rap_mode(:)
@@ -244,9 +244,31 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
                                                       nr2_save, nr3_save )
 
   num_rap_mode=-1
-  high_sym=.TRUE.
-  do_init=.TRUE.
+!
+!  Initialize high_sym
+!
+  high_sym=.FALSE.
+  DO n=1,nq
+     IF (n==1.OR.n==nq) THEN
+        high_sym(n) = .TRUE.
+     ELSE
+        q1(:) = q(:,n) - q(:,n-1)
+        q2(:) = q(:,n+1) - q(:,n)
+        modq1=sqrt( q1(1)*q1(1) + q1(2)*q1(2) + q1(3)*q1(3) )
+        modq2=sqrt( q2(1)*q2(1) + q2(2)*q2(2) + q2(3)*q2(3) )
+        IF (modq1 >1.d-6 .AND. modq2 > 1.d-6) THEN
+           ps = ( q1(1)*q2(1) + q1(2)*q2(2) + q1(3)*q2(3) ) / &
+                   modq1 / modq2
+           high_sym(n) = (ABS(ps-1.d0) >1.0d-4)
+        ENDIF
+!
+!  The gamma point is a high symmetry point
+!
+        IF (q(1,n)**2+q(2,n)**2+q(3,n)**2 < 1.0d-9) high_sym(n)=.TRUE.
+     END IF
+  END DO
 
+  do_init=.TRUE.
   DO n=1, nq
      IF ( MOD(n,20000) == 0 .AND. ionode ) WRITE(stdout, '(5x,"Computing q ",&
                          &   i8, " Total q ", i8 )') n, nq 
