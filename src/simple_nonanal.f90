@@ -12,6 +12,7 @@ subroutine simple_nonanal(nat, epsil, q, zeu, omega, dyn )
   !
   use kinds, only: dp
   use constants, only: pi, fpi, e2
+  USE io_global, ONLY : stdout
  implicit none
  integer, intent(in) :: nat
  !
@@ -34,7 +35,7 @@ subroutine simple_nonanal(nat, epsil, q, zeu, omega, dyn )
  !
 !print*, q(1), q(2), q(3)
  if (qeq < 1.d-8) then
-    write(6,'(5x,"A direction for q was not specified:", &
+    write(stdout,'(5x,"A direction for q was not specified:", &
       &          "TO-LO splitting will be absent")')
     return
  end if

@@ -89,10 +89,10 @@ SUBROUTINE run_thermo_asyncronously(nwork, part, igeom, auxdyn)
                  CALL set_thermo_work_todo(iwork, part, iq, irr, igeom)
                  WRITE(stdout,'(/,2x,76("+"))')
                  IF (lpwscf(iwork)) THEN
-                    WRITE(6,'(5x,"I am the master and now I do geometry", i5)') &
+                    WRITE(stdout,'(5x,"I am the master and now I do geometry", i5)') &
                                                   iwork
                  ELSE IF (lbands(iwork)) THEN
-                    WRITE(6,'(5x,"I am the master and now I do the bands", i5)') 
+                    WRITE(stdout,'(5x,"I am the master and now I do the bands", i5)') 
                  ELSE IF (lphonon(iwork)) THEN
                     WRITE(stdout,'(5x,"I am the master and now I do point", i5, &
                   & " irrep", i5, " of geometry", i5 )') iq, irr, igeom
@@ -140,10 +140,10 @@ SUBROUTINE run_thermo_asyncronously(nwork, part, igeom, auxdyn)
               CALL set_thermo_work_todo(iwork, part, iq, irr, igeom)
               WRITE(stdout,'(/,2x,76("+"))')
               IF (lpwscf(iwork)) THEN
-                 WRITE(6,'(5x,"I am image ", i5, " and now I do geometry", i5)') &
+                 WRITE(stdout,'(5x,"I am image ", i5, " and now I do geometry", i5)') &
                                                  my_image_id, iwork
               ELSE IF (lbands(iwork)) THEN
-                 WRITE(6,'(5x,"I am image ", i5, " and now I do bands", i5)') &
+                 WRITE(stdout,'(5x,"I am image ", i5, " and now I do bands", i5)') &
                                                  my_image_id
               ELSE IF (lphonon(iwork)) THEN
                  WRITE(stdout,'(5x,"I am image ",i5," and now I do point", i5,  &
@@ -179,9 +179,9 @@ SUBROUTINE run_thermo_asyncronously(nwork, part, igeom, auxdyn)
         DO iwork = 1, nwork
            WRITE(stdout,'(/,2x,76("+"))')
            IF (lpwscf(iwork)) THEN
-              WRITE(6,'(5x,"Doing geometry", i5)') iwork
+              WRITE(stdout,'(5x,"Doing geometry", i5)') iwork
            ELSE IF (lbands(iwork)) THEN
-              WRITE(6,'(5x,"Doing bands", i5)') 
+              WRITE(stdout,'(5x,"Doing bands", i5)') 
            ELSE IF (lphonon(iwork)) THEN
               WRITE(stdout,'(5x,"Doing point", i5,  &
                & " irrep", i5, " of geometry", i5 )') iq, irr, igeom

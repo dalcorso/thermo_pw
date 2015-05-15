@@ -331,7 +331,7 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
   tot_points=0
   DO ilines=1,nlines
      tot_points=tot_points+last_point(ilines)-start_point(ilines)+1
-!     write(6,*) 'ilines, start_point, last_point', ilines,  &
+!     write(stdout,*) 'ilines, start_point, last_point', ilines,  &
 !                 start_point(ilines), last_point(ilines)
   ENDDO
   WRITE(stdout,'(5x,"Number of lines:", i4, " Total number of points:",i8)') &

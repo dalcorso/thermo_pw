@@ -65,7 +65,6 @@ SUBROUTINE do_berry ( exit_status, polar, nppl )
   istep=0
 
   DO idir=1,3 
-     write(6,*) 'ENTRATO IN BERRY PHASE', idir
      !
      gdir=idir
      !

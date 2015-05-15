@@ -177,7 +177,6 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
 !  calculate the BZ path that corresponds to the cm parameters
 !
   celldm(:)=cm(:)
-  WRITE(6,*) celldm
   CALL set_bz_path()
   IF (nqaux > 0) CALL set_paths_disp()
   IF (disp_nqs /= nks) &

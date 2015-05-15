@@ -27,7 +27,7 @@ CHARACTER (LEN=256), INTENT(IN) :: auxdyn
 IF (  my_image_id /= root_image ) RETURN
 !
 WRITE(stdout,'(/,2x,76("+"))')
-WRITE(6,'(5x,"Collecting the results and writing fildyn files")') 
+WRITE(stdout,'(5x,"Collecting the results and writing fildyn files")') 
 WRITE(stdout,'(2x,76("+"),/)')
 !
 !  Try to compute everything. All quantities should be already in phsave
