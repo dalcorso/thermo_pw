@@ -158,9 +158,11 @@ PROGRAM thermo_pw
      !  In this part all images are syncronized and can communicate 
      !  their results thought the world_comm communicator
      !
-     CALL mp_sum(energy_geo, world_comm)
-     energy_geo=energy_geo / nproc_image
-     CALL write_energy(nwork, file_dat)
+     IF (nwork>0) THEN
+        CALL mp_sum(energy_geo, world_comm)
+        energy_geo=energy_geo / nproc_image
+        CALL write_energy(nwork, file_dat)
+     ENDIF
   ELSE
      CALL read_energy(nwork, file_dat)
   ENDIF
