@@ -207,7 +207,7 @@ PROGRAM thermo_pw
   CALL deallocate_asyn()
 
   IF (lpwscf_syn_1) THEN
-     outdir=TRIM(outdir_thermo)//'g1/'
+     outdir=TRIM(outdir_thermo)//'/g1/'
      tmp_dir = TRIM ( outdir )
      wfc_dir = tmp_dir
      CALL check_tempdir ( tmp_dir, exst, parallelfs )
