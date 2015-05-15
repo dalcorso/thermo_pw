@@ -219,7 +219,7 @@ PROGRAM thermo_pw
         do_punch=.TRUE.
         IF (.NOT.only_bands_plot) THEN
            WRITE(stdout,'(/,2x,76("+"))')
-           WRITE(6,'(5x,"Doing a self-consistent calculation", i5)') 
+           WRITE(stdout,'(5x,"Doing a self-consistent calculation", i5)') 
            WRITE(stdout,'(2x,76("+"),/)')
            CALL do_pwscf(exit_status, .TRUE.)
         ENDIF
@@ -230,9 +230,15 @@ PROGRAM thermo_pw
            IF (.NOT.only_bands_plot) THEN
               CALL set_paths_disp()
               CALL set_k_points()
+!
+!   by default in a band structure calculation we double the number of
+!   computed bands
+!
+              IF (nbnd_bands == 0) nbnd_bands = 2*nbnd
               IF (nbnd_bands > nbnd) nbnd = nbnd_bands
               WRITE(stdout,'(/,2x,76("+"))')
-              WRITE(6,'(5x,"Doing a non self-consistent calculation", i5)') 
+              WRITE(stdout,'(5x,"Doing a non self-consistent calculation",&
+                                                                    & i5)') 
               WRITE(stdout,'(2x,76("+"),/)')
               CALL do_pwscf(exit_status, .FALSE.)
               nspin0=nspin
@@ -351,10 +357,10 @@ PROGRAM thermo_pw
      always_run=.TRUE.
      CALL start_clock( 'PHONON' )
      DO igeom=1,tot_ngeo
-        write(6,'(/,5x,40("%"))') 
-        write(6,'(5x,"Computing geometry ", i5)') igeom
-        write(6,'(5x,40("%"),/)') 
-        outdir=TRIM(outdir_thermo)//'g'//TRIM(int_to_char(igeom))//'/'
+        write(stdout,'(/,5x,40("%"))') 
+        write(stdout,'(5x,"Computing geometry ", i5)') igeom
+        write(stdout,'(5x,40("%"),/)') 
+        outdir=TRIM(outdir_thermo)//'/g'//TRIM(int_to_char(igeom))//'/'
         !
         IF (.NOT. after_disp) CALL thermo_ph_readin()
         IF (after_disp) ldisp=.TRUE.

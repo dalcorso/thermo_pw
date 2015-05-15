@@ -351,7 +351,8 @@ emin_input : minimum energy for the band dispersion plot.
 emax_input : maximum energy for the band dispersion plot.
              Default: real maximum of the bands
 nbnd_bands : the number of bands in the band calculation
-             Default: integer nbnd given in pw.x input.
+             Default: integer 2*nbnd, where nbnd is the number of bands 
+             given in pw.x input or calculated by pw.x.
 lsym       : if .TRUE. does the symmetry analysis of the bands
              Default: .TRUE.
 flpsband   : postscript file of the electronic band structure
