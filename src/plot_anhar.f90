@@ -7,7 +7,9 @@
 !
 SUBROUTINE plot_anhar()
 !
-!  This is a driver to plot the quantities written inside flanhar
+!  This is a driver to plot the quantities written inside flanhar,
+!  flanhar//'_ph', flanhar//'.aux', flanhar//'.aux_ph' and 
+!  flanhar//'.aux_grun'
 !  
 !
 USE kinds,           ONLY : DP
@@ -24,7 +26,6 @@ USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
                             gnuplot_set_fact
 USE data_files,      ONLY : flanhar
 USE temperature,     ONLY : tmin, tmax
-USE constants,       ONLY : ry_kbar
 USE mp_images,       ONLY : my_image_id, root_image
 USE io_global,       ONLY : ionode
 

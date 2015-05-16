@@ -21,7 +21,7 @@ SUBROUTINE plot_multi_energy()
   USE data_files,           ONLY : flenergy 
   USE postscript_files,     ONLY : flpsenergy
   USE control_energy_plot,  ONLY : ncontours, ene_levels, color_levels
-  USE control_mur,          ONLY : lmurn, celldm0
+  USE control_mur,          ONLY : lmurn
   USE control_quadratic_energy, ONLY : x_pos_min, hessian_v, degree
   USE mp_images,            ONLY : my_image_id, root_image
   USE io_global,            ONLY : ionode
@@ -40,7 +40,6 @@ SUBROUTINE plot_multi_energy()
   REAL(DP) :: xmin, xmax, ymin, ymax
   INTEGER :: max_contours, nx, ny, ifiles, icont, tot_n, iwork, ierr
   INTEGER :: system
-  CHARACTER(LEN=8) :: float_to_char
 
   IF ( my_image_id /= root_image ) RETURN
   IF (ncontours==0) RETURN

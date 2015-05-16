@@ -49,9 +49,9 @@ END SUBROUTINE read_energy
 SUBROUTINE write_energy(nwork, filename)
   !-----------------------------------------------------------------------
   !
-  !  This routine writes the energy at each lattice constant if this is
-  !  already on file. It must be called by all processors, only the
-  !  meta_ionode reads the data and sends them to all the others
+  !  This routine writes the energy at each lattice constant.
+  !  It must be called by all processors, only the meta_ionode 
+  !  writes the data.
   !
   !
   USE kinds,      ONLY : DP
@@ -88,9 +88,9 @@ END SUBROUTINE write_energy
 SUBROUTINE write_stress(nwork, filename)
   !-----------------------------------------------------------------------
   !
-  !  This routine writes the stress at each lattice constant if this is
-  !  already on file. It must be called by all processors, only the
-  !  meta_ionode reads the data and sends them to all the others
+  !  This routine writes the stress at each lattice constant.
+  !  It must be called by all processors, only the meta_ionode 
+  !  writes the data.
   !
   !
   USE kinds,      ONLY : DP

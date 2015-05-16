@@ -13,11 +13,8 @@ SUBROUTINE write_anhar_anis()
 USE kinds,          ONLY : DP
 USE constants,      ONLY : ry_kbar
 USE temperature,    ONLY : ntemp, temp
-USE thermodynamics, ONLY : ph_cv
 USE anharmonic,     ONLY : alpha_anis_t, vmin_t, b0_t, celldm_t, beta_t
-USE control_quadratic_energy, ONLY : nvar, degree, coeff_t
 USE control_pwrun,  ONLY : ibrav_save
-USE cell_base,      ONLY : ibrav
 USE data_files,     ONLY : flanhar
 USE io_global,      ONLY : ionode
 USE mp_images,      ONLY : my_image_id, root_image
@@ -31,7 +28,7 @@ REAL(DP) :: fact1, fact2, deriv1, deriv2
 IF (my_image_id /= root_image) RETURN
 
 alpha_anis_t=0.0_DP
-SELECT CASE (ibrav) 
+SELECT CASE (ibrav_save) 
    CASE(1,2,3) 
       DO itemp = 2, ntemp-1
          alpha_anis_t(1,itemp) = (celldm_t(1,itemp+1)-celldm_t(1,itemp-1)) / &
@@ -87,8 +84,6 @@ ENDDO
 !
 CALL compute_beta(vmin_t, beta_t, temp, ntemp)
 
-!CALL compute_cp(beta_t, vmin_t, b0_t, ph_cv, cv_t, cp_t, b0_s, gamma_t)
-
 IF (ionode) THEN
 !
 !   here we plot the anharmonic quantities calculated from the phonon dos
@@ -126,13 +121,13 @@ IF (ionode) THEN
 !
    filename=TRIM(flanhar)//'.celldm'
    OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
-   IF (ibrav==1 .OR. ibrav==2 .OR. ibrav==3 ) THEN
+   IF (ibrav_save==1 .OR. ibrav_save==2 .OR. ibrav_save==3 ) THEN
       WRITE(iu_therm,'("#   T (K)      celldm(1)      alpha_xx(x10^6)")' )
       DO itemp = 1, ntemp-1
          WRITE(iu_therm, '(e12.5,4e20.9)') temp(itemp), celldm_t(1,itemp), &
                                                alpha_anis_t(1,itemp)*1.D6
       END DO
-   ELSEIF (ibrav==4 .OR. ibrav==6 .OR. ibrav==7 ) THEN
+   ELSEIF (ibrav_save==4 .OR. ibrav_save==6 .OR. ibrav_save==7 ) THEN
       WRITE(iu_therm,'("#   T (K)   celldm(1)   celldm(3)    alpha_xx(x10^6)   alpha_zz (x10^6")' )
       DO itemp = 1, ntemp-1
          WRITE(iu_therm, '(e12.5,4e20.9)') temp(itemp), celldm_t(1,itemp), &
@@ -140,7 +135,7 @@ IF (ionode) THEN
                                                alpha_anis_t(1,itemp)*1.D6, &
                                                alpha_anis_t(2,itemp)*1.D6
       END DO
-   ELSEIF ( ibrav==5 ) THEN
+   ELSEIF ( ibrav_save==5 ) THEN
       WRITE(iu_therm,'("#   T (K)   celldm(1)   celldm(4)    alpha_xx(x10^6)   alpha_zz (x10^6")' )
       DO itemp = 1, ntemp
          WRITE(iu_therm, '(e12.5,4e20.9)') temp(itemp), celldm_t(1,itemp), &
@@ -148,14 +143,14 @@ IF (ionode) THEN
                                                alpha_anis_t(1,itemp)*1.D6, &
                                                alpha_anis_t(2,itemp)*1.D6
       END DO
-   ELSEIF (ibrav==8 .OR. ibrav==9 .OR. ibrav==10 .OR. ibrav==11) THEN
+   ELSEIF (ibrav_save==8 .OR. ibrav_save==9 .OR. ibrav_save==10 .OR. ibrav_save==11) THEN
       WRITE(iu_therm,'("#   T (K)       celldm(1)        celldm(2)        celldm(3)")' )
       DO itemp = 1, ntemp
          WRITE(iu_therm, '(e12.5,3e20.9)') temp(itemp), celldm_t(1,itemp), &
                                                         celldm_t(2,itemp), &
                                                         celldm_t(3,itemp)
       END DO
-   ELSEIF (ibrav==12 .OR. ibrav==13) THEN
+   ELSEIF (ibrav_save==12 .OR. ibrav_save==13) THEN
       WRITE(iu_therm,'("#   T (K)       celldm(1)         celldm(2)        celldm(3)        celldm(4)")' )
       DO itemp = 1, ntemp
          WRITE(iu_therm, '(e12.5,4e17.9)') temp(itemp), celldm_t(1,itemp), &
@@ -163,7 +158,7 @@ IF (ionode) THEN
                                                         celldm_t(3,itemp), &
                                                         celldm_t(4,itemp)
       END DO
-   ELSEIF (ibrav==-12 .OR. ibrav==-13) THEN
+   ELSEIF (ibrav_save==-12 .OR. ibrav_save==-13) THEN
       WRITE(iu_therm,'("#   T (K)       celldm(1)         celldm(2)        celldm(3)        celldm(5)")' )
       DO itemp = 1, ntemp
          WRITE(iu_therm, '(e12.5,4e17.9)') temp(itemp), celldm_t(1,itemp), &
@@ -171,7 +166,7 @@ IF (ionode) THEN
                                                         celldm_t(3,itemp), &
                                                         celldm_t(5,itemp)
       END DO
-   ELSEIF (ibrav==14) THEN
+   ELSEIF (ibrav_save==14) THEN
       WRITE(iu_therm,'("#   T (K)       celldm(1)         celldm(2)        &
                   &celldm(3)        celldm(4)        celldm(5)        celldm(6)")' )
       DO itemp = 1, ntemp
@@ -182,7 +177,7 @@ IF (ionode) THEN
                                                         celldm_t(5,itemp), &
                                                         celldm_t(6,itemp)
       END DO
-   ELSE IF (ibrav==0) THEN
+   ELSE IF (ibrav_save==0) THEN
 !
 !  In this case we write nothing but do not stop
 !
@@ -204,12 +199,9 @@ SUBROUTINE write_ph_freq_anhar_anis()
 USE kinds,          ONLY : DP
 USE constants,      ONLY : ry_kbar
 USE temperature,    ONLY : ntemp, temp
-USE ph_freq_thermodynamics, ONLY : phf_cv
 USE ph_freq_anharmonic, ONLY : alphaf_anis_t, vminf_t, b0f_t, celldmf_t, &
                                betaf_t
-USE control_quadratic_energy, ONLY : nvar, degree, coeff_t
 USE control_pwrun,  ONLY : ibrav_save
-USE cell_base,      ONLY : ibrav
 USE data_files,     ONLY : flanhar
 USE io_global,      ONLY : ionode
 USE mp_images,      ONLY : my_image_id, root_image
@@ -223,7 +215,7 @@ REAL(DP) :: fact1, fact2, deriv1, deriv2
 IF (my_image_id /= root_image) RETURN
 
 alphaf_anis_t=0.0_DP
-SELECT CASE (ibrav) 
+SELECT CASE (ibrav_save) 
    CASE(1,2,3) 
       DO itemp = 2, ntemp-1
          alphaf_anis_t(1,itemp)=(celldmf_t(1,itemp+1)-celldmf_t(1,itemp-1)) / &
@@ -279,15 +271,6 @@ ENDDO
 !
 CALL compute_beta(vminf_t, betaf_t, temp, ntemp)
 
-!DO itemp = 1, ntemp 
-!   CALL compute_bulk_modulus(ibrav, celldm_t(1,itemp), coeff_t(1,itemp), &
-!                                 nvar, degree, b0_t(itemp))
-!   CALL compute_elcons_t(ibrav, celldm_t(1,itemp), coeff_t(1,itemp), &
-!                                 nvar, degree, elcons_t(1,itemp))
-!ENDDO
-
-!CALL compute_cp(beta_t, vmin_t, b0_t, ph_cv, cv_t, cp_t, b0_s, gamma_t)
-
 IF (ionode) THEN
 !
 !   here we plot the anharmonic quantities calculated from the phonon dos
@@ -326,13 +309,13 @@ IF (ionode) THEN
 !
    filename=TRIM(flanhar)//'.celldm_ph'
    OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
-   IF (ibrav==1 .OR. ibrav==2 .OR. ibrav==3 ) THEN
+   IF (ibrav_save==1 .OR. ibrav_save==2 .OR. ibrav_save==3 ) THEN
       WRITE(iu_therm,'("#   T (K)      celldm(1)      alpha_xx(x10^6)")' )
       DO itemp = 1, ntemp-1
          WRITE(iu_therm, '(e12.5,4e20.9)') temp(itemp), celldmf_t(1,itemp), &
                                                alphaf_anis_t(1,itemp)*1.D6
       END DO
-   ELSEIF (ibrav==4 .OR. ibrav==6 .OR. ibrav==7 ) THEN
+   ELSEIF (ibrav_save==4 .OR. ibrav_save==6 .OR. ibrav_save==7 ) THEN
       WRITE(iu_therm,'("#   T (K)   celldm(1)   celldm(3)    alpha_xx(x10^6)   alpha_zz (x10^6")' )
       DO itemp = 1, ntemp-1
          WRITE(iu_therm, '(e12.5,4e20.9)') temp(itemp), celldmf_t(1,itemp), &
@@ -340,7 +323,7 @@ IF (ionode) THEN
                                             alphaf_anis_t(1,itemp)*1.D6, &
                                             alphaf_anis_t(2,itemp)*1.D6
       END DO
-   ELSEIF ( ibrav==5 ) THEN
+   ELSEIF ( ibrav_save==5 ) THEN
       WRITE(iu_therm,'("#   T (K)   celldm(1)   celldm(4)    alpha_xx(x10^6)   alpha_zz (x10^6")' )
       DO itemp = 1, ntemp
          WRITE(iu_therm, '(e12.5,4e20.9)') temp(itemp), celldmf_t(1,itemp), &
@@ -348,14 +331,14 @@ IF (ionode) THEN
                                              alphaf_anis_t(1,itemp)*1.D6, &
                                              alphaf_anis_t(2,itemp)*1.D6
       END DO
-   ELSEIF (ibrav==8 .OR. ibrav==9 .OR. ibrav==10 .OR. ibrav==11) THEN
+   ELSEIF (ibrav_save==8 .OR. ibrav_save==9 .OR. ibrav_save==10 .OR. ibrav_save==11) THEN
       WRITE(iu_therm,'("#   T (K)       celldm(1)        celldm(2)        celldm(3)")' )
       DO itemp = 1, ntemp
          WRITE(iu_therm, '(e12.5,3e20.9)') temp(itemp), celldmf_t(1,itemp), &
                                                         celldmf_t(2,itemp), &
                                                         celldmf_t(3,itemp)
       END DO
-   ELSEIF (ibrav==12 .OR. ibrav==13) THEN
+   ELSEIF (ibrav_save==12 .OR. ibrav_save==13) THEN
       WRITE(iu_therm,'("#   T (K)       celldm(1)         celldm(2)        celldm(3)        celldm(4)")' )
       DO itemp = 1, ntemp
          WRITE(iu_therm, '(e12.5,4e17.9)') temp(itemp), celldmf_t(1,itemp), &
@@ -363,7 +346,7 @@ IF (ionode) THEN
                                                         celldmf_t(3,itemp), &
                                                         celldmf_t(4,itemp)
       END DO
-   ELSEIF (ibrav==-12 .OR. ibrav==-13) THEN
+   ELSEIF (ibrav_save==-12 .OR. ibrav_save==-13) THEN
       WRITE(iu_therm,'("#   T (K)       celldm(1)         celldm(2)        celldm(3)        celldm(5)")' )
       DO itemp = 1, ntemp
          WRITE(iu_therm, '(e12.5,4e17.9)') temp(itemp), celldmf_t(1,itemp), &
@@ -371,7 +354,7 @@ IF (ionode) THEN
                                                         celldmf_t(3,itemp), &
                                                         celldmf_t(5,itemp)
       END DO
-   ELSEIF (ibrav==14) THEN
+   ELSEIF (ibrav_save==14) THEN
       WRITE(iu_therm,'("#   T (K)       celldm(1)         celldm(2)        &
                   &celldm(3)        celldm(4)        celldm(5)        celldm(6)")' )
       DO itemp = 1, ntemp
@@ -382,7 +365,7 @@ IF (ionode) THEN
                                                         celldmf_t(5,itemp), &
                                                         celldmf_t(6,itemp)
       END DO
-   ELSE IF (ibrav==0) THEN
+   ELSE IF (ibrav_save==0) THEN
 !
 !  In this case we write nothing but do not stop
 !

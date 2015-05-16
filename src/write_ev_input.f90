@@ -15,7 +15,7 @@ SUBROUTINE write_ev_input(file_dat)
   !
   !
   USE kinds, ONLY : DP
-  USE mp_images, ONLY : my_image_id, root_image, nproc_image
+  USE mp_images, ONLY : my_image_id, root_image
   USE thermo_mod, ONLY : omega_geo, energy_geo, ngeo
   USE io_global, ONLY : ionode
   IMPLICIT NONE
@@ -66,7 +66,7 @@ SUBROUTINE do_ev()
 !  This subroutine computes the equilibrium volume and bulk modulus
 !
 USE kinds, ONLY : DP
-USE thermo_mod, ONLY : omega_geo, celldm_geo, ngeo, central_geo
+USE thermo_mod, ONLY : omega_geo, celldm_geo, central_geo
 USE control_mur, ONLY : vmin, b0, b01, emin
 USE data_files, ONLY : flevdat
 USE io_global, ONLY : meta_ionode_id, stdout
@@ -109,7 +109,7 @@ USE thermodynamics, ONLY : ph_free_ener
 USE anharmonic,     ONLY : vmin_t, b0_t, b01_t, free_e_min_t
 USE temperature,    ONLY : ntemp, temp
 USE data_files,     ONLY : flevdat
-USE io_global,      ONLY : meta_ionode_id, stdout,  meta_ionode
+USE io_global,      ONLY : stdout
 USE mp_images,      ONLY : my_image_id, root_image
 
 IMPLICIT NONE
@@ -174,7 +174,7 @@ USE ph_freq_anharmonic,     ONLY : vminf_t, b0f_t, b01f_t, free_e_minf_t
 USE control_mur,    ONLY : vmin, b0, b01
 USE temperature,    ONLY : ntemp, temp
 USE data_files,     ONLY : flevdat
-USE io_global,      ONLY : meta_ionode_id, stdout,  meta_ionode
+USE io_global,      ONLY : stdout
 USE mp_images,      ONLY : my_image_id, root_image
 
 IMPLICIT NONE

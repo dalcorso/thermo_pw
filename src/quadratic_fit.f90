@@ -14,14 +14,14 @@ SUBROUTINE quadratic_fit()
   !   equal to the number of indipendent parameters in celldm. 
   !   It finds also the minimum of the quadratic function.
   !   
-  !   the output of this routine is the celldm0
+  !   the output of this routine is celldm0
   !
   !
   USE kinds, ONLY : DP
   USE cell_base, ONLY : ibrav
   USE control_mur, ONLY : celldm0
   USE mp_images, ONLY : my_image_id, root_image
-  USE thermo_mod, ONLY : celldm_geo, energy_geo, omega_geo
+  USE thermo_mod, ONLY : celldm_geo, energy_geo
   USE control_quadratic_energy, ONLY : hessian_v, hessian_e, x_pos_min, degree
   USE io_global, ONLY : stdout
   USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_fit_extremum, &
@@ -268,7 +268,7 @@ SUBROUTINE quadratic_fit_t(itemp)
   USE kinds, ONLY : DP
   USE cell_base, ONLY : ibrav
   USE mp_images, ONLY : my_image_id, root_image
-  USE thermo_mod, ONLY : celldm_geo, energy_geo, omega_geo
+  USE thermo_mod, ONLY : celldm_geo, energy_geo
   USE control_quadratic_energy, ONLY : degree, nvar, coeff_t
   USE temperature, ONLY : temp
   USE thermodynamics, ONLY : ph_free_ener
@@ -366,40 +366,40 @@ SUBROUTINE quadratic_fit_t(itemp)
         ENDDO
   END SELECT
   !
-  WRITE(stdout,'(5x," Fitting the following data")')
-  IF (degree==1) THEN
-     WRITE(stdout,'(10x,"x1",12x,"f")')
-     DO idata=1,ndata
-        WRITE(stdout,'(2f15.8)') x(1,idata), f(idata)
-     ENDDO
-  ELSEIF (degree==2) THEN
-     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"f")')
-     DO idata=1,ndata
-        WRITE(stdout,'(3f15.8)') x(1:2,idata), f(idata)
-     ENDDO
-  ELSEIF (degree==3) THEN
-     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"x3",12x,"f")')
-     DO idata=1,ndata
-        WRITE(stdout,'(4f15.8)') x(1:3,idata), f(idata)
-     ENDDO
-  ELSEIF (degree==4) THEN
-     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"x3",12x,12x,"x4",12x,"f")')
-     DO idata=1,ndata
-        WRITE(stdout,'(5f15.8)') x(1:4,idata), f(idata)
-     ENDDO
-  ELSEIF (degree==5) THEN
-     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"x3",12x,12x,"x4",12x,"x5",12x,"f")')
-     DO idata=1,ndata
-        WRITE(stdout,'(6f15.8)') x(1:5,idata), f(idata)
-     ENDDO
-  ELSEIF (degree==6) THEN
-     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"x3",12x,12x,"x4",12x,"x5",12x,&
-                                                               &"x6",12x,"f")')
-     DO idata=1,ndata
-        WRITE(stdout,'(7f15.8)') x(1:6,idata), f(idata)
-     ENDDO
-
-  ENDIF
+!  WRITE(stdout,'(5x," Fitting the following data")')
+!  IF (degree==1) THEN
+!     WRITE(stdout,'(10x,"x1",12x,"f")')
+!     DO idata=1,ndata
+!        WRITE(stdout,'(2f15.8)') x(1,idata), f(idata)
+!     ENDDO
+!  ELSEIF (degree==2) THEN
+!     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"f")')
+!     DO idata=1,ndata
+!        WRITE(stdout,'(3f15.8)') x(1:2,idata), f(idata)
+!     ENDDO
+!  ELSEIF (degree==3) THEN
+!     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"x3",12x,"f")')
+!     DO idata=1,ndata
+!        WRITE(stdout,'(4f15.8)') x(1:3,idata), f(idata)
+!     ENDDO
+!  ELSEIF (degree==4) THEN
+!     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"x3",12x,12x,"x4",12x,"f")')
+!     DO idata=1,ndata
+!        WRITE(stdout,'(5f15.8)') x(1:4,idata), f(idata)
+!     ENDDO
+!  ELSEIF (degree==5) THEN
+!     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"x3",12x,12x,"x4",12x,"x5",12x,"f")')
+!     DO idata=1,ndata
+!        WRITE(stdout,'(6f15.8)') x(1:5,idata), f(idata)
+!     ENDDO
+!  ELSEIF (degree==6) THEN
+!     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"x3",12x,12x,"x4",12x,"x5",12x,&
+!                                                               &"x6",12x,"f")')
+!     DO idata=1,ndata
+!        WRITE(stdout,'(7f15.8)') x(1:6,idata), f(idata)
+!     ENDDO
+!
+!  ENDIF
   CALL fit_multi_quadratic(ndata,degree,nvar,x,f,coeff)
 
   WRITE(stdout,'(/,5x,"Quadratic polynomial:")') 
@@ -437,7 +437,7 @@ SUBROUTINE quadratic_fit_t(itemp)
   chisq=0.0_DP
   DO idata=1,ndata
      CALL evaluate_fit_quadratic(degree,nvar,x(1,idata),aux,coeff)
-     WRITE(stdout,'(3f19.12)') f(idata), aux, f(idata)-aux
+!     WRITE(stdout,'(3f19.12)') f(idata), aux, f(idata)-aux
      chisq = chisq + (aux - f(idata))**2
   ENDDO
 
@@ -516,7 +516,7 @@ SUBROUTINE quadratic_fit_t_ph(itemp)
   USE kinds, ONLY : DP
   USE cell_base, ONLY : ibrav
   USE mp_images, ONLY : my_image_id, root_image
-  USE thermo_mod, ONLY : celldm_geo, energy_geo, omega_geo
+  USE thermo_mod, ONLY : celldm_geo, energy_geo
   USE control_quadratic_energy, ONLY : degree, nvar, coeff_t
   USE temperature, ONLY : temp
   USE ph_freq_thermodynamics, ONLY : phf_free_ener
@@ -614,40 +614,40 @@ SUBROUTINE quadratic_fit_t_ph(itemp)
         ENDDO
   END SELECT
   !
-  WRITE(stdout,'(5x," Fitting the following data")')
-  IF (degree==1) THEN
-     WRITE(stdout,'(10x,"x1",12x,"f")')
-     DO idata=1,ndata
-        WRITE(stdout,'(2f15.8)') x(1,idata), f(idata)
-     ENDDO
-  ELSEIF (degree==2) THEN
-     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"f")')
-     DO idata=1,ndata
-        WRITE(stdout,'(3f15.8)') x(1:2,idata), f(idata)
-     ENDDO
-  ELSEIF (degree==3) THEN
-     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"x3",12x,"f")')
-     DO idata=1,ndata
-        WRITE(stdout,'(4f15.8)') x(1:3,idata), f(idata)
-     ENDDO
-  ELSEIF (degree==4) THEN
-     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"x3",12x,12x,"x4",12x,"f")')
-     DO idata=1,ndata
-        WRITE(stdout,'(5f15.8)') x(1:4,idata), f(idata)
-     ENDDO
-  ELSEIF (degree==5) THEN
-     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"x3",12x,12x,"x4",12x,"x5",12x,"f")')
-     DO idata=1,ndata
-        WRITE(stdout,'(6f15.8)') x(1:5,idata), f(idata)
-     ENDDO
-  ELSEIF (degree==6) THEN
-     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"x3",12x,12x,"x4",12x,"x5",12x,&
-                                                               &"x6",12x,"f")')
-     DO idata=1,ndata
-        WRITE(stdout,'(7f15.8)') x(1:6,idata), f(idata)
-     ENDDO
-
-  ENDIF
+!  WRITE(stdout,'(5x," Fitting the following data")')
+!  IF (degree==1) THEN
+!     WRITE(stdout,'(10x,"x1",12x,"f")')
+!     DO idata=1,ndata
+!        WRITE(stdout,'(2f15.8)') x(1,idata), f(idata)
+!     ENDDO
+!  ELSEIF (degree==2) THEN
+!     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"f")')
+!     DO idata=1,ndata
+!        WRITE(stdout,'(3f15.8)') x(1:2,idata), f(idata)
+!     ENDDO
+!  ELSEIF (degree==3) THEN
+!     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"x3",12x,"f")')
+!     DO idata=1,ndata
+!        WRITE(stdout,'(4f15.8)') x(1:3,idata), f(idata)
+!     ENDDO
+!  ELSEIF (degree==4) THEN
+!     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"x3",12x,12x,"x4",12x,"f")')
+!     DO idata=1,ndata
+!        WRITE(stdout,'(5f15.8)') x(1:4,idata), f(idata)
+!     ENDDO
+!  ELSEIF (degree==5) THEN
+!     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"x3",12x,12x,"x4",12x,"x5",12x,"f")')
+!     DO idata=1,ndata
+!        WRITE(stdout,'(6f15.8)') x(1:5,idata), f(idata)
+!     ENDDO
+!  ELSEIF (degree==6) THEN
+!     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"x3",12x,12x,"x4",12x,"x5",12x,&
+!                                                               &"x6",12x,"f")')
+!     DO idata=1,ndata
+!        WRITE(stdout,'(7f15.8)') x(1:6,idata), f(idata)
+!     ENDDO
+!
+!  ENDIF
   CALL fit_multi_quadratic(ndata,degree,nvar,x,f,coeff)
 
   WRITE(stdout,'(/,5x,"Quadratic polynomial:")') 
@@ -685,7 +685,7 @@ SUBROUTINE quadratic_fit_t_ph(itemp)
   chisq=0.0_DP
   DO idata=1,ndata
      CALL evaluate_fit_quadratic(degree,nvar,x(1,idata),aux,coeff)
-     WRITE(stdout,'(3f19.12)') f(idata), aux, f(idata)-aux
+!     WRITE(stdout,'(3f19.12)') f(idata), aux, f(idata)-aux
      chisq = chisq + (aux - f(idata))**2
   ENDDO
 

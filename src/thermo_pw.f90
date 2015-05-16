@@ -441,7 +441,7 @@ PROGRAM thermo_pw
 !
               CALL write_thermo(igeom)
               CALL write_thermo_ph(igeom)
-              CALL plot_thermo(igeom)
+              CALL plot_thermo()
            ENDIF
         ENDIF
         CALL deallocate_asyn()

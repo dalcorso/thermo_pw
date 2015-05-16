@@ -10,8 +10,8 @@ SUBROUTINE plot_gruneisen_band_anis(flinput)
 !  This is a driver to plot the gruneisen parameters of anisotropic
 !  solid. This routine knows only how many Gruneisen parameter files 
 !  there are, depending on the Bravais lattice. It generates the names
-!  of the postscrip files and of the file that contains the Gruneisen
-!  parameters and makes the plot.
+!  of the postscript files and of the file that contains the Gruneisen
+!  parameters and call the routine that makes the plot.
 !
 USE kinds,           ONLY : DP
 USE control_gnuplot, ONLY : flgnuplot
@@ -22,7 +22,7 @@ USE mp_images,       ONLY : root_image, my_image_id
 
 IMPLICIT NONE
 
-CHARACTER(LEN=256) :: flinput
+CHARACTER(LEN=256), INTENT(IN) :: flinput
 CHARACTER(LEN=256) :: filename, save_flpsgrun, save_flgrun, save_flgnuplot, &
                       save_flpgrun
 CHARACTER(LEN=6), EXTERNAL :: int_to_char

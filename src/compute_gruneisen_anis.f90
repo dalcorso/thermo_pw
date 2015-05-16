@@ -18,9 +18,8 @@ COMPLEX(DP), INTENT(IN) :: displa_geo(3*nat,3*nat,ngeo)
 REAL(DP), INTENT(INOUT) :: poly_grun(nvar,3*nat)
 
 REAL(DP), ALLOCATABLE :: frequences(:), x(:,:), f(:)
-REAL(DP) :: overlap, overlap_max
+REAL(DP) :: overlap
 INTEGER :: imode, jmode, igeo, idata, central_geo
-INTEGER  :: inlist_old, inlist
 COMPLEX(DP) :: ZDOTC
 
 ALLOCATE (frequences(ngeo))

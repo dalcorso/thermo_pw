@@ -5,7 +5,7 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-SUBROUTINE plot_thermo(igeom)
+SUBROUTINE plot_thermo()
 !
 !  This is a driver to plot the quantities written inside fltherm
 !  
@@ -14,8 +14,9 @@ USE kinds,           ONLY : DP
 USE control_gnuplot, ONLY : flgnuplot, gnuplot_command, lgnuplot
 USE postscript_files, ONLY : flpstherm
 USE gnuplot,         ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
-                            gnuplot_ylabel, gnuplot_write_command, &
-                            gnuplot_xlabel, gnuplot_write_file_mul_data, &
+                            gnuplot_ylabel, &
+                            gnuplot_xlabel, &
+                            gnuplot_write_file_mul_data, &
                             gnuplot_set_fact
 USE data_files,      ONLY : fltherm
 USE temperature,     ONLY : tmin, tmax
@@ -23,9 +24,7 @@ USE mp_images,       ONLY : root_image, my_image_id
 USE io_global,       ONLY : ionode
 
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: igeom
 CHARACTER(LEN=256) :: gnu_filename, filename
-CHARACTER(LEN=6), EXTERNAL :: int_to_char
 INTEGER :: system
 INTEGER :: ierr
 
@@ -43,9 +42,6 @@ filename=TRIM(fltherm)//'_ph'
 CALL gnuplot_xlabel('T (K)', .FALSE.) 
 CALL gnuplot_ylabel('Vibrational energy (kJ / N / mol)',.FALSE.) 
 CALL gnuplot_set_fact(1313.3130_DP, .FALSE.) 
-
-CALL gnuplot_write_command('color_red="red"',.FALSE.)
-CALL gnuplot_write_command('color_blue="blue"',.FALSE.)
 
 CALL gnuplot_write_file_mul_data(fltherm,1,2,'color_red',.TRUE.,.FALSE.,.FALSE.)
 CALL gnuplot_write_file_mul_data(filename,1,2,'color_blue',.FALSE.,.TRUE.,.FALSE.)

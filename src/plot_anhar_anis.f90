@@ -9,8 +9,9 @@ SUBROUTINE plot_anhar_anis()
 !
 !  This is a driver to plot the quantities written inside flanhar for the
 !  case of anisotropic systems. Presently plots celldm as a function of
-!  temperature (one parameter per plot), the thermal expansions (all in the
-!  same plot).
+!  temperature (one parameter per plot), the thermal expansion tensor
+!  components (all in the same plot), the volume as a function of temperature,
+!  the volume thermal expansion as a function of temperature.
 !  
 !
 USE kinds,           ONLY : DP
@@ -21,14 +22,10 @@ USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
                             gnuplot_ylabel,              &
                             gnuplot_xlabel,              &
                             gnuplot_write_file_mul_data, &
-                            gnuplot_write_file_mul_data_sum, &
-                            gnuplot_write_file_mul_point,  &
-                            gnuplot_write_horizontal_line, &
                             gnuplot_set_fact
 USE data_files,  ONLY : flanhar
 USE control_pwrun, ONLY : ibrav_save
 USE temperature,     ONLY : tmin, tmax
-USE constants,       ONLY : ry_kbar
 USE mp_images,       ONLY : my_image_id, root_image
 USE io_global,       ONLY : ionode
 
@@ -36,9 +33,6 @@ IMPLICIT NONE
 
 CHARACTER(LEN=256) :: gnu_filename, filename, filename1, filename2, &
                       filename3, filenameps
-                      
-CHARACTER(LEN=6), EXTERNAL :: int_to_char
-CHARACTER(LEN=8), EXTERNAL :: float_to_char
 INTEGER :: system
 INTEGER :: ierr
 

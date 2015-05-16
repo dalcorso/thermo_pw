@@ -29,7 +29,6 @@ SUBROUTINE write_gnuplot_energy(nwork)
   CHARACTER(LEN=256) :: fileout
   INTEGER :: iu_ev, iwork, ifiles, nfiles, ios
   CHARACTER(LEN=6) :: int_to_char
-  CHARACTER(LEN=8) :: float_to_char
   !
   SELECT CASE (ibrav)
      CASE(1,2,3)

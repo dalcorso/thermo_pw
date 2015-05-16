@@ -9,9 +9,9 @@
 FUNCTION compute_omega_geo(ibrav, celldm_)
   !-----------------------------------------------------------------------
   !
-  !  This routine receives the celldm and computes the
+  !  This routine receives celldm and computes the
   !  volume, using ibrav read from input. The celldm read from input is
-  !  kept.
+  !  not changed but the one of cell_base is changed.
   !
   USE kinds,            ONLY : DP
   USE input_parameters, ONLY : celldm, a, b, c, cosab, cosac, cosbc, &

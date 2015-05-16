@@ -22,7 +22,6 @@ SUBROUTINE compute_gruneisen()
   USE grun_anharmonic,        ONLY : poly_grun, poly_order
   USE control_thermo,         ONLY : with_eigen
   USE mp_images,              ONLY : root_image, my_image_id
-  USE io_global,              ONLY : stdout
 
   IMPLICIT NONE
 
@@ -141,7 +140,7 @@ REAL(DP), INTENT(INOUT) :: poly_grun(poly_order,3*nat)
 REAL(DP), ALLOCATABLE :: frequences(:)
 REAL(DP) :: overlap
 COMPLEX(DP) :: ZDOTC
-INTEGER :: ibnd, jbnd, igeo, irap, central_geo, jmode
+INTEGER :: ibnd, igeo, central_geo, jmode
 
 ALLOCATE (frequences(ngeo))
 

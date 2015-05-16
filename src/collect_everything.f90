@@ -11,18 +11,17 @@ SUBROUTINE collect_everything(auxdyn)
 !  This routine calls phonon a last time in order to collect the results
 !  of all the images. Only the root image calls the phonon.
 !
-USE mp_images,   ONLY : my_image_id, root_image, nimage
+USE mp_images,   ONLY : my_image_id, root_image
 USE io_global,   ONLY : stdout
 USE control_ph,  ONLY : recover
 USE control_qe,  ONLY : tcollect_all
 USE disp,        ONLY : comp_iq
 USE grid_irr_iq, ONLY : comp_irr_iq
-USE ph_restart,  ONLY : check_directory_phsave
 
 IMPLICIT NONE
 CHARACTER (LEN=256), INTENT(IN) :: auxdyn
 !
-!  Only the first image collect the results if there are several images
+!  Only the first image collects the results if there are several images
 !
 IF (  my_image_id /= root_image ) RETURN
 !

@@ -6,9 +6,11 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 SUBROUTINE write_thermo(igeom)
-
+!
+!  This routine writes on file the harmonic thermodynamical quantities
+!
 USE kinds,          ONLY : DP
-USE phdos_module,   ONLY : phdos_type, read_phdos_data, zero_point_energy, &
+USE phdos_module,   ONLY : phdos_type, zero_point_energy, &
                            free_energy, vib_energy, vib_entropy, &
                            specific_heat_cv, integrated_dos
 USE thermo_mod,     ONLY : tot_ngeo
@@ -31,7 +33,8 @@ LOGICAL  :: check_file_exists, do_read
 do_read=.FALSE.
 IF ( check_file_exists(fltherm) ) do_read=.TRUE.
 IF (my_image_id /= root_image) RETURN
-
+IF ( igeom < 1 .OR. igeom > tot_ngeo ) CALL errore('write_thermo', & 
+                                               'Too many geometries',1)
 IF (do_read) THEN
    IF (ionode) THEN
       iu_therm=2
@@ -54,9 +57,6 @@ IF (do_read) THEN
    RETURN
 END IF
 
-
-IF ( igeom < 1 .OR. igeom > tot_ngeo ) CALL errore('write_thermo', & 
-                                               'Too many geometries',1)
 WRITE(stdout,'(/,2x,76("+"))')
 WRITE(stdout,'(5x,"Computing the thermodynamic properties from phonon dos")')
 WRITE(stdout,'(5x,"Writing on file ",a)') TRIM(fltherm)
@@ -141,6 +141,8 @@ filename=TRIM(fltherm)//'_ph'
 IF ( check_file_exists(filename) ) do_read=.TRUE.
 
 IF (my_image_id /= root_image) RETURN
+IF ( igeom < 1 .OR. igeom > tot_ngeo ) CALL errore('write_thermo', & 
+                                               'Too many geometries',1)
 
 IF (do_read) THEN
    IF (ionode) THEN
@@ -164,9 +166,6 @@ IF (do_read) THEN
    RETURN
 END IF
 
-
-IF ( igeom < 1 .OR. igeom > tot_ngeo ) CALL errore('write_thermo', & 
-                                               'Too many geometries',1)
 WRITE(stdout,'(/,2x,76("+"))')
 WRITE(stdout,'(5x,"Computing the thermodynamic properties from frequencies")')
 WRITE(stdout,'(5x,"Writing on file ",a)') TRIM(filename)

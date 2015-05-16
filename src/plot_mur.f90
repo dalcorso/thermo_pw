@@ -19,8 +19,7 @@ USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
                             gnuplot_xlabel,              &
                             gnuplot_write_horizontal_line, &
                             gnuplot_write_file_mul_data, &
-                            gnuplot_write_file_mul_point, &
-                            gnuplot_write_command
+                            gnuplot_write_file_mul_point
 USE data_files,      ONLY : flevdat
 USE control_mur,     ONLY : vmin_input, vmax_input
 USE mp_images,       ONLY : my_image_id, root_image
