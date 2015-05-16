@@ -20,7 +20,7 @@ SUBROUTINE set_fft_mesh
   USE cell_base,          ONLY : at, bg, alat, tpiba, tpiba2
   USE gvect,              ONLY : gcutm
   USE fft_base,           ONLY : dfftp, dffts
-  USE grid_subroutines,   ONLY : realspace_grids_init
+  USE grid_subroutines,   ONLY : realspace_grid_init
   USE thermo_sym,         ONLY : fft_fact
   USE gvecs,              ONLY : doublegrid, gcutms, dual
   USE wvfct,              ONLY : ecutwfc
@@ -48,7 +48,8 @@ SUBROUTINE set_fft_mesh
   ! ... calculate dimensions of the FFT grid
   !
   CALL clean_dfft()
-  CALL realspace_grids_init ( dfftp, dffts, at, bg, gcutm, gcutms, fft_fact )
+  CALL realspace_grid_init ( dfftp, at, bg, gcutm, fft_fact )
+  CALL realspace_grid_init ( dffts, at, bg, gcutms, fft_fact )
   !
   RETURN
   END SUBROUTINE set_fft_mesh

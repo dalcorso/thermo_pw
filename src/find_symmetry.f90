@@ -31,7 +31,7 @@ SUBROUTINE find_symmetry(fft_fact)
   USE ions_base,          ONLY : nat, tau, ntyp => nsp, ityp
   USE gvect,              ONLY : gcutm
   USE fft_base,           ONLY : dfftp, dffts
-  USE grid_subroutines,   ONLY : realspace_grids_init
+  USE grid_subroutines,   ONLY : realspace_grid_init
   USE gvecs,              ONLY : doublegrid, gcutms, dual
   USE wvfct,              ONLY : ecutwfc
   USE symm_base,          ONLY : s, t_rev, irt, nrot, nsym, invsym, nosym, &
@@ -122,7 +122,8 @@ SUBROUTINE find_symmetry(fft_fact)
   !
   ! ... calculate dimensions of the FFT grid
   !
-  CALL realspace_grids_init ( dfftp, dffts, at, bg, gcutm, gcutms, fft_fact )
+  CALL realspace_grid_init ( dfftp, at, bg, gcutm, fft_fact )
+  CALL realspace_grid_init ( dffts, at, bg, gcutms, fft_fact )
   !
   !  ... generate transformation matrices for the crystal point group
   !  ... First we generate all the symmetry matrices of the Bravais lattice
