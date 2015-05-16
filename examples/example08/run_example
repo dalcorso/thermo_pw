@@ -11,7 +11,7 @@ $ECHO
 $ECHO "$EXAMPLE_DIR : starting"
 $ECHO
 $ECHO "This example shows how to use thermo_pw.x to calculate the "
-$ECHO "phonon dispersions and the harmonic thermodynamical properties of Si"
+$ECHO "phonon dispersions and the harmonic thermodynamic properties of Si"
 $ECHO "at the equilibrium lattice constant."
 
 # set the needed environment variables
@@ -126,10 +126,10 @@ ciao
   nq1=4, nq2=4, nq3=4,
 /
 EOF
-$ECHO "  running the thermo mur_lc_disp calculation for Si,"
-$ECHO "  creating the postscript file output_disp.ps,"
-$ECHO "  generating plot of phonon_dos in the file output_dos.ps,"
-$ECHO "  and creating the postscript file output_therm.ps...\c"
+$ECHO " running the thermo mur_lc_disp calculation for Si,"
+$ECHO " dispersions can be found in output_disp.ps.g1,"
+$ECHO " phonon_dos in output_dos.ps.g1,"
+$ECHO " harmonic thermodynamic properties in output_therm.ps.g1...\c"
 $THERMO_PW_COMMAND < si.mur_lc_disp.in > si.mur_lc_disp.out
 check_failure $?
 $ECHO " done"

@@ -108,7 +108,8 @@ K_POINTS AUTOMATIC
 4 4 4 1 1 1 
 EOF
 $ECHO "  running the thermo mur_lc calculation for Si,"
-$ECHO "  and creating the postscript file output_mur.ps...\c"
+$ECHO "  and creating the postscript file output_mur.ps..."
+$ECHO "  the lattice constant and bulk modulus are written in si.mur_lc.out...\c"
 $THERMO_PW_COMMAND < si.mur_lc.in > si.mur_lc.out
 check_failure $?
 $ECHO " done"

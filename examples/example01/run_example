@@ -10,8 +10,8 @@ if test "`echo -e`" = "-e" ; then ECHO=echo ; else ECHO="echo -e" ; fi
 $ECHO
 $ECHO "$EXAMPLE_DIR : starting"
 $ECHO
-$ECHO "This example shows how to use thermo_pw.x to calculate the "
-$ECHO "lattice constant of Si."
+$ECHO "This example shows how to use thermo_pw.x to make a self-consistent "
+$ECHO "calculation of Silicon."
 
 # set the needed environment variables
 . ../../../environment_variables

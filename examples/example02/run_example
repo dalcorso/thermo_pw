@@ -113,7 +113,7 @@ K_POINTS AUTOMATIC
 4 4 4 1 1 1 
 EOF
 $ECHO "  running the scf_bands calculation for Si..."
-$ECHO "  and creating the postscript file output_band.ps...\c"
+$ECHO "  bands are in the postscript file output_band.ps...\c"
 $THERMO_PW_COMMAND < si.scf_bands.in > si.scf_bands.out
 check_failure $?
 $ECHO " done"

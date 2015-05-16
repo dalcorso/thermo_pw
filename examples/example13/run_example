@@ -11,7 +11,7 @@ $ECHO
 $ECHO "$EXAMPLE_DIR : starting"
 $ECHO
 $ECHO "This example shows how to use thermo_pw.x to calculate"
-$ECHO "the elastic constants of silicon at the equilibrium lattice constant."
+$ECHO "the elastic constants of Silicon at the equilibrium lattice constant."
 
 # set the needed environment variables
 . ../../../environment_variables
@@ -111,9 +111,9 @@ ATOMIC_POSITIONS (alat)
 K_POINTS AUTOMATIC
 4 4 4 1 1 1 
 EOF
-$ECHO "  running the scf calculations to calculate the elastic constants"
-$ECHO "  of silicon at the equilibrium lattice constant. The results are"
-$ECHO "  in the output file... \c"
+$ECHO "  running the thermo mur_lc_elastic_constants calculation" 
+$ECHO "  to calculate the elastic constants of silicon at the "
+$ECHO "  equilibrium lattice constant. The results are in si.elastic.out... \c"
 $THERMO_PW_COMMAND < si.elastic.in > si.elastic.out
 check_failure $?
 $ECHO " done"

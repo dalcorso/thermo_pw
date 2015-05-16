@@ -11,7 +11,7 @@ $ECHO
 $ECHO "$EXAMPLE_DIR : starting"
 $ECHO
 $ECHO "This example shows how to use thermo_pw.x to calculate the "
-$ECHO "phonon of Si at X at the equilibrium lattice constant."
+$ECHO "phonon frequencies of Si at X at the equilibrium lattice constant."
 
 # set the needed environment variables
 . ../../../environment_variables
@@ -119,7 +119,8 @@ cat > ph_control << EOF
 /
 1.0 0.0 0.0 
 EOF
-$ECHO "  running the thermo mur_lc_ph calculation for Si...\c"
+$ECHO "  running the thermo mur_lc_ph calculation for Si..."
+$ECHO "  the frequencies are written in the file si.mur_lc_ph.out.\c"
 $THERMO_PW_COMMAND < si.mur_lc_ph.in > si.mur_lc_ph.out
 check_failure $?
 $ECHO " done"
