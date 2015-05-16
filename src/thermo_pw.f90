@@ -519,7 +519,7 @@ PROGRAM thermo_pw
   !
   CALL deallocate_thermo()
   !
-  CALL environment_end( 'THERMO_PW' )
+  CALL environment_end( code )
   !
   CALL mp_global_end ()
   !

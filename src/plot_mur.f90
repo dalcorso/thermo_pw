@@ -41,8 +41,6 @@ filename=TRIM(flpsmur)
 CALL gnuplot_write_header(filename, vmin_input, vmax_input, 0.0_DP, 0.0_DP, &
                           1.0_DP ) 
 
-CALL gnuplot_write_command('color_red="red"',.FALSE.)
-
 filename1=TRIM(flevdat)//'_mur'
 filename2=TRIM(flevdat)//'_mur1'
 
