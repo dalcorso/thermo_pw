@@ -26,7 +26,6 @@ deallocate_thermo.o \
 do_pwscf.o \
 do_berry.o \
 ev_sub.o \
-ev_xml.o \
 find_symmetry.o \
 generate_k_along_lines_kz.o \
 initialize_thermo_work.o \

@@ -14,3 +14,5 @@ the bands in the final run that collects all the dynamical matrices.
 do_phonon_tpw : call phqscf_tpw instead of phqscf and prepare_q_tpw instead
             of prepare_q.
 
+ev_xml : is identical to the QE routine, but it is copied here because files
+         in the PW/tools directory are not linked to thermo_pw.

@@ -10,6 +10,7 @@ MODFLAGS= $(MOD_FLAG)../../iotk/src $(MOD_FLAG)../../Modules \
 MODULES = \
 control_qe.o \
 do_phonon.o \
+ev_xml.o \
 phqscf.o \
 prepare_q.o \
 solve_linter.o 
