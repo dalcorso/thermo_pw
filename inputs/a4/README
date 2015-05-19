@@ -18,6 +18,10 @@ output_bands.ps : plot of the band structure
 output_disp.ps.g1 : plot of the phonon dispersion. Note that the
        experimental data are read by modifying the file gnuplot.tmp.g1_disp
 
+output_grun.ps : plot of the mode Gruneisen parameters.
+
+output_anhar.ps : plot of the anharmonic properties.
+
 c_ph.exp : experimental phonon frequencies
 
 c_anharm.exp : experimental thermal expansion.
