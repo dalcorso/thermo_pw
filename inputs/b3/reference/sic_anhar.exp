@@ -1,0 +1,22 @@
+#
+#  These data have been taken from G. A. Slack and S.F. Bartram
+#  J. of Appl. Phys. 46, 89 (1975).
+#  This is the linear thermal expansion multiplied by 10^6 in K^-1
+#
+0.0     0.0
+100     0.27
+200     1.22
+300     2.77
+400     3.90
+500     4.33
+600     4.61
+800     5.05
+1000    5.34
+1200    5.52
+1400    5.64
+1600    5.65
+1800    5.65
+2000    5.65
+2200    5.65
+2400    5.65
+2600    5.65
