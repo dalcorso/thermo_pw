@@ -1,5 +1,13 @@
 New in version 0.3.0:
 
+ Found a bug that influenced the calculation of anharmonic properties.
+
+ Introduced support for the thermal expansion of hexagonal, tetragonal
+ and orthorhombic solids.
+
+ Added the possibility to plot the phonon frequencies and the Gruneisen
+ parameters at a geometry that corresponds to a given temperature.
+
 
 13/03/2015    Version 0.2.0 of thermo_pw is now frozen.
 
