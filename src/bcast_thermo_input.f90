@@ -22,7 +22,7 @@ SUBROUTINE bcast_thermo_input()
                               flpsnkconv, flpsgrun, flpsenergy
   USE temperature,     ONLY : tmin, tmax, deltat, ntemp
   USE ifc,             ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq, &
-                              zasr, freqmin_input, freqmax_input
+                              zasr, freqmin_input, freqmax_input, phdos_sigma
   USE control_paths,   ONLY : q_in_band_form, q_in_cryst_coord, q2d, &
                               point_label_type, npx
   USE control_bands,   ONLY : emin_input, emax_input, nbnd_bands, lsym
@@ -69,6 +69,7 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( nq3_d, meta_ionode_id, world_comm )
   CALL mp_bcast( freqmin_input, meta_ionode_id, world_comm )
   CALL mp_bcast( freqmax_input, meta_ionode_id, world_comm )
+  CALL mp_bcast( phdos_sigma, meta_ionode_id, world_comm )
   CALL mp_bcast( ndos_input, meta_ionode_id, world_comm )
   CALL mp_bcast( deltafreq, meta_ionode_id, world_comm )
   CALL mp_bcast( nbnd_bands, meta_ionode_id, world_comm )

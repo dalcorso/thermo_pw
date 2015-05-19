@@ -224,6 +224,7 @@ MODULE ifc
   REAL(DP) :: freqmin_input, freqmax_input   ! dos minimum and maximun frequency 
                                  ! be given as input (in cm^{-1})
   REAL(DP) :: deltafreq          ! delta frequency in the dos plot. (in cm^{-1})
+  REAL(DP) :: phdos_sigma        ! smearing for phdos calculation.
   CHARACTER(LEN=10) :: zasr      ! the type of asr
   ! 
 END MODULE ifc

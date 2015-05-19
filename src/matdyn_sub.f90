@@ -74,7 +74,7 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   USE rap_point_group,  ONLY : code_group
 
   USE ifc,        ONLY : frc, atm, zeu, m_loc, &
-                         nq1_d, nq2_d, &
+                         nq1_d, nq2_d, phdos_sigma, &
                          nq3_d, deltafreq, freqmin, freqmax, ndos_input, &
                          zasr, freqmin_input, freqmax_input, wscache
  
@@ -479,7 +479,7 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
      DO n= 1, ndos
         e = emin + (n - 1) * deltafreq
 !        CALL dos_t(freq, 1, 3*nat, nq, ntetra, tetra, e, dosofe)
-        CALL dos_g(freq, 1, 3*nat, nq, wq, 2.0_DP, 0, e, dosofe)
+        CALL dos_g(freq, 1, 3*nat, nq, wq, phdos_sigma, 0, e, dosofe)
         !
         ! The factor 0.5 corrects for the factor 2 in dos_t,
         ! that accounts for the spin in the electron DOS.

@@ -23,7 +23,8 @@ SUBROUTINE thermo_readin()
                                    flpband, flvec
   USE temperature,          ONLY : tmin, tmax, deltat, ntemp
   USE ifc,                  ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq, &
-                                   zasr, freqmin_input, freqmax_input
+                                   zasr, freqmin_input, freqmax_input, &
+                                   phdos_sigma
   USE input_parameters,     ONLY : outdir, ibrav, forc_conv_thr
   USE read_input,           ONLY : read_input_file
   USE command_line_options, ONLY : input_file_ 
@@ -94,6 +95,7 @@ SUBROUTINE thermo_readin()
                             tmin, tmax, deltat, ntemp,      &
                             freqmin_input, freqmax_input,   &
                             ndos_input, deltafreq,          &
+                            phdos_sigma,                    &
                             q2d, q_in_band_form,            &
                             q_in_cryst_coord,               &
                             point_label_type,               &
@@ -167,6 +169,7 @@ SUBROUTINE thermo_readin()
   freqmin_input=0.0_DP
   freqmax_input=0.0_DP
   deltafreq=1.0_DP
+  phdos_sigma=2.0_DP
   ndos_input=1
 
   tmin=1.0_DP
