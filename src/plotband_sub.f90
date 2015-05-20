@@ -879,7 +879,7 @@ IF (icode==1) THEN
 ELSEIF (icode==2.OR.icode==4) THEN
    CALL gnuplot_ylabel('Frequency (cm^{-1})',.FALSE.) 
 ELSEIF (icode==3) THEN
-   CALL gnuplot_ylabel('Gr\374neisen parameter  {/Symbol g}_{/Symbol n}&
+   CALL gnuplot_ylabel('Mode-Gr\374neisen parameters  {/Symbol g}_{/Symbol n}&
                  &({/Helvetica-Bold q})',.FALSE.) 
    CALL gnuplot_write_command('point_size=0.3', .FALSE.)
 ENDIF

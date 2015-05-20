@@ -154,10 +154,13 @@ Once \qe\ is correctly configured, you need to download the \PHonon\
 package. This can be done automatically typing \texttt{make ph} in
 the main \qe\ directory.
 
+Then you need to obtain the source code of the \thermo\ package. There
+are several possibilities depending on the version of \qe\ that you have.
 \texttt{Thermo\_pw.0.2.0.tar.gz} can be downloaded from the 
 \texttt{qe-forge} website at \texttt{http://www.qe-} 
-\texttt{forge.org/gf/project/thermo\_pw/frs/}. This version is 
-compatible with \qe\ 5.1.2. There is also \texttt{Thermo\_pw.0.1.0.tar.gz}
+\texttt{forge.org/gf/project/thermo\_pw/frs/} and is 
+compatible with \qe\ 5.1.2. \texttt{Thermo\_pw.0.1.0.tar.gz} can also 
+be downloaded from the same site and it is
 compatible with \qe\ 5.1.1 but there is no version of \texttt{thermo\_pw} 
 compatible with previous versions of \qe.
 The CVS version of the \texttt{thermo\_pw} directory can be downloaded as 
@@ -167,6 +170,12 @@ The CVS version of \texttt{thermo\_pw} works only with the SVN version of \qe.
 Check also the web page:
 \texttt{http://people.sissa.it/\textasciitilde dalcorso/thermo\_pw\_help.html} if you
 have problems to download the CVS version.
+
+Getting the CVS version of \thermo, you obtain a directory \texttt{thermo\_pw}
+that should be moved in the main \qe\ directory. Getting one of the
+\texttt{.tar.gz} files and unpacking it in the main \qe\ directory
+with the command \texttt{tar -xzvf Thermo\_pw.0.2.0.tar.gz}, you 
+obtain the directory \texttt{thermo\_pw}.
 
 \subsection{Compiling}
 
@@ -178,6 +187,7 @@ Typing \texttt{make thermo\_pw} from the root \qe\ directory, or \texttt{make}
 from the \texttt{thermo\_pw}\ directory, produces the executable
 \texttt{thermo\_pw/src/thermo\_pw.x} that is linked in the 
 \qe\ \texttt{bin/} directory. 
+
 \thermo\ has been written on a PC with Linux operating system using the
 \texttt{gfortran} compiler with \texttt{openMPI} parallelization. It has
 been run in parallel on a Linux cluster with several hundreds processors.
@@ -218,7 +228,7 @@ Some options
 do not use the image feature, so you have to know how the calculation 
 is divided and the number of images must not
 be larger than the number of tasks (see below an indication of this number
-for each option).
+for each option). If you have doubts on this point just use one image.
 
 The outputs of the \thermo\ code are one or more \texttt{postscript} files 
 with plots of the material properties. \thermo\ produces also files with 
@@ -261,7 +271,7 @@ input variables that you can use to control the output plots. Usually
 default values of the input variables are sufficient to carry out  
 the basic \thermo\ tasks and you are not supposed to set any variable except
 \texttt{what}, but in some cases these input variables give you more control
-on the calculation and can be used to tune the accuracy of the calculation.
+on the calculation and can be used to tune its accuracy.
 
 \thermo\ actually writes on file the data to plot and writes a script to plot
 these data. The output postscript files are produced by invoking the 
@@ -590,7 +600,7 @@ of \texttt{pw.x}. To see an \texttt{xsf} file, give the command
 \subsection{\texttt{what='scf\_ph'}}
 With this option the code makes a self-consistent calculation followed
 by a phonon calculation. The phonon calculation is controlled by the file
-\texttt{control\_ph} and can be at a single {\bf q} point or on a mesh of 
+\texttt{ph\_control} and can be at a single {\bf q} point or on a mesh of 
 {\bf q} points. 
 The different representations are calculated in parallel when several images 
 are available. No other input variable is necessary. The outputs of this 
@@ -799,7 +809,7 @@ Presently no graphical tool is implemented to plot the energy
 for monoclinic and triclinic crystal systems. 
 When \texttt{lmurn=.FALSE.} the bulk modulus
 is not calculated. To obtain it, you can calculate the elastic constants at the
-minimum geometry (see the option \texttt{what='elastic\_constants'}). 
+minimum geometry (see the option \texttt{what='scf\_elastic\_constants'}). 
 Note that for anisotropic solids, the equilibrium crystal parameters
 can be calculated also with the \texttt{vc-relax} option of \texttt{pw.x} 
 (using \texttt{what='scf'}).
@@ -880,7 +890,7 @@ Number of tasks for this option:
 
 \subsection{\texttt{what='mur\_lc\_bands'}}
 With this option the code computes the band structure at the geometry 
-obtained from the minimum of the Murnaghan equation. See the options 
+that minimizes the energy. See the options 
 \texttt{what='scf\_bands'} and \texttt{what='mur\_lc'} for a list of 
 the variables that control these two options. An example of the use of 
 this option can be found in \texttt{example06}. \\
@@ -891,7 +901,7 @@ Number of tasks for this option:
 
 \subsection{\texttt{what='mur\_lc\_ph'}}
 This option is similar to \texttt{what='scf\_ph'} but the phonon calculation
-is made at the geometry obtained from the minimum of the Murnaghan equation.
+is made at the geometry that minimizes the energy.
 See the options \texttt{what='scf\_ph'} and \texttt{what='mur\_lc'} for a
 list of the variables that control these two options. 
 An example of the use of this option can be found in \texttt{example07}. \\
@@ -901,7 +911,7 @@ of tasks of the phonon code (see above the option \texttt{what='scf\_ph'}).
 
 \subsection{\texttt{what='mur\_lc\_disp'}}
 This option is similar to \texttt{what='scf\_disp'} but the phonon calculation
-is made at the geometry obtained from the minimum of the Murnaghan equation.
+is made at the geometry that minimizes the energy.
 See the options \texttt{what='scf\_disp'} and \texttt{what='mur\_lc'} for a
 list of the variables that control these two options. 
 An example of the use of this option can be found in \texttt{example08}. \\
@@ -911,7 +921,7 @@ of tasks of the phonon code (see above the option \texttt{what='scf\_ph'}).
 
 \subsection{\texttt{what='mur\_lc\_elastic\_constants'}}
 As \texttt{what='scf\_elastic\_constants'} but the calculation is made at the
-geometry that corresponds to the minimum energy. The energy minimization is 
+geometry that minimizes the energy. The energy minimization is 
 done as described for \texttt{what='mur\_lc'}. An example of the use of this 
 option can be found in \texttt{example13}. \\
 Number of tasks for this option: Maximum between the the number of tasks
@@ -920,7 +930,7 @@ needed for the \texttt{what='scf\_elastic\_constants'} option.
 
 \subsection{\texttt{what='mur\_lc\_piezoelectric\_tensor'}}
 As \texttt{what='scf\_piezoelectric\_tensor'} but the calculation is made at the
-geometry that minimize the energy. The
+geometry that minimizes the energy. The
 energy minimization is made as described for \texttt{what='mur\_lc'}. \\
 This feature is still incomplete and experimental.
 
