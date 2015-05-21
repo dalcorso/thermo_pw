@@ -723,6 +723,10 @@ The default value of \texttt{forc\_conv\_thr} must be changed in the
 \texttt{pw.x} input.
 At finite pressure all methods give the elastic constants that
 relate linearly stress and strain. \\
+Using the computed elastic constants the code prints also the elastic 
+compliances tensor and the bulk modulus. Moreover it prints the
+Young modulus, the shear modulus and the Poisson ratio for policrystalline
+samples in the Voigt, Reuss, and in the Voigt-Reuss-Hill approximations.
 The input variables that control this option are:
 \begin{verbatim}
 frozen_ions: if .TRUE. the elastic constants are calculated 
@@ -730,13 +734,13 @@ frozen_ions: if .TRUE. the elastic constants are calculated
              Default: logical .FALSE.
 ngeo_strain: the number of strained configurations used to calculate each
              derivative. 
-             Default: integer 4
+             Default: integer 4 ('standard' and 'advanced'), 6 ('energy')
 elastic_algorithm: 'standard', 'advanced', or 'energy'. See discussion above.
              Default: character 'standard' 
 delta_epsilon: the interval of strain values between two geometries.
              To avoid a zero strain geometry that might have a
              different symmetry ngeo_strain must be even.
-             Default: real 0.002
+             Default: real 0.005
 fl_el_cons:  the name of the file that contains the elastic constants
              Default: character(len=*) 'output_el_con.dat'
 \end{verbatim}

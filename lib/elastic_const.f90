@@ -848,12 +848,13 @@ SUBROUTINE compute_elastic_constants_ene(energy_geo, epsil_geo, nwork, ngeo, &
 !  the elastic constants defined from the linear relationship between
 !  stress and strain.
 !
-USE quadratic_surfaces, ONLY : fit_multi_quadratic, evaluate_fit_grad_quadratic
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: epsil_geo(3,3,nwork), omega
 REAL(DP), INTENT(IN) :: energy_geo(nwork)
 INTEGER, INTENT(IN) :: nwork, ngeo, ibrav, laue
-REAL(DP) :: x(1,ngeo), y(ngeo), coeff(3), b0, a0, x0(6), der(6), aux
+INTEGER, PARAMETER :: m1=4
+REAL(DP) :: alpha(m1)
+REAL(DP) :: x(ngeo), y(ngeo), b0, a0, x0(6), der(6), aux
 INTEGER :: i, j, idata, iwork, base_data
 
 el_con=0.0_DP
@@ -865,41 +866,42 @@ SELECT CASE (laue)
 !
 !
 !   first part: uniform strain
-!   coeff(3) is multiplied by 2 because of the definition of the quadratic
+!   alpha(3) is multiplied by 2 because of the definition of the quadratic
 !   interpolating polynomial. The second derivative of the polynomial with
-!   respect to x is 2.0 * coeff(3)
+!   respect to x is 2.0 * alpha(3)
 !
       WRITE(stdout,'(/,5x,"Fitting ",i3," functions,",i4," data per function,&
                           & number of data =",i5)') nwork/ngeo, ngeo, nwork
       WRITE(stdout,'(/,5x,"C_11+2C_12")') 
       WRITE(stdout,'(8x,"strain",7x,"Energy (Ry)")') 
       DO idata=1,ngeo
-         x(1,idata)=epsil_geo(1,1,idata)
+         x(idata)=epsil_geo(1,1,idata)
          y(idata)=energy_geo(idata) 
-         WRITE(stdout,'(5x,f10.6,f20.13)') x(1,idata), y(idata)
+         WRITE(stdout,'(5x,f10.6,f20.13)') x(idata), y(idata)
       ENDDO
       
-      CALL fit_multi_quadratic(ngeo,1,3,x,y,coeff)
+      CALL polifit( x, y, ngeo, alpha, m1 )
 
-      press=- coeff(2) / 3.0_DP / omega
+      press=- alpha(2) / 3.0_DP / omega
       WRITE(stdout,'(/,5x,"Estimated pressure",f12.5," kbar")') press*ry_kbar
-      b0 = 1.0_DP / 3.0_DP / omega * ( 2.0_DP * coeff(3) ) +  &
+      b0 = 1.0_DP / 3.0_DP / omega * ( 2.0_DP * alpha(3) ) +  &
            2.0_DP * press
 
       WRITE(stdout,'(5x,"Bulk Modulus",f18.5," kbar")') b0/3.0_DP*ry_kbar
 !
 !   second part: epsilon_3
 !
-      WRITE(stdout,'(/,5x,"C_12")') 
+      WRITE(stdout,'(/,5x,"C_11")') 
       WRITE(stdout,'(8x,"strain",7x,"Energy (Ry)")') 
       DO idata=1,ngeo
-         x(1,idata)=epsil_geo(3,3,ngeo+idata)
+         x(idata)=epsil_geo(3,3,ngeo+idata)
          y(idata)=energy_geo(ngeo+idata) 
-         WRITE(stdout,'(5x,f10.6,f20.13)') x(1,idata), y(idata)
+         WRITE(stdout,'(5x,f10.6,f20.13)') x(idata), y(idata)
       ENDDO
-      CALL fit_multi_quadratic(ngeo,1,3,x,y,coeff)
 
-      el_con(1,1) = 1.0_DP / omega * ( 2.0_DP * coeff(3) )
+      CALL polifit( x, y, ngeo, alpha, m1 )
+
+      el_con(1,1) = 1.0_DP / omega * ( 2.0_DP * alpha(3) )
       el_con(2,2) = el_con(1,1)
       el_con(3,3) = el_con(1,1)
 !
@@ -918,13 +920,14 @@ SELECT CASE (laue)
       WRITE(stdout,'(/,5x,"C_44")') 
       WRITE(stdout,'(8x,"strain",7x,"Energy (Ry)")') 
       DO idata=1,ngeo
-         x(1,idata)=2.0_DP*epsil_geo(2,3,2*ngeo+idata)
+         x(idata)=epsil_geo(2,3,2*ngeo+idata)
          y(idata)=energy_geo(2*ngeo+idata) 
-         WRITE(stdout,'(5x,f10.6,f20.13)') x(1,idata), y(idata)
+         WRITE(stdout,'(5x,f10.6,f20.13)') x(idata), y(idata)
       ENDDO
-      CALL fit_multi_quadratic(ngeo,1,3,x,y,coeff)
 
-      el_con(4,4) = 1.0_DP / 3.0_DP / omega * ( 2.0_DP * coeff(3) ) &
+      CALL polifit( x, y, ngeo, alpha, m1 )
+
+      el_con(4,4) = 0.25_DP / 3.0_DP / omega * ( 2.0_DP * alpha(3) ) &
                         - 0.5_DP * press
 
       el_con(5,5)=el_con(4,4)
@@ -932,10 +935,7 @@ SELECT CASE (laue)
 
    CASE (23)
 !
-!   first part: uniform dilatation or expansion along x
-!   coeff(3) is multiplied by 2 because of the definition of the quadratic
-!   interpolating polynomial. The second derivative of the polynomial with
-!   respect to x is 2.0 * coeff(3)
+!
 !
          WRITE(stdout,'(/,5x,"Fitting ",i3," functions,",i4, &
                           &" data per function, number of data =",i5)') &
@@ -943,47 +943,47 @@ SELECT CASE (laue)
          WRITE(stdout,'(5x,"C_11")')
          WRITE(stdout,'(8x,"strain",7x,"Energy (Ry)")') 
          DO idata=1,ngeo
-            x(1,idata)=epsil_geo(1,1,idata)
+            x(idata)=epsil_geo(1,1,idata)
             y(idata)=energy_geo(idata)
-            WRITE(stdout,'(5x,f10.6,f20.13)') x(1,idata), y(idata)
+            WRITE(stdout,'(5x,f10.6,f20.13)') x(idata), y(idata)
          ENDDO
 
-         CALL fit_multi_quadratic(ngeo,1,3,x,y,coeff)
+         CALL polifit( x, y, ngeo, alpha, m1 )
 
-         press=- coeff(2) / omega
+         press=- alpha(2) / omega
          WRITE(stdout,'(/,5x,"Estimated pressure",f12.5," kbar")') press*ry_kbar
-         el_con(1,1) = 1.0_DP / omega * ( 2.0_DP * coeff(3) )
+         el_con(1,1) = 1.0_DP / omega * ( 2.0_DP * alpha(3) )
          el_con(2,2) = el_con(1,1)
 
          WRITE(stdout,'(5x,"C_33")')
          WRITE(stdout,'(8x,"strain",7x,"Energy (Ry)")') 
          base_data=ngeo
          DO idata=1,ngeo
-            x(1,idata)=epsil_geo(3,3,base_data+idata)
+            x(idata)=epsil_geo(3,3,base_data+idata)
             y(idata)=energy_geo(base_data+idata)
-            WRITE(stdout,'(5x,f10.6,f20.13)') x(1,idata), y(idata)
+            WRITE(stdout,'(5x,f10.6,f20.13)') x(idata), y(idata)
          ENDDO
 
-         CALL fit_multi_quadratic(ngeo,1,3,x,y,coeff)
+         CALL polifit( x, y, ngeo, alpha, m1 )
 
-         press=- coeff(2) / omega
+         press=- alpha(2) / omega
          WRITE(stdout,'(/,5x,"Estimated pressure",f12.5," kbar")') press*ry_kbar
-         el_con(3,3) = 1.0_DP / omega * ( 2.0_DP * coeff(3) )
+         el_con(3,3) = 1.0_DP / omega * ( 2.0_DP * alpha(3) )
 
          WRITE(stdout,'(5x,"C_13")')
          WRITE(stdout,'(8x,"strain",7x,"Energy (Ry)")') 
          base_data=2*ngeo
          DO idata=1,ngeo
-            x(1,idata)=epsil_geo(1,1,base_data+idata)
+            x(idata)=epsil_geo(1,1,base_data+idata)
             y(idata)=energy_geo(base_data+idata)
-            WRITE(stdout,'(5x,f10.6,f20.13)') x(1,idata), y(idata)
+            WRITE(stdout,'(5x,f10.6,f20.13)') x(idata), y(idata)
          ENDDO
 
-         CALL fit_multi_quadratic(ngeo,1,3,x,y,coeff)
+         CALL polifit( x, y, ngeo, alpha, m1 )
 
-         press=- coeff(2) / omega / 2.0_DP
+         press=- alpha(2) / omega / 2.0_DP
          WRITE(stdout,'(/,5x,"Estimated pressure",f12.5," kbar")') press*ry_kbar
-         aux = 1.0_DP / omega * ( 2.0_DP * coeff(3) )
+         aux = 1.0_DP / omega * ( 2.0_DP * alpha(3) )
          el_con(1,3) = (aux - el_con(1,1) - el_con(3,3)) * 0.5_DP + press
          el_con(3,1) = el_con(1,3)
          el_con(2,3) = el_con(1,3)
@@ -993,16 +993,16 @@ SELECT CASE (laue)
          WRITE(stdout,'(8x,"strain",7x,"Energy (Ry)")') 
          base_data=3*ngeo
          DO idata=1,ngeo
-            x(1,idata)=epsil_geo(1,1,base_data+idata)
+            x(idata)=epsil_geo(1,1,base_data+idata)
             y(idata)=energy_geo(base_data+idata)
-            WRITE(stdout,'(5x,f10.6,f20.13)') x(1,idata), y(idata)
+            WRITE(stdout,'(5x,f10.6,f20.13)') x(idata), y(idata)
          ENDDO
 
-         CALL fit_multi_quadratic(ngeo,1,3,x,y,coeff)
+         CALL polifit( x, y, ngeo, alpha, m1 )
 
-         press=- coeff(2) / omega / 3.0_DP
+         press=- alpha(2) / omega / 3.0_DP
          WRITE(stdout,'(/,5x,"Estimated pressure",f12.5," kbar")') press*ry_kbar
-         aux = 1.0_DP / omega * ( 2.0_DP * coeff(3) )
+         aux = 1.0_DP / omega * ( 2.0_DP * alpha(3) )
 !
 !  pressure is subtracted added 3 times because in the expression we should
 !  use C, while el_con(1,3) is B_13. To bring it to C_13 we must subtract P
@@ -1017,14 +1017,14 @@ SELECT CASE (laue)
          WRITE(stdout,'(8x,"strain",7x,"Energy (Ry)")') 
          base_data=4*ngeo
          DO idata=1,ngeo
-            x(1,idata)=2.0_DP * epsil_geo(1,3,base_data+idata)
+            x(idata)=epsil_geo(1,3,base_data+idata)
             y(idata)=energy_geo(base_data+idata)
-            WRITE(stdout,'(5x,f10.6,f20.13)') x(1,idata), y(idata)
+            WRITE(stdout,'(5x,f10.6,f20.13)') x(idata), y(idata)
          ENDDO
 
-         CALL fit_multi_quadratic(ngeo,1,3,x,y,coeff)
+         CALL polifit( x, y, ngeo, alpha, m1 )
 
-         el_con(5,5) = 1.0_DP / omega * ( 2.0_DP * coeff(3) ) - 0.5_DP * press
+         el_con(5,5) = 0.25_DP / omega * ( 2.0_DP * alpha(3) ) - 0.5_DP * press
          el_con(4,4) = el_con(5,5)
 
          el_con(6,6) = (el_con(1,1) - el_con(1,2)) * 0.5_DP
@@ -1041,49 +1041,49 @@ SELECT CASE (laue)
          WRITE(stdout,'(5x,"C_33")')
          WRITE(stdout,'(8x,"strain",7x,"Energy (Ry)")') 
          DO idata=1,ngeo
-            x(1,idata)=epsil_geo(3,3,idata)
+            x(idata)=epsil_geo(3,3,idata)
             y(idata)=energy_geo(idata)
-            WRITE(stdout,'(5x,f10.6,f20.13)') x(1,idata), y(idata)
+            WRITE(stdout,'(5x,f10.6,f20.13)') x(idata), y(idata)
          ENDDO
 
-         CALL fit_multi_quadratic(ngeo,1,3,x,y,coeff)
+         CALL polifit( x, y, ngeo, alpha, m1 )
 
-         press=- coeff(2) / omega
+         press=- alpha(2) / omega
          WRITE(stdout,'(5x,"Estimated pressure",f12.5," kbar")') press*ry_kbar
-         el_con(3,3) = 1.0_DP / omega * ( 2.0_DP * coeff(3) )
+         el_con(3,3) = 1.0_DP / omega * ( 2.0_DP * alpha(3) )
 
          WRITE(stdout,'(5x,"C_11")')
          WRITE(stdout,'(8x,"strain",7x,"Energy (Ry)")') 
          base_data=ngeo
          DO idata=1,ngeo
-            x(1,idata)=epsil_geo(1,1,base_data+idata)
+            x(idata)=epsil_geo(1,1,base_data+idata)
             y(idata)=energy_geo(base_data+idata)
-            WRITE(stdout,'(5x,f10.6,f20.13)') x(1,idata), y(idata)
+            WRITE(stdout,'(5x,f10.6,f20.13)') x(idata), y(idata)
          ENDDO
 
-         CALL fit_multi_quadratic(ngeo,1,3,x,y,coeff)
+         CALL polifit( x, y, ngeo, alpha, m1 )
 
-         press=- coeff(2) / omega
+         press=- alpha(2) / omega
          WRITE(stdout,'(5x,"Estimated pressure",f12.5," kbar")') press*ry_kbar
          WRITE(stdout,'(8x,"strain",7x,"Energy (Ry)")') 
-         el_con(1,1) = 1.0_DP / omega * ( 2.0_DP * coeff(3) )
+         el_con(1,1) = 1.0_DP / omega * ( 2.0_DP * alpha(3) )
          el_con(2,2) = el_con(1,1)
 
          WRITE(stdout,'(5x,"C_12")')
          WRITE(stdout,'(8x,"strain",7x,"Energy (Ry)")') 
          base_data=2*ngeo
          DO idata=1,ngeo
-            x(1,idata)=epsil_geo(1,1,base_data+idata)
+            x(idata)=epsil_geo(1,1,base_data+idata)
             y(idata)=energy_geo(base_data+idata)
-            WRITE(stdout,'(5x,f10.6,f20.13)') x(1,idata), y(idata)
+            WRITE(stdout,'(5x,f10.6,f20.13)') x(idata), y(idata)
          ENDDO
 
-         CALL fit_multi_quadratic(ngeo,1,3,x,y,coeff)
+         CALL polifit( x, y, ngeo, alpha, m1 )
 
-         press=- coeff(2) / omega
+         press=- alpha(2) / omega
          WRITE(stdout,'(/,5x,"Estimated pressure",f12.5," kbar")') press*ry_kbar
          WRITE(stdout,'(8x,"strain",7x,"Energy (Ry)")') 
-         el_con(1,2) = 1.0_DP/omega*( 2.0_DP*coeff(3) )*0.5_DP-el_con(1,1) + &
+         el_con(1,2) = 1.0_DP/omega*( 2.0_DP*alpha(3) )*0.5_DP-el_con(1,1) + &
                                                                      press 
          el_con(2,1) = el_con(1,2)
 
@@ -1091,16 +1091,16 @@ SELECT CASE (laue)
          WRITE(stdout,'(8x,"strain",7x,"Energy (Ry)")') 
          base_data=3*ngeo
          DO idata=1,ngeo
-            x(1,idata)=epsil_geo(1,1,base_data+idata)
+            x(idata)=epsil_geo(1,1,base_data+idata)
             y(idata)=energy_geo(base_data+idata)
-            WRITE(stdout,'(5x,f10.6,f20.13)') x(1,idata), y(idata)
+            WRITE(stdout,'(5x,f10.6,f20.13)') x(idata), y(idata)
          ENDDO
 
-         CALL fit_multi_quadratic(ngeo,1,3,x,y,coeff)
+         CALL polifit( x, y, ngeo, alpha, m1 )
 
-         press=- coeff(2) / omega
+         press=- alpha(2) / omega
          WRITE(stdout,'(/,5x,"Estimated pressure",f12.5," kbar")') press*ry_kbar
-         el_con(1,3) = (1.0_DP/omega*(2.0_DP*coeff(3)) - el_con(3,3) &
+         el_con(1,3) = (1.0_DP/omega*(2.0_DP*alpha(3)) - el_con(3,3) &
                                               -el_con(1,1)) * 0.5_DP + press
          el_con(3,1) = el_con(1,3)
          el_con(2,3) = el_con(1,3)
@@ -1111,27 +1111,27 @@ SELECT CASE (laue)
          WRITE(stdout,'(8x,"strain",7x,"Energy (Ry)")') 
          base_data=4*ngeo
          DO idata=1,ngeo
-            x(1,idata)=epsil_geo(1,2,base_data+idata) * 2.0_DP
+            x(idata)=epsil_geo(1,2,base_data+idata) 
             y(idata)=energy_geo(base_data+idata)
-            WRITE(stdout,'(5x,f10.6,f20.13)') x(1,idata), y(idata)
+            WRITE(stdout,'(5x,f10.6,f20.13)') x(idata), y(idata)
          ENDDO
 
-         CALL fit_multi_quadratic(ngeo,1,3,x,y,coeff)
+         CALL polifit( x, y, ngeo, alpha, m1 )
 
-         el_con(6,6) = 1.0_DP/omega*(2.0_DP*coeff(3)) - 0.5_DP * press
+         el_con(6,6) = 0.25_DP/omega*(2.0_DP*alpha(3)) - 0.5_DP * press
 
          WRITE(stdout,'(5x,"C_55")')
          WRITE(stdout,'(8x,"strain",7x,"Energy (Ry)")') 
          base_data = 5 * ngeo
          DO idata=1,ngeo
-            x(1,idata)=epsil_geo(1,3,base_data+idata) * 2.0_DP
+            x(idata)=epsil_geo(1,3,base_data+idata) 
             y(idata)=energy_geo(base_data+idata)
-            WRITE(stdout,'(5x,f10.6,f20.13)') x(1,idata), y(idata)
+            WRITE(stdout,'(5x,f10.6,f20.13)') x(idata), y(idata)
          ENDDO
 
-         CALL fit_multi_quadratic(ngeo,1,3,x,y,coeff)
+         CALL polifit( x, y, ngeo, alpha, m1 )
 
-         el_con(5,5) = 1.0_DP/omega*(2.0_DP*coeff(3)) - 0.5_DP * press
+         el_con(5,5) = 0.25_DP/omega*(2.0_DP*alpha(3)) - 0.5_DP * press
          el_con(4,4) = el_con(5,5)
    CASE(20)
          WRITE(stdout,'(/,5x,"Fitting ",i3," functions,",i4, &
@@ -1140,61 +1140,60 @@ SELECT CASE (laue)
          WRITE(stdout,'(5x,"C_11")')
          WRITE(stdout,'(8x,"strain",7x,"Energy (Ry)")') 
          DO idata=1,ngeo
-            x(1,idata)=epsil_geo(1,1,idata)
+            x(idata)=epsil_geo(1,1,idata)
             y(idata)=energy_geo(idata)
-            WRITE(stdout,'(5x,f10.6,f20.13)') x(1,idata), y(idata)
+            WRITE(stdout,'(5x,f10.6,f20.13)') x(idata), y(idata)
          ENDDO
 
-         CALL fit_multi_quadratic(ngeo,1,3,x,y,coeff)
-
-         press=- coeff(2) / omega
+         CALL polifit( x, y, ngeo, alpha, m1 )
+         press=- alpha(2) / omega
          WRITE(stdout,'(/,5x,"Estimated pressure",f12.5," kbar")') press*ry_kbar
-         el_con(1,1) = 1.0_DP / omega * ( 2.0_DP * coeff(3) )
+         el_con(1,1) = 1.0_DP / omega * ( 2.0_DP * alpha(3) )
 
          WRITE(stdout,'(5x,"C_22")')
          WRITE(stdout,'(8x,"strain",7x,"Energy (Ry)")') 
          base_data=ngeo
          DO idata=1,ngeo
-            x(1,idata)=epsil_geo(2,2,base_data+idata)
+            x(idata)=epsil_geo(2,2,base_data+idata)
             y(idata)=energy_geo(base_data+idata)
-            WRITE(stdout,'(5x,f10.6,f20.13)') x(1,idata), y(idata)
+            WRITE(stdout,'(5x,f10.6,f20.13)') x(idata), y(idata)
          ENDDO
 
-         CALL fit_multi_quadratic(ngeo,1,3,x,y,coeff)
+         CALL polifit( x, y, ngeo, alpha, m1 )
 
-         press=- coeff(2) / omega
+         press=- alpha(2) / omega
          WRITE(stdout,'(/,5x,"Estimated pressure",f12.5," kbar")') press*ry_kbar
-         el_con(2,2) = 1.0_DP / omega * ( 2.0_DP * coeff(3) )
+         el_con(2,2) = 1.0_DP / omega * ( 2.0_DP * alpha(3) )
 
          WRITE(stdout,'(5x,"C_33")')
          WRITE(stdout,'(8x,"strain",7x,"Energy (Ry)")') 
          base_data=2*ngeo
          DO idata=1,ngeo
-            x(1,idata)=epsil_geo(3,3,base_data+idata)
+            x(idata)=epsil_geo(3,3,base_data+idata)
             y(idata)=energy_geo(base_data+idata)
-            WRITE(stdout,'(5x,f10.6,f20.13)') x(1,idata), y(idata)
+            WRITE(stdout,'(5x,f10.6,f20.13)') x(idata), y(idata)
          ENDDO
 
-         CALL fit_multi_quadratic(ngeo,1,3,x,y,coeff)
+         CALL polifit( x, y, ngeo, alpha, m1 )
 
-         press=- coeff(2) / omega
+         press=- alpha(2) / omega
          WRITE(stdout,'(/,5x,"Estimated pressure",f12.5," kbar")') press*ry_kbar
-         el_con(3,3) = 1.0_DP / omega * ( 2.0_DP * coeff(3) )
+         el_con(3,3) = 1.0_DP / omega * ( 2.0_DP * alpha(3) )
 
          WRITE(stdout,'(5x,"C_12")')
          WRITE(stdout,'(8x,"strain",7x,"Energy (Ry)")') 
          base_data = 3*ngeo
          DO idata=1,ngeo
-            x(1,idata)=epsil_geo(1,1,base_data+idata)
+            x(idata)=epsil_geo(1,1,base_data+idata)
             y(idata)=energy_geo(base_data+idata)
-            WRITE(stdout,'(5x,f10.6,f20.13)') x(1,idata), y(idata)
+            WRITE(stdout,'(5x,f10.6,f20.13)') x(idata), y(idata)
          ENDDO
 
-         CALL fit_multi_quadratic(ngeo,1,3,x,y,coeff)
+         CALL polifit( x, y, ngeo, alpha, m1 )
 
-         press=- coeff(2) / omega
+         press=- alpha(2) / omega
          WRITE(stdout,'(/,5x,"Estimated pressure",f12.5," kbar")') press*ry_kbar
-         el_con(1,2) = (1.0_DP / omega * ( 2.0_DP * coeff(3) ) - el_con(1,1) &
+         el_con(1,2) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(1,1) &
                                    - el_con(2,2) ) * 0.5_DP + press
          el_con(2,1)=el_con(1,2)
 
@@ -1202,16 +1201,16 @@ SELECT CASE (laue)
          WRITE(stdout,'(8x,"strain",7x,"Energy (Ry)")') 
          base_data = 4*ngeo
          DO idata=1,ngeo
-            x(1,idata)=epsil_geo(1,1,base_data+idata)
+            x(idata)=epsil_geo(1,1,base_data+idata)
             y(idata)=energy_geo(base_data+idata)
-            WRITE(stdout,'(5x,f10.6,f20.13)') x(1,idata), y(idata)
+            WRITE(stdout,'(5x,f10.6,f20.13)') x(idata), y(idata)
          ENDDO
 
-         CALL fit_multi_quadratic(ngeo,1,3,x,y,coeff)
+         CALL polifit( x, y, ngeo, alpha, m1 )
 
-         press=- coeff(2) / omega
+         press=- alpha(2) / omega
          WRITE(stdout,'(/,5x,"Estimated pressure",f12.5," kbar")') press*ry_kbar
-         el_con(1,3) = (1.0_DP / omega * ( 2.0_DP * coeff(3) ) - el_con(1,1) &
+         el_con(1,3) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(1,1) &
                                    - el_con(3,3) ) * 0.5_DP + press
          el_con(3,1)=el_con(1,3)
 
@@ -1219,16 +1218,16 @@ SELECT CASE (laue)
          WRITE(stdout,'(8x,"strain",7x,"Energy (Ry)")') 
          base_data = 5 * ngeo
          DO idata=1,ngeo
-            x(1,idata)=epsil_geo(2,2,base_data+idata)
+            x(idata)=epsil_geo(2,2,base_data+idata)
             y(idata)=energy_geo(base_data+idata)
-            WRITE(stdout,'(5x,f10.6,f20.13)') x(1,idata), y(idata)
+            WRITE(stdout,'(5x,f10.6,f20.13)') x(idata), y(idata)
          ENDDO
 
-         CALL fit_multi_quadratic(ngeo,1,3,x,y,coeff)
+         CALL polifit( x, y, ngeo, alpha, m1 )
 
-         press=- coeff(2) / omega
+         press=- alpha(2) / omega
          WRITE(stdout,'(/,5x,"Estimated pressure",f12.5," kbar")') press*ry_kbar
-         el_con(2,3) = (1.0_DP / omega * ( 2.0_DP * coeff(3) ) - el_con(2,2) &
+         el_con(2,3) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(2,2) &
                                    - el_con(3,3) ) * 0.5_DP + press
          el_con(3,2)=el_con(2,3)
 
@@ -1236,40 +1235,40 @@ SELECT CASE (laue)
          WRITE(stdout,'(8x,"strain",7x,"Energy (Ry)")') 
          base_data = 6 * ngeo
          DO idata=1,ngeo
-            x(1,idata)=2.0_DP * epsil_geo(1,2,base_data+idata)
+            x(idata)=epsil_geo(1,2,base_data+idata)
             y(idata)=energy_geo(base_data+idata)
-            WRITE(stdout,'(5x,f10.6,f20.13)') x(1,idata), y(idata)
+            WRITE(stdout,'(5x,f10.6,f20.13)') x(idata), y(idata)
          ENDDO
 
-         CALL fit_multi_quadratic(ngeo,1,3,x,y,coeff)
+         CALL polifit( x, y, ngeo, alpha, m1 )
 
-         el_con(6,6) = 1.0_DP / omega * ( 2.0_DP * coeff(3) ) - 0.5_DP * press
+         el_con(6,6) = 0.25_DP / omega * ( 2.0_DP * alpha(3) ) - 0.5_DP * press
 
          WRITE(stdout,'(5x,"C_55")')
          WRITE(stdout,'(8x,"strain",7x,"Energy (Ry)")') 
          base_data = 7 * ngeo
          DO idata=1,ngeo
-            x(1,idata)=2.0_DP * epsil_geo(1,3,base_data+idata)
+            x(idata)=epsil_geo(1,3,base_data+idata)
             y(idata)=energy_geo(base_data+idata)
-            WRITE(stdout,'(5x,f10.6,f20.13)') x(1,idata), y(idata)
+            WRITE(stdout,'(5x,f10.6,f20.13)') x(idata), y(idata)
          ENDDO
 
-         CALL fit_multi_quadratic(ngeo,1,3,x,y,coeff)
+         CALL polifit( x, y, ngeo, alpha, m1 )
 
-         el_con(5,5) = 1.0_DP / omega * ( 2.0_DP * coeff(3) ) - 0.5_DP * press
+         el_con(5,5) = 0.25_DP / omega * ( 2.0_DP * alpha(3) ) - 0.5_DP * press
 
          WRITE(stdout,'(5x,"C_44")')
          WRITE(stdout,'(8x,"strain",7x,"Energy (Ry)")') 
          base_data = 8 * ngeo
          DO idata=1,ngeo
-            x(1,idata)=2.0_DP * epsil_geo(2,3,base_data+idata)
+            x(idata)=epsil_geo(2,3,base_data+idata)
             y(idata)=energy_geo(base_data+idata)
-            WRITE(stdout,'(5x,f10.6,f20.13)') x(1,idata), y(idata)
+            WRITE(stdout,'(5x,f10.6,f20.13)') x(idata), y(idata)
          ENDDO
 
-         CALL fit_multi_quadratic(ngeo,1,3,x,y,coeff)
+         CALL polifit( x, y, ngeo, alpha, m1 )
 
-         el_con(4,4) = 1.0_DP / omega * ( 2.0_DP * coeff(3) ) - 0.5_DP * press
+         el_con(4,4) = 0.25_DP / omega * ( 2.0_DP * alpha(3) ) - 0.5_DP * press
 
    CASE DEFAULT
       CALL errore('compute_elastic_constants_ene',&

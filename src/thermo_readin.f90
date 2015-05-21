@@ -203,7 +203,7 @@ SUBROUTINE thermo_readin()
   deltasigma=0.005_DP
 
   delta_epsilon=0.005_DP
-  ngeo_strain=4
+  ngeo_strain=0
   frozen_ions=.FALSE.
   elastic_algorithm='standard'
 
@@ -290,6 +290,14 @@ SUBROUTINE thermo_readin()
   read_paths=( what=='scf_bands'.OR.what=='scf_disp'.OR.what=='plot_bz'.OR. &
                what=='mur_lc_bands' .OR. what=='mur_lc_disp' .OR. &
                what=='mur_lc_t' .OR. what=='scf_2d_bands')
+!
+!   ngeo_strain cannot be too small and the energy algorithm requires a
+!   few more points
+!
+  IF (ngeo_strain<4) THEN
+     ngeo_strain=4
+     IF (elastic_algorithm=='energy') ngeo_strain=6
+  ENDIF
 
   IF ( ngeo(1)==0 ) THEN
      IF (what(1:4) == 'scf_') ngeo=1
