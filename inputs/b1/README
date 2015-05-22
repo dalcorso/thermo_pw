@@ -13,3 +13,6 @@ output_keconv.ps: plot of the convergence of the total energy with the
                 kinetic energy cut-off.
 
 output_mur.ps : a plot of the Murnaghan equation.
+
+sic.elastic.out : the output of the elastic constant calculation.
+                  See the end of the file for the elastic constant values.
