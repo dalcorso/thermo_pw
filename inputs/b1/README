@@ -19,4 +19,6 @@ sic.elastic.out : the output of the elastic constant calculation.
 
 nacl_ph.exp : experimental inelastic neutron scattering data.
 
+nacl_anhar.exp : experimental thermal expansion.
+
 
