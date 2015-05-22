@@ -241,19 +241,6 @@ The plot of the Brillouin zone (BZ) is made with the help of the
 for the \texttt{asymptote} code and can also run it to produce the pdf
 file of the BZ. 
 
-The \thermo\ code has a minimal recovery feature. It does not recalculate
-the quantities contained in files that are already in the working
-directory. Each routine checks if a file with the same name
-as the file that it would produce is already in the working directory,
-and if this happens, it returns. Note that this feature cannot be 
-disabled from input. In order to recalculate a given quantity, just remove
-the file that contains it in the working directory.
-The \thermo\ code cannot recover automatically a partial phonon calculation, all 
-the dynamical matrices of a given geometry must be in the working directory to 
-skip the calculation. If one is missing all the phonon calculations are repeated. 
-In that case you might want to use the recover feature  of the \texttt{ph.x} code 
-by specifying \texttt{recover=.TRUE.} in the input of this code.
-
 \section{Input variables}
 
 The \texttt{pw.x} and \texttt{ph.x} input files are described in the \qe\ documentation.
@@ -1059,6 +1046,53 @@ of tasks of the phonon code (see above the option \texttt{what='scf\_ph'}). \\
 %Murnaghan minimization is made as described for \texttt{what='mur\_lc'}.\\
 %This feature is still incomplete and experimental.
 %
+
+\section{Restarting an interrupted run}
+
+There are several situations that might require the restart of the \thermo\ 
+code. We must distinguish two very different cases. In the first,
+\thermo\ stopped while running \qe\ routines, because the code reached
+the maximum cpu time or because some external event stopped the run.
+In the second, \thermo\ stopped while doing some post-processing 
+task or \thermo\ finished normally but you want to change 
+some details of the plot and rerun the postprocessing 
+tools without redoing the \qe\ calculations.
+Support for the first case is quite limited and must be based on the
+recover features provided by \qe\ routines. This restarting method has
+not been tested and might encounter problems with images, but if you are 
+running \thermo\ in tasks that do self-consistent calculations followed 
+by phonon calculations, the self-consistent calculation is not repeated 
+when completed and also completed phonon calculations for a single geometry are
+not redone. The code checks if the dynamical matrices of a given
+geometry are in the working directory and if it finds all of them, it skips the
+phonon calculation for that geometry.
+In general \thermo\ does not 
+recalculate the quantities contained in files that are already in the working
+directory. Each routine checks if a file with the same name
+as the file that it would produce is already in the working directory,
+and if this happens, it reads its content and returns. This feature cannot be
+disabled from input. In order to recalculate a given quantity, just remove
+the file that contains it from the working directory.
+
+In general the restart of a task during phonon calculations
+requires the presence of the \texttt{outdir} directory
+where the self-consistent run saved its data. 
+However, in an anharmonic calculation, if you have already all the dynamical 
+matrices for all the geometries and you do not have any more the
+\texttt{outdir} directory, it is possible to skip entirely
+the phonon calculations by setting the variable 
+\texttt{after\_disp=.TRUE.} and \texttt{fildyn}. In this case 
+\thermo\ can compute the anharmonic properties with a different set 
+of temperatures, or with a different sampling on the phonon frequencies, 
+etc.. You need only to erase the output files that contain
+the phonon dos, or the thermal properties from a previous calculation, keeping 
+the dynamical matrices files and the \texttt{save\_energy} file
+and rerun \thermo.
+Similarly if the files containing the bands energy eigenvalues are already
+in the working directory, it is possible to set the input variable
+\texttt{only\_bands\_plot} to change the bands plot without redoing the
+bands calculation. Note however that in this case it is not possible 
+to change the Brillouin zone path.
 
 \section{Tools}
 
