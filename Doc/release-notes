@@ -8,6 +8,7 @@ New in version 0.3.0:
  Added the possibility to plot the phonon frequencies and the Gruneisen
  parameters at a geometry that corresponds to a given temperature.
 
+ Introduced other two algorithms to compute the elastic constants.
 
 13/03/2015    Version 0.2.0 of thermo_pw is now frozen.
 
