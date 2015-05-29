@@ -123,6 +123,16 @@ SUBROUTINE find_symmetry(fft_fact)
   ! ... calculate dimensions of the FFT grid
   !
   CALL realspace_grid_init ( dfftp, at, bg, gcutm, fft_fact )
+  IF ( gcutms == gcutm ) THEN
+     IF ( dffts%nr1 ==0 .AND. dffts%nr2==0 .AND. dffts%nr3==0) THEN
+          dffts%nr1 = dfftp%nr1     
+          dffts%nr2 = dfftp%nr2     
+          dffts%nr3 = dfftp%nr3
+          dffts%nr1x= dfftp%nr1x
+          dffts%nr2x= dfftp%nr2x     
+          dffts%nr3x= dfftp%nr3x
+     ENDIF
+  END IF
   CALL realspace_grid_init ( dffts, at, bg, gcutms, fft_fact )
   !
   !  ... generate transformation matrices for the crystal point group
