@@ -3,7 +3,7 @@ atoms per cell. Putting one atom in the origin, the other is in
 (1/4, 1/4, 1/4) in alat units.
 It is the structure of diamond.
 
-The reference directory contains the outputs or postscript files:
+The reference directory contains the following files:
 
 asy_tmp.asy : asymptote script to plot the Brillouin zone
 

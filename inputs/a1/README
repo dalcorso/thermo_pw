@@ -1,7 +1,7 @@
 The A1 structure has the face centered cubic Bravais lattice and one
 atom per cell.
 
-The reference directory contains the outputs or postscript files: 
+The reference directory contains the following files: 
 
 asy_tmp.asy : asymptote script to plot the Brillouin zone  
 

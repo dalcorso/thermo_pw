@@ -94,7 +94,7 @@ libs-ph : libph.a libphaux.a
 thermo_pw.x : thermo_pw.o libthermo_pw.a $(PWOBJS) $(LIBOBJS)
 	$(LD) $(LDFLAGS) -o $@ thermo_pw.o ../../PHonon/PH/rigid.o \
                  ../../PHonon/PH/write_eigenvectors.o libthermo_pw.a \
-		 $(PWOBJS) $(QEMODS) $(LIBOBJS) $(PWOBJS) $(QEMODS) $(LIBS)
+		$(PWOBJS) $(QEMODS) $(LIBOBJS) $(PWOBJS) $(QEMODS) $(LIBS) ../../clib/clib.a
 	- ( cd ../../bin ; ln -fs ../thermo_pw/src/thermo_pw.x . )
 
 libthermo_pw.a : $(THERMOOBJS) 

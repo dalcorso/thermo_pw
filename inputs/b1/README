@@ -3,7 +3,7 @@ It has a fcc Bravais lattice and two atoms per cell. When one atom
 is in the origin, the other is in the center of the cubic
 cell (1/2,1/2,1/2) in units of alat.
 
-The reference directory contains the outputs or postscript files:
+The reference directory contains the following files:
 
 asy_tmp.asy :  An asymptote script to plot the Brillouin zone
 

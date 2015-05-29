@@ -34,14 +34,12 @@ clean_dfft.o : ../../Modules/fft_base.o
 clean_dfft.o : ../../Modules/input_parameters.o
 collect_everything.o : ../../Modules/io_global.o
 collect_everything.o : ../../Modules/mp_images.o
-collect_everything.o : ../../PHonon/PH/ph_restart.o
 collect_everything.o : ../../PHonon/PH/phcom.o
 collect_everything.o : ../../thermo_pw/qe/control_qe.o
 compute_cp.o : ../../Modules/constants.o
 compute_cp.o : ../../Modules/kind.o
 compute_cp.o : ../../thermo_pw/lib/isoentropic.o
 compute_cp.o : thermo_mod.o
-compute_gruneisen.o : ../../Modules/io_global.o
 compute_gruneisen.o : ../../Modules/ions_base.o
 compute_gruneisen.o : ../../Modules/kind.o
 compute_gruneisen.o : ../../Modules/mp_images.o
@@ -88,10 +86,7 @@ ev_sub.o : ../../Modules/mp_global.o
 ev_sub.o : ../../Modules/mp_images.o
 ev_sub.o : ../../Modules/mp_world.o
 ev_sub.o : ../../Modules/random_numbers.o
-ev_sub.o : ev_xml.o
-ev_xml.o : ../../Modules/constants.o
-ev_xml.o : ../../Modules/kind.o
-ev_xml.o : ../../iotk/src/iotk_module.o
+ev_sub.o : ../../thermo_pw/qe/ev_xml.o
 find_symmetry.o : ../../Modules/cell_base.o
 find_symmetry.o : ../../Modules/constants.o
 find_symmetry.o : ../../Modules/fft_base.o
@@ -167,13 +162,11 @@ plot_2d_bz.o : ../../thermo_pw/lib/asy.o
 plot_2d_bz.o : ../../thermo_pw/lib/bz_2d_form.o
 plot_2d_bz.o : ../../thermo_pw/lib/bz_asy.o
 plot_2d_bz.o : thermo_mod.o
-plot_anhar.o : ../../Modules/constants.o
 plot_anhar.o : ../../Modules/io_global.o
 plot_anhar.o : ../../Modules/kind.o
 plot_anhar.o : ../../Modules/mp_images.o
 plot_anhar.o : ../../thermo_pw/lib/gnuplot.o
 plot_anhar.o : thermo_mod.o
-plot_anhar_anis.o : ../../Modules/constants.o
 plot_anhar_anis.o : ../../Modules/io_global.o
 plot_anhar_anis.o : ../../Modules/kind.o
 plot_anhar_anis.o : ../../Modules/mp_images.o
@@ -330,6 +323,7 @@ set_thermo_work_todo.o : ../../thermo_pw/lib/elastic_const.o
 set_thermo_work_todo.o : ../../thermo_pw/lib/rotate.o
 set_thermo_work_todo.o : thermo_mod.o
 simple_nonanal.o : ../../Modules/constants.o
+simple_nonanal.o : ../../Modules/io_global.o
 simple_nonanal.o : ../../Modules/kind.o
 simple_plot.o : ../../Modules/io_global.o
 simple_plot.o : ../../Modules/kind.o
@@ -421,7 +415,6 @@ write_anhar.o : ../../Modules/kind.o
 write_anhar.o : ../../Modules/mp_images.o
 write_anhar.o : ../../thermo_pw/lib/ph_freq_module.o
 write_anhar.o : thermo_mod.o
-write_anhar_anis.o : ../../Modules/cell_base.o
 write_anhar_anis.o : ../../Modules/constants.o
 write_anhar_anis.o : ../../Modules/io_global.o
 write_anhar_anis.o : ../../Modules/kind.o

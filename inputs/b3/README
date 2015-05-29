@@ -3,7 +3,7 @@ It has a face-centered cubic Bravais lattice and two atoms per cell.
 When one atom is in the origin, the other is at (1/4,1/4,1/4) in 
 cartesian coordinates and units of alat.
 
-The reference directory contains the outputs or postscript files:
+The reference directory contains the following files:
 
 asy_tmp.asy :  Plot of the Brillouin zone and of the structure
 

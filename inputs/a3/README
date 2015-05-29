@@ -3,3 +3,9 @@ has an hexagonal Bravais lattice and two atoms per unit cell.
 When one atom is in the origin, the other is at (2/3,1/3,1/2) in crystal
 coordinates. The position of the atoms is fixed by symmetry, while
 the ratio c/a is an additional parameter.
+
+The reference directory contains the following files:
+
+asy_tmp.asy : An asymptote script to plot the Brillouin zone.
+
+be_ph.exp : experimental inelastic neutron scattering data.

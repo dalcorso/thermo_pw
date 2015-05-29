@@ -87,7 +87,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
      IF ( .NOT. lscf) THEN
         CALL non_scf ()
      ELSE
-        CALL electrons()
+        CALL electrons_tpw()
      END IF
      !
      ! ... code stopped by user or not converged
