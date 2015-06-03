@@ -13,6 +13,7 @@ addusdens1d_so.o \
 allocate_thermo.o \
 bands_sub.o \
 bcast_thermo_input.o \
+check_existence.o \
 check_file_exists.o \
 clean_dfft.o \
 collect_everything.o \

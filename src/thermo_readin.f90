@@ -65,6 +65,7 @@ SUBROUTINE thermo_readin()
   USE mp_images,            ONLY : nimage, my_image_id, root_image
   USE parser,               ONLY : read_line, parse_unit
   USE environment,          ONLY : environment_end
+  USE wrappers,             ONLY : f_mkdir_safe
   USE mp_global,            ONLY : mp_global_end
   USE io_global,            ONLY : ionode, meta_ionode, meta_ionode_id, stdout
   USE mp,                   ONLY : mp_bcast
@@ -553,6 +554,12 @@ SUBROUTINE thermo_readin()
 
   IF (set_internal_path) CALL set_bz_path()
   IF (set_2d_path) CALL set_2d_bz_path()
+!
+!  create the restart directory
+!
+  ios=0
+  IF (meta_ionode) ios = f_mkdir_safe( 'restart' )
+
 
   RETURN
 END SUBROUTINE thermo_readin

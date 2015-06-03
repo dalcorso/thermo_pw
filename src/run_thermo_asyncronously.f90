@@ -30,7 +30,7 @@ SUBROUTINE run_thermo_asyncronously(nwork, part, igeom, auxdyn)
   INTEGER :: iq, irr
   INTEGER, ALLOCATABLE :: proc_num(:)
   INTEGER :: proc_per_image, iwork, image, exit_status
-  LOGICAL :: all_done_asyn
+  LOGICAL :: all_done_asyn, run
   !
   IF ( nwork == 0 ) RETURN
   !
@@ -99,10 +99,14 @@ SUBROUTINE run_thermo_asyncronously(nwork, part, igeom, auxdyn)
                  END IF
                  WRITE(stdout,'(2x,76("+"),/)')
                  IF (lpwscf(iwork)) THEN
-                    CALL do_pwscf(exit_status, .TRUE.)
-                    energy_geo(iwork)=etot
-                    IF (lstress(iwork)) THEN
-                       sigma_geo(:,:,iwork)=sigma(:,:)
+                    CALL check_existence(iwork,part,run)
+                    IF (run) THEN
+                       CALL do_pwscf(exit_status, .TRUE.)
+                       energy_geo(iwork)=etot
+                       IF (lstress(iwork)) THEN
+                          sigma_geo(:,:,iwork)=sigma(:,:)
+                       ENDIF
+                       CALL save_existence(iwork,part)
                     ENDIF
                  ENDIF
                  IF (lbands(iwork)) CALL do_pwscf(exit_status, .FALSE.)
@@ -153,10 +157,14 @@ SUBROUTINE run_thermo_asyncronously(nwork, part, igeom, auxdyn)
               WRITE(stdout,'(2x,76("+"),/)')
  
               IF (lpwscf(iwork)) THEN
-                 CALL do_pwscf(exit_status, .TRUE.)
-                 energy_geo(iwork)=etot
-                 IF (lstress(iwork)) THEN
-                    sigma_geo(:,:,iwork)=sigma(:,:)
+                 CALL check_existence(iwork,part,run)
+                 IF (run) THEN
+                    CALL do_pwscf(exit_status, .TRUE.)
+                    energy_geo(iwork)=etot
+                    IF (lstress(iwork)) THEN
+                       sigma_geo(:,:,iwork)=sigma(:,:)
+                    ENDIF
+                    CALL save_existence(iwork,part)
                  ENDIF
               END IF
               IF (lbands(iwork)) CALL do_pwscf(exit_status, .FALSE.)
@@ -190,10 +198,14 @@ SUBROUTINE run_thermo_asyncronously(nwork, part, igeom, auxdyn)
             
            CALL set_thermo_work_todo(iwork, part, iq, irr, igeom)
            IF (lpwscf(iwork)) THEN
-              CALL do_pwscf(exit_status, .TRUE.)
-              energy_geo(iwork)=etot
-              IF (lstress(iwork)) THEN
-                 sigma_geo(:,:,iwork)=sigma(:,:)
+              CALL check_existence(iwork,part,run)
+              IF (run) THEN
+                 CALL do_pwscf(exit_status, .TRUE.)
+                 energy_geo(iwork)=etot
+                 IF (lstress(iwork)) THEN
+                    sigma_geo(:,:,iwork)=sigma(:,:)
+                 ENDIF
+                 CALL save_existence(iwork,part)
               ENDIF
            END IF
            IF (lbands(iwork)) CALL do_pwscf(exit_status, .FALSE.)
