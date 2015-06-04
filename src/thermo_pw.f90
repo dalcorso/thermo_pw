@@ -88,14 +88,14 @@ PROGRAM thermo_pw
                                 polar_geo, g_piezo_tensor, d_piezo_tensor, &
                                 print_d_piezo_tensor, print_g_piezo_tensor
   USE control_elastic_constants, ONLY : ngeo_strain, frozen_ions, &
-                                elastic_algorithm, rot_mat, omega0
+                                elastic_algorithm, rot_mat, omega0, at_save
   USE internal_files_names,  ONLY : flfrq_thermo, flvec_thermo
   USE control_paths,    ONLY : nqaux
   USE control_gnuplot,  ONLY : flgnuplot
   USE control_bands,    ONLY : nbnd_bands
   USE control_pwrun,    ONLY : ibrav_save, do_punch
   USE thermo_sym,       ONLY : laue, code_group_save
-  USE cell_base,        ONLY : omega
+  USE cell_base,        ONLY : omega, at
   USE wvfct,            ONLY : nbnd
   USE lsda_mod,         ONLY : nspin
   USE thermodynamics,   ONLY : phdos_save
@@ -204,6 +204,7 @@ PROGRAM thermo_pw
                       trd_ht, rd_ht, cell_units )
      CALL set_fft_mesh()
      omega0=omega
+     at_save(:,:)=at(:,:)
   END IF
 
   CALL deallocate_asyn()

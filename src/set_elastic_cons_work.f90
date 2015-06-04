@@ -123,7 +123,8 @@ USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, rot_mat, &
                               aap_mat, apa_mat, elastic_algorithm
 USE elastic_constants, ONLY : epsilon_voigt, sigma_geo, epsilon_geo, &
                               trans_epsilon
-USE control_pwrun, ONLY : celldm_save, ibrav_save
+USE control_pwrun, ONLY : ibrav_save
+USE control_mur, ONLY : celldm0
 USE thermo_sym, ONLY : laue
 USE strain_mod, ONLY : apply_strain_adv
 IMPLICIT NONE
@@ -252,7 +253,7 @@ DO istep=1,nstep
    base_ind = (istep-1) * ngeo_strain
    DO igeo=1,ngeo_strain
       epsil=epsilon_min + delta_epsilon * ( igeo - 1 )
-      CALL apply_strain_adv(strain_list(istep), ibrav_save, celldm_save, &
+      CALL apply_strain_adv(strain_list(istep), ibrav_save, celldm0, &
            epsil, ibrav_geo(base_ind+igeo), celldm_geo(1,base_ind+igeo), &
            epsilon_voigt(1,base_ind+igeo), rot_mat(1,1,base_ind+igeo), &
            aap_mat(1,1,base_ind+igeo), apa_mat(1,1,base_ind+igeo) )

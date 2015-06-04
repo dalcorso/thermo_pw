@@ -251,7 +251,7 @@ SUBROUTINE set_work_for_elastic_const(iwork)
    USE control_elastic_constants, ONLY : at_save, tau_save, frozen_ions, &
                                 elastic_algorithm, rot_mat, aap_mat, apa_mat
    USE elastic_constants, ONLY : epsilon_geo, apply_strain, print_strain
-   USE control_pwrun, ONLY : celldm_save
+   USE control_mur,   ONLY : celldm0
    USE rotate,        ONLY : rotate_vect
    USE io_files,      ONLY : tmp_dir, wfc_dir, prefix, seqopn
    USE io_global,     ONLY : stdout, ionode
@@ -268,6 +268,14 @@ SUBROUTINE set_work_for_elastic_const(iwork)
 
    WRITE(stdout,'(/,2x,76("-"))')
    CALL print_strain(epsilon_geo(:,:,iwork))
+!
+!  entering here we have:
+!  
+!  at_save that contains the unstrained at vectors in units of celldm0(1)
+!
+!  tau_save that contains the crystal coordinates of the atoms. In 
+!  a uniform strain these coordinates do not change.
+!
 !
 !    first bring tau in the strained lattice
 !
@@ -342,7 +350,7 @@ SUBROUTINE set_work_for_elastic_const(iwork)
 !
 !  bring the tau in the correct units of the new alat
 !
-      tau=tau * celldm_save(1) / celldm(1)
+      tau=tau * celldm0(1) / celldm(1)
 !
 !  find the optimal fft mesh
 !

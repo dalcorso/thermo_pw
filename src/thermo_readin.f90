@@ -48,7 +48,8 @@ SUBROUTINE thermo_readin()
                                    temp_ph, volume_ph, celldm_ph
   USE control_conv,         ONLY : nke, deltake, nkeden, deltakeden, &
                                    nnk, deltank, nsigma, deltasigma
-  USE control_mur,          ONLY : vmin_input, vmax_input, deltav, nvol, lmurn
+  USE control_mur,          ONLY : vmin_input, vmax_input, deltav, nvol, &
+                                   lmurn, celldm0 
   USE control_elastic_constants, ONLY : at_save, tau_save, delta_epsilon, &
                                         ngeo_strain, frozen_ions, &
                                         elastic_algorithm
@@ -509,6 +510,7 @@ SUBROUTINE thermo_readin()
   CALL iosys()
   at_save = at
   celldm_save=celldm
+  celldm0=celldm
   ALLOCATE(tau_save(3,nat))
   tau_save=tau
 !
