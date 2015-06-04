@@ -731,6 +731,13 @@ delta_epsilon: the interval of strain values between two geometries.
 fl_el_cons:  the name of the file that contains the elastic constants
              Default: character(len=*) 'output_el_con.dat'
 \end{verbatim}
+The three algorithms are equivalent only at convergence both with
+{\bf k}-point sampling and with the kinetic-energy cut-off, but 
+large differences between the elastic constants obtained with the 
+\texttt{standard} and \texttt{advanced} algorithms might point to 
+insufficient {\bf k}-point sampling. Large differences between the 
+elastic constants obtained with the \texttt{energy} algorithm with respect 
+to the other two might point to insufficient kinetic-energy cut-off. \\
 Number of tasks for this option: \texttt{ngeo\_strain} times the number of
 independent strains. \\
 %As a rule the user is not supposed to change the elastic algorithm.
