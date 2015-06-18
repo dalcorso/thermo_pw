@@ -1447,7 +1447,7 @@ ENDIF
 RETURN
 END SUBROUTINE el_cons_voigt
 
-SUBROUTINE macro_elasticity( ibrav, code_group, cmn, smn, b0,  &
+SUBROUTINE macro_elasticity( ibrav, cmn, smn, b0,  &
                              e0v, g0v, nuv, e0r, g0r, nur )
 !
 !  This routine collects some relationships that link the elastic constants 
@@ -1467,7 +1467,7 @@ SUBROUTINE macro_elasticity( ibrav, code_group, cmn, smn, b0,  &
 !  
 USE kinds, ONLY : DP
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: ibrav, code_group
+INTEGER, INTENT(IN) :: ibrav
 REAL(DP), INTENT(IN) :: cmn(6,6), smn(6,6)
 REAL(DP), INTENT(OUT) :: b0, e0v, g0v, nuv, e0r, g0r, nur
 REAL(DP) :: c11v, c12v, c44v
@@ -1496,14 +1496,14 @@ nur = e0r/ (2.0_DP * g0r) - 1.0_DP
 RETURN
 END SUBROUTINE macro_elasticity
 
-SUBROUTINE print_macro_elasticity(ibrav, code_group, cmn, smn)
+SUBROUTINE print_macro_elasticity(ibrav, cmn, smn)
 USE kinds, ONLY : DP
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: cmn(6,6), smn(6,6)
-INTEGER, INTENT(IN) :: ibrav, code_group
+INTEGER, INTENT(IN) :: ibrav
 REAL(DP) :: b0, e0v, g0v, nuv, e0r, g0r, nur
 
-CALL macro_elasticity( ibrav, code_group, cmn, smn, b0, &
+CALL macro_elasticity( ibrav, cmn, smn, b0, &
                              e0v, g0v, nuv, e0r, g0r, nur )
 
 WRITE(stdout,'(/,20x,40("-"),/)')
