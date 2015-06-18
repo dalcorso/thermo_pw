@@ -109,6 +109,7 @@ USE thermodynamics, ONLY : ph_free_ener
 USE anharmonic,     ONLY : vmin_t, b0_t, b01_t, free_e_min_t
 USE temperature,    ONLY : ntemp, temp
 USE data_files,     ONLY : flevdat
+USE quadratic_surfaces, ONLY : polifit
 USE io_global,      ONLY : stdout
 USE mp_images,      ONLY : my_image_id, root_image
 
@@ -173,6 +174,7 @@ USE ph_freq_thermodynamics, ONLY : phf_free_ener
 USE ph_freq_anharmonic,     ONLY : vminf_t, b0f_t, b01f_t, free_e_minf_t
 USE control_mur,    ONLY : vmin, b0, b01
 USE temperature,    ONLY : ntemp, temp
+USE quadratic_surfaces, ONLY : polifit
 USE data_files,     ONLY : flevdat
 USE io_global,      ONLY : stdout
 USE mp_images,      ONLY : my_image_id, root_image

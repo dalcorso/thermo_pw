@@ -25,6 +25,13 @@ bcast_thermo_input.o : ../../Modules/mp_world.o
 bcast_thermo_input.o : ../../PHonon/PH/phcom.o
 bcast_thermo_input.o : ../../thermo_pw/lib/piezoelectric_tensor.o
 bcast_thermo_input.o : thermo_mod.o
+check_existence.o : ../../Modules/constants.o
+check_existence.o : ../../Modules/io_global.o
+check_existence.o : ../../Modules/kind.o
+check_existence.o : ../../Modules/mp.o
+check_existence.o : ../../Modules/mp_images.o
+check_existence.o : ../../thermo_pw/lib/elastic_const.o
+check_existence.o : thermo_mod.o
 check_file_exists.o : ../../Modules/io_global.o
 check_file_exists.o : ../../Modules/mp.o
 check_file_exists.o : ../../Modules/mp_world.o
@@ -43,6 +50,7 @@ compute_cp.o : thermo_mod.o
 compute_gruneisen.o : ../../Modules/ions_base.o
 compute_gruneisen.o : ../../Modules/kind.o
 compute_gruneisen.o : ../../Modules/mp_images.o
+compute_gruneisen.o : ../../thermo_pw/lib/quadratic_surfaces.o
 compute_gruneisen.o : thermo_mod.o
 compute_gruneisen_anis.o : ../../Modules/ions_base.o
 compute_gruneisen_anis.o : ../../Modules/kind.o
@@ -221,8 +229,6 @@ plotband_sub.o : ../../PW/src/pwcom.o
 plotband_sub.o : ../../thermo_pw/lib/gnuplot.o
 plotband_sub.o : ../../thermo_pw/lib/point_group.o
 plotband_sub.o : thermo_mod.o
-polifit.o : ../../Modules/kind.o
-polifit.o : ../../thermo_pw/lib/quadratic_surfaces.o
 print_polarization.o : ../../Modules/cell_base.o
 print_polarization.o : ../../Modules/constants.o
 print_polarization.o : ../../Modules/io_global.o
@@ -385,6 +391,7 @@ thermo_readin.o : ../../Modules/mp_images.o
 thermo_readin.o : ../../Modules/mp_world.o
 thermo_readin.o : ../../Modules/parser.o
 thermo_readin.o : ../../Modules/read_input.o
+thermo_readin.o : ../../Modules/wrappers.o
 thermo_readin.o : ../../PHonon/PH/phcom.o
 thermo_readin.o : ../../PW/src/symm_base.o
 thermo_readin.o : ../../thermo_pw/lib/piezoelectric_tensor.o
@@ -434,6 +441,7 @@ write_ev_input.o : ../../Modules/kind.o
 write_ev_input.o : ../../Modules/mp.o
 write_ev_input.o : ../../Modules/mp_images.o
 write_ev_input.o : ../../Modules/mp_world.o
+write_ev_input.o : ../../thermo_pw/lib/quadratic_surfaces.o
 write_ev_input.o : thermo_mod.o
 write_gnuplot_energy.o : ../../Modules/cell_base.o
 write_gnuplot_energy.o : ../../Modules/io_global.o

@@ -848,6 +848,7 @@ SUBROUTINE compute_elastic_constants_ene(energy_geo, epsil_geo, nwork, ngeo, &
 !  the elastic constants defined from the linear relationship between
 !  stress and strain.
 !
+USE quadratic_surfaces, ONLY : polifit
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: epsil_geo(3,3,nwork), omega
 REAL(DP), INTENT(IN) :: energy_geo(nwork)
@@ -935,7 +936,7 @@ SELECT CASE (laue)
 
    CASE (23)
 !
-!
+!  hexagonal case
 !
          WRITE(stdout,'(/,5x,"Fitting ",i3," functions,",i4, &
                           &" data per function, number of data =",i5)') &
@@ -1375,6 +1376,7 @@ END SUBROUTINE voigt_index
 
 SUBROUTINE el_cons_ij(pq, mn, ngeo, epsil_geo, sigma_geo)
 USE kinds, ONLY : DP
+USE quadratic_surfaces, ONLY : polifit
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: mn, pq, ngeo

@@ -46,7 +46,6 @@ plot_multi_energy.o \
 plot_mur.o \
 plot_phdos.o \
 plot_thermo.o \
-polifit.o \
 print_polarization.o \
 proj_band_structure.o \
 q2r_sub.o \

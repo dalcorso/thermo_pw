@@ -74,6 +74,7 @@ SUBROUTINE compute_freq_derivative(ngeo,freq_geo,rap_geo,omega_geo,&
                                                         poly_order,poly_grun)
 USE kinds, ONLY : DP
 USE ions_base, ONLY : nat
+USE quadratic_surfaces, ONLY : polifit
 IMPLICIT NONE
 INTEGER,  INTENT(IN) :: ngeo, poly_order
 INTEGER,  INTENT(IN) :: rap_geo(3*nat,ngeo)
@@ -131,6 +132,7 @@ SUBROUTINE compute_freq_derivative_eigen(ngeo,freq_geo,omega_geo,&
 
 USE kinds, ONLY : DP
 USE ions_base, ONLY : nat
+USE quadratic_surfaces, ONLY : polifit
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ngeo, poly_order
 REAL(DP), INTENT(IN) :: freq_geo(3*nat,ngeo), omega_geo(ngeo)
