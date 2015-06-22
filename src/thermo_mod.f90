@@ -324,6 +324,9 @@ MODULE control_elastic_constants
   CHARACTER(LEN=12) :: elastic_algorithm ! can be standard, advanced or energy
                                 ! it chooses the routines to use to 
                                 ! calculate elastic constants.
+  INTEGER :: elcpvar,     &     ! number of variables of the polynomial function
+                                ! that interpolates stress or energy
+             poly_degree        ! degree of the polynomial interpolation
 
 END MODULE control_elastic_constants
 

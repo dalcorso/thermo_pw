@@ -88,7 +88,8 @@ PROGRAM thermo_pw
                                 polar_geo, g_piezo_tensor, d_piezo_tensor, &
                                 print_d_piezo_tensor, print_g_piezo_tensor
   USE control_elastic_constants, ONLY : ngeo_strain, frozen_ions, &
-                                elastic_algorithm, rot_mat, omega0, at_save
+                                elastic_algorithm, rot_mat, omega0, at_save, &
+                                elcpvar
   USE internal_files_names,  ONLY : flfrq_thermo, flvec_thermo
   USE control_paths,    ONLY : nqaux
   USE control_gnuplot,  ONLY : flgnuplot
@@ -295,13 +296,15 @@ PROGRAM thermo_pw
 !
         IF (elastic_algorithm=='standard') THEN
            CALL compute_elastic_constants(sigma_geo, epsilon_geo, nwork, &
-                               ngeo_strain, ibrav_save, laue)
+                               ngeo_strain, ibrav_save, laue, elcpvar)
         ELSE IF (elastic_algorithm=='advanced') THEN
            CALL compute_elastic_constants_adv(sigma_geo, epsilon_geo, &
-                               nwork, ngeo_strain, ibrav_save, laue, rot_mat)
+                               nwork, ngeo_strain, ibrav_save, laue, rot_mat, &
+                                                   elcpvar)
         ELSE IF (elastic_algorithm=='energy') THEN
            CALL compute_elastic_constants_ene(energy_geo, epsilon_geo, &
-                               nwork, ngeo_strain, ibrav_save, laue, omega0)
+                               nwork, ngeo_strain, ibrav_save, laue, omega0, &
+                                                               elcpvar)
         END IF
         CALL print_elastic_constants(el_con, frozen_ions)
 !

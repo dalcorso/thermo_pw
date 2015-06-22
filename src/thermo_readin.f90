@@ -52,7 +52,8 @@ SUBROUTINE thermo_readin()
                                    lmurn, celldm0 
   USE control_elastic_constants, ONLY : at_save, tau_save, delta_epsilon, &
                                         ngeo_strain, frozen_ions, &
-                                        elastic_algorithm
+                                        elastic_algorithm, poly_degree, &
+                                        elcpvar
   USE control_piezoelectric_tensor, ONLY : nosym_save
   USE control_energy_plot,  ONLY : ncontours, color_levels, ene_levels 
   USE piezoelectric_tensor, ONLY : nppl
@@ -134,6 +135,7 @@ SUBROUTINE thermo_readin()
                             vmin_input, vmax_input, deltav, &
                             lmurn,                          &
                             elastic_algorithm,              &
+                            poly_degree,                    &
                             grunmin_input, grunmax_input,   &
                             delta_epsilon, ngeo_strain,     &
                             frozen_ions,                    &
@@ -208,6 +210,7 @@ SUBROUTINE thermo_readin()
   ngeo_strain=0
   frozen_ions=.FALSE.
   elastic_algorithm='standard'
+  poly_degree=0
 
   nppl=51
   ncontours=0
@@ -300,6 +303,20 @@ SUBROUTINE thermo_readin()
      ngeo_strain=4
      IF (elastic_algorithm=='energy') ngeo_strain=6
   ENDIF
+!
+!   The the default of the interpolation polynomial for elastic constants, if
+!   not set in input, or if the input value is unreasonable
+!
+  IF (poly_degree < 2 ) THEN
+     poly_degree = 3
+     IF (elastic_algorithm=='energy') poly_degree=4
+     IF (ngeo_strain < 6) THEN
+       poly_degree = 2
+       IF (elastic_algorithm=='energy') poly_degree=3
+     ENDIF
+  ENDIF
+  elcpvar=poly_degree+1
+  IF (ngeo_strain < elcpvar) CALL errore('thermo_readin','ngeo_strain is too small',1)
 
   IF ( ngeo(1)==0 ) THEN
      IF (what(1:4) == 'scf_') ngeo=1

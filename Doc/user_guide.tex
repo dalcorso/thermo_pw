@@ -728,6 +728,10 @@ delta_epsilon: the interval of strain values between two geometries.
              To avoid a zero strain geometry that might have a
              different symmetry ngeo_strain must be even.
              Default: real 0.005
+poly_degree: degree of the polynomial used to interpolate stress or energy.
+             ngeo_strain must be larger than poly_degree+1
+             Default: 3 ('standard', 'advanced', 2 if ngeo_strain < 6), 
+                      4 ('energy', 3 if ngeo_strain < 6).
 fl_el_cons:  the name of the file that contains the elastic constants
              Default: character(len=*) 'output_el_con.dat'
 \end{verbatim}

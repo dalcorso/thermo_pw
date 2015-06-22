@@ -210,7 +210,7 @@ RETURN
 END SUBROUTINE read_elastic
 
 SUBROUTINE compute_elastic_constants(sigma_geo, epsil_geo, nwork, ngeo, &
-                                     ibrav, laue)
+                                     ibrav, laue, m1)
 !
 !  This routine computes the elastic constants by fitting the stress-strain
 !  relation with a second order polynomial. This is calculated
@@ -218,7 +218,7 @@ SUBROUTINE compute_elastic_constants(sigma_geo, epsil_geo, nwork, ngeo, &
 !
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: sigma_geo(3,3,nwork), epsil_geo(3,3,nwork)
-INTEGER, INTENT(IN) :: nwork, ngeo, ibrav, laue
+INTEGER, INTENT(IN) :: nwork, ngeo, ibrav, laue, m1
 
 el_con=0.0_DP
 SELECT CASE (laue)
@@ -228,46 +228,46 @@ SELECT CASE (laue)
 !
 !  c_11 
 !
-      CALL el_cons_ij(1, 1, ngeo, epsil_geo, sigma_geo)
+      CALL el_cons_ij(1, 1, ngeo, epsil_geo, sigma_geo, m1)
 !
 !  c_12
 !
-      CALL el_cons_ij(2, 1, ngeo, epsil_geo, sigma_geo)
+      CALL el_cons_ij(2, 1, ngeo, epsil_geo, sigma_geo, m1)
       el_con(1,2) = el_con(2,1)
 !
 ! c_13
 !
-      CALL el_cons_ij(3, 1, ngeo, epsil_geo, sigma_geo)
+      CALL el_cons_ij(3, 1, ngeo, epsil_geo, sigma_geo, m1)
       el_con(1,3) = el_con(3,1)
 !
 ! c_22
 !
-      CALL el_cons_ij(2, 2, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1))
+      CALL el_cons_ij(2, 2, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1), m1)
 !
 ! c_23
 !
-      CALL el_cons_ij(3, 2, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1))
+      CALL el_cons_ij(3, 2, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1), m1)
       el_con(2,3) = el_con(3,2)
 !
 ! c_33
 !
       CALL el_cons_ij(3, 3, ngeo, epsil_geo(1,1,2*ngeo+1), &
-                                  sigma_geo(1,1,2*ngeo+1) )
+                                  sigma_geo(1,1,2*ngeo+1), m1)
 !
 ! c_44
 !
       CALL el_cons_ij(4, 4, ngeo, epsil_geo(1,1,3*ngeo+1), &
-                                  sigma_geo(1,1,3*ngeo+1) )
+                                  sigma_geo(1,1,3*ngeo+1), m1)
 !
 ! c_55
 !
       CALL el_cons_ij(5, 5, ngeo, epsil_geo(1,1,4*ngeo+1), &
-                                  sigma_geo(1,1,4*ngeo+1) )
+                                  sigma_geo(1,1,4*ngeo+1), m1)
 !
 ! c_66
 !
       CALL el_cons_ij(6, 6, ngeo, epsil_geo(1,1,5*ngeo+1), &
-                                  sigma_geo(1,1,5*ngeo+1) )
+                                  sigma_geo(1,1,5*ngeo+1), m1)
 !
 !  c15
 !
@@ -278,25 +278,25 @@ SELECT CASE (laue)
 !
 !  c15
 !
-         CALL el_cons_ij(5, 1, ngeo, epsil_geo, sigma_geo)
+         CALL el_cons_ij(5, 1, ngeo, epsil_geo, sigma_geo, m1)
          el_con(1,5) = el_con(5,1)
 !
 !  c25
 !
          CALL el_cons_ij(5, 2, ngeo, epsil_geo(1,1,ngeo+1), &
-                                     sigma_geo(1,1,ngeo+1) )
+                                     sigma_geo(1,1,ngeo+1), m1)
          el_con(2,5) = el_con(5,2)
 !
 !  c35
 !
          CALL el_cons_ij(5, 3, ngeo, epsil_geo(1,1,2*ngeo+1), &
-                                     sigma_geo(1,1,2*ngeo+1) )
+                                     sigma_geo(1,1,2*ngeo+1), m1)
          el_con(3,5) = el_con(5,3)
 !
 !  c46
 !
          CALL el_cons_ij(6, 4, ngeo, epsil_geo(1,1,3*ngeo+1), &
-                                     sigma_geo(1,1,3*ngeo+1) )
+                                     sigma_geo(1,1,3*ngeo+1), m1)
          el_con(4,6) = el_con(6,4)
 
       ELSE
@@ -305,26 +305,26 @@ SELECT CASE (laue)
 !
 !  c16
 !
-         CALL el_cons_ij(6, 1, ngeo, epsil_geo, sigma_geo)
+         CALL el_cons_ij(6, 1, ngeo, epsil_geo, sigma_geo, m1)
          el_con(1,6) = el_con(6,1)
 !
 !  c26
 !
          CALL el_cons_ij(6, 2, ngeo, epsil_geo(1,1,ngeo+1), &
-                                     sigma_geo(1,1,ngeo+1) )
+                                     sigma_geo(1,1,ngeo+1), m1)
          el_con(2,6) = el_con(6,2)
 !
 !  c36
 !
          CALL el_cons_ij(6, 3, ngeo, epsil_geo(1,1,2*ngeo+1), &
-                                     sigma_geo(1,1,2*ngeo+1) )
+                                     sigma_geo(1,1,2*ngeo+1), m1)
 
          el_con(3,6) = el_con(6,3)
 !
 !  c45
 !
          CALL el_cons_ij(5, 4, ngeo, epsil_geo(1,1,2*ngeo+1), &
-                                     sigma_geo(1,1,2*ngeo+1) )
+                                     sigma_geo(1,1,2*ngeo+1), m1)
          el_con(4,5) = el_con(5,4)
 
       END IF
@@ -334,46 +334,46 @@ SELECT CASE (laue)
 !
 !  c_11 
 !
-      CALL el_cons_ij(1, 1, ngeo, epsil_geo, sigma_geo)
+      CALL el_cons_ij(1, 1, ngeo, epsil_geo, sigma_geo, m1)
 !
 !  c_12
 !
-      CALL el_cons_ij(2, 1, ngeo, epsil_geo, sigma_geo)
+      CALL el_cons_ij(2, 1, ngeo, epsil_geo, sigma_geo, m1)
       el_con(1,2) = el_con(2,1)
 !
 ! c_13
 !
-      CALL el_cons_ij(3, 1, ngeo, epsil_geo, sigma_geo)
+      CALL el_cons_ij(3, 1, ngeo, epsil_geo, sigma_geo, m1)
       el_con(1,3) = el_con(3,1)
 !
 ! c_22
 !
-      CALL el_cons_ij(2, 2, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1))
+      CALL el_cons_ij(2, 2, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1), m1)
 !
 ! c_23
 !
-      CALL el_cons_ij(3, 2, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1))
+      CALL el_cons_ij(3, 2, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1), m1)
       el_con(2,3) = el_con(3,2)
 !
 ! c_33
 !
       CALL el_cons_ij(3, 3, ngeo, epsil_geo(1, 1, 2*ngeo+1), &
-                                  sigma_geo(1, 1, 2*ngeo+1) )
+                                  sigma_geo(1, 1, 2*ngeo+1), m1)
 !
 ! c_44
 !
       CALL el_cons_ij(4, 4, ngeo, epsil_geo(1, 1, 3*ngeo+1), &
-                                  sigma_geo(1, 1, 3*ngeo+1) )
+                                  sigma_geo(1, 1, 3*ngeo+1), m1)
 !
 ! c_55
 !
       CALL el_cons_ij(5, 5, ngeo, epsil_geo(1, 1, 4*ngeo+1), &
-                                  sigma_geo(1, 1, 4*ngeo+1) )
+                                  sigma_geo(1, 1, 4*ngeo+1), m1)
 !
 ! c_66
 !
       CALL el_cons_ij(6, 6, ngeo, epsil_geo(1, 1, 5*ngeo+1), &
-                                  sigma_geo(1, 1, 5*ngeo+1) )
+                                  sigma_geo(1, 1, 5*ngeo+1), m1)
 
    CASE (18,22)
 !
@@ -381,35 +381,35 @@ SELECT CASE (laue)
 !
 !  c_11 = c_22
 !
-      CALL el_cons_ij(1, 1, ngeo, epsil_geo, sigma_geo)
+      CALL el_cons_ij(1, 1, ngeo, epsil_geo, sigma_geo, m1)
       el_con(2,2) = el_con(1,1)
 !
 !  c_12 
 !
-      CALL el_cons_ij(2, 1, ngeo, epsil_geo, sigma_geo)
+      CALL el_cons_ij(2, 1, ngeo, epsil_geo, sigma_geo, m1)
       el_con(1,2) = el_con(2,1)
 !
 ! c_13
 !
-      CALL el_cons_ij(3, 1, ngeo, epsil_geo, sigma_geo)
+      CALL el_cons_ij(3, 1, ngeo, epsil_geo, sigma_geo, m1)
       el_con(1,3) = el_con(3,1)
       el_con(2,3) = el_con(3,1)
       el_con(3,2) = el_con(3,1)
 !
 ! c_33
 !
-      CALL el_cons_ij(3, 3, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1))
+      CALL el_cons_ij(3, 3, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1), m1)
 !
 ! c_44 = c_55
 !
       CALL el_cons_ij(4, 4, ngeo, epsil_geo(1,1,2*ngeo+1), &
-                                  sigma_geo(1,1,2*ngeo+1) )
+                                  sigma_geo(1,1,2*ngeo+1), m1)
       el_con(5,5) = el_con(4,4)
 !
 ! c_66 
 !
       CALL el_cons_ij(6, 6, ngeo, epsil_geo(1,1,3*ngeo+1), &
-                                  sigma_geo(1,1,3*ngeo+1) )
+                                  sigma_geo(1,1,3*ngeo+1), m1)
 !
 !   This part is non zero only on the 4/m Laue class
 !
@@ -417,7 +417,7 @@ SELECT CASE (laue)
 !
 ! c_16, c_26
 !
-         CALL el_cons_ij(6, 1, ngeo, epsil_geo, sigma_geo )
+         CALL el_cons_ij(6, 1, ngeo, epsil_geo, sigma_geo, m1)
          el_con(1,6) = el_con(6,1)
          el_con(2,6) = - el_con(1,6)
          el_con(6,2) = el_con(2,6)
@@ -429,22 +429,22 @@ SELECT CASE (laue)
 !
 !  c_11 = c_22
 !
-      CALL el_cons_ij(1, 1, ngeo, epsil_geo, sigma_geo )
+      CALL el_cons_ij(1, 1, ngeo, epsil_geo, sigma_geo, m1)
       el_con(2,2) = el_con(1,1)
 !
 !  c_12 
 !
-      CALL el_cons_ij(2, 1, ngeo, epsil_geo, sigma_geo )
+      CALL el_cons_ij(2, 1, ngeo, epsil_geo, sigma_geo, m1)
       el_con(1,2) = el_con(2,1)
 !
 !  c_13 
 !
-      CALL el_cons_ij(3, 1, ngeo, epsil_geo, sigma_geo )
+      CALL el_cons_ij(3, 1, ngeo, epsil_geo, sigma_geo, m1)
       el_con(1,3) = el_con(3,1)
 !
 !  c_14 
 !
-      CALL el_cons_ij(4, 1, ngeo, epsil_geo, sigma_geo )
+      CALL el_cons_ij(4, 1, ngeo, epsil_geo, sigma_geo, m1)
       el_con(1,4) = el_con(4,1)
       el_con(2,4) = -el_con(1,4)
       el_con(4,2) = el_con(2,4)
@@ -454,12 +454,12 @@ SELECT CASE (laue)
 !  c_33 
 !
       CALL el_cons_ij(3, 3, ngeo, epsil_geo(1,1,ngeo+1), &
-                                  sigma_geo(1,1,ngeo+1) )
+                                  sigma_geo(1,1,ngeo+1), m1)
 !
 !  c_44 = c_55
 !
       CALL el_cons_ij(4, 4, ngeo, epsil_geo(1,1,2*ngeo+1), &
-                                  sigma_geo(1,1,2*ngeo+1) )
+                                  sigma_geo(1,1,2*ngeo+1), m1)
       el_con(5,5) = el_con(4,4)
 
       el_con(6,6) = 0.5_DP * ( el_con(1,1) - el_con(1,2) )
@@ -471,7 +471,7 @@ SELECT CASE (laue)
 !
       IF (laue==27) THEN
          CALL el_cons_ij(1, 5, ngeo, epsil_geo(1,1,3*ngeo+1), &
-                                     sigma_geo(1,1,3*ngeo+1) )
+                                     sigma_geo(1,1,3*ngeo+1), m1)
          el_con(5,1) = el_con(1,5)
          el_con(2,5) = -el_con(1,5)
          el_con(5,2) = el_con(2,5)
@@ -485,29 +485,29 @@ SELECT CASE (laue)
 !
 !  c_11 = c_22
 !
-      CALL el_cons_ij(1, 1, ngeo, epsil_geo, sigma_geo)
+      CALL el_cons_ij(1, 1, ngeo, epsil_geo, sigma_geo, m1)
       el_con(2,2) = el_con(1,1)
 !
 !  c_12
 !
-      CALL el_cons_ij(2, 1, ngeo, epsil_geo, sigma_geo)
+      CALL el_cons_ij(2, 1, ngeo, epsil_geo, sigma_geo, m1)
       el_con(1,2) = el_con(2,1)
 !
 !  c_13
 !
-      CALL el_cons_ij(3, 1, ngeo, epsil_geo, sigma_geo)
+      CALL el_cons_ij(3, 1, ngeo, epsil_geo, sigma_geo, m1)
       el_con(1,3) = el_con(3,1)
       el_con(2,3) = el_con(1,3)
       el_con(3,2) = el_con(2,3)
 !
 !  c_33
 !
-      CALL el_cons_ij(3, 3, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1))
+      CALL el_cons_ij(3, 3, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1), m1)
 !
 !  c_44
 !
       CALL el_cons_ij(4, 4, ngeo, epsil_geo(1,1,2*ngeo+1), &
-                                  sigma_geo(1,1,2*ngeo+1))
+                                  sigma_geo(1,1,2*ngeo+1), m1)
       el_con(5,5)=el_con(4,4) 
       el_con(6,6)=0.5_DP*(el_con(1,1)-el_con(1,2))
 
@@ -517,13 +517,13 @@ SELECT CASE (laue)
 !
 !  c_11 = c_22 = c_33
 !
-      CALL el_cons_ij(3, 3, ngeo, epsil_geo, sigma_geo)
+      CALL el_cons_ij(3, 3, ngeo, epsil_geo, sigma_geo, m1)
       el_con(1,1) = el_con(3,3)
       el_con(2,2) = el_con(3,3)
 !
 ! c_12 = c_13 = c_23
 !
-      CALL el_cons_ij(1, 3, ngeo, epsil_geo, sigma_geo)
+      CALL el_cons_ij(1, 3, ngeo, epsil_geo, sigma_geo, m1)
       el_con(1,2) = el_con(1,3)
       el_con(2,1) = el_con(1,2)
       el_con(3,1) = el_con(1,3)
@@ -532,7 +532,7 @@ SELECT CASE (laue)
 !
 ! c_44 = c_55 = c_66
 !
-      CALL el_cons_ij(4, 4, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1))
+      CALL el_cons_ij(4, 4, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1), m1)
       el_con(5,5)=el_con(4,4)
       el_con(6,6)=el_con(4,4)
 
@@ -544,112 +544,112 @@ SELECT CASE (laue)
 !
 !  c_11 
 !
-      CALL el_cons_ij(1, 1, ngeo, epsil_geo, sigma_geo)
+      CALL el_cons_ij(1, 1, ngeo, epsil_geo, sigma_geo, m1)
 !
 !  c_12 
 !
-      CALL el_cons_ij(2, 1, ngeo, epsil_geo, sigma_geo)
+      CALL el_cons_ij(2, 1, ngeo, epsil_geo, sigma_geo, m1)
       el_con(1,2) = el_con(2,1)
 !
 !  c_13 
 !
-      CALL el_cons_ij(3, 1, ngeo, epsil_geo, sigma_geo)
+      CALL el_cons_ij(3, 1, ngeo, epsil_geo, sigma_geo, m1)
       el_con(1,3) = el_con(3,1)
 !
 !  c_14 
 !
-      CALL el_cons_ij(4, 1, ngeo, epsil_geo, sigma_geo)
+      CALL el_cons_ij(4, 1, ngeo, epsil_geo, sigma_geo, m1)
       el_con(1,4) = el_con(4,1)
 !
 !  c_15 
 !
-      CALL el_cons_ij(5, 1, ngeo, epsil_geo, sigma_geo)
+      CALL el_cons_ij(5, 1, ngeo, epsil_geo, sigma_geo, m1)
       el_con(1,5) = el_con(5,1)
 !
 !  c_16 
 !
-      CALL el_cons_ij(6, 1, ngeo, epsil_geo, sigma_geo)
+      CALL el_cons_ij(6, 1, ngeo, epsil_geo, sigma_geo, m1)
       el_con(1,6) = el_con(6,1)
 !
 !  c_22 
 !
-      CALL el_cons_ij(2, 2, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1))
+      CALL el_cons_ij(2, 2, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1), m1)
 !
 !  c_23 
 !
-      CALL el_cons_ij(3, 2, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1))
+      CALL el_cons_ij(3, 2, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1), m1)
       el_con(2,3) = el_con(3,2)
 !  
 !  c_24 
 !
-      CALL el_cons_ij(4, 2, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1))
+      CALL el_cons_ij(4, 2, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1), m1)
       el_con(2,4) = el_con(4,2)
 !  
 !  c_25 
 !
-      CALL el_cons_ij(5, 2, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1))
+      CALL el_cons_ij(5, 2, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1), m1)
       el_con(2,5) = el_con(5,2)
 !  
 !  c_26 
 !
-      CALL el_cons_ij( 6, 2, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1))
+      CALL el_cons_ij( 6, 2, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1), m1)
       el_con(2,6) = el_con(6,2)
 !  
 !  c_33 
 !
       CALL el_cons_ij(3, 3, ngeo, epsil_geo(1,1,2*ngeo+1), &
-                                  sigma_geo(1,1,2*ngeo+1))
+                                  sigma_geo(1,1,2*ngeo+1), m1)
 !  
 !  c_34 
 !
       CALL el_cons_ij(4, 3, ngeo, epsil_geo(1,1,2*ngeo+1), &
-                                  sigma_geo(1,1,2*ngeo+1))
+                                  sigma_geo(1,1,2*ngeo+1), m1)
       el_con(3,4) = el_con(4,3)
 !  
 !  c_35 
 !
       CALL el_cons_ij(5, 3, ngeo, epsil_geo(1,1,2*ngeo+1), &
-                                  sigma_geo(1,1,2*ngeo+1))
+                                  sigma_geo(1,1,2*ngeo+1), m1)
       el_con(3,5) = el_con(5,3)
 !  
 !  c_36 
 !
       CALL el_cons_ij(6, 3, ngeo, epsil_geo(1,1,2*ngeo+1), &
-                                  sigma_geo(1,1,2*ngeo+1))
+                                  sigma_geo(1,1,2*ngeo+1), m1)
       el_con(3,6) = el_con(6,3)
 !  
 !  c_44
 !
       CALL el_cons_ij(4, 4, ngeo, epsil_geo(1,1,3*ngeo+1), &
-                                  sigma_geo(1,1,3*ngeo+1))
+                                  sigma_geo(1,1,3*ngeo+1), m1)
 !  
 !  c_45 
 !
       CALL el_cons_ij(5, 4, ngeo, epsil_geo(1,1,3*ngeo+1), &
-                                sigma_geo(1,1,3*ngeo+1))
+                                sigma_geo(1,1,3*ngeo+1), m1)
       el_con(4,5) = el_con(5,4)
 !  
 !  c_46 
 !
       CALL el_cons_ij(6, 4, ngeo, epsil_geo(1,1,3*ngeo+1), &
-                                  sigma_geo(1,1,3*ngeo+1))
+                                  sigma_geo(1,1,3*ngeo+1), m1)
       el_con(4,6) = el_con(6,4)
 !  
 !  c_55 
 !
       CALL el_cons_ij(5, 5, ngeo, epsil_geo(1,1,4*ngeo+1), &
-                                  sigma_geo(1,1,4*ngeo+1))
+                                  sigma_geo(1,1,4*ngeo+1), m1)
 !  
 !  c_56 
 !
       CALL el_cons_ij(6, 5, ngeo, epsil_geo(1,1,4*ngeo+1), &
-                                  sigma_geo(1,1,4*ngeo+1))
+                                  sigma_geo(1,1,4*ngeo+1), m1)
       el_con(5,6) = el_con(6,5)
 !  
 !  c_66 
 !
       CALL el_cons_ij(6, 6, ngeo, epsil_geo(1,1,5*ngeo+1), &
-                                  sigma_geo(1,1,5*ngeo+1))
+                                  sigma_geo(1,1,5*ngeo+1), m1)
 END SELECT
 el_con = el_con * ry_kbar
 
@@ -657,7 +657,7 @@ RETURN
 END SUBROUTINE compute_elastic_constants
 
 SUBROUTINE compute_elastic_constants_adv(sigma_geo, epsil_geo, nwork, ngeo, &
-                                              ibrav, laue, rot_mat)
+                                              ibrav, laue, rot_mat, m1)
 !
 !  This routine computes the elastic constants by fitting the stress-strain
 !  relation with a second order polynomial. This is calculated
@@ -667,7 +667,7 @@ USE rotate, ONLY : rotate_tensors2
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: epsil_geo(3,3,nwork),  rot_mat(3,3,nwork)
 REAL(DP), INTENT(INOUT) :: sigma_geo(3,3,nwork)
-INTEGER, INTENT(IN) :: nwork, ngeo, ibrav, laue
+INTEGER, INTENT(IN) :: nwork, ngeo, ibrav, laue, m1
 REAL(DP) :: sigma_aux(3,3)
 INTEGER :: i, j, igeo, iwork
 
@@ -689,13 +689,13 @@ SELECT CASE (laue)
 !
 !  c_11 = c_22 = c_33
 !
-      CALL el_cons_ij(3, 3, ngeo, epsil_geo, sigma_geo)
+      CALL el_cons_ij(3, 3, ngeo, epsil_geo, sigma_geo, m1)
       el_con(1,1) = el_con(3,3)
       el_con(2,2) = el_con(3,3)
 !
 ! c_12 = c_13 = c_23
 !
-      CALL el_cons_ij(1, 3, ngeo, epsil_geo, sigma_geo)
+      CALL el_cons_ij(1, 3, ngeo, epsil_geo, sigma_geo, m1)
       el_con(1,2) = el_con(1,3)
       el_con(2,1) = el_con(1,2)
       el_con(3,1) = el_con(1,3)
@@ -704,7 +704,7 @@ SELECT CASE (laue)
 !
 ! c_44 = c_55 = c_66
 !
-      CALL el_cons_ij(4, 4, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1))
+      CALL el_cons_ij(4, 4, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1), m1)
       el_con(5,5)=el_con(4,4)
       el_con(6,6)=el_con(4,4)
    CASE(23)
@@ -713,29 +713,31 @@ SELECT CASE (laue)
 !
 !     C_11 = C_22
 
-      CALL el_cons_ij(1, 1, ngeo, epsil_geo, sigma_geo)
+      CALL el_cons_ij(1, 1, ngeo, epsil_geo, sigma_geo, m1)
       el_con(2,2) = el_con(1,1)
 !
 !     C_12 
 !
-      CALL el_cons_ij(2, 1, ngeo, epsil_geo, sigma_geo)
+      CALL el_cons_ij(2, 1, ngeo, epsil_geo, sigma_geo, m1)
       el_con(1,2) = el_con(2,1)
       el_con(6,6) = 0.5_DP * (el_con(1,1) - el_con(1,2))
 !
-!     C_13 = C_23
+!     C_31 = C_32
 !
-      CALL el_cons_ij(3, 1, ngeo, epsil_geo, sigma_geo)
+      CALL el_cons_ij(3, 1, ngeo, epsil_geo, sigma_geo, m1)
       el_con(1,3) = el_con(3,1)
       el_con(2,3) = el_con(3,1)
       el_con(3,2) = el_con(2,3)
 !
-!   C_33
+!   C_33,
 !
-      CALL el_cons_ij(3, 3, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1))
+      CALL el_cons_ij(3, 3, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1), m1)
+!      CALL el_cons_ij(1, 3, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1), m1)
+!      CALL el_cons_ij(2, 3, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1), m1)
 !
 !   C_44
 !
-      CALL el_cons_ij(5, 5, ngeo, epsil_geo(1,1,2*ngeo+1), sigma_geo(1,1,2*ngeo+1))
+      CALL el_cons_ij(5, 5, ngeo, epsil_geo(1,1,2*ngeo+1), sigma_geo(1,1,2*ngeo+1), m1)
       el_con(4,4) = el_con(5,5)
 
    CASE(18,22)
@@ -744,21 +746,21 @@ SELECT CASE (laue)
 !
 !     C_33 
 !
-      CALL el_cons_ij(3, 3, ngeo, epsil_geo, sigma_geo)
+      CALL el_cons_ij(3, 3, ngeo, epsil_geo, sigma_geo, m1)
 !
 !     C_11 = C_22 
 !
-      CALL el_cons_ij(1, 1, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1))
+      CALL el_cons_ij(1, 1, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1), m1)
       el_con(2,2) = el_con(1,1)
 !
 !     C_12 
 !
-      CALL el_cons_ij(2, 1, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1))
+      CALL el_cons_ij(2, 1, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1), m1)
       el_con(1,2) = el_con(2,1)
 !
 !     C_13 = C_23
 !
-      CALL el_cons_ij(3, 1, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1))
+      CALL el_cons_ij(3, 1, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1), m1)
       el_con(1,3) = el_con(3,1)
       el_con(2,3) = el_con(3,1)
       el_con(3,2) = el_con(2,3)
@@ -766,19 +768,19 @@ SELECT CASE (laue)
 !     C_66 
 !
       CALL el_cons_ij(6, 6, ngeo, epsil_geo(1,1,2*ngeo+1), &
-                                  sigma_geo(1,1,2*ngeo+1))
+                                  sigma_geo(1,1,2*ngeo+1), m1)
 !
 !     C_55 = C_44
 !
       CALL el_cons_ij(5, 5, ngeo, epsil_geo(1,1,3*ngeo+1), &
-                                  sigma_geo(1,1,3*ngeo+1))
+                                  sigma_geo(1,1,3*ngeo+1), m1)
       el_con(4,4) = el_con(5,5)
 
       IF (laue==18) THEN
 !
 ! c_16, c_26
 !
-         CALL el_cons_ij(6, 1, ngeo, epsil_geo, sigma_geo )
+         CALL el_cons_ij(6, 1, ngeo, epsil_geo, sigma_geo, m1)
          el_con(1,6) = el_con(6,1)
          el_con(2,6) = - el_con(1,6)
          el_con(6,2) = el_con(2,6)
@@ -790,42 +792,42 @@ SELECT CASE (laue)
 !
 !     C_11 
 !
-      CALL el_cons_ij(1, 1, ngeo, epsil_geo, sigma_geo)
+      CALL el_cons_ij(1, 1, ngeo, epsil_geo, sigma_geo, m1)
 !
 !     C_12 
 !
-      CALL el_cons_ij(2, 1, ngeo, epsil_geo, sigma_geo)
+      CALL el_cons_ij(2, 1, ngeo, epsil_geo, sigma_geo, m1)
       el_con(1,2) = el_con(2,1)
 !
 !     C_13 
 !
-      CALL el_cons_ij(3, 1, ngeo, epsil_geo, sigma_geo)
+      CALL el_cons_ij(3, 1, ngeo, epsil_geo, sigma_geo, m1)
       el_con(1,3) = el_con(3,1)
 !
 !     C_22 
 !
-      CALL el_cons_ij(2, 2, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1))
+      CALL el_cons_ij(2, 2, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1), m1)
 !
 !     C_23 
 !
-      CALL el_cons_ij(3, 2, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1))
+      CALL el_cons_ij(3, 2, ngeo, epsil_geo(1,1,ngeo+1), sigma_geo(1,1,ngeo+1), m1)
       el_con(2,3) = el_con(3,2)
 !
 !     C_33 
 !
-      CALL el_cons_ij(3,3,ngeo,epsil_geo(1,1,2*ngeo+1),sigma_geo(1,1,2*ngeo+1))
+      CALL el_cons_ij(3,3,ngeo,epsil_geo(1,1,2*ngeo+1),sigma_geo(1,1,2*ngeo+1), m1)
 !
 !     C_66
 !
-      CALL el_cons_ij(6,6,ngeo,epsil_geo(1,1,3*ngeo+1),sigma_geo(1,1,3*ngeo+1))
+      CALL el_cons_ij(6,6,ngeo,epsil_geo(1,1,3*ngeo+1),sigma_geo(1,1,3*ngeo+1), m1)
 !
 !     C_55
 !
-      CALL el_cons_ij(5,5,ngeo,epsil_geo(1,1,4*ngeo+1),sigma_geo(1,1,4*ngeo+1))
+      CALL el_cons_ij(5,5,ngeo,epsil_geo(1,1,4*ngeo+1),sigma_geo(1,1,4*ngeo+1), m1)
 !
 !     C_44
 !
-      CALL el_cons_ij(4,4,ngeo,epsil_geo(1,1,5*ngeo+1),sigma_geo(1,1,5*ngeo+1))
+      CALL el_cons_ij(4,4,ngeo,epsil_geo(1,1,5*ngeo+1),sigma_geo(1,1,5*ngeo+1), m1)
 
    CASE DEFAULT
       CALL errore('compute_elastic_constants_adv',&
@@ -837,7 +839,7 @@ RETURN
 END SUBROUTINE compute_elastic_constants_adv
 
 SUBROUTINE compute_elastic_constants_ene(energy_geo, epsil_geo, nwork, ngeo, &
-                                              ibrav, laue, omega)
+                                              ibrav, laue, omega, m1)
 !
 !  This routine computes the elastic constants by fitting the total
 !  energy-strain relation with a second order polynomial. This is calculated
@@ -848,12 +850,11 @@ SUBROUTINE compute_elastic_constants_ene(energy_geo, epsil_geo, nwork, ngeo, &
 !  the elastic constants defined from the linear relationship between
 !  stress and strain.
 !
-USE quadratic_surfaces, ONLY : polifit
+USE quadratic_surfaces, ONLY : polifit, write_poli
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: epsil_geo(3,3,nwork), omega
 REAL(DP), INTENT(IN) :: energy_geo(nwork)
-INTEGER, INTENT(IN) :: nwork, ngeo, ibrav, laue
-INTEGER, PARAMETER :: m1=4
+INTEGER, INTENT(IN) :: nwork, ngeo, ibrav, laue, m1
 REAL(DP) :: alpha(m1)
 REAL(DP) :: x(ngeo), y(ngeo), b0, a0, x0(6), der(6), aux
 INTEGER :: i, j, idata, iwork, base_data
@@ -882,6 +883,7 @@ SELECT CASE (laue)
       ENDDO
       
       CALL polifit( x, y, ngeo, alpha, m1 )
+      CALL write_poli(alpha,m1)
 
       press=- alpha(2) / 3.0_DP / omega
       WRITE(stdout,'(/,5x,"Estimated pressure",f12.5," kbar")') press*ry_kbar
@@ -901,6 +903,7 @@ SELECT CASE (laue)
       ENDDO
 
       CALL polifit( x, y, ngeo, alpha, m1 )
+      CALL write_poli(alpha,m1)
 
       el_con(1,1) = 1.0_DP / omega * ( 2.0_DP * alpha(3) )
       el_con(2,2) = el_con(1,1)
@@ -927,6 +930,7 @@ SELECT CASE (laue)
       ENDDO
 
       CALL polifit( x, y, ngeo, alpha, m1 )
+      CALL write_poli(alpha,m1)
 
       el_con(4,4) = 0.25_DP / 3.0_DP / omega * ( 2.0_DP * alpha(3) ) &
                         - 0.5_DP * press
@@ -950,6 +954,7 @@ SELECT CASE (laue)
          ENDDO
 
          CALL polifit( x, y, ngeo, alpha, m1 )
+         CALL write_poli(alpha,m1)
 
          press=- alpha(2) / omega
          WRITE(stdout,'(/,5x,"Estimated pressure",f12.5," kbar")') press*ry_kbar
@@ -966,6 +971,7 @@ SELECT CASE (laue)
          ENDDO
 
          CALL polifit( x, y, ngeo, alpha, m1 )
+         CALL write_poli(alpha,m1)
 
          press=- alpha(2) / omega
          WRITE(stdout,'(/,5x,"Estimated pressure",f12.5," kbar")') press*ry_kbar
@@ -981,6 +987,7 @@ SELECT CASE (laue)
          ENDDO
 
          CALL polifit( x, y, ngeo, alpha, m1 )
+         CALL write_poli(alpha,m1)
 
          press=- alpha(2) / omega / 2.0_DP
          WRITE(stdout,'(/,5x,"Estimated pressure",f12.5," kbar")') press*ry_kbar
@@ -1000,6 +1007,7 @@ SELECT CASE (laue)
          ENDDO
 
          CALL polifit( x, y, ngeo, alpha, m1 )
+         CALL write_poli(alpha,m1)
 
          press=- alpha(2) / omega / 3.0_DP
          WRITE(stdout,'(/,5x,"Estimated pressure",f12.5," kbar")') press*ry_kbar
@@ -1024,6 +1032,7 @@ SELECT CASE (laue)
          ENDDO
 
          CALL polifit( x, y, ngeo, alpha, m1 )
+         CALL write_poli(alpha,m1)
 
          el_con(5,5) = 0.25_DP / omega * ( 2.0_DP * alpha(3) ) - 0.5_DP * press
          el_con(4,4) = el_con(5,5)
@@ -1048,6 +1057,7 @@ SELECT CASE (laue)
          ENDDO
 
          CALL polifit( x, y, ngeo, alpha, m1 )
+         CALL write_poli(alpha,m1)
 
          press=- alpha(2) / omega
          WRITE(stdout,'(5x,"Estimated pressure",f12.5," kbar")') press*ry_kbar
@@ -1063,6 +1073,7 @@ SELECT CASE (laue)
          ENDDO
 
          CALL polifit( x, y, ngeo, alpha, m1 )
+         CALL write_poli(alpha,m1)
 
          press=- alpha(2) / omega
          WRITE(stdout,'(5x,"Estimated pressure",f12.5," kbar")') press*ry_kbar
@@ -1080,6 +1091,7 @@ SELECT CASE (laue)
          ENDDO
 
          CALL polifit( x, y, ngeo, alpha, m1 )
+         CALL write_poli(alpha,m1)
 
          press=- alpha(2) / omega
          WRITE(stdout,'(/,5x,"Estimated pressure",f12.5," kbar")') press*ry_kbar
@@ -1098,6 +1110,7 @@ SELECT CASE (laue)
          ENDDO
 
          CALL polifit( x, y, ngeo, alpha, m1 )
+         CALL write_poli(alpha,m1)
 
          press=- alpha(2) / omega
          WRITE(stdout,'(/,5x,"Estimated pressure",f12.5," kbar")') press*ry_kbar
@@ -1118,6 +1131,7 @@ SELECT CASE (laue)
          ENDDO
 
          CALL polifit( x, y, ngeo, alpha, m1 )
+         CALL write_poli(alpha,m1)
 
          el_con(6,6) = 0.25_DP/omega*(2.0_DP*alpha(3)) - 0.5_DP * press
 
@@ -1131,6 +1145,7 @@ SELECT CASE (laue)
          ENDDO
 
          CALL polifit( x, y, ngeo, alpha, m1 )
+         CALL write_poli(alpha,m1)
 
          el_con(5,5) = 0.25_DP/omega*(2.0_DP*alpha(3)) - 0.5_DP * press
          el_con(4,4) = el_con(5,5)
@@ -1147,6 +1162,8 @@ SELECT CASE (laue)
          ENDDO
 
          CALL polifit( x, y, ngeo, alpha, m1 )
+         CALL write_poli(alpha,m1)
+
          press=- alpha(2) / omega
          WRITE(stdout,'(/,5x,"Estimated pressure",f12.5," kbar")') press*ry_kbar
          el_con(1,1) = 1.0_DP / omega * ( 2.0_DP * alpha(3) )
@@ -1161,6 +1178,7 @@ SELECT CASE (laue)
          ENDDO
 
          CALL polifit( x, y, ngeo, alpha, m1 )
+         CALL write_poli(alpha,m1)
 
          press=- alpha(2) / omega
          WRITE(stdout,'(/,5x,"Estimated pressure",f12.5," kbar")') press*ry_kbar
@@ -1176,6 +1194,7 @@ SELECT CASE (laue)
          ENDDO
 
          CALL polifit( x, y, ngeo, alpha, m1 )
+         CALL write_poli(alpha,m1)
 
          press=- alpha(2) / omega
          WRITE(stdout,'(/,5x,"Estimated pressure",f12.5," kbar")') press*ry_kbar
@@ -1191,6 +1210,7 @@ SELECT CASE (laue)
          ENDDO
 
          CALL polifit( x, y, ngeo, alpha, m1 )
+         CALL write_poli(alpha,m1)
 
          press=- alpha(2) / omega
          WRITE(stdout,'(/,5x,"Estimated pressure",f12.5," kbar")') press*ry_kbar
@@ -1208,6 +1228,7 @@ SELECT CASE (laue)
          ENDDO
 
          CALL polifit( x, y, ngeo, alpha, m1 )
+         CALL write_poli(alpha,m1)
 
          press=- alpha(2) / omega
          WRITE(stdout,'(/,5x,"Estimated pressure",f12.5," kbar")') press*ry_kbar
@@ -1225,6 +1246,7 @@ SELECT CASE (laue)
          ENDDO
 
          CALL polifit( x, y, ngeo, alpha, m1 )
+         CALL write_poli(alpha,m1)
 
          press=- alpha(2) / omega
          WRITE(stdout,'(/,5x,"Estimated pressure",f12.5," kbar")') press*ry_kbar
@@ -1242,6 +1264,7 @@ SELECT CASE (laue)
          ENDDO
 
          CALL polifit( x, y, ngeo, alpha, m1 )
+         CALL write_poli(alpha,m1)
 
          el_con(6,6) = 0.25_DP / omega * ( 2.0_DP * alpha(3) ) - 0.5_DP * press
 
@@ -1255,6 +1278,7 @@ SELECT CASE (laue)
          ENDDO
 
          CALL polifit( x, y, ngeo, alpha, m1 )
+         CALL write_poli(alpha,m1)
 
          el_con(5,5) = 0.25_DP / omega * ( 2.0_DP * alpha(3) ) - 0.5_DP * press
 
@@ -1268,6 +1292,7 @@ SELECT CASE (laue)
          ENDDO
 
          CALL polifit( x, y, ngeo, alpha, m1 )
+         CALL write_poli(alpha,m1)
 
          el_con(4,4) = 0.25_DP / omega * ( 2.0_DP * alpha(3) ) - 0.5_DP * press
 
@@ -1374,15 +1399,15 @@ ENDIF
 RETURN
 END SUBROUTINE voigt_index
 
-SUBROUTINE el_cons_ij(pq, mn, ngeo, epsil_geo, sigma_geo)
+SUBROUTINE el_cons_ij(pq, mn, ngeo, epsil_geo, sigma_geo, m1)
 USE kinds, ONLY : DP
-USE quadratic_surfaces, ONLY : polifit
+USE quadratic_surfaces, ONLY : polifit, write_poli
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: mn, pq, ngeo
 REAL(DP), INTENT(IN) :: epsil_geo(3,3,ngeo), sigma_geo(3,3,ngeo)
 INTEGER :: igeo, m, n, p, q, mnin, pqin
-INTEGER, PARAMETER :: m1 = 3   ! number of polynomial coefficients
+INTEGER :: m1                  ! number of polynomial coefficients
 REAL(DP) :: alpha(m1)          ! the polynomial coefficients
 REAL(DP) :: x(ngeo), y(ngeo)
 
@@ -1399,6 +1424,7 @@ DO igeo=1,ngeo
    WRITE(stdout,'(2f18.10)') x(igeo), y(igeo)*ry_kbar
 ENDDO
 CALL polifit( x, y, ngeo, alpha, m1 )
+CALL write_poli(alpha,m1)
 el_con(pq, mn) = -alpha(2)
 !
 !  The elastic constant tensor relates the stress to the strain in voigt

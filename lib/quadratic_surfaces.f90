@@ -53,7 +53,7 @@ MODULE quadratic_surfaces
 
   PUBLIC :: evaluate_fit_quadratic, write_fit_hessian, &
             fit_multi_quadratic, find_fit_extremum, linsolvx, &
-            evaluate_fit_grad_quadratic, polifit
+            evaluate_fit_grad_quadratic, polifit, write_poli
 
 CONTAINS
 
@@ -568,7 +568,22 @@ CALL linsolvx(amat,m1,bvec,a)
 
 RETURN
 END SUBROUTINE polifit
-!
+
+SUBROUTINE write_poli(a,m1)
+USE kinds, ONLY : DP
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: m1
+REAL(DP), INTENT(IN) :: a(m1)
+
+INTEGER :: i
+CHARACTER(LEN=6) :: int_to_char
+
+WRITE(stdout,'(/,5x,"Polynomial coefficients")')
+DO i=1,m1
+   WRITE(stdout,'(5x,a,e20.12)') "a"//TRIM(INT_TO_CHAR(i))//"=", a(i)
+END DO
+
+RETURN
+END SUBROUTINE write_poli
 
 END MODULE quadratic_surfaces
-
