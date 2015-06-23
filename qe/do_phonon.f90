@@ -34,6 +34,10 @@ SUBROUTINE do_phonon_tpw(auxdyn)
   USE control_ph,      ONLY : epsil, trans, qplot, only_init, &
                               only_wfc, rec_code, where_rec
   USE el_phon,         ONLY : elph, elph_mat, elph_simple
+  !
+  ! YAMBO >
+  USE YAMBO,           ONLY : elph_yambo
+  ! YAMBO <
 
   IMPLICIT NONE
   !
@@ -109,6 +113,8 @@ SUBROUTINE do_phonon_tpw(auxdyn)
            CALL elphsum_wannier(iq)
         ELSEIF( elph_simple ) THEN
            CALL elphsum_simple()
+        ELSEIF( elph_yambo ) THEN
+           CALL elph_yambo_eval_and_IO()
         ELSE
            CALL elphsum()
         END IF
