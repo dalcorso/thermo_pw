@@ -211,6 +211,7 @@ PROGRAM thermo_pw
   CALL deallocate_asyn()
 
   IF (lpwscf_syn_1) THEN
+     with_asyn_images=.FALSE.
      outdir=TRIM(outdir_thermo)//'/g1/'
      tmp_dir = TRIM ( outdir )
      wfc_dir = tmp_dir
@@ -257,6 +258,7 @@ PROGRAM thermo_pw
            ENDIF
         ENDIF
      ENDIF
+     with_asyn_images=(nimage>1)
   END IF
      !
   IF (lpart2_pw) THEN
