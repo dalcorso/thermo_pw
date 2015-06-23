@@ -109,7 +109,7 @@ K_POINTS AUTOMATIC
 4 4 4 1 1 1 
 EOF
 $ECHO "  running thermo_pw for plotting the BZ of Silicon."
-$ECHO "  to see it run asymptote -V asy_tmp.asy \c"
+$ECHO "  to see it run asy -V asy_tmp.asy \c"
 $THERMO_PW_COMMAND < si.plot_bz.in > si.plot_bz.out
 check_failure $?
 $ECHO " done"
