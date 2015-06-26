@@ -15,7 +15,7 @@ LIBOBJS	= ../lib/thermo_lib.a ../../PHonon/PH/libph.a ../../flib/ptools.a ../../
 
 TLDEPS= bindir mods libs pw
 
-all : group_name.x group_number.x gener_2d_slab.x gener_3d_slab.x gener_nanowire.x supercell.x plot_sur_states.x translate.x
+all : group_name.x group_number.x gener_2d_slab.x gener_3d_slab.x gener_nanowire.x supercell.x plot_sur_states.x translate.x elastic.x
 
 libs-ph : libph.a libphaux.a
 
@@ -38,6 +38,11 @@ translate.x : translate.o $(PWOBJS) $(LIBOBJS)
 	$(LD) $(LDFLAGS) -o $@ translate.o \
 	         $(LIBOBJS) $(PWOBJS) $(QEMODS) $(LIBOBJS) $(PWOBJS) $(LIBS)
 	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/translate.x . )
+
+elastic.x : elastic.o $(PWOBJS) $(LIBOBJS)
+	$(LD) $(LDFLAGS) -o $@ elastic.o \
+	         $(LIBOBJS) $(PWOBJS) $(QEMODS) $(LIBOBJS) $(PWOBJS) $(LIBS)
+	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/elastic.x . )
 
 plot_sur_states.x : plot_sur_states.o $(PWOBJS) $(LIBOBJS)
 	$(LD) $(LDFLAGS) -o $@ plot_sur_states.o  \
