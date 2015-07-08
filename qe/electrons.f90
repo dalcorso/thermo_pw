@@ -571,6 +571,11 @@ SUBROUTINE electrons_scf_tpw ( printout )
               !
               ethr = 0.1D0*dr2 / MAX( 1.D0, nelec )
               !
+              !  If ethr becomes too small in the first iteration the
+              !  diagonalization might become unstable.
+              !
+              ethr = MAX(ethr,1.D-10)
+              !
               CYCLE scf_step
               !
            END IF
