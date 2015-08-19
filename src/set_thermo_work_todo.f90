@@ -108,7 +108,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
               lforce=.TRUE.
               lstres=.TRUE.
               lbfgs = .TRUE.
-              nstep = 10
+              nstep = 20
               epse = etot_conv_thr
               epsf = forc_conv_thr
            ENDIF
@@ -177,7 +177,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
               lforce=.TRUE.
               lstres=lstress(iwork)
               lbfgs = .TRUE.
-              nstep = 10
+              nstep = 20
               epse = etot_conv_thr
               epsf = forc_conv_thr
            ENDIF
@@ -204,7 +204,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
               lforce=.TRUE.
               lstres=.TRUE.
               lbfgs = .TRUE.
-              nstep = 10
+              nstep = 20
               epse = etot_conv_thr
               epsf = forc_conv_thr
            ENDIF
