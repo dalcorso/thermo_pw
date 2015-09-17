@@ -14,7 +14,7 @@ SUBROUTINE thermo_summary()
   !  useful for the thermo_pw calculation
   !
   USE kinds,                ONLY : DP
-  USE thermo_mod,           ONLY : what, ngeo
+  USE thermo_mod,           ONLY : what, ngeo, density
   USE thermo_sym,           ONLY : laue, code_group_save, fft_fact, &
                                    ibrav_group_consistent
   USE input_parameters,     ONLY : ibrav
@@ -1013,48 +1013,7 @@ WRITE(stdout,'(5x,70("-"))')
 !  ----------------------------------------------------------------------
 !  Information on the density
 !
-  total_mass=0.0_DP
-  total_expected_mass=0.0_DP
-  DO ia=1,nat
-     it=ityp(ia)
-     expected_mass=atom_weight(atomic_number(TRIM(atm(it))))
-     IF (amass(it)==0.0_DP) THEN
-        current_mass=expected_mass
-        total_mass=total_mass+current_mass
-        total_expected_mass=total_expected_mass+current_mass
-     ELSE
-        current_mass=amass(it)
-        IF (ABS(current_mass - expected_mass) > 1.0_DP) THEN
-           IF (ia==1) WRITE(stdout,*)
-           WRITE(stdout,'(5x,"Warning the mass of atom ",i5, f9.3,&
-                             &" a.m.u. does not match its name ",a2)') &
-                                      ia, amass(it), atm(it)
-        ENDIF
-        total_mass = total_mass + current_mass
-        total_expected_mass=total_expected_mass+expected_mass
-     ENDIF
-  ENDDO
-
-  fact = amu_si / (bohr_radius_si)**3 
-  IF (ABS(total_mass - total_expected_mass) > 1.0_DP) THEN
-     WRITE(stdout,'(/,5x,"Total mass of this unit cell ",3x,f14.4," a.m.u.")') &
-                                                   total_mass  
-     WRITE(stdout,'(5x, "Expected mass of this unit cell ",f14.4," a.m.u.")') &
-                                                   total_expected_mass  
-     WRITE(stdout,'(5x, "Density of this solid ",9x,f15.2," kg/m^3",&
-                         &f13.4," g/cm^3")') total_mass * fact / omega, &
-                            total_mass * fact / omega / 1000._DP 
-     WRITE(stdout,'(5x, "Expected density of this solid ", f15.2," kg/m^3",&
-                      &f13.4," g/cm^3")') total_expected_mass *fact / omega, &
-                            total_expected_mass * fact / omega / 1000._DP
- 
-  ELSE
-     WRITE(stdout,'(/,5x,"Total mass of this unit cell ",f15.4," a.m.u.")') &
-                                      total_mass  
-     WRITE(stdout,'(5x,"Density of this solid ",7x,f15.2," kg/m^3",&
-                         &f15.4," g/cm^3")') total_mass * fact / omega, &
-                                  total_mass * fact / omega /1000._DP
-  ENDIF
+  CALL compute_density(omega,density)
 !
 !  ----------------------------------------------------------------------
 !  Brillouin zone plot

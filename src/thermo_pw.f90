@@ -82,7 +82,8 @@ PROGRAM thermo_pw
                                 print_elastic_compliances, read_elastic, &
                                 write_elastic, print_macro_elasticity, &
                                 compute_elastic_constants_adv, &
-                                compute_elastic_constants_ene
+                                compute_elastic_constants_ene, &
+                                print_sound_velocities
   USE piezoelectric_tensor, ONLY : compute_piezo_tensor, &
                                 compute_d_piezo_tensor, &
                                 polar_geo, g_piezo_tensor, d_piezo_tensor, &
@@ -108,7 +109,7 @@ PROGRAM thermo_pw
   USE control_mur,      ONLY : vmin, b0, b01, emin, celldm0, lmurn
   USE thermo_mod,       ONLY : what, ngeo, omega_geo, energy_geo, &
                                tot_ngeo, reduced_grid, ibrav_geo, celldm_geo, &
-                               central_geo
+                               central_geo, density
   USE cell_base,        ONLY : ibrav_ => ibrav, celldm_ => celldm
   USE control_2d_bands, ONLY : only_bands_plot
   USE ph_restart,       ONLY : destroy_status_run
@@ -184,6 +185,7 @@ PROGRAM thermo_pw
 !
 !  In a murnaghan equation calculation determine the lattice constant,
 !  bulk modulus and its derivative and write the results
+!  Otherwise interpolate the energy with a quadratic function.
 !
   IF (lev_syn_1) THEN
      IF (lmurn) THEN
@@ -206,6 +208,10 @@ PROGRAM thermo_pw
      CALL set_fft_mesh()
      omega0=omega
      at_save(:,:)=at(:,:)
+!
+!  recompute the density at the minimum volume
+!
+     CALL compute_density(omega,density)
   END IF
 
   CALL deallocate_asyn()
@@ -315,6 +321,12 @@ PROGRAM thermo_pw
         CALL compute_elastic_compliances(el_con,el_compliances)
         CALL print_elastic_compliances(el_compliances, frozen_ions)
         CALL print_macro_elasticity( ibrav_save, el_con, el_compliances)
+!
+!  here compute the sound velocities, using the density of the solid and
+!  the elastic constants
+!
+        CALL print_sound_velocities( ibrav_save, el_con, el_compliances, &
+                                                         density )
 !
 !  save elastic constants and compliances on file
 !

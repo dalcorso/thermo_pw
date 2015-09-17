@@ -18,6 +18,7 @@ check_file_exists.o \
 clean_dfft.o \
 collect_everything.o \
 compute_cp.o \
+compute_density.o \
 compute_gruneisen.o \
 compute_gruneisen_anis.o \
 compute_omega_geo.o \

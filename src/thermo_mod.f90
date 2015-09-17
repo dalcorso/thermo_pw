@@ -44,6 +44,8 @@ MODULE thermo_mod
   LOGICAL :: reduced_grid                       ! if .TRUE. use a reduced
                                                 ! grid to interpolate the
                                                 ! geometry
+  REAL(DP) :: density                           ! the density of the solid
+
 END MODULE thermo_mod
 
 MODULE temperature
@@ -300,7 +302,15 @@ MODULE control_elastic_constants
   !     constants
   !
   SAVE
-  REAL(DP) :: delta_epsilon
+  REAL(DP) :: delta_epsilon               ! the distance between two strains (D)
+  REAL(DP) :: epsilon_0                   ! a minimum strain (e_0). 
+                                          ! For ngeo_strain even, the
+                                          ! strains will be:
+                                          ! -e_0-D/2, -e0-3D/2, ...
+                                          ! e_0+D/2, e0+3D/2, ...
+                                          ! For ngeo_strain odd:
+                                          !  0, -e0-D, -e0-2D, ... 
+                                          !      e0+D,  e0+2D
   REAL(DP) :: at_save(3,3)
   REAL(DP), ALLOCATABLE :: tau_save(:,:)
   REAL(DP), ALLOCATABLE :: rot_mat(:,:,:) ! rotation matrix between the

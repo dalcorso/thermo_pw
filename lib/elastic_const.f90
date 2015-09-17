@@ -37,7 +37,8 @@ MODULE elastic_constants
          compute_elastic_constants_adv, compute_elastic_constants_ene,   &
          el_compliances, compute_elastic_compliances, voigt_index, &
          print_elastic_compliances, print_strain, write_elastic, read_elastic,&
-         macro_elasticity, print_macro_elasticity, el_cons_voigt, press
+         macro_elasticity, print_macro_elasticity, el_cons_voigt, press, &
+         print_sound_velocities
 
 CONTAINS
 !
@@ -1556,5 +1557,35 @@ WRITE(stdout, '(5x,"Poisson Ratio n = ",f12.5)') (e0v+e0r)/    &
 
 RETURN
 END SUBROUTINE print_macro_elasticity
+
+SUBROUTINE print_sound_velocities(ibrav, cmn, smn, density)
+!
+!  In input the elastic constants are in kbar, the elastic compliances 
+!  in kbar^-1 and the density in Kg/m^3. The sound velocity is printed
+!  in m/sec
+!
+USE kinds, ONLY : DP
+IMPLICIT NONE
+REAL(DP), INTENT(IN) :: cmn(6,6), smn(6,6), density
+INTEGER, INTENT(IN) :: ibrav
+REAL(DP) :: b0, e0v, g0v, nuv, e0r, g0r, nur
+
+REAL(DP) :: g0
+
+CALL macro_elasticity( ibrav, cmn, smn, b0, e0v, g0v, nuv, e0r, g0r, nur )
+
+WRITE(stdout, '(/,5x, "Voigt-Reuss-Hill average; sound velocities:",/)') 
+
+g0 = ( g0r + g0v ) * 0.5_DP
+
+WRITE(stdout, '(5x, "Compressional V_P = ",f12.3," m/s")') &
+                        SQRT( ( b0 + 4.0_DP * g0 / 3.0_DP ) * 1.D8 / density )
+WRITE(stdout, '(5x, "Bulk          V_B = ",f12.3," m/s")') &
+                        SQRT( b0 * 1.D8 / density )
+WRITE(stdout, '(5x, "Shear         V_G = ",f12.3," m/s")') &
+                        SQRT( g0 * 1.D8 / density )
+
+RETURN
+END SUBROUTINE print_sound_velocities
 
 END MODULE elastic_constants
