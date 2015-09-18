@@ -53,7 +53,7 @@ SUBROUTINE thermo_readin()
   USE control_elastic_constants, ONLY : at_save, tau_save, delta_epsilon, &
                                         ngeo_strain, frozen_ions, &
                                         elastic_algorithm, poly_degree, &
-                                        elcpvar
+                                        elcpvar, epsilon_0
   USE control_piezoelectric_tensor, ONLY : nosym_save
   USE control_energy_plot,  ONLY : ncontours, color_levels, ene_levels 
   USE piezoelectric_tensor, ONLY : nppl
@@ -138,6 +138,7 @@ SUBROUTINE thermo_readin()
                             poly_degree,                    &
                             grunmin_input, grunmax_input,   &
                             delta_epsilon, ngeo_strain,     &
+                            epsilon_0,                      &
                             frozen_ions,                    &
                             nvol, nke, deltake,             &
                             nkeden, deltakeden,             &
@@ -207,6 +208,7 @@ SUBROUTINE thermo_readin()
   deltasigma=0.005_DP
 
   delta_epsilon=0.005_DP
+  epsilon_0=0.0_DP
   ngeo_strain=0
   frozen_ions=.FALSE.
   elastic_algorithm='standard'

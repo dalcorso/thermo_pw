@@ -9,7 +9,7 @@ SUBROUTINE set_elastic_cons_work( nwork )
 USE kinds, ONLY : DP
 USE thermo_mod, ONLY : ibrav_geo, celldm_geo
 USE cell_base, ONLY : ibrav
-USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain
+USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, epsilon_0
 USE elastic_constants, ONLY : epsilon_voigt, epsilon_geo, sigma_geo, &
                               trans_epsilon
 USE thermo_sym, ONLY : laue
@@ -18,8 +18,8 @@ INTEGER, INTENT(OUT) :: nwork
 REAL(DP) :: epsilon_min, epsilon_min_off
 INTEGER :: igeo, iwork, i, j
 
-epsilon_min= - delta_epsilon * (ngeo_strain - 1 ) / 2.0_DP
-epsilon_min_off= - delta_epsilon * (ngeo_strain - 1 ) 
+epsilon_min= - delta_epsilon * (ngeo_strain - 1 ) / 2.0_DP - epsilon_0
+epsilon_min_off= - delta_epsilon * (ngeo_strain - 1 ) - 2.0_DP * epsilon_0
 SELECT CASE (laue) 
    CASE(29,32)
 !
@@ -32,6 +32,16 @@ SELECT CASE (laue)
          epsilon_voigt(3, igeo) = epsilon_min + delta_epsilon * ( igeo - 1 ) 
          epsilon_voigt(4, ngeo_strain + igeo) = epsilon_min_off + &
                                        2.0_DP * delta_epsilon * ( igeo - 1 )
+         IF (igeo> ngeo_strain/2) THEN
+            epsilon_voigt(3, igeo)=epsilon_voigt(3, igeo)+2.0_DP*epsilon_0
+            epsilon_voigt(4, ngeo_strain+igeo)= &
+                         epsilon_voigt(4, ngeo_strain+igeo)+4.0_DP*epsilon_0
+         ENDIF
+         IF (MOD(ngeo_strain,2)==1 .AND. igeo==ngeo_strain/2 + 1) THEN 
+            epsilon_voigt(3, igeo)=epsilon_voigt(3, igeo)-epsilon_0
+            epsilon_voigt(4, ngeo_strain+igeo)= &
+                         epsilon_voigt(4, ngeo_strain+igeo)-2.0_DP*epsilon_0
+         ENDIF
 !        epsilon_voigt(5, ngeo_strain + igeo) = &
 !                       epsilon_voigt(4, ngeo_strain + igeo)
 !        epsilon_voigt(6, ngeo_strain + igeo) = &
@@ -50,6 +60,20 @@ SELECT CASE (laue)
                                               delta_epsilon * ( igeo - 1 ) 
          epsilon_voigt(4, 2*ngeo_strain + igeo) = epsilon_min_off + &
                                       2.0_DP * delta_epsilon * ( igeo - 1 )
+         IF (igeo> ngeo_strain/2) THEN
+            epsilon_voigt(1, igeo)=epsilon_voigt(1, igeo) + 2.0_DP*epsilon_0
+            epsilon_voigt(3, ngeo_strain+igeo)=&
+                     epsilon_voigt(3, ngeo_strain+igeo) + 2.0_DP*epsilon_0
+            epsilon_voigt(4, 2*ngeo_strain + igeo)= &
+                     epsilon_voigt(4, 2*ngeo_strain + igeo) + 4.0_DP*epsilon_0
+         ENDIF
+         IF (MOD(ngeo_strain,2)==1 .AND. igeo==ngeo_strain/2 + 1) THEN 
+            epsilon_voigt(1, igeo)=epsilon_voigt(1, igeo) - epsilon_0
+            epsilon_voigt(3, ngeo_strain+igeo)=&
+                     epsilon_voigt(3, ngeo_strain+igeo) - epsilon_0
+            epsilon_voigt(4, 2*ngeo_strain + igeo)= &
+                     epsilon_voigt(4, 2*ngeo_strain + igeo) - 2.0_DP*epsilon_0
+         ENDIF
       ENDDO
    CASE(18,22)
 !
@@ -66,6 +90,24 @@ SELECT CASE (laue)
                                        2.0_DP * delta_epsilon * ( igeo - 1 )
          epsilon_voigt(6, 3*ngeo_strain + igeo) = epsilon_min_off + &
                                        2.0_DP * delta_epsilon * ( igeo - 1 )
+         IF (igeo> ngeo_strain/2) THEN
+            epsilon_voigt(1, igeo)=epsilon_voigt(1, igeo)+2.0_DP*epsilon_0
+            epsilon_voigt(3, ngeo_strain + igeo)=&
+                          epsilon_voigt(3, ngeo_strain+igeo)+2.0_DP*epsilon_0
+            epsilon_voigt(4, 2*ngeo_strain + igeo)=&
+                          epsilon_voigt(4, 2*ngeo_strain+igeo)+4.0_DP*epsilon_0
+            epsilon_voigt(6, 3*ngeo_strain+igeo)=&
+                          epsilon_voigt(6, 3*ngeo_strain+igeo)+4.0_DP*epsilon_0
+         ENDIF
+         IF (MOD(ngeo_strain,2)==1 .AND. igeo==ngeo_strain/2 + 1) THEN
+            epsilon_voigt(1, igeo)=epsilon_voigt(1, igeo) - epsilon_0
+            epsilon_voigt(3, ngeo_strain + igeo)=&
+                          epsilon_voigt(3, ngeo_strain+igeo) - epsilon_0
+            epsilon_voigt(4, 2*ngeo_strain + igeo)=&
+                          epsilon_voigt(4, 2*ngeo_strain+igeo)-2.0_DP*epsilon_0
+            epsilon_voigt(6, 3*ngeo_strain+igeo)=&
+                          epsilon_voigt(6, 3*ngeo_strain+igeo)-2.0_DP*epsilon_0
+         ENDIF
       ENDDO
 CASE DEFAULT
 !
@@ -92,6 +134,32 @@ CASE DEFAULT
                                         2.0_DP * delta_epsilon * ( igeo - 1 )
       epsilon_voigt(6, 5*ngeo_strain + igeo) = epsilon_min_off + &
                                         2.0_DP * delta_epsilon * ( igeo - 1 )
+      IF (igeo> ngeo_strain/2) THEN
+         epsilon_voigt(1, igeo)=epsilon_voigt(1, igeo)+2.0_DP*epsilon_0
+         epsilon_voigt(1, ngeo_strain+igeo)=&
+                       epsilon_voigt(1, ngeo_strain+igeo)+2.0_DP*epsilon_0
+         epsilon_voigt(3, 2*ngeo_strain + igeo)=&
+                       epsilon_voigt(3, 2*ngeo_strain+igeo)+2.0_DP*epsilon_0
+         epsilon_voigt(4, 3*ngeo_strain + igeo)=&
+                       epsilon_voigt(4, 3*ngeo_strain+igeo)+4.0_DP*epsilon_0
+         epsilon_voigt(5, 4*ngeo_strain+igeo)=&
+                       epsilon_voigt(5, 4*ngeo_strain+igeo)+4.0_DP*epsilon_0
+         epsilon_voigt(6, 5*ngeo_strain+igeo)=&
+                       epsilon_voigt(6, 5*ngeo_strain+igeo)+4.0_DP*epsilon_0
+      ENDIF
+      IF (MOD(ngeo_strain,2)==1 .AND. igeo==ngeo_strain/2 + 1) THEN
+         epsilon_voigt(1, igeo)=epsilon_voigt(1, igeo) - epsilon_0
+         epsilon_voigt(1, ngeo_strain+igeo)=&
+                       epsilon_voigt(1, ngeo_strain+igeo) - epsilon_0
+         epsilon_voigt(3, 2*ngeo_strain + igeo)=&
+                       epsilon_voigt(3, 2*ngeo_strain+igeo) - epsilon_0
+         epsilon_voigt(4, 3*ngeo_strain + igeo)=&
+                       epsilon_voigt(4, 3*ngeo_strain+igeo)-2.0_DP*epsilon_0
+         epsilon_voigt(5, 4*ngeo_strain+igeo)=&
+                       epsilon_voigt(5, 4*ngeo_strain+igeo)-2.0_DP*epsilon_0
+         epsilon_voigt(6, 5*ngeo_strain+igeo)=&
+                       epsilon_voigt(6, 5*ngeo_strain+igeo)-2.0_DP*epsilon_0
+      ENDIF
    ENDDO
 END SELECT
 
@@ -120,7 +188,7 @@ SUBROUTINE set_elastic_cons_work_adv( nwork )
 USE kinds, ONLY : DP
 USE thermo_mod, ONLY : ibrav_geo, celldm_geo
 USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, rot_mat, &
-                              aap_mat, apa_mat, elastic_algorithm
+                              aap_mat, apa_mat, elastic_algorithm, epsilon_0
 USE elastic_constants, ONLY : epsilon_voigt, sigma_geo, epsilon_geo, &
                               trans_epsilon
 USE control_pwrun, ONLY : ibrav_save
@@ -133,7 +201,7 @@ REAL(DP) :: epsilon_min, epsil
 INTEGER :: igeo, iwork, base_ind, i, j, istep, nstep
 CHARACTER(LEN=2) :: strain_list(9)
 
-epsilon_min= - delta_epsilon * (ngeo_strain - 1 ) / 2.0_DP
+epsilon_min= - delta_epsilon * (ngeo_strain - 1 ) / 2.0_DP - epsilon_0
 SELECT CASE (laue) 
    CASE(29,32)
 !
@@ -253,6 +321,9 @@ DO istep=1,nstep
    base_ind = (istep-1) * ngeo_strain
    DO igeo=1,ngeo_strain
       epsil=epsilon_min + delta_epsilon * ( igeo - 1 )
+      IF (igeo > ngeo_strain/2) epsil=epsil + 2.0_DP*epsilon_0
+      IF (MOD(ngeo_strain,2)==1 .AND. igeo==(ngeo_strain/2 + 1)) epsil=epsil &
+                                                          -epsilon_0
       CALL apply_strain_adv(strain_list(istep), ibrav_save, celldm0, &
            epsil, ibrav_geo(base_ind+igeo), celldm_geo(1,base_ind+igeo), &
            epsilon_voigt(1,base_ind+igeo), rot_mat(1,1,base_ind+igeo), &
