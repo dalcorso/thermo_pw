@@ -8,6 +8,12 @@ bz_asy.o : ../../Modules/bz_form.o
 bz_asy.o : ../../Modules/kind.o
 bz_asy.o : asy.o
 bz_asy.o : bz_2d_form.o
+debye_module.o : ../../Modules/constants.o
+debye_module.o : ../../Modules/io_global.o
+debye_module.o : ../../Modules/kind.o
+debye_module.o : ../../Modules/mp.o
+debye_module.o : ../../Modules/mp_images.o
+debye_module.o : elastic_const.o
 elastic_const.o : ../../Modules/constants.o
 elastic_const.o : ../../Modules/io_global.o
 elastic_const.o : ../../Modules/kind.o
@@ -46,6 +52,7 @@ piezoelectric_tensor.o : ../../Modules/constants.o
 piezoelectric_tensor.o : ../../Modules/io_global.o
 piezoelectric_tensor.o : ../../Modules/kind.o
 piezoelectric_tensor.o : elastic_const.o
+piezoelectric_tensor.o : quadratic_surfaces.o
 point_group.o : ../../Modules/constants.o
 point_group.o : ../../Modules/io_global.o
 point_group.o : ../../Modules/kind.o

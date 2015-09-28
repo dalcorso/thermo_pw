@@ -154,16 +154,31 @@ Once \qe\ is correctly configured, you need to download the \PHonon\
 package. This can be done automatically typing \texttt{make ph} in
 the main \qe\ directory.
 
-Then you need to obtain the source code of the \thermo\ package. There
-are several possibilities depending on the version of \qe\ that you have.
-\texttt{Thermo\_pw.0.2.0.tar.gz} can be downloaded from the 
+Then you need to obtain the source code of the \thermo\ package. 
+\texttt{Thermo\_pw} can be downloaded from the 
 \texttt{qe-forge} website at \texttt{http://www.qe-} 
-\texttt{forge.org/gf/project/thermo\_pw/frs/} and is 
-compatible with \qe\ 5.1.2. \texttt{Thermo\_pw.0.1.0.tar.gz} can also 
-be downloaded from the same site and it is
-compatible with \qe\ 5.1.1 but there is no version of \texttt{thermo\_pw} 
-compatible with previous versions of \qe.
-The CVS version of the \texttt{thermo\_pw} directory can be downloaded as 
+\texttt{forge.org/gf/project/thermo\_pw/frs/}.
+There are several versions. The one that you need depends on the version 
+of \qe\ that you are using. 
+The following table is the compatibility table between \qe\ and 
+\texttt{thermo\_pw} versions. For the versions of \qe\ not listed in
+the table there is no compatible \texttt{thermo\_pw} package.
+\begin{center}
+\begin{table}
+\begin{tabular}{ll}
+\hline
+\hline
+\texttt{thermo\_pw} & \qe  \\
+\hline
+0.3.0 & 5.2.1, 5.2.0 \\
+0.2.0 & 5.1.2 \\
+0.1.0 & 5.1.1 \\
+\hline
+\hline
+\end{tabular}
+\end{table}
+\end{center}
+Also the CVS version of the \texttt{thermo\_pw} directory can be downloaded as 
 described at
 the web page: \texttt{http://www.qe-} \texttt{forge.org/gf/project/thermo\_pw/scmcvs/?action=AccessInfo}.
 The CVS version of \texttt{thermo\_pw} works only with the SVN version of \qe. 
@@ -174,7 +189,7 @@ have problems to download the CVS version.
 Getting the CVS version of \thermo, you obtain a directory \texttt{thermo\_pw}
 that should be moved in the main \qe\ directory. Getting one of the
 \texttt{.tar.gz} files and unpacking it in the main \qe\ directory
-with the command \texttt{tar -xzvf Thermo\_pw.0.2.0.tar.gz}, you 
+with the command \texttt{tar -xzvf thermo\_pw.0.3.0.tar.gz}, you 
 obtain the directory \texttt{thermo\_pw}.
 
 \subsection{Compiling}
@@ -609,12 +624,14 @@ density of vibrational states with a smearing approach. The density of
 states is used to calculate the harmonic thermodynamic properties: 
 vibrational energy, vibrational free energy, vibrational entropy, and 
 isochoric heat capacity.
-The plotted numerical values are per moles in an Avogadro number of unit 
-cells. The same thermodynamic quantities are calculated also by direct 
+The same thermodynamic quantities are calculated also by direct 
 integration over the Brillouin zone and compared in the plots.
 Note that presently no interpolation formula is used at low temperatures
 so that the present code is not suited to obtain accurate thermodynamical 
-properties at very low temperatures. \\
+properties at very low temperatures. 
+The plotted numerical values are per moles in an Avogadro number of unit 
+cells. If you need them per mole you have to divide by the number 
+of formula units in a unit cell. \\
 The input variables that control this option are:
 \begin{verbatim}
 freqmin_input : minimum frequency for phonon dos plot.
@@ -712,7 +729,7 @@ At finite pressure all methods give the elastic constants that
 relate linearly stress and strain. \\
 Using the computed elastic constants the code prints also the elastic 
 compliances tensor and the bulk modulus. Moreover it prints the
-Young modulus, the shear modulus and the Poisson ratio for policrystalline
+Young modulus, the shear modulus and the Poisson ratio for polycrystalline
 samples in the Voigt, Reuss, and in the Voigt-Reuss-Hill approximations.
 The input variables that control this option are:
 \begin{verbatim}
@@ -752,11 +769,23 @@ elastic constants obtained with the \texttt{energy} algorithm with respect
 to the other two might point to insufficient kinetic-energy cut-off. \\
 Number of tasks for this option: \texttt{ngeo\_strain} times the number of
 independent strains. \\
-%As a rule the user is not supposed to change the elastic algorithm.
-%The code will choose the one more suited to the given lattice. The variable
-%\texttt{elastic\_algorithm} is used for tests or when the stress is 
-%not available for a given functional. The latter case can be dealt with by
-%the algorithm \texttt{energy} when it is available for the given lattice.
+
+Using the elastic constants tensor the code can calculate and print
+a few auxiliary quantities:
+the bulk modulus, the polycrystalline averages of the Young modulus,
+of the shear modulus, and of the Poisson ratio. Both the Voigt and the
+Reuss averages are printed together with the Hill average.
+The Voigt-Reuss-Hill average of the shear modulus and the bulk modulus are 
+used to compute average sound velocities. The average of the Poisson ratio and
+the bulk modulus allow the estimation of the Debye 
+temperature. The Debye temperature is calculated also with the exact 
+formula evaluating the average sound 
+velocity from the angular average of the sound velocities calculated 
+for each propagation direction solving the Christoffel wave equation.
+The exact Debye temperature is used within the Debye model to calculate the
+Debye vibrational energy, free energy, entropy and constant volume heat
+capacity. These quantities are plotted in a postscript file as a function
+of temperature which is specified as explained for \texttt{what='scf\_disp'}.
 
 \subsection{\texttt{what='scf\_piezoelectric\_tensor'}}
 With this option the code calculates the piezoelectric tensor 
@@ -1005,7 +1034,7 @@ volume_ph     : The frequencies and Gruneisen parameters interpolated
 celldm_ph     : The frequencies and Gruneisen parameters interpolated 
                 at this crystal parameters are plotted on a postscript file. 
                 If this is 0.0 the celldm are calculated from temp_ph.
-                To have accurate Gruneisen parameters and intepolated
+                To have accurate Gruneisen parameters and interpolated
                 frequencies set the central geometry as close as possible 
                 to celldm_ph. When all nstep are odd, the central geometry 
                 is the one given in the input of pw.x.
@@ -1177,7 +1206,7 @@ same but can be used separately.
 
 \end{itemize}
 
-For a detailed description of each input variables please look at the beginning 
+For a detailed description of the input variables please look at the beginning 
 of the \texttt{fortran} sources of each code.
 
 \section{Examples and inputs}

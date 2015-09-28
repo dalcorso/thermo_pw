@@ -80,3 +80,17 @@ SUBROUTINE allocate_anharmonic()
   !
 END SUBROUTINE allocate_anharmonic
 
+SUBROUTINE allocate_debye()
+
+USE temperature,   ONLY : ntemp
+USE control_debye, ONLY : deb_energy, deb_free_energy, deb_entropy, deb_cv
+
+IMPLICIT NONE
+
+IF (.NOT. ALLOCATED (deb_energy) )       ALLOCATE( deb_energy(ntemp) )
+IF (.NOT. ALLOCATED (deb_free_energy) )  ALLOCATE( deb_free_energy(ntemp) )
+IF (.NOT. ALLOCATED (deb_entropy) )      ALLOCATE( deb_entropy(ntemp) )
+IF (.NOT. ALLOCATED (deb_cv) )           ALLOCATE( deb_cv(ntemp) )
+
+RETURN
+END SUBROUTINE allocate_debye

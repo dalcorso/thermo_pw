@@ -47,6 +47,10 @@ compute_cp.o : ../../Modules/constants.o
 compute_cp.o : ../../Modules/kind.o
 compute_cp.o : ../../thermo_pw/lib/isoentropic.o
 compute_cp.o : thermo_mod.o
+compute_density.o : ../../Modules/constants.o
+compute_density.o : ../../Modules/io_global.o
+compute_density.o : ../../Modules/ions_base.o
+compute_density.o : ../../Modules/kind.o
 compute_gruneisen.o : ../../Modules/ions_base.o
 compute_gruneisen.o : ../../Modules/kind.o
 compute_gruneisen.o : ../../Modules/mp_images.o
@@ -363,6 +367,7 @@ thermo_pw.o : ../../Modules/environment.o
 thermo_pw.o : ../../Modules/input_parameters.o
 thermo_pw.o : ../../Modules/io_files.o
 thermo_pw.o : ../../Modules/io_global.o
+thermo_pw.o : ../../Modules/ions_base.o
 thermo_pw.o : ../../Modules/kind.o
 thermo_pw.o : ../../Modules/mp.o
 thermo_pw.o : ../../Modules/mp_global.o
@@ -372,6 +377,7 @@ thermo_pw.o : ../../PHonon/PH/ph_restart.o
 thermo_pw.o : ../../PHonon/PH/phcom.o
 thermo_pw.o : ../../PHonon/PH/save_ph_input.o
 thermo_pw.o : ../../PW/src/pwcom.o
+thermo_pw.o : ../../thermo_pw/lib/debye_module.o
 thermo_pw.o : ../../thermo_pw/lib/elastic_const.o
 thermo_pw.o : ../../thermo_pw/lib/mp_asyn.o
 thermo_pw.o : ../../thermo_pw/lib/phdos_module.o
@@ -475,9 +481,11 @@ write_read_energy.o : ../../Modules/mp_world.o
 write_read_energy.o : ../../thermo_pw/lib/elastic_const.o
 write_read_energy.o : thermo_mod.o
 write_thermo.o : ../../Modules/io_global.o
+write_thermo.o : ../../Modules/ions_base.o
 write_thermo.o : ../../Modules/kind.o
 write_thermo.o : ../../Modules/mp.o
 write_thermo.o : ../../Modules/mp_images.o
+write_thermo.o : ../../thermo_pw/lib/debye_module.o
 write_thermo.o : ../../thermo_pw/lib/ph_freq_module.o
 write_thermo.o : ../../thermo_pw/lib/phdos_module.o
 write_thermo.o : thermo_mod.o

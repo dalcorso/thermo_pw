@@ -502,6 +502,29 @@ MODULE control_energy_plot
 
 END MODULE control_energy_plot
 
+MODULE control_debye
+
+  USE kinds, ONLY: DP
+  SAVE
+
+  REAL(DP) :: debye_t, deb_e0
+
+  REAL(DP), ALLOCATABLE :: deb_energy(:), deb_free_energy(:),  &
+                           deb_entropy(:), deb_cv(:)
+
+END MODULE control_debye
+
+MODULE control_macro_elasticity
+
+  USE kinds, ONLY: DP
+  SAVE
+
+  REAL(DP) :: macro_el(7)     ! the Voigt and Reuss approximations
+  REAL(DP) :: vp, vb, vg      ! the sound velocities
+  REAL(DP) :: approx_debye_t  ! approximate Debye temperature
+
+END MODULE control_macro_elasticity
+
 MODULE control_quadratic_energy
 
   USE kinds, ONLY: DP

@@ -7,11 +7,10 @@
 !
 PROGRAM elastic
 !
-!  This small program reads in input the elastic constants of a solid and
+!  This program reads in input the elastic constants of a solid and
 !  its Bravais lattice. Sets the elastic constants matrix and computes
-!  a few auxiliary quantities such as the bulk modulus 
-!  and some microcrystalline averages using the routines of the
-!  thermo_pw library
+!  a few auxiliary quantities such as the bulk modulus and some 
+!  polycrystalline averages using the routines of the thermo_pw library
 !
 !  The input variables are:
 !
@@ -23,18 +22,50 @@ PROGRAM elastic
 !  c_ij : the elastic constants as requested and dependent on the laue
 !         class.
 !
+!  optionally you can give also the density in kg/m^3. In this case the
+!  code computes also the Voigt-Reuss-Hill averaged sound velocities.
+!  If you do not know the density set it to 0.0.
+!
+!  Note 1 g/cm^3 -> 10^3 kg/m^3. If you have the density in g/cm^3 multiply
+!  by 10^3 to have it in kg/m^3
+!
+!  If you give also the number of atoms per cell and the cell volume
+!  (in (a.u.)^3) the code will compute the debye averaged sound velocity 
+!  and the debye temperature. It produces also a file that contains the
+!  Debye vibrational energy, free energy, entropy and heat capacity
+!  in the same units used by thermo_pw. The temperature if from 1. to 900.
+!  degrees in steps of 1. degree. These parameters cannot be changed from
+!  input. You have to recompile the code to change them. These 
+!  quantities are written in a file called thermo_debye.dat.
+!  If you do not know set nat to 0.
+!
 USE kinds, ONLY : DP
+USE mp_global,        ONLY : mp_startup, mp_global_end
+USE environment,      ONLY : environment_start, environment_end
 USE elastic_constants, ONLY : print_elastic_constants,     &
                               compute_elastic_compliances, &
                               print_elastic_compliances,   &
-                              print_macro_elasticity
-USE io_global, ONLY : stdout
+                              print_macro_elasticity,      &
+                              print_sound_velocities
+USE debye_module, ONLY : compute_debye_temperature, debye_cv, &
+                         debye_vib_energy, debye_free_energy, debye_entropy, &
+                         compute_debye_temperature_poisson, debye_e0
+USE io_global, ONLY : stdout, ionode
 
 IMPLICIT NONE
 
-INTEGER :: ibrav, laue
+INTEGER :: ibrav, laue, nat
 REAL(DP) :: el_con(6,6)          ! the elastic constants
 REAL(DP) :: el_compliances(6,6)  ! the elastic constants
+REAL(DP) :: density, omega, debye_t, approx_debye_t, poisson, deltat
+REAL(DP) :: macro_el(7), vp, vb, vg, deb_e0
+INTEGER :: i, ntemp, ios
+REAL(DP), ALLOCATABLE :: temp(:), deb_cv(:), deb_energy(:), &
+                         deb_free_energy(:), deb_entropy(:)
+CHARACTER(LEN=9) :: code='elastic'
+
+CALL mp_startup ( start_images=.true. )
+CALL environment_start ( code )
 
 WRITE(stdout,'(5x,"Bravais lattice index")') 
 READ(5,*) ibrav
@@ -66,6 +97,7 @@ ELSEIF (ibrav==4) THEN
 ! hexagonal
 !
    laue=23
+
    WRITE(stdout,'(5x,"C11?")')
    READ(5,*) el_con(1,1)
    WRITE(stdout,'(5x,"C12?")')
@@ -344,6 +376,17 @@ ELSE
    CALL errore('elastic','Bravais lattice not programmed',1)
 ENDIF
 
+WRITE(stdout,'(5x,"Density (kg/m^3)?")')
+READ(5,*) density
+IF (density > 0.0_DP) THEN
+   WRITE(stdout,'(5x,"Number of atoms per cell?")')
+   READ(5,*) nat
+   IF (nat>0) THEN
+      WRITE(stdout,'(5x,"Volume per cell?")')
+      READ(5,*) omega
+   END IF
+END IF
+
 CALL print_elastic_constants(el_con, .FALSE.)
 !
 !  now compute the elastic compliances and prints them
@@ -353,6 +396,72 @@ CALL print_elastic_compliances(el_compliances, .FALSE.)
 !
 !  now compute the macro elasticity quantities
 !
-CALL print_macro_elasticity(ibrav, el_con, el_compliances)
+CALL print_macro_elasticity(ibrav, el_con, el_compliances, macro_el)
+
+IF (density > 0.0_DP) THEN
+!
+!  print the Voigt-Reuss-Hill average sound velocities
+!
+   CALL print_sound_velocities( ibrav, el_con, el_compliances, &
+                                               density, vp, vb, vg )
+!
+!  compute the Debye temperature
+!
+   IF (nat > 0 .AND. omega > 0.0_DP) THEN
+!
+!   first the approximate debye temperature
+!
+      poisson=(macro_el(4)+macro_el(7) ) * 0.5_DP
+      CALL compute_debye_temperature_poisson(poisson, macro_el(1), &
+                               density, nat, omega, approx_debye_t)
+!
+!  then the real one
+!
+      CALL compute_debye_temperature(el_con, density, nat, omega, debye_t)
+      ntemp=900
+      deltat=1._DP
+      ALLOCATE(temp(ntemp))
+      ALLOCATE(deb_cv(ntemp))
+      ALLOCATE(deb_energy(ntemp))
+      ALLOCATE(deb_entropy(ntemp))
+      ALLOCATE(deb_free_energy(ntemp))
+      DO i=1,ntemp
+         temp(i)=deltat*i
+      ENDDO
+      CALL debye_e0 (debye_t, nat, deb_e0)
+      CALL debye_cv (debye_t, temp, ntemp, nat, deb_cv)
+      CALL debye_vib_energy (debye_t, temp, ntemp, nat, deb_energy)
+      CALL debye_free_energy (debye_t, temp, ntemp, nat, deb_free_energy)
+      CALL debye_entropy(debye_t, temp, ntemp, nat, deb_entropy)
+
+      IF (ionode) THEN
+         OPEN(UNIT=25, FILE='thermo_debye.dat', STATUS='unknown', &
+                       FORM='formatted', IOSTAT=ios)
+         WRITE(25,'("# Multiply by 13.6058 x 23060.35 = 313 754.5 to have &
+                  &energies in cal/(N mol).")')
+         WRITE(25,'("# Multiply by 13.6058 x 96526.0 = 1 313 313 to &
+                  &have energies in J/(N mol).")')
+         WRITE(25,'("# N is the number of formula units per cell.")')
+         WRITE(25,'("#",5x,"   T  ", 10x, " energy ", 9x, "  free energy ",&
+                  & 9x, " entropy ", 12x, " Cv ")')
+
+         DO i=1,ntemp
+            WRITE(25,'(5E16.8)') temp(i), deb_energy(i)+deb_e0,  &
+                              deb_free_energy(i)+deb_e0, deb_entropy(i), &
+                              deb_cv(i)
+         ENDDO
+         CLOSE(25)
+      END IF
+      DEALLOCATE(temp)
+      DEALLOCATE(deb_cv)
+      DEALLOCATE(deb_energy)
+      DEALLOCATE(deb_entropy)
+      DEALLOCATE(deb_free_energy)
+   END IF
+END IF
+
+CALL environment_end( code )
+!
+CALL mp_global_end ()
 
 END PROGRAM elastic

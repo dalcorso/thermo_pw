@@ -7,6 +7,7 @@ MODFLAGS= $(MOD_FLAG)../../Modules $(MOD_FLAG).
 
 MODULES = \
 asy.o \
+debye_module.o \
 bz_2d_form.o \
 bz_asy.o \
 elastic_const.o \

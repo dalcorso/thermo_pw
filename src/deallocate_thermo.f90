@@ -31,6 +31,8 @@ SUBROUTINE deallocate_thermo()
   USE control_conv,     ONLY : ke, keden, nk_test, sigma_test
   USE elastic_constants, ONLY : epsilon_geo, sigma_geo, epsilon_voigt
   USE control_elastic_constants, ONLY : rot_mat, aap_mat, apa_mat
+  USE control_debye,    ONLY : deb_energy, deb_free_energy, deb_entropy, &
+                               deb_cv
 
 
   IMPLICIT NONE
@@ -101,6 +103,11 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (rot_mat) )         DEALLOCATE(rot_mat)
   IF ( ALLOCATED (aap_mat) )         DEALLOCATE(aap_mat)
   IF ( ALLOCATED (apa_mat) )         DEALLOCATE(apa_mat)
+
+  IF ( ALLOCATED (deb_energy) )      DEALLOCATE( deb_energy )
+  IF ( ALLOCATED (deb_free_energy) ) DEALLOCATE( deb_free_energy )
+  IF ( ALLOCATED (deb_entropy) )     DEALLOCATE( deb_entropy )
+  IF ( ALLOCATED (deb_cv) )          DEALLOCATE( deb_cv )
   ! 
   RETURN
   !

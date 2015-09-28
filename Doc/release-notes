@@ -1,5 +1,7 @@
 New in version 0.4.0
 
+Introduced support for the Debye model. 
+
 Increased the maximum allowed number of steps in ionic relaxations.
 
 Introduced a minium strain in the calculation of elastic constants.

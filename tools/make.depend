@@ -1,5 +1,8 @@
+elastic.o : ../../Modules/environment.o
 elastic.o : ../../Modules/io_global.o
 elastic.o : ../../Modules/kind.o
+elastic.o : ../../Modules/mp_global.o
+elastic.o : ../../thermo_pw/lib/debye_module.o
 elastic.o : ../../thermo_pw/lib/elastic_const.o
 gener_2d_slab.o : ../../Modules/kind.o
 gener_3d_slab.o : ../../Modules/kind.o

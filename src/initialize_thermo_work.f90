@@ -227,6 +227,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            ENDIF
            lelastic_const=.TRUE.
            do_punch=.FALSE.
+           CALL allocate_debye()
         CASE ('scf_piezoelectric_tensor', 'mur_lc_piezoelectric_tensor')
            IF (ALLOCATED(energy_geo)) DEALLOCATE(energy_geo)
            IF (ALLOCATED(omega_geo)) DEALLOCATE(omega_geo)

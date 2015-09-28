@@ -58,6 +58,7 @@ PROGRAM thermo_pw
   ! ...               and orthorombic systems. 
   ! ...
   USE kinds,            ONLY : DP
+  USE ions_base,        ONLY : nat
   USE check_stop,       ONLY : check_stop_init
   USE mp_global,        ONLY : mp_startup, mp_global_end
   USE mp_images,        ONLY : nimage, nproc_image, my_image_id, root_image
@@ -84,6 +85,9 @@ PROGRAM thermo_pw
                                 compute_elastic_constants_adv, &
                                 compute_elastic_constants_ene, &
                                 print_sound_velocities
+  USE debye_module, ONLY : compute_debye_temperature,  &
+                           compute_debye_temperature_poisson
+  USE control_debye, ONLY : debye_t
   USE piezoelectric_tensor, ONLY : compute_piezo_tensor, &
                                 compute_d_piezo_tensor, &
                                 polar_geo, g_piezo_tensor, d_piezo_tensor, &
@@ -91,6 +95,7 @@ PROGRAM thermo_pw
   USE control_elastic_constants, ONLY : ngeo_strain, frozen_ions, &
                                 elastic_algorithm, rot_mat, omega0, at_save, &
                                 elcpvar
+  USE control_macro_elasticity, ONLY : macro_el, vp, vb, vg, approx_debye_t
   USE internal_files_names,  ONLY : flfrq_thermo, flvec_thermo
   USE control_paths,    ONLY : nqaux
   USE control_gnuplot,  ONLY : flgnuplot
@@ -129,6 +134,7 @@ PROGRAM thermo_pw
   LOGICAL  :: exst, parallelfs
   LOGICAL :: check_file_exists, check_dyn_file_exists
   CHARACTER(LEN=256) :: file_dat
+  REAL(DP) :: poisson
   ! Initialize MPI, clocks, print initial messages
   !
   CALL mp_startup ( start_images=.true. )
@@ -320,13 +326,28 @@ PROGRAM thermo_pw
 !
         CALL compute_elastic_compliances(el_con,el_compliances)
         CALL print_elastic_compliances(el_compliances, frozen_ions)
-        CALL print_macro_elasticity( ibrav_save, el_con, el_compliances)
+        CALL print_macro_elasticity(ibrav_save,el_con,el_compliances,macro_el)
 !
 !  here compute the sound velocities, using the density of the solid and
 !  the elastic constants
 !
         CALL print_sound_velocities( ibrav_save, el_con, el_compliances, &
-                                                         density )
+                                   density, vp, vb, vg )
+!
+!  here we compute the Debye temperature approximatively from the
+!  poisson ratio and the bulk modulus
+!
+        poisson=(macro_el(4)+macro_el(7) ) * 0.5_DP
+        CALL compute_debye_temperature_poisson(poisson, macro_el(1), &
+                               density, nat, omega, approx_debye_t)
+
+!
+!  compute the Debye temperature and the thermodynamic quantities
+!  within the Debye model
+!
+        CALL compute_debye_temperature(el_con, density, nat, omega, debye_t)
+        CALL write_thermo_debye()
+        CALL plot_thermo_debye()
 !
 !  save elastic constants and compliances on file
 !

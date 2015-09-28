@@ -38,7 +38,7 @@ MODULE elastic_constants
          el_compliances, compute_elastic_compliances, voigt_index, &
          print_elastic_compliances, print_strain, write_elastic, read_elastic,&
          macro_elasticity, print_macro_elasticity, el_cons_voigt, press, &
-         print_sound_velocities
+         print_sound_velocities, compute_sound
 
 CONTAINS
 !
@@ -1464,11 +1464,15 @@ IF (flag) THEN
    ENDDO
 ELSE
    elcon=0.0_DP
-   DO ij=1,6
-      CALL voigt_index(i,j,ij,.FALSE.)
-      DO mn=1,6
-         CALL voigt_index(m,n,mn,.FALSE.)
-         elcon(i,j,m,n) = elconv(ij,mn)
+   DO i=1,3
+      DO j=1,3
+         CALL voigt_index(i,j,ij,.TRUE.)
+         DO m=1,3
+            DO n=1,3
+               CALL voigt_index(m,n,mn,.TRUE.)
+               elcon(i,j,m,n) = elconv(ij,mn)
+            ENDDO
+         ENDDO
       ENDDO
    ENDDO
 ENDIF
@@ -1525,10 +1529,11 @@ nur = e0r/ (2.0_DP * g0r) - 1.0_DP
 RETURN
 END SUBROUTINE macro_elasticity
 
-SUBROUTINE print_macro_elasticity(ibrav, cmn, smn)
+SUBROUTINE print_macro_elasticity(ibrav, cmn, smn, macro_el)
 USE kinds, ONLY : DP
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: cmn(6,6), smn(6,6)
+REAL(DP), INTENT(INOUT) :: macro_el(7)
 INTEGER, INTENT(IN) :: ibrav
 REAL(DP) :: b0, e0v, g0v, nuv, e0r, g0r, nur
 
@@ -1555,10 +1560,18 @@ WRITE(stdout, '(5x, "Shear modulus G = ",f12.5," kbar")') (g0v+g0r)*0.5_DP
 WRITE(stdout, '(5x,"Poisson Ratio n = ",f12.5)') (e0v+e0r)/    &
                                                  (2.d0*(g0v+g0r))-1.0_DP
 
+macro_el(1)=b0
+macro_el(2)=e0v
+macro_el(3)=g0v
+macro_el(4)=nuv
+macro_el(5)=e0r
+macro_el(6)=g0r
+macro_el(7)=nur
+
 RETURN
 END SUBROUTINE print_macro_elasticity
 
-SUBROUTINE print_sound_velocities(ibrav, cmn, smn, density)
+SUBROUTINE print_sound_velocities(ibrav, cmn, smn, density, vp, vb, vg)
 !
 !  In input the elastic constants are in kbar, the elastic compliances 
 !  in kbar^-1 and the density in Kg/m^3. The sound velocity is printed
@@ -1566,8 +1579,9 @@ SUBROUTINE print_sound_velocities(ibrav, cmn, smn, density)
 !
 USE kinds, ONLY : DP
 IMPLICIT NONE
-REAL(DP), INTENT(IN) :: cmn(6,6), smn(6,6), density
 INTEGER, INTENT(IN) :: ibrav
+REAL(DP), INTENT(IN) :: cmn(6,6), smn(6,6), density
+REAL(DP), INTENT(OUT) :: vp, vb, vg 
 REAL(DP) :: b0, e0v, g0v, nuv, e0r, g0r, nur
 
 REAL(DP) :: g0
@@ -1578,14 +1592,89 @@ WRITE(stdout, '(/,5x, "Voigt-Reuss-Hill average; sound velocities:",/)')
 
 g0 = ( g0r + g0v ) * 0.5_DP
 
-WRITE(stdout, '(5x, "Compressional V_P = ",f12.3," m/s")') &
-                        SQRT( ( b0 + 4.0_DP * g0 / 3.0_DP ) * 1.D8 / density )
-WRITE(stdout, '(5x, "Bulk          V_B = ",f12.3," m/s")') &
-                        SQRT( b0 * 1.D8 / density )
-WRITE(stdout, '(5x, "Shear         V_G = ",f12.3," m/s")') &
-                        SQRT( g0 * 1.D8 / density )
+vp = SQRT( ( b0 + 4.0_DP * g0 / 3.0_DP ) * 1.D8 / density )
+vb = SQRT( b0 * 1.D8 / density )
+vg = SQRT( g0 * 1.D8 / density )
+
+WRITE(stdout, '(5x, "Compressional V_P = ",f12.3," m/s")') vp
+WRITE(stdout, '(5x, "Bulk          V_B = ",f12.3," m/s")') vb
+WRITE(stdout, '(5x, "Shear         V_G = ",f12.3," m/s")') vg
 
 RETURN
 END SUBROUTINE print_sound_velocities
+
+SUBROUTINE set_sound_mat(elcon, qvec, soundmat)
+!
+!  This routine receives the elastic constants in the format C_{ijkl}
+!  a direction for the propagation of the sound waves and gives as
+!  output the matrix that has to be diagonalized to obtain the sound
+!  speed in the input direction
+!
+USE kinds, ONLY : DP
+IMPLICIT NONE
+REAL(DP), INTENT(IN) :: elcon(3,3,3,3)   ! the elastic constants
+REAL(DP), INTENT(IN) :: qvec(3)           ! the direction of the sound waves
+REAL(DP), INTENT(INOUT) :: soundmat(3,3)  ! the matrix that must be 
+                                          ! diagonalized to compute the 
+                                          ! sound speed
+INTEGER :: i,j,k,l
+
+DO i=1,3
+   DO l=1,3
+      soundmat(i,l)=0.0_DP
+      DO j=1,3
+         DO k=1,3
+            soundmat(i,l) = soundmat(i,l) + elcon(i,j,k,l)*qvec(j)*qvec(k)
+         END DO
+      END DO
+   END DO
+END DO
+
+RETURN
+END SUBROUTINE set_sound_mat
+
+SUBROUTINE compute_sound(elcon, qvec, density, sound_speed, sound_disp)
+!
+!  This routine receives as input the elastic constants in Voigt notation 
+!  C_{ij}, the direction of propagation of the sound, and the
+!  density of the solid. It gives as output the sound velocity and the
+!  eigenvectors that give the polarization of the sound wave.
+!  
+!  In input the density is in kg/m^3 and the elastic constants in kbar.
+!  On output the speed of sound is in m/s.
+!
+USE kinds, ONLY : DP
+IMPLICIT NONE
+
+REAL(DP), INTENT(IN) :: elcon(3,3,3,3)
+REAL(DP), INTENT(IN) :: qvec(3)
+REAL(DP), INTENT(IN) :: density
+
+REAL(DP), INTENT(INOUT) :: sound_speed(3)
+REAL(DP), INTENT(INOUT) :: sound_disp(3,3)
+
+REAL(DP) :: soundmat(3,3)
+INTEGER :: i
+!
+!  set up the matrix to diagonalize
+!
+CALL set_sound_mat(elcon, qvec, soundmat)
+!
+!  and diagonalize it
+!
+!WRITE(6,*) soundmat(1,1), soundmat(1,2), soundmat(1,3)
+!WRITE(6,*) soundmat(2,1), soundmat(2,2), soundmat(2,3)
+!WRITE(6,*) soundmat(3,1), soundmat(3,2), soundmat(3,3)
+
+CALL rdiagh( 3, soundmat, 3, sound_speed, sound_disp )
+!
+!  the factor 1D8 converts from kbar to N/m^2
+!
+DO i=1,3
+   sound_speed(i) = SQRT( sound_speed(i) * 1.D8 / density )
+ENDDO
+
+RETURN
+END SUBROUTINE compute_sound
 
 END MODULE elastic_constants
