@@ -57,8 +57,8 @@ IMPLICIT NONE
 INTEGER :: ibrav, laue, nat
 REAL(DP) :: el_con(6,6)          ! the elastic constants
 REAL(DP) :: el_compliances(6,6)  ! the elastic constants
-REAL(DP) :: density, omega, debye_t, approx_debye_t, poisson, deltat
-REAL(DP) :: macro_el(7), vp, vb, vg, deb_e0
+REAL(DP) :: density, omega, debye_t, approx_debye_t, poisson, bulkm, deltat
+REAL(DP) :: macro_el(8), vp, vb, vg, deb_e0
 INTEGER :: i, ntemp, ios
 REAL(DP), ALLOCATABLE :: temp(:), deb_cv(:), deb_energy(:), &
                          deb_free_energy(:), deb_entropy(:)
@@ -411,8 +411,9 @@ IF (density > 0.0_DP) THEN
 !
 !   first the approximate debye temperature
 !
-      poisson=(macro_el(4)+macro_el(7) ) * 0.5_DP
-      CALL compute_debye_temperature_poisson(poisson, macro_el(1), &
+      poisson=(macro_el(4) + macro_el(8)) * 0.5_DP
+      bulkm=(macro_el(1) + macro_el(5)) * 0.5_DP
+      CALL compute_debye_temperature_poisson(poisson, bulkm, &
                                density, nat, omega, approx_debye_t)
 !
 !  then the real one

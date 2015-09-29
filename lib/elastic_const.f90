@@ -1480,8 +1480,8 @@ ENDIF
 RETURN
 END SUBROUTINE el_cons_voigt
 
-SUBROUTINE macro_elasticity( ibrav, cmn, smn, b0,  &
-                             e0v, g0v, nuv, e0r, g0r, nur )
+SUBROUTINE macro_elasticity( ibrav, cmn, smn, b0v,  &
+                             e0v, g0v, nuv, b0r, e0r, g0r, nur )
 !
 !  This routine collects some relationships that link the elastic constants 
 !  to the parameters of the macroscopic elasticity and to
@@ -1490,10 +1490,11 @@ SUBROUTINE macro_elasticity( ibrav, cmn, smn, b0,  &
 !  It receives as input the elastic constants and compliances and gives
 !  as output:
 !
-!  b0 : the bulk modulus
+!  b0v : The Voigt average of the bulk modulus
 !  e0v : The Voigt average Young modulus
 !  g0v : The Voigt average Shear modulus
 !  nuv : The Voigt average Poisson ratio 
+!  b0r : The Reuss average of the bulk modulus
 !  e0r : The Reuss average Young modulus
 !  g0r : The Reuss average Shear modulus
 !  nur : The Reuss average Poisson ratio 
@@ -1502,11 +1503,9 @@ USE kinds, ONLY : DP
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ibrav
 REAL(DP), INTENT(IN) :: cmn(6,6), smn(6,6)
-REAL(DP), INTENT(OUT) :: b0, e0v, g0v, nuv, e0r, g0r, nur
+REAL(DP), INTENT(OUT) :: b0v, e0v, g0v, nuv, b0r, e0r, g0r, nur
 REAL(DP) :: c11v, c12v, c44v
 
-b0=1.0_DP/(smn(1,1) + smn(2,2) + smn(3,3) + 2.0_DP*smn(1,2) + 2.0_DP*smn(1,3)+ &
-                                        2.0_DP*smn(2,3))
 
 c11v= (3.0_DP / 15.0_DP)*(cmn(1,1) + cmn(2,2) + cmn(3,3)) +   &
       (2.0_DP / 15.0_DP)*(cmn(1,2) + cmn(2,3) + cmn(1,3)) +   &
@@ -1515,9 +1514,12 @@ c12v= (1.0_DP / 15.0_DP)*(cmn(1,1) + cmn(2,2) + cmn(3,3)) +   &
       (4.0_DP / 15.0_DP)*(cmn(1,2) + cmn(2,3) + cmn(1,3)) -   &
       (2.0_DP / 15.0_DP)*(cmn(4,4) + cmn(5,5) + cmn(6,6)) 
 c44v= (c11v-c12v)*0.5_DP
+b0v=( c11v + 2.0_DP * c12v) / 3.0_DP
 e0v = (c11v - c12v)*(c11v+2.0_DP*c12v) / (c11v+c12v)
 g0v = c44v
 nuv = e0v/ (2.0_DP * g0v) - 1.0_DP
+b0r=1.0_DP/(smn(1,1) + smn(2,2) + smn(3,3) + &
+    2.0_DP*smn(1,2) + 2.0_DP*smn(1,3)+ 2.0_DP*smn(2,3))
 e0r = 15.0_DP /( 3.0_DP *(smn(1,1) + smn(2,2) + smn(3,3)) +  &
                  2.0_DP *(smn(1,2) + smn(2,3) + smn(1,3)) +  &
                          (smn(4,4) + smn(5,5) + smn(6,6)) )
@@ -1533,40 +1535,43 @@ SUBROUTINE print_macro_elasticity(ibrav, cmn, smn, macro_el)
 USE kinds, ONLY : DP
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: cmn(6,6), smn(6,6)
-REAL(DP), INTENT(INOUT) :: macro_el(7)
+REAL(DP), INTENT(INOUT) :: macro_el(8)
 INTEGER, INTENT(IN) :: ibrav
-REAL(DP) :: b0, e0v, g0v, nuv, e0r, g0r, nur
+REAL(DP) :: b0v, e0v, g0v, nuv, b0r, e0r, g0r, nur
 
-CALL macro_elasticity( ibrav, cmn, smn, b0, &
-                             e0v, g0v, nuv, e0r, g0r, nur )
+CALL macro_elasticity( ibrav, cmn, smn, b0v, &
+                             e0v, g0v, nuv, b0r, e0r, g0r, nur )
 
 WRITE(stdout,'(/,20x,40("-"),/)')
-WRITE(stdout, '(5x, "Bulk modulus  B = ",f12.5," kbar")') b0
 
 WRITE(stdout, '(/,5x, "Voigt approximation:")') 
 
+WRITE(stdout, '(5x, "Bulk modulus  B = ",f12.5," kbar")') b0v
 WRITE(stdout, '(5x, "Young modulus E = ",f12.5," kbar")') e0v
 WRITE(stdout, '(5x, "Shear modulus G = ",f12.5," kbar")') g0v
 WRITE(stdout, '(5x,"Poisson Ratio n = ",f12.5)') nuv
 
 WRITE(stdout, '(/,5x, "Reuss approximation:")') 
+WRITE(stdout, '(5x, "Bulk modulus  B = ",f12.5," kbar")') b0r
 WRITE(stdout, '(5x, "Young modulus E = ",f12.5," kbar")') e0r
 WRITE(stdout, '(5x, "Shear modulus G = ",f12.5," kbar")') g0r
 WRITE(stdout, '(5x,"Poisson Ratio n = ",f12.5)') nur
 
 WRITE(stdout, '(/,5x, "Voigt-Reuss-Hill average of the two approximations:")') 
+WRITE(stdout, '(5x, "Bulk modulus  B = ",f12.5," kbar")') (b0v+b0r)*0.5_DP
 WRITE(stdout, '(5x, "Young modulus E = ",f12.5," kbar")') (e0v+e0r)*0.5_DP
 WRITE(stdout, '(5x, "Shear modulus G = ",f12.5," kbar")') (g0v+g0r)*0.5_DP
 WRITE(stdout, '(5x,"Poisson Ratio n = ",f12.5)') (e0v+e0r)/    &
                                                  (2.d0*(g0v+g0r))-1.0_DP
 
-macro_el(1)=b0
+macro_el(1)=b0v
 macro_el(2)=e0v
 macro_el(3)=g0v
 macro_el(4)=nuv
-macro_el(5)=e0r
-macro_el(6)=g0r
-macro_el(7)=nur
+macro_el(5)=b0r
+macro_el(6)=e0r
+macro_el(7)=g0r
+macro_el(8)=nur
 
 RETURN
 END SUBROUTINE print_macro_elasticity
@@ -1582,15 +1587,16 @@ IMPLICIT NONE
 INTEGER, INTENT(IN) :: ibrav
 REAL(DP), INTENT(IN) :: cmn(6,6), smn(6,6), density
 REAL(DP), INTENT(OUT) :: vp, vb, vg 
-REAL(DP) :: b0, e0v, g0v, nuv, e0r, g0r, nur
+REAL(DP) :: b0v, e0v, g0v, nuv, b0r, e0r, g0r, nur
 
-REAL(DP) :: g0
+REAL(DP) :: g0, b0
 
-CALL macro_elasticity( ibrav, cmn, smn, b0, e0v, g0v, nuv, e0r, g0r, nur )
+CALL macro_elasticity( ibrav, cmn, smn, b0v, e0v, g0v, nuv, b0r, e0r, g0r, nur )
 
 WRITE(stdout, '(/,5x, "Voigt-Reuss-Hill average; sound velocities:",/)') 
 
 g0 = ( g0r + g0v ) * 0.5_DP
+b0 = ( b0r + b0v ) * 0.5_DP
 
 vp = SQRT( ( b0 + 4.0_DP * g0 / 3.0_DP ) * 1.D8 / density )
 vb = SQRT( b0 * 1.D8 / density )

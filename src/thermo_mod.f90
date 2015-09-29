@@ -519,7 +519,7 @@ MODULE control_macro_elasticity
   USE kinds, ONLY: DP
   SAVE
 
-  REAL(DP) :: macro_el(7)     ! the Voigt and Reuss approximations
+  REAL(DP) :: macro_el(8)     ! the Voigt and Reuss approximations
   REAL(DP) :: vp, vb, vg      ! the sound velocities
   REAL(DP) :: approx_debye_t  ! approximate Debye temperature
 

@@ -88,7 +88,7 @@ END DO
 integral= integral * delta_theta * delta_phi / 12.0_DP / pi
 average_sound_speed=1.0_DP / integral**(1.0_DP/3.0_DP)
 WRITE(stdout,'(/,20x,40("-"),/)')
-WRITE(stdout,'(5x,"Average Debye sound speed = ", f12.3, " m/s")') &
+WRITE(stdout,'(5x,"Average Debye sound velocity = ", f12.3, " m/s")') &
                                                     average_sound_speed 
 RETURN
 END SUBROUTINE compute_average_sound

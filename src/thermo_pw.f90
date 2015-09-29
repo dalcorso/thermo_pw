@@ -134,7 +134,7 @@ PROGRAM thermo_pw
   LOGICAL  :: exst, parallelfs
   LOGICAL :: check_file_exists, check_dyn_file_exists
   CHARACTER(LEN=256) :: file_dat
-  REAL(DP) :: poisson
+  REAL(DP) :: poisson, bulkm
   ! Initialize MPI, clocks, print initial messages
   !
   CALL mp_startup ( start_images=.true. )
@@ -337,8 +337,9 @@ PROGRAM thermo_pw
 !  here we compute the Debye temperature approximatively from the
 !  poisson ratio and the bulk modulus
 !
-        poisson=(macro_el(4)+macro_el(7) ) * 0.5_DP
-        CALL compute_debye_temperature_poisson(poisson, macro_el(1), &
+        poisson=(macro_el(4)+macro_el(8) ) * 0.5_DP
+        bulkm=(macro_el(1)+macro_el(5) ) * 0.5_DP
+        CALL compute_debye_temperature_poisson(poisson, bulkm, &
                                density, nat, omega, approx_debye_t)
 
 !
