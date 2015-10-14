@@ -568,7 +568,7 @@ SUBROUTINE thermo_readin()
      ENDIF
   ENDIF
      
-  CALL clean_ngeo()
+  CALL clean_ngeo(ngeo,ibrav)
      
   DEALLOCATE(input)
   DEALLOCATE(iun_image)
