@@ -185,6 +185,7 @@ SUBROUTINE run_thermo_asyncronously(nwork, part, igeom, auxdyn)
      IF (my_image_id == root_image) THEN
         CALL initialize_thermo_master(nwork, part)
         DO iwork = 1, nwork
+           CALL set_thermo_work_todo(iwork, part, iq, irr, igeom)
            WRITE(stdout,'(/,2x,76("+"))')
            IF (lpwscf(iwork)) THEN
               WRITE(stdout,'(5x,"Doing geometry", i5)') iwork
@@ -196,7 +197,6 @@ SUBROUTINE run_thermo_asyncronously(nwork, part, igeom, auxdyn)
            END IF
            WRITE(stdout,'(2x,76("+"),/)')
             
-           CALL set_thermo_work_todo(iwork, part, iq, irr, igeom)
            IF (lpwscf(iwork)) THEN
               CALL check_existence(iwork,part,run)
               IF (run) THEN
