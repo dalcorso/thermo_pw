@@ -14,7 +14,7 @@ then
     dirs=" Modules clib PW/src CPV/src flib PW/tools upftools PP/src PWCOND/src\
            PHonon/Gamma PHonon/PH PHonon/D3 PHonon/FD atomic/src XSpectra/src \
            ACDFT NEB/src TDDFPT/src GIPAW/src GWW/pw4gww GWW/gww GWW/head \
-           thermo_pw/src thermo_pw/lib thermo_pw/tools"
+           thermo_pw/src thermo_pw/lib thermo_pw/tools thermo_pw/qe"
           
 elif
     test $1 = "-addson" 
@@ -94,6 +94,7 @@ for dir in $dirs; do
 	thermo_pw/tools )
              DEPENDS="$LEVEL2/include $LEVEL2/iotk/src $LEVEL2/Modules \
                       $LEVEL2/PW/src $LEVEL2/PHonon/PH $LEVEL2/thermo_pw/lib" ;;
+
     *)
 # if addson needs a make.depend file
 	DEPENDS="$DEPENDS $add_deps"
@@ -108,15 +109,15 @@ for dir in $dirs; do
 	$TOPDIR/moduledep.sh $DEPENDS > make.depend
 	$TOPDIR/includedep.sh $DEPENDS >> make.depend
 
-        # handle special cases
-        sed '/@\/cineca\/prod\/hpm\/include\/f_hpm.h@/d' \
-            make.depend > make.depend.tmp
-        sed '/@iso_c_binding@/d;/@ifcore@/d' make.depend.tmp > make.depend
+        # handle special cases: hardware-specific monitoring tools
+        sed '/@\/cineca\/prod\/hpm\/include\/f_hpm.h@/d;/@ifcore@/d' make.depend > make.depend.tmp
+        # handle special cases: modules for C-fortran binding, system utilities
+        sed '/@iso_c_binding@/d;/@f90_unix_env@/d' make.depend.tmp > make.depend
 
         if test "$DIR" = "Modules"
         then
             sed '/@mpi@/d;/@elpa1@/d' make.depend > make.depend.tmp
-            sed '/@mkl_dfti/d' make.depend.tmp > make.depend
+            sed '/@mkl_dfti/d;/@fftw3.f/d' make.depend.tmp > make.depend
         fi
 
         if test "$DIR" = "clib"
@@ -127,8 +128,8 @@ for dir in $dirs; do
 
         if test "$DIR" = "PW/src" || test "$DIR" = "TDDFPT/src"
         then
-            sed '/@environ_/d'  make.depend > make.depend.tmp
-            sed '/@solvent_tddfpt@/d' make.depend.tmp > make.depend
+            sed '/@environ_/d;/@solvent_tddfpt@/d' make.depend > make.depend.tmp
+            sed '/fft_defs.h@/d' make.depend.tmp > make.depend
         fi
 
         rm -f make.depend.tmp
