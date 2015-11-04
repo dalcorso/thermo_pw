@@ -14,6 +14,10 @@ phqscf_tpw : call solve_linter_tpw instead of solve_linter
 prepare_q_tpw: use the variable tcollect_all to avoid the calculation of
 the bands in the final run that collects all the dynamical matrices.
 
+run_nscf_tpw : call set_small_group_q also in the lgamma_iq case. This change
+               can probably be done also in the phonon, but it is tested here
+               before changing qe.
+
 do_phonon_tpw : call phqscf_tpw instead of phqscf and prepare_q_tpw instead
             of prepare_q.
 

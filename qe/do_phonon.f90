@@ -55,7 +55,7 @@ SUBROUTINE do_phonon_tpw(auxdyn)
      !
      !  If necessary the bands are recalculated
      !
-     IF (setup_pw) CALL run_nscf(do_band, iq)
+     IF (setup_pw) CALL run_nscf_tpw(do_band, iq)
      !
      !  If only_wfc=.TRUE. the code computes only the wavefunctions 
      !

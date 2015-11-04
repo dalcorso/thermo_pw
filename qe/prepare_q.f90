@@ -50,6 +50,7 @@ SUBROUTINE prepare_q_tpw(auxdyn, do_band, do_iq, setup_pw, iq)
   CHARACTER (LEN=256), INTENT(IN) :: auxdyn
   CHARACTER (LEN=6), EXTERNAL :: int_to_char
   INTEGER :: irr, ierr
+  LOGICAL :: check_bands
   ! YAMBO >
   LOGICAL :: l_exist
   ! YAMBO <
@@ -210,6 +211,7 @@ SUBROUTINE prepare_q_tpw(auxdyn, do_band, do_iq, setup_pw, iq)
 
   IF ( done_iq(iq) ) do_band=.FALSE.
   IF (tcollect_all)  do_band=.FALSE.
+  done_bands(iq) = check_bands(tmp_dir_ph, xq, iq)
 
   RETURN
   !
