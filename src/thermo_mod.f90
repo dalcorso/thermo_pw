@@ -289,6 +289,13 @@ MODULE control_thermo
                             ! are calculated
   LOGICAL :: lmatdyn=.FALSE.  ! if .true. the phonon are interpolated
 
+  LOGICAL :: do_scf_relax   ! to be used with cells with internal 
+                            ! degrees of freedom. If .true. reoptimize
+                            ! the atomic coordinates after finding 
+                            ! the equilibrium crystal parameters. 
+                            ! Not necessary for phonons, but used with
+                            ! elastic constants and piezoelectric tensor
+
   INTEGER :: spin_component
   !
   CHARACTER(LEN=256) :: outdir_thermo ! the outdir read from the input

@@ -58,7 +58,7 @@ PROGRAM thermo_pw
   ! ...               and orthorombic systems. 
   ! ...
   USE kinds,            ONLY : DP
-  USE ions_base,        ONLY : nat
+  USE ions_base,        ONLY : nat, tau
   USE check_stop,       ONLY : check_stop_init
   USE mp_global,        ONLY : mp_startup, mp_global_end
   USE mp_images,        ONLY : nimage, nproc_image, my_image_id, root_image
@@ -94,7 +94,7 @@ PROGRAM thermo_pw
                                 print_d_piezo_tensor, print_g_piezo_tensor
   USE control_elastic_constants, ONLY : ngeo_strain, frozen_ions, &
                                 elastic_algorithm, rot_mat, omega0, at_save, &
-                                elcpvar
+                                elcpvar, tau_save
   USE control_macro_elasticity, ONLY : macro_el, vp, vb, vg, approx_debye_t
   USE internal_files_names,  ONLY : flfrq_thermo, flvec_thermo
   USE control_paths,    ONLY : nqaux
@@ -270,6 +270,11 @@ PROGRAM thermo_pw
            ENDIF
         ENDIF
      ENDIF
+     CALL mp_bcast(tau, meta_ionode_id, world_comm)
+     CALL mp_bcast(celldm, meta_ionode_id, world_comm)
+     CALL mp_bcast(at, meta_ionode_id, world_comm)
+     CALL mp_bcast(omega, meta_ionode_id, world_comm)
+     CALL set_equilibrium_conf(celldm, tau, at, omega)
      with_asyn_images=(nimage>1)
   END IF
      !

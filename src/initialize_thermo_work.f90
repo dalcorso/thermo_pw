@@ -20,7 +20,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
                              lph, lpwscf_syn_1, lbands_syn_1, ldos, lq2r,   &
                              lmatdyn, ltherm, lconv_ke_test, lconv_nk_test, &
                              lstress, lelastic_const, lpiezoelectric_tensor,&
-                             lberry, lpolarization, lpart2_pw
+                             lberry, lpolarization, lpart2_pw, do_scf_relax
   USE control_conv,   ONLY : nke, ke, deltake, nkeden, deltakeden, keden, &
                              nnk, nk_test, deltank, nsigma, sigma_test, &  
                              deltasigma
@@ -150,14 +150,17 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            CALL allocate_thermodynamics()
         CASE ('mur_lc_elastic_constants') 
            CALL initialize_mur(nwork)
+           lpwscf_syn_1=do_scf_relax
            lpart2_pw=.TRUE.
            do_punch=.FALSE.
         CASE ('mur_lc_piezoelectric_tensor') 
            CALL initialize_mur(nwork)
+           lpwscf_syn_1=do_scf_relax
            lpart2_pw=.TRUE.
            do_punch=.FALSE.
         CASE ('mur_lc_polarization')
            CALL initialize_mur(nwork)
+           lpwscf_syn_1=do_scf_relax
            lpart2_pw=.TRUE.
            do_punch=.FALSE.
 !
@@ -516,3 +519,32 @@ INTEGER :: iq, irr
 
 RETURN
 END SUBROUTINE initialize_ph_work
+
+SUBROUTINE set_equilibrium_conf( celldm, tau, at, omega )
+!
+!  After the murnaghan equation this routine sets the input variables
+!  as if they were the equilibrium crystal parameters. This
+!  has to be changed soon, the input variables should not be changed
+!  and this variables should have a different name.
+!
+USE kinds, ONLY : DP
+USE ions_base, ONLY : nat
+USE control_elastic_constants, ONLY : omega0, tau_save, at_save
+USE control_mur, ONLY : celldm0
+IMPLICIT NONE
+
+REAL(DP), INTENT(IN) :: celldm(6), tau(3,nat), at(3,3), omega
+REAL(DP) :: bg(3,3)
+
+tau_save(:,:) = tau(:,:)
+celldm0(:) = celldm(:)
+at_save(:,:) = at(:,:)
+omega0=omega
+!
+!  tau_save is given in crystal coordinates
+!
+CALL recips(at(1,1),at(1,2),at(1,3),bg(1,1),bg(1,2),bg(1,3))
+CALL cryst_to_cart( nat, tau_save, bg, -1 )
+
+RETURN
+END SUBROUTINE set_equilibrium_conf

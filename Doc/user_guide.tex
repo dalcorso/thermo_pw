@@ -963,6 +963,17 @@ As \texttt{what='scf\_elastic\_constants'} but the calculation is made at the
 geometry that minimizes the energy. The energy minimization is 
 done as described for \texttt{what='mur\_lc'}. An example of the use of this 
 option can be found in \texttt{example13}. \\
+One additional input variable controls this option.
+\begin{verbatim}
+do_scf_relax : if .TRUE. the code makes a self-consistent relax calculation at
+               the equilibrium geometry to find the optimized atomic 
+               coordinates, before computing the elastic constants.
+               This step is needed only for solids that have internal
+               degrees of freedom in the unstrained configuration. 
+               If .FALSE. the coordinates of the input geometry are strained 
+               uniformly to the equilibrium geometry.
+               Default: logical .FALSE. 
+\end{verbatim}
 Number of tasks for this option: Maximum between the the number of tasks
 needed by the \texttt{what='mur\_lc'} option and the number of tasks
 needed for the \texttt{what='scf\_elastic\_constants'} option.
@@ -1150,28 +1161,28 @@ the following programs:
 
 \begin{itemize}
 
-\item \texttt{group\_name.x} a small tool that gives the names of the 
+\item \texttt{group\_name.x} gives the names of the 
 space group that correspond to a given space group number. 
 
-\item \texttt{group\_number.x} a small tool that gives the space group number
+\item \texttt{group\_number.x} gives the space group number
 that corresponds to a given space group name. It also lists many equivalent
 names of the same group.
 
-\item \texttt{supercell.x} a small tool that reads a three dimensional
+\item \texttt{supercell.x} reads a three dimensional
 Bravais lattice index and the atomic coordinates of the atoms inside a unit
 cell and produces a supercell with $n1 \times n2 \times n3$ cells of the original
 unit cell. For centered cells there is the option to consider $n1$, $n2$,
 and $n3$ in the conventional or in the centered cell.
 The input unit cell can be specified also by giving the space group and
 the coordinates of the nonequivalents atoms.
-It can be useful to study defects or as a small tool to calculate all the 
+It can be useful to study defects or to calculate all the 
 atomic positions starting from the space-group and the 
 nonequivalents positions.
 
-\item \texttt{translate.x} a small tool that reads a set of atomic positions
+\item \texttt{translate.x} reads a set of atomic positions
 and translates them of a fixed vector.
 
-\item \texttt{gener\_nanowire.x} a small tool that reads a two dimensional (2D)
+\item \texttt{gener\_nanowire.x} reads a two dimensional (2D)
 Bravais lattice index and atomic coordinates an generates a sheet of type
 $(m,n)$. A sheet contained between the two vectors 
 ${\bf C} = m {\bf a}_1 + n {\bf a}_2$ and ${\bf T} = p {\bf a}_1 + q {\bf a}_2$
@@ -1181,25 +1192,25 @@ lattice).
 For lattices that allow it, $p$ and $q$ can be determined automatically so that 
 ${\bf T}$ is perpendicular to ${\bf C}$.
 
-\item \texttt{gener\_2d\_slab.x} a small tool that reads a two dimensional 
+\item \texttt{gener\_2d\_slab.x} reads a two dimensional 
 Bravais lattice index and atomic coordinates an generates an infinite ribbon
 perpendicular to ${\bf G} = m {\bf b}_1 + n {\bf b}_2$, where 
 ${\bf b}_1$ and ${\bf b}_2$ are the primitive Bravais lattice vectors 
 of the 2D Bravais lattice. The number of rows of the ribbon, and the number of
 atoms per row are given as an input variables.
 
-\item \texttt{gener\_3d\_slab.x} a small tool that reads a three dimensional
+\item \texttt{gener\_3d\_slab.x} reads a three dimensional
 Bravais lattice index and atomic coordinates and generates an infinite slab
 perpendicular to ${\bf G} = m {\bf b}_1 + n {\bf b}_2 + o {\bf b}_3$, where
 ${\bf b}_1$, ${\bf b}_2$ and ${\bf b}_3$ are the primitive reciprocal lattice
 vectors of the 3D Bravais lattice. The number of layers of each slab, and the
 size of the surface unit cell are given as input parameters.
 
-\item \texttt{plot\_sur\_states.x} a small tool that reads the dump file
+\item \texttt{plot\_sur\_states.x} reads the dump file
 with the planar averages of the all the states, selects the k points
 and the bands requested in input and generate the plot of the states.
 
-\item \texttt{elastic.x} a small tool that reads the elastic constants of a
+\item \texttt{elastic.x} reads the elastic constants of a
 solid and computes the elastic compliances, the bulk modulus, and a few
 polycrystalline averages. It uses the \tpw\ library so the output is the
 same but can be used separately. 

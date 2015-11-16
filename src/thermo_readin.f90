@@ -15,7 +15,8 @@ SUBROUTINE thermo_readin()
   !
   USE kinds,                ONLY : DP
   USE thermo_mod,           ONLY : what, ngeo, step_ngeo, reduced_grid
-  USE control_thermo,       ONLY : outdir_thermo, after_disp, with_eigen
+  USE control_thermo,       ONLY : outdir_thermo, after_disp, with_eigen,  &
+                                   do_scf_relax
   USE data_files,           ONLY : flevdat, flfrc, flfrq, fldos, fltherm,  &
                                    flanhar, filband, flkeconv,             &
                                    flenergy, flpbs, flprojlayer,           &
@@ -118,6 +119,7 @@ SUBROUTINE thermo_readin()
                             temp_ph, volume_ph, celldm_ph,  &
                             after_disp,                     &
                             with_eigen,                     &
+                            do_scf_relax,                   &
                             fildyn,                         &
                             flevdat,                        &
                             flpband, flpgrun,               &
@@ -229,6 +231,7 @@ SUBROUTINE thermo_readin()
   subtract_vacuum=.TRUE.
   force_bands=.FALSE.
   only_bands_plot=.FALSE.
+  do_scf_relax=.FALSE.
   dump_states=.FALSE.
 
   grunmin_input=0.0_DP
