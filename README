@@ -19,7 +19,7 @@ dispersions, or for the calculation of the thermodynamic properties of
 materials, thermo_pw can be much easier to learn and faster to use, requiring
 much less information from the user.
 
-Note that this software is still very experimental and quite limited.
+Note that this software is still very experimental.
 
 Quick installation instructions:
 

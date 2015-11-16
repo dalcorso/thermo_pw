@@ -168,6 +168,35 @@ ELSEIF(ibrav==2) THEN
       rot(3,1)=-1.0_DP/sqrt3
       rot(3,2)=1.0_DP/sqrt3
       rot(3,3)=1.0_DP/sqrt3
+   ELSEIF (strain_code=='G ') THEN
+      ibrav_strain=13
+!
+      epsilon_voigt(6) = 2.0_DP * epsil
+
+      celldm_strain(1)=celldm(1)*SQRT(1.0_DP+epsil**2)
+      celldm_strain(2)=(1.0_DP+epsil)/SQRT(2.0_DP*(1.0_DP+epsil**2))
+      celldm_strain(3)=1.0_DP/SQRT(1.0_DP+epsil**2)
+      celldm_strain(4) = (1.0_DP+epsil)/SQRT(2.0_DP*(1.0_DP+epsil**2))
+      phi=ATAN(epsil)
+      rot=0.0_DP
+      rot(3,3)=1.0_DP
+      rot(1,1)= COS(phi)
+      rot(2,1)= -SIN(phi)
+      rot(1,2)= SIN(phi)
+      rot(2,2)= COS(phi)
+      aap(:,:)= 0.0_DP
+      aap(1,1) =-1.0_DP
+      aap(1,2) =-1.0_DP
+      aap(2,2) = 1.0_DP
+      aap(1,3) =-1.0_DP
+      aap(2,3) = 1.0_DP
+      aap(3,3) =-1.0_DP
+      apa(:,:) = 0.0_DP
+      apa(1,1) =-1.0_DP
+      apa(1,2) =-1.0_DP
+      apa(2,2) = 1.0_DP
+      apa(2,3) = 1.0_DP
+      apa(3,3) =-1.0_DP
    ELSE
       CALL errore('apply_strain_adv','strain not programmed',ibrav)
    ENDIF
