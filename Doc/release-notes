@@ -1,5 +1,8 @@
 New in version 0.4.0
 
+Thermal expansion from Gruneisen parameters for hexagonal, tetragonal, and
+orthorombic solids (experimental).
+
 In phonon calculations the bands are calculated only when needed, not
 for each representation.
 
