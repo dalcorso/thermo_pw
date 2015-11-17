@@ -193,8 +193,11 @@ MODULE grun_anharmonic
   !  parameters
   !
   SAVE
+
   REAL(DP), ALLOCATABLE :: betab(:)    ! volume thermal expansion multiplied
                                        ! by the bulk modulus
+  REAL(DP), ALLOCATABLE :: alpha_an_g(:,:) ! thermal expansion tensor at each
+                                        !    temperature
   REAL(DP), ALLOCATABLE :: grun_gamma_t(:)  ! average gruneisen parameter
 
   REAL(DP), ALLOCATABLE :: poly_grun(:,:,:) ! For each band and each q point
@@ -202,6 +205,10 @@ MODULE grun_anharmonic
                                         ! polynomial which fit the frequency
                                         ! as a function of volume
   INTEGER :: poly_order                 ! order of the polynomial + 1 
+
+  LOGICAL :: done_grun=.FALSE.          ! the anharmonic quantities with
+                                        ! Gruneisen parameters have been 
+                                        ! calculated
 
 END MODULE grun_anharmonic
 

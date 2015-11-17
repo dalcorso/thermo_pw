@@ -24,6 +24,7 @@ USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
                             gnuplot_write_file_mul_data, &
                             gnuplot_set_fact
 USE data_files,  ONLY : flanhar
+USE grun_anharmonic, ONLY : done_grun
 USE control_pwrun, ONLY : ibrav_save
 USE temperature,     ONLY : tmin, tmax
 USE mp_images,       ONLY : my_image_id, root_image
@@ -32,7 +33,8 @@ USE io_global,       ONLY : ionode
 IMPLICIT NONE
 
 CHARACTER(LEN=256) :: gnu_filename, filename, filename1, filename2, &
-                      filename3, filenameps
+                      filename3, filename4, filenameps
+CHARACTER(LEN=8) :: float_to_char
 INTEGER :: system
 INTEGER :: ierr
 
@@ -54,6 +56,7 @@ filename=TRIM(flanhar)
 filename1=TRIM(flanhar)//'_ph'
 filename2=TRIM(flanhar)//'.celldm'
 filename3=TRIM(flanhar)//'.celldm_ph'
+filename4=TRIM(flanhar)//'.aux_grun'
 
 CALL gnuplot_xlabel('T (K)',.FALSE.) 
 CALL gnuplot_set_fact(1.0_DP,.FALSE.)
@@ -80,7 +83,6 @@ ELSEIF (ibrav_save==8.OR.ibrav_save==9.OR.ibrav_save==10.OR.ibrav_save==11) THEN
                                                               .FALSE.,.FALSE.)
    CALL gnuplot_write_file_mul_data(filename3,1,4,'color_blue',.FALSE., &
                                                               .TRUE.,.FALSE.)
-
 ENDIF
 CALL gnuplot_ylabel('Volume ((a.u.)^3)',.FALSE.) 
 CALL gnuplot_write_file_mul_data(filename,1,2,'color_red',.TRUE.,.FALSE.,&
@@ -93,17 +95,40 @@ IF (ibrav_save==4.OR.ibrav_save==5.OR.ibrav_save==6.OR.ibrav_save==7) THEN
                                                                 .FALSE.)
    CALL gnuplot_write_file_mul_data(filename3,1,4,'color_blue',.FALSE.,.FALSE.,&
                                                                 .FALSE.)
-   CALL gnuplot_write_file_mul_data(filename2,1,5,'color_red',.FALSE.,.FALSE.,&
+   IF (done_grun) &
+      CALL gnuplot_write_file_mul_data(filename4,1,4,'color_cyan',.FALSE.,&
+                                              .FALSE.,.FALSE.)
+   CALL gnuplot_write_file_mul_data(filename2,1,5,'color_pink',.FALSE.,.FALSE.,&
                                                                 .FALSE.)
-   CALL gnuplot_write_file_mul_data(filename3,1,5,'color_green',.FALSE.,.TRUE.,&
-                                                                .FALSE.)
+   IF (done_grun) THEN
+      CALL gnuplot_write_file_mul_data(filename3,1,5,'color_green',.FALSE.,&
+                                                             .FALSE.,.FALSE.)
+      CALL gnuplot_write_file_mul_data(filename4,1,5,'color_orange',.FALSE.,&
+                                                              .TRUE.,.FALSE.)
+   ELSE
+      CALL gnuplot_write_file_mul_data(filename3,1,5,'color_green',.FALSE.,&
+                                                         .TRUE.,.FALSE.)
+   END IF
 ELSEIF (ibrav_save==8.OR.ibrav_save==9.OR.ibrav_save==10.OR.ibrav_save==11) THEN
    CALL gnuplot_write_file_mul_data(filename2,1,5,'color_red',.TRUE.,.FALSE.,&
                                                                 .FALSE.)
+   IF (done_grun) &
+      CALL gnuplot_write_file_mul_data(filename4,1,5,'color_cyan',.FALSE.,&
+                                              .FALSE.,.FALSE.)
    CALL gnuplot_write_file_mul_data(filename2,1,6,'color_green',.FALSE.,&
                                                     .FALSE.,.FALSE.)
-   CALL gnuplot_write_file_mul_data(filename2,1,7,'color_blue',.FALSE.,.TRUE.,&
-                                                                .FALSE.)
+   IF (done_grun) &
+      CALL gnuplot_write_file_mul_data(filename4,1,6,'color_orange',.FALSE.,&
+                                              .FALSE.,.FALSE.)
+   IF (done_grun) THEN
+      CALL gnuplot_write_file_mul_data(filename2,1,7,'color_blue',.FALSE., &
+                                                            .FALSE.,.FALSE.)
+      CALL gnuplot_write_file_mul_data(filename4,1,7,'color_ligth_blue',&
+                                                     .FALSE.,.TRUE.,.FALSE.)
+   ELSE
+      CALL gnuplot_write_file_mul_data(filename2,1,7,'color_blue',.FALSE.,&
+                                                      .TRUE.,.FALSE.)
+   ENDIF
 END IF
 
 CALL gnuplot_ylabel('Volume thermal expansion {/Symbol b} x 10^6 (K^{-1})',.FALSE.) 

@@ -547,13 +547,20 @@ PROGRAM thermo_pw
            ENDDO
            CALL write_anhar_anis()
            CALL write_ph_freq_anhar_anis()
-           CALL plot_anhar_anis()
 !
 !    here we calculate and plot the gruneisen parameters along the given path.
 !
            CALL write_gruneisen_band_anis(flfrq_thermo,flvec_thermo)
            CALL plotband_sub(4,1,flfrq_thermo)
            CALL plot_gruneisen_band_anis(flfrq_thermo)
+!
+!   here we calculate the gruneisen parameters on a mesh and then recompute
+!   the thermal expansion from the gruneisen parameters
+!
+           CALL fit_frequencies_anis()
+
+           CALL write_grun_anharmonic_anis()
+           CALL plot_anhar_anis()
         ENDIF
      ENDIF
 

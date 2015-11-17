@@ -377,3 +377,277 @@ END IF
 
 RETURN
 END SUBROUTINE write_ph_freq_anhar_anis
+
+SUBROUTINE write_grun_anharmonic_anis()
+USE kinds,          ONLY : DP
+USE constants,      ONLY : ry_kbar
+USE ions_base,      ONLY : nat
+USE cell_base,      ONLY : ibrav
+USE thermo_mod,     ONLY : ngeo
+USE temperature,    ONLY : ntemp, temp
+USE ph_freq_thermodynamics, ONLY : ph_freq_save, phf_cv
+USE ph_freq_anharmonic,     ONLY : celldmf_t, vminf_t, cvf_t, b0f_t, cpf_t, &
+                                   b0f_s
+USE grun_anharmonic, ONLY : alpha_an_g, grun_gamma_t, poly_grun, done_grun
+USE ph_freq_module, ONLY : thermal_expansion_ph, ph_freq_type,  &
+                           destroy_ph_freq, init_ph_freq
+USE elastic_constants, ONLY : read_elastic, el_compliances
+USE quadratic_surfaces, ONLY : evaluate_fit_quadratic,      &
+                               evaluate_fit_grad_quadratic
+USE ifc,            ONLY : nq1_d, nq2_d, nq3_d
+USE data_files,     ONLY : flanhar, fl_el_cons
+USE io_global,      ONLY : ionode, stdout
+USE mp_images,      ONLY : my_image_id, root_image
+
+IMPLICIT NONE
+CHARACTER(LEN=256) :: filename
+CHARACTER(LEN=8) :: float_to_char
+INTEGER :: itemp, iu_therm, i, nq, imode, iq, degree, nvar, nwork
+INTEGER :: itens, jtens
+TYPE(ph_freq_type) :: ph_freq    ! the frequencies at the volumes at
+                                 ! which the gruneisen parameters are 
+                                 ! calculated
+TYPE(ph_freq_type), ALLOCATABLE :: ph_grun(:)  ! the gruneisen parameters 
+                                 ! recomputed at each temperature at the 
+                                 ! geometry corresponding to that temperature
+REAL(DP) :: cm(6), aux(6), alpha_aux(6), alpha(6), f, vm
+REAL(DP), ALLOCATABLE :: grad(:), x(:)
+INTEGER :: compute_nwork
+LOGICAL :: exst
+
+done_grun=.FALSE.
+IF (my_image_id /= root_image) RETURN
+!
+!  Not implemented cases
+!
+IF ( ibrav<1 .OR. ibrav>11 ) THEN
+   WRITE(stdout,'(5x,"Thermal expansions from Gruneisen parameters &
+                     & not available")' )
+   RETURN
+END IF
+!
+!  First check if the elastic constants are on file
+!
+CALL read_elastic(fl_el_cons, exst)
+!
+!  If the elastic constants are not available, this calculation cannot be
+!  don_ge
+!
+IF (.NOT. exst) THEN
+   WRITE(stdout,'(5x,"The elastic constants are needed to compute &
+                    &thermal expansions from Gruneisen parameters")' )
+   RETURN
+ENDIF
+!
+!  compute thermal expansion from gruneisen parameters. 
+!  NB: alpha_an calculated by thermal_expansion_ph is multiplied by the 
+!      elastic compliances
+!
+nq=ph_freq_save(1)%nq
+CALL compute_degree(ibrav,degree,nvar)
+nwork=compute_nwork()
+
+CALL init_ph_freq(ph_freq, nat, nq1_d, nq2_d, nq3_d, nq, .FALSE.)
+ALLOCATE(ph_grun(degree))
+ALLOCATE(grad(degree))
+ALLOCATE(x(degree))
+DO i=1, degree
+   CALL init_ph_freq(ph_grun(i), nat, nq1_d, nq2_d, nq3_d, nq, .FALSE.)
+END DO
+
+DO itemp = 1, ntemp
+   IF (MOD(itemp,30)==0) WRITE(stdout,'(5x,"Computing temperature T=",f10.4,&
+                                                   &" K")') temp(itemp)
+   cm(:)=celldmf_t(:,itemp)
+   vm = vminf_t(itemp)
+   CALL compute_x(cm,x,degree,ibrav)
+   ph_freq%nu= 0.0_DP
+   DO i=1,degree
+      ph_grun(i)%nu= 0.0_DP
+   END DO
+   ph_freq%wg=ph_freq_save(1)%wg
+!
+!  compute the frequencies once
+!
+   DO iq=1,nq
+      DO imode=1,3*nat
+         CALL evaluate_fit_quadratic(degree,nvar,x,f,poly_grun(1,imode,iq))
+         CALL evaluate_fit_grad_quadratic(degree,nvar,x,grad,&
+                                                     poly_grun(1,imode,iq))
+         ph_freq%nu(imode,iq) = f 
+         IF (f > 0.0_DP ) THEN
+            DO i=1,degree
+               ph_grun(i)%nu(imode,iq)=grad(i) / f
+            END DO
+         ELSE
+            DO i=1,degree
+               ph_grun(i)%nu(imode,iq)=0.0_DP
+            END DO
+         END IF
+      END DO
+   END DO
+!
+!  Loop over the number of independent crystal parameters for this
+!  Bravais lattice
+!
+   DO i=1,degree
+      CALL thermal_expansion_ph(ph_freq, ph_grun(i), temp(itemp), &
+                                           alpha_aux(i))
+   END DO
+!
+!  Here convert from derivatives with respect to crystal parameters to
+!  derivative with respect to strain. 
+!  NB: This is just the derivative of stress with respect to temperature.
+!
+   alpha(:)=0.0_DP
+   SELECT CASE(ibrav)
+       CASE(1,2,3)
+!
+!  cubic 
+!
+           alpha(1)=alpha_aux(1) * cm(1) / 3.0_DP              
+           alpha(2)=alpha_aux(1) * cm(1) / 3.0_DP            
+           alpha(3)=alpha_aux(1) * cm(1) / 3.0_DP            
+       CASE(4,6,7)
+!
+!  hexagonal or tetragonal
+!
+           alpha(1)=(alpha_aux(1) * cm(1) - alpha_aux(2) * cm(3) ) / 2.0_DP   
+           alpha(2)=alpha(2)             
+           alpha(3)=alpha_aux(2) * cm(3)             
+       CASE(5)
+!
+!  trigonal 
+!
+           alpha(3)=( 1.0_DP + 2.0_DP * cm(4) ) * ( alpha_aux(1) * cm(1) + &
+                      2.0_DP * ( 1.0_DP - cm(4) ) * alpha_aux(2) ) / 3.0_DP
+
+           alpha(1)=(alpha_aux(1) * cm(1) - alpha(3) ) / 2.0_DP   
+           alpha(2)=alpha(2)             
+       CASE(8,9,10,11)
+!
+!   orthorombic case
+!
+           alpha(1)=alpha_aux(1) * cm(1) - alpha_aux(2) * cm(2) &
+                                         - alpha_aux(3) * cm(3)
+           alpha(2)=alpha_aux(2) * cm(2)             
+           alpha(3)=alpha_aux(3) * cm(3)             
+   CASE DEFAULT
+       CALL errore('write_grun_anharmonic_anis','ibrav not programmed',1)
+   END SELECT
+!
+!  The thermal expansion needs to be multiplied by the elastic compliances
+!
+   aux=0.0_DP
+   DO itens=1,6
+      DO jtens=1,6
+         aux(itens)=aux(itens) + el_compliances(itens,jtens) &
+                                              *alpha(jtens)
+      END DO
+      alpha_an_g(:,itemp) = -aux(:) * ry_kbar / vm
+   END DO
+END DO
+
+!CALL compute_cp(betab, vminf_t, b0f_t, phf_cv, cvf_t, cpf_t, b0f_s, &
+!                                                             grun_gamma_t)
+IF (ionode) THEN
+!
+!   here quantities calculated from the gruneisen parameters
+!
+   filename=TRIM(flanhar)//'.aux_grun'
+   iu_therm=2
+   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
+   CALL write_alpha_anis(ibrav, celldmf_t, alpha_an_g, temp, ntemp, iu_therm )
+   CLOSE(iu_therm)
+END IF
+done_grun=.TRUE.
+
+CALL destroy_ph_freq(ph_freq)
+DO i=1,degree
+   CALL destroy_ph_freq(ph_grun(i))
+END DO
+DEALLOCATE(ph_grun)
+DEALLOCATE(grad)
+DEALLOCATE(x)
+
+RETURN
+END SUBROUTINE write_grun_anharmonic_anis
+
+SUBROUTINE write_alpha_anis(ibrav, celldmf_t, alpha_t, temp, ntemp, iu_therm)
+USE kinds, ONLY : DP
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ibrav, ntemp, iu_therm
+REAL(DP), INTENT(IN) :: celldmf_t(6,ntemp), alpha_t(6,ntemp), &
+                        temp(ntemp)
+INTEGER :: itemp
+
+IF (ibrav==1 .OR. ibrav==2 .OR. ibrav==3 ) THEN
+   WRITE(iu_therm,'("#   T (K)      celldm(1)      alpha_xx(x10^6)")' )
+   DO itemp = 1, ntemp-1
+      WRITE(iu_therm, '(e12.5,4e20.9)') temp(itemp), celldmf_t(1,itemp), &
+                                            alpha_t(1,itemp)*1.D6
+   END DO
+ELSEIF (ibrav==4 .OR. ibrav==6 .OR. ibrav==7 ) THEN
+   WRITE(iu_therm,'("#   T (K)         celldm(1)          celldm(3)          alpha_xx(x10^6)         alpha_zz (x10^6)")' )
+   DO itemp = 1, ntemp-1
+      WRITE(iu_therm, '(e12.5,4e20.9)') temp(itemp), celldmf_t(1,itemp), &
+                                                     celldmf_t(3,itemp), &
+                                                     alpha_t(1,itemp)*1.D6, &
+                                                     alpha_t(3,itemp)*1.D6
+   END DO
+ELSEIF ( ibrav==5 ) THEN
+   WRITE(iu_therm,'("#   T (K)   celldm(1)   celldm(4)    alpha_xx(x10^6)   alpha_zz (x10^6)")' )
+   DO itemp = 1, ntemp
+      WRITE(iu_therm, '(e12.5,4e20.9)') temp(itemp), celldmf_t(1,itemp), &
+                                                     celldmf_t(4,itemp), &
+                                                     alpha_t(1,itemp)*1.D6, &
+                                                     alpha_t(3,itemp)*1.D6
+   END DO
+ELSEIF (ibrav==8 .OR. ibrav==9 .OR. ibrav==10 .OR. ibrav==11) THEN
+   WRITE(iu_therm,'("#   T (K)   celldm(1)     celldm(2)    celldm(3) &
+             &alpha_xx(x10^6)  alpha_yy(x10^6)   alpha_zz(x10^6)")' )
+   DO itemp = 1, ntemp
+      WRITE(iu_therm, '(e12.5,6e20.9)') temp(itemp), celldmf_t(1,itemp), &
+                                                     celldmf_t(2,itemp), &
+                                                     celldmf_t(3,itemp), &
+                                                     alpha_t(1,itemp)*1.D6, &
+                                                     alpha_t(2,itemp)*1.D6, &
+                                                     alpha_t(3,itemp)*1.D6  
+   END DO
+ELSEIF (ibrav==12 .OR. ibrav==13) THEN
+   WRITE(iu_therm,'("#   T (K)       celldm(1)         celldm(2)        celldm(3)        celldm(4)")' )
+   DO itemp = 1, ntemp
+      WRITE(iu_therm, '(e12.5,4e17.9)') temp(itemp), celldmf_t(1,itemp), &
+                                                     celldmf_t(2,itemp), &
+                                                     celldmf_t(3,itemp), &
+                                                     celldmf_t(4,itemp)
+   END DO
+ELSEIF (ibrav==-12 .OR. ibrav==-13) THEN
+   WRITE(iu_therm,'("#   T (K)       celldm(1)         celldm(2)        celldm(3)        celldm(5)")' )
+   DO itemp = 1, ntemp
+      WRITE(iu_therm, '(e12.5,4e17.9)') temp(itemp), celldmf_t(1,itemp), &
+                                                     celldmf_t(2,itemp), &
+                                                     celldmf_t(3,itemp), &
+                                                     celldmf_t(5,itemp)
+   END DO
+ELSEIF (ibrav==14) THEN
+   WRITE(iu_therm,'("#   T (K)       celldm(1)         celldm(2)        &
+               &celldm(3)        celldm(4)        celldm(5)        celldm(6)")' )
+   DO itemp = 1, ntemp
+      WRITE(iu_therm, '(e12.5,6e15.7)') temp(itemp), celldmf_t(1,itemp), &
+                                                     celldmf_t(2,itemp), &
+                                                     celldmf_t(3,itemp), &
+                                                     celldmf_t(4,itemp), &
+                                                     celldmf_t(5,itemp), &
+                                                     celldmf_t(6,itemp)
+   END DO
+ELSE IF (ibrav==0) THEN
+!
+!  In this case we write nothing but do not stop
+!
+ELSE
+   CALL errore('write_alpha_anis','ibrav not programmed',1)
+END IF
+
+RETURN
+END SUBROUTINE write_alpha_anis
