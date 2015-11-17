@@ -9,6 +9,7 @@ MODFLAGS= $(MOD_FLAG)../../iotk/src $(MOD_FLAG)../../Modules \
 IFLAGS=
 
 THERMOOBJS = \
+adjust_tau.o \
 addusdens1d_so.o \
 allocate_thermo.o \
 bands_sub.o \

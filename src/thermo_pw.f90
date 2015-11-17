@@ -215,6 +215,10 @@ PROGRAM thermo_pw
      omega0=omega
      at_save(:,:)=at(:,:)
 !
+!   strain tau uniformely
+!
+     CALL adjust_tau(tau_save, tau, at)
+!
 !  recompute the density at the minimum volume
 !
      CALL compute_density(omega,density)
