@@ -23,6 +23,7 @@ SUBROUTINE thermo_readin()
                                    flnkconv, flgrun, flpgrun, fl_el_cons,  &
                                    flpband, flvec
   USE temperature,          ONLY : tmin, tmax, deltat, ntemp
+  USE control_pressure,     ONLY : pressure
   USE ifc,                  ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq, &
                                    zasr, freqmin_input, freqmax_input, &
                                    phdos_sigma
@@ -97,6 +98,7 @@ SUBROUTINE thermo_readin()
                             step_ngeo,                      &
                             nq1_d, nq2_d, nq3_d,            &
                             tmin, tmax, deltat, ntemp,      &
+                            pressure,                       &
                             freqmin_input, freqmax_input,   &
                             ndos_input, deltafreq,          &
                             phdos_sigma,                    &
@@ -183,6 +185,8 @@ SUBROUTINE thermo_readin()
   tmax=800.0_DP
   deltat=3.0_DP
   ntemp=1
+  
+  pressure=0.0_DP
 
   nbnd_bands=0
   emin_input=0.0_DP

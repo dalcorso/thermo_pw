@@ -17,6 +17,7 @@ SUBROUTINE write_ev_input(file_dat)
   USE kinds, ONLY : DP
   USE mp_images, ONLY : my_image_id, root_image
   USE thermo_mod, ONLY : omega_geo, energy_geo, ngeo
+  USE control_pressure, ONLY : pressure
   USE io_global, ONLY : ionode
   IMPLICIT NONE
   CHARACTER(LEN=256) :: file_dat
@@ -30,7 +31,8 @@ SUBROUTINE write_ev_input(file_dat)
      iu_ev=2
      OPEN(UNIT=iu_ev, FILE=TRIM(file_dat), STATUS='UNKNOWN', FORM='FORMATTED')
      DO igeom=1,ngeo(1)
-        WRITE(iu_ev,'(2e30.15)') omega_geo(igeom), energy_geo(igeom)
+        WRITE(iu_ev,'(2e30.15)') omega_geo(igeom), energy_geo(igeom) + &
+                                        pressure * omega_geo(igeom)
      ENDDO
      !
      CLOSE(iu_ev)
@@ -42,14 +44,23 @@ SUBROUTINE write_ev_input(file_dat)
 END SUBROUTINE write_ev_input
 
 SUBROUTINE write_ev_driver(file_dat)
+
+USE kinds, ONLY : DP
 USE io_global, ONLY : ionode
+USE control_pressure, ONLY : pressure, pressure_kb
 IMPLICIT NONE
 CHARACTER(LEN=256), INTENT(IN) :: file_dat
+CHARACTER(LEN=256) :: filename
+CHARACTER(LEN=8) :: float_to_char
 INTEGER :: iu_ev
 !
 IF (ionode) THEN
    iu_ev=2
-   OPEN(UNIT=iu_ev, FILE='input_ev', STATUS='UNKNOWN', FORM='FORMATTED')
+   filename='input_ev'
+   IF (pressure /= 0.0_DP) &
+      filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+     
+   OPEN(UNIT=iu_ev, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
    WRITE(iu_ev,'("au")')
    WRITE(iu_ev,'("hex")')
    WRITE(iu_ev,'("4")')
@@ -66,35 +77,33 @@ SUBROUTINE do_ev()
 !  This subroutine computes the equilibrium volume and bulk modulus
 !
 USE kinds, ONLY : DP
-USE thermo_mod, ONLY : omega_geo, celldm_geo, central_geo
 USE control_mur, ONLY : vmin, b0, b01, emin
+USE control_pressure, ONLY : pressure, pressure_kb
 USE data_files, ONLY : flevdat
 USE io_global, ONLY : meta_ionode_id, stdout
 USE mp_world, ONLY : world_comm
 USE mp, ONLY : mp_bcast
 
 IMPLICIT NONE
-CHARACTER(LEN=256) :: file_dat
-REAL(DP) :: celldm_(6)
+CHARACTER(LEN=256) :: file_dat, filename
+CHARACTER(LEN=8) :: float_to_char
 
   file_dat=TRIM(flevdat) 
+  filename='input_ev'
+  IF (pressure /= 0.0_DP) THEN
+      file_dat=TRIM(file_dat)//'.'//TRIM(float_to_char(pressure_kb,1))
+      filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+  ENDIF
+
   CALL write_ev_input(file_dat)
-  CALL ev_sub(vmin, b0, b01, emin)
+  CALL ev_sub(vmin, b0, b01, emin, filename )
+
   CALL mp_bcast(vmin, meta_ionode_id, world_comm)
   CALL mp_bcast(b0, meta_ionode_id, world_comm)
   CALL mp_bcast(b01, meta_ionode_id, world_comm)
   CALL mp_bcast(emin, meta_ionode_id, world_comm)
   !
-  CALL compute_celldm_geo(vmin, celldm_, celldm_geo(1,central_geo), &
-                                         omega_geo(central_geo))
-  WRITE(stdout,'(/,2x,76("+"))')
-  WRITE(stdout,'(5x, "The equilibrium lattice constant is ",9x,f12.4,&
-                                 &" a.u.")') celldm_(1)
-  WRITE(stdout,'(5x, "The bulk modulus is ",24x,f12.3,"  kbar")')  b0
-  WRITE(stdout,'(5x, "The pressure derivative of the bulk modulus is ",&
-                               &f9.3)')  b01
-  WRITE(stdout,'(2x,76("+"),/)')
-
+  RETURN
 END SUBROUTINE do_ev
 
 SUBROUTINE do_ev_t(itemp)
@@ -108,6 +117,7 @@ USE control_mur,    ONLY : vmin, b0, b01
 USE thermodynamics, ONLY : ph_free_ener
 USE anharmonic,     ONLY : vmin_t, b0_t, b01_t, free_e_min_t
 USE temperature,    ONLY : ntemp, temp
+USE control_pressure, ONLY : pressure, pressure_kb
 USE data_files,     ONLY : flevdat
 USE quadratic_surfaces, ONLY : polifit
 USE io_global,      ONLY : stdout
@@ -128,7 +138,7 @@ REAL(DP) :: a(m1), x(ngeo(1)), y(ngeo(1)), aux, aux1
   ndata=ngeo(1)
   DO idata=1,ndata
      x(idata)=omega_geo(idata)
-     y(idata)=ph_free_ener(itemp,idata) 
+     y(idata)=ph_free_ener(itemp,idata) + pressure * omega_geo(idata)
 !     WRITE(stdout,'(2f25.14)') x(idata), y(idata)
   ENDDO
   CALL polifit(x, y, ndata, a, m1)
@@ -154,6 +164,8 @@ REAL(DP) :: a(m1), x(ngeo(1)), y(ngeo(1)), aux, aux1
                                          omega_geo(central_geo))
   WRITE(stdout,'(/,2x,76("-"))')
   WRITE(stdout,'(5x, "phdos free energy, at T= ", f12.6)') temp(itemp)
+  IF (pressure /= 0.0_DP) &
+     WRITE(stdout, '(5x,"pressure = ",f15.6," kbar")') pressure_kb
   WRITE(stdout,'(5x, "The equilibrium lattice constant is ",9x,f12.4,&
                                  &" a.u.")') celldm_(1)
   WRITE(stdout,'(5x, "The bulk modulus is ",24x,f12.3,"  kbar")')  b0_t(itemp)
@@ -161,9 +173,10 @@ REAL(DP) :: a(m1), x(ngeo(1)), y(ngeo(1)), aux, aux1
                                &f9.3)')  b01_t(itemp)
   WRITE(stdout,'(2x,76("-"),/)')
 
+  RETURN
 END SUBROUTINE do_ev_t
 
-SUBROUTINE do_ev_t_ph(itemp)
+SUBROUTINE do_ev_t_ph(itemp) 
 !
 !  This subroutine compute the equilibrium volume and bulk modulus
 !
@@ -174,6 +187,7 @@ USE ph_freq_thermodynamics, ONLY : phf_free_ener
 USE ph_freq_anharmonic,     ONLY : vminf_t, b0f_t, b01f_t, free_e_minf_t
 USE control_mur,    ONLY : vmin, b0, b01
 USE temperature,    ONLY : ntemp, temp
+USE control_pressure, ONLY : pressure, pressure_kb
 USE quadratic_surfaces, ONLY : polifit
 USE data_files,     ONLY : flevdat
 USE io_global,      ONLY : stdout
@@ -195,7 +209,7 @@ REAL(DP) :: a(m1), x(ngeo(1)), y(ngeo(1)), aux, aux1
   ndata=ngeo(1)
   DO idata=1,ndata
      x(idata)=omega_geo(idata)
-     y(idata)=phf_free_ener(itemp,idata) 
+     y(idata)=phf_free_ener(itemp,idata) + pressure * omega_geo(idata)
 !     WRITE(stdout,'(2f25.14)') x(idata), y(idata)
   ENDDO
   CALL polifit(x, y, ndata, a, m1)
@@ -221,6 +235,8 @@ REAL(DP) :: a(m1), x(ngeo(1)), y(ngeo(1)), aux, aux1
                                          omega_geo(central_geo))
   WRITE(stdout,'(/,2x,76("+"))')
   WRITE(stdout,'(5x, "ph_freq free energy at T=",f12.4)') temp(itemp)
+  IF (pressure /= 0.0_DP) &
+     WRITE(stdout, '(5x,"pressure = ",f15.6," kbar")') pressure_kb
   WRITE(stdout,'(5x, "The equilibrium lattice constant is ",16x,f12.4,&
                                  &" a.u.")') celldm_(1)
   WRITE(stdout,'(5x, "The bulk modulus is ",31x,f12.3,"  kbar")')  b0f_t(itemp)
@@ -229,6 +245,7 @@ REAL(DP) :: a(m1), x(ngeo(1)), y(ngeo(1)), aux, aux1
 
   WRITE(stdout,'(2x,76("+"),/)')
 
+  RETURN
 END SUBROUTINE do_ev_t_ph
 
 SUBROUTINE find_min_mur_pol(v0, b0, b01, a, m1, vm)

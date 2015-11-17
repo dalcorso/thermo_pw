@@ -555,6 +555,25 @@ MODULE control_quadratic_energy
 
 END MODULE control_quadratic_energy
 
+MODULE control_pressure
+!
+!   Some quantities can be calculated at finite pressure. This
+!   module has the variables to control the external pressure
+!
+  USE kinds, ONLY: DP
+  SAVE
+!
+  REAL(DP) :: pressure, & ! Some properties can be calculated
+                          ! at fixed pressure. Read in kbar and converted
+                          ! to Ry/(a.u.)^2
+              pressure_kb ! the pressure in kbar.
+
+  REAL(DP), ALLOCATABLE :: pressure_list(:) ! the list of pressures to calculate
+  INTEGER :: npress=1       ! the number of pressures, presently fixed. 
+  REAL(DP) :: delta_pressure ! separation between pressures
+
+END MODULE control_pressure
+
 MODULE control_gnuplot
   USE kinds,  ONLY : DP
   !

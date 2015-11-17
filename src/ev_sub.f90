@@ -5,7 +5,7 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-SUBROUTINE ev_sub(vmin,b0,b01,emin_out)
+SUBROUTINE ev_sub(vmin,b0,b01,emin_out,inputfile)
 !
 !      fit of E(v) to an equation of state (EOS)
 !
@@ -60,6 +60,7 @@ SUBROUTINE ev_sub(vmin,b0,b01,emin_out)
 
       IMPLICIT NONE
       REAL(DP), INTENT(OUT)  :: vmin, b0, b01, emin_out
+      CHARACTER(LEN=*) :: inputfile
       INTEGER, PARAMETER:: nmaxpar=4, nmaxpt=100, nseek=10000, nmin=8
       INTEGER :: npar,npt,istat, ierr
       CHARACTER :: bravais*3, au_unit*3, filin*256
@@ -76,7 +77,7 @@ SUBROUTINE ev_sub(vmin,b0,b01,emin_out)
   IF ( ionode ) THEN
 
       iu_ev=2
-      OPEN(UNIT=iu_ev, FILE='input_ev', STATUS='OLD', FORM='FORMATTED')
+      OPEN(UNIT=iu_ev, FILE=TRIM(inputfile), STATUS='OLD', FORM='FORMATTED')
 
       READ(iu_ev,'(a)') au_unit
       in_angstrom = au_unit=='Ang' .or. au_unit=='ANG' .or. &

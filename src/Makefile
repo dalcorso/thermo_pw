@@ -29,6 +29,7 @@ deallocate_thermo.o \
 do_pwscf.o \
 do_berry.o \
 ev_sub.o \
+float_to_char.o \
 find_symmetry.o \
 generate_k_along_lines_kz.o \
 initialize_thermo_work.o \
@@ -80,8 +81,10 @@ write_ev_input.o \
 write_gruneisen_band.o \
 write_gruneisen_band_anis.o \
 write_gnuplot_energy.o \
+write_minimum_energy_data.o \
 write_mur.o \
 write_read_energy.o \
+write_quadratic.o \
 write_thermo.o 
 
 PWOBJS = ../../PHonon/PH/libph.a ../../PP/src/libpp.a ../../PW/src/libpw.a 

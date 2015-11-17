@@ -27,6 +27,7 @@ USE data_files,  ONLY : flanhar
 USE grun_anharmonic, ONLY : done_grun
 USE control_pwrun, ONLY : ibrav_save
 USE temperature,     ONLY : tmin, tmax
+USE control_pressure, ONLY : pressure, pressure_kb
 USE mp_images,       ONLY : my_image_id, root_image
 USE io_global,       ONLY : ionode
 
@@ -41,10 +42,14 @@ INTEGER :: ierr
 IF ( my_image_id /= root_image ) RETURN
 
 gnu_filename=TRIM(flgnuplot)//'_anhar'
+IF (pressure /= 0.0_DP) &
+   gnu_filename=TRIM(gnu_filename)//'.'//float_to_char(pressure_kb,1)
 
 CALL gnuplot_start(gnu_filename)
 
 filenameps=TRIM(flpsanhar)
+IF (pressure /= 0.0_DP) &
+   filenameps=TRIM(filenameps)//'.'//float_to_char(pressure_kb,1)
 
 IF (tmin /= 1.0_DP) THEN
    CALL gnuplot_write_header(filenameps, tmin, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
@@ -57,6 +62,14 @@ filename1=TRIM(flanhar)//'_ph'
 filename2=TRIM(flanhar)//'.celldm'
 filename3=TRIM(flanhar)//'.celldm_ph'
 filename4=TRIM(flanhar)//'.aux_grun'
+
+IF (pressure /= 0.0_DP) THEN
+   filename=TRIM(filename)//'.'//float_to_char(pressure_kb,1)
+   filename1=TRIM(filename1)//'.'//float_to_char(pressure_kb,1)
+   filename2=TRIM(filename2)//'.'//float_to_char(pressure_kb,1)
+   filename3=TRIM(filename3)//'.'//float_to_char(pressure_kb,1)
+   filename4=TRIM(filename4)//'.'//float_to_char(pressure_kb,1)
+END IF
 
 CALL gnuplot_xlabel('T (K)',.FALSE.) 
 CALL gnuplot_set_fact(1.0_DP,.FALSE.)

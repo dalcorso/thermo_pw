@@ -148,6 +148,8 @@ PROGRAM thermo_pw
   !
   CALL set_temperature()
   !
+  CALL set_pressure()
+  !
   CALL thermo_summary()
   !
   IF (my_image_id /= root_image) CALL check_stop_init()
@@ -203,11 +205,11 @@ PROGRAM thermo_pw
      ELSE
         CALL write_gnuplot_energy(nwork)
         CALL quadratic_fit()
+        CALL write_quadratic()
         IF (.NOT. reduced_grid) CALL plot_multi_energy()
-        WRITE(stdout,'(5x,"The minimum energy is obtained for celldm")')
-        WRITE(stdout,'(5x,6f12.5)') celldm0
      ENDIF
      CALL mp_bcast(celldm0, meta_ionode_id, world_comm)
+     CALL write_minimum_energy_data()
      celldm=celldm0
      CALL cell_base_init ( ibrav, celldm0, a, b, c, cosab, cosac, cosbc, &
                       trd_ht, rd_ht, cell_units )

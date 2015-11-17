@@ -28,6 +28,7 @@ SUBROUTINE deallocate_thermo()
   USE control_2d_bands, ONLY : averag, vacuum, aux_ind_sur
   USE temperature,      ONLY : temp
 
+  USE control_pressure, ONLY : pressure_list
   USE control_conv,     ONLY : ke, keden, nk_test, sigma_test
   USE elastic_constants, ONLY : epsilon_geo, sigma_geo, epsilon_voigt
   USE control_elastic_constants, ONLY : rot_mat, aap_mat, apa_mat
@@ -88,6 +89,7 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (disp_wq) )         DEALLOCATE(disp_wq)
 
   IF ( ALLOCATED (temp) )            DEALLOCATE(temp)
+  IF ( ALLOCATED (pressure_list) )   DEALLOCATE(pressure_list)
 
   IF ( ALLOCATED (nrap_plot_in) )    DEALLOCATE(nrap_plot_in)
   IF ( ALLOCATED (rap_plot_in) )     DEALLOCATE(rap_plot_in)

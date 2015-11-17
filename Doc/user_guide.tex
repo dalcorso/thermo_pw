@@ -296,6 +296,31 @@ If you are running \thermo\ on a system that has not \texttt{gnuplot}
 you can disable the production of the postscript files and use some other
 graphical tools to produce the plots from the output data. 
 
+\subsection{Temperature and pressure}
+Several quantities in \tpw\ can be calculated as a function of temperature.
+Moreover the equilibrium geometry can be searched at fixed pressure 
+minimizing the enthalpy instead of the energy.
+For the options where these features are active, the values of temperature
+and the pressure are controlled by the following variables:
+\begin{verbatim}
+tmin       : minimum temperature.
+             Default: real 1 K
+tmax       : maximum temperature.
+             Default: real 800 K
+deltat     : interval between two temperatures. Be careful with this value
+             because too small or too large values of this parameter could 
+             give numerical errors in the temperature derivatives used to 
+             calculate anharmonic properties.
+             Default: real 3 K
+ntemp      : number of temperatures
+             Default: integer determined from previous data
+pressure   : The external pressure. The crystal parameters are
+             calculated minimizing the enthalpy at this pressure. 
+             Given in kbar units. 
+             Default: real 0.0 kbar
+\end{verbatim}
+Note that when you fix the external pressure, the geometries chosen to 
+fit the enthalpy must be about the minimum geometry at that pressure.
 
 \subsection{\texttt{what='scf'}}
 With this option the code computes only the total energy. This is a single
@@ -658,17 +683,6 @@ fildyn        : the name of the dynamical matrix file, as would be
                 Default: character ' '
 zasr          : type of acoustic sum rule applied to the ifc.
                 Default: character(len=*) 'Simple'
-tmin          : minimum temperature (do not decrease below the default).
-                Default: real 1 K
-tmax          : maximum temperature.
-                Default: real 800 K
-deltat        : interval between two temperatures. Be careful with this value
-                because too small or too large values of this parameter could 
-                give numerical errors in the temperature derivative used to 
-                calculate anharmonic properties.
-                Default: real 3 K
-ntemp         : number of temperatures
-                Default: integer determined from previous data
 
 flfrc         : file where the interatomic force constants are written
                 Default: character(len=*) 'output_frc.dat.g1'
@@ -847,12 +861,15 @@ Presently no graphical tool is implemented to plot the energy
 for monoclinic and triclinic crystal systems. 
 When \texttt{lmurn=.FALSE.} the bulk modulus
 is not calculated. To obtain it, you can calculate the elastic constants at the
-minimum geometry (see the option \texttt{what='scf\_elastic\_constants'}). 
-Note that for anisotropic solids, the equilibrium crystal parameters
-can be calculated also with the \texttt{vc-relax} option of \texttt{pw.x} 
-(using \texttt{what='scf'}).
-The present option should be used starting from the minimum found by
-\texttt{vc-relax}. \\
+minimum geometry (see the option \texttt{what='mur\_lc\_elastic\_constants'}). 
+With this option the pressure control is active. You can specify a 
+finite pressure and the enthalpy is minimized instead of the
+energy. Note however that if the minimum is distant from the starting
+configuration its associated error can be large, larger for the
+quadratic than for the Murnaghan interpolation. For this
+reason the present option should be used starting from the minimum found by
+\texttt{pw.x} using the \texttt{vc-relax} option and the pressure 
+should not be too different from the pressure used for \texttt{vc-relax}.\\
 This option can be controlled by the following variables:
 \begin{verbatim}
 ngeo(1),...,ngeo(6) : the number of geometries to use for each celldm parameter.
