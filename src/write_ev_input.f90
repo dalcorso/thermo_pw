@@ -138,7 +138,7 @@ REAL(DP) :: a(m1), x(ngeo(1)), y(ngeo(1)), aux, aux1
   ndata=ngeo(1)
   DO idata=1,ndata
      x(idata)=omega_geo(idata)
-     y(idata)=ph_free_ener(itemp,idata) + pressure * omega_geo(idata)
+     y(idata)=ph_free_ener(itemp,idata)
 !     WRITE(stdout,'(2f25.14)') x(idata), y(idata)
   ENDDO
   CALL polifit(x, y, ndata, a, m1)
@@ -209,7 +209,7 @@ REAL(DP) :: a(m1), x(ngeo(1)), y(ngeo(1)), aux, aux1
   ndata=ngeo(1)
   DO idata=1,ndata
      x(idata)=omega_geo(idata)
-     y(idata)=phf_free_ener(itemp,idata) + pressure * omega_geo(idata)
+     y(idata)=phf_free_ener(itemp,idata) 
 !     WRITE(stdout,'(2f25.14)') x(idata), y(idata)
   ENDDO
   CALL polifit(x, y, ndata, a, m1)
