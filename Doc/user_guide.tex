@@ -947,8 +947,12 @@ Number of tasks for this option:
 With this option the code computes the band structure at the geometry 
 that minimizes the energy. See the options 
 \texttt{what='scf\_bands'} and \texttt{what='mur\_lc'} for a list of 
-the variables that control these two options. An example of the use of 
-this option can be found in \texttt{example06}. \\
+the variables that control these two options. 
+With this option the pressure control is active. You can specify a
+finite pressure and the enthalpy is minimized instead of the
+energy to find the equilibrium geometry. The bands are calculated
+at the geometry that corresponds to the external pressure.
+An example of the use of this option can be found in \texttt{example06}. \\
 Number of tasks for this option: 
 \texttt{ngeo(1)} when \texttt{lmurn=.TRUE.}, \\
 \texttt{ngeo(1)}$\times$\texttt{ngeo(2)}$\times$\texttt{ngeo(3)}$\times$\texttt{ngeo(4)}$\times$\texttt{ngeo(5)}$\times$\texttt{ngeo(6)} when 
@@ -959,6 +963,10 @@ This option is similar to \texttt{what='scf\_ph'} but the phonon calculation
 is made at the geometry that minimizes the energy.
 See the options \texttt{what='scf\_ph'} and \texttt{what='mur\_lc'} for a
 list of the variables that control these two options. 
+With this option the pressure control is active. You can specify a
+finite pressure and the enthalpy is minimized instead of the
+energy to find the equilibrium geometry. The phonons are calculated
+at the geometry that corresponds to the external pressure.
 An example of the use of this option can be found in \texttt{example07}. \\
 Number of tasks for this option: Maximum between the number of tasks 
 needed by the \texttt{what='mur\_lc'} option and the number
@@ -969,6 +977,10 @@ This option is similar to \texttt{what='scf\_disp'} but the phonon calculation
 is made at the geometry that minimizes the energy.
 See the options \texttt{what='scf\_disp'} and \texttt{what='mur\_lc'} for a
 list of the variables that control these two options. 
+With this option the pressure control is active. You can specify a
+finite pressure and the enthalpy is minimized instead of the
+energy to find the equilibrium geometry. The phonons are calculated
+at the geometry that corresponds to the external pressure.
 An example of the use of this option can be found in \texttt{example08}. \\
 Number of tasks for this option: Maximum between the number of tasks  
 needed by the \texttt{what='mur\_lc'} option and the number
