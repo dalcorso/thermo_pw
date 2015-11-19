@@ -127,7 +127,7 @@ IMPLICIT NONE
 INTEGER, INTENT(IN) :: itemp
 INTEGER :: igeom, iu_ev
 REAL(DP) :: free_e, vm, celldm_(6)
-INTEGER, PARAMETER :: m1=4
+INTEGER, PARAMETER :: m1=5
 INTEGER :: idata, ndata, i1
 REAL(DP) :: a(m1), x(ngeo(1)), y(ngeo(1)), aux, aux1
 
@@ -198,7 +198,7 @@ INTEGER, INTENT(IN) :: itemp
 INTEGER :: igeom, iu_ev
 CHARACTER(LEN=6) :: int_to_char
 REAL(DP) :: free_e, vm, celldm_(6)
-INTEGER, PARAMETER :: m1=4
+INTEGER, PARAMETER :: m1=5
 INTEGER :: idata, ndata, i1
 REAL(DP) :: a(m1), x(ngeo(1)), y(ngeo(1)), aux, aux1
 
@@ -271,7 +271,18 @@ v1=v0*0.8_DP
 v2=v0*1.3_DP
 f1= compute_fun(v1, v0, b0, b01, a, m1)
 f2= compute_fun(v2, v0, b0, b01, a, m1)
-IF (f1 * f2 > 0.0_DP) CALL errore('find_min_mur_pol','problem finding minimum',1)
+!
+!  Try at least once to reduce the range about v0 if necessary
+!
+IF (f1 * f2 > 0.0_DP) THEN
+   v1=v0*0.9_DP
+   v2=v0*1.1_DP
+   f1= compute_fun(v1, v0, b0, b01, a, m1)
+   f2= compute_fun(v2, v0, b0, b01, a, m1)
+   IF (f1 * f2 > 0.0_DP) CALL errore('find_min_mur_pol',&
+                                     'problem finding minimum',1)
+ENDIF
+
 DO istep=1,maxstep
    vx= ( v1+v2 ) * 0.5_DP
    fx= compute_fun(vx, v0, b0, b01, a, m1)

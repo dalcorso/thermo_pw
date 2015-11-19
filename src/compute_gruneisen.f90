@@ -36,7 +36,7 @@ SUBROUTINE compute_gruneisen()
 !  volume
 !
   nq=ph_freq_save(1)%nq
-  poly_order=3
+  poly_order=5
 
   IF ( .NOT. ALLOCATED( poly_grun ) ) ALLOCATE(poly_grun(poly_order,3*nat,nq))
 

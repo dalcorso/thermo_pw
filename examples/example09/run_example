@@ -86,8 +86,6 @@ $ECHO " done"
 cat > thermo_control << EOF
  &INPUT_THERMO
   what='mur_lc_t',
-  nq1_d=128, nq2_d=128, nq3_d=128,
-  ngeo=7
   deltat=3.
  /
 EOF

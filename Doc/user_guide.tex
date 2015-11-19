@@ -977,7 +977,13 @@ of tasks of the phonon code (see above the option \texttt{what='scf\_ph'}).
 \subsection{\texttt{what='mur\_lc\_elastic\_constants'}}
 As \texttt{what='scf\_elastic\_constants'} but the calculation is made at the
 geometry that minimizes the energy. The energy minimization is 
-done as described for \texttt{what='mur\_lc'}. An example of the use of this 
+done as described for \texttt{what='mur\_lc'}. 
+With this option the pressure control is active. You can specify a
+finite pressure and the enthalpy is minimized instead of the
+energy to find the equilibrium structure. Note however that if the 
+minimum is distant from the starting configuration its associated error 
+can be large, larger for the quadratic than for the Murnaghan interpolation. 
+An example of the use of this 
 option can be found in \texttt{example13}. \\
 One additional input variable controls this option.
 \begin{verbatim}
@@ -1042,7 +1048,12 @@ matrix on the central geometry eigenvectors (might require a lot of RAM).
 The mode Gr\"uneisen parameters are used to calculate the volume
 thermal expansion and the result is compared with the volume thermal expansion
 derived from the numerical derivative of the equilibrium volume obtained
-from the minimization of the Helmholtz free energy. \\
+from the minimization of the Helmholtz free energy. 
+With this option the pressure control is active. You can specify a
+finite pressure and the Gibbs energy is minimized instead of the
+Helmholtz free energy. Note however that if the minimum is distant from 
+the starting configuration its associated error can be large, larger for the
+quadratic than for the Murnaghan interpolation. \\
 The input variables that control these plots are those described in the option
 \texttt{what='mur\_lc'} and \texttt{what='mur\_lc\_disp'} in addition to the 
 following:

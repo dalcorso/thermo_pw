@@ -147,7 +147,7 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
 !  Part two: Compute the Gruneisen parameters
 !
   copy_before=.FALSE.
-  poly_order=3
+  poly_order=5
   ALLOCATE(poly_grun(poly_order,nbnd))
   ALLOCATE(frequency(nbnd,nks))
   ALLOCATE(gruneisen(nbnd,nks))
