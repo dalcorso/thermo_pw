@@ -58,7 +58,7 @@ PROGRAM thermo_pw
   ! ...               and orthorombic systems. 
   ! ...
   USE kinds,            ONLY : DP
-  USE ions_base,        ONLY : nat, tau
+  USE ions_base,        ONLY : nat, tau, ntyp => nsp, amass
   USE check_stop,       ONLY : check_stop_init
   USE mp_global,        ONLY : mp_startup, mp_global_end
   USE mp_images,        ONLY : nimage, nproc_image, my_image_id, root_image
@@ -100,7 +100,7 @@ PROGRAM thermo_pw
   USE control_paths,    ONLY : nqaux
   USE control_gnuplot,  ONLY : flgnuplot
   USE control_bands,    ONLY : nbnd_bands
-  USE control_pwrun,    ONLY : ibrav_save, do_punch
+  USE control_pwrun,    ONLY : ibrav_save, do_punch, amass_save
   USE thermo_sym,       ONLY : laue, code_group_save
   USE cell_base,        ONLY : omega, at
   USE wvfct,            ONLY : nbnd
@@ -462,6 +462,7 @@ PROGRAM thermo_pw
 !   written on file
 !
            CALL q2r_sub(auxdyn) 
+           amass_save(1:ntyp)=amass(1:ntyp)
 !
 !    compute interpolated dispersions
 !

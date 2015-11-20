@@ -15,6 +15,7 @@ USE constants,      ONLY : ry_kbar
 USE temperature,    ONLY : ntemp, temp
 USE anharmonic,     ONLY : alpha_anis_t, vmin_t, b0_t, celldm_t, beta_t
 USE control_pwrun,  ONLY : ibrav_save
+USE control_pressure, ONLY : pressure, pressure_kb
 USE data_files,     ONLY : flanhar
 USE io_global,      ONLY : ionode
 USE mp_images,      ONLY : my_image_id, root_image
@@ -24,6 +25,7 @@ CHARACTER(LEN=256) :: filename
 INTEGER :: itemp, iu_therm
 REAL(DP) :: compute_omega_geo
 REAL(DP) :: fact1, fact2, deriv1, deriv2
+CHARACTER(LEN=8) :: float_to_char
 
 IF (my_image_id /= root_image) RETURN
 
@@ -88,8 +90,11 @@ IF (ionode) THEN
 !
 !   here we plot the anharmonic quantities calculated from the phonon dos
 !
+   filename=flanhar
+   IF (pressure /= 0.0_DP) &
+      filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
    iu_therm=2
-   OPEN(UNIT=iu_therm, FILE=TRIM(flanhar), STATUS='UNKNOWN', FORM='FORMATTED')
+   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
    WRITE(iu_therm,'("# alpha is the linear thermal expansion ")')
    WRITE(iu_therm,'("#   T (K)        V(T) (a.u.)^3           beta (x10^6)  ")' )
 
@@ -120,6 +125,9 @@ IF (ionode) THEN
 !  with respect to temperature. 
 !
    filename=TRIM(flanhar)//'.celldm'
+   IF (pressure /= 0.0_DP) &
+      filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+
    OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
    IF (ibrav_save==1 .OR. ibrav_save==2 .OR. ibrav_save==3 ) THEN
       WRITE(iu_therm,'("#   T (K)      celldm(1)      alpha_xx(x10^6)")' )
@@ -199,9 +207,11 @@ SUBROUTINE write_ph_freq_anhar_anis()
 USE kinds,          ONLY : DP
 USE constants,      ONLY : ry_kbar
 USE temperature,    ONLY : ntemp, temp
+USE control_pressure, ONLY : pressure, pressure_kb
 USE ph_freq_anharmonic, ONLY : alphaf_anis_t, vminf_t, b0f_t, celldmf_t, &
                                betaf_t
 USE control_pwrun,  ONLY : ibrav_save
+USE control_pressure, ONLY : pressure, pressure_kb
 USE data_files,     ONLY : flanhar
 USE io_global,      ONLY : ionode
 USE mp_images,      ONLY : my_image_id, root_image
@@ -211,6 +221,7 @@ CHARACTER(LEN=256) :: filename
 INTEGER :: itemp, iu_therm
 REAL(DP) :: compute_omega_geo
 REAL(DP) :: fact1, fact2, deriv1, deriv2
+CHARACTER(LEN=8) :: float_to_char
 
 IF (my_image_id /= root_image) RETURN
 
@@ -276,7 +287,11 @@ IF (ionode) THEN
 !   here we plot the anharmonic quantities calculated from the phonon dos
 !
    iu_therm=2
-   OPEN(UNIT=iu_therm, FILE=TRIM(flanhar)//'_ph', STATUS='UNKNOWN', &
+   filename=TRIM(flanhar)//'_ph'
+   IF (pressure /= 0.0_DP) &
+      filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+
+   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', &
                                                   FORM='FORMATTED')
    WRITE(iu_therm,'("# alpha is the linear thermal expansion ")')
    WRITE(iu_therm,'("#   T (K)        V(T) (a.u.)^3           beta (x10^6)  ")' )
@@ -308,6 +323,8 @@ IF (ionode) THEN
 !  with respect to temperature. 
 !
    filename=TRIM(flanhar)//'.celldm_ph'
+   IF (pressure /= 0.0_DP) &
+      filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
    OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
    IF (ibrav_save==1 .OR. ibrav_save==2 .OR. ibrav_save==3 ) THEN
       WRITE(iu_therm,'("#   T (K)      celldm(1)      alpha_xx(x10^6)")' )
@@ -385,6 +402,7 @@ USE ions_base,      ONLY : nat
 USE cell_base,      ONLY : ibrav
 USE thermo_mod,     ONLY : ngeo
 USE temperature,    ONLY : ntemp, temp
+USE control_pressure, ONLY : pressure, pressure_kb
 USE ph_freq_thermodynamics, ONLY : ph_freq_save, phf_cv
 USE ph_freq_anharmonic,     ONLY : celldmf_t, vminf_t, cvf_t, b0f_t, cpf_t, &
                                    b0f_s
@@ -555,6 +573,8 @@ IF (ionode) THEN
 !   here quantities calculated from the gruneisen parameters
 !
    filename=TRIM(flanhar)//'.aux_grun'
+   IF (pressure /= 0.0_DP) &
+      filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
    iu_therm=2
    OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
    CALL write_alpha_anis(ibrav, celldmf_t, alpha_an_g, temp, ntemp, iu_therm )

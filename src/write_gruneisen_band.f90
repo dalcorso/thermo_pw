@@ -14,12 +14,13 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
   ! that corresponds to the temperature given in input.
   ! 
   USE kinds,          ONLY : DP
-  USE ions_base,      ONLY : nat, ntyp => nsp, ityp, amass, ityp
+  USE ions_base,      ONLY : nat, ntyp => nsp
   USE control_thermo, ONLY : with_eigen
   USE data_files,     ONLY : flgrun
   USE thermo_mod,     ONLY : ngeo, omega_geo
   USE ph_freq_anharmonic, ONLY : vminf_t
   USE control_grun,   ONLY : temp_ph, volume_ph
+  USE control_pwrun,  ONLY : amass_save, ityp_save
   USE temperature,    ONLY : temp, ntemp
   USE mp,             ONLY : mp_bcast
   USE io_global,      ONLY : stdout, ionode, ionode_id
@@ -123,8 +124,8 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
            is_gamma(n) = (( k(1,n)**2 + k(2,n)**2 + k(3,n)**2) < 1.d-12)
         ENDDO
         IF (with_eigen) &
-           CALL readmodes(nat,nks,k,displa_geo,ngeo(1),igeo,ntyp,ityp,  &
-                                                                 amass,iumode)
+           CALL readmodes(nat,nks,k,displa_geo,ngeo(1),igeo,ntyp,ityp_save,  &
+                                                            amass_save,iumode)
 
         CLOSE(UNIT=1, STATUS='KEEP')
         CLOSE(UNIT=21, STATUS='KEEP')

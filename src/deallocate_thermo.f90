@@ -26,12 +26,13 @@ SUBROUTINE deallocate_thermo()
                                label_disp_q, disp_q, disp_wq, nrap_plot_in,   &
                                rap_plot_in, nrap_plot, rap_plot
   USE control_2d_bands, ONLY : averag, vacuum, aux_ind_sur
+  USE control_pwrun,    ONLY : ityp_save, amass_save
   USE temperature,      ONLY : temp
 
   USE control_pressure, ONLY : pressure_list
   USE control_conv,     ONLY : ke, keden, nk_test, sigma_test
   USE elastic_constants, ONLY : epsilon_geo, sigma_geo, epsilon_voigt
-  USE control_elastic_constants, ONLY : rot_mat, aap_mat, apa_mat
+  USE control_elastic_constants, ONLY : rot_mat, aap_mat, apa_mat, tau_save
   USE control_debye,    ONLY : deb_energy, deb_free_energy, deb_entropy, &
                                deb_cv
 
@@ -106,6 +107,10 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (rot_mat) )         DEALLOCATE(rot_mat)
   IF ( ALLOCATED (aap_mat) )         DEALLOCATE(aap_mat)
   IF ( ALLOCATED (apa_mat) )         DEALLOCATE(apa_mat)
+
+  IF ( ALLOCATED (tau_save) )        DEALLOCATE(tau_save)
+  IF ( ALLOCATED (ityp_save) )       DEALLOCATE(ityp_save)
+  IF ( ALLOCATED (amass_save) )      DEALLOCATE(amass_save)
 
   IF ( ALLOCATED (deb_energy) )      DEALLOCATE( deb_energy )
   IF ( ALLOCATED (deb_free_energy) ) DEALLOCATE( deb_free_energy )

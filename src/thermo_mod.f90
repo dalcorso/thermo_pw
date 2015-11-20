@@ -500,6 +500,9 @@ MODULE control_pwrun
 
   REAL(DP) :: celldm_save(6)   ! save the crystal parameters
   INTEGER  :: ibrav_save       ! save the Bravais lattice
+  INTEGER, ALLOCATABLE :: ityp_save(:)  ! save the type of atoms. To be
+                                        ! used after completely cleaning pw
+  REAL(DP), ALLOCATABLE :: amass_save(:) ! save the mass of atoms. 
   LOGICAL  :: do_punch=.TRUE.  ! set this variable to .FALSE. if pw has
                                ! not to save the punch files.
 

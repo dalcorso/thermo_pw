@@ -14,14 +14,14 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
   ! that corresponds to the temperature given in input.
   ! 
   USE kinds,          ONLY : DP
-  USE ions_base,      ONLY : nat, ntyp => nsp, ityp, amass, ityp
+  USE ions_base,      ONLY : nat, ntyp => nsp
   USE cell_base,      ONLY : celldm
   USE data_files,     ONLY : flgrun
   USE control_paths,  ONLY : nqaux, disp_q, disp_nqs
   USE thermo_mod,     ONLY : ngeo, omega_geo, celldm_geo
   USE anharmonic, ONLY : celldm_t
   USE control_grun,   ONLY : temp_ph, volume_ph, celldm_ph
-  USE control_pwrun,  ONLY : ibrav_save
+  USE control_pwrun,  ONLY : ibrav_save, amass_save, ityp_save
   USE temperature,    ONLY : temp, ntemp
   USE quadratic_surfaces, ONLY : evaluate_fit_quadratic, &
                                  evaluate_fit_grad_quadratic
@@ -133,10 +133,10 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
         ENDDO
 !
 !  readmodes reads a file with the displacements, but writes in displa_geo
-!  the normalized eigenvalues of the dynamical matrix
+!  the normalized eigenvectors of the dynamical matrix
 !
-        CALL readmodes(nat,nks,k,displa_geo,nwork,igeo,ntyp,ityp,amass, &
-                                                                  iumode)
+        CALL readmodes(nat,nks,k,displa_geo,nwork,igeo,ntyp,ityp_save, &
+                                       amass_save, iumode)
         CLOSE(UNIT=iumode, STATUS='KEEP')
         CLOSE(UNIT=iufreq, STATUS='KEEP')
         CLOSE(UNIT=iurap, STATUS='KEEP')

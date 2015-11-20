@@ -22,6 +22,7 @@ USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
                             gnuplot_ylabel,              &
                             gnuplot_xlabel,              &
                             gnuplot_write_file_mul_data, &
+                            gnuplot_write_file_mul_point, &
                             gnuplot_set_fact
 USE data_files,  ONLY : flanhar
 USE grun_anharmonic, ONLY : done_grun
@@ -103,7 +104,23 @@ CALL gnuplot_write_file_mul_data(filename,1,2,'color_red',.TRUE.,.FALSE.,&
 CALL gnuplot_write_file_mul_data(filename1,1,2,'color_blue',.FALSE.,.TRUE.,&
                                                                .FALSE.)
 CALL gnuplot_ylabel('Linear thermal expansion {/Symbol a} x 10^6 (K^{-1})',.FALSE.) 
-IF (ibrav_save==4.OR.ibrav_save==5.OR.ibrav_save==6.OR.ibrav_save==7) THEN
+IF (ibrav_save==1.OR.ibrav_save==2.OR.ibrav_save==3) THEN
+   CALL gnuplot_write_file_mul_data(filename2,1,3,'color_red',.TRUE.,.FALSE.,&
+                                                                .FALSE.)
+   IF (done_grun) &
+      CALL gnuplot_write_file_mul_data(filename4,1,3,'color_green',.FALSE., &
+                                                              .FALSE.,.FALSE.)
+   CALL gnuplot_write_file_mul_data(filename3,1,3,'color_blue',.FALSE., &
+                                                              .TRUE.,.FALSE.)
+!
+!  put as a comment the possibility to plot also the experimental data
+!
+   CALL gnuplot_write_file_mul_data(filename3,1,3,'color_blue',.FALSE.,&
+                                                                .FALSE.,.TRUE.)
+   CALL gnuplot_write_file_mul_point('anhar.exp',1,2,'color_red',.FALSE.,&
+                                                                 .TRUE.,.TRUE.)
+
+ELSEIF (ibrav_save==4.OR.ibrav_save==5.OR.ibrav_save==6.OR.ibrav_save==7) THEN
    CALL gnuplot_write_file_mul_data(filename2,1,4,'color_red',.TRUE.,.FALSE.,&
                                                                 .FALSE.)
    CALL gnuplot_write_file_mul_data(filename3,1,4,'color_blue',.FALSE.,.FALSE.,&

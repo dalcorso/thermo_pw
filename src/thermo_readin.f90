@@ -59,11 +59,12 @@ SUBROUTINE thermo_readin()
   USE control_piezoelectric_tensor, ONLY : nosym_save
   USE control_energy_plot,  ONLY : ncontours, color_levels, ene_levels 
   USE piezoelectric_tensor, ONLY : nppl
-  USE control_pwrun,        ONLY : celldm_save, ibrav_save
+  USE control_pwrun,        ONLY : celldm_save, ibrav_save, ityp_save, &
+                                   amass_save
   USE control_ph,           ONLY : xmldyn
   USE output,               ONLY : fildyn
   USE cell_base,            ONLY : at, bg, celldm
-  USE ions_base,            ONLY : nat, tau
+  USE ions_base,            ONLY : nat, tau, ntyp => nsp, ityp, amass
   USE symm_base,            ONLY : nosym
   USE mp_world,             ONLY : world_comm
   USE mp_images,            ONLY : nimage, my_image_id, root_image
@@ -538,6 +539,9 @@ SUBROUTINE thermo_readin()
   celldm_save=celldm
   celldm0=celldm
   ALLOCATE(tau_save(3,nat))
+  ALLOCATE(ityp_save(nat))
+  ALLOCATE(amass_save(ntyp))
+  ityp_save(:)=ityp(:)
   tau_save=tau
 !
 !  bring tau_save in crystal coordinates. In strained geometries tau_save
