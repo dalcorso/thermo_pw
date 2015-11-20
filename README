@@ -30,6 +30,7 @@ make join_qe
 
 Go again in the main QE directory and type
 
+./configure
 make thermo_pw
 
 Now you should have the file thermo_pw.x in the QE/bin directory and
