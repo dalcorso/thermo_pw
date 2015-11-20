@@ -9,8 +9,8 @@
 SUBROUTINE thermo_summary()
   !-----------------------------------------------------------------------
   !
-  !  This routine write a summary of the input and calculate a few
-  !  quantities that can be deduced from the pw input that can be
+  !  This routine writes a summary of the input and calculates a few
+  !  quantities that can be deduced from the pw input and that can be
   !  useful for the thermo_pw calculation
   !
   USE kinds,                ONLY : DP
