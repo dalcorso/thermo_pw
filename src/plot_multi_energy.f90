@@ -83,7 +83,7 @@ SUBROUTINE plot_multi_energy()
         CALL gnuplot_xlabel('a (a.u.)',.FALSE.)
 
         IF (pressure /= 0.0_DP) THEN
-           label='Gibbs Energy (Ry)    p= '&
+           label='Enthalpy (Ry)    p= '&
                              &//TRIM(float_to_char(pressure_kb,1))//' kbar'
         ELSE
            label='Energy (Ry)'
