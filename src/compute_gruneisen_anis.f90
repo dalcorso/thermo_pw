@@ -64,7 +64,7 @@ SUBROUTINE fit_frequencies_anis()
 END SUBROUTINE fit_frequencies_anis
 
 SUBROUTINE compute_freq_derivative_anis_eigen(ngeo,freq_geo,celldm_geo,&
-                     displa_geo, degree,nvar,ibrav,poly_grun)
+                     displa_geo,degree,nvar,ibrav,poly_grun)
 
 USE kinds, ONLY : DP
 USE ions_base, ONLY : nat

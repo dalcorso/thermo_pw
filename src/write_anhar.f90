@@ -13,12 +13,14 @@ USE thermodynamics, ONLY : ph_cv
 USE anharmonic,     ONLY : alpha_t, beta_t, gamma_t, cp_t, cv_t, b0_s, &
                            vmin_t, b0_t, b01_t
 USE thermo_mod,     ONLY : omega_geo
+USE control_pressure, ONLY : pressure, pressure_kb
 USE data_files,     ONLY : flanhar
 USE io_global,      ONLY : ionode
 USE mp_images,      ONLY : my_image_id, root_image
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
+CHARACTER(LEN=8) :: float_to_char 
 INTEGER :: itemp, iu_therm
 
 IF (my_image_id /= root_image) RETURN
@@ -34,7 +36,10 @@ IF (ionode) THEN
 !   here we plot the quantities calculated from the phonon dos
 !
    iu_therm=2
-   OPEN(UNIT=iu_therm, FILE=TRIM(flanhar), STATUS='UNKNOWN', FORM='FORMATTED')
+   filename=TRIM(flanhar)
+   IF (pressure /= 0.0_DP) &
+      filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
    WRITE(iu_therm,'("# beta is the volume thermal expansion ")')
    WRITE(iu_therm,'("#   T (K)     V(T) (a.u.)^3   B (T) (kbar) &
                       & d B (T) / dP  beta (10^(-6) K^(-1))")' )
@@ -48,6 +53,8 @@ IF (ionode) THEN
 !   here auxiliary quantities calculated from the phonon dos
 !
    filename=TRIM(flanhar)//'.aux'
+   IF (pressure /= 0.0_DP) &
+      filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
    OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
    WRITE(iu_therm,'("# gamma is the average gruneisen parameter ")')
    WRITE(iu_therm,'("#   T (K)       gamma(T)       C_v ( Ry / cell ) &
@@ -72,6 +79,7 @@ USE temperature,    ONLY : ntemp, temp
 USE ph_freq_thermodynamics, ONLY : phf_cv
 USE ph_freq_anharmonic, ONLY : alphaf_t, betaf_t, gammaf_t, cpf_t, cvf_t, &
                         b0f_s, vminf_t, b0f_t, b01f_t
+USE control_pressure, ONLY : pressure, pressure_kb
 USE thermo_mod,     ONLY : omega_geo
 USE data_files,     ONLY : flanhar
 USE io_global,      ONLY : ionode
@@ -79,6 +87,7 @@ USE mp_images,      ONLY : my_image_id, root_image
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
+CHARACTER(LEN=8) :: float_to_char 
 INTEGER :: itemp, iu_therm
 
 IF (my_image_id /= root_image) RETURN
@@ -94,7 +103,10 @@ IF (ionode) THEN
 !   here we plot the quantities calculated from the phonon dos
 !
    iu_therm=2
-   OPEN(UNIT=iu_therm, FILE=TRIM(flanhar)//'_ph', STATUS='UNKNOWN', FORM='FORMATTED')
+   filename=TRIM(flanhar)//'_ph'
+   IF (pressure /= 0.0_DP) &
+      filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
    WRITE(iu_therm,'("# beta is the volume thermal expansion ")')
    WRITE(iu_therm,'("#   T (K)     V(T) (a.u.)^3   B (T) (kbar) &
                       & d B (T) / dP     beta (10^(-6) K^(-1))")' )
@@ -109,6 +121,8 @@ IF (ionode) THEN
 !   here auxiliary quantities calculated from the phonon dos
 !
    filename=TRIM(flanhar)//'.aux_ph'
+   IF (pressure /= 0.0_DP) &
+      filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
    OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
    WRITE(iu_therm,'("# gamma is the average gruneisen parameter ")')
    WRITE(iu_therm,'("#   T (K)       gamma(T)       C_p ( Ry / cell ) &
@@ -137,6 +151,7 @@ USE ph_freq_anharmonic,     ONLY :  vminf_t, cvf_t, b0f_t, cpf_t, b0f_s
 USE grun_anharmonic, ONLY : betab, grun_gamma_t, poly_grun, poly_order
 USE ph_freq_module, ONLY : thermal_expansion_ph, ph_freq_type,  &
                            destroy_ph_freq, init_ph_freq
+USE control_pressure, ONLY : pressure, pressure_kb
 USE ifc,            ONLY : nq1_d, nq2_d, nq3_d
 USE data_files,     ONLY : flanhar
 USE io_global,      ONLY : ionode
@@ -144,6 +159,7 @@ USE mp_images,      ONLY : my_image_id, root_image
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
+CHARACTER(LEN=8) :: float_to_char 
 INTEGER :: itemp, iu_therm, i, nq, imode, iq
 TYPE(ph_freq_type) :: ph_freq    ! the frequencies at the volumes at
                                  ! which the gruneisen parameters are 
@@ -194,6 +210,8 @@ IF (ionode) THEN
 !   here quantities calculated from the gruneisen parameters
 !
    filename=TRIM(flanhar)//'.aux_grun'
+   IF (pressure /= 0.0_DP) &
+      filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
    iu_therm=2
    OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
    WRITE(iu_therm,'("# gamma is the average gruneisen parameter ")')

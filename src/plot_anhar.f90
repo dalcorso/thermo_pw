@@ -26,22 +26,28 @@ USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
                             gnuplot_set_fact
 USE data_files,      ONLY : flanhar
 USE temperature,     ONLY : tmin, tmax
+USE control_pressure, ONLY : pressure, pressure_kb
 USE mp_images,       ONLY : my_image_id, root_image
 USE io_global,       ONLY : ionode
 
 IMPLICIT NONE
 
-CHARACTER(LEN=256) :: gnu_filename, filename, filename1, filename2, filename3
-CHARACTER(LEN=6), EXTERNAL :: int_to_char
+CHARACTER(LEN=256) :: gnu_filename, filename, filename0, filename1, filename2,&
+                                              filename3
+CHARACTER(LEN=8) :: float_to_char
 INTEGER :: system
 INTEGER :: ierr
 
 IF ( my_image_id /= root_image ) RETURN
 
 gnu_filename=TRIM(flgnuplot)//'_anhar'
+IF (pressure /= 0.0_DP) &
+       gnu_filename=TRIM(gnu_filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 CALL gnuplot_start(gnu_filename)
 
 filename=TRIM(flpsanhar)
+IF (pressure /= 0.0_DP) &
+       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 IF (tmin /= 1.0_DP) THEN
    CALL gnuplot_write_header(filename, tmin, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
 ELSE
@@ -49,29 +55,38 @@ ELSE
 ENDIF
 
 filename=TRIM(flanhar)//'_ph'
+filename0=TRIM(flanhar)
 filename1=TRIM(flanhar)//'.aux'
 filename2=TRIM(flanhar)//'.aux_ph'
 filename3=TRIM(flanhar)//'.aux_grun'
 
+IF (pressure /= 0.0_DP) THEN
+   filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+   filename0=TRIM(filename0)//'.'//TRIM(float_to_char(pressure_kb,1))
+   filename1=TRIM(filename1)//'.'//TRIM(float_to_char(pressure_kb,1))
+   filename2=TRIM(filename2)//'.'//TRIM(float_to_char(pressure_kb,1))
+   filename3=TRIM(filename3)//'.'//TRIM(float_to_char(pressure_kb,1))
+END IF
+
 CALL gnuplot_xlabel('T (K)',.FALSE.) 
 CALL gnuplot_set_fact(1.0_DP,.FALSE.)
 CALL gnuplot_ylabel('Volume ((a.u.)^3)',.FALSE.) 
-CALL gnuplot_write_file_mul_data(flanhar,1,2,'color_red',.TRUE.,.FALSE.,.FALSE.)
+CALL gnuplot_write_file_mul_data(filename0,1,2,'color_red',.TRUE.,.FALSE.,.FALSE.)
 CALL gnuplot_write_file_mul_data(filename,1,2,'color_blue',.FALSE.,.TRUE.,.FALSE.)
 
 CALL gnuplot_set_fact(1.0_DP,.FALSE.)
 CALL gnuplot_ylabel('Bulk modulus (kbar)',.FALSE.) 
-CALL gnuplot_write_file_mul_data(flanhar,1,3,'color_red',.TRUE.,.FALSE.,.FALSE.)
+CALL gnuplot_write_file_mul_data(filename0,1,3,'color_red',.TRUE.,.FALSE.,.FALSE.)
 CALL gnuplot_write_file_mul_data(filename,1,3,'color_blue',.FALSE.,.TRUE.,.FALSE.)
 
 CALL gnuplot_set_fact(1.0_DP,.FALSE.)
 CALL gnuplot_ylabel('d B / d p',.FALSE.) 
-CALL gnuplot_write_file_mul_data(flanhar,1,4,'color_red',.TRUE.,.FALSE.,.FALSE.)
+CALL gnuplot_write_file_mul_data(filename0,1,4,'color_red',.TRUE.,.FALSE.,.FALSE.)
 CALL gnuplot_write_file_mul_data(filename,1,4,'color_blue',.FALSE.,.TRUE.,.FALSE.)
 
 CALL gnuplot_set_fact(1.0_DP,.FALSE.)
 CALL gnuplot_ylabel('Thermal expansion ({/Symbol b} x 10^{6}) (K^{-1})',.FALSE.) 
-CALL gnuplot_write_file_mul_data(flanhar,1,5,'color_red',.TRUE.,.FALSE.,.FALSE.)
+CALL gnuplot_write_file_mul_data(filename0,1,5,'color_red',.TRUE.,.FALSE.,.FALSE.)
 CALL gnuplot_write_file_mul_data(filename,1,5,'color_blue',.FALSE.,.FALSE.,.FALSE.)
 CALL gnuplot_write_file_mul_data(filename3,1,2,'color_green',.FALSE.,.TRUE.,.FALSE.)
 !

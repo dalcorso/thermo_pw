@@ -9,25 +9,18 @@
 FUNCTION compute_omega_geo(ibrav, celldm_)
   !-----------------------------------------------------------------------
   !
-  !  This routine receives celldm and computes the
-  !  volume, using ibrav read from input. The celldm read from input is
-  !  not changed but the one of cell_base is changed.
+  !  This function receives ibrav and celldm and computes the volume
+  !  of the unit cell. 
   !
   USE kinds,            ONLY : DP
-  USE input_parameters, ONLY : celldm, a, b, c, cosab, cosac, cosbc, &
-                               trd_ht, rd_ht, cell_units
-  USE cell_base,        ONLY : at, cell_base_init, omega, alat
   !
   IMPLICIT NONE
+  REAL(DP) :: compute_omega_geo
   INTEGER, INTENT(IN) :: ibrav
   REAL(DP), INTENT(IN) :: celldm_(6)
-  REAL(DP) :: compute_omega_geo, celldm_save(6)
-  !
-  celldm_save=celldm
-  celldm=celldm_
-  CALL cell_base_init ( ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
-                        trd_ht, rd_ht, cell_units )
-  celldm=celldm_save
+  REAL(DP) :: at(3,3), omega
+
+  CALL latgen( ibrav, celldm_, at(1,1), at(1,2), at(1,3), omega )
   compute_omega_geo = omega
 
   RETURN

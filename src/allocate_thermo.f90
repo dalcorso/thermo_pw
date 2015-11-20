@@ -61,7 +61,7 @@ SUBROUTINE allocate_anharmonic()
   IF (.NOT. ALLOCATED (alpha_anis_t) )  ALLOCATE(alpha_anis_t(6,ntemp)) 
   IF (.NOT. ALLOCATED (coeff_t) )       ALLOCATE(coeff_t(nvar,ntemp)) 
 
-  IF (.NOT. ALLOCATED (vminf_t) )        ALLOCATE(vminf_t(ntemp)) 
+  IF (.NOT. ALLOCATED (vminf_t) )       ALLOCATE(vminf_t(ntemp)) 
   IF (.NOT. ALLOCATED (b0f_t) )         ALLOCATE(b0f_t(ntemp)) 
   IF (.NOT. ALLOCATED (b01f_t) )        ALLOCATE(b01f_t(ntemp)) 
   IF (.NOT. ALLOCATED (free_e_minf_t) ) ALLOCATE(free_e_minf_t(ntemp)) 
@@ -72,10 +72,10 @@ SUBROUTINE allocate_anharmonic()
   IF (.NOT. ALLOCATED (betaf_t) )       ALLOCATE(betaf_t(ntemp)) 
   IF (.NOT. ALLOCATED (gammaf_t) )      ALLOCATE(gammaf_t(ntemp)) 
   IF (.NOT. ALLOCATED (betab) )         ALLOCATE(betab(ntemp))
-  IF (.NOT. ALLOCATED (alpha_an_g) )  ALLOCATE(alpha_an_g(6,ntemp)) 
+  IF (.NOT. ALLOCATED (alpha_an_g) )    ALLOCATE(alpha_an_g(6,ntemp)) 
   IF (.NOT. ALLOCATED (grun_gamma_t) )  ALLOCATE(grun_gamma_t(ntemp)) 
-  IF (.NOT. ALLOCATED (celldmf_t) )      ALLOCATE(celldmf_t(6,ntemp)) 
-  IF (.NOT. ALLOCATED (alphaf_anis_t) )  ALLOCATE(alphaf_anis_t(6,ntemp)) 
+  IF (.NOT. ALLOCATED (celldmf_t) )     ALLOCATE(celldmf_t(6,ntemp)) 
+  IF (.NOT. ALLOCATED (alphaf_anis_t) ) ALLOCATE(alphaf_anis_t(6,ntemp)) 
 
   RETURN
   !
