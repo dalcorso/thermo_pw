@@ -21,13 +21,6 @@ elastic_const.o : ../../Modules/mp.o
 elastic_const.o : ../../Modules/mp_images.o
 elastic_const.o : quadratic_surfaces.o
 elastic_const.o : rotate.o
-elastic_const_modified.o : ../../Modules/constants.o
-elastic_const_modified.o : ../../Modules/io_global.o
-elastic_const_modified.o : ../../Modules/kind.o
-elastic_const_modified.o : ../../Modules/mp.o
-elastic_const_modified.o : ../../Modules/mp_images.o
-elastic_const_modified.o : quadratic_surfaces.o
-elastic_const_modified.o : rotate.o
 gnuplot.o : ../../Modules/io_global.o
 gnuplot.o : ../../Modules/kind.o
 isoentropic.o : ../../Modules/constants.o

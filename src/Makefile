@@ -4,6 +4,7 @@ include ../../make.sys
 
 # location of needed modules and included files (if any)
 MODFLAGS= $(MOD_FLAG)../../iotk/src $(MOD_FLAG)../../Modules \
+          $(MOD_FLAG)../../FFTXlib \
           $(MOD_FLAG)../../PW/src $(MOD_FLAG)../../PHonon/PH \
           $(MOD_FLAG)../lib $(MOD_FLAG)../qe $(MOD_FLAG).
 IFLAGS=
@@ -88,7 +89,7 @@ write_quadratic.o \
 write_thermo.o 
 
 PWOBJS = ../../PHonon/PH/libph.a ../../PP/src/libpp.a ../../PW/src/libpw.a 
-QEMODS = ../../Modules/libqemod.a
+QEMODS = ../../Modules/libqemod.a ../../FFTXlib/libqefft.a
 
 LIBOBJS	= ../lib/thermo_lib.a ../qe/thermo_qe.a ../../PHonon/PH/libph.a ../../flib/ptools.a ../../flib/flib.a ../../clib/clib.a ../../iotk/src/libiotk.a
 

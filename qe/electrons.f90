@@ -372,7 +372,7 @@ SUBROUTINE electrons_scf_tpw ( printout )
   ! ... for the first scf iteration of each ionic step (after the first),
   ! ... the threshold is fixed to a default value of 1.D-6
   !
-  IF ( istep > 0 ) ethr = 1.D-6
+!  IF ( istep > 0 ) ethr = 1.D-6
   !
   IF ( restart ) CALL restart_in_electrons (iter, dr2, ethr, et )
   !
@@ -501,7 +501,8 @@ SUBROUTINE electrons_scf_tpw ( printout )
               ENDIF
            ENDIF
            !
-           IF ( first .AND. istep == 0 .AND. starting_pot == 'atomic' ) THEN
+!           IF ( first .AND. istep == 0 .AND. starting_pot == 'atomic' ) THEN
+           IF ( first .AND. starting_pot == 'atomic' ) THEN
               CALL ns_adj()
               IF (noncolin) THEN
                  rhoin%ns_nc = rho%ns_nc
