@@ -19,20 +19,21 @@ thermo_qe:
 	( cd qe ; $(MAKE) all || exit 1 )
 
 join_qe:
-	mv ../Makefile Makefile_qe
-	mv main_Makefile ../Makefile
-	mv ../install/plugins_makefile plugins_makefile_qe
-	mv plugins_makefile ../install
-	mv ../install/makedeps.sh makedeps.sh_qe
-	mv makedeps.sh ../install/
+	if test -f main_Makefile ; then mv ../Makefile Makefile_qe ; \
+           mv main_Makefile ../Makefile ; fi
+	if test -f plugins_makefile ; then mv ../install/plugins_makefile \
+           plugins_makefile_qe ; mv plugins_makefile ../install ; fi
+	if test -f makedeps.sh ; then mv ../install/makedeps.sh \
+           makedeps.sh_qe ; mv makedeps.sh ../install/ ; fi
 
 leave_qe:
-	mv ../Makefile main_Makefile
-	mv Makefile_qe ../Makefile
-	mv ../install/plugins_makefile .
-	mv plugins_makefile_qe ../install/plugins_makefile
-	mv ../install/makedeps.sh .
-	mv makedeps.sh_qe ../install/makedeps.sh
+	if test -f Makefile_qe ; then mv ../Makefile main_Makefile ; \
+           mv Makefile_qe ../Makefile ; fi
+	if test -f plugins_makefile_qe ; then \
+           mv ../install/plugins_makefile . ; \
+           mv plugins_makefile_qe ../install/plugins_makefile ; fi
+	if test -f makedeps.sh_qe ; then mv ../install/makedeps.sh . ; \
+           mv makedeps.sh_qe ../install/makedeps.sh ; fi
 
 clean: thermo_tools_clean thermo_pw_clean thermo_lib_clean thermo_qe_clean examples_clean doc_clean
 
