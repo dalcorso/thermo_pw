@@ -1,0 +1,2495 @@
+%!
+%! Copyright (C) 2015 Andrea Dal Corso 
+%! This file is distributed under the terms of the
+%! GNU General Public License. See the file `License'
+%! in the root directory of the present distribution,
+%! or http://www.gnu.org/copyleft/gpl.txt .
+%!
+\documentclass[12pt,a4paper]{article}
+\def\version{0.4.0}
+\def\qe{{\sc Quantum ESPRESSO}}
+\def\tpw{{\sc thermo\_pw}}
+
+\usepackage{html}
+
+\usepackage{graphicx}
+
+\textwidth = 17cm
+\textheight = 24cm
+\topmargin =-1 cm
+\oddsidemargin = 0 cm
+
+\def\pwx{\texttt{pw.x}}
+\def\phx{\texttt{ph.x}}
+\def\configure{\texttt{configure}}
+\def\PWscf{\texttt{PWscf}}
+\def\PHonon{\texttt{PHonon}}
+\def\thermo{\texttt{thermo\_pw}}
+\def\make{\texttt{make}}
+
+\begin{document} 
+\author{}
+\date{}
+
+\def\qeImage{../../Doc/quantum_espresso.pdf}
+\def\democritosImage{../../Doc/democritos.pdf}
+\def\SissaImage{./sissa.pdf}
+
+\title{
+%  \includegraphics[width=6cm]{\SissaImage}\\
+  \vskip 1cm
+  \Huge Thermo\_pw: Thermodynamics of crystals \\
+  \Large (version \version)
+}
+
+\maketitle
+
+\tableofcontents
+
+\section{Introduction}
+These notes describe the thermodynamics of crystals implemented in \tpw. 
+
+\section{People}
+These notes have been written by Andrea Dal Corso (SISSA - Trieste). \\
+Disclaimer: I am not an expert of crystal thermodynamics. 
+These notes reflect what I have understood so far and implemented in 
+\texttt{thermo\_pw}. If you think that some formula is wrong, 
+that I misunderstood something, or that something can be calculated more 
+simply, please let me know, I would like to learn more. 
+You can contact me directly: \texttt{dalcorso@sissa.it} or send an
+e-mail to the \texttt{thermo\_pw-forum} mailing list.
+
+\section{Overview}
+The properties of a solid addressed by \tpw\ are described by the thermodynamic
+theory of the elastic solid. In this theory a solid is characterized by an
+equilibrium configuration that depends on the temperature $T$ and on an
+external stress $\sigma$ (assumed constant) that describes the forces 
+that act on the surface. The state
+of the solid is characterized by a reference configuration 
+(for instance the equilibrium configuration at $T=0$ and $\sigma=0$) and 
+a strain $\epsilon$ which describes the deformation with respect to the 
+reference configuration. 
+Within the quasi-harmonic approximation the solid has an internal
+energy given by  
+\begin{equation}
+U=U_0 + U_{el} + U_{ph}
+\end{equation}
+where $U_0$ is the ground state energy of the electrons in the field 
+of the nuclei fixed at the equilibrium positions at the given strain and
+temperature, $U_{el}$ is the additional electron energy due to the 
+finite electron temperature and $U_{ph}$ is the internal energy of the 
+phonons that accounts for the vibrational energy of the nuclei. 
+Given the phonon frequencies $\omega_{{\bf q},\nu}$ of the solid 
+(at wavevector ${\bf q}$) we can write:
+\begin{equation}
+U_{ph} = \sum_{{\bf q},\nu} {\hbar \omega_{{\bf q},\nu} \over 2}
++ \sum_{{\bf q},\nu} {\hbar \omega_{{\bf q},\nu} \over 
+e^{\beta \hbar \omega_{{\bf q},\nu}}-1}.
+\label{uvib}
+\end{equation}
+where $\beta=1/ k_B T$ and $k_B$ is the Boltzmann constant and $\hbar$ is the
+Planck constant.
+Presently in \tpw\ $U_{el}$ is neglected and $U_0$ is calculated
+within density functional theory.
+Similarly the Helmholtz free energy is $F=U_0+F_{ph}$ with:
+\begin{equation}
+F_{ph} = \sum_{{\bf q},\nu} \ln \left[ 2 \sinh \left({\beta \hbar 
+\omega_{{\bf q},\nu} \over 2}\right) \right],
+\nonumber
+\end{equation}
+where we have neglected the finite electron temperature. \\
+Having the internal energy and the Helmholtz free energy, the entropy can 
+be calculated as $S=(U-F)/T$.
+
+\tpw\ calculates the energy, the Helmholtz free energy, and the
+entropy of a unit cell of the solid for a given choice of the primitive 
+Bravais lattice vectors ${\bf a}_1$, ${\bf a}_2$, and ${\bf a}_3$. These
+vectors depend on a few parameters $\alpha_k$ that determine the size 
+of the unit cell ($k$ is $1$ for cubic lattices and has a maximum
+value $k=6$ for the triclinic lattice).
+The unit cell contains $N_{at}$ atoms
+whose positions are indicated by ${\bf d}_s$ with $1\le s\le N_{at}$.
+These positions are assumed to be optimized so that the forces acting
+on atoms vanish.
+The reference configuration of the solid is
+characterized by a set of parameters $\alpha_{k,0}$ and a set of parameters 
+$\alpha_k$ corresponds to a solid in a strained state.
+Therefore from a theoretical point of view it is easy to calculate the 
+internal energy, the Helmholtz free energy, and the entropy as a 
+function of strain and temperature.
+
+Experimentally it is simpler to control the stress imposed on the solid. 
+Moreover in some cases the thermodynamic quantities are measured without 
+heat exchange, that is at constant entropy instead of at constant temperature. 
+In the thermodynamic theory of the elastic solid it is natural to consider two
+functions. The internal energy as a function of strain and entropy  
+to describe adiabatic properties and the Helmholtz free energy as a function
+of strain and temperature to describe isothermal properties.
+Therefore we can calculate directly isothermal quantities (measured at constant
+temperature), but we need thermodynamics equations to calculate
+the adiabatic quantities (measured at constant entropy).
+
+First derivatives of the Helmholtz free energy with respect to strain
+give the stress acting of the solid and this gives one or more equations
+of state that relate strain, stress, and temperature. 
+Searching the strain for which the stress is zero we determine the 
+equilibrium geometry of the solid at each temperature as the minimum of 
+the Helmholtz free energy. From these information we can deduce the
+thermal expansion of the solid. The first derivative of the entropy 
+with respect to temperature at fixed strain multiplied by the temperature
+is the heat capacity at constant strain. Second derivatives of the 
+Helmholtz free energy with 
+respect to strain calculated at the equilibrium geometry give the 
+isothermal elastic constants at the given temperature and at zero pressure. 
+From the elastic constants we can calculate the isothermal bulk modulus 
+of the solid at any temperature. 
+Thermal expansions and elastic constants allows the calculation of the thermal
+stresses and using these quantities we can obtain the adiabatic heat
+capacity, elastic constants, and bulk moduli from the corresponding 
+isothermal ones. Finally from the constant strain heat capacity and 
+the thermal stresses we can calculate the anisotropic average Gr\"uneisen 
+parameters.
+
+The strain for which the stress is a given pressure (or stress) at a given
+temperature minimizes the Gibbs free energy at that temperature and
+pressure (or stress) and from the minimum of this function we can determine 
+the equilibrium geometry of the solid as a function of temperature and 
+pressure (or stress). 
+From these information we can deduce the thermal expansion of the 
+solid at fixed pressure (or stress). Second derivatives of the Gibbs free
+energy with respect to strain give the isothermal elastic constants at the 
+given temperature and pressure (or stress). From the elastic constants 
+we can calculate the isothermal bulk modulus of the solid at the
+given temperature and pressure (or stress).
+%Thermal expansions and elastic constants allow the calculation of the thermal
+%stresses at the given pressure (or stress) and using these quantities we 
+%can obtain the adiabatic heat capacity, elastic constants, and bulk moduli at
+%the given pressure (or stress) from the corresponding isothermal ones. 
+%Finally from the constant strain heat capacity and the thermal stresses 
+%we can calculate the anisotropic average Gr\"uneisen parameters at 
+%the given temperature and pressure (or stress).
+
+In this guide we define all the quantities described above and calculated 
+by \tpw\ and give the formulas needed to relate the crystallographic
+parameters $\alpha_k$ to the thermodynamic functions.
+
+\section{Crystal lattices}
+We start with a short review of the fourteen Bravais lattices and give
+our definition of the primitive lattice vectors. For each lattice we 
+specify the number of parameters necessary to define the unit cell.
+The volume of one unit cell is indicated with $\Omega$ and the total 
+volume of the solid is $V=N\Omega$ where $N$ is the number of unit cells
+of the solid. 
+
+\subsection{Cubic system}
+The cubic system comprises three Bravais lattices. The cubic lattice
+is:
+\begin{eqnarray}
+{\bf a}_1 &=& a (1, 0, 0), \nonumber \\
+{\bf a}_2 &=& a (0, 1, 0), \nonumber \\
+{\bf a}_3 &=& a (0, 0, 1). \nonumber
+\nonumber
+\end{eqnarray}
+The volume of the unit cell is $\Omega = a^3$. \\
+The face-centered cubic lattice is:
+\begin{eqnarray}
+{\bf a}_1 &=& {a \over 2} (-1, 0, 1), \nonumber \\
+{\bf a}_2 &=& {a \over 2} (0, 1, 1), \nonumber \\
+{\bf a}_3 &=& {a \over 2} (-1, 1, 0). \nonumber
+\nonumber
+\end{eqnarray}
+The volume of the unit cell is $\Omega = a^3/4$. \\
+The body-centered cubic lattice is:
+\begin{eqnarray}
+{\bf a}_1 &=&{a \over 2} (1, 1, 1), \nonumber \\
+{\bf a}_2 &=&{a \over 2} (-1, 1, 1), \nonumber \\
+{\bf a}_3 &=&{a \over 2} (-1, -1, 1). \nonumber
+\nonumber
+\end{eqnarray}
+The volume of the unit cell is $\Omega = a^3/2$. \\
+All three lattices are characterized by one parameter $\alpha_1=a$.
+
+\subsection{Tetragonal system}
+The tetragonal system comprises two Bravais lattices: the tetragonal
+and the centered tetragonal lattices.\\
+The tetragonal lattice is:
+\begin{eqnarray}
+{\bf a}_1 &=& a (1, 0, 0), \nonumber \\
+{\bf a}_2 &=& a (0, 1, 0), \nonumber \\
+{\bf a}_3 &=& a (0, 0, {c\over a}). \nonumber
+\nonumber
+\end{eqnarray}
+The volume of the unit cell is $\Omega = a^2c$. \\
+The centered tetragonal lattice is:
+\begin{eqnarray}
+{\bf a}_1 &=& {a \over 2} (1, -1, {c\over a}), \nonumber \\
+{\bf a}_2 &=& {a \over 2} (1, 1, {c\over a}), \nonumber \\
+{\bf a}_3 &=& {a \over 2} (-1, -1, {c\over a}). \nonumber
+\nonumber
+\end{eqnarray}
+The volume of the unit cell is $\Omega = a^2c/2$. \\
+Both lattices are characterized by two parameters $\alpha_1=a$ and 
+$\alpha_2=c/a$.
+
+\subsection{Orthorhombic system}
+The orthorhombic system comprises four Bravais lattices.
+The orthorhombic lattice:
+\begin{eqnarray}
+{\bf a}_1 &=& a (1, 0, 0), \nonumber \\
+{\bf a}_2 &=& a (0, {b\over a}, 0), \nonumber \\
+{\bf a}_3 &=& a (0, 0, {c\over a}). \nonumber
+\nonumber
+\end{eqnarray}
+The volume of the unit cell is $\Omega = abc$. \\
+The base-centered orthorhombic lattice:
+\begin{eqnarray}
+{\bf a}_1 &=& {a \over 2} (1, {b \over a}, 0), \nonumber \\
+{\bf a}_2 &=& {a \over 2} (-1, {b \over a}, 0), \nonumber \\
+{\bf a}_3 &=& a  (0, 0, {c \over a}). \nonumber
+\nonumber
+\end{eqnarray}
+The volume of the unit cell is $\Omega = abc/2$. \\
+The face-centered orthorhombic lattice:
+\begin{eqnarray}
+{\bf a}_1 &=& {a \over 2} (1, 0, {c \over a}), \nonumber \\
+{\bf a}_2 &=& {a \over 2} (1, {b \over a}, 0), \nonumber \\
+{\bf a}_3 &=& {a \over 2} (0, {b \over a}, {c \over a}). \nonumber
+\nonumber
+\end{eqnarray}
+The volume of the unit cell is $\Omega = abc/4$. \\
+The body-centered orthorhombic lattice:
+\begin{eqnarray}
+{\bf a}_1 &=& {a \over 2} (1, {b \over a}, {c \over a}), \nonumber \\
+{\bf a}_2 &=& {a \over 2} (-1, {b \over a}, {c \over a}), \nonumber \\
+{\bf a}_3 &=& {a \over 2} (-1, -{b \over a}, {c \over a}). \nonumber
+\nonumber
+\end{eqnarray}
+The volume of the unit cell is $\Omega = abc/2$. \\
+All four lattices are characterized by three parameters, 
+$\alpha_1=a$, $\alpha_2=b/a$ and $\alpha_3=c/a$.
+
+\subsection{Monoclinic system}
+The monoclinic system comprises two Bravais lattices:
+The monoclinic and the base-centered monoclinic lattices.
+Each one of these two lattices can be $c$-unique or $b$-unique depending on
+which axis is perpendicular to the other two. 
+The $c$-unique monoclinic lattice is:
+\begin{eqnarray}
+{\bf a}_1 &=& a (1, 0, 0), \nonumber \\
+{\bf a}_2 &=& a ({b \over a} \cos{\gamma}, {b \over a}\sin{\gamma}, 0), \nonumber \\
+{\bf a}_3 &=& a (0, 0, {c \over a}). 
+\nonumber
+\end{eqnarray}
+The volume of the unit cell is $\Omega = abc \sin\gamma$. \\
+The $b$-unique monoclinic lattice is:
+\begin{eqnarray}
+{\bf a}_1 &=& a (1, 0, 0), \nonumber \\
+{\bf a}_2 &=& a (0, {b \over a}, 0), \nonumber \\
+{\bf a}_3 &=& a ({c \over a} \cos{\beta}, 0, {c \over a}\sin{\beta}), \nonumber 
+\end{eqnarray}
+The volume of the unit cell is $\Omega = abc \sin\beta$. \\
+The $c$-unique base-centered monoclinic lattice is:
+\begin{eqnarray}
+{\bf a}_1 &=& a ({1\over 2}, 0, -{c \over 2 a}), \nonumber \\
+{\bf a}_2 &=& a ({b \over a} \cos{\gamma}, {b \over a}\sin{\gamma}, 0), \nonumber \\
+{\bf a}_3 &=& a ({1\over 2}, 0, {c \over 2 a}). 
+\nonumber
+\end{eqnarray}
+The volume of the unit cell is $\Omega = abc \sin\gamma/2$. \\
+The $b$ unique base-centered orthorhombic lattice is:
+\begin{eqnarray}
+{\bf a}_1 &=& a ({1\over 2}, -{b \over 2 a}, 0), \nonumber \\
+{\bf a}_2 &=& a ({1\over 2}, {b \over 2 a}, 0), \nonumber \\
+{\bf a}_3 &=& a ({c \over a} \cos{\beta}, 0, {c \over a}\sin{\beta}), \nonumber 
+\end{eqnarray}
+The volume of the unit cell is $\Omega = abc \sin\beta/2$. \\
+All lattices are characterized by four parameters $\alpha_1=a$, $\alpha_2=b/a$,
+$\alpha_3=c/a$ and $\alpha_4=\cos\gamma$
+($c$-unique) or $\cos\beta$ ($b$-unique).
+
+\subsection{Triclinic system}
+The triclinic system comprises only the triclinic Bravais lattice:
+\begin{eqnarray}
+{\bf a}_1 &=& a (1, 0, 0), \nonumber \\
+{\bf a}_2 &=& a ({b \over a}\cos\gamma, {b \over a}\sin\gamma, 0), \nonumber \\
+{\bf a}_3 &=& a ({c \over a} \cos{\beta}, {c \over a}(\cos\alpha-\cos\beta\cos\gamma)/\sin\gamma,\nonumber \\
+&\phantom{=}& {c \over a}(1+2\cos\alpha\cos\beta\cos\gamma-\cos^2\alpha-\cos^2\beta-\cos^2\gamma), \nonumber 
+\end{eqnarray}
+The volume of the unit cell is $\Omega=abc \sin\gamma \left( 
+1+2\cos\alpha\cos\beta\cos\gamma-\cos^2\alpha-\cos^2\beta-\cos^2\gamma\right)
+$.
+The lattice is characterized by six parameters $\alpha_1=a$, 
+$\alpha_2=b$, $\alpha_3=c$, $\alpha_4=\cos\alpha$,
+$\alpha_5=\cos\beta$, $\alpha_6=\cos\gamma$.
+
+\subsection{Hexagonal system}
+The hexagonal system comprises only the hexagonal Bravais lattice:
+\begin{eqnarray}
+{\bf a}_1 &=& a (1, 0, 0), \nonumber \\
+{\bf a}_2 &=& a (-{1 \over 2}, {\sqrt{3} \over 2}, 0), \nonumber \\
+{\bf a}_3 &=& a (0, 0, {c\over a}), \nonumber
+\nonumber
+\end{eqnarray}
+The volume of the unit cell is $\sqrt{3} a^2 c /2$. \\
+The lattice is characterized by two parameters $\alpha_1=a$ 
+and $\alpha_2=c/a$.
+
+\subsection{Trigonal system}
+The trigonal system comprises two Bravais lattices: the hexagonal Bravais 
+lattice described above or the rhombohedral Bravais lattice:
+\begin{eqnarray}
+{\bf a}_1 &=& a ({\sqrt{3}\over 2}\sin{\theta}, -{1\over 2} \sin{\theta},
+          \cos{\theta}), 
+\nonumber \\
+{\bf a}_2 &=& a (0, \sin{\theta}, \cos{\theta}), 
+\nonumber \\
+{\bf a}_3 &=& a (-{\sqrt{3}\over 2} \sin{\theta}, -{1\over 2} \sin{\theta},
+         \cos{\theta}), 
+\nonumber \\
+\nonumber
+\end{eqnarray}
+where $\sin{\theta}=\sqrt{2\over 3}\sqrt{1-\cos{\alpha}}$
+and $\cos{\theta}=\sqrt{1\over 3}\sqrt{1 + 2 \cos{\alpha}}$. \\
+The volume of the unit cell is $\Omega={3 \sqrt{3} \over 2} a^3 \sin^2\theta
+\cos\theta$. \\
+The lattice is characterized by two parameters $\alpha_1=a$ and 
+$\alpha_2=\cos\alpha$.
+
+\section{The strain tensor}
+The strain applied to the solid is defined by a $3\times 3$ tensor
+$\epsilon$. We say that a strain $\epsilon$ is applied
+to the solid if the three primitive vectors 
+${\bf a}_1$, ${\bf a}_2$, and ${\bf a}_3$, of the unperturbed solid are
+transformed into 
+${\bf a}'_1$, ${\bf a}'_2$, and ${\bf a}'_3$ in the strained solid
+where:
+\begin{equation}
+{\bf a}'_{j,i} = {\bf a}_{j,i} +  \sum_{k=1}^3 \epsilon_{j,k} {\bf a}_{k,i}.
+\end{equation}
+Here $i=1,2,3$ is the index of the primitive vector, while $k$ and $j$ run
+on the three coordinates. We consider only symmetric tensors
+$\epsilon_{i,j}=\epsilon_{j,i}$ removing any global rotation. 
+In order to make the connection with the classical elasticity theory, we
+call ${\bf X}$ the coordinates of an unstrained solid and
+${\bf x}({\bf X})$ the position of each point ${\bf X}$ in
+the strained solid. Calling ${\bf u}= {\bf x} -{\bf X}$ the displacements
+of each point, the standard theory of elasticity defines the $3\times3$ matrix
+$\alpha_{i,j}=\delta_{i,j}+u_{i,j}$ where $u_{i,j}= {\partial u_i \over 
+\partial X_j}$ are the displacement gradients and 
+${\bf x}_i = \alpha_{i,j} {\bf X}_j$. With our definition $\epsilon_{i,k}$
+corresponds to the symmetrized tensor $\epsilon_{i,k}={1\over 2} ( u_{i,j} +
+u_{j,i})$. Notice that $\epsilon_{i,j}$ are not the Lagrangian strains
+$\eta_{i,k}={1\over 2} ( u_{i,j} + u_{j,i} + u_{k,i}u_{k,j})$, but they
+differ from them only for quadratic terms in $u_{i,j}$. 
+
+In general a generic strain can change not only the size of the
+unit cell but also its shape changing the type of Bravais lattice 
+needed to describe the solid. In this section we consider the different 
+strain types that are of interest for our applications and
+discuss the type of units cells that result. 
+We consider the following strains:
+\begin{equation}
+\epsilon_A=\left( \begin{array}{ccc}
+\epsilon_{1,1}, & 0, & 0 
+\\
+0,& \epsilon_{1,1}, & 0 
+\\
+0,& 0, & \epsilon_{1,1}
+\end{array}
+\right),
+\end{equation}
+an isotropic strain that modifies the $x$, $y$, and $z$ directions in the
+same way.
+\begin{equation}
+\epsilon_B=\left( \begin{array}{ccc}
+\epsilon_{1,1},& 0, & 0 
+\\
+0, & \epsilon_{1,1}, &  0 
+\\
+0, & 0, &  0
+\end{array}
+\right),
+\end{equation}
+\begin{equation}
+\epsilon_{B'}=\left( \begin{array}{ccc}
+\epsilon_{1,1},& 0, & 0 
+\\
+0, & 0, &  0
+\\
+0, & 0, & \epsilon_{1,1}
+\end{array}
+\right),
+\end{equation}
+and
+\begin{equation}
+\epsilon_{B''}=\left( \begin{array}{ccc}
+0, & 0, & 0 
+\\
+0, & \epsilon_{2,2}, &  0
+\\
+0, & 0, & \epsilon_{2,2}
+\end{array}
+\right),
+\end{equation}
+are three strains that modify the $xy$, $xz$, and $yz$ plane 
+isotropically, while they do not change the other direction.
+The following three strains modify the length in one direction, 
+$x$, $y$, or $z$, so they are compressions or dilatations in these directions:
+\begin{equation}
+\epsilon_C=\left( \begin{array}{ccc}
+\epsilon_{1,1}, & 0, & 0 
+\\
+0, & 0, & 0 
+\\
+0, & 0, & 0
+\end{array}
+\right),
+\end{equation}
+
+\begin{equation}
+\epsilon_D=\left( \begin{array}{ccc}
+0, & 0, & 0 
+\\
+0, &  \epsilon_{2,2}, & 0 
+\\
+0, & 0, & 0
+\end{array}
+\right),
+\end{equation}
+
+\begin{equation}
+\epsilon_E=\left( \begin{array}{ccc}
+0, & 0, & 0 
+\\
+0, & 0, & 0 
+\\
+0, & 0, & \epsilon_{3,3}
+\end{array}
+\right).
+\end{equation}
+Then we consider shear strains first in all three directions:
+\begin{equation}
+\epsilon_F=\left( \begin{array}{ccc}
+0, & \epsilon_{1,2}, & \epsilon_{1,2}
+\\
+\epsilon_{1,2}, & 0, & \epsilon_{1,2} 
+\\
+\epsilon_{1,2}, & \epsilon_{1,2}, & 0
+\end{array}
+\right),
+\end{equation}
+then only in the $xy$ plane:
+\begin{equation}
+\epsilon_G=\left( \begin{array}{ccc}
+0, & \epsilon_{1,2}, & 0
+\\
+\epsilon_{1,2}, & 0, & 0
+\\
+0, & 0, & 0
+\end{array}
+\right),
+\end{equation}
+in the $xz$ plane:
+\begin{equation}
+\epsilon_H=\left( \begin{array}{ccc}
+0, & 0, & \epsilon_{1,3}
+\\
+0, & 0, & 0
+\\
+\epsilon_{1,3}, & 0, & 0
+\end{array}
+\right),
+\end{equation}
+and finally in the $yz$ plane:
+\begin{equation}
+\epsilon_I=\left( \begin{array}{ccc}
+0, & 0, & 0
+\\
+0, & 0, & \epsilon_{2,3} 
+\\
+0, & \epsilon_{2,3}, & 0
+\end{array}
+\right).
+\end{equation}
+A generic strain in the $xy$ plane is
+\begin{equation}
+\epsilon_L=\left( \begin{array}{ccc}
+\epsilon_{1,1}, & \epsilon_{1,2}, & 0 
+\\
+\epsilon_{2,1}, & \epsilon_{2,2}, & 0 
+\\
+0, & 0, & 0
+\end{array}
+\right).
+\end{equation}
+For some lattices it is also of interest to apply
+\begin{equation}
+\epsilon_M=\left( \begin{array}{ccc}
+\epsilon_{1,1}, & 0, & 0 
+\\
+0, & \epsilon_{1,1}, & 0 
+\\
+0, & 0, & \epsilon_{3,3}
+\end{array}
+\right),
+\end{equation}
+a strain that modifies isotropically the plane $xy$ and also the $z$ direction.
+\begin{equation}
+\epsilon_N=\left( \begin{array}{ccc}
+\epsilon_{1,1}, & 0, & 0 
+\\
+0, & -\epsilon_{1,1}, & 0 
+\\
+0, & 0, & 0
+\end{array}
+\right),
+\end{equation}
+is a shear strain that elongates (or compresses) the $x$ direction and
+compresses (or elongates) of the same amount the $y$ direction.
+We can define similar strains for the $x$ and $z$ and for 
+the $y$ and $z$ directions.
+\begin{equation}
+\epsilon_O=\left( \begin{array}{ccc}
+\epsilon_{1,1}, & 0, & 0 
+\\
+0, & 0, & 0 
+\\
+0, & 0, & -\epsilon_{1,1}
+\end{array}
+\right),
+\end{equation}
+
+\begin{equation}
+\epsilon_P=\left( \begin{array}{ccc}
+0, & 0, & 0 
+\\
+0, & \epsilon_{2,2}, & 0 
+\\
+0, & 0, & -\epsilon_{2,2}
+\end{array}
+\right).
+\end{equation}
+The strain is a symmetric tensors so it is possible to introduce 
+the Voigt notation where
+$\epsilon_1=\epsilon_{1,1}$,
+$\epsilon_2=\epsilon_{2,2}$, $\epsilon_3=\epsilon_{3,3}$, but
+$\epsilon_4=2 \epsilon_{2,3}$, $\epsilon_5=2 \epsilon_{1,3}$, and
+$\epsilon_6=2 \epsilon_{1,2}$ and we can write a generic strain as:
+\begin{equation}
+\epsilon=\left( \begin{array}{ccc}
+\epsilon_1, & \epsilon_6/2, & \epsilon_5/2 
+\\
+\epsilon_6/2, & \epsilon_2, & \epsilon_4/2  
+\\
+\epsilon_5/2, & \epsilon_4/2, & \epsilon_{3}
+\end{array}
+\right).
+\end{equation}
+
+For each lattice (with the exception of the trigonal, monoclinic, 
+and triclinic systems) we consider two questions. Which strain is applied
+by changing the parameters $\alpha_k$ that define the unit cell and 
+how does the Bravais lattice change for a given strain. In the latter
+case we consider only the strains of interest for the given Bravais 
+lattice.
+
+\subsection{Cubic system}
+The only strain that keeps the shape of the unit cell cubic is an isotropic
+strain $\epsilon_A$.
+Changing the cubic lattice constant of $da$ is equivalent to apply a
+isotropic strain in which all diagonal components are equal to 
+$\epsilon_{i,i} = da / a$.
+
+Among the strains that change the shape of the unit cell we consider
+$\epsilon_E$ that transforms the cubic unit cell into a tetragonal unit cell.
+The cubic unit cell with edge $a_c$ is transformed into a 
+tetragonal unit cell with $a_t=a_c$ and $c_t=a_c(1+\epsilon_{3,3})$.
+The body-centered cubic unit cell is transformed into
+a centered tetragonal unit cell and the face-centered unit cell is
+transformed into a centered tetragonal cell with $a_t=a_c / \sqrt{2}$ 
+and $c_t=a_c(1+\epsilon_{3,3})$.
+
+Among the shear strain $\epsilon_F$
+transforms the cubic unit cell into a trigonal unit cell with
+parameters:
+\begin{eqnarray}
+a_t&=& a_c \sqrt{1+2\epsilon_{1,2}^2} \\
+\cos\alpha &=& {\epsilon_{1,2} (\epsilon_{1,2} + 2) \over 
+1 + 2 \epsilon_{1,2}^2 }
+\end{eqnarray}
+The face-centered cubic cell is transformed in a trigonal unit cell 
+with parameters:
+\begin{eqnarray}
+a_t&=& {a_c \over 2} \sqrt{6 \epsilon_{1,2}^2+4 \epsilon_{1,2} +2} \\
+\cos\alpha &=& {5\epsilon_{1,2}^2+ 6\epsilon_{1,2} + 1 \over 
+6\epsilon_{1,2}^2 + 4\epsilon_{1,2}+2 },
+\end{eqnarray}
+while the body-centered cubic cell is transformed in a trigonal unit cell
+with parameters:
+\begin{eqnarray}
+a_t&=& {a_c \over 2} \sqrt{ 4\epsilon_{1,2}^2 - 4\epsilon_{1,2} + 3 } \\
+\cos\alpha &=& {4\epsilon_{1,2}-1 \over 4\epsilon_{1,2}^2-4\epsilon_{1,2}+3}
+\end{eqnarray}
+
+It is of interest to apply $\epsilon_B$ that transforms the 
+cubic unit cell into a tetragonal unit cell with:
+\begin{eqnarray}
+a&=&a_c (1+\epsilon_{1,1}), \\
+c&=&a_c.
+\end{eqnarray}
+The face-centered cubic lattice becomes a centered tetragonal lattice with
+\begin{eqnarray}
+a&=&a_c {\sqrt{2} \over 2} (1+\epsilon_{1,1}), \\
+c&=&a_c,
+\end{eqnarray}
+and the body-centered cubic lattice becomes a centered tetragonal
+lattice with parameters:
+\begin{eqnarray}
+a&=&a_c (1+\epsilon_{1,1}), \\
+c&=&a_c.
+\end{eqnarray}
+
+\subsection{Tetragonal system}
+There are three strains that maintain the shape of the tetragonal cell 
+$\epsilon_A$, $\epsilon_B$, and $\epsilon_E$. $\epsilon_B$ changes the 
+lattice parameter $a$ into $a(1+\epsilon_{1,1})$. 
+Therefore changing the lattice constant $a$ of the tetragonal cell of $da$
+is equivalent to apply $\epsilon_B$  with $\epsilon_{1,1}=da/a$.
+$\epsilon_E$ changes the lattice constant $c$ into $c(1+\epsilon_{3,3})$. 
+Therefore changing the lattice constant $c$ of the tetragonal cell of $dc$
+is equivalent to apply $\epsilon_C$ with $\epsilon_{3,3}=dc/c$.
+
+Among the strains that change the shape of the unit cell, we consider
+$\epsilon_C$ which transforms the tetragonal cell into an  
+orthorhombic cell with
+\begin{equation}
+a= a_t (1+\epsilon_{1,1}), \ \ \ \ \
+b= a_t, \ \ \ \ \
+c=c_t,
+\end{equation}
+and a centered tetragonal into a body-centered orthorhombic cell with the same
+parameters.\\
+
+The shear strains of interest are $\epsilon_G$ and $\epsilon_H$.
+$\epsilon_G$ applied to the
+tetragonal cell transforms it into a base-centered orthorhombic cell,
+with parameters:
+\begin{eqnarray}
+a&=&\sqrt{2} a_t (1-\epsilon_{1,2}), \\
+b&=&\sqrt{2} a_t (1+\epsilon_{1,2}) , \\
+c&=&c_t.
+\end{eqnarray}
+The coordinate axes of the orthorhombic cell are rotated of $-45^\circ$ 
+about the $z$ axis with respect to the tetragonal cell. $\epsilon_H$ 
+transforms the tetragonal cell into a monoclinic (b-unique) cell with:
+\begin{eqnarray}
+a&=&a_t \sqrt{1+\epsilon_{1,3}^2}, \\
+b&=&a_t, \\
+c&=&c_t \sqrt{1+\epsilon_{1,3}^2}, \\
+\cos\beta &=& {2 \epsilon_{1,3} \over 1 + \epsilon_{1,3}^2}.
+\end{eqnarray}
+
+$\epsilon_G$ applied to the centered tetragonal cell transforms it into
+a face centered orthorhombic cell rotated of $45^\circ$ with respect to 
+the tetragonal cell. The parameters of the face-centered orthorhombic cell 
+are the same as the parameters of the orthorhombic cell obtained by
+straining the tetragonal cell. 
+Applying $\epsilon_H$ transforms the centered tetragonal cell into 
+a base-centered $b$-unique monoclinic cell with
+\begin{eqnarray}
+a&=&\sqrt{(a_t^2+c_t^2)(1+\epsilon_{1,3}^2)-4\epsilon_{1,3}a_tc_t}, \\
+b&=&a_t, \\
+c&=&a_t \sqrt{1+\epsilon_{1,3}^2}, \\
+\cos\beta &=& {a_t (1+\epsilon_{1,3}^2) -2 \epsilon_{1,3} c_t \over 
+\sqrt{(a_t^2+c_t^2)(1+\epsilon_{1,3}^2)-4\epsilon_{1,3}a_tc_t} 
+\sqrt{(1+\epsilon_{1,3}^2)}}.
+\end{eqnarray}
+The coordinate system is rotated of an angle $\phi$ about the $y$ axis
+and 
+\begin{equation}
+{\rm tg} \phi = -{\epsilon_{1,3} a_t - c_t \over a_t - \epsilon_{3,1} c_t}.
+\end{equation}
+
+\subsection{Orthorhombic system}
+$\epsilon_C$, $\epsilon_D$, $\epsilon_E$, $\epsilon_B$, $\epsilon_{B'}$,
+and $\epsilon_{B''}$ are six strains that maintain the shape of the 
+orthorhombic cell. $\epsilon_C$ changes the lattice constant $a$ into 
+$a(1+\epsilon_{1,1})$, $\epsilon_D$ changes the lattice constant $b$ 
+into $b(1+\epsilon_{2,2})$, and 
+$\epsilon_E$ changes the lattice constant $c$ into $c(1+\epsilon_{3,3})$. 
+Therefore changing the lattice constant $a$ of $da$,
+$b$ of $db$, and $c$ of $dc$ is equivalent to apply $\epsilon_C$
+with $\epsilon_{1,1}=da/a$, $\epsilon_D$ with $\epsilon_{2,2}=db/b$,
+and $\epsilon_E$ with $\epsilon_{3,3}=dc/c$, respectively.
+The application of $\epsilon_B$ means to change simultaneously
+$a$ and $b$ so that $da/a=db/b=\epsilon_{1,1}$. Similarly the application
+of $\epsilon_{B'}$ means to change $a$ and $c$ so that 
+$da/a=dc/c=\epsilon_{1,1}$, while the application of $\epsilon_{B''}$ 
+corresponds to change $b$ and $c$ so that $db/b=dc/c=\epsilon_{3,3}$.
+
+Among the strains that change the shape of the unit cell we will consider
+the shear strains $\epsilon_G$, $\epsilon_H$, and $\epsilon_I$.
+$\epsilon_G$ transforms the orthorhombic cell into a 
+monoclinic ($c$-unique) cell with
+\begin{eqnarray}
+a&=&a_o \sqrt{1+\epsilon_{1,2}^2}, \\
+b&=&b_o \sqrt{1+\epsilon_{1,2}^2}, \\
+c&=&c_o, \\
+\cos\gamma &=& {2 \epsilon_{1,2} \over 1 + \epsilon_{1,2}^2}.
+\end{eqnarray}
+Similarly $\epsilon_H$ transform the orthorhombic lattice into a 
+monoclinic lattice ($b$-unique) with 
+\begin{eqnarray}
+a&=&a_o \sqrt{1+\epsilon_{1,3}^2}, \\
+b&=&b_o, \\
+c&=&c_o \sqrt{1+\epsilon_{1,3}^2}, \\
+\cos\beta &=& {2 \epsilon_{1,3} \over 1 + \epsilon_{1,3}^2}. 
+\end{eqnarray}
+$\epsilon_I$ transforms the orthorhombic lattice in a monoclinic lattice that 
+however is $a$-unique and must be rotated to be simulated.
+For instance we can simulate the strained orthorhombic cell with a monoclinic
+$c$-unique lattice with
+\begin{eqnarray}
+a&=&b_o \sqrt{1+\epsilon_{2,3}^2}, \\
+b&=&c_o \sqrt{1+\epsilon_{2,3}^2}, \\
+c&=&a_o, \\
+\cos\gamma &=& {2 \epsilon_{2,3} \over 1 + \epsilon_{2,3}^2}. 
+\end{eqnarray}
+With a rotation matrix
+\begin{equation}
+R=\left( \begin{array}{ccc}
+0, & \cos \phi, &  -\sin \phi
+\\
+0, & \sin \phi, & \cos \phi 
+\\
+1, & 0, & 0
+\end{array}
+\right),
+\end{equation}
+and ${\rm tg} \phi =-\epsilon_{2,3}$, that transforms the coordinates
+of a point expressed in the Cartesian basis of the orthorhombic system
+into the coordinates of a point in the Cartesian basis of the monoclinic
+system.
+
+The application of $\epsilon_G$ to a base-centered orthorhombic lattice
+transforms it into a $c$-unique monoclinic lattice with parameters:
+\begin{eqnarray}
+a&=&a_o \sqrt{1+\epsilon_{1,2}^2}, \\
+b&=&{1\over 2} \sqrt{(a_o^2+b_o^2)(1+\epsilon_{1,2}^2)+4a_ob_o\epsilon_{1,2}}, \\
+c&=&c_o,  \\
+\cos\gamma &=& {a_o (1+\epsilon_{1,2}^2)+2a_ob_o\epsilon_{1,2} \over
+\sqrt{1+\epsilon_{1,2}^2} \sqrt{(a_o^2+b_o^2)
+(1+\epsilon_{1,2}^2)+4a_ob_o\epsilon_{1,2}}}. 
+\end{eqnarray}
+A rotation of an angle $\phi$ about the $z$ axis with 
+${\rm tg}\phi=-\epsilon_{1,2}$ relates the two Cartesian systems.
+The application of $\epsilon_H$ to a base-centered orthorhombic lattice
+transforms it into a base-centered monoclinic lattice with the same parameters
+found for the application of $\epsilon_H$ to a primitive orthorhombic lattice.
+The application of $\epsilon_I$ to a base-centered orthorhombic lattice
+transforms it into a base-centered monoclinic lattice that however
+is $a$-unique. We can do the same rotation made in previous case
+and we obtain a base-centered $c$-unique monoclinic cell with 
+the same parameters as those found for the application of $\epsilon_I$ 
+to the orthorhombic cell.
+
+The application of $\epsilon_G$ to a face-centered orthorhombic lattice
+transforms it into a $c$-unique base-centered monoclinic lattice with 
+parameters:
+\begin{eqnarray}
+a&=&a_o \sqrt{1+\epsilon_{1,2}^2}, \\
+b&=&{1\over 2} \sqrt{(a_o^2+b_o^2)(1+\epsilon_{1,2}^2)+4a_ob_o\epsilon_{1,2}}, \\
+c&=&c_o,  \\
+\cos\gamma &=& {a_o (1+\epsilon_{1,2}^2)+2a_ob_o\epsilon_{1,2} \over
+\sqrt{1+\epsilon_{1,2}^2} \sqrt{(a_o^2+b_o^2)
+(1+\epsilon_{1,2}^2)+4a_ob_o\epsilon_{1,2}}}. 
+\end{eqnarray}
+A rotation of an angle $\phi$ about the $z$ axis with 
+${\rm tg}\phi=-\epsilon_{1,2}$ relates the two Cartesian systems.
+
+The application of $\epsilon_H$ to a face-centered orthorhombic lattice
+transforms it into a $b$-unique base-centered monoclinic lattice with
+parameters:
+\begin{eqnarray}
+a&=&a_o \sqrt{1+\epsilon_{1,3}^2}, \\
+b&=&b_o,  \\
+c&=&{1\over 2} \sqrt{(a_o^2+c_o^2)(1+\epsilon_{1,3}^2)+4a_oc_o\epsilon_{1,3}}, \\
+\cos\gamma &=& {a_o (1+\epsilon_{1,3}^2)+2a_oc_o\epsilon_{1,3} \over
+\sqrt{1+\epsilon_{1,3}^2} \sqrt{(a_o^2+c_o^2)
+(1+\epsilon_{1,3}^2)+4a_oc_o\epsilon_{1,2}}}. 
+\end{eqnarray}
+A rotation of an angle $\phi$ about the $y$ axis with 
+${\rm tg}\phi=-\epsilon_{1,3}$ relates the two Cartesian systems.
+
+The application of $\epsilon_I$ to a face-centered orthorhombic lattice
+transforms it into a base-centered monoclinic lattice that however is 
+$a$-unique, so we have to rotate it. For instance we can transform it
+in a base-centered $c$-unique monoclinic lattice with parameters:
+\begin{eqnarray}
+a&=&b_o \sqrt{1+\epsilon_{2,3}^2}, \\
+b&=&{1\over 2} \sqrt{(b_o^2+c_o^2)(1+\epsilon_{2,3}^2)+4b_oc_o
+\epsilon_{2,3}}, \\
+c&=&a_o,  \\
+\cos\gamma &=& {b_o^2 (1+\epsilon_{2,3}^2)+2b_oc_o\epsilon_{2,3} \over
+\sqrt{1+\epsilon_{2,3}^2} \sqrt{(b_o^2+c_o^2)
+(1+\epsilon_{2,3}^2)+4b_oc_o\epsilon_{2,3}}}. 
+\end{eqnarray}
+With a rotation matrix
+\begin{equation}
+R=\left( \begin{array}{ccc}
+0, & \cos \phi, &  -\sin \phi
+\\
+0, & \sin \phi, & \cos \phi 
+\\
+1, & 0, & 0
+\end{array}
+\right),
+\end{equation}
+and ${\rm tg} \phi =-\epsilon_{2,3}$.
+
+The application of $\epsilon_G$ to a body-centered orthorhombic lattice
+transforms it into a base-centered $c$-unique monoclinic lattice with 
+parameters:
+\begin{eqnarray}
+a&=&\sqrt{(a_o^2+b_o^2)(1+\epsilon_{1,2}^2)-4a_ob_o\epsilon_{1,2}}, \\
+a&=&a_o \sqrt{1+\epsilon_{1,2}^2}, \\
+c&=&c_o,  \\
+\cos\gamma &=& {a_o (1+\epsilon_{1,2}^2)-2a_ob_o\epsilon_{1,2} \over
+\sqrt{1+\epsilon_{1,2}^2} \sqrt{(a_o^2+b_o^2)
+(1+\epsilon_{1,2}^2)-4a_ob_o\epsilon_{1,2}}}, 
+\end{eqnarray}
+where the coordinate system is rotated of an angle $\phi$ about the $z$
+axis with
+\begin{equation}
+{\rm tg} \phi = -{ \epsilon a_o - b_o \over a_o - \epsilon b_o }.
+\end{equation}
+The application of a strain $\epsilon_H$ to a body-centered orthorhombic
+lattice transforms it into a base-centered $b$-unique monoclinic lattice 
+\begin{eqnarray}
+a&=&\sqrt{(a_o^2+c_o^2)(1+\epsilon_{1,3}^2)-4\epsilon_{1,3}a_oc_o}, \\
+b&=&b_o, \\
+c&=&a_o \sqrt{1+\epsilon_{1,3}^2}, \\
+\cos\beta &=& {a_o (1+\epsilon_{1,3}^2) -2 \epsilon_{1,3} c_o \over 
+\sqrt{(a_o^2+c_o^2)(1+\epsilon_{1,3}^2)-4\epsilon_{1,3}a_oc_o} 
+\sqrt{(1+\epsilon_{1,3}^2)}}.
+\end{eqnarray}
+The coordinate system is rotated of an angle $\phi$ about the $y$ axis
+and
+\begin{equation}
+{\rm tg} \phi = -{\epsilon_{1,3} a_o - c_o \over a_o - \epsilon_{3,1} c_o}.
+\end{equation}
+The application of a strain $\epsilon_I$ to a body-centered orthorhombic
+lattice transforms it into a base-centered monoclinic lattice that however
+is $a$-unique. In order to simulate it we must rotate it so that it
+becomes for instance a base-centered $c$-unique monoclinic lattice with
+parameters
+\begin{eqnarray}
+a&=&\sqrt{(b_o^2+c_o^2)(1+\epsilon_{2,3}^2)-4\epsilon_{2,3}b_oc_o}, \\
+b&=&b_o \sqrt{1+\epsilon_{2,3}^2}, \\
+c&=&a_o \\
+\cos\gamma &=& {b_o (1+\epsilon_{2,3}^2) -2 \epsilon_{2,3} c_o \over 
+\sqrt{(b_o^2+c_o^2)(1+\epsilon_{2,3}^2)-4\epsilon_{2,3}b_oc_o} 
+\sqrt{(1+\epsilon_{2,3}^2)}}.
+\end{eqnarray}
+With a rotation matrix that transforms the coordinates of a point
+in the orthorhombic Cartesian coordinates to those of the monoclinic one
+\begin{equation}
+R=\left( \begin{array}{ccc}
+0, & \cos \phi, &  -\sin \phi
+\\
+0, & \sin \phi, & \cos \phi 
+\\
+1, & 0, & 0
+\end{array}
+\right),
+\end{equation}
+and 
+\begin{equation}
+{\rm tg} \phi = -{\epsilon_{2,3} b_o - c_o \over b_o - \epsilon_{3,2} c_o}.
+\end{equation}
+
+
+%\subsection{Triclinic and Monoclinic system}
+%Let us start by considering the $c$-unique case. In this case 
+%$\epsilon_E$ changes the lattice constant $c$ into $c(1+\epsilon_{3,3})$,
+%but does not modify the shape of the unit cell.
+%Therefore changing the lattice constant $c$ of the monoclinic cell of $dc$
+%is equivalent to apply $\epsilon_E$ with $\epsilon_{3,3}=dc/c$.
+%$\epsilon_B$ changes simultaneously $a$ into $a(1+\epsilon_{1,1})$ and 
+%$b$ into $b(1+\epsilon_{1,1})$ keeping $\cos\gamma$ constant.
+%
+%Applying $\epsilon_C$ to a $c$-unique monoclinic lattice does not change
+%the Bravais lattice and the new parameters are:
+%\begin{eqnarray}
+%a&=&a_m(1+\epsilon_{1,1}), \\
+%b&=&b_m \sqrt{1+2 \epsilon_{1,1}\cos^2\gamma_m
+%+\epsilon_{1,1}^2 \cos^2\gamma_m}, \\
+%c&=&c_m \\
+%\cos\gamma &=& {(1+\epsilon_{1,1}) \cos\gamma_m \over 
+%\sqrt{1+2 \epsilon_{1,1}\cos^2\gamma_m
+%+\epsilon_{1,1}^2 \cos^2\gamma_m}},
+%\end{eqnarray}
+%where the index $m$ indicates the parameters of the unstrained lattice.
+%
+%Applying $\epsilon_D$ to a $c$-unique monoclinic lattice does not change
+%the Bravais lattice and the new parameters are:
+%\begin{eqnarray}
+%a&=&a_m, \\
+%b&=&b_m \sqrt{1+2 \epsilon_{2,2}\sin^2\gamma_m
+%+\epsilon_{2,2}^2 \sin^2\gamma_m}, \\
+%c&=&c_m \\
+%\cos\gamma &=& {\cos\gamma_m \over 
+%\sqrt{1+2 \epsilon_{2,2}\sin^2\gamma_m
+%+\epsilon_{2,2}^2 \sin^2\gamma_m}}.
+%\end{eqnarray}
+%
+%Applying $\epsilon_G$ to a $c$-unique monoclinic lattice does not change the
+%Bravais lattice and the new parameters are:
+%\begin{eqnarray}
+%a&=&a_m \sqrt{1+\epsilon_{1,2}^2}, \\
+%b&=&b_m \sqrt{(1+\epsilon_{1,2})^2
+%+4\epsilon_{1,2} \cos\gamma_m \sin\gamma_m}, \\
+%c&=&c_m \\
+%\cos\gamma &=& {\cos\gamma_m (1+\epsilon_{1,2}^2) + 2 \epsilon_{1,2} 
+%\sin \gamma_m \over \sqrt{1+\epsilon_{1,2}^2} 
+%\sqrt{(1+\epsilon_{1,2})^2+4\epsilon_{1,2} \cos\gamma_m \sin\gamma_m}}.
+%\end{eqnarray}
+%Moreover the Cartesian coordinate system is rotated and one must
+%apply a rotation of an angle $\phi$ about the $z$ axis with ${\rm tg} \phi
+%=-\epsilon_{1,2}$.
+
+%Applying $\epsilon_H$ or $\epsilon_I$ to a $c$-unique monoclinic lattice 
+%transform it into a trigonal lattice with parameters that for 
+
+%\subsection{Triclinic system}
+%In this case any strain will mantain the shape of the unit cell and
+%it is interesting to apply $\epsilon_C$, $\epsilon_D$, $\epsilon_E$ and
+%the three shear strains $\epsilon_G$, $\epsilon_H$, $\epsilon_I$.
+
+\subsection{Hexagonal system}
+There are two strains that maintain the shape of the hexagonal cell,
+$\epsilon_B$ and $\epsilon_E$.
+$\epsilon_B$ changes the lattice constant $a$ into $a(1+\epsilon_{1,1})$. 
+Therefore changing the lattice constant $a$ of the hexagonal cell of $da$
+is equivalent to apply $\epsilon_B$ with $\epsilon_{1,1}=da/a$.
+$\epsilon_E$ changes the lattice constant $c$ into $c(1+\epsilon_{3,3})$. 
+Therefore changing the lattice constant $c$ of the hexagonal cell of $dc$
+is equivalent to apply $\epsilon_E$ with $\epsilon_{3,3}=dc/c$.
+
+A strain $\epsilon_C$ transforms the hexagonal cell into a base-centered 
+orthorhombic cell with:
+\begin{eqnarray}
+a&=&a_h (1+\epsilon_{1,1}), \\
+b&=&a_h \sqrt{3}, \\
+c&=&c_h.
+\end{eqnarray}
+Similarly the strain $\epsilon_{B'}$ transforms the hexagonal cell into
+a base-centered orthorhombic cell with:
+\begin{eqnarray}
+a&=&a_h (1+\epsilon_{1,1}), \\
+b&=&a_h \sqrt{3}, \\
+c&=&c_h (1+\epsilon_{1,1}).
+\end{eqnarray}
+
+Of interest is also the strain $\epsilon_H$ that transforms the hexagonal
+cell in a base-centered $b$-unique monoclinic cell with
+\begin{eqnarray}
+a&=&a_h \sqrt{1 + \epsilon_{1,3}^2}, \\
+b&=&a_h \sqrt{3}, \\
+c&=&c_h \sqrt{1 + \epsilon_{1,3}^2}, \\
+\cos\alpha &=& {2 \epsilon_{1,3} \over 1+\epsilon_{1,3}^2}.
+\end{eqnarray}
+Furthermore due to the definition of the direct lattice vectors of the 
+base-centered monoclinic cell, since ${\bf a}_1$ and ${\bf a}_2$ are 
+in the $xy$ plane we must make a small rotation about the $y$ axis of an angle 
+${\rm tg} \phi = - \epsilon_{1,3}$.
+
+\subsection{Trigonal system}
+A isotropic strain $\epsilon_A$ keeps the trigonal shape and
+changes the length of each primitive vector to
+$a(1+\epsilon_{1,1})$. Conversely a change of the lattice constant
+$a$ of the trigonal cell of $da$ corresponds to apply a uniform strain
+$\epsilon_A$ with $\epsilon_{1,1}=da/a$.
+If we apply a strain $\epsilon_M$, the cell remains trigonal, but both $a$ 
+and $\cos\alpha$ will change.
+It is simple to show that 
+\begin{eqnarray}
+a'&=&a \sqrt{(1+\epsilon_{1,1})^2 \sin^2\theta+
+(1+\epsilon_{3,3})^2\cos^2\theta}  \\
+{\rm tan} \theta'&=& {(1+\epsilon_{1,1}) \sin \theta \over
+(1+\epsilon_{3,3}) \cos \theta}
+\end{eqnarray}
+while the rhombohedral angle is linked to $\theta'$ by the relation
+$\cos\alpha=-3/2 \sin^2 \theta'+1$. Conversely, if we change $\cos \alpha$
+to $\cos\alpha+d \cos\alpha$, we are changing $\theta$ to $\theta'$ that
+can be calculated for instance as $\cos \theta'=\sqrt{2\over 3} 
+\sqrt{1-\cos\alpha-d\cos\alpha}$. Now requiring $a'=a$ and solving
+for $\epsilon_{3,3}$ and $\epsilon_{1,1}$ we obtain:
+\begin{eqnarray}
+1+\epsilon_{3,3} &=& {\cos\theta \over \sqrt{{\rm tan}^2 \theta'+1}} \\
+1+\epsilon_{1,1} &=& (1+\epsilon_{3,3}){\cos\theta \over \sin\theta} 
+{\rm tan} \theta' 
+\end{eqnarray}
+So a change of the angle $\alpha$ is equivalent to apply a strain
+$\epsilon_M$.
+ 
+\section{The stress tensor}
+
+Consider a small volume $dV$ of the solid with the form of a prism with 
+edges parallel to $x_1$, $x_2$, and $x_3$. Let us call $S_i$ one of
+the two surfaces perpendicular to $x_i$ of area $dS_i$. If on this surface 
+there is a force ${\bf f}_i=(f_{1,i}, f_{2,i}, f_{3,i})$ where the components
+are along $x_1$, $x_2$, and $x_3$, we say that on the solid a
+stress: 
+\begin{equation}
+\sigma_{j,i}=f_{j,i} / dS_i, 
+\end{equation}
+is acting.
+We consider only uniform stresses
+that do not depend on the position of the volume $dV$ on the solid.
+The force on the other surface perpendicular to $x_i$ is 
+${\bf f}_i=-(f_{1,i}, f_{2,i}, f_{3,i})$. With this definition a positive
+stress pulls outward on the surface of the volume.
+
+Also the stress is a symmetric tensor so it is possible to use the Voigt
+notation, but we have
+$\sigma_1=\sigma_{1,1}$,
+$\sigma_2=\sigma_{2,2}$, $\sigma_3=\sigma_{3,3}$, $\sigma_4=\sigma_{2,3}$,
+$\sigma_5=\sigma_{1,3}$, and $\sigma_6=\sigma_{1,2}$.
+
+A uniform pressure applied to the solid is a particular stress that has
+only diagonal components. In Voigt notation we have
+$\sigma_1=-p$, $\sigma_2=-p$, $\sigma_3=-p$, while the other components
+vanish. Conversely we can compute the pressure as:
+\begin{equation}
+p=-{1\over 3} (\sigma_1 + \sigma_2 + \sigma_3).
+\end{equation}
+The negative sign indicates that a positive pressure reduces the
+volume of the solid so it pushes on the surfaces.
+
+\section{Thermodynamic functions}
+
+The thermodynamic functions can be introduced by using the first law
+of thermodynamics and the definition of the entropy ($S$). The heat 
+given reversibly to the solid can be written as $dQ=TdS$ where $T$ is
+the temperature of the solid and $dS$ is its entropy change. The change 
+of the internal energy is given by $dU = TdS - dW$ where $dW$ is 
+the work done by the solid. If the strain changes by $d\epsilon$ and 
+the stress is $\sigma$ then $W=-V \sum_i \sigma_i d\epsilon_i$, where $V$
+is the volume of the unperturbed solid. \\
+Therefore
+\begin{equation}
+dU=TdS + V \sum_{i=1}^6 \sigma_i d\epsilon_i.
+\end{equation}
+In our approach, this function is not particularly suited for 
+calculations because we do not compute the internal energy as a function 
+of entropy but as a function of temperature (see Eq.~\ref{uvib}). However
+at $T=0$ ($S=0$) we have $\sigma_i={1 \over V} 
+{\partial U \over \partial \epsilon_i}$ and, neglecting zero point motion,
+we can calculate the derivative of $U_0$. 
+Here the derivatives with 
+respect to $\epsilon_i$ must be done keeping all the other strain 
+components fixed. \\
+At $\sigma=0$ the equilibrium strain minimizes $U$. \\ 
+At finite stress $\sigma$, 
+the equations of state $\sigma_i ={1\over V} 
+{\partial U \over \partial \epsilon_i}$
+can be obtained by minimizing
+\begin{equation}
+H= U - V \sum_{i=1}^6 \sigma_i \epsilon_i.
+\end{equation}
+We have:
+\begin{equation}
+{1\over V }{\partial H \over \partial \epsilon_i} = {1\over V} 
+{\partial U \over \partial \epsilon_i}- 
+\sigma_i = 0.
+\end{equation}
+$H$ is called enthalpy of the solid. \\
+For dealing with finite temperatures, it is convenient to introduce the 
+Helmholtz free energy by writing $F=U-TS$ so that
+\begin{equation}
+dF=-S dT + V \sum_{i=1}^6 \sigma_i d\epsilon_i.
+\end{equation}
+At fixed temperature, the equations of state of the solid are
+\begin{equation}
+\sigma_i= {1\over V }{\partial F \over \partial \epsilon_i}\Bigg|_T.
+\end{equation}
+and at zero stress, the strain minimizes $F$.
+Here the volume $V$ is the volume at temperature $T$. \\
+At finite temperature $T$ and stress $\sigma$, the equations of state
+ $\sigma_i={1\over V}
+{\partial F\over \partial \epsilon_i}\Big|_T$ can be obtained by 
+minimizing the function:
+\begin{equation}
+G= F - V \sum_{i=1}^6 \sigma_i \epsilon_i.
+\end{equation}
+We have:
+\begin{equation}
+{1\over V} {\partial G \over \partial \epsilon_i}\Bigg |_T = {1\over V} {\partial F \over \partial \epsilon_i}\Bigg |_T - \sigma_i = 0.
+\end{equation}
+$G$ is called the Gibbs free energy of the solid.
+
+\section{Equilibrium geometry and thermal expansion}
+To calculate the equilibrium geometry at $T=0$ and at zero stress it
+is sufficient to minimize the internal energy with respect to strain:
+\begin{equation}
+{\partial U \over \partial \epsilon_i}=0.
+\end{equation}
+Neglecting the contribution of $U_{ph}$ (zero point motion) we can minimize 
+$U_0$.\\
+In practice this equation is difficult to use and one limits to consider
+only strains that do not modify the shape of the unit cell. The
+vanishing derivatives are imposed only for these strains.
+This is equivalent to calculate $U$ as a function of the lattice parameters 
+$\alpha_k$ and to check the minimum condition:
+\begin{equation}
+{\partial U \over \partial \alpha_k}=0.
+\end{equation}
+Similarly at temperature $T$ the equations that define the lattice 
+parameters are:
+\begin{equation}
+{\partial F \over \partial \alpha_k}=0.
+\end{equation}
+Note that at $T=0$ this equation contains the effect of zero point nuclear
+motion. By identifying the position of the minimum at each temperature 
+we obtain the parameters $\alpha_k (T)$ that can be compared with
+results of X-ray diffraction experiments.
+
+The volume thermal expansion is defined as the variation of the crystal
+volume when the temperature changes. Therefore using the parameters
+$\alpha_k (T)$ we can calculate the volume $V(T)$
+with the expressions written above.  
+Numerical differentiation of $V(T)$ gives the volume thermal expansion:
+\begin{equation}
+\beta = {1 \over V(T)} {d V \over d T}.
+\end{equation}
+
+The calculation of the thermal expansion tensor is slightly more
+complex. At each temperature the solid has equilibrium parameters
+$\alpha_{k}(T)$. The thermal expansion tensor $\alpha_{i}$ is defined 
+as the strain $d\epsilon_{i}(T)$ induced by a change of temperature $dT$. 
+We can write
+\begin{equation}
+\alpha_{i} = {d \epsilon_{i}(T) \over  d T }.
+\end{equation}
+We have only the crystal parameters $\alpha_k (T)$ and their derivatives
+with respect to $T$. In general these are not sufficient to deduce 
+${d \epsilon_{i}(T) \over  d T }$ for an arbitrary strain, but the strains
+induced by a temperature must conserve the shape of the unit cell, so
+${d \alpha_k (T) \over d T}$ suffice to calculate the physically
+interesting strains. We discuss this point separately for each crystal
+system.
+
+\subsection{Cubic system}
+In the cubic system $k=1$ and $\alpha_1=a$. By symmetry the strain that can
+be induced by a change of temperature is only $\epsilon_A$ and we have the 
+conditions ${d\epsilon_1}={d\epsilon_2}={d\epsilon_3}={da\over a(T)}$.
+All the other strains are zero. Therefore only $\alpha_1$, $\alpha_2$, 
+and $\alpha_3$ are nonvanishing and we have
+\begin{equation}
+\alpha_{i} =  {1\over a(T) } {d a(T) \over dT}.
+\end{equation}
+
+\subsection{Tetragonal and hexagonal systems}
+In the tetragonal and hexagonal systems $k=2$, $\alpha_1=a$, $\alpha_2=c/a$.
+The only nonzero components of the thermal expansion are 
+$\alpha_{1}=\alpha_{2}$ and $\alpha_{3}$. A change of $a$ 
+corresponds to a strain $d\epsilon_1=d\epsilon_2={da\over a}$ while
+a change of $c$ corresponds to a strain 
+$d\epsilon_3 = {dc \over c}$.
+Therefore from the definition of the thermal expansion we have
+\begin{eqnarray}
+\alpha_1 &=& \alpha_2= {1\over a(T)} {d a \over dT}, \\ 
+\alpha_3 &=& {1\over c(T)} {d c \over dT}. 
+\end{eqnarray}
+Choosing $a$ and $c/a$ as parameters,
+we have to use the equations $c(T)=a(T) (c/a(T))$ and 
+\begin{equation}
+{dc \over d T} = {da \over d T} c/a(T) + a(T) {d c/a \over dT},
+\end{equation}
+and we have
+\begin{equation}
+\alpha_1 = \alpha_2= {1\over a(T)} {d a \over dT}, \ \ \ 
+\alpha_3 = {1\over a(T)} {da \over d T}  + {1\over c/a(T)} {d c/a \over dT}.
+\end{equation}
+
+\subsection{Trigonal system}
+In the trigonal system $k=2$, $\alpha_1=a$, $\alpha_2=\cos\alpha$. The 
+strain allowed by symmetry is $\epsilon_M$. The thermal expansion tensor
+has three diagonal components and $\alpha_1=\alpha_2$. We can use the
+link between the hexagonal and the trigonal cell. A change of the 
+hexagonal parameter $a_h$ corresponds to a strain 
+${d\epsilon_1}={da_h \over a_h}$ and a change of $c_h$ corresponds to a
+strain ${d\epsilon_3}={d c_h \over c_h}$. Therefore 
+we have
+\begin{eqnarray}
+\alpha_1 &=& \alpha_2= {1\over a_h(T)} {d a_h \over dT}, \\
+\alpha_3 &=& {1\over c_h(T)} {dc_h \over d T}
+\end{eqnarray}
+Choosing as parameters $a$ and $\cos \alpha$ we must use the relationships:
+\begin{equation}
+a_h= a \sqrt{2} \sqrt{1-\cos\alpha}
+\end{equation}
+and 
+\begin{equation}
+c_h= a \sqrt{3} \sqrt{1+2\cos\alpha}
+\end{equation}
+and the corresponding temperature derivatives:
+\begin{equation}
+{d a_h \over d T}= {a_h \over a} {d a \over d T} - {a_h \over 2(1-\cos\alpha)}{d \cos\alpha \over d T}
+\end{equation}
+\begin{equation}
+{d c_h \over d T}= {c_h \over a} {d a \over d T} + {c_h \over 1+2\cos\alpha}{d \cos\alpha \over d T}
+\end{equation}
+to obtain
+\begin{eqnarray}
+\alpha_1 &=& \alpha_2= {1\over a(T)} {d a \over dT} - {1 \over 2(1-\cos\alpha)}{d \cos\alpha \over d T}, \\
+\alpha_3 &=& {1\over a(T)} {d a \over dT} + {1 \over 1+2\cos\alpha}
+{d \cos\alpha \over d T}
+\end{eqnarray}
+
+\subsection{Orthorhombic systems}
+In the orthorhombic system $k=3$, $\alpha_1=a$, $\alpha_2=b/a$, 
+$\alpha_3=c/a$. The nonzero components of the thermal expansion are 
+$\alpha_{1}$, $\alpha_{2}$, and $\alpha_{3}$. 
+A change of $a$ corresponds to a strain ${d\epsilon_1}={da\over a(T)}$,  
+a change of $b$ to a strain ${d\epsilon_2}={db\over b(T)}$,  
+and a chance of $c$ to a strain ${d\epsilon_3}={dc\over c(T)}$. 
+Therefore from the definition of thermal expansion we have:  
+\begin{eqnarray}
+\alpha_{1} &=&  {1\over a(T) } {d a \over dT}, \\ 
+\alpha_{2} &=&  {1\over b(T) } {d b \over dT}, \\
+\alpha_{3} &=&  {1\over c(T) } {d c \over dT}.
+\end{eqnarray}
+Choosing $a$, $b/a$, and $c/a$ as parameters we find:
+\begin{eqnarray}
+\alpha_1 &=& {1\over a(T)} {d a \over dT}, \\
+\alpha_2 &=& {1\over a(T)} {da \over d T}  + {1\over b/a(T)} {d b/a \over dT}, \\
+\alpha_3 &=& {1\over a(T)} {da \over d T}  + {1\over c/a(T)} {d c/a \over dT}.
+\end{eqnarray}
+
+
+%\subsection{Monoclinic systems}
+%In the monoclinic system $k=4$, $\alpha_1=a$, $\alpha_2=b$, $\alpha_3=c$, 
+%$\alpha_4=\cos\gamma$ (c-unique) of $\alpha_4=\cos\beta$ (b-unique). 
+%For the c-unique cell it is simple to define 
+%\begin{equation}
+%\alpha_{3,3}= {1\over c } {d c \over dT}
+%\end{equation}
+%For the other two.
+
+\section{The heat capacity}
+The heat capacity measure the variation of the temperature of the solid
+when a certain quantity of heat is given to it at constant strain:
+\begin{equation}
+C_\epsilon= T {d S \over dT}\Big|_\epsilon = { d U \over d T}\Big|_\epsilon
+\end{equation}
+Since only the entropy of the ionic displacements is taken into consideration,
+the only term that is derived is $U_{ph}$. This is usually done at the
+equilibrium geometry. Once the phonon dispersions have been calculated this
+quantity is immediately available by deriving Eq.~\ref{uvib}
+
+\section{The elastic constants}
+
+When a crystal is deformed with a given strain $\epsilon_i$ forces
+appear to bring it to the equilibrium configuration. These
+forces can be described by the stress tensor. For small strain the 
+stress tensor is proportional to the strain and we have:
+\begin{equation}
+\sigma_{i} =\sum_{il} C_{i,l} \epsilon_l 
+\end{equation}
+$C_{i,l}$ is the tensor of elastic constants. 
+At zero temperature we can write:
+\begin{equation}
+C_{i,l}= {\partial \sigma_i \over \partial \epsilon_{l}}=
+{1 \over V}{\partial^2 U \over \partial \epsilon_i \partial \epsilon_l}
+.
+\end{equation}
+The nonzero components of the elastic constant tensor for each crystal point
+group can be derived using group theory. The form of the elastic constants
+tensor depends on the Laue class obtained by adding an inversion center to
+the group operations. From this relationship we find that for finite
+and small strains the total energy can be written as:
+\begin{equation}
+U= {V \over 2} \sum_{i,l} \epsilon_i C_{i,l} \epsilon_l
+\end{equation}
+By choosing the form of the strain $\epsilon$ and fitting the
+energy with a quadratic function we can calculate the elastic constants.
+Calculating the stress tensor we can also use the definition
+of elastic constants and fit linearly the stress as a function of strain. \\
+The procedure depends on the Laue class of the solid. We discuss separately
+the different Bravais lattices below.
+
+\subsection{Cubic system}
+
+The nonzero components of the elastic constants tensor for the cubic system
+are independent on the Laue class and are $C_{11}=C_{22}=C_{33}$,
+$C_{12}=C_{13}=C_{23}$ and $C_{44}=C_{55}=C_{66}$. [1]
+Applying a strain $\epsilon_E$ the cell becomes tetragonal and we have:
+\begin{equation}
+\sigma_{1} = C_{12} \epsilon_3
+\end{equation}
+\begin{equation}
+\sigma_{3} = C_{11} \epsilon_3
+\end{equation}
+To calculate $C_{44}$ we can apply $\epsilon_F$ that
+transforms the cubic cell into a trigonal cell as described above. In
+this case we obtain
+\begin{equation}
+\sigma_{4} = C_{44} \epsilon_4
+\end{equation}
+and $\sigma_{5} = \sigma_{6} = \sigma_{4}$. \\
+In order to calculate the elastic constant using only the energy
+we can consider a strain $\epsilon_A$ that gives:
+\begin{equation}
+U_A = {3 V \over 2} (C_{11} + 2C_{12}) \epsilon_1^2.
+\end{equation}
+The energy for a strain $\epsilon_E$ gives
+\begin{equation}
+U_E = {V \over 2} C_{11} \epsilon_3^2.
+\end{equation}
+and from these two relationships we can obtain both $C_{11}$ and $C_{12}$.
+Finally to calculate $C_{44}$, we can apply a strain $\epsilon_F$ 
+which gives:
+\begin{equation}
+U_F = {3 V \over 2} C_{44} \epsilon_4^2.
+\end{equation}
+By fitting the energy with a quadratic function for these three cases,
+we can calculate the elastic constants as:
+\begin{eqnarray}
+C_{11}&=&{1 \over V} {d^2 U_E \over d \epsilon_3^2}, \\ 
+C_{12}&=&{1 \over 6 V} {d^2 U_A \over d \epsilon_1^2}  - {1\over 2} C_{11}, \\
+C_{44}&=&{1 \over 3 V} {d^2 U_F \over d \epsilon_4^2}.
+\end{eqnarray}
+but the use of the energy instead of stress requires three fits instead
+of the two. 
+
+\subsection{Tetragonal system}
+In this case there are two possibilities depending on the Laue class.
+For the point groups $C_{4v} (4mm)$, $D_{2d} (\bar42m)$, $D_4 (422)$ and
+$D_{4h} (4/mmm)$ (Laue class $D_{4h} (4/mmm)$) the nonzero components of the 
+elastic constants tensor are
+$C_{11}=C_{22}$, $C_{12}$, $C_{13}=C_{23}$, $C_{33}$, $C_{44}=C_{55}$, 
+$C_{66}$.
+For the point groups $C_{4} (4)$, $S_{4} (\bar4)$, $C_{4h} (4/m)$ (Laue class
+$C_{4h} (4/m)$) in addition to the components of the elastic constants tensor
+discussed above also the $C_{16}=-C_{26}$ components are non zero.
+
+By doing a strain $\epsilon_E$ that conserves the shape of the tetragonal
+cell we obtain
+\begin{equation}
+\sigma_{1} = C_{13} \epsilon_3 
+\end{equation}
+\begin{equation}
+\sigma_{3} = C_{33} \epsilon_3 
+\end{equation}
+and we obtain $C_{13}$ and $C_{33}$.
+To obtain the other components of the tensor we must change the shape of the 
+unit cell. $\epsilon_C$ transforms the tetragonal cell in an orthorhombic cell 
+and gives:
+\begin{equation}
+\sigma_{1} = C_{11} \epsilon_1 
+\end{equation}
+\begin{equation}
+\sigma_{2} =  C_{12} \epsilon_1
+\end{equation}
+Applying $\epsilon_G$ we obtain:
+\begin{equation}
+\sigma_{6} = C_{66} \epsilon_6 
+\end{equation}
+Finally applying the strain $\epsilon_H$ we obtain
+\begin{equation}
+\sigma_{5} = C_{55} \epsilon_5
+\end{equation}
+that gives $C_{55}$. \\
+For the Laue class $C_{4h} (4/m)$ the strain $\epsilon_G$ gives also 
+\begin{equation}
+\sigma_{1} = C_{16} \epsilon_6 
+\end{equation}
+
+To use the energy as a function of strain 
+we need the following strains and relationships. 
+By applying $\epsilon_C$ we get:
+\begin{equation}
+U_C= {V \over 2} C_{11} \epsilon_1^2
+\end{equation}
+By applying $\epsilon_E$ we get:
+\begin{equation}
+U_E= {V \over 2} C_{33} \epsilon_3^2
+\end{equation}
+By applying $\epsilon_B$ we get
+\begin{equation}
+U_B= {2 V \over 2} (C_{11} + C_{12}) \epsilon_1^2
+\end{equation}
+By applying $\epsilon_B'$ we get
+\begin{equation}
+U_B= {V \over 2} (C_{11} + C_{33} + 2 C_{13}) \epsilon_1^2
+\end{equation}
+These strains transform the tetragonal into an orthorhombic cell 
+and allow us to get four elastic constants. 
+To obtain the last two elastic constants we 
+must apply $\epsilon_G$ and we get
+\begin{equation}
+U_G= {V \over 2} C_{66} \epsilon_6^2,
+\end{equation}
+applying $\epsilon_H$ we obtain
+\begin{equation}
+U_H= {V \over 2} C_{55} \epsilon_5^2,
+\end{equation}
+Solving these equations we obtain:
+\begin{eqnarray}
+C_{11}&=&{1 \over V} {d^2 U_C \over d \epsilon_1^2}, \\ 
+C_{33}&=&{1 \over V} {d^2 U_E \over d \epsilon_3^2}, \\ 
+C_{12}&=&{1 \over 2 V} {d^2 U_B \over d \epsilon_1^2} - C_{11}, \\
+C_{13}&=&{1 \over 2 V} {d^2 U_{B'} \over d \epsilon_1^2} - {C_{11} \over 2} 
+                                                         - {C_{33} \over 2}, \\
+C_{44}&=&{1 \over V} {d^2 U_G \over d \epsilon_4^2}, \\
+C_{66}&=&{1 \over V} {d^2 U_H \over d \epsilon_6^2}.
+\end{eqnarray}
+For the groups that require $C_{16}$ we must apply a strain ...
+
+\subsection{Orthorhombic system}
+In this system all solids belong to the $D_{2h} (mmm)$ Laue class so
+the non zero elements of the elastic constant tensor are the same for all 
+point groups and are
+$C_{11}$, $C_{12}$, $C_{13}$, $C_{22}$, $C_{23}$,
+$C_{33}$, $C_{44}$, $C_{55}$, and $C_{66}$. \\
+Applying $\epsilon_C$ we obtain
+\begin{eqnarray}
+\sigma_1&=&C_{11} \epsilon_1,  \\
+\sigma_2&=&C_{12} \epsilon_1,  \\
+\sigma_3&=&C_{13} \epsilon_1.
+\end{eqnarray}
+Applying $\epsilon_D$ we obtain
+\begin{eqnarray}
+\sigma_2&=&C_{22} \epsilon_2,  \\
+\sigma_3&=&C_{23} \epsilon_2.
+\end{eqnarray}
+Finally applying $\epsilon_E$ we obtain
+\begin{equation}
+\sigma_3=C_{33} \epsilon_3.
+\end{equation}
+To obtain the other components of the elastic constant tensor,
+we have to modify the shape of the orthorhombic cell. \\
+Applying $\epsilon_G$ we have
+\begin{equation}
+\sigma_6=C_{66} \epsilon_6.
+\end{equation}
+Applying $\epsilon_H$ we have
+\begin{equation}
+\sigma_5=C_{55} \epsilon_5.
+\end{equation}
+Finally applying $\epsilon_I$ we have
+\begin{equation}
+\sigma_4=C_{44} \epsilon_4.
+\end{equation}
+
+To use the energy as a function of strain we need the following strains
+and relationships. 
+By applying $\epsilon_C$ we get:
+\begin{equation}
+U_C= {V \over 2} C_{11} \epsilon_1^2.
+\end{equation}
+By applying $\epsilon_D$ we get:
+\begin{equation}
+U_D= {V \over 2} C_{22} \epsilon_2^2.
+\end{equation}
+By applying $\epsilon_E$ we get:
+\begin{equation}
+U_E= {V \over 2} C_{33} \epsilon_3^2.
+\end{equation}
+By applying $\epsilon_B$ we get:
+\begin{equation}
+U_B= {V \over 2} (C_{11} + C_{22} + 2 C_{12}) \epsilon_1^2.
+\end{equation}
+By applying $\epsilon_B'$ we get: 
+\begin{equation}
+U_B= {V \over 2} (C_{11} + C_{33} + 2 C_{13}) \epsilon_1^2.
+\end{equation}
+By applying $\epsilon_B''$ we get:
+\begin{equation}
+U_B= {V \over 2} (C_{22} + C_{33} + 2 C_{23}) \epsilon_2^2.
+\end{equation}
+These strains conserve the orthorhombic cell and allow us to get
+six elastic constants. To obtain the last three elastic constants we 
+apply $\epsilon_G$ to obtain
+\begin{equation}
+U_G= {V \over 2} C_{66} \epsilon_6^2,
+\end{equation}
+$\epsilon_H$ to obtain
+\begin{equation}
+U_H= {V \over 2} C_{55} \epsilon_5^2,
+\end{equation}
+and $\epsilon_I$ to obtain
+\begin{equation}
+U_I= {V \over 2} C_{44} \epsilon_4^2.
+\end{equation}
+Solving these equations we have:
+\begin{eqnarray}
+C_{11}&=&{1 \over V} {d^2 U_C \over d \epsilon_1^2}, \\ 
+C_{22}&=&{1 \over V} {d^2 U_D \over d \epsilon_2^2}, \\ 
+C_{33}&=&{1 \over V} {d^2 U_E \over d \epsilon_3^2}, \\ 
+C_{12}&=&{1 \over 2 V} {d^2 U_B \over d \epsilon_1^2} - {C_{11}\over 2} - 
+{C_{22}\over 2}, \\
+C_{13}&=&{1 \over 2 V} {d^2 U_{B'} \over d \epsilon_1^2} - {C_{11}\over 2} - {C_{33} \over 2}, \\
+C_{23}&=&{1 \over 2 V} {d^2 U_{B''} \over d \epsilon_2^2} - {C_{22}\over 2} - {C_{33} \over 2}, \\
+C_{44}&=&{1 \over V} {d^2 U_I \over d \epsilon_4^2}, \\
+C_{55}&=&{1 \over V} {d^2 U_H \over d \epsilon_5^2}, \\
+C_{66}&=&{1 \over V} {d^2 U_G \over d \epsilon_6^2}.
+\end{eqnarray}
+
+\subsection{Monoclinic system}
+The non zero components of the elastic constants tensor depend on the choice
+of the unit cell $b$-unique or $c$-unique. 
+$C_{11}$, $C_{12}$, $C_{13}$, $C_{22}$, $C_{23}$, $C_{33}$, $C_{44}$, 
+$C_{55}$, and $C_{66}$ are always different from zero, while for the
+$b$-unique cell also the $C_{15}$, $C_{25}$, $C_{35}$, and $C_{46}$ components
+are different from zero. For the $c$-unique cell, instead, $C_{16}$, $C_{26}$, 
+$C_{36}$, and $C_{45}$ are different from zero. \\
+Applying $\epsilon_C$ we obtain
+\begin{eqnarray}
+\sigma_1&=&C_{11} \epsilon_1,  \\
+\sigma_2&=&C_{12} \epsilon_1,  \\
+\sigma_3&=&C_{13} \epsilon_1.  
+\end{eqnarray}
+Moreover
+\begin{eqnarray}
+\sigma_5&=&C_{15} \epsilon_1
+\end{eqnarray}
+for the $b$-unique cell and 
+\begin{eqnarray}
+\sigma_6&=&C_{16} \epsilon_1
+\end{eqnarray}
+for the $c$-unique cell. \\
+Applying $\epsilon_D$ we obtain
+\begin{eqnarray}
+\sigma_2&=&C_{22} \epsilon_2,  \\
+\sigma_3&=&C_{23} \epsilon_2.  
+\end{eqnarray}
+Moreover
+\begin{eqnarray}
+\sigma_5&=&C_{25} \epsilon_2.
+\end{eqnarray}
+for the $b$-unique cell and 
+\begin{eqnarray}
+\sigma_6&=&C_{26} \epsilon_2.
+\end{eqnarray}
+for the $c$-unique cell. \\
+Finally applying $\epsilon_E$ we obtain
+\begin{eqnarray}
+\sigma_3&=&C_{33} \epsilon_3.
+\end{eqnarray}
+Moreover 
+\begin{eqnarray}
+\sigma_5&=&C_{35} \epsilon_3
+\end{eqnarray}
+for the $b$-unique cell and 
+\begin{eqnarray}
+\sigma_6&=&C_{36} \epsilon_3
+\end{eqnarray}
+for the $c$-unique cell. \\
+Applying $\epsilon_I$ we obtain
+\begin{eqnarray}
+\sigma_4&=&C_{44} \epsilon_4.
+\end{eqnarray}
+Moreover
+\begin{eqnarray}
+\sigma_6&=&C_{46} \epsilon_4
+\end{eqnarray}
+for the $b$-unique cell and
+\begin{eqnarray}
+\sigma_5&=&C_{45} \epsilon_4
+\end{eqnarray}
+for the $c$-unique cell. \\
+Applying $\epsilon_H$ we obtain
+\begin{eqnarray}
+\sigma_5&=&C_{55} \epsilon_5,
+\end{eqnarray}
+and applying $\epsilon_G$ we obtain
+\begin{eqnarray}
+\sigma_6&=&C_{66} \epsilon_6,
+\end{eqnarray}
+
+\subsection{Triclinic system}
+In this case all the components of the elastic constant tensors are non zero.
+We can apply $\epsilon_C$ and obtain:
+\begin{eqnarray}
+\sigma_1&=&C_{11} \epsilon_1  \\
+\sigma_2&=&C_{12} \epsilon_1  \\
+\sigma_3&=&C_{13} \epsilon_1  \\
+\sigma_4&=&C_{14} \epsilon_1  \\
+\sigma_5&=&C_{15} \epsilon_1  \\
+\sigma_6&=&C_{16} \epsilon_1  \\
+\end{eqnarray}
+where we have used the symmetry of the elastic constants matrix.
+Applying $\epsilon_D$ we obtain:
+\begin{eqnarray}
+\sigma_2&=&C_{22} \epsilon_2  \\
+\sigma_3&=&C_{23} \epsilon_2  \\
+\sigma_4&=&C_{24} \epsilon_2  \\
+\sigma_5&=&C_{25} \epsilon_2  \\
+\sigma_6&=&C_{26} \epsilon_2  \\
+\end{eqnarray}
+Applying $\epsilon_E$ we obtain:
+\begin{eqnarray}
+\sigma_3&=&C_{33} \epsilon_3  \\
+\sigma_4&=&C_{34} \epsilon_3  \\
+\sigma_5&=&C_{35} \epsilon_3  \\
+\sigma_6&=&C_{36} \epsilon_3  \\
+\end{eqnarray}
+Applying $\epsilon_I$ we obtain:
+\begin{eqnarray}
+\sigma_4&=&C_{44} \epsilon_4  \\
+\sigma_5&=&C_{45} \epsilon_4  \\
+\sigma_6&=&C_{46} \epsilon_4  \\
+\end{eqnarray}
+Applying $\epsilon_H$ we obtain:
+\begin{eqnarray}
+\sigma_5&=&C_{55} \epsilon_5  \\
+\sigma_6&=&C_{56} \epsilon_5  \\
+\end{eqnarray}
+Applying $\epsilon_G$ we obtain:
+\begin{eqnarray}
+\sigma_6&=&C_{66} \epsilon_6  \\
+\end{eqnarray}
+Clearly in all cases, independent of the lattice, these equations can be
+applied to calculate the elastic constant, neglecting any symmetry
+information, but the number of calculations is larger than that needed
+when symmetry is used.
+
+For using the energy in the calculation we use the following
+relationships. Applying $\epsilon_C$ we get:
+\begin{equation}
+U_C= {V \over 2} C_{11} \epsilon_1^2
+\end{equation}
+By applying $\epsilon_D$ we get:
+\begin{equation}
+U_D= {V \over 2} C_{22} \epsilon_2^2
+\end{equation}
+By applying $\epsilon_E$ we get:
+\begin{equation}
+U_E= {V \over 2} C_{33} \epsilon_3^2
+\end{equation}
+By applying $\epsilon_B$ we get
+\begin{equation}
+U_B= {V \over 2} (C_{11} + C_{22} + 2 C_{12}) \epsilon_1^2
+\end{equation}
+By applying $\epsilon_B'$ in which only $\epsilon_1$ and
+$\epsilon_3=\epsilon_1$ are non zero, we have
+\begin{equation}
+U_{B'}= {V \over 2} (C_{11} + C_{33} + 2 C_{13}) \epsilon_1^2
+\end{equation}
+By applying $\epsilon_B''$ in which only $\epsilon_2$ and
+$\epsilon_3=\epsilon_2$ are non zero, we have
+\begin{equation}
+U_{B''}= {V \over 2} (C_{22} + C_{33} + 2 C_{23}) \epsilon_2^2
+\end{equation}
+And in this way we get six elastic constant. Continuing as in the
+orthorhombic case we can
+apply $\epsilon_G$ and we get
+\begin{equation}
+U_G= {V \over 2} C_{66} \epsilon_6^2,
+\end{equation}
+applying $\epsilon_H$ we obtain
+\begin{equation}
+U_H= {V \over 2} C_{55} \epsilon_5^2,
+\end{equation}
+applying $\epsilon_I$ we obtain
+\begin{equation}
+U_I= {V \over 2} C_{44} \epsilon_4^2.
+\end{equation}
+The triclinic case twelve components. Applying simultaneously two strains
+we can get combinations of other elastic constants with those already
+calculated. For instance applying $\epsilon_C + \epsilon_G$ and taking
+$\epsilon_1=\epsilon_6=\epsilon$ we obtain:
+\begin{equation}
+U_{C+G}= {V \over 2} (C_{11}+2 C_{16} + C_{66}) \epsilon^2.
+\end{equation}
+Similarly applying $\epsilon_C + \epsilon_H$ and taking $\epsilon_1=
+\epsilon_5=\epsilon$ we obtain:
+\begin{equation}
+U_{C+H}= {V \over 2} (C_{11}+2 C_{15} + C_{55}) \epsilon^2.
+\end{equation}
+Similarly applying $\epsilon_C + \epsilon_I$ and taking
+$\epsilon_1=\epsilon_4=\epsilon$ we obtain:
+\begin{equation}
+U_{C+I}= {V \over 2} (C_{11}+2 C_{14} + C_{44}) \epsilon^2.
+\end{equation}
+Then we can apply $\epsilon_D + \epsilon_G$ taking
+$\epsilon_2=\epsilon_6=\epsilon$ and we obtain:
+\begin{equation}
+U_{D+G}= {V \over 2} (C_{22}+2 C_{26} + C_{66}) \epsilon^2.
+\end{equation}
+Similarly applying $\epsilon_D + \epsilon_H$ taking
+$\epsilon_2=\epsilon_5=\epsilon$ and we obtain:
+\begin{equation}
+U_{D+H}= {V \over 2} (C_{22}+2 C_{25} + C_{55}) \epsilon^2.
+\end{equation}
+Similarly applying $\epsilon_D + \epsilon_I$ taking
+$\epsilon_2=\epsilon_4=\epsilon$ and we obtain:
+\begin{equation}
+U_{D+I}= {V \over 2} (C_{22}+2 C_{24} + C_{44}) \epsilon^2.
+\end{equation}
+Then we can apply $\epsilon_E + \epsilon_G$ taking
+$\epsilon_3=\epsilon_6=\epsilon$ and we obtain:
+\begin{equation}
+U_{E+G}= {V \over 2} (C_{33}+2 C_{36} + C_{66}) \epsilon^2.
+\end{equation}
+Similarly applying $\epsilon_E + \epsilon_H$ taking
+$\epsilon_3=\epsilon_5=\epsilon$ and we obtain:
+\begin{equation}
+U_{E+H}= {V \over 2} (C_{33}+2 C_{35} + C_{55}) \epsilon^2.
+\end{equation}
+Similarly applying $\epsilon_E + \epsilon_I$ taking
+$\epsilon_3=\epsilon_4=\epsilon$ and we obtain:
+\begin{equation}
+U_{E+I}= {V \over 2} (C_{33}+2 C_{34} + C_{44}) \epsilon^2.
+\end{equation}
+In order to calculate the last three components we need to apply
+simultaneously two shear strains. Applying $\epsilon_G + \epsilon_H$ 
+and taking $\epsilon_6=\epsilon_5=\epsilon$ we obtain:
+\begin{equation}
+U_{G+H}= {V \over 2} (C_{55}+2 C_{56} + C_{66}) \epsilon^2.
+\end{equation}
+Similarly applying $\epsilon_G + \epsilon_I$
+and taking $\epsilon_6=\epsilon_4=\epsilon$
+\begin{equation}
+U_{G+I}= {V \over 2} (C_{44}+2 C_{46} + C_{66}) \epsilon^2.
+\end{equation}
+Finally applying $\epsilon_H + \epsilon_I$
+and taking $\epsilon_5=\epsilon_4=\epsilon$
+\begin{equation}
+U_{H+I}= {V \over 2} (C_{44}+2 C_{45} + C_{55}) \epsilon^2.
+\end{equation}
+Solving these equations we obtain:
+\begin{eqnarray}
+C_{11}&=&{1 \over V} {d^2 U_C \over d \epsilon_1^2}, \\ 
+C_{22}&=&{1 \over V} {d^2 U_D \over d \epsilon_2^2}, \\ 
+C_{33}&=&{1 \over V} {d^2 U_E \over d \epsilon_3^2}, \\ 
+C_{12}&=&{1 \over 2 V} {d^2 U_B \over d \epsilon_1^2} - 
+                             {(C_{11}+ C_{22})\over 2}, \\
+C_{13}&=&{1 \over 2 V} {d^2 U_{B'} \over d \epsilon_1^2} - 
+                             {(C_{11} + C_{33})\over 2}, \\
+C_{23}&=&{1 \over 2 V} {d^2 U_{B''} \over d \epsilon_2^2} - 
+                             {(C_{22} - C_{33})\over 2}, \\
+C_{44}&=&{1 \over 3 V} {d^2 U_I \over d \epsilon_4^2}, \\
+C_{55}&=&{1 \over 3 V} {d^2 U_H \over d \epsilon_5^2}, \\
+C_{66}&=&{1 \over 3 V} {d^2 U_G \over d \epsilon_6^2}, \\
+C_{14}&=&{1 \over 2 V} {d^2 U_{C+I} \over d \epsilon^2} - {(C_{11} + C_{44})\over 2}, \\
+C_{15}&=&{1 \over 2 V} {d^2 U_{C+H} \over d \epsilon^2} - {(C_{11} + C_{55})\over 2}, \\
+C_{16}&=&{1 \over 2 V} {d^2 U_{C+G} \over d \epsilon^2} - {(C_{11} + C_{66})\over 2}, \\
+C_{24}&=&{1 \over 2 V} {d^2 U_{D+I} \over d \epsilon^2} - {(C_{22} + C_{44})\over 2}, \\
+C_{25}&=&{1 \over 2 V} {d^2 U_{D+H} \over d \epsilon^2} - {(C_{22} + C_{55})\over 2}, \\
+C_{26}&=&{1 \over 2 V} {d^2 U_{D+G} \over d \epsilon^2} - {(C_{22} + C_{66})\over 2}, \\
+C_{34}&=&{1 \over 2 V} {d^2 U_{E+I} \over d \epsilon^2} - {(C_{33} + C_{44})\over 2}, \\
+C_{35}&=&{1 \over 2 V} {d^2 U_{E+H} \over d \epsilon^2} - {(C_{33} + C_{55})\over 2}, \\
+C_{36}&=&{1 \over 2 V} {d^2 U_{E+G} \over d \epsilon^2} - {(C_{33} + C_{66})\over 2}, \\
+C_{45}&=&{1 \over 2 V} {d^2 U_{H+I} \over d \epsilon^2} - {(C_{44} + C_{55})\over 2}, \\
+C_{46}&=&{1 \over 2 V} {d^2 U_{G+I} \over d \epsilon^2} - {(C_{44} + C_{66})\over 2}, \\
+C_{56}&=&{1 \over 2 V} {d^2 U_{G+H} \over d \epsilon^2} - {(C_{55} + C_{66})\over 2}.
+\end{eqnarray}
+
+\subsection{Hexagonal system}
+In this case the form of the elastic constants tensor is independent of
+the Laue class. The nonzero components are $C_{11}=C_{22}$, $C_{12}$, 
+$C_{13}=C_{23}$, $C_{33}$, $C_{44}=C_{55}$, $C_{66}={1\over 2} 
+(C_{11}-C_{12})$. 
+$C_{11}$, $C_{12}$ and $C_{13}$ can be obtained by doing a strain $\epsilon_C$,
+transforming the hexagonal cell into a base-centered orthorhombic
+cell. We have:
+\begin{eqnarray}
+\sigma_1&=&C_{11} \epsilon_1,  \\
+\sigma_2&=&C_{12} \epsilon_1,  \\
+\sigma_3&=&C_{13} \epsilon_1.
+\end{eqnarray}
+The strain $\epsilon_E$ conserves the shape of the hexagonal cell and
+gives $C_{33}$:
+\begin{eqnarray}
+\sigma_3&=&C_{33} \epsilon_3.  
+\end{eqnarray}
+In order to obtain $C_{44}=C_{55}$ we can apply a strain $\epsilon_H$ 
+that transforms the hexagonal cell into a base-centered monoclinic cell.
+We have
+\begin{eqnarray}
+\sigma_5&=&C_{55} \epsilon_5. 
+\end{eqnarray}
+
+To use the energy as a function of strain 
+we need the following strains and relationships. \\
+By applying $\epsilon_C$, we get $C_{11}$:
+\begin{equation}
+U_C= {V \over 2} C_{11} \epsilon_1^2.
+\end{equation}
+By applying $\epsilon_E$, we get $C_{33}$:
+\begin{equation}
+U_E= {V \over 2} C_{33} \epsilon_3^2.
+\end{equation}
+By applying $\epsilon_B'$ in which only $\epsilon_1$ and 
+$\epsilon_3=\epsilon_1$ are non zero, we have:
+\begin{equation}
+U_B= {V \over 2} (C_{11} + C_{33} + 2 C_{13}) \epsilon_1^2,
+\end{equation}
+and using the previously calculated elastic constants, we can obtain $C_{13}$.
+By applying $\epsilon_A$, we get
+\begin{equation}
+U_B= {V \over 2} (2C_{11} + C_{33} + 2 C_{12} + 4 C_{13}) \epsilon_1^2,
+\end{equation}
+and using the previously calculated elastic constants, we can obtain $C_{12}$.
+Finally applying $\epsilon_H$, we obtain $C_{55}$:
+\begin{equation}
+U_H= {V \over 2} C_{55} \epsilon_5^2.
+\end{equation}
+Solving these equations we obtain:
+\begin{eqnarray}
+C_{11}&=&{1 \over V} {d^2 U_C \over d \epsilon_1^2}, \\ 
+C_{33}&=&{1 \over V} {d^2 U_E \over d \epsilon_3^2}, \\ 
+C_{13}&=&{1 \over 2 V} {d^2 U_{B'} \over d \epsilon_1^2} - C_{11}/2 - C_{33}/2, \\
+C_{12}&=&{1 \over 2 V} {d^2 U_A \over d \epsilon_1^2} - C_{11} - C_{33}/2
+- 2 C_{13}, \\
+C_{55}&=&{1 \over V} {d^2 U_I \over d \epsilon_5^2}, \\
+\end{eqnarray}
+
+
+\section{Pressure dependent elastic constants}
+The elastic constants of a solid on which we apply a pressure $P$ can still
+be defined from the linear relationship between applied strain and 
+induced stress: 
+\begin{equation}
+\sigma_{ij} =\sigma^{(0)}_{ij}+\sum_{kl} B_{ij,kl} \epsilon_{kl}.
+\end{equation}
+However since the solid is already in a strained state
+to balance the pressure $P$, the elastic constants defined as
+\begin{equation}
+C_{ij,kl}= 
+{1 \over V}{\partial^2 U \over \partial \epsilon_{ij} \partial \epsilon_{kl}},
+\end{equation}
+do not coincide with $B_{ij,kl}$. Actually there is a simple 
+relationship between the two:
+\begin{equation}
+B_{ij,kl} = C_{ij,kl} + {1\over 2} P (2 \delta_{ij} \delta_{kl} - 
+ \delta_{il} \delta_{jk} - \delta_{ik} \delta_{jl} ).
+\end{equation}
+Since experimental measurements of elastic constants are usually done 
+using the stress-strain relation it is common to give the numerical
+values of $B_{ij,kl}$ and to call these the elastic constants of a
+solid under pressure. We can write out the relationship for the Voigt 
+components:
+\begin{eqnarray}
+B_{44} &=& C_{44} - {1\over 2} P \\
+B_{55} &=& C_{55} - {1\over 2} P \\
+B_{66} &=& C_{66} - {1\over 2} P \\
+B_{12} &=& C_{12} + P \\
+B_{13} &=& C_{13} + P \\
+B_{23} &=& C_{23} + P 
+\end{eqnarray}
+while for all the other components $B_{ij}=C_{ij}$.
+Note however that for a generic stress, instead of
+an isotropic pressure, the $B_{ij,kl}$ have not the same symmetry properties 
+of $C_{ij,kl}$. In general they cannot be written using the Voigt notation.
+
+%\section{Temperature dependent elastic constants}
+%In principle to calculate the elastic constants at each temperature it
+%is sufficient to substitute the Helmholtz free energy to the total energy
+%in the equations of the previous section. There are however two complications
+%that make the calculation more difficult. One is that the stress is not
+%readily available at finite temperatures and therefore we can use only the
+%energy expressions. The second is that, at each temperature, the strain must be
+%applied taking as equilibrium (unstrained) geometry the one that 
+%minimizes the free energy at temperature $T$ and the volume that appears in
+%the equations should be the equilibrium one at temperature $T$.
+%We have:
+%\begin{equation}
+%C_{i,l}^T= {1 \over V(T)}{\partial^2 F \over \partial \epsilon_i \partial \epsilon_l}
+%\Bigg|_T.
+%\end{equation}
+%Since we cannot make an elastic constant calculation for each temperature, it
+%is convenient to calculate the Helmholtz free energy in a regular grid in
+%a space whose dimension are the parameters $\alpha_k$ that define the 
+%unstrained lattice plus an additional parameter that define the strain necessary
+%to calculate the given elastic constant. Sometimes this strain can be applied
+%simply changing the parameters $\alpha_k$, but in some cases it is an
+%additional parameter that increases of one the dimension of 
+%the parameter space, or equivalently lowers the symmetry of the cell so
+%that we need more parameters to determine it (however all the additional
+%parameters are a function of the strain amplitude).
+%The free energy is then fitted by a quadratic polynomial in this extended space
+%at each temperature and the minimum of the quadratic polynomial gives
+%the equilibrium geometry at that temperature. In principle for a solid
+%that is stable at that temperature the minimum is obtained at
+%zero strain. Then the same free energy values are fitted with a quartic
+%polynomial and the second derivatives of the free energy with respect
+%to strain are calculated at the minimum.
+%It is important to use a fourth-order polynomial to calculate the
+%second derivatives. A second order polynomial is sufficient to determine
+%the minimum but not the second derivatives. Under pressure instead of the
+%Helmholtz free energy we minimize the Gibbs free energy. The second
+%derivatives of the Gibbs free energy gives:
+%\begin{equation}
+%B_{i,l}^T= {1 \over V(T)}{\partial^2 G \over \partial \epsilon_i \partial \epsilon_l}
+%\Bigg|_T.
+%\end{equation}
+%This equation is sufficient to calculate the elastic constant at a 
+%given pressure and temperature, but not at a given generic stress. In the
+%latter case $B_{i,l}^T$ cannot be written using the Voigt notation.
+%
+%Let us consider separately the different Bravais lattices.
+%
+%\subsection{Cubic system}
+%The application of $\epsilon_A$ is equivalent to the change of the lattice 
+%constant $a$, so the calculation of $C_{11}+2 C_{12}$ can be done by fitting
+%$F(a)$ with the quadratic function
+%$F(a) = g_1 + g_3 (a-a_0)^2$ where $a_0$ is the parameter $a$ that minimizes
+%the free energy at each temperature. Since
+%\begin{equation}
+%F(\epsilon_A)= {3 V(T) \over 2} \epsilon_1^2 (C_{11}+2C_{12}) 
+%\end{equation}
+%and $\epsilon_1=(a-a_0)/a_0$ we have:
+%\begin{equation}
+%C^T_{11}+2C^T_{12}= {1 \over 3 V(T)}  a_0^2 2 g_3
+%\end{equation}
+%
+%Let us now consider $\epsilon_E$. To apply this strain we have to transform
+%the cubic cell in a tetragonal cell. At $T=0$ it was sufficient to change only
+%the parameter $c/a$ keeping $a$ fixed to calculate $C_{11}$, now instead we
+%have to vary both $a$ and $c/a$. Fitting the free energy
+%$F(a, \epsilon_3) = g_1 + g_3 (a-a_0)^2 + g_5 \epsilon_3^2 
+%+ g_6 (a-a_0) \epsilon_3$.
+%At the minimum $a_0$ and $\epsilon_{30}$ we should have
+%$F(\epsilon_3) = {V\over 2} C_{11} \epsilon_3^2$.
+%Since the strain $\epsilon_E$ does not change $a$ we have simply:
+%\begin{equation}
+%C^T_{11} = {1 \over V(T)} 2 g_5
+%\end{equation}
+%but $g_5$ must be obtained from a two-dimensional fit of the free energy
+%as a function of both $a$ and $\epsilon_3$ at each temperature.
+%
+%Let us now consider $\epsilon_F$. To apply this strain we have to transform the
+%unit cell in a trigonal cell and we must study a strain 
+%$\epsilon_4=\epsilon_5=\epsilon_6=\epsilon$. In this case we must vary both 
+%$a_t$ and $\cos\alpha$ of the trigonal cell.
+%Using the relationships between trigonal and strained cubic cell we can write
+%the free energy as:
+%\begin{equation}
+%F(a, \epsilon) = g_1 + g_3 (a-a_0)^2 + g_5 \epsilon^2 + g_6 (a-a_0) \epsilon.
+%\end{equation}
+%where $a$ is the size of the cubic cell and we already used the fact that
+%the minimum should be obtained for $\epsilon=0$. We therefore compute the free energy
+%in a uniform mesh of values of $a$ and $\epsilon$ and from the coefficients
+%of the interpolating polynomial and the equation:
+%\begin{equation}
+%F(\epsilon) = { 3 V \over 2} C_{44} \epsilon^2
+%\end{equation}
+%we obtain 
+%\begin{equation}
+%C_{44}= { 1\over 3 V } 2 g_5 
+%\end{equation}
+%If the fit is made with $N_g$ free energy evaluations per parameter, the cost of
+%this procedure is $N_g + 2 N_g^2$ free energy evaluations.
+%
+%\subsection{Hexagonal system}
+%The application of $\epsilon_C$ means that we transform the hexagonal cell
+%into a base-centered orthorhombic cell. This cell is defined by three 
+%parameters $a_o$, $b_o/a_o$ and $c_o/a_o$. We can fit the Helmholtz free 
+%energy with a quadratic function of three parameters $a$, $c/a$, and 
+%$\epsilon_1$, where $a$ and $c/a$ are the parameters of the hexagonal
+%cell as:
+%\begin{eqnarray}
+%F(a, c/a, \epsilon_1) = g_1 &+& g_3 (a-a_0)^2 + g_5 (c/a-c_0/a_0)^2
+%+ g_6 (a-a_0) (c/a-c_0/a_0) \nonumber \\ &+& g_8 \epsilon_1^2 + g_9 (a-a_0) \epsilon_1
+%+g_{10} (c/a-c_0/a_0) \epsilon_1, 
+%\label{quadratic_3}
+%\end{eqnarray}
+%The conversion between the orthorhombic parameters and the hexagonal ones
+%plus strain has been given above.
+%At the minimum of the free energy $\epsilon_1=0$ while $a$ and $c/a$ have
+%the equilibrium values at the temperature $T$. At the minimum 
+%\begin{equation}
+%F(\epsilon_1) = { V \over 2} C_{11} \epsilon_1^2
+%\end{equation}
+%so we obtain
+%\begin{equation}
+%C_{11}= { 1\over V } 2 g_8 
+%\end{equation}
+%
+%In order to calculate $C_{33}$ at any temperature we can apply $\epsilon_E$.
+%We keep the hexagonal cell and change $a$ and $c/a$ fitting the free energy 
+%as a function of $a$ and $\epsilon_3$ with a second order polynomial. We can 
+%write:
+%\begin{equation}
+%F(a, \epsilon_3) = g_1 + g_3 (a-a_0)^2 + 
+%                         g_5 (\epsilon_3-\epsilon_{30})^2 + 
+%                         g_6 (a-a_0) (\epsilon_3-\epsilon_{30})
+%\end{equation}
+%$a_0$ and $\epsilon_{30}$ will give the equilibrium configuration at
+%each temperature. $\epsilon_{30}$ will depend on the reference configuration
+%chosen to make the fit.
+%At the minimum:
+%\begin{equation}
+%F(\epsilon_3) = { V \over 2} C_{33} (\epsilon_3-\epsilon_{30})^2
+%\end{equation}
+%so that 
+%\begin{equation}
+%C_{33}= { 1\over V } 2 g_5 
+%\end{equation}
+%
+%Then we can calculate the combination $C_{11}+C_{33}+2C_{13}$ by repeating
+%the procedure seen above for the strain $\epsilon_{B'}$ and writing the
+%orthorhombic parameters in terms of $a$, $c/a$ and $\epsilon_1$. This time
+%the functional dependence of the orthorhombic parameters will be the
+%one appropriate to the strain $\epsilon_{B'}$, and we get:
+%\begin{equation}
+%C_{11}+C_{33}+2C_{13}= { 1\over V } 2 g_8 
+%\end{equation}
+%
+%Then we calculate the combination $2C_{11}+C_{33}+2C_{12}+4C_{13}$ by 
+%applying a strain $\epsilon_A$. We can write the free energy as a function
+%of $a$ and $\epsilon_1$:
+%\begin{equation}
+%F(a, \epsilon_1) = g_1 + g_3 (a-a_0)^2 + 
+%                         g_5 (\epsilon_1-\epsilon_{10})^2 + 
+%                         g_6 (a-a_0) (\epsilon_1-\epsilon_{10})
+%\end{equation}
+%and at the minimum $a_0$ and $\epsilon_1$ gives the values of $a$ and $c/a$
+%that correspond to the given temperature and at the minimum:
+%\begin{equation}
+%2C_{11}+C_{33}+2C_{12}+4C_{13}= { 1\over V } 2 g_5 
+%\end{equation}
+%
+%Finally we have to make a strain $\epsilon_H$ to determine $C_{55}$. Since
+%now both $a$ and $c/a$ might vary, we link the four parameters of the 
+%monoclinic lattice with $a$, $c/a$ and $\epsilon_5$. A quadratic fit of
+%this function of three parameters similar to Eq.~\ref{quadratic_3}
+%will give:
+%\begin{equation}
+%C_{55}= { 1\over V } 2 g_8 
+%\end{equation}
+%
+%\section{Pressure and temperature dependent elastic constants}
+%
+%Under pressure instead of using the Helmholtz free energy we can minimize 
+%the Gibbs free energy. The second
+%derivatives of the Gibbs free energy are the elastic constants:
+%\begin{equation}
+%B_{i,l}^T= {1 \over V(T)}{\partial^2 G \over \partial 
+%\epsilon_i \partial \epsilon_l}
+%\Bigg|_T.
+%\end{equation}
+%This equation is sufficient to calculate the elastic constant at a
+%given pressure and temperature, but not at a given generic stress. In the
+%latter case $B_{i,l}^T$ cannot be written using the Voigt notation.
+%In general if the interval of parameters used to explore the free energy
+%surface is sufficiently large we can fit the Gibbs free energy
+%with a second order polynomial and find the minimum at any pressure
+%without additional energy or phonon calculations. However the quadratic
+%fit is sufficient to determine the new minimum for a range of pressures,
+%but not to determine the second derivatives. To have sufficient accuracy 
+%the Gibbs free energy must be fitted with a quartic
+%polynomial and the second derivatives of the free energy with respect
+%to strain of this polynomial must be calculated at the minimum.
+%The range of pressures for which this approach works can be tested changing
+%the starting configuration.
+
+\section{The elastic compliances}
+The relationship between stress and strain can be inverted. A stress 
+applied to a solid produces a strain proportional to the stress:
+\begin{equation}
+\epsilon_{i} =\sum_{il} S_{i,l} \sigma_l 
+\end{equation}
+where the tensor $S_{i,l}$ is known as elastic compliances. It is the
+inverse of the elastic constant tensor: 
+\begin{equation}
+S_{i,l} = C_{i,l}^{-1}.
+\end{equation}
+
+
+\section{Bulk modulus and compressibility}
+
+The isothermal compressibility is defined as the derivative of the 
+equilibrium volume with respect to pressure divided by the volume,
+calculated at constant temperature.
+\begin{equation}
+K_T = - {1 \over V} {d V \over d p}\Bigg|_T
+\end{equation}
+The bulk modulus is the inverse of the compressibility. 
+
+In order to calculate it we should calculate the change of volume
+due to an external pressure $p$. Since the change of volume can be
+written as 
+\begin{equation}
+dV = V (\epsilon_1 + \epsilon_2 + \epsilon_3)
+\end{equation}
+and we can calculate $\epsilon$ from the elastic compliances and the
+stress $\sigma_1=-p$, $\sigma_2=-p$, $\sigma_3=-p$ we have
+\begin{equation}
+B_T = {1 \over S_{1,1}+S_{2,2}+S_{3,3}+2 S_{1,2}+2 S_{1,3}+2 S_{2,3}}.
+\end{equation}
+%In some cases it might be useful to express the bulk modulus in
+%terms of the elastic constants, for instance when not all the 
+%elastic constants are available and it is not possible to calculate 
+%the elastic compliances. Moreover it is interesting to express
+%the bulk modulus in terms of the derivatives of the free energy with
+%respect to the crystal parameters $\alpha_k$.
+%This depends on the Laue class and on the Bravais lattice, so we discuss
+%this in the following.
+
+\section{Thermal expansion from Gr\"uneisen parameters}
+Thermal expansion can be calculated from the numerical derivatives of the 
+phonon frequencies with respect to strain, doing analytically the
+derivative with respect to the temperature.
+From the definition of thermal expansion:
+\begin{equation}
+\alpha_i= \left( {d \epsilon_i \over d T}\right)_{\sigma},
+\end{equation}
+we can write:
+\begin{equation}
+\alpha_i= - \sum_j \left({d \epsilon_i \over d \sigma_j}\right)_{T} 
+\left({d \sigma_j \over d T} \right)_{\epsilon} = - \sum_j S_{i,j}
+\left({d \sigma_j \over d T} \right)_{\epsilon}.
+\end{equation}
+Using the fact that 
+\begin{equation}
+\left({d \sigma_j \over d T} \right)_{\epsilon} = {1\over V} {d \over d T} \left( {d F \over d \epsilon_j}\right),
+\end{equation}
+where $F$ is the free energy, we obtain 
+\begin{equation}
+\left({d \sigma_j \over d T} \right)_{\epsilon} = {1\over V} \sum_{{\bf q},\nu}
+\gamma_{{\bf q},\nu}^j c_{{\bf q},\nu},
+\end{equation}
+where
+\begin{equation}
+\gamma_{{\bf q},\nu}^j = {1\over \omega_{{\bf q},\nu}} {\partial
+\omega_{{\bf q},\nu} \over \partial \epsilon_j} 
+\end{equation}
+are the modes Gr\"uneisen parameters and 
+\begin{equation}
+c_{{\bf q},\nu} = {\hbar \omega_{{\bf q},\nu}} {\partial
+\over \partial T } {1 \over e^{\beta \hbar \omega_{{\bf q},\nu}} - 1}
+\end{equation}
+are the mode contribution to the heat capacity.
+The final expression of the thermal expansion is therefore:
+\begin{equation}
+\alpha_i = -{1\over V} \sum_j S_{i,j} \sum_{{\bf q},\nu}
+\gamma_{{\bf q},\nu}^j c_{{\bf q},\nu}.
+\end{equation}
+An accurate evaluation of this sum would require the temperature dependent
+elastic compliances and equilibrium volume, but an approximate expression 
+can be obtained neglecting this dependence and using the $T=0$ values. 
+
+Again we have the problem that the phonon frequencies and hence their
+derivatives can be calculated only with respect to the crystal parameters,
+while we need the derivatives with respect to the strain. We discuss
+this point for each crystal system.
+
+\subsection{Cubic system}
+Assuming that the phonon frequencies ${\omega}_{{\bf q}\nu}$ are a function 
+of the set of strains $\{\epsilon_i\}$, it seems that the calculation of 
+the derivative of the frequency with respect to one strain component 
+$\epsilon_i$ require the simulation of a noncubic cell.  
+However we can consider in strain space, a six-dimensional space, the line 
+$\epsilon_1=\epsilon_2=\epsilon_3=\epsilon$ and 
+$\epsilon_4=\epsilon_5=\epsilon_6=0$ and consider the derivative of phonon
+frequencies along this line. Moving along this line means to keep the cell
+cubic and change the lattice constant $a$ so that $d\epsilon={da \over a}$
+therefore:
+\begin{equation}
+{d \omega_{{\bf q}\nu} \over d \epsilon} =a{d \omega_{{\bf q}\nu} \over d a},
+\end{equation}
+but along the line we have:
+\begin{equation}
+{d \omega_{{\bf q}\nu} \over d \epsilon} = {\partial \omega_{{\bf q}\nu} 
+\over \partial \epsilon_1} + {\partial \omega_{{\bf q}\nu} 
+\over \partial \epsilon_2} + {\partial \omega_{{\bf q}\nu} 
+\over \partial \epsilon_3} 
+\end{equation}
+Now using the fact that in a cubic system the three partial derivatives 
+are equal we have:
+\begin{equation}
+{\partial \omega_{{\bf q}\nu} 
+\over \partial \epsilon_1} = {a \over 3} {d \omega_{{\bf q}\nu} \over d a}.
+\end{equation}
+
+\subsection{Tetragonal and hexagonal systems}
+In these systems we can consider two lines in strain space. 
+The line $\epsilon_1=\epsilon_2=\epsilon_3=\epsilon$, and
+$\epsilon_4=\epsilon_5=\epsilon_6=0$ that means a change of $a$ at fixed
+$c/a$, and the line $\epsilon_3=\epsilon$ and 
+$\epsilon_1=\epsilon_2=\epsilon_4=\epsilon_5 =\epsilon_6=0$ that means 
+a change of $c/a$ at fixed $a$.
+Along the first line $d\epsilon={d a \over a}$, while along the second
+$d\epsilon={d c/a \over c/a}$.
+Along the first line we have:
+\begin{equation}
+{d \omega_{{\bf q}\nu} \over d \epsilon} = {\partial \omega_{{\bf q}\nu} 
+\over \partial \epsilon_1} + {\partial \omega_{{\bf q}\nu} 
+\over \partial \epsilon_2} + {\partial \omega_{{\bf q}\nu} 
+\over \partial \epsilon_3} = a {d \omega_{{\bf q}\nu} 
+\over d a},
+\end{equation}
+while along the second
+\begin{equation}
+{d \omega_{{\bf q}\nu} \over d \epsilon} = {\partial \omega_{{\bf q}\nu} 
+\over \partial \epsilon_3} = {c\over a} {d \omega_{{\bf q}\nu} 
+\over d c/a}.
+\end{equation}
+From the second equation we obtain ${\partial \omega_{{\bf q}\nu} 
+\over \partial \epsilon_3}$ that inserted in the first equation gives
+\begin{equation}
+2 {\partial \omega_{{\bf q}\nu} \over \partial \epsilon_1} = a  
+{d \omega_{{\bf q}\nu} \over d a} -
+{c\over a} {d \omega_{{\bf q}\nu} \over d c/a}
+\end{equation}
+where we used the fact that in tetragonal and hexagonal systems
+${\partial \omega_{{\bf q}\nu} \over \partial \epsilon_1}
+={\partial \omega_{{\bf q}\nu} \over \partial \epsilon_2}$.
+ 
+\subsection{Trigonal system}
+We can use the analogy with the hexagonal system and the relationship
+between $a_h$ and $x=c_h/a_h$ and the parameters $a$ and $\cos \alpha$ of the
+trigonal system. 
+We have
+\begin{equation}
+a={a_h \over 3} \sqrt{3 + x^2}
+\end{equation}
+and
+\begin{equation}
+\cos\alpha={ 2 x^2 - 3 \over 6 + 2 x^2}.
+\end{equation}
+Using the relationship found at previous point for the hexagonal system:
+\begin{equation}
+{\partial \omega_{{\bf q}\nu} 
+\over \partial \epsilon_3} = x {d \omega_{{\bf q}\nu} 
+\over d x}
+\end{equation}
+and
+\begin{equation}
+{\partial \omega_{{\bf q}\nu} 
+\over \partial \epsilon_1} = 
+{1\over 2} \left(a_h {\partial \omega_{{\bf q}\nu} \over \partial a_h} - 
+{\partial \omega_{{\bf q}\nu} \over \partial 
+\epsilon_3} \right)
+\end{equation}
+and transforming to the trigonal variables using ${\partial a \over \partial
+a_h}={a\over a_h}$, ${\partial \cos \alpha \over \partial
+a_h}=0$, ${\partial a \over \partial x}={a_h^2 x \over 9 a}$ and
+${\partial \cos \alpha \over \partial
+x}={ a_h^4 x \over 9 a^4}$ we obtain:
+\begin{equation}
+{\partial \omega_{{\bf q}\nu} 
+\over \partial \epsilon_3} = {1\over 3} (1 + 2 \cos \alpha)
+\left[ a {\partial \omega_{{\bf q}\nu} \over \partial a} +
+2 (1-\cos\alpha) {\partial \omega_{{\bf q}\nu} \over \partial \cos \alpha}
+\right],
+\end{equation}
+and
+\begin{equation}
+{\partial \omega_{{\bf q}\nu} \over \partial \epsilon_1} = 
+{1\over 2} \left(a {\partial \omega_{{\bf q}\nu} \over \partial a} - {\partial 
+\omega_{{\bf q}\nu} \over \partial 
+\epsilon_3} \right) 
+\end{equation}
+
+\subsection{Orthorhombic system}
+In this system we can consider the three lines 
+$\epsilon_1=\epsilon_2=\epsilon_3=\epsilon$ and
+$\epsilon_4=\epsilon_5 =\epsilon_6=0$ obtained varying $a$ at fixed
+$b/a$ and $c/a$, 
+$\epsilon_2=\epsilon$ and
+$\epsilon_1=\epsilon_3=\epsilon_4=\epsilon_5 =\epsilon_6=0$, 
+obtained varying $b/a$ at fixed $a$ and $c/a$,
+and 
+$\epsilon_3=\epsilon$ and
+$\epsilon_1=\epsilon_2=\epsilon_4=\epsilon_5 =\epsilon_6=0$
+obtained varying $c/a$ at fixed $a$ and $b/a$.
+Along these three lines we have $d\epsilon={da \over a}$, 
+$d\epsilon={db \over b}$, and $d\epsilon={dc \over c}$, respectively.
+Along the first line we have
+\begin{equation}
+{d \omega_{{\bf q}\nu} \over d \epsilon} = {\partial \omega_{{\bf q}\nu} 
+\over \partial \epsilon_1} + {\partial \omega_{{\bf q}\nu} 
+\over \partial \epsilon_2} + {\partial \omega_{{\bf q}\nu} 
+\over \partial \epsilon_3} = a {d \omega_{{\bf q}\nu} 
+\over d a},
+\end{equation}
+along the second
+\begin{equation}
+{d \omega_{{\bf q}\nu} \over d \epsilon} = {\partial \omega_{{\bf q}\nu} 
+\over \partial \epsilon_2} = {b\over a} {d \omega_{{\bf q}\nu} 
+\over d b/a},
+\end{equation}
+and along the third
+\begin{equation}
+{d \omega_{{\bf q}\nu} \over d \epsilon} = {\partial \omega_{{\bf q}\nu} 
+\over \partial \epsilon_3} = {c\over a} {d \omega_{{\bf q}\nu} 
+\over d c/a}.
+\end{equation}
+Using the second and the third equation to calculate 
+${\partial \omega_{{\bf q}\nu} \over \partial \epsilon_2}$ and
+${\partial \omega_{{\bf q}\nu} \over \partial \epsilon_3}$, we can
+substitute in the first equation
+\begin{equation}
+{\partial \omega_{{\bf q}\nu} \over \partial \epsilon_1} 
+ = a {d \omega_{{\bf q}\nu} \over da} - {b\over a} {d \omega_{{\bf q}\nu} 
+\over d b/a} - {c\over a} {d \omega_{{\bf q}\nu} 
+\over d c/a}
+\end{equation}
+\section{Average Gr\"uneisen parameter}
+
+The product of the thermal expansion coefficient $\beta$, the bulk modulus
+$B_T$, and the volume of unit cell $V$, divided by the constant volume
+heat capacity $C_V$ is the average Gr\"uneisen parameter $\gamma$
+that we can calculate as:
+\begin{equation}
+\gamma = {V B_T \beta \over C_V}
+\end{equation}
+and this can be calculated even for anisotropic solids if we have
+calculated the bulk modulus as written above.
+
+For anisotropic solids we can generalize this concept by introducing
+the thermal stresses, as products of the elastic constants and the
+thermal expansion:
+\begin{equation}
+b_{ij} = -\sum_{lm} C_{ij,lm} \alpha_{lm}
+\end{equation}
+Multiplying this quantity by the ratio between the volume and the
+constant strain heat capacity we obtain the generalized Gr\"uneisen
+parameters:
+\begin{equation}
+\gamma_{ij} =  {V b_{ij} \over C_\epsilon}
+\end{equation}
+
+\section{Adiabatic quantities}
+
+The difference between the heat capacity calculated at constant strain 
+and that calculated at constant stress is given by:
+\begin{equation}
+C^\sigma - C^\epsilon = T \sum_{ij} \alpha_{ij} b_{ij}
+\end{equation}
+Similarly the difference between isothermal and adiabatic
+elastic compliances is given by (Voigt notation):
+\begin{equation}
+S^S_{i,l} - S^T_{i,l} = - {T \alpha_{i} \alpha_{l} \over C^\sigma}
+\end{equation}
+While the difference between isothermal and adiabatic elastic constants
+is given by
+\begin{equation}
+C^S_{ij,lm} - C^T_{ij,lm} = - {T V b_{ij} b_{lm} \over C^\epsilon}
+\end{equation}
+
+\section{Appendix}
+It is often useful to express the primitive vectors of the centered
+lattices in term of the primitive vectors of the conventional lattices
+and viceversa. We report in this appendix the relationships that result
+from the definitions of the primitive vectors given above.
+We indicate with a prime the primitive vectors of the centered lattices. \\
+Face-centered cubic lattice:
+\begin{eqnarray}
+{\bf a}_1'&=&{1\over 2} (-{\bf a}_1 + {\bf a}_3), \\
+{\bf a}_2'&=&{1\over 2} ({\bf a}_2 + {\bf a}_3), \\
+{\bf a}_3'&=&{1\over 2} (-{\bf a}_1 + {\bf a}_2). 
+\end{eqnarray}
+
+\begin{eqnarray}
+{\bf a}_1&=& -{\bf a}_1' + {\bf a}_2'- {\bf a}_3', \\
+{\bf a}_2&=& -{\bf a}_1' + {\bf a}_2'+ {\bf a}_3', \\
+{\bf a}_3&=& {\bf a}_1' + {\bf a}_2'- {\bf a}_3' .
+\end{eqnarray}
+Body-centered cubic lattice:
+\begin{eqnarray}
+{\bf a}_1'&=&{1\over 2} ({\bf a}_1 + {\bf a}_2 + {\bf a}_3), \\
+{\bf a}_2'&=&{1\over 2} (-{\bf a}_1 + {\bf a}_2 + {\bf a}_3), \\
+{\bf a}_3'&=&{1\over 2} (-{\bf a}_1 - {\bf a}_2 + {\bf a}_3). 
+\end{eqnarray}
+
+\begin{eqnarray}
+{\bf a}_1&=&  {\bf a}_1' - {\bf a}_2', \\
+{\bf a}_2&=&  {\bf a}_2' - {\bf a}_3', \\
+{\bf a}_3&=& {\bf a}_1' + {\bf a}_3'.
+\end{eqnarray}
+Centered tetragonal:
+\begin{eqnarray}
+{\bf a}_1'&=&{1\over 2} ({\bf a}_1 - {\bf a}_2 + {\bf a}_3), \\
+{\bf a}_2'&=&{1\over 2} ({\bf a}_1 + {\bf a}_2 + {\bf a}_3), \\
+{\bf a}_3'&=&{1\over 2} (-{\bf a}_1 - {\bf a}_2 + {\bf a}_3). 
+\end{eqnarray}
+
+\begin{eqnarray}
+{\bf a}_1&=&  {\bf a}_1' - {\bf a}_3', \\
+{\bf a}_2&=& -{\bf a}_1' + {\bf a}_2', \\
+{\bf a}_3&=& {\bf a}_2' + {\bf a}_3'.
+\end{eqnarray}
+Base-centered orthorhombic:
+\begin{eqnarray}
+{\bf a}_1'&=&{1\over 2} ({\bf a}_1 + {\bf a}_2), \\
+{\bf a}_2'&=&{1\over 2} (-{\bf a}_1 + {\bf a}_2), \\
+{\bf a}_3'&=&{\bf a}_3. 
+\end{eqnarray}
+
+\begin{eqnarray}
+{\bf a}_1&=&  {\bf a}_1' - {\bf a}_2', \\
+{\bf a}_2&=&  {\bf a}_1' + {\bf a}_2', \\
+{\bf a}_3&=& {\bf a}_3'.
+\end{eqnarray}
+Face-centered orthorhombic:
+\begin{eqnarray}
+{\bf a}_1'&=&{1\over 2} ({\bf a}_1 + {\bf a}_3), \\
+{\bf a}_2'&=&{1\over 2} ({\bf a}_1 + {\bf a}_2), \\
+{\bf a}_3'&=&{1\over 2} ({\bf a}_2 + {\bf a}_3), \\
+\end{eqnarray}
+
+\begin{eqnarray}
+{\bf a}_1&=&  {\bf a}_1' + {\bf a}_2' - {\bf a}_3', \\
+{\bf a}_2&=& -{\bf a}_1' + {\bf a}_2' + {\bf a}_3', \\
+{\bf a}_3&=&  {\bf a}_1' - {\bf a}_2' + {\bf a}_3'.
+\end{eqnarray}
+Body-centered orthorhombic:
+\begin{eqnarray}
+{\bf a}_1'&=&{1\over 2} ({\bf a}_1 + {\bf a}_2 + {\bf a}_3), \\
+{\bf a}_2'&=&{1\over 2} (-{\bf a}_1 + {\bf a}_2 + {\bf a}_3), \\
+{\bf a}_3'&=&{1\over 2} (-{\bf a}_1 - {\bf a}_2 + {\bf a}_3). 
+\end{eqnarray}
+
+\begin{eqnarray}
+{\bf a}_1&=&  {\bf a}_1' - {\bf a}_2', \\
+{\bf a}_2&=&  {\bf a}_2' - {\bf a}_3', \\
+{\bf a}_3&=& {\bf a}_1' + {\bf a}_3'.
+\end{eqnarray}
+Base-centered monoclinic ($b$-unique):
+\begin{eqnarray}
+{\bf a}_1'&=&{1\over 2} ({\bf a}_1 - {\bf a}_2), \\
+{\bf a}_2'&=&{1\over 2} ({\bf a}_1 + {\bf a}_2), \\
+{\bf a}_3'&=&{\bf a}_3. 
+\end{eqnarray}
+
+\begin{eqnarray}
+{\bf a}_1&=&  {\bf a}_1' + {\bf a}_2', \\
+{\bf a}_2&=& -{\bf a}_1' + {\bf a}_2', \\
+{\bf a}_3&=& {\bf a}_3'.
+\end{eqnarray}
+Base-centered monoclinic ($c$-unique):
+\begin{eqnarray}
+{\bf a}_1'&=&{1\over 2} ({\bf a}_1 - {\bf a}_3), \\
+{\bf a}_2'&=&{\bf a}_2, \\
+{\bf a}_3'&=&{1\over 2} ({\bf a}_1 + {\bf a}_3). 
+\end{eqnarray}
+
+\begin{eqnarray}
+{\bf a}_1&=& {\bf a}_1' + {\bf a}_3', \\
+{\bf a}_2&=& {\bf a}_2' \\
+{\bf a}_2&=& -{\bf a}_1' + {\bf a}_3'.
+\end{eqnarray}
+
+
+\section{Bibliography}
+\begin{enumerate}
+
+\item
+J.F. Nye, Physical properties of crystals, Oxford University press, 
+Oxford (1957)
+
+\item
+D.C. Wallace, Thermodynamics of crystals, J. Wiley and Sons, (1972),
+Dover edition (1998).
+
+\end{enumerate}
+
+\end{document}
