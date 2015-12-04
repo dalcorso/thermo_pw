@@ -182,8 +182,10 @@ described at
 the web page: \texttt{http://www.qe-} \texttt{forge.org/gf/project/thermo\_pw/scmcvs/?action=AccessInfo}.
 The CVS version of \texttt{thermo\_pw} works only with the SVN version of \qe. 
 Check also the web page:
-\texttt{http://people.sissa.it/\textasciitilde dalcorso/thermo\_pw\_help.html} if you
-have problems to download the CVS version.
+\texttt{http://people.sissa.it/\textasciitilde dalcorso/thermo\_pw\_help.html} 
+if you have problems to download the CVS version of \texttt{thermo\_pw}
+or if the combination \texttt{thermo\_pw (CVS)} + \texttt{QE (SVN)} is not 
+working.
 
 Getting the CVS version of \thermo, you obtain a directory \texttt{thermo\_pw}
 that should be moved in the main \qe\ directory. Getting one of the
@@ -205,6 +207,9 @@ from the \texttt{thermo\_pw}\ directory, produces the executable
 \thermo\ has been written on a PC with Linux operating system using the
 \texttt{gfortran} compiler with \texttt{openMPI} parallelization. It has
 been run in parallel on a Linux cluster with several hundreds processors.
+It has been tested with \texttt{Intel/15.0} + \texttt{mkl/11.2} +
+\texttt{openMPI} and with \texttt{Intel/13.1} + \texttt{mkl/11.2} +
+\texttt{openMPI/1.6.5}.
 Any other combination of computer/operating system has not been tested, but 
 usually \thermo\ runs on the same systems where \qe\ runs. 
 
@@ -212,10 +217,7 @@ usually \thermo\ runs on the same systems where \qe\ runs.
 
 In order to remove \thermo\ from your \qe\ distribution, just enter in the
 \texttt{thermo\_pw} directory and give the command \texttt{make leave\_qe}.
-Then just remove the \texttt{thermo\_pw} directory. Please be careful, the
-command \texttt{make leave\_qe} can be given only if you have already
-given the command \texttt{make join\_qe} otherwise it might scramble the
-\texttt{Makefiles} of \texttt{QE}.
+Then just remove the \texttt{thermo\_pw} directory. 
 
 \subsection{Running \thermo}
 

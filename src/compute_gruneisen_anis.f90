@@ -78,7 +78,7 @@ REAL(DP), INTENT(INOUT) :: poly_grun(nvar,3*nat)
 REAL(DP), ALLOCATABLE :: frequences(:), x(:,:), f(:)
 REAL(DP) :: overlap
 INTEGER :: imode, jmode, igeo, idata, central_geo
-COMPLEX(DP) :: ZDOTC
+COMPLEX(DP), EXTERNAL :: ZDOTC
 
 ALLOCATE (frequences(ngeo))
 ALLOCATE (x(degree,ngeo))

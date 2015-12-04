@@ -54,7 +54,8 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   LOGICAL, ALLOCATABLE :: high_symmetry(:)
   LOGICAL :: exst
   REAL(DP), PARAMETER :: accuracy=1.d-4
-  COMPLEX(DP) :: d_spink(2,2,48), d_spink1(2,2,48),d_spin_is(2,2,48), zdotc
+  COMPLEX(DP) :: d_spink(2,2,48), d_spink1(2,2,48),d_spin_is(2,2,48)
+  COMPLEX(DP), EXTERNAL :: zdotc
   COMPLEX(DP),ALLOCATABLE :: times(:,:,:)
   REAL(DP) :: dxk(3), dkmod, dkmod_save, k1(3), k2(3), modk1, modk2, ps
   INTEGER, ALLOCATABLE :: rap_et(:,:), code_group_k(:), aux_ind(:)
