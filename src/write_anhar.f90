@@ -21,7 +21,6 @@ USE mp_images,      ONLY : my_image_id, root_image
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
 CHARACTER(LEN=8) :: float_to_char 
-INTEGER :: itemp, iu_therm
 
 IF (my_image_id /= root_image) RETURN
 
@@ -35,38 +34,20 @@ IF (ionode) THEN
 !
 !   here we plot the quantities calculated from the phonon dos
 !
-   iu_therm=2
    filename=TRIM(flanhar)
    IF (pressure /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
-   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
-   WRITE(iu_therm,'("# beta is the volume thermal expansion ")')
-   WRITE(iu_therm,'("#   T (K)     V(T) (a.u.)^3   B (T) (kbar) &
-                      & d B (T) / dP  beta (10^(-6) K^(-1))")' )
 
-   DO itemp = 2, ntemp-1
-      WRITE(iu_therm, '(e12.5,e20.13,2e14.6,e18.8)') temp(itemp), &
-                   vmin_t(itemp), b0_t(itemp), b01_t(itemp), beta_t(itemp)*1.D6
-   END DO
-   CLOSE(iu_therm)
+   CALL write_murn_beta(temp, vmin_t, b0_t, b01_t, beta_t, ntemp, filename)
 !
 !   here auxiliary quantities calculated from the phonon dos
 !
    filename=TRIM(flanhar)//'.aux'
    IF (pressure /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
-   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
-   WRITE(iu_therm,'("# gamma is the average gruneisen parameter ")')
-   WRITE(iu_therm,'("#   T (K)       gamma(T)       C_v ( Ry / cell ) &
-                    &   (C_p - C_v)(T)      (B_S - B_T) (T) (kbar) " )' )
 
-   DO itemp = 2, ntemp-1
-      WRITE(iu_therm, '(5e16.8)') temp(itemp),                  &
-                                  gamma_t(itemp), cv_t(itemp),  &
-                                  cp_t(itemp) - cv_t(itemp),    &
-                                  b0_s(itemp) - b0_t(itemp)
-   END DO
-   CLOSE(iu_therm)
+   CALL write_aux_anharm(temp, gamma_t, cv_t, cp_t, b0_t, b0_s, ntemp, filename)
+
 END IF
 
 RETURN
@@ -88,7 +69,6 @@ USE mp_images,      ONLY : my_image_id, root_image
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
 CHARACTER(LEN=8) :: float_to_char 
-INTEGER :: itemp, iu_therm
 
 IF (my_image_id /= root_image) RETURN
 
@@ -102,39 +82,21 @@ IF (ionode) THEN
 !
 !   here we plot the quantities calculated from the phonon dos
 !
-   iu_therm=2
    filename=TRIM(flanhar)//'_ph'
    IF (pressure /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
-   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
-   WRITE(iu_therm,'("# beta is the volume thermal expansion ")')
-   WRITE(iu_therm,'("#   T (K)     V(T) (a.u.)^3   B (T) (kbar) &
-                      & d B (T) / dP     beta (10^(-6) K^(-1))")' )
 
+   CALL write_murn_beta(temp, vminf_t, b0f_t, b01f_t, betaf_t, ntemp, filename)
 
-   DO itemp = 2, ntemp-1
-      WRITE(iu_therm, '(e12.5,e20.13,2e14.6,e18.8)') temp(itemp), &
-              vminf_t(itemp), b0f_t(itemp), b01f_t(itemp), betaf_t(itemp)*1.D6
-   END DO
-   CLOSE(iu_therm)
 !
 !   here auxiliary quantities calculated from the phonon dos
 !
    filename=TRIM(flanhar)//'.aux_ph'
    IF (pressure /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
-   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
-   WRITE(iu_therm,'("# gamma is the average gruneisen parameter ")')
-   WRITE(iu_therm,'("#   T (K)       gamma(T)       C_p ( Ry / cell ) &
-                    &   (C_p - C_v)(T)      (B_S - B_T) (T) (kbar) " )' )
 
-   DO itemp = 2, ntemp-1
-      WRITE(iu_therm, '(5e16.8)') temp(itemp),               &
-                                  gammaf_t(itemp), cvf_t(itemp), &
-                                  cpf_t(itemp) - cvf_t(itemp),   &
-                                  b0f_s(itemp) - b0f_t(itemp)
-   END DO
-   CLOSE(iu_therm)
+   CALL write_aux_anharm(temp, gammaf_t, cvf_t, cpf_t, b0f_t, b0f_s, &
+                                                          ntemp, filename)
 END IF
 
 RETURN
@@ -255,3 +217,57 @@ USE kinds, ONLY : DP
 
   RETURN
 END SUBROUTINE compute_beta
+
+SUBROUTINE write_murn_beta(temp, vmin, b0, b01, beta, ntemp, filename)
+USE kinds, ONLY : DP
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ntemp
+REAL(DP), INTENT(IN) :: temp(ntemp), vmin(ntemp), b0(ntemp), b01(ntemp), &
+                        beta(ntemp)
+CHARACTER(LEN=*) :: filename
+
+INTEGER :: itemp, iu_therm
+
+iu_therm=2
+OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
+
+WRITE(iu_therm,'("# beta is the volume thermal expansion ")')
+WRITE(iu_therm,'("#   T (K)     V(T) (a.u.)^3   B (T) (kbar) &
+                   & d B (T) / dP  beta (10^(-6) K^(-1))")' )
+
+DO itemp = 2, ntemp-1
+   WRITE(iu_therm, '(e12.5,e20.13,2e14.6,e18.8)') temp(itemp), &
+                vmin(itemp), b0(itemp), b01(itemp), beta(itemp)*1.D6
+END DO
+  
+CLOSE(iu_therm)
+RETURN
+END SUBROUTINE write_murn_beta
+
+SUBROUTINE write_aux_anharm(temp, gamma_t, cv, cp, b0_t, b0_s, ntemp, filename)
+USE kinds, ONLY : DP
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ntemp
+REAL(DP), INTENT(IN) :: temp(ntemp), gamma_t(ntemp), cv(ntemp), cp(ntemp), &
+                  b0_s(ntemp), b0_t(ntemp)
+CHARACTER(LEN=*) :: filename
+
+INTEGER :: itemp, iu_therm
+
+iu_therm=2
+OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
+
+WRITE(iu_therm,'("# gamma is the average gruneisen parameter ")')
+WRITE(iu_therm,'("#   T (K)       gamma(T)       C_p ( Ry / cell ) &
+                 &   (C_p - C_v)(T)      (B_S - B_T) (T) (kbar) " )' )
+
+DO itemp = 2, ntemp-1
+   WRITE(iu_therm, '(5e16.8)') temp(itemp),               &
+                               gamma_t(itemp), cv(itemp), &
+                               cp(itemp) - cv(itemp),   &
+                               b0_s(itemp) - b0_t(itemp)
+END DO
+CLOSE(iu_therm)
+
+RETURN
+END SUBROUTINE write_aux_anharm
