@@ -144,11 +144,11 @@ isothermal elastic constants at the given temperature and at zero pressure.
 From the elastic constants we can calculate the isothermal bulk modulus 
 of the solid at any temperature. 
 Thermal expansions and elastic constants allows the calculation of the thermal
-stresses and using these quantities we can obtain the adiabatic heat
-capacity, elastic constants, and bulk moduli from the corresponding 
-isothermal ones. Finally from the constant strain heat capacity and 
-the thermal stresses we can calculate the anisotropic average Gr\"uneisen 
-parameters.
+stresses and using these quantities we can obtain the heat capacity at
+constant stress, the adiabatic elastic constants and bulk moduli 
+from the corresponding isothermal ones. Finally from the constant strain 
+heat capacity and the thermal stresses we can calculate the anisotropic 
+average Gr\"uneisen parameters.
 
 The strain for which the stress is a given pressure (or stress) at a given
 temperature minimizes the Gibbs free energy at that temperature and
@@ -2357,13 +2357,16 @@ parameters:
 \gamma_{ij} =  {V b_{ij} \over C_\epsilon}
 \end{equation}
 
-\section{Adiabatic quantities}
+\section{Constant stress heat capacity}
 
 The difference between the heat capacity calculated at constant strain 
 and that calculated at constant stress is given by:
 \begin{equation}
 C^\sigma - C^\epsilon = T \sum_{ij} \alpha_{ij} b_{ij}
 \end{equation}
+
+\section{Adiabatic quantities}
+
 Similarly the difference between isothermal and adiabatic
 elastic compliances is given by (Voigt notation):
 \begin{equation}
