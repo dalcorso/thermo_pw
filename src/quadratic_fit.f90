@@ -273,13 +273,14 @@ SUBROUTINE quadratic_fit_t(itemp)
   USE cell_base, ONLY : ibrav
   USE mp_images, ONLY : my_image_id, root_image
   USE thermo_mod, ONLY : celldm_geo, energy_geo, omega_geo
-  USE control_quadratic_energy, ONLY : degree, nvar, coeff_t
+  USE control_quadratic_energy, ONLY : degree, nvar, coeff_t, &
+                                       enthalpy_coeff => coeff 
   USE temperature, ONLY : temp
   USE control_pressure, ONLY : pressure, pressure_kb
   USE thermodynamics, ONLY : ph_free_ener
   USE anharmonic, ONLY : celldm_t
   USE io_global, ONLY : stdout
-  USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_fit_extremum, &
+  USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_two_fit_extremum, &
                                  write_fit_hessian, evaluate_fit_quadratic
   IMPLICIT NONE
   INTEGER :: itemp
@@ -323,8 +324,7 @@ SUBROUTINE quadratic_fit_t(itemp)
      CASE(1,2,3) 
        DO idata=1,ndata
           x(1,idata)=celldm_geo(1,idata)
-          f(idata)=energy_geo(idata) + ph_free_ener(itemp,idata) &
-                                     + pressure * omega_geo(idata)                 
+          f(idata)=ph_free_ener(itemp,idata) 
        ENDDO 
      CASE(4,5,6,7)
         DO idata=1,ndata
@@ -334,16 +334,14 @@ SUBROUTINE quadratic_fit_t(itemp)
            ELSE
               x(2,idata)=celldm_geo(3,idata)
            ENDIF
-           f(idata)=energy_geo(idata) + ph_free_ener(itemp,idata) &
-                                      + pressure * omega_geo(idata)
+           f(idata)=ph_free_ener(itemp,idata) 
         END DO 
      CASE(8,9,91,10,11)
         DO idata=1,ndata
            x(1,idata)=celldm_geo(1,idata)
            x(2,idata)=celldm_geo(2,idata)
            x(3,idata)=celldm_geo(3,idata)
-           f(idata)=energy_geo(idata) + ph_free_ener(itemp,idata) &
-                                      + pressure * omega_geo(idata)
+           f(idata)= ph_free_ener(itemp,idata) 
         ENDDO
      CASE(12,-12,13,-13) 
         DO idata=1,ndata
@@ -361,8 +359,7 @@ SUBROUTINE quadratic_fit_t(itemp)
 !
               x(4,idata)=ACOS(celldm_geo(5,idata))
            ENDIF
-           f(idata)=energy_geo(idata) + ph_free_ener(itemp,idata) &
-                                      + pressure * omega_geo(idata)
+           f(idata)=ph_free_ener(itemp,idata)
         ENDDO
      CASE DEFAULT
         DO idata=1,ndata
@@ -372,8 +369,7 @@ SUBROUTINE quadratic_fit_t(itemp)
            x(4,idata)=ACOS(celldm_geo(4,idata))
            x(5,idata)=ACOS(celldm_geo(5,idata))
            x(6,idata)=ACOS(celldm_geo(6,idata))
-           f(idata)=energy_geo(idata) + ph_free_ener(itemp,idata) &
-                                      + pressure * omega_geo(idata)
+           f(idata)=ph_free_ener(itemp,idata) 
         ENDDO
   END SELECT
   !
@@ -452,7 +448,7 @@ SUBROUTINE quadratic_fit_t(itemp)
      chisq = chisq + (aux - f(idata))**2
   ENDDO
 
-  CALL find_fit_extremum(degree,nvar,x_pos_min,ymin,coeff)
+  CALL find_two_fit_extremum(degree,nvar,x_pos_min,ymin,enthalpy_coeff,coeff)
 
   WRITE(stdout,'(/,5x,"Extremum found at:")')
   WRITE(stdout,'(23x,"x1=",f16.9)') x_pos_min(1)
@@ -528,13 +524,14 @@ SUBROUTINE quadratic_fit_t_ph(itemp)
   USE cell_base, ONLY : ibrav
   USE mp_images, ONLY : my_image_id, root_image
   USE thermo_mod, ONLY : celldm_geo, energy_geo, omega_geo
-  USE control_quadratic_energy, ONLY : degree, nvar, coeff_t
+  USE control_quadratic_energy, ONLY : degree, nvar, coeff_t, &
+                         enthalpy_coeff => coeff
   USE temperature, ONLY : temp
   USE control_pressure, ONLY : pressure, pressure_kb
   USE ph_freq_thermodynamics, ONLY : phf_free_ener
   USE ph_freq_anharmonic, ONLY : celldmf_t
   USE io_global, ONLY : stdout
-  USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_fit_extremum, &
+  USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_two_fit_extremum, &
                                  write_fit_hessian, evaluate_fit_quadratic
   IMPLICIT NONE
   INTEGER :: itemp
@@ -578,8 +575,7 @@ SUBROUTINE quadratic_fit_t_ph(itemp)
      CASE(1,2,3) 
        DO idata=1,ndata
           x(1,idata)=celldm_geo(1,idata)
-          f(idata)=energy_geo(idata) + phf_free_ener(itemp,idata) &
-                                     + pressure * omega_geo(idata)
+          f(idata)=phf_free_ener(itemp,idata) 
        ENDDO 
      CASE(4,5,6,7)
         DO idata=1,ndata
@@ -589,16 +585,14 @@ SUBROUTINE quadratic_fit_t_ph(itemp)
            ELSE
               x(2,idata)=celldm_geo(3,idata)
            ENDIF
-           f(idata)=energy_geo(idata) + phf_free_ener(itemp,idata) &
-                                      + pressure * omega_geo(idata)
+           f(idata)=phf_free_ener(itemp,idata) 
         END DO 
      CASE(8,9,91,10,11)
         DO idata=1,ndata
            x(1,idata)=celldm_geo(1,idata)
            x(2,idata)=celldm_geo(2,idata)
            x(3,idata)=celldm_geo(3,idata)
-           f(idata)=energy_geo(idata) + phf_free_ener(itemp,idata) &
-                                      + pressure * omega_geo(idata)
+           f(idata)= phf_free_ener(itemp,idata) 
         ENDDO
      CASE(12,-12,13,-13) 
         DO idata=1,ndata
@@ -616,8 +610,7 @@ SUBROUTINE quadratic_fit_t_ph(itemp)
 !
               x(4,idata)=ACOS(celldm_geo(5,idata))
            ENDIF
-           f(idata)=energy_geo(idata) + phf_free_ener(itemp,idata) &
-                                      + pressure * omega_geo(idata)
+           f(idata)= phf_free_ener(itemp,idata) 
         ENDDO
      CASE DEFAULT
         DO idata=1,ndata
@@ -707,7 +700,7 @@ SUBROUTINE quadratic_fit_t_ph(itemp)
      chisq = chisq + (aux - f(idata))**2
   ENDDO
 
-  CALL find_fit_extremum(degree,nvar,x_pos_min,ymin,coeff)
+  CALL find_two_fit_extremum(degree,nvar,x_pos_min,ymin,enthalpy_coeff,coeff)
 
   WRITE(stdout,'(/,5x,"Extremum found at:")')
   WRITE(stdout,'(23x,"x1=",f16.9)') x_pos_min(1)
