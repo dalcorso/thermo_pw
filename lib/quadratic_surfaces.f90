@@ -36,6 +36,9 @@ MODULE quadratic_surfaces
 !   find_fit_extremum receives as input the coefficients of the quadratic 
 !   functions and finds the position of the extremum
 !
+!   find_two_fit_extremum receives as input the coefficients of two quadratic 
+!   functions and finds the position of the extremum of their sum.
+!
 !   two additional routines are auxiliary.
 !   evaluate_fit_quadratic, given the coordinates of a point, and the
 !   coefficients of the quadratic function, evaluates the quadratic function 
@@ -53,6 +56,7 @@ MODULE quadratic_surfaces
 
   PUBLIC :: evaluate_fit_quadratic, write_fit_hessian, &
             fit_multi_quadratic, find_fit_extremum, linsolvx, &
+            find_two_fit_extremum, &
             evaluate_fit_grad_quadratic, polifit, write_poli
 
 CONTAINS
@@ -253,6 +257,22 @@ CALL evaluate_fit_quadratic(degree,nvar,x,f,coeff)
 
 RETURN
 END SUBROUTINE find_fit_extremum
+
+SUBROUTINE find_two_fit_extremum(degree,nvar,x,f,coeff,coeff1)
+USE kinds, ONLY : DP
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: degree, nvar
+REAL(DP), INTENT(IN) :: coeff(nvar), coeff1(nvar)
+REAL(DP), INTENT(OUT) :: x(degree), f
+
+REAL(DP) :: coeff2(nvar)
+
+coeff2(:) = coeff(:) + coeff1(:)
+
+CALL find_fit_extremum(degree,nvar,x,f,coeff2)
+
+RETURN
+END SUBROUTINE find_two_fit_extremum
 
 SUBROUTINE evaluate_fit_quadratic(degree,nvar,x,f,coeff)
 
