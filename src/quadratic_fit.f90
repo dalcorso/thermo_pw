@@ -620,8 +620,7 @@ SUBROUTINE quadratic_fit_t_ph(itemp)
            x(4,idata)=ACOS(celldm_geo(4,idata))
            x(5,idata)=ACOS(celldm_geo(5,idata))
            x(6,idata)=ACOS(celldm_geo(6,idata))
-           f(idata)=energy_geo(idata) + phf_free_ener(itemp,idata) &
-                                      + pressure * omega_geo(idata)
+           f(idata)= phf_free_ener(itemp,idata) 
         ENDDO
   END SELECT
   !
