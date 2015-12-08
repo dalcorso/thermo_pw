@@ -24,56 +24,11 @@ IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
 INTEGER :: itemp, iu_therm
 REAL(DP) :: compute_omega_geo
-REAL(DP) :: fact1, fact2, deriv1, deriv2
 CHARACTER(LEN=8) :: float_to_char
 
 IF (my_image_id /= root_image) RETURN
 
-alpha_anis_t=0.0_DP
-SELECT CASE (ibrav_save) 
-   CASE(1,2,3) 
-      DO itemp = 2, ntemp-1
-         alpha_anis_t(1,itemp) = (celldm_t(1,itemp+1)-celldm_t(1,itemp-1)) / &
-                         (temp(itemp+1)-temp(itemp-1)) / celldm_t(1,itemp)
-      END DO
-   CASE(4,6,7)
-      DO itemp = 2, ntemp-1
-         alpha_anis_t(1,itemp) = (celldm_t(1,itemp+1)-celldm_t(1,itemp-1)) / &
-                         (temp(itemp+1)-temp(itemp-1)) / celldm_t(1,itemp)
-         alpha_anis_t(2,itemp) = ( celldm_t(3,itemp+1)*celldm_t(1,itemp+1)-   &
-                                   celldm_t(3,itemp-1)*celldm_t(1,itemp-1) )/ &
-                         (temp(itemp+1)-temp(itemp-1))/(celldm_t(3,itemp)*  &
-                          celldm_t(1,itemp)) 
-      END DO
-   CASE(5)
-      DO itemp = 2, ntemp-1
-         fact1 = 2.0_DP * ( 1.0_DP - celldm_t(4,itemp) )
-         fact2 = 1.0_DP + 2.0_DP * celldm_t(4,itemp)
-         deriv1 = ( celldm_t(1,itemp+1) - celldm_t(1,itemp-1) )/      &
-                                     ( temp(itemp+1) - temp(itemp-1) )
-         deriv2 = ( celldm_t(4,itemp+1) - celldm_t(4,itemp-1)) /      &
-                                     ( temp(itemp+1) - temp(itemp-1) )
-         alpha_anis_t(1,itemp) = deriv1 / celldm_t(1, itemp) - deriv2 / fact1 
-         alpha_anis_t(2,itemp) = deriv1 / celldm_t(2, itemp) + deriv2 / fact2
-      END DO
-   CASE (8,9,10,11)
-      DO itemp = 2, ntemp-1
-         alpha_anis_t(1,itemp) = (celldm_t(1,itemp+1)-celldm_t(1,itemp-1)) / &
-                         (temp(itemp+1)-temp(itemp-1)) / celldm_t(1,itemp)
-         alpha_anis_t(2,itemp) = ( celldm_t(2,itemp+1)*celldm_t(1,itemp+1)-   &
-                                   celldm_t(2,itemp-1)*celldm_t(1,itemp-1) )/ &
-                         (temp(itemp+1)-temp(itemp-1))/(celldm_t(2,itemp)*  &
-                          celldm_t(1,itemp)) 
-         alpha_anis_t(3,itemp) = ( celldm_t(3,itemp+1)*celldm_t(1,itemp+1)-   &
-                                   celldm_t(3,itemp-1)*celldm_t(1,itemp-1) )/ &
-                         (temp(itemp+1)-temp(itemp-1))/(celldm_t(3,itemp)*  &
-                          celldm_t(1,itemp)) 
-      END DO
-   CASE DEFAULT
-!
-!   In this case do nothing. The thermal expansion tensor is not written later
-!
-END SELECT
+CALL compute_alpha_anis(celldm_t, alpha_anis_t, temp, ntemp, ibrav_save)
 !
 !  compute the volume as a function of temperature
 !
@@ -128,71 +83,8 @@ IF (ionode) THEN
    IF (pressure /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 
-   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
-   IF (ibrav_save==1 .OR. ibrav_save==2 .OR. ibrav_save==3 ) THEN
-      WRITE(iu_therm,'("#   T (K)      celldm(1)      alpha_xx(x10^6)")' )
-      DO itemp = 1, ntemp-1
-         WRITE(iu_therm, '(e12.5,4e20.9)') temp(itemp), celldm_t(1,itemp), &
-                                               alpha_anis_t(1,itemp)*1.D6
-      END DO
-   ELSEIF (ibrav_save==4 .OR. ibrav_save==6 .OR. ibrav_save==7 ) THEN
-      WRITE(iu_therm,'("#   T (K)   celldm(1)   celldm(3)    alpha_xx(x10^6)   alpha_zz (x10^6")' )
-      DO itemp = 1, ntemp-1
-         WRITE(iu_therm, '(e12.5,4e20.9)') temp(itemp), celldm_t(1,itemp), &
-                                                        celldm_t(3,itemp), &
-                                               alpha_anis_t(1,itemp)*1.D6, &
-                                               alpha_anis_t(2,itemp)*1.D6
-      END DO
-   ELSEIF ( ibrav_save==5 ) THEN
-      WRITE(iu_therm,'("#   T (K)   celldm(1)   celldm(4)    alpha_xx(x10^6)   alpha_zz (x10^6")' )
-      DO itemp = 1, ntemp
-         WRITE(iu_therm, '(e12.5,4e20.9)') temp(itemp), celldm_t(1,itemp), &
-                                                        celldm_t(4,itemp), &
-                                               alpha_anis_t(1,itemp)*1.D6, &
-                                               alpha_anis_t(2,itemp)*1.D6
-      END DO
-   ELSEIF (ibrav_save==8 .OR. ibrav_save==9 .OR. ibrav_save==10 .OR. ibrav_save==11) THEN
-      WRITE(iu_therm,'("#   T (K)       celldm(1)        celldm(2)        celldm(3)")' )
-      DO itemp = 1, ntemp
-         WRITE(iu_therm, '(e12.5,3e20.9)') temp(itemp), celldm_t(1,itemp), &
-                                                        celldm_t(2,itemp), &
-                                                        celldm_t(3,itemp)
-      END DO
-   ELSEIF (ibrav_save==12 .OR. ibrav_save==13) THEN
-      WRITE(iu_therm,'("#   T (K)       celldm(1)         celldm(2)        celldm(3)        celldm(4)")' )
-      DO itemp = 1, ntemp
-         WRITE(iu_therm, '(e12.5,4e17.9)') temp(itemp), celldm_t(1,itemp), &
-                                                        celldm_t(2,itemp), &
-                                                        celldm_t(3,itemp), &
-                                                        celldm_t(4,itemp)
-      END DO
-   ELSEIF (ibrav_save==-12 .OR. ibrav_save==-13) THEN
-      WRITE(iu_therm,'("#   T (K)       celldm(1)         celldm(2)        celldm(3)        celldm(5)")' )
-      DO itemp = 1, ntemp
-         WRITE(iu_therm, '(e12.5,4e17.9)') temp(itemp), celldm_t(1,itemp), &
-                                                        celldm_t(2,itemp), &
-                                                        celldm_t(3,itemp), &
-                                                        celldm_t(5,itemp)
-      END DO
-   ELSEIF (ibrav_save==14) THEN
-      WRITE(iu_therm,'("#   T (K)       celldm(1)         celldm(2)        &
-                  &celldm(3)        celldm(4)        celldm(5)        celldm(6)")' )
-      DO itemp = 1, ntemp
-         WRITE(iu_therm, '(e12.5,6e15.7)') temp(itemp), celldm_t(1,itemp), &
-                                                        celldm_t(2,itemp), &
-                                                        celldm_t(3,itemp), &
-                                                        celldm_t(4,itemp), &
-                                                        celldm_t(5,itemp), &
-                                                        celldm_t(6,itemp)
-      END DO
-   ELSE IF (ibrav_save==0) THEN
-!
-!  In this case we write nothing but do not stop
-!
-   ELSE
-      CALL errore('write_anhar_anis','ibrav not programmed',1)
-   END IF
-   CLOSE(iu_therm)
+   CALL write_alpha_anis(ibrav_save, celldm_t, alpha_anis_t, temp, ntemp, filename )
+
 END IF
 
 RETURN
@@ -220,56 +112,11 @@ IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
 INTEGER :: itemp, iu_therm
 REAL(DP) :: compute_omega_geo
-REAL(DP) :: fact1, fact2, deriv1, deriv2
 CHARACTER(LEN=8) :: float_to_char
 
 IF (my_image_id /= root_image) RETURN
 
-alphaf_anis_t=0.0_DP
-SELECT CASE (ibrav_save) 
-   CASE(1,2,3) 
-      DO itemp = 2, ntemp-1
-         alphaf_anis_t(1,itemp)=(celldmf_t(1,itemp+1)-celldmf_t(1,itemp-1)) / &
-                         (temp(itemp+1)-temp(itemp-1)) / celldmf_t(1,itemp)
-      END DO
-   CASE(4,6,7)
-      DO itemp = 2, ntemp-1
-         alphaf_anis_t(1,itemp)=(celldmf_t(1,itemp+1)-celldmf_t(1,itemp-1)) / &
-                         (temp(itemp+1)-temp(itemp-1)) / celldmf_t(1,itemp)
-         alphaf_anis_t(2,itemp)=( celldmf_t(3,itemp+1)*celldmf_t(1,itemp+1)-   &
-                                celldmf_t(3,itemp-1)*celldmf_t(1,itemp-1) )/ &
-                         (temp(itemp+1)-temp(itemp-1))/(celldmf_t(3,itemp)*  &
-                          celldmf_t(1,itemp)) 
-      END DO
-   CASE(5)
-      DO itemp = 2, ntemp-1
-         fact1 = 2.0_DP * ( 1.0_DP - celldmf_t(4,itemp) )
-         fact2 = 1.0_DP + 2.0_DP * celldmf_t(4,itemp)
-         deriv1 = ( celldmf_t(1,itemp+1) - celldmf_t(1,itemp-1) )/      &
-                                     ( temp(itemp+1) - temp(itemp-1) )
-         deriv2 = ( celldmf_t(4,itemp+1) - celldmf_t(4,itemp-1)) /      &
-                                     ( temp(itemp+1) - temp(itemp-1) )
-         alphaf_anis_t(1,itemp) = deriv1 / celldmf_t(1, itemp) - deriv2 / fact1 
-         alphaf_anis_t(2,itemp) = deriv1 / celldmf_t(2, itemp) + deriv2 / fact2
-      END DO
-   CASE (8,9,10,11)
-      DO itemp = 2, ntemp-1
-         alphaf_anis_t(1,itemp)=(celldmf_t(1,itemp+1)-celldmf_t(1,itemp-1)) / &
-                         (temp(itemp+1)-temp(itemp-1)) / celldmf_t(1,itemp)
-         alphaf_anis_t(2,itemp)=(celldmf_t(2,itemp+1)*celldmf_t(1,itemp+1)-   &
-                                celldmf_t(2,itemp-1)*celldmf_t(1,itemp-1) )/ &
-                         (temp(itemp+1)-temp(itemp-1))/(celldmf_t(2,itemp)*  &
-                          celldmf_t(1,itemp)) 
-         alphaf_anis_t(3,itemp)=(celldmf_t(3,itemp+1)*celldmf_t(1,itemp+1)-   &
-                                 celldmf_t(3,itemp-1)*celldmf_t(1,itemp-1) )/ &
-                         (temp(itemp+1)-temp(itemp-1))/(celldmf_t(3,itemp)*  &
-                          celldmf_t(1,itemp)) 
-      END DO
-   CASE DEFAULT
-!
-!   In this case do nothing. The thermal expansion tensor is not written later
-!
-END SELECT
+CALL compute_alpha_anis(celldmf_t, alphaf_anis_t, temp, ntemp, ibrav_save)
 !
 !  compute the volume as a function of temperature
 !
@@ -325,72 +172,10 @@ IF (ionode) THEN
    filename=TRIM(flanhar)//'.celldm_ph'
    IF (pressure /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
-   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
-   IF (ibrav_save==1 .OR. ibrav_save==2 .OR. ibrav_save==3 ) THEN
-      WRITE(iu_therm,'("#   T (K)      celldm(1)      alpha_xx(x10^6)")' )
-      DO itemp = 1, ntemp-1
-         WRITE(iu_therm, '(e12.5,4e20.9)') temp(itemp), celldmf_t(1,itemp), &
-                                               alphaf_anis_t(1,itemp)*1.D6
-      END DO
-   ELSEIF (ibrav_save==4 .OR. ibrav_save==6 .OR. ibrav_save==7 ) THEN
-      WRITE(iu_therm,'("#   T (K)   celldm(1)   celldm(3)    alpha_xx(x10^6)   alpha_zz (x10^6")' )
-      DO itemp = 1, ntemp-1
-         WRITE(iu_therm, '(e12.5,4e20.9)') temp(itemp), celldmf_t(1,itemp), &
-                                                        celldmf_t(3,itemp), &
-                                            alphaf_anis_t(1,itemp)*1.D6, &
-                                            alphaf_anis_t(2,itemp)*1.D6
-      END DO
-   ELSEIF ( ibrav_save==5 ) THEN
-      WRITE(iu_therm,'("#   T (K)   celldm(1)   celldm(4)    alpha_xx(x10^6)   alpha_zz (x10^6")' )
-      DO itemp = 1, ntemp
-         WRITE(iu_therm, '(e12.5,4e20.9)') temp(itemp), celldmf_t(1,itemp), &
-                                                        celldmf_t(4,itemp), &
-                                             alphaf_anis_t(1,itemp)*1.D6, &
-                                             alphaf_anis_t(2,itemp)*1.D6
-      END DO
-   ELSEIF (ibrav_save==8 .OR. ibrav_save==9 .OR. ibrav_save==10 .OR. ibrav_save==11) THEN
-      WRITE(iu_therm,'("#   T (K)       celldm(1)        celldm(2)        celldm(3)")' )
-      DO itemp = 1, ntemp
-         WRITE(iu_therm, '(e12.5,3e20.9)') temp(itemp), celldmf_t(1,itemp), &
-                                                        celldmf_t(2,itemp), &
-                                                        celldmf_t(3,itemp)
-      END DO
-   ELSEIF (ibrav_save==12 .OR. ibrav_save==13) THEN
-      WRITE(iu_therm,'("#   T (K)       celldm(1)         celldm(2)        celldm(3)        celldm(4)")' )
-      DO itemp = 1, ntemp
-         WRITE(iu_therm, '(e12.5,4e17.9)') temp(itemp), celldmf_t(1,itemp), &
-                                                        celldmf_t(2,itemp), &
-                                                        celldmf_t(3,itemp), &
-                                                        celldmf_t(4,itemp)
-      END DO
-   ELSEIF (ibrav_save==-12 .OR. ibrav_save==-13) THEN
-      WRITE(iu_therm,'("#   T (K)       celldm(1)         celldm(2)        celldm(3)        celldm(5)")' )
-      DO itemp = 1, ntemp
-         WRITE(iu_therm, '(e12.5,4e17.9)') temp(itemp), celldmf_t(1,itemp), &
-                                                        celldmf_t(2,itemp), &
-                                                        celldmf_t(3,itemp), &
-                                                        celldmf_t(5,itemp)
-      END DO
-   ELSEIF (ibrav_save==14) THEN
-      WRITE(iu_therm,'("#   T (K)       celldm(1)         celldm(2)        &
-                  &celldm(3)        celldm(4)        celldm(5)        celldm(6)")' )
-      DO itemp = 1, ntemp
-         WRITE(iu_therm, '(e12.5,6e15.7)') temp(itemp), celldmf_t(1,itemp), &
-                                                        celldmf_t(2,itemp), &
-                                                        celldmf_t(3,itemp), &
-                                                        celldmf_t(4,itemp), &
-                                                        celldmf_t(5,itemp), &
-                                                        celldmf_t(6,itemp)
-      END DO
-   ELSE IF (ibrav_save==0) THEN
-!
-!  In this case we write nothing but do not stop
-!
-   ELSE
-      CALL errore('write_ph_freq_anhar_anis','ibrav not programmed',1)
-   END IF
-   CLOSE(iu_therm)
-END IF
+
+   CALL write_alpha_anis(ibrav_save, celldmf_t, alphaf_anis_t, temp, ntemp, filename )
+
+ENDIF
 
 RETURN
 END SUBROUTINE write_ph_freq_anhar_anis
@@ -575,10 +360,7 @@ IF (ionode) THEN
    filename=TRIM(flanhar)//'.aux_grun'
    IF (pressure /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
-   iu_therm=2
-   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
-   CALL write_alpha_anis(ibrav, celldmf_t, alpha_an_g, temp, ntemp, iu_therm )
-   CLOSE(iu_therm)
+   CALL write_alpha_anis(ibrav, celldmf_t, alpha_an_g, temp, ntemp, filename )
 END IF
 done_grun=.TRUE.
 
@@ -593,13 +375,18 @@ DEALLOCATE(x)
 RETURN
 END SUBROUTINE write_grun_anharmonic_anis
 
-SUBROUTINE write_alpha_anis(ibrav, celldmf_t, alpha_t, temp, ntemp, iu_therm)
+SUBROUTINE write_alpha_anis(ibrav, celldmf_t, alpha_t, temp, ntemp, filename)
 USE kinds, ONLY : DP
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: ibrav, ntemp, iu_therm
+INTEGER, INTENT(IN) :: ibrav, ntemp
 REAL(DP), INTENT(IN) :: celldmf_t(6,ntemp), alpha_t(6,ntemp), &
                         temp(ntemp)
-INTEGER :: itemp
+CHARACTER(LEN=*), INTENT(IN) :: filename
+INTEGER :: itemp, iu_therm
+
+iu_therm=2
+
+OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
 
 IF (ibrav==1 .OR. ibrav==2 .OR. ibrav==3 ) THEN
    WRITE(iu_therm,'("#   T (K)      celldm(1)      alpha_xx(x10^6)")' )
@@ -669,5 +456,72 @@ ELSE
    CALL errore('write_alpha_anis','ibrav not programmed',1)
 END IF
 
+CLOSE(iu_therm)
+
 RETURN
 END SUBROUTINE write_alpha_anis
+
+SUBROUTINE compute_alpha_anis(celldm_t, alpha_anis_t, temp, ntemp, ibrav)
+
+USE kinds, ONLY : DP
+
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ibrav, ntemp
+REAL(DP), INTENT(IN) :: celldm_t(6,ntemp), temp(ntemp)
+REAL(DP), INTENT(INOUT) :: alpha_anis_t(6,ntemp)
+
+INTEGER :: itemp
+REAL(DP) :: fact1, fact2, deriv1, deriv2
+
+   alpha_anis_t=0.0_DP
+   SELECT CASE (ibrav) 
+      CASE(1,2,3) 
+         DO itemp = 2, ntemp-1
+            alpha_anis_t(1,itemp) = (celldm_t(1,itemp+1)-celldm_t(1,itemp-1)) / &
+                            (temp(itemp+1)-temp(itemp-1)) / celldm_t(1,itemp)
+            alpha_anis_t(2,itemp) = alpha_anis_t(1,itemp)
+            alpha_anis_t(3,itemp) = alpha_anis_t(1,itemp)
+         END DO
+      CASE(4,6,7)
+          DO itemp = 2, ntemp-1
+             alpha_anis_t(1,itemp) = (celldm_t(1,itemp+1)-celldm_t(1,itemp-1)) / &
+                             (temp(itemp+1)-temp(itemp-1)) / celldm_t(1,itemp)
+             alpha_anis_t(2,itemp) = alpha_anis_t(1,itemp)
+             alpha_anis_t(3,itemp) = ( celldm_t(3,itemp+1)*celldm_t(1,itemp+1)-   &
+                                   celldm_t(3,itemp-1)*celldm_t(1,itemp-1) )/ &
+                            (temp(itemp+1)-temp(itemp-1))/(celldm_t(3,itemp)*  &
+                             celldm_t(1,itemp)) 
+         END DO
+      CASE(5)
+         DO itemp = 2, ntemp-1
+            fact1 = 2.0_DP * ( 1.0_DP - celldm_t(4,itemp) )
+            fact2 = 1.0_DP + 2.0_DP * celldm_t(4,itemp)
+            deriv1 = ( celldm_t(1,itemp+1) - celldm_t(1,itemp-1) )/      &
+                                        ( temp(itemp+1) - temp(itemp-1) )
+            deriv2 = ( celldm_t(4,itemp+1) - celldm_t(4,itemp-1)) /      &
+                                        ( temp(itemp+1) - temp(itemp-1) )
+            alpha_anis_t(1,itemp) = deriv1 / celldm_t(1, itemp) - deriv2 / fact1 
+            alpha_anis_t(2,itemp) = alpha_anis_t(1,itemp)
+            alpha_anis_t(3,itemp) = deriv1 / celldm_t(2, itemp) + deriv2 / fact2
+         END DO
+      CASE (8,9,10,11)
+         DO itemp = 2, ntemp-1
+            alpha_anis_t(1,itemp) = (celldm_t(1,itemp+1)-celldm_t(1,itemp-1)) / &
+                            (temp(itemp+1)-temp(itemp-1)) / celldm_t(1,itemp)
+            alpha_anis_t(2,itemp) = ( celldm_t(2,itemp+1)*celldm_t(1,itemp+1)-   &
+                                   celldm_t(2,itemp-1)*celldm_t(1,itemp-1) )/ &
+                            (temp(itemp+1)-temp(itemp-1))/(celldm_t(2,itemp)*  &
+                             celldm_t(1,itemp)) 
+            alpha_anis_t(3,itemp) = ( celldm_t(3,itemp+1)*celldm_t(1,itemp+1)-   &
+                                      celldm_t(3,itemp-1)*celldm_t(1,itemp-1) )/ &
+                            (temp(itemp+1)-temp(itemp-1))/(celldm_t(3,itemp)*  &
+                             celldm_t(1,itemp)) 
+         END DO
+      CASE DEFAULT
+   !
+   !   In this case do nothing. The thermal expansion tensor is not written later
+   !
+   END SELECT
+
+RETURN
+END SUBROUTINE compute_alpha_anis
