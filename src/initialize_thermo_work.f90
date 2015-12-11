@@ -349,6 +349,8 @@ INTEGER, INTENT(IN) :: ibrav
 INTEGER, INTENT(INOUT) :: ngeo(6), fact_ngeo(6)
 INTEGER :: ngeo_aux(6), fact_ngeo_aux(6)
 
+INTEGER :: i
+
 ngeo_aux=1
 ngeo_aux(1)=ngeo(1)
 fact_ngeo_aux=1
@@ -358,27 +360,67 @@ IF (.NOT.lmurn) THEN
    SELECT CASE (ibrav)
       CASE(1,2,3)
       CASE (4,6,7)
-         ngeo_aux(3)=ngeo(3)
+         IF (ngeo(3) /= 0) THEN
+             ngeo_aux(3)=ngeo(3)
+         ELSE
+             ngeo_aux(3)=5
+         ENDIF
          fact_ngeo_aux(3)=fact_ngeo(3)
       CASE (5)
-         ngeo_aux(4)=ngeo(4)
+         IF (ngeo(4) /= 0) THEN
+            ngeo_aux(4)=ngeo(4)
+         ELSE
+            ngeo_aux(4)=ngeo(4)
+         ENDIF
          fact_ngeo_aux(4)=fact_ngeo(4)
       CASE(8,9,-9,91,10,11)
-         ngeo_aux(2)=ngeo(2)
-         ngeo_aux(3)=ngeo(3)
+         IF (ngeo(2) /= 0) THEN
+            ngeo_aux(2)=ngeo(2)
+         ELSE
+            ngeo_aux(2)=5
+         ENDIF
+         IF (ngeo(3) /= 0) THEN
+            ngeo_aux(3)=ngeo(3)
+         ELSE
+            ngeo_aux(3)=5
+         ENDIF
          fact_ngeo_aux(2)=fact_ngeo(2)
          fact_ngeo_aux(3)=fact_ngeo(3)
       CASE(12,13)
-         ngeo_aux(2)=ngeo(2)
-         ngeo_aux(3)=ngeo(3)
-         ngeo_aux(4)=ngeo(4)
+         IF (ngeo(2) /= 0) THEN
+            ngeo_aux(2)=ngeo(2)
+         ELSE
+            ngeo_aux(2)=5
+         ENDIF
+         IF (ngeo(3) /= 0) THEN
+            ngeo_aux(3)=ngeo(3)
+         ELSE
+            ngeo_aux(3)=5
+         ENDIF
+         IF (ngeo(4) /= 0) THEN
+            ngeo_aux(4)=ngeo(4)
+         ELSE
+            ngeo_aux(4)=5
+         ENDIF
          fact_ngeo_aux(2)=fact_ngeo(2)
          fact_ngeo_aux(3)=fact_ngeo(3)
          fact_ngeo_aux(4)=fact_ngeo(4)
       CASE(-12,-13)   
-         ngeo_aux(2)=ngeo(2)
-         ngeo_aux(3)=ngeo(3)
-         ngeo_aux(5)=ngeo(5)
+         IF (ngeo(2) /= 0) THEN
+            ngeo_aux(2)=ngeo(2)
+         ELSE
+            ngeo_aux(2)=5
+         ENDIF
+         IF (ngeo(3) /= 0) THEN
+            ngeo_aux(3)=ngeo(3)
+         ELSE
+            ngeo_aux(3)=5
+         ENDIF
+         IF (ngeo(5) /= 0) THEN
+            ngeo_aux(5)=ngeo(5)
+         ELSE
+            ngeo_aux(5)=5
+         ENDIF
          fact_ngeo_aux(2)=fact_ngeo(2)
          fact_ngeo_aux(3)=fact_ngeo(3)
          fact_ngeo_aux(5)=fact_ngeo(5)
@@ -387,6 +429,9 @@ IF (.NOT.lmurn) THEN
 !  If the Bravais lattice is unkown, 14 or 0 we let the user choose
 !
          ngeo_aux=ngeo
+         DO i=2,6
+            IF (ngeo_aux(i)==0) ngeo_aux(i)=5
+         ENDDO
          fact_ngeo_aux=fact_ngeo
    END SELECT
 END IF
