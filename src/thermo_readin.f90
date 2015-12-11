@@ -14,7 +14,8 @@ SUBROUTINE thermo_readin()
   !  and written and the variables of the calculations.
   !
   USE kinds,                ONLY : DP
-  USE thermo_mod,           ONLY : what, ngeo, step_ngeo, reduced_grid
+  USE thermo_mod,           ONLY : what, ngeo, step_ngeo, reduced_grid, &
+                                   fact_ngeo
   USE control_thermo,       ONLY : outdir_thermo, after_disp, with_eigen,  &
                                    do_scf_relax
   USE data_files,           ONLY : flevdat, flfrc, flfrq, fldos, fltherm,  &
@@ -96,6 +97,7 @@ SUBROUTINE thermo_readin()
                             flfrc, flfrq, fldos, fltherm,   &
                             flanhar, filband, flkeconv,     &
                             flnkconv,                       &
+                            fact_ngeo,                      &
                             step_ngeo,                      &
                             nq1_d, nq2_d, nq3_d,            &
                             tmin, tmax, deltat, ntemp,      &
@@ -164,6 +166,7 @@ SUBROUTINE thermo_readin()
 
   what=' '
   ngeo=0
+  fact_ngeo=1
   step_ngeo(1) = 0.05_DP
   step_ngeo(2) = 0.02_DP
   step_ngeo(3) = 0.02_DP
@@ -579,7 +582,7 @@ SUBROUTINE thermo_readin()
      ENDIF
   ENDIF
      
-  CALL clean_ngeo(ngeo,ibrav)
+  CALL clean_ngeo(ngeo,fact_ngeo,ibrav)
      
   DEALLOCATE(input)
   DEALLOCATE(iun_image)

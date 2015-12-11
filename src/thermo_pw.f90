@@ -114,7 +114,7 @@ PROGRAM thermo_pw
   USE control_mur,      ONLY : vmin, b0, b01, emin, celldm0, lmurn
   USE thermo_mod,       ONLY : what, ngeo, omega_geo, energy_geo, &
                                tot_ngeo, reduced_grid, ibrav_geo, celldm_geo, &
-                               central_geo, density
+                               central_geo, density, no_ph
   USE cell_base,        ONLY : ibrav_ => ibrav, celldm_ => celldm
   USE control_2d_bands, ONLY : only_bands_plot
   USE ph_restart,       ONLY : destroy_status_run
@@ -409,6 +409,7 @@ PROGRAM thermo_pw
      always_run=.TRUE.
      CALL start_clock( 'PHONON' )
      DO igeom=1,tot_ngeo
+        IF (no_ph(igeom)) CYCLE
         write(stdout,'(/,5x,40("%"))') 
         write(stdout,'(5x,"Computing geometry ", i5)') igeom
         write(stdout,'(5x,40("%"),/)') 

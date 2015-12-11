@@ -272,7 +272,7 @@ SUBROUTINE quadratic_fit_t(itemp)
   USE kinds, ONLY : DP
   USE cell_base, ONLY : ibrav
   USE mp_images, ONLY : my_image_id, root_image
-  USE thermo_mod, ONLY : celldm_geo, energy_geo, omega_geo
+  USE thermo_mod, ONLY : celldm_geo, energy_geo, omega_geo, no_ph
   USE control_quadratic_energy, ONLY : degree, nvar, coeff_t, &
                                        enthalpy_coeff => coeff 
   USE temperature, ONLY : temp
@@ -284,11 +284,11 @@ SUBROUTINE quadratic_fit_t(itemp)
                                  write_fit_hessian, evaluate_fit_quadratic
   IMPLICIT NONE
   INTEGER :: itemp
-  INTEGER :: ndata
+  INTEGER :: ndata, ndatatot
   REAL(DP), ALLOCATABLE :: x(:,:), y(:), f(:), coeff(:), x_pos_min(:)
   REAL(DP) :: ymin, chisq, aux
   INTEGER :: idata
-  INTEGER :: compute_nwork
+  INTEGER :: compute_nwork, compute_nwork_ph
   !
   ! Only the first image does the calculation
   !
@@ -305,7 +305,8 @@ SUBROUTINE quadratic_fit_t(itemp)
   !  5              21, 
   !  6              28
   !
-  ndata = compute_nwork()
+  ndatatot= compute_nwork()
+  ndata = compute_nwork_ph(no_ph,ndatatot)
 
   WRITE(stdout,'(5x, "Phdos Free energy, at T= ", f12.6)') temp(itemp)
   WRITE(stdout,'(5x, "Pressure is :",f12.6)') pressure_kb
@@ -320,56 +321,72 @@ SUBROUTINE quadratic_fit_t(itemp)
   ALLOCATE(f(ndata))
   ALLOCATE(coeff(nvar))
 
+  ndata=0
   SELECT CASE (ibrav)
      CASE(1,2,3) 
-       DO idata=1,ndata
-          x(1,idata)=celldm_geo(1,idata)
-          f(idata)=ph_free_ener(itemp,idata) 
+       DO idata=1,ndatatot
+          IF (.NOT. no_ph(idata)) THEN
+             ndata=ndata+1
+             x(1,ndata)=celldm_geo(1,idata)
+             f(ndata)=ph_free_ener(itemp,idata) 
+          ENDIF
        ENDDO 
      CASE(4,5,6,7)
-        DO idata=1,ndata
-           x(1,idata)=celldm_geo(1,idata)
-           IF (ibrav==5) THEN
-              x(2,idata)=ACOS(celldm_geo(4,idata))
-           ELSE
-              x(2,idata)=celldm_geo(3,idata)
+        DO idata=1,ndatatot
+           IF (.NOT. no_ph(idata)) THEN
+              ndata=ndata+1
+              x(1,ndata)=celldm_geo(1,idata)
+              IF (ibrav==5) THEN
+                 x(2,ndata)=ACOS(celldm_geo(4,idata))
+              ELSE
+                 x(2,ndata)=celldm_geo(3,idata)
+              ENDIF
+              f(ndata)=ph_free_ener(itemp,idata) 
            ENDIF
-           f(idata)=ph_free_ener(itemp,idata) 
         END DO 
      CASE(8,9,91,10,11)
-        DO idata=1,ndata
-           x(1,idata)=celldm_geo(1,idata)
-           x(2,idata)=celldm_geo(2,idata)
-           x(3,idata)=celldm_geo(3,idata)
-           f(idata)= ph_free_ener(itemp,idata) 
+        DO idata=1,ndatatot
+           IF (.NOT. no_ph(idata)) THEN
+              ndata=ndata+1
+              x(1,ndata)=celldm_geo(1,idata)
+              x(2,ndata)=celldm_geo(2,idata)
+              x(3,ndata)=celldm_geo(3,idata)
+              f(ndata)= ph_free_ener(itemp,idata) 
+           END IF
         ENDDO
      CASE(12,-12,13,-13) 
-        DO idata=1,ndata
-           x(1,idata)=celldm_geo(1,idata)
-           x(2,idata)=celldm_geo(2,idata)
-           x(3,idata)=celldm_geo(3,idata)
-           IF (ibrav>0) THEN
+        DO idata=1,ndatatot
+           IF (.NOT. no_ph(idata)) THEN
+              ndata=ndata+1
+              x(1,ndata)=celldm_geo(1,idata)
+              x(2,ndata)=celldm_geo(2,idata)
+              x(3,ndata)=celldm_geo(3,idata)
+              IF (ibrav>0) THEN
 !
 !   c unique
 !
-              x(4,idata)=ACOS(celldm_geo(4,idata))
-           ELSE
+                 x(4,ndata)=ACOS(celldm_geo(4,idata))
+              ELSE
 !
 !   b unique
 !
-              x(4,idata)=ACOS(celldm_geo(5,idata))
+                 x(4,ndata)=ACOS(celldm_geo(5,idata))
+              ENDIF
+              f(ndata)=ph_free_ener(itemp,idata)
            ENDIF
-           f(idata)=ph_free_ener(itemp,idata)
         ENDDO
      CASE DEFAULT
-        DO idata=1,ndata
-           x(1,idata)=celldm_geo(1,idata)
-           x(2,idata)=celldm_geo(2,idata)
-           x(3,idata)=celldm_geo(3,idata)
-           x(4,idata)=ACOS(celldm_geo(4,idata))
-           x(5,idata)=ACOS(celldm_geo(5,idata))
-           x(6,idata)=ACOS(celldm_geo(6,idata))
-           f(idata)=ph_free_ener(itemp,idata) 
+        DO idata=1,ndatatot
+           IF (.NOT. no_ph(idata)) THEN
+              ndata=ndata+1
+              x(1,ndata)=celldm_geo(1,idata)
+              x(2,ndata)=celldm_geo(2,idata)
+              x(3,ndata)=celldm_geo(3,idata)
+              x(4,ndata)=ACOS(celldm_geo(4,idata))
+              x(5,ndata)=ACOS(celldm_geo(5,idata))
+              x(6,ndata)=ACOS(celldm_geo(6,idata))
+              f(ndata)=ph_free_ener(itemp,idata) 
+           END IF
         ENDDO
   END SELECT
   !
@@ -523,7 +540,7 @@ SUBROUTINE quadratic_fit_t_ph(itemp)
   USE kinds, ONLY : DP
   USE cell_base, ONLY : ibrav
   USE mp_images, ONLY : my_image_id, root_image
-  USE thermo_mod, ONLY : celldm_geo, energy_geo, omega_geo
+  USE thermo_mod, ONLY : celldm_geo, energy_geo, omega_geo, no_ph
   USE control_quadratic_energy, ONLY : degree, nvar, coeff_t, &
                          enthalpy_coeff => coeff
   USE temperature, ONLY : temp
@@ -535,11 +552,11 @@ SUBROUTINE quadratic_fit_t_ph(itemp)
                                  write_fit_hessian, evaluate_fit_quadratic
   IMPLICIT NONE
   INTEGER :: itemp
-  INTEGER :: ndata
+  INTEGER :: ndata, ndatatot
   REAL(DP), ALLOCATABLE :: x(:,:), y(:), f(:), coeff(:), x_pos_min(:)
   REAL(DP) :: ymin, chisq, aux
   INTEGER :: idata
-  INTEGER :: compute_nwork
+  INTEGER :: compute_nwork, compute_nwork_ph
   !
   ! Only the first image does the calculation
   !
@@ -556,7 +573,8 @@ SUBROUTINE quadratic_fit_t_ph(itemp)
   !  5              21, 
   !  6              28
   !
-  ndata = compute_nwork()
+  ndatatot= compute_nwork()
+  ndata = compute_nwork_ph(no_ph,ndatatot)
 
   WRITE(stdout,'(5x, "Phdos Free energy, at T= ", f12.6)') temp(itemp)
   WRITE(stdout,'(5x, "Pressure is :",f12.6)') pressure_kb
@@ -571,56 +589,72 @@ SUBROUTINE quadratic_fit_t_ph(itemp)
   ALLOCATE(f(ndata))
   ALLOCATE(coeff(nvar))
 
+  ndata=0
   SELECT CASE (ibrav)
      CASE(1,2,3) 
-       DO idata=1,ndata
-          x(1,idata)=celldm_geo(1,idata)
-          f(idata)=phf_free_ener(itemp,idata) 
+       DO idata=1,ndatatot
+          IF (.NOT. no_ph(idata)) THEN
+             ndata=ndata+1
+             x(1,ndata)=celldm_geo(1,idata)
+             f(ndata)=phf_free_ener(itemp,idata) 
+          ENDIF
        ENDDO 
      CASE(4,5,6,7)
-        DO idata=1,ndata
-           x(1,idata)=celldm_geo(1,idata)
-           IF (ibrav==5) THEN
-              x(2,idata)=ACOS(celldm_geo(4,idata))
-           ELSE
-              x(2,idata)=celldm_geo(3,idata)
+        DO idata=1,ndatatot
+           IF (.NOT. no_ph(idata)) THEN
+              ndata=ndata+1
+              x(1,ndata)=celldm_geo(1,idata)
+              IF (ibrav==5) THEN
+                 x(2,ndata)=ACOS(celldm_geo(4,idata))
+              ELSE
+                 x(2,ndata)=celldm_geo(3,idata)
+              ENDIF
+              f(ndata)=phf_free_ener(itemp,idata) 
            ENDIF
-           f(idata)=phf_free_ener(itemp,idata) 
-        END DO 
+         END DO 
      CASE(8,9,91,10,11)
-        DO idata=1,ndata
-           x(1,idata)=celldm_geo(1,idata)
-           x(2,idata)=celldm_geo(2,idata)
-           x(3,idata)=celldm_geo(3,idata)
-           f(idata)= phf_free_ener(itemp,idata) 
+        DO idata=1,ndatatot
+           IF (.NOT. no_ph(idata)) THEN
+              ndata=ndata+1
+              x(1,ndata)=celldm_geo(1,idata)
+              x(2,ndata)=celldm_geo(2,idata)
+              x(3,ndata)=celldm_geo(3,idata)
+              f(ndata)= phf_free_ener(itemp,idata) 
+           ENDIF
         ENDDO
      CASE(12,-12,13,-13) 
-        DO idata=1,ndata
-           x(1,idata)=celldm_geo(1,idata)
-           x(2,idata)=celldm_geo(2,idata)
-           x(3,idata)=celldm_geo(3,idata)
-           IF (ibrav>0) THEN
+        DO idata=1,ndatatot
+           IF (.NOT. no_ph(idata)) THEN
+              ndata=ndata+1
+              x(1,ndata)=celldm_geo(1,idata)
+              x(2,ndata)=celldm_geo(2,idata)
+              x(3,ndata)=celldm_geo(3,idata)
+              IF (ibrav>0) THEN
 !
 !   c unique
 !
-              x(4,idata)=ACOS(celldm_geo(4,idata))
-           ELSE
+                 x(4,ndata)=ACOS(celldm_geo(4,idata))
+              ELSE
 !
 !   b unique
 !
-              x(4,idata)=ACOS(celldm_geo(5,idata))
+                 x(4,ndata)=ACOS(celldm_geo(5,idata))
+              ENDIF
+              f(ndata)= phf_free_ener(itemp,idata) 
            ENDIF
-           f(idata)= phf_free_ener(itemp,idata) 
         ENDDO
      CASE DEFAULT
-        DO idata=1,ndata
-           x(1,idata)=celldm_geo(1,idata)
-           x(2,idata)=celldm_geo(2,idata)
-           x(3,idata)=celldm_geo(3,idata)
-           x(4,idata)=ACOS(celldm_geo(4,idata))
-           x(5,idata)=ACOS(celldm_geo(5,idata))
-           x(6,idata)=ACOS(celldm_geo(6,idata))
-           f(idata)= phf_free_ener(itemp,idata) 
+        DO idata=1,ndatatot
+           IF (.NOT. no_ph(idata)) THEN
+              ndata=ndata+1
+              x(1,ndata)=celldm_geo(1,idata)
+              x(2,ndata)=celldm_geo(2,idata)
+              x(3,ndata)=celldm_geo(3,idata)
+              x(4,ndata)=ACOS(celldm_geo(4,idata))
+              x(5,ndata)=ACOS(celldm_geo(5,idata))
+              x(6,ndata)=ACOS(celldm_geo(6,idata))
+              f(ndata)= phf_free_ener(itemp,idata) 
+           ENDIF
         ENDDO
   END SELECT
   !
@@ -780,3 +814,18 @@ INTEGER, INTENT(OUT) :: degree, nvar
  RETURN
 END SUBROUTINE compute_degree
 
+INTEGER FUNCTION compute_nwork_ph(no_ph,ndatatot)
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ndatatot
+LOGICAL, INTENT(IN) :: no_ph(ndatatot)
+
+INTEGER :: idata, counter_ndata
+
+counter_ndata=0
+DO idata=1,ndatatot
+   IF (.NOT. no_ph(idata)) counter_ndata=counter_ndata+1
+ENDDO
+compute_nwork_ph=counter_ndata
+
+RETURN
+END FUNCTION compute_nwork_ph

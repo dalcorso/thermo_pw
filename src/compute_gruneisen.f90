@@ -16,7 +16,7 @@ SUBROUTINE compute_gruneisen()
   !
   ! 
   USE kinds,                  ONLY : DP
-  USE thermo_mod,             ONLY : ngeo, omega_geo
+  USE thermo_mod,             ONLY : ngeo, omega_geo, no_ph
   USE ions_base,              ONLY : nat
   USE ph_freq_thermodynamics, ONLY : ph_freq_save
   USE grun_anharmonic,        ONLY : poly_grun, poly_order
@@ -50,16 +50,18 @@ SUBROUTINE compute_gruneisen()
 
   DO n = 1, nq
      DO igeo=1,ngeo(1)
-        freq_geo(1:3*nat,igeo)=ph_freq_save(igeo)%nu(1:3*nat,n)
-        IF (with_eigen) displa_geo(1:3*nat, 1:3*nat, igeo)= &
-                             ph_freq_save(igeo)%displa(1:3*nat,1:3*nat,n)
+        IF (.NOT. no_ph(igeo)) THEN
+           freq_geo(1:3*nat,igeo)=ph_freq_save(igeo)%nu(1:3*nat,n)
+           IF (with_eigen) displa_geo(1:3*nat, 1:3*nat, igeo)= &
+                                ph_freq_save(igeo)%displa(1:3*nat,1:3*nat,n)
+        ENDIF
      ENDDO
      IF (with_eigen) THEN
         CALL compute_freq_derivative_eigen(ngeo(1),freq_geo,omega_geo,     &
-                               displa_geo,poly_order,poly_grun(1,1,n))
+                               displa_geo,no_ph, poly_order,poly_grun(1,1,n))
      ELSE
         CALL compute_freq_derivative(ngeo(1),freq_geo,rap_geo,omega_geo,   &
-                                             poly_order,poly_grun(1,1,n))
+                                             no_ph, poly_order,poly_grun(1,1,n))
      END IF
   ENDDO
 
@@ -70,7 +72,7 @@ SUBROUTINE compute_gruneisen()
   RETURN
 END SUBROUTINE compute_gruneisen
 
-SUBROUTINE compute_freq_derivative(ngeo,freq_geo,rap_geo,omega_geo,&
+SUBROUTINE compute_freq_derivative(ngeo,freq_geo,rap_geo,omega_geo,no_ph,&
                                                         poly_order,poly_grun)
 USE kinds, ONLY : DP
 USE ions_base, ONLY : nat
@@ -79,17 +81,35 @@ IMPLICIT NONE
 INTEGER,  INTENT(IN) :: ngeo, poly_order
 INTEGER,  INTENT(IN) :: rap_geo(3*nat,ngeo)
 REAL(DP), INTENT(IN) :: freq_geo(3*nat,ngeo), omega_geo(ngeo)
+LOGICAL, INTENT(IN)  :: no_ph(ngeo)
 REAL(DP), INTENT(INOUT) :: poly_grun(poly_order,3*nat)
 
-REAL(DP), ALLOCATABLE :: frequences(:)
+REAL(DP), ALLOCATABLE :: frequences(:), omega_data(:)
 INTEGER,  ALLOCATABLE :: level(:,:)
-INTEGER :: ibnd, jbnd, igeo, irap, central_geo
+INTEGER :: ibnd, jbnd, igeo, irap, central_geo, ndata
 
 ALLOCATE (level(12,ngeo))
 ALLOCATE (frequences(ngeo))
+ALLOCATE (omega_data(ngeo))
 
 central_geo=ngeo/2
 IF (MOD(ngeo,2)==1) central_geo=central_geo+1
+IF (no_ph(central_geo)) THEN
+   DO igeo=1,ngeo/2
+      central_geo=central_geo-igeo
+      IF (.NOT. no_ph(central_geo)) EXIT
+      central_geo=central_geo+2*igeo
+      IF (.NOT. no_ph(central_geo)) EXIT
+      central_geo=central_geo-igeo
+   ENDDO
+ENDIF
+ndata=0
+DO igeo=1,ngeo
+   IF (.NOT. no_ph(igeo)) THEN
+      ndata=ndata+1
+      omega_data(ndata)=omega_geo(igeo)
+   END IF
+END DO
 level=1
 DO ibnd=1, 3*nat
 !
@@ -99,36 +119,45 @@ DO ibnd=1, 3*nat
    irap = rap_geo(ibnd,central_geo)
 
    IF (irap == -1) THEN
+      ndata=0
       DO igeo=1,ngeo
-         frequences(igeo)=freq_geo(ibnd,igeo)
+         IF (.NOT. no_ph(igeo)) THEN
+            ndata=ndata+1
+            frequences(ndata)=freq_geo(ibnd,igeo)
+         ENDIF
       END DO
    ELSE
+      ndata=0
       DO igeo=1,ngeo
-         DO jbnd=level(irap,igeo), 3*nat
-            IF (rap_geo(jbnd,igeo)==irap) THEN
-               frequences(igeo)=freq_geo(jbnd,igeo)
-               level(irap,igeo)=jbnd+1
-               GOTO 20
-            ENDIF
-         ENDDO
-         CALL errore('compute_freq_derivative','representation not found',1)
-20       CONTINUE
+         IF (.NOT. no_ph(igeo)) THEN
+            ndata=ndata+1
+            DO jbnd=level(irap,igeo), 3*nat
+               IF (rap_geo(jbnd,igeo)==irap) THEN
+                  frequences(ndata)=freq_geo(jbnd,igeo)
+                  level(irap,igeo)=jbnd+1
+                  GOTO 20
+               ENDIF
+            ENDDO
+            CALL errore('compute_freq_derivative','representation not found',1)
+20          CONTINUE
+         ENDIF
       ENDDO
    ENDIF
 !
 !    Fit the frequencies as a function of the volume
 !
-   CALL polifit( omega_geo, frequences, ngeo,  &
+   CALL polifit( omega_data, frequences, ndata,  &
                                      poly_grun(:,ibnd), poly_order )
 ENDDO
 
 DEALLOCATE ( level )
 DEALLOCATE ( frequences )
+DEALLOCATE (omega_data)
 RETURN
 END SUBROUTINE compute_freq_derivative
 
 SUBROUTINE compute_freq_derivative_eigen(ngeo,freq_geo,omega_geo,&
-                                         displa_geo, poly_order,poly_grun)
+                                         displa_geo, no_ph, poly_order,poly_grun)
 
 USE kinds, ONLY : DP
 USE ions_base, ONLY : nat
@@ -137,21 +166,46 @@ IMPLICIT NONE
 INTEGER, INTENT(IN) :: ngeo, poly_order
 REAL(DP), INTENT(IN) :: freq_geo(3*nat,ngeo), omega_geo(ngeo)
 COMPLEX(DP), INTENT(IN) :: displa_geo(3*nat,3*nat,ngeo)
+LOGICAL, INTENT(IN) :: no_ph(ngeo)
 REAL(DP), INTENT(INOUT) :: poly_grun(poly_order,3*nat)
 
-REAL(DP), ALLOCATABLE :: frequences(:)
+REAL(DP), ALLOCATABLE :: frequences(:), omega_data(:)
 REAL(DP) :: overlap
-COMPLEX(DP), EXTERNAL :: ZDOTC
-INTEGER :: ibnd, igeo, central_geo, jmode
+COMPLEX(DP) :: ZDOTC
+INTEGER :: ibnd, igeo, central_geo, jmode, ndata
 
 ALLOCATE (frequences(ngeo))
+ALLOCATE(omega_data(ngeo))
 
 central_geo=ngeo/2
 IF (MOD(ngeo,2)==1) central_geo=central_geo+1
+!
+!  find the central_geo closer to this value that has been calculated
+!
+IF (no_ph(central_geo)) THEN
+   DO igeo=1,ngeo/2
+      central_geo=central_geo-igeo
+      IF (.NOT. no_ph(central_geo)) EXIT 
+      central_geo=central_geo+2*igeo
+      IF (.NOT. no_ph(central_geo)) EXIT 
+      central_geo=central_geo-igeo
+   ENDDO
+ENDIF
+ndata=0
+DO igeo=1,ngeo
+   IF (.NOT. no_ph(igeo)) THEN
+      ndata=ndata+1
+      omega_data(ndata)=omega_geo(igeo)
+   ENDIF
+ENDDO
+
 DO ibnd=1, 3*nat
    frequences=0.0_DP
+   ndata=0
    DO igeo=1, ngeo
-      IF (igeo /= central_geo) THEN
+      IF (.NOT. no_ph(igeo)) THEN
+         ndata=ndata+1
+         IF (igeo /= central_geo) THEN
 !
 !   It can be shown that the frequency function defined below has the same 
 !   derivatives of the real frequency at the central geometry.
@@ -164,20 +218,22 @@ DO ibnd=1, 3*nat
 !   same as those calculated as the expectation value of the derivative 
 !   of the dynamical matrix on the central geometry eigenvectors.
 !
-         DO jmode=1,3*nat
-            overlap=ABS(ZDOTC(3*nat,displa_geo(1,jmode,igeo),1,&
-                                      displa_geo(1,ibnd,central_geo),1))**2
-            frequences(igeo)=frequences(igeo) + freq_geo(jmode,igeo)* overlap
-         ENDDO
-      ELSE
-         frequences(igeo)=freq_geo(ibnd,igeo)
-      ENDIF
+            DO jmode=1,3*nat
+               overlap=ABS(ZDOTC(3*nat,displa_geo(1,jmode,igeo),1,&
+                                        displa_geo(1,ibnd,central_geo),1))**2
+               frequences(ndata)=frequences(ndata) + freq_geo(jmode,igeo)* overlap
+            ENDDO
+         ELSE
+            frequences(ndata)=freq_geo(ibnd,igeo)
+         ENDIF
+      END IF
    END DO
-   CALL polifit( omega_geo, frequences, ngeo,  &
+   CALL polifit( omega_data, frequences, ndata,  &
                                      poly_grun(:,ibnd), poly_order )
 ENDDO
 
 DEALLOCATE ( frequences )
+DEALLOCATE ( omega_data )
 
 RETURN
 END SUBROUTINE compute_freq_derivative_eigen

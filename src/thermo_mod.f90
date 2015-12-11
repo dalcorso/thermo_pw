@@ -23,6 +23,12 @@ MODULE thermo_mod
   INTEGER  :: ngeo(6)                   ! number of different geometries 
                                         ! per celldm parameter
 
+  INTEGER :: fact_ngeo(6)               ! factors used to reduce the
+                                        ! size of the grid where phonons
+                                        ! are interpolated
+  LOGICAL, ALLOCATABLE :: no_ph(:)      ! decide in which phonon geometries
+                                        ! the phonons are calculated
+
   INTEGER :: tot_ngeo                   ! total number of geometries for
                                         ! which we calculate the phonon
                                         ! dispersions

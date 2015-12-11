@@ -17,7 +17,7 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
   USE ions_base,      ONLY : nat, ntyp => nsp
   USE control_thermo, ONLY : with_eigen
   USE data_files,     ONLY : flgrun
-  USE thermo_mod,     ONLY : ngeo, omega_geo
+  USE thermo_mod,     ONLY : ngeo, omega_geo, no_ph
   USE ph_freq_anharmonic, ONLY : vminf_t
   USE control_grun,   ONLY : temp_ph, volume_ph
   USE control_pwrun,  ONLY : amass_save, ityp_save
@@ -56,6 +56,7 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
   WRITE(stdout,*)
   DO igeo = 1, ngeo(1)
 
+     IF (no_ph(igeo)) CYCLE
      filedata = TRIM(file_disp)//'.g'//TRIM(int_to_char(igeo))
 
      IF (ionode) &
@@ -192,10 +193,11 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
      ELSE
         IF (with_eigen) THEN
            CALL compute_freq_derivative_eigen(ngeo(1),freq_geo(1,1,n),   &
-                        omega_geo, displa_geo(1,1,1,n),poly_order,poly_grun)
+                        omega_geo, displa_geo(1,1,1,n),no_ph, &
+                                                       poly_order,poly_grun)
         ELSE 
            CALL compute_freq_derivative(ngeo,freq_geo(1,1,n),rap_geo(1,1,n), &
-                                   omega_geo,poly_order,poly_grun)
+                                   omega_geo,no_ph,poly_order,poly_grun)
         ENDIF
 
 !

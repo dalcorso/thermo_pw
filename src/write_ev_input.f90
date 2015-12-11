@@ -112,7 +112,8 @@ SUBROUTINE do_ev_t(itemp)
 !
 USE kinds,          ONLY : DP
 USE constants,      ONLY : ry_kbar
-USE thermo_mod,     ONLY : ngeo, omega_geo, energy_geo, celldm_geo, central_geo
+USE thermo_mod,     ONLY : ngeo, omega_geo, energy_geo, celldm_geo, &
+                           central_geo, no_ph
 USE control_mur,    ONLY : vmin, b0, b01
 USE thermodynamics, ONLY : ph_free_ener
 USE anharmonic,     ONLY : vmin_t, b0_t, b01_t, free_e_min_t
@@ -135,11 +136,14 @@ REAL(DP) :: a(m1), x(ngeo(1)), y(ngeo(1)), aux, aux1
   IF (my_image_id /= root_image) RETURN
 
 !  WRITE(stdout,*) 
-  ndata=ngeo(1)
-  DO idata=1,ndata
-     x(idata)=omega_geo(idata)
-     y(idata)=ph_free_ener(itemp,idata)
-!     WRITE(stdout,'(2f25.14)') x(idata), y(idata)
+  ndata=0
+  DO idata=1,ngeo(1)
+     IF (.NOT. no_ph(idata)) THEN
+        ndata=ndata+1
+        x(ndata)=omega_geo(idata)
+        y(ndata)=ph_free_ener(itemp,idata)
+!       WRITE(stdout,'(2f25.14)') x(ndata), y(ndata)
+     ENDIF
   ENDDO
   CALL polifit(x, y, ndata, a, m1)
 
@@ -181,7 +185,8 @@ SUBROUTINE do_ev_t_ph(itemp)
 !  This subroutine compute the equilibrium volume and bulk modulus
 !
 USE kinds,          ONLY : DP
-USE thermo_mod,     ONLY : ngeo, omega_geo, energy_geo, celldm_geo, central_geo
+USE thermo_mod,     ONLY : ngeo, omega_geo, energy_geo, celldm_geo, &
+                           central_geo, no_ph
 USE constants,      ONLY : ry_kbar
 USE ph_freq_thermodynamics, ONLY : phf_free_ener
 USE ph_freq_anharmonic,     ONLY : vminf_t, b0f_t, b01f_t, free_e_minf_t
@@ -206,11 +211,14 @@ REAL(DP) :: a(m1), x(ngeo(1)), y(ngeo(1)), aux, aux1
   IF (my_image_id /= root_image) RETURN
 
 !  WRITE(stdout,*) 
-  ndata=ngeo(1)
-  DO idata=1,ndata
-     x(idata)=omega_geo(idata)
-     y(idata)=phf_free_ener(itemp,idata) 
-!     WRITE(stdout,'(2f25.14)') x(idata), y(idata)
+  ndata=0
+  DO idata=1,ngeo(1)
+     IF (.NOT. no_ph(idata)) THEN
+        ndata=ndata+1
+        x(ndata)=omega_geo(idata)
+        y(ndata)=phf_free_ener(itemp,idata) 
+!       WRITE(stdout,'(2f25.14)') x(ndata), y(ndata)
+     ENDIF
   ENDDO
   CALL polifit(x, y, ndata, a, m1)
 

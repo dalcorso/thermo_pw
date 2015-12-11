@@ -15,7 +15,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   !
   USE kinds,      ONLY : DP
   USE thermo_mod, ONLY : what, step_ngeo, energy_geo, ngeo, &
-                         celldm_geo, omega_geo, ibrav_geo, tot_ngeo
+                         celldm_geo, omega_geo, ibrav_geo, tot_ngeo, no_ph
   USE control_thermo, ONLY : lpwscf, lbands, lphonon, lev_syn_1, lev_syn_2, &
                              lph, lpwscf_syn_1, lbands_syn_1, ldos, lq2r,   &
                              lmatdyn, ltherm, lconv_ke_test, lconv_nk_test, &
@@ -64,11 +64,15 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            lpwscf_syn_1=.TRUE.
            lph=.TRUE.
            tot_ngeo=1
+           ALLOCATE(no_ph(tot_ngeo))
+           no_ph(1)=.FALSE.
         CASE ('scf_disp')
            ALLOCATE(energy_geo(1))
            lpwscf_syn_1=.TRUE.
            lph=.TRUE.
            tot_ngeo=1
+           ALLOCATE(no_ph(tot_ngeo))
+           no_ph(1)=.FALSE.
            lq2r = .TRUE.
            lmatdyn = .TRUE.
            ldos = .TRUE.
@@ -137,12 +141,16 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            lpwscf_syn_1=.TRUE.
            lph=.TRUE.
            tot_ngeo=1
+           ALLOCATE(no_ph(tot_ngeo))
+           no_ph(1)=.FALSE.
         CASE ('mur_lc_disp')
            CALL initialize_mur(nwork)
            do_punch=.FALSE.
            lpwscf_syn_1=.TRUE.
            lph=.TRUE.
            tot_ngeo=1
+           ALLOCATE(no_ph(tot_ngeo))
+           no_ph(1)=.FALSE.
            lq2r = .TRUE.
            ldos = .TRUE.
            lmatdyn = .TRUE.
@@ -171,6 +179,8 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            CALL initialize_mur(nwork)
            lph = .TRUE.
            tot_ngeo=nwork
+           ALLOCATE(no_ph(tot_ngeo))
+           CALL initialize_no_ph(no_ph, tot_ngeo)
            lq2r = .TRUE.
            ldos = .TRUE.
            ltherm = .TRUE.
@@ -331,39 +341,59 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   RETURN
 END SUBROUTINE initialize_thermo_work
 
-SUBROUTINE clean_ngeo(ngeo,ibrav)
+SUBROUTINE clean_ngeo(ngeo,fact_ngeo,ibrav)
 
+USE control_mur, ONLY : lmurn
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ibrav
-INTEGER, INTENT(INOUT) :: ngeo(6)
-INTEGER :: ngeo_aux(6)
+INTEGER, INTENT(INOUT) :: ngeo(6), fact_ngeo(6)
+INTEGER :: ngeo_aux(6), fact_ngeo_aux(6)
 
 ngeo_aux=1
 ngeo_aux(1)=ngeo(1)
-SELECT CASE (ibrav)
-   CASE(1,2,3)
-   CASE (4,6,7)
-      ngeo_aux(3)=ngeo(3)
-   CASE (5)
-      ngeo_aux(4)=ngeo(4)
-   CASE(8,9,-9,91,10,11)
-      ngeo_aux(2)=ngeo(2)
-      ngeo_aux(3)=ngeo(3)
-   CASE(12,13)
-      ngeo_aux(2)=ngeo(2)
-      ngeo_aux(3)=ngeo(3)
-      ngeo_aux(4)=ngeo(4)
-   CASE(-12,-13)   
-      ngeo_aux(2)=ngeo(2)
-      ngeo_aux(3)=ngeo(3)
-      ngeo_aux(5)=ngeo(5)
-CASE DEFAULT
-!
+fact_ngeo_aux=1
+fact_ngeo_aux(1)=fact_ngeo(1)
+
+IF (.NOT.lmurn) THEN
+   SELECT CASE (ibrav)
+      CASE(1,2,3)
+      CASE (4,6,7)
+         ngeo_aux(3)=ngeo(3)
+         fact_ngeo_aux(3)=fact_ngeo(3)
+      CASE (5)
+         ngeo_aux(4)=ngeo(4)
+         fact_ngeo_aux(4)=fact_ngeo(4)
+      CASE(8,9,-9,91,10,11)
+         ngeo_aux(2)=ngeo(2)
+         ngeo_aux(3)=ngeo(3)
+         fact_ngeo_aux(2)=fact_ngeo(2)
+         fact_ngeo_aux(3)=fact_ngeo(3)
+      CASE(12,13)
+         ngeo_aux(2)=ngeo(2)
+         ngeo_aux(3)=ngeo(3)
+         ngeo_aux(4)=ngeo(4)
+         fact_ngeo_aux(2)=fact_ngeo(2)
+         fact_ngeo_aux(3)=fact_ngeo(3)
+         fact_ngeo_aux(4)=fact_ngeo(4)
+      CASE(-12,-13)   
+         ngeo_aux(2)=ngeo(2)
+         ngeo_aux(3)=ngeo(3)
+         ngeo_aux(5)=ngeo(5)
+         fact_ngeo_aux(2)=fact_ngeo(2)
+         fact_ngeo_aux(3)=fact_ngeo(3)
+         fact_ngeo_aux(5)=fact_ngeo(5)
+   CASE DEFAULT
+
 !  If the Bravais lattice is unkown, 14 or 0 we let the user choose
 !
-      ngeo_aux=ngeo
-END SELECT
+         ngeo_aux=ngeo
+         fact_ngeo_aux=fact_ngeo
+   END SELECT
+END IF
+
 ngeo=ngeo_aux
+fact_ngeo=fact_ngeo_aux
+
 RETURN
 END SUBROUTINE clean_ngeo
 
@@ -473,7 +503,8 @@ END FUNCTION compute_nwork
 
 SUBROUTINE initialize_mur(nwork)
 USE kinds, ONLY : DP
-USE thermo_mod, ONLY : ngeo, ibrav_geo, celldm_geo, energy_geo, omega_geo
+USE thermo_mod, ONLY : ngeo, ibrav_geo, celldm_geo, energy_geo, omega_geo, &
+                       fact_ngeo
 USE control_pwrun, ONLY : ibrav_save
 USE control_thermo, ONLY : lev_syn_1
 
@@ -483,7 +514,7 @@ INTEGER :: igeom
 INTEGER :: compute_nwork
 REAL(DP) :: compute_omega_geo
 
-   CALL clean_ngeo(ngeo,ibrav_save)
+   CALL clean_ngeo(ngeo,fact_ngeo,ibrav_save)
    nwork=compute_nwork()
    ALLOCATE(ibrav_geo(nwork))
    ALLOCATE(celldm_geo(6,nwork))
@@ -519,6 +550,61 @@ INTEGER :: iq, irr
 
 RETURN
 END SUBROUTINE initialize_ph_work
+
+SUBROUTINE initialize_no_ph(no_ph, tot_ngeo)
+USE thermo_mod, ONLY : ngeo, fact_ngeo, reduced_grid
+IMPLICIT NONE
+
+INTEGER, INTENT(IN) :: tot_ngeo
+LOGICAL, INTENT(INOUT) :: no_ph(tot_ngeo)
+INTEGER :: count_ngeo
+
+LOGICAL :: todo(6)
+INTEGER :: igeo1, igeo2, igeo3, igeo4, igeo5, igeo6, i
+!
+!  test the compatibility of ngeo and fact_ngeo
+!
+IF (MOD(ngeo(1)-1, fact_ngeo(1))/=0 .OR. &
+    MOD(ngeo(2)-1, fact_ngeo(2))/=0 .OR. &
+    MOD(ngeo(3)-1, fact_ngeo(3))/=0 .OR. &
+    MOD(ngeo(4)-1, fact_ngeo(4))/=0 .OR. &
+    MOD(ngeo(5)-1, fact_ngeo(5))/=0 .OR. &
+    MOD(ngeo(6)-1, fact_ngeo(6))/=0 ) CALL errore('initialize_no_ph', &
+                                              'fact_ngeo incompatible with ngeo',1) 
+count_ngeo=0
+IF (reduced_grid) THEN
+   DO i=1,6
+      DO igeo1=1,ngeo(i)
+         count_ngeo=count_ngeo+1
+         no_ph(count_ngeo)= .NOT. (MOD(igeo1-1, fact_ngeo(i))==0)
+      ENDDO
+   ENDDO
+ELSE
+   DO igeo6 = 1, ngeo(6)
+      todo(6)= (MOD(igeo6-1, fact_ngeo(6))==0)
+      DO igeo5 = 1, ngeo(5)
+         todo(5)= (MOD(igeo5-1, fact_ngeo(5))==0)
+         DO igeo4 = 1, ngeo(4)
+            todo(4)= (MOD(igeo4-1, fact_ngeo(4))==0)
+            DO igeo3 = 1, ngeo(3)
+               todo(3)= (MOD(igeo3-1, fact_ngeo(3))==0)
+               DO igeo2 = 1, ngeo(2)
+                  todo(2)= (MOD(igeo2-1, fact_ngeo(2))==0)
+                  DO igeo1 = 1, ngeo(1)
+                     todo(1)= (MOD(igeo1-1, fact_ngeo(1))==0)
+                     count_ngeo = count_ngeo + 1       
+                     no_ph(count_ngeo)= .NOT. (todo(1).AND.todo(2).AND.todo(3) &
+                                        .AND.todo(4).AND.todo(5).AND.todo(6))
+                  END DO
+               END DO
+            END DO
+         END DO
+      END DO
+   END DO
+ENDIF
+
+RETURN
+END SUBROUTINE initialize_no_ph
 
 SUBROUTINE set_equilibrium_conf( celldm, tau, at, omega )
 !

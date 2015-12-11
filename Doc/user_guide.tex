@@ -1071,7 +1071,6 @@ quadratic than for the Murnaghan interpolation. \\
 The input variables that control these plots are those described in the option
 \texttt{what='mur\_lc'} and \texttt{what='mur\_lc\_disp'} in addition to the 
 following:
-
 \begin{verbatim}
 grunmin_input : minimum y coordinate for the Gruneisen parameter plot.
                 Default: real, calculated from the Gruneisen parameters.
@@ -1116,6 +1115,24 @@ flanhar       : file where the anharmonic thermodynamic quantities are written.
                 Default: character(len=*) 'output_anhar.dat'
 flpsanhar     : postscript file of the anharmonic quantities.
                 Default: character(len=*) 'output_anhar.ps'
+fact_ngeo(1)...fact_ngeo(6) : With these factors the vibrational free energy 
+                is interpolated using a smaller number of geometries 
+                with respect to the total energy. The phonons are always 
+                calculated at geometry 1, then fact_ngeo(i)-1 geometries 
+                are not calculated and so on. The last calculated geometry 
+                must be ngeo(i). This happens when fact_ngeo(i) divides
+                ngeo(i)-1. For even ngeo(i), fact_ngeo(i) must be 1.
+                For odd ngeo(i) the following table gives a few examples
+                ngeo   fact_ngeo      calculated geometries
+                3         2            1,3
+                5         2            1,3,5
+                7         2            1,3,5,7
+                7         3            1,4,7
+                9         2            1,3,5,7,9
+                9         4            1,5,9
+                11        2            1,3,5,7,9,11
+                11        5            1,6,11
+                Defaults: integer 1,1,1,1,1,1
 \end{verbatim}
 The output files corresponding to different geometries can be identified
 by the presence of the letters \texttt{g1}, \texttt{g2}, ... in the filename.
@@ -1123,7 +1140,6 @@ An example of the use of this option can be found in \texttt{example09}. \\
 Number of tasks for this option: Maximum between the the number of tasks  
 needed by the \texttt{what='mur\_lc'} option and the number
 of tasks of the phonon code (see above the option \texttt{what='scf\_ph'}). \\
-
 
 
 %\subsection{\texttt{what='scf\_polarization'}}

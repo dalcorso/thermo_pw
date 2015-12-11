@@ -18,7 +18,7 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
   USE cell_base,      ONLY : celldm
   USE data_files,     ONLY : flgrun
   USE control_paths,  ONLY : nqaux, disp_q, disp_nqs
-  USE thermo_mod,     ONLY : ngeo, omega_geo, celldm_geo
+  USE thermo_mod,     ONLY : ngeo, omega_geo, celldm_geo, no_ph
   USE anharmonic, ONLY : celldm_t
   USE control_grun,   ONLY : temp_ph, volume_ph, celldm_ph
   USE control_pwrun,  ONLY : ibrav_save, amass_save, ityp_save
@@ -62,7 +62,8 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
 
   nwork=compute_nwork()
   DO igeo = 1, nwork
-
+     
+     IF (no_ph(igeo)) CYCLE
      filedata = TRIM(file_disp)//'.g'//TRIM(int_to_char(igeo))
 
      IF (ionode) &
@@ -215,7 +216,7 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
      ELSE
         CALL compute_freq_derivative_anis_eigen(nwork, freq_geo(1,1,n),&
               celldm_geo, displa_geo(1,1,1,n), degree, nvar, ibrav_save, &
-                                                             poly_grun)
+                                                       no_ph, poly_grun)
 !
 !  frequencies and gruneisen parameters are calculated at the chosen
 !  volume
