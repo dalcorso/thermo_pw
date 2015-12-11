@@ -209,6 +209,7 @@ PROGRAM thermo_pw
         IF (.NOT. reduced_grid) CALL plot_multi_energy()
      ENDIF
      CALL mp_bcast(celldm0, meta_ionode_id, world_comm)
+     CALL mp_bcast(emin, meta_ionode_id, world_comm)
      CALL write_minimum_energy_data()
      celldm=celldm0
      CALL cell_base_init ( ibrav, celldm0, a, b, c, cosab, cosac, cosbc, &
