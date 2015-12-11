@@ -39,8 +39,8 @@ gnu_filename=TRIM(flgnuplot)//'_nkconv'
 CALL gnuplot_start(gnu_filename)
 
 filename=TRIM(flpsnkconv)
-xmin = nk_test(1)
-xmax = nk_test(nnk)
+xmin = nk_test(1,1)
+xmax = nk_test(1,nnk)
 CALL gnuplot_write_header(filename, xmin, xmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
 
 CALL gnuplot_xlabel(' nk ',.FALSE.) 
@@ -52,18 +52,18 @@ DO isigma=1,nsigma
    IF (nsigma > 1) THEN
       filename=TRIM(flnkconv)//TRIM(int_to_char(isigma))//'/'//TRIM(flnkconv)
       IF (isigma==1) THEN
-         CALL gnuplot_write_file_mul_data(filename,1,2,'color_red',.TRUE.,.FALSE.,&
+         CALL gnuplot_write_file_mul_data(filename,1,4,'color_red',.TRUE.,.FALSE.,&
                                                              .FALSE.)
       ELSEIF (isigma==nsigma) THEN
-         CALL gnuplot_write_file_mul_data(filename,1,2,'color_blue',.FALSE.,.TRUE.,&
+         CALL gnuplot_write_file_mul_data(filename,1,4,'color_blue',.FALSE.,.TRUE.,&
                                           .FALSE.)
       ELSE
-         CALL gnuplot_write_file_mul_data(filename,1,2,'color_green',.FALSE.,.FALSE.,&
+         CALL gnuplot_write_file_mul_data(filename,1,4,'color_green',.FALSE.,.FALSE.,&
                                   .FALSE.)
       ENDIF
    ELSE
       filename=TRIM(flnkconv)
-      CALL gnuplot_write_file_mul_data(filename,1,2,'color_red',.TRUE.,.TRUE.,.FALSE.)
+      CALL gnuplot_write_file_mul_data(filename,1,4,'color_red',.TRUE.,.TRUE.,.FALSE.)
    END IF
 ENDDO
 

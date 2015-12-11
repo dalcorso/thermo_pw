@@ -382,13 +382,13 @@ MODULE control_conv
   REAL(DP), ALLOCATABLE :: ke(:)    ! the kinetic energy that are tested
   REAL(DP), ALLOCATABLE :: keden(:) ! the kinetic energy of the charge
   REAL(DP), ALLOCATABLE :: sigma_test(:) ! the smearing value
-  INTEGER,  ALLOCATABLE :: nk_test(:) ! the nk to calculate
+  INTEGER,  ALLOCATABLE :: nk_test(:,:) ! the nk to calculate
   REAL(DP) :: deltake               ! the interval between kinetic energies
   INTEGER  :: nke                   ! the number of kinetic energies
   REAL(DP) :: deltakeden            ! the interval for kinetic energy for density
   INTEGER  :: nkeden                ! the number of kinetic energies for densiy
   INTEGER  :: nnk                   ! the number of nk values to test k points
-  INTEGER  :: deltank               ! the step between nk values to test k points
+  INTEGER  :: deltank(3)            ! the step between nk values to test k points
   INTEGER  :: nsigma                ! the number of smearing values to test
   REAL(DP) :: deltasigma            ! the step between smaring values
 

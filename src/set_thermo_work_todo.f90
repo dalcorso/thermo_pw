@@ -76,9 +76,9 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
            CALL check_tempdir ( tmp_dir, exst, parallelfs )
         CASE ('scf_nk')
            degauss = sigma_test(iwork)
-           nk1=nk_test(iwork)
-           nk2=nk1
-           nk3=nk1
+           nk1=nk_test(1,iwork)
+           nk2=nk_test(2,iwork)
+           nk3=nk_test(3,iwork)
            CALL init_start_k ( nk1, nk2, nk3, k1, k2, k3, k_points, &
                                nkstot, xk, wk )
            CALL set_fft_mesh()

@@ -99,7 +99,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            do_punch=.FALSE.
         CASE ( 'scf_nk' ) 
            nwork= nnk * nsigma
-           ALLOCATE(nk_test(nwork))
+           ALLOCATE(nk_test(3,nwork))
            ALLOCATE(sigma_test(nwork))
            ALLOCATE(energy_geo(nwork))
            tot_ngeo=0
@@ -107,7 +107,9 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            DO isigma=1, nsigma
               DO ink = 1, nnk
                  icount = icount + 1
-                 nk_test(icount)=nk1 + (ink - 1) * deltank
+                 nk_test(1,icount) = nk1 + (ink - 1) * deltank(1)
+                 nk_test(2,icount) = nk2 + (ink - 1) * deltank(2)
+                 nk_test(3,icount) = nk3 + (ink - 1) * deltank(3)
                  sigma_test(icount) = degauss + (isigma - 1) * deltasigma
               ENDDO
            ENDDO
