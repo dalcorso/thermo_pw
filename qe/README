@@ -24,3 +24,8 @@ do_phonon_tpw : call phqscf_tpw instead of phqscf and prepare_q_tpw instead
 ev_xml : is identical to the QE routine, but it is copied here because files
          in the PW/tools directory are not linked to thermo_pw.
 
+read_dyn_from_file : in the routine of PH there is an implicit dependence
+         on first. The routine makes two different things if it is called
+         for the first time. Since thermo_pw calls this routine for several
+         geometry, the first file of each geometry should be considered as
+         first. Removed the dependence on first.

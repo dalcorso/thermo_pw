@@ -41,7 +41,7 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
   REAL(DP), ALLOCATABLE :: poly_grun(:,:), frequency(:,:), gruneisen(:,:)
   REAL(DP) :: vm
   LOGICAL, ALLOCATABLE :: high_symmetry(:), is_gamma(:)
-  LOGICAL :: copy_before
+  LOGICAL :: copy_before, exst_rap
   CHARACTER(LEN=256) :: filename, filedata, file_vec
   CHARACTER(LEN=6), EXTERNAL :: int_to_char
 
@@ -54,9 +54,9 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
 
   iumode=23
   WRITE(stdout,*)
+  exst_rap=.TRUE.
   DO igeo = 1, ngeo(1)
 
-     IF (no_ph(igeo)) CYCLE
      filedata = TRIM(file_disp)//'.g'//TRIM(int_to_char(igeo))
 
      IF (ionode) &
@@ -82,17 +82,22 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
      IF (ionode) OPEN(UNIT=21, FILE=TRIM(filename), FORM='formatted', &
                    STATUS='old', ERR=100, IOSTAT=ios)
 100  CALL mp_bcast(ios, ionode_id, intra_image_comm)
-     CALL errore('write_gruneisen_band','representations are needed',ABS(ios))
+     IF (ios /= 0) exst_rap=.FALSE.
 
-     IF (ionode) READ (21, plot_rap, ERR=110, IOSTAT=ios)
-110  CALL mp_bcast(ios, ionode_id, intra_image_comm)
-     CALL errore('write_gruneisen_band','problem reading &
+     IF (exst_rap) THEN
+        IF (ionode) READ (21, plot_rap, ERR=110, IOSTAT=ios)
+110     CALL mp_bcast(ios, ionode_id, intra_image_comm)
+        CALL errore('write_gruneisen_band','problem reading &
                                            &representations',ABS(ios))
-     CALL mp_bcast(nks_rap, ionode_id, intra_image_comm)
-     CALL mp_bcast(nbnd_rap, ionode_id, intra_image_comm)
-     IF ( nks_rap/=nks .OR. nbnd_rap/=nbnd ) &
-        CALL errore('write_gruneisen_band','("file with representations &
+        CALL mp_bcast(nks_rap, ionode_id, intra_image_comm)
+        CALL mp_bcast(nbnd_rap, ionode_id, intra_image_comm)
+        IF ( nks_rap/=nks .OR. nbnd_rap/=nbnd ) &
+           CALL errore('write_gruneisen_band','("file with representations &
                        & not compatible with bands")')
+     ELSE
+        nks_rap=nks
+        nbnd_rap=nbnd
+     ENDIF
 
      IF (with_eigen) THEN
         filename=TRIM(file_vec)//".g"//TRIM(int_to_char(igeo))
@@ -116,12 +121,17 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
         DO n=1,nks
            READ(1,*,end=220,err=220)  (k(i,n), i=1,3 )
            READ(1,*,end=220,err=220)  (freq_geo(i,igeo,n),i=1,nbnd)
-           READ(21,*,end=220,err=220) (k_rap(i,n),i=1,3), high_symmetry(n)
-           READ(21,*,end=220,err=220) (rap_geo(i,igeo,n),i=1,nbnd)
-           IF (abs(k(1,n)-k_rap(1,n))+abs(k(2,n)-k_rap(2,n))+  &
-               abs(k(3,n)-k_rap(3,n))  > eps ) &
+           IF (exst_rap) THEN
+              READ(21,*,end=220,err=220) (k_rap(i,n),i=1,3), high_symmetry(n)
+              READ(21,*,end=220,err=220) (rap_geo(i,igeo,n),i=1,nbnd)
+              IF (abs(k(1,n)-k_rap(1,n))+abs(k(2,n)-k_rap(2,n))+  &
+                  abs(k(3,n)-k_rap(3,n))  > eps ) &
                   CALL errore('write_gruneisen_band',&
                        '("Incompatible k points in rap file")',1)
+           ELSE
+              k_rap(:,n)=k(:,n)
+              rap_geo(:,igeo,n)=-1
+           ENDIF
            is_gamma(n) = (( k(1,n)**2 + k(2,n)**2 + k(3,n)**2) < 1.d-12)
         ENDDO
         IF (with_eigen) &
@@ -193,8 +203,8 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
      ELSE
         IF (with_eigen) THEN
            CALL compute_freq_derivative_eigen(ngeo(1),freq_geo(1,1,n),   &
-                        omega_geo, displa_geo(1,1,1,n),no_ph, &
-                                                       poly_order,poly_grun)
+                        omega_geo, displa_geo(1,1,1,n),no_ph,poly_order, &
+                        poly_grun)
         ELSE 
            CALL compute_freq_derivative(ngeo,freq_geo(1,1,n),rap_geo(1,1,n), &
                                    omega_geo,no_ph,poly_order,poly_grun)

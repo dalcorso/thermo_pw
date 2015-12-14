@@ -942,8 +942,13 @@ IF ( nkz == 1 .OR. ( nkz > 1 .AND. .NOT. lprojpbs) .OR. force_bands ) THEN
 !
    IF (.NOT.exist_rap) THEN
       filename=TRIM(fileout)
-      CALL gnuplot_write_file_data(filename,'band_lw','color_red',&
+      IF (with_lines) THEN
+         CALL gnuplot_write_file_data(filename,'band_lw','color_red',&
                                            .TRUE.,.TRUE.,.FALSE.)
+      ELSE
+         CALL gnuplot_write_file_mul_point(filename, 1, 2, &
+                                         'color_red', .TRUE., .TRUE., .FALSE.)
+      ENDIF
    ELSE
       ALLOCATE(dorap(nlines,12))
       first_rap=0

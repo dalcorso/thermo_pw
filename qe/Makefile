@@ -17,6 +17,7 @@ ev_xml.o \
 phqscf.o \
 prepare_q.o \
 run_nscf.o \
+read_dyn_from_file.o \
 solve_linter.o 
 
 all : thermo_qe.a

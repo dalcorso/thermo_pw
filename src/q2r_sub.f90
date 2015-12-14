@@ -162,8 +162,8 @@ SUBROUTINE q2r_sub(fildyn)
            OPEN (unit=1,file=filin,status='old',form='formatted',iostat=ierr)
         CALL mp_bcast(ierr, ionode_id, intra_image_comm)
         IF (ierr /= 0) CALL errore('q2r_sub','file '//TRIM(filin)//' missing!',1)
-        CALL read_dyn_from_file (nqs, q, epsil, lrigid,  &
-                ntyp, nat, ibrav, celldm, at, atm, amass)
+        CALL read_dyn_from_file_tpw (nqs, q, epsil, lrigid,  &
+                ntyp, nat, ibrav, celldm, at, atm, amass, ifile)
         IF (ionode) CLOSE(unit=1)
      ENDIF
      IF (ifile == 1) THEN
