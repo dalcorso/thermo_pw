@@ -1,0 +1,298 @@
+\documentclass[12pt,a4paper]{article}
+\def\version{0.4.0}
+\def\qe{{\sc Quantum ESPRESSO}}
+\def\tpw{{\sc THERMO\_PW}}
+
+\usepackage{html}
+
+\usepackage{graphicx}
+
+\textwidth = 17cm
+\textheight = 24cm
+\topmargin =-1 cm
+\oddsidemargin = 0 cm
+
+\def\pwx{\texttt{pw.x}}
+\def\phx{\texttt{ph.x}}
+\def\configure{\texttt{configure}}
+\def\PWscf{\texttt{PWscf}}
+\def\PHonon{\texttt{PHonon}}
+\def\make{\texttt{make}}
+
+\begin{document}
+\author{Andrea Dal Corso (SISSA - Trieste)}
+\date{}
+
+\def\qeImage{../../Doc/quantum_espresso.pdf}
+\def\democritosImage{../../Doc/democritos.pdf}
+\def\SissaImage{./sissa.pdf}
+
+\title{
+%  \includegraphics[width=6cm]{\SissaImage}\\
+  \vskip 1cm
+  \Huge \tpw\ Developer's Guide \\
+  \Large (version \version)
+}
+\maketitle
+
+\tableofcontents
+
+\newpage
+
+\section{Introduction}
+This guide discusses the internal organization of \tpw. It is not necessary
+to read it to use \tpw. It contains some technical information not 
+appropriate for the user's guide.
+It assumes that you have read and understood the user's guide and that
+you have already some familiarity with the input variables and 
+the working modes of the \tpw\ code.
+
+\section{People}
+This guide has been written by Andrea Dal Corso (SISSA - Trieste). 
+
+\section {Overview}
+\tpw\ is logically divided into parts. In some parts the different
+images run asynchronously doing different tasks and in some parts the
+run is synchronous. Usually in this synchronous parts results are 
+collected and only the first image is actually doing the work while
+the other images are blocked waiting for the results.
+Presently \tpw\ has two asynchronous runs each one followed
+by one or more synchronous parts. The parts that are activated in
+each run depend on the input variable \texttt{what}. After reading the input,
+and writing some summary, the code calls the routine 
+\texttt{initialize\_thermo\_work} that sets all the
+logical flags that control the global run and the first asynchronous
+part. The first asynchronous part (A) makes \texttt{nwork} \texttt{pw.x} 
+calculations in parallel in each image. 
+Then the following synchronous part makes one or more of
+the following calculations:
+\begin{itemize}
+
+\item
+B) \texttt{lconv\_ke\_test=.TRUE.} writes and plots the total
+energy as a function of the kinetic energy.
+
+\item
+C) \texttt{lconv\_nk\_test=.TRUE.} writes and plots the total energy
+as a function of the {\bf k}-points set.
+
+\item
+D) \texttt{lev\_syn\_1=.TRUE.} makes a Murnaghan fit of the 
+total energy/enthalpy as a function of the unit cell volume or 
+a quadratic fit of the total energy / enthalpy as a function of the crystal
+parameters and determines the minimum energy geometry.
+
+\item
+E) \texttt{lpwscf\_syn\_1=.TRUE.} makes a self-consistent \texttt{pw.x} 
+calculation.
+
+\item
+F) \texttt{lband\_syn\_1=.TRUE.} makes a non self-consistent \texttt{pw.x}
+calculation to compute the band structure.
+
+\end{itemize}
+
+The second part can have an asynchronous part in which
+many \texttt{pw.x} calculations are made (\texttt{lpart2\_pw=.TRUE.}) (G1)
+or a loop of asynchronous phonon runs (G2), one for each geometry calculated
+in A or at the minimum energy/enthalpy geometry
+found in D whose self-consistent calculation has been done in E.
+The G2 run is controlled by \texttt{lph=.TRUE.} and by 
+\texttt{tot\_ngeo} which is the number of geometries. For each geometry 
+one can calculate the phonon dispersions, the phonon dos and the 
+harmonic thermodynamic quantities. The geometry to do is controlled only 
+changing the \texttt{outdir} directory where the phonon run finds the
+files produced by the \texttt{pw.x} calculation. The final collection
+of the dynamical matrices, calculations of the phonon dispersions, phonon 
+dos and harmonic thermodynamic quantities are done in a synchronous way 
+within the loop over the geometries.
+
+Following G1 or G2 there is another synchronous part. 
+After G1 the synchronous part will do one of the following:
+
+\begin{itemize}
+
+\item
+H) \texttt{lelastic\_const=.TRUE.} elastic constants calculations.
+
+\item
+I) \texttt{lpiezoelectric\_tensor=.TRUE.} piezoelectric tensor calculation.
+
+\item
+L) \texttt{lpolarization=.TRUE.} polarization calculation.
+
+\end{itemize}
+
+After G2, depending on \texttt{what} the synchronous part will do nothing, 
+or if the phonons have been computed in several geometries it will do:
+
+\begin{itemize}
+
+\item
+M) the interpolation and minimization of the 
+Helmholtz or Gibbs free energy at any temperature.
+
+\item
+N) Calculation of the Gr\"uneisen parameters on a path over the Brillouin
+zone and their plot.
+
+\item
+O) Calculation of the anharmonic quantities such as the thermal expansion
+from the numerical differentiation of the crystal parameters. Calculation
+of the isoentropic quantities when programmed.
+
+\item
+P) Calculation of the Gr\"uneisen parameters on a uniform mesh of {\bf q} 
+points and calculation of the thermal expansion from the Gr\"uneisen parameters.
+Calculation of the isoentropic quantities when programmed.
+
+\end{itemize}
+
+\section{Activated parts}
+
+The different \texttt{what} activates the following parts of the code:
+
+\begin{verbatim}
+what         A   B   C   D   E    F     G1    H    I   L   G2   M   N   O   P
+
+scf                          *
+scf_ke       *   *
+scf_nk       *       *
+scf_band                     *    *
+scf_ph                       *                              *
+scf_disp                     *                              *
+scf_elastic_constants                    *     *
+scf_piezoelectric_tensor                 *          +
+scf_polarization                         *              +
+mur_lc       *           *
+mur_lc_band  *           *   *    *
+mur_lc_ph    *           *   *                              *
+mur_lc_disp  *           *   *                              *
+mur_lc_elastic_constants
+             *           *               *      *
+mur_lc_piezoelectric_tensor
+             *           *               *          +
+mur_lc_polarization
+             *           *               *               +
+mur_lc_t     *           *                                   *     *  *   *  *
+
++ not yet active or working.
+\end{verbatim}
+
+
+\section{Scripts and Files}
+
+In almost all tasks, \tpw\ produces some data file containing the quantity 
+to plot, some script to plot the data and, if the \texttt{gnuplot} code
+is available, the postscript files with the plot of the data. So for each 
+task there is an associated routine
+that writes the output data and a routine that plots the output data
+writing the \texttt{gnuplot} script. Usually the name of the routine that
+writes the data starts with \texttt{write\_} and the routine that plots
+the data is called \texttt{plot\_}. The following is a list of the routines
+that write and plot the data and the name of the associated files
+containing the data, the scripts and the postscript files.
+
+\begin{verbatim}
+
+what             routines         data           scripts            postscript
+
+scf                 --             --               --                 --
+scf_ke          write_e_ke       flkeconv
+                plot_e_ke                       flgnuplot(_keconv)  flpskeconv
+scf_nk          write_e_nk       flnkconv
+                plot_e_nk                       flgnuplot(_nkconv)  flpsnkconv
+
+scf_band        bands_sub
+                write_bands      filband
+                plotbands_sub    flpbands
+                write_gnuplot_file              flgnuplot(_band)    flpsband     
+
+scf_ph             --              --               --                  --
+scf_disp                         fildyn
+                 q2r_sub         flfrc
+                 matdyn_sub      flfrq
+                                 fldos
+                 simple_plot                    flgnuplot(_dos)     flpsdos
+                 write_thermo    fltherm
+                 write_thermo_ph fltherm(_ph)
+                 plot_thermo                    flgnuplot(_therm)   flpstherm
+
+mur_lc           do_ev           flevdat        (input_ev)
+                                 flevdat(.ev.out)
+                 write_mur       flevdat(_mur)
+                                 flevdat(_mur1)
+                 plot_mur                       flgnuplot(_mur)     flpsmur
+                 write_gnuplot_energy
+                                 flenergy
+                 plot_multi_energy              flgnuplot(_energy)  flpsenergy
+
+mur_lc_t        
+        For cubic solids: 
+                 write_anharmonic
+                                 flanhar
+                                 flanhar(.aux)
+                 write_anharmonic_ph
+                                 flanhar(_ph)
+                                 flanhar(.aux_ph)
+                 write_anharmonic_grun
+                                 flanhar(.aux_grun)
+                 plot_anhar                     flgnuplot(_anhar)   flpsanhar
+                 write_gruneisen_bands
+                                 flgrun
+                                 flgrun(_freq)
+                 plotband_sub    flpgrun
+                                 flpgrun(_freq)
+                 write_gnuplot_file             flgnuplot(_grun)    flpsgrun
+                                                flgnuplot(_grun_freq) 
+                                                                 flpsgrun(_freq)
+        For anisotropic solids:
+                 write_anharm_anis
+                                 flanhar(.celldm)
+                 write_anharm_anis_ph
+                                 flanhar(_ph.celldm)
+                 plot_anhar_anis                flgnuplot(_anhar)   flpsanhar
+                 write_gruneisen_bands_anis
+                                 flgrun(_#)
+                                 flgrun(_freq)
+                 plot_gruneisen_band_anis
+                                 flpgrun(_#)
+                                 flpgrun(_freq)
+                 write_gnuplot_file             flgnuplot(_grun_#)   flpsgrun_#
+                                                flgnuplot(_grun_freq) 
+                                                                 flpsgrun(_freq)
+# is an integer from 1 to the number of crystal parameters
+\end{verbatim} 
+
+\noindent This is the list of the plots that can be obtained and 
+the \texttt{what} to use:
+
+\begin{verbatim}
+Brillouin zone                                 plot_bz
+Total energy versus kinetic energy             scf_ke
+Total energy versus k points                   scf_nk
+Total energy as a function of volume           mur_lc
+Total energy as a function of two or three
+crystallographic parameters                    mur_lc
+Energy bands                                   scf_bands, mur_lc_bands
+Phonon dispersions                             scf_disp, mur_lc_disp
+Phonon dos                                     scf_disp, mur_lc_disp
+Vibrational energy, free energy, entropy,      
+isochoric heat capacity                        scf_disp, mur_lc_disp
+Lattice parameters as a function of T          mur_lc_t
+Thermal expansion as a function of T           mur_lc_t 
+Gruneisen parameters dispersions               mur_lc_t
+Phonon dispersions at the geometry 
+that corresponds to a given temperature        mur_lc_t
+
+For cubic systems also the following quantities are available:
+
+Bulk modulus as a function of T                mur_lc_t
+Difference isobaric-isochoric heat capacity    mur_lc_t
+Difference isoentropic-isothermal bulk modulus mur_lc_t
+Average Gruneisen parameter                    mur_lc_t
+
+\end{verbatim}
+
+\end{document}
+

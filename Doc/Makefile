@@ -3,7 +3,7 @@ HELPDOC=../../dev-tools/helpdoc
 LATEX   = pdflatex
 LATEX2HTML = latex2html
 
-PDFS = user_guide.pdf point_groups.pdf thermo.pdf
+PDFS = user_guide.pdf developer_guide.pdf point_groups.pdf thermo.pdf
 AUXS = $(PDFS:.pdf=.aux)
 LOGS = $(PDFS:.pdf=.log)
 OUTS = $(PDFS:.pdf=.out)
