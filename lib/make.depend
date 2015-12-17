@@ -30,6 +30,7 @@ isoentropic.o : ../../Modules/mp.o
 isoentropic.o : ../../Modules/mp_images.o
 isoentropic.o : elastic_const.o
 latgen_2d.o : ../../Modules/kind.o
+lattices.o : ../../Modules/kind.o
 ph_freq_module.o : ../../Modules/constants.o
 ph_freq_module.o : ../../Modules/io_global.o
 ph_freq_module.o : ../../Modules/kind.o
@@ -58,3 +59,9 @@ rotate.o : ../../Modules/kind.o
 space_groups.o : ../../Modules/io_global.o
 space_groups.o : ../../Modules/kind.o
 strain.o : ../../Modules/kind.o
+xrdp.o : ../../Modules/constants.o
+xrdp.o : ../../Modules/io_global.o
+xrdp.o : ../../Modules/kind.o
+xrdp.o : ../../Modules/mp.o
+xrdp.o : ../../Modules/mp_images.o
+xrdp.o : lattices.o

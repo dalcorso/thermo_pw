@@ -72,6 +72,11 @@ prepare_q.o : ../../PHonon/PH/ramanm.o
 prepare_q.o : ../../PHonon/PH/yambo.o
 prepare_q.o : ../../PW/src/pwcom.o
 prepare_q.o : control_qe.o
+read_dyn_from_file.o : ../../Modules/io_global.o
+read_dyn_from_file.o : ../../Modules/kind.o
+read_dyn_from_file.o : ../../Modules/mp.o
+read_dyn_from_file.o : ../../Modules/mp_images.o
+read_dyn_from_file.o : ../../PHonon/PH/io_dyn_mat_old.o
 run_nscf.o : ../../Modules/check_stop.o
 run_nscf.o : ../../Modules/control_flags.o
 run_nscf.o : ../../Modules/fft_base.o

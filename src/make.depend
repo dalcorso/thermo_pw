@@ -205,6 +205,9 @@ plot_e_nk.o : ../../Modules/kind.o
 plot_e_nk.o : ../../Modules/mp_images.o
 plot_e_nk.o : ../../thermo_pw/lib/gnuplot.o
 plot_e_nk.o : thermo_mod.o
+plot_formf.o : ../../Modules/ions_base.o
+plot_formf.o : ../../Modules/kind.o
+plot_formf.o : thermo_mod.o
 plot_gruneisen_band_anis.o : ../../Modules/kind.o
 plot_gruneisen_band_anis.o : ../../Modules/mp_images.o
 plot_gruneisen_band_anis.o : thermo_mod.o
@@ -226,6 +229,12 @@ plot_thermo.o : ../../Modules/kind.o
 plot_thermo.o : ../../Modules/mp_images.o
 plot_thermo.o : ../../thermo_pw/lib/gnuplot.o
 plot_thermo.o : thermo_mod.o
+plot_xrdp.o : ../../Modules/io_global.o
+plot_xrdp.o : ../../Modules/kind.o
+plot_xrdp.o : ../../Modules/mp.o
+plot_xrdp.o : ../../Modules/mp_images.o
+plot_xrdp.o : ../../thermo_pw/lib/gnuplot.o
+plot_xrdp.o : thermo_mod.o
 plotband_sub.o : ../../Modules/cell_base.o
 plotband_sub.o : ../../Modules/constants.o
 plotband_sub.o : ../../Modules/io_global.o
@@ -388,6 +397,7 @@ thermo_pw.o : ../../thermo_pw/lib/elastic_const.o
 thermo_pw.o : ../../thermo_pw/lib/mp_asyn.o
 thermo_pw.o : ../../thermo_pw/lib/phdos_module.o
 thermo_pw.o : ../../thermo_pw/lib/piezoelectric_tensor.o
+thermo_pw.o : ../../thermo_pw/lib/xrdp.o
 thermo_pw.o : thermo_mod.o
 thermo_readin.o : ../../Modules/cell_base.o
 thermo_readin.o : ../../Modules/command_line_options.o
@@ -407,6 +417,7 @@ thermo_readin.o : ../../Modules/wrappers.o
 thermo_readin.o : ../../PHonon/PH/phcom.o
 thermo_readin.o : ../../PW/src/symm_base.o
 thermo_readin.o : ../../thermo_pw/lib/piezoelectric_tensor.o
+thermo_readin.o : ../../thermo_pw/lib/xrdp.o
 thermo_readin.o : thermo_mod.o
 thermo_summary.o : ../../Modules/cell_base.o
 thermo_summary.o : ../../Modules/constants.o
@@ -426,6 +437,7 @@ thermo_summary.o : ../../PW/src/pwcom.o
 thermo_summary.o : ../../PW/src/symm_base.o
 thermo_summary.o : ../../thermo_pw/lib/bz_2d_form.o
 thermo_summary.o : ../../thermo_pw/lib/space_groups.o
+thermo_summary.o : ../../thermo_pw/lib/xrdp.o
 thermo_summary.o : thermo_mod.o
 write_anhar.o : ../../Modules/constants.o
 write_anhar.o : ../../Modules/io_global.o
