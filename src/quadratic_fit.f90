@@ -28,7 +28,8 @@ SUBROUTINE quadratic_fit()
   USE io_global, ONLY : stdout
   USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_fit_extremum, &
                                  write_fit_hessian, evaluate_fit_quadratic, &
-                                 print_quadratic_polynomial
+                                 print_quadratic_polynomial, &
+                                 summarize_fitting_data
   IMPLICIT NONE
   INTEGER :: nvar, ndata
   REAL(DP), ALLOCATABLE :: x(:,:), y(:), f(:)
@@ -125,40 +126,8 @@ SUBROUTINE quadratic_fit()
         ENDDO
   END SELECT
   !
-  WRITE(stdout,'(5x," Fitting the following data")')
-  IF (degree==1) THEN
-     WRITE(stdout,'(10x,"x1",12x,"f")')
-     DO idata=1,ndata
-        WRITE(stdout,'(2f15.8)') x(1,idata), f(idata)
-     ENDDO
-  ELSEIF (degree==2) THEN
-     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"f")')
-     DO idata=1,ndata
-        WRITE(stdout,'(3f15.8)') x(1:2,idata), f(idata)
-     ENDDO
-  ELSEIF (degree==3) THEN
-     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"x3",12x,"f")')
-     DO idata=1,ndata
-        WRITE(stdout,'(4f15.8)') x(1:3,idata), f(idata)
-     ENDDO
-  ELSEIF (degree==4) THEN
-     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"x3",12x,12x,"x4",12x,"f")')
-     DO idata=1,ndata
-        WRITE(stdout,'(5f15.8)') x(1:4,idata), f(idata)
-     ENDDO
-  ELSEIF (degree==5) THEN
-     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"x3",12x,12x,"x4",12x,"x5",12x,"f")')
-     DO idata=1,ndata
-        WRITE(stdout,'(6f15.8)') x(1:5,idata), f(idata)
-     ENDDO
-  ELSEIF (degree==6) THEN
-     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"x3",12x,12x,"x4",12x,"x5",12x,&
-                                                               &"x6",12x,"f")')
-     DO idata=1,ndata
-        WRITE(stdout,'(7f15.8)') x(1:6,idata), f(idata)
-     ENDDO
+  CALL summarize_fitting_data(degree, ndata, x, f)
 
-  ENDIF
   CALL fit_multi_quadratic(ndata,degree,nvar,x,f,coeff)
   
   CALL print_quadratic_polynomial(degree, nvar, coeff)
@@ -254,7 +223,8 @@ SUBROUTINE quadratic_fit_t(itemp)
   USE io_global, ONLY : stdout
   USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_two_fit_extremum, &
                                  write_fit_hessian, evaluate_fit_quadratic,  &
-                                 print_quadratic_polynomial
+                                 print_quadratic_polynomial, &
+                                 summarize_fitting_data
   IMPLICIT NONE
   INTEGER :: itemp
   INTEGER :: ndata, ndatatot
@@ -363,40 +333,8 @@ SUBROUTINE quadratic_fit_t(itemp)
         ENDDO
   END SELECT
   !
-!  WRITE(stdout,'(5x," Fitting the following data")')
-!  IF (degree==1) THEN
-!     WRITE(stdout,'(10x,"x1",12x,"f")')
-!     DO idata=1,ndata
-!        WRITE(stdout,'(2f15.8)') x(1,idata), f(idata)
-!     ENDDO
-!  ELSEIF (degree==2) THEN
-!     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"f")')
-!     DO idata=1,ndata
-!        WRITE(stdout,'(3f15.8)') x(1:2,idata), f(idata)
-!     ENDDO
-!  ELSEIF (degree==3) THEN
-!     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"x3",12x,"f")')
-!     DO idata=1,ndata
-!        WRITE(stdout,'(4f15.8)') x(1:3,idata), f(idata)
-!     ENDDO
-!  ELSEIF (degree==4) THEN
-!     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"x3",12x,12x,"x4",12x,"f")')
-!     DO idata=1,ndata
-!        WRITE(stdout,'(5f15.8)') x(1:4,idata), f(idata)
-!     ENDDO
-!  ELSEIF (degree==5) THEN
-!     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"x3",12x,12x,"x4",12x,"x5",12x,"f")')
-!     DO idata=1,ndata
-!        WRITE(stdout,'(6f15.8)') x(1:5,idata), f(idata)
-!     ENDDO
-!  ELSEIF (degree==6) THEN
-!     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"x3",12x,12x,"x4",12x,"x5",12x,&
-!                                                               &"x6",12x,"f")')
-!     DO idata=1,ndata
-!        WRITE(stdout,'(7f15.8)') x(1:6,idata), f(idata)
-!     ENDDO
-!
-!  ENDIF
+  !CALL summarize_fitting_data(degree, ndata, x, f)
+  !
   CALL fit_multi_quadratic(ndata,degree,nvar,x,f,coeff)
 
   CALL print_quadratic_polynomial(degree, nvar, coeff)
@@ -494,7 +432,8 @@ SUBROUTINE quadratic_fit_t_ph(itemp)
   USE io_global, ONLY : stdout
   USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_two_fit_extremum, &
                                  write_fit_hessian, evaluate_fit_quadratic,  &
-                                 print_quadratic_polynomial
+                                 print_quadratic_polynomial, &
+                                 summarize_fitting_data
   IMPLICIT NONE
   INTEGER :: itemp
   INTEGER :: ndata, ndatatot
@@ -603,40 +542,8 @@ SUBROUTINE quadratic_fit_t_ph(itemp)
         ENDDO
   END SELECT
   !
-!  WRITE(stdout,'(5x," Fitting the following data")')
-!  IF (degree==1) THEN
-!     WRITE(stdout,'(10x,"x1",12x,"f")')
-!     DO idata=1,ndata
-!        WRITE(stdout,'(2f15.8)') x(1,idata), f(idata)
-!     ENDDO
-!  ELSEIF (degree==2) THEN
-!     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"f")')
-!     DO idata=1,ndata
-!        WRITE(stdout,'(3f15.8)') x(1:2,idata), f(idata)
-!     ENDDO
-!  ELSEIF (degree==3) THEN
-!     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"x3",12x,"f")')
-!     DO idata=1,ndata
-!        WRITE(stdout,'(4f15.8)') x(1:3,idata), f(idata)
-!     ENDDO
-!  ELSEIF (degree==4) THEN
-!     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"x3",12x,12x,"x4",12x,"f")')
-!     DO idata=1,ndata
-!        WRITE(stdout,'(5f15.8)') x(1:4,idata), f(idata)
-!     ENDDO
-!  ELSEIF (degree==5) THEN
-!     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"x3",12x,12x,"x4",12x,"x5",12x,"f")')
-!     DO idata=1,ndata
-!        WRITE(stdout,'(6f15.8)') x(1:5,idata), f(idata)
-!     ENDDO
-!  ELSEIF (degree==6) THEN
-!     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"x3",12x,12x,"x4",12x,"x5",12x,&
-!                                                               &"x6",12x,"f")')
-!     DO idata=1,ndata
-!        WRITE(stdout,'(7f15.8)') x(1:6,idata), f(idata)
-!     ENDDO
-!
-!  ENDIF
+  !CALL summarize_fitting_data(degree, ndata, x, f)
+  !
   CALL fit_multi_quadratic(ndata,degree,nvar,x,f,coeff)
 
   CALL print_quadratic_polynomial(degree, nvar, coeff)

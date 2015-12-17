@@ -58,7 +58,7 @@ MODULE quadratic_surfaces
             fit_multi_quadratic, find_fit_extremum, linsolvx, &
             find_two_fit_extremum, &
             evaluate_fit_grad_quadratic, polifit, write_poli, &
-            print_quadratic_polynomial
+            print_quadratic_polynomial, summarize_fitting_data
 
 CONTAINS
 
@@ -650,5 +650,52 @@ REAL(DP), INTENT(IN) :: coeff(nvar)
 
 RETURN
 END SUBROUTINE print_quadratic_polynomial
+
+SUBROUTINE summarize_fitting_data(degree, ndata, x, f)
+
+USE kinds, ONLY : DP
+USE io_global, ONLY : stdout
+IMPLICIT NONE
+INTEGER :: degree, ndata
+REAL(DP) :: x(degree,ndata), f(ndata)
+
+INTEGER :: idata
+
+  WRITE(stdout,'(5x," Fitting the following data")')
+  IF (degree==1) THEN
+     WRITE(stdout,'(10x,"x1",12x,"f")')
+     DO idata=1,ndata
+        WRITE(stdout,'(2f15.8)') x(1,idata), f(idata)
+     ENDDO
+  ELSEIF (degree==2) THEN
+     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"f")')
+     DO idata=1,ndata
+        WRITE(stdout,'(3f15.8)') x(1:2,idata), f(idata)
+     ENDDO
+  ELSEIF (degree==3) THEN
+     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"x3",12x,"f")')
+     DO idata=1,ndata
+        WRITE(stdout,'(4f15.8)') x(1:3,idata), f(idata)
+     ENDDO
+  ELSEIF (degree==4) THEN
+     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"x3",12x,12x,"x4",12x,"f")')
+     DO idata=1,ndata
+        WRITE(stdout,'(5f15.8)') x(1:4,idata), f(idata)
+     ENDDO
+  ELSEIF (degree==5) THEN
+     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"x3",12x,12x,"x4",12x,"x5",12x,"f")')
+     DO idata=1,ndata
+        WRITE(stdout,'(6f15.8)') x(1:5,idata), f(idata)
+     ENDDO
+  ELSEIF (degree==6) THEN
+     WRITE(stdout,'(10x,"x1",12x,"x2",12x,"x3",12x,12x,"x4",12x,"x5",12x,&
+                                                               &"x6",12x,"f")')
+     DO idata=1,ndata
+        WRITE(stdout,'(7f15.8)') x(1:6,idata), f(idata)
+     ENDDO
+  ENDIF
+
+RETURN
+END SUBROUTINE summarize_fitting_data
 
 END MODULE quadratic_surfaces
