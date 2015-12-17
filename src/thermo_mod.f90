@@ -583,6 +583,33 @@ MODULE control_pressure
 
 END MODULE control_pressure
 
+MODULE control_xrdp
+
+  USE kinds, ONLY: DP
+  SAVE
+
+  REAL(DP) :: lambda              ! wavelenght in Angstrom of the X-rays
+  CHARACTER(LEN=2) :: lambda_elem ! anode element
+
+  CHARACTER(LEN=256) :: flxrdp    ! file where the data are written 
+  CHARACTER(LEN=256) :: flpsxrdp  ! postscript file with the X-ray diffraction
+                                  ! spectrum
+  LOGICAL :: lformf               ! If true makes plot of the form factor
+                                  ! of each atom type
+  CHARACTER(LEN=256) :: flformf   ! file where the data are written 
+  CHARACTER(LEN=256) :: flpsformf ! postscript file with the X-ray diffraction
+
+  REAL(DP) :: smin, smax          ! the minimum and maximum s for the 
+                                  ! atomic form factor plot
+  INTEGER :: nspoint
+  LOGICAL :: lcm                  ! if .true. use the Cromer-Mann coefficients
+                                  ! to calculate the form factors, otherwise
+                                  ! use Doyle-Turner or Smith-Burge parameters
+  LOGICAL :: lxrdp                ! if .true. compute xrdp after the crystal
+                                  ! parameters optimization
+
+END MODULE control_xrdp
+
 MODULE control_gnuplot
   USE kinds,  ONLY : DP
   !

@@ -14,6 +14,7 @@ elastic_const.o \
 isoentropic.o \
 latgen_2d.o \
 gnuplot.o \
+lattices.o \
 mp_asyn.o \
 phdos_module.o \
 ph_freq_module.o \
@@ -23,7 +24,8 @@ quadratic_surfaces.o \
 quartic_surfaces.o \
 rotate.o \
 space_groups.o \
-strain.o
+strain.o \
+xrdp.o 
 
 all : thermo_lib.a
 

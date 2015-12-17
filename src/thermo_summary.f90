@@ -24,6 +24,8 @@ SUBROUTINE thermo_summary()
   USE control_asy,          ONLY : flasy, lasymptote, asymptote_command
   USE control_elastic_constants, ONLY : frozen_ions, ngeo_strain, &
                                   elastic_algorithm
+  USE control_xrdp,         ONLY : lambda, flxrdp, flpsxrdp, lformf, &
+                                   flformf, smin, smax, nspoint, lcm
   USE control_2d_bands,     ONLY : lprojpbs
   USE space_groups,         ONLY : sg_name, find_space_group, set_fft_fact
   USE control_pwrun,        ONLY : nr1_save, nr2_save, nr3_save
@@ -34,10 +36,11 @@ SUBROUTINE thermo_summary()
   USE spin_orb,             ONLY : domag
   USE rap_point_group,      ONLY : code_group
   USE cell_base,            ONLY : at, bg, celldm, omega
-  USE ions_base,            ONLY : tau, nat, ityp, amass, atm
+  USE ions_base,            ONLY : tau, nat, ityp, nsp, amass, atm
   USE symm_base,            ONLY : irt, nsym, s, sr, ftau
   USE constants,            ONLY : amu_si, bohr_radius_si
   USE bz_2d_form,           ONLY : bz_2d, allocate_2d_bz, init_2d_bz
+  USE xrdp_module,          ONLY : write_form_factor, compute_xrdp
   USE mp_world,             ONLY : world_comm
   USE mp_images,            ONLY : nimage, my_image_id, root_image
   USE environment,          ONLY : environment_end
@@ -48,7 +51,7 @@ SUBROUTINE thermo_summary()
   IMPLICIT NONE
   INTEGER :: ios
   CHARACTER(LEN=6) :: int_to_char
-  CHARACTER(LEN=256) :: asy_filename
+  CHARACTER(LEN=256) :: asy_filename, filename
   CHARACTER(LEN=11) :: group_name
   REAL(DP) :: total_mass, total_expected_mass, current_mass, expected_mass, fact
   REAL(DP) :: atom_weight, celldm_2d(3)
@@ -1023,8 +1026,7 @@ WRITE(stdout,'(5x,70("-"))')
      asy_filename=TRIM(flasy)//'.asy'
      IF ( my_image_id==root_image ) THEN
         IF (ibrav /= 13 .AND. ibrav /= -13 .AND. ibrav /=91 .AND. &
-                        ibrav /=14 .AND. ibrav /=0) &
-           THEN 
+                        ibrav /=14 .AND. ibrav /=0) THEN 
            CALL plot_bz(ibrav, celldm, at, bg, point_label_type, &
                 xqaux, wqaux, nqaux, letter, letter_path, npk_label, &
                 label_list, asy_filename)
@@ -1032,6 +1034,28 @@ WRITE(stdout,'(5x,70("-"))')
            IF (lasymptote.AND.ionode) &
                ierr=system(TRIM(asymptote_command)//' '//TRIM(asy_filename))
         ENDIF
+!
+!  Form factors of the atoms
+
+        WRITE(stdout,'(/,5x,"Computing the X-ray powder diffraction intensities")')
+        IF (lformf) THEN
+           DO it=1,nsp
+              IF (lcm) THEN
+                WRITE(stdout,'(/,5x,"Form factors from Cromer-Mann &
+                             &parameters")')
+              ELSE
+                 WRITE(stdout,'(/,5x,"Form factors from Doyle-Turner &
+                             &or Smith-Burge parameters")')
+              END IF
+              filename=TRIM(flformf)//'.'//TRIM(int_to_char(it))
+              CALL write_form_factor(atm(it),smin,smax,nspoint,lcm,filename)
+           END DO
+           CALL plot_form_factors()
+        END IF
+
+        CALL compute_xrdp(at,bg,celldm(1),nat,tau,nsp,ityp,atm, &
+                               lambda,ibrav,lcm,flxrdp)
+        CALL plot_xrdp('')
      ENDIF
      CALL summarize_kpt(xqaux, wqaux, nqaux, letter_path)
 

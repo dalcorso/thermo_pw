@@ -58,6 +58,10 @@ SUBROUTINE thermo_readin()
                                         elastic_algorithm, poly_degree, &
                                         elcpvar, epsilon_0
   USE control_piezoelectric_tensor, ONLY : nosym_save
+  USE control_xrdp,         ONLY : lambda, flxrdp, flpsxrdp, lformf, smin, &
+                                   smax, nspoint, flformf, flpsformf, lcm, &
+                                   lxrdp, lambda_elem
+  USE xrdp_module,          ONLY : select_lambda
   USE control_energy_plot,  ONLY : ncontours, color_levels, ene_levels 
   USE piezoelectric_tensor, ONLY : nppl
   USE control_pwrun,        ONLY : celldm_save, ibrav_save, ityp_save, &
@@ -136,8 +140,13 @@ SUBROUTINE thermo_readin()
                             flenergy,                       &
                             fl_el_cons,                     &
                             flvec,                          &
+                            flxrdp,                         &
                             flasy, asymptote_command,       &
                             lasymptote,                     &
+                            flpsxrdp, flpsxrdp,             &
+                            flpsformf, flformf,             &
+                            smin, smax, nspoint,            &
+                            lformf, lcm, lxrdp,             &
                             emin_input, emax_input,         &
                             vmin_input, vmax_input, deltav, &
                             lmurn,                          &
@@ -248,6 +257,15 @@ SUBROUTINE thermo_readin()
   volume_ph=0.0_DP
   celldm_ph=0.0_DP
 
+  lambda=0.0_DP
+  lambda_elem=' '
+  smin=0.0_DP
+  smax=1.0_DP
+  nspoint=200
+  lformf=.FALSE.
+  lcm=.FALSE.
+  lxrdp=.FALSE.
+
   filband='output_band.dat'
   flpband='output_pband.dat'
   flpgrun='output_pgrun.dat'
@@ -262,6 +280,8 @@ SUBROUTINE thermo_readin()
   flgrun='output_grun.dat'
   flevdat='output_ev.dat'
   fl_el_cons='output_el_cons.dat'
+  flxrdp='output_xrdp.dat'
+  flformf='output_formf.dat'
   flpbs='output_pbs'
   flprojlayer='output_projlayer'
   flenergy='output_energy'
@@ -277,6 +297,8 @@ SUBROUTINE thermo_readin()
   flpsnkconv='output_nkconv.ps'
   flpsgrun='output_grun.ps'
   flpsenergy='output_energy.ps'
+  flpsxrdp='output_xrdp.ps'
+  flpsformf='output_formf.ps'
 
   flasy='asy_tmp'
   lasymptote=.FALSE.
@@ -374,6 +396,8 @@ SUBROUTINE thermo_readin()
 
   IF (volume_ph==0.0_DP.AND.celldm_ph(1)==0.0_DP.AND.temp_ph==0.0_DP) &
                                          temp_ph=tmin
+
+  IF (lambda==0.0_DP) CALL select_lambda(lambda_elem,lambda)
 
   nqaux=0
   set_internal_path=.FALSE.

@@ -40,6 +40,9 @@ SUBROUTINE bcast_thermo_input()
   USE control_2d_bands,     ONLY : lprojpbs, nkz, sym_divide, identify_sur, &
                                    gap_thr, sur_layers, sur_thr, force_bands, &
                                    only_bands_plot, dump_states, subtract_vacuum
+  USE control_xrdp,    ONLY : lambda, flxrdp, flpsxrdp, lformf, smin, smax, &
+                              nspoint, flformf, flpsformf, lcm, lxrdp, &
+                              lambda_elem
   USE output,          ONLY : fildyn
   USE mp_world,        ONLY : world_comm
   USE mp,              ONLY : mp_bcast
@@ -103,6 +106,18 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( deltat, meta_ionode_id, world_comm )
   CALL mp_bcast( ntemp, meta_ionode_id, world_comm )
   CALL mp_bcast( pressure, meta_ionode_id, world_comm )
+  CALL mp_bcast( lambda, meta_ionode_id, world_comm )
+  CALL mp_bcast( lambda_elem, meta_ionode_id, world_comm )
+  CALL mp_bcast( smin, meta_ionode_id, world_comm )
+  CALL mp_bcast( smax, meta_ionode_id, world_comm )
+  CALL mp_bcast( nspoint, meta_ionode_id, world_comm )
+  CALL mp_bcast( lformf, meta_ionode_id, world_comm )
+  CALL mp_bcast( lcm, meta_ionode_id, world_comm )
+  CALL mp_bcast( lxrdp, meta_ionode_id, world_comm )
+  CALL mp_bcast( flxrdp, meta_ionode_id, world_comm )
+  CALL mp_bcast( flpsxrdp, meta_ionode_id, world_comm )
+  CALL mp_bcast( flformf, meta_ionode_id, world_comm )
+  CALL mp_bcast( flpsformf, meta_ionode_id, world_comm )
   CALL mp_bcast( nppl, meta_ionode_id, world_comm )
   CALL mp_bcast( npx, meta_ionode_id, world_comm )
   CALL mp_bcast( lprojpbs, meta_ionode_id, world_comm )

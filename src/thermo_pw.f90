@@ -58,7 +58,7 @@ PROGRAM thermo_pw
   ! ...               and orthorombic systems. 
   ! ...
   USE kinds,            ONLY : DP
-  USE ions_base,        ONLY : nat, tau, ntyp => nsp, amass
+  USE ions_base,        ONLY : nat, atm, tau, nsp, ityp, amass
   USE check_stop,       ONLY : check_stop_init
   USE mp_global,        ONLY : mp_startup, mp_global_end
   USE mp_images,        ONLY : nimage, nproc_image, my_image_id, root_image
@@ -101,13 +101,16 @@ PROGRAM thermo_pw
   USE control_gnuplot,  ONLY : flgnuplot
   USE control_bands,    ONLY : nbnd_bands
   USE control_pwrun,    ONLY : ibrav_save, do_punch, amass_save
+  USE control_xrdp,     ONLY : lxrdp, lambda, flxrdp, lcm
+  USE xrdp_module,      ONLY : compute_xrdp
   USE thermo_sym,       ONLY : laue, code_group_save
-  USE cell_base,        ONLY : omega, at
+  USE cell_base,        ONLY : omega, at, bg
   USE wvfct,            ONLY : nbnd
   USE lsda_mod,         ONLY : nspin
   USE thermodynamics,   ONLY : phdos_save
   USE ph_freq_thermodynamics, ONLY: ph_freq_save
   USE temperature,      ONLY : ntemp
+  USE control_pressure, ONLY : pressure, pressure_kb
   USE phdos_module,     ONLY : destroy_phdos
   USE input_parameters, ONLY : ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
                                trd_ht, rd_ht, cell_units, outdir
@@ -130,10 +133,11 @@ PROGRAM thermo_pw
   CHARACTER (LEN=256) :: auxdyn=' '
   CHARACTER (LEN=256) :: diraux=' '
   CHARACTER(LEN=6) :: int_to_char
+  CHARACTER(LEN=8) :: float_to_char
   INTEGER :: part, nwork, igeom, itemp, nspin0, exit_status
   LOGICAL  :: exst, parallelfs
   LOGICAL :: check_file_exists, check_dyn_file_exists
-  CHARACTER(LEN=256) :: file_dat
+  CHARACTER(LEN=256) :: file_dat, filename
   REAL(DP) :: poisson, bulkm
   ! Initialize MPI, clocks, print initial messages
   !
@@ -225,6 +229,18 @@ PROGRAM thermo_pw
 !  recompute the density at the minimum volume
 !
      CALL compute_density(omega,density)
+!
+!  compute the xrdp at the minimum volume if required by the user
+!
+     IF (lxrdp) THEN
+        filename=TRIM(flxrdp)
+        IF (pressure /= 0.0_DP) &
+           filename=TRIM(flxrdp)//'.'//TRIM(float_to_char(pressure_kb,1))
+
+        CALL compute_xrdp(at,bg,celldm(1),nat,tau,nsp,ityp,atm, &
+                                lambda,ibrav,lcm,filename)
+        CALL plot_xrdp('')
+     END IF
   END IF
 
   CALL deallocate_asyn()
@@ -246,6 +262,12 @@ PROGRAM thermo_pw
            WRITE(stdout,'(5x,"Doing a self-consistent calculation", i5)') 
            WRITE(stdout,'(2x,76("+"),/)')
            CALL do_pwscf(exit_status, .TRUE.)
+           IF (lxrdp) THEN
+              filename=TRIM(flxrdp)//'.scf'
+              CALL compute_xrdp(at,bg,celldm(1),nat,tau,nsp,ityp,atm, &
+                                   lambda,ibrav,lcm,filename)
+              CALL plot_xrdp('.scf')
+           END IF
         ENDIF
         IF (lbands_syn_1) THEN
 !
@@ -464,7 +486,7 @@ PROGRAM thermo_pw
 !   written on file
 !
            CALL q2r_sub(auxdyn) 
-           amass_save(1:ntyp)=amass(1:ntyp)
+           amass_save(1:nsp)=amass(1:nsp)
 !
 !    compute interpolated dispersions
 !

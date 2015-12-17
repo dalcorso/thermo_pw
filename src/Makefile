@@ -45,11 +45,13 @@ plotband_sub.o \
 plot_2d_bz.o \
 plot_e_ke.o \
 plot_e_nk.o \
+plot_formf.o \
 plot_gruneisen_band_anis.o \
 plot_multi_energy.o \
 plot_mur.o \
 plot_phdos.o \
 plot_thermo.o \
+plot_xrdp.o \
 print_polarization.o \
 proj_band_structure.o \
 q2r_sub.o \
