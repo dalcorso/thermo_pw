@@ -678,7 +678,7 @@ CHARACTER(LEN=*), INTENT(IN) :: opacity, color
 
 IF (ionode) &
    WRITE(iun_gnuplot, &
-     '("set obj rect from ",f12.6,"*xscale-xshift,",f12.6," to ",f12.6,"*xscale-shift,",f12.6,&
+     '("set obj rect from ",f12.6,"*xscale-xshift,",f12.6," to ",f12.6,"*xscale-xshift,",f12.6,&
                      &" behind fs solid ",a," noborder fc rgb ",a)') x(1), y(1), &
                                      x(3), y(3), TRIM(opacity), TRIM(color)
 RETURN
