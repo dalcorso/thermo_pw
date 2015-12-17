@@ -27,7 +27,8 @@ SUBROUTINE quadratic_fit()
                                coeff, degree
   USE io_global, ONLY : stdout
   USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_fit_extremum, &
-                                 write_fit_hessian, evaluate_fit_quadratic
+                                 write_fit_hessian, evaluate_fit_quadratic, &
+                                 print_quadratic_polynomial
   IMPLICIT NONE
   INTEGER :: nvar, ndata
   REAL(DP), ALLOCATABLE :: x(:,:), y(:), f(:)
@@ -160,36 +161,7 @@ SUBROUTINE quadratic_fit()
   ENDIF
   CALL fit_multi_quadratic(ndata,degree,nvar,x,f,coeff)
   
-  WRITE(stdout,'(/,5x,"Quadratic polynomial:")') 
-  WRITE(stdout,'(f15.8," +",f15.8," x1 +",f15.8," x1^2")') coeff(1), coeff(2), &
-                                                      coeff(3)
-  IF (degree>1) THEN
-     WRITE(stdout,'(f15.8," x2 +",f15.8," x2^2 +",f15.8," x1*x2")') coeff(4), &
-                                                     coeff(5), coeff(6)
-  ENDIF
-
-  IF (degree>2) THEN
-     WRITE(stdout,'(f15.8," x3 +",f15.8," x3^2 +",f15.8," x1*x3 +&
-              &",f15.8," x2*x3")') coeff(7), coeff(8), coeff(9), coeff(10)
-  ENDIF
-
-  IF (degree>3) THEN
-     WRITE(stdout,'(f15.8," x4 +",f15.8," x4^2 +",f15.8," x1*x4 +&
-              &",f15.8," x2*x4",f15.8," x3*x4")') coeff(11), coeff(12), &
-                                       coeff(13), coeff(14), coeff(15)
-  ENDIF
-
-  IF (degree>4) THEN
-     WRITE(stdout,'(f15.8," x5 +",f15.8," x5^2 +",f15.8," x1*x5 +&
-              &",f15.8," x2*x5",f15.8," x3*x5", f15.8, " x4*x5")') &
-              coeff(16), coeff(17), coeff(18), coeff(19), coeff(20), coeff(21)
-  ENDIF
-  IF (degree>5) THEN
-     WRITE(stdout,'(f15.8," x6 +",f15.8," x6^2 +",f15.8," x1*x6 +&
-              &",f15.8," x2*x6",f15.8," x3*x6", f15.8, " x4*x6",&
-              &f15.8," x5*x6")') coeff(22), coeff(23), coeff(24), &
-                                 coeff(25), coeff(26), coeff(27), coeff(28)
-  ENDIF
+  CALL print_quadratic_polynomial(degree, nvar, coeff)
 
 !  WRITE(stdout,'(/,7x,"Energy (1)      Fitted energy (2)   DeltaE (1)-(2)")') 
   chisq=0.0_DP
@@ -281,7 +253,8 @@ SUBROUTINE quadratic_fit_t(itemp)
   USE anharmonic, ONLY : celldm_t
   USE io_global, ONLY : stdout
   USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_two_fit_extremum, &
-                                 write_fit_hessian, evaluate_fit_quadratic
+                                 write_fit_hessian, evaluate_fit_quadratic,  &
+                                 print_quadratic_polynomial
   IMPLICIT NONE
   INTEGER :: itemp
   INTEGER :: ndata, ndatatot
@@ -426,38 +399,9 @@ SUBROUTINE quadratic_fit_t(itemp)
 !  ENDIF
   CALL fit_multi_quadratic(ndata,degree,nvar,x,f,coeff)
 
-  WRITE(stdout,'(/,5x,"Quadratic polynomial:")') 
-  WRITE(stdout,'(f15.8," +",f15.8," x1 +",f15.8," x1^2")') coeff(1), &
-                                                  coeff(2), coeff(3)
-  IF (degree>1) THEN
-     WRITE(stdout,'(f15.8," x2 +",f15.8," x2^2 +",f15.8," x1*x2")') &
-                                            coeff(4), coeff(5), coeff(6)
-  ENDIF
+  CALL print_quadratic_polynomial(degree, nvar, coeff)
 
-  IF (degree>2) THEN
-     WRITE(stdout,'(f15.8," x3 +",f15.8," x3^2 +",f15.8," x1*x3 +&
-              &",f15.8," x2*x3")') coeff(7), coeff(8), coeff(9), coeff(10)
-  ENDIF
-
-  IF (degree>3) THEN
-     WRITE(stdout,'(f15.8," x4 +",f15.8," x4^2 +",f15.8," x1*x4 +&
-              &",f15.8," x2*x4",f15.8," x3*x4")') coeff(11), coeff(12), &
-                                       coeff(13), coeff(14), coeff(15)
-  ENDIF
-
-  IF (degree>4) THEN
-     WRITE(stdout,'(f15.8," x5 +",f15.8," x5^2 +",f15.8," x1*x5 +&
-              &",f15.8," x2*x5",f15.8," x3*x5", f15.8, " x4*x5")') &
-              coeff(16), coeff(17), coeff(18), coeff(19), coeff(20), coeff(21)
-  ENDIF
-  IF (degree>5) THEN
-     WRITE(stdout,'(f15.8," x6 +",f15.8," x6^2 +",f15.8," x1*x6 +&
-              &",f15.8," x2*x6",f15.8," x3*x6", f15.8, " x4*x6",&
-              &f15.8," x5*x6")') coeff(22), coeff(23), coeff(24), &
-                                 coeff(25), coeff(26), coeff(27), coeff(28)
-  ENDIF
-
-  WRITE(stdout,'(/,7x,"Energy (1)      Fitted energy (2)   DeltaE (1)-(2)")') 
+!  WRITE(stdout,'(/,7x,"Energy (1)      Fitted energy (2)   DeltaE (1)-(2)")') 
   chisq=0.0_DP
   DO idata=1,ndata
      CALL evaluate_fit_quadratic(degree,nvar,x(1,idata),aux,coeff)
@@ -549,7 +493,8 @@ SUBROUTINE quadratic_fit_t_ph(itemp)
   USE ph_freq_anharmonic, ONLY : celldmf_t
   USE io_global, ONLY : stdout
   USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_two_fit_extremum, &
-                                 write_fit_hessian, evaluate_fit_quadratic
+                                 write_fit_hessian, evaluate_fit_quadratic,  &
+                                 print_quadratic_polynomial
   IMPLICIT NONE
   INTEGER :: itemp
   INTEGER :: ndata, ndatatot
@@ -694,36 +639,7 @@ SUBROUTINE quadratic_fit_t_ph(itemp)
 !  ENDIF
   CALL fit_multi_quadratic(ndata,degree,nvar,x,f,coeff)
 
-  WRITE(stdout,'(/,5x,"Quadratic polynomial:")') 
-  WRITE(stdout,'(f15.8," +",f15.8," x1 +",f15.8," x1^2")') coeff(1), &
-                                                  coeff(2), coeff(3)
-  IF (degree>1) THEN
-     WRITE(stdout,'(f15.8," x2 +",f15.8," x2^2 +",f15.8," x1*x2")') &
-                                            coeff(4), coeff(5), coeff(6)
-  ENDIF
-
-  IF (degree>2) THEN
-     WRITE(stdout,'(f15.8," x3 +",f15.8," x3^2 +",f15.8," x1*x3 +&
-              &",f15.8," x2*x3")') coeff(7), coeff(8), coeff(9), coeff(10)
-  ENDIF
-
-  IF (degree>3) THEN
-     WRITE(stdout,'(f15.8," x4 +",f15.8," x4^2 +",f15.8," x1*x4 +&
-              &",f15.8," x2*x4",f15.8," x3*x4")') coeff(11), coeff(12), &
-                                       coeff(13), coeff(14), coeff(15)
-  ENDIF
-
-  IF (degree>4) THEN
-     WRITE(stdout,'(f15.8," x5 +",f15.8," x5^2 +",f15.8," x1*x5 +&
-              &",f15.8," x2*x5",f15.8," x3*x5", f15.8, " x4*x5")') &
-              coeff(16), coeff(17), coeff(18), coeff(19), coeff(20), coeff(21)
-  ENDIF
-  IF (degree>5) THEN
-     WRITE(stdout,'(f15.8," x6 +",f15.8," x6^2 +",f15.8," x1*x6 +&
-              &",f15.8," x2*x6",f15.8," x3*x6", f15.8, " x4*x6",&
-              &f15.8," x5*x6")') coeff(22), coeff(23), coeff(24), &
-                                 coeff(25), coeff(26), coeff(27), coeff(28)
-  ENDIF
+  CALL print_quadratic_polynomial(degree, nvar, coeff)
 
   WRITE(stdout,'(/,7x,"Energy (1)      Fitted energy (2)   DeltaE (1)-(2)")') 
   chisq=0.0_DP

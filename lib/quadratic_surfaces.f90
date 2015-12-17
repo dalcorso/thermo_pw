@@ -57,7 +57,8 @@ MODULE quadratic_surfaces
   PUBLIC :: evaluate_fit_quadratic, write_fit_hessian, &
             fit_multi_quadratic, find_fit_extremum, linsolvx, &
             find_two_fit_extremum, &
-            evaluate_fit_grad_quadratic, polifit, write_poli
+            evaluate_fit_grad_quadratic, polifit, write_poli, &
+            print_quadratic_polynomial
 
 CONTAINS
 
@@ -605,5 +606,49 @@ END DO
 
 RETURN
 END SUBROUTINE write_poli
+
+SUBROUTINE print_quadratic_polynomial(degree, nvar, coeff)
+
+USE kinds, ONLY : DP
+USE io_global, ONLY : stdout
+IMPLICIT NONE
+
+INTEGER, INTENT(IN) :: degree, nvar
+REAL(DP), INTENT(IN) :: coeff(nvar)
+
+
+  WRITE(stdout,'(/,5x,"Quadratic polynomial:")') 
+  WRITE(stdout,'(f15.8," +",f15.8," x1 +",f15.8," x1^2")') coeff(1), coeff(2), &
+                                                      coeff(3)
+  IF (degree>1) THEN
+     WRITE(stdout,'(f15.8," x2 +",f15.8," x2^2 +",f15.8," x1*x2")') coeff(4), &
+                                                     coeff(5), coeff(6)
+  ENDIF
+
+  IF (degree>2) THEN
+     WRITE(stdout,'(f15.8," x3 +",f15.8," x3^2 +",f15.8," x1*x3 +&
+              &",f15.8," x2*x3")') coeff(7), coeff(8), coeff(9), coeff(10)
+  ENDIF
+
+  IF (degree>3) THEN
+     WRITE(stdout,'(f15.8," x4 +",f15.8," x4^2 +",f15.8," x1*x4 +&
+              &",f15.8," x2*x4",f15.8," x3*x4")') coeff(11), coeff(12), &
+                                       coeff(13), coeff(14), coeff(15)
+  ENDIF
+
+  IF (degree>4) THEN
+     WRITE(stdout,'(f15.8," x5 +",f15.8," x5^2 +",f15.8," x1*x5 +&
+              &",f15.8," x2*x5",f15.8," x3*x5", f15.8, " x4*x5")') &
+              coeff(16), coeff(17), coeff(18), coeff(19), coeff(20), coeff(21)
+  ENDIF
+  IF (degree>5) THEN
+     WRITE(stdout,'(f15.8," x6 +",f15.8," x6^2 +",f15.8," x1*x6 +&
+              &",f15.8," x2*x6",f15.8," x3*x6", f15.8, " x4*x6",&
+              &f15.8," x5*x6")') coeff(22), coeff(23), coeff(24), &
+                                 coeff(25), coeff(26), coeff(27), coeff(28)
+  ENDIF
+
+RETURN
+END SUBROUTINE print_quadratic_polynomial
 
 END MODULE quadratic_surfaces
