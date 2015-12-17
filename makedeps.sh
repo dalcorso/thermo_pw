@@ -82,18 +82,18 @@ for dir in $dirs; do
              DEPENDS="$LEVEL2/include $LEVEL2/iotk/src $LEVEL2/FFTXlib $LEVEL2/Modules \
                       $LEVEL2/PW/src $LEVEL2/PHonon/PH" ;;
 	thermo_pw/lib )
-             DEPENDS="$LEVEL2/include $LEVEL2/iotk/src $LEVEL2/Modules \
-                      $LEVEL2/PW/src $LEVEL2/PHonon/PH " ;;
+             DEPENDS="$LEVEL2/include $LEVEL2/iotk/src $LEVEL2/FFTXlib \
+                      $LEVEL2/Modules $LEVEL2/PW/src $LEVEL2/PHonon/PH " ;;
 	thermo_pw/qe )
-             DEPENDS="$LEVEL2/include $LEVEL2/iotk/src $LEVEL2/Modules \
-                      $LEVEL2/PW/src $LEVEL2/PHonon/PH \ 
+             DEPENDS="$LEVEL2/include $LEVEL2/iotk/src $LEVEL2/FFTXlib \
+                      $LEVEL2/Modules $LEVEL2/PW/src $LEVEL2/PHonon/PH \
                       $LEVEL2/thermo_pw/lib " ;;
 	thermo_pw/src )
-             DEPENDS="$LEVEL2/include $LEVEL2/iotk/src $LEVEL2/Modules \
+             DEPENDS="$LEVEL2/include $LEVEL2/iotk/src $LEVEL2/FFTXlib $LEVEL2/Modules \
                       $LEVEL2/PW/src $LEVEL2/PHonon/PH $LEVEL2/PP/src \
                       $LEVEL2/thermo_pw/lib $LEVEL2/thermo_pw/qe " ;;
 	thermo_pw/tools )
-             DEPENDS="$LEVEL2/include $LEVEL2/iotk/src $LEVEL2/Modules \
+             DEPENDS="$LEVEL2/include $LEVEL2/iotk/src $LEVEL2/FFTXlib $LEVEL2/Modules \
                       $LEVEL2/PW/src $LEVEL2/PHonon/PH $LEVEL2/thermo_pw/lib" ;;
 
     *)
