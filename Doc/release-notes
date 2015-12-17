@@ -1,5 +1,8 @@
 New in version 0.4.0
 
+Added support for the calculation of the X-ray diffraction spectra of a
+given structure.
+
 Started to implement finite pressure calculations.
 
 Thermal expansion from Gruneisen parameters for hexagonal, tetragonal, and
@@ -16,6 +19,7 @@ Introduced a minium strain in the calculation of elastic constants.
 
 Introduced a tool that reads the elastic constants of a solid and
 computes the Voigt-Reuss-Hill averages separately from the main code.
+
 
 23/06/2015 Version 0.3.0 of thermo_pw is now frozen.
 
