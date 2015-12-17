@@ -14,6 +14,7 @@ elastic_const.o \
 isoentropic.o \
 latgen_2d.o \
 gnuplot.o \
+gnuplot_color.o \
 lattices.o \
 mp_asyn.o \
 phdos_module.o \

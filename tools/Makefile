@@ -15,7 +15,7 @@ LIBOBJS	= ../lib/thermo_lib.a ../../PHonon/PH/libph.a ../../flib/ptools.a ../../
 
 TLDEPS= bindir mods libs pw
 
-all : group_name.x group_number.x gener_2d_slab.x gener_3d_slab.x gener_nanowire.x supercell.x plot_sur_states.x translate.x elastic.x
+all : group_name.x group_number.x gener_2d_slab.x gener_3d_slab.x gener_nanowire.x supercell.x plot_sur_states.x translate.x elastic.x test_colors.x
 
 libs-ph : libph.a libphaux.a
 
@@ -65,9 +65,23 @@ gener_nanowire.x : gener_nanowire.o $(PWOBJS) $(LIBOBJS)
 		 $(LIBOBJS) $(PWOBJS) $(QEMODS) $(LIBOBJS) $(PWOBJS) $(LIBS)
 	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/gener_nanowire.x . )
 
+test_colors.x : test_colors.o $(PWOBJS) $(LIBOBJS)
+	$(LD) $(LDFLAGS) -o $@ test_colors.o \
+		 $(LIBOBJS) $(PWOBJS) $(QEMODS) $(LIBOBJS) $(PWOBJS) $(LIBS)
+	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/test_colors.x . )
+
 clean :
 	- /bin/rm -f *.x *.o *.a *~ *.F90 *.d *.mod *.i *.L
-	- /bin/rm -rf ../../bin/thermo_pw.x 
+	- /bin/rm -rf ../../bin/group_name.x 
+	- /bin/rm -rf ../../bin/group_number.x 
+	- /bin/rm -rf ../../bin/supercell.x 
+	- /bin/rm -rf ../../bin/translate.x 
+	- /bin/rm -rf ../../bin/elastic.x 
+	- /bin/rm -rf ../../bin/plot_sur_states.x 
+	- /bin/rm -rf ../../bin/gener_2d_slab.x 
+	- /bin/rm -rf ../../bin/gener_3d_slab.x 
+	- /bin/rm -rf ../../bin/gener_nanowire.x 
+	- /bin/rm -rf ../../bin/test_colors.x 
 
 include make.depend
 # DO NOT DELETE
