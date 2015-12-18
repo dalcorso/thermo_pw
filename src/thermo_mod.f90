@@ -52,6 +52,11 @@ MODULE thermo_mod
                                                 ! geometry
   REAL(DP) :: density                           ! the density of the solid
 
+  INTEGER :: max_geometries                     ! This value controls the
+                                                ! number of geometries for
+                                                ! which phonons are calculated
+                                                ! in each run
+
 END MODULE thermo_mod
 
 MODULE temperature

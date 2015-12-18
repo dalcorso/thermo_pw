@@ -15,7 +15,7 @@ SUBROUTINE thermo_readin()
   !
   USE kinds,                ONLY : DP
   USE thermo_mod,           ONLY : what, ngeo, step_ngeo, reduced_grid, &
-                                   fact_ngeo
+                                   fact_ngeo, max_geometries
   USE control_thermo,       ONLY : outdir_thermo, after_disp, with_eigen,  &
                                    do_scf_relax
   USE data_files,           ONLY : flevdat, flfrc, flfrq, fldos, fltherm,  &
@@ -103,6 +103,7 @@ SUBROUTINE thermo_readin()
                             flnkconv,                       &
                             fact_ngeo,                      &
                             step_ngeo,                      &
+                            max_geometries,                 &
                             nq1_d, nq2_d, nq3_d,            &
                             tmin, tmax, deltat, ntemp,      &
                             pressure,                       &
@@ -183,6 +184,7 @@ SUBROUTINE thermo_readin()
   step_ngeo(5) = 0.5_DP
   step_ngeo(6) = 0.5_DP
   reduced_grid =.FALSE.
+  max_geometries=1000000
 
   nq1_d=192
   nq2_d=192

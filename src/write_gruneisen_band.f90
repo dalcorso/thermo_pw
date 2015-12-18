@@ -57,6 +57,7 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
   exst_rap=.TRUE.
   DO igeo = 1, ngeo(1)
 
+     IF (no_ph(igeo)) CYCLE
      filedata = TRIM(file_disp)//'.g'//TRIM(int_to_char(igeo))
 
      IF (ionode) &

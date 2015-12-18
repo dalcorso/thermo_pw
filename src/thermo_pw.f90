@@ -117,7 +117,7 @@ PROGRAM thermo_pw
   USE control_mur,      ONLY : vmin, b0, b01, emin, celldm0, lmurn
   USE thermo_mod,       ONLY : what, ngeo, omega_geo, energy_geo, &
                                tot_ngeo, reduced_grid, ibrav_geo, celldm_geo, &
-                               central_geo, density, no_ph
+                               central_geo, density, no_ph, max_geometries
   USE cell_base,        ONLY : ibrav_ => ibrav, celldm_ => celldm
   USE control_2d_bands, ONLY : only_bands_plot
   USE ph_restart,       ONLY : destroy_status_run
@@ -134,7 +134,7 @@ PROGRAM thermo_pw
   CHARACTER (LEN=256) :: diraux=' '
   CHARACTER(LEN=6) :: int_to_char
   CHARACTER(LEN=8) :: float_to_char
-  INTEGER :: part, nwork, igeom, itemp, nspin0, exit_status
+  INTEGER :: part, nwork, igeom, itemp, nspin0, exit_status, ph_geometries
   LOGICAL  :: exst, parallelfs
   LOGICAL :: check_file_exists, check_dyn_file_exists
   CHARACTER(LEN=256) :: file_dat, filename
@@ -464,6 +464,12 @@ PROGRAM thermo_pw
 
         IF ( .NOT. check_dyn_file_exists(auxdyn)) THEN
 
+           ph_geometries=ph_geometries+1
+           IF (ph_geometries > max_geometries) THEN
+              WRITE(stdout,'(5x,"The code stops because max_geometries is",&
+                               &i4)') max_geometries
+              GOTO 1000
+           ENDIF
            CALL check_initial_status(auxdyn)
            !
            part=2
@@ -590,7 +596,7 @@ PROGRAM thermo_pw
            CALL plot_anhar_anis()
         ENDIF
      ENDIF
-
+1000 CONTINUE
      IF (lmatdyn.AND.ldos) THEN
         DO igeom=1,tot_ngeo
            CALL destroy_phdos(phdos_save(igeom))
