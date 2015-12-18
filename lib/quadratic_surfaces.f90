@@ -58,7 +58,8 @@ MODULE quadratic_surfaces
             fit_multi_quadratic, find_fit_extremum, linsolvx, &
             find_two_fit_extremum, &
             evaluate_fit_grad_quadratic, polifit, write_poli, &
-            print_quadratic_polynomial, summarize_fitting_data
+            print_quadratic_polynomial, summarize_fitting_data, &
+            write_vector, introduce_quadratic_fit
 
 CONTAINS
 
@@ -697,5 +698,34 @@ INTEGER :: idata
 
 RETURN
 END SUBROUTINE summarize_fitting_data
+
+SUBROUTINE write_vector(degree, x)
+
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: degree
+REAL(DP) :: x(degree)
+
+INTEGER :: i
+
+  DO i=1, degree
+     WRITE(stdout,'(23x,"x",i1,"=",f16.9)') i, x(i)
+  END DO
+
+RETURN
+END SUBROUTINE write_vector
+
+SUBROUTINE introduce_quadratic_fit(degree, nvar, ndata)
+
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: degree, nvar, ndata
+
+  WRITE(stdout,'(/,5x,"Fitting the data with a quadratic function")')
+  WRITE(stdout,'(5x,"Number of degrees of freedom: ",i5)')  degree
+  WRITE(stdout,'(5x,"Coefficients of the quadratic:",i5)')  nvar
+  WRITE(stdout,'(5x,"Number of fitting data:",7x,i5,/)')  ndata
+
+RETURN
+END SUBROUTINE introduce_quadratic_fit
+
 
 END MODULE quadratic_surfaces
