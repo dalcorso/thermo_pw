@@ -38,7 +38,6 @@ SUBROUTINE do_berry ( exit_status, polar, nppl )
   USE symm_base,        ONLY : nosym
   USE input_parameters, ONLY : diago_thr_init
   USE bp,               ONLY : pdl_tot, nppstr, gdir, lberry
-  USE check_stop,       ONLY : check_stop_init, check_stop_now
   USE mp_images,        ONLY : intra_image_comm
   !
   IMPLICIT NONE

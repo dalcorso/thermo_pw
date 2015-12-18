@@ -65,7 +65,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   ethr=diago_thr_init
   istep=0
   !
-  CALL check_stop_init()
+  ! CALL check_stop_init()
   !
   CALL setup ()
   !

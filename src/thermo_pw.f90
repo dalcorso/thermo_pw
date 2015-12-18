@@ -156,7 +156,7 @@ PROGRAM thermo_pw
   !
   CALL thermo_summary()
   !
-  IF (my_image_id /= root_image) CALL check_stop_init()
+  CALL check_stop_init()
   !
   part = 1
   !
