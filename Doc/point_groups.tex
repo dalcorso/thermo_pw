@@ -6,11 +6,17 @@
 %! or http://www.gnu.org/copyleft/gpl.txt .
 %!
 \documentclass[12pt,a4paper]{article}
-\def\version{0.2.0}
+\def\version{0.4.0}
 \def\qe{{\sc Quantum ESPRESSO}}
-\def\tpw{{\sc thermo\_pw}}
+\def\tpw{{\sc THERMO\_PW}}
 
 \usepackage{html}
+\usepackage{color}
+
+\definecolor{web-blue}{rgb}{0,0.5,1.0}
+\definecolor{coral}{rgb}{1.0,0.5,0.3}
+\definecolor{red}{rgb}{1.0,0,0.0}
+\definecolor{green}{rgb}{0.,1.0,0.0}
 
 \usepackage{graphicx}
 
@@ -31,14 +37,12 @@
 \author{}
 \date{}
 
-\def\qeImage{../../Doc/quantum_espresso.pdf}
-\def\democritosImage{../../Doc/democritos.pdf}
-\def\SissaImage{./sissa.pdf}
+%\def\SissaImage{./sissa_on_white.png}
 
 \title{
 %  \includegraphics[width=6cm]{\SissaImage}\\
   \vskip 1cm
-  \Huge Point groups in \qe\ and \tpw \smallskip
+  {\color{red}\Huge Point groups in \qe\ and \tpw\ }
   \Large (version \version)
 }
 
@@ -46,7 +50,9 @@
 
 \tableofcontents
 
-\section{Introduction}
+\newpage
+
+\section{\color{coral}Introduction}
 \qe\ and \tpw\ can determine the point group of a
 solid, the symmetry of its physical properties, the symmetry
 of the electronic wavefunctions and of the phonon modes. The proper interpretation
@@ -99,10 +105,10 @@ and their orientation with respect to the Cartesian axes, as given by the
 \qe\ routines, are described there and here we assume that the reader has a
 basic understanding of these primitive vectors. 
 
-\section{People}
+\section{\color{coral}People}
 This guide has been written by Andrea Dal Corso (SISSA).
 
-\section{Overview}
+\section{\color{coral}Overview}
 The $32$ crystallographic point groups (point groups in the following)
 in \qe\ and \tpw\ are identified by an integer number (the group code) and 
 by a string (the group name) according to the following table:
@@ -184,9 +190,10 @@ For the double groups a minus sign in front of the symmetry name
 indicates that the operation is multiplied by the $360^\circ$ rotation 
 (called \texttt{-E} in the tables or $\bar E$ in the text).
 
-\section{Point groups}
+\newpage
+\section{\color{coral}Point groups}
 
-\subsection{$C_1\ (1)$}
+\subsection{\color{web-blue}$C_1\ (1)$}
 This group contains only the identity ($E$). 
 It is a group compatible with the triclinic Bravais lattice 
 (\texttt{ibrav=14}). \\
@@ -208,7 +215,7 @@ There is only one irreducible representation ($\Gamma_2$),
 so all functions are totally symmetric. \\
 This group has no subgroup.
 
-\subsection{$C_i\ (\bar 1)$}
+\subsection{\color{web-blue}$C_i\ (\bar 1)$}
 This group has two elements: The identity and inversion ($i$).
 It is a group compatible with the triclinic Bravais lattice 
 (\texttt{ibrav=14}). \\
@@ -241,7 +248,7 @@ C_i    G_2+   G_2-
 C_1    G_2    G_2
 \end{verbatim}
 
-\subsection{$C_s\ (m)$}
+\subsection{\color{web-blue}$C_s\ (m)$}
 This group has two elements: The identity and a mirror symmetry ($\sigma$).
 It is a group compatible with the monoclinic system and with the
 simple monoclinic (\texttt{ibrav=$\pm$12}) or the one-base centered monoclinic 
@@ -292,7 +299,7 @@ C_s    G_3    G_4
 C_1    G_2    G_2
 \end{verbatim}
 
-\subsection{$C_2\ (2)$}
+\subsection{\color{web-blue}$C_2\ (2)$}
 This group has two elements: The identity and a rotation of $180^\circ$ 
 about an axis ($C_2$).
 It is a group compatible with the monoclinic system and with the
@@ -340,7 +347,7 @@ C_2    G_3    G_4
 C_1    G_2    G_2
 \end{verbatim}
 
-\subsection{$C_3\ (3)$}
+\subsection{\color{web-blue}$C_3\ (3)$}
 This group has three elements: The identity and two rotations of $\pm120^\circ$ 
 about an axis ($C_3$ and $C_3^2$).
 It is a group compatible with the trigonal and hexagonal systems and with the
@@ -395,7 +402,7 @@ C_2    G_4    G_5    G_6
 C_1    G_2    G_2    G_2
 \end{verbatim}
 
-\subsection{$C_4\ (4)$}
+\subsection{\color{web-blue}$C_4\ (4)$}
 This group has four elements: The identity, two rotations of $\pm90^\circ$ 
 about an axis ($C_4$ and $C_4^3$), and a rotation of $180^\circ$ about the same
 axis ($C_2$).
@@ -463,7 +470,7 @@ C_1     G_2    G_2    G_2    G_2
 C_2     G_3    G_4    G_3    G_4
 \end{verbatim}
 
-\subsection{$C_6\ (6)$}
+\subsection{\color{web-blue}$C_6\ (6)$}
 This group has six elements: The identity, two rotations of $\pm60^\circ$ 
 about an axis ($C_6$ and $C_6^5$), two rotations of $\pm120^\circ$
 about the same axis ($C_3$ and $C_3^2$) and a rotation of $180^\circ$ about 
@@ -544,7 +551,7 @@ C_2     G_3    G_4    G_4    G_3    G_4    G_3
 C_3     G_4    G_5    G_4    G_5    G_6    G_6
 \end{verbatim}
 
-\subsection{$D_2\ (222)$ or $V$} 
+\subsection{\color{web-blue}$D_2\ (222)$ or $V$} 
 This group has four elements: The identity and three rotations of $180^\circ$ about 
 three perpendicular axes ($C_2$, $C_2'$, and $C_2''$). It is a group compatible with 
 the orthorhombic system and with the simple orthorhombic (\texttt{ibrav=8}), 
@@ -609,7 +616,7 @@ C_1     2 G_2
 C_2     G_3 + G_4
 \end{verbatim}
 
-\subsection{$D_3\ (32)$}
+\subsection{\color{web-blue}$D_3\ (32)$}
 This group has six elements: The identity, two rotations of $\pm120^\circ$ about
 an axis ($C_3$ and $C_3^2$) and three rotations of $180^\circ$ 
 ($3C_2'$) about three axes perpendicular to the axis of $C_3$.
@@ -676,7 +683,7 @@ C_2     G_3 + G_4    G_3    G_4
 C_3     G_4 + G_5    G_6    G_6   
 \end{verbatim}
 
-\subsection{$D_4\ (422)$} 
+\subsection{\color{web-blue}$D_4\ (422)$} 
 This group has eight elements: The identity, two rotations of 
 $\pm90^\circ$ about
 an axis ($C_4$ and $C_4^3$), a rotation of $180^\circ$ about the same axis and
@@ -760,7 +767,7 @@ C_4     G_5 + G_6       G_7 + G_8
 D_2     G_5             G_5
 \end{verbatim}
 
-\subsection{$D_6\ (622)$} 
+\subsection{\color{web-blue}$D_6\ (622)$} 
 This group has twelve elements: The identity, two rotations of 
 $\pm60^\circ$ about an axis ($C_6$ and $C_6^5$), two rotations of 
 $\pm120^\circ$ about the same axis
@@ -837,7 +844,7 @@ D_2       G_5          G_5           G_5
 D_3       G_4          G_4        G_5 + G_6
 \end{verbatim}
 
-\subsection{$C_{2v}\ (mm2)$} 
+\subsection{\color{web-blue}$C_{2v}\ (mm2)$} 
 This group has four elements: The identity, a rotation of $180^\circ$ about
 an axis ($C_2$) and two mirror planes ($\sigma_v$ and $\sigma_v'$) that contain 
 the $C_2$ axis.
@@ -918,7 +925,7 @@ C_s     G_3 + G_4
 C_2     G_3 + G_4
 \end{verbatim}
 
-\subsection{$C_{3v}\ (3m)$} 
+\subsection{\color{web-blue}$C_{3v}\ (3m)$} 
 This group has six elements: The identity, two rotations of $\pm120^\circ$ about
 an axis ($C_3$ and $C_3^2$) and three mirror planes ($3\sigma_v$) 
 that contain the $C_3$ axis.
@@ -984,7 +991,7 @@ C_s    G_3 + G_4   G_3      G_4
 C_3    G_4 + G_5   G_6      G_6
 \end{verbatim}
 
-\subsection{$C_{4v}\ (4mm)$} 
+\subsection{\color{web-blue}$C_{4v}\ (4mm)$} 
 This group has eight elements: The identity, two rotations of $\pm90^\circ$ 
 about an axis ($C_4$ and $C_4^3$), a rotation of $180^\circ$ about the same axis 
 ($C_2$) and four mirror symmetries ($2\sigma_v$ and $2 \sigma_d$) with respect
@@ -1057,7 +1064,7 @@ C_4    G_5 + G_6    G_7 + G_8
 C_2v    G_5          G_5
 \end{verbatim}
 
-\subsection{$C_{6v}\ (6mm)$} 
+\subsection{\color{web-blue}$C_{6v}\ (6mm)$} 
 This group has twelve elements: The identity, two rotations of $\pm60^\circ$ 
 about an axis ($C_6$ and $C_6^5$), two rotations of $\pm120^\circ$
 about the same axis ($C_3$ and $C_3^2$), a rotation of $180^\circ$ about 
@@ -1142,7 +1149,7 @@ C_2v    G_5          G_5             G_5
 C_3v    G_4          G_4           G_5 + G_6
 \end{verbatim}
 
-\subsection{$C_{2h}\ (2/m)$} 
+\subsection{\color{web-blue}$C_{2h}\ (2/m)$} 
 This group has four elements: The identity, a rotation of $180^\circ$ 
 about an axis ($C_2$), inversion and a mirror symmetry with respect to 
 a plane perpendicular to the $C_2$ axis.
@@ -1210,7 +1217,7 @@ C_s      G_3       G_4      G_4      G_3
 C_2      G_3       G_4      G_3      G_4
 \end{verbatim}
 
-\subsection{$C_{3h}\ (\bar 6)$}  
+\subsection{\color{web-blue}$C_{3h}\ (\bar 6)$}  
 This group has six elements: The identity, two rotation of $\pm120^\circ$ 
 about an axis ($C_3$ and $C_3^2$), a mirror symmetry with respect to a 
 plane perpendicular to the $C_3$ axis and the product of these operations, 
@@ -1291,7 +1298,7 @@ C_s      G_3      G_4      G_4      G_3       G_4       G_3
 C_3      G_4      G_5      G_4      G_5       G_6       G_6
 \end{verbatim}
 
-\subsection{$C_{4h}\ (4/m)$}  
+\subsection{\color{web-blue}$C_{4h}\ (4/m)$}  
 This group has eight elements: The identity, two rotation of $\pm90^\circ$ 
 about an axis ($C_4$ and $C_4^3$), a rotation of $180^\circ$ about the
 same axis ($C_2$), inversion, and the product of inversion with previous
@@ -1414,7 +1421,7 @@ C_2h     G_3+    G_4+   G_3+   G_4+    G_3-   G_4-    G_3-    G_4-
 S_4      G_5     G_6    G_7    G_8     G_7    G_8     G_5     G_6
 \end{verbatim}
 
-\subsection{$C_{6h}\ (6/m)$}  
+\subsection{\color{web-blue}$C_{6h}\ (6/m)$}  
 This group has twelve elements: The identity, two rotations of $\pm60^\circ$ 
 about an axis ($C_6$ and $C_6^5$), two rotations of $\pm120^\circ$
 about the same axis ($C_3$ and $C_3^2$), a rotation of $180^\circ$ about the
@@ -1571,7 +1578,7 @@ C_3h   G_7  G_8  G_9   G_10  G_11 G_12  G_9  G_10 G_7   G_8   G_12  G_11
 S_6    G_4+ G_5+ G_4+  G_5+  G_6+ G_6+  G_4- G_5- G_4-  G_5-  G_6-  G_6-
 \end{verbatim}
 
-\subsection{$D_{2h}\ (mmm)$ or $V_h$}  
+\subsection{\color{web-blue}$D_{2h}\ (mmm)$ or $V_h$}  
 This group has eight elements: The identity, three rotation of $180^\circ$
 about three perpendicular axes ($C_2$, $C_2'$, and $C_2''$),
 inversion and three mirror symmetries with respect to planes perpendicular to
@@ -1693,7 +1700,7 @@ C_2v       G_5           G_5
 C_2h       G_3+ + G_4+   G_3- + G_4-
 \end{verbatim}
 
-\subsection{$D_{3h}\ (\bar 62m)$} 
+\subsection{\color{web-blue}$D_{3h}\ (\bar 62m)$} 
 This group has twelve elements: The identity, two rotations of $\pm120^\circ$
 about an axis ($C_3$ and $C_3^2$), three rotations of $180^\circ$
 about three axes ($3C_2$) perpendicular to the $C_3$ axis,
@@ -1784,7 +1791,7 @@ C_3v       G_4           G_4            G_5 + G_6
 C_3h       G_7 + G_8     G_9 + G_10     G_11 + G_12
 \end{verbatim}
 
-\subsection{$D_{4h}\ (4/mmm)$} 
+\subsection{\color{web-blue}$D_{4h}\ (4/mmm)$} 
 This group has sixteen elements: The identity, two rotations of $\pm90^\circ$
 about an axis ($C_4$ and $C_4^3$), a rotation of $180^\circ$ about the 
 same axis ($C_2$), four rotations of $180^\circ$ about four axes ($2C_2'$
@@ -1953,7 +1960,7 @@ D_2d        G_6          G_7           G_7          G_6
 S_4       G_5 + G_6    G_7 + G_8    G_7 + G_8    G_5 + G_6
 \end{verbatim}
 
-\subsection{$D_{6h}\ (6/mmm)$} 
+\subsection{\color{web-blue}$D_{6h}\ (6/mmm)$} 
 This group has twenty-four elements: The identity, two rotations of 
 $\pm60^\circ$ about an axis ($C_6$ and $C_6^5$), two rotations of 
 $\pm120^\circ$ about the same axis ($C_3$ and $C_3^2$), a rotation of 
@@ -2167,7 +2174,7 @@ D_3d     G_4+        G_4+    G_5++G_6+     G_4-       G_4-     G_5-+G_6-
 S_6   G_4++G_5+  G_4++G_5+    2 G_6+    G_4-+G_5-  G_4-+G_5-    2 G_6-
 \end{verbatim}
 
-\subsection{$D_{2d}\ (\bar 42m)$} 
+\subsection{\color{web-blue}$D_{2d}\ (\bar 42m)$} 
 This group has eight elements: The identity, two improper rotations 
 of $\pm90^\circ$ about an axis ($S_4^3$ and $S_4$), a rotation of 
 $180^\circ$ about the same axis ($C_2$), two rotations of $180^\circ$ about
@@ -2257,7 +2264,7 @@ C_2v     G_5          G_5
 S_4   G_5 + G_6    G_7 + G_8
 \end{verbatim}
 
-\subsection{$D_{3d}\ (\bar 3m)$} 
+\subsection{\color{web-blue}$D_{3d}\ (\bar 3m)$} 
 This group has twelve elements: The identity, two improper rotations 
 of $\pm120^\circ$ about an axis ($S_6^5$ and $S_6$), two rotation of 
 $\pm120^\circ$ about the same axis ($C_3$ and $C_3^2$), inversion,
@@ -2362,7 +2369,7 @@ C_2h   G_3++G_4+  G_3+    G_4+    G_3-+G_4-  G_3-     G_4-
 S_6    G_4++G_5+  G_6+    G_6+    G_4-+G_5-  G_6-     G_6-
 \end{verbatim}
 
-\subsection{$S_4\ (\bar 4)$}  
+\subsection{\color{web-blue}$S_4\ (\bar 4)$}  
 This group has four elements: The identity, two improper rotations 
 of $\pm90^\circ$ about an axis ($S_4$ and $S_4^3$),  
 a rotations of $180^\circ$ about the same axis. 
@@ -2426,7 +2433,7 @@ C_1    G_2       G_2      G_2      G_2
 C_2    G_3       G_4      G_3      G_4
 \end{verbatim}
 
-\subsection{$S_6\ (\bar 3)$ or $C_{3i}$}  
+\subsection{\color{web-blue}$S_6\ (\bar 3)$ or $C_{3i}$}  
 This group has six elements: The identity, two improper rotations 
 of $\pm120^\circ$ about an axis ($S_6^5$ and $S_6$), two rotations of 
 $\pm120^\circ$ about the same axis ($C_3$ and $C_3^2$) and inversion.
@@ -2506,7 +2513,7 @@ C_i    G_2+     G_2+     G_2+     G_2-     G_2-     G_2-
 C_3    G_4      G_5      G_6      G_4      G_5      G_6 
 \end{verbatim}
 
-\subsection{$T\ (23)$} 
+\subsection{\color{web-blue}$T\ (23)$} 
 This group has twelve elements: The identity, eight rotations of $\pm120^\circ$ 
 about four axes ($4C_3$ and $4C_3^2$ (called $C_3'$ in the character
 table)), three rotations of $180^\circ$ about three different axes ($3C_2$).
@@ -2577,7 +2584,7 @@ C_3   G_4 + G_5  G_6 + G_4    G_6 + G_5
 D_2      G_5        G_5          G_5
 \end{verbatim}
 
-\subsection{$T_h\ (m\bar 3)$}
+\subsection{\color{web-blue}$T_h\ (m\bar 3)$}
 This group has twenty-four elements: The identity, eight rotations 
 of $\pm120^\circ$ about four axes ($4C_3$ and $4C_3^2$ (called $4C3'$ in the 
 character table)), three rotations of $180^\circ$ about three different axes 
@@ -2712,7 +2719,7 @@ S_6   G_4++G_5+  G_5++G_6+  G_4++G_6+ G_4-+G_5- G_5-+G_6- G_4-+G_6-
 T       G_5        G_6      G_7       G_5       G_6       G_7
 \end{verbatim}
 
-\subsection{$T_d\ (\bar 43m)$}
+\subsection{\color{web-blue}$T_d\ (\bar 43m)$}
 This group has twenty-four elements: The identity, eight rotations 
 of $\pm120^\circ$ about four axes ($8C_3$), three rotations of 
 $180^\circ$ about three different axes ($3C_2$), six
@@ -2799,7 +2806,7 @@ S_4     G_5 + G_6    G_7 + G_8  G_5 + G_6 + G_7 + G_8
 T          G_5          G_5           G_6 + G_7
 \end{verbatim}
 
-\subsection{$O\ (432)$} 
+\subsection{\color{web-blue}$O\ (432)$} 
 This group has twenty-four elements: The identity, eight rotations 
 of $\pm120^\circ$ about four axes ($8C_3$), three rotations of 
 $180^\circ$ about three different axes ($3C_2$), six
@@ -2884,7 +2891,7 @@ D_4         G_6          G_7      G_6 + G_7
 T           G_5          G_5      G_6 + G_7 
 \end{verbatim}
 
-\subsection{$O_h\ (m\bar3m)$}   
+\subsection{\color{web-blue}$O_h\ (m\bar3m)$}   
 This group has forty-eight elements: 
 The identity, eight rotations of $\pm120^\circ$ about four axes ($8C_3$), 
 three rotations of $180^\circ$ about three different axes ($3C_2$), six
@@ -3101,7 +3108,8 @@ T_d    G_6       G_7       G_8              G_7        G_6       G_8
 O      G_6       G_7       G_8              G_6        G_7       G_8    
 \end{verbatim}
 
-\section{Symmetry matrices}
+\newpage
+\section{\color{coral}Symmetry matrices}
 \qe\ uses internally the following symmetry matrices. Each one of these
 matrices is checked as a possible symmetry in the give order. The names
 of the symmetry operations is the one printed by \qe.
@@ -3496,7 +3504,8 @@ of the symmetry operations is the one printed by \qe.
 
 \end{verbatim}
 
-\section{Bibliography}
+\newpage
+\section{\color{coral}Bibliography}
 \begin{enumerate}
 
 \item

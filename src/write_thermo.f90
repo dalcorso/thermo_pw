@@ -74,38 +74,10 @@ DO itemp = 1, ntemp
    ph_ener(itemp,igeom)=ph_ener(itemp,igeom)+e0
 END DO
 
-IF (ionode) THEN
-   iu_therm=2
-   OPEN (UNIT=iu_therm, FILE=TRIM(fltherm), STATUS='unknown',&
-                                                     FORM='formatted')
-   WRITE(iu_therm,'("# Zero point energy:", f8.5, " Ry/cell,", f9.5, &
-                    &" kJ/(N mol),", f9.5, " kcal/(N mol)")') e0, &
-                       e0 * 1313.313_DP, e0 * 313.7545_DP 
-   WRITE(iu_therm,'("# Temperature T in K, ")')
-   WRITE(iu_therm,'("# Total number of states is:", f15.5,",")') tot_states
-   WRITE(iu_therm,'("# Energy and free energy in Ry/cell,")')
-   WRITE(iu_therm,'("# Entropy in Ry/cell/K,")')
-   WRITE(iu_therm,'("# Heat capacity Cv in Ry/cell/K.")')
-   WRITE(iu_therm,'("# Multiply by 13.6058 to have energies in &
-                       &eV/cell etc..")')
-   WRITE(iu_therm,'("# Multiply by 13.6058 x 23060.35 = 313 754.5 to have &
-                  &energies in cal/(N mol).")')
-   WRITE(iu_therm,'("# Multiply by 13.6058 x 96526.0 = 1 313 313 to &
-                  &have energies in J/(N mol).")')
-   WRITE(iu_therm,'("# N is the number of formula units per cell.")')
-   WRITE(iu_therm,'("# For instance in silicon N=2. Divide by N to have &
-                   &energies in cal/mol etc. ")')
-   WRITE(iu_therm,'("#",5x,"   T  ", 10x, " energy ", 9x, "  free energy ",&
-                  & 9x, " entropy ", 12x, " Cv ")')
-
-   DO itemp = 1, ntemp
-      WRITE(iu_therm, '(e16.8,4e20.12)') temp(itemp), &
-                    ph_ener(itemp,igeom), ph_free_ener(itemp,igeom), &
-                    ph_entropy(itemp,igeom), ph_cv(itemp,igeom)
-   END DO
-
-   CLOSE(iu_therm)
-END IF
+IF (ionode) &
+   CALL write_thermo_info(e0, tot_states, ntemp, temp, ph_ener(1,igeom), &
+              ph_free_ener(1,igeom), ph_entropy(1,igeom), ph_cv(1,igeom),&
+                                                                1,fltherm)
 
 RETURN
 END SUBROUTINE write_thermo
@@ -188,38 +160,10 @@ DO itemp = 1, ntemp
 END DO
 phf_entropy(:,igeom)=(phf_ener(:, igeom) - phf_free_ener(:, igeom))/  &
                         temp(:)
-IF (ionode) THEN
-   iu_therm=2
-   OPEN (UNIT=iu_therm, FILE=TRIM(filename), STATUS='unknown',&
-                                                     FORM='formatted')
-   WRITE(iu_therm,'("# Zero point energy:", f8.5, " Ry/cell,", f9.5, &
-                    &" kJ/(N mol),", f9.5, " kcal/(N mol)")') e0, &
-                       e0 * 1313.313_DP, e0 * 313.7545_DP 
-   WRITE(iu_therm,'("# Temperature T in K, ")')
-   WRITE(iu_therm,'("# Energy and free energy in Ry/cell,")')
-   WRITE(iu_therm,'("# Entropy in Ry/cell/K,")')
-   WRITE(iu_therm,'("# Heat capacity Cv in Ry/cell/K.")')
-   WRITE(iu_therm,'("# Multiply by 13.6058 to have energies in &
-                       &eV/cell etc..")')
-   WRITE(iu_therm,'("# Multiply by 13.6058 x 23060.35 = 313 754.5 to have &
-                  &energies in cal / (N mol).")')
-   WRITE(iu_therm,'("# Multiply by 13.6058 x 96526.0 = 1 313 313 to &
-                  &have energies in J / (N mol).")')
-   WRITE(iu_therm,'("# N is the number of formula units per cell.")')
-   WRITE(iu_therm,'("# For instance in silicon N=2. Divide by N to have &
-                   &energies in cal/mol etc. ")')
-   WRITE(iu_therm,'("#",5x,"   T  ", 10x, " energy ", 9x, "  free energy ",&
-                  & 9x, " entropy ", 12x, " Cv ")') 
-
-   DO itemp = 1, ntemp
-      WRITE(iu_therm, '(e16.8,4e20.12)') temp(itemp), &
-                    phf_ener(itemp,igeom), phf_free_ener(itemp,igeom), &
-                    phf_entropy(itemp,igeom), phf_cv(itemp,igeom)
-   END DO
-
-   CLOSE(iu_therm)
-END IF
-
+ IF (ionode) &
+     CALL write_thermo_info(e0, 0.0_DP, ntemp, temp, phf_ener(1,igeom), &
+                phf_free_ener(1,igeom), phf_entropy(1,igeom), phf_cv(1,igeom),& 
+                                                            2,filename)
 RETURN
 END SUBROUTINE write_thermo_ph
 
@@ -272,15 +216,38 @@ END DO
 !
 !  Write on file
 !
-IF (ionode) THEN
+ IF (ionode) &
+    CALL write_thermo_info(deb_e0, debye_t, ntemp, temp, deb_energy, &
+               deb_free_energy, deb_entropy, deb_cv, 3, filename)
+
+RETURN
+END SUBROUTINE write_thermo_debye
+
+SUBROUTINE write_thermo_info(e0, tot_states, ntemp, temp, energy, &
+                                 free_energy, entropy, cv, iflag, filename)
+USE kinds, ONLY : DP
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ntemp, iflag
+REAL(DP), INTENT(IN) :: e0, tot_states, temp(ntemp), energy(ntemp),  &
+                        free_energy(ntemp), entropy(ntemp), cv(ntemp)
+CHARACTER(LEN=*) :: filename
+
+INTEGER :: iu_therm, itemp
+
    iu_therm=2
    OPEN (UNIT=iu_therm, FILE=TRIM(filename), STATUS='unknown',&
                                                      FORM='formatted')
    WRITE(iu_therm,'("# Zero point energy:", f8.5, " Ry/cell,", f9.5, &
-                    &" kJ/(N mol),", f9.5, " kcal/(N mol)")') deb_e0, &
-                       deb_e0 * 1313.313_DP, deb_e0 * 313.7545_DP 
-   WRITE(iu_therm,'("# Temperature T in K, Debye temperature=",f12.3, " K,")') &
-                                         debye_t  
+                    &" kJ/(N mol),", f9.5, " kcal/(N mol)")') e0, &
+                       e0 * 1313.313_DP, e0 * 313.7545_DP 
+   IF (iflag==3) THEN
+      WRITE(iu_therm,'("# Temperature T in K, Debye temperature=",f12.3, &
+                                             &" K,")') tot_states
+   ELSE
+      WRITE(iu_therm,'("# Temperature T in K, ")')
+   ENDIF
+   IF (iflag==1) &
+   WRITE(iu_therm,'("# Total number of states is:", f15.5,",")') tot_states
    WRITE(iu_therm,'("# Energy and free energy in Ry/cell,")')
    WRITE(iu_therm,'("# Entropy in Ry/cell/K,")')
    WRITE(iu_therm,'("# Heat capacity Cv in Ry/cell/K.")')
@@ -294,16 +261,14 @@ IF (ionode) THEN
    WRITE(iu_therm,'("# For instance in silicon N=2. Divide by N to have &
                    &energies in cal/mol etc. ")')
    WRITE(iu_therm,'("#",5x,"   T  ", 10x, " energy ", 9x, "  free energy ",&
-                  & 9x, " entropy ", 12x, " Cv ")') 
+                  & 9x, " entropy ", 12x, " Cv ")')
+
 
    DO itemp = 1, ntemp
-      WRITE(iu_therm, '(e16.8,4e20.12)') temp(itemp), &
-                    deb_energy(itemp), deb_free_energy(itemp), &
-                    deb_entropy(itemp), deb_cv(itemp)
+      WRITE(iu_therm, '(e16.8,4e20.12)') temp(itemp), energy(itemp), &
+                    free_energy(itemp), entropy(itemp), cv(itemp)
    END DO
-
    CLOSE(iu_therm)
-END IF
 
 RETURN
-END SUBROUTINE write_thermo_debye
+END SUBROUTINE write_thermo_info

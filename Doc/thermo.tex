@@ -11,8 +11,15 @@
 \def\tpw{{\sc thermo\_pw}}
 
 \usepackage{html}
+\usepackage{color}
 
 \usepackage{graphicx}
+
+\definecolor{web-blue}{rgb}{0,0.5,1.0}
+\definecolor{coral}{rgb}{1.0,0.5,0.3}
+\definecolor{red}{rgb}{1.0,0,0.0}
+\definecolor{green}{rgb}{0.,1.0,0.0}
+
 
 \textwidth = 17cm
 \textheight = 24cm
@@ -31,14 +38,12 @@
 \author{}
 \date{}
 
-\def\qeImage{../../Doc/quantum_espresso.pdf}
-\def\democritosImage{../../Doc/democritos.pdf}
-\def\SissaImage{./sissa.pdf}
+%\def\SissaImage{./sissa_on_white.png}
 
 \title{
 %  \includegraphics[width=6cm]{\SissaImage}\\
   \vskip 1cm
-  \Huge Thermo\_pw: Thermodynamics of crystals \\
+  {\color{red} \Huge Thermo\_pw: Thermodynamics of crystals} \\
   \Large (version \version)
 }
 
@@ -46,10 +51,12 @@
 
 \tableofcontents
 
-\section{Introduction}
+\newpage
+
+\section{{\color{coral}Introduction}}
 These notes describe the thermodynamics of crystals implemented in \tpw. 
 
-\section{People}
+\section{\color{coral}People}
 These notes have been written by Andrea Dal Corso (SISSA - Trieste). \\
 Disclaimer: I am not an expert of crystal thermodynamics. 
 These notes reflect what I have understood so far and implemented in 
@@ -59,7 +66,7 @@ simply, please let me know, I would like to learn more.
 You can contact me directly: \texttt{dalcorso@sissa.it} or send an
 e-mail to the \texttt{thermo\_pw-forum} mailing list.
 
-\section{Overview}
+\section{\color{coral}Overview}
 The properties of a solid addressed by \tpw\ are described by the thermodynamic
 theory of the elastic solid. In this theory a solid is characterized by an
 equilibrium configuration that depends on the temperature $T$ and on an
@@ -104,7 +111,7 @@ be calculated as $S=(U-F)/T$.
 \tpw\ calculates the energy, the Helmholtz free energy, and the
 entropy of a unit cell of the solid for a given choice of the primitive 
 Bravais lattice vectors ${\bf a}_1$, ${\bf a}_2$, and ${\bf a}_3$. These
-vectors depend on a few parameters $\alpha_k$ that determine the size 
+vectors depend on a few parameters $\zeta_k$ that determine the size 
 of the unit cell ($k$ is $1$ for cubic lattices and has a maximum
 value $k=6$ for the triclinic lattice).
 The unit cell contains $N_{at}$ atoms
@@ -112,8 +119,8 @@ whose positions are indicated by ${\bf d}_s$ with $1\le s\le N_{at}$.
 These positions are assumed to be optimized so that the forces acting
 on atoms vanish.
 The reference configuration of the solid is
-characterized by a set of parameters $\alpha_{k,0}$ and a set of parameters 
-$\alpha_k$ corresponds to a solid in a strained state.
+characterized by a set of parameters $\zeta_{k,0}$ and a set of parameters 
+$\zeta_k$ corresponds to a solid in a strained state.
 Therefore from a theoretical point of view it is easy to calculate the 
 internal energy, the Helmholtz free energy, and the entropy as a 
 function of strain and temperature.
@@ -171,9 +178,11 @@ given temperature and pressure (or stress).
 
 In this guide we define all the quantities described above and calculated 
 by \tpw\ and give the formulas needed to relate the crystallographic
-parameters $\alpha_k$ to the thermodynamic functions.
+parameters $\zeta_k$ to the thermodynamic functions.
 
-\section{Crystal lattices}
+\newpage
+
+\section{\color{coral}Crystal lattices}
 We start with a short review of the fourteen Bravais lattices and give
 our definition of the primitive lattice vectors. For each lattice we 
 specify the number of parameters necessary to define the unit cell.
@@ -181,7 +190,7 @@ The volume of one unit cell is indicated with $\Omega$ and the total
 volume of the solid is $V=N\Omega$ where $N$ is the number of unit cells
 of the solid. 
 
-\subsection{Cubic system}
+\subsection{\color{web-blue}Cubic system}
 The cubic system comprises three Bravais lattices. The cubic lattice
 is:
 \begin{eqnarray}
@@ -207,9 +216,9 @@ The body-centered cubic lattice is:
 \nonumber
 \end{eqnarray}
 The volume of the unit cell is $\Omega = a^3/2$. \\
-All three lattices are characterized by one parameter $\alpha_1=a$.
+All three lattices are characterized by one parameter $\zeta_1=a$.
 
-\subsection{Tetragonal system}
+\subsection{\color{web-blue}Tetragonal system}
 The tetragonal system comprises two Bravais lattices: the tetragonal
 and the centered tetragonal lattices.\\
 The tetragonal lattice is:
@@ -228,10 +237,10 @@ The centered tetragonal lattice is:
 \nonumber
 \end{eqnarray}
 The volume of the unit cell is $\Omega = a^2c/2$. \\
-Both lattices are characterized by two parameters $\alpha_1=a$ and 
-$\alpha_2=c/a$.
+Both lattices are characterized by two parameters $\zeta_1=a$ and 
+$\zeta_2=c/a$.
 
-\subsection{Orthorhombic system}
+\subsection{\color{web-blue}Orthorhombic system}
 The orthorhombic system comprises four Bravais lattices.
 The orthorhombic lattice:
 \begin{eqnarray}
@@ -266,9 +275,9 @@ The body-centered orthorhombic lattice:
 \end{eqnarray}
 The volume of the unit cell is $\Omega = abc/2$. \\
 All four lattices are characterized by three parameters, 
-$\alpha_1=a$, $\alpha_2=b/a$ and $\alpha_3=c/a$.
+$\zeta_1=a$, $\zeta_2=b/a$ and $\zeta_3=c/a$.
 
-\subsection{Monoclinic system}
+\subsection{\color{web-blue}Monoclinic system}
 The monoclinic system comprises two Bravais lattices:
 The monoclinic and the base-centered monoclinic lattices.
 Each one of these two lattices can be $c$-unique or $b$-unique depending on
@@ -303,11 +312,11 @@ The $b$ unique base-centered orthorhombic lattice is:
 {\bf a}_3 &=& a ({c \over a} \cos{\beta}, 0, {c \over a}\sin{\beta}), \nonumber 
 \end{eqnarray}
 The volume of the unit cell is $\Omega = abc \sin\beta/2$. \\
-All lattices are characterized by four parameters $\alpha_1=a$, $\alpha_2=b/a$,
-$\alpha_3=c/a$ and $\alpha_4=\cos\gamma$
+All lattices are characterized by four parameters $\zeta_1=a$, $\zeta_2=b/a$,
+$\zeta_3=c/a$ and $\zeta_4=\cos\gamma$
 ($c$-unique) or $\cos\beta$ ($b$-unique).
 
-\subsection{Triclinic system}
+\subsection{\color{web-blue}Triclinic system}
 The triclinic system comprises only the triclinic Bravais lattice:
 \begin{eqnarray}
 {\bf a}_1 &=& a (1, 0, 0), \nonumber \\
@@ -318,11 +327,11 @@ The triclinic system comprises only the triclinic Bravais lattice:
 The volume of the unit cell is $\Omega=abc \sin\gamma \left( 
 1+2\cos\alpha\cos\beta\cos\gamma-\cos^2\alpha-\cos^2\beta-\cos^2\gamma\right)
 $.
-The lattice is characterized by six parameters $\alpha_1=a$, 
-$\alpha_2=b$, $\alpha_3=c$, $\alpha_4=\cos\alpha$,
-$\alpha_5=\cos\beta$, $\alpha_6=\cos\gamma$.
+The lattice is characterized by six parameters $\zeta_1=a$, 
+$\zeta_2=b$, $\zeta_3=c$, $\zeta_4=\cos\alpha$,
+$\zeta_5=\cos\beta$, $\zeta_6=\cos\gamma$.
 
-\subsection{Hexagonal system}
+\subsection{\color{web-blue}Hexagonal system}
 The hexagonal system comprises only the hexagonal Bravais lattice:
 \begin{eqnarray}
 {\bf a}_1 &=& a (1, 0, 0), \nonumber \\
@@ -331,10 +340,10 @@ The hexagonal system comprises only the hexagonal Bravais lattice:
 \nonumber
 \end{eqnarray}
 The volume of the unit cell is $\sqrt{3} a^2 c /2$. \\
-The lattice is characterized by two parameters $\alpha_1=a$ 
-and $\alpha_2=c/a$.
+The lattice is characterized by two parameters $\zeta_1=a$ 
+and $\zeta_2=c/a$.
 
-\subsection{Trigonal system}
+\subsection{\color{web-blue}Trigonal system}
 The trigonal system comprises two Bravais lattices: the hexagonal Bravais 
 lattice described above or the rhombohedral Bravais lattice:
 \begin{eqnarray}
@@ -352,10 +361,12 @@ where $\sin{\theta}=\sqrt{2\over 3}\sqrt{1-\cos{\alpha}}$
 and $\cos{\theta}=\sqrt{1\over 3}\sqrt{1 + 2 \cos{\alpha}}$. \\
 The volume of the unit cell is $\Omega={3 \sqrt{3} \over 2} a^3 \sin^2\theta
 \cos\theta$. \\
-The lattice is characterized by two parameters $\alpha_1=a$ and 
-$\alpha_2=\cos\alpha$.
+The lattice is characterized by two parameters $\zeta_1=a$ and 
+$\zeta_2=\cos\alpha$.
 
-\section{The strain tensor}
+\newpage
+
+\section{\color{coral}The strain tensor}
 The strain applied to the solid is defined by a $3\times 3$ tensor
 $\epsilon$. We say that a strain $\epsilon$ is applied
 to the solid if the three primitive vectors 
@@ -588,12 +599,12 @@ $\epsilon_6=2 \epsilon_{1,2}$ and we can write a generic strain as:
 
 For each lattice (with the exception of the trigonal, monoclinic, 
 and triclinic systems) we consider two questions. Which strain is applied
-by changing the parameters $\alpha_k$ that define the unit cell and 
+by changing the parameters $\zeta_k$ that define the unit cell and 
 how does the Bravais lattice change for a given strain. In the latter
 case we consider only the strains of interest for the given Bravais 
 lattice.
 
-\subsection{Cubic system}
+\subsection{\color{web-blue}Cubic system}
 The only strain that keeps the shape of the unit cell cubic is an isotropic
 strain $\epsilon_A$.
 Changing the cubic lattice constant of $da$ is equivalent to apply a
@@ -649,7 +660,7 @@ a&=&a_c (1+\epsilon_{1,1}), \\
 c&=&a_c.
 \end{eqnarray}
 
-\subsection{Tetragonal system}
+\subsection{\color{web-blue}Tetragonal system}
 There are three strains that maintain the shape of the tetragonal cell 
 $\epsilon_A$, $\epsilon_B$, and $\epsilon_E$. $\epsilon_B$ changes the 
 lattice parameter $a$ into $a(1+\epsilon_{1,1})$. 
@@ -710,7 +721,7 @@ and
 {\rm tg} \phi = -{\epsilon_{1,3} a_t - c_t \over a_t - \epsilon_{3,1} c_t}.
 \end{equation}
 
-\subsection{Orthorhombic system}
+\subsection{\color{web-blue}Orthorhombic system}
 $\epsilon_C$, $\epsilon_D$, $\epsilon_E$, $\epsilon_B$, $\epsilon_{B'}$,
 and $\epsilon_{B''}$ are six strains that maintain the shape of the 
 orthorhombic cell. $\epsilon_C$ changes the lattice constant $a$ into 
@@ -909,7 +920,7 @@ and
 \end{equation}
 
 
-%\subsection{Triclinic and Monoclinic system}
+%\subsection{\color{web-blue}Triclinic and Monoclinic system}
 %Let us start by considering the $c$-unique case. In this case 
 %$\epsilon_E$ changes the lattice constant $c$ into $c(1+\epsilon_{3,3})$,
 %but does not modify the shape of the unit cell.
@@ -961,12 +972,12 @@ and
 %Applying $\epsilon_H$ or $\epsilon_I$ to a $c$-unique monoclinic lattice 
 %transform it into a trigonal lattice with parameters that for 
 
-%\subsection{Triclinic system}
+%\subsection{\color{web-blue}Triclinic system}
 %In this case any strain will mantain the shape of the unit cell and
 %it is interesting to apply $\epsilon_C$, $\epsilon_D$, $\epsilon_E$ and
 %the three shear strains $\epsilon_G$, $\epsilon_H$, $\epsilon_I$.
 
-\subsection{Hexagonal system}
+\subsection{\color{web-blue}Hexagonal system}
 There are two strains that maintain the shape of the hexagonal cell,
 $\epsilon_B$ and $\epsilon_E$.
 $\epsilon_B$ changes the lattice constant $a$ into $a(1+\epsilon_{1,1})$. 
@@ -1004,7 +1015,7 @@ base-centered monoclinic cell, since ${\bf a}_1$ and ${\bf a}_2$ are
 in the $xy$ plane we must make a small rotation about the $y$ axis of an angle 
 ${\rm tg} \phi = - \epsilon_{1,3}$.
 
-\subsection{Trigonal system}
+\subsection{\color{web-blue}Trigonal system}
 A isotropic strain $\epsilon_A$ keeps the trigonal shape and
 changes the length of each primitive vector to
 $a(1+\epsilon_{1,1})$. Conversely a change of the lattice constant
@@ -1033,7 +1044,8 @@ for $\epsilon_{3,3}$ and $\epsilon_{1,1}$ we obtain:
 So a change of the angle $\alpha$ is equivalent to apply a strain
 $\epsilon_M$.
  
-\section{The stress tensor}
+\newpage
+\section{\color{coral}The stress tensor}
 
 Consider a small volume $dV$ of the solid with the form of a prism with 
 edges parallel to $x_1$, $x_2$, and $x_3$. Let us call $S_i$ one of
@@ -1051,8 +1063,8 @@ The force on the other surface perpendicular to $x_i$ is
 ${\bf f}_i=-(f_{1,i}, f_{2,i}, f_{3,i})$. With this definition a positive
 stress pulls outward on the surface of the volume.
 
-Also the stress is a symmetric tensor so it is possible to use the Voigt
-notation, but we have
+The stress is a symmetric tensor so it is possible to use the Voigt
+notation. We have
 $\sigma_1=\sigma_{1,1}$,
 $\sigma_2=\sigma_{2,2}$, $\sigma_3=\sigma_{3,3}$, $\sigma_4=\sigma_{2,3}$,
 $\sigma_5=\sigma_{1,3}$, and $\sigma_6=\sigma_{1,2}$.
@@ -1067,7 +1079,8 @@ p=-{1\over 3} (\sigma_1 + \sigma_2 + \sigma_3).
 The negative sign indicates that a positive pressure reduces the
 volume of the solid so it pushes on the surfaces.
 
-\section{Thermodynamic functions}
+\newpage
+\section{\color{coral}Thermodynamic functions}
 
 The thermodynamic functions can be introduced by using the first law
 of thermodynamics and the definition of the entropy ($S$). The heat 
@@ -1075,7 +1088,7 @@ given reversibly to the solid can be written as $dQ=TdS$ where $T$ is
 the temperature of the solid and $dS$ is its entropy change. The change 
 of the internal energy is given by $dU = TdS - dW$ where $dW$ is 
 the work done by the solid. If the strain changes by $d\epsilon$ and 
-the stress is $\sigma$ then $W=-V \sum_i \sigma_i d\epsilon_i$, where $V$
+the stress is $\sigma$ then $dW=-V \sum_i \sigma_i d\epsilon_i$, where $V$
 is the volume of the unperturbed solid. \\
 Therefore
 \begin{equation}
@@ -1129,7 +1142,8 @@ We have:
 \end{equation}
 $G$ is called the Gibbs free energy of the solid.
 
-\section{Equilibrium geometry and thermal expansion}
+\newpage
+\section{\color{coral}Equilibrium geometry and thermal expansion}
 To calculate the equilibrium geometry at $T=0$ and at zero stress it
 is sufficient to minimize the internal energy with respect to strain:
 \begin{equation}
@@ -1141,23 +1155,23 @@ In practice this equation is difficult to use and one limits to consider
 only strains that do not modify the shape of the unit cell. The
 vanishing derivatives are imposed only for these strains.
 This is equivalent to calculate $U$ as a function of the lattice parameters 
-$\alpha_k$ and to check the minimum condition:
+$\zeta_k$ and to check the minimum condition:
 \begin{equation}
-{\partial U \over \partial \alpha_k}=0.
+{\partial U \over \partial \zeta_k}=0.
 \end{equation}
 Similarly at temperature $T$ the equations that define the lattice 
 parameters are:
 \begin{equation}
-{\partial F \over \partial \alpha_k}=0.
+{\partial F \over \partial \zeta_k}=0.
 \end{equation}
 Note that at $T=0$ this equation contains the effect of zero point nuclear
 motion. By identifying the position of the minimum at each temperature 
-we obtain the parameters $\alpha_k (T)$ that can be compared with
+we obtain the parameters $\zeta_k (T)$ that can be compared with
 results of X-ray diffraction experiments.
 
 The volume thermal expansion is defined as the variation of the crystal
 volume when the temperature changes. Therefore using the parameters
-$\alpha_k (T)$ we can calculate the volume $V(T)$
+$\zeta_k (T)$ we can calculate the volume $V(T)$
 with the expressions written above.  
 Numerical differentiation of $V(T)$ gives the volume thermal expansion:
 \begin{equation}
@@ -1166,22 +1180,22 @@ Numerical differentiation of $V(T)$ gives the volume thermal expansion:
 
 The calculation of the thermal expansion tensor is slightly more
 complex. At each temperature the solid has equilibrium parameters
-$\alpha_{k}(T)$. The thermal expansion tensor $\alpha_{i}$ is defined 
+$\zeta_k(T)$. The thermal expansion tensor $\alpha_{i}$ is defined 
 as the strain $d\epsilon_{i}(T)$ induced by a change of temperature $dT$. 
 We can write
 \begin{equation}
 \alpha_{i} = {d \epsilon_{i}(T) \over  d T }.
 \end{equation}
-We have only the crystal parameters $\alpha_k (T)$ and their derivatives
+We have only the crystal parameters $\zeta_k (T)$ and their derivatives
 with respect to $T$. In general these are not sufficient to deduce 
 ${d \epsilon_{i}(T) \over  d T }$ for an arbitrary strain, but the strains
-induced by a temperature must conserve the shape of the unit cell, so
-${d \alpha_k (T) \over d T}$ suffice to calculate the physically
+induced by temperature must conserve the shape of the unit cell, so
+${d \zeta_k (T) \over d T}$ suffice to calculate the physically
 interesting strains. We discuss this point separately for each crystal
 system.
 
-\subsection{Cubic system}
-In the cubic system $k=1$ and $\alpha_1=a$. By symmetry the strain that can
+\subsection{\color{web-blue}Cubic system}
+In the cubic system $k=1$ and $\zeta_1=a$. By symmetry the strain that can
 be induced by a change of temperature is only $\epsilon_A$ and we have the 
 conditions ${d\epsilon_1}={d\epsilon_2}={d\epsilon_3}={da\over a(T)}$.
 All the other strains are zero. Therefore only $\alpha_1$, $\alpha_2$, 
@@ -1190,8 +1204,8 @@ and $\alpha_3$ are nonvanishing and we have
 \alpha_{i} =  {1\over a(T) } {d a(T) \over dT}.
 \end{equation}
 
-\subsection{Tetragonal and hexagonal systems}
-In the tetragonal and hexagonal systems $k=2$, $\alpha_1=a$, $\alpha_2=c/a$.
+\subsection{\color{web-blue}Tetragonal and hexagonal systems}
+In the tetragonal and hexagonal systems $k=2$, $\zeta_1=a$, $\zeta_2=c/a$.
 The only nonzero components of the thermal expansion are 
 $\alpha_{1}=\alpha_{2}$ and $\alpha_{3}$. A change of $a$ 
 corresponds to a strain $d\epsilon_1=d\epsilon_2={da\over a}$ while
@@ -1213,8 +1227,8 @@ and we have
 \alpha_3 = {1\over a(T)} {da \over d T}  + {1\over c/a(T)} {d c/a \over dT}.
 \end{equation}
 
-\subsection{Trigonal system}
-In the trigonal system $k=2$, $\alpha_1=a$, $\alpha_2=\cos\alpha$. The 
+\subsection{\color{web-blue}Trigonal system}
+In the trigonal system $k=2$, $\zeta_1=a$, $\zeta_2=\cos\alpha$. The 
 strain allowed by symmetry is $\epsilon_M$. The thermal expansion tensor
 has three diagonal components and $\alpha_1=\alpha_2$. We can use the
 link between the hexagonal and the trigonal cell. A change of the 
@@ -1248,9 +1262,9 @@ to obtain
 {d \cos\alpha \over d T}
 \end{eqnarray}
 
-\subsection{Orthorhombic systems}
-In the orthorhombic system $k=3$, $\alpha_1=a$, $\alpha_2=b/a$, 
-$\alpha_3=c/a$. The nonzero components of the thermal expansion are 
+\subsection{\color{web-blue}Orthorhombic systems}
+In the orthorhombic system $k=3$, $\zeta_1=a$, $\zeta_2=b/a$, 
+$\zeta_3=c/a$. The nonzero components of the thermal expansion are 
 $\alpha_{1}$, $\alpha_{2}$, and $\alpha_{3}$. 
 A change of $a$ corresponds to a strain ${d\epsilon_1}={da\over a(T)}$,  
 a change of $b$ to a strain ${d\epsilon_2}={db\over b(T)}$,  
@@ -1269,27 +1283,33 @@ Choosing $a$, $b/a$, and $c/a$ as parameters we find:
 \end{eqnarray}
 
 
-%\subsection{Monoclinic systems}
-%In the monoclinic system $k=4$, $\alpha_1=a$, $\alpha_2=b$, $\alpha_3=c$, 
-%$\alpha_4=\cos\gamma$ (c-unique) of $\alpha_4=\cos\beta$ (b-unique). 
+%\subsection{\color{web-blue}Monoclinic systems}
+%In the monoclinic system $k=4$, $\zeta_1=a$, $\zeta_2=b$, $\zeta_3=c$, 
+%$\zeta_4=\cos\gamma$ (c-unique) of $\zeta_4=\cos\beta$ (b-unique). 
 %For the c-unique cell it is simple to define 
 %\begin{equation}
 %\alpha_{3,3}= {1\over c } {d c \over dT}
 %\end{equation}
 %For the other two.
 
-\section{The heat capacity}
-The heat capacity measure the variation of the temperature of the solid
+\newpage
+\section{\color{coral}The heat capacity}
+The heat capacity measures the variation of the temperature of the solid
 when a certain quantity of heat is given to it at constant strain:
 \begin{equation}
-C_\epsilon= T {d S \over dT}\Big|_\epsilon = { d U \over d T}\Big|_\epsilon
+C_\epsilon= T {d S \over dT}\Big|_\epsilon = { d U \over d T}\Big|_\epsilon.
 \end{equation}
 Since only the entropy of the ionic displacements is taken into consideration,
 the only term that is derived is $U_{ph}$. This is usually done at the
 equilibrium geometry. Once the phonon dispersions have been calculated this
 quantity is immediately available by deriving Eq.~\ref{uvib}
 
-\section{The elastic constants}
+Note that for metals the electronic contribution, while not large, is important 
+and must be accounted for before comparing with experiment. However this
+is not presently implemented in \tpw.
+
+\newpage
+\section{\color{coral}The elastic constants}
 
 When a crystal is deformed with a given strain $\epsilon_i$ forces
 appear to bring it to the equilibrium configuration. These
@@ -1320,7 +1340,7 @@ of elastic constants and fit linearly the stress as a function of strain. \\
 The procedure depends on the Laue class of the solid. We discuss separately
 the different Bravais lattices below.
 
-\subsection{Cubic system}
+\subsection{\color{web-blue}Cubic system}
 
 The nonzero components of the elastic constants tensor for the cubic system
 are independent on the Laue class and are $C_{11}=C_{22}=C_{33}$,
@@ -1364,7 +1384,7 @@ C_{44}&=&{1 \over 3 V} {d^2 U_F \over d \epsilon_4^2}.
 but the use of the energy instead of stress requires three fits instead
 of the two. 
 
-\subsection{Tetragonal system}
+\subsection{\color{web-blue}Tetragonal system}
 In this case there are two possibilities depending on the Laue class.
 For the point groups $C_{4v} (4mm)$, $D_{2d} (\bar42m)$, $D_4 (422)$ and
 $D_{4h} (4/mmm)$ (Laue class $D_{4h} (4/mmm)$) the nonzero components of the 
@@ -1448,7 +1468,7 @@ C_{66}&=&{1 \over V} {d^2 U_H \over d \epsilon_6^2}.
 \end{eqnarray}
 For the groups that require $C_{16}$ we must apply a strain ...
 
-\subsection{Orthorhombic system}
+\subsection{\color{web-blue}Orthorhombic system}
 In this system all solids belong to the $D_{2h} (mmm)$ Laue class so
 the non zero elements of the elastic constant tensor are the same for all 
 point groups and are
@@ -1538,7 +1558,7 @@ C_{55}&=&{1 \over V} {d^2 U_H \over d \epsilon_5^2}, \\
 C_{66}&=&{1 \over V} {d^2 U_G \over d \epsilon_6^2}.
 \end{eqnarray}
 
-\subsection{Monoclinic system}
+\subsection{\color{web-blue}Monoclinic system}
 The non zero components of the elastic constants tensor depend on the choice
 of the unit cell $b$-unique or $c$-unique. 
 $C_{11}$, $C_{12}$, $C_{13}$, $C_{22}$, $C_{23}$, $C_{33}$, $C_{44}$, 
@@ -1610,7 +1630,7 @@ and applying $\epsilon_G$ we obtain
 \sigma_6&=&C_{66} \epsilon_6,
 \end{eqnarray}
 
-\subsection{Triclinic system}
+\subsection{\color{web-blue}Triclinic system}
 In this case all the components of the elastic constant tensors are non zero.
 We can apply $\epsilon_C$ and obtain:
 \begin{eqnarray}
@@ -1789,7 +1809,7 @@ C_{46}&=&{1 \over 2 V} {d^2 U_{G+I} \over d \epsilon^2} - {(C_{44} + C_{66})\ove
 C_{56}&=&{1 \over 2 V} {d^2 U_{G+H} \over d \epsilon^2} - {(C_{55} + C_{66})\over 2}.
 \end{eqnarray}
 
-\subsection{Hexagonal system}
+\subsection{\color{web-blue}Hexagonal system}
 In this case the form of the elastic constants tensor is independent of
 the Laue class. The nonzero components are $C_{11}=C_{22}$, $C_{12}$, 
 $C_{13}=C_{23}$, $C_{33}$, $C_{44}=C_{55}$, $C_{66}={1\over 2} 
@@ -1850,15 +1870,17 @@ C_{55}&=&{1 \over V} {d^2 U_I \over d \epsilon_5^2}, \\
 \end{eqnarray}
 
 
-\section{Pressure dependent elastic constants}
-The elastic constants of a solid on which we apply a pressure $P$ can still
+\newpage
+\section{\color{coral}Pressure dependent elastic constants}
+
+The elastic constants of a solid on which we apply a pressure $p$ can still
 be defined from the linear relationship between applied strain and 
 induced stress: 
 \begin{equation}
 \sigma_{ij} =\sigma^{(0)}_{ij}+\sum_{kl} B_{ij,kl} \epsilon_{kl}.
 \end{equation}
 However since the solid is already in a strained state
-to balance the pressure $P$, the elastic constants defined as
+to balance the pressure $p$, the elastic constants defined as
 \begin{equation}
 C_{ij,kl}= 
 {1 \over V}{\partial^2 U \over \partial \epsilon_{ij} \partial \epsilon_{kl}},
@@ -1866,28 +1888,28 @@ C_{ij,kl}=
 do not coincide with $B_{ij,kl}$. Actually there is a simple 
 relationship between the two:
 \begin{equation}
-B_{ij,kl} = C_{ij,kl} + {1\over 2} P (2 \delta_{ij} \delta_{kl} - 
+B_{ij,kl} = C_{ij,kl} + {1\over 2} p (2 \delta_{ij} \delta_{kl} - 
  \delta_{il} \delta_{jk} - \delta_{ik} \delta_{jl} ).
 \end{equation}
 Since experimental measurements of elastic constants are usually done 
-using the stress-strain relation it is common to give the numerical
-values of $B_{ij,kl}$ and to call these the elastic constants of a
+using the stress-strain relationship it is common to give the numerical
+values of $B_{ij,kl}$ and to call them the elastic constants of a
 solid under pressure. We can write out the relationship for the Voigt 
 components:
 \begin{eqnarray}
-B_{44} &=& C_{44} - {1\over 2} P \\
-B_{55} &=& C_{55} - {1\over 2} P \\
-B_{66} &=& C_{66} - {1\over 2} P \\
-B_{12} &=& C_{12} + P \\
-B_{13} &=& C_{13} + P \\
-B_{23} &=& C_{23} + P 
+B_{44} &=& C_{44} - {1\over 2} p \\
+B_{55} &=& C_{55} - {1\over 2} p \\
+B_{66} &=& C_{66} - {1\over 2} p \\
+B_{12} &=& C_{12} + p \\
+B_{13} &=& C_{13} + p \\
+B_{23} &=& C_{23} + p 
 \end{eqnarray}
 while for all the other components $B_{ij}=C_{ij}$.
-Note however that for a generic stress, instead of
+Note however that for a generic stress, as opposed to 
 an isotropic pressure, the $B_{ij,kl}$ have not the same symmetry properties 
 of $C_{ij,kl}$. In general they cannot be written using the Voigt notation.
 
-%\section{Temperature dependent elastic constants}
+%\section{\color{coral}Temperature dependent elastic constants}
 %In principle to calculate the elastic constants at each temperature it
 %is sufficient to substitute the Helmholtz free energy to the total energy
 %in the equations of the previous section. There are however two complications
@@ -1904,10 +1926,10 @@ of $C_{ij,kl}$. In general they cannot be written using the Voigt notation.
 %\end{equation}
 %Since we cannot make an elastic constant calculation for each temperature, it
 %is convenient to calculate the Helmholtz free energy in a regular grid in
-%a space whose dimension are the parameters $\alpha_k$ that define the 
+%a space whose dimension are the parameters $\zeta_k$ that define the 
 %unstrained lattice plus an additional parameter that define the strain necessary
 %to calculate the given elastic constant. Sometimes this strain can be applied
-%simply changing the parameters $\alpha_k$, but in some cases it is an
+%simply changing the parameters $\zeta_k$, but in some cases it is an
 %additional parameter that increases of one the dimension of 
 %the parameter space, or equivalently lowers the symmetry of the cell so
 %that we need more parameters to determine it (however all the additional
@@ -1934,7 +1956,7 @@ of $C_{ij,kl}$. In general they cannot be written using the Voigt notation.
 %
 %Let us consider separately the different Bravais lattices.
 %
-%\subsection{Cubic system}
+%\subsection{\color{web-blue}Cubic system}
 %The application of $\epsilon_A$ is equivalent to the change of the lattice 
 %constant $a$, so the calculation of $C_{11}+2 C_{12}$ can be done by fitting
 %$F(a)$ with the quadratic function
@@ -1986,7 +2008,7 @@ of $C_{ij,kl}$. In general they cannot be written using the Voigt notation.
 %If the fit is made with $N_g$ free energy evaluations per parameter, the cost of
 %this procedure is $N_g + 2 N_g^2$ free energy evaluations.
 %
-%\subsection{Hexagonal system}
+%\subsection{\color{web-blue}Hexagonal system}
 %The application of $\epsilon_C$ means that we transform the hexagonal cell
 %into a base-centered orthorhombic cell. This cell is defined by three 
 %parameters $a_o$, $b_o/a_o$ and $c_o/a_o$. We can fit the Helmholtz free 
@@ -2064,7 +2086,7 @@ of $C_{ij,kl}$. In general they cannot be written using the Voigt notation.
 %C_{55}= { 1\over V } 2 g_8 
 %\end{equation}
 %
-%\section{Pressure and temperature dependent elastic constants}
+%\section{\color{coral}Pressure and temperature dependent elastic constants}
 %
 %Under pressure instead of using the Helmholtz free energy we can minimize 
 %the Gibbs free energy. The second
@@ -2089,7 +2111,8 @@ of $C_{ij,kl}$. In general they cannot be written using the Voigt notation.
 %The range of pressures for which this approach works can be tested changing
 %the starting configuration.
 
-\section{The elastic compliances}
+\newpage
+\section{\color{coral}The elastic compliances}
 The relationship between stress and strain can be inverted. A stress 
 applied to a solid produces a strain proportional to the stress:
 \begin{equation}
@@ -2102,7 +2125,8 @@ S_{i,l} = C_{i,l}^{-1}.
 \end{equation}
 
 
-\section{Bulk modulus and compressibility}
+\newpage
+\section{\color{coral}Bulk modulus and compressibility}
 
 The isothermal compressibility is defined as the derivative of the 
 equilibrium volume with respect to pressure divided by the volume,
@@ -2128,11 +2152,12 @@ B_T = {1 \over S_{1,1}+S_{2,2}+S_{3,3}+2 S_{1,2}+2 S_{1,3}+2 S_{2,3}}.
 %elastic constants are available and it is not possible to calculate 
 %the elastic compliances. Moreover it is interesting to express
 %the bulk modulus in terms of the derivatives of the free energy with
-%respect to the crystal parameters $\alpha_k$.
+%respect to the crystal parameters $\zeta_k$.
 %This depends on the Laue class and on the Bravais lattice, so we discuss
 %this in the following.
 
-\section{Thermal expansion from Gr\"uneisen parameters}
+\newpage
+\section{\color{coral}Thermal expansion from Gr\"uneisen parameters}
 Thermal expansion can be calculated from the numerical derivatives of the 
 phonon frequencies with respect to strain, doing analytically the
 derivative with respect to the temperature.
@@ -2180,7 +2205,7 @@ derivatives can be calculated only with respect to the crystal parameters,
 while we need the derivatives with respect to the strain. We discuss
 this point for each crystal system.
 
-\subsection{Cubic system}
+\subsection{\color{web-blue}Cubic system}
 Assuming that the phonon frequencies ${\omega}_{{\bf q}\nu}$ are a function 
 of the set of strains $\{\epsilon_i\}$, it seems that the calculation of 
 the derivative of the frequency with respect to one strain component 
@@ -2208,7 +2233,7 @@ are equal we have:
 \over \partial \epsilon_1} = {a \over 3} {d \omega_{{\bf q}\nu} \over d a}.
 \end{equation}
 
-\subsection{Tetragonal and hexagonal systems}
+\subsection{\color{web-blue}Tetragonal and hexagonal systems}
 In these systems we can consider two lines in strain space. 
 The line $\epsilon_1=\epsilon_2=\epsilon_3=\epsilon$, and
 $\epsilon_4=\epsilon_5=\epsilon_6=0$ that means a change of $a$ at fixed
@@ -2242,7 +2267,7 @@ where we used the fact that in tetragonal and hexagonal systems
 ${\partial \omega_{{\bf q}\nu} \over \partial \epsilon_1}
 ={\partial \omega_{{\bf q}\nu} \over \partial \epsilon_2}$.
  
-\subsection{Trigonal system}
+\subsection{\color{web-blue}Trigonal system}
 We can use the analogy with the hexagonal system and the relationship
 between $a_h$ and $x=c_h/a_h$ and the parameters $a$ and $\cos \alpha$ of the
 trigonal system. 
@@ -2288,7 +2313,7 @@ and
 \epsilon_3} \right) 
 \end{equation}
 
-\subsection{Orthorhombic system}
+\subsection{\color{web-blue}Orthorhombic system}
 In this system we can consider the three lines 
 $\epsilon_1=\epsilon_2=\epsilon_3=\epsilon$ and
 $\epsilon_4=\epsilon_5 =\epsilon_6=0$ obtained varying $a$ at fixed
@@ -2332,7 +2357,9 @@ substitute in the first equation
 \over d b/a} - {c\over a} {d \omega_{{\bf q}\nu} 
 \over d c/a}
 \end{equation}
-\section{Average Gr\"uneisen parameter}
+
+\newpage
+\section{\color{coral}Average Gr\"uneisen parameter}
 
 The product of the thermal expansion coefficient $\beta$, the bulk modulus
 $B_T$, and the volume of unit cell $V$, divided by the constant volume
@@ -2357,7 +2384,8 @@ parameters:
 \gamma_{ij} =  {V b_{ij} \over C_\epsilon}
 \end{equation}
 
-\section{Constant stress heat capacity}
+\newpage
+\section{\color{coral}Constant stress heat capacity}
 
 The difference between the heat capacity calculated at constant strain 
 and that calculated at constant stress is given by:
@@ -2365,7 +2393,8 @@ and that calculated at constant stress is given by:
 C^\sigma - C^\epsilon = T \sum_{ij} \alpha_{ij} b_{ij}
 \end{equation}
 
-\section{Adiabatic quantities}
+\newpage
+\section{\color{coral}Adiabatic quantities}
 
 Similarly the difference between isothermal and adiabatic
 elastic compliances is given by (Voigt notation):
@@ -2378,7 +2407,8 @@ is given by
 C^S_{ij,lm} - C^T_{ij,lm} = - {T V b_{ij} b_{lm} \over C^\epsilon}
 \end{equation}
 
-\section{Appendix}
+\newpage
+\section{\color{coral}Appendix}
 It is often useful to express the primitive vectors of the centered
 lattices in term of the primitive vectors of the conventional lattices
 and viceversa. We report in this appendix the relationships that result
@@ -2482,7 +2512,9 @@ Base-centered monoclinic ($c$-unique):
 \end{eqnarray}
 
 
-\section{Bibliography}
+\newpage
+
+\section{\color{coral}Bibliography}
 \begin{enumerate}
 
 \item

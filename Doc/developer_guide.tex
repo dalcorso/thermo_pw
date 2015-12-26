@@ -1,11 +1,24 @@
+%!
+%! Copyright (C) 2015 Andrea Dal Corso 
+%! This file is distributed under the terms of the
+%! GNU General Public License. See the file `License'
+%! in the root directory of the present distribution,
+%! or http://www.gnu.org/copyleft/gpl.txt .
+%!
 \documentclass[12pt,a4paper]{article}
 \def\version{0.4.0}
 \def\qe{{\sc Quantum ESPRESSO}}
 \def\tpw{{\sc THERMO\_PW}}
 
 \usepackage{html}
+\usepackage{color}
 
 \usepackage{graphicx}
+
+\definecolor{web-blue}{rgb}{0,0.5,1.0}
+\definecolor{coral}{rgb}{1.0,0.5,0.3}
+\definecolor{red}{rgb}{1.0,0,0.0}
+\definecolor{green}{rgb}{0.,1.0,0.0}
 
 \textwidth = 17cm
 \textheight = 24cm
@@ -23,14 +36,12 @@
 \author{Andrea Dal Corso (SISSA - Trieste)}
 \date{}
 
-\def\qeImage{../../Doc/quantum_espresso.pdf}
-\def\democritosImage{../../Doc/democritos.pdf}
-\def\SissaImage{./sissa.pdf}
+%\def\SissaImage{./sissa_on_white.png}
 
 \title{
 %  \includegraphics[width=6cm]{\SissaImage}\\
   \vskip 1cm
-  \Huge \tpw\ Developer's Guide \\
+  {\color{red}\Huge \tpw\ Developer's Guide} \\
   \Large (version \version)
 }
 \maketitle
@@ -39,7 +50,7 @@
 
 \newpage
 
-\section{Introduction}
+\section{\color{coral}Introduction}
 This guide discusses the internal organization of \tpw. It is not necessary
 to read it to use \tpw. It contains some technical information not 
 appropriate for the user's guide.
@@ -47,10 +58,11 @@ It assumes that you have read and understood the user's guide and that
 you have already some familiarity with the input variables and 
 the working modes of the \tpw\ code.
 
-\section{People}
+\section{\color{coral}People}
 This guide has been written by Andrea Dal Corso (SISSA - Trieste). 
 
-\section {Overview}
+\newpage
+\section{\color{coral}Overview}
 \tpw\ is logically divided into parts. In some parts the different
 images run asynchronously doing different tasks and in some parts the
 run is synchronous. Usually in this synchronous parts results are 
@@ -148,7 +160,8 @@ Calculation of the isoentropic quantities when programmed.
 
 \end{itemize}
 
-\section{Activated parts}
+\newpage
+\section{\color{coral}Activated parts}
 
 The different \texttt{what} activates the following parts of the code:
 
@@ -179,11 +192,48 @@ mur_lc_t     *           *                                   *     *  *   *  *
 + not yet active or working.
 \end{verbatim}
 
+\newpage
 
-\section{Scripts and Files}
+\section{\color{coral}Plots}
+This is the list of the plots that can be obtained and 
+the \texttt{what} to use:
 
-In almost all tasks, \tpw\ produces some data file containing the quantity 
-to plot, some script to plot the data and, if the \texttt{gnuplot} code
+\begin{verbatim}
+Brillouin zone                                 plot_bz
+X-ray powder diffraction pattern               plot_bz
+Total energy versus kinetic energy             scf_ke
+Total energy versus k points                   scf_nk
+Total energy as a function of volume           mur_lc
+Total energy as a function of two or three
+crystallographic parameters                    mur_lc
+Energy bands                                   scf_bands, mur_lc_bands
+Phonon dispersions                             scf_disp, mur_lc_disp
+Phonon dos                                     scf_disp, mur_lc_disp
+Vibrational energy, free energy, entropy,      
+isochoric heat capacity                        scf_disp, mur_lc_disp
+Debye vibrational energy, free energy, 
+entropy and isochoric heat capacity            scf_elastic_constants, 
+                                               mur_lc_elastic_constants
+Lattice parameters as a function of T          mur_lc_t
+Thermal expansion as a function of T           mur_lc_t 
+Mode Gruneisen parameters                      mur_lc_t
+Phonon dispersions at the geometry 
+that corresponds to a given temperature        mur_lc_t
+
+For cubic systems also the following quantities are available:
+
+Bulk modulus as a function of T                mur_lc_t
+Difference isobaric-isochoric heat capacity    mur_lc_t
+Difference isoentropic-isothermal bulk modulus mur_lc_t
+Average Gruneisen parameter                    mur_lc_t
+
+\end{verbatim}
+
+\newpage
+\section{\color{coral}Scripts and Files}
+
+In almost all tasks, \tpw\ produces some data files containing the quantity 
+to plot, some scripts to plot the data and, if the \texttt{gnuplot} code
 is available, the postscript files with the plot of the data. So for each 
 task there is an associated routine
 that writes the output data and a routine that plots the output data
@@ -208,7 +258,7 @@ scf_band        bands_sub
                 plotbands_sub    flpbands
                 write_gnuplot_file              flgnuplot(_band)    flpsband     
 
-scf_ph             --              --               --                  --
+scf_ph             --            fildyn               --                  --
 scf_disp                         fildyn
                  q2r_sub         flfrc
                  matdyn_sub      flfrq
@@ -264,35 +314,124 @@ mur_lc_t
 # is an integer from 1 to the number of crystal parameters
 \end{verbatim} 
 
-\noindent This is the list of the plots that can be obtained and 
-the \texttt{what} to use:
 
-\begin{verbatim}
-Brillouin zone                                 plot_bz
-Total energy versus kinetic energy             scf_ke
-Total energy versus k points                   scf_nk
-Total energy as a function of volume           mur_lc
-Total energy as a function of two or three
-crystallographic parameters                    mur_lc
-Energy bands                                   scf_bands, mur_lc_bands
-Phonon dispersions                             scf_disp, mur_lc_disp
-Phonon dos                                     scf_disp, mur_lc_disp
-Vibrational energy, free energy, entropy,      
-isochoric heat capacity                        scf_disp, mur_lc_disp
-Lattice parameters as a function of T          mur_lc_t
-Thermal expansion as a function of T           mur_lc_t 
-Gruneisen parameters dispersions               mur_lc_t
-Phonon dispersions at the geometry 
-that corresponds to a given temperature        mur_lc_t
+\newpage
+\section{\color{coral}Library}
 
-For cubic systems also the following quantities are available:
+\tpw\ offers a library of modules to deal with solid properties. The 
+modules are independent from the \tpw\ variables, but might
+depend on the \qe\ modules. They are used by the routines of \tpw\ 
+but can also be used by independent programs such as those contained
+in the \texttt{tools} directory. Presently the library contains the
+following modules:
 
-Bulk modulus as a function of T                mur_lc_t
-Difference isobaric-isochoric heat capacity    mur_lc_t
-Difference isoentropic-isothermal bulk modulus mur_lc_t
-Average Gruneisen parameter                    mur_lc_t
+\begin{itemize}
 
-\end{verbatim}
+\item \texttt{lattices.f90} contains routines to deal with Bravais lattices.
+Presently there is a routine to calculate the primitive cell of
+a given centered cell.
+
+\item
+\texttt{latgen\_2d.f90} contains routines to deal with two dimensional
+Bravais lattices. Presently it contains the routines to generate the
+primitive vectors of these lattices and their reciprocal lattice vectors.
+
+\item
+\texttt{bz\_2d\_form.f90} contains the information required to make a
+plot of the two-dimensional Brillouin zones.
+
+\item
+\texttt{rotate.f90} contains routines to deal with rotations. Presently it
+applies a given rotation to a vector or to a tensor.
+
+\item
+\texttt{space\_groups.f90} contains routines to detect the space group,
+to set the FFT indeces compatible with a given space group, to find the
+space group number given the name, or the name given the number etc.
+
+\item
+\texttt{point\_group.f90} contains routines to deal with crystallographic
+point groups. Given a representation of a given group it can find 
+the subgroups representations that correspond to it (also for
+double groups). It has the same conventions as the routines 
+in \texttt{find\_group.f90}, \texttt{divide\_class.f90}, and 
+\texttt{divide\_class\_so.f90} of \qe.
+
+\item
+\texttt{ph\_freq\_module.f90} contains routines to calculate the vibrational
+energy, free energy, entropy, and constant strain specific heat from the
+phonon frequencies.   
+
+\item
+\texttt{phdos\_module.f90} contains routines to calculate the vibrational
+energy, free energy, entropy, and constant strain specific heat from the
+phonon density of states.
+
+\item
+\texttt{strain.f90} contains routines to apply a given strain to a given
+Bravais lattice.
+
+\item
+\texttt{isoentropic.f90} contains routines to calculate the isoentropic
+quantities or the constant stress specific heat.
+
+\item
+\texttt{piezoelectric\_tensor.f90} contains routines to calculate the
+piezoelectric tensor given the strain and the induced polarization.
+
+\item
+\texttt{elastic\_const.f90} contains routines to calculate the elastic
+constants given the strain and the induced stress. It can also compute
+quantities dependent on the elastic constants, such as the elastic 
+compliances, the bulk moduli, the sound speeds or the Voigt-Reuss-Hill 
+averages. It has also routines to transform from the Voigt to the 
+tensorial notation and viceversa.
+
+\item
+\texttt{xrdp.f90} contains routines to calculate the atomic form factors 
+and the X-rays powder diffraction spectra.
+
+\item
+\texttt{debye\_module.f90} contains routines to calculate the debye 
+temperature, the vibrational energy, free-energy, and entropy according
+to the Debye's model.
+
+\item
+\texttt{quadratic\_surfaces.f90} contains routines to fit a set of data
+with a quadratic polynomial, to find the gradient or the hessian in 
+a given point and to find the minimum of the quadratic function. 
+The number of independent variables can vary from one to six.
+
+\item
+\texttt{quartic\_surfaces.f90} contains routines to fit a set of data
+with a quartic polynomial, to find the gradient or the hessian in 
+a given point and to find the minimum of the quartic function given a 
+reasonably good guess of its position.
+The number of independent variables can vary from one to four.
+
+\item
+\texttt{mp\_asyn.f90} contains the routines needed to run many 
+independent calculations in a asynchronous way. It supports a master-slave
+approach in which a processor acts as a master and sends to the slaves
+the information on the work to do when they are ready to do it.
+
+\item
+\texttt{asy.f90} contains the routines to write a script for the
+\texttt{asymptote} code.
+
+\item
+\texttt{bz\_asy.f90} contains the informations needed to make the plot       
+of the Brillouin zone using the \texttt{asymptote} code.      
+
+\item
+\texttt{gnuplot.f90} contains the routines to write a \texttt{gnuplot} script.
+
+\item
+\texttt{gnuplot\_color.f90} contains routines to insert the color names
+inside the \texttt{gnuplot} scripts.
+
+\end{itemize}
+
 
 \end{document}
 
