@@ -102,6 +102,7 @@ PROGRAM thermo_pw
   USE control_bands,    ONLY : nbnd_bands
   USE control_pwrun,    ONLY : ibrav_save, do_punch, amass_save
   USE control_xrdp,     ONLY : lxrdp, lambda, flxrdp, lcm
+  USE control_ph,       ONLY : recover
   USE xrdp_module,      ONLY : compute_xrdp
   USE thermo_sym,       ONLY : laue, code_group_save
   USE cell_base,        ONLY : omega, at, bg
@@ -113,7 +114,7 @@ PROGRAM thermo_pw
   USE control_pressure, ONLY : pressure, pressure_kb
   USE phdos_module,     ONLY : destroy_phdos
   USE input_parameters, ONLY : ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
-                               trd_ht, rd_ht, cell_units, outdir
+                               trd_ht, rd_ht, cell_units, outdir, max_seconds
   USE control_mur,      ONLY : vmin, b0, b01, emin, celldm0, lmurn
   USE thermo_mod,       ONLY : what, ngeo, omega_geo, energy_geo, &
                                tot_ngeo, reduced_grid, ibrav_geo, celldm_geo, &
@@ -210,7 +211,7 @@ PROGRAM thermo_pw
         CALL write_gnuplot_energy(nwork)
         CALL quadratic_fit()
         CALL write_quadratic()
-        IF (.NOT. reduced_grid) CALL plot_multi_energy()
+        CALL plot_multi_energy()
      ENDIF
      CALL mp_bcast(celldm0, meta_ionode_id, world_comm)
      CALL mp_bcast(emin, meta_ionode_id, world_comm)

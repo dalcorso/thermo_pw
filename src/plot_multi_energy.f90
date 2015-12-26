@@ -15,13 +15,15 @@ SUBROUTINE plot_multi_energy()
   !
   !
   USE kinds,                ONLY : DP
-  USE thermo_mod,           ONLY : ngeo, celldm_geo, energy_geo, omega_geo
+  USE thermo_mod,           ONLY : ngeo, celldm_geo, energy_geo, omega_geo, &
+                                   reduced_grid
   USE input_parameters,     ONLY : ibrav
   USE control_gnuplot,      ONLY : flgnuplot, gnuplot_command, lgnuplot
   USE data_files,           ONLY : flenergy, flevdat
   USE postscript_files,     ONLY : flpsenergy
   USE control_energy_plot,  ONLY : ncontours, ene_levels, color_levels
-  USE control_quadratic_energy, ONLY : x_pos_min, hessian_v, degree
+  USE control_quadratic_energy, ONLY : x_pos_min, hessian_v, degree, show_fit
+  USE control_mur,          ONLY : nvol
   USE control_pressure,     ONLY : pressure, pressure_kb
   USE mp_images,            ONLY : my_image_id, root_image
   USE io_global,            ONLY : ionode
@@ -45,11 +47,16 @@ SUBROUTINE plot_multi_energy()
   REAL(DP) :: xmin, xmax, ymin, ymax
   INTEGER :: max_contours, nx, ny, icont, tot_n, iwork, ierr
   INTEGER :: system
+  INTEGER :: compute_nwork
 
   IF ( my_image_id /= root_image ) RETURN
 
   gnu_filename=TRIM(flgnuplot)//'_energy'
-  filename=TRIM(flenergy)//int_to_char(1)
+  IF (reduced_grid.OR.show_fit) THEN
+     filename=TRIM(flevdat)//'_quadratic'
+  ELSE
+     filename=TRIM(flenergy)//int_to_char(1)
+  ENDIF
   filenameps=TRIM(flpsenergy)
   IF (pressure /= 0.0_DP) THEN
      gnu_filename=TRIM(gnu_filename)//'.'//TRIM(float_to_char(pressure_kb,1))
@@ -109,9 +116,14 @@ SUBROUTINE plot_multi_energy()
      CASE(4,6,7)
         IF (ncontours==0) RETURN
         ene_levels_int(:)=ene_levels(:)
-        nx=ngeo(1)
-        ny=ngeo(3)
-        tot_n=ngeo(1)*ngeo(3)
+        IF (reduced_grid.OR.show_fit) THEN
+           nx=nvol
+           ny=nvol
+        ELSE
+           nx=ngeo(1)
+           ny=ngeo(3)
+        ENDIF
+        tot_n=compute_nwork()
         xmin=1.d10
         xmax=-1.d10
         ymin=1.d10

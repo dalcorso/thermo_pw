@@ -10,14 +10,14 @@ SUBROUTINE write_gnuplot_energy(nwork)
   !-----------------------------------------------------------------------
   !
   !  This routine writes the energy at each geometry in a form that
-  !  can be read by gnuplot to make two dimensional plots of the 
+  !  can be read by gnuplot to make two dimensional countour plots of the 
   !  energy.
   !  It must be called by all processors, only the meta_ionode writes 
   !  the data.
   !
   !
   USE kinds,      ONLY : DP
-  USE thermo_mod, ONLY : energy_geo, ngeo, celldm_geo, omega_geo
+  USE thermo_mod, ONLY : energy_geo, ngeo, celldm_geo, omega_geo, reduced_grid
   USE cell_base,  ONLY : ibrav
   USE data_files, ONLY : flenergy
   USE control_pressure, ONLY : pressure, pressure_kb
@@ -54,30 +54,48 @@ SUBROUTINE write_gnuplot_energy(nwork)
 
         SELECT CASE (ibrav)
            CASE(1,2,3)
-              DO iwork=1,ngeo(1)
+              DO iwork=1,nwork
                  WRITE(iu_ev,'(2e30.15)', ERR=20, IOSTAT=ios) &
                            celldm_geo(1,iwork), energy_geo(iwork) &
                                               + pressure * omega_geo(iwork)
               ENDDO
            CASE(4,6,7)
-              DO iwork=1,ngeo(1)*ngeo(3)
+              DO iwork=1,nwork
                   WRITE (iu_ev,'(3e25.12)', ERR=20, IOSTAT=ios) &
                         celldm_geo(1,iwork), &
                         celldm_geo(3,iwork), & 
                         energy_geo(iwork) + pressure * omega_geo(iwork)
               ENDDO
            CASE(5)
-              DO iwork=1,ngeo(1)*ngeo(4)
+              DO iwork=1,nwork
                  WRITE(iu_ev,'(3e25.12)', ERR=20, IOSTAT=ios) &
                       celldm_geo(1,iwork), &
                       celldm_geo(4,iwork), &
                       energy_geo(iwork) + pressure * omega_geo(iwork)
               ENDDO
            CASE(8,9,91,10,11)
-              DO iwork=1+(ifiles-1)*ngeo(1)*ngeo(2), ifiles*ngeo(1)*ngeo(2)
-                 WRITE(iu_ev,'(3e25.12)', ERR=20, IOSTAT=ios) &
-                     celldm_geo(1,iwork), &
-                     celldm_geo(2,iwork), energy_geo(iwork) &  
+              IF (.NOT. reduced_grid) THEN
+                 DO iwork=1+(ifiles-1)*ngeo(1)*ngeo(2), ifiles*ngeo(1)*ngeo(2)
+                    WRITE(iu_ev,'(3e25.12)', ERR=20, IOSTAT=ios) &
+                        celldm_geo(1,iwork), &
+                        celldm_geo(2,iwork), energy_geo(iwork) &  
+                                 + pressure * omega_geo(iwork)
+                 ENDDO
+              ELSE
+                 DO iwork = 1, nwork
+                    WRITE(iu_ev,'(4e20.12)', ERR=20, IOSTAT=ios)  &
+                        celldm_geo(1,iwork), celldm_geo(2,iwork), &
+                        celldm_geo(3,iwork), energy_geo(iwork)    &  
+                                 + pressure * omega_geo(iwork)
+                 ENDDO
+              END IF
+           CASE DEFAULT
+              DO iwork = 1, nwork
+                 WRITE(iu_ev,'(7e20.12)', ERR=20, IOSTAT=ios)  &
+                     celldm_geo(1,iwork), celldm_geo(2,iwork), &
+                     celldm_geo(3,iwork), celldm_geo(4,iwork), &
+                     celldm_geo(4,iwork), celldm_geo(5,iwork), &
+                     celldm_geo(6,iwork), energy_geo(iwork)    &  
                               + pressure * omega_geo(iwork)
               ENDDO
         END SELECT

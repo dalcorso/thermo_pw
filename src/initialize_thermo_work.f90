@@ -449,74 +449,47 @@ SUBROUTINE set_celldm_geo()
 !   This routine sets the celldm to a grid of points.
 !
 USE kinds, ONLY : DP
-USE thermo_mod, ONLY : what, step_ngeo, ngeo, celldm_geo, reduced_grid
+USE thermo_mod, ONLY : what, step_ngeo, ngeo, celldm_geo, reduced_grid, &
+                       start_geo, jump_geo
 USE control_pwrun, ONLY : celldm_save
 IMPLICIT NONE
 INTEGER :: igeo1, igeo2, igeo3, igeo4, igeo5, igeo6
-INTEGER :: iwork, igeo, jgeo, i
+INTEGER :: iwork, igeo, jgeo, i, total_work
 REAL(DP) :: angle1, angle2, angle3, angle
 
 iwork=0
 celldm_geo=0.0_DP
-IF (reduced_grid) then
-   iwork=1
-   celldm_geo(:,iwork)=celldm_save(:)
-   DO i=1,3
-      IF (ngeo(i)>1) THEN
-         DO igeo=1,ngeo(i)
-            jgeo=NINT(igeo-(ngeo(i)+1.0_DP)/2.0_DP)
-            IF (jgeo /= 0) THEN
-               iwork=iwork+1
-               celldm_geo(:,iwork) = celldm_save(:)
-               celldm_geo(i,iwork) = celldm_save(i) + jgeo * step_ngeo(i)
-            END IF
-         END DO
-      END IF
-   END DO
-
-   DO i=4,6
-      IF (ngeo(i)>1) THEN
-         DO igeo=1,ngeo(i)
-            jgeo=NINT(igeo-(ngeo(i)+1.0_DP)/2.0_DP)
-            IF (jgeo /= 0) THEN
-               iwork = iwork+1
-               angle = ACOS(celldm_save(i)) + jgeo * step_ngeo(i)
-               celldm_geo(:,iwork) = celldm_save(:)
-               celldm_geo(i,iwork) = COS(angle)
-            END IF
-         END DO
-      END IF
-   END DO
-ELSE
-   DO igeo6 = 1, ngeo(6)
-      angle3 = ACOS(celldm_save(6)) +  &
-               (igeo6-(ngeo(6)+1.0_DP)/2.0_DP)*step_ngeo(6)
-      DO igeo5 = 1, ngeo(5)
-         angle2 = ACOS(celldm_save(5)) +  &
-                (igeo5-(ngeo(5)+1.0_DP)/2.0_DP)*step_ngeo(5)
-         DO igeo4 = 1, ngeo(4)
-            angle1 = ACOS(celldm_save(4)) +  &
-                 (igeo4-(ngeo(4)+1.0_DP)/2.0_DP)*step_ngeo(4)
-            DO igeo3 = 1, ngeo(3)
-               DO igeo2 = 1, ngeo(2)
-                  DO igeo1 = 1, ngeo(1)
-                     iwork=iwork+1
-                     celldm_geo(1,iwork)=celldm_save(1)+&
-                           (igeo1-(ngeo(1)+1.0_DP)/2.0_DP)*step_ngeo(1)
-                     celldm_geo(2,iwork)=celldm_save(2)+&
-                           (igeo2-(ngeo(2)+1.0_DP)/2.0_DP)*step_ngeo(2)
-                     celldm_geo(3,iwork)=celldm_save(3)+&
-                           (igeo3-(ngeo(3)+1.0_DP)/2.0_DP)*step_ngeo(3)
-                     celldm_geo(4,iwork)= COS(angle1)
-                     celldm_geo(5,iwork)= COS(angle2)
-                     celldm_geo(6,iwork)= COS(angle3)
-                  ENDDO
+DO igeo6 = 1, ngeo(6)
+   angle3 = ACOS(celldm_save(6)) +  &
+            (igeo6-(ngeo(6)+1.0_DP)/2.0_DP)*step_ngeo(6)
+   DO igeo5 = 1, ngeo(5)
+      angle2 = ACOS(celldm_save(5)) +  &
+             (igeo5-(ngeo(5)+1.0_DP)/2.0_DP)*step_ngeo(5)
+      DO igeo4 = 1, ngeo(4)
+         angle1 = ACOS(celldm_save(4)) +  &
+              (igeo4-(ngeo(4)+1.0_DP)/2.0_DP)*step_ngeo(4)
+         DO igeo3 = 1, ngeo(3)
+            DO igeo2 = 1, ngeo(2)
+               DO igeo1 = 1, ngeo(1)
+                  total_work=total_work+1
+                  IF (reduced_grid.AND.(total_work - start_geo) >= 0 .AND. &
+                          MOD(total_work - start_geo, jump_geo)/=0) CYCLE
+                  iwork=iwork+1
+                  celldm_geo(1,iwork)=celldm_save(1)+&
+                        (igeo1-(ngeo(1)+1.0_DP)/2.0_DP)*step_ngeo(1)
+                  celldm_geo(2,iwork)=celldm_save(2)+&
+                        (igeo2-(ngeo(2)+1.0_DP)/2.0_DP)*step_ngeo(2)
+                  celldm_geo(3,iwork)=celldm_save(3)+&
+                        (igeo3-(ngeo(3)+1.0_DP)/2.0_DP)*step_ngeo(3)
+                  celldm_geo(4,iwork)= COS(angle1)
+                  celldm_geo(5,iwork)= COS(angle2)
+                  celldm_geo(6,iwork)= COS(angle3)
                ENDDO
             ENDDO
          ENDDO
       ENDDO
    ENDDO
-ENDIF
+ENDDO
 
 RETURN
 END SUBROUTINE set_celldm_geo
@@ -524,23 +497,14 @@ END SUBROUTINE set_celldm_geo
 
 INTEGER FUNCTION compute_nwork()
 
-USE thermo_mod, ONLY : ngeo, reduced_grid, central_geo
+USE thermo_mod, ONLY : ngeo, reduced_grid, central_geo, start_geo, jump_geo
 USE control_mur, ONLY : lmurn
 IMPLICIT NONE
-INTEGER :: iwork
+INTEGER :: iwork, auxgeo
 
-IF (reduced_grid) THEN
-   iwork= ngeo(1) + ngeo(2) + ngeo(3) + ngeo(4) + ngeo(5) + ngeo(6)
-   IF (MOD(ngeo(1),2) /= 0) iwork = iwork - 1
-   IF (MOD(ngeo(2),2) /= 0) iwork = iwork - 1
-   IF (MOD(ngeo(3),2) /= 0) iwork = iwork - 1
-   IF (MOD(ngeo(4),2) /= 0) iwork = iwork - 1
-   IF (MOD(ngeo(5),2) /= 0) iwork = iwork - 1
-   IF (MOD(ngeo(6),2) /= 0) iwork = iwork - 1
-   compute_nwork=iwork + 1
-ELSE
-   compute_nwork=ngeo(1)*ngeo(2)*ngeo(3)*ngeo(4)*ngeo(5)*ngeo(6)
-ENDIF
+auxgeo=ngeo(1)*ngeo(2)*ngeo(3)*ngeo(4)*ngeo(5)*ngeo(6)
+IF (reduced_grid) auxgeo=(auxgeo+1)/jump_geo - (start_geo -1)/jump_geo
+compute_nwork=auxgeo
 IF (lmurn) compute_nwork=ngeo(1)
 central_geo=compute_nwork/2
 IF (MOD(compute_nwork,2)==1) central_geo=central_geo+1
@@ -618,37 +582,34 @@ IF (MOD(ngeo(1)-1, fact_ngeo(1))/=0 .OR. &
     MOD(ngeo(5)-1, fact_ngeo(5))/=0 .OR. &
     MOD(ngeo(6)-1, fact_ngeo(6))/=0 ) CALL errore('initialize_no_ph', &
                                               'fact_ngeo incompatible with ngeo',1) 
-count_ngeo=0
+
 IF (reduced_grid) THEN
-   DO i=1,6
-      DO igeo1=1,ngeo(i)
-         count_ngeo=count_ngeo+1
-         no_ph(count_ngeo)= .NOT. (MOD(igeo1-1, fact_ngeo(i))==0)
-      ENDDO
-   ENDDO
-ELSE
-   DO igeo6 = 1, ngeo(6)
-      todo(6)= (MOD(igeo6-1, fact_ngeo(6))==0)
-      DO igeo5 = 1, ngeo(5)
-         todo(5)= (MOD(igeo5-1, fact_ngeo(5))==0)
-         DO igeo4 = 1, ngeo(4)
-            todo(4)= (MOD(igeo4-1, fact_ngeo(4))==0)
-            DO igeo3 = 1, ngeo(3)
-               todo(3)= (MOD(igeo3-1, fact_ngeo(3))==0)
-               DO igeo2 = 1, ngeo(2)
-                  todo(2)= (MOD(igeo2-1, fact_ngeo(2))==0)
-                  DO igeo1 = 1, ngeo(1)
-                     todo(1)= (MOD(igeo1-1, fact_ngeo(1))==0)
-                     count_ngeo = count_ngeo + 1       
-                     no_ph(count_ngeo)= .NOT. (todo(1).AND.todo(2).AND.todo(3) &
-                                        .AND.todo(4).AND.todo(5).AND.todo(6))
-                  END DO
+   no_ph=.FALSE.
+   RETURN
+ENDIF
+
+count_ngeo=0
+DO igeo6 = 1, ngeo(6)
+   todo(6)= (MOD(igeo6-1, fact_ngeo(6))==0)
+   DO igeo5 = 1, ngeo(5)
+      todo(5)= (MOD(igeo5-1, fact_ngeo(5))==0)
+      DO igeo4 = 1, ngeo(4)
+         todo(4)= (MOD(igeo4-1, fact_ngeo(4))==0)
+         DO igeo3 = 1, ngeo(3)
+            todo(3)= (MOD(igeo3-1, fact_ngeo(3))==0)
+            DO igeo2 = 1, ngeo(2)
+               todo(2)= (MOD(igeo2-1, fact_ngeo(2))==0)
+               DO igeo1 = 1, ngeo(1)
+                  todo(1)= (MOD(igeo1-1, fact_ngeo(1))==0)
+                  count_ngeo = count_ngeo + 1       
+                  no_ph(count_ngeo)= .NOT. (todo(1).AND.todo(2).AND.todo(3) &
+                                     .AND.todo(4).AND.todo(5).AND.todo(6))
                END DO
             END DO
          END DO
       END DO
    END DO
-ENDIF
+END DO
 
 RETURN
 END SUBROUTINE initialize_no_ph
