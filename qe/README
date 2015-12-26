@@ -16,7 +16,9 @@ the bands in the final run that collects all the dynamical matrices.
 
 run_nscf_tpw : call set_small_group_q also in the lgamma_iq case. This change
                can probably be done also in the phonon, but it is tested here
-               before changing qe.
+               before changing qe. Set lscf to .false. because thermo_pw
+               reads the input of pw that sets lscf or can do a scf calculation
+               that sets this variable.
 
 do_phonon_tpw : call phqscf_tpw instead of phqscf and prepare_q_tpw instead
             of prepare_q.

@@ -17,7 +17,7 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   USE basis,           ONLY : starting_wfc, starting_pot, startingconfig
   USE io_files,        ONLY : prefix, tmp_dir, wfc_dir, seqopn
   USE lsda_mod,        ONLY : nspin
-  USE control_flags,   ONLY : restart
+  USE control_flags,   ONLY : restart, lscf
   USE check_stop,      ONLY : check_stop_now
   USE fft_base,        ONLY : dffts
   USE modes,           ONLY : minus_q, nsymq, invsymq
@@ -68,6 +68,7 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   startingconfig    = 'input'
   starting_pot      = 'file'
   starting_wfc      = 'atomic'
+  lscf              = .FALSE.
   restart = ext_restart
   conv_ions=.true.
   !

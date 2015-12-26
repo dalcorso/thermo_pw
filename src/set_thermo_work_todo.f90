@@ -25,6 +25,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
   USE control_conv, ONLY : ke, keden, nk_test, sigma_test
   USE control_elastic_constants, ONLY : at_save, tau_save, frozen_ions
   USE elastic_constants, ONLY : epsilon_geo, apply_strain, print_strain
+  USE control_ph, ONLY : recover
   USE control_flags, ONLY : gamma_only, tstress, tprnfor, lbfgs, nstep, niter
   USE force_mod, ONLY : lforce, lstres
   USE relax,       ONLY : epse, epsf
@@ -38,8 +39,8 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
   USE klist,       ONLY : degauss
   USE gvect,       ONLY : ecutrho
   USE gvecs,       ONLY : dual
-  USE grid_irr_iq, ONLY : irr_iq, comp_irr_iq
-  USE disp,        ONLY : nqs, comp_iq
+  USE grid_irr_iq, ONLY : irr_iq, comp_irr_iq, done_irr_iq
+  USE disp,        ONLY : nqs, comp_iq, done_iq
   USE io_global,   ONLY : stdout
   !
   IMPLICIT NONE
@@ -154,8 +155,13 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
               DO irr=0, irr_iq(iq)
                  jwork=jwork+1
                  IF (jwork==iwork) THEN
-                    comp_irr_iq(irr,iq)=.TRUE.
-                    comp_iq(iq)=.TRUE.
+                    IF (recover) THEN
+                       comp_irr_iq(irr,iq)=.NOT.done_irr_iq(irr,iq)
+                       comp_iq(iq)=.NOT.done_iq(iq)
+                    ELSE
+                       comp_irr_iq(irr,iq)=.TRUE.
+                       comp_iq(iq)=.TRUE.
+                    ENDIF
                     iq_point=iq
                     irr_value=irr
                  ENDIF
