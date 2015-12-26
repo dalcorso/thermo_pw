@@ -167,7 +167,7 @@ REAL(DP) :: a(m1), x(ngeo(1)), y(ngeo(1)), aux, aux1
   CALL compute_celldm_geo(vmin_t(itemp), celldm_, celldm_geo(1,central_geo), &
                                          omega_geo(central_geo))
   WRITE(stdout,'(/,2x,76("-"))')
-  WRITE(stdout,'(5x, "phdos free energy, at T= ", f12.6)') temp(itemp)
+  WRITE(stdout,'(5x, "free energy from phonon dos, at T= ", f12.6)') temp(itemp)
   IF (pressure /= 0.0_DP) &
      WRITE(stdout, '(5x,"pressure = ",f15.6," kbar")') pressure_kb
   WRITE(stdout,'(5x, "The equilibrium lattice constant is ",9x,f12.4,&
@@ -242,7 +242,8 @@ REAL(DP) :: a(m1), x(ngeo(1)), y(ngeo(1)), aux, aux1
   CALL compute_celldm_geo(vminf_t(itemp), celldm_, celldm_geo(1,central_geo), &
                                          omega_geo(central_geo))
   WRITE(stdout,'(/,2x,76("+"))')
-  WRITE(stdout,'(5x, "ph_freq free energy at T=",f12.4)') temp(itemp)
+  WRITE(stdout,'(5x, "free energy from phonon frequencies at T=",f12.4)') &
+                                                               temp(itemp)
   IF (pressure /= 0.0_DP) &
      WRITE(stdout, '(5x,"pressure = ",f15.6," kbar")') pressure_kb
   WRITE(stdout,'(5x, "The equilibrium lattice constant is ",16x,f12.4,&
@@ -259,7 +260,7 @@ END SUBROUTINE do_ev_t_ph
 SUBROUTINE find_min_mur_pol(v0, b0, b01, a, m1, vm)
 !
 !  This routine minimizes a function equal to the Murnaghan equation
-!  with parameters v0, b0 and b01 and a polynomial of degree m1-1 of
+!  with parameters v0, b0, and b01 and a polynomial of degree m1-1 of
 !  the form a(1) + a(2) * v + a(3) * v**2 +... a(m1) * v**(m1-1)
 !  NB: b0 must be in atomic units not kbar.
 !
@@ -269,49 +270,34 @@ IMPLICIT NONE
 INTEGER, INTENT(IN) :: m1
 REAL(DP), INTENT(IN) :: v0, b0, b01, a(m1)
 REAL(DP), INTENT(OUT) :: vm
-REAL(DP), PARAMETER :: tol=1.D-11
+REAL(DP), PARAMETER :: tol=1.D-12
 INTEGER, PARAMETER :: maxstep=100
-REAL(DP) :: fx, f1, f2, vx, v1, v2
-REAL(DP) :: compute_fun
+REAL(DP) :: fx, fxp, v1, v1old
+REAL(DP) :: compute_fun, compute_fun_deriv
 INTEGER :: istep
 
 v1=v0*0.8_DP
-v2=v0*1.3_DP
-f1= compute_fun(v1, v0, b0, b01, a, m1)
-f2= compute_fun(v2, v0, b0, b01, a, m1)
-!
-!  Try at least once to reduce the range about v0 if necessary
-!
-IF (f1 * f2 > 0.0_DP) THEN
-   v1=v0*0.9_DP
-   v2=v0*1.1_DP
-   f1= compute_fun(v1, v0, b0, b01, a, m1)
-   f2= compute_fun(v2, v0, b0, b01, a, m1)
-   IF (f1 * f2 > 0.0_DP) CALL errore('find_min_mur_pol',&
-                                     'problem finding minimum',1)
-ENDIF
-
+v1old=v1
 DO istep=1,maxstep
-   vx= ( v1+v2 ) * 0.5_DP
-   fx= compute_fun(vx, v0, b0, b01, a, m1)
-   IF (fx * f1 < 0.0_DP) THEN
-      v2=vx
-   ELSE
-      v1=vx
-   END IF
-   IF (ABS(v1-v2) < tol) GOTO 100
-!   WRITE(stdout,'("V1", f20.12, " V2 ", f20.12)') v1, v2
+   fx = compute_fun(v1, v0, b0, b01, a, m1)
+   fxp = compute_fun_deriv(v1, v0, b0, b01, a, m1)
+!
+!  Newton method
+!
+   v1 = v1 - fx/fxp
+!   WRITE(stdout,'(5x,"Step", i4, " V1=", f20.12, " f= ", f20.12)') istep, v1, fx
+   IF (ABS(v1-v1old) < tol .OR. ABS(fx) < tol ) GOTO 100
+   v1old=v1
 ENDDO
 CALL errore('find_min_mur_pol','minimum not found',1)
 100 CONTINUE
-vm=(v1+v2)*0.5_DP
+vm=v1
 !WRITE(stdout,'("Vmin", 3f20.12)') vm
 
 RETURN
 END SUBROUTINE find_min_mur_pol
 
 FUNCTION compute_fun(v, v0, b0, b01, a, m1)
-
 USE kinds, ONLY : DP 
 IMPLICIT NONE
 REAL(DP) :: compute_fun
@@ -320,7 +306,7 @@ REAL(DP), INTENT(IN) :: v, v0, b0, b01, a(m1)
 REAL(DP) :: aux
 INTEGER :: i1
 
-aux=v0*b0 * ( 1.0_DP / v0  - (v0 / v ) **( b01-1.0_DP) / v) / b01 + a(2)
+aux=b0 * ( 1.0_DP  - (v0 / v ) **b01 ) / b01 + a(2)
 
 DO i1=3, m1
    aux = aux + (i1-1.0_DP) * a(i1) * v**(i1-2)
@@ -329,3 +315,21 @@ ENDDO
 compute_fun=aux
 RETURN
 END FUNCTION compute_fun
+
+FUNCTION compute_fun_deriv(v, v0, b0, b01, a, m1)
+USE kinds, ONLY : DP 
+IMPLICIT NONE
+REAL(DP) :: compute_fun_deriv
+INTEGER, INTENT(IN) :: m1
+REAL(DP), INTENT(IN) :: v, v0, b0, b01, a(m1)
+REAL(DP) :: aux
+INTEGER :: i1
+
+aux=b0 * (v0 / v )**( b01+1.0_DP)/ v0 + a(3) * 2.0_DP
+DO i1=4, m1
+   aux = aux + (i1-1.0_DP) * (i1-2.0_DP) * a(i1) * v**(i1-3)
+ENDDO
+compute_fun_deriv=aux
+
+RETURN
+END FUNCTION compute_fun_deriv

@@ -12,7 +12,7 @@ SUBROUTINE bcast_thermo_input()
   !  This routine broadcasts to all the images the input of thermo_pw.
   !
   USE thermo_mod,      ONLY : what, ngeo, step_ngeo, reduced_grid, fact_ngeo, &
-                              max_geometries
+                              max_geometries, start_geo, jump_geo
   USE control_mur,     ONLY : vmin_input, vmax_input, deltav, nvol, lmurn
   USE control_thermo,  ONLY : outdir_thermo, after_disp, with_eigen,          &
                               do_scf_relax
@@ -26,6 +26,7 @@ SUBROUTINE bcast_thermo_input()
   USE temperature,     ONLY : tmin, tmax, deltat, ntemp
   USE ifc,             ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq, &
                               zasr, freqmin_input, freqmax_input, phdos_sigma
+  USE input_parameters, ONLY : max_seconds
   USE control_paths,   ONLY : q_in_band_form, q_in_cryst_coord, q2d, &
                               point_label_type, npx
   USE control_bands,   ONLY : emin_input, emax_input, nbnd_bands, lsym
@@ -37,6 +38,8 @@ SUBROUTINE bcast_thermo_input()
   USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, &
                               epsilon_0, frozen_ions, elastic_algorithm, &
                               poly_degree
+  USE control_quadratic_energy, ONLY : show_fit
+  USE control_quartic_energy, ONLY : lquartic, lquartic_ph
   USE piezoelectric_tensor, ONLY : nppl
   USE control_2d_bands,     ONLY : lprojpbs, nkz, sym_divide, identify_sur, &
                                    gap_thr, sur_layers, sur_thr, force_bands, &
@@ -56,6 +59,12 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( fact_ngeo, meta_ionode_id, world_comm )
   CALL mp_bcast( step_ngeo, meta_ionode_id, world_comm )
   CALL mp_bcast( reduced_grid, meta_ionode_id, world_comm )
+  CALL mp_bcast( start_geo, meta_ionode_id, world_comm )
+  CALL mp_bcast( jump_geo, meta_ionode_id, world_comm )
+  CALL mp_bcast( lquartic, meta_ionode_id, world_comm )
+  CALL mp_bcast( lquartic_ph, meta_ionode_id, world_comm )
+  CALL mp_bcast( show_fit, meta_ionode_id, world_comm )
+  CALL mp_bcast( max_seconds, meta_ionode_id, world_comm )
   CALL mp_bcast( max_geometries, meta_ionode_id, world_comm )
   CALL mp_bcast( zasr, meta_ionode_id, world_comm )
   CALL mp_bcast( flfrc, meta_ionode_id, world_comm )

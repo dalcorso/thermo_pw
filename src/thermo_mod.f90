@@ -50,6 +50,9 @@ MODULE thermo_mod
   LOGICAL :: reduced_grid                       ! if .TRUE. use a reduced
                                                 ! grid to interpolate the
                                                 ! geometry
+  INTEGER :: start_geo                          ! initial geometry
+  INTEGER :: jump_geo                           ! jumped geometries in the
+                                                ! reduced grid
   REAL(DP) :: density                           ! the density of the solid
 
   INTEGER :: max_geometries                     ! This value controls the
@@ -566,8 +569,27 @@ MODULE control_quadratic_energy
                            coeff(:),       &   ! coefficients of quadratic fit
                            coeff_t(:,:)        ! coefficients at each
                                                ! temperature
-
+  LOGICAL :: show_fit            ! if .TRUE. show the countour plots of the
+                                 ! fitted polynomial
 END MODULE control_quadratic_energy
+
+MODULE control_quartic_energy
+
+  USE kinds, ONLY: DP
+  SAVE
+
+  LOGICAL :: lquartic                        ! if .TRUE. fit the energy/enthalpy
+                                             ! with a quartic polynomium
+
+  LOGICAL :: lquartic_ph                     ! if .TRUE. fit the vibrational 
+                                             ! free_energy with a quartic
+                                             ! polynomium
+  INTEGER :: nvar4                           ! number of variables of 
+                                             ! the polynomial fit
+  REAL(DP), ALLOCATABLE :: x_min_4(:),   &   ! coordinates of the minimum
+                           coeff4(:)         ! coefficients of quartic fit
+
+END MODULE control_quartic_energy
 
 MODULE control_pressure
 !

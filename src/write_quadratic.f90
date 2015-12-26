@@ -18,7 +18,12 @@ USE thermo_mod,     ONLY : ngeo, energy_geo, celldm_geo
 USE cell_base,      ONLY : ibrav
 USE control_mur,    ONLY : nvol
 USE control_quadratic_energy, ONLY : coeff
+USE control_quartic_energy, ONLY : coeff4, lquartic
 USE control_pressure, ONLY : pressure, pressure_kb
+USE quadratic_surfaces, ONLY : evaluate_fit_quadratic, &
+                               evaluate_fit_grad_quadratic
+USE quartic_surfaces,   ONLY : evaluate_fit_quartic, &
+                               evaluate_fit_grad_quartic
 USE mp_images,      ONLY : root_image, my_image_id
 USE constants,      ONLY : ry_kbar
 USE io_global,      ONLY : ionode
@@ -27,30 +32,48 @@ IMPLICIT NONE
 
 CHARACTER(LEN=256) :: filename, filename1
 CHARACTER(LEN=8) :: float_to_char
-REAL(DP) :: a, e, p, fact, xmax, xmin, deltaa
-INTEGER :: i, iu_mur, iwork
+REAL(DP) :: a(1), e, p(1), fact, xmax, xmin, deltaa, x2max(2), x2min(2), x2(2),&
+            delta2(2)
+INTEGER :: i, j, iu_mur, iwork, nwork
+INTEGER :: compute_nwork
 
 IF (my_image_id /= root_image) RETURN
 
-IF (ibrav<1.OR.ibrav>3) RETURN
+IF (ibrav<1.OR.ibrav>7.OR.ibrav==5) RETURN
 IF (ibrav==1) fact=1.0_DP
 IF (ibrav==2) fact=0.25_DP
 IF (ibrav==3) fact=0.5_DP
+
+nwork=compute_nwork()
 
 filename=TRIM(flevdat)//'_quadratic'
 IF (pressure /= 0.0_DP) &
    filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 
-xmax=0.0_DP
-xmin=100000.0_DP
-DO iwork = 1, ngeo(1)
-   IF (celldm_geo(1,iwork) > xmax) xmax=celldm_geo(1,iwork)
-   IF (celldm_geo(1,iwork) < xmin) xmin=celldm_geo(1,iwork)
-ENDDO
-xmin=xmin*0.99_DP
-xmax=xmax*1.01_DP
-IF (nvol <= 1) nvol=50
-deltaa = (xmax - xmin)/(nvol-1)
+IF (ibrav==1.OR.ibrav==2.OR.ibrav==3) THEN
+   xmax=0.0_DP
+   xmin=100000.0_DP
+   DO iwork = 1, ngeo(1)
+      IF (celldm_geo(1,iwork) > xmax) xmax=celldm_geo(1,iwork)
+      IF (celldm_geo(1,iwork) < xmin) xmin=celldm_geo(1,iwork)
+   ENDDO
+   xmin=xmin*0.99_DP
+   xmax=xmax*1.01_DP
+   IF (nvol <= 1) nvol=50
+   deltaa = (xmax - xmin)/(nvol-1)
+ELSEIF (ibrav==4.OR.ibrav==6.OR.ibrav==7) THEN
+   x2max=0.0_DP
+   x2min=100000.0_DP
+   DO iwork = 1, nwork
+      IF (celldm_geo(1,iwork) > x2max(1)) x2max(1)=celldm_geo(1,iwork)
+      IF (celldm_geo(1,iwork) < x2min(1)) x2min(1)=celldm_geo(1,iwork)
+      IF (celldm_geo(3,iwork) > x2max(2)) x2max(2)=celldm_geo(3,iwork)
+      IF (celldm_geo(3,iwork) < x2min(2)) x2min(2)=celldm_geo(3,iwork)
+   ENDDO
+   IF (nvol <= 1) nvol=50
+   delta2(1) = (x2max(1) - x2min(1))/(nvol-1)
+   delta2(2) = (x2max(2) - x2min(2))/(nvol-1)
+ENDIF
 
 IF (ionode) THEN
    iu_mur=2
@@ -61,13 +84,33 @@ IF (ionode) THEN
       WRITE(iu_mur,'( "# a (a.u.)       energy (Ry)      pressure (kbar)" )')
    END IF
 
-   DO i=1,nvol
-      a= xmin + deltaa * (i-1)
-      e= coeff(1) + coeff(2)*a + coeff(3)*a**2
-      p= -(coeff(2) + 2.0_DP * coeff(3) * a ) * ry_kbar / (fact*3.0_DP * a**2)
-      WRITE(iu_mur,'(3f20.10)') a, e, p + pressure_kb
-   ENDDO 
-
+   IF (ibrav==1.OR.ibrav==2.OR.ibrav==3) THEN
+      DO i=1,nvol
+         a= xmin + deltaa * (i-1)
+         IF (lquartic) THEN
+            CALL evaluate_fit_quartic(1,5,a,e,coeff4)
+            CALL evaluate_fit_grad_quartic(1,5,a,p,coeff4)
+         ELSE
+            CALL evaluate_fit_quadratic(1,3,a,e,coeff)
+            CALL evaluate_fit_grad_quadratic(1,3,a,p,coeff)
+         ENDIF
+         p= - p * ry_kbar / (fact*3.0_DP * a(1)**2)
+         WRITE(iu_mur,'(3f20.10)') a, e, p + pressure_kb
+      ENDDO 
+   ELSEIF (ibrav==4.OR.ibrav==6.OR.ibrav==7) THEN
+      DO i=1,nvol
+         x2(1)=x2min(1)+delta2(1)*(i-1)
+         DO j=1,nvol
+            x2(2)=x2min(2)+delta2(2)*(j-1)
+            IF (lquartic) THEN
+               CALL evaluate_fit_quartic(2,15,x2,e,coeff4)
+            ELSE
+               CALL evaluate_fit_quadratic(2,6,x2,e,coeff)
+            ENDIF
+            WRITE(iu_mur,'(3f20.10)') x2(1), x2(2), e
+         END DO
+      END DO  
+   ENDIF
    CLOSE(UNIT=iu_mur, STATUS='KEEP')
 END IF
 

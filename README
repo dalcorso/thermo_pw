@@ -44,7 +44,7 @@ Enter in this directory and type
 make leave_qe
 Then remove this directory.
 
-NB: This code changes a few file of the QE distribution (mainly makefiles). 
+NB: This code changes a few files of the QE distribution (mainly makefiles). 
 Only after typing make leave_qe you recover the original QE distribution. If
 you just remove the thermo_pw directory the files of QE package remain 
 modified.

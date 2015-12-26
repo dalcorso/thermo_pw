@@ -15,7 +15,8 @@ SUBROUTINE thermo_readin()
   !
   USE kinds,                ONLY : DP
   USE thermo_mod,           ONLY : what, ngeo, step_ngeo, reduced_grid, &
-                                   fact_ngeo, max_geometries
+                                   fact_ngeo, max_geometries, start_geo, &
+                                   jump_geo
   USE control_thermo,       ONLY : outdir_thermo, after_disp, with_eigen,  &
                                    do_scf_relax
   USE data_files,           ONLY : flevdat, flfrc, flfrq, fldos, fltherm,  &
@@ -28,7 +29,7 @@ SUBROUTINE thermo_readin()
   USE ifc,                  ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq, &
                                    zasr, freqmin_input, freqmax_input, &
                                    phdos_sigma
-  USE input_parameters,     ONLY : outdir, ibrav, forc_conv_thr
+  USE input_parameters,     ONLY : outdir, ibrav, forc_conv_thr, max_seconds
   USE read_input,           ONLY : read_input_file
   USE command_line_options, ONLY : input_file_ 
   USE control_paths,        ONLY : xqaux, wqaux, wqauxr, npk_label, letter, &
@@ -63,6 +64,8 @@ SUBROUTINE thermo_readin()
                                    lxrdp, lambda_elem
   USE xrdp_module,          ONLY : select_lambda
   USE control_energy_plot,  ONLY : ncontours, color_levels, ene_levels 
+  USE control_quadratic_energy, ONLY : show_fit
+  USE control_quartic_energy, ONLY : lquartic, lquartic_ph
   USE piezoelectric_tensor, ONLY : nppl
   USE control_pwrun,        ONLY : celldm_save, ibrav_save, ityp_save, &
                                    amass_save
@@ -95,7 +98,7 @@ SUBROUTINE thermo_readin()
   LOGICAL :: tend, terr, read_paths, set_internal_path, set_2d_path, exst
   LOGICAL :: has_xml
   CHARACTER(LEN=256) :: input_line, buffer
-  REAL(DP) :: wq0
+  REAL(DP) :: wq0, max_seconds_
   !
   NAMELIST / input_thermo / what, ngeo, zasr,               &
                             flfrc, flfrq, fldos, fltherm,   &
@@ -103,7 +106,13 @@ SUBROUTINE thermo_readin()
                             flnkconv,                       &
                             fact_ngeo,                      &
                             step_ngeo,                      &
+                            start_geo,                      &
+                            jump_geo,                       &
                             max_geometries,                 &
+                            lquartic,                       &
+                            lquartic_ph,                    &
+                            show_fit,                       &
+                            max_seconds,                    &
                             nq1_d, nq2_d, nq3_d,            &
                             tmin, tmax, deltat, ntemp,      &
                             pressure,                       &
@@ -168,6 +177,7 @@ SUBROUTINE thermo_readin()
   iun_thermo=2
   parse_unit_save=parse_unit
   parse_unit=iun_thermo
+  max_seconds_=1.D8
   IF (meta_ionode) &
      OPEN(UNIT=iun_thermo,FILE='thermo_control',STATUS='OLD', &
                                FORM='FORMATTED', ERR=10, IOSTAT=ios )
@@ -184,7 +194,13 @@ SUBROUTINE thermo_readin()
   step_ngeo(5) = 0.5_DP
   step_ngeo(6) = 0.5_DP
   reduced_grid =.FALSE.
+  start_geo=1
+  jump_geo=1
   max_geometries=1000000
+  lquartic=.TRUE.
+  lquartic_ph=.FALSE.
+  show_fit=.TRUE.
+  max_seconds=1.D8
 
   nq1_d=192
   nq2_d=192
@@ -318,6 +334,7 @@ SUBROUTINE thermo_readin()
   CALL errore( 'thermo_readin', 'reading input_thermo namelist', ABS( ios ) )
   !
   CALL bcast_thermo_input()
+  IF (nimage==1) max_seconds_=max_seconds
   !
   IF (what /= 'scf_2d_bands') THEN
      nkz=1
@@ -564,6 +581,7 @@ SUBROUTINE thermo_readin()
   CALL read_input_file('PW',TRIM(input(my_image_id+1)))
   outdir_thermo=outdir
   CALL iosys()
+  max_seconds=max_seconds_
   at_save = at
   celldm_save=celldm
   celldm0=celldm

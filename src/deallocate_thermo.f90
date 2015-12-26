@@ -35,6 +35,8 @@ SUBROUTINE deallocate_thermo()
   USE control_elastic_constants, ONLY : rot_mat, aap_mat, apa_mat, tau_save
   USE control_debye,    ONLY : deb_energy, deb_free_energy, deb_entropy, &
                                deb_cv
+  USE control_quadratic_energy, ONLY : coeff, hessian_v, hessian_e, x_pos_min
+  USE control_quartic_energy, ONLY : coeff4, x_min_4
 
 
   IMPLICIT NONE
@@ -91,6 +93,13 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (disp_q) )          DEALLOCATE(disp_q)
   IF ( ALLOCATED (disp_wq) )         DEALLOCATE(disp_wq)
 
+  IF ( ALLOCATED (coeff) )           DEALLOCATE( coeff )
+  IF ( ALLOCATED (hessian_v) )       DEALLOCATE( hessian_v )
+  IF ( ALLOCATED (hessian_e) )       DEALLOCATE( hessian_e )
+  IF ( ALLOCATED (x_pos_min) )       DEALLOCATE( x_pos_min )
+  IF ( ALLOCATED (x_min_4) )         DEALLOCATE( x_min_4 )
+  IF ( ALLOCATED (coeff4) )          DEALLOCATE( coeff4 )
+
   IF ( ALLOCATED (temp) )            DEALLOCATE(temp)
   IF ( ALLOCATED (pressure_list) )   DEALLOCATE(pressure_list)
 
@@ -118,6 +127,9 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (deb_free_energy) ) DEALLOCATE( deb_free_energy )
   IF ( ALLOCATED (deb_entropy) )     DEALLOCATE( deb_entropy )
   IF ( ALLOCATED (deb_cv) )          DEALLOCATE( deb_cv )
+
+
+
   ! 
   RETURN
   !
