@@ -114,7 +114,7 @@ PROGRAM thermo_pw
   USE control_pressure, ONLY : pressure, pressure_kb
   USE phdos_module,     ONLY : destroy_phdos
   USE input_parameters, ONLY : ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
-                               trd_ht, rd_ht, cell_units, outdir, max_seconds
+                               trd_ht, rd_ht, cell_units, outdir
   USE control_mur,      ONLY : vmin, b0, b01, emin, celldm0, lmurn
   USE thermo_mod,       ONLY : what, ngeo, omega_geo, energy_geo, &
                                tot_ngeo, reduced_grid, ibrav_geo, celldm_geo, &
@@ -135,8 +135,9 @@ PROGRAM thermo_pw
   CHARACTER (LEN=256) :: diraux=' '
   CHARACTER(LEN=6) :: int_to_char
   CHARACTER(LEN=8) :: float_to_char
-  INTEGER :: part, nwork, igeom, itemp, nspin0, exit_status, ph_geometries
-  LOGICAL  :: exst, parallelfs
+  INTEGER :: part, nwork, igeom, itemp, nspin0, exit_status, ph_geometries, &
+             iaux
+  LOGICAL  :: exst, parallelfs, run
   LOGICAL :: check_file_exists, check_dyn_file_exists
   CHARACTER(LEN=256) :: file_dat, filename
   REAL(DP) :: poisson, bulkm
@@ -161,7 +162,7 @@ PROGRAM thermo_pw
   !
   part = 1
   !
-  CALL initialize_thermo_work(nwork, part)
+  CALL initialize_thermo_work(nwork, part, iaux)
   !
   !  In this part the images work asyncronously. No communication is
   !  allowed except though the master-workers mechanism
@@ -256,7 +257,11 @@ PROGRAM thermo_pw
            WRITE(stdout,'(/,2x,76("+"))')
            WRITE(stdout,'(5x,"Doing a self-consistent calculation", i5)') 
            WRITE(stdout,'(2x,76("+"),/)')
-           CALL do_pwscf(exit_status, .TRUE.)
+           CALL check_existence(0,1,0,run)
+           IF (run) THEN
+              CALL do_pwscf(exit_status, .TRUE.)
+              CALL save_existence(0,1,0)
+           END IF
            IF (lxrdp) THEN
               filename=TRIM(flxrdp)//'.scf'
               CALL compute_xrdp(at,bg,celldm(1),nat,tau,nsp,ityp,atm, &
@@ -308,12 +313,12 @@ PROGRAM thermo_pw
 !   calculation of elastic constants
 !
      part=2
-     CALL initialize_thermo_work(nwork, part)
+     CALL initialize_thermo_work(nwork, part, iaux)
      !
      !  Asyncronous work starts again. No communication is
      !  allowed except though the master workers mechanism
      !
-     CALL run_thermo_asyncronously(nwork, part, igeom, auxdyn)
+     CALL run_thermo_asyncronously(nwork, part, iaux, auxdyn)
      !
      ! here we return syncronized and calculate the elastic constants 
      ! from energy or stress 
@@ -322,17 +327,16 @@ PROGRAM thermo_pw
      IF (lelastic_const) THEN
        IF (elastic_algorithm == 'energy') THEN
 !
-!   save the energy calculated by all images
+!   recover the energy calculated by all images
 !
           CALL mp_sum(energy_geo, world_comm)
           energy_geo=energy_geo / nproc_image
        ELSE
 !
-!   save the stress tensors calculated by all images
+!   recover the stress tensors calculated by all images
 !
           CALL mp_sum(sigma_geo, world_comm)
           sigma_geo=sigma_geo / nproc_image
-!         CALL write_stress(nwork, file_dat)
       ENDIF
 !
 !  the elastic constants are calculated here
@@ -468,7 +472,7 @@ PROGRAM thermo_pw
            CALL check_initial_status(auxdyn)
            !
            part=2
-           CALL initialize_thermo_work(nwork, part)
+           CALL initialize_thermo_work(nwork, part, iaux)
            !
            !  Asyncronous work starts again. No communication is
            !  allowed except though the master workers mechanism

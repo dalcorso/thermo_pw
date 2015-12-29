@@ -99,14 +99,14 @@ SUBROUTINE run_thermo_asyncronously(nwork, part, igeom, auxdyn)
                  END IF
                  WRITE(stdout,'(2x,76("+"),/)')
                  IF (lpwscf(iwork)) THEN
-                    CALL check_existence(iwork,part,run)
+                    CALL check_existence(iwork,part,igeom,run)
                     IF (run) THEN
                        CALL do_pwscf(exit_status, .TRUE.)
                        energy_geo(iwork)=etot
                        IF (lstress(iwork)) THEN
                           sigma_geo(:,:,iwork)=sigma(:,:)
                        ENDIF
-                       CALL save_existence(iwork,part)
+                       CALL save_existence(iwork,part,igeom)
                     ENDIF
                  ENDIF
                  IF (lbands(iwork)) CALL do_pwscf(exit_status, .FALSE.)
@@ -157,14 +157,14 @@ SUBROUTINE run_thermo_asyncronously(nwork, part, igeom, auxdyn)
               WRITE(stdout,'(2x,76("+"),/)')
  
               IF (lpwscf(iwork)) THEN
-                 CALL check_existence(iwork,part,run)
+                 CALL check_existence(iwork,part,igeom,run)
                  IF (run) THEN
                     CALL do_pwscf(exit_status, .TRUE.)
                     energy_geo(iwork)=etot
                     IF (lstress(iwork)) THEN
                        sigma_geo(:,:,iwork)=sigma(:,:)
                     ENDIF
-                    CALL save_existence(iwork,part)
+                    CALL save_existence(iwork,part,igeom)
                  ENDIF
               END IF
               IF (lbands(iwork)) CALL do_pwscf(exit_status, .FALSE.)
@@ -198,14 +198,14 @@ SUBROUTINE run_thermo_asyncronously(nwork, part, igeom, auxdyn)
            WRITE(stdout,'(2x,76("+"),/)')
             
            IF (lpwscf(iwork)) THEN
-              CALL check_existence(iwork,part,run)
+              CALL check_existence(iwork,part,igeom,run)
               IF (run) THEN
                  CALL do_pwscf(exit_status, .TRUE.)
                  energy_geo(iwork)=etot
                  IF (lstress(iwork)) THEN
                     sigma_geo(:,:,iwork)=sigma(:,:)
                  ENDIF
-                 CALL save_existence(iwork,part)
+                 CALL save_existence(iwork,part,igeom)
               ENDIF
            END IF
            IF (lbands(iwork)) CALL do_pwscf(exit_status, .FALSE.)

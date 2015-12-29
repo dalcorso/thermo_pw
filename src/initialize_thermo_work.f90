@@ -6,7 +6,7 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !-----------------------------------------------------------------------
-SUBROUTINE initialize_thermo_work(nwork, part)
+SUBROUTINE initialize_thermo_work(nwork, part, iaux)
   !-----------------------------------------------------------------------
   !
   !  This is called by all images and initializes the global variables
@@ -36,13 +36,14 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   USE cell_base,  ONLY : alat
   !
   IMPLICIT NONE
-  INTEGER, INTENT(OUT) :: nwork
+  INTEGER, INTENT(OUT) :: nwork, iaux
   INTEGER, INTENT(IN) :: part
   INTEGER :: igeom, iq, irr, ike
   INTEGER :: iden, icount, ink, isigma
   REAL(DP) :: compute_omega_geo
   !
   nwork=0
+  iaux=0
   IF (part == 1) THEN
      SELECT CASE (TRIM(what))
 !
@@ -249,11 +250,13 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            CALL set_piezo_tensor_work(nwork) 
            ALLOCATE(energy_geo(nwork))
            ALLOCATE(omega_geo(nwork))
+           iaux=10
            lpiezoelectric_tensor=.TRUE.
            do_punch=.TRUE.
         CASE ('scf_polarization', 'mur_lc_polarization')
            IF (ALLOCATED(energy_geo)) DEALLOCATE(energy_geo)
            IF (ALLOCATED(omega_geo)) DEALLOCATE(omega_geo)
+           iaux=20 
            nwork=1
            lpolarization=.TRUE.
            ALLOCATE(polar_geo(3,nwork))
