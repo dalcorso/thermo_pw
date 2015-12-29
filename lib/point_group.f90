@@ -32,8 +32,14 @@ MODULE point_group
   PRIVATE
   SAVE
 
+  CHARACTER(LEN=30) :: color_rap(12)
 
-  PUBLIC convert_rap, find_aux_ind_two_groups, has_sigma_h, is_right_oriented
+  DATA color_rap / 'color_red', 'color_green', 'color_blue','color_cyan', &
+              'color_magenta', 'color_gold', 'color_pink', 'color_black', &
+              'color_olive', 'color_brown', 'color_light_blue', 'color_orange' /
+
+  PUBLIC convert_rap, find_aux_ind_two_groups, has_sigma_h, is_right_oriented,&
+         color_rap
 
 CONTAINS
   SUBROUTINE convert_rap(n, list_in, list_out, group_in, group_out, aux_ind, &

@@ -802,6 +802,7 @@ USE postscript_files, ONLY : flpsband, flpsdisp, flpsgrun
 USE control_gnuplot, ONLY : flgnuplot, gnuplot_command, lgnuplot
 USE control_2d_bands, ONLY : nkz, lprojpbs, identify_sur, sym_divide, &
                           force_bands
+USE point_group,   ONLY : color_rap
 USE gnuplot,       ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
                           gnuplot_write_file_data, gnuplot_ylabel, &
                           gnuplot_write_vertical_line, gnuplot_write_label, &
@@ -834,7 +835,7 @@ REAL(DP) :: shift, xscale
 LOGICAL, ALLOCATABLE :: dorap(:,:)
 LOGICAL :: with_lines
 CHARACTER(LEN=256) :: gnu_filename, filename, command
-CHARACTER(LEN=30) :: colore(12), xlabel
+CHARACTER(LEN=30) :: xlabel
 CHARACTER(LEN=6), EXTERNAL :: int_to_char
 
 IF (icode==1) THEN
@@ -909,19 +910,6 @@ ELSE
                           ' ymin + shift ', letter_path(n),.FALSE.)
    END DO
 END IF
-
-colore(1)='color_red'
-colore(2)='color_green'
-colore(3)='color_blue'
-colore(4)='color_cyan'
-colore(5)='color_magenta'
-colore(6)='color_gold'
-colore(7)='color_pink'
-colore(8)='color_black'
-colore(9)='color_olive'
-colore(10)='color_brown'
-colore(11)='color_light_blue'
-colore(12)='color_orange'
 
 CALL gnuplot_write_command('band_lw=2',.FALSE.)
 
@@ -1016,13 +1004,13 @@ IF ( nkz == 1 .OR. ( nkz > 1 .AND. .NOT. lprojpbs) .OR. force_bands ) THEN
                IF (has_points(ilines,irap).AND.dorap(ilines,irap)) THEN
                   IF (first_line==ilines .AND. irap==first_rap) THEN
                      CALL gnuplot_write_file_data(filename,'band_lw',&
-                                    colore(irap),.TRUE.,.FALSE.,.FALSE.)
+                                    color_rap(irap),.TRUE.,.FALSE.,.FALSE.)
                   ELSEIF (last_line==ilines .AND. irap==last_rap) THEN
                      CALL gnuplot_write_file_data(filename,'band_lw',&
-                              colore(irap),.FALSE.,.TRUE.,.FALSE.)
+                              color_rap(irap),.FALSE.,.TRUE.,.FALSE.)
                   ELSE
                      CALL gnuplot_write_file_data(filename,'band_lw',&
-                              colore(irap),.FALSE.,.FALSE.,.FALSE.)
+                              color_rap(irap),.FALSE.,.FALSE.,.FALSE.)
                   ENDIF
                ENDIF
             ENDDO
