@@ -947,8 +947,9 @@ ngeo(1),...,ngeo(6) : the number of geometries to use for each celldm parameter.
              ngeo(1) must be odd. Only the values of celldm relevant for
              each Bravais lattice are actually changed.
              Default: integer 1,1,1,1,1,1 for what=scf_*, 9,1,1,1,1,1 for 
-             what=mur_lc_* and lmurn=.TRUE., 5 on all the relevant celldm 
-             parameters when lmurn=.FALSE..
+             what=mur_lc_* and lmurn=.TRUE. or for cubic systems, 5 on all 
+             the relevant celldm parameters when lmurn=.FALSE. and the system
+             is not cubic.
 step_ngeo(1),...,step_ngeo(6) : The step between the lattice constants at 
              different geometries. step_ngeo(1) is, in atomic units, the change
              of a, step_ngeo(2), step_ngeo(3) are dimensionless and are the

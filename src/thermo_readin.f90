@@ -199,7 +199,7 @@ SUBROUTINE thermo_readin()
   max_geometries=1000000
   lquartic=.TRUE.
   lquartic_ph=.FALSE.
-  show_fit=.TRUE.
+  show_fit=.FALSE.
   max_seconds=1.D8
 
   nq1_d=192
@@ -372,22 +372,6 @@ SUBROUTINE thermo_readin()
   elcpvar=poly_degree+1
   IF (ngeo_strain < elcpvar) CALL errore('thermo_readin','ngeo_strain is too small',1)
 
-  IF ( ngeo(1)==0 ) THEN
-     IF (what(1:4) == 'scf_') ngeo=1
-     IF (what(1:6) == 'mur_lc') THEN
-        IF (lmurn) THEN
-           ngeo(1)=9
-           DO igeo=2,6
-              IF (ngeo(igeo)==0) ngeo(igeo)=1
-           ENDDO
-        ELSE
-!
-!   The default mesh is 5 in each crystallographic relevant direction.
-!
-           ngeo=5
-        ENDIF
-     ENDIF
-  END IF
 
   IF (what(1:6)=='mur_lc') THEN
      IF (ncontours==0) THEN
@@ -600,6 +584,7 @@ SUBROUTINE thermo_readin()
   input_file_=input(my_image_id+1)
   with_eigen=with_eigen.AND.(ibrav==1.OR.ibrav==2.OR.ibrav==3)
 
+
   IF (ionode) THEN
      INQUIRE( FILE=TRIM(input(my_image_id+1)), EXIST = exst )
      IF (exst) THEN
@@ -625,6 +610,26 @@ SUBROUTINE thermo_readin()
         sur_layers=MIN(2, nat/2)
      ENDIF
   ENDIF
+
+  IF ( ngeo(1)==0 ) THEN
+     IF (what(1:4) == 'scf_') ngeo=1
+     IF (what(1:6) == 'mur_lc') THEN
+        IF (lmurn) THEN
+           ngeo(1)=9
+           DO igeo=2,6
+              IF (ngeo(igeo)==0) ngeo(igeo)=1
+           ENDDO
+        ELSE
+!
+!   The default mesh is 5 in each crystallographic relevant direction,
+!   except for cubic systems for which we take 9 point to make the
+!   calculation compatible with lmurn=.TRUE.
+!
+           ngeo=5
+           IF (ibrav==1.OR.ibrav==2.OR.ibrav==3) ngeo(1)=9
+        ENDIF
+     ENDIF
+  END IF
      
   CALL clean_ngeo(ngeo,fact_ngeo,ibrav)
      
