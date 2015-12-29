@@ -162,24 +162,18 @@ PROGRAM thermo_pw
   part = 1
   !
   CALL initialize_thermo_work(nwork, part)
-  file_dat='save_energy' 
-  IF ( .NOT. check_file_exists(file_dat) ) THEN
-     !
-     !  In this part the images work asyncronously. No communication is
-     !  allowed except though the master-workers mechanism
-     !
-     CALL run_thermo_asyncronously(nwork, part, 1, auxdyn)
-     !
-     !  In this part all images are syncronized and can communicate 
-     !  their results thought the world_comm communicator
-     !
-     IF (nwork>0) THEN
-        CALL mp_sum(energy_geo, world_comm)
-        energy_geo=energy_geo / nproc_image
-        CALL write_energy(nwork, file_dat)
-     ENDIF
-  ELSE
-     CALL read_energy(nwork, file_dat)
+  !
+  !  In this part the images work asyncronously. No communication is
+  !  allowed except though the master-workers mechanism
+  !
+  CALL run_thermo_asyncronously(nwork, part, 1, auxdyn)
+  !
+  !  In this part all images are syncronized and can communicate 
+  !  their results thought the world_comm communicator
+  !
+  IF (nwork>0) THEN
+     CALL mp_sum(energy_geo, world_comm)
+     energy_geo=energy_geo / nproc_image
   ENDIF
 !
 !  In the kinetic energy test write the results

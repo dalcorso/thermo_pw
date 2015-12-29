@@ -86,7 +86,6 @@ write_gruneisen_band_anis.o \
 write_gnuplot_energy.o \
 write_minimum_energy_data.o \
 write_mur.o \
-write_read_energy.o \
 write_quadratic.o \
 write_thermo.o 
 
