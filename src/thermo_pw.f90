@@ -167,7 +167,7 @@ PROGRAM thermo_pw
   !  In this part the images work asyncronously. No communication is
   !  allowed except though the master-workers mechanism
   !
-  CALL run_thermo_asyncronously(nwork, part, 1, auxdyn)
+  CALL run_thermo_asyncronously(nwork, part, iaux, auxdyn)
   !
   !  In this part all images are syncronized and can communicate 
   !  their results thought the world_comm communicator
