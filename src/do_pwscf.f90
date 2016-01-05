@@ -32,16 +32,19 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   USE parameters,       ONLY : ntypx, npk, lmaxx
   USE cell_base,        ONLY : fix_volume, fix_area
   USE basis,            ONLY : starting_pot, startingconfig
-  USE control_flags,    ONLY : conv_elec, gamma_only, lscf, lbands, ethr, &
+  USE control_flags,    ONLY : conv_elec, gamma_only, lscf, twfcollect, &
+                               lbands, ethr, &
                                conv_ions, istep, nstep, restart, lmd, lbfgs
   USE input_parameters, ONLY : diago_thr_init
   USE force_mod,        ONLY : lforce, lstres, sigma, force
   USE check_stop,       ONLY : check_stop_init, check_stop_now
   USE mp_images,        ONLY : intra_image_comm
+  USE extrapolation,    ONLY : update_file, update_pot
   !
   IMPLICIT NONE
   INTEGER, INTENT(OUT) :: exit_status
   LOGICAL, INTENT(IN) :: lscf_
+  INTEGER :: idone
   !
   exit_status = 0
   IF ( ionode ) WRITE( unit = stdout, FMT = 9010 ) ntypx, npk, lmaxx
@@ -80,7 +83,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
      RETURN
   ENDIF
   !
-  main_loop: DO
+  main_loop: DO idone = 1, nstep
      !
      ! ... electronic self-consistency or band structure calculation
      !
@@ -95,6 +98,8 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
      IF ( check_stop_now() .OR. .NOT. conv_elec ) THEN
         IF ( check_stop_now() ) exit_status = 255
         IF ( .NOT. conv_elec )  exit_status =  2
+        ! workaround for the case of a single k-point
+        twfcollect = .FALSE.
         CALL punch( 'config' )
         RETURN
      ENDIF
@@ -107,7 +112,11 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
      !
      ! ... file in CASINO format written here if required
      !
-     IF ( lmd ) CALL pw2casino()
+     IF ( lmd ) THEN
+        CALL pw2casino( idone )
+     ELSE
+        CALL pw2casino( 0 )
+     END IF
      !
      ! ... force calculation
      !
@@ -120,17 +129,19 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
      IF ( lmd .OR. lbfgs ) THEN
         !
         if (fix_volume) CALL impose_deviatoric_stress(sigma)
-        !
         if (fix_area)  CALL  impose_deviatoric_stress_2d(sigma)
+        !
+        ! ... save data needed for potential and wavefunction extrapolation
+        !
+        CALL update_file ( )
         !
         ! ... ionic step (for molecular dynamics or optimization)
         !
-        CALL move_ions()
+        CALL move_ions ( idone )
         !
         ! ... then we save restart information for the new configuration
         !
-        IF ( istep < nstep .AND. .NOT. conv_ions ) &
-           CALL punch( 'config' )
+        IF ( idone <= nstep .AND. .NOT. conv_ions ) CALL punch( 'config' )
         !
      END IF
      !
@@ -160,7 +171,6 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   !
   ! ... save final data file
   !
-  IF ( .not. lmd) CALL pw2casino()
   IF ( do_punch ) CALL punch('all')
   !
   IF ( .NOT. conv_ions )  exit_status =  3
