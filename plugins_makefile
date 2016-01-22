@@ -8,7 +8,7 @@
 #
 # Makefile for plugins
 
-include ../make.sys
+sinclude ../make.sys
 include plugins_list
 
 # MAIN target
@@ -171,12 +171,13 @@ epw:
 
 ##########################################################
 #   Thermo_pw
-##########################################################
+#   ##########################################################
 thermo_pw:
 	if test -d ../thermo_pw; then \
         cd ../thermo_pw; $(MAKE) all || exit 1; cd ../bin; \
         ln -fs ../thermo_pw/src/thermo_pw.x . ; \
         fi
+
 ###########################################################
 # wannier90
 ###########################################################
@@ -329,7 +330,7 @@ sax: extlibs uncompress-sax configure-sax
 	touch ./make-sax
 
 uncompress-sax: touch-dummy
-	$(call download_and_unpack,$(SAX),$(SAX_URL),SaX,SaX)
+	$(call download_and_unpack,$(SAX),$(SAX_URL),SaX,$(SAX))
 	touch uncompress-sax
 
 configure-sax: touch-dummy
@@ -350,11 +351,8 @@ configure-sax: touch-dummy
 	AR="$(AR)" \
 	ARFLAGS="$(ARFLAGS)" \
 	RANLIB="$(RANLIB)" \
-	DFLAGS="$(DFLAGS)" \
-	FDFLAGS="$(DFLAGS)" \
-	LAPACK_LIBS="$(LAPACK_LIBS)" \
-	BLAS_LIBS="$(BLAS_LIBS)" \
-	FFT_LIBS="$(FFT_LIBS)" 
+	LIB_LAPACK="$(LAPACK_LIBS)" \
+	LIB_BLAS="$(BLAS_LIBS)" 
 	touch ./configure-sax
 
 ###########################################################
@@ -419,6 +417,9 @@ ld1_clean:
 ld1_veryclean: ld1_clean
 # dir is not deleted for compatibility with the repository
 
+ld1_distclean: 
+	rm -f ../archive/$(LD1).tar.gz
+
 xspectra_clean:
 	if test -d ../XSpectra; then (cd ../XSpectra; \
 	$(MAKE) clean); fi
@@ -427,6 +428,9 @@ xspectra_clean:
 
 xspectra_veryclean: xspectra_clean
 # dir is not deleted for compatibility with the repository
+
+xspectra_distclean: 
+	rm -f ../archive/$(XSPECTRA).tar.gz
 
 pwcond_clean:
 	if test -d ../PWCOND; then (cd ../PWCOND; \
@@ -437,6 +441,9 @@ pwcond_clean:
 pwcond_veryclean: pwcond_clean
 # dir is not deleted for compatibility with the repository
 
+pwcond_distclean:
+	rm -f ../archive/$(PWCOND).tar.gz
+
 neb_clean:
 	if test -d ../NEB; then (cd ../NEB; \
 	$(MAKE) clean); fi
@@ -445,6 +452,9 @@ neb_clean:
  
 neb_veryclean: neb_clean
 # dir is not deleted for compatibility with the repository
+
+neb_distclean: 
+	rm -f ../archive/$(NEB).tar.gz
 
 tddfpt_clean:
 	if test -d ../TDDFPT; then (cd ../TDDFPT; \
@@ -455,6 +465,9 @@ tddfpt_clean:
 
 tddfpt_veryclean: tddfpt_clean 
 # dir is not deleted for compatibility with the repository
+
+tddfpt_distclean: 
+	rm -f ../archive/$(TDDFPT).tar.gz
 
 phonon_clean:
 	if test -d ../PHonon; then (cd ../PHonon; \
@@ -478,6 +491,8 @@ thermo_pw_clean:
 	if test -d ../thermo_pw; then (cd ../thermo_pw; \
 	$(MAKE) clean); fi
 
+phonon_distclean:
+	rm -f ../archive/$(PHONON).tar.gz
 
 gipaw_clean:
 	if test -d ../GIPAW; then (cd ../GIPAW; $(MAKE) clean); fi
@@ -489,6 +504,11 @@ gipaw_veryclean: gipaw_clean
 	rm -f config.log config.status ); fi
 	rm -rf ./configure-gipaw
 
+gipaw_distclean:
+	if test -d ../GIPAW; then (rm -R -f ../GIPAW ); fi
+	if test -d ../$(GIPAW); then (rm -R -f ../$(GIPAW) ); fi
+	rm -f ../archive/$(GIPAW).tar.gz
+
 epw_clean:
 	if test -d ../EPW; then (cd ../EPW; \
 	$(MAKE) clean); fi
@@ -496,6 +516,8 @@ epw_clean:
 	rm -rf ./make-epw 
 
 epw_veryclean: epw_clean
+
+epw_distclean: epw_clean
 
 w90_clean:
 	if test -d ../W90; then (cd ../W90; \
@@ -509,6 +531,9 @@ w90_veryclean: w90_clean
 	rm -f ../bin/wannier90.x
 	rm -rf ./uncompress-w90
 
+w90_distclean:
+	rm -f ../archive/$(W90).tar.gz
+
 want_clean:
 	if test -d ../WANT; then (cd ../WANT; \
 	$(MAKE) clean); fi
@@ -520,6 +545,9 @@ want_veryclean: want_clean
 	if test -e ../archive/$(WANT).tar.gz ; then (rm -f ../archive/$(WANT).tar.gz); fi
 	- rm -rf ./uncompress-want
 
+want_distclean: 
+	rm -f ../archive/$(WANT).tar.gz
+
 yambo_clean:
 	if test -d ../YAMBO; then (cd ../YAMBO; \
 	$(MAKE) clean); fi
@@ -528,8 +556,11 @@ yambo_clean:
 yambo_veryclean: yambo_clean
 	if test -d ../YAMBO; then (rm -R -f ../YAMBO); fi
 	if test -d ../$(YAMBO); then (rm -R -f ../$(YAMBO)); fi
-	if test -e ../archive/$(YAMBO).tar.gz ; then (rm -f ../archive/$(YAMBO).tar.gz); fi
 	- rm -rf ./uncompress-yambo
+
+yambo_distclean: 
+	if test -e ../archive/$(YAMBO).tar.gz ; then \
+		rm -f ../archive/$(YAMBO).tar.gz; fi
 
 yambo-devel_clean:
 	if test -d ../YAMBO_DEVEL; then (cd ../YAMBO_DEVEL; \
@@ -539,10 +570,13 @@ yambo-devel_clean:
 yambo-devel_veryclean: yambo-devel_clean
 	if test -d ../YAMBO_DEVEL; then (rm -R -f ../YAMBO_DEVEL); fi
 	if test -d ../$(YAMBO_DEVEL); then (rm -R -f ../$(YAMBO_DEVEL)); fi
-	if test -e ../archive/$(YAMBO_DEVEL).tar.gz ; then (rm -f ../archive/$(YAMBO_DEVEL).tar.gz); fi
 	- rm -rf ./uncompress-yambo-devel
 
-plumed_clean:
+yambo-devel_distclean: 
+	if test -e ../archive/$(YAMBO_DEVEL).tar.gz ; then \
+		rm -f ../archive/$(YAMBO_DEVEL).tar.gz; fi
+
+plumed_clean: 
 	if test -d ../PLUMED; then (cd ../PLUMED; \
 	export plumedir="`pwd`" ; \
 	cd ../ ; ./plumedpatch_qespresso_5.2.sh -revert); fi
@@ -554,6 +588,9 @@ plumed_veryclean: plumed_clean
 	if test -d ../$(PLUMED); then (rm -R -f ../$(PLUMED)); fi
 	rm -rf ./uncompress-plumed ../plumedpatch_qespresso_5.2.sh
 
+plumed_distclean: 
+# Nothing to do here
+
 sax_clean:
 	if test -d ../SaX; then (cd ../SaX; \
 	$(MAKE) clean); fi
@@ -564,6 +601,9 @@ sax_veryclean: sax_clean
 	if test -d ../$(SAX); then (rm -R -f ../$(SAX)); fi
 	- rm -rf ./uncompress-sax
 
+sax_distclean: 
+	rm -f ../archive/$(SAX).tar.gz
+
 west_clean:
 	if test -d ../West; then (cd ../West; \
 	$(MAKE) clean); fi
@@ -572,15 +612,25 @@ west_clean:
 west_veryclean: west_clean
 # dir is not deleted for compatibility with the repository
 
+west_distclean: 
+	   rm -f ../archive/$(WEST).tar.gz
+
 gui_clean:
 	rm -rf ./make-gui 
 
 gui_veryclean: gui_clean
 # dir is not deleted for compatibility with the repository
 
+gui_distclean: 
+
 test-suite_clean:
 	if test -d ../test-suite; then (cd ../test-suite; \
 	$(MAKE) clean); fi
+
+test-suite_veryclean: test-suite_clean
+
+test-suite_distclean:
+	rm -f ../archive/$(TESTSUITE).tar.gz
 
 gpu_clean:
 	rm -f ./make-gpu 
@@ -588,15 +638,27 @@ gpu_clean:
 gpu_veryclean: gpu_clean
 # dir is not deleted for compatibility with the repository
 
+gpu_distclean: 
+	rm -f ../archive/$(GPU).tar.gz
+
 ##########################################################
 # general cleaning
 ##########################################################
 
-clean: w90_clean want_clean yambo_clean yambo-devel_clean plumed_clean epw_clean \
-	gui_clean phonon_clean tddfpt_clean xspectra_clean neb_clean pwcond_clean \
-	ld1_clean gipaw_clean gpu_clean west_clean test-suite_clean \
-        thermo_pw_clean
+clean: w90_clean want_clean yambo_clean yambo-devel_clean plumed_clean \
+	epw_clean gui_clean phonon_clean tddfpt_clean xspectra_clean neb_clean \
+	pwcond_clean ld1_clean gipaw_clean gpu_clean west_clean test-suite_clean \
+	sax_clean thermo_pw_clean
 
-veryclean: w90_veryclean want_veryclean yambo_veryclean yambo-devel_veryclean plumed_veryclean epw_veryclean \
-	gui_veryclean phonon_veryclean tddfpt_veryclean xspectra_veryclean neb_veryclean \
-	pwcond_veryclean ld1_veryclean gipaw_veryclean gpu_veryclean west_veryclean
+veryclean: w90_veryclean want_veryclean yambo_veryclean yambo-devel_veryclean \
+	plumed_veryclean epw_veryclean gui_veryclean phonon_veryclean \
+	tddfpt_veryclean xspectra_veryclean neb_veryclean pwcond_veryclean \
+	ld1_veryclean gipaw_veryclean gpu_veryclean west_veryclean \
+	test-suite_veryclean sax_veryclean
+
+#distclean : veryclean
+distclean: w90_distclean want_distclean yambo_distclean yambo-devel_distclean \
+  epw_distclean gui_distclean phonon_distclean test-suite_distclean \
+  tddfpt_distclean xspectra_distclean neb_distclean pwcond_distclean \
+  ld1_distclean gipaw_distclean gpu_distclean west_distclean sax_distclean
+

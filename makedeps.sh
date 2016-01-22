@@ -15,7 +15,6 @@ then
            PHonon/Gamma PHonon/PH PHonon/D3 PHonon/FD atomic/src XSpectra/src \
            ACDFT NEB/src TDDFPT/src GIPAW/src GWW/pw4gww GWW/gww GWW/head \
            thermo_pw/src thermo_pw/lib thermo_pw/tools thermo_pw/qe"
-
           
 elif
     test $1 = "-addson" 
@@ -81,21 +80,20 @@ for dir in $dirs; do
 	TDDFPT/src )
              DEPENDS="$LEVEL2/include $LEVEL2/iotk/src $LEVEL2/FFTXlib $LEVEL2/Modules \
                       $LEVEL2/PW/src $LEVEL2/PHonon/PH" ;;
-	thermo_pw/lib )
+        thermo_pw/lib )
              DEPENDS="$LEVEL2/include $LEVEL2/iotk/src $LEVEL2/FFTXlib \
                       $LEVEL2/Modules $LEVEL2/PW/src $LEVEL2/PHonon/PH " ;;
-	thermo_pw/qe )
+        thermo_pw/qe )
              DEPENDS="$LEVEL2/include $LEVEL2/iotk/src $LEVEL2/FFTXlib \
                       $LEVEL2/Modules $LEVEL2/PW/src $LEVEL2/PHonon/PH \
                       $LEVEL2/thermo_pw/lib " ;;
-	thermo_pw/src )
+        thermo_pw/src )
              DEPENDS="$LEVEL2/include $LEVEL2/iotk/src $LEVEL2/FFTXlib $LEVEL2/Modules \
                       $LEVEL2/PW/src $LEVEL2/PHonon/PH $LEVEL2/PP/src \
                       $LEVEL2/thermo_pw/lib $LEVEL2/thermo_pw/qe " ;;
-	thermo_pw/tools )
+        thermo_pw/tools )
              DEPENDS="$LEVEL2/include $LEVEL2/iotk/src $LEVEL2/FFTXlib $LEVEL2/Modules \
                       $LEVEL2/PW/src $LEVEL2/PHonon/PH $LEVEL2/thermo_pw/lib" ;;
-
     *)
 # if addson needs a make.depend file
 	DEPENDS="$DEPENDS $add_deps"
@@ -131,6 +129,12 @@ for dir in $dirs; do
         then
             sed '/@environ_/d;/@solvent_tddfpt@/d' make.depend > make.depend.tmp
             sed '/fft_defs.h@/d' make.depend.tmp > make.depend
+        fi
+
+        if test "$DIR" = "CPV/src"
+        then
+            sed '/@f90_unix_proc@/d' make.depend > make.depend.tmp
+            cp make.depend.tmp make.depend
         fi
 
         rm -f make.depend.tmp
