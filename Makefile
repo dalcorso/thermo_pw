@@ -61,4 +61,4 @@ doc:
 	( cd Doc ; $(MAKE) all || exit 1 ) ; fi
 
 
-distclean: clean doc_clean
+distclean: clean 

@@ -1,11 +1,12 @@
+23/01/2016 Version 0.4.0 of thermo_pw is now frozen.
+
 New in version 0.4.0
 
 Added the possibility to fit the energy with a fourth order polynomial.
 
 Improved the recover abilities of the code.
 
-Added support for the calculation of the X-ray diffraction spectra of a
-given structure.
+Added support for the calculation of the X-ray diffraction spectra. 
 
 Started to implement finite pressure calculations.
 
