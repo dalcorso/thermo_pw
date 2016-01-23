@@ -15,4 +15,11 @@ plot_sur_states.o : ../../Modules/mp_global.o
 plot_sur_states.o : ../../thermo_pw/lib/gnuplot.o
 supercell.o : ../../Modules/kind.o
 supercell.o : ../../PW/src/wyckoff.o
+test_colors.o : ../../Modules/environment.o
+test_colors.o : ../../Modules/io_global.o
+test_colors.o : ../../Modules/kind.o
+test_colors.o : ../../Modules/mp_global.o
+test_colors.o : ../../Modules/mp_images.o
+test_colors.o : ../../thermo_pw/lib/gnuplot.o
+test_colors.o : ../../thermo_pw/lib/gnuplot_color.o
 translate.o : ../../Modules/kind.o

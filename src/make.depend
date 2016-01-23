@@ -21,6 +21,7 @@ bands_sub.o : ../../Modules/mp_images.o
 bands_sub.o : ../../Modules/noncol.o
 bands_sub.o : ../../PW/src/pwcom.o
 bands_sub.o : thermo_mod.o
+bcast_thermo_input.o : ../../Modules/input_parameters.o
 bcast_thermo_input.o : ../../Modules/io_global.o
 bcast_thermo_input.o : ../../Modules/mp.o
 bcast_thermo_input.o : ../../Modules/mp_world.o
@@ -32,6 +33,7 @@ check_existence.o : ../../Modules/io_global.o
 check_existence.o : ../../Modules/kind.o
 check_existence.o : ../../Modules/mp.o
 check_existence.o : ../../Modules/mp_images.o
+check_existence.o : ../../PW/src/pwcom.o
 check_existence.o : ../../thermo_pw/lib/elastic_const.o
 check_existence.o : thermo_mod.o
 check_file_exists.o : ../../Modules/io_global.o
@@ -71,7 +73,6 @@ deallocate_thermo.o : ../../Modules/kind.o
 deallocate_thermo.o : ../../thermo_pw/lib/elastic_const.o
 deallocate_thermo.o : thermo_mod.o
 do_berry.o : ../../Modules/cell_base.o
-do_berry.o : ../../Modules/check_stop.o
 do_berry.o : ../../Modules/control_flags.o
 do_berry.o : ../../Modules/input_parameters.o
 do_berry.o : ../../Modules/io_global.o
@@ -92,6 +93,7 @@ do_pwscf.o : ../../Modules/mp_images.o
 do_pwscf.o : ../../Modules/parameters.o
 do_pwscf.o : ../../PW/src/atomic_wfc_mod.o
 do_pwscf.o : ../../PW/src/pwcom.o
+do_pwscf.o : ../../PW/src/update_pot.o
 do_pwscf.o : thermo_mod.o
 ev_sub.o : ../../Modules/constants.o
 ev_sub.o : ../../Modules/io_global.o
@@ -273,6 +275,7 @@ quadratic_fit.o : ../../Modules/io_global.o
 quadratic_fit.o : ../../Modules/kind.o
 quadratic_fit.o : ../../Modules/mp_images.o
 quadratic_fit.o : ../../thermo_pw/lib/quadratic_surfaces.o
+quadratic_fit.o : ../../thermo_pw/lib/quartic_surfaces.o
 quadratic_fit.o : thermo_mod.o
 read_state_densities.o : ../../Modules/io_global.o
 read_state_densities.o : ../../Modules/ions_base.o
@@ -506,13 +509,9 @@ write_quadratic.o : ../../Modules/constants.o
 write_quadratic.o : ../../Modules/io_global.o
 write_quadratic.o : ../../Modules/kind.o
 write_quadratic.o : ../../Modules/mp_images.o
+write_quadratic.o : ../../thermo_pw/lib/quadratic_surfaces.o
+write_quadratic.o : ../../thermo_pw/lib/quartic_surfaces.o
 write_quadratic.o : thermo_mod.o
-write_read_energy.o : ../../Modules/io_global.o
-write_read_energy.o : ../../Modules/kind.o
-write_read_energy.o : ../../Modules/mp.o
-write_read_energy.o : ../../Modules/mp_world.o
-write_read_energy.o : ../../thermo_pw/lib/elastic_const.o
-write_read_energy.o : thermo_mod.o
 write_thermo.o : ../../Modules/io_global.o
 write_thermo.o : ../../Modules/ions_base.o
 write_thermo.o : ../../Modules/kind.o
