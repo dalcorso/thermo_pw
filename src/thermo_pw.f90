@@ -428,6 +428,7 @@ PROGRAM thermo_pw
      ! ... reads the phonon input
      !
      with_ext_images=with_asyn_images
+     ph_geometries=0
      always_run=.TRUE.
      CALL start_clock( 'PHONON' )
      DO igeom=1,tot_ngeo
