@@ -368,8 +368,12 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
 !
 !    In this case the two points are considered close
 !
-              high_sym(n)= ((code_group/=code_group_old).AND..NOT. &
-                                                        high_sym(n-1))
+!              high_sym(n)= ((code_group/=code_group_old).AND..NOT. &
+!                                                        high_sym(n-1))
+              IF (.NOT. high_sym(n-1)) &
+                 high_sym(n) = code_group /= code_group_old .OR. &
+                                                        high_sym(n)
+
               dqmod_save= MAX(dqmod_save * 0.5_DP, dqmod)
            ELSE
               high_sym(n)=.TRUE.
