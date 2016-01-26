@@ -258,5 +258,4 @@ CALL environment_end( code )
 !
 CALL mp_global_end ()
 
-RETURN
 END PROGRAM test_colors
