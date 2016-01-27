@@ -462,6 +462,7 @@ REAL(DP) :: angle1, angle2, angle3, angle
 
 iwork=0
 celldm_geo=0.0_DP
+total_work=0
 DO igeo6 = 1, ngeo(6)
    angle3 = ACOS(celldm_save(6)) +  &
             (igeo6-(ngeo(6)+1.0_DP)/2.0_DP)*step_ngeo(6)
@@ -475,8 +476,8 @@ DO igeo6 = 1, ngeo(6)
             DO igeo2 = 1, ngeo(2)
                DO igeo1 = 1, ngeo(1)
                   total_work=total_work+1
-                  IF (reduced_grid.AND.(total_work - start_geo) >= 0 .AND. &
-                          MOD(total_work - start_geo, jump_geo)/=0) CYCLE
+                  IF (reduced_grid.AND.((total_work - start_geo) < 0 .OR. &
+                          MOD((total_work - start_geo), jump_geo)/=0)) CYCLE
                   iwork=iwork+1
                   celldm_geo(1,iwork)=celldm_save(1)+&
                         (igeo1-(ngeo(1)+1.0_DP)/2.0_DP)*step_ngeo(1)
@@ -506,7 +507,7 @@ IMPLICIT NONE
 INTEGER :: iwork, auxgeo
 
 auxgeo=ngeo(1)*ngeo(2)*ngeo(3)*ngeo(4)*ngeo(5)*ngeo(6)
-IF (reduced_grid) auxgeo=(auxgeo+1)/jump_geo - (start_geo -1)/jump_geo
+IF (reduced_grid) auxgeo=(auxgeo - start_geo)/jump_geo + 1
 compute_nwork=auxgeo
 IF (lmurn) compute_nwork=ngeo(1)
 central_geo=compute_nwork/2
