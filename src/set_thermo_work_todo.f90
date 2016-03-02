@@ -26,7 +26,9 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
   USE control_elastic_constants, ONLY : at_save, tau_save, frozen_ions
   USE elastic_constants, ONLY : epsilon_geo, apply_strain, print_strain
   USE control_ph, ONLY : recover
-  USE control_flags, ONLY : gamma_only, tstress, tprnfor, lbfgs, nstep, niter
+  USE control_flags, ONLY : gamma_only, tstress, tprnfor, lbfgs, nstep, niter, &
+                            lscf, lmd
+  USE cellmd,        ONLY : lmovecell
   USE force_mod, ONLY : lforce, lstres
   USE relax,       ONLY : epse, epsf
   USE io_files,    ONLY : tmp_dir, wfc_dir, prefix, seqopn
@@ -105,7 +107,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
               calculation='scf'
               lbfgs=.FALSE.
            ELSE
-              calculation='relax'
+              IF (calculation=='vc-relax') lmovecell=.TRUE.
               lforce=.TRUE.
               lstres=.TRUE.
               lbfgs = .TRUE.
@@ -134,6 +136,19 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
            tmp_dir = TRIM ( outdir )
            wfc_dir = tmp_dir
            CALL check_tempdir ( tmp_dir, exst, parallelfs )
+
+           IF (.NOT.frozen_ions .AND. ionode) THEN
+              !
+              !  clean the bfgs history
+              !
+              iunupdate=2
+              CALL seqopn( iunupdate, 'update', 'FORMATTED', exst )
+              CLOSE(iunupdate, STATUS='DELETE')
+              filename = TRIM( tmp_dir ) // TRIM( prefix ) // '.bfgs'
+              OPEN( iunupdate, FILE=TRIM(filename), FORM='FORMATTED')
+              CLOSE(iunupdate, STATUS='DELETE')
+           END IF
+
         CASE DEFAULT
            CALL errore('set_thermo_work_todo','unknown what',1)
      END SELECT
