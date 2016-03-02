@@ -55,7 +55,6 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   LOGICAL :: exst
   REAL(DP), PARAMETER :: accuracy=1.d-4
   COMPLEX(DP) :: d_spink(2,2,48), d_spink1(2,2,48),d_spin_is(2,2,48)
-  COMPLEX(DP), EXTERNAL :: zdotc
   COMPLEX(DP),ALLOCATABLE :: times(:,:,:)
   REAL(DP) :: dxk(3), dkmod, dkmod_save, k1(3), k2(3), modk1, modk2, ps
   INTEGER, ALLOCATABLE :: rap_et(:,:), code_group_k(:), aux_ind(:)
@@ -117,6 +116,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
      CALL find_info_group(nsymk,sk,t_revk,ftauk,d_spink,gk,snamek,&
           sk_is,d_spin_is,gk_is,is_symmorphic,search_sym)
      code_group_k(ik)=code_group
+     IF (noncolin.AND.domag) code_group_k(ik)=code_group_is
      !
      IF (.not.search_sym) THEN
         rap_et(:,ik)=-1
@@ -184,8 +184,13 @@ SUBROUTINE sym_band_sub(filband, spin_component)
         CALL find_info_group(nsymk,sk,t_revk,ftauk,d_spink,gk,snamek,&
              sk_is,d_spin_is,gk_is, &
              is_symmorphic,search_sym)
-        IF (code_group_k(ik) /= code_group) &
+        IF (noncolin.AND.domag) THEN
+           IF (code_group_k(ik) /= code_group_is) &
              CALL errore('sym_band_sub','problem with code_group',1)
+        ELSE
+           IF (code_group_k(ik) /= code_group) &
+             CALL errore('sym_band_sub','problem with code_group',1)
+        ENDIF
         WRITE(stdout, '(/,1x,74("*"))')
         WRITE(stdout, '(/,20x,"xk=(",2(f10.5,","),f10.5,"  )")') &
              xk(1,ik), xk(2,ik), xk(3,ik)
@@ -413,16 +418,20 @@ SUBROUTINE find_aux_ind_xk(xk1, xk2, aux_ind)
 USE kinds, ONLY : DP
 USE cell_base, ONLY : at, bg
 USE symm_base, ONLY : s, ftau, t_rev, sname, nsym
+USE noncollin_module, ONLY : noncolin
+USE spin_orb,        ONLY : domag
 USE rap_point_group, ONLY : code_group
 USE rap_point_group_so, ONLY : d_spin
+USE rap_point_group_is, ONLY : code_group_is, nsym_is
 USE point_group,        ONLY : find_aux_ind_two_groups
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: xk1(3), xk2(3)
 INTEGER, INTENT(OUT) :: aux_ind
 INTEGER :: sk(3,3,48), ftauk(3,48), gk(3,48), sk_is(3,3,48), &
            gk_is(3,48), t_revk(48), nsymk
-INTEGER :: sk1(3,3,48), ftauk1(3,48), gk1(3,48), t_revk1(48), nsymk1
-INTEGER :: group_a, group_b
+INTEGER :: sk1(3,3,48), ftauk1(3,48), gk1(3,48), sk1_is(3,3,48), &
+           t_revk1(48), nsymk1
+INTEGER :: group_a, group_b, nsym_isa, nsym_isb
 LOGICAL :: is_symmorphic, search_sym
 CHARACTER(len=45) :: snamek(48), snamek1(48)
 COMPLEX(DP) :: d_spink(2,2,48), d_spink1(2,2,48), d_spin_is(2,2,48)
@@ -432,15 +441,28 @@ CALL smallgk (xk1, at, bg, s, ftau, t_rev, sname, &
 CALL find_info_group(nsymk, sk, t_revk, ftauk, d_spink, gk, snamek,&
              sk_is, d_spin_is, gk_is, is_symmorphic, search_sym)
 group_a=code_group
+IF (noncolin.AND.domag) THEN
+   group_a=code_group_is
+   nsym_isa=nsym_is
+ENDIF
 CALL smallgk (xk2, at, bg, s, ftau, t_rev, sname, &
             nsym, sk1, ftauk1, gk1, t_revk1, snamek1, nsymk1)
 CALL find_info_group(nsymk1, sk1, t_revk1, ftauk1, d_spink1, gk1,&
-            snamek1, sk_is, d_spin_is, gk_is,is_symmorphic,search_sym)
+            snamek1, sk1_is, d_spin_is, gk_is,is_symmorphic,search_sym)
 group_b=code_group
+IF (noncolin.AND.domag) THEN
+   group_b=code_group_is
+   nsym_isb=nsym_is
+ENDIF
 
 IF (group_b /= group_a) THEN
-   CALL find_aux_ind_two_groups(nsymk, nsymk1, sk, sk1, at, bg, &
+   IF (noncolin.AND.domag) THEN
+      CALL find_aux_ind_two_groups(nsym_isa, nsym_isb, sk_is, sk1_is, at, bg, &
                                 group_a, group_b, aux_ind)
+   ELSE
+      CALL find_aux_ind_two_groups(nsymk, nsymk1, sk, sk1, at, bg, &
+                                group_a, group_b, aux_ind)
+   ENDIF
 ELSE
    aux_ind=0
 ENDIF
