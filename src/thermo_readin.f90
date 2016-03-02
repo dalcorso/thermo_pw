@@ -29,7 +29,8 @@ SUBROUTINE thermo_readin()
   USE ifc,                  ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq, &
                                    zasr, freqmin_input, freqmax_input, &
                                    phdos_sigma
-  USE input_parameters,     ONLY : outdir, ibrav, forc_conv_thr, max_seconds
+  USE input_parameters,     ONLY : outdir, ibrav, forc_conv_thr, max_seconds, &
+                                   calculation
   USE read_input,           ONLY : read_input_file
   USE command_line_options, ONLY : input_file_ 
   USE control_paths,        ONLY : xqaux, wqaux, wqauxr, npk_label, letter, &
@@ -609,6 +610,12 @@ SUBROUTINE thermo_readin()
      IF (sur_layers==0) THEN
         sur_layers=MIN(2, nat/2)
      ENDIF
+  ENDIF
+
+  IF (what(1:6)=='mur_lc'.AND..NOT.lmurn) THEN
+     IF (calculation/='scf'.AND.calculation/='relax') &
+        CALL errore('thermo_readin','thermo_pw requires scf or relax in &
+                                               &pw input',1)
   ENDIF
 
   IF ( ngeo(1)==0 ) THEN
