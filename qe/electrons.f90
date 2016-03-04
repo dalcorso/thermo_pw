@@ -25,7 +25,8 @@ SUBROUTINE electrons_tpw()
                                    elondon, ef_up, ef_dw
   USE scf,                  ONLY : rho, rho_core, rhog_core, v, vltot, vrs, &
                                    kedtau, vnew
-  USE control_flags,        ONLY : tr2, niter, conv_elec, restart, lmd
+  USE control_flags,        ONLY : tr2, niter, conv_elec, restart, lmd,   &
+                                   do_makov_payne
   USE io_files,             ONLY : iunwfc, iunmix, nwordwfc, output_drho, &
                                    iunres, iunefield, seqopn
   USE buffers,              ONLY : save_buffer, close_buffer
@@ -213,6 +214,7 @@ SUBROUTINE electrons_tpw()
         WRITE( stdout, 9064 ) 0.5D0*fock2
         !
         IF ( dexx < tr2_final ) THEN
+           IF ( do_makov_payne ) CALL makov_payne( etot )
            WRITE( stdout, 9101 )
            RETURN
         END IF
@@ -282,20 +284,20 @@ SUBROUTINE electrons_scf_tpw ( printout )
   USE gvect,                ONLY : ngm, gstart, nl, nlm, g, gg, gcutm
   USE gvecs,                ONLY : doublegrid, ngms
   USE klist,                ONLY : xk, wk, nelec, ngk, nks, nkstot, lgauss, &
-                                   two_fermi_energies
+                                   two_fermi_energies, tot_charge
   USE lsda_mod,             ONLY : lsda, nspin, magtot, absmag, isk
   USE vlocal,               ONLY : strf
   USE wvfct,                ONLY : nbnd, et, npwx, ecutwfc
   USE ener,                 ONLY : etot, hwf_energy, eband, deband, ehart, &
                                    vtxc, etxc, etxcc, ewld, demet, epaw, &
-                                   elondon, ef_up, ef_dw, exdm
+                                   elondon, ef_up, ef_dw, exdm, ef
   USE scf,                  ONLY : scf_type, scf_type_COPY, bcast_scf_type,&
                                    create_scf_type, destroy_scf_type, &
                                    open_mix_file, close_mix_file, &
                                    rho, rho_core, rhog_core, v, vltot, vrs, &
                                    kedtau, vnew
   USE control_flags,        ONLY : mixing_beta, tr2, ethr, niter, nmix, &
-                                   iprint, istep, conv_elec, &
+                                   iprint, conv_elec, &
                                    restart, io_level, do_makov_payne,  &
                                    gamma_only, iverbosity, textfor,     &
                                    llondon, scf_must_converge, lxdm, ts_vdw
@@ -324,7 +326,8 @@ SUBROUTINE electrons_scf_tpw ( printout )
   USE paw_symmetry,         ONLY : PAW_symmetrize_ddd
   USE uspp_param,           ONLY : nh, nhm ! used for PAW
   USE dfunct,               ONLY : newd
-  USE esm,                  ONLY : do_comp_esm, esm_printpot
+  USE esm,                  ONLY : do_comp_esm, esm_printpot, esm_ewald
+  USE fcp_variables,        ONLY : lfcpopt, lfcpdyn
   USE iso_c_binding,        ONLY : c_int
   USE mp_asyn,              ONLY : asyn_master, with_asyn_images
   USE mp_images,            ONLY : my_image_id, root_image
@@ -368,12 +371,6 @@ SUBROUTINE electrons_scf_tpw ( printout )
   iter = 0
   dr2  = 0.0_dp
   !
-  ! ... Convergence threshold for iterative diagonalization
-  ! ... for the first scf iteration of each ionic step (after the first),
-  ! ... the threshold is fixed to a default value of 1.D-6
-  !
-!  IF ( istep > 0 ) ethr = 1.D-6
-  !
   IF ( restart ) CALL restart_in_electrons (iter, dr2, ethr, et )
   !
   WRITE( stdout, 9000 ) get_clock( 'PWSCF' )
@@ -387,8 +384,12 @@ SUBROUTINE electrons_scf_tpw ( printout )
   !
   ! ... calculates the ewald contribution to total energy
   !
-  ewld = ewald( alat, nat, nsp, ityp, zv, at, bg, tau, &
+  IF ( do_comp_esm ) THEN
+     ewld = esm_ewald()
+  ELSE
+     ewld = ewald( alat, nat, nsp, ityp, zv, at, bg, tau, &
                 omega, g, gg, ngm, gcutm, gstart, gamma_only, strf )
+  END IF
   !
   IF ( llondon ) THEN
      elondon = energy_london ( alat , nat , ityp , at ,bg , tau )
@@ -501,7 +502,6 @@ SUBROUTINE electrons_scf_tpw ( printout )
               ENDIF
            ENDIF
            !
-!           IF ( first .AND. istep == 0 .AND. starting_pot == 'atomic' ) THEN
            IF ( first .AND. starting_pot == 'atomic' ) THEN
               CALL ns_adj()
               IF (noncolin) THEN
@@ -725,6 +725,11 @@ SUBROUTINE electrons_scf_tpw ( printout )
         etot = etot + etotefield
         hwf_energy = hwf_energy + etotefield
      END IF
+
+     IF ( lfcpopt .or. lfcpdyn ) THEN
+        etot = etot + ef * tot_charge
+        hwf_energy = hwf_energy + ef * tot_charge
+     ENDIF
      !
      ! ... adds possible external contribution from plugins to the energy
      !
@@ -735,8 +740,9 @@ SUBROUTINE electrons_scf_tpw ( printout )
      IF ( conv_elec ) THEN
         !
         ! ... if system is charged add a Makov-Payne correction to the energy
+        ! ... (not in case of hybrid functionals: it is added at the end)
         !
-        IF ( do_makov_payne ) CALL makov_payne( etot )
+        IF ( do_makov_payne .AND. printout/= 0 ) CALL makov_payne( etot )
         !
         ! ... print out ESM potentials if desired
         !
@@ -1072,6 +1078,12 @@ SUBROUTINE electrons_scf_tpw ( printout )
           !
           IF ( lgauss ) WRITE( stdout, 9070 ) demet
           !
+          ! ... With Fictitious charge particle (FCP), etot is the grand
+          ! ... potential energy Omega = E - muN, -muN is the potentiostat
+          ! ... contribution.
+          !
+          IF ( lfcpopt .or. lfcpdyn ) WRITE( stdout, 9072 ) ef*tot_charge
+          !
        ELSE IF ( conv_elec ) THEN
           !
           IF ( dr2 > eps8 ) THEN
@@ -1120,6 +1132,7 @@ SUBROUTINE electrons_scf_tpw ( printout )
 9069 FORMAT( '     scf correction            =',F17.8,' Ry' )
 9070 FORMAT( '     smearing contrib. (-TS)   =',F17.8,' Ry' )
 9071 FORMAT( '     Magnetic field            =',3F12.7,' Ry' )
+9072 FORMAT( '     pot.stat. contrib. (-muN) =',F17.8,' Ry' )
 9073 FORMAT( '     lambda                    =',F11.2,' Ry' )
 9074 FORMAT( '     Dispersion Correction     =',F17.8,' Ry' )
 9075 FORMAT( '     Dispersion XDM Correction =',F17.8,' Ry' )
