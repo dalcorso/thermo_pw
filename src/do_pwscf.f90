@@ -166,6 +166,10 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
         CALL hinit1()
         !
      END IF
+     ! ... Reset convergence threshold of iterative diagonalization for
+     ! ... the first scf iteration of each ionic step (after the first)
+     !
+     ethr = 1.0D-6
      !
   END DO main_loop
   !
