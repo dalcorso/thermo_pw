@@ -172,6 +172,7 @@ scf                          *
 scf_ke       *   *
 scf_nk       *       *
 scf_band                     *    *
+scf_dos                      *    *
 scf_ph                       *                              *
 scf_disp                     *                              *
 scf_elastic_constants                    *     *
@@ -179,6 +180,7 @@ scf_piezoelectric_tensor                 *          +
 scf_polarization                         *              +
 mur_lc       *           *
 mur_lc_band  *           *   *    *
+mur_lc_dos   *           *   *    *
 mur_lc_ph    *           *   *                              *
 mur_lc_disp  *           *   *                              *
 mur_lc_elastic_constants
@@ -207,6 +209,7 @@ Total energy as a function of volume           mur_lc
 Total energy as a function of two or three
 crystallographic parameters                    mur_lc
 Energy bands                                   scf_bands, mur_lc_bands
+Electron density of states                     scf_dos, mur_lc_dos
 Phonon dispersions                             scf_disp, mur_lc_disp
 Phonon dos                                     scf_disp, mur_lc_disp
 Vibrational energy, free energy, entropy,      
@@ -257,6 +260,9 @@ scf_band        bands_sub
                 write_bands      filband
                 plotbands_sub    flpbands
                 write_gnuplot_file              flgnuplot(_band)    flpsband     
+
+scf_dos         dos_sub          fldos
+                plot_dos         flpsdos
 
 scf_ph             --            fildyn               --                  --
 scf_disp                         fildyn
@@ -408,6 +414,10 @@ with a quartic polynomial, to find the gradient or the hessian in
 a given point and to find the minimum of the quartic function given a 
 reasonably good guess of its position.
 The number of independent variables can vary from one to six.
+
+\item
+\texttt{linear\_solvers.f90} contains routines needed solve iteratively
+a linear system. 
 
 \item
 \texttt{mp\_asyn.f90} contains the routines needed to run many 
