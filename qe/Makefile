@@ -10,16 +10,29 @@ MODFLAGS= $(MOD_FLAG)../../iotk/src $(MOD_FLAG)../../Modules \
 
 MODULES = \
 adddvepsi_us.o \
+apply_ac.o \
 check_bands.o \
 control_qe.o \
 do_phonon.o \
+ccg_psi.o \
 electrons.o \
 ev_xml.o \
+initialize_ph.o \
 phqscf.o \
 prepare_q.o \
 run_nscf.o \
 read_dyn_from_file.o \
-solve_linter.o 
+phescf.o \
+phq_readin.o \
+phq_summary.o \
+polarizc.o \
+psyme_fpol.o \
+psym_dmage_fpol.o \
+scal_prod.o \
+solve_e_fpolc.o \
+solve_linter.o  \
+syme_fpol.o     \
+sym_dmage_fpol.o 
 
 all : thermo_qe.a
 

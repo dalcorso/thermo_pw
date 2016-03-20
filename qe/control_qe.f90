@@ -15,10 +15,54 @@
 MODULE control_qe
   USE kinds,  ONLY : DP
   !
-  !
   SAVE
 
   LOGICAL  :: tcollect_all=.FALSE.
 
 END MODULE control_qe
+
+MODULE optical
+  USE kinds,  ONLY : DP
+  !
+  SAVE
+
+  REAL(DP), ALLOCATABLE :: fru(:)       ! real part of the frequency
+  COMPLEX(DP) :: current_w              ! current frequency
+
+  LOGICAL :: lcfreq,        &    ! complex frequency calculation
+             freq_line,     &    ! in input frequencies are given
+                                 ! along lines
+             lcharge,       &    ! if .true. computes the charge-charge susc.
+             lchimag,       &    ! if .true. computes the mag_z-mag_z susc.
+             lmagnon,       &    ! if .true. computes \chi_+-
+             lall_tensor         ! if .true. computes \chi_-+
+
+  COMPLEX (DP), ALLOCATABLE ::      &
+                  intq(:,:,:),      &! nhm, nhm, nat),    integral of e^iqr Q 
+                  intq_nc(:,:,:,:)   ! nhm, nhm, nat, nspin), integral of 
+                                     ! e^iqr Q in the noncollinear case
+
+  REAL(DP), ALLOCATABLE :: dmuxc_tran(:)  ! contains 1\|m| d B_xc / d|m|
+
+
+  COMPLEX(DP), ALLOCATABLE :: chirr(:), &  ! charge-charge \chi
+                              chirz(:), &  ! charge-mag_z \chi
+                              chizr(:), &  ! mag_z-charge \chi
+                              chizz(:), &  ! mag_z-mag_z \chi
+                              chipm(:), &  ! \chi_+-
+                              chimp(:), &  ! \chi_-+
+                              chixx(:), &  ! \chi_xx
+                              chixy(:), &  ! \chi_xy
+                              epsm1(:)     ! epsm1
+
+  COMPLEX(DP), ALLOCATABLE :: polarc(:,:,:)   ! polarizability (computed
+                                              ! via Clausius-Mossotti relation)
+                                              ! for molecules only
+  COMPLEX(DP), ALLOCATABLE :: epsilonc(:,:,:) ! complex dielectric constant
+  COMPLEX(DP), ALLOCATABLE :: epsilonm1c(:,:,:) ! inverse of the complex
+                                              ! dielectric constant
+
+  INTEGER :: iu1dwf, lr1dwf     ! unit for response wavefunctions at -w
+
+END MODULE optical
 

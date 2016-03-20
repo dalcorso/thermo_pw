@@ -498,7 +498,7 @@ PROGRAM thermo_pw
            IF (trans) THEN
               CALL collect_everything(auxdyn)
            ELSE
-!              CALL plot_epsilon_omega()
+              CALL plot_epsilon_omega()
            ENDIF
            !
         END IF

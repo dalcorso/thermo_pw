@@ -207,6 +207,14 @@ plot_e_nk.o : ../../Modules/kind.o
 plot_e_nk.o : ../../Modules/mp_images.o
 plot_e_nk.o : ../../thermo_pw/lib/gnuplot.o
 plot_e_nk.o : thermo_mod.o
+plot_epsilon_omega.o : ../../Modules/cell_base.o
+plot_epsilon_omega.o : ../../Modules/constants.o
+plot_epsilon_omega.o : ../../Modules/io_global.o
+plot_epsilon_omega.o : ../../Modules/kind.o
+plot_epsilon_omega.o : ../../Modules/mp_images.o
+plot_epsilon_omega.o : ../../PW/src/pwcom.o
+plot_epsilon_omega.o : ../../thermo_pw/lib/gnuplot.o
+plot_epsilon_omega.o : thermo_mod.o
 plot_formf.o : ../../Modules/ions_base.o
 plot_formf.o : ../../Modules/kind.o
 plot_formf.o : thermo_mod.o

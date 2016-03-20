@@ -23,6 +23,15 @@ run_nscf_tpw : call set_small_group_q also in the lgamma_iq case. This change
 do_phonon_tpw : call phqscf_tpw instead of phqscf and prepare_q_tpw instead
             of prepare_q.
 
+phescf_tpw : call the more general routine solve_e_fpolc in the case of finite
+             frequency instead of solve_e_fpol.
+
+ccg_psi_tpw : uses the new conventions for the noncollinear case.
+
+phq_summary_tpw : summarize the frequencies in complex form
+
+initialize_ph_tpw.f90 : calls the new routine phq_summary_tpw
+
 adddvepsi_us_tpw.f90 : added the number of occupated bands as an input.
 
 ev_xml : is identical to the QE routine, but it is copied here because files
@@ -33,3 +42,32 @@ read_dyn_from_file : in the routine of PH there is an implicit dependence
          for the first time. Since thermo_pw calls this routine for several
          geometry, the first file of each geometry should be considered as
          first. Removed the dependence on first.
+
+
+This directory contains also some routines that are new, or generalize
+those of QE. They are still experimental.
+
+solve_e_fpolc.f90 : equivalent of solve_e, but computes the +w and -w
+                    frequencies. Used to compute the complex
+                    macroscopic dielectric constant at finite frequency.
+
+apply_ac.f90
+Apply H-eS-wS+a_c Q to a generic function, with the new conventions
+required by the linear solvers. The c indicates a non Hermitian matrix 
+(used when omega /=0 is complex).
+
+scal_prod.f90 Makes the scalar products between wavefunctions.
+Nedeed by the linear solver routines.
+
+
+psym_dmage_fpol.f90 ! parallel driver of the following
+sym_dmage_fpol.f90 ! similar to sym_dmag.f90, but used in the optical case
+                     does not assume that the potential is real.
+
+psyme_fpol.f90     ! parallel driver of the following
+syme_fpol.f90      ! similar to syme.f90, but used in the optical case
+                   ! does not assume that the potential is real.
+
+polarizc.f90     ! computes the complex polarizability and writes it on
+                 ! output.
+

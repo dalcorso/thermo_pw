@@ -68,11 +68,11 @@ SUBROUTINE do_phonon_tpw(auxdyn)
      !  Initialize the quantities which do not depend on
      !  the linear response of the system
      !
-     CALL initialize_ph()
+     CALL initialize_ph_tpw()
      !
      !  electric field perturbation
      !
-     IF (epsil) CALL phescf()
+     IF (epsil) CALL phescf_tpw()
      !
      !  IF only_init is .true. the code computes only the 
      !  initialization parts.

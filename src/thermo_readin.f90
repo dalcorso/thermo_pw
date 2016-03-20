@@ -718,7 +718,7 @@ SUBROUTINE thermo_ph_readin()
 !    outdir should not be given in the input of thermo_pw.
 !
      outdir_in_ph=TRIM(outdir)
-     CALL phq_readin()
+     CALL phq_readin_tpw()
      IF (meta_ionode) CLOSE(5,STATUS='KEEP')
      !
   ENDIF
