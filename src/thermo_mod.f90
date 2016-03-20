@@ -289,6 +289,8 @@ MODULE control_thermo
                                   ! for scf calculation
   LOGICAL :: lbands_syn_1=.FALSE. ! if .true. must calculate the syncronous pw
                                   ! for nscf calculation
+  LOGICAL :: ldos_syn_1=.FALSE.   ! if .true. must calculate the syncronous pw
+                                  ! for nscf calculation for dos
   LOGICAL :: lpart2_pw=.FALSE.    ! if .true. in the second part makes
                                   ! also pw calculations           
   LOGICAL :: with_eigen=.FALSE.   ! save phonon frequencies and eigenvectors
@@ -485,6 +487,21 @@ MODULE control_2d_bands
                          ! on vacuum is subtracted
 END MODULE control_2d_bands
 
+MODULE control_dos
+
+  USE kinds, ONLY: DP
+  SAVE
+
+  REAL(DP) :: deltae        ! the distance between energy points in the plot
+  INTEGER :: ndose               ! number of points in the dos plot
+  INTEGER :: nk1_d, nk2_d, nk3_d ! the k-point mesh for dos
+  INTEGER :: k1_d, k2_d, k3_d    ! the k-point mesh shift
+  REAL(DP) :: sigmae        ! the optional smearing different from the one
+                            ! used in the pw.x calculation
+  LOGICAL :: legauss        ! if .true. use gaussian smearing for dos plot
+  INTEGER :: save_ndos      ! number of points in the file 
+
+END MODULE control_dos
 
 MODULE control_grun
 
@@ -671,6 +688,8 @@ MODULE data_files
   CHARACTER(LEN=256) :: flevdat ! file with data for ev.x 
   CHARACTER(LEN=256) :: flenergy  ! the name of the file with the energy
                                   ! suited for gnuplot contour plots
+  CHARACTER(LEN=256) :: flepsilon ! the name of the file with the dielectric
+                                  ! constant
   CHARACTER(LEN=256) :: filband ! file with the bands, readable by plotband 
   CHARACTER(LEN=256) :: flpband ! the name of the file with the bands in 
                                 ! a format readable by gnuplot
@@ -712,6 +731,8 @@ MODULE postscript_files
                                   ! the gruneisen parameters
   CHARACTER(LEN=256) :: flpsenergy  ! the name of the postscript file with 
                                   ! the energy contours
+  CHARACTER(LEN=256) :: flpsepsilon ! the name of the file with the dielectric
+                                  ! constant
 END MODULE postscript_files
 
 MODULE internal_files_names

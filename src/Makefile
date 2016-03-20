@@ -29,6 +29,7 @@ deallocate_thermo.o \
 deallocate_thermo.o \
 do_pwscf.o \
 do_berry.o \
+dos_sub.o \
 ev_sub.o \
 float_to_char.o \
 find_symmetry.o \
@@ -43,10 +44,12 @@ plot_anhar.o \
 plot_anhar_anis.o \
 plotband_sub.o \
 plot_2d_bz.o \
+plot_dos.o \
 plot_e_ke.o \
 plot_e_nk.o \
 plot_formf.o \
 plot_gruneisen_band_anis.o \
+plot_epsilon_omega.o \
 plot_multi_energy.o \
 plot_mur.o \
 plot_phdos.o \
@@ -61,6 +64,7 @@ read_state_densities.o \
 run_thermo_asyncronously.o \
 set_2d_bz_path.o \
 set_bz_path.o \
+set_dos_kpoints.o \
 set_elastic_cons_work.o \
 set_files_names.o \
 set_fft_mesh.o \
@@ -92,7 +96,7 @@ write_thermo.o
 PWOBJS = ../../PHonon/PH/libph.a ../../PP/src/libpp.a ../../PW/src/libpw.a 
 QEMODS = ../../Modules/libqemod.a ../../FFTXlib/libqefft.a
 
-LIBOBJS	= ../lib/thermo_lib.a ../qe/thermo_qe.a ../../PHonon/PH/libph.a ../../flib/ptools.a ../../flib/flib.a ../../clib/clib.a ../../iotk/src/libiotk.a
+LIBOBJS	= ../lib/thermo_lib.a ../qe/thermo_qe.a ../lib/thermo_lib.a ../../PHonon/PH/libph.a ../../flib/ptools.a ../../flib/flib.a ../../clib/clib.a ../../iotk/src/libiotk.a
 
 all : libthermo_pw.a thermo_pw.x 
 

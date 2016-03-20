@@ -63,6 +63,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
 !
         CASE ('scf',              &
               'scf_bands',        &
+              'scf_dos',          &
               'scf_ph',           &
               'scf_disp')
 !
@@ -96,6 +97,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
 !
         CASE ('mur_lc',                      &
               'mur_lc_bands',                &
+              'mur_lc_dos',                  &
               'mur_lc_ph',                   &
               'mur_lc_disp',                 &
               'mur_lc_t',                    &

@@ -19,10 +19,11 @@ SUBROUTINE bcast_thermo_input()
   USE control_pressure, ONLY : pressure
   USE data_files,      ONLY : flevdat, flfrc, flfrq, fldos, fltherm, flanhar, &
                               filband, flkeconv, flnkconv, flgrun, flpband,   &
-                              flpgrun, flenergy, flprojlayer, flpbs, flvec
+                              flpgrun, flenergy, flprojlayer, flpbs, flvec, &
+                              flepsilon
   USE postscript_files, ONLY : flpsband, flpsdisp, flpsdisp, flpsdos, &
                               flpstherm,  flpsanhar, flpsmur, flpskeconv, &
-                              flpsnkconv, flpsgrun, flpsenergy
+                              flpsnkconv, flpsgrun, flpsenergy, flpsepsilon
   USE temperature,     ONLY : tmin, tmax, deltat, ntemp
   USE ifc,             ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq, &
                               zasr, freqmin_input, freqmax_input, phdos_sigma
@@ -44,6 +45,8 @@ SUBROUTINE bcast_thermo_input()
   USE control_2d_bands,     ONLY : lprojpbs, nkz, sym_divide, identify_sur, &
                                    gap_thr, sur_layers, sur_thr, force_bands, &
                                    only_bands_plot, dump_states, subtract_vacuum
+  USE control_dos,          ONLY : deltae, ndose, nk1_d, nk2_d, nk3_d, &
+                                   k1_d, k2_d, k3_d, sigmae, legauss
   USE control_xrdp,    ONLY : lambda, flxrdp, flpsxrdp, lformf, smin, smax, &
                               nspoint, flformf, flpsformf, lcm, lxrdp, &
                               lambda_elem
@@ -86,6 +89,16 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( nq1_d, meta_ionode_id, world_comm )
   CALL mp_bcast( nq2_d, meta_ionode_id, world_comm )
   CALL mp_bcast( nq3_d, meta_ionode_id, world_comm )
+  CALL mp_bcast( nk1_d, meta_ionode_id, world_comm )
+  CALL mp_bcast( nk2_d, meta_ionode_id, world_comm )
+  CALL mp_bcast( nk3_d, meta_ionode_id, world_comm )
+  CALL mp_bcast( k1_d, meta_ionode_id, world_comm )
+  CALL mp_bcast( k2_d, meta_ionode_id, world_comm )
+  CALL mp_bcast( k3_d, meta_ionode_id, world_comm )
+  CALL mp_bcast( deltae, meta_ionode_id, world_comm )
+  CALL mp_bcast( ndose, meta_ionode_id, world_comm )
+  CALL mp_bcast( sigmae, meta_ionode_id, world_comm )
+  CALL mp_bcast( legauss, meta_ionode_id, world_comm )
   CALL mp_bcast( freqmin_input, meta_ionode_id, world_comm )
   CALL mp_bcast( freqmax_input, meta_ionode_id, world_comm )
   CALL mp_bcast( phdos_sigma, meta_ionode_id, world_comm )

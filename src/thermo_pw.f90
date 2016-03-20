@@ -33,6 +33,7 @@ PROGRAM thermo_pw
   ! ...                  a slab and the default path is chosen in the 2d 
   ! ...                  Brillouin zone. This option can be used also to 
   ! ...                  calculate the projected bulk band structure.
+  ! ...   scf_dos : a dos calculation after a scf calcul.
   ! ...   scf_ph    : a phonon calculation after an scf run
   ! ...   scf_disp  : a phonon dispersion calculation after a scf run
   ! ...   scf_elastic_constants : elastic constants at zero temperature 
@@ -41,15 +42,17 @@ PROGRAM thermo_pw
   ! ...   mur_lc    : lattice constant via Murnaghan equation or 
   ! ...               quadratic interpolation of the equation of state
   ! ...   mur_lc_bands  : a band structure calculation at the minimum or the
-  ! ...               Murnaghan 
-  ! ...   mur_lc_ph : a phonon calculation at the minimum of the Murnaghan
-  ! ...   mur_lc_disp : a dispersion calculation at the minimum of the
-  ! ...               Murnaghan with the possibility to compute the harmonic
+  ! ...               total energy
+  ! ...   mur_lc_dos  : an electronic dos calculation at the minimum or the
+  ! ...               total energy 
+  ! ...   mur_lc_ph : a phonon calculation at the minimum of the total energy
+  ! ...   mur_lc_disp : a dispersion calculation at the minimum of the total
+  ! ...               energy with the possibility to compute the harmonic
   ! ...               thermodynamic quantities
   ! ...   mur_lc_elastic_constants : elastic constants at zero temperature 
-  ! ...               at the minimum of the Murnaghan equation 
+  ! ...               at the minimum of the total energy equation 
   ! ...   mur_lc_piezoelectric_tensor : piezoelectric tensor at zero temperature
-  ! ...               at the minimum of the Murnaghan equation 
+  ! ...               at the minimum of the total energy 
   ! ...
   ! ...   mur_lc_t  : lattice constant and bulk modulus as a function 
   ! ...               of temperature within the quasiharmonic approximation
@@ -70,7 +73,7 @@ PROGRAM thermo_pw
   USE mp,               ONLY : mp_sum, mp_bcast
   USE control_thermo,   ONLY : lev_syn_1, lev_syn_2, lpwscf_syn_1,         &
                                lbands_syn_1, lph, outdir_thermo, lq2r,     &
-                               lmatdyn, ldos, ltherm,                      &
+                               ldos_syn_1, lmatdyn, ldos, ltherm,          &
                                lconv_ke_test, lconv_nk_test,               &
                                spin_component, after_disp, lelastic_const, &
                                lpiezoelectric_tensor, lpolarization, lpart2_pw
@@ -102,7 +105,7 @@ PROGRAM thermo_pw
   USE control_bands,    ONLY : nbnd_bands
   USE control_pwrun,    ONLY : ibrav_save, do_punch, amass_save
   USE control_xrdp,     ONLY : lxrdp, lambda, flxrdp, lcm
-  USE control_ph,       ONLY : recover
+  USE control_ph,       ONLY : recover, trans
   USE xrdp_module,      ONLY : compute_xrdp
   USE thermo_sym,       ONLY : laue, code_group_save
   USE cell_base,        ONLY : omega, at, bg
@@ -274,7 +277,11 @@ PROGRAM thermo_pw
 !   do the band calculation after setting the path
 !
            IF (.NOT.only_bands_plot) THEN
-              CALL set_paths_disp()
+              IF (ldos_syn_1) THEN
+                 CALL set_dos_kpoints()
+              ELSE
+                 CALL set_paths_disp()
+              ENDIF
               CALL set_k_points()
 !
 !   by default in a band structure calculation we double the number of
@@ -287,12 +294,17 @@ PROGRAM thermo_pw
                                                                     & i5)') 
               WRITE(stdout,'(2x,76("+"),/)')
               CALL do_pwscf(exit_status, .FALSE.)
-              nspin0=nspin
-              IF (nspin==4) nspin0=1
-              DO spin_component = 1, nspin0
-                 CALL bands_sub()
-                 CALL plotband_sub(1,1,' ')
-              ENDDO
+              IF (ldos_syn_1) THEN
+                 CALL dos_sub()
+                 CALL plot_dos()
+              ELSE
+                 nspin0=nspin
+                 IF (nspin==4) nspin0=1
+                 DO spin_component = 1, nspin0
+                    CALL bands_sub()
+                    CALL plotband_sub(1,1,' ')
+                 ENDDO
+              ENDIF
            ELSE
               CALL read_minimal_info(.TRUE.)
               CALL plotband_sub(1,1,' ')
@@ -483,7 +495,11 @@ PROGRAM thermo_pw
            !   return to syncronous work. Collect the work of all images and
            !   writes the dynamical matrix
            !
-           CALL collect_everything(auxdyn)
+           IF (trans) THEN
+              CALL collect_everything(auxdyn)
+           ELSE
+!              CALL plot_epsilon_omega()
+           ENDIF
            !
         END IF
         IF (lq2r) THEN

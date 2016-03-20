@@ -83,6 +83,8 @@ SUBROUTINE thermo_summary()
           WRITE(stdout,'(5x,"Doing a band calculation")')
           WRITE(stdout,'(5x,"Use what=plot_bz to visualize the BZ path")')
           read_path=.TRUE.
+     CASE ('scf_dos')
+          WRITE(stdout,'(5x,"Doing a electronic bands dos calculation")')
      CASE ('scf_ph') 
           WRITE(stdout,'(5x,"Doing a phonon calculation")')
      CASE ('scf_disp')
@@ -98,6 +100,10 @@ SUBROUTINE thermo_summary()
                                                  &volume")')
           WRITE(stdout,'(5x,"Use what=plot_bz to visualize the BZ path")')
           read_path=.TRUE.
+          lmur=.TRUE.
+     CASE ('mur_lc_dos')
+          WRITE(stdout,'(5x,"Calculating the electronic bands dos at minimum &
+                                                 &volume")')
           lmur=.TRUE.
      CASE ('mur_lc_ph') 
           WRITE(stdout,'(5x,"Doing a phonon calculation at the Murnaghan &

@@ -20,7 +20,8 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
                              lph, lpwscf_syn_1, lbands_syn_1, ldos, lq2r,   &
                              lmatdyn, ltherm, lconv_ke_test, lconv_nk_test, &
                              lstress, lelastic_const, lpiezoelectric_tensor,&
-                             lberry, lpolarization, lpart2_pw, do_scf_relax
+                             lberry, lpolarization, lpart2_pw, do_scf_relax, &
+                             ldos_syn_1
   USE control_conv,   ONLY : nke, ke, deltake, nkeden, deltakeden, keden, &
                              nnk, nk_test, deltank, nsigma, sigma_test, &  
                              deltasigma
@@ -60,6 +61,11 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            ALLOCATE(energy_geo(1))
            lpwscf_syn_1=.TRUE.
            lbands_syn_1=.TRUE.
+        CASE ('scf_dos') 
+           ALLOCATE(energy_geo(1))
+           lpwscf_syn_1=.TRUE.
+           lbands_syn_1=.TRUE.
+           ldos_syn_1=.TRUE.
         CASE ('scf_ph') 
            ALLOCATE(energy_geo(1))
            lpwscf_syn_1=.TRUE.
@@ -138,6 +144,12 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            do_punch=.FALSE.
            lpwscf_syn_1=.TRUE.
            lbands_syn_1=.TRUE.
+        CASE ('mur_lc_dos') 
+           CALL initialize_mur(nwork)
+           do_punch = .FALSE.
+           lpwscf_syn_1 = .TRUE.
+           lbands_syn_1 = .TRUE.
+           ldos_syn_1 = .TRUE.
         CASE ('mur_lc_ph') 
            CALL initialize_mur(nwork)
            do_punch=.FALSE.
@@ -289,6 +301,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
 !
         CASE ( 'scf',                        &
                'scf_bands',                  &
+               'scf_dos',                    &
                'scf_2d_bands',               &
                'scf_ph',                     & 
                'scf_disp',                   &
@@ -302,6 +315,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
               'scf_nk',                      &
               'mur_lc',                      &
               'mur_lc_bands',                &
+              'mur_lc_dos',                  &
               'mur_lc_ph',                   &
               'mur_lc_disp',                 &
               'mur_lc_t',                    &
@@ -550,18 +564,25 @@ SUBROUTINE initialize_ph_work(nwork)
 USE kinds, ONLY : DP
 USE grid_irr_iq, ONLY : irr_iq
 USE disp, ONLY : nqs
+USE control_ph, ONLY : epsil, trans
 
 IMPLICIT NONE
 INTEGER, INTENT(OUT) :: nwork
 
 INTEGER :: iq, irr
 
-   nwork=0
+nwork=0
+IF (trans) THEN
    DO iq=1,nqs
       DO irr=0, irr_iq(iq)
          nwork=nwork+1
       ENDDO
    ENDDO
+ELSEIF (epsil) THEN
+   nwork=1
+ELSE
+   CALL errore('initialize_ph_work','Both trans and epsil .false.',1)
+ENDIF
 
 RETURN
 END SUBROUTINE initialize_ph_work

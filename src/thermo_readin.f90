@@ -23,7 +23,7 @@ SUBROUTINE thermo_readin()
                                    flanhar, filband, flkeconv,             &
                                    flenergy, flpbs, flprojlayer,           &
                                    flnkconv, flgrun, flpgrun, fl_el_cons,  &
-                                   flpband, flvec
+                                   flpband, flvec, flepsilon
   USE temperature,          ONLY : tmin, tmax, deltat, ntemp
   USE control_pressure,     ONLY : pressure
   USE ifc,                  ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq, &
@@ -42,13 +42,16 @@ SUBROUTINE thermo_readin()
   USE control_gnuplot,      ONLY : flgnuplot, gnuplot_command, lgnuplot
   USE postscript_files,     ONLY : flpsband, flpsdisp, flpsmur, flpsdos, &
                                    flpstherm, flpsanhar, flpskeconv, &
-                                   flpsnkconv, flpsgrun,  flpsenergy
+                                   flpsnkconv, flpsgrun,  flpsenergy, &
+                                   flpsepsilon
   USE control_2d_bands,     ONLY : lprojpbs, nkz, gap_thr, sym_divide, &
                                    identify_sur, sur_layers, sur_thr, &
                                    force_bands, only_bands_plot, dump_states, &
                                    subtract_vacuum
   USE control_asy,          ONLY : flasy, lasymptote, asymptote_command
   USE control_bands,        ONLY : emin_input, emax_input, nbnd_bands, lsym 
+  USE control_dos,          ONLY : deltae, ndose, nk1_d, nk2_d, nk3_d, &
+                                   k1_d, k2_d, k3_d, sigmae, legauss
   USE control_grun,         ONLY : grunmin_input, grunmax_input, &
                                    temp_ph, volume_ph, celldm_ph
   USE control_conv,         ONLY : nke, deltake, nkeden, deltakeden, &
@@ -115,6 +118,10 @@ SUBROUTINE thermo_readin()
                             show_fit,                       &
                             max_seconds,                    &
                             nq1_d, nq2_d, nq3_d,            &
+                            nk1_d, nk2_d, nk3_d,            &
+                            k1_d, k2_d, k3_d,               &
+                            deltae, ndose,                  &
+                            sigmae, legauss,                &
                             tmin, tmax, deltat, ntemp,      &
                             pressure,                       &
                             freqmin_input, freqmax_input,   &
@@ -245,6 +252,17 @@ SUBROUTINE thermo_readin()
   nsigma=1  
   deltasigma=0.005_DP
 
+  nk1_d=16
+  nk2_d=16
+  nk3_d=16
+  k1_d=1
+  k2_d=1
+  k3_d=1
+  deltae=0.0_DP
+  ndose=0
+  sigmae=0.0_DP
+  legauss=.FALSE.
+
   delta_epsilon=0.005_DP
   epsilon_0=0.0_DP
   ngeo_strain=0
@@ -304,6 +322,7 @@ SUBROUTINE thermo_readin()
   flpbs='output_pbs'
   flprojlayer='output_projlayer'
   flenergy='output_energy'
+  flepsilon='epsilon'
 
   flgnuplot='gnuplot.tmp'
   flpsmur='output_mur.ps'
@@ -316,6 +335,7 @@ SUBROUTINE thermo_readin()
   flpsnkconv='output_nkconv.ps'
   flpsgrun='output_grun.ps'
   flpsenergy='output_energy.ps'
+  flpsepsilon='output_epsilon.ps'
   flpsxrdp='output_xrdp.ps'
   flpsformf='output_formf.ps'
 
