@@ -6,7 +6,7 @@
 %! or http://www.gnu.org/copyleft/gpl.txt .
 %!
 \documentclass[12pt,a4paper]{article}
-\def\version{0.4.0}
+\def\version{0.5.0}
 \def\qe{{\sc Quantum ESPRESSO}}
 \def\tpw{{\sc THERMO\_PW}}
 
@@ -91,6 +91,9 @@ input of \thermo\ by the \texttt{XCrySDen} program).
 
 \item Electronic band structure at fixed geometry.
 
+\item Complex dielectric constant as a function of the complex
+frequency $\omega$ at fixed geometry.
+
 \item Phonon frequencies at fixed geometry.
 
 \item Phonon dispersions at fixed geometry and computation of the harmonic
@@ -105,6 +108,9 @@ a quadratic polynomial and determination of equilibrium lattice parameters.
 Murnaghan fit for cubic systems.
 
 \item Electronic band structure at the minimum of the total energy.
+
+\item Complex dielectric constant as a function of the complex
+frequency $\omega$ at the minimum of the total energy.
 
 \item Phonon frequencies at the minimum of the total energy.
 
@@ -414,9 +420,9 @@ in the first {\bf k} point, in metals at the Fermi energy. \\
 The energy bands plot can be modified by the following variables:
 
 \begin{verbatim}
-emin_input : minimum energy for the band dispersion plot.
+emin_input : minimum energy for the band dispersion plot (in eV).
              Default: real minimum of the bands
-emax_input : maximum energy for the band dispersion plot.
+emax_input : maximum energy for the band dispersion plot (in eV).
              Default: real maximum of the bands
 nbnd_bands : the number of bands in the band calculation
              Default: integer 2*nbnd, where nbnd is the number of bands 
@@ -602,6 +608,40 @@ plot. To change the defaults you can modify directly the gnuplot script,
 it is written in such a way that a change to a few variables can
 control the entire plot.
 
+\subsection{\texttt{what='scf\_dos'}}
+With this option the code makes a self-consistent calculation followed
+by a band structure calculation on a uniform mesh of {\bf k}-points and
+computes and plots the electronic density of states. \\
+There is no image parallelization and no advantage to use several images. \\
+This option is controlled by the following variables:
+\begin{verbatim} 
+deltae        : energy interval for electron dos plot (in Ry).
+                Default: real 0.01 Ry.
+ndose         : number of frequency points in the dos plot.
+                Default: determined from previous data
+nk1_d, nk2_d, nk3_d : thick mesh for dos calculation.
+                Default: integer 32, 32, 32
+k1_d, k2_d, k3_d : the shift of the k point mesh
+                Default: integer 0, 0, 0
+sigmae         : the smearing used for dos calculation (in eV).
+                If 0.0 uses the degauss of the electronic structure
+                calculation in metals and 0.01 Ry in insulators.
+                Default: real 0.0 
+legauss        : When .true. computes the electronic dos using a gaussian
+                smearing. When .false. uses the same smearing of the
+                electronic structure calculation in metals or gaussian smearing
+                in insulators.
+                Default: logical .false.
+\end{verbatim}
+The minimum and maximum energy, as well as the number of bands,
+are specified as with the option \texttt{what='scf\_bands'}.
+However with the present option no shift is applied to the bands
+and the minimum and maximum energies refer to the unshifted eigenvalues.
+Note that after a calculation with \texttt{what='scf\_dos'} you can
+run the tool code \texttt{epsilon\_twp.x} to evaluate the frequency
+dependent dielectric constant (for insulators only).
+
+
 \subsection{\color{web-blue}\texttt{what='plot\_bz'}}
 With this option the code writes a script to make a plot
 of the Brillouin zone and of the path (the default one or the one given in 
@@ -708,7 +748,35 @@ calculation are the dynamical matrices files.
 An example of the use of this option can be found in \texttt{example03}. \\
 Number of tasks for this option: number of parallelizable tasks of the 
 phonon code (smaller but of the order of the number of {\bf q} points times 
-$3 N_{at}$, where $N_{at}$ is the number of atoms in the unit cell).
+$3 N_{at}$, where $N_{at}$ is the number of atoms in the unit cell). \\
+\texttt{thermo\_pw} adds to the \texttt{ph.x} code the ability to
+compute the complex dielectric constant tensor of insulators as a function 
+of a complex frequency for the study of optical properties within 
+time-dependent density functional perturbation theory (TD-DFPT). 
+The TD-DFPT algorithm uses the Sternheimer equation and a self-consistent loop.
+The option is activated in the \texttt{ph.x} input by setting 
+\texttt{epsil=.TRUE.} and \texttt{fpol=.TRUE.}, but at variance with
+the \texttt{ph.x} code, the frequencies must be specified as complex numbers.
+The following additional variables can be put in the input of the \texttt{ph.x}
+code, to select the frequency range and the number of frequencies to compute:
+\begin{verbatim}
+freq_line : if this variable is .TRUE. the FREQUENCY keyword has the number 
+            of frequency points and the starting and final frequencies. 
+            If .FALSE. the number of frequencies and a list of frequencies 
+            are given. The frequencies are complex numbers and are given 
+            with a real and an imaginary part (in Ry), without parenthesis.
+            Default: .FALSE.
+
+delta_freq : When freq_line is .TRUE. instead of giving the last frequency 
+            of the line one can give the distance between two frequency points
+            delta_freq as a complex number. The last point of the line is 
+            calculated using the number of frequencies nfs and the first 
+            frequency. When delta_freq is not zero the last frequency 
+            is not used and can be omitted.
+            Default: complex, (0.0, 0.0).
+
+\end{verbatim}
+Number of tasks for frequency calculations: 1 (images are not active yet).
 
 \subsection{\color{web-blue}\texttt{what='scf\_disp'}}
 With this option the code makes a self-consistent calculation followed by
@@ -1359,6 +1427,14 @@ perpendicular to ${\bf G} = m {\bf b}_1 + n {\bf b}_2$, where
 ${\bf b}_1$ and ${\bf b}_2$ are the primitive Bravais lattice vectors 
 of the 2D Bravais lattice. The number of rows of the ribbon, and the number of
 atoms per row are given as an input variables.
+
+\item \texttt{epsilon\_tpw.x} generalizes the routine
+epsilon.f90 of the \qe\ distribution. It calculates the complex dielectric
+constant of a solid as a function of the frequency for independent electrons
+using the LDA or GGA eigenvalues. It is limited to insulators, but supports
+norm-conserving, ultrasoft, and PAW pseudopotentials. It supports both scalar
+relativistic and fully relativistic pseudopotentials and it uses the point
+group symmetry of the solid to reduce the number of k-points.
 
 \item \texttt{gener\_3d\_slab.x} reads a three dimensional
 Bravais lattice index and atomic coordinates and generates an infinite slab
