@@ -16,6 +16,7 @@ latgen_2d.o \
 gnuplot.o \
 gnuplot_color.o \
 lattices.o \
+linear_solvers.o \
 mp_asyn.o \
 phdos_module.o \
 ph_freq_module.o \
