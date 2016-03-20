@@ -1,0 +1,4 @@
+ &INPUT_THERMO
+  what='scf_dos',
+  emax_input=25.,
+ /

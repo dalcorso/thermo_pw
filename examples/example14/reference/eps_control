@@ -1,0 +1,8 @@
+&input_epsilon
+  prefix='silicon'
+  outdir='/home/espresso/THERMO/tempdir//g1/'
+  calculation='eps'
+  wmin=0.05
+  wmax=1.6
+  nfs=1000
+ /

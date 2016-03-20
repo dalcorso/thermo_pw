@@ -28,8 +28,9 @@
 !  must be launched with the same options used in the thermo_pw.x 
 !  calculation. 
 !  A typical run is as the epsilon.f90 routine:
-!  A run of thermo_pw.x (or pw.x) with some input and what='scf'.
-!  A run of epsilon_tpw with the same prefix and the same outdir
+!  A run of thermo_pw.x (or pw.x) with some input and what='scf' or 
+!  what='scf_dos'.
+!  A run of epsilon_tpw.x with the same prefix and the same outdir
 !  (with an /g1 extension in the case in which thermo_pw.x has been used).
 !  Input variables in the input_epsilon namelist:
 !  
@@ -699,7 +700,7 @@ CHARACTER(LEN=256) :: gnu_filename, filename, ylabel, xlabel
 
 IF ( my_image_id /= root_image ) RETURN
 
-gnu_filename='gnuplot_tmp'
+gnu_filename='gnuplot_tmp_epsilon'
 CALL gnuplot_start(gnu_filename)
 
 filename=TRIM(fileps)

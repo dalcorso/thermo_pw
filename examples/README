@@ -128,3 +128,11 @@ what=mur_lc_elastic_constants : this example computes the elastic constants
                of silicon at the minimum of the Murnaghan equation. The
                atoms are relaxed for e44 strains.
 
+example14:
+what=scf_dos : this example computes the electron density of states of
+               of silicon.
+               The LDA bands and eigenfunctions of thermo_pw are read by
+               epsilon_tpw.x to calculate the frequency denpendent
+               dielectric constant of silicon (neglecting local fields).
+
+

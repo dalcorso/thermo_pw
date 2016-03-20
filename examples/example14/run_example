@@ -1,0 +1,137 @@
+#!/bin/sh
+
+# run from directory where this script is
+cd `echo $0 | sed 's/\(.*\)\/.*/\1/'` # extract pathname
+EXAMPLE_DIR=`pwd`
+
+# check whether echo has the -e option
+if test "`echo -e`" = "-e" ; then ECHO=echo ; else ECHO="echo -e" ; fi
+
+$ECHO
+$ECHO "$EXAMPLE_DIR : starting"
+$ECHO
+$ECHO "This example shows how to use thermo_pw.x to calculate the "
+$ECHO "frequency dependent dielectric constant of Silicon."
+
+# set the needed environment variables
+. ../../../environment_variables
+
+# required executables and pseudopotentials
+BIN_LIST="thermo_pw.x"
+PSEUDO_LIST="Si.pz-vbc.UPF"
+
+$ECHO
+$ECHO "  executables directory: $BIN_DIR"
+$ECHO "  pseudo directory:      $PSEUDO_DIR"
+$ECHO "  temporary directory:   $TMP_DIR"
+$ECHO "  checking that needed directories and files exist...\c"
+
+# check for directories
+for DIR in "$BIN_DIR" "$PSEUDO_DIR" ; do
+    if test ! -d $DIR ; then
+        $ECHO
+        $ECHO "ERROR: $DIR not existent or not a directory"
+        $ECHO "Aborting"
+        exit 1
+    fi
+done
+for DIR in "$TMP_DIR" "$EXAMPLE_DIR/results" ; do
+    if test ! -d $DIR ; then
+        mkdir $DIR
+    fi
+done
+cd $EXAMPLE_DIR/results
+
+# check for executables
+for FILE in $BIN_LIST ; do
+    if test ! -x $BIN_DIR/$FILE ; then
+        $ECHO
+        $ECHO "ERROR: $BIN_DIR/$FILE not existent or not executable"
+        $ECHO "Aborting"
+        exit 1
+    fi
+done
+
+# check for pseudopotentials
+for FILE in $PSEUDO_LIST ; do
+    if test ! -r $PSEUDO_DIR/$FILE ; then
+       $ECHO
+       $ECHO "Downloading $FILE to $PSEUDO_DIR...\c"
+            $WGET $PSEUDO_DIR/$FILE $NETWORK_PSEUDO/$FILE 2> /dev/null
+    fi
+    if test $? != 0; then
+        $ECHO
+        $ECHO "ERROR: $PSEUDO_DIR/$FILE not existent or not readable"
+        $ECHO "Aborting"
+        exit 1
+    fi
+done
+$ECHO " done"
+
+# how to run executables
+THERMO_PW_COMMAND="$PARA_IMAGE_PREFIX $BIN_DIR/thermo_pw.x $PARA_IMAGE_POSTFIX"
+EPSILON_COMMAND="$PARA_IMAGE_PREFIX $BIN_DIR/epsilon_tpw.x $PARA_IMAGE_POSTFIX"
+$ECHO
+$ECHO "  running thermo_pw.x as: $THERMO_PW_COMMAND"
+$ECHO
+
+$ECHO "  cleaning $TMP_DIR...\c"
+rm -rf $TMP_DIR/g1/silicon*
+rm -rf $TMP_DIR/g1/_ph*/silicon*
+$ECHO " done"
+
+cat > thermo_control << EOF
+ &INPUT_THERMO
+  what='scf_dos',
+  emax_input=25.,
+ /
+EOF
+
+cat > si.scf.in << EOF
+ &control
+    calculation = 'scf'
+    restart_mode='from_scratch',
+    prefix='silicon',
+    tstress = .true.
+    tprnfor = .true.
+    pseudo_dir = '$PSEUDO_DIR/',
+    outdir='$TMP_DIR/'
+ /
+ &system
+    ibrav=  2, celldm(1) =10.26, nat=  2, ntyp= 1,
+    ecutwfc =25.0,
+    nbnd=16
+ /
+ &electrons
+ /
+ATOMIC_SPECIES
+Si  28.086   Si.pz-vbc.UPF
+ATOMIC_POSITIONS (alat)
+Si 0.00 0.00 0.00
+Si 0.25 0.25 0.25
+K_POINTS AUTOMATIC
+ 8 8 8  1 1 1 
+EOF
+
+cat > eps_control << EOF
+&input_epsilon
+  prefix='silicon'
+  outdir='$TMP_DIR/g1/'
+  calculation='eps'
+  wmin=0.05
+  wmax=1.6
+  nfs=1000
+ /
+EOF
+
+$ECHO "  Running the thermo_pw scf_dos calculation for Si..."
+$ECHO "  Followed by epsilon_tpw.x..."
+$ECHO "  The density of states is in output_dos.ps."
+$ECHO "  The dielectric constant is in output_epsilon.ps.\c"
+$THERMO_PW_COMMAND < si.scf.in > si.scf.out
+$EPSILON_COMMAND < eps_control > eps_control.out
+check_failure $?
+$ECHO " done"
+
+$ECHO
+$ECHO "$EXAMPLE_DIR : done"
