@@ -42,8 +42,7 @@ SUBROUTINE gnuplot_write_header(filename, xmin, xmax, ymin, ymax, xscale)
 !  xmin, xmax : the minimum and maximum x values of the plot
 !  ymin, ymax : the minimum and maximum y values of the plot
 !  xscale : an optional multiplicative factor for all the x coordinate,
-!           to change the units. It is a comment, must be activated in the
-!           script 
+!           to change the units. 
 !
 IMPLICIT NONE
 CHARACTER(LEN=*) :: filename
@@ -55,8 +54,7 @@ IF (ionode) THEN
    WRITE(iun_gnuplot,'("set output """, a, """")') TRIM(filename) 
    WRITE(iun_gnuplot,*)
    WRITE(iun_gnuplot,'("set key off")')
-   WRITE(iun_gnuplot,'("#xscale=",f15.6)') xscale
-   WRITE(iun_gnuplot,'("xscale=1.0")') 
+   WRITE(iun_gnuplot,'("xscale=",f15.6)') xscale
    WRITE(iun_gnuplot,'("xshift=0.0")') 
 
    IF (xmin /= xmax) THEN
