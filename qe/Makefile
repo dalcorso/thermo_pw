@@ -9,6 +9,7 @@ MODFLAGS= $(MOD_FLAG)../../iotk/src $(MOD_FLAG)../../Modules \
           $(MOD_FLAG)../lib  $(MOD_FLAG).
 
 MODULES = \
+adddvepsi_us.o \
 check_bands.o \
 control_qe.o \
 do_phonon.o \

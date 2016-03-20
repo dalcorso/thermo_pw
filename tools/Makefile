@@ -4,18 +4,19 @@ include ../../make.sys
 
 # location of needed modules and included files (if any)
 MODFLAGS= $(MOD_FLAG)../../iotk/src $(MOD_FLAG)../../Modules \
+          $(MOD_FLAG)../../FFTXlib \
           $(MOD_FLAG)../../PW/src $(MOD_FLAG)../../PHonon/PH \
-          $(MOD_FLAG)../lib $(MOD_FLAG).
+          $(MOD_FLAG)../lib $(MOD_FLAG)../qe $(MOD_FLAG).
 IFLAGS=
 
 PWOBJS = ../../PHonon/PH/libph.a ../../PP/src/libpp.a ../../PW/src/libpw.a 
-QEMODS = ../../Modules/libqemod.a
+QEMODS = ../../Modules/libqemod.a ../../FFTXlib/libqefft.a
 
-LIBOBJS	= ../lib/thermo_lib.a ../../PHonon/PH/libph.a ../../flib/ptools.a ../../flib/flib.a ../../clib/clib.a ../../iotk/src/libiotk.a
+LIBOBJS	= ../lib/thermo_lib.a ../qe/thermo_qe.a ../../PHonon/PH/libph.a ../../flib/ptools.a ../../flib/flib.a ../../clib/clib.a ../../iotk/src/libiotk.a
 
 TLDEPS= bindir mods libs pw
 
-all : group_name.x group_number.x gener_2d_slab.x gener_3d_slab.x gener_nanowire.x supercell.x plot_sur_states.x translate.x elastic.x test_colors.x
+all : group_name.x group_number.x gener_2d_slab.x gener_3d_slab.x gener_nanowire.x supercell.x plot_sur_states.x translate.x elastic.x test_colors.x epsilon_tpw.x
 
 libs-ph : libph.a libphaux.a
 
@@ -67,11 +68,17 @@ gener_nanowire.x : gener_nanowire.o $(PWOBJS) $(LIBOBJS)
 
 test_colors.x : test_colors.o $(PWOBJS) $(LIBOBJS)
 	$(LD) $(LDFLAGS) -o $@ test_colors.o \
-		 $(LIBOBJS) $(PWOBJS) $(QEMODS) $(LIBOBJS) $(PWOBJS) $(LIBS)
+	         $(LIBOBJS) $(PWOBJS) $(QEMODS) $(LIBOBJS) $(PWOBJS) $(LIBS)
 	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/test_colors.x . )
+
+epsilon_tpw.x : epsilon_tpw.o $(PWOBJS) $(LIBOBJS)
+	$(LD) $(LDFLtAGS) -o $@ epsilon_tpw.o \
+	         $(LIBOBJS) $(PWOBJS) $(QEMODS) $(LIBOBJS) $(PWOBJS) $(LIBS)
+	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/epsilon_tpw.x . )
 
 clean :
 	- /bin/rm -f *.x *.o *.a *~ *.F90 *.d *.mod *.i *.L
+	- /bin/rm -rf ../../bin/thermo_pw.x 
 	- /bin/rm -rf ../../bin/group_name.x 
 	- /bin/rm -rf ../../bin/group_number.x 
 	- /bin/rm -rf ../../bin/supercell.x 
@@ -82,6 +89,7 @@ clean :
 	- /bin/rm -rf ../../bin/gener_3d_slab.x 
 	- /bin/rm -rf ../../bin/gener_nanowire.x 
 	- /bin/rm -rf ../../bin/test_colors.x 
+	- /bin/rm -rf ../../bin/epsilon_tpw.x 
 
 include make.depend
 # DO NOT DELETE

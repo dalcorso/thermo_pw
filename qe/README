@@ -23,6 +23,8 @@ run_nscf_tpw : call set_small_group_q also in the lgamma_iq case. This change
 do_phonon_tpw : call phqscf_tpw instead of phqscf and prepare_q_tpw instead
             of prepare_q.
 
+adddvepsi_us_tpw.f90 : added the number of occupated bands as an input.
+
 ev_xml : is identical to the QE routine, but it is copied here because files
          in the PW/tools directory are not linked to thermo_pw.
 
