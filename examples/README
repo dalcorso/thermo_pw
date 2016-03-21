@@ -135,4 +135,9 @@ what=scf_dos : this example computes the electron density of states of
                epsilon_tpw.x to calculate the frequency denpendent
                dielectric constant of silicon (neglecting local fields).
 
+example15:
+what=scf_ph : this example computes the frequency denpendent
+              dielectric constant of silicon (neglecting local fields)
+              using the non-self-consistent Sternheimer equation without
+              sums over the empty bands.
 
