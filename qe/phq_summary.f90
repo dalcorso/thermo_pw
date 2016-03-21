@@ -272,7 +272,7 @@ subroutine phq_summary_tpw
      IF (fpol)  THEN
         WRITE( stdout, '(5x,"Frequency Dependent Polarizability at (Ry) ")' )
         DO iu=1,nfs
-           WRITE( stdout,'(5x,f9.4,"+",f10.4"i  Ry")') fru(iu), fiu(iu)
+           WRITE( stdout,'(5x,f9.4," +",f10.4" i  Ry")') fru(iu), fiu(iu)
         ENDDO
      ENDIF
   ENDIF

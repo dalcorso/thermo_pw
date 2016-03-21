@@ -129,15 +129,19 @@ what=mur_lc_elastic_constants : this example computes the elastic constants
                atoms are relaxed for e44 strains.
 
 example14:
-what=scf_dos : this example computes the electron density of states of
-               of silicon.
-               The LDA bands and eigenfunctions of thermo_pw are read by
+what=scf_dos : this example computes the electron density of states 
+               of silicon. The LDA bands and eigenfunctions are read by
                epsilon_tpw.x to calculate the frequency denpendent
                dielectric constant of silicon (neglecting local fields).
 
 example15:
-what=scf_ph : this example computes the frequency denpendent
+what=scf_ph : this example computes the frequency dependent
               dielectric constant of silicon (neglecting local fields)
               using the non-self-consistent Sternheimer equation without
               sums over the empty bands.
+
+example16:
+what=scf_ph : this example computes the frequency dependent
+              dielectric constant of silicon within the TD-DFPT,
+              using the self-consistent Sternheimer equation.
 

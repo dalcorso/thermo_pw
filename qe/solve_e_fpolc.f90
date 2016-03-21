@@ -191,10 +191,7 @@ SUBROUTINE solve_e_fpolc(iu)
   !
   if (convt) go to 155
   !
-  ! if q=0 for a metal: allocate and compute local DOS at Ef
-  !
   if (lgauss) call errore ('solve_e_fpolc', 'For metals a q is needed', 1)
-
   !
   !   The outside loop is over the iterations
   !
@@ -288,7 +285,7 @@ SUBROUTINE solve_e_fpolc(iu)
               ! dvscf_q from previous iteration (mix_potential)
               !
               IF ( ntask_groups > 1) dffts%have_task_groups=.TRUE.
-              IF( dffts%have_task_groups ) THEN
+              IF ( dffts%have_task_groups ) THEN
                  IF (noncolin) THEN
                     CALL tg_cgather( dffts, dvscfins(:,1,ipol), &
                                                                 tg_dv(:,1))
