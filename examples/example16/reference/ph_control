@@ -1,0 +1,16 @@
+ciao
+&inputph
+  tr2_ph=1.0d-12,
+  prefix='silicon'
+  alpha_mix=0.5
+  freq_line=.true.
+  epsil=.true.,
+  trans=.false.,
+  fpol=.true.,
+ /
+0.0 0.0 0.0
+
+FREQUENCIES
+100
+0.05   0.01
+1.6    0.01
