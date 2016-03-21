@@ -25,8 +25,8 @@ SUBROUTINE initialize_thermo_master(nwork, part)
   IF ( part==1 ) THEN
      SELECT CASE (TRIM(what))
         CASE ('scf', 'scf_ke', 'scf_nk', 'scf_bands', 'scf_dos', 'scf_ph', &
-              'scf_disp', 'mur_lc', 'mur_lc_bands', 'mur_lc_ph', &
-              'mur_lc_disp',         &
+              'scf_disp', 'mur_lc', 'mur_lc_bands', 'mur_lc_dos', &
+              'mur_lc_ph', 'mur_lc_disp',         &
               'mur_lc_t','mur_lc_elastic_constants',&
               'mur_lc_piezoelectric_tensor', 'mur_lc_polarization')
            max_priority=1
@@ -54,8 +54,9 @@ SUBROUTINE initialize_thermo_master(nwork, part)
   priority=0
   IF ( part == 1) THEN
      SELECT CASE (TRIM(what))
-        CASE ('scf', 'scf_bands','scf_ph', 'scf_disp', 'mur_lc', &
-                     'mur_lc_bands', 'mur_lc_ph', 'mur_lc_disp', 'mur_lc_t')
+        CASE ('scf', 'scf_bands','scf_dos', 'scf_ph', 'scf_disp', 'mur_lc', &
+                     'mur_lc_bands', 'mur_lc_dos', 'mur_lc_ph', &
+                     'mur_lc_disp', 'mur_lc_t')
      END SELECT
   ELSE IF ( part == 2) THEN
      SELECT CASE (TRIM(what))
