@@ -435,6 +435,7 @@ IF (degree>5) THEN
    amat(6,5)=amat(5,6)
    amat(6,6)=coeff(23)
 ENDIF
+amat(:,:) = 2.0_DP * amat(:,:) 
 
 WRITE(stdout,'(/,5x,"Hessian:")')
 DO ideg=1,degree
