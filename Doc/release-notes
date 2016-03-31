@@ -1,3 +1,16 @@
+New in version 0.5.0
+
+Added a routine epsilon_tpw.x to calculate the complex dielectric constant
+with sums over the empty states.
+
+Added the options what='scf_dos' and what='mur_lc_dos' to compute and plot 
+the electronic density of states.
+
+Added a few routines that complement the phonon code and compute the
+complex dielectric constant at a complex frequency via the Sternheimer 
+equation.
+
+
 23/01/2016 Version 0.4.0 of thermo_pw is now frozen.
 
 New in version 0.4.0

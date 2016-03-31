@@ -26,6 +26,7 @@ MODULE gnuplot
            gnuplot_xlabel, gnuplot_ylabel, gnuplot_write_label_yl, &
            gnuplot_unset_xticks, gnuplot_unset_yticks, &
            gnuplot_set_xticks, gnuplot_set_yticks,    &
+           gnuplot_write_file_mul_data_minus, &
            gnuplot_write_file_mul_data, gnuplot_write_file_mul_point, &
            gnuplot_write_file_mul_data_sum, gnuplot_write_command, &
            gnuplot_end, gnuplot_do_2dplot, gnuplot_start_2dplot, &
@@ -455,6 +456,33 @@ IF (ionode) &
 
 RETURN
 END SUBROUTINE gnuplot_write_file_mul_data
+
+SUBROUTINE gnuplot_write_file_mul_data_minus(data_file, col1, col2, &
+                                      color, start, last, comment)
+IMPLICIT NONE
+
+CHARACTER(LEN=*), INTENT(IN) :: data_file
+INTEGER, INTENT(IN) :: col1, col2
+CHARACTER(LEN=*), INTENT(IN) :: color
+LOGICAL, INTENT(IN) :: start, last
+
+CHARACTER(LEN=256) :: string
+CHARACTER(LEN=6) :: int_to_char
+LOGICAL :: comment
+
+string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//&
+                     "*xscale-xshift):(-$"//TRIM(int_to_char(col2)) &
+            //"*fact-eref)*gfact w l lw 3 lc rgb "//TRIM(color)
+
+IF (start) string="plot "//TRIM(string)
+IF (.NOT.last) string=TRIM(string)//", \"
+IF (comment) string = '# ' // TRIM(string)
+
+IF (ionode) &
+   WRITE(iun_gnuplot,'(a)') TRIM(string)
+
+RETURN
+END SUBROUTINE gnuplot_write_file_mul_data_minus
 
 SUBROUTINE gnuplot_write_file_mul_point(data_file, col1, col2, color, start, &
                                         last, comment)

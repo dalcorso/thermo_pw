@@ -43,6 +43,8 @@ read_dyn_from_file : in the routine of PH there is an implicit dependence
          geometry, the first file of each geometry should be considered as
          first. Removed the dependence on first.
 
+usnldiagq.f90 generalizes usnldiag.f90. It computes the diagonal elements 
+              of the Hamiltonian at k+q (except the kinetic energy).
 
 This directory contains also some routines that are new, or generalize
 those of QE. They are still experimental.
@@ -59,15 +61,48 @@ required by the linear solvers. The c indicates a non Hermitian matrix
 scal_prod.f90 Makes the scalar products between wavefunctions.
 Nedeed by the linear solver routines.
 
+polarizc.f90     ! computes the complex polarizability and writes it on
+                 ! output.
 
-psym_dmage_fpol.f90 ! parallel driver of the following
-sym_dmage_fpol.f90 ! similar to sym_dmag.f90, but used in the optical case
-                     does not assume that the potential is real.
+pheqscf.f90      ! compute the susceptibility at finite q and frequency.
+
+
+set_intq_nc.f90        !
+compute_intq.f90       !  These routines compute the integral of the 
+transform_intq_nc.f90  !  augmentation function and e^iqr for the study of
+transform_intq_so.f90  !  EELS with US PPs or PAW
+                       !
+
+solve_eq.f90      : This routine computes the charge-charge susceptibility
+                    at finite q and frequency and the inverse of the
+                    dielectric constant.
+
+orthogonalize_omega.f90 : generalize orthogonalize for the case of
+                          metals at finite frequency w when the alpha_pv 
+                          term is included.
+
+paw_add_symmetry.f90   : symmetrize the PAW term in the case of a e^iqr
+                         perturbation.
+
+dveqpsi_us.f90       ! computes e^iqr |psi_n>
+dveqpsi_us_only.f90  ! computes the US contribution to e^iqr K |psi_kn>
+
+addusddenseq.f90   ! add the augmentation charge in the case of a single
+                   ! e^iqr perturbation.
 
 psyme_fpol.f90     ! parallel driver of the following
 syme_fpol.f90      ! similar to syme.f90, but used in the optical case
                    ! does not assume that the potential is real.
 
-polarizc.f90     ! computes the complex polarizability and writes it on
-                 ! output.
+psymeq.f90         ! parallel driver of the following
+symeq.f90          ! similar to syme_fpol.f90, but used for EELS and
+                   ! symmetrize only one susceptibility.
+
+psym_dmage_fpol.f90 ! parallel driver of the following
+sym_dmage_fpol.f90  ! similar to sym_dmag.f90, but used in the optical case
+                      does not assume that the potential is real.
+
+psym_dmageq.f90   ! parallel driver of the following
+sym_dmageq.f90    ! similar to sym_dmage.f90, but used for EELS and only
+                    one perturbation is made.
 

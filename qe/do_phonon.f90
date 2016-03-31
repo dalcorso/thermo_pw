@@ -32,7 +32,7 @@ SUBROUTINE do_phonon_tpw(auxdyn)
 
   USE disp,            ONLY : nqs
   USE control_ph,      ONLY : epsil, trans, qplot, only_init, &
-                              only_wfc, rec_code, where_rec
+                              only_wfc, rec_code, where_rec, lgamma
   USE el_phon,         ONLY : elph, elph_mat, elph_simple
   !
   ! YAMBO >
@@ -72,7 +72,13 @@ SUBROUTINE do_phonon_tpw(auxdyn)
      !
      !  electric field perturbation
      !
-     IF (epsil) CALL phescf_tpw()
+     IF (epsil) THEN
+        IF (lgamma) THEN
+           CALL phescf_tpw()
+        ELSE
+           CALL pheqscf()
+        ENDIF
+     END IF
      !
      !  IF only_init is .true. the code computes only the 
      !  initialization parts.
