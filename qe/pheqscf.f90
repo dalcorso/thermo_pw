@@ -270,7 +270,6 @@ IF (meta_ionode) THEN
    IF (.NOT.lsda.OR.lcharge) THEN
       iu_epsil=2
       INQUIRE(FILE="epsilon", exist=exst)
-      WRITE(6,*) 'epsilon', exst
       IF (exst) THEN
          OPEN (UNIT=iu_epsil, FILE='epsilon', STATUS='old', &
                                POSITION='append', FORM='formatted')
