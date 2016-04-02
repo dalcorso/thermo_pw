@@ -122,6 +122,7 @@ PROGRAM thermo_pw
   USE thermo_mod,       ONLY : what, ngeo, omega_geo, energy_geo, &
                                tot_ngeo, reduced_grid, ibrav_geo, celldm_geo, &
                                central_geo, density, no_ph, max_geometries
+  USE optical,          ONLY : fru
   USE cell_base,        ONLY : ibrav_ => ibrav, celldm_ => celldm
   USE control_2d_bands, ONLY : only_bands_plot
   USE ph_restart,       ONLY : destroy_status_run
@@ -551,6 +552,7 @@ PROGRAM thermo_pw
            CALL close_phq(.FALSE.)
            CALL clean_input_variables()
            CALL destroy_status_run()
+           IF (ALLOCATED(fru)) DEALLOCATE(fru)
            CALL deallocate_part()
         ENDIF
      ENDDO
