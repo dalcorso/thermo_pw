@@ -258,7 +258,7 @@ iu_therm=2
 OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
 
 WRITE(iu_therm,'("# gamma is the average gruneisen parameter ")')
-WRITE(iu_therm,'("#   T (K)       gamma(T)       C_p ( Ry / cell ) &
+WRITE(iu_therm,'("#   T (K)       gamma(T)     C_v ( Ry / cell / K ) &
                  &   (C_p - C_v)(T)      (B_S - B_T) (T) (kbar) " )' )
 
 DO itemp = 2, ntemp-1
