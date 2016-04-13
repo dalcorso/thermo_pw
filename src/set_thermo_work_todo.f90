@@ -36,7 +36,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
   USE cell_base,   ONLY : cell_base_init, at
   USE ions_base,   ONLY : tau, nat
   USE fft_base,    ONLY : dfftp, dffts
-  USE wvfct,       ONLY : ecutwfc
+  USE gvecw,       ONLY : ecutwfc
   USE start_k,     ONLY : init_start_k
   USE klist,       ONLY : degauss
   USE gvect,       ONLY : ecutrho

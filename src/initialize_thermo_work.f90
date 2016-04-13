@@ -29,7 +29,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
   USE piezoelectric_tensor, ONLY : polar_geo
   USE control_elastic_constants, ONLY : elastic_algorithm, omega0
   USE control_mur,    ONLY : vmin, vmin_input, vmax_input
-  USE wvfct,          ONLY : ecutwfc
+  USE gvecw,          ONLY : ecutwfc
   USE gvect,          ONLY : ecutrho
   USE control_quadratic_energy, ONLY : nvar, degree
   USE input_parameters, ONLY : nk1, nk2, nk3

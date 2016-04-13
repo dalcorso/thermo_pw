@@ -23,7 +23,7 @@ SUBROUTINE apply_ac (ndmx, n, h, ah, ik, m, indi, iflag)
   USE qpoint,               ONLY : igkq, ikks
   USE noncollin_module,     ONLY : noncolin, npol
 
-  USE control_ph,           ONLY : alpha_pv, nbnd_occ, lgamma
+  USE control_lr,           ONLY : alpha_pv, nbnd_occ, lgamma
   USE eqv,                  ONLY : evq
   USE qpoint,               ONLY : ikqs
   USE optical,              ONLY : current_w

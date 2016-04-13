@@ -32,18 +32,20 @@ subroutine phq_summary_tpw
   USE funct,         ONLY : write_dft_name
   USE run_info, ONLY : title
   USE gamma_gamma,   ONLY : with_symmetry, nasr
-  USE control_ph,    ONLY : lgamma_gamma, lnoloc, lrpa, zue, epsil, ldisp, &
+  USE control_ph,    ONLY : lgamma_gamma, lnoloc, zue, epsil, ldisp, &
                             nmix_ph, alpha_mix, tr2_ph, zeu, search_sym
+  USE control_lr,    ONLY : lrpa
   USE freq_ph,       ONLY : fpol, nfs, fiu
   USE partial,       ONLY : atomo, nat_todo, all_comp, done_irr, comp_irr
-  USE modes,         ONLY : u, npert, irotmq, minus_q, nsymq, nirr, &
-                            name_rap_mode
+  USE modes,         ONLY : u, npert, nirr, name_rap_mode
   USE optical,       ONLY : fru
   USE rap_point_group, ONLY : gname
   USE qpoint,        ONLY : xq
   USE ramanm,        ONLY : lraman, elop
   USE control_flags, ONLY : iverbosity
-  USE wvfct,         ONLY : ecutwfc
+  USE gvecw,         ONLY : ecutwfc
+  USE lr_symm_base,  ONLY : irotmq, minus_q, nsymq
+
 
   implicit none
 

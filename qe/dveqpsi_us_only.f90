@@ -25,7 +25,7 @@ SUBROUTINE dveqpsi_us_only (ik)
 ! modules from phcom
   USE qpoint,     ONLY : npwq, ikks
   USE optical,    ONLY : intq, intq_nc
-  USE phus,       ONLY : becp1
+  USE lrus,       ONLY : becp1
   USE eqv,        ONLY : dvpsi
   implicit none
   !

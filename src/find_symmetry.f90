@@ -33,7 +33,7 @@ SUBROUTINE find_symmetry(fft_fact)
   USE fft_base,           ONLY : dfftp, dffts
   USE grid_subroutines,   ONLY : realspace_grid_init
   USE gvecs,              ONLY : doublegrid, gcutms, dual
-  USE wvfct,              ONLY : ecutwfc
+  USE gvecw,              ONLY : ecutwfc
   USE symm_base,          ONLY : s, t_rev, irt, nrot, nsym, invsym, nosym, &
                                  set_sym_bl, find_sym
   USE noncollin_module, ONLY : m_loc, noncolin, i_cons, npol, angle1, angle2

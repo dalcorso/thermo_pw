@@ -53,11 +53,12 @@ SUBROUTINE solve_e_fpolc(iu)
   USE units_ph,              ONLY : lrdwf, iudwf, lrwfc, iuwfc, lrdrho, &
                                     iudrho
   USE output,                ONLY : fildrho
-  USE control_ph,            ONLY : ext_recover, rec_code, alpha_pv, &
-                                    lnoloc, nbnd_occ, convt, tr2_ph, nmix_ph, &
+  USE control_ph,            ONLY : ext_recover, rec_code, &
+                                    lnoloc, convt, tr2_ph, nmix_ph, &
                                     alpha_mix, lgamma_gamma, niter_ph, &
-                                    lgamma, flmixdpot, rec_code_read
-  USE phus,                  ONLY : int3_paw
+                                    flmixdpot, rec_code_read
+  USE control_lr,            ONLY : alpha_pv, nbnd_occ, lgamma
+  USE lrus,                  ONLY : int3_paw
   USE qpoint,                ONLY : npwq, nksq
   USE recover_mod,           ONLY : read_rec, write_rec
   USE optical,               ONLY : current_w, fru, iu1dwf, lr1dwf
@@ -322,7 +323,7 @@ SUBROUTINE solve_e_fpolc(iu)
            !
            ! Orthogonalize dvpsi to valence states: ps = <evc|dvpsi>
            !
-           CALL orthogonalize(dvpsi, evc, ik, ik, dpsi, npwq)
+           CALL orthogonalize(dvpsi, evc, ik, ik, dpsi, npwq, .false.)
            !
            !  dvpsi is saved because the ccg_many_vectors routine corrupts it
            !
@@ -481,7 +482,7 @@ SUBROUTINE solve_e_fpolc(iu)
      do ipol=1,3
         if (fildrho.ne.' ') call davcio_drho(dvscfout(1,1,ipol),lrdrho, &
              iudrho,ipol,+1)
-        call dv_of_drho (0, dvscfout (1, 1, ipol), .false.)
+        call dv_of_drho (dvscfout (1, 1, ipol), .false.)
      enddo
      !
      !   mix the new potential with the old

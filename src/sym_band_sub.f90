@@ -17,7 +17,8 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   USE fft_base,             ONLY : dfftp
   USE gvect,                ONLY : ngm, nl, g
   USE lsda_mod,             ONLY : nspin
-  USE wvfct,                ONLY : et, nbnd, npwx, npw, igk, g2kin, ecutwfc
+  USE wvfct,                ONLY : et, nbnd, npwx, npw, igk, g2kin
+  USE gvecw,                ONLY : ecutwfc
   USE klist,                ONLY : xk, nks, nkstot
   USE io_files,             ONLY : nwordwfc, iunwfc
   USE buffers,              ONLY : get_buffer

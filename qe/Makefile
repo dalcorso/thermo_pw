@@ -4,9 +4,9 @@ include ../../make.sys
 
 # location of needed modules
 MODFLAGS= $(MOD_FLAG)../../iotk/src $(MOD_FLAG)../../Modules \
-          $(MOD_FLAG)../../FFTXlib \
-          $(MOD_FLAG)../../PW/src $(MOD_FLAG)../../PHonon/PH \
-          $(MOD_FLAG)../lib  $(MOD_FLAG).
+          $(MOD_FLAG)../../FFTXlib $(MOD_FLAG)../../LAXlib  \
+          $(MOD_FLAG)../../PW/src $(MOD_FLAG)../../LR_Modules \
+          $(MOD_FLAG)../../PHonon/PH $(MOD_FLAG)../lib  $(MOD_FLAG).
 
 MODULES = \
 adddvepsi_us.o \

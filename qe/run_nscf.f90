@@ -20,7 +20,7 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   USE control_flags,   ONLY : restart, lscf
   USE check_stop,      ONLY : check_stop_now
   USE fft_base,        ONLY : dffts
-  USE modes,           ONLY : minus_q, nsymq, invsymq
+  USE lr_symm_base,    ONLY : minus_q, nsymq, invsymq
   USE disp,            ONLY : lgamma_iq
   USE qpoint,          ONLY : xq
   USE control_ph,      ONLY : reduce_io, recover, tmp_dir_phq, &
@@ -32,6 +32,7 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   USE grid_irr_iq,     ONLY : done_bands
   USE acfdtest,        ONLY : acfdt_is_active, acfdt_num_der, ir_point, delta_vrs
   USE scf,             ONLY : vrs
+  USE el_phon,         ONLY : elph_mat
   USE mp_bands,        ONLY : ntask_groups
 
  !
@@ -72,7 +73,7 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   restart = ext_restart
   conv_ions=.true.
   !
-  CALL setup_nscf ( newgrid, xq )
+  CALL setup_nscf ( newgrid, xq, elph_mat )
   CALL init_run()
 !!!!!!!!!!!!!!!!!!!!!!!! ACFDT TEST !!!!!!!!!!!!!!!!
   IF (acfdt_is_active) THEN

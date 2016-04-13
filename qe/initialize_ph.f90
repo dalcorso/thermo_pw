@@ -13,7 +13,7 @@ SUBROUTINE initialize_ph_tpw()
   !
   USE klist,  ONLY : nks, nkstot
   USE qpoint, ONLY : nksq, nksqtot, ikks, ikqs
-  USE control_ph, ONLY : lgamma
+  USE control_lr, ONLY : lgamma
   !
   IMPLICIT NONE
   INTEGER :: ik

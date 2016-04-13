@@ -4,15 +4,17 @@ include ../../make.sys
 
 # location of needed modules and included files (if any)
 MODFLAGS= $(MOD_FLAG)../../iotk/src $(MOD_FLAG)../../Modules \
-          $(MOD_FLAG)../../FFTXlib \
-          $(MOD_FLAG)../../PW/src $(MOD_FLAG)../../PHonon/PH \
-          $(MOD_FLAG)../lib $(MOD_FLAG)../qe $(MOD_FLAG).
+          $(MOD_FLAG)../../FFTXlib $(MOD_FLAG)../../LAXlib  \
+          $(MOD_FLAG)../../PW/src $(MOD_FLAG)../../LR_Modules \
+          $(MOD_FLAG)../../PHonon/PH $(MOD_FLAG)../lib  $(MOD_FLAG).
+
 IFLAGS=
 
+LRMODS = ../../LR_Modules/liblrmod.a
 PWOBJS = ../../PHonon/PH/libph.a ../../PP/src/libpp.a ../../PW/src/libpw.a 
-QEMODS = ../../Modules/libqemod.a ../../FFTXlib/libqefft.a
+QEMODS = ../../Modules/libqemod.a ../../FFTXlib/libqefft.a ../../LAXlib/libqela.a
 
-LIBOBJS	= ../lib/thermo_lib.a ../qe/thermo_qe.a ../../PHonon/PH/libph.a ../../flib/ptools.a ../../flib/flib.a ../../clib/clib.a ../../iotk/src/libiotk.a
+LIBOBJS	= ../lib/thermo_lib.a ../qe/thermo_qe.a ../../PHonon/PH/libph.a ../../clib/clib.a ../../iotk/src/libiotk.a
 
 TLDEPS= bindir mods libs pw
 
@@ -73,7 +75,7 @@ test_colors.x : test_colors.o $(PWOBJS) $(LIBOBJS)
 
 epsilon_tpw.x : epsilon_tpw.o $(PWOBJS) $(LIBOBJS)
 	$(LD) $(LDFLtAGS) -o $@ epsilon_tpw.o \
-	         $(LIBOBJS) $(PWOBJS) $(QEMODS) $(LIBOBJS) $(PWOBJS) $(LIBS)
+	         $(LIBOBJS) $(PWOBJS) $(QEMODS) $(LRMODS) $(LIBOBJS) $(PWOBJS) $(LIBS)
 	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/epsilon_tpw.x . )
 
 clean :

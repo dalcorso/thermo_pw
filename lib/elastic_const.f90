@@ -1331,13 +1331,13 @@ SUBROUTINE compute_elastic_compliances(cmn,smn)
 ! its inverse, the elastic compliance matrix
 !
 USE kinds, ONLY : DP
+USE matrix_inversion, ONLY : invmat
 IMPLICIT NONE
 
-REAL(DP), INTENT(IN) :: cmn(6,6)
+REAL(DP), INTENT(INOUT) :: cmn(6,6)
 REAL(DP), INTENT(INOUT) :: smn(6,6)
-REAL(DP) :: da ! not used
 
-CALL invmat(6, cmn, smn, da)
+CALL invmat(6, cmn, smn)
 
 RETURN
 END SUBROUTINE compute_elastic_compliances

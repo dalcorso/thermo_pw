@@ -58,10 +58,11 @@ subroutine solve_eq(iu, flag)
                                     iudrho, lrbar, iubar
   USE output,                ONLY : fildrho
   USE control_ph,            ONLY : ext_recover, rec_code, &
-                                    lnoloc, nbnd_occ, convt, tr2_ph, nmix_ph, &
+                                    lnoloc, convt, tr2_ph, nmix_ph, &
                                     alpha_mix, lgamma_gamma, niter_ph, &
-                                    lgamma, flmixdpot, rec_code_read, alpha_pv
-  USE phus,                  ONLY : int3_paw
+                                    flmixdpot, rec_code_read
+  USE control_lr,            ONLY : lgamma, alpha_pv, nbnd_occ
+  USE lrus,                  ONLY : int3_paw
   USE qpoint,                ONLY : xq, npwq, igkq, nksq, ikks, ikqs
   USE recover_mod,           ONLY : read_rec, write_rec
 
@@ -506,7 +507,7 @@ subroutine solve_eq(iu, flag)
         convt=.TRUE.
         GOTO 1001
      ELSE
-        call dv_of_drho (0, dvscfout (1, 1, 1), .false.)
+        call dv_of_drho (dvscfout (1, 1, 1), .false.)
      ENDIF
      !
      !   mix the new potential with the old

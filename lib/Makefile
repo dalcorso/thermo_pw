@@ -3,7 +3,7 @@
 include ../../make.sys
 
 # location of needed modules
-MODFLAGS= $(MOD_FLAG)../../Modules $(MOD_FLAG)../../FFTXlib $(MOD_FLAG).
+MODFLAGS= $(MOD_FLAG)../../Modules $(MOD_FLAG)../../FFTXlib $(MOD_FLAG)../../LAXlib $(MOD_FLAG).
 
 MODULES = \
 asy.o \

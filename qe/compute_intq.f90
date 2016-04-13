@@ -24,7 +24,7 @@ subroutine compute_intq
 
   USE optical,              ONLY : intq
   USE qpoint,               ONLY : xq, eigqts
-  USE control_ph,           ONLY : lgamma
+  USE control_lr,           ONLY : lgamma
 
   USE mp_bands,  ONLY: intra_bgrp_comm
   USE mp,        ONLY: mp_sum

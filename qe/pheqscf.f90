@@ -26,11 +26,12 @@ SUBROUTINE pheqscf()
   USE io_files,        ONLY : tmp_dir
   USE lsda_mod,        ONLY : nspin, lsda
   USE control_ph,      ONLY : convt, zeu, rec_code, rec_code_read, lnoloc, &
-                              lrpa, where_rec, done_epsil, done_zeu, epsil
+                              where_rec, done_epsil, done_zeu, epsil
+  USE control_lr,      ONLY : lrpa
   USE control_flags,   ONLY : io_level
   USE output,          ONLY : fildrho
   USE ph_restart,      ONLY : ph_writefile
-  USE phus,            ONLY : int3, int3_nc, int3_paw
+  USE lrus,            ONLY : int3, int3_nc, int3_paw
   USE freq_ph,         ONLY : fiu, fpol, nfs
   USE optical,         ONLY : current_w, fru, polarc, epsilonc, epsilonm1c,   &
                               intq, intq_nc, dmuxc_tran, chirr, chirz, chizz, &
@@ -48,11 +49,11 @@ SUBROUTINE pheqscf()
   LOGICAL :: exst_mem, exst
   !
   IF (okvan) THEN
-     ALLOCATE (int3 ( nhm, nhm, 1, nat, nspin_mag))
+     ALLOCATE (int3 ( nhm, nhm, nat, nspin_mag, 1))
      ALLOCATE (intq (nhm, nhm, nat) )
-     IF (okpaw) ALLOCATE (int3_paw ( nhm, nhm, 1, nat, nspin_mag))
+     IF (okpaw) ALLOCATE (int3_paw ( nhm, nhm, nat, nspin_mag, 1))
      IF (noncolin) THEN
-        ALLOCATE(int3_nc( nhm, nhm, 1, nat, nspin))
+        ALLOCATE(int3_nc( nhm, nhm, nat, nspin, 1))
         ALLOCATE(intq_nc( nhm, nhm, nat, nspin))
      ENDIF
      IF (fpol) CALL compute_intq()

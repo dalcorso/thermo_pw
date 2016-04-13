@@ -32,7 +32,8 @@ SUBROUTINE do_phonon_tpw(auxdyn)
 
   USE disp,            ONLY : nqs
   USE control_ph,      ONLY : epsil, trans, qplot, only_init, &
-                              only_wfc, rec_code, where_rec, lgamma
+                              only_wfc, rec_code, where_rec
+  USE control_lr,      ONLY : lgamma
   USE el_phon,         ONLY : elph, elph_mat, elph_simple
   !
   ! YAMBO >

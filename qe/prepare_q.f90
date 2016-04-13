@@ -28,10 +28,11 @@ SUBROUTINE prepare_q_tpw(auxdyn, do_band, do_iq, setup_pw, iq)
   USE qpoint,          ONLY : xq
   USE disp,            ONLY : x_q, done_iq, comp_iq, lgamma_iq
   USE grid_irr_iq,     ONLY : irr_iq, done_irr_iq, done_bands
-  USE control_ph,      ONLY : ldisp, lgamma, epsil, trans, zue, zeu, &
+  USE control_ph,      ONLY : ldisp, epsil, trans, zue, zeu, &
                               start_irr, last_irr, current_iq, newgrid, &
                               tmp_dir_ph, tmp_dir_phq, lqdir, qplot, &
                               always_run, where_rec, rec_code
+  USE control_lr,      ONLY : lgamma
   USE control_qe,      ONLY : tcollect_all
   USE ph_restart,      ONLY : ph_writefile
   USE io_files,        ONLY : prefix

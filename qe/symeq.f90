@@ -18,7 +18,7 @@ subroutine symeq (dvsym)
   USE fft_base,  only : dfftp
   USE symm_base, only : s, ftau
   USE noncollin_module, only : nspin_lsda, nspin_mag
-  USE modes, ONLY : gi, nsymq
+  USE lr_symm_base, ONLY : gi, nsymq
   USE constants, ONLY : tpi
   implicit none
 

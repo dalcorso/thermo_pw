@@ -25,7 +25,7 @@ SUBROUTINE phqscf_tpw
   USE control_ph, ONLY : zue, convt, rec_code
   USE partial,    ONLY : done_irr, comp_irr
   USE modes,      ONLY : nirr, npert
-  USE phus,       ONLY : int3, int3_nc, int3_paw
+  USE lrus,       ONLY : int3, int3_nc, int3_paw
   USE uspp_param, ONLY : nhm
   USE eqv,        ONLY : drhoscfs
   USE paw_variables, ONLY : okpaw
@@ -74,9 +74,9 @@ SUBROUTINE phqscf_tpw
         !    then for this irreducible representation we solve the linear system
         !
         IF (okvan) THEN
-           ALLOCATE (int3 ( nhm, nhm, npe, nat, nspin_mag))
-           IF (okpaw) ALLOCATE (int3_paw (nhm, nhm, npe, nat, nspin_mag))
-           IF (noncolin) ALLOCATE(int3_nc( nhm, nhm, npe, nat, nspin))
+           ALLOCATE (int3 ( nhm, nhm, nat, nspin_mag, npe))
+           IF (okpaw) ALLOCATE (int3_paw (nhm, nhm, nat, nspin_mag, npe))
+           IF (noncolin) ALLOCATE(int3_nc( nhm, nhm, nat, nspin, npe))
         ENDIF
         WRITE( stdout, '(/,5x,"Self-consistent Calculation")')
         CALL solve_linter_tpw (irr, imode0, npe, drhoscfs)

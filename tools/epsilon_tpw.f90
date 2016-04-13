@@ -71,7 +71,7 @@ PROGRAM epsilon_tpw
   USE uspp,        ONLY : okvan
   USE spin_orb,    ONLY : lspinorb
   USE lsda_mod,    ONLY : nspin
-  USE phus,        ONLY : dpqq, dpqq_so
+  USE lrus,        ONLY : dpqq, dpqq_so
   USE klist,       ONLY : lgauss
   USE ktetra,      ONLY : ltetra
   USE wvfct,       ONLY : nbnd
@@ -499,11 +499,11 @@ SUBROUTINE dipole_calc( ik, dipole_aux, nbndmin, nbndmax, shift )
   !------------------------------------------------------------------
   USE kinds,                ONLY : DP
   USE constants,            ONLY : pi, degspin
-  USE wvfct,                ONLY : wg, npw, nbnd, igk, g2kin, ecutwfc, npwx, &
-                                   et
+  USE wvfct,                ONLY : wg, npw, nbnd, igk, g2kin, npwx, et
+  USE gvecw,                ONLY : ecutwfc
   USE wavefunctions_module, ONLY : evc
   USE ener,                 ONLY : ef
-  USE klist,                ONLY : xk, wk, nelec
+  USE klist,                ONLY : xk, wk, nelec, ngk, igk_k
   USE noncollin_module,     ONLY : noncolin, npol
   USE uspp,                 ONLY : vkb, nkb, okvan
   USE cell_base,            ONLY : tpiba2
@@ -541,6 +541,12 @@ SUBROUTINE dipole_calc( ik, dipole_aux, nbndmin, nbndmax, shift )
   ! setup k+G grids for each kpt
   !
   CALL gk_sort (xk (1, ik), ngm, g, ecutwfc / tpiba2, npw, igk, g2kin)
+  !
+  !  should be in readfile but it is not there
+  !
+  ngk(ik) = npw
+  !
+  igk_k(1:npw,ik) = igk(1:npw)
   !
   ! read wfc for the given kpt
   !

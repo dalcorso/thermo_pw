@@ -19,7 +19,7 @@ subroutine sym_dmageq (dvsym)
   USE cell_base,only : at, bg
   USE fft_base, only : dfftp
   USE symm_base,only : sname, s, ftau, t_rev, invs
-  USE modes,    ONLY : gi, nsymq
+  USE lr_symm_base,  ONLY : gi, nsymq
   USE lsda_mod, only : nspin
   implicit none
 

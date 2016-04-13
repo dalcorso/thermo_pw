@@ -22,13 +22,12 @@ USE klist, ONLY : lgauss, degauss, ngauss
 USE noncollin_module, ONLY : noncolin, npol
 USE wvfct, ONLY : npwx, nbnd, et
 USE ener, ONLY : ef
-USE control_ph,  ONLY : alpha_pv, nbnd_occ
+USE control_lr,  ONLY : alpha_pv, nbnd_occ
 USE becmod,      ONLY : bec_type, becp, calbec
 USE uspp,        ONLY : vkb, okvan
 USE mp_bands,    ONLY : intra_bgrp_comm
 USE mp,          ONLY : mp_sum
 USE control_flags, ONLY : gamma_only
-USE realus,      ONLY : npw_k
 USE gvect,       ONLY : gstart
 !
 IMPLICIT NONE

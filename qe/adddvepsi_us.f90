@@ -20,7 +20,7 @@ SUBROUTINE adddvepsi_us_tpw(nbnd_occ,becp1,becp2,ipol,kpoint,dvpsi)
   USE ions_base, ONLY : nat, ityp, ntyp => nsp
   USE noncollin_module, ONLY : noncolin, npol
   USE uspp_param, only: nh
-  USE phus,     ONLY : dpqq, dpqq_so
+  USE lrus,     ONLY : dpqq, dpqq_so
   USE becmod,   ONLY : bec_type
   USE control_flags, ONLY : gamma_only
 

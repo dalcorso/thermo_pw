@@ -23,7 +23,7 @@ SUBROUTINE set_fft_mesh
   USE grid_subroutines,   ONLY : realspace_grid_init
   USE thermo_sym,         ONLY : fft_fact
   USE gvecs,              ONLY : doublegrid, gcutms, dual
-  USE wvfct,              ONLY : ecutwfc
+  USE gvecw,              ONLY : ecutwfc
   !
   IMPLICIT NONE
   !

@@ -21,7 +21,7 @@ subroutine polarizc ( iu )
   USE symme,        ONLY : symmatrix, crys_to_cart
   USE wvfct,        ONLY : npw, npwx, igk
   USE kinds,        ONLY : DP
-  USE control_ph,   ONLY : nbnd_occ
+  USE control_lr,   ONLY : nbnd_occ
   USE lsda_mod,     ONLY : lsda
   USE units_ph,     ONLY : lrdwf, iudwf, lrebar, iuebar
   USE buffers,      ONLY : get_buffer

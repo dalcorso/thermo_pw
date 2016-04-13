@@ -323,7 +323,8 @@ SUBROUTINE do_plan_avg (ik, averag, vacuum, plan, zdim, ninter, i1, &
   USE klist, ONLY: nks, nkstot, xk
   USE lsda_mod, ONLY: nspin, lsda, current_spin, isk
   USE uspp, ONLY: vkb, nkb
-  USE wvfct, ONLY: npw, npwx, nbnd, wg, igk, g2kin, ecutwfc
+  USE wvfct, ONLY: npw, npwx, nbnd, wg, igk, g2kin
+  USE gvecw, ONLY : ecutwfc
   USE wavefunctions_module,  ONLY: evc
   USE noncollin_module, ONLY : noncolin, npol
   USE io_files, ONLY: iunwfc, nwordwfc

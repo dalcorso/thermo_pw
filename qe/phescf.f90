@@ -21,13 +21,14 @@ SUBROUTINE phescf_tpw()
   USE noncollin_module,ONLY : noncolin, nspin_mag, npol
   USE lsda_mod,        ONLY : nspin
   USE control_ph,      ONLY : convt, zeu, rec_code, rec_code_read, lnoloc, &
-                              lrpa, where_rec, done_epsil, done_zeu, epsil
+                              where_rec, done_epsil, done_zeu, epsil
+  USE control_lr,      ONLY : lrpa
   USE io_files,        ONLY : tmp_dir
   USE wvfct,           ONLY : nbnd, npwx
   USE control_flags,   ONLY : io_level
   USE output,          ONLY : fildrho
   USE ph_restart,      ONLY : ph_writefile
-  USE phus,            ONLY : int3, int3_nc, int3_paw
+  USE lrus,            ONLY : int3, int3_nc, int3_paw
   USE freq_ph
   USE optical,         ONLY : current_w, fru, polarc, epsilonc, epsilonm1c, &
                               lr1dwf, iu1dwf, lcfreq
@@ -49,9 +50,9 @@ SUBROUTINE phescf_tpw()
   ENDIF
   !
   IF (okvan) THEN
-     ALLOCATE (int3 ( nhm, nhm, 3, nat, nspin_mag))
-     IF (okpaw) ALLOCATE (int3_paw ( nhm, nhm, 3, nat, nspin_mag))
-     IF (noncolin) ALLOCATE(int3_nc( nhm, nhm, 3, nat, nspin))
+     ALLOCATE (int3 ( nhm, nhm, nat, nspin_mag, 3))
+     IF (okpaw) ALLOCATE (int3_paw ( nhm, nhm, nat, nspin_mag, 3))
+     IF (noncolin) ALLOCATE(int3_nc( nhm, nhm, nat, nspin, 3))
   ENDIF
   !
   IF (fpol) THEN    ! calculate freq. dependent polarizability

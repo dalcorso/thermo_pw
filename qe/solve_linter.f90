@@ -46,20 +46,21 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   USE paw_symmetry,         ONLY : paw_dusymmetrize, paw_dumqsymmetrize
   USE buffers,              ONLY : save_buffer, get_buffer
   USE control_ph,           ONLY : rec_code, niter_ph, nmix_ph, tr2_ph, &
-                                   alpha_pv, lgamma, lgamma_gamma, convt, &
-                                   nbnd_occ, alpha_mix, rec_code_read, &
+                                   lgamma_gamma, convt, &
+                                   alpha_mix, rec_code_read, &
                                    where_rec, flmixdpot, ext_recover
+  USE control_lr,           ONLY : alpha_pv, lgamma, nbnd_occ
   USE el_phon,              ONLY : elph
-  USE nlcc_ph,              ONLY : nlcc_any
+  USE uspp,                 ONLY : nlcc_any
   USE units_ph,             ONLY : iudrho, lrdrho, iudwf, lrdwf, iubar, lrbar, &
                                    iuwfc, lrwfc, iudvscf, iuint3paw, lint3paw
   USE output,               ONLY : fildrho, fildvscf
-  USE phus,                 ONLY : int3_paw, becsumort
+  USE lrus,                 ONLY : int3_paw
+  USE phus,                 ONLY : becsumort
   USE eqv,                  ONLY : dvpsi, dpsi, evq, eprec
   USE qpoint,               ONLY : xq, npwq, igkq, nksq, ikks, ikqs
-  USE modes,                ONLY : npertx, npert, u, t, irotmq, tmq, &
-                                   minus_q, nsymq, rtau
-
+  USE modes,                ONLY : npertx, npert, u, t, tmq
+  USE lr_symm_base,         ONLY : irotmq, minus_q, nsymq, rtau
   USE recover_mod,          ONLY : read_rec, write_rec
   ! used to write fildrho:
   USE dfile_autoname,       ONLY : dfile_name
@@ -101,7 +102,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   ! change of scf potential (output)
   complex(DP), allocatable :: ldos (:,:), ldoss (:,:), mixin(:), mixout(:), &
        dbecsum (:,:,:,:), dbecsum_nc(:,:,:,:,:), aux1 (:,:), tg_dv(:,:), &
-       tg_psic(:,:), aux2(:,:)
+       tg_psic(:,:), aux2(:,:), drhoc(:)
   ! Misc work space
   ! ldos : local density of states af Ef
   ! ldoss: as above, without augmentation charges
@@ -164,6 +165,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   allocate (aux1 ( dffts%nnr, npol))
   allocate (h_diag ( npwx*npol, nbnd))
   allocate (aux2(npwx*npol, nbnd))
+  allocate (drhoc(dfftp%nnr))
   incr=1
   IF ( dffts%have_task_groups ) THEN
      !
@@ -352,7 +354,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
            ! Ortogonalize dvpsi to valence states: ps = <evq|dvpsi>
            ! Apply -P_c^+.
            !
-           CALL orthogonalize(dvpsi, evq, ikk, ikq, dpsi, npwq)
+           CALL orthogonalize(dvpsi, evq, ikk, ikq, dpsi, npwq, .false.)
            !
            if (where_rec=='solve_lint'.or.iter > 1) then
               !
@@ -486,7 +488,12 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
         endif
         
         call zcopy (dfftp%nnr*nspin_mag,drhoscfh(1,1,ipert),1,dvscfout(1,1,ipert),1)
-        call dv_of_drho (imode0+ipert, dvscfout(1,1,ipert), .true.)
+        !
+        ! Compute the response of the core charge density
+        ! IT: Should the condition "imode0+ipert > 0" be removed?
+        !
+        call addcore (imode0+ipert, drhoc)
+        call dv_of_drho (dvscfout(1,1,ipert), .true., drhoc)
      enddo
      !
      !   And we mix with the old potential
@@ -584,7 +591,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
            endif
            call davcio_drho ( dvscfin(1,1,ipert),  lrdrho, iudvscf, &
                          imode0 + ipert, +1 )
-           IF (okpaw.AND.me_bgrp==0) CALL davcio( int3_paw(:,:,ipert,:,:), lint3paw, &
+           IF (okpaw.AND.me_bgrp==0) CALL davcio( int3_paw(:,:,:,:,ipert), lint3paw, &
                                                   iuint3paw, imode0+ipert, + 1 )
         end do
         if (elph) call elphel (irr, npe, imode0, dvscfins)
@@ -607,6 +614,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   if (doublegrid) deallocate (dvscfins)
   deallocate (dvscfin)
   deallocate(aux2)
+  deallocate(drhoc)
   IF ( ntask_groups > 1) dffts%have_task_groups=.TRUE.
   IF ( dffts%have_task_groups ) THEN
      DEALLOCATE( tg_dv )
