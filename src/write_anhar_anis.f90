@@ -316,7 +316,7 @@ DO itemp = 1, ntemp
 !  hexagonal or tetragonal
 !
            alpha(1)=(alpha_aux(1) * cm(1) - alpha_aux(2) * cm(3) ) / 2.0_DP   
-           alpha(2)=alpha(2)             
+           alpha(2)=alpha(1)             
            alpha(3)=alpha_aux(2) * cm(3)             
        CASE(5)
 !
