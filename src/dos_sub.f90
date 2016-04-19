@@ -17,10 +17,12 @@ SUBROUTINE dos_sub()
   USE io_files,   ONLY : prefix, tmp_dir
   USE constants,  ONLY : rytoev
   USE kinds,      ONLY : DP
-  USE klist,      ONLY : xk, wk, degauss, ngauss, lgauss, nks, nkstot
+  USE klist,      ONLY : xk, wk, degauss, ngauss, lgauss, nks, nkstot, nelec
+  USE lsda_mod,   ONLY : isk
   USE ktetra,     ONLY : ntetra, tetra, ltetra
   USE wvfct,      ONLY : nbnd, et
   USE lsda_mod,   ONLY : nspin
+  USE ener,       ONLY : ef
   USE control_dos, ONLY : legauss, sigmae, deltae, ndose, save_ndos
   USE noncollin_module, ONLY: noncolin
   USE control_bands, ONLY : emax_input, emin_input
@@ -36,7 +38,8 @@ SUBROUTINE dos_sub()
   CHARACTER(len=256) :: fildos, outdir
   REAL(DP) :: emin, emax
   REAL(DP), ALLOCATABLE :: e(:), dosofe(:,:), dosint(:)
-  REAL(DP) :: save_degauss
+  REAL(DP) :: save_degauss, ef1
+  REAL(DP), EXTERNAL :: efermig, efermit
   INTEGER  :: save_ngauss
   LOGICAL  :: save_lgauss, save_ltetra
   INTEGER :: n, ndos, iu_dos
@@ -77,7 +80,7 @@ SUBROUTINE dos_sub()
   IF ( emin_input == 0.0_DP ) THEN
      emin = MINVAL ( et(1, 1:nks) )
      CALL mp_min(emin, inter_pool_comm)
-     IF ( degauss > 0.0_dp ) emin = emin - 3.0_dp * degauss
+     IF ( degauss > 0.0_dp ) emin = emin - 5.0_dp * degauss
   ELSE
      emin = emin_input/rytoev
   END IF
@@ -98,6 +101,7 @@ SUBROUTINE dos_sub()
      deltae=0.01_DP
      ndos = nint ( (emax - emin) / deltae)
   ENDIF
+  WRITE(stdout,'(/,5x,"Delta e=", f15.8, ", ndos= ", i9)') deltae, ndos
 
   save_ndos=ndos
 
@@ -110,6 +114,7 @@ SUBROUTINE dos_sub()
   !
   DO n= 1, ndos
      e(n) = emin + (n - 1) * deltae
+     IF (mod(n,1000)==0) WRITE(6,*) 'computing n', n
      IF (ltetra) THEN
         CALL dos_t(et,nspin,nbnd,nks,ntetra,tetra,e(n),dosofe(1,n))
      ELSE
@@ -134,6 +139,23 @@ SUBROUTINE dos_sub()
         dosint(n) = dosint(n-1) + (dosofe (1,n) + dosofe (2,n) ) * deltae
      ENDIF
   END DO
+
+  IF (ltetra .OR. lgauss) THEN
+!
+!  Recalculate the Fermi level using the degauss and ngauss requested
+!  in the dos calculation.
+!
+     WRITE(stdout,'(/,5x, "Fermi energy from nscf run", f19.8, " eV")')  &
+                                                               ef * rytoev
+     IF (lgauss) THEN
+        ef1 = efermig (et, nbnd, nks, nelec, wk, degauss, ngauss, 0, isk)
+     ELSE
+        ef1 = efermit (et, nbnd, nks, nelec, nspin, ntetra, tetra, 0, isk)
+     END IF 
+
+     WRITE(stdout,'(/,5x, "Fermi energy with dos parameters", &
+                              & f13.8, " eV")')  ef1 * rytoev
+  END IF
   !
   !  Write the results on file
   !
@@ -155,10 +177,10 @@ SUBROUTINE dos_sub()
 
      DO n= 1, ndos
         IF (nspin==1 .OR. nspin==4) THEN
-           WRITE (iu_dos, '(f10.6,2e16.8)') e(n)*rytoev, dosofe(1,n)/rytoev,&
+           WRITE (iu_dos, '(f15.9,2e16.8)') e(n)*rytoev, dosofe(1,n)/rytoev,&
                                             dosint(n)
         ELSE
-           WRITE (iu_dos, '(f10.3,3e16.8)') e(n)*rytoev, dosofe(:,n)/rytoev,&
+           WRITE (iu_dos, '(f15.9,3e16.8)') e(n)*rytoev, dosofe(:,n)/rytoev,&
                                             dosint(n)
         ENDIF
      ENDDO

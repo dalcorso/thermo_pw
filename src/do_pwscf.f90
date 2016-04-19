@@ -60,7 +60,6 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
      starting_pot ='file'
      startingconfig='file'
      lscf=.FALSE.
-     lbands=.TRUE.
      lbfgs=.FALSE.
      lforce=.FALSE.
      lstres=.FALSE.

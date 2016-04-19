@@ -92,6 +92,7 @@ PROGRAM thermo_pw
   USE debye_module, ONLY : compute_debye_temperature,  &
                            compute_debye_temperature_poisson
   USE control_debye, ONLY : debye_t
+  USE control_flags, ONLY : lbands
   USE piezoelectric_tensor, ONLY : compute_piezo_tensor, &
                                 compute_d_piezo_tensor, &
                                 polar_geo, g_piezo_tensor, d_piezo_tensor, &
@@ -283,8 +284,8 @@ PROGRAM thermo_pw
                  CALL set_dos_kpoints()
               ELSE
                  CALL set_paths_disp()
+                 CALL set_k_points()
               ENDIF
-              CALL set_k_points()
 !
 !   by default in a band structure calculation we double the number of
 !   computed bands
@@ -295,10 +296,17 @@ PROGRAM thermo_pw
               WRITE(stdout,'(5x,"Doing a non self-consistent calculation",&
                                                                     & i5)') 
               WRITE(stdout,'(2x,76("+"),/)')
+              IF (ldos_syn_1) THEN
+                 lbands=.FALSE.
+              ELSE
+                 lbands=.TRUE.
+              ENDIF
               CALL do_pwscf(exit_status, .FALSE.)
               IF (ldos_syn_1) THEN
                  CALL dos_sub()
                  CALL plot_dos()
+                 CALL write_el_thermo()
+                 CALL plot_el_thermo()
               ELSE
                  nspin0=nspin
                  IF (nspin==4) nspin0=1
