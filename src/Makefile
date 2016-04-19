@@ -85,6 +85,7 @@ write_anhar.o \
 write_anhar_anis.o \
 write_e_nk.o \
 write_e_ke.o  \
+write_el_thermo.o \
 write_ev_input.o \
 write_gruneisen_band.o \
 write_gruneisen_band_anis.o \

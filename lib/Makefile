@@ -11,6 +11,7 @@ debye_module.o \
 bz_2d_form.o \
 bz_asy.o \
 elastic_const.o \
+eldos_module.o \
 isoentropic.o \
 latgen_2d.o \
 gnuplot.o \
