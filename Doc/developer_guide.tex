@@ -265,6 +265,9 @@ scf_band        bands_sub
 
 scf_dos         dos_sub          fldos
                 plot_dos         flpsdos
+                write_el_therm   fltherm
+                plot_el_therm                   flgnuplot(_el_therm) 
+                                                           flpstherm(_el_therm)
 
 scf_ph             --            fildyn               --                  --
 scf_disp                         fildyn
