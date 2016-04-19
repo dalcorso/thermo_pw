@@ -326,7 +326,7 @@ DO itemp = 1, ntemp
                       2.0_DP * ( 1.0_DP - cm(4) ) * alpha_aux(2) ) / 3.0_DP
 
            alpha(1)=(alpha_aux(1) * cm(1) - alpha(3) ) / 2.0_DP   
-           alpha(2)=alpha(2)             
+           alpha(2)=alpha(1)             
        CASE(8,9,10,11)
 !
 !   orthorombic case
