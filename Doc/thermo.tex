@@ -2408,6 +2408,57 @@ C^S_{ij,lm} - C^T_{ij,lm} = - {T V b_{ij} b_{lm} \over C^\epsilon}
 \end{equation}
 
 \newpage
+
+\section{\color{coral}Finite temperature electronic excitation energy}
+The electronic excitation energy due to the finite temperature $U_{el}$ is
+neglected in semiconductors and insulators. For metals it gives a finite
+contribution to the heat capacity that we estimate by a model of independent 
+electrons whose energy-wave vector dispersion is given by the band structure. 
+We assume Fermi-Dirac occupations of the available electronic levels:
+\begin{equation}
+f(E,T,\mu) = \tilde \theta({\mu - E \over k_B T}),
+\end{equation}
+where $\mu$ is the chemical potential and the function $\tilde \theta(x)$ is
+\begin{equation}
+\tilde \theta(x) = {1 \over 1 + e^{-x}}.
+\end{equation}
+Given the density of electronic states $N(E)$,
+we determine the chemical potential $\mu(T)$ at each temperature
+from the condition
+\begin{equation}
+N_{el} = \int_{-\infty}^\infty N(E) f(E,T,\mu) dE,
+\end{equation}
+where $N_{el}$ is the number of electrons per unit cell.
+The electronic excitation energy $U_{el}$ is given by
+\begin{equation}
+U_{el}=\int_{-\infty}^\infty E N(E) f(E,T,\mu) dE - 
+\int_{-\infty}^{E_F} E N(E) dE,
+\end{equation}
+where $E_F$ is the Fermi energy.
+The electronic entropy is given:
+\begin{equation}
+S_{el}=-k_B\int_{-\infty}^\infty \left[ f(E,T,\mu) \ln f(E,T,\mu) 
++ (1 - f(E,T,\mu)) \ln (1 - f(E,T,\mu)) \right] N(E) dE.
+\end{equation}
+The electron Helmholtz free-energy is calculated by 
+$F_{el}=U_{el}-TS_{el}$.
+Finally the constant strain electronic specific heat is estimated by:
+\begin{equation}
+C_{\eta,el}=\int_{-\infty}^\infty (E - \mu) N(E) 
+{\partial f(E,T,\mu) \over \partial T} dE,  
+\end{equation}
+where the partial derivative with respect to the temperature:
+\begin{equation}
+{\partial f(E,T,\mu) \over \partial T} = {E -\mu \over k_B T^2} \ \tilde 
+\theta'({\mu - E \over k_B T}),
+\end{equation}
+indicates that, in computing the derivative, we neglect the temperature 
+dependence of the chemical potential, and
+\begin{equation}
+\tilde \theta'(x) = {1 \over 1 + e^x+ e^{-x}}.
+\end{equation}
+
+\newpage
 \section{\color{coral}Appendix}
 It is often useful to express the primitive vectors of the centered
 lattices in term of the primitive vectors of the conventional lattices

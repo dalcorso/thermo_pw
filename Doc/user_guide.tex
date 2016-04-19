@@ -617,7 +617,7 @@ plot. To change the defaults you can modify directly the gnuplot script,
 it is written in such a way that a change to a few variables can
 control the entire plot.
 
-\subsection{\texttt{what='scf\_dos'}}
+\subsection{\color{web-blue}\texttt{what='scf\_dos'}}
 With this option the code makes a self-consistent calculation followed
 by a band structure calculation on a uniform mesh of {\bf k}-points and
 computes and plots the electronic density of states. \\
@@ -648,8 +648,15 @@ However with the present option no shift is applied to the bands
 and the minimum and maximum energies refer to the unshifted eigenvalues.
 Note that after a calculation with \texttt{what='scf\_dos'} you can
 run the tool code \texttt{epsilon\_twp.x} to evaluate the frequency
-dependent dielectric constant (for insulators only).
-
+dependent dielectric constant (for insulators only). \\
+With this option, in the metallic case, 
+the code computes the electronic thermodynamic quantities of
+a gas of independent electrons whose energy levels give the calculated 
+density of states and produces a postscript file
+with the electronic exitation energy, free energy, entropy,
+and constant strain heat capacity as a function of temperature. 
+The zero of the electronic energy is the energy at the smallest temperature 
+required in input when it is lower than $4$ K or $4$ K. 
 
 \subsection{\color{web-blue}\texttt{what='plot\_bz'}}
 With this option the code writes a script to make a plot

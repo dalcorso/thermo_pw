@@ -209,7 +209,9 @@ Total energy as a function of volume           mur_lc
 Total energy as a function of two or three
 crystallographic parameters                    mur_lc
 Energy bands                                   scf_bands, mur_lc_bands
-Electron density of states                     scf_dos, mur_lc_dos
+Electronic density of states                     scf_dos, mur_lc_dos
+Electronic energy, free energy, entropy,      
+isochoric heat capacity (metals only)          scf_dos, mur_lc_dos
 Phonon dispersions                             scf_disp, mur_lc_disp
 Phonon dos                                     scf_disp, mur_lc_disp
 Vibrational energy, free energy, entropy,      
@@ -364,13 +366,19 @@ in \texttt{find\_group.f90}, \texttt{divide\_class.f90}, and
 \texttt{divide\_class\_so.f90} of \qe.
 
 \item
+\texttt{eldos\_module.f90} contains routines to calculate the electronic
+excitation energy, free energy, entropy, and constant strain heat capacity
+from the electronic density of states, assuming a gas of independent 
+electrons.   
+
+\item
 \texttt{ph\_freq\_module.f90} contains routines to calculate the vibrational
-energy, free energy, entropy, and constant strain specific heat from the
+energy, free energy, entropy, and constant strain heat capacity from the
 phonon frequencies.   
 
 \item
 \texttt{phdos\_module.f90} contains routines to calculate the vibrational
-energy, free energy, entropy, and constant strain specific heat from the
+energy, free energy, entropy, and constant strain heat capacity from the
 phonon density of states.
 
 \item
