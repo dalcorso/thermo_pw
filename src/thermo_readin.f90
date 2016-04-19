@@ -14,6 +14,9 @@ SUBROUTINE thermo_readin()
   !  and written and the variables of the calculations.
   !
   USE kinds,                ONLY : DP
+  USE constants,            ONLY : k_boltzmann_ry
+  USE klist,                ONLY : degauss
+  USE ktetra,               ONLY : ltetra
   USE thermo_mod,           ONLY : what, ngeo, step_ngeo, reduced_grid, &
                                    fact_ngeo, max_geometries, start_geo, &
                                    jump_geo
@@ -637,6 +640,13 @@ SUBROUTINE thermo_readin()
         CALL errore('thermo_readin','thermo_pw requires scf or relax in &
                                                &pw input',1)
   ENDIF
+
+  IF (what(1:7)=='scf_dos'.OR.what(1:10)=='mur_lc_dos') THEN
+     IF (deltae==0.0_DP.AND.ndose==0.AND.(degauss>0.0_DP.OR.ltetra)) THEN
+        deltae=1.5_DP * k_boltzmann_ry*MIN(4.0_DP, tmin) 
+        WRITE(stdout,'(/,5x,"Deltae set to",f20.9," Ry")') deltae
+     ENDIF
+  END IF
 
   IF ( ngeo(1)==0 ) THEN
      IF (what(1:4) == 'scf_') ngeo=1
