@@ -11,7 +11,8 @@ USE kinds, ONLY : DP
 USE constants, ONLY : rytoev
 USE gnuplot,   ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
                       gnuplot_xlabel, gnuplot_ylabel, gnuplot_write_command, &
-                      gnuplot_write_file_mul_data
+                      gnuplot_write_file_mul_data, &
+                      gnuplot_write_file_mul_data_minus
 USE control_gnuplot, ONLY : gnuplot_command, lgnuplot, flgnuplot
 USE control_dos,     ONLY : save_ndos
 USE io_files,   ONLY : prefix
@@ -29,7 +30,7 @@ IMPLICIT NONE
 INTEGER  :: ierr
 
 CHARACTER(LEN=256) :: gnu_filename, filename, fildos, ylabel, xlabel
-REAL(DP), ALLOCATABLE :: e(:), dos(:), int_dos(:)
+REAL(DP), ALLOCATABLE :: e(:), dos(:), ddos(:), int_dos(:)
 INTEGER :: n
 INTEGER :: iu_dos
 REAL(DP) :: ymax, ymin, ymin1, ymax1
@@ -38,6 +39,7 @@ IF ( my_image_id /= root_image ) RETURN
 
 ALLOCATE(e(save_ndos))
 ALLOCATE(dos(save_ndos))
+IF (nspin==2) ALLOCATE(ddos(save_ndos))
 ALLOCATE(int_dos(save_ndos))
 
 IF ( ionode ) THEN
@@ -51,9 +53,15 @@ IF ( ionode ) THEN
    OPEN (unit=iu_dos, file=fildos, status='unknown', form='formatted')
 
    READ(iu_dos,*)
-   DO n=1, save_ndos
-      READ(iu_dos,*) e(n), dos(n), int_dos(n)
-   ENDDO
+   IF (nspin==2) THEN
+      DO n=1, save_ndos
+         READ(iu_dos,*) e(n), dos(n), ddos(n), int_dos(n)
+      ENDDO
+   ELSE
+      DO n=1, save_ndos
+         READ(iu_dos,*) e(n), dos(n), int_dos(n)
+      ENDDO
+   END IF
    CLOSE(iu_dos)
 END IF
 
@@ -62,6 +70,10 @@ ymax=0.0_DP
 DO n=1,save_ndos
    IF (dos(n) > ymax) ymax=dos(n)
    IF (dos(n) < ymin) ymin=dos(n)
+   IF (nspin==2) THEN
+      IF (ddos(n) > ymax) ymax=ddos(n)
+      IF (ddos(n) < ymin) ymin=ddos(n)
+   END IF 
 END DO
 ymax=ymax*1.1_DP
 
@@ -79,13 +91,13 @@ CALL gnuplot_start(gnu_filename)
 
 filename=TRIM(flpsdos)
 
-CALL gnuplot_write_header(filename, e(1), e(save_ndos), ymin, ymax, 1.0_DP )
-
 xlabel='Energy (eV)'
 IF (nspin==2) THEN
-   ylabel='dos (states / (eV spin cell))'
+   CALL gnuplot_write_header(filename, e(1), e(save_ndos), -ymax, ymax, 1.0_DP )
+   ylabel='dos (states / (spin  eV  cell) )'
 ELSE
-   ylabel='dos (states / (eV cell) )'
+   CALL gnuplot_write_header(filename, e(1), e(save_ndos), ymin, ymax, 1.0_DP )
+   ylabel='dos (states / (eV cell))'
 ENDIF
 
 CALL gnuplot_ylabel(TRIM(ylabel), .FALSE.)
@@ -93,18 +105,28 @@ CALL gnuplot_xlabel(TRIM(xlabel), .FALSE.)
 CALL gnuplot_write_command('plot_width=2',.FALSE.)
 
 IF (degauss>0.0_DP.OR.ltetra) THEN
-   WRITE(ylabel,'("set arrow from ",f13.5,",",f13.5," to ",f13.5,",",&
+   IF (nspin==2) THEN
+      WRITE(ylabel,'("set arrow from ",f13.5,",-ymax to ",f13.5,&
+                      &", ymax nohead lw 2")') ef*rytoev,ef*rytoev
+   ELSE
+      WRITE(ylabel,'("set arrow from ",f13.5,",",f13.5," to ",f13.5,",",&
                  &f13.5," nohead lw 2")') ef*rytoev,ymin,ef*rytoev,ymax
+   END IF
    CALL gnuplot_write_command(TRIM(ylabel),.FALSE.)
-   WRITE(ylabel,'("set label ""E_F"" at",f13.5,",",f13.5)') ef*rytoev*1.05_DP, &
-                                                                  ymax*0.9_DP
+   WRITE(ylabel,'("set label ""E_F"" at",f13.5,",",f13.5)') &
+                                    ef*rytoev*1.05_DP, ymax*0.92_DP
    CALL gnuplot_write_command(TRIM(ylabel),.FALSE.)
+   IF (nspin==2) THEN 
+      WRITE(ylabel,'("set arrow from xmin,0.0 to xmax, 0.0 nohead lw 2")')
+      CALL gnuplot_write_command(TRIM(ylabel),.FALSE.)
+   END IF
 END IF
 
-CALL gnuplot_write_file_mul_data(fldos,1,2,'color_red',.TRUE.,.TRUE.,.FALSE.)
 IF (nspin==2) THEN
-   CALL gnuplot_write_file_mul_data(fldos,1,3,'color_green',.TRUE.,.TRUE.,.FALSE.)
-   ylabel='Integrated dos (states/cell)'
+   CALL gnuplot_write_file_mul_data(fldos,1,2,'color_red',.TRUE.,.FALSE.,.FALSE.)
+   CALL gnuplot_write_file_mul_data_minus(fldos,1,3,'color_blue',.FALSE., &
+                                                  .TRUE., .FALSE.)
+   ylabel='Integrated dos (states / cell)'
    CALL gnuplot_ylabel(TRIM(ylabel), .FALSE.)
    WRITE(ylabel,'("set yrange[",f13.6,":",f13.6,"]")') ymin1, ymax1
    CALL gnuplot_write_command(TRIM(ylabel),.FALSE.)
@@ -112,7 +134,8 @@ IF (nspin==2) THEN
    CALL gnuplot_write_command('unset label',.FALSE.)
    CALL gnuplot_write_file_mul_data(fldos,1,4,'color_blue',.TRUE.,.TRUE.,.FALSE.)
 ELSE
-   ylabel='Integrated dos (states/cell)'
+   CALL gnuplot_write_file_mul_data(fldos,1,2,'color_red',.TRUE.,.TRUE.,.FALSE.)
+   ylabel='Integrated dos (states / cell)'
    CALL gnuplot_ylabel(TRIM(ylabel), .FALSE.)
    WRITE(ylabel,'("set yrange[",f13.6,":",f13.6,"]")') ymin1, ymax1
    CALL gnuplot_write_command(TRIM(ylabel),.FALSE.)
@@ -125,6 +148,7 @@ CALL gnuplot_end()
 
 DEALLOCATE(e)
 DEALLOCATE(dos)
+IF (nspin==2) DEALLOCATE(ddos)
 DEALLOCATE(int_dos)
 
 IF (lgnuplot.AND.ionode) &
