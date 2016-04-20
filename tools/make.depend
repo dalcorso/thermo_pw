@@ -4,10 +4,12 @@ elastic.o : ../../Modules/kind.o
 elastic.o : ../../Modules/mp_global.o
 elastic.o : ../../thermo_pw/lib/debye_module.o
 elastic.o : ../../thermo_pw/lib/elastic_const.o
+epsilon_tpw.o : ../../LR_Modules/lrcom.o
 epsilon_tpw.o : ../../Modules/becmod.o
 epsilon_tpw.o : ../../Modules/cell_base.o
 epsilon_tpw.o : ../../Modules/constants.o
 epsilon_tpw.o : ../../Modules/environment.o
+epsilon_tpw.o : ../../Modules/gvecw.o
 epsilon_tpw.o : ../../Modules/io_files.o
 epsilon_tpw.o : ../../Modules/io_global.o
 epsilon_tpw.o : ../../Modules/ions_base.o
@@ -21,7 +23,6 @@ epsilon_tpw.o : ../../Modules/noncol.o
 epsilon_tpw.o : ../../Modules/recvec.o
 epsilon_tpw.o : ../../Modules/uspp.o
 epsilon_tpw.o : ../../Modules/wavefunctions.o
-epsilon_tpw.o : ../../PHonon/PH/phcom.o
 epsilon_tpw.o : ../../PW/src/pwcom.o
 epsilon_tpw.o : ../../PW/src/symme.o
 epsilon_tpw.o : ../../thermo_pw/lib/gnuplot.o

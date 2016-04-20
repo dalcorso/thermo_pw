@@ -118,6 +118,7 @@ find_symmetry.o : ../../Modules/cell_base.o
 find_symmetry.o : ../../Modules/constants.o
 find_symmetry.o : ../../Modules/fft_base.o
 find_symmetry.o : ../../Modules/griddim.o
+find_symmetry.o : ../../Modules/gvecw.o
 find_symmetry.o : ../../Modules/io_global.o
 find_symmetry.o : ../../Modules/ions_base.o
 find_symmetry.o : ../../Modules/kind.o
@@ -133,6 +134,7 @@ generate_k_along_lines_kz.o : thermo_mod.o
 initialize_thermo_master.o : ../../Modules/kind.o
 initialize_thermo_master.o : thermo_mod.o
 initialize_thermo_work.o : ../../Modules/cell_base.o
+initialize_thermo_work.o : ../../Modules/gvecw.o
 initialize_thermo_work.o : ../../Modules/input_parameters.o
 initialize_thermo_work.o : ../../Modules/ions_base.o
 initialize_thermo_work.o : ../../Modules/kind.o
@@ -170,6 +172,7 @@ plan_avg_sub.o : ../../Modules/becmod.o
 plan_avg_sub.o : ../../Modules/cell_base.o
 plan_avg_sub.o : ../../Modules/control_flags.o
 plan_avg_sub.o : ../../Modules/fft_base.o
+plan_avg_sub.o : ../../Modules/gvecw.o
 plan_avg_sub.o : ../../Modules/io_files.o
 plan_avg_sub.o : ../../Modules/io_global.o
 plan_avg_sub.o : ../../Modules/ions_base.o
@@ -255,6 +258,7 @@ plot_phdos.o : thermo_mod.o
 plot_thermo.o : ../../Modules/io_global.o
 plot_thermo.o : ../../Modules/kind.o
 plot_thermo.o : ../../Modules/mp_images.o
+plot_thermo.o : ../../PW/src/pwcom.o
 plot_thermo.o : ../../thermo_pw/lib/gnuplot.o
 plot_thermo.o : thermo_mod.o
 plot_xrdp.o : ../../Modules/io_global.o
@@ -331,6 +335,7 @@ set_bz_path.o : ../../Modules/cell_base.o
 set_bz_path.o : ../../Modules/kind.o
 set_bz_path.o : thermo_mod.o
 set_dos_kpoints.o : ../../Modules/cell_base.o
+set_dos_kpoints.o : ../../PW/src/start_k.o
 set_dos_kpoints.o : ../../PW/src/symm_base.o
 set_dos_kpoints.o : thermo_mod.o
 set_elastic_cons_work.o : ../../Modules/cell_base.o
@@ -342,9 +347,9 @@ set_fft_mesh.o : ../../Modules/cell_base.o
 set_fft_mesh.o : ../../Modules/constants.o
 set_fft_mesh.o : ../../Modules/fft_base.o
 set_fft_mesh.o : ../../Modules/griddim.o
+set_fft_mesh.o : ../../Modules/gvecw.o
 set_fft_mesh.o : ../../Modules/kind.o
 set_fft_mesh.o : ../../Modules/recvec.o
-set_fft_mesh.o : ../../PW/src/pwcom.o
 set_fft_mesh.o : thermo_mod.o
 set_files_names.o : ../../PHonon/PH/phcom.o
 set_files_names.o : thermo_mod.o
@@ -367,6 +372,7 @@ set_temperature.o : thermo_mod.o
 set_thermo_work_todo.o : ../../Modules/cell_base.o
 set_thermo_work_todo.o : ../../Modules/control_flags.o
 set_thermo_work_todo.o : ../../Modules/fft_base.o
+set_thermo_work_todo.o : ../../Modules/gvecw.o
 set_thermo_work_todo.o : ../../Modules/input_parameters.o
 set_thermo_work_todo.o : ../../Modules/io_files.o
 set_thermo_work_todo.o : ../../Modules/io_global.o
@@ -390,6 +396,7 @@ simple_plot.o : thermo_mod.o
 sym_band_sub.o : ../../Modules/cell_base.o
 sym_band_sub.o : ../../Modules/constants.o
 sym_band_sub.o : ../../Modules/fft_base.o
+sym_band_sub.o : ../../Modules/gvecw.o
 sym_band_sub.o : ../../Modules/io_files.o
 sym_band_sub.o : ../../Modules/io_global.o
 sym_band_sub.o : ../../Modules/ions_base.o
@@ -408,8 +415,10 @@ sym_band_sub.o : thermo_mod.o
 thermo_mod.o : ../../Modules/kind.o
 thermo_mod.o : ../../thermo_pw/lib/ph_freq_module.o
 thermo_mod.o : ../../thermo_pw/lib/phdos_module.o
+thermo_pw.o : ../../LR_Modules/lrcom.o
 thermo_pw.o : ../../Modules/cell_base.o
 thermo_pw.o : ../../Modules/check_stop.o
+thermo_pw.o : ../../Modules/control_flags.o
 thermo_pw.o : ../../Modules/environment.o
 thermo_pw.o : ../../Modules/input_parameters.o
 thermo_pw.o : ../../Modules/io_files.o
@@ -430,9 +439,11 @@ thermo_pw.o : ../../thermo_pw/lib/mp_asyn.o
 thermo_pw.o : ../../thermo_pw/lib/phdos_module.o
 thermo_pw.o : ../../thermo_pw/lib/piezoelectric_tensor.o
 thermo_pw.o : ../../thermo_pw/lib/xrdp.o
+thermo_pw.o : ../../thermo_pw/qe/control_qe.o
 thermo_pw.o : thermo_mod.o
 thermo_readin.o : ../../Modules/cell_base.o
 thermo_readin.o : ../../Modules/command_line_options.o
+thermo_readin.o : ../../Modules/constants.o
 thermo_readin.o : ../../Modules/environment.o
 thermo_readin.o : ../../Modules/input_parameters.o
 thermo_readin.o : ../../Modules/io_files.o
@@ -447,6 +458,7 @@ thermo_readin.o : ../../Modules/parser.o
 thermo_readin.o : ../../Modules/read_input.o
 thermo_readin.o : ../../Modules/wrappers.o
 thermo_readin.o : ../../PHonon/PH/phcom.o
+thermo_readin.o : ../../PW/src/pwcom.o
 thermo_readin.o : ../../PW/src/symm_base.o
 thermo_readin.o : ../../thermo_pw/lib/piezoelectric_tensor.o
 thermo_readin.o : ../../thermo_pw/lib/xrdp.o
@@ -496,6 +508,14 @@ write_e_nk.o : ../../Modules/io_global.o
 write_e_nk.o : ../../Modules/kind.o
 write_e_nk.o : ../../Modules/mp_images.o
 write_e_nk.o : thermo_mod.o
+write_el_thermo.o : ../../Modules/constants.o
+write_el_thermo.o : ../../Modules/io_global.o
+write_el_thermo.o : ../../Modules/kind.o
+write_el_thermo.o : ../../Modules/mp.o
+write_el_thermo.o : ../../Modules/mp_images.o
+write_el_thermo.o : ../../PW/src/pwcom.o
+write_el_thermo.o : ../../thermo_pw/lib/eldos_module.o
+write_el_thermo.o : thermo_mod.o
 write_ev_input.o : ../../Modules/constants.o
 write_ev_input.o : ../../Modules/io_global.o
 write_ev_input.o : ../../Modules/kind.o
