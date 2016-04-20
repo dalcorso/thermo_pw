@@ -2,7 +2,7 @@ This is the distribution of the thermo_pw package. This program is
 a driver to compute the physical properties of materials, using 
 Quantum ESPRESSO (QE) (see http://www.quantum-espresso.org) routines 
 as the underlying engine.
-All quantities calculated by thermo_pw can be calculated also by the
+Almost all quantities calculated by thermo_pw can be calculated also by the
 QE package with more effort. thermo_pw decreases the number of steps 
 necessary to obtain a postscript picture of selected properties. See the 
 Doc/user_guide.pdf file for a list of the quantities presently available 
@@ -15,9 +15,8 @@ run with a single image.
 Thermo_pw is much less flexible than QE and probably after using it
 you may want to pass to QE for the more sophisticated tasks, but for the most
 common tasks, such as the calculation of band structures, of phonon
-dispersions, or for the calculation of the thermodynamic properties of
-materials, thermo_pw can be much easier to learn and faster to use, requiring
-much less information from the user.
+dispersions, or of thermodynamic properties thermo_pw can be much easier 
+to learn and faster to use, requiring much less information from the user.
 
 Note that this software is still experimental.
 
