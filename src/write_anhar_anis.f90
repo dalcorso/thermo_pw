@@ -347,8 +347,8 @@ DO itemp = 1, ntemp
          aux(itens)=aux(itens) + el_compliances(itens,jtens) &
                                               *alpha(jtens)
       END DO
-      alpha_an_g(:,itemp) = -aux(:) * ry_kbar / vm
    END DO
+   alpha_an_g(:,itemp) = -aux(:) * ry_kbar / vm
 END DO
 
 !CALL compute_cp(betab, vminf_t, b0f_t, phf_cv, cvf_t, cpf_t, b0f_s, &
