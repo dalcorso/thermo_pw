@@ -93,6 +93,8 @@ input of \thermo\ by the \texttt{XCrySDen} program).
 
 \item Electronic density of states at fixed geometry.
 
+\item Electronic heat capacity as a function of temperature (for metals only).
+
 \item Complex dielectric constant as a function of the complex
 frequency $\omega$ at fixed geometry.
 
@@ -109,8 +111,8 @@ temperature.
 \item Frozen ions and total elastic constants at fixed geometry.
 
 \item Fit of the total energy as a function of the lattice parameters with
-a quadratic polynomial and determination of equilibrium lattice parameters.
-Murnaghan fit for cubic systems.
+a quadratic or quartic polynomial and determination of equilibrium lattice 
+parameters.  Murnaghan fit for cubic systems.
 
 \item Electronic band structure at the minimum of the total energy.
 
@@ -145,8 +147,9 @@ band structure.
 
 \end{itemize}
 
-\thermo\ can run in parallel using all the parallel modes available in
-\qe. Moreover, \thermo\ can run using several images.
+\thermo\ can run on both serial and parallel machines using all 
+the parallellization options of \qe. Moreover, \thermo\ can run using 
+several images.
 When possible, the image parallelization is used in an asynchronous way.
 One processor takes the role of master and distributes the work 
 to all the images that carry it out independently. Presently 
@@ -181,11 +184,10 @@ Then you need to obtain the source code of the \thermo\ package.
 \texttt{Thermo\_pw} can be downloaded from the 
 \texttt{qe-forge} website at \texttt{http://www.qe-} 
 \texttt{forge.org/gf/project/thermo\_pw/frs/}.
-There are several versions. The one that you need depends on the version 
-of \qe\ that you are using. 
-The following table is the compatibility table between \qe\ and 
-\texttt{thermo\_pw} versions. For the versions of \qe\ not listed in
-the table there is no compatible \texttt{thermo\_pw} package.
+The version of \texttt{thermo\_pw} and that of \qe\ must be carefully matched. 
+The following table illustrates the compatibility between \qe\ and 
+\texttt{thermo\_pw}. There is no \texttt{thermo\_pw} package
+for the versions of \qe\ not listed here.
 \begin{center}
 \begin{table}
 \begin{tabular}{ll}
@@ -193,7 +195,7 @@ the table there is no compatible \texttt{thermo\_pw} package.
 \hline
 \texttt{thermo\_pw} & \qe  \\
 \hline
-0.5.0 & 5.3.0 \\
+0.5.0 (CVS) & SVN \\
 0.4.0 & 5.3.0 \\
 0.3.0 & 5.2.1, 5.2.0 \\
 0.2.0 & 5.1.2 \\
@@ -203,14 +205,15 @@ the table there is no compatible \texttt{thermo\_pw} package.
 \end{tabular}
 \end{table}
 \end{center}
-Also the CVS version of the \texttt{thermo\_pw} directory can be downloaded as 
+The \texttt{CVS} version of \texttt{thermo\_pw} can be downloaded as 
 described at
 the web page: \texttt{http://www.qe-} \texttt{forge.org/gf/project/thermo\_pw/scmcvs/?action=AccessInfo}.
-The CVS version of \texttt{thermo\_pw} works with the 5.3.0 version of \qe, 
+The CVS version of \texttt{thermo\_pw} works with the \texttt{SVN} version 
+of \qe.
 Check also the web page:
 \texttt{http://people.sissa.it/\textasciitilde dalcorso/thermo\_pw\_help.html} 
 if you have problems to download the CVS version of \texttt{thermo\_pw}
-or if the combination \texttt{thermo\_pw (CVS)} + \texttt{QE (5.3.0)} is not 
+or if the combination \texttt{thermo\_pw (CVS)} + \texttt{QE (SVN)} is not 
 working. 
 
 Getting the CVS version of \thermo, you obtain a directory \texttt{thermo\_pw}
@@ -227,7 +230,7 @@ directory and give the command \texttt{make join\_qe}. This command exchanges
 the files contained in \texttt{thermo\_pw} with those of the \qe\ package.
 Typing \texttt{make thermo\_pw} from the root \qe\ directory, or \texttt{make} 
 from the \texttt{thermo\_pw}\ directory, produces the executable
-\texttt{thermo\_pw/src/thermo\_pw.x} that is linked in the 
+\texttt{thermo\_pw/src/thermo\_pw.x} that can be found in the 
 \qe\ \texttt{bin/} directory. 
 
 \thermo\ has been written on a PC with Linux operating system using the
@@ -309,7 +312,8 @@ these data. The output postscript files are produced by invoking the
 \texttt{gnuplot} program within the code. Usually any modern Linux 
 distribution provides a package to install this code, or has it already 
 installed by default. If not, you can download it from 
-\texttt{http://www.gnuplot.info/}. Three input variables of \thermo\ control 
+\texttt{http://www.gnuplot.info/}. \\
+Three input variables of \thermo\ control 
 the use of the \texttt{gnuplot} code:
 
 \begin{verbatim}
@@ -653,7 +657,7 @@ With this option, in the metallic case,
 the code computes the electronic thermodynamic quantities of
 a gas of independent electrons whose energy levels give the calculated 
 density of states and produces a postscript file
-with the electronic exitation energy, free energy, entropy,
+with the electronic excitation energy, free energy, entropy,
 and constant strain heat capacity as a function of temperature. 
 The zero of the electronic energy is the energy at the smallest temperature 
 required in input when it is lower than $4$ K or $4$ K. 
@@ -792,9 +796,9 @@ delta_freq : When freq_line is .TRUE. instead of giving the last frequency
             Default: complex, (0.0, 0.0).
 
 \end{verbatim}
-When in the input of the phonon code a non zero wave-vector ${\bf q}$
+When in the input of the phonon code a non zero wave-vector {\bf q}
 is specified, the previous options produce the inverse of the dielectric 
-constant as a function of the frequency at the wave-vector ${\bf q}$
+constant as a function of the frequency at the wave-vector {\bf q}
 (this option can be used both for insulators and metals).
 Number of tasks for frequency calculations: 1 (images are not active yet).
 
@@ -805,15 +809,15 @@ input of \texttt{pw.x}. The dynamical matrices are used to calculate
 the interatomic force constants and to interpolate the phonon frequencies 
 along a path in the Brillouin zone. The path can be generated automatically 
 or given in input as in a band structure calculation (see above \texttt{what='scf\_bands'}). The code then 
-interpolates the phonon frequencies on a uniform mesh of {\bf q} points and computes the 
-density of vibrational states with a smearing approach. The density of 
+interpolates the phonon frequencies on a uniform mesh of {\bf q} points and 
+computes the phonon density of states with a smearing approach. The density of 
 states is used to calculate the harmonic thermodynamic properties: 
 vibrational energy, vibrational free energy, vibrational entropy, and 
-isochoric heat capacity.
+constant strain heat capacity.
 The same thermodynamic quantities are calculated also by direct 
 integration over the Brillouin zone and compared in the plots.
 Note that presently no interpolation formula is used at low temperatures
-so that the present code is not suited to obtain accurate thermodynamic 
+so \texttt{thermo\_pw} can not be used to obtain thermodynamic 
 properties at very low temperatures. 
 The plotted numerical values are per moles in an Avogadro number of unit 
 cells. If you need them per mole you have to divide by the number 
@@ -882,7 +886,7 @@ tensor.
 The \texttt{advanced}  method, available only for selected Bravais lattices, 
 try to optimize the calculation by choosing strains for which the number
 of needed {\bf k}-points is reduced. Moreover it identifies the 
-Bravais lattice of the strained solid and regenerate the primitive
+Bravais lattice of the strained solid and recalculates the primitive
 vectors with the conventions of \qe. When available this should be the
 most efficient method.
 The third algorithm is called \texttt{energy}.
@@ -958,41 +962,41 @@ Debye's vibrational energy, free energy, entropy and constant strain heat
 capacity. These quantities are plotted in a postscript file as a function
 of temperature.
 
-\subsection{\color{web-blue}\texttt{what='scf\_piezoelectric\_tensor'}}
-With this option the code calculates the piezoelectric tensor 
-($g_{\alpha,m}$ $\alpha=1,3,\ m=1,6$) of the solid.
-Depending on the point group, it calculates the polarization of the
-solid for a set of strains of the lattice. For each strain, it relaxes 
-the ions to their equilibrium positions when \texttt{frozen\_ions=.FALSE.} 
-or keep them in the strained positions when \texttt{frozen\_ions=.TRUE.}. 
-Finally it computes the piezoelectric tensor from the numerical derivatives 
-of the polarization with respect to strain.
-The number of strains used to compute each derivative 
-is \texttt{ngeo\_strain}.\\
-The input variables
-that control this option are the same as those used for the elastic constant:
-\begin{verbatim}
-frozen_ions: if .TRUE. the piezoelectric tensor is calculated 
-             keeping the ions frozen in the strained positions. 
-             Default: logical .FALSE.
-ngeo_strain: the number of strained configurations used. 
-             Default: integer 4
-nppl:        the number of k-points per line in Berry phase calculations
-             Default: integer 51
-delta_epsilon: the interval of strain values between two geometries.
-               To avoid a zero strain geometry that might have a
-               different symmetry ngeo_strain must be even.
-               Default: real 0.002
-\end{verbatim}
-If a file with the elastic constants is found on disk, the code computes also
-the direct piezoelectric tensor $d_{\alpha,m}$ which describes
-the polarization induced by an external stress, as $d_{\alpha,m}=
-\sum_n g_{\alpha,n} C_{nm}^{-1}$. All these quantities are calculated 
-for a vanishing electric field. \\
-Number of tasks for this option: \texttt{ngeo\_strain} times the number of
-independent strains. \\
-This feature is still incomplete and experimental.
-
+%\subsection{\color{web-blue}\texttt{what='scf\_piezoelectric\_tensor'}}
+%With this option the code calculates the piezoelectric tensor 
+%($g_{\alpha,m}$ $\alpha=1,3,\ m=1,6$) of the solid.
+%Depending on the point group, it calculates the polarization of the
+%solid for a set of strains of the lattice. For each strain, it relaxes 
+%the ions to their equilibrium positions when \texttt{frozen\_ions=.FALSE.} 
+%or keep them in the strained positions when \texttt{frozen\_ions=.TRUE.}. 
+%Finally it computes the piezoelectric tensor from the numerical derivatives 
+%of the polarization with respect to strain.
+%The number of strains used to compute each derivative 
+%is \texttt{ngeo\_strain}.\\
+%The input variables
+%that control this option are the same as those used for the elastic constant:
+%\begin{verbatim}
+%frozen_ions: if .TRUE. the piezoelectric tensor is calculated 
+%             keeping the ions frozen in the strained positions. 
+%             Default: logical .FALSE.
+%ngeo_strain: the number of strained configurations used. 
+%             Default: integer 4
+%nppl:        the number of k-points per line in Berry phase calculations
+%             Default: integer 51
+%delta_epsilon: the interval of strain values between two geometries.
+%               To avoid a zero strain geometry that might have a
+%               different symmetry ngeo_strain must be even.
+%               Default: real 0.002
+%\end{verbatim}
+%If a file with the elastic constants is found on disk, the code computes also
+%the direct piezoelectric tensor $d_{\alpha,m}$ which describes
+%the polarization induced by an external stress, as $d_{\alpha,m}=
+%\sum_n g_{\alpha,n} C_{nm}^{-1}$. All these quantities are calculated 
+%for a vanishing electric field. \\
+%Number of tasks for this option: \texttt{ngeo\_strain} times the number of
+%independent strains. \\
+%This feature is still incomplete and experimental.
+%
 \subsection{\color{web-blue}\texttt{what='mur\_lc'}}
 With this option the code runs several self-consistent calculations
 at different geometries. The runs can be done in parallel when several images 
@@ -1006,7 +1010,7 @@ at the values given as input of \texttt{pw.x}.
 When \texttt{lmurn=.FALSE.} the energy is calculated in a uniform
 grid of parameters composed of \texttt{ngeo(1)} $\times$ \texttt{ngeo(2)...}
 $\times$ \texttt{ngeo(6)} points.
-All the energies are fitted with a quadratic polynomial of
+The energies are fitted with a quadratic or quartic polynomial of
 $N_k$ variables, where $N_k$ is the number of independent crystal
 parameters for the given crystal system. A plot of the energy as 
 a function of the lattice constant is produced for cubic systems.
@@ -1176,15 +1180,15 @@ do_scf_relax : if .TRUE. the code makes a self-consistent relax calculation at
                uniformly to the equilibrium geometry.
                Default: logical .FALSE. 
 \end{verbatim}
-Number of tasks for this option: Maximum between the the number of tasks
+Number of tasks for this option: Maximum between the number of tasks
 needed by the \texttt{what='mur\_lc'} option and the number of tasks
 needed for the \texttt{what='scf\_elastic\_constants'} option.
 
-\subsection{\color{web-blue}\texttt{what='mur\_lc\_piezoelectric\_tensor'}}
-As \texttt{what='scf\_piezoelectric\_tensor'} but the calculation is made at the
-geometry that minimizes the energy. The
-energy minimization is made as described for \texttt{what='mur\_lc'}. \\
-This feature is still incomplete and experimental.
+%\subsection{\color{web-blue}\texttt{what='mur\_lc\_piezoelectric\_tensor'}}
+%As \texttt{what='scf\_piezoelectric\_tensor'} but the calculation is made at the
+%geometry that minimizes the energy. The
+%energy minimization is made as described for \texttt{what='mur\_lc'}. \\
+%This feature is still incomplete and experimental.
 
 \subsection{\color{web-blue}\texttt{what='mur\_lc\_t'}}
 With this option the code calculates the anharmonic 
@@ -1194,8 +1198,7 @@ The outputs of the code are the values of crystal parameters
 by computing the phonon dispersions on all the geometries specified as in
 \texttt{what='mur\_lc'} (or on a subset of these geometries) and 
 minimizing the Helmholtz free energy.
-Separate plots of the phonon dispersions along a path specified as
-described for \texttt{what='scf\_bands'} are obtained for all the 
+Separate plots of the phonon dispersions are obtained for all the 
 calculated geometries.
 For each geometry the code produces also plots of the phonon density
 of states and of the harmonic thermodynamic quantities.
@@ -1203,7 +1206,7 @@ From \texttt{celldm} as a function of temperature the code computes the thermal
 expansion tensor, the volume, and the volume thermal expansion as a 
 function of temperature. 
 The frequencies at all the calculated geometries are interpolated
-by quadratic fits of the frequencies as a function of the crystal parameters
+by quadratic or quartic polynomials of the crystal parameters
 and can be shown at crystal parameters given in input or at those that
 correspond to a given temperature. The interpolated frequencies  
 are shown on the same path used for the phonon dispersions.
@@ -1212,14 +1215,14 @@ the derivatives of the frequencies with respect to the crystal parameters
 multiplied by the crystal parameters. \\
 For anisotropic solids the derivatives of the frequencies are 
 used to calculate the thermal expansion tensor if the code finds a
-files that contains the elastic constants in the working directory. 
+file that contains the elastic constants in the working directory. 
 This possibility is implemented only for tetragonal, hexagonal, trigonal, and 
 orthorhombic systems. \\
 For cubic systems, the Murnaghan equation is used to interpolate the
 Helmholtz free energy and in addition to the lattice constant as a function of
-temperature, the code computes also the bulk modulus and the
-pressure derivative of the bulk modulus as a function 
-of temperature. Moreover the isobaric specific heat, the isoentropic 
+temperature, the bulk modulus and the pressure derivative of the bulk modulus 
+are plotted as a function of temperature. Moreover the isobaric specific 
+heat, the isoentropic 
 bulk modulus, and the average Gr\"uneisen parameter are calculated as 
 a function of temperature.
 The mode Gr\"uneisen parameters are calculated with cubic interpolations of the
@@ -1393,8 +1396,8 @@ different set
 of temperatures, or with a different sampling on the phonon frequencies, 
 etc.. You need to erase the output files that contain
 the phonon dos, or the thermal properties from a previous calculation, keeping 
-the dynamical matrices files, the \texttt{save\_energy} file and the
-\texttt{restart} directory and rerun \thermo.
+the dynamical matrices files and the \texttt{restart} directory and 
+rerun \thermo.
 Similarly if the files containing the bands energy eigenvalues are already
 in the working directory, it is possible to set the input variable
 \texttt{only\_bands\_plot} to change the bands plot without redoing the
@@ -1434,17 +1437,17 @@ and translates them of a fixed vector.
 \item \texttt{gener\_nanowire.x} reads a two dimensional (2D)
 Bravais lattice index and atomic coordinates an generates a sheet of type
 $(m,n)$. A sheet contained between the two vectors 
-${\bf C} = m {\bf a}_1 + n {\bf a}_2$ and ${\bf T} = p {\bf a}_1 + q {\bf a}_2$
-can be also generated and wrapped about ${\bf C}$ in a nanotube form 
-(${\bf a}_1$ and ${\bf a}_2$ are the primitive lattices of the 2D Bravais 
+{\bf C}$ = m$ {\bf a}$_1 + n ${\bf a}$_2$ and {\bf T} $= p ${\bf a}$_1 + q ${\bf a}$_2$
+can be also generated and wrapped about {\bf C} in a nanotube form 
+({\bf a}$_1$ and {\bf a}$_2$ are the primitive lattices of the 2D Bravais 
 lattice). 
 For lattices that allow it, $p$ and $q$ can be determined automatically so that 
-${\bf T}$ is perpendicular to ${\bf C}$.
+{\bf T} is perpendicular to {\bf C}.
 
 \item \texttt{gener\_2d\_slab.x} reads a two dimensional 
 Bravais lattice index and atomic coordinates an generates an infinite ribbon
-perpendicular to ${\bf G} = m {\bf b}_1 + n {\bf b}_2$, where 
-${\bf b}_1$ and ${\bf b}_2$ are the primitive Bravais lattice vectors 
+perpendicular to {\bf G} $= m$ {\bf b}$_1 + n ${\bf b}$_2$, where 
+{\bf b}$_1$ and {\bf b}$_2$ are the primitive reciprocal lattice vectors 
 of the 2D Bravais lattice. The number of rows of the ribbon, and the number of
 atoms per row are given as an input variables.
 
@@ -1454,12 +1457,13 @@ constant of a solid as a function of the frequency for independent electrons
 using the LDA or GGA eigenvalues. It is limited to insulators, but supports
 norm-conserving, ultrasoft, and PAW pseudopotentials. It supports both scalar
 relativistic and fully relativistic pseudopotentials and it uses the point
-group symmetry of the solid to reduce the number of k-points.
+group symmetry of the solid to reduce the number of {\bf k}-points.
 
 \item \texttt{gener\_3d\_slab.x} reads a three dimensional
 Bravais lattice index and atomic coordinates and generates an infinite slab
-perpendicular to ${\bf G} = m {\bf b}_1 + n {\bf b}_2 + o {\bf b}_3$, where
-${\bf b}_1$, ${\bf b}_2$ and ${\bf b}_3$ are the primitive reciprocal lattice
+perpendicular to {\bf G} $= m ${\bf b}$_1 + n ${\bf b}$_2 + o ${\bf b}$_3$, 
+where {\bf b}$_1$, {\bf b}$_2$ and {\bf b}$_3$ are the primitive reciprocal 
+lattice
 vectors of the 3D Bravais lattice. The number of layers of each slab, and the
 size of the surface unit cell are given as input parameters.
 
