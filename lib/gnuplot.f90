@@ -243,7 +243,7 @@ ELSE
     ws=label
 ENDIF
 
-frt='("set label """,a,""" at ", f12.4,",",a," center")'
+frt='("set label """,a,""" at ", f12.4,"*xscale-xshift,",a," center")'
 IF (comment) frt = '# ' // TRIM(frt)
 
 IF (ionode) WRITE(iun_gnuplot, frt)  TRIM(ws), xcoord, TRIM(ylabel)
