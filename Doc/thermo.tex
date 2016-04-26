@@ -96,8 +96,12 @@ e^{\beta \hbar \omega_{{\bf q},\nu}}-1}.
 \end{equation}
 where $\beta=1/ k_B T$ and $k_B$ is the Boltzmann constant and $\hbar$ is the
 Planck constant.
-Presently in \tpw\ $U_{el}$ is neglected and $U_0$ is calculated
-within density functional theory.
+Presently $U_0$ is calculated within density functional theory (DFT) and
+$U_{ph}$ within density functional perturbation theory (DFPT). 
+For metals the electronic contribution to the heat capacity is not 
+completly negligible. \tpw\ allows its estimate for a gas of 
+independent electrons with the density of states given by the DFT bands,
+but it neglects $U_{el}$ in all other calculations.
 Similarly the Helmholtz free energy is $F=U_0+F_{ph}$ with:
 \begin{equation}
 F_{ph} = \sum_{{\bf q},\nu} \ln \left[ 2 \sinh \left({\beta \hbar 
@@ -597,9 +601,9 @@ $\epsilon_6=2 \epsilon_{1,2}$ and we can write a generic strain as:
 \right).
 \end{equation}
 
-For each lattice (with the exception of the trigonal, monoclinic, 
-and triclinic systems) we consider two questions. Which strain is applied
-by changing the parameters $\zeta_k$ that define the unit cell and 
+For each system (with the exception of the monoclinic and triclinic) 
+we consider two questions. Which strain is applied
+by changing the crystal parameters $\zeta_k$ and 
 how does the Bravais lattice change for a given strain. In the latter
 case we consider only the strains of interest for the given Bravais 
 lattice.
@@ -1300,13 +1304,14 @@ when a certain quantity of heat is given to it at constant strain:
 C_\epsilon= T {d S \over dT}\Big|_\epsilon = { d U \over d T}\Big|_\epsilon.
 \end{equation}
 Since only the entropy of the ionic displacements is taken into consideration,
-the only term that is derived is $U_{ph}$. This is usually done at the
-equilibrium geometry. Once the phonon dispersions have been calculated this
-quantity is immediately available by deriving Eq.~\ref{uvib}
+the only term that is derived is $U_{ph}$. Once the phonon dispersions 
+have been calculated this quantity can be obtained by deriving Eq.~\ref{uvib}
 
 Note that for metals the electronic contribution, while not large, is important 
-and must be accounted for before comparing with experiment. However this
-is not presently implemented in \tpw.
+and must be accounted for before comparing with experiment. Presently,
+this term is calculated in \tpw\ for a model of indenpendent electrons with
+the same density of states (DOS) of the DFT bands. This contribution is 
+calculated for a metal together with the DOS (see below).
 
 \newpage
 \section{\color{coral}The elastic constants}
