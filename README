@@ -2,23 +2,18 @@ This is the distribution of the thermo_pw package. This program is
 a driver to compute the physical properties of materials, using 
 Quantum ESPRESSO (QE) (see http://www.quantum-espresso.org) routines 
 as the underlying engine.
-Almost all quantities calculated by thermo_pw can be calculated also by the
-QE package with more effort. thermo_pw decreases the number of steps 
-necessary to obtain a postscript picture of selected properties. See the 
-Doc/user_guide.pdf file for a list of the quantities presently available 
+Thermo_pw decreases the number of steps necessary to obtain a postscript 
+picture of selected properties. It is less flexible than QE, but for the 
+most common tasks, such as the calculation of band structures, of phonon 
+dispersions, or of harmonic and anharmonic thermodynamic properties it 
+can be easier to learn and simpler to use.
+See the Doc/user_guide.pdf file for a list of the quantities available 
 in thermo_pw. 
+
 The package can run on parallel machines. In addition to the standard 
 QE parallelization schemes thermo_pw can use the image parallelization 
 to parallelize as much as possible the different tasks, but it can also 
 run with a single image.
-
-Thermo_pw is much less flexible than QE and probably after using it
-you may want to pass to QE for the more sophisticated tasks, but for the most
-common tasks, such as the calculation of band structures, of phonon
-dispersions, or of thermodynamic properties thermo_pw can be much easier 
-to learn and faster to use, requiring much less information from the user.
-
-Note that this software is still experimental.
 
 Quick installation instructions:
 
@@ -43,8 +38,9 @@ Enter in this directory and type
 make leave_qe
 Then remove this directory.
 
-NB: This code changes a few files of the QE distribution (mainly makefiles). 
-Only after typing make leave_qe you recover the original QE distribution. If
+NB: This code substitutes the main Makefile, and the files install/makedeps.sh 
+and install/plugins_makefile of the QE distribution. Only after typing 
+make leave_qe the original files are copied in the QE distribution. If
 you just remove the thermo_pw directory the files of QE package remain 
 modified.
 
