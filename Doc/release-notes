@@ -1,3 +1,6 @@
+
+23/04/2016 Version 0.5.0 of thermo_pw is now frozen.
+
 New in version 0.5.0
 
 Added a module to calculate the thermodynamic properties of a gas of
@@ -6,13 +9,16 @@ independent electrons (only for metals).
 Added the options what='scf_dos' and what='mur_lc_dos' to compute and plot 
 the electronic density of states.
 
-Added a routine epsilon_tpw.x to calculate the complex dielectric constant
-with sums over the empty states.
+Added a few routines that compute the inverse of the complex dielectric 
+constant at a complex frequency and a finite wave vector q solving the 
+self-consistent Sternheimer equation.
 
 Added a few routines that complement the phonon code and compute the
-complex dielectric constant at a complex frequency via the Sternheimer 
-equation.
+complex dielectric constant at a complex frequency solving the  
+(self-consistent) Sternheimer equation.
 
+Added a routine epsilon_tpw.x to calculate the complex dielectric constant
+with sums over the empty states.
 
 23/01/2016 Version 0.4.0 of thermo_pw is now frozen.
 

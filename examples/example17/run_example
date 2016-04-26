@@ -11,8 +11,8 @@ $ECHO
 $ECHO "$EXAMPLE_DIR : starting"
 $ECHO
 $ECHO "This example shows how to use thermo_pw.x to calculate the"
-$ECHO "frequency dependent dielectric constant of a metal at a finite"
-$ECHO "wavevector q."
+$ECHO "inverse of the frequency dependent dielectric constant of Aluminum"
+$ECHO "for a complex frequency w and wavevector q."
 
 # set the needed environment variables
 . ../../../environment_variables

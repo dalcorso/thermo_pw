@@ -146,6 +146,6 @@ what=scf_ph : this example computes the frequency dependent
               using the self-consistent Sternheimer equation.
 
 example17:
-what=scf_ph : this example computes the frequency dependent
+what=scf_ph : this example computes the inverse of the frequency dependent
               dielectric constant of aluminum at a given q within the TD-DFPT,
               using the self-consistent Sternheimer equation.
