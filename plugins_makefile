@@ -163,11 +163,15 @@ configure-gipaw: touch-dummy
 # EPW
 ###########################################################
 
-epw: 
+epw: extlibs uncompress-epw
 	if test -d ../EPW; then \
 	cd ../EPW ; $(MAKE) all ; $(MAKE) all || exit 1; cd ../bin; ln -fs ../EPW/bin/epw.x . ; fi
 	-(cd ../bin; ln -fs ../EPW/src/epw.x .)
-	touch make-epw
+	touch ./make-epw
+
+uncompress-epw: touch-dummy
+	$(call download_and_unpack,$(EPW),$(EPW_URL),EPW,EPW)
+	touch uncompress-epw
 
 ##########################################################
 #   Thermo_pw
@@ -514,12 +518,13 @@ gipaw_distclean:
 epw_clean:
 	if test -d ../EPW; then (cd ../EPW; \
 	$(MAKE) clean); fi
-	rm -f ../bin/epw.x
-	rm -rf ./make-epw 
+	- rm -rf ./make-epw ./configure-epw
 
 epw_veryclean: epw_clean
+# dir is not deleted for compatibility with the repository
 
-epw_distclean: epw_clean
+epw_distclean:
+	rm -f ../archive/$(EPW).tar.gz
 
 w90_clean:
 	if test -d ../W90; then (cd ../W90; \
