@@ -171,23 +171,40 @@ license.
 \subsection{\color{web-blue}Installing}
 
 \thermo\ is a package tightly bound to \qe. It cannot be compiled without
-the \qe\ routines. For instruction on how to download and compile \qe, please 
+it. For instruction on how to download and compile \qe, please 
 refer to the general User's Guide, available in file \texttt{Doc/user\_guide.pdf}
-under the main \qe\ directory, or in the web site \\
+under the main \qe\ directory, or in the web site 
 \texttt{http://www.quantum-espresso.org}.
-
 Once \qe\ is correctly configured, you need to download the \PHonon\ 
 package. This can be done automatically typing \texttt{make ph} in
 the main \qe\ directory.
 
-Then you need to obtain the source code of the \thermo\ package. 
+At this point you need the source code of the \thermo\ package. 
 \texttt{Thermo\_pw} can be downloaded from the 
 \texttt{qe-forge} website at \texttt{http://www.qe-} 
-\texttt{forge.org/gf/project/thermo\_pw/frs/}.
-The version of \texttt{thermo\_pw} and that of \qe\ must be carefully matched. 
-The following table illustrates the compatibility between \qe\ and 
-\texttt{thermo\_pw}. There is no \texttt{thermo\_pw} package
-for the versions of \qe\ not listed here.
+\texttt{forge.org/gf/project/thermo\_pw/}, by clicking on the \texttt{Files}
+section and downloading one of the \texttt{.tar.gz} files.
+The versions of \texttt{thermo\_pw} and of \qe\ must be carefully matched
+as illustrated in Table 1. 
+There is no \texttt{thermo\_pw} package for the versions of \qe\ not listed 
+there. Unpacking the \texttt{.tar.gz} files in the main \qe\ directory, for
+instance with the command \texttt{tar -xzvf thermo\_pw.0.5.0.tar.gz}, you
+obtain a directory \texttt{thermo\_pw} with the source files. \\
+It is also possible to download the \texttt{CVS} version of 
+\texttt{thermo\_pw} as described at
+the web page: \texttt{http://www.qe-} \texttt{forge.org/gf/project/thermo\_pw/scmcvs/?action=AccessInfo}.
+Usually the CVS version of \texttt{thermo\_pw} contains the most recent
+features and bug fixes but it might work only with the \texttt{SVN} 
+version of \qe\ and its use is not advised.
+Please read the web page: 
+\texttt{http://people.sissa.it/\textasciitilde dalcorso/thermo\_pw\_help.html} 
+to have updated information about the compatibility bewteen the \texttt{CVS} 
+version of \texttt{thermo\_pw} and \qe\ or if you have problems downloading
+the \texttt{CVS} version of \texttt{thermo\_pw}.
+This page contains also information on critical bugs found in the 
+\texttt{thermo\_pw} packages and should be consulted before using 
+\texttt{thermo\_pw}.
+
 \begin{center}
 \begin{table}
 \begin{tabular}{ll}
@@ -203,35 +220,23 @@ for the versions of \qe\ not listed here.
 \hline
 \hline
 \end{tabular}
+\caption{Compatibility between the versions of 
+\texttt{thermo\_pw} and of \texttt{QE}.}
 \end{table}
 \end{center}
-The \texttt{CVS} version of \texttt{thermo\_pw} can be downloaded as 
-described at
-the web page: \texttt{http://www.qe-} \texttt{forge.org/gf/project/thermo\_pw/scmcvs/?action=AccessInfo}.
-The CVS version of \texttt{thermo\_pw} works with the \texttt{SVN} version 
-of \qe.
-Check also the web page:
-\texttt{http://people.sissa.it/\textasciitilde dalcorso/thermo\_pw\_help.html} 
-if you have problems to download the CVS version of \texttt{thermo\_pw}
-or if the combination \texttt{thermo\_pw (CVS)} + \texttt{QE (SVN)} is not 
-working. 
-
-Getting the CVS version of \thermo, you obtain a directory \texttt{thermo\_pw}
-that should be moved in the main \qe\ directory. Getting one of the
-\texttt{.tar.gz} files and unpacking it in the main \qe\ directory
-with the command \texttt{tar -xzvf thermo\_pw.0.4.0.tar.gz}, you 
-obtain the directory \texttt{thermo\_pw}.
 
 \subsection{\color{web-blue}Compiling}
 
-In order to compile \thermo\ the main \texttt{Makefile} and a few other
-files of \qe\ need to be updated. Just enter in the \texttt{thermo\_pw}
+In order to compile \thermo\ the main \texttt{Makefile} and the files
+\texttt{install/makedeps.sh} and \texttt{install/plugins\_makefile}
+of \qe\ need to be changed. Just enter in the \texttt{thermo\_pw}
 directory and give the command \texttt{make join\_qe}. This command exchanges
 the files contained in \texttt{thermo\_pw} with those of the \qe\ package.
-Typing \texttt{make thermo\_pw} from the root \qe\ directory, or \texttt{make} 
+Typing \texttt{make thermo\_pw} from the main \qe\ directory, or \texttt{make} 
 from the \texttt{thermo\_pw}\ directory, produces the executable
 \texttt{thermo\_pw/src/thermo\_pw.x} that can be found in the 
-\qe\ \texttt{bin/} directory. 
+\qe\ \texttt{bin/} directory. A few other tool codes are produced as well
+and linked in the \texttt{bin/} directory of \qe.
 
 \thermo\ has been written on a PC with Linux operating system using the
 \texttt{gfortran} compiler with \texttt{openMPI} parallelization. It has
@@ -241,6 +246,14 @@ It has been tested with \texttt{Intel/15.0} + \texttt{mkl/11.2} +
 \texttt{openMPI/1.6.5}.
 Any other combination of computer/operating system has not been tested, but 
 usually \thermo\ runs on the same systems where \qe\ runs. 
+
+\subsection{\color{web-blue}Searching help and reporting bugs}
+If you have problems installing \texttt{thermo\_pw} or if you need help
+with some of its features, please subscribe to the \texttt{thermo\_pw-forum}
+mailing list and report there your problems. Requests for the implementation 
+of new features are also welcome. If you think to have found a bug 
+in \texttt{thermo\_pw} you can report it to the mailing list or 
+write directly to me at \texttt{dalcorso.at.sissa.it}.
 
 \subsection{\color{web-blue}Uninstalling}
 
