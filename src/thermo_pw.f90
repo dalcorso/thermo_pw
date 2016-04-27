@@ -199,7 +199,7 @@ PROGRAM thermo_pw
 !
 !  In a murnaghan equation calculation determine the lattice constant,
 !  bulk modulus and its derivative and write the results
-!  Otherwise interpolate the energy with a quadratic function.
+!  Otherwise interpolate the energy with a quadratic or quartic polynomium.
 !
   IF (lev_syn_1) THEN
      IF (lmurn) THEN
@@ -570,9 +570,12 @@ PROGRAM thermo_pw
 !
 !     Here the Helmholtz free energy at each lattice constant is available.
 !     We can write on file the free energy as a function of the volume at
-!     any temperature. For each temperature we call the murnaghan equation
-!     to fit the data. We save the minimum volume, the bulk modulus and its
-!     pressure derivative for each temperature.
+!     any temperature. For each temperature we can fit the free energy
+!     or the Gibbs energy if we have a finite pressure with a 
+!     Murnaghan equation or with a quadratic or quartic polynomial. 
+!     We save the minimum volume or crystal parameters. With the Murnaghan fit
+!     we save also the bulk modulus and its pressure derivative for each 
+!     temperature.
 !
      IF (lev_syn_2) THEN
         IF (lmurn) THEN

@@ -149,3 +149,9 @@ example17:
 what=scf_ph : this example computes the inverse of the frequency dependent
               dielectric constant of aluminum at a given q within the TD-DFPT,
               using the self-consistent Sternheimer equation.
+
+example18:
+what=scf_dos : this example computes the electron density of states of aluminum
+              and writes on file the electronic thermodynamic properties
+              of a gas of independent electrons with the same density of
+              states.

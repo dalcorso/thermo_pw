@@ -25,7 +25,7 @@ SUBROUTINE dos_sub()
   USE ener,       ONLY : ef
   USE control_dos, ONLY : legauss, sigmae, deltae, ndose, save_ndos
   USE noncollin_module, ONLY: noncolin
-  USE control_bands, ONLY : emax_input, emin_input
+  USE control_bands, ONLY : emax_input
   USE data_files, ONLY : fldos
   USE mp,         ONLY : mp_min, mp_max, mp_sum
   USE mp_pools,   ONLY : inter_pool_comm
@@ -77,13 +77,10 @@ SUBROUTINE dos_sub()
   !
   ! find min and max energy for plot (band extrema if not set)
   !
-  IF ( emin_input == 0.0_DP ) THEN
-     emin = MINVAL ( et(1, 1:nks) )
-     CALL mp_min(emin, inter_pool_comm)
-     IF ( degauss > 0.0_dp ) emin = emin - 5.0_dp * degauss
-  ELSE
-     emin = emin_input/rytoev
-  END IF
+  emin = MINVAL ( et(1, 1:nks) )
+  CALL mp_min(emin, inter_pool_comm)
+  IF ( degauss > 0.0_dp ) emin = emin - 5.0_dp * degauss
+
   IF ( emax_input  == 0.0_DP ) THEN
      emax = MINVAL ( et(nbnd, 1:nks) )
      CALL mp_max(emax, inter_pool_comm)
@@ -112,9 +109,11 @@ SUBROUTINE dos_sub()
   dosofe=0.0_DP
   dosint = 0.d0
   !
+  WRITE(stdout,*)
   DO n= 1, ndos
+     IF (MOD(n,10000)==0) WRITE(stdout,&
+                     '(5x,"Computing point number ", i10, " /", i10)') n, ndos
      e(n) = emin + (n - 1) * deltae
-     IF (mod(n,1000)==0) WRITE(6,*) 'computing n', n
      IF (ltetra) THEN
         CALL dos_t(et,nspin,nbnd,nks,ntetra,tetra,e(n),dosofe(1,n))
      ELSE

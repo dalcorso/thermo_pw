@@ -15,6 +15,7 @@ USE gnuplot,   ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
                       gnuplot_write_file_mul_data_minus
 USE control_gnuplot, ONLY : gnuplot_command, lgnuplot, flgnuplot
 USE control_dos,     ONLY : save_ndos
+USE control_bands,   ONLY : emin_input
 USE io_files,   ONLY : prefix
 USE data_files, ONLY : fldos
 USE postscript_files, ONLY : flpsdos
@@ -33,7 +34,7 @@ CHARACTER(LEN=256) :: gnu_filename, filename, fildos, ylabel, xlabel
 REAL(DP), ALLOCATABLE :: e(:), dos(:), ddos(:), int_dos(:)
 INTEGER :: n
 INTEGER :: iu_dos
-REAL(DP) :: ymax, ymin, ymin1, ymax1
+REAL(DP) :: ymax, ymin, ymin1, ymax1, e1
 
 IF ( my_image_id /= root_image ) RETURN
 
@@ -92,11 +93,13 @@ CALL gnuplot_start(gnu_filename)
 filename=TRIM(flpsdos)
 
 xlabel='Energy (eV)'
+e1=e(1)
+IF (emin_input /= 0.0_DP) e1=emin_input
 IF (nspin==2) THEN
-   CALL gnuplot_write_header(filename, e(1), e(save_ndos), -ymax, ymax, 1.0_DP )
+   CALL gnuplot_write_header(filename, e1, e(save_ndos), -ymax, ymax, 1.0_DP )
    ylabel='dos (states / (spin  eV  cell) )'
 ELSE
-   CALL gnuplot_write_header(filename, e(1), e(save_ndos), ymin, ymax, 1.0_DP )
+   CALL gnuplot_write_header(filename, e1, e(save_ndos), ymin, ymax, 1.0_DP )
    ylabel='dos (states / (eV cell))'
 ENDIF
 
