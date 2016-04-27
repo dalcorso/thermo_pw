@@ -1,0 +1,7 @@
+ &INPUT_THERMO
+  what='scf_dos',
+  nk1_d=48
+  nk2_d=48
+  nk3_d=48
+  emax_input=25.0
+ /
