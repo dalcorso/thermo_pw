@@ -23,7 +23,7 @@ USE temperature,    ONLY : tmin, tmax, deltat, ntemp, temp
 USE mp_images,      ONLY : root_image, my_image_id, intra_image_comm
 USE mp,             ONLY : mp_bcast
 USE io_global,      ONLY : ionode, ionode_id, stdout
-USE data_files,     ONLY : fltherm, fldos
+USE data_files,     ONLY : fleltherm, fleldos
 
 IMPLICIT NONE
 
@@ -50,10 +50,10 @@ IF (degauss==0.0_DP.AND..NOT.ltetra) RETURN
 
 WRITE(stdout,'(/,2x,76("+"))')
 WRITE(stdout,'(5x,"Computing the thermodynamic properties from electron dos")')
-WRITE(stdout,'(5x,"Writing on file ",a)') TRIM(fltherm)
+WRITE(stdout,'(5x,"Writing on file ",a)') TRIM(fleltherm)
 WRITE(stdout,'(2x,76("+"),/)')
 
-CALL read_eldos_data(eldos, lsda, fldos)
+CALL read_eldos_data(eldos, lsda, fleldos)
 
 ALLOCATE(el_mu(ntemp))
 ALLOCATE(el_free_ener(ntemp))
@@ -121,7 +121,7 @@ END DO
 
 IF (ionode) THEN
    iu_therm=2
-   OPEN (UNIT=iu_therm, FILE=TRIM(fltherm), STATUS='unknown',&
+   OPEN (UNIT=iu_therm, FILE=TRIM(fleltherm), STATUS='unknown',&
                                                      FORM='formatted')
    WRITE(iu_therm,'("#")')  
    WRITE(iu_therm,'("# Temperature T in K, ")')

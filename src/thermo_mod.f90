@@ -501,6 +501,7 @@ MODULE control_dos
   LOGICAL :: legauss        ! if .true. use gaussian smearing for dos plot
   INTEGER :: save_ndos      ! number of points in the file 
 
+
 END MODULE control_dos
 
 MODULE control_grun
@@ -683,7 +684,9 @@ MODULE data_files
   CHARACTER(LEN=256) :: flfrc   ! file with the force constants
   CHARACTER(LEN=256) :: flfrq   ! file with the frequencies 
   CHARACTER(LEN=256) :: fldos   ! file with the phonon dos
+  CHARACTER(LEN=256) :: fleldos ! file with the electron dos
   CHARACTER(LEN=256) :: fltherm ! file with the harmonic thermodynamic 
+  CHARACTER(LEN=256) :: fleltherm ! file with the electronic thermodynamic 
   CHARACTER(LEN=256) :: flanhar ! file with the anharmonic quantities
   CHARACTER(LEN=256) :: flevdat ! file with data for ev.x 
   CHARACTER(LEN=256) :: flenergy  ! the name of the file with the energy
@@ -719,8 +722,11 @@ MODULE postscript_files
   CHARACTER(LEN=256) :: flpsband  ! the name of the output postscript file
   CHARACTER(LEN=256) :: flpsdisp  ! the name of the output postscript file
   CHARACTER(LEN=256) :: flpsdos   ! the name of the postscript file with dos
+  CHARACTER(LEN=256) :: flpseldos ! the name of the postscript file with el dos
   CHARACTER(LEN=256) :: flpstherm ! the name of the postscript file with 
                                   ! thermodynamic quantities
+  CHARACTER(LEN=256) :: flpseltherm ! the name of the postscript file with 
+                                  ! electronic thermodynamic quantities
   CHARACTER(LEN=256) :: flpsanhar ! the name of the postscript file with 
                                   ! anharmonic quantities
   CHARACTER(LEN=256) :: flpskeconv! the name of the postscript file with 

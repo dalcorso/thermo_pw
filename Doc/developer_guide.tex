@@ -263,11 +263,10 @@ scf_band        bands_sub
                 plotbands_sub    flpbands
                 write_gnuplot_file              flgnuplot(_band)    flpsband     
 
-scf_dos         dos_sub          fldos
-                plot_dos         flpsdos
-                write_el_therm   fltherm
-                plot_el_therm                   flgnuplot(_el_therm) 
-                                                           flpstherm(_el_therm)
+scf_dos         dos_sub          fleldos
+                plot_dos                        flgnuplot(_eldos)   flpseldos
+                write_el_therm   fleltherm
+                plot_el_therm                   flgnuplot(_eltherm) flpseltherm
 
 scf_ph             --            fildyn               --                  --
 scf_disp                         fildyn

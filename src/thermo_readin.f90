@@ -26,7 +26,8 @@ SUBROUTINE thermo_readin()
                                    flanhar, filband, flkeconv,             &
                                    flenergy, flpbs, flprojlayer,           &
                                    flnkconv, flgrun, flpgrun, fl_el_cons,  &
-                                   flpband, flvec, flepsilon
+                                   flpband, flvec, flepsilon, fleldos,     &
+                                   fleltherm
   USE temperature,          ONLY : tmin, tmax, deltat, ntemp
   USE control_pressure,     ONLY : pressure
   USE ifc,                  ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq, &
@@ -46,7 +47,7 @@ SUBROUTINE thermo_readin()
   USE postscript_files,     ONLY : flpsband, flpsdisp, flpsmur, flpsdos, &
                                    flpstherm, flpsanhar, flpskeconv, &
                                    flpsnkconv, flpsgrun,  flpsenergy, &
-                                   flpsepsilon
+                                   flpsepsilon, flpseldos, flpseltherm
   USE control_2d_bands,     ONLY : lprojpbs, nkz, gap_thr, sym_divide, &
                                    identify_sur, sur_layers, sur_thr, &
                                    force_bands, only_bands_plot, dump_states, &
@@ -111,6 +112,7 @@ SUBROUTINE thermo_readin()
                             flfrc, flfrq, fldos, fltherm,   &
                             flanhar, filband, flkeconv,     &
                             flnkconv,                       &
+                            fleldos, fleltherm,             &
                             fact_ngeo,                      &
                             step_ngeo,                      &
                             start_geo,                      &
@@ -158,6 +160,7 @@ SUBROUTINE thermo_readin()
                             flpsanhar, flpsmur, flpskeconv, &
                             flpsnkconv, flgrun,             &
                             flpsenergy,                     &
+                            flpsdos, flpseltherm,           &
                             flenergy,                       &
                             fl_el_cons,                     &
                             flvec,                          &
@@ -312,10 +315,12 @@ SUBROUTINE thermo_readin()
   flfrc='output_frc.dat'
   flfrq='output_frq.dat'
   fldos='output_dos.dat'
+  fleldos='output_eldos.dat'
   flvec='matdyn.modes'
   flkeconv='output_keconv.dat'
   flnkconv='output_nkconv.dat'
   fltherm='output_therm.dat'
+  fleltherm='output_eltherm.dat'
   flanhar='output_anhar.dat'
   flgrun='output_grun.dat'
   flevdat='output_ev.dat'
@@ -332,7 +337,9 @@ SUBROUTINE thermo_readin()
   flpsband='output_band.ps'
   flpsdisp='output_disp.ps'
   flpsdos='output_dos.ps'
+  flpseldos='output_eldos.ps'
   flpstherm='output_therm.ps'
+  flpseltherm='output_eltherm.ps'
   flpsanhar='output_anhar.ps'
   flpskeconv='output_keconv.ps'
   flpsnkconv='output_nkconv.ps'

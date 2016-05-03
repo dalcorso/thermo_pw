@@ -17,8 +17,8 @@ USE control_gnuplot, ONLY : gnuplot_command, lgnuplot, flgnuplot
 USE control_dos,     ONLY : save_ndos
 USE control_bands,   ONLY : emin_input
 USE io_files,   ONLY : prefix
-USE data_files, ONLY : fldos
-USE postscript_files, ONLY : flpsdos
+USE data_files, ONLY : fleldos
+USE postscript_files, ONLY : flpseldos
 USE ener,             ONLY : ef
 USE klist,     ONLY : degauss
 USE ktetra,    ONLY : ltetra
@@ -30,7 +30,7 @@ IMPLICIT NONE
 
 INTEGER  :: ierr
 
-CHARACTER(LEN=256) :: gnu_filename, filename, fildos, ylabel, xlabel
+CHARACTER(LEN=256) :: gnu_filename, filename, ylabel, xlabel
 REAL(DP), ALLOCATABLE :: e(:), dos(:), ddos(:), int_dos(:)
 INTEGER :: n
 INTEGER :: iu_dos
@@ -44,14 +44,8 @@ IF (nspin==2) ALLOCATE(ddos(save_ndos))
 ALLOCATE(int_dos(save_ndos))
 
 IF ( ionode ) THEN
-   IF ( fldos == ' ' ) THEN
-      fildos = trim(prefix)//'.dos'
-   ELSE
-      fildos=TRIM(fldos)
-   ENDIF
-
    iu_dos=2
-   OPEN (unit=iu_dos, file=fildos, status='unknown', form='formatted')
+   OPEN (unit=iu_dos, file=TRIM(fleldos), status='unknown', form='formatted')
 
    READ(iu_dos,*)
    IF (nspin==2) THEN
@@ -87,10 +81,10 @@ DO n=1,save_ndos
 END DO
 ymax1=ymax1*1.1_DP
 
-gnu_filename = TRIM(flgnuplot)//'_dos'
+gnu_filename = TRIM(flgnuplot)//'_eldos'
 CALL gnuplot_start(gnu_filename)
 
-filename=TRIM(flpsdos)
+filename=TRIM(flpseldos)
 
 xlabel='Energy (eV)'
 e1=e(1)
@@ -126,8 +120,8 @@ IF (degauss>0.0_DP.OR.ltetra) THEN
 END IF
 
 IF (nspin==2) THEN
-   CALL gnuplot_write_file_mul_data(fldos,1,2,'color_red',.TRUE.,.FALSE.,.FALSE.)
-   CALL gnuplot_write_file_mul_data_minus(fldos,1,3,'color_blue',.FALSE., &
+   CALL gnuplot_write_file_mul_data(fleldos,1,2,'color_red',.TRUE.,.FALSE.,.FALSE.)
+   CALL gnuplot_write_file_mul_data_minus(fleldos,1,3,'color_blue',.FALSE., &
                                                   .TRUE., .FALSE.)
    ylabel='Integrated dos (states / cell)'
    CALL gnuplot_ylabel(TRIM(ylabel), .FALSE.)
@@ -135,16 +129,19 @@ IF (nspin==2) THEN
    CALL gnuplot_write_command(TRIM(ylabel),.FALSE.)
    CALL gnuplot_write_command('unset arrow',.FALSE.)
    CALL gnuplot_write_command('unset label',.FALSE.)
-   CALL gnuplot_write_file_mul_data(fldos,1,4,'color_blue',.TRUE.,.TRUE.,.FALSE.)
+   CALL gnuplot_write_file_mul_data(fleldos,1,4,'color_blue',.TRUE.,.TRUE.,&
+                                                                      .FALSE.)
 ELSE
-   CALL gnuplot_write_file_mul_data(fldos,1,2,'color_red',.TRUE.,.TRUE.,.FALSE.)
+   CALL gnuplot_write_file_mul_data(fleldos,1,2,'color_red',.TRUE.,.TRUE.,&
+                                                                      .FALSE.)
    ylabel='Integrated dos (states / cell)'
    CALL gnuplot_ylabel(TRIM(ylabel), .FALSE.)
    WRITE(ylabel,'("set yrange[",f13.6,":",f13.6,"]")') ymin1, ymax1
    CALL gnuplot_write_command(TRIM(ylabel),.FALSE.)
    CALL gnuplot_write_command('unset arrow',.FALSE.)
    CALL gnuplot_write_command('unset label',.FALSE.)
-   CALL gnuplot_write_file_mul_data(fldos,1,3,'color_blue',.TRUE.,.TRUE.,.FALSE.)
+   CALL gnuplot_write_file_mul_data(fleldos,1,3,'color_blue',.TRUE.,.TRUE.,&
+                                                                      .FALSE.)
 ENDIF
 
 CALL gnuplot_end()

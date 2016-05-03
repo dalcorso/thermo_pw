@@ -26,7 +26,7 @@ SUBROUTINE dos_sub()
   USE control_dos, ONLY : legauss, sigmae, deltae, ndose, save_ndos
   USE noncollin_module, ONLY: noncolin
   USE control_bands, ONLY : emax_input
-  USE data_files, ONLY : fldos
+  USE data_files, ONLY : fleldos
   USE mp,         ONLY : mp_min, mp_max, mp_sum
   USE mp_pools,   ONLY : inter_pool_comm
   USE mp_images,  ONLY : my_image_id, root_image
@@ -35,7 +35,7 @@ SUBROUTINE dos_sub()
   !
   CHARACTER(LEN=256), EXTERNAL :: trimcheck
   !
-  CHARACTER(len=256) :: fildos, outdir
+  CHARACTER(len=256) :: outdir
   REAL(DP) :: emin, emax
   REAL(DP), ALLOCATABLE :: e(:), dosofe(:,:), dosint(:)
   REAL(DP) :: save_degauss, ef1
@@ -159,14 +159,9 @@ SUBROUTINE dos_sub()
   !  Write the results on file
   !
   IF ( ionode ) THEN
-     IF ( fldos == ' ' ) THEN
-        fildos = trim(prefix)//'.dos'
-     ELSE
-        fildos=TRIM(fldos)
-     ENDIF
 
      iu_dos=2
-     OPEN (unit=iu_dos, file=fildos, status='unknown', form='formatted')
+     OPEN (unit=iu_dos, file=TRIM(fleldos), status='unknown', form='formatted')
 
      IF (nspin==1 .OR. nspin==4) THEN
         WRITE(iu_dos,'("#  E (eV)   dos(E)     Int dos(E)")')

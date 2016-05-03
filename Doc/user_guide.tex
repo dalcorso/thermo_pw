@@ -659,6 +659,16 @@ legauss        : When .true. computes the electronic dos using a gaussian
                 electronic structure calculation in metals or gaussian smearing
                 in insulators.
                 Default: logical .false.
+fleldos        : name of the file that contains the electron dos data
+                Default: character output_eldos.dat
+flpseldos      : name of the postscript file that contains the electron 
+                dos picture
+                Default: character output_eldos.ps
+fleltherm      : name of the file that contains the electron thermodynamic data 
+                Default: character output_eltherm.dat
+flpseldos      : name of the postscript file that contains the picture of the
+                electron thermodynamic quatities
+                Default: character output_eltherm.ps
 \end{verbatim}
 The minimum and maximum energy, as well as the number of bands,
 are specified as with the option \texttt{what='scf\_bands'}.

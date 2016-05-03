@@ -20,10 +20,11 @@ SUBROUTINE bcast_thermo_input()
   USE data_files,      ONLY : flevdat, flfrc, flfrq, fldos, fltherm, flanhar, &
                               filband, flkeconv, flnkconv, flgrun, flpband,   &
                               flpgrun, flenergy, flprojlayer, flpbs, flvec, &
-                              flepsilon
+                              flepsilon, fleldos, fleltherm
   USE postscript_files, ONLY : flpsband, flpsdisp, flpsdisp, flpsdos, &
                               flpstherm,  flpsanhar, flpsmur, flpskeconv, &
-                              flpsnkconv, flpsgrun, flpsenergy, flpsepsilon
+                              flpsnkconv, flpsgrun, flpsenergy, flpsepsilon, &
+                              flpseldos, flpseltherm
   USE temperature,     ONLY : tmin, tmax, deltat, ntemp
   USE ifc,             ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq, &
                               zasr, freqmin_input, freqmax_input, phdos_sigma
@@ -74,6 +75,8 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( flfrq, meta_ionode_id, world_comm )
   CALL mp_bcast( fldos, meta_ionode_id, world_comm )
   CALL mp_bcast( fltherm, meta_ionode_id, world_comm )
+  CALL mp_bcast( fleldos, meta_ionode_id, world_comm )
+  CALL mp_bcast( fleltherm, meta_ionode_id, world_comm )
   CALL mp_bcast( flanhar, meta_ionode_id, world_comm )
   CALL mp_bcast( flkeconv, meta_ionode_id, world_comm )
   CALL mp_bcast( flnkconv, meta_ionode_id, world_comm )
@@ -162,6 +165,8 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( flpsband, meta_ionode_id, world_comm )
   CALL mp_bcast( flpsdos, meta_ionode_id, world_comm )
   CALL mp_bcast( flpstherm, meta_ionode_id, world_comm )
+  CALL mp_bcast( flpseldos, meta_ionode_id, world_comm )
+  CALL mp_bcast( flpseltherm, meta_ionode_id, world_comm )
   CALL mp_bcast( flpsanhar, meta_ionode_id, world_comm )
   CALL mp_bcast( flpskeconv, meta_ionode_id, world_comm )
   CALL mp_bcast( flpsnkconv, meta_ionode_id, world_comm )

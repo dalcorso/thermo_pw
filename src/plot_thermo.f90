@@ -132,7 +132,7 @@ SUBROUTINE plot_el_thermo()
 !
 USE kinds,           ONLY : DP
 USE control_gnuplot, ONLY : flgnuplot, gnuplot_command, lgnuplot
-USE postscript_files, ONLY : flpstherm
+USE postscript_files, ONLY : flpseltherm
 USE gnuplot,         ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
                             gnuplot_ylabel, &
                             gnuplot_xlabel, &
@@ -140,7 +140,7 @@ USE gnuplot,         ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
                             gnuplot_set_fact
 USE klist,           ONLY : degauss
 USE ktetra,          ONLY : ltetra
-USE data_files,      ONLY : fltherm
+USE data_files,      ONLY : fleltherm
 USE temperature,     ONLY : tmin, tmax
 USE mp_images,       ONLY : root_image, my_image_id
 USE io_global,       ONLY : ionode
@@ -153,16 +153,16 @@ INTEGER :: ierr
 IF ( my_image_id /= root_image ) RETURN
 
 IF (degauss==0.0_DP.AND..NOT.ltetra) RETURN
-gnu_filename=TRIM(flgnuplot)//'_el_thermo'
+gnu_filename=TRIM(flgnuplot)//'_eltherm'
 CALL gnuplot_start(gnu_filename)
 
-psfilename=TRIM(flpstherm)//'_el_thermo'
+psfilename=TRIM(flpseltherm)
 IF (tmin ==1._DP) THEN
    CALL gnuplot_write_header(psfilename, 0.0_DP, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
 ELSE
    CALL gnuplot_write_header(psfilename, tmin, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
 ENDIF
-filename=TRIM(fltherm)
+filename=TRIM(fleltherm)
 CALL gnuplot_xlabel('T (K)', .FALSE.) 
 CALL gnuplot_ylabel('Electron energy (kJ / (N mol))',.FALSE.) 
 CALL gnuplot_set_fact(1313.3130_DP, .FALSE.) 
