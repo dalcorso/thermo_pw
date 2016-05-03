@@ -1,0 +1,307 @@
+%!
+%! Copyright (C) 2016 Andrea Dal Corso 
+%! This file is distributed under the terms of the
+%! GNU General Public License. See the file `License'
+%! in the root directory of the present distribution,
+%! or http://www.gnu.org/copyleft/gpl.txt .
+%!
+\documentclass[12pt,a4paper]{article}
+\def\version{0.6.0}
+\def\qe{{\sc Quantum ESPRESSO}}
+\def\tpw{{\sc THERMO\_PW}}
+
+\usepackage{html}
+\usepackage{color}
+
+\usepackage{graphicx}
+
+\definecolor{web-blue}{rgb}{0,0.5,1.0}
+\definecolor{coral}{rgb}{1.0,0.5,0.3}
+\definecolor{red}{rgb}{1.0,0,0.0}
+\definecolor{green}{rgb}{0.,1.0,0.0}
+
+\textwidth = 17cm
+\textheight = 24cm
+\topmargin =-1 cm
+\oddsidemargin = 0 cm
+
+\def\pwx{\texttt{pw.x}}
+\def\phx{\texttt{ph.x}}
+\def\configure{\texttt{configure}}
+\def\PWscf{\texttt{PWscf}}
+\def\PHonon{\texttt{PHonon}}
+\def\thermo{\texttt{thermo\_pw}}
+\def\make{\texttt{make}}
+
+\begin{document} 
+\author{Andrea Dal Corso (SISSA - Trieste)}
+\date{}
+
+%\def\SissaImage{./sissa_on_white.png}
+
+\title{
+%  \includegraphics[width=6cm]{\SissaImage}\\
+  \vskip 1cm
+  {\color{red} \Huge \tpw\ Tutorial} \\
+  \Large (version \version)
+}
+
+\maketitle
+
+\tableofcontents
+
+\newpage
+
+\section{\color{coral}Introduction}
+
+This guide gives a brief overview of the possibilities of the \thermo\ package. 
+It is a sort of HOWTO that gives you the most important information needed 
+to accomplish a given task.
+It assumes that you have already downloaded and compiled \qe\ and \thermo\  
+and that you have some task to do and want to known where to start. 
+The ultimate reference for the use of \thermo\ is its user's guide,
+however the capabilities of the code are rapidly expanding and the 
+user's guide is becoming more and more complex, so if you do not want
+to read it entirely you can find here some indications about where
+to find the information that you need.
+This tutorial tells you also in which file to find the quantity that you need.
+
+\section{\color{coral}People}
+This tutorial has been written by Andrea Dal Corso (SISSA - Trieste). 
+
+\section{\color{coral}Overview}
+
+In order to make a calculation with \thermo\ you need to be able to 
+produce an input file for the \texttt{pw.x} code of \qe. This input file
+requires mainly five information:
+\begin{itemize}
+\item The Bravais lattice.
+
+\item The position of the atoms inside the unit cell.
+
+\item The type of atoms and the pseudopotentials files that you want to use.
+
+\item The cut-off energies.
+
+\item The {\bf k}-point mesh that the code should use to make integrations over
+the Brillouin zone. The smearing parameter for metals. 
+\end{itemize}
+
+The Bravais lattice is specified by an integer number \texttt{ibrav} and by the
+crystal parameters \texttt{celldm} (up to six numbers). You can find 
+information on the \texttt{ibrav} code and on the required crystal parameters
+in the file \texttt{PW/Doc/INPUT\_PW} of the \qe\ distribution. 
+In \qe\ you can use \texttt{ibrav=0} and give directly the primitive
+lattice vectors of the Bravais lattice. Presently \thermo\ needs to
+known the Bravais lattice number so this form of input is not recommended. \\
+
+The positions of the atoms inside the unit cell are defined by an integer
+number \texttt{nat} (the number of atoms) and by \texttt{nat} 
+three-dimensional vectors as specified in the file \texttt{PW/Doc/INPUT\_PW}.
+You can use several units, specify the coordinates in cartesian or on the
+crystal basis or you can give the space group number and the
+coordinates of the inequivalent atoms. 
+These options are supported by \thermo. See the above file for details. \\
+
+The number of different types of atoms is given by an integer number 
+\texttt{ntyp} and for each atomic type you need to specify a 
+pseudopotential file. Pseudopotential files depend on the exchange and 
+correlation functional that you want to use and can be found in many 
+different places. There is a pseudopotential page in the \qe\ website, or 
+you can consider generating your pseudopotentials with the \texttt{pslibrary} 
+inputs. You can consult the web page \texttt{http://www.qe-forge.org/gf/project/pslibrary/} for more information. \\
+
+The kinetic energies cut-offs depend on the pseudopotentials
+and on the accuracy that you want to have in your calculation. You can 
+find some hints on the required cut-offs inside the pseudopotentials files,
+but you need to check the convergence of your results with the cut-off 
+energies. \\
+
+The {\bf k}-point mesh is given by three integer numbers and possible
+shifts (0 or 1) in the three directions. The convergence of the results
+with this mesh should be tested. \\
+
+Once you have an input for \texttt{pw.x}, in order to run \thermo\ you
+have to write a file called \texttt{thermo\_control} that contains a single
+namelist called \texttt{INPUT\_THERMO}. This namelist contains a keyword
+\texttt{what} that controls the type of calculation performed by 
+\thermo. Ideally you should set only \texttt{what} and make a calculation
+similar to \texttt{pw.x} calling instead the executable \texttt{thermo\_pw.x}
+and giving as input the input prepared for \texttt{pw.x}.
+
+\section{\color{coral}How do I make a self-consistent calculation?}
+Use \texttt{what='scf'}. See \texttt{example01}. The calculation is
+equivalent to a call to \texttt{pw.x} and is controlled by
+its input. In particular in the input of \texttt{pw.x} you can choose
+a single self-consistent calculation using \texttt{calculation='scf'}, 
+an atomic relaxation using \texttt{calculation='relax'}, or a cell relaxation 
+using \texttt{calculation='vc-relax'}.
+The use of \texttt{calculation='nscf'} and \texttt{calculation}
+\texttt{='bands'} is
+not supported by \thermo\ and could give unpredictable results.
+There is no advantage to use \thermo\ to do a molecular dynamic
+calculation. 
+
+\section{\color{coral}How do I plot the band structure?}
+Use \texttt{what='scf\_bands'}. See \texttt{example02}.
+With this option \thermo\ calls twice
+\texttt{pw.x} making first a self-consistent calculation with the parameters
+given in the \texttt{pw.x} input and then a band calculation along a 
+path chosen by \thermo, or along a path given by the user. It is recommended
+to use the standard path but see the user's guide if you want to give
+the path in the input of \thermo. 
+A few other parameters control the band plot. The most useful are 
+\texttt{emin\_input} and \texttt{emax\_input} that allow you to plot the 
+bands in a given energy range. The bands can be found 
+in a file called \texttt{output\_band.ps} if you do not specify the name 
+of the postcript file in the \thermo\ input.
+
+\section{\color{coral}How do I plot of the electronic density of states?}
+Use \texttt{what='scf\_dos'}. See \texttt{example18}. With this option
+\thermo\ calls twice \texttt{pw.x} making first a self-consistent calculation
+followed by a non self-consistent calculation on a regular mesh of 
+{\bf k} points.
+This second mesh can be specified in the \thermo\ input. The density of
+states can be found in a file called \texttt{output\_dos.ps} if you do not
+specify the name of the postscript file in the \thermo\ input.
+
+\section{\color{coral}How can I see the crystal structure?}
+\thermo\ is not a crystal structure viewer, but you can use a code such
+as \texttt{XCrySDen} that is able to read the \texttt{pw.x} input and
+see the crystal structure. If you use \texttt{what='plot\_bz'}, 
+\thermo\ produces a \texttt{.xsf} file that contains the structure given in
+input and can be read directly by \texttt{XCrySDen}. This could
+be useful if you have the space group and the inequivalent atomic positions.
+The generated \texttt{.xsf} file contains all the symmetry equivalent 
+atomic positions. For the same purpose you could also use the output
+of \texttt{pw.x}.
+
+\section{\color{coral}How can I see the Brillouin zone?}
+Use \texttt{what='plot\_bz'}. See \texttt{example12}. With this option
+the \thermo\ does not call \texttt{pw.x}, it just produces a script for
+the \texttt{asymptote} code with the instructions to plot the Brillouin
+zone and the standard path.
+
+\section{\color{coral}How can I plot the X-ray powder diffraction spectrum?}
+Use \texttt{what='plot\_bz'} to see the spectrum corresponding to
+the geometry given in the \texttt{pw.x} input. You can also see the
+spectrum corresponding to a relaxed structure using for instance
+\texttt{what='scf'}, asking for an atomic (cell) relaxation in the \texttt{pw.x}
+input and using \texttt{lxrdp=.TRUE.} variable in the \thermo\ input.
+The X-ray powder diffraction spectrum is shown in a file called 
+\texttt{output\_xrdp.ps} if the name of the postscript file is not
+given in the \thermo\ input. The scattering angles and intensities
+are also written in a file called \texttt{output\_xrdp.dat} if the filename
+is not given in the \thermo\ input.
+
+\section{\color{coral}How do I plot the phonon dispersions?}
+Use \texttt{what='scf\_disp'}. See \texttt{example04}. In this case you
+have to prepare an input for the \texttt{ph.x} code that must be
+called \texttt{ph\_control}. The required information in this input
+is the {\bf q}-point mesh used to interpolate the dynamical matrices and
+the name of the dynamical matrix files.
+See the \texttt{ph.x} guide if you need information on this point.
+The phonon dispersions are found in a file called \texttt{output\_disp.ps.g1}
+if the name of the postscript file is not given in the \thermo\ input.
+The vibrational density of states is found in a file called 
+\texttt{output\_dos.ps.g1} if the name of the postscript file in not
+given in the \thermo\ input.
+
+\section{\color{coral}How do I calculate the vibrational energy, free energy, entropy, and heat capacity?}
+Use \texttt{what='scf\_disp'}. See \texttt{example04}. These quantities
+are calculated after the phonon dispersion calculation for the default 
+temperature range ($1$ K - $800$ K) if this range
+is not given in the \thermo\ input. These quantities 
+as a function of temperature are found in the file \texttt{output\_therm.ps.g1}.
+
+\section{\color{coral}How do I calculate the elastic constants?}
+Use \texttt{what='scf\_elastic\_constants'}. See \texttt{example13}. The
+elastic constants appear in the output of \thermo\ and also in a file
+called \texttt{output\_el\_cons.dat} if the name of the file is not
+specified in input. This file can be read by \thermo\ for the options
+that require the knowledge of the elastic constants.
+
+\section{\color{coral}How do I calculate the Debye temperature?}
+Use \texttt{what='scf\_elastic\_constants'}. See \texttt{example13}. The
+Debye temperature appears in the output of \thermo. A file called
+\texttt{output\_therm.ps\_debye} contains a plot of the vibrational
+energy, free energy, entropy and heat capacity computed within the 
+Debye model.
+
+\section{\color{coral}How do I calculate the equilibrium structure?}
+Use \texttt{what='mur\_lc'}. See \texttt{example05}. Refer to the user's
+guide if you have an anisotropic solid. The crystal
+parameters are written in the \thermo\ output file. Note that the structure is
+searched interpolating with a polynomial or with the Murnaghan
+equation the energy calculated for several geometries close to the geometry 
+given in the input of \texttt{pw.x} so the closer this structure is to the 
+actual equilibrium structure the better is the fit and the
+closer the value found by \thermo\ to the real minimum. If the 
+equilibrium structure is very different from the one given in the 
+\texttt{pw.x} input you might want to repeat the calculation starting 
+from the new equilibrium structure. You can also check with the file
+\texttt{output\_mur.ps} (when \texttt{lmur=.true.}) or 
+\texttt{output\_energy.ps} (when \texttt{lmur=.false.}) if the minimum
+found is within the range of calculated structures. If this is not 
+the case the minimum has probably a non negligible error.
+Note also that almost all options can be specified using
+\texttt{what='mur\_lc\_...'} instead of \texttt{what='scf\_...'}.
+In this case they are calculated at the equilibrium geometry instead of
+the geometry given in the \texttt{pw.x} input. 
+This holds also if a finite pressure is specified in the \thermo\ input 
+and the equilibrium structure corresponds to the given pressure (See below).
+
+\section{\color{coral}How do I calculate the equilibrium structure 
+at a given pressure?}
+Use \texttt{what='mur\_lc'} and specify \texttt{pressure=value} in kbar in the
+\thermo\ input. Note that in the input of \texttt{pw.x} you should 
+give a geometry which is as close as possible to the equilibrium value
+found by the code at the given pressure (see above).
+
+\section{\color{coral} How do I specify the interval of temperatures that 
+I need?}
+See the user's guide in the subsection {\it Temperature and Pressure}.
+
+\section{\color{coral} How do I calculate the crystal parameters as a function
+of temperature?}
+Use \texttt{what='mur\_lc\_t'}. See \texttt{example09}. Note that
+for this option you need to give also the \texttt{ph.x} input.
+For anisotropic solids you need to specify \texttt{lmurn=.FALSE.},
+otherwise you calculate only the volume as a function of temperature
+varying \texttt{celldm(1)} but keeping all the other crystal parameters
+constant. The crystal parameters are plotted as a function of temperature
+in the standard temperature range if not given in input, in the file 
+\texttt{output\_anharm.ps} for cubic solids and
+\texttt{output\_anharm.ps\_celldm} for anisotropic
+solids if the name of the postscript file is not given in input.
+
+\section{\color{coral} How do I calculate the thermal expansion?}
+Use \texttt{what='mur\_lc\_t'}. See \texttt{example09}. The thermal expansions
+are shown as a function of temperature in the file \texttt{output\_anharm.ps}.
+
+\section{\color{coral} How do I calculate the bulk modulus as a function of 
+temperature?}
+Use \texttt{what='mur\_lc\_t'} and the option \texttt{lmurn=.TRUE.}.
+This approach is rigorously valid only for cubic solids, for anisotropic
+solid it is only an approximation in which only \texttt{celldm(1)} is
+changed while the other crystal parameters are kept constant.
+
+\section{\color{coral} How do I calculate the constant pressure heat capacity?}
+Use \texttt{what='mur\_lc\_t'} and the option \texttt{lmurn=.TRUE.}.
+This approach is rigorously valid only for cubic solids, for anisotropic
+solid it is only an approximation in which only \texttt{celldm(1)} is
+changed while the other crystal parameters are kept constant.
+
+\section{\color{coral} How do I calculate the electronic heat capacity
+of a metal?}
+Use \texttt{what='scf\_dos'}. See \texttt{example18}. In the metallic
+case in addition to a plot of the density of states this option produces
+also a plot of the electronic energy, free energy, entropy, heat capacity
+and chemical potential in the standard temperature range if this range is
+not given in the \thermo\ input. These quantities are found in the file
+\texttt{output\_therm.ps\_el\_thermo} if the name of the postscript
+file is not given in the \thermo\ input.
+Please keep the default value of \texttt{deltae} or the electronic
+thermodynamic properties could be wrong at low temperatures.
+
+\end{document}
