@@ -35,7 +35,7 @@ INTEGER :: ierr
 
 IF ( my_image_id /= root_image ) RETURN
 
-gnu_filename=TRIM(flgnuplot)//'_mur'
+gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//'_mur'
 filename=TRIM(flpsmur)
 IF (pressure /= 0.0_DP) THEN
    gnu_filename=TRIM(gnu_filename)//'.'//TRIM(float_to_char(pressure_kb,1))
@@ -49,8 +49,8 @@ CALL gnuplot_write_header(filename, vmin_input, vmax_input, 0.0_DP, 0.0_DP, &
 
 CALL gnuplot_xlabel('Volume ((a.u.)^3)',.FALSE.) 
 
-filename1=TRIM(flevdat)//'_mur'
-filename2=TRIM(flevdat)//'_mur1'
+filename1="energy_files/"//TRIM(flevdat)//'_mur'
+filename2="energy_files/"//TRIM(flevdat)//'_mur1'
 
 IF (pressure /= 0.0_DP) THEN
    filename1=TRIM(filename1)//'.'//TRIM(float_to_char(pressure_kb,1))

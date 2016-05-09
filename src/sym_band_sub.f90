@@ -85,7 +85,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   ios=0
   IF ( ionode ) THEN
      iunout=58
-     namefile=trim(filband)//".rap"
+     namefile="band_files/"//TRIM(filband)//".rap"
      OPEN (unit = iunout, file = namefile, status = 'unknown', form = &
           'formatted', iostat = ios)
      REWIND (iunout)

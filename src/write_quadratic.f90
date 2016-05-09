@@ -46,7 +46,7 @@ IF (ibrav==3) fact=0.5_DP
 
 nwork=compute_nwork()
 
-filename=TRIM(flevdat)//'_quadratic'
+filename='energy_files/'//TRIM(flevdat)//'_quadratic'
 IF (pressure /= 0.0_DP) &
    filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 

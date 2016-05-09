@@ -28,17 +28,19 @@ INTEGER  :: i, ios, idum
 REAL(DP) :: e0, tot_states
 INTEGER  :: itemp
 INTEGER  :: iu_therm
+CHARACTER(LEN=256) :: filetherm
 LOGICAL  :: check_file_exists, do_read
 !
 do_read=.FALSE.
-IF ( check_file_exists(fltherm) ) do_read=.TRUE.
+filetherm="therm_files/"//TRIM(fltherm)
+IF ( check_file_exists(filetherm) ) do_read=.TRUE.
 IF (my_image_id /= root_image) RETURN
 IF ( igeom < 1 .OR. igeom > tot_ngeo ) CALL errore('write_thermo', & 
                                                'Too many geometries',1)
 IF (do_read) THEN
    IF (ionode) THEN
       iu_therm=2
-      OPEN (UNIT=iu_therm, FILE=TRIM(fltherm), STATUS='unknown',&
+      OPEN (UNIT=iu_therm, FILE=TRIM(filetherm), STATUS='unknown',&
                                                      FORM='formatted')
       DO idum=1,12
          READ(iu_therm,*)
@@ -59,7 +61,7 @@ END IF
 
 WRITE(stdout,'(/,2x,76("+"))')
 WRITE(stdout,'(5x,"Computing the thermodynamic properties from phonon dos")')
-WRITE(stdout,'(5x,"Writing on file ",a)') TRIM(fltherm)
+WRITE(stdout,'(5x,"Writing on file ",a)') TRIM(filetherm)
 WRITE(stdout,'(2x,76("+"),/)')
 
 CALL zero_point_energy(phdos_save(igeom), e0)
@@ -77,7 +79,7 @@ END DO
 IF (ionode) &
    CALL write_thermo_info(e0, tot_states, ntemp, temp, ph_ener(1,igeom), &
               ph_free_ener(1,igeom), ph_entropy(1,igeom), ph_cv(1,igeom),&
-                                                                1,fltherm)
+                                                             1,filetherm)
 
 RETURN
 END SUBROUTINE write_thermo
@@ -108,7 +110,7 @@ INTEGER  :: itemp
 INTEGER  :: iu_therm
 !
 do_read=.FALSE.
-filename=TRIM(fltherm)//'_ph'
+filename="therm_files/"//TRIM(fltherm)//'_ph'
 IF ( check_file_exists(filename) ) do_read=.TRUE.
 
 IF (my_image_id /= root_image) RETURN
@@ -190,7 +192,7 @@ INTEGER  :: i, ios, idum
 INTEGER  :: itemp
 INTEGER  :: iu_therm
 !
-filename=TRIM(fltherm)//'_debye'
+filename='therm_files/'//TRIM(fltherm)//'_debye'
 
 IF (my_image_id /= root_image) RETURN
 

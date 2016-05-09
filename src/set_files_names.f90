@@ -19,7 +19,7 @@ IMPLICIT NONE
 INTEGER, INTENT(IN) :: igeom
 CHARACTER(LEN=6) :: int_to_char
 
-IF (igeom==1) fildyn_thermo=TRIM(fildyn)
+IF (igeom==1) fildyn_thermo="dynamical_matrices/"//TRIM(fildyn)
 IF (igeom==1) flfrc_thermo=TRIM(flfrc)
 IF (igeom==1) flfrq_thermo=TRIM(flfrq)
 IF (igeom==1) flvec_thermo=TRIM(flvec)

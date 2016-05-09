@@ -24,11 +24,11 @@ IF (my_image_id /= root_image) RETURN
 iu_enk=2
 DO isigma=1, nsigma
    IF (nsigma > 1) THEN
-      filename=TRIM(flnkconv)//int_to_char(isigma)
+      filename='energy_files/'//TRIM(flnkconv)//int_to_char(isigma)
       CALL check_tempdir ( filename, exst, parallelfs )     
       filename=TRIM(filename)//'/'//TRIM(flnkconv)
    ELSE
-      filename=TRIM(flnkconv)
+      filename='energy_files/'//TRIM(flnkconv)
    END IF
    IF (ionode) THEN
       OPEN(UNIT=iu_enk, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')

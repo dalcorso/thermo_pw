@@ -40,7 +40,7 @@ INTEGER :: ierr
 
 IF ( my_image_id /= root_image ) RETURN
 
-gnu_filename=TRIM(flgnuplot)//'_anhar'
+gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//'_anhar'
 IF (pressure /= 0.0_DP) &
        gnu_filename=TRIM(gnu_filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 CALL gnuplot_start(gnu_filename)
@@ -54,11 +54,11 @@ ELSE
    CALL gnuplot_write_header(filename, 0.0_DP, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
 ENDIF
 
-filename=TRIM(flanhar)//'_ph'
-filename0=TRIM(flanhar)
-filename1=TRIM(flanhar)//'.aux'
-filename2=TRIM(flanhar)//'.aux_ph'
-filename3=TRIM(flanhar)//'.aux_grun'
+filename="anhar_files/"//TRIM(flanhar)//'_ph'
+filename0="anhar_files/"//TRIM(flanhar)
+filename1="anhar_files/"//TRIM(flanhar)//'.aux'
+filename2="anhar_files/"//TRIM(flanhar)//'.aux_ph'
+filename3="anhar_files/"//TRIM(flanhar)//'.aux_grun'
 
 IF (pressure /= 0.0_DP) THEN
    filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))

@@ -21,15 +21,17 @@ SUBROUTINE write_ev_input(file_dat)
   USE io_global, ONLY : ionode
   IMPLICIT NONE
   CHARACTER(LEN=256) :: file_dat
+  CHARACTER(LEN=256) :: filedata
   INTEGER :: iu_ev, igeom
   !
   IF (my_image_id /= root_image) RETURN
   !
-  CALL write_ev_driver(file_dat) 
+  filedata=TRIM(file_dat)
+  CALL write_ev_driver(filedata) 
   !
   IF (ionode) THEN
      iu_ev=2
-     OPEN(UNIT=iu_ev, FILE=TRIM(file_dat), STATUS='UNKNOWN', FORM='FORMATTED')
+     OPEN(UNIT=iu_ev, FILE=TRIM(filedata), STATUS='UNKNOWN', FORM='FORMATTED')
      DO igeom=1,ngeo(1)
         WRITE(iu_ev,'(2e30.15)') omega_geo(igeom), energy_geo(igeom) + &
                                         pressure * omega_geo(igeom)
@@ -56,7 +58,7 @@ INTEGER :: iu_ev
 !
 IF (ionode) THEN
    iu_ev=2
-   filename='input_ev'
+   filename='energy_files/input_ev'
    IF (pressure /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
      
@@ -88,8 +90,8 @@ IMPLICIT NONE
 CHARACTER(LEN=256) :: file_dat, filename
 CHARACTER(LEN=8) :: float_to_char
 
-  file_dat=TRIM(flevdat) 
-  filename='input_ev'
+  file_dat="energy_files/"//TRIM(flevdat) 
+  filename='energy_files/input_ev'
   IF (pressure /= 0.0_DP) THEN
       file_dat=TRIM(file_dat)//'.'//TRIM(float_to_char(pressure_kb,1))
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))

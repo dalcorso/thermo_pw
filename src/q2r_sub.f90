@@ -66,7 +66,7 @@ SUBROUTINE q2r_sub(fildyn)
   INTEGER              :: nr1, nr2, nr3, nr(3)
   !     dimensions of the FFT grid formed by the q-point grid
   !
-  CHARACTER(len=256) :: fildyn, filin
+  CHARACTER(len=256) :: fildyn, filin, filefrc
   CHARACTER(len=3)   :: atm(ntypx)
   CHARACTER(LEN=6), EXTERNAL :: int_to_char
   !
@@ -90,11 +90,13 @@ SUBROUTINE q2r_sub(fildyn)
   IF ( my_image_id /= root_image ) RETURN
   IF (flfrc == ' '.OR. .NOT. ldisp) RETURN
   !
+  filefrc="phdisp_files/"//TRIM(flfrc)
   WRITE(stdout,'(/,2x,76("+"))')
   WRITE(stdout,'(5x,"Computing the interatomic force constants")')
-  WRITE(stdout,'(5x,"Writing on file ",a)') TRIM(flfrc)
+  WRITE(stdout,'(5x,"Writing on file ",a)') TRIM(filefrc)
   WRITE(stdout,'(2x,76("+"),/)')
   !
+   
   IF (ionode) OPEN (unit=1, file=TRIM(fildyn)//'0', status='old', &
                     form='formatted', iostat=ierr)
   CALL mp_bcast(ierr, ionode_id, intra_image_comm)
@@ -242,17 +244,17 @@ SUBROUTINE q2r_sub(fildyn)
   !
   IF (xmldyn) THEN
      IF (lrigid) THEN
-        CALL write_dyn_mat_header( flfrc, ntyp, nat, ibrav, nspin_mag,  &
+        CALL write_dyn_mat_header( filefrc, ntyp, nat, ibrav, nspin_mag,  &
              celldm, at, bg, omega, atm, amass, tau, ityp,   &
              m_loc, nqs, epsil, zeu)
      ELSE
-        CALL write_dyn_mat_header( flfrc, ntyp, nat, ibrav, nspin_mag,  &
+        CALL write_dyn_mat_header( filefrc, ntyp, nat, ibrav, nspin_mag,  &
              celldm, at, bg, omega, atm, amass, tau, ityp, m_loc, nqs)
      ENDIF
      CALL write_ifc(nr1,nr2,nr3,nat,phid)
   ELSE 
      IF (ionode) THEN
-        OPEN(unit=2,file=flfrc,status='unknown',form='formatted')
+        OPEN(unit=2,file=filefrc,status='unknown',form='formatted')
         WRITE(2,'(i3,i5,i3,6f11.7)') ntyp,nat,ibrav,celldm
         IF (ibrav==0) WRITE (2,'(2x,3f15.9)') ((at(i,j),i=1,3),j=1,3)
         DO nt = 1,ntyp

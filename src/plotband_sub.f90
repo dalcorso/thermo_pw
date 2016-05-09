@@ -80,18 +80,19 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
 
   IF (icode==1.OR.icode==2) THEN
     IF (flpband == ' ') RETURN
-    fileout=TRIM(flpband)
+    IF (icode==1) fileout="band_files/"//TRIM(flpband)
+    IF (icode==2) fileout="phdisp_files/"//TRIM(flpband)
   ELSEIF (icode==3) THEN
     IF (flpgrun == ' ') RETURN
-    fileout=TRIM(flpgrun)
+    fileout="anhar_files/"//TRIM(flpgrun)
   ELSEIF (icode==4) THEN
     IF (flpgrun == ' ') RETURN
-    fileout=TRIM(flpgrun)//'_freq'
+    fileout="anhar_files/"//TRIM(flpgrun)//'_freq'
   ENDIF
-  IF (icode==1) filedata = TRIM(filband)
-  IF (icode==2) filedata = TRIM(flfrq)
-  IF (icode==3) filedata = TRIM(flgrun)
-  IF (icode==4) filedata = TRIM(flgrun)//'_freq'
+  IF (icode==1) filedata = "band_files/"//TRIM(filband)
+  IF (icode==2) filedata = "phdisp_files/"//TRIM(flfrq)
+  IF (icode==3) filedata = "anhar_files/"//TRIM(flgrun)
+  IF (icode==4) filedata = "anhar_files/"//TRIM(flgrun)//'_freq'
 
 
   IF (ionode) &
@@ -115,7 +116,8 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
   IF (icode==3.OR.icode==4) THEN
      central_geo=tot_ngeo/2
      IF (MOD(tot_ngeo,2)==1) central_geo=central_geo+1
-     filename = TRIM(file_disp)//'.g'//TRIM(int_to_char(central_geo))//".rap"
+     filename = "phdisp_files/"//TRIM(file_disp)//'.g'//&
+                                        TRIM(int_to_char(central_geo))//".rap"
   ELSE
      filename=TRIM(filedata)//".rap"
   ENDIF
@@ -847,6 +849,7 @@ ELSEIF (icode==3) THEN
 ELSEIF (icode==4) THEN
    gnu_filename=TRIM(flgnuplot)//'_grun_freq'
 ENDIF
+gnu_filename="gnuplot_files/"//TRIM(gnu_filename)
 !
 !  The Gruneisen parameters of dispersions that do not have representations
 !  must be plotted with points

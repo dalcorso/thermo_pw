@@ -24,11 +24,11 @@ IF (my_image_id /= root_image) RETURN
 iu_eke=2
 DO iden=1, nkeden
    IF (nkeden > 1) THEN
-      filename=TRIM(flkeconv)//int_to_char(iden)
+      filename='energy_files/'//TRIM(flkeconv)//int_to_char(iden)
       CALL check_tempdir ( filename, exst, parallelfs )     
       filename=TRIM(filename)//'/'//TRIM(flkeconv)
    ELSE
-      filename=TRIM(flkeconv)
+      filename='energy_files/'//TRIM(flkeconv)
    END IF
    IF (ionode) THEN
       OPEN(UNIT=iu_eke, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')

@@ -201,13 +201,13 @@ IF (meta_ionode) THEN
 !   nonmagnetic case or noncollinear with time reversal
 !
        iu_epsil=2
-       INQUIRE(FILE="chirr", exist=exst)
+       INQUIRE(FILE="dynamical_matrices/chirr", exist=exst)
        IF (exst) THEN
-          OPEN (UNIT=iu_epsil, FILE='chirr', STATUS='old', &
+          OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/chirr', STATUS='old', &
                                POSITION='append', FORM='formatted')
        ELSE
-          OPEN (UNIT=iu_epsil, FILE='chirr', STATUS='unknown', &
-                                                      FORM='formatted')
+          OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/chirr', &
+                                 STATUS='unknown', FORM='formatted')
           WRITE(iu_epsil,'("#    Re(w)     Im(w)     Re(chirr)       Im(chirr)&
                              &      Re (1/chirr)      Im(1/chirr) ")')
        END IF
@@ -224,12 +224,12 @@ IF (meta_ionode) THEN
 !  lsda case
 !
       iu_epsil=2
-      INQUIRE(FILE="chimag_re", exist=exst)
+      INQUIRE(FILE="dynamical_matrices/chimag_re", exist=exst)
       IF (exst) THEN
-         OPEN (UNIT=iu_epsil, FILE='chimag_re', STATUS='old', &
-                              POSITION='append', FORM='formatted')
+         OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/chimag_re', &
+                          STATUS='old', POSITION='append', FORM='formatted')
       ELSE
-         OPEN (UNIT=iu_epsil, FILE='chimag_re', STATUS='unknown', &
+         OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/chimag_re', STATUS='unknown', &
                                              FORM='formatted')
          WRITE(iu_epsil,'("#  Re(w)     Im(w)     rr       rz        zz&
                            &         +-        -+       xx        xy")')
@@ -244,13 +244,13 @@ IF (meta_ionode) THEN
       CLOSE(iu_epsil)
 
       iu_epsil=2
-      INQUIRE(FILE="chimag_im", exist=exst)
+      INQUIRE(FILE="dynamical_matrices/chimag_im", exist=exst)
       IF (exst) THEN
-         OPEN (UNIT=iu_epsil, FILE='chimag_im', STATUS='old', &
-                              POSITION='append', FORM='formatted')
+         OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/chimag_im', &
+                        STATUS='old', POSITION='append', FORM='formatted')
       ELSE
-         OPEN (UNIT=iu_epsil, FILE='chimag_im', STATUS='unknown', &
-                                             FORM='formatted')
+         OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/chimag_im', &
+                            STATUS='unknown', FORM='formatted')
          WRITE(iu_epsil,'("#  Re(w)     Im(w)     rr       rz        zz&
                            &         +-        -+       xx        xy")')
       END IF
@@ -270,13 +270,13 @@ IF (meta_ionode) THEN
 
    IF (.NOT.lsda.OR.lcharge) THEN
       iu_epsil=2
-      INQUIRE(FILE="epsilon", exist=exst)
+      INQUIRE(FILE="dynamical_matrices/epsilon", exist=exst)
       IF (exst) THEN
-         OPEN (UNIT=iu_epsil, FILE='epsilon', STATUS='old', &
+         OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/epsilon', STATUS='old', &
                                POSITION='append', FORM='formatted')
       ELSE
-         OPEN (UNIT=iu_epsil, FILE='epsilon', STATUS='unknown', &
-                                             FORM='formatted')
+         OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/epsilon', &
+                    STATUS='unknown', FORM='formatted')
          WRITE(iu_epsil,'("#    Re(w)     Im(w)     Re(1/eps)       Im(1/eps)&
                         &      Re (eps)      Im(eps) ")')
       END IF

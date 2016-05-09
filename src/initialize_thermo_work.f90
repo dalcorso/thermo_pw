@@ -35,11 +35,13 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
   USE input_parameters, ONLY : nk1, nk2, nk3
   USE klist,          ONLY : degauss
   USE cell_base,  ONLY : alat
+  USE wrappers,       ONLY : f_mkdir_safe
+  USE io_global,  ONLY : meta_ionode
   !
   IMPLICIT NONE
   INTEGER, INTENT(OUT) :: nwork, iaux
   INTEGER, INTENT(IN) :: part
-  INTEGER :: igeom, iq, irr, ike
+  INTEGER :: igeom, iq, irr, ike, ios
   INTEGER :: iden, icount, ink, isigma
   REAL(DP) :: compute_omega_geo
   !
@@ -57,15 +59,21 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            ALLOCATE(energy_geo(1))
            lpwscf_syn_1=.TRUE.
            lbands_syn_1=.TRUE.
+           IF (meta_ionode) ios = f_mkdir_safe( 'band_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
         CASE ('scf_2d_bands')
            ALLOCATE(energy_geo(1))
            lpwscf_syn_1=.TRUE.
            lbands_syn_1=.TRUE.
+           IF (meta_ionode) ios = f_mkdir_safe( 'band_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
         CASE ('scf_dos') 
            ALLOCATE(energy_geo(1))
            lpwscf_syn_1=.TRUE.
            lbands_syn_1=.TRUE.
            ldos_syn_1=.TRUE.
+           IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
         CASE ('scf_ph') 
            ALLOCATE(energy_geo(1))
            lpwscf_syn_1=.TRUE.
@@ -73,6 +81,8 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            tot_ngeo=1
            ALLOCATE(no_ph(tot_ngeo))
            no_ph(1)=.FALSE.
+           IF (meta_ionode) ios = f_mkdir_safe( 'dynamical_matrices' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
         CASE ('scf_disp')
            ALLOCATE(energy_geo(1))
            lpwscf_syn_1=.TRUE.
@@ -88,6 +98,10 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
 !
 !   In these cases we make asyncronous work in the first part
 !
+           IF (meta_ionode) ios = f_mkdir_safe( 'dynamical_matrices' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'phdisp_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
         CASE ( 'scf_ke') 
            nwork= nke * nkeden
            ALLOCATE(ke(nwork))
@@ -104,6 +118,8 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            energy_geo=0.0_DP
            lconv_ke_test=.TRUE.
            do_punch=.FALSE.
+           IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
         CASE ( 'scf_nk' ) 
            nwork= nnk * nsigma
            ALLOCATE(nk_test(3,nwork))
@@ -123,11 +139,15 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            energy_geo=0.0_DP
            lconv_nk_test=.TRUE.
            do_punch=.FALSE.
+           IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
 !
 !   in part 1 these cases do nothing
 !
         CASE ('scf_elastic_constants') 
            lpart2_pw=.TRUE.
+           IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
         CASE ('scf_piezoelectric_tensor')
            lpart2_pw=.TRUE.
         CASE ('scf_polarization') 
@@ -139,17 +159,25 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
         CASE ('mur_lc')
            CALL initialize_mur(nwork)
            do_punch=.FALSE.
+           IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
         CASE ('mur_lc_bands') 
            CALL initialize_mur(nwork)
            do_punch=.FALSE.
            lpwscf_syn_1=.TRUE.
            lbands_syn_1=.TRUE.
+           IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'band_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
         CASE ('mur_lc_dos') 
            CALL initialize_mur(nwork)
            do_punch = .FALSE.
            lpwscf_syn_1 = .TRUE.
            lbands_syn_1 = .TRUE.
            ldos_syn_1 = .TRUE.
+           IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
         CASE ('mur_lc_ph') 
            CALL initialize_mur(nwork)
            do_punch=.FALSE.
@@ -158,6 +186,9 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            tot_ngeo=1
            ALLOCATE(no_ph(tot_ngeo))
            no_ph(1)=.FALSE.
+           IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'dynamical_matrices' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
         CASE ('mur_lc_disp')
            CALL initialize_mur(nwork)
            do_punch=.FALSE.
@@ -171,16 +202,26 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            lmatdyn = .TRUE.
            ltherm = .TRUE.
            CALL allocate_thermodynamics()
+           IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'dynamical_matrices' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'phdisp_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
         CASE ('mur_lc_elastic_constants') 
            CALL initialize_mur(nwork)
            lpwscf_syn_1=do_scf_relax
            lpart2_pw=.TRUE.
            do_punch=.FALSE.
+           IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
         CASE ('mur_lc_piezoelectric_tensor') 
            CALL initialize_mur(nwork)
            lpwscf_syn_1=do_scf_relax
            lpart2_pw=.TRUE.
            do_punch=.FALSE.
+           IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
         CASE ('mur_lc_polarization')
            CALL initialize_mur(nwork)
            lpwscf_syn_1=do_scf_relax
@@ -190,6 +231,8 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
 !    Here all the cases that compute the free energy and minimize it
 !
 
+           IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
         CASE ('mur_lc_t')
            CALL initialize_mur(nwork)
            lph = .TRUE.
@@ -204,6 +247,12 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            CALL compute_degree(ibrav_save, degree, nvar)
            CALL allocate_thermodynamics()
            CALL allocate_anharmonic()
+           IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'anhar_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'dynamical_matrices' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'phdisp_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
         CASE DEFAULT
            CALL errore('initialize_thermo_work','what not recognized',1)
      END SELECT

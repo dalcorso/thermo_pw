@@ -35,7 +35,7 @@ SUBROUTINE dos_sub()
   !
   CHARACTER(LEN=256), EXTERNAL :: trimcheck
   !
-  CHARACTER(len=256) :: outdir
+  CHARACTER(len=256) :: outdir, filedos
   REAL(DP) :: emin, emax
   REAL(DP), ALLOCATABLE :: e(:), dosofe(:,:), dosint(:)
   REAL(DP) :: save_degauss, ef1
@@ -161,7 +161,8 @@ SUBROUTINE dos_sub()
   IF ( ionode ) THEN
 
      iu_dos=2
-     OPEN (unit=iu_dos, file=TRIM(fleldos), status='unknown', form='formatted')
+     filedos='therm_files/'//TRIM(fleldos)
+     OPEN (unit=iu_dos, file=TRIM(filedos), status='unknown', form='formatted')
 
      IF (nspin==1 .OR. nspin==4) THEN
         WRITE(iu_dos,'("#  E (eV)   dos(E)     Int dos(E)")')

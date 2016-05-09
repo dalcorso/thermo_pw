@@ -46,7 +46,7 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
   REAL(DP), ALLOCATABLE :: grad(:), x(:)
   LOGICAL, ALLOCATABLE :: high_symmetry(:), is_gamma(:)
   LOGICAL :: copy_before, exst_rap
-  CHARACTER(LEN=256) :: filename, filedata
+  CHARACTER(LEN=256) :: filename, filedata, filegrun
   CHARACTER(LEN=6), EXTERNAL :: int_to_char
 
   NAMELIST /plot/ nks, nbnd
@@ -65,7 +65,7 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
   DO igeo = 1, nwork
      
      IF (no_ph(igeo)) CYCLE
-     filedata = TRIM(file_disp)//'.g'//TRIM(int_to_char(igeo))
+     filedata = 'phdisp_files/'//TRIM(file_disp)//'.g'//TRIM(int_to_char(igeo))
 
      IF (ionode) &
         OPEN(UNIT=iufreq,FILE=TRIM(filedata),FORM='formatted',&
@@ -108,7 +108,7 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
         nbnd_rap=nbnd
      ENDIF
 
-     filename=TRIM(file_vec)//".g"//TRIM(int_to_char(igeo))
+     filename='phdisp_files/'//TRIM(file_vec)//".g"//TRIM(int_to_char(igeo))
      IF (ionode) OPEN(UNIT=iumode, FILE=TRIM(filename), FORM='formatted', &
                    STATUS='old', ERR=200, IOSTAT=ios)
 200  CALL mp_bcast(ios, ionode_id, intra_image_comm)
@@ -267,8 +267,9 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
 !
   DO icrys=1, degree
      iu_grun=2
+     filegrun='anhar_files/'//TRIM(flgrun)//'_'//TRIM(INT_TO_CHAR(icrys))
      IF (ionode) &
-        OPEN(UNIT=iu_grun, FILE=TRIM(flgrun)//'_'//TRIM(INT_TO_CHAR(icrys)), &
+        OPEN(UNIT=iu_grun, FILE=TRIM(filegrun), &
              FORM='formatted', STATUS='UNKNOWN', ERR=20, IOSTAT=ios)
 20   CALL mp_bcast(ios, ionode_id, intra_image_comm)
      CALL errore('write_gruneisen_band_anis','opening c-gruneisen file', &
@@ -291,7 +292,7 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
 !
 iu_grun=2
 IF (ionode) &
-   OPEN(UNIT=iu_grun, FILE=TRIM(flgrun)//'_freq', FORM='formatted', &
+   OPEN(UNIT=iu_grun, FILE=TRIM(filegrun)//'_freq', FORM='formatted', &
                   STATUS='UNKNOWN', ERR=30, IOSTAT=ios)
 30 CALL mp_bcast(ios, ionode_id, intra_image_comm)
    CALL errore('write_gruneisen_band_anis','opening dispersion file 1',ABS(ios))

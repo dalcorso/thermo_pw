@@ -45,7 +45,7 @@ IF (ionode) THEN
 !
 !   here we plot the anharmonic quantities calculated from the phonon dos
 !
-   filename=flanhar
+   filename='anhar_files/'//flanhar
    IF (pressure /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
    iu_therm=2
@@ -79,7 +79,7 @@ IF (ionode) THEN
 !  Here we write on output the celldm parameters and their derivative
 !  with respect to temperature. 
 !
-   filename=TRIM(flanhar)//'.celldm'
+   filename='anhar_files/'//TRIM(flanhar)//'.celldm'
    IF (pressure /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 
@@ -134,7 +134,7 @@ IF (ionode) THEN
 !   here we plot the anharmonic quantities calculated from the phonon dos
 !
    iu_therm=2
-   filename=TRIM(flanhar)//'_ph'
+   filename='anhar_files/'//TRIM(flanhar)//'_ph'
    IF (pressure /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 
@@ -169,7 +169,7 @@ IF (ionode) THEN
 !  Here we write on output the celldm parameters and their derivative
 !  with respect to temperature. 
 !
-   filename=TRIM(flanhar)//'.celldm_ph'
+   filename='anhar_files/'//TRIM(flanhar)//'.celldm_ph'
    IF (pressure /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 
@@ -357,7 +357,7 @@ IF (ionode) THEN
 !
 !   here quantities calculated from the gruneisen parameters
 !
-   filename=TRIM(flanhar)//'.aux_grun'
+   filename='anhar_files/'//TRIM(flanhar)//'.aux_grun'
    IF (pressure /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
    CALL write_alpha_anis(ibrav, celldmf_t, alpha_an_g, temp, ntemp, filename )

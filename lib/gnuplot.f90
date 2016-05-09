@@ -540,7 +540,7 @@ ALLOCATE(contour_color(contour_max))
 RETURN
 END SUBROUTINE gnuplot_initialize_contour_counter
 
-SUBROUTINE gnuplot_set_contour(file2d_dat,levr,color)
+SUBROUTINE gnuplot_set_contour(file2d_dat,levr,color,tablefile)
 !
 !  This routine gives the commands to search a contour levr in a file with a 2d
 !  function and write it in a table file. It assumes that gnuplot_start_2dplot
@@ -549,7 +549,7 @@ SUBROUTINE gnuplot_set_contour(file2d_dat,levr,color)
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: levr
 CHARACTER(LEN=*),INTENT(IN) :: file2d_dat, color
-CHARACTER(LEN=256) :: filename
+CHARACTER(LEN=256) :: filename, tablefile
 CHARACTER(LEN=6) :: int_to_char
 
 contour_counter=contour_counter+1
@@ -558,7 +558,7 @@ IF (contour_counter > contour_max) CALL errore('gnuplot_set_contour',&
 contour_color(contour_counter) = color
 IF (ionode) THEN
    WRITE(iun_gnuplot,'("set cntrparam levels discrete",f12.6)') levr
-   filename='table_'//TRIM(int_to_char(contour_counter))//'.dat'
+   filename=TRIM(tablefile)//'_'//TRIM(int_to_char(contour_counter))//'.dat'
    WRITE(iun_gnuplot,'("set output """,a,"""")') TRIM(filename)
    WRITE(iun_gnuplot,'("splot ''",a,"'' using 1:2:3 w l")') TRIM(file2d_dat)
 ENDIF
@@ -631,12 +631,13 @@ IF (ionode) WRITE(iun_gnuplot,'("unset table")')
 RETURN
 END SUBROUTINE gnuplot_close_2dplot_prep
 
-SUBROUTINE gnuplot_do_2dplot(filename, xmin, xmax, ymin, ymax, xlabel, ylabel)
+SUBROUTINE gnuplot_do_2dplot(filename, xmin, xmax, ymin, ymax, xlabel, &
+                                       ylabel, tablefile)
 
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: xmin, xmax, ymin, ymax
 CHARACTER(LEN=*), INTENT(IN) :: filename, xlabel, ylabel
-CHARACTER(LEN=256) :: filename1
+CHARACTER(LEN=256) :: filename1, tablefile
 CHARACTER(LEN=6) :: int_to_char
 INTEGER :: iplot
 
@@ -651,7 +652,7 @@ IF (ionode) THEN
      CALL gnuplot_set_yticks(ymin,(ymax-ymin)/4.0_DP,ymax,.FALSE.)
    WRITE(iun_gnuplot,'("set size ratio",f15.7)') (ymax-ymin)/(xmax-xmin)
    DO iplot=1, contour_counter
-      filename1='table_'//TRIM(int_to_char(iplot))//'.dat'
+      filename1=TRIM(tablefile)//'_'//TRIM(int_to_char(iplot))//'.dat'
       IF (iplot==1.AND.contour_counter>1) THEN
          WRITE(iun_gnuplot,'("plot """,a,""" u 1:2 w l lw 4 lc rgb ",a,",\")') & 
                   TRIM(filename1), TRIM(contour_color(iplot))

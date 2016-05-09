@@ -46,7 +46,7 @@ SUBROUTINE write_gnuplot_energy(nwork)
   IF (meta_ionode) THEN
      iu_ev=2
      DO ifiles = 1, nfiles
-        fileout=TRIM(flenergy)//int_to_char(ifiles)
+        fileout='energy_files/'//TRIM(flenergy)//int_to_char(ifiles)
         IF (pressure /= 0.0_DP) fileout = TRIM(fileout)//'.'// &
                                           TRIM(float_to_char(pressure_kb,1))
         OPEN(UNIT=iu_ev, FILE=TRIM(fileout), STATUS='UNKNOWN', &

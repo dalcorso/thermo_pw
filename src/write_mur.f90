@@ -29,8 +29,8 @@ INTEGER :: i, iu_mur
 
 IF (my_image_id /= root_image) RETURN
 
-filename=TRIM(flevdat)//'_mur'
-filename1=TRIM(flevdat)//'_mur1'
+filename="energy_files/"//TRIM(flevdat)//'_mur'
+filename1="energy_files/"//TRIM(flevdat)//'_mur1'
 IF (pressure /= 0.0_DP) THEN
    filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
    filename1=TRIM(filename1)//'.'//TRIM(float_to_char(pressure_kb,1))

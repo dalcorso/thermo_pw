@@ -57,7 +57,7 @@ INTEGER :: im, ierr
 
 IF ( my_image_id /= root_image ) RETURN
 
-gnu_filename=TRIM(flgnuplot)//'_epsilon'
+gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_epsilon'
 CALL gnuplot_start(gnu_filename)
 
 filename=TRIM(flpsepsilon)
@@ -73,12 +73,12 @@ DO im=1,2
 !      
       IF (im==1) THEN
          CALL gnuplot_ylabel('tr {/Symbol e}_1 ({/Symbol w})',.FALSE.) 
-         filename=TRIM(flepsilon)//'_re'
+         filename='dynamical_matrices/'//TRIM(flepsilon)//'_re'
          string="plot """//TRIM(filename)//""" u ($1*13.605698066):(($3+$4+$5)&
              &/3.0) w l lw 3 lc rgb color_red"
       ELSE
          CALL gnuplot_ylabel('tr {/Symbol e}_2 ({/Symbol w})',.FALSE.) 
-         filename=TRIM(flepsilon)//'_im'
+         filename='dynamical_matrices/'//TRIM(flepsilon)//'_im'
          string="plot """//TRIM(filename)//""" u ($1*13.605698066):(($3+$4+$5)&
              &/3.0) w l lw 3 lc rgb color_red"
       ENDIF
@@ -87,7 +87,7 @@ DO im=1,2
       IF (im==2) THEN
          CALL gnuplot_ylabel('Absorption   {/Symbol s}_2 ({/Symbol w}) (a.u.)^2',&
                                                         .FALSE.) 
-         filename='polariz_im'
+         filename='dynamical_matrices/polariz_im'
 !
 !   the factor corresponds to 2*pi / c where c is the speed of light in a.u.
 !   the formula assumes that the frequency is given in Ry and the 
@@ -103,10 +103,10 @@ DO im=1,2
 !
       IF (im==1) THEN
          CALL gnuplot_ylabel('{/Symbol e}_1 ({/Symbol w})',.FALSE.) 
-         filename=TRIM(flepsilon)//'_re'
+         filename='dynamical_matrices/'//TRIM(flepsilon)//'_re'
       ELSE
          CALL gnuplot_ylabel('{/Symbol e}_2 ({/Symbol w})',.FALSE.) 
-         filename=TRIM(flepsilon)//'_im'
+         filename='dynamical_matrices/'//TRIM(flepsilon)//'_im'
       ENDIF
 
       IF (ibrav==1.OR.ibrav==2.OR.ibrav==3) THEN
@@ -174,7 +174,7 @@ INTEGER :: im, ierr
 
 IF ( my_image_id /= root_image ) RETURN
 
-gnu_filename=TRIM(flgnuplot)//'_epsilon'
+gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_epsilon'
 CALL gnuplot_start(gnu_filename)
 
 filename=TRIM(flpsepsilon)
@@ -183,7 +183,7 @@ CALL gnuplot_write_header(filename, 0.0_DP, 0.0_DP, 0.0_DP, 0.0_DP, rytoev )
 CALL gnuplot_xlabel('{/Symbol w}  (eV)',.FALSE.) 
 
 CALL gnuplot_ylabel('Re 1 / {/Symbol e} (q, {/Symbol w})',.FALSE.) 
-filename=TRIM(flepsilon)
+filename='dynamical_matrices/'//TRIM(flepsilon)
 CALL gnuplot_write_file_mul_data(filename,1,3,'color_red',.TRUE.,&
                                                 .TRUE.,.FALSE.)
 

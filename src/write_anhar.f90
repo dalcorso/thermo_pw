@@ -34,7 +34,7 @@ IF (ionode) THEN
 !
 !   here we plot the quantities calculated from the phonon dos
 !
-   filename=TRIM(flanhar)
+   filename="anhar_files/"//TRIM(flanhar)
    IF (pressure /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 
@@ -42,7 +42,7 @@ IF (ionode) THEN
 !
 !   here auxiliary quantities calculated from the phonon dos
 !
-   filename=TRIM(flanhar)//'.aux'
+   filename="anhar_files/"//TRIM(flanhar)//'.aux'
    IF (pressure /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 
@@ -82,7 +82,7 @@ IF (ionode) THEN
 !
 !   here we plot the quantities calculated from the phonon dos
 !
-   filename=TRIM(flanhar)//'_ph'
+   filename="anhar_files/"//TRIM(flanhar)//'_ph'
    IF (pressure /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 
@@ -91,7 +91,7 @@ IF (ionode) THEN
 !
 !   here auxiliary quantities calculated from the phonon dos
 !
-   filename=TRIM(flanhar)//'.aux_ph'
+   filename="anhar_files/"//TRIM(flanhar)//'.aux_ph'
    IF (pressure /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 
@@ -171,7 +171,7 @@ IF (ionode) THEN
 !
 !   here quantities calculated from the gruneisen parameters
 !
-   filename=TRIM(flanhar)//'.aux_grun'
+   filename="anhar_files/"//TRIM(flanhar)//'.aux_grun'
    IF (pressure /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
    iu_therm=2

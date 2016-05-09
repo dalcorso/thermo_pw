@@ -32,7 +32,7 @@ INTEGER :: system
 
 IF ( my_image_id /= root_image ) RETURN
 
-gnu_filename=TRIM(flgnuplot)//TRIM(ext)
+gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//TRIM(ext)
 CALL gnuplot_start(gnu_filename)
 
 filename=TRIM(psfilename)

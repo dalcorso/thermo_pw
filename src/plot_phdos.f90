@@ -14,8 +14,10 @@ USE data_files, ONLY : fldos
 USE postscript_files, ONLY : flpsdos
 
 IMPLICIT NONE
+CHARACTER(LEN=256) :: filedos
 
-CALL simple_plot('_dos', fldos, flpsdos, 'frequency (cm^{-1})', &
+filedos="phdisp_files/"//TRIM(fldos)
+CALL simple_plot('_dos', filedos, flpsdos, 'frequency (cm^{-1})', &
                 'DOS (states / cm^{-1} / cell)', 'color_red', freqmin, &
                                    freqmax, 0.0_DP, 0.0_DP)
 RETURN

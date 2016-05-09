@@ -24,13 +24,13 @@ USE mp_images,       ONLY : root_image, my_image_id
 USE io_global,       ONLY : ionode
 
 IMPLICIT NONE
-CHARACTER(LEN=256) :: gnu_filename, filename
+CHARACTER(LEN=256) :: gnu_filename, filename, filetherm
 INTEGER :: system
 INTEGER :: ierr
 
 IF ( my_image_id /= root_image ) RETURN
 
-gnu_filename=TRIM(flgnuplot)//'_therm'
+gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//'_therm'
 CALL gnuplot_start(gnu_filename)
 
 IF (tmin ==1._DP) THEN
@@ -38,25 +38,26 @@ IF (tmin ==1._DP) THEN
 ELSE
    CALL gnuplot_write_header(flpstherm, tmin, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
 ENDIF
-filename=TRIM(fltherm)//'_ph'
+filetherm="therm_files/"//TRIM(fltherm)
+filename=TRIM(filetherm)//'_ph'
 CALL gnuplot_xlabel('T (K)', .FALSE.) 
 CALL gnuplot_ylabel('Vibrational energy (kJ / (N mol))',.FALSE.) 
 CALL gnuplot_set_fact(1313.3130_DP, .FALSE.) 
 
-CALL gnuplot_write_file_mul_data(fltherm,1,2,'color_red',.TRUE.,.FALSE.,.FALSE.)
+CALL gnuplot_write_file_mul_data(filetherm,1,2,'color_red',.TRUE.,.FALSE.,.FALSE.)
 CALL gnuplot_write_file_mul_data(filename,1,2,'color_blue',.FALSE.,.TRUE.,.FALSE.)
 
 CALL gnuplot_ylabel('Vibrational free energy (kJ / (N mol))', .FALSE.) 
-CALL gnuplot_write_file_mul_data(fltherm,1,3,'color_red',.TRUE.,.FALSE., .FALSE.)
+CALL gnuplot_write_file_mul_data(filetherm,1,3,'color_red',.TRUE.,.FALSE., .FALSE.)
 CALL gnuplot_write_file_mul_data(filename,1,3,'color_blue',.FALSE.,.TRUE., .FALSE.)
 
 CALL gnuplot_set_fact(1313313.0_DP, .FALSE.) 
 CALL gnuplot_ylabel('Entropy (J / K / (N mol))',.FALSE.) 
-CALL gnuplot_write_file_mul_data(fltherm,1,4,'color_red',.TRUE.,.FALSE.,.FALSE.)
+CALL gnuplot_write_file_mul_data(filetherm,1,4,'color_red',.TRUE.,.FALSE.,.FALSE.)
 CALL gnuplot_write_file_mul_data(filename,1,4,'color_blue',.FALSE.,.TRUE.,.FALSE.)
 
 CALL gnuplot_ylabel('Heat capacity C_v (J / K / (N mol))',.FALSE.) 
-CALL gnuplot_write_file_mul_data(fltherm,1,5,'color_red',.TRUE.,.FALSE.,.FALSE.)
+CALL gnuplot_write_file_mul_data(filetherm,1,5,'color_red',.TRUE.,.FALSE.,.FALSE.)
 CALL gnuplot_write_file_mul_data(filename,1,5,'color_blue',.FALSE.,.TRUE.,.FALSE.)
 
 CALL gnuplot_end()
@@ -92,7 +93,7 @@ INTEGER :: ierr
 
 IF ( my_image_id /= root_image ) RETURN
 
-gnu_filename=TRIM(flgnuplot)//'_debye'
+gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_debye'
 CALL gnuplot_start(gnu_filename)
 
 psfilename=TRIM(flpstherm)//'_debye'
@@ -101,7 +102,7 @@ IF (tmin ==1._DP) THEN
 ELSE
    CALL gnuplot_write_header(psfilename, tmin, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
 ENDIF
-filename=TRIM(fltherm)//'_debye'
+filename='therm_files/'//TRIM(fltherm)//'_debye'
 CALL gnuplot_xlabel('T (K)', .FALSE.) 
 CALL gnuplot_ylabel('Debye vibrational energy (kJ / (N mol))',.FALSE.) 
 CALL gnuplot_set_fact(1313.3130_DP, .FALSE.) 
@@ -153,7 +154,7 @@ INTEGER :: ierr
 IF ( my_image_id /= root_image ) RETURN
 
 IF (degauss==0.0_DP.AND..NOT.ltetra) RETURN
-gnu_filename=TRIM(flgnuplot)//'_eltherm'
+gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_eltherm'
 CALL gnuplot_start(gnu_filename)
 
 psfilename=TRIM(flpseltherm)
@@ -162,7 +163,7 @@ IF (tmin ==1._DP) THEN
 ELSE
    CALL gnuplot_write_header(psfilename, tmin, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
 ENDIF
-filename=TRIM(fleltherm)
+filename='therm_files/'//TRIM(fleltherm)
 CALL gnuplot_xlabel('T (K)', .FALSE.) 
 CALL gnuplot_ylabel('Electron energy (kJ / (N mol))',.FALSE.) 
 CALL gnuplot_set_fact(1313.3130_DP, .FALSE.) 

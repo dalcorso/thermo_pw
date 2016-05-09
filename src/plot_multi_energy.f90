@@ -39,7 +39,8 @@ SUBROUTINE plot_multi_energy()
                                    gnuplot_line_v
 
   IMPLICIT NONE
-  CHARACTER(LEN=256) :: gnu_filename, filename, filename1, label, filenameps
+  CHARACTER(LEN=256) :: gnu_filename, filename, filename1, label, filenameps, &
+                        tablefile
   CHARACTER(LEN=6) :: int_to_char
   CHARACTER(LEN=8) :: float_to_char
   CHARACTER(LEN=12) :: color(8), xlabel, ylabel
@@ -51,11 +52,11 @@ SUBROUTINE plot_multi_energy()
 
   IF ( my_image_id /= root_image ) RETURN
 
-  gnu_filename=TRIM(flgnuplot)//'_energy'
+  gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_energy'
   IF (reduced_grid.OR.show_fit) THEN
-     filename=TRIM(flevdat)//'_quadratic'
+     filename='energy_files/'//TRIM(flevdat)//'_quadratic'
   ELSE
-     filename=TRIM(flenergy)//int_to_char(1)
+     filename='energy_files/'//TRIM(flenergy)//int_to_char(1)
   ENDIF
   filenameps=TRIM(flpsenergy)
   IF (pressure /= 0.0_DP) THEN
@@ -72,6 +73,7 @@ SUBROUTINE plot_multi_energy()
   color(6)='color_cyan'
   color(7)='color_orange'
   color(8)='color_black'
+  tablefile='gnuplot_files/table'
   CALL gnuplot_start(gnu_filename)
 
   SELECT CASE (ibrav) 
@@ -157,14 +159,14 @@ SUBROUTINE plot_multi_energy()
   
         DO icont=1,ncontours
            CALL gnuplot_set_contour(filename,ene_levels_int(icont), &
-                                            color_levels(icont))
+                                            color_levels(icont),tablefile)
         ENDDO
         CALL gnuplot_close_2dplot_prep()
         xlabel='a (a.u.)'
         ylabel='c/a '
 
         CALL gnuplot_do_2dplot(filenameps, xmin, xmax, ymin, ymax, xlabel, &
-                                                                   ylabel)
+                                                  ylabel, tablefile)
 
         IF (degree==2) THEN
            CALL gnuplot_line_v(hessian_v(1,1), hessian_v(2,1), x_pos_min(1),  &

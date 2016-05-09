@@ -171,6 +171,7 @@ SUBROUTINE write_bands (filband, spin_component)
 
   IMPLICIT NONE
   CHARACTER (LEN=*), INTENT(IN) :: filband
+  CHARACTER (LEN=256) :: filename
   INTEGER, INTENT(IN) :: spin_component
   REAL(DP), ALLOCATABLE :: xk_collect(:,:), et_collect(:,:)
   INTEGER :: iunpun, ios, ibnd, ik
@@ -181,7 +182,8 @@ SUBROUTINE write_bands (filband, spin_component)
   !
   IF ( ionode ) THEN
      !
-     OPEN (UNIT = iunpun, FILE = TRIM(filband), STATUS = 'unknown', FORM = &
+     filename='band_files/'//TRIM(filband)
+     OPEN (UNIT = iunpun, FILE = TRIM(filename), STATUS = 'unknown', FORM = &
           'formatted', IOSTAT = ios)
      REWIND (iunpun)
      !

@@ -35,7 +35,7 @@ REAL(DP) :: xmin, xmax
 
 IF ( my_image_id /= root_image ) RETURN
 
-gnu_filename=TRIM(flgnuplot)//'_nkconv'
+gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_nkconv'
 CALL gnuplot_start(gnu_filename)
 
 filename=TRIM(flpsnkconv)
@@ -50,7 +50,8 @@ CALL gnuplot_set_gfact(1000._DP,.FALSE.)
 
 DO isigma=1,nsigma
    IF (nsigma > 1) THEN
-      filename=TRIM(flnkconv)//TRIM(int_to_char(isigma))//'/'//TRIM(flnkconv)
+      filename='energy_files/'//TRIM(flnkconv)//TRIM(int_to_char(isigma))&
+                                                      //'/'//TRIM(flnkconv)
       IF (isigma==1) THEN
          CALL gnuplot_write_file_mul_data(filename,1,4,'color_red',.TRUE.,.FALSE.,&
                                                              .FALSE.)

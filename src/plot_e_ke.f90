@@ -35,7 +35,7 @@ INTEGER :: iden, ierr
 
 IF ( my_image_id /= root_image ) RETURN
 
-gnu_filename=TRIM(flgnuplot)//'_keconv'
+gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_keconv'
 CALL gnuplot_start(gnu_filename)
 
 filename=TRIM(flpskeconv)
@@ -48,7 +48,8 @@ CALL gnuplot_set_gfact(1000._DP,.FALSE.)
 
 DO iden=1,nkeden
    IF (nkeden > 1) THEN
-      filename=TRIM(flkeconv)//TRIM(int_to_char(iden))//'/'//TRIM(flkeconv)
+      filename='energy_files/'//TRIM(flkeconv)//TRIM(int_to_char(iden))&
+                                                //'/'//TRIM(flkeconv)
       IF (iden==1) THEN
          CALL gnuplot_write_file_mul_data(filename,1,2,'color_red',.TRUE.,&
                                           .FALSE.,.FALSE.)
@@ -60,7 +61,7 @@ DO iden=1,nkeden
                                           .FALSE.,.FALSE.)
       ENDIF
    ELSE
-      filename=TRIM(flkeconv)
+      filename='energy_files/'//TRIM(flkeconv)
       CALL gnuplot_write_file_mul_data(filename,1,2,'color_red',.TRUE.,.TRUE.,&
                                                  .FALSE.)
    END IF

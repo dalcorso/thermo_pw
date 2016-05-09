@@ -42,7 +42,7 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
   REAL(DP) :: vm
   LOGICAL, ALLOCATABLE :: high_symmetry(:), is_gamma(:)
   LOGICAL :: copy_before, exst_rap
-  CHARACTER(LEN=256) :: filename, filedata, file_vec
+  CHARACTER(LEN=256) :: filename, filedata, file_vec, filegrun
   CHARACTER(LEN=6), EXTERNAL :: int_to_char
 
   NAMELIST /plot/ nks, nbnd
@@ -58,7 +58,7 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
   DO igeo = 1, ngeo(1)
 
      IF (no_ph(igeo)) CYCLE
-     filedata = TRIM(file_disp)//'.g'//TRIM(int_to_char(igeo))
+     filedata = "phdisp_files/"//TRIM(file_disp)//'.g'//TRIM(int_to_char(igeo))
 
      IF (ionode) &
         OPEN(UNIT=1,FILE=TRIM(filedata),FORM='formatted',STATUS='OLD',ERR=101,&
@@ -101,7 +101,7 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
      ENDIF
 
      IF (with_eigen) THEN
-        filename=TRIM(file_vec)//".g"//TRIM(int_to_char(igeo))
+        filename="phdisp_files/"//TRIM(file_vec)//".g"//TRIM(int_to_char(igeo))
         IF (ionode) OPEN(UNIT=iumode, FILE=TRIM(filename), FORM='formatted', &
                    STATUS='old', ERR=210, IOSTAT=ios)
 210     CALL mp_bcast(ios, ionode_id, intra_image_comm)
@@ -247,9 +247,11 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
 !  Third part: writes Gruneisen parameters on file
 !
 iu_grun=2
-IF (ionode) &
-   OPEN(UNIT=iu_grun, FILE=TRIM(flgrun), FORM='formatted', STATUS='UNKNOWN', &
+IF (ionode) THEN
+   filegrun="anhar_files/"//TRIM(flgrun)
+   OPEN(UNIT=iu_grun, FILE=TRIM(filegrun), FORM='formatted', STATUS='UNKNOWN', &
              ERR=10, IOSTAT=ios)
+END IF
 10 CALL mp_bcast(ios, ionode_id, intra_image_comm)
    CALL errore('write_gruneisen_band','opening dispersion file',ABS(ios))
 
@@ -268,7 +270,7 @@ IF (ionode) &
 !
 iu_grun=2
 IF (ionode) &
-   OPEN(UNIT=iu_grun, FILE=TRIM(flgrun)//'_freq', FORM='formatted', &
+   OPEN(UNIT=iu_grun, FILE=TRIM(filegrun)//'_freq', FORM='formatted', &
                   STATUS='UNKNOWN', ERR=20, IOSTAT=ios)
 20 CALL mp_bcast(ios, ionode_id, intra_image_comm)
    CALL errore('write_gruneisen_band','opening dispersion file 1',ABS(ios))

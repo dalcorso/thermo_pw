@@ -30,7 +30,7 @@ IMPLICIT NONE
 
 INTEGER  :: ierr
 
-CHARACTER(LEN=256) :: gnu_filename, filename, ylabel, xlabel
+CHARACTER(LEN=256) :: gnu_filename, filename, fileeldos, ylabel, xlabel
 REAL(DP), ALLOCATABLE :: e(:), dos(:), ddos(:), int_dos(:)
 INTEGER :: n
 INTEGER :: iu_dos
@@ -43,9 +43,10 @@ ALLOCATE(dos(save_ndos))
 IF (nspin==2) ALLOCATE(ddos(save_ndos))
 ALLOCATE(int_dos(save_ndos))
 
+fileeldos='therm_files/'//TRIM(fleldos)
 IF ( ionode ) THEN
    iu_dos=2
-   OPEN (unit=iu_dos, file=TRIM(fleldos), status='unknown', form='formatted')
+   OPEN (unit=iu_dos, file=TRIM(fileeldos), status='unknown', form='formatted')
 
    READ(iu_dos,*)
    IF (nspin==2) THEN
@@ -72,7 +73,7 @@ DO n=1,save_ndos
 END DO
 ymax=ymax*1.1_DP
 
-gnu_filename = TRIM(flgnuplot)//'_dos'
+gnu_filename = 'gnuplot_files/'//TRIM(flgnuplot)//'_dos'
 ymin1=1.D10
 ymax1=0.0_DP
 DO n=1,save_ndos
@@ -81,7 +82,7 @@ DO n=1,save_ndos
 END DO
 ymax1=ymax1*1.1_DP
 
-gnu_filename = TRIM(flgnuplot)//'_eldos'
+gnu_filename = 'gnuplot_files/'//TRIM(flgnuplot)//'_eldos'
 CALL gnuplot_start(gnu_filename)
 
 filename=TRIM(flpseldos)
@@ -120,8 +121,8 @@ IF (degauss>0.0_DP.OR.ltetra) THEN
 END IF
 
 IF (nspin==2) THEN
-   CALL gnuplot_write_file_mul_data(fleldos,1,2,'color_red',.TRUE.,.FALSE.,.FALSE.)
-   CALL gnuplot_write_file_mul_data_minus(fleldos,1,3,'color_blue',.FALSE., &
+   CALL gnuplot_write_file_mul_data(fileeldos,1,2,'color_red',.TRUE.,.FALSE.,.FALSE.)
+   CALL gnuplot_write_file_mul_data_minus(fileeldos,1,3,'color_blue',.FALSE., &
                                                   .TRUE., .FALSE.)
    ylabel='Integrated dos (states / cell)'
    CALL gnuplot_ylabel(TRIM(ylabel), .FALSE.)
@@ -129,10 +130,10 @@ IF (nspin==2) THEN
    CALL gnuplot_write_command(TRIM(ylabel),.FALSE.)
    CALL gnuplot_write_command('unset arrow',.FALSE.)
    CALL gnuplot_write_command('unset label',.FALSE.)
-   CALL gnuplot_write_file_mul_data(fleldos,1,4,'color_blue',.TRUE.,.TRUE.,&
+   CALL gnuplot_write_file_mul_data(fileeldos,1,4,'color_blue',.TRUE.,.TRUE.,&
                                                                       .FALSE.)
 ELSE
-   CALL gnuplot_write_file_mul_data(fleldos,1,2,'color_red',.TRUE.,.TRUE.,&
+   CALL gnuplot_write_file_mul_data(fileeldos,1,2,'color_red',.TRUE.,.TRUE.,&
                                                                       .FALSE.)
    ylabel='Integrated dos (states / cell)'
    CALL gnuplot_ylabel(TRIM(ylabel), .FALSE.)
@@ -140,7 +141,7 @@ ELSE
    CALL gnuplot_write_command(TRIM(ylabel),.FALSE.)
    CALL gnuplot_write_command('unset arrow',.FALSE.)
    CALL gnuplot_write_command('unset label',.FALSE.)
-   CALL gnuplot_write_file_mul_data(fleldos,1,3,'color_blue',.TRUE.,.TRUE.,&
+   CALL gnuplot_write_file_mul_data(fileeldos,1,3,'color_blue',.TRUE.,.TRUE.,&
                                                                       .FALSE.)
 ENDIF
 

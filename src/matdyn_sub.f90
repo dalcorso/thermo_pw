@@ -98,7 +98,7 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   REAL(DP), PARAMETER :: eps=1.0d-6
   INTEGER :: nr1, nr2, nr3, ntetra, ibrav
   INTEGER :: iq, imode, counter
-  CHARACTER(LEN=256) :: filename
+  CHARACTER(LEN=256) :: filename, filedos, filefrc, filevec, filefrq
   LOGICAL :: has_zstar
   COMPLEX(DP), ALLOCATABLE :: dyn(:,:,:,:)
   COMPLEX(DP), ALLOCATABLE :: z(:,:), save_z(:,:,:)
@@ -135,12 +135,13 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   !
 
   dos = (do_dos == 1) .AND. ldos
-  filename='save_frequencies.'//TRIM(int_to_char(igeom))
+  filename='phdisp_files/save_frequencies.'//TRIM(int_to_char(igeom))
   done_dos=.FALSE.
   IF (dos) THEN
-     IF ( check_file_exists(fldos) ) THEN
+     filedos="phdisp_files/"//TRIM(fldos)
+     IF ( check_file_exists(filedos) ) THEN
         IF ( my_image_id == root_image ) THEN
-           CALL read_phdos_data(phdos_save(igeom),fldos)
+           CALL read_phdos_data(phdos_save(igeom),filedos)
            CALL find_minimum_maximum(phdos_save(igeom), freqmin, freqmax)
            done_dos=.TRUE.
         END IF
@@ -151,7 +152,8 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
         END IF
      END IF
   ELSE
-     IF (check_file_exists(flfrq)) RETURN
+     filefrq="phdisp_files/"//TRIM(flfrq)
+     IF (check_file_exists(filefrq)) RETURN
   END IF
 
   IF ( my_image_id /= root_image ) RETURN
@@ -159,17 +161,18 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   WRITE(stdout,'(/,2x,76("+"))')
   WRITE(stdout,'(5x,"Interpolating the dynamical matrices")')
   IF (dos) THEN
-     WRITE(stdout,'(5x,"Dos written on file ",a)') TRIM(fldos)
+     WRITE(stdout,'(5x,"Dos written on file ",a)') TRIM(filedos)
   ELSE
-     WRITE(stdout,'(5x,"Frequencies written on file ",a)') TRIM(flfrq)
+     WRITE(stdout,'(5x,"Frequencies written on file ",a)') TRIM(filefrq)
   ENDIF
   WRITE(stdout,'(2x,76("+"),/)')
   !
   ! read force constants
   !
   xmlifc=xmldyn
+  filefrc="phdisp_files/"//TRIM(flfrc)
   IF (xmlifc) THEN
-     CALL read_dyn_mat_param(flfrc,ntyp,nat)
+     CALL read_dyn_mat_param(filefrc,ntyp,nat)
      ALLOCATE (m_loc(3,nat))
      ALLOCATE (atm(ntyp))
      ALLOCATE (zeu(3,3,nat))
@@ -182,7 +185,7 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
      ALLOCATE(frc(nr1,nr2,nr3,3,3,nat,nat))
      CALL read_ifc(nr1,nr2,nr3,nat,frc)
   ELSE
-     CALL readfc ( flfrc, nr1, nr2, nr3, epsil, nat, ibrav, alat, at, ntyp, &
+     CALL readfc ( filefrc, nr1, nr2, nr3, epsil, nat, ibrav, alat, at, ntyp, &
           amass, omega, has_zstar)
   ENDIF
   !
@@ -227,7 +230,8 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
      iout=0
   ELSE
      iout=4
-     IF (ionode) OPEN (unit=iout,file=TRIM(flvec),status='unknown', &
+     filevec="phdisp_files/"//flvec
+     IF (ionode) OPEN (unit=iout,file=TRIM(filevec),status='unknown', &
                                                           form='formatted')
   END IF
 
@@ -401,7 +405,7 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   END DO
   !
   IF (flfrq.NE.' '.AND..NOT.dos.AND.ionode) THEN
-     filename=TRIM(flfrq)
+     filename="phdisp_files/"//TRIM(flfrq)
      OPEN (unit=2,file=filename ,status='unknown',form='formatted')
      WRITE(2, '(" &plot nbnd=",i6,", nks=",i6," /")') 3*nat, nq
      DO n=1, nq
@@ -429,8 +433,8 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
      ENDDO
 
      IF (ionode) THEN
-        filename=TRIM(flfrq)//'.rap'
-        OPEN (unit=2,file=filename ,status='unknown',form='formatted')
+        filename="phdisp_files/"//TRIM(flfrq)//'.rap'
+        OPEN (unit=2,file=TRIM(filename) ,status='unknown',form='formatted')
         WRITE(2, '(" &plot_rap nbnd_rap=",i6,", nks_rap=",i6," /")') 3*nat, nq
         DO n=1, nq
            WRITE(2,'(10x,3f10.6,l6,2i6)') q(1,n), q(2,n), q(3,n), high_sym(n),&
@@ -479,7 +483,7 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
 
      CALL set_phdos(phdos_save(igeom),ndos,deltafreq)
 
-     IF (ionode) OPEN (unit=2,file=fldos,status='unknown',form='formatted')
+     IF (ionode) OPEN (unit=2,file=filedos,status='unknown',form='formatted')
      DO n= 1, ndos
         e = emin + (n - 1) * deltafreq
 !        CALL dos_t(freq, 1, 3*nat, nq, ntetra, tetra, e, dosofe)

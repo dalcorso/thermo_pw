@@ -31,6 +31,7 @@ INTEGER          :: itemp
 INTEGER          :: iu_therm
 TYPE(eldos_type) :: eldos
 
+CHARACTER(LEN=256) :: fileeltherm, fileeldos
 REAL(DP), ALLOCATABLE :: el_mu(:)
 REAL(DP), ALLOCATABLE :: el_free_ener(:)
 REAL(DP), ALLOCATABLE :: el_ener(:)
@@ -53,7 +54,8 @@ WRITE(stdout,'(5x,"Computing the thermodynamic properties from electron dos")')
 WRITE(stdout,'(5x,"Writing on file ",a)') TRIM(fleltherm)
 WRITE(stdout,'(2x,76("+"),/)')
 
-CALL read_eldos_data(eldos, lsda, fleldos)
+fileeldos='therm_files/'//TRIM(fleldos)
+CALL read_eldos_data(eldos, lsda, fileeldos)
 
 ALLOCATE(el_mu(ntemp))
 ALLOCATE(el_free_ener(ntemp))
@@ -121,7 +123,8 @@ END DO
 
 IF (ionode) THEN
    iu_therm=2
-   OPEN (UNIT=iu_therm, FILE=TRIM(fleltherm), STATUS='unknown',&
+   fileeltherm='therm_files/'//TRIM(fleltherm)
+   OPEN (UNIT=iu_therm, FILE=TRIM(fileeltherm), STATUS='unknown',&
                                                      FORM='formatted')
    WRITE(iu_therm,'("#")')  
    WRITE(iu_therm,'("# Temperature T in K, ")')
