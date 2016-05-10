@@ -74,7 +74,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
            ecutrho = keden(iwork)
            dual = ecutrho / ecutwfc
            CALL set_fft_mesh()
-           outdir=TRIM(outdir_thermo)//'ke'//TRIM(int_to_char(iwork))//'/'
+           outdir=TRIM(outdir_thermo)//'/ke'//TRIM(int_to_char(iwork))//'/'
            tmp_dir = TRIM ( outdir )
            wfc_dir = tmp_dir
            CALL check_tempdir ( tmp_dir, exst, parallelfs )
@@ -87,7 +87,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
                                nkstot, xk, wk )
            CALL set_fft_mesh()
            gamma_only = ( k_points == 'gamma' )
-           outdir=TRIM(outdir_thermo)//'ke'//TRIM(int_to_char(iwork))//'/'
+           outdir=TRIM(outdir_thermo)//'/ke'//TRIM(int_to_char(iwork))//'/'
            tmp_dir = TRIM ( outdir )
            wfc_dir = tmp_dir
            CALL check_tempdir ( tmp_dir, exst, parallelfs )
@@ -134,7 +134,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
            tau=tau_save
            CALL cryst_to_cart( nat, tau, at, 1 )
 
-           outdir=TRIM(outdir_thermo)//'g'//TRIM(int_to_char(iwork))//'/'
+           outdir=TRIM(outdir_thermo)//'/g'//TRIM(int_to_char(iwork))//'/'
            tmp_dir = TRIM ( outdir )
            wfc_dir = tmp_dir
            CALL check_tempdir ( tmp_dir, exst, parallelfs )
@@ -237,7 +237,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
            CALL cell_base_init ( ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
                          trd_ht, rd_ht, cell_units )
            CALL set_fft_mesh()
-           outdir=TRIM(outdir_thermo)//'g'//TRIM(int_to_char(iwork))//'/'
+           outdir=TRIM(outdir_thermo)//'/g'//TRIM(int_to_char(iwork))//'/'
            tmp_dir = TRIM ( outdir )
            wfc_dir = tmp_dir
            CALL check_tempdir ( tmp_dir, exst, parallelfs )
@@ -380,7 +380,7 @@ SUBROUTINE set_work_for_elastic_const(iwork)
       CALL find_fft_fact()
   ENDIF
 
-  outdir=TRIM(outdir_thermo)//'g'//TRIM(int_to_char(iwork))//'/'
+  outdir=TRIM(outdir_thermo)//'/g'//TRIM(int_to_char(iwork))//'/'
   tmp_dir = TRIM ( outdir )
   wfc_dir = tmp_dir
   CALL check_tempdir ( tmp_dir, exst, parallelfs )
