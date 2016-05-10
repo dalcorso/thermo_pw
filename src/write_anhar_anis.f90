@@ -188,6 +188,8 @@ USE cell_base,      ONLY : ibrav
 USE thermo_mod,     ONLY : ngeo
 USE temperature,    ONLY : ntemp, temp
 USE control_pressure, ONLY : pressure, pressure_kb
+USE control_grun,   ONLY : lv0_t
+USE control_mur,    ONLY : celldm0, vmin
 USE ph_freq_thermodynamics, ONLY : ph_freq_save, phf_cv
 USE ph_freq_anharmonic,     ONLY : celldmf_t, vminf_t, cvf_t, b0f_t, cpf_t, &
                                    b0f_s
@@ -261,8 +263,13 @@ END DO
 DO itemp = 1, ntemp
    IF (MOD(itemp,30)==0) WRITE(stdout,'(5x,"Computing temperature T=",f10.4,&
                                                    &" K")') temp(itemp)
-   cm(:)=celldmf_t(:,itemp)
-   vm = vminf_t(itemp)
+   IF (lv0_t) THEN
+      cm(:)=celldmf_t(:,itemp)
+      vm = vminf_t(itemp)
+   ELSE
+      cm(:)=celldm0(:)
+      vm = vmin
+   END IF
    CALL compute_x(cm,x,degree,ibrav)
    ph_freq%nu= 0.0_DP
    DO i=1,degree

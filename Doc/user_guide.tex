@@ -1300,6 +1300,17 @@ with_eigen    : if .TRUE. use the eigenvectors of the dynamical matrix to
 lquartic_ph   : if .TRUE. fit the vibrational free energy with a fourth
                 order polynomial, otherwise with a second order polynomial
                 Default: logical .FALSE.
+lv0_t         : if .TRUE.  the calculation of the thermal expansion with 
+                Gruneisen parameters uses the equilibrium volume as a 
+                function of temperature computed from the free energy 
+                minimization, otherwise the volume at T=0 K.
+                Default: logical .TRUE.
+lb0_t         : if .TRUE. the calculation of the thermal expansion with 
+                Gruneisen parameters uses the bulk modulus as a function of 
+                temperature computed from the free energy minimization, 
+                otherwise the bulk modulus computed at T=0 K. For anisotropic
+                solids only lb0_t=.FALSE. is implemented.
+                Default: logical .TRUE.
 flpgrun       : file where the values of the Gruneisen parameters are written. 
                 Default: character(len=*) 'output_pgrun.dat'
 flgrun        : file where the Gruneisen parameters in a plotable form are

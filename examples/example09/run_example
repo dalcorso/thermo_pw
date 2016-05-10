@@ -87,6 +87,10 @@ cat > thermo_control << EOF
  &INPUT_THERMO
   what='mur_lc_t',
   deltat=3.
+  after_disp=.TRUE.
+  fildyn='si.dyn.xml',
+  lb0_t=.FALSE.
+  lv0_t=.FALSE.
  /
 EOF
 

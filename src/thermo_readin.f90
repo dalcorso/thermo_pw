@@ -57,7 +57,8 @@ SUBROUTINE thermo_readin()
   USE control_dos,          ONLY : deltae, ndose, nk1_d, nk2_d, nk3_d, &
                                    k1_d, k2_d, k3_d, sigmae, legauss
   USE control_grun,         ONLY : grunmin_input, grunmax_input, &
-                                   temp_ph, volume_ph, celldm_ph
+                                   temp_ph, volume_ph, celldm_ph, lv0_t, &
+                                   lb0_t
   USE control_conv,         ONLY : nke, deltake, nkeden, deltakeden, &
                                    nnk, deltank, nsigma, deltasigma
   USE control_mur,          ONLY : vmin_input, vmax_input, deltav, nvol, &
@@ -177,6 +178,7 @@ SUBROUTINE thermo_readin()
                             elastic_algorithm,              &
                             poly_degree,                    &
                             grunmin_input, grunmax_input,   &
+                            lv0_t, lb0_t,                   &
                             delta_epsilon, ngeo_strain,     &
                             epsilon_0,                      &
                             frozen_ions,                    &
@@ -299,6 +301,8 @@ SUBROUTINE thermo_readin()
   temp_ph=0.0_DP
   volume_ph=0.0_DP
   celldm_ph=0.0_DP
+  lv0_t=.TRUE.
+  lb0_t=.TRUE.
 
   lambda=0.0_DP
   lambda_elem=' '

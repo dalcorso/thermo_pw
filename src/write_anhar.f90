@@ -114,6 +114,8 @@ USE grun_anharmonic, ONLY : betab, grun_gamma_t, poly_grun, poly_order
 USE ph_freq_module, ONLY : thermal_expansion_ph, ph_freq_type,  &
                            destroy_ph_freq, init_ph_freq
 USE control_pressure, ONLY : pressure, pressure_kb
+USE control_grun,     ONLY : lv0_t, lb0_t
+USE control_mur,    ONLY : vmin, b0
 USE ifc,            ONLY : nq1_d, nq2_d, nq3_d
 USE data_files,     ONLY : flanhar
 USE io_global,      ONLY : ionode
@@ -140,7 +142,11 @@ nq=ph_freq_save(1)%nq
 CALL init_ph_freq(ph_grun, nat, nq1_d, nq2_d, nq3_d, nq, .FALSE.)
 CALL init_ph_freq(ph_freq, nat, nq1_d, nq2_d, nq3_d, nq, .FALSE.)
 DO itemp = 1, ntemp
-   vm=vminf_t(itemp)
+   IF (lv0_t) THEN
+      vm=vminf_t(itemp)
+   ELSE
+      vm=vmin
+   ENDIF
    ph_freq%nu= 0.0_DP
    ph_freq%wg=ph_freq_save(1)%wg
    ph_grun%nu= 0.0_DP
@@ -162,7 +168,11 @@ DO itemp = 1, ntemp
    END DO
       
    CALL thermal_expansion_ph(ph_freq, ph_grun, temp(itemp), betab(itemp))
-   betab(itemp)=betab(itemp) * ry_kbar / b0f_t(itemp)
+   IF (lb0_t) THEN
+      betab(itemp)=betab(itemp) * ry_kbar / b0f_t(itemp)
+   ELSE
+      betab(itemp)=betab(itemp) * ry_kbar / b0
+   ENDIF
 END DO
 
 CALL compute_cp(betab, vminf_t, b0f_t, phf_cv, cvf_t, cpf_t, b0f_s, &

@@ -521,6 +521,12 @@ MODULE control_grun
                                 ! are interpolated.
   REAL(DP) :: temp_ph           ! when volume_ph=0.0_DP we use the volume
                                 ! corresponding to this temperature
+  LOGICAL :: lv0_t,    &        ! if .TRUE. use the temperature dependent
+                                ! volume from free energy minimization
+             lb0_t              ! if .TRUE. use the temperature dependent
+                                ! bulk modulus from energy minimization
+
+
 END MODULE control_grun
 
 MODULE control_pwrun
