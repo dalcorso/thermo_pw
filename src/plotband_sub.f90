@@ -537,6 +537,7 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
               IF (ionode) WRITE (2,'(2f10.4)') (kx(n), e_eff(i,n),&
                                                               n=tot_points,1,-1)
            ENDIF
+           IF (ionode) WRITE(2,*)
         ENDIF
      ENDDO
      IF (ionode) CLOSE (UNIT = 2, STATUS='KEEP')
@@ -641,6 +642,7 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
                                                             n=lpe, spe,-1 )
                 ENDIF
                 has_points(ilines,1)=.TRUE.
+                IF (ionode) WRITE(2,*)
              ENDIF
           ENDDO
           IF (ionode) CLOSE (unit = 2)
@@ -704,6 +706,7 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
                          e_rap(start_rapk(irap,n)+i-1,n), n=lpe,spe,-1)
                    END IF
                    has_points(ilines,irap)=.TRUE.
+                   IF (ionode) WRITE(2,*) 
                 END IF
              END DO
              IF (MINVAL(nbnd_rapk(irap,spe:lpe))==0) THEN
