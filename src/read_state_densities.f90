@@ -102,12 +102,13 @@ IF (identify_sur) THEN
 
   IF (read_not_write) THEN
      IF (ionode) &
-        INQUIRE( FILE = 'info_data', EXIST = exst )
+        INQUIRE( FILE = 'band_files/info_data', EXIST = exst )
      CALL mp_bcast(exst, ionode_id, intra_image_comm)
      IF (.NOT. exst) CALL errore('read_minimal_info','info_data not present',1)
      IF (ionode) THEN
         iun=39
-        OPEN(UNIT=iun, FILE='info_data', STATUS='old', ERR=300, IOSTAT=ios)
+        OPEN(UNIT=iun, FILE='band_files/info_data', STATUS='old', ERR=300,  &
+                                                                IOSTAT=ios)
         READ(iun, *) ef, nelec
         READ(iun, *) nqaux_
         READ(iun, '(9i8)') (label_disp_q(n), n=1,nqaux)
@@ -151,7 +152,8 @@ IF (identify_sur) THEN
   ELSE
      IF (ionode) THEN
         iun=39
-        OPEN(UNIT=iun,FILE='info_data',STATUS='unknown',ERR=400,IOSTAT=ios)
+        OPEN(UNIT=iun,FILE='band_files/info_data',STATUS='unknown',&
+                                                          ERR=400,IOSTAT=ios)
         WRITE(iun, '(2f16.11)') ef, nelec
         WRITE(iun, '(i8)') nqaux
         WRITE(iun, '(9i8)') (label_disp_q(n), n=1,nqaux)

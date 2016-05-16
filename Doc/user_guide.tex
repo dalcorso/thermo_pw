@@ -454,6 +454,13 @@ emax_input : maximum energy for the band dispersion plot (in eV).
 nbnd_bands : the number of bands in the band calculation
              Default: integer 2*nbnd, where nbnd is the number of bands 
              given in pw.x input or calculated by pw.x.
+only_bands_plot: if the files with the bands and the representations
+             are already on files, this option allows to change the 
+             parameters of the plot (such as the maximum or minimum energy) and
+             do another plot without additional calculation. If the files are
+             missing and this variable is .TRUE. an error occurs. Note that
+             using this option you cannot change the path.
+             Default: logical .FALSE.
 lsym       : if .TRUE. does the symmetry analysis of the bands
              Default: .TRUE.
 flpsband   : postscript file with the electronic band structure

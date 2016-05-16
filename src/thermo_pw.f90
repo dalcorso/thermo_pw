@@ -312,6 +312,7 @@ PROGRAM thermo_pw
                  IF (nspin==4) nspin0=1
                  DO spin_component = 1, nspin0
                     CALL bands_sub()
+                    CALL read_minimal_info(.FALSE.)
                     CALL plotband_sub(1,1,' ')
                  ENDDO
               ENDIF
