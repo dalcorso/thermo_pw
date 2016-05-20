@@ -28,7 +28,7 @@ SUBROUTINE write_ph_dispersions()
   USE thermo_sym, ONLY : code_group_save
   USE rap_point_group,  ONLY : code_group
   USE control_pwrun, ONLY : nr1_save, nr2_save, nr3_save
-  USE control_paths, ONLY : disp_q, disp_wq, disp_nqs
+  USE control_paths, ONLY : disp_q, disp_wq, disp_nqs, high_sym_path
   USE control_ph,    ONLY : xmldyn
   USE ifc,           ONLY : m_loc, atm, zeu, has_zstar
   USE noncollin_module, ONLY : nspin_mag
@@ -46,7 +46,6 @@ SUBROUTINE write_ph_dispersions()
   LOGICAL, ALLOCATABLE :: high_sym(:)
   LOGICAL :: check_file_exists
   !
-
   filefrq="phdisp_files/"//TRIM(flfrq)
   IF (check_file_exists(filefrq)) THEN
      WRITE(stdout,'(/,2x,76("-"))')
@@ -98,27 +97,7 @@ SUBROUTINE write_ph_dispersions()
 !
 !  Initialize high_sym
 !
-  high_sym=.FALSE.
-  DO n=1,nq
-     IF (n==1.OR.n==nq) THEN
-        high_sym(n) = .TRUE.
-     ELSE
-        q1(:) = disp_q(:,n) - disp_q(:,n-1)
-        q2(:) = disp_q(:,n+1) - disp_q(:,n)
-        modq1=sqrt( q1(1)*q1(1) + q1(2)*q1(2) + q1(3)*q1(3) )
-        modq2=sqrt( q2(1)*q2(1) + q2(2)*q2(2) + q2(3)*q2(3) )
-        IF (modq1 >1.d-6 .AND. modq2 > 1.d-6) THEN
-           ps = ( q1(1)*q2(1) + q1(2)*q2(2) + q1(3)*q2(3) ) / &
-                   modq1 / modq2
-           high_sym(n) = (ABS(ps-1.d0) >1.0d-4)
-        ENDIF
-!
-!  The gamma point is a high symmetry point
-!
-        IF (SQRT(disp_q(1,n)**2+disp_q(2,n)**2+disp_q(3,n)**2) < 1.0d-9) &
-                                                          high_sym(n)=.TRUE.
-     END IF
-  END DO
+  high_sym(1:nq)=high_sym_path(1:nq)
 !
 ! Now at all q points for which we can perform the symmetry analysis check
 ! the bands. If there some symmetry change is detected change also 

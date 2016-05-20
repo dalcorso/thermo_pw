@@ -26,7 +26,7 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
   USE control_grun,  ONLY : grunmin_input, grunmax_input
   USE data_files,    ONLY : flpgrun, flpband, filband, flfrq, flgrun
   USE control_paths, ONLY : letter_path, label_list, label_disp_q, npk_label, &
-                            nqaux, nrap_plot, rap_plot
+                            nqaux, nrap_plot, rap_plot, high_sym_path
   USE control_2d_bands, ONLY : nkz, aux_ind_sur, identify_sur, lprojpbs, &
                                sym_divide, lsurface_state, lsurface_state_rap
   USE thermo_mod,    ONLY : tot_ngeo
@@ -262,30 +262,12 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
 !  in the representation file. This is necessary because the representation
 !  file might be missing. In this case we identify here the high
 !  symmetry points
+! 
 !
-  DO n=1,nks
-     IF (n==1 .OR. n==nks) THEN
-        high_symmetry(n) = .TRUE.
-     ELSE
-        k1(:) = k(:,n) - k(:,n-1)
-        k2(:) = k(:,n+1) - k(:,n)
-        modk1=sqrt( k1(1)*k1(1) + k1(2)*k1(2) + k1(3)*k1(3) )
-        modk2=sqrt( k2(1)*k2(1) + k2(2)*k2(2) + k2(3)*k2(3) )
-        IF (modk1 <1.d-6 .OR. modk2 < 1.d-6) CYCLE
-        ps = ( k1(1)*k2(1) + k1(2)*k2(2) + k1(3)*k2(3) ) / &
-             modk1 / modk2 
-        high_symmetry(n) = (ABS(ps-1.d0) >1.0d-4).OR.high_symmetry(n)
-!
-!  The gamma point is a high symmetry point
-!
-        IF (k(1,n)**2+k(2,n)**2+k(3,n)**2 < 1.0d-9) high_symmetry(n)=.true.
-!
-!   save the typical lenght of dk
-!
-        IF (n==2) dxmod_save = sqrt( k1(1)**2 + k1(2)**2 + k1(3)**2)
-
-     ENDIF
-  ENDDO
+  high_symmetry(1:nks)= high_symmetry(1:nks).OR.high_sym_path(1:nks)
+  IF (nks>1) dxmod_save = SQRT( (k(1,2)-k(1,1))**2 +  &
+                                (k(2,2)-k(2,1))**2 +  &
+                                (k(3,2)-k(3,1))**2 )
 !
 ! At this point we should count how many lines do we have and
 ! set the first and the last point of each line

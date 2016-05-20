@@ -34,6 +34,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
                                    sym_divide, nlayers, identify_sur, &
                                    surface1, surface2
   USE control_bands,        ONLY : lsym
+  USE control_paths,        ONLY : high_sym_path
   USE data_files,           ONLY : flprojlayer
   USE uspp,                 ONLY : nkb, vkb
   USE spin_orb,             ONLY : domag
@@ -159,26 +160,8 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   CALL ipoolrecover(istart,nbnd+1,nkstot,nks)
 #endif
   IF (ionode) THEN
-     high_symmetry=.FALSE.
-     DO ik=1,nkstot
-        IF (ik==1.OR.ik==nkstot) THEN
-           high_symmetry(ik) = .TRUE.
-        ELSE
-           k1(:) = xk(:,ik) - xk(:,ik-1)
-           k2(:) = xk(:,ik+1) - xk(:,ik)
-           modk1=sqrt( k1(1)*k1(1) + k1(2)*k1(2) + k1(3)*k1(3) )
-           modk2=sqrt( k2(1)*k2(1) + k2(2)*k2(2) + k2(3)*k2(3) )
-           IF (modk1 <1.d-6 .OR. modk2 < 1.d-6) CYCLE
-           ps = ( k1(1)*k2(1) + k1(2)*k2(2) + k1(3)*k2(3) ) / &
-                modk1 / modk2
-           high_symmetry(ik) = (ABS(ps-1.d0) >1.0d-4)
-!
-!  The gamma point is a high symmetry point
-!
-           IF (xk(1,ik)**2+xk(2,ik)**2+xk(3,ik)**2 < 1.0d-9) &
-                             high_symmetry(ik)=.TRUE.
-        END IF 
-     END DO
+     high_symmetry(1:nkstot)=high_sym_path(1:nkstot)
+
      DO ik=1, nkstot
         CALL smallgk (xk(1,ik), at, bg, s, ftau, t_rev, sname, &
              nsym, sk, ftauk, gk, t_revk, snamek, nsymk)

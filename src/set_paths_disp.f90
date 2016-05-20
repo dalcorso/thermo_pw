@@ -14,11 +14,13 @@ SUBROUTINE set_paths_disp()
 !  should be given as letters to be computed here with the correct
 !  geometry.
 !
+  USE kinds,         ONLY : DP
   USE control_paths, ONLY : nqaux, xqaux, wqaux, wqauxr, npk_label, letter, &
                             label_list, nqaux, q_in_band_form, &
                             q_in_cryst_coord, q2d, point_label_type, &
                             label_disp_q, disp_nqs, disp_q, disp_wq, &
-                            nrap_plot, rap_plot, nrap_plot_in, rap_plot_in
+                            nrap_plot, rap_plot, nrap_plot_in, rap_plot_in, &
+                            high_sym_path
   USE control_2d_bands, ONLY : nkz, sym_divide
   USE thermo_mod,    ONLY : what
   USE cell_base,     ONLY : ibrav, celldm, bg
@@ -27,12 +29,14 @@ SUBROUTINE set_paths_disp()
 
   IMPLICIT NONE
   CHARACTER(len=80) :: k_points = 'tpiba'
-  INTEGER :: i, j, ik
+  INTEGER :: n, i, j, ik
+  REAL(DP) :: q1(3), q2(3), modq1, modq2, ps
  
   IF (nqaux==0) CALL errore('set_paths_disp','path_not_set',1)
 
   IF ( ALLOCATED(disp_q) )    DEALLOCATE (disp_q)
   IF ( ALLOCATED(disp_wq) )   DEALLOCATE (disp_wq)
+  IF ( ALLOCATED(high_sym_path) )   DEALLOCATE (high_sym_path)
   IF ( ALLOCATED(nrap_plot) ) DEALLOCATE (nrap_plot)
   IF ( ALLOCATED(rap_plot) )  DEALLOCATE (rap_plot)
 
@@ -94,6 +98,35 @@ SUBROUTINE set_paths_disp()
          label_disp_q(i)=i
       ENDDO
    ENDIF
+!
+!  detect if some points are high symmetry points from the change
+!  of direction of the path
+!
+  ALLOCATE(high_sym_path(disp_nqs))
+  high_sym_path=.FALSE.
+  DO n=1,disp_nqs
+     IF (n==1.OR.n==disp_nqs) THEN
+!
+!     first and last points are assumed to be high symmetry points
+!
+        high_sym_path(n) = .TRUE.
+     ELSE
+        q1(:) = disp_q(:,n) - disp_q(:,n-1)
+        q2(:) = disp_q(:,n+1) - disp_q(:,n)
+        modq1=sqrt( q1(1)*q1(1) + q1(2)*q1(2) + q1(3)*q1(3) )
+        modq2=sqrt( q2(1)*q2(1) + q2(2)*q2(2) + q2(3)*q2(3) )
+        IF (modq1 >1.d-6 .AND. modq2 > 1.d-6) THEN
+           ps = ( q1(1)*q2(1) + q1(2)*q2(2) + q1(3)*q2(3) ) / &
+                   modq1 / modq2
+           high_sym_path(n) = (ABS(ps-1.d0) >1.0d-4)
+        ENDIF
+!
+!  The gamma point is a high symmetry point
+!
+        IF (SQRT(disp_q(1,n)**2+disp_q(2,n)**2+disp_q(3,n)**2) < 1.0d-9) &
+                                              high_sym_path(n)=.TRUE.
+     END IF
+  END DO
 
-   RETURN
+  RETURN
 END SUBROUTINE set_paths_disp

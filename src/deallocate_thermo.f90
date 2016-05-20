@@ -25,7 +25,7 @@ SUBROUTINE deallocate_thermo()
                                b0_grun_s, grun_gamma_t, poly_grun
   USE control_paths,    ONLY : xqaux, wqaux, letter, label_list, letter_path, &
                                label_disp_q, disp_q, disp_wq, nrap_plot_in,   &
-                               rap_plot_in, nrap_plot, rap_plot
+                               rap_plot_in, nrap_plot, rap_plot, high_sym_path
   USE control_2d_bands, ONLY : averag, vacuum, aux_ind_sur
   USE control_pwrun,    ONLY : ityp_save, amass_save
   USE temperature,      ONLY : temp
@@ -111,6 +111,7 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (rap_plot_in) )     DEALLOCATE(rap_plot_in)
   IF ( ALLOCATED (nrap_plot) )       DEALLOCATE(nrap_plot)
   IF ( ALLOCATED (rap_plot) )        DEALLOCATE(rap_plot)
+  IF ( ALLOCATED (high_sym_path) )   DEALLOCATE(high_sym_path)
 
   IF ( ALLOCATED (averag) )          DEALLOCATE(averag)
   IF ( ALLOCATED (vacuum) )          DEALLOCATE(vacuum)

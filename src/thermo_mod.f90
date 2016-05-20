@@ -441,6 +441,7 @@ MODULE control_paths
   INTEGER, ALLOCATABLE :: label_list(:)   ! correspondence label xqaux list
   INTEGER, ALLOCATABLE :: label_disp_q(:)   ! correspondence label disp_q list
   CHARACTER(LEN=10) :: point_label_type   ! type of point labels
+  LOGICAL, ALLOCATABLE :: high_sym_path(:)! high_symmetry points along the path
   LOGICAL :: q_in_band_form
   LOGICAL :: q_in_cryst_coord
   LOGICAL :: q2d
