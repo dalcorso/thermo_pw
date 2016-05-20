@@ -198,7 +198,7 @@ features and bug fixes but it might work only with the \texttt{SVN}
 version of \qe\ and its use is not advised.
 Please read the web page: 
 \texttt{http://people.sissa.it/\textasciitilde dalcorso/thermo\_pw\_help.html} 
-to have updated information about the compatibility bewteen the \texttt{CVS} 
+to have updated information about the compatibility between the \texttt{CVS} 
 version of \texttt{thermo\_pw} and \qe\ or if you have problems downloading
 the \texttt{CVS} version of \texttt{thermo\_pw}.
 This page contains also information on critical bugs found in the 
@@ -674,7 +674,7 @@ flpseldos      : name of the postscript file that contains the electron
 fleltherm      : name of the file that contains the electron thermodynamic data 
                 Default: character output_eltherm.dat
 flpseldos      : name of the postscript file that contains the picture of the
-                electron thermodynamic quatities
+                electron thermodynamic quantities
                 Default: character output_eltherm.ps
 \end{verbatim}
 The minimum and maximum energy, as well as the number of bands,
@@ -1572,6 +1572,150 @@ in \texttt{thermo\_pw}.
 \texttt{developer\_guide.pdf} : some notes on the internal logic of
 \texttt{thermo\_pw}.
 
+\end{itemize}
+
+\section{\color{coral}Color codes}
+
+In this section we briefly summarize the color codes of some of the figures
+that can be obtained from \texttt{thermo\_pw}.
+
+\begin{itemize} 
+\item
+Total energy versus kinetic energy. This is a single figure of the total
+energy versus wave-functions kinetic energy cut-offs. When the test
+requires several charge density cut-offs there is a different curve
+for each charge density cut-off. The curve corresponding to the lowest
+charge density cut-off is \texttt{red}, the one corresponding to the
+highest is \texttt{blue}, all the others are \texttt{green}.
+Note that the total energy of the last configuration (highest wave function
+and charge density cut offs) is subtracted from all energies.
+
+\item
+Total energy versus size of the {\bf k}-point mesh. This is a single
+figure of the total energy as a function of the size of the {\bf k}-point
+mesh. When the test requires several values of \texttt{degauss}, there
+is a curve for each \texttt{degauss}. The curve corresponding to the
+first \texttt{degauss} is \texttt{red}, the one corresponding to the
+last is \texttt{blue}, all the others are \texttt{green}.          
+Note that the total energy of the last configuration (highest number of
+points and lowest \texttt{degauss}) is subtracted from all energies.
+
+\item
+Total energy as a function of volume (\texttt{lmurn=.TRUE.}). 
+This plot is composed by two figures. Total energy as a function of volume 
+and pressure as a function of volume. Both curves are \texttt{red}.   
+The points on the first curve are the calculated energies, the continuous
+curve is the fit.
+
+\item
+Total energy as a function of one or two crystallographic parameters
+(\texttt{lmurn=.FALSE.}). When there is a single parameter the curve is
+\texttt{red} as in the case (\texttt{lmurn=.TRUE.}). When there are two
+parameters a contour plot of the energy as a function of two parameters
+is shown. The contour levels, their number and their colors can be
+given in input. By default the code shows nine levels with three
+colors. From the lowest to the highest levels, the colors are \texttt{red},
+\texttt{green}, and \texttt{blue}. The energy value of each level is 
+written on output. When the user requests more levels without specifying
+their colors, the code continues with three \texttt{yellow} levels, 
+then \texttt{pink}, \texttt{cyan}, \texttt{orange}, \texttt{black}, and
+when more than $24$ levels are requested the sequence of colors is repeated.
+For crystal systems with more crystallographic parameters, this figure is
+not available.
+
+\item
+Energy bands. In this figure the bands have the color of
+their irreducible representation. Each line of the path can have a different
+point group and representations. See the \texttt{point\_groups.pdf} file
+for the list of representations and their color code. Bands that in a given
+panel are all \texttt{red} have not been separated according to symmetry,
+because the path is at the border of the Brillouin zone and the space
+group is not symmorphic.
+                              
+\item
+Electron density of states. This is a plot composed by two figures,
+the first contains the electron density of states, the second the integral
+of the density of states up to that energy. The dos is \texttt{red}.
+In the local spin density case, the dos for spin up is \texttt{red} the
+one for spin down is \texttt{blue} and with a negative sign.          
+The integrated density of states is \texttt{blue}. In the spin polarized
+case, the curve shows the integral of the sum of the up and down density 
+of states.
+
+\item
+Electronic energy, free energy, entropy, and isochoric heat capacity 
+(metals only). This plot is composed by four pictures one for each
+quantity. There is a single \texttt{blue} curve per plot.      
+
+\item
+Phonon dispersions. In this figure the phonon dispersions have the color 
+of their irreducible representations. The same comments made for the plot of 
+the band structure apply here.                       
+
+\item
+Phonon dos. There is one picture with a single \texttt{red} curve.  
+   
+\item
+Vibrational energy, free energy, entropy, and isochoric heat capacity. This plot
+is composed by four figures each one showing one quantity. In \texttt{red} the 
+quantities obtained using the phonon density of states, 
+in \texttt{blue} those obtained from three dimensional integrals over 
+the Brillouin zone. In some cases the \texttt{red} curve is not visible 
+because it is exactly below the \texttt{blue} one.
+
+\item
+Debye vibrational energy, free energy, 
+entropy, and isochoric heat capacity. This plot is composed by four 
+figures each one showing one quantity. The curves are in \texttt{blue}
+and the word Debye appears in the $y$ axis label.
+                                            
+\item
+Equilibrium volume, bulk modulus, pressure derivative of the bulk
+modulus, isochoric heat capacity, isobaric heat capacity,
+thermal expansion, isobaric-isochoric difference of the heat capacity,    
+isoentropic-isothermal difference of the bulk modulus, and 
+average Gr\"uneisen parameter as a function of T (\texttt{lmurn=.TRUE.}). 
+This is a plot composed by nine figures, each one containing a different
+quantity in the order given above. In \texttt{red} the quantities 
+calculated using the phonon dos, in \texttt{blue} those
+obtained by a three dimensional integral over the Brillouin zone.
+Thermal expansion and average Gr\"uneisen parameter can also be 
+calculated using the mode Gr\"uneisen parameters and the result is plotted in
+\texttt{green}.
+
+\item
+Crystallographic parameters, thermal expansion tensor, and volume thermal
+expansion as a function of temperature (\texttt{lmurn=.FALSE.}). The number of
+pictures in this plot depends on the crystal system. It shows $a$, 
+$b/a$ (for orthorhombic solids) and $c/a$ (for tetragonal, hexagonal, and 
+orthorhombic solids) as a function of temperature. Then it shows the
+volume, the thermal expansion tensor, and the volume thermal expansion as
+a function of temperature. All quantities calculated using the phonon 
+density of states are in \texttt{red}, those calculated from integration
+over the Brillouin zone are in \texttt{blue} with the exception of the
+thermal expansion tensor. This tensor is in \texttt{red} or \texttt{blue}
+as above, or it might be \texttt{green} if computed from Gr\"uneisen
+parameters. For hexagonal and tetragonal solids $\alpha_{xx}$ is \texttt{red}
+if computed from phonon dos, \texttt{blue} if computed from three-dimensional
+frequency integration and \texttt{green} if computed from Gr\"uneisen 
+parameters. $\alpha_{zz}$ is \texttt{pink}, \texttt{cyan}, and \texttt{orange}
+in the same three cases.
+In the orthorhombic case $\alpha_{xx}$ and $\alpha_{zz}$ have the same
+colors, while $\alpha_{yy}$ is \texttt{gold}, \texttt{olive}, and 
+\texttt{light-blue} in the three cases described above.
+Only $a$, the volume, and the volume thermal expansion are shown 
+for all the other crystal systems.
+
+\item
+Mode Gr\"uneisen parameters. In this plot the mode Gr\"uneisen parameters have
+the color of the irreducible representation of the phonon dispersion curve
+of which their are the derivative.
+The same comments made for the band structure plot apply here.
+
+\item
+Phonon dispersions at the geometry that corresponds to a given temperature. 
+The color are assigned on the basis of the irreducible representation of
+each mode. The same comments made for the band structure plot apply here.
 
 \end{itemize}
 

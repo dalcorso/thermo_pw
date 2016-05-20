@@ -135,7 +135,7 @@ IF (ibrav_save==1.OR.ibrav_save==2.OR.ibrav_save==3) THEN
 
 ELSEIF (ibrav_save==4.OR.ibrav_save==5.OR.ibrav_save==6.OR.ibrav_save==7) THEN
    IF (done_grun) THEN
-      CALL gnuplot_write_file_mul_data(filename4,1,4,'color_cyan',.TRUE.,&
+      CALL gnuplot_write_file_mul_data(filename4,1,4,'color_green',.TRUE.,&
                                               .FALSE.,.FALSE.)
       CALL gnuplot_write_file_mul_data(filename4,1,5,'color_orange',.FALSE.,&
                                  .NOT.(ltherm_dos.OR.ltherm_freq),.FALSE.)
@@ -149,32 +149,32 @@ ELSEIF (ibrav_save==4.OR.ibrav_save==5.OR.ibrav_save==6.OR.ibrav_save==7) THEN
    IF (ltherm_freq) THEN
       CALL gnuplot_write_file_mul_data(filename3,1,4,'color_blue', &
              .NOT.(done_grun.OR.ltherm_dos),.FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename3,1,5,'color_green',.FALSE.,&
+      CALL gnuplot_write_file_mul_data(filename3,1,5,'color_cyan',.FALSE.,&
                                                          .TRUE.,.FALSE.)
    END IF
 ELSEIF (ibrav_save==8.OR.ibrav_save==9.OR.ibrav_save==10.OR.ibrav_save==11) THEN
    IF (done_grun) THEN
-      CALL gnuplot_write_file_mul_data(filename4,1,5,'color_cyan',.TRUE.,&
+      CALL gnuplot_write_file_mul_data(filename4,1,5,'color_green',.TRUE.,&
                                               .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename4,1,6,'color_orange',.FALSE.,&
-                                              .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename4,1,7,'color_ligth_blue',&
+      CALL gnuplot_write_file_mul_data(filename4,1,6,'color_light_blue',&
+                                              .FALSE.,.FALSE.,.FALSE.)
+      CALL gnuplot_write_file_mul_data(filename4,1,7,'color_orange',&
                         .FALSE.,.NOT.(ltherm_dos.OR.ltherm_freq),.FALSE.)
    ENDIF
    IF (ltherm_dos) THEN 
       CALL gnuplot_write_file_mul_data(filename2,1,5,'color_red', &
                                       .NOT.done_grun,.FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename2,1,6,'color_green',.FALSE.,&
+      CALL gnuplot_write_file_mul_data(filename2,1,6,'color_gold',.FALSE.,&
                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename2,1,7,'color_blue',.FALSE.,&
+      CALL gnuplot_write_file_mul_data(filename2,1,7,'color_pink',.FALSE.,&
                                                .NOT.ltherm_freq,.FALSE.)
    ENDIF
    IF (ltherm_freq) THEN 
-      CALL gnuplot_write_file_mul_data(filename3,1,5,'color_red', &
+      CALL gnuplot_write_file_mul_data(filename3,1,5,'color_blue', &
                            .NOT.(done_grun.OR.ltherm_dos),.FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename3,1,6,'color_green',.FALSE.,&
+      CALL gnuplot_write_file_mul_data(filename3,1,6,'color_olive',.FALSE.,&
                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename3,1,7,'color_blue',.FALSE.,&
+      CALL gnuplot_write_file_mul_data(filename3,1,7,'color_cyan',.FALSE.,&
                                                .TRUE.,.FALSE.)
    ENDIF
 END IF

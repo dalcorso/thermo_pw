@@ -26,7 +26,7 @@ SUBROUTINE plot_multi_energy()
   USE control_mur,          ONLY : nvol
   USE control_pressure,     ONLY : pressure, pressure_kb
   USE mp_images,            ONLY : my_image_id, root_image
-  USE io_global,            ONLY : ionode
+  USE io_global,            ONLY : ionode, stdout
   USE gnuplot,              ONLY : gnuplot_start, gnuplot_end,             &
                                    gnuplot_start_2dplot,                   &
                                    gnuplot_set_contour, gnuplot_do_2dplot, &
@@ -154,6 +154,12 @@ SUBROUTINE plot_multi_energy()
               color_levels(icont) = color(MOD((icont-1)/3,8)+1)
            END DO
         END IF
+
+        WRITE(stdout,'(/,5x,"The plot will have ",i5," levels")') ncontours
+        DO icont=1, ncontours
+           WRITE(stdout,'(5x,"Level ",i5," Energy= ",f15.8," ", a)') icont, &
+                             ene_levels_int(icont), TRIM(color_levels(icont))
+        ENDDO
 
         CALL gnuplot_start_2dplot(ncontours, nx, ny)
   
