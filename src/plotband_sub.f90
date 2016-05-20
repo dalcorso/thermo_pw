@@ -702,15 +702,17 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
   ENDIF
 
   IF (icode==1) THEN
-     WRITE(stdout,'(5x,"Bands in gnuplot format written to file ",a)') flpband
+     WRITE(stdout,'(5x,"Bands in gnuplot format written to file ",a)') &
+                                                            TRIM(flpband)
   ELSEIF (icode==2) THEN
-     WRITE(stdout,'(5x,"Phonons in gnuplot format written to file ",a)') flpband
+     WRITE(stdout,'(5x,"Phonons in gnuplot format written to file ",a)') &
+                                                            TRIM(flpband)
   ELSEIF (icode==3) THEN
      WRITE(stdout,'(5x,"Gruneisen parameters in gnuplot format written &
-                                            &to file ",a)') flpband
+                                            &to file ",a)') TRIM(flpband)
   ELSEIF (icode==4) THEN
      WRITE(stdout,'(5x,"Interpolated phonons in gnuplot format written &
-                                            &to file ",a)') flpband
+                                            &to file ",a)') TRIM(flpband)
   ENDIF
   !
   IF (emin_input /= 0.0_DP) THEN
