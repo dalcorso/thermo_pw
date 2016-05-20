@@ -291,6 +291,7 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
 !  writes frequencies at the chosen geometry on file
 !
 iu_grun=2
+filegrun='anhar_files/'//TRIM(flgrun)
 IF (ionode) &
    OPEN(UNIT=iu_grun, FILE=TRIM(filegrun)//'_freq', FORM='formatted', &
                   STATUS='UNKNOWN', ERR=30, IOSTAT=ios)
