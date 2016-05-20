@@ -68,6 +68,8 @@ CALL zero_point_energy(phdos_save(igeom), e0)
 CALL integrated_dos(phdos_save(igeom), tot_states)
 
 DO itemp = 1, ntemp
+   IF (MOD(itemp,30)==0) WRITE(6,'(5x,"Computing temperature ", i5 " / ",&
+                       & i5, 4x," T=",f12.2," K")') itemp, ntemp, temp(itemp)
    CALL free_energy(phdos_save(igeom), temp(itemp), ph_free_ener(itemp,igeom))
    CALL vib_energy(phdos_save(igeom), temp(itemp), ph_ener(itemp,igeom))
    CALL vib_entropy(phdos_save(igeom), temp(itemp), ph_entropy(itemp, igeom))
@@ -150,7 +152,8 @@ WRITE(stdout,'(2x,76("+"),/)')
 CALL zero_point_energy_ph(ph_freq_save(igeom), e0)
 
 DO itemp = 1, ntemp
-   IF (MOD(itemp,30)==0) WRITE(6,'(5x,"Computing temperature ", i5)') itemp
+   IF (MOD(itemp,30)==0) WRITE(6,'(5x,"Computing temperature ", i5 " / ",&
+                      & i5,4x," T=",f12.2," K")') itemp, ntemp, temp(itemp)
    CALL free_energy_ph(ph_freq_save(igeom), temp(itemp), &
                                        phf_free_ener(itemp,igeom))
    CALL vib_energy_ph(ph_freq_save(igeom), temp(itemp), &
