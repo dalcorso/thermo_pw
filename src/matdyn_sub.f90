@@ -1,4 +1,5 @@
 ! Copyright (C) 2001-2013 Quantum ESPRESSO group
+! Copyright (C) 2016 Andrea Dal Corso
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -6,23 +7,17 @@
 !
 !
 !---------------------------------------------------------------------
-SUBROUTINE matdyn_sub(do_dos, igeom)
+SUBROUTINE matdyn_interp(with_eigen)
   !-----------------------------------------------------------------------
   !  this program calculates the phonon frequencies for a list of generic
   !  q vectors starting from the interatomic force constants generated
   !  from the dynamical matrices as written by DFPT phonon code through
   !  the companion program q2r
   !
-  !  matdyn can generate a supercell of the original cell for mass
-  !  approximation calculation. If supercell data are not specified
-  !  in input, the unit cell, lattice vectors, atom types and positions
-  !  are read from the force constant file
+  !  This routine is interfaced with the thermo_pw code and uses the
+  !  following variables of its common structure
   !
-  !  Input cards: namelist &input
-  !     flfrc     file produced by q2r containing force constants (needed)
-  !               It is the same as in the input of q2r.x (+ the .xml extension
-  !               if the dynamical matrices produced by ph.x were in xml
-  !               format). No default value: must be specified.
+  !     flfrc     file produced by q2r containing force constants 
   !      zasr     (character) indicates the type of Acoustic Sum Rule imposed
   !               - 'no': no Acoustic Sum Rules imposed (default)
   !               - 'simple':  previous implementation of the asr used
@@ -42,17 +37,13 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   !               molecule or if all the atoms are aligned, etc.).
   !               In these cases the supplementary asr are cancelled
   !               during the orthonormalization procedure (see below).
-  !     flvec     output file for normalized phonon displacements 
-  !               (default: 'matdyn.modes'). The normalized phonon displacements
-  !               are the eigenvectors divided by the mass and then normalized.
-  !               As such they are not orthogonal.
-  !              
-  !     at        supercell lattice vectors - must form a superlattice of the
-  !               original lattice (default: use original cell)
-  !     ntyp      number of atom types in the supercell (default: ntyp of the
-  !               original cell)
-  !     amass     masses of atoms in the supercell (a.m.u.), one per atom type
-  !               (default: use masses read from file flfrc)
+  !  disp_nqs     The number of q vectors in which the interpolation must
+  !               be done
+  !  disp_q(3,disp_nqs) ! the cartesian coordinates in units of 2 pi / a 
+  !               of the q vectors for which the dynamical matrix needs
+  !               to be computed
+  !  with_eigen   .TRUE. if the routine has to compute also the eigen
+  !               vectors.
   !  If q = 0, the direction qhat (q=>0) for the non-analytic part
   !  is extracted from the sequence of q-points as follows:
   !     qhat = q(n) - q(n-1)  or   qhat = q(n) - q(n+1)
@@ -60,136 +51,68 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   !  For low-symmetry crystals, specify twice q = 0 in the list
   !  if you want to have q = 0 results for two different directions
   !
-  USE kinds,      ONLY : DP
-  USE mp,         ONLY : mp_bcast
-  USE mp_images,  ONLY : intra_image_comm, my_image_id, root_image
-  USE io_global,  ONLY : ionode, ionode_id, stdout
-  USE io_dyn_mat, ONLY : read_dyn_mat_param, read_dyn_mat_header, &
-                         read_ifc_param, read_ifc
-  USE ions_base,  ONLY : tau, ityp
-  USE cell_base,  ONLY : at, bg, celldm
-  USE constants,  ONLY : RY_TO_THZ, RY_TO_CMM1, amu_ry
-  USE symm_base,  ONLY : set_sym
-  USE thermo_sym, ONLY : code_group_save
-  USE rap_point_group,  ONLY : code_group
-
-  USE ifc,        ONLY : frc, atm, zeu, m_loc, &
-                         nq1_d, nq2_d, phdos_sigma, &
-                         nq3_d, deltafreq, freqmin, freqmax, ndos_input, &
-                         zasr, freqmin_input, freqmax_input, wscache
- 
-  USE control_ph, ONLY : xmldyn
-  USE control_pwrun, ONLY : nr1_save, nr2_save, nr3_save
-  USE control_paths, ONLY : disp_q, disp_nqs
-  USE thermodynamics, ONLY : phdos_save
-  USE ph_freq_thermodynamics, ONLY : ph_freq_save
-  USE control_thermo, ONLY : ldos, with_eigen
-  USE data_files,     ONLY : flfrc, flfrq, fldos, flvec
-  USE ions_base, ONLY : amass
-  USE phdos_module, ONLY : set_phdos, read_phdos_data, find_minimum_maximum
-  USE ph_freq_module, ONLY : init_ph_freq, read_ph_freq_data, &
-                             write_ph_freq_data
+  !  The output of the routine is given by in the two vectors:
+  !  freq_save(3*nat, disp_nps) contains the frequencies in cm^-1 (a negative 
+  !              number for the imaginary frequencies)
+  !
+  !  z_save(3*nat, 3*nat, disp_nqs) ! this quantity must be allocated and
+  !              is given in output only if with_eigen is .true. 
+  !              NB: these are the displacements as in the output of the
+  !              dyndia routine, not the eigenvalues of the dynamical matrix.
+  !
+  USE kinds,          ONLY : DP
+  USE mp_images,      ONLY : my_image_id, root_image
+  USE io_global,      ONLY : stdout
+  USE io_dyn_mat,     ONLY : read_dyn_mat_param, read_dyn_mat_header, &
+                             read_ifc_param, read_ifc
+  USE ions_base,      ONLY : nat, tau, ityp, ntyp => nsp, amass
+  USE cell_base,      ONLY : at, bg, celldm, omega, alat
+  USE constants,      ONLY : RY_TO_CMM1, amu_ry
+  USE noncollin_module, ONLY : nspin_mag
+  USE ifc,            ONLY : frc, atm, has_zstar, zeu, epsil_ifc, m_loc, &
+                             zasr, wscache
+  USE control_ph,     ONLY : xmldyn
+  USE disp,           ONLY : nq1, nq2, nq3
+  USE phonon_save,    ONLY : freq_save, z_save
+  USE control_paths,  ONLY : disp_q, disp_nqs
+  USE data_files,     ONLY : flfrc
   !
   IMPLICIT NONE
   !
-  INTEGER, INTENT(IN) :: do_dos
-  INTEGER, INTENT(IN) :: igeom
+  LOGICAL, INTENT(IN) :: with_eigen
+
   INTEGER, PARAMETER:: nrwsx=200
   REAL(DP), PARAMETER :: eps=1.0d-6
-  INTEGER :: nr1, nr2, nr3, ntetra, ibrav
-  INTEGER :: iq, imode, counter
-  CHARACTER(LEN=256) :: filename, filedos, filefrc, filevec, filefrq
-  LOGICAL :: has_zstar
+  CHARACTER(LEN=256) :: filefrc
   COMPLEX(DP), ALLOCATABLE :: dyn(:,:,:,:)
-  COMPLEX(DP), ALLOCATABLE :: z(:,:), save_z(:,:,:)
-  REAL(DP), ALLOCATABLE:: q(:,:), wq(:), w2(:,:), freq(:,:)
-  INTEGER, ALLOCATABLE:: tetra(:,:)
-  REAL(DP) ::     omega,  alat,   &! cell parameters and volume
-                  epsil(3,3),     &! dielectric tensor
-                  atws(3,3),      &! lattice vector for WS initialization
+  COMPLEX(DP), ALLOCATABLE :: z(:,:)
+  !
+  REAL(DP), ALLOCATABLE:: q(:,:), w2(:,:)
+  REAL(DP) ::     atws(3,3),      &! lattice vector for WS initialization
                   rws(0:3,nrwsx)   ! nearest neighbor list, rws(0,*) = norm^2
+  REAL(DP) :: qhat(3), qh, masst
   !
-  INTEGER :: nat, ntyp,  &
-             nrws,                         & ! number of nearest neighbor
-             code_group_old
-
-  INTEGER :: nspin_mag, nqs, nta, ipol, ios
+  INTEGER :: nr1, nr2, nr3, ibrav, iq
+  INTEGER :: nrws, nqs
+  INTEGER :: n, i, it, nq, na, nqtot
   !
-  LOGICAL :: xmlifc, lo_to_split
-  !
-  REAL(DP) :: qhat(3), qh, e, emin, emax, dosofe(2), qq, dq(3), dqmod, &
-              dqmod_save, masst, ps, q1(3), q2(3), modq1, modq2
-  INTEGER :: n, i, j, k, it, nq, nqx, na, nb, iout, nqtot
-  LOGICAL, EXTERNAL :: has_xml
-  CHARACTER(LEN=15), ALLOCATABLE :: name_rap_mode(:)
-  INTEGER, ALLOCATABLE :: num_rap_mode(:,:)
-  LOGICAL, ALLOCATABLE :: high_sym(:)
-  ! .... variables for band plotting based on similarity of eigenvalues
-  INTEGER :: location(1), isig
-  CHARACTER(LEN=6) :: int_to_char
-  INTEGER            :: npk_label, nch, ndos
-  INTEGER ::  jmode
-  CHARACTER(LEN=3), ALLOCATABLE :: letter(:)
-  INTEGER, ALLOCATABLE :: label_list(:), qcode_group(:), aux_ind(:)
-  LOGICAL :: tend, terr, dos, do_init, check_file_exists, done_dos
-  !
-
-  dos = (do_dos == 1) .AND. ldos
-  filename='phdisp_files/save_frequencies.'//TRIM(int_to_char(igeom))
-  done_dos=.FALSE.
-  IF (dos) THEN
-     filedos="phdisp_files/"//TRIM(fldos)
-     IF ( check_file_exists(filedos) ) THEN
-        IF ( my_image_id == root_image ) THEN
-           CALL read_phdos_data(phdos_save(igeom),filedos)
-           CALL find_minimum_maximum(phdos_save(igeom), freqmin, freqmax)
-           done_dos=.TRUE.
-        END IF
-        IF (.NOT.with_eigen .AND. check_file_exists(filename)) THEN
-           IF ( my_image_id /= root_image ) RETURN
-           CALL read_ph_freq_data(ph_freq_save(igeom),filename)
-           RETURN
-        END IF
-     END IF
-  ELSE
-     filefrq="phdisp_files/"//TRIM(flfrq)
-     IF (check_file_exists(filefrq)) RETURN
-  END IF
+  LOGICAL :: xmlifc, lo_to_split, do_init
 
   IF ( my_image_id /= root_image ) RETURN
 
+  xmlifc=xmldyn
+  filefrc="phdisp_files/"//TRIM(flfrc)
   WRITE(stdout,'(/,2x,76("+"))')
   WRITE(stdout,'(5x,"Interpolating the dynamical matrices")')
-  IF (dos) THEN
-     WRITE(stdout,'(5x,"Dos written on file ",a)') TRIM(filedos)
-  ELSE
-     WRITE(stdout,'(5x,"Frequencies written on file ",a)') TRIM(filefrq)
-  ENDIF
+  WRITE(stdout,'(5x,"Reading the interatomic force constants from file")') 
+  WRITE(stdout,'(5x,a)') TRIM(filefrc)
   WRITE(stdout,'(2x,76("+"),/)')
   !
   ! read force constants
   !
-  xmlifc=xmldyn
-  filefrc="phdisp_files/"//TRIM(flfrc)
-  IF (xmlifc) THEN
-     CALL read_dyn_mat_param(filefrc,ntyp,nat)
-     ALLOCATE (m_loc(3,nat))
-     ALLOCATE (atm(ntyp))
-     ALLOCATE (zeu(3,3,nat))
-     CALL read_dyn_mat_header(ntyp, nat, ibrav, nspin_mag, &
-               celldm, at, bg, omega, atm, amass, &
-               tau, ityp, m_loc, nqs, has_zstar, epsil, zeu )
-     alat=celldm(1)
-     call volume(alat,at(1,1),at(1,2),at(1,3),omega)
-     CALL read_ifc_param(nr1,nr2,nr3)
-     ALLOCATE(frc(nr1,nr2,nr3,3,3,nat,nat))
-     CALL read_ifc(nr1,nr2,nr3,nat,frc)
-  ELSE
-     CALL readfc ( filefrc, nr1, nr2, nr3, epsil, nat, ibrav, alat, at, ntyp, &
-          amass, omega, has_zstar)
-  ENDIF
-  !
-  CALL recips ( at(1,1),at(1,2),at(1,3), bg(1,1),bg(1,2),bg(1,3) )
+  nr1=nq1
+  nr2=nq2
+  nr3=nq3
   !
   ! build the WS cell corresponding to the force constant grid
   !
@@ -198,89 +121,31 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
   atws(:,3) = at(:,3)*DBLE(nr3)
   ! initialize WS r-vectors
   CALL wsinit(rws,nrwsx,nrws,atws)
-  !
-  !  generate the q points or copy them on the local variables
-  !
-  IF (dos) THEN
-     ntetra = 6 * nq1_d * nq2_d * nq3_d
-     nqx = nq1_d * nq2_d * nq3_d
-     ALLOCATE ( tetra(4,ntetra)) 
-     ALLOCATE ( q(3,nqx) )
-     ALLOCATE ( wq(nqx) )
-     CALL gen_qpoints (ibrav, at, bg, nat, tau, ityp, nq1_d, nq2_d, nq3_d, &
-             ntetra, nqx, nq, q, wq)
-     nqtot=nq
-  ELSE
-     !
-     ! read q-point list
-     !
-     nqtot=disp_nqs
-     ALLOCATE( q(3,nqtot) )
-     ALLOCATE( wq(1) )
-     ALLOCATE( tetra(1,1) )
-     q(:,:)=disp_q(:,:)
-     nq=nqtot
-     ! 
-  END IF
+  !  apply the acoustic sum rule if requested
   !
   IF (zasr /= 'no') &
      CALL set_asr (zasr, nr1, nr2, nr3, frc, zeu, nat, ibrav, tau)
   !
-  IF (flvec.EQ.' '.OR. dos ) THEN
-     iout=0
-  ELSE
-     iout=4
-     filevec="phdisp_files/"//flvec
-     IF (ionode) OPEN (unit=iout,file=TRIM(filevec),status='unknown', &
-                                                          form='formatted')
-  END IF
-
-
+  ! copy the q-point list in the local variables
+  !
+  nqtot=disp_nqs
+  ALLOCATE ( q(3,nqtot) )
   ALLOCATE ( dyn(3,3,nat,nat) )
   ALLOCATE ( z(3*nat,3*nat) )
-  ALLOCATE ( w2(3*nat,nq) )
-  ALLOCATE ( num_rap_mode(3*nat,nq) )
-  ALLOCATE ( high_sym(nq) )
-  ALLOCATE ( qcode_group(nq) )
-  IF (with_eigen) ALLOCATE ( save_z(3*nat,3*nat,nq) )
+  ALLOCATE ( w2(3*nat,nqtot) )
 
-  IF (xmlifc) CALL set_sym(nat, tau, ityp, nspin_mag, m_loc, nr1_save, &
-                                                      nr2_save, nr3_save )
-
-  num_rap_mode=-1
-!
-!  Initialize high_sym
-!
-  high_sym=.FALSE.
-  DO n=1,nq
-     IF (n==1.OR.n==nq) THEN
-        high_sym(n) = .TRUE.
-     ELSE
-        q1(:) = q(:,n) - q(:,n-1)
-        q2(:) = q(:,n+1) - q(:,n)
-        modq1=sqrt( q1(1)*q1(1) + q1(2)*q1(2) + q1(3)*q1(3) )
-        modq2=sqrt( q2(1)*q2(1) + q2(2)*q2(2) + q2(3)*q2(3) )
-        IF (modq1 >1.d-6 .AND. modq2 > 1.d-6) THEN
-           ps = ( q1(1)*q2(1) + q1(2)*q2(2) + q1(3)*q2(3) ) / &
-                   modq1 / modq2
-           high_sym(n) = (ABS(ps-1.d0) >1.0d-4)
-        ENDIF
-!
-!  The gamma point is a high symmetry point
-!
-        IF (q(1,n)**2+q(2,n)**2+q(3,n)**2 < 1.0d-9) high_sym(n)=.TRUE.
-     END IF
-  END DO
+  q(:,1:nqtot)=disp_q(:,1:nqtot)
+  nq=nqtot
 
   do_init=.TRUE.
   DO n=1, nq
-     IF ( MOD(n,20000) == 0 .AND. ionode ) WRITE(stdout, '(5x,"Computing q ",&
-                         &   i8, " Total q ", i8 )') n, nq 
+     IF ( MOD(n,20000) == 0 ) WRITE(stdout, '(5x,"Computing q ",&
+                         &   i8, " /", i8 )') n, nq 
 
      dyn(:,:,:,:) = (0.d0, 0.d0)
      lo_to_split=.FALSE.
      CALL setupmat_simple (q(1,n),dyn,nat,at,bg,tau,omega,alat, &
-     &                 epsil,zeu,frc,nr1,nr2,nr3,has_zstar,rws,nrws,do_init)
+     &              epsil_ifc,zeu,frc,nr1,nr2,nr3,has_zstar,rws,nrws,do_init)
      do_init=.FALSE.
 
      qhat(1) = q(1,n)*at(1,1)+q(2,n)*at(2,1)+q(3,n)*at(3,1)
@@ -324,226 +189,33 @@ SUBROUTINE matdyn_sub(do_dos, igeom)
            lo_to_split=.TRUE.
         ENDIF
         !
-        CALL simple_nonanal (nat, epsil, qhat, zeu, omega, dyn)
+        CALL simple_nonanal (nat, epsil_ifc, qhat, zeu, omega, dyn)
         !
      END IF
 
      CALL dyndiag(nat,ntyp,amass,ityp,dyn,w2(1,n),z)
      !
-     IF (ldos.AND.with_eigen) THEN
-        DO na = 1,nat
-           nta = ityp(na)
-           masst=SQRT(amu_ry*amass(nta))
-           DO ipol = 1,3
-              jmode=(na-1)*3+ipol
-              save_z(jmode,:,n) = z(jmode,:) * masst
-           END DO
-        END DO
-     END IF
-     !
-     ! Cannot use the small group of \Gamma to analize the symmetry
-     ! of the mode if there is an electric field.
-     !
-     IF (n==1) THEN
-        high_sym(n)=.TRUE.
-        dq(:) = q(:,2) - q(:,1)
-        dqmod_save = sqrt( dq(1)**2 + dq(2)**2 + dq(3)**2 )
-        code_group_old=0
-     ENDIF
+     IF (with_eigen) z_save(:,:,n) = z(:,:) 
 
-     IF (xmlifc.AND..NOT.lo_to_split.AND..NOT.dos) THEN
-        ALLOCATE(name_rap_mode(3*nat))
-        CALL find_representations_mode_q(nat,ntyp,q(:,n), &
-                    w2(:,n),z,tau,ityp,amass,name_rap_mode, &
-                    num_rap_mode(:,n), nspin_mag)
-        qcode_group(n)=code_group
-        IF (n==1) THEN
-           code_group_old=code_group
-        ELSE
-           dq(:) = q(:,n) - q(:,n-1)
-           dqmod= sqrt( dq(1)**2 + dq(2)**2 + dq(3)**2 )
-           IF (dqmod < 1.D-6) THEN
-              !
-              !   In this case is_high_sym does not change because the point
-              !   is the same
-              high_sym(n)=high_sym(n-1)
-              !
-           ELSE IF (dqmod < 5.0_DP * dqmod_save) THEN
-!
-!    In this case the two points are considered close
-!
-!              high_sym(n)= ((code_group/=code_group_old).AND..NOT. &
-!                                                        high_sym(n-1))
-              IF (.NOT. high_sym(n-1)) &
-                 high_sym(n) = code_group /= code_group_old .OR. &
-                                                        high_sym(n)
-
-              dqmod_save= MAX(dqmod_save * 0.5_DP, dqmod)
-           ELSE
-              high_sym(n)=.TRUE.
-           ENDIF
-           code_group_old=code_group
-        ENDIF
-        DEALLOCATE(name_rap_mode)
-!        write(6,'(2i5, 3f15.5,l5)') n, qcode_group(n), q(:,n), high_sym(n)
-     ELSEIF (lo_to_split) THEN
-        qcode_group(n)=code_group_save
-     ENDIF
-
-     IF (ionode.AND.iout.NE.0) CALL writemodes(nat,q(1,n),w2(1,n),z,iout)
   END DO  !nq
   !
-  IF(iout.NE.0.AND.ionode) CLOSE(unit=iout)
-  !
-  ALLOCATE (freq(3*nat, nq))
   DO n=1,nq
-     ! freq(i,n) = frequencies in cm^(-1), with negative sign if omega^2 is negative
+     ! freq_save(i,n) = frequencies in cm^(-1), with negative sign if 
+     ! omega^2 is negative
      DO i=1,3*nat
-        freq(i,n)= SQRT(ABS(w2(i,n))) * RY_TO_CMM1
-        IF (w2(i,n) < 0.0d0) freq(i,n) = -freq(i,n)
+        freq_save(i,n)= SQRT(ABS(w2(i,n))) * RY_TO_CMM1
+        IF (w2(i,n) < 0.0d0) freq_save(i,n) = -freq_save(i,n)
      END DO
   END DO
   !
-  IF (flfrq.NE.' '.AND..NOT.dos.AND.ionode) THEN
-     filename="phdisp_files/"//TRIM(flfrq)
-     OPEN (unit=2,file=filename ,status='unknown',form='formatted')
-     WRITE(2, '(" &plot nbnd=",i6,", nks=",i6," /")') 3*nat, nq
-     DO n=1, nq
-        WRITE(2, '(10x,3f10.6)')  q(1,n), q(2,n), q(3,n)
-        WRITE(2,'(6f10.4)') (freq(i,n), i=1,3*nat)
-     END DO
-     CLOSE(unit=2)
-  END IF
-  !
-  !  If the force constants are in the xml format we write also
-  !  the file with the representations of each mode
-  !
-  IF (flfrq.NE.' '.AND.xmlifc.AND..NOT.dos) THEN
-     
-     ALLOCATE(aux_ind(nq))
-     aux_ind=0
-     CALL find_aux_ind_xk(q(1,1), q(1,2), aux_ind(2))
-     CALL find_aux_ind_xk(q(1,nq), q(1,nq-1), aux_ind(nq-1))
-     DO n=2,nq-1
-!        write(6,'(3f15.5,3l5)') q(:,n), high_sym(n-1), high_sym(n), high_sym(n+1)
-        IF (high_sym(n).AND..NOT.high_sym(n+1)) &
-           CALL find_aux_ind_xk(q(1,n), q(1,n+1), aux_ind(n+1))
-        IF (high_sym(n).AND..NOT.high_sym(n-1)) &
-           CALL find_aux_ind_xk(q(1,n), q(1,n-1), aux_ind(n-1))
-     ENDDO
-
-     IF (ionode) THEN
-        filename="phdisp_files/"//TRIM(flfrq)//'.rap'
-        OPEN (unit=2,file=TRIM(filename) ,status='unknown',form='formatted')
-        WRITE(2, '(" &plot_rap nbnd_rap=",i6,", nks_rap=",i6," /")') 3*nat, nq
-        DO n=1, nq
-           WRITE(2,'(10x,3f10.6,l6,2i6)') q(1,n), q(2,n), q(3,n), high_sym(n),&
-                       qcode_group(n), aux_ind(n)                   
-           WRITE(2,'(6i10)') (num_rap_mode(i,n), i=1,3*nat)
-        END DO
-        CLOSE(unit=2)
-     ENDIF
-     DEALLOCATE(aux_ind)
-  END IF
-  !
-  !  write the dos file
-  !
-  IF (dos.AND..NOT.done_dos) THEN
-     emin = 0.0d0
-     emax = 0.0d0
-     DO n=1,nq
-        DO i=1, 3*nat
-           emin = MIN (emin, freq(i,n))
-           emax = MAX (emax, freq(i,n))
-        END DO
-     END DO
-     emax=emax*1.02_DP
-     !
-     IF (freqmin_input > 0.0_DP) THEN
-        emin=freqmin_input
-        freqmin=emin
-     ELSE
-        freqmin=emin
-     ENDIF
-     !
-     IF (freqmax_input > 0.0_DP) THEN
-        emax=freqmax_input
-        freqmax=NINT(emax*1.05_DP)
-     ELSE
-        freqmax=NINT(emax*1.05_DP)
-     ENDIF
-     !
-     IF (ndos_input > 1) THEN
-        deltafreq = (emax - emin)/(ndos_input-1)
-        ndos = ndos_input
-     ELSE
-        ndos = NINT ( (emax - emin) / deltafreq + 1.51d0 )
-        ndos_input = ndos
-     END IF
-
-     CALL set_phdos(phdos_save(igeom),ndos,deltafreq)
-
-     IF (ionode) OPEN (unit=2,file=filedos,status='unknown',form='formatted')
-     DO n= 1, ndos
-        e = emin + (n - 1) * deltafreq
-!        CALL dos_t(freq, 1, 3*nat, nq, ntetra, tetra, e, dosofe)
-        CALL dos_g(freq, 1, 3*nat, nq, wq, phdos_sigma, 0, e, dosofe)
-        !
-        ! The factor 0.5 corrects for the factor 2 in dos_t,
-        ! that accounts for the spin in the electron DOS.
-        !
-        !WRITE (2, '(F15.10,F15.2,F15.6,F20.5)') &
-        !     E, E*RY_TO_CMM1, E*RY_TO_THZ, 0.5d0*DOSofE(1)
-        IF (ionode) WRITE (2, '(ES30.15, ES30.15)') e, dosofe(1)
-        phdos_save(igeom)%nu(n) = e
-        phdos_save(igeom)%phdos(n) = dosofe(1)
-     END DO
-     IF (ionode) CLOSE(unit=2)
-  END IF
-  IF (dos) THEN
-!
-!   save the frequencies
-!
-     CALL init_ph_freq(ph_freq_save(igeom), nat, nq1_d, nq2_d, nq3_d, nq, &
-                                                              with_eigen)
-     DO iq=1, nq
-        ph_freq_save(igeom)%wg(iq)=wq(iq)
-        ph_freq_save(igeom)%nu(:,iq)=freq(:,iq)
-     ENDDO
-     IF (with_eigen) THEN
-!
-!  The eigenvectors are not saved on disk. They are recalculated each time.
-!
-         DO iq=1, nq
-            ph_freq_save(igeom)%displa(:,:,iq)=save_z(:,:,iq)
-         ENDDO
-      ELSE
-         CALL write_ph_freq_data(ph_freq_save(igeom),filename)
-     END IF
-  END IF  !dos
-
-  !
   DEALLOCATE (z) 
-  IF (ALLOCATED(save_z)) DEALLOCATE (save_z)
   DEALLOCATE (w2) 
   DEALLOCATE (dyn) 
-  DEALLOCATE (freq)
-  IF (ALLOCATED(num_rap_mode)) DEALLOCATE (num_rap_mode)
-  IF (ALLOCATED(qcode_group)) DEALLOCATE (qcode_group)
-  DEALLOCATE (high_sym)
   DEALLOCATE (q)
-  DEALLOCATE (wq)
-  DEALLOCATE (tetra)
-  DEALLOCATE (zeu)
-  DEALLOCATE (frc)
   IF (ALLOCATED(wscache)) DEALLOCATE(wscache)
-  IF (xmlifc) THEN
-     DEALLOCATE(m_loc)
-     DEALLOCATE(atm)
-  ENDIF
   !
   RETURN
-END SUBROUTINE matdyn_sub
+END SUBROUTINE matdyn_interp
 !
 !-----------------------------------------------------------------------
 SUBROUTINE readfc ( flfrc, nr1, nr2, nr3, epsil, nat,  &
@@ -1371,119 +1043,6 @@ subroutine sp3(u,v,i,na,nr1,nr2,nr3,nat,scal)
   !
 end subroutine sp3
 !
-!-----------------------------------------------------------------------
-SUBROUTINE gen_qpoints (ibrav, at_, bg_, nat, tau, ityp, nk1, nk2, nk3, &
-     ntetra, nqx, nq, q, wq)
-  !-----------------------------------------------------------------------
-  !
-  USE kinds,      ONLY : DP
-  USE cell_base,  ONLY : at, bg
-  USE symm_base,  ONLY : set_sym_bl, find_sym, s, irt, nsym, &
-                         nrot, t_rev, time_reversal,  sname
-  USE control_pwrun, ONLY : nr1_save, nr2_save, nr3_save
-  !
-  IMPLICIT NONE
-  ! input
-  INTEGER :: ibrav, nat, nk1, nk2, nk3, ntetra, ityp(*)
-  REAL(DP) :: at_(3,3), bg_(3,3), tau(3,nat)
-  ! output
-  INTEGER :: nqx, nq, tetra(4,ntetra)
-  REAL(DP) :: q(3,nqx), wq(nqx)
-  ! local
-  REAL(DP) :: xqq(3), mdum(3,nat)
-  LOGICAL :: magnetic_sym=.FALSE., skip_equivalence=.FALSE.
-  !
-  time_reversal = .true.
-  t_rev(:) = 0
-  xqq (:) =0.d0
-  at = at_
-  bg = bg_
-  CALL set_sym_bl ( )
-  !
-  CALL kpoint_grid ( nrot, time_reversal, skip_equivalence, s, t_rev, bg, nqx, &
-                           0,0,0, nk1,nk2,nk3, nq, q, wq)
-  !
-  CALL find_sym ( nat, tau, ityp, nr1_save, nr2_save, nr3_save, &
-                                                     .NOT.time_reversal, mdum )
-  !
-  CALL irreducible_BZ (nrot, s, nsym, time_reversal, magnetic_sym, &
-                       at, bg, nqx, nq, q, wq, t_rev)
-  !
-!  IF (ntetra /= 6 * nk1 * nk2 * nk3) &
-!       CALL errore ('gen_qpoints','inconsistent ntetra',1)
-  !
-!  write(6,*) 'tetrahedra'
-!  CALL tetrahedra (nsym, s, time_reversal, t_rev, at, bg, nqx, 0, 0, 0, &
-!       nk1, nk2, nk3, nq, q, wk, ntetra, tetra)
-  !
-  RETURN
-END SUBROUTINE gen_qpoints
-!
-!
-SUBROUTINE find_representations_mode_q ( nat, ntyp, xq, w2, u, tau, ityp, &
-                  amass, name_rap_mode, num_rap_mode, nspin_mag )
-
-  USE kinds,      ONLY : DP
-  USE cell_base,  ONLY : at, bg
-  USE symm_base,  ONLY : find_sym, s, sr, ftau, irt, nsym, &
-                         nrot, t_rev, time_reversal, sname, copy_sym, &
-                         s_axis_to_cart
-  USE rap_point_group,  ONLY : code_group, gname
-
-  IMPLICIT NONE
-  INTEGER, INTENT(IN) :: nat, ntyp, nspin_mag
-  REAL(DP), INTENT(IN) :: xq(3), amass(ntyp), tau(3,nat)
-  REAL(DP), INTENT(IN) :: w2(3*nat)
-  INTEGER, INTENT(IN) :: ityp(nat)
-  COMPLEX(DP), INTENT(IN) :: u(3*nat,3*nat)
-  CHARACTER(15), INTENT(OUT) :: name_rap_mode(3*nat)
-  INTEGER, INTENT(OUT) :: num_rap_mode(3*nat)
-  REAL(DP) :: gi (3, 48), gimq (3), sr_is(3,3,48), rtau(3,48,nat)
-  INTEGER :: irotmq, nsymq, nsym_is, isym, i, ierr
-  LOGICAL :: minus_q, search_sym, sym(48), magnetic_sym
-!
-!  find the small group of q
-!
-  time_reversal=.TRUE.
-  IF (.NOT.time_reversal) minus_q=.FALSE.
-
-  sym(1:nsym)=.true.
-  call smallg_q (xq, 0, at, bg, nsym, s, ftau, sym, minus_q)
-  nsymq=copy_sym(nsym,sym )
-  call s_axis_to_cart ()
-  CALL set_giq (xq,s,nsymq,nsym,irotmq,minus_q,gi,gimq)
-!
-!  if the small group of q is non symmorphic,
-!  search the symmetries only if there are no G such that Sq -> q+G
-!
-  search_sym=.TRUE.
-  IF ( ANY ( ftau(:,1:nsymq) /= 0 ) ) THEN
-     DO isym=1,nsymq
-        search_sym=( search_sym.and.(abs(gi(1,isym))<1.d-8).and.  &
-                                    (abs(gi(2,isym))<1.d-8).and.  &
-                                    (abs(gi(3,isym))<1.d-8) )
-     END DO
-  END IF
-!
-!  Set the representations tables of the small group of q and
-!  find the mode symmetry
-!
-  IF (search_sym) THEN
-     magnetic_sym=(nspin_mag==4)
-     CALL prepare_sym_analysis(nsymq,sr,t_rev,magnetic_sym)
-     sym (1:nsym) = .TRUE.
-     CALL sgam_ph_new (at, bg, nsym, s, irt, tau, rtau, nat)
-     CALL find_mode_sym_new (u, w2, tau, nat, nsymq, sr, irt, xq,    &
-             rtau, amass, ntyp, ityp, 1, .FALSE., .FALSE., num_rap_mode, ierr)
-
-     CALL print_mode_sym(w2, num_rap_mode, .FALSE.)
-
-  ELSE
-     CALL find_group(nsymq,sr,gname,code_group)
-  ENDIF
-  RETURN
-  END SUBROUTINE find_representations_mode_q
-
 !-----------------------------------------------------------------------
 SUBROUTINE setupmat_simple (q,dyn,nat,at,bg,tau,omega,alat, &
      &                 epsil,zeu,frc,nr1,nr2,nr3,has_zstar,rws,nrws,do_init)

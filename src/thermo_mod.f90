@@ -212,6 +212,12 @@ MODULE grun_anharmonic
                                        ! by the bulk modulus
   REAL(DP), ALLOCATABLE :: alpha_an_g(:,:) ! thermal expansion tensor at each
                                         !    temperature
+  REAL(DP), ALLOCATABLE :: cv_grun_t(:) ! isochoric heat capacity as a 
+                                        ! function of temperature
+  REAL(DP), ALLOCATABLE :: cp_grun_t(:) ! isobaric heat capacity as a 
+                                        ! function of temperature
+  REAL(DP), ALLOCATABLE :: b0_grun_s(:) ! isoentropic bulk modulus as a 
+                                        ! function of temperature
   REAL(DP), ALLOCATABLE :: grun_gamma_t(:)  ! average gruneisen parameter
 
   REAL(DP), ALLOCATABLE :: poly_grun(:,:,:) ! For each band and each q point
@@ -232,6 +238,8 @@ MODULE ifc
   SAVE
   REAL(DP), ALLOCATABLE :: frc(:,:,:,:,:,:,:), zeu(:,:,:), &
                m_loc(:,:), wscache(:,:,:,:,:)
+  REAL(DP) :: epsil_ifc(3,3)
+  LOGICAL :: has_zstar
   ! frc : interatomic force constants in real space
   ! tau : atomic positions for the original cell
   ! zeu : effective charges for the original cell
@@ -294,7 +302,12 @@ MODULE control_thermo
   LOGICAL :: lpart2_pw=.FALSE.    ! if .true. in the second part makes
                                   ! also pw calculations           
   LOGICAL :: with_eigen=.FALSE.   ! save phonon frequencies and eigenvectors
-                               !
+
+  LOGICAL :: ltherm_dos=.TRUE.    ! computes the phonon dos and the thermal
+                                  ! properties from phonon dos
+  LOGICAL :: ltherm_freq=.TRUE.   ! computes the phonon frequencies and 
+                                  ! the thermal properties from phonon dos
+                                  !
   LOGICAL :: lconv_ke_test=.FALSE.! if .true. this writes the ke test on file
   LOGICAL :: lconv_nk_test=.FALSE.! if .true. this writes the k-point on file
   LOGICAL :: lelastic_const=.FALSE. ! if .true. compute elastic constants
@@ -302,15 +315,13 @@ MODULE control_thermo
                                   ! tensor
   LOGICAL :: lpolarization=.FALSE. ! if .true. compute the piezoelectric 
   LOGICAL :: lph=.FALSE.    ! if .true. must calculate phonon
-  LOGICAL :: ldos=.FALSE.   ! if .true. the phonon dos is calculated
   LOGICAL :: ltherm=.FALSE. ! if .true. the thermodynamic properties are
                             ! calculated
   LOGICAL :: after_disp=.FALSE. ! if .true. dynamical matrix files are supposed
                             ! to be already on disk. fildyn must be read
                             ! from thermo_control.
   LOGICAL :: lq2r=.FALSE.   ! if .true. the interatomic force constants 
-                            ! are calculated
-  LOGICAL :: lmatdyn=.FALSE.  ! if .true. the phonon are interpolated
+                            ! are calculated and the phonon are interpolated
 
   LOGICAL :: do_scf_relax   ! to be used with cells with internal 
                             ! degrees of freedom. If .true. reoptimize
@@ -802,3 +813,16 @@ MODULE thermo_sym
   INTEGER :: fft_fact(3)     ! the factors that must be inside the fft
 
 END MODULE thermo_sym
+
+MODULE phonon_save
+  USE kinds,  ONLY : DP
+  !
+  ! ... The variables needed to pass frequencies and eigenvectors from
+  !     matdyn_interp to the other routines
+  !
+  SAVE
+  !
+  REAL(DP), ALLOCATABLE :: freq_save(:,:)
+  COMPLEX(DP), ALLOCATABLE :: z_save(:,:,:)
+
+END MODULE phonon_save

@@ -18,9 +18,12 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
   USE control_thermo, ONLY : with_eigen
   USE data_files,     ONLY : flgrun
   USE thermo_mod,     ONLY : ngeo, omega_geo, no_ph
+  USE anharmonic,     ONLY : vmin_t
   USE ph_freq_anharmonic, ONLY : vminf_t
   USE control_grun,   ONLY : temp_ph, volume_ph
   USE control_pwrun,  ONLY : amass_save, ityp_save
+  USE control_mur,    ONLY : vmin
+  USE control_thermo, ONLY : ltherm_dos, ltherm_freq
   USE temperature,    ONLY : temp, ntemp
   USE mp,             ONLY : mp_bcast
   USE io_global,      ONLY : stdout, ionode, ionode_id
@@ -167,13 +170,20 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
   frequency(:,:)= 0.0_DP
   gruneisen(:,:)= 0.0_DP
   IF (volume_ph==0.0_DP) THEN
-     CALL evaluate_vm(temp_ph, vm, ntemp, temp, vminf_t)
+     IF (ltherm_freq) THEN
+        CALL evaluate_vm(temp_ph, vm, ntemp, temp, vminf_t)
+     ELSEIF (ltherm_dos) THEN
+        CALL evaluate_vm(temp_ph, vm, ntemp, temp, vmin_t)
+     ELSE
+        vm=vmin
+     ENDIF
   ELSE
      vm=volume_ph
   ENDIF
 
-  WRITE(stdout,'(/,5x,"Plotting Gruneisen parameters at volume",f17.8)') vm
-  IF (volume_ph==0.0_DP) &
+  WRITE(stdout,'(/,5x,"Plotting Gruneisen parameters at volume",f17.8,&
+                                                    &" (a.u.)^3")') vm
+  IF (volume_ph==0.0_DP.AND.(ltherm_freq.OR.ltherm_dos)) &
             WRITE(stdout,'(5x,"Corresponding to T=",f17.8)') temp_ph
 
   DO n = 1,nks

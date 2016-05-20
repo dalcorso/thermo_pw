@@ -74,10 +74,11 @@ PROGRAM thermo_pw
   USE mp,               ONLY : mp_sum, mp_bcast
   USE control_thermo,   ONLY : lev_syn_1, lev_syn_2, lpwscf_syn_1,         &
                                lbands_syn_1, lph, outdir_thermo, lq2r,     &
-                               ldos_syn_1, lmatdyn, ldos, ltherm,          &
+                               ldos_syn_1, ltherm,                         &
                                lconv_ke_test, lconv_nk_test,               &
                                spin_component, after_disp, lelastic_const, &
-                               lpiezoelectric_tensor, lpolarization, lpart2_pw
+                               lpiezoelectric_tensor, lpolarization,       &
+                               lpart2_pw, ltherm_dos, ltherm_freq
   USE postscript_files, ONLY : flpstherm, flpsdisp, flpsdos
   USE data_files,        ONLY : flevdat, fl_el_cons
   USE elastic_constants, ONLY : print_elastic_constants, &
@@ -527,34 +528,25 @@ PROGRAM thermo_pw
 !
 !    compute interpolated dispersions
 !
-           IF (lmatdyn) THEN
-              CALL matdyn_sub(0, igeom)
-              CALL plotband_sub(2,igeom,' ')
-           ENDIF
+           CALL write_ph_dispersions()
+           CALL plotband_sub(2,igeom,' ')
+
+           IF (ltherm) THEN
 !
-!    compute phonon dos
+!    the frequencies on a uniform mesh are interpolated or read from disk 
+!    if available and saved in ph_freq_save 
 !
-           IF (lmatdyn.AND.ldos) THEN
-!
-!    the phonon dos is calculated and the frequencies saved on the ph_freq_save 
-!    structure
-!
-              IF (.NOT.ALLOCATED(phdos_save)) ALLOCATE(phdos_save(tot_ngeo))
-              IF (.NOT.ALLOCATED(ph_freq_save)) ALLOCATE(ph_freq_save(tot_ngeo))
-              CALL matdyn_sub(1,igeom)
-              CALL plot_phdos()
-           ENDIF
-!
-!    computes the thermodynamic properties
-!
-           IF (ldos.AND.ltherm) THEN
-!
-!    first from phonon dos
-!
-              CALL write_thermo(igeom)
-              CALL write_thermo_ph(igeom)
+              CALL write_ph_freq(igeom)
+              IF (ltherm_freq) CALL write_thermo_ph(igeom)
+ 
+              IF (ltherm_dos) THEN
+                 CALL write_phdos(igeom)
+                 CALL plot_phdos()
+                 CALL write_thermo(igeom)
+              ENDIF
               CALL plot_thermo()
            ENDIF
+           CALL clean_ifc_variables()
         ENDIF
         CALL deallocate_asyn()
         IF (.NOT. after_disp) THEN
@@ -581,14 +573,14 @@ PROGRAM thermo_pw
      IF (lev_syn_2) THEN
         IF (lmurn) THEN
            DO itemp = 1, ntemp
-              CALL do_ev_t(itemp)
-              CALL do_ev_t_ph(itemp)
+              IF (ltherm_dos) CALL do_ev_t(itemp)
+              IF (ltherm_freq) CALL do_ev_t_ph(itemp)
            ENDDO
 !
 !    here we calculate several anharmonic quantities 
 !
-           CALL write_anharmonic()
-           CALL write_ph_freq_anharmonic()
+           IF (ltherm_dos) CALL write_anharmonic()
+           IF (ltherm_freq) CALL write_ph_freq_anharmonic()
 !
 !    here we calculate and plot the gruneisen parameters along the given path.
 !
@@ -610,16 +602,23 @@ PROGRAM thermo_pw
 !    of temperature and the thermal expansion tensor
 !
            DO itemp = 1, ntemp
-              CALL quadratic_fit_t(itemp)
-              CALL quadratic_fit_t_ph(itemp)
+              IF (ltherm_dos) CALL quadratic_fit_t(itemp)
+              IF (ltherm_freq) CALL quadratic_fit_t_ph(itemp)
            ENDDO
-           CALL write_anhar_anis()
-           CALL write_ph_freq_anhar_anis()
+           IF (ltherm_dos) CALL write_anhar_anis()
+           IF (ltherm_freq) CALL write_ph_freq_anhar_anis()
 !
 !    here we calculate and plot the gruneisen parameters along the given path.
 !
            CALL write_gruneisen_band_anis(flfrq_thermo,flvec_thermo)
+!
+!    plotband_sub writes the interpolated phonon at the requested temperature
+!
            CALL plotband_sub(4,1,flfrq_thermo)
+!
+!   and the next driver plots all the gruneisen parameters depending on the
+!   lattice.
+!
            CALL plot_gruneisen_band_anis(flfrq_thermo)
 !
 !   here we calculate the gruneisen parameters on a mesh and then recompute
@@ -632,7 +631,7 @@ PROGRAM thermo_pw
         ENDIF
      ENDIF
 1000 CONTINUE
-     IF (lmatdyn.AND.ldos) THEN
+     IF (ltherm.AND.ltherm_dos) THEN
         DO igeom=1,tot_ngeo
            CALL destroy_phdos(phdos_save(igeom))
         ENDDO

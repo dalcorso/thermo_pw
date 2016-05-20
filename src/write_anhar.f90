@@ -108,14 +108,18 @@ USE constants,      ONLY : ry_kbar
 USE ions_base,      ONLY : nat
 USE thermo_mod,     ONLY : ngeo, omega_geo
 USE temperature,    ONLY : ntemp, temp
+USE thermodynamics, ONLY : ph_cv
 USE ph_freq_thermodynamics, ONLY : ph_freq_save, phf_cv
+USE anharmonic,     ONLY :  vmin_t, b0_t
 USE ph_freq_anharmonic,     ONLY :  vminf_t, cvf_t, b0f_t, cpf_t, b0f_s
-USE grun_anharmonic, ONLY : betab, grun_gamma_t, poly_grun, poly_order
+USE grun_anharmonic, ONLY : betab, cv_grun_t, cp_grun_t, b0_grun_s, &
+                            grun_gamma_t, poly_grun, poly_order
 USE ph_freq_module, ONLY : thermal_expansion_ph, ph_freq_type,  &
                            destroy_ph_freq, init_ph_freq
 USE control_pressure, ONLY : pressure, pressure_kb
 USE control_grun,     ONLY : lv0_t, lb0_t
 USE control_mur,    ONLY : vmin, b0
+USE control_thermo, ONLY : ltherm_dos, ltherm_freq
 USE ifc,            ONLY : nq1_d, nq2_d, nq3_d
 USE data_files,     ONLY : flanhar
 USE io_global,      ONLY : ionode
@@ -143,7 +147,13 @@ CALL init_ph_freq(ph_grun, nat, nq1_d, nq2_d, nq3_d, nq, .FALSE.)
 CALL init_ph_freq(ph_freq, nat, nq1_d, nq2_d, nq3_d, nq, .FALSE.)
 DO itemp = 1, ntemp
    IF (lv0_t) THEN
-      vm=vminf_t(itemp)
+      IF (ltherm_freq) THEN
+         vm=vminf_t(itemp)
+      ELSEIF (ltherm_dos) THEN
+         vm=vmin_t(itemp)
+      ELSE
+         vm=vmin
+      ENDIF
    ELSE
       vm=vmin
    ENDIF
@@ -169,14 +179,30 @@ DO itemp = 1, ntemp
       
    CALL thermal_expansion_ph(ph_freq, ph_grun, temp(itemp), betab(itemp))
    IF (lb0_t) THEN
-      betab(itemp)=betab(itemp) * ry_kbar / b0f_t(itemp)
+      IF (ltherm_freq) THEN
+         betab(itemp)=betab(itemp) * ry_kbar / b0f_t(itemp)
+      ELSEIF(ltherm_dos) THEN 
+         betab(itemp)=betab(itemp) * ry_kbar / b0_t(itemp)
+      ELSE
+         betab(itemp)=betab(itemp) * ry_kbar / b0
+      ENDIF
    ELSE
       betab(itemp)=betab(itemp) * ry_kbar / b0
    ENDIF
 END DO
 
-CALL compute_cp(betab, vminf_t, b0f_t, phf_cv, cvf_t, cpf_t, b0f_s, &
-                                                             grun_gamma_t)
+IF (ltherm_freq) THEN
+   CALL compute_cp(betab, vminf_t, b0f_t, phf_cv, cv_grun_t, cp_grun_t, &
+                                                   b0_grun_s, grun_gamma_t)
+ELSEIF (ltherm_dos) THEN
+   CALL compute_cp(betab, vmin_t, b0_t, ph_cv, cv_grun_t, cp_grun_t, &
+                                                   b0_grun_s, grun_gamma_t)
+ELSE
+  cv_grun_t=0.0_DP
+  cp_grun_t=0.0_DP
+  b0_grun_s=0.0_DP
+  grun_gamma_t=0.0_DP
+ENDIF
 IF (ionode) THEN
 !
 !   here quantities calculated from the gruneisen parameters
@@ -191,7 +217,7 @@ IF (ionode) THEN
 
    DO itemp = 2, ntemp-1
       WRITE(iu_therm, '(e13.6,3e16.8)') temp(itemp), &
-              betab(itemp)*1.D6, grun_gamma_t(itemp), cvf_t(itemp)
+              betab(itemp)*1.D6, grun_gamma_t(itemp), cv_grun_t(itemp)
    END DO
    CLOSE(iu_therm)
 END IF

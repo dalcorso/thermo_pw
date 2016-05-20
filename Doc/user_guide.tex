@@ -880,7 +880,12 @@ fildyn        : the name of the dynamical matrix file, as would be
                 Default: character ' '
 zasr          : type of acoustic sum rule applied to the ifc.
                 Default: character(len=*) 'Simple'
-
+ltherm_dos    : if .TRUE. the thermal properties are calculated from the 
+                phonon dos.
+                Default: logical .TRUE.
+ltherm_freq   : if .TRUE. the thermal properties are calculated from the
+                direct integration using the phonon frequencies.
+                Default: logical .TRUE.
 flfrc         : file where the interatomic force constants are written
                 Default: character(len=*) 'output_frc.dat.g1'
 flfrq         : file where matdyn writes the interpolated frequencies

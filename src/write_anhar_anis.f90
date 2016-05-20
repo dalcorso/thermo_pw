@@ -239,8 +239,8 @@ CALL read_elastic(fl_el_cons, exst)
 !  don_ge
 !
 IF (.NOT. exst) THEN
-   WRITE(stdout,'(5x,"The elastic constants are needed to compute &
-                    &thermal expansions from Gruneisen parameters")' )
+   WRITE(stdout,'(5x,"The elastic constants are needed to compute ")')
+   WRITE(stdout,'(5x,"thermal expansions from Gruneisen parameters")')
    RETURN
 ENDIF
 !

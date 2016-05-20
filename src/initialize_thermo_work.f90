@@ -17,11 +17,11 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
   USE thermo_mod, ONLY : what, step_ngeo, energy_geo, ngeo, &
                          celldm_geo, omega_geo, ibrav_geo, tot_ngeo, no_ph
   USE control_thermo, ONLY : lpwscf, lbands, lphonon, lev_syn_1, lev_syn_2, &
-                             lph, lpwscf_syn_1, lbands_syn_1, ldos, lq2r,   &
-                             lmatdyn, ltherm, lconv_ke_test, lconv_nk_test, &
+                             lph, lpwscf_syn_1, lbands_syn_1, lq2r,   &
+                             ltherm, lconv_ke_test, lconv_nk_test, &
                              lstress, lelastic_const, lpiezoelectric_tensor,&
                              lberry, lpolarization, lpart2_pw, do_scf_relax, &
-                             ldos_syn_1
+                             ldos_syn_1, ltherm_dos, ltherm_freq
   USE control_conv,   ONLY : nke, ke, deltake, nkeden, deltakeden, keden, &
                              nnk, nk_test, deltank, nsigma, sigma_test, &  
                              deltasigma
@@ -91,9 +91,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            ALLOCATE(no_ph(tot_ngeo))
            no_ph(1)=.FALSE.
            lq2r = .TRUE.
-           lmatdyn = .TRUE.
-           ldos = .TRUE.
-           ltherm = .TRUE.
+           ltherm = ltherm_dos .OR. ltherm_freq
            CALL allocate_thermodynamics()
 !
 !   In these cases we make asyncronous work in the first part
@@ -198,9 +196,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            ALLOCATE(no_ph(tot_ngeo))
            no_ph(1)=.FALSE.
            lq2r = .TRUE.
-           ldos = .TRUE.
-           lmatdyn = .TRUE.
-           ltherm = .TRUE.
+           ltherm = ltherm_dos .OR. ltherm_freq
            CALL allocate_thermodynamics()
            IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'dynamical_matrices' )
@@ -240,9 +236,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            ALLOCATE(no_ph(tot_ngeo))
            CALL initialize_no_ph(no_ph, tot_ngeo)
            lq2r = .TRUE.
-           ldos = .TRUE.
            ltherm = .TRUE.
-           lmatdyn = .TRUE.
            lev_syn_2=.TRUE.
            CALL compute_degree(ibrav_save, degree, nvar)
            CALL allocate_thermodynamics()

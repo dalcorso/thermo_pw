@@ -271,8 +271,8 @@ scf_dos         dos_sub          fleldos
 scf_ph             --            fildyn               --                  --
 scf_disp                         fildyn
                  q2r_sub         flfrc
-                 matdyn_sub      flfrq
-                                 fldos
+                 write_ph_dispersions  flfrq
+                 write_phdos     fldos
                  simple_plot                    flgnuplot(_dos)     flpsdos
                  write_thermo    fltherm
                  write_thermo_ph fltherm(_ph)

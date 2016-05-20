@@ -21,7 +21,7 @@ SUBROUTINE thermo_readin()
                                    fact_ngeo, max_geometries, start_geo, &
                                    jump_geo
   USE control_thermo,       ONLY : outdir_thermo, after_disp, with_eigen,  &
-                                   do_scf_relax
+                                   do_scf_relax, ltherm_dos, ltherm_freq
   USE data_files,           ONLY : flevdat, flfrc, flfrq, fldos, fltherm,  &
                                    flanhar, filband, flkeconv,             &
                                    flenergy, flpbs, flprojlayer,           &
@@ -153,6 +153,7 @@ SUBROUTINE thermo_readin()
                             after_disp,                     &
                             with_eigen,                     &
                             do_scf_relax,                   &
+                            ltherm_dos, ltherm_freq,        &
                             fildyn,                         &
                             flevdat,                        &
                             flpband, flpgrun,               &
@@ -294,6 +295,8 @@ SUBROUTINE thermo_readin()
   force_bands=.FALSE.
   only_bands_plot=.FALSE.
   do_scf_relax=.FALSE.
+  ltherm_dos=.TRUE.
+  ltherm_freq=.TRUE.
   dump_states=.FALSE.
 
   grunmin_input=0.0_DP

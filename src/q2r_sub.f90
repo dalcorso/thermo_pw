@@ -55,7 +55,6 @@ SUBROUTINE q2r_sub(fildyn)
   USE io_dyn_mat, ONLY : read_dyn_mat_param, read_dyn_mat_header, &
                          read_dyn_mat, read_dyn_mat_tail, &
                          write_dyn_mat_header, write_ifc
-  USE control_thermo, ONLY : ldos
   USE data_files, ONLY : flfrc
   USE control_ph, ONLY : ldisp, xmldyn
   !
@@ -102,8 +101,8 @@ SUBROUTINE q2r_sub(fildyn)
   CALL mp_bcast(ierr, ionode_id, intra_image_comm)
   IF (ionode) THEN
      IF (ierr /= 0) CALL errore('q2r_sub','No grid information on file',1)
-     WRITE (stdout,'(/,4x," reading grid info from file ",a)') &
-                                                        TRIM(fildyn)//'0'
+     WRITE (stdout,'(/,5x,"Reading q grid from file ")') 
+     WRITE (stdout,'(5x,a)') TRIM(fildyn)//'0'
      READ (1, *) nr1, nr2, nr3
      READ (1, *) nfile
      CLOSE (UNIT=1, STATUS='KEEP')
@@ -136,7 +135,8 @@ SUBROUTINE q2r_sub(fildyn)
   !
   DO ifile=1,nfile
      filin = TRIM(fildyn) // TRIM( int_to_char( ifile ) )
-     WRITE (stdout,*) ' reading force constants from file ',TRIM(filin)
+     WRITE (stdout,'(/,5x,"Reading force constants from file")')
+     WRITE (stdout,'(5x,a)') TRIM(filin)
 
      IF (xmldyn) THEN
         CALL read_dyn_mat_param(filin,ntyp,nat)
@@ -166,6 +166,7 @@ SUBROUTINE q2r_sub(fildyn)
         IF (ierr /= 0) CALL errore('q2r_sub','file '//TRIM(filin)//' missing!',1)
         CALL read_dyn_from_file_tpw (nqs, q, epsil, lrigid,  &
                 ntyp, nat, ibrav, celldm, at, atm, amass, ifile)
+        ALLOCATE (m_loc(3,nat))
         IF (ionode) CLOSE(unit=1)
      ENDIF
      IF (ifile == 1) THEN
@@ -185,8 +186,9 @@ SUBROUTINE q2r_sub(fildyn)
      IF (lrigid.AND..NOT.lrigid1) CALL errore('q2r_sub', &
            & 'file with dyn.mat. at q=0 should be first of the list',ifile)
      !
+     WRITE(stdout,*)
      DO nq = 1,nqs
-        WRITE(stdout,'(a,3f12.8)') ' q= ',(q(i,nq),i=1,3)
+        WRITE(stdout,'(5x,"q= ",3f12.8)') (q(i,nq),i=1,3)
         lq = .TRUE.
         DO ipol=1,3
            xq = 0.0d0
@@ -220,7 +222,7 @@ SUBROUTINE q2r_sub(fildyn)
   !
   nq_log = SUM (nc)
   IF (nq_log == nr1*nr2*nr3) THEN
-     WRITE (stdout,'(/5x,a,i4)') ' q-space grid ok, #points = ',nq_log
+     WRITE (stdout,'(/5x,"q grid ok,  number points =",i5)') nq_log
   ELSE
      CALL errore('q2r_sub',' missing q-point(s)!',1)
   END IF
@@ -296,21 +298,23 @@ SUBROUTINE q2r_sub(fildyn)
   END IF
   resi = SUM ( ABS (AIMAG ( phid ) ) )
   IF (resi > eps12) THEN
-     WRITE (stdout,"(/5x,' fft-check warning: sum of imaginary terms = ',es12.6)") resi
+     WRITE (stdout,"(/,5x,'fft-check warning: sum of imaginary terms = ',&
+                                               &es12.6)") resi
   ELSE
-     WRITE (stdout,"(/5x,' fft-check success (sum of imaginary terms < 10^-12)')")
+     WRITE (stdout,"(/,5x,'fft-check success (sum of imaginary terms < &
+                                                          &10^-12)')")
   END IF
+  !
+  CALL interface_with_tpw(phid, nr1, nr2, nr3, nat, ntyp, lrigid, zeu, &
+                                                 epsil, atm, m_loc)
   !
   DEALLOCATE(nc)
   DEALLOCATE(phid) 
   DEALLOCATE(zeu) 
   DEALLOCATE(tau)
   DEALLOCATE(ityp)
-  IF (xmldyn) THEN
-     DEALLOCATE(m_loc)
-  ELSE 
-     DEALLOCATE(phiq)
-  ENDIF
+  DEALLOCATE(m_loc)
+  IF (.NOT. xmldyn) DEALLOCATE(phiq)
   !
   RETURN
   !
@@ -567,3 +571,62 @@ subroutine sp_zeu(zeu_u,zeu_v,nat,scal)
   RETURN
   !
 END SUBROUTINE sp_zeu
+
+SUBROUTINE interface_with_tpw(frc_, nr1, nr2, nr3, nat, ntyp, has_zstar_, &
+                                        zeu_, epsil_, atm_, m_loc_ )
+!
+!  This routine is used to copy the variables produced by q2r in the variables
+!  of the thermo_pw code, avoiding to read the file on disk.
+!
+USE kinds,  ONLY : DP
+USE ifc,    ONLY : frc, atm, zeu, m_loc, epsil_ifc, has_zstar
+USE disp,   ONLY : nq1, nq2, nq3
+
+IMPLICIT NONE
+INTEGER,     INTENT(IN) :: nr1, nr2, nr3, nat, ntyp
+COMPLEX(DP),    INTENT(IN) :: frc_(nr1,nr2,nr3,3,3,nat,nat)
+REAL(DP),    INTENT(IN) :: zeu_(3,3,nat), m_loc_(3,nat), epsil_(3,3)
+LOGICAL,     INTENT(IN) :: has_zstar_
+CHARACTER(LEN=3), INTENT(IN) :: atm_(ntyp)
+
+ALLOCATE (frc(nr1,nr2,nr3,3,3,nat,nat))
+ALLOCATE (zeu(3,3,nat))
+ALLOCATE (atm(ntyp))
+ALLOCATE (m_loc(3,nat))
+
+IF (nq1==0 .AND. nq2==0 .AND. nq3==0) THEN
+   nq1=nr1
+   nq2=nr2
+   nq3=nr3
+ELSEIF (nq1/=nr1 .OR. nq2/=nr2 .OR. nq3/=nr3) THEN
+   CALL errore('interface_with_tpw','nq1, nq2, or nq3 different from &
+                          &nr1, nr2, or nr3',1)
+ENDIF
+
+frc=DBLE(frc_)
+zeu=zeu_
+atm=atm_
+m_loc=m_loc_
+epsil_ifc=epsil_
+has_zstar=has_zstar_
+
+RETURN
+END SUBROUTINE interface_with_tpw
+
+SUBROUTINE clean_ifc_variables()
+
+USE kinds,          ONLY : DP
+USE ifc,            ONLY : frc, atm, zeu, m_loc
+USE phonon_save,    ONLY : freq_save, z_save
+IMPLICIT NONE
+
+IF (ALLOCATED(frc)) DEALLOCATE(frc)
+IF (ALLOCATED(atm)) DEALLOCATE(atm)
+IF (ALLOCATED(zeu)) DEALLOCATE(zeu)
+IF (ALLOCATED(m_loc)) DEALLOCATE(m_loc)
+IF (ALLOCATED(freq_save))  DEALLOCATE (freq_save)
+IF (ALLOCATED(z_save))  DEALLOCATE (z_save)
+
+
+RETURN
+END SUBROUTINE clean_ifc_variables

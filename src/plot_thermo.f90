@@ -12,6 +12,7 @@ SUBROUTINE plot_thermo()
 !
 USE kinds,           ONLY : DP
 USE control_gnuplot, ONLY : flgnuplot, gnuplot_command, lgnuplot
+USE control_thermo,  ONLY : ltherm_dos, ltherm_freq
 USE postscript_files, ONLY : flpstherm
 USE gnuplot,         ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
                             gnuplot_ylabel, &
@@ -44,21 +45,38 @@ CALL gnuplot_xlabel('T (K)', .FALSE.)
 CALL gnuplot_ylabel('Vibrational energy (kJ / (N mol))',.FALSE.) 
 CALL gnuplot_set_fact(1313.3130_DP, .FALSE.) 
 
-CALL gnuplot_write_file_mul_data(filetherm,1,2,'color_red',.TRUE.,.FALSE.,.FALSE.)
-CALL gnuplot_write_file_mul_data(filename,1,2,'color_blue',.FALSE.,.TRUE.,.FALSE.)
+IF (ltherm_dos) &
+   CALL gnuplot_write_file_mul_data(filetherm,1,2,'color_red',.TRUE.,&
+                                                     .NOT.ltherm_freq,.FALSE.)
+IF (ltherm_freq) &
+   CALL gnuplot_write_file_mul_data(filename,1,2,'color_blue', &
+                                                .NOT.ltherm_dos,.TRUE.,.FALSE.)
 
 CALL gnuplot_ylabel('Vibrational free energy (kJ / (N mol))', .FALSE.) 
-CALL gnuplot_write_file_mul_data(filetherm,1,3,'color_red',.TRUE.,.FALSE., .FALSE.)
-CALL gnuplot_write_file_mul_data(filename,1,3,'color_blue',.FALSE.,.TRUE., .FALSE.)
+IF (ltherm_dos) &
+   CALL gnuplot_write_file_mul_data(filetherm,1,3,'color_red',.TRUE.,&
+                                                     .NOT.ltherm_freq, .FALSE.)
+IF (ltherm_freq) &
+   CALL gnuplot_write_file_mul_data(filename,1,3,'color_blue',&
+                                                .NOT.ltherm_dos,.TRUE.,.FALSE.)
 
 CALL gnuplot_set_fact(1313313.0_DP, .FALSE.) 
 CALL gnuplot_ylabel('Entropy (J / K / (N mol))',.FALSE.) 
-CALL gnuplot_write_file_mul_data(filetherm,1,4,'color_red',.TRUE.,.FALSE.,.FALSE.)
-CALL gnuplot_write_file_mul_data(filename,1,4,'color_blue',.FALSE.,.TRUE.,.FALSE.)
+IF (ltherm_dos) &
+   CALL gnuplot_write_file_mul_data(filetherm,1,4,'color_red',.TRUE., &
+                                                   .NOT.ltherm_freq,.FALSE.)
+IF (ltherm_freq) &
+   CALL gnuplot_write_file_mul_data(filename,1,4,'color_blue',.NOT.ltherm_dos,&
+                                                             .TRUE.,.FALSE.)
 
 CALL gnuplot_ylabel('Heat capacity C_v (J / K / (N mol))',.FALSE.) 
-CALL gnuplot_write_file_mul_data(filetherm,1,5,'color_red',.TRUE.,.FALSE.,.FALSE.)
-CALL gnuplot_write_file_mul_data(filename,1,5,'color_blue',.FALSE.,.TRUE.,.FALSE.)
+IF (ltherm_dos) &
+   CALL gnuplot_write_file_mul_data(filetherm,1,5,'color_red',.TRUE.,&
+                 .NOT.ltherm_freq,.FALSE.)
+
+IF (ltherm_freq) &
+   CALL gnuplot_write_file_mul_data(filename,1,5,'color_blue',.NOT.ltherm_dos,&
+                                                           .TRUE.,.FALSE.)
 
 CALL gnuplot_end()
 
