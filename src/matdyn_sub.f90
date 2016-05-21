@@ -61,7 +61,8 @@ SUBROUTINE matdyn_interp(with_eigen)
   !              dyndia routine, not the eigenvalues of the dynamical matrix.
   !
   USE kinds,          ONLY : DP
-  USE mp_images,      ONLY : my_image_id, root_image
+  USE mp_images,      ONLY : my_image_id, root_image, intra_image_comm
+  USE mp,             ONLY : mp_sum
   USE io_global,      ONLY : stdout
   USE io_dyn_mat,     ONLY : read_dyn_mat_param, read_dyn_mat_header, &
                              read_ifc_param, read_ifc
@@ -92,7 +93,7 @@ SUBROUTINE matdyn_interp(with_eigen)
                   rws(0:3,nrwsx)   ! nearest neighbor list, rws(0,*) = norm^2
   REAL(DP) :: qhat(3), qh, masst
   !
-  INTEGER :: nr1, nr2, nr3, ibrav, iq
+  INTEGER :: nr1, nr2, nr3, ibrav, iq, nstart, nlast
   INTEGER :: nrws, nqs
   INTEGER :: n, i, it, nq, na, nqtot
   !
@@ -138,9 +139,12 @@ SUBROUTINE matdyn_interp(with_eigen)
   nq=nqtot
 
   do_init=.TRUE.
-  DO n=1, nq
-     IF ( MOD(n,20000) == 0 ) WRITE(stdout, '(5x,"Computing q ",&
-                         &   i8, " /", i8 )') n, nq 
+  CALL divide(intra_image_comm,nq, nstart, nlast)
+  IF (with_eigen) z_save=(0.0_DP,0.0_DP)
+  freq_save=0.0_DP
+  DO n=nstart, nlast
+     IF ( MOD(n-nstart+1,20000) == 0 ) WRITE(stdout, '(5x,"Computing q ",&
+                         &   i8, " /", i8 )') n-nstart+1, nlast-nstart+1
 
      dyn(:,:,:,:) = (0.d0, 0.d0)
      lo_to_split=.FALSE.
@@ -199,7 +203,7 @@ SUBROUTINE matdyn_interp(with_eigen)
 
   END DO  !nq
   !
-  DO n=1,nq
+  DO n=nstart,nlast
      ! freq_save(i,n) = frequencies in cm^(-1), with negative sign if 
      ! omega^2 is negative
      DO i=1,3*nat
@@ -207,6 +211,8 @@ SUBROUTINE matdyn_interp(with_eigen)
         IF (w2(i,n) < 0.0d0) freq_save(i,n) = -freq_save(i,n)
      END DO
   END DO
+  CALL mp_sum(freq_save, intra_image_comm)
+  IF (with_eigen) CALL mp_sum(z_save, intra_image_comm)
   !
   DEALLOCATE (z) 
   DEALLOCATE (w2) 
@@ -216,135 +222,6 @@ SUBROUTINE matdyn_interp(with_eigen)
   !
   RETURN
 END SUBROUTINE matdyn_interp
-!
-!-----------------------------------------------------------------------
-SUBROUTINE readfc ( flfrc, nr1, nr2, nr3, epsil, nat,  &
-                    ibrav, alat, at, ntyp, amass, omega, has_zstar )
-  !-----------------------------------------------------------------------
-  !
-  USE kinds,      ONLY : DP
-  USE ions_base,  ONLY : tau, ityp
-  USE ifc,        ONLY : frc, zeu
-  USE cell_base,  ONLY : celldm
-  USE io_global,  ONLY : ionode, ionode_id, stdout
-  USE mp,         ONLY : mp_bcast 
-  USE mp_images,  ONLY : intra_image_comm 
-  USE constants,  ONLY : amu_ry
-  !
-  IMPLICIT NONE
-  ! I/O variable
-  CHARACTER(LEN=256) :: flfrc
-  INTEGER :: ibrav, nr1, nr2, nr3, nat, ntyp
-  REAL(DP) :: alat, at(3,3), epsil(3,3)
-  LOGICAL :: has_zstar
-  ! local variables
-  INTEGER :: i, j, na, nb, m1,m2,m3
-  INTEGER :: ibid, jbid, nabid, nbbid, m1bid, m2bid, m3bid
-  REAL(DP) :: amass(ntyp), amass_from_file, omega
-  INTEGER :: nt
-  CHARACTER(LEN=3) :: atm
-  !
-  !
-  IF (ionode) OPEN (unit=1,file=TRIM(flfrc),status='old',form='formatted')
-  !
-  !  read cell data
-  !
-  IF (ionode)THEN
-     READ(1,*) ntyp,nat,ibrav,(celldm(i),i=1,6)
-     if (ibrav==0) then
-        read(1,*) ((at(i,j),i=1,3),j=1,3)
-     end if
-  ENDIF
-  CALL mp_bcast(ntyp, ionode_id, intra_image_comm)
-  CALL mp_bcast(nat, ionode_id, intra_image_comm)
-  CALL mp_bcast(ibrav, ionode_id, intra_image_comm)
-  CALL mp_bcast(celldm, ionode_id, intra_image_comm)
-  IF (ibrav==0) CALL mp_bcast(at, ionode_id, intra_image_comm)
-  !
-  CALL latgen(ibrav,celldm,at(1,1),at(1,2),at(1,3),omega)
-  alat = celldm(1)
-  at = at / alat !  bring at in units of alat
-  CALL volume(alat,at(1,1),at(1,2),at(1,3),omega)
-  !
-  !  read atomic types, positions and masses
-  !
-  DO nt = 1,ntyp
-     IF (ionode) READ(1,*) i,atm,amass_from_file
-     CALL mp_bcast(i,ionode_id, intra_image_comm)
-     CALL mp_bcast(atm,ionode_id, intra_image_comm)
-     CALL mp_bcast(amass_from_file,ionode_id, intra_image_comm)
-     IF (i.NE.nt) CALL errore ('readfc','wrong data read',nt)
-     IF (amass(nt).EQ.0.d0) THEN
-        amass(nt) = amass_from_file/amu_ry
-     ELSE
-        WRITE(stdout,*) 'for atomic type',nt,' mass from file not used'
-     END IF
-  END DO
-  !
-  ALLOCATE (zeu(3,3,nat))
-  !
-  DO na=1,nat
-     IF (ionode) READ(1,*) i,ityp(na),(tau(j,na),j=1,3)
-     CALL mp_bcast(i,ionode_id, intra_image_comm)
-     IF (i.NE.na) CALL errore ('readfc','wrong data read',na)
-  END DO
-  CALL mp_bcast(ityp,ionode_id, intra_image_comm)
-  CALL mp_bcast(tau,ionode_id, intra_image_comm)
-  !
-  !  read macroscopic variable
-  !
-  IF (ionode) READ (1,*) has_zstar
-  CALL mp_bcast(has_zstar,ionode_id,intra_image_comm)
-  IF (has_zstar) THEN
-     IF (ionode) READ(1,*) ((epsil(i,j),j=1,3),i=1,3)
-     CALL mp_bcast(epsil,ionode_id,intra_image_comm)
-     IF (ionode) THEN
-        DO na=1,nat
-           READ(1,*)
-           READ(1,*) ((zeu(i,j,na),j=1,3),i=1,3)
-        END DO
-     ENDIF
-     CALL mp_bcast(zeu,ionode_id, intra_image_comm)
-  ELSE
-     zeu  (:,:,:) = 0.d0
-     epsil(:,:) = 0.d0
-  END IF
-  !
-  IF (ionode) READ (1,*) nr1,nr2,nr3
-  CALL mp_bcast(nr1,ionode_id, intra_image_comm)
-  CALL mp_bcast(nr2,ionode_id, intra_image_comm)
-  CALL mp_bcast(nr3,ionode_id, intra_image_comm)
-  !
-  !  read real-space interatomic force constants
-  !
-  ALLOCATE ( frc(nr1,nr2,nr3,3,3,nat,nat) )
-  frc(:,:,:,:,:,:,:) = 0.d0
-  DO i=1,3
-     DO j=1,3
-        DO na=1,nat
-           DO nb=1,nat
-              IF (ionode) READ (1,*) ibid, jbid, nabid, nbbid
-              CALL mp_bcast(ibid,ionode_id, intra_image_comm)
-              CALL mp_bcast(jbid,ionode_id, intra_image_comm)
-              CALL mp_bcast(nabid,ionode_id, intra_image_comm)
-              CALL mp_bcast(nbbid,ionode_id, intra_image_comm)
-              IF(i .NE.ibid  .OR. j .NE.jbid .OR.                   &
-                 na.NE.nabid .OR. nb.NE.nbbid)                      &
-                 CALL errore  ('readfc','error in reading',1)
-              IF (ionode) READ (1,*) (((m1bid, m2bid, m3bid,        &
-                          frc(m1,m2,m3,i,j,na,nb),                  &
-                           m1=1,nr1),m2=1,nr2),m3=1,nr3)
-               
-              CALL mp_bcast(frc(:,:,:,i,j,na,nb),ionode_id, intra_image_comm)
-           END DO
-        END DO
-     END DO
-  END DO
-  !
-  IF (ionode) CLOSE(unit=1)
-  !
-  RETURN
-END SUBROUTINE readfc
 !
 !-----------------------------------------------------------------------
 SUBROUTINE frc_blk(dyn,q,tau,nat,nr1,nr2,nr3,frc,at,bg,rws,nrws,do_init)
