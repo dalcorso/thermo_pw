@@ -123,12 +123,13 @@ USE control_thermo, ONLY : ltherm_dos, ltherm_freq
 USE ifc,            ONLY : nq1_d, nq2_d, nq3_d
 USE data_files,     ONLY : flanhar
 USE io_global,      ONLY : ionode
-USE mp_images,      ONLY : my_image_id, root_image
+USE mp_images,      ONLY : my_image_id, root_image, intra_image_comm
+USE mp,             ONLY : mp_sum
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
 CHARACTER(LEN=8) :: float_to_char 
-INTEGER :: itemp, iu_therm, i, nq, imode, iq
+INTEGER :: itemp, iu_therm, i, nq, imode, iq, nstart, nlast
 TYPE(ph_freq_type) :: ph_freq    ! the frequencies at the volumes at
                                  ! which the gruneisen parameters are 
                                  ! calculated
@@ -145,7 +146,9 @@ IF (my_image_id /= root_image) RETURN
 nq=ph_freq_save(1)%nq
 CALL init_ph_freq(ph_grun, nat, nq1_d, nq2_d, nq3_d, nq, .FALSE.)
 CALL init_ph_freq(ph_freq, nat, nq1_d, nq2_d, nq3_d, nq, .FALSE.)
-DO itemp = 1, ntemp
+CALL divide(intra_image_comm, ntemp, nstart, nlast)
+betab=0.0_DP
+DO itemp = nstart, nlast
    IF (lv0_t) THEN
       IF (ltherm_freq) THEN
          vm=vminf_t(itemp)
@@ -190,6 +193,7 @@ DO itemp = 1, ntemp
       betab(itemp)=betab(itemp) * ry_kbar / b0
    ENDIF
 END DO
+CALL mp_sum(betab, intra_image_comm)
 
 IF (ltherm_freq) THEN
    CALL compute_cp(betab, vminf_t, b0f_t, phf_cv, cv_grun_t, cp_grun_t, &

@@ -19,7 +19,8 @@ SUBROUTINE write_phdos(igeom)
   !  phdos_save(igeom) variables and exits.
   !
   USE kinds,      ONLY : DP
-  USE mp_images,  ONLY : my_image_id, root_image
+  USE mp,         ONLY : mp_sum
+  USE mp_images,  ONLY : my_image_id, root_image, intra_image_comm
   USE io_global,  ONLY : ionode, stdout
   USE ions_base,  ONLY : nat
   USE ifc,        ONLY : phdos_sigma, deltafreq, freqmin, freqmax, ndos_input, &
@@ -37,7 +38,7 @@ SUBROUTINE write_phdos(igeom)
 
   CHARACTER(LEN=256) :: filedos
   REAL(DP) :: e, emin, emax, dosofe(2)
-  INTEGER :: n, i, ndos, nq
+  INTEGER :: n, i, ndos, nq, nstart, nlast
   LOGICAL :: check_file_exists
 !
 !  If phdos is on file it is read
@@ -93,18 +94,35 @@ SUBROUTINE write_phdos(igeom)
 ! initialize the phdos_save space 
 !
   CALL set_phdos(phdos_save(igeom),ndos,deltafreq)
-
-  IF (ionode) OPEN (UNIT=2,FILE=filedos,STATUS='unknown',FORM='formatted')
-  DO n= 1, ndos
+!
+!   Divide the calculation of the density of states among processors
+!   of one image
+!
+  CALL divide (intra_image_comm, ndos, nstart, nlast)
+  phdos_save(igeom)%nu=0.0_DP
+  phdos_save(igeom)%phdos=0.0_DP
+  DO n= nstart, nlast
      e = emin + (n - 1) * deltafreq
      !
      CALL dos_g(freq_save, 1, 3*nat, nq, disp_wq, phdos_sigma, 0, e, dosofe)
      !
-     IF (ionode) WRITE (2, '(ES30.15, ES30.15)') e, dosofe(1)
      phdos_save(igeom)%nu(n) = e
      phdos_save(igeom)%phdos(n) = dosofe(1)
   END DO
-  IF (ionode) CLOSE(unit=2)
+!
+!  and collect the results
+!
+  CALL mp_sum(phdos_save(igeom)%nu, intra_image_comm)
+  CALL mp_sum(phdos_save(igeom)%phdos, intra_image_comm)
+
+  IF (ionode) THEN
+     OPEN (UNIT=2,FILE=filedos,STATUS='unknown',FORM='formatted')
+     DO n=1, ndos 
+        WRITE (2, '(ES30.15, ES30.15)') phdos_save(igeom)%nu(n),  &
+                                             phdos_save(igeom)%phdos(n)
+     ENDDO
+     CLOSE(unit=2)
+  END IF
   !
   RETURN
 END SUBROUTINE write_phdos

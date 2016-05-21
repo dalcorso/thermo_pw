@@ -584,10 +584,11 @@ USE disp,   ONLY : nq1, nq2, nq3
 
 IMPLICIT NONE
 INTEGER,     INTENT(IN) :: nr1, nr2, nr3, nat, ntyp
-COMPLEX(DP),    INTENT(IN) :: frc_(nr1,nr2,nr3,3,3,nat,nat)
+COMPLEX(DP),    INTENT(IN) :: frc_(nr1*nr2*nr3,3,3,nat,nat)
 REAL(DP),    INTENT(IN) :: zeu_(3,3,nat), m_loc_(3,nat), epsil_(3,3)
 LOGICAL,     INTENT(IN) :: has_zstar_
 CHARACTER(LEN=3), INTENT(IN) :: atm_(ntyp)
+INTEGER :: i,j,k,ijk
 
 ALLOCATE (frc(nr1,nr2,nr3,3,3,nat,nat))
 ALLOCATE (zeu(3,3,nat))
@@ -603,7 +604,14 @@ ELSEIF (nq1/=nr1 .OR. nq2/=nr2 .OR. nq3/=nr3) THEN
                           &nr1, nr2, or nr3',1)
 ENDIF
 
-frc=DBLE(frc_)
+DO k=1,nr3
+   DO j=1,nr2
+      DO i=1,nr1
+         ijk=i+(j-1)*nr1+(k-1)*nr1*nr2
+         frc(i,j,k,:,:,:,:)=DBLE(frc_(ijk,:,:,:,:))
+      ENDDO
+   ENDDO
+ENDDO
 zeu=zeu_
 atm=atm_
 m_loc=m_loc_

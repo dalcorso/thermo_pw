@@ -17,7 +17,7 @@ USE kinds, ONLY : DP
 USE constants, ONLY : k_boltzmann_ry, ry_to_cmm1
 USE io_global, ONLY : stdout
 USE mp_images, ONLY : intra_image_comm
-USE mp, ONLY : mp_sum
+USE mp, ONLY : mp_bcast
 IMPLICIT NONE
 SAVE
 PRIVATE
@@ -109,8 +109,6 @@ SUBROUTINE read_ph_freq_data(ph_freq, filename)
 !  for the frequencies and their representation
 !
 USE io_global, ONLY : ionode, ionode_id
-USE mp_images, ONLY : intra_image_comm
-USE mp,        ONLY : mp_bcast
 IMPLICIT NONE
 TYPE(ph_freq_type), INTENT(INOUT) :: ph_freq
 CHARACTER(LEN=256), INTENT(IN) :: filename
@@ -184,8 +182,6 @@ SUBROUTINE write_ph_freq_data(ph_freq, filename)
 !  for the frequencies
 !
 USE io_global, ONLY : ionode, ionode_id
-USE mp_images, ONLY : intra_image_comm
-USE mp,        ONLY : mp_bcast
 IMPLICIT NONE
 TYPE(ph_freq_type), INTENT(INOUT) :: ph_freq
 CHARACTER(LEN=256), INTENT(IN) :: filename
@@ -264,7 +260,7 @@ TYPE(ph_freq_type), INTENT(IN) :: ph_freq
 REAL(DP), INTENT(IN) :: temp
 REAL(DP), INTENT(OUT) :: free_ener
 
-INTEGER :: nq, iq, nat, imode, startq, lastq, counter
+INTEGER :: nq, iq, nat, imode, counter
 REAL(DP) :: nu, arg, wg, temp1, onesixth, one24
 
 free_ener=0.0_DP
@@ -274,9 +270,8 @@ nq=ph_freq%nq
 nat=ph_freq%nat
 onesixth=1.0_DP / 6.0_DP
 one24=1.0_DP /24.0_DP
-CALL divide (intra_image_comm, nq, startq, lastq)
 counter=0
-DO iq=startq,lastq
+DO iq=1,nq
    wg=ph_freq%wg(iq)
    DO imode=1,3*nat
       nu=ph_freq%nu(imode,iq)
@@ -291,8 +286,6 @@ DO iq=startq,lastq
       ENDIF
    ENDDO
 ENDDO
-CALL mp_sum(free_ener, intra_image_comm)
-CALL mp_sum(counter, intra_image_comm)
 IF (counter > 3) THEN
    WRITE(stdout,'(5x,"WARNING: Too many acoustic modes")')
 ELSEIF (counter<3) THEN
@@ -314,7 +307,7 @@ TYPE(ph_freq_type), INTENT(IN) :: ph_freq
 REAL(DP), INTENT(IN) :: temp
 REAL(DP), INTENT(OUT) :: ener
 
-INTEGER :: nq, iq, imode, nat, startq, lastq
+INTEGER :: nq, iq, imode, nat
 REAL(DP) :: nu, temp1, arg, wg, onesixth, one24, earg
 
 ener=0.0_DP
@@ -324,8 +317,7 @@ onesixth=1.0_DP / 6.0_DP
 one24=1.0_DP /24.0_DP
 nq=ph_freq%nq
 nat=ph_freq%nat
-CALL divide(intra_image_comm, nq, startq, lastq)
-DO iq=startq,lastq
+DO iq=1,nq
    wg=ph_freq%wg(iq)
    DO imode=1, 3*nat
       nu=ph_freq%nu(imode,iq)
@@ -340,7 +332,6 @@ DO iq=startq,lastq
    ENDDO
 ENDDO
 ener = ener / ry_to_cmm1
-CALL mp_sum(ener, intra_image_comm)
 
 RETURN
 END SUBROUTINE vib_energy_ph
@@ -379,7 +370,7 @@ TYPE(ph_freq_type), INTENT(IN) :: ph_freq
 REAL(DP), INTENT(IN) :: temp
 REAL(DP), INTENT(OUT) :: cv
 
-INTEGER :: nq, iq, imode, nat, startq, lastq
+INTEGER :: nq, iq, imode, nat
 REAL(DP) :: nu, temp1, arg, wg, onesixth, one24, earg
 
 cv=0.0_DP
@@ -389,8 +380,7 @@ one24 = 1.0_DP / 24.0_DP
 temp1 = 1.0_DP / temp
 nq=ph_freq%nq
 nat=ph_freq%nat
-CALL divide(intra_image_comm, nq, startq, lastq)
-DO iq=startq,lastq
+DO iq=1,nq
    wg=ph_freq%wg(iq)
    DO imode=1,3*nat
       nu=ph_freq%nu(imode,iq)
@@ -406,7 +396,6 @@ DO iq=startq,lastq
    ENDDO
 ENDDO
 cv = cv * kb
-CALL mp_sum(cv, intra_image_comm)
 
 RETURN
 END SUBROUTINE specific_heat_cv_ph
@@ -424,7 +413,7 @@ TYPE(ph_freq_type), INTENT(IN) :: ph_freq, ph_grun
 REAL(DP), INTENT(IN)  :: temp
 REAL(DP), INTENT(OUT) :: betab
 
-INTEGER :: nq, iq, imode, nat, startq, lastq
+INTEGER :: nq, iq, imode, nat
 REAL(DP) :: nu, temp1, arg, gamman, wg, onesixth, one24, earg
 
 betab=0.0_DP
@@ -434,8 +423,7 @@ one24=1.0_DP/24.0_DP
 temp1 = 1.0_DP / temp
 nq=ph_freq%nq
 nat=ph_freq%nat
-CALL divide(intra_image_comm, nq, startq, lastq)
-DO iq=startq,lastq
+DO iq=1, nq
    wg=ph_freq%wg(iq)
    DO imode=1, 3*nat
       nu=ph_freq%nu(imode,iq)
@@ -453,7 +441,6 @@ DO iq=startq,lastq
    ENDDO
 ENDDO
 betab = betab * kb
-CALL mp_sum(betab, intra_image_comm)
 
 RETURN
 END SUBROUTINE thermal_expansion_ph
