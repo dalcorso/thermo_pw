@@ -84,8 +84,6 @@ $ECHO " done"
 cat > thermo_control << EOF
  &INPUT_THERMO
   what='scf_disp',
-  fildyn='si.dyn.xml'
-  after_disp=.TRUE.
   nq1_d=128, 
   nq2_d=128, 
   nq3_d=128,
