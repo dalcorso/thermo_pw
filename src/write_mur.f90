@@ -22,7 +22,7 @@ USE io_global,      ONLY : ionode
 IMPLICIT NONE
 
 REAL(DP), INTENT(IN) :: emin, omega0, b0in, b01
-CHARACTER(LEN=256) :: filename, filename1
+CHARACTER(LEN=256) :: filename
 CHARACTER(LEN=8) :: float_to_char
 REAL(DP) :: omega, e, p, b0
 INTEGER :: i, iu_mur
@@ -30,11 +30,8 @@ INTEGER :: i, iu_mur
 IF (my_image_id /= root_image) RETURN
 
 filename="energy_files/"//TRIM(flevdat)//'_mur'
-filename1="energy_files/"//TRIM(flevdat)//'_mur1'
-IF (pressure /= 0.0_DP) THEN
+IF (pressure /= 0.0_DP) &
    filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
-   filename1=TRIM(filename1)//'.'//TRIM(float_to_char(pressure_kb,1))
-END IF
 
 b0 = b0in / ry_kbar
 IF (vmin_input == 0.0_DP) vmin_input=omega_geo(1) * 0.98_DP
@@ -67,13 +64,6 @@ IF (ionode) THEN
    ENDDO 
    CLOSE(UNIT=iu_mur, STATUS='KEEP')
 
-   OPEN(UNIT=iu_mur, FILE=TRIM(filename1), STATUS='UNKNOWN', FORM='FORMATTED')
-   DO i=1,ngeo(1)
-      WRITE(iu_mur,'(2f20.10)') omega_geo(i), energy_geo(i) + pressure * &
-                                omega_geo(i)
-
-   ENDDO
-   CLOSE(UNIT=iu_mur, STATUS='KEEP')
 END IF
 
 RETURN

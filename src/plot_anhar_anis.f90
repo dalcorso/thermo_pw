@@ -63,7 +63,7 @@ filename='anhar_files/'//TRIM(flanhar)
 filename1='anhar_files/'//TRIM(flanhar)//'_ph'
 filename2='anhar_files/'//TRIM(flanhar)//'.celldm'
 filename3='anhar_files/'//TRIM(flanhar)//'.celldm_ph'
-filename4='anhar_files/'//TRIM(flanhar)//'.aux_grun'
+filename4='anhar_files/'//TRIM(flanhar)//'.celldm_grun'
 
 IF (pressure /= 0.0_DP) THEN
    filename=TRIM(filename)//'.'//float_to_char(pressure_kb,1)

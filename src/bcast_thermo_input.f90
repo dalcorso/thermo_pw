@@ -20,7 +20,7 @@ SUBROUTINE bcast_thermo_input()
   USE data_files,      ONLY : flevdat, flfrc, flfrq, fldos, fltherm, flanhar, &
                               filband, flkeconv, flnkconv, flgrun, flpband,   &
                               flpgrun, flenergy, flprojlayer, flpbs, flvec, &
-                              flepsilon, fleldos, fleltherm
+                              flepsilon, fleldos, fleltherm, fldosfrq
   USE postscript_files, ONLY : flpsband, flpsdisp, flpsdisp, flpsdos, &
                               flpstherm,  flpsanhar, flpsmur, flpskeconv, &
                               flpsnkconv, flpsgrun, flpsenergy, flpsepsilon, &
@@ -75,6 +75,7 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( flfrq, meta_ionode_id, world_comm )
   CALL mp_bcast( fldos, meta_ionode_id, world_comm )
   CALL mp_bcast( fltherm, meta_ionode_id, world_comm )
+  CALL mp_bcast( fldosfrq, meta_ionode_id, world_comm )
   CALL mp_bcast( fleldos, meta_ionode_id, world_comm )
   CALL mp_bcast( fleltherm, meta_ionode_id, world_comm )
   CALL mp_bcast( flanhar, meta_ionode_id, world_comm )

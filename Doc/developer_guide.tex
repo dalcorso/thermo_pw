@@ -324,8 +324,287 @@ mur_lc_t
 # is an integer from 1 to the number of crystal parameters
 \end{verbatim} 
 
-
 \newpage
+
+\section{\color{coral}Files contents}
+
+Many data files produced by \texttt{thermo\_pw} are in a form readable
+by the \texttt{gnuplot} program and are therefore arranged in columns.
+Usually the first column is the temperature and the other columns are
+the physical quantities. Several other files are in a format exported
+from the Quantum ESPRESSO package and are usually readable by its 
+programs. In this section we report a short list of the files produced
+by \texttt{thermo\_pw} and a short description of the quantities 
+saved in each file. 
+
+\begin{itemize}
+
+\item 
+\texttt{therm\_files/flevdat} (default name \texttt{output\_ev.dat})
+This file contains the total energy as a function of the volume for the
+points actually calculated by \texttt{thermo\_pw}. It has the format
+\begin{verbatim}
+Omega     energy
+\end{verbatim}
+where $\Omega$ is the volume and energy is the total energy (or enthalpy at
+finite pressure).
+
+\item 
+\texttt{therm\_files/flevdat(\_mur)} (default name \texttt{output\_ev.dat\_mur})
+This file contains the Murnaghan interpolation of the input data on a 
+mesh of volumes and the pressure that corresponds to each volume. It has
+the format:
+\begin{verbatim}
+# omega (a.u.)**3       energy (Ry)      pressure (kbar)
+\end{verbatim}
+where $\Omega$ is the volume, energy the total energy (or enthalpy at finite
+pressure).
+
+\item 
+\texttt{therm\_files/flevdat(.ev.out)} 
+(default name \texttt{output\_ev.dat.ev.out})
+This file contains the output information on the Murnaghan interpolation 
+in the same format as the output of the \texttt{ev.x} program of 
+Quantum ESPRESSO package. This file is written in two formats.
+There is also an \texttt{.xml} file where the same quantities are written 
+with more digits and in a \texttt{XML} format.
+
+\item 
+\texttt{energy\_files/flenergy(\#)} 
+(default name \texttt{output\_energy.dat(\#)}). This file is written only
+when \texttt{lmurn=.FALSE.}. Its content depends on the crystal system.
+For the cubic system it contains:
+\begin{verbatim}
+#   celldm(1)       energy
+\end{verbatim}
+For hexagonal and tetragonal systems it contains:
+\begin{verbatim}
+#   celldm(1)    celldm(3)   energy
+\end{verbatim}
+For trigonal systems it contains:
+\begin{verbatim}
+#   celldm(1)    celldm(4)   energy
+\end{verbatim}
+For orthorhombic system several of these files are produced, one for each
+value of \texttt{celldm(3)} and they contain:
+\begin{verbatim}
+#   celldm(1)    celldm(2)   energy
+\end{verbatim}
+For all other systems a file is produced with the format:
+\begin{verbatim}
+#   celldm(1)    celldm(2)   celldm(3) celldm(4)  celldm(5) celldm(6) energy
+\end{verbatim}
+
+\item 
+\texttt{therm\_files/fleldos} (default name \texttt{output\_eldos.dat})
+This file contains the electron density of states. It has the format
+\begin{verbatim}
+#  E (eV)   dos(E)     Int dos(E)
+\end{verbatim}
+and contains the energy, the electron density of states per cell, and
+its integral. In the local spin density case the format of the file is
+\begin{verbatim}
+#  E (eV)   dosup(E)  dosdn(E)    Int dos(E)
+\end{verbatim}
+with the density of states for spin up and for spin down. The integrated
+density of states refers to the sum of spin up and spin down states.
+
+\item 
+\texttt{therm\_files/fleltherm} (default name \texttt{output\_eltherm.dat})
+This file contains the electron thermodynamic properties as a function of
+temperature. It has the format:
+\begin{verbatim}
+#   T     energy     free energy     entropy    C_v        chemical pot
+\end{verbatim}
+and contains the electron excitation energy, free energy, entropy, 
+isochoric specific heat and chemical potential.
+
+\item 
+\texttt{phdisp\_files/flfrc.g\#)} (default name \texttt{output\_frc.dat.g\#})
+For each geometry for which a phonon dispersion is calculated this file
+contains the interatomic force constants. It is in a format readable by
+the code \texttt{matdyn.f90} of the QE distribution. \texttt{g\#} indicates 
+the number of the geometry.
+
+\item 
+\texttt{phdisp\_files/flvec.g\#)} (default name 
+\texttt{matdyn.modes.g\#}). For each geometry for which a phonon dispersion
+is calculated this file contains the vibrational modes and the frequencies
+along the path. It is in a format defined by the \texttt{matdyn.f90} routine 
+of the QE distribution.
+
+\item 
+\texttt{phdisp\_files/flfrq.g\#)} (default name \texttt{output\_frq.dat.g\#})
+For each geometry for which a phonon dispersion is calculated this file
+contains the frequencies along the path. It is in a format readable by
+the code \texttt{plotband.f90} of the QE distribution.
+
+\item 
+\texttt{phdisp\_files/flpband.g\#)(.\#)(.\#)} 
+(default name \texttt{output\_pband.dat.g\#(.\#)(.\#)})
+For each geometry for which a phonon dispersion is calculated these files
+contain the frequencies along the path. They are in a format readable by
+\texttt{gnuplot} as produced by the \texttt{plotband.f90} code of Quantum
+ESPRESSO. The numbers after the geometry indicate the number of the line 
+along the path and the number of the irreducible representation.
+
+\item 
+\texttt{phdisp\_files/fldosfrq.g\#)} (default name 
+\texttt{save\_frequencies.g\#}). For each geometry for which a phonon 
+density of states is calculated this file contains the vibrational  
+frequencies in all the {\bf q} vectors used for the phonon density of states.
+The file contains for each {\bf q} vector its weight and the frequencies,
+an information sufficient to recalculate the density of states.
+The file is readable only by \texttt{thermo\_pw}
+
+\item 
+\texttt{phdisp\_files/fldos.g\#)} (default name 
+\texttt{output\_dos.dat.g\#}). For each geometry for which a phonon dispersion
+is calculated a phonon density of states is also calculated when
+\texttt{ltherm\_dos=.TRUE.}. The phonon dos is written in this file 
+with the form:
+\begin{verbatim}
+#   Frequency       dos
+\end{verbatim}
+The frequency and the phonon density of states. 
+
+\item 
+\texttt{therm\_files/fltherm.g\#(\_ph)} (default name 
+\texttt{output\_therm.dat.g\#(\_ph)}). For each geometry for which 
+a complete phonon dispersion is calculated (and whose number is given
+by \texttt{g\#}) the code produces one of these files that contain the harmonic 
+thermodynamic quantities as a function of temperature. It contains:
+\begin{verbatim}
+#   T       energy       free energy       entropy      C_v 
+\end{verbatim}
+The temperature, the vibrational energy, free energy, entropy, and
+isochoric heat capacity. The extension \texttt{(\_ph)} indicates 
+quantities calculated from the direct integration over the Brillouin zone,
+while no extension indicates quantities obtained from the phonon density 
+of states.
+
+\item 
+\texttt{anhar\_files/flanhar(\_ph)} (default name \texttt{output\_anhar.dat}). The content of this file depends on the 
+value of the flag \texttt{lmurn}. When \texttt{lmurn=.TRUE.} we have:
+\begin{verbatim}
+#   T      V(T)   B (T)    dB(T)/dP     beta 
+\end{verbatim}
+The temperature, the volume, the bulk modulus, the pressure derivative
+of the bulk modulus derived from the Murnaghan equation and the volume
+thermal expansion $\beta$ obtained from the numerical derivative of the
+volume. When \texttt{lmurn=.FALSE.} the bulk modulus
+and its pressure derivative are not available and the file contains
+only the three quantities:
+\begin{verbatim}
+#   T        V(T)      beta 
+\end{verbatim}
+The presence (absence) of the \texttt{(\_ph)} extension indicates that
+these quantities have been calculated from the free energy obtained from 
+direct integration over the Brilluoin zone (computing the phonon density
+of states). 
+
+\item \texttt{anharm\_files/flanhar(.aux)(\_ph)} 
+(default name \texttt{output\_anharm.dat.aux})
+This file is present
+only when \texttt{lmurn=.TRUE.} and contains:
+\begin{verbatim}
+   T     gamma(T)    C_v (T)    (C_p - C_v)(T)  (B_S - B_T) (T) 
+\end{verbatim}
+The temperature, the average Gr\"uneisen parameter, the isochoric heat
+capacity computed from interpolation of the volume dependent isochoric heat
+capacity at the volume corresponding to the temperature $T$, the difference
+between isobaric and isochoric heat capacity, the difference between
+isoentropic and isothermal bulk moduli.
+The presence (absence) of the \texttt{(\_ph)} extension indicates that
+these quantities have been calculated from the free energy obtained from 
+direct integration over the Brilluoin zone (computing the phonon density
+of states). 
+
+\item 
+\texttt{anhar\_files/flanhar(.aux\_grun)} 
+(default name \texttt{output\_anhar.dat.aux\_grun}). This file is printed
+only when \texttt{lmurn=.TRUE.} and contains: 
+\begin{verbatim}
+#   T        beta      gamma    C_v (T) 
+\end{verbatim}
+the temperature, the volume thermal expansion calculated from mode 
+Gr\"uneisen parameters, the average Gr\"uneisein parameter that results
+from the new $\beta$ but keeping all the other quantities as calculated
+from the free energy derivatives. The isochoric heat capacity is calculated
+by interpolating the isochoric heat capacity.
+
+\item 
+\texttt{anhar\_files/flanhar.celldm(\_ph)(\_grun)} 
+(default name \\ \texttt{output\_anhar.dat.celldm(\_ph)(\_grun)}). 
+This file is printed
+only when \texttt{lmurn=.FALSE.} and its content depends on the crystal 
+system. For cubic solids it contains: 
+\begin{verbatim}
+#   T        celldm(1)        alpha_xx
+\end{verbatim}
+the temperature, the cubic lattice constant and the linear thermal expansion.
+For hexagonal and tetragonal solids it contains:
+\begin{verbatim}
+#   T    celldm(1)   celldm(3)   alpha_xx   alpha_zz
+\end{verbatim}
+For trigonal solids it contains:
+\begin{verbatim}
+#   T    celldm(1)   celldm(4)   alpha_xx   alpha_zz
+\end{verbatim}
+For orthorhombic solids it contains:
+\begin{verbatim}
+#   T  celldm(1)  celldm(2)  celldm(3)  alpha_xx  alpha_yy  alpha_zz
+\end{verbatim}
+For monoclinic solids b-unique:
+\begin{verbatim}
+#   T    celldm(1)   celldm(2)   celldm(3)  celldm(5)
+\end{verbatim}
+For monoclinic solids c-unique:
+\begin{verbatim}
+#   T    celldm(1)   celldm(2)   celldm(3)  celldm(4)
+\end{verbatim}
+For triclinic solids:
+\begin{verbatim}
+#   T  celldm(1)  celldm(2)  celldm(3)  celldm(4)  celldm(5)  celldm(6)
+\end{verbatim}
+No extension or the extension \texttt{(\_ph)} 
+indicate that the quantities have been calculated from the minimization of
+the free energy obtained from the phonon density of states or from the
+three dimensional integration over the Brillouin zone. The extension
+\texttt{(\_grun)} indicates that the thermal expansions have been
+calculated from the mode Gr\"uneisen parameters, while the \texttt{celldm}
+parameters are still obtained from the free energy minimization. Which
+one depend from the variable \texttt{ltherm\_dos} and \texttt{ltherm\_freq}.
+If both are \texttt{.TRUE.} the second is used.
+
+\item 
+\texttt{anhar\_files/flgrun(\_\#)}(default name 
+\texttt{output\_grun.dat(\_\#)}) This file contains the mode Gr\"uneisen
+parameters. In anisotropic crystal systems with \texttt{lmurn=.FALSE.} this
+file contains the derivative of the frequencies with respect to the
+crystal parameters. The optional number in the filename indicates which
+crystal parameter. The format of the file is readable by the program
+\texttt{plotband.f90} of the Quantum ESPRESSO package.
+
+\item 
+\texttt{anhar\_files/flgrun(\_freq)} 
+(default name \texttt{output\_grun.dat\_freq)}).
+This file contains the phonon frequencies interpolated at the requested 
+temperature or volume. The format of the file is readable by the program
+\texttt{plotband.f90} of the Quantum ESPRESSO package.
+
+\item 
+\texttt{anhar\_files/flpgrun(.\#)(.\#)} 
+(default name \texttt{output\_pgrun.dat(.\#)(.\#)})
+These files contains the Gr\"uneisen parameters along the path.
+They are in a format readable by \texttt{gnuplot} as produced by 
+the \texttt{plotband.f90} code of Quantum
+ESPRESSO. The numbers after the geometry indicate the number of the line 
+along the path and the number of the irreducible representation.
+
+\end{itemize}
+
+
 \section{\color{coral}Library}
 
 \tpw\ offers a library of modules to deal with solid properties. The 
@@ -389,7 +668,7 @@ Bravais lattice.
 
 \item
 \texttt{isoentropic.f90} contains routines to calculate the isoentropic
-quantities or the constant stress specific heat.
+quantities or the constant stress heat capacity.
 
 \item
 \texttt{piezoelectric\_tensor.f90} contains routines to calculate the

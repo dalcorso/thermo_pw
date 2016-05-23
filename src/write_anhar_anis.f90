@@ -364,7 +364,7 @@ IF (ionode) THEN
 !
 !   here quantities calculated from the gruneisen parameters
 !
-   filename='anhar_files/'//TRIM(flanhar)//'.aux_grun'
+   filename='anhar_files/'//TRIM(flanhar)//'.celldm_grun'
    IF (pressure /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
    CALL write_alpha_anis(ibrav, celldmf_t, alpha_an_g, temp, ntemp, filename )

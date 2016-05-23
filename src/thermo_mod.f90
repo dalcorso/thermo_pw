@@ -702,6 +702,7 @@ MODULE data_files
   CHARACTER(LEN=256) :: flfrc   ! file with the force constants
   CHARACTER(LEN=256) :: flfrq   ! file with the frequencies 
   CHARACTER(LEN=256) :: fldos   ! file with the phonon dos
+  CHARACTER(LEN=256) :: fldosfrq   ! file with the frequencies for phonon dos
   CHARACTER(LEN=256) :: fleldos ! file with the electron dos
   CHARACTER(LEN=256) :: fltherm ! file with the harmonic thermodynamic 
   CHARACTER(LEN=256) :: fleltherm ! file with the electronic thermodynamic 
@@ -768,8 +769,9 @@ MODULE internal_files_names
 
   CHARACTER(LEN=256) :: fildyn_thermo    ! dynamical matrix file
   CHARACTER(LEN=256) :: flfrc_thermo     ! interatomic force constants file
-  CHARACTER(LEN=256) :: flfrq_thermo     ! frequencies files
+  CHARACTER(LEN=256) :: flfrq_thermo     ! frequencies files for dispersion
   CHARACTER(LEN=256) :: fldos_thermo     ! dos file
+  CHARACTER(LEN=256) :: fldosfrq_thermo  ! frequencies for dos 
   CHARACTER(LEN=256) :: fltherm_thermo   ! thermodynamic quantities files
   CHARACTER(LEN=256) :: flpband_thermo   ! dispersions in gnuplot format
 

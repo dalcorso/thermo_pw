@@ -50,7 +50,7 @@ CALL gnuplot_write_header(filename, vmin_input, vmax_input, 0.0_DP, 0.0_DP, &
 CALL gnuplot_xlabel('Volume ((a.u.)^3)',.FALSE.) 
 
 filename1="energy_files/"//TRIM(flevdat)//'_mur'
-filename2="energy_files/"//TRIM(flevdat)//'_mur1'
+filename2="energy_files/"//TRIM(flevdat)
 
 IF (pressure /= 0.0_DP) THEN
    filename1=TRIM(filename1)//'.'//TRIM(float_to_char(pressure_kb,1))

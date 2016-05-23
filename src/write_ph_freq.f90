@@ -31,6 +31,7 @@ SUBROUTINE write_ph_freq(igeom)
   USE constants,     ONLY : amu_ry
   USE control_paths, ONLY : disp_q, disp_wq, disp_nqs
   USE ifc,           ONLY : nq1_d, nq2_d, nq3_d, atm, zeu, m_loc
+  USE data_files,    ONLY : fldosfrq
   USE ph_freq_thermodynamics, ONLY : ph_freq_save
   USE control_thermo, ONLY : with_eigen
   USE ph_freq_module, ONLY : init_ph_freq, read_ph_freq_data, &
@@ -49,7 +50,7 @@ SUBROUTINE write_ph_freq(igeom)
   CHARACTER(LEN=6) :: int_to_char
   LOGICAL :: check_file_exists
   !
-  filename='phdisp_files/save_frequencies.'//TRIM(int_to_char(igeom))
+  filename='phdisp_files/'//TRIM(fldosfrq)
   file_exist=check_file_exists(filename)
   IF (.NOT.ALLOCATED(ph_freq_save)) ALLOCATE(ph_freq_save(tot_ngeo))
 
