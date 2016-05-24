@@ -340,7 +340,30 @@ saved in each file.
 \begin{itemize}
 
 \item 
-\texttt{therm\_files/flevdat} (default name \texttt{output\_ev.dat})
+\texttt{band\_files/filband(.rap)} (default name 
+\texttt{output\_band.dat(.rap)}) contains the band eigenvalues for each 
+{\bf k} point. The \texttt{.rap} file contains the number of the irreducible
+representation for each band. The format of these files can be read
+by the \texttt{plotband.f90} code of Quantum ESPRESSO.
+
+\item 
+\texttt{band\_files/flpband(.\#)(.\#)} 
+(default name \texttt{output\_pband.dat(.\#)(.\#)})
+These files contain the band eigenvalues along the path. They are in a 
+format readable by \texttt{gnuplot} and are similar to the file written
+by the \texttt{plotband.f90} code of Quantum ESPRESSO. The numbers indicate 
+the number of the line along the path and the number of the irreducible 
+representation.
+
+\item 
+\texttt{band\_files/info\_data} (default name \texttt{info\_data}) This
+file contains a minimal number of information needed by \texttt{thermo\_pw}
+to redo the plot when \texttt{only\_bands\_plot=.TRUE.}. It is written
+in a form readable by \texttt{thermo\_pw}. Among other things it
+contains the Fermi level.
+
+\item 
+\texttt{energy\_files/flevdat} (default name \texttt{output\_ev.dat})
 This file contains the total energy as a function of the volume for the
 points actually calculated by \texttt{thermo\_pw}. It has the format
 \begin{verbatim}
@@ -350,7 +373,8 @@ where $\Omega$ is the volume and energy is the total energy (or enthalpy at
 finite pressure).
 
 \item 
-\texttt{therm\_files/flevdat(\_mur)} (default name \texttt{output\_ev.dat\_mur})
+\texttt{energy\_files/flevdat(\_mur)} 
+(default name \texttt{output\_ev.dat\_mur})
 This file contains the Murnaghan interpolation of the input data on a 
 mesh of volumes and the pressure that corresponds to each volume. It has
 the format:
@@ -361,7 +385,7 @@ where $\Omega$ is the volume, energy the total energy (or enthalpy at finite
 pressure).
 
 \item 
-\texttt{therm\_files/flevdat(.ev.out)} 
+\texttt{energy\_files/flevdat(.ev.out)} 
 (default name \texttt{output\_ev.dat.ev.out})
 This file contains the output information on the Murnaghan interpolation 
 in the same format as the output of the \texttt{ev.x} program of 
