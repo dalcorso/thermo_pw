@@ -36,7 +36,6 @@ float_to_char.o \
 find_symmetry.o \
 generate_k_along_lines_kz.o \
 initialize_thermo_work.o \
-initialize_thermo_master.o \
 local_dos1d_so.o \
 matdyn_sub.o \
 plan_avg_sub.o \

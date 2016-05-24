@@ -28,13 +28,6 @@ MODULE mp_asyn
 !  wait until the master answers. The master can call asyn_master_work 
 !  to ask for same work to do. 
 ! 
-!  This version of the module allows to establish a priority
-!  among the works. If the master initializes with a call to 
-!  asyn_master_init_with_priority it can pass an array npriority(nwork) 
-!  that for each work tells how many works must be done before this one. 
-!  priority(nwork,ipriority) says, for each work on which works it depends. 
-!  max_priority is the second dimension of priority.
-!
 !  If the code is running after a serial compilation the routines of this
 !  module should not be called.
 !
@@ -53,7 +46,6 @@ INTEGER :: nworkers             ! number of workers
 INTEGER :: master               ! the master processor
 INTEGER :: asyn_comm            ! the communicator for the asyncronous work
 INTEGER :: tag=1                ! tag used in each message
-INTEGER :: max_priority         ! max number of priority dependence of a work
 
 INTEGER, ALLOCATABLE :: proc_num(:) ! gives the processor number of 
                                 ! the master and of the workers inside the
@@ -64,12 +56,6 @@ INTEGER, ALLOCATABLE :: sent(:) ! the master use this array to save the
                                 ! processor that is doing a job
 INTEGER, ALLOCATABLE :: doing(:) ! the master use this array to know
                                  ! what a worker is doing
-INTEGER, ALLOCATABLE :: npriority(:) ! each work can specify how many
-                                ! works have priority on him
-INTEGER, ALLOCATABLE :: priority(:,:) ! for each work give the list of
-                                ! works that have priority on him
-INTEGER, ALLOCATABLE :: count_dep(:) ! for each work count how many works
-                                ! depends on it and gives high priority
 LOGICAL, ALLOCATABLE :: done(:) ! master use this array to known which
                                 ! jobs have been already done
 LOGICAL, ALLOCATABLE :: done_proc(:) ! master use this array to know
@@ -78,8 +64,7 @@ LOGICAL :: with_asyn_images=.FALSE. ! The calling program must set this
                                 ! variable to true to use this module
 
 PUBLIC asyn_master_init, asyn_worker_init, asyn_close, asyn_master, &
-       asyn_worker, asyn_master_work, with_asyn_images, &
-       asyn_master_init_with_priority
+       asyn_worker, asyn_master_work, with_asyn_images
 
 CONTAINS
 
@@ -94,13 +79,9 @@ nwork=nwork_
 asyn_comm=comm
 ALLOCATE(done(nwork))
 ALLOCATE(sent(nwork))
-ALLOCATE(npriority(nwork))
-ALLOCATE(count_dep(nwork))
 ALLOCATE(doing(0:nworkers))
 done=.FALSE.
 sent=-1
-npriority=0
-count_dep=0
 doing=NO_WORK
 tag=1
 !
@@ -153,47 +134,6 @@ ENDDO
 
 RETURN
 END SUBROUTINE asyn_master_init
-
-SUBROUTINE asyn_master_init_with_priority(nproc_, nwork_, proc_num_, &
-           npriority_, priority_, max_priority_, comm)
-IMPLICIT NONE
-INTEGER, INTENT(IN) :: nproc_, nwork_, comm
-INTEGER, INTENT(IN) :: proc_num_(0:nproc_-1)
-INTEGER, INTENT(IN) :: max_priority_
-INTEGER, INTENT(IN) :: npriority_(nwork_), priority_(nwork_,max_priority_)
-INTEGER :: iw, ip
-INTEGER :: iproc, ierr
-
-CALL initialize_master (nproc_, nwork_, proc_num_, comm)
-
-IF (nworkers==0) RETURN
-
-max_priority=max_priority_
-ALLOCATE(priority(nwork,max_priority))
-npriority(1:nwork)=npriority_(1:nwork)
-priority(1:nwork,1:max_priority)=priority_(1:nwork,1:max_priority)
-!
-!  count, for each work, how many works depends on it. These works are
-!  given higher priority.
-!
-DO iw=1, nwork
-   DO ip=1,npriority(iw)
-      count_dep(priority(iw,ip))=count_dep(priority(iw,ip))+1
-   ENDDO
-ENDDO
-!
-! during initialization the master listens to all the workers for the
-! READY message, without blocking
-!
-#ifdef __MPI
-DO iproc=1,nworkers
-   CALL mpi_irecv(buf(iproc),1,MPI_INTEGER,proc_num(iproc),tag,asyn_comm,&
-                  req(iproc),ierr)
-ENDDO
-#endif
-
-RETURN
-END SUBROUTINE asyn_master_init_with_priority
 
 SUBROUTINE asyn_worker_init(master_, comm)
 IMPLICIT NONE
@@ -361,18 +301,13 @@ LOGICAL FUNCTION choose_next(iwork, work_finished)
 !  This function chooses the next work to do.
 !  There are three possible outputs:
 !  a) All works have been done. In this case work_finished becomes .TRUE.
-!  b) No work is available because we have to wait that some other
-!     work finishes. In this case the function returns .FALSE.
-!  c) There is some work to do. In this case the function returns .TRUE.
+!  b) There is some work to do. In this case the function returns .TRUE.
 !     and iwork gives the work to do.
-!  Priority is given to works that have all priorities done and have
-!  the maximum number of works that depends on them.
 !
 IMPLICIT NONE
 INTEGER, INTENT(OUT) :: iwork
 LOGICAL, INTENT(OUT) :: work_finished
-INTEGER :: iw, ip, current_count
-LOGICAL :: no_priority
+INTEGER :: iw, ip
 !
 !  case a, all works have been done
 !
@@ -386,16 +321,8 @@ IF (work_finished) RETURN
 !
 !  First check that for a given work there is no pending dependence
 !
-current_count=-1
 DO iw=1,nwork
-   no_priority=.TRUE.
-   DO ip=1,npriority(iw)
-      IF (.NOT.done(priority(iw,ip))) no_priority=.FALSE.
-   END DO
-   IF (sent(iw) == -1.AND.count_dep(iw)>current_count.AND.no_priority) THEN
-      iwork=iw
-      current_count=count_dep(iw)
-   END IF
+   IF ( sent(iw) == -1 .AND. iwork==0 ) iwork=iw
 END DO
 choose_next = (iwork>0)
 
@@ -413,13 +340,10 @@ IF (nworkers > 0) THEN
    DEALLOCATE(buf)
    DEALLOCATE(done_proc)
    DEALLOCATE(proc_num)
-   IF (max_priority > 0) DEALLOCATE(priority)
 END IF
 DEALLOCATE(sent)
 DEALLOCATE(done)
 DEALLOCATE(doing)
-DEALLOCATE(npriority)
-DEALLOCATE(count_dep)
 
 RETURN
 END SUBROUTINE asyn_close

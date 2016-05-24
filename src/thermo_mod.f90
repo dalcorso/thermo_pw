@@ -260,20 +260,6 @@ MODULE ifc
   ! 
 END MODULE ifc
 
-MODULE thermo_priority
-  USE kinds,  ONLY : DP
-  !
-  ! ... The variables needed to describe the job priority
-  !
-  SAVE
-  INTEGER, ALLOCATABLE :: npriority(:)  ! the number of jobs that must be
-                                        ! calculated before this one
-  INTEGER, ALLOCATABLE :: priority(:,:) ! the priority of the calculation
-  !
-  INTEGER :: max_priority
-  !
-END MODULE thermo_priority
-
 MODULE control_thermo
   USE kinds,  ONLY : DP
   !

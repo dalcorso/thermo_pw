@@ -11,10 +11,9 @@ SUBROUTINE run_thermo_asyncronously(nwork, part, igeom, auxdyn)
   USE io_global,       ONLY : ionode, ionode_id, meta_ionode_id, stdout
   USE mp_images,       ONLY : nimage, root_image, my_image_id, & 
                               intra_image_comm
-  USE mp_asyn,         ONLY : asyn_master_init_with_priority, asyn_worker_init, &
+  USE mp_asyn,         ONLY : asyn_master_init, asyn_worker_init, &
                               asyn_close, asyn_master, asyn_worker, &
                               asyn_master_work, with_asyn_images
-  USE thermo_priority, ONLY : npriority, priority, max_priority
   USE thermo_mod,      ONLY : energy_geo
   USE control_thermo,  ONLY : lpwscf, lstress, lbands, lphonon, lberry
   USE elastic_constants, ONLY : sigma_geo
@@ -54,14 +53,9 @@ SUBROUTINE run_thermo_asyncronously(nwork, part, igeom, auxdyn)
            proc_num(image) = proc_num(image-1) + proc_per_image
         ENDDO
   !
-  !   Set the priority of the different works
-  !
-        CALL initialize_thermo_master(nwork, part)
-  !
   !    and initialize the asynchronous communication
   !
-        IF (ionode) CALL asyn_master_init_with_priority(nimage, nwork, &
-                         proc_num, npriority, priority, max_priority, world_comm)
+        IF (ionode) CALL asyn_master_init(nimage, nwork, proc_num, world_comm)
   !
   !    enter into a loop of listening, answering, and working
   !
@@ -183,7 +177,6 @@ SUBROUTINE run_thermo_asyncronously(nwork, part, igeom, auxdyn)
 !  only the master that does all the works one after the other.
 !
      IF (my_image_id == root_image) THEN
-        CALL initialize_thermo_master(nwork, part)
         DO iwork = 1, nwork
            CALL set_thermo_work_todo(iwork, part, iq, irr, igeom)
            WRITE(stdout,'(/,2x,76("+"))')
