@@ -5,7 +5,7 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-SUBROUTINE run_thermo_asyncronously(nwork, part, igeom, auxdyn)
+SUBROUTINE run_thermo_asynchronously(nwork, part, igeom, auxdyn)
   USE mp,              ONLY : mp_bcast
   USE mp_world,        ONLY : world_comm, nproc
   USE io_global,       ONLY : ionode, ionode_id, meta_ionode_id, stdout
@@ -210,4 +210,4 @@ SUBROUTINE run_thermo_asyncronously(nwork, part, igeom, auxdyn)
   END IF
 RETURN
 !
-END SUBROUTINE run_thermo_asyncronously
+END SUBROUTINE run_thermo_asynchronously

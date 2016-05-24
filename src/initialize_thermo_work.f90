@@ -50,7 +50,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
   IF (part == 1) THEN
      SELECT CASE (TRIM(what))
 !
-!   In these cases we do not do any asyncronous work in the first part
+!   In these cases we do not do any asynchronous work in the first part
 !
         CASE ( 'scf') 
            ALLOCATE(energy_geo(1))
@@ -94,7 +94,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            ltherm = ltherm_dos .OR. ltherm_freq
            CALL allocate_thermodynamics()
 !
-!   In these cases we make asyncronous work in the first part
+!   In these cases we make asynchronous work in the first part
 !
            IF (meta_ionode) ios = f_mkdir_safe( 'dynamical_matrices' )
            IF (meta_ionode) ios = f_mkdir_safe( 'phdisp_files' )

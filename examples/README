@@ -17,7 +17,7 @@ what = scf_ph    : a phonon calculation at a single q after a scf run.
 ngeo = 1           This calculation computes only the frequencies and
                    displacements at a given q.
                    When calculated with several images, only the root image
-                   does the scf calculation. All the images run asyncronously
+                   does the scf calculation. All the images run asynchronously
                    and cooperate to calculate the phonon. The maximum number
                    of working images is the number representations, the others
                    remain idle. 
@@ -30,7 +30,7 @@ ngeo = 1           This calculation produces a plot of the phonon dispersions,
                    the vibrational energy, free energy, entropy, and constant 
                    volume specific heat. 
                    If calculated with several images, only the root image
-                   does the scf calculation. All the images run asyncronously
+                   does the scf calculation. All the images run asynchronously
                    and cooperate to calculate the phonons. The maximum number
                    of working images is the total number representations
                    (adding on all q).
@@ -45,14 +45,14 @@ ngeo = # of geom.  Presently only celldm(1) is changed. All the ratios and
                    The equilibrium T=0 lattice constant and bulk modulus 
                    are written on output.
                    If calculated with several images all the images run 
-                   asyncronously and cooperate to calculate each geometry.
+                   asynchronously and cooperate to calculate each geometry.
 
 example06:
 what = mur_lc_b  : This example computes all as above and produces a
 ngeo = # of geom.  plot of the band structure at the equilibrium lattice 
                    constant.
                    If calculated with several images each image run 
-                   asyncronously and calculates a different geometry.
+                   asynchronously and calculates a different geometry.
                    The bands are calculated by only one image.
 
 example07:
@@ -60,10 +60,10 @@ what = mur_lc_ph : This example computes all as in example05 and produces also
 ngeo = # of geom.  the frequencies and displacements at a single q at the 
                    minimum of the murmaghan.
                    If calculated with several images each image runs 
-                   asyncronously and calculate a different geometry.
+                   asynchronously and calculate a different geometry.
                    Then the root image computes the lattice constant at the
                    equilibrium geometry and finally all the images run again
-                   asyncronously each one computing a different representation.
+                   asynchronously each one computing a different representation.
 
 example08:
 what = mur_lc_disp : This examples computes all as in example05 and
@@ -72,10 +72,10 @@ ngeo = # of geom.    a phonon dispersion at the minimum of the murnaghan.
                      constant volume specific heat can be ploted at the
                      minimum of the murnaghan.
                      If calculated with several images each image runs 
-                     asyncronously and calculates a different geometry.
+                     asynchronously and calculates a different geometry.
                      Then the root image computes the lattice constant at the
                      equilibrium geometry and finally all the images run again
-                     asyncronously each one computing a different representation.
+                     asynchronously each one computing a different representation.
 
 example09:
 what = mur_lc_t  : This example computes a phonon dispersion at each lattice
@@ -93,10 +93,10 @@ ngeo = # of geom.  constant and allows the calculation of the zero-point
                    capacity as a function of temperature, isoentropic bulk
                    modulus as a function of temperature.
                    If calculated with several images each image runs 
-                   asyncronously and calculates the ground state of 
+                   asynchronously and calculates the ground state of 
                    a different geometry. Then all images are resyncronized 
                    before computing the phonon dispersions. The latter 
-                   are calculated asyncronously, but the different geometries
+                   are calculated asynchronously, but the different geometries
                    are calculate sequentially and all the images are 
                    resyncronized before changing geometry.
 
@@ -106,7 +106,7 @@ ngeo=1           of the kinetic energy cut-off of the wavefunctions and of the
                  charge density. The two can be specified independently or
                  a calculation at fixed dual or for several dual can be
                  specified. When images are used, each kinetic energy
-                 is calculated asyncronously from the others in different
+                 is calculated asynchronously from the others in different
                  images.
 
 example11:

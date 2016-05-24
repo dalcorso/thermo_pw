@@ -14,11 +14,11 @@ MODULE mp_asyn
 !  between master and workers, and an array proc_num(0:nworkers) that 
 !  for the master (0) and for all the workers (1:nworkers) gives the 
 !  number of the processor within the communicator. 
-!  The typical use of this module is inter images asyncronous
+!  The typical use of this module is inter images asynchronous
 !  communication. The images can divide the total work into nwork
-!  pieces and carry it out asyncronously. The images should not 
+!  pieces and carry it out asynchronously. The images should not 
 !  communicate with each other: only intra-image communications are allowed
-!  because in general images run asyncronously. They can however 
+!  because in general images run asynchronously. They can however 
 !  syncronize the work using this module, that tells to the representative 
 !  of each image which is the task that the image has to carry out. 
 !
@@ -44,7 +44,7 @@ INTEGER, PARAMETER :: NO_WORK=-1! end of work message
 INTEGER :: nwork                ! number of jobs to do
 INTEGER :: nworkers             ! number of workers
 INTEGER :: master               ! the master processor
-INTEGER :: asyn_comm            ! the communicator for the asyncronous work
+INTEGER :: asyn_comm            ! the communicator for the asynchronous work
 INTEGER :: tag=1                ! tag used in each message
 
 INTEGER, ALLOCATABLE :: proc_num(:) ! gives the processor number of 
@@ -102,7 +102,7 @@ END SUBROUTINE initialize_master
 
 SUBROUTINE asyn_master_init(nproc_, nwork_, proc_num_, comm)
 !
-!  This routine initializes the asyncronous work. It is called by the master
+!  This routine initializes the asynchronous work. It is called by the master
 !  when it knows:
 !  nwork_ : number of works to do_. 
 !  nproc_ : is the number of processors master+workers. 

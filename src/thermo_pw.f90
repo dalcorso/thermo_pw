@@ -171,10 +171,10 @@ PROGRAM thermo_pw
   !
   CALL initialize_thermo_work(nwork, part, iaux)
   !
-  !  In this part the images work asyncronously. No communication is
+  !  In this part the images work asynchronously. No communication is
   !  allowed except though the master-workers mechanism
   !
-  CALL run_thermo_asyncronously(nwork, part, iaux, auxdyn)
+  CALL run_thermo_asynchronously(nwork, part, iaux, auxdyn)
   !
   !  In this part all images are syncronized and can communicate 
   !  their results thought the world_comm communicator
@@ -342,7 +342,7 @@ PROGRAM thermo_pw
      !  Asyncronous work starts again. No communication is
      !  allowed except though the master workers mechanism
      !
-     CALL run_thermo_asyncronously(nwork, part, iaux, auxdyn)
+     CALL run_thermo_asynchronously(nwork, part, iaux, auxdyn)
      !
      ! here we return syncronized and calculate the elastic constants 
      ! from energy or stress 
@@ -443,7 +443,7 @@ PROGRAM thermo_pw
   IF (what(1:8) /= 'mur_lc_t') ngeo=1
 !
 !   This part makes now one or several phonon calculations, using the
-!   image feature of this code and running asyncronously the images
+!   image feature of this code and running asynchronously the images
 !   different geometries are made in sequence. This should be improved,
 !   there should be no need to resyncronize after each geometry
 !
@@ -502,7 +502,7 @@ PROGRAM thermo_pw
            !  Asyncronous work starts again. No communication is
            !  allowed except though the master workers mechanism
            !
-           CALL run_thermo_asyncronously(nwork, part, igeom, auxdyn)
+           CALL run_thermo_asynchronously(nwork, part, igeom, auxdyn)
            !  
            !   return to syncronous work. Collect the work of all images and
            !   writes the dynamical matrix

@@ -9,7 +9,7 @@
 SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
   !-----------------------------------------------------------------------
   !
-  !  This routine receives from the asyncronous driver the work to do in
+  !  This routine receives from the asynchronous driver the work to do in
   !  the integer iwork and sets the input variables of pwscf or of the
   !  phonon according to iwork before performing the actual calculation.
   !
