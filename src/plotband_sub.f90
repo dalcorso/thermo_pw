@@ -38,7 +38,7 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
   USE klist,         ONLY : degauss, nelec
   USE noncollin_module, ONLY : noncolin
   USE spin_orb,      ONLY : lspinorb
-  USE ifc,           ONLY : freqmin_input, freqmax_input
+  USE control_dosq,  ONLY : freqmin_input, freqmax_input
   USE mp,            ONLY : mp_bcast
   USE io_global,     ONLY : stdout, ionode, ionode_id
   USE mp_images,     ONLY : intra_image_comm, root_image, my_image_id

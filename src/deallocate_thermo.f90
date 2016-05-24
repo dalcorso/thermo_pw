@@ -26,6 +26,7 @@ SUBROUTINE deallocate_thermo()
   USE control_paths,    ONLY : xqaux, wqaux, letter, label_list, letter_path, &
                                label_disp_q, disp_q, disp_wq, nrap_plot_in,   &
                                rap_plot_in, nrap_plot, rap_plot, high_sym_path
+  USE control_dosq,     ONLY : dos_q, dos_wq
   USE control_2d_bands, ONLY : averag, vacuum, aux_ind_sur
   USE control_pwrun,    ONLY : ityp_save, amass_save
   USE temperature,      ONLY : temp
@@ -96,6 +97,8 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (label_disp_q) )    DEALLOCATE(label_disp_q)
   IF ( ALLOCATED (disp_q) )          DEALLOCATE(disp_q)
   IF ( ALLOCATED (disp_wq) )         DEALLOCATE(disp_wq)
+  IF ( ALLOCATED (dos_q) )           DEALLOCATE(dos_q)
+  IF ( ALLOCATED (dos_wq) )          DEALLOCATE(dos_wq)
 
   IF ( ALLOCATED (coeff) )           DEALLOCATE( coeff )
   IF ( ALLOCATED (hessian_v) )       DEALLOCATE( hessian_v )

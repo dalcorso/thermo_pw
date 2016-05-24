@@ -120,7 +120,7 @@ USE control_pressure, ONLY : pressure, pressure_kb
 USE control_grun,     ONLY : lv0_t, lb0_t
 USE control_mur,    ONLY : vmin, b0
 USE control_thermo, ONLY : ltherm_dos, ltherm_freq
-USE ifc,            ONLY : nq1_d, nq2_d, nq3_d
+USE control_dosq,   ONLY : nq1_d, nq2_d, nq3_d
 USE data_files,     ONLY : flanhar
 USE io_global,      ONLY : ionode
 USE mp_images,      ONLY : my_image_id, root_image, intra_image_comm

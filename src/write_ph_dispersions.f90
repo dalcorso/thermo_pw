@@ -69,7 +69,7 @@ SUBROUTINE write_ph_dispersions()
 !
 !  we always need the eigenvectors to make the symmetry analysis
 !
-  CALL matdyn_interp(.TRUE.)
+  CALL matdyn_interp(disp_nqs, disp_q, .TRUE.)
 
   iout=0
   IF (flvec/=' ') THEN

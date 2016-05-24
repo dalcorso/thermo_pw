@@ -199,7 +199,7 @@ USE ph_freq_module, ONLY : thermal_expansion_ph, ph_freq_type,  &
 USE elastic_constants, ONLY : read_elastic, el_compliances
 USE quadratic_surfaces, ONLY : evaluate_fit_quadratic,      &
                                evaluate_fit_grad_quadratic
-USE ifc,            ONLY : nq1_d, nq2_d, nq3_d
+USE control_dosq,   ONLY : nq1_d, nq2_d, nq3_d
 USE data_files,     ONLY : flanhar, fl_el_cons
 USE io_global,      ONLY : ionode, stdout
 USE mp_images,      ONLY : my_image_id, root_image

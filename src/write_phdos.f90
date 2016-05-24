@@ -23,12 +23,13 @@ SUBROUTINE write_phdos(igeom)
   USE mp_images,  ONLY : my_image_id, root_image, intra_image_comm
   USE io_global,  ONLY : ionode, stdout
   USE ions_base,  ONLY : nat
-  USE ifc,        ONLY : phdos_sigma, deltafreq, freqmin, freqmax, ndos_input, &
+  USE control_dosq, ONLY : phdos_sigma, deltafreq, freqmin, freqmax, &
+                         ndos_input, &
                          freqmin_input, freqmax_input, nq1_d, nq2_d, nq3_d
   USE phonon_save,    ONLY : freq_save
   USE thermo_mod,     ONLY : tot_ngeo
   USE thermodynamics, ONLY : phdos_save
-  USE control_paths,  ONLY : disp_wq, disp_nqs
+  USE control_dosq,   ONLY : dos_wq, dos_nqs
   USE data_files,     ONLY : fldos
   USE phdos_module,   ONLY : set_phdos, read_phdos_data, find_minimum_maximum
   !
@@ -63,7 +64,7 @@ SUBROUTINE write_phdos(igeom)
   WRITE(stdout,'(5x,"Writing phdos on file ",a)') 
   WRITE(stdout,'(5x,a)') TRIM(filedos)
   WRITE(stdout,'(2x,76("+"),/)')
-  nq=disp_nqs
+  nq=dos_nqs
 !
 ! compute the dos
 !
@@ -104,7 +105,7 @@ SUBROUTINE write_phdos(igeom)
   DO n= nstart, nlast
      e = emin + (n - 1) * deltafreq
      !
-     CALL dos_g(freq_save, 1, 3*nat, nq, disp_wq, phdos_sigma, 0, e, dosofe)
+     CALL dos_g(freq_save, 1, 3*nat, nq, dos_wq, phdos_sigma, 0, e, dosofe)
      !
      phdos_save(igeom)%nu(n) = e
      phdos_save(igeom)%phdos(n) = dosofe(1)

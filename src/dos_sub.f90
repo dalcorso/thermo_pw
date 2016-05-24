@@ -23,7 +23,7 @@ SUBROUTINE dos_sub()
   USE wvfct,      ONLY : nbnd, et
   USE lsda_mod,   ONLY : nspin
   USE ener,       ONLY : ef
-  USE control_dos, ONLY : legauss, sigmae, deltae, ndose, save_ndos
+  USE control_eldos, ONLY : legauss, sigmae, deltae, ndose, save_ndos
   USE noncollin_module, ONLY: noncolin
   USE control_bands, ONLY : emax_input
   USE data_files, ONLY : fleldos

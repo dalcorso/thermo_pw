@@ -14,7 +14,7 @@ USE gnuplot,   ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
                       gnuplot_write_file_mul_data, &
                       gnuplot_write_file_mul_data_minus
 USE control_gnuplot, ONLY : gnuplot_command, lgnuplot, flgnuplot
-USE control_dos,     ONLY : save_ndos
+USE control_eldos,   ONLY : save_ndos
 USE control_bands,   ONLY : emin_input
 USE io_files,   ONLY : prefix
 USE data_files, ONLY : fleldos

@@ -7,7 +7,7 @@
 !
 !
 !---------------------------------------------------------------------
-SUBROUTINE matdyn_interp(with_eigen)
+SUBROUTINE matdyn_interp(disp_nqs, disp_q, with_eigen)
   !-----------------------------------------------------------------------
   !  this program calculates the phonon frequencies for a list of generic
   !  q vectors starting from the interatomic force constants generated
@@ -37,6 +37,7 @@ SUBROUTINE matdyn_interp(with_eigen)
   !               molecule or if all the atoms are aligned, etc.).
   !               In these cases the supplementary asr are cancelled
   !               during the orthonormalization procedure (see below).
+  !  The input variables are:
   !  disp_nqs     The number of q vectors in which the interpolation must
   !               be done
   !  disp_q(3,disp_nqs) ! the cartesian coordinates in units of 2 pi / a 
@@ -75,12 +76,13 @@ SUBROUTINE matdyn_interp(with_eigen)
   USE control_ph,     ONLY : xmldyn
   USE disp,           ONLY : nq1, nq2, nq3
   USE phonon_save,    ONLY : freq_save, z_save
-  USE control_paths,  ONLY : disp_q, disp_nqs
   USE data_files,     ONLY : flfrc
   !
   IMPLICIT NONE
   !
   LOGICAL, INTENT(IN) :: with_eigen
+  INTEGER, INTENT(IN) :: disp_nqs
+  REAL(DP), INTENT(IN) :: disp_q(3,disp_nqs)
 
   INTEGER, PARAMETER:: nrwsx=200
   REAL(DP), PARAMETER :: eps=1.0d-6

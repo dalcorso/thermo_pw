@@ -26,8 +26,9 @@ SUBROUTINE bcast_thermo_input()
                               flpsnkconv, flpsgrun, flpsenergy, flpsepsilon, &
                               flpseldos, flpseltherm
   USE temperature,     ONLY : tmin, tmax, deltat, ntemp
-  USE ifc,             ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq, &
-                              zasr, freqmin_input, freqmax_input, phdos_sigma
+  USE ifc,             ONLY : zasr
+  USE control_dosq,    ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq, &
+                              freqmin_input, freqmax_input, phdos_sigma
   USE input_parameters, ONLY : max_seconds
   USE control_paths,   ONLY : q_in_band_form, q_in_cryst_coord, q2d, &
                               point_label_type, npx
@@ -47,7 +48,7 @@ SUBROUTINE bcast_thermo_input()
   USE control_2d_bands,     ONLY : lprojpbs, nkz, sym_divide, identify_sur, &
                                    gap_thr, sur_layers, sur_thr, force_bands, &
                                    only_bands_plot, dump_states, subtract_vacuum
-  USE control_dos,          ONLY : deltae, ndose, nk1_d, nk2_d, nk3_d, &
+  USE control_eldos,        ONLY : deltae, ndose, nk1_d, nk2_d, nk3_d, &
                                    k1_d, k2_d, k3_d, sigmae, legauss
   USE control_xrdp,    ONLY : lambda, flxrdp, flpsxrdp, lformf, smin, smax, &
                               nspoint, flformf, flpsformf, lcm, lxrdp, &

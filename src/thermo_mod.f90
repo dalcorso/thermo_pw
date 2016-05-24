@@ -247,8 +247,30 @@ MODULE ifc
   ! wscache: the weight of each q point 
   !
   CHARACTER(LEN=3), ALLOCATABLE :: atm(:)
+
+  CHARACTER(LEN=10) :: zasr      ! the type of asr
+  ! 
+END MODULE ifc
+
+MODULE control_dosq
   !
-  INTEGER :: nq1_d, nq2_d, nq3_d ! grid for phonon dos
+  !   This module contains the quantities to make an integration
+  !   over the Brilluin zone. The coordinates of the q points, their weights,
+  !   if tetraedra are used also ntetra and tetra.
+  !
+  USE kinds, ONLY: DP
+  SAVE
+
+  INTEGER :: nq1_d, nq2_d, nq3_d    ! grid for phonon dos
+  INTEGER :: dos_nqs                ! total number of points for the phonon dos
+
+  REAL(DP), ALLOCATABLE :: dos_q(:,:)  ! the cartesian coordinate of the q
+                                       ! points for dos
+  REAL(DP), ALLOCATABLE :: dos_wq(:)   ! the weights for the phonon dos
+
+  INTEGER :: ntetra
+  REAL(DP), ALLOCATABLE ::  tetra(:,:,:)
+  !
   INTEGER :: ndos_input          ! number of points in the dos plot
   REAL(DP) :: freqmin, freqmax   ! dos minimum and maximun frequency 
                                  ! at this geometry
@@ -256,9 +278,8 @@ MODULE ifc
                                  ! be given as input (in cm^{-1})
   REAL(DP) :: deltafreq          ! delta frequency in the dos plot. (in cm^{-1})
   REAL(DP) :: phdos_sigma        ! smearing for phdos calculation.
-  CHARACTER(LEN=10) :: zasr      ! the type of asr
-  ! 
-END MODULE ifc
+
+END MODULE control_dosq
 
 MODULE control_thermo
   USE kinds,  ONLY : DP
@@ -431,9 +452,9 @@ MODULE control_paths
   LOGICAL :: q_in_band_form
   LOGICAL :: q_in_cryst_coord
   LOGICAL :: q2d
-                                                    ! phonon
-  !
+
 END MODULE control_paths
+
 
 MODULE control_bands
   USE kinds,  ONLY : DP
@@ -485,7 +506,7 @@ MODULE control_2d_bands
                          ! on vacuum is subtracted
 END MODULE control_2d_bands
 
-MODULE control_dos
+MODULE control_eldos
 
   USE kinds, ONLY: DP
   SAVE
@@ -500,7 +521,7 @@ MODULE control_dos
   INTEGER :: save_ndos      ! number of points in the file 
 
 
-END MODULE control_dos
+END MODULE control_eldos
 
 MODULE control_grun
 

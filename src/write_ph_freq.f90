@@ -17,7 +17,8 @@ SUBROUTINE write_ph_freq(igeom)
   !  is .TRUE. the dynamical matrices are always diagonalized because the
   !  eigenvector are not saved on disk.
   !  The variables allocated by this routine:
-  !  freq_save, z_save, disp_q, disp_wq must be deallocated
+  !  freq_save, z_save, dos_q, dos_wq they must be deallocated outside the
+  !  routine
   !  separately after they have been used. A call to clean_ifc_variables
   !  cleanup these variables, among other things.
   !
@@ -29,8 +30,8 @@ SUBROUTINE write_ph_freq(igeom)
   USE phonon_save,   ONLY : freq_save, z_save
   USE thermo_mod,    ONLY : tot_ngeo
   USE constants,     ONLY : amu_ry
-  USE control_paths, ONLY : disp_q, disp_wq, disp_nqs
-  USE ifc,           ONLY : nq1_d, nq2_d, nq3_d, atm, zeu, m_loc
+  USE control_dosq,  ONLY : nq1_d, nq2_d, nq3_d, dos_q, dos_wq, dos_nqs
+  USE ifc,           ONLY : atm, zeu, m_loc
   USE data_files,    ONLY : fldosfrq
   USE ph_freq_thermodynamics, ONLY : ph_freq_save
   USE control_thermo, ONLY : with_eigen
@@ -58,12 +59,12 @@ SUBROUTINE write_ph_freq(igeom)
   !
   ! Allocate space for the q points and the frequencies
   !
-  IF (ALLOCATED(disp_q)) DEALLOCATE(disp_q)
-  IF (ALLOCATED(disp_wq)) DEALLOCATE(disp_wq)
+  IF (ALLOCATED(dos_q)) DEALLOCATE(dos_q)
+  IF (ALLOCATED(dos_wq)) DEALLOCATE(dos_wq)
   ntetra = 6 * nq1_d * nq2_d * nq3_d
   nqx = nq1_d * nq2_d * nq3_d
-  ALLOCATE ( disp_q(3,nqx) )
-  ALLOCATE ( disp_wq(nqx) )
+  ALLOCATE ( dos_q(3,nqx) )
+  ALLOCATE ( dos_wq(nqx) )
   ALLOCATE ( freq_save(3*nat, nqx) )
   IF (with_eigen) ALLOCATE ( z_save(3*nat, 3*nat, nqx) )
 
@@ -80,17 +81,17 @@ SUBROUTINE write_ph_freq(igeom)
      CALL read_ph_freq_data(ph_freq_save(igeom),filename)
      nq=ph_freq_save(igeom)%nq
      freq_save(:,1:nq) = ph_freq_save(igeom)%nu(:,1:nq)
-     disp_wq(1:nq) = ph_freq_save(igeom)%wg(1:nq)
-     disp_nqs=nq
+     dos_wq(1:nq) = ph_freq_save(igeom)%wg(1:nq)
+     dos_nqs=nq
      RETURN
   ELSE
 !
 !   otherwise recompute the q points, the weights and the frequencies
 !
      CALL gen_qpoints (ibrav, at, bg, nat, tau, ityp, nq1_d, nq2_d, nq3_d, &
-          ntetra, nqx, nq, disp_q, disp_wq)
-     disp_nqs=nq
-     CALL matdyn_interp(with_eigen)
+          ntetra, nqx, nq, dos_q, dos_wq)
+     dos_nqs=nq
+     CALL matdyn_interp(dos_nqs, dos_q, with_eigen)
   END IF
 !
 !   initialize space to save the frequencies
@@ -101,7 +102,7 @@ SUBROUTINE write_ph_freq(igeom)
 !   save the frequencies
 !
   DO iq=1, nq
-     ph_freq_save(igeom)%wg(iq)=disp_wq(iq)
+     ph_freq_save(igeom)%wg(iq)=dos_wq(iq)
      ph_freq_save(igeom)%nu(:,iq)=freq_save(:,iq)
   ENDDO
 

@@ -30,8 +30,9 @@ SUBROUTINE thermo_readin()
                                    fleltherm, fldosfrq
   USE temperature,          ONLY : tmin, tmax, deltat, ntemp
   USE control_pressure,     ONLY : pressure
-  USE ifc,                  ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq, &
-                                   zasr, freqmin_input, freqmax_input, &
+  USE ifc,                  ONLY : zasr
+  USE control_dosq,         ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq, &
+                                   freqmin_input, freqmax_input, &
                                    phdos_sigma
   USE input_parameters,     ONLY : outdir, ibrav, forc_conv_thr, max_seconds, &
                                    calculation
@@ -54,7 +55,7 @@ SUBROUTINE thermo_readin()
                                    subtract_vacuum
   USE control_asy,          ONLY : flasy, lasymptote, asymptote_command
   USE control_bands,        ONLY : emin_input, emax_input, nbnd_bands, lsym 
-  USE control_dos,          ONLY : deltae, ndose, nk1_d, nk2_d, nk3_d, &
+  USE control_eldos,        ONLY : deltae, ndose, nk1_d, nk2_d, nk3_d, &
                                    k1_d, k2_d, k3_d, sigmae, legauss
   USE control_grun,         ONLY : grunmin_input, grunmax_input, &
                                    temp_ph, volume_ph, celldm_ph, lv0_t, &
