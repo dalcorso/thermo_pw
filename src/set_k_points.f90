@@ -11,10 +11,10 @@ SUBROUTINE set_k_points()
 !  the pw.x code.
 !
   USE control_paths,    ONLY : disp_nqs, disp_q, disp_wq
-  USE input_parameters, ONLY : k_points
   USE start_k,       ONLY : init_start_k
   IMPLICIT NONE
   INTEGER :: nk1, nk2, nk3, k1, k2, k3
+  CHARACTER(len=80) :: k_points 
 
   nk1=0
   nk2=0

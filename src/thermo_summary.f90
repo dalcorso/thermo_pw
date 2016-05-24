@@ -17,7 +17,7 @@ SUBROUTINE thermo_summary()
   USE thermo_mod,           ONLY : what, ngeo, density
   USE thermo_sym,           ONLY : laue, code_group_save, fft_fact, &
                                    ibrav_group_consistent
-  USE input_parameters,     ONLY : ibrav
+  USE cell_base,            ONLY : ibrav
   USE control_paths,        ONLY : xqaux, wqaux, npk_label, letter, &
                                    label_list, nqaux, point_label_type, &
                                    letter_path

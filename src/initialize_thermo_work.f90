@@ -32,7 +32,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
   USE gvecw,          ONLY : ecutwfc
   USE gvect,          ONLY : ecutrho
   USE control_quadratic_energy, ONLY : nvar, degree
-  USE input_parameters, ONLY : nk1, nk2, nk3
+  USE start_k,        ONLY : nk1, nk2, nk3
   USE klist,          ONLY : degauss
   USE cell_base,  ONLY : alat
   USE wrappers,       ONLY : f_mkdir_safe
