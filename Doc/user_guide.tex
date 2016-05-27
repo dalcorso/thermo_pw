@@ -1121,6 +1121,12 @@ nvol       : number of volumes in Murnaghan plot
              Default : integer 51
 lquartic   : if .TRUE. fit the energy with a quartic polynomial.
              Default : logical .TRUE.
+lsolve     : choose the algorithm used to fit the quartic polynomial parameters.
+             Allowed values:
+             1 explicitly minimize chi^2
+             2 Use the QR algorithm to minimize chi^2 (lapack routine dgels)
+             3 Use the SVD algorithm to minimize chi^2 (lapack routine dgelss)
+             Default: integer 2
 flevdat    : file where the Murnaghan equation is written. The results of the
              Murnaghan fit are then written in flevdat.ev.out.
              Default: character(len=*) 'output_ev.dat'
