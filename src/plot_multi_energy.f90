@@ -98,7 +98,7 @@ SUBROUTINE plot_multi_energy()
            label='Energy (Ry)'
         END IF
         CALL gnuplot_ylabel(TRIM(label),.FALSE.)
-        filename1=TRIM(flevdat)//'_quadratic'
+        filename1='energy_files/'//TRIM(flevdat)//'_quadratic'
         IF (pressure /= 0.0_DP) filename1=TRIM(filename1)//'.'// &
                                    TRIM(float_to_char(pressure_kb,1))
         CALL gnuplot_write_file_mul_data(filename1,1,2,'color_red',.TRUE., &
