@@ -80,6 +80,7 @@ thermo_mod.o \
 thermo_readin.o \
 thermo_pw.o \
 thermo_summary.o \
+check_el_cons.o \
 write_anhar.o \
 write_anhar_anis.o \
 write_e_nk.o \

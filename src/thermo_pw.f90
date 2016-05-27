@@ -588,7 +588,7 @@ PROGRAM thermo_pw
            CALL plotband_sub(3,1,flfrq_thermo)
            CALL plotband_sub(4,1,flfrq_thermo)
 !
-!    here we compute the gruneisen parameters on the uniform mesh
+!    here we compute the gruneisen parameters on the dos mesh
 !
            CALL compute_gruneisen()
 !
@@ -597,6 +597,10 @@ PROGRAM thermo_pw
            CALL write_grun_anharmonic()
            CALL plot_anhar() 
         ELSE
+!
+!   Start trying to read the elastic constants from file
+!
+           CALL check_el_cons()
 !
 !    Anisotropic solid. Compute only the crystal parameters as a function
 !    of temperature and the thermal expansion tensor

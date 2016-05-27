@@ -13,9 +13,14 @@ SUBROUTINE write_anhar_anis()
 USE kinds,          ONLY : DP
 USE constants,      ONLY : ry_kbar
 USE temperature,    ONLY : ntemp, temp
-USE anharmonic,     ONLY : alpha_anis_t, vmin_t, b0_t, celldm_t, beta_t
+USE thermodynamics, ONLY : ph_cv
+USE anharmonic,     ONLY : alpha_anis_t, vmin_t, b0_t, celldm_t, beta_t, &
+                           gamma_t, cv_t, cp_t, b0_s
+USE control_grun,   ONLY : lb0_t
 USE control_pwrun,  ONLY : ibrav_save
 USE control_pressure, ONLY : pressure, pressure_kb
+USE control_macro_elasticity, ONLY : macro_el
+USE control_elastic_constants, ONLY : el_cons_available
 USE data_files,     ONLY : flanhar
 USE io_global,      ONLY : ionode
 USE mp_images,      ONLY : my_image_id, root_image
@@ -41,6 +46,11 @@ ENDDO
 !
 CALL compute_beta(vmin_t, beta_t, temp, ntemp)
 
+IF (.NOT. lb0_t.AND.el_cons_available) THEN
+   b0_t=macro_el(5)
+   CALL compute_cp(beta_t, vmin_t, b0_t, ph_cv, cv_t, cp_t, b0_s, gamma_t)
+ENDIF
+
 IF (ionode) THEN
 !
 !   here we plot the anharmonic quantities calculated from the phonon dos
@@ -61,20 +71,22 @@ IF (ionode) THEN
 !
 !   here auxiliary quantities calculated from the phonon dos
 !
-!   filename=TRIM(flanhar)//'.aux'
-!   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
-!   WRITE(iu_therm,'("# gamma is the average gruneisen parameter ")')
-!   WRITE(iu_therm,'("#   T (K)       gamma(T)       C_v ( Ry / cell ) &
-!                    &   (C_p - C_v)(T)      (B_S - B_T) (T) (kbar) " )' )
-!
-!   DO itemp = 2, ntemp-1
-!      WRITE(iu_therm, '(5e16.8)') temp(itemp),                  &
-!                                  gamma_t(itemp), cv_t(itemp),  &
-!                                  cp_t(itemp) - cv_t(itemp),    &
-!                                  b0_s(itemp) - b0_t(itemp)
-!   END DO
-!   CLOSE(iu_therm)
-!END IF
+   IF (.NOT. lb0_t .AND. el_cons_available) THEN
+      filename='anhar_files/'//TRIM(flanhar)//'.aux'
+      OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', &
+                                                             FORM='FORMATTED')
+      WRITE(iu_therm,'("# gamma is the average Gruneisen parameter ")')
+      WRITE(iu_therm,'("#   T (K)       gamma(T)       C_v ( Ry / cell ) &
+                    &   (C_p - C_v)(T)      (B_S - B_T) (T) (kbar) " )' )
+
+      DO itemp = 2, ntemp-1
+         WRITE(iu_therm, '(5e16.8)') temp(itemp),                  &
+                                     gamma_t(itemp), cv_t(itemp),  &
+                                     cp_t(itemp) - cv_t(itemp),    &
+                                     b0_s(itemp) - b0_t(itemp)
+      END DO
+      CLOSE(iu_therm)
+   END IF
 !
 !  Here we write on output the celldm parameters and their derivative
 !  with respect to temperature. 
@@ -83,7 +95,8 @@ IF (ionode) THEN
    IF (pressure /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 
-   CALL write_alpha_anis(ibrav_save, celldm_t, alpha_anis_t, temp, ntemp, filename )
+   CALL write_alpha_anis(ibrav_save, celldm_t, alpha_anis_t, temp, ntemp, &
+                                                                   filename )
 
 END IF
 
@@ -100,10 +113,14 @@ USE kinds,          ONLY : DP
 USE constants,      ONLY : ry_kbar
 USE temperature,    ONLY : ntemp, temp
 USE control_pressure, ONLY : pressure, pressure_kb
+USE ph_freq_thermodynamics, ONLY : phf_cv
 USE ph_freq_anharmonic, ONLY : alphaf_anis_t, vminf_t, b0f_t, celldmf_t, &
-                               betaf_t
+                               betaf_t, gammaf_t, cvf_t, cpf_t, b0f_s
+USE control_grun,   ONLY : lb0_t
 USE control_pwrun,  ONLY : ibrav_save
 USE control_pressure, ONLY : pressure, pressure_kb
+USE control_macro_elasticity, ONLY : macro_el
+USE control_elastic_constants, ONLY : el_cons_available
 USE data_files,     ONLY : flanhar
 USE io_global,      ONLY : ionode
 USE mp_images,      ONLY : my_image_id, root_image
@@ -129,6 +146,12 @@ ENDDO
 !
 CALL compute_beta(vminf_t, betaf_t, temp, ntemp)
 
+IF (.NOT. lb0_t.AND.el_cons_available) THEN
+   b0f_t=macro_el(5)
+   CALL compute_cp(betaf_t, vminf_t, b0f_t, phf_cv, cvf_t, cpf_t, &
+                                            b0f_s, gammaf_t)
+ENDIF
+
 IF (ionode) THEN
 !
 !   here we plot the anharmonic quantities calculated from the phonon dos
@@ -151,20 +174,21 @@ IF (ionode) THEN
 !
 !   here auxiliary quantities calculated from the phonon dos
 !
-!   filename=TRIM(flanhar)//'.aux'
-!   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
-!   WRITE(iu_therm,'("# gamma is the average gruneisen parameter ")')
-!   WRITE(iu_therm,'("#   T (K)       gamma(T)       C_v ( Ry / cell ) &
-!                    &   (C_p - C_v)(T)      (B_S - B_T) (T) (kbar) " )' )
-!
-!   DO itemp = 2, ntemp-1
-!      WRITE(iu_therm, '(5e16.8)') temp(itemp),                  &
-!                                  gamma_t(itemp), cv_t(itemp),  &
-!                                  cp_t(itemp) - cv_t(itemp),    &
-!                                  b0_s(itemp) - b0_t(itemp)
-!   END DO
-!   CLOSE(iu_therm)
-!END IF
+   IF (.NOT.lb0_t.AND.el_cons_available) THEN
+      filename='anhar_files/'//TRIM(flanhar)//'.aux_ph'
+      OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
+      WRITE(iu_therm,'("# gamma is the average Gruneisen parameter ")')
+      WRITE(iu_therm,'("#   T (K)       gamma(T)       C_v ( Ry / cell ) &
+                    &   (C_p - C_v)(T)      (B_S - B_T) (T) (kbar) " )' )
+
+      DO itemp = 2, ntemp-1
+         WRITE(iu_therm, '(5e16.8)') temp(itemp),                  &
+                                     gammaf_t(itemp), cvf_t(itemp),  &
+                                     cpf_t(itemp) - cvf_t(itemp),    &
+                                     b0f_s(itemp) - b0f_t(itemp)
+      END DO
+      CLOSE(iu_therm)
+   END IF
 !
 !  Here we write on output the celldm parameters and their derivative
 !  with respect to temperature. 
@@ -196,19 +220,21 @@ USE ph_freq_anharmonic,     ONLY : celldmf_t, vminf_t, cvf_t, b0f_t, cpf_t, &
 USE grun_anharmonic, ONLY : alpha_an_g, grun_gamma_t, poly_grun, done_grun
 USE ph_freq_module, ONLY : thermal_expansion_ph, ph_freq_type,  &
                            destroy_ph_freq, init_ph_freq
-USE elastic_constants, ONLY : read_elastic, el_compliances
+USE elastic_constants, ONLY :  el_compliances
+USE control_elastic_constants, ONLY : el_cons_available
 USE quadratic_surfaces, ONLY : evaluate_fit_quadratic,      &
                                evaluate_fit_grad_quadratic
 USE control_dosq,   ONLY : nq1_d, nq2_d, nq3_d
 USE data_files,     ONLY : flanhar, fl_el_cons
 USE io_global,      ONLY : ionode, stdout
-USE mp_images,      ONLY : my_image_id, root_image
+USE mp_images,      ONLY : my_image_id, root_image, intra_image_comm
+USE mp,             ONLY : mp_sum
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
 CHARACTER(LEN=8) :: float_to_char
 INTEGER :: itemp, iu_therm, i, nq, imode, iq, degree, nvar, nwork
-INTEGER :: itens, jtens
+INTEGER :: itens, jtens, nstart, nlast
 TYPE(ph_freq_type) :: ph_freq    ! the frequencies at the volumes at
                                  ! which the gruneisen parameters are 
                                  ! calculated
@@ -230,19 +256,19 @@ IF ( ibrav<1 .OR. ibrav>11 ) THEN
                      & not available")' )
    RETURN
 END IF
-!
-!  First check if the elastic constants are on file
-!
-CALL read_elastic(fl_el_cons, exst)
-!
 !  If the elastic constants are not available, this calculation cannot be
 !  don_ge
 !
-IF (.NOT. exst) THEN
+IF (.NOT. el_cons_available) THEN
    WRITE(stdout,'(5x,"The elastic constants are needed to compute ")')
    WRITE(stdout,'(5x,"thermal expansions from Gruneisen parameters")')
    RETURN
 ENDIF
+WRITE(stdout,'(/,2x,76("+"))')
+WRITE(stdout,'(5x,"Computing the anharmonic properties from &
+                                                   &Gruneisen parameters")')
+WRITE(stdout,'(5x,"Writing on file anhar_files/",a)') TRIM(flanhar)
+WRITE(stdout,'(2x,76("+"),/)')
 !
 !  compute thermal expansion from gruneisen parameters. 
 !  NB: alpha_an calculated by thermal_expansion_ph is multiplied by the 
@@ -260,9 +286,12 @@ DO i=1, degree
    CALL init_ph_freq(ph_grun(i), nat, nq1_d, nq2_d, nq3_d, nq, .FALSE.)
 END DO
 
-DO itemp = 1, ntemp
-   IF (MOD(itemp,30)==0) WRITE(stdout,'(5x,"Computing temperature T=",f10.4,&
-                                                   &" K")') temp(itemp)
+CALL divide(intra_image_comm, ntemp, nstart, nlast)
+alpha_an_g=0.0_DP
+DO itemp = nstart, nlast
+   IF (MOD(itemp-nstart+1,30)==0) &
+             WRITE(6,'(5x,"Computing temperature ", i5 " / ",&
+       & i5, 4x," T=",f12.2," K")') itemp-nstart+1, nlast-nstart+1, temp(itemp)
    IF (lv0_t) THEN
       cm(:)=celldmf_t(:,itemp)
       vm = vminf_t(itemp)
@@ -357,6 +386,7 @@ DO itemp = 1, ntemp
    END DO
    alpha_an_g(:,itemp) = -aux(:) * ry_kbar / vm
 END DO
+CALL mp_sum(alpha_an_g, intra_image_comm)
 
 !CALL compute_cp(betab, vminf_t, b0f_t, phf_cv, cvf_t, cpf_t, b0f_s, &
 !                                                             grun_gamma_t)

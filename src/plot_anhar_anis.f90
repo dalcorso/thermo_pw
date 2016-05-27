@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2015 Andrea Dal Corso 
+! Copyright (C) 2015-2016 Andrea Dal Corso 
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -23,11 +23,14 @@ USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
                             gnuplot_xlabel,              &
                             gnuplot_write_file_mul_data, &
                             gnuplot_write_file_mul_point, &
+                            gnuplot_write_horizontal_line, &
                             gnuplot_set_fact
 USE data_files,  ONLY : flanhar
 USE grun_anharmonic, ONLY : done_grun
+USE control_grun,  ONLY : lb0_t
 USE control_pwrun, ONLY : ibrav_save
 USE control_thermo,  ONLY : ltherm_dos, ltherm_freq
+USE control_elastic_constants, ONLY : el_cons_available
 USE temperature,     ONLY : tmin, tmax
 USE control_pressure, ONLY : pressure, pressure_kb
 USE mp_images,       ONLY : my_image_id, root_image
@@ -36,7 +39,7 @@ USE io_global,       ONLY : ionode
 IMPLICIT NONE
 
 CHARACTER(LEN=256) :: gnu_filename, filename, filename1, filename2, &
-                      filename3, filename4, filenameps
+                      filename3, filename4, filename5, filename6, filenameps
 CHARACTER(LEN=8) :: float_to_char
 INTEGER :: system
 INTEGER :: ierr
@@ -64,6 +67,8 @@ filename1='anhar_files/'//TRIM(flanhar)//'_ph'
 filename2='anhar_files/'//TRIM(flanhar)//'.celldm'
 filename3='anhar_files/'//TRIM(flanhar)//'.celldm_ph'
 filename4='anhar_files/'//TRIM(flanhar)//'.celldm_grun'
+filename5='anhar_files/'//TRIM(flanhar)//'.aux'
+filename6='anhar_files/'//TRIM(flanhar)//'.aux_ph'
 
 IF (pressure /= 0.0_DP) THEN
    filename=TRIM(filename)//'.'//float_to_char(pressure_kb,1)
@@ -186,6 +191,38 @@ IF (ltherm_dos) &
 IF (ltherm_freq) &
    CALL gnuplot_write_file_mul_data(filename1,1,3,'color_blue', &
                                     .NOT.ltherm_dos,.TRUE., .FALSE.)
+
+IF (.NOT.lb0_t.AND.el_cons_available) THEN
+   CALL gnuplot_set_fact(1313313.0_DP,.FALSE.)
+   CALL gnuplot_ylabel('Heat capacity C_v (J / K / N / mol)',.FALSE.)
+   IF (ltherm_dos) &
+      CALL gnuplot_write_file_mul_data(filename5,1,3,'color_red',.TRUE.,&
+                                            .NOT.ltherm_freq,.FALSE.)
+   IF (ltherm_freq) &
+      CALL gnuplot_write_file_mul_data(filename6,1,3,'color_blue',&
+                                            .NOT.ltherm_dos,.TRUE.,.FALSE.)
+
+   CALL gnuplot_set_fact(1313313.0_DP,.FALSE.)
+   CALL gnuplot_ylabel('C_p - C_v (J / K / N / mol)',.FALSE.)
+
+   IF (ltherm_dos) &
+      CALL gnuplot_write_file_mul_data(filename5,1,4,'color_red',.TRUE., &
+                                                   .NOT.ltherm_freq,.FALSE.)
+   IF (ltherm_freq) &
+      CALL gnuplot_write_file_mul_data(filename6,1,4,'color_blue',&
+                                               .NOT.ltherm_dos,.TRUE.,.FALSE.)
+
+   CALL gnuplot_set_fact(1.0_DP,.FALSE.)
+   CALL gnuplot_ylabel('Gr\374neisen parameter ({/Symbol g})',.FALSE.)
+   CALL gnuplot_write_horizontal_line(0.0_DP, 2, 'front', 'color_black', &
+                                                                  .FALSE.)
+   IF (ltherm_dos) &
+      CALL gnuplot_write_file_mul_data(filename5,1,2,'color_red',.TRUE.,&
+                                                        .FALSE.,.FALSE.)
+   IF (ltherm_freq) &
+      CALL gnuplot_write_file_mul_data(filename6,1,2,'color_blue',&
+                                        .NOT.ltherm_dos,.TRUE.,.FALSE.)
+END IF
 
 CALL gnuplot_end()
 
