@@ -8,13 +8,14 @@
 !
 MODULE linear_solvers
 
+  USE io_global, ONLY : stdout
   IMPLICIT NONE
   !
   SAVE
   !
   PRIVATE
 
-  PUBLIC  ccg_many_vectors, cg_many_vectors
+  PUBLIC  ccg_many_vectors, cg_many_vectors, linsolvx, linsolvms, linsolvsvd
 
 
 CONTAINS
@@ -519,5 +520,136 @@ SUBROUTINE ccg_many_vectors (apply_a, precond, scal_prod, d0psi, dpsi, &
   CALL stop_clock ('ccg_many_vectors')
   RETURN
 END SUBROUTINE ccg_many_vectors
+!
+!-------------------------------------------------------------------
+SUBROUTINE linsolvms(hc,m,n,vc,alpha)
+!-------------------------------------------------------------------
+!
+!    This routine is a driver for the correspondent lapack routines
+!    which solve a linear system of equations with real coefficients. 
+!    The system is assumed to be overdetermined, so the number of equation
+!    is larger than the number of unknown. The program gives the solution
+!    that minimize the || Ax - b ||^2. 
+!    input the matrix is contained in hc, and the known part in vc, on 
+!    output the solution is on alpha.
+!
+!
+USE kinds, ONLY : DP
+IMPLICIT NONE
+
+INTEGER, INTENT(IN)  :: m, n        ! input: logical dimensions of hc
+
+REAL(DP), INTENT(IN)  ::  hc(m,n),  &  ! input: the matrix to solve
+                          vc(m)        ! input: the known part of the system
+
+REAL(DP), INTENT(INOUT) ::  alpha(n)     ! output: the solution
+
+REAL(DP) :: aux(m,1)                     ! auxiliary space
+REAL(DP), ALLOCATABLE    :: work(:)
+REAL(DP) :: rwork
+INTEGER :: iwork
+INTEGER :: info
+
+aux(1:m,1)=vc(1:m)
+iwork=-1
+CALL dgels('N',m,n,1,hc,m,aux,m,rwork,iwork,info)
+CALL errore('linsolvms','error finding optimal size',abs(info))
+iwork=NINT(rwork)
+ALLOCATE(work(iwork))
+CALL dgels('N',m,n,1,hc,m,aux,m,work,iwork,info)
+CALL errore('linsolvms','error in solving',abs(info))
+alpha(1:n)=aux(1:n,1)
+ 
+DEALLOCATE( work )
+
+RETURN
+END SUBROUTINE linsolvms
+
+!-------------------------------------------------------------------
+SUBROUTINE linsolvsvd(hc,m,n,vc,alpha)
+!-------------------------------------------------------------------
+!
+!    This routine is a driver for the correspondent lapack routines
+!    which solve a linear system of equations with real coefficients. 
+!    The system is assumed to be overdetermined, so the number of equation
+!    is larger than the number of unknown. The program gives the solution
+!    that minimize the || Ax - b ||^2 using the singular value decomposition
+!    method.
+!    input the matrix is contained in hc, and the known part in vc, on 
+!    output the solution is on alpha.
+!
+!
+USE kinds, ONLY : DP
+IMPLICIT NONE
+
+INTEGER, INTENT(IN)  :: m, n        ! input: logical dimensions of hc
+
+REAL(DP), INTENT(IN)  ::  hc(m,n),  &  ! input: the matrix to solve
+                          vc(m)        ! input: the known part of the system
+
+REAL(DP), INTENT(INOUT) ::  alpha(n)     ! output: the solution
+
+REAL(DP) :: aux(m,1), w2(m)               ! auxiliary space
+REAL(DP), ALLOCATABLE    :: work(:)
+REAL(DP) :: rwork, rcond
+INTEGER :: iwork, rank
+INTEGER :: info
+
+aux(1:m,1)=vc(1:m)
+rcond=-1.0_DP
+iwork=-1
+CALL dgelss(m,n,1,hc,m,aux,m,w2,rcond,rank,rwork,iwork,info)
+CALL errore('linsolvsvd','error finding optimal size',abs(info))
+iwork=NINT(rwork)
+ALLOCATE(work(iwork))
+CALL dgelss(m,n,1,hc,m,aux,m,w2,rcond,rank,work,iwork,info)
+CALL errore('linsolvsvd','error in solving',abs(info))
+alpha(1:n)=aux(1:n,1)
+WRITE(stdout,'(/5x,"In linsolvsvd m, n, and rank are: ",3i6)') m, n, rank
+ 
+DEALLOCATE( work )
+
+RETURN
+END SUBROUTINE linsolvsvd
+
+!
+!-------------------------------------------------------------------
+SUBROUTINE linsolvx(hc,n,vc,alpha)
+!-------------------------------------------------------------------
+!
+!    This routine was initially in the Quantum ESPRESSO distribution.
+!    
+!    This routine is a driver for the correspondent lapack routines
+!    which solve a linear system of equations with real coefficients. On 
+!    input the matrix is contained in hc, and the known part in vc, on 
+!    output the solution is on alpha.
+!
+!
+USE kinds, ONLY : DP
+IMPLICIT NONE
+
+INTEGER, INTENT(IN)  :: n        ! input: logical dimension of hc
+
+REAL(DP), INTENT(IN)  ::  hc(n,n),  &  ! input: the matrix to solve
+                          vc(n)        ! input: the known part of the system
+
+REAL(DP), INTENT(INOUT) ::  alpha(n)     ! output: the solution
+
+INTEGER, ALLOCATABLE    :: iwork(:)
+INTEGER :: info
+
+ALLOCATE(iwork(n))
+
+CALL dgetrf(n,n,hc,n,iwork,info)
+CALL errore('linsolvx','error in factorization',abs(info))
+alpha=vc
+CALL dgetrs('N',n,1,hc,n,iwork,alpha,n,info)
+CALL errore('linsolvx','error in solving',abs(info))
+ 
+DEALLOCATE( iwork )
+
+RETURN
+END SUBROUTINE linsolvx
+
 
 END MODULE linear_solvers

@@ -43,7 +43,7 @@ SUBROUTINE bcast_thermo_input()
                               epsilon_0, frozen_ions, elastic_algorithm, &
                               poly_degree
   USE control_quadratic_energy, ONLY : show_fit
-  USE control_quartic_energy, ONLY : lquartic, lquartic_ph
+  USE control_quartic_energy, ONLY : lquartic, lquartic_ph, lsolve
   USE piezoelectric_tensor, ONLY : nppl
   USE control_2d_bands,     ONLY : lprojpbs, nkz, sym_divide, identify_sur, &
                                    gap_thr, sur_layers, sur_thr, force_bands, &
@@ -67,6 +67,7 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( reduced_grid, meta_ionode_id, world_comm )
   CALL mp_bcast( start_geo, meta_ionode_id, world_comm )
   CALL mp_bcast( jump_geo, meta_ionode_id, world_comm )
+  CALL mp_bcast( lsolve, meta_ionode_id, world_comm )
   CALL mp_bcast( lquartic, meta_ionode_id, world_comm )
   CALL mp_bcast( lquartic_ph, meta_ionode_id, world_comm )
   CALL mp_bcast( show_fit, meta_ionode_id, world_comm )

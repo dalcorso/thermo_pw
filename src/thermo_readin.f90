@@ -75,7 +75,7 @@ SUBROUTINE thermo_readin()
   USE xrdp_module,          ONLY : select_lambda
   USE control_energy_plot,  ONLY : ncontours, color_levels, ene_levels 
   USE control_quadratic_energy, ONLY : show_fit
-  USE control_quartic_energy, ONLY : lquartic, lquartic_ph
+  USE control_quartic_energy, ONLY : lquartic, lquartic_ph, lsolve
   USE piezoelectric_tensor, ONLY : nppl
   USE control_pwrun,        ONLY : celldm_save, ibrav_save, ityp_save, &
                                    amass_save
@@ -123,6 +123,7 @@ SUBROUTINE thermo_readin()
                             max_geometries,                 &
                             lquartic,                       &
                             lquartic_ph,                    &
+                            lsolve,                         &
                             show_fit,                       &
                             max_seconds,                    &
                             nq1_d, nq2_d, nq3_d,            &
@@ -216,6 +217,7 @@ SUBROUTINE thermo_readin()
   start_geo=1
   jump_geo=1
   max_geometries=1000000
+  lsolve=2
   lquartic=.TRUE.
   lquartic_ph=.FALSE.
   show_fit=.FALSE.

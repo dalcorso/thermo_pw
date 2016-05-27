@@ -25,7 +25,7 @@ SUBROUTINE quadratic_fit()
   USE control_pressure, ONLY : pressure, pressure_kb
   USE control_quadratic_energy, ONLY : hessian_v, hessian_e, x_pos_min, &
                                coeff, degree
-  USE control_quartic_energy, ONLY : nvar4, coeff4, x_min_4, lquartic
+  USE control_quartic_energy, ONLY : nvar4, coeff4, x_min_4, lquartic, lsolve
   USE io_global, ONLY : stdout
   USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_fit_extremum, &
                                  write_fit_hessian, evaluate_fit_quadratic, &
@@ -116,17 +116,18 @@ SUBROUTINE quadratic_fit()
      ALLOCATE(x_min_4(degree))
      ALLOCATE(coeff4(nvar4))
 
-     CALL fit_multi_quartic(ndata,degree,nvar4,x,f,coeff4)
+     CALL fit_multi_quartic(ndata,degree,nvar4,lsolve,x,f,coeff4)
      !
      CALL print_quartic_polynomial(degree, nvar4, coeff4)
 !    WRITE(stdout,'(/,7x,"Energy (1)    Fitted energy (2)   DeltaE (1)-(2)")') 
      chisq=0.0_DP
      DO idata=1,ndata
         CALL evaluate_fit_quartic(degree,nvar4,x(1,idata),aux,coeff4)
-!       WRITE(stdout,'(3f19.12)') f(idata), aux, f(idata)-aux
+!       WRITE(stdout,'(2f10.4,2f19.12,e19.12)') x(1,idata), x(2,idata), f(idata), &
+!                                                   aux, f(idata)-aux
         chisq = chisq + (aux - f(idata))**2
      ENDDO
-     WRITE(stdout,'(5x,"chi square=",e18.5,/)') chisq
+     WRITE(stdout,'(/,5x,"chi square=",e18.5,/)') chisq
 !
 !   searching the minimum starting from the minimum of the quadratic
 !
@@ -167,7 +168,8 @@ SUBROUTINE quadratic_fit_t(itemp)
   USE thermo_mod, ONLY : celldm_geo, energy_geo, no_ph, omega_geo
   USE control_quadratic_energy, ONLY : degree, nvar, coeff_t, &
                                        enthalpy_coeff => coeff 
-  USE control_quartic_energy, ONLY :  nvar4, coeff4, lquartic, lquartic_ph
+  USE control_quartic_energy, ONLY :  nvar4, coeff4, lquartic, lquartic_ph, &
+                                      lsolve
   USE temperature, ONLY : temp
   USE control_pressure, ONLY : pressure, pressure_kb
   USE thermodynamics, ONLY : ph_free_ener
@@ -259,7 +261,7 @@ SUBROUTINE quadratic_fit_t(itemp)
   IF (lquartic) THEN
      IF (lquartic_ph) THEN
         WRITE(stdout,'(/,5x, "Fit improved with a fourth order polynomial")') 
-        CALL fit_multi_quartic(ndata,degree,nvar4,x,f,coefft4)
+        CALL fit_multi_quartic(ndata,degree,nvar4,lsolve,x,f,coefft4)
      ELSE
         WRITE(stdout,'(/,5x,"Quartic fit used only a T=0:")')
      ENDIF
@@ -327,7 +329,8 @@ SUBROUTINE quadratic_fit_t_ph(itemp)
   USE control_quadratic_energy, ONLY : degree, nvar, coeff_t, &
                          enthalpy_coeff => coeff
   USE temperature, ONLY : temp
-  USE control_quartic_energy, ONLY :  nvar4, coeff4, lquartic, lquartic_ph
+  USE control_quartic_energy, ONLY :  nvar4, coeff4, lquartic, lquartic_ph, &
+                                      lsolve
   USE control_pressure, ONLY : pressure, pressure_kb
   USE ph_freq_thermodynamics, ONLY : phf_free_ener
   USE ph_freq_anharmonic, ONLY : celldmf_t
@@ -419,7 +422,7 @@ SUBROUTINE quadratic_fit_t_ph(itemp)
   IF (lquartic) THEN
      IF (lquartic_ph) THEN
         WRITE(stdout,'(/,5x, "Fit improved with a fourth order polynomial")') 
-        CALL fit_multi_quartic(ndata,degree,nvar4,x,f,coefft4)
+        CALL fit_multi_quartic(ndata,degree,nvar4,lsolve,x,f,coefft4)
      ELSE
         WRITE(stdout,'(/,5x,"Quartic fit used only a T=0:")')
      ENDIF

@@ -59,11 +59,11 @@ MODULE quartic_surfaces
 
 CONTAINS
 
-SUBROUTINE fit_multi_quartic(ndata,degree,nvar,x,f,coeff)
+SUBROUTINE fit_multi_quartic(ndata,degree,nvar,lsolve,x,f,coeff)
 !
 !  This routine receives as input a set of vectors x(degree,ndata) and
 !  function values f(ndata) and gives as output the coefficients of
-!  a quadratic interpolating polynomial coeff(nvar). In input
+!  a quartic interpolating polynomial coeff(nvar). In input
 !  ndata is the number of data points. degree is the number of degrees of
 !  freedom or equivalently the number of independent parameters (the
 !  maximum is 6), and nvar is the number of coefficients of the
@@ -75,6 +75,15 @@ SUBROUTINE fit_multi_quartic(ndata,degree,nvar,x,f,coeff)
 !          4        70
 !          5       126
 !          6       210
+!  lsolve can be 1, 2 or 3. It chooses the method to compute the
+!  polynomial coefficients. Using 1 a matrix nvar x nvar is calculated
+!                           Using 2 the overdetemined linear system is solved
+!                           using QR or LQ factorization
+!                           Using 3 the overdetermined linear system is solved
+!                           using SVD decomposition
+!                           If lsolve is not one of these values method 2 
+!                           is used 
+!
 !  The coefficients are organized like this:
 !  a_1 + a_2  x(1,i) + a_3  x(1,i)**2 + a_4  x(1,i)**3 + a_5 x(1,i)**4        
 !      + a_6  x(2,i) + a_7  x(2,i)**2 + a_8  x(2,i)**3 + a_9 x(2,i)**4        2
@@ -184,11 +193,12 @@ SUBROUTINE fit_multi_quartic(ndata,degree,nvar,x,f,coeff)
 !      + a_210 x(3,i) * x(4,i) * x(5,i) * x(6,i)
 !
 USE kinds, ONLY : DP
-USE quadratic_surfaces, ONLY : linsolvx
+USE linear_solvers,     ONLY : linsolvx, linsolvms, linsolvsvd
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: degree, nvar, ndata
+INTEGER, INTENT(INOUT) :: lsolve
 REAL(DP), INTENT(IN) :: x(degree,ndata), f(ndata)
-REAL(DP), INTENT(OUT) :: coeff(nvar)
+REAL(DP), INTENT(INOUT) :: coeff(nvar)
 
 REAL(DP) :: amat(ndata,nvar), aa(nvar,nvar), b(nvar) 
 
@@ -208,21 +218,21 @@ amat=0.0_DP
 DO idata=1,ndata
    amat(idata,1) = 1.0_DP
    amat(idata,2) = x(1,idata)
-   amat(idata,3) = x(1,idata)**2
-   amat(idata,4) = x(1,idata)**3
-   amat(idata,5) = x(1,idata)**4
+   amat(idata,3) = x(1,idata)*x(1,idata)
+   amat(idata,4) = x(1,idata)*x(1,idata)*x(1,idata)
+   amat(idata,5) = x(1,idata)*x(1,idata)*x(1,idata)*x(1,idata)
 
    IF (degree>1) THEN
-      amat(idata,6) = x(2,idata)
-      amat(idata,7) = x(2,idata)**2
-      amat(idata,8) = x(2,idata)**3
-      amat(idata,9) = x(2,idata)**4
+      amat(idata,6)  = x(2,idata)
+      amat(idata,7)  = x(2,idata) * x(2,idata)
+      amat(idata,8)  = x(2,idata) * x(2,idata) * x(2,idata)
+      amat(idata,9)  = x(2,idata) * x(2,idata) * x(2,idata) * x(2,idata)
       amat(idata,10) = x(1,idata) * x(2,idata)
-      amat(idata,11) = x(1,idata) * x(2,idata)**2
-      amat(idata,12) = x(1,idata) * x(2,idata)**3
-      amat(idata,13) = x(1,idata) **2 * x(2,idata)
-      amat(idata,14) = x(1,idata) **2 * x(2,idata)**2
-      amat(idata,15) = x(1,idata) **3 * x(2,idata)
+      amat(idata,11) = x(1,idata) * x(2,idata) * x(2,idata)
+      amat(idata,12) = x(1,idata) * x(2,idata) * x(2,idata) * x(2,idata)
+      amat(idata,13) = x(1,idata) * x(1,idata) * x(2,idata)
+      amat(idata,14) = x(1,idata) * x(1,idata) * x(2,idata) * x(2,idata)
+      amat(idata,15) = x(1,idata) * x(1,idata) * x(1,idata) * x(2,idata)
    ENDIF
 
    IF (degree>2) THEN
@@ -433,9 +443,7 @@ DO idata=1,ndata
    ENDIF
 
 ENDDO
-!
-!   Now set the linear system
-!
+
 aa=0.0_DP
 b =0.0_DP
 DO ivar=1,nvar
@@ -451,7 +459,20 @@ END DO
 !
 !   solve the linear system and find the coefficients
 !
-CALL linsolvx(aa,nvar,b,coeff)
+coeff=0.0_DP
+IF (lsolve<1.OR.lsolve>3) lsolve=2
+IF (lsolve==1) THEN
+   WRITE(stdout,'(5x,"Finding the quartic polynomial using &
+                                                   &nvar x nvar matrix")')  
+   CALL linsolvx(aa,nvar,b,coeff)
+ELSEIF(lsolve==2) THEN
+   WRITE(stdout,'(5x,"Finding the quartic polynomial using &
+                                                   &QR factorization")')  
+   CALL linsolvms(amat,ndata,nvar,f,coeff)
+ELSEIF(lsolve==3) THEN
+   WRITE(stdout,'(5x,"Finding the quartic polynomial using SVD")')  
+   CALL linsolvsvd(amat,ndata,nvar,f,coeff)
+ENDIF
 
 RETURN
 END SUBROUTINE fit_multi_quartic
@@ -469,17 +490,16 @@ REAL(DP) :: aux
 !
 !  one variable
 !
-aux=coeff(1) + coeff(2) * x(1) + coeff(3) * x(1)**2 + coeff(4) * x(1)**3 + &
-                                                      coeff(5) * x(1)**4
+aux = coeff(1) + x(1)*(coeff(2)+x(1)*(coeff(3)+x(1)*(coeff(4)+coeff(5)*x(1))))
 !
 !  two variables
 !
 IF (degree>1) THEN
-   aux = aux + coeff(6) * x(2) + coeff(7) * x(2)**2 + coeff(8) * x(2)**3 + &
-                                                      coeff(9) * x(2)**4  &
-             + coeff(10) * x(1) * x(2) + coeff(11) * x(1) * x(2)**2 &
-             + coeff(12) * x(1) * x(2)**3 + coeff(13) * x(1)**2 * x(2) &
-             + coeff(14) * x(1)**2 * x(2)**2 + coeff(15) * x(1)**3 * x(2)
+   aux=aux+x(2)*(coeff(6) + x(2)*( coeff(7) + coeff(11) * x(1) +     &
+                                             coeff(14) * x(1)**2 +  &
+              x(2)*(coeff(8) + coeff(9) * x(2) + coeff(12) * x(1)))  &
+             + x(1) *( coeff(10)    &
+             + x(1) * (coeff(13) + coeff(15) * x(1) ) ) )
 ENDIF
 !
 !  three variables
@@ -1730,7 +1750,7 @@ SUBROUTINE find_quartic_extremum(degree,nvar,x,f,coeff)
 !  to x. In output x are the coordinates of the extremum and f 
 !  the value of the quartic function at the minimum
 !
-USE quadratic_surfaces, ONLY : linsolvx
+USE linear_solvers, ONLY : linsolvx
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: degree, nvar
 REAL(DP),INTENT(INOUT) :: x(degree), f
@@ -1932,196 +1952,198 @@ IMPLICIT NONE
 INTEGER, INTENT(IN) :: degree, nvar
 REAL(DP), INTENT(IN) :: coeff(nvar)
 
-  WRITE(stdout,'(/,5x,"Quartic polynomial:")') 
-  WRITE(stdout,'(5x,f13.7,"          +",f13.7," x1        +",f13.7," x1^2")') &
-                                       coeff(1), coeff(2), coeff(3)
-  WRITE(stdout,'(4x,"+",f13.7," x1^3     +",f13.7," x1^4")') coeff(4), &
-                                                              coeff(5)
+  WRITE(stdout,'(/,5x,"Quartic polynomial:",/)') 
+  WRITE(stdout,'(5x,    f20.7,11x,"+",f20.7," x1 ")') coeff(1), coeff(2) 
+  WRITE(stdout,'(4x,"+",f20.7," x1^2",6x,"+",f20.7," x1^3")') coeff(3), coeff(4)
+  WRITE(stdout,'(4x,"+",f20.7," x1^4")') coeff(5)
   IF (degree>1) THEN
-     WRITE(stdout,'(4x,"+",f13.7," x2       +",f13.7," x2^2      +",&
-                     &f13.7," x2^3")') coeff(6), coeff(7), coeff(8)
-     WRITE(stdout,'(4x,"+",f13.7," x2^4     +",f13.7," x1 x2     +",f13.7,&
-                              &" x1 x2^2")') coeff(9), coeff(10), coeff(11)
-     WRITE(stdout,'(4x,"+",f13.7," x1 x2^3  +",f13.7," x1^2 x2   +",& 
-                          &f13.7," x1^2 x2^2")') coeff(12), coeff(13), coeff(14)
-     WRITE(stdout,'(4x,"+",f13.7," x1^3 x2")') coeff(15)
+     WRITE(stdout,'(4x,"+",f20.7," x2",8x,"+",f20.7," x2^2")')  coeff(6), &
+                                                                coeff(7)
+     WRITE(stdout,'(4x,"+",f20.7," x2^3",6x,"+",f20.7," x2^4")') coeff(8), &
+                                                                coeff(9)
+     WRITE(stdout,'(4x,"+",f20.7," x1 x2",5x,"+",f20.7," x1 x2^2")') &
+                                                          coeff(10), coeff(11)
+     WRITE(stdout,'(4x,"+",f20.7," x1 x2^3",3x,"+",f20.7," x1^2 x2")') &
+                                                          coeff(12), coeff(13)
+     WRITE(stdout,'(4x,"+",f20.7," x1^2 x2^2 +", f20.7," x1^3 x2")') &
+                                             coeff(14), coeff(15)
   ENDIF
 
   IF (degree>2) THEN
-     WRITE(stdout,'(4x,"+",f13.7," x3       +",f13.7," x3^2      +",&
-                        &f13.7," x3^3")') coeff(16), coeff(17), coeff(18)
-     WRITE(stdout,'(4x,"+",f13.7," x3^4     +",f13.7," x1 x3     +",f13.7,&
+     WRITE(stdout,'(4x,"+",f15.7," x3       +",f15.7," x3^2      +",&
+                        &f15.7," x3^3")') coeff(16), coeff(17), coeff(18)
+     WRITE(stdout,'(4x,"+",f15.7," x3^4     +",f15.7," x1 x3     +",f13.7,&
                               &" x1 x3^2")') coeff(19), coeff(20), coeff(21)
-     WRITE(stdout,'(4x,"+",f13.7," x1 x3^3  +",f13.7," x1^2 x3   +",& 
-                          &f13.7," x1^2 x3^2")') coeff(22), coeff(23), coeff(24)
-     WRITE(stdout,'(4x,"+",f13.7," x1^3 x3   ")') coeff(25)
-     WRITE(stdout,'(4x,"+",f13.7," x2 x3    +",f13.7," x2 x3^2   +",&
-               &f13.7," x2 x3^3  ")') coeff(26), coeff(27), coeff(28)
-     WRITE(stdout,'(4x,"+",f13.7," x2^2 x3  +",f13.7," x2^2 x3^2 +",& 
-                          &f13.7," x2^3 x3")') coeff(29), coeff(30), coeff(31)
-     WRITE(stdout,'(4x,"+",f13.7," x1 x2 x3 +",f13.7," x1 x2^2 x3+",& 
-                          &f13.7," x1 x2 x3^2")') coeff(32), coeff(33), &
+     WRITE(stdout,'(4x,"+",f15.7," x1 x3^3  +",f15.7," x1^2 x3   +",& 
+                          &f15.7," x1^2 x3^2")') coeff(22), coeff(23), coeff(24)
+     WRITE(stdout,'(4x,"+",f15.7," x1^3 x3   ")') coeff(25)
+     WRITE(stdout,'(4x,"+",f15.7," x2 x3    +",f15.7," x2 x3^2   +",&
+               &f15.7," x2 x3^3  ")') coeff(26), coeff(27), coeff(28)
+     WRITE(stdout,'(4x,"+",f15.7," x2^2 x3  +",f15.7," x2^2 x3^2 +",& 
+                          &f15.7," x2^3 x3")') coeff(29), coeff(30), coeff(31)
+     WRITE(stdout,'(4x,"+",f15.7," x1 x2 x3 +",f15.7," x1 x2^2 x3+",& 
+                          &f15.7," x1 x2 x3^2")') coeff(32), coeff(33), &
                                                                      coeff(34)
-     WRITE(stdout,'(4x,"+",f13.7," x1^2 x2 x3")') coeff(35)
+     WRITE(stdout,'(4x,"+",f15.7," x1^2 x2 x3")') coeff(35)
   ENDIF
 
   IF (degree>3) THEN
-     WRITE(stdout,'(4x,"+",f13.7," x4       +",f13.7," x4^2      +",&
-                        &f13.7," x4^3")') coeff(36), coeff(37), coeff(38)
-     WRITE(stdout,'(4x,"+",f13.7," x4^4     +",f13.7," x1 x4     +",f13.7,&
+     WRITE(stdout,'(4x,"+",f15.7," x4       +",f15.7," x4^2      +",&
+                        &f15.7," x4^3")') coeff(36), coeff(37), coeff(38)
+     WRITE(stdout,'(4x,"+",f15.7," x4^4     +",f15.7," x1 x4     +",f15.7,&
                               &" x1 x4^2")') coeff(39), coeff(40), coeff(41)
-     WRITE(stdout,'(4x,"+",f13.7," x1 x4^3  +",f13.7," x1^2 x4   +",& 
-                          &f13.7," x1^2 x4^2")') coeff(42), coeff(43), coeff(44)
-     WRITE(stdout,'(4x,"+",f13.7," x1^3 x4   ")') coeff(45)
-     WRITE(stdout,'(4x,"+",f13.7," x2 x4    +",f13.7," x2 x4^2   +",&
-               &f13.7," x2 x4^3  ")') coeff(46), coeff(47), coeff(48)
-     WRITE(stdout,'(4x,"+",f13.7," x2^2 x4  +",f13.7," x2^2 x4^2 +",& 
-                          &f13.7," x2^3 x4")') coeff(49), coeff(50), coeff(51)
-     WRITE(stdout,'(4x,"+",f13.7," x3 x4    +",f13.7," x3 x4^2   +",&
-               &f13.7," x3 x4^3  ")') coeff(52), coeff(53), coeff(54)
-     WRITE(stdout,'(4x,"+",f13.7," x3^2 x4  +",f13.7," x3^2 x4^2 +",& 
-                          &f13.7," x3^3 x4")') coeff(55), coeff(56), coeff(57)
-     WRITE(stdout,'(4x,"+",f13.7," x1 x2 x4 +",f13.7," x1 x2^2 x4+",& 
-                          &f13.7," x1 x2 x4^2")') coeff(58), coeff(59), &
+     WRITE(stdout,'(4x,"+",f15.7," x1 x4^3  +",f15.7," x1^2 x4   +",& 
+                          &f15.7," x1^2 x4^2")') coeff(42), coeff(43), coeff(44)
+     WRITE(stdout,'(4x,"+",f15.7," x1^3 x4   ")') coeff(45)
+     WRITE(stdout,'(4x,"+",f15.7," x2 x4    +",f15.7," x2 x4^2   +",&
+               &f15.7," x2 x4^3  ")') coeff(46), coeff(47), coeff(48)
+     WRITE(stdout,'(4x,"+",f15.7," x2^2 x4  +",f15.7," x2^2 x4^2 +",& 
+                          &f15.7," x2^3 x4")') coeff(49), coeff(50), coeff(51)
+     WRITE(stdout,'(4x,"+",f15.7," x3 x4    +",f15.7," x3 x4^2   +",&
+               &f15.7," x3 x4^3  ")') coeff(52), coeff(53), coeff(54)
+     WRITE(stdout,'(4x,"+",f15.7," x3^2 x4  +",f15.7," x3^2 x4^2 +",& 
+                          &f15.7," x3^3 x4")') coeff(55), coeff(56), coeff(57)
+     WRITE(stdout,'(4x,"+",f15.7," x1 x2 x4 +",f15.7," x1 x2^2 x4+",& 
+                          &f15.7," x1 x2 x4^2")') coeff(58), coeff(59), &
                                                               coeff(60)
-     WRITE(stdout,'(4x,"+",f13.7," x1^2 x2 x4")') coeff(61)
-     WRITE(stdout,'(4x,"+",f13.7," x1 x3 x4 +",f13.7," x1 x3^2 x4+",& 
-                          &f13.7," x1 x3 x4^2")') coeff(62), coeff(63), &
+     WRITE(stdout,'(4x,"+",f15.7," x1^2 x2 x4")') coeff(61)
+     WRITE(stdout,'(4x,"+",f15.7," x1 x3 x4 +",f15.7," x1 x3^2 x4+",& 
+                          &f15.7," x1 x3 x4^2")') coeff(62), coeff(63), &
                                                               coeff(64)
-     WRITE(stdout,'(4x,"+",f13.7," x1^2 x3 x4")') coeff(65)
-     WRITE(stdout,'(4x,"+",f13.7," x2 x3 x4 +",f13.7," x2 x3^2 x4+",& 
-                          &f13.7," x2 x3 x4^2")') coeff(66), coeff(67), &
+     WRITE(stdout,'(4x,"+",f15.7," x1^2 x3 x4")') coeff(65)
+     WRITE(stdout,'(4x,"+",f15.7," x2 x3 x4 +",f15.7," x2 x3^2 x4+",& 
+                          &f15.7," x2 x3 x4^2")') coeff(66), coeff(67), &
                                                               coeff(68)
-     WRITE(stdout,'(4x,"+",f13.7," x2^2 x3 x4")') coeff(69)
-     WRITE(stdout,'(4x,"+",f13.7," x1 x2 x3 x4")') coeff(70)
+     WRITE(stdout,'(4x,"+",f15.7," x2^2 x3 x4")') coeff(69)
+     WRITE(stdout,'(4x,"+",f15.7," x1 x2 x3 x4")') coeff(70)
   ENDIF
 
   IF (degree>4) THEN
-     WRITE(stdout,'(4x,"+",f13.7," x5       +",f13.7," x5^2      +",&
-                        &f13.7," x5^3")') coeff(71), coeff(72), coeff(73)
-     WRITE(stdout,'(4x,"+",f13.7," x5^4     +",f13.7," x1 x5     +",f13.7,&
+     WRITE(stdout,'(4x,"+",f15.7," x5       +",f15.7," x5^2      +",&
+                        &f15.7," x5^3")') coeff(71), coeff(72), coeff(73)
+     WRITE(stdout,'(4x,"+",f15.7," x5^4     +",f15.7," x1 x5     +",f15.7,&
                               &" x1 x5^2")') coeff(74), coeff(75), coeff(76)
-     WRITE(stdout,'(4x,"+",f13.7," x1 x5^3  +",f13.7," x1^2 x5   +",& 
-                          &f13.7," x1^2 x5^2")') coeff(77), coeff(78), coeff(79)
-     WRITE(stdout,'(4x,"+",f13.7," x1^3 x5   ")') coeff(80)
-     WRITE(stdout,'(4x,"+",f13.7," x2 x5    +",f13.7," x2 x5^2   +",&
-               &f13.7," x2 x5^3  ")') coeff(81), coeff(82), coeff(83)
-     WRITE(stdout,'(4x,"+",f13.7," x2^2 x5  +",f13.7," x2^2 x5^2 +",& 
-                          &f13.7," x2^3 x5")') coeff(84), coeff(85), coeff(86)
-     WRITE(stdout,'(4x,"+",f13.7," x3 x5    +",f13.7," x3 x5^2   +",&
-               &f13.7," x3 x5^3  ")') coeff(87), coeff(88), coeff(89)
-     WRITE(stdout,'(4x,"+",f13.7," x3^2 x5  +",f13.7," x3^2 x5^2 +",& 
-                          &f13.7," x3^3 x5")') coeff(90), coeff(91), coeff(92)
-     WRITE(stdout,'(4x,"+",f13.7," x4 x5    +",f13.7," x4 x5^2   +",&
-               &f13.7," x4 x5^3  ")') coeff(93), coeff(94), coeff(95)
-     WRITE(stdout,'(4x,"+",f13.7," x4^2 x5  +",f13.7," x4^2 x5^2 +",& 
-                          &f13.7," x4^3 x5")') coeff(96), coeff(97), coeff(98)
-     WRITE(stdout,'(4x,"+",f13.7," x1 x2 x5 +",f13.7," x1 x2^2 x5+",& 
-                          &f13.7," x1 x2 x5^2")') coeff(99), coeff(100), &
+     WRITE(stdout,'(4x,"+",f15.7," x1 x5^3  +",f15.7," x1^2 x5   +",& 
+                          &f15.7," x1^2 x5^2")') coeff(77), coeff(78), coeff(79)
+     WRITE(stdout,'(4x,"+",f15.7," x1^3 x5   ")') coeff(80)
+     WRITE(stdout,'(4x,"+",f15.7," x2 x5    +",f15.7," x2 x5^2   +",&
+               &f15.7," x2 x5^3  ")') coeff(81), coeff(82), coeff(83)
+     WRITE(stdout,'(4x,"+",f15.7," x2^2 x5  +",f15.7," x2^2 x5^2 +",& 
+                          &f15.7," x2^3 x5")') coeff(84), coeff(85), coeff(86)
+     WRITE(stdout,'(4x,"+",f15.7," x3 x5    +",f15.7," x3 x5^2   +",&
+               &f15.7," x3 x5^3  ")') coeff(87), coeff(88), coeff(89)
+     WRITE(stdout,'(4x,"+",f15.7," x3^2 x5  +",f15.7," x3^2 x5^2 +",& 
+                          &f15.7," x3^3 x5")') coeff(90), coeff(91), coeff(92)
+     WRITE(stdout,'(4x,"+",f15.7," x4 x5    +",f15.7," x4 x5^2   +",&
+               &f15.7," x4 x5^3  ")') coeff(93), coeff(94), coeff(95)
+     WRITE(stdout,'(4x,"+",f15.7," x4^2 x5  +",f15.7," x4^2 x5^2 +",& 
+                          &f15.7," x4^3 x5")') coeff(96), coeff(97), coeff(98)
+     WRITE(stdout,'(4x,"+",f15.7," x1 x2 x5 +",f15.7," x1 x2^2 x5+",& 
+                          &f15.7," x1 x2 x5^2")') coeff(99), coeff(100), &
                                                               coeff(101)
-     WRITE(stdout,'(4x,"+",f13.7," x1^2 x2 x5")') coeff(102)
-     WRITE(stdout,'(4x,"+",f13.7," x1 x3 x5 +",f13.7," x1 x3^2 x5+",& 
-                          &f13.7," x1 x3 x5^2")') coeff(103), coeff(104), &
+     WRITE(stdout,'(4x,"+",f15.7," x1^2 x2 x5")') coeff(102)
+     WRITE(stdout,'(4x,"+",f15.7," x1 x3 x5 +",f15.7," x1 x3^2 x5+",& 
+                          &f15.7," x1 x3 x5^2")') coeff(103), coeff(104), &
                                                               coeff(105)
-     WRITE(stdout,'(4x,"+",f13.7," x1^2 x3 x5")') coeff(106)
-     WRITE(stdout,'(4x,"+",f13.7," x1 x4 x5 +",f13.7," x1 x4^2 x5+",& 
-                          &f13.7," x1 x4 x5^2")') coeff(107), coeff(108), &
+     WRITE(stdout,'(4x,"+",f15.7," x1^2 x3 x5")') coeff(106)
+     WRITE(stdout,'(4x,"+",f15.7," x1 x4 x5 +",f15.7," x1 x4^2 x5+",& 
+                          &f15.7," x1 x4 x5^2")') coeff(107), coeff(108), &
                                                               coeff(109)
-     WRITE(stdout,'(4x,"+",f13.7," x1^2 x4 x5")') coeff(110)
-     WRITE(stdout,'(4x,"+",f13.7," x2 x3 x5 +",f13.7," x2 x3^2 x5+",& 
-                          &f13.7," x2 x3 x5^2")') coeff(111), coeff(112), &
+     WRITE(stdout,'(4x,"+",f15.7," x1^2 x4 x5")') coeff(110)
+     WRITE(stdout,'(4x,"+",f15.7," x2 x3 x5 +",f15.7," x2 x3^2 x5+",& 
+                          &f15.7," x2 x3 x5^2")') coeff(111), coeff(112), &
                                                               coeff(113)
-     WRITE(stdout,'(4x,"+",f13.7," x2^2 x3 x5")') coeff(114)
-     WRITE(stdout,'(4x,"+",f13.7," x2 x4 x5 +",f13.7," x2 x4^2 x5+",& 
-                          &f13.7," x2 x4 x5^2")') coeff(115), coeff(116), &
+     WRITE(stdout,'(4x,"+",f15.7," x2^2 x3 x5")') coeff(114)
+     WRITE(stdout,'(4x,"+",f15.7," x2 x4 x5 +",f15.7," x2 x4^2 x5+",& 
+                          &f15.7," x2 x4 x5^2")') coeff(115), coeff(116), &
                                                               coeff(117)
-     WRITE(stdout,'(4x,"+",f13.7," x2^2 x4 x5")') coeff(118)
-     WRITE(stdout,'(4x,"+",f13.7," x3 x4 x5 +",f13.7," x3 x4^2 x5+",& 
-                          &f13.7," x3 x4 x5^2")') coeff(119), coeff(120), &
+     WRITE(stdout,'(4x,"+",f15.7," x2^2 x4 x5")') coeff(118)
+     WRITE(stdout,'(4x,"+",f15.7," x3 x4 x5 +",f15.7," x3 x4^2 x5+",& 
+                          &f15.7," x3 x4 x5^2")') coeff(119), coeff(120), &
                                                               coeff(121)
-     WRITE(stdout,'(4x,"+",f13.7," x3^2 x4 x5")') coeff(122)
+     WRITE(stdout,'(4x,"+",f15.7," x3^2 x4 x5")') coeff(122)
 
-     WRITE(stdout,'(4x,"+",f13.7," x1x2x3x5 +",f13.7," x1x2x4x5  +",& 
-                          &f13.7," x1x3x4x5")') coeff(123), coeff(124), &
+     WRITE(stdout,'(4x,"+",f15.7," x1x2x3x5 +",f15.7," x1x2x4x5  +",& 
+                          &f15.7," x1x3x4x5")') coeff(123), coeff(124), &
                                                               coeff(125)
-     WRITE(stdout,'(4x,"+",f13.7," x2x3x4x5")') coeff(126)
+     WRITE(stdout,'(4x,"+",f15.7," x2x3x4x5")') coeff(126)
   ENDIF
 
   IF (degree>5) THEN
-     WRITE(stdout,'(4x,"+",f13.7," x6       +",f13.7," x6^2      +",      &
-                        &f13.7," x6^3")') coeff(127), coeff(128), coeff(129)
-     WRITE(stdout,'(4x,"+",f13.7," x6^4     +",f13.7," x1 x6     +",f13.7,&
+     WRITE(stdout,'(4x,"+",f15.7," x6       +",f15.7," x6^2      +",      &
+                        &f15.7," x6^3")') coeff(127), coeff(128), coeff(129)
+     WRITE(stdout,'(4x,"+",f15.7," x6^4     +",f15.7," x1 x6     +",f13.7,&
                       &" x1 x6^2")') coeff(130), coeff(131), coeff(132)
-     WRITE(stdout,'(4x,"+",f13.7," x1 x6^3  +",f13.7," x1^2 x6   +",      & 
-               &f13.7," x1^2 x6^2")') coeff(133), coeff(134), coeff(135)
-     WRITE(stdout,'(4x,"+",f13.7," x1^3 x6   ")') coeff(136)
-     WRITE(stdout,'(4x,"+",f13.7," x2 x6    +",f13.7," x2 x6^2   +",      &
-               &f13.7," x2 x6^3  ")') coeff(137), coeff(138), coeff(139)
-     WRITE(stdout,'(4x,"+",f13.7," x2^2 x6  +",f13.7," x2^2 x6^2 +",      & 
-               &f13.7," x2^3 x6")') coeff(140), coeff(141), coeff(142)
-     WRITE(stdout,'(4x,"+",f13.7," x3 x6    +",f13.7," x3 x6^2   +",      &
-               &f13.7," x3 x6^3  ")') coeff(143), coeff(144), coeff(145)
-     WRITE(stdout,'(4x,"+",f13.7," x3^2 x6  +",f13.7," x3^2 x6^2 +",      & 
-               &f13.7," x3^3 x6")') coeff(146), coeff(147), coeff(148)
-     WRITE(stdout,'(4x,"+",f13.7," x4 x6    +",f13.7," x4 x6^2   +",      &
-               &f13.7," x4 x6^3  ")') coeff(149), coeff(150), coeff(151)
-     WRITE(stdout,'(4x,"+",f13.7," x4^2 x6  +",f13.7," x4^2 x6^2 +",      & 
-               &f13.7," x4^3 x6")') coeff(152), coeff(153), coeff(154)
-     WRITE(stdout,'(4x,"+",f13.7," x5 x6    +",f13.7," x5 x6^2   +",      &
-               &f13.7," x5 x6^3  ")') coeff(155), coeff(156), coeff(157)
-     WRITE(stdout,'(4x,"+",f13.7," x5^2 x6  +",f13.7," x5^2 x6^2 +",      & 
-               &f13.7," x5^3 x6")') coeff(158), coeff(159), coeff(160)
-     WRITE(stdout,'(4x,"+",f13.7," x1 x2 x6 +",f13.7," x1 x2^2 x6+",      & 
-                          &f13.7," x1 x2 x6^2")') coeff(161), coeff(162), &
+     WRITE(stdout,'(4x,"+",f15.7," x1 x6^3  +",f15.7," x1^2 x6   +",      & 
+               &f15.7," x1^2 x6^2")') coeff(133), coeff(134), coeff(135)
+     WRITE(stdout,'(4x,"+",f15.7," x1^3 x6   ")') coeff(136)
+     WRITE(stdout,'(4x,"+",f15.7," x2 x6    +",f15.7," x2 x6^2   +",      &
+               &f15.7," x2 x6^3  ")') coeff(137), coeff(138), coeff(139)
+     WRITE(stdout,'(4x,"+",f15.7," x2^2 x6  +",f15.7," x2^2 x6^2 +",      & 
+               &f15.7," x2^3 x6")') coeff(140), coeff(141), coeff(142)
+     WRITE(stdout,'(4x,"+",f15.7," x3 x6    +",f15.7," x3 x6^2   +",      &
+               &f15.7," x3 x6^3  ")') coeff(143), coeff(144), coeff(145)
+     WRITE(stdout,'(4x,"+",f15.7," x3^2 x6  +",f15.7," x3^2 x6^2 +",      & 
+               &f15.7," x3^3 x6")') coeff(146), coeff(147), coeff(148)
+     WRITE(stdout,'(4x,"+",f15.7," x4 x6    +",f15.7," x4 x6^2   +",      &
+               &f15.7," x4 x6^3  ")') coeff(149), coeff(150), coeff(151)
+     WRITE(stdout,'(4x,"+",f15.7," x4^2 x6  +",f15.7," x4^2 x6^2 +",      & 
+               &f15.7," x4^3 x6")') coeff(152), coeff(153), coeff(154)
+     WRITE(stdout,'(4x,"+",f15.7," x5 x6    +",f15.7," x5 x6^2   +",      &
+               &f15.7," x5 x6^3  ")') coeff(155), coeff(156), coeff(157)
+     WRITE(stdout,'(4x,"+",f15.7," x5^2 x6  +",f15.7," x5^2 x6^2 +",      & 
+               &f15.7," x5^3 x6")') coeff(158), coeff(159), coeff(160)
+     WRITE(stdout,'(4x,"+",f15.7," x1 x2 x6 +",f15.7," x1 x2^2 x6+",      & 
+                          &f15.7," x1 x2 x6^2")') coeff(161), coeff(162), &
                                                               coeff(163)
-     WRITE(stdout,'(4x,"+",f13.7," x1^2 x2 x6")') coeff(164)
-     WRITE(stdout,'(4x,"+",f13.7," x1 x3 x6 +",f13.7," x1 x3^2 x6+",      & 
-                          &f13.7," x1 x3 x6^2")') coeff(165), coeff(166), &
+     WRITE(stdout,'(4x,"+",f15.7," x1^2 x2 x6")') coeff(164)
+     WRITE(stdout,'(4x,"+",f15.7," x1 x3 x6 +",f15.7," x1 x3^2 x6+",      & 
+                          &f15.7," x1 x3 x6^2")') coeff(165), coeff(166), &
                                                               coeff(167)
-     WRITE(stdout,'(4x,"+",f13.7," x1^2 x3 x6")') coeff(168)
-     WRITE(stdout,'(4x,"+",f13.7," x1 x4 x6 +",f13.7," x1 x4^2 x6+",      & 
-                          &f13.7," x1 x4 x6^2")') coeff(169), coeff(170), &
+     WRITE(stdout,'(4x,"+",f15.7," x1^2 x3 x6")') coeff(168)
+     WRITE(stdout,'(4x,"+",f15.7," x1 x4 x6 +",f15.7," x1 x4^2 x6+",      & 
+                          &f15.7," x1 x4 x6^2")') coeff(169), coeff(170), &
                                                               coeff(171)
-     WRITE(stdout,'(4x,"+",f13.7," x1^2 x4 x6")') coeff(172)
-     WRITE(stdout,'(4x,"+",f13.7," x1 x5 x6 +",f13.7," x1 x5^2 x6+",      & 
-                          &f13.7," x1 x5 x6^2")') coeff(173), coeff(174), &
+     WRITE(stdout,'(4x,"+",f15.7," x1^2 x4 x6")') coeff(172)
+     WRITE(stdout,'(4x,"+",f15.7," x1 x5 x6 +",f15.7," x1 x5^2 x6+",      & 
+                          &f15.7," x1 x5 x6^2")') coeff(173), coeff(174), &
                                                               coeff(175)
-     WRITE(stdout,'(4x,"+",f13.7," x1^2 x5 x6")') coeff(176)
-     WRITE(stdout,'(4x,"+",f13.7," x2 x3 x6 +",f13.7," x2 x3^2 x6+",      & 
-                          &f13.7," x2 x3 x6^2")') coeff(177), coeff(178), &
+     WRITE(stdout,'(4x,"+",f15.7," x1^2 x5 x6")') coeff(176)
+     WRITE(stdout,'(4x,"+",f15.7," x2 x3 x6 +",f15.7," x2 x3^2 x6+",      & 
+                          &f15.7," x2 x3 x6^2")') coeff(177), coeff(178), &
                                                               coeff(179)
-     WRITE(stdout,'(4x,"+",f13.7," x2^2 x3 x6")') coeff(180)
-     WRITE(stdout,'(4x,"+",f13.7," x2 x4 x6 +",f13.7," x2 x4^2 x6+",      & 
-                          &f13.7," x2 x4 x6^2")') coeff(181), coeff(182), &
+     WRITE(stdout,'(4x,"+",f15.7," x2^2 x3 x6")') coeff(180)
+     WRITE(stdout,'(4x,"+",f15.7," x2 x4 x6 +",f15.7," x2 x4^2 x6+",      & 
+                          &f15.7," x2 x4 x6^2")') coeff(181), coeff(182), &
                                                               coeff(183)
-     WRITE(stdout,'(4x,"+",f13.7," x2^2 x4 x6")') coeff(184)
-     WRITE(stdout,'(4x,"+",f13.7," x2 x5 x6 +",f13.7," x2 x5^2 x6+",      & 
-                          &f13.7," x2 x5 x6^2")') coeff(185), coeff(186), &
+     WRITE(stdout,'(4x,"+",f15.7," x2^2 x4 x6")') coeff(184)
+     WRITE(stdout,'(4x,"+",f15.7," x2 x5 x6 +",f15.7," x2 x5^2 x6+",      & 
+                          &f15.7," x2 x5 x6^2")') coeff(185), coeff(186), &
                                                               coeff(187)
-     WRITE(stdout,'(4x,"+",f13.7," x2^2 x5 x6")') coeff(188)
+     WRITE(stdout,'(4x,"+",f15.7," x2^2 x5 x6")') coeff(188)
 
-     WRITE(stdout,'(4x,"+",f13.7," x3 x4 x6 +",f13.7," x3 x4^2 x6+",      & 
-                          &f13.7," x3 x4 x6^2")') coeff(189), coeff(190), &
+     WRITE(stdout,'(4x,"+",f15.7," x3 x4 x6 +",f15.7," x3 x4^2 x6+",      & 
+                          &f15.7," x3 x4 x6^2")') coeff(189), coeff(190), &
                                                               coeff(191)
-     WRITE(stdout,'(4x,"+",f13.7," x3^2 x4 x6")') coeff(192)
-     WRITE(stdout,'(4x,"+",f13.7," x3 x5 x6 +",f13.7," x3 x5^2 x6+",      & 
-                          &f13.7," x3 x5 x6^2")') coeff(193), coeff(194), &
+     WRITE(stdout,'(4x,"+",f15.7," x3^2 x4 x6")') coeff(192)
+     WRITE(stdout,'(4x,"+",f15.7," x3 x5 x6 +",f15.7," x3 x5^2 x6+",      & 
+                          &f15.7," x3 x5 x6^2")') coeff(193), coeff(194), &
                                                               coeff(195)
-     WRITE(stdout,'(4x,"+",f13.7," x3^2 x5 x6")') coeff(196)
-     WRITE(stdout,'(4x,"+",f13.7," x4 x5 x6 +",f13.7," x4 x5^2 x6+",      & 
-                          &f13.7," x4 x5 x6^2")') coeff(197), coeff(198), &
+     WRITE(stdout,'(4x,"+",f15.7," x3^2 x5 x6")') coeff(196)
+     WRITE(stdout,'(4x,"+",f15.7," x4 x5 x6 +",f15.7," x4 x5^2 x6+",      & 
+                          &f15.7," x4 x5 x6^2")') coeff(197), coeff(198), &
                                                               coeff(199)
-     WRITE(stdout,'(4x,"+",f13.7," x4^2 x5 x6")') coeff(200)
-     WRITE(stdout,'(4x,"+",f13.7," x1x2x3x6 +",f13.7," x1x2x4x6  +",      & 
-                          &f13.7," x1x2x5x6")') coeff(201), coeff(202),   &
+     WRITE(stdout,'(4x,"+",f15.7," x4^2 x5 x6")') coeff(200)
+     WRITE(stdout,'(4x,"+",f15.7," x1x2x3x6 +",f15.7," x1x2x4x6  +",      & 
+                          &f15.7," x1x2x5x6")') coeff(201), coeff(202),   &
                                                               coeff(203)
-     WRITE(stdout,'(4x,"+",f13.7," x1x3x4x6 +",f13.7," x1x3x5x6  +",      & 
-                          &f13.7," x1x4x5x6")') coeff(204), coeff(205),   &
+     WRITE(stdout,'(4x,"+",f15.7," x1x3x4x6 +",f15.7," x1x3x5x6  +",      & 
+                          &f15.7," x1x4x5x6")') coeff(204), coeff(205),   &
                                                               coeff(206)
-     WRITE(stdout,'(4x,"+",f13.7," x2x3x4x6 +",f13.7," x2x3x5x6  +",      & 
-                          &f13.7," x2x4x5x6")') coeff(207), coeff(208),   &
+     WRITE(stdout,'(4x,"+",f15.7," x2x3x4x6 +",f15.7," x2x3x5x6  +",      & 
+                          &f15.7," x2x4x5x6")') coeff(207), coeff(208),   &
                                                               coeff(209)
-     WRITE(stdout,'(4x,"+",f13.7," x3x4x5x6")') coeff(210)
+     WRITE(stdout,'(4x,"+",f15.7," x3x4x5x6")') coeff(210)
   ENDIF
 
 RETURN

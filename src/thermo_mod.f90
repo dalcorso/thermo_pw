@@ -386,6 +386,10 @@ MODULE control_elastic_constants
                                 ! that interpolates stress or energy
              poly_degree        ! degree of the polynomial interpolation
 
+  LOGICAL :: el_cons_available=.FALSE.  ! when this flag becomes true it
+                                ! means that the elastic constant have been
+                                ! read from file and are available
+
 END MODULE control_elastic_constants
 
 MODULE control_piezoelectric_tensor
@@ -631,6 +635,9 @@ MODULE control_quartic_energy
                                              ! the polynomial fit
   REAL(DP), ALLOCATABLE :: x_min_4(:),   &   ! coordinates of the minimum
                            coeff4(:)         ! coefficients of quartic fit
+  INTEGER :: lsolve                          ! 1, 2, 3 controls the method
+                                             ! used to find the polynomial
+                                             ! coefficients (Default 2)
 
 END MODULE control_quartic_energy
 

@@ -55,7 +55,7 @@ MODULE quadratic_surfaces
   SAVE
 
   PUBLIC :: evaluate_fit_quadratic, write_fit_hessian, &
-            fit_multi_quadratic, find_fit_extremum, linsolvx, &
+            fit_multi_quadratic, find_fit_extremum,  &
             find_two_fit_extremum, &
             evaluate_fit_grad_quadratic, polifit, write_poli, &
             print_quadratic_polynomial, summarize_fitting_data, &
@@ -92,6 +92,7 @@ SUBROUTINE fit_multi_quadratic(ndata,degree,nvar,x,f,coeff)
 !
 !
 USE kinds, ONLY : DP
+USE linear_solvers, ONLY : linsolvx
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: degree, nvar, ndata
 REAL(DP), INTENT(IN) :: x(degree,ndata), f(ndata)
@@ -180,6 +181,7 @@ END SUBROUTINE fit_multi_quadratic
 
 SUBROUTINE find_fit_extremum(degree,nvar,x,f,coeff)
 USE kinds, ONLY : DP
+USE linear_solvers, ONLY : linsolvx
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: degree, nvar
 REAL(DP), INTENT(IN) :: coeff(nvar)
@@ -526,44 +528,10 @@ DEALLOCATE(ee)
 RETURN
 END SUBROUTINE diagonalize_r
 !
-!-------------------------------------------------------------------
-SUBROUTINE linsolvx(hc,n,vc,alpha)
-!-------------------------------------------------------------------
 !
-!    This routine is a driver for the correspondent lapack routines
-!    which solve a linear system of equations with real coefficients. On 
-!    input the matrix is contained in hc, and the known part in vc, on 
-!    output the solution is on alpha.
-!
-!
-USE kinds, ONLY : DP
-IMPLICIT NONE
-
-INTEGER, INTENT(IN)  :: n        ! input: logical dimension of hc
-
-REAL(DP), INTENT(IN)  ::  hc(n,n),  &  ! input: the matrix to solve
-                          vc(n)        ! input: the known part of the system
-
-REAL(DP), INTENT(OUT) ::  alpha(n)     ! output: the solution
-
-INTEGER, ALLOCATABLE    :: iwork(:)
-INTEGER :: info
-
-ALLOCATE(iwork(n))
-
-CALL dgetrf(n,n,hc,n,iwork,info)
-CALL errore('linsolvx','error in factorization',abs(info))
-alpha=vc
-CALL dgetrs('N',n,1,hc,n,iwork,alpha,n,info)
-CALL errore('linsolvx','error in solving',abs(info))
- 
-DEALLOCATE( iwork )
-
-RETURN
-END SUBROUTINE linsolvx
-
 SUBROUTINE polifit(x,y,ndati,a,m1)
 USE kinds, ONLY : DP
+USE linear_solvers, ONLY : linsolvx
 IMPLICIT NONE
 INTEGER, INTENT(IN)   ::   ndati, &  ! number of data points
                            m1        ! polynomial coefficients 
