@@ -11,7 +11,8 @@ $ECHO
 $ECHO "$EXAMPLE_DIR : starting"
 $ECHO
 $ECHO "This example shows how to use thermo_pw.x to calculate the "
-$ECHO "frequency dependent dielectric constant of Silicon."
+$ECHO "frequency dependent dielectric constant of Silicon within the"
+$ECHO "indipendent particle approximation."
 
 # set the needed environment variables
 . ../../../environment_variables

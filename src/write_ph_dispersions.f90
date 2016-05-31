@@ -28,7 +28,7 @@ SUBROUTINE write_ph_dispersions()
   USE thermo_sym, ONLY : code_group_save
   USE rap_point_group,  ONLY : code_group
   USE control_pwrun, ONLY : nr1_save, nr2_save, nr3_save
-  USE control_paths, ONLY : disp_q, disp_wq, disp_nqs, high_sym_path
+  USE control_paths, ONLY : disp_q, disp_nqs, high_sym_path
   USE control_ph,    ONLY : xmldyn
   USE ifc,           ONLY : m_loc, atm, zeu, has_zstar
   USE noncollin_module, ONLY : nspin_mag

@@ -91,8 +91,8 @@ as a function of the {\bf k}-points set.
 \item
 D) \texttt{lev\_syn\_1=.TRUE.} makes a Murnaghan fit of the 
 total energy/enthalpy as a function of the unit cell volume or 
-a quadratic fit of the total energy / enthalpy as a function of the crystal
-parameters and determines the minimum energy geometry.
+a quadratic/quartic fit of the total energy / enthalpy as a function 
+of the crystal parameters and determines the minimum energy geometry.
 
 \item
 E) \texttt{lpwscf\_syn\_1=.TRUE.} makes a self-consistent \texttt{pw.x} 
@@ -151,12 +151,12 @@ zone and their plot.
 \item
 O) Calculation of the anharmonic quantities such as the thermal expansion
 from the numerical differentiation of the crystal parameters. Calculation
-of the isoentropic quantities when programmed.
+of the isoentropic quantities when available.
 
 \item
 P) Calculation of the Gr\"uneisen parameters on a uniform mesh of {\bf q} 
 points and calculation of the thermal expansion from the Gr\"uneisen parameters.
-Calculation of the isoentropic quantities when programmed.
+Calculation of the isoentropic quantities when available.
 
 \end{itemize}
 
@@ -350,7 +350,7 @@ by the \texttt{plotband.f90} code of Quantum ESPRESSO.
 \texttt{band\_files/flpband(.\#)(.\#)} 
 (default name \texttt{output\_pband.dat(.\#)(.\#)})
 These files contain the band eigenvalues along the path. They are in a 
-format readable by \texttt{gnuplot} and are similar to the file written
+format readable by \texttt{gnuplot} and are similar to the files written
 by the \texttt{plotband.f90} code of Quantum ESPRESSO. The numbers indicate 
 the number of the line along the path and the number of the irreducible 
 representation.
@@ -391,7 +391,7 @@ This file contains the output information on the Murnaghan interpolation
 in the same format as the output of the \texttt{ev.x} program of 
 Quantum ESPRESSO package. This file is written in two formats.
 There is also an \texttt{.xml} file where the same quantities are written 
-with more digits and in a \texttt{XML} format.
+with more digits and in the \texttt{XML} format.
 
 \item 
 \texttt{energy\_files/flenergy(\#)} 
@@ -477,16 +477,14 @@ along the path and the number of the irreducible representation.
 \texttt{save\_frequencies.g\#}). For each geometry for which a phonon 
 density of states is calculated this file contains the vibrational  
 frequencies in all the {\bf q} vectors used for the phonon density of states.
-The file contains for each {\bf q} vector its weight and the frequencies,
+The files contain, for each {\bf q} vector, its weight and the frequencies,
 an information sufficient to recalculate the density of states.
-The file is readable only by \texttt{thermo\_pw}
+The file is readable only by \texttt{thermo\_pw}.
 
 \item 
 \texttt{phdisp\_files/fldos.g\#)} (default name 
-\texttt{output\_dos.dat.g\#}). For each geometry for which a phonon dispersion
-is calculated a phonon density of states is also calculated when
-\texttt{ltherm\_dos=.TRUE.}. The phonon dos is written in this file 
-with the form:
+\texttt{output\_dos.dat.g\#}). For each geometry for which a phonon density of 
+states is calculated (when \texttt{ltherm\_dos=.TRUE.}) this file contains:
 \begin{verbatim}
 #   Frequency       dos
 \end{verbatim}
@@ -529,13 +527,13 @@ of states).
 
 \item \texttt{anharm\_files/flanhar(.aux)(\_ph)} 
 (default name \texttt{output\_anharm.dat.aux})
-This file is present
-only when \texttt{lmurn=.TRUE.} and contains:
+This file is present when \texttt{lmurn=.TRUE.} or when the elastic
+constants are on file and \texttt{lb0\_t=.FALSE.}. It contains:
 \begin{verbatim}
    T     gamma(T)    C_v (T)    (C_p - C_v)(T)  (B_S - B_T) (T) 
 \end{verbatim}
 The temperature, the average Gr\"uneisen parameter, the isochoric heat
-capacity computed from interpolation of the volume dependent isochoric heat
+capacity computed from the interpolation of the volume dependent isochoric heat
 capacity at the volume corresponding to the temperature $T$, the difference
 between isobaric and isochoric heat capacity, the difference between
 isoentropic and isothermal bulk moduli.
@@ -551,7 +549,7 @@ only when \texttt{lmurn=.TRUE.} and contains:
 \begin{verbatim}
 #   T        beta      gamma    C_v (T) 
 \end{verbatim}
-the temperature, the volume thermal expansion calculated from mode 
+the temperature, the volume thermal expansion calculated from the mode 
 Gr\"uneisen parameters, the average Gr\"uneisein parameter that results
 from the new $\beta$ but keeping all the other quantities as calculated
 from the free energy derivatives. The isochoric heat capacity is calculated
@@ -620,7 +618,7 @@ temperature or volume. The format of the file is readable by the program
 \item 
 \texttt{anhar\_files/flpgrun(.\#)(.\#)} 
 (default name \texttt{output\_pgrun.dat(.\#)(.\#)})
-These files contains the Gr\"uneisen parameters along the path.
+These files contains the mode Gr\"uneisen parameters along the path.
 They are in a format readable by \texttt{gnuplot} as produced by 
 the \texttt{plotband.f90} code of Quantum
 ESPRESSO. The numbers after the geometry indicate the number of the line 
@@ -631,10 +629,10 @@ along the path and the number of the irreducible representation.
 \newpage
 \section{\color{coral}Library}
 
-\tpw\ offers a library of modules to deal with solid properties. The 
+\tpw\ offers a library of modules to deal with the properties of solids. The 
 modules are independent from the \tpw\ variables, but might
 depend on the \qe\ modules. They are used by the routines of \tpw\ 
-but can also be used by independent programs such as those contained
+but they can also be used by other programs such as those contained
 in the \texttt{tools} directory. Presently the library contains the
 following modules:
 
@@ -730,7 +728,8 @@ The number of independent variables can vary from one to six.
 
 \item
 \texttt{linear\_solvers.f90} contains routines that solve iteratively
-a linear system. 
+a linear system. It contains also a few drivers that calls LAPACK routines
+and do not require workspace information. 
 
 \item
 \texttt{mp\_asyn.f90} contains the routines needed to run many 

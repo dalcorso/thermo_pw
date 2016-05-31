@@ -12,7 +12,9 @@ $ECHO "$EXAMPLE_DIR : starting"
 $ECHO
 $ECHO "This example shows how to use thermo_pw.x to calculate the"
 $ECHO "inverse of the frequency dependent dielectric constant of Aluminum"
-$ECHO "for a complex frequency w and wavevector q."
+$ECHO "for a complex frequency w and wavevector q using"
+$ECHO "the Sternheimer equation within time-dependent density"
+$ECHO "functional theory."
 
 # set the needed environment variables
 . ../../../environment_variables

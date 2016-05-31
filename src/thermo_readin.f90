@@ -41,7 +41,7 @@ SUBROUTINE thermo_readin()
   USE control_paths,        ONLY : xqaux, wqaux, wqauxr, npk_label, letter, &
                                    label_list, nqaux, q_in_band_form, &
                                    q_in_cryst_coord, q2d, point_label_type, &
-                                   disp_q, disp_wq, disp_nqs, npx, &
+                                   disp_q, disp_nqs, npx, &
                                    label_disp_q, letter_path, nrap_plot_in, &
                                    rap_plot_in
   USE control_gnuplot,      ONLY : flgnuplot, gnuplot_command, lgnuplot

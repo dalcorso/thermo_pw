@@ -11,7 +11,9 @@ $ECHO
 $ECHO "$EXAMPLE_DIR : starting"
 $ECHO
 $ECHO "This example shows how to use thermo_pw.x to calculate the "
-$ECHO "complex dielectric constant of Silicon."
+$ECHO "complex dielectric constant of Silicon within the"
+$ECHO "indipendent particles approximation, using the Sternheimer"
+$ECHO "equation."
 
 # set the needed environment variables
 . ../../../environment_variables
