@@ -537,7 +537,7 @@ PROGRAM thermo_pw
 !    if available and saved in ph_freq_save 
 !
               CALL write_ph_freq(igeom)
-              IF (ltherm_freq) CALL write_thermo_ph(igeom)
+              IF (ltherm_freq.OR..NOT.ltherm_dos) CALL write_thermo_ph(igeom)
  
               IF (ltherm_dos) THEN
                  CALL write_phdos(igeom)

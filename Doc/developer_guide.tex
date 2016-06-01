@@ -545,15 +545,17 @@ of states).
 \item 
 \texttt{anhar\_files/flanhar(.aux\_grun)} 
 (default name \texttt{output\_anhar.dat.aux\_grun}). This file is printed
-only when \texttt{lmurn=.TRUE.} and contains: 
+when \texttt{lmurn=.TRUE.} or when the elastic
+constants are on file and \texttt{lb0\_t=.FALSE.}. It contains
 \begin{verbatim}
-#   T        beta      gamma    C_v (T) 
+#   T        beta      gamma    (C_p - C_v)(T)     (B_S - B_T) (T)
 \end{verbatim}
 the temperature, the volume thermal expansion calculated from the mode 
-Gr\"uneisen parameters, the average Gr\"uneisein parameter that results
+Gr\"uneisen parameters, the average Gr\"uneisein parameter, the difference
+between isobaric and isochoric heat capacities and the difference between
+adiabatic and isothermal bulk moduli that results
 from the new $\beta$ but keeping all the other quantities as calculated
-from the free energy derivatives. The isochoric heat capacity is calculated
-by interpolating the isochoric heat capacity.
+from the free energy derivatives. 
 
 \item 
 \texttt{anhar\_files/flanhar.celldm(\_ph)(\_grun)} 

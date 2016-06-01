@@ -28,7 +28,8 @@ CALL compute_beta(vmin_t, beta_t, temp, ntemp)
 
 alpha_t = beta_t / 3.0_DP
 
-CALL compute_cp(beta_t, vmin_t, b0_t, ph_cv, cv_t, cp_t, b0_s, gamma_t)
+CALL interpolate_cv(vmin_t, ph_cv, cv_t) 
+CALL compute_cp(beta_t, vmin_t, b0_t, cv_t, cp_t, b0_s, gamma_t)
 
 IF (ionode) THEN
 !
@@ -76,7 +77,8 @@ CALL compute_beta(vminf_t, betaf_t, temp, ntemp)
 
 alphaf_t = betaf_t / 3.0_DP
 
-CALL compute_cp(betaf_t, vminf_t, b0f_t, phf_cv, cvf_t, cpf_t, b0f_s, gammaf_t)
+CALL interpolate_cv(vminf_t, phf_cv, cvf_t) 
+CALL compute_cp(betaf_t, vminf_t, b0f_t, cvf_t, cpf_t, b0f_s, gammaf_t)
 
 IF (ionode) THEN
 !
@@ -108,11 +110,10 @@ USE constants,      ONLY : ry_kbar
 USE ions_base,      ONLY : nat
 USE thermo_mod,     ONLY : ngeo, omega_geo
 USE temperature,    ONLY : ntemp, temp
-USE thermodynamics, ONLY : ph_cv
 USE ph_freq_thermodynamics, ONLY : ph_freq_save, phf_cv
-USE anharmonic,     ONLY :  vmin_t, b0_t
+USE anharmonic,     ONLY :  vmin_t, b0_t, cv_t
 USE ph_freq_anharmonic,     ONLY :  vminf_t, cvf_t, b0f_t, cpf_t, b0f_s
-USE grun_anharmonic, ONLY : betab, cv_grun_t, cp_grun_t, b0_grun_s, &
+USE grun_anharmonic, ONLY : betab, cp_grun_t, b0_grun_s, &
                             grun_gamma_t, poly_grun, poly_order
 USE ph_freq_module, ONLY : thermal_expansion_ph, ph_freq_type,  &
                            destroy_ph_freq, init_ph_freq
@@ -196,17 +197,19 @@ END DO
 CALL mp_sum(betab, intra_image_comm)
 
 IF (ltherm_freq) THEN
-   CALL compute_cp(betab, vminf_t, b0f_t, phf_cv, cv_grun_t, cp_grun_t, &
+   CALL compute_cp(betab, vminf_t, b0f_t, cvf_t, cp_grun_t, &
                                                    b0_grun_s, grun_gamma_t)
 ELSEIF (ltherm_dos) THEN
-   CALL compute_cp(betab, vmin_t, b0_t, ph_cv, cv_grun_t, cp_grun_t, &
+   CALL compute_cp(betab, vmin_t, b0_t, cv_t, cp_grun_t, &
                                                    b0_grun_s, grun_gamma_t)
 ELSE
-  cv_grun_t=0.0_DP
-  cp_grun_t=0.0_DP
-  b0_grun_s=0.0_DP
-  grun_gamma_t=0.0_DP
+   vmin_t(1:ntemp)=vmin
+   b0_t(1:ntemp)=b0
+   CALL interpolate_cv(vmin_t, phf_cv, cv_t)
+   CALL compute_cp(betab, vmin_t, b0_t, cv_t, cp_grun_t, &
+                                              b0_grun_s, grun_gamma_t)
 ENDIF
+
 IF (ionode) THEN
 !
 !   here quantities calculated from the gruneisen parameters
@@ -214,15 +217,26 @@ IF (ionode) THEN
    filename="anhar_files/"//TRIM(flanhar)//'.aux_grun'
    IF (pressure /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+
    iu_therm=2
    OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
    WRITE(iu_therm,'("# gamma is the average gruneisen parameter ")')
-   WRITE(iu_therm,'("#   T (K)       beta(T)      gamma(T)    C_v (T) ( Ry / N/ K)  " )' )
+   WRITE(iu_therm,'("#   T (K)   beta(T)x10^6    gamma(T)      &
+                 &   (C_p - C_v)(T)      (B_S - B_T) (T) (kbar) " )' )
 
-   DO itemp = 2, ntemp-1
-      WRITE(iu_therm, '(e13.6,3e16.8)') temp(itemp), &
-              betab(itemp)*1.D6, grun_gamma_t(itemp), cv_grun_t(itemp)
-   END DO
+   IF (ltherm_freq) THEN
+      DO itemp = 2, ntemp-1
+         WRITE(iu_therm, '(5e16.8)') temp(itemp), betab(itemp)*1.D6,    &
+                        grun_gamma_t(itemp), cp_grun_t(itemp)-cvf_t(itemp),   &
+                        b0_grun_s(itemp) - b0f_t(itemp)
+      END DO
+   ELSE
+      DO itemp = 2, ntemp-1
+         WRITE(iu_therm, '(5e16.8)') temp(itemp), betab(itemp)*1.D6,    &
+                        grun_gamma_t(itemp), cp_grun_t(itemp) - cv_t(itemp), &
+                        b0_grun_s(itemp) - b0_t(itemp)
+      END DO
+   ENDIF
    CLOSE(iu_therm)
 END IF
 

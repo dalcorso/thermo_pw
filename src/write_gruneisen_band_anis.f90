@@ -18,10 +18,13 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
   USE cell_base,      ONLY : celldm
   USE data_files,     ONLY : flgrun
   USE control_paths,  ONLY : nqaux, disp_q, disp_nqs
+  USE control_mur,    ONLY : celldm0
   USE thermo_mod,     ONLY : ngeo, omega_geo, celldm_geo, no_ph
-  USE anharmonic, ONLY : celldm_t
+  USE anharmonic,     ONLY : celldm_t
+  USE ph_freq_anharmonic,  ONLY : celldmf_t
   USE control_grun,   ONLY : temp_ph, volume_ph, celldm_ph
   USE control_pwrun,  ONLY : ibrav_save, amass_save, ityp_save
+  USE control_thermo, ONLY : ltherm_dos, ltherm_freq
   USE temperature,    ONLY : temp, ntemp
   USE quadratic_surfaces, ONLY : evaluate_fit_quadratic, &
                                  evaluate_fit_grad_quadratic
@@ -180,7 +183,13 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
   frequency(:,:)= 0.0_DP
   gruneisen(:,:,:)= 0.0_DP
   IF (celldm_ph(1)==0.0_DP) THEN
-     CALL evaluate_celldm(temp_ph, cm, ntemp, temp, celldm_t)
+     IF (ltherm_freq) THEN
+        CALL evaluate_celldm(temp_ph, cm, ntemp, temp, celldmf_t)
+     ELSEIF(ltherm_dos) THEN
+        CALL evaluate_celldm(temp_ph, cm, ntemp, temp, celldm_t)
+     ELSE
+        cm(:)=celldm0(:)
+     ENDIF
   ELSE
      cm=celldm_ph(:)
   ENDIF
@@ -195,8 +204,8 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
      CALL errore('write_gruneisen_band_anis','Problem with the path',1)
 
   WRITE(stdout,'(/,5x,"Plotting Gruneisen parameters at celldm:")') 
-  WRITE(stdout,'(5x,6f15.7)') cm 
-  IF (celldm_ph(1)==0.0_DP) &
+  WRITE(stdout,'(5x,6f12.7)') cm 
+  IF (celldm_ph(1)==0.0_DP.AND.(ltherm_freq.OR.ltherm_dos)) &
             WRITE(stdout,'(5x,"Corresponding to T=",f17.8)') temp_ph
 
   DO n = 1,nks

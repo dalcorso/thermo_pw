@@ -212,8 +212,6 @@ MODULE grun_anharmonic
                                        ! by the bulk modulus
   REAL(DP), ALLOCATABLE :: alpha_an_g(:,:) ! thermal expansion tensor at each
                                         !    temperature
-  REAL(DP), ALLOCATABLE :: cv_grun_t(:) ! isochoric heat capacity as a 
-                                        ! function of temperature
   REAL(DP), ALLOCATABLE :: cp_grun_t(:) ! isobaric heat capacity as a 
                                         ! function of temperature
   REAL(DP), ALLOCATABLE :: b0_grun_s(:) ! isoentropic bulk modulus as a 

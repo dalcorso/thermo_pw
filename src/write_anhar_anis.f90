@@ -48,7 +48,8 @@ CALL compute_beta(vmin_t, beta_t, temp, ntemp)
 
 IF (.NOT. lb0_t.AND.el_cons_available) THEN
    b0_t=macro_el(5)
-   CALL compute_cp(beta_t, vmin_t, b0_t, ph_cv, cv_t, cp_t, b0_s, gamma_t)
+   CALL interpolate_cv(vmin_t, ph_cv, cv_t)
+   CALL compute_cp(beta_t, vmin_t, b0_t, cv_t, cp_t, b0_s, gamma_t)
 ENDIF
 
 IF (ionode) THEN
@@ -148,8 +149,8 @@ CALL compute_beta(vminf_t, betaf_t, temp, ntemp)
 
 IF (.NOT. lb0_t.AND.el_cons_available) THEN
    b0f_t=macro_el(5)
-   CALL compute_cp(betaf_t, vminf_t, b0f_t, phf_cv, cvf_t, cpf_t, &
-                                            b0f_s, gammaf_t)
+   CALL interpolate_cv(vminf_t, phf_cv, cvf_t)
+   CALL compute_cp(betaf_t, vminf_t, b0f_t, cvf_t, cpf_t, b0f_s, gammaf_t)
 ENDIF
 
 IF (ionode) THEN
@@ -214,14 +215,19 @@ USE temperature,    ONLY : ntemp, temp
 USE control_pressure, ONLY : pressure, pressure_kb
 USE control_grun,   ONLY : lv0_t
 USE control_mur,    ONLY : celldm0, vmin
+USE thermodynamics,         ONLY : ph_cv
 USE ph_freq_thermodynamics, ONLY : ph_freq_save, phf_cv
-USE ph_freq_anharmonic,     ONLY : celldmf_t, vminf_t, cvf_t, b0f_t, cpf_t, &
-                                   b0f_s
-USE grun_anharmonic, ONLY : alpha_an_g, grun_gamma_t, poly_grun, done_grun
+USE anharmonic,             ONLY : celldm_t, vmin_t, b0_t, cv_t
+USE ph_freq_anharmonic,     ONLY : celldmf_t, vminf_t, b0f_t, cvf_t
+USE grun_anharmonic, ONLY : alpha_an_g, grun_gamma_t, poly_grun, done_grun, &
+                            cp_grun_t, b0_grun_s, betab
 USE ph_freq_module, ONLY : thermal_expansion_ph, ph_freq_type,  &
                            destroy_ph_freq, init_ph_freq
+USE control_macro_elasticity, ONLY : macro_el
+USE control_grun,     ONLY : lb0_t
+USE control_thermo, ONLY : ltherm_dos, ltherm_freq
 USE elastic_constants, ONLY :  el_compliances
-USE control_elastic_constants, ONLY : el_cons_available
+USE control_elastic_constants, ONLY : el_cons_available, omega0
 USE quadratic_surfaces, ONLY : evaluate_fit_quadratic,      &
                                evaluate_fit_grad_quadratic
 USE control_dosq,   ONLY : nq1_d, nq2_d, nq3_d
@@ -264,10 +270,16 @@ IF (.NOT. el_cons_available) THEN
    WRITE(stdout,'(5x,"thermal expansions from Gruneisen parameters")')
    RETURN
 ENDIF
+IF (lb0_t) THEN
+   WRITE(stdout,'(5x,"You need to set lb0_t=.FALSE. to compute ")')
+   WRITE(stdout,'(5x,"thermal expansions from Gruneisen parameters")')
+   RETURN
+ENDIF
 WRITE(stdout,'(/,2x,76("+"))')
 WRITE(stdout,'(5x,"Computing the anharmonic properties from &
                                                    &Gruneisen parameters")')
-WRITE(stdout,'(5x,"Writing on file anhar_files/",a)') TRIM(flanhar)
+WRITE(stdout,'(5x,"Writing on file anhar_files/",a)') TRIM(flanhar)// &
+                                                                  '.aux_grun'
 WRITE(stdout,'(2x,76("+"),/)')
 !
 !  compute thermal expansion from gruneisen parameters. 
@@ -292,12 +304,15 @@ DO itemp = nstart, nlast
    IF (MOD(itemp-nstart+1,30)==0) &
              WRITE(6,'(5x,"Computing temperature ", i5 " / ",&
        & i5, 4x," T=",f12.2," K")') itemp-nstart+1, nlast-nstart+1, temp(itemp)
-   IF (lv0_t) THEN
+   IF (lv0_t.AND.ltherm_freq) THEN
       cm(:)=celldmf_t(:,itemp)
       vm = vminf_t(itemp)
+   ELSEIF (lv0_t.AND.ltherm_dos) THEN
+      cm(:)=celldm_t(:,itemp)
+      vm = vmin_t(itemp)
    ELSE
       cm(:)=celldm0(:)
-      vm = vmin
+      vm = omega0
    END IF
    CALL compute_x(cm,x,degree,ibrav)
    ph_freq%nu= 0.0_DP
@@ -388,8 +403,24 @@ DO itemp = nstart, nlast
 END DO
 CALL mp_sum(alpha_an_g, intra_image_comm)
 
-!CALL compute_cp(betab, vminf_t, b0f_t, phf_cv, cvf_t, cpf_t, b0f_s, &
-!                                                             grun_gamma_t)
+betab(:)=alpha_an_g(1,:)+alpha_an_g(2,:)+alpha_an_g(3,:)
+
+IF (.NOT. lb0_t .AND. el_cons_available ) THEN
+   IF (ltherm_freq) THEN
+      CALL compute_cp(betab, vminf_t, b0f_t, cvf_t, cp_grun_t, b0_grun_s, &
+                                                               grun_gamma_t)
+   ELSEIF (ltherm_dos) THEN
+      CALL compute_cp(betab, vmin_t, b0_t, cv_t, cp_grun_t, b0_grun_s, &
+                                                               grun_gamma_t)
+   ELSE
+      vmin_t(1:ntemp)=omega0
+      b0_t(1:ntemp)=macro_el(5)
+      CALL interpolate_cv(vmin_t, phf_cv, cv_t)
+      CALL compute_cp(betab, vmin_t, b0_t, cv_t, cp_grun_t, &
+                                                 b0_grun_s, grun_gamma_t)
+   END IF
+ENDIF
+
 IF (ionode) THEN
 !
 !   here quantities calculated from the gruneisen parameters
@@ -397,8 +428,57 @@ IF (ionode) THEN
    filename='anhar_files/'//TRIM(flanhar)//'.celldm_grun'
    IF (pressure /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
-   CALL write_alpha_anis(ibrav, celldmf_t, alpha_an_g, temp, ntemp, filename )
+   IF (ltherm_freq) THEN
+      CALL write_alpha_anis(ibrav, celldmf_t, alpha_an_g, temp, ntemp, &
+                                                                filename )
+   ELSEIF (ltherm_dos) THEN
+      CALL write_alpha_anis(ibrav, celldm_t, alpha_an_g, temp, ntemp, &
+                                                                filename )
+   ELSE
+!
+!     here we plot the celldm that has been used to compute the thermal
+!     expansion, not the celldm that results from the thermal expansion.
+!
+      DO itemp=1,ntemp
+         celldm_t(:,itemp)=celldm0(:)
+      ENDDO
+      CALL write_alpha_anis(ibrav, celldm_t, alpha_an_g, temp, ntemp, &
+                                                                filename )
+      celldm_t=0.0_DP
+   ENDIF
+!
+!   here quantities calculated from the gruneisen parameters
+!
+   IF (.NOT. lb0_t .AND. el_cons_available ) &
+                                                                   THEN
+      filename="anhar_files/"//TRIM(flanhar)//'.aux_grun'
+      IF (pressure /= 0.0_DP) &
+         filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+      iu_therm=2
+      OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', &
+                                                            FORM='FORMATTED')
+      WRITE(iu_therm,'("# gamma is the average gruneisen parameter ")')
+      WRITE(iu_therm,'("#   T (K)     beta(T)    gamma(T)      &
+                 &   (C_p - C_v)(T)      (B_S - B_T) (T) (kbar) " )' )
+
+      WRITE(6,*) ltherm_freq, ltherm_dos, lb0_t, el_cons_available
+      IF (ltherm_freq) THEN
+         DO itemp = 2, ntemp-1
+            WRITE(iu_therm, '(5e16.8)') temp(itemp), betab(itemp)*1.D6,   &
+                        grun_gamma_t(itemp), cp_grun_t(itemp) - cvf_t(itemp), &
+                        b0_grun_s(itemp) - b0f_t(itemp)
+         END DO
+      ELSE IF (ltherm_dos.OR.(.NOT.lb0_t.AND.el_cons_available)) THEN
+         DO itemp = 2, ntemp-1
+            WRITE(iu_therm, '(5e16.8)') temp(itemp), betab(itemp)*1.D6,    &
+                        grun_gamma_t(itemp), cp_grun_t(itemp) - cv_t(itemp), &
+                        b0_grun_s(itemp) - b0_t(itemp)
+         END DO
+      END IF
+      CLOSE(iu_therm)
+   END IF
 END IF
+
 done_grun=.TRUE.
 
 CALL destroy_ph_freq(ph_freq)

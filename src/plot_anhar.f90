@@ -152,7 +152,10 @@ IF (ltherm_dos) &
                                                    .NOT.ltherm_freq,.FALSE.)
 IF (ltherm_freq) &
    CALL gnuplot_write_file_mul_data(filename2,1,4,'color_blue',&
-                                               .NOT.ltherm_dos,.TRUE.,.FALSE.)
+                                               .NOT.ltherm_dos,.FALSE.,.FALSE.)
+
+CALL gnuplot_write_file_mul_data(filename3,1,4,'color_green', &
+                              .NOT.(ltherm_dos.OR.ltherm_freq),.TRUE.,.FALSE.)
 
 CALL gnuplot_set_fact(1._DP,.FALSE.)
 CALL gnuplot_ylabel('B_S - B_T (kbar)',.FALSE.) 
@@ -161,7 +164,10 @@ IF (ltherm_dos) &
                                              .NOT.ltherm_freq,.FALSE.)
 IF (ltherm_freq) &
    CALL gnuplot_write_file_mul_data(filename2,1,5,'color_blue',&
-                                           .NOT.ltherm_dos,.TRUE.,.FALSE.)
+                                           .NOT.ltherm_dos,.FALSE.,.FALSE.)
+
+CALL gnuplot_write_file_mul_data(filename3,1,5,'color_green', &
+                              .NOT.(ltherm_dos.OR.ltherm_freq),.TRUE.,.FALSE.)
 
 CALL gnuplot_set_fact(1.0_DP,.FALSE.)
 CALL gnuplot_ylabel('Gr\374neisen parameter ({/Symbol g})',.FALSE.) 
@@ -172,9 +178,9 @@ IF (ltherm_dos) &
 IF (ltherm_freq) &
    CALL gnuplot_write_file_mul_data(filename2,1,2,'color_blue',&
                          .NOT.ltherm_dos,.FALSE.,.FALSE.)
-IF (ltherm_freq.OR.ltherm_dos) &
+
    CALL gnuplot_write_file_mul_data(filename3,1,3,'color_green', &
-                         .FALSE.,.TRUE.,.FALSE.)
+                     .NOT.(ltherm_dos.OR.ltherm_freq),.TRUE.,.FALSE.)
 
 CALL gnuplot_end()
 

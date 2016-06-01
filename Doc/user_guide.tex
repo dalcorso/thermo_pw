@@ -1690,8 +1690,9 @@ calculated using the mode Gr\"uneisen parameters and the result is plotted in
 \texttt{green}.
 
 \item
-Crystallographic parameters, thermal expansion tensor, and volume thermal
-expansion as a function of temperature (\texttt{lmurn=.FALSE.}). The number of
+Crystallographic parameters, volume, thermal expansion tensor, and 
+volume thermal expansion as a function of temperature 
+(\texttt{lmurn=.FALSE.}). The number of
 pictures in this plot depends on the crystal system. It shows $a$, 
 $b/a$ (for orthorhombic solids) and $c/a$ (for tetragonal, hexagonal, and 
 orthorhombic solids) as a function of temperature. Then it shows the
@@ -1711,6 +1712,20 @@ colors, while $\alpha_{yy}$ is \texttt{gold}, \texttt{olive}, and
 \texttt{light-blue} in the three cases described above.
 Only $a$, the volume, and the volume thermal expansion are shown 
 for all the other crystal systems.
+When the working directory contains a file with the elastic constants and
+the flag \texttt{lb0\_t=.FALSE.} the code uses the elastic constants to
+compute the bulk modulus and plots the difference between isobaric and
+isochoric heat capacities and the difference between isobaric and isothermal
+bulk modulus. In each plot there are three curves in \texttt{red} or
+\texttt{blue} that indicate quantities calculated
+from the phonon density of states or from direct integration over the
+Brillouin zone. The \texttt{green} curves use the 
+mode Gr\"uneisen parameters to calculate the thermal expansion and
+the elastic constants to calculate the bulk modulus. The volume instead
+is the same as in the \texttt{blue} curve if \texttt{ltherm\_freq=.TRUE.}
+or as in the \texttt{red} curve if \texttt{ltherm\_freq=.FALSE.}.
+When both \texttt{ltherm\_freq=.FALSE.} and \texttt{ltherm\_dos=.FALSE.}
+the volume is kept fixed at the equilibrium volume at $T=0$ K.
 
 \item
 Mode Gr\"uneisen parameters. In this plot the mode Gr\"uneisen parameters have
