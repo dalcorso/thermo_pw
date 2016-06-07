@@ -31,9 +31,7 @@ SUBROUTINE check_el_cons()
   !
   !  First check if the elastic constants are on file
   !
-  WRITE(6,*) 'checking elastic constants ', TRIM(fl_el_cons)
   CALL read_elastic(fl_el_cons, exst)
-  WRITE(6,*) 'checking elastic constants ', TRIM(fl_el_cons), exst 
   !
   !  If the elastic constants are not available, the routine exits.
   !

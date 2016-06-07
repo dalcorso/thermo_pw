@@ -29,6 +29,7 @@ MODULE isoentropic
   SAVE
 
   PUBLIC  isobaric_heat_capacity, isoentropic_bulk_modulus,  &
+          isostress_heat_capacity,                           &
           average_gruneisen, thermal_stress,                 &
           isoentropic_elastic_constants, gen_average_gruneisen
 
@@ -152,6 +153,45 @@ END DO
 
 RETURN
 END SUBROUTINE thermal_stress
+
+SUBROUTINE isostress_heat_capacity(volume,el_con_t,alpha_t,temp,cpmcv,ntemp)
+!
+!  This routine receives the isothermal elastic constants and
+!  the thermal expansion tensor and gives as output the difference
+!  between the constant stress and the constant strain heat capacity.
+!
+
+USE kinds, ONLY : DP
+USE constants, ONLY : ry_kbar
+USE elastic_constants, ONLY : el_cons_voigt, trans_epsilon
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ntemp
+REAL(DP), INTENT(IN) :: el_con_t(6,6,ntemp), alpha_t(6,ntemp), temp(ntemp), &
+                        volume(ntemp)
+REAL(DP), INTENT(OUT) :: cpmcv(ntemp)
+
+REAL(DP) :: elcon(3,3,3,3), alp(3,3), aux(6,6)
+INTEGER :: itemp, i, j, m, n
+
+cpmcv=0.0_DP
+DO itemp=2,ntemp-1
+   aux(:,:)=el_con_t(:,:,itemp)
+   CALL el_cons_voigt(aux, elcon, .FALSE.)
+   CALL trans_epsilon(alpha_t(1,itemp), alp, 1)
+   DO i=1,3 
+      DO j=1,3
+         DO m=1,3
+            DO n=1,3
+               cpmcv(itemp) = cpmcv(itemp) + alp(i,j)*elcon(i,j,m,n)*alp(m,n)
+            END DO
+         END DO
+      END DO
+   END DO
+   cpmcv(itemp)=cpmcv(itemp) * temp(itemp) * volume(itemp) / ry_kbar
+END DO
+
+RETURN
+END SUBROUTINE isostress_heat_capacity
 
 SUBROUTINE isoentropic_elastic_constants(volume,bths,cv_t,temp,csmct,ntemp)
 !
