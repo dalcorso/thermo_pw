@@ -558,6 +558,22 @@ from the new $\beta$ but keeping all the other quantities as calculated
 from the free energy derivatives. 
 
 \item 
+\texttt{anhar\_files/flanhar(.anis)(\_ph)} 
+(default name \texttt{output\_anhar.anis(\_ph)}). This file is printed
+when \texttt{lmurn=.FALSE.}, the elastic constants are on file and 
+\texttt{lb0\_t=.FALSE.}. It contains the anharmonic properties
+calculated from the elastic constants. Presently it contains only
+\begin{verbatim}
+#   T         (C_p - C_v)(T)    
+\end{verbatim}
+the temperature, the difference between isostress and isostrain heat 
+capacities that results from the thermal expansion tensor $\alpha$ and the
+volume calculated from the crystal parameters obtained from the minimization of 
+the free energy. No extension or the \texttt{(\_ph)} extension mean
+that the free energy is calculated using the phonon density of states,
+or from a three dimensional Brillouin zone integration.
+
+\item 
 \texttt{anhar\_files/flanhar.celldm(\_ph)(\_grun)} 
 (default name \\ \texttt{output\_anhar.dat.celldm(\_ph)(\_grun)}). 
 This file is printed

@@ -1730,6 +1730,13 @@ is the same as in the \texttt{blue} curve if \texttt{ltherm\_freq=.TRUE.}
 or as in the \texttt{red} curve if \texttt{ltherm\_freq=.FALSE.}.
 When both \texttt{ltherm\_freq=.FALSE.} and \texttt{ltherm\_dos=.FALSE.}
 the volume is kept fixed at the equilibrium volume at $T=0$ K.
+The difference $C_\sigma-C_\epsilon$ of the heat capaticities computed at
+constant stress or constant strain is computed also using the anisotropic
+formula, without introducing the bulk modulus. In this case it is
+plotted in \texttt{yellow} (\texttt{orange}) when the crystallographic 
+parameters are calculated from the minimization of the free energy 
+obtained from phonon density of states (direct integration over the 
+Brillouin zone).
 
 \item
 Mode Gr\"uneisen parameters. In this plot the mode Gr\"uneisen parameters have

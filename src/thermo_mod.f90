@@ -170,6 +170,9 @@ MODULE anharmonic
                            ! function of temperature
   REAL(DP), ALLOCATABLE :: alpha_anis_t(:,:)  ! thermal expansion tensor
 
+  REAL(DP), ALLOCATABLE :: cpmcv_anis(:) ! difference cp-cv computed from
+                                         ! elastic constants
+
 END MODULE anharmonic
 
 MODULE ph_freq_anharmonic
@@ -196,6 +199,9 @@ MODULE ph_freq_anharmonic
   REAL(DP), ALLOCATABLE :: celldmf_t(:,:) ! the lattice parameters as a 
                            ! function of temperature
   REAL(DP), ALLOCATABLE :: alphaf_anis_t(:,:)  ! thermal expansion tensor
+
+  REAL(DP), ALLOCATABLE :: cpmcvf_anis(:) ! difference cp-cv computed from
+                                          ! elastic constants
 
 END MODULE ph_freq_anharmonic
 

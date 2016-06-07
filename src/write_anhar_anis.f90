@@ -15,7 +15,7 @@ USE constants,      ONLY : ry_kbar
 USE temperature,    ONLY : ntemp, temp
 USE thermodynamics, ONLY : ph_cv
 USE anharmonic,     ONLY : alpha_anis_t, vmin_t, b0_t, celldm_t, beta_t, &
-                           gamma_t, cv_t, cp_t, b0_s
+                           gamma_t, cv_t, cp_t, b0_s, cpmcv_anis
 USE control_grun,   ONLY : lb0_t
 USE control_pwrun,  ONLY : ibrav_save
 USE control_pressure, ONLY : pressure, pressure_kb
@@ -30,7 +30,7 @@ USE mp_images,      ONLY : my_image_id, root_image
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
 INTEGER :: itemp, iu_therm
-REAL(DP) :: compute_omega_geo, cpmcv(ntemp), el_con_t(6,6,ntemp)
+REAL(DP) :: compute_omega_geo, el_con_t(6,6,ntemp)
 CHARACTER(LEN=8) :: float_to_char
 
 IF (my_image_id /= root_image) RETURN
@@ -55,7 +55,8 @@ IF (.NOT. lb0_t.AND.el_cons_available) THEN
    DO itemp=1,ntemp
       el_con_t(:,:,itemp)=el_con(:,:)
    END DO
-   CALL isostress_heat_capacity(vmin_t,el_con_t,alpha_anis_t,temp,cpmcv,ntemp)
+   CALL isostress_heat_capacity(vmin_t,el_con_t,alpha_anis_t,temp,&
+                                                          cpmcv_anis,ntemp)
 ENDIF
 
 IF (ionode) THEN
@@ -109,17 +110,19 @@ IF (ionode) THEN
 !  anisotropic solids, using the thermal expansion tensor, as opposed
 !  to the volume thermal expansion used in the file aux
 !
-   filename='anhar_files/'//TRIM(flanhar)//'.anis'
-   IF (pressure /= 0.0_DP) &
-      filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
-   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', &
+   IF (.NOT. lb0_t.AND.el_cons_available) THEN
+      filename='anhar_files/'//TRIM(flanhar)//'.anis'
+      IF (pressure /= 0.0_DP) &
+         filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+      OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', &
                                                           FORM='FORMATTED')
-   WRITE(iu_therm,'("#   T (K)       (C_p - C_v)(T)  " )' )
+      WRITE(iu_therm,'("#   T (K)       (C_p - C_v)(T)  " )' )
 
-   DO itemp = 2, ntemp-1
-      WRITE(iu_therm, '(2e16.8)') temp(itemp),  cpmcv(itemp)
-   END DO
-   CLOSE(iu_therm)
+      DO itemp = 2, ntemp-1
+         WRITE(iu_therm, '(2e16.8)') temp(itemp),  cpmcv_anis(itemp)
+      END DO
+      CLOSE(iu_therm)
+   END IF
 
 END IF
 
@@ -138,12 +141,15 @@ USE temperature,    ONLY : ntemp, temp
 USE control_pressure, ONLY : pressure, pressure_kb
 USE ph_freq_thermodynamics, ONLY : phf_cv
 USE ph_freq_anharmonic, ONLY : alphaf_anis_t, vminf_t, b0f_t, celldmf_t, &
-                               betaf_t, gammaf_t, cvf_t, cpf_t, b0f_s
+                               betaf_t, gammaf_t, cvf_t, cpf_t, b0f_s, &
+                               cpmcvf_anis
+USE elastic_constants, ONLY : el_con
 USE control_grun,   ONLY : lb0_t
 USE control_pwrun,  ONLY : ibrav_save
 USE control_pressure, ONLY : pressure, pressure_kb
 USE control_macro_elasticity, ONLY : macro_el
 USE control_elastic_constants, ONLY : el_cons_available
+USE isoentropic,    ONLY : isostress_heat_capacity
 USE data_files,     ONLY : flanhar
 USE io_global,      ONLY : ionode
 USE mp_images,      ONLY : my_image_id, root_image
@@ -151,7 +157,7 @@ USE mp_images,      ONLY : my_image_id, root_image
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
 INTEGER :: itemp, iu_therm
-REAL(DP) :: compute_omega_geo
+REAL(DP) :: compute_omega_geo, el_con_t(6,6,ntemp)
 CHARACTER(LEN=8) :: float_to_char
 
 IF (my_image_id /= root_image) RETURN
@@ -173,6 +179,11 @@ IF (.NOT. lb0_t.AND.el_cons_available) THEN
    b0f_t=macro_el(5)
    CALL interpolate_cv(vminf_t, phf_cv, cvf_t)
    CALL compute_cp(betaf_t, vminf_t, b0f_t, cvf_t, cpf_t, b0f_s, gammaf_t)
+   DO itemp=1,ntemp
+      el_con_t(:,:,itemp)=el_con(:,:)
+   END DO
+   CALL isostress_heat_capacity(vminf_t,el_con_t,alphaf_anis_t,temp,&
+                                                         cpmcvf_anis,ntemp)
 ENDIF
 
 IF (ionode) THEN
@@ -221,6 +232,24 @@ IF (ionode) THEN
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 
    CALL write_alpha_anis(ibrav_save, celldmf_t, alphaf_anis_t, temp, ntemp, filename )
+!
+!  Here we write on output the anharmonic properties computed for
+!  anisotropic solids, using the thermal expansion tensor, as opposed
+!  to the volume thermal expansion used in the file aux
+!
+   IF (.NOT. lb0_t.AND.el_cons_available) THEN
+      filename='anhar_files/'//TRIM(flanhar)//'.anis_ph'
+      IF (pressure /= 0.0_DP) &
+         filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+      OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', &
+                                                          FORM='FORMATTED')
+      WRITE(iu_therm,'("#   T (K)       (C_p - C_v)(T)  " )' )
+
+      DO itemp = 2, ntemp-1
+         WRITE(iu_therm, '(2e16.8)') temp(itemp), cpmcvf_anis(itemp)
+      END DO
+      CLOSE(iu_therm)
+   END IF
 
 ENDIF
 

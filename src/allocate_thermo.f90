@@ -38,10 +38,11 @@ SUBROUTINE allocate_anharmonic()
   USE temperature,         ONLY : ntemp
   USE anharmonic,          ONLY : vmin_t, b0_t, b01_t, free_e_min_t,          &
                                   alpha_t, beta_t, gamma_t, cv_t, cp_t, b0_s, &
-                                  celldm_t, alpha_anis_t
+                                  celldm_t, alpha_anis_t, cpmcv_anis
   USE ph_freq_anharmonic,  ONLY : vminf_t, b0f_t, b01f_t, free_e_minf_t,     &
                                   alphaf_t, betaf_t, gammaf_t, cvf_t, cpf_t, &
-                                  b0f_s, celldmf_t, alphaf_anis_t
+                                  b0f_s, celldmf_t, alphaf_anis_t,           &
+                                  cpmcvf_anis
   USE grun_anharmonic,     ONLY : betab, alpha_an_g, cp_grun_t, &
                                   b0_grun_s, grun_gamma_t
   USE control_quadratic_energy, ONLY : nvar, coeff_t
@@ -60,6 +61,8 @@ SUBROUTINE allocate_anharmonic()
   IF (.NOT. ALLOCATED (gamma_t) )       ALLOCATE(gamma_t(ntemp)) 
   IF (.NOT. ALLOCATED (celldm_t) )      ALLOCATE(celldm_t(6,ntemp)) 
   IF (.NOT. ALLOCATED (alpha_anis_t) )  ALLOCATE(alpha_anis_t(6,ntemp)) 
+  IF (.NOT. ALLOCATED (cpmcv_anis) )    ALLOCATE(cpmcv_anis(ntemp)) 
+  IF (.NOT. ALLOCATED (cpmcvf_anis) )   ALLOCATE(cpmcvf_anis(ntemp)) 
   IF (.NOT. ALLOCATED (coeff_t) )       ALLOCATE(coeff_t(nvar,ntemp)) 
 
   IF (.NOT. ALLOCATED (vminf_t) )       ALLOCATE(vminf_t(ntemp)) 

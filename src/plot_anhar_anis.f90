@@ -40,7 +40,7 @@ IMPLICIT NONE
 
 CHARACTER(LEN=256) :: gnu_filename, filename, filename1, filename2, &
                       filename3, filename4, filename5, filename6, &
-                      filename7, filenameps
+                      filename7, filename8, filename9, filenameps
 CHARACTER(LEN=8) :: float_to_char
 LOGICAL :: lgrun
 INTEGER :: system
@@ -72,6 +72,8 @@ filename4='anhar_files/'//TRIM(flanhar)//'.celldm_grun'
 filename5='anhar_files/'//TRIM(flanhar)//'.aux'
 filename6='anhar_files/'//TRIM(flanhar)//'.aux_ph'
 filename7='anhar_files/'//TRIM(flanhar)//'.aux_grun'
+filename8='anhar_files/'//TRIM(flanhar)//'.anis'
+filename9='anhar_files/'//TRIM(flanhar)//'.anis_ph'
 
 lgrun=.NOT.lb0_t.AND.el_cons_available 
 
@@ -213,14 +215,24 @@ IF (lgrun) THEN
    CALL gnuplot_set_fact(1313313.0_DP,.FALSE.)
    CALL gnuplot_ylabel('C_p - C_v (J / K / N / mol)',.FALSE.)
 
-   IF (ltherm_dos) &
+   IF (ltherm_dos) THEN
       CALL gnuplot_write_file_mul_data(filename5,1,4,'color_red',.TRUE., &
                                   .FALSE.,.FALSE.)
-   IF (ltherm_freq) &
+      IF (lgrun) &
+      CALL gnuplot_write_file_mul_data(filename8,1,2,'color_gold',.FALSE., &
+                                  .FALSE.,.FALSE.)
+   ENDIF   
+   IF (ltherm_freq) THEN
       CALL gnuplot_write_file_mul_data(filename6,1,4,'color_blue',&
                                   .NOT.ltherm_dos,.NOT.lgrun,.FALSE.)
 
-   CALL gnuplot_write_file_mul_data(filename7,1,4,'color_green',&
+      IF (lgrun) &
+         CALL gnuplot_write_file_mul_data(filename9,1,2,'color_orange',&
+                                                .FALSE., .FALSE.,.FALSE.)
+
+   ENDIF
+   IF (lgrun) &
+      CALL gnuplot_write_file_mul_data(filename7,1,4,'color_green',&
                     .NOT.(ltherm_dos.OR.ltherm_freq),.TRUE.,.FALSE.)
 
    CALL gnuplot_set_fact(1.0_DP,.FALSE.)
