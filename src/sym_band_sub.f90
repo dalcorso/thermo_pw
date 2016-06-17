@@ -303,8 +303,10 @@ SUBROUTINE sym_band_sub(filband, spin_component)
      ENDDO
 
      aux_ind=0
-     CALL find_aux_ind_xk(xk(1,1), xk(1,2), aux_ind(2))
-     CALL find_aux_ind_xk(xk(1,nkstot), xk(1,nkstot-1), aux_ind(nkstot-1))
+     IF (nkstot > 1) THEN
+        CALL find_aux_ind_xk(xk(1,1), xk(1,2), aux_ind(2))
+        CALL find_aux_ind_xk(xk(1,nkstot), xk(1,nkstot-1), aux_ind(nkstot-1))
+     END IF
      DO ik=2,nkstot-1
         IF (high_symmetry(ik).AND..NOT.high_symmetry(ik+1)) &
            CALL find_aux_ind_xk(xk(1,ik), xk(1,ik+1), aux_ind(ik+1))

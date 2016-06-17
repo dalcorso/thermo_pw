@@ -143,6 +143,7 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
         exist_rap=.FALSE.
      ENDIF
   ENDIF
+  IF (nks<=1) RETURN
   !
   ALLOCATE (e(nbnd,nks))
   ALLOCATE (k(3,nks)) 
