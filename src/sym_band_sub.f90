@@ -24,10 +24,10 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   USE buffers,              ONLY : get_buffer
   USE symm_base,            ONLY : s, ftau, nsym, t_rev, sname
   USE rap_point_group,      ONLY : code_group, nclass, nelem, elem, which_irr, &
-       char_mat, name_rap, name_class, gname, ir_ram
+       char_mat, name_rap, name_class, gname, ir_ram, elem_name
   USE rap_point_group_so,   ONLY : nrap, nelem_so, elem_so, has_e, &
        which_irr_so, char_mat_so, name_rap_so, &
-       name_class_so, d_spin, name_class_so1
+       name_class_so, d_spin, name_class_so1, elem_name_so
   USE rap_point_group_is,   ONLY : nsym_is, sr_is, ftau_is, gname_is, &
        sname_is, code_group_is
   USE control_2d_bands,     ONLY : nkz, averag, vacuum, aux_ind_sur,  &
@@ -168,6 +168,12 @@ SUBROUTINE sym_band_sub(filband, spin_component)
         CALL find_info_group(nsymk,sk,t_revk,ftauk,d_spink,gk,snamek,&
              sk_is,d_spin_is,gk_is, &
              is_symmorphic,search_sym)
+        IF (noncolin) THEN
+           CALL set_class_el_name_so(nsymk,snamek,has_e,nclass,nelem_so, &
+                                     elem_so,elem_name_so)
+        ELSE
+           CALL set_class_el_name(nsymk,snamek,nclass,nelem,elem,elem_name)
+        ENDIF
         IF (noncolin.AND.domag) THEN
            IF (code_group_k(ik) /= code_group_is) &
              CALL errore('sym_band_sub','problem with code_group',1)
