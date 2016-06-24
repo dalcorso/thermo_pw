@@ -383,7 +383,8 @@ PROGRAM thermo_pw
 !
         CALL compute_elastic_compliances(el_con,el_compliances)
         CALL print_elastic_compliances(el_compliances, frozen_ions)
-        CALL print_macro_elasticity(ibrav_save,el_con,el_compliances,macro_el)
+        CALL print_macro_elasticity(ibrav_save,el_con,el_compliances,&
+                                                             macro_el,.TRUE.)
 !
 !  here compute the sound velocities, using the density of the solid and
 !  the elastic constants

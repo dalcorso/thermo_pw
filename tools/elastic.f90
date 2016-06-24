@@ -396,7 +396,7 @@ CALL print_elastic_compliances(el_compliances, .FALSE.)
 !
 !  now compute the macro elasticity quantities
 !
-CALL print_macro_elasticity(ibrav, el_con, el_compliances, macro_el)
+CALL print_macro_elasticity(ibrav, el_con, el_compliances, macro_el, .TRUE.)
 
 IF (density > 0.0_DP) THEN
 !

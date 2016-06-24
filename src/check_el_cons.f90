@@ -45,7 +45,7 @@ SUBROUTINE check_el_cons()
      el_cons_available=.TRUE.
      CALL print_elastic_constants(el_con, frozen_ions)
      CALL print_elastic_compliances(el_compliances, frozen_ions)
-     CALL print_macro_elasticity(ibrav,el_con,el_compliances,macro_el)
+     CALL print_macro_elasticity(ibrav,el_con,el_compliances,macro_el,.TRUE.)
   ENDIF
 
   RETURN

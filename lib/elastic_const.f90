@@ -1531,38 +1531,46 @@ nur = e0r/ (2.0_DP * g0r) - 1.0_DP
 RETURN
 END SUBROUTINE macro_elasticity
 
-SUBROUTINE print_macro_elasticity(ibrav, cmn, smn, macro_el)
+SUBROUTINE print_macro_elasticity(ibrav, cmn, smn, macro_el, flag)
+!
+! If flag is .true. print the macroscopic elastic properties. If it
+! is false it only computes them
+!
 USE kinds, ONLY : DP
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: cmn(6,6), smn(6,6)
 REAL(DP), INTENT(INOUT) :: macro_el(8)
 INTEGER, INTENT(IN) :: ibrav
+LOGICAL, INTENT(IN) :: flag
 REAL(DP) :: b0v, e0v, g0v, nuv, b0r, e0r, g0r, nur
 
 CALL macro_elasticity( ibrav, cmn, smn, b0v, &
                              e0v, g0v, nuv, b0r, e0r, g0r, nur )
 
-WRITE(stdout,'(/,20x,40("-"),/)')
+IF (flag) THEN
+   WRITE(stdout,'(/,20x,40("-"),/)')
 
-WRITE(stdout, '(/,5x, "Voigt approximation:")') 
+   WRITE(stdout, '(/,5x, "Voigt approximation:")') 
 
-WRITE(stdout, '(5x, "Bulk modulus  B = ",f12.5," kbar")') b0v
-WRITE(stdout, '(5x, "Young modulus E = ",f12.5," kbar")') e0v
-WRITE(stdout, '(5x, "Shear modulus G = ",f12.5," kbar")') g0v
-WRITE(stdout, '(5x,"Poisson Ratio n = ",f12.5)') nuv
+   WRITE(stdout, '(5x, "Bulk modulus  B = ",f12.5," kbar")') b0v
+   WRITE(stdout, '(5x, "Young modulus E = ",f12.5," kbar")') e0v
+   WRITE(stdout, '(5x, "Shear modulus G = ",f12.5," kbar")') g0v
+   WRITE(stdout, '(5x,"Poisson Ratio n = ",f12.5)') nuv
 
-WRITE(stdout, '(/,5x, "Reuss approximation:")') 
-WRITE(stdout, '(5x, "Bulk modulus  B = ",f12.5," kbar")') b0r
-WRITE(stdout, '(5x, "Young modulus E = ",f12.5," kbar")') e0r
-WRITE(stdout, '(5x, "Shear modulus G = ",f12.5," kbar")') g0r
-WRITE(stdout, '(5x,"Poisson Ratio n = ",f12.5)') nur
+   WRITE(stdout, '(/,5x, "Reuss approximation:")') 
+   WRITE(stdout, '(5x, "Bulk modulus  B = ",f12.5," kbar")') b0r
+   WRITE(stdout, '(5x, "Young modulus E = ",f12.5," kbar")') e0r
+   WRITE(stdout, '(5x, "Shear modulus G = ",f12.5," kbar")') g0r
+   WRITE(stdout, '(5x,"Poisson Ratio n = ",f12.5)') nur
 
-WRITE(stdout, '(/,5x, "Voigt-Reuss-Hill average of the two approximations:")') 
-WRITE(stdout, '(5x, "Bulk modulus  B = ",f12.5," kbar")') (b0v+b0r)*0.5_DP
-WRITE(stdout, '(5x, "Young modulus E = ",f12.5," kbar")') (e0v+e0r)*0.5_DP
-WRITE(stdout, '(5x, "Shear modulus G = ",f12.5," kbar")') (g0v+g0r)*0.5_DP
-WRITE(stdout, '(5x,"Poisson Ratio n = ",f12.5)') (e0v+e0r)/    &
+   WRITE(stdout, '(/,5x, "Voigt-Reuss-Hill average of the two &
+                                                         &approximations:")') 
+   WRITE(stdout, '(5x, "Bulk modulus  B = ",f12.5," kbar")') (b0v+b0r)*0.5_DP
+   WRITE(stdout, '(5x, "Young modulus E = ",f12.5," kbar")') (e0v+e0r)*0.5_DP
+   WRITE(stdout, '(5x, "Shear modulus G = ",f12.5," kbar")') (g0v+g0r)*0.5_DP
+   WRITE(stdout, '(5x,"Poisson Ratio n = ",f12.5)') (e0v+e0r)/    &
                                                  (2.d0*(g0v+g0r))-1.0_DP
+END IF
 
 macro_el(1)=b0v
 macro_el(2)=e0v
