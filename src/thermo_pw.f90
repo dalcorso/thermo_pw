@@ -100,7 +100,7 @@ PROGRAM thermo_pw
                                 print_d_piezo_tensor, print_g_piezo_tensor
   USE control_elastic_constants, ONLY : ngeo_strain, frozen_ions, &
                                 elastic_algorithm, rot_mat, omega0, at_save, &
-                                elcpvar, tau_save
+                                elcpvar, tau_save, el_cons_t_available
   USE control_macro_elasticity, ONLY : macro_el, vp, vb, vg, approx_debye_t
   USE internal_files_names,  ONLY : flfrq_thermo, flvec_thermo
   USE control_paths,    ONLY : nqaux
@@ -146,7 +146,7 @@ PROGRAM thermo_pw
              iaux
   LOGICAL  :: exst, parallelfs, run
   LOGICAL :: check_file_exists, check_dyn_file_exists
-  CHARACTER(LEN=256) :: file_dat, filename
+  CHARACTER(LEN=256) :: file_dat, filename, filelastic
   REAL(DP) :: poisson, bulkm
   ! Initialize MPI, clocks, print initial messages
   !
@@ -334,111 +334,117 @@ PROGRAM thermo_pw
   IF (lpart2_pw) THEN
 !
 !   here the second part does not use the phonon code. This is for the
-!   calculation of elastic constants
+!   calculation of elastic constants. We allow the calculation for several
+!   geometries
 !
-     part=2
-     CALL initialize_thermo_work(nwork, part, iaux)
-     !
-     !  Asyncronous work starts again. No communication is
-     !  allowed except though the master workers mechanism
-     !
-     CALL run_thermo_asynchronously(nwork, part, iaux, auxdyn)
-     !
-     ! here we return syncronized and calculate the elastic constants 
-     ! from energy or stress 
-     !
+     DO igeom=1,tot_ngeo
 
-     IF (lelastic_const) THEN
-       IF (elastic_algorithm == 'energy') THEN
+        IF (tot_ngeo > 1) CALL set_geometry_el_cons(igeom)
+
+        part=2
+        CALL initialize_thermo_work(nwork, part, iaux)
+        !
+        !  Asyncronous work starts again. No communication is
+        !  allowed except though the master workers mechanism
+        !
+        CALL run_thermo_asynchronously(nwork, part, igeom, auxdyn)
+        !
+        ! here we return syncronized and calculate the elastic constants 
+        ! from energy or stress 
+        !
+
+        IF (lelastic_const) THEN
+           IF (elastic_algorithm == 'energy') THEN
 !
 !   recover the energy calculated by all images
 !
-          CALL mp_sum(energy_geo, world_comm)
-          energy_geo=energy_geo / nproc_image
-       ELSE
+             CALL mp_sum(energy_geo, world_comm)
+             energy_geo=energy_geo / nproc_image
+           ELSE
 !
 !   recover the stress tensors calculated by all images
 !
-          CALL mp_sum(sigma_geo, world_comm)
-          sigma_geo=sigma_geo / nproc_image
-      ENDIF
+             CALL mp_sum(sigma_geo, world_comm)
+             sigma_geo=sigma_geo / nproc_image
+           ENDIF
 !
 !  the elastic constants are calculated here
 !
-        IF (elastic_algorithm=='standard') THEN
-           CALL compute_elastic_constants(sigma_geo, epsilon_geo, nwork, &
+           IF (elastic_algorithm=='standard') THEN
+              CALL compute_elastic_constants(sigma_geo, epsilon_geo, nwork, &
                                ngeo_strain, ibrav_save, laue, elcpvar)
-        ELSE IF (elastic_algorithm=='advanced') THEN
-           CALL compute_elastic_constants_adv(sigma_geo, epsilon_geo, &
+           ELSE IF (elastic_algorithm=='advanced') THEN
+              CALL compute_elastic_constants_adv(sigma_geo, epsilon_geo, &
                                nwork, ngeo_strain, ibrav_save, laue, rot_mat, &
                                                    elcpvar)
-        ELSE IF (elastic_algorithm=='energy') THEN
-           CALL compute_elastic_constants_ene(energy_geo, epsilon_geo, &
+           ELSE IF (elastic_algorithm=='energy') THEN
+              CALL compute_elastic_constants_ene(energy_geo, epsilon_geo, &
                                nwork, ngeo_strain, ibrav_save, laue, omega0, &
                                                                elcpvar)
-        END IF
-        CALL print_elastic_constants(el_con, frozen_ions)
+           END IF
+           CALL print_elastic_constants(el_con, frozen_ions)
 !
 !  now compute the elastic compliances and prints them
 !
-        CALL compute_elastic_compliances(el_con,el_compliances)
-        CALL print_elastic_compliances(el_compliances, frozen_ions)
-        CALL print_macro_elasticity(ibrav_save,el_con,el_compliances,&
-                                                             macro_el,.TRUE.)
+           CALL compute_elastic_compliances(el_con,el_compliances)
+           CALL print_elastic_compliances(el_compliances, frozen_ions)
+           CALL print_macro_elasticity(ibrav_save,el_con,el_compliances,&
+                                                   macro_el, .TRUE.)
 !
 !  here compute the sound velocities, using the density of the solid and
 !  the elastic constants
 !
-        CALL print_sound_velocities( ibrav_save, el_con, el_compliances, &
-                                   density, vp, vb, vg )
+           CALL print_sound_velocities( ibrav_save, el_con, el_compliances, &
+                                       density, vp, vb, vg )
 !
 !  here we compute the Debye temperature approximatively from the
 !  poisson ratio and the bulk modulus
 !
-        poisson=(macro_el(4)+macro_el(8) ) * 0.5_DP
-        bulkm=(macro_el(1)+macro_el(5) ) * 0.5_DP
-        CALL compute_debye_temperature_poisson(poisson, bulkm, &
+           poisson=(macro_el(4)+macro_el(8) ) * 0.5_DP
+           bulkm=(macro_el(1)+macro_el(5) ) * 0.5_DP
+           CALL compute_debye_temperature_poisson(poisson, bulkm, &
                                density, nat, omega, approx_debye_t)
-
 !
 !  compute the Debye temperature and the thermodynamic quantities
 !  within the Debye model
 !
-        CALL compute_debye_temperature(el_con, density, nat, omega, debye_t)
-        CALL write_thermo_debye()
-        CALL plot_thermo_debye()
+           CALL compute_debye_temperature(el_con, density, nat, omega, debye_t)
+           CALL write_thermo_debye(igeom)
+           CALL plot_thermo_debye(igeom)
 !
 !  save elastic constants and compliances on file
 !
-        IF (my_image_id==root_image) CALL write_elastic(fl_el_cons)
-     ENDIF
+           filelastic='elastic_constants/'//TRIM(fl_el_cons)//'.g'//&
+                                                     TRIM(int_to_char(igeom))
+           IF (my_image_id==root_image) CALL write_elastic(filelastic)
+        ENDIF
 
-     IF (lpiezoelectric_tensor) THEN
-        CALL mp_sum(polar_geo, world_comm)
-        polar_geo=polar_geo / nproc_image
+        IF (lpiezoelectric_tensor) THEN
+           CALL mp_sum(polar_geo, world_comm)
+           polar_geo=polar_geo / nproc_image
 !
 !  the elastic constants are calculated here
 !
-        CALL compute_piezo_tensor(polar_geo, epsilon_geo, nwork, &
+           CALL compute_piezo_tensor(polar_geo, epsilon_geo, nwork, &
                                ngeo_strain, ibrav_save, code_group_save)
-        CALL print_g_piezo_tensor(frozen_ions)
+           CALL print_g_piezo_tensor(frozen_ions)
 
-        IF (my_image_id==root_image) CALL read_elastic(fl_el_cons, exst)
-        CALL mp_bcast(exst, meta_ionode_id, world_comm)
-        IF (exst) THEN
-           CALL mp_bcast(el_con, meta_ionode_id, world_comm)
-           CALL mp_bcast(el_compliances, meta_ionode_id, world_comm)
-           CALL compute_d_piezo_tensor(el_compliances)
-           CALL print_d_piezo_tensor(frozen_ions)
+           IF (my_image_id==root_image) CALL read_elastic(fl_el_cons, exst)
+           CALL mp_bcast(exst, meta_ionode_id, world_comm)
+           IF (exst) THEN
+              CALL mp_bcast(el_con, meta_ionode_id, world_comm)
+              CALL mp_bcast(el_compliances, meta_ionode_id, world_comm)
+              CALL compute_d_piezo_tensor(el_compliances)
+              CALL print_d_piezo_tensor(frozen_ions)
+           ENDIF
+        END IF
+        IF (lpolarization) THEN
+           CALL mp_sum(polar_geo, world_comm)
+           polar_geo=polar_geo / nproc_image
+           CALL print_polarization(polar_geo(:,1), .TRUE. )
         ENDIF
-     END IF
-     IF (lpolarization) THEN
-        CALL mp_sum(polar_geo, world_comm)
-        polar_geo=polar_geo / nproc_image
-        CALL print_polarization(polar_geo(:,1), .TRUE. )
-     ENDIF
-
-     CALL deallocate_asyn()
+        CALL deallocate_asyn()
+     END DO
   ENDIF
 
   IF (what(1:8) /= 'mur_lc_t') ngeo=1
@@ -599,10 +605,6 @@ PROGRAM thermo_pw
            CALL plot_anhar() 
         ELSE
 !
-!   Start trying to read the elastic constants from file
-!
-           CALL check_el_cons()
-!
 !    Anisotropic solid. Compute only the crystal parameters as a function
 !    of temperature and the thermal expansion tensor
 !
@@ -610,6 +612,15 @@ PROGRAM thermo_pw
               IF (ltherm_dos) CALL quadratic_fit_t(itemp)
               IF (ltherm_freq) CALL quadratic_fit_t_ph(itemp)
            ENDDO
+!
+!  Check if the elastic constants are on file. If they are, the code
+!  computes the elastic constants as a function of temperature interpolating
+!  at the crystal parameters found in the quadratic/quartic fit
+!
+           CALL check_el_cons()
+           CALL write_elastic_t()
+           CALL plot_elastic_t()
+
            IF (ltherm_dos) CALL write_anhar_anis()
            IF (ltherm_freq) CALL write_ph_freq_anhar_anis()
 !

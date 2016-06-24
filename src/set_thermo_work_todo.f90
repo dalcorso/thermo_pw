@@ -65,7 +65,8 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
               'scf_bands',        &
               'scf_dos',          &
               'scf_ph',           &
-              'scf_disp')
+              'scf_disp',         &
+              'elastic_constants_t') 
 !
 !  then the cases in which we set the kinetic energy and the k points
 !
@@ -187,7 +188,8 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
 !
 !    Here the elastic constant calculation
 !
-        CASE ('scf_elastic_constants', 'mur_lc_elastic_constants')
+        CASE ('scf_elastic_constants', 'mur_lc_elastic_constants', &
+                                                      'elastic_constants_t')
            tstress=.TRUE.
            tprnfor=.TRUE.
            niter = electron_maxstep

@@ -146,6 +146,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            lpart2_pw=.TRUE.
            IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
         CASE ('scf_piezoelectric_tensor')
            lpart2_pw=.TRUE.
         CASE ('scf_polarization') 
@@ -211,6 +212,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
         CASE ('mur_lc_piezoelectric_tensor') 
            CALL initialize_mur(nwork)
            lpwscf_syn_1=do_scf_relax
@@ -247,6 +249,17 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            IF (meta_ionode) ios = f_mkdir_safe( 'dynamical_matrices' )
            IF (meta_ionode) ios = f_mkdir_safe( 'phdisp_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
+        CASE ('elastic_constants_t')
+           CALL initialize_mur(nwork)
+           tot_ngeo=nwork
+           lpart2_pw=.TRUE.
+           CALL init_elastic_constants_t()
+           IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
+           nwork=0
+           lev_syn_1=.FALSE.
         CASE DEFAULT
            CALL errore('initialize_thermo_work','what not recognized',1)
      END SELECT
@@ -268,7 +281,8 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            CALL initialize_ph_work(nwork)
         CASE ('mur_lc_t')
            CALL initialize_ph_work(nwork)
-        CASE ('scf_elastic_constants', 'mur_lc_elastic_constants')
+        CASE ('scf_elastic_constants', 'mur_lc_elastic_constants',&
+                                       'elastic_constants_t')
            IF (ALLOCATED(ibrav_geo))  DEALLOCATE(ibrav_geo)
            IF (ALLOCATED(celldm_geo)) DEALLOCATE(celldm_geo)
            IF (ALLOCATED(energy_geo)) DEALLOCATE(energy_geo)
@@ -349,6 +363,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
                'scf_ph',                     & 
                'scf_disp',                   &
                'scf_elastic_constants',      &
+               'elastic_constants_t',        &
                'scf_piezoelectric_tensor',   &
                'scf_polarization' )
 !
@@ -385,7 +400,8 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
 !
 !  Here the cases in which there are pwscf calculation in the second part
 !
-        CASE ('scf_elastic_constants', 'mur_lc_elastic_constants')
+        CASE ('scf_elastic_constants', 'mur_lc_elastic_constants', &
+                                       'elastic_constants_t')
            lpwscf(1:nwork)=.TRUE.
            IF (elastic_algorithm=='standard'.OR.elastic_algorithm=='advanced')&
               lstress(1:nwork)=.TRUE.

@@ -30,7 +30,8 @@ USE grun_anharmonic, ONLY : done_grun
 USE control_grun,  ONLY : lb0_t
 USE control_pwrun, ONLY : ibrav_save
 USE control_thermo,  ONLY : ltherm_dos, ltherm_freq
-USE control_elastic_constants, ONLY : el_cons_available
+USE anharmonic, ONLY : lelastic
+USE ph_freq_anharmonic, ONLY : lelasticf
 USE temperature,     ONLY : tmin, tmax
 USE control_pressure, ONLY : pressure, pressure_kb
 USE mp_images,       ONLY : my_image_id, root_image
@@ -75,7 +76,7 @@ filename7='anhar_files/'//TRIM(flanhar)//'.aux_grun'
 filename8='anhar_files/'//TRIM(flanhar)//'.anis'
 filename9='anhar_files/'//TRIM(flanhar)//'.anis_ph'
 
-lgrun=.NOT.lb0_t.AND.el_cons_available 
+lgrun = lelastic .OR. lelasticf
 
 IF (pressure /= 0.0_DP) THEN
    filename=TRIM(filename)//'.'//float_to_char(pressure_kb,1)
@@ -83,6 +84,11 @@ IF (pressure /= 0.0_DP) THEN
    filename2=TRIM(filename2)//'.'//float_to_char(pressure_kb,1)
    filename3=TRIM(filename3)//'.'//float_to_char(pressure_kb,1)
    filename4=TRIM(filename4)//'.'//float_to_char(pressure_kb,1)
+   filename5=TRIM(filename5)//'.'//float_to_char(pressure_kb,1)
+   filename6=TRIM(filename6)//'.'//float_to_char(pressure_kb,1)
+   filename7=TRIM(filename7)//'.'//float_to_char(pressure_kb,1)
+   filename8=TRIM(filename8)//'.'//float_to_char(pressure_kb,1)
+   filename9=TRIM(filename9)//'.'//float_to_char(pressure_kb,1)
 END IF
 
 CALL gnuplot_xlabel('T (K)',.FALSE.) 
@@ -95,7 +101,7 @@ IF (ltherm_freq) &
    CALL gnuplot_write_file_mul_data(filename3,1,2,'color_blue',&
                                              .NOT.ltherm_dos, .TRUE., .FALSE.)
 
-IF (ibrav_save==4.OR.ibrav_save==5.OR.ibrav_save==6.OR.ibrav_save==7) THEN
+IF (ibrav_save==4.OR.ibrav_save==6.OR.ibrav_save==7) THEN
    CALL gnuplot_ylabel('c/a ',.FALSE.) 
    IF (ltherm_dos) &
    CALL gnuplot_write_file_mul_data(filename2,1,3,'color_red',.TRUE., &

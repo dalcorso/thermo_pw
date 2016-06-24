@@ -31,6 +31,7 @@ deallocate_thermo.o \
 do_pwscf.o \
 do_berry.o \
 dos_sub.o \
+elastic_constants_t.o \
 ev_sub.o \
 float_to_char.o \
 find_symmetry.o \
@@ -51,6 +52,7 @@ plot_e_ke.o \
 plot_e_nk.o \
 plot_formf.o \
 plot_gruneisen_band_anis.o \
+plot_elastic_t.o \
 plot_epsilon_omega.o \
 plot_multi_energy.o \
 plot_mur.o \
@@ -89,6 +91,7 @@ write_e_nk.o \
 write_e_ke.o  \
 write_el_thermo.o \
 write_ev_input.o \
+write_elastic_t.o \
 write_gruneisen_band.o \
 write_gruneisen_band_anis.o \
 write_gnuplot_energy.o \

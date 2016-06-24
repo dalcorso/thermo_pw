@@ -59,7 +59,7 @@ SUBROUTINE thermo_summary()
   INTEGER :: atomic_number
   INTEGER :: laue_class
   INTEGER :: it, ia, na, ipol, jpol, unique, trig
-  LOGICAL :: read_path, lelc, lpiezo, ltherm_expansion, lmur
+  LOGICAL :: read_path, lelc, lpiezo, ltherm_expansion
   INTEGER :: ierr, system, sg_number
   LOGICAL :: check_group_ibrav
   CHARACTER(LEN=12) :: spaceg_name
@@ -70,7 +70,6 @@ SUBROUTINE thermo_summary()
   read_path=.FALSE.
   lelc = .FALSE.
   ltherm_expansion = .FALSE.
-  lmur=.FALSE.
   lpiezo=.FALSE.
   WRITE(stdout,'(/)')
   SELECT CASE (TRIM(what))
@@ -94,28 +93,23 @@ SUBROUTINE thermo_summary()
           read_path=.TRUE.
      CASE ('mur_lc') 
           WRITE(stdout,'(5x,"Calculating the volume that minimizes the energy")')
-          lmur=.TRUE.
      CASE ('mur_lc_bands') 
           WRITE(stdout,'(5x,"Calculating the bands at the Murnaghan minimum &
                                                  &volume")')
           WRITE(stdout,'(5x,"Use what=plot_bz to visualize the BZ path")')
           read_path=.TRUE.
-          lmur=.TRUE.
      CASE ('mur_lc_dos')
           WRITE(stdout,'(5x,"Calculating the electronic bands dos at minimum &
                                                  &volume")')
-          lmur=.TRUE.
      CASE ('mur_lc_ph') 
           WRITE(stdout,'(5x,"Doing a phonon calculation at the Murnaghan &
                                          &minimum volume")')
-          lmur=.TRUE.
      CASE ('mur_lc_disp') 
           WRITE(stdout,'(5x,"Doing a phonon dispersion calculation at the &
                                            & minimum volume")')
           WRITE(stdout,'(5x,"Use what=plot_bz to visualize the BZ path")')
           WRITE(stdout,'(5x,"Computing the harmonic thermodynamic quantities")')
           read_path=.TRUE.
-          lmur=.TRUE.
      CASE ('mur_lc_t') 
           WRITE(stdout,'(5x,"Computing the lattice constant and the bulk" )')
           WRITE(stdout,'(5x,"modulus as a function of temperature ")')
@@ -137,7 +131,15 @@ SUBROUTINE thermo_summary()
                                   &Murnaghan minimum volume ")')
           ENDIF
           lelc = .TRUE.
-          lmur=.TRUE.
+     CASE ('elastic_constants_t') 
+          IF (frozen_ions) THEN
+             WRITE(stdout,'(5x,"Computing the frozen ions elastic constants &
+                         &at all geometries")')
+          ELSE
+             WRITE(stdout,'(5x,"Computing the elastic constants at &
+                                  &all geometries ")')
+          ENDIF
+          lelc = .TRUE.
      CASE ('scf_piezoelectric_tensor') 
           IF (frozen_ions) THEN
              WRITE(stdout,'(5x,"Computing the frozen ions piezoelectric tensor")')
@@ -154,7 +156,6 @@ SUBROUTINE thermo_summary()
                                   &Murnaghan minimum volume")')
           ENDIF
           lpiezo=.TRUE.
-          lmur=.TRUE.
      CASE ('scf_polarization') 
           WRITE(stdout,'(5x,"Computing the spontaneous polarization")')
      CASE ('mur_lc_polarization') 

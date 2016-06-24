@@ -20,6 +20,11 @@ INTEGER :: igeo, iwork, i, j
 
 epsilon_min= - delta_epsilon * (ngeo_strain - 1 ) / 2.0_DP - epsilon_0
 epsilon_min_off= - delta_epsilon * (ngeo_strain - 1 ) - 2.0_DP * epsilon_0
+IF (ALLOCATED(epsilon_voigt)) DEALLOCATE(epsilon_voigt)
+IF (ALLOCATED(sigma_geo))     DEALLOCATE(sigma_geo)
+IF (ALLOCATED(epsilon_geo))   DEALLOCATE(epsilon_geo)
+IF (ALLOCATED(ibrav_geo))     DEALLOCATE(ibrav_geo)
+IF (ALLOCATED(celldm_geo))    DEALLOCATE(celldm_geo)
 SELECT CASE (laue) 
    CASE(29,32)
 !

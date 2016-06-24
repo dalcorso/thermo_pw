@@ -17,10 +17,11 @@ SUBROUTINE deallocate_thermo()
   USE ph_freq_thermodynamics, ONLY : phf_free_ener, phf_ener, phf_entropy, phf_cv
   USE anharmonic,     ONLY : vmin_t, b0_t, free_e_min_t, &
                              alpha_t, beta_t, gamma_t, cv_t, cp_t, b0_s, &
-                             celldm_t, alpha_anis_t, cpmcv_anis
+                             celldm_t, alpha_anis_t, cpmcv_anis, el_cons_t, &
+                             el_comp_t, macro_el_t
   USE ph_freq_anharmonic, ONLY : vminf_t, b0f_t, free_e_minf_t, &
                              alphaf_t, betaf_t, gammaf_t, cvf_t, cpf_t, b0f_s, &
-                             celldmf_t, alphaf_anis_t, cpmcvf_anis
+                             celldmf_t, alphaf_anis_t, cpmcvf_anis, el_consf_t
   USE grun_anharmonic,  ONLY : betab, alpha_an_g, cp_grun_t, &
                                b0_grun_s, grun_gamma_t, poly_grun
   USE control_paths,    ONLY : xqaux, wqaux, letter, label_list, letter_path, &
@@ -34,7 +35,8 @@ SUBROUTINE deallocate_thermo()
   USE control_pressure, ONLY : pressure_list
   USE control_conv,     ONLY : ke, keden, nk_test, sigma_test
   USE elastic_constants, ONLY : epsilon_geo, sigma_geo, epsilon_voigt
-  USE control_elastic_constants, ONLY : rot_mat, aap_mat, apa_mat, tau_save
+  USE control_elastic_constants, ONLY : rot_mat, aap_mat, apa_mat, tau_save, &
+                              el_con_geo
   USE control_debye,    ONLY : deb_energy, deb_free_energy, deb_entropy, &
                                deb_cv
   USE control_quadratic_energy, ONLY : coeff, hessian_v, hessian_e, x_pos_min
@@ -78,6 +80,11 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (b0f_s) )           DEALLOCATE(b0f_s) 
   IF ( ALLOCATED (cvf_t) )           DEALLOCATE(cvf_t) 
   IF ( ALLOCATED (cpf_t) )           DEALLOCATE(cpf_t) 
+  IF ( ALLOCATED (el_cons_t) )       DEALLOCATE(el_cons_t)
+  IF ( ALLOCATED (el_comp_t) )       DEALLOCATE(el_comp_t)
+  IF ( ALLOCATED (macro_el_t) )      DEALLOCATE(macro_el_t)
+  IF ( ALLOCATED (el_consf_t) )      DEALLOCATE(el_consf_t)
+
   IF ( ALLOCATED (alphaf_t) )        DEALLOCATE(alphaf_t) 
   IF ( ALLOCATED (betaf_t) )         DEALLOCATE(betaf_t) 
   IF ( ALLOCATED (gammaf_t) )        DEALLOCATE(gammaf_t) 

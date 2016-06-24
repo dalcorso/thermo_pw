@@ -173,6 +173,15 @@ MODULE anharmonic
   REAL(DP), ALLOCATABLE :: cpmcv_anis(:) ! difference cp-cv computed from
                                          ! elastic constants
 
+  LOGICAL :: lelastic=.FALSE.            ! elastic constants available in
+                                         ! some approximation
+  REAL(DP), ALLOCATABLE :: el_cons_t(:,:,:) ! elastic constants as a function
+                                         ! of temperature
+  REAL(DP), ALLOCATABLE :: el_comp_t(:,:,:) ! elastic compliances as a function
+                                         ! of temperature
+  REAL(DP), ALLOCATABLE :: macro_el_t(:,:) ! macroscopic elasticity as a 
+                                         ! function of t
+
 END MODULE anharmonic
 
 MODULE ph_freq_anharmonic
@@ -202,6 +211,14 @@ MODULE ph_freq_anharmonic
 
   REAL(DP), ALLOCATABLE :: cpmcvf_anis(:) ! difference cp-cv computed from
                                           ! elastic constants
+  LOGICAL :: lelasticf=.FALSE.           ! elastic constants available in
+                                         ! some approximation
+  REAL(DP), ALLOCATABLE :: el_consf_t(:,:,:) ! elastic constants as a function
+                                          ! of temperature
+  REAL(DP), ALLOCATABLE :: el_compf_t(:,:,:) ! elastic compliances as a function
+                                         ! of temperature
+  REAL(DP), ALLOCATABLE :: macro_elf_t(:,:) ! macroscopic elasticity as a 
+                                         ! function of t
 
 END MODULE ph_freq_anharmonic
 
@@ -393,6 +410,22 @@ MODULE control_elastic_constants
   LOGICAL :: el_cons_available=.FALSE.  ! when this flag becomes true it
                                 ! means that the elastic constant have been
                                 ! read from file and are available
+
+  LOGICAL :: el_cons_t_available=.FALSE.  ! when this flag becomes true it
+                                ! means that the elastic constants for each 
+                                ! geometry are available and can be 
+                                ! interpolated at each temperature
+  REAL(DP), ALLOCATABLE :: el_con_geo(:,:,:)  ! the elastic constants at
+                                ! each geometry
+  INTEGER, ALLOCATABLE :: el_con_ibrav_geo(:) ! the ibrav at each geometry
+                                ! for which the elastic constants are 
+                                ! calculated
+  REAL(DP), ALLOCATABLE :: el_con_celldm_geo(:,:) ! the celldm at each geometry
+                                ! for which the elastic constants are 
+                                ! calculated
+  REAL(DP), ALLOCATABLE :: el_con_tau_geo(:,:,:) ! the atomic coordinates at
+                                ! each geometry for which the elastic 
+                                ! constants are calculated
 
 END MODULE control_elastic_constants
 

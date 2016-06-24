@@ -1234,7 +1234,7 @@ needed for the \texttt{what='scf\_elastic\_constants'} option.
 
 \subsection{\color{web-blue}\texttt{what='mur\_lc\_t'}}
 With this option the code calculates the anharmonic 
-properties of the system within the quasi-harmonic approximation. 
+properties within the quasi-harmonic approximation. 
 The outputs of the code are the values of crystal parameters 
 (\texttt{celldm}) as a function of temperature. This calculation is done 
 by computing the phonon dispersions on all the geometries specified as in
@@ -1255,16 +1255,11 @@ are shown on the same path used for the phonon dispersions.
 In addition to the frequencies the code produces also several plots of
 the derivatives of the frequencies with respect to the crystal parameters
 multiplied by the crystal parameters. \\
-For anisotropic solids the derivatives of the frequencies are 
-used to calculate the thermal expansion tensor if the code finds a
-file that contains the elastic constants in the working directory. 
-This possibility is implemented only for tetragonal, hexagonal, trigonal, and 
-orthorhombic systems. \\
-For cubic systems, the Murnaghan equation is used to interpolate the
-Helmholtz free energy and in addition to the lattice constant as a function of
-temperature, the bulk modulus and the pressure derivative of the bulk modulus 
-are plotted as a function of temperature. Moreover the isobaric specific 
-heat, the isoentropic 
+When the Murnaghan equation is used to interpolate the
+Helmholtz free energy (\texttt{lmurn=.TRUE.}), in addition to the volume, 
+the bulk modulus and the pressure derivative of the bulk modulus are 
+plotted as a function of 
+temperature. Moreover the isobaric heat capacity, the isoentropic 
 bulk modulus, and the average Gr\"uneisen parameter are calculated as 
 a function of temperature.
 The mode Gr\"uneisen parameters are calculated with cubic interpolations of the
@@ -1276,6 +1271,28 @@ The mode Gr\"uneisen parameters are used to calculate the volume
 thermal expansion and the result is compared with the volume thermal expansion
 derived from the numerical derivative of the equilibrium volume obtained
 from the minimization of the Helmholtz free energy. 
+When the Helmholtz free energy is interpolated with a quadratic or cubic
+polynomium (\texttt{lmurn=.FALSE.}), by default, the code computes only 
+the temperature dependence of the lattice parameters and of the volume, the 
+volume thermal expansion, and the thermal expansion tensor. However if a file 
+with the elastic constants is found in the working directory 
+and \texttt{lb0\_t=.FALSE.} the bulk modulus is calculated and 
+assumed independent from the temperature so that also the isobaric specific 
+heat, the isoentropic bulk modulus, and the average Gr\"uneisen parameter 
+are calculated as a function of temperature. The derivatives of the 
+frequencies are used to calculate the thermal expansion tensor which 
+is compared with that obtained from the numerical derivatives of the 
+crystal parameters obtained from the minimization of the Helmholtz free energy.
+If many files with the elastic constants, one for each geometry, as
+produced with the option \texttt{elastic\_constants\_t}, are found
+in the working directory, the bulk modulus and the elastic constants
+are computed as a function of temperature and are used
+to calculate the other thermodynamic properties. In addition to the
+quantities plotted for cubic solids, the code plots also the elastic
+constants as a function of the temperature and the difference between
+elastic constants calculated at constant temperature or at constant
+entropy. These possibilities are implemented only for cubic, tetragonal, 
+hexagonal, trigonal, and orthorhombic systems. \\
 With this option the pressure control is active. You can specify a
 finite pressure and the Gibbs energy is minimized instead of the
 Helmholtz free energy. Note however that if the minimum is distant from 
@@ -1372,6 +1389,24 @@ Number of tasks for this option: Maximum between the the number of tasks
 needed by the \texttt{what='mur\_lc'} option and the number
 of tasks of the phonon code (see above the option \texttt{what='scf\_ph'}). \\
 
+\subsection{\color{web-blue}\texttt{what='elastic\_constants\_t'}}
+
+With this option the code computes the elastic constants for a set of
+geometries, the same geometries that are chosen with the option 
+\texttt{what='mur\_lc\_t'} and write them on separate files, one for
+each geometry. The temperature dependence of the elastic constants is
+not computed by this option. In order to plot the elastic constants
+as a function of temperature it is necessary to make a calculation
+with \texttt{what='mur\_lc\_t'} having on files the elastic constants
+calculated with the present option. In this case \texttt{thermo\_pw}
+will be able to calculate the anharmonic properties using temperature
+dependent elastic constants and bulk moduli obtained by interpolating 
+the elastic constants computed by this option at the crystal parameters 
+found at each temperature from the minimization of the free energy. 
+The parameters that control this option are the same as those used with  
+\texttt{what='mur\_lc'} for the choice of the geometries and with
+\texttt{what='scf\_elastic\_constants} for the control of the elastic
+constants.
 
 %\subsection{\color{web-blue}\texttt{what='scf\_polarization'}}
 %With this option the code calculates the spontaneous polarization.
@@ -1748,6 +1783,12 @@ The same comments made for the band structure plot apply here.
 Phonon dispersions at the geometry that corresponds to a given temperature. 
 The color are assigned on the basis of the irreducible representation of
 each mode. The same comments made for the band structure plot apply here.
+
+\item
+Temperature dependence of the elastic constants within the 
+`Quasistatic Approximation'. The elastic constants are calculated 
+at several geometries and
+intepola  
 
 \end{itemize}
 

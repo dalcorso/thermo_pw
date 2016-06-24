@@ -198,7 +198,7 @@ phf_entropy(:,igeom)=(phf_ener(:, igeom) - phf_free_ener(:, igeom))/temp(:)
 RETURN
 END SUBROUTINE write_thermo_ph
 
-SUBROUTINE write_thermo_debye()
+SUBROUTINE write_thermo_debye(igeom)
 
 USE kinds,            ONLY : DP
 USE ions_base,        ONLY : nat
@@ -215,13 +215,15 @@ USE io_global,        ONLY : ionode, ionode_id, stdout
 USE data_files,       ONLY : fltherm
 
 IMPLICIT NONE
+INTEGER, INTENT(IN) :: igeom
 CHARACTER(LEN=256) :: filename
+CHARACTER(LEN=6) :: int_to_char
 
 INTEGER  :: i, ios, idum
 INTEGER  :: itemp
 INTEGER  :: iu_therm
 !
-filename='therm_files/'//TRIM(fltherm)//'_debye'
+filename='therm_files/'//TRIM(fltherm)//'_debye.g'//TRIM(int_to_char(igeom))
 
 IF (my_image_id /= root_image) RETURN
 

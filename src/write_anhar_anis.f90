@@ -15,12 +15,13 @@ USE constants,      ONLY : ry_kbar
 USE temperature,    ONLY : ntemp, temp
 USE thermodynamics, ONLY : ph_cv
 USE anharmonic,     ONLY : alpha_anis_t, vmin_t, b0_t, celldm_t, beta_t, &
-                           gamma_t, cv_t, cp_t, b0_s, cpmcv_anis
+                           gamma_t, cv_t, cp_t, b0_s, cpmcv_anis, el_cons_t, &
+                           lelastic
 USE control_grun,   ONLY : lb0_t
 USE control_pwrun,  ONLY : ibrav_save
 USE control_pressure, ONLY : pressure, pressure_kb
 USE control_macro_elasticity, ONLY : macro_el
-USE control_elastic_constants, ONLY : el_cons_available
+USE control_elastic_constants, ONLY : el_cons_available, el_cons_t_available
 USE elastic_constants, ONLY : el_con
 USE isoentropic,    ONLY : isostress_heat_capacity
 USE data_files,     ONLY : flanhar
@@ -30,7 +31,7 @@ USE mp_images,      ONLY : my_image_id, root_image
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
 INTEGER :: itemp, iu_therm
-REAL(DP) :: compute_omega_geo, el_con_t(6,6,ntemp)
+REAL(DP) :: compute_omega_geo
 CHARACTER(LEN=8) :: float_to_char
 
 IF (my_image_id /= root_image) RETURN
@@ -48,15 +49,11 @@ ENDDO
 !
 CALL compute_beta(vmin_t, beta_t, temp, ntemp)
 
-IF (.NOT. lb0_t.AND.el_cons_available) THEN
-   b0_t=macro_el(5)
-   CALL interpolate_cv(vmin_t, ph_cv, cv_t)
+CALL interpolate_cv(vmin_t, ph_cv, cv_t)
+IF (lelastic) THEN
    CALL compute_cp(beta_t, vmin_t, b0_t, cv_t, cp_t, b0_s, gamma_t)
-   DO itemp=1,ntemp
-      el_con_t(:,:,itemp)=el_con(:,:)
-   END DO
-   CALL isostress_heat_capacity(vmin_t,el_con_t,alpha_anis_t,temp,&
-                                                          cpmcv_anis,ntemp)
+   CALL isostress_heat_capacity(vmin_t,el_cons_t,alpha_anis_t,temp,&
+                                                         cpmcv_anis,ntemp)
 ENDIF
 
 IF (ionode) THEN
@@ -68,18 +65,40 @@ IF (ionode) THEN
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
    iu_therm=2
    OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
-   WRITE(iu_therm,'("# alpha is the linear thermal expansion ")')
-   WRITE(iu_therm,'("#   T (K)        V(T) (a.u.)^3           beta (x10^6)  ")' )
+   WRITE(iu_therm,'("# beta is the volume thermal expansion ")')
+   IF (el_cons_t_available) THEN
+      WRITE(iu_therm,'("#   T (K)        V(T) (a.u.)^3       B_0(T) (kbar)    &
+                                                           &beta (x10^6)  ")' )
 
-   DO itemp = 2, ntemp-1
-      WRITE(iu_therm, '(e12.5,e20.13,e15.6)') temp(itemp), vmin_t(itemp), &
+      DO itemp = 2, ntemp-1
+         WRITE(iu_therm, '(e12.5,e20.13,2e15.6)') temp(itemp), vmin_t(itemp), &
+                                           b0_t(itemp), beta_t(itemp)*1.D6
+      END DO
+   ELSE
+      WRITE(iu_therm,'("#   T (K)        V(T) (a.u.)^3         &
+                                                        &  beta (x10^6)  ")' )
+
+      DO itemp = 2, ntemp-1
+         WRITE(iu_therm, '(e12.5,e20.13,e15.6)') temp(itemp), vmin_t(itemp), &
                                                            beta_t(itemp)*1.D6
-   END DO
+      END DO
+   END IF
+
    CLOSE(iu_therm)
+!
+!  Here we write on output the celldm parameters and their derivative
+!  with respect to temperature. 
+!
+   filename='anhar_files/'//TRIM(flanhar)//'.celldm'
+   IF (pressure /= 0.0_DP) &
+      filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+
+   CALL write_alpha_anis(ibrav_save, celldm_t, alpha_anis_t, temp, ntemp, &
+                                                                   filename )
 !
 !   here auxiliary quantities calculated from the phonon dos
 !
-   IF (.NOT. lb0_t .AND. el_cons_available) THEN
+   IF (lelastic) THEN
       filename='anhar_files/'//TRIM(flanhar)//'.aux'
       OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', &
                                                              FORM='FORMATTED')
@@ -94,23 +113,11 @@ IF (ionode) THEN
                                      b0_s(itemp) - b0_t(itemp)
       END DO
       CLOSE(iu_therm)
-   END IF
-!
-!  Here we write on output the celldm parameters and their derivative
-!  with respect to temperature. 
-!
-   filename='anhar_files/'//TRIM(flanhar)//'.celldm'
-   IF (pressure /= 0.0_DP) &
-      filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
-
-   CALL write_alpha_anis(ibrav_save, celldm_t, alpha_anis_t, temp, ntemp, &
-                                                                   filename )
 !
 !  Here we write on output the anharmonic properties computed for
 !  anisotropic solids, using the thermal expansion tensor, as opposed
 !  to the volume thermal expansion used in the file aux
 !
-   IF (.NOT. lb0_t.AND.el_cons_available) THEN
       filename='anhar_files/'//TRIM(flanhar)//'.anis'
       IF (pressure /= 0.0_DP) &
          filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
@@ -119,11 +126,10 @@ IF (ionode) THEN
       WRITE(iu_therm,'("#   T (K)       (C_p - C_v)(T)  " )' )
 
       DO itemp = 2, ntemp-1
-         WRITE(iu_therm, '(2e16.8)') temp(itemp),  cpmcv_anis(itemp)
+         WRITE(iu_therm, '(2e16.8)') temp(itemp), cpmcv_anis(itemp)
       END DO
       CLOSE(iu_therm)
    END IF
-
 END IF
 
 RETURN
@@ -142,7 +148,7 @@ USE control_pressure, ONLY : pressure, pressure_kb
 USE ph_freq_thermodynamics, ONLY : phf_cv
 USE ph_freq_anharmonic, ONLY : alphaf_anis_t, vminf_t, b0f_t, celldmf_t, &
                                betaf_t, gammaf_t, cvf_t, cpf_t, b0f_s, &
-                               cpmcvf_anis
+                               cpmcvf_anis, el_consf_t, lelasticf
 USE elastic_constants, ONLY : el_con
 USE control_grun,   ONLY : lb0_t
 USE control_pwrun,  ONLY : ibrav_save
@@ -175,14 +181,10 @@ ENDDO
 !
 CALL compute_beta(vminf_t, betaf_t, temp, ntemp)
 
-IF (.NOT. lb0_t.AND.el_cons_available) THEN
-   b0f_t=macro_el(5)
+IF (lelasticf) THEN
    CALL interpolate_cv(vminf_t, phf_cv, cvf_t)
    CALL compute_cp(betaf_t, vminf_t, b0f_t, cvf_t, cpf_t, b0f_s, gammaf_t)
-   DO itemp=1,ntemp
-      el_con_t(:,:,itemp)=el_con(:,:)
-   END DO
-   CALL isostress_heat_capacity(vminf_t,el_con_t,alphaf_anis_t,temp,&
+   CALL isostress_heat_capacity(vminf_t,el_consf_t,alphaf_anis_t,temp,&
                                                          cpmcvf_anis,ntemp)
 ENDIF
 
@@ -206,9 +208,19 @@ IF (ionode) THEN
    END DO
    CLOSE(iu_therm)
 !
+!  Here we write on output the celldm parameters and their derivative
+!  with respect to temperature. 
+!
+   filename='anhar_files/'//TRIM(flanhar)//'.celldm_ph'
+   IF (pressure /= 0.0_DP) &
+      filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+
+   CALL write_alpha_anis(ibrav_save, celldmf_t, alphaf_anis_t, temp, ntemp, &
+                                                               filename )
+!
 !   here auxiliary quantities calculated from the phonon dos
 !
-   IF (.NOT.lb0_t.AND.el_cons_available) THEN
+   IF (lelasticf) THEN
       filename='anhar_files/'//TRIM(flanhar)//'.aux_ph'
       OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
       WRITE(iu_therm,'("# gamma is the average Gruneisen parameter ")')
@@ -222,22 +234,11 @@ IF (ionode) THEN
                                      b0f_s(itemp) - b0f_t(itemp)
       END DO
       CLOSE(iu_therm)
-   END IF
-!
-!  Here we write on output the celldm parameters and their derivative
-!  with respect to temperature. 
-!
-   filename='anhar_files/'//TRIM(flanhar)//'.celldm_ph'
-   IF (pressure /= 0.0_DP) &
-      filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
-
-   CALL write_alpha_anis(ibrav_save, celldmf_t, alphaf_anis_t, temp, ntemp, filename )
 !
 !  Here we write on output the anharmonic properties computed for
 !  anisotropic solids, using the thermal expansion tensor, as opposed
 !  to the volume thermal expansion used in the file aux
 !
-   IF (.NOT. lb0_t.AND.el_cons_available) THEN
       filename='anhar_files/'//TRIM(flanhar)//'.anis_ph'
       IF (pressure /= 0.0_DP) &
          filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
@@ -268,8 +269,9 @@ USE control_grun,   ONLY : lv0_t
 USE control_mur,    ONLY : celldm0, vmin
 USE thermodynamics,         ONLY : ph_cv
 USE ph_freq_thermodynamics, ONLY : ph_freq_save, phf_cv
-USE anharmonic,             ONLY : celldm_t, vmin_t, b0_t, cv_t
-USE ph_freq_anharmonic,     ONLY : celldmf_t, vminf_t, b0f_t, cvf_t
+USE anharmonic,             ONLY : celldm_t, vmin_t, b0_t, cv_t, lelastic, &
+                                   el_comp_t
+USE ph_freq_anharmonic,     ONLY : celldmf_t, vminf_t, b0f_t, cvf_t, lelasticf
 USE grun_anharmonic, ONLY : alpha_an_g, grun_gamma_t, poly_grun, done_grun, &
                             cp_grun_t, b0_grun_s, betab
 USE ph_freq_module, ONLY : thermal_expansion_ph, ph_freq_type,  &
@@ -278,7 +280,8 @@ USE control_macro_elasticity, ONLY : macro_el
 USE control_grun,     ONLY : lb0_t
 USE control_thermo, ONLY : ltherm_dos, ltherm_freq
 USE elastic_constants, ONLY :  el_compliances
-USE control_elastic_constants, ONLY : el_cons_available, omega0
+USE control_elastic_constants, ONLY : el_cons_available, el_cons_t_available, &
+                                      omega0
 USE quadratic_surfaces, ONLY : evaluate_fit_quadratic,      &
                                evaluate_fit_grad_quadratic
 USE control_dosq,   ONLY : nq1_d, nq2_d, nq3_d
@@ -316,16 +319,12 @@ END IF
 !  If the elastic constants are not available, this calculation cannot be
 !  don_ge
 !
-IF (.NOT. el_cons_available) THEN
+IF ( .NOT.(lelastic.OR.lelasticf) ) THEN
    WRITE(stdout,'(5x,"The elastic constants are needed to compute ")')
    WRITE(stdout,'(5x,"thermal expansions from Gruneisen parameters")')
    RETURN
 ENDIF
-IF (lb0_t) THEN
-   WRITE(stdout,'(5x,"You need to set lb0_t=.FALSE. to compute ")')
-   WRITE(stdout,'(5x,"thermal expansions from Gruneisen parameters")')
-   RETURN
-ENDIF
+
 WRITE(stdout,'(/,2x,76("+"))')
 WRITE(stdout,'(5x,"Computing the anharmonic properties from &
                                                    &Gruneisen parameters")')
@@ -444,33 +443,37 @@ DO itemp = nstart, nlast
 !  The thermal expansion needs to be multiplied by the elastic compliances
 !
    aux=0.0_DP
-   DO itens=1,6
-      DO jtens=1,6
-         aux(itens)=aux(itens) + el_compliances(itens,jtens) &
-                                              *alpha(jtens)
+   IF (el_cons_t_available) THEN
+      DO itens=1,6
+         DO jtens=1,6
+            aux(itens)=aux(itens) + el_comp_t(itens,jtens,itemp) &
+                                                 *alpha(jtens)
+         END DO
       END DO
-   END DO
+   ELSEIF (el_cons_available) THEN
+      DO itens=1,6
+         DO jtens=1,6
+            aux(itens)=aux(itens) + el_compliances(itens,jtens)*alpha(jtens)
+         END DO
+      END DO
+   END IF
    alpha_an_g(:,itemp) = -aux(:) * ry_kbar / vm
 END DO
 CALL mp_sum(alpha_an_g, intra_image_comm)
 
 betab(:)=alpha_an_g(1,:)+alpha_an_g(2,:)+alpha_an_g(3,:)
 
-IF (.NOT. lb0_t .AND. el_cons_available ) THEN
-   IF (ltherm_freq) THEN
-      CALL compute_cp(betab, vminf_t, b0f_t, cvf_t, cp_grun_t, b0_grun_s, &
+IF (ltherm_freq) THEN
+   CALL compute_cp(betab, vminf_t, b0f_t, cvf_t, cp_grun_t, b0_grun_s, &
                                                                grun_gamma_t)
-   ELSEIF (ltherm_dos) THEN
-      CALL compute_cp(betab, vmin_t, b0_t, cv_t, cp_grun_t, b0_grun_s, &
+ELSEIF (ltherm_dos) THEN
+   CALL compute_cp(betab, vmin_t, b0_t, cv_t, cp_grun_t, b0_grun_s, &
                                                                grun_gamma_t)
-   ELSE
-      vmin_t(1:ntemp)=omega0
-      b0_t(1:ntemp)=macro_el(5)
-      CALL interpolate_cv(vmin_t, phf_cv, cv_t)
-      CALL compute_cp(betab, vmin_t, b0_t, cv_t, cp_grun_t, &
+ELSE
+   CALL interpolate_cv(vmin_t, phf_cv, cv_t)
+   CALL compute_cp(betab, vmin_t, b0_t, cv_t, cp_grun_t, &
                                                  b0_grun_s, grun_gamma_t)
-   END IF
-ENDIF
+END IF
 
 IF (ionode) THEN
 !
@@ -499,34 +502,30 @@ IF (ionode) THEN
    ENDIF
 
 
-   IF (.NOT. lb0_t .AND. el_cons_available ) &
-                                                                   THEN
-      filename="anhar_files/"//TRIM(flanhar)//'.aux_grun'
-      IF (pressure /= 0.0_DP) &
-         filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
-      iu_therm=2
-      OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', &
-                                                            FORM='FORMATTED')
-      WRITE(iu_therm,'("# gamma is the average gruneisen parameter ")')
-      WRITE(iu_therm,'("#   T (K)     beta(T)    gamma(T)      &
-                 &   (C_p - C_v)(T)      (B_S - B_T) (T) (kbar) " )' )
+   filename="anhar_files/"//TRIM(flanhar)//'.aux_grun'
+   IF (pressure /= 0.0_DP) &
+      filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+   iu_therm=2
+   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', &
+                                                         FORM='FORMATTED')
+   WRITE(iu_therm,'("# gamma is the average gruneisen parameter ")')
+   WRITE(iu_therm,'("#   T (K)     beta(T)    gamma(T)      &
+              &   (C_p - C_v)(T)      (B_S - B_T) (T) (kbar) " )' )
 
-      WRITE(6,*) ltherm_freq, ltherm_dos, lb0_t, el_cons_available
-      IF (ltherm_freq) THEN
-         DO itemp = 2, ntemp-1
-            WRITE(iu_therm, '(5e16.8)') temp(itemp), betab(itemp)*1.D6,   &
-                        grun_gamma_t(itemp), cp_grun_t(itemp) - cvf_t(itemp), &
-                        b0_grun_s(itemp) - b0f_t(itemp)
-         END DO
-      ELSE IF (ltherm_dos.OR.(.NOT.lb0_t.AND.el_cons_available)) THEN
-         DO itemp = 2, ntemp-1
-            WRITE(iu_therm, '(5e16.8)') temp(itemp), betab(itemp)*1.D6,    &
-                        grun_gamma_t(itemp), cp_grun_t(itemp) - cv_t(itemp), &
-                        b0_grun_s(itemp) - b0_t(itemp)
-         END DO
-      END IF
-      CLOSE(iu_therm)
+   IF (ltherm_freq) THEN
+      DO itemp = 2, ntemp-1
+         WRITE(iu_therm, '(5e16.8)') temp(itemp), betab(itemp)*1.D6,   &
+                     grun_gamma_t(itemp), cp_grun_t(itemp) - cvf_t(itemp), &
+                     b0_grun_s(itemp) - b0f_t(itemp)
+      END DO
+   ELSE
+      DO itemp = 2, ntemp-1
+         WRITE(iu_therm, '(5e16.8)') temp(itemp), betab(itemp)*1.D6,    &
+                     grun_gamma_t(itemp), cp_grun_t(itemp) - cv_t(itemp), &
+                     b0_grun_s(itemp) - b0_t(itemp)
+      END DO
    END IF
+   CLOSE(iu_therm)
 END IF
 
 done_grun=.TRUE.
@@ -556,7 +555,7 @@ iu_therm=2
 OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
 
 IF (ibrav==1 .OR. ibrav==2 .OR. ibrav==3 ) THEN
-   WRITE(iu_therm,'("#   T (K)      celldm(1)      alpha_xx(x10^6)")' )
+   WRITE(iu_therm,'("#   T (K)        celldm(1)         alpha_xx(x10^6)")' )
    DO itemp = 1, ntemp-1
       WRITE(iu_therm, '(e12.5,4e20.9)') temp(itemp), celldmf_t(1,itemp), &
                                             alpha_t(1,itemp)*1.D6

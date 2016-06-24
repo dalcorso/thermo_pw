@@ -1,7 +1,10 @@
 New in version 0.6.0
 
-The output files have been reorganized in subdirectories. 
+Introduced the option what='elastic_constant_t' to compute the elastic
+constants at several geometries and obtain their temperature dependence
+through the quasistatic approximation.
 
+The output files have been reorganized in subdirectories. 
 
 23/04/2016 Version 0.5.0 of thermo_pw is now frozen.
 

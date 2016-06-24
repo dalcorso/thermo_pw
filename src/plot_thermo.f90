@@ -86,10 +86,9 @@ IF (lgnuplot.AND.ionode) &
 RETURN
 END SUBROUTINE plot_thermo
 
-SUBROUTINE plot_thermo_debye()
+SUBROUTINE plot_thermo_debye(igeom)
 !
 !  This is a driver to plot the quantities written inside fltherm_debye
-!  
 !
 USE kinds,           ONLY : DP
 USE control_gnuplot, ONLY : flgnuplot, gnuplot_command, lgnuplot
@@ -105,22 +104,25 @@ USE mp_images,       ONLY : root_image, my_image_id
 USE io_global,       ONLY : ionode
 
 IMPLICIT NONE
+INTEGER, INTENT(IN) :: igeom
 CHARACTER(LEN=256) :: gnu_filename, filename, psfilename
+CHARACTER(LEN=6) :: int_to_char
 INTEGER :: system
 INTEGER :: ierr
 
 IF ( my_image_id /= root_image ) RETURN
 
-gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_debye'
+gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_debye.g'//&
+                                                   TRIM(int_to_char(igeom))
 CALL gnuplot_start(gnu_filename)
 
-psfilename=TRIM(flpstherm)//'_debye'
+psfilename=TRIM(flpstherm)//'_debye.g'//TRIM(int_to_char(igeom))
 IF (tmin ==1._DP) THEN
    CALL gnuplot_write_header(psfilename, 0.0_DP, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
 ELSE
    CALL gnuplot_write_header(psfilename, tmin, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
 ENDIF
-filename='therm_files/'//TRIM(fltherm)//'_debye'
+filename='therm_files/'//TRIM(fltherm)//'_debye.g'//TRIM(int_to_char(igeom))
 CALL gnuplot_xlabel('T (K)', .FALSE.) 
 CALL gnuplot_ylabel('Debye vibrational energy (kJ / (N mol))',.FALSE.) 
 CALL gnuplot_set_fact(1313.3130_DP, .FALSE.) 
