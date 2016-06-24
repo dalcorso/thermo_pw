@@ -38,8 +38,20 @@ MODULE point_group
               'color_magenta', 'color_gold', 'color_pink', 'color_black', &
               'color_olive', 'color_brown', 'color_light_blue', 'color_orange' /
 
+  CHARACTER(LEN=8) :: sym_label(64)
+  DATA sym_label / 'E',   '2z', '2y',  '2x',   '2xy', '2x-y', '4-z', '4z',     &
+              '2xz',   '2-xz', '4y', '4-y',   '2yz', '2y-z', '4-x', '4x',     &
+              '3-x-y-z', '3-xyz',  '3xy-z', '3x-yz', '3xyz', '3-xy-z',        &
+              '3x-y-z', '3-x-yz',  '6z', '6-z', '3z', '3-z', '21-10', '2210', & 
+              '2010', '2110', &
+              'i',   'i2z',   'i2y', 'i2x',  'i2xy', 'i2x-y', 'i4-z', 'i4z',  &
+              'i2xz', 'i2-xz', 'i4y', 'i4-y', 'i2yz', 'i2y-z', 'i4-x', 'i4x', &
+              'i3-x-y-z', 'i3-xyz', 'i3xy-z', 'i3x-yz', 'i3xyz', 'i3-xy-z',   &
+              'i3x-y-z', 'i3-x-yz', 'i6z', 'i6-z', 'i3z', 'i3-z', 'i21-10', &
+              'i2210', 'i2010', 'i2110' /
+
   PUBLIC convert_rap, find_aux_ind_two_groups, has_sigma_h, is_right_oriented,&
-         color_rap
+         color_rap, find_group_info_ext, sym_label
 
 CONTAINS
   SUBROUTINE convert_rap(n, list_in, list_out, group_in, group_out, aux_ind, &
@@ -9572,6 +9584,1301 @@ CONTAINS
   RETURN
 
   END SUBROUTINE find_aux_ind_two_groups
+
+
+  SUBROUTINE find_group_info_ext(nsym, smat, code_group_ext, &
+                                                  which_elem, group_desc)
+!
+!  This subroutine extends the find_group_info routine of QE.
+!  It provides a code of the point group that identify unambigously 
+!  which point group it is 
+!  among all the possible orientations of the axis. Accounting for the
+!  orientation, there are a total of 136 different point groups. Furthermore 
+!  it orders the symmetry elements, so that
+!  it correspond to a fixed ordering. 
+!
+!  The following table gives the extended code of each group and the
+!  sequence of operations in each group. The numbers are the
+!  same as in the symm_base routine of QE that lists 64 symmetry operations.
+!  The extended point number is identified from the point group
+!  and within the point group from the sum of the square of the number of the 
+!  symmetry operator that gives a unique signature to the group
+!  See also the point_group manual of thermo_pw
+!
+!  The points groups and their codes are the following:
+!
+!  1)   C_1  E            1          = 1
+!  2)   C_2  E  C_2z      1  2       = 5
+!  3)   C_2  E  C_2y      1  3       = 10
+!  4)   C_2  E  C_2x      1  4       = 17
+!  5)   C_2  E  C_2xy     1  5       = 26
+!  6)   C_2  E  C_2-xy    1  6       = 37
+!  7)   C_2  E  C_2xz     1  9       = 82
+!  8)   C_2  E  C_2-xz    1  10      = 101
+!  9)   C_2  E  C_2yz     1  13      = 170
+! 10)   C_2  E  C_2-yz    1  14      = 197
+! 11)   C_2  E  C_21-10   1  29      = 842
+! 12)   C_2  E  C_2210    1  30      = 901
+! 13)   C_2  E  C_2010    1  31      = 962
+! 14)   C_2  E  C_2110    1  32      = 1025
+! 15)   C_s  E  s_2z      1  34      = 1157
+! 16)   C_s  E  s_2y      1  35      = 1226
+! 17)   C_s  E  s_2x      1  36      = 1297
+! 18)   C_s  E  s_2xy     1  37      = 1370
+! 19)   C_s  E  s_2-xy    1  38      = 1445
+! 20)   C_s  E  s_2xz     1  41      = 1682
+! 21)   C_s  E  s_2-xz    1  42      = 1765
+! 22)   C_s  E  s_2yz     1  45      = 2026
+! 23)   C_s  E  s_2-yz    1  46      = 2117
+! 24)   C_s  E  s_21-10   1  61      = 3722
+! 25)   C_s  E  s_2210    1  62      = 3845
+! 26)   C_s  E  s_2010    1  63      = 3970
+! 27)   C_s  E  s_2110    1  64      = 4097
+! 28)   C_i  E  i         1  33      = 1090
+! 29)   C_3  E  C_3xyz     C_3-x-y-z 1  21  17   = 731
+! 30)   C_3  E  C_3-xyz    C_3x-y-z  1  18  23   = 854
+! 31)   C_3  E  C_3-x-yz   C_3xy-z   1  24  19   = 938
+! 32)   C_3  E  C_3x-yz    C_3-xy-z  1  20  22   = 885
+! 33)   C_3  E  C_3z       C_3-z     1  27  28   = 1514
+! 34)   C_4  E  C_4z C_2z  C_4-z     1  8   2  7  = 118
+! 35)   C_4  E  C_4y C_2y  C_4-y     1  11  3  12 = 275
+! 36)   C_4  E  C_4x C_2x  C_4-x     1  16  4  15 = 498
+! 37)   C_6  E  C_6z C_3z  C_2z  C_3-z C_6-z  1  25  27  2  28  26 = 2819
+! 38)   D_2  E  C_2z C_2y  C_2x      1  2   3   4   = 30
+! 39)   D_2  E  C_2z C_2xy C_2-xy    1  2   5   6   = 66
+! 40)   D_2  E  C_2y C_2xz C_2-xz    1  3   9   10  = 191
+! 41)   D_2  E  C_2x C_2yz C_2y-z    1  4   13  14  = 382
+! 42)   D_2  E  C_2z C_21-10  C_2110 1  2   29  32  = 1870
+! 43)   D_2  E  C_2z C_2210   C_2010 1  2   30  31  = 1866
+
+! 44)   D_3  E  C_3z C_3-z C_2x C_2010 C_2110   1  27 28 4 31 32 = 3515
+! 45)   D_3  E  C_3z C_3-z C_2y C_21-10 C_2210  1  27 28 3 29 30 = 3264
+! 46)   D_3  E  C_3xyz C_3-x-y-z C_2x-y C_2-xz C_2y-z  1  21 17 6  10 14 = 1063
+! 47)   D_3  E  C_3x-yz C_3-xy-z C_2xy C_2-xz C_2yz 1  20 22 5  10 13 = 1179 
+! 48)   D_3  E  C_3-xyz C_3x-y-z C_2xy C_2xz C_2y-z 1  18 23 5  9  14 = 1156
+! 49)   D_3  E  C_3-x-yz C_3xy-z C_2x-y C_2xz C_2yz 1  24 19 6  9  13 = 1224
+
+! 50)   D_4  E  C_4z C_2z C_4-z C_2x C_2y C_2xy C_2x-y 1 8 2 7 4 3 5 6 = 204
+! 51)   D_4  E  C_4y C_2y C_4-y C_2z C_2x C_2xz C_2x-z 1 11 3 12 2 4 9 10 = 476
+! 52)   D_4  E  C_4x C_2x C_4-x C_2y C_2z C_2x C_2yz C_2y-z 1 15 4 16 3 2 13 14 !                                                                         =876
+! 53)   D_6  E  C_6z C_3z C_2z C_3-z C_6-z C_2y C_2x C_21-10 C_2210 C_2010
+!            C_2110  1 25 27 2 28 26 3 4 29 30 31 32 = 6570
+! 54)   C_2v E  C_2x   s_z   s_y     1   4   34  35  = 2398
+! 55)   C_2v E  C_2x   s_yz  s_y-z   1   4   45  46  = 4158
+! 56)   C_2v E  C_2y   s_z   s_x     1   3   34  36  = 2462
+! 57)   C_2v E  C_2y   s_xz  s_x-z   1   3   41  42  = 3455
+! 58)   C_2v E  C_2z   s_y   s_x     1   2   35  36  = 2526
+! 59)   C_2v E  C_2z   s_xy  s_x-y   1   2   37  38  = 2818
+! 60)   C_2v E  C_2xy  s_z   s_x-y   1   5   34  38  = 2626
+! 61)   C_2v E  C_2x-y s_z   s_xy    1   6   34  37  = 2562
+! 62)   C_2v E  C_2xz  s_y   s_x-z   1   9   35  42  = 3071
+! 63)   C_2v E  C_2x-z s_y   s_xz    1   10  35  41  = 3007
+! 64)   C_2v E  C_2yz  s_x   s_y-z   1   13  36  46  = 3582
+! 65)   C_2v E  C_2y-z s_x   s_yz    1   14  36  45  = 3518
+! 66)   C_2v E  C_2z   s_210  s_010  1   2   62  63  = 7818
+! 67)   C_2v E  C_2z   s_1-10 s_110  1   2   61  64  = 7822
+! 68)   C_2v E  C_2210  s_z   s_010  1   30  34  63  = 6026
+! 69)   C_2v E  C_21-10  s_z  s_110  1   29  34  64  = 6094
+! 70)   C_2v E  C_2110  s_z   s_1-10 1   32  34  61  = 5902
+! 71)   C_2v E  C_2010  s_z   s_210  1   31  34  62  = 5962
+! 72)   C_3v E  C_3z C_3-z s_x s_010 s_110 1 27 28 36 63 64 = 10875
+! 73)   C_3v E  C_3z C_3-z s_y s_1-10 s_210 1 27 28 35 61 62 = 10304
+! 74)   C_3v E  C_3xyz C_3-x-y-z s_x-y s_x-z s_y-z 1 21 17 38 42 46 = 6055
+! 75)   C_3v E  C_3x-yz C_3-xy-z s_xy s_x-z s_yz   1 20 22 37 42 45 = 6043
+! 76)   C_3v E  C_3-xyz C_3x-y-z s_xy s_xz s_y-z   1 18 23 37 41 46 = 6020
+! 77)   C_3v E  C_3-x-yz C_3xy-z s_x-y s_xz s_yz   1 24 19 38 41 45 = 6088
+! 78)   C_4v E  C_4z C_2z C_4-z  s_y  s_x  s_xy s_x-y  1 8 2 7 35 36 37 38 =
+!                                                                       5452
+! 79)   C_4v E  C_4y C_2y C_4-y  s_z  s_x  s_xz s_x-z  1 11 3 12 34 36 41 42 =
+!                                                                       6172
+! 80)   C_4v E  C_4x C_2x C_4-x  s_z  s_y  s_yz s_y-z  1 16 4 15 34 35 45 46 =
+!                                                                       7020
+! 81)   C_6v E  C_6z C_3z C_2z  C_3-z  C_6-z s_y  s_x  s_1-10 s_210 s_010 s_110
+!                1 25 27 2 28 26 35 36 61 62 63 64 = 20970
+! 82)   C_2h E  C_2z   i s_z    1  2  33  34 = 2250
+! 83)   C_2h E  C_2y   i s_y    1  3  33  35 = 2324
+! 84)   C_2h E  C_2x   i s_x    1  4  33  36 = 2402
+! 85)   C_2h E  C_2xy  i s_xy   1  5  33  37 = 2484
+! 86)   C_2h E  C_2x-y i s_x-y  1  6  33  38 = 2570
+! 87)   C_2h E  C_2xz  i s_xz   1  9  33  41 = 2852
+! 88)   C_2h E  C_2x-z i s_x-z  1  10 33  42 = 2954
+! 89)   C_2h E  C_2yz  i s_yz   1  13 33  45 = 3284
+! 90)   C_2h E  C_2y-z i s_y-z  1  14 33  46 = 3402
+! 91)   C_2h E  C_2110 i s_110  1  32 33  64 = 6210
+! 92)   C_2h E  C_2010 i s_010  1  31 33  63 = 6020 
+! 93)   C_2h E  C_2210 i s_210  1  30 33  62 = 5834 
+! 94)   C_2h E  C_21-10 i s_1-10 1 29 33  61 = 5652
+! 95)   C_3h E  C_3z  C_3-z s_z s_6z s_6-z 1 27 28 34 57 58 = 9283
+! 96)   C_4h E  C_4z C_2z C_4-z i s_4z s_z s_4-z 1 8 2 7  33 40 34 39 = 5484
+! 97)   C_4h E  C_4y C_2y C_4-y i s_4y s_y s_4-y 1 11 3 12 33 43 35 44 = 6374
+! 98)   C_4h E  C_4x C_2x C_4-x i s_4x s_x s_4-x 1 16 4 15 33 48 36 47 = 7396
+! 99)   C_6h E  C_6z  C_3z C_2 C_3-z C_6-z i s_6z s_3z s_z s_3-z s_6-z 
+!               1  25 27 2 28 26 33 57 59 34 60 58 = 18758 
+! 100)  D_2h E  C_2z C_2y C_2x i s_z s_y s_x  1 2 3 4 33 34 35 36 = 4796
+! 101)  D_2h E  C_2x C_2yz C_2y-z i s_x s_yz s_y-z  1 4 13 14 33 36 45 46 = 6908
+! 102)  D_2h E  C_2y C_2xz C_2x-z i s_y s_xz s_x-z  1 3 9 10 33 35 41 42 = 5950
+! 103)  D_2h E  C_2z C_2xy C_2x-y i s_z s_xy s_x-y  1 2 5 6 33 34 37 38 = 5124
+! 104)  D_2h E  C_2z C_21-10 C_2110 i s_z s_1-10 s_110  1 2 29 32 33 34 61 64 =
+!                                                      11932
+! 105)  D_2h E  C_2z C_2210 C_2010 i s_z s_210 s_010  1 2 30 31 33 34 62 63 = 
+!                                                      11924
+! 106)  D_3h E  C_3z C_3-z C_2x C_2010 C_2110 s_z s_6z s_6-z s_y s_1-10 s_210   
+!                      1   27  28 4 31  32  34   57  58 35  61  62 = 20074
+! 107)  D_3h E  C_3z C_3-z C_2y C_21-10 C_2210 s_z s_6z s_6-z s_x s_010 s_110   
+!                      1   27  28 3  29  30  34  57  58 36  63  64 = 20394 
+! 108)  D_4h E  C_4z C_2z C_4-z C_2y C_2x C_xy C_x-y i s_4z s_z s_4-z s_y 
+!            s_x s_xy s_x-y 1  8 2 7 3  4  5  6  33 40 34 39 35 36 37 38 = 10904
+! 109)  D_4h E  C_4y C_2y C_4-y C_2x C_2z C_xz C_x-z  i s_4y s_y s_4-y s_y 
+!            s_x s_xz s_x-z 1 11 3 12  2  4  9 10 33 43 35 44 34 36 41 42 = 
+!                                                                12472
+! 110)  D_4h E C_4x C_2x C_4-x C_2y C_2z C_yz C_y-z i s_4x s_x s_4-x s_y s_z 
+!            s_yz s_y-z 1 15 4 16 3  2 13 14 33 47 36 48 35 34 45 46 = 
+!                                                                14296
+! 111)  D_6h E C_6z C_3z C_2z C_3-z C_6-z C_2y C_2x C_21-10 C_2210 C_2010 C_2110
+!            i s_6z s_3z s_z s_3-z s_6-z s_y  s_x  s_1-10  s_210 s_010 s_110
+!            1 25 27 2 28 26 3 4 29 30 31 32 33 57 59 34 60 58 35 36 61 62 
+!            63 64 = 40660
+! 112)  D_2d E s_4z C_2z s_4-z C_2y C_2x s_xy s_x-y 1 40 2 39 3 4 37 38 = 5964
+! 113)  D_2d E s_4z C_2z s_4-z C_2xy C_2x-y s_y s_x 1 40 2 39 5 6 35 36 = 5708
+! 114)  D_2d E s_4y C_2y s_4-y C_2x C_2z s_xz s_x-z 1 43 3 44 4 2 41 42 = 7260
+! 115)  D_2d E s_4y C_2y s_4-y C_xz C_x-z s_z s_x   1 43 3 44 9 10 34 36 = 6428
+! 116)  D_2d E s_4x C_2x s_4-x C_2y C_2z s_yz s_y-z 1 48 4 47 3 2 45 46 = 8684
+! 117)  D_2d E s_4x C_2x s_4-x C_yz C_2y-z s_z s_y  1 48 4 47 13 14 34 35 = 7276
+! 118)  D_3d E C_3z C_3-z C_2x C_2010 C_2110 i s_3z s_3-z s_x s_010 s_110  
+!                    1 27 28 4 31 32 33 59 60 36 63 64 = 21046
+! 119)  D_3d E C_3z C_3-z C_2y C_21-10 C_2210 i s_3z s_3-z s_y s_1-10 s_210  
+!                    1 27 28 3 29 30 33 59 60 35 61 62 = 20224
+! 120)  D_3d E C_3xyz C_3-x-y-z C_2x-y C_2x-z C_2y-z i s_3xyz s_3-x-y-z s_x-y 
+!            s_x-z s_y-z  1 21 17 6 10 14 33 49 53 38 42 46 = 12686
+! 121)  D_3d E C_3x-yz C_3-xy-z C_2xy C_2x-z C_2yz i s_3x-yz s_3-xy-z s_xy 
+!            s_x-z s_yz  1 20 22 5 10 13 33 52 54 37 42 45  = 13046
+! 122)  D_3d E C_3-xyz C_3x-y-z C_2xy C_2xz C_2y-z  i s_3-xyz s_3x-y-z s_xy 
+!            s_xz s_y-z  1 18 23 5 9 14  33 50 55 37 41 46 = 12936
+! 123)  D_3d E C_3-x-yz C_3xy-z C_2x-y C_2xz C_2yz i s_3-x-yz s_3xy-z s_x-y 
+!            s_xz s_yz  1 24 19 6 9 13  33 56 51 38 41 45 = 13200
+! 124)  S_4  E s_4z C_2z s_4-z 1 40 2 39 = 3126  
+! 125)  S_4  E s_4y C_2y s_4y  1 43 3 44 = 3795
+! 126)  S_4  E s_4x C_2x s_4-x 1 48 4 47 = 4530
+! 127)  S_6  E C_3z C_3-z i s_3z s_3-z 1 27 28 33 59 60 = 9684
+! 128)  S_6  E C_3xyz C_3-x-y-z i s_3xyz s_3-x-y-z  1 21 17 33 53 49 = 7030  
+! 129)  S_6  E C_3-xyz C_3x-y-z i s_3-xyz s_3x-y-z  1 18 23 33 50 44 = 6379
+! 130)  S_6  E C_3-x-yz C_3xy-z i s_3-x-yz s_3xy-z  1 22 19 33 56 51 = 7672
+! 131)  S_6  E C_3x-yz C_3-xy-z i s_3x-yz s_3-xy-z  1 20 22 33 52 54 = 7594
+! 132)  T    E C_2z C_2y C_2x C_3-x-y-z C_3-xyz C_3xy-z C_3x-yz C_3xyz C_3-xy-z
+!            C_3x-y-z C_3-x-yz  1 2 3 4 17 18 19 20 21 22 23 24 = 3434
+! 133)  T_h  E C_2z C_2y C_2x C_3-x-y-z C_3-xyz C_3xy-z C_3x-yz C_3xyz C_3-xy-z
+!            C_3x-y-z C_3-x-yz i s_z s_y s_x s_3-x-y-z s_3-xyz s_3xy-z s_3x-yz
+!            s_3xyz s_3-xy-z s_3x-y-z s_3-x-yz 1 2 3 4 17 18 19 20 21 22 23 24
+!            33 34 35 36 49 50 51 52 53 54 55 56 = 30292 
+! 134)  T_d  E C_2z C_2y C_2x C_3-x-y-z C_3-xyz C_3xy-z C_3x-yz C_3xyz C_3-xy-z
+!            C_3x-y-z C_3-x-yz s_xy s_x-y s_4-z s_4z s_xz s_x-z s_4y s_4-y s_yz
+!            s_y-z s_4-x s_4x 1 2 3 4 17 18 19 20 21 22 23 24 37 38 39 40 41 
+!            42 43 44 45 46 47 48 = 25252
+! 135)  O    E C_2z C_2y C_2x C_2xy C_2x-y C_4-z C_4z C_2xz C_2x-z C_4y C_4-y 
+!            C_2yz C_2y-z C_4x C_4-x C_3-x-y-z C_3-xyz C_3xy-z C_3x-yz C_3xyz 
+!            C_3-xy-z C_3x-y-z C_3-x-yz 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
+!            17 18 19 20 21 22 23 24 = 4900
+! 136)  O_h  E C_2z C_2y C_2x C_2xy C_2x-y C_4-z C_4z C_2xz C_2x-z C_4y C_4-y 
+!            C_2yz C_2y-z C_4x C_4-x C_3-x-y-z C_3-xyz C_3xy-z C_3x-yz C_3xyz 
+!            C_3-xy-z C_3x-y-z C_3-x-yz i s_z s_y s_x s_2xy s_2x-y s_4-z s_4z
+!            s_2xz s_2x-z s_4y s_4-y s_2yz s_2y-z s_4x s_4-x s_3-x-y-z s_3-xyz 
+!            s_3xy-z s_3x-yz s_3xyz s_3-xy-z s_3x-y-z s_3-x-yz 1 2 3 4 5 6 7 8 
+!            9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 33 34 35 36 37 
+!            38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 = 53576
+
+  IMPLICIT NONE
+  INTEGER, INTENT(IN) :: nsym
+  REAL(DP), INTENT(IN) :: smat(3,3,nsym)
+  INTEGER, INTENT(OUT) :: code_group_ext 
+  INTEGER, INTENT(OUT) :: which_elem(nsym)
+  INTEGER, INTENT(OUT) :: group_desc(48)
+
+  INTEGER, PARAMETER :: npg = 136
+  INTEGER :: hash_tab (npg)
+  DATA hash_tab /   1,    5,   10,   17,   26,   37,   82,  101,  170,  197, &
+                  842,  901,  962, 1025, 1157, 1226, 1297, 1370, 1445, 1682, &
+                 1765, 2026, 2117, 3722, 3845, 3970, 4097, 1090,  731,  854, &
+                  938,  885, 1514,  118,  275,  498, 2819,   30,   66,  191, &
+                  382, 1870, 1866, 3515, 3264, 1063, 1179, 1156, 1224,  204, &
+                  476,  876, 6570, 2398, 4158, 2462, 3455, 2526, 2818, 2626, &
+                 2562, 3071, 3007, 3582, 3518, 7818, 7822, 6026, 6094, 5902, &
+                 5962,10875,10304, 6055, 6043, 6020, 6088, 5452, 6172, 7020, &
+                20970, 2250, 2324, 2402, 2484, 2570, 2852, 2954, 3284, 3402, &
+                 6210, 6020, 5834, 5652, 9283, 5484, 6374, 7396,18758, 4796, &
+                 6908, 5950, 5124,11932,11924,20074,20394,10904,12472,14296, & 
+                40660, 5964, 5708, 7260, 6428, 8684, 7276,21046,20224,12686, &
+                13046,12936,13200, 3126, 3795, 4530, 9684, 7030, 6379, 7672, &
+                 7594, 3434,30292,25252, 4900,53576 /  
+
+  INTEGER :: group_tags(nsym), group_tag
+
+  INTEGER :: isym, jsym, i
+
+  CALL find_group_tags(nsym, smat, group_tags)
+
+  group_tag=0
+  DO isym=1,nsym
+     group_tag = group_tag + group_tags(isym)**2
+  ENDDO
+
+  code_group_ext=0
+  DO i=1,npg
+     IF (group_tag==hash_tab(i)) code_group_ext=i
+  ENDDO
+  IF (code_group_ext==0) &
+      CALL errore('find_group_info_ext','input group unknown',1)
+!
+!  set the description of the point group. This is the order of the
+!  elements used in the table of projective representations
+!
+  group_desc=0
+  group_desc(1)=1
+  SELECT CASE (code_group_ext)
+     CASE (1)
+!
+!  C_2
+!
+     CASE (2)
+       group_desc(2)=2
+     CASE (3)
+       group_desc(2)=3
+     CASE (4)
+       group_desc(2)=4
+     CASE (5)
+       group_desc(2)=5
+     CASE (6)
+       group_desc(2)=6
+     CASE (7)
+       group_desc(2)=9
+     CASE (8)
+       group_desc(2)=10
+     CASE (9)
+       group_desc(2)=13
+     CASE (10)
+       group_desc(2)=14
+     CASE (11)
+       group_desc(2)=29
+     CASE (12)
+       group_desc(2)=30
+     CASE (13)
+       group_desc(2)=31
+     CASE (14)
+       group_desc(2)=32
+!
+!   C_s
+!
+     CASE (15)
+       group_desc(2)=34
+     CASE (16)
+       group_desc(2)=35
+     CASE (17)
+       group_desc(2)=36
+     CASE (18)
+       group_desc(2)=37
+     CASE (19)
+       group_desc(2)=38
+     CASE (20)
+       group_desc(2)=41
+     CASE (21)
+       group_desc(2)=42
+     CASE (22)
+       group_desc(2)=45
+     CASE (23)
+       group_desc(2)=46
+     CASE (24)
+       group_desc(2)=61
+     CASE (25)
+       group_desc(2)=62
+     CASE (26)
+       group_desc(2)=63
+     CASE (27)
+       group_desc(2)=64
+!
+!  C_i
+!
+     CASE (28)
+       group_desc(2)=33
+!
+!  C_3    E   C_3   C_3^-1
+!
+     CASE (29)
+       group_desc(2)=21
+       group_desc(3)=17
+     CASE (30)
+       group_desc(2)=18
+       group_desc(3)=23
+     CASE (31)
+       group_desc(2)=24
+       group_desc(3)=19
+     CASE (32)
+       group_desc(2)=20
+       group_desc(3)=22
+     CASE (33)
+       group_desc(2)=27
+       group_desc(3)=28
+!
+!  C_4   E  C_4  C_2  C_4^-1
+!
+     CASE (34)
+       group_desc(2)=8
+       group_desc(3)=2
+       group_desc(4)=7
+     CASE (35)
+       group_desc(2)=11
+       group_desc(3)=3
+       group_desc(4)=12
+     CASE (36)
+       group_desc(2)=16
+       group_desc(3)=4
+       group_desc(4)=15
+!
+!  C_6   C_6z  C_3z  C_2z  C_3-z  C_6-z
+!
+     CASE (37)
+       group_desc(2)=25
+       group_desc(3)=27
+       group_desc(4)=2
+       group_desc(5)=28
+       group_desc(6)=26
+!
+!  D_2  order written above
+!
+     CASE (38)
+       group_desc(2)=2
+       group_desc(3)=3
+       group_desc(4)=4
+     CASE (39)
+       group_desc(2)=2
+       group_desc(3)=5
+       group_desc(4)=6
+     CASE (40)
+       group_desc(2)=3
+       group_desc(3)=9
+       group_desc(4)=10
+     CASE (41)
+       group_desc(2)=4
+       group_desc(3)=13
+       group_desc(4)=14
+     CASE (42)
+       group_desc(2)=2
+       group_desc(3)=29
+       group_desc(4)=32
+     CASE (43)
+       group_desc(2)=2
+       group_desc(3)=30
+       group_desc(4)=31
+!
+!  D_3
+!
+     CASE (44)
+       group_desc(2)=27
+       group_desc(3)=28
+       group_desc(4)=4
+       group_desc(5)=31
+       group_desc(6)=32
+     CASE (45)
+       group_desc(2)=27
+       group_desc(3)=28
+       group_desc(4)=3
+       group_desc(5)=29
+       group_desc(6)=30
+     CASE (46)
+       group_desc(2)=21
+       group_desc(3)=17
+       group_desc(4)=6
+       group_desc(5)=10
+       group_desc(6)=14
+     CASE (47)
+       group_desc(2)=20
+       group_desc(3)=22
+       group_desc(4)=5
+       group_desc(5)=10
+       group_desc(6)=13
+     CASE (48)
+       group_desc(2)=18
+       group_desc(3)=23
+       group_desc(4)=5
+       group_desc(5)=9
+       group_desc(6)=14
+     CASE (49)
+       group_desc(2)=24
+       group_desc(3)=19
+       group_desc(4)=6
+       group_desc(5)=9
+       group_desc(6)=13
+!
+!  D_4
+!
+     CASE (50)
+       group_desc(2)=8
+       group_desc(3)=2
+       group_desc(4)=7
+       group_desc(5)=4
+       group_desc(6)=3
+       group_desc(7)=5
+       group_desc(8)=6
+     CASE (51)
+       group_desc(2)=11
+       group_desc(3)=3
+       group_desc(4)=12
+       group_desc(5)=2
+       group_desc(6)=4
+       group_desc(7)=9
+       group_desc(8)=10
+     CASE (52)
+       group_desc(2)=16
+       group_desc(3)=4
+       group_desc(4)=15
+       group_desc(5)=3
+       group_desc(6)=2
+       group_desc(7)=13
+       group_desc(8)=14
+!
+!  D_6
+!
+     CASE (53)
+       group_desc(2)=25
+       group_desc(3)=27
+       group_desc(4)=2
+       group_desc(5)=28
+       group_desc(6)=26
+       group_desc(7)=3
+       group_desc(8)=4
+       group_desc(9)=29
+       group_desc(10)=30
+       group_desc(11)=31
+       group_desc(12)=32
+!
+!  C_2v
+!
+     CASE (54)
+       group_desc(2)=4
+       group_desc(3)=34
+       group_desc(4)=35
+     CASE (55)
+       group_desc(2)=4
+       group_desc(3)=45
+       group_desc(4)=46
+     CASE (56)
+       group_desc(2)=3
+       group_desc(3)=34
+       group_desc(4)=36
+     CASE (57)
+       group_desc(2)=3
+       group_desc(3)=41
+       group_desc(4)=42
+     CASE (58)
+       group_desc(2)=2
+       group_desc(3)=35
+       group_desc(4)=36
+     CASE (59)
+       group_desc(2)=2
+       group_desc(3)=37
+       group_desc(4)=38
+     CASE (60)
+       group_desc(2)=5
+       group_desc(3)=34
+       group_desc(4)=38
+     CASE (61)
+       group_desc(2)=6
+       group_desc(3)=34
+       group_desc(4)=37
+     CASE (62)
+       group_desc(2)=9
+       group_desc(3)=35
+       group_desc(4)=42
+     CASE (63)
+       group_desc(2)=10
+       group_desc(3)=35
+       group_desc(4)=41
+     CASE (64)
+       group_desc(2)=13
+       group_desc(3)=36
+       group_desc(4)=46
+     CASE (65)
+       group_desc(2)=14
+       group_desc(3)=36
+       group_desc(4)=45
+     CASE (66)
+       group_desc(2)=2
+       group_desc(3)=62
+       group_desc(4)=63
+     CASE (67)
+       group_desc(2)=2
+       group_desc(3)=61
+       group_desc(4)=64
+     CASE (68)
+       group_desc(2)=30
+       group_desc(3)=34
+       group_desc(4)=63
+     CASE (69)
+       group_desc(2)=29
+       group_desc(3)=34
+       group_desc(4)=64
+     CASE (70)
+       group_desc(2)=32
+       group_desc(3)=34
+       group_desc(4)=61
+     CASE (71)
+       group_desc(2)=31
+       group_desc(3)=34
+       group_desc(4)=62
+!
+!  C_3v
+!
+     CASE (72)
+       group_desc(2)=27
+       group_desc(3)=28
+       group_desc(4)=36
+       group_desc(5)=63
+       group_desc(6)=64
+     CASE (73)
+       group_desc(2)=27
+       group_desc(3)=28
+       group_desc(4)=35
+       group_desc(5)=61
+       group_desc(6)=62
+     CASE (74)
+       group_desc(2)=21
+       group_desc(3)=17
+       group_desc(4)=38
+       group_desc(5)=42
+       group_desc(6)=46
+     CASE (75)
+       group_desc(2)=20
+       group_desc(3)=22
+       group_desc(4)=37
+       group_desc(5)=42
+       group_desc(6)=45
+     CASE (76)
+       group_desc(2)=18
+       group_desc(3)=23
+       group_desc(4)=37
+       group_desc(5)=41
+       group_desc(6)=46
+     CASE (77)
+       group_desc(2)=24
+       group_desc(3)=19
+       group_desc(4)=38
+       group_desc(5)=41
+       group_desc(6)=45
+!
+!  C_4v
+!
+     CASE (78)
+       group_desc(2)=8
+       group_desc(3)=2
+       group_desc(4)=7
+       group_desc(5)=35
+       group_desc(6)=36
+       group_desc(7)=37
+       group_desc(8)=38
+     CASE (79)
+       group_desc(2)=11
+       group_desc(3)=3
+       group_desc(4)=12
+       group_desc(5)=34
+       group_desc(6)=36
+       group_desc(7)=41
+       group_desc(8)=42
+     CASE (80)
+       group_desc(2)=16
+       group_desc(3)=4
+       group_desc(4)=15
+       group_desc(5)=34
+       group_desc(6)=35
+       group_desc(7)=45
+       group_desc(8)=46
+!
+!   C_6v
+!
+     CASE (81)
+       group_desc(2)=25
+       group_desc(3)=27
+       group_desc(4)=2
+       group_desc(5)=28
+       group_desc(6)=26
+       group_desc(7)=35
+       group_desc(8)=36
+       group_desc(9)=61
+       group_desc(10)=62
+       group_desc(11)=63
+       group_desc(12)=64
+!
+!   C_2h
+!
+     CASE (82)
+       group_desc(2)=2
+       group_desc(3)=33
+       group_desc(4)=34
+     CASE (83)
+       group_desc(2)=3
+       group_desc(3)=33
+       group_desc(4)=35
+     CASE (84)
+       group_desc(2)=4
+       group_desc(3)=33
+       group_desc(4)=36
+     CASE (85)
+       group_desc(2)=5
+       group_desc(3)=33
+       group_desc(4)=37
+     CASE (86)
+       group_desc(2)=6
+       group_desc(3)=33
+       group_desc(4)=38
+     CASE (87)
+       group_desc(2)=9
+       group_desc(3)=33
+       group_desc(4)=41
+     CASE (88)
+       group_desc(2)=10
+       group_desc(3)=33
+       group_desc(4)=42
+     CASE (89)
+       group_desc(2)=13
+       group_desc(3)=33
+       group_desc(4)=45
+     CASE (90)
+       group_desc(2)=14
+       group_desc(3)=33
+       group_desc(4)=46
+     CASE (91)
+       group_desc(2)=32
+       group_desc(3)=33
+       group_desc(4)=64
+     CASE (92)
+       group_desc(2)=31
+       group_desc(3)=33
+       group_desc(4)=63
+     CASE (93)
+       group_desc(2)=30
+       group_desc(3)=33
+       group_desc(4)=62
+     CASE (94)
+       group_desc(2)=29
+       group_desc(3)=33
+       group_desc(4)=61
+!
+!  C_3h
+!
+     CASE (95)
+       group_desc(2)=27
+       group_desc(3)=28
+       group_desc(4)=34
+       group_desc(5)=57
+       group_desc(6)=58
+!
+!  C_4h
+!
+     CASE (96)
+       group_desc(2)=8
+       group_desc(3)=2
+       group_desc(4)=7
+       group_desc(5)=33
+       group_desc(6)=40
+       group_desc(7)=34
+       group_desc(8)=39
+     CASE (97)
+       group_desc(2)=11
+       group_desc(3)=3
+       group_desc(4)=12
+       group_desc(5)=33
+       group_desc(6)=43
+       group_desc(7)=35
+       group_desc(8)=44
+     CASE (98)
+       group_desc(2)=16
+       group_desc(3)=4
+       group_desc(4)=15
+       group_desc(5)=33
+       group_desc(6)=48
+       group_desc(7)=36
+       group_desc(8)=47
+!
+!  C_6h
+!
+     CASE (99)
+       group_desc(2)=25
+       group_desc(3)=27
+       group_desc(4)=2
+       group_desc(5)=28
+       group_desc(6)=26
+       group_desc(7)=33
+       group_desc(8)=57
+       group_desc(9)=59
+       group_desc(10)=34
+       group_desc(11)=60
+       group_desc(12)=58
+!
+!  D_2h
+!
+     CASE (100)
+       group_desc(2)=2
+       group_desc(3)=3
+       group_desc(4)=4
+       group_desc(5)=33
+       group_desc(6)=34
+       group_desc(7)=35
+       group_desc(8)=36
+     CASE (101)
+       group_desc(2)=4
+       group_desc(3)=13
+       group_desc(4)=14
+       group_desc(5)=33
+       group_desc(6)=36
+       group_desc(7)=45
+       group_desc(8)=46
+     CASE (102)
+       group_desc(2)=3
+       group_desc(3)=9
+       group_desc(4)=10
+       group_desc(5)=33
+       group_desc(6)=35
+       group_desc(7)=41
+       group_desc(8)=42
+     CASE (103)
+       group_desc(2)=2
+       group_desc(3)=5
+       group_desc(4)=6
+       group_desc(5)=33
+       group_desc(6)=34
+       group_desc(7)=37
+       group_desc(8)=38
+     CASE (104)
+       group_desc(2)=2
+       group_desc(3)=29
+       group_desc(4)=32
+       group_desc(5)=33
+       group_desc(6)=34
+       group_desc(7)=61
+       group_desc(8)=64
+     CASE (105)
+       group_desc(2)=2
+       group_desc(3)=30
+       group_desc(4)=31
+       group_desc(5)=33
+       group_desc(6)=34
+       group_desc(7)=62
+       group_desc(8)=63
+!
+!  D_3h
+!
+     CASE (106)
+       group_desc(2)=27
+       group_desc(3)=28
+       group_desc(4)=4
+       group_desc(5)=31
+       group_desc(6)=32
+       group_desc(7)=34
+       group_desc(8)=57
+       group_desc(9)=58
+       group_desc(10)=35
+       group_desc(11)=61
+       group_desc(12)=62
+     CASE (107)
+       group_desc(2)=27
+       group_desc(3)=28
+       group_desc(4)=3
+       group_desc(5)=29
+       group_desc(6)=30
+       group_desc(7)=34
+       group_desc(8)=57
+       group_desc(9)=58
+       group_desc(10)=36
+       group_desc(11)=63
+       group_desc(12)=64
+!
+!  D_4h
+!
+     CASE (108)
+       group_desc(2)=8
+       group_desc(3)=2
+       group_desc(4)=7
+       group_desc(5)=4
+       group_desc(6)=3
+       group_desc(7)=5
+       group_desc(8)=6
+       group_desc(9)=33
+       group_desc(10)=40
+       group_desc(11)=34
+       group_desc(12)=39
+       group_desc(13)=36
+       group_desc(14)=35
+       group_desc(15)=37
+       group_desc(16)=38
+     CASE (109)
+       group_desc(2)=11
+       group_desc(3)=3
+       group_desc(4)=12
+       group_desc(5)=2
+       group_desc(6)=4
+       group_desc(7)=9
+       group_desc(8)=10
+       group_desc(9)=33
+       group_desc(10)=43
+       group_desc(11)=35
+       group_desc(12)=44
+       group_desc(13)=34
+       group_desc(14)=36
+       group_desc(15)=41
+       group_desc(16)=42
+     CASE (110)
+       group_desc(2)=15
+       group_desc(3)=4
+       group_desc(4)=16
+       group_desc(5)=3
+       group_desc(6)=2
+       group_desc(7)=13
+       group_desc(8)=14
+       group_desc(9)=33
+       group_desc(10)=47
+       group_desc(11)=36
+       group_desc(12)=48
+       group_desc(13)=35
+       group_desc(14)=34
+       group_desc(15)=45
+       group_desc(16)=46
+
+!
+!  D_6h
+!
+     CASE (111)
+       group_desc(2)=25
+       group_desc(3)=27
+       group_desc(4)=2
+       group_desc(5)=28
+       group_desc(6)=26
+       group_desc(7)=3
+       group_desc(8)=4
+       group_desc(9)=29
+       group_desc(10)=30
+       group_desc(11)=31
+       group_desc(12)=32
+       group_desc(13)=33
+       group_desc(14)=57
+       group_desc(15)=59
+       group_desc(16)=34
+       group_desc(17)=60
+       group_desc(18)=58
+       group_desc(19)=35
+       group_desc(20)=36
+       group_desc(21)=61
+       group_desc(22)=62
+       group_desc(23)=63
+       group_desc(24)=64
+!
+!  D_2d
+!
+     CASE (112)
+       group_desc(2)=40
+       group_desc(3)=2
+       group_desc(4)=39
+       group_desc(5)=3
+       group_desc(6)=4
+       group_desc(7)=37
+       group_desc(8)=38
+     CASE (113)
+       group_desc(2)=40
+       group_desc(3)=2
+       group_desc(4)=39
+       group_desc(5)=5
+       group_desc(6)=6
+       group_desc(7)=35
+       group_desc(8)=36
+     CASE (114)
+       group_desc(2)=43
+       group_desc(3)=3
+       group_desc(4)=44
+       group_desc(5)=4
+       group_desc(6)=2
+       group_desc(7)=41
+       group_desc(8)=42
+     CASE (115)
+       group_desc(2)=43
+       group_desc(3)=3
+       group_desc(4)=44
+       group_desc(5)=9
+       group_desc(6)=10
+       group_desc(7)=34
+       group_desc(8)=36
+     CASE (116)
+       group_desc(2)=48
+       group_desc(3)=4
+       group_desc(4)=47
+       group_desc(5)=3
+       group_desc(6)=2
+       group_desc(7)=45
+       group_desc(8)=46
+     CASE (117)
+       group_desc(2)=48
+       group_desc(3)=4
+       group_desc(4)=47
+       group_desc(5)=13
+       group_desc(6)=14
+       group_desc(7)=34
+       group_desc(8)=35
+!
+!  D_3d
+!
+     CASE (118)
+       group_desc(2)=27
+       group_desc(3)=28
+       group_desc(4)=4
+       group_desc(5)=31
+       group_desc(6)=32
+       group_desc(7)=33
+       group_desc(8)=59 
+       group_desc(9)=60
+       group_desc(10)=36
+       group_desc(11)=63
+       group_desc(12)=64
+     CASE (119)
+       group_desc(2)=27
+       group_desc(3)=28
+       group_desc(4)=3
+       group_desc(5)=29
+       group_desc(6)=30
+       group_desc(7)=33
+       group_desc(8)=59
+       group_desc(9)=60
+       group_desc(10)=35
+       group_desc(11)=61
+       group_desc(12)=62
+     CASE (120)
+       group_desc(2)=21
+       group_desc(3)=17
+       group_desc(4)=6
+       group_desc(5)=10
+       group_desc(6)=14
+       group_desc(7)=33
+       group_desc(8)=49
+       group_desc(9)=53
+       group_desc(10)=38
+       group_desc(11)=42
+       group_desc(12)=46
+     CASE (121)
+       group_desc(2)=20
+       group_desc(3)=22
+       group_desc(4)=5
+       group_desc(5)=10
+       group_desc(6)=13
+       group_desc(7)=33
+       group_desc(8)=52
+       group_desc(9)=54
+       group_desc(10)=37
+       group_desc(11)=42
+       group_desc(12)=45
+     CASE (122)
+       group_desc(2)=18
+       group_desc(3)=23
+       group_desc(4)=5
+       group_desc(5)=9
+       group_desc(6)=14
+       group_desc(7)=33
+       group_desc(8)=50
+       group_desc(9)=55
+       group_desc(10)=37
+       group_desc(11)=41
+       group_desc(12)=46
+     CASE (123)
+       group_desc(2)=24
+       group_desc(3)=19
+       group_desc(4)=6
+       group_desc(5)=9
+       group_desc(6)=13
+       group_desc(7)=33
+       group_desc(8)=56
+       group_desc(9)=51
+       group_desc(10)=38
+       group_desc(11)=41
+       group_desc(12)=45
+!
+!  S_4
+!
+     CASE (124)
+       group_desc(2)=40
+       group_desc(3)=2
+       group_desc(4)=39
+     CASE (125)
+       group_desc(2)=43
+       group_desc(3)=3
+       group_desc(4)=44
+     CASE (126)
+       group_desc(2)=48
+       group_desc(3)=4
+       group_desc(4)=47
+!
+!  S_6
+!
+
+     CASE (127)
+       group_desc(2)=27
+       group_desc(3)=28
+       group_desc(4)=33
+       group_desc(5)=59
+       group_desc(6)=60
+     CASE (128)
+       group_desc(2)=21
+       group_desc(3)=17
+       group_desc(4)=33
+       group_desc(5)=53
+       group_desc(6)=49
+     CASE (129)
+       group_desc(2)=18
+       group_desc(3)=23
+       group_desc(4)=33
+       group_desc(5)=50
+       group_desc(6)=44
+     CASE (130)
+       group_desc(2)=22
+       group_desc(3)=19
+       group_desc(4)=33
+       group_desc(5)=56
+       group_desc(6)=51
+     CASE (131)
+       group_desc(2)=20
+       group_desc(3)=22
+       group_desc(4)=33
+       group_desc(5)=52
+       group_desc(6)=54
+!
+!  T
+!
+     CASE (132)
+       group_desc(2)=2
+       group_desc(3)=3
+       group_desc(4)=4
+       group_desc(5)=17
+       group_desc(6)=18
+       group_desc(7)=19
+       group_desc(8)=20
+       group_desc(9)=21
+       group_desc(10)=22
+       group_desc(11)=23
+       group_desc(12)=24
+!
+!  T_h
+!
+     CASE (133)
+       group_desc(2)=2
+       group_desc(3)=3
+       group_desc(4)=4
+       group_desc(5)=17
+       group_desc(6)=18
+       group_desc(7)=19
+       group_desc(8)=20
+       group_desc(9)=21
+       group_desc(10)=22
+       group_desc(11)=23
+       group_desc(12)=24
+       DO i=1,12
+          group_desc(12+i)=group_desc(i)+32
+       ENDDO
+!
+!  T_d
+!
+     CASE (134)
+       group_desc(2)=2
+       group_desc(3)=3
+       group_desc(4)=4
+       group_desc(5)=17
+       group_desc(6)=18
+       group_desc(7)=19
+       group_desc(8)=20
+       group_desc(9)=21
+       group_desc(10)=22
+       group_desc(11)=23
+       group_desc(12)=24
+       group_desc(13)=37
+       group_desc(14)=38
+       group_desc(15)=39
+       group_desc(16)=40
+       group_desc(17)=41
+       group_desc(18)=42
+       group_desc(19)=43
+       group_desc(20)=44
+       group_desc(21)=45
+       group_desc(22)=46
+       group_desc(23)=47
+       group_desc(24)=48
+!
+!   O
+!
+     CASE (135)
+       DO isym=1,24
+          group_desc(isym) = isym
+       END DO
+!
+!   O_h
+!
+     CASE (136)
+       DO isym=1,24
+          group_desc(isym) = isym
+          group_desc(isym+24) = 32+isym
+       ENDDO
+     CASE DEFAULT
+       CALL errore('find_group_info_ext','group index not found',1)
+  END SELECT
+!
+!  for each element of the input symmetry group find its position
+!  in the group description
+!
+  which_elem=0
+  DO isym=1, nsym
+     DO jsym=1,nsym
+        IF (group_tags(isym)==group_desc(jsym)) THEN
+           which_elem(isym)=jsym
+           EXIT
+        ENDIF
+     ENDDO
+     IF (which_elem(isym)==0) &
+        CALL errore('find_group_info_ext','element not found',1)
+  ENDDO
+
+  RETURN
+  END SUBROUTINE find_group_info_ext
+
+SUBROUTINE find_group_tags(nsym, smat, group_tags)
+!
+!  This routine finds for all the symmetries of a point group the
+!  number of the symmetry operation in the list of symmetries
+!
+  USE kinds, ONLY : DP
+  IMPLICIT NONE
+  INTEGER, INTENT(IN) :: nsym
+  REAL(DP), INTENT(IN) :: smat(3,3,nsym)
+  INTEGER, INTENT(OUT) :: group_tags(nsym)
+
+  INTEGER :: isym, i
+  INTEGER :: tipo_sym, ts  
+  REAL(DP), PARAMETER :: sqr2=SQRT(2.0_DP), sqr3=SQRT(3.0_DP)
+  REAL(DP) :: a(3,32), b(3,32), angl(32), angle_rot, ang, s(3,3), ax(3)
+
+  group_tags=0
+  a=0.0_DP
+  a(3,2)=1.0_DP
+  a(2,3)=1.0_DP
+  a(1,4)=1.0_DP
+  a(1,5)=1.0_DP/sqr2
+  a(2,5)=1.0_DP/sqr2
+  a(1,6)=1.0_DP/sqr2
+  a(2,6)=-1.0_DP/sqr2
+  a(1,9)=1.0_DP/sqr2
+  a(3,9)=1.0_DP/sqr2
+  a(1,10)=1.0_DP/sqr2
+  a(3,10)=-1.0_DP/sqr2
+  a(2,13)=1.0_DP/sqr2
+  a(3,13)=1.0_DP/sqr2
+  a(2,14)=1.0_DP/sqr2
+  a(3,14)=-1.0_DP/sqr2
+  a(1,29)=sqr3/2.0_DP
+  a(2,29)=-0.5_DP
+  a(1,30)=sqr3/2.0_DP
+  a(2,30)=0.5_DP
+  a(1,31)=-0.5_DP
+  a(2,31)=sqr3/2.0_DP
+  a(1,32)=0.5_DP
+  a(2,32)=sqr3/2.0_DP
+  b=0.0_DP
+  angl=0.0_DP
+  angl(7)=270._DP
+  b(3,7)=1.0_DP
+  angl(8)=90._DP
+  b(3,8)=1.0_DP
+  angl(11)=90._DP
+  b(2,11)=1.0_DP
+  angl(12)=270._DP
+  b(2,12)=1.0_DP
+  angl(15)=270._DP
+  b(1,15)=1.0_DP
+  angl(16)=90._DP
+  b(1,16)=1.0_DP
+  angl(17)=240._DP
+  b(1,17)=1.0_DP/sqr3
+  b(2,17)=1.0_DP/sqr3
+  b(3,17)=1.0_DP/sqr3
+  angl(18)=120._DP
+  b(1,18)=-1.0_DP/sqr3
+  b(2,18)=1.0_DP/sqr3
+  b(3,18)=1.0_DP/sqr3
+  angl(19)=240._DP
+  b(1,19)=-1.0_DP/sqr3
+  b(2,19)=-1.0_DP/sqr3
+  b(3,19)=1.0_DP/sqr3
+  angl(20)=120._DP
+  b(1,20)=1.0_DP/sqr3
+  b(2,20)=-1.0_DP/sqr3
+  b(3,20)=1.0_DP/sqr3
+  angl(21)=120._DP
+  b(:,21)=b(:,17)
+  angl(22)=240._DP
+  b(:,22)=b(:,20)
+  angl(23)=240._DP
+  b(:,23)=b(:,18)
+  angl(24)=120._DP
+  b(:,24)=b(:,19)
+  angl(25)=60._DP
+  b(3,25)=1.0_DP
+  angl(26)=300._DP
+  b(3,26)=1.0_DP
+  angl(27)=120._DP
+  b(3,27)=1.0_DP
+  angl(28)=240._DP
+  b(3,28)=1.0_DP
+
+  DO isym=1,nsym
+     ts=tipo_sym(smat(1,1,isym))
+     IF (ts==1) THEN
+        group_tags(isym) = 1
+     ELSEIF (ts==2) THEN
+        group_tags(isym) = 33
+     ELSEIF (ts==3) THEN
+        CALL versor(smat(1,1,isym),ax)
+        ang=angle_rot(smat(1,1,isym))
+        DO i=2,32
+           IF (ABS(ax(1)*b(1,i)+ax(2)*b(2,i)+ax(3)*b(3,i)-1.0_DP)<1.D-8 &
+              .AND. ABS(ang-angl(i))<1.D-8 ) THEN
+              group_tags(isym)=i
+            END IF
+        END DO
+     ELSEIF (ts==4) THEN
+        CALL versor(smat(1,1,isym),ax)
+        DO i=2,32
+           IF (ABS(ax(1)*a(1,i)+ax(2)*a(2,i)+ax(3)*a(3,i)-1.0_DP)<1.D-8 &
+              .OR. ABS(ax(1)*a(1,i)+ax(2)*a(2,i)+ax(3)*a(3,i)+1.0_DP)<1.D-8) &
+                                                                          THEN
+              group_tags(isym)=i
+           ENDIF
+        ENDDO
+     ELSEIF (ts==5) THEN
+        s=-smat(:,:,isym)
+        CALL versor(s,ax)
+        DO i=2,32
+           IF (ABS(ax(1)*a(1,i)+ax(2)*a(2,i)+ax(3)*a(3,i)-1.0_DP)<1.D-8 &
+              .OR. ABS(ax(1)*a(1,i)+ax(2)*a(2,i)+ax(3)*a(3,i)+1.0_DP)<1.D-8) &
+                                                                          THEN
+              group_tags(isym)=i+32
+           ENDIF
+        ENDDO
+     ELSEIF (ts==6) THEN
+        s=-smat(:,:,isym)
+        CALL versor(s,ax)
+        ang=angle_rot(s)
+        DO i=2,32
+           IF (ABS(ax(1)*b(1,i)+ax(2)*b(2,i)+ax(3)*b(3,i)-1.0_DP)<1.D-8 &
+              .AND. ABS(ang-angl(i))<1.D-8 ) THEN
+              group_tags(isym)=i+32
+            END IF
+        END DO
+     ENDIF   
+     IF (group_tags(isym)==0) &
+        CALL errore('find_group_tags','problem identifying symmetry', isym)   
+  END DO
+
+
+RETURN
+END SUBROUTINE find_group_tags
 
 SUBROUTINE  transform_s_to_cart( sk, sr, nsym, at, bg )
   !----------------------------------------------------------------------
