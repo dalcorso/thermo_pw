@@ -10,6 +10,7 @@ MODFLAGS= $(MOD_FLAG)../../iotk/src $(MOD_FLAG)../../Modules \
 
 MODULES = \
 adddvepsi_us.o \
+adddvscf_tran.o \
 addusddenseq.o \
 apply_ac.o \
 check_bands.o \
@@ -19,10 +20,12 @@ ccg_psi.o \
 do_phonon.o \
 dveqpsi_us.o \
 dveqpsi_us_only.o \
+dv_of_drho_tran.o \
 electrons.o \
 ev_xml.o \
 initialize_ph.o \
 orthogonalize_omega.o \
+paw_add_onecenter.o \
 paw_add_symmetry.o \
 phescf.o \
 phqscf.o \
@@ -38,9 +41,13 @@ psym_dmage_fpol.o \
 run_nscf.o \
 read_dyn_from_file.o \
 scal_prod.o \
+set_defaults_pw.o \
+set_fxc_tran.o \
 set_intq_nc.o \
+set_kup_and_kdw.o \
 solve_e_fpolc.o \
 solve_eq.o \
+solve_eq_tran.o \
 solve_linter.o  \
 syme_fpol.o     \
 symeq.o \

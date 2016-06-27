@@ -59,10 +59,10 @@ SUBROUTINE pheqscf()
      IF (fpol) CALL compute_intq()
   ENDIF
 
-!  IF (fpol.AND.lsda) THEN
-!     ALLOCATE (dmuxc_tran ( dfftp%nnr ) )
-!     CALL set_fxc_tran()
-!  END IF
+  IF (fpol.AND.lsda) THEN
+     ALLOCATE (dmuxc_tran ( dfftp%nnr ) )
+     CALL set_fxc_tran()
+  END IF
   !
   IF (fpol) THEN    ! calculate freq. dependent polarizability
      !
@@ -127,22 +127,22 @@ SUBROUTINE pheqscf()
 !   magnons and the stoner spin-flip exitations (by default only this
 !   is computed)
 !
-!           IF (lmagnon) THEN
-!              WRITE( stdout, '(/,5x,70("_"))') 
-!              WRITE( stdout, '(/10x,"Applying B+ and computing m+")')
-!              CALL solve_eq_tran( iu, 1 )
-!           ENDIF
+           IF (lmagnon) THEN
+              WRITE( stdout, '(/,5x,70("_"))') 
+              WRITE( stdout, '(/10x,"Applying B+ and computing m+")')
+              CALL solve_eq_tran( iu, 1 )
+           ENDIF
 !
 !   lall_tensor computes the \chi-+ susceptibility and gives all
 !   the nonzero (within LSDA) cartesian components of the response.
 !   Note that this is equivalent to compute \chi+- at -w* and to take
 !   the complex conjugate.
 !
-!           IF (lall_tensor) THEN
-!              WRITE( stdout, '(/,5x,70("_"))') 
-!              WRITE( stdout, '(/,10x,"Applying B- and computing m-")')
-!              CALL solve_eq_tran( iu, 2 )
-!           ENDIF
+           IF (lall_tensor) THEN
+              WRITE( stdout, '(/,5x,70("_"))') 
+              WRITE( stdout, '(/,10x,"Applying B- and computing m-")')
+              CALL solve_eq_tran( iu, 2 )
+           ENDIF
         ENDIF
         CALL write_chi_on_disk(iu)
         !
@@ -172,7 +172,7 @@ SUBROUTINE pheqscf()
         DEALLOCATE(intq_nc)
      END IF
   ENDIF
-!  IF (fpol.AND.lsda) DEALLOCATE (dmuxc_tran)
+  IF (fpol.AND.lsda) DEALLOCATE (dmuxc_tran)
   !
   RETURN
   !

@@ -73,7 +73,7 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   restart = ext_restart
   conv_ions=.true.
   !
-  CALL setup_nscf ( newgrid, xq, elph_mat )
+  CALL setup_nscf_tpw ( newgrid, xq, elph_mat )
   CALL init_run()
 !!!!!!!!!!!!!!!!!!!!!!!! ACFDT TEST !!!!!!!!!!!!!!!!
   IF (acfdt_is_active) THEN
