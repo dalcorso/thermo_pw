@@ -1,0 +1,36 @@
+This directory contains a set of scripts to test a set of pseudopotentials.
+Presently it tests the files of pslibrary.1.0.0 with low accuracy.
+The pseudopotential tests can be done with the following procedure.
+The directory that contains this file is called $TOP_DIR. 
+You are not supposed to modify any file here.
+Choose a working directory ($WORK_DIR) and copy there the four
+files:
+
+environment.job 
+lattice_constants_inputs.job
+run_lc.job
+exctract_lc.job
+
+Edit only the file environment.job and choose the parameters of the run,
+cut-off energies, k points, smearing etc.. Be careful to set the four
+main directories here:
+TOP_DIR : this directory,
+WORK_DIR : your working directory where output files are written,
+PSEUDO_DIR : the directory with the pseudopotentials,
+TMP_DIR: the outdir directory used as scratch by thermo_pw.
+Set here also the command used to run thermo_pw.
+Generate all the inputs giving the command
+. ./lattice_constants_input.job 
+in your working directory $WORK_DIR.
+Run all the inputs by giving the command:
+. ./run_lc.job 
+in your working directory $WORK_DIR.
+Extract the lattice constants and bulk moduli of all the computed solids
+by giving the command:
+. ./extract_lc.job.
+
+The example produces also the band structure of each solid inside each
+solid directory in the postscript file output_band.ps.
+
+In order to run a subsets of the input or a single solid edit the file
+run_lc.job. 

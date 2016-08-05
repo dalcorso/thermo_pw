@@ -1,0 +1,41 @@
+el1='Cu'
+el2='I'
+name='cui_b3'
+
+mkdir $name
+cd $name
+
+cat > $name.d$i <<EOF
+$el1
+$el2
+ &control
+    calculation = 'scf'
+    prefix='$name',
+    pseudo_dir = '$PSEUDO_DIR',
+    outdir='$TMP_DIR'
+ /
+ &system
+    ibrav=  2, 
+    celldm(1) =$cui_b3, 
+    nat=  2, 
+    ntyp= 2,
+    noncolin=$ncol,
+    lspinorb=$lso,
+    ecutwfc =$ecutwfc,
+    ecutrho =$ecutrho
+ /
+ &electrons
+    conv_thr =  1.0d-10
+ /
+ATOMIC_SPECIES
+$el1  0.0    $pseudo_cu
+$el2  0.0    $pseudo_i
+ATOMIC_POSITIONS
+$el1  0.0000000   0.00000000   0.0
+$el2  0.2500000   0.25000000   0.25
+K_POINTS AUTOMATIC
+$nki $nki $nki $ish $ish $ish
+EOF
+
+cd ..
+

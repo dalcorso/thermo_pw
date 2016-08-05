@@ -1,0 +1,37 @@
+#!/bin/bash
+#
+# Copyright (C) 2016 - present, Andrea Dal Corso 
+# This file is distributed under the terms of the
+# GNU General Public License. See the file `License'
+# in the root directory of the present distribution,
+# or http://www.gnu.org/copyleft/gpl.txt .
+#
+
+. ./environment.job
+
+. $TOP_DIR/parameters_$rel.job
+
+. $TOP_DIR/pseudo_$pseudo_type.job
+
+. $TOP_DIR/lattice_constants_set_$gfun.job
+
+cd $WORK_DIR
+#
+# substitute the next line with one of the following to run only a subset of
+# solids or a single solid
+#
+#for solid in $solids_a1 ; do
+#for solid in $lanthanides_a1 ; do
+#for solid in $solids_a2 ; do
+#for solid in $solids_a4 ; do
+#for solid in $solids_b1 ; do
+#for solid in $solids_b3 ; do
+#for solid in gaas_b3 ; do
+
+for solid in $solids_a1 $solids_a2 $solids_a4 $solids_b1 $solids_b3 ; do
+
+cd $solid
+$THERMO_PW_COMMAND < $solid.d > $solid.out
+cd $WORK_DIR
+
+done

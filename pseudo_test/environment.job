@@ -1,0 +1,92 @@
+#!/bin/bash
+#
+# Copyright (C) 2016 - present, Andrea Dal Corso 
+# This file is distributed under the terms of the
+# GNU General Public License. See the file `License'
+# in the root directory of the present distribution,
+# or http://www.gnu.org/copyleft/gpl.txt .
+#
+#
+#  Here select:
+#
+#  The cut-off energy for wavefunctions (ecutwfc) and charge (ecutrho).
+#
+ecutwfc=35
+ecutrho=300
+#
+#  The number of k points and the smearing (degauss). 
+#  The mesh will be nk nk nk for metals, nki nki nki for insulators.
+#  the shift of the k points is ish (0 or 1).
+#
+nk=16
+nki=8
+ish=1
+degauss=0.01
+#
+#  The smearing function as in the input of QE. Here the default is 
+#  Methfessel and Paxton (mp), but you can choose any other smearing
+#  accepted by QE (gaussian, fd, mv, etc.).
+#
+smearing_type='mp'
+#
+#  The pseudopotential type: paw or ultrasoft (us). Note that this string
+#  will choose only the file where the list of pseudopotentials is written
+#  (pseudo_$pseudo_type), so the actual PP used is written in the file 
+#  pseudo_paw or pseudo_us contained in $TOP_DIR and can be changed by
+#  changing this file. Presently the test uses the PPs of pslibrary.1.0.0
+#  of low accuracy.
+#
+pseudo_type='paw'
+#pseudo_type='us'
+#
+# Choose one. This is the functional written in the pseudopotential name and
+# this is the real functional used in the calculation. It can be any functional
+# accepted by QE and for which you have generated the PPs.
+#
+fct='pz'
+#fct='rel-pz'
+#fct='pbe'
+#fct='rel-pbe'
+
+#
+#Choose one. The script will choose as starting lattice constants those
+#contained in the file lattice_constants_set_$gfun.job.  
+#The code will compute the Murnaghan equation choosing 9 lattice constants 
+#centered on the one specified in the file lattice_constant_sets_$gfun.job
+#
+gfun='LDA'
+#gfun='PBE'
+#
+#
+#Choose one. sr for scalar relativistic, rel for fully relativistic. This
+#option choose the parameter file that sets the number of bands, 
+#the noncolin and lspinorb flags. See the files parameters_$rel in
+#TOP_DIR
+
+rel='sr'
+#rel='rel'
+#
+#  write here the top directory. This is the name of the directory that
+#  contains the original scripts of the tests. 
+#
+TOP_DIR='/home/espresso/PROGETTI/SET_TEST_THERMO/COLLECTS/'
+#
+#  write here the working directory. This is the name of the directory
+#  where you are working now. All output files will be written here.
+#
+WORK_DIR='/home/espresso/PROGETTI/SET_TEST_THERMO/COLLECTS/WORK'
+#
+#  write here the outdir directory of the QE input where the scratch files
+#  are produced
+#
+TMP_DIR='/scratch/tmp_e/'
+#
+#  write here the directory where the pseudopotentials are found
+#
+PSEUDO_DIR="/home/espresso/pslibrary.1.0.0/$fct/PSEUDOPOTENTIALS"
+#
+#Write here the command used to run thermo_pw. Any parallelization option 
+#must be specified here. Change ni or nk to run with a different number 
+#of images or pools. 
+#
+THERMO_PW_COMMAND='mpirun -n 4 /home/espresso/espresso-5.4.0/bin/thermo_pw.x -ni 1 -nk 1'

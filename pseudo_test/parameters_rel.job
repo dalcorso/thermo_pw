@@ -1,0 +1,15 @@
+#
+# Copyright (C) 2016 - present, Andrea Dal Corso 
+# This file is distributed under the terms of the
+# GNU General Public License. See the file `License'
+# in the root directory of the present distribution,
+# or http://www.gnu.org/copyleft/gpl.txt .
+#
+nspin=4
+nbnd_6=12
+nbnd_9=18
+nbnd_12=24
+nbnd_16=32
+ncol=.true.
+lso=.true.
+smag=0.5

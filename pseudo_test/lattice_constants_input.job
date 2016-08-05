@@ -1,0 +1,55 @@
+#!/bin/bash
+#
+# Copyright (C) 2016 - present, Andrea Dal Corso 
+# This file is distributed under the terms of the
+# GNU General Public License. See the file `License'
+# in the root directory of the present distribution,
+# or http://www.gnu.org/copyleft/gpl.txt .
+#
+. ./environment.job
+
+. $TOP_DIR/parameters_$rel.job
+
+. $TOP_DIR/pseudo_$pseudo_type.job
+
+. $TOP_DIR/lattice_constants_set_$gfun.job
+
+cd $WORK_DIR
+
+cat > thermo_control << EOF
+ &INPUT_THERMO
+  what='mur_lc_bands',
+  emax_input=10,
+  emin_input=-10,
+ /
+EOF
+
+for solid in $solids_a1 ; do
+    . $TOP_DIR/A1/$solid
+    cp thermo_control $WORK_DIR/$solid
+done
+
+#for solid in $lantanides_a1 ; do
+#    . $TOP_DIR/A1/$solid
+#    cp thermo_control $WORK_DIR/$solid
+#done
+
+for solid in $solids_a2 ; do
+   . $TOP_DIR/A2/$solid
+   cp thermo_control $WORK_DIR/$solid
+done
+
+for solid in $solids_a4 ; do
+   . $TOP_DIR/A4/$solid
+   cp thermo_control $WORK_DIR/$solid
+done
+
+for solid in $solids_b1 ; do
+   . $TOP_DIR/B1/$solid
+   cp thermo_control $WORK_DIR/$solid
+done
+
+for solid in $solids_b3 ; do
+   . $TOP_DIR/B3/$solid
+   cp thermo_control $WORK_DIR/$solid
+done

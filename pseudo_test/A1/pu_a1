@@ -1,0 +1,40 @@
+el1='Pu'
+name='pu_a1'
+
+mkdir $name
+cd $name
+
+cat > $name.d <<EOF
+$el1
+$el1
+ &control
+    calculation = 'scf'
+    prefix='$el1',
+    pseudo_dir = '$PSEUDO_DIR',
+    outdir='$TMP_DIR'
+ /
+ &system
+    ibrav=  2, 
+    celldm(1) =$pu_a1, 
+    nat=  1, 
+    ntyp= 1,
+    occupations='smearing',
+    smearing='$smearing_type',
+    degauss=$degauss
+    ecutwfc =$ecutwfc,
+    ecutrho =$ecutrho
+    noncolin=$ncol,
+    lspinorb=$lso,
+ /
+ &electrons
+    conv_thr =  1.0d-10
+ /
+ATOMIC_SPECIES
+$el1  0.0    $pseudo_pu
+ATOMIC_POSITIONS
+$el1  0.0000000   0.00000000   0.0
+K_POINTS AUTOMATIC
+$nk $nk $nk $ish $ish $ish
+EOF
+
+cd ..

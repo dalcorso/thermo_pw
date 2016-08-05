@@ -1,0 +1,23 @@
+#!/bin/bash
+#
+# Copyright (C) 2016 - present, Andrea Dal Corso 
+# This file is distributed under the terms of the
+# GNU General Public License. See the file `License'
+# in the root directory of the present distribution,
+# or http://www.gnu.org/copyleft/gpl.txt .
+#
+
+. ./environment.job
+
+for solid in solids_a1 solids_a2 solids_a4 solids_b1 solids_b3 ; do
+
+cd $WORK_DIR/$solid
+
+alat=`grep 'equilibrium lattice' $solid.out | cut -c 45- | cut -c -19`
+bulk=`grep 'The bulk' $solid.out | cut -c 45- | cut -c -17`
+
+echo $solid $alat $bulk
+
+cd $WORK_DIR
+
+done
