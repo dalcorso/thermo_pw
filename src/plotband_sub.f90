@@ -29,6 +29,8 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
                             nqaux, nrap_plot, rap_plot, high_sym_path
   USE control_2d_bands, ONLY : nkz, aux_ind_sur, identify_sur, lprojpbs, &
                                sym_divide, lsurface_state, lsurface_state_rap
+  USE control_thermo, ONLY : spin_component
+  USE lsda_mod,      ONLY : nspin
   USE thermo_mod,    ONLY : tot_ngeo
   USE thermo_sym,    ONLY : code_group_save
   USE constants,     ONLY : rytoev
@@ -80,7 +82,12 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
 
   IF (icode==1.OR.icode==2) THEN
     IF (flpband == ' ') RETURN
-    IF (icode==1) fileout="band_files/"//TRIM(flpband)
+    IF (icode==1) THEN
+       fileout="band_files/"//TRIM(flpband)
+       IF (nspin==2) &
+          fileout="band_files/"//TRIM(flpband)//"."//&
+                                 TRIM(int_to_char(spin_component))
+    END IF
     IF (icode==2) fileout="phdisp_files/"//TRIM(flpband)
   ELSEIF (icode==3) THEN
     IF (flpgrun == ' ') RETURN
@@ -89,7 +96,12 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
     IF (flpgrun == ' ') RETURN
     fileout="anhar_files/"//TRIM(flpgrun)//'_freq'
   ENDIF
-  IF (icode==1) filedata = "band_files/"//TRIM(filband)
+  IF (icode==1) THEN
+     filedata = "band_files/"//TRIM(filband)
+     IF (nspin==2) &
+        filedata = "band_files/"//TRIM(filband)// &
+                              '.'//TRIM(int_to_char(spin_component))
+  ENDIF 
   IF (icode==2) filedata = "phdisp_files/"//TRIM(flfrq)
   IF (icode==3) filedata = "anhar_files/"//TRIM(flgrun)
   IF (icode==4) filedata = "anhar_files/"//TRIM(flgrun)//'_freq'
@@ -729,7 +741,7 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
   END IF
 
   CALL plot_dispersion(kx, e_eff, k_eff, tot_points, nbnd, emin, emax, &
-                          eref, nlines, nrap, rap_eff, gcodek_eff, &
+                          eref, nlines, nrap, rap_eff,  &
                           e_rap, nbnd_rapk, start_rapk, &
                           has_points, start_point_eff, &
                           last_point_eff, nrap_plot_eff, rap_plot_eff, &

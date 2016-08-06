@@ -174,7 +174,8 @@ SUBROUTINE write_bands (filband, spin_component)
   CHARACTER (LEN=256) :: filename
   INTEGER, INTENT(IN) :: spin_component
   REAL(DP), ALLOCATABLE :: xk_collect(:,:), et_collect(:,:)
-  INTEGER :: iunpun, ios, ibnd, ik
+  INTEGER :: iunpun, ios, ibnd, ik, ik0, nkstot_eff
+  CHARACTER(LEN=6) :: int_to_char
 
   IF (filband == ' ') RETURN
 
@@ -183,6 +184,9 @@ SUBROUTINE write_bands (filband, spin_component)
   IF ( ionode ) THEN
      !
      filename='band_files/'//TRIM(filband)
+     IF (nspin==2) &
+        filename='band_files/'//TRIM(filband)// &
+                                      '.'//TRIM(int_to_char(spin_component))
      OPEN (UNIT = iunpun, FILE = TRIM(filename), STATUS = 'unknown', FORM = &
           'formatted', IOSTAT = ios)
      REWIND (iunpun)
@@ -205,13 +209,20 @@ SUBROUTINE write_bands (filband, spin_component)
   !
   IF ( ionode ) THEN
      !
-     DO ik=1,nkstot
+     nkstot_eff=nkstot
+     ik0=0
+     IF (nspin==2) THEN
+        nkstot_eff=nkstot/nspin
+        IF (spin_component==2) ik0=nkstot_eff
+     ENDIF
+     DO ik=1,nkstot_eff
         IF (ik == 1) THEN
            WRITE (iunpun, '(" &plot nbnd=",i4,", nks=",i6," /")') &
-             nbnd, nkstot
+             nbnd, nkstot_eff
         ENDIF
-        WRITE (iunpun, '(10x,3f10.6)') xk_collect(:,ik)
-        WRITE (iunpun, '(10f8.3)') (et_collect(ibnd, ik)*rytoev,ibnd = 1, nbnd)
+        WRITE (iunpun, '(10x,3f10.6)') xk_collect(:,ik+ik0)
+        WRITE (iunpun, '(10f8.3)') (et_collect(ibnd, ik+ik0)*rytoev, &
+                                                             ibnd = 1, nbnd)
         !
      ENDDO
      CLOSE(UNIT=iunpun, STATUS='KEEP')

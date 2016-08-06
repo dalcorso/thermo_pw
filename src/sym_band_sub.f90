@@ -34,7 +34,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
                                    sym_divide, nlayers, identify_sur, &
                                    surface1, surface2
   USE control_bands,        ONLY : lsym
-  USE control_paths,        ONLY : high_sym_path
+  USE control_paths,        ONLY : high_sym_path, disp_nqs
   USE data_files,           ONLY : flprojlayer
   USE uspp,                 ONLY : nkb, vkb
   USE spin_orb,             ONLY : domag
@@ -49,6 +49,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   INTEGER :: ik, i, j, irot, iclass, ig, ibnd, ilayer, ishift
   INTEGER :: nat_, nbnd_, nkstot_, idum, iun
   INTEGER :: spin_component, nks1, nks2, firstk, lastk
+  INTEGER :: nks1tot, nks2tot
   INTEGER :: iunout, igroup, irap, dim_rap, ik2, ike, ikz, nks_, ios
   INTEGER :: sk(3,3,48), ftauk(3,48), gk(3,48), sk_is(3,3,48), &
        gk_is(3,48), t_revk(48), nsymk, isym, ipol, jpol
@@ -61,9 +62,10 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   REAL(DP) :: dxk(3), dkmod, dkmod_save, k1(3), k2(3), modk1, modk2, ps
   INTEGER, ALLOCATABLE :: rap_et(:,:), code_group_k(:), aux_ind(:)
   INTEGER, ALLOCATABLE :: ngroup(:), istart(:,:)
-  CHARACTER(len=11) :: group_name
-  CHARACTER(len=45) :: snamek(48)
-  CHARACTER (len=256) :: filband, namefile
+  CHARACTER(LEN=11) :: group_name
+  CHARACTER(LEN=45) :: snamek(48)
+  CHARACTER(LEN=6) :: int_to_char
+  CHARACTER (LEN=256) :: filband, namefile
   !
   IF (.NOT.lsym) GOTO 450
   IF (spin_component/=1.and.nspin/=2) &
@@ -83,10 +85,15 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   rap_et=-1
   times=(0.0_DP,0.0_DP)
 
+  CALL find_nks1nks2(1,nkstot,nks1tot,nks1,nks2tot,nks2,spin_component)
+
   ios=0
   IF ( ionode ) THEN
      iunout=58
      namefile="band_files/"//TRIM(filband)//".rap"
+     IF (nspin==2) &
+        namefile="band_files/"//TRIM(filband)//"."// &
+                                TRIM(int_to_char(spin_component))//".rap"
      OPEN (unit = iunout, file = namefile, status = 'unknown', form = &
           'formatted', iostat = ios)
      REWIND (iunout)
@@ -95,7 +102,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   CALL mp_bcast ( ios, ionode_id, intra_image_comm )
   IF ( ios /= 0) CALL errore ('sym_band_sub', 'Opening filband file', abs (ios) )
 
-  DO ik = 1, nks
+  DO ik = nks1, nks2
      !
      !    prepare the indices of this k point
      !
@@ -160,9 +167,11 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   CALL ipoolrecover(istart,nbnd+1,nkstot,nks)
 #endif
   IF (ionode) THEN
-     high_symmetry(1:nkstot)=high_sym_path(1:nkstot)
+     IF (disp_nqs /= nks2tot - nks1tot + 1) &
+        CALL errore('sym_band_sub','problem with number of k points',1)
+     high_symmetry(nks1tot:nks2tot)=high_sym_path(1:disp_nqs)
 
-     DO ik=1, nkstot
+     DO ik=nks1tot, nks2tot
         CALL smallgk (xk(1,ik), at, bg, s, ftau, t_rev, sname, &
              nsym, sk, ftauk, gk, t_revk, snamek, nsymk)
         CALL find_info_group(nsymk,sk,t_revk,ftauk,d_spink,gk,snamek,&
@@ -189,9 +198,9 @@ SUBROUTINE sym_band_sub(filband, spin_component)
            WRITE(stdout,'(5x,"symmetry decomposition not available")')
            WRITE(stdout, '(/,1x,74("*"))')
         ENDIF
-        IF (ik == 1) THEN
+        IF (ik == nks1tot) THEN
            WRITE (iunout, '(" &plot_rap nbnd_rap=",i8,", nks_rap=",i8," /")') &
-                nbnd, nkstot
+                nbnd, nks2tot - nks1tot +1
            IF (search_sym) CALL write_group_info(.true.)
            dxk(:) = xk(:,2) - xk(:,1)
            dkmod_save = sqrt( dxk(1)**2 + dxk(2)**2 + dxk(3)**2 )
@@ -309,18 +318,18 @@ SUBROUTINE sym_band_sub(filband, spin_component)
      ENDDO
 
      aux_ind=0
-     IF (nkstot > 1) THEN
-        CALL find_aux_ind_xk(xk(1,1), xk(1,2), aux_ind(2))
-        CALL find_aux_ind_xk(xk(1,nkstot), xk(1,nkstot-1), aux_ind(nkstot-1))
+     IF (nks2tot - nks1tot > 1) THEN
+        CALL find_aux_ind_xk(xk(1,nks1tot), xk(1,nks1tot+1), aux_ind(nks1tot+1))
+        CALL find_aux_ind_xk(xk(1,nks2tot), xk(1,nks2tot-1), aux_ind(nks2tot-1))
      END IF
-     DO ik=2,nkstot-1
+     DO ik=nks1tot+1,nks2tot-1
         IF (high_symmetry(ik).AND..NOT.high_symmetry(ik+1)) &
            CALL find_aux_ind_xk(xk(1,ik), xk(1,ik+1), aux_ind(ik+1))
         IF (high_symmetry(ik).AND..NOT.high_symmetry(ik-1)) &
            CALL find_aux_ind_xk(xk(1,ik), xk(1,ik-1), aux_ind(ik-1))
      ENDDO
 
-     DO ik=1,nkstot
+     DO ik=nks1tot,nks2tot
         WRITE (iunout, '(10x,3f10.6,l5,2i5)') xk(1,ik), xk(2,ik), xk(3,ik), &
              high_symmetry(ik), code_group_k(ik), aux_ind(ik)
         WRITE (iunout, '(10i8)') (rap_et(ibnd,ik), ibnd=1,nbnd)
@@ -331,7 +340,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
 !  of the different layers
 !
      IF (nkz>1.AND.sym_divide) THEN
-        nks_ = nkstot / nkz
+        nks_ = (nks2tot - nks1tot + 1) / nkz
         ALLOCATE(aux_ind_sur(nks_,nkz))
         IF (MOD(nkz,2)==0) THEN
            ishift=0
@@ -341,7 +350,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
         aux_ind_sur=0
         DO ik = 1, nks_
            ik2 = ik + ishift
-           DO ikz = 1, nkz
+           DO ikz = nks1tot, nks1tot + nkz - 1
               ike = ik + nks_ * (ikz - 1)
               CALL find_aux_ind_xk(xk(1,ike),xk(1,ik2),aux_ind_sur(ik,ikz))
            END DO
@@ -349,7 +358,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
      END IF
   ELSE
      IF (sym_divide.AND.nkz>1) THEN
-        nks_ = nkstot / nkz
+        nks_ = (nks2tot - nks1tot + 1) / nkz
         ALLOCATE(aux_ind_sur(nks_,nkz))
      ENDIF
   ENDIF
@@ -384,7 +393,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
                                                            IOSTAT=ios)
         WRITE(iun, '(5i8)') nat, nlayers, nbnd, nkstot, nspin     
         WRITE(iun, '(4i8)') surface1, surface2    
-        DO ik=1,nkstot
+        DO ik=nks1tot,nks2tot
            DO ibnd=1, nbnd
               WRITE(iun,'(2i8)') ik, ibnd
               DO ilayer=1,nlayers

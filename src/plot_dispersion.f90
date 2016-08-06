@@ -6,7 +6,7 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 SUBROUTINE plot_dispersion(kx, e, xk, nks, nbnd, emin, emax, eref, nlines, &
-     nrap, rap, gcodek, e_rap, nbnd_rapk, start_rapk, has_points, &
+     nrap, rap, e_rap, nbnd_rapk, start_rapk, has_points, &
      start_point, last_point, nrap_plot, rap_plot, label_disp_q, icode, exist_rap, &
      igeom, fileout)
 
@@ -15,9 +15,11 @@ USE constants,       ONLY : bohr_radius_si
 USE ions_base,       ONLY : nat
 USE cell_base,       ONLY : tpiba
 USE klist,           ONLY : degauss
+USE lsda_mod,        ONLY : nspin
 USE control_paths,   ONLY : nqaux, letter_path, q_in_band_form
 USE postscript_files, ONLY : flpsband, flpsdisp, flpsgrun
 USE control_gnuplot, ONLY : flgnuplot, gnuplot_command, lgnuplot
+USE control_thermo,  ONLY : spin_component
 USE control_2d_bands, ONLY : nkz, lprojpbs, identify_sur, sym_divide, &
                           force_bands
 USE point_group,   ONLY : color_rap
@@ -35,7 +37,7 @@ USE io_global,     ONLY : ionode
 IMPLICIT NONE
 CHARACTER(LEN=*), INTENT(IN) :: fileout
 INTEGER, INTENT(IN) :: nks, nbnd, nlines, icode, igeom
-INTEGER, INTENT(IN) :: nrap(nlines), gcodek(nks), rap(nbnd,nks)
+INTEGER, INTENT(IN) :: nrap(nlines), rap(nbnd,nks)
 INTEGER, INTENT(IN) :: start_point(nks), last_point(nks)
 INTEGER, INTENT(IN) :: nbnd_rapk(12,nks), start_rapk(12,nks)
 INTEGER, INTENT(IN) :: nrap_plot(nks), rap_plot(12,nks)
@@ -58,6 +60,8 @@ CHARACTER(LEN=6), EXTERNAL :: int_to_char
 
 IF (icode==1) THEN
    gnu_filename=TRIM(flgnuplot)//'_band'
+   IF (nspin==2) gnu_filename=TRIM(flgnuplot)//'_band.'&
+                   //TRIM(int_to_char(spin_component))
 ELSEIF (icode==2) THEN
    gnu_filename=TRIM(flgnuplot)//'_disp'
 ELSEIF (icode==3) THEN
@@ -76,6 +80,8 @@ CALL gnuplot_start(gnu_filename)
 with_lines=.TRUE.
 IF (icode==1) THEN
    filename=TRIM(flpsband)
+   IF (nspin==2.AND.spin_component==1) filename=TRIM(flpsband)//'_up'
+   IF (nspin==2.AND.spin_component==2) filename=TRIM(flpsband)//'_down'
 ELSEIF (icode==2) THEN
    filename=TRIM(flpsdisp)
 ELSEIF (icode==3) THEN
