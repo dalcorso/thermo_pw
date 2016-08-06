@@ -2,10 +2,9 @@ el1='Hf'
 el2='N'
 name='hfn_b1'
 
-mkdir $name
-cd $name
+mkdir $WORK_DIR/$name
 
-cat > $name.d <<EOF
+cat > $WORK_DIR/$name/$name.d <<EOF
 $el1
 $el2
  &control
@@ -39,7 +38,4 @@ $el2  0.500000   0.5000000   0.500000
 K_POINTS AUTOMATIC
 $nk $nk $nk $ish $ish $ish
 EOF
-
-
-cd ..
 

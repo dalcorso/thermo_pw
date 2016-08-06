@@ -2,10 +2,9 @@ el1='Si'
 el2='C'
 name='sic_b3'
 
-mkdir $name
-cd $name
+mkdir $WORK_DIR/$name
 
-cat > $name.d <<EOF
+cat > $WORK_DIR/$name/$name.d <<EOF
 $el1
 $el2
  &control
@@ -36,7 +35,4 @@ $el2  0.2500000   0.25000000   0.25
 K_POINTS AUTOMATIC
 $nki $nki $nki $ish $ish $ish
 EOF
-
-
-cd ..
 

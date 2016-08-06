@@ -2,10 +2,9 @@ el1='Ag'
 el2='Cl'
 name='agcl_b1'
 
-mkdir $name
-cd $name
+mkdir $WORK_DIR/$name
 
-cat > $name.d <<EOF
+cat > $WORK_DIR/$name/$name.d <<EOF
 $el1
 $el2
  &control
@@ -36,6 +35,4 @@ $el2  0.500000    0.5000000   0.5
 K_POINTS AUTOMATIC
 $nki $nki $nki $ish $ish $ish
 EOF
-
-cd ..
 

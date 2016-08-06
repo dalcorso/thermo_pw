@@ -2,10 +2,9 @@ el1='Fe'
 el2='O'
 name='feo_b1'
 
-mkdir $name
-cd $name
+mkdir $WORK_DIR/$name
 
-cat > $name.d <<EOF
+cat > $WORK_DIR/$name/$name.d <<EOF
 $el1
 $el2
  &control
@@ -41,4 +40,3 @@ $nk $nk $nk $ish $ish $ish
 EOF
 
 
-cd ..
