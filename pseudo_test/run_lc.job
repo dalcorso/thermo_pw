@@ -9,10 +9,6 @@
 
 . ./environment.job
 
-. $TOP_DIR/parameters_$rel.job
-
-. $TOP_DIR/pseudo_$pseudo_type.job
-
 . $TOP_DIR/lattice_constants_set_$gfun.job
 
 cd $WORK_DIR
