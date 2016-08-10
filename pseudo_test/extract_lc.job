@@ -9,7 +9,9 @@
 
 . ./environment.job
 
-for solid in solids_a1 solids_a2 solids_a4 solids_b1 solids_b3 ; do
+. $TOP_DIR/lattice_constants_set_$gfun.job
+
+for solid in $solids_a1 $solids_a2 $solids_a4 $solids_b1 $solids_b3 ; do
 
 cd $WORK_DIR/$solid
 

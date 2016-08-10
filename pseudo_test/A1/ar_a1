@@ -17,9 +17,6 @@ $el1
     celldm(1) =$ar_a1, 
     nat=  1, 
     ntyp= 1,
-    occupations='smearing',
-    smearing='$smearing_type',
-    degauss=$degauss
     ecutwfc =$ecutwfc,
     ecutrho =$ecutrho
     noncolin=$ncol,
@@ -33,6 +30,6 @@ $el1  0.0    $pseudo_ar
 ATOMIC_POSITIONS
 $el1  0.0000000   0.00000000   0.0
 K_POINTS AUTOMATIC
-$nk $nk $nk $ish $ish $ish
+$nki $nki $nki $ish $ish $ish
 EOF
 
