@@ -81,15 +81,21 @@ DO i=1,npt_theta
 !      WRITE(6,*) 'qvec', qvec(1), qvec(2), qvec(3)
       CALL compute_sound(elcon, qvec, density, sound_speed, sound_disp)
 !      WRITE(6,*) 'sound speed', sound_speed(1), sound_speed(2), sound_speed(3)
+      IF (sound_speed(1)>0.0_DP.AND.sound_speed(2)>0.0_DP.AND. &
+          sound_speed(3)>0.0_DP) &
       integral = integral + SIN(theta) * ( 1.0_DP / sound_speed(1)**3 + &
                   1.0_DP / sound_speed(2)**3 + 1.0_DP / sound_speed(3)**3 )
    END DO
 END DO
 integral= integral * delta_theta * delta_phi / 12.0_DP / pi
-average_sound_speed=1.0_DP / integral**(1.0_DP/3.0_DP)
-WRITE(stdout,'(/,20x,40("-"),/)')
-WRITE(stdout,'(5x,"Average Debye sound velocity = ", f12.3, " m/s")') &
+IF (integral > 0.0_DP) THEN
+   average_sound_speed=1.0_DP / integral**(1.0_DP/3.0_DP)
+   WRITE(stdout,'(/,20x,40("-"),/)')
+   WRITE(stdout,'(5x,"Average Debye sound velocity = ", f12.3, " m/s")') &
                                                     average_sound_speed 
+ELSE
+   WRITE(stdout,'(5x,"Average Debye sound velocity not available")') 
+ENDIF
 RETURN
 END SUBROUTINE compute_average_sound
 
@@ -375,9 +381,19 @@ poisson=in_poisson
 IF (in_poisson==0.0_DP) poisson=0.25_DP
 
 fun = 2.0_DP*(1.0_DP + poisson) / 3.0_DP / ( 1.0_DP - 2.0_DP * poisson)
-fun = SQRT (fun**3.0_DP)
+IF (fun>0.0_DP) THEN
+   fun = SQRT (fun**3.0_DP)
+ELSE
+   WRITE(stdout, '(/,5x,"The approximate Debye temperature not available" )')
+   RETURN
+ENDIF
 fun1= (1.0_DP + poisson) / 3.0_DP / ( 1.0_DP - poisson)
-fun1= SQRT (fun1**3.0_DP)
+IF (fun1>0.0_DP) THEN
+   fun1= SQRT (fun1**3.0_DP)
+ELSE
+   WRITE(stdout, '(/,5x,"The approximate Debye temperature not available" )')
+   RETURN
+ENDIF
 fun = 3.0_DP / ( 2.0_DP * fun + fun1)
 fun = fun**(1.0_DP / 3.0_DP)
 

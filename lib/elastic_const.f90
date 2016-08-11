@@ -1606,13 +1606,28 @@ WRITE(stdout, '(/,5x, "Voigt-Reuss-Hill average; sound velocities:",/)')
 g0 = ( g0r + g0v ) * 0.5_DP
 b0 = ( b0r + b0v ) * 0.5_DP
 
-vp = SQRT( ( b0 + 4.0_DP * g0 / 3.0_DP ) * 1.D8 / density )
-vb = SQRT( b0 * 1.D8 / density )
-vg = SQRT( g0 * 1.D8 / density )
+IF (b0 + 4.0_DP * g0 / 3.0_DP > 0.0_DP) THEN
+   vp = SQRT( ( b0 + 4.0_DP * g0 / 3.0_DP ) * 1.D8 / density )
+   WRITE(stdout, '(5x, "Compressional V_P = ",f12.3," m/s")') vp
+ELSE
+   vp=0.0_DP
+   WRITE(stdout, '(5x, "The system is unstable for compressional deformations")') 
+ENDIF
+IF (b0 > 0.0_DP) THEN
+   vb = SQRT( b0 * 1.D8 / density )
+   WRITE(stdout, '(5x, "Bulk          V_B = ",f12.3," m/s")') vb
+ELSE
+   vb =0.0_DP
+   WRITE(stdout, '(5x, "The system is unstable")') 
+END IF
+IF (g0 > 0.0_DP) THEN
+   vg = SQRT( g0 * 1.D8 / density )
+   WRITE(stdout, '(5x, "Shear         V_G = ",f12.3," m/s")') vg
+ELSE
+   vg = 0.0_DP
+   WRITE(stdout, '(5x, "The system is unstable for shear deformations")') 
+ENDIF
 
-WRITE(stdout, '(5x, "Compressional V_P = ",f12.3," m/s")') vp
-WRITE(stdout, '(5x, "Bulk          V_B = ",f12.3," m/s")') vb
-WRITE(stdout, '(5x, "Shear         V_G = ",f12.3," m/s")') vg
 
 RETURN
 END SUBROUTINE print_sound_velocities
@@ -1685,7 +1700,11 @@ CALL rdiagh( 3, soundmat, 3, sound_speed, sound_disp )
 !  the factor 1D8 converts from kbar to N/m^2
 !
 DO i=1,3
-   sound_speed(i) = SQRT( sound_speed(i) * 1.D8 / density )
+   IF (sound_speed(i) > 0.0_DP) THEN
+      sound_speed(i) = SQRT( sound_speed(i) * 1.D8 / density )
+   ELSE
+      sound_speed(i) = 0.0_DP
+   ENDIF
 ENDDO
 
 RETURN
