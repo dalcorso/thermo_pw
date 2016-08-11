@@ -144,13 +144,16 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
 !
         CASE ('scf_elastic_constants') 
            lpart2_pw=.TRUE.
+           tot_ngeo=1
            IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
         CASE ('scf_piezoelectric_tensor')
            lpart2_pw=.TRUE.
+           tot_ngeo=1
         CASE ('scf_polarization') 
            lpart2_pw=.TRUE.
+           tot_ngeo=1
 !
 !   here all the cases that require the determination of the minimization
 !   of the energy to find the equilibrium crystal parameters
@@ -209,6 +212,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            lpwscf_syn_1=do_scf_relax
            lpart2_pw=.TRUE.
            do_punch=.FALSE.
+           tot_ngeo=1
            IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
@@ -218,6 +222,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            lpwscf_syn_1=do_scf_relax
            lpart2_pw=.TRUE.
            do_punch=.FALSE.
+           tot_ngeo=1
            IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
         CASE ('mur_lc_polarization')
@@ -225,6 +230,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            lpwscf_syn_1=do_scf_relax
            lpart2_pw=.TRUE.
            do_punch=.FALSE.
+           tot_ngeo=1
 !
 !    Here all the cases that compute the free energy and minimize it
 !
