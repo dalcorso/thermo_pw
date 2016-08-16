@@ -61,7 +61,6 @@ piezoelectric_tensor.o : quadratic_surfaces.o
 point_group.o : ../../Modules/constants.o
 point_group.o : ../../Modules/io_global.o
 point_group.o : ../../Modules/kind.o
-print.o : ../../Modules/kind.o
 quadratic_surfaces.o : ../../Modules/io_global.o
 quadratic_surfaces.o : ../../Modules/kind.o
 quadratic_surfaces.o : linear_solvers.o
