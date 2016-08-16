@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2001-2013 Quantum ESPRESSO group
+! Copyright (C) 2001-2016 Quantum ESPRESSO group
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -19,20 +19,18 @@ SUBROUTINE electrons_tpw()
   USE fft_base,             ONLY : dfftp
   USE gvecs,                ONLY : doublegrid
   USE gvect,                ONLY : ecutrho
-  USE lsda_mod,             ONLY : lsda, nspin, magtot, absmag, isk
+  USE lsda_mod,             ONLY : nspin, magtot, absmag
   USE ener,                 ONLY : etot, hwf_energy, eband, deband, ehart, &
                                    vtxc, etxc, etxcc, ewld, demet, epaw, &
                                    elondon, ef_up, ef_dw
   USE scf,                  ONLY : rho, rho_core, rhog_core, v, vltot, vrs, &
                                    kedtau, vnew
-  USE control_flags,        ONLY : tr2, niter, conv_elec, restart, lmd,   &
+  USE control_flags,        ONLY : tr2, niter, conv_elec, restart, lmd, &
                                    do_makov_payne
-  USE io_files,             ONLY : iunwfc, iunmix, nwordwfc, output_drho, &
+  USE io_files,             ONLY : iunmix, output_drho, &
                                    iunres, iunefield, seqopn
-  USE buffers,              ONLY : save_buffer, close_buffer
   USE ldaU,                 ONLY : eth
   USE extfield,             ONLY : tefield, etotefield
-  USE wavefunctions_module, ONLY : evc
   USE wvfct,                ONLY : nbnd, wg, et
   USE klist,                ONLY : nks
   USE noncollin_module,     ONLY : noncolin, magtot_nc, i_cons,  bfield, &
@@ -41,12 +39,13 @@ SUBROUTINE electrons_tpw()
   USE exx,                  ONLY : exxinit, exxenergy2, exxbuff, &
                                    fock0, fock1, fock2, dexx
   USE funct,                ONLY : dft_is_hybrid, exx_is_active
-  USE control_flags,        ONLY : adapt_thr, tr2_init, tr2_multi
+  USE control_flags,        ONLY : adapt_thr, tr2_init, tr2_multi, gamma_only
   !
+  USE mp_asyn,              ONLY : asyn_master, with_asyn_images
+  USE mp_images,            ONLY : my_image_id, root_image
   USE paw_variables,        ONLY : okpaw, ddd_paw, total_core_energy, only_paw
   USE paw_onecenter,        ONLY : PAW_potential
   USE paw_symmetry,         ONLY : PAW_symmetrize_ddd
-  USE uspp_param,           ONLY : nh, nhm ! used for PAW
   !
   !
   IMPLICIT NONE
@@ -54,7 +53,9 @@ SUBROUTINE electrons_tpw()
   ! ... a few local variables
   !
   REAL(DP) :: &
-      charge         ! the total charge
+      charge,       &! the total charge
+      ee, exxen      ! used to compute exchange energy
+  REAL(dp), EXTERNAL :: exxenergyace
   INTEGER :: &
       idum,         &! dummy counter on iterations
       iter,         &! counter on iterations
@@ -64,14 +65,16 @@ SUBROUTINE electrons_tpw()
       tr2_min,     &! estimated error on energy coming from diagonalization
       tr2_final     ! final threshold for exx minimization 
                     ! when using adaptive thresholds.
-  LOGICAL :: first, exst
+  LOGICAL :: first, exst, all_done_asyn
   !
   !
+  exxen = 0.0d0
   iter = 0
   first = .true.
   tr2_final = tr2
   IF ( dft_is_hybrid() ) THEN
-     printout = 0  ! do not print etot and energy components at each scf step
+     ! printout = 0  : do not print etot and energy components at each scf step
+     printout = 1  ! print etot, not energy components at each scf step
   ELSE IF ( lmd ) THEN
      printout = 1  ! print etot, not energy components at each scf step
   ELSE
@@ -125,12 +128,14 @@ SUBROUTINE electrons_tpw()
   !
   DO idum=1,niter
      !
+     IF ( with_asyn_images.AND.my_image_id==root_image.AND.ionode ) &
+                      CALL asyn_master(all_done_asyn)
      iter = iter + 1
      !
      ! ... Self-consistency loop. For hybrid functionals the exchange potential
      ! ... is calculated with the orbitals at previous step (none at first step)
      !
-     CALL electrons_scf_tpw ( printout )
+     CALL electrons_scf_tpw ( printout, exxen )
      !
      IF ( .NOT. dft_is_hybrid() ) RETURN
      !
@@ -166,13 +171,21 @@ SUBROUTINE electrons_tpw()
         ! then calculate exchange energy (will be useful at next step)
         !
         CALL exxinit()
+#ifdef __EXX_ACE 
+        fock2 = exxenergyace()
+#else  
         fock2 = exxenergy2()
+#endif
+        exxen = 0.50d0*fock2 
+        etot = etot - etxc 
         !
         ! Recalculate potential because XC functional has changed,
         ! start self-consistency loop on exchange
         !
         CALL v_of_rho( rho, rho_core, rhog_core, &
              ehart, etxc, vtxc, eth, etotefield, charge, v)
+        etot = etot + etxc + exxen
+        !
         IF (okpaw) CALL PAW_potential(rho%bec, ddd_PAW, epaw)
         CALL set_vrs( vrs, vltot, v%of_r, kedtau, v%kin_r, dfftp%nnr, &
              nspin, doublegrid )
@@ -182,7 +195,11 @@ SUBROUTINE electrons_tpw()
         ! fock1 is the exchange energy calculated for orbitals at step n,
         !       using orbitals at step n-1 in the expression of exchange
         !
+#ifdef __EXX_ACE
+        fock1 = exxenergyace()
+#else  
         fock1 = exxenergy2()
+#endif
         !
         ! Set new orbitals for the calculation of the exchange term
         !
@@ -193,7 +210,11 @@ SUBROUTINE electrons_tpw()
         ! fock0 is fock2 at previous step
         !
         fock0 = fock2
+#ifdef __EXX_ACE 
+        fock2 = exxenergyace()
+#else  
         fock2 = exxenergy2()
+#endif
         !
         ! check for convergence. dexx is positive definite: if it isn't,
         ! there is some numerical problem. One such cause could be that
@@ -203,7 +224,11 @@ SUBROUTINE electrons_tpw()
         IF ( dexx < 0d0 ) CALL errore( 'electrons', 'dexx is negative! &
            &  Check that exxdiv_treatment is appropriate for the system', 1 )
         !
-        etot = etot + 0.5D0*fock2 - fock1
+        !   remove the estimate exchange energy exxen used in the inner SCF
+        !
+        etot = etot + exxen + 0.5D0*fock2 - fock1
+        exxen = 0.5D0*fock2 
+        ! write(*,*) '@chken', etot
         hwf_energy = hwf_energy + 0.5D0*fock2 - fock1
         IF ( dexx < tr2_final ) THEN
            WRITE( stdout, 9066 ) '!', etot, hwf_energy, dexx
@@ -262,7 +287,7 @@ SUBROUTINE electrons_tpw()
 END SUBROUTINE electrons_tpw
 !
 !----------------------------------------------------------------------------
-SUBROUTINE electrons_scf_tpw ( printout )
+SUBROUTINE electrons_scf_tpw ( printout, exxen )
   !----------------------------------------------------------------------------
   !
   ! ... This routine is a driver of the self-consistent cycle.
@@ -287,7 +312,7 @@ SUBROUTINE electrons_scf_tpw ( printout )
                                    two_fermi_energies, tot_charge
   USE lsda_mod,             ONLY : lsda, nspin, magtot, absmag, isk
   USE vlocal,               ONLY : strf
-  USE wvfct,                ONLY : nbnd, et, npwx
+  USE wvfct,                ONLY : nbnd, et
   USE gvecw,                ONLY : ecutwfc
   USE ener,                 ONLY : etot, hwf_energy, eband, deband, ehart, &
                                    vtxc, etxc, etxcc, ewld, demet, epaw, &
@@ -302,13 +327,15 @@ SUBROUTINE electrons_scf_tpw ( printout )
                                    restart, io_level, do_makov_payne,  &
                                    gamma_only, iverbosity, textfor,     &
                                    llondon, scf_must_converge, lxdm, ts_vdw
-  USE io_files,             ONLY : iunwfc, iunmix, nwordwfc, output_drho, &
+#ifdef __XSD 
+  USE control_flags,        ONLY : n_scf_steps, scf_error
+#endif
+
+  USE io_files,             ONLY : iunmix, output_drho, &
                                    iunres, iunefield, seqopn
-  USE buffers,              ONLY : save_buffer, close_buffer
   USE ldaU,                 ONLY : eth, Hubbard_U, Hubbard_lmax, &
                                    niter_with_fixed_ns, lda_plus_u
   USE extfield,             ONLY : tefield, etotefield
-  USE wavefunctions_module, ONLY : evc
   USE noncollin_module,     ONLY : noncolin, magtot_nc, i_cons,  bfield, &
                                    lambda, report
   USE spin_orb,             ONLY : domag
@@ -325,19 +352,18 @@ SUBROUTINE electrons_scf_tpw ( printout )
   USE paw_variables,        ONLY : okpaw, ddd_paw, total_core_energy, only_paw
   USE paw_onecenter,        ONLY : PAW_potential
   USE paw_symmetry,         ONLY : PAW_symmetrize_ddd
-  USE uspp_param,           ONLY : nh, nhm ! used for PAW
   USE dfunct,               ONLY : newd
   USE esm,                  ONLY : do_comp_esm, esm_printpot, esm_ewald
   USE fcp_variables,        ONLY : lfcpopt, lfcpdyn
   USE iso_c_binding,        ONLY : c_int
   USE mp_asyn,              ONLY : asyn_master, with_asyn_images
-  USE mp_images,            ONLY : my_image_id, root_image
   !
   USE plugin_variables,     ONLY : plugin_etot
   !
   IMPLICIT NONE
   !
   INTEGER, INTENT (IN) :: printout
+  REAL(DP),INTENT (IN) :: exxen    ! current estimate of the echange energy
   !
   ! ... a few local variables
   !
@@ -371,7 +397,6 @@ SUBROUTINE electrons_scf_tpw ( printout )
   !
   iter = 0
   dr2  = 0.0_dp
-  !
   IF ( restart ) CALL restart_in_electrons (iter, dr2, ethr, et )
   !
   WRITE( stdout, 9000 ) get_clock( 'PWSCF' )
@@ -411,8 +436,6 @@ SUBROUTINE electrons_scf_tpw ( printout )
   !
   DO idum = 1, niter
      !
-     IF ( with_asyn_images.AND.my_image_id==root_image.AND.ionode ) &
-                      CALL asyn_master(all_done_asyn)
      IF ( check_stop_now() ) THEN
         conv_elec=.FALSE.
         CALL save_in_electrons (iter, dr2, ethr, et )
@@ -669,6 +692,13 @@ SUBROUTINE electrons_scf_tpw ( printout )
      WRITE( stdout, 9000 ) get_clock( 'PWSCF' )
      !
      IF ( conv_elec ) WRITE( stdout, 9101 )
+#ifdef __XSD 
+     IF ( conv_elec ) THEN 
+           scf_error = dr2
+           n_scf_steps = iter
+     END IF  
+#endif
+
      !
      IF ( conv_elec .OR. MOD( iter, iprint ) == 0 ) THEN
         !
@@ -695,6 +725,9 @@ SUBROUTINE electrons_scf_tpw ( printout )
      END IF
      !
      etot = eband + ( etxc - etxcc ) + ewld + ehart + deband + demet + descf
+     ! for hybrid calculations, add the current estimate of exchange energy
+     etot = etot - exxen  
+     ! write(*,*) '@chk', etot 
      !
      IF (okpaw) etot = etot + epaw
      IF ( lda_plus_u ) etot = etot + eth
@@ -726,7 +759,7 @@ SUBROUTINE electrons_scf_tpw ( printout )
         etot = etot + etotefield
         hwf_energy = hwf_energy + etotefield
      END IF
-
+     !
      IF ( lfcpopt .or. lfcpdyn ) THEN
         etot = etot + ef * tot_charge
         hwf_energy = hwf_energy + ef * tot_charge
@@ -775,7 +808,7 @@ SUBROUTINE electrons_scf_tpw ( printout )
   !
 10  FLUSH( stdout )
   !
-  ! ... exiting: write (unless disables) the charge density to file
+  ! ... exiting: write (unless disabled) the charge density to file
   ! ... (also write ldaU ns coefficients and PAW becsum)
   !
   IF ( io_level > -1 ) CALL write_rho( rho, nspin )
@@ -1052,6 +1085,7 @@ SUBROUTINE electrons_scf_tpw ( printout )
        USE constants, ONLY : eps8
        INTEGER, INTENT (IN) :: printout
        !
+   
        IF ( printout == 0 ) RETURN
        IF ( ( conv_elec .OR. MOD(iter,iprint) == 0 ) .AND. printout > 1 ) THEN
           !
@@ -1156,3 +1190,4 @@ SUBROUTINE electrons_scf_tpw ( printout )
   END SUBROUTINE print_energies
   !
 END SUBROUTINE electrons_scf_tpw
+!

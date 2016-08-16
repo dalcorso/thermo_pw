@@ -14,12 +14,11 @@ subroutine polarizc ( iu )
   !
 
   USE io_global,    ONLY : stdout
-  USE io_files,     ONLY : iunigk
   USE constants,    ONLY : fpi, rytoev
   USE cell_base,    ONLY : at, bg
   USE klist,        ONLY : wk, nkstot
   USE symme,        ONLY : symmatrix, crys_to_cart
-  USE wvfct,        ONLY : npw, npwx, igk
+  USE wvfct,        ONLY : npwx
   USE kinds,        ONLY : DP
   USE control_lr,   ONLY : nbnd_occ
   USE lsda_mod,     ONLY : lsda
@@ -29,6 +28,7 @@ subroutine polarizc ( iu )
   USE optical,      ONLY : iu1dwf, lr1dwf, current_w, epsilonc, fru
   USE eqv,          ONLY : dpsi, dvpsi
   USE qpoint,       ONLY : nksq
+  USE klist,        ONLY : ngk
   USE ph_restart,   ONLY : ph_writefile
   USE cell_base,    ONLY : omega
   USE noncollin_module, ONLY : noncolin
@@ -42,7 +42,7 @@ subroutine polarizc ( iu )
   !
   ! local variables
   !
-  integer :: ibnd, ipol, jpol, nrec, ik, ierr
+  integer :: ibnd, ipol, jpol, nrec, ik, ierr, npw
   ! counter on polarizations
   ! counter on records
   ! counter on k points
@@ -53,9 +53,8 @@ subroutine polarizc ( iu )
 
   call start_clock ('polariz')
   cepsilon(:,:) = (0.0_DP, 0.0_DP)
-  if (nksq > 1) rewind (unit = iunigk)
   do ik = 1, nksq
-     if (nksq > 1) read (iunigk) npw, igk
+     npw = ngk(ik)
      IF (ABS(CMPLX(fru(iu),fiu(iu)))> 1.D-7) THEN
 !
 !   two wavefunctions at (+w and -w) are added in this case

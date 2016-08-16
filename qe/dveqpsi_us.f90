@@ -20,17 +20,18 @@ subroutine dveqpsi_us (ik)
   USE fft_interfaces, ONLY: fwfft, invfft
   USE gvecs,     ONLY : nls
   USE noncollin_module, ONLY : noncolin
-  USE wvfct,     ONLY : nbnd, npw, npwx, igk
+  USE wvfct,     ONLY : nbnd, npwx
+
   USE wavefunctions_module,  ONLY: evc
   USE eqv,        ONLY : dvpsi
-  USE qpoint,     ONLY : npwq, igkq
-
+  USE qpoint,     ONLY : ikks, ikqs
+  USE klist,      ONLY : ngk, igk_k 
   implicit none
   !
   !   The dummy variables
   !
 
-  integer :: ik
+  integer :: ik, npw, npwq, ikk, ikq
   ! input: the k point
 
   integer :: ibnd, ig
@@ -44,8 +45,6 @@ subroutine dveqpsi_us (ik)
   logical :: htg
 
   call start_clock ('dveqpsi_us')
-  htg = dffts%have_task_groups
-  dffts%have_task_groups=.FALSE.
   allocate (aux2(dffts%nnr))
   !
   !  The unperturbed wavefunctions must be multiplied by e^{iqr}.
@@ -56,21 +55,26 @@ subroutine dveqpsi_us (ik)
   !
   dvpsi(:,:) = (0.d0, 0.d0)
 
+  ikk = ikks(ik)
+  ikq = ikqs(ik)
+  npw = ngk(ikk)
+  npwq= ngk(ikq)
+
   do ibnd = 1, nbnd
      aux2(:) = (0.d0, 0.d0)
      do ig = 1, npw
-        aux2 (nls (igk (ig) ) ) = evc (ig, ibnd)
+        aux2 (nls (igk_k (ig,ikk) ) ) = evc (ig, ibnd)
      enddo
      do ig = 1, npwq
-        dvpsi (ig, ibnd) = aux2 (nls (igkq (ig) ) )
+        dvpsi (ig, ibnd) = aux2 (nls (igk_k (ig,ikq) ) )
      enddo
      IF (noncolin) THEN
         aux2(:) = (0.d0, 0.d0)
         do ig = 1, npw
-           aux2 (nls (igk (ig) ) ) = evc (ig+npwx, ibnd)
+           aux2 (nls (igk_k (ig,ikk) ) ) = evc (ig+npwx, ibnd)
         enddo
         do ig = 1, npwq
-           dvpsi (ig+npwx, ibnd) = aux2 (nls (igkq (ig) ) )
+           dvpsi (ig+npwx, ibnd) = aux2 (nls (igk_k (ig,ikq) ) )
         enddo
      END IF
   enddo
@@ -83,7 +87,6 @@ subroutine dveqpsi_us (ik)
   !
   call dveqpsi_us_only (ik)
 
-  dffts%have_task_groups=htg
   call stop_clock ('dveqpsi_us')
   return
 end subroutine dveqpsi_us

@@ -65,7 +65,7 @@ PROGRAM epsilon_tpw
   USE constants,   ONLY : rytoev
   USE io_global,   ONLY : stdout, ionode, ionode_id, meta_ionode, &
                           meta_ionode_id
-  USE io_files,    ONLY : tmp_dir, prefix, outdir, iunwfc
+  USE io_files,    ONLY : tmp_dir, prefix, iunwfc
   USE ions_base,   ONLY : ntyp => nsp
   USE uspp_param,  ONLY : nhm
   USE uspp,        ONLY : okvan
@@ -90,6 +90,7 @@ PROGRAM epsilon_tpw
   !
   INTEGER                 :: nfs, nbndmin, nbndmax
   REAL(DP)                :: intersmear, wmax, wmin, shift
+  CHARACTER(LEN=256)      :: outdir
   CHARACTER(10)           :: calculation
   CHARACTER(LEN=9) :: code='epsil_tpw'
   !
@@ -499,7 +500,7 @@ SUBROUTINE dipole_calc( ik, dipole_aux, nbndmin, nbndmax, shift )
   !------------------------------------------------------------------
   USE kinds,                ONLY : DP
   USE constants,            ONLY : pi, degspin
-  USE wvfct,                ONLY : wg, npw, nbnd, igk, g2kin, npwx, et
+  USE wvfct,                ONLY : wg, nbnd, g2kin, npwx, et
   USE gvecw,                ONLY : ecutwfc
   USE wavefunctions_module, ONLY : evc
   USE ener,                 ONLY : ef
@@ -511,6 +512,7 @@ SUBROUTINE dipole_calc( ik, dipole_aux, nbndmin, nbndmax, shift )
   USE io_files,             ONLY : nwordwfc, iunwfc
   USE becmod,               ONLY : bec_type, calbec, &
                                    allocate_bec_type, deallocate_bec_type
+  USE klist,                ONLY : ngk, igk_k
   USE io_global,            ONLY : stdout
   USE mp_global,            ONLY : intra_bgrp_comm
   USE mp,                   ONLY : mp_sum
@@ -526,10 +528,11 @@ SUBROUTINE dipole_calc( ik, dipole_aux, nbndmin, nbndmax, shift )
   !
   TYPE(bec_type) :: becp1, becp2  ! the scalar products between wavefunctions
                                   ! and projectors
-  INTEGER :: iband1, iband2, ig, nbnd_occ, ipol, ibnd
+  INTEGER :: iband1, iband2, ig, nbnd_occ, ipol, ibnd, npw
   !
   COMPLEX(DP)   :: ZDOTC
   COMPLEX(DP), ALLOCATABLE :: dpsi(:,:), dvpsi(:,:)
+  INTEGER, ALLOCATABLE :: igk(:)
   REAL(DP) :: small, xmax, fac, targete, etrans
   !
   CALL start_clock( 'dipole_calc' )
@@ -537,6 +540,7 @@ SUBROUTINE dipole_calc( ik, dipole_aux, nbndmin, nbndmax, shift )
   ALLOCATE ( dpsi ( npwx*npol, nbnd))
   !
   IF (okvan) ALLOCATE ( dvpsi ( npwx*npol, nbnd))
+  ALLOCATE(igk(npwx))
   !
   ! setup k+G grids for each kpt
   !
@@ -620,6 +624,7 @@ SUBROUTINE dipole_calc( ik, dipole_aux, nbndmin, nbndmax, shift )
   !
   CALL deallocate_bec_type (becp1)
   CALL deallocate_bec_type (becp2)
+  DEALLOCATE(igk)
   DEALLOCATE(dpsi)
   IF (okvan) DEALLOCATE(dvpsi)
   !

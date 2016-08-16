@@ -31,7 +31,6 @@ SUBROUTINE find_symmetry(fft_fact)
   USE ions_base,          ONLY : nat, tau, ntyp => nsp, ityp
   USE gvect,              ONLY : gcutm
   USE fft_base,           ONLY : dfftp, dffts
-  USE grid_subroutines,   ONLY : realspace_grid_init
   USE gvecs,              ONLY : doublegrid, gcutms, dual
   USE gvecw,              ONLY : ecutwfc
   USE symm_base,          ONLY : s, t_rev, irt, nrot, nsym, invsym, nosym, &
@@ -39,6 +38,7 @@ SUBROUTINE find_symmetry(fft_fact)
   USE noncollin_module, ONLY : m_loc, noncolin, i_cons, npol, angle1, angle2
   USE lsda_mod,         ONLY : starting_magnetization, nspin
   USE spin_orb,         ONLY : domag, lspinorb
+  USE mp_bands,         ONLY : intra_bgrp_comm
   !
   IMPLICIT NONE
   INTEGER, INTENT(IN) :: fft_fact(3)
@@ -122,7 +122,8 @@ SUBROUTINE find_symmetry(fft_fact)
   !
   ! ... calculate dimensions of the FFT grid
   !
-  CALL realspace_grid_init ( dfftp, at, bg, gcutm, fft_fact )
+  dfftp%comm=intra_bgrp_comm
+  CALL realspace_grid_init_tpw ( dfftp, at, bg, gcutm, fft_fact )
   IF ( gcutms == gcutm ) THEN
      IF ( dffts%nr1 ==0 .AND. dffts%nr2==0 .AND. dffts%nr3==0) THEN
           dffts%nr1 = dfftp%nr1     
@@ -133,7 +134,8 @@ SUBROUTINE find_symmetry(fft_fact)
           dffts%nr3x= dfftp%nr3x
      ENDIF
   END IF
-  CALL realspace_grid_init ( dffts, at, bg, gcutms, fft_fact )
+  dffts%comm=intra_bgrp_comm
+  CALL realspace_grid_init_tpw ( dffts, at, bg, gcutms, fft_fact )
   !
   !  ... generate transformation matrices for the crystal point group
   !  ... First we generate all the symmetry matrices of the Bravais lattice
@@ -152,3 +154,4 @@ SUBROUTINE find_symmetry(fft_fact)
   RETURN
   !
 END SUBROUTINE find_symmetry
+

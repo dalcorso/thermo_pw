@@ -323,8 +323,9 @@ SUBROUTINE do_plan_avg (ik, averag, vacuum, plan, zdim, ninter, i1, &
   USE klist, ONLY: nks, nkstot, xk
   USE lsda_mod, ONLY: nspin, lsda, current_spin, isk
   USE uspp, ONLY: vkb, nkb
-  USE wvfct, ONLY: npw, npwx, nbnd, wg, igk, g2kin
+  USE wvfct, ONLY: npwx, nbnd, wg, g2kin
   USE gvecw, ONLY : ecutwfc
+  USE klist, ONLY : ngk, igk_k
   USE wavefunctions_module,  ONLY: evc
   USE noncollin_module, ONLY : noncolin, npol
   USE io_files, ONLY: iunwfc, nwordwfc
@@ -344,7 +345,7 @@ SUBROUTINE do_plan_avg (ik, averag, vacuum, plan, zdim, ninter, i1, &
   !      Local variables
   !
   INTEGER :: ik, ibnd, iin, na, ir, ij, ind, i1 (nat), ntau (nat + 1), ind1, &
-                       ind2, i3, vacuum1, vacuum2, max_dist, ispin
+                       ind2, i3, vacuum1, vacuum2, max_dist, ispin, npw
   INTEGER, ALLOCATABLE :: distance(:)
   ! counter on k points
   ! counter on bands
@@ -364,9 +365,10 @@ SUBROUTINE do_plan_avg (ik, averag, vacuum, plan, zdim, ninter, i1, &
   !     for each state compute the planar average
   !
   IF (lsda) current_spin = isk (ik)
-  CALL gk_sort (xk (1, ik), ngm, g, ecutwfc / tpiba2, npw, igk, g2kin)
+  npw=ngk(ik)
+!  CALL gk_sort (xk (1, ik), ngm, g, ecutwfc / tpiba2, npw, igk, g2kin)
   CALL davcio (evc, 2*nwordwfc, iunwfc, ik, - 1)
-  CALL init_us_2 (npw, igk, xk (1, ik), vkb)
+  CALL init_us_2 (npw, igk_k(1,ik), xk (1, ik), vkb)
 
   CALL calbec ( npw, vkb, evc, becp)
 

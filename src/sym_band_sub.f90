@@ -17,7 +17,8 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   USE fft_base,             ONLY : dfftp
   USE gvect,                ONLY : ngm, nl, g
   USE lsda_mod,             ONLY : nspin
-  USE wvfct,                ONLY : et, nbnd, npwx, npw, igk, g2kin
+  USE wvfct,                ONLY : et, nbnd, npwx, g2kin
+  USE klist,                ONLY : ngk, igk_k
   USE gvecw,                ONLY : ecutwfc
   USE klist,                ONLY : xk, nks, nkstot
   USE io_files,             ONLY : nwordwfc, iunwfc
@@ -47,7 +48,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   IMPLICIT NONE
   !
   INTEGER :: ik, i, j, irot, iclass, ig, ibnd, ilayer, ishift
-  INTEGER :: nat_, nbnd_, nkstot_, idum, iun
+  INTEGER :: npw, nat_, nbnd_, nkstot_, idum, iun
   INTEGER :: spin_component, nks1, nks2, firstk, lastk
   INTEGER :: nks1tot, nks2tot
   INTEGER :: iunout, igroup, irap, dim_rap, ik2, ike, ikz, nks_, ios
@@ -106,10 +107,9 @@ SUBROUTINE sym_band_sub(filband, spin_component)
      !
      !    prepare the indices of this k point
      !
-     CALL gk_sort (xk (1, ik), ngm, g, ecutwfc / tpiba2, npw, &
-          igk, g2kin)
+     npw = ngk(ik)
      !
-     CALL init_us_2 (npw, igk, xk (1, ik), vkb)
+     CALL init_us_2 (npw, igk_k(1,ik), xk (1, ik), vkb)
      !
      !   read eigenfunctions
      !
@@ -136,18 +136,18 @@ SUBROUTINE sym_band_sub(filband, spin_component)
      !
      IF (noncolin) THEN
         IF (domag) THEN
-           CALL find_band_sym_so(evc,et(1,ik),nsym_is, &
+           CALL find_band_sym_so(ik, evc,et(1,ik),nsym_is, &
                 sk_is,ftau_is,d_spin_is,gk_is,&
                 rap_et(1,ik),times(1,1,ik), &
                 ngroup(ik),istart(1,ik),accuracy)
         ELSE
-           CALL find_band_sym_so(evc,et(1,ik),nsymk, &
+           CALL find_band_sym_so(ik, evc,et(1,ik),nsymk, &
                 sk,ftauk,d_spink,gk, &
                 rap_et(1,ik),times(1,1,ik),ngroup(ik),&
                 istart(1,ik),accuracy)
         ENDIF
      ELSE
-        CALL find_band_sym (evc, et(1,ik),  nsymk, sk, ftauk, gk, &
+        CALL find_band_sym (ik, evc, et(1,ik),  nsymk, sk, ftauk, gk, &
              rap_et(1,ik), times(1,1,ik), ngroup(ik), &
              istart(1,ik),accuracy)
      ENDIF

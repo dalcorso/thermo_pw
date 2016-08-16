@@ -1,6 +1,6 @@
 # Makefile for Modules
 
-include ../../make.sys
+include ../../make.inc
 
 # location of needed modules
 MODFLAGS= $(MOD_FLAG)../../iotk/src $(MOD_FLAG)../../Modules \
@@ -40,6 +40,7 @@ psymeq.o \
 psym_dmage_fpol.o \
 run_nscf.o \
 read_dyn_from_file.o \
+realspace_grid_init.o \
 scal_prod.o \
 set_defaults_pw.o \
 set_fxc_tran.o \
@@ -54,8 +55,7 @@ symeq.o \
 sym_dmage_fpol.o \
 sym_dmageq.o \
 transform_intq_nc.o \
-transform_intq_so.o \
-usnldiagq.o
+transform_intq_so.o 
 
 all : thermo_qe.a
 

@@ -22,7 +22,7 @@ SUBROUTINE phq_readin_tpw()
   USE mp,            ONLY : mp_bcast
   USE mp_world,      ONLY : world_comm
   USE ions_base,     ONLY : amass, atm
-  USE input_parameters, ONLY : max_seconds, nk1, nk2, nk3, k1, k2, k3
+  USE input_parameters, ONLY : max_seconds, nk1, nk2, nk3, k1, k2, k3, outdir
   USE start_k,       ONLY : reset_grid
   USE klist,         ONLY : xk, nks, nkstot, lgauss, two_fermi_energies, lgauss
   USE ktetra,        ONLY : ltetra
@@ -53,7 +53,7 @@ SUBROUTINE phq_readin_tpw()
   USE partial,       ONLY : atomo, nat_todo, nat_todo_input
   USE output,        ONLY : fildyn, fildvscf, fildrho
   USE disp,          ONLY : nq1, nq2, nq3, x_q, wq, nqs, lgamma_iq
-  USE io_files,      ONLY : outdir, tmp_dir, prefix
+  USE io_files,      ONLY : tmp_dir, prefix
   USE noncollin_module, ONLY : i_cons, noncolin
   USE ldaU,          ONLY : lda_plus_u
   USE control_flags, ONLY : iverbosity, modenum, twfcollect
@@ -655,8 +655,8 @@ SUBROUTINE phq_readin_tpw()
   IF (ts_vdw) CALL errore('phq_readin',&
      'The phonon code with TS-VdW is not yet available',1)
 
-  IF ( dft_is_nonlocc() ) CALL errore('phq_readin',&
-     'The phonon code with non-local vdW functionals is not yet available',1)
+!  IF ( dft_is_nonlocc() ) CALL errore('phq_readin',&
+!     'The phonon code with non-local vdW functionals is not yet available',1)
 
   IF ( dft_is_hybrid() ) CALL errore('phq_readin',&
      'The phonon code with hybrid functionals is not yet available',1)
@@ -685,10 +685,6 @@ SUBROUTINE phq_readin_tpw()
   IF (nproc_pool /= nproc_pool_file .and. .not. twfcollect)  &
      CALL errore('phq_readin',&
      'pw.x run with a different number of pools. Use wf_collect=.true.',1)
-  !
-  !   Task groups not used in phonon. Activated only in some places
-  !
-  IF (ntask_groups > 1) dffts%have_task_groups=.FALSE.
 
   IF (nproc_bgrp_file /= nproc_bgrp .AND. .NOT. twfcollect) &
      CALL errore('phq_readin','pw.x run with different band parallelization',1)

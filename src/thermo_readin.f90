@@ -34,7 +34,7 @@ SUBROUTINE thermo_readin()
   USE control_dosq,         ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq, &
                                    freqmin_input, freqmax_input, &
                                    phdos_sigma
-  USE input_parameters,     ONLY : outdir, ibrav, forc_conv_thr, max_seconds, &
+  USE input_parameters,     ONLY : outdir,ibrav, forc_conv_thr, max_seconds, &
                                    calculation
   USE read_input,           ONLY : read_input_file
   USE command_line_options, ONLY : input_file_ 
@@ -714,7 +714,7 @@ SUBROUTINE thermo_ph_readin()
   USE thermo_mod, ONLY : what
   USE mp_world,   ONLY : world_comm
   USE io_global,  ONLY : meta_ionode, meta_ionode_id
-  USE io_files,   ONLY : outdir_in_ph => outdir
+  USE io_files,   ONLY : outdir_in_ph => tmp_dir
   USE mp,         ONLY : mp_bcast
   USE output, ONLY : fildyn
   USE command_line_options, ONLY : input_file_ 

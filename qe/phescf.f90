@@ -189,13 +189,13 @@ LOGICAL :: exst
 IF (meta_ionode) THEN
 
    iu_epsil=2
-   INQUIRE(FILE="epsilon_re", exist=exst)
+   INQUIRE(FILE="dynamical_matrices/epsilon_re", exist=exst)
    IF (exst) THEN
-      OPEN (UNIT=iu_epsil, FILE='epsilon_re', STATUS='old', &
+      OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/epsilon_re', STATUS='old',&
                               POSITION='append', FORM='formatted')
    ELSE
-      OPEN (UNIT=iu_epsil, FILE='epsilon_re', STATUS='unknown', &
-                                                     FORM='formatted')
+      OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/epsilon_re',  &
+                                        STATUS='unknown', FORM='formatted')
       WRITE(iu_epsil,'("#  Re(w)     Im(w)    e11            e22&
               &            e33            e12            e13            e23")')
    END IF
@@ -208,13 +208,13 @@ IF (meta_ionode) THEN
    CLOSE(iu_epsil)
 
    iu_epsil=2
-   INQUIRE(FILE="epsilon_im", exist=exst)
+   INQUIRE(FILE="dynamical_matrices/epsilon_im", exist=exst)
    IF (exst) THEN
-      OPEN (UNIT=iu_epsil, FILE='epsilon_im', STATUS='old', &
+      OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/epsilon_im', STATUS='old',&
                               POSITION='append', FORM='formatted')
    ELSE
-      OPEN (UNIT=iu_epsil, FILE='epsilon_im', STATUS='unknown', &
-                                                     FORM='formatted')
+      OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/epsilon_im', &
+                      STATUS='unknown', FORM='formatted')
       WRITE(iu_epsil,'("#  Re(w)     Im(w)    e11            e22&
               &            e33            e12            e13            e23")')
    END IF
@@ -227,13 +227,13 @@ IF (meta_ionode) THEN
    CLOSE(iu_epsil)
 
    iu_epsil=2
-   INQUIRE(FILE="epsilonm1_re", exist=exst)
+   INQUIRE(FILE="dynamical_matrices/epsilonm1_re", exist=exst)
    IF (exst) THEN
-      OPEN (UNIT=iu_epsil, FILE='epsilonm1_re', STATUS='old', &
-                              POSITION='append', FORM='formatted')
+      OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/epsilonm1_re', &
+                       STATUS='old', POSITION='append', FORM='formatted')
    ELSE
-      OPEN (UNIT=iu_epsil, FILE='epsilonm1_re', STATUS='unknown', &
-                                                     FORM='formatted')
+      OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/epsilonm1_re', &
+                                           STATUS='unknown', FORM='formatted')
       WRITE(iu_epsil,'("#  Re(w)     Im(w)  em111          em122&
               &          em133          em112          em113          em123")')
    END IF
@@ -244,13 +244,13 @@ IF (meta_ionode) THEN
    CLOSE(iu_epsil)
 
    iu_epsil=2
-   INQUIRE(FILE="epsilonm1_im", exist=exst)
+   INQUIRE(FILE="dynamical_matrices/epsilonm1_im", exist=exst)
    IF (exst) THEN
-      OPEN (UNIT=iu_epsil, FILE='epsilonm1_im', STATUS='old', &
-                           POSITION='append', FORM='formatted')
+      OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/epsilonm1_im', &
+                      STATUS='old', POSITION='append', FORM='formatted')
    ELSE
-      OPEN (UNIT=iu_epsil, FILE='epsilonm1_im', STATUS='unknown', &
-                                                     FORM='formatted')
+      OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/epsilonm1_im', &
+                                      STATUS='unknown', FORM='formatted')
       WRITE(iu_epsil,'("#  Re(w)     Im(w)  em111          em122&
               &          em133          em112          em113          em123")')
    END IF
@@ -267,13 +267,13 @@ IF (meta_ionode) THEN
 !   In the molecular case write also the polarization
 !
       iu_epsil=2
-      INQUIRE(FILE="polariz_re", exist=exst)
+      INQUIRE(FILE="dynamical_matrices/polariz_re", exist=exst)
       IF (exst) THEN
-         OPEN (UNIT=iu_epsil, FILE='polariz_re', STATUS='old', &
-                                 POSITION='append', FORM='formatted')
+         OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/polariz_re', &
+                       STATUS='old', POSITION='append', FORM='formatted')
       ELSE
-         OPEN (UNIT=iu_epsil, FILE='polariz_re', STATUS='unknown', &
-                                                     FORM='formatted')
+         OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/polariz_re', &
+                          STATUS='unknown', FORM='formatted')
          WRITE(iu_epsil,'("#  Re(w)     Im(w)    a11            a22&
               &            a33            a12            a13            a23")')
       END IF
@@ -286,13 +286,13 @@ IF (meta_ionode) THEN
       CLOSE(iu_epsil)
 
       iu_epsil=2
-      INQUIRE(FILE="polariz_im", exist=exst)
+      INQUIRE(FILE="dynamical_matrices/polariz_im", exist=exst)
       IF (exst) THEN
-         OPEN (UNIT=iu_epsil, FILE='polariz_im', STATUS='old', &
-                                 POSITION='append', FORM='formatted')
+         OPEN (UNIT=iu_epsil, FILE='dynamica_matrices/polariz_im', &
+                           STATUS='old', POSITION='append', FORM='formatted')
       ELSE
-         OPEN (UNIT=iu_epsil, FILE='polariz_im', STATUS='unknown', &
-                                                     FORM='formatted')
+         OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/polariz_im', &
+                    STATUS='unknown', FORM='formatted')
          WRITE(iu_epsil,'("#  Re(w)     Im(w)    a11            a22&
               &            a33            a12            a13            a23")')
       END IF

@@ -15,11 +15,11 @@ SUBROUTINE apply_ac (ndmx, n, h, ah, ik, m, indi, iflag)
   !
 
   USE kinds,                ONLY : DP
-  USE wvfct,                ONLY : npwx, nbnd
+  USE wvfct,                ONLY : npwx, nbnd, current_k
   USE becmod,               ONLY : bec_type, becp, calbec
   USE uspp,                 ONLY : nkb, vkb
   USE fft_base,             ONLY : dffts
-  USE wvfct,                ONLY : npwx, igk, et
+  USE wvfct,                ONLY : npwx, et
   USE qpoint,               ONLY : igkq, ikks
   USE noncollin_module,     ONLY : noncolin, npol
 
@@ -28,7 +28,7 @@ SUBROUTINE apply_ac (ndmx, n, h, ah, ik, m, indi, iflag)
   USE qpoint,               ONLY : ikqs
   USE optical,              ONLY : current_w
 
-  USE mp_bands,             ONLY : intra_bgrp_comm, ntask_groups
+  USE mp_bands,             ONLY : intra_bgrp_comm
   USE mp,                   ONLY : mp_sum
 
   !Needed only for TDDFPT
@@ -65,10 +65,6 @@ SUBROUTINE apply_ac (ndmx, n, h, ah, ik, m, indi, iflag)
 
   CALL start_clock ('ch_psi')
   IF (ndmx /= npwx*npol) CALL errore('apply_a','something wrong',1)
-  !
-  !  This routine is task groups aware
-  !
-  IF (ntask_groups > 1) dffts%have_task_groups=.TRUE.
 
   ALLOCATE (ps  ( nbnd , m))
   ALLOCATE (e  (m))
@@ -87,25 +83,10 @@ SUBROUTINE apply_ac (ndmx, n, h, ah, ik, m, indi, iflag)
   !
   !   compute the product of the hamiltonian with the h vector
   !
-  IF (dffts%have_task_groups) THEN
-  !
-  !   With task groups we use the Hpsi routine of PW parallelized
-  !   on task groups
-  !
-     IF (.NOT.lgamma) THEN
-        ALLOCATE(ibuf(npwx))
-        ibuf=igk
-        igk=igkq 
-     ENDIF   
-     CALL h_psi (npwx, n, m, h, hpsi)
-     CALL s_psi (npwx, n, m, h, spsi)
-     IF (.NOT.lgamma) THEN
-        igk=ibuf
-        DEALLOCATE(ibuf)
-     ENDIF
-  ELSE
-    CALL h_psiq (npwx, n, m, h, hpsi, spsi)
-  ENDIF
+  current_k = ikqs(ik)
+  CALL h_psi (npwx, n, m, h, hpsi)
+  CALL s_psi (npwx, n, m, h, spsi)
+
 
   CALL start_clock ('last')
   !
@@ -145,7 +126,6 @@ SUBROUTINE apply_ac (ndmx, n, h, ah, ik, m, indi, iflag)
   DEALLOCATE (ps)
 
   IF (tddfpt) NULLIFY(evq)
-  dffts%have_task_groups=.FALSE.
 
   CALL stop_clock ('last')
   CALL stop_clock ('ch_psi')

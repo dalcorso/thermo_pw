@@ -29,16 +29,17 @@ SUBROUTINE solve_e_fpolc(iu)
   USE kinds,                 ONLY : DP
   USE ions_base,             ONLY : nat
   USE io_global,             ONLY : stdout, ionode
-  USE io_files,              ONLY : iunigk, diropn
+  USE io_files,              ONLY : diropn
   USE cell_base,             ONLY : tpiba2
   USE klist,                 ONLY : lgauss, xk, wk
   USE gvect,                 ONLY : g
   USE gvecs,                 ONLY : doublegrid
-  USE fft_base,              ONLY : dfftp, dffts
+  USE fft_base,              ONLY : dfftp, dffts, dtgs
   USE fft_parallel,          ONLY : tg_cgather
   USE lsda_mod,              ONLY : lsda, nspin, current_spin, isk
   USE spin_orb,              ONLY : domag
-  USE wvfct,                 ONLY : nbnd, npw, npwx, igk, g2kin,  et
+  USE wvfct,                 ONLY : nbnd, npwx, g2kin,  et
+  USE klist,                 ONLY : ngk, igk_k
   USE check_stop,            ONLY : check_stop_now
   USE buffers,               ONLY : get_buffer, save_buffer
   USE wavefunctions_module,  ONLY : evc
@@ -49,7 +50,7 @@ SUBROUTINE solve_e_fpolc(iu)
   USE paw_variables,         ONLY : okpaw
   USE paw_onecenter,         ONLY : paw_dpotential
   USE paw_symmetry,          ONLY : paw_desymmetrize
-  USE eqv,                   ONLY : dpsi, dvpsi, eprec
+  USE eqv,                   ONLY : dpsi, dvpsi
   USE units_ph,              ONLY : lrdwf, iudwf, lrwfc, iuwfc, lrdrho, &
                                     iudrho
   USE output,                ONLY : fildrho
@@ -59,11 +60,12 @@ SUBROUTINE solve_e_fpolc(iu)
                                     flmixdpot, rec_code_read
   USE control_lr,            ONLY : alpha_pv, nbnd_occ, lgamma
   USE lrus,                  ONLY : int3_paw
-  USE qpoint,                ONLY : npwq, nksq
+  USE qpoint,                ONLY : nksq
   USE recover_mod,           ONLY : read_rec, write_rec
   USE optical,               ONLY : current_w, fru, iu1dwf, lr1dwf
   USE freq_ph,               ONLY : fiu
   USE linear_solvers,        ONLY : ccg_many_vectors
+  USE dv_of_drho_lr,         ONLY : dv_of_drho
   USE mp_pools,              ONLY : inter_pool_comm
   USE mp_bands,              ONLY : intra_bgrp_comm, ntask_groups
   USE mp,                    ONLY : mp_sum
@@ -102,7 +104,7 @@ SUBROUTINE solve_e_fpolc(iu)
   integer :: kter, iter0, ipol, ibnd, iter, lter, ik, ig, is, nrec, ndim, ios, &
              nmix_ph_eff
   ! counters
-  integer :: ltaver, lintercall, incr, jpol, v_siz
+  integer :: ltaver, lintercall, incr, jpol, v_siz, npw, npwq
 
   real(DP) :: tcpu, get_clock
   ! timing variables
@@ -119,7 +121,6 @@ SUBROUTINE solve_e_fpolc(iu)
   !
   !  This routine is task group aware
   !
-  IF ( ntask_groups > 1 ) dffts%have_task_groups=.TRUE.
   w=CMPLX(fru(iu),fiu(iu))
   ldpsi1=ABS(w)>1.D-7
   alpha_pv0=alpha_pv
@@ -174,12 +175,12 @@ SUBROUTINE solve_e_fpolc(iu)
      iter0 = 0
   endif
   incr=1
-  IF ( dffts%have_task_groups ) THEN
+  IF ( dtgs%have_task_groups ) THEN
      !
-     v_siz =  dffts%tg_nnr * dffts%nogrp
+     v_siz =  dtgs%tg_nnr * dtgs%nogrp
      ALLOCATE( tg_dv   ( v_siz, nspin_mag ) )
      ALLOCATE( tg_psic( v_siz, npol ) )
-     incr = dffts%nogrp
+     incr = dtgs%nogrp
      !
   ENDIF
   !
@@ -207,33 +208,25 @@ SUBROUTINE solve_e_fpolc(iu)
      dbecsum(:,:,:,:)=(0.d0,0.d0)
      IF (noncolin) dbecsum_nc=(0.d0,0.d0)
 
-     if (nksq.gt.1) rewind (unit = iunigk)
      do ik = 1, nksq
         if (lsda) current_spin = isk (ik)
-        if (nksq.gt.1) then
-           read (iunigk, err = 100, iostat = ios) npw, igk
-100        call errore ('solve_e', 'reading igk', abs (ios) )
-        endif
+        npw=ngk(ik)
         !
         ! reads unperturbed wavefuctions psi_k in G_space, for all bands
         !
         if (nksq.gt.1) call get_buffer (evc, lrwfc, iuwfc, ik)
         npwq = npw
-        call init_us_2 (npw, igk, xk (1, ik), vkb)
+        call init_us_2 (npw, igk_k(1,ik), xk (1, ik), vkb)
         !
         ! compute the kinetic energy
         !
-        do ig = 1, npwq
-           g2kin (ig) = ( (xk (1,ik ) + g (1,igk(ig)) ) **2 + &
-                          (xk (2,ik ) + g (2,igk(ig)) ) **2 + &
-                          (xk (3,ik ) + g (3,igk(ig)) ) **2 ) * tpiba2
-        enddo
+        CALL g2_kin(ik)
         IF (ldpsi1) THEN
            h_diag=(0.0_DP,0.0_DP)
            h_diag1=(0.0_DP,0.0_DP)
            h_dia=0.0_DP
            s_dia=0.0_DP
-           CALL usnldiag( h_dia, s_dia )
+           CALL usnldiag( npw, h_dia, s_dia )
            DO ibnd = 1, nbnd_occ (ik)
               !
               !  we precondition with the inverse of the diagonal elements 
@@ -260,18 +253,7 @@ SUBROUTINE solve_e_fpolc(iu)
            !
            enddo
         ELSE
-           h_diagr=0.0_DP
-           do ibnd = 1, nbnd_occ (ik)
-              do ig = 1, npw
-                 aar=g2kin(ig)/eprec(ibnd,ik)
-                 h_diagr(ig,ibnd)=1.d0/max(1.0d0,aar)
-              end do
-              IF (noncolin) THEN
-                 do ig = 1, npw
-                    h_diagr(npwx+ig,ibnd) = h_diagr(ig,ibnd)
-                 enddo
-              ENDIF
-           enddo
+           CALL h_prec (ik, evc, h_diagr)
         ENDIF
         !
         do ipol = 1, 3
@@ -285,34 +267,33 @@ SUBROUTINE solve_e_fpolc(iu)
               ! calculates dvscf_q*psi_k in G_space, for all bands, k=kpoint
               ! dvscf_q from previous iteration (mix_potential)
               !
-              IF ( ntask_groups > 1) dffts%have_task_groups=.TRUE.
-              IF ( dffts%have_task_groups ) THEN
+              IF ( dtgs%have_task_groups ) THEN
                  IF (noncolin) THEN
-                    CALL tg_cgather( dffts, dvscfins(:,1,ipol), &
+                    CALL tg_cgather( dffts, dtgs, dvscfins(:,1,ipol), &
                                                                 tg_dv(:,1))
                     IF (domag) THEN
                        DO jpol=2,4
-                          CALL tg_cgather( dffts, dvscfins(:,jpol,ipol), &
+                          CALL tg_cgather( dffts, dtgs, dvscfins(:,jpol,ipol), &
                                                              tg_dv(:,jpol))
                        ENDDO
                     ENDIF
                  ELSE
-                    CALL tg_cgather( dffts, dvscfins(:,current_spin,ipol), &
+                    CALL tg_cgather( dffts, dtgs, dvscfins(:,current_spin,ipol), &
                                                              tg_dv(:,1))
                  ENDIF
               ENDIF
               aux2=(0.0_DP,0.0_DP)
               do ibnd = 1, nbnd_occ (ik), incr
-                 IF ( dffts%have_task_groups ) THEN
-                    call cft_wave_tg (evc, tg_psic, 1, v_siz, ibnd, &
+                 IF ( dtgs%have_task_groups ) THEN
+                    call cft_wave_tg (ik, evc, tg_psic, 1, v_siz, ibnd, &
                                       nbnd_occ (ik) )
                     call apply_dpot(v_siz, tg_psic, tg_dv, 1)
-                    call cft_wave_tg (aux2, tg_psic, -1, v_siz, ibnd, &
+                    call cft_wave_tg (ik, aux2, tg_psic, -1, v_siz, ibnd, &
                                       nbnd_occ (ik))
                  ELSE
-                    call cft_wave (evc (1, ibnd), aux1, +1)
+                    call cft_wave (ik, evc (1, ibnd), aux1, +1)
                     call apply_dpot(dffts%nnr, aux1, dvscfins(1,1,ipol), current_spin)
-                    call cft_wave (aux2 (1, ibnd), aux1, -1)
+                    call cft_wave (ik, aux2 (1, ibnd), aux1, -1)
                  ENDIF
               enddo
               dvpsi=dvpsi+aux2
@@ -579,15 +560,13 @@ SUBROUTINE solve_e_fpolc(iu)
   DEALLOCATE (dvscfin)
   IF (noncolin) DEALLOCATE(dbecsum_nc)
   DEALLOCATE(aux2)
-  IF ( ntask_groups > 1 ) dffts%have_task_groups=.TRUE.
-  IF ( dffts%have_task_groups ) THEN
+  IF ( dtgs%have_task_groups ) THEN
      !
      DEALLOCATE( tg_dv  )
      DEALLOCATE( tg_psic)
      !
   ENDIF
 
-  dffts%have_task_groups=.FALSE.
   alpha_pv=alpha_pv0
 
   CALL stop_clock ('solve_e')

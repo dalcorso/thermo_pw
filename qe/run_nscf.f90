@@ -19,7 +19,7 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   USE lsda_mod,        ONLY : nspin
   USE control_flags,   ONLY : restart, lscf
   USE check_stop,      ONLY : check_stop_now
-  USE fft_base,        ONLY : dffts
+  USE fft_base,        ONLY : dffts, dfftp
   USE lr_symm_base,    ONLY : minus_q, nsymq, invsymq
   USE disp,            ONLY : lgamma_iq
   USE qpoint,          ONLY : xq
@@ -28,13 +28,17 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
                               only_wfc
   USE io_global,       ONLY : stdout
   USE save_ph,         ONLY : tmp_dir_save
-  !
+  !!!
+  USE fft_types, ONLY: fft_type_allocate
+  USE cell_base, ONLY: at, bg
+  USE gvect,     ONLY: gcutm
+  USE gvecs,     ONLY: gcutms
+  !!!
   USE grid_irr_iq,     ONLY : done_bands
   USE acfdtest,        ONLY : acfdt_is_active, acfdt_num_der, ir_point, delta_vrs
   USE scf,             ONLY : vrs
   USE el_phon,         ONLY : elph_mat
-  USE mp_bands,        ONLY : ntask_groups
-
+  USE mp_bands,        ONLY : intra_bgrp_comm
  !
   IMPLICIT NONE
   !
@@ -73,6 +77,10 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   restart = ext_restart
   conv_ions=.true.
   !
+  !!!
+  CALL fft_type_allocate ( dfftp, at, bg, gcutm, intra_bgrp_comm )
+  CALL fft_type_allocate ( dffts, at, bg, gcutms, intra_bgrp_comm)
+  !!!
   CALL setup_nscf_tpw ( newgrid, xq, elph_mat )
   CALL init_run()
 !!!!!!!!!!!!!!!!!!!!!!!! ACFDT TEST !!!!!!!!!!!!!!!!
@@ -113,12 +121,6 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   !
 
   bands_computed=.TRUE.
-  !
-  !  PWscf has run with task groups if available, but in the phonon 
-  !  they are not used, apart in particular points, where they are
-  !  activated.
-  !
-  IF (ntask_groups > 1) dffts%have_task_groups=.FALSE.
   !
   CALL stop_clock( 'PWSCF' )
   !

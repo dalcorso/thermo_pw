@@ -8,7 +8,7 @@
 #
 # Makefile for plugins
 
-sinclude ../make.sys
+sinclude ../make.inc
 include plugins_list
 
 # MAIN target
@@ -199,7 +199,7 @@ uncompress-w90: touch-dummy
 configure-w90: touch-dummy
 	cd ../W90 ; \
 	if (test -e ../install/make_wannier90.sys) || (test -d ../W90); then \
-	(cp ../install/make_wannier90.sys ../W90/make.sys); fi 
+	(cp ../install/make_wannier90.inc ../W90/make.sys); fi 
 	touch ./configure-w90
 
 ###########################################################
@@ -256,7 +256,7 @@ uncompress-yambo: touch-dummy
 
 configure-yambo: touch-dummy
 	@(if test -z "$(F90)" ; then \
-	echo "*** F90 is not defined; please define F90 or edit make.sys" ; exit 1 ; fi)
+	echo "*** F90 is not defined; please define F90 or edit make.inc" ; exit 1 ; fi)
 	cd ../YAMBO ; \
 	./configure \
 	 --with-blas-libs="$(BLAS_LIBS)" \
@@ -281,7 +281,7 @@ uncompress-yambo-devel: touch-dummy
 
 configure-yambo-devel: touch-dummy
 	@(if test -z "$(F90)" ; then \
-	echo "*** F90 is not defined; please define F90 or edit make.sys" ; exit 1 ; fi)
+	echo "*** F90 is not defined; please define F90 or edit make.inc" ; exit 1 ; fi)
 	cd ../YAMBO_DEVEL ; \
 	./configure \
 	 --with-blas-libs="$(BLAS_LIBS)" \
@@ -511,8 +511,8 @@ gipaw_veryclean: gipaw_clean
 	rm -rf ./configure-gipaw
 
 gipaw_distclean:
-	if test -d ../GIPAW; then (rm -R -f ../GIPAW ); fi
-	if test -d ../$(GIPAW); then (rm -R -f ../$(GIPAW) ); fi
+	#if test -d ../GIPAW; then (rm -R -f ../GIPAW ); fi
+	#if test -d ../$(GIPAW); then (rm -R -f ../$(GIPAW) ); fi
 	rm -f ../archive/$(GIPAW).tar.gz
 
 epw_clean:
@@ -524,6 +524,8 @@ epw_veryclean: epw_clean
 # dir is not deleted for compatibility with the repository
 
 epw_distclean:
+	if test -d ../EPW; then (cd ../EPW; \
+	$(MAKE) distclean); fi
 	rm -f ../archive/$(EPW).tar.gz
 
 w90_clean:
@@ -550,7 +552,7 @@ want_veryclean: want_clean
 	if test -d ../WANT; then (rm -R -f ../WANT); fi
 	if test -d ../$(WANT); then (rm -R -f ../$(WANT)); fi
 	if test -e ../archive/$(WANT).tar.gz ; then (rm -f ../archive/$(WANT).tar.gz); fi
-	- rm -rf ./uncompress-want
+	- rm -rf ./uncompress-want ./configure.h
 
 want_distclean: 
 	rm -f ../archive/$(WANT).tar.gz
