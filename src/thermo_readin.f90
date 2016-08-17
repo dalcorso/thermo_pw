@@ -717,6 +717,7 @@ SUBROUTINE thermo_ph_readin()
   USE io_files,   ONLY : outdir_in_ph => tmp_dir
   USE mp,         ONLY : mp_bcast
   USE output, ONLY : fildyn
+  USE control_ph, ONLY : ldisp
   USE command_line_options, ONLY : input_file_ 
   USE input_parameters, ONLY : outdir
   !
@@ -749,6 +750,8 @@ SUBROUTINE thermo_ph_readin()
      outdir_in_ph=TRIM(outdir)
      CALL phq_readin_tpw()
      IF (meta_ionode) CLOSE(5,STATUS='KEEP')
+     IF (.NOT.ldisp.AND. what /= 'scf_ph' .AND. what /= 'mur_lc_ph' ) &
+        CALL errore('thermo_ph_reading','ldisp should be .TRUE.',1)
      !
   ENDIF
   !
