@@ -257,8 +257,13 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
                ik2 = ik + ishift
                IF (gcodek(ike) /= gcodek(ik2)) THEN
                   rapin(:)=rap(:,ike)
-                  CALL convert_rap(nbnd,rapin,rap(1,ike),&
+                  IF (icode==1) THEN
+                      CALL convert_rap(nbnd,rapin,rap(1,ike),&
                        gcodek(ike), gcodek(ik2), aux_ind_sur(ik,ikz),lspinorb)
+                  ELSE
+                      CALL convert_rap(nbnd,rapin,rap(1,ike),&
+                       gcodek(ike), gcodek(ik2), aux_ind_sur(ik,ikz),.FALSE.)
+                  ENDIF
                   gcodek(ike)=gcodek(ik2)
                   aux_ind(ike) = aux_ind(ik2)
 !
@@ -573,12 +578,22 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
 !
              IF (n==spe) THEN
                 rapin(:)=rap_eff(:,n)
-                CALL convert_rap(nbnd,rapin,rap_eff(1,n),gcodek_eff(n), &
+                IF (icode==1) THEN
+                   CALL convert_rap(nbnd,rapin,rap_eff(1,n),gcodek_eff(n), &
                                   code_group_line, aux_ind_eff(n+1),lspinorb)
+                ELSE
+                   CALL convert_rap(nbnd,rapin,rap_eff(1,n),gcodek_eff(n), &
+                                  code_group_line, aux_ind_eff(n+1),.FALSE.)
+                ENDIF
              ELSEIF (n==lpe) THEN
                 rapin(:)=rap_eff(:,n)
-                CALL convert_rap(nbnd,rapin,rap_eff(1,n),gcodek_eff(n), &
+                IF (icode==1) THEN
+                   CALL convert_rap(nbnd,rapin,rap_eff(1,n),gcodek_eff(n), &
                                   code_group_line, aux_ind_eff(n-1),lspinorb)
+                ELSE
+                   CALL convert_rap(nbnd,rapin,rap_eff(1,n),gcodek_eff(n), &
+                                  code_group_line, aux_ind_eff(n-1),.FALSE.)
+                ENDIF
              ELSE
                 CALL errore('plotband_sub','unexpected change of symmetry',1)
              ENDIF
