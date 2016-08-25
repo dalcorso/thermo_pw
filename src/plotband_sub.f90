@@ -66,6 +66,7 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
   INTEGER :: ilines, irap, ibnd, ipoint, jnow, ios, i, j, n, ik, ikz, &
              ike, ik2, spe, lpe, nbc, iq, tot_points, ishift, ierr
   INTEGER :: start_shift, last_shift, central_geo
+  REAL(DP) :: factor_dx, sizeb, sizec
   LOGICAL, ALLOCATABLE :: high_symmetry(:), is_in_range(:), &
                           is_in_range_rap(:), has_points(:,:), &
                           lsurface_state_eff(:,:)
@@ -404,6 +405,20 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
      END DO
   END DO
   IF (ik /= tot_points) CALL errore('plotband_sub','Missing points',1)
+
+  IF (celldm(2)>0.0_DP) THEN
+     sizeb=celldm(2)
+  ELSE
+     sizeb=1.0_DP
+  ENDIF
+
+  IF (celldm(3)>0.0_DP) THEN
+     sizec=celldm(3)
+  ELSE
+     sizec=1.0_DP
+  ENDIF
+  factor_dx = MAX(5.0_DP, 2.0_DP * sizeb, 2.0_DP * sizec, &
+                                       2.0_DP/sizeb, 2.0_DP/sizec)
 !
 !  now compute the x coordinate on the plot, but use the effective k
 !  points
@@ -419,7 +434,7 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
 !   This is a PBS calculation and now we switch to the next plot
 !
          kx(n)=0.0_DP
-     ELSEIF (dxmod > 5*dxmod_save) THEN
+     ELSEIF (dxmod > factor_dx*dxmod_save) THEN
 !
 !   A big jump in dxmod is a sign that the point k(:,n) and k(:,n-1)
 !   are quite distant and belong to two different lines. We put them on

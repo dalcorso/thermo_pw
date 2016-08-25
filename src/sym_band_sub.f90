@@ -63,6 +63,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   REAL(DP) :: dxk(3), dkmod, dkmod_save, k1(3), k2(3), modk1, modk2, ps
   INTEGER, ALLOCATABLE :: rap_et(:,:), code_group_k(:), aux_ind(:)
   INTEGER, ALLOCATABLE :: ngroup(:), istart(:,:)
+  REAL(DP) :: factor_dx, sizeb, sizec
   CHARACTER(LEN=11) :: group_name
   CHARACTER(LEN=45) :: snamek(48)
   CHARACTER(LEN=6) :: int_to_char
@@ -169,8 +170,25 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   IF (ionode) THEN
      IF (disp_nqs /= nks2tot - nks1tot + 1) &
         CALL errore('sym_band_sub','problem with number of k points',1)
-     high_symmetry(nks1tot:nks2tot)=high_sym_path(1:disp_nqs)
+!
+!   avoid that cells too long in one direction confuse the
+!   plotting program
+!
+     IF (celldm(2)>0.0_DP) THEN
+        sizeb=celldm(2)
+     ELSE
+        sizeb=1.0_DP
+     ENDIF
 
+     IF (celldm(3)>0.0_DP) THEN
+        sizec=celldm(3)
+     ELSE
+        sizec=1.0_DP
+     ENDIF
+     factor_dx = MAX(5.0_DP, 2.0_DP * sizeb, 2.0_DP * sizec, &
+                                       2.0_DP/sizeb, 2.0_DP/sizec)
+
+     high_symmetry(nks1tot:nks2tot)=high_sym_path(1:disp_nqs)
      DO ik=nks1tot, nks2tot
         CALL smallgk (xk(1,ik), at, bg, s, ftau, t_rev, sname, &
              nsym, sk, ftauk, gk, t_revk, snamek, nsymk)
@@ -223,7 +241,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
               !   is the same
               high_symmetry(ik)=high_symmetry(ik-1)
               !
-           ELSE IF (dkmod < 5.0_DP * dkmod_save) THEN
+           ELSE IF (dkmod < factor_dx * dkmod_save) THEN
 !
 !    In this case the two points are considered close
 !
