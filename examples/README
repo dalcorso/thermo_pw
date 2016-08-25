@@ -36,7 +36,7 @@ ngeo = 1           This calculation produces a plot of the phonon dispersions,
                    (adding on all q).
 
 example05:
-what = mur_lc    : equilibrium lattice constant via murnaghan equation.
+what = mur_lc    : equilibrium lattice constant via Murnaghan equation.
 ngeo = # of geom.  Presently only celldm(1) is changed. All the ratios and
                    angles are kept constant.
                    This calculation produces a plot of the energy as a 
@@ -60,17 +60,17 @@ what = mur_lc_ph : This example computes all as in example05 and produces also
 ngeo = # of geom.  the frequencies and displacements at a single q at the 
                    minimum of the murmaghan.
                    If calculated with several images each image runs 
-                   asynchronously and calculate a different geometry.
+                   asynchronously and calculates a different geometry.
                    Then the root image computes the lattice constant at the
                    equilibrium geometry and finally all the images run again
                    asynchronously each one computing a different representation.
 
 example08:
 what = mur_lc_disp : This examples computes all as in example05 and
-ngeo = # of geom.    a phonon dispersion at the minimum of the murnaghan. 
+ngeo = # of geom.    a phonon dispersion at the minimum of the Murnaghan. 
                      The vibrational energy, free energy, entropy, and 
-                     constant volume specific heat can be ploted at the
-                     minimum of the murnaghan.
+                     constant volume specific heat can be plotted at the
+                     minimum of the Murnaghan.
                      If calculated with several images each image runs 
                      asynchronously and calculates a different geometry.
                      Then the root image computes the lattice constant at the
@@ -81,12 +81,12 @@ example09:
 what = mur_lc_t  : This example computes a phonon dispersion at each lattice
 ngeo = # of geom.  constant and allows the calculation of the zero-point 
                    energy contribution to the lattice constant and to the 
-                   bulk modulus and, using the quasiharmonic approximation,
+                   bulk modulus and, using the quasi harmonic approximation,
                    their dependence on the temperature. 
                    The outputs are: Dispersions at each geometry.
                    Density of states at each geometry.
-                   Vibrational free energy, energy, entropy, and constant
-                   volume heat capacity at each geometry.
+                   Vibrational free energy, energy, entropy, and isochoric
+                   heat capacity at each geometry.
                    Gruneisen parameters. Lattice constant and bulk modulus 
                    as a function of the temperature. Average Gruneisen 
                    parameters as a function of temperature. Isobaric heat
@@ -94,11 +94,11 @@ ngeo = # of geom.  constant and allows the calculation of the zero-point
                    modulus as a function of temperature.
                    If calculated with several images each image runs 
                    asynchronously and calculates the ground state of 
-                   a different geometry. Then all images are resyncronized 
+                   a different geometry. Then all images are resynchronized 
                    before computing the phonon dispersions. The latter 
                    are calculated asynchronously, but the different geometries
                    are calculate sequentially and all the images are 
-                   resyncronized before changing geometry.
+                   resynchronized before changing geometry.
 
 example10:
 what = scf_ke  : this example computes the total energy for several values
@@ -131,27 +131,29 @@ what=mur_lc_elastic_constants : this example computes the elastic constants
 example14:
 what=scf_dos : this example computes the electron density of states 
                of silicon. The LDA bands and eigenfunctions are read by
-               epsilon_tpw.x to calculate the frequency denpendent
+               epsilon_tpw.x to calculate the frequency dependent
                dielectric constant of silicon (neglecting local fields).
+               (experimental)
 
 example15:
 what=scf_ph : this example computes the frequency dependent
               dielectric constant of silicon (neglecting local fields)
               using the non-self-consistent Sternheimer equation without
-              sums over the empty bands.
+              sums over the empty bands. (experimental)
 
 example16:
 what=scf_ph : this example computes the frequency dependent
               dielectric constant of silicon within the TD-DFPT,
               using the self-consistent Sternheimer equation.
-
+              (experimental)
 example17:
 what=scf_ph : this example computes the inverse of the frequency dependent
               dielectric constant of aluminum at a given q within the TD-DFPT,
               using the self-consistent Sternheimer equation.
+              (experimental)
 
 example18:
 what=scf_dos : this example computes the electron density of states of aluminum
               and writes on file the electronic thermodynamic properties
               of a gas of independent electrons with the same density of
-              states.
+              states. (experimental)

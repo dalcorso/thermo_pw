@@ -234,7 +234,7 @@ SUBROUTINE q2r_sub(fildyn)
         DO na1=1,nat
            DO na2=1,nat
               CALL cfft3d ( phid (:,j1,j2,na1,na2), &
-                      nr1,nr2,nr3, nr1,nr2,nr3, 1 )
+                      nr1,nr2,nr3, nr1,nr2,nr3, 1, 1 )
               phid(:,j1,j2,na1,na2) = &
                    phid(:,j1,j2,na1,na2) / DBLE(nr1*nr2*nr3)
            END DO

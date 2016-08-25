@@ -19,6 +19,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   USE lsda_mod,             ONLY : nspin
   USE wvfct,                ONLY : et, nbnd, npwx, g2kin
   USE klist,                ONLY : ngk, igk_k
+  USE cell_base,            ONLY : celldm
   USE gvecw,                ONLY : ecutwfc
   USE klist,                ONLY : xk, nks, nkstot
   USE io_files,             ONLY : nwordwfc, iunwfc

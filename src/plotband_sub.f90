@@ -31,6 +31,7 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
                                sym_divide, lsurface_state, lsurface_state_rap
   USE control_thermo, ONLY : spin_component
   USE lsda_mod,      ONLY : nspin
+  USE cell_base,     ONLY : celldm
   USE thermo_mod,    ONLY : tot_ngeo
   USE thermo_sym,    ONLY : code_group_save
   USE constants,     ONLY : rytoev
