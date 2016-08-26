@@ -497,6 +497,8 @@ thermo_pw_clean:
 	if test -d ../thermo_pw; then (cd ../thermo_pw; \
 	$(MAKE) clean); fi
 
+thermo_pw_veryclean: thermo_pw_clean
+
 phonon_distclean:
 	rm -f ../archive/$(PHONON).tar.gz
 
@@ -663,7 +665,7 @@ veryclean: w90_veryclean want_veryclean yambo_veryclean yambo-devel_veryclean \
 	plumed_veryclean epw_veryclean gui_veryclean phonon_veryclean \
 	tddfpt_veryclean xspectra_veryclean neb_veryclean pwcond_veryclean \
 	ld1_veryclean gipaw_veryclean gpu_veryclean west_veryclean \
-	test-suite_veryclean sax_veryclean
+	test-suite_veryclean sax_veryclean thermo_pw_veryclean
 
 #distclean : veryclean
 distclean: w90_distclean want_distclean yambo_distclean yambo-devel_distclean \
