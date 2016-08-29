@@ -682,12 +682,12 @@ SUBROUTINE phq_readin_tpw()
 !     CALL errore('phq_readin',&
 !     'pw.x run with a different number of processors. Use wf_collect=.true.',1)
 
-  IF (nproc_pool /= nproc_pool_file .and. .not. twfcollect)  &
-     CALL errore('phq_readin',&
-     'pw.x run with a different number of pools. Use wf_collect=.true.',1)
+!  IF (nproc_pool /= nproc_pool_file .and. .not. twfcollect)  &
+!     CALL errore('phq_readin',&
+!     'pw.x run with a different number of pools. Use wf_collect=.true.',1)
 
-  IF (nproc_bgrp_file /= nproc_bgrp .AND. .NOT. twfcollect) &
-     CALL errore('phq_readin','pw.x run with different band parallelization',1)
+!  IF (nproc_bgrp_file /= nproc_bgrp .AND. .NOT. twfcollect) &
+!     CALL errore('phq_readin','pw.x run with different band parallelization',1)
   
   if(elph_mat.and.fildvscf.eq.' ') call errore('phq_readin',&
        'el-ph with wannier requires fildvscf',1)
