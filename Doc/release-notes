@@ -1,3 +1,5 @@
+29/08/2016 Version 0.6.0 of thermo_pw is now frozen.
+
 New in version 0.6.0
 
 Added a set of scripts to test a pseudopotential library (see pseudo_test).
