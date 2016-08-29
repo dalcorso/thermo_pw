@@ -125,7 +125,6 @@ ev_sub.o : ../../Modules/mp_images.o
 ev_sub.o : ../../Modules/mp_world.o
 ev_sub.o : ../../Modules/random_numbers.o
 ev_sub.o : ../../thermo_pw/qe/ev_xml.o
-find_symmetry.o : ../../FFTXlib/fft_types.o
 find_symmetry.o : ../../Modules/cell_base.o
 find_symmetry.o : ../../Modules/constants.o
 find_symmetry.o : ../../Modules/fft_base.o
@@ -133,6 +132,7 @@ find_symmetry.o : ../../Modules/gvecw.o
 find_symmetry.o : ../../Modules/io_global.o
 find_symmetry.o : ../../Modules/ions_base.o
 find_symmetry.o : ../../Modules/kind.o
+find_symmetry.o : ../../Modules/mp_bands.o
 find_symmetry.o : ../../Modules/noncol.o
 find_symmetry.o : ../../Modules/recvec.o
 find_symmetry.o : ../../PW/src/pwcom.o
@@ -291,6 +291,7 @@ plot_xrdp.o : ../../Modules/mp.o
 plot_xrdp.o : ../../Modules/mp_images.o
 plot_xrdp.o : ../../thermo_pw/lib/gnuplot.o
 plot_xrdp.o : thermo_mod.o
+plotband_sub.o : ../../Modules/cell_base.o
 plotband_sub.o : ../../Modules/constants.o
 plotband_sub.o : ../../Modules/io_global.o
 plotband_sub.o : ../../Modules/ions_base.o
@@ -366,12 +367,12 @@ set_elastic_cons_work.o : ../../Modules/kind.o
 set_elastic_cons_work.o : ../../thermo_pw/lib/elastic_const.o
 set_elastic_cons_work.o : ../../thermo_pw/lib/strain.o
 set_elastic_cons_work.o : thermo_mod.o
-set_fft_mesh.o : ../../FFTXlib/fft_types.o
 set_fft_mesh.o : ../../Modules/cell_base.o
 set_fft_mesh.o : ../../Modules/constants.o
 set_fft_mesh.o : ../../Modules/fft_base.o
 set_fft_mesh.o : ../../Modules/gvecw.o
 set_fft_mesh.o : ../../Modules/kind.o
+set_fft_mesh.o : ../../Modules/mp_bands.o
 set_fft_mesh.o : ../../Modules/recvec.o
 set_fft_mesh.o : thermo_mod.o
 set_files_names.o : ../../PHonon/PH/phcom.o

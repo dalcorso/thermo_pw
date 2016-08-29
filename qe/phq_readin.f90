@@ -678,9 +678,9 @@ SUBROUTINE phq_readin_tpw()
 
   IF (reduce_io) io_level=0
 
-  IF (nproc_image /= nproc_image_file .and. .not. twfcollect)  &
-     CALL errore('phq_readin',&
-     'pw.x run with a different number of processors. Use wf_collect=.true.',1)
+!  IF (nproc_image /= nproc_image_file .and. .not. twfcollect)  &
+!     CALL errore('phq_readin',&
+!     'pw.x run with a different number of processors. Use wf_collect=.true.',1)
 
   IF (nproc_pool /= nproc_pool_file .and. .not. twfcollect)  &
      CALL errore('phq_readin',&
