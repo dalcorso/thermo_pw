@@ -188,6 +188,12 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
                CLOSE(unit=21)
                exist_rap=.false.
            ENDIF
+           IF (aux_ind(n)==-1) THEN
+              WRITE(stdout,'(/,5x,"k points in wrong order, not using &
+                                                       &symmetry",/)')
+              CLOSE(unit=21)
+              exist_rap=.false.
+           ENDIF
         ENDIF
      ENDDO
      CLOSE(unit=1)
