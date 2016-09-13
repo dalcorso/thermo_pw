@@ -34,7 +34,7 @@
 \def\make{\texttt{make}}
 
 \begin{document} 
-\author{}
+\author{Andrea Dal Corso (SISSA - Trieste)}
 \date{}
 
 %\def\SissaImage{./sissa_on_white.png}
@@ -51,7 +51,6 @@
 \tableofcontents
 
 \newpage
-
 \section{\color{coral}Introduction}
 \qe\ and \tpw\ can determine the point group of a
 solid, the symmetry of its physical properties, the symmetry
@@ -83,6 +82,10 @@ The character table of the double group and a description of the main
 characteristic of each irreducible representation.
 
 \item
+The character tables of the inequivalent projective representations for the 
+groups that have them.
+
+\item
 A list of the possible subgroups and the relative orientation of the symmetry
 elements of these subgroups.
 
@@ -91,6 +94,25 @@ A subgroup compatibility table of the irreducible representations.
 
 \item
 A subgroup compatibility table of the double-group irreducible representations. 
+
+\end{itemize}
+Other information on the crystallographic points groups used by the code 
+not reported in the present manual can be obtained using the tool 
+\texttt{crystal\_point\_group.x}. Among them we mention:
+\begin{itemize}
+
+\item A complete listing of the symmetry operations of each group
+and their $O(3)$ and $SU(2)$ matrices.
+
+\item A complete listing of all point subgroups and supergroups.
+
+\item A multiplication table of all the double point groups.
+
+\item A compatibility table of all the projective representations.
+
+\item A table of all the Kronecker products of the representations and
+their decomposition into the irreducible or projective representations
+of all the subgroups.
 
 \end{itemize}
 It is assumed that the reader has a basic understanding of group theory and
@@ -105,12 +127,15 @@ and their orientation with respect to the Cartesian axes, as given by the
 \qe\ routines, are described there and here we assume that the reader has a
 basic understanding of these primitive vectors. 
 
+\newpage
 \section{\color{coral}People}
-This guide has been written by Andrea Dal Corso (SISSA).
+This guide has been written by Andrea Dal Corso (SISSA - Trieste).
 
+\newpage
 \section{\color{coral}Overview}
-The $32$ crystallographic point groups (point groups in the following)
-in \qe\ and \tpw\ are identified by an integer number (the group code) and 
+In \qe\ and \tpw, the $32$ crystallographic point groups 
+(point groups in the following) are identified by an integer number 
+(the group code) and 
 by a string (the group name) according to the following table:
 
 \begin{verbatim}
@@ -135,13 +160,14 @@ different types, with an integer number identifying the symmetry type:
 \end{verbatim}
 The point group is identified by counting the number of symmetry operations of 
 each type. \\
+An extended group code is also available for a more easy control of the
+point group. This number is reported in the following manual close
+to the description of each group.
 The point group representations can be used to classify the symmetry properties 
 of the electronic wavefunctions for wave-vectors inside the Brillouin zone. 
 For wave-vectors on the Brillouin zone surface this is possible only for 
-symmorphic space groups. For non-symmorphic space groups the symmetry classification
-of the electronic wavefunctions with wave-vectors on the Brillouin zone surface
-requires the representations of different groups that are not implemented 
-in the \qe\ and \tpw\ codes and will not be discussed here.
+symmorphic space groups. Non-symmorphic space groups require the projective 
+representations of the point groups. 
 The point groups have up to $12$ irreducible 
 representations distinguished in the electronic bands or phonon dispersions
 plots produced by \tpw\ by a different color. \\
@@ -156,25 +182,50 @@ The color codes for each representation are the following:
 \end{verbatim} 
 The number of each irreducible representation corresponds to its position
 in the character table and is given below after the list of characters. 
+Group of bands degenerate by time reversal might belong to a reducible
+representation. In that case the bands are plotted with the color of the
+irreducible represention with higher number contained in the decomposition
+of the reducible representation.
 The names of the irreducible representations have been taken from Ref.~[1]
-for the point groups and from Ref.~[2] for the double point groups. The character
-tables of the $32$ point groups can be found in many places but the 
-conventions and definitions can be slightly different. So we
-include the tables in this guide as a reference even if there is some 
+for the point groups and from Ref.~[2] for the double point groups. 
+The character tables of the $32$ point groups can be found in many places 
+but the conventions and definitions can be slightly different. So in
+this guide we include the tables as a reference even if there is some 
 overlap with Ref.~[2]. The tables are those printed by the \qe\ 
 routines. For each character only two digits are given, so the
 following correspondence should be used:
 $1.41 \rightarrow \sqrt{2}$, $1.73 \rightarrow \sqrt{3}$, 
 $0.71 \rightarrow \sqrt{2}/2$, $0.87 \rightarrow \sqrt{3}/2$.
+For the proper point groups or improper point groups isomorphic to a 
+proper point group and for $S_6$ and $T_h$ all the projective 
+representations are p-equivalent to the representations of the single 
+or of the double point group.~[11] For the groups $C_{2h}$, $C_{4h}$, $C_{6h}$,
+$D_{3d}$, and $O_h$ there is an additional nonequivalent projective 
+set of representations, while for $D_{2h}$, $D_{4h}$, and $D_{6h}$ there 
+are three additional projective sets that are reported in the tables below.
+In a projective representation, elements belonging to the 
+same class might have different characters so we report in the tables all 
+the elements that have non-zero character (except for $O_h$ whose
+projective table is given for groups of operations that have the same
+non-zero character). 
+Only one representative example of the many possible realizations of 
+the point group is given. You can use the tool code 
+\texttt{crystal\_point\_group.x} to have more precise information
+on each point group. The names 
+of these projective representations are taken from Ref.~[11] (and converted
+to the name used in this manual for the representations of the point group 
+and of the double point group) while the same color codes as described above 
+are used for the projective representations (this feature is available
+only in \texttt{thermo\_pw}).
 
 The names of the symmetry operations are indicated using
-the Schoenflies notation. 
+the Sch\"onflies notation. 
 We assume that the orientation of the axes is with the tip in the positive
 $z$ hemisphere and positive rotation angles are counterclockwise about 
 the rotation axis when seen from the tip to the origin. Axes in the $z=0$ 
 plane are oriented with the tip in the
-positive $y$ direction, and the $x$ axis is oriented in the direction of positive
-$x$. In this guide, improper rotations are described 
+positive $x$ direction, and the $y$ axis is oriented in the 
+direction of positive $y$. In this guide, improper rotations are described 
 as rotations followed by inversion as in the Hermann-Mauguin (HM) 
 definitions. In the Schoenflies notation improper rotations are rotations
 followed by a mirror symmetry with respect to a plane perpendicular to 
@@ -195,7 +246,7 @@ indicates that the operation is multiplied by the $360^\circ$ rotation
 \section{\color{coral}Point groups}
 
 \subsection{\color{web-blue}$C_1\ (1)$}
-This group contains only the identity ($E$). 
+This group contains only the identity ($E$) \texttt{[1]}. 
 It is a group compatible with the triclinic Bravais lattice 
 (\texttt{ibrav=14}). \\
 Its Laue class is $C_i$. \\
@@ -216,8 +267,9 @@ There is only one irreducible representation ($\Gamma_2$),
 so all functions are totally symmetric. \\
 This group has no subgroup.
 
+\newpage
 \subsection{\color{web-blue}$C_i\ (\bar 1)$}
-This group has two elements: The identity and inversion ($i$).
+This group has two elements: The identity and inversion ($i$) \texttt{[28]}.
 It is a group compatible with the triclinic Bravais lattice 
 (\texttt{ibrav=14}). \\
 Its Laue class is $C_i$. \\
@@ -249,6 +301,7 @@ C_i    G_2+   G_2-
 C_1    G_2    G_2
 \end{verbatim}
 
+\newpage
 \subsection{\color{web-blue}$C_s\ (m)$}
 This group has two elements: The identity and a mirror symmetry ($\sigma$).
 It is a group compatible with the monoclinic system and with the
@@ -256,9 +309,14 @@ simple monoclinic (\texttt{ibrav=$\pm$12}) or the one-base centered monoclinic
 (\texttt{ibrav=$\pm$13}) Bravais lattices. \\
 Its Laue class is $C_{2h}$. \\
 The mirror plane can be perpendicular to several axes:  
-$x$, $y$, $z$, $(x=y, z=0)$, $(x=-y, z=0)$, $(x=z, y=0)$, $(x=-z, y=0)$,
-$(y=z, x=0)$, $(y=-z, x=0)$, $(y=\sqrt{3}x, z=0)$, $(y=-\sqrt{3}x, z=0)$, 
-$(y=x/\sqrt{3}, z=0)$, $(y=-x/\sqrt{3}, z=0)$ ($x$ is a shorthand notation for
+$x$ \texttt{[17]}, $y$ \texttt{[16]}, $z$ \texttt{[15]}, 
+$(x=y, z=0)$ \texttt{[18]}, 
+$(x=-y, z=0)$ \texttt{[19]}, 
+$(x=z, y=0)$ \texttt{[20]}, $(x=-z, y=0)$ \texttt{[21]},
+$(y=z, x=0)$ \texttt{[22]}, $(y=-z, x=0)$ \texttt{[23]}, 
+$(y=\sqrt{3}x, z=0)$ \texttt{[24]}, $(y=-\sqrt{3}x, z=0)$ \texttt{[25]}, 
+$(y=x/\sqrt{3}, z=0)$ \texttt{[26]}, $(y=-x/\sqrt{3}, z=0)$ 
+\texttt{[27]} ($x$ is a shorthand notation for
 the axis $(y=0, z=0)$, $y$ is a shorthand notation for
 the axis $(x=0, z=0)$, and $z$ is a shorthand notation for
 the axis $(x=0, y=0)$). There are therefore $13$ 
@@ -300,6 +358,7 @@ C_s    G_3    G_4
 C_1    G_2    G_2
 \end{verbatim}
 
+\newpage
 \subsection{\color{web-blue}$C_2\ (2)$}
 This group has two elements: The identity and a rotation of $180^\circ$ 
 about an axis ($C_2$).
@@ -308,9 +367,13 @@ simple monoclinic (\texttt{ibrav=$\pm$12}) or the one-base centered monoclinic
 (\texttt{ibrav=$\pm$13}) Bravais lattices. \\
 Its Laue class is $C_{2h}$. \\
 The axis can be:  
-$x$, $y$, $z$, $(x=y, z=0)$, $(x=-y, z=0)$, $(x=z, y=0)$, $(x=-z, y=0)$,
-$(y=z, x=0)$, $(y=-z, x=0)$, $(y=\sqrt{3}x, z=0)$, $(y=-\sqrt{3}x, z=0)$, 
-$(y=x/\sqrt{3}, z=0)$, $(y=-x/\sqrt{3}, z=0)$. 
+$x$ \texttt{[4]}, $y$ \texttt{[3]}, $z$ \texttt{[2]}, 
+$(x=y, z=0)$ \texttt{[5]}, $(x=-y, z=0)$ \texttt{[6]}, 
+$(x=z, y=0)$ \texttt{[7]}, 
+$(x=-z, y=0)$ \texttt{[8]},
+$(y=z, x=0)$ \texttt{[9]}, $(y=-z, x=0)$ \texttt{[10]}, 
+$(y=\sqrt{3}x, z=0)$ \texttt{[12]}, $(y=-\sqrt{3}x, z=0)$ \texttt{[11]}, 
+$(y=x/\sqrt{3}, z=0)$ \texttt{[14]}, $(y=-x/\sqrt{3}, z=0)$ \texttt{[13]}. 
 There are therefore $13$ realizations of interest for solids. \\
 The character table is:
 \begin{verbatim}
@@ -348,6 +411,7 @@ C_2    G_3    G_4
 C_1    G_2    G_2
 \end{verbatim}
 
+\newpage
 \subsection{\color{web-blue}$C_3\ (3)$}
 This group has three elements: The identity and two rotations of $\pm120^\circ$ 
 about an axis ($C_3$ and $C_3^2$).
@@ -355,7 +419,8 @@ It is a group compatible with the trigonal and hexagonal systems and with the
 rhombohedral (\texttt{ibrav=5}) or the hexagonal (\texttt{ibrav=4}) Bravais 
 lattices. \\
 Its Laue class is $S_6$. \\
-The $C_3$ axis can be: $z$, $x=y=z$, $x=-y=z$, $x=-y=-z$, $x=y=-z$.
+The $C_3$ axis can be: $z$ \texttt{[33]}, $x=y=z$ \texttt{[29]}, 
+$x=-y=z$ \texttt{[32]}, $x=-y=-z$ \texttt{[30]}, $x=y=-z$ \texttt{[31]}.
 There are therefore $5$ realizations of interest for solids. \\
 The character table is:
 \begin{verbatim}
@@ -399,10 +464,11 @@ C_1     A      A      A
 \end{verbatim}
 The compatibility table for the double group is:
 \begin{verbatim}
-C_2    G_4    G_5    G_6 
+C_3    G_4    G_5    G_6 
 C_1    G_2    G_2    G_2
 \end{verbatim}
 
+\newpage
 \subsection{\color{web-blue}$C_4\ (4)$}
 This group has four elements: The identity, two rotations of $\pm90^\circ$ 
 about an axis ($C_4$ and $C_4^3$), and a rotation of $180^\circ$ about the same
@@ -411,7 +477,7 @@ It is a group compatible with the tetragonal system and with the
 simple tetragonal (\texttt{ibrav=6}) or centered tetragonal (\texttt{ibrav=7})
 Bravais lattices. \\ 
 Its Laue class is $C_{4h}$. \\
-The axes can be: $x$, $y$, or $z$.
+The axes can be: $x$ \texttt{[36]}, $y$ \texttt{[35]}, or $z$ \texttt{[34]}.
 There are therefore $3$ realizations of interest for solids. \\
 The character table is:
 \begin{verbatim}
@@ -466,11 +532,12 @@ C_2     A      A      B      B
 \end{verbatim}
 The compatibility table for the double group is:
 \begin{verbatim}
-C_4     G_4    G_5    G_6    G_7 
+C_4     G_5    G_6    G_7    G_8 
 C_1     G_2    G_2    G_2    G_2
 C_2     G_3    G_4    G_3    G_4
 \end{verbatim}
 
+\newpage
 \subsection{\color{web-blue}$C_6\ (6)$}
 This group has six elements: The identity, two rotations of $\pm60^\circ$ 
 about an axis ($C_6$ and $C_6^5$), two rotations of $\pm120^\circ$
@@ -479,7 +546,7 @@ the same axis ($C_2$).
 It is a group compatible with the hexagonal system and with the
 hexagonal (\texttt{ibrav=4}) Bravais lattice. \\ 
 Its Laue class is $C_{6h}$. \\
-The $C_6$ axis is $z$.
+The $C_6$ axis is $z$ \texttt{[37]}.
 There is therefore $1$ realization of interest for solids. \\
 The character table is:
 \begin{verbatim}
@@ -552,6 +619,7 @@ C_2     G_3    G_4    G_4    G_3    G_4    G_3
 C_3     G_4    G_5    G_4    G_5    G_6    G_6
 \end{verbatim}
 
+\newpage
 \subsection{\color{web-blue}$D_2\ (222)$ or $V$} 
 This group has four elements: The identity and three rotations of $180^\circ$ about 
 three perpendicular axes ($C_2$, $C_2'$, and $C_2''$). It is a group compatible with 
@@ -563,17 +631,17 @@ Its Laue class is $D_{2h}$. \\
 The three perpendicular axes can be: 
 \begin{itemize}
 \item
-a) $z$ ($C_2$), $y$ ($C_2'$), and $x$ ($C_2''$)
+a) $z$ ($C_2$), $x$ ($C_2'$), and $y$ ($C_2''$) \texttt{[38]}
 \item
-b) $x$ ($C_2$), ($y=z$, $x=0$) ($C_2'$), ($y=-z$, $x=0$) ($C_2''$)
+b) $x$ ($C_2$), ($y=z$, $x=0$) ($C_2'$), ($y=-z$, $x=0$) ($C_2''$) \texttt{[41]}
 \item
-c) $y$ ($C_2$), ($x=z$, $y=0$) ($C_2'$), ($x=-z$, $y=0$) ($C_2''$)
+c) $y$ ($C_2$), ($x=-z$, $y=0$) ($C_2'$), ($x=z$, $y=0$) ($C_2''$) \texttt{[40]}
 \item
-d) $z$ ($C_2$), ($y=x$, $z=0$) ($C_2'$), ($y=-x$, $z=0$) ($C_2''$)
+d) $z$ ($C_2$), ($y=-x$, $z=0$) ($C_2'$), ($y=x$, $z=0$) ($C_2''$) \texttt{[39]}
 \item
-e) $z$ ($C_2$), ($y=\sqrt{3}x$, $z=0$) ($C_2'$), ($y=-x/\sqrt{3}$, $z=0$) ($C_2''$)
+e) $z$ ($C_2$), ($y=-x/\sqrt{3}$, $z=0$) ($C_2'$), ($y=\sqrt{3}x$, $z=0$) ($C_2''$) \texttt{[42]}
 \item
-f) $z$ ($C_2$), ($y=-\sqrt{3}x$, $z=0$) ($C_2'$), ($y=x/\sqrt{3}$, $z=0$) ($C_2''$)
+f) $z$ ($C_2$), ($y=-\sqrt{3}x$, $z=0$) ($C_2'$), ($y=x/\sqrt{3}$, $z=0$) ($C_2''$) \texttt{[43]}
 \end{itemize}
 There are therefore $6$ realizations of interest in solids. \\
 The character table is:
@@ -617,6 +685,7 @@ C_1     2 G_2
 C_2     G_3 + G_4
 \end{verbatim}
 
+\newpage
 \subsection{\color{web-blue}$D_3\ (32)$}
 This group has six elements: The identity, two rotations of $\pm120^\circ$ about
 an axis ($C_3$ and $C_3^2$) and three rotations of $180^\circ$ 
@@ -627,16 +696,16 @@ Bravais lattices. \\
 Its Laue class is $D_{3d}$. \\
 The $C_3$ axis can be: $z$, $x=y=z$, $x=-y=z$, $x=-y=-z$, $x=y=-z$.
 When the $C_3$ axis is $z$, the three $C_2'$ axes can be
-$x$, $(y=\sqrt{3}x, z=0)$, $(y=-\sqrt{3}x, z=0)$ or 
-$y$, $(y=x/\sqrt{3}, z=0)$, $(y=-x/\sqrt{3}, z=0)$. 
+$x$, $(y=\sqrt{3}x, z=0)$, $(y=-\sqrt{3}x, z=0)$ \texttt{[44]} or 
+$y$, $(y=x/\sqrt{3}, z=0)$, $(y=-x/\sqrt{3}, z=0)$ \texttt{[45]}. 
 When the $C_3$ axis is $x=y=z$ the three $C_2'$ axes are
-($x=-y$, $z=0$), ($x=-z$, $y=0$), ($y=-z$, $x=0$).
+($y=-z$, $x=0$), ($x=-y$, $z=0$), ($x=-z$, $y=0$) \texttt{[46]}.
 When the $C_3$ axis is $x=-y=z$ the three $C_2'$ axes are
-($x=y$, $z=0$), ($x=-z$, $y=0$), ($y=z$, $x=0$).
+($y=z$, $x=0$), ($x=-z$, $y=0$), ($x=y$, $z=0$) \texttt{[47]}.
 When the $C_3$ axis is $x=-y=-z$ the three $C_2'$ axes are
-($x=y$, $z=0$), ($x=z$, $y=0$), ($y=-z$, $x=0$).
+($x=z$, $y=0$), ($x=y$, $z=0$), ($y=-z$, $x=0$) \texttt{[48]}.
 When the $C_3$ axis is $x=y=-z$ the three $C_2'$ axes are
-($x=-y$, $z=0$), ($x=z$, $y=0$), ($y=z$, $x=0$). 
+($x=z$, $y=0$), ($y=z$, $x=0$), ($x=-y$, $z=0$) \texttt{[48]}. 
 There are therefore $6$ realizations of interest for solids. \\
 The character table is:
 \begin{verbatim}
@@ -684,6 +753,7 @@ C_2     G_3 + G_4    G_3    G_4
 C_3     G_4 + G_5    G_6    G_6   
 \end{verbatim}
 
+\newpage
 \subsection{\color{web-blue}$D_4\ (422)$} 
 This group has eight elements: The identity, two rotations of 
 $\pm90^\circ$ about
@@ -697,11 +767,14 @@ The $C_4$ axis can be: $x$, $y$, or $z$. The four $C_2$ perpendicular rotation
 axes are: 
 \begin{itemize}
 \item
-a) $C_4$ coinciding with $x$: $y$, $z$ ($C_2'$), ($y=\pm z$, $x=0$) ($C_2''$).
+a) $C_4$ coinciding with $x$: $y$, $z$ ($C_2'$), ($y=\pm z$, $x=0$) ($C_2''$)
+\texttt{[52]}.
 \item
-b) $C_4$ coinciding with $y$: $x$, $z$ ($C_2'$), ($x=\pm z$, $y=0$) ($C_2''$).
+b) $C_4$ coinciding with $y$: $x$, $z$ ($C_2'$), ($x=\pm z$, $y=0$) ($C_2''$)
+\texttt{[51]}.
 \item
-c) $C_4$ coinciding with $z$: $x$, $y$ ($C_2'$), ($y=\pm x$, $z=0$) ($C_2''$).
+c) $C_4$ coinciding with $z$: $x$, $y$ ($C_2'$), ($y=\pm x$, $z=0$) ($C_2''$)
+\texttt{[50]}.
 \end{itemize}
 There are therefore $3$ realizations of interest for solids. \\
 The character table is:
@@ -768,13 +841,15 @@ C_4     G_5 + G_6       G_7 + G_8
 D_2     G_5             G_5
 \end{verbatim}
 
+\newpage
 \subsection{\color{web-blue}$D_6\ (622)$} 
 This group has twelve elements: The identity, two rotations of 
 $\pm60^\circ$ about an axis ($C_6$ and $C_6^5$), two rotations of 
 $\pm120^\circ$ about the same axis
 ($C_3$ and $C_3^2$), a rotation of $180^\circ$ about the same axis and
 six rotations of $180^\circ$ ($3C_2'$ and $3C_2''$) about axes perpendicular 
-to the $C_6$ axis. It is a group compatible with the hexagonal system and with the
+to the $C_6$ axis \texttt{[53]}. It is a group compatible with the 
+hexagonal system and with the
 hexagonal (\texttt{ibrav=4}) Bravais lattice. \\ 
 Its Laue class is $D_{6h}$. \\
 The $C_6$ axis is the $z$ axis. The six $C_2$ perpendicular rotation axes are
@@ -845,6 +920,7 @@ D_2       G_5          G_5           G_5
 D_3       G_4          G_4        G_5 + G_6
 \end{verbatim}
 
+\newpage
 \subsection{\color{web-blue}$C_{2v}\ (mm2)$} 
 This group has four elements: The identity, a rotation of $180^\circ$ about
 an axis ($C_2$) and two mirror planes ($\sigma_v$ and $\sigma_v'$) that contain 
@@ -862,24 +938,24 @@ $(y=\sqrt{3}x, z=0)$, $(y=-\sqrt{3}x, z=0)$. For the mirror planes there are
 the following possibilities:
 \begin{verbatim}
          C_2                perp. to s_v           perp. to s_v'
-a)        x                      y                      z 
-b)        x                 y=z,    x=0            y=-z,    x=0
-c)        y                      z                      x
-d)        y                 x=z,    y=0            x=-z,    y=0
-e)        z                      y                      x              
-f)        z                 x=y,    z=0            x=-y,    z=0 
-g)   x=y,    z=0                 z                 x=-y,    z=0 
-h)   x=-y,   z=0                 z                 x=y,     z=0
-i)   x=z,    y=0                 y                 x=-z,    y=0
-l)   x=-z,   y=0                 y                 x=z,     y=0
-m)   y=z,    x=0                 x                 y=-z,    x=0
-n)   y=-z,   x=0                 x                 y=z,     x=0
-o)        z                 y=x/m,  z=0            y=-m x,  z=0     
-p)        z                 y=-x/m, z=0            y= m x,  z=0     
-q)   y=x/m,  z=0                 z                 y=-m x,  z=0
-r)   y=-x/m, z=0                 z                 y= m x,  z=0
-s)   y= m x, z=0                 z                 y=-x/m,  z=0
-t)   y=-m x, z=0                 z                 y= x/m,  z=0
+a)        x                      y                      z          [54]
+b)        x                 y=z,     x=0           y=-z,    x=0    [55]
+c)        y                      z                      x          [56]
+d)        y                 x=-z,    y=0           x=z,     y=0    [57]
+e)        z                      x                      y          [58]    
+f)        z                 x=-y,    z=0           x=y,     z=0    [59]
+g)   x=y,    z=0                 z                 x=-y,    z=0    [60]
+h)   x=-y,   z=0            x=y      z=0                z          [61] 
+i)   x=z,    y=0                 y                 x=-z,    y=0    [62] 
+l)   x=-z,   y=0            x=z,     y=0                y          [63]
+m)   y=z,    x=0            y=-z,    x=0                x          [64]
+n)   y=-z,   x=0                 x                 y=z,     x=0    [65]
+o)        z                 y=-m x,  z=0           y=x/m,   z=0    [66] 
+p)        z                 y=-x/m,  z=0           y= m x,  z=0    [67] 
+q)   y=x/m,  z=0                 z                 y=-m x,  z=0    [68]
+r)   y=-x/m, z=0            y= m x,  z=0                z          [69]
+s)   y= m x, z=0                 z                 y=-x/m,  z=0    [70]
+t)   y=-m x, z=0            y= x/m,  z=0                z          [71]
 \end{verbatim}
 where $m=\sqrt{3}$.
 There are therefore $18$ realizations of interest for solids. \\
@@ -926,6 +1002,7 @@ C_s     G_3 + G_4
 C_2     G_3 + G_4
 \end{verbatim}
 
+\newpage
 \subsection{\color{web-blue}$C_{3v}\ (3m)$} 
 This group has six elements: The identity, two rotations of $\pm120^\circ$ about
 an axis ($C_3$ and $C_3^2$) and three mirror planes ($3\sigma_v$) 
@@ -937,12 +1014,12 @@ The $C_3$ axis can be: $z$, $x=y=z$, $x=-y=z$, $x=-y=-z$, $x=y=-z$.
 For the mirror planes there are the following possibilities:
 \begin{verbatim}
       C_3        perp. to s_v       perp to s_v'     perp to s_v''
-a)     z             x              y=m x, z=0       y=-m x, z=0
-b)     z             y              y=x/m, z=0       y=-x/m, z=0
-c)    x=y=z      x=-y, z=0          x=-z,  y=0       y=-z,   x=0
-d)    x=-y=z     x=y,  z=0          x=-z,  y=0       y=z,    x=0
-e)    x=-y=-z    x=y,  z=0          x=z,   y=0       y=-z,   x=0
-f)    x=y=-z     x=-y, z=0          x=z,   y=0       y=z,    x=0
+a)     z             x              y=m x, z=0       y=-m x, z=0     [72]
+b)     z         y=x/m, z=0              y           y=-x/m, z=0     [73]
+c)    x=y=z      y=-z  x=0          x=-y,  z=0       x=-z,   y=0     [74]
+d)    x=-y=z     y=z,  x=0          x=-z,  y=0       x=y,    z=0     [75]
+e)    x=-y=-z    x=z,  y=0          x=y,   z=0       y=-z,   x=0     [76]
+f)    x=y=-z     x=z,  y=0          y=z,   x=0       x=-y,   z=0     [77]
 \end{verbatim}
 There are therefore $6$ realizations of interest for solids. \\
 The character table is (isomorphic to $D_3$ with $\sigma_v \rightarrow C_2$):
@@ -992,6 +1069,7 @@ C_s    G_3 + G_4   G_3      G_4
 C_3    G_4 + G_5   G_6      G_6
 \end{verbatim}
 
+\newpage
 \subsection{\color{web-blue}$C_{4v}\ (4mm)$} 
 This group has eight elements: The identity, two rotations of $\pm90^\circ$ 
 about an axis ($C_4$ and $C_4^3$), a rotation of $180^\circ$ about the same axis 
@@ -1002,12 +1080,12 @@ simple tetragonal \texttt{ibrav=6}) and centered tetragonal (\texttt{ibrav=7})
 Bravais lattices. \\ 
 Its Laue class is $D_{4h}$. \\
 The $C_4$ axis can be: $x$, $y$, $z$. When the $C_4$ axis is $x$ the axes
-perpendicular to the mirror planes are $y$, $z$ ($\sigma_v$), 
-$(y=\pm z, x=0)$ ($\sigma_d$). When the $C_4$ axis is $y$
+perpendicular to the mirror planes are $(y=\pm z, x=0)$ ($\sigma_v$), 
+$y$, $z$ ($\sigma_d$) \texttt{[80]}. When the $C_4$ axis is $y$
 the axes perpendicular to the mirror planes are $x$, $z$ ($\sigma_v$),
-$(x=\pm z, y=0)$ ($\sigma_d$). When the 
+$(x=\pm z, y=0)$ ($\sigma_d$) \texttt{[79]}. When the 
 $C_4$ axis is $z$ the axes perpendicular to the mirror planes are $x$, $y$
-($\sigma_v$), $(y=\pm x, z=0)$ ($\sigma_d$).
+($\sigma_v$), $(y=\pm x, z=0)$ ($\sigma_d$) \texttt{[78]}.
 There are therefore $3$ realizations of interest for solids. \\
 The character table is (isomorphic to $D_4$ with $\sigma_v \rightarrow C_2'$
 and $\sigma_d \rightarrow C_2''$):
@@ -1065,12 +1143,13 @@ C_4    G_5 + G_6    G_7 + G_8
 C_2v    G_5          G_5
 \end{verbatim}
 
+\newpage
 \subsection{\color{web-blue}$C_{6v}\ (6mm)$} 
 This group has twelve elements: The identity, two rotations of $\pm60^\circ$ 
 about an axis ($C_6$ and $C_6^5$), two rotations of $\pm120^\circ$
 about the same axis ($C_3$ and $C_3^2$), a rotation of $180^\circ$ about 
 the same axis ($C_2$), and six mirror symmetries with respect to
-planes ($3\sigma_v$ and $3\sigma_d$) that contain the $C_6$ axis.
+planes ($3\sigma_v$ and $3\sigma_d$) that contain the $C_6$ axis \texttt{[81]}.
 It is a group compatible with the hexagonal system and with the  
 hexagonal (\texttt{ibrav=4}) Bravais lattice. \\ 
 Its Laue class is $D_{6h}$. \\
@@ -1078,10 +1157,10 @@ The $C_6$ axis is the $z$ axis. The mirror planes $\sigma_v$ are perpendicular
 to $y$ and to $(y=\pm x/\sqrt{3}, z=0)$, while the mirror planes $\sigma_d$
 are perpendicular to $x$ and to $(y=\pm \sqrt{3} x, z=0)$.
 There is therefore $1$ realization of interest for solids. \\
-The character table is (isomorphic to $D_6$ with $\sigma_v \rightarrow C_2'$
-and $\sigma_d \rightarrow C_2''$):
+The character table is (isomorphic to $D_6$ with $\sigma_d \rightarrow C_2'$
+and $\sigma_v \rightarrow C_2''$):
 \begin{verbatim}
-C_6v   E     2C6   2C3   C2    3s_v  3s_d 
+C_6v   E     2C6   2C3   C2    3s_d  3s_v 
 A_1    1.00  1.00  1.00  1.00  1.00  1.00      1
 A_2    1.00  1.00  1.00  1.00 -1.00 -1.00      2
 B_1    1.00 -1.00  1.00 -1.00  1.00 -1.00      3
@@ -1091,17 +1170,17 @@ E_2    2.00 -1.00 -1.00  2.00  0.00  0.00      6
 \end{verbatim}
 There are six irreducible representations. $A_1$ is totally symmetric, while
 $A_2$ is odd with respect to all mirror symmetries. $B_1$ and $B_2$ can be
-distinguished for the behavior for a $\sigma_v$ and a
-$\sigma_d$ reflection. $B_1$ is even with respect to the planes $\sigma_v$
-and odd with respect to the planes $\sigma_d$, while $B_2$ is odd with
-respect to the planes $\sigma_v$ and even with respect to the planes 
-$\sigma_d$. $E_1$ and $E_2$ are both two dimensional and can be 
+distinguished for the behaviour for a $\sigma_v$ and a
+$\sigma_d$ reflection. $B_1$ is even with respect to the planes $\sigma_d$
+and odd with respect to the planes $\sigma_v$, while $B_2$ is odd with
+respect to the planes $\sigma_d$ and even with respect to the planes 
+$\sigma_v$. $E_1$ and $E_2$ are both two dimensional and can be 
 distinguished by the character of a $C_6$ rotation. It is
 $1$ according to $E_1$ and $-1$ according to $E_2$.\\
 The character table of the double group is:
 \begin{verbatim}
-C_6v   E     -E     2C6  -2C6   2C3  -2C3   C2    3s_v  3s_d
-                                           -C2   -3s_v -3s_d
+C_6v   E     -E     2C6  -2C6   2C3  -2C3   C2    3s_d  3s_v
+                                           -C2   -3s_d -3s_v
 G_7    2.00 -2.00  1.73 -1.73  1.00 -1.00  0.00  0.00  0.00    1
 G_8    2.00 -2.00 -1.73  1.73  1.00 -1.00  0.00  0.00  0.00    2
 G_9    2.00 -2.00  0.00  0.00 -2.00  2.00  0.00  0.00  0.00    3
@@ -1113,18 +1192,16 @@ $0$ according to $\Gamma_9$.\\
 The subgroups of $C_{6v}$ are $C_1$, $C_s$, $C_2$, $C_3$, $C_6$,
 $C_{2v}$, and $C_{3v}$. The rotation axes of $C_2$, $C_3$, $C_6$, $C_{2v}$,
 and $C_{3v}$ coincide with the rotation axis of $C_{6v}$. The mirror 
-plane of $C_s$ can be a $\sigma_v$ (case 1) or a $\sigma_d$ (case 2). The two 
+plane of $C_s$ can be a $\sigma_d$ (case 1) or a $\sigma_v$ (case 2). The two 
 mirror planes of $C_{2v}$
 can coincide with the two planes perpendicular to $x$ and $y$, 
 or perpendicular to $(y=\sqrt{3} x, z=0)$ and $(y=-x /\sqrt{3}, z=0)$,
 or perpendicular to $(y=-\sqrt{3} x, z=0)$ and $(y=x /\sqrt{3}, z=0)$.
-In all three cases one of the two mirrors of $C_{2v}$ is a $\sigma_v$ of $C_{6v}$,
-and the other is a $\sigma_d$ of $C_{6v}$. With our conventions on the choice of 
-$\sigma_v$ and $\sigma_v'$ in $C_{2v}$, $\sigma_v$ of $C_{2v}$
-coincides always with a plane $\sigma_v$ of $C_{6v}$ and $\sigma_v'$ with a 
-plane $\sigma_d$.
+There are therefore two possibilities. The plane $\sigma_v$ of $C_{2v}$
+can coincide with one of the planes $\sigma_d$ (case 1) of $C_{2v}$
+or with one of the planes $\sigma_v$ (case 2).
 The three mirror planes of $C_{3v}$ can coincide with the three mirrors 
-$\sigma_v$ of $C_{6v}$ (case 1) or with the three mirrors $\sigma_d$ (case 2).\\
+$\sigma_d$ of $C_{6v}$ (case 1) or with the three mirrors $\sigma_v$ (case 2).\\
 The compatibility table is:
 \begin{verbatim}
 C_6v    A_1      A_2      B_1       B_2      E_1           E_2
@@ -1134,7 +1211,8 @@ C_s_2    A'       A''      A''       A'     A' + A''     A' + A''
 C_2      A        A        B         B       2 B           2 A
 C_3      A        A        A         A      E  + E*      E  + E*
 C_6      A        A        B         B     E_1 + E_1*   E_2 + E_2*
-C_2v     A_1      A_2      B_1       B_2   B_1 + B_2    A_1 + A_2
+C_2v_1   A_1      A_2      B_1       B_2   B_1 + B_2    A_1 + A_2
+C_2v_2   A_1      A_2      B_2       B_1   B_1 + B_2    A_1 + A_2
 C_3v_1   A_1      A_2      A_1       A_2       E            E  
 C_3v_2   A_1      A_2      A_2       A_1       E            E
 \end{verbatim}
@@ -1150,6 +1228,7 @@ C_2v    G_5          G_5             G_5
 C_3v    G_4          G_4           G_5 + G_6
 \end{verbatim}
 
+\newpage
 \subsection{\color{web-blue}$C_{2h}\ (2/m)$} 
 This group has four elements: The identity, a rotation of $180^\circ$ 
 about an axis ($C_2$), inversion and a mirror symmetry with respect to 
@@ -1159,9 +1238,14 @@ simple monoclinic (\texttt{ibrav=$\pm$12}) and one-base centered monoclinic
 (\texttt{ibrav=$\pm$13}) Bravais lattices. \\ 
 Its Laue class is $C_{2h}$. \\
 The axis can be:
-$x$, $y$, $z$, $(x=y, z=0)$, $(x=-y, z=0)$, $(x=z, y=0)$, $(x=-z, y=0)$,
-$(y=z, x=0)$, $(y=-z, x=0)$, $(y=\sqrt{3}x, z=0)$, $(y=-\sqrt{3}x, z=0)$,
-$(y=x/\sqrt{3}, z=0)$, $(y=-x/\sqrt{3}, z=0)$. The mirror plane $\sigma_h$ 
+$x$ \texttt{[84]}, $y$ \texttt{[83]}, $z$ \texttt{[82]}, 
+$(x=y, z=0)$ \texttt{[85]}, $(x=-y, z=0)$ \texttt{[86]}, 
+$(x=z, y=0)$ \texttt{[87]}, $(x=-z, y=0)$ \texttt{[88]},
+$(y=z, x=0)$ \texttt{[89]}, 
+$(y=-z, x=0)$ \texttt{[90]}, $(y=\sqrt{3}x, z=0)$ \texttt{[91]}, 
+$(y=-\sqrt{3}x, z=0)$ \texttt{[92]},
+$(y=x/\sqrt{3}, z=0)$ \texttt{[93]}, 
+$(y=-x/\sqrt{3}, z=0)$ \texttt{[94]}. The mirror plane $\sigma_h$ 
 is perpendicular to the axis. There are therefore $13$ realizations 
 of interest for solids. \\
 The character table is (using $C_{2h}=C_2 \times C_i$):
@@ -1217,12 +1301,29 @@ C_i      G_2+      G_2+     G_2-     G_2-
 C_s      G_3       G_4      G_4      G_3
 C_2      G_3       G_4      G_3      G_4
 \end{verbatim}
+This group has also projective representations corresponding to
+$IC_2 = \beta C_2 I$ and $\beta=-1$ ($I$ is the inversion).
+With the representations of the $C_2$ point group one can build [11]:
+\begin{verbatim}
+     real part
+C_2h      E     
+BA      2.00       1
+\end{verbatim}
+With the representations of the $C_2$ double point group we have:
+\begin{verbatim}
+     real part
+C_2h      E     
+G_4G_3  2.00       1
+\end{verbatim}
+All elements not explicitely indicated have zero character.
 
+\newpage
 \subsection{\color{web-blue}$C_{3h}\ (\bar 6)$}  
 This group has six elements: The identity, two rotation of $\pm120^\circ$ 
 about an axis ($C_3$ and $C_3^2$), a mirror symmetry with respect to a 
 plane perpendicular to the $C_3$ axis and the product of these operations, 
-that is rotations of $\pm60^\circ$ multiplied by inversion ($S_3^5$ and $S_3$).
+that is rotations of $\pm60^\circ$ multiplied by inversion 
+($S_3^5$ and $S_3$) \texttt{[95]}.
 It is a group compatible with the hexagonal system and with the  
 hexagonal (\texttt{ibrav=4}) Bravais lattice. \\ 
 Its Laue class is $C_{6h}$. \\
@@ -1299,6 +1400,7 @@ C_s      G_3      G_4      G_4      G_3       G_4       G_3
 C_3      G_4      G_5      G_4      G_5       G_6       G_6
 \end{verbatim}
 
+\newpage
 \subsection{\color{web-blue}$C_{4h}\ (4/m)$}  
 This group has eight elements: The identity, two rotation of $\pm90^\circ$ 
 about an axis ($C_4$ and $C_4^3$), a rotation of $180^\circ$ about the
@@ -1310,7 +1412,8 @@ It is a group compatible with the tetragonal system and with the
 simple tetragonal (\texttt{ibrav=6}) and centered tetragonal (\texttt{ibrav=7})
 Bravais lattices. \\ 
 Its Laue class is $C_{4h}$. \\
-The $C_4$ axis can be parallel to $x$, $y$, or $z$. There are therefore
+The $C_4$ axis can be parallel to $x$ \texttt{[98]}, $y$ \texttt{[97]}, 
+or $z$ \texttt{[96]}. There are therefore
 $3$ realizations of interest for solids. \\
 The character table is (using $C_{4h}=C_4 \times C_i$):
 \begin{verbatim}
@@ -1421,7 +1524,33 @@ C_4      G_5     G_6    G_7    G_8     G_5    G_6     G_7     G_8
 C_2h     G_3+    G_4+   G_3+   G_4+    G_3-   G_4-    G_3-    G_4-
 S_4      G_5     G_6    G_7    G_8     G_7    G_8     G_5     G_6
 \end{verbatim}
+This group has also projective representations corresponding to
+$I 4z = \beta 4z I$ and $\beta=-1$ ($I$ is the inversion).
+With the representations of the $C_4$ point group one can obtain [11]:
+\begin{verbatim}
+     real part
+C_4h      E         2z
+E* E     2.00     -2.00     1
+BA       2.00      2.00     2
+     imaginary part
+C_4h      E         2z
+E* E     0.00      0.00     1
+BA       0.00      0.00     2
+\end{verbatim}
+With the representations of the $C_4$ double point group we have:
+\begin{verbatim}
+     real part
+C_4h      E         2z
+G_6G_8   2.00      0.00     1
+G_7G_5   2.00      0.00     2
+     imaginary part
+C_4h      E         2z
+G_6G_8   0.00     -2.00     1
+G_7G_5   0.00      2.00     2
+\end{verbatim}
+All elements not explicitely indicated have zero character.
 
+\newpage
 \subsection{\color{web-blue}$C_{6h}\ (6/m)$}  
 This group has twelve elements: The identity, two rotations of $\pm60^\circ$ 
 about an axis ($C_6$ and $C_6^5$), two rotations of $\pm120^\circ$
@@ -1430,7 +1559,7 @@ same axis ($C_2$), inversion, and the product of inversion with previous
 rotations that gives two rotations of $\pm60^\circ$ multiplied by inversion
 ($S_3^5$ and $S_3$), two rotations of $\pm120^\circ$ multiplied 
 by inversion ($S_6^5$ and $S_6$), and a mirror $\sigma_h$
-with respect to a plane perpendicular to the $C_6$ axis. 
+with respect to a plane perpendicular to the $C_6$ axis \texttt{[99]}. 
 It is a group compatible with the hexagonal system and with the  
 hexagonal (\texttt{ibrav=4}) Bravais lattice. \\ 
 Its Laue class is $C_{6h}$. \\
@@ -1578,7 +1707,35 @@ C_2h   G_3+ G_4+ G_4+  G_3+  G_4+ G_3+  G_3- G_4- G_4-  G_3-  G_4-  G_3-
 C_3h   G_7  G_8  G_9   G_10  G_11 G_12  G_9  G_10 G_7   G_8   G_12  G_11 
 S_6    G_4+ G_5+ G_4+  G_5+  G_6+ G_6+  G_4- G_5- G_4-  G_5-  G_6-  G_6-
 \end{verbatim}
+This group has also projective representations corresponding to
+$IC_2 = \beta C_2 I$ and $\beta=-1$ ($I$ is the inversion).
+With the representations of the $C_6$ point group one can obtain [11]:
+\begin{verbatim}
+     real part
+C_6h      E        3z        3-z
+E_1*E_2  2.00     -1.00     -1.00    1
+E_2*E_1  2.00     -1.00     -1.00    2
+BA       2.00      2.00      2.00    3
+     imaginary part
+E_1*E_2  0.00     -1.73      1.73    1
+E_2*E_1  0.00      1.73     -1.73    2
+BA       0.00      0.00      0.00    3
+\end{verbatim}
+With the representations of the $C_6$ double point group we have:
+\begin{verbatim}
+     real part
+C_6h      E        3z        3-z
+G_8G_10  2.00      1.00      1.00    1
+G_12G_11 2.00     -2.00     -2.00    2
+G_9G_7   2.00      1.00      1.00    3
+     imaginary part
+G_8G_10  0.00     -1.73      1.73    1
+G_12G_11 0.00      0.00      0.00    2
+G_9G_7   0.00      1.73     -1.73    3
+\end{verbatim}
+All elements not explicitely indicated have zero character.
 
+\newpage
 \subsection{\color{web-blue}$D_{2h}\ (mmm)$ or $V_h$}  
 This group has eight elements: The identity, three rotation of $180^\circ$
 about three perpendicular axes ($C_2$, $C_2'$, and $C_2''$),
@@ -1592,19 +1749,22 @@ Its Laue class is $D_{2h}$. \\
 The three perpendicular axes can be:
 \begin{itemize}
 \item
-a) $z$ ($C_2$), $y$ ($C_2'$), and $x$ ($C_2''$)
+a) $z$ ($C_2$), $x$ ($C_2'$), and $y$ ($C_2''$) \texttt{[100]}
 \item
-b) $x$ ($C_2$), ($y=z$, $x=0$) ($C_2'$), ($y=-z$, $x=0$) ($C_2''$)
+b) $x$ ($C_2$), ($y=z$, $x=0$) ($C_2'$), ($y=-z$, $x=0$) ($C_2''$) 
+\texttt{[101]}
 \item
-c) $y$ ($C_2$), ($x=z$, $y=0$) ($C_2'$), ($x=-z$, $y=0$) ($C_2''$)
+c) $y$ ($C_2$), ($x=-z$, $y=0$) ($C_2'$), ($x=z$, $y=0$) ($C_2''$) 
+\texttt{[102]}
 \item
-d) $z$ ($C_2$), ($x=y$, $z=0$) ($C_2'$), ($x=-y$, $z=0$) ($C_2''$)
+d) $z$ ($C_2$), ($y=-x$, $z=0$) ($C_2'$), ($y=x$, $z=0$) ($C_2''$) 
+\texttt{[103]}
 \item
-e) $z$ ($C_2$), ($y=\sqrt{3}x$, $z=0$) ($C_2'$), ($y=-x/\sqrt{3}$, $z=0$) 
-($C_2''$)
+e) $z$ ($C_2$), ($y=-x/\sqrt{3}$, $z=0$) ($C_2'$), ($y=\sqrt{3}x$, $z=0$) 
+($C_2''$) \texttt{[104]}
 \item
 f) $z$ ($C_2$), ($y=-\sqrt{3}x$, $z=0$) ($C_2'$), ($y=x/\sqrt{3}$, $z=0$) 
-($C_2''$)
+($C_2''$) \texttt{[105]}
 \end{itemize}
 The mirrors $\sigma_v$, $\sigma_v'$, and $\sigma_v''$  are perpendicular to 
 the $C_2$, $C_2'$, and $C_2''$ axes, respectively.
@@ -1682,7 +1842,7 @@ C_2v_1   A_1    A_2     B_1     B_2     A_2    A_1     B_2     B_1
 C_2v_2   A_1    B_1     A_2     B_2     A_2    B_2     A_1     B_1   
 C_2v_3   A_1    B_1     B_2     A_2     A_2    B_2     B_1     A_1   
 C_2v_4   A_1    A_2     B_2     B_1     A_2    A_1     B_1     B_2
-C_2v_5   A_1    B_2     A_2     B_1     A_2    B_1     A_2     B_2
+C_2v_5   A_1    B_2     A_2     B_1     A_2    B_1     A_1     B_2
 C_2v_6   A_1    B_2     B_1     A_2     A_2    B_1     B_2     A_1
 C_2h_1   A_g    A_g     B_g     B_g     A_u    A_u     B_u     B_u   
 C_2h_2   A_g    B_g     A_g     B_g     A_u    B_u     A_u     B_u   
@@ -1700,7 +1860,75 @@ D_2        G_5           G_5
 C_2v       G_5           G_5
 C_2h       G_3+ + G_4+   G_3- + G_4-
 \end{verbatim}
+$D_{2h}$ has also projective representations corresponding to
+$\beta=1$ and $\gamma=-1$ where $I 2z = \beta 2z I$, 
+$I 2x = \gamma 2x I$ ($I$ is the inversion). With the representations
+of the $D_2$ point group we have [11]:
+\begin{verbatim}
+     real part
+D_2h      E         2z       i2z
+AB_1     2.00      2.00      0.00     1
+B_2B_3   2.00     -2.00      0.00     2
+     imaginary part
+AB_1     0.00      0.00      0.00     1
+B_2B_3   0.00      0.00      0.00     2
+\end{verbatim}
+With the representations of the $D_2$ double point group we have:
+\begin{verbatim}
+     real part
+D_2h      E         2z       i2z
+G_5y     2.00      0.00      0.00     1
+G_5-y    2.00      0.00      0.00     2
+     imaginary part
+G_5y     0.00      0.00     -2.00     1
+G_5-y    0.00      0.00      2.00     2
+\end{verbatim}
+All elements not explicitely indicated have zero character.
+There are also projective representations corresponding to $\beta=-1$ 
+and $\gamma=1$. With the representations of the $D_2$ point group we have:
+\begin{verbatim}
+     real part
+D_2h      E        2x        i2x
+AB_2     2.00      2.00      0.00     1
+B_1B_3   2.00     -2.00      0.00     2
+     imaginary part
+AB_2     0.00      0.00      0.00     1
+B_1B_3   0.00      0.00      0.00     2
+\end{verbatim}
+With the representations of the $D_2$ double point group we have:
+\begin{verbatim}
+     real part
+D_2h      E        2x        i2x
+G_5z     2.00      0.00      0.00     1
+G_5-z    2.00      0.00      0.00     2
+     imaginary part
+G_5z     0.00      0.00     -2.00     1
+G_5-z    0.00      0.00      2.00     2
+\end{verbatim}
+Finally there are projective representations corresponding to
+$\beta=-1$ and $\gamma=-1$. With the representations of the $D_2$ point
+group we have: 
+\begin{verbatim}
+     real part
+D_2h      E         2y       i2y
+AB_3     2.00      2.00      0.00     1
+B_1B_2   2.00     -2.00      0.00     2
+     imaginary part
+AB_3     0.00      0.00      0.00     1
+B_1B_2   0.00      0.00      0.00     2
+\end{verbatim}
+With the representations of the $D_2$ double point group we have:
+\begin{verbatim}
+     real part
+D_2h      E         2y       i2y
+G_5x     2.00      0.00      0.00     1
+G_5-x    2.00      0.00      0.00     2
+     imaginary part
+G_5x     0.00      0.00     -2.00     1
+G_5-x    0.00      0.00      2.00     2
+\end{verbatim}
 
+\newpage
 \subsection{\color{web-blue}$D_{3h}\ (\bar 62m)$} 
 This group has twelve elements: The identity, two rotations of $\pm120^\circ$
 about an axis ($C_3$ and $C_3^2$), three rotations of $180^\circ$
@@ -1715,8 +1943,10 @@ It is a group compatible with the hexagonal system
 and with the hexagonal (\texttt{ibrav=4}) Bravais lattice. \\
 Its Laue class is $D_{6h}$. \\
 The $C_3$ axis is $z$.
-The three $C_2$ axes can be: $x$, ($y=\pm \sqrt{3} x$, $z=0$) (a), or
-$y$, ($y=\pm x/\sqrt{3}$, $z=0$) (b). In case (a) the mirror planes 
+The three $C_2$ axes can be: $x$, ($y=\pm \sqrt{3} x$, $z=0$) (a) 
+\texttt{[106]}, or
+$y$, ($y=\pm x/\sqrt{3}$, $z=0$) (b) \texttt{[107]}. 
+In case (a) the mirror planes 
 $3\sigma_v$ are perpendicular to the $3C_2$ axes of case (b) and in case (b) 
 they are perpendicular to the $3C_2$ axes of case (a).
 There are therefore $2$ realizations of interest for solids. \\
@@ -1792,6 +2022,7 @@ C_3v       G_4           G_4            G_5 + G_6
 C_3h       G_7 + G_8     G_9 + G_10     G_11 + G_12
 \end{verbatim}
 
+\newpage
 \subsection{\color{web-blue}$D_{4h}\ (4/mmm)$} 
 This group has sixteen elements: The identity, two rotations of $\pm90^\circ$
 about an axis ($C_4$ and $C_4^3$), a rotation of $180^\circ$ about the 
@@ -1805,7 +2036,8 @@ It is a group compatible with the tetragonal system
 and with the simple tetragonal (\texttt{ibrav=4}) or centered tetragonal
 (\texttt{ibrav=5}) Bravais lattices. \\
 Its Laue class is $D_{4h}$. \\
-The $C_4$ axis can be $x$, $y$, or $z$. 
+The $C_4$ axis can be $x$ \texttt{[110]}, $y$ \texttt{[109]}, 
+or $z$ \texttt{[108]}. 
 When the $C_4$ axis is $x$ the four $C_2$ axes are : $y$, $z$ ($2C_2'$),
 ($y=\pm z$, $x=0$) ($2C_2''$).  
 When the $C_4$ axis is $y$ the four $C_2$ axes are : $x$, $z$ ($2C_2'$),
@@ -1960,7 +2192,73 @@ D_2h        G_5+         G_5+          G_5-         G_5-
 D_2d        G_6          G_7           G_7          G_6
 S_4       G_5 + G_6    G_7 + G_8    G_7 + G_8    G_5 + G_6
 \end{verbatim}
+$D_{4h}$ has also projective representations corresponding to
+$\beta=1$ and $\gamma=-1$ where $IC_{4z} = \beta C_{4z} I$, 
+$IC_{2x} = \gamma C_{2x} I$ ($I$ is the inversion).
+With the representations of the $D_4$ point group one can obtain [11]:
+\begin{verbatim}
+     real part
+D_4h      E        4z        2z     4-z      i4z      i2z     i4-z
+A_1A_2   2.00      2.00     2.00    2.00     0.00     0.00    0.00    1
+B_1B_2   2.00     -2.00     2.00   -2.00     0.00     0.00    0.00    2
+Ey       2.00      0.00    -2.00    0.00    -2.00     0.00    2.00    3
+E-y      2.00      0.00    -2.00    0.00     2.00     0.00   -2.00    4
+     imaginary part
+A_1A_2   0.00      0.00     0.00    0.00     0.00     0.00    0.00    1
+B_1B_2   0.00      0.00     0.00    0.00     0.00     0.00    0.00    2
+Ey       0.00      0.00     0.00    0.00     0.00     0.00    0.00    3
+E-y      0.00      0.00     0.00    0.00     0.00     0.00    0.00    4
+\end{verbatim}
+With the representations of the double point group we have:
+\begin{verbatim}
+     real part
+D_4h      E        4z        2z     4-z      i4z      i2z     i4-z
+G_6y     2.00      1.41     0.00    1.41     0.00     0.00    0.00    1
+G_6-y    2.00      1.41     0.00    1.41     0.00     0.00    0.00    2
+G_7y     2.00     -1.41     0.00   -1.41     0.00     0.00    0.00    3
+G_7-y    2.00     -1.41     0.00   -1.41     0.00     0.00    0.00    4
+     imaginary part
+G_6y     0.00      0.00     0.00    0.00    -1.41    -2.00    1.41    1
+G_6-y    0.00      0.00     0.00    0.00     1.41     2.00   -1.41    2
+G_7y     0.00      0.00     0.00    0.00    -1.41     2.00    1.41    3
+G_7-y    0.00      0.00     0.00    0.00     1.41    -2.00   -1.41    4
+\end{verbatim}
+All elements not explicitely indicated have zero character.
+There are also projective representations corresponding to $\beta=-1$ 
+and $\gamma=1$. With the representations of the $D_4$ point group one
+can obtain:  
+\begin{verbatim}
+     real part
+D_4h      E      2z        2x      2y      i2x     i2y
+A_1B_1   2.00    2.00     2.00    2.00     0.00    0.00     1 
+A_2B_2   2.00    2.00    -2.00   -2.00     0.00    0.00     2
+Ez       2.00   -2.00     0.00    0.00    -2.00   -2.00     3
+E-z      2.00   -2.00     0.00    0.00     2.00    2.00     4
+\end{verbatim}
+With the representations of the $D_4$ double point group we have:  
+\begin{verbatim}
+     real part
+D_4h      E      2z        2x      2y      i2x     i2y
+G_6G_7z  4.00    0.00     0.00    0.00     0.00    0.00     1
+\end{verbatim}
+There are also projective representations corresponding to $\beta=-1$ 
+and $\gamma=-1$. With the representations of the $D_4$ point group we have:
+\begin{verbatim}
+     real part
+D_4h      E      2z      2xy     2x-y     i2xy    i2x-y
+A_1B_2   2.00    2.00    2.00    2.00     0.00    0.00     1
+A_2B_1   2.00    2.00   -2.00   -2.00     0.00    0.00     2
+Ex       2.00   -2.00    0.00    0.00    -2.00    2.00     3
+E-x      2.00   -2.00    0.00    0.00     2.00   -2.00     4
+\end{verbatim}
+With the representations of the $D_4$ double point group we have:  
+\begin{verbatim}
+     real part
+D_4h      E      2z      2xy     2x-y     i2xy    i2x-y
+G_6G_7x  4.00    0.00    0.00    0.00     0.00    0.00     1
+\end{verbatim}
 
+\newpage
 \subsection{\color{web-blue}$D_{6h}\ (6/mmm)$} 
 This group has twenty-four elements: The identity, two rotations of 
 $\pm60^\circ$ about an axis ($C_6$ and $C_6^5$), two rotations of 
@@ -1973,7 +2271,7 @@ $C_6$ axis multiplied by inversion ($S_3^5$ and $S_3$), two rotations of
 $\pm120^\circ$ about the $C_6$ axis multiplied by inversion 
 ($S_6^5$ and $S_6$), a mirror plane 
 perpendicular to the $C_6$ axis ($\sigma_h$), six mirrors perpendicular 
-to $3C_2'$ and $3C_2''$ ($3\sigma_d$ and $3\sigma_v$).
+to $3C_2'$ and $3C_2''$ ($3\sigma_d$ and $3\sigma_v$) \texttt{[111]}.
 It is a group compatible with the hexagonal system
 and with the hexagonal (\texttt{ibrav=4}) Bravais lattice. \\
 Its Laue class is $D_{6h}$. \\
@@ -2137,7 +2435,7 @@ C_2v_3 A_1  B_2  A_2  B_1  A_2+B_1 A_1+B_2 A_2 B_1  A_1   B_2  A_1+B_2 A_2+B_1
 C_2v_4 A_1  B_1  B_2  A_2  A_2+B_2 A_1+B_1 A_2 B_2  B_1   A_1  A_1+B_1 A_2+B_2
 C_3v_1 A_1  A_2  A_2  A_1    E       E     A_2 A_1  A_1   A_2     E      E
 C_3v_2 A_1  A_2  A_1  A_2    E       E     A_2 A_1  A_2   A_1     E      E
-C_6v   A_1  A_2  B_2  B_1   E_1     E_2    A_2 A_1  B_1   B_2    E_1    E_2
+C_6v   A_1  A_2  B_1  B_2   E_1     E_2    A_2 A_1  B_2   B_1    E_1    E_2
 C_2h_1 A_g  A_g  B_g  B_g  2 B_g   2 A_g   A_u A_u  B_u   B_u   2 B_u  2 A_u 
 C_2h_2 A_g  B_g  A_g  B_g  A_g+B_g A_g+B_g A_u B_u  A_u   B_u  A_u+B_u A_u+B_u
 C_2h_3 A_g  B_g  B_g  A_g  A_g+B_g A_g+B_g A_u B_u  B_u   A_u  A_u+B_u A_u+B_u
@@ -2166,6 +2464,7 @@ D_2      G_5         G_5        G_5        G_5        G_5        G_5
 D_3      G_4         G_4     G_5 + G_6     G_4        G_4     G_5 + G_6    
 D_6      G_7         G_8        G_9        G_7        G_8        G_9
 C_2v     G_5         G_5        G_5        G_5        G_5        G_5
+C_6v     G_7         G_8        G_9        G_7        G_8        G_9
 C_2h  G_3++G_4+  G_3++G_4+   G_3++G_4+  G_3-+G_4-  G_3-+G_4-  G_3-+G_4- 
 C_3h  G_7 + G_8  G_9 + G_10  G_11+G_12  G_9 + G_10 G_7 + G_8  G_11+G_12
 C_6h  G_7++G_8+  G_9++G_10+ G_11++G_12+ G_7-+G_8-  G_9-+G_10- G_11-+G_12-
@@ -2174,7 +2473,98 @@ D_3h     G_7         G_8        G_9        G_8        G_7        G_9
 D_3d     G_4+        G_4+    G_5++G_6+     G_4-       G_4-     G_5-+G_6-
 S_6   G_4++G_5+  G_4++G_5+    2 G_6+    G_4-+G_5-  G_4-+G_5-    2 G_6-
 \end{verbatim}
+$D_{6h}$ has also projective representations corresponding to
+$\beta=1$ and $\gamma=-1$ where $IC_{6z} = \beta C_{6z} I$, 
+$IC_{2x} = \gamma C_{2x} I$ ($I$ is the inversion). With the 
+representations of the $D_6$ point group one can obtain:
+\begin{verbatim}
+     real part
+D_6h    E     6z    3z    2z    3-z   6-z   i6z   i3z   i2z   i3-z   i6-z
+A_1A_2  2.00  2.00  2.00  2.00  2.00  2.00  0.00  0.00  0.00  0.00   0.00  1
+B_1B_2  2.00 -2.00  2.00 -2.00  2.00 -2.00  0.00  0.00  0.00  0.00   0.00  2
+E1y     2.00  1.00 -1.00 -2.00 -1.00  1.00  0.00  0.00  0.00  0.00   0.00  3
+E1-y    2.00  1.00 -1.00 -2.00 -1.00  1.00  0.00  0.00  0.00  0.00   0.00  4
+E2y     2.00 -1.00 -1.00  2.00 -1.00 -1.00  0.00  0.00  0.00  0.00   0.00  5
+E2-y    2.00 -1.00 -1.00  2.00 -1.00 -1.00  0.00  0.00  0.00  0.00   0.00  6
+     imaginary part
+A_1A_2  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00   0.00  1
+B_1B_2  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00   0.00  2
+E1y     0.00  0.00  0.00  0.00  0.00  0.00 -1.73 -1.73  0.00  1.73   1.73  3
+E1-y    0.00  0.00  0.00  0.00  0.00  0.00  1.73  1.73  0.00 -1.73  -1.73  4
+E2y     0.00  0.00  0.00  0.00  0.00  0.00 -1.73  1.73  0.00  1.73  -1.73  5
+E2-y    0.00  0.00  0.00  0.00  0.00  0.00  1.73 -1.73  0.00 -1.73   1.73  6
+\end{verbatim}
+With the representations of the $D_6$ double point group we have:
+\begin{verbatim}
+     real part
+D_6h    E     6z    3z    2z    3-z   6-z   i6z   i3z   i2z   i3-z   i6-z
+G_7y    2.00  1.73  1.00  0.00  1.00  1.73  0.00  0.00  0.00  0.00   0.00  1
+G_7-y   2.00  1.73  1.00  0.00  1.00  1.73  0.00  0.00  0.00  0.00   0.00  2
+G_9y    2.00  0.00 -2.00  0.00 -2.00  0.00  0.00  0.00  0.00  0.00   0.00  3
+G_9-y   2.00  0.00 -2.00  0.00 -2.00  0.00  0.00  0.00  0.00  0.00   0.00  4
+G_8y    2.00 -1.73  1.00  0.00  1.00 -1.73  0.00  0.00  0.00  0.00   0.00  5
+G_8-y   2.00 -1.73  1.00  0.00  1.00 -1.73  0.00  0.00  0.00  0.00   0.00  6
+     imaginary part
+G_7y    0.00  0.00  0.00  0.00  0.00  0.00 -1.00 -1.73 -2.00  1.73   1.00  1
+G_7-y   0.00  0.00  0.00  0.00  0.00  0.00  1.00  1.73  2.00 -1.73  -1.00  2
+G_9y    0.00  0.00  0.00  0.00  0.00  0.00 -2.00  0.00  2.00  0.00   2.00  3
+G_9-y   0.00  0.00  0.00  0.00  0.00  0.00  2.00  0.00 -2.00  0.00  -2.00  4
+G_8y    0.00  0.00  0.00  0.00  0.00  0.00 -1.00  1.73 -2.00 -1.73   1.00  5
+G_8-y   0.00  0.00  0.00  0.00  0.00  0.00  1.00 -1.73  2.00  1.73  -1.00  6
+\end{verbatim}
+All elements not explicitely indicated have zero character.
+There are also projective representations corresponding to $\beta=-1$ 
+and $\gamma=1$. With the representations of the $D_6$ point group we have:  
+\begin{verbatim}
+     real part
+D_6h    E     3z     3-z    2x   2110  2010    i2x    i2110   i2010
+A_1B_1  2.00  2.00  2.00   2.00  2.00  2.00   0.00    0.00    0.00     1
+A_2B_2  2.00  2.00  2.00  -2.00 -2.00 -2.00   0.00    0.00    0.00     2
+E_1E_2  4.00 -2.00 -2.00   0.00  0.00  0.00   0.00    0.00    0.00     3
+     imaginary part
+A_1B_1  0.00  0.00  0.00   0.00  0.00  0.00   0.00    0.00    0.00     1
+A_2B_2  0.00  0.00  0.00   0.00  0.00  0.00   0.00    0.00    0.00     2
+E_1E_2  0.00  0.00  0.00   0.00  0.00  0.00   0.00    0.00    0.00     3
+\end{verbatim}
+With the representations of the $D_6$ double point group we have:
+\begin{verbatim}
+     real part
+D_6h    E     3z     3-z    2x   2110  2010    i2x    i2110   i2010
+G_9z    2.00 -2.00 -2.00   0.00  0.00  0.00   0.00    0.00    0.00     1
+G_9-z   2.00 -2.00 -2.00   0.00  0.00  0.00   0.00    0.00    0.00     2
+G_9G_8  4.00  2.00  2.00   0.00  0.00  0.00   0.00    0.00    0.00     3
+     imaginary part
+G_9z    0.00  0.00  0.00   0.00  0.00  0.00  -2.00    2.00    2.00     1
+G_9-z   0.00  0.00  0.00   0.00  0.00  0.00   2.00   -2.00   -2.00     2
+G_9G_8  0.00  0.00  0.00   0.00  0.00  0.00   0.00    0.00    0.00     3
+\end{verbatim}
+There are also projective representations corresponding to $\beta=-1$ 
+and $\gamma=-1$. With the representations of the $D_6$ point group we have:  
+\begin{verbatim}
+     real part
+D_6h    E     3z    3-z    2210   2y   21-10   i2210   i2y    i21-10
+A_1B_2  2.00  2.00  2.00   2.00  2.00  2.00    0.00    0.00    0.00     1
+A_2B_1  2.00  2.00  2.00  -2.00 -2.00 -2.00    0.00    0.00    0.00     2
+E_1E_2  4.00 -2.00 -2.00   0.00  0.00  0.00    0.00    0.00    0.00     2
+     imaginary part
+A_1B_2  0.00  0.00  0.00   0.00  0.00  0.00    0.00    0.00    0.00     1
+A_2B_1  0.00  0.00  0.00   0.00  0.00  0.00    0.00    0.00    0.00     2
+E_1E_2  0.00  0.00  0.00   0.00  0.00  0.00    0.00    0.00    0.00     3
+\end{verbatim}
+With the representations of the $D_6$ double point group we have:
+\begin{verbatim}
+     real part
+D_6h    E     3z    3-z    2210   2y   21-10   i2210   i2y    i21-10
+G_9x    2.00 -2.00 -2.00   0.00  0.00  0.00    0.00    0.00    0.00     1
+G_9-x   2.00 -2.00 -2.00   0.00  0.00  0.00    0.00    0.00    0.00     2
+G_7G_8  4.00  2.00  2.00   0.00  0.00  0.00    0.00    0.00    0.00     3
+     imaginary part
+G_9x    0.00  0.00  0.00   0.00  0.00  0.00   -2.00    2.00    2.00     1
+G_9-x   0.00  0.00  0.00   0.00  0.00  0.00    2.00   -2.00   -2.00     2
+G_7G_8  0.00  0.00  0.00   0.00  0.00  0.00    0.00    0.00    0.00     3
+\end{verbatim}
 
+\newpage
 \subsection{\color{web-blue}$D_{2d}\ (\bar 42m)$} 
 This group has eight elements: The identity, two improper rotations 
 of $\pm90^\circ$ about an axis ($S_4^3$ and $S_4$), a rotation of 
@@ -2188,17 +2578,17 @@ Its Laue class is $D_{4h}$. \\
 The $S_4$ axis can be $x$, $y$, or $z$. There are several possibilities:
 \begin{itemize}
 \item a) $S_4$ axis parallel to $x$, $C_2'$ axes $y$ and $z$, $\sigma_d$
-perpendicular to $(y=\pm z, x=0)$.
+perpendicular to $(y=\pm z, x=0)$ \texttt{[116]}.
 \item b) $S_4$ axis parallel to $x$, $C_2'$ axes $(y=\pm z, x=0)$, $\sigma_d$
-perpendicular to $y$ and $z$.
+perpendicular to $y$ and $z$ \texttt{[117]}.
 \item c) $S_4$ axis parallel to $y$, $C_2'$ axes $x$ and $z$, $\sigma_d$
-perpendicular to $(x=\pm z, y=0)$.
+perpendicular to $(x=\pm z, y=0)$ \texttt{[114]}.
 \item d) $S_4$ axis parallel to $y$, $C_2'$ axes $(x=\pm z, y=0)$, $\sigma_d$
-perpendicular to $x$ and $z$.
+perpendicular to $x$ and $z$ \texttt{[115]}.
 \item e) $S_4$ axis parallel to $z$, $C_2'$ axes $x$ and $y$, $\sigma_d$
-perpendicular to $(y=\pm x, z=0)$.
+perpendicular to $(y=\pm x, z=0)$ \texttt{[112]}.
 \item f) $S_4$ axis parallel to $z$, $C_2'$ axes $(y=\pm x, z=0)$, $\sigma_d$
-perpendicular to $x$ and $y$.
+perpendicular to $x$ and $y$ \texttt{[113]}.
 \end{itemize}
 There are therefore $6$ realizations of interest for solids.\\
 The character table is (isomorphic to $D_4$ with $S_4 \rightarrow C_4$
@@ -2265,6 +2655,7 @@ C_2v     G_5          G_5
 S_4   G_5 + G_6    G_7 + G_8
 \end{verbatim}
 
+\newpage
 \subsection{\color{web-blue}$D_{3d}\ (\bar 3m)$} 
 This group has twelve elements: The identity, two improper rotations 
 of $\pm120^\circ$ about an axis ($S_6^5$ and $S_6$), two rotation of 
@@ -2278,15 +2669,18 @@ Its Laue class is $D_{3d}$. \\
 The six-fold rotoinversion axis can be: $z$, $x=y=z$, $x=-y=z$,
 $x=-y=-z$, $x=y=-z$.
 When the $S_6$ axis is $z$ the $C_2'$ axes can be:
-$x$, $(y=\pm\sqrt{3}x, z=0)$ or $y$, $(y=\pm x/\sqrt{3}, z=0)$. The mirror
+$x$, $(y=\pm\sqrt{3}x, z=0)$ \texttt{[118]}or $y$, $(y=\pm x/\sqrt{3}, z=0)$
+\texttt{[119]}. The mirror
 planes $\sigma_d$ are perpendicular to the $C_2'$ axes.
 When the $S_6$ axis is $x=y=z$ the $C_2'$ axes are $(y=-z, x=0)$, 
-$(x=-z, y=0)$, and $(y=-x, z=0)$. When the $S_6$ axis is $x=-y=z$ 
-the $C_2'$ axes are $(y=z, x=0)$, $(x=-z, y=0)$, and $(y=x, z=0)$. 
+$(x=-z, y=0)$, and $(y=-x, z=0)$ \texttt{[120]}. 
+When the $S_6$ axis is $x=-y=z$ 
+the $C_2'$ axes are $(y=z, x=0)$, $(x=-z, y=0)$, and $(y=x, z=0)$
+\texttt{[121]}. 
 When the $S_6$ axis is $x=-y=-z$ the $C_2'$ axes are $(y=-z, x=0)$, 
-$(x=z, y=0)$, and $(y=x, z=0)$.  When the $S_6$ axis is $x=y=-z$ the 
-$C_2'$ axes are $(y=z, x=0)$, $(x=z, y=0)$, and $(y=-x, z=0)$. The mirror
-planes are perpendicular to the $C_2'$ axes.
+$(x=z, y=0)$, and $(y=x, z=0)$ \texttt{[122]}. When the $S_6$ axis is 
+$x=y=-z$ the $C_2'$ axes are $(y=z, x=0)$, $(x=z, y=0)$, and $(y=-x, z=0)$
+\texttt{[123]}. The mirror planes are perpendicular to the $C_2'$ axes.
 There are therefore $6$ realizations of interest for solids. \\
 The character table is (using $D_{3d}=D_3 \times C_i$):
 \begin{verbatim}
@@ -2369,7 +2763,34 @@ C_3v   G_4        G_5     G_6     G_4        G_6      G_5
 C_2h   G_3++G_4+  G_3+    G_4+    G_3-+G_4-  G_3-     G_4-
 S_6    G_4++G_5+  G_6+    G_6+    G_4-+G_5-  G_6-     G_6-
 \end{verbatim}
+This group has also projective representations corresponding to
+$I {3z} = \beta {3z} I$ and $\beta=-1$ ($I$ is the inversion).
+With the representations of the $D_3$ point group one can obtain [11]:
+\begin{verbatim}
+     real part
+D_3d      E         3z       3-z        i3z     i3-z
+A_1A_2   2.00      2.00      2.00      0.00     0.00       1
+E1y      2.00     -1.00     -1.00      0.00     0.00       2
+E1-y     2.00     -1.00     -1.00      0.00     0.00       3
+     imaginary part
+A_1A_2   0.00      0.00      0.00      0.00     0.00       1
+E1y      0.00      0.00      0.00     -1.73     1.73       2
+E1-y     0.00      0.00      0.00      1.73    -1.73       3
+\end{verbatim}
+With the representations of the $D_3$ double point group we have:
+\begin{verbatim}
+     real part
+D_3d      E         3z       3-z        i3z     i3-z
+G_6G_5   2.00     -2.00     -2.00      0.00     0.00       1
+G_4y     2.00      1.00      1.00      0.00     0.00       2
+G_4-y    2.00      1.00      1.00      0.00     0.00       3
+     imaginary part
+G_6G_5   0.00      0.00      0.00      0.00     0.00       1
+G_4y     0.00      0.00      0.00     -1.73     1.73       2
+G_4-y    0.00      0.00      0.00      1.73    -1.73       3
+\end{verbatim}
 
+\newpage
 \subsection{\color{web-blue}$S_4\ (\bar 4)$}  
 This group has four elements: The identity, two improper rotations 
 of $\pm90^\circ$ about an axis ($S_4$ and $S_4^3$),  
@@ -2378,7 +2799,8 @@ It is a group compatible with the tetragonal system and with the
 simple tetragonal (\texttt{ibrav=6}) and centered tetragonal 
 (\texttt{ibrav=7}) Bravais lattices. \\
 Its Laue class is $C_{4h}$. \\
-The $C_4$ axis can be $x$, $y$, or $z$. There are therefore $3$ realizations
+The $C_4$ axis can be $x$ \texttt{[126]}, $y$ \texttt{[125]}, 
+or $z$ \texttt{[124]}. There are therefore $3$ realizations
 of interest for solids. \\ 
 The character table is (isomorphic to $C_4$ with $S_4^3 \rightarrow C_4$ and
 $S_4 \rightarrow C_4^3$):
@@ -2441,8 +2863,8 @@ $\pm120^\circ$ about the same axis ($C_3$ and $C_3^2$) and inversion.
 It is a group compatible with the trigonal and hexagonal systems and with the  
 rhombohedral (\texttt{ibrav=5}) and hexagonal (\texttt{ibrav=4}) Bravais lattices. \\
 Its Laue class is $D_{6h}$. \\
-The $S_6$ axis can be: $z$, $x=y=z$, $x=-y=z$, 
-$x=-y=-z$, $x=y=-z$.
+The $S_6$ axis can be: $z$ \texttt{[127]}, $x=y=z$ \texttt{[128]}, 
+$x=-y=z$ \texttt{[131]}, $x=-y=-z$ \texttt{[129]}, $x=y=-z$ \texttt{[130]}.
 There are therefore $5$ realizations of interest for solids. \\
 The character table is (using $S_6=C_3 \times C_i$):
 \begin{verbatim}
@@ -2514,10 +2936,12 @@ C_i    G_2+     G_2+     G_2+     G_2-     G_2-     G_2-
 C_3    G_4      G_5      G_6      G_4      G_5      G_6 
 \end{verbatim}
 
+\newpage
 \subsection{\color{web-blue}$T\ (23)$} 
 This group has twelve elements: The identity, eight rotations of $\pm120^\circ$ 
 about four axes ($4C_3$ and $4C_3^2$ (called $C_3'$ in the character
-table)), three rotations of $180^\circ$ about three different axes ($3C_2$).
+table)), three rotations of $180^\circ$ about three different axes ($3C_2$)
+\texttt{[132]}.
 It is a group compatible with the cubic system and with the  
 simple (\texttt{ibrav=1}), face-centered (\texttt{ibrav=2}), 
 and body-centered cubic (\texttt{ibrav=3}) Bravais lattices. \\
@@ -2585,6 +3009,7 @@ C_3   G_4 + G_5  G_6 + G_4    G_6 + G_5
 D_2      G_5        G_5          G_5
 \end{verbatim}
 
+\newpage
 \subsection{\color{web-blue}$T_h\ (m\bar 3)$}
 This group has twenty-four elements: The identity, eight rotations 
 of $\pm120^\circ$ about four axes ($4C_3$ and $4C_3^2$ (called $4C3'$ in the 
@@ -2592,7 +3017,7 @@ character table)), three rotations of $180^\circ$ about three different axes
 ($3C_2$), inversion and all previous operations multiplied by inversion, that is
 eight rotations of $\pm120^\circ$ about the same four axes multiplied by inversion
 ($4S_6^5$ (called also $S_6'$ in the character table) and $4S_6$) and three 
-mirror planes ($3\sigma_h$) perpendicular to the $C_2$ axes.
+mirror planes ($3\sigma_h$) perpendicular to the $C_2$ axes \texttt{[133]}.
 It is a group compatible with the cubic system and with the  
 simple (\texttt{ibrav=1}), face-centered (\texttt{ibrav=2}), 
 and body-centered cubic (\texttt{ibrav=3}) Bravais lattices. \\
@@ -2720,12 +3145,13 @@ S_6   G_4++G_5+  G_5++G_6+  G_4++G_6+ G_4-+G_5- G_5-+G_6- G_4-+G_6-
 T       G_5        G_6      G_7       G_5       G_6       G_7
 \end{verbatim}
 
+\newpage
 \subsection{\color{web-blue}$T_d\ (\bar 43m)$}
 This group has twenty-four elements: The identity, eight rotations 
 of $\pm120^\circ$ about four axes ($8C_3$), three rotations of 
 $180^\circ$ about three different axes ($3C_2$), six
 improper rotations of $\pm90^\circ$ about the $C_2$ axes and
-six mirror symmetries ($6\sigma_d$) with axes described below.
+six mirror symmetries ($6\sigma_d$) with axes described below \texttt{[134]}.
 It is a group compatible with the cubic system and with the  
 simple (\texttt{ibrav=1}), face-centered (\texttt{ibrav=2}), 
 and body-centered cubic (\texttt{ibrav=3}) Bravais lattices. \\
@@ -2807,12 +3233,14 @@ S_4     G_5 + G_6    G_7 + G_8  G_5 + G_6 + G_7 + G_8
 T          G_5          G_5           G_6 + G_7
 \end{verbatim}
 
+\newpage
 \subsection{\color{web-blue}$O\ (432)$} 
 This group has twenty-four elements: The identity, eight rotations 
 of $\pm120^\circ$ about four axes ($8C_3$), three rotations of 
 $180^\circ$ about three different axes ($3C_2$), six
 rotations of $\pm90^\circ$ about the $C_2$ axes ($6C_4$) and
-six rotations of $180^\circ$ ($6C_2'$) about axes described below.
+six rotations of $180^\circ$ ($6C_2'$) about axes described below
+\texttt{[135]}.
 It is a group compatible with the cubic system and with the  
 simple (\texttt{ibrav=1}), face-centered (\texttt{ibrav=2}), 
 and body-centered cubic (\texttt{ibrav=3}) Bravais lattices. \\
@@ -2892,6 +3320,7 @@ D_4         G_6          G_7      G_6 + G_7
 T           G_5          G_5      G_6 + G_7 
 \end{verbatim}
 
+\newpage
 \subsection{\color{web-blue}$O_h\ (m\bar3m)$}   
 This group has forty-eight elements: 
 The identity, eight rotations of $\pm120^\circ$ about four axes ($8C_3$), 
@@ -2903,7 +3332,8 @@ eight rotation of $\pm60^\circ$ multiplied by inversion about the $C_3$ axes
 ($8S_6$), three mirror planes $3\sigma_h$ perpendicular to the $C_4$ axes,
 six rotations of $\pm90^\circ$ about the $C_4$ axes multiplied by inversion
 ($6S_4$), and six mirror planes perpendicular to the axes described
-below ($6\sigma_d$). It is a group compatible with the cubic system and with the  
+below ($6\sigma_d$) \texttt{[136]}. It is a group compatible with the 
+cubic system and with the  
 simple (\texttt{ibrav=1}), face-centered (\texttt{ibrav=2}), 
 and body-centered cubic (\texttt{ibrav=3}) Bravais lattices. \\
 Its Laue class is $O_{h}$. \\
@@ -3108,403 +3538,443 @@ T_h    G_5+      G_5+      G_6++G_7+        G_5-       G_5-      G_6-+G_7-
 T_d    G_6       G_7       G_8              G_7        G_6       G_8
 O      G_6       G_7       G_8              G_6        G_7       G_8    
 \end{verbatim}
+This group has also projective representations corresponding to
+$I {4z} = \beta {4z} I$ and $\beta=-1$ ($I$ is the inversion). With
+the representation of the $O$ point group we have:
+\begin{verbatim}
+     real part
+O_h       E        3C2       8C3      4 iC3   4 iC3^-1  
+A_1A_2   2.00      2.00      2.00      0.00     0.00   1
+Ey       2.00      2.00     -1.00      0.00     0.00   2
+E-y      2.00      2.00     -1.00      0.00     0.00   3
+T_1T_2   6.00     -2.00      0.00      0.00     0.00   4
+     imaginary part
+A_1A_2   0.00      0.00      0.00      0.00     0.00   1
+Ey       0.00      0.00      0.00     -1.73     1.73   2
+E-y      0.00      0.00      0.00      1.73    -1.73   3 
+T_1T_2   0.00      0.00      0.00      0.00     0.00   4
+\end{verbatim}
+With the representations of the $O$ double point group we have:
+\begin{verbatim}
+     real part
+O_h       E        3C2       8C3      4 iC3    4iC3^-1 
+G_6G_7   4.00      0.00      2.00      0.00     0.00    1
+G_8y     4.00      0.00     -1.00      0.00     0.00    2
+G_8-y    4.00      0.00     -1.00      0.00     0.00    3
+     imaginary part
+G_6G_7   0.00      0.00      0.00      0.00     0.00    1
+G_8y     0.00      0.00      0.00      1.73    -1.73    2
+G_8-y    0.00      0.00      0.00     -1.73     1.73    3
+\end{verbatim}
+
 
 \newpage
 \section{\color{coral}Symmetry matrices}
+\subsection{\color{web-blue}O(3)}
 \qe\ uses internally the following symmetry matrices. Each one of these
-matrices is checked as a possible symmetry in the given order. The names
-of the symmetry operations is the one printed by \qe.
+matrices is checked as a possible symmetry in the given order. The extended
+description of the symmetry operations is the one printed by \qe. Moreover
+I added two symbols not present in the output of the codes. The
+first symbol indicates the generic name of the symmetry used in the character
+tables of the point groups and double point groups. The second symbol is
+a more detailed description of the symmetry and is used in the character
+tables of the projective representations. The number $n$ in the symbol 
+indicates the rotation angle ($2 \pi / n$ or $360^\circ/n$), the following
+letters indicate the rotation axis (for instance \texttt{z} indicates the 
+$z$ axis, \texttt{x-y} indicates the axis $y=-x, z=0$ and \texttt{xyz} 
+indicates the axis $x=y=z$).
+A letter \texttt{i} in front of the symbol indicates multiplication 
+by inversion.
 \begin{verbatim}
-      isym =  1     identity    E
+      isym =  1     identity    E      E
 
  cart.    s( 1) = (  1.0000000  0.0000000  0.0000000 )
                   (  0.0000000  1.0000000  0.0000000 )
                   (  0.0000000  0.0000000  1.0000000 )
 
-      isym =  2     180 deg rotation - cart. axis [0,0,1]       C2
+      isym =  2     180 deg rotation - cart. axis [0,0,1]       C2    2z
 
  cart.    s( 2) = ( -1.0000000  0.0000000  0.0000000 )
                   (  0.0000000 -1.0000000  0.0000000 )
                   (  0.0000000  0.0000000  1.0000000 )
 
-      isym =  3     180 deg rotation - cart. axis [0,1,0]       C2
+      isym =  3     180 deg rotation - cart. axis [0,1,0]       C2    2y
 
  cart.    s( 3) = ( -1.0000000  0.0000000  0.0000000 )
                   (  0.0000000  1.0000000  0.0000000 )
                   (  0.0000000  0.0000000 -1.0000000 )
 
-      isym =  4     180 deg rotation - cart. axis [1,0,0]       C2
+      isym =  4     180 deg rotation - cart. axis [1,0,0]       C2    2x
 
  cart.    s( 4) = (  1.0000000  0.0000000  0.0000000 )
                   (  0.0000000 -1.0000000  0.0000000 )
                   (  0.0000000  0.0000000 -1.0000000 )
 
-      isym =  5     180 deg rotation - cart. axis [1,1,0]       C2
+      isym =  5     180 deg rotation - cart. axis [1,1,0]       C2    2xy
 
  cart.    s( 5) = (  0.0000000  1.0000000  0.0000000 )
                   (  1.0000000  0.0000000  0.0000000 )
                   (  0.0000000  0.0000000 -1.0000000 )
 
-      isym =  6     180 deg rotation - cart. axis [1,-1,0]      C2
+      isym =  6     180 deg rotation - cart. axis [1,-1,0]      C2    2x-y
 
  cart.    s( 6) = (  0.0000000 -1.0000000  0.0000000 )
                   ( -1.0000000  0.0000000  0.0000000 )
                   (  0.0000000  0.0000000 -1.0000000 )
 
-      isym =  7      90 deg rotation - cart. axis [0,0,-1]      C4^3
+      isym =  7      90 deg rotation - cart. axis [0,0,-1]      C4^3  4-z
 
  cart.    s( 7) = (  0.0000000  1.0000000  0.0000000 )
                   ( -1.0000000  0.0000000  0.0000000 )
                   (  0.0000000  0.0000000  1.0000000 )
 
-      isym =  8      90 deg rotation - cart. axis [0,0,1]       C4
+      isym =  8      90 deg rotation - cart. axis [0,0,1]       C4    4z
 
  cart.    s( 8) = (  0.0000000 -1.0000000  0.0000000 )
                   (  1.0000000  0.0000000  0.0000000 )
                   (  0.0000000  0.0000000  1.0000000 )
 
-     isym =  9     180 deg rotation - cart. axis [1,0,1]        C2
+     isym =  9     180 deg rotation - cart. axis [1,0,1]        C2    2xz
 
  cart.    s( 9) = (  0.0000000  0.0000000  1.0000000 )
                   (  0.0000000 -1.0000000  0.0000000 )
                   (  1.0000000  0.0000000  0.0000000 )
 
-      isym = 10     180 deg rotation - cart. axis [-1,0,1]      C2
+      isym = 10     180 deg rotation - cart. axis [-1,0,1]      C2    2x-z
 
  cart.    s(10) = (  0.0000000  0.0000000 -1.0000000 )
                   (  0.0000000 -1.0000000  0.0000000 )
                   ( -1.0000000  0.0000000  0.0000000 )
 
-      isym = 11      90 deg rotation - cart. axis [0,1,0]       C4
+      isym = 11      90 deg rotation - cart. axis [0,1,0]       C4    4y
 
  cart.    s(11) = (  0.0000000  0.0000000  1.0000000 )
                   (  0.0000000  1.0000000  0.0000000 )
                   ( -1.0000000  0.0000000  0.0000000 )
 
 
-      isym = 12      90 deg rotation - cart. axis [0,-1,0]      C4^3
+      isym = 12      90 deg rotation - cart. axis [0,-1,0]      C4^3   4-y
 
  cart.    s(12) = (  0.0000000  0.0000000 -1.0000000 )
                   (  0.0000000  1.0000000  0.0000000 )
                   (  1.0000000  0.0000000  0.0000000 )
 
-      isym = 13     180 deg rotation - cart. axis [0,1,1]       C2
+      isym = 13     180 deg rotation - cart. axis [0,1,1]       C2     2yz
 
  cart.    s(13) = ( -1.0000000  0.0000000  0.0000000 )
                   (  0.0000000  0.0000000  1.0000000 )
                   (  0.0000000  1.0000000  0.0000000 )
 
-      isym = 14     180 deg rotation - cart. axis [0,1,-1]      C2
+      isym = 14     180 deg rotation - cart. axis [0,1,-1]      C2     2y-z
 
  cart.    s(14) = ( -1.0000000  0.0000000  0.0000000 )
                   (  0.0000000  0.0000000 -1.0000000 )
                   (  0.0000000 -1.0000000  0.0000000 )
 
-     isym = 15      90 deg rotation - cart. axis [-1,0,0]       C4^3
+     isym = 15      90 deg rotation - cart. axis [-1,0,0]       C4^3   4-x
 
  cart.    s(15) = (  1.0000000  0.0000000  0.0000000 )
                   (  0.0000000  0.0000000  1.0000000 )
                   (  0.0000000 -1.0000000  0.0000000 )
 
-      isym = 16      90 deg rotation - cart. axis [1,0,0]       C4
+      isym = 16      90 deg rotation - cart. axis [1,0,0]       C4     4x
 
  cart.    s(16) = (  1.0000000  0.0000000  0.0000000 )
                   (  0.0000000  0.0000000 -1.0000000 )
                   (  0.0000000  1.0000000  0.0000000 )
 
-      isym = 17     120 deg rotation - cart. axis [-1,-1,-1]    C3^2
+      isym = 17     120 deg rotation - cart. axis [-1,-1,-1]    C3^2   3-x-y-z
 
  cart.    s(17) = (  0.0000000  1.0000000  0.0000000 )
                   (  0.0000000  0.0000000  1.0000000 )
                   (  1.0000000  0.0000000  0.0000000 )
 
-      isym = 18     120 deg rotation - cart. axis [-1,1,1]      C3
+      isym = 18     120 deg rotation - cart. axis [-1,1,1]      C3     3-xyz
 
  cart.    s(18) = (  0.0000000 -1.0000000  0.0000000 )
                   (  0.0000000  0.0000000  1.0000000 )
                   ( -1.0000000  0.0000000  0.0000000 )
 
-      isym = 19     120 deg rotation - cart. axis [1,1,-1]      C3^2
+      isym = 19     120 deg rotation - cart. axis [1,1,-1]      C3^2   3xy-z
 
  cart.    s(19) = (  0.0000000  1.0000000  0.0000000 )
                   (  0.0000000  0.0000000 -1.0000000 )
                   ( -1.0000000  0.0000000  0.0000000 )
 
-      isym = 20     120 deg rotation - cart. axis [1,-1,1]      C3
+      isym = 20     120 deg rotation - cart. axis [1,-1,1]      C3     3x-yz
 
  cart.    s(20) = (  0.0000000 -1.0000000  0.0000000 )
                   (  0.0000000  0.0000000 -1.0000000 )
                   (  1.0000000  0.0000000  0.0000000 )
 
-      isym = 21     120 deg rotation - cart. axis [1,1,1]       C3
+      isym = 21     120 deg rotation - cart. axis [1,1,1]       C3     3xyz
 
  cart.    s(21) = (  0.0000000  0.0000000  1.0000000 )
                   (  1.0000000  0.0000000  0.0000000 )
                   (  0.0000000  1.0000000  0.0000000 )
 
-      isym = 22     120 deg rotation - cart. axis [-1,1,-1]     C3^2
+      isym = 22     120 deg rotation - cart. axis [-1,1,-1]     C3^2   3-xy-z
 
  cart.    s(22) = (  0.0000000  0.0000000  1.0000000 )
                   ( -1.0000000  0.0000000  0.0000000 )
                   (  0.0000000 -1.0000000  0.0000000 )
 
 
-      isym = 23     120 deg rotation - cart. axis [1,-1,-1]     C3^2
+      isym = 23     120 deg rotation - cart. axis [1,-1,-1]     C3^2   3x-y-z
 
  cart.    s(23) = (  0.0000000  0.0000000 -1.0000000 )
                   ( -1.0000000  0.0000000  0.0000000 )
                   (  0.0000000  1.0000000  0.0000000 )
 
-      isym = 24     120 deg rotation - cart. axis [-1,-1,1]     C3
+      isym = 24     120 deg rotation - cart. axis [-1,-1,1]     C3     3-x-yz
 
  cart.    s(24) = (  0.0000000  0.0000000 -1.0000000 )
                   (  1.0000000  0.0000000  0.0000000 )
                   (  0.0000000 -1.0000000  0.0000000 )
 
+      isym = 25      60 deg rotation - cryst. axis [0,0,1]      C6     6z
 
-      isym = 25     inversion                                   i
-
- cart.    s(25) = ( -1.0000000  0.0000000  0.0000000 )
-                  (  0.0000000 -1.0000000  0.0000000 )
-                  (  0.0000000  0.0000000 -1.0000000 )
-
-      isym = 26     inv. 180 deg rotation - cart. axis [0,0,1]  s
-
- cart.    s(26) = (  1.0000000  0.0000000  0.0000000 )
-                  (  0.0000000  1.0000000  0.0000000 )
-                  (  0.0000000  0.0000000 -1.0000000 )
-
-      isym = 27     inv. 180 deg rotation - cart. axis [0,1,0]  s
-
- cart.    s(27) = (  1.0000000  0.0000000  0.0000000 )
-                  (  0.0000000 -1.0000000  0.0000000 )
-                  (  0.0000000  0.0000000  1.0000000 )
-
-      isym = 28     inv. 180 deg rotation - cart. axis [1,0,0]  s
-
- cart.    s(28) = ( -1.0000000  0.0000000  0.0000000 )
-                  (  0.0000000  1.0000000  0.0000000 )
-                  (  0.0000000  0.0000000  1.0000000 )
-
-      isym = 29     inv. 180 deg rotation - cart. axis [1,1,0]  s
-
- cart.    s(29) = (  0.0000000 -1.0000000  0.0000000 )
-                  ( -1.0000000  0.0000000  0.0000000 )
-                  (  0.0000000  0.0000000  1.0000000 )
-
-      isym = 30     inv. 180 deg rotation - cart. axis [1,-1,0] s
-
- cart.    s(30) = (  0.0000000  1.0000000  0.0000000 )
-                  (  1.0000000  0.0000000  0.0000000 )
-                  (  0.0000000  0.0000000  1.0000000 )
-
-     isym = 31     inv.  90 deg rotation - cart. axis [0,0,-1]  S4
-
- cart.    s(31) = (  0.0000000 -1.0000000  0.0000000 )
-                  (  1.0000000  0.0000000  0.0000000 )
-                  (  0.0000000  0.0000000 -1.0000000 )
-
-      isym = 32     inv.  90 deg rotation - cart. axis [0,0,1]  S4^3
-
- cart.    s(32) = (  0.0000000  1.0000000  0.0000000 )
-                  ( -1.0000000  0.0000000  0.0000000 )
-                  (  0.0000000  0.0000000 -1.0000000 )
-
-     isym = 33     inv. 180 deg rotation - cart. axis [1,0,1]   s
-
- cart.    s(33) = (  0.0000000  0.0000000 -1.0000000 )
-                  (  0.0000000  1.0000000  0.0000000 )
-                  ( -1.0000000  0.0000000  0.0000000 )
-
-      isym = 34     inv. 180 deg rotation - cart. axis [-1,0,1] s
-
- cart.    s(34) = (  0.0000000  0.0000000  1.0000000 )
-                  (  0.0000000  1.0000000  0.0000000 )
-                  (  1.0000000  0.0000000  0.0000000 )
-
-      isym = 35     inv.  90 deg rotation - cart. axis [0,1,0]  S4^3
-
- cart.    s(35) = (  0.0000000  0.0000000 -1.0000000 )
-                  (  0.0000000 -1.0000000  0.0000000 )
-                  (  1.0000000  0.0000000  0.0000000 )
-
-      isym = 36     inv.  90 deg rotation - cart. axis [0,-1,0] S4
-
- cart.    s(36) = (  0.0000000  0.0000000  1.0000000 )
-                  (  0.0000000 -1.0000000  0.0000000 )
-                  ( -1.0000000  0.0000000  0.0000000 )
-
-      isym = 37     inv. 180 deg rotation - cart. axis [0,1,1]  s
-
- cart.    s(37) = (  1.0000000  0.0000000  0.0000000 )
-                  (  0.0000000  0.0000000 -1.0000000 )
-                  (  0.0000000 -1.0000000  0.0000000 )
-
-      isym = 38     inv. 180 deg rotation - cart. axis [0,1,-1] s
-
- cart.    s(38) = (  1.0000000  0.0000000  0.0000000 )
-                  (  0.0000000  0.0000000  1.0000000 )
-                  (  0.0000000  1.0000000  0.0000000 )
-
-      isym = 39     inv.  90 deg rotation - cart. axis [-1,0,0] S4
-
- cart.    s(39) = ( -1.0000000  0.0000000  0.0000000 )
-                  (  0.0000000  0.0000000 -1.0000000 )
-                  (  0.0000000  1.0000000  0.0000000 )
-
-      isym = 40     inv.  90 deg rotation - cart. axis [1,0,0]  S4^3
-
- cart.    s(40) = ( -1.0000000  0.0000000  0.0000000 )
-                  (  0.0000000  0.0000000  1.0000000 )
-                  (  0.0000000 -1.0000000  0.0000000 )
-
-      isym = 41     inv. 120 deg rotation - cart. axis [-1,-1,-1] S6
-
- cart.    s(41) = (  0.0000000 -1.0000000  0.0000000 )
-                  (  0.0000000  0.0000000 -1.0000000 )
-                  ( -1.0000000  0.0000000  0.0000000 )
-
-      isym = 42     inv. 120 deg rotation - cart. axis [-1,1,1] S6^5
-
- cart.    s(42) = (  0.0000000  1.0000000  0.0000000 )
-                  (  0.0000000  0.0000000 -1.0000000 )
-                  (  1.0000000  0.0000000  0.0000000 )
-
-      isym = 43     inv. 120 deg rotation - cart. axis [1,1,-1] S6
-
- cart.    s(43) = (  0.0000000 -1.0000000  0.0000000 )
-                  (  0.0000000  0.0000000  1.0000000 )
-                  (  1.0000000  0.0000000  0.0000000 )
-
-      isym = 44     inv. 120 deg rotation - cart. axis [1,-1,1] S6^5
-
- cart.    s(44) = (  0.0000000  1.0000000  0.0000000 )
-                  (  0.0000000  0.0000000  1.0000000 )
-                  ( -1.0000000  0.0000000  0.0000000 )
-
-      isym = 45     inv. 120 deg rotation - cart. axis [1,1,1]  S6^5
-
- cart.    s(45) = (  0.0000000  0.0000000 -1.0000000 )
-                  ( -1.0000000  0.0000000  0.0000000 )
-                  (  0.0000000 -1.0000000  0.0000000 )
-
-      isym = 46     inv. 120 deg rotation - cart. axis [-1,1,-1] S6
-
- cart.    s(46) = (  0.0000000  0.0000000 -1.0000000 )
-                  (  1.0000000  0.0000000  0.0000000 )
-                  (  0.0000000  1.0000000  0.0000000 )
-
-      isym = 47     inv. 120 deg rotation - cart. axis [1,-1,-1] S6 
-
- cart.    s(47) = (  0.0000000  0.0000000  1.0000000 )
-                  (  1.0000000  0.0000000  0.0000000 )
-                  (  0.0000000 -1.0000000  0.0000000 )
-
-      isym = 48     inv. 120 deg rotation - cart. axis [-1,-1,1] S6^5
-
- cart.    s(48) = (  0.0000000  0.0000000  1.0000000 )
-                  ( -1.0000000  0.0000000  0.0000000 )
-                  (  0.0000000  1.0000000  0.0000000 )
-
-      isym = 49      60 deg rotation - cryst. axis [0,0,1]      C6
-
- cart.    s(49) = (  0.5000000 -0.8660254  0.0000000 )
+ cart.    s(25) = (  0.5000000 -0.8660254  0.0000000 )
                   (  0.8660254  0.5000000  0.0000000 )
                   (  0.0000000  0.0000000  1.0000000 )
 
-      isym = 50      60 deg rotation - cryst. axis [0,0,-1]     C6^5
+      isym = 26      60 deg rotation - cryst. axis [0,0,-1]     C6^5   6-z
 
- cart.    s(50) = (  0.5000000  0.8660254  0.0000000 )
+ cart.    s(26) = (  0.5000000  0.8660254  0.0000000 )
                   ( -0.8660254  0.5000000  0.0000000 )
                   (  0.0000000  0.0000000  1.0000000 )
 
-      isym = 51     120 deg rotation - cryst. axis [0,0,1]      C3
+      isym = 27     120 deg rotation - cryst. axis [0,0,1]      C3     3z
 
- cart.    s(51) = ( -0.5000000 -0.8660254  0.0000000 )
+ cart.    s(27) = ( -0.5000000 -0.8660254  0.0000000 )
                   (  0.8660254 -0.5000000  0.0000000 )
                   (  0.0000000  0.0000000  1.0000000 )
 
-      isym = 52     120 deg rotation - cryst. axis [0,0,-1]     C3^2
+      isym = 28     120 deg rotation - cryst. axis [0,0,-1]     C3^2   3-z
 
- cart.    s(52) = ( -0.5000000  0.8660254  0.0000000 )
+ cart.    s(28) = ( -0.5000000  0.8660254  0.0000000 )
                   ( -0.8660254 -0.5000000  0.0000000 )
                   (  0.0000000  0.0000000  1.0000000 )
 
-      isym = 53     180 deg rotation - cryst. axis [1,-1,0]     C2
+      isym = 29     180 deg rotation - cryst. axis [1,-1,0]     C2     21-10
 
- cart.    s(53) = (  0.5000000 -0.8660254  0.0000000 )
+ cart.    s(29) = (  0.5000000 -0.8660254  0.0000000 )
                   ( -0.8660254 -0.5000000  0.0000000 )
                   (  0.0000000  0.0000000 -1.0000000 )
 
-      isym = 54     180 deg rotation - cryst. axis [2,1,0]      C2
+      isym = 30     180 deg rotation - cryst. axis [2,1,0]      C2     2210
 
- cart.    s(54) = (  0.5000000  0.8660254  0.0000000 )
+ cart.    s(30) = (  0.5000000  0.8660254  0.0000000 )
                   (  0.8660254 -0.5000000  0.0000000 )
                   (  0.0000000  0.0000000 -1.0000000 )
 
-      isym = 55     180 deg rotation - cryst. axis [0,1,0]      C2
+      isym = 31     180 deg rotation - cryst. axis [0,1,0]      C2     2010
 
- cart.    s(55) = ( -0.5000000 -0.8660254  0.0000000 )
+ cart.    s(31) = ( -0.5000000 -0.8660254  0.0000000 )
                   ( -0.8660254  0.5000000  0.0000000 )
                   (  0.0000000  0.0000000 -1.0000000 )
 
-      isym = 56     180 deg rotation - cryst. axis [1,1,0]      C2
+      isym = 32     180 deg rotation - cryst. axis [1,1,0]      C2     2110
 
- cart.    s(56) = ( -0.5000000  0.8660254  0.0000000 )
+ cart.    s(32) = ( -0.5000000  0.8660254  0.0000000 )
                   (  0.8660254  0.5000000  0.0000000 )
                   (  0.0000000  0.0000000 -1.0000000 )
 
-      isym = 57     inv.  60 deg rotation - cryst. axis [0,0,1] S3^5
+      isym = 33     inversion                                   i      i
+
+ cart.    s(33) = ( -1.0000000  0.0000000  0.0000000 )
+                  (  0.0000000 -1.0000000  0.0000000 )
+                  (  0.0000000  0.0000000 -1.0000000 )
+
+      isym = 34     inv. 180 deg rotation - cart. axis [0,0,1]  s      i2z
+
+ cart.    s(34) = (  1.0000000  0.0000000  0.0000000 )
+                  (  0.0000000  1.0000000  0.0000000 )
+                  (  0.0000000  0.0000000 -1.0000000 )
+
+      isym = 35     inv. 180 deg rotation - cart. axis [0,1,0]  s      i2y
+
+ cart.    s(35) = (  1.0000000  0.0000000  0.0000000 )
+                  (  0.0000000 -1.0000000  0.0000000 )
+                  (  0.0000000  0.0000000  1.0000000 )
+
+      isym = 36     inv. 180 deg rotation - cart. axis [1,0,0]  s      i2x
+
+ cart.    s(36) = ( -1.0000000  0.0000000  0.0000000 )
+                  (  0.0000000  1.0000000  0.0000000 )
+                  (  0.0000000  0.0000000  1.0000000 )
+
+      isym = 37     inv. 180 deg rotation - cart. axis [1,1,0]  s      i2xy
+
+ cart.    s(37) = (  0.0000000 -1.0000000  0.0000000 )
+                  ( -1.0000000  0.0000000  0.0000000 )
+                  (  0.0000000  0.0000000  1.0000000 )
+
+      isym = 38     inv. 180 deg rotation - cart. axis [1,-1,0] s      i2x-y
+
+ cart.    s(38) = (  0.0000000  1.0000000  0.0000000 )
+                  (  1.0000000  0.0000000  0.0000000 )
+                  (  0.0000000  0.0000000  1.0000000 )
+
+     isym = 39     inv.  90 deg rotation - cart. axis [0,0,-1]  S4     i4-z
+
+ cart.    s(39) = (  0.0000000 -1.0000000  0.0000000 )
+                  (  1.0000000  0.0000000  0.0000000 )
+                  (  0.0000000  0.0000000 -1.0000000 )
+
+      isym = 40     inv.  90 deg rotation - cart. axis [0,0,1]  S4^3   i4z
+
+ cart.    s(40) = (  0.0000000  1.0000000  0.0000000 )
+                  ( -1.0000000  0.0000000  0.0000000 )
+                  (  0.0000000  0.0000000 -1.0000000 )
+
+     isym = 41     inv. 180 deg rotation - cart. axis [1,0,1]   s      i2xz
+
+ cart.    s(41) = (  0.0000000  0.0000000 -1.0000000 )
+                  (  0.0000000  1.0000000  0.0000000 )
+                  ( -1.0000000  0.0000000  0.0000000 )
+
+      isym = 42     inv. 180 deg rotation - cart. axis [-1,0,1] s      i2x-z
+
+ cart.    s(42) = (  0.0000000  0.0000000  1.0000000 )
+                  (  0.0000000  1.0000000  0.0000000 )
+                  (  1.0000000  0.0000000  0.0000000 )
+
+      isym = 43     inv.  90 deg rotation - cart. axis [0,1,0]  S4^3   i4y
+
+ cart.    s(43) = (  0.0000000  0.0000000 -1.0000000 )
+                  (  0.0000000 -1.0000000  0.0000000 )
+                  (  1.0000000  0.0000000  0.0000000 )
+
+      isym = 44     inv.  90 deg rotation - cart. axis [0,-1,0] S4     i4-y
+
+ cart.    s(44) = (  0.0000000  0.0000000  1.0000000 )
+                  (  0.0000000 -1.0000000  0.0000000 )
+                  ( -1.0000000  0.0000000  0.0000000 )
+
+      isym = 45     inv. 180 deg rotation - cart. axis [0,1,1]  s      i2yz
+
+ cart.    s(45) = (  1.0000000  0.0000000  0.0000000 )
+                  (  0.0000000  0.0000000 -1.0000000 )
+                  (  0.0000000 -1.0000000  0.0000000 )
+
+      isym = 46     inv. 180 deg rotation - cart. axis [0,1,-1] s      i2y-z
+
+ cart.    s(46) = (  1.0000000  0.0000000  0.0000000 )
+                  (  0.0000000  0.0000000  1.0000000 )
+                  (  0.0000000  1.0000000  0.0000000 )
+
+      isym = 47     inv.  90 deg rotation - cart. axis [-1,0,0] S4     i4-x
+
+ cart.    s(47) = ( -1.0000000  0.0000000  0.0000000 )
+                  (  0.0000000  0.0000000 -1.0000000 )
+                  (  0.0000000  1.0000000  0.0000000 )
+
+      isym = 48     inv.  90 deg rotation - cart. axis [1,0,0]  S4^3   i4x
+
+ cart.    s(48) = ( -1.0000000  0.0000000  0.0000000 )
+                  (  0.0000000  0.0000000  1.0000000 )
+                  (  0.0000000 -1.0000000  0.0000000 )
+
+      isym = 49     inv. 120 deg rotation - cart. axis [-1,-1,-1] S6   i3-x-y-z
+
+ cart.    s(49) = (  0.0000000 -1.0000000  0.0000000 )
+                  (  0.0000000  0.0000000 -1.0000000 )
+                  ( -1.0000000  0.0000000  0.0000000 )
+
+      isym = 50     inv. 120 deg rotation - cart. axis [-1,1,1] S6^5   i3-xyz
+
+ cart.    s(50) = (  0.0000000  1.0000000  0.0000000 )
+                  (  0.0000000  0.0000000 -1.0000000 )
+                  (  1.0000000  0.0000000  0.0000000 )
+
+      isym = 51     inv. 120 deg rotation - cart. axis [1,1,-1] S6     i3xy-z
+
+ cart.    s(51) = (  0.0000000 -1.0000000  0.0000000 )
+                  (  0.0000000  0.0000000  1.0000000 )
+                  (  1.0000000  0.0000000  0.0000000 )
+
+      isym = 52     inv. 120 deg rotation - cart. axis [1,-1,1] S6^5   i3x-yz
+
+ cart.    s(52) = (  0.0000000  1.0000000  0.0000000 )
+                  (  0.0000000  0.0000000  1.0000000 )
+                  ( -1.0000000  0.0000000  0.0000000 )
+
+      isym = 53     inv. 120 deg rotation - cart. axis [1,1,1]  S6^5   i3xyz
+
+ cart.    s(53) = (  0.0000000  0.0000000 -1.0000000 )
+                  ( -1.0000000  0.0000000  0.0000000 )
+                  (  0.0000000 -1.0000000  0.0000000 )
+
+      isym = 54     inv. 120 deg rotation - cart. axis [-1,1,-1] S6    i3-xy-z
+
+ cart.    s(54) = (  0.0000000  0.0000000 -1.0000000 )
+                  (  1.0000000  0.0000000  0.0000000 )
+                  (  0.0000000  1.0000000  0.0000000 )
+
+      isym = 55     inv. 120 deg rotation - cart. axis [1,-1,-1] S6    i3x-y-z
+
+ cart.    s(55) = (  0.0000000  0.0000000  1.0000000 )
+                  (  1.0000000  0.0000000  0.0000000 )
+                  (  0.0000000 -1.0000000  0.0000000 )
+
+      isym = 56     inv. 120 deg rotation - cart. axis [-1,-1,1] S6^5  i3-x-yz
+
+ cart.    s(56) = (  0.0000000  0.0000000  1.0000000 )
+                  ( -1.0000000  0.0000000  0.0000000 )
+                  (  0.0000000  1.0000000  0.0000000 )
+
+
+      isym = 57     inv.  60 deg rotation - cryst. axis [0,0,1] S3^5   i6z
 
  cart.    s(57) = ( -0.5000000  0.8660254  0.0000000 )
                   ( -0.8660254 -0.5000000  0.0000000 )
                   (  0.0000000  0.0000000 -1.0000000 )
 
 
-      isym = 58     inv.  60 deg rotation - cryst. axis [0,0,-1] S3
+      isym = 58     inv.  60 deg rotation - cryst. axis [0,0,-1] S3    i6-z
 
  cart.    s(58) = ( -0.5000000 -0.8660254  0.0000000 )
                   (  0.8660254 -0.5000000  0.0000000 )
                   (  0.0000000  0.0000000 -1.0000000 )
 
-      isym = 59     inv. 120 deg rotation - cryst. axis [0,0,1] S6^5
+      isym = 59     inv. 120 deg rotation - cryst. axis [0,0,1] S6^5   i3z
 
  cart.    s(59) = (  0.5000000  0.8660254  0.0000000 )
                   ( -0.8660254  0.5000000  0.0000000 )
                   (  0.0000000  0.0000000 -1.0000000 )
 
-      isym = 60     inv. 120 deg rotation - cryst. axis [0,0,-1] S6
+      isym = 60     inv. 120 deg rotation - cryst. axis [0,0,-1] S6    i3-z
 
  cart.    s(60) = (  0.5000000 -0.8660254  0.0000000 )
                   (  0.8660254  0.5000000  0.0000000 )
                   (  0.0000000  0.0000000 -1.0000000 )
 
-      isym = 61     inv. 180 deg rotation - cryst. axis [1,-1,0] s
+      isym = 61     inv. 180 deg rotation - cryst. axis [1,-1,0] s     i21-10
 
  cart.    s(61) = ( -0.5000000  0.8660254  0.0000000 )
                   (  0.8660254  0.5000000  0.0000000 )
                   (  0.0000000  0.0000000  1.0000000 )
 
-      isym = 62     inv. 180 deg rotation - cryst. axis [2,1,0] s
+      isym = 62     inv. 180 deg rotation - cryst. axis [2,1,0] s      i2210
 
  cart.    s(62) = ( -0.5000000 -0.8660254  0.0000000 )
                   ( -0.8660254  0.5000000  0.0000000 )
                   (  0.0000000  0.0000000  1.0000000 )
 
-      isym = 63     inv. 180 deg rotation - cryst. axis [0,1,0] s
+      isym = 63     inv. 180 deg rotation - cryst. axis [0,1,0] s      i2010
 
  cart.    s(63) = (  0.5000000  0.8660254  0.0000000 )
                   (  0.8660254 -0.5000000  0.0000000 )
                   (  0.0000000  0.0000000  1.0000000 )
 
-      isym = 64     inv. 180 deg rotation - cryst. axis [1,1,0] s
+      isym = 64     inv. 180 deg rotation - cryst. axis [1,1,0] s      i2110
 
  cart.    s(64) = (  0.5000000 -0.8660254  0.0000000 )
                   ( -0.8660254 -0.5000000  0.0000000 )
                   (  0.0000000  0.0000000  1.0000000 )
 
 \end{verbatim}
-
 The directions of the rotation axes or the perpendicular to the mirror
 planes in the hexagonal case are indicated in the following figure
 (axis with the same color are perpendicular to each other):
@@ -3516,6 +3986,100 @@ to the Bravais lattice $n_1 {\bf a}_1 + n_2 {\bf a}_2 + n_3 {\bf a}_3$
 where ${\bf a}_1$ is along $x$, ${\bf a}_2$ is rotated 
 of $120^\circ$ in the $xy$ plane and ${\bf a}_3$ is parallel to the $z$
 axis.
+
+\subsection{\color{web-blue}SU(2)}
+The application of the rotation operator to a two-component spinor 
+wavefunction requires the $2\times2$ matrices of the $SU(2)$ group.
+The operation of $SU(2)$ in spin space can be defined by the Cayley-Klein
+parameters ($a$ and $b$):
+\begin{equation}
+U=\left( \begin{array}{cc}
+a, & b
+\\
+-b^*, & a^*
+\end{array}
+\right).
+\nonumber
+\end{equation}
+There are two matrices of the double point group (differing by a global
+sign) that correspond to the same rotation when the difference of $2\pi$ in
+the rotation angle is neglected. In order to define the
+matrices of the point group it is necessary to choose one $SU(2)$ matrix
+for each rotation. The choice is not obvious for $180^\circ$ rotations.
+Ref.[11] suggests the following choice of the Cayley-Klein parameters: 
+\begin{verbatim}
+     1   E       
+             a=  1.00  0.00    b=  0.00  0.00   
+     2   2z      
+             a=  0.00 -1.00    b=  0.00  0.00    
+     3   2y      
+             a=  0.00  0.00    b= -1.00  0.00    
+     4   2x      
+             a=  0.00  0.00    b=  0.00 -1.00   
+     5   2xy     
+             a=  0.00  0.00    b= -0.71 -0.71    
+     6   2x-y    
+             a=  0.00  0.00    b=  0.71 -0.71     
+     7   4-z     
+             a=  0.71  0.71    b=  0.00  0.00  
+     8   4z      
+             a=  0.71 -0.71    b=  0.00  0.00   
+     9   2xz     
+             a=  0.00 -0.71    b=  0.00 -0.71  
+    10   2x-z    
+             a=  0.00 -0.71    b=  0.00  0.71     
+    11   4y      
+             a=  0.71  0.00    b= -0.71  0.00   
+    12   4-y     
+             a=  0.71  0.00    b=  0.71  0.00   
+    13   2yz     
+             a=  0.00 -0.71    b= -0.71  0.00  
+    14   2y-z    
+             a=  0.00 -0.71    b=  0.71  0.00  
+    15   4-x     
+             a=  0.71  0.00    b=  0.00  0.71  
+    16   4x      
+             a=  0.71  0.00    b=  0.00 -0.71   
+    17   3-x-y-z 
+             a=  0.50  0.50    b=  0.50  0.50    
+    18   3-xyz   
+             a=  0.50 -0.50    b= -0.50  0.50   
+    19   3xy-z   
+             a=  0.50  0.50    b= -0.50 -0.50   
+    20   3x-yz   
+             a=  0.50 -0.50    b=  0.50 -0.50  
+    21   3xyz    
+             a=  0.50 -0.50    b= -0.50 -0.50  
+    22   3-xy-z  
+             a=  0.50  0.50    b= -0.50  0.50    
+    23   3x-y-z  
+             a=  0.50  0.50    b=  0.50 -0.50    
+    24   3-x-yz  
+             a=  0.50 -0.50    b=  0.50  0.50    
+    25   6z      
+             a=  0.87 -0.50    b=  0.00  0.00    
+    26   6-z     
+             a=  0.87  0.50    b=  0.00  0.00    
+    27   3z      
+             a=  0.50 -0.87    b=  0.00  0.00    
+    28   3-z     
+             a=  0.50  0.87    b=  0.00  0.00    
+    29   21-10   
+             a=  0.00  0.00    b=  0.50 -0.87      
+    30   2210    
+             a=  0.00  0.00    b= -0.50 -0.87    
+    31   2010    
+             a=  0.00  0.00    b=  0.87 -0.50     
+    32   2110    
+             a=  0.00  0.00    b= -0.87 -0.50    
+\end{verbatim}
+for almost all groups except $D_3$, $C_{3v}$, and $D_{3d}$ for which
+a different sign choice is necessary to keep in the same class the three
+$C_2$ or $\sigma_v$ operations. \qe\ uses 
+Ref.[11] conventions for all groups, without any sign change for
+$D_3$, $C_{3v}$, and $D_{3d}$ operations. For these groups we use the
+matrices written above changing the character table of the double point 
+groups accordingly. 
 
 \newpage
 \section{\color{coral}Bibliography}

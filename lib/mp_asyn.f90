@@ -32,7 +32,7 @@ MODULE mp_asyn
 !  module should not be called.
 !
 IMPLICIT NONE
-#ifdef __MPI
+#if defined(__MPI)
 INCLUDE 'mpif.h'
 #endif
 SAVE 
@@ -125,7 +125,7 @@ IF (nworkers==0) RETURN
 ! during initialization the master listens to all the workers for the
 ! READY message, without blocking
 !
-#ifdef __MPI
+#if defined(__MPI)
 DO iproc=1,nworkers
    CALL mpi_irecv(buf(iproc),1,MPI_INTEGER,proc_num(iproc),tag,asyn_comm,&
                   req(iproc),ierr)
@@ -159,14 +159,14 @@ LOGICAL, INTENT(OUT) :: all_done    ! when this variable becomes true
                                     ! the NO_WORK message.
 LOGICAL :: work_finished            ! if this becomes .true. the work is 
                                     ! finished
-#ifdef __MPI
+#if defined(__MPI)
 INTEGER :: status_(MPI_STATUS_SIZE) ! status of the probe function
 #endif
 INTEGER :: iproc, iwork             ! counters
 INTEGER :: ierr                     ! error variable
 LOGICAL :: exst                     ! if true the worker is willing to work
 
-#ifdef __MPI
+#if defined(__MPI)
 DO iproc=1,nworkers
 !
 !  If this processor has already received the end of work message 
@@ -277,7 +277,7 @@ SUBROUTINE asyn_worker(worker_work)
 !
 IMPLICIT NONE
 INTEGER, INTENT(OUT) :: worker_work ! worker work
-#ifdef __MPI
+#if defined(__MPI)
 INTEGER :: status_(MPI_STATUS_SIZE) ! status of the receive function
 INTEGER :: ierr                     ! error variable
 INTEGER :: iwork                    ! auxiliary

@@ -113,7 +113,7 @@ END SUBROUTINE realspace_grid_init_tpw
         END IF
       END DO
 
-#ifdef __MPI
+#if defined(__MPI)
       CALL MPI_ALLREDUCE( MPI_IN_PLACE, nb, 3, MPI_INTEGER, MPI_MAX, dfft%comm, i )
 #endif
 

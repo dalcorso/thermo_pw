@@ -8,8 +8,6 @@ MODFLAGS= $(MOD_FLAG)../../iotk/src $(MOD_FLAG)../../Modules \
           $(MOD_FLAG)../../PW/src $(MOD_FLAG)../../LR_Modules \
           $(MOD_FLAG)../../PHonon/PH $(MOD_FLAG)../lib $(MOD_FLAG)../qe $(MOD_FLAG).
 
-IFLAGS=
-
 THERMOOBJS = \
 adjust_tau.o \
 addusdens1d_so.o \

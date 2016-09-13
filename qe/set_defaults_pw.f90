@@ -75,7 +75,7 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
   max_cg_iter=20
   natomwfc = n_atom_wfc( nat, ityp, noncolin )
   !
-#ifdef __MPI
+#if defined(__MPI)
   IF ( use_para_diag )  CALL check_para_diag( nbnd )
 #else
   use_para_diag = .FALSE.
@@ -162,7 +162,7 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
   !
   qnorm = sqrt(xq(1)**2 + xq(2)**2 + xq(3)**2)
   !
-#ifdef __MPI
+#if defined(__MPI)
   !
   ! ... set the granularity for k-point distribution
   !

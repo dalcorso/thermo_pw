@@ -244,12 +244,12 @@ SUBROUTINE PAW_deqsymmetrize(dbecsum)
       END DO
    ENDIF
 
-#ifdef __MPI
+#if defined(__MPI)
     IF( mykey /= 0 ) becsym = 0.0_dp
     CALL mp_sum(becsym, intra_image_comm)
 #endif
 
-#ifdef __DEBUG_PAW_SYM
+#if defined(__DEBUG_PAW_SYM)
    write(stdout,*) "------------"
     if(ionode) then
         ia = 1
