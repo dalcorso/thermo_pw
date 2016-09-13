@@ -16,7 +16,7 @@ USE point_group,      ONLY : print_element_list, group_index_from_ext, &
                              sym_label, set_group_desc, print_character_table, &
                              print_compatibility_table, set_sym_o3, &
                              set_sym_su2, product_sym_su2, compute_classes, &
-                             compute_classes_double, print_kroneker_table, &
+                             compute_classes_double, print_kronecker_table, &
                              kovalev_cubic, kovalev_hexagonal
 USE io_global,        ONLY : stdout
 
@@ -39,23 +39,23 @@ CALL mp_startup ( start_images=.true. )
 CALL environment_start ( code )
 
 WRITE(stdout,'(/,5x,"Choose what to write")')
-WRITE(stdout,'(5x,"1) List point groups (short)")')
-WRITE(stdout,'(5x,"2) List symmetry operations")')
+WRITE(stdout,'(5x,"1) List the point groups (short)")')
+WRITE(stdout,'(5x,"2) List the symmetry operations")')
 WRITE(stdout,'(5x,"3) Product of two rotations")')
-WRITE(stdout,'(5x,"4) List point groups (long)")')
+WRITE(stdout,'(5x,"4) List the point groups (long)")')
 WRITE(stdout,'(5x,"5) List the elements of a point group")')
 WRITE(stdout,'(5x,"6) Write the matrices of a point group elements")')
-WRITE(stdout,'(5x,"7) Write product table")')
+WRITE(stdout,'(5x,"7) Write the product table")')
 WRITE(stdout,'(5x,"8) List the point group classes")')
 WRITE(stdout,'(5x,"9) List the double group classes")')
-WRITE(stdout,'(5x,"10) Write character table")')
+WRITE(stdout,'(5x,"10) Write the character table")')
 WRITE(stdout,'(5x,"11) List subgroups")')
 WRITE(stdout,'(5x,"12) List supergroups")')
 WRITE(stdout,'(5x,"13) Write one compatibility table")')
 WRITE(stdout,'(5x,"14) Write all compatibility tables for one group")')
 WRITE(stdout,'(5x,"15) Write all compatibility tables")')
-WRITE(stdout,'(5x,"16) Decompose Kroneker products table (chi x chi)")')
-WRITE(stdout,'(5x,"17) Decompose Kroneker products table (chi^* x chi)")')
+WRITE(stdout,'(5x,"16) Decompose Kronecker products table (chi x chi)")')
+WRITE(stdout,'(5x,"17) Decompose Kronecker products table (chi^* x chi)")')
 WRITE(stdout,'(5x,"18) Write Kovalev symmetry operations list")')
 WRITE(stdout,'(5x,"19) Write Kovalev cubic product table")')
 WRITE(stdout,'(5x,"20) Write Kovalev hexagonal product table")')
@@ -284,10 +284,10 @@ ELSEIF (work_choice == 16 .OR. work_choice==17) THEN
                               IF (i>l) CYCLE
                               IF (k>j) CYCLE
                               IF (work_choice==14) THEN
-                                 CALL print_kroneker_table(group_index_in_ext,&
+                                 CALL print_kronecker_table(group_index_in_ext,&
                                    ptype1,ptype2,group_index_out_ext,.FALSE.)
                               ELSE
-                                 CALL print_kroneker_table(group_index_in_ext,&
+                                 CALL print_kronecker_table(group_index_in_ext,&
                                    ptype1,ptype2,group_index_out_ext,.TRUE.)
                               END IF
                            END DO

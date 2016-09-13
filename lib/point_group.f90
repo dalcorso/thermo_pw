@@ -99,7 +99,7 @@ MODULE point_group
          print_compatibility_table, find_group_ext, &
          find_double_product_table_from_sym, set_sym_o3, set_sym_su2, &
          product_sym_su2, compute_classes, compute_classes_double, &
-         print_kroneker_table, write_group_table, kovalev_cubic, &
+         print_kronecker_table, write_group_table, kovalev_cubic, &
          kovalev_hexagonal
 
 CONTAINS
@@ -16133,7 +16133,7 @@ ENDDO
 RETURN
 END SUBROUTINE print_compatibility_table
 
-SUBROUTINE print_kroneker_table(cge_in,ptype1_in,ptype2_in,cge_out,lcomp)
+SUBROUTINE print_kronecker_table(cge_in,ptype1_in,ptype2_in,cge_out,lcomp)
 !
 !  This routine writes the compatibility table between the product of
 !  two irreducible representations of the group cge_in with the projection 
@@ -16294,7 +16294,7 @@ DO irap=1,nrap1_in
          ndeg= NINT(DBLE(asum) / DBLE(nsym_out))
 !         WRITE(6,*) irap, jrap, asum, ndeg
          IF (ABS(ndeg - asum / DBLE(nsym_out)) > 1.D-6) &
-             CALL errore('compute_kroneker_table','problem with ndeg',1)
+             CALL errore('compute_kronecker_table','problem with ndeg',1)
 
          CALL add_rap_name(rap_name, ndeg, name_rap_out(jrap)(1:8))
       ENDDO
@@ -16307,7 +16307,7 @@ DO irap=1,nrap1_in
 ENDDO
 
 RETURN
-END SUBROUTINE print_kroneker_table
+END SUBROUTINE print_kronecker_table
 
 SUBROUTINE add_rap_name(rap_name, ndeg, add_name)
 
