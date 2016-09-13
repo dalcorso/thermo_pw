@@ -179,7 +179,7 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
   !
   ! ... distribute k-points (and their weights and spin indices)
   !
-  CALL divide_et_impera( xk, wk, isk, lsda, nkstot, nks )
+  CALL divide_et_impera( nkstot, xk, wk, isk, nks )
   !
 #else
   !

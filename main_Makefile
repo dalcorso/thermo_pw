@@ -65,19 +65,19 @@ default :
 # If "|| exit 1" is not present, the error code from make in subdirectories
 # is not returned and make goes on even if compilation has failed
 
-pw : bindir libfft libla mods liblapack libblas libs libiotk 
+pw : bindir libfft libla mods liblapack libs libiotk 
 	if test -d PW ; then \
 	( cd PW ; $(MAKE) TLDEPS= all || exit 1) ; fi
 
-pw-lib : bindir libfft libla mods liblapack libblas libs libiotk
+pw-lib : bindir libfft libla mods liblapack libs libiotk
 	if test -d PW ; then \
 	( cd PW ; $(MAKE) TLDEPS= pw-lib || exit 1) ; fi
 
-lr-lib : bindir libfft libla mods liblapack libblas libs libiotk
+lr-lib : bindir libfft libla mods liblapack libs libiotk
 	if test -d LR_Modules ; then \
 	( cd LR_Modules ; $(MAKE) TLDEPS= all || exit 1) ; fi
 
-cp : bindir libfft libla mods liblapack libblas libs libiotk
+cp : bindir libfft libla mods liblapack libs libiotk
 	if test -d CPV ; then \
 	( cd CPV ; $(MAKE) TLDEPS= all || exit 1) ; fi
 
@@ -115,10 +115,10 @@ gwl : ph
 gipaw : pw
 	( cd install ; $(MAKE) -f plugins_makefile $@ || exit 1 )
 
-ld1 : bindir liblapack libblas libfft libla mods libs
+ld1 : bindir liblapack libfft libla mods libs
 	( cd install ; $(MAKE) -f plugins_makefile $@ || exit 1 )
 
-upf : libfft libla mods libs liblapack libblas
+upf : libfft libla mods libs liblapack
 	if test -d upftools ; then \
 	( cd upftools ; $(MAKE) TLDEPS= all || exit 1 ) ; fi
 
@@ -187,7 +187,7 @@ libiotk: touch-dummy
 # plugins
 #########################################################
 
-w90: bindir libblas liblapack
+w90: bindir liblapack
 	( cd install ; $(MAKE) -f plugins_makefile $@ || exit 1 )
 
 want : touch-dummy
@@ -209,9 +209,6 @@ west: pw touch-dummy
 	( cd install ; $(MAKE) -f plugins_makefile $@ || exit 1 )
 
 epw: pw ph ld1 touch-dummy
-	( cd install ; $(MAKE) -f plugins_makefile $@ || exit 1 )
-
-gpu: touch-dummy
 	( cd install ; $(MAKE) -f plugins_makefile $@ || exit 1 )
 
 touch-dummy :
@@ -301,6 +298,7 @@ veryclean : clean
 	- rm -rf install/patch-plumed
 	- cd install ; rm -f config.log configure.msg config.status \
 		CPV/version.h ChangeLog* intel.pcl */intel.pcl
+	- rm -rf include/configure.h install/make_wannier90.inc
 	- cd install ; rm -fr autom4te.cache
 	- cd pseudo; ./clean_ps ; cd -
 	- cd install; ./clean.sh ; cd -
@@ -364,7 +362,10 @@ doc_clean :
 	( if test -f $$dir/Makefile ; then \
 	( cd $$dir; $(MAKE) TLDEPS= clean ) ; fi ) ;  done
 
-depend: libiotk mods
+depend: libiotk version
 	@echo 'Checking dependencies...'
 	- ( if test -x install/makedeps.sh ; then install/makedeps.sh ; fi)
+# update file containing version number before looking for dependencies
+version:
+	- ( cd Modules; make version )
 

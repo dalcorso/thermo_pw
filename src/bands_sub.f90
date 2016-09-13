@@ -85,7 +85,8 @@ SUBROUTINE punch_band_2d(filband,spin_component)
    
    ALLOCATE(xk_collect(3,nkstot))
    ALLOCATE(et_collect(nbnd,nkstot))
-   CALL xk_et_collect( xk_collect, et_collect, xk, et, nkstot, nks, nbnd )
+   CALL poolcollect(    3, nks, xk, nkstot, xk_collect)
+   CALL poolcollect( nbnd, nks, et, nkstot, et_collect)
 
    start_k=1
    last_k=nkstot
@@ -205,7 +206,8 @@ SUBROUTINE write_bands (filband, spin_component)
 
   ALLOCATE(xk_collect(3,nkstot))
   ALLOCATE(et_collect(nbnd,nkstot))
-  CALL xk_et_collect( xk_collect, et_collect, xk, et, nkstot, nks, nbnd )
+  CALL poolcollect(    3, nks, xk, nkstot, xk_collect)
+  CALL poolcollect( nbnd, nks, et, nkstot, et_collect)
   !
   IF ( ionode ) THEN
      !

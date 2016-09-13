@@ -157,7 +157,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
 100  CONTINUE
   ENDDO
 
-#ifdef __MPI
+#if defined(__MPI)
   !
   !  Only the symmetry of a set of k points is calculated by this
   !  processor with pool. Here we collect the results into ionode
@@ -167,6 +167,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   CALL poolrecover(times,2*24*nbnd,nkstot,nks)
   CALL ipoolrecover(ngroup,1,nkstot,nks)
   CALL ipoolrecover(istart,nbnd+1,nkstot,nks)
+
 #endif
   IF (ionode) THEN
      IF (disp_nqs /= nks2tot - nks1tot + 1) &
