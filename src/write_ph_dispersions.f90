@@ -43,6 +43,7 @@ SUBROUTINE write_ph_dispersions()
   REAL(DP) :: ps, qh, dq(3), q1(3), q2(3), modq1, modq2, dqmod, dqmod_save
   REAL(DP), ALLOCATABLE :: w2(:,:)
   INTEGER, ALLOCATABLE :: num_rap_mode(:,:), qcode_group(:), aux_ind(:)
+  INTEGER :: qcode_old
   LOGICAL, ALLOCATABLE :: high_sym(:)
   LOGICAL :: check_file_exists
   !
@@ -103,6 +104,8 @@ SUBROUTINE write_ph_dispersions()
 ! the bands. If there some symmetry change is detected change also 
 ! high_symmetry
 !
+  IF (nq > 0) WRITE(stdout,'(/,5x,70("*"))')
+  qcode_old=0
   DO n=1, nq
      lo_to_split=.FALSE.
      IF (n==1) THEN
@@ -121,10 +124,12 @@ SUBROUTINE write_ph_dispersions()
   !
      qh = SQRT(disp_q(1,n)**2+disp_q(2,n)**2+disp_q(3,n)**2)
      IF (qh < 1.d-9 .AND. has_zstar) lo_to_split=.TRUE.
+     WRITE(stdout, '(/,20x,"q=(",2(f10.5,","),f10.5,"  )")') disp_q(:,n)
      IF (xmldyn.AND..NOT.lo_to_split) THEN
+        IF (n>1) qcode_old=qcode_group(n-1)
         CALL find_representations_mode_q(nat,nsp,disp_q(:,n), &
                     w2(:,n),z_save(:,:,n),tau,ityp,amass,name_rap_mode, &
-                    num_rap_mode(:,n), nspin_mag)
+                    num_rap_mode(:,n), nspin_mag, qcode_old)
         qcode_group(n)=code_group
         IF (n==1) THEN
            code_group_old=code_group
@@ -150,12 +155,16 @@ SUBROUTINE write_ph_dispersions()
            ENDIF
            code_group_old=code_group
         ENDIF
+        WRITE(stdout,'(/,5x,70("*"))')
 !     write(6,'(2i5, 3f15.5,l5)') n, qcode_group(n), q(:,n), high_sym(n)
      ELSEIF (lo_to_split) THEN
 !
 !  At gamma the group is the point group of the solid
 !
         qcode_group(n)=code_group_save
+        WRITE(stdout, '(/,5x,"Mode symmetry analysis not available &
+                                                      &for this point")') 
+        WRITE(stdout, '(/,5x,70("*"))')
      ENDIF
   END DO
   !
@@ -214,31 +223,35 @@ SUBROUTINE write_ph_dispersions()
 END SUBROUTINE write_ph_dispersions
 !
 SUBROUTINE find_representations_mode_q ( nat, ntyp, xq, w2, u, tau, ityp, &
-                  amass, name_rap_mode, num_rap_mode, nspin_mag )
+                  amass, name_rap_mode, num_rap_mode, nspin_mag, qcode_old )
 
   USE kinds,      ONLY : DP
   USE cell_base,  ONLY : at, bg
   USE symm_base,  ONLY : find_sym, s, sr, ftau, irt, nsym, &
                          nrot, t_rev, time_reversal, sname, copy_sym, &
                          s_axis_to_cart
+  USE lr_symm_base, ONLY : gi, nsymq
   USE rap_point_group,  ONLY : code_group, gname
+  USE io_global, ONLY : stdout
 
   IMPLICIT NONE
-  INTEGER, INTENT(IN) :: nat, ntyp, nspin_mag
+  INTEGER, INTENT(IN) :: nat, ntyp, nspin_mag, qcode_old
   REAL(DP), INTENT(IN) :: xq(3), amass(ntyp), tau(3,nat)
   REAL(DP), INTENT(IN) :: w2(3*nat)
   INTEGER, INTENT(IN) :: ityp(nat)
   COMPLEX(DP), INTENT(IN) :: u(3*nat,3*nat)
   CHARACTER(15), INTENT(OUT) :: name_rap_mode(3*nat)
   INTEGER, INTENT(OUT) :: num_rap_mode(3*nat)
-  REAL(DP) :: gi (3, 48), gimq (3), sr_is(3,3,48), rtau(3,48,nat)
-  INTEGER :: irotmq, nsymq, nsym_is, isym, i, ierr
+  REAL(DP) :: gimq (3), sr_is(3,3,48), rtau(3,48,nat)
+  INTEGER :: irotmq, isym, i, ierr
   LOGICAL :: minus_q, search_sym, sym(48), magnetic_sym
+  LOGICAL :: symmorphic_or_nzb
 !
 !  find the small group of q
 !
   time_reversal=.TRUE.
   IF (.NOT.time_reversal) minus_q=.FALSE.
+
 
   sym(1:nsym)=.true.
   call smallg_q (xq, 0, at, bg, nsym, s, ftau, sym, minus_q)
@@ -249,14 +262,7 @@ SUBROUTINE find_representations_mode_q ( nat, ntyp, xq, w2, u, tau, ityp, &
 !  if the small group of q is non symmorphic,
 !  search the symmetries only if there are no G such that Sq -> q+G
 !
-  search_sym=.TRUE.
-  IF ( ANY ( ftau(:,1:nsymq) /= 0 ) ) THEN
-     DO isym=1,nsymq
-        search_sym=( search_sym.and.(abs(gi(1,isym))<1.d-8).and.  &
-                                    (abs(gi(2,isym))<1.d-8).and.  &
-                                    (abs(gi(3,isym))<1.d-8) )
-     END DO
-  END IF
+  search_sym=symmorphic_or_nzb(ftau)
 !
 !  Set the representations tables of the small group of q and
 !  find the mode symmetry
@@ -269,9 +275,11 @@ SUBROUTINE find_representations_mode_q ( nat, ntyp, xq, w2, u, tau, ityp, &
      CALL find_mode_sym_new (u, w2, tau, nat, nsymq, sr, irt, xq,    &
              rtau, amass, ntyp, ityp, 1, .FALSE., .FALSE., num_rap_mode, ierr)
 
+     IF (code_group/=qcode_old) CALL write_group_info(.TRUE.)
      CALL print_mode_sym(w2, num_rap_mode, .FALSE.)
-
+     
   ELSE
+     WRITE(stdout,'(/,5x,"Zone border point and nonsymmorphic operations",/)')
      CALL find_group(nsymq,sr,gname,code_group)
   ENDIF
   RETURN

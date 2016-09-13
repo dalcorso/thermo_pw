@@ -60,7 +60,11 @@ SUBROUTINE print_symmetries_tpw ( iverbosity, noncolin, domag )
       WRITE( stdout, '(/)' )
   END IF
   IF ( iverbosity > 0 ) THEN
-     WRITE( stdout, '(26x,"s",18x,"frac. trans.",4x,"U(a,b)")')
+     IF (noncolin) THEN
+        WRITE( stdout, '(26x,"s",18x,"frac. trans.",4x,"U(a,b)")')
+     ELSE
+        WRITE( stdout, '(26x,"s",18x,"frac. trans.")')
+     ENDIF
      nsym_is=0
      DO isym = 1, nsym
         WRITE( stdout, '(/6x,"isym = ",i2,5x,a45/)') isym, sname(isym)
@@ -75,7 +79,6 @@ SUBROUTINE print_symmetries_tpw ( iverbosity, noncolin, domag )
                  sname_is(nsym_is)=sname(isym)
               ENDIF
            ELSE
-              WRITE(6,*) 'calling find u', isym
               CALL find_u(sr(1,1,isym),d_spin(1,1,isym))
            END IF
         END IF
