@@ -34,6 +34,7 @@ CHARACTER(LEN=256) :: gnu_filename, filename, fileeldos, ylabel, xlabel
 REAL(DP), ALLOCATABLE :: e(:), dos(:), ddos(:), int_dos(:)
 INTEGER :: n
 INTEGER :: iu_dos
+INTEGER :: system
 REAL(DP) :: ymax, ymin, ymin1, ymax1, e1
 
 IF ( my_image_id /= root_image ) RETURN

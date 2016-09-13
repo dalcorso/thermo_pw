@@ -1197,5 +1197,80 @@ ENDIF
 RETURN
 END SUBROUTINE compute_pot_nonc
 !
+SUBROUTINE add_small_mag(i, ix, rho_rad)
+
+USE noncollin_module, ONLY : nspin_mag
+!
+!  This subroutine computes the contribution of the small component to the
+!  magnetization in the noncollinear case and adds its to rho_rad.
+!  The calculation is done along the radial line ix.
+!
+!  NB: Both the input and the output magnetizations are multiplied by
+!      r^2.
+!
+TYPE(paw_info), INTENT(IN) :: i   ! atom's minimal info
+INTEGER, INTENT(IN) :: ix ! the line
+REAL(DP), INTENT(INOUT)  :: rho_rad(i%m,nspin_mag)  ! the magnetization 
+
+REAL(DP) :: msmall_rad(i%m, nspin_mag) ! auxiliary: the mag of the small 
+                                          ! components along a line
+REAL(DP) :: hatr(3)
+INTEGER  :: k, ipol, kpol
+ 
+CALL PAW_lm2rad(i, ix, msmall_lm, msmall_rad, nspin_mag)
+hatr(1)=rad(i%t)%sin_th(ix)*rad(i%t)%cos_phi(ix)
+hatr(2)=rad(i%t)%sin_th(ix)*rad(i%t)%sin_phi(ix)
+hatr(3)=rad(i%t)%cos_th(ix)
+
+DO k=1,i%m
+   DO ipol=1,3
+      DO kpol=1,3
+         rho_rad(k,ipol+1) = rho_rad(k,ipol+1) - &
+                 msmall_rad(k,kpol+1) * hatr(ipol) * hatr(kpol) * 2.0_DP
+      ENDDO
+   ENDDO
+ENDDO
+
+RETURN
+END SUBROUTINE add_small_mag
+!
+SUBROUTINE compute_g(i, ix, v_rad, g_rad)
+!
+!   This routine receives as input B_{xc} and calculates the function G
+!   described in Phys. Rev. B 82, 075116 (2010). The same routine can 
+!   be used when v_rad contains the induced B_{xc}. In this case the 
+!   output is the change of G.
+!
+   USE noncollin_module, ONLY : nspin_mag
+
+   TYPE(paw_info), INTENT(IN) :: i   ! atom's minimal info
+   INTEGER, INTENT(IN) :: ix         ! the line
+   REAL(DP), INTENT(IN)    :: v_rad(i%m,rad(i%t)%nx,nspin_mag) ! radial pot 
+   REAL(DP), INTENT(INOUT) :: g_rad(i%m,rad(i%t)%nx,nspin_mag) 
+                                                ! radial potential (small comp)
+
+   REAL(DP) :: hatr(3)
+
+   INTEGER :: k, ipol, kpol
+
+   hatr(1)=rad(i%t)%sin_th(ix)*rad(i%t)%cos_phi(ix)
+   hatr(2)=rad(i%t)%sin_th(ix)*rad(i%t)%sin_phi(ix)
+   hatr(3)=rad(i%t)%cos_th(ix)
+
+   DO k=1, i%m
+      DO ipol=1,3
+         DO kpol=1,3
+!
+!    v_rad contains -B_{xc} with the notation of the papers
+!
+            g_rad(k,ix,ipol+1)=g_rad(k,ix,ipol+1) - &
+                               v_rad(k,ix,kpol+1)*hatr(kpol)*hatr(ipol)*2.0_DP
+         ENDDO
+      ENDDO
+   ENDDO
+
+   RETURN
+END SUBROUTINE compute_g
+!
 !
 END MODULE paw_add_onecenter

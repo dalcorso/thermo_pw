@@ -649,6 +649,7 @@ INTEGER, INTENT(IN) :: nw
 REAL(DP) :: wgrid(nw), jdos(nw)
 REAL(DP) :: ymin, ymax
 INTEGER  :: iw, ierr
+INTEGER  :: system
 
 CHARACTER(LEN=256) :: gnu_filename, filename, ylabel, xlabel
 
@@ -706,6 +707,7 @@ INTEGER, INTENT(IN) :: nw
 REAL(DP) :: wgrid(nw), epsr(3,3,nw), epsi(3,3,nw), eels(3,3,nw)
 REAL(DP) :: ymin, ymax
 INTEGER  :: iw, ierr
+INTEGER  :: system
 
 CHARACTER(LEN=256) :: gnu_filename, filename, ylabel, xlabel
 
