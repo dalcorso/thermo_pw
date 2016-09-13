@@ -34,6 +34,7 @@ phq_readin.o \
 phq_summary.o \
 polarizc.o \
 prepare_q.o \
+print_symmetries.o \
 psyme_fpol.o \
 psym_dmageq.o \
 psymeq.o \

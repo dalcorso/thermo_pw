@@ -209,7 +209,7 @@ SUBROUTINE thermo_summary()
   nr2_save=dfftp%nr2
   nr3_save=dfftp%nr3
 
-  CALL print_symmetries ( 1, noncolin, domag )
+  CALL print_symmetries_tpw ( 1, noncolin, domag )
   code_group_save=code_group
 !
 !  Description of Bravais lattice
