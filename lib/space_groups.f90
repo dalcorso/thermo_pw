@@ -43,7 +43,7 @@ MODULE space_groups
   CHARACTER(LEN=14)     :: spg_name            ! name of the space group
   REAL(DP), ALLOCATABLE :: equivalent_tau(:,:) !
 
-  INTEGER, PARAMETER :: nsg = 1056             ! number of space groups
+  INTEGER, PARAMETER :: nsg = 1058             ! number of space groups
   INTEGER, PARAMETER :: nsg_2d = 20            ! number of 2d space groups
   CHARACTER(LEN=13) :: space_group_names(nsg)
   CHARACTER(LEN=13) :: space_group_names_2d(nsg_2d)
@@ -263,12 +263,12 @@ MODULE space_groups
          "C_2^3       S", "C_s^1       S", "C_s^2       S", "C_s^3       S", &
          "C_s^4       S", "C_2h^1      S", "C_2h^2      S", "C_2h^3      S", &
          "C_2h^4      S", "C_2h^5      S", "C_2h^6      S", "D_2^1       S", &
-         "D_2^2       S", "D_2^3       S", "D^2_4       S", "D_2^5       S", &
+         "D_2^2       S", "D_2^3       S", "D_2^4       S", "D_2^5       S", &
          "D_2^6       S", "D_2^7       S", "D_2^8       S", "D_2^9       S", &
          "C_2v^1      S", "C_2v^2      S", "C_2v^3      S", "C_2v^4      S", &
          "C_2v^5      S", "C_2v^6      S", "C_2v^7      S", "C_2v^8      S", &
          "C_2v^9      S", "C_2v^10     S", "C_2v^11     S", "C_2v^12     S", &
-         "C_2v^13     S", "C_2v^14     S", "C_2v^15     S", "C_2v_16     S", &
+         "C_2v^13     S", "C_2v^14     S", "C_2v^15     S", "C_2v^16     S", &
          "C_2v^17     S", "C_2v^18     S", "C_2v^19     S", "C_2v^20     S", &
          "C_2v^21     S", "C_2v^22     S", "D_2h^1      S", "D_2h^2      S", &
          "D_2h^3      S", "D_2h^4      S", "D_2h^5      S", "D_2h^6      S", &
@@ -279,7 +279,7 @@ MODULE space_groups
          "D_2h^23     S", "D_2h^24     S", "D_2h^25     S", "D_2h^26     S", &
          "D_2h^27     S", "D_2h^28     S", "C_4^1       S", "C_4^2       S", &
          "C_4^3       S", "C_4^4       S", "C_4^5       S", "C_4^6       S", &
-         "S_4^1       S", "S^4^2       S", "C_4h^1      S", "C_4h^2      S", &
+         "S_4^1       S", "S_4^2       S", "C_4h^1      S", "C_4h^2      S", &
          "C_4h^3      S", "C_4h^4      S", "C_4h^5      S", "C_4h^6      S", &
          "D_4^1       S", "D_4^2       S", "D_4^3       S", "D_4^4       S", &
          "D_4^5       S", "D_4^6       S", "D_4^7       S", "D_4^8       S", &
@@ -305,7 +305,7 @@ MODULE space_groups
          "C_6^6       S", "C_3h^1      S", "C_6h^1      S", "C_6h^2      S", &
          "D_6^1       S", "D_6^2       S", "D_6^3       S", "D_6^4       S", &
          "D_6^5       S", "D_6^6       S", "C_6v^1      S", "C_6v^2      S", &
-         "C_6v^3      S", "C_6v^1      S", "D_3h^1      S", "D_3h^2      S", &
+         "C_6v^3      S", "C_6v^4      S", "D_3h^1      S", "D_3h^2      S", &
          "D_3h^3      S", "D_3h^4      S", "D_6h^1      S", "D_6h^2      S", &
          "D_6h^3      S", "D_6h^4      S", "T^1         S", "T^2         S", &
          "T^3         S", "T^4         S", "T^5         S", "T_h^1       S", &
@@ -328,7 +328,8 @@ MODULE space_groups
          "V_h^25      S", "V_h^26      S", "V_h^27      S", "V_h^28      S", &
          "V_d^1       S", "V_d^2       S", "V_d^3       S", "V_d^4       S", &
          "V_d^5       S", "V_d^6       S", "V_d^7       S", "V_d^8       S", &
-         "V_d^9       S", "V_d^10      S", "V_d^11      S", "V_d^12      S" /
+         "V_d^9       S", "V_d^10      S", "V_d^11      S", "V_d^12      S", &
+         "S_6^1        ", "S_6^2        " /
 
   DATA space_group_numbers &
       / 1,               2,             3,             4,            &
@@ -594,7 +595,8 @@ MODULE space_groups
        71,              72,            73,            74,            &
       111,             112,           113,           114,            &
       115,             116,           117,           118,            &
-      119,             120,           121,           122              /
+      119,             120,           121,           122,            &
+      147,             148              /
  
   PUBLIC   spg_code, spg_name, set_spg_code, find_space_group, sg_name, &
            equivalent_tau, space_group_names, &
