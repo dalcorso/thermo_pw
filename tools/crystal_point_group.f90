@@ -16,8 +16,7 @@ USE point_group,      ONLY : print_element_list, group_index_from_ext, &
                              sym_label, set_group_desc, print_character_table, &
                              print_compatibility_table, set_sym_o3, &
                              set_sym_su2, product_sym_su2, compute_classes, &
-                             compute_classes_double, print_kronecker_table, &
-                             kovalev_cubic, kovalev_hexagonal
+                             compute_classes_double, print_kronecker_table
 USE io_global,        ONLY : stdout
 
 IMPLICIT NONE
@@ -56,9 +55,6 @@ WRITE(stdout,'(5x,"14) Write all compatibility tables for one group")')
 WRITE(stdout,'(5x,"15) Write all compatibility tables")')
 WRITE(stdout,'(5x,"16) Decompose Kronecker products table (chi x chi)")')
 WRITE(stdout,'(5x,"17) Decompose Kronecker products table (chi^* x chi)")')
-WRITE(stdout,'(5x,"18) Write Kovalev symmetry operations list")')
-WRITE(stdout,'(5x,"19) Write Kovalev cubic product table")')
-WRITE(stdout,'(5x,"20) Write Kovalev hexagonal product table")')
 
 READ(5,*) work_choice
 
@@ -299,46 +295,6 @@ ELSEIF (work_choice == 16 .OR. work_choice==17) THEN
          ENDIF
 !      ENDDO
 !   ENDDO
-ELSEIF (work_choice == 18 ) THEN
-WRITE(stdout,'(/,5x, "Kovalev symmetries - cubic groups",/)')
-DO isym=1,48
-   WRITE(stdout,'(5x,i5," - ",i3,3x,a8)') isym, kovalev_cubic(isym), &
-                                        sym_label(kovalev_cubic(isym))
-ENDDO
-WRITE(stdout,'(/,5x, "Kovalev symmetries - hexagonal groups",/)')
-DO isym=1,24
-   WRITE(stdout,'(5x,i5," - ",i3,3x,a8)') isym, kovalev_hexagonal(isym), &
-                                        sym_label(kovalev_hexagonal(isym))
-ENDDO
-
-ELSEIF (work_choice == 19 .OR. work_choice==20 ) THEN
-IF (work_choice==19) THEN
-   nsym=48
-   group_index_ext=136
-   group_desc=kovalev_cubic
-ELSE
-   nsym=24
-   group_index_ext=111
-   group_desc(1:24)=kovalev_hexagonal
-ENDIF
-
-CALL find_double_product_table_from_sym(prd, epos, group_desc, nsym)
-WRITE(stdout,'(/,5x, "The double group product table",/)')
-ntables= nsym / 8
-IF (MOD(nsym,8) /= 0 ) ntables=ntables+1
-DO itables=1,ntables
-   start=(itables-1)*8+1
-   last=MIN(itables*8,nsym)
-   WRITE(stdout,'(8x,8(1x,a8))') (sym_label(group_desc(jsym)),jsym=start,last)
-   DO isym=1,nsym
-      WRITE(stdout,'(a8,i3,2x,7(i7,2x))') sym_label(group_desc(isym)), &
-     (prd(isym, jsym)*epos(isym,jsym),jsym=start,last)
-   ENDDO
-   WRITE(stdout,*)
-ENDDO
-WRITE(stdout,'(/,5x,"Row x column multiplication table")')
-WRITE(stdout,'(5x,"- means multiplication by -E:")')
-WRITE(stdout,'(5x, "Point group product table: neglect the minus signs")')
 
 END IF
 
