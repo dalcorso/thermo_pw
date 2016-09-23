@@ -302,6 +302,7 @@ PROGRAM thermo_pw
               ELSE
                  lbands=.TRUE.
               ENDIF
+              CALL set_fft_mesh()
               CALL do_pwscf(exit_status, .FALSE.)
               IF (ldos_syn_1) THEN
                  CALL dos_sub()
