@@ -11,11 +11,13 @@ TOPDIR=`pwd`
 
 if test $# = 0
 then
-    dirs=" LAXlib FFTXlib Modules clib PW/src CPV/src PW/tools upftools PP/src \
-           PWCOND/src LR_Modules/ \
-           PHonon/Gamma PHonon/PH PHonon/D3 PHonon/FD atomic/src XSpectra/src \
-           ACFDT/src NEB/src TDDFPT/src GIPAW/src GWW/pw4gww GWW/gww GWW/head \
-           GWW/bse thermo_pw/src thermo_pw/lib thermo_pw/tools thermo_pw/qe" 
+    dirs=" LAXlib FFTXlib Modules clib LR_Modules upftools \
+           PW/src CPV/src PW/tools upftools PP/src PWCOND/src \
+           PHonon/Gamma PHonon/PH PHonon/D3 PHonon/FD atomic/src \
+           XSpectra/src ACFDT/src NEB/src TDDFPT/src \
+           GWW/pw4gww GWW/gww GWW/head GWW/bse thermo_pw/src \
+           thermo_pw/lib thermo_pw/tools thermo_pw/qe" 
+          
 elif
     test $1 = "-addson" 
 then
@@ -51,7 +53,8 @@ for dir in $dirs; do
     DEPENDS="$LEVEL1/include" 
     # for convenience, used later
     DEPEND1="$LEVEL1/include $LEVEL1/iotk/src $LEVEL1/FFTXlib $LEVEL1/LAXlib"
-    DEPEND2="$LEVEL2/include $LEVEL2/iotk/src $LEVEL2/FFTXlib $LEVEL2/LAXlib $LEVEL2/Modules"
+    DEPEND2="$LEVEL2/include $LEVEL2/iotk/src $LEVEL2/FFTXlib $LEVEL2/LAXlib \
+             $LEVEL2/Modules"
     case $DIR in 
         Modules )
              DEPENDS="$DEPEND1" ;;
@@ -70,7 +73,7 @@ for dir in $dirs; do
 	PHonon/D3 | GWW/head | TDDFPT/src )
 	     DEPENDS="$DEPEND2 $LEVEL2/PW/src $LEVEL2/PHonon/PH $LEVEL2/LR_Modules" ;;	
 	GWW/bse )
-	 DEPENDS="$DEPEND2 $LEVEL2/PW/src $LEVEL2/PHonon/PH $LEVEL2/LR_Modules $LEVEL2/GWW/pw4gww $LEVEL2/GWW/gww" ;;	
+	 DEPENDS="$DEPEND2 $LEVEL2/PW/src $LEVEL2/PHonon/PH $LEVEL2/LR_Modulesi $LEVEL2/GWW/pw4gww $LEVEL2/GWW/gww" ;;	
         thermo_pw/lib )
              DEPENDS="$DEPEND2 $LEVEL2/PW/src $LEVEL2/PHonon/PH $LEVEL2/LR_Modules" ;;
         thermo_pw/qe )
@@ -99,10 +102,11 @@ for dir in $dirs; do
 	$TOPDIR/moduledep.sh $DEPENDS > make.depend
 	$TOPDIR/includedep.sh $DEPENDS >> make.depend
 
-        # handle special cases: hardware-specific monitoring tools
-        sed '/@\/cineca\/prod\/hpm\/include\/f_hpm.h@/d;/@ifcore@/d' make.depend > make.depend.tmp
-        # handle special cases: modules for C-fortran binding, system utilities
-        sed '/@iso_c_binding@/d;/@f90_unix_env@/d;s/fft_scalar.*.o/fft_scalar.o/' make.depend.tmp > make.depend
+        # handle special cases: FFTs
+        sed 's/fft_scalar.*.o/fft_scalar.o/' make.depend > make.depend.tmp
+
+        # handle special cases: modules for C-fortran binding, hdf5
+        sed '/@iso_c_binding@/d;/@hdf5@/d' make.depend.tmp > make.depend
 
         if test "$DIR" = "FFTXlib"
         then
@@ -118,8 +122,9 @@ for dir in $dirs; do
 
         if test "$DIR" = "Modules"
         then
+
             sed '/@mpi@/d;/@elpa1@/d' make.depend > make.depend.tmp
-            sed '/@mkl_dfti/d;/@fftw3.f/d' make.depend.tmp > make.depend
+            sed '/@ifcore@/d' make.depend.tmp > make.depend
         fi
 
         if test "$DIR" = "PW/src" || test "$DIR" = "TDDFPT/src"
