@@ -10,7 +10,7 @@ USE kinds,            ONLY : DP
 USE cell_base,        ONLY : ibrav, celldm
 USE control_paths,    ONLY : xqaux, wqaux, npk_label, letter,     &
                              label_list, nqaux, point_label_type, &
-                             label_disp_q, letter_path
+                             label_disp_q, letter_path, long_path
 USE bz_form,          ONLY : find_bz_type
 USE thermo_mod,       ONLY : what
 IMPLICIT NONE
@@ -34,9 +34,21 @@ CASE (1, 3)
      npk_label=6
      IF (what=='mur_lc_t') npk_label=7
 CASE (2)
-     npk_label=7
-     IF (what=='mur_lc_t') npk_label=8
-CASE (4, 7, 12, 13) 
+     IF (long_path) THEN
+        npk_label=10
+        IF (what=='mur_lc_t') npk_label=11
+     ELSE
+        npk_label=6
+        IF (what=='mur_lc_t') npk_label=7
+     ENDIF
+CASE (13) 
+     IF (long_path) THEN
+        npk_label=12
+        IF (what=='mur_lc_t') npk_label=13
+     ELSE
+        npk_label=4
+     ENDIF
+CASE (4, 7, 12) 
      npk_label=12
      IF (what=='mur_lc_t') npk_label=13
 CASE (5)
@@ -105,17 +117,28 @@ CASE (2)
 !
 !  fcc bz
 !
-   IF (what=='mur_lc_t') THEN
-      letter(1:npk_label)= (/ 'gG', 'X ', 'W ', 'M ', 'K ', 'gG', 'gG', 'L ' /)
-      wqaux(1:npk_label) = (/ 40,   20,   20,    15,  40,  0,   40,  1 /)
-      label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
+   IF (long_path) THEN
+      IF (what=='mur_lc_t') THEN
+         letter(1:npk_label)= (/ 'gG', 'X ', 'M ', 'K ', 'gG', &
+                                 'gG', 'L ', 'K ', 'W ', 'X ', 'U '/)
+         wqaux(1:npk_label) = (/ 40,  0,  15,  40,  0,   40,  40, &
+                                 40, 20,  20,   1 /)
+         label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
+      ELSE
+         letter(1:npk_label)= (/ 'gG', 'X ', 'M ', 'K ', 'gG', 'L ',&
+                                 'K ', 'W ', 'X ', 'U ' /)
+         wqaux(1:npk_label) = (/ 40,   0,  15,  30,  40,  40, 40, 20, 20, 1 /)
+         label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
+      ENDIF
+      letter_path=letter
+      letter_path(3)='X'
    ELSE
-      letter(1:npk_label)= (/ 'gG', 'X ', 'W ', 'M ', 'K ', 'gG', 'L ' /)
-      wqaux(1:npk_label) = (/ 40,   20,   20,    15,  40,  40,  1 /)
+      letter(1:npk_label)= (/ 'gG', 'X ', 'M ', 'K ', 'gG', 'L '/)
+      wqaux(1:npk_label) = (/ 30,      0,   15,   30,   30,  1 /)
       label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
+      letter_path=letter
+      letter_path(3)='X'
    ENDIF
-   letter_path=letter
-   letter_path(4)='X'
    point_label_type='BI'
 CASE (3) 
 !
@@ -333,19 +356,25 @@ CASE (13)
 !
 !  simple hexagonal bz
 !
-   IF (what=='mur_lc_t') THEN
-      letter(1:npk_label) = (/ 'gG', 'K ', 'M ', 'gG', 'gG', 'A ', 'H ', &
-                        'L ', 'A ', 'H ', 'K ', 'M ', 'L ' /)
-      wqaux(1:npk_label) =  (/  30,   30,   30,   0,    30,   30,  30, &
+   IF (long_path) THEN
+      IF (what=='mur_lc_t') THEN
+         letter(1:npk_label) = (/ 'gG', 'K ', 'M ', 'gG', 'gG', 'A ', 'H ', &
+                           'L ', 'A ', 'M ', 'L ', 'K ', 'H ' /)
+         wqaux(1:npk_label) =  (/  30,   30,   30,   0,    30,   30,  30, &
                          30,   30,   40,   30,   30,  1 /)
-      label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
-   ELSE
-      letter(1:npk_label) = (/ 'gG', 'K ', 'M ', 'gG', 'A ', 'H ', &
-                        'L ', 'A ', 'H ', 'K ', 'M ', 'L ' /)
-      wqaux(1:npk_label) =  (/  30,   30,   30,    30,   30,  30, &
+         label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
+      ELSE
+         letter(1:npk_label) = (/ 'gG', 'K ', 'M ', 'gG', 'A ', 'H ', &
+                           'L ', 'A ', 'M ', 'L ', 'K ', 'H ' /)
+         wqaux(1:npk_label) =  (/  30,   30,   30,    30,   30,  30, &
                          30,   30,   40,    30,   30,  1 /)
+         label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
+      ENDIF
+   ELSE
+      letter(1:npk_label) = (/ 'gG', 'K ', 'M ', 'gG' /)
+      wqaux(1:npk_label) =  (/  30,   30,   30,   1 /)
       label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
-   ENDIF
+   END IF
    letter_path=letter
    point_label_type='SC'
 CASE (14) 

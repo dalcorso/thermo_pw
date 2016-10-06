@@ -43,7 +43,7 @@ SUBROUTINE thermo_readin()
                                    q_in_cryst_coord, q2d, point_label_type, &
                                    disp_q, disp_nqs, npx, &
                                    label_disp_q, letter_path, nrap_plot_in, &
-                                   rap_plot_in
+                                   rap_plot_in, long_path
   USE control_gnuplot,      ONLY : flgnuplot, gnuplot_command, lgnuplot
   USE postscript_files,     ONLY : flpsband, flpsdisp, flpsmur, flpsdos, &
                                    flpstherm, flpsanhar, flpskeconv, &
@@ -54,7 +54,7 @@ SUBROUTINE thermo_readin()
                                    force_bands, only_bands_plot, dump_states, &
                                    subtract_vacuum
   USE control_asy,          ONLY : flasy, lasymptote, asymptote_command
-  USE control_bands,        ONLY : emin_input, emax_input, nbnd_bands, lsym 
+  USE control_bands,        ONLY : emin_input, emax_input, nbnd_bands, lsym
   USE control_eldos,        ONLY : deltae, ndose, nk1_d, nk2_d, nk3_d, &
                                    k1_d, k2_d, k3_d, sigmae, legauss
   USE control_grun,         ONLY : grunmin_input, grunmax_input, &
@@ -142,6 +142,7 @@ SUBROUTINE thermo_readin()
                             nbnd_bands,                     &
                             nppl,                           &
                             lsym,                           &
+                            long_path,                      &
                             npx,                            &
                             lprojpbs, nkz, gap_thr,         &
                             reduced_grid,                   &
@@ -243,6 +244,7 @@ SUBROUTINE thermo_readin()
   nbnd_bands=0
   emin_input=0.0_DP
   emax_input=0.0_DP
+  long_path=.TRUE.
   lsym=.TRUE.
 
   vmin_input=0.0_DP
