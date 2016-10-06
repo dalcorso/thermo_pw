@@ -16,7 +16,8 @@ USE point_group,      ONLY : print_element_list, group_index_from_ext, &
                              sym_label, set_group_desc, print_character_table, &
                              print_compatibility_table, set_sym_o3, &
                              set_sym_su2, product_sym_su2, compute_classes, &
-                             compute_classes_double, print_kronecker_table
+                             compute_classes_double, print_kronecker_table, &
+                             sym_jones
 USE io_global,        ONLY : stdout
 
 IMPLICIT NONE
@@ -63,12 +64,18 @@ IF (work_choice == 1) THEN
    WRITE(stdout,'(4(i5,2x,a12))') (igroup, TRIM(group_name(igroup)), &
                                            igroup=1,32)
 ELSEIF (work_choice == 2) THEN
-      WRITE(stdout,'(/,5x,"Available symmetry operations:",/)')
-      WRITE(stdout,'(6(i3,2x,a8))') (isym, sym_label(isym), isym=1,64)
+      WRITE(stdout,'(/,5x,"Available symmetry operations:")')
+      WRITE(stdout,'(5x,"Number  Label  Jones symbol cubic   hex QE        &
+                                                          &hex ITA")')
+      WRITE(stdout,'(5x,i3,5x,a8,2x,a41)') (isym, sym_label(isym), &
+                                               sym_jones(isym), isym=1,64)
       WRITE(stdout,'(/,5x,"The number indicates the angle (2-180, 3-120, &
                                              4-90, 6-60)")')
       WRITE(stdout,'(5x,"The letters indicate the rotation axis")')
       WRITE(stdout,'(5x,"i means multiplication by inversion")')
+      WRITE(stdout,'(5x,"QE indicates the hexagonal axes of Quantum ESPRESSO")')
+      WRITE(stdout,'(5x,"ITA indicates those of &
+                         &the International Tables for Crystallography A")')
 ELSEIF (work_choice == 3) THEN
    WRITE(stdout,'(5x,"Give the number of the two rotations &
                                      &(point 2 gives the list)")')

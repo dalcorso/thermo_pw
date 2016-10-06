@@ -78,18 +78,57 @@ MODULE point_group
               'i3-x-y-z', 'i3-xyz', 'i3xy-z', 'i3x-yz', 'i3xyz', 'i3-xy-z',   &
               'i3x-y-z', 'i3-x-yz', 'i6z', 'i6-z', 'i3z', 'i3-z', 'i21-10',   &
               'i2210', 'i2010', 'i2110' /
-!
-!  This variable gives the list of kovalev operations in terms of our definition
-!
-  INTEGER :: kovalev_cubic(48) 
-  DATA kovalev_cubic / 1,   4,  3,  2, 17, 19, 18, 20, 21, 22, 24, 23, &
-                       6,   8,  7,  5, 14, 13, 15, 16, 10, 12,  9, 11, &
-                       33, 36, 35, 34, 49, 51, 50, 52, 53, 54, 56, 55, &
-                       38, 40, 39, 37, 46, 45, 47, 48, 42, 44, 41, 43  /
 
-  INTEGER :: kovalev_hexagonal(24) 
-  DATA kovalev_hexagonal / 1,  25, 27,  2, 28, 26, 31, 29,  4, 30, 32, 3, &
-                          33,  57, 59, 34, 60, 58, 63, 61, 36, 62, 64, 35 /
+  CHARACTER(LEN=40) :: sym_jones(64)
+!
+!  The jones symbol contains the crystal coordinates of the point  
+!  x,y,z transformed by the symmetry. For cubic symetries the coordinates
+!  coincide with the cartesian coordinates. For hexagonal symmetries 
+!  they depend on the definition of the direct lattice vectors. 
+!  We give first the  transformation using the definition of hexagonal axis 
+!  of QE, than those using the ITA definition. For 2x and 2y symmetries 
+!  we give three sets of transformed coordinates: cubic, hex QE and hex ITA.
+!  NB: For QE  a_1 = a (1,0,0),          a_2 = a (-0.5,0.866,0)
+!      for ITA a_1 = a (-0.5,-0.866,0)   a_2 = a (1,0,0)
+!
+   DATA sym_jones / ' x,y,z,         x,y,z,         x,y,z',      &
+                    '-x,-y,z        -x,-y,z        -x,-y,z',     &
+                    '-x,y,-z,        x-y,y,-z,     -x,y-x,-z',   &
+                    ' x,-y,-z,       y-x,y,-z,      x,x-y,-z',   &
+                    ' y,x,-z', '-y,-x,-z', ' y,-x,z',   &
+                    '-y,x,z', ' z,-y,x', '-z,-y,-x',    &
+                    ' z,y,-x', '-z,y,x', '-x,z,y',      &
+                    '-x,-z,-y',' x,z,-y',' x,-z,y',      &
+                    ' y,z,x','-y,z,-x',' y,-z,-x',       &
+                    '-y,-z,x',' z,x,y',' z,-x,-y',       &
+                    '-z,x,y','-z,x,-y',                &
+                    '                x-y,x,z        x-y,x,z',            &
+                    '                y,y-x,z        y,y-x,z',            &
+                    '               -y,x-y,z       -y,x-y,z',            &
+                    '                y-x,-x,z       y-x,-x,z',           &
+                    '               -y,-x,-z,       y-x,y,-z',   &
+                    '                x,x-y,-z,     -y,-x,-z',    &
+                    '               -x,y-x,-z       y,x,-z',     &
+                    '                y,x,-z,        x-y,-y,-z',  &  
+                    '-x,-y,-z       -x,-y,-z,      -x,-y,-z',    &
+                    ' x,y,-z         x,y,-z,        x,y,-z',     &
+                    ' x,-y,z,        y-x,-y,z,      x,x-y,z',    &
+                    '-x,y,z,         x-y,-y,z,     -x,y-x,z',    &
+                    '-y,-x,z', ' y,x,z', '-y,x,-z',      &
+                    ' y,-x,-z', '-z,y,-x', ' z,y,x',     &
+                    '-z,-y,x', ' z,-y,-x', ' x,-z,-y',   &
+                    ' x,z,y','-x,-z,y','-x,z,-y',       &
+                    '-y,-z,-x',' y,-z,x','-y,z,x',      &
+                    ' y,z,-x','-z,-x,-y','-z,x,y',      &
+                    ' z,-x,-y',' z,-x,y',                &
+                    '                y-x,-x,-z      y-x,-x,-z',  &
+                    '               -y,x-y,-z      -y,x-y,-z',   &
+                    '                y,y-x,-z       y,y-x,-z',   &
+                    '                x-y,x,-z       x-y,x,-z',   &
+                    '                y,x,z,         x-y,-y,z', &
+                    '               -x,y-x,z,       y,x,z',    &
+                    '                x,x-y,z       -y,-x,z',   &
+                    '               -y,-x,z,        y-x,y,z' /
 
   PUBLIC convert_rap, find_aux_ind_two_groups, has_sigma_h, is_right_oriented,&
          color_rap, find_group_info_ext, find_irr_proj, sym_label,    &
@@ -99,8 +138,8 @@ MODULE point_group
          print_compatibility_table, find_group_ext, &
          find_double_product_table_from_sym, set_sym_o3, set_sym_su2, &
          product_sym_su2, compute_classes, compute_classes_double, &
-         print_kronecker_table, write_group_table, kovalev_cubic, &
-         kovalev_hexagonal
+         print_kronecker_table, write_group_table,  &
+         print_ptype_info, find_factor_system, sym_jones
 
 CONTAINS
 
@@ -143,7 +182,7 @@ CONTAINS
   END SUBROUTINE convert_rap
  
   SUBROUTINE convert_rap_new(n, list_in, list_out, group_ext_in,  &
-                    group_ext_out, aux_ind, lspinorb, ptype_in, ptype_out, &
+                    group_ext_out, aux_ind, ptype_in, ptype_out, &
                     gauge_in, gauge_out)
 
   USE kinds, ONLY : DP
@@ -152,7 +191,6 @@ CONTAINS
   INTEGER, INTENT(IN) :: list_in(n), ptype_in(3), ptype_out(3)
   REAL(DP) :: gauge_in(48), gauge_out(48)
   INTEGER, INTENT(OUT) :: list_out(n)
-  LOGICAL, INTENT(IN) :: lspinorb
 
   INTEGER :: i, j, ndeg, group_in, group_out
   LOGICAL :: done(n)
@@ -189,13 +227,11 @@ CONTAINS
      END DO
   ELSE
 !
-!  projective representations or double group rap converted in single group rap
-!  or viceversa
+!  projective representations 
 !
-     WRITE(6,*) 'using convert_rap_proj'
      CALL convert_rap_proj(n, list_in, list_out, group_ext_in, &
                            group_ext_out, ptype_in, ptype_out, gauge_in, &
-                           gauge_out,lspinorb)
+                           gauge_out)
   ENDIF
 
   RETURN
@@ -203,7 +239,7 @@ CONTAINS
 
   SUBROUTINE convert_rap_proj(n, list_in, list_out, group_ext_in,    &
                                  group_ext_out, ptype_in, ptype_out, &
-                                 gauge_in, gauge_out, lso)
+                                 gauge_in, gauge_out)
 !
 !   This routine converts a list of irreducible representations of 
 !   group_ext_in into a list of irreducible representations of group_ext_out.
@@ -225,7 +261,6 @@ CONTAINS
                          ptype_in(3), ptype_out(3)
   INTEGER, INTENT(OUT) :: list_out(n)
   REAL(DP), INTENT(IN) :: gauge_in(48), gauge_out(48)
-  LOGICAL,  INTENT(IN) :: lso
 
   INTEGER :: group_desc_in(48), group_desc_out(48), b_in_a(48)
   INTEGER :: nsym_in, nsym_out
@@ -4910,6 +4945,37 @@ CONTAINS
         sub_table(12,3,10,2)=1
         sub_table(12,3,10,3)=2
         sub_table(12,3,10,4)=3
+
+        sub_table(12,4,1,1)=1
+        sub_table(12,4,1,2)=1
+        sub_table(12,4,2,1)=1
+        sub_table(12,4,2,2)=4
+        sub_table(12,4,3,1)=2
+        sub_table(12,4,3,2)=1
+        sub_table(12,4,3,3)=4
+        sub_table(12,4,4,1)=3
+        sub_table(12,4,4,2)=2
+        sub_table(12,4,4,3)=3
+        sub_table(12,4,4,4)=4
+        sub_table(12,4,5,1)=3
+        sub_table(12,4,5,2)=1
+        sub_table(12,4,5,3)=2
+        sub_table(12,4,5,4)=3
+        sub_table(12,4,6,1)=1
+        sub_table(12,4,6,2)=2
+        sub_table(12,4,7,1)=1
+        sub_table(12,4,7,2)=3
+        sub_table(12,4,8,1)=2
+        sub_table(12,4,8,2)=2
+        sub_table(12,4,8,3)=3
+        sub_table(12,4,9,1)=3
+        sub_table(12,4,9,2)=1
+        sub_table(12,4,9,3)=3
+        sub_table(12,4,9,4)=4
+        sub_table(12,4,10,1)=3
+        sub_table(12,4,10,2)=1
+        sub_table(12,4,10,3)=2
+        sub_table(12,4,10,4)=4
         !
         !  with C_3v
         !
@@ -8480,7 +8546,9 @@ CONTAINS
   INTEGER :: imax, imbx, imcx, ic4, is4
   INTEGER :: ic2, ic21, ic211, isv, isv1, ts, ind2(3)
   INTEGER :: xaxis, yaxis, zaxis, naxis, isave
-  INTEGER :: group_desc(48), which_elem(48), ga, gb, group_a_ext, group_b_ext
+  INTEGER :: ga, gb, group_a_ext, group_b_ext
+  INTEGER :: group_desc_a(48), which_elem_a(48)
+  INTEGER :: group_desc_b(48), which_elem_b(48)
   LOGICAL :: is_parallel, isok, isok1
   INTEGER :: tipo_sym
 
@@ -8497,10 +8565,10 @@ CONTAINS
 
   ga=group_a
   CALL find_group_info_ext(nsym_a, sr_a, ga, group_a_ext, &
-                                                  which_elem, group_desc)
+                                                  which_elem_a, group_desc_a)
   gb=group_b
   CALL find_group_info_ext(nsym_b, sr_b, gb, group_b_ext, &
-                                                  which_elem, group_desc)
+                                                  which_elem_b, group_desc_b)
   
   IF (.NOT. is_subgroup(group_a_ext, group_b_ext)) THEN
      aux_ind=-1
@@ -8764,66 +8832,12 @@ CONTAINS
               !
               !  with C_s
               !
-              !  In ibx and icx the two perpendiculars of the two mirrors of C_2v
               !
-              ibx=0
-              DO isym=1, nsym_a
-                 IF (tipo_sym(sr_a(1,1,isym))==5) THEN
-                    CALL mirror_axis(sr_a(1,1,isym),ax)
-                    IF (ibx==0) THEN
-                       CALL which_c2(ax, ibx)
-                    ELSE
-                       CALL which_c2(ax, icx)
-                    ENDIF
-                 ENDIF
-              ENDDO
-              !
-              !  In iax the perpendicular to the C_s mirror
-              !
-              DO isym=1, nsym_b
-                 IF (tipo_sym(sr_b(1,1,isym))==5) THEN
-                    CALL mirror_axis(sr_b(1,1,isym),ax)
-                    CALL which_c2(ax, iax)
-                 ENDIF
-              ENDDO
-              imirror=0
-              IF (ibx==iax) imirror=icx 
-              IF (icx==iax) imirror=ibx 
-              IF (imirror==0) CALL errore('find_aux_ind_two_groups',&
-                                           'C_2v and C_s have no common mirror',1)
-
-              IF (iax==1 .OR. iax==5 .OR. iax==7 .OR. iax==9 .OR. iax==10 .OR. &
-                                                                  iax==11) THEN
-                  aux_ind=2
-              ELSEIF (iax==2) THEN
-                  aux_ind=1
-              ELSEIF (iax==3) THEN
-                  IF (imirror==2) THEN
-                     aux_ind=2
-                  ELSE
-                     aux_ind=1
-                  ENDIF
-              ELSEIF (iax==4) THEN
-                  IF (imirror==1) THEN
-                     aux_ind=2
-                  ELSE
-                     aux_ind=1
-                  ENDIF
-              ELSEIF (iax==6) THEN
-                  IF (imirror==2) THEN
-                     aux_ind=2
-                  ELSE
-                     aux_ind=1
-                  ENDIF
-              ELSEIF (iax==8.OR.iax==12.OR.iax==13) THEN
-                  IF (imirror==3) THEN
-                     aux_ind=2
-                  ELSE
-                     aux_ind=1
-                  ENDIF
-              ELSE
-                 CALL errore('find_aux_ind_two_groups','C_2v/C_s problem with axis',1)
-              ENDIF 
+              aux_ind=0
+              IF (group_desc_a(3)==group_desc_b(2)) aux_ind=1
+              IF (group_desc_a(4)==group_desc_b(2)) aux_ind=2
+              IF (aux_ind==0) CALL errore('find_aux_ind_two_groups',&
+                               'C_2v and C_s have no common mirror', 1)
            CASE (4)
       !
       !   with C_2
@@ -8857,16 +8871,14 @@ CONTAINS
            CASE(3)
         !
         !  C_s
-        !
-        !  The second operation is the mirror
-        !
-             CALL mirror_axis(sr_b(1,1,2),ax)
 
-             IF (is_axis(ax,1).OR.is_axis(ax,2).OR.is_axis(ax,3)) THEN
-                aux_ind=1
-             ELSE
-                aux_ind=2
-             END IF
+        aux_ind=0
+        IF (group_desc_a(5)==group_desc_b(2).OR.  &
+            group_desc_a(7)==group_desc_b(2)) aux_ind=1
+        IF (group_desc_a(6)==group_desc_b(2) .OR. &
+            group_desc_a(8)==group_desc_b(2)) aux_ind=2
+        IF (aux_ind==0) CALL errore('find_aux_ind_two_groups',&
+                               'C_4v and C_s have no common mirror', 1)
 
            CASE(4,6)
       !
@@ -8879,18 +8891,23 @@ CONTAINS
       !   There are two cases, mirror perpendicular to the axis x, y or
       !   to x=y and x=-y
       !
-              DO isym=1,nsym_b
+      IF (group_desc_a(5)==group_desc_b(3).OR.  &
+          group_desc_a(7)==group_desc_b(3)) aux_ind=1
+      IF (group_desc_a(6)==group_desc_b(3) .OR. &
+          group_desc_a(8)==group_desc_b(3)) aux_ind=2
+    
+!              DO isym=1,nsym_b
 !
 !   find one of the mirrors
 !
-                 IF (tipo_sym(sr_b(1,1,isym))==5) imirror=isym
-              ENDDO
-              CALL mirror_axis(sr_b(1,1,imirror),bx)
-              IF (is_axis(bx,1).OR.is_axis(bx,2).OR.is_axis(bx,3)) THEN
-                 aux_ind=1
-              ELSE
-                 aux_ind=2
-              ENDIF
+!                 IF (tipo_sym(sr_b(1,1,isym))==5) imirror=isym
+!              ENDDO
+!              CALL mirror_axis(sr_b(1,1,imirror),bx)
+!              IF (is_axis(bx,1).OR.is_axis(bx,2).OR.is_axis(bx,3)) THEN
+!                 aux_ind=1
+!              ELSE
+!                 aux_ind=2
+!              ENDIF
            CASE DEFAULT
               WRITE(stdout,'(5x,"Group a",i3," Group b", i3)') group_a, &
                                                                group_b
@@ -9874,26 +9891,26 @@ CONTAINS
 
            CASE(12)
       !
-      !     C_2v  to choose between 1 2 or 3
+      !     C_2v  to choose between 1 2 3 or 4
       !
-              DO isym=1,nsym_b
-!
-!   find the axis of order 2 and one of the mirrors.
-!
-                 IF (tipo_sym(sr_b(1,1,isym))==4) iaxis=isym
-                 IF (tipo_sym(sr_b(1,1,isym))==5) imirror=isym
-              ENDDO
-              CALL versor(sr_b(1,1,iaxis),ax)
-              CALL mirror_axis(sr_b(1,1,imirror),bx)
-              IF (is_axis(ax,1).OR.is_axis(ax,2).OR.is_axis(ax,3)) THEN
-                 IF (is_axis(bx,1).OR.is_axis(bx,2).OR.is_axis(bx,3)) THEN
-                    aux_ind=1
-                 ELSE
-                    aux_ind=2
-                 ENDIF
-              ELSE
-                 aux_ind=3
-              ENDIF
+               IF (group_desc_b(2)==2.OR.group_desc_b(2)==3.OR.&
+                   group_desc_b(2)==4) THEN
+
+                  IF (group_desc_b(3)==34.OR.group_desc_b(3)==35.OR. &
+                      group_desc_b(3)==36) THEN
+                     aux_ind=1
+                  ELSE
+                     aux_ind=2
+                  ENDIF
+               ELSE
+                  IF (group_desc_b(3)==34.OR.group_desc_b(3)==35.OR. &
+                      group_desc_b(3)==36) THEN
+                     aux_ind=3
+                  ELSE
+                     aux_ind=4
+                  ENDIF
+               ENDIF 
+
            CASE (16)
        !
        !  C_2h
@@ -10226,7 +10243,10 @@ CONTAINS
   END SUBROUTINE find_group_ext
 
   FUNCTION group_index_from_ext(code_group_ext)
-
+!
+!   This function converts the extended group code (1-136) into the standard
+!   group code (1-32)
+!
   IMPLICIT NONE
   INTEGER :: group_index_from_ext, code_group_ext
   INTEGER, PARAMETER :: npg = 136
@@ -10253,7 +10273,10 @@ CONTAINS
 
 
   SUBROUTINE set_group_desc(group_desc, nsym, code_group_ext)
-
+!
+!   This routine contains the list of symmetry operations for each
+!   extended group code (1-136) and sets them into group_desc
+!
   IMPLICIT NONE
   INTEGER, INTENT(INOUT) :: group_desc(48)
   INTEGER, INTENT(IN) :: code_group_ext
@@ -11324,7 +11347,9 @@ END SUBROUTINE find_group_tags
 
 SUBROUTINE group_generators(code_group, row, column, n, linv, columni)
 !
-!  This routine gives, for each point group, the following information:
+!  Since each point group has two generators A and B and is defined by
+!  A^n1=E' and B^n2=E' and (AB)^2=E',
+!  this routine gives, for each point group, the following information:
 !  In column(i) the index in the list of the group operations (ordered
 !  as specified in find_group_info_ext)
 !      i         operations
@@ -11365,12 +11390,13 @@ SUBROUTINE group_generators(code_group, row, column, n, linv, columni)
 !  E  AB  BA   ABBA  A  B^2  BA^2  A^2B  A^2  B  AB^2  B^2A
 !                     
 !  For O the elements order keeps elements in the same class close. Note that
-!  A does not coincide with that of T
+!  A does not coincide with that of T. This order for the cubic group
+!  is taken from the book Kim (see below the complete reference).
 !
 !    E BA^2B-1  ABA-1B A^2 B A-1A-1B B-1ABA-1 AB-1A B-1 B-1A^2 A^2B-1 A-1BA-1
 !    B-1A  A-1B  AB-1 BA-1 A-1 A A^2B-1A  AB A^2B-1AB  BA BA^2B-1A  BA-1B
 !
-!  T_d is isomorphous to O and ordered in the same way.
+!  T_d is isomorphic to O and ordered in the same way.
 !
 IMPLICIT NONE
 
@@ -11802,7 +11828,8 @@ SUBROUTINE set_stand_irr_proj(cge, ptype, char_mat_proj, name_rap, nrap_proj, &
 !             crystals, Cambridge University Press (1999).
 !
 !  The name of the representations follow the standard conventions, as
-!  reported in the point group manual, or the names introduced in the book.
+!  reported in the point group manual of thermo_pw, or the names introduced 
+!  in the book.
 !
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: cge    ! code group extended
@@ -11813,9 +11840,6 @@ INTEGER, INTENT(OUT) :: nsym_proj ! the number of symmetry elements
 
 CHARACTER(LEN=45), INTENT(OUT) :: name_rap(48)  
                                    ! Output: name of the representations
-                                   ! We use only P_1, P_2, etc. for the
-                                   ! projective one and the same names as in
-                                   ! set_irr for the standard one
 
 COMPLEX(DP) :: char_mat_proj(48,48) ! Output: character matrix of projective 
                                     !         rap (class not used)
@@ -12258,25 +12282,53 @@ SELECT CASE (cge)
          char_mat_proj(2,1:4)=(1.0_DP,0.0_DP)
          char_mat_proj(2,5:8)=(-1.0_DP,0.0_DP)
 
-         name_rap(3)='B_1'
-         char_mat_proj(3,1)=(1.0_DP,0.0_DP)
-         char_mat_proj(3,2)=(-1.0_DP,0.0_DP)
-         char_mat_proj(3,3)=(1.0_DP,0.0_DP)
-         char_mat_proj(3,4)=(-1.0_DP,0.0_DP)
-         char_mat_proj(3,5)=(1.0_DP,0.0_DP)
-         char_mat_proj(3,6)=(-1.0_DP,0.0_DP)
-         char_mat_proj(3,7)=(1.0_DP,0.0_DP)
-         char_mat_proj(3,8)=(-1.0_DP,0.0_DP)
+!
+!  for the point group 52, 80, 116 and 117 the two representations are
+!  reversed. Actually we stick with the standard definition that \sigma_v
+!  are the mirror perpendicular to x, y, z and \sigma_d those perpendicular
+!  to x=y, x=-y etc. and similar definition for C_2' and C_2''.
+!
+         IF (cge==52.OR.cge==80.OR.cge==116.OR.cge==117) THEN
+            name_rap(3)='B_1'
+            char_mat_proj(3,1)=(1.0_DP,0.0_DP)
+            char_mat_proj(3,2)=(-1.0_DP,0.0_DP)
+            char_mat_proj(3,3)=(1.0_DP,0.0_DP)
+            char_mat_proj(3,4)=(-1.0_DP,0.0_DP)
+            char_mat_proj(3,5)=(-1.0_DP,0.0_DP)
+            char_mat_proj(3,6)=(1.0_DP,0.0_DP)
+            char_mat_proj(3,7)=(-1.0_DP,0.0_DP)
+            char_mat_proj(3,8)=(1.0_DP,0.0_DP)
 
-         name_rap(4)='B_2'
-         char_mat_proj(4,1)=(1.0_DP,0.0_DP)
-         char_mat_proj(4,2)=(-1.0_DP,0.0_DP)
-         char_mat_proj(4,3)=(1.0_DP,0.0_DP)
-         char_mat_proj(4,4)=(-1.0_DP,0.0_DP)
-         char_mat_proj(4,5)=(-1.0_DP,0.0_DP)
-         char_mat_proj(4,6)=(1.0_DP,0.0_DP)
-         char_mat_proj(4,7)=(-1.0_DP,0.0_DP)
-         char_mat_proj(4,8)=(1.0_DP,0.0_DP)
+            name_rap(4)='B_2'
+            char_mat_proj(4,1)=(1.0_DP,0.0_DP)
+            char_mat_proj(4,2)=(-1.0_DP,0.0_DP)
+            char_mat_proj(4,3)=(1.0_DP,0.0_DP)
+            char_mat_proj(4,4)=(-1.0_DP,0.0_DP)
+            char_mat_proj(4,5)=(1.0_DP,0.0_DP)
+            char_mat_proj(4,6)=(-1.0_DP,0.0_DP)
+            char_mat_proj(4,7)=(1.0_DP,0.0_DP)
+            char_mat_proj(4,8)=(-1.0_DP,0.0_DP)
+         ELSE
+            name_rap(3)='B_1'
+            char_mat_proj(3,1)=(1.0_DP,0.0_DP)
+            char_mat_proj(3,2)=(-1.0_DP,0.0_DP)
+            char_mat_proj(3,3)=(1.0_DP,0.0_DP)
+            char_mat_proj(3,4)=(-1.0_DP,0.0_DP)
+            char_mat_proj(3,5)=(1.0_DP,0.0_DP)
+            char_mat_proj(3,6)=(-1.0_DP,0.0_DP)
+            char_mat_proj(3,7)=(1.0_DP,0.0_DP)
+            char_mat_proj(3,8)=(-1.0_DP,0.0_DP)
+
+            name_rap(4)='B_2'
+            char_mat_proj(4,1)=(1.0_DP,0.0_DP)
+            char_mat_proj(4,2)=(-1.0_DP,0.0_DP)
+            char_mat_proj(4,3)=(1.0_DP,0.0_DP)
+            char_mat_proj(4,4)=(-1.0_DP,0.0_DP)
+            char_mat_proj(4,5)=(-1.0_DP,0.0_DP)
+            char_mat_proj(4,6)=(1.0_DP,0.0_DP)
+            char_mat_proj(4,7)=(-1.0_DP,0.0_DP)
+            char_mat_proj(4,8)=(1.0_DP,0.0_DP)
+         ENDIF
 
          name_rap(5)='E'
          char_mat_proj(5,1)=(2.0_DP,0.0_DP)
@@ -13405,29 +13457,54 @@ SELECT CASE (cge)
          char_mat_proj(2,1:4)=(1.0_DP,0.0_DP)
          char_mat_proj(2,5:8)=(-1.0_DP,0.0_DP)
          char_mat_proj(2,9:16)=char_mat_proj(2,1:8)
+!
+!  See the explanation for the D_4 group
+!
+         IF (cge==110) THEN
+            name_rap(3)='B_1g'
+            char_mat_proj(3,1)=(1.0_DP,0.0_DP)
+            char_mat_proj(3,2)=(-1.0_DP,0.0_DP)
+            char_mat_proj(3,3)=(1.0_DP,0.0_DP)
+            char_mat_proj(3,4)=(-1.0_DP,0.0_DP)
+            char_mat_proj(3,5)=(-1.0_DP,0.0_DP)
+            char_mat_proj(3,6)=(1.0_DP,0.0_DP)
+            char_mat_proj(3,7)=(-1.0_DP,0.0_DP)
+            char_mat_proj(3,8)=(1.0_DP,0.0_DP)
+            char_mat_proj(3,9:16)=char_mat_proj(3,1:8)
 
-         name_rap(3)='B_1g'
-         char_mat_proj(3,1)=(1.0_DP,0.0_DP)
-         char_mat_proj(3,2)=(-1.0_DP,0.0_DP)
-         char_mat_proj(3,3)=(1.0_DP,0.0_DP)
-         char_mat_proj(3,4)=(-1.0_DP,0.0_DP)
-         char_mat_proj(3,5)=(1.0_DP,0.0_DP)
-         char_mat_proj(3,6)=(-1.0_DP,0.0_DP)
-         char_mat_proj(3,7)=(1.0_DP,0.0_DP)
-         char_mat_proj(3,8)=(-1.0_DP,0.0_DP)
-         char_mat_proj(3,9:16)=char_mat_proj(3,1:8)
+            name_rap(4)='B_2g'
+            char_mat_proj(4,1)=(1.0_DP,0.0_DP)
+            char_mat_proj(4,2)=(-1.0_DP,0.0_DP)
+            char_mat_proj(4,3)=(1.0_DP,0.0_DP)
+            char_mat_proj(4,4)=(-1.0_DP,0.0_DP)
+            char_mat_proj(4,5)=(1.0_DP,0.0_DP)
+            char_mat_proj(4,6)=(-1.0_DP,0.0_DP)
+            char_mat_proj(4,7)=(1.0_DP,0.0_DP)
+            char_mat_proj(4,8)=(-1.0_DP,0.0_DP)
+            char_mat_proj(4,9:16)=char_mat_proj(4,1:8)
+         ELSE
+            name_rap(3)='B_1g'
+            char_mat_proj(3,1)=(1.0_DP,0.0_DP)
+            char_mat_proj(3,2)=(-1.0_DP,0.0_DP)
+            char_mat_proj(3,3)=(1.0_DP,0.0_DP)
+            char_mat_proj(3,4)=(-1.0_DP,0.0_DP)
+            char_mat_proj(3,5)=(1.0_DP,0.0_DP)
+            char_mat_proj(3,6)=(-1.0_DP,0.0_DP)
+            char_mat_proj(3,7)=(1.0_DP,0.0_DP)
+            char_mat_proj(3,8)=(-1.0_DP,0.0_DP)
+            char_mat_proj(3,9:16)=char_mat_proj(3,1:8)
 
-         name_rap(4)='B_2g'
-         char_mat_proj(4,1)=(1.0_DP,0.0_DP)
-         char_mat_proj(4,2)=(-1.0_DP,0.0_DP)
-         char_mat_proj(4,3)=(1.0_DP,0.0_DP)
-         char_mat_proj(4,4)=(-1.0_DP,0.0_DP)
-         char_mat_proj(4,5)=(-1.0_DP,0.0_DP)
-         char_mat_proj(4,6)=(1.0_DP,0.0_DP)
-         char_mat_proj(4,7)=(-1.0_DP,0.0_DP)
-         char_mat_proj(4,8)=(1.0_DP,0.0_DP)
-         char_mat_proj(4,9:16)=char_mat_proj(4,1:8)
-
+            name_rap(4)='B_2g'
+            char_mat_proj(4,1)=(1.0_DP,0.0_DP)
+            char_mat_proj(4,2)=(-1.0_DP,0.0_DP)
+            char_mat_proj(4,3)=(1.0_DP,0.0_DP)
+            char_mat_proj(4,4)=(-1.0_DP,0.0_DP)
+            char_mat_proj(4,5)=(-1.0_DP,0.0_DP)
+            char_mat_proj(4,6)=(1.0_DP,0.0_DP)
+            char_mat_proj(4,7)=(-1.0_DP,0.0_DP)
+            char_mat_proj(4,8)=(1.0_DP,0.0_DP)
+            char_mat_proj(4,9:16)=char_mat_proj(4,1:8)
+         ENDIF
          name_rap(5)='E_2g'
          char_mat_proj(5,1)=(2.0_DP,0.0_DP)
          char_mat_proj(5,3)=(-2.0_DP,0.0_DP)
@@ -13442,28 +13519,51 @@ SELECT CASE (cge)
          char_mat_proj(7,5:8)=(-1.0_DP,0.0_DP)
          char_mat_proj(7,9:16)=-char_mat_proj(7,1:8)
 
-         name_rap(8)='B_1u'
-         char_mat_proj(8,1)=(1.0_DP,0.0_DP)
-         char_mat_proj(8,2)=(-1.0_DP,0.0_DP)
-         char_mat_proj(8,3)=(1.0_DP,0.0_DP)
-         char_mat_proj(8,4)=(-1.0_DP,0.0_DP)
-         char_mat_proj(8,5)=(1.0_DP,0.0_DP)
-         char_mat_proj(8,6)=(-1.0_DP,0.0_DP)
-         char_mat_proj(8,7)=(1.0_DP,0.0_DP)
-         char_mat_proj(8,8)=(-1.0_DP,0.0_DP)
-         char_mat_proj(8,9:16)=-char_mat_proj(8,1:8)
+         IF (cge==110) THEN
+            name_rap(8)='B_1u'
+            char_mat_proj(8,1)=(1.0_DP,0.0_DP)
+            char_mat_proj(8,2)=(-1.0_DP,0.0_DP)
+            char_mat_proj(8,3)=(1.0_DP,0.0_DP)
+            char_mat_proj(8,4)=(-1.0_DP,0.0_DP)
+            char_mat_proj(8,5)=(-1.0_DP,0.0_DP)
+            char_mat_proj(8,6)=(1.0_DP,0.0_DP)
+            char_mat_proj(8,7)=(-1.0_DP,0.0_DP)
+            char_mat_proj(8,8)=(1.0_DP,0.0_DP)
+            char_mat_proj(8,9:16)=-char_mat_proj(8,1:8)
 
-         name_rap(9)='B_2u'
-         char_mat_proj(9,1)=(1.0_DP,0.0_DP)
-         char_mat_proj(9,2)=(-1.0_DP,0.0_DP)
-         char_mat_proj(9,3)=(1.0_DP,0.0_DP)
-         char_mat_proj(9,4)=(-1.0_DP,0.0_DP)
-         char_mat_proj(9,5)=(-1.0_DP,0.0_DP)
-         char_mat_proj(9,6)=(1.0_DP,0.0_DP)
-         char_mat_proj(9,7)=(-1.0_DP,0.0_DP)
-         char_mat_proj(9,8)=(1.0_DP,0.0_DP)
-         char_mat_proj(9,9:16)=-char_mat_proj(9,1:8)
+            name_rap(9)='B_2u'
+            char_mat_proj(9,1)=(1.0_DP,0.0_DP)
+            char_mat_proj(9,2)=(-1.0_DP,0.0_DP)
+            char_mat_proj(9,3)=(1.0_DP,0.0_DP)
+            char_mat_proj(9,4)=(-1.0_DP,0.0_DP)
+            char_mat_proj(9,5)=(1.0_DP,0.0_DP)
+            char_mat_proj(9,6)=(-1.0_DP,0.0_DP)
+            char_mat_proj(9,7)=(1.0_DP,0.0_DP)
+            char_mat_proj(9,8)=(-1.0_DP,0.0_DP)
+            char_mat_proj(9,9:16)=-char_mat_proj(9,1:8)
+         ELSE
+            name_rap(8)='B_1u'
+            char_mat_proj(8,1)=(1.0_DP,0.0_DP)
+            char_mat_proj(8,2)=(-1.0_DP,0.0_DP)
+            char_mat_proj(8,3)=(1.0_DP,0.0_DP)
+            char_mat_proj(8,4)=(-1.0_DP,0.0_DP)
+            char_mat_proj(8,5)=(1.0_DP,0.0_DP)
+            char_mat_proj(8,6)=(-1.0_DP,0.0_DP)
+            char_mat_proj(8,7)=(1.0_DP,0.0_DP)
+            char_mat_proj(8,8)=(-1.0_DP,0.0_DP)
+            char_mat_proj(8,9:16)=-char_mat_proj(8,1:8)
 
+            name_rap(9)='B_2u'
+            char_mat_proj(9,1)=(1.0_DP,0.0_DP)
+            char_mat_proj(9,2)=(-1.0_DP,0.0_DP)
+            char_mat_proj(9,3)=(1.0_DP,0.0_DP)
+            char_mat_proj(9,4)=(-1.0_DP,0.0_DP)
+            char_mat_proj(9,5)=(-1.0_DP,0.0_DP)
+            char_mat_proj(9,6)=(1.0_DP,0.0_DP)
+            char_mat_proj(9,7)=(-1.0_DP,0.0_DP)
+            char_mat_proj(9,8)=(1.0_DP,0.0_DP)
+            char_mat_proj(9,9:16)=-char_mat_proj(9,1:8)
+         ENDIF
          name_rap(10)='E_2u'
          char_mat_proj(10,1)=(2.0_DP,0.0_DP)
          char_mat_proj(10,3)=(-2.0_DP,0.0_DP)
@@ -13569,13 +13669,21 @@ SELECT CASE (cge)
 !
          nrap_proj=4
 
-         name_rap(1)='A_1B_1'
+         IF (cge==110) THEN
+            name_rap(1)='A_1B_2'
+         ELSE
+            name_rap(1)='A_1B_1'
+         ENDIF
          char_mat_proj(1,1)=(2.0_DP,0.0_DP)
          char_mat_proj(1,3)=(2.0_DP,0.0_DP)
          char_mat_proj(1,5)=(2.0_DP,0.0_DP)
          char_mat_proj(1,7)=(2.0_DP,0.0_DP)
 
-         name_rap(2)='A_2B_2'
+         IF (cge==110) THEN
+            name_rap(2)='A_2B_1'
+         ELSE
+            name_rap(2)='A_2B_2'
+         ENDIF
          char_mat_proj(2,1)=(2.0_DP,0.0_DP)
          char_mat_proj(2,3)=(2.0_DP,0.0_DP)
          char_mat_proj(2,5)=(-2.0_DP,0.0_DP)
@@ -13607,13 +13715,21 @@ SELECT CASE (cge)
 !
          nrap_proj=4
 
-         name_rap(1)='A_1B_2'
+         IF (cge==110) THEN
+            name_rap(1)='A_1B_1'
+         ELSE
+            name_rap(1)='A_1B_2'
+         ENDIF
          char_mat_proj(1,1)=(2.0_DP,0.0_DP)
          char_mat_proj(1,3)=(2.0_DP,0.0_DP)
          char_mat_proj(1,6)=(2.0_DP,0.0_DP)
          char_mat_proj(1,8)=(2.0_DP,0.0_DP)
 
-         name_rap(2)='A_2B_1'
+         IF (cge==110) THEN
+            name_rap(2)='A_2B_2'
+         ELSE
+            name_rap(2)='A_2B_1'
+         ENDIF
          char_mat_proj(2,1)=(2.0_DP,0.0_DP)
          char_mat_proj(2,3)=(2.0_DP,0.0_DP)
          char_mat_proj(2,6)=(-2.0_DP,0.0_DP)
@@ -14637,8 +14753,8 @@ SUBROUTINE find_projection_type(code_group, code_group_ext, argument,  &
      arg_beta=argument(row(2),column(2)) 
      arg_gmma= argument(column(1),column(2))*2.0_DP + argument(row(3),column(3))
   ELSEIF (n(1)==4.AND.n(2)==3) THEN
-     arg_alpha=argument(2,2) * 2.0_DP + argument(8,8)
-     arg_beta= argument(17,17) + argument(17,18)
+     arg_alpha=argument(18,18) * 2.0_DP + argument(4,4)
+     arg_beta= argument(5,5) + argument(9,5)
      arg_gmma= argument(column(1),column(2))*2.0_DP + argument(row(3),column(3))
   ELSEIF (n(1)==3.AND.n(2)==3) THEN
      arg_alpha=argument(5,5) + argument(5,9)
@@ -15050,7 +15166,7 @@ SUBROUTINE find_projection_type(code_group, code_group_ext, argument,  &
         gauge(18) = gauge_a
         gauge(5)  = gauge_b
         gauge(20) = argument(18,5) + gauge_a + gauge_b
-        gauge(4)  = argument(18,16) + 2.0_DP*gauge_a 
+        gauge(4)  = argument(18,18) + 2.0_DP*gauge_a 
         gauge(17) = -argument(18,17) - gauge_a 
         gauge(22) = argument(5,18) + gauge_b + gauge_a
         gauge(9)  = -argument(5,9) - gauge_b 
@@ -15096,9 +15212,9 @@ IF (verbose) THEN
       epos=1
    ENDIF
 
-   WRITE(stdout,'(/,5x, "The product table:")')
-   tab(:,:)=prd(:,:)*epos(:,:)
-   CALL write_group_table_integer(group_desc, nsym, tab)
+!   WRITE(stdout,'(/,5x, "The product table:")')
+!   tab(:,:)=prd(:,:)*epos(:,:)
+!   CALL write_group_table_integer(group_desc, nsym, tab)
 
    WRITE(stdout,'(/,5x, "The following phases applied to the input factors")')
    WRITE(stdout,'(5x,"make them p-equivalent to the standard ones:",/)')
@@ -15417,6 +15533,7 @@ END SUBROUTINE compute_classes_double
 FUNCTION is_subgroup(group_in_ext, group_out_ext)
 !
 !  The function returns .TRUE. if group_out is a subgroup of group_in
+!  The two extended codes of the groups are given in input
 !
 IMPLICIT NONE
 LOGICAL :: is_subgroup
@@ -15851,6 +15968,10 @@ RETURN
 END FUNCTION nsym_group
 
 SUBROUTINE zero_tpi(arg)
+!
+!  This subroutine receives the argument of a phase and brings it in the
+!  [0,tpi] range.
+!
 USE kinds, ONLY : DP
 USE constants, ONLY : tpi
 IMPLICIT NONE
@@ -16104,7 +16225,7 @@ DO irap=1,nrap_in
 ENDDO
 
 CALL convert_rap_proj(n, list_in, list_out, cge_in, cge_out, ptype_in, &
-                     ptype_out, gauge_in, gauge_out, .FALSE.)
+                     ptype_out, gauge_in, gauge_out )
 
 CALL set_stand_irr_proj(cge_out, ptype_out, char_mat_proj_out, &
                                 name_rap_out, nrap_out, nsym_out)
@@ -16144,7 +16265,7 @@ SUBROUTINE print_kronecker_table(cge_in,ptype1_in,ptype2_in,cge_out,lcomp)
 !  allowed.
 !
 !  When lcomp=.TRUE. it decomposes chi1^*(S) chi2(S)
-!  When lcomp=.FALSE. it deomcompose chi1(S) chi2(S)
+!  When lcomp=.FALSE. it decomposes chi1(S) chi2(S)
 !
 USE kinds, ONLY : DP
 USE constants, ONLY : pi
@@ -16244,7 +16365,7 @@ IF (((cge_in==1.OR.cge_in==28).OR.(cge_out==1.OR.cge_out==28))&
 CALL set_stand_irr_proj(cge_out, ptype_out, char_mat_proj_out, &
                                 name_rap_out, nrap_out, nsym_out)
 
-WRITE(stdout,'(5x,"projected on ")')
+WRITE(stdout,'(5x,"decomposed into ")')
 CALL print_ptype_info(ptype_out, cge_out)
 WRITE(stdout,*)
 
@@ -16310,7 +16431,11 @@ RETURN
 END SUBROUTINE print_kronecker_table
 
 SUBROUTINE add_rap_name(rap_name, ndeg, add_name)
-
+!
+! This routines adds the string add_name to rap_name. When rap_name
+! is not empty its adds a + sign. Moreover if nged > 1 it puts it 
+! as a coefficient to add_name
+!
 IMPLICIT NONE
 CHARACTER(LEN=256), INTENT(INOUT) :: rap_name
 INTEGER, INTENT(IN) :: ndeg
@@ -16334,7 +16459,10 @@ RETURN
 END SUBROUTINE add_rap_name
 
 SUBROUTINE write_gauge(gauge, group_desc, nsym)
-
+!
+!  This routine prints the gauge factors. In input gauge are the
+!  arguments of the phases.
+!
 USE kinds, ONLY : DP
 USE constants, ONLY : pi
 USE io_global, ONLY : stdout
@@ -16360,7 +16488,9 @@ RETURN
 END SUBROUTINE write_gauge
 
 SUBROUTINE print_ptype_info(ptype, cge)
-
+!
+!  This routine can be used to print information on ptype on output.
+!
 USE io_global, ONLY : stdout
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ptype(3), cge
@@ -16372,41 +16502,112 @@ code_group=group_index_from_ext(cge)
 gname= group_name(code_group)
 
 IF (ptype(1)==1.AND.ptype(2)==1.AND.ptype(3)==1) THEN
-   WRITE(stdout,'(5x,"The irreducible reprepresentations of the point group")')
+   WRITE(stdout,'(5x,"the irreducible reprepresentations of the point group")')
    WRITE(stdout,'(5x,"number ",i3,2x,a)') cge, TRIM(gname)
 ENDIF
 IF (ptype(1)==-1.AND.ptype(2)==1.AND.ptype(3)==1) THEN
-   WRITE(stdout,'(5x,"The irreducible representations of the double point ")')
+   WRITE(stdout,'(5x,"the irreducible representations of the double point ")')
    WRITE(stdout,'(5x,"group number ",i3,2x,a)') cge, TRIM(gname)
 ENDIF
 IF (ptype(1)==1.AND.ptype(2)==-1.AND.ptype(3)==1) THEN
-   WRITE(stdout,'(5x,"The projective irreducible representations with beta=-1")')
+   WRITE(stdout,'(5x,"the projective irreducible representations with beta=-1")')
    WRITE(stdout,'(5x,"point group number ", i3,2x,a)') cge, TRIM(gname)
 END IF
 IF (ptype(1)==1.AND.ptype(2)==1.AND.ptype(3)==-1) THEN
-   WRITE(stdout,'(5x,"The projective irreducible representations with gamma=-1 ")')
+   WRITE(stdout,'(5x,"the projective irreducible representations with gamma=-1 ")')
    WRITE(stdout,'(5x,"point group number ", i3,2x,a)') cge, TRIM(gname)
 END IF
 IF (ptype(1)==1.AND.ptype(2)==-1.AND.ptype(3)==-1) THEN
-   WRITE(stdout,'(5x,"The projective irreducible representations with &
+   WRITE(stdout,'(5x,"the projective irreducible representations with &
              beta=-1 and gamma=-1")')
    WRITE(stdout,'(5x,"point group number ", i3,2x,a)') cge, TRIM(gname)
 END IF
 IF (ptype(1)==-1.AND.ptype(2)==-1.AND.ptype(3)==1) THEN
-   WRITE(stdout,'(5x,"The projective irreducible representations with beta=-1")')
+   WRITE(stdout,'(5x,"the projective irreducible representations with beta=-1")')
    WRITE(stdout,'(5x,"double group number ", i3,2x,a)') cge, TRIM(gname)
 ENDIF
 IF (ptype(1)==-1.AND.ptype(2)==1.AND.ptype(3)==-1) THEN
-   WRITE(stdout,'(5x,"The projective irreducible representations with gamma=-1")')
+   WRITE(stdout,'(5x,"the projective irreducible representations with gamma=-1")')
    WRITE(stdout,'(5x,"double group number ", i3,2x,a)') cge, TRIM(gname)
 ENDIF
 IF (ptype(1)==-1.AND.ptype(2)==-1.AND.ptype(3)==-1) THEN
-   WRITE(stdout,'(5x,"The projective irreducible representations with beta=-1 and &
+   WRITE(stdout,'(5x,"the projective irreducible representations with beta=-1 and &
           &gamma=-1")') 
    WRITE(stdout,'(5x,"double group number ", i3,2x,a)') cge, TRIM(gname)
 ENDIF
 RETURN
 END SUBROUTINE print_ptype_info
+
+SUBROUTINE find_factor_system(sym_mat, dim_rap, nsym, cge, phase, verbosity)
+!
+!  This routine receives a set of nsym routines of dimensions dim_rap that
+!  are supposed to be a representation (possibly projective) of the point 
+!  group given by the extended code group and gives as output the factor 
+!  system of the representation. If verbosity=.TRUE. it writes on 
+!  output both the input matrices and the factor system. The order of the
+!  matrices must be the standard order as in find_info_group_ext.
+!
+USE kinds, ONLY : DP
+USE io_global, ONLY : stdout
+
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: dim_rap, nsym, cge
+COMPLEX(DP), INTENT(IN) :: sym_mat(dim_rap,dim_rap,nsym)
+COMPLEX(DP), INTENT(OUT) :: phase(48,48)
+LOGICAL, INTENT(IN) :: verbosity
+
+INTEGER :: group_desc(48), prd(48,48), epos(48,48)
+INTEGER :: isym, jsym, ksym, lsym, nsym_, i, j
+COMPLEX(DP) :: c_mat(dim_rap,dim_rap)
+
+CALL set_group_desc(group_desc, nsym_, cge)
+CALL find_double_product_table(prd, epos, cge)
+
+IF (verbosity) THEN
+   WRITE(stdout,*)
+   DO isym=1,nsym
+      WRITE(stdout,'(a8)') sym_label(group_desc(isym))
+      DO i=1,dim_rap
+         WRITE(stdout,'(6f13.5)') (sym_mat(i,j,isym),j=1,dim_rap)
+      END DO
+   END DO
+END IF
+
+DO isym=1,nsym
+   DO jsym=1,nsym
+      c_mat = MATMUL(sym_mat(:,:,isym), sym_mat(:,:,jsym))
+      DO i=1, dim_rap
+         IF (ABS(sym_mat(1, i, prd(isym,jsym)))>1.D-8) THEN
+            phase(isym,jsym) = c_mat(1,i) / sym_mat(1,i,prd(isym,jsym)) 
+            EXIT
+         END IF
+         IF (i==dim_rap) CALL errore('find_factor_system',&
+                                     'one row of the matrix is zero',1)
+      END DO
+      !
+      !   check that all the rest of the matrix adjusted with the phase
+      !   coincides with the product matrix
+      !
+      DO ksym=1,dim_rap
+         DO lsym=1,dim_rap
+            IF (ABS(phase(isym,jsym)*sym_mat(ksym,lsym,prd(isym,jsym))-   &
+                        c_mat(ksym,lsym)) > 1.D-4)  THEN
+               WRITE(stdout,'(5x,"isym, jsym",4i5)') isym, jsym, ksym, lsym
+               WRITE(stdout,'(5x,"Phase",2f15.5)') phase(isym,jsym)
+               WRITE(stdout,'(5x,"phase*mat",2f15.5," product",2f15.5)')  &
+                     phase(isym,jsym)*sym_mat(ksym,lsym,prd(isym,jsym)),  &
+                     c_mat(ksym,lsym) 
+               CALL errore('find_factor_system','wrong phase',1)
+            END IF
+         END DO
+      END DO
+   END DO
+END DO
+
+IF (verbosity) CALL write_group_table(group_desc, nsym, phase)
+
+RETURN
+END SUBROUTINE find_factor_system
 
 END MODULE point_group
 
