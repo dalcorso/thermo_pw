@@ -1,3 +1,4 @@
+!
 ! Copyright (C) 2016 Andrea Dal Corso
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
@@ -19,8 +20,11 @@ SUBROUTINE write_ph_dispersions()
   !  routine exits.
   !
   USE kinds,      ONLY : DP
+  USE constants,  ONLY : pi
   USE mp_images,  ONLY : my_image_id, root_image
   USE io_global,  ONLY : ionode, stdout
+  USE proj_rap_point_group, ONLY : code_groupq_ext, qptype, lqproj, qgauge
+  USE point_group,   ONLY : nsym_group
   USE constants,  ONLY : ry_to_cmm1
   USE ions_base,  ONLY : nat, tau, ityp, nsp, amass
   USE symm_base,  ONLY : set_sym
@@ -42,8 +46,11 @@ SUBROUTINE write_ph_dispersions()
   CHARACTER(LEN=15), ALLOCATABLE :: name_rap_mode(:)
   REAL(DP) :: ps, qh, dq(3), q1(3), q2(3), modq1, modq2, dqmod, dqmod_save
   REAL(DP), ALLOCATABLE :: w2(:,:)
-  INTEGER, ALLOCATABLE :: num_rap_mode(:,:), qcode_group(:), aux_ind(:)
-  INTEGER :: qcode_old
+  INTEGER, ALLOCATABLE :: num_rap_mode(:,:), qcode_group(:), aux_ind(:), &
+                          qcode_group_ext(:), ptypeq(:,:), lprojq(:)
+  REAL(DP), ALLOCATABLE :: gaugeq(:,:)
+
+  INTEGER :: qcode_old, isym
   LOGICAL, ALLOCATABLE :: high_sym(:)
   LOGICAL :: check_file_exists
   !
@@ -67,6 +74,7 @@ SUBROUTINE write_ph_dispersions()
   ALLOCATE(freq_save(3*nat, disp_nqs))
   ALLOCATE(z_save(3*nat, 3*nat, disp_nqs))
   ALLOCATE(w2(3*nat, disp_nqs))
+
 !
 !  we always need the eigenvectors to make the symmetry analysis
 !
@@ -91,6 +99,10 @@ SUBROUTINE write_ph_dispersions()
   ALLOCATE ( high_sym(nq) )
   ALLOCATE ( qcode_group(nq) )
   ALLOCATE ( name_rap_mode(3*nat) )
+  ALLOCATE ( qcode_group_ext(nq) )
+  ALLOCATE ( lprojq(nq) )
+  ALLOCATE ( ptypeq(3,nq) )
+  ALLOCATE ( gaugeq(48,nq) )
 
   IF (xmldyn) CALL set_sym(nat, tau, ityp, nspin_mag, m_loc, nr1_save, &
                                                       nr2_save, nr3_save )
@@ -131,6 +143,10 @@ SUBROUTINE write_ph_dispersions()
                     w2(:,n),z_save(:,:,n),tau,ityp,amass,name_rap_mode, &
                     num_rap_mode(:,n), nspin_mag, qcode_old)
         qcode_group(n)=code_group
+        qcode_group_ext(n)=code_groupq_ext
+        ptypeq(:,n)=qptype(:)
+        lprojq(n)=lqproj
+        gaugeq(:,n)=qgauge(:)
         IF (n==1) THEN
            code_group_old=code_group
         ELSE
@@ -162,6 +178,11 @@ SUBROUTINE write_ph_dispersions()
 !  At gamma the group is the point group of the solid
 !
         qcode_group(n)=code_group_save
+        qcode_group_ext(n)=0
+        ptypeq(:,n)=1
+        lprojq(n)=0
+        gaugeq(:,n)=0.0_DP
+
         WRITE(stdout, '(/,5x,"Mode symmetry analysis not available &
                                                       &for this point")') 
         WRITE(stdout, '(/,5x,70("*"))')
@@ -199,9 +220,15 @@ SUBROUTINE write_ph_dispersions()
         OPEN (UNIT=2,FILE=TRIM(filename),STATUS='unknown',FORM='formatted')
         WRITE(2, '(" &plot_rap nbnd_rap=",i6,", nks_rap=",i6," /")') 3*nat, nq
         DO n=1, nq
-           WRITE(2,'(10x,3f10.6,l6,2i6)') disp_q(1,n), disp_q(2,n), &
+           WRITE(2,'(10x,3f10.6,l6,7i6)') disp_q(1,n), disp_q(2,n), &
                                           disp_q(3,n), high_sym(n),&
-                                          qcode_group(n), aux_ind(n) 
+                                          qcode_group(n), aux_ind(n), &
+                                          qcode_group_ext(n), &
+                                          ptypeq(1:3,n), lprojq(n)
+           IF (lprojq(n)==1) &
+              WRITE (2, '(5f16.11)') (gaugeq(isym,n)/pi, isym=1,&
+                                            nsym_group(qcode_group(n)))
+
            WRITE(2,'(6i10)') (num_rap_mode(i,n), i=1,3*nat)
         END DO
         CLOSE(unit=2)
@@ -215,8 +242,11 @@ SUBROUTINE write_ph_dispersions()
   DEALLOCATE (z_save) 
   DEALLOCATE (num_rap_mode)
   DEALLOCATE (name_rap_mode)
-  DEALLOCATE (qcode_group)
   DEALLOCATE (high_sym)
+  DEALLOCATE (qcode_group)
+  DEALLOCATE (ptypeq)
+  DEALLOCATE (qcode_group_ext)
+  DEALLOCATE (lprojq)
   disp_nqs=0
   !
   RETURN
@@ -227,11 +257,16 @@ SUBROUTINE find_representations_mode_q ( nat, ntyp, xq, w2, u, tau, ityp, &
 
   USE kinds,      ONLY : DP
   USE cell_base,  ONLY : at, bg
-  USE symm_base,  ONLY : find_sym, s, sr, ftau, irt, nsym, &
+  USE symm_base,  ONLY : find_sym, s, invs, sr, ftau, irt, nsym, &
                          nrot, t_rev, time_reversal, sname, copy_sym, &
-                         s_axis_to_cart
+                         s_axis_to_cart, inverse_s
+  USE fft_base,   ONLY : dfftp
+  USE control_pwrun, ONLY : nr1_save, nr2_save, nr3_save
   USE lr_symm_base, ONLY : gi, nsymq
   USE rap_point_group,  ONLY : code_group, gname
+  USE proj_rap_point_group, ONLY : lqproj, qptype, which_elem, group_desc, &
+                                   code_groupq_ext
+  USE point_group, ONLY : find_group_info_ext
   USE io_global, ONLY : stdout
 
   IMPLICIT NONE
@@ -242,45 +277,73 @@ SUBROUTINE find_representations_mode_q ( nat, ntyp, xq, w2, u, tau, ityp, &
   COMPLEX(DP), INTENT(IN) :: u(3*nat,3*nat)
   CHARACTER(15), INTENT(OUT) :: name_rap_mode(3*nat)
   INTEGER, INTENT(OUT) :: num_rap_mode(3*nat)
-  REAL(DP) :: gimq (3), sr_is(3,3,48), rtau(3,48,nat)
+  REAL(DP) :: gimq (3), sr_is(3,3,48), rtau(3,48,nat), ft(3,48), &
+              wrk(3,48)
+  INTEGER :: gii(3, 48), ptype(3)
+  REAL(DP) :: argument(48,48)
   INTEGER :: irotmq, isym, i, ierr
   LOGICAL :: minus_q, search_sym, sym(48), magnetic_sym
-  LOGICAL :: symmorphic_or_nzb
+  LOGICAL :: symmorphic_or_nzb, lwrite
 !
 !  find the small group of q
 !
   time_reversal=.TRUE.
+  minus_q=.TRUE.
   IF (.NOT.time_reversal) minus_q=.FALSE.
-
 
   sym(1:nsym)=.true.
   call smallg_q (xq, 0, at, bg, nsym, s, ftau, sym, minus_q)
   nsymq=copy_sym(nsym,sym )
-  call s_axis_to_cart ()
+  CALL s_axis_to_cart ()
   CALL set_giq (xq,s,nsymq,nsym,irotmq,minus_q,gi,gimq)
+  CALL inverse_s()
+  wrk(:,1:nsymq)=gi(:,1:nsymq)
+  CALL cryst_to_cart (nsymq, wrk, at, -1)
+  gii(:,1:nsymq)=NINT(wrk(:,1:nsymq))
 !
 !  if the small group of q is non symmorphic,
 !  search the symmetries only if there are no G such that Sq -> q+G
 !
-  search_sym=symmorphic_or_nzb(ftau)
+  search_sym=symmorphic_or_nzb()
 !
 !  Set the representations tables of the small group of q and
 !  find the mode symmetry
 !
   IF (search_sym) THEN
+     lqproj=0
+     qptype=1
      magnetic_sym=(nspin_mag==4)
      CALL prepare_sym_analysis(nsymq,sr,t_rev,magnetic_sym)
+     CALL find_group_info_ext(nsymq,sr,code_group,code_groupq_ext, &
+                                                    which_elem, group_desc)
      sym (1:nsym) = .TRUE.
      CALL sgam_ph_new (at, bg, nsym, s, irt, tau, rtau, nat)
-     CALL find_mode_sym_new (u, w2, tau, nat, nsymq, sr, irt, xq,    &
+     CALL find_mode_sym_new (u, w2, tau, nat, nsymq, s, sr, irt, xq,    &
              rtau, amass, ntyp, ityp, 1, .FALSE., .FALSE., num_rap_mode, ierr)
 
      IF (code_group/=qcode_old) CALL write_group_info(.TRUE.)
      CALL print_mode_sym(w2, num_rap_mode, .FALSE.)
      
   ELSE
-     WRITE(stdout,'(/,5x,"Zone border point and nonsymmorphic operations",/)')
-     CALL find_group(nsymq,sr,gname,code_group)
+     WRITE(stdout,'(/,5x,"Zone border point and nonsymmorphic operations. &
+                                                                   &Using")')
+
+     DO isym = 1, nsymq
+        ft(1,isym) = DBLE(ftau(1,isym)) / DBLE(nr1_save)
+        ft(2,isym) = DBLE(ftau(2,isym)) / DBLE(nr2_save)
+        ft(3,isym) = DBLE(ftau(3,isym)) / DBLE(nr3_save)
+     END DO
+     lqproj=1
+
+     CALL prepare_sym_analysis_proj(nsymq,s,sr,ft,gii,ptype,qcode_old)
+
+     CALL sgam_ph_new (at, bg, nsym, s, irt, tau, rtau, nat)
+     CALL find_mode_sym_proj (u, w2, tau, nat, nsymq, s, sr, ft, gii, invs, &
+                           irt, xq, rtau, amass, ntyp, ityp, 1, .FALSE., &
+                           .FALSE., num_rap_mode, ierr)
+
+     CALL print_mode_sym_proj(w2, num_rap_mode, ptype)
   ENDIF
+
   RETURN
 END SUBROUTINE find_representations_mode_q

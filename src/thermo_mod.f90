@@ -548,6 +548,31 @@ MODULE control_2d_bands
                          ! on vacuum is subtracted
 END MODULE control_2d_bands
 
+MODULE proj_rap_point_group
+
+  USE kinds, ONLY: DP
+  SAVE
+
+  INTEGER ::  which_elem(48)   ! for each symmetry element says which 
+                               ! element it is in the list of symmetry
+                               ! operations of that group.
+  INTEGER ::  group_desc(48)   ! for each symmetry of the list of
+                               ! operation of a given group says which
+                               ! element it is in the global list of
+                               ! symmetry operations
+  INTEGER :: nrap_proj         ! number of projective representations
+  INTEGER :: nsym_proj         ! number of symmetry elements of the group
+  INTEGER :: code_groupq_ext   ! the extended code of the point group
+  INTEGER :: qptype(3)         ! the ptype of the present q
+  REAL(DP) :: qgauge(48)        ! the gauge of the current q
+  INTEGER :: lqproj            ! if .true. the present q is projective
+  COMPLEX(DP) :: char_mat_proj(48,48)
+  CHARACTER(LEN=45)  :: name_rap_proj(48)  ! the name of each projective
+                                 ! irreducible projective representation
+END MODULE proj_rap_point_group
+
+
+
 MODULE control_eldos
 
   USE kinds, ONLY: DP

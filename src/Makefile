@@ -28,11 +28,15 @@ deallocate_thermo.o \
 deallocate_thermo.o \
 do_pwscf.o \
 do_berry.o \
+do_phonon.o \
 dos_sub.o \
+dynmatrix_tpw.o \
 elastic_constants_t.o \
 ev_sub.o \
 float_to_char.o \
 find_symmetry.o \
+find_band_sym_proj.o \
+find_mode_sym_proj.o \
 generate_k_along_lines_kz.o \
 initialize_thermo_work.o \
 interpolate_cv.o \

@@ -34,8 +34,9 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
   USE cell_base,     ONLY : celldm
   USE thermo_mod,    ONLY : tot_ngeo
   USE thermo_sym,    ONLY : code_group_save
-  USE constants,     ONLY : rytoev
-  USE point_group,   ONLY : convert_rap, has_sigma_h
+  USE constants,     ONLY : rytoev, pi
+  USE point_group,   ONLY : convert_rap, has_sigma_h, nsym_group, &
+                            convert_rap_new
   USE ions_base,     ONLY : nat
   USE ener,          ONLY : ef
   USE klist,         ONLY : degauss, nelec
@@ -55,23 +56,26 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
   REAL(DP) :: emin, emax, eps=1.d-4
   REAL(DP) :: dxmod, dxmod_save, eref, modk1, modk2
   INTEGER, ALLOCATABLE :: nbnd_rapk(:,:), rap(:,:), rap_eff(:,:), gcodek(:), &
-                          aux_ind(:), gcodek_eff(:), aux_ind_eff(:)
+                          aux_ind(:), gcodek_eff(:), aux_ind_eff(:), &
+                          ptypek(:,:), ptypek_eff(:,:), gcodek_ext(:), &
+                          gcodek_ext_eff(:), lprojk(:), lprojk_eff(:)
   INTEGER, ALLOCATABLE :: start_rapk(:,:)
   INTEGER, ALLOCATABLE :: start_point(:), last_point(:), nrap(:)
   INTEGER, ALLOCATABLE :: start_point_eff(:), last_point_eff(:), rapin(:)
   INTEGER, ALLOCATABLE :: nrap_plot_eff(:), rap_plot_eff(:,:), nbnd_count(:)
   INTEGER, ALLOCATABLE :: label_disp_q_eff(:)
   INTEGER :: nks = 0, nbnd = 0, nlines, nks_
-  INTEGER :: code_group_line, nband_occ
+  INTEGER :: code_group_line, code_group_ext_line, nband_occ
   INTEGER :: nks_rap = 0, nbnd_rap = 0
   INTEGER :: ilines, irap, ibnd, ipoint, jnow, ios, i, j, n, ik, ikz, &
              ike, ik2, spe, lpe, nbc, iq, tot_points, ishift, ierr
   INTEGER :: start_shift, last_shift, central_geo
+  REAL(DP), ALLOCATABLE :: gaugek(:,:), gaugek_eff(:,:)
   REAL(DP) :: factor_dx, sizeb, sizec
   LOGICAL, ALLOCATABLE :: high_symmetry(:), is_in_range(:), &
                           is_in_range_rap(:), has_points(:,:), &
                           lsurface_state_eff(:,:)
-  LOGICAL :: exist_rap, type1
+  LOGICAL :: exist_rap, type1, lso
   CHARACTER(LEN=256) :: filename, filedata, fileout
   CHARACTER(LEN=6), EXTERNAL :: int_to_char
   CHARACTER(LEN=11) :: group_name
@@ -81,7 +85,9 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
 
   IF ( my_image_id /= root_image ) RETURN
 
-
+  lso=.FALSE.
+  IF (icode==1.AND.lspinorb) lso=.TRUE.
+  
   IF (icode==1.OR.icode==2) THEN
     IF (flpband == ' ') RETURN
     IF (icode==1) THEN
@@ -165,6 +171,11 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
   ALLOCATE (rap(nbnd,nks))
   ALLOCATE (gcodek(nks))
   ALLOCATE (aux_ind(nks))
+  ALLOCATE (gcodek_ext(nks))
+  ALLOCATE (lprojk(nks))
+  ALLOCATE (gaugek(48,nks))
+  ALLOCATE (ptypek(3,nks))
+
   IF (exist_rap) THEN
      ALLOCATE(k_rap(3,nks))
   ENDIF
@@ -172,19 +183,36 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
   high_symmetry=.FALSE.
   rap=-1
 
+  gcodek_ext=0
+  lprojk=0
+  gaugek=0.0_DP
+  ptypek=1
+
   IF (ionode) THEN
      ierr=0
      DO n=1,nks
         READ(1,*,end=220,err=220) (k(i,n), i=1,3 )
         READ(1,*,end=220,err=220) (e(i,n),i=1,nbnd)
         IF (exist_rap) THEN
-           READ(21,*,end=221,err=221) (k_rap(i,n),i=1,3), high_symmetry(n), &
-                                      gcodek(n), aux_ind(n)
+           IF (icode==1.OR.icode==2) THEN
+              READ(21,*,end=221,err=221) (k_rap(i,n),i=1,3), high_symmetry(n), &
+                                      gcodek(n), aux_ind(n), gcodek_ext(n),  &
+                                      ptypek(1,n), ptypek(2,n), ptypek(3,n), &
+                                      lprojk(n)
+              IF (lprojk(n)==1) THEN
+                 READ(21,*,end=221,err=221) &
+                                (gaugek(i,n),i=1,nsym_group(gcodek(n)))
+                 gaugek(:,n)=gaugek(:,n) * pi
+              ENDIF
+           ELSE
+              READ(21,*,end=221,err=221) (k_rap(i,n),i=1,3), high_symmetry(n), &
+                                         gcodek(n), aux_ind(n)
+           END IF
            READ(21,*,end=221,err=221) (rap(i,n),i=1,nbnd)
            IF (abs(k(1,n)-k_rap(1,n))+abs(k(2,n)-k_rap(2,n))+  &
                abs(k(3,n)-k_rap(3,n))  > eps .AND. icode /=3 &
                                                   .AND. icode /=4 ) THEN
-               WRITE(stdout,'("Incompatible k points in rap file")')
+               WRITE(stdout,'(/,5x,"Incompatible k points in rap file")')
                CLOSE(unit=21)
                exist_rap=.false.
            ENDIF
@@ -228,6 +256,10 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
      CALL mp_bcast(gcodek, ionode_id, intra_image_comm)
      CALL mp_bcast(aux_ind, ionode_id, intra_image_comm)
      CALL mp_bcast(high_symmetry, ionode_id, intra_image_comm)
+     CALL mp_bcast(gcodek_ext, ionode_id, intra_image_comm)
+     CALL mp_bcast(ptypek, ionode_id, intra_image_comm)
+     CALL mp_bcast(lprojk, ionode_id, intra_image_comm)
+     CALL mp_bcast(gaugek, ionode_id, intra_image_comm)
   ENDIF
   IF (identify_sur) CALL identify_surface_states(nat,nbnd,nks,e,rap)
   WRITE(stdout,'(5x,"Starting the generation of the plot",/)') 
@@ -265,12 +297,17 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
                ik2 = ik + ishift
                IF (gcodek(ike) /= gcodek(ik2)) THEN
                   rapin(:)=rap(:,ike)
-                  IF (icode==1) THEN
-                      CALL convert_rap(nbnd,rapin,rap(1,ike),&
-                       gcodek(ike), gcodek(ik2), aux_ind_sur(ik,ikz),lspinorb)
+                  IF (icode==1.OR.icode==2) THEN
+                     CALL convert_rap_new(nbnd,rapin,rap(1,ike),&
+                               gcodek_ext(ike),&
+                               gcodek_ext(ik2), aux_ind_sur(ik,ikz),&
+                               ptypek(1,ike),ptypek(1,ik2),&
+                               gaugek(1,ike),gaugek(1,ik2))
+                     gaugek(:,ike)=gaugek(:,ik2)
+                     ptypek(:,ike)=ptypek(:,ik2)
                   ELSE
                       CALL convert_rap(nbnd,rapin,rap(1,ike),&
-                       gcodek(ike), gcodek(ik2), aux_ind_sur(ik,ikz),.FALSE.)
+                       gcodek(ike), gcodek(ik2), aux_ind_sur(ik,ikz),lso)
                   ENDIF
                   gcodek(ike)=gcodek(ik2)
                   aux_ind(ike) = aux_ind(ik2)
@@ -365,6 +402,10 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
   ALLOCATE (has_points(nlines,12))
   ALLOCATE (label_disp_q_eff(nqaux))
   ALLOCATE (e_rap(nbnd,tot_points))
+  ALLOCATE (gcodek_ext_eff(tot_points))
+  ALLOCATE (ptypek_eff(3,tot_points))
+  ALLOCATE (gaugek_eff(48,tot_points))
+  ALLOCATE (lprojk_eff(tot_points))
   IF (identify_sur) THEN
      ALLOCATE(lsurface_state_eff(nbnd,tot_points))
      ALLOCATE(lsurface_state_rap(nbnd,tot_points))
@@ -387,6 +428,10 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
         rap_eff(:,ik)=rap(:,n)
         aux_ind_eff(ik)=aux_ind(n)
         gcodek_eff(ik)=gcodek(n)
+        gcodek_ext_eff(ik)=gcodek_ext(n)
+        ptypek_eff(:,ik)=ptypek(:,n)
+        gaugek_eff(:,ik)=gaugek(:,n)
+        lprojk_eff(ik)=lprojk(n)
         IF (identify_sur) lsurface_state_eff(:,ik)=lsurface_state(:,n)
         nrap_plot_eff(ik)=nrap_plot(n)
         rap_plot_eff(:,ik)=rap_plot(:,n)
@@ -591,6 +636,7 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
        spe=start_point_eff(ilines)
        lpe=last_point_eff(ilines) 
        code_group_line=gcodek_eff(spe+1)
+       code_group_ext_line=gcodek_ext_eff(spe+1)
        DO n=spe,lpe
           IF (gcodek_eff(n) /= code_group_line) THEN
 !
@@ -600,21 +646,29 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
 !
              IF (n==spe) THEN
                 rapin(:)=rap_eff(:,n)
-                IF (icode==1) THEN
-                   CALL convert_rap(nbnd,rapin,rap_eff(1,n),gcodek_eff(n), &
-                                  code_group_line, aux_ind_eff(n+1),lspinorb)
+                IF (icode==1.OR.icode==2) THEN
+!                   WRITE(6,*) 'first', k_eff(1,n), k_eff(2,n), k_eff(3,n)
+                   CALL convert_rap_new(nbnd,rapin,rap_eff(1,n),      &
+                               gcodek_ext_eff(n),code_group_ext_line, &
+                               aux_ind_eff(n+1), ptypek_eff(1,n),      &
+                               ptypek_eff(1,n+1), gaugek_eff(1,n),    &
+                               gaugek_eff(1,n+1))
                 ELSE
                    CALL convert_rap(nbnd,rapin,rap_eff(1,n),gcodek_eff(n), &
-                                  code_group_line, aux_ind_eff(n+1),.FALSE.)
+                                  code_group_line, aux_ind_eff(n+1),lso)
                 ENDIF
              ELSEIF (n==lpe) THEN
                 rapin(:)=rap_eff(:,n)
-                IF (icode==1) THEN
-                   CALL convert_rap(nbnd,rapin,rap_eff(1,n),gcodek_eff(n), &
-                                  code_group_line, aux_ind_eff(n-1),lspinorb)
+                IF (icode==1.OR.icode==2) THEN
+!                   WRITE(6,*) 'last', k_eff(1,n), k_eff(2,n), k_eff(3,n)
+                   CALL convert_rap_new(nbnd,rapin,rap_eff(1,n),      &
+                               gcodek_ext_eff(n),code_group_ext_line, &
+                               aux_ind_eff(n-1), ptypek_eff(1,n),     &
+                               ptypek_eff(1,n-1), gaugek_eff(1,n),    &
+                               gaugek_eff(1,n-1))
                 ELSE
                    CALL convert_rap(nbnd,rapin,rap_eff(1,n),gcodek_eff(n), &
-                                  code_group_line, aux_ind_eff(n-1),.FALSE.)
+                                  code_group_line, aux_ind_eff(n-1),lso)
                 ENDIF
              ELSE
                 CALL errore('plotband_sub','unexpected change of symmetry',1)
@@ -801,6 +855,10 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
   DEALLOCATE(k_eff)
   DEALLOCATE(e_eff)
   DEALLOCATE(gcodek_eff)
+  DEALLOCATE(gcodek_ext)
+  DEALLOCATE(ptypek)
+  DEALLOCATE(lprojk)
+  DEALLOCATE(gaugek)
   DEALLOCATE(aux_ind_eff)
   DEALLOCATE(start_point_eff)
   DEALLOCATE(last_point_eff)
@@ -812,6 +870,11 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
   DEALLOCATE(label_disp_q_eff)
   DEALLOCATE(rapin)
   DEALLOCATE(e_rap)
+  DEALLOCATE(gcodek_ext_eff)
+  DEALLOCATE(ptypek_eff)
+  DEALLOCATE(gaugek_eff)
+  DEALLOCATE(lprojk_eff)
+
   IF (identify_sur) THEN
      DEALLOCATE(lsurface_state_eff)
      DEALLOCATE(lsurface_state_rap)

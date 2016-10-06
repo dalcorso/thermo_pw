@@ -95,7 +95,7 @@ SUBROUTINE do_phonon_tpw(auxdyn)
      IF ( trans ) THEN
         !
         CALL phqscf_tpw()
-        CALL dynmatrix_new(iq)
+        CALL dynmatrix_tpw(iq)
         !
      END IF
      !
