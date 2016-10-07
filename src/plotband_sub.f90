@@ -194,20 +194,15 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
         READ(1,*,end=220,err=220) (k(i,n), i=1,3 )
         READ(1,*,end=220,err=220) (e(i,n),i=1,nbnd)
         IF (exist_rap) THEN
-           IF (icode==1.OR.icode==2) THEN
-              READ(21,*,end=221,err=221) (k_rap(i,n),i=1,3), high_symmetry(n), &
-                                      gcodek(n), aux_ind(n), gcodek_ext(n),  &
-                                      ptypek(1,n), ptypek(2,n), ptypek(3,n), &
-                                      lprojk(n)
-              IF (lprojk(n)==1) THEN
-                 READ(21,*,end=221,err=221) &
-                                (gaugek(i,n),i=1,nsym_group(gcodek(n)))
-                 gaugek(:,n)=gaugek(:,n) * pi
-              ENDIF
-           ELSE
-              READ(21,*,end=221,err=221) (k_rap(i,n),i=1,3), high_symmetry(n), &
-                                         gcodek(n), aux_ind(n)
-           END IF
+           READ(21,*,end=221,err=221) (k_rap(i,n),i=1,3), high_symmetry(n), &
+                                  gcodek(n), aux_ind(n), gcodek_ext(n),  &
+                                  ptypek(1,n), ptypek(2,n), ptypek(3,n), &
+                                  lprojk(n)
+           IF (lprojk(n)==1) THEN
+              READ(21,*,end=221,err=221) &
+                             (gaugek(i,n),i=1,nsym_group(gcodek(n)))
+              gaugek(:,n)=gaugek(:,n) * pi
+           ENDIF
            READ(21,*,end=221,err=221) (rap(i,n),i=1,nbnd)
            IF (abs(k(1,n)-k_rap(1,n))+abs(k(2,n)-k_rap(2,n))+  &
                abs(k(3,n)-k_rap(3,n))  > eps .AND. icode /=3 &
@@ -297,18 +292,13 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
                ik2 = ik + ishift
                IF (gcodek(ike) /= gcodek(ik2)) THEN
                   rapin(:)=rap(:,ike)
-                  IF (icode==1.OR.icode==2) THEN
-                     CALL convert_rap_new(nbnd,rapin,rap(1,ike),&
-                               gcodek_ext(ike),&
-                               gcodek_ext(ik2), aux_ind_sur(ik,ikz),&
-                               ptypek(1,ike),ptypek(1,ik2),&
-                               gaugek(1,ike),gaugek(1,ik2))
-                     gaugek(:,ike)=gaugek(:,ik2)
-                     ptypek(:,ike)=ptypek(:,ik2)
-                  ELSE
-                      CALL convert_rap(nbnd,rapin,rap(1,ike),&
-                       gcodek(ike), gcodek(ik2), aux_ind_sur(ik,ikz),lso)
-                  ENDIF
+                  CALL convert_rap_new(nbnd,rapin,rap(1,ike),&
+                            gcodek_ext(ike),&
+                            gcodek_ext(ik2), aux_ind_sur(ik,ikz),&
+                            ptypek(1,ike),ptypek(1,ik2),&
+                            gaugek(1,ike),gaugek(1,ik2))
+                  gaugek(:,ike)=gaugek(:,ik2)
+                  ptypek(:,ike)=ptypek(:,ik2)
                   gcodek(ike)=gcodek(ik2)
                   aux_ind(ike) = aux_ind(ik2)
 !
@@ -646,30 +636,20 @@ SUBROUTINE plotband_sub(icode,igeom,file_disp)
 !
              IF (n==spe) THEN
                 rapin(:)=rap_eff(:,n)
-                IF (icode==1.OR.icode==2) THEN
-!                   WRITE(6,*) 'first', k_eff(1,n), k_eff(2,n), k_eff(3,n)
-                   CALL convert_rap_new(nbnd,rapin,rap_eff(1,n),      &
-                               gcodek_ext_eff(n),code_group_ext_line, &
-                               aux_ind_eff(n+1), ptypek_eff(1,n),      &
-                               ptypek_eff(1,n+1), gaugek_eff(1,n),    &
-                               gaugek_eff(1,n+1))
-                ELSE
-                   CALL convert_rap(nbnd,rapin,rap_eff(1,n),gcodek_eff(n), &
-                                  code_group_line, aux_ind_eff(n+1),lso)
-                ENDIF
+!               WRITE(6,*) 'first', k_eff(1,n), k_eff(2,n), k_eff(3,n)
+                CALL convert_rap_new(nbnd,rapin,rap_eff(1,n),       &
+                            gcodek_ext_eff(n), code_group_ext_line, &
+                            aux_ind_eff(n+1), ptypek_eff(1,n),      &
+                            ptypek_eff(1,n+1), gaugek_eff(1,n),     &
+                            gaugek_eff(1,n+1))
              ELSEIF (n==lpe) THEN
                 rapin(:)=rap_eff(:,n)
-                IF (icode==1.OR.icode==2) THEN
 !                   WRITE(6,*) 'last', k_eff(1,n), k_eff(2,n), k_eff(3,n)
-                   CALL convert_rap_new(nbnd,rapin,rap_eff(1,n),      &
-                               gcodek_ext_eff(n),code_group_ext_line, &
-                               aux_ind_eff(n-1), ptypek_eff(1,n),     &
-                               ptypek_eff(1,n-1), gaugek_eff(1,n),    &
-                               gaugek_eff(1,n-1))
-                ELSE
-                   CALL convert_rap(nbnd,rapin,rap_eff(1,n),gcodek_eff(n), &
-                                  code_group_line, aux_ind_eff(n-1),lso)
-                ENDIF
+                CALL convert_rap_new(nbnd,rapin,rap_eff(1,n),       &
+                            gcodek_ext_eff(n), code_group_ext_line, &
+                            aux_ind_eff(n-1), ptypek_eff(1,n),      &
+                            ptypek_eff(1,n-1), gaugek_eff(1,n),     &
+                            gaugek_eff(1,n-1))
              ELSE
                 CALL errore('plotband_sub','unexpected change of symmetry',1)
              ENDIF

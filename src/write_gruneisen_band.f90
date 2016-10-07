@@ -24,6 +24,7 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
   USE control_pwrun,  ONLY : amass_save, ityp_save
   USE control_mur,    ONLY : vmin
   USE control_thermo, ONLY : ltherm_dos, ltherm_freq
+  USE point_group,    ONLY : nsym_group
   USE temperature,    ONLY : temp, ntemp
   USE mp,             ONLY : mp_bcast
   USE io_global,      ONLY : stdout, ionode, ionode_id
@@ -42,9 +43,10 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
   INTEGER :: iu_grun, iumode
   INTEGER :: poly_order
   REAL(DP), ALLOCATABLE :: poly_grun(:,:), frequency(:,:), gruneisen(:,:)
-  REAL(DP) :: vm
+  REAL(DP) :: vm, gaugek(48)
   LOGICAL, ALLOCATABLE :: high_symmetry(:), is_gamma(:)
   LOGICAL :: copy_before, exst_rap
+  INTEGER :: gcodek, aux_ind, gcodek_ext, ptypek(3), lprojk
   CHARACTER(LEN=256) :: filename, filedata, file_vec, filegrun
   CHARACTER(LEN=6), EXTERNAL :: int_to_char
 
@@ -126,7 +128,14 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
            READ(1,*,end=220,err=220)  (k(i,n), i=1,3 )
            READ(1,*,end=220,err=220)  (freq_geo(i,igeo,n),i=1,nbnd)
            IF (exst_rap) THEN
-              READ(21,*,end=220,err=220) (k_rap(i,n),i=1,3), high_symmetry(n)
+              READ(21,*,end=220,err=220) (k_rap(i,n),i=1,3), high_symmetry(n), &
+                                      gcodek, aux_ind, gcodek_ext,            &
+                                      ptypek(1), ptypek(2), ptypek(3),        &
+                                      lprojk
+              IF (lprojk==1) THEN
+                 READ(21,*,end=220,err=220) &
+                                (gaugek(i),i=1,nsym_group(gcodek))
+              ENDIF
               READ(21,*,end=220,err=220) (rap_geo(i,igeo,n),i=1,nbnd)
               IF (abs(k(1,n)-k_rap(1,n))+abs(k(2,n)-k_rap(2,n))+  &
                   abs(k(3,n)-k_rap(3,n))  > eps ) &
