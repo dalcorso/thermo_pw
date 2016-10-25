@@ -18,7 +18,7 @@ LIBOBJS	= ../lib/thermo_lib.a ../qe/thermo_qe.a ../../PHonon/PH/libph.a ../../cl
 
 TLDEPS= bindir mods libs pw
 
-all : group_name.x group_number.x crystal_point_group.x gener_2d_slab.x gener_3d_slab.x gener_nanowire.x supercell.x plot_sur_states.x translate.x elastic.x test_colors.x epsilon_tpw.x
+all : group_name.x group_number.x crystal_point_group.x gener_2d_slab.x gener_3d_slab.x gener_nanowire.x supercell.x plot_sur_states.x translate.x elastic.x test_colors.x epsilon_tpw.x hex_trig.x 
 
 libs-ph : libph.a libphaux.a
 
@@ -36,6 +36,10 @@ crystal_point_group.x : crystal_point_group.o $(PWOBJS) $(LIBOBJS)
 	$(LD) $(LDFLAGS) -o $@ crystal_point_group.o \
 		 $(LIBOBJS) $(PWOBJS) $(QEMODS) $(LIBOBJS) $(PWOBJS) $(LIBS)
 	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/crystal_point_group.x . )
+
+hex_trig.x : hex_trig.o
+	$(LD) $(LDFLAGS) -o $@ hex_trig.o 
+	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/hex_trig.x . )
 
 supercell.x : supercell.o $(PWOBJS) $(LIBOBJS)
 	$(LD) $(LDFLAGS) -o $@ supercell.o \
