@@ -47,9 +47,14 @@ PROGRAM supercell_pos
 !  nat,  integer : number of atoms
 !  'atm', tau(1), tau(2), tau(3) ! nat lines with atom name and coordinates.
 !
-USE kinds, ONLY : DP
+USE kinds,       ONLY : DP
 USE wyckoff,     ONLY : nattot, tautot, ityptot, extfortot, &
                         clean_spacegroup, sup_spacegroup
+USE wy_pos,      ONLY : wypos
+USE parser,      ONLY : read_line, get_field, field_count
+USE wrappers,    ONLY: feval_infix
+USE mp_global,   ONLY : mp_startup, mp_global_end
+USE environment, ONLY : environment_start, environment_end
 
 IMPLICIT NONE
 REAL(DP), PARAMETER :: onet = 1.0_DP / 3.0_DP, twot = 2.0_DP * onet
@@ -102,12 +107,18 @@ REAL(DP) :: celldm(6), omega, at(3,3), bg(3,3)
 ! counters and auxiliary variables
 !
 INTEGER :: which_input, iconv, units
-INTEGER :: na, iat, ia, natoms, nt, nb, i1, i2, i3, iuout
-REAL(DP) :: a, cg
+INTEGER :: na, iat, ia, natoms, nt, nb, i1, i2, i3, iuout, nfield, idx, k, &
+           ierr
+REAL(DP) :: a, cg, inp(3)
 LOGICAL :: found
+CHARACTER (LEN=256) :: input_line, field_str, wp
+CHARACTER(LEN=9) :: code='SUPERCELL'
 !
 !  Part 1 read input variables
 !
+CALL mp_startup ( start_images=.true. )
+CALL environment_start ( code )
+
 WRITE(6,'(5x," Space group (1) or standard coordinates (2)? ")')
 READ(5,*) which_input
 
@@ -117,6 +128,14 @@ IF (which_input==1) THEN
 
    WRITE(6,'(5x," Origin, unique axis b, trigonal or hexagonal? (default 1 1 1) ")')
    READ(5,*) or, unb, trig
+   uniqueb=.FALSE.
+   rhombohedral=.FALSE.
+   IF (space_group_code > 2 .AND. space_group_code < 16 ) THEN 
+      uniqueb=(unb==1)
+   ELSEIF ( space_group_code > 142 .AND. space_group_code < 168) THEN
+      rhombohedral=(trig==1)
+   ENDIF
+   origin_choice=or
 ELSE
    WRITE(6,'(5x," Bravais lattice code ibrav (as in QE)? ")')
    READ(5,*) ibrav
@@ -153,7 +172,62 @@ IF (which_input==1) THEN
    ALLOCATE(rd_for(3,ineq_nat))
 
    DO na=1, ineq_nat
-      READ(5,*) label(na), ineq_tau(1,na), ineq_tau(2,na), ineq_tau(3,na)
+      CALL read_line( input_line )
+      WRITE(6,*) TRIM(input_line)
+      CALL field_count( nfield, input_line )
+      !
+      ! read atom symbol (column 1)
+      !
+      CALL get_field(1, label(na), input_line)
+      label(na) = TRIM(label(na))
+      !
+      !
+      ! read field 2 (atom X coordinate or Wyckoff position symbol)
+      !
+      CALL get_field(2, field_str, input_line)
+      !     
+      ! Check if position na is expressed in wyckoff positions
+      !
+      idx = LEN_TRIM(field_str)
+      IF ( (idx < 4) .AND. &
+          ( IACHAR(field_str(idx:idx)) > 64 .AND. &
+            IACHAR(field_str(idx:idx)) < 123 ) ) THEN
+
+         IF ( nfield < 3 .and. nfield > 8 ) &
+         CALL errore( 'supercell', 'wrong number of columns ' // &
+                        & 'in ATOMIC_POSITIONS', na )
+         wp=field_str
+         inp(:)=1.d5
+         !
+         DO k = 3,MIN(nfield,5)
+            ! read k-th field (coordinate k-2)
+            CALL get_field(k, field_str, input_line)
+            inp(k-2) = feval_infix(ierr, field_str )
+            CALL errore('supercell', 'error reading field', ierr)
+         ENDDO
+
+         CALL wypos(ineq_tau(1,na),wp,inp,space_group_code, &
+                 uniqueb,rhombohedral,origin_choice)
+
+      ELSE
+         ! 
+         ! no wyckoff positions 
+         !
+         IF ( nfield /= 4 .and. nfield /= 7 ) &
+         CALL errore( 'supercell', 'wrong number of columns ' // &
+                        & 'in ATOMIC_POSITIONS', ia )
+         !
+         ! field just read is coordinate X
+         !
+         ineq_tau(1,na) = feval_infix(ierr, field_str )
+         CALL errore('supercell','error reading field', ierr)
+         DO k = 3,4
+            ! read fields 3 and 4 (atom Y and Z coordinate)
+            CALL get_field(k, field_str, input_line)
+            ineq_tau(k-1,na) = feval_infix(ierr, field_str )
+            CALL errore('supercell', 'error reading field', ierr)
+         END DO
+      ENDIF
    ENDDO
 
    ntyp=0
@@ -180,14 +254,6 @@ IF (which_input==1) THEN
       ENDDO
    ENDDO
    
-   uniqueb=.FALSE.
-   rhombohedral=.FALSE.
-   IF (space_group_code > 2 .AND. space_group_code < 16 ) THEN 
-      uniqueb=(unb==1)
-   ELSEIF ( space_group_code > 142 .AND. space_group_code < 168) THEN
-      rhombohedral=(trig==1)
-   ENDIF
-   origin_choice=or
    rd_for=0.0_DP
    if_pos=0
 
@@ -504,6 +570,9 @@ DEALLOCATE(ityp_new)
 DEALLOCATE(tau_new)
 DEALLOCATE(all_tau)
 DEALLOCATE(all_ityp)
+
+CALL environment_end( code )
+CALL mp_global_end ()
 
 END PROGRAM supercell_pos
 
