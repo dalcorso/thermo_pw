@@ -15,6 +15,16 @@ MODULE rotate
 !  rotate_tensors2: takes a set of rank two tensors, a rotation matrix
 !               and gives the rotated rank two tensors.
 !
+!  find_su2_euler: takes three euler angles psi, theta, phi and gives the
+!               Cayley Klein parameters of the su2 rotation
+!
+!  find_rotation: given three 3D vectors at(3,3) obtained by rotating three
+!                 vectors at1(3,3) and the vectors at1(3,3), the routine 
+!                 finds the rotation matrix that brings the at1 into the at.
+!
+!  is_rotation: a function that receives a 3x3 matrix and returns .true.
+!               if it is a rotation matrix
+!
   USE kinds,      ONLY : DP
   !
   IMPLICIT NONE
@@ -22,7 +32,8 @@ MODULE rotate
   SAVE
 
 
-  PUBLIC rotate_vect, rotate_tensors2
+  PUBLIC rotate_vect, rotate_tensors2, euler_to_su2, find_rotation, &
+         is_rotation
 
 CONTAINS
    SUBROUTINE rotate_vect(rot, n, a, ra, flag)
@@ -103,5 +114,82 @@ CONTAINS
 
    RETURN
    END SUBROUTINE rotate_tensors2
+
+
+SUBROUTINE euler_to_su2(psi,theta,phi,a,b)
+
+USE kinds, ONLY : DP
+IMPLICIT NONE
+REAL(DP), INTENT(IN) :: psi, theta, phi
+COMPLEX(DP), INTENT(OUT) :: a, b
+
+REAL(DP) :: arg
+
+arg = -(phi + psi)*0.5_DP
+a=COS(theta/2.0_DP) * CMPLX( COS(arg), SIN(arg), KIND=DP )
+
+arg = (phi - psi)*0.5_DP
+b=SIN(theta/2.0_DP) * CMPLX( COS(arg), SIN(arg), KIND=DP ) * (0.0_DP, -1.0_DP)
+
+RETURN
+END SUBROUTINE euler_to_su2
+
+SUBROUTINE find_rotation(at,at1,sr)
+!
+!   This routine receives six vectors at and at1. The three vectors
+!   at are obtained by applying a matrix sr to the vectors at1. 
+!   The routines gives as output the matrix sr. You can
+!   check if it is a rotation with the is_rotation function.
+!   at, at1, and sr are all in Cartesian coordinates.
+!
+USE kinds, ONLY : DP
+IMPLICIT NONE
+
+REAL(DP), INTENT(IN) :: at(3,3), at1(3,3)
+REAL(DP), INTENT(OUT) :: sr(3,3)
+
+REAL(DP) :: bg(3,3)
+INTEGER :: ipol, jpol
+
+CALL recips(at1(1,1), at1(1,2), at1(1,3), bg(1,1), bg(1,2), bg(1,3)) 
+
+DO ipol=1,3
+   DO jpol=1,3
+      sr(ipol,jpol)=at(ipol,1) * bg(jpol,1) +  &
+                    at(ipol,2) * bg(jpol,2) +  &
+                    at(ipol,3) * bg(jpol,3) 
+   END DO
+END DO
+
+RETURN
+END SUBROUTINE find_rotation
+
+LOGICAL FUNCTION is_rotation(rmat)
+!
+!  This function receives a 3x3 real matrix  becomes .TRUE. if
+!  it is a rotation.
+!
+USE kinds, ONLY : DP
+IMPLICIT NONE
+REAL(DP), INTENT(IN) :: rmat(3,3)
+
+REAL(DP) :: unity(3,3)
+REAL(DP), PARAMETER :: eps1=1.D-8
+INTEGER :: ipol, jpol
+
+unity = matmul(rmat, TRANSPOSE(rmat))
+
+is_rotation=.TRUE.
+DO ipol=1,3
+   is_rotation = is_rotation .AND. ABS(unity(ipol,ipol)-1.0_DP) < eps1
+   DO jpol=ipol+1,3
+      is_rotation = is_rotation .AND. ( ABS(unity(ipol,jpol)) < eps1 ) .AND. &
+                                      ( ABS(unity(jpol,ipol)) < eps1 )
+   END DO 
+END DO
+
+
+RETURN
+END FUNCTION is_rotation
 
 END MODULE rotate
