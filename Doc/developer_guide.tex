@@ -6,7 +6,7 @@
 %! or http://www.gnu.org/copyleft/gpl.txt .
 %!
 \documentclass[12pt,a4paper]{article}
-\def\version{0.6.0}
+\def\version{0.7.0}
 \def\qe{{\sc Quantum ESPRESSO}}
 \def\tpw{{\sc THERMO\_PW}}
 
@@ -659,7 +659,11 @@ following modules:
 
 \item \texttt{lattices.f90} contains routines to deal with Bravais lattices.
 Presently there is a routine to calculate the primitive cell of
-a given centered cell.
+a given centered cell. There are routines to find the ibrav code and the
+celldm parameters given the primitive lattice vectors. There is a routine
+that finds if two sets of primitive lattice vectors define the same 
+Bravais lattice. A routine finds the point group of the Bravais lattice
+given the primitive vectors.
 
 \item
 \texttt{latgen\_2d.f90} contains routines to deal with two dimensional
@@ -673,6 +677,8 @@ plot of the two-dimensional Brillouin zones.
 \item
 \texttt{rotate.f90} contains routines to deal with rotations. Presently it
 applies a given rotation to a vector or to a tensor.
+It finds the rotation that transform three vectors in other three vectors,
+assuming that one sets is the rotated of the other set.
 
 \item
 \texttt{space\_groups.f90} contains routines to detect the space group,
@@ -685,7 +691,13 @@ point groups. Given a representation of a given group it can find
 the subgroups representations that correspond to it (also for
 double groups). It has the same conventions as the routines 
 in \texttt{find\_group.f90}, \texttt{divide\_class.f90}, and 
-\texttt{divide\_class\_so.f90} of \qe.
+\texttt{divide\_class\_so.f90} of \qe. The module has now routines to
+set the projective irreducible representations of a point group.
+It has routines to find the gauge that transforms a given projective
+representation in one of the standard forms. It has routines to decompose
+a projective representation into representations of a subgroups.
+It has routines that finds all the subgroups or supergroups of a given given
+point group.
 
 \item
 \texttt{eldos\_module.f90} contains routines to calculate the electronic

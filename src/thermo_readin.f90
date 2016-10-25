@@ -21,7 +21,8 @@ SUBROUTINE thermo_readin()
                                    fact_ngeo, max_geometries, start_geo, &
                                    jump_geo
   USE control_thermo,       ONLY : outdir_thermo, after_disp, with_eigen,  &
-                                   do_scf_relax, ltherm_dos, ltherm_freq
+                                   do_scf_relax, ltherm_dos, ltherm_freq,  &
+                                   continue_zero_ibrav, find_ibrav
   USE data_files,           ONLY : flevdat, flfrc, flfrq, fldos, fltherm,  &
                                    flanhar, filband, flkeconv,             &
                                    flenergy, flpbs, flprojlayer,           &
@@ -36,6 +37,8 @@ SUBROUTINE thermo_readin()
                                    phdos_sigma
   USE input_parameters,     ONLY : outdir,ibrav, forc_conv_thr, max_seconds, &
                                    calculation
+  USE input_parameters, ONLY : a, b, c, cosab, cosac, cosbc, &
+                               trd_ht, rd_ht, cell_units
   USE read_input,           ONLY : read_input_file
   USE command_line_options, ONLY : input_file_ 
   USE control_paths,        ONLY : xqaux, wqaux, wqauxr, npk_label, letter, &
@@ -79,10 +82,12 @@ SUBROUTINE thermo_readin()
   USE piezoelectric_tensor, ONLY : nppl
   USE control_pwrun,        ONLY : celldm_save, ibrav_save, ityp_save, &
                                    amass_save
+  USE lattices,             ONLY : find_ibrav_code
   USE control_ph,           ONLY : xmldyn
   USE output,               ONLY : fildyn
-  USE cell_base,            ONLY : at, bg, celldm
-  USE ions_base,            ONLY : nat, tau, ntyp => nsp, ityp, amass
+  USE cell_base,            ONLY : at, bg, celldm, cell_base_init
+  USE ions_base,            ONLY : nat, tau, ntyp => nsp, ityp, amass, atm, &
+                                   if_pos
   USE symm_base,            ONLY : nosym
   USE mp_world,             ONLY : world_comm
   USE mp_images,            ONLY : nimage, my_image_id, root_image
@@ -101,7 +106,7 @@ SUBROUTINE thermo_readin()
   CHARACTER(LEN=256) :: asy_filename
   INTEGER, ALLOCATABLE :: iun_image(:)
   INTEGER :: image
-  INTEGER :: iq, ipol, i, j, k, igeo, icont
+  INTEGER :: iq, ipol, i, j, k, igeo, icont, ia, jpol
   INTEGER :: iun_thermo, parse_unit_save
 
   INTEGER :: nch, nrp, ierr
@@ -109,6 +114,8 @@ SUBROUTINE thermo_readin()
   LOGICAL :: has_xml
   CHARACTER(LEN=256) :: input_line, buffer
   REAL(DP) :: wq0, max_seconds_
+  REAL(DP) :: ur(3,3), global_s(3,3), omega, alat_save
+  REAL(DP), PARAMETER :: eps1=1D-8
   !
   NAMELIST / input_thermo / what, ngeo, zasr,               &
                             flfrc, flfrq, fldos, fltherm,   &
@@ -126,6 +133,8 @@ SUBROUTINE thermo_readin()
                             lsolve,                         &
                             show_fit,                       &
                             max_seconds,                    &
+                            continue_zero_ibrav,            &
+                            find_ibrav,                     &
                             nq1_d, nq2_d, nq3_d,            &
                             nk1_d, nk2_d, nk3_d,            &
                             k1_d, k2_d, k3_d,               &
@@ -240,6 +249,9 @@ SUBROUTINE thermo_readin()
   ntemp=1
   
   pressure=0.0_DP
+
+  continue_zero_ibrav=.FALSE.
+  find_ibrav=.FALSE.
 
   nbnd_bands=0
   emin_input=0.0_DP
@@ -611,10 +623,79 @@ SUBROUTINE thermo_readin()
   outdir_thermo=outdir
   CALL iosys()
   max_seconds=max_seconds_
+  ALLOCATE(tau_save(3,nat))
+  IF (ibrav==0.AND..NOT.continue_zero_ibrav) THEN
+     alat_save=celldm(1)
+     at=at*alat_save
+     CALL find_ibrav_code(at(1,1),at(1,2),at(1,3),ibrav,celldm,ur,&
+                                                  global_s,.FALSE.)
+     a=0.0_DP
+     b=0.0_DP
+     c=0.0_DP
+     cosab=0.0_DP
+     cosac=0.0_DP
+     cosbc=0.0_DP
+     trd_ht=.FALSE.
+     rd_ht=0.0_DP
+     cell_units='alat'
+
+     CALL cell_base_init(ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
+                      trd_ht, rd_ht, cell_units )
+
+     tau_save=tau*alat_save
+     tau=0.0_DP
+     DO ia=1,nat
+        DO ipol=1,3
+           DO jpol=1,3
+              tau(ipol,ia)=tau(ipol,ia) + global_s(jpol,ipol)*tau_save(jpol,ia)
+           ENDDO
+        ENDDO
+     ENDDO
+     tau=tau/celldm(1)
+
+     WRITE(stdout,'(/,5x,"ibrav=0, please use:")')  
+     WRITE(stdout,'(/,5x,"ibrav=",i3,",")') ibrav
+     WRITE(stdout,'(5x,"celldm(1)= ", f15.10,",")') celldm(1)
+     IF (ABS(celldm(2))>eps1) &
+        WRITE(stdout,'(5x,"celldm(2)= ", f15.10,",")') celldm(2)
+     IF (ABS(celldm(3))>eps1) &
+        WRITE(stdout,'(5x,"celldm(3)= ", f15.10,",")') celldm(3)
+     IF (ABS(celldm(4))>eps1) &
+        WRITE(stdout,'(5x,"celldm(4)= ", f15.10,",")') celldm(4)
+     IF (ABS(celldm(5))>eps1) &
+        WRITE(stdout,'(5x,"celldm(5)= ", f15.10,",")') celldm(5)
+     IF (ABS(celldm(6))>eps1) &
+        WRITE(stdout,'(5x,"celldm(6)= ", f15.10,",")') celldm(6)
+
+     WRITE(stdout,'(/,"ATOMIC COORDINATES (alat)")')
+     DO ia=1,nat
+        IF (if_pos(1,ia) /= 1 .OR. if_pos(2,ia) /= 1 .OR. if_pos(3,ia) /=1) &
+           THEN
+           WRITE(stdout,'(a3,3f17.10,3i5)') atm(ityp(ia)), &
+                         (tau(ipol,ia),ipol=1,3), if_pos(:,ia)
+        ELSE
+           WRITE(stdout,'(a3,3f17.10)') atm(ityp(ia)), (tau(ipol,ia), ipol=1,3)
+        END IF
+     ENDDO
+ 
+
+     IF (.NOT. find_ibrav) THEN
+        WRITE(stdout,'(/,5x,"The code will now stop, modify the pw.x input")')
+        WRITE(stdout,'(5x,"or set find_ibrav=.TRUE. in thermo_control to &
+                                                   &continue ")')
+        WRITE(stdout,'(5x,"with these modified coordinates.")')
+        WRITE(stdout,'(/,5x,"Set continue_zero_ibrav=.TRUE. to continue &
+                                     &with ibrav=0 (not recommended).")')
+
+        CALL environment_end( 'THERMO_PW' )
+        !
+        CALL mp_global_end ()
+        CALL do_stop( 0 )
+     ENDIF
+  ENDIF
   at_save = at
   celldm_save=celldm
   celldm0=celldm
-  ALLOCATE(tau_save(3,nat))
   ALLOCATE(ityp_save(nat))
   ALLOCATE(amass_save(ntyp))
   ityp_save(:)=ityp(:)

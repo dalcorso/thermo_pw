@@ -357,6 +357,10 @@ MODULE control_thermo
                             ! the equilibrium crystal parameters. 
                             ! Not necessary for phonons, but used with
                             ! elastic constants and piezoelectric tensor
+  LOGICAL :: continue_zero_ibrav ! if .TRUE. run with ibrav=0
+
+  LOGICAL :: find_ibrav     ! if .TRUE. continue the calculation with the
+                            ! converted input
 
   INTEGER :: spin_component
   !

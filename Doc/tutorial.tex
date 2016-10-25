@@ -6,7 +6,7 @@
 %! or http://www.gnu.org/copyleft/gpl.txt .
 %!
 \documentclass[12pt,a4paper]{article}
-\def\version{0.6.0}
+\def\version{0.7.0}
 \def\qe{{\sc Quantum ESPRESSO}}
 \def\tpw{{\sc THERMO\_PW}}
 
@@ -91,9 +91,20 @@ The Bravais lattice is specified by an integer number \texttt{ibrav} and by the
 crystal parameters \texttt{celldm} (up to six numbers). You can find 
 information on the \texttt{ibrav} code and on the required crystal parameters
 in the file \texttt{PW/Doc/INPUT\_PW} of the \qe\ distribution. 
-In \qe\ you can use \texttt{ibrav=0} and give directly the primitive
+In \qe\ you can use \texttt{ibrav=0} and give the primitive
 lattice vectors of the Bravais lattice. Presently \thermo\ needs to
-known the Bravais lattice number so this form of input is not recommended. \\
+known the Bravais lattice number so this form of input is not recommended. 
+If you use it \thermo\ writes on output the \texttt{ibrav}, the 
+\texttt{celldm} and the new atomic coordinates that are needed to run 
+the same cell using \thermo\ and stops.
+You can therefore just cut and paste \texttt{ibrav}, \texttt{celldm} 
+and the atomic coordinates in the input of \texttt{pw.x}. Alternatively
+you can set the flag \texttt{find\_ibrav=.TRUE.} in the \thermo\ input
+and \thermo\ will make the conversion for you and run the job. By setting 
+\texttt{contiue\_zero\_ibrav=.TRUE.} instead \thermo\ will actually use your
+input coordinates and Bravais lattices vector and will run the job, but will 
+not be able to exploit the symmetry so this option is not recommended 
+except when you are deading with supercells.
 
 The positions of the atoms inside the unit cell are defined by an integer
 number \texttt{nat} (the number of atoms) and by \texttt{nat} 

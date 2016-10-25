@@ -1,5 +1,8 @@
 New in version 0.7.0
 
+Added routines to deal with Bravais lattices. The code can now
+identify the Bravais lattice from its primitive vectors.
+
 Added the projective representations of the point groups.
 
 29/08/2016 Version 0.6.0 of thermo_pw is now frozen.

@@ -6,7 +6,7 @@
 %! or http://www.gnu.org/copyleft/gpl.txt .
 %!
 \documentclass[12pt,a4paper]{article}
-\def\version{0.6.0}
+\def\version{0.7.0}
 \def\qe{{\sc Quantum ESPRESSO}}
 \def\tpw{{\sc THERMO\_PW}}
 
@@ -370,6 +370,44 @@ pressure   : The external pressure. The crystal parameters are
 \end{verbatim}
 Note that when you fix the external pressure, the geometries chosen to 
 fit the enthalpy must be about the minimum geometry at that pressure.
+
+\subsection{\color{web-blue}Coordinates and structure}
+The \texttt{thermo\_pw} code requires the Bravais lattice of the solid. 
+Moreover for computing some quantities it assumes that the direct lattice 
+vectors are those provided by the routine \texttt{latgen.f90} of the \qe\ 
+distribution. 
+For this reason it is not recommended to use \texttt{ibrav=0} in the
+\texttt{pw.x} input. The preferred method is to give the value of 
+\texttt{ibrav} and to use the primitive vectors provided by \qe.
+It is also possible to specify the \texttt{space\_group} number and 
+the coordinates of the inequivalent atoms. When the 
+\texttt{pw.x} input contains the \texttt{ibrav=0} option, 
+\texttt{thermo\_pw} writes on output
+the values of \texttt{ibrav}, \texttt{celldm}, and of the atomic coordinates
+that should be used in the input of \texttt{pw.x} to simulate the same 
+solid and stops. There are however two input variables of \texttt{thermo\_pw} 
+that can modify this behaviour:
+\begin{verbatim}
+continue_zero_ibrav : when ibrav=0 in the input of pw.x and this variable 
+             is set to .TRUE. thermo_pw runs with ibrav=0 (not recommended
+             except when you deal with a supercell). 
+             When this variable is .FALSE. and ibrav=0 the behavior 
+             depends on find_ibrav.
+             Default : logical .FALSE.
+
+find_ibrav : This variable is active only when continue_zero_ibrav=.FALSE..
+             When this variable is set to .TRUE. and the input of pw.x
+             has ibrav=0, thermo_pw finds the values of ibrav, celldm,
+             and of the atomic positions that produce the same crystal as
+             given in input and continue the calculation. The geometry 
+             used by thermo_pw might be rotated with respect to the input and
+             have different primitive vectors.
+             When this variable is .FALSE. the code stops after writing in
+             output ibrav, celldm, and the atomic positions. These variables 
+             can be copied in the pw.x input. Note that the automatic 
+             identification of the lattice does not work for supercells.
+             Default : logical .FALSE.
+\end{verbatim}
 
 \subsection{\color{web-blue}\texttt{what='scf'}}
 With this option the code computes only the total energy. This is a single
@@ -1524,8 +1562,14 @@ It can be useful to study defects or to calculate all the
 atomic positions starting from the space-group and the 
 nonequivalents positions.
 
+\item \texttt{bravais\_lattices.x} is a small tool that tests the
+module \texttt{lattices.f90} of the library. Presently it can read three
+primitive lattice vectors of a Bravais lattice and find the \texttt{ibrav} 
+code and the \texttt{celldm} parameters of the input lattice. 
+
 \item \texttt{translate.x} reads a set of atomic positions
-and translates them of a fixed vector.
+and translates them of a fixed vector. If a rotation matrix is given in input
+it can also rototranslate the set of atomic positions.
 
 \item \texttt{gener\_nanowire.x} reads a two dimensional (2D)
 Bravais lattice index and atomic coordinates an generates a sheet of type

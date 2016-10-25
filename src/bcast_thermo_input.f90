@@ -15,7 +15,8 @@ SUBROUTINE bcast_thermo_input()
                               max_geometries, start_geo, jump_geo
   USE control_mur,     ONLY : vmin_input, vmax_input, deltav, nvol, lmurn
   USE control_thermo,  ONLY : outdir_thermo, after_disp, with_eigen,          &
-                              do_scf_relax, ltherm_dos, ltherm_freq
+                              do_scf_relax, ltherm_dos, ltherm_freq,          &
+                              continue_zero_ibrav, find_ibrav
   USE control_pressure, ONLY : pressure
   USE data_files,      ONLY : flevdat, flfrc, flfrq, fldos, fltherm, flanhar, &
                               filband, flkeconv, flnkconv, flgrun, flpband,   &
@@ -73,6 +74,8 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( show_fit, meta_ionode_id, world_comm )
   CALL mp_bcast( max_seconds, meta_ionode_id, world_comm )
   CALL mp_bcast( max_geometries, meta_ionode_id, world_comm )
+  CALL mp_bcast( continue_zero_ibrav, meta_ionode_id, world_comm )
+  CALL mp_bcast( find_ibrav, meta_ionode_id, world_comm )
   CALL mp_bcast( zasr, meta_ionode_id, world_comm )
   CALL mp_bcast( flfrc, meta_ionode_id, world_comm )
   CALL mp_bcast( flfrq, meta_ionode_id, world_comm )
