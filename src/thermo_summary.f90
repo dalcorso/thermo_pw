@@ -46,12 +46,13 @@ SUBROUTINE thermo_summary()
   USE environment,          ONLY : environment_end
   USE mp_global,            ONLY : mp_global_end
   USE io_global,            ONLY : ionode, stdout
+  USE io_files,             ONLY : prefix
   USE mp,                   ONLY : mp_bcast
   !
   IMPLICIT NONE
   INTEGER :: ios
   CHARACTER(LEN=6) :: int_to_char
-  CHARACTER(LEN=256) :: asy_filename, filename
+  CHARACTER(LEN=256) :: asy_filename, filename, xsf_filename
   CHARACTER(LEN=11) :: group_name
   REAL(DP) :: total_mass, total_expected_mass, current_mass, expected_mass, fact
   REAL(DP) :: atom_weight, celldm_2d(3)
@@ -60,7 +61,7 @@ SUBROUTINE thermo_summary()
   INTEGER :: laue_class
   INTEGER :: it, ia, na, ipol, jpol, unique, trig
   LOGICAL :: read_path, lelc, lpiezo, ltherm_expansion
-  INTEGER :: ierr, system, sg_number
+  INTEGER :: ierr, iuout, system, sg_number
   LOGICAL :: check_group_ibrav
   CHARACTER(LEN=12) :: spaceg_name
   CHARACTER(LEN=11) :: gname
@@ -1065,6 +1066,17 @@ WRITE(stdout,'(5x,70("-"))')
         CALL plot_xrdp('')
      ENDIF
      CALL summarize_kpt(xqaux, wqaux, nqaux, letter_path)
+!
+!   write the xsf file for Xcrysden plot of the structure
+!
+     iuout=35
+     xsf_filename=TRIM(prefix)//'.xsf'
+     OPEN(unit=iuout, file=xsf_filename, status='unknown', &
+                                            form='formatted')
+
+     CALL xsf_struct (celldm(1), at, nat, tau, atm, ityp, iuout)
+
+     CLOSE(iuout)
 
      CALL environment_end( 'THERMO_PW' )
      !
