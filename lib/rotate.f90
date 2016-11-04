@@ -9,7 +9,8 @@
 MODULE rotate
 !
 !  This module contains all the routines that have to do with rotations.
-!  Presently it has the follofing:
+!  Presently it has the following:
+!
 !  rotate_vect: takes a set of vectors, a rotation matrix and gives the 
 !               rotated vectors.  
 !  rotate_tensors2: takes a set of rank two tensors, a rotation matrix
@@ -24,6 +25,7 @@ MODULE rotate
 !
 !  is_rotation: a function that receives a 3x3 matrix and returns .true.
 !               if it is a rotation matrix
+!
 !
   USE kinds,      ONLY : DP
   !

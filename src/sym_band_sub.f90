@@ -287,7 +287,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
      ELSE
         sizec=1.0_DP
      ENDIF
-     factor_dx = MAX(5.0_DP, 2.0_DP * sizeb, 2.0_DP * sizec, &
+     factor_dx = MAX(6.0_DP, 2.0_DP * sizeb, 2.0_DP * sizec, &
                                        2.0_DP/sizeb, 2.0_DP/sizec)
 
      high_symmetry(nks1tot:nks2tot)=high_sym_path(1:disp_nqs)

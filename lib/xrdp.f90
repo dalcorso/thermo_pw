@@ -108,7 +108,7 @@ SUBROUTINE compute_xrdp(at,bg,alat,nat,tau,ntyp,ityp,atm,&
 USE kinds, ONLY : DP
 USE constants, ONLY : pi, bohr_radius_si
 USE io_global, ONLY : ionode
-USE lattices,  ONLY : compute_primitive
+USE lattices,  ONLY : compute_conventional
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: nat, ntyp, ibrav
@@ -267,7 +267,7 @@ ENDDO
 !
 !  Find the lattice vectors of the primitive lattice given the centered ones
 !
-CALL compute_primitive(at, atc, ibrav)
+CALL compute_conventional(at, atc, ibrav)
 !
 !  Change the Miller indeces for the centered lattices, so that they
 !  are the Miller indeces of the primitive lattices

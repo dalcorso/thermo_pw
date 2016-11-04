@@ -14,7 +14,7 @@ MODULE lattices
 !
 !  compute_conventional  : this routine receives the direct lattice
 !                          vectors of a centered cell and computes the
-!                          vectors of the corresponding primitive cell.
+!                          vectors of the corresponding conventional cell.
 !                          atc in output are in the same units of the at
 !                          in input. They are in cartesian coordinates.
 !                          This routine must be matched to the routine
@@ -67,13 +67,13 @@ MODULE lattices
   PRIVATE
   SAVE
 
-  PUBLIC compute_primitive, find_ibrav_code, find_combination, &
+  PUBLIC compute_conventional, find_ibrav_code, find_combination, &
          is_bravais_lattice, same_lattice, lattice_point_group, &
          compute_omega
 
 CONTAINS
 
-  SUBROUTINE compute_primitive(at, atp, ibrav)
+  SUBROUTINE compute_conventional(at, atp, ibrav)
 
   IMPLICIT NONE
   INTEGER, INTENT(IN) :: ibrav
@@ -120,7 +120,7 @@ CONTAINS
          atp=at
   END SELECT   
   RETURN
-  END SUBROUTINE compute_primitive
+  END SUBROUTINE compute_conventional
 
   SUBROUTINE find_ibrav_code(a1, a2, a3, ibrav, celldm, ur, global_s, verbosity)
 !
@@ -392,11 +392,11 @@ CONTAINS
 !   if possible take the axis in the order x, y, z
 !
         parallel_axis=.FALSE. 
+        ncount=0
         DO ipol=1,3
            ind(ipol)=ipol
-           ncount=0
            DO jpol=1,3
-              IF (is_axis(e(1,jpol),ipol)) THEN
+              IF (is_axis(ax(1,jpol),ipol)) THEN
                  ind(ipol)=jpol
                  ncount=ncount+1
               ENDIF
@@ -705,7 +705,7 @@ REAL(DP), INTENT(IN) :: at(3,3), at2(3,3)
 REAL(DP), INTENT(OUT) :: ur(3,3), at1(3,3), sr(3,3)
 
 REAL(DP) :: amodulus(3), max_modulus, bg2(3,3), tvec(3), tmod, omega, omega0
-REAL(DP), PARAMETER :: eps1=1.D-7
+REAL(DP), PARAMETER :: eps1=1.D-6, eps2=1.D-4
 LOGICAL :: is_combination
 INTEGER, PARAMETER :: max_comb=96
 INTEGER :: ipol, ivec, nx1, nx2, nx3, comb(3,3,max_comb), nc(3), i, j, k
@@ -718,7 +718,7 @@ CALL compute_omega(at2,omega)
 !  if they have not, the  lattice is different.  
 !
 same_lattice=.FALSE.
-IF (ABS(omega-omega0)> eps1) RETURN
+IF (ABS(omega-omega0)> eps2) RETURN
 !
 !  first check if a linear combination works
 !
@@ -871,7 +871,7 @@ DO i=nx1, -nx1, -1
          tvec(:) = i * at(:,1) + j * at(:,2) + k * at(:,3)
          tmod = tvec(1)**2 + tvec(2)**2 + tvec(3)**2
          DO ipol=1,3
-            IF (ABS(tmod - amodulus(ipol))<eps1) THEN
+            IF (ABS(tmod - amodulus(ipol)) < eps1*tmod) THEN
                nc(ipol)=nc(ipol)+1
                IF (nc(ipol)> max_comb) &
                   CALL errore('lattice_point_group','increase max_comb',1)
