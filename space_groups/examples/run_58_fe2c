@@ -1,0 +1,127 @@
+#!/bin/sh
+
+# run from directory where this script is
+cd `echo $0 | sed 's/\(.*\)\/.*/\1/'` # extract pathname
+EXAMPLE_DIR=`pwd`
+
+# check whether echo has the -e option
+if test "`echo -e`" = "-e" ; then ECHO=echo ; else ECHO="echo -e" ; fi
+
+$ECHO
+$ECHO "$EXAMPLE_DIR : starting"
+$ECHO
+$ECHO "This example runs thermo_pw on a solid with space group 58 (Fe2C)"
+
+# set the needed environment variables
+. ../../../environment_variables
+
+# required executables and pseudopotentials
+BIN_LIST="thermo_pw.x"
+PSEUDO_LIST=""
+
+$ECHO
+$ECHO "  executables directory: $BIN_DIR"
+$ECHO "  pseudo directory:      $PSEUDO_DIR"
+$ECHO "  temporary directory:   $TMP_DIR"
+$ECHO "  checking that needed directories and files exist...\c"
+
+# check for directories
+for DIR in "$BIN_DIR" "$PSEUDO_DIR" ; do
+    if test ! -d $DIR ; then
+        $ECHO
+        $ECHO "ERROR: $DIR not existent or not a directory"
+        $ECHO "Aborting"
+        exit 1
+    fi
+done
+for DIR in "$TMP_DIR" "$EXAMPLE_DIR/res_58_fe2c" ; do
+    if test ! -d $DIR ; then
+        mkdir $DIR
+    fi
+done
+cd $EXAMPLE_DIR/res_58_fe2c
+
+# check for executables
+for FILE in $BIN_LIST ; do
+    if test ! -x $BIN_DIR/$FILE ; then
+        $ECHO
+        $ECHO "ERROR: $BIN_DIR/$FILE not existent or not executable"
+        $ECHO "Aborting"
+        exit 1
+    fi
+done
+
+# check for pseudopotentials
+for FILE in $PSEUDO_LIST ; do
+    if test ! -r $PSEUDO_DIR/$FILE ; then
+       $ECHO
+       $ECHO "Downloading $FILE to $PSEUDO_DIR...\c"
+            $WGET $PSEUDO_DIR/$FILE $NETWORK_PSEUDO/$FILE 2> /dev/null
+    fi
+    if test $? != 0; then
+        $ECHO
+        $ECHO "ERROR: $PSEUDO_DIR/$FILE not existent or not readable"
+        $ECHO "Aborting"
+        exit 1
+    fi
+done
+$ECHO " done"
+
+# how to run executables
+THERMO_PW_COMMAND="$PARA_IMAGE_PREFIX $BIN_DIR/thermo_pw.x $PARA_IMAGE_POSTFIX"
+# check for gnuplot
+$ECHO
+$ECHO "  running thermo_pw.x as: $THERMO_PW_COMMAND"
+$ECHO
+
+$ECHO "  cleaning $TMP_DIR...\c"
+rm -rf $TMP_DIR/g*/fe2c*
+$ECHO " done"
+
+cat > thermo_control << EOF
+ &INPUT_THERMO
+  what='plot_bz',
+ /
+EOF
+
+cat > fe2c.scf_bands.in << EOF
+ &control
+  calculation = 'scf'
+  prefix='fe2c',
+  pseudo_dir = '$PSEUDO_DIR/',
+  outdir='$TMP_DIR/'
+  verbosity='high'
+ /
+ &system
+  ibrav=8
+  celldm(1)=8.8893,
+  celldm(2)=0.917942176871
+  celldm(3)=0.601615646259
+  space_group=58
+  nat=  2, 
+  ntyp= 2,
+  ecutwfc =45.0,
+  ecutrho = 350.,
+!  lspinorb=.TRUE.
+!  noncolin=.TRUE.
+!  nspin=2
+ /
+ &electrons
+  conv_thr =  1.0d-8
+ /
+ATOMIC_SPECIES
+C   0.0  C.pz-n-kjpaw_psl.1.0.0.UPF
+Fe  0.0  Fe.pz-n-kjpaw_psl.1.0.0.UPF
+ATOMIC_POSITIONS crystal_sg
+C  2a  
+Fe 4g  0.7004  0.8787
+K_POINTS AUTOMATIC
+4 4 4 1 1 1 
+EOF
+$ECHO "  running the scf_bands calculation for Fe2C..."
+$THERMO_PW_COMMAND < fe2c.scf_bands.in > fe2c.scf_bands.out
+check_failure $?
+$ECHO " done"
+
+$ECHO
+$ECHO "$EXAMPLE_DIR : done"
