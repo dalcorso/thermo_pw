@@ -597,11 +597,42 @@ MODULE space_groups
       115,             116,           117,           118,            &
       119,             120,           121,           122,            &
       147,             148              /
+
+  CHARACTER(LEN=8) :: sym_label_sg(173)
+  DATA sym_label_sg / 'E', '2z', '2y',  '2x',   '2xy', '2x-y', '4-z', '4z',    &
+              '2xz',   '2x-z', '4y', '4-y',   '2yz', '2y-z', '4-x', '4x',     &
+              '3-x-y-z', '3-xyz',  '3xy-z', '3x-yz', '3xyz', '3-xy-z',        &
+              '3x-y-z', '3-x-yz',  '6z', '6-z', '3z', '3-z', '21-10', '2210', &
+              '2010', '2110', &
+              'i',   'i2z',   'i2y', 'i2x',  'i2xy', 'i2x-y', 'i4-z', 'i4z',  &
+              'i2xz', 'i2x-z', 'i4y', 'i4-y', 'i2yz', 'i2y-z', 'i4-x', 'i4x', &
+              'i3-x-y-z', 'i3-xyz', 'i3xy-z', 'i3x-yz', 'i3xyz', 'i3-xy-z',   &
+              'i3x-y-z', 'i3-x-yz', 'i6z', 'i6-z', 'i3z', 'i3-z', 'i21-10',   &
+              'i2210', 'i2010', 'i2110', '2z1', '2y1', '2x1', '2xy1', '2x-y1', &
+              '4-z1', '4-z2', '4-z3', '4z1', '4z2', '4z3', '2xz1','2x-z1', &
+              '4y1', '4y2', '4y3', '4-y1', '4-y2', '4-y3', '2yz1', '2y-z1', &
+              '4-x1', '4-x2', '4-x3', '4x1', '4x2', '4x3', '3-x-y-z1', &
+              '3-x-y-z2', '3-xyz1', '3-xyz2', '3xy-z1', '3xy-z2', '3x-yz1', &
+              '3x-yz2', '3xyz1', '3xyz2', '3-xy-z1', '3-xy-z2', '3x-y-z1', &
+              '3x-y-z2', '3-x-yz1', '3-x-yz2', '6z1', '6z2', '6z3', '6z4', &
+              '6z5', '6-z1', '6-z2', '6-z3', '6-z4',  '6-z5', '3z1', '3z2', &
+              '3-z1', '3-z2', '21-101', '22101', '20101', '21101', 'i2za', &
+              'i2zb', 'i2zn', 'i2zd', 'i2ya', 'i2yc', 'i2yn', 'i2yd', &
+              'i2xb', 'i2xc', 'i2xn', 'i2xd', 'i2xya', 'i2xyc', 'i2xyn', &
+              'i2xyd', 'i2x-ya', 'i2x-yc', 'i2x-yn', 'i2x-yd', &
+              'i2xza', 'i2xzb', 'i2xzn', 'i2xzd', 'i2x-za', 'i2x-zb', &
+              'i2x-zn', 'i2x-zd', 'i2yza', 'i2yzb', 'i2yzn', 'i2yzd', &
+              'i2y-za', 'i2y-zb', 'i2y-zn', 'i2y-zd', 'i21-10a', &
+              'i21-10c', 'i21-10n', 'i2210a', 'i2210c', &
+              'i2210n', 'i2010a', 'i2010c', 'i2010n', &
+              'i2110a', 'i2110c', 'i2110n'  /
+
  
   PUBLIC   spg_code, spg_name, set_spg_code, find_space_group, sg_name, &
            equivalent_tau, space_group_names, &
            find_space_group_number, find_space_group_names, add_info, &
-           set_add_info, set_fft_fact
+           set_add_info, set_fft_fact, project_frac_tran,  &
+           shift_frac_tran
 
   CONTAINS
 
@@ -1130,32 +1161,40 @@ MODULE space_groups
   END SUBROUTINE set_fft_fact
 
   SUBROUTINE find_space_group(sg_number, ibrav, code_group, nsym, s, sr, ftau, &
-                              at, nr1, nr2, nr3, verbosity)
+                              at, bg, nr1, nr2, nr3, s01, s02, verbosity)
   !
   !  This routine receives as input: 
   !  the bravais lattice, the point group, the number of symmetries, the
-  !  rotation matrices in crystal and in carthesian coordinates, the
+  !  rotation matrices in crystal and in cartesian coordinates, the
   !  fractional translations in number of fft points, the fft mesh nr1, nr2, nr3
   !  and gives as output the space group number.
   !  if verbosity .true. the routine writes informations on the symmetries
   !  ibrav=0 is not supported
+  !  It gives as output the two vectors s01 and s02 which give the position
+  !  of the origin with origin choice 1 and origin choice 2 according to ITA.
+  !  If the ITA give only one origin s02 is set to -1000.0,-1000.0,-1000.0
   !
   USE io_global, ONLY : stdout
+  USE point_group, ONLY : find_group_info_ext, sym_label
   IMPLICIT NONE
   INTEGER, INTENT(IN) :: ibrav, code_group, nsym, nr1, nr2, nr3
   INTEGER, INTENT(IN) :: s(3,3,nsym), ftau(3,nsym)
   LOGICAL, INTENT(IN) :: verbosity
-  REAL(DP) :: sr(3,3,nsym), at(3,3) ! rotation matrices in cartesian coordinates
+  REAL(DP) :: sr(3,3,nsym), at(3,3), bg(3,3)
   INTEGER, INTENT(OUT) :: sg_number
+  REAL(DP), INTENT(OUT) :: s01(3), s02(3)
   LOGICAL :: is_symmorphic
   INTEGER :: isym, nft, iaxis, imirror, irot90, irot60, irot120, ipol, &
-             imirror1, imirror2, nsaz
+             imirror1, imirror2, nsaz, code_group1, code_group_ext, &
+             group_desc(48), group_desc_sg(48), which_elem(48)
   INTEGER :: idir, irot180, type_group, nsp, nsa, nmir, ncomp, jsym, nmp, ipa
   INTEGER :: ft1(3), ft2(3), sp1, sp2, axis_dir(3), mirr_sym(3), idir1, idir2
-  REAL(DP) :: ax(3), bx(3), angle, fact, ft(3), sp, ftrs1(3), ftrs2(3), &
-              ftrs3(3), ashift(3), acryshift(3), ashift_mod
+  REAL(DP) :: ax(3), bx(3), angle, fact, ft(3,48), sp, ftrs1(3), ftrs2(3), &
+              ftrs3(3), ftperp(3,48), s0(3,48), ftpar(3,48), ashift(3), &
+              acryshift(3), ashift_mod, a0(3), ftc(3,48), ftparc(3,48), &
+              ftperpc(3,48), s0c(3,48), ftnew(3,48)
   REAL(DP), PARAMETER :: pi = 3.14159265358979323846_DP, eps=1.D-8
-  LOGICAL :: is_axis
+  LOGICAL :: is_axis, ft_zero
   INTEGER :: tipo_sym, ts
   REAL(DP) :: angle_rot
   
@@ -1165,29 +1204,130 @@ MODULE space_groups
   ENDIF
 
   IF (verbosity) THEN
-     WRITE(stdout,'(/,5x,"Space group identification, ",i3," symmetries:")') nsym
-     WRITE(stdout,'(5x,"(Optional origin shifts are indicated for C2, mirrors,")')
-     WRITE(stdout,'(5x,"and inversion symmetries)",/)')
+     WRITE(stdout,'(/,5x,"Space group identification, ",i3," symmetries:")') &
+                                                              nsym
   ENDIF
+  s01=1000.0_DP
+  s02=1000.0_DP
+
+  CALL find_group_info_ext(nsym, sr, code_group1, code_group_ext, &
+                                                  which_elem, group_desc) 
+  DO isym = 1, nsym
+     DO jsym = 1, nsym
+        IF (which_elem(jsym) == isym) THEN
+           ft(1,isym) = - DBLE(ftau(1,jsym)) / nr1
+           ft(2,isym) = - DBLE(ftau(2,jsym)) / nr2
+           ft(3,isym) = - DBLE(ftau(3,jsym)) / nr3
+           CALL project_frac_tran(sr(1,1,jsym),ft(1,isym),at,bg,&
+                           ftperp(1,isym),ftpar(1,isym))
+           CALL find_sg_tags(sr(1,1,jsym),ft(1,isym),ibrav,at,bg, &
+                             ftperp(1,isym),ftpar(1,isym),group_desc(isym),&
+                             s0(1,isym),group_desc_sg(isym))
+!           CALL shift_frac_tran(sr(1,1,jsym),ft(1,isym),at,bg,s0(1,isym), &
+!                                ftnew(1,isym))
+!           CALL project_frac_tran(sr(1,1,jsym),ftnew(1,isym),at,bg,&
+!                           ftperp(1,isym),ftpar(1,isym))
+        END IF
+     END DO
+  END DO
+
   is_symmorphic=.TRUE.
+  DO isym=1,nsym
+     is_symmorphic = (is_symmorphic .AND. group_desc_sg(isym) < 65)
+     IF (.NOT.is_symmorphic) EXIT
+  END DO
+!
+!  fractional translations and origins in cartesian axis
+!
+  ftc(:,1:nsym)=ft(:,1:nsym)
+  ftperpc(:,1:nsym)=ftperp(:,1:nsym)
+  ftparc(:,1:nsym)=ftpar(:,1:nsym)
+  s0c(:,1:nsym)=s0(:,1:nsym)
+
+  CALL cryst_to_cart(nsym,ftc,at,1)
+  CALL cryst_to_cart(nsym,ftperpc,at,1)
+  CALL cryst_to_cart(nsym,ftparc,at,1)
+  CALL cryst_to_cart(nsym,s0c,at,1)
+
+  ft_zero=.NOT.(ANY(ftau(:,1:nsym) /= 0))
+
+  IF (verbosity.AND.ft_zero) THEN
+     WRITE(stdout,'(/,5x,"Nonsymmorphic operations not found: All fractional &
+                        &translations vanish")')
+  ENDIF
+  IF (verbosity.AND..NOT.ft_zero) THEN
+     WRITE(stdout,'(/,5x,"The coset representatives of the space group with")') 
+     WRITE(stdout,'(5x,"the standard order of operations are:")')
+     WRITE(stdout,'(/,5x,"Fractional translations in crystal coordinates")')
+     WRITE(stdout,'(/,6x, "PGS",4x,"Fract. transl. (all)         &
+                               & Fract. transl. (no shift)",3x,"SGS",/)')
+     DO isym=1,nsym
+        WRITE(stdout,'(1x,a8,i4,3f8.4,4x,3f8.4,a10,i4)') &
+              TRIM(sym_label(group_desc(isym))), group_desc(isym), &
+              ft(1,isym), ft(2,isym), ft(3,isym), &
+              ftpar(1,isym), ftpar(2,isym), ftpar(3,isym), &
+              TRIM(sym_label_sg(group_desc_sg(isym))), group_desc_sg(isym) 
+     END DO
+
+     WRITE(stdout,'(/,5x,"Fractional translations in cartesian coordinates")')
+     WRITE(stdout,'(/,6x, "PGS",6x,"Fract. transl. (all)       &
+                               & Fract. transl. (no shift)",3x,"SGS",/)')
+     DO isym=1,nsym
+        WRITE(stdout,'(1x,a8,i4,3f8.4,4x,3f8.4,a10,i4)') &
+              TRIM(sym_label(group_desc(isym))), group_desc(isym), &
+              ftc(1,isym), ftc(2,isym), ftc(3,isym), &
+              ftparc(1,isym), ftparc(2,isym), ftparc(3,isym), &
+              TRIM(sym_label_sg(group_desc_sg(isym))), group_desc_sg(isym) 
+     END DO
+
+     WRITE(stdout,'(/,5x,"PGS = Point group symmetry, &
+                                       SGS = space group symmetry ")')
+     WRITE(stdout,'(5x,"(no shift) means the part of the fractional &
+                        translation")')
+     WRITE(stdout,'(5x,"that cannot be removed by an origin shift")')
+                                   
+     WRITE(stdout,'(/,5x,"Fractional translation shift and origin shift in &
+                         &crystal coordinates")')
+     WRITE(stdout,'(/,6x, "PGS",6x,"FT shift &
+        &                   Origin shift",17x,"SGS",/)')
+     DO isym=1,nsym
+        WRITE(stdout,'(1x,a8,i4,3f8.4,4x,3f8.4,a10,i4)') &
+              TRIM(sym_label(group_desc(isym))), group_desc(isym), &
+              ftperp(1,isym), ftperp(2,isym), ftperp(3,isym), &
+              s0(1,isym), s0(2,isym), s0(3,isym), &
+              TRIM(sym_label_sg(group_desc_sg(isym))), group_desc_sg(isym) 
+     END DO
+     WRITE(stdout,'(/,5x,"Fractional translation shift and origin shift in &
+                         &cartesian coordinates")')
+     WRITE(stdout,'(/,6x, "PGS",6x,"FT shift &
+        &                   Origin shift",17x,"SGS",/)')
+     DO isym=1,nsym
+        WRITE(stdout,'(1x,a8,i4,3f8.4,4x,3f8.4,a10,i4)') &
+              TRIM(sym_label(group_desc(isym))), group_desc(isym), &
+              ftperpc(1,isym), ftperpc(2,isym), ftperpc(3,isym), &
+              s0c(1,isym), s0c(2,isym), s0c(3,isym), &
+              TRIM(sym_label_sg(group_desc_sg(isym))), group_desc_sg(isym) 
+     END DO
+     WRITE(stdout,*)
+     WRITE(stdout,'(/,5x,"The origin shift gives the point of application&
+                         & of the symmetry")')
+     WRITE(stdout,'(5x,"Subtract this vector from all atomic coordinates")')
+     WRITE(stdout,'(5x,"to have this symmetry centered at the origin")')
+     WRITE(stdout,*)
+
+!     WRITE(stdout,'(/,5x,"The symmetry operations with the order used &
+!                       &inside thermo_pw",/)')
+
+  END IF
   DO isym=1, nsym
-     ts=tipo_sym_sg(sr(1,1,isym), ftau(1,isym), at, nr1, nr2, nr3, ashift, acryshift)
-     ashift_mod=SQRT(ashift(1)**2 + ashift(2)**2 + ashift(3)**2 )
-     IF (verbosity) THEN
-        WRITE(stdout,'(5x,i5,"  ",a)') isym, TRIM(label_sg(ts))
-        IF (ts < 17 .AND. ashift_mod > eps) THEN
-           WRITE(stdout,'(11x,"The origin is not a fixed point of this operation")')
-           WRITE(6,'(11x,"To center it on the origin add to all atomic positions")')
-           WRITE(6,'(11x,"(alat units)")')
-           WRITE(6,'(11x,"(",3f15.10,")",/)') ashift(:)
-           WRITE(6,'(11x,"(cryst. coord.)")')
-           WRITE(6,'(11x,"(",3f15.10,")",/)') acryshift(:)
-        ENDIF
-     ENDIF
-     is_symmorphic = (is_symmorphic .AND. ts < 17 )
+     ts=tipo_sym_sg(sr(1,1,isym), ftau(1,isym), at, nr1, nr2, nr3, ashift, &
+                                                              acryshift)
+     ashift_mod=SQRT(ashift(1)**2 + ashift(2)**2 + ashift(3)**2)
+!     IF (verbosity) THEN
+!        WRITE(stdout,'(5x,i5,"  ",a)') isym, TRIM(label_sg(ts))
+!     ENDIF
   ENDDO
 
-!  is_symmorphic=.NOT.(ANY(ftau(:,1:nsym) /= 0))
   sg_number=0
   SELECT CASE (code_group)
       CASE(1)
@@ -1199,11 +1339,13 @@ MODULE space_groups
 !
 !  -1
 !
+         s01(:)=s0(:,2)
          sg_number=2
       CASE(3)
 !
 !  C_s
 !
+          s01(:)=s0(:,2)
           IF (ABS(ibrav)==13) THEN
              IF (is_symmorphic) THEN
                 sg_number=8
@@ -1221,6 +1363,7 @@ MODULE space_groups
 !
 !   C_2
 !
+         s01(:)=s0(:,2)
          IF (ABS(ibrav)==13) THEN
             sg_number=5
          ELSE
@@ -1234,24 +1377,20 @@ MODULE space_groups
 !
 !  C_3
 !
+         s01(:)=s0(:,2)
          IF (ibrav==4) THEN
             IF (is_symmorphic) THEN
                sg_number=143
             ELSE
-              irot120=0
-              DO isym=2,nsym
-                 IF (tipo_sym(sr(1,1,isym))==3) THEN
-                    IF (ABS(angle_rot(sr(1,1,isym))-120.0_DP)< 1.D-6) &
-                        irot120=isym
-                 ENDIF
-              ENDDO
-              IF ( irot120 == 0 ) CALL errore('find_space_group',&
-                                         'C_3: no 120 degrees rotation',1)
-              IF (ftau(3,irot120) * 3 / nr3 == -1 .OR. &
-                  ftau(3,irot120) * 3 / nr3 == 2 ) sg_number=144
-              IF (ftau(3,irot120) * 3 / nr3 == 1 .OR. &
-                  ftau(3,irot120) * 3 / nr3 == -2 ) sg_number=145
-           ENDIF
+               IF (MOD(group_desc_sg(2),2)==0) THEN
+!
+!  All 3_1 operations have odd number
+!
+                  sg_number=144
+               ELSE
+                  sg_number=145
+               ENDIF
+            ENDIF
          ELSEIF (ibrav==5) THEN
             sg_number=146
          ENDIF
@@ -1259,62 +1398,62 @@ MODULE space_groups
 !
 !   C_4
 !
+         s01(:)=s0(:,2)
          IF (ibrav==6) THEN
             IF (is_symmorphic) THEN
                sg_number=75
             ELSE
-               irot90=0
-               DO isym=2,nsym
-                  IF (tipo_sym(sr(1,1,isym))==3) THEN
-                     IF (ABS(angle_rot(sr(1,1,isym))-90.0_DP)< 1.D-6) &
-                        irot90=isym
-                  ENDIF
-               ENDDO
-               IF ( irot90 == 0 ) CALL errore('find_space_group',&
-                                          'C_4: no 90 degrees rotation',1)
-               IF (ftau(3,irot90) * 4 / nr3 == -1 .OR. &
-                                ftau(3,irot90) * 4 / nr3 == 3) sg_number=76
-               IF (ABS(ftau(3,irot90) * 4 / nr3) == 2) sg_number=77
-               IF (ftau(3,irot90) * 4 / nr3 == -3 .OR. &
-                                ftau(3,irot90) * 4 / nr3 == 1) sg_number=78
+               IF (group_desc_sg(2)==73.OR.group_desc_sg(2)==78.OR. &
+                   group_desc_sg(2)==89) THEN
+                   sg_number=76
+               ELSEIF (group_desc_sg(2)==74.OR.group_desc_sg(2)==79.OR. &
+                   group_desc_sg(2)==90) THEN
+                   sg_number=77
+               ELSEIF (group_desc_sg(2)==75.OR.group_desc_sg(2)==80.OR. &
+                   group_desc_sg(2)==91) THEN
+                   sg_number=78
+               ELSE
+                   CALL errore('find_space_group',&
+                               'symmetry not recognized C_4',1)
+               ENDIF
             ENDIF
          ELSEIF (ibrav==7) THEN
             IF (is_symmorphic) THEN
                sg_number=79
             ELSE
                sg_number=80
+               s01(:)=s0(:,3)
             ENDIF
          ENDIF
       CASE(7)
 !
 !  C_6
 !
+!
+!   origin on the C_6 axis
+!
+         s01(:)=s0(:,2)
          IF (is_symmorphic) THEN
             sg_number=168
          ELSE
-            irot60=0
-            DO isym=2,nsym
-               IF (tipo_sym(sr(1,1,isym))==3) THEN
-                  IF (ABS(angle_rot(sr(1,1,isym))-60.0_DP)< 1.D-6) &
-                         irot60=isym
-               ENDIF
-            ENDDO
-            IF ( irot60 == 0 ) CALL errore('find_space_group',&
-                                          'C_6: no 60 degrees rotation',1)
-            IF (ftau(3,irot60) * 6 / nr3 == -1 .OR.  &
-                           ftau(3,irot60) * 6 / nr3 == 5) sg_number=169
-            IF (ftau(3,irot60) * 6 / nr3 == -2 .OR.  &
-                           ftau(3,irot60) * 6 / nr3 == 4) sg_number=171
-            IF (ABS(ftau(3,irot60) * 6 / nr3) == 3) sg_number=173
-            IF (ftau(3,irot60) * 6 / nr3 == 2 .OR.  &
-                           ftau(3,irot60) * 6 / nr3 == -4) sg_number=172
-            IF (ftau(3,irot60) * 6 / nr3 == 1 .OR.  &
-                           ftau(3,irot60) * 6 / nr3 == -5) sg_number=170
+            IF (group_desc_sg(2)==108) THEN
+               sg_number=169
+            ELSEIF (group_desc_sg(2)==112) THEN
+               sg_number=170
+            ELSEIF (group_desc_sg(2)==109) THEN
+               sg_number=171
+            ELSEIF (group_desc_sg(2)==111) THEN
+               sg_number=172
+            ELSEIF (group_desc_sg(2)==110) THEN
+               sg_number=173
+            ENDIF
          ENDIF
       CASE(8)
 !
 !   D_2
 !
+         s01(:)=s0(:,2)
+         s01(3)=s0(3,2)
          IF (ibrav==8) THEN
             IF (is_symmorphic) THEN
                sg_number=16
@@ -1351,83 +1490,45 @@ MODULE space_groups
 !
 !  D_3
 !
+!  origin at the intersection of the axis of order 3 and the plane that
+!  contains the axis of order 2. Note that the axis 3 must be parallel to
+!  z, the other cases are not programmed yet.
+!
+!  NB: group 155 with hexagonal lattice is not recognized (to do)
+!
+         s01(:)=s0(:,2)
+         s01(3)=s0(3,4)
          IF (ibrav==4) THEN
-            IF (is_symmorphic) THEN
-               DO isym=2,nsym
-                  IF (tipo_sym(sr(1,1,isym))==4) THEN
+            IF (group_desc(4)==4) THEN
 !
-!  search the axis of order 2 and compute the angle with the x axis
+!  groups of type 3_?21
+               IF (is_symmorphic) THEN
+                  sg_number=150
+               ELSEIF (MOD(group_desc_sg(2),2)==0) THEN
+                  sg_number=152
 !
-                     CALL versor(sr(1,1,isym), ax)
-                     angle=ACOS(ax(1))*180.0_DP / pi
-                     IF (MOD(NINT(angle), 60)==0) THEN
+!   origin on the plane that contains the 2110 operation
 !
-!   axis of order 2 on the hexagon edges
-!
-                        sg_number=150
-                     ELSE
-!
-!   axis of order 2 on the hexagon diagonals
-!
-                        sg_number=149
-                     ENDIF
-                     EXIT
-                  ENDIF
-               ENDDO
-            ELSE
-!
-!           find the rotation of 120
-!
-               irot120=0
-               DO isym=2,nsym
-                  IF (tipo_sym(sr(1,1,isym))==3) THEN
-                     IF (ABS(angle_rot(sr(1,1,isym))-120.0_DP)< 1.D-6) &
-                         irot120=isym
-                  ENDIF
-               ENDDO
-               IF ( irot120 == 0 ) CALL errore('find_space_group',&
-                                          'D_3: no 120 degrees rotation',1)
-               IF (ftau(3,irot120) * 3 / nr3 == -1 .OR. &
-                   ftau(3,irot120) * 3 / nr3 == 2 ) THEN
-                  DO isym=2,nsym
-                     IF (tipo_sym(sr(1,1,isym))==4) THEN
-!
-!  search the axis of order 2 and compute the angle with the x axis
-!
-                        CALL versor(sr(1,1,isym), ax)
-                        angle=ACOS(ax(1))*180.0_DP / pi
-                        IF (MOD(NINT(angle), 60)==0) THEN
-!
-!   axis of order 2 on the hexagonal edges
-!
-                           sg_number=152
-                        ELSE
-                           sg_number=151
-                        ENDIF
-                        EXIT
-                     ENDIF
-                  ENDDO
-               ELSEIF (ftau(3,irot120) * 3 / nr3 == 1 .OR.  &
-                       ftau(3,irot120) * 3 / nr3 == -2 ) THEN
-                  DO isym=2,nsym
-                     IF (tipo_sym(sr(1,1,isym))==4) THEN
-!
-!  search the axis of order 2 and compute the angle with the x axis
-!
-                        CALL versor(sr(1,1,isym), ax)
-                        angle=ACOS(ax(1))*180.0_DP / pi
-                        IF (MOD(NINT(angle), 60)==0) THEN
-!
-!   axis of order 2 on the hexagonal edges
-!
-                           sg_number=154
-                        ELSE
-                           sg_number=153
-                        ENDIF
-                        EXIT
-                     ENDIF
-                  ENDDO
+                  s01(3)=s0(3,5)
+               ELSE 
+                  sg_number=154
                ENDIF
+            ELSEIF (group_desc(4)==30) THEN
+!
+!  groups of type 3_?12
+!
+               IF (is_symmorphic) THEN
+                  sg_number=149
+               ELSEIF (MOD(group_desc_sg(2),2)==0) THEN
+                  sg_number=151
+!
+!   origin on the plane that contains the 2210 operation (number 4)
+!
+               ELSE 
+                  sg_number=153
+               ENDIF
+            ELSE
+               CALL errore('find_space_group','Space group not programmed',1)
             ENDIF
          ELSEIF (ibrav==5) THEN
             sg_number=155
@@ -1436,6 +1537,8 @@ MODULE space_groups
 !
 !  D_4
 !
+         s01(:)=s0(:,3)
+         s01(3)=s0(3,6)
          IF (ibrav==6) THEN
             IF (is_symmorphic) THEN
                sg_number=89
@@ -1507,6 +1610,8 @@ MODULE space_groups
 !
 !  D_6
 !
+         s01(:)=s0(:,2)
+         s01(3)=s0(3,7)
          IF (is_symmorphic) THEN
             sg_number=177
          ELSE
@@ -1538,6 +1643,8 @@ MODULE space_groups
 !
          irot180=0
          idir=0
+         s01(:)=s0(:,2)
+         s01(3)=0.0_DP
          DO isym=2,nsym
             IF (tipo_sym(sr(1,1,isym))==4) THEN
                irot180=isym
@@ -1660,6 +1767,9 @@ MODULE space_groups
 !
 !  one glide parallel to the axis
 !
+                        s01(1)=s0(1,3)
+                        s01(2)=s0(2,4)
+                        s01(3)=0.0_DP
                         sg_number=31
                      ELSE
                         sg_number=26
@@ -1876,6 +1986,7 @@ MODULE space_groups
 !
 !  C_4v
 !
+         s01(:)=s0(:,2)
          irot90=0
          imirror=0
          DO isym=2,nsym
@@ -1976,6 +2087,7 @@ MODULE space_groups
 !
 !  C_6v
 !
+         s01(:)=s0(:,2)
          IF (is_symmorphic) THEN
             sg_number=183
          ELSE 
@@ -2068,6 +2180,10 @@ MODULE space_groups
 !
 !  C_4h
 !
+!
+!  origin on inversion center
+!
+         s01(:)=s0(:,5)
          IF (ibrav==6) THEN
             IF (is_symmorphic) THEN
                sg_number=83
@@ -2118,6 +2234,10 @@ MODULE space_groups
 !
 !  D_2h
 !
+!
+!   by default the origin is on the inversion point
+!
+         s01(:)=s0(:,5)
          nsa=0
          nsaz=0
          iaxis=0
@@ -2180,8 +2300,28 @@ MODULE space_groups
                   ELSE
                      IF (nmp==0) THEN
                         sg_number=48
+!
+!  origin choice 1 at the intesection of the 2 axes
+!
+                        s01(:)=s0(:,2)
+                        s01(3)=s0(3,3)
+!
+!   origin choice 2 on inversion
+!
+                        s02(:)=s0(:,5)
                      ELSEIF (nmp==2) THEN
                         sg_number=50
+!
+!  origin choice 1 at the intesection of the 2z axis and its perpendicular 
+!  mirror
+!
+                        s01(:)=s0(:,2)
+                        s01(3)=s0(3,6)
+!
+!   origin choice 2 on inversion
+!
+                        s02(:)=s0(:,5)
+
                      ENDIF
                   ENDIF
                ELSEIF (nsa==1) THEN
@@ -2215,6 +2355,16 @@ MODULE space_groups
                      ENDIF
                   ELSEIF (nmir==2) THEN
                      sg_number=59
+!
+!  origin choice 1 at the intesection of the 2z axis and its perpendicular 
+!  mirror
+!
+                        s01(:)=s0(:,2)
+                        s01(3)=s0(3,6)
+!
+!   origin choice 2 on inversion
+!
+                        s02(:)=s0(:,5)
                   ENDIF
                ELSEIF (nsa==3) THEN
                  IF (nmir==1) THEN
@@ -2289,6 +2439,9 @@ MODULE space_groups
             IF (is_symmorphic) THEN
                sg_number=69
             ELSE
+               s01(:)=(s0c(:,2)+s0c(:,3)+s0c(:,4))/3.0_DP
+               CALL cryst_to_cart(1,s01,bg,-1)
+               s02(:)=s0(:,5)
                sg_number=70
             ENDIF
          ELSEIF (ibrav==11) THEN
@@ -2338,27 +2491,16 @@ MODULE space_groups
 !
 !  D_3h
 !
-         type_group=0
-         DO isym=2,nsym
-            IF (tipo_sym(sr(1,1,isym))==4) THEN
-!
-!  search the axis of order 2 and compute the angle with the x axis
-!
-               CALL versor(sr(1,1,isym), ax)
-               angle=ACOS(ax(1))*180.0_DP / pi
-               IF (MOD(NINT(angle), 60)==0) type_group=1
-               EXIT
-            ENDIF
-         ENDDO
+         s01(:)=s0(:,2)
 
          IF (is_symmorphic) THEN
-            IF (type_group==1) THEN
+            IF (group_desc(7)==4) THEN
                sg_number=189
             ELSE
                sg_number=187
             ENDIF
          ELSE
-            IF (type_group==1) THEN
+            IF (group_desc(7)==4) THEN
                sg_number=190
             ELSE
                sg_number=188
@@ -2368,6 +2510,7 @@ MODULE space_groups
 !
 !  D_4h
 !
+         s01(:)=s0(:,9)
          irot90=0
          irot180=0
          imirror=0
@@ -2515,6 +2658,8 @@ MODULE space_groups
 
                   IF (nft==0) THEN
                      sg_number=141
+                     s01(:)=s0(:,10)
+                     s02(:)=s0(:,9)
                   ELSE
                      sg_number=142
                   ENDIF
@@ -2525,8 +2670,10 @@ MODULE space_groups
 !
 !  D_6h
 !
+         s01(:)=s0(:,13)
          IF (is_symmorphic) THEN
             sg_number=191
+            s01(:)=s0(:,18)
          ELSE
             irot60=0
             imirror=0
@@ -2547,11 +2694,13 @@ MODULE space_groups
 
             IF (ftau(3,irot60)==0) THEN
                sg_number=192
+               s01(:)=s0(:,18)
             ELSEIF (ABS(ftau(3,irot60) * 6 / nr3) == 3) THEN
                IF (ftau(2,imirror)==0.AND.ftau(3,imirror)==0) THEN
                   sg_number=194
                ELSE
                   sg_number=193
+                  s01(:)=s0(:,18)
                ENDIF
             ENDIF
          ENDIF
@@ -2559,6 +2708,10 @@ MODULE space_groups
 !
 !  D_2d
 !
+!
+!  origin on the inversion point of -4
+!
+         s01(:)=s0(:,2)
          type_group=0
          DO isym=2,nsym
             IF (tipo_sym(sr(1,1,isym))==4) THEN
@@ -2661,34 +2814,39 @@ MODULE space_groups
 !
 !  D_3d
 !
-         type_group=0
-         DO isym=2,nsym
-            IF (tipo_sym(sr(1,1,isym))==4) THEN
+!  origin on the inversion point of the i3z operation
 !
-!  search the axis of order 2 and compute the angle with the x axis,
-!  it can be 0,60,120 (type_group=1) or 30,90,150 (type_group=0)
-!
-               CALL versor(sr(1,1,isym), ax)
-               angle=ACOS(ax(1))*180.0_DP / pi
-               IF (MOD(NINT(angle), 60)==0) type_group=1
-               EXIT
-            ENDIF
-         ENDDO
+         s01(:)=s0(:,8)
+         IF (code_group_ext==118) THEN
+            type_group=1
+         ELSEIF (code_group_ext==119) THEN
+            type_group=2
+         ELSE
+            CALL errore('find_space_group','D_3d space group not here',1)
+         ENDIF
 
          IF (ibrav==4) THEN
-             IF (is_symmorphic) THEN
-                IF (type_group==1) THEN
-                   sg_number=164
-                ELSE
-                   sg_number=162
-                ENDIF
-             ELSE
-                IF (type_group==1) THEN
-                   sg_number=165
-                ELSE
-                   sg_number=163
-                ENDIF
-             ENDIF
+            IF (type_group==1) THEN
+!
+!   if all the mirrors are glide planes it is 165, otherwise it is 164
+!
+               IF (group_desc_sg(10)>64.AND.group_desc_sg(11)>64&
+                   .AND.group_desc_sg(12)>64) THEN
+                  sg_number=165
+               ELSE
+                  sg_number=164
+               ENDIF
+            ELSE
+!
+!   if all the mirrors are glide planes it is 163, otherwise it is 164
+!
+               IF (group_desc_sg(10)>64.AND.group_desc_sg(11)>64&
+                   .AND.group_desc_sg(12)>64) THEN
+                  sg_number=163
+               ELSE
+                  sg_number=162
+               ENDIF
+            ENDIF
          ELSEIF (ibrav==5) THEN
              IF (is_symmorphic) THEN
                 sg_number=166
@@ -2709,6 +2867,7 @@ MODULE space_groups
 !
 !  S_6 (-3)
 !
+         s01(:)=s0(:,5)
          IF (ibrav==4) THEN
             sg_number=147
          ELSEIF (ibrav==5) THEN
@@ -2738,23 +2897,30 @@ MODULE space_groups
 !  T_h
 !
 
+         s01(:)=s0(:,17)
          IF (ibrav==1) THEN
              IF (is_symmorphic) THEN
                 sg_number=200
              ELSE
-                irot180=0
-                DO isym=2,nsym
-                   IF (tipo_sym(sr(1,1,isym))==4) THEN
-                      CALL versor(sr(1,1,isym), ax)
-                      IF (is_axis(ax,3)) irot180=isym
-                   ENDIF
-                ENDDO
-                IF ( irot180 == 0 ) CALL errore('find_space_group',&
-                                              'T_h: no 180 degrees rotation',1)
-                IF (ftau(3,irot180)==0) THEN
+                IF (group_desc_sg(14)==128) THEN
+!
+!   the mirror i2z is n
+!
                    sg_number=201
-                ELSE
+!
+!   origin choice 1 at 23
+!
+                   s01(:)=s0(:,2)
+                   s01(3)=s0(3,5)
+!
+!  origin choice 2 at the center of -3
+!
+                   s02(:)=s0(:,17)
+                ELSEIF (group_desc_sg(14)==126.OR.group_desc_sg(14)==127) THEN
                    sg_number=205
+                ELSE
+                   CALL errore('find_space_group',&
+                               'T_h operation not recognized',1)
                 ENDIF
              ENDIF
          ELSEIF (ibrav==2) THEN
@@ -2762,6 +2928,15 @@ MODULE space_groups
                 sg_number=202
              ELSE
                 sg_number=203
+!
+!   origin choice 1 at 23
+!
+                   s01(:)=s0(:,2)
+                   s01(3)=s0(3,5)
+!
+!  origin choice 2 at the center of -3
+!
+                   s02(:)=s0(:,17)
              ENDIF
          ELSEIF (ibrav==3) THEN
              IF (is_symmorphic) THEN
@@ -2774,6 +2949,7 @@ MODULE space_groups
 !
 !  T_d
 !
+         s01(:)=s0(:,18)
          IF (ibrav==1) THEN
              IF (is_symmorphic) THEN
                 sg_number=215
@@ -2838,46 +3014,44 @@ MODULE space_groups
 !
 !  O_h
 !
+!   origin on the inversion point of i3xyz
+!
+         s01(:)=s0(:,29)
          IF (ibrav==1) THEN
-             IF (is_symmorphic) THEN
-                sg_number=221
-             ELSE
+            IF (is_symmorphic) THEN
+               sg_number=221
+            ELSE
+               IF (group_desc_sg(18)==8) THEN
 !
-!   find the rotation of 90 degree about the xaxis and the mirror 
-!   perpendicular to the x axis
+!   the 4z axis has no fractional translation in space group 222
 !
-               irot90=0
-               imirror=0
-               DO isym=2,nsym
-                   IF (tipo_sym(sr(1,1,isym))==3) THEN
-                      CALL versor(sr(1,1,isym), ax)
-                      IF (ABS(angle_rot(sr(1,1,isym))-90.0_DP)< 1.D-6 .AND. &
-                         is_axis(ax,1) ) irot90=isym
-                   ENDIF
-                   IF (tipo_sym(sr(1,1,isym))==5) THEN
-                      CALL mirror_axis(sr(1,1,isym), ax)
-                      IF (is_axis(ax,1)) imirror=isym
-                   ENDIF
-               ENDDO
-               IF ( irot90 == 0 ) CALL errore('find_space_group',&
-                                              'O_h: no 90 degrees rotation',1)
-               IF ( imirror == 0 ) CALL errore('find_space_group',&
-                                              'O_h: no mirror found',1)
+                  sg_number=222
 !
-!  First check if the axis of order 4 has fractional translation, if not
-!  the group is 222, if yes we check the fractional translation of the
-!  mirror perpendicular to the x axis. In 224 this mirror is a glide plane,
-!  in 223 no.
+!   origin choice 1 at 432
 !
-               IF (irot90 /= 0) THEN
-                  IF (ftau(1,irot90) == 0) THEN
-                     sg_number=222
-                  ELSEIF (ABS(ftau(1,irot90) * 4 / nr1) == 2) THEN
-                     IF (ftau(2,imirror)==0 .AND. ftau(2,imirror)==0 ) THEN
-                        sg_number=223
-                     ELSE
-                        sg_number=224
-                     ENDIF
+                  s01(:)=s0(:,18)
+                  s01(3)=s0(3,4)
+!
+!  origin choice 2 at the inversion point of -3
+!
+                  s02(:)=s0(:,29)
+               ELSE
+                  IF (group_desc_sg(28)==34) THEN
+!
+!  in space group 223 the mirror i2z is a mirror, in 224 a glide plane
+!
+                     sg_number=223
+                  ELSE
+                     sg_number=224
+!
+!   origin choice 1 at -43m
+!
+                     s01(:)=s0(:,18)
+                     s01(3)=s0(3,28)
+!
+!  origin choice 2 at the inversion point of -3
+!
+                     s02(:)=s0(:,29)
                   ENDIF
                ENDIF
             ENDIF
@@ -2885,63 +3059,37 @@ MODULE space_groups
             IF (is_symmorphic) THEN
                sg_number=225
             ELSE
+               IF (group_desc_sg(18)==8) THEN
 !
-!   find the rotation of 90 degree about the xaxis and the mirror 
-!   perpendicular to the (110) axis
+!  in this case the 4z rotation has no fractional translation 
 !
-               irot90=0
-               imirror=0
-               DO isym=2,nsym
-                  IF (tipo_sym(sr(1,1,isym))==3) THEN
-                     CALL versor(sr(1,1,isym), ax)
-                     IF (ABS(angle_rot(sr(1,1,isym))-90.0_DP)< 1.D-6 .AND. &
-                        is_axis(ax,1) ) irot90=isym
-                  ENDIF
-                  IF (tipo_sym(sr(1,1,isym))==5) THEN
-                     CALL mirror_axis(sr(1,1,isym), ax)
-                     IF (ABS(ax(1)-ax(2))<1.d-6) imirror=isym
-                  ENDIF
-               ENDDO
-               IF ( irot90 == 0 ) CALL errore('find_space_group',&
-                                              'O_h: no 90 degrees rotation',1)
-               IF ( imirror == 0 ) CALL errore('find_space_group',&
-                                              'O_h: no mirror found',1)
-
-!
-!  First check if the axis of order 4 has fractional translation, if not
-!  the group is 226, if yes we check the fractional translation of the
-!  mirror perpendicular to the axis of order 2 (x=y). 
-!  In 228 this mirror is a glide plane, in 227 no.
-!
-               ftrs1(:) = ftau(1,irot90) * at(:,1) / nr1 &
-                        + ftau(2,irot90) * at(:,2) / nr2 & 
-                        + ftau(3,irot90) * at(:,3) / nr3
-               ftrs2(:) = ftau(1,imirror) * at(:,1) / nr1 &
-                        + ftau(2,imirror) * at(:,2) / nr2 & 
-                        + ftau(3,imirror) * at(:,3) / nr3
-
-               IF ( ABS(ABS(ftrs1(1))-0.5_DP)<1.d-6 .OR. ABS(ftrs1(1)) &
-                                                          < 1.d-6 ) THEN
                   sg_number=226
                ELSE
+                  IF (group_desc_sg(48)==37) THEN
 !
-!  put the fractional translation of the mirror in cartesian coordinates
+!  the i2xy mirror plane is a mirror in 227 and a glide plane in 228
 !
-                  fact= ftrs2(1) + ftrs2(2)  
-!
-!   project on the mirror plane
-!
-
-                  ftrs2(1)=ftrs2(1) - fact / 2.0_DP
-                  ftrs2(2)=ftrs2(2) - fact / 2.0_DP
-                  sp = ftrs2(1)**2 + ftrs2(2)**2 + ftrs2(3)**2 
-!
-!  if the fractional translation vanishes it is 227, ortherwise 228
-!
-                  IF (sp<1.d-6) THEN
                      sg_number=227
+!
+!   origin choice 2 (on the inversion center)
+!
+                     s02(:)=s0(:,25)
+!
+!   origin choice 1 (on the -43m intersection point). We choose the
+!   inversion point of the i4z operation
+!
+                     s01(:)=s0(:,42)
                   ELSE
                      sg_number=228
+!
+!   origin choice 2 (on the inversion center)
+!
+                     s02(:)=s0(:,25)
+!
+!   origin choice 1 (on the -43m intersection point). We choose the
+!   inversion point of the i4z operation
+!
+                     s01(:)=s0(:,42)
                   ENDIF
                ENDIF
             ENDIF
@@ -2956,6 +3104,7 @@ MODULE space_groups
 
   RETURN
   END SUBROUTINE find_space_group
+
 
   SUBROUTINE set_spg_code(code)
   INTEGER, INTENT(IN) :: code
@@ -3266,7 +3415,7 @@ MODULE space_groups
   REAL(DP), PARAMETER :: f43=4.0_DP / 3.0_DP, eps=1.D-7
   REAL(DP) :: angle_rot, angle_rot_s
 
-  INTEGER :: ts, tip_sym
+  INTEGER :: ts, tip_sym, ipol, jpol
   INTEGER :: tipo_sym
   
   CALL recips(at(1,1), at(1,2), at(1,3), bg(1,1), bg(1,2), bg(1,3))
@@ -3512,7 +3661,7 @@ MODULE space_groups
 !   here the fractionary translation is not relevant to identify the space
 !   group, we give only the type of the rotation
 !
-        angle=angle_rot(sr)
+        angle=angle_rot_s(sr)
         IF (ABS(angle-60.0_DP) < eps) THEN
            tipo_sym_sg=11
         ELSEIF (ABS(angle-90.0_DP) < eps) THEN
@@ -3590,5 +3739,1256 @@ MODULE space_groups
   RETURN
   END FUNCTION label_sg
 
+  SUBROUTINE project_frac_tran(sr,ft,at,bg,ftperp,ftpar)
 !
+!  This subroutine receives as input a space group operation in the
+!  form of a rotation matrix sr (in cartesian coordinates) and a 
+!  fractional translation (in crystal coordinates), the direct and
+!  reciprocal lattice vectors and gives as output the parts of
+!  the fractional translation perpendicular or parallel to the
+!  symmetry element (rotation axis or mirror plane). The output
+!  fractional translations are in crystal coordinates. For improper
+!  rotations or inversion ftperp is equal to ft, while ftpar is set to zero.
+!
+  IMPLICIT NONE 
+
+  REAL(DP), INTENT(IN) :: sr(3,3), ft(3), at(3,3), bg(3,3)
+  REAL(DP), INTENT(OUT) :: ftperp(3), ftpar(3)
+
+  INTEGER :: ts, tipo_sym
+  REAL(DP) :: ax(3), ftr(3), ftr1(3), ftr2(3), ps
+
+  ftperp=ft
+  ftpar=0.0_DP
+  ts=tipo_sym(sr)
+!
+!  for identity, inversion or improper rotation ftperp is ft and ftpar is zero
+!
+  IF (ts==1 .OR. ts==2 .OR. ts==6) RETURN
+     
+  IF (ts==3 .OR. ts==4) THEN
+!
+!  rotation
+!
+     CALL versor(sr,ax)
+  ELSE IF (ts==5) THEN
+!
+!  mirror
+!
+     CALL mirror_axis(sr, ax)
+  END IF
+
+  ftr=ft
+  CALL cryst_to_cart(1, ftr, at, 1)
+ 
+!  WRITE(6,*) 'axis', ax(1), ax(2), ax(3)
+!  WRITE(6,*) 'fract', ftr(1), ftr(2), ftr(3)
+  ps = ftr(1) * ax(1) + ftr(2) * ax(2) + ftr(3) * ax(3)
+
+  ftr1(:)= ps * ax(:)
+  ftr2(:)= ftr(:) - ftr1(:)
+  CALL cryst_to_cart(1, ftr1, bg, -1)
+  CALL cryst_to_cart(1, ftr2, bg, -1)
+
+  IF (ts==3 .OR. ts==4) THEN
+     ftpar(:)=ftr1(:)
+     ftperp(:)=ftr2(:)
+  ELSEIF (ts==5) THEN
+     ftpar(:)=ftr2(:)
+     ftperp(:)=ftr1(:)
+  ENDIF
+
+  RETURN
+  END SUBROUTINE project_frac_tran
+
+  SUBROUTINE shift_frac_tran(sr,ft,at,bg,s0,ftnew)
+!
+!  This subroutine receives as input a space group operation in the
+!  form of a rotation matrix sr (in cartesian coordinates) and a 
+!  fractional translation (in crystal coordinates), a shift of the
+!  origin s0 (in crystal coordinates) and gives as output the fractional
+!  translation (in crystal coordinates) referred to the new origin
+!
+  USE kinds, ONLY : DP
+  IMPLICIT NONE
+
+  REAL(DP), INTENT(IN) :: sr(3,3), ft(3), at(3,3), bg(3,3), s0(3)
+  REAL(DP), INTENT(OUT) :: ftnew(3)
+  
+  INTEGER :: ipol, jpol
+  REAL(DP) :: s0r(3), s0rr(3)
+
+  s0r=s0
+  CALL cryst_to_cart(1, s0r, at, 1)
+  
+  s0rr=0.0_DP
+  DO ipol=1,3
+     DO jpol=1,3
+        s0rr(ipol)=s0rr(ipol)+sr(ipol,jpol)*s0r(jpol)
+     ENDDO
+  ENDDO
+  
+  CALL cryst_to_cart(1, s0rr, bg, -1)
+
+  ftnew(:)=ft(:) + s0rr(:) - s0(:)
+
+  RETURN
+  END SUBROUTINE shift_frac_tran
+
+  SUBROUTINE find_sg_tags(sr,ft,ibrav,at,bg,ftperp,ftpar,sym_in,s0,sg_sym_out)
+!
+!   This routine receives as input a space group operation in the form
+!   of a 3x3 matrix sr (in cartesian coordinates), 
+!   a fractional translation ft, the direct and reciprocal lattice vectors, 
+!   the number of the rotation, the projection of the fractional 
+!   translation along the rotation axis or along the mirror plane 
+!   and the projection along the perpendicular direction and 
+!   gives as output the number of the space group operation and the 
+!   origin shift needed to remove the part of the fractional translation 
+!   perpendicular to the rotation axis or to the mirror plane. For 
+!   improper rotation the new origin removes all the fractional translation.
+!   ft,ftperp,ftpar and s0 are in crystal coordinates of at.
+!
+!   The codes of the generalized space group operations are the following
+!
+!   E         1 
+!   2z        2   2z1      65
+!   2y        3   2y1      66
+!   2x        4   2x1      67
+!   2xy       5   2xy1     68
+!   2x-y      6   2x-y1    69
+!   4-z       7   4-z1     70    4-z2     71     4-z3   72
+!   4z        8   4z1      73    4z2      74     4z3    75
+!   2xz       9   2xz1     76
+!   2x-z     10   2x-z1    77     
+!   4y       11   4y1      78    4y2      79     4y3    80
+!   4-y      12   4-y1     81    4-y2     82     4-y3   83
+!   2yz      13   2yz1     84
+!   2y-z     14   2y-z1    85
+!   4-x      15   4-x1     86    4-x2     87     4-x3   88
+!   4x       16   4x1      89    4x2      90     4x3    91
+!   3-x-y-z  17   3-x-y-z1 92    3-x-y-z2 93
+!   3-xyz    18   3-xyz1   94    3-xyz2   95
+!   3xy-z    19   3xy-z1   96    3xy-z2   97
+!   3x-yz    20   3x-yz1   98    3x-yz2   99
+!   3xyz     21   3xyz1   100    3xyz2   101
+!   3-xy-z   22   3-xy-z1 102    3-xy-z2 103
+!   3x-y-z   23   3x-y-z1 104    3x-y-z2 105
+!   3-x-yz   24   3-x-yz1 106    3-x-yz2 107
+!   6z       25   6z1     108    6z2     109    6z3   110   6z4   111  6z5  112
+!   6-z      26   6-z1    113    6-z2    114    6-z3  115   6-z4  116  6-z5 117
+!   3z       27   3z1     118    3z2     119
+!   3-z      28   3-z1    120    3-z2    121
+!   21-10    29   21-101  122
+!   2210     30   22101   123
+!   2010     31   20101   124
+!   2110     32   21101   125
+!   i        33  
+!   i2z      34   i2za    126    i2zb    127    i2zn   128    i2zd    129 
+!   i2y      35   i2ya    130    i2yc    131    i2yn   132    i2yd    133
+!   i2x      36   i2xb    134    i2xc    135    i2xn   136    i2xd    137
+!   i2xy     37   i2xya   138    i2xyc   139    i2xyn  140    i2xyd   141 
+!   i2x-y    38   i2x-ya  142    i2x-yc  143    i2x-yn 144    i2x-yd  145
+!   i4-z     39   
+!   i4z      40   
+!   i2xz     41   i2xza   146    i2xzb   147    i2xzn  148    i2xzd   149
+!   i2x-z    42   i2x-za  150    i2x-zb  151    i2x-zn 152    i2x-zd  153
+!   i4y      43
+!   i4-y     44
+!   i2yz     45   i2yza   154    i2yzb   155     i2yzn  156    i2yzd   157
+!   i2y-z    46   i2y-za  158    i2y-zb  159     i2y-zn 160    i2y-zd  161
+!   i4x      47
+!   i4-x     48
+!   i3-x-y-z 49  
+!   i3-xyz   50 
+!   i3xy-z   51  
+!   i3x-yz   52 
+!   i3xyz    53  
+!   i3-xy-z  54 
+!   i3x-y-z  55   
+!   i3-x-yz  56   
+!   i6z      57
+!   i6-z     58
+!   i3z      59
+!   i3-z     60
+!   i21-10   61   i21-10a 162    i21-10c  163     i21-10n  164   
+!   i2210    62   i2210a  165    i2210c   166     i2210n   167   
+!   i2010    63   i2010a  168    i2010c   169     i2010n   170   
+!   i2110    64   i2110a  171    i2110c   172     i2110n   173   
+!
+!
+  USE kinds, ONLY : DP
+  USE linear_solvers, ONLY : linsolvx
+  USE lattices, ONLY : compute_conventional
+  IMPLICIT NONE
+!
+!   First the operations for which ft is zero
+!
+  INTEGER, INTENT(IN) :: sym_in, ibrav
+  REAL(DP), INTENT(IN) :: sr(3,3), ft(3), at(3,3), bg(3,3), ftperp(3), &
+                          ftpar(3)
+  REAL(DP), INTENT(OUT) :: s0(3)
+  INTEGER, INTENT(OUT) :: sg_sym_out
+
+  REAL(DP)  :: ftmod, amat(3,3), b(3), ftpar2(3), ftpar3(3), ftpar4(3), &
+               ftpar6(3), ftmod2, ftmod3, ftmod4, ftmod6, atp(3,3), bgp(3,3),&
+               ftpar2m(3), ftmod2m, u(3), ps
+  INTEGER :: ts, tipo_sym, iftpar2(3), iftpar3(3), iftpar4(3), iftpar6(3), &
+             iftpar2m(3), imirror, ifact, ipol, jpol,idir
+!
+!  symmorphic operations. The space group operation coincides with the
+!  point group operation
+!
+!  WRITE(6,*) 'find_space_group_tags'
+!  DO ipol=1,3
+!     WRITE(6,*) (at(jpol,ipol), jpol=1,3)
+!  ENDDO
+!  WRITE(6,*) 'find_bg'
+!  DO ipol=1,3
+!     WRITE(6,*) (bg(jpol,ipol), jpol=1,3)
+!  ENDDO
+
+  s0=0.0_DP
+  ftmod = ft(1)**2 + ft(2)**2 + ft(3)**2
+  IF (ftmod<1.D-6) THEN
+     sg_sym_out=sym_in
+     RETURN
+  ENDIF
+!
+! symmorphic operation with displaced origin. 
+! The inversion first
+!
+  IF (sym_in==33) THEN
+     s0(:) = ft(:) * 0.5_DP
+     sg_sym_out=sym_in
+  END IF 
+
+  ts=tipo_sym(sr) 
+  ftmod=ftpar(1)**2 + ftpar(2)**2 + ftpar(3)**2
+
+  IF (ftmod<1.D-6) THEN
+!
+! symmorphic operation with displaced origin. 
+! mirror symmetry or twofold rotation axis
+!
+     IF (ts==4 .OR. ts==5) THEN
+        s0(:)=ftperp(:) * 0.5_DP
+     ENDIF
+!
+! improper rotation
+!
+     IF (ts==6) THEN
+        amat(:,:)=-sr(:,:)
+        DO ipol=1,3
+           amat(ipol,ipol)=1.0_DP - sr(ipol,ipol)
+        ENDDO
+        b(:)=ftperp(:)
+        CALL cryst_to_cart(1, b, at, 1)        
+        CALL linsolvx(amat,3,b,s0)
+        CALL cryst_to_cart(1, s0, bg, -1)        
+     ENDIF
+!
+!  proper rotation about x, y, or z or three-fold rotation about the
+!  cube diagonals
+!
+     IF (sym_in==7.OR.sym_in==8.OR.sym_in==25.OR.sym_in==26 &
+         .OR. sym_in==27.OR.sym_in==28) THEN
+        CALL find_origin_xyz_rot(sr,ftperp,sym_in,at,bg,s0,3)
+     ELSEIF (sym_in==11.OR.sym_in==12) THEN
+        CALL find_origin_xyz_rot(sr,ftperp,sym_in,at,bg,s0,2)
+     ELSEIF (sym_in==15.OR.sym_in==16) THEN
+        CALL find_origin_xyz_rot(sr,ftperp,sym_in,at,bg,s0,1)
+     ELSEIF (sym_in>=17.AND.sym_in<=24) THEN
+        CALL find_origin_3_rot(sr,ftperp,sym_in,at,bg,s0)
+     ENDIF
+     
+     sg_sym_out=sym_in
+     RETURN
+  ENDIF
+!
+!   We first find the origin shift
+!
+  u=0.0_DP
+  IF (ts==4 .OR. ts==5) THEN
+     s0(:)=ftperp(:) * 0.5_DP
+  ELSEIF (sym_in==7.OR.sym_in==8.OR.sym_in==25.OR.sym_in==26 &
+         .OR. sym_in==27.OR.sym_in==28) THEN
+     CALL find_origin_xyz_rot(sr,ftperp,sym_in,at,bg,s0,3)
+     u(3)=1.0_DP
+  ELSEIF (sym_in==11.OR.sym_in==12) THEN
+     CALL find_origin_xyz_rot(sr,ftperp,sym_in,at,bg,s0,2)
+     u(2)=1.0_DP
+  ELSEIF (sym_in==15.OR.sym_in==16) THEN
+     CALL find_origin_xyz_rot(sr,ftperp,sym_in,at,bg,s0,1)
+     u(1)=1.0_DP
+  ELSEIF (sym_in>=17.AND.sym_in<=24) THEN
+     CALL find_origin_3_rot(sr,ftperp,sym_in,at,bg,s0)
+     CALL versor(sr,u)
+  ENDIF
+!
+!  and then decide which operation it is. First find if the
+!  fractional translation is parallel or antiparallel to the axis
+!
+  b(:)=ftpar(:)
+  CALL cryst_to_cart(1, b, at, 1)        
+  ps=b(1)*u(1)+b(2)*u(2)+b(3)*u(3)
+  idir=0
+  IF (ps > 1.D-6) THEN
+     idir=1
+  ELSEIF (ps < -1.D-6) THEN
+     idir=-1
+  ENDIF   
+  ftpar2(:)=ftpar(:)*2.0_DP - NINT(ftpar(:)*2.0_DP)
+  ftpar3(:)=ftpar(:)*3.0_DP - NINT(ftpar(:)*3.0_DP)
+  ftpar4(:)=ftpar(:)*4.0_DP - NINT(ftpar(:)*4.0_DP)
+  ftpar6(:)=ftpar(:)*6.0_DP - NINT(ftpar(:)*6.0_DP)
+  ftmod2 = ftpar2(1)**2 + ftpar2(2)**2 + ftpar2(3)**2
+  ftmod3 = ftpar3(1)**2 + ftpar3(2)**2 + ftpar3(3)**2
+  ftmod4 = ftpar4(1)**2 + ftpar4(2) **2 + ftpar4(3)**2
+  ftmod6 = ftpar6(1)**2 + ftpar6(2) **2 + ftpar6(3)**2
+  iftpar2(:)= NINT(ftpar(:)*2.0_DP)
+  iftpar3(:)= NINT(ftpar(:)*3.0_DP)
+  iftpar4(:)= NINT(ftpar(:)*4.0_DP)
+  iftpar6(:)= NINT(ftpar(:)*6.0_DP)
+  CALL compute_conventional(at, atp, ibrav)
+  CALL recips(atp(1,1), atp(1,2), atp(1,3), bgp(1,1), bgp(1,2), bgp(1,3))
+  CALL cryst_to_cart(1,b,bgp,-1)
+!
+! for the mirror we check the glide with respect to the vectors of the
+! conventional unit cell (for centered lattices)
+!
+  ftpar2m(:)=b(:)*2.0_DP - NINT(b(:)*2.0_DP)
+  ftmod2m = ftpar2m(1)**2 + ftpar2m(2) **2 + ftpar2m(3)**2
+!  WRITE(6,*) b(1), b(2), b(3)
+  iftpar2m(:)= NINT(b(:)*2.0_DP)
+  SELECT CASE (sym_in)
+     CASE(2)
+        IF (ftmod2 < 1.D-6) THEN
+           sg_sym_out=65
+        ELSE
+           GOTO 100
+        ENDIF
+     CASE(3)
+        IF (ftmod2 < 1.D-6) THEN
+           sg_sym_out=66
+        ELSE
+           GOTO 100
+        ENDIF
+     CASE(4)
+        IF (ftmod2 < 1.D-6) THEN
+           sg_sym_out=67
+        ELSE
+           GOTO 100
+        ENDIF
+     CASE(5)
+        IF (ftmod2 < 1.D-6) THEN
+           sg_sym_out=68
+        ELSE
+           GOTO 100
+        ENDIF
+     CASE(6)
+        IF (ftmod2 < 1.D-6) THEN
+           sg_sym_out=69
+        ELSE
+           GOTO 100
+        ENDIF
+     CASE(7)
+        IF (ftmod4 < 1.D-6) THEN
+           CALL find_ifact(4,iftpar4,ifact)       
+           IF (ifact==1) THEN
+              IF (idir==1) THEN
+                 sg_sym_out=72
+              ELSE
+                 sg_sym_out=70
+              ENDIF
+           ELSEIF (ifact==2) THEN
+              sg_sym_out=71
+           ELSEIF (ifact==3) THEN
+              IF (idir==1) THEN
+                 sg_sym_out=70
+              ELSE
+                 sg_sym_out=72
+              ENDIF
+           ENDIF
+        ELSE
+           GOTO 100
+        ENDIF
+     CASE(8)
+        IF (ftmod4 < 1.D-6) THEN
+           CALL find_ifact(4,iftpar4,ifact)       
+           IF (ifact==1) THEN
+              IF (idir==1) THEN
+                 sg_sym_out=73
+              ELSE
+                 sg_sym_out=75
+              ENDIF
+           ELSEIF (ifact==2) THEN
+              sg_sym_out=74
+           ELSEIF (ifact==3) THEN
+              IF (idir==1) THEN
+                 sg_sym_out=75
+              ELSE
+                 sg_sym_out=73
+              ENDIF
+           ENDIF
+        ELSE
+           GOTO 100
+        ENDIF
+     CASE(9)
+        IF (ftmod2 < 1.D-6) THEN
+           sg_sym_out=76
+        ELSE
+           GOTO 100
+        ENDIF
+     CASE(10)
+        IF (ftmod2 < 1.D-6) THEN
+           sg_sym_out=77
+        ELSE
+           GOTO 100
+        ENDIF
+     CASE(11)
+        IF (ftmod4 < 1.D-6) THEN
+           CALL find_ifact(4,iftpar4,ifact)       
+           IF (ifact==1) THEN
+              IF (idir==1) THEN
+                 sg_sym_out=78
+              ELSE
+                 sg_sym_out=80
+              ENDIF
+           ELSEIF (ifact==2) THEN
+              sg_sym_out=79
+           ELSEIF (ifact==3) THEN
+              IF (idir==1) THEN
+                 sg_sym_out=80
+              ELSE
+                 sg_sym_out=78
+              ENDIF
+           ENDIF
+        ELSE
+           GOTO 100
+        ENDIF
+     CASE(12)
+        IF (ftmod4 < 1.D-6) THEN
+           CALL find_ifact(4,iftpar4,ifact)       
+           IF (ifact==1) THEN
+              IF (idir==1) THEN
+                 sg_sym_out=83
+              ELSE
+                 sg_sym_out=81
+              ENDIF
+           ELSEIF (ifact==2) THEN
+              sg_sym_out=82
+           ELSEIF (ifact==3) THEN
+              IF (idir==1) THEN
+                 sg_sym_out=81
+              ELSE
+                 sg_sym_out=83
+              ENDIF
+           ENDIF
+        ELSE
+           GOTO 100
+        ENDIF
+     CASE(13)
+        IF (ftmod2 < 1.D-6) THEN
+           sg_sym_out=84
+        ELSE
+           GOTO 100
+        ENDIF
+     CASE(14)
+        IF (ftmod2 < 1.D-6) THEN
+           sg_sym_out=85
+        ELSE
+           GOTO 100
+        ENDIF
+     CASE(15)
+        IF (ftmod4 < 1.D-6) THEN
+           CALL find_ifact(4,iftpar4,ifact)       
+           IF (ifact==1) THEN
+              IF (idir==1) THEN
+                 sg_sym_out=88
+              ELSE
+                 sg_sym_out=86
+              ENDIF
+           ELSEIF (ifact==2) THEN
+              sg_sym_out=87
+           ELSEIF (ifact==3) THEN
+              IF (idir==1) THEN
+                 sg_sym_out=86
+              ELSE
+                 sg_sym_out=88
+              ENDIF
+           ENDIF
+        ELSE
+           GOTO 100
+        ENDIF
+     CASE(16)
+        IF (ftmod4 < 1.D-6) THEN
+           CALL find_ifact(4,iftpar4,ifact)       
+           IF (ifact==1) THEN
+              IF (idir==1) THEN
+                 sg_sym_out=89
+              ELSE
+                 sg_sym_out=91
+              ENDIF
+           ELSEIF (ifact==2) THEN
+              sg_sym_out=90
+           ELSEIF (ifact==3) THEN
+              IF (idir==1) THEN
+                 sg_sym_out=91
+              ELSE
+                 sg_sym_out=89
+              ENDIF
+           ENDIF
+        ELSE
+           GOTO 100
+        ENDIF
+     CASE(17)
+        IF (ftmod3 < 1.D-6) THEN
+           CALL find_ifact(3,iftpar3,ifact)       
+           IF (idir==1) THEN
+              IF (ifact==1) THEN
+                 sg_sym_out=92
+              ELSEIF (ifact==2) THEN
+                 sg_sym_out=93
+              ENDIF   
+           ELSE
+              IF (ifact==1) THEN
+                 sg_sym_out=93
+              ELSEIF (ifact==2) THEN
+                 sg_sym_out=92
+              ENDIF   
+           ENDIF
+        ELSE
+           GOTO 100
+        ENDIF
+     CASE(18)
+        IF (ftmod3 < 1.D-6) THEN
+           CALL find_ifact(3,iftpar3,ifact)       
+           IF (idir==1) THEN
+              IF (ifact==1) THEN
+                 sg_sym_out=94
+              ELSEIF (ifact==2) THEN
+                 sg_sym_out=95
+              ENDIF   
+           ELSE
+              IF (ifact==1) THEN
+                 sg_sym_out=95
+              ELSEIF (ifact==2) THEN
+                 sg_sym_out=94
+              ENDIF   
+           ENDIF
+        ELSE
+           GOTO 100
+        ENDIF
+     CASE(19)
+        IF (ftmod3 < 1.D-6) THEN
+           CALL find_ifact(3,iftpar3,ifact)       
+           IF (idir==1) THEN
+              IF (ifact==1) THEN
+                 sg_sym_out=96
+              ELSEIF (ifact==2) THEN
+                 sg_sym_out=97
+              ENDIF   
+           ELSE
+              IF (ifact==1) THEN
+                 sg_sym_out=97
+              ELSEIF (ifact==2) THEN
+                 sg_sym_out=96
+              ENDIF   
+           ENDIF
+        ELSE
+           GOTO 100
+        ENDIF
+     CASE(20)
+        IF (ftmod3 < 1.D-6) THEN
+           CALL find_ifact(3,iftpar3,ifact)       
+           IF (idir==1) THEN
+              IF (ifact==1) THEN
+                 sg_sym_out=98
+              ELSEIF (ifact==2) THEN
+                 sg_sym_out=99
+              ENDIF   
+           ELSE
+              IF (ifact==1) THEN
+                 sg_sym_out=99
+              ELSEIF (ifact==2) THEN
+                 sg_sym_out=98
+              ENDIF   
+           ENDIF
+        ELSE
+           GOTO 100
+        ENDIF
+     CASE(21)
+        IF (ftmod3 < 1.D-6) THEN
+           CALL find_ifact(3,iftpar3,ifact)       
+           IF (idir==1) THEN
+              IF (ifact==1) THEN
+                 sg_sym_out=100
+              ELSEIF (ifact==2) THEN
+                 sg_sym_out=101
+              ENDIF   
+           ELSE
+              IF (ifact==1) THEN
+                 sg_sym_out=101
+              ELSEIF (ifact==2) THEN
+                 sg_sym_out=100
+              ENDIF   
+           ENDIF
+        ELSE
+           GOTO 100
+        ENDIF
+     CASE(22)
+        IF (ftmod3 < 1.D-6) THEN
+           CALL find_ifact(3,iftpar3,ifact)       
+           IF (idir==1) THEN
+              IF (ifact==1) THEN
+                 sg_sym_out=103
+              ELSEIF (ifact==2) THEN
+                 sg_sym_out=104
+              ENDIF   
+           ELSE
+              IF (ifact==1) THEN
+                 sg_sym_out=104
+              ELSEIF (ifact==2) THEN
+                 sg_sym_out=103
+              ENDIF   
+           ENDIF
+        ELSE
+           GOTO 100
+        ENDIF
+     CASE(23)
+        IF (ftmod3 < 1.D-6) THEN
+           CALL find_ifact(3,iftpar3,ifact)       
+           IF (idir==1) THEN
+              IF (ifact==1) THEN
+                 sg_sym_out=105
+              ELSEIF (ifact==2) THEN
+                 sg_sym_out=106
+              ENDIF   
+           ELSE
+              IF (ifact==1) THEN
+                 sg_sym_out=106
+              ELSEIF (ifact==2) THEN
+                 sg_sym_out=105
+              ENDIF   
+           ENDIF
+        ELSE
+           GOTO 100
+        ENDIF
+     CASE(24)
+        IF (ftmod3 < 1.D-6) THEN
+           CALL find_ifact(3,iftpar3,ifact)       
+           IF (idir==1) THEN
+              IF (ifact==1) THEN
+                 sg_sym_out=106
+              ELSEIF (ifact==2) THEN
+                 sg_sym_out=107
+              ENDIF   
+           ELSE
+              IF (ifact==1) THEN
+                 sg_sym_out=107
+              ELSEIF (ifact==2) THEN
+                 sg_sym_out=106
+              ENDIF   
+           ENDIF
+        ELSE
+           GOTO 100
+        ENDIF
+     CASE(25)
+        IF (ftmod6 < 1.D-6) THEN
+           CALL find_ifact(6,iftpar6,ifact)       
+           IF (idir==1) THEN
+              IF (ifact==1) THEN
+                 sg_sym_out=108
+              ELSEIF (ifact==2) THEN
+                 sg_sym_out=109
+              ELSEIF (ifact==3) THEN
+                 sg_sym_out=110
+              ELSEIF (ifact==4) THEN
+                 sg_sym_out=111
+              ELSEIF (ifact==5) THEN
+                 sg_sym_out=112
+              ENDIF   
+           ELSE
+              IF (ifact==1) THEN
+                 sg_sym_out=112
+              ELSEIF (ifact==2) THEN
+                 sg_sym_out=111
+              ELSEIF (ifact==3) THEN
+                 sg_sym_out=110
+              ELSEIF (ifact==4) THEN
+                 sg_sym_out=109
+              ELSEIF (ifact==5) THEN
+                 sg_sym_out=108
+              ENDIF   
+           ENDIF
+        ELSE
+           GOTO 100
+        ENDIF
+     CASE(26)
+        IF (ftmod6 < 1.D-6) THEN
+           CALL find_ifact(6,iftpar6,ifact)       
+           IF (idir==1) THEN
+              IF (ifact==1) THEN
+                 sg_sym_out=113
+              ELSEIF (ifact==2) THEN
+                 sg_sym_out=114
+              ELSEIF (ifact==3) THEN
+                 sg_sym_out=115
+              ELSEIF (ifact==4) THEN
+                 sg_sym_out=116
+              ELSEIF (ifact==5) THEN
+                 sg_sym_out=117
+              ENDIF   
+           ELSE
+              IF (ifact==1) THEN
+                 sg_sym_out=117
+              ELSEIF (ifact==2) THEN
+                 sg_sym_out=116
+              ELSEIF (ifact==3) THEN
+                 sg_sym_out=115
+              ELSEIF (ifact==4) THEN
+                 sg_sym_out=114
+              ELSEIF (ifact==5) THEN
+                 sg_sym_out=113
+              ENDIF   
+           ENDIF
+        ELSE
+           GOTO 100
+        ENDIF
+     CASE(27)
+        IF (ftmod3 < 1.D-6) THEN
+           CALL find_ifact(3,iftpar3,ifact)       
+           IF (idir==1) THEN
+              IF (ifact==1) THEN
+                 sg_sym_out=118
+              ELSEIF (ifact==2) THEN
+                 sg_sym_out=119
+              ENDIF   
+           ELSE
+              IF (ifact==1) THEN
+                 sg_sym_out=119
+              ELSEIF (ifact==2) THEN
+                 sg_sym_out=118
+              ENDIF   
+           ENDIF
+        ELSE
+           GOTO 100
+        ENDIF
+     CASE(28)
+        IF (ftmod3 < 1.D-6) THEN
+           CALL find_ifact(3,iftpar3,ifact)       
+           IF (idir==1) THEN
+              IF (ifact==1) THEN
+                 sg_sym_out=121
+              ELSEIF (ifact==2) THEN
+                 sg_sym_out=120
+              ENDIF   
+           ELSE
+              IF (ifact==1) THEN
+                 sg_sym_out=120
+              ELSEIF (ifact==2) THEN
+                 sg_sym_out=121
+              ENDIF   
+           ENDIF
+        ELSE
+           GOTO 100
+        ENDIF
+     CASE(29)
+        IF (ftmod2 < 1.D-6) THEN
+           sg_sym_out=122
+        ELSE
+           GOTO 100
+        ENDIF
+     CASE(30)
+        IF (ftmod2 < 1.D-6) THEN
+           sg_sym_out=123
+        ELSE
+           GOTO 100
+        ENDIF
+     CASE(31)
+        IF (ftmod2 < 1.D-6) THEN
+           sg_sym_out=124
+        ELSE
+           GOTO 100
+        ENDIF
+     CASE(32)
+        IF (ftmod2 < 1.D-6) THEN
+           sg_sym_out=125
+        ELSE
+           GOTO 100
+        ENDIF
+     CASE(34)
+        IF (ftmod2m < 1.D-6) THEN
+           CALL find_mirror_type(iftpar2m,imirror)
+           IF (imirror==1) THEN
+              sg_sym_out=126
+           ELSEIF (imirror==2) THEN
+              sg_sym_out=127
+           ELSEIF (imirror==4) THEN
+              sg_sym_out=128
+           ELSE
+              GOTO 100
+           ENDIF
+        ELSE
+!
+!   check for d
+!
+           IF (ftmod2 < 1.D-6) THEN
+              sg_sym_out=129
+           ELSE
+              GOTO 100
+           ENDIF
+        ENDIF
+     CASE(35)
+        IF (ftmod2m < 1.D-6) THEN
+           CALL find_mirror_type(iftpar2m,imirror)
+           IF (imirror==1) THEN
+              sg_sym_out=130
+           ELSEIF (imirror==3) THEN
+              sg_sym_out=131
+           ELSEIF (imirror==4) THEN
+              sg_sym_out=132
+           ELSE
+              GOTO 100
+           ENDIF
+        ELSE
+           IF (ftmod2 < 1.D-6) THEN
+              sg_sym_out=133
+           ELSE
+              GOTO 100
+           ENDIF
+        ENDIF
+     CASE(36)
+        IF (ftmod2m < 1.D-6) THEN
+           CALL find_mirror_type(iftpar2m,imirror)
+           IF (imirror==2) THEN
+              sg_sym_out=134
+           ELSEIF (imirror==3) THEN
+              sg_sym_out=135
+           ELSEIF (imirror==4) THEN
+              sg_sym_out=136
+           ELSE
+              GOTO 100
+           ENDIF
+        ELSE
+           IF (ftmod2 < 1.D-6) THEN
+              sg_sym_out=137
+           ELSE
+              GOTO 100
+           ENDIF
+        ENDIF
+     CASE(37)
+        IF (ftmod2m < 1.D-6) THEN
+           CALL find_mirror_type(iftpar2m,imirror)
+           IF (imirror==3) THEN
+              sg_sym_out=139
+           ELSEIF (imirror==4) THEN
+              sg_sym_out=140
+           ELSE
+              GOTO 100
+           ENDIF
+        ELSE
+           IF (ftmod2 < 1.D-6) THEN
+              sg_sym_out=141
+           ELSE
+              GOTO 100
+           ENDIF
+        ENDIF
+     CASE(38)
+        IF (ftmod2m < 1.D-6) THEN
+           CALL find_mirror_type(iftpar2m,imirror)
+           IF (imirror==3) THEN
+              sg_sym_out=143
+           ELSEIF (imirror==4) THEN
+              sg_sym_out=144
+           ELSE
+              GOTO 100
+           ENDIF
+        ELSE
+           IF (ftmod2 < 1.D-6) THEN
+              sg_sym_out=145
+           ELSE
+              GOTO 100
+           ENDIF
+        ENDIF
+     CASE(41)
+        IF (ftmod2m < 1.D-6) THEN
+           CALL find_mirror_type(iftpar2m,imirror)
+           IF (imirror==2) THEN
+              sg_sym_out=147
+           ELSEIF (imirror==4) THEN
+              sg_sym_out=148
+           ELSE
+              GOTO 100
+           ENDIF
+        ELSE
+           IF (ftmod2 < 1.D-6) THEN
+              sg_sym_out=149
+           ELSE
+              GOTO 100
+           ENDIF
+        ENDIF
+     CASE(42)
+        IF (ftmod2m < 1.D-6) THEN
+           CALL find_mirror_type(iftpar2m,imirror)
+           IF (imirror==2) THEN
+              sg_sym_out=151
+           ELSEIF (imirror==4) THEN
+              sg_sym_out=152
+           ELSE
+              GOTO 100
+           ENDIF
+        ELSE
+           IF (ftmod2 < 1.D-6) THEN
+              sg_sym_out=153
+           ELSE
+              GOTO 100
+           ENDIF
+        ENDIF
+     CASE(45)
+        IF (ftmod2m < 1.D-6) THEN
+           CALL find_mirror_type(iftpar2m,imirror)
+           IF (imirror==1) THEN
+              sg_sym_out=154
+           ELSEIF (imirror==4) THEN
+              sg_sym_out=156
+           ELSE
+              GOTO 100
+           ENDIF
+        ELSE
+           IF (ftmod2 < 1.D-6) THEN
+              sg_sym_out=157
+           ELSE
+              GOTO 100
+           ENDIF
+        ENDIF
+     CASE(46)
+        IF (ftmod2m < 1.D-6) THEN
+           CALL find_mirror_type(iftpar2m,imirror)
+           IF (imirror==1) THEN
+              sg_sym_out=158
+           ELSEIF (imirror==4) THEN
+              sg_sym_out=160
+           ELSE
+              GOTO 100
+           ENDIF
+        ELSE
+           IF (ftmod2 < 1.D-6) THEN
+              sg_sym_out=157
+           ELSE
+              GOTO 100
+           ENDIF
+        ENDIF
+     CASE(61)
+        IF (ftmod2 < 1.D-6) THEN
+           CALL find_mirror_type(iftpar2m,imirror)
+           IF (imirror==1.OR.imirror==2) THEN
+              sg_sym_out=162
+           ELSEIF (imirror==3) THEN
+              sg_sym_out=163
+           ELSEIF (imirror==4) THEN
+              sg_sym_out=164
+           ENDIF
+        ELSE
+           GOTO 100
+        ENDIF
+     CASE(62)
+        IF (ftmod2 < 1.D-6) THEN
+           CALL find_mirror_type(iftpar2m,imirror)
+           IF (imirror==1.OR.imirror==2) THEN
+              sg_sym_out=165
+           ELSEIF (imirror==3) THEN
+              sg_sym_out=166
+           ELSEIF (imirror==4) THEN
+              sg_sym_out=167
+           ENDIF
+        ELSE
+           GOTO 100
+        ENDIF
+     CASE(63)
+        IF (ftmod2 < 1.D-6) THEN
+           IF (imirror==1.OR.imirror==2) THEN
+              sg_sym_out=168
+           ELSEIF (imirror==3) THEN
+              sg_sym_out=169
+           ELSEIF (imirror==4) THEN
+              sg_sym_out=170
+           ENDIF
+        ELSE
+           GOTO 100
+        ENDIF
+     CASE(64)
+        IF (ftmod2 < 1.D-6) THEN
+           IF (imirror==1.OR.imirror==2) THEN
+              sg_sym_out=171
+           ELSEIF (imirror==3) THEN
+              sg_sym_out=172
+           ELSEIF (imirror==4) THEN
+              sg_sym_out=173
+           ENDIF
+        ELSE
+           GOTO 100
+        ENDIF
+  CASE DEFAULT
+       GOTO 100
+  END SELECT
+  RETURN
+100 CALL errore('find_sg_tags','Some problems. The routine should not &
+                                                            &arrive here',1)
+  RETURN
+  END SUBROUTINE find_sg_tags
+
+SUBROUTINE find_mirror_type(ifrac,imirror)
+!
+!  imirror codes
+!  1  a
+!  2  b
+!  3  c
+!  4  n
+!  All codes are appropriate for mirror d if ifrac is calculated with
+!  the centered lattice vectors. Note however that a,b,c,n must be 
+!  checked before d.
+!
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ifrac(3)
+INTEGER, INTENT(OUT) :: imirror
+
+IF (ifrac(1)/=0.AND.ifrac(2)==0.AND.ifrac(3)==0) imirror=1 
+IF (ifrac(1)==0.AND.ifrac(2)/=0.AND.ifrac(3)==0) imirror=2 
+IF (ifrac(1)==0.AND.ifrac(2)==0.AND.ifrac(3)/=0) imirror=3 
+IF (ifrac(1)/=0.AND.ifrac(2)/=0.AND.ifrac(3)==0) imirror=4    
+IF (ifrac(1)==0.AND.ifrac(2)/=0.AND.ifrac(3)/=0) imirror=4 
+IF (ifrac(1)/=0.AND.ifrac(2)==0.AND.ifrac(3)/=0) imirror=4 
+IF (ifrac(1)/=0.AND.ifrac(2)/=0.AND.ifrac(3)/=0) imirror=4
+
+RETURN
+END SUBROUTINE find_mirror_type
+
+SUBROUTINE find_ifact(axis_order,ifrac,ifact)
+!
+!   This routine receives a vector of three integers ifrac.
+!   It removes the zeros and for the remaining integers it checks
+!   if they have a common factor k. k, modulus the input value
+!   axis_order, is set into ifact. 
+!   The use is the following. A fractional translation parallel to a
+!   rotation axis must be parallel to a Bravais lattice vector
+!   n_1 a_1 + n_2 a_2 + n_3 a_3. If n_1, n_2 and n_3 have no common factor
+!   this is the shortest Bravais lattice vector parallel to the axis.
+!   Multiplying the fractional translation written in crystal coordinates 
+!   by axis_order (the order of the axis) we will obtain:
+!   k n_1 a_1 + k n_2 a_2 + k n_3 a_3
+!   this routine finds k (mod axis_order) receiving in input k n_1, k n_2 and
+!   k n_3.
+!   
+!
+IMPLICIT NONE
+INTEGER, INTENT(IN) ::  axis_order, ifrac(3)
+INTEGER, INTENT(OUT) :: ifact
+
+INTEGER :: ifa(3), nterms, ipol, iorder
+
+nterms=0
+
+DO ipol=1,3
+   IF (ifrac(ipol) /= 0) THEN
+      nterms=nterms+1
+      ifa(nterms)=ifrac(ipol)
+   ENDIF
+ENDDO
+
+IF (nterms==0) CALL errore('find_ifact','called in the wrong case',1)
+
+DO iorder=axis_order-1, 1, -1
+   IF (nterms==1) THEN
+      IF (MOD(ifa(1),iorder)==0) THEN
+         ifact=iorder
+         RETURN
+      ENDIF
+   ELSEIF (nterms==2) THEN
+      IF ( (MOD(ifa(1),iorder)==0).AND.(MOD(ifa(2),iorder)==0)) THEN
+         ifact=iorder
+         RETURN
+      END IF
+   ELSEIF (nterms==3) THEN
+      IF ((MOD(ifa(1),iorder)==0).AND. &
+          (MOD(ifa(2),iorder)==0).AND. &
+          (MOD(ifa(3),iorder)==0)) THEN
+         ifact=iorder
+         RETURN
+      END IF
+   ENDIF
+END DO
+
+RETURN
+END SUBROUTINE find_ifact
+
+SUBROUTINE find_origin_xyz_rot(sr,ftperp,sym_in,at,bg,s0,ipol)
+!
+! This routine finds the origin shift needed to bring the fractional
+! translation associated to a rotation whose axis is parallel to x, y, or
+! z to be parallel to the rotation axis
+!
+USE kinds, ONLY : DP
+USE linear_solvers, ONLY : linsolvx
+
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: sym_in, ipol
+REAL(DP), INTENT(IN) :: sr(3,3), ftperp(3), at(3,3), bg(3,3)
+REAL(DP), INTENT(OUT) :: s0(3)
+
+
+REAL(DP) ::  &  
+         b(3),      & ! the fractional translation in cartesian coordinates
+         amat(3,3), & ! the matrix E-R
+         cmat(2,2), & ! the matrix E-R reduced to 2x2
+         c(2),      & ! auxiliary vector to contain a part of b
+         s(2)         ! auxiliary vector solution of the linear system
+
+INTEGER :: jpol
+!
+!  bring the fractional translation in cartesian coordinates
+!
+b(:)=ftperp(:)
+CALL cryst_to_cart(1,b,at,1)
+!
+!  write the matrix E-R
+!
+amat(:,:)=-sr(:,:)
+DO jpol=1,3
+   amat(jpol,jpol)=1.0_DP-sr(jpol,jpol)
+ENDDO
+!
+!  construct the linear system to invert. According to ipol choose a
+!  part of the rotation matrix
+!
+IF (ipol==1) THEN
+   cmat(1,1) = amat(2,2)
+   cmat(1,2) = amat(2,3)
+   cmat(2,1) = amat(3,2)
+   cmat(2,2) = amat(3,3)
+   c(1)=b(2)
+   c(2)=b(3)
+ELSEIF (ipol==2) THEN
+   cmat(1,1) = amat(1,1)
+   cmat(1,2) = amat(1,3)
+   cmat(2,1) = amat(3,1)
+   cmat(2,2) = amat(3,3)
+   c(1)=b(1)
+   c(2)=b(3)
+ELSEIF (ipol==3) THEN
+   cmat(1,1) = amat(1,1)
+   cmat(1,2) = amat(1,2)
+   cmat(2,1) = amat(2,1)
+   cmat(2,2) = amat(2,2)
+   c(1)=b(1)
+   c(2)=b(2)
+ENDIF
+!
+!  solve the linear system that gives s(1) and s(2)
+!
+CALL linsolvx(cmat,2,c,s)
+!
+!  uncomment to check the linear system
+!
+!WRITE(6,*) 'linear system'
+!WRITE(6,*) cmat(1,1)*s(1)+ cmat(1,2)*s(2) - c(1)
+!WRITE(6,*) cmat(2,1)*s(1)+ cmat(2,2)*s(2) - c(2)
+!
+!  compute s0
+!
+IF (ipol==1) THEN
+   s0(1) = 0.0_DP
+   s0(2) = s(1)
+   s0(3) = s(2)
+ELSEIF (ipol==2) THEN
+   s0(1) = s(1)
+   s0(2) = 0.0_DP
+   s0(3) = s(2)
+ELSEIF (ipol==3) THEN
+   s0(1) = s(1)
+   s0(2) = s(2)
+   s0(3) = 0.0_DP
+ENDIF
+!
+!  bring s0 in crystal coordinates
+!
+CALL cryst_to_cart(1,s0,bg,-1)
+
+RETURN
+END SUBROUTINE find_origin_xyz_rot
+
+SUBROUTINE find_origin_3_rot(sr,ftperp,sym_in,at,bg,s0)
+!
+! This routine finds the origin shift needed to bring the fractional
+! translation associated to a rotation of +-120 about a diagonal of the cube
+! to be parallel to the rotation axis
+!
+USE kinds, ONLY : DP
+USE constants, ONLY : pi, tpi
+USE linear_solvers, ONLY : linsolvx
+
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: sym_in
+REAL(DP), INTENT(IN) :: sr(3,3), ftperp(3), at(3,3), bg(3,3)
+REAL(DP), INTENT(OUT) :: s0(3)
+
+REAL(DP), PARAMETER :: sqrt3=SQRT(3.0_DP)
+REAL(DP) :: u(3),      &  ! rotation axis
+            b(3),      &  ! the fractional translation
+            amat(3,3), &  ! the matrix E-R
+            cmat(2,2), &  ! the matrix E-R reduced to a 2x2
+            alpha, beta   ! auxiliary quantities
+
+INTEGER :: ipol
+!
+!  set the rotation axis
+!
+CALL versor(sr,u)
+!
+!  bring the fractional translation in cartesian coordinates
+!
+b(:)=ftperp(:)
+CALL cryst_to_cart(1,b,at,1)
+!
+!  write the matrix E-R
+!
+amat(:,:)=-sr(:,:)
+DO ipol=1,3
+   amat(ipol,ipol)=1.0_DP-sr(ipol,ipol)
+ENDDO
+!
+!  find alpha and beta  s0(3)=alpha s0(1) + beta s0(2)
+!
+alpha=-u(1)/u(3)
+beta=-u(2)/u(3)
+!
+!  construct the linear system to invert
+!
+cmat(1,1) = amat(1,1)+alpha*amat(1,3)
+cmat(1,2) = amat(1,2)+beta*amat(1,3)
+cmat(2,1) = amat(2,1)+alpha*amat(2,3)
+cmat(2,2) = amat(2,2)+beta*amat(2,3)
+!
+!  solve the linear system that gives s0(1) and s0(2)
+!
+CALL linsolvx(cmat,2,b,s0)
+!
+!  uncomment to check the linear system
+!
+!WRITE(6,*) 'linear system'
+!WRITE(6,*) cmat(1,1)*s0(1)+ cmat(1,2)*s0(2) - b(1)
+!WRITE(6,*) cmat(2,1)*s0(1)+ cmat(2,2)*s0(2) - b(2)
+!
+!  compute s0(3)
+!
+s0(3) = alpha * s0(1) + beta * s0(2)
+!
+!  bring s0 in crystal coordinates
+!
+CALL cryst_to_cart(1,s0,bg,-1)
+
+RETURN
+END SUBROUTINE find_origin_3_rot
+
 END MODULE space_groups

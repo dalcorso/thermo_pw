@@ -17,6 +17,17 @@ Open Crystallographic Database (http://www.crystallography.net/cod/).
 
 Number of currently tested space groups: 63 / 230.
 
+Running these files, for each solid you obtain: 
+a .xsf file of the structure, to be seen by xcrysden --xsf prefix.xsf 
+a .asy file of the Brillouin zone and of the BZ path, to be seen by 
+       asy -V asy_tmp.asy
+       (only for supported Bravais lattice (all except base-centered 
+        monoclinic and triclinic))
+an output_xrdp.ps postscript file with the XPD diffraction lines and intensities
+a description of the point group, of the Bravais lattice, and of the
+space group of the solid and the form of the main tensors that describe
+the physical quantities (in the output file).
+
 Presently, the following space groups have no representative structure
 in this directory:
 
@@ -52,3 +63,6 @@ it in the thermo_pw-forum mailing list. Cut-off energies, k-points, and
 smearing are completely untested and should be tested before using these 
 input for realistic calculations.
 
+NB: These examples requires the pseudopotentials of pslibrary.1.0.0. 
+You need to install the library and to change the PSEUDO_DIR variable in
+the environment_variables file.

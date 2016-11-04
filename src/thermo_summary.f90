@@ -14,6 +14,7 @@ SUBROUTINE thermo_summary()
   !  useful for the thermo_pw calculation
   !
   USE kinds,                ONLY : DP
+  USE constants,            ONLY : pi
   USE thermo_mod,           ONLY : what, ngeo, density
   USE thermo_sym,           ONLY : laue, code_group_save, fft_fact, &
                                    ibrav_group_consistent
@@ -27,7 +28,9 @@ SUBROUTINE thermo_summary()
   USE control_xrdp,         ONLY : lambda, flxrdp, flpsxrdp, lformf, &
                                    flformf, smin, smax, nspoint, lcm
   USE control_2d_bands,     ONLY : lprojpbs
-  USE space_groups,         ONLY : sg_name, find_space_group, set_fft_fact
+  USE space_groups,         ONLY : sg_name, find_space_group, set_fft_fact, &
+                                   project_frac_tran
+  USE point_group,          ONLY : sym_label, find_group_info_ext
   USE control_pwrun,        ONLY : nr1_save, nr2_save, nr3_save
   USE ktetra,               ONLY : tetra, ltetra
   USE control_flags,        ONLY : iverbosity
@@ -55,7 +58,8 @@ SUBROUTINE thermo_summary()
   CHARACTER(LEN=256) :: asy_filename, filename, xsf_filename
   CHARACTER(LEN=11) :: group_name
   REAL(DP) :: total_mass, total_expected_mass, current_mass, expected_mass, fact
-  REAL(DP) :: atom_weight, celldm_2d(3)
+  REAL(DP) :: atom_weight, celldm_2d(3), ft(3,48), ftpar(3,48), ftperp(3,48)
+  REAL(DP) :: s01(3), s02(3), s01c(3), s02c(3), s01mod, s02mod
   REAL(DP), ALLOCATABLE :: xau(:,:)
   INTEGER :: atomic_number
   INTEGER :: laue_class
@@ -66,7 +70,8 @@ SUBROUTINE thermo_summary()
   CHARACTER(LEN=12) :: spaceg_name
   CHARACTER(LEN=11) :: gname
   TYPE(bz_2d) :: bz_2d_struc
-  INTEGER :: ibz, i
+  INTEGER :: ibz, i, group_desc(48), which_elem(48), isym, jsym, &
+             code_group_ext, code_group1
 
   read_path=.FALSE.
   lelc = .FALSE.
@@ -188,7 +193,7 @@ SUBROUTINE thermo_summary()
 
   IF ( ibrav_group_consistent ) THEN
      CALL find_space_group(sg_number, ibrav, code_group, nsym, s, sr, ftau, &
-                              at, dfftp%nr1, dfftp%nr2, dfftp%nr3,.FALSE.)
+                      at, bg, dfftp%nr1, dfftp%nr2, dfftp%nr3,s01,s02,.FALSE.)
 
      IF (sg_number > 0) THEN
         unique=0
@@ -210,45 +215,88 @@ SUBROUTINE thermo_summary()
   nr2_save=dfftp%nr2
   nr3_save=dfftp%nr3
 
-  CALL print_symmetries_tpw ( 1, noncolin, domag )
   code_group_save=code_group
 !
 !  Description of Bravais lattice
 !
+  WRITE(stdout,'(/,5x,"Bravais lattice:")')
   SELECT CASE (ibrav)
      CASE(1)  
-         WRITE(stdout,'(/,5x, "ibrav=1 Simple cubic lattice")')
+         WRITE(stdout,'(/,5x, "ibrav=1: Simple cubic lattice")')
+         WRITE(stdout,'(5x,"Starting cell parameters:")')
+         WRITE(stdout,'(/,5x,"alat=",f11.6," a.u.",/)') celldm(1)
      CASE(2)  
          WRITE(stdout,'(/,5x, "ibrav=2 Face centered cubic lattice")')
+         WRITE(stdout,'(5x,"Starting cell parameters:")')
+         WRITE(stdout,'(/,5x,"alat=",f11.6," a.u.",/)') celldm(1)
      CASE(3)  
          WRITE(stdout,'(/,5x, "ibrav=3 Body centered cubic lattice")')
+         WRITE(stdout,'(5x,"Starting cell parameters:")')
+         WRITE(stdout,'(/,5x,"alat=",f11.6," a.u.",/)') celldm(1)
      CASE(4)  
          WRITE(stdout,'(/,5x, "ibrav=4 Hexagonal lattice")')
+         WRITE(stdout,'(5x,"Starting cell parameters:")')
+         WRITE(stdout,'(/,5x,"alat=",f11.6," a.u., c/a=",f11.6,/)') celldm(1), &
+                                                            celldm(3)
      CASE(5)  
          WRITE(stdout,'(/,5x, "ibrav=5 Trigonal lattice")')
          IF (ltherm_expansion) &
             CALL errore('thermo_summary','Thermal expansion not available',1)
+         WRITE(stdout,'(5x,"Starting cell parameters:")')
+         WRITE(stdout,'(/,5x,"alat=",f11.6," a.u., cos(alpha)=",f11.6,/)') &
+                                        celldm(1), celldm(4)
      CASE(6)  
          WRITE(stdout,'(/,5x, "ibrav=6 Simple tetragonal lattice")')
+         WRITE(stdout,'(5x,"Starting cell parameters:")')
+         WRITE(stdout,'(/,5x,"alat=",f11.6," a.u., c/a=",f11.6,/)') &
+                                  celldm(1), celldm(3)
      CASE(7)  
          WRITE(stdout,'(/,5x, "ibrav=7 Centered tetragonal lattice")')
+         WRITE(stdout,'(5x,"Starting cell parameters:")')
+         WRITE(stdout,'(/,5x,"alat=",f11.6," a.u., c/a=",f11.6,/)') celldm(1), &
+                                                            celldm(3)
      CASE(8)  
          WRITE(stdout,'(/,5x, "ibrav=8 Simple orthorombic lattice")')
+         WRITE(stdout,'(5x,"Starting cell parameters:")')
+         WRITE(stdout,'(/,5x,"alat=",f11.6," a.u., b/a=",f11.6,&
+                          &", c/a=",f11.6,/)') celldm(1), celldm(2), celldm(3)
      CASE(9, -9)  
          WRITE(stdout,'(/,5x, "ibrav=9 One face (C) centered orthorombic lattice")')
+         WRITE(stdout,'(5x,"Starting cell parameters:")')
+         WRITE(stdout,'(/,5x,"alat=",f11.6," a.u., b/a=",f11.6,&
+                            &", c/a=",f11.6,/)') celldm(1), celldm(2), celldm(3)
      CASE(91)  
          WRITE(stdout,'(/,5x, "ibrav=91 One face (A) centered orthorombic lattice")')
          IF (ltherm_expansion) &
             CALL errore('thermo_summary','Thermal expansion not available',1)
+         WRITE(stdout,'(5x,"Starting cell parameters:")')
+         WRITE(stdout,'(/,5x,"alat=",f11.6," a.u., b/a=",f11.6,&
+                      &", c/a=",f11.6)') celldm(1), celldm(2), celldm(3)
      CASE(10)  
          WRITE(stdout,'(/,5x, "ibrav=10 Face centered orthorombic lattice")')
+         WRITE(stdout,'(5x,"Starting cell parameters:")')
+         WRITE(stdout,'(/,5x,"alat=",f11.6," a.u., b/a=",f11.6,&
+                        &", c/a=",f11.6,/)') celldm(1), celldm(2), celldm(3)
      CASE(11)  
          WRITE(stdout,'(/,5x, "ibrav=11 Body centered orthorombic lattice")')
+         WRITE(stdout,'(5x,"Starting cell parameters:")')
+         WRITE(stdout,'(/,5x,"alat=",f11.6," a.u., b/a=",f11.6,&
+                  &", c/a=",f11.6,/)') celldm(1), celldm(2), celldm(3)
      CASE(12,-12)  
          IF (ibrav==12) THEN
             WRITE(stdout,'(/,5x, "ibrav=12 Monoclinic lattice (c unique)")')
+            WRITE(stdout,'(5x,"Starting cell parameters:")')
+            WRITE(stdout,'(/,5x,"alat=",f11.6," a.u., b/a=",f11.6,&
+                   &", c/a=",f11.6)') celldm(1), celldm(2), celldm(3)
+            WRITE(stdout,'(/,5x,"cos(gamma)=",f11.6,/)') celldm(4)
+            WRITE(stdout,'(5x,"gamma=",f11.6,/)') ACOS(celldm(4))*180.0_DP/pi
          ELSE
             WRITE(stdout,'(/,5x, "ibrav=12 Monoclinic lattice (b unique)")')
+            WRITE(stdout,'(5x,"Starting cell parameters:")')
+            WRITE(stdout,'(/,5x,"alat=",f11.6," a.u., b/a=",f11.6,&
+                      &", c/a=",f11.6)') celldm(1), celldm(2), celldm(3)
+            WRITE(stdout,'(/,5x,"cos(beta)=",f11.6,/)') celldm(5)
+            WRITE(stdout,'(5x,"beta=",f11.6,/)') ACOS(celldm(5))*180.0_DP/pi
          ENDIF
          IF (ltherm_expansion) &
             CALL errore('thermo_summary','Thermal expansion not available',1)
@@ -256,9 +304,19 @@ SUBROUTINE thermo_summary()
          IF (ibrav==13) THEN
             WRITE(stdout,'(/,5x, "ibrav=13 Centered monoclinic lattice &
                           &(c unique)")')
+            WRITE(stdout,'(5x,"Starting cell parameters:")')
+            WRITE(stdout,'(/,5x,"alat=",f11.6," a.u., b/a=",f11.6,&
+                      &", c/a=",f11.6,/)') celldm(1), celldm(2), celldm(3)
+            WRITE(stdout,'(/,5x,"cos(gamma)=",f11.6)') celldm(4)
+            WRITE(stdout,'(5x,"gamma=",f11.6,/)') ACOS(celldm(4))*180.0_DP/pi
          ELSE
             WRITE(stdout,'(/,5x, "ibrav=-13 Centered monoclinic lattice &
                           &(b unique)")')
+            WRITE(stdout,'(5x,"Starting cell parameters:")')
+            WRITE(stdout,'(/,5x,"alat=",f11.6," a.u., b/a=",f11.6,&
+                       &", c/a=",f11.6)') celldm(1), celldm(2), celldm(3)
+            WRITE(stdout,'(/,5x,"cos(beta)=",f11.6)') celldm(5)
+            WRITE(stdout,'(5x,"beta=",f11.6,/)') ACOS(celldm(5))*180.0_DP/pi
          ENDIF
          IF (read_path) &
          WRITE(stdout,'(/,5x, "No Brillouin Zone support. You must provide the path ")')
@@ -271,6 +329,17 @@ SUBROUTINE thermo_summary()
                                &the path ")')
          IF (ltherm_expansion) &
             CALL errore('thermo_summary','Thermal expansion not available',1)
+            WRITE(stdout,'(5x,"Starting cell parameters:")')
+            WRITE(stdout,'(/,5x,"alat=",f11.6," a.u., b/a=",f11.6,&
+                      &", c/a=",f11.6)') celldm(1), celldm(2), celldm(3)
+            WRITE(stdout,'(/,5x,"cos(alpha)=",f11.6, &
+                          &", cos(beta)=",f11.6,", cos(gamma)=",f11.6)') &
+                          celldm(4), celldm(5), celldm(6)
+            WRITE(stdout,'(5x,"alpha=",f11.6," deg,",2x,"beta=",f11.6,&
+                                           &" deg,",2x,"gamma=",f11.6," deg",/)') &
+                          ACOS(celldm(4))*180.0_DP/pi,  &
+                          ACOS(celldm(5))*180.0_DP/pi,  &
+                          ACOS(celldm(6))*180.0_DP/pi
      CASE(0)  
          WRITE(stdout,'(/,5x, "ibrav=0 user provided cell")')
          WRITE(stdout,'(/,5x, "Be careful many options do not work with ibrav=0")')
@@ -279,21 +348,25 @@ SUBROUTINE thermo_summary()
                           & the path ")')
          IF (ltherm_expansion) &
             CALL errore('thermo_summary','Thermal expansion not available',1)
+         WRITE(stdout,'(5x,"Starting cell parameters:")')
+         WRITE(stdout,'(/,5x,"alat=",f11.6," a.u.")') celldm(1)
   CASE DEFAULT
      CALL errore('thermo_summary','ibrav not programmed',1)
   END SELECT
 
-  WRITE( stdout, '(/,5x, &
-      &     "crystal axes: (cart. coord. in units of alat)",/, &
+  WRITE(stdout,'(5x,"Starting primitive lattice vectors:")')
+  WRITE( stdout, '(5x, &
+      &     "crystal axes: (cart. coord. in units of alat)",/,/, &
       &       3(15x,"a(",i1,") = (",3f11.6," )  ",/ ) )')  (jpol,  &
       (at (ipol, jpol) , ipol = 1, 3) , jpol = 1, 3)
   !
+  WRITE(stdout,'(5x,"Starting reciprocal lattice vectors:")')
   WRITE( stdout, '(5x, &
-      &   "reciprocal axes: (cart. coord. in units 2 pi/alat)",/, &
+      &   "reciprocal axes: (cart. coord. in units 2 pi/alat)",/,/, &
       &            3(15x,"b(",i1,") = (",3f10.6," )  ",/ ) )')  (jpol,&
       &  (bg (ipol, jpol) , ipol = 1, 3) , jpol = 1, 3)
 
-  WRITE( stdout, '(/,3x,"Cartesian axes")')
+  WRITE(stdout,'(5x,"Starting atomic positions in Cartesian axes:")')
   WRITE( stdout, '(/,5x,"site n.     atom                  positions (alat units)")')
 
   WRITE( stdout, '(6x,i4,8x,a6," tau(",i4,") = (",3f12.7,"  )")') &
@@ -313,7 +386,7 @@ SUBROUTINE thermo_summary()
      ENDDO
   ENDDO
 
-  WRITE( stdout, '(/,3x,"Crystallographic axes")')
+  WRITE( stdout, '(/,5x,"Starting atomic positions in crystallographic axes:")')
   WRITE( stdout, '(/,5x,"site n.     atom        ", &
        &             "          positions (cryst. coord.)")')
 
@@ -336,19 +409,69 @@ SUBROUTINE thermo_summary()
   IF (what=='scf_2d_band') GOTO 1000
 
   IF ( ibrav_group_consistent ) THEN
-     WRITE(stdout,'(/,5x,"The point group, ",a,", is compatible with the&
-                                    & Bravais lattice.")') TRIM(group_name &
-                                                               (code_group))
+
+     CALL find_group_info_ext(nsym, sr, code_group1, code_group_ext, &
+                                                    which_elem, group_desc) 
+
+     WRITE(stdout,'(/,5x,"The point group",i4,1x,a," is compatible &
+                           &with the Bravais lattice.")') code_group_ext, &
+                                    TRIM(group_name(code_group))
+                                   
+     WRITE(stdout,'(/,5x,"The rotation matrices with the order used inside &
+                          &thermo_pw are:")') 
+
+     CALL print_symmetries_tpw ( 1, noncolin, domag )
+
      CALL find_space_group(sg_number, ibrav, code_group, nsym, s, sr, ftau, &
-                              at, dfftp%nr1, dfftp%nr2, dfftp%nr3,.TRUE.)
+                              at, bg, dfftp%nr1, dfftp%nr2, dfftp%nr3,s01,  &
+                              s02, .TRUE.)
      CALL sg_name(sg_number, spaceg_name)
      IF (sg_number > 0) THEN
         WRITE(stdout,'(/,5x,"Space group ",a,"   (group number",i4, ").")') &
                             TRIM(spaceg_name), sg_number
+        s01mod=s01(1)**2 + s01(2)**2 + s01(3)**2
+        s02mod=s02(1)**2 + s02(2)**2 + s02(3)**2
+        s01c=s01
+        s02c=s02
+        CALL cryst_to_cart(1,s01c,at,1)
+        CALL cryst_to_cart(1,s02c,at,1)
+        IF (s01mod < 1.D-4.AND.s02mod>1.D3) THEN
+           WRITE(stdout,'(5x,"The origin coincides with the ITA tables.")')
+        ELSEIF (s01mod<1.D-4.AND.s02mod<1.D3) THEN
+           WRITE(stdout,'(5x,"The origin coincides with &
+                       &the ITA tables (origin choice 1).")')
+           WRITE(stdout,'(/,5x,"To shift to origin choice 2 &
+                              &subtract to all coordinates:")')
+           WRITE(stdout,'(17x,"(cryst. coord.)",18x,"(cart. coord.)")')
+           WRITE(stdout,'(5x,3f12.7,2x,3f12.7)') s02(:), s02c(:)
+        ELSEIF (s01mod > 1.D-4 .AND. s02mod<1.D-4 ) THEN
+           WRITE(stdout,'(5x,"The origin coincides with &
+                       & the ITA tables (origin choice 2).")')
+           WRITE(stdout,'(/,5x,"To shift to origin choice 1 &
+                              &subtract to all coordinates:")')
+           WRITE(stdout,'(17x,"(cryst. coord.)",18x,"(cart. coord.)")')
+           WRITE(stdout,'(5x,3f12.7,2x,3f12.7)') s01(:), s01c(:)
+        ELSEIF (s01mod > 1.D-4 .AND. s01mod<1.d3 .AND. s02mod > 1.d3 ) THEN
+           WRITE(stdout,'(5x,"The origin does not coincide with &
+                       &the ITA tables.")')
+           WRITE(stdout,'(/,5x,"To have the origin as in the ITA &
+                          &tables subtract to all coordinates:")')
+           WRITE(stdout,'(17x,"(cryst. coord.)",18x,"(cart. coord.)")')
+           WRITE(stdout,'(5x,3f12.7,2x,3f12.7)') s01(:), s01c(:)
+       ELSEIF (s01mod > 1.D-4 .AND. s02mod < 1.d3 ) THEN
+           WRITE(stdout,'(5x,"The origin does not coincide with the ITA tables.")')
+           WRITE(stdout,'(/,5x,"To shift to origin choice 1 &
+                              &subtract to all coordinates:")')
+           WRITE(stdout,'(17x,"(cryst. coord.)",18x,"(cart. coord.)")')
+           WRITE(stdout,'(5x,3f12.7,2x,3f12.7)') s01(:), s01c(:)
+           WRITE(stdout,'(/,5x,"to shift to origin choice 2 &
+                             &subtract to all coordinates: ")')
+           WRITE(stdout,'(17x,"(cryst. coord.)",18x,"(cart. coord.)")')
+           WRITE(stdout,'(5x,3f12.7,2x,3f12.7)') s02(:), s02c(:)
+        ENDIF
      ELSE
         WRITE(stdout,'(/,5x,"Unknown space group.")') 
      ENDIF
-
 !
 !  first rank tensors
 !
@@ -932,6 +1055,7 @@ SUBROUTINE thermo_summary()
 !  as the high symmetry axis, I skip completely the use of symmetry for
 !  this case
 !
+    CALL print_symmetries_tpw ( 1, noncolin, domag )
     WRITE(stdout,'(/,5x,"ibrav=0 or Bravais lattice not compatible with &
                                     &the point group.")')
     WRITE(stdout,'(/,5x,"I will not use symmetry.")')
@@ -1066,9 +1190,7 @@ WRITE(stdout,'(5x,70("-"))')
         CALL plot_xrdp('')
      ENDIF
      CALL summarize_kpt(xqaux, wqaux, nqaux, letter_path)
-!
-!   write the xsf file for Xcrysden plot of the structure
-!
+
      iuout=35
      xsf_filename=TRIM(prefix)//'.xsf'
      OPEN(unit=iuout, file=xsf_filename, status='unknown', &
@@ -1077,6 +1199,7 @@ WRITE(stdout,'(5x,70("-"))')
      CALL xsf_struct (celldm(1), at, nat, tau, atm, ityp, iuout)
 
      CLOSE(iuout)
+
 
      CALL environment_end( 'THERMO_PW' )
      !
@@ -1395,7 +1518,7 @@ SUBROUTINE find_fft_fact()
 !
 USE kinds,            ONLY : DP
 USE fft_base,         ONLY : dfftp
-USE cell_base,        ONLY : ibrav, at
+USE cell_base,        ONLY : ibrav, at, bg
 USE thermo_sym,       ONLY : fft_fact, ibrav_group_consistent
 USE rap_point_group,  ONLY : code_group
 USE space_groups,     ONLY : find_space_group, set_fft_fact
@@ -1405,6 +1528,7 @@ IMPLICIT NONE
 INTEGER :: sg_number
 INTEGER :: unique, trig
 LOGICAL :: check_group_ibrav
+REAL(DP) :: s01(3), s02(3)
 CHARACTER(LEN=12) :: spaceg_name
 CHARACTER(LEN=11) :: gname
 
@@ -1419,7 +1543,7 @@ CHARACTER(LEN=11) :: gname
 
   IF ( ibrav_group_consistent ) THEN
      CALL find_space_group(sg_number, ibrav, code_group, nsym, s, sr, ftau, &
-                              at, dfftp%nr1, dfftp%nr2, dfftp%nr3, .FALSE.)
+                  at, bg, dfftp%nr1, dfftp%nr2, dfftp%nr3, s01, s02, .FALSE.)
 
      IF (sg_number > 0) THEN
         unique=0
