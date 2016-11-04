@@ -54,10 +54,6 @@ compute_intq.o : ../../Modules/noncol.o
 compute_intq.o : ../../Modules/uspp.o
 compute_intq.o : control_qe.o
 control_qe.o : ../../Modules/kind.o
-do_phonon.o : ../../LR_Modules/lrcom.o
-do_phonon.o : ../../PHonon/PH/elph.o
-do_phonon.o : ../../PHonon/PH/phcom.o
-do_phonon.o : ../../PHonon/PH/yambo.o
 dv_of_drho_tran.o : ../../Modules/fft_base.o
 dv_of_drho_tran.o : ../../Modules/kind.o
 dv_of_drho_tran.o : control_qe.o
@@ -271,6 +267,12 @@ prepare_q.o : ../../PHonon/PH/ramanm.o
 prepare_q.o : ../../PHonon/PH/yambo.o
 prepare_q.o : ../../PW/src/pwcom.o
 prepare_q.o : control_qe.o
+print_symmetries.o : ../../Modules/cell_base.o
+print_symmetries.o : ../../Modules/fft_base.o
+print_symmetries.o : ../../Modules/io_global.o
+print_symmetries.o : ../../Modules/kind.o
+print_symmetries.o : ../../PW/src/pwcom.o
+print_symmetries.o : ../../PW/src/symm_base.o
 psym_dmage_fpol.o : ../../FFTXlib/scatter_mod.o
 psym_dmage_fpol.o : ../../Modules/fft_base.o
 psym_dmage_fpol.o : ../../Modules/kind.o
