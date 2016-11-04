@@ -750,6 +750,10 @@ SUBROUTINE thermo_readin()
      ENDIF
   END IF
 
+  IF (what=='elastic_constants_t' .AND. elastic_algorithm/='standard') &
+     CALL errore('thermo_readin','Only the standard algorithm is working &
+                                          &in this case',1)
+
   IF ( ngeo(1)==0 ) THEN
      IF (what(1:4) == 'scf_') ngeo=1
      IF (what(1:6) == 'mur_lc'.OR.what=='elastic_constants_t') THEN

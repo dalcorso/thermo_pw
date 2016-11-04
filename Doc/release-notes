@@ -1,5 +1,8 @@
 New in version 0.7.0
 
+Added a small tool to identify a Bravais lattice and to compare two
+sets of primitive vectors.
+
 Added routines to deal with Bravais lattices. The code can now
 identify the Bravais lattice from its primitive vectors.
 
