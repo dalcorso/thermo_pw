@@ -72,6 +72,7 @@ properties directly comparable with experiment.
 \texttt{examples/} & : some running examples \\
 \texttt{inputs/}   & : a collection of useful inputs \\
 \texttt{pseudo\_test/} & : a collection of inputs to test a pseudopotential library\\
+\texttt{space\_groups/} & : a collection of structures for many space groups \\
 \texttt{lib/}      & : source files for modules used by \thermo\ \\
 \texttt{src/}      & : source files for \thermo\ \\
 \texttt{tools/}    & : source files for auxiliary tools \\
@@ -213,7 +214,8 @@ This page contains also information on critical bugs found in the
 \hline
 \texttt{thermo\_pw} & \qe  \\
 \hline
-0.6.0 & 5.4.0 \\
+0.7.0 & SVN 7-10-2016 \\
+0.6.0 & 6.0.0 \\
 0.5.0 & 5.4.0 \\
 0.4.0 & 5.3.0 \\
 0.3.0 & 5.2.1, 5.2.0 \\
@@ -514,7 +516,7 @@ By default, the bands are plotted along a fixed path in the Brillouin
 zone, but the user can modify this behavior giving the path at the end of 
 the \texttt{INPUT\_THERMO} namelist with the same format used for 
 the \texttt{pw.x} input. The automatic path generation is not available 
-for centered monoclinic and for triclinic Bravais lattices. For these
+for base-centered monoclinic and for triclinic Bravais lattices. For these
 lattices the path must be given explicitly.
 The following variables control the path:
 
@@ -1646,7 +1648,7 @@ For a detailed description of the input variables please look at the beginning
 of the \texttt{fortran} sources of each code.
 
 \newpage
-\section{\color{coral}Examples, inputs, pseudo\_tests, space\_groups}
+\section{\color{coral}Examples, inputs, pseudo\_test, space\_groups}
 
 The directories \texttt{examples}, \texttt{inputs}, \texttt{pseudo\_tests}, 
 \texttt{space\_groups} contain a set
@@ -1667,7 +1669,7 @@ and many material properties are calculated for each structure.
 This directory can be seen as a gallery of the results that can be
 obtained by the \thermo\ code, or as a source of information for the
 construction of a particular input geometry. \\
-The directory \texttt{pseudo\_tests} contains a set of inputs that can
+The directory \texttt{pseudo\_test} contains a set of inputs that can
 be used to test a pseudopotential library. It illustrates how to use \thermo\ 
 for high-throughput calculations. \\
 The directory \texttt{space\_groups} contains a collection of structures
