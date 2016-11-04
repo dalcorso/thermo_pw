@@ -1562,11 +1562,25 @@ the coordinates of the nonequivalents atoms.
 It can be useful to study defects or to calculate all the 
 atomic positions starting from the space-group and the 
 nonequivalents positions.
+It is also possible to give the input Bravais lattice by using
+\texttt{ibrav=0} and the three principal vectors. In this case
+however, before generating the supercell, the code rotates the Bravais
+lattice so that it has the same orientation of the vectors described
+in the \texttt{thermo.pdf} guide.
 
 \item \texttt{bravais\_lattices.x} is a small tool that tests the
 module \texttt{lattices.f90} of the library. Presently it can read three
-primitive lattice vectors of a Bravais lattice and find the \texttt{ibrav} 
-code and the \texttt{celldm} parameters of the input lattice. 
+primitive lattice vectors of a Bravais lattice and find the \texttt{ibrav}
+code and the \texttt{celldm} parameters of the input lattice. It
+can also read two sets of primitive vectors and decide if they describe
+the same Bravais lattice. In the positive case it gives the orientation
+of one lattice with respect to the other.
+
+\item \texttt{hex\_trig.x} is a small tool that reads the values of $a$ and $c$
+of the conventional hexagonal cell of a rhombohedral lattice (in \AA ngstrom),
+and gives as output the size $a_r$ (in a.u.) and the cosine of the angle
+$\alpha$ of the rhombohedral cell. This information can
+be put directly in the input of \texttt{pw.x} for this type of cells.
 
 \item \texttt{translate.x} reads a set of atomic positions
 and translates them of a fixed vector. If a rotation matrix is given in input
@@ -1587,7 +1601,7 @@ Bravais lattice index and atomic coordinates an generates an infinite ribbon
 perpendicular to {\bf G} $= m$ {\bf b}$_1 + n ${\bf b}$_2$, where 
 {\bf b}$_1$ and {\bf b}$_2$ are the primitive reciprocal lattice vectors 
 of the 2D Bravais lattice. The number of rows of the ribbon, and the number of
-atoms per row are given as an input variables.
+atoms per row are given as input variables.
 
 \item \texttt{crystal\_point\_group.x} is a crystal point group calculator.
 It can give several information about the crystallographic point groups,
@@ -1632,9 +1646,10 @@ For a detailed description of the input variables please look at the beginning
 of the \texttt{fortran} sources of each code.
 
 \newpage
-\section{\color{coral}Examples and inputs}
+\section{\color{coral}Examples, inputs, pseudo\_tests, space\_groups}
 
-The two directories \texttt{examples} and \texttt{inputs} contain a set
+The directories \texttt{examples}, \texttt{inputs}, \texttt{pseudo\_tests}, 
+\texttt{space\_groups} contain a set
 of examples that can be studied in order to learn how to use the \thermo\ 
 package. The \texttt{examples} directory contains inputs that run in a few
 seconds but do not give converged results. These examples can be studied 
@@ -1651,7 +1666,17 @@ The \texttt{inputs} examples are divided according to the structure type
 and many material properties are calculated for each structure.
 This directory can be seen as a gallery of the results that can be
 obtained by the \thermo\ code, or as a source of information for the
-construction of a particular input geometry.
+construction of a particular input geometry. \\
+The directory \texttt{pseudo\_tests} contains a set of inputs that can
+be used to test a pseudopotential library. It illustrates how to use \thermo\ 
+for high-throughput calculations. \\
+The directory \texttt{space\_groups} contains a collection of structures
+ordered by the space group number that are used to test the space
+groups routines. These inputs are also examples of the use of the
+keyword \texttt{space\_group} and of the Wyckoff positions to give the
+atomic coordinates in the \texttt{pw.x} input. You can also use these
+strutures for your calculations, but note that the cut-off energies and
+the {\bf k}-point meshes used in these inputs are not converged.
 
 \newpage
 \section{\color{coral}Documentation}
@@ -1660,6 +1685,10 @@ In addition to this user's guide, this directory contains the following
 documents:
 
 \begin{itemize}
+
+\item
+\texttt{tutorial.pdf} : a short guide that indicates where to find the
+information needed to perform a given task.
 
 \item
 \texttt{point\_groups.pdf} : a description of the crystallographic point groups
