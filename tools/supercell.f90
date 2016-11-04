@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2014-2015 Andrea Dal Corso 
+! Copyright (C) 2014-2016 Andrea Dal Corso 
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -38,9 +38,16 @@ PROGRAM supercell_pos
 !  If which_input=2
 !     ibrav, integer    : Bravais lattice index (ibrav as in QE)
 !     units             : 1 alat units, 2 crystal coordinates
-!  --- in both cases
+!  --- in both cases (if ibrav/=0)
 !  celldm,  real(8), dimension(6) : dimensions of the unit cell. Same
 !                       conventions as QE, see INPUT_PW for more info.
+!  --- if ibrav=0 
+!      at units        real        ! a real number. All at are multiplied by
+!                                  ! this number
+!      at(1,1), at(2,1), at(3,1)   ! first primitive vector
+!      at(1,2), at(2,2), at(3,2)   ! second primitive vector
+!      at(1,3), at(2,3), at(3,3)   ! third primitive vector
+!  --- in all cases
 !  n1, n2, n3, integer : number of cells along a_1, a_2, a_3
 !  iconv, integer : 1   for centered cells convert atomic positions to 
 !                       the conventional unit cell
@@ -52,6 +59,7 @@ USE wyckoff,     ONLY : nattot, tautot, ityptot, extfortot, &
                         clean_spacegroup, sup_spacegroup
 USE wy_pos,      ONLY : wypos
 USE parser,      ONLY : read_line, get_field, field_count
+USE lattices,    ONLY : find_ibrav_code
 USE wrappers,    ONLY: feval_infix
 USE mp_global,   ONLY : mp_startup, mp_global_end
 USE environment, ONLY : environment_start, environment_end
@@ -85,6 +93,7 @@ CHARACTER(LEN=3), ALLOCATABLE :: atm(:)  ! the name of each type
 !
 INTEGER :: nat                     ! number of atoms
 REAL(DP), ALLOCATABLE :: tau(:,:)  ! coordinates
+REAL(DP), ALLOCATABLE :: stau(:,:) ! save the coordinates
 INTEGER, ALLOCATABLE :: ityp(:)    ! the type of each atom
 !
 !  all atoms in the conventional unit cell
@@ -102,13 +111,13 @@ INTEGER, ALLOCATABLE :: all_ityp(:)     ! type of each atom
 !   Description of the cell size and shape
 !
 INTEGER  :: ibrav
-REAL(DP) :: celldm(6), omega, at(3,3), bg(3,3)
+REAL(DP) :: celldm(6), omega, at(3,3), bg(3,3), ur(3,3), global_s(3,3)
 !
 ! counters and auxiliary variables
 !
 INTEGER :: which_input, iconv, units
 INTEGER :: na, iat, ia, natoms, nt, nb, i1, i2, i3, iuout, nfield, idx, k, &
-           ierr
+           ivec, jvec, ipol, jpol, ierr
 REAL(DP) :: a, cg, inp(3)
 LOGICAL :: found
 CHARACTER (LEN=256) :: input_line, field_str, wp
@@ -123,6 +132,7 @@ WRITE(6,'(5x," Space group (1) or standard coordinates (2)? ")')
 READ(5,*) which_input
 
 IF (which_input==1) THEN
+   units=2
    WRITE(6,'(5x," Space group number? ")')
    READ(5,*) space_group_code
 
@@ -136,15 +146,27 @@ IF (which_input==1) THEN
       rhombohedral=(trig==1)
    ENDIF
    origin_choice=or
+   WRITE(6,'(5x,"celldm ? (For instance 1.0 0.0 0.0 0.0 0.0 0.0)  ")')
+   READ(5,*) celldm(1), celldm(2), celldm(3), celldm(4), celldm(5), celldm(6)
 ELSE
    WRITE(6,'(5x," Bravais lattice code ibrav (as in QE)? ")')
    READ(5,*) ibrav
    WRITE(6,'(5x," Units (alat (1) or crystal coordinates (2)) ? ")')
    READ(5,*) units
+   IF (ibrav/=0) THEN
+      WRITE(6,'(5x,"celldm ? (For instance 1.0 0.0 0.0 0.0 0.0 0.0)  ")')
+      READ(5,*) celldm(1), celldm(2), celldm(3), celldm(4), celldm(5), celldm(6)
+   ELSE
+      celldm=0.0_DP
+      WRITE(6,'(5x,"Units of at (at are multiplied by this number)? ")')
+      READ(5,*) celldm(1)
+      WRITE(6,'(5x,"at ? ")')
+      DO ivec=1,3
+         READ(5,*) at(:,ivec)
+      ENDDO 
+      at=at*celldm(1)
+   ENDIF
 ENDIF
-
-WRITE(6,'(5x,"celldm ? (For instance 1.0 0.0 0.0 0.0 0.0 0.0)  ")')
-READ(5,*) celldm(1), celldm(2), celldm(3), celldm(4), celldm(5), celldm(6)
 
 WRITE(6,'(5x,"n1, n2, n3? (for instance 1 1 1) ")') 
 READ(5,*) n1, n2, n3
@@ -174,6 +196,7 @@ IF (which_input==1) THEN
    DO na=1, ineq_nat
       CALL read_line( input_line )
       WRITE(6,*) TRIM(input_line)
+!      READ(5,*) label(na), ineq_tau(1,na), ineq_tau(2,na), ineq_tau(3,na)
       CALL field_count( nfield, input_line )
       !
       ! read atom symbol (column 1)
@@ -278,6 +301,7 @@ ELSE
    rhombohedral = (ibrav==5)
    READ(5,*) nat
    ALLOCATE(tau(3,nat))
+   ALLOCATE(stau(3,nat))
    ALLOCATE(ityp(nat))
    ALLOCATE(label(nat))
    DO na=1, nat
@@ -313,11 +337,38 @@ ELSE
    !  If coordinates are in alat units, transform to crystal coordinates
    !
    IF (units==1) THEN
-      CALL latgen(ibrav, celldm, at(1,1), at(1,2), at(1,3), omega)
-      at= at / celldm(1)
+      IF (ibrav/=0) THEN
+         CALL latgen(ibrav, celldm, at(1,1), at(1,2), at(1,3), omega)
+         at= at / celldm(1)
+      ENDIF
       CALL recips(at(1,1), at(1,2), at(1,3), bg(1,1), bg(1,2), bg(1,3))
       CALL cryst_to_cart( nat, tau, bg, -1 )
    END IF 
+
+   IF (ibrav==0) THEN
+!
+!   the at have been given using ibrav=0, we find the Bravais
+!   lattice code and convert the coordinates to our conventions
+!
+      CALL find_ibrav_code(at(1,1), at(1,2), at(1,3), ibrav, celldm, ur, &
+                                                       global_s,.TRUE.)
+      WRITE(6,*) 'ur'
+      DO ipol=1,3
+         WRITE(6,*) (ur(ipol,jpol), jpol=1,3)
+      END DO
+
+      stau=0.0_DP
+      DO na=1,nat
+         DO ivec=1,3
+            DO jvec=1,3
+               stau(ivec,na)=stau(ivec,na) + ur(jvec, ivec) * tau(jvec,na)
+            ENDDO
+         ENDDO
+         WRITE(6,*) (stau(ipol,na), ipol=1,3)
+      ENDDO
+      tau=stau
+   ENDIF
+   DEALLOCATE(stau)
    DEALLOCATE(label)
 ENDIF
 
@@ -331,7 +382,7 @@ IF (ibrav==5 .AND. .NOT. rhombohedral) THEN
    celldm(3)=0.0_DP
    celldm(4)=cg
 ENDIF
-!
+
 !  In this part we set up the conventional cell, or copy the data if
 !  the conventional cell is not requested
 !  nat_new
@@ -505,7 +556,6 @@ ENDIF
 !  all_nat
 !  all_tau
 !  all_ityp
-!  
 !
 CALL latgen(ibrav, celldm, at(1,1), at(1,2), at(1,3), omega)
 all_nat=nat_new * n1 * n2 * n3
@@ -543,6 +593,7 @@ DO i1=-(n1-1)/2, n1/2
    ENDDO
 ENDDO
 
+WRITE(6,'("ATOMIC_POSITIONS (crystal)")')
 DO na=1,all_nat
    WRITE(6,'(a,3f18.10)') TRIM(atm(all_ityp(na))), all_tau(1,na), &
                                                    all_tau(2,na), &
@@ -552,7 +603,6 @@ ENDDO
 iuout=35
 OPEN(unit=iuout, file='supercell.xsf', status='unknown', &
                                               form='formatted')
-
 at=at/celldm(1)
 at(:,1)=at(:,1)*n1
 at(:,2)=at(:,2)*n2
@@ -678,8 +728,8 @@ INTEGER :: na
 tau_new=tau
 DO na=1,nat
    tau(1,na) =  tau_new(1,na) 
-   tau(2,na) =  0.5_DP * ( tau_new(2,na) - tau_new(3,na) )
-   tau(3,na) =  0.5_DP * ( tau_new(2,na) + tau_new(3,na) )
+   tau(2,na) = - 0.5_DP * ( tau_new(2,na) - tau_new(3,na) )
+   tau(3,na) =   0.5_DP * ( tau_new(2,na) + tau_new(3,na) )
 END DO
 
 RETURN
@@ -713,8 +763,8 @@ INTEGER :: na
 
 tau_new=tau
 DO na=1,nat
-   tau(1,na) = - 0.5_DP * ( tau_new(1,na) - tau_new(2,na) - tau_new(3,na) )
-   tau(2,na) =   0.5_DP * ( tau_new(1,na) + tau_new(2,na) + tau_new(3,na) )
+   tau(1,na) =   0.5_DP * ( tau_new(1,na) - tau_new(2,na) - tau_new(3,na) )
+   tau(2,na) =   0.5_DP * ( tau_new(1,na) + tau_new(2,na) - tau_new(3,na) )
    tau(3,na) =   0.5_DP * ( tau_new(1,na) + tau_new(2,na) + tau_new(3,na) )
 END DO
 
