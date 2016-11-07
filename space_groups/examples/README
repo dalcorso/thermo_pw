@@ -15,7 +15,7 @@ The AFLOW Library of Crystallographic Prototypes, arXiv:1607.02532.
 Some structures have been corrected referring to the 
 Open Crystallographic Database (http://www.crystallography.net/cod/).
 
-Number of currently tested space groups: 63 / 230.
+Number of currently tested space groups: 64 / 230.
 
 Running these files, for each solid you obtain: 
 a .xsf file of the structure, to be seen by xcrysden --xsf prefix.xsf 
@@ -44,7 +44,7 @@ in this directory:
 101  102  103  104  105  106  107  108  109  110
 111  112       114  115  116  117  118  119  120
           123  124  125  126  127  128       130
-     132  133  134  135       137  138  139  
+     132  133  134  135       137  138       
      142  143  144  145  146       148  149  150
           153       155  156  157  158  159  160
 161                 165            168  169  170
