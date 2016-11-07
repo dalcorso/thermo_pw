@@ -17,6 +17,8 @@
 ./run_61_cdsb
 ./run_62_sns
 ./run_63_crb
+./run_63_u
+./run_64_i
 ./run_70_s
 ./run_72_sis2
 ./run_84_pds
@@ -29,6 +31,7 @@
 ./run_129_np        
 ./run_131_pts       
 ./run_136_n         
+./run_139_in
 ./run_140_setl      
 ./run_141_sn        
 ./run_141_tio2      
@@ -42,7 +45,11 @@
 ./run_163_kagc2n2  
 ./run_164_al3ni2   
 ./run_166_as       
+./run_166_b
+./run_166_bi2te3
+./run_166_sm
 ./run_167_caco3    
+./run_166_hg
 ./run_180_sio2     
 ./run_186_zns      
 ./run_187_wc       
