@@ -381,7 +381,7 @@ subroutine solve_eq(iu, flag)
               !
               ! threshold for iterative solution of the linear system
               !
-              thresh = min (0.1d0 * sqrt (dr2), 1.0d-2)
+              thresh = min (0.1d0 * sqrt (dr2), thresh)
            endif
            !
            ! iterative solution of the linear system (H-e)*dpsi=dvpsi
