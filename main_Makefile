@@ -79,11 +79,11 @@ cp : bindir libfft libla mods liblapack libs libiotk
 
 ph : bindir libfft libla mods libs pw lrmods
 	if test -d PHonon; then \
-        (cd PHonon; $(MAKE) all || exit 1) ; fi
+	(cd PHonon; $(MAKE) all || exit 1) ; fi
 
 thermo_pw : bindir libfft libla mods libs pw ph pp
 	if test -d thermo_pw; then \
-        (cd thermo_pw; $(MAKE) all || exit 1) ; fi
+	(cd thermo_pw; $(MAKE) all || exit 1) ; fi
 
 neb : bindir libfft libla mods libs pw
 	if test -d NEB; then \
@@ -92,7 +92,7 @@ neb : bindir libfft libla mods libs pw
 
 tddfpt : bindir libfft libla mods libs pw
 	if test -d TDDFPT; then \
-        (cd TDDFPT; $(MAKE) all || exit 1) ; fi
+	(cd TDDFPT; $(MAKE) all || exit 1) ; fi
 
 pp : bindir libfft libla mods libs pw
 	if test -d PP ; then \
@@ -100,7 +100,7 @@ pp : bindir libfft libla mods libs pw
 
 pwcond : bindir libfft libla mods libs pw pp
 	if test -d PWCOND ; then \
-        ( cd PWCOND ; $(MAKE) TLDEPS= all || exit 1 ) ; fi
+	( cd PWCOND ; $(MAKE) TLDEPS= all || exit 1 ) ; fi
 
 acfdt : bindir libfft libla mods libs pw ph
 	if test -d ACFDT ; then \
@@ -122,7 +122,7 @@ d3q : pw ph
 
 ld1 : bindir liblapack libfft libla mods libs
 	if test -d atomic ; then \
-        ( cd atomic ; $(MAKE) TLDEPS= all || exit 1 ) ; fi
+	( cd atomic ; $(MAKE) TLDEPS= all || exit 1 ) ; fi
 
 upf : libfft libla mods libs liblapack
 	if test -d upftools ; then \
@@ -134,7 +134,7 @@ pw_export : libiotk bindir libfft mods libs pw
 
 xspectra : bindir libfft mods libs pw
 	if test -d XSpectra ; then \
-        ( cd XSpectra ; $(MAKE) TLDEPS= all || exit 1 ) ; fi
+	( cd XSpectra ; $(MAKE) TLDEPS= all || exit 1 ) ; fi
 
 couple : pw cp
 	if test -d COUPLE ; then \
@@ -143,8 +143,8 @@ couple : pw cp
 # EPW needs to invoke make twice due to a Wannier90 workaround
 epw: pw ph ld1
 	if test -d EPW ; then \
-        ( cd EPW ; $(MAKE) all ; $(MAKE) all || exit 1; \
-                cd ../bin; ln -fs ../EPW/bin/epw.x . ); fi
+	( cd EPW ; $(MAKE) all ; $(MAKE) all || exit 1; \
+		cd ../bin; ln -fs ../EPW/bin/epw.x . ); fi
 gui :
 	@echo 'Check "PWgui-6.0/README" how to access the Graphical User Interface'
 

@@ -49,7 +49,7 @@ test-suite: uncompress-test-suite
 	( cd ../test-suite ; $(MAKE) TLDEPS= run-tests || exit 1) ; fi
 
 uncompress-test-suite: touch-dummy
-	$(call download_and_unpack,$(TESTSUITE),$(TESTSUITE_URL),test-suite,test-suite-6.0)
+	$(call download_and_unpack,$(TESTSUITE),$(TESTSUITE_URL),test-suite,test-suite)
 	touch uncompress-test-suite
 
 ###########################################################
@@ -59,7 +59,7 @@ uncompress-test-suite: touch-dummy
 examples: uncompress-examples
 
 uncompress-examples: touch-dummy
-	$(call download_and_unpack,$(EXAMPLES),$(EXAMPLES_URL),Examples,Examples-6.0)
+	$(call download_and_unpack,$(EXAMPLES),$(EXAMPLES_URL),Examples,Examples)
 	touch uncompress-examples
 
 ##########################################################
