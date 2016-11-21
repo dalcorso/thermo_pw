@@ -21,6 +21,9 @@ MODULE lattices
 !                          latgen because it depends on the choice of the
 !                          direct lattice vectors.
 !
+!  conventional_ibrav   : given the ibrav, sets the ibrav of the conventional
+!                         lattice
+!
 !  find_ibrav_code        : this routine receives the direct lattice
 !                          vectors and finds the code number (1-14) of the
 !                          bravais lattice. The code correspond to the
@@ -61,6 +64,11 @@ MODULE lattices
 !  compute_omega: receives three primitive lattice vectors and gives as
 !                 output the volume of the unit cell
 !
+!  is_centered : receives ibrav and gives true if the lattice is centered
+!
+!  lattice_name : receives the bravais lattice and gives the lattice name
+!
+!
   USE kinds,      ONLY : DP
   !
   IMPLICIT NONE
@@ -69,7 +77,7 @@ MODULE lattices
 
   PUBLIC compute_conventional, find_ibrav_code, find_combination, &
          is_bravais_lattice, same_lattice, lattice_point_group, &
-         compute_omega
+         compute_omega, conventional_ibrav, is_centered, lattice_name
 
 CONTAINS
 
@@ -89,6 +97,10 @@ CONTAINS
          atp(:,1)=  at(:,1) - at(:,2) 
          atp(:,2)=  at(:,2) - at(:,3)
          atp(:,3)=  at(:,1) + at(:,3)
+     CASE(5)
+         atp(:,1)= at(:,1) - at(:,3)
+         atp(:,2)= - at(:,1) + at(:,2)
+         atp(:,3)= -at(:,1) - at(:,2) - at(:,3)
      CASE(7)
          atp(:,1)=  at(:,1) - at(:,3) 
          atp(:,2)= -at(:,1) + at(:,2)
@@ -97,6 +109,10 @@ CONTAINS
          atp(:,1)=  at(:,1) - at(:,2) 
          atp(:,2)=  at(:,1) + at(:,2)
          atp(:,3)=  at(:,3)
+     CASE(91)
+         atp(:,1)=  at(:,1) 
+         atp(:,2)=  at(:,2) + at(:,3)
+         atp(:,3)= -at(:,2) + at(:,3)
      CASE(10)
          atp(:,1)=  at(:,1) + at(:,2) - at(:,3)
          atp(:,2)= -at(:,1) + at(:,2) + at(:,3)
@@ -106,13 +122,13 @@ CONTAINS
          atp(:,2)=  at(:,2) - at(:,3)
          atp(:,3)=  at(:,1) + at(:,3)
      CASE(13)
-         atp(:,1)=  at(:,1) + at(:,2) 
-         atp(:,2)= -at(:,1) + at(:,2)
-         atp(:,3)=  at(:,3)
-     CASE(-13)
          atp(:,1)=  at(:,1) + at(:,3) 
          atp(:,2)=  at(:,2)
          atp(:,3)= -at(:,1) + at(:,3)
+     CASE(-13)
+         atp(:,1)=  at(:,1) + at(:,2) 
+         atp(:,2)= -at(:,1) + at(:,2)
+         atp(:,3)=  at(:,3)
      CASE DEFAULT
 !
 !  If this is not a known centered lattice we simply copy the at in atp
@@ -121,6 +137,39 @@ CONTAINS
   END SELECT   
   RETURN
   END SUBROUTINE compute_conventional
+
+  SUBROUTINE conventional_ibrav(ibrav, cibrav)
+
+  IMPLICIT NONE
+  INTEGER, INTENT(IN) :: ibrav
+  INTEGER, INTENT(OUT) :: cibrav
+  INTEGER :: c_ibrav(14)
+  
+  DATA c_ibrav / 1, 1, 1, 4, 4, 6, 6, 8, 8, 8, 8, 12, 12, 14 /
+
+  IF (ibrav>0.AND.ibrav<15) THEN
+     cibrav= c_ibrav(ibrav)
+  ELSEIF (ibrav==91) THEN
+     cibrav=8
+  ELSEIF (ibrav==-12.OR.ibrav==-13) THEN
+     cibrav=-12
+  ENDIF
+
+  RETURN
+  END SUBROUTINE conventional_ibrav
+
+  LOGICAL FUNCTION is_centered(ibrav)
+
+  IMPLICIT NONE
+  INTEGER, INTENT(IN) :: ibrav
+
+  is_centered = (ibrav==2.OR.ibrav==3.OR.ibrav==5.OR.ibrav==7.OR.ibrav==9&
+                 .OR.ibrav==91.OR.ibrav==10.OR.ibrav==11.OR.ibrav==13.OR. &
+                 ibrav==-13)
+
+  RETURN
+  END FUNCTION is_centered
+
 
   SUBROUTINE find_ibrav_code(a1, a2, a3, ibrav, celldm, ur, global_s, verbosity)
 !
@@ -976,5 +1025,59 @@ omega=ABS(omega)
 
 RETURN
 END SUBROUTINE compute_omega
+
+SUBROUTINE lattice_name(ibrav, latt_name)
+!
+!  this subroutine receives as input the Bravais lattice vector index
+!  and gives as output the lattice name
+!
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ibrav
+CHARACTER(LEN=40), INTENT(OUT) :: latt_name
+
+SELECT CASE (ibrav)
+    CASE(0)
+        latt_name='free lattice'
+    CASE(1)
+        latt_name='simple cubic'
+    CASE(2)
+        latt_name='face centered cubic'
+    CASE(3)
+        latt_name='body centered cubic'
+    CASE(4)
+        latt_name='hexagonal'
+    CASE(5,-5)
+        latt_name='trigonal'
+    CASE(6)
+        latt_name='tetragonal'
+    CASE(7)
+        latt_name='centered tetragonal'
+    CASE(8)
+        latt_name='simple orthorombic'
+    CASE(9, -9)
+        latt_name='one face centered orthorombic (C)'
+    CASE(91)
+        latt_name='one face centered orthorombic (A)'
+    CASE(10)
+        latt_name='face centered orthorombic'
+    CASE(11)
+        latt_name='body centered orthorombic'
+    CASE(12)
+        latt_name='monoclinic (c unique)'
+    CASE(-12)
+        latt_name='monoclinic (b unique)'
+    CASE(13)
+        latt_name='base centered monoclinic (c unique)'
+    CASE(-13)
+        latt_name='base centered monoclinic (b unique)'
+    CASE(14)
+        latt_name='triclinic'
+CASE DEFAULT
+     CALL errore('lattice_name','ibrav not known',1)
+END SELECT
+
+RETURN
+END SUBROUTINE lattice_name
+
 
 END MODULE lattices
