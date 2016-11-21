@@ -192,9 +192,14 @@ SUBROUTINE thermo_summary()
   ibrav_group_consistent=check_group_ibrav(code_group, ibrav)
 
   IF ( ibrav_group_consistent ) THEN
-     CALL find_space_group(sg_number, ibrav, code_group, nsym, s, sr, ftau, &
-                      at, bg, dfftp%nr1, dfftp%nr2, dfftp%nr3,s01,s02,.FALSE.)
+     DO isym=1,nsym
+        ft(1,isym)= -DBLE(ftau(1,isym)) / dfftp%nr1
+        ft(2,isym)= -DBLE(ftau(2,isym)) / dfftp%nr2
+        ft(3,isym)= -DBLE(ftau(3,isym)) / dfftp%nr3
+     END DO
 
+     CALL find_space_group(ibrav, nsym, sr, ft, at, bg, sg_number, &
+                                                        s01, s02, .FALSE.)
      IF (sg_number > 0) THEN
         unique=0
         trig=0
@@ -422,9 +427,14 @@ SUBROUTINE thermo_summary()
 
      CALL print_symmetries_tpw ( 1, noncolin, domag )
 
-     CALL find_space_group(sg_number, ibrav, code_group, nsym, s, sr, ftau, &
-                              at, bg, dfftp%nr1, dfftp%nr2, dfftp%nr3,s01,  &
-                              s02, .TRUE.)
+     DO isym=1,nsym
+        ft(1,isym)= -DBLE(ftau(1,isym)) / dfftp%nr1
+        ft(2,isym)= -DBLE(ftau(2,isym)) / dfftp%nr2
+        ft(3,isym)= -DBLE(ftau(3,isym)) / dfftp%nr3
+     END DO
+
+     CALL find_space_group(ibrav, nsym, sr, ft, at, bg, sg_number, &
+                                                        s01,  s02, .TRUE.)
      CALL sg_name(sg_number, spaceg_name)
      IF (sg_number > 0) THEN
         WRITE(stdout,'(/,5x,"Space group ",a,"   (group number",i4, ").")') &
@@ -1231,6 +1241,7 @@ FUNCTION check_group_ibrav(code_group, ibrav)
 !
 USE kinds, ONLY : DP
 USE io_global, ONLY : stdout
+USE lattices, ONLY : lattice_name
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: code_group, ibrav
 
@@ -1457,59 +1468,6 @@ END IF
 RETURN
 END FUNCTION check_group_ibrav
 
-SUBROUTINE lattice_name(ibrav, latt_name)
-!
-!  this subroutine receives as input the Bravais lattice vector index
-!  and gives as output the lattice name
-!
-IMPLICIT NONE
-INTEGER, INTENT(IN) :: ibrav
-CHARACTER(LEN=40), INTENT(OUT) :: latt_name
-
-SELECT CASE (ibrav)
-    CASE(0)
-        latt_name='free lattice'
-    CASE(1)
-        latt_name='simple cubic'
-    CASE(2)
-        latt_name='face centered cubic'
-    CASE(3)
-        latt_name='body centered cubic'
-    CASE(4)
-        latt_name='hexagonal'
-    CASE(5,-5)
-        latt_name='trigonal'
-    CASE(6)
-        latt_name='tetragonal'
-    CASE(7)
-        latt_name='centered tetragonal'
-    CASE(8)
-        latt_name='simple orthorombic'
-    CASE(9, -9)
-        latt_name='one face centered orthorombic (C)'
-    CASE(91)
-        latt_name='one face centered orthorombic (A)'
-    CASE(10)
-        latt_name='face centered orthorombic'
-    CASE(11)
-        latt_name='body centered orthorombic'
-    CASE(12)
-        latt_name='monoclinic (c unique)'
-    CASE(-12)
-        latt_name='monoclinic (b unique)'
-    CASE(13)
-        latt_name='base centered monoclinic (c unique)'
-    CASE(-13)
-        latt_name='base centered monoclinic (b unique)'
-    CASE(14)
-        latt_name='triclinic'
-CASE DEFAULT
-     CALL errore('lattice_name','ibrav not known',1)
-END SELECT
-
-RETURN
-END SUBROUTINE lattice_name
-
 SUBROUTINE find_fft_fact()
 !
 !  this routine finds the fft_fact that correspond to the space group
@@ -1526,9 +1484,9 @@ USE symm_base,        ONLY : nsym, s, sr, ftau
 
 IMPLICIT NONE
 INTEGER :: sg_number
-INTEGER :: unique, trig
+INTEGER :: unique, trig, isym
 LOGICAL :: check_group_ibrav
-REAL(DP) :: s01(3), s02(3)
+REAL(DP) :: s01(3), s02(3), ft(3,48)
 CHARACTER(LEN=12) :: spaceg_name
 CHARACTER(LEN=11) :: gname
 
@@ -1542,8 +1500,13 @@ CHARACTER(LEN=11) :: gname
   ibrav_group_consistent=check_group_ibrav(code_group, ibrav)
 
   IF ( ibrav_group_consistent ) THEN
-     CALL find_space_group(sg_number, ibrav, code_group, nsym, s, sr, ftau, &
-                  at, bg, dfftp%nr1, dfftp%nr2, dfftp%nr3, s01, s02, .FALSE.)
+     DO isym=1,nsym
+        ft(1,isym)= -DBLE(ftau(1,isym)) / dfftp%nr1
+        ft(2,isym)= -DBLE(ftau(2,isym)) / dfftp%nr2
+        ft(3,isym)= -DBLE(ftau(3,isym)) / dfftp%nr3
+     END DO
+     CALL find_space_group(ibrav, nsym, sr, ft, at, bg, sg_number, &
+                                  s01, s02, .FALSE.)
 
      IF (sg_number > 0) THEN
         unique=0
