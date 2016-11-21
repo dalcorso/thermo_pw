@@ -10081,9 +10081,9 @@ CONTAINS
 ! 93)   C_2h E  2210  i  i2210  1  30 33  62 = 5834 
 ! 94)   C_2h E  21-10 i  i21-10 1 29 33  61 = 5652
 ! 95)   C_3h E  6z  3z i2z 3-z i6-z 1 57 27 34 28 58  = 9283
-! 96)   C_4h E  4z 2z 4-z i i24z i2z i24-z 1 8 2 7  33 40 34 39 = 5484
-! 97)   C_4h E  4y 2y 4-y i i24y i2y i24-y 1 11 3 12 33 43 35 44 = 6374
-! 98)   C_4h E  4x 2x 4-x i i24x i2x i24-x 1 16 4 15 33 48 36 47 = 7396
+! 96)   C_4h E  4z 2z 4-z i i4z i2z i4-z 1 8 2 7  33 40 34 39 = 5484
+! 97)   C_4h E  4y 2y 4-y i i4y i2y i4-y 1 11 3 12 33 43 35 44 = 6374
+! 98)   C_4h E  4x 2x 4-x i i4x i2x i4-x 1 16 4 15 33 48 36 47 = 7396
 ! 99)   C_6h E  6z 3z 2z 3-z 6-z i i6z i3z i2z i3-z i6-z 
 !               1  25 27 2 28 26 33 57 59 34 60 58 = 18758 
 ! 100)  D_2h E  2z 2x   2y    i i2z i2x   i2y  1 2 4 3 33 34 36 35 = 4796
@@ -10132,7 +10132,7 @@ CONTAINS
 ! 129)  S_6  E 3-xyz 3x-y-z i i3-xyz i3x-y-z  1 18 23 33 50 55 = 7468
 ! 130)  S_6  E 3-x-yz 3xy-z i i3-x-yz i3xy-z  1 24 19 33 56 51 = 7764
 ! 131)  S_6  E 3x-yz 3-xy-z i i3x-yz i3-xy-z  1 20 22 33 52 54 = 7594
-! 132)  T    E 2x  2y 2z 3xyz 3x-y-z 3-x-yz 3x-yz 3-x-y-z 
+! 132)  T    E 2z  2y 2x 3xyz 3x-y-z 3-x-yz 3x-yz 3-x-y-z 
 !              3-xyz  3xy-z 3x-yz 1 2 3 4 21 23 24 22 17 18 19 20 = 3434
 ! 133)  T_h  E 2z 2y 2x 3xyz 3x-y-z 3-x-yz 3x-yz 3-x-y-z 
 !            3-xyz  3xy-z 3x-yz i i2z i2y i2x i3xyz i3x-y-z i3-x-yz 
