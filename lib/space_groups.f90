@@ -43,7 +43,7 @@ MODULE space_groups
   CHARACTER(LEN=14)     :: spg_name            ! name of the space group
   REAL(DP), ALLOCATABLE :: equivalent_tau(:,:) !
 
-  INTEGER, PARAMETER :: nsg = 1080             ! number of space groups
+  INTEGER, PARAMETER :: nsg = 1068             ! number of space groups
   INTEGER, PARAMETER :: nsg_2d = 20            ! number of 2d space groups
   CHARACTER(LEN=13) :: space_group_names(nsg)
   CHARACTER(LEN=13) :: space_group_names_2d(nsg_2d)
@@ -329,10 +329,7 @@ MODULE space_groups
          "V_d^1       S", "V_d^2       S", "V_d^3       S", "V_d^4       S", &
          "V_d^5       S", "V_d^6       S", "V_d^7       S", "V_d^8       S", &
          "V_d^9       S", "V_d^10      S", "V_d^11      S", "V_d^12      S", &
-         "S_6^1        ", "S_6^2        ", "A12_11       ", "A112_1       ", &
-         "B2_111       ", "B112_1       ", "C2_111       ", "C12_11       ", &
-         "I2_111       ", "I12_11       ", "I112_1       ", "I12/c1       ", &
-         "I112/b       ", "I2/c11       ", "A2_12_12_1   ", "B2_12_12_1   ", &
+         "S_6^1        ", "S_6^2        ", "A2_12_12_1   ", "B2_12_12_1   ", &
          "C2_12_12_1   ", "F22_12_1     ", "F2_122_1     ", "F2_12_12     ", &
          "I4_2         ", "F4_2         ", "I4_3         ", "F4_3         "/
 
@@ -602,10 +599,7 @@ MODULE space_groups
       111,             112,           113,           114,            &
       115,             116,           117,           118,            &
       119,             120,           121,           122,            &
-      147,             148,             5,             5,            &
-        5,               5,             5,             5,            &
-        5,               5,             5,            15,            &
-       15,              15,            20,            20,            &
+      147,             148,            20,            20,            &
        20,              22,            22,            22,            &
        79,              79,            80,            80   /
 
@@ -644,7 +638,8 @@ MODULE space_groups
            equivalent_tau, space_group_names, &
            find_space_group_number, find_space_group_names, add_info, &
            set_add_info, set_fft_fact, project_frac_tran,  &
-           shift_frac_tran, set_standard_sg, set_point_group_code
+           shift_frac_tran, set_standard_sg, set_point_group_code, &
+           check_code_group_ext
 
   CONTAINS
 
@@ -1187,6 +1182,9 @@ MODULE space_groups
   !  origin choice 2 according to ITA. 
   !  If the ITA give only one origin s02 is set to 1000.0,1000.0,1000.0
   !
+  !  NB: it assumes that the space group orientation is the one of the ITA
+  !      tables.
+  !
   USE io_global, ONLY : stdout
   USE point_group, ONLY : find_group_info_ext, sym_label
   USE lattices,    ONLY : is_centered, compute_conventional, lattice_name
@@ -1243,6 +1241,9 @@ MODULE space_groups
 !
   CALL find_group_info_ext(nsym, sr_in, code_group, code_group_ext, &
                                                   which_elem, group_desc) 
+
+  IF (.NOT.check_code_group_ext(code_group_ext)) &
+     CALL errore('find_space_group','point group orientation uncorrect',1)
 
   IF (verbosity) THEN
      WRITE(stdout,'(/,5x,"Space group identification, ",i3," symmetries:")') &
@@ -1376,7 +1377,8 @@ MODULE space_groups
 
         IF (is_centered(ibrav)) THEN
            WRITE(stdout,'(/,5x,"Fractional translation shift and origin shift &
-                         &in conventional crystal coordinates")')
+                         &in conventional")')
+           WRITE(stdout,'(5x,"crystal coordinates")')
            WRITE(stdout,'(/,6x, "PGS",6x,"FT shift &
               &                   Origin shift",17x,"SGS",/)')
            DO isym=1,nsym
@@ -1415,8 +1417,22 @@ MODULE space_groups
 !  C_s
 !
           s01(:)=s0(:,2)
-          IF (ABS(ibrav)==13) THEN
-             IF (is_symmorphic) THEN
+          IF (ibrav==13) THEN
+             IF (group_desc_sg(2)==34.OR.group_desc_sg(2)==126) THEN
+!
+!   B11m  unique c
+!      a
+!
+                sg_number=8
+             ELSE 
+                sg_number=9
+             ENDIF
+          ELSEIF (ibrav==-13) THEN
+             IF (group_desc_sg(2)==35.OR.group_desc_sg(2)==130) THEN
+!
+!   C1m1  unique b
+!     a
+!
                 sg_number=8
              ELSE 
                 sg_number=9
@@ -1488,7 +1504,7 @@ MODULE space_groups
                ENDIF
             ENDIF
          ELSEIF (ibrav==7) THEN
-            IF (is_symmorphic) THEN
+            IF (group_desc_sg(2)==8.OR.group_desc_sg(2)==74) THEN
                sg_number=79
             ELSE
                sg_number=80
@@ -1560,7 +1576,11 @@ MODULE space_groups
                ENDIF
             ENDIF
          ELSEIF (ibrav==9) THEN
-            IF (is_symmorphic) THEN
+            nft=0
+            IF (group_desc_sg(2)/=2) nft=nft+1
+            IF (group_desc_sg(3)/=4) nft=nft+1
+            IF (group_desc_sg(4)/=3) nft=nft+1
+            IF (nft==0.OR.nft==2) THEN
                sg_number=21
             ELSE
                sg_number=20
@@ -1647,65 +1667,64 @@ MODULE space_groups
          s01(:)=s0(:,2)
          s01(3)=s0(3,5)
          IF (ibrav==6) THEN
-            IF (is_symmorphic) THEN
-               sg_number=89
-            ELSE 
 !
 !   Find the axis of order 4, and the axis of order 2 parallel to x
 !
-               irot90=2
-               irot180=5
-
-               IF (ABS(ft(3,irot90)) < eps1 ) THEN
+            irot90=2
+            irot180=5
+            IF (group_desc_sg(irot90)==8) THEN
+               IF (group_desc_sg(irot180)==4) THEN
+                  sg_number=89
+               ELSE
 !
 !  axis 4
 !
                   sg_number=90
                   s01(:)=s0(:,3)
                   s01(3)=s0(3,5)
-               ELSEIF (group_desc_sg(irot90) == 73) THEN
+               ENDIF
+            ELSEIF (group_desc_sg(irot90) == 73) THEN
 !
 !  axis 4_1
 !
-                  IF (ABS(ft(1,irot180))<eps1) THEN
-                     sg_number=91
-                     s01(:)=s0(:,2)
-                     s01(3)=s0(3,7)
-                  ELSE
-                     sg_number=92
-                     s01(:)=s0(:,3)
-                     s01(3)=s0(3,5)
-                  ENDIF
-               ELSEIF (group_desc_sg(irot90) == 74) THEN
+               IF (group_desc_sg(irot180)==4) THEN
+                  sg_number=91
+                  s01(:)=s0(:,2)
+                  s01(3)=s0(3,7)
+               ELSE
+                  sg_number=92
+                  s01(:)=s0(:,3)
+                  s01(3)=s0(3,5)
+               ENDIF
+            ELSEIF (group_desc_sg(irot90) == 74) THEN
 !
 !  axis 4_2
 !
-                  IF (ABS(ft(1,irot180))<eps1) THEN
-                     sg_number=93
-                     s01(:)=s0(:,3)
-                     s01(3)=s0(3,5)
-                  ELSE
-                     sg_number=94
-                     s01(:)=s0(:,3)
-                     s01(3)=s0(3,5)
-                  ENDIF
-               ELSEIF (group_desc_sg(irot90) == 75) THEN
+               IF (group_desc_sg(irot180)==4) THEN
+                  sg_number=93
+                  s01(:)=s0(:,3)
+                  s01(3)=s0(3,5)
+               ELSE
+                  sg_number=94
+                  s01(:)=s0(:,3)
+                  s01(3)=s0(3,5)
+               ENDIF
+            ELSEIF (group_desc_sg(irot90) == 75) THEN
 !
 !  axis 4_3
 !
-                  IF (ABS(ft(1,irot180)) < eps1 ) THEN
-                     sg_number=95
-                     s01(:)=s0(:,2)
-                     s01(3)=s0(3,7)
-                  ELSE
-                     sg_number=96
-                     s01(:)=s0(:,3)
-                     s01(3)=s0(3,6)
-                  ENDIF
+               IF (group_desc_sg(irot180)==4) THEN
+                  sg_number=95
+                  s01(:)=s0(:,2)
+                  s01(3)=s0(3,7)
+               ELSE
+                  sg_number=96
+                  s01(:)=s0(:,3)
+                  s01(3)=s0(3,6)
                ENDIF
             ENDIF
          ELSEIF (ibrav==7) THEN
-            IF (is_symmorphic) THEN
+            IF (group_desc_sg(2)==8.OR.group_desc_sg(2)==74) THEN
                sg_number=97
             ELSE 
                sg_number=98
@@ -1719,21 +1738,18 @@ MODULE space_groups
 !
          s01(:)=s0(:,2)
          s01(3)=s0(3,7)
-         IF (is_symmorphic) THEN
-            sg_number=177
-         ELSE
-            irot60=2
-            IF (group_desc_sg(irot60) == 108) sg_number=178   ! 6_1
-            IF (group_desc_sg(irot60) == 112) sg_number=179   ! 6_5
-            IF (group_desc_sg(irot60) == 109) sg_number=180   ! 6_2
-            IF (group_desc_sg(irot60) == 111) sg_number=181   ! 6_4
-            IF (group_desc_sg(irot60) == 110) sg_number=182   ! 6_3
-         ENDIF
+         irot60=2
+         IF (group_desc_sg(irot60) == 25) sg_number=177   ! 6
+         IF (group_desc_sg(irot60) == 108) sg_number=178   ! 6_1
+         IF (group_desc_sg(irot60) == 112) sg_number=179   ! 6_5
+         IF (group_desc_sg(irot60) == 109) sg_number=180   ! 6_2
+         IF (group_desc_sg(irot60) == 111) sg_number=181   ! 6_4
+         IF (group_desc_sg(irot60) == 110) sg_number=182   ! 6_3
       CASE(12)
 !
 !   C_2v
 !
-!   the origin in the C_2 axis
+!   the origin on the C_2 axis
 !
          s01(:)=s0(:,2)
          s01(3)=0.0_DP
@@ -1853,135 +1869,71 @@ MODULE space_groups
                ENDIF
             ENDIF
          ELSEIF (ibrav==9) THEN
-            IF (is_symmorphic) THEN
+            IF (group_desc_sg(2) == 65) THEN
+               sg_number=36
+            ELSEIF (ABS(ftc(3,3))<eps1.AND.ABS(ftc(3,4))<eps1) THEN
                sg_number=35
             ELSE 
-               IF (group_desc_sg(2) == 65) THEN
-                  sg_number=36
-               ELSE
-                  sg_number=37
-               ENDIF
+               sg_number=37
             ENDIF
          ELSEIF (ibrav==91) THEN
 !
-!   find the mirror perpendicular to y
+!   find the mirror perpendicular to x mirror1 and to y mirror2
 !
-            imirror1=4
-            IF (is_symmorphic) THEN
-               sg_number=38
-            ELSE 
-               IF (ABS(ft(1,imirror1))<eps1) THEN
+            imirror1=3
+            imirror2=4
+            IF (group_desc_sg(imirror1)==36.OR.&
+                                        group_desc_sg(imirror1)==136) THEN
+               IF (group_desc_sg(imirror2)==35.OR.&
+                                        group_desc_sg(imirror2)==131) THEN
+                    sg_number=38
+               ELSE
+!
+!    Ann2_1
+!
+                     sg_number=40
+               ENDIF
+            ELSE
+               IF (group_desc_sg(imirror2)==35.OR.&
+                                        group_desc_sg(imirror2)==131) THEN
+!
+!    Aec2_1
+!
                   sg_number=39
                ELSE
 !
-!  Find the mirror perpendicular to x
+!    Aen2_1
 !
-
-                  imirror2=3
-!
-!  bring the fractional translation in the orthorombic axis
-!
-                  ftrs1(:) = ftc(:,imirror2)
-!
-!    check if it is a proper mirrror or a glide plane (in the latter case only
-!    one component is different from zero)
-!
-                  nft=0
-                  IF ((ABS(ftrs1(2)) < 1.d-6 .AND. ABS(ftrs1(3)) > 1.d-6) .OR.&
-                (ABS(ftrs1(3)) < 1.d-6 .AND. ABS(ftrs1(2)) > 1.d-6) ) nft=nft+1
-
-                  IF (nft==0) THEN
-!
-!   the mirror perpendicular to x is a proper mirror
-!
-                     sg_number=40
-                  ELSE
-!
-!    the mirror perpendicular to x is a glide plane
-!
-                     sg_number=41
-                  ENDIF
+                   sg_number=41
                ENDIF
             ENDIF
          ELSEIF (ibrav==10) THEN
-            IF (is_symmorphic) THEN
-               sg_number=42
-            ELSE 
+            IF (group_desc_sg(3)==137.AND.group_desc_sg(4)==133) THEN
                sg_number=43
+            ELSE 
+               sg_number=42
             ENDIF
          ELSEIF (ibrav==11) THEN
-            IF (is_symmorphic) THEN
+!
+!   mirror1 is the mirror perpendicular to x, 
+!   mirror2 is the mirror perpendicular to y, 
+!
+            imirror1=3
+            imirror2=4
+            IF (group_desc_sg(imirror2)==35.OR.&
+                             group_desc_sg(imirror2)==132) THEN
+!
+!   mirror2 is m or n
+!
                sg_number=44
-            ELSE 
+            ELSEIF (group_desc_sg(imirror1)==36.OR.&
+                                     group_desc_sg(imirror1)==136) THEN
 !
-!  Find the two mirrors perpendicular to the proper axis
+!  mirror1 is m or n
 !
-
-               imirror1=0
-               imirror2=0
-               DO isym=2, nsym
-                  IF (tipo_sym(sr(1,1,isym))==5) THEN
-                     IF (imirror1==0) THEN
-                        imirror1=isym
-                        CALL mirror_axis(sr(1,1,isym),ax)
-                        DO ipol=1,3 
-                           IF (is_axis(ax,ipol)) idir1=ipol
-                        ENDDO
-                     ELSE
-                        imirror2=isym
-                        CALL mirror_axis(sr(1,1,isym),ax)
-                        DO ipol=1,3 
-                           IF (is_axis(ax,ipol)) idir2=ipol
-                        ENDDO
-                     ENDIF
-                  ENDIF
-               ENDDO
-               IF ( imirror1 == 0 ) CALL errore('find_space_group',&
-                                         'C_2v: no mirror found',1)
-               IF ( imirror2 == 0 ) CALL errore('find_space_group',&
-                                         'C_2v: second mirror not found',1)
-
-!
-!  bring the fractional translation in the orthorombic axis
-!
-               ftrs1(:) = ftc(:,imirror1)  
-               ftrs2(:) = ftc(:,imirror2)
-!
-!    check if mirrror1 is a glide plane 
-!
-               nft=0
-               IF (idir1==1) THEN
-                  IF ((ABS(ftrs1(2)) < 1.d-6 .AND. ABS(ftrs1(3)) > 1.d-6) .OR. &
-                 (ABS(ftrs1(3)) < 1.d-6 .AND. ABS(ftrs1(2)) > 1.d-6) ) nft=nft+1
-               ELSEIF(idir1==2) THEN
-                  IF ((ABS(ftrs1(1)) < 1.d-6 .AND. ABS(ftrs1(3)) > 1.d-6) .OR.&
-                 (ABS(ftrs1(3)) < 1.d-6 .AND. ABS(ftrs1(1)) > 1.d-6) ) nft=nft+1
-               ELSEIF(idir1==3) THEN
-                  IF ((ABS(ftrs1(1)) < 1.d-6 .AND. ABS(ftrs1(2)) > 1.d-6) .OR. &
-                 (ABS(ftrs1(1)) < 1.d-6 .AND. ABS(ftrs1(2)) > 1.d-6) ) nft=nft+1
-               ENDIF
-               IF (idir2==1) THEN
-                  IF ((ABS(ftrs2(2)) < 1.d-6 .AND. ABS(ftrs2(3)) > 1.d-6) .OR. &
-                 (ABS(ftrs2(3)) < 1.d-6 .AND. ABS(ftrs2(2)) > 1.d-6) ) nft=nft+1
-               ELSEIF(idir2==2) THEN
-                  IF ((ABS(ftrs2(1)) < 1.d-6 .AND. ABS(ftrs2(3)) > 1.d-6) .OR. &
-                 (ABS(ftrs2(3)) < 1.d-6 .AND. ABS(ftrs2(1)) > 1.d-6) ) nft=nft+1
-               ELSEIF(idir2==3) THEN
-                  IF ((ABS(ftrs2(1)) < 1.d-6 .AND. ABS(ftrs2(2)) > 1.d-6) .OR. &
-                 (ABS(ftrs2(1)) < 1.d-6 .AND. ABS(ftrs2(2)) > 1.d-6) ) nft=nft+1
-               ENDIF
-
-               IF (nft==1) THEN
-!
-!   one mirror is proper
-!
-                  sg_number=46
-               ELSEIF (nft==2) THEN
-!
-!   both mirrors are glide planes
-!
-                  sg_number=45
-               ENDIF
+               sg_number=46
+            ELSE
+               sg_number=45
             ENDIF
          ENDIF
       CASE(13)
@@ -1995,21 +1947,21 @@ MODULE space_groups
          IF (code_group_ext==72) type_group=1
 
          IF (ibrav==4) THEN
-            IF (is_symmorphic) THEN
-               IF (type_group==1) THEN
+            IF (type_group==1) THEN
+               IF (group_desc_sg(4)==36.OR.group_desc_sg(4)==134) THEN
                   sg_number=156
                ELSE
-                  sg_number=157
-               ENDIF
-            ELSE 
-               IF (type_group==1) THEN
                   sg_number=158
+               END IF
+            ELSE     
+               IF (group_desc_sg(5)==35.OR.group_desc_sg(5)==130) THEN
+                  sg_number=157
                ELSE
                   sg_number=159
                ENDIF
             ENDIF
          ELSEIF (ibrav==5) THEN
-            IF (is_symmorphic) THEN
+            IF (group_desc_sg(4)==36.OR.group_desc_sg(4)==134) THEN
                sg_number=160
             ELSE 
                sg_number=161
@@ -2024,84 +1976,43 @@ MODULE space_groups
          imirror=5
 
          IF (ibrav==6) THEN
-            IF (is_symmorphic) THEN
-               sg_number=99
-            ELSE 
-               IF (ABS(ft(3,irot90)) < eps1) THEN
-                  IF (ABS(ft(3,imirror))<eps1) THEN
-                     sg_number=100
-                  ELSEIF (ABS(ft(2,imirror))<eps1) THEN
-                     sg_number=103
-                  ELSE
-                     sg_number=104
-                  ENDIF
-               ELSEIF (group_desc_sg(irot90) == 74) THEN
-!
-!  look at the mirror perpendicular to the x axis.
-!
-                  IF (ABS(ft(3,imirror))<eps1.AND.&
-                                        ABS(ft(2,imirror))<eps1) THEN
-!
-!   proper mirror
-!
-                     sg_number=105
-                  ELSEIF (ABS(ft(3,imirror))<eps1) THEN
-
-!   glide perpendicular to the z axis
-!
-                     sg_number=106
-                  ELSEIF (ABS(ft(2,imirror))<eps1) THEN
-!
-!   glide parallel to the z axis
-!
-                     sg_number=101
-                  ELSE
-!
-!   glide neither parallel nor perpendicular to the z axis
-!
-                     sg_number=102
-                  END IF
-               END IF
+            IF (group_desc_sg(irot90)==8) THEN
+               IF (group_desc_sg(imirror)==36 ) THEN
+                  sg_number=99
+               ELSEIF (group_desc_sg(imirror)==134 ) THEN
+                  sg_number=100
+               ELSEIF (group_desc_sg(imirror)==135 ) THEN
+                  sg_number=103
+               ELSEIF (group_desc_sg(imirror)==136 ) THEN
+                  sg_number=104
+               ENDIF
+            ELSE
+               IF (group_desc_sg(imirror)==36 ) THEN
+                  sg_number=105
+               ELSEIF (group_desc_sg(imirror)==134 ) THEN
+                  sg_number=106
+               ELSEIF (group_desc_sg(imirror)==135 ) THEN
+                  sg_number=101
+               ELSEIF (group_desc_sg(imirror)==136 ) THEN
+                  sg_number=102
+               ENDIF
             END IF
          ELSEIF (ibrav==7) THEN
-            IF (is_symmorphic) THEN
-               sg_number=107
-            ELSE 
-!
-!  bring the fractional translation associated to the 90 degree rotation
-!  in the cartesian axis
-!
-               ftrs1(:) = ftc(:,irot90) 
-
-               IF ( ABS((ABS(ftrs1(3) / at(3,1))-1.0_DP))<1.d-6 .OR. &
-                     ABS(ftrs1(3)) < 1.d-6 ) THEN
-!
-!  the axis of order four is proper
-!
+            IF (group_desc_sg(irot90)==8.OR.group_desc_sg(irot90)==74) THEN
+               IF (group_desc_sg(imirror)==36.OR.&
+                                      group_desc_sg(imirror)==136) THEN
+                  sg_number=107
+               ELSE
                   sg_number=108
-               ELSE 
-!
-!  the axis of order four is improprer
-!
-                  ftrs2(:) = ftc(:,imirror) 
-                  nft=0
-                  IF ((ABS(ftrs2(2)) < 1.d-6 .AND. ABS(ftrs2(3)) > 1.d-6).OR.&
-                      (ABS(ftrs2(3)) < 1.d-6 .AND. ABS(ftrs2(2)) > 1.d-6) ) &
-                      nft=nft+1
-
-                  IF (nft==0) THEN
-!
-!   the mirror is proper. Origin on the 2 axis
-!
-                     sg_number=109
-                     s01(:) = s0(:,3)
-                  ELSE
-!
-!  origin on the 2 axis.
-!
-                     sg_number=110
-                     s01(:) = s0(:,3)
-                  ENDIF
+               END IF
+            ELSE
+               IF (group_desc_sg(imirror)==36.OR.&
+                                      group_desc_sg(imirror)==136) THEN
+                  sg_number=109
+                  s01(:) = s0(:,3)
+               ELSE
+                  sg_number=110
+                  s01(:) = s0(:,3)
                ENDIF
             ENDIF
          ENDIF
@@ -2110,20 +2021,19 @@ MODULE space_groups
 !  C_6v
 !
          s01(:)=s0(:,2)
-         IF (is_symmorphic) THEN
-            sg_number=183
-         ELSE 
-            irot60=2
-            imirror=7
-
-            IF (ABS(ft(3,irot60)) <eps1 ) THEN
+         irot60=2
+         imirror=7
+         IF (group_desc_sg(irot60)==25) THEN
+            IF (group_desc_sg(imirror)==36.OR.group_desc_sg(imirror)==134) THEN
+               sg_number=183
+            ELSE
                sg_number=184
-            ELSEIF (group_desc_sg(irot60) == 110) THEN
-               IF (ABS(ft(2,imirror))<eps1.AND.ABS(ft(3,imirror))<eps1) THEN
-                  sg_number=186
-               ELSE
-                  sg_number=185
-               ENDIF
+            ENDIF
+         ELSE
+            IF (group_desc_sg(imirror)==36.OR.group_desc_sg(imirror)==134) THEN
+               sg_number=186
+            ELSE
+               sg_number=185
             ENDIF
          ENDIF
       CASE(16)
@@ -2134,8 +2044,22 @@ MODULE space_groups
 !   origin on the inversion center
 !
           s01(:)=s0(:,3)
-          IF (ABS(ibrav)==13) THEN
-             IF (is_symmorphic) THEN
+          IF (ibrav==-13) THEN
+!
+!  B112/m     unique c
+!     2_1/a
+!
+             IF (group_desc_sg(4)==35.OR.group_desc_sg(4)==130) THEN
+                sg_number=12
+             ELSE 
+                sg_number=15
+             ENDIF
+          ELSEIF (ibrav==13) THEN
+!
+!  C12/m1   unique b
+!    2_1/a
+!
+             IF (group_desc_sg(4)==34.OR.group_desc_sg(4)==126) THEN
                 sg_number=12
              ELSE 
                 sg_number=15
@@ -2223,7 +2147,7 @@ MODULE space_groups
                ENDIF
             ENDIF
          ELSEIF(ibrav==7) THEN
-            IF (is_symmorphic) THEN
+            IF (group_desc_sg(2)==8.OR.group_desc_sg(2)==74) THEN
                sg_number=87
             ELSE
                sg_number=88
@@ -2394,101 +2318,62 @@ MODULE space_groups
                ENDIF 
             ENDIF
          ELSEIF (ibrav==9) THEN
-            IF (is_symmorphic) THEN
-               sg_number=65
+            IF (group_desc_sg(2)/=2) THEN
+!
+!    mirror perpendicular to z
+!
+               imirror1=6
+               IF (group_desc_sg(imirror1)==34.OR.&
+                                   group_desc_sg(imirror1)==128) THEN
+                  sg_number=63 
+               ELSE
+                  sg_number=64
+               ENDIF
             ELSE
-               IF (nsaz==0) THEN
-
-                  DO iaxis=1,3
-                     IF (axis_dir(iaxis)==3) ftrs1(:) = ftc(:,mirr_sym(iaxis))
-                  ENDDO
-
-                  nft=0
-                  IF ((ABS(ftrs1(1)) < 1.d-6 .AND. ABS(ftrs1(2)) > 1.d-6) .OR. &
-                     (ABS(ftrs1(2)) < 1.d-6 .AND. ABS(ftrs1(1)) > 1.d-6) ) &
-                                                               nft=nft+1
-!
-!   check only the mirror perpendicular to x, the other is equal
-!
-
-                  nmir=0
-                  DO iaxis=1,3
-                     IF (axis_dir(iaxis)==1) THEN
-                        IF (ABS(ft(3,mirr_sym(iaxis)))<eps1) nmir=nmir+1 
-                     ENDIF
-                  ENDDO
-                  nmir=nmir*2
-
-                  IF (nft==0) THEN
+               imirror1=6
+               imirror2=8
+               IF (group_desc_sg(imirror1)==34.OR.&
+                                   group_desc_sg(imirror1)==128) THEN
+                  IF (group_desc_sg(imirror2)==35.OR.&
+                                   group_desc_sg(imirror2)==130) THEN
+                     sg_number=65
+                  ELSE
                      sg_number=66
-                  ELSEIF (nft==1.AND.nmir==0) THEN
-                     sg_number=68
-!
-!  origin choice 1 at the intesection of the 222 axis  
-!
-                     s01(:)=s0(:,2)
-                     s01(3)=s0(3,3)
-!
-!   origin choice 2 on inversion
-!
-                     s02(:)=s0(:,5)
-                  ELSEIF (nft==1.AND.nmir==2) THEN
-                     sg_number=67
                   ENDIF
-               ELSEIF (nsaz==1) THEN
-!
-!   check only the mirror parallel to the centered C face
-!
-                  DO iaxis=1,3
-                     IF (axis_dir(iaxis)==3) ftrs1(:) = ftc(:,mirr_sym(iaxis))
-                  ENDDO
-
-                  nft=0
-                  IF ((ABS(ftrs1(1)) < 1.d-6 .AND. ABS(ftrs1(2)) > 1.d-6) .OR. &
-                 (ABS(ftrs1(2)) < 1.d-6 .AND. ABS(ftrs1(1)) > 1.d-6) ) nft=nft+1
-
-                  IF (nft==0) THEN
-                     sg_number=63
-                  ELSEIF (nft==1) THEN
-                     sg_number=64
+               ELSE
+                  IF (group_desc_sg(imirror2)==35.OR.&
+                                   group_desc_sg(imirror2)==130) THEN
+                     sg_number=67
+                  ELSE
+                     sg_number=68
                   ENDIF
                ENDIF
             ENDIF
          ELSEIF (ibrav==10) THEN
-            IF (is_symmorphic) THEN
-               sg_number=69
-            ELSE
+            IF (group_desc_sg(7)==137.AND.group_desc_sg(8)==133) THEN
                s01(:)=(s0c(:,2)+s0c(:,3)+s0c(:,4))/3.0_DP
                CALL cryst_to_cart(1,s01,bg,-1)
                s02(:)=s0(:,5)
                sg_number=70
+            ELSE
+               sg_number=69
             ENDIF
          ELSEIF (ibrav==11) THEN
-            IF (is_symmorphic) THEN
-               sg_number=71
-            ELSE
-!
-!   check the three mirrors 
-!
-               DO iaxis=1,3
-                  IF (axis_dir(iaxis)==1) ftrs1(:) = ftc(:,mirr_sym(iaxis))
-                  IF (axis_dir(iaxis)==2) ftrs2(:) = ftc(:,mirr_sym(iaxis))
-                  IF (axis_dir(iaxis)==3) ftrs3(:) = ftc(:,mirr_sym(iaxis))
-               ENDDO
-
-               nft=0
-               IF ((ABS(ftrs1(2)) < 1.d-6 .AND. ABS(ftrs1(3)) > 1.d-6) .OR. &
-               (ABS(ftrs1(3)) < 1.d-6 .AND. ABS(ftrs1(2)) > 1.d-6) ) nft=nft+1
-               IF ((ABS(ftrs2(1)) < 1.d-6 .AND. ABS(ftrs2(3)) > 1.d-6) .OR. &
-               (ABS(ftrs2(3)) < 1.d-6 .AND. ABS(ftrs2(1)) > 1.d-6) ) nft=nft+1
-               IF ((ABS(ftrs3(2)) < 1.d-6 .AND. ABS(ftrs3(1)) > 1.d-6) .OR. &
-               (ABS(ftrs3(1)) < 1.d-6 .AND. ABS(ftrs3(2)) > 1.d-6) ) nft=nft+1
-
-               IF (nft==1) THEN
-                  sg_number=74
-               ELSEIF (nft==2) THEN
+            imirror1=6   ! perpendicular to z
+            imirror2=7   ! perpendicular to x 
+            IF (group_desc_sg(imirror1)==34.OR.&
+                                   group_desc_sg(imirror1)==128) THEN
+               IF (group_desc_sg(imirror2)==36.OR.&
+                                   group_desc_sg(imirror2)==136) THEN
+                  sg_number=71
+               ELSE
                   sg_number=72
-               ELSEIF (nft==3) THEN
+               ENDIF
+            ELSE
+               IF (group_desc_sg(imirror2)==36.OR.&
+                                   group_desc_sg(imirror2)==136) THEN
+                  sg_number=74
+               ELSE
                   sg_number=73
                ENDIF
             ENDIF
@@ -2501,20 +2386,20 @@ MODULE space_groups
 !
          s01(:)=s0(:,2)
 
-         IF (is_symmorphic) THEN
-            IF (group_desc(7)==4) THEN
-               sg_number=189
-            ELSE
-               sg_number=187
-            ENDIF
+         IF (code_group_ext==107) THEN
+!
+!  x is perpendicular to a mirror
+!
+            type_group=1
+            imirror=7
          ELSE
-            IF (group_desc(7)==4) THEN
-!
-!  origin on 32c
-!
-               s01(:)=s0(:,3)
-               s01(3)=s0(3,7)
-               sg_number=190
+            type_group=2
+            imirror=10
+         ENDIF
+         IF (type_group==1) THEN
+            IF (group_desc_sg(imirror)==36.OR.&
+                               group_desc_sg(imirror)==134) THEN
+               sg_number=187
             ELSE
 !
 !  origin on 3c2
@@ -2522,6 +2407,18 @@ MODULE space_groups
                s01(:)=s0(:,3)
                s01(3)=s0(3,10)
                sg_number=188
+            ENDIF
+         ELSE
+            IF (group_desc_sg(imirror)==35.OR.&
+                               group_desc_sg(imirror)==130) THEN
+               sg_number=189
+            ELSE
+!
+!  origin on 32c
+!
+               s01(:)=s0(:,3)
+               s01(3)=s0(3,7)
+               sg_number=190
             ENDIF
          ENDIF
       CASE(22)
@@ -2533,155 +2430,89 @@ MODULE space_groups
          irot180=5
          imirror=13
          IF (ibrav==6) THEN
-            IF (is_symmorphic) THEN
-               sg_number=123
-            ELSE
-               IF (ABS(ft(3,irot90))<eps1) THEN
-                  IF (ABS(ft(1,irot180))<eps1) THEN
-                     IF (ABS(ft(2,imirror))<eps1) THEN
-!
-!  glide plane c
-!
-                        sg_number=124
-                     ELSEIF(ABS(ft(3,imirror))<eps1) THEN
-!
-!  glide plane b
-!
-                        sg_number=125
+            IF (group_desc_sg(irot90)==8) THEN
+               IF (group_desc_sg(irot180)==4) THEN
+                  IF (group_desc_sg(imirror)==36) THEN
+                     sg_number=123
+                  ELSEIF (group_desc_sg(imirror)==135) THEN
+                     sg_number=124
+                  ELSEIF (group_desc_sg(imirror)==134) THEN
+                     sg_number=125
 !
 !  two origins origin 1 on the inversion point of -4, origin 2 on the inversion
 !  center
 !
-                        s01(:)=s0(:,10)
-                        s02(:)=s0(:,9)
-                     ELSE
-!
-!  glide plane n
-!
-                        sg_number=126
-                        s01(:)=s0(:,10)
-                        s02(:)=s0(:,9)
-                     ENDIF
-                  ELSEIF (group_desc_sg(irot180) == 67) THEN
-                     IF (ABS(ft(2,imirror))<eps1.AND.&
-                         ABS(ft(3,imirror))<eps1) THEN
-!
-!  mirror
-!
-                        sg_number=129
-                        s01(:)=s0(:,10)
-                        s02(:)=s0(:,9)
-                     ELSEIF (ABS(ft(2,imirror))<eps1) THEN
-!
-!  glide plane c
-!
-                        sg_number=130
-                        s01(:)=s0(:,10)
-                        s02(:)=s0(:,9)
-                     ELSEIF(ABS(ft(3,imirror))<eps1) THEN
-!
-!  glide plane b
-!
-                        sg_number=127
-                     ELSE
-!
-!  glide plane n
-!
-                        sg_number=128
-                     ENDIF
+                     s01(:)=s0(:,10)
+                     s02(:)=s0(:,9)
+                  ELSEIF (group_desc_sg(imirror)==136) THEN
+                     sg_number=126
+                     s01(:)=s0(:,10)
+                     s02(:)=s0(:,9)
                   ENDIF
-               ELSEIF (group_desc_sg(irot90) == 74) THEN
-                  IF (ABS(ft(1,irot180))<eps1) THEN
-                     IF (ABS(ft(2,imirror))<eps1.AND.&
-                         ABS(ft(3,imirror))<eps1) THEN
-!
-!  mirror
-!
-                        sg_number=131
-                     ELSEIF (ABS(ft(2,imirror))<eps1) THEN
-!
-!  glide plane c
-!
-                        sg_number=132
-                     ELSEIF(ABS(ft(3,imirror))<eps1) THEN
-!
-!  glide plane b
-!
-                        sg_number=133
-                        s01(:)=s0(:,10)
-                        s02(:)=s0(:,9)
-                     ELSE
-!
-!  glide plane n
-!
-                        sg_number=134
-                        s01(:)=s0(:,10)
-                        s02(:)=s0(:,9)
-                     ENDIF
-                  ELSEIF (group_desc_sg(irot180) == 67) THEN
-                     IF (ABS(ft(2,imirror))<eps1.AND.&
-                         ABS(ft(3,imirror))<eps1) THEN
-!
-!  mirror
-!
-                        sg_number=137
-                        s01(:)=s0(:,10)
-                        s02(:)=s0(:,9)
-                     ELSEIF (ABS(ft(2,imirror))<eps1) THEN
-!
-!  glide plane c
-!
-                        sg_number=138
-                        s01(:)=s0(:,10)
-                        s02(:)=s0(:,9)
-                     ELSEIF(ABS(ft(3,imirror))<eps1) THEN
-!
-!  glide plane b
-!
-                        sg_number=135
-                     ELSE
-!
-!  glide plane n
-!
-                        sg_number=136
-                     ENDIF
+               ELSE
+                  IF (group_desc_sg(imirror)==36) THEN
+                     sg_number=129
+                     s01(:)=s0(:,10)
+                     s02(:)=s0(:,9)
+                  ELSEIF (group_desc_sg(imirror)==135) THEN
+                     sg_number=130
+                     s01(:)=s0(:,10)
+                     s02(:)=s0(:,9)
+                  ELSEIF (group_desc_sg(imirror)==134) THEN
+                     sg_number=127
+                  ELSEIF (group_desc_sg(imirror)==136) THEN
+                     sg_number=128
+                  ENDIF
+               ENDIF
+            ELSE
+               IF (group_desc_sg(irot180)==4) THEN
+                  IF (group_desc_sg(imirror)==36) THEN
+                     sg_number=131
+                  ELSEIF (group_desc_sg(imirror)==135) THEN
+                     sg_number=132
+                  ELSEIF (group_desc_sg(imirror)==134) THEN
+                     sg_number=133
+                     s01(:)=s0(:,10)
+                     s02(:)=s0(:,9)
+                  ELSEIF (group_desc_sg(imirror)==136) THEN
+                     sg_number=134
+                     s01(:)=s0(:,10)
+                     s02(:)=s0(:,9)
+                  END IF
+               ELSE
+                  IF (group_desc_sg(imirror)==36) THEN
+                     sg_number=137
+                     s01(:)=s0(:,10)
+                     s02(:)=s0(:,9)
+                  ELSEIF (group_desc_sg(imirror)==135) THEN
+                     sg_number=138
+                     s01(:)=s0(:,10)
+                     s02(:)=s0(:,9)
+                  ELSEIF (group_desc_sg(imirror)==134) THEN
+                     sg_number=135
+                  ELSEIF (group_desc_sg(imirror)==136) THEN
+                     sg_number=136
                   ENDIF
                ENDIF
             ENDIF
          ELSEIF (ibrav==7) THEN
-            IF (is_symmorphic) THEN
-               sg_number=139
-            ELSE
-!
-!    Bring the fractional translation associated with the fourfold rotation
-!    to cartesian axis
-!
-               ftrs1(:) = ftc(:,irot90)
-
-               IF ( group_desc_sg(irot90) == 8 ) THEN
-!
-!  the axis of order four is proper
-!
-                  sg_number=140
+            IF (group_desc_sg(irot90)==8.OR.group_desc_sg(irot90)==74) THEN
+               IF (group_desc_sg(imirror)==36.OR.&
+                                    group_desc_sg(imirror)==136) THEN
+                  sg_number=139
                ELSE
-!
-!  the axis of order four is a screw axis
-!
-                  ftrs2(:) = ftc(:,imirror) 
-                  nft=0
-                  IF ((ABS(ftrs2(2)) < 1.d-6 .AND. ABS(ftrs2(3)) > 1.d-6).OR.&
-                      (ABS(ftrs2(3)) < 1.d-6 .AND. ABS(ftrs2(2)) > 1.d-6) ) &
-                      nft=nft+1
-
-                  IF (nft==0) THEN
-                     sg_number=141
-                     s01(:)=s0(:,10)
-                     s02(:)=s0(:,9)
-                  ELSE
-                     sg_number=142
-                     s01(:)=s0(:,10)
-                     s02(:)=s0(:,9)
-                  ENDIF
+                  sg_number=140
+               ENDIF
+            ELSE
+               IF (group_desc_sg(imirror)==36.OR.&
+                                    group_desc_sg(imirror)==136) THEN
+                  sg_number=141
+                  s01(:)=s0(:,10)
+                  s02(:)=s0(:,9)
+               ELSE
+                  sg_number=142
+                  s01(:)=s0(:,10)
+                  s02(:)=s0(:,9)
                ENDIF
             ENDIF
          ENDIF 
@@ -2691,21 +2522,20 @@ MODULE space_groups
 !
 !  origin on the inversion center of the -3_z operation
 !
-
          s01(:)=s0(:,18)
-         IF (is_symmorphic) THEN
-            sg_number=191
-         ELSE
-            irot60=2
-            imirror=19
-            IF (ABS(ft(3,irot60))<eps1) THEN
+         irot60=2
+         imirror=19 ! perpendicular to x
+         IF (group_desc_sg(irot60)==25) THEN
+            IF (group_desc_sg(imirror)==36.OR.group_desc_sg(imirror)==134) THEN
+               sg_number=191
+            ELSE
                sg_number=192
-            ELSEIF (group_desc_sg(irot60)==110) THEN
-               IF (ABS(ft(2,imirror))<eps1.AND.ABS(ft(3,imirror))<eps1) THEN
-                  sg_number=194
-               ELSE
-                  sg_number=193
-               ENDIF
+            ENDIF
+         ELSE
+            IF (group_desc_sg(imirror)==36.OR.group_desc_sg(imirror)==134) THEN
+               sg_number=194
+            ELSE
+               sg_number=193
             ENDIF
          ENDIF
       CASE(24)
@@ -2738,45 +2568,46 @@ MODULE space_groups
          ENDIF
 
          IF (ibrav==6) THEN
-            IF (is_symmorphic) THEN
-               IF (type_group==0) THEN
-                  sg_number=115
-               ELSE
-                  sg_number=111
-               ENDIF
-            ELSE
-               IF (type_group==1) THEN
-                  IF (ABS(ft(1,irot180))<eps1) THEN
+            IF (type_group==1) THEN
+               IF (group_desc_sg(irot180)==4) THEN
+                  IF (group_desc_sg(imirror1)==139.OR.&
+                                    group_desc_sg(imirror1)==140) THEN
                      sg_number=112
                   ELSE
-                    IF (ABS(ft(3,imirror1))<eps1) THEN
-                       sg_number=113
-                    ELSE
-                       sg_number=114
-                    ENDIF
+                     sg_number=111
                   ENDIF
                ELSE
-                  IF (ABS(ft(3,imirror))<eps1) THEN
-                     sg_number=117
-                  ELSEIF (ABS(ft(2,imirror))<eps1) THEN
-                     sg_number=116
-                  ELSE 
-                     sg_number=118
-                  ENDIF 
+                  IF (group_desc_sg(imirror1)==139.OR.&
+                                    group_desc_sg(imirror1)==140) THEN
+                     sg_number=114
+                  ELSE
+                     sg_number=113
+                  ENDIF
+               ENDIF
+            ELSE
+               IF (group_desc_sg(imirror)==36) THEN
+                  sg_number=115
+               ELSEIF (group_desc_sg(imirror)==135) THEN
+                  sg_number=116
+               ELSEIF (group_desc_sg(imirror)==134) THEN
+                  sg_number=117
+               ELSEIF (group_desc_sg(imirror)==136) THEN
+                  sg_number=118
                ENDIF
             ENDIF
          ELSEIF (ibrav==7) THEN
-            IF (is_symmorphic) THEN
-               IF (type_group==1) THEN
-                  sg_number=121
-               ELSE
+            IF (type_group==0) THEN
+               IF (group_desc_sg(imirror)==36.OR.&
+                                    group_desc_sg(imirror)==136) THEN
                   sg_number=119
-               ENDIF
-            ELSE
-               IF (type_group==1) THEN
-                  sg_number=122
                ELSE
                   sg_number=120
+               ENDIF
+            ELSE
+               IF (group_desc_sg(imirror1)==141) THEN
+                  sg_number=122
+               ELSE
+                  sg_number=121
                ENDIF
             ENDIF
          ENDIF
@@ -2798,27 +2629,25 @@ MODULE space_groups
          IF (ibrav==4) THEN
             IF (type_group==1) THEN
 !
-!   if all the mirrors are glide planes it is 165, otherwise it is 164
+!   if the mirror perpendicular to x is proper or b it is 164
 !
-               IF (group_desc_sg(10)>64.AND.group_desc_sg(11)>64&
-                   .AND.group_desc_sg(12)>64) THEN
-                  sg_number=165
-               ELSE
+               IF (group_desc_sg(10)==36.OR.group_desc_sg(10)==134) THEN
                   sg_number=164
+               ELSE
+                  sg_number=165
                ENDIF
             ELSE
 !
-!   if all the mirrors are glide planes it is 163, otherwise it is 164
+!   if all the mirror perpendicular to y is proper or a it is 162
 !
-               IF (group_desc_sg(10)>64.AND.group_desc_sg(11)>64&
-                   .AND.group_desc_sg(12)>64) THEN
-                  sg_number=163
-               ELSE
+               IF (group_desc_sg(11)==35.OR.group_desc_sg(10)==130) THEN
                   sg_number=162
+               ELSE
+                  sg_number=163
                ENDIF
             ENDIF
          ELSEIF (ibrav==5) THEN
-             IF (is_symmorphic) THEN
+             IF (group_desc_sg(10)==36.OR.group_desc_sg(10)==134) THEN
                 sg_number=166
              ELSE
                 sg_number=167
@@ -2910,9 +2739,7 @@ MODULE space_groups
                 ENDIF
              ENDIF
          ELSEIF (ibrav==2) THEN
-             IF (is_symmorphic) THEN
-                sg_number=202
-             ELSE
+             IF (group_desc_sg(14)==129) THEN
                 sg_number=203
 !
 !   origin choice 1 at 23
@@ -2923,9 +2750,11 @@ MODULE space_groups
 !  origin choice 2 at the center of -3
 !
                    s02(:)=s0(:,17)
+             ELSE
+                sg_number=202
              ENDIF
          ELSEIF (ibrav==3) THEN
-             IF (is_symmorphic) THEN
+             IF (group_desc_sg(14)==34.OR.group_desc_sg(14)==128) THEN
                 sg_number=204
              ELSE
                 sg_number=206
@@ -2937,15 +2766,21 @@ MODULE space_groups
 !
          s01(:)=s0(:,18)
          IF (ibrav==1) THEN
-             IF (is_symmorphic) THEN
-                sg_number=215
-             ELSE
+             IF (group_desc_sg(24)==139.OR.group_desc_sg(24)==140) THEN
                 s01(:)=s0(:,4)
                 s01(3)=s0(3,2)
                 sg_number=218
+             ELSE
+                sg_number=215
              ENDIF
          ELSEIF (ibrav==2) THEN
-             IF (is_symmorphic) THEN
+!
+!  one of the two operations i2xy or i2x-y (or both) is a real mirror in 216
+!  they are all glide planes in 219. (Is this sufficient or should we
+!  check the six diagonal mirrors?)
+!  Same problem to distinguish 225 - 226 and 227 - 228
+!
+             IF (group_desc_sg(24)==37.OR.group_desc_sg(23)==38) THEN
                 sg_number=216
              ELSE
                 s01(:)=s0(:,4)
@@ -2953,14 +2788,14 @@ MODULE space_groups
                 sg_number=219
              ENDIF
          ELSEIF (ibrav==3) THEN
-             IF (is_symmorphic) THEN
-                sg_number=217
-             ELSE
+             IF (group_desc_sg(24)==141) THEN
 !
 !    origin to be programmed
 !
                 s01=1000.0_DP
                 sg_number=220
+             ELSE
+                sg_number=217
              ENDIF
          ENDIF
       CASE(31)
@@ -2971,50 +2806,44 @@ MODULE space_groups
 !
          s01(:)=s0(:,4)
          s01(3)=s0(3,2)
+         irot90=14
          IF (ibrav==1) THEN
-             IF (is_symmorphic) THEN
-                sg_number=207
-             ELSE
-!
-!          find the 90 degree rotation about the x axis and check its
-!          fractional translation along the axis.
-!
-                irot90=14
+            IF (group_desc_sg(irot90)==16) THEN
+               sg_number=207
+            ELSEIF (group_desc_sg(irot90)==90) THEN
 !
 !    4x is 4_2 in 208, 4_1 in 213, 4_3 in 212
 !
-                IF (group_desc_sg(14)==90) sg_number=208
-                IF (group_desc_sg(14)==89) THEN
-                   sg_number=213
-!
-!  origin to be programmed
-!
-                   s01=1000.0_DP
-                ENDIF
-                IF (group_desc_sg(14)==91) THEN
-                   sg_number=212
-!
-!  origin to be programmed
-!
-                   s01=1000.0_DP
-                ENDIF
-             ENDIF
-         ELSEIF (ibrav==2) THEN
-             IF (is_symmorphic) THEN
-                sg_number=209
-             ELSE
-                sg_number=210
-             ENDIF
-         ELSEIF (ibrav==3) THEN
-             IF (is_symmorphic) THEN
-                sg_number=211
-             ELSE
+                sg_number=208
+            ELSEIF (group_desc_sg(irot90)==89) THEN
+                sg_number=213
 !
 !  origin to be programmed
 !
                 s01=1000.0_DP
-                sg_number=214
-             ENDIF
+            ELSEIF (group_desc_sg(irot90)==91) THEN
+                sg_number=212
+!
+!  origin to be programmed
+!
+                s01=1000.0_DP
+            ENDIF
+         ELSEIF (ibrav==2) THEN
+            IF (group_desc_sg(irot90)==16.OR.group_desc_sg(irot90)==90) THEN
+               sg_number=209
+            ELSE
+               sg_number=210
+            ENDIF
+         ELSEIF (ibrav==3) THEN
+            IF (group_desc_sg(irot90)==16.OR.group_desc_sg(irot90)==90) THEN
+               sg_number=211
+            ELSE
+!
+!  origin to be programmed
+!
+               s01=1000.0_DP
+               sg_number=214
+            ENDIF
          ENDIF
       CASE(32)
 !
@@ -3024,13 +2853,10 @@ MODULE space_groups
 !
          s01(:)=s0(:,29)
          IF (ibrav==1) THEN
-            IF (is_symmorphic) THEN
-               sg_number=221
-            ELSE
-               IF (group_desc_sg(18)==8) THEN
-!
-!   the 4z axis has no fractional translation in space group 222
-!
+            IF (group_desc_sg(18)==8) THEN
+               IF (group_desc_sg(28)==34) THEN
+                  sg_number=221
+               ELSE
                   sg_number=222
 !
 !   origin choice 1 at 432
@@ -3041,66 +2867,63 @@ MODULE space_groups
 !  origin choice 2 at the inversion point of -3
 !
                   s02(:)=s0(:,29)
+               ENDIF
+            ELSE
+               IF (group_desc_sg(28)==34) THEN
+                  sg_number=223
                ELSE
-                  IF (group_desc_sg(28)==34) THEN
+                  sg_number=224
 !
-!  in space group 223 the mirror i2z is a mirror, in 224 a glide plane
+!  origin choice 1 at -43m
 !
-                     sg_number=223
-                  ELSE
-                     sg_number=224
-!
-!   origin choice 1 at -43m
-!
-                     s01(:)=s0(:,18)
-                     s01(3)=s0(3,28)
+                  s01(:)=s0(:,18)
+                  s01(3)=s0(3,28)
 !
 !  origin choice 2 at the inversion point of -3
 !
-                     s02(:)=s0(:,29)
-                  ENDIF
+                  s02(:)=s0(:,29)
                ENDIF
             ENDIF
          ELSEIF (ibrav==2) THEN
-            IF (is_symmorphic) THEN
-               sg_number=225
-            ELSE
-               IF (group_desc_sg(28)==34) THEN
+            IF (group_desc_sg(18)==8.OR.group_desc_sg(18)==74) THEN
 !
-!  in this case i2z is a pure mirror
+!  See above 216 - 215
 !
-                  sg_number=226
+               IF (group_desc_sg(48)==37.OR.group_desc_sg(47)==38) THEN
+                  sg_number=225
                ELSE
-                  IF (group_desc_sg(47)==38.OR.group_desc_sg(48)==37) THEN
+                  sg_number=226
+               ENDIF 
+            ELSE
 !
-!  one of i2xy or i2x-y is a pure mirror in 227 and a glide plane in 228
+!  See above 216 - 215
 !
-                     sg_number=227
+               IF (group_desc_sg(48)==37.OR.group_desc_sg(47)==38) THEN
+                  sg_number=227
 !
 !   origin choice 2 (on the inversion center)
 !
-                     s02(:)=s0(:,25)
+                  s02(:)=s0(:,25)
 !
 !   origin choice 1 (on the -43m intersection point). We choose the
 !   inversion point of the i4z operation
 !
-                     s01(:)=s0(:,42)
-                  ELSE
-                     sg_number=228
+                  s01(:)=s0(:,42)
+               ELSE
+                  sg_number=228
 !
 !   origin choice 2 (on the inversion center)
 !
-                     s02(:)=s0(:,25)
+                  s02(:)=s0(:,25)
 !
 !   origin choice 1 (on the -43m intersection point). We choose the
 !   inversion point of the i4z operation
 !
-                     s01(:)=s0(:,42)
-                  ENDIF
-               ENDIF
+                  s01(:)=s0(:,42)
+               ENDIF 
             ENDIF
          ELSEIF (ibrav==3) THEN
-            IF (is_symmorphic) THEN
+            IF (group_desc_sg(18)==8.OR.group_desc_sg(18)==74) THEN
                sg_number=229
             ELSE
                sg_number=230
@@ -3110,15 +2933,6 @@ MODULE space_groups
 
   RETURN
   END SUBROUTINE find_space_group
-
-
-  SUBROUTINE set_spg_code(code)
-  INTEGER, INTENT(IN) :: code
-  
-  spg_code=code
-
-  RETURN
-  END SUBROUTINE set_spg_code
 
 
   SUBROUTINE transform_fcc_axis(tau_aux,naux)
@@ -3453,6 +3267,53 @@ MODULE space_groups
 
   RETURN
   END SUBROUTINE shift_frac_tran
+
+  SUBROUTINE roto_shift_sg(sr,ft,at,bg,rot,s0,srnew,ftnew)
+!
+!  This subroutine receives as input a space group operation in the
+!  form of a rotation matric sr (in cartesian coordinates) and a 
+!  fractional translation (in crystal coordinates), a shift of the
+!  origin s0 (in crystal coordinates) and a rotation matrix rot
+!  and gives as output the rotation matrix and the fractional
+!  translation (in crystal coordinates) referred to the new origin
+!  and to the rotated reference system
+!
+  IMPLICIT NONE
+
+  REAL(DP), INTENT(IN) :: sr(3,3), ft(3), at(3,3), bg(3,3), s0(3), rot(3,3)
+  REAL(DP), INTENT(OUT) :: srnew(3,3), ftnew(3)
+
+  REAL(DP)  :: ft_inter(3)
+  INTEGER :: ipol, jpol
+!
+!  first apply the origin traslation
+!
+  CALL shift_frac_tran(sr,ft,at,bg,s0,ft_inter)
+!
+!   ft_inter in cartesian coordinates
+!
+  CALL cryst_to_cart(1, ft_inter, at, 1)
+!
+!   Apply rot^-1
+!
+  ftnew=0.0_DP
+  DO ipol=1,3
+     DO jpol=1,3
+        ftnew(ipol)=ftnew(ipol)+sr(jpol,ipol)*ft_inter(jpol)
+     ENDDO
+  ENDDO
+!
+!  and return to crystal coordinates
+!
+  CALL cryst_to_cart(1, ftnew, bg, -1)
+!
+!  Then rotate sr => srnew = rot^-1 sr rot
+!  
+  srnew=MATMUL(TRANSPOSE(rot),MATMUL(sr,rot))
+
+  RETURN
+  END SUBROUTINE roto_shift_sg
+
 
   SUBROUTINE find_sg_tags(sr,ft,ibrav,at,bg,ftperp,ftpar,sym_in,s0,sg_sym_out)
 !
@@ -5585,5 +5446,59 @@ ft3 = ft1 + ftaux
 
 RETURN
 END SUBROUTINE space_group_multiply
+
+
+SUBROUTINE find_reference_pg(code_group_ext, ref_code_group_ext)
+!
+!  For each point group (in extended form, gives the point group of
+!  the reference space group for that point group
+!
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: code_group_ext
+INTEGER, INTENT(OUT) :: ref_code_group_ext
+
+INTEGER :: rfc(136)
+
+DATA  rfc / 1,    2,    2,    2,    2,    2,    2,    2,    2,    2,  &
+            2,    2,    2,    2,   15,   15,   15,   15,   15,   15,  &
+           15,   15,   15,   15,   15,   15,   15,   28,   33,   33,  &
+           33,   33,   33,   34,   34,   34,   37,   38,   38,   38,  &
+           38,   38,   38,   44,   45,   44,   44,   44,   44,   50,  &
+           50,   50,   53,   58,   58,   58,   58,   58,   58,   58,  &
+           58,   58,   58,   58,   58,   58,   58,   58,   58,   58,  &
+           58,   72,   73,   72,   72,   72,   72,   78,   78,   78,  &
+           81,   82,   82,   82,   82,   82,   82,   82,   82,   82,  &
+           82,   82,   82,   82,   95,   96,   96,   96,   99,  100,  &
+          100,  100,  100,  100,  100,  106,  107,  108,  108,  108,  &
+          111,  112,  113,  112,  112,  112,  112,  118,  119,  118,  &
+          118,  118,  118,  124,  124,  124,  127,  127,  127,  127,  &
+          127,  132,  133,  134,  135,  136  /
+
+
+ref_code_group_ext=rfc(code_group_ext)
+
+RETURN
+END SUBROUTINE find_reference_pg
+
+LOGICAL FUNCTION check_code_group_ext(cge)
+!
+!  this function gives .TRUE. if the point group is one of those compatible
+!  with the ITA tables
+!
+IMPLICIT NONE
+
+INTEGER, INTENT(IN) :: cge
+
+check_code_group_ext=(cge==1.OR.cge==2.OR.cge==15.OR.cge==28.OR.cge==33 &
+               .OR.cge==34.OR.cge==37.OR.cge==38.OR.cge==44.OR.cge==45  &
+               .OR.cge==50.OR.cge==53.OR.cge==58.OR.cge==72.OR.cge==73  &
+               .OR.cge==78.OR.cge==81.OR.cge==82.OR.cge==95.OR.cge==96  &
+               .OR.cge==99.OR.cge==100.OR.cge==106.OR.cge==107.OR.cge==108 &
+               .OR.cge==111.OR.cge==112.OR.cge==113.OR.cge==118.OR.cge==119 &
+               .OR.cge==124.OR.cge==127.OR.cge==132.OR.cge==133.OR.cge==134 &
+               .OR.cge==135.OR.cge==136)
+
+RETURN
+END FUNCTION check_code_group_ext
 
 END MODULE space_groups
