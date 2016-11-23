@@ -634,7 +634,7 @@ MODULE space_groups
               'i2110a', 'i2110c', 'i2110n'  /
 
  
-  PUBLIC   spg_code, spg_name, set_spg_code, find_space_group, sg_name, &
+  PUBLIC   spg_code, spg_name, find_space_group, sg_name, &
            equivalent_tau, space_group_names, &
            find_space_group_number, find_space_group_names, add_info, &
            set_add_info, set_fft_fact, project_frac_tran,  &
