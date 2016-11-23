@@ -130,6 +130,34 @@ MODULE point_group
                     '                x,x-y,z       -y,-x,z',   &
                     '               -y,-x,z,        y-x,y,z' /
 
+  LOGICAL :: cub_op(64)
+
+  DATA cub_op / .TRUE.,  .TRUE.,  .TRUE.,  .TRUE.,   .TRUE.,   .TRUE.,  &     
+                .TRUE.,  .TRUE.,  .TRUE.,  .TRUE.,   .TRUE.,   .TRUE.,  &
+                .TRUE.,  .TRUE.,  .TRUE.,  .TRUE.,   .TRUE.,   .TRUE.,  &
+                .TRUE.,  .TRUE.,  .TRUE.,  .TRUE.,   .TRUE.,   .TRUE.,  &
+               .FALSE., .FALSE., .FALSE., .FALSE.,  .FALSE.,  .FALSE.,  &
+               .FALSE., .FALSE.,  .TRUE.,  .TRUE.,   .TRUE.,   .TRUE.,  &
+                .TRUE.,  .TRUE.,  .TRUE.,  .TRUE.,   .TRUE.,   .TRUE.,  &
+                .TRUE.,  .TRUE.,  .TRUE.,  .TRUE.,   .TRUE.,   .TRUE.,  &
+                .TRUE.,  .TRUE.,  .TRUE.,  .TRUE.,   .TRUE.,   .TRUE.,  &
+                .TRUE.,  .TRUE., .FALSE., .FALSE.,  .FALSE.,  .FALSE.,  &
+               .FALSE., .FALSE., .FALSE.,  .FALSE. /
+
+  LOGICAL :: hex_op(64)
+
+  DATA hex_op / .TRUE.,  .TRUE.,  .TRUE.,  .TRUE.,  .FALSE.,  .FALSE., &     
+               .FALSE., .FALSE., .FALSE., .FALSE.,  .FALSE.,  .FALSE., &
+               .FALSE., .FALSE., .FALSE., .FALSE.,  .FALSE.,  .FALSE., &
+               .FALSE., .FALSE., .FALSE., .FALSE.,  .FALSE.,  .FALSE., &
+                .TRUE.,  .TRUE.,  .TRUE.,  .TRUE.,   .TRUE.,   .TRUE., &
+                .TRUE.,  .TRUE.,  .TRUE.,  .TRUE.,   .TRUE.,   .TRUE., &
+               .FALSE., .FALSE., .FALSE., .FALSE.,  .FALSE.,  .FALSE., &
+               .FALSE., .FALSE., .FALSE., .FALSE.,  .FALSE.,  .FALSE., &
+               .FALSE., .FALSE., .FALSE., .FALSE.,  .FALSE.,  .FALSE., &
+               .FALSE., .FALSE.,  .TRUE.,  .TRUE.,   .TRUE.,   .TRUE., &
+                .TRUE.,  .TRUE.,  .TRUE.,  .TRUE. /
+
   PUBLIC convert_rap, find_aux_ind_two_groups, has_sigma_h, is_right_oriented,&
          color_rap, find_group_info_ext, find_irr_proj, sym_label,    &
          group_generators,  print_element_list, find_projection_type, &
@@ -139,7 +167,8 @@ MODULE point_group
          find_double_product_table_from_sym, set_sym_o3, set_sym_su2, &
          product_sym_su2, compute_classes, compute_classes_double, &
          print_kronecker_table, write_group_table,  &
-         print_ptype_info, find_factor_system, sym_jones
+         print_ptype_info, find_factor_system, sym_jones, transform_group, &
+         hex_op, cub_op, point_group_bravais, find_group_tags
 
 CONTAINS
 
@@ -10236,6 +10265,12 @@ CONTAINS
   DO i=1,npg
      IF (group_tag==hash_tab(i)) code_group_ext=i
   ENDDO
+!
+!  groups 76 and 92 have the same hash value.  The routine here finds always 92.
+!  We distinguish them from the number of operations.
+!
+  IF (code_group_ext==92.AND.nsym==6) code_group_ext=76
+
   IF (code_group_ext==0) &
      CALL errore('find_group_info_ext','input group unknown',1)
 
@@ -16608,6 +16643,71 @@ IF (verbosity) CALL write_group_table(group_desc, nsym, phase)
 
 RETURN
 END SUBROUTINE find_factor_system
+
+SUBROUTINE point_group_bravais(code_group, bl_code_group)
+!
+!   This routine receives the code of a point group and gives the
+!   code_group of the Bravais lattice compatible with the input point group
+!
+!   For each row it gives the code of the last point group of the row
+!
+!   C_1  C_i
+!   C_s  C_2  C_2h
+!   D_2  C_2v D_2h
+!   S_4  D_2d C_4 C_4h C_4v  D_4  D_4h
+!   C_3  S_6  C_3v D_3  D_3d
+!   C_3h D_3h C_6 C_6h C_6v D_6 D_6h
+!   T  T_h T_d O O_h
+!
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: code_group
+INTEGER, INTENT(OUT) :: bl_code_group
+
+INTEGER :: bl_cg(32)
+
+DATA bl_cg  / 2,         2,         16,          16,   &
+             25,        22,         23,          20,   &
+             25,        22,         23,          20,   &
+             25,        22,         23,          16,   &
+             23,        22,         23,          20,   &
+             23,        22,         23,          22,   &
+             25,        22,         25,          32,   &
+             32,        32,         32,          32    /
+
+bl_code_group = bl_cg(code_group)
+
+RETURN
+END SUBROUTINE point_group_bravais
+
+SUBROUTINE transform_group(code_group_ext_in, op_code, code_group_ext_out)
+!
+!  This routine find the group conjugate of the input group according to
+!  the operation op_code
+!
+USE kinds, ONLY : DP
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: code_group_ext_in, op_code
+INTEGER, INTENT(OUT) :: code_group_ext_out
+
+INTEGER :: group_desc_in(48), nsym_in, group_desc_out(48), which_elem(48), &
+           isym, code_group
+REAL(DP) :: sr(3,3,48), sr_out(3,3,48), s_op(3,3)
+
+code_group_ext_out=0
+
+CALL set_group_desc(group_desc_in, nsym_in, code_group_ext_in)
+
+CALL set_sym_o3(s_op, op_code)
+DO isym=1,nsym_in
+   CALL set_sym_o3(sr(:,:,isym),group_desc_in(isym))
+   sr_out(:,:,isym)=MATMUL(TRANSPOSE(s_op), MATMUL(sr(:,:,isym),s_op)) 
+ENDDO
+
+CALL find_group_info_ext(nsym_in, sr_out, code_group, code_group_ext_out, &
+                                               which_elem, group_desc_out)
+RETURN
+END SUBROUTINE transform_group
+
 
 END MODULE point_group
 
