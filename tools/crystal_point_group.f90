@@ -17,7 +17,7 @@ USE point_group,      ONLY : print_element_list, group_index_from_ext, &
                              print_compatibility_table, set_sym_o3, &
                              set_sym_su2, product_sym_su2, compute_classes, &
                              compute_classes_double, print_kronecker_table, &
-                             sym_jones
+                             sym_jones, transform_group, hex_op, cub_op
 USE io_global,        ONLY : stdout
 
 IMPLICIT NONE
@@ -56,6 +56,7 @@ WRITE(stdout,'(5x,"14) Write all compatibility tables for one group")')
 WRITE(stdout,'(5x,"15) Write all compatibility tables")')
 WRITE(stdout,'(5x,"16) Decompose Kronecker products table (chi x chi)")')
 WRITE(stdout,'(5x,"17) Decompose Kronecker products table (chi^* x chi)")')
+WRITE(stdout,'(5x,"18) List conjugate groups")')
 
 READ(5,*) work_choice
 
@@ -303,6 +304,21 @@ ELSEIF (work_choice == 16 .OR. work_choice==17) THEN
 !      ENDDO
 !   ENDDO
 
+ELSEIF (work_choice==18) THEN
+   CALL read_group_index(group_desc,nsym,group_index_in_ext)
+
+   WRITE(stdout,*)
+   DO ielem=1,64
+      IF (hex_op(ielem).AND.is_subgroup(111,group_index_in_ext) &
+        .OR. (cub_op(ielem).AND.is_subgroup(136,group_index_in_ext))) THEN
+         CALL transform_group(group_index_in_ext, ielem, group_index_out_ext)
+         IF (group_index_out_ext > 0) THEN
+            WRITE(stdout,'(5x,"Symmetry ",i4,2x,a8," => ", i4,2x,a11)') &
+            ielem, TRIM(sym_label(ielem)), group_index_out_ext, &
+                  group_name(group_index_from_ext(group_index_out_ext)) 
+         END IF
+      END IF
+   END DO
 END IF
 
 CALL environment_end( code )
