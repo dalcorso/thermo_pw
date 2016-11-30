@@ -63,7 +63,7 @@ SUBROUTINE thermo_summary()
   REAL(DP), ALLOCATABLE :: xau(:,:)
   INTEGER :: atomic_number
   INTEGER :: laue_class
-  INTEGER :: it, ia, na, ipol, jpol, unique, trig
+  INTEGER :: it, ia, na, ipol, jpol, unique, trig, aux_sg
   LOGICAL :: read_path, lelc, lpiezo, ltherm_expansion
   INTEGER :: ierr, iuout, system, sg_number
   LOGICAL :: check_group_ibrav
@@ -198,7 +198,7 @@ SUBROUTINE thermo_summary()
         ft(3,isym)= -DBLE(ftau(3,isym)) / dfftp%nr3
      END DO
 
-     CALL find_space_group(ibrav, nsym, sr, ft, at, bg, sg_number, &
+     CALL find_space_group(ibrav, nsym, sr, ft, at, bg, sg_number, aux_sg, &
                                                         s01, s02, .FALSE.)
      IF (sg_number > 0) THEN
         unique=0
@@ -433,9 +433,9 @@ SUBROUTINE thermo_summary()
         ft(3,isym)= -DBLE(ftau(3,isym)) / dfftp%nr3
      END DO
 
-     CALL find_space_group(ibrav, nsym, sr, ft, at, bg, sg_number, &
+     CALL find_space_group(ibrav, nsym, sr, ft, at, bg, sg_number, aux_sg, &
                                                         s01,  s02, .TRUE.)
-     CALL sg_name(sg_number, spaceg_name)
+     CALL sg_name(sg_number, 1, spaceg_name)
      IF (sg_number > 0) THEN
         WRITE(stdout,'(/,5x,"Space group ",a,"   (group number",i4, ").")') &
                             TRIM(spaceg_name), sg_number
@@ -1484,7 +1484,7 @@ USE symm_base,        ONLY : nsym, s, sr, ftau
 
 IMPLICIT NONE
 INTEGER :: sg_number
-INTEGER :: unique, trig, isym
+INTEGER :: unique, trig, isym, aux_sg
 LOGICAL :: check_group_ibrav
 REAL(DP) :: s01(3), s02(3), ft(3,48)
 CHARACTER(LEN=12) :: spaceg_name
@@ -1505,7 +1505,7 @@ CHARACTER(LEN=11) :: gname
         ft(2,isym)= -DBLE(ftau(2,isym)) / dfftp%nr2
         ft(3,isym)= -DBLE(ftau(3,isym)) / dfftp%nr3
      END DO
-     CALL find_space_group(ibrav, nsym, sr, ft, at, bg, sg_number, &
+     CALL find_space_group(ibrav, nsym, sr, ft, at, bg, sg_number, aux_sg, &
                                   s01, s02, .FALSE.)
 
      IF (sg_number > 0) THEN

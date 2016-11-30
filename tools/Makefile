@@ -18,19 +18,9 @@ LIBOBJS	= ../lib/thermo_lib.a ../qe/thermo_qe.a ../../PHonon/PH/libph.a ../../cl
 
 TLDEPS= bindir mods libs pw
 
-all : group_name.x group_number.x crystal_point_group.x gener_2d_slab.x gener_3d_slab.x gener_nanowire.x supercell.x plot_sur_states.x translate.x elastic.x test_colors.x epsilon_tpw.x kovalev.x hex_trig.x bravais_lattices.x space_groups.x
+all : crystal_point_group.x gener_2d_slab.x gener_3d_slab.x gener_nanowire.x supercell.x plot_sur_states.x translate.x elastic.x test_colors.x epsilon_tpw.x kovalev.x hex_trig.x bravais_lattices.x space_groups.x
 
 libs-ph : libph.a libphaux.a
-
-group_name.x : group_name.o $(PWOBJS) $(LIBOBJS)
-	$(LD) $(LDFLAGS) -o $@ group_name.o  \
-		 $(LIBOBJS) $(PWOBJS) $(QEMODS) $(LIBOBJS) $(PWOBJS) $(LIBS)
-	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/group_name.x . )
-
-group_number.x : group_number.o $(PWOBJS) $(LIBOBJS)
-	$(LD) $(LDFLAGS) -o $@ group_number.o \
-		 $(LIBOBJS) $(PWOBJS) $(QEMODS) $(LIBOBJS) $(PWOBJS) $(LIBS)
-	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/group_number.x . )
 
 space_groups.x : space_groups.o $(PWOBJS) $(LIBOBJS)
 	$(LD) $(LDFLAGS) -o $@ space_groups.o \

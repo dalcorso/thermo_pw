@@ -33,7 +33,7 @@ CHARACTER(LEN=9) :: code='Space'
 CHARACTER(LEN=11) :: gname
 REAL(DP), PARAMETER :: eps1=1.D-8, eps2=1.D-5
 INTEGER :: group_desc(48), group_code, group_code_ext, work_choice, ibrav, &
-           sgc, sgc_, nsym, isym, ivec, ftau(3,48)
+           sgc, sgc_, aux_sg, nsym, isym, ivec, ftau(3,48)
 REAL(DP) :: celldm(6), sr(3,3,48), ft(3,48), s01(3), s02(3), at(3,3), bg(3,3), &
             omega
 CHARACTER(LEN=11) :: group_name, sg_name
@@ -124,9 +124,9 @@ ELSEIF (work_choice==3) THEN
 
    CALL find_space_group_names(sgc)
 
-    CALL find_space_group(ibrav, nsym, sr, ft, at, bg, sgc_, s01, s02,.TRUE.)
+    CALL find_space_group(ibrav, nsym, sr, ft, at, bg, sgc_, aux_sg, s01, s02,.TRUE.)
 
-    CALL find_sg_name(sgc_, sg_name1)
+    CALL find_sg_name(sgc_, aux_sg, sg_name1)
     WRITE(stdout,'(/,5x,"input/output space group",i5," / ",i4, 2x, a)') sgc, &
                                                       sgc_, TRIM(sg_name1)
 
