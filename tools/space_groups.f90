@@ -24,7 +24,7 @@ USE point_group,      ONLY : set_group_desc, sym_label
 USE space_groups,     ONLY : set_point_group_code, set_standard_sg,    &
                              find_space_group_names, find_space_group, &
                              set_add_info, find_space_group_number,    &
-                             find_sg_name => sg_name
+                             find_sg_name => sg_name, symmorphic_sg
 USE io_global,        ONLY : stdout
 
 IMPLICIT NONE
@@ -33,7 +33,7 @@ CHARACTER(LEN=9) :: code='Space'
 CHARACTER(LEN=11) :: gname
 REAL(DP), PARAMETER :: eps1=1.D-8, eps2=1.D-5
 INTEGER :: group_desc(48), group_code, group_code_ext, work_choice, ibrav, &
-           sgc, sgc_, aux_sg, nsym, isym, ivec, ftau(3,48)
+           sgc, sgc_, ssgc, nsym, isym, ivec, counter, aux_sg, ftau(3,48)
 REAL(DP) :: celldm(6), sr(3,3,48), ft(3,48), s01(3), s02(3), at(3,3), bg(3,3), &
             omega
 CHARACTER(LEN=11) :: group_name, sg_name
@@ -46,6 +46,7 @@ WRITE(stdout,'(/,5x,"Choose what to do")')
 WRITE(stdout,'(5x,"1) Write the space group names")')
 WRITE(stdout,'(5x,"2) Write the space group number")')
 WRITE(stdout,'(5x,"3) Write the symmetry elements of a space group")')
+WRITE(stdout,'(5x,"4) Write symmorphic space groups")')
 
 READ(5,*) work_choice
 
@@ -64,17 +65,17 @@ IF (work_choice==1) THEN
    CALL set_add_info()
 
    IF (sgc > 0.AND. sgc <= 230 ) THEN
-      WRITE(stdout,'(5x,"The name(s) of the space group ",i5, " is (are):")')&
+      WRITE(stdout,'(5x,"The name(s) of the space group ",i4, " is (are):",/)')&
                                                                   sgc
       CALL find_space_group_names(sgc)
       WRITE(stdout,'(/,5x,"The first name is in the ITA tables. ")')
-      WRITE(stdout,'(5x,"s short name, S Schoenflies symbol, * name used in &
-                                 &1935 edition of the IT.")')
+      WRITE(stdout,'(5x,"s short name, S Schoenflies symbol. ")') 
+      WRITE(stdout,'(5x,"* (#) name used in 1935 (1952) edition of IT.")')
       IF (sgc > 15 .AND. sgc < 75) THEN
          WRITE(stdout,'(5x,"Orthorombic group.")')
          WRITE(stdout,'(5x,"Apply the second transformation to the &
                                          &coordinates and")')
-         WRITE(stdout,'(5x,"to celldm to pass to the ITA group, and the first  &
+         WRITE(stdout,'(5x,"to celldm to pass to the ITA group, and the first &
                     &transformation")')
          WRITE(stdout,'(5x,"to return to the given group.")')
       ENDIF
@@ -93,8 +94,8 @@ ELSEIF (work_choice==2) THEN
       WRITE(stdout,'(5x,"Other names of the same group:",/)')
       CALL find_space_group_names(sgc)
       WRITE(stdout,'(/,5x,"The first name is in the ITA tables. ")')
-      WRITE(stdout,'(5x,"s short name, S Schoenflies symbol, * name used in &
-                            &1935 edition of IT.")')
+      WRITE(stdout,'(5x,"s short name, S Schoenflies symbol. ")')
+      WRITE(stdout,'(5x,"* (#) name used in 1935 (1952) edition of IT.")')
       IF (sgc > 15 .AND. sgc < 75) THEN
         WRITE(stdout,'(5x,"Orthorombic group.")')
         WRITE(stdout,'(5x,"Apply the second transformation to the coordinates &
@@ -111,8 +112,9 @@ ELSEIF (work_choice==3) THEN
    WRITE(stdout,'(5x,"Input space_group_number? ")')
    READ(5,*) sgc
 
+   CALL set_add_info()
 
-!   DO sgc=10,15
+!   DO sgc=1,230
 
    WRITE(stdout,'(/,5x,"This is space group number",i5,/)') sgc
    CALL set_point_group_code(sgc, group_code, group_code_ext)
@@ -124,16 +126,28 @@ ELSEIF (work_choice==3) THEN
 
    CALL find_space_group_names(sgc)
 
-    CALL find_space_group(ibrav, nsym, sr, ft, at, bg, sgc_, aux_sg, s01, s02,.TRUE.)
+   CALL find_space_group(ibrav, nsym, sr, ft, at, bg, sgc_, aux_sg, &
+                                                            s01, s02,.TRUE.)
 
-    CALL find_sg_name(sgc_, aux_sg, sg_name1)
-    WRITE(stdout,'(/,5x,"input/output space group",i5," / ",i4, 2x, a)') sgc, &
+   CALL find_sg_name(sgc_, aux_sg, sg_name1)
+   WRITE(stdout,'(/,5x,"input/output space group",i5," / ",i4, 2x, a)') sgc, &
                                                       sgc_, TRIM(sg_name1)
 
-    IF (sgc /= sgc_) CALL errore('space_group','problem with space',1)
+   IF (sgc /= sgc_) CALL errore('space_group','problem with space',1)
 
-!    ENDDO
+!   ENDDO
 
+ELSEIF (work_choice==4) THEN
+   WRITE(stdout,*)
+   counter=0
+   DO sgc=1,230
+      IF (symmorphic_sg(sgc,ssgc)) THEN
+         counter=counter+1
+         CALL find_sg_name(sgc, 1, sg_name1)
+         WRITE(stdout,'(5x,i5,"  space group number", i5, 2x, a)') counter, &
+                                                  sgc, TRIM(sg_name1)
+      END IF
+   END DO
 ENDIF
 
 CALL environment_end(code)
