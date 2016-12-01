@@ -10,7 +10,7 @@ if test "`echo -e`" = "-e" ; then ECHO=echo ; else ECHO="echo -e" ; fi
 $ECHO
 $ECHO "$EXAMPLE_DIR : starting"
 $ECHO
-$ECHO "This example runs thermo_pw on a solid with space group 162 (V2N)"
+$ECHO "This example runs thermo_pw on a solid with space group 141 (V2H)"
 
 # set the needed environment variables
 . ../../../environment_variables
@@ -80,8 +80,7 @@ $ECHO
 
 cat > thermo_control << EOF
  &INPUT_THERMO
-  what='scf_bands',
-  only_bands_plot=.TRUE.
+  what='plot_bz',
  /
 EOF
 

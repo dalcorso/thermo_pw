@@ -10,7 +10,7 @@ if test "`echo -e`" = "-e" ; then ECHO=echo ; else ECHO="echo -e" ; fi
 $ECHO
 $ECHO "$EXAMPLE_DIR : starting"
 $ECHO
-$ECHO "This example runs thermo_pw on a solid with space group 205 (Si)"
+$ECHO "This example runs thermo_pw on a solid with space group 206 (Si)"
 #This is a highly compressed phase of silicon. The common phase of
 #si please use run_227_c
 

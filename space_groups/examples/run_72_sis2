@@ -10,7 +10,7 @@ if test "`echo -e`" = "-e" ; then ECHO=echo ; else ECHO="echo -e" ; fi
 $ECHO
 $ECHO "$EXAMPLE_DIR : starting"
 $ECHO
-$ECHO "This example runs thermo_pw on a solid with space group 72 (SiS_2)"
+$ECHO "This example runs thermo_pw on a solid with space group 72 (SiS2)"
 
 # set the needed environment variables
 . ../../../environment_variables
