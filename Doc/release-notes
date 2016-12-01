@@ -1,5 +1,8 @@
 New in version 0.7.0
 
+Improved the routine that detects the space group. Now it should work
+for any origin.
+
 Added a small tool to identify a Bravais lattice and to compare two
 sets of primitive vectors.
 

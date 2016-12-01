@@ -101,17 +101,17 @@ You can therefore just cut and paste \texttt{ibrav}, \texttt{celldm}
 and the atomic coordinates in the input of \texttt{pw.x}. Alternatively
 you can set the flag \texttt{find\_ibrav=.TRUE.} in the \thermo\ input
 and \thermo\ will make the conversion for you and run the job. By setting 
-\texttt{contiue\_zero\_ibrav=.TRUE.} instead \thermo\ will actually use your
+\texttt{continue\_zero\_ibrav=.TRUE.} instead \thermo\ will actually use your
 input coordinates and Bravais lattices vectors and will run the job, but will 
 not be able to exploit the symmetry so this option is not recommended 
-except when you are deading with supercells. After setting the correct
+except when you are dealing with supercells. After setting the correct
 \texttt{ibrav} and \texttt{celldm}, \texttt{thermo\_pw} might still tell you
 that the Bravais lattice is not compatible with the point group. This
 can happen, for instance, if you have isolated molecules, amorphous solids,
 or defects. In these cases you can still do some useful calculation
 with \texttt{thermo\_pw} but symmetry will not be used to reduce the
 number of components of the tensors that represent the physical quantities.
-In rare cases, with lattices such as the face-centered orthorombic some
+In rare cases, with lattices such as the face-centered orthorhombic some
 symmetry operations might be incompatible with the FFT grid found by the
 \texttt{pw.x}. The choice made in \qe\ is to discard these symmetries making
 the lattice incompatible with the point group. In these cases the code needs 
@@ -121,7 +121,7 @@ equal to the largest one.
 The positions of the atoms inside the unit cell are defined by an integer
 number \texttt{nat} (the number of atoms) and by \texttt{nat} 
 three-dimensional vectors as specified in the file \texttt{PW/Doc/INPUT\_PW}.
-You can use several units, specify the coordinates in cartesian or on the
+You can use several units, specify the coordinates in Cartesian or on the
 crystal basis or you can give the space group number and the
 coordinates of the nonequivalent atoms. 
 These options are supported by \thermo. See the above file for details. \\
@@ -170,21 +170,22 @@ Use \texttt{what='scf\_bands'}. See \texttt{example02}.
 With this option \thermo\ calls twice
 \texttt{pw.x} making first a self-consistent calculation with the parameters
 given in the \texttt{pw.x} input and then a band calculation along a 
-path chosen by \thermo, or along a path given by the user. It is recommended
-to use the standard path but see the user's guide if you want to give
-the path in the input of \thermo. 
+path chosen by \thermo, or along a path given by the user
+after the \texttt{INPUT\_THERMO} namelist. The path can be given as
+in the \texttt{pw.x} input, but see the user's guide for additional details.
 A few other parameters control the band plot. The most useful are 
 \texttt{emin\_input} and \texttt{emax\_input} that allow you to plot the 
 bands in a given energy range. The bands can be found 
 in a file called \texttt{output\_band.ps} if you do not specify the name 
-of the postcript file in the \thermo\ input.
+of the postscript file in the \thermo\ input.
 
 \section{\color{coral}How do I plot of the electronic density of states?}
 Use \texttt{what='scf\_dos'}. See \texttt{example18}. With this option
 \thermo\ calls twice \texttt{pw.x} making first a self-consistent calculation
 followed by a non self-consistent calculation on a regular mesh of 
 {\bf k} points.
-This second mesh can be specified in the \thermo\ input. The density of
+This mesh can be specified in the \thermo\ input (if none is given \thermo\ 
+uses the default values). The density of
 states can be found in a file called \texttt{output\_eldos.ps} if you do not
 specify the name of the postscript file in the \thermo\ input.
 
@@ -194,7 +195,7 @@ as \texttt{XCrySDen} that is able to read the \texttt{pw.x} input and
 see the crystal structure. If you use \texttt{what='plot\_bz'}, 
 \thermo\ produces a \texttt{.xsf} file that contains the structure given in
 input and can be read directly by \texttt{XCrySDen}. This could
-be useful if you have the space group and the inequivalent atomic positions.
+be useful if you have the space group and the nonequivalents atomic positions.
 The generated \texttt{.xsf} file contains all the symmetry equivalent 
 atomic positions. For the same purpose you could also use the output
 of \texttt{pw.x}.
@@ -203,7 +204,8 @@ of \texttt{pw.x}.
 Use \texttt{what='plot\_bz'}. See \texttt{example12}. With this option
 \thermo\ does not call \texttt{pw.x}, it just produces a script for
 the \texttt{asymptote} code with the instructions to plot the Brillouin
-zone and the standard path.
+zone and the standard path (or the path that you have given in the \thermo\ 
+input).
 
 \section{\color{coral}How can I plot the X-ray powder diffraction spectrum?}
 Use \texttt{what='plot\_bz'} to see the spectrum corresponding to
@@ -216,6 +218,13 @@ The X-ray powder diffraction spectrum is shown in a file called
 given in the \thermo\ input. The scattering angles and intensities
 are also written in a file called \texttt{output\_xrdp.dat} if the filename
 is not given in the \thermo\ input.
+
+\section{\color{coral}How can I find the space group of my crystal?}
+Use \texttt{what='plot\_bz'} and look at the output. The space group is
+identified. In the case you have a structure with \texttt{ibrav=0} and
+the primitive lattice vectors use the option \texttt{find\_ibrav=.TRUE.} 
+in the \texttt{thermo\_pw} input (See the user guide in the subsection
+{\it Coordinates and structure}).
 
 \section{\color{coral}How do I plot the phonon dispersions?}
 Use \texttt{what='scf\_disp'}. See \texttt{example04}. In this case you
@@ -258,7 +267,7 @@ parameters are written in the \thermo\ output file. Note that the structure is
 searched interpolating with a polynomial or with the Murnaghan
 equation the energy calculated for several geometries close to the geometry 
 given in the input of \texttt{pw.x} so the closer this structure is to the 
-actual equilibrium structure the better is the fit and the
+actual equilibrium structure the better the fit is and the
 closer the value found by \thermo\ to the real minimum. If the 
 equilibrium structure is very different from the one given in the 
 \texttt{pw.x} input you might want to repeat the calculation starting 
@@ -326,5 +335,17 @@ not given in the \thermo\ input. These quantities are found in the file
 file is not given in the \thermo\ input.
 Please keep the default value of \texttt{deltae} or the electronic
 thermodynamic properties could be wrong at low temperatures.
+
+\section{\color{coral} Which is the meaning of the colors in
+the electronic bands and phonon dispersions plots?}
+Different colors correspond to different irreducible representations of 
+the small point group of the {\bf k} or {\bf q} wavevector. To see the
+correspondence colors-representation see the \texttt{point\_groups.pdf} 
+manual. The point group used for each {\bf k} or {\bf q} point is
+written in the \thermo\ output. In the same output you can also find,
+close to each band energy or phonon frequency value, the name of the
+irreducible representation. Relevant character tables are given in the
+\texttt{point\_groups.pdf} manual, in the \thermo\ output, or by the
+\texttt{crystal\_point\_group.x} tool.
 
 \end{document}
