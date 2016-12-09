@@ -263,7 +263,7 @@ SUBROUTINE find_representations_mode_q ( nat, ntyp, xq, w2, u, tau, ityp, &
   USE fft_base,   ONLY : dfftp
   USE control_pwrun, ONLY : nr1_save, nr2_save, nr3_save
   USE lr_symm_base, ONLY : gi, nsymq
-  USE rap_point_group,  ONLY : code_group, gname
+  USE rap_point_group,  ONLY : code_group, gname, nclass, nelem, elem, elem_name
   USE proj_rap_point_group, ONLY : lqproj, qptype, which_elem, group_desc, &
                                    code_groupq_ext
   USE point_group, ONLY : find_group_info_ext
@@ -321,7 +321,11 @@ SUBROUTINE find_representations_mode_q ( nat, ntyp, xq, w2, u, tau, ityp, &
      CALL find_mode_sym_new (u, w2, tau, nat, nsymq, s, sr, irt, xq,    &
              rtau, amass, ntyp, ityp, 1, .FALSE., .FALSE., num_rap_mode, ierr)
 
-     IF (code_group/=qcode_old) CALL write_group_info(.TRUE.)
+     IF (code_group/=qcode_old) THEN
+        CALL set_class_el_name(nsymq,sname,nclass,nelem,elem,elem_name)
+        CALL write_group_info_ph(.TRUE.)
+     ENDIF
+
      CALL print_mode_sym(w2, num_rap_mode, .FALSE.)
      
   ELSE

@@ -55,7 +55,8 @@ symeq.o \
 sym_dmage_fpol.o \
 sym_dmageq.o \
 transform_intq_nc.o \
-transform_intq_so.o 
+transform_intq_so.o  \
+write_group_info_ph.o 
 
 all : thermo_qe.a
 
