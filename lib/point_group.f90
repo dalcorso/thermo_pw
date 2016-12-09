@@ -168,7 +168,8 @@ MODULE point_group
          product_sym_su2, compute_classes, compute_classes_double, &
          print_kronecker_table, write_group_table,  &
          print_ptype_info, find_factor_system, sym_jones, transform_group, &
-         hex_op, cub_op, point_group_bravais, find_group_tags
+         hex_op, cub_op, point_group_bravais, find_group_tags,  &
+         group_name_schoenflies, group_name_international
 
 CONTAINS
 
@@ -359,7 +360,8 @@ CONTAINS
 !
   ELSEIF (ptype(1) /= ptype_out(1) .OR. ptype(2) /= ptype_out(2) .OR. &
       ptype(3) /= ptype_out(3) ) THEN
-      WRITE(stdout,'(5x,"Group in",4i5)') group_ext_in, ptype_in(1:3)
+      WRITE(stdout,'(5x,"Group in ",4i5)') group_ext_in, ptype_in(1:3)
+      WRITE(stdout,'(5x,"ptype_out",5x,3i5)')  ptype(1:3)
       WRITE(stdout,'(5x,"Group out",4i5)') group_ext_out, ptype_out(1:3)
       CALL errore('convert_rap_proj','Decomposition not possible',1)
   ENDIF
@@ -16708,6 +16710,59 @@ CALL find_group_info_ext(nsym_in, sr_out, code_group, code_group_ext_out, &
 RETURN
 END SUBROUTINE transform_group
 
+SUBROUTINE group_name_schoenflies(code, group_name)
+!
+!   This routine receives the code of a point group and writes its
+!   Schoenflies name in a form that can be used to write a gnuplot
+!   scripts.
+!
+INTEGER :: code
+CHARACTER(LEN=12) :: group_name
+
+CHARACTER(LEN=12) :: gname(32)
+
+data gname  / "C_1         ", "C_i         ", "C_s         ", "C_2         ", &
+              "C_3         ", "C_4         ", "C_6         ", "D_2         ", &
+              "D_3         ", "D_4         ", "D_6         ", "C_{2v}      ", &
+              "C_{3v}      ", "C_{4v}      ", "C_{6v}      ", "C_{2h}      ", &
+              "C_{3h}      ", "C_{4h}      ", "C_{6h}      ", "D_{2h}      ", &
+              "D_{3h}      ", "D_{4h}      ", "D_{6h}      ", "D_{2d}      ", &
+              "D_{3d}      ", "S_4         ", "S_6         ", "T           ", &
+              "T_h         ", "T_d         ", "O           ", "O_h         "  /
+
+IF (code < 1 .OR. code > 32 ) CALL errore('group_name_schoenflies', &
+                                               'code is out of range',1)
+group_name=gname(code)
+
+RETURN
+END SUBROUTINE group_name_schoenflies
+
+SUBROUTINE group_name_international(code, group_name)
+!
+!   This routine receives the code of a point group and writes its
+!   international name in a form that can be used to write a gnuplot
+!   scripts.
+!
+INTEGER :: code
+CHARACTER(LEN=12) :: group_name
+
+CHARACTER(LEN=12) :: gname(32)
+
+data gname  /"1           ", "@^{/=24-}1  ", "m           ", "2           ", &
+             "3           ", "4           ", "6           ", "222         ", &
+             "32          ", "422         ", "622         ", "mm2         ", &
+             "3m          ", "4mm         ", "6mm         ", "2/m         ", &
+             "@^{/=24-}6  ", "4/m         ", "6/m         ", "mmm         ", &
+             "@^{/=24-}62m", "4/mmm       ", "6/mmm       ", "@^{/=24-}42m", &
+             "@^{/=24-}3m ", "@^{/=24-}4  ", "@^{/=24-}3  ", "23          ", &
+             "m@^{/=24-}3 ", "@^{/=24-}43m", "432         ", "m@^{/=24-}3m"  /
+
+IF (code < 1 .OR. code > 32 ) CALL errore('group_name_international', &
+                                               'code is out of range',1)
+group_name=gname(code)
+
+RETURN
+END SUBROUTINE group_name_international
 
 END MODULE point_group
 
