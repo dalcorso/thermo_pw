@@ -68,6 +68,13 @@ MODULE lattices
 !
 !  lattice_name : receives the bravais lattice and gives the lattice name
 !
+!  zone_border : receives a vector in reciprocal space, the direct and
+!                reciprocal lattice vectors and gives .true. if the input
+!                vector is at zone border
+!
+!  same_star : receives two k vectors and a point group matrieces and 
+!              gives .TRUE. if the two k vectors belong to the same star,
+!              up to a reciprocal lattice vector.
 !
   USE kinds,      ONLY : DP
   !
@@ -77,7 +84,8 @@ MODULE lattices
 
   PUBLIC compute_conventional, find_ibrav_code, find_combination, &
          is_bravais_lattice, same_lattice, lattice_point_group, &
-         compute_omega, conventional_ibrav, is_centered, lattice_name
+         compute_omega, conventional_ibrav, is_centered, lattice_name, &
+         zone_border, same_star
 
 CONTAINS
 
@@ -1079,5 +1087,106 @@ END SELECT
 RETURN
 END SUBROUTINE lattice_name
 
+LOGICAL FUNCTION zone_border(vect,at,bg,iflag)
+!
+!   This function recieves a vector vect, the direct and reciprocal lattice
+!   vectors at and bg and a iflag=+-1.
+!   The vector vect is in cartesian coordinates. 
+!   When iflag is +1 it is supposed to be in real space and the
+!   function returns .TRUE. if more than one Bravais lattice point is
+!   at the same distance from vect.
+!   When iflag is -1 the vectors vect is supposed to be in reciprocal
+!   space and the function return .TRUE. is more than one reciprocal
+!   lattice vector is at the same distance from vect.
+!
+USE kinds, ONLY : DP
+IMPLICIT NONE
+REAL(DP), INTENT(IN) :: vect(3), at(3,3), bg(3,3)
+INTEGER, INTENT(IN) :: iflag
+
+REAL(DP) :: max_modulus, gvec(3), tvec(3), tmod
+REAL(DP), PARAMETER :: eps1=1.D-10
+INTEGER :: nc, i, j, k
+INTEGER :: nx1, nx2, nx3
+
+max_modulus=vect(1)**2 + vect(2)**2 + vect(3)**2
+
+IF (iflag==1) THEN
+   nx1=INT(SQRT(4.0_DP*max_modulus)*SQRT(bg(1,1)**2+bg(2,1)**2+bg(3,1)**2))+1
+   nx2=INT(SQRT(4.0_DP*max_modulus)*SQRT(bg(1,2)**2+bg(2,2)**2+bg(3,2)**2))+1
+   nx3=INT(SQRT(4.0_DP*max_modulus)*SQRT(bg(1,3)**2+bg(2,3)**2+bg(3,3)**2))+1
+ELSE
+   nx1=INT(SQRT(4.0_DP*max_modulus)*SQRT(at(1,1)**2+at(2,1)**2+at(3,1)**2))+1
+   nx2=INT(SQRT(4.0_DP*max_modulus)*SQRT(at(1,2)**2+at(2,2)**2+at(3,2)**2))+1
+   nx3=INT(SQRT(4.0_DP*max_modulus)*SQRT(at(1,3)**2+at(2,3)**2+at(3,3)**2))+1
+ENDIF
+
+nc=0
+DO i=nx1, -nx1, -1
+   DO j=nx2, -nx2, -1
+      DO k=nx3, -nx3, -1
+         IF (iflag==1) THEN
+            gvec(:) = i * at(:,1) + j * at(:,2) + k * at(:,3)
+         ELSE
+            gvec(:) = i * bg(:,1) + j * bg(:,2) + k * bg(:,3)
+         ENDIF
+         tvec(:)=vect(:) - gvec(:)
+         tmod = tvec(1)**2 + tvec(2)**2 + tvec(3)**2
+         IF ((tmod - max_modulus)<-eps1) THEN
+            nc=1
+            max_modulus=tmod
+         ELSEIF (ABS(tmod - max_modulus)<eps1) THEN
+            nc=nc+1
+         ENDIF
+      END DO
+   END DO
+END DO
+
+zone_border = nc>1
+
+RETURN
+END FUNCTION zone_border
+
+LOGICAL FUNCTION same_star(nsym, s, xk1, xk2, at)
+!
+!  This routine receives a point group of order nsym and its rotations
+!  matrices s in the crystal basis. It uses these symmetries to see if
+!  xk1 and xk2 belong to the same star of k points. It returns .TRUE.
+!  if this is the case. It return .TRUE. even if xk2 differ by a reciprocal
+!  lattice vector from a vector of the star of xk1
+!  xk1 and xk2 are in cartesian coordinates.
+!  at are the direct lattice vectors.
+!
+USE kinds, ONLY : DP
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: nsym, s(3,3,nsym)
+
+REAL(DP) :: xk1(3), xk2(3), at(3,3), xkr(3), xk1c(3), xk2c(3), xkrmod
+INTEGER :: isym, ipol 
+!
+!   Bring xk1 in reciprocal space
+!
+xk1c=xk1
+CALL cryst_to_cart(1, xk1c, at, -1)
+xk2c=xk2
+CALL cryst_to_cart(1, xk2c, at, -1)
+
+same_star=.FALSE.
+DO isym=1,nsym
+   DO ipol=1,3
+      xkr(ipol) = s(ipol,1,isym) * xk1c(1) &
+                + s(ipol,2,isym) * xk1c(2) &
+                + s(ipol,3,isym) * xk1c(3)
+      xkr(ipol) = xk2c(ipol) - xkr(ipol) - nint( xk2c(ipol) - xkr(ipol) )
+   ENDDO
+   xkrmod= xkr(1)**2 + xkr(2)**2 + xkr(3)**2
+   IF (xkrmod < 1.D-9) THEN
+      same_star=.TRUE.
+      RETURN
+   ENDIF
+ENDDO   
+
+RETURN
+END FUNCTION same_star
 
 END MODULE lattices
