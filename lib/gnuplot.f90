@@ -25,13 +25,15 @@ MODULE gnuplot
            gnuplot_set_eref, gnuplot_set_fact, gnuplot_set_gfact, &
            gnuplot_xlabel, gnuplot_ylabel, gnuplot_write_label_yl, &
            gnuplot_unset_xticks, gnuplot_unset_yticks, &
+           gnuplot_unset_border, gnuplot_write_horizontal_segment,&
            gnuplot_set_xticks, gnuplot_set_yticks,    &
            gnuplot_write_file_mul_data_minus, &
            gnuplot_write_file_mul_data, gnuplot_write_file_mul_point, &
            gnuplot_write_file_mul_data_sum, gnuplot_write_command, &
            gnuplot_end, gnuplot_do_2dplot, gnuplot_start_2dplot, &
            gnuplot_set_contour, gnuplot_rectangle, gnuplot_polygon, &
-           gnuplot_put_label, gnuplot_circle, gnuplot_line_v, &
+           gnuplot_put_label, gnuplot_put_label_yl, gnuplot_circle, &
+           gnuplot_line_v, gnuplot_rectangle_yl,&
            gnuplot_line, gnuplot_print_objects, gnuplot_close_2dplot_prep
 
 CONTAINS
@@ -88,6 +90,7 @@ IF (ionode) THEN
    CALL gnuplot_write_command('color_gray="gray"',.FALSE.)
    CALL gnuplot_write_command('color_light_blue="light-blue"',.FALSE.)
    CALL gnuplot_write_command('color_orange="orange"',.FALSE.)
+   CALL gnuplot_write_command('color_yellow="yellow"',.FALSE.)
 
 ENDIF
 
@@ -128,6 +131,28 @@ WRITE(iun_gnuplot, frt) ycoord, ycoord, TRIM(pos), linewidth, TRIM(color)
 
 RETURN
 END SUBROUTINE gnuplot_write_horizontal_line
+
+SUBROUTINE gnuplot_write_horizontal_segment(x, ycoord, linewidth, pos, color, comment)
+!
+!   this routine is like gnuplot_write_horizontal_line but writes the
+!   segment between x(1) and x(2)
+!
+IMPLICIT NONE
+REAL(DP) :: x(2)
+INTEGER  :: linewidth
+CHARACTER(LEN=*) :: ycoord, color, pos
+CHARACTER(LEN=256) :: frt
+LOGICAL :: comment
+
+frt='("set arrow from ",f12.4,"*xscale-xshift, '//TRIM(ycoord)//  &
+      ' to ",f12.4,"*xscale-xshift,'//TRIM(ycoord) //' nohead ",a,&
+      &" lw ",i3," lc rgb ",a)'
+IF (comment) frt = '# ' // TRIM(frt)
+IF (ionode) &
+WRITE(iun_gnuplot, frt) x(1), x(2), TRIM(pos), linewidth, TRIM(color)
+
+RETURN
+END SUBROUTINE gnuplot_write_horizontal_segment
  
 SUBROUTINE gnuplot_write_label(xcoord, ycoord, label, comment)
 IMPLICIT NONE
@@ -195,6 +220,38 @@ IF (ionode) WRITE(iun_gnuplot, frt)  tag, TRIM(label),  xcoord, ycoord, TRIM(whe
 
 RETURN
 END SUBROUTINE gnuplot_put_label
+
+SUBROUTINE gnuplot_put_label_yl(xcoord, wherey, tag, label, color, &
+                                                    comment, where_lab)
+!
+!  this routine writes only the label, without any transformation.
+!  The y coordinate is calculated from the gnuplot script and here
+!  the command to calculate this coordinate much be provided
+!
+IMPLICIT NONE
+REAL(DP) :: xcoord
+INTEGER, INTENT(IN) :: tag
+CHARACTER(LEN=*), OPTIONAL :: where_lab
+CHARACTER(LEN=*) :: label, wherey, color
+CHARACTER(LEN=256) :: frt, whel
+INTEGER :: lens
+LOGICAL :: comment
+
+lens=LEN_TRIM(label)
+IF (PRESENT(where_lab)) THEN
+   whel=' '//TRIM(where_lab)
+ELSE
+   whel=' center'
+ENDIF
+frt='("set label ",i7," """,a,""" at ", f12.4,"*xscale-xshift,",a,a,&
+                                                       &" tc rgb ",a)'
+IF (comment) frt = '# ' // TRIM(frt)
+
+IF (ionode) WRITE(iun_gnuplot, frt)  tag, TRIM(label),  xcoord, TRIM(wherey), &
+                   TRIM(whel), TRIM(color)
+
+RETURN
+END SUBROUTINE gnuplot_put_label_yl
 
 SUBROUTINE gnuplot_write_label_yl(xcoord, ylabel, label, comment)
 !
@@ -296,6 +353,19 @@ IF (ionode) WRITE(iun_gnuplot, frt)
 
 RETURN
 END SUBROUTINE gnuplot_unset_xticks
+
+SUBROUTINE gnuplot_unset_border(comment)
+IMPLICIT NONE
+CHARACTER(LEN=256) :: frt
+LOGICAL :: comment
+
+frt = '("unset border")'
+IF (comment) frt = '# ' // TRIM(frt)
+
+IF (ionode) WRITE(iun_gnuplot, frt) 
+
+RETURN
+END SUBROUTINE gnuplot_unset_border
 
 SUBROUTINE gnuplot_set_xticks(xstart,delta,xend,comment)
 IMPLICIT NONE
@@ -710,6 +780,19 @@ IF (ionode) &
                                      x(3), y(3), TRIM(opacity), TRIM(color)
 RETURN
 END SUBROUTINE gnuplot_rectangle
+
+SUBROUTINE gnuplot_rectangle_yl(x, opacity, color)
+IMPLICIT NONE
+REAL(DP), INTENT(IN) :: x(2)
+CHARACTER(LEN=*), INTENT(IN) :: opacity, color
+
+IF (ionode) &
+   WRITE(iun_gnuplot, &
+     '("set obj rect from ",f12.6,"*xscale-xshift, ymin  to ",f12.6,&
+       &"*xscale-xshift, ymax behind fs solid ",a," noborder fc rgb ",a)')&
+                x(1), x(2), TRIM(opacity), TRIM(color)
+RETURN
+END SUBROUTINE gnuplot_rectangle_yl
 
 SUBROUTINE gnuplot_circle(x, y, radius, opacity, color)
 IMPLICIT NONE
