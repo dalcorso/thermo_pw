@@ -36,7 +36,7 @@ SUBROUTINE bands_sub()
   IF (q2d) THEN
      CALL punch_band_2d(filband, spin_component)
   ELSE
-     CALL write_bands(filband, spin_component)
+     CALL write_bands_tpw(filband, spin_component)
      CALL sym_band_sub(filband,spin_component)
   END IF
   CALL close_files(.TRUE.)
@@ -156,7 +156,7 @@ loop_k:  DO j=start_k+2, nkstot
   END SUBROUTINE punch_band_2d
 !
 !-----------------------------------------------------------------------
-SUBROUTINE write_bands (filband, spin_component)
+SUBROUTINE write_bands_tpw (filband, spin_component)
   !-----------------------------------------------------------------------
   !
   !    This routine writes the band energies on a file. 
@@ -196,13 +196,13 @@ SUBROUTINE write_bands (filband, spin_component)
   !
   CALL mp_bcast( ios, ionode_id, intra_image_comm )
   IF ( ios /= 0 ) &
-     CALL errore ('write_bands', 'Opening filband file', abs(ios) )
+     CALL errore ('write_bands_tpw', 'Opening filband file', abs(ios) )
   !
   !
   IF ( spin_component/=1 .AND. nspin/=2 ) &
-     CALL errore('write_bands','incorrect spin_component',1)
+     CALL errore('write_bands_tpw','incorrect spin_component',1)
   IF (spin_component<1.or.spin_component>2) &
-     CALL errore('write_bands','incorrect lsda spin_component',1)
+     CALL errore('write_bands_tpw','incorrect lsda spin_component',1)
 
   ALLOCATE(xk_collect(3,nkstot))
   ALLOCATE(et_collect(nbnd,nkstot))
@@ -235,5 +235,5 @@ SUBROUTINE write_bands (filband, spin_component)
   !
   RETURN
   !
-END SUBROUTINE write_bands
+END SUBROUTINE write_bands_tpw
 
