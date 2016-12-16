@@ -146,7 +146,8 @@ PROGRAM thermo_pw
              iaux
   LOGICAL  :: exst, parallelfs, run
   LOGICAL :: check_file_exists, check_dyn_file_exists
-  CHARACTER(LEN=256) :: file_dat, filename, filelastic
+  CHARACTER(LEN=256) :: file_dat, filename, filelastic, filedata, filerap, &
+                        fileout, gnu_filename, filenameps
   REAL(DP) :: poisson, bulkm
   ! Initialize MPI, clocks, print initial messages
   !
@@ -314,13 +315,30 @@ PROGRAM thermo_pw
                  IF (nspin==4) nspin0=1
                  DO spin_component = 1, nspin0
                     CALL bands_sub()
-                    CALL read_minimal_info(.FALSE.)
-                    CALL plotband_sub(1,1,' ')
+                    CALL read_minimal_info(.FALSE.,ierr)
+                    CALL set_files_for_plot(1, ' ', filedata, filerap, &
+                                           fileout, gnu_filename, filenameps)
+                    CALL plotband_sub(1,filedata, filerap, fileout, &
+                                                    gnu_filename, filenameps)
                  ENDDO
               ENDIF
            ELSE
-              CALL read_minimal_info(.TRUE.)
-              CALL plotband_sub(1,1,' ')
+              CALL read_minimal_info(.TRUE., ierr)
+              IF (ierr /= 0) THEN
+!
+!    The code might have only the punch files but not the bands files
+!
+                 CALL set_paths_disp()
+                 nspin0=nspin
+                 IF (nspin==4) nspin0=1
+                 DO spin_component = 1, nspin0
+                    CALL bands_sub()
+                 END DO
+              END IF
+              CALL set_files_for_plot(1, ' ', filedata, filerap, fileout,  &
+                                                gnu_filename, filenameps)
+              CALL plotband_sub(1, filedata, filerap, fileout, &
+                                                  gnu_filename, filenameps)
            ENDIF
         ENDIF
      ENDIF
@@ -537,8 +555,10 @@ PROGRAM thermo_pw
 !    compute interpolated dispersions
 !
            CALL write_ph_dispersions()
-           CALL plotband_sub(2,igeom,' ')
-
+           CALL set_files_for_plot(2, ' ', filedata, filerap, fileout, &
+                                                    gnu_filename, filenameps)
+           CALL plotband_sub(2, filedata, filerap, fileout, &
+                                                    gnu_filename, filenameps)
            IF (ltherm) THEN
 !
 !    the frequencies on a uniform mesh are interpolated or read from disk 
@@ -593,8 +613,14 @@ PROGRAM thermo_pw
 !    here we calculate and plot the gruneisen parameters along the given path.
 !
            CALL write_gruneisen_band(flfrq_thermo,flvec_thermo)
-           CALL plotband_sub(3,1,flfrq_thermo)
-           CALL plotband_sub(4,1,flfrq_thermo)
+           CALL set_files_for_plot(3, flfrq_thermo, filedata, filerap, &
+                                      fileout, gnu_filename, filenameps)
+           CALL plotband_sub(3, filedata, filerap, fileout,  &
+                                                    gnu_filename, filenameps)
+           CALL set_files_for_plot(4, flfrq_thermo, filedata, filerap,  &
+                                       fileout, gnu_filename, filenameps)
+           CALL plotband_sub(4, filedata, filerap, fileout,  &
+                                                    gnu_filename, filenameps)
 !
 !    here we compute the gruneisen parameters on the dos mesh
 !
@@ -631,7 +657,10 @@ PROGRAM thermo_pw
 !
 !    plotband_sub writes the interpolated phonon at the requested temperature
 !
-           CALL plotband_sub(4,1,flfrq_thermo)
+           CALL set_files_for_plot(4, flfrq_thermo, filedata, filerap, &
+                                          fileout, gnu_filename, filenameps)
+           CALL plotband_sub(4, filedata, filerap, fileout, &
+                                                   gnu_filename, filenameps)
 !
 !   and the next driver plots all the gruneisen parameters depending on the
 !   lattice.

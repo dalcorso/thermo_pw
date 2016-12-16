@@ -45,8 +45,8 @@ SUBROUTINE thermo_readin()
                                    label_list, nqaux, q_in_band_form, &
                                    q_in_cryst_coord, q2d, point_label_type, &
                                    disp_q, disp_nqs, npx, &
-                                   label_disp_q, letter_path, nrap_plot_in, &
-                                   rap_plot_in, long_path
+                                   letter_path, nrap_plot_in, &
+                                   label_disp_q, rap_plot_in, long_path
   USE control_gnuplot,      ONLY : flgnuplot, gnuplot_command, lgnuplot
   USE postscript_files,     ONLY : flpsband, flpsdisp, flpsmur, flpsdos, &
                                    flpstherm, flpsanhar, flpskeconv, &
@@ -57,7 +57,8 @@ SUBROUTINE thermo_readin()
                                    force_bands, only_bands_plot, dump_states, &
                                    subtract_vacuum
   USE control_asy,          ONLY : flasy, lasymptote, asymptote_command
-  USE control_bands,        ONLY : emin_input, emax_input, nbnd_bands, lsym
+  USE control_bands,        ONLY : emin_input, emax_input, nbnd_bands, lsym, &
+                                   enhance_plot
   USE control_eldos,        ONLY : deltae, ndose, nk1_d, nk2_d, nk3_d, &
                                    k1_d, k2_d, k3_d, sigmae, legauss
   USE control_grun,         ONLY : grunmin_input, grunmax_input, &
@@ -151,6 +152,7 @@ SUBROUTINE thermo_readin()
                             nbnd_bands,                     &
                             nppl,                           &
                             lsym,                           &
+                            enhance_plot,                   &
                             long_path,                      &
                             npx,                            &
                             lprojpbs, nkz, gap_thr,         &
@@ -258,6 +260,7 @@ SUBROUTINE thermo_readin()
   emax_input=0.0_DP
   long_path=.TRUE.
   lsym=.TRUE.
+  enhance_plot=.FALSE.
 
   vmin_input=0.0_DP
   vmax_input=0.0_DP
@@ -627,8 +630,8 @@ SUBROUTINE thermo_readin()
   IF (ibrav==0.AND..NOT.continue_zero_ibrav) THEN
      alat_save=celldm(1)
      at=at*alat_save
-     CALL find_ibrav_code(at(1,1),at(1,2),at(1,3),ibrav,celldm,ur,&
-                                                  global_s,.FALSE.)
+     CALL find_ibrav_code(at(1,1),at(1,2),at(1,3),ibrav,celldm, &
+                          ur,global_s,.FALSE.)
      a=0.0_DP
      b=0.0_DP
      c=0.0_DP

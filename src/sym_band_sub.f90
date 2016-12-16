@@ -39,13 +39,15 @@ SUBROUTINE sym_band_sub(filband, spin_component)
                                    sym_divide, nlayers, identify_sur, &
                                    surface1, surface2
   USE band_symmetry,        ONLY : find_band_sym_proj
+  USE lattices,             ONLY : zone_border, same_star
   USE control_bands,        ONLY : lsym
-  USE control_paths,        ONLY : high_sym_path, disp_nqs
+  USE control_paths,        ONLY : high_sym_path, disp_nqs, nrap_plot, rap_plot
   USE data_files,           ONLY : flprojlayer
   USE uspp,                 ONLY : nkb, vkb
   USE spin_orb,             ONLY : domag
   USE noncollin_module,     ONLY : noncolin
   USE wavefunctions_module, ONLY : evc
+  USE io_bands,             ONLY : write_representations
   USE io_global,            ONLY : ionode, ionode_id, stdout
   USE mp,                   ONLY : mp_bcast
   USE mp_images,            ONLY : intra_image_comm
@@ -56,7 +58,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   INTEGER :: npw, nat_, nbnd_, nkstot_, iun
   INTEGER :: spin_component, nks1, nks2
   INTEGER :: nks1tot, nks2tot
-  INTEGER :: iunout, igroup, irap, dim_rap, ik2, ike, ikz, nks_, ios
+  INTEGER :: igroup, irap, dim_rap, ik2, ike, ikz, nks_, ios
   INTEGER :: sk(3,3,48), ftauk(3,48), gk(3,48), invsk(48), t_revk(48), &
              nsymk, isym
   INTEGER :: sk_is(3,3,48), gk_is(3,48), invs_is(48)
@@ -73,9 +75,11 @@ SUBROUTINE sym_band_sub(filband, spin_component)
                           code_group_ext_k(:), lprojk(:), nrapk(:), &
                           ptypek(:,:), ngroup(:), istart(:,:)
   INTEGER :: code_group1, code_group_ext, code_group_in, nsym_in, ptype(3), &
-             nr1, nr2, nr3
+             nr1, nr2, nr3, sg_number
   LOGICAL :: lwrite
-  REAL(DP) :: factor_dx, sizeb, sizec, ft_in(3,48)
+  LOGICAL, ALLOCATABLE :: same_next(:)
+  REAL(DP) :: factor_dx, sizeb, sizec, ft_in(3,48), rot(3,3), ur(3,3), &
+              s01(3), s02(3)
   REAL(DP), ALLOCATABLE :: gaugek(:,:)
   CHARACTER(LEN=11) :: group_name
   CHARACTER(LEN=45) :: snamek(48), name_out(12)
@@ -100,6 +104,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   ALLOCATE(ngroup(nkstot))
   ALLOCATE(istart(nbnd+1,nkstot))
   ALLOCATE(high_symmetry(nkstot))
+  ALLOCATE(same_next(nkstot))
 
   nr1=dfftp%nr1
   nr2=dfftp%nr2
@@ -205,6 +210,8 @@ SUBROUTINE sym_band_sub(filband, spin_component)
                 invsk, rap_et(1,ik), times(1,1,ik), ngroup(ik), &
                 istart(1,ik),accuracy)
         ENDIF
+        IF (zone_border(xk(1,ik),at,bg,-1)) lprojk(ik)=3
+           
      ELSE
 !
 !  This part uses the routines of thermo_pw
@@ -257,18 +264,12 @@ SUBROUTINE sym_band_sub(filband, spin_component)
 
   ios=0
   IF ( ionode ) THEN
-     iunout=58
      namefile="band_files/"//TRIM(filband)//".rap"
      IF (nspin==2) &
         namefile="band_files/"//TRIM(filband)//"."// &
                                 TRIM(int_to_char(spin_component))//".rap"
-     OPEN (unit = iunout, file = namefile, status = 'unknown', form = &
-          'formatted', iostat = ios)
-     REWIND (iunout)
   ENDIF
-  CALL mp_bcast ( ios, ionode_id, intra_image_comm )
-  IF ( ios /= 0) CALL errore ('sym_band_sub', 'Opening filband file', &
-                                                             ABS(ios))
+
   IF (ionode) THEN
      IF (disp_nqs /= nks2tot - nks1tot + 1) &
         CALL errore('sym_band_sub','problem with number of k points',1)
@@ -376,8 +377,6 @@ SUBROUTINE sym_band_sub(filband, spin_component)
                        name_rap_proj, nrap_proj, nsym_in, ptype, gauge, lwrite)
         ENDIF
         IF (ik == nks1tot) THEN
-           WRITE (iunout, '(" &plot_rap nbnd_rap=",i8,", nks_rap=",i8," /")') &
-                nbnd, nks2tot - nks1tot +1
            IF (search_sym) CALL write_group_info(.true.)
            dxk(:) = xk(:,2) - xk(:,1)
            dkmod_save = sqrt( dxk(1)**2 + dxk(2)**2 + dxk(3)**2 )
@@ -515,16 +514,12 @@ SUBROUTINE sym_band_sub(filband, spin_component)
 !    Here write the symmetry information on the output file.
 !
      DO ik=nks1tot,nks2tot
-        WRITE (iunout, '(10x,3f10.6,l5,7i5)') xk(1,ik), xk(2,ik), xk(3,ik), &
-             high_symmetry(ik), code_group_k(ik), aux_ind(ik), &
-             code_group_ext_k(ik), ptypek(1:3,ik), lprojk(ik)
-        IF (lprojk(ik)==1) &
-           WRITE (iunout, '(5f16.11)') (gaugek(isym,ik)/pi, isym=1,&
-                                            nsym_group(code_group_k(ik)))
-        WRITE (iunout, '(10i8)') (rap_et(ibnd,ik), ibnd=1,nbnd)
+        IF (ik==nks2tot) THEN
+           same_next(ik)=.FALSE.
+        ELSE
+           same_next(ik)= same_star(nsym, s, xk(1,ik), xk(1,ik+1), at) 
+        ENDIF
      ENDDO
-     CLOSE(iunout)
-!
 !  In a pbs calculation we need also the aux_ind for the symmetry descent
 !  of the different layers
 !
@@ -552,6 +547,10 @@ SUBROUTINE sym_band_sub(filband, spin_component)
      ENDIF
   ENDIF
 
+  CALL write_representations(nks, nbnd, xk, rap_et, high_symmetry,      &
+                        code_group_k, aux_ind, code_group_ext_k, ptypek, &
+                        lprojk, same_next, gaugek, namefile)
+
   IF (sym_divide.AND.nkz>1) &
      CALL mp_bcast(aux_ind_sur,ionode_id,intra_image_comm)
 
@@ -566,6 +565,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   DEALLOCATE(rap_et)
   DEALLOCATE(ngroup)
   DEALLOCATE(high_symmetry)
+  DEALLOCATE(same_next)
   DEALLOCATE(istart)
   !
 450 CONTINUE

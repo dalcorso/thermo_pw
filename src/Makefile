@@ -17,9 +17,11 @@ bcast_thermo_input.o \
 check_existence.o \
 check_file_exists.o \
 clean_dfft.o \
+clean_path.o \
 collect_everything.o \
 compute_cp.o \
 compute_density.o \
+compute_eref_band.o \
 compute_gruneisen.o \
 compute_gruneisen_anis.o \
 compute_omega_geo.o \
@@ -40,6 +42,7 @@ find_mode_sym_proj.o \
 generate_k_along_lines_kz.o \
 initialize_thermo_work.o \
 interpolate_cv.o \
+io_bands.o \
 local_dos1d_so.o \
 matdyn_sub.o \
 plan_avg_sub.o \
@@ -81,6 +84,7 @@ set_temperature.o \
 set_thermo_work_todo.o \
 simple_nonanal.o \
 simple_plot.o \
+surface.o     \
 sym_band_sub.o \
 thermo_mod.o \
 thermo_readin.o \

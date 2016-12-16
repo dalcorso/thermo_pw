@@ -25,6 +25,8 @@ IMPLICIT NONE
 CHARACTER(LEN=256), INTENT(IN) :: flinput
 CHARACTER(LEN=256) :: filename, save_flpsgrun, save_flgrun, save_flgnuplot, &
                       save_flpgrun
+CHARACTER(LEN=256) :: filedata, filerap, fileout, gnu_filename, filenameps
+
 CHARACTER(LEN=6), EXTERNAL :: int_to_char
 INTEGER :: degree, nvar, icrys
 
@@ -42,7 +44,9 @@ DO icrys=1,degree
    flgrun = TRIM(save_flgrun)//'_'//TRIM(int_to_char(icrys))
    flpgrun = TRIM(save_flpgrun)//'_'//TRIM(int_to_char(icrys))
    flgnuplot = TRIM(save_flgnuplot)//'_'//TRIM(int_to_char(icrys))
-   CALL plotband_sub(3,1,flinput)
+   CALL set_files_for_plot(3, flinput, filedata, filerap, &
+                                       fileout, gnu_filename, filenameps)
+   CALL plotband_sub(3,filedata, filerap, fileout, gnu_filename, filenameps)
 END DO
 
 flgrun=save_flgrun

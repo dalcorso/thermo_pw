@@ -24,17 +24,21 @@ SUBROUTINE write_ph_dispersions()
   USE mp_images,  ONLY : my_image_id, root_image
   USE io_global,  ONLY : ionode, stdout
   USE proj_rap_point_group, ONLY : code_groupq_ext, qptype, lqproj, qgauge
+  USE lattices,   ONLY : same_star
   USE point_group,   ONLY : nsym_group
   USE constants,  ONLY : ry_to_cmm1
   USE ions_base,  ONLY : nat, tau, ityp, nsp, amass
-  USE symm_base,  ONLY : set_sym
+  USE symm_base,  ONLY : set_sym, nsym, s
+  USE cell_base,  ONLY : at
   USE phonon_save, ONLY : freq_save, z_save
   USE thermo_sym, ONLY : code_group_save
   USE rap_point_group,  ONLY : code_group
   USE control_pwrun, ONLY : nr1_save, nr2_save, nr3_save
-  USE control_paths, ONLY : disp_q, disp_nqs, high_sym_path
+  USE control_paths, ONLY : disp_q, disp_nqs, high_sym_path, nrap_plot, &
+                            rap_plot
   USE control_ph,    ONLY : xmldyn
   USE ifc,           ONLY : m_loc, atm, zeu, has_zstar
+  USE io_bands,      ONLY : write_bands, write_representations
   USE noncollin_module, ONLY : nspin_mag
   USE data_files,     ONLY : flfrq, flvec
   !
@@ -51,7 +55,7 @@ SUBROUTINE write_ph_dispersions()
   REAL(DP), ALLOCATABLE :: gaugeq(:,:)
 
   INTEGER :: qcode_old, isym
-  LOGICAL, ALLOCATABLE :: high_sym(:)
+  LOGICAL, ALLOCATABLE :: high_sym(:), same_next(:)
   LOGICAL :: check_file_exists
   !
   filefrq="phdisp_files/"//TRIM(flfrq)
@@ -189,21 +193,15 @@ SUBROUTINE write_ph_dispersions()
      ENDIF
   END DO
   !
-  IF (flfrq.NE.' '.AND.ionode) THEN
-     OPEN (unit=2,file=filefrq ,status='unknown',form='formatted')
-     WRITE(2, '(" &plot nbnd=",i6,", nks=",i6," /")') 3*nat, nq
-     DO n=1, nq
-        WRITE(2, '(10x,3f10.6)')  disp_q(1,n), disp_q(2,n), disp_q(3,n)
-        WRITE(2,'(6f10.4)') (freq_save(i,n), i=1,3*nat)
-     END DO
-     CLOSE(unit=2)
-  END IF
+  IF (flfrq.NE.' ') CALL write_bands(nq, 3*nat, disp_q, freq_save, 1.0_DP, &
+                                                          filefrq)
   !
   !  If the force constants are in the xml format we write also
   !  the file with the representations of each mode
   !
   IF (flfrq.NE.' '.AND.xmldyn) THEN
      ALLOCATE(aux_ind(nq))
+     ALLOCATE(same_next(nq))
      aux_ind=0
      CALL find_aux_ind_xk(disp_q(1,1), disp_q(1,2), aux_ind(2))
      CALL find_aux_ind_xk(disp_q(1,nq), disp_q(1,nq-1), aux_ind(nq-1))
@@ -215,25 +213,20 @@ SUBROUTINE write_ph_dispersions()
            CALL find_aux_ind_xk(disp_q(1,n), disp_q(1,n-1), aux_ind(n-1))
      ENDDO
 
-     IF (ionode) THEN
-        filename=TRIM(filefrq)//'.rap'
-        OPEN (UNIT=2,FILE=TRIM(filename),STATUS='unknown',FORM='formatted')
-        WRITE(2, '(" &plot_rap nbnd_rap=",i6,", nks_rap=",i6," /")') 3*nat, nq
-        DO n=1, nq
-           WRITE(2,'(10x,3f10.6,l6,7i6)') disp_q(1,n), disp_q(2,n), &
-                                          disp_q(3,n), high_sym(n),&
-                                          qcode_group(n), aux_ind(n), &
-                                          qcode_group_ext(n), &
-                                          ptypeq(1:3,n), lprojq(n)
-           IF (lprojq(n)==1) &
-              WRITE (2, '(5f16.11)') (gaugeq(isym,n)/pi, isym=1,&
-                                            nsym_group(qcode_group(n)))
+     DO n=1, nq
+        IF (n==nq) THEN
+           same_next(n)=.FALSE.
+        ELSE
+           same_next(n)= same_star(nsym, s, disp_q(1,n), disp_q(1,n+1), at)
+        ENDIF
+     ENDDO
 
-           WRITE(2,'(6i10)') (num_rap_mode(i,n), i=1,3*nat)
-        END DO
-        CLOSE(unit=2)
-     ENDIF
+     filename=TRIM(filefrq)//'.rap'
+     CALL write_representations(nq, 3*nat, disp_q, num_rap_mode, high_sym,  &
+                       qcode_group, aux_ind, qcode_group_ext, ptypeq, lprojq, &
+                       same_next, gaugeq, filename)
 
+     DEALLOCATE(same_next)
      DEALLOCATE(aux_ind)
   ENDIF
   !
@@ -264,8 +257,10 @@ SUBROUTINE find_representations_mode_q ( nat, ntyp, xq, w2, u, tau, ityp, &
   USE control_pwrun, ONLY : nr1_save, nr2_save, nr3_save
   USE lr_symm_base, ONLY : gi, nsymq
   USE rap_point_group,  ONLY : code_group, gname, nclass, nelem, elem, elem_name
+
   USE proj_rap_point_group, ONLY : lqproj, qptype, which_elem, group_desc, &
                                    code_groupq_ext
+  USE lattices,    ONLY : zone_border
   USE point_group, ONLY : find_group_info_ext
   USE io_global, ONLY : stdout
 
@@ -311,6 +306,7 @@ SUBROUTINE find_representations_mode_q ( nat, ntyp, xq, w2, u, tau, ityp, &
 !
   IF (search_sym) THEN
      lqproj=0
+     IF (zone_border(xq,at,bg,-1)) lqproj=3
      qptype=1
      magnetic_sym=(nspin_mag==4)
      CALL prepare_sym_analysis(nsymq,sr,t_rev,magnetic_sym)
@@ -325,7 +321,6 @@ SUBROUTINE find_representations_mode_q ( nat, ntyp, xq, w2, u, tau, ityp, &
         CALL set_class_el_name(nsymq,sname,nclass,nelem,elem,elem_name)
         CALL write_group_info_ph(.TRUE.)
      ENDIF
-
      CALL print_mode_sym(w2, num_rap_mode, .FALSE.)
      
   ELSE

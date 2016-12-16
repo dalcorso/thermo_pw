@@ -11,8 +11,8 @@ SUBROUTINE set_paths_disp()
 !  from the label letters or the auxiliary (k or q) points given in
 !  input. Note that this routine should be called after the calculation
 !  of the geometry. If the latter is changing the input k or q points
-!  should be given as letters to be computed here with the correct
-!  geometry.
+!  should be given as letters, or in crystal coordinates, to be computed 
+!  here with the correct geometry.
 !
   USE kinds,         ONLY : DP
   USE control_paths, ONLY : nqaux, xqaux, wqaux, wqauxr, npk_label, letter, &
@@ -59,6 +59,7 @@ SUBROUTINE set_paths_disp()
      ALLOCATE(disp_wq(disp_nqs))
      CALL generate_k_in_plane(nqaux, xqaux, wqaux, disp_q, disp_wq, disp_nqs)
   ELSEIF (q_in_band_form) THEN
+      CALL clean_path(nqaux, xqaux, wqaux)
       disp_nqs=SUM(wqaux(1:nqaux-1))+1
       DO i=1,nqaux-1
          IF (wqaux(i)==0) disp_nqs=disp_nqs+1

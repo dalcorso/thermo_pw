@@ -33,7 +33,7 @@ PROGRAM gener_3d_slab
 !  ibrav_3d     The Bravais lattice of the bulk, defined as in QE. This
 !               code use the same latgen routine.
 !  
-!  celldm_3d(3) The size of the unit cell.
+!  celldm_3d(6) The size of the unit cell.
 !
 !  nat_3d       The number of atoms inside the unit cell
 !

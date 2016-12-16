@@ -514,6 +514,7 @@ MODULE control_bands
   REAL(DP) :: emin_input     ! minimum energy of the plot (eV)
   REAL(DP) :: emax_input     ! maximum energy of the plot (eV)
   LOGICAL  :: lsym           ! if .TRUE. does the symmetry analysis of the bands
+  LOGICAL  :: enhance_plot   ! if .TRUE. an enhaced band plot is done
 
 END MODULE control_bands
 
@@ -893,8 +894,9 @@ MODULE thermo_sym
   INTEGER :: code_group_save ! the code of the point group of the unperturbed
                              ! solid
   LOGICAL :: ibrav_group_consistent ! if .true., point group and bravais lattice are
-                                    ! consistent 
+                             ! consistent 
   INTEGER :: fft_fact(3)     ! the factors that must be inside the fft
+  INTEGER :: sg_number       ! the number of the space_group
 
 END MODULE thermo_sym
 

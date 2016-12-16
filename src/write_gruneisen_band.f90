@@ -26,6 +26,8 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
   USE control_thermo, ONLY : ltherm_dos, ltherm_freq
   USE point_group,    ONLY : nsym_group
   USE temperature,    ONLY : temp, ntemp
+  USE io_bands,       ONLY : read_bands, read_parameters, &
+                             read_representations, write_bands
   USE mp,             ONLY : mp_bcast
   USE io_global,      ONLY : stdout, ionode, ionode_id
   USE mp_images,      ONLY : intra_image_comm, root_image, my_image_id
@@ -35,23 +37,23 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
   CHARACTER(LEN=256), INTENT(IN) :: file_disp
 
   REAL(DP) :: eps=1.d-4
-  REAL(DP), ALLOCATABLE :: freq_geo(:,:,:), k(:,:), k_rap(:,:)
+  REAL(DP), ALLOCATABLE :: freq_geo(:,:,:), k(:,:), k_rap(:,:), gaugek(:,:)
+  REAL(DP), ALLOCATABLE :: frequency_geo(:,:)
   COMPLEX(DP), ALLOCATABLE :: displa_geo(:,:,:,:)
-  INTEGER, ALLOCATABLE :: rap_geo(:,:,:)
+  INTEGER, ALLOCATABLE :: rap_geo(:,:,:), repres_geo(:,:), gcodek(:), &
+                          aux_ind(:), gcodek_ext(:), ptypek(:,:), lprojk(:)
+  LOGICAL, ALLOCATABLE :: same_next(:)
   INTEGER :: nks, nbnd, nks_rap, nbnd_rap 
   INTEGER :: ibnd, jbnd, irap, ios, i, n, ierr, igeo
   INTEGER :: iu_grun, iumode
   INTEGER :: poly_order
   REAL(DP), ALLOCATABLE :: poly_grun(:,:), frequency(:,:), gruneisen(:,:)
-  REAL(DP) :: vm, gaugek(48)
+  REAL(DP) :: vm
   LOGICAL, ALLOCATABLE :: high_symmetry(:), is_gamma(:)
-  LOGICAL :: copy_before, exst_rap
-  INTEGER :: gcodek, aux_ind, gcodek_ext, ptypek(3), lprojk
-  CHARACTER(LEN=256) :: filename, filedata, file_vec, filegrun
+  LOGICAL :: copy_before, exist_rap, allocated_variables
+  CHARACTER(LEN=256) :: filename, filedata, file_vec, filegrun, filefreq
   CHARACTER(LEN=6), EXTERNAL :: int_to_char
 
-  NAMELIST /plot/ nks, nbnd
-  NAMELIST /plot_rap/ nks_rap, nbnd_rap
 
   IF ( my_image_id /= root_image ) RETURN
 
@@ -59,51 +61,51 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
 
   iumode=23
   WRITE(stdout,*)
-  exst_rap=.TRUE.
+  exist_rap=.TRUE.
+  allocated_variables=.FALSE.
   DO igeo = 1, ngeo(1)
 
      IF (no_ph(igeo)) CYCLE
      filedata = "phdisp_files/"//TRIM(file_disp)//'.g'//TRIM(int_to_char(igeo))
+     CALL read_parameters(nks, nbnd, filedata)
 
-     IF (ionode) &
-        OPEN(UNIT=1,FILE=TRIM(filedata),FORM='formatted',STATUS='OLD',ERR=101,&
-                                                  IOSTAT=ios)
-101  CALL mp_bcast(ios, ionode_id, intra_image_comm)
-     CALL errore('write_gruneisen_band','opening dispersion file',ABS(ios))
-
-     IF (ionode) READ (1, plot, IOSTAT=ios)
-     CALL mp_bcast(ios, ionode_id, intra_image_comm)
-     CALL errore('write_gruneisen_band','reading plot namelist',ABS(ios))
-     CALL mp_bcast(nks, ionode_id, intra_image_comm)
-     CALL mp_bcast(nbnd, ionode_id, intra_image_comm)
-     !
      IF (nks <= 0 .or. nbnd <= 0) THEN
         CALL errore('write_gruneisen_band','reading plot namelist',ABS(ios))
      ELSE
         WRITE(stdout, '(5x,"Reading ",i4," dispersions at ",i6," k-points for&
                        & geometry",i4)') nbnd, nks, igeo
      ENDIF
+     IF (.NOT.allocated_variables) THEN
+        ALLOCATE (freq_geo(nbnd,nks,ngeo(1)))
+        IF (with_eigen) ALLOCATE (displa_geo(nbnd,nbnd,ngeo(1),nks))
+        ALLOCATE (rap_geo(nbnd,nks,ngeo(1)))
+        ALLOCATE (k(3,nks)) 
+        ALLOCATE (k_rap(3,nks))
+        ALLOCATE (high_symmetry(nks))
+        ALLOCATE (gcodek(nks))
+        ALLOCATE (gcodek_ext(nks))
+        ALLOCATE (aux_ind(nks))
+        ALLOCATE (ptypek(3,nks))
+        ALLOCATE (lprojk(nks))
+        ALLOCATE (same_next(nks))
+        ALLOCATE (gaugek(48,nks))
+        ALLOCATE (is_gamma(nks))
+        allocated_variables=.TRUE.
+     ENDIF
+     CALL read_bands(nks, nbnd, k, freq_geo(1,1,igeo), filedata)
 
      filename=TRIM(filedata)//".rap"
-     IF (ionode) OPEN(UNIT=21, FILE=TRIM(filename), FORM='formatted', &
-                   STATUS='old', ERR=100, IOSTAT=ios)
-100  CALL mp_bcast(ios, ionode_id, intra_image_comm)
-     IF (ios /= 0) exst_rap=.FALSE.
-
-     IF (exst_rap) THEN
-        IF (ionode) READ (21, plot_rap, ERR=110, IOSTAT=ios)
-110     CALL mp_bcast(ios, ionode_id, intra_image_comm)
-        CALL errore('write_gruneisen_band','problem reading &
-                                           &representations',ABS(ios))
-        CALL mp_bcast(nks_rap, ionode_id, intra_image_comm)
-        CALL mp_bcast(nbnd_rap, ionode_id, intra_image_comm)
-        IF ( nks_rap/=nks .OR. nbnd_rap/=nbnd ) &
-           CALL errore('write_gruneisen_band','("file with representations &
-                       & not compatible with bands")')
-     ELSE
-        nks_rap=nks
-        nbnd_rap=nbnd
-     ENDIF
+     k_rap(:,:)=k(:,:)
+     rap_geo(:,:,igeo)=-1
+     CALL read_representations(nks, nbnd, k_rap, rap_geo(1,1,igeo),     &
+                          high_symmetry, gcodek, aux_ind, gcodek_ext,   &
+                          ptypek, lprojk, same_next, gaugek, exist_rap, &
+                          filename)
+     nks_rap=nks
+     nbnd_rap=nbnd
+     DO n=1,nks
+        is_gamma(n) = (( k(1,n)**2 + k(2,n)**2 + k(3,n)**2) < 1.d-12)
+     ENDDO
 
      IF (with_eigen) THEN
         filename="phdisp_files/"//TRIM(file_vec)//".g"//TRIM(int_to_char(igeo))
@@ -111,68 +113,22 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
                    STATUS='old', ERR=210, IOSTAT=ios)
 210     CALL mp_bcast(ios, ionode_id, intra_image_comm)
         CALL errore('write_gruneisen_band','modes are needed',ABS(ios))
-     END IF
-     !
-     IF ( .NOT. ALLOCATED( freq_geo ) )  ALLOCATE (freq_geo(nbnd,ngeo(1),nks))
-     IF ( .NOT. ALLOCATED( displa_geo ) .AND. with_eigen )  &
-                                  ALLOCATE (displa_geo(nbnd,nbnd,ngeo(1),nks))
-     IF ( .NOT. ALLOCATED( rap_geo ) )   ALLOCATE (rap_geo(nbnd,ngeo(1),nks))
-     IF ( .NOT. ALLOCATED( k ) )         ALLOCATE (k(3,nks)) 
-     IF ( .NOT. ALLOCATED( k_rap ) )     ALLOCATE (k_rap(3,nks))
-     IF ( .NOT. ALLOCATED( high_symmetry ) ) ALLOCATE (high_symmetry(nks))
-     IF ( .NOT. ALLOCATED( is_gamma ) ) ALLOCATE (is_gamma(nks))
-
-     IF (ionode) THEN
-        ierr=0
-        DO n=1,nks
-           READ(1,*,end=220,err=220)  (k(i,n), i=1,3 )
-           READ(1,*,end=220,err=220)  (freq_geo(i,igeo,n),i=1,nbnd)
-           IF (exst_rap) THEN
-              READ(21,*,end=220,err=220) (k_rap(i,n),i=1,3), high_symmetry(n), &
-                                      gcodek, aux_ind, gcodek_ext,            &
-                                      ptypek(1), ptypek(2), ptypek(3),        &
-                                      lprojk
-              IF (lprojk==1) THEN
-                 READ(21,*,end=220,err=220) &
-                                (gaugek(i),i=1,nsym_group(gcodek))
-              ENDIF
-              READ(21,*,end=220,err=220) (rap_geo(i,igeo,n),i=1,nbnd)
-              IF (abs(k(1,n)-k_rap(1,n))+abs(k(2,n)-k_rap(2,n))+  &
-                  abs(k(3,n)-k_rap(3,n))  > eps ) &
-                  CALL errore('write_gruneisen_band',&
-                       '("Incompatible k points in rap file")',1)
-           ELSE
-              k_rap(:,n)=k(:,n)
-              rap_geo(:,igeo,n)=-1
-           ENDIF
-           is_gamma(n) = (( k(1,n)**2 + k(2,n)**2 + k(3,n)**2) < 1.d-12)
-        ENDDO
-        IF (with_eigen) &
+        IF (ionode) THEN
            CALL readmodes(nat,nks,k,displa_geo,ngeo(1),igeo,ntyp,ityp_save,  &
                                                             amass_save,iumode)
 
-        CLOSE(UNIT=1, STATUS='KEEP')
-        CLOSE(UNIT=21, STATUS='KEEP')
-        IF (with_eigen) CLOSE(UNIT=iumode, STATUS='KEEP')
-        GOTO 222
-220     ierr=1
-        GOTO 222
+           CLOSE(UNIT=iumode, STATUS='KEEP')
+        ENDIF
      ENDIF
-222  CALL mp_bcast(ierr, ionode_id, intra_image_comm)
-     IF (ierr==1) CALL errore('write_gruneisen_band','problem reading data',1)
   ENDDO
-  CALL mp_bcast(k, ionode_id, intra_image_comm)
-  CALL mp_bcast(k_rap, ionode_id, intra_image_comm)
-  CALL mp_bcast(is_gamma, ionode_id, intra_image_comm)
-  CALL mp_bcast(high_symmetry, ionode_id, intra_image_comm)
-  CALL mp_bcast(freq_geo, ionode_id, intra_image_comm)
-  IF (with_eigen) CALL mp_bcast(displa_geo, ionode_id, intra_image_comm)
-  CALL mp_bcast(rap_geo, ionode_id, intra_image_comm)
+  CALL mp_bcast(displa_geo, ionode_id, intra_image_comm)
 !
 !  Part two: Compute the Gruneisen parameters
 !
   copy_before=.FALSE.
   poly_order=5
+  ALLOCATE(frequency_geo(nbnd,ngeo(1)))
+  ALLOCATE(repres_geo(nbnd,ngeo(1)))
   ALLOCATE(poly_grun(poly_order,nbnd))
   ALLOCATE(frequency(nbnd,nks))
   ALLOCATE(gruneisen(nbnd,nks))
@@ -221,15 +177,16 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
            ENDDO
         ENDIF
      ELSE
+        frequency_geo(:,:)=freq_geo(:,n,:)
         IF (with_eigen) THEN
-           CALL compute_freq_derivative_eigen(ngeo(1),freq_geo(1,1,n),   &
+           CALL compute_freq_derivative_eigen(ngeo(1),frequency_geo,   &
                         omega_geo, displa_geo(1,1,1,n),no_ph,poly_order, &
                         poly_grun)
         ELSE 
-           CALL compute_freq_derivative(ngeo,freq_geo(1,1,n),rap_geo(1,1,n), &
+           repres_geo(:,:)=rap_geo(:,n,:)
+           CALL compute_freq_derivative(ngeo,frequency_geo,repres_geo, &
                                    omega_geo,no_ph,poly_order,poly_grun)
         ENDIF
-
 !
 !  frequencies and gruneisen parameters are calculated at the chosen
 !  volume
@@ -265,56 +222,34 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
 !
 !  Third part: writes Gruneisen parameters on file
 !
-iu_grun=2
-IF (ionode) THEN
    filegrun="anhar_files/"//TRIM(flgrun)
-   OPEN(UNIT=iu_grun, FILE=TRIM(filegrun), FORM='formatted', STATUS='UNKNOWN', &
-             ERR=10, IOSTAT=ios)
-END IF
-10 CALL mp_bcast(ios, ionode_id, intra_image_comm)
-   CALL errore('write_gruneisen_band','opening dispersion file',ABS(ios))
-
-   IF (ionode) THEN
-      DO n=1,nks
-         IF (n == 1 ) &
-            WRITE (iu_grun, '(" &plot nbnd=",i4,", nks=",i4," /")') &
-                  nbnd, nks
-         WRITE (iu_grun, '(10x,3f13.7)') k(1,n),k(2,n),k(3,n)
-         WRITE (iu_grun, '(6f13.7)') (gruneisen(ibnd,n), ibnd = 1, nbnd)
-      ENDDO
-      CLOSE(iu_grun)
-   ENDIF
+   CALL write_bands(nks, nbnd, k, gruneisen, 1.0_DP, filegrun)
 !
 !  writes frequencies at the chosen volume on file
 !
-iu_grun=2
-IF (ionode) &
-   OPEN(UNIT=iu_grun, FILE=TRIM(filegrun)//'_freq', FORM='formatted', &
-                  STATUS='UNKNOWN', ERR=20, IOSTAT=ios)
-20 CALL mp_bcast(ios, ionode_id, intra_image_comm)
-   CALL errore('write_gruneisen_band','opening dispersion file 1',ABS(ios))
-
-   IF (ionode) THEN
-      DO n=1,nks
-         IF (n == 1 ) &
-            WRITE (iu_grun, '(" &plot nbnd=",i4,", nks=",i4," /")') &
-                  nbnd, nks
-         WRITE (iu_grun, '(10x,3f13.7)') k(1,n),k(2,n),k(3,n)
-         WRITE (iu_grun, '(6f13.7)') (frequency(ibnd,n), ibnd = 1, nbnd)
-      ENDDO
-      CLOSE(iu_grun)
-   ENDIF
+   filefreq=TRIM(filegrun)//'_freq'
+   CALL write_bands(nks, nbnd, k, frequency, 1.0_DP, filefreq)
 
    DEALLOCATE ( is_gamma )
    DEALLOCATE ( high_symmetry )
    DEALLOCATE ( k_rap )
    DEALLOCATE ( k ) 
    DEALLOCATE ( rap_geo )
-   IF (with_eigen) DEALLOCATE ( displa_geo )
    DEALLOCATE ( freq_geo )
+   DEALLOCATE ( gcodek )
+   DEALLOCATE ( gcodek_ext )
+   DEALLOCATE ( aux_ind )
+   DEALLOCATE ( ptypek )
+   DEALLOCATE ( lprojk )
+   DEALLOCATE ( same_next )
+   DEALLOCATE ( gaugek )
    DEALLOCATE ( poly_grun )
+   DEALLOCATE ( frequency_geo )
+   DEALLOCATE ( repres_geo )
    DEALLOCATE ( frequency )
    DEALLOCATE ( gruneisen )
+
+   IF (with_eigen) DEALLOCATE ( displa_geo )
 
    RETURN
 END SUBROUTINE write_gruneisen_band

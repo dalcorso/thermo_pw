@@ -12,7 +12,8 @@ USE input_parameters, ONLY : ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
 USE cell_base,        ONLY : at, celldm_cb => celldm, cell_base_init
 USE control_paths,    ONLY : xqaux, wqaux, npk_label, letter,     &
                              label_list, nqaux, point_label_type, &
-                             label_disp_q, letter_path
+                             label_disp_q, letter_path, nrap_plot_in, &
+                             rap_plot_in
 USE bz_2d_form,       ONLY : find_ibrav_2d
 IMPLICIT NONE
 
@@ -53,6 +54,8 @@ ALLOCATE(letter(nqaux))
 ALLOCATE(letter_path(nqaux))
 ALLOCATE(label_list(nqaux))
 ALLOCATE(label_disp_q(nqaux))
+ALLOCATE(nrap_plot_in(nqaux))
+ALLOCATE(rap_plot_in(12,nqaux))
 !
 ! and set the default path.
 !
@@ -105,6 +108,8 @@ CASE (5)
       label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
       letter_path=letter
 END SELECT
+nrap_plot_in=0
+rap_plot_in=0
 
 RETURN
 END SUBROUTINE set_2d_bz_path

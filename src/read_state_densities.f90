@@ -71,7 +71,7 @@ IF (identify_sur) THEN
   RETURN
   END SUBROUTINE read_state_densities
 
-  SUBROUTINE read_minimal_info(read_not_write)
+  SUBROUTINE read_minimal_info(read_not_write,ierr)
   !
   !  This routine writes and reads a minimal amount of information necessary
   !  to make a plot of the bands without redoing the self consistent calculation
@@ -97,14 +97,21 @@ IF (identify_sur) THEN
   USE kinds, ONLY : DP
   IMPLICIT NONE
   LOGICAL :: read_not_write
+  INTEGER :: ierr
   LOGICAL :: exst
   INTEGER :: iun, ios, n, i, ik, ikz, nqaux_, nks_
 
+  ierr=0
   IF (read_not_write) THEN
      IF (ionode) &
         INQUIRE( FILE = 'band_files/info_data', EXIST = exst )
      CALL mp_bcast(exst, ionode_id, intra_image_comm)
-     IF (.NOT. exst) CALL errore('read_minimal_info','info_data not present',1)
+     IF (.NOT. exst) THEN
+!        CALL errore('read_minimal_info','info_data not present',1)
+         ef=0.0_DP
+         ierr=-1
+         RETURN
+     ENDIF
      IF (ionode) THEN
         iun=39
         OPEN(UNIT=iun, FILE='band_files/info_data', STATUS='old', ERR=300,  &
@@ -174,6 +181,7 @@ IF (identify_sur) THEN
 400  CALL mp_bcast(ios,ionode_id,intra_image_comm)
      IF (ios /= 0) CALL errore('read_minimal_info','problems writing file',ABS(ios))
   ENDIF
+
 
   RETURN
   END SUBROUTINE read_minimal_info
