@@ -6,7 +6,7 @@
 %! or http://www.gnu.org/copyleft/gpl.txt .
 %!
 \documentclass[12pt,a4paper]{article}
-\def\version{0.6.0}
+\def\version{0.7.0}
 \def\qe{{\sc Quantum ESPRESSO}}
 \def\tpw{{\sc thermo\_pw}}
 
@@ -254,14 +254,23 @@ The orthorhombic lattice:
 \nonumber
 \end{eqnarray}
 The volume of the unit cell is $\Omega = abc$. \\
-The base-centered orthorhombic lattice:
+The base-centered orthorhombic lattice. This lattice can be of three
+types A, B, or C, but only two types are presently used. 
+The C-type is:
 \begin{eqnarray}
 {\bf a}_1 &=& {a \over 2} (1, {b \over a}, 0), \nonumber \\
 {\bf a}_2 &=& {a \over 2} (-1, {b \over a}, 0), \nonumber \\
-{\bf a}_3 &=& a  (0, 0, {c \over a}). \nonumber
+{\bf a}_3 &=& a  (0, 0, {c \over a}), \nonumber
 \nonumber
 \end{eqnarray}
-The volume of the unit cell is $\Omega = abc/2$. \\
+while the A-type is:
+\begin{eqnarray}
+{\bf a}_1 &=& a  (1, 0, 0), \nonumber \\
+{\bf a}_2 &=& {a \over 2} (0, {b \over a}, -{c \over a}), \nonumber \\
+{\bf a}_3 &=& {a \over 2} (0, {b \over a}, {c \over a}). \nonumber 
+\nonumber
+\end{eqnarray}
+The volume of the unit cell is $\Omega = abc/2$ for both lattices. \\
 The face-centered orthorhombic lattice:
 \begin{eqnarray}
 {\bf a}_1 &=& {a \over 2} (1, 0, {c \over a}), \nonumber \\
@@ -374,7 +383,7 @@ $\zeta_2=\cos\alpha$.
 The strain applied to the solid is defined by a $3\times 3$ tensor
 $\epsilon$. We say that a strain $\epsilon$ is applied
 to the solid if the three primitive vectors 
-${\bf a}_1$, ${\bf a}_2$, and ${\bf a}_3$, of the unperturbed solid are
+${\bf a}_1$, ${\bf a}_2$, and ${\bf a}_3$, of the equilibrium configuration are
 transformed into 
 ${\bf a}'_1$, ${\bf a}'_2$, and ${\bf a}'_3$ in the strained solid
 where:
@@ -397,7 +406,7 @@ u_{j,i})$. Notice that $\epsilon_{i,j}$ are not the Lagrangian strains
 $\eta_{i,k}={1\over 2} ( u_{i,j} + u_{j,i} + u_{k,i}u_{k,j})$, but they
 differ from them only for quadratic terms in $u_{i,j}$. 
 
-In general a generic strain can change not only the size of the
+In general, a strain can change not only the size of the
 unit cell but also its shape changing the type of Bravais lattice 
 needed to describe the solid. In this section we consider the different 
 strain types that are of interest for our applications and
@@ -625,21 +634,21 @@ transformed into a centered tetragonal cell with $a_t=a_c / \sqrt{2}$
 and $c_t=a_c(1+\epsilon_{3,3})$.
 
 Among the shear strain $\epsilon_F$
-transforms the cubic unit cell into a trigonal unit cell with
+transforms the cubic unit cell into a rhombohedral unit cell with
 parameters:
 \begin{eqnarray}
 a_t&=& a_c \sqrt{1+2\epsilon_{1,2}^2} \\
 \cos\alpha &=& {\epsilon_{1,2} (\epsilon_{1,2} + 2) \over 
 1 + 2 \epsilon_{1,2}^2 }
 \end{eqnarray}
-The face-centered cubic cell is transformed in a trigonal unit cell 
+The face-centered cubic cell is transformed in a rhombohedral unit cell 
 with parameters:
 \begin{eqnarray}
 a_t&=& {a_c \over 2} \sqrt{6 \epsilon_{1,2}^2+4 \epsilon_{1,2} +2} \\
 \cos\alpha &=& {5\epsilon_{1,2}^2+ 6\epsilon_{1,2} + 1 \over 
 6\epsilon_{1,2}^2 + 4\epsilon_{1,2}+2 },
 \end{eqnarray}
-while the body-centered cubic cell is transformed in a trigonal unit cell
+while the body-centered cubic cell is transformed in a rhombohedral unit cell
 with parameters:
 \begin{eqnarray}
 a_t&=& {a_c \over 2} \sqrt{ 4\epsilon_{1,2}^2 - 4\epsilon_{1,2} + 3 } \\
@@ -1020,12 +1029,12 @@ in the $xy$ plane we must make a small rotation about the $y$ axis of an angle
 ${\rm tg} \phi = - \epsilon_{1,3}$.
 
 \subsection{\color{web-blue}Trigonal system}
-A isotropic strain $\epsilon_A$ keeps the trigonal shape and
+A isotropic strain $\epsilon_A$ keeps the rhombohedral shape and
 changes the length of each primitive vector to
 $a(1+\epsilon_{1,1})$. Conversely a change of the lattice constant
-$a$ of the trigonal cell of $da$ corresponds to apply a uniform strain
+$a$ of the rhombohedral cell of $da$ corresponds to apply a uniform strain
 $\epsilon_A$ with $\epsilon_{1,1}=da/a$.
-If we apply a strain $\epsilon_M$, the cell remains trigonal, but both $a$ 
+If we apply a strain $\epsilon_M$, the cell remains rhombohedral, but both $a$ 
 and $\cos\alpha$ will change.
 It is simple to show that 
 \begin{eqnarray}
@@ -1148,7 +1157,7 @@ $G$ is called the Gibbs free energy of the solid.
 
 \newpage
 \section{\color{coral}Equilibrium geometry and thermal expansion}
-To calculate the equilibrium geometry at $T=0$ and at zero stress it
+To calculate the equilibrium geometry at $T=0$ and $\sigma=0$ it
 is sufficient to minimize the internal energy with respect to strain:
 \begin{equation}
 {\partial U \over \partial \epsilon_i}=0.
@@ -1235,7 +1244,7 @@ and we have
 In the trigonal system $k=2$, $\zeta_1=a$, $\zeta_2=\cos\alpha$. The 
 strain allowed by symmetry is $\epsilon_M$. The thermal expansion tensor
 has three diagonal components and $\alpha_1=\alpha_2$. We can use the
-link between the hexagonal and the trigonal cell. A change of the 
+link between the hexagonal and the rhombohedral cell. A change of the 
 hexagonal parameter $a_h$ corresponds to a strain 
 ${d\epsilon_1}={da_h \over a_h}$ and a change of $c_h$ corresponds to a
 strain ${d\epsilon_3}={d c_h \over c_h}$. Therefore 
@@ -1358,7 +1367,7 @@ Applying a strain $\epsilon_E$ the cell becomes tetragonal and we have:
 \sigma_{3} = C_{11} \epsilon_3
 \end{equation}
 To calculate $C_{44}$ we can apply $\epsilon_F$ that
-transforms the cubic cell into a trigonal cell as described above. In
+transforms the cubic cell into a rhombohedral cell as described above. In
 this case we obtain
 \begin{equation}
 \sigma_{4} = C_{44} \epsilon_4
@@ -1387,7 +1396,7 @@ C_{12}&=&{1 \over 6 V} {d^2 U_A \over d \epsilon_1^2}  - {1\over 2} C_{11}, \\
 C_{44}&=&{1 \over 3 V} {d^2 U_F \over d \epsilon_4^2}.
 \end{eqnarray}
 but the use of the energy instead of stress requires three fits instead
-of the two. 
+of two. 
 
 \subsection{\color{web-blue}Tetragonal system}
 In this case there are two possibilities depending on the Laue class.

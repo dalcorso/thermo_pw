@@ -94,25 +94,26 @@ in the file \texttt{PW/Doc/INPUT\_PW} of the \qe\ distribution.
 In \qe\ you can use \texttt{ibrav=0} and give the primitive
 lattice vectors of the Bravais lattice. Presently \thermo\ needs to
 known the Bravais lattice number so this form of input is not recommended. 
-If you use it \thermo\ writes on output the \texttt{ibrav}, the 
-\texttt{celldm} and the new atomic coordinates that are needed to run 
+If you use it, \thermo\ writes on output the \texttt{ibrav}, the 
+\texttt{celldm} and the atomic coordinates needed to simulate
 the same cell and stops.
 You can therefore just cut and paste \texttt{ibrav}, \texttt{celldm} 
 and the atomic coordinates in the input of \texttt{pw.x}. Alternatively
 you can set the flag \texttt{find\_ibrav=.TRUE.} in the \thermo\ input
-and \thermo\ will make the conversion for you and run the job. By setting 
-\texttt{continue\_zero\_ibrav=.TRUE.} instead \thermo\ will actually use your
-input coordinates and Bravais lattices vectors and will run the job, but will 
-not be able to exploit the symmetry so this option is not recommended 
-except when you are dealing with supercells. After setting the correct
+and \thermo\ will make the conversion for you and run the job. 
+After setting the correct
 \texttt{ibrav} and \texttt{celldm}, \texttt{thermo\_pw} might still tell you
 that the Bravais lattice is not compatible with the point group. This
 can happen, for instance, if you have isolated molecules, amorphous solids,
-or defects. In these cases you can still do some useful calculation
-with \texttt{thermo\_pw} but symmetry will not be used to reduce the
-number of components of the tensors that represent the physical quantities.
+or defects. In these cases you can still continue but symmetry will not be 
+used to reduce the number of components of the tensors that represent 
+the physical quantities. In order to use the residual symmetry, you have to
+use one of the suggested \texttt{ibrav}, adjusting the \texttt{celldm} to
+the parameters of your cell. For instance if you have a cubic cell, but
+the symmetry requires a tetragonal lattice, you have to use a tetragonal
+lattice with \texttt{celldm(3)=1.0}.
 In rare cases, with lattices such as the face-centered orthorhombic some
-symmetry operations might be incompatible with the FFT grid found by the
+symmetry operations might be incompatible with the FFT grid found by 
 \texttt{pw.x}. The choice made in \qe\ is to discard these symmetries making
 the lattice incompatible with the point group. In these cases the code needs 
 \texttt{nr1=nr2=nr3}. Set these three parameters in the \texttt{pw.x} input 
@@ -123,20 +124,21 @@ number \texttt{nat} (the number of atoms) and by \texttt{nat}
 three-dimensional vectors as specified in the file \texttt{PW/Doc/INPUT\_PW}.
 You can use several units, specify the coordinates in Cartesian or on the
 crystal basis or you can give the space group number and the
-coordinates of the nonequivalent atoms. 
-These options are supported by \thermo. See the above file for details. \\
+coordinates of the inequivalent atoms. 
+These options are supported by \thermo. See the \texttt{pw.x} manual
+for details. \\
 
 The number of different types of atoms is given by an integer number 
 \texttt{ntyp} and for each atomic type you need to specify a 
 pseudopotential file. Pseudopotential files depend on the exchange and 
-correlation functional that you want to use and can be found in many 
+correlation functional and can be found in many 
 different places. There is a pseudopotential page in the \qe\ website, or 
 you can consider generating your pseudopotentials with the \texttt{pslibrary} 
 inputs. You can consult the web page \texttt{http://www.qe-forge.org/gf/project/pslibrary/} for more information. \\
 
 The kinetic energies cut-offs depend on the pseudopotentials
-and on the accuracy that you want to have in your calculation. You can 
-find some hints on the required cut-offs inside the pseudopotentials files,
+and on the accuracy of your calculation. You can 
+find some hints about the required cut-offs inside the pseudopotentials files,
 but you need to check the convergence of your results with the cut-off 
 energies. \\
 
@@ -195,7 +197,7 @@ as \texttt{XCrySDen} that is able to read the \texttt{pw.x} input and
 see the crystal structure. If you use \texttt{what='plot\_bz'}, 
 \thermo\ produces a \texttt{.xsf} file that contains the structure given in
 input and can be read directly by \texttt{XCrySDen}. This could
-be useful if you have the space group and the nonequivalents atomic positions.
+be useful if you have the space group and the inequivalents atomic positions.
 The generated \texttt{.xsf} file contains all the symmetry equivalent 
 atomic positions. For the same purpose you could also use the output
 of \texttt{pw.x}.
@@ -340,9 +342,10 @@ thermodynamic properties could be wrong at low temperatures.
 the electronic bands and phonon dispersions plots?}
 Different colors correspond to different irreducible representations of 
 the small point group of the {\bf k} or {\bf q} wavevector. To see the
-correspondence colors-representation see the \texttt{point\_groups.pdf} 
+correspondence color-representation see the \texttt{point\_groups.pdf} 
 manual. The point group used for each {\bf k} or {\bf q} point is
-written in the \thermo\ output. In the same output you can also find,
+written in the \thermo\ output and also in the plot if you set
+\texttt{enhance\_plot=.TRUE.}. In the output you can also find,
 close to each band energy or phonon frequency value, the name of the
 irreducible representation. Relevant character tables are given in the
 \texttt{point\_groups.pdf} manual, in the \thermo\ output, or by the

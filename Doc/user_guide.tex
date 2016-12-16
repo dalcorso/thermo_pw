@@ -60,8 +60,9 @@ If not please consult the web site: \texttt{http://www.quantum-espresso.org}.
 
 \thermo\ is a \texttt{FORTRAN} code that computes material properties.
 It can be considered as a set of drivers that,
-at low level, call the \qe\ routines and, at high level, have post-processing 
-tools that convert the output of \qe\ routines into plots of material 
+at low level, call the \qe\ routines and, at high level, have pre-processing
+tools that reduce the number of information required to the user and
+post-processing tools that convert the output of \qe\ into plots of material 
 properties directly comparable with experiment.
 
 \thermo\ has the following directory structure, contained in a subdirectory 
@@ -214,7 +215,7 @@ This page contains also information on critical bugs found in the
 \hline
 \texttt{thermo\_pw} & \qe  \\
 \hline
-0.7.0 & SVN 7-10-2016 \\
+0.7.0 & SVN 17-11-2016 \\
 0.6.0 & 6.0.0 \\
 0.5.0 & 5.4.0 \\
 0.4.0 & 5.3.0 \\
@@ -233,8 +234,8 @@ This page contains also information on critical bugs found in the
 
 In order to compile \thermo\ the main \texttt{Makefile} and the files
 \texttt{install/makedeps.sh} and \texttt{install/plugins\_makefile}
-of \qe\ need to be changed. Just enter in the \texttt{thermo\_pw}
-directory and give the command \texttt{make join\_qe}. This command exchanges
+of \qe\ need to be changed. In the \texttt{thermo\_pw}
+directory give the command \texttt{make join\_qe}. This command exchanges
 the files contained in \texttt{thermo\_pw} with those of the \qe\ package.
 Typing \texttt{make thermo\_pw} from the main \qe\ directory, or \texttt{make} 
 from the \texttt{thermo\_pw}\ directory, produces the executable
@@ -252,30 +253,29 @@ Any other combination of computer/operating system has not been tested, but
 usually \thermo\ runs on the same systems where \qe\ runs. 
 
 \subsection{\color{web-blue}Searching help and reporting bugs}
-If you have problems installing \texttt{thermo\_pw} or if you need help
+If you have problems installing \texttt{thermo\_pw} or need help
 with some of its features, please subscribe to the \texttt{thermo\_pw-forum}
-mailing list and report there your problems. Requests for the implementation 
+mailing list to report your problems. Requests for the implementation 
 of new features are also welcome. If you think to have found a bug 
 in \texttt{thermo\_pw} you can report it to the mailing list or 
-write directly to me at \texttt{dalcorso.at.sissa.it}.
+write directly to me (\texttt{dalcorso.at.sissa.it}).
 
 \subsection{\color{web-blue}Uninstalling}
 
-In order to remove \thermo\ from your \qe\ distribution, just enter in the
-\texttt{thermo\_pw} directory and give the command \texttt{make leave\_qe}.
-Then just remove the \texttt{thermo\_pw} directory. 
+In order to remove \thermo, give the command \texttt{make leave\_qe} in the
+\texttt{thermo\_pw} directory. Then just remove the directory. 
 
 \subsection{\color{web-blue}Running \thermo}
 
 In order to use the \thermo\ code you need to create a file called
-\texttt{thermo\_control} in your working directory in addition to copy
-there the input of \texttt{pw.x} and, if requested by the task, an
+\texttt{thermo\_control} in your working directory in addition to 
+the input of \texttt{pw.x} and, if requested by the task, to the
 input of \texttt{ph.x} that must be called \texttt{ph\_control}.
 The input of \texttt{pw.x} can have any name and is given as input to
 the \thermo\ code. It is not necessary to specify an \texttt{outdir} 
 directory in the \texttt{ph.x} input.
 
-A typical command for running the \thermo\ code could be:
+A typical command for running \thermo\ is:
 \begin{verbatim}
 mpirun -n np thermo_pw.x -ni ni ... < input_pw > output_thermo_pw
 \end{verbatim}
@@ -283,14 +283,14 @@ where \texttt{np} is the number of processors and \texttt{ni} is the number
 of images. The dots indicate the other parallelization options that
 you can find in the \qe\ manual.
 
-Note that it is very easy to waste a lot of resources if the number of 
+Note that it is very easy to waste resources if the number of 
 images is too large. Unused images wait for the working images to complete
-their tasks doing nothing, just wasting cpu-time in an endless loop. 
+their tasks wasting cpu-time in an endless loop. 
 Some options 
 do not use the image feature, so you have to know how the calculation 
 is divided and the number of images must not
 be larger than the number of tasks (see below an indication of this number
-for each option). If you have doubts on this point just use one image.
+for each option). If you have doubts on this point use one image.
 
 The outputs of the \thermo\ code are one or more \texttt{postscript} files 
 with plots of the material properties. \thermo\ produces also files with 
@@ -328,7 +328,7 @@ on the calculation and can be used to tune its accuracy.
 these data. The output postscript files are produced by invoking the 
 \texttt{gnuplot} program within the code. Usually any modern Linux 
 distribution provides a package to install this code, or has it already 
-installed by default. If not, you can download it from 
+installed. If not, you can download it from 
 \texttt{http://www.gnuplot.info/}. \\
 Three input variables of \thermo\ control 
 the use of the \texttt{gnuplot} code:
@@ -348,7 +348,7 @@ you can disable the production of the postscript files and use some other
 graphical tools to produce the plots from the output data. 
 
 \subsection{\color{web-blue}Temperature and pressure}
-Several quantities in \tpw\ can be calculated as a function of temperature.
+Several quantities in \thermo\ can be calculated as a function of temperature.
 Moreover the equilibrium geometry can be searched at fixed pressure 
 minimizing the enthalpy instead of the energy.
 For the options where these features are active, the values of temperature
@@ -380,7 +380,7 @@ vectors are those provided by the routine \texttt{latgen.f90} of the \qe\
 distribution. 
 For this reason it is not recommended to use \texttt{ibrav=0} in the
 \texttt{pw.x} input. The preferred method is to give the value of 
-\texttt{ibrav} and to use the primitive vectors provided by \qe.
+\texttt{ibrav} using primitive vectors provided by \qe.
 It is also possible to specify the \texttt{space\_group} number and 
 the coordinates of the inequivalent atoms. When the 
 \texttt{pw.x} input contains the \texttt{ibrav=0} option, 
@@ -400,8 +400,8 @@ continue_zero_ibrav : when ibrav=0 in the input of pw.x and this variable
 find_ibrav : This variable is active only when continue_zero_ibrav=.FALSE..
              When this variable is set to .TRUE. and the input of pw.x
              has ibrav=0, thermo_pw finds the values of ibrav, celldm,
-             and of the atomic positions that produce the same crystal as
-             given in input and continue the calculation. The geometry 
+             and of the atomic positions that produce the same crystal 
+             and continue the calculation. The geometry 
              used by thermo_pw might be rotated with respect to the input and
              have different primitive vectors.
              When this variable is .FALSE. the code stops after writing in
@@ -483,8 +483,8 @@ by a band structure calculation. There is no image parallelization and no
 advantage to use several images. The output of the band structure 
 calculation is further processed in order to produce a plot of the band 
 structure.
-In insulators the zero of the energy is at the highest valence band 
-in the first {\bf k} point, in metals at the Fermi energy. \\
+In insulators the zero of the energy is the highest valence band 
+of the first {\bf k} point, in metals the Fermi energy. \\
 The energy bands plot can be modified by the following variables:
 
 \begin{verbatim}
@@ -504,8 +504,11 @@ only_bands_plot: if the files with the bands and the representations
              Default: logical .FALSE.
 lsym       : if .TRUE. does the symmetry analysis of the bands
              Default: .TRUE.
+enhance_plot: if .TRUE. writes on the band plot the point group labels,
+             and colors with differente colors lines at the zone border.
+             Default: .FALSE.
 long_path  : if .TRUE. plot the bands in all the Brillouin zone path. 
-             Otherwise makes a faster calculation on a short path.
+             Otherwise makes a faster calculation on a short path. 
              Default: .TRUE.
 flpsband   : postscript file with the electronic band structure
              Default: character(len=*) 'output_band.ps'
@@ -649,9 +652,9 @@ However you must be careful because these representation numbers refer
 to the slab small point group of each {\bf k}-point when you
 plot the slab band structures and to the surface small point 
 group of each {\bf k}-point when you plot a PBS.
-For a given {\bf k}-point parallel to the surface, the slab
-might have a point group larger than the true surface, because it 
-might contain operations that exchange the two surfaces.
+For a given {\bf k}-point parallel to the surface, the 
+point group of the slab might be larger than the one of the surface, because it 
+contain operations that exchange the two surfaces.
 In this case the surface point group of a given {\bf k}-point parallel 
 to the surface can be found in the projected band structure calculation,
 for a {\bf k}-point with the same component parallel to the surface
@@ -663,7 +666,7 @@ surface point groups. Some particular values of {\bf k}$_z$, such as
 might have a different point group than a generic {\bf k}$_z$ and in this
 case the representations are transformed into those of the smaller
 group of the surface using the group-subgroup relationships and
-the descent in symmetry of the irreducible representations
+the symmetry descent of the irreducible representations
 (only when \texttt{sym\_divide=.TRUE.}).
 It is the user responsibility to specify the same number of panels
 for the PBS and for the slab calculation and to assure that the
@@ -770,7 +773,7 @@ that can read the input file of \texttt{pw.x}. You can find the code at
 \texttt{xsf} format called \texttt{prefix.xsf}, where the variable 
 \texttt{prefix}
 is given in the input of \texttt{pw.x}. This can be useful when
-the nonequivalent atomic positions and the space group are given in the input
+the inequivalent atomic positions and the space group are given in the input
 of \texttt{pw.x}. To see an \texttt{xsf} file, give the command
 \texttt{xcrysden --xsf file.xsf}.
 
@@ -1135,8 +1138,8 @@ step_ngeo(1),...,step_ngeo(6) : The step between the lattice constants at
              Default: real 0.05 a.u., 0.02, 0.02, 0.5, 0.5, 0.5
 lmurn       : if .TRUE. the Murnaghan fit is done. Only ngeo(1) values of
              the energy are fitted, the other values of ngeo are not used. 
-             if .FALSE. use a quadratic function to interpolate the energy 
-             as a function of all celldm parameters. The number of 
+             if .FALSE. use a quadratic or quartic function to interpolate 
+             the energy as a function of all celldm parameters. The number of 
              self-consistent calculations is ngeo(1) x ngeo(2) x ngeo(3)
              x ngeo(4) x ngeo(5) x ngeo(6). In this case only the 
              minimum energy and the optimal celldm are given in output. 
@@ -1330,7 +1333,8 @@ crystal parameters obtained from the minimization of the Helmholtz free energy.
 If many files with the elastic constants, one for each geometry, as
 produced with the option \texttt{elastic\_constants\_t}, are found
 in the working directory, the bulk modulus and the elastic constants
-are computed as a function of temperature and are used
+are computed as a function of temperature within the "quasi-static
+approximation" and are used
 to calculate the other thermodynamic properties. In addition to the
 quantities plotted for cubic solids, the code plots also the elastic
 constants as a function of the temperature and the difference between
@@ -1437,7 +1441,7 @@ of tasks of the phonon code (see above the option \texttt{what='scf\_ph'}). \\
 
 With this option the code computes the elastic constants for a set of
 geometries, the same geometries that are chosen with the option 
-\texttt{what='mur\_lc\_t'} and write them on separate files, one for
+\texttt{what='mur\_lc\_t'}, and writes them on separate files, one for
 each geometry. The temperature dependence of the elastic constants is
 not computed by this option. In order to plot the elastic constants
 as a function of temperature it is necessary to make a calculation
@@ -1445,7 +1449,8 @@ with \texttt{what='mur\_lc\_t'} having on files the elastic constants
 calculated with the present option. In this case \texttt{thermo\_pw}
 will be able to calculate the anharmonic properties using temperature
 dependent elastic constants and bulk moduli obtained by interpolating 
-the elastic constants computed by this option at the crystal parameters 
+(within the "quasi-static approximation") the elastic constants computed 
+by this option at the crystal parameters 
 found at each temperature from the minimization of the free energy. 
 The parameters that control this option are the same as those used with  
 \texttt{what='mur\_lc'} for the choice of the geometries and with
@@ -1542,35 +1547,14 @@ to change the Brillouin zone path. \\
 \section{\color{coral}Tools}
 
 The directory \texttt{tools} contains a few tools that can be useful to build
-structures of solids, surfaces, ribbons, and nanowires. Currently it contains
-the following programs:
+structures of solids, surfaces, ribbons, and nanowires. Moreover it 
+contains some miscellaneous codes that give additional information
+on the internal conventions of \thermo\ or further process its output. 
+Currently it contains the following programs:
 
 \begin{itemize}
 
-\item \texttt{space\_groups.x} gives several information on space groups.
-It can give the names of the space group given the ITA number, or
-the number given one of the names, translate the names between different
-editions of the ITA tables or the Sh\"oneflies names. It gives the list 
-of coset representatives of each space group and the list of symmorphic 
-space groups.
-
-\item \texttt{supercell.x} reads a three dimensional
-Bravais lattice index and the atomic coordinates of the atoms inside a unit
-cell and produces a supercell with $n1 \times n2 \times n3$ cells of the original
-unit cell. For centered cells there is the option to consider $n1$, $n2$,
-and $n3$ in the conventional or in the centered cell.
-The input unit cell can be specified also by giving the space group and
-the coordinates of the nonequivalents atoms.
-It can be useful to study defects or to calculate all the 
-atomic positions starting from the space-group and the 
-nonequivalents positions.
-It is also possible to give the input Bravais lattice by using
-\texttt{ibrav=0} and the three principal vectors. In this case
-however, before generating the supercell, the code rotates the Bravais
-lattice so that it has the same orientation of the vectors described
-in the \texttt{thermo.pdf} guide.
-
-\item \texttt{bravais\_lattices.x} is a small tool that tests the
+\item \texttt{bravais\_lattices.x} tests the
 module \texttt{lattices.f90} of the library. Presently it can read three
 primitive lattice vectors of a Bravais lattice and find the \texttt{ibrav}
 code and the \texttt{celldm} parameters of the input lattice. It
@@ -1578,15 +1562,30 @@ can also read two sets of primitive vectors and decide if they describe
 the same Bravais lattice. In the positive case it gives the orientation
 of one lattice with respect to the other.
 
-\item \texttt{hex\_trig.x} is a small tool that reads the values of $a$ and $c$
-of the conventional hexagonal cell of a rhombohedral lattice (in \AA ngstrom),
-and gives as output the size $a_r$ (in a.u.) and the cosine of the angle
-$\alpha$ of the rhombohedral cell. This information can
-be put directly in the input of \texttt{pw.x} for this type of cells.
+\item \texttt{crystal\_point\_group.x} is a crystal point group calculator.
+It can give several information about the crystallographic point groups,
+such as the list of symmetry operations, the product of two rotation
+matrices, the product table, the class structure, the character tables of 
+the irreducible representations of the point group and of the double
+point group and the projective representations of the point group. It
+gives the list of subgroups and supergroups of a given group and 
+the compatibility tables of a given group with its subgroups. It can 
+also decompose the Kronecker product representations. Finally it
+can list the cojugate groups.
 
-\item \texttt{translate.x} reads a set of atomic positions
-and translates them of a fixed vector. If a rotation matrix is given in input
-it can also rototranslate the set of atomic positions.
+\item \texttt{elastic.x} reads the elastic constants of a
+solid and computes the elastic compliances, the bulk modulus, and a few
+poly-crystalline averages. It uses the \thermo\ library so the output is the
+same. 
+
+\item \texttt{epsilon\_tpw.x} generalizes the routine
+\texttt{epsilon.f90} of the \qe\ distribution. It calculates the 
+complex dielectric
+constant of a solid as a function of the frequency for independent electrons
+using the LDA or GGA eigenvalues. It is limited to insulators, but supports
+norm-conserving, ultrasoft, and PAW pseudopotentials. It supports both scalar
+relativistic and fully relativistic pseudopotentials and it uses the point
+group symmetry of the solid to reduce the number of {\bf k}-points.
 
 \item \texttt{gener\_nanowire.x} reads a two dimensional (2D)
 Bravais lattice index and atomic coordinates an generates a sheet of type
@@ -1605,42 +1604,60 @@ perpendicular to {\bf G} $= m$ {\bf b}$_1 + n ${\bf b}$_2$, where
 of the 2D Bravais lattice. The number of rows of the ribbon, and the number of
 atoms per row are given as input variables.
 
-\item \texttt{crystal\_point\_group.x} is a crystal point group calculator.
-It can give several information about the crystallographic point groups,
-such as the list of symmetry operations, the product of two rotation
-matrices, the class structure of the point group and of the double point
-group, the character tables of the point group, of the double point
-group and the characters of the projective representations of the point
-group, the list of subgroups and supergroups of a given group and
-the compatibility tables of a given group with its subgroups.
-
-\item \texttt{epsilon\_tpw.x} generalizes the routine
-epsilon.f90 of the \qe\ distribution. It calculates the complex dielectric
-constant of a solid as a function of the frequency for independent electrons
-using the LDA or GGA eigenvalues. It is limited to insulators, but supports
-norm-conserving, ultrasoft, and PAW pseudopotentials. It supports both scalar
-relativistic and fully relativistic pseudopotentials and it uses the point
-group symmetry of the solid to reduce the number of {\bf k}-points.
-
 \item \texttt{gener\_3d\_slab.x} reads a three dimensional
 Bravais lattice index and atomic coordinates and generates an infinite slab
 perpendicular to {\bf G} $= m ${\bf b}$_1 + n ${\bf b}$_2 + o ${\bf b}$_3$, 
 where {\bf b}$_1$, {\bf b}$_2$ and {\bf b}$_3$ are the primitive reciprocal 
 lattice
-vectors of the 3D Bravais lattice. The number of layers of each slab, and the
+vectors of the Bravais lattice. The number of layers of each slab, and the
 size of the surface unit cell are given as input parameters.
 
-\item \texttt{plot\_sur\_states.x} reads the dump file
-with the planar averages of the all the states, selects the k points
-and the bands requested in input and generate the plot of the states.
+\item \texttt{hex\_trig.x} reads the values of $a$ and $c$
+of the conventional hexagonal cell of a rhombohedral lattice (in \AA ngstrom),
+and gives as output the size $a_r$ (in a.u.) and the cosine of the angle
+$\alpha$ of the rhombohedral cell. This information can
+be written in the input of \texttt{pw.x} for this type of cells. It
+is used to convert the structural information contained in a CIF file
+to the \texttt{pw.x} input.
 
-\item \texttt{elastic.x} reads the elastic constants of a
-solid and computes the elastic compliances, the bulk modulus, and a few
-poly-crystalline averages. It uses the \tpw\ library so the output is the
-same but can be used separately. 
+\item \texttt{kovalev.x} writes the correspondence between point group
+symmetry operations defined in the Kovalev tables and those used by \qe.
+
+\item \texttt{plot\_sur\_states.x} reads the dump file produced
+by \thermo\ in a \texttt{what='scf\_2d\_bands'} calculation that
+contains the planar averages of the all the states, and plots
+the states with the {\bf k} point and the band numbers requested in input.
+
+\item \texttt{space\_groups.x} gives several information on space groups.
+It can give the names of the space group given the number reported in
+the International Tables for Crystallography (ITA), or
+the number given one of the names, translate the names between different
+editions of the ITA tables or the Sh\"onflies name. It gives the list 
+of coset representatives of each space group and the list of symmorphic 
+space groups.
+
+\item \texttt{supercell.x} reads a three dimensional
+Bravais lattice index and the atomic coordinates of the atoms inside a unit
+cell and produces a supercell with $n1 \times n2 \times n3$ cells of the original
+unit cell. For centered cells there is the option to consider $n1$, $n2$,
+and $n3$ in the conventional or in the centered cell.
+The input unit cell can be specified also by giving the space group and
+the coordinates of the inequivalents atoms.
+It can be useful to study defects or to calculate all the 
+atomic positions starting from the space-group and the 
+inequivalents positions.
+It is also possible to give the input Bravais lattice by using
+\texttt{ibrav=0} and the three principal vectors. In this case,
+before generating the supercell, the code rotates the Bravais
+lattice so that it has the same orientation of the vectors described
+in the \texttt{thermo.pdf} guide.
 
 \item \texttt{test\_colors.x} produces a postscript file with the 
 \texttt{gnuplot} colors that can be used in the plots.   
+
+\item \texttt{translate.x} reads a set of atomic positions and a translation
+vector and translates the atomic positions. It can read also a rotation matrix 
+and roto-translate the atomic positions.
 
 \end{itemize}
 
@@ -1693,9 +1710,11 @@ documents:
 information needed to perform a given task.
 
 \item
-\texttt{point\_groups.pdf} : a description of the crystallographic point groups
-and of their single and double representations, for the interpretation of
-the color codes in the band and phonon dispersion plots.
+\texttt{point\_groups.pdf} : a description of the crystallographic point 
+groups, character tables of the irreducible representations of groups and 
+of the double point groups and tables of the projective representations, 
+for the interpretation of the color codes in the band and phonon dispersion 
+plots.
 
 \item
 \texttt{thermo.pdf} : some notes on the thermodynamic expressions implemented
@@ -1744,7 +1763,7 @@ curve is the fit.
 \item
 Total energy as a function of one or two crystallographic parameters
 (\texttt{lmurn=.FALSE.}). When there is a single parameter the curve is
-\texttt{red} as in the case (\texttt{lmurn=.TRUE.}). When there are two
+\texttt{red} as in the case \texttt{lmurn=.TRUE.}. When there are two
 parameters a contour plot of the energy as a function of two parameters
 is shown. The contour levels, their number and their colors can be
 given in input. By default the code shows nine levels with three
@@ -1761,10 +1780,8 @@ not available.
 Energy bands. In this figure the bands have the color of
 their irreducible representation. Each line of the path can have a different
 point group and representations. See the \texttt{point\_groups.pdf} file
-for the list of representations and their color code. Bands that in a given
-panel are all \texttt{red} have not been separated according to symmetry,
-because the path is at the border of the Brillouin zone and the space
-group is not symmorphic.
+for the list of representations and their color code. 
+When the symmetry analysis is not done all the bands are \texttt{red}.
                               
 \item
 Electron density of states. This is a plot composed by two figures,
@@ -1875,9 +1892,11 @@ each mode. The same comments made for the band structure plot apply here.
 
 \item
 Temperature dependence of the elastic constants within the 
-`Quasistatic Approximation'. The elastic constants are calculated 
-at several geometries and
-intepola  
+`Quasi-static Approximation'. There is a plot for each non-zero
+elastic constant and the number depends on the Laue class. Elastic constants 
+interpolated at the geometry computed using the phonon density of states 
+are in \texttt{red}, those calculated from integration over the 
+Brillouin zone are in \texttt{blue}.
 
 \end{itemize}
 
