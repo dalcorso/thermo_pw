@@ -21,7 +21,7 @@ MODULE space_groups
 !  Given the space group name, it returns the space group number
 !  Given the space group number, it returns all the space groups names
 !  compatible with that number.
-!  In the case of orthorombic groups it gives the rotation needed to
+!  In the case of orthorhombic groups it gives the rotation needed to
 !  transform the group to the one found in the ITA tables.
 !
 !  The point group and the Bravais lattice must be compatible, otherwise
@@ -2174,12 +2174,11 @@ MODULE space_groups
        "                ", "                ", "                " /
 
 
-  PUBLIC   spg_code, spg_name, find_space_group, sg_name, &
-           equivalent_tau, sg_names, &
-           find_space_group_number, find_space_group_names, add_info, &
+  PUBLIC   spg_code, spg_name, find_space_group, sg_name, equivalent_tau, &
+           sg_names, find_space_group_number, find_space_group_names, add_info,&
            set_add_info, set_fft_fact, project_frac_tran,  &
            shift_frac_tran, set_standard_sg, set_point_group_code, &
-           check_code_group_ext, symmorphic_sg
+           check_code_group_ext, symmorphic_sg, sg_origin
 
   CONTAINS
 
@@ -2730,7 +2729,7 @@ MODULE space_groups
   !  NB: it assumes that the space group orientation is the one of the ITA
   !      tables.
   !  aux_sg is an additional output code, used only for selected space groups.
-  !      In the monoclinic and orthorombic case it is a number from 1 to 6 
+  !      In the monoclinic and orthorhombic case it is a number from 1 to 6 
   !      that gives the orientation. It uses the same convention of table
   !      4.3.2.1 of the ITA tables, and indicates the column if all columns
   !      are different. If some columns coincide it is a pointer in the
@@ -4880,7 +4879,6 @@ MODULE space_groups
 
   RETURN
   END SUBROUTINE find_space_group
-
 
 
   SUBROUTINE transform_fcc_axis(tau_aux,naux)
@@ -7435,7 +7433,7 @@ IMPLICIT NONE
 
 INTEGER, INTENT(IN) :: cge
 !
-!  c unique, b unique, and all settings for the orthorombic groups
+!  c unique, b unique, and all settings for the orthorhombic groups
 !
 check_code_group_ext=(cge==1.OR.cge==2.OR.cge==3.OR.cge==15.OR.cge==16      &
                .OR.cge==28.OR.cge==33.OR.cge==34.OR.cge==37.OR.cge==38      &
@@ -7532,5 +7530,67 @@ check_intersection=type1.AND.type2.AND.type3
 
 RETURN
 END FUNCTION check_intersection
+
+SUBROUTINE sg_origin(sg_number, spaceg_name, at, s01, s02)
+
+USE kinds, ONLY : DP
+USE io_global, ONLY : stdout
+
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: sg_number
+REAL(DP), INTENT(IN) :: at(3,3), s01(3), s02(3)
+CHARACTER(LEN=12) :: spaceg_name
+
+REAL(DP) :: s01c(3), s02c(3), s01mod, s02mod
+
+IF (sg_number > 0) THEN
+   WRITE(stdout,'(/,5x,"Space group ",a,"   (group number",i4, ").")') &
+                         TRIM(spaceg_name), sg_number
+   s01mod=s01(1)**2 + s01(2)**2 + s01(3)**2
+   s02mod=s02(1)**2 + s02(2)**2 + s02(3)**2
+   s01c=s01
+   s02c=s02
+   CALL cryst_to_cart(1,s01c,at,1)
+   CALL cryst_to_cart(1,s02c,at,1)
+   IF (s01mod < 1.D-4.AND.s02mod>1.D3) THEN
+      WRITE(stdout,'(5x,"The origin coincides with the ITA tables.")')
+   ELSEIF (s01mod<1.D-4.AND.s02mod<1.D3) THEN
+      WRITE(stdout,'(5x,"The origin coincides with &
+                   &the ITA tables (origin choice 1).")')
+      WRITE(stdout,'(/,5x,"To shift to origin choice 2 &
+                         &subtract to all coordinates:")')
+      WRITE(stdout,'(17x,"(cryst. coord.)",18x,"(cart. coord.)")')
+      WRITE(stdout,'(5x,3f12.7,2x,3f12.7)') s02(:), s02c(:)
+   ELSEIF (s01mod > 1.D-4 .AND. s02mod<1.D-4 ) THEN
+      WRITE(stdout,'(5x,"The origin coincides with &
+                  & the ITA tables (origin choice 2).")')
+      WRITE(stdout,'(/,5x,"To shift to origin choice 1 &
+                         &subtract to all coordinates:")')
+      WRITE(stdout,'(17x,"(cryst. coord.)",18x,"(cart. coord.)")')
+      WRITE(stdout,'(5x,3f12.7,2x,3f12.7)') s01(:), s01c(:)
+   ELSEIF (s01mod > 1.D-4 .AND. s01mod<1.d3 .AND. s02mod > 1.d3 ) THEN
+      WRITE(stdout,'(5x,"The origin does not coincide with &
+                  &the ITA tables.")')
+      WRITE(stdout,'(/,5x,"To have the origin as in the ITA &
+                     &tables subtract to all coordinates:")')
+      WRITE(stdout,'(17x,"(cryst. coord.)",18x,"(cart. coord.)")')
+      WRITE(stdout,'(5x,3f12.7,2x,3f12.7)') s01(:), s01c(:)
+   ELSEIF (s01mod > 1.D-4 .AND. s02mod < 1.d3 ) THEN
+      WRITE(stdout,'(5x,"The origin does not coincide with the ITA tables.")')
+      WRITE(stdout,'(/,5x,"To shift to origin choice 1 &
+                           &subtract to all coordinates:")')
+      WRITE(stdout,'(17x,"(cryst. coord.)",18x,"(cart. coord.)")')
+      WRITE(stdout,'(5x,3f12.7,2x,3f12.7)') s01(:), s01c(:)
+      WRITE(stdout,'(/,5x,"to shift to origin choice 2 &
+                             &subtract to all coordinates: ")')
+      WRITE(stdout,'(17x,"(cryst. coord.)",18x,"(cart. coord.)")')
+      WRITE(stdout,'(5x,3f12.7,2x,3f12.7)') s02(:), s02c(:)
+   ENDIF
+ELSE
+   WRITE(stdout,'(/,5x,"Unknown space group.")') 
+ENDIF
+
+RETURN
+END SUBROUTINE sg_origin
 
 END MODULE space_groups

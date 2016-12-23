@@ -117,11 +117,11 @@ SELECT CASE (laue)
 CASE DEFAULT
 !
 !   generic case, used when ibrav=0 or for triclinic, monoclinic, and 
-!   orthorombic systems, no information is deduced from symmetry 
+!   orthorhombic systems, no information is deduced from symmetry 
 !   in the first three cases, all 21 elements of the elastic constants 
 !   matrix are computed. 
 !   Requires 6 * ngeo_strain self consistent calculations. In the monoclinic
-!   and orthorombic case, some elements vanish by symmetry, but we need to
+!   and orthorhombic case, some elements vanish by symmetry, but we need to
 !   make six independent strains in any case.
 !
    nwork = 6 * ngeo_strain
@@ -281,7 +281,7 @@ SELECT CASE (laue)
       ENDIF
    CASE (20,0)
 !
-!   orthorombic system
+!   orthorhombic system
 !
       IF (ibrav_save==8.OR.ibrav_save==9.OR.ibrav_save==10.OR.ibrav_save==11) THEN
          IF (elastic_algorithm=='advanced') THEN

@@ -16,18 +16,17 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
   USE kinds,            ONLY : DP
   USE thermo_mod,       ONLY : what, celldm_geo
   USE control_thermo,   ONLY : outdir_thermo, lstress
-  USE input_parameters, ONLY : ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
-                               trd_ht, rd_ht, cell_units, outdir, &
+  USE input_parameters, ONLY : ibrav, celldm, outdir, &
                                electron_maxstep, &
                                k_points, xk, wk, nk1, nk2, nk3,  &
                                k1, k2, k3, nkstot, &
                                calculation, etot_conv_thr, forc_conv_thr
   USE control_conv, ONLY : ke, keden, nk_test, sigma_test
-  USE control_elastic_constants, ONLY : at_save, tau_save, frozen_ions
+  USE control_elastic_constants, ONLY : frozen_ions
+  USE control_pwrun, ONLY : at_save, tau_save
   USE elastic_constants, ONLY : epsilon_geo, apply_strain, print_strain
   USE control_ph, ONLY : recover
-  USE control_flags, ONLY : gamma_only, tstress, tprnfor, lbfgs, nstep, niter, &
-                            lscf, lmd
+  USE control_flags, ONLY : gamma_only, tstress, tprnfor, lbfgs, nstep, niter 
   USE cellmd,        ONLY : lmovecell
   USE force_mod, ONLY : lforce, lstres
   USE relax,       ONLY : epse, epsf
@@ -49,12 +48,15 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
   INTEGER, INTENT(OUT) :: iwork, iq_point, irr_value
   INTEGER, INTENT(IN) :: part, igeo
   INTEGER :: jwork, irr, iq, i, ia, iunupdate
+  REAL(DP) :: rd_ht(3,3), zero
+  CHARACTER(LEN=10) :: cell_units
   CHARACTER(LEN=6) :: int_to_char
   CHARACTER(LEN=256) :: filename
-  LOGICAL :: exst, parallelfs
+  LOGICAL :: exst, parallelfs, trd_ht
   !
   iq_point=0
   irr_value=0
+  zero=0.0_DP
 
   IF (part == 1) THEN
      SELECT CASE (TRIM(what))
@@ -93,7 +95,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
            wfc_dir = tmp_dir
            CALL check_tempdir ( tmp_dir, exst, parallelfs )
 !
-!   then all the cases that require a many energies calculations at
+!   then all the cases that require many energies calculations at
 !   different geometries. The geometry is set here in the pwscf variables
 !
         CASE ('mur_lc',                      &
@@ -119,14 +121,12 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
               epsf = forc_conv_thr
            ENDIF
 !
-!   now set the celldm. Both the input parameters and the variables in 
-!   cell_base module
+!   now set the celldm. 
 !
            celldm(:)=celldm_geo(:,iwork)
-           CALL cell_base_init ( ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
-                         trd_ht, rd_ht, cell_units )
-!
-!
+           rd_ht=0.0_DP
+           CALL cell_base_init ( ibrav, celldm, zero, zero, zero, zero, &
+                                     zero, zero, .FALSE., rd_ht, ' ' )
 !
            CALL set_fft_mesh()
 !
@@ -236,8 +236,8 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, igeo)
            rd_ht = TRANSPOSE( at ) 
            trd_ht=.TRUE.
            cell_units='alat'
-           CALL cell_base_init ( ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
-                         trd_ht, rd_ht, cell_units )
+           CALL cell_base_init ( ibrav, celldm, zero, zero, zero, zero, &
+                         zero, zero, trd_ht, rd_ht, cell_units )
            CALL set_fft_mesh()
            outdir=TRIM(outdir_thermo)//'/g'//TRIM(int_to_char(iwork))//'/'
            tmp_dir = TRIM ( outdir )
@@ -271,10 +271,10 @@ SUBROUTINE set_work_for_elastic_const(iwork)
    USE cell_base,  ONLY : cell_base_init, at
    USE ions_base,  ONLY : tau, nat
    USE control_thermo,   ONLY : outdir_thermo
-   USE input_parameters, ONLY : ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
-                                trd_ht, rd_ht, cell_units, outdir
-   USE control_elastic_constants, ONLY : at_save, tau_save, frozen_ions, &
+   USE input_parameters, ONLY : ibrav, celldm, outdir
+   USE control_elastic_constants, ONLY : frozen_ions, &
                                 elastic_algorithm, rot_mat, aap_mat, apa_mat
+   USE control_pwrun, ONLY : at_save, tau_save
    USE elastic_constants, ONLY : epsilon_geo, apply_strain, print_strain
    USE control_mur,   ONLY : celldm0
    USE rotate,        ONLY : rotate_vect
@@ -286,9 +286,10 @@ SUBROUTINE set_work_for_elastic_const(iwork)
 
    INTEGER :: i, na, ipol, jpol, kpol, iunupdate
    REAL(DP), ALLOCATABLE :: tau_ocoord(:,:)
-   REAL(DP) :: atp(3,3)
-   LOGICAL :: exst, parallelfs
+   REAL(DP) :: atp(3,3), rd_ht(3,3), zero
+   LOGICAL :: exst, parallelfs, trd_ht
    CHARACTER(LEN=256) :: filename
+   CHARACTER(LEN=10) :: cell_units
    CHARACTER(LEN=6) :: int_to_char
 
    WRITE(stdout,'(/,2x,76("-"))')
@@ -304,6 +305,7 @@ SUBROUTINE set_work_for_elastic_const(iwork)
 !
 !    first bring tau in the strained lattice
 !
+   zero=0.0_DP
    IF (elastic_algorithm=='advanced' .OR. &
                               elastic_algorithm=='energy') THEN
       atp=0.0_DP
@@ -351,8 +353,8 @@ SUBROUTINE set_work_for_elastic_const(iwork)
       rd_ht = TRANSPOSE( at )
       trd_ht=.TRUE.
       cell_units='alat'
-      CALL cell_base_init ( ibrav, celldm, a, b, c, cosab, &
-                     cosac, cosbc, trd_ht, rd_ht, cell_units )
+      CALL cell_base_init ( ibrav, celldm, zero, zero, zero, zero, &
+                     zero, zero, trd_ht, rd_ht, cell_units )
       CALL set_fft_mesh()
    ELSEIF (elastic_algorithm=='advanced' .OR. &
                                            elastic_algorithm=='energy') THEN
@@ -361,8 +363,8 @@ SUBROUTINE set_work_for_elastic_const(iwork)
       cell_units='alat'
       trd_ht=.FALSE.
       rd_ht=0.0_DP
-      CALL cell_base_init ( ibrav, celldm, a, b, c, cosab, &
-                         cosac, cosbc, trd_ht, rd_ht, cell_units )
+      CALL cell_base_init ( ibrav, celldm, zero, zero, zero, zero, &
+                         zero, zero, .FALSE., rd_ht, ' ' )
       ALLOCATE(tau_ocoord(3,nat))
       tau_ocoord=tau
 !

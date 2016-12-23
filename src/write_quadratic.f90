@@ -19,7 +19,7 @@ USE cell_base,      ONLY : ibrav
 USE control_mur,    ONLY : nvol
 USE control_quadratic_energy, ONLY : coeff
 USE control_quartic_energy, ONLY : coeff4, lquartic
-USE control_pressure, ONLY : pressure, pressure_kb
+USE control_pressure, ONLY : pressure_kb
 USE quadratic_surfaces, ONLY : evaluate_fit_quadratic, &
                                evaluate_fit_grad_quadratic
 USE quartic_surfaces,   ONLY : evaluate_fit_quartic, &
@@ -47,7 +47,7 @@ IF (ibrav==3) fact=0.5_DP
 nwork=compute_nwork()
 
 filename='energy_files/'//TRIM(flevdat)//'_quadratic'
-IF (pressure /= 0.0_DP) &
+IF (pressure_kb /= 0.0_DP) &
    filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 
 IF (ibrav==1.OR.ibrav==2.OR.ibrav==3) THEN
@@ -78,7 +78,7 @@ ENDIF
 IF (ionode) THEN
    iu_mur=2
    OPEN(UNIT=iu_mur, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
-   IF (pressure /= 0.0_DP) THEN
+   IF (pressure_kb /= 0.0_DP) THEN
       WRITE(iu_mur,'( "# a (a.u.)       enthalpy (Ry)    pressure (kbar)" )')
    ELSE
       WRITE(iu_mur,'( "# a (a.u.)       energy (Ry)      pressure (kbar)" )')

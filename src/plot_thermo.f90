@@ -10,15 +10,15 @@ SUBROUTINE plot_thermo()
 !  This is a driver to plot the quantities written inside fltherm
 !  
 !
-USE kinds,           ONLY : DP
-USE control_gnuplot, ONLY : flgnuplot, gnuplot_command, lgnuplot
-USE control_thermo,  ONLY : ltherm_dos, ltherm_freq
+USE kinds,            ONLY : DP
+USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot
+USE control_thermo,   ONLY : ltherm_dos, ltherm_freq
 USE postscript_files, ONLY : flpstherm
-USE gnuplot,         ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
-                            gnuplot_ylabel, &
-                            gnuplot_xlabel, &
-                            gnuplot_write_file_mul_data, &
-                            gnuplot_set_fact
+USE gnuplot,          ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
+                             gnuplot_ylabel, &
+                             gnuplot_xlabel, &
+                             gnuplot_write_file_mul_data, &
+                             gnuplot_set_fact
 USE data_files,      ONLY : fltherm
 USE temperature,     ONLY : tmin, tmax
 USE mp_images,       ONLY : root_image, my_image_id
@@ -90,18 +90,18 @@ SUBROUTINE plot_thermo_debye(igeom)
 !
 !  This is a driver to plot the quantities written inside fltherm_debye
 !
-USE kinds,           ONLY : DP
-USE control_gnuplot, ONLY : flgnuplot, gnuplot_command, lgnuplot
+USE kinds,            ONLY : DP
+USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot
 USE postscript_files, ONLY : flpstherm
-USE gnuplot,         ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
-                            gnuplot_ylabel, &
-                            gnuplot_xlabel, &
-                            gnuplot_write_file_mul_data, &
-                            gnuplot_set_fact
-USE data_files,      ONLY : fltherm
-USE temperature,     ONLY : tmin, tmax
-USE mp_images,       ONLY : root_image, my_image_id
-USE io_global,       ONLY : ionode
+USE gnuplot,          ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
+                             gnuplot_ylabel, &
+                             gnuplot_xlabel, &
+                             gnuplot_write_file_mul_data, &
+                             gnuplot_set_fact
+USE data_files,       ONLY : fltherm
+USE temperature,      ONLY : tmin, tmax
+USE mp_images,        ONLY : root_image, my_image_id
+USE io_global,        ONLY : ionode
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: igeom
@@ -151,20 +151,20 @@ SUBROUTINE plot_el_thermo()
 !
 !  This is a driver to plot the quantities written inside fltherm_el_thermo
 !
-USE kinds,           ONLY : DP
-USE control_gnuplot, ONLY : flgnuplot, gnuplot_command, lgnuplot
+USE kinds,            ONLY : DP
+USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot
 USE postscript_files, ONLY : flpseltherm
-USE gnuplot,         ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
-                            gnuplot_ylabel, &
-                            gnuplot_xlabel, &
-                            gnuplot_write_file_mul_data, &
-                            gnuplot_set_fact
-USE klist,           ONLY : degauss
-USE ktetra,          ONLY : ltetra
-USE data_files,      ONLY : fleltherm
-USE temperature,     ONLY : tmin, tmax
-USE mp_images,       ONLY : root_image, my_image_id
-USE io_global,       ONLY : ionode
+USE gnuplot,          ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
+                             gnuplot_ylabel, &
+                             gnuplot_xlabel, &
+                             gnuplot_write_file_mul_data, &
+                             gnuplot_set_fact
+USE klist,            ONLY : degauss
+USE ktetra,           ONLY : ltetra
+USE data_files,       ONLY : fleltherm
+USE temperature,      ONLY : tmin, tmax
+USE mp_images,        ONLY : root_image, my_image_id
+USE io_global,        ONLY : ionode
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: gnu_filename, filename, psfilename

@@ -72,9 +72,9 @@ MODULE lattices
 !                reciprocal lattice vectors and gives .true. if the input
 !                vector is at zone border
 !
-!  same_star : receives two k vectors and a point group matrieces and 
-!              gives .TRUE. if the two k vectors belong to the same star,
-!              up to a reciprocal lattice vector.
+!  is_compatible_group_ibrav : a function that check is a point group 
+!                is compatible with a given Bravais lattice and gives also 
+!                all the list of compatible lattices
 !
   USE kinds,      ONLY : DP
   !
@@ -82,10 +82,11 @@ MODULE lattices
   PRIVATE
   SAVE
 
-  PUBLIC compute_conventional, find_ibrav_code, find_combination, &
-         is_bravais_lattice, same_lattice, lattice_point_group, &
+  PUBLIC compute_conventional, find_ibrav_code, find_combination,      &
+         is_bravais_lattice, same_lattice, lattice_point_group,        &
          compute_omega, conventional_ibrav, is_centered, lattice_name, &
-         zone_border, same_star
+         zone_border, same_star, is_compatible_group_ibrav,            &
+         print_bravais_description
 
 CONTAINS
 
@@ -179,7 +180,8 @@ CONTAINS
   END FUNCTION is_centered
 
 
-  SUBROUTINE find_ibrav_code(a1, a2, a3, ibrav, celldm, ur, global_s, verbosity)
+  SUBROUTINE find_ibrav_code(a1, a2, a3, ibrav, celldm, code_group_ext, ur, &
+                             global_s, verbosity)
 !
 !   This routine is closely related to the routine latgen.f90 of the
 !   QE distribution. Given ibrav and celldm the routine latgen
@@ -223,15 +225,23 @@ CONTAINS
 !   the ibrav and celldm. These variables are used to generate the at2
 !   and the routine
 !
+!   If the variable code_group_ext is set to zero the routine finds the
+!   code of the point group, otherwise it will search the Bravais lattice
+!   only among those compatible with the input code_group_ext, even if 
+!   the actual at might be invariant for a larger point group. In any case 
+!   code_group_ext must be a subgroup of the actual point group of the at.
 !
   USE kinds, ONLY : DP
   USE io_global, ONLY : stdout
   USE rotate, ONLY : is_rotation, find_rotation
+  USE point_group, ONLY : find_group_info_ext, group_index_from_ext, &
+                          is_subgroup, point_group_bravais
 
   IMPLICIT NONE
   REAL(DP), INTENT(IN) :: a1(3), a2(3), a3(3)
   LOGICAL, INTENT(IN) :: verbosity
   INTEGER, INTENT(OUT) :: ibrav
+  INTEGER, INTENT(INOUT) :: code_group_ext
   REAL(DP), INTENT(OUT) :: celldm(6), global_s(3,3), ur(3,3)
 
   REAL(DP), PARAMETER :: eps1=1.D-7, eps2=5.D-7
@@ -240,16 +250,28 @@ CONTAINS
               omega, angle_rot, ps, e1(3,3), rot_mat(3,3), lm, ceangle(3), &
               celldm0(6)
   INTEGER :: ipol, jpol, ivec, code_group, nsym, isym, ts, tipo_sym, iperp, &
-             ipar1, ipar2, enne(3), ind(3), ncount
+             ipar1, ipar2, enne(3), ind(3), ncount, code_group_, &
+             which_elem(48), group_desc(48), code_group_ext_
   LOGICAL :: is_axis, parallel_axis
-  CHARACTER(LEN=11) :: gname
+  CHARACTER(LEN=11) :: gname, gname_at, group_name
 !
 ! find the point group
 !
   at(:,1)=a1(:)
   at(:,2)=a2(:)
   at(:,3)=a3(:)
-  CALL lattice_point_group(at,gname,code_group,nsym,sr)
+  CALL lattice_point_group(at,gname_at,code_group,nsym,sr)
+  CALL find_group_info_ext(nsym, sr, code_group, code_group_ext_, &
+                                                which_elem, group_desc)
+  IF (code_group_ext==0) THEN
+     code_group_ext=code_group_ext_
+     gname=gname_at
+  ELSE
+     IF (.NOT. is_subgroup(code_group_ext_, code_group_ext)) &
+        CALL errore('find_ibrav_code','input point group code wrong',1)
+     CALL point_group_bravais(group_index_from_ext(code_group_ext), code_group)
+     gname=group_name(code_group)
+  ENDIF
 
   IF (verbosity) THEN
      WRITE(stdout,'(/,5x," find ibrav for a1, a2, a3",/)') 
@@ -258,7 +280,10 @@ CONTAINS
      WRITE(stdout,'(3f20.12)') a2(:)
      WRITE(stdout,'(3f20.12)') a3(:)
 
-     WRITE(stdout,'(/,5x,"Point group ",a11)') gname
+     WRITE(stdout,'(/,5x,"Point group of the at ",a11)') gname_at
+     IF (gname /= gname_at) &
+        WRITE(stdout,'(/,5x,"Searching the ibrav among the lattices &
+                      compatible with ",a11)') gname
   END IF
 !
 !  set the three cartesian directions
@@ -442,7 +467,7 @@ CONTAINS
               CALL versor(sr(1,1,isym), ax(1,ipol))
               IF (.NOT. bravais_dir(at, ax(1,ipol), enne, e(1,ipol), &
                          emod(ipol) ) ) &
-                 CALL errore('find_ibrav_code','problem with orthorombic dir',1)
+                 CALL errore('find_ibrav_code','problem with orthorhombic dir',1)
            ENDIF
         ENDDO
 !
@@ -508,7 +533,7 @@ CONTAINS
                        CALL latgen(ibrav,celldm,at2(1,1),at2(1,2),at2(1,3),&
                                                                         omega)
                        IF (.NOT.same_lattice(at, at2, ur, at1, global_s)) &
-                          CALL errore('find_ibrav_code','orthorombic lattice &
+                          CALL errore('find_ibrav_code','orthorhombic lattice &
                                                     &not found',1)
                     ENDIF
                  ENDIF
@@ -556,53 +581,50 @@ CONTAINS
            END IF
         END IF
 !
-     CASE(23)
+     CASE(23,25)
 !
-!  hexagonal case  D_6h
+!  hexagonal case  D_6h or trigonal D_3d
 !
-        DO isym=1,nsym
-           ts=tipo_sym(sr(1,1,isym))
-           IF (ts==3 .AND. ABS(angle_rot(sr(1,1,isym))-60.0_DP)<eps1 ) THEN
-              CALL versor(sr(1,1,isym), ax(1,3))
-           ENDIF
-        ENDDO
+        IF (ABS(tmod(1)-tmod(2))>eps1.AND.ABS(tmod(1)-tmod(3))>eps1) THEN
+           DO isym=1,nsym
+              ts=tipo_sym(sr(1,1,isym))
+              IF (ts==3 .AND. ABS(angle_rot(sr(1,1,isym))-60.0_DP)<eps1 ) THEN
+                 CALL versor(sr(1,1,isym), ax(1,3))
+              ENDIF
+           ENDDO
 !
 !   find an at paralell and one perpendicular to ax(1,3)
 !
-        ibrav=4
-        celldm(1)=1.D20
-        DO ipol=1,3
-           ps=ABS(at(1,ipol)*ax(1,3)+at(2,ipol)*ax(2,3)+at(3,ipol)*ax(3,3))
-           IF (ABS(ps-tmod(ipol))<eps1) celldm(3)=tmod(ipol)
-           IF (ABS(ps)<eps1.AND.tmod(ipol)<celldm(1)) celldm(1)=tmod(ipol)
-        ENDDO
-        celldm(3)=celldm(3)/celldm(1)
-
-        CALL latgen(ibrav,celldm,at2(1,1),at2(1,2),at2(1,3),omega)
-        IF (.NOT.same_lattice(at, at2, ur, at1, global_s)) &
-           CALL errore('find_ibrav_code','hexagonal lattice not found',1)
 !
-     CASE(25)
+!   hexagonal lattice
+!       
+           ibrav=4
+           celldm(1)=1.D20
+           DO ipol=1,3
+              ps=ABS(at(1,ipol)*ax(1,3)+at(2,ipol)*ax(2,3)+at(3,ipol)*ax(3,3))
+              IF (ABS(ps-tmod(ipol))<eps1) celldm(3)=tmod(ipol)
+              IF (ABS(ps)<eps1.AND.tmod(ipol)<celldm(1)) celldm(1)=tmod(ipol)
+           ENDDO
+           celldm(3)=celldm(3)/celldm(1)
+
+           CALL latgen(ibrav,celldm,at2(1,1),at2(1,2),at2(1,3),omega)
+           IF (.NOT.same_lattice(at, at2, ur, at1, global_s)) &
+              CALL errore('find_ibrav_code','hexagonal lattice not found',1)
+        ELSE
+!
 !
 !  trigonal case  D_3d
 !
 !   set the standard orientation of the three axis
 !
-!        DO isym=1,nsym
-!           ts=tipo_sym(sr(1,1,isym))
-!           IF (ts==4 .AND. ABS(angle_rot(sr(1,1,isym))-60.0_DP)<eps1 ) THEN
-!              CALL versor(sr(1,1,isym), ax(1,3))
-!           ENDIF
-!        ENDDO
-!
-        ibrav=5
-        celldm(1)=tmod(1)
-        celldm(4)=cangle(1)
+           ibrav=5
+           celldm(1)=tmod(1)
+           celldm(4)=cangle(1)
 
-        CALL latgen(ibrav,celldm,at2(1,1),at2(1,2),at2(1,3),omega)
-        IF (.NOT.same_lattice(at, at2, ur, at1, global_s)) &
-           CALL errore('find_ibrav_code','trigonal lattice not found',1)
-
+           CALL latgen(ibrav,celldm,at2(1,1),at2(1,2),at2(1,3),omega)
+           IF (.NOT.same_lattice(at, at2, ur, at1, global_s)) &
+              CALL errore('find_ibrav_code','trigonal lattice not found',1)
+        ENDIF
      CASE(32)
 !
 !   cubic case O_h. The three fourfold axis give the global orientation
@@ -1061,15 +1083,15 @@ SELECT CASE (ibrav)
     CASE(7)
         latt_name='centered tetragonal'
     CASE(8)
-        latt_name='simple orthorombic'
+        latt_name='simple orthorhombic'
     CASE(9, -9)
-        latt_name='one face centered orthorombic (C)'
+        latt_name='one face centered orthorhombic (C)'
     CASE(91)
-        latt_name='one face centered orthorombic (A)'
+        latt_name='one face centered orthorhombic (A)'
     CASE(10)
-        latt_name='face centered orthorombic'
+        latt_name='face centered orthorhombic'
     CASE(11)
-        latt_name='body centered orthorombic'
+        latt_name='body centered orthorhombic'
     CASE(12)
         latt_name='monoclinic (c unique)'
     CASE(-12)
@@ -1188,5 +1210,301 @@ ENDDO
 
 RETURN
 END FUNCTION same_star
+
+FUNCTION is_compatible_group_ibrav(code_group, ibrav, is_compatible, ncomp)
+!
+!  This function returns .TRUE. is the Bravais lattice and the
+!  point group are compatible.
+!
+USE kinds, ONLY : DP
+USE io_global, ONLY : stdout
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: code_group, ibrav
+INTEGER, INTENT(OUT) :: is_compatible(32,6), ncomp(32)
+LOGICAL :: is_compatible_group_ibrav
+
+INTEGER :: i
+
+is_compatible=0
+!
+!   C_1, C_i triclinic
+!
+is_compatible(1,1)=14
+ncomp(1)=1
+is_compatible(2,1)=14
+ncomp(2)=1
+!
+!   C_s, C_2, monoclinic
+!
+is_compatible(3,1)=12
+is_compatible(3,2)=13
+is_compatible(3,3)=-12
+is_compatible(3,4)=-13
+ncomp(3)=4
+is_compatible(4,1)=12
+is_compatible(4,2)=13
+is_compatible(4,3)=-12
+is_compatible(4,4)=-13
+ncomp(4)=4
+!
+!   C_3, trigonal or hexagonal
+!
+is_compatible(5,1)=4
+is_compatible(5,2)=5
+is_compatible(5,3)=-5
+ncomp(5)=3
+!
+!   C_4, tetragonal
+!
+is_compatible(6,1)=6
+is_compatible(6,2)=7
+ncomp(6)=2
+!
+!   C_6, hexagonal
+!
+is_compatible(7,1)=4
+ncomp(7)=1
+!
+!   D_2, orthorhombic
+!
+is_compatible(8,1)=8
+is_compatible(8,2)=9
+is_compatible(8,3)=10
+is_compatible(8,4)=11
+is_compatible(8,5)=-9
+is_compatible(8,6)=91
+ncomp(8)=6
+!
+!   D_3 trigonal or hexagonal
+!
+is_compatible(9,1)=4
+is_compatible(9,2)=5
+is_compatible(9,3)=-5
+ncomp(9)=3
+!
+!   D_4 tetragonal
+!
+is_compatible(10,1)=6
+is_compatible(10,2)=7
+ncomp(10)=2
+!
+!   D_6 hexagonal
+!
+is_compatible(11,1)=4
+ncomp(11)=1
+!
+!   C_2v orthorhombic
+!
+is_compatible(12,1)=8
+is_compatible(12,2)=9
+is_compatible(12,3)=10
+is_compatible(12,4)=11
+is_compatible(12,5)=-9
+is_compatible(12,6)=91
+ncomp(12)=6
+!
+!   C_3v hexagonal or trigonal
+!
+is_compatible(13,1)=4
+is_compatible(13,2)=5
+is_compatible(13,3)=-5
+ncomp(13)=3
+!
+!   C_4v tetragonal
+!
+is_compatible(14,1)=6
+is_compatible(14,2)=7
+ncomp(14)=2
+!
+!   C_6v hexagonal
+!
+is_compatible(15,1)=4
+ncomp(15)=1
+!
+!   C_2h monoclinic
+!
+is_compatible(16,1)=12
+is_compatible(16,2)=13
+is_compatible(16,3)=-12
+is_compatible(16,4)=-13
+ncomp(16)=4
+!
+!  C_3h hexagonal
+!
+is_compatible(17,1)=4
+ncomp(17)=1
+!
+!  C_4h tetragonal
+!
+is_compatible(18,1)=6
+is_compatible(18,2)=7
+ncomp(18)=2
+!
+!  C_6h hexagonal
+!
+is_compatible(19,1)=4
+ncomp(19)=1
+!
+!  D_2h orthorhombic
+!
+is_compatible(20,1)=8
+is_compatible(20,2)=9
+is_compatible(20,3)=10
+is_compatible(20,4)=11
+is_compatible(20,5)=-9
+is_compatible(20,6)=91
+ncomp(20)=6
+!
+!  D_3h hexagonal
+!
+is_compatible(21,1)=4
+ncomp(21)=1
+!
+!  D_4h tetragonal
+!
+is_compatible(22,1)=6
+is_compatible(22,2)=7
+ncomp(22)=2
+!
+!  D_6h hexagonal
+!
+is_compatible(23,1)=4
+ncomp(23)=1
+!
+!  D_2d tetragonal
+!
+is_compatible(24,1)=6
+is_compatible(24,2)=7
+ncomp(24)=1
+!
+!   D_3d hexagonal or trigonal
+!
+is_compatible(25,1)=4
+is_compatible(25,2)=5
+is_compatible(25,3)=-5
+ncomp(25)=3
+!
+!   S_4 tetragonal
+!
+is_compatible(26,1)=6
+is_compatible(26,2)=7
+ncomp(26)=2
+!
+!   S_6 hexagonal or trigonal
+!
+is_compatible(27,1)=4
+is_compatible(27,2)=5
+is_compatible(27,3)=-5
+ncomp(27)=3
+!
+!   T cubic
+!
+is_compatible(28,1)=1
+is_compatible(28,2)=2
+is_compatible(28,3)=3
+ncomp(28)=3
+!
+!   T_h cubic
+!
+is_compatible(29,1)=1
+is_compatible(29,2)=2
+is_compatible(29,3)=3
+ncomp(29)=3
+!
+!   T_d cubic
+!
+is_compatible(30,1)=1
+is_compatible(30,2)=2
+is_compatible(30,3)=3
+ncomp(30)=3
+!
+!   O cubic
+!
+is_compatible(31,1)=1
+is_compatible(31,2)=2
+is_compatible(31,3)=3
+ncomp(31)=3
+!
+!   O_h cubic
+!
+is_compatible(32,1)=1
+is_compatible(32,2)=2
+is_compatible(32,3)=3
+ncomp(32)=3
+
+is_compatible_group_ibrav=.FALSE.
+
+DO i=1, ncomp(code_group)
+   IF (is_compatible(code_group,i)==ibrav) is_compatible_group_ibrav=.TRUE.
+ENDDO
+
+RETURN
+END FUNCTION is_compatible_group_ibrav
+
+SUBROUTINE print_bravais_description(ibrav,celldm)
+
+USE kinds, ONLY : DP
+USE constants, ONLY : pi
+USE io_global, ONLY : stdout
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ibrav
+REAL(DP), INTENT(IN) :: celldm(6)
+
+CHARACTER(LEN=40) :: latt_name
+
+CALL lattice_name(ibrav, latt_name)
+WRITE(stdout,'(/,5x, "ibrav=",i3,": ", a)') ibrav, TRIM(latt_name)
+WRITE(stdout,'(5x,"Cell parameters:")')
+
+SELECT CASE (ibrav)
+   CASE(1)  
+      WRITE(stdout,'(/,5x,"alat=",f11.6," a.u.",/)') celldm(1)
+   CASE(2)  
+      WRITE(stdout,'(/,5x,"alat=",f11.6," a.u.",/)') celldm(1)
+   CASE(3)  
+      WRITE(stdout,'(/,5x,"alat=",f11.6," a.u.",/)') celldm(1)
+   CASE(4)  
+      WRITE(stdout,'(/,5x,"alat=",f11.6," a.u., c/a=",f11.6,/)') celldm(1), &
+                                                            celldm(3)
+   CASE(5)  
+      WRITE(stdout,'(/,5x,"alat=",f11.6," a.u., cos(alpha)=",f11.6,/)') &
+                                        celldm(1), celldm(4)
+   CASE(6)  
+      WRITE(stdout,'(/,5x,"alat=",f11.6," a.u., c/a=",f11.6,/)') &
+                                  celldm(1), celldm(3)
+   CASE(7)  
+      WRITE(stdout,'(/,5x,"alat=",f11.6," a.u., c/a=",f11.6,/)') celldm(1), &
+                                                            celldm(3)
+   CASE(8,9,-9,91,10,11)  
+      WRITE(stdout,'(/,5x,"alat=",f11.6," a.u., b/a=",f11.6,&
+                          &", c/a=",f11.6,/)') celldm(1), celldm(2), celldm(3)
+   CASE(12,13)  
+      WRITE(stdout,'(/,5x,"alat=",f11.6," a.u., b/a=",f11.6,&
+                   &", c/a=",f11.6)') celldm(1), celldm(2), celldm(3)
+      WRITE(stdout,'(/,5x,"cos(gamma)=",f11.6,/)') celldm(4)
+      WRITE(stdout,'(5x,"gamma=",f11.6,/)') ACOS(celldm(4))*180.0_DP/pi
+   CASE(-12,-13)
+      WRITE(stdout,'(/,5x,"alat=",f11.6," a.u., b/a=",f11.6,&
+                  &", c/a=",f11.6)') celldm(1), celldm(2), celldm(3)
+      WRITE(stdout,'(/,5x,"cos(beta)=",f11.6,/)') celldm(5)
+      WRITE(stdout,'(5x,"beta=",f11.6,/)') ACOS(celldm(5))*180.0_DP/pi
+   CASE(14)  
+      WRITE(stdout,'(/,5x,"alat=",f11.6," a.u., b/a=",f11.6,&
+                  &", c/a=",f11.6)') celldm(1), celldm(2), celldm(3)
+      WRITE(stdout,'(/,5x,"cos(alpha)=",f11.6, &
+                     &", cos(beta)=",f11.6,", cos(gamma)=",f11.6)') &
+                      celldm(4), celldm(5), celldm(6)
+      WRITE(stdout,'(5x,"alpha=",f11.6," deg,",2x,"beta=",f11.6,&
+                                      &" deg,",2x,"gamma=",f11.6," deg",/)') &
+                      ACOS(celldm(4))*180.0_DP/pi,  &
+                      ACOS(celldm(5))*180.0_DP/pi,  &
+                      ACOS(celldm(6))*180.0_DP/pi
+  CASE(0)
+  CASE DEFAULT
+     CALL errore('print_bravais_description','ibrav not programmed',1)
+  END SELECT
+
+RETURN
+END SUBROUTINE print_bravais_description
 
 END MODULE lattices

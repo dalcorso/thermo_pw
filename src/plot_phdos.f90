@@ -8,9 +8,9 @@
 
 SUBROUTINE plot_phdos()
 
-USE kinds,      ONLY : DP
-USE control_dosq,  ONLY : freqmin, freqmax
-USE data_files, ONLY : fldos
+USE kinds,            ONLY : DP
+USE control_dosq,     ONLY : freqmin, freqmax
+USE data_files,       ONLY : fldos
 USE postscript_files, ONLY : flpsdos
 
 IMPLICIT NONE

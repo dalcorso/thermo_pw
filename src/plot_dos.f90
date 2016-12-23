@@ -16,7 +16,6 @@ USE gnuplot,   ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
 USE control_gnuplot, ONLY : gnuplot_command, lgnuplot, flgnuplot
 USE control_eldos,   ONLY : save_ndos
 USE control_bands,   ONLY : emin_input
-USE io_files,   ONLY : prefix
 USE data_files, ONLY : fleldos
 USE postscript_files, ONLY : flpseldos
 USE ener,             ONLY : ef

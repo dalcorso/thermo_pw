@@ -34,7 +34,7 @@ SUBROUTINE bands_sub()
   CALL openfil_pp()
   !
   IF (q2d) THEN
-     CALL punch_band_2d(filband, spin_component)
+     CALL punch_band_2d_tpw(filband, spin_component)
   ELSE
      CALL write_bands_tpw(filband, spin_component)
      CALL sym_band_sub(filband,spin_component)
@@ -48,7 +48,7 @@ SUBROUTINE bands_sub()
   RETURN
 END SUBROUTINE bands_sub
 
-SUBROUTINE punch_band_2d(filband,spin_component)
+SUBROUTINE punch_band_2d_tpw(filband,spin_component)
 !
 !  This routine opens a file for each band and writes on output 
 !  kx, ky, energy, 
@@ -153,7 +153,7 @@ loop_k:  DO j=start_k+2, nkstot
   DEALLOCATE(et_collect)
 
   RETURN
-  END SUBROUTINE punch_band_2d
+  END SUBROUTINE punch_band_2d_tpw
 !
 !-----------------------------------------------------------------------
 SUBROUTINE write_bands_tpw (filband, spin_component)

@@ -310,7 +310,6 @@ MODULE control_thermo
   SAVE
   !
   LOGICAL, ALLOCATABLE :: lpwscf(:),  & ! if .true. this work requires a scf calc.
-                          lbands(:),  & ! if .true. this work requires a band
                           lberry(:),  & ! if .true. this work requires 
                                         ! a berry_phase calculation
                           lstress(:), & ! if .true. this work computes stress
@@ -366,6 +365,10 @@ MODULE control_thermo
   !
   CHARACTER(LEN=256) :: outdir_thermo ! the outdir read from the input
   !
+  LOGICAL :: set_internal_path ! the path provided by thermo_pw is used
+  !
+  LOGICAL :: set_2d_path    ! the path provided by thermo_pw is used
+  !
 END MODULE control_thermo
 
 MODULE control_elastic_constants
@@ -384,8 +387,6 @@ MODULE control_elastic_constants
                                           ! For ngeo_strain odd:
                                           !  0, -e0-D, -e0-2D, ... 
                                           !      e0+D,  e0+2D
-  REAL(DP) :: at_save(3,3)
-  REAL(DP), ALLOCATABLE :: tau_save(:,:)
   REAL(DP), ALLOCATABLE :: rot_mat(:,:,:) ! rotation matrix between the
                                           ! cartesian coordinates of the
                                           ! strained and unstrained cell  
@@ -411,6 +412,7 @@ MODULE control_elastic_constants
                                 ! that interpolates stress or energy
              poly_degree        ! degree of the polynomial interpolation
 
+
   LOGICAL :: el_cons_available=.FALSE.  ! when this flag becomes true it
                                 ! means that the elastic constant have been
                                 ! read from file and are available
@@ -432,18 +434,6 @@ MODULE control_elastic_constants
                                 ! constants are calculated
 
 END MODULE control_elastic_constants
-
-MODULE control_piezoelectric_tensor
-  USE kinds,  ONLY : DP
-  !
-  ! ... The variables needed to control the calculation of the elastic 
-  !     constants
-  !
-  SAVE
-
-  LOGICAL :: nosym_save
-  !
-END MODULE control_piezoelectric_tensor
   !
 MODULE control_conv
   USE kinds,  ONLY : DP
@@ -625,16 +615,19 @@ MODULE control_pwrun
   USE kinds, ONLY: DP
   SAVE
 
-  INTEGER  :: nr1_save, nr2_save, nr3_save  ! save the fft dimensions
-
-  REAL(DP) :: celldm_save(6)   ! save the crystal parameters
   INTEGER  :: ibrav_save       ! save the Bravais lattice
+  REAL(DP) :: celldm_save(6)   ! save the crystal parameters
   INTEGER, ALLOCATABLE :: ityp_save(:)  ! save the type of atoms. To be
                                         ! used after completely cleaning pw
   REAL(DP), ALLOCATABLE :: amass_save(:) ! save the mass of atoms. 
+  REAL(DP) :: at_save(3,3)     ! save the at of the configuration read pw.x 
+                               ! input
+  REAL(DP), ALLOCATABLE :: tau_save(:,:) ! save the atomic coordinates read
+                               ! from pw.x input
+  INTEGER  :: nr1_save, nr2_save, nr3_save  ! save the fft dimensions
+  LOGICAL :: nosym_save        ! save the input nosym
   LOGICAL  :: do_punch=.TRUE.  ! set this variable to .FALSE. if pw has
                                ! not to save the punch files.
-
 END MODULE control_pwrun
 
 MODULE control_energy_plot
@@ -722,9 +715,6 @@ MODULE control_pressure
                           ! to Ry/(a.u.)^2
               pressure_kb ! the pressure in kbar.
 
-  REAL(DP), ALLOCATABLE :: pressure_list(:) ! the list of pressures to calculate
-  INTEGER :: npress=1       ! the number of pressures, presently fixed. 
-  REAL(DP) :: delta_pressure ! separation between pressures
 
 END MODULE control_pressure
 
@@ -897,6 +887,7 @@ MODULE thermo_sym
                              ! consistent 
   INTEGER :: fft_fact(3)     ! the factors that must be inside the fft
   INTEGER :: sg_number       ! the number of the space_group
+  INTEGER :: aux_sg          ! the orientation of the space group
 
 END MODULE thermo_sym
 

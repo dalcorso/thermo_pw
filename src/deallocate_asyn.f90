@@ -12,11 +12,10 @@ SUBROUTINE deallocate_asyn()
   !  This routine deallocates the variables that control the thermo calculation
   !
   USE kinds, ONLY : DP
-  USE control_thermo, ONLY : lpwscf, lbands, lphonon, lstress, lberry
+  USE control_thermo, ONLY : lpwscf, lphonon, lstress, lberry
   IMPLICIT NONE
   !
   IF (ALLOCATED(lpwscf))     DEALLOCATE(lpwscf) 
-  IF (ALLOCATED(lbands))     DEALLOCATE(lbands) 
   IF (ALLOCATED(lberry))     DEALLOCATE(lberry) 
   IF (ALLOCATED(lphonon))    DEALLOCATE(lphonon) 
   IF (ALLOCATED(lstress))    DEALLOCATE(lstress) 

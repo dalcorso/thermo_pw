@@ -1,4 +1,4 @@
-
+!
 ! Copyright (C) 2013-2015 Andrea Dal Corso
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
@@ -16,8 +16,8 @@ PROGRAM thermo_pw
   ! ... which calculations to do and the parameters for these calculations.
   ! ... It checks the scratch directories to see what has been already
   ! ... calculated. The info for the quantities that have been already
-  ! ... calculated is read inside the code. The others tasks are scheduled,
-  ! ... their priorities determined, and distributed to the image driver.
+  ! ... calculated is read inside the code. The others tasks are scheduled
+  ! ... and distributed to the image driver.
   ! ... If there are several available images the different tasks are
   ! ... carried out in parallel. This driver can carry out a scf 
   ! ... calculation, a non scf calculation to determine the band structure,
@@ -37,7 +37,6 @@ PROGRAM thermo_pw
   ! ...   scf_ph    : a phonon calculation after an scf run
   ! ...   scf_disp  : a phonon dispersion calculation after a scf run
   ! ...   scf_elastic_constants : elastic constants at zero temperature 
-  ! ...   scf_piezoelectric_tensor : piezoelectric tensor at zero temperature
   ! ...
   ! ...   mur_lc    : lattice constant via Murnaghan equation or 
   ! ...               quadratic interpolation of the equation of state
@@ -51,14 +50,11 @@ PROGRAM thermo_pw
   ! ...               thermodynamic quantities
   ! ...   mur_lc_elastic_constants : elastic constants at zero temperature 
   ! ...               at the minimum of the total energy equation 
-  ! ...   mur_lc_piezoelectric_tensor : piezoelectric tensor at zero temperature
-  ! ...               at the minimum of the total energy 
-  ! ...
   ! ...   mur_lc_t  : lattice constant and bulk modulus as a function 
   ! ...               of temperature within the quasiharmonic approximation
   ! ...               for cubic systems or crystal parameters as a function
   ! ...               of temperature for tetragonal, hexagonal, trigonal,
-  ! ...               and orthorombic systems. 
+  ! ...               and orthorhombic systems. 
   ! ...
   USE kinds,            ONLY : DP
   USE ions_base,        ONLY : nat, atm, tau, nsp, ityp, amass
@@ -79,8 +75,7 @@ PROGRAM thermo_pw
                                spin_component, after_disp, lelastic_const, &
                                lpiezoelectric_tensor, lpolarization,       &
                                lpart2_pw, ltherm_dos, ltherm_freq
-  USE postscript_files, ONLY : flpstherm, flpsdisp, flpsdos
-  USE data_files,        ONLY : flevdat, fl_el_cons
+  USE data_files,        ONLY : fl_el_cons
   USE elastic_constants, ONLY : print_elastic_constants, &
                                 compute_elastic_constants, epsilon_geo, &
                                 sigma_geo, el_con, el_compliances, &
@@ -99,12 +94,12 @@ PROGRAM thermo_pw
                                 polar_geo, g_piezo_tensor, d_piezo_tensor, &
                                 print_d_piezo_tensor, print_g_piezo_tensor
   USE control_elastic_constants, ONLY : ngeo_strain, frozen_ions, &
-                                elastic_algorithm, rot_mat, omega0, at_save, &
-                                elcpvar, tau_save, el_cons_t_available
+                                elastic_algorithm, rot_mat, omega0, &
+                                elcpvar, el_cons_t_available
+  USE control_pwrun,    ONLY : tau_save, at_save
   USE control_macro_elasticity, ONLY : macro_el, vp, vb, vg, approx_debye_t
   USE internal_files_names,  ONLY : flfrq_thermo, flvec_thermo
   USE control_paths,    ONLY : nqaux
-  USE control_gnuplot,  ONLY : flgnuplot
   USE control_bands,    ONLY : nbnd_bands
   USE control_pwrun,    ONLY : ibrav_save, do_punch, amass_save
   USE control_xrdp,     ONLY : lxrdp, lambda, flxrdp, lcm
@@ -145,13 +140,13 @@ PROGRAM thermo_pw
   INTEGER :: part, nwork, igeom, itemp, nspin0, exit_status, ph_geometries, &
              iaux
   LOGICAL  :: exst, parallelfs, run
-  LOGICAL :: check_file_exists, check_dyn_file_exists
-  CHARACTER(LEN=256) :: file_dat, filename, filelastic, filedata, filerap, &
+  LOGICAL :: check_dyn_file_exists
+  CHARACTER(LEN=256) :: filename, filelastic, filedata, filerap, &
                         fileout, gnu_filename, filenameps
   REAL(DP) :: poisson, bulkm
   ! Initialize MPI, clocks, print initial messages
   !
-  CALL mp_startup ( start_images=.true. )
+  CALL mp_startup ( start_images=.TRUE. )
   CALL environment_start ( code )
   CALL start_clock( 'PWSCF' )
   with_asyn_images=(nimage > 1)
@@ -160,9 +155,7 @@ PROGRAM thermo_pw
   !
   CALL thermo_readin()
   !
-  CALL set_temperature()
-  !
-  CALL set_pressure()
+  CALL thermo_setup()
   !
   CALL thermo_summary()
   !
@@ -177,7 +170,7 @@ PROGRAM thermo_pw
   !
   CALL run_thermo_asynchronously(nwork, part, iaux, auxdyn)
   !
-  !  In this part all images are syncronized and can communicate 
+  !  In this part all images are synchronized and can communicate 
   !  their results thought the world_comm communicator
   !
   IF (nwork>0) THEN
@@ -199,9 +192,9 @@ PROGRAM thermo_pw
      CALL plot_e_nk()
   ENDIF
 !
-!  In a murnaghan equation calculation determine the lattice constant,
-!  bulk modulus and its derivative and write the results
-!  Otherwise interpolate the energy with a quadratic or quartic polynomium.
+!  In a Murnaghan equation calculation determine the lattice constant,
+!  bulk modulus and its pressure derivative and write the results.
+!  Otherwise interpolate the energy with a quadratic or quartic polynomial.
 !
   IF (lev_syn_1) THEN
      IF (lmurn) THEN
@@ -226,7 +219,7 @@ PROGRAM thermo_pw
      omega0=omega
      at_save(:,:)=at(:,:)
 !
-!   strain tau uniformely
+!   strain tau uniformly
 !
      CALL adjust_tau(tau_save, tau, at)
 !
@@ -250,7 +243,6 @@ PROGRAM thermo_pw
   CALL deallocate_asyn()
 
   IF (lpwscf_syn_1) THEN
-     with_asyn_images=.FALSE.
      outdir=TRIM(outdir_thermo)//'/g1/'
      tmp_dir = TRIM ( outdir )
      wfc_dir = tmp_dir
@@ -347,7 +339,6 @@ PROGRAM thermo_pw
      CALL mp_bcast(at, meta_ionode_id, world_comm)
      CALL mp_bcast(omega, meta_ionode_id, world_comm)
      CALL set_equilibrium_conf(celldm, tau, at, omega)
-     with_asyn_images=(nimage>1)
   END IF
      !
   IF (lpart2_pw) THEN
@@ -471,7 +462,7 @@ PROGRAM thermo_pw
 !   This part makes now one or several phonon calculations, using the
 !   image feature of this code and running asynchronously the images
 !   different geometries are made in sequence. This should be improved,
-!   there should be no need to resyncronize after each geometry
+!   there should be no need to resynchronize after each geometry
 !
   IF (lph) THEN
      !
@@ -610,7 +601,7 @@ PROGRAM thermo_pw
            IF (ltherm_dos) CALL write_anharmonic()
            IF (ltherm_freq) CALL write_ph_freq_anharmonic()
 !
-!    here we calculate and plot the gruneisen parameters along the given path.
+!    here we calculate and plot the Gruneisen parameters along the given path.
 !
            CALL write_gruneisen_band(flfrq_thermo,flvec_thermo)
            CALL set_files_for_plot(3, flfrq_thermo, filedata, filerap, &
@@ -622,7 +613,7 @@ PROGRAM thermo_pw
            CALL plotband_sub(4, filedata, filerap, fileout,  &
                                                     gnu_filename, filenameps)
 !
-!    here we compute the gruneisen parameters on the dos mesh
+!    here we compute the Gruneisen parameters on the dos mesh
 !
            CALL compute_gruneisen()
 !

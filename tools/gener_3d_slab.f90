@@ -328,8 +328,8 @@ ELSEIF (ibrav_3d == 7)  THEN
    g(:)=g(:)/fact
 ELSEIF (ibrav_3d == 9)  THEN
 !
-!  With one-base (C) centered orthorombic lattice m, n, and o refer to 
-!  the primitive orthorombic reciprocal lattice vectors
+!  With one-base (C) centered orthorhombic lattice m, n, and o refer to 
+!  the primitive orthorhombic reciprocal lattice vectors
 !
    beff=0.0_DP
    beff(1,1) = 2.0_DP
@@ -350,8 +350,8 @@ ELSEIF (ibrav_3d == 9)  THEN
    g(:)=g(:)/fact
 ELSEIF (ibrav_3d == 91)  THEN
 !
-!  With one-base (A) centered orthorombic lattice m, n, and o refer to 
-!  the primitive orthorombic reciprocal lattice vectors
+!  With one-base (A) centered orthorhombic lattice m, n, and o refer to 
+!  the primitive orthorhombic reciprocal lattice vectors
 !
    beff=0.0_DP
    beff(1,1) = 1.0_DP
@@ -372,8 +372,8 @@ ELSEIF (ibrav_3d == 91)  THEN
 
 ELSEIF (ibrav_3d == 10)  THEN
 !
-!  With face centered orthorombic lattice m, n, and o refer to 
-!  the primitive orthorombic reciprocal lattice vectors
+!  With face centered orthorhombic lattice m, n, and o refer to 
+!  the primitive orthorhombic reciprocal lattice vectors
 !
    beff=0.0_DP
    beff(1,1) = 2.0_DP
@@ -384,7 +384,7 @@ ELSEIF (ibrav_3d == 10)  THEN
    o1 = o
    g(:) = m1 * beff(:,1) + n1 * beff(:,2) + o1 * beff(:,3)
 !
-!  here we return to the m, n, and o of the centered orthorombic lattice
+!  here we return to the m, n, and o of the centered orthorhombic lattice
 !
    m = m1 + o1  
    n = m1 + n1  
@@ -394,8 +394,8 @@ ELSEIF (ibrav_3d == 10)  THEN
    g(:)=g(:)/fact
 ELSEIF (ibrav_3d == 11)  THEN
 !
-!  With body centered orthorombic lattice m, n, and o refer to 
-!  the primitive orthorombic reciprocal lattice vectors
+!  With body centered orthorhombic lattice m, n, and o refer to 
+!  the primitive orthorhombic reciprocal lattice vectors
 !
    beff=0.0_DP
    beff(1,1) = 2.0_DP
@@ -406,7 +406,7 @@ ELSEIF (ibrav_3d == 11)  THEN
    o1 = o
    g(:) = m1 * beff(:,1) + n1 * beff(:,2) + o1 * beff(:,3)
 !
-!  here we return to the m, n, and o of the body centered orthorombic lattice
+!  here we return to the m, n, and o of the body centered orthorhombic lattice
 !
    m =  m1 + n1 + o1  
    n = -m1 + n1 + o1 
@@ -428,7 +428,7 @@ ELSEIF (ibrav_3d == 13)  THEN
    o1 = o
    g(:) = m1 * beff(:,1) + n1 * beff(:,2) + o1 * beff(:,3)
 !
-!  here we return to the m, n, and o of the body centered orthorombic lattice
+!  here we return to the m, n, and o of the body centered orthorhombic lattice
 !
    m = m1 - o1  
    n = n1  
@@ -450,7 +450,7 @@ ELSEIF (ibrav_3d == -13)  THEN
    o1 = o
    g(:) = m1 * beff(:,1) + n1 * beff(:,2) + o1 * beff(:,3)
 !
-!  here we return to the m, n, and o of the body centered orthorombic lattice
+!  here we return to the m, n, and o of the body centered orthorhombic lattice
 !
    m = m1 - n1  
    n = m1 + n1  

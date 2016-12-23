@@ -42,7 +42,8 @@ CALL gnuplot_ylabel(TRIM(ylabel), .FALSE.)
 CALL gnuplot_xlabel(TRIM(xlabel), .FALSE.) 
 CALL gnuplot_write_command('plot_width=2',.FALSE.)
 
-CALL gnuplot_write_file_data(data_filename,'plot_width',colore,.TRUE.,.TRUE., .FALSE.)
+CALL gnuplot_write_file_data(data_filename,'plot_width',colore,.TRUE.,.TRUE.,&
+                                                                      .FALSE.)
 
 CALL gnuplot_end()
 

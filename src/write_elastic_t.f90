@@ -13,7 +13,7 @@ SUBROUTINE write_elastic_t( )
 !
 USE kinds, ONLY : DP
 USE io_global, ONLY : stdout
-USE mp_images, ONLY : my_image_id, root_image, intra_image_comm
+USE mp_images, ONLY : my_image_id, root_image
 USE thermo_mod, ONLY : tot_ngeo
 USE control_quartic_energy, ONLY :  nvar4, lquartic, lsolve
 USE quadratic_surfaces, ONLY : evaluate_fit_quadratic, fit_multi_quadratic, &
@@ -35,6 +35,7 @@ USE anharmonic,     ONLY : celldm_t, el_cons_t, el_comp_t, macro_el_t, b0_t, &
                            lelastic
 USE ph_freq_anharmonic, ONLY : celldmf_t, el_consf_t, el_compf_t, macro_elf_t, &
                            b0f_t, lelasticf
+USE thermo_sym, ONLY : laue
 
 USE data_files, ONLY : flanhar
 USE temperature, ONLY : ntemp, temp
@@ -164,7 +165,8 @@ IF (ltherm_dos) THEN
    END DO
    lelastic=.TRUE.
    filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons'
-   CALL write_el_cons_on_file(temp, ntemp, ibrav, el_cons_t, b0_t, filelastic)
+   CALL write_el_cons_on_file(temp, ntemp, laue, ibrav, el_cons_t, b0_t, &
+                                                              filelastic)
 ENDIF
 
 IF (ltherm_freq) THEN
@@ -193,7 +195,8 @@ IF (ltherm_freq) THEN
    END DO
    lelasticf=.TRUE.
    filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_ph'
-   CALL write_el_cons_on_file(temp, ntemp, ibrav, el_consf_t, b0f_t, filelastic)
+   CALL write_el_cons_on_file(temp, ntemp, laue, ibrav, el_consf_t, b0f_t, &
+                                                               filelastic)
 ENDIF
 
 DEALLOCATE(x)
@@ -205,14 +208,15 @@ IF (lquartic) DEALLOCATE(el_cons_coeff4)
 RETURN
 END SUBROUTINE write_elastic_t
 
-SUBROUTINE write_el_cons_on_file(temp, ntemp, ibrav, el_cons_t, b0_t, filename)
+SUBROUTINE write_el_cons_on_file(temp, ntemp, laue, ibrav, el_cons_t, &
+                                                           b0_t, filename)
 
 USE kinds,     ONLY : DP
 USE io_global, ONLY : ionode, ionode_id, stdout
 USE mp_images, ONLY : intra_image_comm
 USE mp,        ONLY : mp_bcast
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: ntemp, ibrav
+INTEGER, INTENT(IN) :: ntemp, laue, ibrav
 REAL(DP), INTENT(IN) :: temp(ntemp), el_cons_t(6,6,ntemp), b0_t(ntemp)
 CHARACTER(LEN=*), INTENT(IN) :: filename
 
@@ -227,8 +231,8 @@ IF (ionode) &
                                                              ABS(ios))
 
 IF (ionode) THEN
-   SELECT CASE (ibrav)
-      CASE(1,2,3)
+   SELECT CASE (laue)
+      CASE(29,32)
          WRITE(iu_el_cons,'("#",5x,"   T  ", 10x, " C_11 ", 9x, "  C_12 ",&
                   & 9x, " C_44 ", 9x, " B " )')
          DO itemp=1,ntemp
@@ -236,7 +240,7 @@ IF (ionode) THEN
                  el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
                  el_cons_t(4,4,itemp), b0_t(itemp)
          ENDDO
-      CASE(4)
+      CASE(19,23)
          WRITE(iu_el_cons,'("#",5x,"   T  ", 10x, " C_11 ", 9x, " C_12 ",&
                   & 9x, " C_13 ", 9x, " C_33 ", 9x, "C_44", 9x, " B " )')
          DO itemp=1,ntemp
@@ -245,6 +249,103 @@ IF (ionode) THEN
                   el_cons_t(1,3,itemp), el_cons_t(3,3,itemp), &
                   el_cons_t(4,4,itemp), b0_t(itemp)
          ENDDO
+      CASE(22)
+         WRITE(iu_el_cons,'("#",5x,"   T  ", 10x, " C_11 ", 9x, " C_12 ",&
+                  & 9x, " C_13 ", 9x, " C_33 ", 9x, "C_44", 9x, & 
+                        " C_66 ", 9x, " B " )')
+         DO itemp=1,ntemp
+            WRITE(iu_el_cons,'(e16.8,7e20.12)') temp(itemp), &
+                  el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
+                  el_cons_t(1,3,itemp), el_cons_t(3,3,itemp), &
+                  el_cons_t(4,4,itemp), el_cons_t(6,6,itemp), b0_t(itemp)
+         ENDDO
+      CASE(20)
+         WRITE(iu_el_cons,'("#",5x,"   T  ", 10x, " C_11 ", 9x, " C_12 ", &
+                  & 9x, " C_13 ", 9x, " C_22 ", 9x, " C_23 ", 9x, " C_33 ",  &
+                    9x, " C_44 ", 9x, " C_55 ", 9x, " C_66 ", 9x, " B " )')
+         DO itemp=1,ntemp
+            WRITE(iu_el_cons,'(e16.8,10e20.12)') temp(itemp), &
+                  el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
+                  el_cons_t(1,3,itemp), el_cons_t(2,2,itemp), &
+                  el_cons_t(2,3,itemp), el_cons_t(3,3,itemp), &
+                  el_cons_t(4,4,itemp), el_cons_t(5,5,itemp), &
+                  el_cons_t(6,6,itemp), b0_t(itemp)
+         ENDDO
+      CASE(18)
+         WRITE(iu_el_cons,'("#",5x,"   T  ", 10x, " C_11 ", 9x, " C_12 ",&
+                  & 9x, " C_13 ", 9x, " C_33 ", 9x, "C_44", 9x, &
+                        " C_66 ", 9x, " C_16 ", 9x, " B " )')
+
+         DO itemp=1,ntemp
+            WRITE(iu_el_cons,'(e16.8,8e20.12)') temp(itemp),  &
+                  el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
+                  el_cons_t(1,3,itemp), el_cons_t(3,3,itemp), &
+                  el_cons_t(4,4,itemp), el_cons_t(6,6,itemp), &
+                  el_cons_t(1,6,itemp), b0_t(itemp)
+         ENDDO
+      CASE(16)
+         IF (ibrav > 0) THEN
+            !
+            !  b unique
+            !
+            WRITE(iu_el_cons,'("#",5x,"   T  ", 10x, " C_11 ", 9x, " C_12 ", &
+                  & 9x, " C_13 ", 9x, " C_22 ", 9x, " C_23 ", 9x, " C_33 ",  &
+                    9x, " C_44 ", 9x, " C_55 ", 9x, " C_66 ", 9x, " C_15 ",  &
+                    9x, " C_25 ", 9x, " C_35 ", 9x, " C_46 ", 9x, " B " )')
+            DO itemp=1,ntemp
+               WRITE(iu_el_cons,'(e16.8,14e20.12)') temp(itemp), &
+                     el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
+                     el_cons_t(1,3,itemp), el_cons_t(2,2,itemp), &
+                     el_cons_t(2,3,itemp), el_cons_t(3,3,itemp), &
+                     el_cons_t(4,4,itemp), el_cons_t(5,5,itemp), &
+                     el_cons_t(6,6,itemp), el_cons_t(1,5,itemp), &
+                     el_cons_t(2,5,itemp), el_cons_t(3,5,itemp), &
+                     el_cons_t(4,6,itemp), b0_t(itemp)
+            ENDDO
+         ELSE
+            !
+            !  c unique
+            !
+            WRITE(iu_el_cons,'("#",5x,"   T  ", 10x, " C_11 ", 9x, " C_12 ", &
+                  & 9x, " C_13 ", 9x, " C_22 ", 9x, " C_23 ", 9x, " C_33 ",  &
+                    9x, " C_44 ", 9x, " C_55 ", 9x, " C_66 ", 9x, " C_16 ",  &
+                    9x, " C_26 ", 9x, " C_36 ", 9x, " C_45 ", 9x, " B " )')
+            DO itemp=1,ntemp
+               WRITE(iu_el_cons,'(e16.8,14e20.12)') temp(itemp), &
+                     el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
+                     el_cons_t(1,3,itemp), el_cons_t(2,2,itemp), &
+                     el_cons_t(2,3,itemp), el_cons_t(3,3,itemp), &
+                     el_cons_t(4,4,itemp), el_cons_t(5,5,itemp), &
+                     el_cons_t(6,6,itemp), el_cons_t(1,6,itemp), &
+                     el_cons_t(2,6,itemp), el_cons_t(3,6,itemp), &
+                     el_cons_t(4,5,itemp), b0_t(itemp)
+            ENDDO
+         ENDIF
+      CASE(2)
+         WRITE(iu_el_cons,'("#",5x,"   T  ", 10x, " C_11 ", 9x, " C_12 ",   &
+                  & 9x, " C_13 ", 9x, " C_22 ", 9x, " C_23 ", 9x, " C_33 ", &
+                    9x, " C_44 ", 9x, " C_55 ", 9x, " C_66 ", 9x, &
+                    9x, " C_14 ", 9x, " C_15 ", 9x, " C_16 ", 9x, &
+                    9x, " C_24 ", 9x, " C_25 ", 9x, " C_26 ", 9x, &
+                    9x, " C_34 ", 9x, " C_35 ", 9x, " C_36 ", 9x, &
+                    9x, " C_45 ", 9x, " C_46 ", 9x, " C_55 ", 9x, &
+                    9x, " C_56 ", 9x, " C_66 ", 9x, " B " )')
+         DO itemp=1,ntemp
+            WRITE(iu_el_cons,'(e16.8,24e20.12)') temp(itemp), &
+                  el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
+                  el_cons_t(1,3,itemp), el_cons_t(2,2,itemp), &
+                  el_cons_t(2,3,itemp), el_cons_t(3,3,itemp), &
+                  el_cons_t(4,4,itemp), el_cons_t(5,5,itemp), &
+                  el_cons_t(6,6,itemp), el_cons_t(1,4,itemp), &
+                  el_cons_t(1,5,itemp), el_cons_t(1,6,itemp), &
+                  el_cons_t(2,4,itemp), el_cons_t(2,5,itemp), &
+                  el_cons_t(2,6,itemp), el_cons_t(3,4,itemp), &
+                  el_cons_t(3,5,itemp), el_cons_t(3,6,itemp), &
+                  el_cons_t(4,5,itemp), el_cons_t(4,6,itemp), &
+                  el_cons_t(5,5,itemp), el_cons_t(5,6,itemp), &
+                  el_cons_t(6,6,itemp), b0_t(itemp)
+         ENDDO
+
    END SELECT
    CLOSE(iu_el_cons)
 ENDIF

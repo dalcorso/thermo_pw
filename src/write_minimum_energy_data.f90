@@ -15,13 +15,13 @@ SUBROUTINE write_minimum_energy_data()
   !
   USE kinds, ONLY : DP
   USE control_mur,      ONLY : b0, b01, emin, celldm0, lmurn
-  USE control_pressure, ONLY : pressure, pressure_kb
+  USE control_pressure, ONLY : pressure_kb
   USE cell_base,        ONLY : ibrav
   USE io_global, ONLY : stdout
   IMPLICIT NONE
   !
   WRITE(stdout,'(/,2x,76("-"))')
-  IF (pressure /= 0.0_DP) THEN
+  IF (pressure_kb /= 0.0_DP) THEN
      WRITE(stdout,'(5x,"At pressure ",f15.6," kbar")') pressure_kb
   ELSE
      WRITE(stdout,*) 
@@ -30,7 +30,7 @@ SUBROUTINE write_minimum_energy_data()
      WRITE(stdout,'(5x, "The equilibrium lattice constant is ",9x,f12.4,&
                                  &" a.u.")') celldm0(1)
   ELSE
-     IF (pressure /= 0.0_DP) THEN
+     IF (pressure_kb /= 0.0_DP) THEN
         WRITE(stdout,'(5x,"The minimum enthalpy is obtained for celldm")')
      ELSE
         WRITE(stdout,'(5x,"The minimum energy is obtained for celldm")')
@@ -43,7 +43,7 @@ SUBROUTINE write_minimum_energy_data()
      WRITE(stdout,'(5x, "The pressure derivative of the bulk modulus is ",&
                                   &f9.3)')  b01
   END IF
-  IF (pressure /= 0.0_DP) THEN
+  IF (pressure_kb /= 0.0_DP) THEN
      WRITE(stdout,'(5x,"The enthalpy at the minimum is    ",6x,f20.9," Ry")') &
                                                                emin
   ELSE

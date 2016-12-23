@@ -251,7 +251,7 @@ CASE (6)
 
 CASE (7) 
 !
-!  Simple orthorombic lattice
+!  Simple orthorhombic lattice
 !
    IF (what=='mur_lc_t') THEN
       letter(1:npk_label)= (/ 'gG', 'X ', 'S ', 'Y ', 'gG', 'gG', 'Z ', &
@@ -293,7 +293,7 @@ CASE (8)
    point_label_type='SC'
 CASE (9) 
 !
-!  Face centered orthorombic case 2
+!  Face centered orthorhombic case 2
 !
    IF (what=='mur_lc_t') THEN
       letter(1:npk_label)= (/ 'gG', 'Y ', 'C ', 'D ', 'X ', 'gG', 'gG',  &
@@ -312,7 +312,7 @@ CASE (9)
    point_label_type='SC'
 CASE (10) 
 !
-!  Face centered orthorombic case 3
+!  Face centered orthorhombic case 3
 !
    IF (what=='mur_lc_t') THEN
       letter(1:npk_label)= (/ 'gG', 'Y ', 'T ', 'Z ', 'gG', 'gG',  &
@@ -331,7 +331,7 @@ CASE (10)
    point_label_type='SC'
 CASE (11) 
 !
-!  Body centered orthorombic
+!  Body centered orthorhombic
 !
    IF (what=='mur_lc_t') THEN
       IF (celldm(2) < 1.0_DP .AND. celldm(3) < 1.0_DP ) THEN
@@ -374,7 +374,7 @@ CASE (11)
    point_label_type='SC'
 CASE (12)
 !
-!  Base centered orthorombic
+!  Base centered orthorhombic
 !
    IF (what=='mur_lc_t') THEN
       IF (celldm(2) >= 1.0_DP) THEN

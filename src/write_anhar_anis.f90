@@ -19,7 +19,7 @@ USE anharmonic,     ONLY : alpha_anis_t, vmin_t, b0_t, celldm_t, beta_t, &
                            lelastic
 USE control_grun,   ONLY : lb0_t
 USE control_pwrun,  ONLY : ibrav_save
-USE control_pressure, ONLY : pressure, pressure_kb
+USE control_pressure, ONLY : pressure_kb
 USE control_macro_elasticity, ONLY : macro_el
 USE control_elastic_constants, ONLY : el_cons_available, el_cons_t_available
 USE elastic_constants, ONLY : el_con
@@ -61,7 +61,7 @@ IF (ionode) THEN
 !   here we plot the anharmonic quantities calculated from the phonon dos
 !
    filename='anhar_files/'//flanhar
-   IF (pressure /= 0.0_DP) &
+   IF (pressure_kb /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
    iu_therm=2
    OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
@@ -90,7 +90,7 @@ IF (ionode) THEN
 !  with respect to temperature. 
 !
    filename='anhar_files/'//TRIM(flanhar)//'.celldm'
-   IF (pressure /= 0.0_DP) &
+   IF (pressure_kb /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 
    CALL write_alpha_anis(ibrav_save, celldm_t, alpha_anis_t, temp, ntemp, &
@@ -119,7 +119,7 @@ IF (ionode) THEN
 !  to the volume thermal expansion used in the file aux
 !
       filename='anhar_files/'//TRIM(flanhar)//'.anis'
-      IF (pressure /= 0.0_DP) &
+      IF (pressure_kb /= 0.0_DP) &
          filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
       OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', &
                                                           FORM='FORMATTED')
@@ -144,7 +144,6 @@ SUBROUTINE write_ph_freq_anhar_anis()
 USE kinds,          ONLY : DP
 USE constants,      ONLY : ry_kbar
 USE temperature,    ONLY : ntemp, temp
-USE control_pressure, ONLY : pressure, pressure_kb
 USE ph_freq_thermodynamics, ONLY : phf_cv
 USE ph_freq_anharmonic, ONLY : alphaf_anis_t, vminf_t, b0f_t, celldmf_t, &
                                betaf_t, gammaf_t, cvf_t, cpf_t, b0f_s, &
@@ -152,7 +151,7 @@ USE ph_freq_anharmonic, ONLY : alphaf_anis_t, vminf_t, b0f_t, celldmf_t, &
 USE elastic_constants, ONLY : el_con
 USE control_grun,   ONLY : lb0_t
 USE control_pwrun,  ONLY : ibrav_save
-USE control_pressure, ONLY : pressure, pressure_kb
+USE control_pressure, ONLY : pressure_kb
 USE control_macro_elasticity, ONLY : macro_el
 USE control_elastic_constants, ONLY : el_cons_available
 USE isoentropic,    ONLY : isostress_heat_capacity
@@ -194,7 +193,7 @@ IF (ionode) THEN
 !
    iu_therm=2
    filename='anhar_files/'//TRIM(flanhar)//'_ph'
-   IF (pressure /= 0.0_DP) &
+   IF (pressure_kb /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 
    OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', &
@@ -212,7 +211,7 @@ IF (ionode) THEN
 !  with respect to temperature. 
 !
    filename='anhar_files/'//TRIM(flanhar)//'.celldm_ph'
-   IF (pressure /= 0.0_DP) &
+   IF (pressure_kb /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 
    CALL write_alpha_anis(ibrav_save, celldmf_t, alphaf_anis_t, temp, ntemp, &
@@ -240,7 +239,7 @@ IF (ionode) THEN
 !  to the volume thermal expansion used in the file aux
 !
       filename='anhar_files/'//TRIM(flanhar)//'.anis_ph'
-      IF (pressure /= 0.0_DP) &
+      IF (pressure_kb /= 0.0_DP) &
          filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
       OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', &
                                                           FORM='FORMATTED')
@@ -264,7 +263,7 @@ USE ions_base,      ONLY : nat
 USE cell_base,      ONLY : ibrav
 USE thermo_mod,     ONLY : ngeo
 USE temperature,    ONLY : ntemp, temp
-USE control_pressure, ONLY : pressure, pressure_kb
+USE control_pressure, ONLY : pressure_kb
 USE control_grun,   ONLY : lv0_t
 USE control_mur,    ONLY : celldm0, vmin
 USE thermodynamics,         ONLY : ph_cv
@@ -430,7 +429,7 @@ DO itemp = nstart, nlast
            alpha(2)=alpha(1)             
        CASE(8,9,10,11)
 !
-!   orthorombic case
+!   orthorhombic case
 !
            alpha(1)=alpha_aux(1) * cm(1) - alpha_aux(2) * cm(2) &
                                          - alpha_aux(3) * cm(3)
@@ -480,7 +479,7 @@ IF (ionode) THEN
 !   here quantities calculated from the gruneisen parameters
 !
    filename='anhar_files/'//TRIM(flanhar)//'.celldm_grun'
-   IF (pressure /= 0.0_DP) &
+   IF (pressure_kb /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
    IF (ltherm_freq) THEN
       CALL write_alpha_anis(ibrav, celldmf_t, alpha_an_g, temp, ntemp, &
@@ -503,7 +502,7 @@ IF (ionode) THEN
 
 
    filename="anhar_files/"//TRIM(flanhar)//'.aux_grun'
-   IF (pressure /= 0.0_DP) &
+   IF (pressure_kb /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
    iu_therm=2
    OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', &

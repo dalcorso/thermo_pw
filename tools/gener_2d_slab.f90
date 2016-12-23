@@ -272,7 +272,7 @@ tmod = SQRT ( t(1)**2 + t(2)**2 )
 iuout=28
 OPEN(unit=iuout, file=TRIM(filename), status='unknown', form='formatted')
 !
-!  we use an orthorombic cell
+!  we use an orthorhombic cell
 !
 WRITE (iuout, '("ibrav=8")')
 WRITE (iuout, '("celldm(1)= ",f15.8)') cmod * alat

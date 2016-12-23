@@ -19,6 +19,7 @@ gnuplot_color.o \
 lattices.o \
 linear_solvers.o \
 mp_asyn.o \
+nye.o \
 phdos_module.o \
 ph_freq_module.o \
 piezoelectric_tensor.o \

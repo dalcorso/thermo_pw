@@ -331,7 +331,7 @@ SELECT CASE (laue)
       END IF
    CASE (20)
 !
-!  orthorombic case
+!  orthorhombic case
 !
 !  c_11 
 !
@@ -789,7 +789,7 @@ SELECT CASE (laue)
 
    CASE(20,0)
 !
-!  orthorombic case
+!  orthorhombic case
 !
 !     C_11 
 !

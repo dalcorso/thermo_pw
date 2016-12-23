@@ -16,6 +16,9 @@ MODULE rotate
 !  rotate_tensors2: takes a set of rank two tensors, a rotation matrix
 !               and gives the rotated rank two tensors.
 !
+!  rotate_rot : receive a rotation matrix that describe a rotation of
+!               the reference system and a rotation matrix in the old
+!               reference system. Gives the rotation in the rotated system
 !  find_su2_euler: takes three euler angles psi, theta, phi and gives the
 !               Cayley Klein parameters of the su2 rotation
 !
@@ -35,7 +38,7 @@ MODULE rotate
 
 
   PUBLIC rotate_vect, rotate_tensors2, euler_to_su2, find_rotation, &
-         is_rotation
+         is_rotation, rotate_rot
 
 CONTAINS
    SUBROUTINE rotate_vect(rot, n, a, ra, flag)
@@ -71,6 +74,7 @@ CONTAINS
 
    RETURN
    END SUBROUTINE rotate_vect
+
 
    SUBROUTINE rotate_tensors2(rot, n, a, ra, flag)
 !
@@ -116,6 +120,17 @@ CONTAINS
 
    RETURN
    END SUBROUTINE rotate_tensors2
+
+   SUBROUTINE rotate_rot(rot, rot_in, rot_out)
+
+   USE kinds, ONLY : DP
+   IMPLICIT NONE
+   REAL(DP) :: rot(3,3), rot_in(3,3), rot_out(3,3)
+
+   rot_out=MATMUL(TRANSPOSE(rot), MATMUL(rot_in, rot)) 
+
+   RETURN
+   END SUBROUTINE rotate_rot
 
 
 SUBROUTINE euler_to_su2(psi,theta,phi,a,b)

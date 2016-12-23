@@ -12,24 +12,24 @@ SUBROUTINE plot_anhar()
 !  flanhar//'.aux_grun'
 !  
 !
-USE kinds,           ONLY : DP
-USE control_gnuplot, ONLY : flgnuplot, gnuplot_command, lgnuplot
-USE control_thermo,  ONLY : ltherm, ltherm_dos, ltherm_freq
+USE kinds,            ONLY : DP
+USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot
+USE control_thermo,   ONLY : ltherm, ltherm_dos, ltherm_freq
 USE postscript_files, ONLY : flpsanhar
-USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
-                            gnuplot_write_header,        &
-                            gnuplot_ylabel,              &
-                            gnuplot_xlabel,              &
-                            gnuplot_write_file_mul_data, &
-                            gnuplot_write_file_mul_data_sum, &
-                            gnuplot_write_file_mul_point,  &
-                            gnuplot_write_horizontal_line, &
-                            gnuplot_set_fact
-USE data_files,      ONLY : flanhar
-USE temperature,     ONLY : tmin, tmax
-USE control_pressure, ONLY : pressure, pressure_kb
-USE mp_images,       ONLY : my_image_id, root_image
-USE io_global,       ONLY : ionode
+USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,  &
+                             gnuplot_write_header,        &
+                             gnuplot_ylabel,              &
+                             gnuplot_xlabel,              &
+                             gnuplot_write_file_mul_data, &
+                             gnuplot_write_file_mul_data_sum, &
+                             gnuplot_write_file_mul_point,  &
+                             gnuplot_write_horizontal_line, &
+                             gnuplot_set_fact
+USE data_files,       ONLY : flanhar
+USE temperature,      ONLY : tmin, tmax
+USE control_pressure, ONLY : pressure_kb
+USE mp_images,        ONLY : my_image_id, root_image
+USE io_global,        ONLY : ionode
 
 IMPLICIT NONE
 
@@ -42,12 +42,12 @@ INTEGER :: ierr
 IF ( my_image_id /= root_image ) RETURN
 
 gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//'_anhar'
-IF (pressure /= 0.0_DP) &
+IF (pressure_kb /= 0.0_DP) &
        gnu_filename=TRIM(gnu_filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 CALL gnuplot_start(gnu_filename)
 
 filename=TRIM(flpsanhar)
-IF (pressure /= 0.0_DP) &
+IF (pressure_kb /= 0.0_DP) &
        filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 IF (tmin /= 1.0_DP) THEN
    CALL gnuplot_write_header(filename, tmin, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
@@ -61,7 +61,7 @@ filename1="anhar_files/"//TRIM(flanhar)//'.aux'
 filename2="anhar_files/"//TRIM(flanhar)//'.aux_ph'
 filename3="anhar_files/"//TRIM(flanhar)//'.aux_grun'
 
-IF (pressure /= 0.0_DP) THEN
+IF (pressure_kb /= 0.0_DP) THEN
    filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
    filename0=TRIM(filename0)//'.'//TRIM(float_to_char(pressure_kb,1))
    filename1=TRIM(filename1)//'.'//TRIM(float_to_char(pressure_kb,1))

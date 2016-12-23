@@ -195,8 +195,8 @@ ELSEIF (ibrav==6 .OR. ibrav==7) THEN
    ENDIF
 ELSEIF (ibrav==8 .OR. ibrav==9 .OR. ibrav==10 .OR. ibrav==11) THEN
 !
-!  Orthorombic, base-centered orthorombic, face-centered orthorombic,
-!  body-centered orthorombic
+!  Orthorombic, base-centered orthorhombic, face-centered orthorhombic,
+!  body-centered orthorhombic
 !
    laue=20
    WRITE(stdout,'(5x,"C11?")')

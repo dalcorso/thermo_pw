@@ -7,7 +7,7 @@
 !
 SUBROUTINE plot_gruneisen_band_anis(flinput)
 !
-!  This is a driver to plot the gruneisen parameters of anisotropic
+!  This is a driver to plot the Gruneisen parameters of anisotropic
 !  solid. This routine knows only how many Gruneisen parameter files 
 !  there are, depending on the Bravais lattice. It generates the names
 !  of the postscript files and of the file that contains the Gruneisen

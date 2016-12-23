@@ -42,6 +42,7 @@ latgen_2d.o : ../../Modules/kind.o
 lattices.o : ../../Modules/io_global.o
 lattices.o : ../../Modules/kind.o
 lattices.o : rotate.o
+lattices.o : point_group.o
 linear_solvers.o : ../../Modules/io_global.o
 linear_solvers.o : ../../Modules/kind.o
 ph_freq_module.o : ../../Modules/constants.o

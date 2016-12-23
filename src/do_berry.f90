@@ -33,7 +33,7 @@ SUBROUTINE do_berry ( exit_status, polar, nppl )
   USE basis,            ONLY : starting_pot, startingconfig
   USE control_flags,    ONLY : gamma_only, lscf, lbands, ethr, &
                                istep, nstep, restart, lmd, lbfgs
-  USE control_piezoelectric_tensor, ONLY : nosym_save
+  USE control_pwrun,    ONLY : nosym_save
   USE control_thermo,   ONLY : lpolarization
   USE symm_base,        ONLY : nosym
   USE input_parameters, ONLY : diago_thr_init

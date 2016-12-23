@@ -11,9 +11,11 @@ PROGRAM bravais_lattices
 !  finds ibrav and celldm of that lattice. It can be used to transform
 !  any triplet of primitive vectors in the input needed by thermo_pw or
 !  QE.
-!  Moreover it can compare two sets of primitive vectors to see if
-!  they define the same Bravais lattice and in the positive case it
-!  gives the rotation matrix or the transformation matrix between the two.
+!  Alternatively it checks the routine find_ibrav of the 
+!  thermo_pw module by generating all the Bravais lattice vectors 
+!  and checking that the module identify correctly the bravais lattice, then
+!  it applies an arbitrary rotation and again checks that 
+!  the routine find_ibrav identify correctly the lattice.
 !
 USE kinds, ONLY : DP
 USE mp_global,        ONLY : mp_startup, mp_global_end
@@ -36,7 +38,7 @@ REAL(DP) :: celldm(6), celldm2(6), at(3,3), at1(3,3), at2(3,3), at3(3,3),   &
             maxdiff
 LOGICAL :: equivalent, lsame
 INTEGER :: ibrav, ibrav_output, ibrav_output2, ipol, ivec, jvec, jpol,      &
-           group_code, nsym, work_choice
+           group_code, nsym, work_choice, code_group_ext
 
 CALL mp_startup (start_images=.TRUE.)
 CALL environment_start(code)
@@ -53,8 +55,9 @@ IF (work_choice==1) THEN
       READ(5,*) (at(ipol,ivec),ipol=1,3)
    END DO
 
-   CALL find_ibrav_code(at(1,1), at(1,2), at(1,3), ibrav_output, celldm_, ur, &
-                                                       global_s,.TRUE.)
+   code_group_ext=0
+   CALL find_ibrav_code(at(1,1), at(1,2), at(1,3), ibrav_output, celldm_, & 
+                                       code_group_ext,  ur, global_s,.TRUE.)
    WRITE(stdout,'(/,5x,"ibrav= ", i5)') ibrav_output
    WRITE(stdout,'(5x,"celldm(1)= ", f13.8)') celldm_(1)
    IF (ABS(celldm_(2))>eps1) &
@@ -100,11 +103,13 @@ ELSEIF (work_choice==2) THEN
    END DO
    at2 = at2 * celldm2(1)
 
+   code_group_ext=0
    CALL find_ibrav_code(at(1,1), at(1,2), at(1,3), ibrav_output, celldm_, &
-                                               ur, global_s,.FALSE.)
+                                  code_group_ext, ur, global_s,.FALSE.)
 
+   code_group_ext=0
    CALL find_ibrav_code(at2(1,1), at2(1,2), at2(1,3), ibrav_output2, celldm2, &
-                                               ur2, global_s2,.FALSE.)
+                                  code_group_ext, ur2, global_s2,.FALSE.)
 
    lsame = (ibrav_output==ibrav_output2)
    maxdiff=MAX(ABS(celldm_(1)-celldm2(1)), ABS(celldm_(2)-celldm2(2)), &
@@ -160,3 +165,4 @@ CALL environment_end(code)
 CALL mp_global_end ()
 
 END PROGRAM bravais_lattices
+

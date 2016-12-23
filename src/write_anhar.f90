@@ -13,7 +13,7 @@ USE thermodynamics, ONLY : ph_cv
 USE anharmonic,     ONLY : alpha_t, beta_t, gamma_t, cp_t, cv_t, b0_s, &
                            vmin_t, b0_t, b01_t
 USE thermo_mod,     ONLY : omega_geo
-USE control_pressure, ONLY : pressure, pressure_kb
+USE control_pressure, ONLY : pressure_kb
 USE data_files,     ONLY : flanhar
 USE io_global,      ONLY : ionode
 USE mp_images,      ONLY : my_image_id, root_image
@@ -36,7 +36,7 @@ IF (ionode) THEN
 !   here we plot the quantities calculated from the phonon dos
 !
    filename="anhar_files/"//TRIM(flanhar)
-   IF (pressure /= 0.0_DP) &
+   IF (pressure_kb /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 
    CALL write_murn_beta(temp, vmin_t, b0_t, b01_t, beta_t, ntemp, filename)
@@ -44,7 +44,7 @@ IF (ionode) THEN
 !   here auxiliary quantities calculated from the phonon dos
 !
    filename="anhar_files/"//TRIM(flanhar)//'.aux'
-   IF (pressure /= 0.0_DP) &
+   IF (pressure_kb /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 
    CALL write_aux_anharm(temp, gamma_t, cv_t, cp_t, b0_t, b0_s, ntemp, filename)
@@ -61,7 +61,7 @@ USE temperature,    ONLY : ntemp, temp
 USE ph_freq_thermodynamics, ONLY : phf_cv
 USE ph_freq_anharmonic, ONLY : alphaf_t, betaf_t, gammaf_t, cpf_t, cvf_t, &
                         b0f_s, vminf_t, b0f_t, b01f_t
-USE control_pressure, ONLY : pressure, pressure_kb
+USE control_pressure, ONLY : pressure_kb
 USE thermo_mod,     ONLY : omega_geo
 USE data_files,     ONLY : flanhar
 USE io_global,      ONLY : ionode
@@ -85,7 +85,7 @@ IF (ionode) THEN
 !   here we plot the quantities calculated from the phonon dos
 !
    filename="anhar_files/"//TRIM(flanhar)//'_ph'
-   IF (pressure /= 0.0_DP) &
+   IF (pressure_kb /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 
    CALL write_murn_beta(temp, vminf_t, b0f_t, b01f_t, betaf_t, ntemp, filename)
@@ -94,7 +94,7 @@ IF (ionode) THEN
 !   here auxiliary quantities calculated from the phonon dos
 !
    filename="anhar_files/"//TRIM(flanhar)//'.aux_ph'
-   IF (pressure /= 0.0_DP) &
+   IF (pressure_kb /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 
    CALL write_aux_anharm(temp, gammaf_t, cvf_t, cpf_t, b0f_t, b0f_s, &
@@ -117,7 +117,7 @@ USE grun_anharmonic, ONLY : betab, cp_grun_t, b0_grun_s, &
                             grun_gamma_t, poly_grun, poly_order
 USE ph_freq_module, ONLY : thermal_expansion_ph, ph_freq_type,  &
                            destroy_ph_freq, init_ph_freq
-USE control_pressure, ONLY : pressure, pressure_kb
+USE control_pressure, ONLY : pressure_kb
 USE control_grun,     ONLY : lv0_t, lb0_t
 USE control_mur,    ONLY : vmin, b0
 USE control_thermo, ONLY : ltherm_dos, ltherm_freq
@@ -215,7 +215,7 @@ IF (ionode) THEN
 !   here quantities calculated from the gruneisen parameters
 !
    filename="anhar_files/"//TRIM(flanhar)//'.aux_grun'
-   IF (pressure /= 0.0_DP) &
+   IF (pressure_kb /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 
    iu_therm=2

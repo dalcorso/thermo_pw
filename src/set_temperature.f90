@@ -16,7 +16,7 @@ INTEGER  :: itemp
 !
 !  Allocate thermodynamic quantities
 !
-IF (deltat <= 0.0_8) CALL errore('set_temperature','Negative deltat',1)
+IF (deltat <= 0.0_DP) CALL errore('set_temperature','Negative deltat',1)
 ntemp=1+NINT((tmax-tmin)/deltat)
 
 IF (.NOT.ALLOCATED(temp)) ALLOCATE(temp(ntemp))
@@ -38,26 +38,16 @@ SUBROUTINE set_pressure()
 !
 USE kinds,          ONLY : DP
 USE constants,      ONLY : ry_kbar
-USE control_pressure, ONLY : pressure, pressure_kb, npress, delta_pressure, &
-                             pressure_list
+USE control_pressure, ONLY : pressure, pressure_kb
 IMPLICIT NONE
-INTEGER :: ipress
 !
-!  Allocate all quantities that are calculated at each pressure
+! save the pressure in kbar
 !
-ALLOCATE(pressure_list(npress))
+pressure_kb=pressure
 !
-!  set the list of pressures (presently limited to one pressure)
+! convert the pressure in kbar
 !
-DO ipress=1, npress
-   pressure_list(ipress)=pressure + delta_pressure * (ipress-1)
-ENDDO
-pressure_list=pressure_list/ry_kbar
-pressure=pressure_list(1)
-!
-! pressure is also saved in kbar
-!
-pressure_kb=pressure*ry_kbar
+pressure=pressure_kb/ry_kbar
 
 RETURN
 END SUBROUTINE set_pressure

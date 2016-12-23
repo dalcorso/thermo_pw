@@ -49,7 +49,7 @@ SUBROUTINE write_ev_driver(file_dat)
 
 USE kinds, ONLY : DP
 USE io_global, ONLY : ionode
-USE control_pressure, ONLY : pressure, pressure_kb
+USE control_pressure, ONLY : pressure_kb
 IMPLICIT NONE
 CHARACTER(LEN=256), INTENT(IN) :: file_dat
 CHARACTER(LEN=256) :: filename
@@ -59,7 +59,7 @@ INTEGER :: iu_ev
 IF (ionode) THEN
    iu_ev=2
    filename='energy_files/input_ev'
-   IF (pressure /= 0.0_DP) &
+   IF (pressure_kb /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
      
    OPEN(UNIT=iu_ev, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
@@ -80,7 +80,7 @@ SUBROUTINE do_ev()
 !
 USE kinds, ONLY : DP
 USE control_mur, ONLY : vmin, b0, b01, emin
-USE control_pressure, ONLY : pressure, pressure_kb
+USE control_pressure, ONLY : pressure_kb
 USE data_files, ONLY : flevdat
 USE io_global, ONLY : meta_ionode_id, stdout
 USE mp_world, ONLY : world_comm
@@ -92,7 +92,7 @@ CHARACTER(LEN=8) :: float_to_char
 
   file_dat="energy_files/"//TRIM(flevdat) 
   filename='energy_files/input_ev'
-  IF (pressure /= 0.0_DP) THEN
+  IF (pressure_kb /= 0.0_DP) THEN
       file_dat=TRIM(file_dat)//'.'//TRIM(float_to_char(pressure_kb,1))
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
   ENDIF
@@ -120,7 +120,7 @@ USE control_mur,    ONLY : vmin, b0, b01
 USE thermodynamics, ONLY : ph_free_ener
 USE anharmonic,     ONLY : vmin_t, b0_t, b01_t, free_e_min_t
 USE temperature,    ONLY : ntemp, temp
-USE control_pressure, ONLY : pressure, pressure_kb
+USE control_pressure, ONLY : pressure_kb
 USE data_files,     ONLY : flevdat
 USE quadratic_surfaces, ONLY : polifit
 USE io_global,      ONLY : stdout
@@ -170,7 +170,7 @@ REAL(DP) :: a(m1), x(ngeo(1)), y(ngeo(1)), aux, aux1
                                          omega_geo(central_geo))
   WRITE(stdout,'(/,2x,76("-"))')
   WRITE(stdout,'(5x, "free energy from phonon dos, at T= ", f12.6)') temp(itemp)
-  IF (pressure /= 0.0_DP) &
+  IF (pressure_kb /= 0.0_DP) &
      WRITE(stdout, '(5x,"pressure = ",f15.6," kbar")') pressure_kb
   WRITE(stdout,'(5x, "The equilibrium lattice constant is ",9x,f12.4,&
                                  &" a.u.")') celldm_(1)
@@ -194,7 +194,7 @@ USE ph_freq_thermodynamics, ONLY : phf_free_ener
 USE ph_freq_anharmonic,     ONLY : vminf_t, b0f_t, b01f_t, free_e_minf_t
 USE control_mur,    ONLY : vmin, b0, b01
 USE temperature,    ONLY : ntemp, temp
-USE control_pressure, ONLY : pressure, pressure_kb
+USE control_pressure, ONLY : pressure_kb
 USE quadratic_surfaces, ONLY : polifit
 USE data_files,     ONLY : flevdat
 USE io_global,      ONLY : stdout
@@ -246,7 +246,7 @@ REAL(DP) :: a(m1), x(ngeo(1)), y(ngeo(1)), aux, aux1
   WRITE(stdout,'(/,2x,76("+"))')
   WRITE(stdout,'(5x, "free energy from phonon frequencies at T=",f12.4)') &
                                                                temp(itemp)
-  IF (pressure /= 0.0_DP) &
+  IF (pressure_kb /= 0.0_DP) &
      WRITE(stdout, '(5x,"pressure = ",f15.6," kbar")') pressure_kb
   WRITE(stdout,'(5x, "The equilibrium lattice constant is ",16x,f12.4,&
                                  &" a.u.")') celldm_(1)

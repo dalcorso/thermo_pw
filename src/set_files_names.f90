@@ -104,7 +104,7 @@ SUBROUTINE set_files_for_plot(icode, file_disp, filedata, filerap, fileout, &
 !   contained in the thermo_pw modules and are provided on the dummy veriables
 !
 
-USE thermo_mod,       ONLY : tot_ngeo
+USE thermo_mod,       ONLY : tot_ngeo, central_geo
 USE control_thermo,   ONLY : spin_component
 USE lsda_mod,         ONLY : nspin
 
@@ -121,7 +121,6 @@ CHARACTER(LEN=256), INTENT(IN) :: file_disp
 CHARACTER(LEN=256), INTENT(OUT) :: filedata, filerap, fileout, gnu_filename, &
                                    filenameps 
 CHARACTER(LEN=6) :: int_to_char
-INTEGER :: central_geo
 !
 !  first the file with the data 
 !
@@ -143,8 +142,6 @@ INTEGER :: central_geo
   IF (icode==1.OR.icode==2) THEN
      filerap=TRIM(filedata)//".rap"
   ELSEIF (icode==3.OR.icode==4) THEN
-     central_geo=tot_ngeo/2
-     IF (MOD(tot_ngeo,2)==1) central_geo=central_geo+1
      filerap = "phdisp_files/"//TRIM(file_disp)//'.g'//&
                                         TRIM(int_to_char(central_geo))//".rap"
   ENDIF

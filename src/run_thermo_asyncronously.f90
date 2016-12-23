@@ -15,7 +15,7 @@ SUBROUTINE run_thermo_asynchronously(nwork, part, igeom, auxdyn)
                               asyn_close, asyn_master, asyn_worker, &
                               asyn_master_work, with_asyn_images
   USE thermo_mod,      ONLY : energy_geo
-  USE control_thermo,  ONLY : lpwscf, lstress, lbands, lphonon, lberry
+  USE control_thermo,  ONLY : lpwscf, lstress, lphonon, lberry
   USE elastic_constants, ONLY : sigma_geo
   USE piezoelectric_tensor, ONLY : polar_geo, nppl
   USE ener,            ONLY : etot
@@ -83,13 +83,11 @@ SUBROUTINE run_thermo_asynchronously(nwork, part, igeom, auxdyn)
                  CALL set_thermo_work_todo(iwork, part, iq, irr, igeom)
                  WRITE(stdout,'(/,2x,76("+"))')
                  IF (lpwscf(iwork)) THEN
-                    WRITE(stdout,'(5x,"I am the master and now I do geometry", i5)') &
-                                                  iwork
-                 ELSE IF (lbands(iwork)) THEN
-                    WRITE(stdout,'(5x,"I am the master and now I do the bands", i5)') 
+                    WRITE(stdout,'(5x,"I am the master and now I do geometry",&
+                                                                  & i5)') iwork
                  ELSE IF (lphonon(iwork)) THEN
-                    WRITE(stdout,'(5x,"I am the master and now I do point", i5, &
-                  & " irrep", i5, " of geometry", i5 )') iq, irr, igeom
+                    WRITE(stdout,'(5x,"I am the master and now I do point",&
+                       & i5," irrep", i5, " of geometry", i5 )') iq, irr, igeom
                  END IF
                  WRITE(stdout,'(2x,76("+"),/)')
                  IF (lpwscf(iwork)) THEN
@@ -103,7 +101,6 @@ SUBROUTINE run_thermo_asynchronously(nwork, part, igeom, auxdyn)
                        CALL save_existence(iwork,part,igeom)
                     ENDIF
                  ENDIF
-                 IF (lbands(iwork)) CALL do_pwscf(exit_status, .FALSE.)
                  IF (lberry(iwork)) CALL do_berry(exit_status, &
                                        polar_geo(1,iwork),nppl)
                  IF (lphonon(iwork)) CALL do_phonon_tpw(auxdyn) 
@@ -138,15 +135,12 @@ SUBROUTINE run_thermo_asynchronously(nwork, part, igeom, auxdyn)
               CALL set_thermo_work_todo(iwork, part, iq, irr, igeom)
               WRITE(stdout,'(/,2x,76("+"))')
               IF (lpwscf(iwork)) THEN
-                 WRITE(stdout,'(5x,"I am image ", i5, " and now I do geometry", i5)') &
-                                                 my_image_id, iwork
-              ELSE IF (lbands(iwork)) THEN
-                 WRITE(stdout,'(5x,"I am image ", i5, " and now I do bands", i5)') &
-                                                 my_image_id
+                 WRITE(stdout,'(5x,"I am image ", i5, " and now I do &
+                                       &geometry", i5)') my_image_id, iwork
               ELSE IF (lphonon(iwork)) THEN
-                 WRITE(stdout,'(5x,"I am image ",i5," and now I do point", i5,  &
-                  & " irrep", i5, " of geometry", i5 )') my_image_id, iq, irr, &
-                                                         igeom
+                 WRITE(stdout,'(5x,"I am image ",i5," and now I do point", &
+                  i5," irrep", i5, " of geometry", i5 )') my_image_id, iq, &
+                                                          irr, igeom
               END IF
               WRITE(stdout,'(2x,76("+"),/)')
  
@@ -161,7 +155,6 @@ SUBROUTINE run_thermo_asynchronously(nwork, part, igeom, auxdyn)
                     CALL save_existence(iwork,part,igeom)
                  ENDIF
               END IF
-              IF (lbands(iwork)) CALL do_pwscf(exit_status, .FALSE.)
               IF (lberry(iwork)) CALL do_berry(exit_status, &
                                        polar_geo(1,iwork), nppl)
               IF (lphonon(iwork)) THEN
@@ -173,7 +166,7 @@ SUBROUTINE run_thermo_asynchronously(nwork, part, igeom, auxdyn)
      END IF
   ELSE
 !
-!  This is the standard case. Asyncronous images are not used. There is
+!  This is the standard case. Asynchronous images are not used. There is
 !  only the master that does all the works one after the other.
 !
      IF (my_image_id == root_image) THEN
@@ -182,8 +175,6 @@ SUBROUTINE run_thermo_asynchronously(nwork, part, igeom, auxdyn)
            WRITE(stdout,'(/,2x,76("+"))')
            IF (lpwscf(iwork)) THEN
               WRITE(stdout,'(5x,"Doing geometry", i5)') iwork
-           ELSE IF (lbands(iwork)) THEN
-              WRITE(stdout,'(5x,"Doing bands", i5)') 
            ELSE IF (lphonon(iwork)) THEN
               WRITE(stdout,'(5x,"Doing point", i5,  &
                & " irrep", i5, " of geometry", i5 )') iq, irr, igeom
@@ -201,13 +192,12 @@ SUBROUTINE run_thermo_asynchronously(nwork, part, igeom, auxdyn)
                  CALL save_existence(iwork,part,igeom)
               ENDIF
            END IF
-           IF (lbands(iwork)) CALL do_pwscf(exit_status, .FALSE.)
            IF (lberry(iwork)) CALL do_berry(exit_status, &
                                             polar_geo(1,iwork), nppl)
            IF (lphonon(iwork)) CALL do_phonon_tpw(auxdyn)
         END DO
      END IF
   END IF
-RETURN
 !
+RETURN
 END SUBROUTINE run_thermo_asynchronously

@@ -117,7 +117,7 @@ REAL(DP) :: celldm(6), omega, at(3,3), bg(3,3), ur(3,3), global_s(3,3)
 !
 INTEGER :: which_input, iconv, units
 INTEGER :: na, iat, ia, natoms, nt, nb, i1, i2, i3, iuout, nfield, idx, k, &
-           ivec, jvec, ipol, jpol, ierr
+           ivec, jvec, ipol, jpol, ierr, code_group_ext
 REAL(DP) :: a, cg, inp(3)
 LOGICAL :: found
 CHARACTER (LEN=256) :: input_line, field_str, wp
@@ -350,8 +350,9 @@ ELSE
 !   the at have been given using ibrav=0, we find the Bravais
 !   lattice code and convert the coordinates to our conventions
 !
-      CALL find_ibrav_code(at(1,1), at(1,2), at(1,3), ibrav, celldm, ur, &
-                                                       global_s,.TRUE.)
+      code_group_ext=0
+      CALL find_ibrav_code(at(1,1), at(1,2), at(1,3), ibrav, celldm, &
+                                          code_group_ext, ur, global_s,.TRUE.)
       WRITE(6,*) 'ur'
       DO ipol=1,3
          WRITE(6,*) (ur(ipol,jpol), jpol=1,3)

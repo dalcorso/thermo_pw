@@ -8,10 +8,10 @@
 SUBROUTINE plot_anhar_anis()
 !
 !  This is a driver to plot the quantities written inside flanhar for the
-!  case of anisotropic systems. Presently plots celldm as a function of
-!  temperature (one parameter per plot), the thermal expansion tensor
-!  components (all in the same plot), the volume as a function of temperature,
-!  the volume thermal expansion as a function of temperature.
+!  case of anisotropic systems. Presently plots celldm (one parameter &
+!  per plot), the thermal expansion tensor !  components (all in the same 
+!  plot), the volume, and the volume thermal expansion as a function 
+!  of temperature.
 !  
 !
 USE kinds,           ONLY : DP
@@ -33,7 +33,7 @@ USE control_thermo,  ONLY : ltherm_dos, ltherm_freq
 USE anharmonic, ONLY : lelastic
 USE ph_freq_anharmonic, ONLY : lelasticf
 USE temperature,     ONLY : tmin, tmax
-USE control_pressure, ONLY : pressure, pressure_kb
+USE control_pressure, ONLY : pressure_kb
 USE mp_images,       ONLY : my_image_id, root_image
 USE io_global,       ONLY : ionode
 
@@ -50,13 +50,13 @@ INTEGER :: ierr
 IF ( my_image_id /= root_image ) RETURN
 
 gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_anhar'
-IF (pressure /= 0.0_DP) &
+IF (pressure_kb /= 0.0_DP) &
    gnu_filename=TRIM(gnu_filename)//'.'//float_to_char(pressure_kb,1)
 
 CALL gnuplot_start(gnu_filename)
 
 filenameps=TRIM(flpsanhar)
-IF (pressure /= 0.0_DP) &
+IF (pressure_kb /= 0.0_DP) &
    filenameps=TRIM(filenameps)//'.'//float_to_char(pressure_kb,1)
 
 IF (tmin /= 1.0_DP) THEN
@@ -78,7 +78,7 @@ filename9='anhar_files/'//TRIM(flanhar)//'.anis_ph'
 
 lgrun = lelastic .OR. lelasticf
 
-IF (pressure /= 0.0_DP) THEN
+IF (pressure_kb /= 0.0_DP) THEN
    filename=TRIM(filename)//'.'//float_to_char(pressure_kb,1)
    filename1=TRIM(filename1)//'.'//float_to_char(pressure_kb,1)
    filename2=TRIM(filename2)//'.'//float_to_char(pressure_kb,1)

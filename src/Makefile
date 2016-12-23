@@ -88,6 +88,7 @@ surface.o     \
 sym_band_sub.o \
 thermo_mod.o \
 thermo_readin.o \
+thermo_setup.o \
 thermo_pw.o \
 thermo_summary.o \
 check_el_cons.o \

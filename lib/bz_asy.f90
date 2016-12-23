@@ -66,7 +66,7 @@ proj=asy_proj
 ! Determine which faces are visible in the plot, projecting on the 
 ! direction of the orthogonal projection.
 !
-! in the orthorombic case the bz can be constructed in rotated axis, we
+! in the orthorhombic case the bz can be constructed in rotated axis, we
 ! need to rotate also the projection direction to find the visible faces
 !
 IF (ibz>7.AND.ibz<13) &
@@ -186,7 +186,7 @@ ELSEIF (ibz==6) THEN
 
 ELSEIF (ibz==7) THEN
 !
-!  simple orthorombic bz
+!  simple orthorhombic bz
 !
    bz_asy_struc%letter_position(1)='S'
    bz_asy_struc%letter_position(2)='NW'
@@ -199,7 +199,7 @@ ELSEIF (ibz==7) THEN
 
 ELSEIF (ibz==8) THEN
 !
-!  face centered orthorombic (1/a^2 > 1/b^2 + 1/c^2) bz
+!  face centered orthorhombic (1/a^2 > 1/b^2 + 1/c^2) bz
 !
    bz_asy_struc%letter_position(1)='S'
    bz_asy_struc%letter_position(2)='NW'
@@ -252,7 +252,7 @@ ELSEIF (ibz==8) THEN
 
 ELSEIF (ibz==9) THEN
 !
-!  face centered orthorombic (1/a^2 < 1/b^2 + 1/c^2) bz
+!  face centered orthorhombic (1/a^2 < 1/b^2 + 1/c^2) bz
 !
 !
    bz_asy_struc%letter_position(1)='S'
@@ -325,7 +325,7 @@ ELSEIF (ibz==9) THEN
 
 ELSEIF (ibz==10) THEN
 !
-!  face centered orthorombic (1/a^2 = 1/b^2 + 1/c^2) bz
+!  face centered orthorhombic (1/a^2 = 1/b^2 + 1/c^2) bz
 !
 
    bz_asy_struc%letter_position(1)='S'
@@ -378,7 +378,7 @@ ELSEIF (ibz==10) THEN
 
 ELSEIF (ibz==11) THEN
 !
-!  body centered orthorombic bz
+!  body centered orthorhombic bz
 !
 !   bz_asy_struc%visible(2)=.FALSE.
 !   bz_asy_struc%visible(3)=.FALSE.
@@ -559,7 +559,7 @@ ELSEIF (ibz==11) THEN
 
 ELSEIF (ibz==12) THEN
 !
-!  one face centered orthorombic bz
+!  one face centered orthorhombic bz
 !
 !   bz_asy_struc%visible(3)=.FALSE.
 !   bz_asy_struc%visible(4)=.FALSE.

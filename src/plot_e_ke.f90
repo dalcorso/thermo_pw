@@ -10,16 +10,16 @@ SUBROUTINE plot_e_ke()
 !  This is a driver to plot the quantities written inside flkeconv
 !  
 !
-USE kinds,           ONLY : DP
-USE control_gnuplot, ONLY : flgnuplot, lgnuplot, gnuplot_command
+USE kinds,            ONLY : DP
+USE control_gnuplot,  ONLY : flgnuplot, lgnuplot, gnuplot_command
 USE postscript_files, ONLY : flpskeconv
-USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
-                            gnuplot_write_header,        &
-                            gnuplot_set_gfact,           &
-                            gnuplot_set_eref,            &
-                            gnuplot_ylabel,              &
-                            gnuplot_xlabel,              &
-                            gnuplot_write_file_mul_data
+USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,  &
+                             gnuplot_write_header,        &
+                             gnuplot_set_gfact,           &
+                             gnuplot_set_eref,            &
+                             gnuplot_ylabel,              &
+                             gnuplot_xlabel,              &
+                             gnuplot_write_file_mul_data
 USE data_files,      ONLY : flkeconv
 USE control_conv,    ONLY : ke, nke, nkeden
 USE thermo_mod,      ONLY : energy_geo
