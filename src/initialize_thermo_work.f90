@@ -260,11 +260,11 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
         CASE ('mur_lc_t')
            lev_syn_1=.TRUE.
            lph = .TRUE.
-           tot_ngeo=nwork
            lq2r = .TRUE.
            ltherm = .TRUE.
            lev_syn_2=.TRUE.
            CALL initialize_mur(nwork)
+           tot_ngeo=nwork
            ALLOCATE(no_ph(tot_ngeo))
            CALL initialize_no_ph(no_ph, tot_ngeo)
            CALL compute_degree(ibrav_save, degree, nvar)
