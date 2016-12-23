@@ -503,3 +503,5 @@ transform_intq_so.o : ../../Modules/noncol.o
 transform_intq_so.o : ../../Modules/uspp.o
 transform_intq_so.o : ../../PW/src/pwcom.o
 transform_intq_so.o : control_qe.o
+write_group_info_ph.o : ../../Modules/io_global.o
+write_group_info_ph.o : ../../PW/src/pwcom.o

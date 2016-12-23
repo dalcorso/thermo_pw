@@ -41,8 +41,6 @@ epsilon_tpw.o : ../../thermo_pw/lib/gnuplot.o
 gener_2d_slab.o : ../../Modules/kind.o
 gener_3d_slab.o : ../../Modules/kind.o
 gener_3d_slab.o : ../../PW/src/wyckoff.o
-group_name.o : ../../thermo_pw/lib/space_groups.o
-group_number.o : ../../thermo_pw/lib/space_groups.o
 hex_trig.o : ../../Modules/kind.o
 kovalev.o : ../../Modules/constants.o
 kovalev.o : ../../Modules/io_global.o
@@ -53,6 +51,12 @@ plot_sur_states.o : ../../Modules/environment.o
 plot_sur_states.o : ../../Modules/kind.o
 plot_sur_states.o : ../../Modules/mp_global.o
 plot_sur_states.o : ../../thermo_pw/lib/gnuplot.o
+space_groups.o : ../../Modules/environment.o
+space_groups.o : ../../Modules/io_global.o
+space_groups.o : ../../Modules/kind.o
+space_groups.o : ../../Modules/mp_global.o
+space_groups.o : ../../thermo_pw/lib/point_group.o
+space_groups.o : ../../thermo_pw/lib/space_groups.o
 supercell.o : ../../Modules/environment.o
 supercell.o : ../../Modules/kind.o
 supercell.o : ../../Modules/mp_global.o
