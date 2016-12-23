@@ -510,6 +510,10 @@ enhance_plot: if .TRUE. writes on the band plot the point group labels,
 long_path  : if .TRUE. plot the bands in all the Brillouin zone path. 
              Otherwise makes a faster calculation on a short path. 
              Default: .TRUE.
+filband    : file where the bands are written in the QE format
+             Default: character(len=*) 'output_band.dat'
+flpband    : file(s) where the bands are written in gnuplot format.
+             Default: character(len=*) 'output_pband.dat'
 flpsband   : postscript file with the electronic band structure
              Default: character(len=*) 'output_band.ps'
 \end{verbatim}
@@ -532,6 +536,9 @@ q_in_cryst_coord : the k - points are given in crystal coordinates.
                  Default: .FALSE.
 point_label_type : the label definition (see the BZ manual)
                  Default: SC
+q2d              : the q points define a rectangle in reciprocal space.
+                   See the QE guide for more details.
+                 Default: .FALSE.
 \end{verbatim}
 Note that the path cannot be given in the input of \texttt{pw.x} that
 must contain the information to generate the mesh of {\bf k} points 
@@ -701,14 +708,14 @@ deltae        : energy interval for electron dos plot (in Ry).
 ndose         : number of frequency points in the dos plot.
                 Default: determined from previous data
 nk1_d, nk2_d, nk3_d : thick mesh for dos calculation.
-                Default: integer 32, 32, 32
+                Default: integer 16, 16, 16
 k1_d, k2_d, k3_d : the shift of the k point mesh
-                Default: integer 0, 0, 0
+                Default: integer 1, 1, 1
 sigmae         : the smearing used for dos calculation (in eV).
                 If 0.0 uses the degauss of the electronic structure
                 calculation in metals and 0.01 Ry in insulators.
                 Default: real 0.0 
-legauss        : When .true. computes the electronic dos using a gaussian
+legauss        : When .TRUE. computes the electronic dos using a gaussian
                 smearing. When .false. uses the same smearing of the
                 electronic structure calculation in metals or gaussian smearing
                 in insulators.
@@ -720,7 +727,7 @@ flpseldos      : name of the postscript file that contains the electron
                 Default: character output_eldos.ps
 fleltherm      : name of the file that contains the electron thermodynamic data 
                 Default: character output_eltherm.dat
-flpseldos      : name of the postscript file that contains the picture of the
+flpseltherm    : name of the postscript file that contains the picture of the
                 electron thermodynamic quantities
                 Default: character output_eltherm.ps
 \end{verbatim}
@@ -818,7 +825,7 @@ smin        : minimum value of s used in the atomic form factor plot.
               Default: real 0.0
 smax        : maximum value of s used in the atomic form factor plot.
               Default: real 1.0
-npoint      : number of points in which the atomic form factor is calculated.
+nspoint     : number of points in which the atomic form factor is calculated.
               Default: integer 200
 lcm         : when .TRUE. the code uses the Cromer-Mann coefficients form
               the International Tables of Crystallography to
@@ -877,7 +884,18 @@ delta_freq : When freq_line is .TRUE. instead of giving the last frequency
 When in the input of the phonon code a non zero wave-vector {\bf q}
 is specified, the previous options produce the inverse of the dielectric 
 constant as a function of the frequency at the wave-vector {\bf q}
-(this option can be used both for insulators and metals).
+(this option can be used both for insulators and metals). \\
+Two additional variables can be specified in the \thermo\ input to control
+where the frequency dependent dielectric constant is written and plotted:
+\begin{verbatim}
+flepsilon : beginning of the name of the file where the frequency dependent 
+            dielectric constant is written (the code adds the extensions _re
+            and _im)
+            Default: character(len=*) 'epsilon'
+flpsepsilon : name of the postscript file where the frequency dependent 
+              dielectric constant is plotted.
+            Default: character(len=*) 'output_epsilon.ps'
+\end{verbatim}
 Number of tasks for frequency calculations: 1 (images are not active yet).
 
 \subsection{\color{web-blue}\texttt{what='scf\_disp'}}
@@ -908,7 +926,7 @@ freqmax_input : maximum frequency for phonon dos plot.
                 Default: real determined from phonon frequencies
 deltafreq     : frequency interval for phonon dos plot.
                 Default: real 1 cm^{-1}
-ndos          : number of frequency points in the dos plot.
+ndos_input    : number of frequency points in the dos plot.
                 Default: determined from previous data
 nq1_d, nq2_d, nq3_d : thick mesh for phonon dos calculation.
                 Default: integer 192, 192, 192
@@ -937,6 +955,12 @@ flfrc         : file where the interatomic force constants are written
                 Default: character(len=*) 'output_frc.dat.g1'
 flfrq         : file where matdyn writes the interpolated frequencies
                 Default: character(len=*) 'output_frq.dat.g1'
+flvec         : file where the eigenvectors of the dynamical matrix are
+                written
+                Default: character(len=*) 'matdyn.modes'
+fldosfrq      : file where the frequencies used to calculate the phonon
+                density of states are saved.
+                Default: character(len=*) 'save_frequencies.dat'
 fldos         : file where the phonon dos is written
                 Default: character(len=*) 'output_dos.dat.g1'
 fltherm       : file where the harmonic thermodynamic quantities are written
@@ -1217,7 +1241,20 @@ finite pressure and the enthalpy is minimized instead of the
 energy to find the equilibrium geometry. The bands are calculated
 at the geometry that corresponds to the external pressure.
 An example of the use of this option can be found in \texttt{example06}. \\
-Number of tasks for this option: see \texttt{what='mur\_lc}.
+Number of tasks for this option: see \texttt{what='mur\_lc'} and
+\texttt{what='scf\_bands'}.
+
+\subsection{\color{web-blue}\texttt{what='mur\_lc\_dos'}}
+With this option the code computes the electronic dos at the geometry 
+that minimizes the energy. See the options 
+\texttt{what='scf\_dos'} and \texttt{what='mur\_lc'} for a list of 
+the variables that control these two options. 
+With this option the pressure control is active. You can specify a
+finite pressure and the enthalpy is minimized instead of the
+energy to find the equilibrium geometry. The dos is calculated
+at the geometry that corresponds to the external pressure. \\
+Number of tasks for this option: see \texttt{what='mur\_lc'} and 
+\texttt{what='scf\_dos'}.
 
 \subsection{\color{web-blue}\texttt{what='mur\_lc\_ph'}}
 This option is similar to \texttt{what='scf\_ph'} but the phonon calculation
@@ -1542,7 +1579,19 @@ in the working directory, it is possible to set the input variable
 \texttt{only\_bands\_plot} to change the bands plot without redoing the
 bands calculation. Note however that in this case it is not possible 
 to change the Brillouin zone path. \\
+The following variables can be used to stop \thermo\ before it concludes all
+the calcultions:
+\begin{verbatim}
+max_seconds : the code stops after max_seconds have elapsed. Note
+              that the check is not done continously so the clean stop
+              might occur a few minutes after max_seconds.
+              Default: real 10E8
 
+max_geometries : the code stops after computing the dispersions in 
+              max_geometries.
+              Default: integer 1000000
+
+\end{verbatim}
 \newpage
 \section{\color{coral}Tools}
 
