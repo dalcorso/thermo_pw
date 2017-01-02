@@ -10,23 +10,24 @@ SUBROUTINE quadratic_fit()
   !-----------------------------------------------------------------------
   !
   !   This routine receives the total energy for several values of 
-  !   celldm and fits them with a quadratic function of dimension 
+  !   celldm and fits them with a quadratic polynomial of dimension 
   !   equal to the number of indipendent parameters in celldm. 
   !   It finds also the minimum of the quadratic function.
   !   
   !   the output of this routine is celldm0(:)
   !
   !
-  USE kinds, ONLY : DP
-  USE cell_base, ONLY : ibrav
-  USE control_mur, ONLY : celldm0, emin
-  USE mp_images, ONLY : my_image_id, root_image
-  USE thermo_mod, ONLY : celldm_geo, energy_geo, omega_geo
+  USE kinds,        ONLY : DP
+  USE cell_base,    ONLY : ibrav
+  USE control_mur,  ONLY : emin
+  USE equilibrium_conf, ONLY : celldm0
+  USE mp_images,    ONLY : my_image_id, root_image
+  USE thermo_mod,   ONLY : celldm_geo, energy_geo, omega_geo
   USE control_pressure, ONLY : pressure, pressure_kb
   USE control_quadratic_energy, ONLY : hessian_v, hessian_e, x_pos_min, &
                                coeff, degree
   USE control_quartic_energy, ONLY : nvar4, coeff4, x_min_4, lquartic, lsolve
-  USE io_global, ONLY : stdout
+  USE io_global,    ONLY : stdout
   USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_fit_extremum, &
                                  write_fit_hessian, evaluate_fit_quadratic, &
                                  print_quadratic_polynomial, &
@@ -36,11 +37,12 @@ SUBROUTINE quadratic_fit()
                                find_quartic_extremum, evaluate_fit_quartic, &
                                print_quartic_polynomial, introduce_quartic_fit
   IMPLICIT NONE
-  INTEGER :: nvar, ndata
+
+  INTEGER  :: nvar, ndata
   REAL(DP), ALLOCATABLE :: x(:,:), y(:), f(:)
   REAL(DP) :: ymin, chisq, aux, ymin4
-  INTEGER :: idata
-  INTEGER :: compute_nwork
+  INTEGER  :: idata
+  INTEGER  :: compute_nwork
   !
   ! Only the first image does the calculation
   !
@@ -162,10 +164,10 @@ SUBROUTINE quadratic_fit_t(itemp)
   !   The output of this routine is celldm_t at the given temperature itemp
   !
   !
-  USE kinds, ONLY : DP
-  USE cell_base, ONLY : ibrav
-  USE mp_images, ONLY : my_image_id, root_image
-  USE thermo_mod, ONLY : celldm_geo, energy_geo, no_ph, omega_geo
+  USE kinds,       ONLY : DP
+  USE cell_base,   ONLY : ibrav
+  USE mp_images,   ONLY : my_image_id, root_image
+  USE thermo_mod,  ONLY : celldm_geo, energy_geo, no_ph, omega_geo
   USE control_quadratic_energy, ONLY : degree, nvar, coeff_t, &
                                        enthalpy_coeff => coeff 
   USE control_quartic_energy, ONLY :  nvar4, coeff4, lquartic, lquartic_ph, &
@@ -173,16 +175,16 @@ SUBROUTINE quadratic_fit_t(itemp)
   USE temperature, ONLY : temp
   USE control_pressure, ONLY : pressure, pressure_kb
   USE thermodynamics, ONLY : ph_free_ener
-  USE anharmonic, ONLY : celldm_t
-  USE io_global, ONLY : stdout
+  USE anharmonic,  ONLY : celldm_t
+  USE io_global,   ONLY : stdout
   USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_two_fit_extremum, &
-                                 write_fit_hessian, evaluate_fit_quadratic,  &
-                                 print_quadratic_polynomial, &
-                                 summarize_fitting_data, write_vector, &
-                                 introduce_quadratic_fit
+                          write_fit_hessian, evaluate_fit_quadratic,  &
+                          print_quadratic_polynomial, &
+                          summarize_fitting_data, write_vector, &
+                          introduce_quadratic_fit
   USE quartic_surfaces, ONLY : find_quartic_quadratic_extremum, &
-                               evaluate_quartic_quadratic, fit_multi_quartic, &
-                               find_two_quartic_extremum, evaluate_two_quartic
+                          evaluate_quartic_quadratic, fit_multi_quartic, &
+                          find_two_quartic_extremum, evaluate_two_quartic
   IMPLICIT NONE
   INTEGER :: itemp
   INTEGER :: ndata, ndatatot
@@ -322,10 +324,10 @@ SUBROUTINE quadratic_fit_t_ph(itemp)
   !   The output of this routine is celldmf_t at the given temperature itemp
   !
   !
-  USE kinds, ONLY : DP
-  USE cell_base, ONLY : ibrav
-  USE mp_images, ONLY : my_image_id, root_image
-  USE thermo_mod, ONLY : celldm_geo, energy_geo, no_ph, omega_geo
+  USE kinds,       ONLY : DP
+  USE cell_base,   ONLY : ibrav
+  USE mp_images,   ONLY : my_image_id, root_image
+  USE thermo_mod,  ONLY : celldm_geo, energy_geo, no_ph, omega_geo
   USE control_quadratic_energy, ONLY : degree, nvar, coeff_t, &
                          enthalpy_coeff => coeff
   USE temperature, ONLY : temp
@@ -334,15 +336,15 @@ SUBROUTINE quadratic_fit_t_ph(itemp)
   USE control_pressure, ONLY : pressure, pressure_kb
   USE ph_freq_thermodynamics, ONLY : phf_free_ener
   USE ph_freq_anharmonic, ONLY : celldmf_t
-  USE io_global, ONLY : stdout
+  USE io_global,   ONLY : stdout
   USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_two_fit_extremum, &
-                                 write_fit_hessian, evaluate_fit_quadratic,  &
-                                 print_quadratic_polynomial, &
-                                 summarize_fitting_data, write_vector, &
-                                 introduce_quadratic_fit
+                          write_fit_hessian, evaluate_fit_quadratic,  &
+                          print_quadratic_polynomial, &
+                          summarize_fitting_data, write_vector, &
+                          introduce_quadratic_fit
   USE quartic_surfaces, ONLY : find_quartic_quadratic_extremum, &
-                               evaluate_quartic_quadratic, fit_multi_quartic, &
-                               find_two_quartic_extremum, evaluate_two_quartic
+                          evaluate_quartic_quadratic, fit_multi_quartic, &
+                          find_two_quartic_extremum, evaluate_two_quartic
 
   IMPLICIT NONE
   INTEGER :: itemp
@@ -350,8 +352,8 @@ SUBROUTINE quadratic_fit_t_ph(itemp)
   REAL(DP), ALLOCATABLE :: x(:,:), f(:), coeff(:), x_pos_min(:), &
                            celldm_data(:,:), fun(:), coefft4(:)
   REAL(DP) :: ymin, chisq, aux
-  INTEGER :: idata
-  INTEGER :: compute_nwork, compute_nwork_ph
+  INTEGER  :: idata
+  INTEGER  :: compute_nwork, compute_nwork_ph
   !
   ! Only the first image does the calculation
   !
@@ -472,7 +474,10 @@ END SUBROUTINE quadratic_fit_t_ph
 
 SUBROUTINE compute_degree(ibrav, degree, nvar)
 !
-!  number of coefficients of the quadratic equation
+!  For each Bravais lattice this routine gives the number of independent
+!  crystallographic parameters and the number of variables of a 
+!  quadratic polynomial of these variables
+!
 !  degrees       nvar
 !  1               3, 
 !  2               6, 
@@ -481,24 +486,15 @@ SUBROUTINE compute_degree(ibrav, degree, nvar)
 !  5              21, 
 !  6              28
 !
+USE lattices, ONLY : crystal_parameters
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: ibrav
+INTEGER, INTENT(IN)  :: ibrav
 INTEGER, INTENT(OUT) :: degree, nvar
 
- SELECT CASE (ibrav)
-    CASE(1,2,3)
-       degree=1
-    CASE(4,5,6,7)
-       degree=2
-    CASE(8,9,91,10,11)
-       degree=3
-    CASE(12,-12,13,-13)
-       degree=4
-    CASE DEFAULT
-       degree=6
- END SELECT
- nvar = (1 + degree)*(degree + 2) / 2
- RETURN
+degree = crystal_parameters(ibrav)
+nvar = (1 + degree)*(degree + 2) / 2
+
+RETURN
 END SUBROUTINE compute_degree
 
 INTEGER FUNCTION compute_nwork_ph(no_ph,ndatatot)
@@ -518,113 +514,121 @@ RETURN
 END FUNCTION compute_nwork_ph
 
 SUBROUTINE set_x_from_celldm(ibrav, degree, ndata, x, celldm_geo)
+!
+!  this rouotine receives and array of values of celldm celldm_geo(6,ndata)
+!  and transform it in a compact array x(degree,ndata), where degree depends
+!  on the Bravais lattice
+!
 USE kinds, ONLY : DP
 
 IMPLICIT NONE
-
 INTEGER, INTENT(IN) :: ibrav, degree, ndata
 REAL(DP), INTENT(IN) :: celldm_geo(6,ndata)
 REAL(DP), INTENT(INOUT) :: x(degree,ndata)
 
-INTEGER :: idata, pdata
+INTEGER :: idata
 
-  SELECT CASE (ibrav)
-     CASE(1,2,3) 
-       DO idata=1,ndata
-          x(1,idata)=celldm_geo(1,idata)
-       ENDDO 
-     CASE(4,5,6,7)
-        DO idata=1,ndata
-           x(1,idata)=celldm_geo(1,idata)
-           IF (ibrav==5) THEN
-              x(2,idata)=ACOS(celldm_geo(4,idata))
-           ELSE
-              x(2,idata)=celldm_geo(3,idata)
-           ENDIF
-        END DO 
-     CASE(8,9,91,10,11)
-        DO idata=1,ndata
-           x(1,idata)=celldm_geo(1,idata)
-           x(2,idata)=celldm_geo(2,idata)
-           x(3,idata)=celldm_geo(3,idata)
-        ENDDO
-     CASE(12,-12,13,-13) 
-        DO idata=1,ndata
-           x(1,idata)=celldm_geo(1,idata)
-           x(2,idata)=celldm_geo(2,idata)
-           x(3,idata)=celldm_geo(3,idata)
-           IF (ibrav>0) THEN
+SELECT CASE (ibrav)
+   CASE(1,2,3) 
+      DO idata=1,ndata
+         x(1,idata)=celldm_geo(1,idata)
+      ENDDO 
+   CASE(4,5,6,7)
+      DO idata=1,ndata
+         x(1,idata)=celldm_geo(1,idata)
+         IF (ibrav==5) THEN
+            x(2,idata)=ACOS(celldm_geo(4,idata))
+         ELSE
+            x(2,idata)=celldm_geo(3,idata)
+         ENDIF
+      ENDDO 
+   CASE(8,9,91,10,11)
+      DO idata=1,ndata
+         x(1,idata)=celldm_geo(1,idata)
+         x(2,idata)=celldm_geo(2,idata)
+         x(3,idata)=celldm_geo(3,idata)
+      ENDDO
+   CASE(12,-12,13,-13) 
+      DO idata=1,ndata
+         x(1,idata)=celldm_geo(1,idata)
+         x(2,idata)=celldm_geo(2,idata)
+         x(3,idata)=celldm_geo(3,idata)
+         IF (ibrav>0) THEN
 
 !   c unique
 !
-              x(4,idata)=ACOS(celldm_geo(4,idata))
-           ELSE
+            x(4,idata)=ACOS(celldm_geo(4,idata))
+         ELSE
 !
 !   b unique
 !
-              x(4,idata)=ACOS(celldm_geo(5,idata))
-           ENDIF
-        ENDDO
-     CASE DEFAULT
-        DO idata=1,ndata
-           x(1,idata)=celldm_geo(1,idata)
-           x(2,idata)=celldm_geo(2,idata)
-           x(3,idata)=celldm_geo(3,idata)
-           x(4,idata)=ACOS(celldm_geo(4,idata))
-           x(5,idata)=ACOS(celldm_geo(5,idata))
-           x(6,idata)=ACOS(celldm_geo(6,idata))
-        ENDDO
-  END SELECT
+            x(4,idata)=ACOS(celldm_geo(5,idata))
+         ENDIF
+      ENDDO
+   CASE DEFAULT
+      DO idata=1,ndata
+         x(1,idata)=celldm_geo(1,idata)
+         x(2,idata)=celldm_geo(2,idata)
+         x(3,idata)=celldm_geo(3,idata)
+         x(4,idata)=ACOS(celldm_geo(4,idata))
+         x(5,idata)=ACOS(celldm_geo(5,idata))
+         x(6,idata)=ACOS(celldm_geo(6,idata))
+      ENDDO
+END SELECT
 
 RETURN
 END SUBROUTINE set_x_from_celldm
 
 SUBROUTINE set_celldm_from_xmin(ibrav, degree, x, celldm)
+!
+!  This routine receives a set of crystallographic parameters in the
+!  array x(degree) and transform it in the celldm array
+!
 USE kinds, ONLY : DP
 
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: ibrav, degree
-REAL(DP), INTENT(IN) :: x(degree)
+INTEGER,  INTENT(IN)    :: ibrav, degree
+REAL(DP), INTENT(IN)    :: x(degree)
 REAL(DP), INTENT(INOUT) :: celldm(6)
 
-  celldm=0.0_DP
-  SELECT CASE (ibrav)
-     CASE(1,2,3) 
-        celldm(1)=x(1)
-     CASE(4,5,6,7)
-        celldm(1)=x(1)
-        IF (ibrav==5) THEN
-           celldm(4)=COS(x(2))
-        ELSE
-           celldm(3)= x(2)
-        ENDIF
-     CASE(8,9,91,10,11)
-        celldm(1)=x(1)
-        celldm(2)=x(2)
-        celldm(3)=x(3)
-     CASE(12,-12,13,-13) 
-        celldm(1)=x(1)
-        celldm(2)=x(2)
-        celldm(3)=x(3)
-        IF (ibrav>0) THEN
+celldm=0.0_DP
+SELECT CASE (ibrav)
+   CASE(1,2,3) 
+      celldm(1)=x(1)
+   CASE(4,5,6,7)
+      celldm(1)=x(1)
+      IF (ibrav==5) THEN
+         celldm(4)=COS(x(2))
+      ELSE
+         celldm(3)= x(2)
+      ENDIF
+   CASE(8,9,91,10,11)
+      celldm(1)=x(1)
+      celldm(2)=x(2)
+      celldm(3)=x(3)
+   CASE(12,-12,13,-13) 
+      celldm(1)=x(1)
+      celldm(2)=x(2)
+      celldm(3)=x(3)
+      IF (ibrav>0) THEN
 !
 !   c unique
 !
-           celldm(4)=COS(x(4))
-        ELSE
+         celldm(4)=COS(x(4))
+      ELSE
 !
 !   b unique
 !
-           celldm(5)=COS(x(4))
-        ENDIF
-     CASE DEFAULT
-        celldm(1)=x(1)
-        celldm(2)=x(2)
-        celldm(3)=x(3)
-        celldm(4)=COS(x(4))
-        celldm(5)=COS(x(5))
-        celldm(6)=COS(x(6))
-  END SELECT
+         celldm(5)=COS(x(4))
+      ENDIF
+   CASE DEFAULT
+      celldm(1)=x(1)
+      celldm(2)=x(2)
+      celldm(3)=x(3)
+      celldm(4)=COS(x(4))
+      celldm(5)=COS(x(5))
+      celldm(6)=COS(x(6))
+END SELECT
 
 RETURN
 END SUBROUTINE set_celldm_from_xmin

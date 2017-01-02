@@ -80,7 +80,7 @@ SUBROUTINE run_thermo_asynchronously(nwork, part, igeom, auxdyn)
 !   And do the work
 !
               IF (iwork>0) THEN
-                 CALL set_thermo_work_todo(iwork, part, iq, irr, igeom)
+                 CALL set_thermo_work_todo(iwork, part, iq, irr)
                  WRITE(stdout,'(/,2x,76("+"))')
                  IF (lpwscf(iwork)) THEN
                     WRITE(stdout,'(5x,"I am the master and now I do geometry",&
@@ -132,7 +132,7 @@ SUBROUTINE run_thermo_asynchronously(nwork, part, igeom, auxdyn)
 !       and then do the work
 !
            IF (iwork>0) THEN
-              CALL set_thermo_work_todo(iwork, part, iq, irr, igeom)
+              CALL set_thermo_work_todo(iwork, part, iq, irr)
               WRITE(stdout,'(/,2x,76("+"))')
               IF (lpwscf(iwork)) THEN
                  WRITE(stdout,'(5x,"I am image ", i5, " and now I do &
@@ -171,7 +171,7 @@ SUBROUTINE run_thermo_asynchronously(nwork, part, igeom, auxdyn)
 !
      IF (my_image_id == root_image) THEN
         DO iwork = 1, nwork
-           CALL set_thermo_work_todo(iwork, part, iq, irr, igeom)
+           CALL set_thermo_work_todo(iwork, part, iq, irr)
            WRITE(stdout,'(/,2x,76("+"))')
            IF (lpwscf(iwork)) THEN
               WRITE(stdout,'(5x,"Doing geometry", i5)') iwork

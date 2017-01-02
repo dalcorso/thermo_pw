@@ -44,6 +44,13 @@ initialize_thermo_work.o \
 interpolate_cv.o \
 io_bands.o \
 local_dos1d_so.o \
+manage_anhar.o   \
+manage_bands.o   \
+manage_elastic_cons.o \
+manage_energy_minimum.o \
+manage_piezo_tensor.o \
+manage_ph_dispersions.o \
+manage_xrdp.o \
 matdyn_sub.o \
 plan_avg_sub.o \
 plot_bz.o \

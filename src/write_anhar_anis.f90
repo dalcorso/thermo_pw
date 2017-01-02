@@ -18,7 +18,7 @@ USE anharmonic,     ONLY : alpha_anis_t, vmin_t, b0_t, celldm_t, beta_t, &
                            gamma_t, cv_t, cp_t, b0_s, cpmcv_anis, el_cons_t, &
                            lelastic
 USE control_grun,   ONLY : lb0_t
-USE control_pwrun,  ONLY : ibrav_save
+USE initial_conf,   ONLY : ibrav_save
 USE control_pressure, ONLY : pressure_kb
 USE control_macro_elasticity, ONLY : macro_el
 USE control_elastic_constants, ONLY : el_cons_available, el_cons_t_available
@@ -150,7 +150,7 @@ USE ph_freq_anharmonic, ONLY : alphaf_anis_t, vminf_t, b0f_t, celldmf_t, &
                                cpmcvf_anis, el_consf_t, lelasticf
 USE elastic_constants, ONLY : el_con
 USE control_grun,   ONLY : lb0_t
-USE control_pwrun,  ONLY : ibrav_save
+USE initial_conf,   ONLY : ibrav_save
 USE control_pressure, ONLY : pressure_kb
 USE control_macro_elasticity, ONLY : macro_el
 USE control_elastic_constants, ONLY : el_cons_available
@@ -265,7 +265,8 @@ USE thermo_mod,     ONLY : ngeo
 USE temperature,    ONLY : ntemp, temp
 USE control_pressure, ONLY : pressure_kb
 USE control_grun,   ONLY : lv0_t
-USE control_mur,    ONLY : celldm0, vmin
+USE equilibrium_conf, ONLY : celldm0, omega0
+USE control_mur,    ONLY : vmin
 USE thermodynamics,         ONLY : ph_cv
 USE ph_freq_thermodynamics, ONLY : ph_freq_save, phf_cv
 USE anharmonic,             ONLY : celldm_t, vmin_t, b0_t, cv_t, lelastic, &
@@ -279,8 +280,7 @@ USE control_macro_elasticity, ONLY : macro_el
 USE control_grun,     ONLY : lb0_t
 USE control_thermo, ONLY : ltherm_dos, ltherm_freq
 USE elastic_constants, ONLY :  el_compliances
-USE control_elastic_constants, ONLY : el_cons_available, el_cons_t_available, &
-                                      omega0
+USE control_elastic_constants, ONLY : el_cons_available, el_cons_t_available
 USE quadratic_surfaces, ONLY : evaluate_fit_quadratic,      &
                                evaluate_fit_grad_quadratic
 USE control_dosq,   ONLY : nq1_d, nq2_d, nq3_d

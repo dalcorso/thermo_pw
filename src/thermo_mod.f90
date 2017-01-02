@@ -96,7 +96,6 @@ MODULE control_mur
                                ! otherwise makes a fit of the energy as a 
                                ! function of the celldm parameters, with a
                                ! quadratic function of dimension up to 6
-  REAL(DP) :: celldm0(6)  ! the minimum celldm
 
 END MODULE control_mur
 
@@ -361,13 +360,14 @@ MODULE control_thermo
   LOGICAL :: find_ibrav     ! if .TRUE. continue the calculation with the
                             ! converted input
 
-  INTEGER :: spin_component
   !
   CHARACTER(LEN=256) :: outdir_thermo ! the outdir read from the input
   !
   LOGICAL :: set_internal_path ! the path provided by thermo_pw is used
   !
   LOGICAL :: set_2d_path    ! the path provided by thermo_pw is used
+  !
+  INTEGER :: spin_component ! the spin
   !
 END MODULE control_thermo
 
@@ -396,9 +396,6 @@ MODULE control_elastic_constants
   REAL(DP), ALLOCATABLE :: apa_mat(:,:,:) ! possible change of the definition
                                           ! of the direct lattice vectors
                                           ! a' (new) in terms of a (old)
-  REAL(DP) :: omega0            ! for elastic constants not dependent 
-                                ! on temperature this is the unperturbed 
-                                ! volume
   INTEGER :: ngeo_strain        ! number of strain configurations
 
   LOGICAL :: frozen_ions        ! if .true. compute the elastic constant 
@@ -610,22 +607,49 @@ MODULE control_grun
 
 END MODULE control_grun
 
-MODULE control_pwrun
-
+MODULE initial_conf
   USE kinds, ONLY: DP
   SAVE
 
   INTEGER  :: ibrav_save       ! save the Bravais lattice
   REAL(DP) :: celldm_save(6)   ! save the crystal parameters
+  REAL(DP) :: omega_save       ! the volume of the initial configuration
   INTEGER, ALLOCATABLE :: ityp_save(:)  ! save the type of atoms. To be
                                         ! used after completely cleaning pw
   REAL(DP), ALLOCATABLE :: amass_save(:) ! save the mass of atoms. 
-  REAL(DP) :: at_save(3,3)     ! save the at of the configuration read pw.x 
-                               ! input
+  REAL(DP) :: at_save(3,3)     ! save the at of the configuration read by pw.x 
+  REAL(DP) :: bg_save(3,3)     ! save the bg of the configuration read by pw.x 
   REAL(DP), ALLOCATABLE :: tau_save(:,:) ! save the atomic coordinates read
                                ! from pw.x input
+  REAL(DP), ALLOCATABLE :: tau_save_crys(:,:) ! save the atomic coordinates read
+                               ! from pw.x input in crystal coordinates
   INTEGER  :: nr1_save, nr2_save, nr3_save  ! save the fft dimensions
   LOGICAL :: nosym_save        ! save the input nosym
+
+END MODULE initial_conf
+
+MODULE equilibrium_conf
+  USE kinds, ONLY: DP
+  SAVE
+
+  REAL(DP) :: celldm0(6)       ! equilibrium crystal parameters
+  REAL(DP) :: omega0           ! the volume at the equilibrium configuration
+  REAL(DP) :: at0(3,3)         ! save the equilibrium lattice vectors
+  REAL(DP) :: bg0(3,3)         ! save the equilibrium reciprocal lattice vectors
+  REAL(DP), ALLOCATABLE :: tau0(:,:) ! save the atomic coordinates read
+                               ! from pw.x input
+  REAL(DP), ALLOCATABLE :: tau0_crys(:,:) ! save the atomic coordinates 
+                               ! in crystal coordinates
+  INTEGER  :: nr1_0, nr2_0, nr3_0  ! the fft dimensions of the equilibrium
+                                   !  configuration
+END MODULE equilibrium_conf
+
+MODULE control_pwrun
+
+  USE kinds, ONLY: DP
+  SAVE
+
+
   LOGICAL  :: do_punch=.TRUE.  ! set this variable to .FALSE. if pw has
                                ! not to save the punch files.
 END MODULE control_pwrun

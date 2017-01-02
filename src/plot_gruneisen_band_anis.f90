@@ -17,7 +17,7 @@ USE kinds,           ONLY : DP
 USE control_gnuplot, ONLY : flgnuplot
 USE postscript_files, ONLY : flpsgrun
 USE data_files,      ONLY : flgrun, flpgrun
-USE control_pwrun,   ONLY : ibrav_save
+USE initial_conf,    ONLY : ibrav_save
 USE mp_images,       ONLY : root_image, my_image_id
 
 IMPLICIT NONE

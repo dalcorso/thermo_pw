@@ -75,6 +75,9 @@ MODULE lattices
 !  is_compatible_group_ibrav : a function that check is a point group 
 !                is compatible with a given Bravais lattice and gives also 
 !                all the list of compatible lattices
+!  
+!  crystal_parameters : receives the Bravais lattice index and give the
+!                       number of required independent crystal parameters
 !
   USE kinds,      ONLY : DP
   !
@@ -86,7 +89,7 @@ MODULE lattices
          is_bravais_lattice, same_lattice, lattice_point_group,        &
          compute_omega, conventional_ibrav, is_centered, lattice_name, &
          zone_border, same_star, is_compatible_group_ibrav,            &
-         print_bravais_description
+         print_bravais_description, crystal_parameters
 
 CONTAINS
 
@@ -261,12 +264,13 @@ CONTAINS
   at(:,2)=a2(:)
   at(:,3)=a3(:)
   CALL lattice_point_group(at,gname_at,code_group,nsym,sr)
-  CALL find_group_info_ext(nsym, sr, code_group, code_group_ext_, &
-                                                which_elem, group_desc)
+
   IF (code_group_ext==0) THEN
-     code_group_ext=code_group_ext_
+     code_group_ext=0
      gname=gname_at
   ELSE
+     CALL find_group_info_ext(nsym, sr, code_group, code_group_ext_, &
+                                                which_elem, group_desc)
      IF (.NOT. is_subgroup(code_group_ext_, code_group_ext)) &
         CALL errore('find_ibrav_code','input point group code wrong',1)
      CALL point_group_bravais(group_index_from_ext(code_group_ext), code_group)
@@ -1506,5 +1510,33 @@ SELECT CASE (ibrav)
 
 RETURN
 END SUBROUTINE print_bravais_description
+
+INTEGER FUNCTION crystal_parameters(ibrav)
+!
+!   This function returs the number of independent crystal parameters
+!   for each Bravais lattice index
+!
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ibrav
+
+INTEGER :: degree
+
+SELECT CASE (ibrav)
+   CASE(1,2,3)
+      degree=1
+   CASE(4,5,6,7)
+      degree=2
+   CASE(8,9,91,10,11)
+      degree=3
+   CASE(12,-12,13,-13)
+      degree=4
+   CASE DEFAULT
+      degree=6
+END SELECT
+
+crystal_parameters=degree
+
+RETURN
+END FUNCTION crystal_parameters
 
 END MODULE lattices

@@ -28,7 +28,7 @@ USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
 USE data_files,  ONLY : flanhar
 USE grun_anharmonic, ONLY : done_grun
 USE control_grun,  ONLY : lb0_t
-USE control_pwrun, ONLY : ibrav_save
+USE initial_conf,  ONLY : ibrav_save
 USE control_thermo,  ONLY : ltherm_dos, ltherm_freq
 USE anharmonic, ONLY : lelastic
 USE ph_freq_anharmonic, ONLY : lelasticf

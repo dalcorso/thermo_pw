@@ -33,7 +33,7 @@ SUBROUTINE write_ph_dispersions()
   USE phonon_save, ONLY : freq_save, z_save
   USE thermo_sym, ONLY : code_group_save
   USE rap_point_group,  ONLY : code_group
-  USE control_pwrun, ONLY : nr1_save, nr2_save, nr3_save
+  USE initial_conf, ONLY : nr1_save, nr2_save, nr3_save
   USE control_paths, ONLY : disp_q, disp_nqs, high_sym_path, nrap_plot, &
                             rap_plot
   USE control_ph,    ONLY : xmldyn
@@ -254,7 +254,7 @@ SUBROUTINE find_representations_mode_q ( nat, ntyp, xq, w2, u, tau, ityp, &
                          nrot, t_rev, time_reversal, sname, copy_sym, &
                          s_axis_to_cart, inverse_s
   USE fft_base,   ONLY : dfftp
-  USE control_pwrun, ONLY : nr1_save, nr2_save, nr3_save
+  USE initial_conf, ONLY : nr1_save, nr2_save, nr3_save
   USE lr_symm_base, ONLY : gi, nsymq
   USE rap_point_group,  ONLY : code_group, gname, nclass, nelem, elem, elem_name
 

@@ -28,7 +28,7 @@ USE control_elastic_constants, ONLY : el_con_geo, el_con_celldm_geo, &
 USE elastic_constants, ONLY : print_macro_elasticity, &
                               compute_elastic_compliances, el_con
 USE control_grun,   ONLY : lb0_t
-USE control_mur,    ONLY : celldm0
+USE equilibrium_conf,    ONLY : celldm0
 USE control_thermo, ONLY : ltherm_dos, ltherm_freq
 USE control_macro_elasticity, ONLY: macro_el
 USE anharmonic,     ONLY : celldm_t, el_cons_t, el_comp_t, macro_el_t, b0_t, &

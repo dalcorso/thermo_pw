@@ -64,7 +64,7 @@ DO iden=1,nkeden
       filename='energy_files/'//TRIM(flkeconv)
       CALL gnuplot_write_file_mul_data(filename,1,2,'color_red',.TRUE.,.TRUE.,&
                                                  .FALSE.)
-   END IF
+   ENDIF
 ENDDO
 
 CALL gnuplot_end()

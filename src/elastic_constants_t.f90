@@ -10,10 +10,10 @@ SUBROUTINE init_elastic_constants_t( )
 !  This routine copies in its internal variables the lattice parameters
 !  of each geometry decided by the energy minimizer. These are all the
 !  geometries that must be computed by the elastic constants routine.
-!  All these geometries are the unperturbed geometries of the 
-!  elastic constants calculation.
+!  All these geometries are the unperturbed geometries of the elastic 
+!  constants calculation.
 !
-USE kinds, ONLY : DP
+USE kinds,      ONLY : DP
 USE thermo_mod, ONLY : tot_ngeo
 USE ions_base,  ONLY : tau, nat
 USE control_elastic_constants, ONLY : el_con_geo, el_con_ibrav_geo,  &
@@ -46,12 +46,12 @@ USE cell_base, ONLY : ibrav, celldm
 USE ions_base, ONLY : tau, nat, atm, ityp
 USE control_elastic_constants, ONLY : el_con_ibrav_geo, el_con_celldm_geo, &
                                       el_con_tau_geo
-USE input_parameters, ONLY : celldm_ => celldm, ibrav_ => ibrav
 USE io_global, ONLY : stdout
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: igeom
+
 REAL(DP) :: omega, at(3,3)
-INTEGER :: ipol, na
+INTEGER  :: ipol, na
 
 ibrav=el_con_ibrav_geo(igeom)
 celldm(:)=el_con_celldm_geo(:,igeom)
@@ -59,8 +59,6 @@ tau(:,:)=el_con_tau_geo(:,:,igeom)
 CALL latgen(ibrav,celldm,at(1,1),at(1,2),at(1,3),omega)
 at=at/celldm(1)
 CALL set_equilibrium_conf( celldm, tau, at, omega )
-celldm_=celldm
-ibrav_=ibrav
 
 WRITE(stdout, '(/,80("*"))')
 WRITE(stdout, '(5x,"Computing geometry ", i5)') igeom

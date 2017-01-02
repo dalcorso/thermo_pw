@@ -44,7 +44,7 @@ SUBROUTINE set_fft_mesh
      !
      gcutms = gcutm
      !
-  END IF
+  ENDIF
   !
   ! ... calculate dimensions of the FFT grid
   !
@@ -54,12 +54,12 @@ SUBROUTINE set_fft_mesh
   CALL realspace_grid_init_tpw ( dfftp, at, bg, gcutm, fft_fact )
   IF ( gcutms == gcutm ) THEN
      IF ( dffts%nr1 ==0 .AND. dffts%nr2==0 .AND. dffts%nr3==0) THEN
-          dffts%nr1 = dfftp%nr1     
-          dffts%nr2 = dfftp%nr2     
-          dffts%nr3 = dfftp%nr3
-          dffts%nr1x= dfftp%nr1x
-          dffts%nr2x= dfftp%nr2x     
-          dffts%nr3x= dfftp%nr3x
+        dffts%nr1 = dfftp%nr1     
+        dffts%nr2 = dfftp%nr2     
+        dffts%nr3 = dfftp%nr3
+        dffts%nr1x= dfftp%nr1x
+        dffts%nr2x= dfftp%nr2x     
+        dffts%nr3x= dfftp%nr3x
      END IF
   END IF
   dffts%comm=intra_bgrp_comm

@@ -14,7 +14,8 @@ SUBROUTINE write_minimum_energy_data()
   !
   !
   USE kinds, ONLY : DP
-  USE control_mur,      ONLY : b0, b01, emin, celldm0, lmurn
+  USE control_mur,      ONLY : b0, b01, emin, lmurn
+  USE equilibrium_conf, ONLY : celldm0
   USE control_pressure, ONLY : pressure_kb
   USE cell_base,        ONLY : ibrav
   USE io_global, ONLY : stdout

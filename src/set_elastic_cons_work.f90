@@ -6,25 +6,32 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 SUBROUTINE set_elastic_cons_work( nwork )
-USE kinds, ONLY : DP
+
+USE kinds,      ONLY : DP
 USE thermo_mod, ONLY : ibrav_geo, celldm_geo
-USE cell_base, ONLY : ibrav
 USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, epsilon_0
-USE elastic_constants, ONLY : epsilon_voigt, epsilon_geo, sigma_geo, &
-                              trans_epsilon
+
 USE thermo_sym, ONLY : laue
+!
+!   library helper routine
+!
+USE elastic_constants, ONLY : epsilon_voigt, epsilon_geo, sigma_geo, &
+                       trans_epsilon
+
 IMPLICIT NONE
 INTEGER, INTENT(OUT) :: nwork
 REAL(DP) :: epsilon_min, epsilon_min_off
-INTEGER :: igeo, iwork, i, j
+INTEGER  :: igeo, iwork
 
 epsilon_min= - delta_epsilon * (ngeo_strain - 1 ) / 2.0_DP - epsilon_0
 epsilon_min_off= - delta_epsilon * (ngeo_strain - 1 ) - 2.0_DP * epsilon_0
+
 IF (ALLOCATED(epsilon_voigt)) DEALLOCATE(epsilon_voigt)
 IF (ALLOCATED(sigma_geo))     DEALLOCATE(sigma_geo)
 IF (ALLOCATED(epsilon_geo))   DEALLOCATE(epsilon_geo)
 IF (ALLOCATED(ibrav_geo))     DEALLOCATE(ibrav_geo)
 IF (ALLOCATED(celldm_geo))    DEALLOCATE(celldm_geo)
+
 SELECT CASE (laue) 
    CASE(29,32)
 !
@@ -175,6 +182,7 @@ epsilon_geo=0.0_DP
 DO iwork = 1, nwork
    CALL trans_epsilon(epsilon_voigt(1,iwork), epsilon_geo(1,1,iwork), 1)
 ENDDO
+
 ALLOCATE( ibrav_geo(nwork) )
 ALLOCATE( celldm_geo(6,nwork) )
 
@@ -190,16 +198,22 @@ SUBROUTINE set_elastic_cons_work_adv( nwork )
 !  Moreover it sets the strain matrix for each geometery, both in 
 !  Voigt notation and in strain form.
 !
-USE kinds, ONLY : DP
+USE kinds,      ONLY : DP
 USE thermo_mod, ONLY : ibrav_geo, celldm_geo
 USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, rot_mat, &
                               aap_mat, apa_mat, elastic_algorithm, epsilon_0
+
+
+USE initial_conf, ONLY : ibrav_save
+USE equilibrium_conf, ONLY : celldm0
+USE thermo_sym, ONLY : laue
+!
+!  library helper modules
+!
 USE elastic_constants, ONLY : epsilon_voigt, sigma_geo, epsilon_geo, &
                               trans_epsilon
-USE control_pwrun, ONLY : ibrav_save
-USE control_mur, ONLY : celldm0
-USE thermo_sym, ONLY : laue
 USE strain_mod, ONLY : apply_strain_adv
+
 IMPLICIT NONE
 INTEGER, INTENT(OUT) :: nwork
 REAL(DP) :: epsilon_min, epsil

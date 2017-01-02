@@ -21,7 +21,7 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
   USE anharmonic,     ONLY : vmin_t
   USE ph_freq_anharmonic, ONLY : vminf_t
   USE control_grun,   ONLY : temp_ph, volume_ph
-  USE control_pwrun,  ONLY : amass_save, ityp_save
+  USE initial_conf,   ONLY : amass_save, ityp_save
   USE control_mur,    ONLY : vmin
   USE control_thermo, ONLY : ltherm_dos, ltherm_freq
   USE point_group,    ONLY : nsym_group

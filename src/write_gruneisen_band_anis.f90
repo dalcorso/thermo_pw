@@ -18,12 +18,12 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
   USE cell_base,      ONLY : celldm
   USE data_files,     ONLY : flgrun
   USE control_paths,  ONLY : nqaux, disp_q, disp_nqs
-  USE control_mur,    ONLY : celldm0
+  USE equilibrium_conf, ONLY : celldm0
   USE thermo_mod,     ONLY : ngeo, omega_geo, celldm_geo, no_ph
   USE anharmonic,     ONLY : celldm_t
   USE ph_freq_anharmonic,  ONLY : celldmf_t
   USE control_grun,   ONLY : temp_ph, volume_ph, celldm_ph
-  USE control_pwrun,  ONLY : ibrav_save, amass_save, ityp_save
+  USE initial_conf,   ONLY : ibrav_save, amass_save, ityp_save
   USE control_thermo, ONLY : ltherm_dos, ltherm_freq
   USE temperature,    ONLY : temp, ntemp
   USE quadratic_surfaces, ONLY : evaluate_fit_quadratic, &

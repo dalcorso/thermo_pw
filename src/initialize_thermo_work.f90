@@ -26,12 +26,14 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
                              lstress, lelastic_const, lpiezoelectric_tensor,&
                              lberry, lpolarization, lpart2_pw, do_scf_relax, &
                              ldos_syn_1, ltherm_dos, ltherm_freq
+  USE control_pwrun,  ONLY : do_punch
   USE control_conv,   ONLY : nke, ke, deltake, nkeden, deltakeden, keden, &
                              nnk, nk_test, deltank, nsigma, sigma_test, &  
                              deltasigma
-  USE control_pwrun,  ONLY : celldm_save, ibrav_save, do_punch
+  USE equilibrium_conf, ONLY : celldm0, omega0
+  USE initial_conf,   ONLY : celldm_save, ibrav_save
   USE piezoelectric_tensor, ONLY : polar_geo
-  USE control_elastic_constants, ONLY : elastic_algorithm, omega0
+  USE control_elastic_constants, ONLY : elastic_algorithm
   USE gvecw,          ONLY : ecutwfc
   USE gvect,          ONLY : ecutrho
   USE control_quadratic_energy, ONLY : nvar, degree
@@ -45,7 +47,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
   INTEGER, INTENT(IN) :: part
 
   INTEGER :: igeom, ike, iden, icount, ink, isigma, ios
-  REAL(DP) :: compute_omega_geo
+  REAL(DP) :: compute_omega_geo, dual
   !
 !
 !   the restart directory is used in all cases
@@ -124,6 +126,9 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
                  icount = icount + 1
                  ke(icount) = ecutwfc + (ike-1) * deltake
                  keden(icount) = ecutrho + (iden-1) * deltakeden
+                 dual=keden(icount)/ke(icount)
+                 IF ( dual < 3.9999_dp ) CALL errore('initialize_thermo_work',&
+                                                   'dual is too small', 1 )
               ENDDO
            ENDDO
            energy_geo=0.0_DP
@@ -336,7 +341,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
                  omega_geo(igeom)=compute_omega_geo(ibrav_geo(igeom),&
                                                     celldm_geo(1,igeom))
               ENDDO
-              omega0 = compute_omega_geo(ibrav_save, celldm_save)
+              omega0 = compute_omega_geo(ibrav_save, celldm0)
            ENDIF
            lelastic_const=.TRUE.
            do_punch=.FALSE.
@@ -562,7 +567,7 @@ SUBROUTINE set_celldm_geo()
 USE kinds,         ONLY : DP
 USE thermo_mod,    ONLY : step_ngeo, ngeo, celldm_geo, reduced_grid, &
                           start_geo, jump_geo
-USE control_pwrun, ONLY : celldm_save
+USE initial_conf,  ONLY : celldm_save
 
 IMPLICIT NONE
 INTEGER  :: igeo1, igeo2, igeo3, igeo4, igeo5, igeo6
@@ -639,7 +644,7 @@ SUBROUTINE initialize_mur(nwork)
 !
 USE kinds,         ONLY : DP
 USE thermo_mod,    ONLY : ibrav_geo, celldm_geo, energy_geo, omega_geo
-USE control_pwrun, ONLY : ibrav_save
+USE initial_conf,  ONLY : ibrav_save
 
 IMPLICIT NONE
 
@@ -747,32 +752,32 @@ END SUBROUTINE initialize_no_ph
 
 SUBROUTINE set_equilibrium_conf( celldm, tau, at, omega )
 !
-!  After the Murnaghan equation this routine sets the input variables
-!  as if they were the equilibrium crystal parameters. This
-!  has to be changed soon, the input variables should not be changed
-!  and this variables should have a different name.
+!  This routine sets the equilibrium variables to those given
+!  in input. The tau are in cartesian coordinates and this routine
+!  computes the reciprocal lattice vectors and the atomic
+!  coordinates in crystal basis.
 !
 USE kinds,            ONLY : DP
 USE ions_base,        ONLY : nat
-USE control_elastic_constants, ONLY : omega0
-USE control_pwrun,    ONLY : tau_save, at_save
-USE control_mur,      ONLY : celldm0
+USE equilibrium_conf, ONLY : celldm0, omega0, tau0, tau0_crys, at0, bg0
 
 IMPLICIT NONE
 
 REAL(DP), INTENT(IN) :: celldm(6), tau(3,nat), at(3,3), omega
 
-REAL(DP) :: bg(3,3)
-
-tau_save(:,:) = tau(:,:)
 celldm0(:) = celldm(:)
-at_save(:,:) = at(:,:)
 omega0=omega
+at0(:,:) = at(:,:)
 !
-!  tau_save is given in crystal coordinates
+! compute the reciprocal lattice vectors
 !
-CALL recips(at(1,1),at(1,2),at(1,3),bg(1,1),bg(1,2),bg(1,3))
-CALL cryst_to_cart( nat, tau_save, bg, -1 )
+CALL recips(at0(1,1),at0(1,2),at0(1,3),bg0(1,1),bg0(1,2),bg0(1,3))
+!
+! set the equlibrium tau and computes them in crystal coordinates
+!
+tau0(:,:) = tau(:,:)
+tau0_crys=tau0
+CALL cryst_to_cart( nat, tau0_crys, bg0, -1 )
 
 RETURN
 END SUBROUTINE set_equilibrium_conf

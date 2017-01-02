@@ -363,7 +363,7 @@ CONTAINS
       WRITE(stdout,'(5x,"Group in ",4i5)') group_ext_in, ptype_in(1:3)
       WRITE(stdout,'(5x,"ptype_out",5x,3i5)')  ptype(1:3)
       WRITE(stdout,'(5x,"Group out",4i5)') group_ext_out, ptype_out(1:3)
-      CALL errore('convert_rap_proj','Decomposition not possible',1)
+!      CALL errore('convert_rap_proj','Decomposition not possible',1)
   ENDIF
 !
 !  If the code arrives here the two representations are compatible.

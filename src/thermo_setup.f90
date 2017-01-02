@@ -38,7 +38,8 @@ SUBROUTINE thermo_setup()
   USE control_elastic_constants, ONLY : ngeo_strain, elastic_algorithm, &
                                  poly_degree, elcpvar
   USE control_eldos,        ONLY : deltae, ndose
-  USE control_mur,          ONLY : lmurn, celldm0
+  USE control_mur,          ONLY : lmurn
+  USE equilibrium_conf,     ONLY : celldm0, at0, tau0, tau0_crys
   USE control_paths,        ONLY : npk_label
   USE control_grun,         ONLY : temp_ph, volume_ph, celldm_ph
   USE control_xrdp,         ONLY : lambda, lambda_elem
@@ -46,9 +47,11 @@ SUBROUTINE thermo_setup()
 !
 !  variables modified by this routine
 !
-  USE control_pwrun,        ONLY : celldm_save, ibrav_save, ityp_save,       &
+  USE initial_conf,         ONLY : celldm_save, ibrav_save, ityp_save,       &
                                    amass_save, nr1_save, nr2_save, nr3_save, &
-                                   nosym_save, tau_save, at_save
+                                   nosym_save, tau_save, tau_save_crys, &
+                                   omega_save, at_save
+  USE equilibrium_conf,     ONLY : nr1_0, nr2_0, nr3_0
   USE thermo_sym,           ONLY : code_group_save
 !
 !   helper codes from the library
@@ -60,7 +63,7 @@ SUBROUTINE thermo_setup()
 !  ibrav, celldm, tau, dfftp parameters.
 !  This routine sets also the point group variables of QE.
 !
-  USE cell_base,            ONLY : at, bg, ibrav, celldm, cell_base_init
+  USE cell_base,            ONLY : at, bg, ibrav, celldm, omega, cell_base_init
   USE ions_base,            ONLY : nat, tau, ntyp => nsp, ityp, amass, atm, &
                                    if_pos
 
@@ -194,13 +197,17 @@ SUBROUTINE thermo_setup()
  
   IF (set_internal_path) CALL set_bz_path()
   IF (set_2d_path) CALL set_2d_bz_path()
-
+!
+! Save the initial configurantion in the initial variables
+!
   ALLOCATE(ityp_save(nat))
   ALLOCATE(amass_save(ntyp))
   ALLOCATE(tau_save(3,nat))
+  ALLOCATE(tau_save_crys(3,nat))
 
   ibrav_save=ibrav
   at_save = at
+  omega_save=omega
   celldm_save=celldm
   nosym_save=nosym
   ityp_save(:)=ityp(:)
@@ -209,7 +216,8 @@ SUBROUTINE thermo_setup()
 !  bring tau_save in crystal coordinates. In strained geometries tau_save
 !  is kept constant.
 !
-  CALL cryst_to_cart( nat, tau_save, bg, -1 )
+  tau_save_crys=tau_save
+  CALL cryst_to_cart( nat, tau_save_crys, bg, -1 )
 !
 !  We now check the point group and the space group so that we can
 !  find the optimal fft mesh for the run. Save also the code group
@@ -226,7 +234,13 @@ SUBROUTINE thermo_setup()
 ! The equilibrium configuration is set here for the case in which we
 ! do not minimize the energy. In this case we keep the input geometry
 !
-  celldm0=celldm
+  ALLOCATE(tau0(3,nat))
+  ALLOCATE(tau0_crys(3,nat))
+
+  CALL set_equilibrium_conf(celldm, tau, at, omega)
+  nr1_0=nr1_save
+  nr2_0=nr2_save
+  nr3_0=nr3_save
 !
 !   Some initialization on ngeo
 !

@@ -29,7 +29,8 @@ SUBROUTINE deallocate_thermo()
                                rap_plot_in, nrap_plot, rap_plot, high_sym_path
   USE control_dosq,     ONLY : dos_q, dos_wq
   USE control_2d_bands, ONLY : averag, vacuum, aux_ind_sur
-  USE control_pwrun,    ONLY : ityp_save, amass_save, tau_save
+  USE initial_conf,     ONLY : ityp_save, amass_save, tau_save, tau_save_crys
+  USE equilibrium_conf, ONLY : tau0, tau0_crys
   USE temperature,      ONLY : temp
 
   USE control_conv,     ONLY : ke, keden, nk_test, sigma_test
@@ -134,8 +135,12 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (apa_mat) )         DEALLOCATE(apa_mat)
 
   IF ( ALLOCATED (tau_save) )        DEALLOCATE(tau_save)
+  IF ( ALLOCATED (tau_save_crys) )   DEALLOCATE(tau_save_crys)
   IF ( ALLOCATED (ityp_save) )       DEALLOCATE(ityp_save)
   IF ( ALLOCATED (amass_save) )      DEALLOCATE(amass_save)
+
+  IF ( ALLOCATED (tau0) )            DEALLOCATE(tau0)
+  IF ( ALLOCATED (tau0_crys) )       DEALLOCATE(tau0_crys)
 
   IF ( ALLOCATED (deb_energy) )      DEALLOCATE( deb_energy )
   IF ( ALLOCATED (deb_free_energy) ) DEALLOCATE( deb_free_energy )
