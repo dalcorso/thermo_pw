@@ -9,6 +9,7 @@
 \def\version{0.7.0}
 \def\qe{{\sc Quantum ESPRESSO}}
 \def\tpw{{\sc THERMO\_PW}}
+\def\thermo{{\texttt{thermo\_pw}}}
 
 \usepackage{html}
 \usepackage{color}
@@ -326,7 +327,79 @@ mur_lc_t
 \end{verbatim} 
 
 \newpage
+\section{\color{coral}Directory structure}
+\thermo\ creates several directories where it saves the data needed to
+create the plots or the information needed to restart the calculation.  
+As \qe, it uses two main directories: the \texttt{working} 
+directory, which is the current directory when \thermo\ is started 
+(the one written by the unix command \texttt{pwd}), and a scratch directory 
+called \texttt{outdir} directory and defined in the \texttt{pw.x} input. For its
+internal purposes \thermo\ might change the \texttt{outdir} directory creating
+some subdirectories within the \texttt{outdir} directory. This is done to
+have different images working in different scratch directories and running
+independently. \\
+The following directories are created within the \texttt{working} directory:
+\begin{verbatim}
+restart         : a directory where each task creates a file with the total
+                  energy and possibly the stress that it has calculated.
 
+gnuplot_files   : a directory where the gnuplot scripts are written.
+
+energy_files    : a directory where the energies for the energy minimization
+                  or the Murnaghan interpolation are saved.
+
+band_files      : a directory where the files with the energy bands and 
+                  representations are written. This directory contains also
+                  the files readable by the gnuplot code.
+
+dynamical_matrices : a directory where the dynamical matrix files are
+                  written.
+
+phdisp_files    : a directory where the files with the phonon frequencies
+                  and representations are written. This directory contains
+                  also the files readable by the gnuplot code. Moreover it
+                  contains the files with the interatomic force constants and
+                  the dynamical matrices eigenvectors.
+
+therm_files     : a directory where the files with the harmonic thermodynamic
+                  properties are saved.
+
+anhar_files     : a directory that contains the files with the anharmonic
+                  quantities. This directory contains also the file with the
+                  Gruneisen parameters and the files with the Gruneisen
+                  parameters readable by the gnuplot code, together with the 
+                  interpolated frequencies and the files with these frequencies
+                  readable by the gnuplot code.
+
+elastic_constants : a directory that contains the elastic constants files.
+\end{verbatim}
+The postscript files with the physical quantities are all written in
+the \texttt{working} directory. \\
+In the \texttt{outdir} directory defined in the input of \texttt{pw.x},
+\thermo\ creates a directory called \texttt{g\#} for each geometry, 
+where \texttt{\#} indicates the geometry number, and uses the directory 
+\texttt{outdir/g\#} as the outdir directory for each different geometry. 
+An image that receives the task, for instance a self-consistent calculation 
+or a phonon calculation for a given geometry, will write in the directory 
+corresponding to its geometry.
+Moreover the phonon code will create a directory \texttt{\_ph\#} 
+(where \texttt{\#} is the image number) within its \texttt{outdir/g\#} scratch 
+directory, so that several images might work on the same geometry 
+simultaneously.
+Note that the number of geometries used in the first or in the second
+asynchronous run coincide for some values of \texttt{what} and are
+different for other values. \\
+\texttt{What} that does not require different geometries, such as
+\texttt{what='scf\_ke'} create an \texttt{outdir} directory called
+\texttt{outdir/ke\#} for each different task, where \texttt{\#} is the
+task number. Similarly \texttt{what='scf\_ke'} uses outdir directories
+called \texttt{outdir/nk\#}.
+Recent versions of the \qe\ package allows also two different scratch
+directories, one for the wavefunctions and one for the other quantities.
+\thermo\ does not uses this feature and sets always the wavefunction
+directory coincident with the \texttt{outdir} directory.
+
+\newpage
 \section{\color{coral}Files contents}
 
 Many data files produced by \texttt{thermo\_pw} are in a form readable
@@ -684,6 +757,12 @@ assuming that one sets is the rotated of the other set.
 \texttt{space\_groups.f90} contains routines to detect the space group,
 to set the FFT indeces compatible with a given space group, to find the
 space group number given the name, or the name given the number etc.
+
+\item
+\texttt{nye.f90} contains routines to print the form of tensors of
+rank ranging from one to four, according to the point group and the
+Bravais lattice.
+
 
 \item
 \texttt{point\_group.f90} contains routines to deal with crystallographic
