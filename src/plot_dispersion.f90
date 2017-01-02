@@ -115,7 +115,7 @@ color(5)='color_gray'
 color_map=1
 IF (enhance_plot.AND.nkz==1) THEN
    DO n=1,nks
-      IF (lprojk(n)==1.OR.lprojk(n)==2) color_map(n)=2
+      IF (lprojk(n)==1) color_map(n)=2
    ENDDO
 ENDIF
 !
@@ -190,7 +190,7 @@ IF (enhance_plot.AND.nkz==1) THEN
                                                         .FALSE., 'center')
    ENDDO
 !
-!  Now put also a rectancle in all the panels that correspond to zone
+!  Now put a rectancle in all the panels that correspond to zone
 !  border lines. Reset the color map to the colors of the rectangles
 !
    color_map=0
@@ -207,8 +207,18 @@ IF (enhance_plot.AND.nkz==1) THEN
 !   zone border but has not been colored. In this case the panel must 
 !   become gray
 !
+!   avoid that a rectangle starts at the last point of a line to not color 
+!   the gaps in the plot
+!
+   DO ilines=1,nlines
+      IF (color_map(last_point(ilines))==2) color_map(last_point(ilines))=5
+   ENDDO
+!
+!  then check all the points that are at zone border. If they are not
+!  colored, they might be the start of a gray rectangle.
+!
    DO n=1,nks_-1
-      IF (color_map(n)==2.AND.lprojk(n)/=0.AND.lprojk(n+1)==3) THEN
+      IF (color_map(n)==2.AND.lprojk(n)/=0.AND.lprojk(n+1)==2) THEN
          x(1)=kx(n)
          x(2)=0.0_DP
          color_map(n)=5

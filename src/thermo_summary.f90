@@ -708,7 +708,7 @@ ELSE
       ENDIF
    ENDDO
    WRITE(stdout,'(/,5x,"You might want to change the Bravais lattice or to")') 
-   WRITE(stdout,'(/,5x,"understand why the symmetries are wrong before&
+   WRITE(stdout,'(/,5x,"understand why the symmetries are wrong before &
                       &continuing")') 
    WRITE(stdout,'(5x,"The point group or the Laue class are not used to &
                       &reduce the number of ")')

@@ -306,7 +306,7 @@ SUBROUTINE find_representations_mode_q ( nat, ntyp, xq, w2, u, tau, ityp, &
 !
   IF (search_sym) THEN
      lqproj=0
-     IF (zone_border(xq,at,bg,-1)) lqproj=3
+     IF (zone_border(xq,at,bg,-1)) lqproj=2
      qptype=1
      magnetic_sym=(nspin_mag==4)
      CALL prepare_sym_analysis(nsymq,sr,t_rev,magnetic_sym)

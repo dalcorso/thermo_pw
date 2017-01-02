@@ -35,10 +35,10 @@ DO iden=1, nkeden
       WRITE(iu_eke,'("#   E_kin (Ry)       E_tot (Ry) ")' )
       DO ike = 1, nke
          WRITE(iu_eke, '(2e20.10)') ke(ike), energy_geo( ike + (iden-1) * nke ) 
-      END DO
-      CLOSE(iu_eke)
-   END IF
-END DO
+      ENDDO
+      CLOSE(UNIT=iu_eke, STATUS='KEEP')
+   ENDIF
+ENDDO
 
 RETURN
 END SUBROUTINE write_e_ke

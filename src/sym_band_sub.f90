@@ -210,7 +210,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
                 invsk, rap_et(1,ik), times(1,1,ik), ngroup(ik), &
                 istart(1,ik),accuracy)
         ENDIF
-        IF (zone_border(xk(1,ik),at,bg,-1)) lprojk(ik)=3
+        IF (zone_border(xk(1,ik),at,bg,-1)) lprojk(ik)=2
            
      ELSE
 !

@@ -29,7 +29,7 @@ DO isigma=1, nsigma
       filename=TRIM(filename)//'/'//TRIM(flnkconv)
    ELSE
       filename='energy_files/'//TRIM(flnkconv)
-   END IF
+   ENDIF
    IF (ionode) THEN
       OPEN(UNIT=iu_enk, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
       WRITE(iu_enk,'("#   nk1   nk2    nk3          E_tot (Ry) ")' )
@@ -37,10 +37,10 @@ DO isigma=1, nsigma
          WRITE(iu_enk, '(3i5,e20.10)') nk_test(1, ink), nk_test(2, ink), &
                                        nk_test(3, ink), energy_geo(ink + &
                                      (isigma -1) * nnk ) 
-      END DO
-      CLOSE(iu_enk)
-   END IF
-END DO
+      ENDDO
+      CLOSE(UNIT=iu_enk, STATUS='KEEP')
+   ENDIF
+ENDDO
 
 RETURN
 END SUBROUTINE write_e_nk
