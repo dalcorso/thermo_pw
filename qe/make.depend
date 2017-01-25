@@ -54,6 +54,7 @@ compute_intq.o : ../../Modules/noncol.o
 compute_intq.o : ../../Modules/uspp.o
 compute_intq.o : control_qe.o
 control_qe.o : ../../Modules/kind.o
+deallocate_ph_tpw.o : control_qe.o
 dv_of_drho_tran.o : ../../Modules/fft_base.o
 dv_of_drho_tran.o : ../../Modules/kind.o
 dv_of_drho_tran.o : control_qe.o
@@ -155,6 +156,8 @@ pheqscf.o : ../../Modules/io_files.o
 pheqscf.o : ../../Modules/io_global.o
 pheqscf.o : ../../Modules/ions_base.o
 pheqscf.o : ../../Modules/kind.o
+pheqscf.o : ../../Modules/mp.o
+pheqscf.o : ../../Modules/mp_images.o
 pheqscf.o : ../../Modules/noncol.o
 pheqscf.o : ../../Modules/paw_variables.o
 pheqscf.o : ../../Modules/uspp.o
@@ -165,11 +168,15 @@ pheqscf.o : ../../PW/src/buffers.o
 pheqscf.o : ../../PW/src/pwcom.o
 pheqscf.o : control_qe.o
 phescf.o : ../../LR_Modules/lrcom.o
+phescf.o : ../../Modules/cell_base.o
+phescf.o : ../../Modules/constants.o
 phescf.o : ../../Modules/control_flags.o
 phescf.o : ../../Modules/io_files.o
 phescf.o : ../../Modules/io_global.o
 phescf.o : ../../Modules/ions_base.o
 phescf.o : ../../Modules/kind.o
+phescf.o : ../../Modules/mp.o
+phescf.o : ../../Modules/mp_images.o
 phescf.o : ../../Modules/noncol.o
 phescf.o : ../../Modules/paw_variables.o
 phescf.o : ../../Modules/uspp.o
@@ -363,6 +370,7 @@ solve_e_fpolc.o : ../../Modules/ions_base.o
 solve_e_fpolc.o : ../../Modules/kind.o
 solve_e_fpolc.o : ../../Modules/mp.o
 solve_e_fpolc.o : ../../Modules/mp_bands.o
+solve_e_fpolc.o : ../../Modules/mp_images.o
 solve_e_fpolc.o : ../../Modules/mp_pools.o
 solve_e_fpolc.o : ../../Modules/noncol.o
 solve_e_fpolc.o : ../../Modules/paw_variables.o
@@ -377,6 +385,7 @@ solve_e_fpolc.o : ../../PW/src/paw_symmetry.o
 solve_e_fpolc.o : ../../PW/src/pwcom.o
 solve_e_fpolc.o : ../../PW/src/scf_mod.o
 solve_e_fpolc.o : ../../thermo_pw/lib/linear_solvers.o
+solve_e_fpolc.o : ../../thermo_pw/lib/mp_asyn.o
 solve_e_fpolc.o : control_qe.o
 solve_eq.o : ../../FFTXlib/fft_interfaces.o
 solve_eq.o : ../../FFTXlib/fft_parallel.o
@@ -392,6 +401,7 @@ solve_eq.o : ../../Modules/ions_base.o
 solve_eq.o : ../../Modules/kind.o
 solve_eq.o : ../../Modules/mp.o
 solve_eq.o : ../../Modules/mp_bands.o
+solve_eq.o : ../../Modules/mp_images.o
 solve_eq.o : ../../Modules/mp_pools.o
 solve_eq.o : ../../Modules/noncol.o
 solve_eq.o : ../../Modules/paw_variables.o
@@ -405,6 +415,7 @@ solve_eq.o : ../../PW/src/paw_onecenter.o
 solve_eq.o : ../../PW/src/pwcom.o
 solve_eq.o : ../../PW/src/scf_mod.o
 solve_eq.o : ../../thermo_pw/lib/linear_solvers.o
+solve_eq.o : ../../thermo_pw/lib/mp_asyn.o
 solve_eq.o : control_qe.o
 solve_eq.o : paw_add_symmetry.o
 solve_eq_tran.o : ../../FFTXlib/fft_interfaces.o
@@ -421,6 +432,7 @@ solve_eq_tran.o : ../../Modules/ions_base.o
 solve_eq_tran.o : ../../Modules/kind.o
 solve_eq_tran.o : ../../Modules/mp.o
 solve_eq_tran.o : ../../Modules/mp_bands.o
+solve_eq_tran.o : ../../Modules/mp_images.o
 solve_eq_tran.o : ../../Modules/mp_pools.o
 solve_eq_tran.o : ../../Modules/noncol.o
 solve_eq_tran.o : ../../Modules/paw_variables.o
@@ -433,6 +445,7 @@ solve_eq_tran.o : ../../PW/src/buffers.o
 solve_eq_tran.o : ../../PW/src/pwcom.o
 solve_eq_tran.o : ../../PW/src/scf_mod.o
 solve_eq_tran.o : ../../thermo_pw/lib/linear_solvers.o
+solve_eq_tran.o : ../../thermo_pw/lib/mp_asyn.o
 solve_eq_tran.o : control_qe.o
 solve_eq_tran.o : paw_add_onecenter.o
 solve_eq_tran.o : paw_add_symmetry.o
