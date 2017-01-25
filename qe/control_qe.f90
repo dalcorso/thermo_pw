@@ -66,3 +66,10 @@ MODULE optical
 
 END MODULE optical
 
+MODULE images_omega
+  USE kinds,  ONLY : DP
+
+  LOGICAL, ALLOCATABLE :: comp_f(:)
+
+END MODULE images_omega
+

@@ -675,6 +675,7 @@ SUBROUTINE initialize_ph_work(nwork)
 !
 USE grid_irr_iq, ONLY : irr_iq
 USE disp,        ONLY : nqs
+USE freq_ph,     ONLY : nfs, fpol
 USE control_ph,  ONLY : epsil, trans
 
 IMPLICIT NONE
@@ -689,6 +690,8 @@ IF (trans) THEN
          nwork=nwork+1
       ENDDO
    ENDDO
+ELSEIF (fpol) THEN
+   nwork=nfs
 ELSEIF (epsil) THEN
    nwork=1
 ELSE

@@ -20,6 +20,7 @@ SUBROUTINE run_thermo_asynchronously(nwork, part, igeom, auxdyn)
   USE piezoelectric_tensor, ONLY : polar_geo, nppl
   USE ener,            ONLY : etot
   USE force_mod,       ONLY : sigma
+  USE freq_ph,         ONLY : fpol
   !
   IMPLICIT NONE
   !
@@ -86,8 +87,13 @@ SUBROUTINE run_thermo_asynchronously(nwork, part, igeom, auxdyn)
                     WRITE(stdout,'(5x,"I am the master and now I do geometry",&
                                                                   & i5)') iwork
                  ELSE IF (lphonon(iwork)) THEN
-                    WRITE(stdout,'(5x,"I am the master and now I do point",&
+                    IF (fpol) THEN
+                       WRITE(stdout,'(5x,"I am the master and now I do &
+                            &frequency", i5)') iwork
+                    ELSE
+                       WRITE(stdout,'(5x,"I am the master and now I do point",&
                        & i5," irrep", i5, " of geometry", i5 )') iq, irr, igeom
+                    ENDIF
                  END IF
                  WRITE(stdout,'(2x,76("+"),/)')
                  IF (lpwscf(iwork)) THEN
@@ -138,9 +144,14 @@ SUBROUTINE run_thermo_asynchronously(nwork, part, igeom, auxdyn)
                  WRITE(stdout,'(5x,"I am image ", i5, " and now I do &
                                        &geometry", i5)') my_image_id, iwork
               ELSE IF (lphonon(iwork)) THEN
-                 WRITE(stdout,'(5x,"I am image ",i5," and now I do point", &
-                  i5," irrep", i5, " of geometry", i5 )') my_image_id, iq, &
+                 IF (fpol) THEN
+                    WRITE(stdout,'(5x,"I am image ",i5," and now I do &
+                     &frequency", i5 )') my_image_id, iwork
+                 ELSE
+                    WRITE(stdout,'(5x,"I am image ",i5," and now I do point", &
+                     i5," irrep", i5, " of geometry", i5 )') my_image_id, iq, &
                                                           irr, igeom
+                 END IF
               END IF
               WRITE(stdout,'(2x,76("+"),/)')
  
@@ -176,8 +187,12 @@ SUBROUTINE run_thermo_asynchronously(nwork, part, igeom, auxdyn)
            IF (lpwscf(iwork)) THEN
               WRITE(stdout,'(5x,"Doing geometry", i5)') iwork
            ELSE IF (lphonon(iwork)) THEN
-              WRITE(stdout,'(5x,"Doing point", i5,  &
-               & " irrep", i5, " of geometry", i5 )') iq, irr, igeom
+              IF (fpol) THEN
+                 WRITE(stdout,'(5x,"Doing frequency", i5)') iwork
+              ELSE
+                 WRITE(stdout,'(5x,"Doing point", i5,  &
+                   & " irrep", i5, " of geometry", i5 )') iq, irr, igeom
+              END IF
            END IF
            WRITE(stdout,'(2x,76("+"),/)')
             

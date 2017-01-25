@@ -17,6 +17,7 @@ check_bands.o \
 compute_intq.o \
 control_qe.o \
 ccg_psi.o \
+deallocate_ph_tpw.o \
 dveqpsi_us.o \
 dveqpsi_us_only.o \
 dv_of_drho_tran.o \

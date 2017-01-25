@@ -93,8 +93,8 @@ PROGRAM thermo_pw
 
   USE control_lr,       ONLY : lgamma
   USE control_ph,       ONLY : with_ext_images, always_run, ldisp, trans
-  USE optical,          ONLY : fru
   USE ph_restart,       ONLY : destroy_status_run
+  USE freq_ph,          ONLY : fpol
   USE save_ph,          ONLY : clean_input_variables
   USE output,           ONLY : fildyn
   USE io_files,         ONLY : tmp_dir, wfc_dir
@@ -355,10 +355,12 @@ PROGRAM thermo_pw
            !
            IF (trans) THEN
               CALL collect_everything(auxdyn)
-           ELSE
+           ELSEIF (fpol) THEN
               IF (lgamma) THEN
+                 IF (nimage>1) CALL collect_all_epsilon()
                  CALL plot_epsilon_omega_opt()
               ELSE
+                 IF (nimage>1) CALL collect_all_chi()
                  CALL plot_epsilon_omega_q()
               ENDIF
            ENDIF
@@ -373,7 +375,7 @@ PROGRAM thermo_pw
            CALL close_phq(.FALSE.)
            CALL clean_input_variables()
            CALL destroy_status_run()
-           IF (ALLOCATED(fru)) DEALLOCATE(fru)
+           CALL deallocate_ph_tpw()
            CALL deallocate_part()
         ENDIF
      ENDDO

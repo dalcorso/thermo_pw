@@ -41,6 +41,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
   USE relax,       ONLY : epse, epsf
   USE start_k,     ONLY : init_start_k
   USE klist,       ONLY : degauss
+  USE freq_ph,     ONLY : fpol
   USE io_files,    ONLY : tmp_dir, wfc_dir
 !
 !   the phonon variables set here or used to set the input
@@ -48,6 +49,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
   USE grid_irr_iq, ONLY : irr_iq, comp_irr_iq, done_irr_iq
   USE disp,        ONLY : nqs, comp_iq, done_iq
   USE control_ph,       ONLY : recover
+  USE images_omega, ONLY : comp_f
 
   USE io_global,   ONLY : stdout
   !
@@ -168,23 +170,30 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
               'mur_lc_t')
            comp_irr_iq=.FALSE.
            comp_iq=.FALSE.
+           comp_f=.FALSE.
            jwork=0
-           DO iq=1,nqs
-              DO irr=0, irr_iq(iq)
-                 jwork=jwork+1
-                 IF (jwork==iwork) THEN
-                    IF (recover) THEN
-                       comp_irr_iq(irr,iq)=.NOT.done_irr_iq(irr,iq)
-                       comp_iq(iq)=.NOT.done_iq(iq)
-                    ELSE
-                       comp_irr_iq(irr,iq)=.TRUE.
-                       comp_iq(iq)=.TRUE.
+           IF (fpol) THEN
+              comp_iq(1)=.TRUE.
+              comp_irr_iq(0,1)=.TRUE.
+              comp_f(iwork)=.TRUE.
+           ELSE
+              DO iq=1,nqs
+                 DO irr=0, irr_iq(iq)
+                    jwork=jwork+1
+                    IF (jwork==iwork) THEN
+                       IF (recover) THEN
+                          comp_irr_iq(irr,iq)=.NOT.done_irr_iq(irr,iq)
+                          comp_iq(iq)=.NOT.done_iq(iq)
+                       ELSE
+                          comp_irr_iq(irr,iq)=.TRUE.
+                          comp_iq(iq)=.TRUE.
+                       ENDIF
+                       iq_point=iq
+                       irr_value=irr
                     ENDIF
-                    iq_point=iq
-                    irr_value=irr
-                 ENDIF
+                 ENDDO
               ENDDO
-           ENDDO
+           ENDIF
 !
 !    Here the elastic constant calculation
 !

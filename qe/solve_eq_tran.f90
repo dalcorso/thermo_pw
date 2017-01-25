@@ -71,8 +71,10 @@ subroutine solve_eq_tran(iu, flag)
                                     chipm, chimp, chixx, chixy
   USE freq_ph,               ONLY : fiu
   USE linear_solvers,        ONLY : ccg_many_vectors
+  USE mp_asyn,               ONLY : asyn_master, with_asyn_images
   USE mp_pools,              ONLY : inter_pool_comm
   USE mp_bands,              ONLY : intra_bgrp_comm, ntask_groups
+  USE mp_images,             ONLY : root_image, my_image_id
   USE mp,                    ONLY : mp_sum
 
   implicit none
@@ -114,7 +116,7 @@ subroutine solve_eq_tran(iu, flag)
 
   complex(DP), EXTERNAL :: zdotc      ! the scalar product function
 
-  logical :: conv_root, exst
+  logical :: conv_root, exst, all_done_asyn
   ! conv_root: true if linear system is converged
 
   integer :: kter, iter0, ipol, ibnd, iter, lter, ik, ikk, ikq, &
@@ -463,6 +465,8 @@ subroutine solve_eq_tran(iu, flag)
                                           ik, dbecsum(1,1,1,ipol), dpsi1)
            END IF
         enddo   ! on polarizations
+        IF ( with_asyn_images.AND.my_image_id==root_image.AND.ionode ) &
+                           CALL asyn_master(all_done_asyn)
      enddo      ! on k points
      current_w=w
 

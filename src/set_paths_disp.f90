@@ -32,7 +32,7 @@ SUBROUTINE set_paths_disp()
   INTEGER :: n, i, j, ik
   REAL(DP) :: q1(3), q2(3), modq1, modq2, ps
  
-  IF (nqaux==0) CALL errore('set_paths_disp','path_not_set',1)
+  IF (nqaux==0) RETURN
 
   IF ( ALLOCATED(disp_q) )    DEALLOCATE (disp_q)
   IF ( ALLOCATED(disp_wq) )   DEALLOCATE (disp_wq)

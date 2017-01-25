@@ -69,6 +69,7 @@ SUBROUTINE phq_readin_tpw()
   USE freq_ph,       ONLY : fpol, fiu, nfs
   USE optical,       ONLY : fru, lcfreq, freq_line, lmagnon, lcharge, &
                             lall_tensor, lchimag
+  USE images_omega,   ONLY : comp_f
   USE cryst_ph,      ONLY : magnetic_sym
   USE ph_restart,    ONLY : ph_readfile
   USE xml_io_base,   ONLY : create_directory
@@ -496,6 +497,8 @@ SUBROUTINE phq_readin_tpw()
      if (nfs < 1) call errore('phq_readin','Too few frequencies',1)
      ALLOCATE(fiu(nfs))
      ALLOCATE(fru(nfs))
+     ALLOCATE(comp_f(nfs))
+     comp_f=.TRUE.
      IF (meta_ionode) THEN
         IF ( TRIM(card) == 'FREQUENCIES' .OR. &
              TRIM(card) == 'frequencies' .OR. &
@@ -531,8 +534,10 @@ SUBROUTINE phq_readin_tpw()
      nfs=1
      ALLOCATE(fru(1))
      ALLOCATE(fiu(1))
+     ALLOCATE(comp_f(1))
      fru=0.0_DP
      fiu=0.0_DP
+     comp_f=.TRUE.
   END IF
   lcfreq=ANY(ABS(fru)>1.D-7).OR.ANY(ABS(fiu)>1.D-7)
   !

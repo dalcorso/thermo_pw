@@ -40,6 +40,7 @@ SUBROUTINE pheqscf()
                               lr1dwf, iu1dwf
   USE ramanm,          ONLY : ramtns, lraman, elop, done_lraman, done_elop
   USE buffers,         ONLY : close_buffer, open_buffer
+  USE images_omega,    ONLY : comp_f
   !
   IMPLICIT NONE
   !
@@ -95,6 +96,7 @@ SUBROUTINE pheqscf()
      !
      DO iu = 1, nfs
         !
+        IF (.NOT. comp_f(iu) ) CYCLE
         current_w=CMPLX(fru(iu), fiu(iu))
         WRITE( stdout, '(/,5x,70("-"))') 
         WRITE( stdout, '(10x,"q=(",3f15.5,")")') xq(1:3)
@@ -185,28 +187,33 @@ USE optical,          ONLY : current_w, fru, lcharge, &
                              chipm, chimp, chixx, chixy, chizr, epsm1
 USE lsda_mod,         ONLY : nspin, lsda
 USE freq_ph,          ONLY : fiu
-USE io_global,        ONLY : stdout, meta_ionode
+USE mp_images,        ONLY : my_image_id
+USE io_global,        ONLY : stdout, ionode
 USE noncollin_module, ONLY : noncolin, nspin_mag
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: iu
 INTEGER :: iu_epsil
 COMPLEX(DP) :: epsi
+CHARACTER(LEN=6) :: int_to_char
+CHARACTER(LEN=256) :: filename
 
 LOGICAL :: exst
 
-IF (meta_ionode) THEN
+IF (ionode) THEN
    IF (nspin_mag==1) THEN
 !
 !   nonmagnetic case or noncollinear with time reversal
 !
        iu_epsil=2
-       INQUIRE(FILE="dynamical_matrices/chirr", exist=exst)
+       filename='dynamical_matrices/chirr'
+       IF (my_image_id>0) filename=TRIM(filename)//'_'//int_to_char(my_image_id)
+       INQUIRE(FILE=TRIM(filename), exist=exst)
        IF (exst) THEN
-          OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/chirr', STATUS='old', &
+          OPEN (UNIT=iu_epsil, FILE=TRIM(filename), STATUS='old', &
                                POSITION='append', FORM='formatted')
        ELSE
-          OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/chirr', &
+          OPEN (UNIT=iu_epsil, FILE=TRIM(filename), &
                                  STATUS='unknown', FORM='formatted')
           WRITE(iu_epsil,'("#    Re(w)     Im(w)     Re(chirr)       Im(chirr)&
                              &      Re (1/chirr)      Im(1/chirr) ")')
@@ -224,12 +231,14 @@ IF (meta_ionode) THEN
 !  lsda case
 !
       iu_epsil=2
-      INQUIRE(FILE="dynamical_matrices/chimag_re", exist=exst)
+      filename='dynamical_matrices/chimag_re'
+      IF (my_image_id>0) filename=TRIM(filename)//'_'//int_to_char(my_image_id)
+      INQUIRE(FILE=TRIM(filename), exist=exst)
       IF (exst) THEN
-         OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/chimag_re', &
+         OPEN (UNIT=iu_epsil, FILE=TRIM(filename), &
                           STATUS='old', POSITION='append', FORM='formatted')
       ELSE
-         OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/chimag_re', STATUS='unknown', &
+         OPEN (UNIT=iu_epsil, FILE=TRIM(filename), STATUS='unknown', &
                                              FORM='formatted')
          WRITE(iu_epsil,'("#  Re(w)     Im(w)     rr       rz        zz&
                            &         +-        -+       xx        xy")')
@@ -244,12 +253,14 @@ IF (meta_ionode) THEN
       CLOSE(iu_epsil)
 
       iu_epsil=2
-      INQUIRE(FILE="dynamical_matrices/chimag_im", exist=exst)
+      filename='dynamical_matrices/chimag_im'
+      IF (my_image_id>0) filename=TRIM(filename)//'_'//int_to_char(my_image_id)
+      INQUIRE(FILE=TRIM(filename), exist=exst)
       IF (exst) THEN
-         OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/chimag_im', &
+         OPEN (UNIT=iu_epsil, FILE=TRIM(filename), &
                         STATUS='old', POSITION='append', FORM='formatted')
       ELSE
-         OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/chimag_im', &
+         OPEN (UNIT=iu_epsil, FILE=TRIM(filename), &
                             STATUS='unknown', FORM='formatted')
          WRITE(iu_epsil,'("#  Re(w)     Im(w)     rr       rz        zz&
                            &         +-        -+       xx        xy")')
@@ -270,13 +281,15 @@ IF (meta_ionode) THEN
 
    IF (.NOT.lsda.OR.lcharge) THEN
       iu_epsil=2
-      INQUIRE(FILE="dynamical_matrices/epsilon", exist=exst)
+      filename='dynamical_matrices/epsilon'
+      IF (my_image_id>0) filename=TRIM(filename)//'_'//int_to_char(my_image_id)
+      INQUIRE(FILE=TRIM(filename), exist=exst)
       IF (exst) THEN
-         OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/epsilon', STATUS='old', &
+         OPEN (UNIT=iu_epsil, FILE=TRIM(filename), STATUS='old', &
                                POSITION='append', FORM='formatted')
       ELSE
-         OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/epsilon', &
-                    STATUS='unknown', FORM='formatted')
+         OPEN (UNIT=iu_epsil, FILE=TRIM(filename), STATUS='unknown', &
+                                                            FORM='formatted')
          WRITE(iu_epsil,'("#    Re(w)     Im(w)     Re(1/eps)       Im(1/eps)&
                         &      Re (eps)      Im(eps) ")')
       END IF
@@ -293,3 +306,282 @@ END IF
 
 RETURN
 END SUBROUTINE write_chi_on_disk
+
+SUBROUTINE collect_all_chi()
+
+USE kinds, ONLY : DP
+USE noncollin_module,  ONLY : nspin_mag
+USE lsda_mod,  ONLY : lsda
+USE freq_ph,   ONLY : fiu, nfs
+USE optical,   ONLY : lcharge, fru, chirr, epsm1
+USE optical,   ONLY : fru, lcharge, chirr, chirz, chizz, &
+                      chipm, chimp, chixx, chixy, chizr, epsm1
+USE io_global, ONLY : meta_ionode, ionode, ionode_id
+USE mp_images, ONLY : my_image_id, intra_image_comm, inter_image_comm
+USE mp,        ONLY : mp_bcast, mp_sum
+
+
+IMPLICIT NONE
+INTEGER :: iu_epsil, iuf, iu
+LOGICAL :: exst
+REAL(DP) :: chirrr, chirri, epsir, epsii, epsm1r, epsm1i, ro, ri
+REAL(DP) :: chirzr, chizzr, chipmr, chimpr, chixxr, chixyr, chirzi, chizzi, &
+            chipmi, chimpi, chixxi, chixyi
+REAL(DP), ALLOCATABLE :: chirrb(:), chirzb(:), chizzb(:), chipmb(:), &
+                         chimpb(:), chixxb(:), chixyb(:), chirrc(:), &
+                         chirzc(:), chizzc(:), chipmc(:), chimpc(:), &
+                         chixxc(:), chixyc(:)
+CHARACTER(LEN=256) :: filename
+CHARACTER(LEN=6)   :: int_to_char
+
+
+ALLOCATE(chirr(nfs))
+ALLOCATE(chirz(nfs))
+ALLOCATE(chizz(nfs))
+ALLOCATE(chipm(nfs))
+ALLOCATE(chimp(nfs))
+ALLOCATE(chixx(nfs))
+ALLOCATE(chixy(nfs))
+ALLOCATE(epsm1(nfs))
+
+ALLOCATE(chirrb(nfs))
+ALLOCATE(chirzb(nfs))
+ALLOCATE(chizzb(nfs))
+ALLOCATE(chipmb(nfs))
+ALLOCATE(chimpb(nfs))
+ALLOCATE(chixxb(nfs))
+ALLOCATE(chixyb(nfs))
+
+ALLOCATE(chirrc(nfs))
+ALLOCATE(chirzc(nfs))
+ALLOCATE(chizzc(nfs))
+ALLOCATE(chipmc(nfs))
+ALLOCATE(chimpc(nfs))
+ALLOCATE(chixxc(nfs))
+ALLOCATE(chixyc(nfs))
+
+chirr=0.0_DP
+epsm1=0.0_DP
+
+IF (ionode) THEN
+   iu_epsil=2
+   IF (nspin_mag==1) THEN
+!
+!  nonmagnetic case of noncollinear with time reversal
+!
+      filename='dynamical_matrices/chirr'
+      IF (my_image_id>0) filename=TRIM(filename)//'_'//int_to_char(my_image_id)
+      INQUIRE(FILE=TRIM(filename), exist=exst)
+      IF (exst) THEN
+         OPEN (UNIT=iu_epsil, FILE=TRIM(filename), STATUS='old', &
+                                                              FORM='formatted')
+         READ(iu_epsil, *)
+      END IF
+
+      DO iuf=1,nfs
+         READ(iu_epsil,'(2f10.5, 4e15.7)',END=100) ro, ri,   &
+                                                chirrr, chirri, epsir, epsii
+         DO iu=1,nfs
+            IF ((ABS(ro-fru(iu))+ABS(ri-fiu(iu)))<1.D-4) THEN
+               chirr(iu)=CMPLX(chirrr,chirri)
+               EXIT
+            END IF
+         END DO
+      END DO
+100   CONTINUE
+      CLOSE(iu_epsil)
+
+   ELSEIF (nspin_mag==2) THEN
+
+      filename='dynamical_matrices/chimag_re'
+      IF (my_image_id>0) filename=TRIM(filename)//'_'//int_to_char(my_image_id)
+      INQUIRE(FILE=TRIM(filename), exist=exst)
+      IF (exst) THEN
+         OPEN (UNIT=iu_epsil, FILE=TRIM(filename), STATUS='old', &
+                                                              FORM='formatted')
+         READ(iu_epsil, *)
+      END IF
+
+      DO iuf=1,nfs
+         READ(iu_epsil,'(2f10.5,7e15.7)',END=200) ro, ri, chirrr, chirzr, & 
+                                  chizzr, chipmr, chimpr, chixxr, chixyr
+         DO iu=1,nfs
+            IF ((ABS(ro-fru(iu))+ABS(ri-fiu(iu)))<1.D-4) THEN
+               chirrb(iu)=chirrr
+               chirzb(iu)=chirzr
+               chizz(iu)=chizzr
+               chipmb(iu)=chipmr
+               chimpb(iu)=chimpr
+               chixxb(iu)=chixxr
+               chixyb(iu)=chixyr
+               EXIT
+            ENDIF
+         ENDDO
+      ENDDO
+200   CONTINUE
+      CLOSE(iu_epsil)
+
+      filename='dynamical_matrices/chimag_im'
+      IF (my_image_id>0) filename=TRIM(filename)//'_'//int_to_char(my_image_id)
+      INQUIRE(FILE=TRIM(filename), exist=exst)
+      IF (exst) THEN
+         OPEN (UNIT=iu_epsil, FILE=TRIM(filename), STATUS='old', &
+                                                              FORM='formatted')
+         READ(iu_epsil, *)
+      END IF
+
+      DO iuf=1,nfs
+         READ(iu_epsil,'(2f10.5,7e15.7)',END=300) ro, ri, chirri, chirzi, & 
+                                  chizzi, chipmi, chimpi, chixxi, chixyi
+         DO iu=1,nfs
+            IF ((ABS(ro-fru(iu))+ABS(ri-fiu(iu)))<1.D-4) THEN
+               chirrc(iu)=chirri
+               chirzc(iu)=chirzi
+               chizzc(iu)=chizzi
+               chipmc(iu)=chipmi
+               chimpc(iu)=chimpi
+               chixxc(iu)=chixxi
+               chixyc(iu)=chixyi
+               EXIT
+            ENDIF
+         ENDDO
+      ENDDO
+300   CONTINUE
+      CLOSE(iu_epsil)
+!
+!  Finally collect all the results
+!
+      chirr(:)=CMPLX(chirrb(:),chirrc(:))
+      chirz(:)=CMPLX(chirzb(:),chirzc(:))
+      chizz(:)=CMPLX(chizzb(:),chizzc(:))
+      chipm(:)=CMPLX(chipmb(:),chipmc(:))
+      chimp(:)=CMPLX(chimpb(:),chimpc(:))
+      chixx(:)=CMPLX(chixxb(:),chixxc(:))
+      chixy(:)=CMPLX(chixyb(:),chixyc(:))
+
+   ELSE
+!
+!   Noncollinear magnetic case, not yet implemented
+!
+   ENDIF
+
+   IF (.NOT.lsda.OR.lcharge) THEN
+      iu_epsil=2
+      filename='dynamical_matrices/epsilon'
+      IF (my_image_id>0) filename=TRIM(filename)//'_'//int_to_char(my_image_id)
+      INQUIRE(FILE=TRIM(filename), exist=exst)
+      IF (exst) THEN
+         OPEN (UNIT=iu_epsil, FILE=TRIM(filename), STATUS='old', &
+                                                            FORM='formatted')
+         READ(iu_epsil, *)
+      END IF
+
+      DO iuf=1,nfs
+         READ(iu_epsil,'(2f10.5, 4e15.7)',END=400) ro, ri, epsm1r, epsm1i, &
+                                                                   epsir, epsii
+         DO iu=1,nfs
+            IF ((ABS(ro-fru(iu))+ABS(ri-fiu(iu)))<1.D-4) THEN
+               epsm1(iu)=CMPLX(epsm1r,epsm1i)
+               EXIT
+            END IF
+         END DO
+      END DO
+400   CONTINUE
+      CLOSE(iu_epsil)
+   ENDIF
+ENDIF
+!
+! Now transfer the susceptibility and epsm1 to all nodes. First collect
+! all the frequencies and then send to all the nodes of each image
+!
+IF (nspin_mag==1) THEN
+   CALL mp_sum(chirr, inter_image_comm)
+   CALL mp_bcast(chirr, ionode_id, intra_image_comm)
+ELSEIF(nspin_mag==2) THEN
+   CALL mp_sum(chirr, inter_image_comm)
+   CALL mp_bcast(chirr, ionode_id, intra_image_comm)
+   CALL mp_sum(chirz, inter_image_comm)
+   CALL mp_bcast(chirz, ionode_id, intra_image_comm)
+   CALL mp_sum(chizz, inter_image_comm)
+   CALL mp_bcast(chizz, ionode_id, intra_image_comm)
+   CALL mp_sum(chipm, inter_image_comm)
+   CALL mp_bcast(chipm, ionode_id, intra_image_comm)
+   CALL mp_sum(chimp, inter_image_comm)
+   CALL mp_bcast(chimp, ionode_id, intra_image_comm)
+   CALL mp_sum(chixx, inter_image_comm)
+   CALL mp_bcast(chixx, ionode_id, intra_image_comm)
+   CALL mp_sum(chixy, inter_image_comm)
+   CALL mp_bcast(chixy, ionode_id, intra_image_comm)
+ELSE
+
+ENDIF
+
+IF (.NOT.lsda.OR.lcharge) THEN
+   CALL mp_sum(epsm1, inter_image_comm)
+   CALL mp_bcast(epsm1, ionode_id, intra_image_comm)
+ENDIF
+!
+!  Now remove all the files created by the images
+!
+IF (ionode) THEN
+   IF (nspin_mag==1) THEN
+      filename='dynamical_matrices/chirr'
+      IF (my_image_id>0) filename=TRIM(filename)//'_'//int_to_char(my_image_id)
+      OPEN (UNIT=iu_epsil, FILE=TRIM(filename), STATUS='old', FORM='formatted')
+      CLOSE (UNIT=iu_epsil, STATUS='DELETE')
+   ELSEIF (nspin_mag==2) THEN
+      filename='dynamical_matrices/chimag_re'
+      IF (my_image_id>0) filename=TRIM(filename)//'_'//int_to_char(my_image_id)
+      OPEN (UNIT=iu_epsil, FILE=TRIM(filename), STATUS='old', FORM='formatted')
+      CLOSE (UNIT=iu_epsil, STATUS='DELETE')
+      filename='dynamical_matrices/chimag_im'
+      IF (my_image_id>0) filename=TRIM(filename)//'_'//int_to_char(my_image_id)
+      OPEN (UNIT=iu_epsil, FILE=TRIM(filename), STATUS='old', FORM='formatted')
+      CLOSE (UNIT=iu_epsil, STATUS='DELETE')
+   ELSE
+   ENDIF
+
+   IF (.NOT.lsda.OR.lcharge) THEN
+      filename='dynamical_matrices/epsilon'
+      IF (my_image_id>0) filename=TRIM(filename)//'_'//int_to_char(my_image_id)
+      OPEN (UNIT=iu_epsil, FILE=TRIM(filename), STATUS='old', FORM='formatted')
+      CLOSE (UNIT=iu_epsil, STATUS='DELETE')
+   ENDIF
+ENDIF
+!
+!  now rewrite on a single file all the collected chi.
+!  Only one processor writes on disk
+!
+IF (meta_ionode) THEN
+   DO iu=1,nfs
+      CALL write_chi_on_disk(iu)
+   END DO
+END IF
+
+DEALLOCATE(chirr)
+DEALLOCATE(chirz)
+DEALLOCATE(chizz)
+DEALLOCATE(chipm)
+DEALLOCATE(chimp)
+DEALLOCATE(chixx)
+DEALLOCATE(chixy)
+DEALLOCATE(epsm1)
+
+DEALLOCATE(chirrb)
+DEALLOCATE(chirzb)
+DEALLOCATE(chizzb)
+DEALLOCATE(chipmb)
+DEALLOCATE(chimpb)
+DEALLOCATE(chixxb)
+DEALLOCATE(chixyb)
+
+DEALLOCATE(chirrc)
+DEALLOCATE(chirzc)
+DEALLOCATE(chizzc)
+DEALLOCATE(chipmc)
+DEALLOCATE(chimpc)
+DEALLOCATE(chixxc)
+DEALLOCATE(chixyc)
+
+RETURN
+END SUBROUTINE collect_all_chi

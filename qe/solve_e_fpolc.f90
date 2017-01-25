@@ -66,6 +66,8 @@ SUBROUTINE solve_e_fpolc(iu)
   USE freq_ph,               ONLY : fiu
   USE linear_solvers,        ONLY : ccg_many_vectors
   USE dv_of_drho_lr,         ONLY : dv_of_drho
+  USE mp_asyn,               ONLY : asyn_master, with_asyn_images
+  USE mp_images,             ONLY : my_image_id, root_image
   USE mp_pools,              ONLY : inter_pool_comm
   USE mp_bands,              ONLY : intra_bgrp_comm, ntask_groups
   USE mp,                    ONLY : mp_sum
@@ -98,7 +100,7 @@ SUBROUTINE solve_e_fpolc(iu)
                    tg_dv(:,:), &
                    tg_psic(:,:), aux2(:,:), dvpsi1(:,:)
 
-  logical :: conv_root, exst
+  logical :: conv_root, exst, all_done_asyn
   ! conv_root: true if linear system is converged
 
   integer :: kter, iter0, ipol, ibnd, iter, lter, ik, ig, is, nrec, ndim, ios, &
@@ -411,6 +413,8 @@ SUBROUTINE solve_e_fpolc(iu)
                          ik, dbecsum(1,1,current_spin,ipol), dpsi)
            END IF
         enddo   ! on polarizations
+        IF ( with_asyn_images.AND.my_image_id==root_image.AND.ionode ) &
+                           CALL asyn_master(all_done_asyn)
      enddo      ! on k points
      current_w=w
 
