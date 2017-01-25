@@ -1,5 +1,7 @@
 New in version 0.7.0
 
+Image parallelization over the frequencies.
+
 Improved the routine that detects the space group. Now it should work
 for any origin.
 
