@@ -2191,28 +2191,31 @@ Using the fact that
 \end{equation}
 where $F$ is the free energy, we obtain 
 \begin{equation}
-\left({d \sigma_j \over d T} \right)_{\epsilon} = {1\over V} \sum_{{\bf q},\nu}
+\left({d \sigma_j \over d T} \right)_{\epsilon} = -\sum_{{\bf q},\nu}
 \gamma_{{\bf q},\nu}^j c_{{\bf q},\nu},
 \end{equation}
 where
 \begin{equation}
-\gamma_{{\bf q},\nu}^j = {1\over \omega_{{\bf q},\nu}} {\partial
+\gamma_{{\bf q},\nu}^j = -{1\over \omega_{{\bf q},\nu}} {\partial
 \omega_{{\bf q},\nu} \over \partial \epsilon_j} 
 \end{equation}
 are the modes Gr\"uneisen parameters and 
 \begin{equation}
-c_{{\bf q},\nu} = {\hbar \omega_{{\bf q},\nu}} {\partial
-\over \partial T } {1 \over e^{\beta \hbar \omega_{{\bf q},\nu}} - 1}
+c_{{\bf q},\nu} = {\hbar \omega_{{\bf q},\nu} \over V} {\partial
+\over \partial T } \left[{1 \over e^{\beta \hbar \omega_{{\bf q},\nu}} - 1}
+\right]
 \end{equation}
 are the mode contribution to the heat capacity.
 The final expression of the thermal expansion is therefore:
 \begin{equation}
-\alpha_i = -{1\over V} \sum_j S_{i,j} \sum_{{\bf q},\nu}
+\alpha_i = \sum_j S_{i,j} \sum_{{\bf q},\nu}
 \gamma_{{\bf q},\nu}^j c_{{\bf q},\nu}.
 \end{equation}
 An accurate evaluation of this sum would require the temperature dependent
-elastic compliances and equilibrium volume, but an approximate expression 
-can be obtained neglecting this dependence and using the $T=0$ values. 
+elastic compliances and the Gr\"uneisen parameters should be calculated
+at the equilibrium volume at each temperature, but an approximate expression 
+can be obtained neglecting this dependence and using the $T=0$ values
+of the volume and of the compliances. 
 
 Again we have the problem that the phonon frequencies and hence their
 derivatives can be calculated only with respect to the crystal parameters,
@@ -2413,12 +2416,12 @@ C^\sigma - C^\epsilon = - T V \sum_{ij} \alpha_{ij} b_{ij}
 Similarly the difference between isothermal and adiabatic
 elastic compliances is given by (Voigt notation):
 \begin{equation}
-S^S_{i,l} - S^T_{i,l} = - {T \alpha_{i} \alpha_{l} \over C^\sigma}
+S^S_{i,l} - S^T_{i,l} = - {T V \alpha_{i} \alpha_{l} \over C^\sigma}
 \end{equation}
 While the difference between isothermal and adiabatic elastic constants
 is given by
 \begin{equation}
-C^S_{ij,lm} - C^T_{ij,lm} = - {T V b_{ij} b_{lm} \over C^\epsilon}
+C^S_{ij,lm} - C^T_{ij,lm} =  {T V b_{ij} b_{lm} \over C^\epsilon}
 \end{equation}
 
 \newpage
