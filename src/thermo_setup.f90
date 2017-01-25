@@ -70,8 +70,7 @@ SUBROUTINE thermo_setup()
   USE symm_base,            ONLY : nosym
   USE rap_point_group,      ONLY : code_group
   USE fft_base,             ONLY : dfftp
-  USE klist,                ONLY : degauss
-  USE ktetra,               ONLY : ltetra
+  USE klist,                ONLY : degauss, ltetra
   USE io_global,            ONLY : stdout
 
   !

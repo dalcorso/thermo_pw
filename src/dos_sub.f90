@@ -17,9 +17,10 @@ SUBROUTINE dos_sub()
   USE io_files,   ONLY : prefix, tmp_dir
   USE constants,  ONLY : rytoev
   USE kinds,      ONLY : DP
-  USE klist,      ONLY : xk, wk, degauss, ngauss, lgauss, nks, nkstot, nelec
+  USE klist,      ONLY : xk, wk, degauss, ngauss, lgauss, ltetra, &
+                         nks, nkstot, nelec
   USE lsda_mod,   ONLY : isk
-  USE ktetra,     ONLY : ntetra, tetra, ltetra
+  USE ktetra,     ONLY : ntetra, tetra, tetra_dos_t
   USE wvfct,      ONLY : nbnd, et
   USE lsda_mod,   ONLY : nspin
   USE ener,       ONLY : ef
@@ -115,7 +116,7 @@ SUBROUTINE dos_sub()
                      '(5x,"Computing point number ", i10, " /", i10)') n, ndos
      e(n) = emin + (n - 1) * deltae
      IF (ltetra) THEN
-        CALL dos_t(et,nspin,nbnd,nks,ntetra,tetra,e(n),dosofe(1,n))
+        CALL tetra_dos_t(et,nspin,nbnd,nks,e(n),dosofe(1,n))
      ELSE
         CALL dos_g(et,nspin,nbnd,nks,wk,degauss,ngauss,e(n),dosofe(1,n))
      ENDIF

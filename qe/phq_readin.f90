@@ -24,8 +24,8 @@ SUBROUTINE phq_readin_tpw()
   USE ions_base,     ONLY : amass, atm
   USE input_parameters, ONLY : max_seconds, nk1, nk2, nk3, k1, k2, k3, outdir
   USE start_k,       ONLY : reset_grid
-  USE klist,         ONLY : xk, nks, nkstot, lgauss, two_fermi_energies, lgauss
-  USE ktetra,        ONLY : ltetra
+  USE klist,         ONLY : xk, nks, nkstot, lgauss, two_fermi_energies, &
+                            lgauss, ltetra
   USE control_flags, ONLY : gamma_only, tqr, restart, lkpoint_dir, io_level, &
                             llondon, ts_vdw
   USE funct,         ONLY : dft_is_nonlocc, dft_is_hybrid

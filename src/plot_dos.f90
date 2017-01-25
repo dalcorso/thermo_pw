@@ -19,8 +19,7 @@ USE control_bands,   ONLY : emin_input
 USE data_files, ONLY : fleldos
 USE postscript_files, ONLY : flpseldos
 USE ener,             ONLY : ef
-USE klist,     ONLY : degauss
-USE ktetra,    ONLY : ltetra
+USE klist,     ONLY : degauss, ltetra
 USE lsda_mod,  ONLY : nspin
 USE io_global, ONLY : ionode
 USE mp_images, ONLY : my_image_id, root_image

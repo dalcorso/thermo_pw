@@ -16,8 +16,7 @@ USE eldos_module,   ONLY : eldos_type, el_free_energy, el_energy, el_entropy, &
                            el_chem_pot, read_eldos_data
 USE ener,           ONLY : ef
 USE lsda_mod,       ONLY : nspin
-USE klist,          ONLY : degauss, nelec
-USE ktetra,         ONLY : ltetra
+USE klist,          ONLY : degauss, nelec, ltetra
 USE lsda_mod,       ONLY : lsda
 USE temperature,    ONLY : tmin, tmax, deltat, ntemp, temp
 USE mp_images,      ONLY : root_image, my_image_id, intra_image_comm

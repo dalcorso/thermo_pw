@@ -72,8 +72,7 @@ PROGRAM epsilon_tpw
   USE spin_orb,    ONLY : lspinorb
   USE lsda_mod,    ONLY : nspin
   USE lrus,        ONLY : dpqq, dpqq_so
-  USE klist,       ONLY : lgauss
-  USE ktetra,      ONLY : ltetra
+  USE klist,       ONLY : lgauss, ltetra
   USE wvfct,       ONLY : nbnd
 
   USE mp_world,    ONLY : world_comm

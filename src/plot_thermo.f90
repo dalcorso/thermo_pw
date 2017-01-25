@@ -159,8 +159,7 @@ USE gnuplot,          ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
                              gnuplot_xlabel, &
                              gnuplot_write_file_mul_data, &
                              gnuplot_set_fact
-USE klist,            ONLY : degauss
-USE ktetra,           ONLY : ltetra
+USE klist,            ONLY : degauss, ltetra
 USE data_files,       ONLY : fleltherm
 USE temperature,      ONLY : tmin, tmax
 USE mp_images,        ONLY : root_image, my_image_id
