@@ -20,7 +20,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
   USE control_thermo,   ONLY : outdir_thermo, lstress
   USE control_elastic_constants, ONLY : frozen_ions
   USE control_conv,     ONLY : ke, keden, nk_test, sigma_test
-  USE initial_conf,     ONLY : ibrav_save, tau_save
+  USE initial_conf,     ONLY : ibrav_save, tau_save_crys
   USE equilibrium_conf, ONLY : at0, tau0
 !
 !  the library modules
@@ -144,7 +144,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
 !
 ! strain uniformly the coordinates to the new celldm
 !
-           tau=tau_save
+           tau=tau_save_crys
            CALL cryst_to_cart( nat, tau, at, 1 )
 
            outdir=TRIM(outdir_thermo)//'/g'//TRIM(int_to_char(iwork))//'/'
