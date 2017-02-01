@@ -45,6 +45,7 @@ SUBROUTINE initialize_ph_tpw()
   !  Allocate the phonon variables
   !
   CALL allocate_phq()
+  CALL allocate_phq_tpw()
   !
   !  Set the main control variable of the phonon code
   !
@@ -65,7 +66,7 @@ SUBROUTINE initialize_ph_tpw()
   !  Initialize all quantities which do not depend on the
   !  linear response to the perturbation
   !
-  CALL phq_init()
+  CALL phq_init_tpw()
   !
   CALL print_clock( 'PHONON' )
   !

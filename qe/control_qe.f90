@@ -73,3 +73,12 @@ MODULE images_omega
 
 END MODULE images_omega
 
+MODULE zstar_add
+  USE kinds,  ONLY : DP
+
+  COMPLEX (DP), ALLOCATABLE ::          &
+                zstareu0_rec(:,:)        ! 3, 3 * nat)
+ 
+  LOGICAL :: done_start_zstar=.FALSE.
+
+END MODULE zstar_add

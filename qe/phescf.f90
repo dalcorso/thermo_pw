@@ -17,12 +17,14 @@ SUBROUTINE phescf_tpw()
   USE klist,           ONLY : lgauss
   USE uspp,            ONLY : okvan
   USE uspp_param,      ONLY : nhm
+  USE fft_base,        ONLY : dffts
   USE ions_base,       ONLY : nat
   USE noncollin_module,ONLY : noncolin, nspin_mag, npol
   USE lsda_mod,        ONLY : nspin
   USE control_ph,      ONLY : convt, zeu, rec_code, rec_code_read, lnoloc, &
                               where_rec, done_epsil, done_zeu, epsil
   USE control_lr,      ONLY : lrpa
+  USE eqv,             ONLY : drhoscfs
   USE io_files,        ONLY : tmp_dir
   USE wvfct,           ONLY : nbnd, npwx
   USE control_flags,   ONLY : io_level
@@ -55,6 +57,8 @@ SUBROUTINE phescf_tpw()
      IF (okpaw) ALLOCATE (int3_paw ( nhm, nhm, nat, nspin_mag, 3))
      IF (noncolin) ALLOCATE(int3_nc( nhm, nhm, nat, nspin, 3))
   ENDIF
+  !
+  ALLOCATE (drhoscfs( dffts%nnr, nspin_mag, 3))
   !
   IF (fpol) THEN    ! calculate freq. dependent polarizability
      !
@@ -121,7 +125,7 @@ SUBROUTINE phescf_tpw()
 
         WRITE( stdout, '(/,5X,"Electric Fields Calculation")' )
         !
-        CALL solve_e()
+        CALL solve_e_tpw(drhoscfs)
         !
         WRITE( stdout, '(/,5X,"End of electric fields calculation")' )
         !
@@ -138,7 +142,7 @@ SUBROUTINE phescf_tpw()
            ! ... calculate the effective charges Z(E,Us) (E=scf,Us=bare)
            !
            IF (.NOT.(lrpa.OR.lnoloc).AND.(zeu.AND..NOT.done_zeu)) THEN
-              CALL zstar_eu()
+              CALL zstar_eu_tpw(drhoscfs)
            ELSEIF (done_zeu) THEN
               CALL summarize_zeu()
            ENDIF
@@ -170,6 +174,8 @@ SUBROUTINE phescf_tpw()
      IF (okpaw) DEALLOCATE (int3_paw)
      IF (noncolin) DEALLOCATE(int3_nc)
   ENDIF
+
+  DEALLOCATE (drhoscfs)
   !
   RETURN
   !
@@ -509,6 +515,7 @@ ENDIF
 DEALLOCATE(polarc)
 DEALLOCATE(epsilonc)
 DEALLOCATE(epsilonm1c)
+
 
 RETURN
 END SUBROUTINE collect_all_epsilon
