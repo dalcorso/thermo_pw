@@ -223,7 +223,7 @@ SUBROUTINE write_bands_tpw (filband, spin_component)
              nbnd, nkstot_eff
         ENDIF
         WRITE (iunpun, '(10x,3f10.6)') xk_collect(:,ik+ik0)
-        WRITE (iunpun, '(10f8.3)') (et_collect(ibnd, ik+ik0)*rytoev, &
+        WRITE (iunpun, '(10f9.3)') (et_collect(ibnd, ik+ik0)*rytoev, &
                                                              ibnd = 1, nbnd)
         !
      ENDDO

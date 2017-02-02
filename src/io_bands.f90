@@ -68,7 +68,7 @@ CONTAINS
      DO ik=1,nks
         !
         WRITE (iunpun, '(10x,3f10.6)') xk(:,ik)
-        WRITE (iunpun, '(10f8.3)') (et(ibnd, ik), ibnd = 1, nbnd)
+        WRITE (iunpun, '(10f9.3)') (et(ibnd, ik), ibnd = 1, nbnd)
         !
      ENDDO
      CLOSE( UNIT=iunpun, STATUS='KEEP' )
