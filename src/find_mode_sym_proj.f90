@@ -137,7 +137,7 @@ SUBROUTINE find_mode_sym_proj (u, w2, tau, nat, nsym, s, sr, ft, gk, invs, &
 ! The other modes are divided into groups of degenerate modes
 !
   DO imode=istart(1)+1,nmodes
-     IF (ABS(w1(imode)-w1(imode-1)) > 5.0d-2) THEN
+     IF (ABS(w1(imode)-w1(imode-1)) > 1.0d-2) THEN
         ngroup=ngroup+1
         istart(ngroup)=imode
      END IF
