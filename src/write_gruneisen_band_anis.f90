@@ -141,7 +141,7 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
   ALLOCATE(frequency_geo(nbnd,nwork))
   ALLOCATE(poly_grun(nvar,nbnd))
   ALLOCATE(frequency(nbnd,nks))
-  ALLOCATE(gruneisen(degree,nbnd,nks))
+  ALLOCATE(gruneisen(nbnd,nks,degree))
   ALLOCATE(x(degree))
   ALLOCATE(grad(degree))
   frequency(:,:)= 0.0_DP
@@ -187,7 +187,7 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
            copy_before=.TRUE.
         ELSE
            DO ibnd=1,nbnd
-              gruneisen(:,ibnd,n)=gruneisen(:,ibnd,n-1)
+              gruneisen(ibnd,n,:)=gruneisen(ibnd,n-1,:)
               frequency(ibnd,n)=frequency(ibnd,n-1)
            END DO
 !
@@ -198,7 +198,7 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
            END DO
         ENDIF
      ELSE
-        frequency_geo(:,:)=freq_geo(:,n,:)
+        frequency_geo(1:nbnd,1:nwork)=freq_geo(1:nbnd,n,1:nwork)
         CALL compute_freq_derivative_anis_eigen(nwork, frequency_geo,&
               celldm_geo, displa_geo(1,1,1,n), degree, nvar, ibrav_save, &
                                                        no_ph, poly_grun)
@@ -211,17 +211,17 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
            CALL evaluate_fit_grad_quadratic(degree,nvar,x,grad,&
                                                           poly_grun(1,ibnd))
            frequency(ibnd,n) = f 
-           gruneisen(:,ibnd,n) = -grad(:)
+           gruneisen(ibnd,n,:) = -grad(:)
            IF (frequency(ibnd,n) > 0.0_DP ) THEN
               DO i=1,degree
-                 gruneisen(i,ibnd,n) = x(i) * gruneisen(i,ibnd,n) /  &
+                 gruneisen(ibnd,n,i) = x(i) * gruneisen(ibnd,n,i) /  &
                                               frequency(ibnd,n)
               END DO
            ELSE
-              gruneisen(:,ibnd,n) = 0.0_DP
+              gruneisen(ibnd,n,:) = 0.0_DP
            ENDIF
            IF (copy_before) THEN
-              gruneisen(:,ibnd,n-1) = gruneisen(:,ibnd,n)
+              gruneisen(ibnd,n-1,:) = gruneisen(ibnd,n,:)
               frequency(ibnd,n-1) = frequency(ibnd,n)
            ENDIF 
         ENDDO
@@ -241,7 +241,7 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
 !
   DO icrys=1, degree
      filegrun='anhar_files/'//TRIM(flgrun)//'_'//TRIM(INT_TO_CHAR(icrys))
-     CALL write_bands(nks, nbnd, disp_q, gruneisen, 1.0_DP, filegrun)
+     CALL write_bands(nks, nbnd, disp_q, gruneisen(1,1,icrys), 1.0_DP, filegrun)
   END DO
 !
 !  writes frequencies at the chosen geometry on file

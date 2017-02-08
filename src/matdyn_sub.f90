@@ -65,8 +65,6 @@ SUBROUTINE matdyn_interp(disp_nqs, disp_q, with_eigen)
   USE mp_images,      ONLY : my_image_id, root_image, intra_image_comm
   USE mp,             ONLY : mp_sum
   USE io_global,      ONLY : stdout
-  USE io_dyn_mat,     ONLY : read_dyn_mat_param, read_dyn_mat_header, &
-                             read_ifc_param, read_ifc
   USE ions_base,      ONLY : nat, tau, ityp, ntyp => nsp, amass
   USE cell_base,      ONLY : at, bg, celldm, omega, alat
   USE constants,      ONLY : RY_TO_CMM1, amu_ry
