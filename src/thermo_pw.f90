@@ -176,7 +176,7 @@ PROGRAM thermo_pw
 !
 !   minimize the energy and find the equilibrium geometry
 !
-     CALL manage_energy_minimum()
+     CALL manage_energy_minimum(nwork)
 !
 !  recompute the density at the minimum volume
 !
