@@ -206,12 +206,16 @@ CASE (5)
          wqaux(1:npk_label) =  (/  30,   30,   30,  0,  30,   0,   &
                                    30,    0,   30,  30,  30,  1   /)
          label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
+         letter_path=letter
+         letter_path(7)='Z '
       ELSE
          letter(1:npk_label)= (/ 'gG', 'X ', 'M ', 'gG', 'Z ',   &
                                  'Z1', 'M ', 'X ', 'P ', 'N ', 'gG' /)  
          wqaux(1:npk_label) =  (/  30,   30,   30,   30,    0,    &
                                 30,    0,   30,   30,   30,    1 /)
          label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
+         letter_path=letter
+         letter_path(6)='Z '
       ENDIF
    ELSE
       IF (what=='mur_lc_t') THEN
@@ -223,8 +227,8 @@ CASE (5)
          wqaux(1:npk_label) =  (/  30,   30,   30,   30,   1 /)
          label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
       ENDIF
+      letter_path=letter
    ENDIF
-   letter_path=letter
    point_label_type='SC'
 CASE (6) 
 !
