@@ -306,7 +306,7 @@ SUBROUTINE q2r_sub(fildyn)
   END IF
   !
   CALL interface_with_tpw(phid, nr1, nr2, nr3, nat, ntyp, lrigid, zeu, &
-                                                 epsil, atm, m_loc)
+                            epsil, atm, m_loc, tau, ityp, at, bg, omega)
   !
   DEALLOCATE(nc)
   DEALLOCATE(phid) 
@@ -572,22 +572,25 @@ subroutine sp_zeu(zeu_u,zeu_v,nat,scal)
   !
 END SUBROUTINE sp_zeu
 
-SUBROUTINE interface_with_tpw(frc_, nr1, nr2, nr3, nat, ntyp, has_zstar_, &
-                                        zeu_, epsil_, atm_, m_loc_ )
+SUBROUTINE interface_with_tpw(frc_, nr1, nr2, nr3, nat_, ntyp_, has_zstar_, &
+                zeu_, epsil_, atm_, m_loc_, tau_, ityp_, at_, bg_, omega_ )
 !
 !  This routine is used to copy the variables produced by q2r in the variables
 !  of the thermo_pw code, avoiding to read the file on disk.
 !
 USE kinds,  ONLY : DP
 USE ifc,    ONLY : frc, atm, zeu, m_loc, epsil_ifc, has_zstar
+USE ions_base, ONLY : nat, ntyp=>nsp, tau, ityp
+USE cell_base, ONLY : at, bg, omega
 USE disp,   ONLY : nq1, nq2, nq3
 
 IMPLICIT NONE
-INTEGER,     INTENT(IN) :: nr1, nr2, nr3, nat, ntyp
-COMPLEX(DP),    INTENT(IN) :: frc_(nr1*nr2*nr3,3,3,nat,nat)
-REAL(DP),    INTENT(IN) :: zeu_(3,3,nat), m_loc_(3,nat), epsil_(3,3)
+INTEGER,     INTENT(IN) :: nr1, nr2, nr3, nat_, ntyp_, ityp_(nat_)
+COMPLEX(DP),    INTENT(IN) :: frc_(nr1*nr2*nr3,3,3,nat_,nat_)
+REAL(DP),    INTENT(IN) :: zeu_(3,3,nat_), m_loc_(3,nat_), epsil_(3,3), &
+                           at_(3,3), bg_(3,3), omega_, tau_(3,nat_) 
 LOGICAL,     INTENT(IN) :: has_zstar_
-CHARACTER(LEN=3), INTENT(IN) :: atm_(ntyp)
+CHARACTER(LEN=3), INTENT(IN) :: atm_(ntyp_)
 INTEGER :: i,j,k,ijk
 
 ALLOCATE (frc(nr1,nr2,nr3,3,3,nat,nat))
@@ -617,6 +620,17 @@ atm=atm_
 m_loc=m_loc_
 epsil_ifc=epsil_
 has_zstar=has_zstar_
+!
+!  initialize atomic positions and the cell. This is necessary when using 
+!  after_disp=.TRUE.
+!
+at=at_
+bg=bg_
+nat=nat_
+tau=tau_
+ityp=ityp
+ntyp=ntyp_
+omega=omega_
 
 RETURN
 END SUBROUTINE interface_with_tpw
