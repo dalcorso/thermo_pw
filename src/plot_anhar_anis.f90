@@ -30,6 +30,7 @@ USE grun_anharmonic, ONLY : done_grun
 USE control_grun,  ONLY : lb0_t
 USE initial_conf,  ONLY : ibrav_save
 USE control_thermo,  ONLY : ltherm_dos, ltherm_freq
+USE control_elastic_constants, ONLY : el_cons_t_available
 USE anharmonic, ONLY : lelastic
 USE ph_freq_anharmonic, ONLY : lelasticf
 USE temperature,     ONLY : tmin, tmax
@@ -198,9 +199,16 @@ ELSEIF (ibrav_save==8.OR.ibrav_save==9.OR.ibrav_save==10.OR.ibrav_save==11) THEN
 END IF
 
 CALL gnuplot_ylabel('Volume thermal expansion {/Symbol b} x 10^6 (K^{-1})',.FALSE.) 
-IF (ltherm_dos) &
-   CALL gnuplot_write_file_mul_data(filename,1,3,'color_red',.TRUE., &
+
+IF (ltherm_dos) THEN
+   IF (el_cons_t_available) THEN
+      CALL gnuplot_write_file_mul_data(filename,1,4,'color_red',.TRUE., &
                            .NOT.(ltherm_freq.OR.lgrun), .FALSE.)
+   ELSE
+      CALL gnuplot_write_file_mul_data(filename,1,3,'color_red',.TRUE., &
+                           .NOT.(ltherm_freq.OR.lgrun), .FALSE.)
+   END IF
+END IF
 IF (ltherm_freq) &
    CALL gnuplot_write_file_mul_data(filename1,1,3,'color_blue', &
                                     .NOT.ltherm_dos,.NOT.lgrun, .FALSE.)

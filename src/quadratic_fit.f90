@@ -255,9 +255,9 @@ SUBROUTINE quadratic_fit_t(itemp)
   WRITE(stdout,'(/,5x,"Extremum of the quadratic found at:")')
   CALL write_vector(degree,x_pos_min)
   IF (pressure > 0.0_DP) THEN
-     WRITE(stdout,'(5x,"Gibbs energy at the extremum",f18.12)') ymin
+     WRITE(stdout,'(5x,"Gibbs energy at the extremum",f22.12)') ymin
   ELSE
-     WRITE(stdout,'(5x,"Free energy at the extremum",f18.12)') ymin
+     WRITE(stdout,'(5x,"Free energy at the extremum",f22.12)') ymin
   END IF
 
   IF (lquartic) THEN
@@ -291,9 +291,9 @@ SUBROUTINE quadratic_fit_t(itemp)
      WRITE(stdout,'(/,5x,"Extremum of the quartic found at:")')
      CALL write_vector(degree,x_pos_min)
      IF (pressure > 0.0_DP) THEN
-        WRITE(stdout,'(5x,"Gibbs energy at the extremum",f18.12)') ymin
+        WRITE(stdout,'(5x,"Gibbs energy at the extremum",f22.12)') ymin
      ELSE
-        WRITE(stdout,'(5x,"Free energy at the extremum",f18.12)') ymin
+        WRITE(stdout,'(5x,"Free energy at the extremum",f22.12)') ymin
      END IF
   END IF
 
@@ -416,9 +416,9 @@ SUBROUTINE quadratic_fit_t_ph(itemp)
   WRITE(stdout,'(/,5x,"Extremum of the quadratic found at:")')
   CALL write_vector(degree,x_pos_min)
   IF (pressure > 0.0_DP) THEN
-     WRITE(stdout,'(5x,"Gibbs energy at the extremum",f18.12)') ymin
+     WRITE(stdout,'(5x,"Gibbs energy at the extremum",f22.12)') ymin
   ELSE
-     WRITE(stdout,'(5x,"Free energy at the extremum",f18.12)') ymin
+     WRITE(stdout,'(5x,"Free energy at the extremum",f22.12)') ymin
   END IF
 
   IF (lquartic) THEN
@@ -452,9 +452,9 @@ SUBROUTINE quadratic_fit_t_ph(itemp)
      WRITE(stdout,'(/,5x,"Extremum of the quartic found at:")')
      CALL write_vector(degree,x_pos_min)
      IF (pressure > 0.0_DP) THEN
-        WRITE(stdout,'(5x,"Gibbs energy at the extremum",f18.12)') ymin
+        WRITE(stdout,'(5x,"Gibbs energy at the extremum",f22.12)') ymin
      ELSE
-        WRITE(stdout,'(5x,"Free energy at the extremum",f18.12)') ymin
+        WRITE(stdout,'(5x,"Free energy at the extremum",f22.12)') ymin
      END IF
   END IF
 
