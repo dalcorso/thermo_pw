@@ -13,7 +13,7 @@ if test $# = 0
 then
     dirs=" LAXlib FFTXlib Modules clib LR_Modules upftools \
            PW/src CPV/src PW/tools upftools PP/src PWCOND/src \
-           PHonon/Gamma PHonon/PH PHonon/D3 PHonon/FD atomic/src \
+           PHonon/Gamma PHonon/PH PHonon/FD atomic/src \
            XSpectra/src ACFDT/src NEB/src TDDFPT/src \
            GWW/pw4gww GWW/gww GWW/head GWW/bse thermo_pw/src \
            thermo_pw/lib thermo_pw/tools thermo_pw/qe" 
@@ -70,10 +70,10 @@ for dir in $dirs; do
 	     DEPENDS="$DEPEND2 $LEVEL2/PW/src" ;;
 	PHonon/FD | PHonon/PH | PHonon/Gamma | XSpectra/src  | GIPAW/src )
 	     DEPENDS="$DEPEND2 $LEVEL2/PW/src $LEVEL2/LR_Modules" ;;
-	PHonon/D3 | GWW/head | TDDFPT/src )
-	     DEPENDS="$DEPEND2 $LEVEL2/PW/src $LEVEL2/PHonon/PH $LEVEL2/LR_Modules" ;;	
+	GWW/head | TDDFPT/src )
+	     DEPENDS="$DEPEND2 $LEVEL2/PW/src $LEVEL2/PHonon/PH $LEVEL2/LR_Modules" ;;
 	GWW/bse )
-	 DEPENDS="$DEPEND2 $LEVEL2/PW/src $LEVEL2/PHonon/PH $LEVEL2/LR_Modulesi $LEVEL2/GWW/pw4gww $LEVEL2/GWW/gww" ;;	
+	 DEPENDS="$DEPEND2 $LEVEL2/PW/src $LEVEL2/PHonon/PH $LEVEL2/LR_Modules $LEVEL2/GWW/pw4gww $LEVEL2/GWW/gww" ;;	
         thermo_pw/lib )
              DEPENDS="$DEPEND2 $LEVEL2/PW/src $LEVEL2/PHonon/PH $LEVEL2/LR_Modules" ;;
         thermo_pw/qe )
@@ -102,28 +102,26 @@ for dir in $dirs; do
 	$TOPDIR/moduledep.sh $DEPENDS > make.depend
 	$TOPDIR/includedep.sh $DEPENDS >> make.depend
 
-        # handle special cases: FFTs
-        sed 's/fft_scalar.*.o/fft_scalar.o/' make.depend > make.depend.tmp
-
-        # handle special cases: modules for C-fortran binding, hdf5
-        sed '/@iso_c_binding@/d;/@hdf5@/d' make.depend.tmp > make.depend
+        # handle special cases: modules for C-fortran binding, hdf5, MPI
+        sed '/@iso_c_binding@/d' make.depend > make.depend.tmp
+        sed '/@hdf5@/d;/@mpi@/d' make.depend.tmp > make.depend
 
         if test "$DIR" = "FFTXlib"
         then
-            sed '/@mpi@/d;/@fft_scalar.*.f90@/d' make.depend > make.depend.tmp
-            sed '/@mkl_dfti/d;/@fftw3.f/d;s/@fftw.c@/fftw.c/;s/@fft_param.f90@/fft_param.f90/' make.depend.tmp > make.depend
+            sed '/@mkl_dfti/d' make.depend > make.depend.tmp
+            sed '/@fftw3.f/d;s/@fftw.c@/fftw.c/' make.depend.tmp > make.depend
         fi
 
         if test "$DIR" = "LAXlib"
         then
-            sed '/@mpi@/d;/@elpa1@/d' make.depend > make.depend.tmp
-            sed 's/@la_param.f90@/la_param.f90/' make.depend.tmp > make.depend
+            sed '/@elpa1@/d' make.depend > make.depend.tmp
+            cp make.depend.tmp make.depend
         fi
 
         if test "$DIR" = "Modules"
         then
 
-            sed '/@mpi@/d;/@elpa1@/d' make.depend > make.depend.tmp
+            sed '/@elpa1@/d' make.depend > make.depend.tmp
             sed '/@ifcore@/d' make.depend.tmp > make.depend
         fi
 

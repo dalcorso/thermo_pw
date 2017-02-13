@@ -56,11 +56,11 @@ uncompress-test-suite: touch-dummy
 # Examples
 ###########################################################
 
-examples: uncompress-examples
+#examples: uncompress-examples
 
-uncompress-examples: touch-dummy
-	$(call download_and_unpack,$(EXAMPLES),$(EXAMPLES_URL),Examples,Examples)
-	touch uncompress-examples
+#uncompress-examples: touch-dummy
+#	$(call download_and_unpack,$(EXAMPLES),$(EXAMPLES_URL),Examples,Examples)
+#	touch uncompress-examples
 
 ##########################################################
 # GIPAW
@@ -95,7 +95,7 @@ thermo_pw:
 
 w90: uncompress-w90 configure-w90
 	if test -d ../W90; then \
-	cd ../W90; $(MAKE) all || exit 1; cd ../bin; ln -fs ../W90/wannier90.x . ; fi
+	cd ../W90; $(MAKE) || exit 1; cd ../bin; ln -fs ../W90/wannier90.x . ; fi
 	-(cd ../bin; ln -fs ../W90/wannier90.x .)
 	touch make-w90
 
@@ -106,7 +106,7 @@ uncompress-w90: touch-dummy
 configure-w90: touch-dummy
 	cd ../W90 ; \
 	if (test -e ../install/make_wannier90.sys) || (test -d ../W90); then \
-	(cp ../install/make_wannier90.inc ../W90/make.sys); fi 
+	(cp ../install/make_wannier90.inc ../W90/make.inc); fi 
 	touch ./configure-w90
 
 ###########################################################
@@ -416,11 +416,12 @@ test-suite_clean:
 
 test-suite_veryclean: test-suite_clean
 
-test-suite_distclean: test-suite_clean
+test-suite_distclean:
 	rm -f ../archive/$(TESTSUITE).tar.gz
 
-examples_distclean:
-	rm -f ../archive/$(EXAMPLES).tar.gz
+#examples_clean:
+
+#examples_veryclean: examples_clean
 
 ##########################################################
 # general cleaning
@@ -428,11 +429,11 @@ examples_distclean:
 
 clean: w90_clean want_clean yambo_clean yambo-devel_clean plumed_clean \
 	gipaw_clean west_clean test-suite_clean \
-	sax_clean d3q_clean thermo_pw_clean
+	sax_clean d3q_clean thermo_pw_clean #examples_clean
 
 veryclean: w90_veryclean want_veryclean yambo_veryclean yambo-devel_veryclean \
 	plumed_veryclean gipaw_veryclean thermo_pw_veryclean west_veryclean \
-	test-suite_veryclean sax_veryclean d3q_veryclean
+	test-suite_veryclean sax_veryclean d3q_veryclean #examples_veryclean
 
 #distclean : veryclean
 distclean: w90_distclean want_distclean yambo_distclean yambo-devel_distclean \
