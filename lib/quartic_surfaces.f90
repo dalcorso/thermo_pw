@@ -1759,7 +1759,7 @@ REAL(DP),INTENT(IN) :: coeff(nvar)
 INTEGER, PARAMETER :: maxiter=100
 
 INTEGER :: iter, ideg
-REAL(DP), PARAMETER :: tol=1.D-12
+REAL(DP), PARAMETER :: tol=3.D-12
 REAL(DP) :: g(degree), y(degree), xold(degree)
 REAL(DP) :: j(degree, degree) 
 REAL(DP) :: deltax, fmod
