@@ -108,8 +108,7 @@ SUBROUTINE write_ph_dispersions()
   ALLOCATE ( ptypeq(3,nq) )
   ALLOCATE ( gaugeq(48,nq) )
 
-  IF (xmldyn) CALL set_sym(nat, tau, ityp, nspin_mag, m_loc, nr1_save, &
-                                                      nr2_save, nr3_save )
+  IF (xmldyn) CALL set_sym(nat, tau, ityp, nspin_mag, m_loc)
   num_rap_mode=-1
 !
 !  Initialize high_sym

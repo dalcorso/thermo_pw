@@ -145,8 +145,7 @@ SUBROUTINE find_symmetry(fft_fact)
   !
   ! ... eliminate rotations that are not symmetry operations
   !
-  CALL find_sym ( nat, tau, ityp, dfftp%nr1, dfftp%nr2, dfftp%nr3, &
-                 magnetic_sym, m_loc )
+  CALL find_sym ( nat, tau, ityp, magnetic_sym, m_loc )
 
   DEALLOCATE(m_loc)
   IF (ALLOCATED(irt)) DEALLOCATE(irt)

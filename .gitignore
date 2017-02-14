@@ -5,6 +5,11 @@
 *.a
 bin/*
 *.inc
+*.aux
+*.toc
+*.log
+*.pdf
+*.out
 iotk
 S3DE
 include/fft_defs.h

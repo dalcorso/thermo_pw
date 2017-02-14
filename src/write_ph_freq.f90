@@ -163,8 +163,7 @@ SUBROUTINE gen_qpoints (ibrav, at_, bg_, nat, tau, ityp, nk1, nk2, nk3, &
   CALL kpoint_grid ( nrot, time_reversal, skip_equivalence, s, t_rev, bg, nqx, &
                            0,0,0, nk1,nk2,nk3, nq, q, wq)
   !
-  CALL find_sym ( nat, tau, ityp, nr1_save, nr2_save, nr3_save, &
-                                                     .NOT.time_reversal, mdum )
+  CALL find_sym ( nat, tau, ityp, .NOT.time_reversal, mdum )
   !
   CALL irreducible_BZ (nrot, s, nsym, time_reversal, magnetic_sym, &
                        at, bg, nqx, nq, q, wq, t_rev)
