@@ -16780,7 +16780,7 @@ FUNCTION angle_rot_tpw(smat)
 !   and for a point on the x axis (y=0) it points in the positive x.
 !   The rotation angle is anti clockwise looking the axis from the tip
 !   to the origin.
-!   For the pi 
+!   On output the angle is in degrees.
 !
 USE kinds, ONLY : DP
 USE constants, ONLY : pi, tpi
