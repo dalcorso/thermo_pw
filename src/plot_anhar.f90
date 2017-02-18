@@ -149,7 +149,7 @@ CALL gnuplot_ylabel('C_p - C_v (J / K / N / mol)',.FALSE.)
 
 IF (ltherm_dos) &
    CALL gnuplot_write_file_mul_data(filename1,1,4,'color_red',.TRUE., &
-                                                   .NOT.ltherm_freq,.FALSE.)
+                                                   .FALSE.,.FALSE.)
 IF (ltherm_freq) &
    CALL gnuplot_write_file_mul_data(filename2,1,4,'color_blue',&
                                                .NOT.ltherm_dos,.FALSE.,.FALSE.)
@@ -161,7 +161,7 @@ CALL gnuplot_set_fact(1._DP,.FALSE.)
 CALL gnuplot_ylabel('B_S - B_T (kbar)',.FALSE.) 
 IF (ltherm_dos) &
    CALL gnuplot_write_file_mul_data(filename1,1,5,'color_red',.TRUE.,&
-                                             .NOT.ltherm_freq,.FALSE.)
+                                             .FALSE.,.FALSE.)
 IF (ltherm_freq) &
    CALL gnuplot_write_file_mul_data(filename2,1,5,'color_blue',&
                                            .NOT.ltherm_dos,.FALSE.,.FALSE.)
