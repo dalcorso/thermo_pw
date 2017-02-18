@@ -579,24 +579,24 @@ SUBROUTINE interface_with_tpw(frc_, nr1, nr2, nr3, nat_, ntyp_, has_zstar_, &
 !  of the thermo_pw code, avoiding to read the file on disk.
 !
 USE kinds,  ONLY : DP
-USE ifc,    ONLY : frc, atm, zeu, m_loc, epsil_ifc, has_zstar
 USE ions_base, ONLY : nat, ntyp=>nsp, tau, ityp
 USE cell_base, ONLY : at, bg, omega
+USE ifc,    ONLY : frc, atm, zeu, m_loc, epsil_ifc, has_zstar
 USE disp,   ONLY : nq1, nq2, nq3
 
 IMPLICIT NONE
 INTEGER,     INTENT(IN) :: nr1, nr2, nr3, nat_, ntyp_, ityp_(nat_)
 COMPLEX(DP),    INTENT(IN) :: frc_(nr1*nr2*nr3,3,3,nat_,nat_)
 REAL(DP),    INTENT(IN) :: zeu_(3,3,nat_), m_loc_(3,nat_), epsil_(3,3), &
-                           at_(3,3), bg_(3,3), omega_, tau_(3,nat_) 
+                           at_(3,3), bg_(3,3), omega_, tau_(3,nat_)
 LOGICAL,     INTENT(IN) :: has_zstar_
 CHARACTER(LEN=3), INTENT(IN) :: atm_(ntyp_)
 INTEGER :: i,j,k,ijk
 
-ALLOCATE (frc(nr1,nr2,nr3,3,3,nat,nat))
-ALLOCATE (zeu(3,3,nat))
-ALLOCATE (atm(ntyp))
-ALLOCATE (m_loc(3,nat))
+ALLOCATE (frc(nr1,nr2,nr3,3,3,nat_,nat_))
+ALLOCATE (zeu(3,3,nat_))
+ALLOCATE (atm(ntyp_))
+ALLOCATE (m_loc(3,nat_))
 
 IF (nq1==0 .AND. nq2==0 .AND. nq3==0) THEN
    nq1=nr1
@@ -628,7 +628,7 @@ at=at_
 bg=bg_
 nat=nat_
 tau=tau_
-ityp=ityp
+ityp=ityp_
 ntyp=ntyp_
 omega=omega_
 
