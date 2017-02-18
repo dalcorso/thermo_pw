@@ -11248,15 +11248,16 @@ SUBROUTINE find_group_tags(nsym, smat, group_tags)
 !  number of the symmetry operation in the list of symmetries
 !
   USE kinds, ONLY : DP
+  USE io_global, ONLY : stdout
   IMPLICIT NONE
   INTEGER, INTENT(IN) :: nsym
   REAL(DP), INTENT(IN) :: smat(3,3,nsym)
   INTEGER, INTENT(OUT) :: group_tags(nsym)
 
-  INTEGER :: isym, i
+  INTEGER :: isym, i, ipol, jpol
   INTEGER :: tipo_sym, ts  
   REAL(DP), PARAMETER :: sqr2=SQRT(2.0_DP), sqr3=SQRT(3.0_DP)
-  REAL(DP) :: a(3,32), b(3,32), angl(32), angle_rot, ang, s(3,3), ax(3)
+  REAL(DP) :: a(3,32), b(3,32), angl(32), ang, s(3,3), ax(3)
 
   group_tags=0
   a=0.0_DP
@@ -11338,7 +11339,7 @@ SUBROUTINE find_group_tags(nsym, smat, group_tags)
         group_tags(isym) = 33
      ELSEIF (ts==3) THEN
         CALL versor(smat(1,1,isym),ax)
-        ang=angle_rot(smat(1,1,isym))
+        ang=angle_rot_tpw(smat(1,1,isym))
         DO i=2,32
            IF (ABS(ax(1)*b(1,i)+ax(2)*b(2,i)+ax(3)*b(3,i)-1.0_DP)<1.D-8 &
               .AND. ABS(ang-angl(i))<1.D-8 ) THEN
@@ -11367,7 +11368,7 @@ SUBROUTINE find_group_tags(nsym, smat, group_tags)
      ELSEIF (ts==6) THEN
         s=-smat(:,:,isym)
         CALL versor(s,ax)
-        ang=angle_rot(s)
+        ang=angle_rot_tpw(s)
         DO i=2,32
            IF (ABS(ax(1)*b(1,i)+ax(2)*b(2,i)+ax(3)*b(3,i)-1.0_DP)<1.D-8 &
               .AND. ABS(ang-angl(i))<1.D-8 ) THEN
@@ -11375,8 +11376,13 @@ SUBROUTINE find_group_tags(nsym, smat, group_tags)
             END IF
         END DO
      ENDIF   
-     IF (group_tags(isym)==0) &
+     IF (group_tags(isym)==0) THEN
+        WRITE(stdout,'(5x,"symmetry number",i5," symmetry type",i5)') isym, ts
+        DO ipol=1,3
+           WRITE(stdout,'(3f23.16)') (smat(ipol,jpol,isym), jpol=1,3)
+        ENDDO
         CALL errore('find_group_tags','problem identifying symmetry', isym)   
+     END IF
   END DO
 
 RETURN
@@ -16763,6 +16769,66 @@ group_name=gname(code)
 
 RETURN
 END SUBROUTINE group_name_international
+
+FUNCTION angle_rot_tpw(smat)
+!
+!   This routine receives a rotation matrix and computes the rotation
+!   angle. It slightly different from the one contained in QE.
+!   The rotation angle is between 0 and 2 pi and the convention for 
+!   the axis is that it points from the origin to the positive z emisphere.
+!   For an axis on the plane z=0 it points in the positive y direction
+!   and for a point on the x axis (y=0) it points in the positive x.
+!   The rotation angle is anti clockwise looking the axis from the tip
+!   to the origin.
+!   For the pi 
+!
+USE kinds, ONLY : DP
+USE constants, ONLY : pi, tpi
+IMPLICIT NONE
+
+REAL(DP), INTENT(IN) :: smat(3,3)
+REAL(DP) :: angle_rot_tpw
+
+REAL(DP), PARAMETER :: eps= 1.D-8
+REAL(DP) :: trace, angle, a1(3)
+INTEGER :: tipo_sym
+LOGICAL :: pos_sign
+
+IF (tipo_sym(smat)==4) THEN
+   angle_rot_tpw=180.0_DP
+   RETURN
+END IF
+
+trace = smat(1,1) + smat(2,2) + smat(3,3)
+!
+! angle is between 0.0 and \pi
+!
+angle=ACOS( (trace - 1.0_DP)*0.5_DP )
+!
+!  Compute the axis
+!
+a1(1) =-smat(2,3)+smat(3,2)
+a1(2) =-smat(3,1)+smat(1,3)
+a1(3) =-smat(1,2)+smat(2,1)
+
+pos_sign=.TRUE.
+!
+!  If the axis has not the correct orientation, the angle is 2 pi - angle
+!
+IF (a1(3) < -eps ) THEN
+   pos_sign=.FALSE.
+ELSEIF (ABS(a1(3))<eps .AND. a1(2) < -eps ) THEN
+   pos_sign=.FALSE.
+ELSEIF (ABS(a1(3))<eps .AND. ABS(a1(2))<eps.AND.a1(1) < -eps ) THEN
+   pos_sign=.FALSE.
+ENDIF
+
+IF (.NOT.pos_sign) angle=tpi-angle
+
+angle_rot_tpw = angle * 180.0_DP / pi
+
+RETURN
+END FUNCTION angle_rot_tpw
 
 END MODULE point_group
 
