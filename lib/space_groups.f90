@@ -2777,7 +2777,6 @@ MODULE space_groups
   INTEGER :: tipo_sym, ts
   CHARACTER(LEN=11) :: group_name
   CHARACTER(LEN=40) :: latt_name
-  REAL(DP) :: angle_rot
 !
 !  initialization
 !  
