@@ -316,7 +316,19 @@ DO ilines = 1, nlines
                                //  "." // TRIM(int_to_char(irap))
       ENDIF
       IF (has_points(irap,ilines).AND.dorap(irap,ilines)) THEN
-         IF (first_line==ilines .AND. irap==first_rap) THEN
+         IF (first_line==ilines .AND. irap==first_rap .AND. &
+              last_line==ilines .AND. irap==last_rap ) THEN 
+! 
+!   Special case, only one line and one representation
+!
+            IF (with_lines(ilines)) THEN
+               CALL gnuplot_write_file_data(filename,'band_lw',&
+                             color_rap(irap),.TRUE.,.TRUE.,.FALSE.)
+            ELSE
+               CALL gnuplot_write_file_mul_point(filename, 1, 2, &
+                                      'color_red', .TRUE., .TRUE., .FALSE.)
+            ENDIF
+         ELSEIF (first_line==ilines .AND. irap==first_rap) THEN
             IF (with_lines(ilines)) THEN
                CALL gnuplot_write_file_data(filename,'band_lw',&
                              color_rap(irap),.TRUE.,.FALSE.,.FALSE.)
