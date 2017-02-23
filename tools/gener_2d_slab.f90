@@ -53,7 +53,13 @@ PROGRAM gener_2d_slab
 !
 !  vacuum       the vacuum distance
 !
-USE kinds, ONLY : DP
+!  filename     output file name
+!
+USE kinds,       ONLY : DP
+USE io_global,   ONLY : stdout, ionode
+USE mp_global,   ONLY : mp_startup, mp_global_end
+USE environment, ONLY : environment_start, environment_end
+
 IMPLICIT NONE
 
 INTEGER, PARAMETER :: nmax=10000
@@ -62,15 +68,21 @@ REAL(DP) :: a1(3), a2(3), b1(3), b2(3), g(3), t(3), c(3), d(3), t1(3), c1(3)
 REAL(DP) :: alat, cmod, tmod, pi, prod1, prod2, vacuum, gmod, dist, dist1, &
             tau(3), b1eff(3), b2eff(3)
 INTEGER :: m, n, m1, n1, p, q, nrows, nat_row, nat, ibrav_2d, nat_2d, q0, p0, &
-           q1, ia, iat, j, itry, na, found, nspace
-REAL(DP) :: y(3,nmax), alat_box, celldm_2d(3)
+           q1, ia, iat, j, itry, na, nt, ntyp, found, nspace, iuout
+REAL(DP) :: y(3,nmax), alat_box, celldm_2d(3), celldm(6), omega, at(3,3)
 INTEGER :: ps(nmax), qs(nmax)
-REAL(DP), ALLOCATABLE :: tau_2d(:,:)
+INTEGER, ALLOCATABLE :: ityp(:)
+REAL(DP), ALLOCATABLE :: tau_2d(:,:), tau_ribbon(:,:)
 CHARACTER ( LEN=3 ), ALLOCATABLE :: atm_2d(:)
 CHARACTER ( LEN=3 ) :: atm(nmax)
 LOGICAL :: ldist_vacuum
-INTEGER :: iuout
-CHARACTER(LEN=256) :: filename
+CHARACTER(LEN=256) :: filename, xsf_filename
+CHARACTER(LEN=3) :: atm_typ(10)
+CHARACTER(LEN=9) :: code='2D_SLAB'
+
+CALL mp_startup ( start_images=.true. )
+CALL environment_start ( code )
+
 
 WRITE(6,'("ibrav_2d ")')
 WRITE(6,'("1 -- oblique, give a, b, cos(gamma) ")')
@@ -274,19 +286,70 @@ OPEN(unit=iuout, file=TRIM(filename), status='unknown', form='formatted')
 !
 !  we use an orthorhombic cell
 !
+celldm=0.0_DP
+celldm(1)=cmod * alat
+celldm(2)=tmod/cmod
+celldm(3)=alat_box/cmod/alat
+ALLOCATE(tau_ribbon(3,nat))
+ALLOCATE(ityp(nat))
 WRITE (iuout, '("ibrav=8")')
-WRITE (iuout, '("celldm(1)= ",f15.8)') cmod * alat
-WRITE (iuout, '("celldm(2)= ",f15.8)') tmod/cmod
-WRITE (iuout, '("celldm(3)= ",f15.8)') alat_box/cmod/alat
+WRITE (iuout, '("celldm(1)= ",f15.8)') celldm(1)
+WRITE (iuout, '("celldm(2)= ",f15.8)') celldm(2)
+WRITE (iuout, '("celldm(3)= ",f15.8)') celldm(3)
 WRITE (iuout, '("nat= ",i5)') nat
 WRITE (iuout, '("ATOMIC_POSITIONS {crystal}")') 
 DO na=1,nat
    prod1 = y(1,na) * c1(1) + y(2,na) * c1(2)
    prod2 = y(1,na) * t1(1) + y(2,na) * t1(2)
+   tau_ribbon(1,na)=prod1
+   tau_ribbon(2,na)=prod2
+   tau_ribbon(3,na)=y(3,na) * alat / alat_box
    WRITE (iuout,'(a,3f18.10)') atm(na), prod1, prod2, y(3,na) * alat / alat_box
 ENDDO
 
 CLOSE(iuout)
+
+!  Count how many types of atoms we have and how they are called
+!
+ntyp=1
+atm_typ(1)=atm(1)
+ityp(1)=1
+DO ia=2, nat
+   found=0
+   DO nt=1, ntyp
+      IF ( TRIM( atm(ia) ) == TRIM( atm_typ(nt) ) ) THEN
+         ityp(ia)=nt
+         found=1
+      END IF
+   ENDDO
+   IF (found==0) THEN
+      ntyp = ntyp + 1
+      atm_typ(ntyp) = atm(ia)
+      ityp(ia)=ntyp
+   END IF
+END DO
+
+
+IF (ionode) THEN
+   iuout=35
+   xsf_filename=TRIM(filename)//'.xsf'
+   OPEN(UNIT=iuout, FILE=TRIM(xsf_filename), STATUS='unknown', &
+                                                             FORM='formatted')
+   CALL latgen(8, celldm, at(1,1), at(1,2), at(1,3), omega)
+   at=at/celldm(1) 
+!
+!   bring the atomic positions in cartesian coordinates in unit of alat
+!
+   CALL cryst_to_cart(nat,tau_ribbon,at,1)
+   CALL xsf_struct (celldm(1), at, nat, tau_ribbon, atm_typ, ityp, iuout)
+   CLOSE(iuout)
+ENDIF
+
+DEALLOCATE(tau_ribbon)
+DEALLOCATE(ityp)
+
+CALL environment_end( code )
+CALL mp_global_end ()
 
 END PROGRAM gener_2d_slab
 
