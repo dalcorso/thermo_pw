@@ -75,14 +75,18 @@ PROGRAM gener_3d_slab
 !               unit cell are written
 !              
 USE kinds, ONLY : DP
+USE constants, ONLY : pi
 USE wyckoff,  ONLY : nattot, tautot, ityptot, sup_spacegroup, clean_spacegroup
+USE io_global,   ONLY : stdout, ionode
+USE mp_global,   ONLY : mp_startup, mp_global_end
+USE environment, ONLY : environment_start, environment_end
 
 IMPLICIT NONE
 
 INTEGER, PARAMETER :: nmax=10000
 REAL(DP) :: at(3,3), bg(3,3), g(3), t(3), c1(3), c2(3), d(3), bc1(3), bc2(3), &
             bt(3), beff(3,3), d1(3), d2(3), bd1(3), bd2(3), vprod(3), dz(3)
-REAL(DP) :: alat, c1mod, c2mod, tmod, pi, prod1, prod2, prod3, vacuum, &
+REAL(DP) :: alat, c1mod, c2mod, tmod, prod1, prod2, prod3, vacuum, &
             gmod, dist, dist1, tau(3), det, omega, prod, area, super_area, &
             alpha, c_alat, shiftz
 INTEGER  :: m, n, h, o, p, q, s, t11, t12, t21, t22, nlayers, nat, ibrav_3d, &
@@ -101,6 +105,10 @@ CHARACTER ( LEN=3 ) :: atm(nmax), atm_typ(100)
 LOGICAL :: ldist_vacuum, three_indices, uniqueb, rhombohedral
 INTEGER :: iuout
 CHARACTER( LEN=256 ) :: filename
+CHARACTER(LEN=9) :: code='3D_SLAB'
+
+CALL mp_startup ( start_images=.true. )
+CALL environment_start ( code )
 
 WRITE(6,'("ibrav_3d? ")')
 READ(5,*) ibrav_3d
@@ -187,6 +195,8 @@ IF (lcryst==2) THEN
    DEALLOCATE(if_pos)
 ENDIF
 
+
+
 IF (ibrav_3d == 4) THEN
    WRITE(6,'("Three (.TRUE.) or four (.FALSE.) indices  ?")') 
    READ(5,*) three_indices
@@ -235,7 +245,6 @@ WRITE(6,'("Output file name?")')
 READ(5,*) filename
 WRITE(6,'(a)') TRIM(filename)
 
-pi=4.0_DP * atan(1.0_DP)
 CALL latgen(ibrav_3d, celldm, at(1,1), at(1,2), at(1,3), omega)
 
 at=at/alat
@@ -496,8 +505,8 @@ IF ( o /= 0) THEN
    o1=ABS(o)
    DO itry=0, o1
       DO jtry = 0, o1
-         DO sign1=-1,1,2
-            DO sign2=-1,1,2
+         DO sign1=1,-1,-2
+            DO sign2=1,-1,-2
                IF (MOD(-sign1*itry*m - sign2*jtry*n, o1)==0) THEN
                   found=found+1
                   ps(found) = sign1 * itry
@@ -513,8 +522,8 @@ ELSEIF ( n /= 0) THEN
    n1=ABS(n)
    DO itry=0, n1
       DO jtry = 0, n1
-         DO sign1=-1,1,2
-            DO sign2=-1,1,2
+         DO sign1=1,-1,-2
+            DO sign2=1,-1,-2
                IF (MOD(-sign1*itry*m - sign2*jtry*o, n1)==0) THEN
                   found=found+1
                   ps(found) = sign1 * itry
@@ -530,8 +539,8 @@ ELSEIF ( m /= 0) THEN
    m1 = ABS(m)
    DO itry=0, m1
       DO jtry = 0, m1
-         DO sign1=-1,1,2
-            DO sign2=-1,1,2
+         DO sign1=1,-1,-2
+            DO sign2=1,-1,-2
                IF (MOD( -sign1 * itry * n - sign2 * jtry * o, m1)==0) THEN
                   found=found+1
                   ps(found) = ( -sign1*itry*n - sign2*jtry*o ) / m
@@ -682,7 +691,7 @@ DO j=-(nlayers-1)/2+origin_shift, nlayers/2 + origin_shift
       IF (ABS(j) < min_j .AND. j /= 0) min_j=ABS(j)
    ENDIF
 
-!   write(6,*) 'p, q, and s', p, q, s
+!   WRITE(6,*) 'p, q, and s', p, q, s
 
    DO ia=1,nat_3d
       nat = nat + 1
@@ -708,7 +717,7 @@ END IF
 !  c1 has been calculated above
 !
 c2(:) = p01 * at(:,1) + q01 * at(:,2) + s01 * at(:,3)
-t(:) = ( (nlayers - 1) * alat / gmod + vacuum ) * g(:) / gmod / alat
+t(:) = ( nlayers * alat / gmod + vacuum ) * g(:) / gmod / alat
 
 c1mod = SQRT ( c1(1)**2 + c1(2)**2 + c1(3)**2 )
 c2mod = SQRT ( c2(1)**2 + c2(2)**2 + c2(3)**2 )
@@ -720,6 +729,7 @@ tmod  = SQRT ( t(1)**2  + t(2)**2  + t(3)**2 )
 det = c1(1) * ( c2(2) * t(3) - c2(3) * t(2) ) -   &
       c2(1) * ( c1(2) * t(3) - c1(3) * t(2) ) +   &
       t(1)  * ( c1(2) * c2(3) - c1(3) * c2(2) )
+
 
 IF (det < 0.0_DP) c2(:) = - c2(:)
 !
@@ -906,6 +916,9 @@ CALL cryst_to_cart( nat, tau_sur, at, 1 )
 CALL xsf_struct (c_alat, at, nat, tau_sur, atm_typ, ityp_all, iuout)
 
 CLOSE(iuout)
+
+CALL environment_end( code )
+CALL mp_global_end ()
 
 END PROGRAM gener_3d_slab
 
