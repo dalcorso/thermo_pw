@@ -1,0 +1,27 @@
+1                           ! which input 1) space group 2) bravais lattice 
+166                         ! space group number
+1 1 2                       ! origin_choice, uniqueb, rombohedral or hexagonal
+8.2827 0.0 6.9557 0.0 0.0 0.0  ! celldm(1-6) (celldm(1) in a.u.)
+1 1 1                       ! number of cells along a_1, a_2, a_3
+1                           ! iconv 1 convert to conventional cell
+2                           ! icenter 0 no change, 1 between -0.5,0.5, 2 0-1
+3                           ! number of inequivalent atoms
+Te 3a                       ! Wyckoff positions of the inequivalent atoms
+Te 6c  0.20800 
+Bi 6c  0.39900  
+
+!
+!  This example shows the use of the code supercell.x. 
+!  This input generates the coordinates of 3 Bi_2Te_3 quintuple layers
+!  starting from their Wyckoff positions and space group.
+!  It writes on output the celldm to simulate this cell with an
+!  hexagonal Bravais lattice and 15 atoms. 
+!  Set iconv=0 if you want the output to simulate the system with 
+!  5 atoms and a rhombohedral cell.
+!
+!  This input can be used with:
+!  supercell.x < supercell.in
+!  The output appear on the standard output. An .xsf file called supercell.xsf
+!  is also created to see the supercell:
+!  xcrysdens  --xsf supercell.xsf
+!
