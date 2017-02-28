@@ -51,6 +51,11 @@ PROGRAM supercell_pos
 !  n1, n2, n3, integer : number of cells along a_1, a_2, a_3
 !  iconv, integer : 1   for centered cells convert atomic positions to 
 !                       the conventional unit cell
+!  icenter, integer : 0 no change to atomic coordinates
+!                   : 1 output atomic coordinates between -0.5 and 0.5 in
+!                       crystal coordinates
+!                   : 2 output atomic coordinates between 0 and 1 in
+!                       crystal coordinates
 !  nat,  integer : number of atoms
 !  'atm', tau(1), tau(2), tau(3) ! nat lines with atom name and coordinates.
 !
@@ -115,7 +120,7 @@ REAL(DP) :: celldm(6), omega, at(3,3), bg(3,3), ur(3,3), global_s(3,3)
 !
 ! counters and auxiliary variables
 !
-INTEGER :: which_input, iconv, units
+INTEGER :: which_input, iconv, icenter, units
 INTEGER :: na, iat, ia, natoms, nt, nb, i1, i2, i3, iuout, nfield, idx, k, &
            ivec, jvec, ipol, jpol, ierr, code_group_ext
 REAL(DP) :: a, cg, inp(3)
@@ -183,6 +188,9 @@ READ(5,*) iconv
 !  ityp
 !  atm
 !
+WRITE(6,'(5x,"Centered output crystal coordinates? &
+                 &(0=No, 1=Yes -0.5,0.5, 2=Yes 0,1) ")') 
+READ(5,*) icenter
 WRITE(6,'(5x," Number of atoms and atomic coordinates? ")')
 IF (which_input==1) THEN
    READ(5,*) ineq_nat
@@ -283,6 +291,7 @@ IF (which_input==1) THEN
    CALL sup_spacegroup(ineq_tau, ineq_ityp, rd_for, if_pos, space_group_code, &
         ineq_nat, uniqueb, rhombohedral, origin_choice, ibrav)
 
+   write(6,*) 'after sup_spacegroup', ibrav
    nat=nattot
    ALLOCATE(tau(3,nat))
    ALLOCATE(ityp(nat))
@@ -382,6 +391,7 @@ IF (ibrav==5 .AND. .NOT. rhombohedral) THEN
    celldm(1)=a
    celldm(3)=0.0_DP
    celldm(4)=cg
+   WRITE(6,*) 'transformed', celldm(1), celldm(4)
 ENDIF
 
 !  In this part we set up the conventional cell, or copy the data if
@@ -593,10 +603,24 @@ DO i1=-(n1-1)/2, n1/2
       ENDDO
    ENDDO
 ENDDO
-
+IF (icenter == 1.OR.icenter==2) THEN
+!
+!   Bring all crystal coordinates between -0.5 and 0.5 or between 0 and 1
+!
+   DO na=1,all_nat
+      DO ipol=1,3
+         all_tau(ipol,na)=all_tau(ipol,na)-NINT(all_tau(ipol,na))
+         IF (all_tau(ipol,na)<0.0_DP.AND.icenter==2) &
+                             all_tau(ipol,na)=all_tau(ipol,na)+1.0_DP
+      ENDDO
+   ENDDO
+ENDIF
+!
+!  and write on output the coordinates
+!
 WRITE(6,'("ATOMIC_POSITIONS (crystal)")')
 DO na=1,all_nat
-   WRITE(6,'(a,3f18.10)') TRIM(atm(all_ityp(na))), all_tau(1,na), &
+   WRITE(6,'(a,3f21.13)') TRIM(atm(all_ityp(na))), all_tau(1,na), &
                                                    all_tau(2,na), &
                                                    all_tau(3,na) 
 ENDDO
