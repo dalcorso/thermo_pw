@@ -1,0 +1,22 @@
+5                                    ! 2d bravais lattice
+7.374 0.0 0.0                        ! 2d celldm (in a.u.)
+2                                    ! number of atoms
+Si  0.5000000   0.288675134   0.0    ! atomic cartesian coordinates (alat unit)
+Si  0.5000000  -0.288675134  -0.0    ! atomic cartesian coorsinates
+25.0                                 ! size of the box along z (in a.u.)
+2 -1                                 ! ribbon perpendicular to n_1 b1 + n_2 b2
+7                                    ! number of ribbon layers
+1                                    ! atoms per layer
+.FALSE.                              ! if .FALSE. distance between ribbon is used otherwise an integer number of layers closer to distance
+25.0                                 ! y distance between ribbons (in a.u.)
+'gener_2d_slab.out'                  ! name of the output file
+
+!
+! This is an example of the input of the gener_2d_slab code.
+! This example generates the coordinates of an armchair silicene ribbon 
+! with seven layers (14 atoms). 
+! The ribbon is inserted in a simple orthorombic cell and is
+! oriented parallel to x.
+!
+! use the code gener_2d_slab.x < this_input
+! use xcrysdens --xsf gener_2di_slab.out.xsf to see the ribbon
