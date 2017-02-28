@@ -177,13 +177,13 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
            ENDDO
         ENDIF
      ELSE
-        frequency_geo(:,:)=freq_geo(:,n,:)
+        frequency_geo(1:nbnd,1:ngeo(1))=freq_geo(1:nbnd,n,1:ngeo(1))
         IF (with_eigen) THEN
            CALL compute_freq_derivative_eigen(ngeo(1),frequency_geo,   &
                         omega_geo, displa_geo(1,1,1,n),no_ph,poly_order, &
                         poly_grun)
         ELSE 
-           repres_geo(:,:)=rap_geo(:,n,:)
+           repres_geo(1:nbnd,1:ngeo(1))=rap_geo(1:nbnd,n,1:ngeo(1))
            CALL compute_freq_derivative(ngeo,frequency_geo,repres_geo, &
                                    omega_geo,no_ph,poly_order,poly_grun)
         ENDIF

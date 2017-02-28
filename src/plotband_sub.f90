@@ -754,7 +754,7 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
            IF (ionode) THEN
               DO ibnd=1,nbnd
                  IF (is_in_range(ibnd,ilines)) THEN
-                    WRITE (iunout,'(2f10.4)') (kx(n), e_eff(ibnd,n), &
+                    WRITE (iunout,'(2f14.7)') (kx(n), e_eff(ibnd,n), &
                                                                   n=spe, lpe)
                     WRITE(iunout,*)
                  ENDIF
@@ -779,7 +779,7 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
               IF (ionode) THEN
                  DO i=1,nbnd_rapk_min(irap,ilines)
                     IF (is_in_range_rap(i,ilines)) THEN
-                       WRITE (iunout,'(2f10.4)') (kx(n), &
+                       WRITE (iunout,'(2f14.7)') (kx(n), &
                              e_rap(start_rapk(irap,n)+i-1,n), n=spe,lpe)
                        WRITE(iunout,*) 
                     ENDIF
