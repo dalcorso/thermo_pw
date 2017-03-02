@@ -764,6 +764,7 @@ IF ( ibrav_group_consistent ) THEN
       IF (ibrav==-12.OR.ibrav==-13) unique=1
       IF (ibrav==5) trig=1
       CALL set_fft_fact(sg_number, unique, trig, fft_fact)
+      CALL add_origin_fact(s01,fft_fact)
       CALL clean_dfft()
       CALL find_symmetry(fft_fact)
    ENDIF
@@ -806,3 +807,35 @@ WRITE(stdout,*)
 
 RETURN
 END SUBROUTINE summarize_kpt
+
+SUBROUTINE add_origin_fact(s0,fft_fact)
+!
+!   This routine receives the origin shift in crystal coordinates
+!   and checks if the fft_factors contains the factors needed to represent
+!   the origin shift. If not it adds them to the factors.
+!
+USE kinds, ONLY : DP
+IMPLICIT NONE
+
+REAL(DP), INTENT(IN)   :: s0(3)
+INTEGER, INTENT(INOUT) :: fft_fact(3)
+
+INTEGER :: ipol, i
+!
+!  try only the factors 2, 3, 4, 5, 6, 7, 8
+!
+DO ipol=1,3
+   IF (ABS(s0(ipol)) > 1.D-8) THEN
+factors:   DO i=2,8
+         IF (fft_fact(ipol)==0 .OR. MOD(fft_fact(ipol),i)/=0) THEN
+            IF (ABS(s0(ipol)*i-NINT(s0(ipol)*i))< 1.D-6) THEN
+                fft_fact(ipol)= MAX(fft_fact(ipol),1)*i
+                EXIT factors
+            ENDIF
+         ENDIF
+      ENDDO  factors
+   ENDIF
+ENDDO
+
+RETURN
+END SUBROUTINE add_origin_fact
