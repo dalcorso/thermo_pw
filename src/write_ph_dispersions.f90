@@ -108,7 +108,11 @@ SUBROUTINE write_ph_dispersions()
   ALLOCATE ( ptypeq(3,nq) )
   ALLOCATE ( gaugeq(48,nq) )
 
-  IF (xmldyn) CALL set_sym(nat, tau, ityp, nspin_mag, m_loc)
+  IF (xmldyn) THEN
+     CALL set_sym(nat, tau, ityp, nspin_mag, m_loc)
+     IF ( .NOT. allfrac ) CALL remove_sym ( nr1_save, nr2_save, nr3_save )
+  ENDIF
+
   num_rap_mode=-1
 !
 !  Initialize high_sym
@@ -251,7 +255,7 @@ SUBROUTINE find_representations_mode_q ( nat, ntyp, xq, w2, u, tau, ityp, &
   USE cell_base,  ONLY : at, bg
   USE symm_base,  ONLY : find_sym, s, invs, sr, ftau, irt, nsym, &
                          nrot, t_rev, time_reversal, sname, copy_sym, &
-                         s_axis_to_cart, inverse_s
+                         s_axis_to_cart, inverse_s, allfrac, remove_sym
   USE fft_base,   ONLY : dfftp
   USE initial_conf, ONLY : nr1_save, nr2_save, nr3_save
   USE lr_symm_base, ONLY : gi, nsymq

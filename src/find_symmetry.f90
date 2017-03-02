@@ -34,7 +34,7 @@ SUBROUTINE find_symmetry(fft_fact)
   USE gvecs,              ONLY : doublegrid, gcutms, dual
   USE gvecw,              ONLY : ecutwfc
   USE symm_base,          ONLY : s, t_rev, irt, nrot, nsym, invsym, nosym, &
-                                 set_sym_bl, find_sym
+                                 set_sym_bl, find_sym, allfrac, remove_sym
   USE noncollin_module, ONLY : m_loc, noncolin, i_cons, npol, angle1, angle2
   USE lsda_mod,         ONLY : starting_magnetization, nspin
   USE spin_orb,         ONLY : domag, lspinorb
@@ -146,6 +146,8 @@ SUBROUTINE find_symmetry(fft_fact)
   ! ... eliminate rotations that are not symmetry operations
   !
   CALL find_sym ( nat, tau, ityp, magnetic_sym, m_loc )
+
+  IF ( .NOT. allfrac ) CALL remove_sym ( dfftp%nr1, dfftp%nr2, dfftp%nr3 )
 
   DEALLOCATE(m_loc)
   IF (ALLOCATED(irt)) DEALLOCATE(irt)

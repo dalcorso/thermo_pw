@@ -139,7 +139,8 @@ SUBROUTINE gen_qpoints (ibrav, at_, bg_, nat, tau, ityp, nk1, nk2, nk3, &
   USE kinds,      ONLY : DP
   USE cell_base,  ONLY : at, bg
   USE symm_base,  ONLY : set_sym_bl, find_sym, s, irt, nsym, &
-                         nrot, t_rev, time_reversal,  sname
+                         nrot, t_rev, time_reversal,  sname, &
+                         allfrac, remove_sym
   USE initial_conf, ONLY : nr1_save, nr2_save, nr3_save
   !
   IMPLICIT NONE
@@ -164,6 +165,7 @@ SUBROUTINE gen_qpoints (ibrav, at_, bg_, nat, tau, ityp, nk1, nk2, nk3, &
                            0,0,0, nk1,nk2,nk3, nq, q, wq)
   !
   CALL find_sym ( nat, tau, ityp, .NOT.time_reversal, mdum )
+  IF ( .NOT. allfrac ) CALL remove_sym ( nr1_save, nr2_save, nr3_save )
   !
   CALL irreducible_BZ (nrot, s, nsym, time_reversal, magnetic_sym, &
                        at, bg, nqx, nq, q, wq, t_rev)
