@@ -150,8 +150,8 @@ travis : pwall epw
 	( cd test-suite ; make run-travis || exit 1 ) ; fi
 
 gui :
-	@echo 'Check "GUI/README" how to access the Graphical User Interface'
-#@echo 'Check "PWgui-X.Y/README" how to access the Graphical User Interface'
+	#@echo 'Check "GUI/README" how to access the Graphical User Interface'
+	@echo 'Check "PWgui-6.1/README" how to access the Graphical User Interface'
 
 
 examples : touch-dummy
@@ -359,11 +359,11 @@ doc : touch-dummy
 	( cd $$dir; $(MAKE) TLDEPS= all ) ; fi ) ;  done
 
 doc_clean :
-	if test -d Doc ; then \
-	( cd Doc ; $(MAKE) TLDEPS= clean ) ; fi
-	for dir in */Doc; do \
-	( if test -f $$dir/Makefile ; then \
-	( cd $$dir; $(MAKE) TLDEPS= clean ) ; fi ) ;  done
+#if test -d Doc ; then \
+#( cd Doc ; $(MAKE) TLDEPS= clean ) ; fi
+#for dir in */Doc; do \
+#( if test -f $$dir/Makefile ; then \
+#( cd $$dir; $(MAKE) TLDEPS= clean ) ; fi ) ;  done
 
 depend: libiotk version
 	@echo 'Checking dependencies...'
