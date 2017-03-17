@@ -130,8 +130,8 @@ SUBROUTINE do_phonon_tpw(auxdyn)
      !
      ! ... cleanup of the variables for the next q point
      !
-100  CALL clean_pw_ph(iq)
-     CALL deallocate_phq_tpw()
+100  CALL deallocate_phq_tpw()
+     CALL clean_pw_ph(iq)
         !
   END DO
 

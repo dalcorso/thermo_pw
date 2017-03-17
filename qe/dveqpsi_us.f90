@@ -85,7 +85,7 @@ subroutine dveqpsi_us (ik)
   !   First a term similar to the KB case.
   !   Then a term due to the change of the D coefficients.
   !
-  call dveqpsi_us_only (ik)
+  call dveqpsi_us_only (npwq, ik)
 
   call stop_clock ('dveqpsi_us')
   return

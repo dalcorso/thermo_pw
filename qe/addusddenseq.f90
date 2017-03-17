@@ -28,7 +28,7 @@ subroutine addusddenseq (drhoscf, dbecsum)
   USE uspp_param, ONLY: upf, lmaxq, nh, nhm
   USE noncollin_module, ONLY : nspin_mag
 
-  USE qpoint, ONLY : eigqts
+  USE qpoint, ONLY : xq, eigqts
   implicit none
   !
   !   the dummy variables
@@ -37,8 +37,8 @@ subroutine addusddenseq (drhoscf, dbecsum)
   ! input: if zero does not compute drho
   ! input: the number of perturbations
 
-  complex(DP) :: drhoscf(dfftp%nnr,nspin_mag), &
-                 dbecsum(nhm*(nhm+1)/2,nat,nspin_mag)
+  complex(DP) :: drhoscf(dfftp%nnr,nspin_mag,1), &
+                 dbecsum(nhm*(nhm+1)/2,nat,nspin_mag,1)
 
   ! inp/out: change of the charge density
   ! input: sum over kv of bec
@@ -50,7 +50,7 @@ subroutine addusddenseq (drhoscf, dbecsum)
 
   ! counters
 
-  real(DP), allocatable  :: qmod(:), ylmk0(:,:)
+  real(DP), allocatable  :: qmod(:), qpg(:,:), ylmk0(:,:)
   ! the modulus of q+G
   ! the spherical harmonics
 
@@ -60,20 +60,21 @@ subroutine addusddenseq (drhoscf, dbecsum)
   ! work space
 
   if (.not.okvan) return
-  call start_clock ('addusddense')
+  call start_clock ('addusddenseq')
   allocate (aux(  ngm, nspin_mag))
   allocate (sk (  ngm))
   allocate (qg (  dfftp%nnr))
   allocate (ylmk0(ngm , lmaxq * lmaxq))
   allocate (qgm  (ngm))
   allocate (qmod (ngm))
-
+  allocate (qpg(3, ngm))
   !
   !  And then we compute the additional charge in reciprocal space
   !
-  call ylmr2 (lmaxq * lmaxq, ngm, g, gg, ylmk0)
+  call setqmod (ngm, xq, g, qmod, qpg)
+  call ylmr2 (lmaxq * lmaxq, ngm, qpg, gg, ylmk0)
   do ig = 1, ngm
-     qmod (ig) = sqrt (gg (ig) )
+     qmod (ig) = sqrt (qmod (ig) )
   enddo
 
   aux (:,:) = (0.d0, 0.d0)
@@ -97,7 +98,7 @@ subroutine addusddenseq (drhoscf, dbecsum)
                     !  And qgmq and becp and dbecq
                     !
                     do is=1,nspin_mag
-                       zsum = dbecsum (ijh, na, is)
+                       zsum = dbecsum (ijh, na, is, 1)
                        call zaxpy(ngm,zsum,sk,1,aux(1,is),1)
                     enddo
                  endif
@@ -113,8 +114,10 @@ subroutine addusddenseq (drhoscf, dbecsum)
      qg (:) = (0.d0, 0.d0)
      qg (nl (:) ) = aux (:, is)
      CALL invfft ('Dense', qg, dfftp)
-     drhoscf(:,is) = drhoscf(:,is) + 2.d0*qg(:)
+     drhoscf(:,is,1) = drhoscf(:,is,1) + 2.d0*qg(:)
   enddo
+
+  deallocate (qpg)
   deallocate (qmod)
   deallocate (qgm)
   deallocate (ylmk0)
@@ -122,6 +125,6 @@ subroutine addusddenseq (drhoscf, dbecsum)
   deallocate (sk)
   deallocate (aux)
 
-  call stop_clock ('addusddense')
+  call stop_clock ('addusddenseq')
   return
 end subroutine addusddenseq

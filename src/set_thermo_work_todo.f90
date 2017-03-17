@@ -22,10 +22,12 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
   USE control_conv,     ONLY : ke, keden, nk_test, sigma_test
   USE initial_conf,     ONLY : ibrav_save, tau_save_crys
   USE equilibrium_conf, ONLY : at0, tau0
+  USE images_omega,     ONLY : omega_group
 !
 !  the library modules
 !
   USE elastic_constants, ONLY : epsilon_geo, apply_strain, print_strain
+  USE mp_asyn,           ONLY : with_asyn_images
 !
 !  the pw variables that are set here or used to set the input
 !
@@ -41,7 +43,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
   USE relax,       ONLY : epse, epsf
   USE start_k,     ONLY : init_start_k
   USE klist,       ONLY : degauss
-  USE freq_ph,     ONLY : fpol
+  USE freq_ph,     ONLY : fpol, nfs
   USE io_files,    ONLY : tmp_dir, wfc_dir
 !
 !   the phonon variables set here or used to set the input
@@ -57,7 +59,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
   INTEGER, INTENT(IN) :: iwork, part
   INTEGER, INTENT(OUT) :: iq_point, irr_value
 
-  INTEGER :: jwork, irr, iq, i, ia, nk1, nk2, nk3, ibrav
+  INTEGER :: jwork, irr, iq, i, j, ia, nk1, nk2, nk3, ibrav, start_omega
   REAL(DP) :: rd_ht(3,3), zero, celldm(6)
   CHARACTER(LEN=10) :: cell_units
   CHARACTER(LEN=6) :: int_to_char
@@ -175,7 +177,15 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
            IF (fpol) THEN
               comp_iq(1)=.TRUE.
               comp_irr_iq(0,1)=.TRUE.
-              comp_f(iwork)=.TRUE.
+              IF (with_asyn_images) THEN
+                 start_omega=(iwork-1)*omega_group
+                 DO i=1, omega_group
+                    j=MIN(start_omega+i, nfs)
+                    comp_f(j)=.TRUE.
+                 ENDDO
+              ELSE
+                 comp_f=.TRUE.
+             ENDIF
            ELSE
               DO iq=1,nqs
                  DO irr=0, irr_iq(iq)

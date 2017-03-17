@@ -78,6 +78,7 @@ SUBROUTINE thermo_readin()
   USE control_quadratic_energy, ONLY : show_fit
   USE control_quartic_energy, ONLY : lquartic, lquartic_ph, lsolve
   USE piezoelectric_tensor, ONLY : nppl
+  USE images_omega, ONLY : omega_group
 !
 !  the QE variables needed here. max_seconds, zasr, xmldyn and fildyn
 !  could be set by this routine 
@@ -237,6 +238,10 @@ SUBROUTINE thermo_readin()
                             flpgrun, flgrun, flpsgrun,      &
                             flanhar, flpsanhar,             &
                             fact_ngeo,                      &
+!
+!   optical
+!
+                            omega_group,                    &
 !
 !   recover features
 !
@@ -427,6 +432,7 @@ SUBROUTINE thermo_readin()
   flanhar='output_anhar.dat'
   flpsanhar='output_anhar.ps'
   fact_ngeo=1
+  omega_group=1
 
   max_geometries=1000000
   max_seconds=1.D8

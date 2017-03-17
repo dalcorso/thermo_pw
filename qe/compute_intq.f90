@@ -24,10 +24,6 @@ subroutine compute_intq
 
   USE optical,              ONLY : intq
   USE qpoint,               ONLY : xq, eigqts
-  USE control_lr,           ONLY : lgamma
-
-  USE mp_bands,  ONLY: intra_bgrp_comm
-  USE mp,        ONLY: mp_sum
 
   implicit none
 
@@ -41,8 +37,8 @@ subroutine compute_intq
 
 
   ! work space
-  complex(DP) :: qg(3), qgm, aux1
-  real(DP) :: qmod, zero(3)
+  complex(DP) :: qgm(1), aux1
+  real(DP) :: qmod(1), zero(3,1), qg(3,1)
 
   if (.not.okvan) return
   call start_clock ('compute_intq')
@@ -55,7 +51,7 @@ subroutine compute_intq
   zero=0.0_DP
   call setqmod (1, xq, zero, qmod, qg)
   call ylmr2 (lmaxq * lmaxq, 1, qg, qmod, ylmk0)
-  qmod = sqrt (qmod  )
+  qmod(1) = sqrt( qmod(1) )
 
   do nt = 1, ntyp
      if (upf(nt)%tvanp ) then
@@ -64,7 +60,7 @@ subroutine compute_intq
               call qvan2 (1, ih, jh, nt, qmod, qgm, ylmk0)
               do na = 1, nat
                  if (ityp (na) == nt) then
-                    aux1 = qgm * eigqts(na)
+                    aux1 = qgm(1) * eigqts(na)
                     intq(ih,jh,na) = omega * CONJG(aux1)
                  endif
               enddo

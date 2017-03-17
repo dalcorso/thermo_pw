@@ -53,7 +53,7 @@ SUBROUTINE phq_init_tpw()
   USE m_gth,                ONLY : setlocq_gth
   USE phus,                 ONLY : alphap
   USE nlcc_ph,              ONLY : drc
-  USE control_ph,           ONLY : trans, zue, epsil, all_done
+  USE control_ph,           ONLY : trans, zue, zeu, epsil, all_done
   USE units_ph,             ONLY : lrwfc, iuwfc
   USE efield_mod,           ONLY : zstareu0, zstarue0
 
@@ -251,7 +251,7 @@ SUBROUTINE phq_init_tpw()
      CALL qdipol_cryst()
   END IF
   !
-  CALL drho_tpw()
+  IF (trans.OR.zeu) CALL drho_tpw()
   !
   ! Add to the effective charges the terms that do not depend of the 
   ! perturbed wavefunctions

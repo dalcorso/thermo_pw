@@ -71,6 +71,8 @@ MODULE images_omega
 
   LOGICAL, ALLOCATABLE :: comp_f(:)
 
+  INTEGER :: omega_group
+
 END MODULE images_omega
 
 MODULE zstar_add

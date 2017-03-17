@@ -160,11 +160,11 @@ SUBROUTINE pheqscf()
      DEALLOCATE(chixy)
      DEALLOCATE(epsm1)
      !
+     CALL close_buffer(iu1dwf, 'delete')
      WRITE( stdout, '(/,6X,"End of Frequency Dependent Susceptibility Calculation")' )
      !
   ENDIF
   !
-  CALL close_buffer(iu1dwf, 'delete')
   IF (okvan) THEN
      DEALLOCATE (intq)
      DEALLOCATE (int3)

@@ -676,7 +676,9 @@ SUBROUTINE initialize_ph_work(nwork)
 USE grid_irr_iq, ONLY : irr_iq
 USE disp,        ONLY : nqs
 USE freq_ph,     ONLY : nfs, fpol
+USE images_omega,ONLY : omega_group
 USE control_ph,  ONLY : epsil, trans
+USE mp_asyn,     ONLY : with_asyn_images
 
 IMPLICIT NONE
 INTEGER, INTENT(OUT) :: nwork
@@ -691,7 +693,12 @@ IF (trans) THEN
       ENDDO
    ENDDO
 ELSEIF (fpol) THEN
-   nwork=nfs
+   IF (with_asyn_images) THEN
+      nwork=nfs/omega_group
+      IF (nwork*omega_group /= nfs) nwork=nwork+1
+   ELSE
+      nwork=1
+   ENDIF
 ELSEIF (epsil) THEN
    nwork=1
 ELSE

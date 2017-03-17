@@ -6,7 +6,7 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !----------------------------------------------------------------------
-SUBROUTINE dveqpsi_us_only (ik)
+SUBROUTINE dveqpsi_us_only (npwq, ik)
   !----------------------------------------------------------------------
   !
   !     This routine computes the contribution of the fourier transform 
@@ -23,7 +23,7 @@ SUBROUTINE dveqpsi_us_only (ik)
   USE wvfct,      ONLY : nbnd, npwx
   USE noncollin_module, ONLY : noncolin, npol
 ! modules from phcom
-  USE qpoint,     ONLY : npwq, ikks
+  USE qpoint,     ONLY : ikks
   USE optical,    ONLY : intq, intq_nc
   USE lrus,       ONLY : becp1
   USE eqv,        ONLY : dvpsi
@@ -31,9 +31,9 @@ SUBROUTINE dveqpsi_us_only (ik)
   !
   !   The dummy variables
   !
-  integer :: ik, ipert
+  integer :: ik, npwq
   ! input: the k point
-  ! input: the perturbation
+  ! input: the number of plane waves at k+q
   !
   !   And the local variables
   !

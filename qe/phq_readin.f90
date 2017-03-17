@@ -430,7 +430,8 @@ SUBROUTINE phq_readin_tpw()
   !  charges dF/dE, but we cannot calculate Born effective charges dF/dE
   !  without epsil.
   !
-  IF (zeu) zeu = epsil
+  IF (zeu) zeu = epsil.AND..NOT.fpol
+  IF (zue) zue = zue.AND.trans
   !
   !    reads the q point (just if ldisp = .false.)
   !

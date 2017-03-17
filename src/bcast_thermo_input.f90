@@ -56,6 +56,7 @@ SUBROUTINE bcast_thermo_input()
   USE control_energy_plot, ONLY : ncontours
   USE control_grun,    ONLY : temp_ph, volume_ph, celldm_ph, lv0_t, lb0_t,    &
                               grunmin_input, grunmax_input
+  USE images_omega,    ONLY : omega_group
 !
 !   and a few  QE variables
 !
@@ -263,6 +264,10 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( flanhar, meta_ionode_id, world_comm )
   CALL mp_bcast( flpsanhar, meta_ionode_id, world_comm )
   CALL mp_bcast( fact_ngeo, meta_ionode_id, world_comm )
+!
+! optical
+!
+  CALL mp_bcast( omega_group, meta_ionode_id, world_comm )
 !
 !   restart
 !
