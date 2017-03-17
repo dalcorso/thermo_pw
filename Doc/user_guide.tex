@@ -885,8 +885,9 @@ When in the input of the phonon code a non zero wave-vector {\bf q}
 is specified, the previous options produce the inverse of the dielectric 
 constant as a function of the frequency at the wave-vector {\bf q}
 (this option can be used both for insulators and metals). \\
-Two additional variables can be specified in the \thermo\ input to control
-where the frequency dependent dielectric constant is written and plotted:
+Additional variables can be specified in the \thermo\ input to control
+where the frequency dependent dielectric constant is written and plotted
+and how the images divide the work:
 \begin{verbatim}
 flepsilon : beginning of the name of the file where the frequency dependent 
             dielectric constant is written (the code adds the extensions _re
@@ -895,8 +896,12 @@ flepsilon : beginning of the name of the file where the frequency dependent
 flpsepsilon : name of the postscript file where the frequency dependent 
               dielectric constant is plotted.
             Default: character(len=*) 'output_epsilon.ps'
+omega_group : number of frequencies calculated together by each image.
+            This variables is used only with images.
+            Default: integer 1.
 \end{verbatim}
-Number of tasks for frequency calculations: nfs, the number of frequencies.
+Number of tasks for frequency calculations: nfs/ omega\_group, the 
+number of frequencies, divided the number of frequencies in each group.
 
 \subsection{\color{web-blue}\texttt{what='scf\_disp'}}
 With this option the code makes a self-consistent calculation followed by
