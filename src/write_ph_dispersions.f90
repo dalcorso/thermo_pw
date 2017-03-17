@@ -28,7 +28,7 @@ SUBROUTINE write_ph_dispersions()
   USE point_group,   ONLY : nsym_group
   USE constants,  ONLY : ry_to_cmm1
   USE ions_base,  ONLY : nat, tau, ityp, nsp, amass
-  USE symm_base,  ONLY : set_sym, nsym, s
+  USE symm_base,  ONLY : set_sym, nsym, s, allfrac, remove_sym
   USE cell_base,  ONLY : at
   USE phonon_save, ONLY : freq_save, z_save
   USE thermo_sym, ONLY : code_group_save
