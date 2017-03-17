@@ -447,6 +447,7 @@ MODULE control_conv
   INTEGER  :: nke                   ! the number of kinetic energies
   REAL(DP) :: deltakeden            ! the interval for kinetic energy for density
   INTEGER  :: nkeden                ! the number of kinetic energies for densiy
+  INTEGER  :: ncutoffene            ! combined number of cut-off energies
   INTEGER  :: nnk                   ! the number of nk values to test k points
   INTEGER  :: deltank(3)            ! the step between nk values to test k points
   INTEGER  :: nsigma                ! the number of smearing values to test
@@ -627,6 +628,20 @@ MODULE initial_conf
   LOGICAL :: nosym_save        ! save the input nosym
 
 END MODULE initial_conf
+
+MODULE initial_param
+  USE kinds,  ONLY : DP
+  !
+  ! ... The variables needed to save the initial parameters
+  !
+  SAVE
+
+  REAL(DP) :: ecutwfc0  ! initial cutoff on wavefunction
+  REAL(DP) :: ecutrho0  ! initial cutoff on the charge density
+  
+
+END MODULE initial_param
+
 
 MODULE equilibrium_conf
   USE kinds, ONLY: DP

@@ -21,7 +21,7 @@ USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,  &
                              gnuplot_xlabel,              &
                              gnuplot_write_file_mul_data
 USE data_files,      ONLY : flkeconv
-USE control_conv,    ONLY : ke, nke, nkeden
+USE control_conv,    ONLY : ke, nke, nkeden, ncutoffene
 USE thermo_mod,      ONLY : energy_geo
 USE mp_images,       ONLY : my_image_id, root_image
 USE io_global,       ONLY : ionode
@@ -39,11 +39,11 @@ gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_keconv'
 CALL gnuplot_start(gnu_filename)
 
 filename=TRIM(flpskeconv)
-CALL gnuplot_write_header(filename, ke(1), ke(nke), 0.0_DP, 0.0_DP, 1.0_DP ) 
-
+CALL gnuplot_write_header(filename, ke(1), ke(ncutoffene), 0.0_DP, &
+                                                           0.0_DP, 1.0_DP ) 
 CALL gnuplot_xlabel('Kinetic energy (Ry)',.FALSE.) 
 CALL gnuplot_ylabel('Total energy (mRy)',.FALSE.) 
-CALL gnuplot_set_eref(energy_geo(nke*nkeden),.FALSE.) 
+CALL gnuplot_set_eref(energy_geo(ncutoffene),.FALSE.) 
 CALL gnuplot_set_gfact(1000._DP,.FALSE.) 
 
 DO iden=1,nkeden

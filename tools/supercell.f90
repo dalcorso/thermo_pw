@@ -291,7 +291,6 @@ IF (which_input==1) THEN
    CALL sup_spacegroup(ineq_tau, ineq_ityp, rd_for, if_pos, space_group_code, &
         ineq_nat, uniqueb, rhombohedral, origin_choice, ibrav)
 
-   write(6,*) 'after sup_spacegroup', ibrav
    nat=nattot
    ALLOCATE(tau(3,nat))
    ALLOCATE(ityp(nat))
@@ -391,7 +390,6 @@ IF (ibrav==5 .AND. .NOT. rhombohedral) THEN
    celldm(1)=a
    celldm(3)=0.0_DP
    celldm(4)=cg
-   WRITE(6,*) 'transformed', celldm(1), celldm(4)
 ENDIF
 
 !  In this part we set up the conventional cell, or copy the data if

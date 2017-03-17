@@ -83,7 +83,7 @@ cat > thermo_control << EOF
   what='scf_ke',
   deltake=10.0,
   nke=8
-  nkeden=1
+  nkeden=3
   deltakeden=100.0,
  /
 EOF

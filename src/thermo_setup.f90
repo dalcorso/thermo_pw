@@ -51,6 +51,7 @@ SUBROUTINE thermo_setup()
                                    amass_save, nr1_save, nr2_save, nr3_save, &
                                    nosym_save, tau_save, tau_save_crys, &
                                    omega_save, at_save
+  USE initial_param,        ONLY : ecutwfc0, ecutrho0
   USE equilibrium_conf,     ONLY : nr1_0, nr2_0, nr3_0
   USE thermo_sym,           ONLY : code_group_save
 !
@@ -67,6 +68,8 @@ SUBROUTINE thermo_setup()
   USE ions_base,            ONLY : nat, tau, ntyp => nsp, ityp, amass, atm, &
                                    if_pos
 
+  USE gvecw,                ONLY : ecutwfc
+  USE gvect,                ONLY : ecutrho
   USE symm_base,            ONLY : nosym
   USE rap_point_group,      ONLY : code_group
   USE fft_base,             ONLY : dfftp
@@ -229,6 +232,8 @@ SUBROUTINE thermo_setup()
   nr3_save=dfftp%nr3
 
   code_group_save=code_group
+  ecutwfc0=ecutwfc
+  ecutrho0=ecutrho
 !
 ! The equilibrium configuration is set here for the case in which we
 ! do not minimize the energy. In this case we keep the input geometry

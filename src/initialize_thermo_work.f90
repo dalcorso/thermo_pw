@@ -29,7 +29,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
   USE control_pwrun,  ONLY : do_punch
   USE control_conv,   ONLY : nke, ke, deltake, nkeden, deltakeden, keden, &
                              nnk, nk_test, deltank, nsigma, sigma_test, &  
-                             deltasigma
+                             deltasigma, ncutoffene
   USE equilibrium_conf, ONLY : celldm0, omega0
   USE initial_conf,   ONLY : celldm_save, ibrav_save
   USE piezoelectric_tensor, ONLY : polar_geo
@@ -47,7 +47,8 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
   INTEGER, INTENT(IN) :: part
 
   INTEGER :: igeom, ike, iden, icount, ink, isigma, ios
-  REAL(DP) :: compute_omega_geo, dual
+  INTEGER :: count_energies
+  REAL(DP) :: compute_omega_geo, dual, kev, kedenv
   !
 !
 !   the restart directory is used in all cases
@@ -116,19 +117,23 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
         CASE ( 'scf_ke') 
-           nwork= nke * nkeden
+           nwork= count_energies(ecutwfc, ecutrho, deltake, deltakeden, nke,&
+                                                                      nkeden)
+           ncutoffene=nwork
            ALLOCATE(ke(nwork))
            ALLOCATE(keden(nwork))
            ALLOCATE(energy_geo(nwork))
            icount=0
            DO iden=1, nkeden
+              kedenv = ecutrho + (iden-1) * deltakeden
               DO ike = 1, nke
-                 icount = icount + 1
-                 ke(icount) = ecutwfc + (ike-1) * deltake
-                 keden(icount) = ecutrho + (iden-1) * deltakeden
-                 dual=keden(icount)/ke(icount)
-                 IF ( dual < 3.9999_dp ) CALL errore('initialize_thermo_work',&
-                                                   'dual is too small', 1 )
+                 kev = ecutwfc + (ike-1) * deltake
+                 dual=kedenv/kev
+                 IF ( dual > 3.9999_dp ) THEN
+                    icount = icount + 1
+                    ke(icount) = kev
+                    keden(icount) = kedenv
+                 ENDIF
               ENDDO
            ENDDO
            energy_geo=0.0_DP
@@ -791,3 +796,26 @@ CALL cryst_to_cart( nat, tau0_crys, bg0, -1 )
 
 RETURN
 END SUBROUTINE set_equilibrium_conf
+
+INTEGER FUNCTION count_energies(ecutwfc, ecutrho, deltake, deltakeden, &
+                                                             nke, nkeden)
+USE kinds, ONLY : DP
+IMPLICIT NONE
+INTEGER :: nke, nkeden
+REAL(DP) :: ecutwfc, ecutrho, deltake, deltakeden
+
+INTEGER :: icount, iden, ike
+REAL(DP) :: keden, ke
+
+icount=0
+DO iden=1, nkeden
+   keden=ecutrho + (iden-1) * deltakeden
+   DO ike = 1, nke
+      ke = ecutwfc + (ike-1) * deltake
+      IF (keden/ke > 3.9999_DP) icount = icount + 1
+   ENDDO
+ENDDO
+count_energies=icount
+
+RETURN
+END FUNCTION count_energies
