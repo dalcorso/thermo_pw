@@ -252,7 +252,7 @@ IF (ionode) THEN
       CASE(22)
          WRITE(iu_el_cons,'("#",5x,"   T  ", 10x, " C_11 ", 9x, " C_12 ",&
                   & 9x, " C_13 ", 9x, " C_33 ", 9x, "C_44", 9x, & 
-                        " C_66 ", 9x, " B " )')
+                  &     " C_66 ", 9x, " B " )')
          DO itemp=1,ntemp
             WRITE(iu_el_cons,'(e16.8,7e20.12)') temp(itemp), &
                   el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
@@ -262,7 +262,7 @@ IF (ionode) THEN
       CASE(20)
          WRITE(iu_el_cons,'("#",5x,"   T  ", 10x, " C_11 ", 9x, " C_12 ", &
                   & 9x, " C_13 ", 9x, " C_22 ", 9x, " C_23 ", 9x, " C_33 ",  &
-                    9x, " C_44 ", 9x, " C_55 ", 9x, " C_66 ", 9x, " B " )')
+                  & 9x, " C_44 ", 9x, " C_55 ", 9x, " C_66 ", 9x, " B " )')
          DO itemp=1,ntemp
             WRITE(iu_el_cons,'(e16.8,10e20.12)') temp(itemp), &
                   el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
@@ -274,7 +274,7 @@ IF (ionode) THEN
       CASE(18)
          WRITE(iu_el_cons,'("#",5x,"   T  ", 10x, " C_11 ", 9x, " C_12 ",&
                   & 9x, " C_13 ", 9x, " C_33 ", 9x, "C_44", 9x, &
-                        " C_66 ", 9x, " C_16 ", 9x, " B " )')
+                  &     " C_66 ", 9x, " C_16 ", 9x, " B " )')
 
          DO itemp=1,ntemp
             WRITE(iu_el_cons,'(e16.8,8e20.12)') temp(itemp),  &
@@ -290,8 +290,8 @@ IF (ionode) THEN
             !
             WRITE(iu_el_cons,'("#",5x,"   T  ", 10x, " C_11 ", 9x, " C_12 ", &
                   & 9x, " C_13 ", 9x, " C_22 ", 9x, " C_23 ", 9x, " C_33 ",  &
-                    9x, " C_44 ", 9x, " C_55 ", 9x, " C_66 ", 9x, " C_15 ",  &
-                    9x, " C_25 ", 9x, " C_35 ", 9x, " C_46 ", 9x, " B " )')
+                  & 9x, " C_44 ", 9x, " C_55 ", 9x, " C_66 ", 9x, " C_15 ",  &
+                  & 9x, " C_25 ", 9x, " C_35 ", 9x, " C_46 ", 9x, " B " )')
             DO itemp=1,ntemp
                WRITE(iu_el_cons,'(e16.8,14e20.12)') temp(itemp), &
                      el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
@@ -308,8 +308,8 @@ IF (ionode) THEN
             !
             WRITE(iu_el_cons,'("#",5x,"   T  ", 10x, " C_11 ", 9x, " C_12 ", &
                   & 9x, " C_13 ", 9x, " C_22 ", 9x, " C_23 ", 9x, " C_33 ",  &
-                    9x, " C_44 ", 9x, " C_55 ", 9x, " C_66 ", 9x, " C_16 ",  &
-                    9x, " C_26 ", 9x, " C_36 ", 9x, " C_45 ", 9x, " B " )')
+                  & 9x, " C_44 ", 9x, " C_55 ", 9x, " C_66 ", 9x, " C_16 ",  &
+                  & 9x, " C_26 ", 9x, " C_36 ", 9x, " C_45 ", 9x, " B " )')
             DO itemp=1,ntemp
                WRITE(iu_el_cons,'(e16.8,14e20.12)') temp(itemp), &
                      el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
@@ -324,12 +324,12 @@ IF (ionode) THEN
       CASE(2)
          WRITE(iu_el_cons,'("#",5x,"   T  ", 10x, " C_11 ", 9x, " C_12 ",   &
                   & 9x, " C_13 ", 9x, " C_22 ", 9x, " C_23 ", 9x, " C_33 ", &
-                    9x, " C_44 ", 9x, " C_55 ", 9x, " C_66 ", 9x, &
-                    9x, " C_14 ", 9x, " C_15 ", 9x, " C_16 ", 9x, &
-                    9x, " C_24 ", 9x, " C_25 ", 9x, " C_26 ", 9x, &
-                    9x, " C_34 ", 9x, " C_35 ", 9x, " C_36 ", 9x, &
-                    9x, " C_45 ", 9x, " C_46 ", 9x, " C_55 ", 9x, &
-                    9x, " C_56 ", 9x, " C_66 ", 9x, " B " )')
+                  & 9x, " C_44 ", 9x, " C_55 ", 9x, " C_66 ", 9x, &
+                  & 9x, " C_14 ", 9x, " C_15 ", 9x, " C_16 ", 9x, &
+                  & 9x, " C_24 ", 9x, " C_25 ", 9x, " C_26 ", 9x, &
+                  & 9x, " C_34 ", 9x, " C_35 ", 9x, " C_36 ", 9x, &
+                  & 9x, " C_45 ", 9x, " C_46 ", 9x, " C_55 ", 9x, &
+                  & 9x, " C_56 ", 9x, " C_66 ", 9x, " B " )')
          DO itemp=1,ntemp
             WRITE(iu_el_cons,'(e16.8,24e20.12)') temp(itemp), &
                   el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &

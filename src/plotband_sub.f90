@@ -96,6 +96,8 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
              i, n, ik, spe, lpe, nbc, iq, ishift, ir, &
              nrapp, cpe, start_shift, last_shift, ncentral, iunout, ierr, ios
 
+  INTEGER :: system
+
   LOGICAL :: exist_rap, type1, lso, print_eref, norap
 
   CHARACTER(LEN=256) :: filename, ylabel
