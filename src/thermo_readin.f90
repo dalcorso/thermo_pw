@@ -101,6 +101,7 @@ SUBROUTINE thermo_readin()
   INTEGER, ALLOCATABLE :: iun_image(:)
   INTEGER :: image, iq, ipol, jpol, icont, iun_thermo, parse_unit_save, &
              nch, nrp, i, j, k, ios
+  INTEGER :: iun_input
   LOGICAL :: tend, terr, read_paths, exst, has_xml
   CHARACTER(LEN=6) :: int_to_char
   CHARACTER(LEN=512) :: dummy
@@ -626,13 +627,21 @@ SUBROUTINE thermo_readin()
   END DO
 
   IF (meta_ionode) THEN
+     IF (input_file_==' ') THEN
+        iun_input=5
+     ELSE
+        iun_input=101+nimage
+        OPEN(UNIT=iun_input,FILE=TRIM(input_file_),STATUS='OLD', &
+          FORM='FORMATTED', ERR=30, IOSTAT=ios )
+     END IF
+
      DO image=1,nimage
         OPEN(UNIT=iun_image(image),FILE=TRIM(input(image)),STATUS='UNKNOWN', &
              FORM='FORMATTED', ERR=30, IOSTAT=ios )
      ENDDO
      dummy=' '
      DO WHILE ( .TRUE. )
-        READ (5,fmt='(A512)',END=20) dummy
+        READ (iun_input,fmt='(A512)',END=20) dummy
         DO image=1,nimage
            WRITE (iun_image(image),'(A)') TRIM(dummy)
         ENDDO
@@ -641,8 +650,12 @@ SUBROUTINE thermo_readin()
 20   DO image=1,nimage 
         CLOSE ( UNIT=iun_image(image), STATUS='KEEP' )
      ENDDO
+     IF (input_file_/=' ') THEN
+        CLOSE(UNIT=iun_input, STATUS='KEEP')
+     ENDIF
   ENDIF 
 30  CALL mp_bcast(ios, meta_ionode_id, world_comm)
+  CALL errore('thermo_readin','Creating input files',ios)
   !
   !  Read the input of pw.x and copy the result in the pw.x variables
   !  Note that each image reads its input file
@@ -652,7 +665,6 @@ SUBROUTINE thermo_readin()
   CALL iosys()
   max_seconds=max_seconds_
 
-  input_file_=input(my_image_id+1)
 !
 !   Now delete the temporary input files
 !
@@ -711,14 +723,14 @@ SUBROUTINE thermo_ph_readin()
   CHARACTER(LEN=512) :: dummy
   !
   !  Only the meta_io_node reads the input and sends it to all images
-  !  the input is read from file input_file_. This routine searches the
+  !  the input is read from file ph_control. This routine searches the
   !  string '---'. It is assumed that the input of the ph.x code is
   !  written after this string.
   !
   IF ( what == 'scf_ph' .OR. what== 'scf_disp' .OR. what == 'mur_lc_ph' &
      .OR. what== 'mur_lc_disp' .OR. what == 'mur_lc_t') THEN
 
-     IF (meta_ionode) OPEN(unit=5, FILE='ph_control', STATUS='OLD', &
+     IF (meta_ionode) OPEN(UNIT=5, FILE='ph_control', STATUS='OLD', &
                  FORM='FORMATTED', ERR=20, IOSTAT=ios )
 20   CALL mp_bcast(ios, meta_ionode_id, world_comm)
      CALL errore('thermo_ph_readin','error opening file '//'ph_control',&

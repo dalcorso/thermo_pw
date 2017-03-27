@@ -197,10 +197,6 @@ SUBROUTINE phq_readin_tpw()
   !
   IF (meta_ionode) THEN
   !
-  ! ... Input from file ?
-  !
-     CALL input_from_file ( )
-  !
   ! ... Read the first line of the input file
   !
      READ( 5, '(A)', IOSTAT = ios ) title
