@@ -547,7 +547,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
      ENDIF
   ENDIF
 
-  CALL write_representations(nks, nbnd, xk, rap_et, high_symmetry,      &
+  CALL write_representations(nkstot, nbnd, xk, rap_et, high_symmetry,    &
                         code_group_k, aux_ind, code_group_ext_k, ptypek, &
                         lprojk, same_next, gaugek, namefile)
 
