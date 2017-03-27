@@ -1,0 +1,30 @@
+import settings;
+defaultpen(1.6);
+size(15cm);
+
+pair    G1=(  0.666667,  0.000000);
+pair    G2=(  0.333333,  0.577350);
+pair    G3=( -0.333333,  0.577350);
+pair    G4=( -0.666667, -0.000000);
+pair    G5=( -0.333333, -0.577350);
+pair    G6=(  0.333333, -0.577350);
+
+path yp=G1--G2--G3--G4--G5--G6--cycle;
+filldraw(yp,yellow);
+pair   PF1=(  0.000000,  0.000000);
+label(scale(2.2)*"$\Gamma$",PF1,S,blue);
+pair   PF2=(  0.666667,  0.000000);
+label(scale(2.2)*"K",PF2,SE,blue);
+pair   PF3=(  0.500000,  0.288675);
+label(scale(2.2)*"M",PF3,NE,blue);
+pair   PF4=(  0.000000,  0.000000);
+label(scale(2.2)*"$\Gamma$",PF4,S,blue);
+pair      MF1=(  0.666667,  0.000000);
+pair      MF2=(  0.000000,  0.000000);
+draw(MF1--MF2,blue);
+pair      MF3=(  0.500000,  0.288675);
+pair      MF4=(  0.666667,  0.000000);
+draw(MF3--MF4,blue);
+pair      MF5=(  0.000000,  0.000000);
+pair      MF6=(  0.500000,  0.288675);
+draw(MF5--MF6,blue);

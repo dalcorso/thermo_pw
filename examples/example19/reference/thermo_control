@@ -1,0 +1,10 @@
+ &INPUT_THERMO
+  what='scf_2d_bands',
+  lprojpbs=.TRUE.
+  emax_input=5,
+  nbnd_bands=80,
+  identify_sur=.TRUE.
+  enhance_plot=.TRUE.
+  nkz=1
+  sur_thr=0.45
+ /

@@ -1,0 +1,196 @@
+#!/bin/sh
+
+# run from directory where this script is
+cd `echo $0 | sed 's/\(.*\)\/.*/\1/'` # extract pathname
+EXAMPLE_DIR=`pwd`
+
+# check whether echo has the -e option
+if test "`echo -e`" = "-e" ; then ECHO=echo ; else ECHO="echo -e" ; fi
+
+$ECHO
+$ECHO "$EXAMPLE_DIR : starting"
+$ECHO
+$ECHO "This example shows how to use thermo_pw.x to calculate the "
+$ECHO "band structure of the Al(111) surface."
+
+# set the needed environment variables
+. ../../../environment_variables
+
+# required executables and pseudopotentials
+BIN_LIST="thermo_pw.x"
+PSEUDO_LIST="Al.pz-vbc.UPF"
+
+$ECHO
+$ECHO "  executables directory: $BIN_DIR"
+$ECHO "  pseudo directory:      $PSEUDO_DIR"
+$ECHO "  temporary directory:   $TMP_DIR"
+$ECHO "  checking that needed directories and files exist...\c"
+
+# check for directories
+for DIR in "$BIN_DIR" "$PSEUDO_DIR" ; do
+    if test ! -d $DIR ; then
+        $ECHO
+        $ECHO "ERROR: $DIR not existent or not a directory"
+        $ECHO "Aborting"
+        exit 1
+    fi
+done
+for DIR in "$TMP_DIR" "$EXAMPLE_DIR/results_pbs" "$EXAMPLE_DIR/results" ; do
+    if test ! -d $DIR ; then
+        mkdir $DIR
+    fi
+done
+cd $EXAMPLE_DIR/results_pbs
+
+# check for executables
+for FILE in $BIN_LIST ; do
+    if test ! -x $BIN_DIR/$FILE ; then
+        $ECHO
+        $ECHO "ERROR: $BIN_DIR/$FILE not existent or not executable"
+        $ECHO "Aborting"
+        exit 1
+    fi
+done
+
+# check for pseudopotentials
+for FILE in $PSEUDO_LIST ; do
+    if test ! -r $PSEUDO_DIR/$FILE ; then
+       $ECHO
+       $ECHO "Downloading $FILE to $PSEUDO_DIR...\c"
+            $WGET $PSEUDO_DIR/$FILE $NETWORK_PSEUDO/$FILE 2> /dev/null
+    fi
+    if test $? != 0; then
+        $ECHO
+        $ECHO "ERROR: $PSEUDO_DIR/$FILE not existent or not readable"
+        $ECHO "Aborting"
+        exit 1
+    fi
+done
+$ECHO " done"
+
+# how to run executables
+THERMO_PW_COMMAND="$PARA_IMAGE_PREFIX $BIN_DIR/thermo_pw.x $PARA_IMAGE_POSTFIX"
+# check for gnuplot
+$ECHO
+$ECHO "  running thermo_pw.x as: $THERMO_PW_COMMAND"
+$ECHO
+
+$ECHO "  cleaning $TMP_DIR...\c"
+rm -rf $TMP_DIR/g1/aluminum*
+$ECHO " done"
+
+cat > thermo_control << EOF
+ &INPUT_THERMO
+  what='scf_2d_bands',
+  lprojpbs=.TRUE.
+  emax_input=5,
+  nbnd_bands=16,
+  enhance_plot=.TRUE.
+  nkz=20
+ /
+EOF
+
+cat > al.scf_bands.in << EOF
+ &control
+  calculation = 'scf'
+  prefix='silicon',
+  pseudo_dir = '$PSEUDO_DIR/',
+  outdir='$TMP_DIR/'
+ /
+ &system
+  ibrav=4
+  celldm(1)=      5.32309985
+  celldm(3)=      2.44948974
+  nat=     3
+  ntyp= 1,
+  ecutwfc =24.0,
+  occupations='smearing'
+  smearing='mp'
+  degauss=0.02
+ /
+ &electrons
+  conv_thr =  1.0d-8
+ /
+ATOMIC_SPECIES
+ Al  0.0  Al.pz-vbc.UPF
+ATOMIC_POSITIONS {crystal}
+Al      0.6666666666667     0.3333333333333    -0.3333333333333  0  0  0
+Al      0.0000000000000     0.0000000000000     0.0000000000000  0  0  0
+Al     -0.6666666666667    -0.3333333333333     0.3333333333333  0  0  0
+K_POINTS AUTOMATIC
+4 4 1 1 1 0 
+EOF
+$ECHO "  running the scf_bands calculation for Al PBS..."
+$ECHO "  bands are in the postscript file output_band.ps...\c"
+$THERMO_PW_COMMAND < al.scf_bands.in > al.scf_bands.out
+check_failure $?
+$ECHO " done"
+
+cp $EXAMPLE_DIR/results_pbs/output_pbs $EXAMPLE_DIR/results
+
+cd $EXAMPLE_DIR/results
+
+cat > thermo_control << EOF
+ &INPUT_THERMO
+  what='scf_2d_bands',
+  lprojpbs=.TRUE.
+  emax_input=5,
+  nbnd_bands=80,
+  identify_sur=.TRUE.
+  enhance_plot=.TRUE.
+  nkz=1
+  sur_thr=0.45
+ /
+EOF
+
+cat > al.scf_bands.in << EOF
+ &control
+  calculation = 'scf'
+  prefix='silicon',
+  pseudo_dir = '$PSEUDO_DIR/',
+  outdir='$TMP_DIR/'
+ /
+ &system
+  ibrav=4
+  celldm(1)=      5.32309985
+  celldm(3)=     15.51343504
+  nat=    15
+  ntyp= 1,
+  ecutwfc =24.0,
+  occupations='smearing'
+  smearing='mp'
+  degauss=0.02
+ /
+ &electrons
+  conv_thr =  1.0d-8
+ /
+ATOMIC_SPECIES
+ Al  0.0  Al.pz-vbc.UPF
+ATOMIC_POSITIONS {crystal}
+Al     -0.6666666666667    -0.3333333333333    -0.3684210526316  0  0  0
+Al      0.0000000000000     0.0000000000000    -0.3157894736842  0  0  0
+Al      0.6666666666667     0.3333333333333    -0.2631578947368  0  0  0
+Al     -0.6666666666667    -0.3333333333333    -0.2105263157895  0  0  0
+Al      0.0000000000000     0.0000000000000    -0.1578947368421  0  0  0
+Al      0.6666666666667     0.3333333333333    -0.1052631578947  0  0  0
+Al     -0.6666666666667    -0.3333333333333    -0.0526315789474  0  0  0
+Al      0.0000000000000     0.0000000000000     0.0000000000000  0  0  0
+Al      0.6666666666667     0.3333333333333     0.0526315789474  0  0  0
+Al     -0.6666666666667    -0.3333333333333     0.1052631578947  0  0  0
+Al      0.0000000000000     0.0000000000000     0.1578947368421  0  0  0
+Al      0.6666666666667     0.3333333333333     0.2105263157895  0  0  0
+Al     -0.6666666666667    -0.3333333333333     0.2631578947368  0  0  0
+Al      0.0000000000000     0.0000000000000     0.3157894736842  0  0  0
+Al      0.6666666666667     0.3333333333333     0.3684210526316  0  0  0
+K_POINTS AUTOMATIC
+4 4 1 1 1 0 
+EOF
+$ECHO "  running the scf_bands calculation for Al(111) slab..."
+$ECHO "  bands are in the postscript file output_band.ps...\c"
+$THERMO_PW_COMMAND < al.scf_bands.in > al.scf_bands.out
+check_failure $?
+$ECHO " done"
+
+$ECHO
+$ECHO "$EXAMPLE_DIR : done"
+
