@@ -157,3 +157,8 @@ what=scf_dos : this example computes the electron density of states of aluminum
               and writes on file the electronic thermodynamic properties
               of a gas of independent electrons with the same density of
               states. (experimental)
+
+example19:
+what=scf_2d_bands : this example shows how to plot a projected density of 
+             states (PBS) on a surface and the band structure of a slab on 
+             top of the PBS.

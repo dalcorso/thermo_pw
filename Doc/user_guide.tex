@@ -215,7 +215,7 @@ contains also information on critical bugs found in the
 \hline
 \texttt{thermo\_pw} & \qe  \\
 \hline
-0.7.0 & SVN 17-11-2016 \\
+0.7.0 & 6.1 \\
 0.6.0 & 6.0.0 \\
 0.5.0 & 5.4.0 \\
 0.4.0 & 5.3.0 \\
@@ -433,11 +433,13 @@ The variables that control this option are:
 nke        : number of kinetic energies tested for the wavefunctions cut-off.
              Default: integer 5
 deltake    : delta of wavefunctions kinetic energy cut-off in Ry.
+             (can be either positive or negative)
              Default: real 10 Ry
 nkeden     : number of kinetic energies tested for the charge density
              cut-off.
              Default: integer 1
 deltakeden : delta of charge density kinetic energy cut-off in Ry.
+             (can be either positive or negative)
              Default: real 100 Ry.
 flkeconv   : name of the file where the data with the total energy as a
              function of the kinetic energy is written.
@@ -468,6 +470,7 @@ deltank(3) : the interval between nk values. All three values of nk1, nk2, and
 nsigma     : the number of smearing intervals.
              Default: integer 1 
 deltasigma : the distance between different smearing values.
+             (can be either positive or negative)
              Default: 0.005 Ry
 flnkconv   : file where the data with the k point convergence is written
              Default: character(len=*) 'output_nkconv.dat'
