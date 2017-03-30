@@ -1,0 +1,21 @@
+2                          ! Bravais lattice index ibrav
+7.528 0.0 0.0 0.0 0.0 0.0  ! celldm of the bulk unit cell
+3                          ! 3 cartesian coordinates (1 crystal, 2 ineq. at.)
+1                          ! number of atoms in the unit cell
+'Al' 0.0 0.0 0.0           ! Label and coordinates of the atoms
+1 1 1                      ! m_1, m_2, m_3 of the G vector
+15                         ! number of atoms in the unit cell
+1 0 0 1                    ! supercell on the surface (t11, t12, t21, t22)
+.FALSE.                    ! if .TRUE. the vacuum distance is given below
+15.0                       ! the vacuum distance in a.u.
+0                          ! origin shift 
+'altau'                    ! name of the file with the output coordinates
+
+!
+!  This example shows the use of the code gener_3d_slab.x.
+!  This input generates the coordinates of 15 atoms slab of fcc Al 
+!  perpendicular to the 111 direction.
+!  It writes on output the celldm to simulate this cell with an
+!  hexagonal Bravais lattice and the coordinates of all the atoms.
+!  The slab is rotated so that the 111 direction becomes the z axis.
+!
