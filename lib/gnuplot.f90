@@ -413,7 +413,7 @@ REAL(DP), INTENT(IN) :: eref
 CHARACTER(LEN=256) :: frt
 LOGICAL :: comment
 
-frt = '("eref=", e20.8)'
+frt = '("eref=", e24.12)'
 IF (comment) frt = '# ' // TRIM(frt)
 
 IF (ionode) WRITE(iun_gnuplot, frt) eref
