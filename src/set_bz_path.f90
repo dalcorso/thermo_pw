@@ -10,7 +10,7 @@ USE kinds,            ONLY : DP
 USE cell_base,        ONLY : ibrav, celldm
 USE control_paths,    ONLY : xqaux, wqaux, npk_label, letter,     &
                              label_list, nqaux, point_label_type, &
-                             label_disp_q, letter_path, long_path
+                             label_disp_q, letter_path, long_path, old_path
 USE bz_form,          ONLY : find_bz_type
 USE thermo_sym,       ONLY : sg_number
 USE thermo_mod,       ONLY : what
@@ -75,7 +75,7 @@ CASE (12)
      npk_label=12
      IF (what=='mur_lc_t') npk_label=13
 CASE (13) 
-     IF (long_path) THEN
+     IF (long_path.OR.old_path) THEN
         npk_label=12
         IF (what=='mur_lc_t') npk_label=13
      ELSE
@@ -409,7 +409,21 @@ CASE (13)
 !
 !  simple hexagonal bz
 !
-   IF (long_path) THEN
+   IF (old_path) THEN
+      IF (what=='mur_lc_t') THEN
+         letter(1:npk_label) = (/ 'gG', 'K ', 'M ', 'gG', 'gG', 'A ', 'H ', &
+                                  'L ', 'A ', 'M ', 'L ', 'K ', 'H ' /)
+         wqaux(1:npk_label) =  (/  30,   30,   30,   0,    30,   30,  30, &
+                                   30,   30,   30,   30,   30,    1 /)
+         label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
+      ELSE
+         letter(1:npk_label) = (/ 'gG', 'K ', 'M ', 'gG', 'A ', 'H ', &
+                           'L ', 'A ', 'M ', 'L ', 'K ', 'H ' /)
+         wqaux(1:npk_label) =  (/  30,   30,   30,    30,   30,  30, &
+                                   30,   30,   30,    30,   30,  1 /)
+         label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
+      ENDIF
+   ELSEIF (long_path) THEN
       IF (what=='mur_lc_t') THEN
          letter(1:npk_label) = (/ 'gG', 'M ', 'K ', 'gG', 'gG', 'A ', 'L ', &
                                   'H ', 'A ', 'L ', 'M ', 'H ', 'K ' /)

@@ -21,7 +21,7 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
   USE anharmonic,     ONLY : vmin_t
   USE ph_freq_anharmonic, ONLY : vminf_t
   USE control_grun,   ONLY : temp_ph, volume_ph
-  USE initial_conf,   ONLY : amass_save, ityp_save
+  USE initial_conf,   ONLY : amass_save, ityp_save, ibrav_save
   USE control_mur,    ONLY : vmin
   USE control_thermo, ONLY : ltherm_dos, ltherm_freq
   USE point_group,    ONLY : nsym_group
@@ -50,7 +50,7 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
   REAL(DP), ALLOCATABLE :: poly_grun(:,:), frequency(:,:), gruneisen(:,:)
   REAL(DP) :: vm
   LOGICAL, ALLOCATABLE :: high_symmetry(:), is_gamma(:)
-  LOGICAL :: copy_before, exist_rap, allocated_variables
+  LOGICAL :: copy_before, exist_rap, allocated_variables, non_cubic
   CHARACTER(LEN=256) :: filename, filedata, file_vec, filegrun, filefreq
   CHARACTER(LEN=6), EXTERNAL :: int_to_char
 
@@ -61,6 +61,7 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
 
   iumode=23
   WRITE(stdout,*)
+  non_cubic = (ibrav_save/=1.AND.ibrav_save/=2.AND.ibrav_save/=3)
   exist_rap=.TRUE.
   allocated_variables=.FALSE.
   DO igeo = 1, ngeo(1)
@@ -77,7 +78,7 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
      ENDIF
      IF (.NOT.allocated_variables) THEN
         ALLOCATE (freq_geo(nbnd,nks,ngeo(1)))
-        IF (with_eigen) ALLOCATE (displa_geo(nbnd,nbnd,ngeo(1),nks))
+        IF (with_eigen.OR.non_cubic) ALLOCATE (displa_geo(nbnd,nbnd,ngeo(1),nks))
         ALLOCATE (rap_geo(nbnd,nks,ngeo(1)))
         ALLOCATE (k(3,nks)) 
         ALLOCATE (k_rap(3,nks))
@@ -107,7 +108,7 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
         is_gamma(n) = (( k(1,n)**2 + k(2,n)**2 + k(3,n)**2) < 1.d-12)
      ENDDO
 
-     IF (with_eigen) THEN
+     IF (with_eigen.OR.non_cubic) THEN
         filename="phdisp_files/"//TRIM(file_vec)//".g"//TRIM(int_to_char(igeo))
         IF (ionode) OPEN(UNIT=iumode, FILE=TRIM(filename), FORM='formatted', &
                    STATUS='old', ERR=210, IOSTAT=ios)
@@ -178,7 +179,7 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
         ENDIF
      ELSE
         frequency_geo(1:nbnd,1:ngeo(1))=freq_geo(1:nbnd,n,1:ngeo(1))
-        IF (with_eigen) THEN
+        IF (with_eigen.OR.non_cubic) THEN
            CALL compute_freq_derivative_eigen(ngeo(1),frequency_geo,   &
                         omega_geo, displa_geo(1,1,1,n),no_ph,poly_order, &
                         poly_grun)
@@ -249,7 +250,7 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
    DEALLOCATE ( frequency )
    DEALLOCATE ( gruneisen )
 
-   IF (with_eigen) DEALLOCATE ( displa_geo )
+   IF (with_eigen.OR.non_cubic) DEALLOCATE ( displa_geo )
 
    RETURN
 END SUBROUTINE write_gruneisen_band

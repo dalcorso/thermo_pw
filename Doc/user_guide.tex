@@ -513,6 +513,9 @@ enhance_plot: if .TRUE. writes on the band plot the point group labels,
 long_path  : if .TRUE. plot the bands in all the Brillouin zone path. 
              Otherwise makes a faster calculation on a short path. 
              Default: .TRUE.
+old_path   : if .TRUE. use an alternative path, usually more similar to the one
+             used in experimental papers (available only for a few lattices).
+             Default: .FALSE.
 filband    : file where the bands are written in the QE format
              Default: character(len=*) 'output_band.dat'
 flpband    : file(s) where the bands are written in gnuplot format.

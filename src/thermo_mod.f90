@@ -483,6 +483,7 @@ MODULE control_paths
   CHARACTER(LEN=10) :: point_label_type   ! type of point labels
   LOGICAL, ALLOCATABLE :: high_sym_path(:)! high_symmetry points along the path
   LOGICAL  :: long_path      ! if .TRUE. use the complete path in the BZ
+  LOGICAL  :: old_path      ! if .TRUE. use the alternative path in the BZ
   LOGICAL :: q_in_band_form
   LOGICAL :: q_in_cryst_coord
   LOGICAL :: q2d
