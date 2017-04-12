@@ -88,7 +88,7 @@ test_colors.x : test_colors.o $(PWOBJS) $(LIBOBJS)
 	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/test_colors.x . )
 
 epsilon_tpw.x : epsilon_tpw.o $(PWOBJS) $(LIBOBJS)
-	$(LD) $(LDFLtAGS) -o $@ epsilon_tpw.o \
+	$(LD) $(LDFLAGS) -o $@ epsilon_tpw.o \
 	         $(LIBOBJS) $(PWOBJS) $(QEMODS) $(LRMODS) $(LIBOBJS) $(PWOBJS) $(LIBS)
 	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/epsilon_tpw.x . )
 
