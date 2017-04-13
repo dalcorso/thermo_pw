@@ -75,7 +75,7 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
                           nbnd_rapk_min(:,:), start_point_eff(:), &
                           last_point_eff(:), label_disp_q_eff(:), &
                           projective(:)
-  LOGICAL, ALLOCATABLE :: is_in_range(:,:), is_in_range_rap(:,:), &
+  LOGICAL, ALLOCATABLE :: is_in_range(:,:), is_in_range_rap(:,:,:), &
                           has_points(:,:), dorap(:,:), with_lines(:)
 !
 ! bands ordered with representation
@@ -241,7 +241,7 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
   ALLOCATE (projective(nlines))
   ALLOCATE (nrap(nlines))
   ALLOCATE (nbnd_rapk_min(12,nlines))
-  ALLOCATE (is_in_range_rap(nbnd,nlines))
+  ALLOCATE (is_in_range_rap(nbnd,12,nlines))
 !
 !  then we have to define a new path, that we call effective path,
 !  made of tot_points where each starting and last point of each line 
@@ -413,7 +413,8 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
 !  dorap(12,nlines)             ! For each representation if it has to be
 !                               ! plotted
 !  is_in_range(nbnd,nlines)     ! for each band if it is between emin and emax
-!  is_in_range_rap(nbnd,nlines) ! for each band if it is between emin and emax
+!  is_in_range_rap(nbnd,12,nlines) ! for each band in a given rap if it is 
+!                               ! between emin and emax
 !  has_points(12,nlines)        ! for each representation if there are bands
 !                               ! of that representations
 !  with_lines(nlines)           ! if .TRUE. join the bands with lines
@@ -631,8 +632,9 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
               DO n=spe,lpe
                  DO i=1,nbnd_rapk_min(irap,ilines)
                     ibnd=start_rapk(irap,n)+i-1
-                    is_in_range_rap(i,ilines)=is_in_range_rap(i,ilines) &
-                     .OR.(e_rap(ibnd,n)  >= emin .AND. e_rap(ibnd,n) <= emax ) 
+                    is_in_range_rap(i,irap,ilines)=&
+                                            is_in_range_rap(i,irap,ilines) &
+                     .OR.(e_rap(ibnd,n) >= emin .AND. e_rap(ibnd,n) <= emax ) 
                  ENDDO
               ENDDO
            ENDDO
@@ -641,22 +643,19 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
 !
            DO irap=1,nrap(ilines)
               DO ibnd=1,nbnd_rapk_min(irap,ilines)
-                 IF (is_in_range(ibnd,ilines)) has_points(irap,ilines)=.TRUE.
+                 IF (is_in_range_rap(ibnd,irap,ilines)) &
+                                      has_points(irap,ilines)=.TRUE.
               ENDDO
            ENDDO
         ELSE
-           DO n = spe, lpe 
-              DO ibnd=1,nbnd
-                 IF (is_in_range(ibnd,ilines)) has_points(1,ilines)=.TRUE.
-              ENDDO
+           DO ibnd=1,nbnd
+              IF (is_in_range(ibnd,ilines)) has_points(1,ilines)=.TRUE.
            ENDDO
         ENDIF
      ELSE
         WRITE(stdout,'(5x, "Line ", i7, " Representations not available")')
-        DO n = spe, lpe
-           DO ibnd=1,nbnd
-              IF (is_in_range(ibnd,ilines)) has_points(1,ilines)=.TRUE.
-           ENDDO
+        DO ibnd=1,nbnd
+           IF (is_in_range(ibnd,ilines)) has_points(1,ilines)=.TRUE.
         ENDDO
      ENDIF
   ENDDO
@@ -780,7 +779,7 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
                                                        ABS(ios)) 
               IF (ionode) THEN
                  DO i=1,nbnd_rapk_min(irap,ilines)
-                    IF (is_in_range_rap(i,ilines)) THEN
+                    IF (is_in_range_rap(i,irap,ilines)) THEN
                        WRITE (iunout,'(2f14.7)') (kx(n), &
                              e_rap(start_rapk(irap,n)+i-1,n), n=spe,lpe)
                        WRITE(iunout,*) 
