@@ -237,18 +237,22 @@ SUBROUTINE solve_e_fpolc(iu)
               DO ig = 1, npw
                  aa=g2kin(ig)+v_of_0+h_dia(ig,1)- &
                     (et(ibnd,ik)+w)*s_dia(ig,1) 
+                 IF (ABS(aa)<1._DP) aa=(1.0_DP,0.0_DP)
                  h_diag(ig,ibnd)=CMPLX(1.d0, 0.d0,kind=DP) / aa 
                  aa=g2kin(ig)+v_of_0+h_dia(ig,1)- &
                     (et(ibnd,ik)-w)*s_dia(ig,1) 
+                 IF (ABS(aa)<1._DP) aa=(1.0_DP,0.0_DP)
                  h_diag1(ig,ibnd)=CMPLX(1.d0, 0.d0,kind=DP) / aa 
               END DO
               IF (noncolin) THEN
                  DO ig = 1, npw
                     aa=g2kin(ig)+v_of_0+h_dia(ig,2)- &
                        (et(ibnd,ik)+w)*s_dia(ig,2) 
+                    IF (ABS(aa)<1._DP) aa=(1.0_DP,0.0_DP)
                     h_diag(ig+npwx,ibnd)=CMPLX(1.d0, 0.d0,kind=DP)/aa 
                     aa=g2kin(ig)+v_of_0+h_dia(ig,2)- &
                        (et(ibnd,ik)-w)*s_dia(ig,2) 
+                    IF (ABS(aa)<1._DP) aa=(1.0_DP,0.0_DP)
                     h_diag1(ig+npwx,ibnd)=CMPLX(1.d0, 0.d0,kind=DP)/aa 
                  END DO
               ENDIF
@@ -478,14 +482,14 @@ SUBROUTINE solve_e_fpolc(iu)
      !
         call setmixout(3*dfftp%nnr*nspin_mag,(nhm*(nhm+1)*nat*nspin_mag*3)/2, &
                     mixout, dvscfout, dbecsum, ndim, -1 )
-        call mix_potential (2*3*dfftp%nnr*nspin_mag+2*ndim, mixout, mixin, &
+        call mix_potential_tpw (2*3*dfftp%nnr*nspin_mag+2*ndim, mixout, mixin, &
                          alpha_mix(kter), dr2, 3*tr2_ph/npol, iter, &
-                         nmix_ph_eff, flmixdpot, convt)
+                          flmixdpot, convt)
         call setmixout(3*dfftp%nnr*nspin_mag,(nhm*(nhm+1)*nat*nspin_mag*3)/2, &
                        mixin, dvscfin, dbecsum, ndim, 1 )
      ELSE
-        call mix_potential (2*3*dfftp%nnr*nspin_mag, dvscfout, dvscfin, alpha_mix ( &
-          kter), dr2, 3 * tr2_ph / npol, iter, nmix_ph_eff, flmixdpot, convt)
+        call mix_potential_tpw (2*3*dfftp%nnr*nspin_mag, dvscfout, dvscfin, alpha_mix ( &
+          kter), dr2, 3 * tr2_ph / npol, iter, flmixdpot, convt)
      ENDIF
 
      if (doublegrid) then

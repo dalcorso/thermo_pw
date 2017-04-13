@@ -31,6 +31,7 @@ dv_of_drho_tran.o \
 electrons.o \
 ev_xml.o \
 initialize_ph.o \
+mix_pot.o \
 orthogonalize_omega.o \
 paw_add_onecenter.o \
 paw_add_symmetry.o \

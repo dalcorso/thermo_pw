@@ -59,7 +59,7 @@ subroutine solve_eq(iu, flag)
                                     iudrho, lrbar, iubar
   USE output,                ONLY : fildrho
   USE control_ph,            ONLY : ext_recover, rec_code, &
-                                    lnoloc, convt, tr2_ph, nmix_ph, &
+                                    lnoloc, convt, tr2_ph, &
                                     alpha_mix, lgamma_gamma, niter_ph, &
                                     flmixdpot, rec_code_read
   USE control_lr,            ONLY : lgamma, alpha_pv, nbnd_occ
@@ -117,7 +117,7 @@ subroutine solve_eq(iu, flag)
   ! conv_root: true if linear system is converged
 
   integer :: kter, iter0, ipol, ibnd, iter, lter, ik, ikk, ikq, &
-             ig, is, nrec, ndim, nmix_ph_eff, npw, npwq, ios
+             ig, is, nrec, ndim, npw, npwq, ios
   ! counters
   integer :: ltaver, lintercall, incr, jpol, v_siz
   real(DP) :: xqmod2, alpha_pv0
@@ -140,7 +140,6 @@ subroutine solve_eq(iu, flag)
   !
   w=CMPLX(fru(iu),fiu(iu))
   ldpsi1=ABS(w)>1.D-7
-  nmix_ph_eff=max(nmix_ph,8)
   alpha_pv0=alpha_pv
   alpha_pv=alpha_pv0 + REAL(w)
 
@@ -242,7 +241,6 @@ subroutine solve_eq(iu, flag)
            call get_buffer (evc, lrwfc, iuwfc, ikk)
            call get_buffer (evq, lrwfc, iuwfc, ikq)
         endif
-
         !
         ! compute the kinetic energy
         !
@@ -259,20 +257,24 @@ subroutine solve_eq(iu, flag)
               !
               DO ig = 1, npwq
                  aa=g2kin(ig)+v_of_0+h_dia(ig,1)- &
-                    (et(ibnd,ikk)+w)*s_dia(ig,1)
-                 h_diag(ig,ibnd)=CMPLX(1.d0, 0.d0,kind=DP) / aa
+                    (et(ibnd,ikk)+w)*s_dia(ig,1) 
+                 IF (ABS(aa)<1.0_DP) aa=1.0_DP
+                 h_diag(ig,ibnd)=CMPLX(1.0d0, 0.d0,kind=DP) / aa
                  aa=g2kin(ig)+v_of_0+h_dia(ig,1)- &
-                    (et(ibnd,ikk)-w)*s_dia(ig,1)
-                 h_diag1(ig,ibnd)=CMPLX(1.d0, 0.d0,kind=DP) / aa
+                    (et(ibnd,ikk)-w)*s_dia(ig,1) 
+                 IF (ABS(aa)<1.0_DP) aa=1.0_DP
+                 h_diag1(ig,ibnd)=CMPLX(1.0d0, 0.d0,kind=DP) / aa
               END DO
               !
               IF (noncolin) THEN
                  do ig = 1, npwq
                     aa=g2kin(ig)+v_of_0+h_dia(ig,2)- &
                        (et(ibnd,ikk)+w)*s_dia(ig,2)
+                    IF (ABS(aa)<1.0_DP) aa=1.0_DP
                     h_diag(ig+npwx,ibnd)=CMPLX(1.d0, 0.d0,kind=DP) / aa
                     aa=g2kin(ig)+v_of_0+h_dia(ig,2)- &
                        (et(ibnd,ikk)-w)*s_dia(ig,2)
+                    IF (ABS(aa)<1.0_DP) aa=1.0_DP
                     h_diag1(ig+npwx,ibnd)=CMPLX(1.d0, 0.d0,kind=DP) / aa
                  enddo
               END IF
@@ -331,7 +333,8 @@ subroutine solve_eq(iu, flag)
                                       nbnd_occ (ikk))
                  ELSE
                     call cft_wave (ik, evc (1, ibnd), aux1, +1)
-                    call apply_dpot(dffts%nnr, aux1, dvscfins(1,1,ipol), current_spin)
+                    call apply_dpot(dffts%nnr, aux1, dvscfins(1,1,ipol), &
+                                                                current_spin)
                     call cft_wave (ik, aux2 (1, ibnd), aux1, -1)
                  ENDIF
               enddo
@@ -512,14 +515,14 @@ subroutine solve_eq(iu, flag)
      !
         call setmixout(dfftp%nnr*nspin_mag,(nhm*(nhm+1)*nat*nspin_mag)/2, &
                     mixout, dvscfout, dbecsum, ndim, -1 )
-        call mix_potential (2*dfftp%nnr*nspin_mag+2*ndim, mixout, mixin, &
-                         alpha_mix(kter), dr2, tr2_ph/npol, iter, &
-                         nmix_ph_eff, flmixdpot, convt)
+        CALL mix_potential_tpw (2*dfftp%nnr*nspin_mag+2*ndim, mixout, mixin, &
+                         alpha_mix(kter), dr2, tr2_ph/npol, iter, flmixdpot, &
+                         convt)
         call setmixout(dfftp%nnr*nspin_mag,(nhm*(nhm+1)*nat*nspin_mag)/2, &
                        mixin, dvscfin, dbecsum, ndim, 1 )
      ELSE
-        call mix_potential (2*dfftp%nnr*nspin_mag, dvscfout, dvscfin, alpha_mix ( &
-          kter), dr2,  tr2_ph / npol, iter, nmix_ph_eff, flmixdpot, convt)
+        CALL mix_potential_tpw(2*dfftp%nnr*nspin_mag, dvscfout, dvscfin,  &
+             alpha_mix (kter), dr2,  tr2_ph / npol, iter, flmixdpot, convt)
      ENDIF
 
      if (doublegrid) then
