@@ -35,6 +35,10 @@ PROGRAM gener_3d_slab
 !  
 !  celldm_3d(6) The size of the unit cell.
 !
+!  lcryst       1 all crystal coordinates as in QE input, 
+!               2 only inequivalent atoms crystal coordinates (as in space_sg)
+!               3 cartesian coordinates
+!
 !  nat_3d       The number of atoms inside the unit cell
 !
 !  atm_3d, tau_3d(3) ! label and coordinates of the atoms inside the unit cell.

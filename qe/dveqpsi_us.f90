@@ -7,45 +7,44 @@
 !
 !
 !----------------------------------------------------------------------
-subroutine dveqpsi_us (ik)
+SUBROUTINE dveqpsi_us (ik)
   !----------------------------------------------------------------------
   !
-  ! This routine calculates applies e^iqr to a wavefunction.
-  ! In the US and PAW case apply e^iqr K(r,r',r'')
+  ! This routine applies e^iqr to a wavefunction.
+  ! In the US and PAW case applies e^iqr K(r,r',r'')
   !
-  USE kinds, only : DP
+  USE kinds,     ONLY : DP
   USE ions_base, ONLY : nat, ityp
   USE cell_base, ONLY : tpiba
-  USE fft_base,   ONLY: dfftp, dffts
+  USE fft_base,  ONLY: dfftp, dffts
   USE fft_interfaces, ONLY: fwfft, invfft
   USE gvecs,     ONLY : nls
   USE noncollin_module, ONLY : noncolin
   USE wvfct,     ONLY : nbnd, npwx
 
   USE wavefunctions_module,  ONLY: evc
-  USE eqv,        ONLY : dvpsi
-  USE qpoint,     ONLY : ikks, ikqs
-  USE klist,      ONLY : ngk, igk_k 
-  implicit none
+  USE eqv,       ONLY : dvpsi
+  USE qpoint,    ONLY : ikks, ikqs
+  USE klist,     ONLY : ngk, igk_k 
+  IMPLICIT NONE
   !
   !   The dummy variables
   !
 
-  integer :: ik, npw, npwq, ikk, ikq
+  INTEGER :: ik, npw, npwq, ikk, ikq
   ! input: the k point
 
-  integer :: ibnd, ig
+  INTEGER :: ibnd, ig
   ! counter on bands
   ! counter on G vectors
   ! counter on polarizations
   ! counter on reciprocal mesh
 
-  complex(DP) , allocatable ::  aux2 (:)
+  COMPLEX(DP) , ALLOCATABLE ::  aux2 (:)
   ! work space
-  logical :: htg
 
-  call start_clock ('dveqpsi_us')
-  allocate (aux2(dffts%nnr))
+  CALL start_clock ('dveqpsi_us')
+  ALLOCATE (aux2(dffts%nnr))
   !
   !  The unperturbed wavefunctions must be multiplied by e^{iqr}.
   !  This means that we have to order the coefficients with the mesh
@@ -53,40 +52,38 @@ subroutine dveqpsi_us (ik)
   !  with the indices of k+G (igk) and then saving them with the mesh 
   !  of k+q+G (igkq)
   !
-  dvpsi(:,:) = (0.d0, 0.d0)
+  dvpsi(:,:) = (0.D0, 0.D0)
 
   ikk = ikks(ik)
   ikq = ikqs(ik)
   npw = ngk(ikk)
   npwq= ngk(ikq)
 
-  do ibnd = 1, nbnd
-     aux2(:) = (0.d0, 0.d0)
-     do ig = 1, npw
+  DO ibnd = 1, nbnd
+     aux2(:) = (0.D0, 0.D0)
+     DO ig = 1, npw
         aux2 (nls (igk_k (ig,ikk) ) ) = evc (ig, ibnd)
-     enddo
-     do ig = 1, npwq
+     ENDDO
+     DO ig = 1, npwq
         dvpsi (ig, ibnd) = aux2 (nls (igk_k (ig,ikq) ) )
-     enddo
+     ENDDO
      IF (noncolin) THEN
         aux2(:) = (0.d0, 0.d0)
-        do ig = 1, npw
+        DO ig = 1, npw
            aux2 (nls (igk_k (ig,ikk) ) ) = evc (ig+npwx, ibnd)
-        enddo
-        do ig = 1, npwq
+        ENDDO
+        DO ig = 1, npwq
            dvpsi (ig+npwx, ibnd) = aux2 (nls (igk_k (ig,ikq) ) )
-        enddo
+        ENDDO
      END IF
-  enddo
+  ENDDO
   !
-  deallocate (aux2)
+  DEALLOCATE (aux2)
   !
   !   We add the contribution of the nonlocal potential in the US form
-  !   First a term similar to the KB case.
-  !   Then a term due to the change of the D coefficients.
   !
-  call dveqpsi_us_only (npwq, ik)
+  CALL dveqpsi_us_only (npwq, ik)
 
-  call stop_clock ('dveqpsi_us')
-  return
-end subroutine dveqpsi_us
+  CALL stop_clock ('dveqpsi_us')
+  RETURN
+END SUBROUTINE dveqpsi_us

@@ -9,11 +9,10 @@
 SUBROUTINE dveqpsi_us_only (npwq, ik)
   !----------------------------------------------------------------------
   !
-  !     This routine computes the contribution of the fourier transform 
+  !     This routine computes the contribution of the Fourier transform 
   !     of the augmentation function at the given q, and adds it to
   !     dvpsi.
   !
-
   USE kinds,      ONLY : DP
   USE uspp_param, ONLY : upf, nh
   USE uspp,       ONLY : vkb, okvan
@@ -27,17 +26,17 @@ SUBROUTINE dveqpsi_us_only (npwq, ik)
   USE optical,    ONLY : intq, intq_nc
   USE lrus,       ONLY : becp1
   USE eqv,        ONLY : dvpsi
-  implicit none
+  IMPLICIT NONE
   !
   !   The dummy variables
   !
-  integer :: ik, npwq
+  INTEGER :: ik, npwq
   ! input: the k point
-  ! input: the number of plane waves at k+q
-  !
+  ! input: number of plane waves at the q point
+  
   !   And the local variables
   !
-  integer :: na, nt, ibnd, ih, jh, ijkb0, ikk, ikb, jkb, is, js, ijs
+  INTEGER :: na, nt, ibnd, ih, jh, ijkb0, ikk, ikb, jkb, is, js, ijs
   ! counter on atoms
   ! counter on atomic types
   ! counter on bands
@@ -47,64 +46,64 @@ SUBROUTINE dveqpsi_us_only (npwq, ik)
   ! counter on the k points
   ! counter on vkb
   ! counter on vkb
-  complex(DP) :: sum0, sum_nc(npol)
+  COMPLEX(DP) :: sum0, sum_nc(npol)
   ! auxiliary variable
 
-  if (.not.okvan) return
-  call start_clock ('dveqpsi_us_only')
+  IF (.NOT.okvan) RETURN
+  CALL start_clock ('dveqpsi_us_only')
   ikk = ikks(ik)
-  if (lsda) current_spin = isk (ikk)
+  IF (lsda) current_spin = isk (ikk)
   ijkb0 = 0
-  do nt = 1, ntyp
-     if (upf(nt)%tvanp  ) then
-        do na = 1, nat
-           if (ityp (na) .eq.nt) then
+  DO nt = 1, ntyp
+     IF (upf(nt)%tvanp  ) THEN
+        DO na = 1, nat
+           IF (ityp (na)==nt) THEN
               !
               !   we multiply the integral for the becp term and the beta_n
               !
-              do ibnd = 1, nbnd
-                 do ih = 1, nh (nt)
+              DO ibnd = 1, nbnd
+                 DO ih = 1, nh (nt)
                     ikb = ijkb0 + ih
                     IF (noncolin) THEN
                        sum_nc = (0.d0, 0.d0)
                     ELSE
                        sum0 = (0.d0, 0.d0)
                     END IF
-                    do jh = 1, nh (nt)
+                    DO jh = 1, nh (nt)
                        jkb = ijkb0 + jh
                        IF (noncolin) THEN
                           ijs=0
-                          do is=1,npol
-                             do js=1,npol
+                          DO is=1,npol
+                             DO js=1,npol
                                 ijs=ijs+1
                                 sum_nc(is)=sum_nc(is)+         &
                                      intq_nc(ih,jh,na,ijs)*    &
                                      becp1(ik)%nc(jkb, js, ibnd)
-                             enddo
-                          enddo
+                             ENDDO
+                          ENDDO
                        ELSE
-                          sum0 = sum0 + intq (ih, jh, na)*&
+                          sum0 = sum0 + intq (ih, jh, na)*     &
                                    becp1(ik)%k(jkb, ibnd)
-                       END IF
-                    enddo
+                       ENDIF
+                    ENDDO
                     IF (noncolin) THEN
-                       call zaxpy(npwq,sum_nc(1),vkb(1,ikb),1,dvpsi(1,ibnd),1)
-                       call zaxpy(npwq,sum_nc(2),vkb(1,ikb),1, &
+                       CALL zaxpy(npwq,sum_nc(1),vkb(1,ikb),1,dvpsi(1,ibnd),1)
+                       CALL zaxpy(npwq,sum_nc(2),vkb(1,ikb),1, &
                                                  dvpsi(1+npwx,ibnd),1)
                     ELSE
-                       call zaxpy(npwq,sum0,vkb(1,ikb),1,dvpsi(1,ibnd),1)
-                    END IF
-                 enddo
-              enddo
+                       CALL zaxpy(npwq,sum0,vkb(1,ikb),1,dvpsi(1,ibnd),1)
+                    ENDIF
+                 ENDDO
+              ENDDO
               ijkb0 = ijkb0 + nh (nt)
-           endif
-        enddo
-     else
-        do na = 1, nat
-           if (ityp (na) .eq.nt) ijkb0 = ijkb0 + nh (nt)
-        enddo
-     endif
-  enddo
+           ENDIF
+        ENDDO
+     ELSE
+        DO na = 1, nat
+           IF (ityp (na)==nt) ijkb0 = ijkb0 + nh (nt)
+        ENDDO
+     ENDIF
+  ENDDO
 
   CALL stop_clock ('dveqpsi_us_only')
   RETURN

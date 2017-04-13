@@ -7,13 +7,12 @@
 !
 !
 !----------------------------------------------------------------------
-subroutine compute_intq
+SUBROUTINE compute_intq
   !----------------------------------------------------------------------
   !
   !     This routine computes the contribution of the selfconsistent
   !     change of the potential to the known part of the linear
   !     system and adds it to dvpsi.
-  !
   !
   USE kinds,                ONLY : DP
   USE ions_base,            ONLY : nat, ityp, ntyp => nsp
@@ -25,66 +24,66 @@ subroutine compute_intq
   USE optical,              ONLY : intq
   USE qpoint,               ONLY : xq, eigqts
 
-  implicit none
+  IMPLICIT NONE
 
-  integer :: na, ig, nt, ir, ih, jh
+  INTEGER :: na, ig, nt, ir, ih, jh
   ! countera
 
-  real(DP), allocatable ::  ylmk0 (:,:)
+  REAL(DP), ALLOCATABLE ::  ylmk0 (:,:)
   ! the modulus of q+G
   ! the values of q+G
   ! the spherical harmonics
 
 
   ! work space
-  complex(DP) :: qgm(1), aux1
-  real(DP) :: qmod(1), zero(3,1), qg(3,1)
+  COMPLEX(DP) :: qgm(1), aux1
+  REAL(DP)    :: qmod(1), zero(3,1), qg(3,1)
 
-  if (.not.okvan) return
-  call start_clock ('compute_intq')
+  IF (.NOT.okvan) RETURN
+  CALL start_clock ('compute_intq')
 
-  intq (:,:,:) = (0.d0, 0.0d0)
-  allocate (ylmk0(1 , lmaxq * lmaxq))
+  intq (:,:,:) = (0.D0, 0.0D0)
+  ALLOCATE (ylmk0(1 , lmaxq * lmaxq))
   !
   !    first compute the spherical harmonics
   !
   zero=0.0_DP
-  call setqmod (1, xq, zero, qmod, qg)
-  call ylmr2 (lmaxq * lmaxq, 1, qg, qmod, ylmk0)
-  qmod(1) = sqrt( qmod(1) )
+  CALL setqmod (1, xq, zero, qmod, qg)
+  CALL ylmr2 (lmaxq * lmaxq, 1, qg, qmod, ylmk0)
+  qmod(1) = SQRT (qmod(1)  )
 
-  do nt = 1, ntyp
-     if (upf(nt)%tvanp ) then
-        do ih = 1, nh (nt)
-           do jh = ih, nh (nt)
-              call qvan2 (1, ih, jh, nt, qmod, qgm, ylmk0)
-              do na = 1, nat
-                 if (ityp (na) == nt) then
+  DO nt = 1, ntyp
+     IF (upf(nt)%tvanp ) THEN
+        DO ih = 1, nh (nt)
+           DO jh = ih, nh (nt)
+              CALL qvan2 (1, ih, jh, nt, qmod, qgm, ylmk0)
+              DO na = 1, nat
+                 IF (ityp (na) == nt) THEN
                     aux1 = qgm(1) * eigqts(na)
                     intq(ih,jh,na) = omega * CONJG(aux1)
-                 endif
-              enddo
-           enddo
-        enddo
-        do na = 1, nat
-           if (ityp(na) == nt) then
+                 ENDIF
+              ENDDO
+           ENDDO
+        ENDDO
+        DO na = 1, nat
+           IF (ityp(na) == nt) THEN
               !
               !    We use the symmetry properties of the ps factor
               !
-              do ih = 1, nh (nt)
-                 do jh = ih, nh (nt)
+              DO ih = 1, nh (nt)
+                 DO jh = ih, nh (nt)
                     intq(jh,ih,na) = intq(ih,jh,na)
-                 enddo
-              enddo
-           endif
-        enddo
-     endif
-  enddo
+                 ENDDO
+              ENDDO
+           ENDIF
+        ENDDO
+     ENDIF
+  ENDDO
 
   IF (noncolin) CALL set_intq_nc()
 
-  deallocate (ylmk0)
+  DEALLOCATE (ylmk0)
 
-  call stop_clock ('compute_intq')
-  return
-end subroutine compute_intq
+  CALL stop_clock ('compute_intq')
+  RETURN
+END SUBROUTINE compute_intq
