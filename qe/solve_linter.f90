@@ -92,7 +92,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   ! anorm : the norm of the error
   ! averlt: average number of iterations
   ! dr2   : self-consistency error
-  real(DP) :: dos_ef, weight, aux_avg (2)
+  real(DP) :: dos_ef, weight
   ! Misc variables for metals
   ! dos_ef: density of states at Ef
 
@@ -526,14 +526,12 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
      !     of the change of potential and Q
      !
      call newdq (dvscfin, npe)
-#if defined (__MPI)
-     aux_avg (1) = DBLE (ltaver)
-     aux_avg (2) = DBLE (lintercall)
-     call mp_sum ( aux_avg, inter_pool_comm )
-     averlt = aux_avg (1) / aux_avg (2)
-#else
+
+     call mp_sum ( ltaver, inter_pool_comm )
+     call mp_sum ( lintercall, inter_pool_comm )
+
      averlt = DBLE (ltaver) / lintercall
-#endif
+
      tcpu = get_clock ('PHONON')
 
      WRITE( stdout, '(/,5x," iter # ",i3," total cpu time :",f8.1, &

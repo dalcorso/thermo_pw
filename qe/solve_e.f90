@@ -397,6 +397,8 @@ subroutine solve_e_tpw(drhoscf)
 
      call newdq(dvscfin,3)
 
+     CALL mp_sum(ltaver, inter_pool_comm)
+     CALL mp_sum(lintercall, inter_pool_comm)
      averlt = DBLE (ltaver) / DBLE (lintercall)
 
      tcpu = get_clock ('PHONON')

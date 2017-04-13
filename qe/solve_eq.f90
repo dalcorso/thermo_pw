@@ -548,6 +548,9 @@ subroutine solve_eq(iu, flag)
 
 1001 CONTINUE
 
+     CALL mp_sum(ltaver,inter_pool_comm)
+     CALL mp_sum(lintercall,inter_pool_comm)
+
      averlt = DBLE (ltaver) / DBLE (lintercall)
 
      tcpu = get_clock ('PHONON')
