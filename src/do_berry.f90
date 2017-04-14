@@ -34,6 +34,7 @@ SUBROUTINE do_berry ( exit_status, polar, nppl )
   USE control_flags,    ONLY : gamma_only, lscf, lbands, ethr, &
                                istep, nstep, restart, lmd, lbfgs
   USE initial_conf,     ONLY : nosym_save
+  USE initial_param,    ONLY : ethr0
   USE control_thermo,   ONLY : lpolarization
   USE symm_base,        ONLY : nosym
   USE input_parameters, ONLY : diago_thr_init
@@ -60,7 +61,7 @@ SUBROUTINE do_berry ( exit_status, polar, nppl )
   lberry=.TRUE.
   nppstr=nppl
 
-  ethr=diago_thr_init
+  ethr=ethr0
   istep=0
 
   DO idir=1,3 

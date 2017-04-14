@@ -16,8 +16,6 @@ SUBROUTINE transform_intq_nc(intq,na)
 USE kinds,                ONLY : DP
 USE ions_base,            ONLY : nat, ityp
 USE uspp_param,           ONLY : nh, nhm
-USE noncollin_module,     ONLY : nspin_mag
-USE spin_orb,             ONLY : domag
 USE optical,              ONLY : intq_nc
 !
 IMPLICIT NONE
@@ -27,7 +25,7 @@ COMPLEX(DP) :: intq(nhm,nhm,nat)
 !
 ! ... local variables
 !
-INTEGER :: ih, jh, ipol, np, npert
+INTEGER :: ih, jh, np
 
 np=ityp(na)
 DO ih = 1, nh(np)

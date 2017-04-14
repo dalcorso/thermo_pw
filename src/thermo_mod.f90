@@ -639,6 +639,8 @@ MODULE initial_param
 
   REAL(DP) :: ecutwfc0  ! initial cutoff on wavefunction
   REAL(DP) :: ecutrho0  ! initial cutoff on the charge density
+
+  REAL(DP) :: ethr0     ! the initial accuracy of the eigenvalues
   
 
 END MODULE initial_param

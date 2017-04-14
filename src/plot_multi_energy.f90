@@ -17,7 +17,7 @@ SUBROUTINE plot_multi_energy()
   USE kinds,                ONLY : DP
   USE thermo_mod,           ONLY : ngeo, celldm_geo, energy_geo, omega_geo, &
                                    reduced_grid
-  USE input_parameters,     ONLY : ibrav
+  USE initial_conf,         ONLY : ibrav_save
   USE control_gnuplot,      ONLY : flgnuplot, gnuplot_command, lgnuplot
   USE data_files,           ONLY : flenergy, flevdat
   USE postscript_files,     ONLY : flpsenergy
@@ -76,7 +76,7 @@ SUBROUTINE plot_multi_energy()
   tablefile='gnuplot_files/table'
   CALL gnuplot_start(gnu_filename)
 
-  SELECT CASE (ibrav) 
+  SELECT CASE (ibrav_save) 
      CASE(1,2,3)
         nx=ngeo(1)
         xmax=0.0_DP

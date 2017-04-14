@@ -28,6 +28,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   !
   USE kinds,            ONLY : DP
   USE control_pwrun,    ONLY : do_punch
+  USE initial_param,    ONLY : ethr0
   USE io_global,        ONLY : stdout, ionode, ionode_id
   USE parameters,       ONLY : ntypx, npk, lmaxx
   USE cell_base,        ONLY : fix_volume, fix_area
@@ -35,7 +36,6 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   USE control_flags,    ONLY : conv_elec, gamma_only, lscf, twfcollect, &
                                lbands, ethr, &
                                conv_ions, istep, nstep, restart, lmd, lbfgs
-  USE input_parameters, ONLY : diago_thr_init
   USE force_mod,        ONLY : lforce, lstres, sigma, force
   USE check_stop,       ONLY : check_stop_init, check_stop_now
   USE mp_images,        ONLY : intra_image_comm
@@ -64,7 +64,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
      lforce=.FALSE.
      lstres=.FALSE.
   ENDIF
-  ethr=diago_thr_init
+  ethr=ethr0
   istep=0
   !
   ! CALL check_stop_init()
