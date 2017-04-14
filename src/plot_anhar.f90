@@ -36,8 +36,6 @@ IMPLICIT NONE
 CHARACTER(LEN=256) :: gnu_filename, filename, filename0, filename1, filename2,&
                                               filename3
 CHARACTER(LEN=8) :: float_to_char
-INTEGER :: system
-INTEGER :: ierr
 
 IF ( my_image_id /= root_image ) RETURN
 
@@ -185,7 +183,9 @@ IF (ltherm_freq) &
 CALL gnuplot_end()
 
 IF (lgnuplot.AND.ionode) &
-   ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
+                                       //TRIM(gnu_filename), WAIT=.FALSE.)
+
 
 RETURN
 END SUBROUTINE plot_anhar

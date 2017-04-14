@@ -29,7 +29,7 @@ PROGRAM plot_new_sur_states
 !  latoms      : .true. if you want an indication of the atomic positions
 !
 USE kinds, ONLY : DP
-USE io_global,     ONLY : stdout
+USE io_global,     ONLY : stdout, ionode
 USE mp_global,     ONLY : mp_startup, mp_global_end
 USE environment,   ONLY : environment_start, environment_end
 USE gnuplot, ONLY : gnuplot_start, gnuplot_end, gnuplot_xlabel, &
@@ -38,12 +38,12 @@ USE gnuplot, ONLY : gnuplot_start, gnuplot_end, gnuplot_xlabel, &
                     gnuplot_line, gnuplot_put_label
 IMPLICIT NONE
 
-CHARACTER(LEN=256) :: dump_file, gnu_filename, filename, data_filename
+CHARACTER(LEN=256) :: dump_file, gnu_filename, gnuplot_command, filename, &
+                      data_filename
 REAL(DP) :: startz, endz, posz
 LOGICAL :: latoms
 INTEGER :: nstates, nmax, ibrav, nr3, nks, nbnd, nat, nspin, nlab
 INTEGER :: istate, na, ik, i, ibnd, iks, idum, ir, ispin, ios, ierr, iun
-INTEGER :: system
 INTEGER, ALLOCATABLE :: nk_plot(:), ik_plot(:,:), ibnd_plot(:,:)
 REAL(DP), ALLOCATABLE :: plan(:,:,:), state(:,:), tau(:,:), mag(:,:), k(:,:), e(:,:)
 REAL(DP) :: xmin, xmax, ymin, ymax, dimz, delta, celldm(6), x(2), y(2), kcur(3), &
@@ -58,6 +58,7 @@ CHARACTER(LEN=9) :: code='plot_surf_states'
 CALL mp_startup ( start_images=.true. )
 CALL environment_start ( code )
 
+gnuplot_command='gnuplot'
 WRITE(stdout,'(5x,"Number of states to plot and maximum number of states per group")') 
 READ(5,*) nstates, nmax
 WRITE(stdout,'(5x,i5)') nstates, nmax
@@ -232,6 +233,7 @@ ENDDO
 !
 !  Initialize gnuplot and make the minimal plot for each state
 !
+gnuplot_command='gnuplot'
 gnu_filename='gnuplot.tmp_file'
 CALL gnuplot_start(gnu_filename)
 
@@ -278,7 +280,10 @@ END DO
 
 CALL gnuplot_end()
 
-ierr=system('gnuplot '//TRIM(gnu_filename))
+  IF (ionode) &
+     CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
+                                       //TRIM(gnu_filename), WAIT=.FALSE.)
+
 !
 !   If this file contains also the magnetization information plot it in
 !   another postscript file
@@ -364,7 +369,9 @@ IF (nspin > 1) THEN
 
    CALL gnuplot_end()
 
-   ierr=system('gnuplot '//TRIM(gnu_filename))
+   IF (ionode) &
+      CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
+                                       //TRIM(gnu_filename), WAIT=.FALSE.)
 
    DEALLOCATE(mag)
    DEALLOCATE(k)

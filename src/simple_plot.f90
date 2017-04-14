@@ -24,11 +24,9 @@ IMPLICIT NONE
 REAL(DP), INTENT(IN) :: xmin, xmax, ymin, ymax
 CHARACTER(LEN=*), INTENT(IN) :: data_filename, psfilename, xlabel, ylabel
 
-INTEGER :: ierr
 CHARACTER(LEN=256) :: gnu_filename, filename
 CHARACTER(LEN=*) :: colore, ext
 CHARACTER(LEN=6), EXTERNAL :: int_to_char
-INTEGER :: system
 
 IF ( my_image_id /= root_image ) RETURN
 
@@ -48,7 +46,8 @@ CALL gnuplot_write_file_data(data_filename,'plot_width',colore,.TRUE.,.TRUE.,&
 CALL gnuplot_end()
 
 IF (lgnuplot.AND.ionode) &
-   ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
+                                       //TRIM(gnu_filename), WAIT=.FALSE.)
 
 RETURN
 END SUBROUTINE simple_plot

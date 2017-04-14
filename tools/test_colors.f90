@@ -52,7 +52,6 @@ CHARACTER(LEN=256) :: gnu_filename, filename, psfilename
 CHARACTER(LEN=256) :: flgnuplot, gnuplot_command
 LOGICAL :: lgnuplot
 CHARACTER(LEN=20) :: color
-INTEGER :: system
 REAL(DP) :: x(4), y(4), xmin, xmax, ymin, ymax, deltax, xm
 INTEGER  :: icolor
 CHARACTER(LEN=9) :: code='test_colors'
@@ -250,8 +249,8 @@ CALL gnuplot_write_command('plot x+100',.FALSE.)
 CALL gnuplot_end()
 
 IF (lgnuplot.AND.ionode) &
-   ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
-
+   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
+                                       //TRIM(gnu_filename), WAIT=.FALSE.)
 100 CONTINUE
 
 CALL environment_end( code )

@@ -94,9 +94,7 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
 
   INTEGER :: code_group_line, code_group_ext_line, ilines, irap, ibnd, &
              i, n, ik, spe, lpe, nbc, iq, ishift, ir, &
-             nrapp, cpe, start_shift, last_shift, ncentral, iunout, ierr, ios
-
-  INTEGER :: system
+             nrapp, cpe, start_shift, last_shift, ncentral, iunout, ios
 
   LOGICAL :: exist_rap, type1, lso, print_eref, norap
 
@@ -840,7 +838,8 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
 
   CALL gnuplot_end()
   IF (lgnuplot.AND.ionode) &
-      ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+     CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '//TRIM(gnu_filename),&
+                                                             WAIT=.FALSE.)
 !
 !  First deallocate the variables that define the path read from file
 !

@@ -46,8 +46,7 @@ SUBROUTINE plot_multi_energy()
   CHARACTER(LEN=12) :: color(8), xlabel, ylabel
   REAL(DP) :: emax, emin, deltae, ene_levels_int(ncontours)
   REAL(DP) :: xmin, xmax, ymin, ymax
-  INTEGER :: max_contours, nx, ny, icont, tot_n, iwork, ierr
-  INTEGER :: system
+  INTEGER :: max_contours, nx, ny, icont, tot_n, iwork
   INTEGER :: compute_nwork
 
   IF ( my_image_id /= root_image ) RETURN
@@ -189,7 +188,8 @@ SUBROUTINE plot_multi_energy()
   CALL gnuplot_end()
 
   IF (lgnuplot.AND.ionode) &
-     ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+     CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
+                                       //TRIM(gnu_filename), WAIT=.FALSE.)
 
   RETURN
   END SUBROUTINE plot_multi_energy

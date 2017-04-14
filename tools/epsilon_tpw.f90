@@ -647,13 +647,13 @@ CHARACTER(LEN=256), INTENT(IN) :: fileps
 INTEGER, INTENT(IN) :: nw
 REAL(DP) :: wgrid(nw), jdos(nw)
 REAL(DP) :: ymin, ymax
-INTEGER  :: iw, ierr
-INTEGER  :: system
+INTEGER  :: iw
 
-CHARACTER(LEN=256) :: gnu_filename, filename, ylabel, xlabel
+CHARACTER(LEN=256) :: gnu_filename, gnuplot_command, filename, ylabel, xlabel
 
 IF ( my_image_id /= root_image ) RETURN
 
+gnuplot_command='gnuplot'
 gnu_filename='gnuplot_tmp_epsilon'
 CALL gnuplot_start(gnu_filename)
 
@@ -684,7 +684,8 @@ CALL gnuplot_write_file_mul_data('jdos',1,3,'color_red',.TRUE.,.TRUE., .FALSE.)
 CALL gnuplot_end()
 
 IF (ionode) &
-   ierr=system('gnuplot '//TRIM(gnu_filename))
+   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
+                                       //TRIM(gnu_filename), WAIT=.FALSE.)
 
 RETURN
 END SUBROUTINE plot_jdos
@@ -705,13 +706,13 @@ CHARACTER(LEN=256), INTENT(IN) :: fileps
 INTEGER, INTENT(IN) :: nw
 REAL(DP) :: wgrid(nw), epsr(3,3,nw), epsi(3,3,nw), eels(3,3,nw)
 REAL(DP) :: ymin, ymax
-INTEGER  :: iw, ierr
-INTEGER  :: system
+INTEGER  :: iw
 
-CHARACTER(LEN=256) :: gnu_filename, filename, ylabel, xlabel
+CHARACTER(LEN=256) :: gnu_filename, gnuplot_command, filename, ylabel, xlabel
 
 IF ( my_image_id /= root_image ) RETURN
 
+gnuplot_command='gnuplot'
 gnu_filename='gnuplot_tmp_epsilon'
 CALL gnuplot_start(gnu_filename)
 
@@ -748,7 +749,8 @@ CALL gnuplot_write_file_mul_data('epsilonm1_im',1,5,'color_red',.FALSE.,.TRUE., 
 CALL gnuplot_end()
 
 IF (ionode) &
-   ierr=system('gnuplot '//TRIM(gnu_filename))
+   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
+                                       //TRIM(gnu_filename), WAIT=.FALSE.)
 
 RETURN
 END SUBROUTINE plot_epsilon

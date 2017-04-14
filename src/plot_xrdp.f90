@@ -30,8 +30,7 @@ CHARACTER(LEN=*), INTENT(IN) :: exten
 
 CHARACTER(LEN=256) :: filename, gnu_filename
 CHARACTER(LEN=8) :: float_to_char
-INTEGER :: system
-INTEGER :: ierr, ios
+INTEGER :: ios
 INTEGER, PARAMETER :: data_max=10000
 INTEGER :: miller(3,data_max), multiplicity(data_max)
 REAL(DP) :: theta2(data_max), dist(data_max), intensity(data_max), x(2), y(2)
@@ -96,7 +95,8 @@ CALL gnuplot_write_command('plot x+1000',.FALSE.)
 CALL gnuplot_end()
 
 IF (lgnuplot.AND.ionode) &
-   ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+  CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
+                                       //TRIM(gnu_filename), WAIT=.FALSE.)
 
 RETURN
 END SUBROUTINE plot_xrdp

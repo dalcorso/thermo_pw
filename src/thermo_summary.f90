@@ -71,10 +71,10 @@ SUBROUTINE thermo_summary()
   REAL(DP) :: ft(3,48)
   REAL(DP) :: s01(3), s02(3)
   REAL(DP), ALLOCATABLE :: xau(:,:)
-  INTEGER :: it, ia, na, ipol, jpol, ierr, iuout, &
+  INTEGER :: it, ia, na, ipol, jpol, iuout, &
              group_desc(48), which_elem(48), isym, code_group_ext,     &
              code_group1
-  INTEGER :: system, laue_class
+  INTEGER :: laue_class
   LOGICAL :: lpolar, lelc, lpiezo, check_group_ibrav
   CHARACTER(LEN=12)  :: spaceg_name
   CHARACTER(LEN=11)  :: gname, group_name
@@ -600,7 +600,8 @@ WRITE(stdout,'(5x,70("-"))')
                 label_list, asy_filename)
 
            IF (lasymptote.AND.ionode) &
-               ierr=system(TRIM(asymptote_command)//' '//TRIM(asy_filename))
+              CALL EXECUTE_COMMAND_LINE(TRIM(asymptote_command)//' '&
+                                       //TRIM(asy_filename), WAIT=.FALSE.)
         ENDIF
 !
 !  Form factors of the atoms
@@ -648,8 +649,8 @@ WRITE(stdout,'(5x,70("-"))')
              letter, letter_path, npk_label, label_list, asy_filename)
 
         IF (lasymptote.AND.ionode) &
-           ierr=system(TRIM(asymptote_command)//' '//TRIM(asy_filename))
-
+           CALL EXECUTE_COMMAND_LINE(TRIM(asymptote_command)//' '&
+                                       //TRIM(asy_filename), WAIT=.FALSE.)
      ENDIF
      !
   ENDIF

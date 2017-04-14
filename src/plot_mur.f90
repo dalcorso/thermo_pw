@@ -29,8 +29,6 @@ IMPLICIT NONE
 
 CHARACTER(LEN=256) :: filename, filename1, filename2, gnu_filename, label
 CHARACTER(LEN=8) :: float_to_char
-INTEGER :: system
-INTEGER :: ierr
 
 IF ( my_image_id /= root_image ) RETURN
 
@@ -75,7 +73,8 @@ CALL gnuplot_write_file_mul_data(filename1,1,3,'color_red',.TRUE.,.TRUE.,&
 CALL gnuplot_end()
 
 IF (lgnuplot.AND.ionode) &
-   ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
+                                       //TRIM(gnu_filename), WAIT=.FALSE.)
 
 RETURN
 END SUBROUTINE plot_mur

@@ -26,13 +26,10 @@ USE mp_images, ONLY : my_image_id, root_image
 
 IMPLICIT NONE
 
-INTEGER  :: ierr
-
 CHARACTER(LEN=256) :: gnu_filename, filename, fileeldos, ylabel, xlabel
 REAL(DP), ALLOCATABLE :: e(:), dos(:), ddos(:), int_dos(:)
 INTEGER :: n
 INTEGER :: iu_dos
-INTEGER :: system
 REAL(DP) :: ymax, ymin, ymin1, ymax1, e1
 
 IF ( my_image_id /= root_image ) RETURN
@@ -152,7 +149,8 @@ IF (nspin==2) DEALLOCATE(ddos)
 DEALLOCATE(int_dos)
 
 IF (lgnuplot.AND.ionode) &
-   ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+  CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
+                                       //TRIM(gnu_filename), WAIT=.FALSE.)
 
 RETURN
 END SUBROUTINE plot_dos
