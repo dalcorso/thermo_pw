@@ -12,7 +12,7 @@ solve_linter_tpw: contains a call to asyn_master to have the master check for
 phqscf_tpw : call solve_linter_tpw instead of solve_linter
 
 prepare_q_tpw: use the variable tcollect_all to avoid the calculation of
-the bands in the final run that collects all the dynamical matrices.
+         the bands in the final run that collects all the dynamical matrices.
 
 run_nscf_tpw : call set_small_group_q also in the lgamma_iq case. This change
                can probably be done also in the phonon, but it is tested here
@@ -30,7 +30,8 @@ ccg_psi_tpw : uses the new conventions for the noncollinear case.
 
 phq_summary_tpw : summarize the frequencies in complex form
 
-initialize_ph_tpw.f90 : calls the new routine phq_summary_tpw
+initialize_ph_tpw.f90 : calls the new routine phq_summary_tpw, phq_init_tpw
+                 and allocate_phq_tpw
 
 adddvepsi_us_tpw.f90 : added the number of occupated bands as an input.
 
@@ -45,6 +46,20 @@ read_dyn_from_file : in the routine of PH there is an implicit dependence
 
 usnldiagq.f90 generalizes usnldiag.f90. It computes the diagonal elements 
               of the Hamiltonian at k+q (except the kinetic energy).
+
+drho_tpw.f90 must call compute_drhous_tpw and compute_drhous_nc_tpw
+             instead of compute_drho_us and compute_drhous_nc.
+
+mix_pot_tpw.f90 it is derived from that of QE, but does not reset the
+            history. Seems better for optical properties. 
+
+phq_init_tpw.f90 call drho_tpw instead of drho and call add_zstar_us_tpw
+            which computes the part of the effective charges independent
+            on the response.
+
+phq_readin_tpw.f90 reads all the additional variables of the phonon, 
+            such as the real part of the frequency.
+
 
 This directory contains also some routines that are new, or generalize
 those of QE. They are still experimental.
@@ -77,6 +92,9 @@ solve_eq.f90      : This routine computes the charge-charge susceptibility
                     at finite q and frequency and the inverse of the
                     dielectric constant.
 
+solve_eq_tran.f90 : computes the magnetic susceptibilities in the lsda
+                    case (still totally untested).
+
 orthogonalize_omega.f90 : generalize orthogonalize for the case of
                           metals at finite frequency w when the alpha_pv 
                           term is included.
@@ -89,6 +107,21 @@ dveqpsi_us_only.f90  ! computes the US contribution to e^iqr K |psi_kn>
 
 addusddenseq.f90   ! add the augmentation charge in the case of a single
                    ! e^iqr perturbation.
+
+add_dkmds.f90      ! used to compute effective charges. Similar to the one
+                   ! of QE, but partially rewritten with the new logics.
+addnlcc_zstar_eu_us.f90
+add_zstar_ue.f90   ! new logics for effective charges with US-PP.
+add_zstar_us_tpw.f90   ! new logics for effective cgarges with US-PP.
+allocate_phq_tpw.f90 ! allocate a variable for effective charges.
+compute_drhous_tpw.f90    ! compute also a part of effective charges
+compute_drhous_nc_tpw.f90 ! compute also a part of the effective charges
+zstar_eu_tpw.f90 ! new logics for effective charges
+zstar_eu_loc.f90 ! new routine for effective charges
+zstar_eu_us_tpw.f90 ! new routine for effective charges
+
+adddvscf_tran.f90  ! add the self consistent potential in the magnetic case.
+dv_of_drho_tran.f90 ! compute dv from drho for the magnetic case.
 
 psyme_fpol.f90     ! parallel driver of the following
 syme_fpol.f90      ! similar to syme.f90, but used in the optical case
@@ -106,3 +139,15 @@ psym_dmageq.f90   ! parallel driver of the following
 sym_dmageq.f90    ! similar to sym_dmage.f90, but used for EELS and only
                     one perturbation is made.
 
+check_bands.f90   ! a function that tests if the files with bands are already
+                  ! in the outdir directory
+control_qe.f90    ! contains new variables for the modified routines
+deallocate_ph_tpw.f90 ! deallocate the new variables of the these routines
+
+write_group_info_ph.f90 ! write the point group information, but writes 
+                   ! always the point group tables since for phonon
+                   ! we must use the point group tables also in the 
+                   ! relativistic case
+
+setup_kup_kdw_tpw.f90 ! a different order of the k, k+q (up), k, k+q (down) is
+                   ! needed in the magnetic case. 
