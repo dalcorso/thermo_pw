@@ -5,7 +5,6 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-!
 !----------------------------------------------------------------------------
 SUBROUTINE transform_intq_so(intq,na)
 !----------------------------------------------------------------------------
@@ -42,21 +41,18 @@ DO ih = 1, nh(np)
                   DO is1=1,npol
                      DO is2=1,npol
                         ijs=ijs+1
-                        intq_nc(ih,jh,na,ijs)=                       &
-                            intq_nc(ih,jh,na,ijs) +                  &
-                            intq (kh,lh,na)*                         &
-                          (fcoef(ih,kh,is1,1,np)*fcoef(lh,jh,1,is2,np)  + &
-                          fcoef(ih,kh,is1,2,np)*fcoef(lh,jh,2,is2,np)   )
-                     END DO
-                  END DO
-               END IF
-            END DO
-         END DO
-      END IF
-   END DO
-END DO
+                        intq_nc(ih,jh,na,ijs)=                           &
+                            intq_nc(ih,jh,na,ijs) + intq (kh,lh,na)*     &
+                          (fcoef(ih,kh,is1,1,np)*fcoef(lh,jh,1,is2,np) + &
+                          fcoef(ih,kh,is1,2,np)*fcoef(lh,jh,2,is2,np)  )
+                     ENDDO
+                  ENDDO
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDIF
+   ENDDO
+ENDDO
        !
 RETURN
 END SUBROUTINE transform_intq_so
-!
-

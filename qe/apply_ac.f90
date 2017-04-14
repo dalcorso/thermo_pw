@@ -73,13 +73,15 @@ SUBROUTINE apply_ac (ndmx, n, h, ah, ik, m, indi, iflag)
   hpsi (:,:) = (0.d0, 0.d0)
   spsi (:,:) = (0.d0, 0.d0)
   iw=current_w
-  DO ibnd=1,m
-     IF (iflag==1) THEN
+  IF (iflag==1) THEN
+     DO ibnd=1,m
         e(ibnd) = CMPLX(et(indi(ibnd), ikks(ik))+DREAL(iw), DIMAG(iw), KIND=DP) 
-     ELSE
+     ENDDO
+  ELSE
+     DO ibnd=1,m
         e(ibnd) = CMPLX(et(indi(ibnd), ikks(ik))+DREAL(iw),-DIMAG(iw), KIND=DP) 
-     ENDIF
-  ENDDO
+     ENDDO
+  ENDIF
   !
   !   compute the product of the hamiltonian with the h vector
   !
