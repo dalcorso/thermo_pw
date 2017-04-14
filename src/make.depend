@@ -27,6 +27,7 @@ bcast_thermo_input.o : ../../Modules/mp.o
 bcast_thermo_input.o : ../../Modules/mp_world.o
 bcast_thermo_input.o : ../../PHonon/PH/phcom.o
 bcast_thermo_input.o : ../../thermo_pw/lib/piezoelectric_tensor.o
+bcast_thermo_input.o : ../../thermo_pw/qe/control_qe.o
 bcast_thermo_input.o : thermo_mod.o
 check_el_cons.o : ../../Modules/cell_base.o
 check_el_cons.o : ../../Modules/io_global.o
@@ -100,7 +101,6 @@ do_phonon.o : ../../PHonon/PH/yambo.o
 do_pwscf.o : ../../Modules/cell_base.o
 do_pwscf.o : ../../Modules/check_stop.o
 do_pwscf.o : ../../Modules/control_flags.o
-do_pwscf.o : ../../Modules/input_parameters.o
 do_pwscf.o : ../../Modules/io_global.o
 do_pwscf.o : ../../Modules/kind.o
 do_pwscf.o : ../../Modules/mp_images.o
@@ -198,7 +198,9 @@ initialize_thermo_work.o : ../../Modules/wrappers.o
 initialize_thermo_work.o : ../../PHonon/PH/phcom.o
 initialize_thermo_work.o : ../../PW/src/pwcom.o
 initialize_thermo_work.o : ../../PW/src/start_k.o
+initialize_thermo_work.o : ../../thermo_pw/lib/mp_asyn.o
 initialize_thermo_work.o : ../../thermo_pw/lib/piezoelectric_tensor.o
+initialize_thermo_work.o : ../../thermo_pw/qe/control_qe.o
 initialize_thermo_work.o : thermo_mod.o
 interpolate_cv.o : ../../Modules/kind.o
 interpolate_cv.o : thermo_mod.o
@@ -260,7 +262,6 @@ matdyn_sub.o : ../../Modules/kind.o
 matdyn_sub.o : ../../Modules/mp.o
 matdyn_sub.o : ../../Modules/mp_images.o
 matdyn_sub.o : ../../Modules/noncol.o
-matdyn_sub.o : ../../PHonon/PH/io_dyn_mat.o
 matdyn_sub.o : ../../PHonon/PH/phcom.o
 matdyn_sub.o : thermo_mod.o
 plan_avg_sub.o : ../../Modules/becmod.o
@@ -346,7 +347,6 @@ plot_formf.o : thermo_mod.o
 plot_gruneisen_band_anis.o : ../../Modules/kind.o
 plot_gruneisen_band_anis.o : ../../Modules/mp_images.o
 plot_gruneisen_band_anis.o : thermo_mod.o
-plot_multi_energy.o : ../../Modules/input_parameters.o
 plot_multi_energy.o : ../../Modules/io_global.o
 plot_multi_energy.o : ../../Modules/kind.o
 plot_multi_energy.o : ../../Modules/mp_images.o
@@ -396,7 +396,9 @@ proj_band_structure.o : ../../thermo_pw/lib/gnuplot.o
 proj_band_structure.o : ../../thermo_pw/lib/point_group.o
 proj_band_structure.o : thermo_mod.o
 q2r_sub.o : ../../FFTXlib/fft_scalar.o
+q2r_sub.o : ../../Modules/cell_base.o
 q2r_sub.o : ../../Modules/io_global.o
+q2r_sub.o : ../../Modules/ions_base.o
 q2r_sub.o : ../../Modules/kind.o
 q2r_sub.o : ../../Modules/mp.o
 q2r_sub.o : ../../Modules/mp_images.o
@@ -489,6 +491,7 @@ set_thermo_work_todo.o : ../../PHonon/PH/phcom.o
 set_thermo_work_todo.o : ../../PW/src/pwcom.o
 set_thermo_work_todo.o : ../../PW/src/start_k.o
 set_thermo_work_todo.o : ../../thermo_pw/lib/elastic_const.o
+set_thermo_work_todo.o : ../../thermo_pw/lib/mp_asyn.o
 set_thermo_work_todo.o : ../../thermo_pw/lib/rotate.o
 set_thermo_work_todo.o : ../../thermo_pw/qe/control_qe.o
 set_thermo_work_todo.o : thermo_mod.o
@@ -561,13 +564,17 @@ thermo_readin.o : ../../Modules/parser.o
 thermo_readin.o : ../../Modules/read_input.o
 thermo_readin.o : ../../PHonon/PH/phcom.o
 thermo_readin.o : ../../thermo_pw/lib/piezoelectric_tensor.o
+thermo_readin.o : ../../thermo_pw/qe/control_qe.o
 thermo_readin.o : thermo_mod.o
 thermo_setup.o : ../../Modules/cell_base.o
 thermo_setup.o : ../../Modules/constants.o
+thermo_setup.o : ../../Modules/control_flags.o
 thermo_setup.o : ../../Modules/fft_base.o
+thermo_setup.o : ../../Modules/gvecw.o
 thermo_setup.o : ../../Modules/io_global.o
 thermo_setup.o : ../../Modules/ions_base.o
 thermo_setup.o : ../../Modules/kind.o
+thermo_setup.o : ../../Modules/recvec.o
 thermo_setup.o : ../../PW/src/pwcom.o
 thermo_setup.o : ../../PW/src/symm_base.o
 thermo_setup.o : ../../thermo_pw/lib/lattices.o
