@@ -177,7 +177,7 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
       CALL convert_rap_surface(nbnd, nks, nkz, high_symmetry, gcodek, aux_ind, &
                                gcodek_ext, ptypek, rap, gaugek)
 !
-! At this point we should count how many lines do we have and
+! At this point we should count how many lines we have and
 ! set the first and the last point of each line
 !
   ALLOCATE (start_point(nks))
@@ -553,8 +553,7 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
            ENDIF
         ENDDO
 !
-!    check if the initial and final lines have representations, otherwise
-!    copy those of the next point
+!    check if the initial and final points have representations
 !
         start_shift=0 
         last_shift=0 
@@ -563,8 +562,7 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
            IF (rap_eff(ibnd,lpe) <= 0) last_shift=1
         ENDDO
 !
-!   If the point at line border has not the representations 
-!   we copy those of the closest point. This is equivalent to make all 
+!   if not we copy those of the closest point. This is equivalent to make all 
 !   avoided crossing between the line border and the point after of before.
 !
         IF (start_shift==1) rap_eff(:,spe)=rap_eff(:,spe+1)
@@ -659,7 +657,9 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
         ENDDO
      ENDIF
   ENDDO
-
+!
+!   here try to estimate the size of the path
+!
   IF (celldm(2)>0.0_DP) THEN
      sizeb=celldm(2)
   ELSE
@@ -674,9 +674,12 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
   factor_dx = MAX(6.0_DP, 2.0_DP * sizeb, 2.0_DP * sizec, &
                                        2.0_DP/sizeb, 2.0_DP/sizec)
 
-  IF (nks>1) dxmod_save = SQRT( (k(1,2)-k(1,1))**2 +  &
-                                (k(2,2)-k(2,1))**2 +  &
-                                (k(3,2)-k(3,1))**2 )
+  dxmod_save = SQRT( (k(1,2)-k(1,1))**2 +  &
+                     (k(2,2)-k(2,1))**2 +  &
+                     (k(3,2)-k(3,1))**2 )
+!
+!  and set a spacing for panels that are not contiguous.
+!
   dgap=15.0_DP * dxmod_save
   IF (.NOT.long_path) dgap=0.0_DP
 !
@@ -894,12 +897,12 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
   DEALLOCATE (start_rapk)
   DEALLOCATE (e_rap)
 !
-!  Finally the additional working variables
+!  Additional working variables
 !
   DEALLOCATE (nbnd_count)
   DEALLOCATE (rapin)
 !
-!  finally the x coordinate of the path and the k_rap
+!  the x coordinate of the path and the k_rap
 !
   DEALLOCATE (kx) 
   DEALLOCATE (k_rap)
