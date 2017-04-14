@@ -423,7 +423,7 @@ CONTAINS
         asum = asum + char_mat_sub(irap,isym) * CONJG(char_mat_sub(irap,isym))
      ENDDO
      ndeg = NINT(DBLE(asum) / DBLE(nsym_out))  
-!     write(6,*) ndeg,  asum / DBLE(nsym_out), ndeg - asum / DBLE(nsym_out)
+!     write(stdout,*) ndeg,  asum / DBLE(nsym_out), ndeg - asum / DBLE(nsym_out)
      IF (ABS(ndeg - asum / DBLE(nsym_out)) > 1.D-6) &
         CALL errore('convert_rap_proj','problem with rap',irap)
 
@@ -438,7 +438,7 @@ CONTAINS
                            CONJG(char_mat_proj_out(jrap,isym))
         ENDDO
         ndeg= NINT(DBLE(asum) / DBLE(nsym_out))
-!        WRITE(6,*) irap, jrap, asum, ndeg
+!        WRITE(stdout,*) irap, jrap, asum, ndeg
         IF (ABS(ndeg - asum / DBLE(nsym_out)) > 1.D-6) &
             CALL errore('convert_rap_proj','problem with ndeg',1)
 
@@ -15863,7 +15863,6 @@ SUBROUTINE set_sym_su2(sym_num, smat, sinv)
 
  DO ksym=1,64
     CALL set_sym_su2(ksym, group_mat(1,1,ksym), sinv(ksym))
-!    WRITE(6,*) 'ksym', ksym, group_desc(ksym)
  ENDDO
 
  a_mat(:,:)=group_mat(:,:,isym)
@@ -16291,7 +16290,7 @@ DO irap=1,nrap_in
       rap(jrap)=rap(jrap)/ndeg
       CALL add_rap_name(rap_name, rap(jrap), name_rap_out(jrap)(1:8))
    ENDDO
-   WRITE(6,'(5x, a8," = ",a)') name_rap_in(irap), TRIM(rap_name)
+   WRITE(stdout,'(5x, a8," = ",a)') name_rap_in(irap), TRIM(rap_name)
 ENDDO
 
 RETURN
@@ -16456,7 +16455,7 @@ DO irap=1,nrap1_in
                            CONJG(char_mat_proj_out(jrap,isym))
          ENDDO
          ndeg= NINT(DBLE(asum) / DBLE(nsym_out))
-!         WRITE(6,*) irap, jrap, asum, ndeg
+!         WRITE(stdout,*) irap, jrap, asum, ndeg
          IF (ABS(ndeg - asum / DBLE(nsym_out)) > 1.D-6) &
              CALL errore('compute_kronecker_table','problem with ndeg',1)
 
@@ -16465,7 +16464,7 @@ DO irap=1,nrap1_in
 !
 !  and write the output
 !
-      WRITE(6,'(5x, a8," x ",a8," =",3x,a)') TRIM(name_rap1_in(irap)), &
+      WRITE(stdout,'(5x, a8," x ",a8," =",3x,a)') TRIM(name_rap1_in(irap)), &
                                 TRIM(name_rap2_in(krap)), TRIM(rap_name)
    ENDDO
 ENDDO

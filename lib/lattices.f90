@@ -846,7 +846,7 @@ nx1=INT(SQRT(max_modulus)*SQRT(bg2(1,1)**2+bg2(2,1)**2+bg2(3,1)**2))+1
 nx2=INT(SQRT(max_modulus)*SQRT(bg2(1,2)**2+bg2(2,2)**2+bg2(3,2)**2))+1
 nx3=INT(SQRT(max_modulus)*SQRT(bg2(1,3)**2+bg2(2,3)**2+bg2(3,3)**2))+1
 
-!WRITE(6,*) 'same lattice using grid', nx1, nx2, nx3
+!WRITE(stdout,*) 'same lattice using grid', nx1, nx2, nx3
 !
 !  save the combinations that have the correct modulus
 !
@@ -945,7 +945,7 @@ nx1=INT(SQRT(max_modulus)*SQRT(bg(1,1)**2+bg(2,1)**2+bg(3,1)**2))+1
 nx2=INT(SQRT(max_modulus)*SQRT(bg(1,2)**2+bg(2,2)**2+bg(3,2)**2))+1
 nx3=INT(SQRT(max_modulus)*SQRT(bg(1,3)**2+bg(2,3)**2+bg(3,3)**2))+1
 
-!WRITE(6,*) 'lattice point group using grid', nx1, nx2, nx3
+!WRITE(stdout,*) 'lattice point group using grid', nx1, nx2, nx3
 
 nc=0
 DO i=nx1, -nx1, -1

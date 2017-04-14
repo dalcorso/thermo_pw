@@ -510,7 +510,7 @@ CALL dsyevx(jobz, range, uplo, npw, h, npw, rdummy, rdummy, 1, nbnd, zero, &
             m, ee, v, npw, work, lwork, iwork, ifail, info)
 !
 IF (ABS(info) /= 0) THEN
-   WRITE(6,'("Error in the diagonalization, info= ", i5)') info
+   WRITE(stdout,'("Error in the diagonalization, info= ", i5)') info
    STOP 1
 ENDIF
 !

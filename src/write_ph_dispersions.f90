@@ -179,7 +179,7 @@ SUBROUTINE write_ph_dispersions()
            code_group_old=code_group
         ENDIF
         WRITE(stdout,'(/,5x,70("*"))')
-!     write(6,'(2i5, 3f15.5,l5)') n, qcode_group(n), q(:,n), high_sym(n)
+!     WRITE(stdout,'(2i5, 3f15.5,l5)') n, qcode_group(n), q(:,n), high_sym(n)
      ELSEIF (lo_to_split) THEN
 !
 !  At gamma the group is the point group of the solid

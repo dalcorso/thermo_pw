@@ -58,9 +58,13 @@ PROGRAM gener_nanowire
 !
 !  nz           unit of repetition along z.
 !
+USE kinds,       ONLY : DP
+USE io_global,   ONLY : stdout
+USE mp_global,   ONLY : mp_startup, mp_global_end
+USE environment, ONLY : environment_start, environment_end
 IMPLICIT NONE
 
-INTEGER, PARAMETER :: DP=8, nmax=10000
+INTEGER, PARAMETER :: nmax=10000
 
 REAL(DP), PARAMETER :: eps=1.d-12
 REAL(DP) :: a1(3), a2(3), c(3), t(3), c1(3), t1(3), tau(3)
@@ -73,55 +77,61 @@ CHARACTER(LEN=3) :: atm(nmax)
 LOGICAL :: lwire, lrect
 INTEGER :: iuout
 CHARACTER(LEN=256) :: filename
+CHARACTER(LEN=9) :: code='NANOWIRE'
 
-WRITE(6,'("ibrav_2d ")')
-WRITE(6,'("1 -- oblique, give a, b, cos(gamma) ")')
-WRITE(6,'("2 -- rectangular, give a and b ")')
-WRITE(6,'("3 -- centered rectangular, give a and b ")')
-WRITE(6,'("4 -- square, give a ")')
-WRITE(6,'("5 -- hexagonal, give a ")')
-WRITE(6,'("ibrav_2d?")')
+CALL mp_startup ( start_images=.true. )
+CALL environment_start ( code )
+
+
+WRITE(stdout,'("ibrav_2d ")')
+WRITE(stdout,'("1 -- oblique, give a, b, cos(gamma) ")')
+WRITE(stdout,'("2 -- rectangular, give a and b ")')
+WRITE(stdout,'("3 -- centered rectangular, give a and b ")')
+WRITE(stdout,'("4 -- square, give a ")')
+WRITE(stdout,'("5 -- hexagonal, give a ")')
+WRITE(stdout,'("ibrav_2d?")')
 READ(5,*) ibrav_2d
-WRITE(6,'(i5)') ibrav_2d
-WRITE(6,'("a, b/a, COS(gamma)? ")')
+WRITE(stdout,'(i5)') ibrav_2d
+WRITE(stdout,'("a, b/a, COS(gamma)? ")')
 READ(5,*) celldm_2d(1), celldm_2d(2), celldm_2d(3)
-WRITE(6,'(3f15.6)') celldm_2d
+WRITE(stdout,'(3f15.6)') celldm_2d
 alat=celldm_2d(1)
-WRITE(6,'("Number of atoms in the 2d unit cell?")') 
+WRITE(stdout,'("Number of atoms in the 2d unit cell?")') 
 READ(5,*) nat_2d
-WRITE(6,'(i5)') nat_2d
+WRITE(stdout,'(i5)') nat_2d
 
 ALLOCATE(tau_2d(3,nat_2d))
 ALLOCATE(atm_2d(nat_2d))
 DO ia=1,nat_2d
    READ(5,*) atm_2d(ia), tau_2d(1,ia), tau_2d(2,ia), tau_2d(3,ia)
-   WRITE(6,'(a3, 3f18.10)') atm_2d(ia), tau_2d(1,ia), tau_2d(2,ia), tau_2d(3,ia)
+   WRITE(stdout,'(a3, 3f18.10)') atm_2d(ia), tau_2d(1,ia), tau_2d(2,ia), &
+                                                            tau_2d(3,ia)
 ENDDO
 
-WRITE(6,'("Dimension of the box?")')
+WRITE(stdout,'("Dimension of the box?")')
 READ(5,*) alat_box
-WRITE(6,'(f15.6)') alat_box
+WRITE(stdout,'(f15.6)') alat_box
 
-WRITE(6,'("Two dimensional sheet (.FALSE.) or wire (.TRUE.)?")')
+WRITE(stdout,'("Two dimensional sheet (.FALSE.) or wire (.TRUE.)?")')
 READ(5,*) lwire
-WRITE(6,*) lwire
+WRITE(stdout,*) lwire
 
 SELECT CASE (ibrav_2d) 
    CASE(1)
 !
 !  rhombus
 !
-      WRITE(6,'("General lattice, give m,n,p,q")')
+      WRITE(stdout,'("General lattice, give m,n,p,q")')
       READ(5,*) m, n, p, q
    CASE(2)
 !
 !  rectangular
 !
-      WRITE(6,'("Only nanowires of type (m,0) or (0,n) have rectangular cell")')
-      WRITE(6,'("Rectangular? If .TRUE. then give m and n otherwise &
+      WRITE(stdout,'("Only nanowires of type (m,0) or (0,n) have rectangular cell")')
+      WRITE(stdout,'("Rectangular? If .TRUE. then give m and n otherwise &
                  &give m n p q")')
       READ(5,*) lrect
-      WRITE(6,*) lrect
+      WRITE(stdout,*) lrect
       IF (lrect) THEN
          READ(5,*) m, n
          IF (m > 0) THEN
@@ -138,11 +148,11 @@ SELECT CASE (ibrav_2d)
 !
 !  centered rectangular
 !
-      WRITE(6,'("Only nanowires of type (m,m) are rectangular.")')
-      WRITE(6,'("Rectangular? If .TRUE. then give m otherwise &
+      WRITE(stdout,'("Only nanowires of type (m,m) are rectangular.")')
+      WRITE(stdout,'("Rectangular? If .TRUE. then give m otherwise &
                  &give m n p q")')
       READ(5,*) lrect
-      WRITE(6,*) lrect
+      WRITE(stdout,*) lrect
       IF (lrect) THEN
          READ(5,*) m
          n=m
@@ -155,11 +165,11 @@ SELECT CASE (ibrav_2d)
 !
 !  square
 !
-      WRITE(6,'("Nanowires of all types (m,n) are rectangular.")')
-      WRITE(6,'("Rectangular? If .TRUE. then give m and n otherwise &
+      WRITE(stdout,'("Nanowires of all types (m,n) are rectangular.")')
+      WRITE(stdout,'("Rectangular? If .TRUE. then give m and n otherwise &
                  &give m n p q")')
       READ(5,*) lrect
-      WRITE(6,*) lrect
+      WRITE(stdout,*) lrect
       IF (lrect) THEN
          READ(5,*) m,n
          IF (n>0) THEN
@@ -183,11 +193,11 @@ SELECT CASE (ibrav_2d)
 !
 !  hexagonal
 !
-      WRITE(6,'("Nanowires of all types (m,n) are rectangular.")')
-      WRITE(6,'("Rectangular? If .TRUE. then give m and n otherwise &
+      WRITE(stdout,'("Nanowires of all types (m,n) are rectangular.")')
+      WRITE(stdout,'("Rectangular? If .TRUE. then give m and n otherwise &
                  &give m n p q")')
       READ(5,*) lrect
-      WRITE(6,*) lrect
+      WRITE(stdout,*) lrect
       IF (lrect) THEN
          READ(5,*) m,n
          IF (2*n-m /= 0) THEN
@@ -213,11 +223,11 @@ SELECT CASE (ibrav_2d)
 END SELECT
 
 IF (p==0.AND.q==0) THEN
-   WRITE(6,*) 'Unable to find p and q'
+   WRITE(stdout,*) 'Unable to find p and q'
    STOP 1
 ENDIF
 
-WRITE(6,'("repeated units along z?")')
+WRITE(stdout,'("repeated units along z?")')
 READ(5,*) nz
 
 IF (nz > 1) THEN
@@ -225,17 +235,17 @@ IF (nz > 1) THEN
    q=q*nz
 ENDIF
 
-WRITE(6,'("Output file name?")')
+WRITE(stdout,'("Output file name?")')
 READ(5,*) filename
 
 pi=4.0_DP * atan(1.0_DP)
 CALL latgen_2d(ibrav_2d, celldm_2d, a1, a2)
 
-WRITE(6,'("Direct lattice vectors")')
-WRITE(6,'("(",f15.6,",",f15.6,")")') a1(1), a1(2)
-WRITE(6,'("(",f15.6,",",f15.6,")")') a2(1), a2(2)
+WRITE(stdout,'("Direct lattice vectors")')
+WRITE(stdout,'("(",f15.6,",",f15.6,")")') a1(1), a1(2)
+WRITE(stdout,'("(",f15.6,",",f15.6,")")') a2(1), a2(2)
 
-WRITE(6,'("(m, n), and (p, q)", 4i6)') m, n, p, q
+WRITE(stdout,'("(m, n), and (p, q)", 4i6)') m, n, p, q
 
 c(:) = m * a1(:) + n * a2(:)
 t(:) = p * a1(:) + q * a2(:)
@@ -255,7 +265,7 @@ DO m1 = MIN(-1,m-1,p-1,m+p-1), MAX(1,m+1,p+1,m+p+1)
                                prod1 >=-eps.AND.prod1<1.0_DP-eps)THEN
             nat=nat+1
             IF ( nat > nmax) THEN
-               WRITE(6,'("Too many atoms")')
+               WRITE(stdout,'("Too many atoms")')
                STOP 1
             END IF
             y(1,nat)=prod
@@ -313,6 +323,9 @@ ELSE
 ENDIF
 
 CLOSE(iuout)
+CALL environment_end( code )
+CALL mp_global_end ()
+
 
 END PROGRAM gener_nanowire
 

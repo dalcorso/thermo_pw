@@ -78,9 +78,10 @@ DO i=1,npt_theta
       qvec(1) = SIN(theta) * COS(phi)
       qvec(2) = SIN(theta) * SIN(phi)
       qvec(3) = COS(theta) 
-!      WRITE(6,*) 'qvec', qvec(1), qvec(2), qvec(3)
+!      WRITE(stdout,*) 'qvec', qvec(1), qvec(2), qvec(3)
       CALL compute_sound(elcon, qvec, density, sound_speed, sound_disp)
-!      WRITE(6,*) 'sound speed', sound_speed(1), sound_speed(2), sound_speed(3)
+!      WRITE(stdout,*) 'sound speed', sound_speed(1), sound_speed(2), 
+!                       sound_speed(3)
       IF (sound_speed(1)>0.0_DP.AND.sound_speed(2)>0.0_DP.AND. &
           sound_speed(3)>0.0_DP) &
       integral = integral + SIN(theta) * ( 1.0_DP / sound_speed(1)**3 + &

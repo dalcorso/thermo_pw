@@ -65,7 +65,8 @@ USE wyckoff,     ONLY : nattot, tautot, ityptot, extfortot, &
 USE wy_pos,      ONLY : wypos
 USE parser,      ONLY : read_line, get_field, field_count
 USE lattices,    ONLY : find_ibrav_code
-USE wrappers,    ONLY: feval_infix
+USE wrappers,    ONLY : feval_infix
+USE io_global,   ONLY : stdout
 USE mp_global,   ONLY : mp_startup, mp_global_end
 USE environment, ONLY : environment_start, environment_end
 
@@ -133,15 +134,15 @@ CHARACTER(LEN=9) :: code='SUPERCELL'
 CALL mp_startup ( start_images=.true. )
 CALL environment_start ( code )
 
-WRITE(6,'(5x," Space group (1) or standard coordinates (2)? ")')
+WRITE(stdout,'(5x," Space group (1) or standard coordinates (2)? ")')
 READ(5,*) which_input
 
 IF (which_input==1) THEN
    units=2
-   WRITE(6,'(5x," Space group number? ")')
+   WRITE(stdout,'(5x," Space group number? ")')
    READ(5,*) space_group_code
 
-   WRITE(6,'(5x," Origin, unique axis b, trigonal or hexagonal? (default 1 1 1) ")')
+   WRITE(stdout,'(5x," Origin, unique axis b, trigonal or hexagonal? (default 1 1 1) ")')
    READ(5,*) or, unb, trig
    uniqueb=.FALSE.
    rhombohedral=.FALSE.
@@ -151,21 +152,21 @@ IF (which_input==1) THEN
       rhombohedral=(trig==1)
    ENDIF
    origin_choice=or
-   WRITE(6,'(5x,"celldm ? (For instance 1.0 0.0 0.0 0.0 0.0 0.0)  ")')
+   WRITE(stdout,'(5x,"celldm ? (For instance 1.0 0.0 0.0 0.0 0.0 0.0)  ")')
    READ(5,*) celldm(1), celldm(2), celldm(3), celldm(4), celldm(5), celldm(6)
 ELSE
-   WRITE(6,'(5x," Bravais lattice code ibrav (as in QE)? ")')
+   WRITE(stdout,'(5x," Bravais lattice code ibrav (as in QE)? ")')
    READ(5,*) ibrav
-   WRITE(6,'(5x," Units (alat (1) or crystal coordinates (2)) ? ")')
+   WRITE(stdout,'(5x," Units (alat (1) or crystal coordinates (2)) ? ")')
    READ(5,*) units
    IF (ibrav/=0) THEN
-      WRITE(6,'(5x,"celldm ? (For instance 1.0 0.0 0.0 0.0 0.0 0.0)  ")')
+      WRITE(stdout,'(5x,"celldm ? (For instance 1.0 0.0 0.0 0.0 0.0 0.0)  ")')
       READ(5,*) celldm(1), celldm(2), celldm(3), celldm(4), celldm(5), celldm(6)
    ELSE
       celldm=0.0_DP
-      WRITE(6,'(5x,"Units of at (at are multiplied by this number)? ")')
+      WRITE(stdout,'(5x,"Units of at (at are multiplied by this number)? ")')
       READ(5,*) celldm(1)
-      WRITE(6,'(5x,"at ? ")')
+      WRITE(stdout,'(5x,"at ? ")')
       DO ivec=1,3
          READ(5,*) at(:,ivec)
       ENDDO 
@@ -173,10 +174,10 @@ ELSE
    ENDIF
 ENDIF
 
-WRITE(6,'(5x,"n1, n2, n3? (for instance 1 1 1) ")') 
+WRITE(stdout,'(5x,"n1, n2, n3? (for instance 1 1 1) ")') 
 READ(5,*) n1, n2, n3
 
-WRITE(6,'(5x,"Transform to conventional cell? (1=Yes, 0=No) ")') 
+WRITE(stdout,'(5x,"Transform to conventional cell? (1=Yes, 0=No) ")') 
 READ(5,*) iconv
 !
 !  now read atomic positions and compute all atoms in the primitive unit cell 
@@ -188,10 +189,10 @@ READ(5,*) iconv
 !  ityp
 !  atm
 !
-WRITE(6,'(5x,"Centered output crystal coordinates? &
+WRITE(stdout,'(5x,"Centered output crystal coordinates? &
                  &(0=No, 1=Yes -0.5,0.5, 2=Yes 0,1) ")') 
 READ(5,*) icenter
-WRITE(6,'(5x," Number of atoms and atomic coordinates? ")')
+WRITE(stdout,'(5x," Number of atoms and atomic coordinates? ")')
 IF (which_input==1) THEN
    READ(5,*) ineq_nat
 
@@ -203,7 +204,7 @@ IF (which_input==1) THEN
 
    DO na=1, ineq_nat
       CALL read_line( input_line )
-      WRITE(6,*) TRIM(input_line)
+      WRITE(stdout,*) TRIM(input_line)
 !      READ(5,*) label(na), ineq_tau(1,na), ineq_tau(2,na), ineq_tau(3,na)
       CALL field_count( nfield, input_line )
       !
@@ -361,9 +362,9 @@ ELSE
       code_group_ext=0
       CALL find_ibrav_code(at(1,1), at(1,2), at(1,3), ibrav, celldm, &
                                           code_group_ext, ur, global_s,.TRUE.)
-      WRITE(6,*) 'ur'
+      WRITE(stdout,*) 'ur'
       DO ipol=1,3
-         WRITE(6,*) (ur(ipol,jpol), jpol=1,3)
+         WRITE(stdout,*) (ur(ipol,jpol), jpol=1,3)
       END DO
 
       stau=0.0_DP
@@ -373,7 +374,7 @@ ELSE
                stau(ivec,na)=stau(ivec,na) + ur(jvec, ivec) * tau(jvec,na)
             ENDDO
          ENDDO
-         WRITE(6,*) (stau(ipol,na), ipol=1,3)
+         WRITE(stdout,*) (stau(ipol,na), ipol=1,3)
       ENDDO
       tau=stau
    ENDIF
@@ -569,20 +570,20 @@ ENDIF
 CALL latgen(ibrav, celldm, at(1,1), at(1,2), at(1,3), omega)
 all_nat=nat_new * n1 * n2 * n3
 
-WRITE(6,'(5x, "celldm(1)= ",f15.9)') celldm(1) * n1
+WRITE(stdout,'(5x, "celldm(1)= ",f15.9)') celldm(1) * n1
 IF (celldm(2) > 0.0_DP ) &
-   WRITE(6,'(5x, "celldm(2)= ",f15.9)') (celldm(2) * n2) / n1
+   WRITE(stdout,'(5x, "celldm(2)= ",f15.9)') (celldm(2) * n2) / n1
 IF (celldm(3) > 0.0_DP ) &
-   WRITE(6,'(5x, "celldm(3)= ",f15.9)') (celldm(3) * n3) / n1
+   WRITE(stdout,'(5x, "celldm(3)= ",f15.9)') (celldm(3) * n3) / n1
 IF (celldm(4) /= 0.0_DP ) &
-   WRITE(6,'(5x, "celldm(4)= ",f15.9)') celldm(4) 
+   WRITE(stdout,'(5x, "celldm(4)= ",f15.9)') celldm(4) 
 IF (celldm(5) /= 0.0_DP ) &
-   WRITE(6,'(5x, "celldm(5)= ",f15.9)') celldm(5) 
+   WRITE(stdout,'(5x, "celldm(5)= ",f15.9)') celldm(5) 
 IF (celldm(6) /= 0.0_DP ) &
-   WRITE(6,'(5x, "celldm(6)= ",f15.9)') celldm(6) 
+   WRITE(stdout,'(5x, "celldm(6)= ",f15.9)') celldm(6) 
 
-WRITE(6,'(5x,"ibrav= ",i3)') ibrav
-WRITE(6,'(5x,"nat= ",i5)') all_nat
+WRITE(stdout,'(5x,"ibrav= ",i3)') ibrav
+WRITE(stdout,'(5x,"nat= ",i5)') all_nat
 
 ALLOCATE(all_tau(3,all_nat))
 ALLOCATE(all_ityp(all_nat))
@@ -616,9 +617,9 @@ ENDIF
 !
 !  and write on output the coordinates
 !
-WRITE(6,'("ATOMIC_POSITIONS (crystal)")')
+WRITE(stdout,'("ATOMIC_POSITIONS (crystal)")')
 DO na=1,all_nat
-   WRITE(6,'(a,3f21.13)') TRIM(atm(all_ityp(na))), all_tau(1,na), &
+   WRITE(stdout,'(a,3f21.13)') TRIM(atm(all_ityp(na))), all_tau(1,na), &
                                                    all_tau(2,na), &
                                                    all_tau(3,na) 
 ENDDO

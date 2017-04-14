@@ -84,73 +84,74 @@ CALL mp_startup ( start_images=.true. )
 CALL environment_start ( code )
 
 
-WRITE(6,'("ibrav_2d ")')
-WRITE(6,'("1 -- oblique, give a, b, cos(gamma) ")')
-WRITE(6,'("2 -- rectangular, give a and b ")')
-WRITE(6,'("3 -- centered rectangular, give a and b ")')
-WRITE(6,'("4 -- square, give a ")')
-WRITE(6,'("5 -- hexagonal, give a ")')
-WRITE(6,'("ibrav_2d?")')
+WRITE(stdout,'("ibrav_2d ")')
+WRITE(stdout,'("1 -- oblique, give a, b, cos(gamma) ")')
+WRITE(stdout,'("2 -- rectangular, give a and b ")')
+WRITE(stdout,'("3 -- centered rectangular, give a and b ")')
+WRITE(stdout,'("4 -- square, give a ")')
+WRITE(stdout,'("5 -- hexagonal, give a ")')
+WRITE(stdout,'("ibrav_2d?")')
 READ(5,*) ibrav_2d
-WRITE(6,'(i5)') ibrav_2d
-WRITE(6,'("a, b/a, COS(gamma)? ")')
+WRITE(stdout,'(i5)') ibrav_2d
+WRITE(stdout,'("a, b/a, COS(gamma)? ")')
 READ(5,*) celldm_2d(1), celldm_2d(2), celldm_2d(3)
-WRITE(6,'(3f15.6)') celldm_2d
+WRITE(stdout,'(3f15.6)') celldm_2d
 alat=celldm_2d(1)
-WRITE(6,'("Number of atoms in the 2d unit cell?")') 
+WRITE(stdout,'("Number of atoms in the 2d unit cell?")') 
 READ(5,*) nat_2d
-WRITE(6,'(i5)') nat_2d
+WRITE(stdout,'(i5)') nat_2d
 
 ALLOCATE(tau_2d(3,nat_2d))
 ALLOCATE(atm_2d(nat_2d))
 DO ia=1,nat_2d
    READ(5,*) atm_2d(ia), tau_2d(1,ia), tau_2d(2,ia), tau_2d(3,ia)
-   WRITE(6,'(a3, 3f18.10)') atm_2d(ia), tau_2d(1,ia), tau_2d(2,ia), tau_2d(3,ia)
+   WRITE(stdout,'(a3, 3f18.10)') atm_2d(ia), tau_2d(1,ia), tau_2d(2,ia), &
+                                              tau_2d(3,ia)
 ENDDO
 
-WRITE(6,'("Dimension of the box?")')
+WRITE(stdout,'("Dimension of the box?")')
 READ(5,*) alat_box
-WRITE(6,'(f15.6)') alat_box
+WRITE(stdout,'(f15.6)') alat_box
 
-WRITE(6,'("Crystal coordinates of the G vector m b1 + n b2 (m,n)?")')
+WRITE(stdout,'("Crystal coordinates of the G vector m b1 + n b2 (m,n)?")')
 READ(5,*) m, n
-WRITE(6,'(2i5)') m,n
+WRITE(stdout,'(2i5)') m,n
 
-WRITE(6,'("Number of rows ?")')
+WRITE(stdout,'("Number of rows ?")')
 READ(5,*) nrows
 IF ( MOD(nrows,2) == 0 ) THEN
    nrows=nrows+1
 END IF
-WRITE(6,'(i5)') nrows
+WRITE(stdout,'(i5)') nrows
 
-WRITE(6,'("Number of atoms per row ?")')
+WRITE(stdout,'("Number of atoms per row ?")')
 READ(5,*) nat_row
-WRITE(6,'(i5)') nat_row
+WRITE(stdout,'(i5)') nat_row
 
-WRITE(6,'("Exact vacuum (.TRUE.) or row distance multiples (.FALSE.)?")')
+WRITE(stdout,'("Exact vacuum (.TRUE.) or row distance multiples (.FALSE.)?")')
 READ(5,*) ldist_vacuum
-WRITE(6,*) ldist_vacuum
+WRITE(stdout,*) ldist_vacuum
 
-WRITE(6,'("Vacuum space in a.u. ?")')
+WRITE(stdout,'("Vacuum space in a.u. ?")')
 READ(5,*) vacuum
-WRITE(6,'(f15.6)') vacuum 
+WRITE(stdout,'(f15.6)') vacuum 
 
-WRITE(6,'("Output file name?")')
+WRITE(stdout,'("Output file name?")')
 READ(5,*) filename
-WRITE(6,'(a)') TRIM(filename)
+WRITE(stdout,'(a)') TRIM(filename)
 
 pi=4.0_DP * atan(1.0_DP)
 CALL latgen_2d(ibrav_2d, celldm_2d, a1, a2)
 
-WRITE(6,'("Direct lattice vectors")')
-WRITE(6,'("(",f15.6,",",f15.6,")")') a1(1), a1(2)
-WRITE(6,'("(",f15.6,",",f15.6,")")') a2(1), a2(2)
+WRITE(stdout,'("Direct lattice vectors")')
+WRITE(stdout,'("(",f15.6,",",f15.6,")")') a1(1), a1(2)
+WRITE(stdout,'("(",f15.6,",",f15.6,")")') a2(1), a2(2)
 
 CALL recips_2d(a1,a2,b1,b2)
 
-WRITE(6,'("Reciprocal lattice vectors")')
-WRITE(6,'("(",f15.6,",",f15.6,")")') b1(1), b1(2)
-WRITE(6,'("(",f15.6,",",f15.6,")")') b2(1), b2(2)
+WRITE(stdout,'("Reciprocal lattice vectors")')
+WRITE(stdout,'("(",f15.6,",",f15.6,")")') b1(1), b1(2)
+WRITE(stdout,'("(",f15.6,",",f15.6,")")') b2(1), b2(2)
 
 IF (ibrav_2d == 3)  THEN
 !
@@ -225,7 +226,7 @@ ELSE
          END IF
       END DO
       IF ( found == 0  ) THEN
-         WRITE(6,*) 'p and q not found'
+         WRITE(stdout,*) 'p and q not found'
          STOP
       END IF
 !
@@ -241,7 +242,7 @@ ELSE
             dist=dist1
          ENDIF
       ENDDO
-      write(6,*) 'p and q', p, q
+!      WRITE(stdout,*) 'p and q', p, q
       DO ia=1,nat_2d
          nat = nat + 1
          y(:,nat) = p * a1(:) + q * a2(:) + tau_2d(:,ia)

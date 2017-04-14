@@ -81,7 +81,7 @@ PROGRAM gener_3d_slab
 USE kinds, ONLY : DP
 USE constants, ONLY : pi
 USE wyckoff,  ONLY : nattot, tautot, ityptot, sup_spacegroup, clean_spacegroup
-USE io_global,   ONLY : stdout, ionode
+USE io_global,   ONLY : stdout
 USE mp_global,   ONLY : mp_startup, mp_global_end
 USE environment, ONLY : environment_start, environment_end
 
@@ -114,42 +114,42 @@ CHARACTER(LEN=9) :: code='3D_SLAB'
 CALL mp_startup ( start_images=.true. )
 CALL environment_start ( code )
 
-WRITE(6,'("ibrav_3d? ")')
+WRITE(stdout,'("ibrav_3d? ")')
 READ(5,*) ibrav_3d
-WRITE(6,'(i5)') ibrav_3d
-WRITE(6,'("celldm ")')
+WRITE(stdout,'(i5)') ibrav_3d
+WRITE(stdout,'("celldm ")')
 READ(5,*) celldm(1), celldm(2), celldm(3), celldm(4), celldm(5), celldm(6)
-WRITE(6,'(6f12.6)') celldm
+WRITE(stdout,'(6f12.6)') celldm
 alat=celldm(1)
-WRITE(6,'("Crystal coordinates? (1 yes all, 2 yes only irreducible, 3 no)")')
+WRITE(stdout,'("Crystal coordinates? (1 yes all, 2 yes only irreducible, 3 no)")')
 READ(5,*) lcryst
-WRITE(6,'(i5)') lcryst
+WRITE(stdout,'(i5)') lcryst
 
 IF (lcryst==2) THEN
-   WRITE(6,'("Space group number?")')
+   WRITE(stdout,'("Space group number?")')
    READ(5,*) space_group_number
-   WRITE(6,'(i5)') space_group_number
-   WRITE(6,'("Unique axis b? (.TRUE. or .FALSE.")') 
+   WRITE(stdout,'(i5)') space_group_number
+   WRITE(stdout,'("Unique axis b? (.TRUE. or .FALSE.")') 
    READ(5,*) uniqueb
-   WRITE(6,'(l5)') uniqueb
-   WRITE(6,'("Rombohedral? (.TRUE. or .FALSE.")') 
+   WRITE(stdout,'(l5)') uniqueb
+   WRITE(stdout,'("Rombohedral? (.TRUE. or .FALSE.")') 
    READ(5,*) rhombohedral
-   WRITE(6,'(l5)') rhombohedral
-   WRITE(6,'("Origin choice? (1 or 2)")') 
+   WRITE(stdout,'(l5)') rhombohedral
+   WRITE(stdout,'("Origin choice? (1 or 2)")') 
    READ(5,*) origin_choice
-   WRITE(6,'(i5)') origin_choice
+   WRITE(stdout,'(i5)') origin_choice
 END IF
 
-WRITE(6,'("Number of atoms in the bulk unit cell?")') 
+WRITE(stdout,'("Number of atoms in the bulk unit cell?")') 
 READ(5,*) nat_3d
-WRITE(6,'(i5)') nat_3d
+WRITE(stdout,'(i5)') nat_3d
 
 ALLOCATE(tau_3d(3,nat_3d))
 ALLOCATE(ityp(nat_3d))
 ALLOCATE(atm_3d(nat_3d))
 DO ia=1,nat_3d
    READ(5,*) atm_3d(ia), tau_3d(1,ia), tau_3d(2,ia), tau_3d(3,ia)
-   WRITE(6,'(a3, 3f18.10)') atm_3d(ia), tau_3d(1,ia), tau_3d(2,ia), tau_3d(3,ia)
+   WRITE(stdout,'(a3, 3f18.10)') atm_3d(ia), tau_3d(1,ia), tau_3d(2,ia), tau_3d(3,ia)
 ENDDO
 !
 !  Count how many types we have and how they are called
@@ -202,68 +202,68 @@ ENDIF
 
 
 IF (ibrav_3d == 4) THEN
-   WRITE(6,'("Three (.TRUE.) or four (.FALSE.) indices  ?")') 
+   WRITE(stdout,'("Three (.TRUE.) or four (.FALSE.) indices  ?")') 
    READ(5,*) three_indices
-   WRITE(6,'(l5)') three_indices
+   WRITE(stdout,'(l5)') three_indices
    IF (three_indices) THEN
-       WRITE(6,'("Crystal coordinates of the &
+       WRITE(stdout,'("Crystal coordinates of the &
                              &G vector m b1 + n b2 + o b3 (m,n,o)?")')
        READ(5,*) m, n, o
-       WRITE(6,'(3i5)') m,n,o
+       WRITE(stdout,'(3i5)') m,n,o
    ELSE
-       WRITE(6,'("Crystal coordinates of the &
+       WRITE(stdout,'("Crystal coordinates of the &
                              &G vector m b1 + n b2 + o b3 (m,n,h,o) h=-m-n?")')
        READ(5,*) m, n, h, o
-       WRITE(6,'(4i5)') m,n,h,o
+       WRITE(stdout,'(4i5)') m,n,h,o
        IF (h /= -m-n) CALL errore('gener_3d_slab','h must be equal to -m-n', 1)
    ENDIF
 ELSE
-   WRITE(6,'("Crystal coordinates of the &
+   WRITE(stdout,'("Crystal coordinates of the &
                              &G vector m b1 + n b2 + o b3 (m,n,o)?")')
    READ(5,*) m, n, o
-   WRITE(6,'(3i5)') m,n,o
+   WRITE(stdout,'(3i5)') m,n,o
 ENDIF
 
-WRITE(6,'("Number of layers ?")')
+WRITE(stdout,'("Number of layers ?")')
 READ(5,*) nlayers
-WRITE(6,'(i5)') nlayers
+WRITE(stdout,'(i5)') nlayers
 
-WRITE(6,'("Transformation matrix ? (t11, t12, t21, t22) ")')
+WRITE(stdout,'("Transformation matrix ? (t11, t12, t21, t22) ")')
 READ(5,*) t11, t12, t21, t22
-WRITE(6,'(2i5)') t11, t12
-WRITE(6,'(2i5)') t21, t22
+WRITE(stdout,'(2i5)') t11, t12
+WRITE(stdout,'(2i5)') t21, t22
 
-WRITE(6,'("Exact vacuum (.TRUE.) or row distance multiples (.FALSE.)?")')
+WRITE(stdout,'("Exact vacuum (.TRUE.) or row distance multiples (.FALSE.)?")')
 READ(5,*) ldist_vacuum
-WRITE(6,*) ldist_vacuum
+WRITE(stdout,*) ldist_vacuum
 
-WRITE(6,'("Vacuum space in a.u. ?")')
+WRITE(stdout,'("Vacuum space in a.u. ?")')
 READ(5,*) vacuum
-WRITE(6,'(f15.6)') vacuum 
+WRITE(stdout,'(f15.6)') vacuum 
 
-WRITE(6,'("In which layer do you want to put the origin ?")')
+WRITE(stdout,'("In which layer do you want to put the origin ?")')
 READ(5,*) origin_shift
-WRITE(6,'(i5)') origin_shift
+WRITE(stdout,'(i5)') origin_shift
 
-WRITE(6,'("Output file name?")')
+WRITE(stdout,'("Output file name?")')
 READ(5,*) filename
-WRITE(6,'(a)') TRIM(filename)
+WRITE(stdout,'(a)') TRIM(filename)
 
 CALL latgen(ibrav_3d, celldm, at(1,1), at(1,2), at(1,3), omega)
 
 at=at/alat
 
-WRITE(6,'("Direct lattice vectors")')
-WRITE(6,'("(",2(f15.6,","),f15.6,")")') at(:,1)
-WRITE(6,'("(",2(f15.6,","),f15.6,")")') at(:,2)
-WRITE(6,'("(",2(f15.6,","),f15.6,")")') at(:,3)
+WRITE(stdout,'("Direct lattice vectors")')
+WRITE(stdout,'("(",2(f15.6,","),f15.6,")")') at(:,1)
+WRITE(stdout,'("(",2(f15.6,","),f15.6,")")') at(:,2)
+WRITE(stdout,'("(",2(f15.6,","),f15.6,")")') at(:,3)
 
 CALL recips( at(1,1), at(1,2), at(1,3), bg(1,1), bg(1,2), bg(1,3) )
 
-WRITE(6,'("Reciprocal lattice vectors")')
-WRITE(6,'("(",2(f15.6,","),f15.6,")")') bg(:,1)
-WRITE(6,'("(",2(f15.6,","),f15.6,")")') bg(:,2)
-WRITE(6,'("(",2(f15.6,","),f15.6,")")') bg(:,3)
+WRITE(stdout,'("Reciprocal lattice vectors")')
+WRITE(stdout,'("(",2(f15.6,","),f15.6,")")') bg(:,1)
+WRITE(stdout,'("(",2(f15.6,","),f15.6,")")') bg(:,2)
+WRITE(stdout,'("(",2(f15.6,","),f15.6,")")') bg(:,3)
 
 IF (lcryst==1.OR.lcryst==2) THEN
 !
@@ -476,7 +476,7 @@ ELSE
 ENDIF
 gmod = SQRT( g(1)**2 + g(2)**2 + g(3)**2 )
 
-WRITE(6,'("G vector", 3f18.7)') g(1), g(2), g(3) 
+WRITE(stdout,'("G vector", 3f18.7)') g(1), g(2), g(3) 
 
 IF (.NOT.(ldist_vacuum)) THEN
 !
@@ -558,7 +558,7 @@ ELSEIF ( m /= 0) THEN
 END IF
 
 IF ( found == 0  ) THEN
-   WRITE(6,*) 'p,q, and s not found'
+   WRITE(stdout,*) 'p,q, and s not found'
    STOP
 END IF
 
@@ -578,7 +578,7 @@ DO ia=1, found
    ENDIF
 END DO
 
-!WRITE(6,*) 'p0, q0, and s0', p0, q0, s0
+!WRITE(stdout,*) 'p0, q0, and s0', p0, q0, s0
 
 c1(:) = p0 * at(:,1) + q0 * at(:,2) + s0 * at(:,3)
 
@@ -602,7 +602,7 @@ DO ia=1, found
    END IF
 END DO
 
-!WRITE(6,*) 'p01, q01, and s01', p01, q01, s01
+!WRITE(stdout,*) 'p01, q01, and s01', p01, q01, s01
 
 min_j = 1000
 nat=0
@@ -672,7 +672,7 @@ DO j=-(nlayers-1)/2+origin_shift, nlayers/2 + origin_shift
    END IF
 
    IF ( found == 0  ) THEN
-      WRITE(6,*) 'p,q, and s not found'
+      WRITE(stdout,*) 'p,q, and s not found'
       STOP
    END IF
 !
@@ -695,7 +695,7 @@ DO j=-(nlayers-1)/2+origin_shift, nlayers/2 + origin_shift
       IF (ABS(j) < min_j .AND. j /= 0) min_j=ABS(j)
    ENDIF
 
-!   WRITE(6,*) 'p, q, and s', p, q, s
+!   WRITE(stdout,*) 'p, q, and s', p, q, s
 
    DO ia=1,nat_3d
       nat = nat + 1
@@ -706,15 +706,15 @@ DO j=-(nlayers-1)/2+origin_shift, nlayers/2 + origin_shift
 END DO
 
 IF (min_j < 1000) THEN
-   WRITE(6,'("In this direction the bulk has lattice planes of",i5,&
+   WRITE(stdout,'("In this direction the bulk has lattice planes of",i5,&
                                                   " types")') min_j
 ELSE
-   WRITE(6,'("Vanishing distance not found")')
+   WRITE(stdout,'("Vanishing distance not found")')
    IF (ibrav_3d > 3) THEN
-      WRITE(6,'("Either the bulk cannot be obtained in this direction")')
-      WRITE(6,'("or it requires more than",i5," lattice planes")') (nlayers)/2
+      WRITE(stdout,'("Either the bulk cannot be obtained in this direction")')
+      WRITE(stdout,'("or it requires more than",i5," lattice planes")') (nlayers)/2
    ELSE
-      WRITE(6,'("The bulk has more than",i5," lattice planes")') (nlayers)/2
+      WRITE(stdout,'("The bulk has more than",i5," lattice planes")') (nlayers)/2
    END IF 
 END IF
 !

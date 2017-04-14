@@ -29,8 +29,9 @@ PROGRAM plot_new_sur_states
 !  latoms      : .true. if you want an indication of the atomic positions
 !
 USE kinds, ONLY : DP
-USE mp_global,        ONLY : mp_startup, mp_global_end
-USE environment,      ONLY : environment_start, environment_end
+USE io_global,     ONLY : stdout
+USE mp_global,     ONLY : mp_startup, mp_global_end
+USE environment,   ONLY : environment_start, environment_end
 USE gnuplot, ONLY : gnuplot_start, gnuplot_end, gnuplot_xlabel, &
                     gnuplot_ylabel, gnuplot_write_file_data,    &
                     gnuplot_write_header, gnuplot_write_command,&
@@ -57,62 +58,62 @@ CHARACTER(LEN=9) :: code='plot_surf_states'
 CALL mp_startup ( start_images=.true. )
 CALL environment_start ( code )
 
-WRITE(6,'(5x,"Number of states to plot and maximum number of states per group")') 
+WRITE(stdout,'(5x,"Number of states to plot and maximum number of states per group")') 
 READ(5,*) nstates, nmax
-WRITE(6,'(5x,i5)') nstates, nmax
+WRITE(stdout,'(5x,i5)') nstates, nmax
 ALLOCATE(nk_plot(nstates))
 ALLOCATE(ik_plot(nmax,nstates))
 ALLOCATE(ibnd_plot(nmax,nstates))
 ALLOCATE(label_plot(nstates))
-WRITE(6,'(5x,"Input all the states...")') 
+WRITE(stdout,'(5x,"Input all the states...")') 
 DO istate=1,nstates
-   write(6,*) 'istate', istate
+   write(stdout,*) 'istate', istate
    READ(5,*) nk_plot(istate)
    IF (nk_plot(istate)> nmax) CALL errore('plot_sur_states','increase nmax',1)
-   WRITE(6,'(5x,i6)') nk_plot(istate)
+   WRITE(stdout,'(5x,i6)') nk_plot(istate)
    DO ik=1,nk_plot(istate)
       READ(5,*) ik_plot(ik,istate), ibnd_plot(ik,istate), label_plot(istate)
-      WRITE(6,'(5x,2i7,3x,a)') ik_plot(ik,istate), ibnd_plot(ik,istate), &
+      WRITE(stdout,'(5x,2i7,3x,a)') ik_plot(ik,istate), ibnd_plot(ik,istate), &
                                              TRIM(label_plot(istate))
    ENDDO
 ENDDO
-WRITE(6,'(5x,"Name of the file with the planar averages")') 
+WRITE(stdout,'(5x,"Name of the file with the planar averages")') 
 READ(5,'(a)')  dump_file
-WRITE(6,'(5x,a)')  TRIM(dump_file)
-WRITE(6,'(5x,"Starting and ending points of the plot")') 
+WRITE(stdout,'(5x,a)')  TRIM(dump_file)
+WRITE(stdout,'(5x,"Starting and ending points of the plot")') 
 READ(5,*) startz, endz
-WRITE(6,'(5x,2f15.5)') startz, endz
-WRITE(6,'(5x,"Do you want to plot the atoms (.TRUE.=yes)")') 
+WRITE(stdout,'(5x,2f15.5)') startz, endz
+WRITE(stdout,'(5x,"Do you want to plot the atoms (.TRUE.=yes)")') 
 READ(5,*) latoms
-WRITE(6,'(5x,l5)') latoms
+WRITE(stdout,'(5x,l5)') latoms
 !
 !  Open dump_file and read the states and the atomic positions
 !
-WRITE(6,'(5x,2a)') 'Reading file ', TRIM(dump_file)
+WRITE(stdout,'(5x,2a)') 'Reading file ', TRIM(dump_file)
 iun=38
 filename1=TRIM(dump_file)
 OPEN(UNIT=iun, FILE=TRIM(filename1), STATUS='OLD', ERR=100, IOSTAT=ios)
 100 IF (ios /= 0) THEN
-       WRITE(6,'(5x,"Problem opening the dump file ",a)') TRIM(dump_file)
+       WRITE(stdout,'(5x,"Problem opening the dump file ",a)') TRIM(dump_file)
        STOP
 ENDIF
 
 READ(iun,*) ibrav
-WRITE(6,'(5x,"Ibrav= ",i5)') ibrav
+WRITE(stdout,'(5x,"Ibrav= ",i5)') ibrav
 READ(iun,*) celldm
-WRITE(6,'(5x,"celldm= ",6f11.6)') celldm
+WRITE(stdout,'(5x,"celldm= ",6f11.6)') celldm
 READ(iun,*) nat
-WRITE(6,'(5x,"nat= ",i5)') nat
+WRITE(stdout,'(5x,"nat= ",i5)') nat
 ALLOCATE(atm(nat))
 ALLOCATE(tau(3,nat))
 DO na=1,nat 
    READ(iun,*) atm(na), tau(:,na)
-   WRITE(6,'(5x,a,3f15.9)') TRIM(atm(na)), tau(:,na)
+   WRITE(stdout,'(5x,a,3f15.9)') TRIM(atm(na)), tau(:,na)
 ENDDO
 dimz=celldm(3)*celldm(1)
 
 READ(iun,*) nr3, nbnd, nks, nspin
-WRITE(6,'(5x,"nr3=",i6," nbnd=",i6," nks=",i6," nspin=",i6)') nr3, nbnd, nks, &
+WRITE(stdout,'(5x,"nr3=",i6," nbnd=",i6," nks=",i6," nspin=",i6)') nr3, nbnd, nks, &
                                                              nspin
 
 CLOSE(iun)
@@ -126,7 +127,7 @@ DO istate=1,nstates
       filename1='state_k_'//TRIM(int_to_char(ik))
       OPEN(UNIT=iun,FILE=TRIM(filename1),STATUS='unknown',ERR=300,IOSTAT=ios)
 300   IF (ios /= 0) THEN
-         WRITE(6,*) 'problem opening output_band.dat'
+         WRITE(stdout,*) 'problem opening output_band.dat'
          STOP
       ENDIF
 
@@ -151,7 +152,7 @@ IF (nspin>1) THEN
                                                   IOSTAT=ios)
 10 CONTINUE
    IF (ios /= 0) THEN
-      WRITE(6,*) 'problem opening output_band.dat'
+      WRITE(stdout,*) 'problem opening output_band.dat'
       STOP
    ENDIF
 
@@ -164,7 +165,7 @@ IF (nspin>1) THEN
    ENDDO
 220 CONTINUE
    IF (ios /= 0) THEN
-      WRITE(6,*) 'problem reading output_band.dat'
+      WRITE(stdout,*) 'problem reading output_band.dat'
       STOP
    ENDIF
    CLOSE(1)
@@ -181,7 +182,6 @@ IF (nspin>1) THEN
          kcur(:) = k(:,2) - k(:,1)
       ENDIF
       kmod = SQRT( kcur(1)**2 + kcur(2)**2 )  
-      write(6,*) 'kmod', kmod
       IF (kmod > 0.0_DP) THEN
          kcur(:)=kcur(:) / kmod
       ELSE
@@ -190,7 +190,7 @@ IF (nspin>1) THEN
 !
          kcur(1)=1.0_DP
       ENDIF 
-      write(6,*) 'istate,ik, kcur(1), kcur(2)', istate, ik, kcur(1), kcur(2)
+!      WRITE(stdout,*) 'istate,ik, kcur(1), kcur(2)', istate, ik, kcur(1), kcur(2)
 !
 !  and now project the magnetization in the direction of k (1) or in the 
 !  perpendicular direction (2). NB: k must be parallel to the surface
@@ -216,7 +216,8 @@ DO istate=1,nstates
       OPEN(UNIT=iun, FILE=TRIM(data_filename), STATUS='UNKNOWN', &
                                             ERR=200, IOSTAT=ios)
 200   IF (ios /= 0) THEN
-         WRITE(6,'(5x,"Problem opening the output file",a)') TRIM(data_filename)
+         WRITE(stdout,'(5x,"Problem opening the output file",a)') &
+                                                      TRIM(data_filename)
          STOP
       ENDIF
 

@@ -210,7 +210,7 @@ SUBROUTINE find_band_sym_proj (ik,evc,et,nsym,s,ftau,d_spin,gk,invs, &
            trace(irot,igroup)=trace(irot,igroup) +            &
                 zdotc(npol*npwx,evc(1,ibnd),1,evcr(1,ibnd),1)
         ENDDO
-        !      write(6,*) igroup, irot, dim_rap, trace(irot,igroup)
+        !      write(stdout,*) igroup, irot, dim_rap, trace(irot,igroup)
      ENDDO
 !
 ! For testing purposes we can compute all the matrix of the 
@@ -258,7 +258,8 @@ SUBROUTINE find_band_sym_proj (ik,evc,et,nsym,s,ftau,d_spin,gk,invs, &
                 +trace(irot,igroup)*CONJG(char_mat_proj(irap,which_elem(irot)))
         ENDDO
         times(igroup,irap)=times(igroup,irap)/nsym
-!       WRITE(6,*) 'group representation ', igroup, irap, times(igroup,irap)
+!       WRITE(stdout,*) 'group representation ', igroup, irap, &
+!                                                    times(igroup,irap)
 
         IF ((ABS(NINT(DBLE(times(igroup,irap)))-DBLE(times(igroup,irap))) &
              > accuracy).OR. (ABS(AIMAG(times(igroup,irap))) > eps) ) THEN

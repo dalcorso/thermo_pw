@@ -1691,9 +1691,9 @@ CALL set_sound_mat(elcon, qvec, soundmat)
 !
 !  and diagonalize it
 !
-!WRITE(6,*) soundmat(1,1), soundmat(1,2), soundmat(1,3)
-!WRITE(6,*) soundmat(2,1), soundmat(2,2), soundmat(2,3)
-!WRITE(6,*) soundmat(3,1), soundmat(3,2), soundmat(3,3)
+!WRITE(stdout,*) soundmat(1,1), soundmat(1,2), soundmat(1,3)
+!WRITE(stdout,*) soundmat(2,1), soundmat(2,2), soundmat(2,3)
+!WRITE(stdout,*) soundmat(3,1), soundmat(3,2), soundmat(3,3)
 
 CALL rdiagh( 3, soundmat, 3, sound_speed, sound_disp )
 !
