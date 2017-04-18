@@ -89,11 +89,11 @@ SUBROUTINE find_symmetry(fft_fact)
      npol = 1
      !
      !
-     IF ( i_cons == 1) then
-        do na=1,nat
+     IF ( i_cons == 1) THEN
+        DO na=1,nat
            m_loc(1,na) = starting_magnetization(ityp(na))
-        end do
-     end if
+        END DO
+     END IF
      IF ( i_cons /= 0 .AND. nspin ==1) &
         CALL errore( 'find_symmetry', 'this i_cons requires a magnetic calculation ', 1 )
      IF ( i_cons /= 0 .AND. i_cons /= 1 ) &
@@ -140,7 +140,7 @@ SUBROUTINE find_symmetry(fft_fact)
   !  ... generate transformation matrices for the crystal point group
   !  ... First we generate all the symmetry matrices of the Bravais lattice
   !
-  call set_sym_bl ( )
+  CALL set_sym_bl ( )
   !
   !
   ! ... eliminate rotations that are not symmetry operations

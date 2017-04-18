@@ -24,14 +24,13 @@ SUBROUTINE write_ph_freq(igeom)
   !
   USE kinds,         ONLY : DP
   USE mp_images,     ONLY : my_image_id, root_image
-  USE io_global,     ONLY : ionode, stdout
+  USE io_global,     ONLY : stdout
   USE ions_base,     ONLY : nat, tau, ityp, amass
   USE cell_base,     ONLY : ibrav, at, bg, celldm
   USE phonon_save,   ONLY : freq_save, z_save
   USE thermo_mod,    ONLY : tot_ngeo
   USE constants,     ONLY : amu_ry
   USE control_dosq,  ONLY : nq1_d, nq2_d, nq3_d, dos_q, dos_wq, dos_nqs
-  USE ifc,           ONLY : atm, zeu, m_loc
   USE data_files,    ONLY : fldosfrq
   USE ph_freq_thermodynamics, ONLY : ph_freq_save
   USE control_thermo, ONLY : with_eigen
