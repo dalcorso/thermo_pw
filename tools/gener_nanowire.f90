@@ -59,7 +59,7 @@ PROGRAM gener_nanowire
 !  nz           unit of repetition along z.
 !
 USE kinds,       ONLY : DP
-USE io_global,   ONLY : stdout
+USE io_global,   ONLY : ionode, stdout
 USE mp_global,   ONLY : mp_startup, mp_global_end
 USE environment, ONLY : environment_start, environment_end
 IMPLICIT NONE
@@ -76,6 +76,7 @@ CHARACTER(LEN=3), ALLOCATABLE :: atm_2d(:)
 CHARACTER(LEN=3) :: atm(nmax)
 LOGICAL :: lwire, lrect
 INTEGER :: iuout
+INTEGER :: find_free_unit
 CHARACTER(LEN=256) :: filename
 CHARACTER(LEN=9) :: code='NANOWIRE'
 
@@ -277,52 +278,54 @@ DO m1 = MIN(-1,m-1,p-1,m+p-1), MAX(1,m+1,p+1,m+p+1)
    END DO
 END DO
 
-iuout=28
-OPEN(unit=iuout, file=TRIM(filename), status='unknown', form='formatted')
+IF (ionode) THEN
+   iuout=find_free_unit()
+   OPEN(unit=iuout, file=TRIM(filename), status='unknown', form='formatted')
 
-IF (.NOT.lwire) THEN
-   prod=c(1)*t(1)+c(2)*t(2)
-   IF (ABS(prod)<1.d-8) THEN
+   IF (.NOT.lwire) THEN
+      prod=c(1)*t(1)+c(2)*t(2)
+      IF (ABS(prod)<1.d-8) THEN
 !
 !  vectors are orthogonal, a wire can be built
 !
-      WRITE (iuout, '("ibrav=8")')
-      WRITE (iuout, '("celldm(1)= ",f15.8)') cmod * alat
-      WRITE (iuout, '("celldm(2)= ",f15.8)') tmod/cmod
-      WRITE (iuout, '("celldm(3)= ",f15.8)') alat_box/cmod/alat
+         WRITE (iuout, '("ibrav=8")')
+         WRITE (iuout, '("celldm(1)= ",f15.8)') cmod * alat
+         WRITE (iuout, '("celldm(2)= ",f15.8)') tmod/cmod
+         WRITE (iuout, '("celldm(3)= ",f15.8)') alat_box/cmod/alat
+         WRITE (iuout, '("nat= ",i5)') nat
+      ELSE
+         WRITE (iuout, '("ibrav=12")')
+         WRITE (iuout, '("celldm(1)= ",f15.8)') cmod * alat
+         WRITE (iuout, '("celldm(2)= ",f15.8)') tmod/cmod
+         WRITE (iuout, '("celldm(3)= ",f15.8)') alat_box/cmod/alat
+         WRITE (iuout, '("celldm(4)= ",f15.8)') prod/cmod/tmod
+      ENDIF
       WRITE (iuout, '("nat= ",i5)') nat
+      WRITE (iuout, '("ATOMIC_POSITIONS {crystal}")') 
+      DO na=1,nat
+         WRITE (iuout,'(a,3f18.10)') atm(na), y(1,na), y(2,na), y(3,na)
+      ENDDO
    ELSE
-      WRITE (iuout, '("ibrav=12")')
-      WRITE (iuout, '("celldm(1)= ",f15.8)') cmod * alat
-      WRITE (iuout, '("celldm(2)= ",f15.8)') tmod/cmod
-      WRITE (iuout, '("celldm(3)= ",f15.8)') alat_box/cmod/alat
-      WRITE (iuout, '("celldm(4)= ",f15.8)') prod/cmod/tmod
-   ENDIF
-   WRITE (iuout, '("nat= ",i5)') nat
-   WRITE (iuout, '("ATOMIC_POSITIONS {crystal}")') 
-   DO na=1,nat
-      WRITE (iuout,'(a,3f18.10)') atm(na), y(1,na), y(2,na), y(3,na)
-   ENDDO
-ELSE
-   r=cmod / 2.0_DP / pi 
+      r=cmod / 2.0_DP / pi 
 
-   WRITE (iuout, '("wire radius r= ",f15.8, "  a.u.")') r * alat
-   WRITE (iuout, '("ibrav=6")')
-   WRITE (iuout, '("celldm(1)= ",f15.8)') alat_box
-   WRITE (iuout, '("celldm(3)= ",f15.8)') tmod * alat / alat_box
-   WRITE (iuout, '("nat= ",i5)') nat
-   WRITE (iuout, '("ATOMIC_POSITIONS {alat}")') 
-   DO na=1, nat
-      phi = 2.0_DP * pi * y(1,na) 
-      z = y(2,na) 
-      WRITE(iuout, '(a, 3f18.10)' )  atm(na), &
+      WRITE (iuout, '("wire radius r= ",f15.8, "  a.u.")') r * alat
+      WRITE (iuout, '("ibrav=6")')
+      WRITE (iuout, '("celldm(1)= ",f15.8)') alat_box
+      WRITE (iuout, '("celldm(3)= ",f15.8)') tmod * alat / alat_box
+      WRITE (iuout, '("nat= ",i5)') nat
+      WRITE (iuout, '("ATOMIC_POSITIONS {alat}")') 
+      DO na=1, nat
+         phi = 2.0_DP * pi * y(1,na) 
+         z = y(2,na) 
+         WRITE(iuout, '(a, 3f18.10)' )  atm(na), &
                                  (r + y(3,na))*COS(phi)*alat/alat_box, &
                                  (r + y(3,na))*SIN(phi) * alat / alat_box, &
                                  z * tmod * alat / alat_box
-   END DO
+      END DO
+   ENDIF
+   CLOSE(UNIT=iuout,STATUS='keep')
 ENDIF
 
-CLOSE(iuout)
 CALL environment_end( code )
 CALL mp_global_end ()
 

@@ -227,6 +227,7 @@ SUBROUTINE eps_calc (intersmear, nw, wmax, wmin, nbndmin, nbndmax, shift, &
   !
   INTEGER       :: i, ik, iband1, iband2, ipol, jpol
   INTEGER       :: iw, ierr, iu_epsil
+  INTEGER       :: find_free_unit
   REAL(DP)      :: etrans, const, w, sumweight
   !
   REAL(DP), ALLOCATABLE    :: epsr(:,:,:), epsi(:,:,:) 
@@ -355,7 +356,7 @@ SUBROUTINE eps_calc (intersmear, nw, wmax, wmin, nbndmin, nbndmax, shift, &
         !
         ! write results on data files
         !
-        iu_epsil=2
+        iu_epsil=find_free_unit()
         INQUIRE(FILE="jdos", exist=exst)
         IF (exst) THEN
            OPEN (UNIT=iu_epsil, FILE='jdos', STATUS='old', &
@@ -418,7 +419,7 @@ SUBROUTINE eps_calc (intersmear, nw, wmax, wmin, nbndmin, nbndmax, shift, &
         !
         ! write results on data files
         !
-        iu_epsil=2
+        iu_epsil=find_free_unit()
         INQUIRE(FILE="epsilon_re", exist=exst)
         IF (exst) THEN
            OPEN (UNIT=iu_epsil, FILE='epsilon_re', STATUS='old', &
@@ -438,7 +439,6 @@ SUBROUTINE eps_calc (intersmear, nw, wmax, wmin, nbndmin, nbndmax, shift, &
         END DO
         CLOSE(iu_epsil)
  
-        iu_epsil=2
         INQUIRE(FILE="epsilon_im", exist=exst)
         IF (exst) THEN
            OPEN (UNIT=iu_epsil, FILE='epsilon_im', STATUS='old', &
@@ -458,7 +458,6 @@ SUBROUTINE eps_calc (intersmear, nw, wmax, wmin, nbndmin, nbndmax, shift, &
         END DO
         CLOSE(iu_epsil)
 
-        iu_epsil=2
         INQUIRE(FILE="epsilonm1_im", exist=exst)
         IF (exst) THEN
            OPEN (UNIT=iu_epsil, FILE='epsilonm1_im', STATUS='old', &

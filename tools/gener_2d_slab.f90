@@ -72,6 +72,7 @@ INTEGER :: m, n, m1, n1, p, q, nrows, nat_row, nat, ibrav_2d, nat_2d, q0, p0, &
 REAL(DP) :: y(3,nmax), alat_box, celldm_2d(3), celldm(6), omega, at(3,3)
 INTEGER :: ps(nmax), qs(nmax)
 INTEGER, ALLOCATABLE :: ityp(:)
+INTEGER :: find_free_unit
 REAL(DP), ALLOCATABLE :: tau_2d(:,:), tau_ribbon(:,:)
 CHARACTER ( LEN=3 ), ALLOCATABLE :: atm_2d(:)
 CHARACTER ( LEN=3 ) :: atm(nmax)
@@ -281,9 +282,6 @@ END IF
 CALL recips_2d(c,t,c1,t1)
 cmod = SQRT ( c(1)**2 + c(2)**2 )
 tmod = SQRT ( t(1)**2 + t(2)**2 )
-
-iuout=28
-OPEN(unit=iuout, file=TRIM(filename), status='unknown', form='formatted')
 !
 !  we use an orthorhombic cell
 !
@@ -293,22 +291,26 @@ celldm(2)=tmod/cmod
 celldm(3)=alat_box/cmod/alat
 ALLOCATE(tau_ribbon(3,nat))
 ALLOCATE(ityp(nat))
-WRITE (iuout, '("ibrav=8")')
-WRITE (iuout, '("celldm(1)= ",f15.8)') celldm(1)
-WRITE (iuout, '("celldm(2)= ",f15.8)') celldm(2)
-WRITE (iuout, '("celldm(3)= ",f15.8)') celldm(3)
-WRITE (iuout, '("nat= ",i5)') nat
-WRITE (iuout, '("ATOMIC_POSITIONS {crystal}")') 
-DO na=1,nat
-   prod1 = y(1,na) * c1(1) + y(2,na) * c1(2)
-   prod2 = y(1,na) * t1(1) + y(2,na) * t1(2)
-   tau_ribbon(1,na)=prod1
-   tau_ribbon(2,na)=prod2
-   tau_ribbon(3,na)=y(3,na) * alat / alat_box
-   WRITE (iuout,'(a,3f18.10)') atm(na), prod1, prod2, y(3,na) * alat / alat_box
-ENDDO
-
-CLOSE(iuout)
+IF (ionode) THEN
+   iuout=find_free_unit()
+   OPEN(unit=iuout, file=TRIM(filename), status='unknown', form='formatted')
+   WRITE (iuout, '("ibrav=8")')
+   WRITE (iuout, '("celldm(1)= ",f15.8)') celldm(1)
+   WRITE (iuout, '("celldm(2)= ",f15.8)') celldm(2)
+   WRITE (iuout, '("celldm(3)= ",f15.8)') celldm(3)
+   WRITE (iuout, '("nat= ",i5)') nat
+   WRITE (iuout, '("ATOMIC_POSITIONS {crystal}")') 
+   DO na=1,nat
+      prod1 = y(1,na) * c1(1) + y(2,na) * c1(2)
+      prod2 = y(1,na) * t1(1) + y(2,na) * t1(2)
+      tau_ribbon(1,na)=prod1
+      tau_ribbon(2,na)=prod2
+      tau_ribbon(3,na)=y(3,na) * alat / alat_box
+      WRITE (iuout,'(a,3f18.10)') atm(na), prod1, prod2, &
+                                           y(3,na) * alat / alat_box
+   ENDDO
+   CLOSE(iuout)
+END IF
 
 !  Count how many types of atoms we have and how they are called
 !
@@ -332,7 +334,7 @@ END DO
 
 
 IF (ionode) THEN
-   iuout=35
+   iuout=find_free_unit()
    xsf_filename=TRIM(filename)//'.xsf'
    OPEN(UNIT=iuout, FILE=TRIM(xsf_filename), STATUS='unknown', &
                                                              FORM='formatted')

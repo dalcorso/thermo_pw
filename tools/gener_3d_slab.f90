@@ -81,7 +81,7 @@ PROGRAM gener_3d_slab
 USE kinds, ONLY : DP
 USE constants, ONLY : pi
 USE wyckoff,  ONLY : nattot, tautot, ityptot, sup_spacegroup, clean_spacegroup
-USE io_global,   ONLY : stdout
+USE io_global,   ONLY : ionode, stdout
 USE mp_global,   ONLY : mp_startup, mp_global_end
 USE environment, ONLY : environment_start, environment_end
 
@@ -108,6 +108,7 @@ CHARACTER ( LEN=3 ), ALLOCATABLE :: atm_3d(:)
 CHARACTER ( LEN=3 ) :: atm(nmax), atm_typ(100)
 LOGICAL :: ldist_vacuum, three_indices, uniqueb, rhombohedral
 INTEGER :: iuout
+INTEGER :: find_free_unit
 CHARACTER( LEN=256 ) :: filename
 CHARACTER(LEN=9) :: code='3D_SLAB'
 
@@ -798,8 +799,10 @@ prod1 = ( c1(1) * c2(1) + c1(2) * c2(2) + c1(3) * c2(3) ) / c1mod / c2mod
 
 CALL recips(c1,c2,t,bc1,bc2,bt)
 
-iuout=28
-OPEN(unit=iuout, file=TRIM(filename), status='unknown', form='formatted')
+IF (ionode) THEN
+   iuout=find_free_unit()
+   OPEN(unit=iuout, file=TRIM(filename), status='unknown', form='formatted')
+ENDIF
 
 celldm_sur=0.0_DP
 IF (ABS(prod1) < eps) THEN
@@ -812,9 +815,11 @@ IF (ABS(prod1) < eps) THEN
       celldm_sur(1) = c_alat
       celldm_sur(3) = tmod/c1mod
       ibrav_sur=6
-      WRITE (iuout, '("ibrav=6")')
-      WRITE (iuout, '("celldm(1)= ",f15.8)') celldm_sur(1)
-      WRITE (iuout, '("celldm(3)= ",f15.8)') celldm_sur(3)
+      IF (ionode) THEN
+         WRITE (iuout, '("ibrav=6")')
+         WRITE (iuout, '("celldm(1)= ",f15.8)') celldm_sur(1)
+         WRITE (iuout, '("celldm(3)= ",f15.8)') celldm_sur(3)
+      ENDIF
    ELSE
 !
 !  c1 and c2 have different modulus, use a simple tetragonal cell   
@@ -824,10 +829,12 @@ IF (ABS(prod1) < eps) THEN
       celldm_sur(2) = c2mod / c1mod
       celldm_sur(3) = tmod / c1mod
       ibrav_sur=8
-      WRITE (iuout, '("ibrav=8")')
-      WRITE (iuout, '("celldm(1)= ",f15.8)') c1mod * alat
-      WRITE (iuout, '("celldm(2)= ",f15.8)') c2mod / c1mod
-      WRITE (iuout, '("celldm(3)= ",f15.8)') tmod / c1mod
+      IF (ionode) THEN
+         WRITE (iuout, '("ibrav=8")')
+         WRITE (iuout, '("celldm(1)= ",f15.8)') c1mod * alat
+         WRITE (iuout, '("celldm(2)= ",f15.8)') c2mod / c1mod
+         WRITE (iuout, '("celldm(3)= ",f15.8)') tmod / c1mod
+      END IF
    END IF
 ELSEIF (ABS(c1mod-c2mod) < eps .AND. ABS(prod1 + 0.5_DP) < eps ) THEN
 !
@@ -837,9 +844,11 @@ ELSEIF (ABS(c1mod-c2mod) < eps .AND. ABS(prod1 + 0.5_DP) < eps ) THEN
    celldm_sur(1) = c_alat
    celldm_sur(3) = tmod / c1mod
    ibrav_sur=4
-   WRITE (iuout, '("ibrav=4")')
-   WRITE (iuout, '("celldm(1)= ",f15.8)') c1mod * alat
-   WRITE (iuout, '("celldm(3)= ",f15.8)') tmod / c1mod
+   IF (ionode) THEN
+      WRITE (iuout, '("ibrav=4")')
+      WRITE (iuout, '("celldm(1)= ",f15.8)') c1mod * alat
+      WRITE (iuout, '("celldm(3)= ",f15.8)') tmod / c1mod
+   ENDIF
 ELSEIF (ABS(c1mod-c2mod) < eps ) THEN
 !
 !  The angle is neither 90 nor 120, but the vectors have equal length, 
@@ -852,11 +861,13 @@ ELSEIF (ABS(c1mod-c2mod) < eps ) THEN
    celldm_sur(2) = 2.0_DP*c1mod*COS(alpha)*alat / c_alat
    celldm_sur(3) = tmod * alat / c_alat
    ibrav_sur=9
-   WRITE (iuout, '("ibrav=9")')
-   WRITE (iuout, '("celldm(1)= ",f15.8)') c_alat
-   WRITE (iuout, '("celldm(2)= ",f15.8)') 2.0_DP*c1mod*COS(alpha)*alat / c_alat
-   WRITE (iuout, '("celldm(3)= ",f15.8)') tmod * alat / c_alat
-
+   IF (ionode) THEN
+      WRITE (iuout, '("ibrav=9")')
+      WRITE (iuout, '("celldm(1)= ",f15.8)') c_alat
+      WRITE (iuout, '("celldm(2)= ",f15.8)') 2.0_DP*c1mod*COS(alpha)*alat &
+                                                                    / c_alat
+      WRITE (iuout, '("celldm(3)= ",f15.8)') tmod * alat / c_alat
+   ENDIF
 ELSE
 !
 !  c1 and c2 form an angle different from 90 and 120 degrees or have different
@@ -868,15 +879,19 @@ ELSE
    celldm_sur(3) = tmod / c1mod
    celldm_sur(4) = prod1
    ibrav_sur=12
-   WRITE (iuout, '("ibrav=12")')
-   WRITE (iuout, '("celldm(1)= ",f15.8)') c1mod * alat
-   WRITE (iuout, '("celldm(2)= ",f15.8)') c2mod / c1mod
-   WRITE (iuout, '("celldm(3)= ",f15.8)') tmod / c1mod
-   WRITE (iuout, '("celldm(4)= ",f15.8)') prod1
+   IF (ionode) THEN
+      WRITE (iuout, '("ibrav=12")')
+      WRITE (iuout, '("celldm(1)= ",f15.8)') c1mod * alat
+      WRITE (iuout, '("celldm(2)= ",f15.8)') c2mod / c1mod
+      WRITE (iuout, '("celldm(3)= ",f15.8)') tmod / c1mod
+      WRITE (iuout, '("celldm(4)= ",f15.8)') prod1
+   ENDIF
 END IF
 
-WRITE (iuout, '("nat= ",i5)') nat
-WRITE (iuout, '("ATOMIC_POSITIONS {crystal}")') 
+IF (ionode) THEN
+   WRITE (iuout, '("nat= ",i5)') nat
+   WRITE (iuout, '("ATOMIC_POSITIONS {crystal}")') 
+ENDIF
 
 !
 !  project dz in the t direction
@@ -891,25 +906,30 @@ DO na=1,nat
    tau_sur(1,na) = prod1
    tau_sur(2,na) = prod2
    tau_sur(3,na) = prod3 + shiftz
-   WRITE (iuout,'(a,3f20.13,"  0  0  0")') atm(na), prod1, prod2, prod3 + shiftz
+   IF (ionode) &
+      WRITE (iuout,'(a,3f20.13,"  0  0  0")') atm(na), prod1, prod2, &
+                                              prod3 + shiftz
 ENDDO
-CLOSE(iuout)
+IF (ionode) CLOSE(iuout)
 !
 !  write the coordinate for xcrydens with the original orientation 
 !  of the surface
 !
-OPEN(unit=iuout, file=TRIM(filename)//'.or.xsf', status='unknown', &
+IF (ionode) THEN
+   OPEN(unit=iuout, file=TRIM(filename)//'.or.xsf', status='unknown', &
                                               form='formatted')
-at(:,1)=c1(:)
-at(:,2)=c2(:)
-at(:,3)=t(:)
-CALL xsf_struct (c_alat, at, nat, y, atm_typ, ityp_all, iuout)
+   at(:,1)=c1(:)
+   at(:,2)=c2(:)
+   at(:,3)=t(:)
+   CALL xsf_struct (c_alat, at, nat, y, atm_typ, ityp_all, iuout)
 
-CLOSE(iuout)
+   CLOSE(iuout)
+ENDIF
 !
 !  rotate the coordinates so that the normal to the surface is along the
 !  z axis. 
 !
+IF (ionode) &
 OPEN(unit=iuout, file=TRIM(filename)//'.xsf', status='unknown', &
                                               form='formatted')
 
@@ -919,7 +939,7 @@ CALL cryst_to_cart( nat, tau_sur, at, 1 )
 
 CALL xsf_struct (c_alat, at, nat, tau_sur, atm_typ, ityp_all, iuout)
 
-CLOSE(iuout)
+IF (ionode) CLOSE(iuout)
 
 CALL environment_end( code )
 CALL mp_global_end ()

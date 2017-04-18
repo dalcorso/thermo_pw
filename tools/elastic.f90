@@ -59,7 +59,8 @@ REAL(DP) :: el_con(6,6)          ! the elastic constants
 REAL(DP) :: el_compliances(6,6)  ! the elastic constants
 REAL(DP) :: density, omega, debye_t, approx_debye_t, poisson, bulkm, deltat
 REAL(DP) :: macro_el(8), vp, vb, vg, deb_e0
-INTEGER :: i, ntemp, ios
+INTEGER :: i, ntemp, iundeb, ios
+INTEGER :: find_free_unit
 REAL(DP), ALLOCATABLE :: temp(:), deb_cv(:), deb_energy(:), &
                          deb_free_energy(:), deb_entropy(:)
 CHARACTER(LEN=9) :: code='elastic'
@@ -436,22 +437,23 @@ IF (density > 0.0_DP) THEN
       CALL debye_entropy(debye_t, temp, ntemp, nat, deb_entropy)
 
       IF (ionode) THEN
-         OPEN(UNIT=25, FILE='thermo_debye.dat', STATUS='unknown', &
+         iundeb=find_free_unit()
+         OPEN(UNIT=iundeb, FILE='thermo_debye.dat', STATUS='unknown', &
                        FORM='formatted', IOSTAT=ios)
-         WRITE(25,'("# Multiply by 13.6058 x 23060.35 = 313 754.5 to have &
+         WRITE(iundeb,'("# Multiply by 13.6058 x 23060.35 = 313 754.5 to have &
                   &energies in cal/(N mol).")')
-         WRITE(25,'("# Multiply by 13.6058 x 96526.0 = 1 313 313 to &
+         WRITE(iundeb,'("# Multiply by 13.6058 x 96526.0 = 1 313 313 to &
                   &have energies in J/(N mol).")')
-         WRITE(25,'("# N is the number of formula units per cell.")')
-         WRITE(25,'("#",5x,"   T  ", 10x, " energy ", 9x, "  free energy ",&
+         WRITE(iundeb,'("# N is the number of formula units per cell.")')
+         WRITE(iundeb,'("#",5x,"   T  ", 10x, " energy ", 9x, "  free energy ",&
                   & 9x, " entropy ", 12x, " Cv ")')
 
          DO i=1,ntemp
-            WRITE(25,'(5E16.8)') temp(i), deb_energy(i)+deb_e0,  &
+            WRITE(iundeb,'(5E16.8)') temp(i), deb_energy(i)+deb_e0,  &
                               deb_free_energy(i)+deb_e0, deb_entropy(i), &
                               deb_cv(i)
          ENDDO
-         CLOSE(25)
+         CLOSE(iundeb)
       END IF
       DEALLOCATE(temp)
       DEALLOCATE(deb_cv)

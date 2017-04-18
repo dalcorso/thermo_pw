@@ -66,7 +66,7 @@ USE wy_pos,      ONLY : wypos
 USE parser,      ONLY : read_line, get_field, field_count
 USE lattices,    ONLY : find_ibrav_code
 USE wrappers,    ONLY : feval_infix
-USE io_global,   ONLY : stdout
+USE io_global,   ONLY : ionode, stdout
 USE mp_global,   ONLY : mp_startup, mp_global_end
 USE environment, ONLY : environment_start, environment_end
 
@@ -124,6 +124,7 @@ REAL(DP) :: celldm(6), omega, at(3,3), bg(3,3), ur(3,3), global_s(3,3)
 INTEGER :: which_input, iconv, icenter, units
 INTEGER :: na, iat, ia, natoms, nt, nb, i1, i2, i3, iuout, nfield, idx, k, &
            ivec, jvec, ipol, jpol, ierr, code_group_ext
+INTEGER :: find_free_unit
 REAL(DP) :: a, cg, inp(3)
 LOGICAL :: found
 CHARACTER (LEN=256) :: input_line, field_str, wp
@@ -624,18 +625,20 @@ DO na=1,all_nat
                                                    all_tau(3,na) 
 ENDDO
 
-iuout=35
-OPEN(unit=iuout, file='supercell.xsf', status='unknown', &
+IF (ionode) THEN
+   iuout=find_free_unit()
+   OPEN(unit=iuout, file='supercell.xsf', status='unknown', &
                                               form='formatted')
-at=at/celldm(1)
-at(:,1)=at(:,1)*n1
-at(:,2)=at(:,2)*n2
-at(:,3)=at(:,3)*n3
-CALL cryst_to_cart( all_nat, all_tau, at, 1 )
+   at=at/celldm(1)
+   at(:,1)=at(:,1)*n1
+   at(:,2)=at(:,2)*n2
+   at(:,3)=at(:,3)*n3
+   CALL cryst_to_cart( all_nat, all_tau, at, 1 )
 
-CALL xsf_struct (celldm(1), at, all_nat, all_tau, atm, all_ityp, iuout)
+   CALL xsf_struct (celldm(1), at, all_nat, all_tau, atm, all_ityp, iuout)
 
-CLOSE(iuout)
+   CLOSE(iuout)
+ENDIF
 
 DEALLOCATE(atm)
 DEALLOCATE(ityp)
