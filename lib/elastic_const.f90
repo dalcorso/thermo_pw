@@ -152,13 +152,16 @@ SUBROUTINE write_elastic(filename)
 !
 IMPLICIT NONE
 CHARACTER(LEN=*), INTENT(IN) :: filename
+INTEGER :: find_free_unit
 INTEGER :: outunit, ios, i, j
 
-outunit=25
-IF (ionode) &
-OPEN(UNIT=outunit, FILE=TRIM(filename), STATUS='unknown', FORM='formatted', &
-     ERR=100, IOSTAT=ios)
-100 CONTINUE
+IF (ionode) THEN
+   outunit=find_free_unit()
+   OPEN(UNIT=outunit, FILE=TRIM(filename), STATUS='unknown', FORM='formatted', &
+        ERR=100, IOSTAT=ios)
+ENDIF
+100 CALL mp_bcast(ios,ionode_id,intra_image_comm)
+    CALL errore('write_elastic','ploblem opening output file', ABS(ios))
 
 IF (ionode) THEN
    DO i=1,6
@@ -182,11 +185,13 @@ IMPLICIT NONE
 CHARACTER(LEN=*), INTENT(IN) :: filename
 LOGICAL, INTENT(OUT) :: exists
 INTEGER :: inunit, ios, i, j
+INTEGER :: find_free_unit
 
-inunit=25
-IF (ionode) &
+IF (ionode) THEN
+   inunit=find_free_unit()
    OPEN(UNIT=inunit, FILE=TRIM(filename), STATUS='old', FORM='formatted', &
        ERR=100, IOSTAT=ios)
+ENDIF
 100 CALL mp_bcast(ios,ionode_id,intra_image_comm)
 IF (ios /= 0) THEN
    exists=.FALSE.

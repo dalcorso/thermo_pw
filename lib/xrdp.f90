@@ -47,7 +47,8 @@ CHARACTER(LEN=*) :: filename
 
 REAL(DP) :: deltas
 REAL(DP), ALLOCATABLE :: ff(:), s(:)
-INTEGER :: ipoint
+INTEGER :: ipoint, iuxrdp
+INTEGER :: find_free_unit
 
 IF (smin < 0.0_DP) smin=0.0_DP
 IF (smax == 0.0_DP) smax=1.0_DP
@@ -66,11 +67,12 @@ DO ipoint=1,npoint
 END DO
 
 IF (ionode) THEN
-   OPEN (UNIT=47, FILE=TRIM(filename), STATUS='unknown',FORM='formatted')
+   iuxrdp=find_free_unit()
+   OPEN (UNIT=iuxrdp, FILE=TRIM(filename), STATUS='unknown',FORM='formatted')
    DO ipoint=1,npoint
-      WRITE(47,'(2f16.8)') s(ipoint), ff(ipoint)
+      WRITE(iuxrdp,'(2f16.8)') s(ipoint), ff(ipoint)
    ENDDO
-   CLOSE(UNIT=47)
+   CLOSE(UNIT=iuxrdp)
 ENDIF
 
 DEALLOCATE(s)
@@ -127,6 +129,8 @@ REAL(DP) :: gvec(3), gmod, gcutm, gcutm2, lambda0, gtau, ff, intmax, atc(3,3)
 REAL(DP), ALLOCATABLE :: g(:,:), gg(:), theta(:), s(:), gi(:,:), intensity(:), &
                          intensity_g(:), sgg(:), thetag(:)
 INTEGER, ALLOCATABLE :: miller_g(:,:), miller(:,:)
+INTEGER :: iuxrdp
+INTEGER :: find_free_unit
 COMPLEX(DP) :: factor
 COMPLEX(DP) :: phase
 CHARACTER(LEN=6) :: int_to_char
@@ -283,18 +287,19 @@ END DO
 !  Open a file and write inside all the computed quantities
 !
 IF (ionode) THEN
-   OPEN (UNIT=47, FILE=TRIM(in_filename), STATUS='unknown',FORM='formatted')
+   iuxrdp=find_free_unit()
+   OPEN (UNIT=iuxrdp, FILE=TRIM(in_filename), STATUS='unknown',FORM='formatted')
 
-   WRITE(47,'("# theta calculated for lambda=",f15.7," A")') lambda0 &
+   WRITE(iuxrdp,'("# theta calculated for lambda=",f15.7," A")') lambda0 &
                                                    * 1.D10 * bohr_radius_si
-   WRITE(47,'("# Miller indeces multiplicity  2 x theta        d (A)     intensity" )')
+   WRITE(iuxrdp,'("# Miller indeces multiplicity  2 x theta        d (A)     intensity" )')
 
    DO i=1,ntheta
-      WRITE(47,'(3i5,5x,i4,f16.4,f18.8,f12.4)') miller(1:3,i), &
+      WRITE(iuxrdp,'(3i5,5x,i4,f16.4,f18.8,f12.4)') miller(1:3,i), &
          multiplicity(i), theta(i), 1.0_DP/2.0_DP/s(i), intensity(i)*&
                                     100.0_DP / intmax
    ENDDO
-   CLOSE(UNIT=47)
+   CLOSE(UNIT=iuxrdp)
 END IF
 
 DEALLOCATE( g )

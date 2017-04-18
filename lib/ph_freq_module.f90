@@ -116,11 +116,14 @@ INTEGER :: iunit, ios
 REAL(DP), ALLOCATABLE :: nu(:), dos(:)
 INTEGER :: nat, nq1, nq2, nq3, nq
 INTEGER :: iq, imode, jmode, ndiv, nqtot
+INTEGER :: find_free_unit
 LOGICAL :: with_eigen
 
-iunit=65
-IF (ionode) OPEN(file=TRIM(filename), unit=iunit, status='old', &
+IF (ionode) THEN
+   iunit=find_free_unit()
+   OPEN(file=TRIM(filename), unit=iunit, status='old', &
      form='formatted', err=100, iostat=ios)
+ENDIF
 100  CALL mp_bcast(ios, ionode_id, intra_image_comm)
     IF (ios /= 0) CALL errore('read_ph_freq_data','opening file',ios)
 
@@ -189,10 +192,13 @@ INTEGER :: iunit, ios
 REAL(DP), ALLOCATABLE :: nu(:), dos(:)
 INTEGER :: nat, nq
 INTEGER :: iq, imode, jmode
+INTEGER :: find_free_unit
 
-iunit=65
-IF (ionode) OPEN(FILE=TRIM(filename), UNIT=iunit, STATUS='unknown', &
+IF (ionode) THEN
+   iunit=find_free_unit()
+   OPEN(FILE=TRIM(filename), UNIT=iunit, STATUS='unknown', &
      FORM='formatted', ERR=100, IOSTAT=ios)
+ENDIF
 100  CALL mp_bcast(ios, ionode_id, intra_image_comm)
     IF (ios /= 0) CALL errore('write_ph_freq_data','opening file',ios)
 

@@ -86,10 +86,13 @@ INTEGER, PARAMETER :: ndivx=100000
 REAL(DP), ALLOCATABLE :: nu(:), dos(:)
 REAL(DP) :: de, de_
 INTEGER :: i, ndiv
+INTEGER :: find_free_unit
 
-iunit=65
-IF (ionode) OPEN(file=TRIM(filename), unit=iunit, status='old', &
+IF (ionode) THEN
+   iunit=find_free_unit()
+   OPEN(file=TRIM(filename), unit=iunit, status='old', &
        form='formatted', err=100, iostat=ios)
+ENDIF
 100 CALL mp_bcast(ios, ionode_id, intra_image_comm)
 IF (ios /= 0) CALL errore('read_phdos_data', &
                           'opening file'//TRIM(filename), ABS(ios))

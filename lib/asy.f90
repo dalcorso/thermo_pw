@@ -179,11 +179,14 @@ SUBROUTINE asy_openplot(filename_asy)
 USE mp, ONLY : mp_bcast
 IMPLICIT NONE
 CHARACTER(LEN=*) :: filename_asy
+INTEGER :: find_free_unit
 INTEGER :: ios
 
-IF (ionode) &
+IF (ionode) THEN
+   asyu=find_free_unit()
    OPEN(unit=asyu, file=TRIM(filename_asy), status='unknown', &
              form='formatted', err=30, iostat=ios)
+ENDIF
 CALL mp_bcast(ios, ionode_id, intra_image_comm)
 30 CALL errore('asy_openplot','opening asy plotting file',ABS(ios))
 
@@ -206,11 +209,14 @@ SUBROUTINE asy_open2dplot(filename_asy)
 USE mp, ONLY : mp_bcast
 IMPLICIT NONE
 CHARACTER(LEN=*) :: filename_asy
+INTEGER :: find_free_unit
 INTEGER :: ios
 
-IF (ionode) &
+IF (ionode) THEN
+   asyu=find_free_unit()
    OPEN(unit=asyu, file=TRIM(filename_asy), status='unknown', &
              form='formatted', err=30, iostat=ios)
+ENDIF
 CALL mp_bcast(ios, ionode_id, intra_image_comm)
 30 CALL errore('asy_openplot','opening asy plotting file',ABS(ios))
 
