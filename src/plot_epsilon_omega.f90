@@ -27,7 +27,7 @@ SUBROUTINE plot_epsilon_omega_opt()
 !  The code assumes that the system is a molecule if there is only one
 !  k point (or two in the lsda case). In this case it plots only
 !  the trace of the dielectric constant tensor (real and imaginary).
-!  Moreover it plots also the produce of the trace of the imaginary part
+!  Moreover it plots also the product of the trace of the imaginary part
 !  and the frequency, proportional to the average photoabsorption cross
 !  section.
 !
@@ -158,10 +158,7 @@ USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,   &
                             gnuplot_write_command,         &
                             gnuplot_write_file_mul_data_minus, &
                             gnuplot_write_file_mul_data
-USE lsda_mod,         ONLY : lsda
-USE klist,            ONLY : nkstot
 USE data_files,       ONLY : flepsilon
-USE cell_base,        ONLY : ibrav
 USE mp_images,        ONLY : my_image_id, root_image
 USE io_global,        ONLY : ionode
 

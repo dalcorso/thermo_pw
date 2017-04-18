@@ -30,7 +30,7 @@ SUBROUTINE plot_multi_energy()
   USE gnuplot,              ONLY : gnuplot_start, gnuplot_end,             &
                                    gnuplot_start_2dplot,                   &
                                    gnuplot_set_contour, gnuplot_do_2dplot, &
-                                   gnuplot_set_xticks, gnuplot_xlabel,     &
+                                   gnuplot_xlabel,     &
                                    gnuplot_write_header,                   &
                                    gnuplot_write_file_mul_data,            &
                                    gnuplot_write_file_mul_point,           &
@@ -46,7 +46,7 @@ SUBROUTINE plot_multi_energy()
   CHARACTER(LEN=12) :: color(8), xlabel, ylabel
   REAL(DP) :: emax, emin, deltae, ene_levels_int(ncontours)
   REAL(DP) :: xmin, xmax, ymin, ymax
-  INTEGER :: max_contours, nx, ny, icont, tot_n, iwork
+  INTEGER :: nx, ny, icont, tot_n, iwork
   INTEGER :: compute_nwork
 
   IF ( my_image_id /= root_image ) RETURN

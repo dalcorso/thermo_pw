@@ -6,7 +6,6 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-!
 !--------------------------------------------------------------------
 SUBROUTINE local_dos1d_so (ik, kband, plan)
   !--------------------------------------------------------------------
@@ -132,6 +131,7 @@ SUBROUTINE local_dos1d_so (ik, kband, plan)
   ENDIF
   !
   !    If we have a US pseudopotential we compute here the becsum term
+  !
   IF (okvan) THEN
      IF (noncolin) THEN
         ALLOCATE(becsum_nc(nhm*(nhm+1)/2,nat,npol,npol))
@@ -225,7 +225,7 @@ SUBROUTINE local_dos1d_so (ik, kband, plan)
      CALL fwfft ('Dense', prho(:,ispin), dfftp)
   ENDDO
   !
-  !    Here we add the US contribution to the charge for the atoms which n
+  !    Here we add the US contribution to the charge for the atoms which have
   !    it. Or compute the planar average in the NC case.
   !
   CALL addusdens1d_so (plan, prho)

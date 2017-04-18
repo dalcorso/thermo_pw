@@ -125,7 +125,7 @@ SUBROUTINE matdyn_interp(disp_nqs, disp_q, with_eigen)
   !  apply the acoustic sum rule if requested
   !
   IF (zasr /= 'no') &
-     CALL set_asr (zasr, nr1, nr2, nr3, frc, zeu, nat, ibrav, tau)
+     CALL set_asr_tpw (zasr, nr1, nr2, nr3, frc, zeu, nat, ibrav, tau)
   !
   ! copy the q-point list in the local variables
   !
@@ -324,7 +324,7 @@ END SUBROUTINE frc_blk
 !
 !
 !----------------------------------------------------------------------
-SUBROUTINE set_asr (asr, nr1, nr2, nr3, frc, zeu, nat, ibrav, tau)
+SUBROUTINE set_asr_tpw (asr, nr1, nr2, nr3, frc, zeu, nat, ibrav, tau)
   !-----------------------------------------------------------------------
   !
   USE kinds,      ONLY : DP
@@ -820,105 +820,8 @@ SUBROUTINE set_asr (asr, nr1, nr2, nr3, frc, zeu, nat, ibrav, tau)
   deallocate (frc_new)
   !
   return
-end subroutine set_asr
+end subroutine set_asr_tpw
 !
-!----------------------------------------------------------------------
-subroutine sp1(u,v,nr1,nr2,nr3,nat,scal)
-  !-----------------------------------------------------------------------
-  !
-  ! does the scalar product of two force-constants matrices u and v (considered as
-  ! vectors in the R^(3*3*nat*nat*nr1*nr2*nr3) space, and coded in the usual way)
-  !
-  USE kinds, ONLY: DP
-  implicit none
-  integer nr1,nr2,nr3,i,j,na,nb,n1,n2,n3,nat
-  real(DP) u(nr1,nr2,nr3,3,3,nat,nat)
-  real(DP) v(nr1,nr2,nr3,3,3,nat,nat)
-  real(DP) scal
-  !
-  !
-  scal=0.0d0
-  do i=1,3
-    do j=1,3
-      do na=1,nat
-        do nb=1,nat
-          do n1=1,nr1
-            do n2=1,nr2
-              do n3=1,nr3
-                scal=scal+u(n1,n2,n3,i,j,na,nb)*v(n1,n2,n3,i,j,na,nb)
-              enddo
-            enddo
-          enddo
-        enddo
-      enddo
-    enddo
-  enddo
-  !
-  return
-  !
-end subroutine sp1
-!
-!----------------------------------------------------------------------
-subroutine sp2(u,v,ind_v,nr1,nr2,nr3,nat,scal)
-  !-----------------------------------------------------------------------
-  !
-  ! does the scalar product of two force-constants matrices u and v (considered as
-  ! vectors in the R^(3*3*nat*nat*nr1*nr2*nr3) space). u is coded in the usual way
-  ! but v is coded as explained when defining the vectors corresponding to the
-  ! symmetry constraints
-  !
-  USE kinds, ONLY: DP
-  implicit none
-  integer nr1,nr2,nr3,i,nat
-  real(DP) u(nr1,nr2,nr3,3,3,nat,nat)
-  integer ind_v(2,7)
-  real(DP) v(2)
-  real(DP) scal
-  !
-  !
-  scal=0.0d0
-  do i=1,2
-    scal=scal+u(ind_v(i,1),ind_v(i,2),ind_v(i,3),ind_v(i,4),ind_v(i,5),ind_v(i,6), &
-         ind_v(i,7))*v(i)
-  enddo
-  !
-  return
-  !
-end subroutine sp2
-!
-!----------------------------------------------------------------------
-subroutine sp3(u,v,i,na,nr1,nr2,nr3,nat,scal)
-  !-----------------------------------------------------------------------
-  !
-  ! like sp1, but in the particular case when u is one of the u(k)%vec
-  ! defined in set_asr (before orthonormalization). In this case most of the
-  ! terms are zero (the ones that are not are characterized by i and na), so
-  ! that a lot of computer time can be saved (during Gram-Schmidt).
-  !
-  USE kinds, ONLY: DP
-  implicit none
-  integer nr1,nr2,nr3,i,j,na,nb,n1,n2,n3,nat
-  real(DP) u(nr1,nr2,nr3,3,3,nat,nat)
-  real(DP) v(nr1,nr2,nr3,3,3,nat,nat)
-  real(DP) scal
-  !
-  !
-  scal=0.0d0
-  do j=1,3
-    do nb=1,nat
-      do n1=1,nr1
-        do n2=1,nr2
-          do n3=1,nr3
-            scal=scal+u(n1,n2,n3,i,j,na,nb)*v(n1,n2,n3,i,j,na,nb)
-          enddo
-        enddo
-      enddo
-    enddo
-  enddo
-  !
-  return
-  !
-end subroutine sp3
 !
 !-----------------------------------------------------------------------
 SUBROUTINE setupmat_simple (q,dyn,nat,at,bg,tau,omega,alat, &

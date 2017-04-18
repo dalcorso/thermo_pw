@@ -9,7 +9,7 @@ SUBROUTINE simple_plot(ext, data_filename, psfilename, xlabel, ylabel, &
                        colore, xmin, xmax, ymin, ymax)
 !
 !  This is a simple routine which write a gnuplot script in flgnuplot,
-!  The script create a graph of the data contained in data_filename,
+!  The script creates a graph of the data contained in data_filename,
 !  in a postscript file called psfilename.
 !
 USE kinds,           ONLY : DP

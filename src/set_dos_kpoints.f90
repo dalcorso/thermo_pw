@@ -11,8 +11,6 @@ SUBROUTINE set_dos_kpoints()
 !  calculation. 
 !
   USE control_dosq,  ONLY : dos_q, dos_wq
-  USE cell_base,     ONLY : bg
-  USE symm_base,     ONLY : s, nrot, t_rev, time_reversal
   USE control_eldos, ONLY : nk1_d, nk2_d, nk3_d, k1_d, k2_d, k3_d
   USE start_k,       ONLY : init_start_k
 

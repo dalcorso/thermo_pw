@@ -8,8 +8,8 @@
 
 SUBROUTINE plot_form_factors()
 
-USE kinds, ONLY : DP
-USE ions_base, ONLY : nsp, atm
+USE kinds,        ONLY : DP
+USE ions_base,    ONLY : nsp, atm
 USE control_xrdp, ONLY : smin, smax, flpsformf, flformf 
 
 IMPLICIT NONE

@@ -12,13 +12,12 @@ SUBROUTINE write_minimum_energy_data()
   !  This routine writes on output the information on the (Gibbs) energy 
   !  minimization.
   !
-  !
-  USE kinds, ONLY : DP
+  USE kinds,            ONLY : DP
   USE control_mur,      ONLY : b0, b01, emin, lmurn
   USE equilibrium_conf, ONLY : celldm0
   USE control_pressure, ONLY : pressure_kb
   USE cell_base,        ONLY : ibrav
-  USE io_global, ONLY : stdout
+  USE io_global,        ONLY : stdout
   IMPLICIT NONE
   !
   WRITE(stdout,'(/,2x,76("-"))')

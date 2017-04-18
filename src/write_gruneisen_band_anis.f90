@@ -30,7 +30,6 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
                                  evaluate_fit_grad_quadratic
   USE io_bands,       ONLY : read_bands, read_parameters, &
                              read_representations, write_bands
-  USE point_group,    ONLY : nsym_group
   USE mp,             ONLY : mp_bcast
   USE io_global,      ONLY : stdout, ionode, ionode_id
   USE mp_images,      ONLY : intra_image_comm, root_image, my_image_id
@@ -47,8 +46,8 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
                           aux_ind(:), gcodek_ext(:), ptypek(:,:), lprojk(:)
   LOGICAL, ALLOCATABLE :: same_next(:)
   INTEGER :: nks, nbnd, nks_rap, nbnd_rap 
-  INTEGER :: ibnd, jbnd, irap, ios, i, n, ierr, igeo, nwork
-  INTEGER :: iufreq, iurap, iumode
+  INTEGER :: ibnd, ios, i, n, ierr, igeo, nwork
+  INTEGER :: iumode
   INTEGER :: nvar, degree, icrys, compute_nwork
   REAL(DP), ALLOCATABLE :: poly_grun(:,:), frequency(:,:), gruneisen(:,:,:)
   REAL(DP) :: vm, cm(6), f
@@ -62,8 +61,6 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
 
   IF (flgrun == ' ') RETURN
 
-  iufreq=1
-  iurap=21
   iumode=22
   exist_rap=.TRUE.
   allocated_variables=.FALSE.

@@ -359,7 +359,7 @@ SUBROUTINE rotate_all_psi_tpw(ik,psic_nc,evcr,s,ftau,d_spin,has_e,gk)
   nr3x=dfftp%nr3x
   nrxx=dfftp%nnr
 
-  call divide (intra_bgrp_comm, nbnd, start_band, last_band)
+  CALL divide (intra_bgrp_comm, nbnd, start_band, last_band)
   start_band_proc=0
   start_band_proc(dfftp%mype+1)=start_band
   nbnd_proc=0

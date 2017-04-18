@@ -13,8 +13,12 @@ SUBROUTINE quadratic_fit()
   !   celldm and fits them with a quadratic polynomial of dimension 
   !   equal to the number of indipendent parameters in celldm. 
   !   It finds also the minimum of the quadratic function.
+  !   If lquartic is true it fits the data with a quartic polynomial 
+  !   and starting from the quadratic minimum it finds the minimum of
+  !   the quartic polynomial.
   !   
-  !   the output of this routine is celldm0(:)
+  !   the output of this routine is celldm0(:) and emin the energy at
+  !   the mimimum.
   !
   !
   USE kinds,        ONLY : DP
@@ -47,6 +51,7 @@ SUBROUTINE quadratic_fit()
   ! Only the first image does the calculation
   !
   celldm0(:)=0.0_DP
+  emin=0.0_DP
   IF (my_image_id /= root_image) RETURN
   !
   WRITE(stdout,'(/,5x,71("-"))')
@@ -160,6 +165,9 @@ SUBROUTINE quadratic_fit_t(itemp)
   !   This routine receives the total free energy for several values of 
   !   celldm and fits them with a quadratic function of dimension 
   !   equal to the number of indipendent parameters in celldm. 
+  !   If lquartic and lquartic_ph are both true it interpolates the
+  !   data with a quartic polynomium and finds its minimum starting from
+  !   the minimum of the quadratic polynomium.
   !
   !   The output of this routine is celldm_t at the given temperature itemp
   !
@@ -186,13 +194,13 @@ SUBROUTINE quadratic_fit_t(itemp)
                           evaluate_quartic_quadratic, fit_multi_quartic, &
                           find_two_quartic_extremum, evaluate_two_quartic
   IMPLICIT NONE
-  INTEGER :: itemp
-  INTEGER :: ndata, ndatatot
+  INTEGER  :: itemp
+  INTEGER  :: ndata, ndatatot
   REAL(DP), ALLOCATABLE :: x(:,:), f(:), coeff(:), x_pos_min(:), &
             celldm_data(:,:), fun(:), coefft4(:)
   REAL(DP) :: ymin, chisq, aux
-  INTEGER :: idata
-  INTEGER :: compute_nwork, compute_nwork_ph
+  INTEGER  :: idata
+  INTEGER  :: compute_nwork, compute_nwork_ph
   !
   ! Only the first image does the calculation
   !
@@ -347,8 +355,8 @@ SUBROUTINE quadratic_fit_t_ph(itemp)
                           find_two_quartic_extremum, evaluate_two_quartic
 
   IMPLICIT NONE
-  INTEGER :: itemp
-  INTEGER :: ndata, ndatatot
+  INTEGER  :: itemp
+  INTEGER  :: ndata, ndatatot
   REAL(DP), ALLOCATABLE :: x(:,:), f(:), coeff(:), x_pos_min(:), &
                            celldm_data(:,:), fun(:), coefft4(:)
   REAL(DP) :: ymin, chisq, aux
@@ -522,8 +530,8 @@ SUBROUTINE set_x_from_celldm(ibrav, degree, ndata, x, celldm_geo)
 USE kinds, ONLY : DP
 
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: ibrav, degree, ndata
-REAL(DP), INTENT(IN) :: celldm_geo(6,ndata)
+INTEGER, INTENT(IN)     :: ibrav, degree, ndata
+REAL(DP), INTENT(IN)    :: celldm_geo(6,ndata)
 REAL(DP), INTENT(INOUT) :: x(degree,ndata)
 
 INTEGER :: idata
