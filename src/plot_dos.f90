@@ -30,6 +30,7 @@ CHARACTER(LEN=256) :: gnu_filename, filename, fileeldos, ylabel, xlabel
 REAL(DP), ALLOCATABLE :: e(:), dos(:), ddos(:), int_dos(:)
 INTEGER :: n
 INTEGER :: iu_dos
+INTEGER :: find_free_unit
 REAL(DP) :: ymax, ymin, ymin1, ymax1, e1
 
 IF ( my_image_id /= root_image ) RETURN
@@ -41,7 +42,7 @@ ALLOCATE(int_dos(save_ndos))
 
 fileeldos='therm_files/'//TRIM(fleldos)
 IF ( ionode ) THEN
-   iu_dos=2
+   iu_dos=find_free_unit()
    OPEN (unit=iu_dos, file=TRIM(fileeldos), status='unknown', form='formatted')
 
    READ(iu_dos,*)

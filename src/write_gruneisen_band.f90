@@ -7,7 +7,7 @@
 !
 SUBROUTINE write_gruneisen_band(file_disp, file_vec)
   !
-  ! read data files produced by "bands_sub" for ngeo geometries, writes
+  ! read data files produced by write_ph_freq for ngeo geometries, writes
   ! a file with the gruneisen parameters: the derivatives of the phonon 
   ! dispersions with respect to the volume (gruneisen parameters)
   ! This is calculated at the volume given in input or at the volume
@@ -24,7 +24,6 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
   USE initial_conf,   ONLY : amass_save, ityp_save, ibrav_save
   USE control_mur,    ONLY : vmin
   USE control_thermo, ONLY : ltherm_dos, ltherm_freq
-  USE point_group,    ONLY : nsym_group
   USE temperature,    ONLY : temp, ntemp
   USE io_bands,       ONLY : read_bands, read_parameters, &
                              read_representations, write_bands
@@ -34,7 +33,7 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
 
   IMPLICIT NONE
 
-  CHARACTER(LEN=256), INTENT(IN) :: file_disp
+  CHARACTER(LEN=256), INTENT(IN) :: file_disp, file_vec
 
   REAL(DP) :: eps=1.d-4
   REAL(DP), ALLOCATABLE :: freq_geo(:,:,:), k(:,:), k_rap(:,:), gaugek(:,:)
@@ -44,14 +43,15 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
                           aux_ind(:), gcodek_ext(:), ptypek(:,:), lprojk(:)
   LOGICAL, ALLOCATABLE :: same_next(:)
   INTEGER :: nks, nbnd, nks_rap, nbnd_rap 
-  INTEGER :: ibnd, jbnd, irap, ios, i, n, ierr, igeo
-  INTEGER :: iu_grun, iumode
+  INTEGER :: ibnd, ios, i, n, igeo
+  INTEGER :: iumode
   INTEGER :: poly_order
+  INTEGER :: find_free_unit
   REAL(DP), ALLOCATABLE :: poly_grun(:,:), frequency(:,:), gruneisen(:,:)
   REAL(DP) :: vm
   LOGICAL, ALLOCATABLE :: high_symmetry(:), is_gamma(:)
   LOGICAL :: copy_before, exist_rap, allocated_variables, non_cubic
-  CHARACTER(LEN=256) :: filename, filedata, file_vec, filegrun, filefreq
+  CHARACTER(LEN=256) :: filename, filedata, filegrun, filefreq
   CHARACTER(LEN=6), EXTERNAL :: int_to_char
 
 
@@ -59,9 +59,14 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
 
   IF (flgrun == ' ') RETURN
 
-  iumode=23
+  IF (ionode) iumode=find_free_unit()
   WRITE(stdout,*)
   non_cubic = (ibrav_save/=1.AND.ibrav_save/=2.AND.ibrav_save/=3)
+!
+!  In this routine we always use eigenvectors
+!
+  non_cubic =.TRUE.
+!
   exist_rap=.TRUE.
   allocated_variables=.FALSE.
   DO igeo = 1, ngeo(1)
@@ -122,7 +127,8 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
         ENDIF
      ENDIF
   ENDDO
-  CALL mp_bcast(displa_geo, ionode_id, intra_image_comm)
+  IF (with_eigen.OR.non_cubic) &
+     CALL mp_bcast(displa_geo, ionode_id, intra_image_comm)
 !
 !  Part two: Compute the Gruneisen parameters
 !

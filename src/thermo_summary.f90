@@ -75,6 +75,7 @@ SUBROUTINE thermo_summary()
              group_desc(48), which_elem(48), isym, code_group_ext,     &
              code_group1
   INTEGER :: laue_class
+  INTEGER :: find_free_unit
   LOGICAL :: lpolar, lelc, lpiezo, check_group_ibrav
   CHARACTER(LEN=12)  :: spaceg_name
   CHARACTER(LEN=11)  :: gname, group_name
@@ -630,7 +631,7 @@ WRITE(stdout,'(5x,70("-"))')
 !   write the xsf file for plotting the structure using xcrysden
 !
         IF (ionode) THEN
-           iuout=35
+           iuout=find_free_unit()
            xsf_filename=TRIM(prefix)//'.xsf'
            OPEN(UNIT=iuout, FILE=TRIM(xsf_filename), STATUS='unknown', &
                                                              FORM='formatted')

@@ -74,7 +74,8 @@ SUBROUTINE q2r_sub(fildyn)
   INTEGER :: nat, nq, ntyp, iq, icar, nfile, ifile, nqs, nq_log
   INTEGER :: na, nt
   !
-  INTEGER :: ibrav, ierr, nspin_mag, ios
+  INTEGER :: ibrav, ierr, nspin_mag, iundyn, iunfrc, ios
+  INTEGER :: find_free_unit
   !
   INTEGER,     ALLOCATABLE ::  nc(:,:,:)
   COMPLEX(DP), ALLOCATABLE :: phid(:,:,:,:,:)
@@ -82,7 +83,7 @@ SUBROUTINE q2r_sub(fildyn)
   !
   REAL(DP) :: celldm(6), at(3,3), bg(3,3)
   REAL(DP) :: q(3,48), omega, xq, amass(ntypx), resi
-  REAL(DP) :: epsil(3,3)
+  REAL(DP) :: epsil(3,3), smat(3,3), angle_rot
   !
   ! Only one image run this routine 
   !
@@ -96,16 +97,19 @@ SUBROUTINE q2r_sub(fildyn)
   WRITE(stdout,'(2x,76("+"),/)')
   !
    
-  IF (ionode) OPEN (unit=1, file=TRIM(fildyn)//'0', status='old', &
-                    form='formatted', iostat=ierr)
+  IF (ionode) THEN
+     iundyn=find_free_unit()
+     OPEN (UNIT=iundyn, FILE=TRIM(fildyn)//'0', STATUS='old', &
+                                            FORM='formatted', IOSTAT=ierr)
+  ENDIF
   CALL mp_bcast(ierr, ionode_id, intra_image_comm)
   IF (ionode) THEN
      IF (ierr /= 0) CALL errore('q2r_sub','No grid information on file',1)
      WRITE (stdout,'(/,5x,"Reading q grid from file ")') 
      WRITE (stdout,'(5x,a)') TRIM(fildyn)//'0'
-     READ (1, *) nr1, nr2, nr3
-     READ (1, *) nfile
-     CLOSE (UNIT=1, STATUS='KEEP')
+     READ (iundyn, *) nr1, nr2, nr3
+     READ (iundyn, *) nfile
+     CLOSE (UNIT=iundyn, STATUS='KEEP')
   ENDIF
   CALL mp_bcast(nr1, ionode_id, intra_image_comm)
   CALL mp_bcast(nr2, ionode_id, intra_image_comm)
@@ -160,14 +164,18 @@ SUBROUTINE q2r_sub(fildyn)
         ENDDO
         CALL read_dyn_mat_tail(nat)
      ELSE
-        IF (ionode) &
-           OPEN (unit=1,file=filin,status='old',form='formatted',iostat=ierr)
+        IF (ionode) THEN
+           iundyn=find_free_unit()
+           OPEN (UNIT=iundyn, FILE=TRIM(filin), STATUS='old', &
+                                                FORM='formatted', IOSTAT=ierr)
+        ENDIF
         CALL mp_bcast(ierr, ionode_id, intra_image_comm)
-        IF (ierr /= 0) CALL errore('q2r_sub','file '//TRIM(filin)//' missing!',1)
+        IF (ierr /= 0) CALL errore('q2r_sub','file '//TRIM(filin)&
+                                                           //' missing!',1)
         CALL read_dyn_from_file_tpw (nqs, q, epsil, lrigid,  &
-                ntyp, nat, ibrav, celldm, at, atm, amass, ifile)
+                ntyp, nat, ibrav, celldm, at, atm, amass, ifile, iundyn)
         IF (ifile==1) ALLOCATE (m_loc(3,nat))
-        IF (ionode) CLOSE(unit=1)
+        IF (ionode) CLOSE(unit=iundyn)
      ENDIF
      IF (ifile == 1) THEN
         ! it must be allocated here because nat is read from file
@@ -256,35 +264,36 @@ SUBROUTINE q2r_sub(fildyn)
      CALL write_ifc(nr1,nr2,nr3,nat,phid)
   ELSE 
      IF (ionode) THEN
-        OPEN(unit=2,file=filefrc,status='unknown',form='formatted')
-        WRITE(2,'(i3,i5,i3,6f11.7)') ntyp,nat,ibrav,celldm
+        iunfrc=find_free_unit()
+        OPEN(unit=iunfrc,file=filefrc,status='unknown',form='formatted')
+        WRITE(iunfrc,'(i3,i5,i3,6f11.7)') ntyp,nat,ibrav,celldm
         IF (ibrav==0) WRITE (2,'(2x,3f15.9)') ((at(i,j),i=1,3),j=1,3)
         DO nt = 1,ntyp
-           WRITE(2,*) nt," '",atm(nt),"' ",amass(nt)
+           WRITE(iunfrc,*) nt," '",atm(nt),"' ",amass(nt)
         END DO
         DO na=1,nat
-           WRITE(2,'(2i5,3f18.10)') na,ityp(na),(tau(j,na),j=1,3)
+           WRITE(iunfrc,'(2i5,3f18.10)') na,ityp(na),(tau(j,na),j=1,3)
         END DO
-        WRITE (2,*) lrigid
+        WRITE (iunfrc,*) lrigid
         IF (lrigid) THEN
-           WRITE(2,'(3f15.7)') ((epsil(i,j),j=1,3),i=1,3)
+           WRITE(iunfrc,'(3f15.7)') ((epsil(i,j),j=1,3),i=1,3)
            DO na=1,nat
-              WRITE(2,'(i5)') na
-              WRITE(2,'(3f15.7)') ((zeu(i,j,na),j=1,3),i=1,3)
+              WRITE(iunfrc,'(i5)') na
+              WRITE(iunfrc,'(3f15.7)') ((zeu(i,j,na),j=1,3),i=1,3)
            END DO
         END IF
-        WRITE (2,'(4i4)') nr1, nr2, nr3
+        WRITE (iunfrc,'(4i4)') nr1, nr2, nr3
         DO j1=1,3
            DO j2=1,3
               DO na1=1,nat
                  DO na2=1,nat
-                    WRITE (2,'(4i4)') j1,j2,na1,na2
+                    WRITE (iunfrc,'(4i4)') j1,j2,na1,na2
                     nn=0
                     DO m3=1,nr3
                        DO m2=1,nr2
                           DO m1=1,nr1
                              nn=nn+1
-                             WRITE (2,'(3i4,2x,1pe18.11)')   &
+                             WRITE (iunfrc,'(3i4,2x,1pe18.11)')   &
                                 m1,m2,m3, DBLE(phid(nn,j1,j2,na1,na2))
                            END DO
                        END DO
@@ -293,7 +302,7 @@ SUBROUTINE q2r_sub(fildyn)
               END DO
            END DO
         END DO
-        CLOSE(2)
+        CLOSE(iunfrc)
      END IF
   END IF
   resi = SUM ( ABS (AIMAG ( phid ) ) )
@@ -543,34 +552,6 @@ subroutine set_zasr ( zasr, nr1,nr2,nr3, nat, ibrav, tau, zeu)
    !
    return
  end subroutine set_zasr
-!
-!----------------------------------------------------------------------
-subroutine sp_zeu(zeu_u,zeu_v,nat,scal)
-  !-----------------------------------------------------------------------
-  !
-  ! does the scalar product of two effective charges matrices zeu_u and zeu_v
-  ! (considered as vectors in the R^(3*3*nat) space, and coded in the usual way)
-  !
-  USE kinds, ONLY : DP
-  IMPLICIT NONE
-  INTEGER :: i,j,na,nat
-  REAL(DP) :: zeu_u(3,3,nat)
-  REAL(DP) :: zeu_v(3,3,nat)
-  REAL(DP) :: scal
-  !
-  !
-  scal=0.0d0
-  DO i=1,3
-    DO j=1,3
-      DO na=1,nat
-        scal=scal+zeu_u(i,j,na)*zeu_v(i,j,na)
-      ENDDO
-    ENDDO
-  ENDDO
-  !
-  RETURN
-  !
-END SUBROUTINE sp_zeu
 
 SUBROUTINE interface_with_tpw(frc_, nr1, nr2, nr3, nat_, ntyp_, has_zstar_, &
                 zeu_, epsil_, atm_, m_loc_, tau_, ityp_, at_, bg_, omega_ )
@@ -579,16 +560,16 @@ SUBROUTINE interface_with_tpw(frc_, nr1, nr2, nr3, nat_, ntyp_, has_zstar_, &
 !  of the thermo_pw code, avoiding to read the file on disk.
 !
 USE kinds,  ONLY : DP
+USE ifc,    ONLY : frc, atm, zeu, m_loc, epsil_ifc, has_zstar
 USE ions_base, ONLY : nat, ntyp=>nsp, tau, ityp
 USE cell_base, ONLY : at, bg, omega
-USE ifc,    ONLY : frc, atm, zeu, m_loc, epsil_ifc, has_zstar
 USE disp,   ONLY : nq1, nq2, nq3
 
 IMPLICIT NONE
 INTEGER,     INTENT(IN) :: nr1, nr2, nr3, nat_, ntyp_, ityp_(nat_)
 COMPLEX(DP),    INTENT(IN) :: frc_(nr1*nr2*nr3,3,3,nat_,nat_)
 REAL(DP),    INTENT(IN) :: zeu_(3,3,nat_), m_loc_(3,nat_), epsil_(3,3), &
-                           at_(3,3), bg_(3,3), omega_, tau_(3,nat_)
+                           at_(3,3), bg_(3,3), omega_, tau_(3,nat_) 
 LOGICAL,     INTENT(IN) :: has_zstar_
 CHARACTER(LEN=3), INTENT(IN) :: atm_(ntyp_)
 INTEGER :: i,j,k,ijk
@@ -627,10 +608,10 @@ has_zstar=has_zstar_
 at=at_
 bg=bg_
 nat=nat_
-tau=tau_
-ityp=ityp_
 ntyp=ntyp_
 omega=omega_
+tau=tau_
+ityp=ityp_
 
 RETURN
 END SUBROUTINE interface_with_tpw
@@ -646,8 +627,8 @@ IF (ALLOCATED(frc)) DEALLOCATE(frc)
 IF (ALLOCATED(atm)) DEALLOCATE(atm)
 IF (ALLOCATED(zeu)) DEALLOCATE(zeu)
 IF (ALLOCATED(m_loc)) DEALLOCATE(m_loc)
-IF (ALLOCATED(freq_save))  DEALLOCATE (freq_save)
-IF (ALLOCATED(z_save))  DEALLOCATE (z_save)
+IF (ALLOCATED(freq_save)) DEALLOCATE (freq_save)
+IF (ALLOCATED(z_save)) DEALLOCATE (z_save)
 
 
 RETURN

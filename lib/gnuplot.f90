@@ -854,11 +854,13 @@ SUBROUTINE gnuplot_start(filename_gnu)
 !
 IMPLICIT NONE
 CHARACTER(LEN=*) :: filename_gnu
+INTEGER :: find_free_unit
 
-iun_gnuplot=55
-
-IF (ionode) OPEN(UNIT=iun_gnuplot, FILE=TRIM(filename_gnu), &
-                 STATUS='unknown', FORM='formatted')
+IF (ionode) THEN
+   iun_gnuplot=find_free_unit()
+   OPEN(UNIT=iun_gnuplot, FILE=TRIM(filename_gnu), STATUS='unknown', &
+                                                           FORM='formatted')
+ENDIF
 
 RETURN
 END SUBROUTINE gnuplot_start

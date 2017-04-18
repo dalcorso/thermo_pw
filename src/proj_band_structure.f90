@@ -86,6 +86,7 @@ REAL(DP) :: e(nbnd_,nks_), kx(nks_), e_rap(nbnd_, nks_)
 INTEGER :: nks   ! this is the number of k point of a single path
 INTEGER :: ik, ibnd, i, ike, ikz, ik2, it, nbnd, irap, spe, lpe, nbnd_ilines, iun
 INTEGER :: ilines, nlines, jbnd, jrap, code_group_line, ios, nrapp, rapp(12)
+INTEGER :: find_free_unit
 REAL(DP), ALLOCATABLE :: et1(:,:), et2(:,:), eth(:,:)
 REAL(DP), ALLOCATABLE :: x(:), y(:)
 INTEGER, ALLOCATABLE :: nbnd_plot(:), start_point(:), last_point(:)
@@ -107,7 +108,6 @@ ALLOCATE(last_point(nlines_))
 start_point=start_point_
 last_point=last_point_
 
-iun=38
 IF ( nkz > 1) THEN
 !
    ALLOCATE(et1(nbnd,nks))
@@ -179,6 +179,7 @@ IF ( nkz > 1) THEN
    ENDDO
 
    IF (ionode) THEN
+      iun=find_free_unit()
       OPEN(UNIT=iun,FILE=TRIM(flpbs),STATUS='unknown',ERR=100,IOSTAT=ios)
       WRITE(iun, '(3i5,f12.6)') nbnd, nks, nlines, eref
       DO ilines=1, nlines

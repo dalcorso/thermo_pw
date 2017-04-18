@@ -70,13 +70,14 @@ SUBROUTINE ev_sub(vmin,b0,b01,emin_out,inputfile)
       REAL(DP), PARAMETER :: gpa_kbar = 10.0_dp
       LOGICAL :: in_angstrom
       INTEGER :: iu_ev
+      INTEGER :: find_free_unit
       CHARACTER(LEN=256) :: fileout
   !
   IF (my_image_id /= root_image) RETURN
 
   IF ( ionode ) THEN
 
-      iu_ev=2
+      iu_ev=find_free_unit()
       OPEN(UNIT=iu_ev, FILE=TRIM(inputfile), STATUS='OLD', FORM='FORMATTED')
 
       READ(iu_ev,'(a)') au_unit
@@ -135,9 +136,9 @@ SUBROUTINE ev_sub(vmin,b0,b01,emin_out,inputfile)
             emin = etot(npt)
          ENDIF
       ENDDO
-      CLOSE(iu_ev)
       npt = nmaxpt+1
-  20  npt = npt-1
+  20  CLOSE(iu_ev)
+      npt = npt-1
 !
 ! par(1) = V, Volume of the unit cell in (a.u.^3)
 ! par(2) = B, Bulk Modulus (in KBar)
@@ -276,10 +277,11 @@ SUBROUTINE ev_sub(vmin,b0,b01,emin_out,inputfile)
       !
       REAL(DP) :: p(npt), epv(npt)
       INTEGER :: i, iun
+      INTEGER :: find_free_unit
       LOGICAL :: exst
 
       IF(filout/=' ') THEN
-         iun=8
+         iun=find_free_unit()
          INQUIRE(file=filout,exist=exst)
          IF (exst) PRINT '(5x,"Beware: file ",A," will be overwritten")',&
                   trim(filout)
@@ -381,7 +383,7 @@ SUBROUTINE ev_sub(vmin,b0,b01,emin_out,inputfile)
          end if
 
       ENDIF
-      IF(filout/=' ') CLOSE(unit=iun)
+      IF(filout/=' ') CLOSE(UNIT=iun)
  99   RETURN
     END SUBROUTINE write_results
 !

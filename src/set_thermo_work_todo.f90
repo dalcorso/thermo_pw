@@ -412,6 +412,7 @@ USE io_global,   ONLY : ionode
 
 IMPLICIT NONE
 INTEGER :: iunupdate
+INTEGER :: find_free_unit
 LOGICAL :: exst
 CHARACTER(LEN=256) :: filename
 
@@ -419,7 +420,7 @@ IF (ionode) THEN
    !
    !  clean the bfgs history
    !
-   iunupdate=2
+   iunupdate=find_free_unit()
    CALL seqopn( iunupdate, 'update', 'FORMATTED', exst )
    CLOSE(iunupdate, STATUS='DELETE')
    filename = TRIM( tmp_dir ) // TRIM( prefix ) // '.bfgs'

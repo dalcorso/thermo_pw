@@ -7,15 +7,12 @@
 !
 SUBROUTINE write_anharmonic()
 USE kinds,          ONLY : DP
-USE constants,      ONLY : ry_kbar
 USE temperature,    ONLY : ntemp, temp
 USE thermodynamics, ONLY : ph_cv
 USE anharmonic,     ONLY : alpha_t, beta_t, gamma_t, cp_t, cv_t, b0_s, &
                            vmin_t, b0_t, b01_t
-USE thermo_mod,     ONLY : omega_geo
 USE control_pressure, ONLY : pressure_kb
 USE data_files,     ONLY : flanhar
-USE io_global,      ONLY : ionode
 USE mp_images,      ONLY : my_image_id, root_image
 
 IMPLICIT NONE
@@ -30,41 +27,34 @@ alpha_t = beta_t / 3.0_DP
 
 CALL interpolate_cv(vmin_t, ph_cv, cv_t) 
 CALL compute_cp(beta_t, vmin_t, b0_t, cv_t, cp_t, b0_s, gamma_t)
-
-IF (ionode) THEN
 !
 !   here we plot the quantities calculated from the phonon dos
 !
-   filename="anhar_files/"//TRIM(flanhar)
-   IF (pressure_kb /= 0.0_DP) &
-      filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+filename="anhar_files/"//TRIM(flanhar)
+IF (pressure_kb /= 0.0_DP) &
+   filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 
-   CALL write_murn_beta(temp, vmin_t, b0_t, b01_t, beta_t, ntemp, filename)
+CALL write_murn_beta(temp, vmin_t, b0_t, b01_t, beta_t, ntemp, filename)
 !
 !   here auxiliary quantities calculated from the phonon dos
 !
-   filename="anhar_files/"//TRIM(flanhar)//'.aux'
-   IF (pressure_kb /= 0.0_DP) &
-      filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+filename="anhar_files/"//TRIM(flanhar)//'.aux'
+IF (pressure_kb /= 0.0_DP) &
+   filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 
-   CALL write_aux_anharm(temp, gamma_t, cv_t, cp_t, b0_t, b0_s, ntemp, filename)
-
-END IF
+CALL write_aux_anharm(temp, gamma_t, cv_t, cp_t, b0_t, b0_s, ntemp, filename)
 
 RETURN
 END SUBROUTINE write_anharmonic
 
 SUBROUTINE write_ph_freq_anharmonic()
 USE kinds,          ONLY : DP
-USE constants,      ONLY : ry_kbar
 USE temperature,    ONLY : ntemp, temp
 USE ph_freq_thermodynamics, ONLY : phf_cv
 USE ph_freq_anharmonic, ONLY : alphaf_t, betaf_t, gammaf_t, cpf_t, cvf_t, &
                         b0f_s, vminf_t, b0f_t, b01f_t
 USE control_pressure, ONLY : pressure_kb
-USE thermo_mod,     ONLY : omega_geo
 USE data_files,     ONLY : flanhar
-USE io_global,      ONLY : ionode
 USE mp_images,      ONLY : my_image_id, root_image
 
 IMPLICIT NONE
@@ -80,26 +70,23 @@ alphaf_t = betaf_t / 3.0_DP
 CALL interpolate_cv(vminf_t, phf_cv, cvf_t) 
 CALL compute_cp(betaf_t, vminf_t, b0f_t, cvf_t, cpf_t, b0f_s, gammaf_t)
 
-IF (ionode) THEN
 !
 !   here we plot the quantities calculated from the phonon dos
 !
-   filename="anhar_files/"//TRIM(flanhar)//'_ph'
-   IF (pressure_kb /= 0.0_DP) &
-      filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+filename="anhar_files/"//TRIM(flanhar)//'_ph'
+IF (pressure_kb /= 0.0_DP) &
+   filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 
-   CALL write_murn_beta(temp, vminf_t, b0f_t, b01f_t, betaf_t, ntemp, filename)
-
+CALL write_murn_beta(temp, vminf_t, b0f_t, b01f_t, betaf_t, ntemp, filename)
 !
 !   here auxiliary quantities calculated from the phonon dos
 !
-   filename="anhar_files/"//TRIM(flanhar)//'.aux_ph'
-   IF (pressure_kb /= 0.0_DP) &
-      filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+filename="anhar_files/"//TRIM(flanhar)//'.aux_ph'
+IF (pressure_kb /= 0.0_DP) &
+   filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 
-   CALL write_aux_anharm(temp, gammaf_t, cvf_t, cpf_t, b0f_t, b0f_s, &
+CALL write_aux_anharm(temp, gammaf_t, cvf_t, cpf_t, b0f_t, b0f_s, &
                                                           ntemp, filename)
-END IF
 
 RETURN
 END SUBROUTINE write_ph_freq_anharmonic
@@ -108,7 +95,6 @@ SUBROUTINE write_grun_anharmonic()
 USE kinds,          ONLY : DP
 USE constants,      ONLY : ry_kbar
 USE ions_base,      ONLY : nat
-USE thermo_mod,     ONLY : ngeo, omega_geo
 USE temperature,    ONLY : ntemp, temp
 USE ph_freq_thermodynamics, ONLY : ph_freq_save, phf_cv
 USE anharmonic,     ONLY :  vmin_t, b0_t, cv_t
@@ -138,6 +124,7 @@ TYPE(ph_freq_type) :: ph_grun    ! the gruneisen parameters recomputed
                                  ! at each temperature at the volume
                                  ! corresponding to that temperature
 REAL(DP) :: vm
+INTEGER :: find_free_unit
 
 IF (my_image_id /= root_image) RETURN
 !
@@ -218,7 +205,7 @@ IF (ionode) THEN
    IF (pressure_kb /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 
-   iu_therm=2
+   iu_therm=find_free_unit()
    OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
    WRITE(iu_therm,'("# gamma is the average gruneisen parameter ")')
    WRITE(iu_therm,'("#   T (K)   beta(T)x10^6    gamma(T)      &
@@ -273,7 +260,8 @@ USE kinds, ONLY : DP
 END SUBROUTINE compute_beta
 
 SUBROUTINE write_murn_beta(temp, vmin, b0, b01, beta, ntemp, filename)
-USE kinds, ONLY : DP
+USE kinds,     ONLY : DP
+USE io_global, ONLY : ionode
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ntemp
 REAL(DP), INTENT(IN) :: temp(ntemp), vmin(ntemp), b0(ntemp), b01(ntemp), &
@@ -281,25 +269,29 @@ REAL(DP), INTENT(IN) :: temp(ntemp), vmin(ntemp), b0(ntemp), b01(ntemp), &
 CHARACTER(LEN=*) :: filename
 
 INTEGER :: itemp, iu_therm
+INTEGER :: find_free_unit
 
-iu_therm=2
-OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
+IF (ionode) THEN
+   iu_therm=find_free_unit()
+   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
 
-WRITE(iu_therm,'("# beta is the volume thermal expansion ")')
-WRITE(iu_therm,'("#   T (K)     V(T) (a.u.)^3   B (T) (kbar) &
+   WRITE(iu_therm,'("# beta is the volume thermal expansion ")')
+   WRITE(iu_therm,'("#   T (K)     V(T) (a.u.)^3   B (T) (kbar) &
                    & d B (T) / dP  beta (10^(-6) K^(-1))")' )
 
-DO itemp = 2, ntemp-1
-   WRITE(iu_therm, '(e12.5,e20.13,2e14.6,e18.8)') temp(itemp), &
+   DO itemp = 2, ntemp-1
+      WRITE(iu_therm, '(e12.5,e20.13,2e14.6,e18.8)') temp(itemp), &
                 vmin(itemp), b0(itemp), b01(itemp), beta(itemp)*1.D6
-END DO
+   END DO
   
-CLOSE(iu_therm)
+   CLOSE(iu_therm)
+ENDIF
 RETURN
 END SUBROUTINE write_murn_beta
 
 SUBROUTINE write_aux_anharm(temp, gamma_t, cv, cp, b0_t, b0_s, ntemp, filename)
 USE kinds, ONLY : DP
+USE io_global, ONLY : ionode
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ntemp
 REAL(DP), INTENT(IN) :: temp(ntemp), gamma_t(ntemp), cv(ntemp), cp(ntemp), &
@@ -307,21 +299,24 @@ REAL(DP), INTENT(IN) :: temp(ntemp), gamma_t(ntemp), cv(ntemp), cp(ntemp), &
 CHARACTER(LEN=*) :: filename
 
 INTEGER :: itemp, iu_therm
+INTEGER :: find_free_unit
 
-iu_therm=2
-OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
+IF (ionode) THEN
+   iu_therm=find_free_unit()
+   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
 
-WRITE(iu_therm,'("# gamma is the average gruneisen parameter ")')
-WRITE(iu_therm,'("#   T (K)       gamma(T)     C_v ( Ry / cell / K ) &
+   WRITE(iu_therm,'("# gamma is the average gruneisen parameter ")')
+   WRITE(iu_therm,'("#   T (K)       gamma(T)     C_v ( Ry / cell / K ) &
                  &   (C_p - C_v)(T)      (B_S - B_T) (T) (kbar) " )' )
 
-DO itemp = 2, ntemp-1
-   WRITE(iu_therm, '(5e16.8)') temp(itemp),               &
+   DO itemp = 2, ntemp-1
+      WRITE(iu_therm, '(5e16.8)') temp(itemp),               &
                                gamma_t(itemp), cv(itemp), &
                                cp(itemp) - cv(itemp),   &
                                b0_s(itemp) - b0_t(itemp)
-END DO
-CLOSE(iu_therm)
+   END DO
+   CLOSE(iu_therm)
+ENDIF
 
 RETURN
 END SUBROUTINE write_aux_anharm

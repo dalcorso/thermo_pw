@@ -7,11 +7,11 @@
 !
 SUBROUTINE set_k_points()
 !
-!  This subroutine copy the k points for dispersion in the kpoints of
+!  This subroutine copies the k points path in the input k points of
 !  the pw.x code.
 !
   USE control_paths,    ONLY : disp_nqs, disp_q, disp_wq
-  USE start_k,       ONLY : init_start_k
+  USE start_k,          ONLY : init_start_k
   IMPLICIT NONE
   INTEGER :: nk1, nk2, nk3, k1, k2, k3
   CHARACTER(len=80) :: k_points 

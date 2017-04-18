@@ -19,7 +19,7 @@ USE cell_base,      ONLY : ibrav
 USE control_mur,    ONLY : nvol
 USE control_quadratic_energy, ONLY : coeff
 USE control_quartic_energy, ONLY : coeff4, lquartic
-USE control_pressure, ONLY : pressure_kb
+USE control_pressure,   ONLY : pressure_kb
 USE quadratic_surfaces, ONLY : evaluate_fit_quadratic, &
                                evaluate_fit_grad_quadratic
 USE quartic_surfaces,   ONLY : evaluate_fit_quartic, &
@@ -30,12 +30,12 @@ USE io_global,      ONLY : ionode
 
 IMPLICIT NONE
 
-CHARACTER(LEN=256) :: filename, filename1
+CHARACTER(LEN=256) :: filename
 CHARACTER(LEN=8) :: float_to_char
 REAL(DP) :: a(1), e, p(1), fact, xmax, xmin, deltaa, x2max(2), x2min(2), x2(2),&
             delta2(2)
 INTEGER :: i, j, iu_mur, iwork, nwork
-INTEGER :: compute_nwork
+INTEGER :: compute_nwork, find_free_unit
 
 IF (my_image_id /= root_image) RETURN
 
@@ -76,7 +76,7 @@ ELSEIF (ibrav==4.OR.ibrav==6.OR.ibrav==7) THEN
 ENDIF
 
 IF (ionode) THEN
-   iu_mur=2
+   iu_mur=find_free_unit()
    OPEN(UNIT=iu_mur, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
    IF (pressure_kb /= 0.0_DP) THEN
       WRITE(iu_mur,'( "# a (a.u.)       enthalpy (Ry)    pressure (kbar)" )')

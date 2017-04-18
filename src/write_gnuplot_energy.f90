@@ -21,17 +21,20 @@ SUBROUTINE write_gnuplot_energy(nwork)
   USE cell_base,  ONLY : ibrav
   USE data_files, ONLY : flenergy
   USE control_pressure, ONLY : pressure, pressure_kb
-  USE io_global,  ONLY : stdout, meta_ionode, meta_ionode_id
-  USE mp_world,   ONLY : world_comm
+  USE io_global,  ONLY : stdout, ionode, ionode_id
+  USE mp_images,  ONLY : my_image_id, root_image, intra_image_comm
   USE mp,         ONLY : mp_bcast
 
   IMPLICIT NONE
   INTEGER, INTENT(IN) :: nwork
-  CHARACTER(LEN=256) :: fileout
+  CHARACTER(LEN=256)  :: fileout
   INTEGER :: iu_ev, iwork, ifiles, nfiles, ios
+  INTEGER :: find_free_unit
   CHARACTER(LEN=6) :: int_to_char
   CHARACTER(LEN=8) :: float_to_char
   !
+  IF (my_image_id /= root_image) RETURN
+
   SELECT CASE (ibrav)
      CASE(1,2,3)
         nfiles=1
@@ -43,8 +46,8 @@ SUBROUTINE write_gnuplot_energy(nwork)
      RETURN
   END SELECT
 
-  IF (meta_ionode) THEN
-     iu_ev=2
+  IF (ionode) THEN
+     iu_ev=find_free_unit()
      DO ifiles = 1, nfiles
         fileout='energy_files/'//TRIM(flenergy)//int_to_char(ifiles)
         IF (pressure /= 0.0_DP) fileout = TRIM(fileout)//'.'// &
@@ -104,7 +107,7 @@ SUBROUTINE write_gnuplot_energy(nwork)
      !
   END IF
   !
-20 CALL mp_bcast(ios, meta_ionode_id, world_comm)
+20 CALL mp_bcast(ios, ionode_id, intra_image_comm)
   IF (ios /= 0 ) CALL errore('write_gnuplot_energy',&
                                   'opening or writing output file',1)
   !

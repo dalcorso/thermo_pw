@@ -34,7 +34,8 @@ INTEGER :: ios
 INTEGER, PARAMETER :: data_max=10000
 INTEGER :: miller(3,data_max), multiplicity(data_max)
 REAL(DP) :: theta2(data_max), dist(data_max), intensity(data_max), x(2), y(2)
-INTEGER :: ndata, idata
+INTEGER :: ndata, idata, iunxrdp
+INTEGER :: find_free_unit
 
 IF ( my_image_id /= root_image ) RETURN
 
@@ -42,23 +43,26 @@ filename=TRIM(flxrdp)//TRIM(exten)
 IF (pressure_kb /= 0.0_DP) &
    filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 
-IF (ionode) OPEN (UNIT=47, FILE=TRIM(filename), STATUS='old', &
+IF (ionode) THEN
+   iunxrdp=find_free_unit()
+   OPEN (UNIT=iunxrdp, FILE=TRIM(filename), STATUS='old', &
                                     FORM='formatted',ERR=100,IOSTAT=ios)
+ENDIF
 100 CALL mp_bcast(ios,ionode_id,intra_image_comm)
 CALL errore('plot_xrdp','problem opening the data file',ios)
 
 IF (ionode) THEN
-   READ(47,*)
-   READ(47,*)
+   READ(iunxrdp,*)
+   READ(iunxrdp,*)
    ndata=0
    DO idata=1,data_max
-      READ(47,'(3i5,5x,i4,f16.4,f18.8,f12.2)',END=200) miller(:,idata), &
+      READ(iunxrdp,'(3i5,5x,i4,f16.4,f18.8,f12.2)',END=200) miller(:,idata), &
                   multiplicity(idata), theta2(idata), dist(idata), & 
                   intensity(idata)
       ndata=ndata+1
    ENDDO
 200 CONTINUE
-   CLOSE (47)
+   CLOSE (iunxrdp)
 ENDIF
 CALL mp_bcast(ndata,ionode_id,intra_image_comm)
 CALL mp_bcast(miller(3,1:ndata),ionode_id,intra_image_comm)

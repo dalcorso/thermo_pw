@@ -43,7 +43,8 @@ SUBROUTINE dos_sub()
   REAL(DP), EXTERNAL :: efermig, efermit
   INTEGER  :: save_ngauss
   LOGICAL  :: save_lgauss, save_ltetra
-  INTEGER :: n, ndos, iu_dos
+  INTEGER  :: n, ndos, iu_dos
+  INTEGER  :: find_free_unit
   !
   IF ( my_image_id /= root_image ) RETURN
   !
@@ -161,7 +162,7 @@ SUBROUTINE dos_sub()
   !
   IF ( ionode ) THEN
 
-     iu_dos=2
+     iu_dos=find_free_unit()
      filedos='therm_files/'//TRIM(fleldos)
      OPEN (unit=iu_dos, file=TRIM(filedos), status='unknown', form='formatted')
 

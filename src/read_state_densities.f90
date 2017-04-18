@@ -22,6 +22,7 @@ IMPLICIT NONE
 LOGICAL :: exst
 INTEGER :: iun, ios, idum, ilayer, ik, ibnd, nspin, nat_, nbnd_, nkstot_
 INTEGER :: ispin
+INTEGER :: find_free_unit
 
 IF (identify_sur) THEN
    IF (ionode) &
@@ -29,7 +30,7 @@ IF (identify_sur) THEN
      CALL mp_bcast(exst,ionode_id,intra_image_comm)
      
      IF (exst) THEN
-        iun=39
+        iun=find_free_unit()
         IF (ionode) THEN
            OPEN(UNIT=iun,FILE=TRIM(flprojlayer),STATUS='old',ERR=300,&
                                                               IOSTAT=ios)
@@ -100,6 +101,7 @@ IF (identify_sur) THEN
   INTEGER :: ierr
   LOGICAL :: exst
   INTEGER :: iun, ios, n, i, ik, ikz, nqaux_, nks_
+  INTEGER :: find_free_unit
 
   ierr=0
   IF (read_not_write) THEN
@@ -113,7 +115,7 @@ IF (identify_sur) THEN
          RETURN
      ENDIF
      IF (ionode) THEN
-        iun=39
+        iun=find_free_unit()
         OPEN(UNIT=iun, FILE='band_files/info_data', STATUS='old', ERR=300,  &
                                                                 IOSTAT=ios)
         READ(iun, *) ef, nelec
@@ -158,7 +160,7 @@ IF (identify_sur) THEN
         CALL mp_bcast(aux_ind_sur, ionode_id, intra_image_comm)
   ELSE
      IF (ionode) THEN
-        iun=39
+        iun=find_free_unit()
         OPEN(UNIT=iun,FILE='band_files/info_data',STATUS='unknown',&
                                                           ERR=400,IOSTAT=ios)
         WRITE(iun, '(2f16.11)') ef, nelec

@@ -15,15 +15,16 @@ USE io_global,      ONLY : ionode
 USE mp_images,      ONLY : my_image_id, root_image
 
 IMPLICIT NONE
-INTEGER :: ike, iden, icount, iu_eke
-CHARACTER(LEN=6) :: int_to_char
+INTEGER            :: ike, iden, icount, iu_eke
+INTEGER            :: find_free_unit
+CHARACTER(LEN=6)   :: int_to_char
 CHARACTER(LEN=256) :: filename
 REAL(DP) :: kev, kedenv
-LOGICAL :: exst, parallelfs
+LOGICAL  :: exst, parallelfs
 
 IF (my_image_id /= root_image) RETURN
 
-iu_eke=2
+IF (ionode) iu_eke=find_free_unit()
 icount = 0
 DO iden=1, nkeden
    kedenv=ecutrho0 + (iden-1) * deltakeden

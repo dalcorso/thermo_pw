@@ -18,7 +18,7 @@ USE ener,           ONLY : ef
 USE lsda_mod,       ONLY : nspin
 USE klist,          ONLY : degauss, nelec, ltetra
 USE lsda_mod,       ONLY : lsda
-USE temperature,    ONLY : tmin, tmax, deltat, ntemp, temp
+USE temperature,    ONLY : ntemp, temp
 USE mp_images,      ONLY : root_image, my_image_id, intra_image_comm
 USE mp,             ONLY : mp_bcast
 USE io_global,      ONLY : ionode, ionode_id, stdout
@@ -40,6 +40,7 @@ REAL(DP) :: ene0, mu0
 REAL(DP) ::  dos1, dos2, dosef, udosef, ddosef, ddos1, ddos2, &
              uddosde, dddosde, ddosde
 INTEGER :: n1, n2, n, ndos
+INTEGER :: find_free_unit
 !
 IF (my_image_id /= root_image) RETURN
 !
@@ -121,7 +122,7 @@ DO itemp = 1, ntemp
 END DO
 
 IF (ionode) THEN
-   iu_therm=2
+   iu_therm=find_free_unit()
    fileeltherm='therm_files/'//TRIM(fleltherm)
    OPEN (UNIT=iu_therm, FILE=TRIM(fileeltherm), STATUS='unknown',&
                                                      FORM='formatted')

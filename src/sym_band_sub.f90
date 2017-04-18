@@ -76,6 +76,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
                           ptypek(:,:), ngroup(:), istart(:,:)
   INTEGER :: code_group1, code_group_ext, code_group_in, nsym_in, ptype(3), &
              nr1, nr2, nr3, sg_number
+  INTEGER :: find_free_unit
   LOGICAL :: lwrite
   LOGICAL, ALLOCATABLE :: same_next(:)
   REAL(DP) :: factor_dx, sizeb, sizec, ft_in(3,48), rot(3,3), ur(3,3), &
@@ -547,7 +548,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
      ENDIF
   ENDIF
 
-  CALL write_representations(nkstot, nbnd, xk, rap_et, high_symmetry,    &
+  CALL write_representations(nkstot, nbnd, xk, rap_et, high_symmetry,      &
                         code_group_k, aux_ind, code_group_ext_k, ptypek, &
                         lprojk, same_next, gaugek, namefile)
 
@@ -584,7 +585,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
      CALL plan_avg_sub(averag, vacuum, nat, nbnd, nkstot, nlayers, &
                                surface1, surface2)
      IF (ionode) THEN
-        iun=39
+        iun=find_free_unit()
         OPEN(UNIT=iun,FILE=TRIM(flprojlayer),STATUS='unknown',ERR=400,&
                                                            IOSTAT=ios)
         WRITE(iun, '(5i8)') nat, nlayers, nbnd, nkstot, nspin     

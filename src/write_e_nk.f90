@@ -15,13 +15,14 @@ USE mp_images,      ONLY : my_image_id, root_image
 
 IMPLICIT NONE
 INTEGER :: ink, isigma, iu_enk
+INTEGER :: find_free_unit
 CHARACTER(LEN=6) :: int_to_char
 CHARACTER(LEN=256) :: filename
 LOGICAL :: exst, parallelfs
 
 IF (my_image_id /= root_image) RETURN
 
-iu_enk=2
+iu_enk=find_free_unit()
 DO isigma=1, nsigma
    IF (nsigma > 1) THEN
       filename='energy_files/'//TRIM(flnkconv)//int_to_char(isigma)

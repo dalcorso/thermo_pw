@@ -102,6 +102,8 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
   CHARACTER(LEN=6), EXTERNAL :: int_to_char
   CHARACTER(LEN=11) :: group_name
 
+  INTEGER :: find_free_unit
+
   IF ( my_image_id /= root_image ) RETURN
 
   lso=.FALSE.
@@ -732,7 +734,7 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
            ilines, kx(start_point_eff(ilines)), kx(last_point_eff(ilines))
   ENDDO
   !
-  iunout=2
+  IF (ionode) iunout=find_free_unit()
 !
 !   In this case we write a different file for each line and for each
 !   representation. Each file contains the bands of that representation.

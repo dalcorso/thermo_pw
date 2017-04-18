@@ -27,14 +27,15 @@ SUBROUTINE check_existence(iwork, part, iaux, run)
   LOGICAL, INTENT(OUT) :: run
 
   INTEGER  :: iu_ene, ios, ipol, jpol
+  INTEGER  :: find_free_unit
   CHARACTER(LEN=6) :: int_to_char
   CHARACTER(LEN=256) :: filename
   REAL(DP) :: energy, stress(3,3)
   LOGICAL :: exst
   run=.TRUE.
   
-  iu_ene=2
   IF (ionode) THEN
+     iu_ene=find_free_unit()
      filename='restart/e_work_part.'//TRIM(int_to_char(iwork))//'.'//&
                               TRIM(int_to_char(part+iaux))
      INQUIRE(FILE=TRIM(filename),EXIST=exst)
@@ -99,13 +100,13 @@ SUBROUTINE save_existence(iwork, part, iaux)
   IMPLICIT NONE
   !
   INTEGER, INTENT(IN) :: iwork, part, iaux
-
+  INTEGER :: find_free_unit
   CHARACTER(LEN=6) :: int_to_char
   CHARACTER(LEN=256) :: filename
   INTEGER :: iu_ene, ios, ipol, jpol
 
-  iu_ene=2
   IF (ionode) THEN
+     iu_ene=find_free_unit()
      filename='restart/e_work_part.'//TRIM(int_to_char(iwork))//'.'//&
                               TRIM(int_to_char(part+iaux))
      OPEN(UNIT=iu_ene, FILE=TRIM(filename), STATUS='UNKNOWN', &

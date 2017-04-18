@@ -5,10 +5,10 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-!
 !-----------------------------------------------------------------------
 SUBROUTINE plan_avg_sub(averag, vacuum, nat_, nbnd_, nks_, ninter, &
            surface1, surface2 )
+!-----------------------------------------------------------------------
   !
   ! calculate planar averages of each wavefunction
   ! on output this routine sets the array averag with the planar average
@@ -49,12 +49,9 @@ SUBROUTINE plan_avg_sub(averag, vacuum, nat_, nbnd_, nks_, ninter, &
   CHARACTER(LEN=256) :: filename
   CHARACTER(LEN=6) :: int_to_char
   !
-
-  !-----------------------------------------------------------------------
-  !
   REAL(DP), ALLOCATABLE :: plan (:,:,:)
   INTEGER :: ir, na, ibnd, ik, iun, ios
-  !
+  INTEGER :: find_free_unit
   !
   !   Now clean completely pw, allocate space for pwscf variables, 
   !   read and check them.
@@ -83,7 +80,7 @@ SUBROUTINE plan_avg_sub(averag, vacuum, nat_, nbnd_, nks_, ninter, &
   !
   IF (dump_states) THEN
      IF (ionode) THEN
-        iun=39
+        iun=find_free_unit()
         OPEN(UNIT=iun,FILE='dump/dump_states',STATUS='unknown',ERR=400,&
                                                               IOSTAT=ios)
         WRITE(iun,'(i5)') ibrav
@@ -99,21 +96,20 @@ SUBROUTINE plan_avg_sub(averag, vacuum, nat_, nbnd_, nks_, ninter, &
 400  CALL mp_bcast(ios,ionode_id,intra_image_comm)
      IF (ios /= 0) CALL errore('plan_avg_sub','problems with dump of states',1)
 
-  iun=39
   CALL allocate_bec_type ( nkb, nbnd, becp )
   ! create the directory dump with all states
   IF (nbgrp > 1.AND.dump_states) &
       CALL errore('plan_avg_sub','dump state not implemented with band &
                                   &parallization',1)
-     
   DO ik=1,nks
      plan(:,:,:) = 0.d0
      CALL do_plan_avg (ik, averag, vacuum, plan, zdim, ninter, i1, &
-                                             vacuum1, vacuum2, surface1, surface2 )
+                                       vacuum1, vacuum2, surface1, surface2 )
 !
-!   NB: This does not work with band parallelization
+!   to be checked if there is band parallelization
 !
-     IF (dump_states .AND. me_bgrp==root_bgrp) THEN
+     IF (dump_states.AND.ionode) THEN
+        iun=find_free_unit()
         ik_index = find_global_ik(ik)
         filename='dump/state_k_'//TRIM(int_to_char(ik_index))
         OPEN(UNIT=iun,FILE=TRIM(filename),STATUS='unknown',ERR=300,&

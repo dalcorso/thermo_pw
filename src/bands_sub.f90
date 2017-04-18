@@ -134,7 +134,7 @@ loop_k:  DO j=start_k+2, nkstot
   DO ibnd=1,nbnd
      filename=TRIM(filband) // '.' // TRIM(int_to_char(ibnd))
      IF (ionode) &
-     open(unit=iuntmp,file=filename,status='unknown', err=100, iostat=ios)
+     OPEN(UNIT=iuntmp,FILE=filename,STATUS='unknown', ERR=100, IOSTAT=ios)
      CALL mp_bcast(ios,ionode_id, intra_image_comm)
 100  CALL errore('punch_band_2d','Problem opening outputfile',ios)
      ijk=0
@@ -176,14 +176,15 @@ SUBROUTINE write_bands_tpw (filband, spin_component)
   INTEGER, INTENT(IN) :: spin_component
   REAL(DP), ALLOCATABLE :: xk_collect(:,:), et_collect(:,:)
   INTEGER :: iunpun, ios, ibnd, ik, ik0, nkstot_eff
+  INTEGER :: find_free_unit
   CHARACTER(LEN=6) :: int_to_char
 
   IF (filband == ' ') RETURN
 
-  iunpun = 18
   !
   IF ( ionode ) THEN
      !
+     iunpun = find_free_unit()
      filename='band_files/'//TRIM(filband)
      IF (nspin==2) &
         filename='band_files/'//TRIM(filband)// &
@@ -223,7 +224,7 @@ SUBROUTINE write_bands_tpw (filband, spin_component)
              nbnd, nkstot_eff
         ENDIF
         WRITE (iunpun, '(10x,3f10.6)') xk_collect(:,ik+ik0)
-        WRITE (iunpun, '(10f9.3)') (et_collect(ibnd, ik+ik0)*rytoev, &
+        WRITE (iunpun, '(8f14.7)') (et_collect(ibnd, ik+ik0)*rytoev, &
                                                              ibnd = 1, nbnd)
         !
      ENDDO

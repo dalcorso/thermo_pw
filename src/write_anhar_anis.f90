@@ -11,7 +11,6 @@ SUBROUTINE write_anhar_anis()
 !   solids.
 !
 USE kinds,          ONLY : DP
-USE constants,      ONLY : ry_kbar
 USE temperature,    ONLY : ntemp, temp
 USE thermodynamics, ONLY : ph_cv
 USE anharmonic,     ONLY : alpha_anis_t, vmin_t, b0_t, celldm_t, beta_t, &
@@ -20,7 +19,6 @@ USE anharmonic,     ONLY : alpha_anis_t, vmin_t, b0_t, celldm_t, beta_t, &
 USE control_grun,   ONLY : lb0_t
 USE initial_conf,   ONLY : ibrav_save
 USE control_pressure, ONLY : pressure_kb
-USE control_macro_elasticity, ONLY : macro_el
 USE control_elastic_constants, ONLY : el_cons_available, el_cons_t_available
 USE elastic_constants, ONLY : el_con
 USE isoentropic,    ONLY : isostress_heat_capacity
@@ -31,6 +29,7 @@ USE mp_images,      ONLY : my_image_id, root_image
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
 INTEGER :: itemp, iu_therm
+INTEGER :: find_free_unit
 REAL(DP) :: compute_omega_geo
 CHARACTER(LEN=8) :: float_to_char
 
@@ -63,7 +62,7 @@ IF (ionode) THEN
    filename='anhar_files/'//flanhar
    IF (pressure_kb /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
-   iu_therm=2
+   iu_therm=find_free_unit()
    OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
    WRITE(iu_therm,'("# beta is the volume thermal expansion ")')
    IF (el_cons_t_available) THEN
@@ -142,7 +141,6 @@ SUBROUTINE write_ph_freq_anhar_anis()
 !   the phonon frequencies.
 !
 USE kinds,          ONLY : DP
-USE constants,      ONLY : ry_kbar
 USE temperature,    ONLY : ntemp, temp
 USE ph_freq_thermodynamics, ONLY : phf_cv
 USE ph_freq_anharmonic, ONLY : alphaf_anis_t, vminf_t, b0f_t, celldmf_t, &
@@ -152,7 +150,6 @@ USE elastic_constants, ONLY : el_con
 USE control_grun,   ONLY : lb0_t
 USE initial_conf,   ONLY : ibrav_save
 USE control_pressure, ONLY : pressure_kb
-USE control_macro_elasticity, ONLY : macro_el
 USE control_elastic_constants, ONLY : el_cons_available
 USE isoentropic,    ONLY : isostress_heat_capacity
 USE data_files,     ONLY : flanhar
@@ -162,6 +159,7 @@ USE mp_images,      ONLY : my_image_id, root_image
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
 INTEGER :: itemp, iu_therm
+INTEGER :: find_free_unit
 REAL(DP) :: compute_omega_geo, el_con_t(6,6,ntemp)
 CHARACTER(LEN=8) :: float_to_char
 
@@ -191,7 +189,7 @@ IF (ionode) THEN
 !
 !   here we plot the anharmonic quantities calculated from the phonon dos
 !
-   iu_therm=2
+   iu_therm=find_free_unit()
    filename='anhar_files/'//TRIM(flanhar)//'_ph'
    IF (pressure_kb /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
@@ -276,7 +274,6 @@ USE grun_anharmonic, ONLY : alpha_an_g, grun_gamma_t, poly_grun, done_grun, &
                             cp_grun_t, b0_grun_s, betab
 USE ph_freq_module, ONLY : thermal_expansion_ph, ph_freq_type,  &
                            destroy_ph_freq, init_ph_freq
-USE control_macro_elasticity, ONLY : macro_el
 USE control_grun,     ONLY : lb0_t
 USE control_thermo, ONLY : ltherm_dos, ltherm_freq
 USE elastic_constants, ONLY :  el_compliances
@@ -303,6 +300,7 @@ TYPE(ph_freq_type), ALLOCATABLE :: ph_grun(:)  ! the gruneisen parameters
 REAL(DP) :: cm(6), aux(6), alpha_aux(6), alpha(6), f, vm
 REAL(DP), ALLOCATABLE :: grad(:), x(:)
 INTEGER :: compute_nwork
+INTEGER :: find_free_unit
 LOGICAL :: exst
 
 done_grun=.FALSE.
@@ -504,7 +502,7 @@ IF (ionode) THEN
    filename="anhar_files/"//TRIM(flanhar)//'.aux_grun'
    IF (pressure_kb /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
-   iu_therm=2
+   iu_therm=find_free_unit()
    OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', &
                                                          FORM='FORMATTED')
    WRITE(iu_therm,'("# gamma is the average gruneisen parameter ")')
@@ -548,8 +546,9 @@ REAL(DP), INTENT(IN) :: celldmf_t(6,ntemp), alpha_t(6,ntemp), &
                         temp(ntemp)
 CHARACTER(LEN=*), INTENT(IN) :: filename
 INTEGER :: itemp, iu_therm
+INTEGER :: find_free_unit
 
-iu_therm=2
+iu_therm=find_free_unit()
 
 OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
 

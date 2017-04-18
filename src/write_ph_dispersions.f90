@@ -25,10 +25,10 @@ SUBROUTINE write_ph_dispersions()
   USE io_global,  ONLY : ionode, stdout
   USE proj_rap_point_group, ONLY : code_groupq_ext, qptype, lqproj, qgauge
   USE lattices,   ONLY : same_star
-  USE point_group,   ONLY : nsym_group
+  USE point_group,ONLY : nsym_group
   USE constants,  ONLY : ry_to_cmm1
   USE ions_base,  ONLY : nat, tau, ityp, nsp, amass
-  USE symm_base,  ONLY : set_sym, nsym, s, allfrac, remove_sym
+  USE symm_base,  ONLY : set_sym, nsym, s
   USE cell_base,  ONLY : at
   USE phonon_save, ONLY : freq_save, z_save
   USE thermo_sym, ONLY : code_group_save
@@ -37,7 +37,7 @@ SUBROUTINE write_ph_dispersions()
   USE control_paths, ONLY : disp_q, disp_nqs, high_sym_path, nrap_plot, &
                             rap_plot
   USE control_ph,    ONLY : xmldyn
-  USE ifc,           ONLY : m_loc, atm, zeu, has_zstar
+  USE ifc,           ONLY : m_loc, has_zstar
   USE io_bands,      ONLY : write_bands, write_representations
   USE noncollin_module, ONLY : nspin_mag
   USE data_files,     ONLY : flfrq, flvec
@@ -108,10 +108,8 @@ SUBROUTINE write_ph_dispersions()
   ALLOCATE ( ptypeq(3,nq) )
   ALLOCATE ( gaugeq(48,nq) )
 
-  IF (xmldyn) THEN
-     CALL set_sym(nat, tau, ityp, nspin_mag, m_loc)
-     IF ( .NOT. allfrac ) CALL remove_sym ( nr1_save, nr2_save, nr3_save )
-  ENDIF
+  IF (xmldyn) CALL set_sym(nat, tau, ityp, nspin_mag, m_loc, &
+                                            nr1_save, nr2_save, nr3_save )
 
   num_rap_mode=-1
 !

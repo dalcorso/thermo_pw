@@ -18,14 +18,13 @@ SUBROUTINE write_phdos(igeom)
   !  the phdisp_files directory the routine will read the dos, set the 
   !  phdos_save(igeom) variables and exits.
   !
-  USE kinds,      ONLY : DP
-  USE mp,         ONLY : mp_sum
-  USE mp_images,  ONLY : my_image_id, root_image, intra_image_comm
-  USE io_global,  ONLY : ionode, stdout
-  USE ions_base,  ONLY : nat
-  USE control_dosq, ONLY : phdos_sigma, deltafreq, freqmin, freqmax, &
-                         ndos_input, &
-                         freqmin_input, freqmax_input, nq1_d, nq2_d, nq3_d
+  USE kinds,          ONLY : DP
+  USE mp,             ONLY : mp_sum
+  USE mp_images,      ONLY : my_image_id, root_image, intra_image_comm
+  USE io_global,      ONLY : ionode, stdout
+  USE ions_base,      ONLY : nat
+  USE control_dosq,   ONLY : phdos_sigma, deltafreq, freqmin, freqmax, &
+                             ndos_input, freqmin_input, freqmax_input
   USE phonon_save,    ONLY : freq_save
   USE thermo_mod,     ONLY : tot_ngeo
   USE thermodynamics, ONLY : phdos_save
@@ -39,7 +38,8 @@ SUBROUTINE write_phdos(igeom)
 
   CHARACTER(LEN=256) :: filedos
   REAL(DP) :: e, emin, emax, dosofe(2)
-  INTEGER :: n, i, ndos, nq, nstart, nlast
+  INTEGER :: n, i, ndos, nq, nstart, nlast, iundos
+  INTEGER :: find_free_unit
   LOGICAL :: check_file_exists
 !
 !  If phdos is on file it is read
@@ -117,12 +117,13 @@ SUBROUTINE write_phdos(igeom)
   CALL mp_sum(phdos_save(igeom)%phdos, intra_image_comm)
 
   IF (ionode) THEN
-     OPEN (UNIT=2,FILE=filedos,STATUS='unknown',FORM='formatted')
+     iundos=find_free_unit()
+     OPEN (UNIT=iundos,FILE=filedos,STATUS='unknown',FORM='formatted')
      DO n=1, ndos 
-        WRITE (2, '(ES30.15, ES30.15)') phdos_save(igeom)%nu(n),  &
+        WRITE (iundos, '(ES30.15, ES30.15)') phdos_save(igeom)%nu(n),  &
                                              phdos_save(igeom)%phdos(n)
      ENDDO
-     CLOSE(unit=2)
+     CLOSE(UNIT=iundos,STATUS='keep')
   END IF
   !
   RETURN

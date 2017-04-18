@@ -50,6 +50,7 @@ CHARACTER (LEN=256) :: fildyn
 CHARACTER (LEN=6) :: int_to_char
 LOGICAL :: exst, exst_all
 INTEGER :: iq, nq1, nq2, nq3, nqs, iudyn
+INTEGER :: find_free_unit
 
 exst_all=.TRUE.
 nqs=0
@@ -59,7 +60,7 @@ CALL mp_bcast(exst, meta_ionode_id, world_comm)
 exst_all=exst_all.AND.exst
 IF (exst_all) THEN
    IF (meta_ionode) THEN
-      iudyn=2
+      iudyn=find_free_unit()
       OPEN (UNIT=iudyn, FILE=TRIM(fildyn), STATUS='old',FORM='formatted')
       READ(iudyn,*) nq1, nq2, nq3
       READ(iudyn,*) nqs

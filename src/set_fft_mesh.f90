@@ -7,7 +7,7 @@
 !
 !
 !----------------------------------------------------------------------------
-SUBROUTINE set_fft_mesh
+SUBROUTINE set_fft_mesh()
   !----------------------------------------------------------------------------
   !
   !  This routine sets the FFT mesh after knowing the geometry.

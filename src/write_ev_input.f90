@@ -14,15 +14,17 @@ SUBROUTINE write_ev_input(file_dat)
   !  for the ev_sub subroutine.
   !
   !
-  USE kinds, ONLY : DP
-  USE mp_images, ONLY : my_image_id, root_image
-  USE thermo_mod, ONLY : omega_geo, energy_geo, ngeo
+  USE kinds,            ONLY : DP
+  USE mp_images,        ONLY : my_image_id, root_image
+  USE thermo_mod,       ONLY : omega_geo, energy_geo, ngeo
   USE control_pressure, ONLY : pressure
-  USE io_global, ONLY : ionode
+  USE io_global,        ONLY : ionode
+
   IMPLICIT NONE
   CHARACTER(LEN=256) :: file_dat
   CHARACTER(LEN=256) :: filedata
   INTEGER :: iu_ev, igeom
+  INTEGER :: find_free_unit
   !
   IF (my_image_id /= root_image) RETURN
   !
@@ -30,14 +32,14 @@ SUBROUTINE write_ev_input(file_dat)
   CALL write_ev_driver(filedata) 
   !
   IF (ionode) THEN
-     iu_ev=2
+     iu_ev=find_free_unit()
      OPEN(UNIT=iu_ev, FILE=TRIM(filedata), STATUS='UNKNOWN', FORM='FORMATTED')
      DO igeom=1,ngeo(1)
         WRITE(iu_ev,'(2e30.15)') omega_geo(igeom), energy_geo(igeom) + &
                                         pressure * omega_geo(igeom)
      ENDDO
      !
-     CLOSE(iu_ev)
+     CLOSE(UNIT=iu_ev,STATUS='keep')
      !
   END IF
   !
@@ -47,17 +49,19 @@ END SUBROUTINE write_ev_input
 
 SUBROUTINE write_ev_driver(file_dat)
 
-USE kinds, ONLY : DP
-USE io_global, ONLY : ionode
+USE kinds,            ONLY : DP
+USE io_global,        ONLY : ionode
 USE control_pressure, ONLY : pressure_kb
+
 IMPLICIT NONE
 CHARACTER(LEN=256), INTENT(IN) :: file_dat
 CHARACTER(LEN=256) :: filename
 CHARACTER(LEN=8) :: float_to_char
 INTEGER :: iu_ev
+INTEGER :: find_free_unit
 !
 IF (ionode) THEN
-   iu_ev=2
+   iu_ev=find_free_unit()
    filename='energy_files/input_ev'
    IF (pressure_kb /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
@@ -78,13 +82,13 @@ SUBROUTINE do_ev()
 !
 !  This subroutine computes the equilibrium volume and bulk modulus
 !
-USE kinds, ONLY : DP
+USE kinds,       ONLY : DP
 USE control_mur, ONLY : vmin, b0, b01, emin
 USE control_pressure, ONLY : pressure_kb
-USE data_files, ONLY : flevdat
-USE io_global, ONLY : meta_ionode_id, stdout
-USE mp_world, ONLY : world_comm
-USE mp, ONLY : mp_bcast
+USE data_files,  ONLY : flevdat
+USE io_global,   ONLY : meta_ionode_id, stdout
+USE mp_world,    ONLY : world_comm
+USE mp,          ONLY : mp_bcast
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: file_dat, filename
@@ -303,7 +307,7 @@ FUNCTION compute_fun(v, v0, b0, b01, a, m1)
 USE kinds, ONLY : DP 
 IMPLICIT NONE
 REAL(DP) :: compute_fun
-INTEGER, INTENT(IN) :: m1
+INTEGER,  INTENT(IN) :: m1
 REAL(DP), INTENT(IN) :: v, v0, b0, b01, a(m1)
 REAL(DP) :: aux
 INTEGER :: i1

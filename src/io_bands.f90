@@ -54,11 +54,13 @@ CONTAINS
   CHARACTER(LEN=256) :: filedata
 
   INTEGER :: ios, ik, ibnd, iunpun
+  INTEGER :: find_free_unit
 
-  iunpun=1
-  IF ( ionode ) &
+  IF ( ionode ) THEN
+     iunpun=find_free_unit()
      OPEN (UNIT = iunpun, FILE = TRIM(filedata), STATUS = 'unknown', &
                            FORM = 'formatted', IOSTAT = ios)
+  ENDIF
   CALL mp_bcast( ios, ionode_id, intra_image_comm )
   IF ( ios /= 0 ) &
      CALL errore ('write_bands', 'Opening filband file', ABS(ios) )
@@ -95,11 +97,13 @@ CONTAINS
   CHARACTER(LEN=256) :: filedata
 
   INTEGER :: iunpun, ios, ik, ibnd, isym, irap
+  INTEGER :: find_free_unit
 
-  iunpun=1
-  IF ( ionode ) &
+  IF ( ionode ) THEN
+     iunpun=find_free_unit()
      OPEN (UNIT = iunpun, FILE = TRIM(filedata), STATUS = 'unknown', &
                            FORM = 'formatted', IOSTAT = ios)
+  ENDIF
   CALL mp_bcast( ios, ionode_id, intra_image_comm )
   IF ( ios /= 0 ) &
      CALL errore ('write_representations', 'Opening representation file', &
@@ -129,17 +133,19 @@ CONTAINS
   CHARACTER(LEN=256) :: filedata
   
   INTEGER :: iunpun, ios
+  INTEGER :: find_free_unit
 
   NAMELIST /plot/ nks, nbnd
 
-  iunpun=1
-  IF (ionode) &
+  IF (ionode) THEN
+     iunpun=find_free_unit()
      OPEN(UNIT=iunpun,FILE=TRIM(filedata),FORM='formatted',STATUS='OLD',ERR=10,&
                                                   IOSTAT=ios)
+  ENDIF
 10  CALL mp_bcast(ios, ionode_id, intra_image_comm)
   CALL errore('read_parameters','opening band file',ABS(ios))
 
-  IF (ionode) READ (1, plot, ERR=20, IOSTAT=ios)
+  IF (ionode) READ (iunpun, plot, ERR=20, IOSTAT=ios)
 20  CALL mp_bcast(ios, ionode_id, intra_image_comm)
   CALL errore('read_parameters','reading plot namelist',ABS(ios))
   CALL mp_bcast(nks, ionode_id, intra_image_comm)
@@ -161,6 +167,7 @@ CONTAINS
   CHARACTER(LEN=256) :: filedata
 
   INTEGER :: iunpun, ik, ipol, ibnd, ios
+  INTEGER :: find_free_unit
 
   NAMELIST /plot/ nks, nbnd
 
@@ -169,14 +176,15 @@ CONTAINS
   IF ((nks /= nks_) .OR. (nbnd/=nbnd_)) CALL errore('read_band',&
                       'Wrong parameters',1)
   
-  iunpun=1
-  IF (ionode) &
+  IF (ionode) THEN
+     iunpun=find_free_unit()
      OPEN(UNIT=iunpun,FILE=TRIM(filedata),FORM='formatted',STATUS='OLD',ERR=10,&
                                                   IOSTAT=ios)
+  END IF
 10  CALL mp_bcast(ios, ionode_id, intra_image_comm)
   CALL errore('read_bands','opening band file',ABS(ios))
 
-  IF (ionode) READ (1, plot, ERR=20, IOSTAT=ios)
+  IF (ionode) READ (iunpun, plot, ERR=20, IOSTAT=ios)
 20  CALL mp_bcast(ios, ionode_id, intra_image_comm)
   CALL errore('read_bands','reading plot namelist',ABS(ios))
   CALL mp_bcast(nks, ionode_id, intra_image_comm)
@@ -222,6 +230,7 @@ CONTAINS
   CHARACTER(LEN=256) :: filedata
 
   INTEGER :: iunpun, ik, ipol, isym, ibnd, irap, ios, nks_rap, nbnd_rap
+  INTEGER :: find_free_unit
 
   NAMELIST /plot_rap/ nks_rap, nbnd_rap
 
@@ -231,10 +240,11 @@ CONTAINS
                       'Wrong parameters',1)
   exist_rap=.TRUE.
 
-  iunpun=1
-  IF (ionode) &
+  IF (ionode) THEN
+     iunpun=find_free_unit()
      OPEN(UNIT=iunpun,FILE=TRIM(filedata),FORM='formatted',STATUS='OLD',ERR=10,&
                                                   IOSTAT=ios)
+  ENDIF
 10  CALL mp_bcast(ios, ionode_id, intra_image_comm)
   IF (ios /= 0) THEN
      exist_rap=.FALSE.

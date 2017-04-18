@@ -102,6 +102,7 @@ SUBROUTINE thermo_readin()
   INTEGER :: image, iq, ipol, jpol, icont, iun_thermo, parse_unit_save, &
              nch, nrp, i, j, k, ios
   INTEGER :: iun_input
+  INTEGER :: find_free_unit
   LOGICAL :: tend, terr, read_paths, exst, has_xml
   CHARACTER(LEN=6) :: int_to_char
   CHARACTER(LEN=512) :: dummy
@@ -254,13 +255,14 @@ SUBROUTINE thermo_readin()
   !  First read the input of thermo. This input should be in a file
   !  called thermo_control
   !
-  iun_thermo=2
   parse_unit_save=parse_unit
   parse_unit=iun_thermo
   max_seconds_=1.D8
-  IF (meta_ionode) &
+  IF (meta_ionode) THEN
+     iun_thermo=find_free_unit()
      OPEN(UNIT=iun_thermo,FILE='thermo_control',STATUS='OLD', &
                                FORM='FORMATTED', ERR=10, IOSTAT=ios )
+  ENDIF
 10  CALL mp_bcast(ios, meta_ionode_id, world_comm )
     CALL errore( 'thermo_readin', 'opening thermo_control file', ABS( ios ) )
 

@@ -10,11 +10,10 @@ SUBROUTINE write_thermo(igeom)
 !  This routine writes on file the harmonic thermodynamical quantities
 !
 USE kinds,          ONLY : DP
-USE phdos_module,   ONLY : phdos_type, zero_point_energy, &
-                           free_energy, vib_energy, vib_entropy, &
+USE phdos_module,   ONLY : zero_point_energy, free_energy, vib_energy, &
                            specific_heat_cv, integrated_dos
 USE thermo_mod,     ONLY : tot_ngeo
-USE temperature,    ONLY : tmin, tmax, deltat, ntemp, temp
+USE temperature,    ONLY : ntemp, temp
 USE thermodynamics, ONLY : ph_ener, ph_free_ener, ph_entropy, ph_cv, phdos_save
 USE mp_images,      ONLY : root_image, my_image_id, intra_image_comm
 USE mp,             ONLY : mp_bcast, mp_sum
@@ -24,10 +23,9 @@ USE data_files,     ONLY : fltherm
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: igeom
 
-INTEGER  :: i, ios, idum
+INTEGER  :: idum, itemp, nstart, nlast, iu_therm
+INTEGER  :: find_free_unit
 REAL(DP) :: e0, tot_states
-INTEGER  :: itemp, nstart, nlast
-INTEGER  :: iu_therm
 CHARACTER(LEN=256) :: filetherm
 LOGICAL  :: check_file_exists, do_read
 !
@@ -39,7 +37,7 @@ IF ( igeom < 1 .OR. igeom > tot_ngeo ) CALL errore('write_thermo', &
                                                'Too many geometries',1)
 IF (do_read) THEN
    IF (ionode) THEN
-      iu_therm=2
+      iu_therm=find_free_unit()
       OPEN (UNIT=iu_therm, FILE=TRIM(filetherm), STATUS='old',&
                                                      FORM='formatted')
       DO idum=1,12
@@ -103,11 +101,10 @@ SUBROUTINE write_thermo_ph(igeom)
 
 USE kinds,            ONLY : DP
 USE ph_freq_module,   ONLY : ph_freq_type, zero_point_energy_ph, &
-                          free_energy_ph, vib_energy_ph, vib_entropy_ph, &
-                          specific_heat_cv_ph
-USE temperature,      ONLY : tmin, tmax, deltat, ntemp, temp
+                             free_energy_ph, vib_energy_ph, specific_heat_cv_ph
+USE temperature,      ONLY : ntemp, temp
 USE ph_freq_thermodynamics, ONLY : phf_ener, phf_free_ener, phf_entropy, &
-                           phf_cv, ph_freq_save
+                             phf_cv, ph_freq_save
 USE thermo_mod,       ONLY : tot_ngeo
 USE mp_images,        ONLY : root_image, my_image_id, intra_image_comm
 USE mp,               ONLY : mp_bcast, mp_sum
@@ -119,10 +116,9 @@ INTEGER, INTENT(IN) :: igeom
 CHARACTER(LEN=256) :: filename
 LOGICAL :: check_file_exists, do_read
 
-INTEGER  :: i, ios, idum
+INTEGER  :: idum, itemp, nstart, nlast, iu_therm
+INTEGER  :: find_free_unit
 REAL(DP) :: e0
-INTEGER  :: itemp, nstart, nlast
-INTEGER  :: iu_therm
 !
 do_read=.FALSE.
 filename="therm_files/"//TRIM(fltherm)//'_ph'
@@ -134,7 +130,7 @@ IF ( igeom < 1 .OR. igeom > tot_ngeo ) CALL errore('write_thermo', &
 
 IF (do_read) THEN
    IF (ionode) THEN
-      iu_therm=2
+      iu_therm=find_free_unit()
       OPEN (UNIT=iu_therm, FILE=TRIM(filename), STATUS='old',&
                                                      FORM='formatted')
       DO idum=1,11
@@ -172,7 +168,7 @@ phf_ener(:,igeom)=0.0_DP
 phf_cv(:,igeom)=0.0_DP
 DO itemp = nstart, nlast
    IF (MOD(itemp-nstart+1,30)==0) &
-        WRITE(6,'(5x,"Computing temperature ", i5 " / ",&
+        WRITE(stdout,'(5x,"Computing temperature ", i5 " / ",&
         & i5,4x," T=",f12.2," K")') itemp-nstart+1, nlast-nstart+1, temp(itemp)
    CALL free_energy_ph(ph_freq_save(igeom), temp(itemp), &
                                        phf_free_ener(itemp,igeom))
@@ -206,9 +202,7 @@ USE debye_module,     ONLY : debye_e0, debye_vib_energy, debye_free_energy, &
                              debye_entropy, debye_cv
 USE control_debye,    ONLY : deb_e0, deb_cv, deb_entropy, deb_energy, &
                              deb_free_energy, debye_t
-USE temperature,      ONLY : tmin, tmax, deltat, ntemp, temp
-USE ph_freq_thermodynamics, ONLY : phf_ener, phf_free_ener, phf_entropy, &
-                           phf_cv, ph_freq_save
+USE temperature,      ONLY : ntemp, temp
 USE mp_images,        ONLY : root_image, my_image_id, intra_image_comm
 USE mp,               ONLY : mp_bcast
 USE io_global,        ONLY : ionode, ionode_id, stdout
@@ -219,9 +213,8 @@ INTEGER, INTENT(IN) :: igeom
 CHARACTER(LEN=256) :: filename
 CHARACTER(LEN=6) :: int_to_char
 
-INTEGER  :: i, ios, idum
+INTEGER  :: idum
 INTEGER  :: itemp
-INTEGER  :: iu_therm
 !
 filename='therm_files/'//TRIM(fltherm)//'_debye.g'//TRIM(int_to_char(igeom))
 
@@ -266,42 +259,42 @@ REAL(DP), INTENT(IN) :: e0, tot_states, temp(ntemp), energy(ntemp),  &
 CHARACTER(LEN=*) :: filename
 
 INTEGER :: iu_therm, itemp
+INTEGER :: find_free_unit
 
-   iu_therm=2
-   OPEN (UNIT=iu_therm, FILE=TRIM(filename), STATUS='unknown',&
+iu_therm=find_free_unit()
+OPEN (UNIT=iu_therm, FILE=TRIM(filename), STATUS='unknown',&
                                                      FORM='formatted')
-   WRITE(iu_therm,'("# Zero point energy:", f8.5, " Ry/cell,", f9.5, &
-                    &" kJ/(N mol),", f9.5, " kcal/(N mol)")') e0, &
-                       e0 * 1313.313_DP, e0 * 313.7545_DP 
-   IF (iflag==3) THEN
-      WRITE(iu_therm,'("# Temperature T in K, Debye temperature=",f12.3, &
-                                             &" K,")') tot_states
-   ELSE
-      WRITE(iu_therm,'("# Temperature T in K, ")')
-   ENDIF
-   IF (iflag==1) &
-   WRITE(iu_therm,'("# Total number of states is:", f15.5,",")') tot_states
-   WRITE(iu_therm,'("# Energy and free energy in Ry/cell,")')
-   WRITE(iu_therm,'("# Entropy in Ry/cell/K,")')
-   WRITE(iu_therm,'("# Heat capacity Cv in Ry/cell/K.")')
-   WRITE(iu_therm,'("# Multiply by 13.6058 to have energies in &
+WRITE(iu_therm,'("# Zero point energy:", f8.5, " Ry/cell,", f9.5, &
+                 &" kJ/(N mol),", f9.5, " kcal/(N mol)")') e0, &
+                    e0 * 1313.313_DP, e0 * 313.7545_DP 
+IF (iflag==3) THEN
+   WRITE(iu_therm,'("# Temperature T in K, Debye temperature=",f12.3, &
+                                          &" K,")') tot_states
+ELSE
+   WRITE(iu_therm,'("# Temperature T in K, ")')
+ENDIF
+IF (iflag==1) &
+WRITE(iu_therm,'("# Total number of states is:", f15.5,",")') tot_states
+WRITE(iu_therm,'("# Energy and free energy in Ry/cell,")')
+WRITE(iu_therm,'("# Entropy in Ry/cell/K,")')
+WRITE(iu_therm,'("# Heat capacity Cv in Ry/cell/K.")')
+WRITE(iu_therm,'("# Multiply by 13.6058 to have energies in &
                        &eV/cell etc..")')
-   WRITE(iu_therm,'("# Multiply by 13.6058 x 23060.35 = 313 754.5 to have &
+WRITE(iu_therm,'("# Multiply by 13.6058 x 23060.35 = 313 754.5 to have &
                   &energies in cal/(N mol).")')
-   WRITE(iu_therm,'("# Multiply by 13.6058 x 96526.0 = 1 313 313 to &
+WRITE(iu_therm,'("# Multiply by 13.6058 x 96526.0 = 1 313 313 to &
                   &have energies in J/(N mol).")')
-   WRITE(iu_therm,'("# N is the number of formula units per cell.")')
-   WRITE(iu_therm,'("# For instance in silicon N=2. Divide by N to have &
-                   &energies in cal/mol etc. ")')
-   WRITE(iu_therm,'("#",5x,"   T  ", 10x, " energy ", 9x, "  free energy ",&
-                  & 9x, " entropy ", 12x, " Cv ")')
+WRITE(iu_therm,'("# N is the number of formula units per cell.")')
+WRITE(iu_therm,'("# For instance in silicon N=2. Divide by N to have &
+                &energies in cal/mol etc. ")')
+WRITE(iu_therm,'("#",5x,"   T  ", 10x, " energy ", 9x, "  free energy ",&
+               & 9x, " entropy ", 12x, " Cv ")')
 
-
-   DO itemp = 1, ntemp
-      WRITE(iu_therm, '(e16.8,4e20.12)') temp(itemp), energy(itemp), &
-                    free_energy(itemp), entropy(itemp), cv(itemp)
-   END DO
-   CLOSE(iu_therm)
+DO itemp = 1, ntemp
+   WRITE(iu_therm, '(e16.8,4e20.12)') temp(itemp), energy(itemp), &
+                 free_energy(itemp), entropy(itemp), cv(itemp)
+END DO
+CLOSE(iu_therm)
 
 RETURN
 END SUBROUTINE write_thermo_info

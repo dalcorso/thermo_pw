@@ -221,8 +221,9 @@ REAL(DP), INTENT(IN) :: temp(ntemp), el_cons_t(6,6,ntemp), b0_t(ntemp)
 CHARACTER(LEN=*), INTENT(IN) :: filename
 
 INTEGER :: itemp, iu_el_cons, ios
+INTEGER :: find_free_unit
 
-iu_el_cons=2
+iu_el_cons=find_free_unit()
 IF (ionode) &
    OPEN(UNIT=iu_el_cons, FILE=TRIM(filename), FORM='formatted', &
                                        STATUS='UNKNOWN', ERR=30, IOSTAT=ios)

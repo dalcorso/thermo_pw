@@ -22,10 +22,11 @@ USE io_global,        ONLY : ionode
 IMPLICIT NONE
 
 REAL(DP), INTENT(IN) :: emin, omega0, b0in, b01
-CHARACTER(LEN=256) :: filename
-CHARACTER(LEN=8) :: float_to_char
+CHARACTER(LEN=256)   :: filename
+CHARACTER(LEN=8)     :: float_to_char
 REAL(DP) :: omega, e, p, b0
-INTEGER :: i, iu_mur
+INTEGER  :: i, iu_mur
+INTEGER  :: find_free_unit
 
 IF (my_image_id /= root_image) RETURN
 
@@ -48,7 +49,7 @@ ELSE
 END IF
 
 IF (ionode) THEN
-   iu_mur=2
+   iu_mur=find_free_unit()
    OPEN(UNIT=iu_mur, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
    IF (pressure_kb /= 0.0_DP) THEN
       WRITE(iu_mur,'( "# omega (a.u.)**3      Gibbs energy (Ry)   pressure (kbar)" )')
