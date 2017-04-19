@@ -6,7 +6,7 @@
 %! or http://www.gnu.org/copyleft/gpl.txt .
 %!
 \documentclass[12pt,a4paper]{article}
-\def\version{0.7.0}
+\def\version{0.8.0}
 \def\qe{{\sc Quantum ESPRESSO}}
 \def\tpw{{\sc THERMO\_PW}}
 \def\thermo{{\texttt{thermo\_pw}}}
@@ -160,6 +160,10 @@ points and calculation of the thermal expansion from the Gr\"uneisen parameters.
 Calculation of the isoentropic quantities when available.
 
 \end{itemize}
+There is also an initial routine (\texttt{thermo\_summary}) that can carry
+out preprocessing tasks, such as finding the space group or suggesting
+alternative \texttt{ibrav} and \texttt{celldm}. This routine is called by
+all \texttt{what} options.
 
 \newpage
 \section{\color{coral}Activated parts}
@@ -169,10 +173,12 @@ The different \texttt{what} activates the following parts of the code:
 \begin{verbatim}
 what         A   B   C   D   E    F     G1    H    I   L   G2   M   N   O   P
 
+plot_bz
 scf                          *
 scf_ke       *   *
 scf_nk       *       *
-scf_band                     *    *
+scf_bands                    *    *
+scf_2d_bands                 *    *
 scf_dos                      *    *
 scf_ph                       *                              *
 scf_disp                     *                              *
@@ -180,7 +186,7 @@ scf_elastic_constants                    *     *
 scf_piezoelectric_tensor                 *          +
 scf_polarization                         *              +
 mur_lc       *           *
-mur_lc_band  *           *   *    *
+mur_lc_bands *           *   *    *
 mur_lc_dos   *           *   *    *
 mur_lc_ph    *           *   *                              *
 mur_lc_disp  *           *   *                              *
@@ -210,10 +216,15 @@ Total energy versus k points                   scf_nk
 Total energy as a function of volume           mur_lc
 Total energy as a function of two or three
 crystallographic parameters                    mur_lc
+Pressure as a function of volume (T=0)         mur_lc
 Energy bands                                   scf_bands, mur_lc_bands
-Electronic density of states                     scf_dos, mur_lc_dos
+Surface Energy bands                           scf_2d_bands
+Electronic density of states                   scf_dos, mur_lc_dos
 Electronic energy, free energy, entropy,      
 isochoric heat capacity (metals only)          scf_dos, mur_lc_dos
+Frequency dependent dielectric constant (q=0)  scf_ph, mur_lc_ph
+(insulators only)
+Frequency dependent dielectric constant (q/=0) scf_ph, mur_lc_ph
 Phonon dispersions                             scf_disp, mur_lc_disp
 Phonon dos                                     scf_disp, mur_lc_disp
 Vibrational energy, free energy, entropy,      
@@ -226,14 +237,31 @@ Thermal expansion as a function of T           mur_lc_t
 Mode Gruneisen parameters                      mur_lc_t
 Phonon dispersions at the geometry 
 that corresponds to a given temperature        mur_lc_t
+Elastic constants as a function of temperature mur_lc_t, elastic_constant_t
 
-For cubic systems also the following quantities are available:
+For cubic systems, or when elastic constants are on file,
+also the following quantities are plotted:
 
 Bulk modulus as a function of T                mur_lc_t
 Difference isobaric-isochoric heat capacity    mur_lc_t
 Difference isoentropic-isothermal bulk modulus mur_lc_t
 Average Gruneisen parameter                    mur_lc_t
 
+\end{verbatim}
+
+\newpage
+This is the list of the quantities that can be obtained in output
+and the \texttt{what} to use:
+
+\begin{verbatim}
+Space group number                             plot_bz 
+Equilibrium geometry                           mur_lc
+Total energy                                   scf, mur_lc
+Phonon frequencies at a given q                scf_ph, mur_lc_ph
+Dielectric constant (insulators only)          scf_ph, mur_lc_ph
+Born effective charges (insulators only)       scf_ph, mur_lc_ph
+Elastic constant tensor                        scf_elastic_constants, 
+                                               mur_lc_elastic_constants
 \end{verbatim}
 
 \newpage
@@ -294,10 +322,10 @@ mur_lc_t
                  write_anharmonic
                                  flanhar
                                  flanhar(.aux)
-                 write_anharmonic_ph
+                 write_ph_freq_anharmonic
                                  flanhar(_ph)
                                  flanhar(.aux_ph)
-                 write_anharmonic_grun
+                 write_grun_anharmonic
                                  flanhar(.aux_grun)
                  plot_anhar                     flgnuplot(_anhar)   flpsanhar
                  write_gruneisen_bands
@@ -309,20 +337,27 @@ mur_lc_t
                                                 flgnuplot(_grun_freq) 
                                                                  flpsgrun(_freq)
         For anisotropic solids:
-                 write_anharm_anis
+                 write_anhar_anis
                                  flanhar(.celldm)
-                 write_anharm_anis_ph
+                 write_ph_freq_anhar_anis
                                  flanhar(_ph.celldm)
+                 write_grun_anharmonic_anis
+                                 flanhar(.celldm_grun)
+                                 flanhar(.aux_grun)
                  plot_anhar_anis                flgnuplot(_anhar)   flpsanhar
                  write_gruneisen_bands_anis
                                  flgrun(_#)
                                  flgrun(_freq)
                  plot_gruneisen_band_anis
-                                 flpgrun(_#)
+                 plotband_sub    flpgrun(_#)
                                  flpgrun(_freq)
                  write_gnuplot_file             flgnuplot(_grun_#)   flpsgrun_#
                                                 flgnuplot(_grun_freq) 
                                                                  flpsgrun(_freq)
+                 write_elastic_t flanhar(.el_cons)
+                                 flanhar(.el_cons_ph)
+                 plot_elastic_t                 flgnuplot(_el_cons)  
+                                                           flpsanhar(.el_cons)
 # is an integer from 1 to the number of crystal parameters
 \end{verbatim} 
 
@@ -417,22 +452,24 @@ saved in each file.
 \texttt{band\_files/filband(.rap)} (default name 
 \texttt{output\_band.dat(.rap)}) contains the band eigenvalues for each 
 {\bf k} point. The \texttt{.rap} file contains the number of the irreducible
-representation for each band. The format of these files can be read
+representation for each band. The format of these files is readable
 by the \texttt{plotband.f90} code of Quantum ESPRESSO.
 
 \item 
 \texttt{band\_files/flpband(.\#)(.\#)} 
 (default name \texttt{output\_pband.dat(.\#)(.\#)})
-These files contain the band eigenvalues along the path. They are in a 
-format readable by \texttt{gnuplot} and are similar to the files written
-by the \texttt{plotband.f90} code of Quantum ESPRESSO. The numbers indicate 
-the number of the line along the path and the number of the irreducible 
-representation.
+These files contain the band eigenvalues along a line of the path 
+(and for one irreducible representation). 
+The format is readable by \texttt{gnuplot} and are similar to the files written
+by the \texttt{plotband.f90} code of Quantum ESPRESSO. The numbers in
+the filename indicate the number of the line along the path and the number 
+of the irreducible representation.
 
 \item 
 \texttt{band\_files/info\_data} (default name \texttt{info\_data}) This
-file contains a minimal number of information needed by \texttt{thermo\_pw}
-to redo the plot when \texttt{only\_bands\_plot=.TRUE.}. It is written
+file contains the information needed by \texttt{thermo\_pw}
+to redo the plot without reading the files produced by \texttt{pw.x}
+when \texttt{only\_bands\_plot=.TRUE.}. It is written
 in a form readable by \texttt{thermo\_pw}. Among other things it
 contains the Fermi level.
 
@@ -518,27 +555,27 @@ and contains the electron excitation energy, free energy, entropy,
 isochoric specific heat and chemical potential.
 
 \item 
-\texttt{phdisp\_files/flfrc.g\#)} (default name \texttt{output\_frc.dat.g\#})
+\texttt{phdisp\_files/flfrc.g\#} (default name \texttt{output\_frc.dat.g\#})
 For each geometry for which a phonon dispersion is calculated this file
 contains the interatomic force constants. It is in a format readable by
 the code \texttt{matdyn.f90} of the QE distribution. \texttt{g\#} indicates 
 the number of the geometry.
 
 \item 
-\texttt{phdisp\_files/flvec.g\#)} (default name 
+\texttt{phdisp\_files/flvec.g\#} (default name 
 \texttt{matdyn.modes.g\#}). For each geometry for which a phonon dispersion
 is calculated this file contains the vibrational modes and the frequencies
 along the path. It is in a format defined by the \texttt{matdyn.f90} routine 
 of the QE distribution.
 
 \item 
-\texttt{phdisp\_files/flfrq.g\#)} (default name \texttt{output\_frq.dat.g\#})
+\texttt{phdisp\_files/flfrq.g\#} (default name \texttt{output\_frq.dat.g\#})
 For each geometry for which a phonon dispersion is calculated this file
 contains the frequencies along the path. It is in a format readable by
 the code \texttt{plotband.f90} of the QE distribution.
 
 \item 
-\texttt{phdisp\_files/flpband.g\#)(.\#)(.\#)} 
+\texttt{phdisp\_files/flpband.g\#(.\#)(.\#)} 
 (default name \texttt{output\_pband.dat.g\#(.\#)(.\#)})
 For each geometry for which a phonon dispersion is calculated these files
 contain the frequencies along the path. They are in a format readable by
@@ -547,7 +584,7 @@ ESPRESSO. The numbers after the geometry indicate the number of the line
 along the path and the number of the irreducible representation.
 
 \item 
-\texttt{phdisp\_files/fldosfrq.g\#)} (default name 
+\texttt{phdisp\_files/fldosfrq.g\#} (default name 
 \texttt{save\_frequencies.g\#}). For each geometry for which a phonon 
 density of states is calculated this file contains the vibrational  
 frequencies in all the {\bf q} vectors used for the phonon density of states.
@@ -556,7 +593,7 @@ an information sufficient to recalculate the density of states.
 The file is readable only by \texttt{thermo\_pw}.
 
 \item 
-\texttt{phdisp\_files/fldos.g\#)} (default name 
+\texttt{phdisp\_files/fldos.g\#} (default name 
 \texttt{output\_dos.dat.g\#}). For each geometry for which a phonon density of 
 states is calculated (when \texttt{ltherm\_dos=.TRUE.}) this file contains:
 \begin{verbatim}
@@ -715,6 +752,55 @@ They are in a format readable by \texttt{gnuplot} as produced by
 the \texttt{plotband.f90} code of Quantum
 ESPRESSO. The numbers after the geometry indicate the number of the line 
 along the path and the number of the irreducible representation.
+
+\item
+\texttt{anhar\_files/flanhar.el\_cons(\_ph)}
+(default name \texttt{output\_anhar.dat.el\_cons(\_ph)}). This file
+contains the elastic constants as a functions of temperature. The number
+of columns depends on the Laue class. The first column is always the 
+temperature while the last one is the bulk modulus. The others are the
+non zero elements of the elastic constants tensor. \\ 
+For the Laue class $O_h$ and $T_h$, it contains
+\begin{verbatim}
+#   T     C_{11}   C_{12}    C_{44}    B
+\end{verbatim}
+For the Laue class $D_{6h}$ and $C_{6h}$, it contains
+\begin{verbatim}
+#   T     C_{11}   C_{12}    C_{13}    C_{33}    C_{44}    B
+\end{verbatim}
+For the Laue class $D_{4h}$, it contains
+\begin{verbatim}
+#   T     C_{11}   C_{12}    C_{13}    C_{33}    C_{44}    B
+\end{verbatim}
+For the Laue class $D_{4h}$, it contains
+\begin{verbatim}
+#   T     C_{11}   C_{12}    C_{13}    C_{33}    C_{44}    C_{66}   B
+\end{verbatim}
+For the Laue class $D_{2h}$, it contains
+\begin{verbatim}
+#   T  C_{11} C_{12} C_{13} C_{22} C_{23} C_{33} C_{44} C_{55} C_{66} B
+\end{verbatim}
+For the Laue class $C_{4h}$, it contains
+\begin{verbatim}
+#   T  C_{11}   C_{12}   C_{13}   C_{33}   C_{44}   C_{66}   C_{16}  B
+\end{verbatim}
+For the Laue class $C_{2h}$, the content depends on the Bravais lattice. 
+If the lattice is $b$-unique the file contains:
+\begin{verbatim}
+#   T C_{11} C_{12} C_{13} C_{22} C_{23} C_{33} C_{44} C_{55} C_{66} 
+      C_{15} C_{25} C_{35} C_{46} B
+\end{verbatim}
+If the lattice is $c$-unique the file contains:
+\begin{verbatim}
+#   T C_{11} C_{12} C_{13} C_{22} C_{23} C_{33} C_{44} C_{55} C_{66} 
+      C_{16} C_{26} C_{36} C_{45} B
+\end{verbatim}
+For the Laue class $C_i$, it contains
+\begin{verbatim}
+#   T C_{11} C_{12} C_{13} C_{22} C_{23} C_{33} C_{44} C_{55} C_{66} 
+      C_{14} C_{15} C_{16} C_{24} C_{25} C_{26} C_{34} C_{35} C_{36}
+      C_{45} C_{46} C_{55} C_{56} C_{66} B
+\end{verbatim}
 
 \end{itemize}
 

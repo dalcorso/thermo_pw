@@ -1,6 +1,10 @@
-18/03/2017 Version 0.7.0 of thermo_pw is now frozen.
+New in version 0.8.0
 
-New in version 0.7.0
+Some change in the mixing routine for the optical properties
+with Sternheimer equation.
+
+
+New in version 0.7.0:
 
 Image parallelization on the frequencies.
 

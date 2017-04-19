@@ -6,7 +6,7 @@
 %! or http://www.gnu.org/copyleft/gpl.txt .
 %!
 \documentclass[12pt,a4paper]{article}
-\def\version{0.7.0}
+\def\version{0.8.0}
 \def\qe{{\sc Quantum ESPRESSO}}
 \def\tpw{{\sc THERMO\_PW}}
 
@@ -215,6 +215,7 @@ contains also information on critical bugs found in the
 \hline
 \texttt{thermo\_pw} & \qe  \\
 \hline
+0.8.0 & 6.1 \\
 0.7.0 & 6.1 \\
 0.6.0 & 6.0.0 \\
 0.5.0 & 5.4.0 \\
@@ -1423,10 +1424,12 @@ temp_ph       : The frequencies and Gruneisen parameters interpolated at
                 celldm_ph(1)=0.0).
                 Default : real tmin (in K)
 with_eigen    : if .TRUE. use the eigenvectors of the dynamical matrix to
-                calculate the Gruneisen parameters. For anisotropic solids
-                this option cannot be changed. It is .TRUE. for the plotted
-                Gruneisen bands, but Gruneisen parameters are not used to
-                calculate anharmonic properties.
+                calculate the Gruneisen parameters used for anharmonic 
+                properties. It can be activated only in cubic solids but
+                requires a lot of RAM.
+                Note however that eigenvectors are always used to calculate
+                the plotted Gruneisen bands (both in cubic and anisotropic
+                solids).
                 Default: logical .FALSE. 
 lquartic_ph   : if .TRUE. fit the vibrational free energy with a fourth
                 order polynomial, otherwise with a second order polynomial
@@ -1725,10 +1728,11 @@ For a detailed description of the input variables please look at the beginning
 of the \texttt{fortran} sources of each code.
 
 \newpage
-\section{\color{coral}Examples, inputs, pseudo\_test, space\_groups}
+\section{\color{coral}Examples, inputs, pseudo\_test, space\_groups, \\
+tools\_inputs}
 
 The directories \texttt{examples}, \texttt{inputs}, \texttt{pseudo\_tests}, 
-\texttt{space\_groups} contain a set
+\texttt{space\_groups} and \texttt{tools\_inputs} contain a set
 of examples that can be studied in order to learn how to use the \thermo\ 
 package. The \texttt{examples} directory contains inputs that run in a few
 seconds but do not give converged results. These examples can be studied 
@@ -1736,7 +1740,7 @@ to see how the \thermo\ code works in the different cases. The
 reference directory of each example contains all the output
 files produced by the run. A one-to-one comparison with the output
 produced by running the example script is however not possible due to the
-asynchronous nature of the runs. The plotted physical quantities however
+asynchronous nature of the runs. Only the plotted physical quantities 
 should be the same. \\
 The directory \texttt{inputs} contains a set
 of realistic inputs and reasonably converged results. Not all
@@ -1755,7 +1759,9 @@ groups routines. These inputs are also examples of the use of the
 keyword \texttt{space\_group} and of the Wyckoff positions to give the
 atomic coordinates in the \texttt{pw.x} input. You can also use these
 strutures for your calculations, but note that the cut-off energies and
-the {\bf k}-point meshes used in these inputs are not converged.
+the {\bf k}-point meshes used in these inputs are not converged. \\
+The directory \texttt{tools\_inputs} give some examples of the inputs of
+the auxiliary \texttt{tools} programs.
 
 \newpage
 \section{\color{coral}Documentation}
@@ -1767,7 +1773,7 @@ documents:
 
 \item
 \texttt{tutorial.pdf} : a short guide that indicates where to find the
-information needed to perform a given task.
+information needed to compute a given quantity. 
 
 \item
 \texttt{point\_groups.pdf} : a description of the crystallographic point 
@@ -1817,8 +1823,8 @@ points and lowest \texttt{degauss}) is subtracted from all energies.
 Total energy as a function of volume (\texttt{lmurn=.TRUE.}). 
 This plot is composed by two figures. Total energy as a function of volume 
 and pressure as a function of volume. Both curves are \texttt{red}.   
-The points on the first curve are the calculated energies, the continuous
-curve is the fit.
+The points on the first curve are the energies calculated by 
+\texttt{pw.x}, the continuous curve is the fit.
 
 \item
 Total energy as a function of one or two crystallographic parameters
@@ -1839,7 +1845,7 @@ not available.
 \item
 Energy bands. In this figure the bands have the color of
 their irreducible representation. Each line of the path can have a different
-point group and representations. See the \texttt{point\_groups.pdf} file
+point group and set of representations. See the \texttt{point\_groups.pdf} file
 for the list of representations and their color code. 
 When the symmetry analysis is not done all the bands are \texttt{red}.
                               
