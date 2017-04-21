@@ -240,8 +240,8 @@ SUBROUTINE prepare_plan_avg (ninter, zdim, i1, vacuum1, vacuum2, surface1, surfa
   DO iin=2, ninter-1
      distance(iin)= i1(iin+1)-i1(iin-1)
   ENDDO
-  distance(ninter)= i1(2) + dfftp%nr3 - i1(ninter)
-  distance(1)= i1(1) + dfftp%nr3 - i1(ninter-1) 
+  distance(1)= i1(2) + dfftp%nr3 - i1(ninter)
+  distance(ninter)= i1(1) + dfftp%nr3 - i1(ninter-1) 
   max_dist=0
   DO iin=1, ninter
      IF (distance(iin) > max_dist) THEN
