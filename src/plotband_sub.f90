@@ -93,7 +93,7 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
   INTEGER, ALLOCATABLE :: rapin(:),  nbnd_count(:)
 
   INTEGER :: code_group_line, code_group_ext_line, ilines, irap, ibnd, &
-             i, n, ik, spe, lpe, nbc, iq, ishift, ir, &
+             i, n, ik, spe, lpe, nbc, iq, ishift, ir, count0, &
              nrapp, cpe, start_shift, last_shift, ncentral, iunout, ios
 
   LOGICAL :: exist_rap, type1, lso, print_eref, norap
@@ -572,13 +572,24 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
 !   number 
 !
         nrap(ilines)=1
+        count0=0
         norap=.FALSE.
         DO n=spe, lpe
            DO ibnd=1,nbnd
               nrap(ilines)=MAX(nrap(ilines),rap_eff(ibnd,n))
               norap=(norap.OR.(rap_eff(ibnd,n)< 1))
+              IF (rap_eff(ibnd,n)<1) count0=count0+1
            ENDDO
         ENDDO
+!
+!   if along this line too many bands have no symmetry classification, 
+!   disable the plot of the representations and put dots in the plot along
+!   this line
+!
+        IF (count0/(lpe-spe) > 4) THEN
+           nrap(ilines)=1
+           with_lines(ilines)=.FALSE.
+        ENDIF
 
         IF (nrap(ilines) > 12) CALL errore("plotband_sub",&
                                            "Too many representations",1)

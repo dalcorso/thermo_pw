@@ -24,40 +24,7 @@ PROGRAM thermo_pw
   ! ... or a linear response calculation at a given q and for a given
   ! ... representation. Finally the root image can carry out several
   ! ... post processing tasks. The type of calculations currently implemented 
-  ! ... are:
-  ! ... 
-  ! ...   scf       : a single scf calculation to determine the total energy.
-  ! ...   scf_ke    : many scf calculations at different cut-offs
-  ! ...   scf_nk    : many scf calculations at different numbers of k points
-  ! ...   scf_bands : a band structure calculation after a scf calcul.
-  ! ...   scf_2d_bands : as scf_bands, but the cell is assumed to be 
-  ! ...                  a slab and the default path is chosen in the 2d 
-  ! ...                  Brillouin zone. This option can be used also to 
-  ! ...                  calculate the projected bulk band structure.
-  ! ...   scf_dos   : a dos calculation after a scf calcul.
-  ! ...   scf_ph    : a phonon calculation after an scf run
-  ! ...   scf_disp  : a phonon dispersion calculation after a scf run
-  ! ...   scf_elastic_constants : elastic constants at zero temperature 
-  ! ...
-  ! ...   mur_lc    : lattice constant via Murnaghan equation or quadratic/
-  ! ...               quartic interpolation of the equation of state
-  ! ...   mur_lc_bands  : a band structure calculation at the minimum of the
-  ! ...               total energy
-  ! ...   mur_lc_dos  : an electronic dos calculation at the minimum of the
-  ! ...               total energy 
-  ! ...   mur_lc_ph : a phonon calculation at the minimum of the total energy
-  ! ...   mur_lc_disp : a dispersion calculation at the minimum of the total
-  ! ...               energy with the possibility to compute the harmonic
-  ! ...               thermodynamic quantities
-  ! ...   mur_lc_elastic_constants : elastic constants at zero temperature 
-  ! ...               at the minimum of the total energy 
-  ! ...   mur_lc_t  : lattice constant and bulk modulus as a function 
-  ! ...               of temperature within the quasiharmonic approximation
-  ! ...               for cubic systems or crystal parameters as a function
-  ! ...               of temperature for tetragonal, hexagonal, trigonal,
-  ! ...               and orthorhombic systems. 
-  ! ...   elastic_constants_t : elastic constants in the same set of
-  ! ...               geometries used for mur_lc_t
+  ! ... are described in the user's guide and in the developer's guide.
   ! ...
 
   USE kinds,            ONLY : DP
