@@ -256,10 +256,10 @@ SUBROUTINE thermo_readin()
   !  called thermo_control
   !
   parse_unit_save=parse_unit
+  IF (ionode) iun_thermo=find_free_unit()
   parse_unit=iun_thermo
   max_seconds_=1.D8
   IF (meta_ionode) THEN
-     iun_thermo=find_free_unit()
      OPEN(UNIT=iun_thermo,FILE='thermo_control',STATUS='OLD', &
                                FORM='FORMATTED', ERR=10, IOSTAT=ios )
   ENDIF
