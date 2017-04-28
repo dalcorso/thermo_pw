@@ -31,7 +31,7 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
   USE control_dosq,  ONLY : freqmin_input, freqmax_input
   USE control_paths, ONLY : label_disp_q, nqaux, high_sym_path, disp_nqs, &
                             nrap_plot, rap_plot, long_path
-  USE control_2d_bands, ONLY : nkz, aux_ind_sur, identify_sur, lprojpbs, &
+  USE control_2d_bands, ONLY : nkz, identify_sur, lprojpbs, &
                                sym_divide, lsurface_state, lsurface_state_rap, &
                                force_bands
   USE cell_base,     ONLY : celldm, tpiba
@@ -175,7 +175,7 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
 !
    IF (nkz > 1 .AND. lprojpbs .AND. sym_divide .AND. exist_rap) &
       CALL convert_rap_surface(nbnd, nks, nkz, high_symmetry, gcodek, aux_ind, &
-                               gcodek_ext, ptypek, rap, gaugek)
+                          gcodek_ext, ptypek, rap, gaugek, lprojk)
 !
 ! At this point we should count how many lines we have and
 ! set the first and the last point of each line
@@ -507,20 +507,6 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
            projective(ilines)=3
         ENDIF
 !
-!   here set dorap, for each line which representations have to be plotted.
-!   This is controlled by nrap_plot_eff and rap_plot_eff
-!
-        nrapp= nrap_plot_eff(spe)
-        DO irap=1, nrapp
-           IF (sym_divide) THEN
-              dorap(irap,ilines)=.FALSE.
-              DO ir=1,nrapp
-                 dorap(irap,ilines) = dorap(irap,ilines) &
-                       .OR.(rap_plot_eff(ir,spe)==irap)
-              ENDDO
-           ENDIF
-        ENDDO
-!
 !  Now convert the representations of the border points to those of the
 !  central point group
 !
@@ -598,6 +584,20 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
                        code_group_ext_line, TRIM(group_name(code_group_line))
 
         IF (icode==3.AND.norap) with_lines(ilines)=.FALSE.
+!
+!   here set dorap, for each line which representations have to be plotted.
+!   This is controlled by nrap_plot_eff and rap_plot_eff
+!
+        nrapp= nrap_plot_eff(spe)
+        DO irap=1, nrap(ilines)
+           IF (sym_divide) THEN
+              dorap(irap,ilines)=(nrapp==0)
+              DO ir=1,nrapp
+                 dorap(irap,ilines) = dorap(irap,ilines) &
+                       .OR.(rap_plot_eff(ir,spe)==irap)
+              ENDDO
+           ENDIF
+        ENDDO
 !
 !   Finally manage the representations. We count how many bands
 !   there are for each representation and reorder the bands so that there

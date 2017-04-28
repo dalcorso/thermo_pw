@@ -6,7 +6,7 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 SUBROUTINE convert_rap_surface(nbnd, nks, nkz, high_symmetry, gcodek, aux_ind, &
-                               gcodek_ext, ptypek, rap, gaugek)
+                       gcodek_ext, ptypek, rap, gaugek, lprojk)
 !
 !   In a projected band structure calculation, we change the representations
 !   of the points groups of higher symmetry that might occur for particular 
@@ -23,7 +23,7 @@ SUBROUTINE convert_rap_surface(nbnd, nks, nkz, high_symmetry, gcodek, aux_ind, &
   IMPLICIT NONE
   INTEGER, INTENT(IN) :: nks, nkz, nbnd
   INTEGER, INTENT(INOUT) ::  gcodek(nks), aux_ind(nks), gcodek_ext(nks), &
-                             ptypek(3,nks), rap(nbnd, nks)
+                             ptypek(3,nks), rap(nbnd, nks), lprojk(nks)
 
   LOGICAL, INTENT(INOUT) :: high_symmetry(nks)
   REAL(DP), INTENT(INOUT) :: gaugek(48,nks)
@@ -54,7 +54,9 @@ SUBROUTINE convert_rap_surface(nbnd, nks, nkz, high_symmetry, gcodek, aux_ind, &
            gaugek(:,ike)=gaugek(:,ik2)
            ptypek(:,ike)=ptypek(:,ik2)
            gcodek(ike)=gcodek(ik2)
+           gcodek_ext(ike)=gcodek_ext(ik2)
            aux_ind(ike) = aux_ind(ik2)
+           lprojk(ike)=lprojk(ik2)
 
 !   a point must be high symmetry in all planes.
 !
@@ -105,6 +107,8 @@ ALLOCATE(plot(nlayers))
 !
 IF (sur_layers * 2 > nat ) &
    CALL errore('identify_surface_states','too many surface layers',1)
+WRITE(stdout,'(/, 5x, "Surface#1 is layer", i4, "Surface#2 is layer",i4)') &
+                    surface1, surface2
 plot=.FALSE.
 DO na=1, sur_layers
    plot(surface1-na+1)=.TRUE.

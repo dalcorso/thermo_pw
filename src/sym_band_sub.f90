@@ -34,7 +34,9 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   USE proj_rap_point_group, ONLY : which_elem, char_mat_proj, nrap_proj, &
                                    name_rap_proj, group_desc, nsym_proj
   USE point_group,          ONLY : find_group_info_ext, find_irr_proj, &
-                                   find_projection_type, nsym_group
+                                   find_projection_type, nsym_group,  &
+                                   has_sigma_h
+  USE thermo_sym,           ONLY : code_group_save
   USE control_2d_bands,     ONLY : nkz, averag, vacuum, aux_ind_sur,  &
                                    sym_divide, nlayers, identify_sur, &
                                    surface1, surface2
@@ -63,7 +65,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
              nsymk, isym
   INTEGER :: sk_is(3,3,48), gk_is(3,48), invs_is(48)
   INTEGER :: sk_in(3,3,48), ftau_in(3,48), gk_in(3,48), invs_in(48)
-  LOGICAL :: is_symmorphic, search_sym
+  LOGICAL :: is_symmorphic, search_sym, type1
   LOGICAL, ALLOCATABLE :: high_symmetry(:)
   LOGICAL :: exst, lprinted
   REAL(DP), PARAMETER :: accuracy=1.d-4
@@ -527,11 +529,17 @@ SUBROUTINE sym_band_sub(filband, spin_component)
      IF (nkz>1.AND.sym_divide) THEN
         nks_ = (nks2tot - nks1tot + 1) / nkz
         ALLOCATE(aux_ind_sur(nks_,nkz))
-        IF (MOD(nkz,2)==0) THEN
-           ishift=0
-        ELSE
+        type1=has_sigma_h(code_group_save)
+        IF (type1) THEN
            ishift=nks_
+        ELSE
+           ishift=0
         ENDIF
+!        IF (MOD(nkz,2)==0) THEN
+!           ishift=0
+!        ELSE
+!           ishift=nks_
+!        ENDIF
         aux_ind_sur=0
         DO ik = 1, nks_
            ik2 = ik + ishift

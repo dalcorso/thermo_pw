@@ -113,7 +113,7 @@ color(5)='color_gray'
 !   projective or standard
 !
 color_map=1
-IF (enhance_plot.AND.nkz==1) THEN
+IF (enhance_plot) THEN
    DO n=1,nks
       IF (lprojk(n)==1) color_map(n)=2
    ENDDO
@@ -168,7 +168,7 @@ IF (q_in_band_form) THEN
    ENDDO
 END IF
 
-IF (enhance_plot.AND.nkz==1) THEN
+IF (enhance_plot) THEN
 !
 !  with an enhanced plot, write the point group of the initial point
 !  and of the line. If the last point of a panel does not coincide with 
