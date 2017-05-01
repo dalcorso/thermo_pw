@@ -432,8 +432,10 @@ IF (convt) THEN
 !    Add the contribution of this change of the self-consistent potential
 !    to the effective charges
 !
-   IF (nlcc_any.and.zeu) CALL addnlcc_zstar_eu_us_tpw( drhoscfh )
-   IF (zeu) CALL zstar_eu_us_tpw (dvscfin)
+   IF (zeu) THEN
+      CALL addnlcc_zstar_eu_us_tpw( drhoscfh )
+      CALL zstar_eu_us_tpw (dvscfin)
+   ENDIF
 ENDIF
 
   deallocate (h_diag)

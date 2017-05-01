@@ -14,6 +14,7 @@ addnlcc_zstar_eu_us.o \
 adddvepsi_us.o \
 adddvscf_tran.o \
 addusddenseq.o \
+add_zstar_ue.o \
 add_zstar_us.o \
 apply_ac.o \
 allocate_phq.o \

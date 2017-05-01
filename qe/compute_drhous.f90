@@ -13,9 +13,9 @@ subroutine compute_drhous_tpw (drhous, dbecsum, wgg, becq, alpq)
   !    This routine computes the part of the change of the charge density
   !    which is due to the orthogonalization constraint on wavefunctions
   !
-  !
+  
   USE kinds,      ONLY : DP
-  USE ions_base,  ONLY : nat
+  USE ions_base,  ONLY : nat, ityp, atm
   USE wavefunctions_module,  ONLY: evc
   USE buffers,    ONLY : get_buffer
   USE uspp,       ONLY : okvan, nkb, vkb
@@ -37,6 +37,8 @@ subroutine compute_drhous_tpw (drhous, dbecsum, wgg, becq, alpq)
   USE efield_mod, ONLY : zstarue0
   USE units_ph,   ONLY : iuwfc, lrwfc
   USE becmod,     ONLY : bec_type
+  USE partial,    ONLY : done_irr, comp_irr
+  USE io_global,  ONLY : stdout
   USE mp_bands,   ONLY : intra_bgrp_comm
   USE mp,         ONLY : mp_sum
 
@@ -57,7 +59,7 @@ subroutine compute_drhous_tpw (drhous, dbecsum, wgg, becq, alpq)
   real(DP) :: wgg (nbnd, nbnd, nksq)
   ! input: the weights
 
-  integer :: npw, npwq, ik, ikq, ikk, ig, nu_i, ibnd, ios, jpol
+  integer :: npw, npwq, ik, ikq, ikk, ig, nu_i, ibnd, ios, jpol, ipol, na
   ! counter on k points
   ! the point k+q
   ! record for wfcs at k point
@@ -73,12 +75,15 @@ subroutine compute_drhous_tpw (drhous, dbecsum, wgg, becq, alpq)
   complex(DP), allocatable :: evcr (:,:), dpsi_save(:,:)
   ! the wavefunctions in real space
   COMPLEX(DP) :: zdotc
+  LOGICAL :: add_zstar
 
   if (.not.okvan) return
+  add_zstar= (zeu.OR.zue.AND.(.NOT.done_start_zstar)).AND.comp_irr(0).AND. &
+             (.NOT. done_irr(0))
 
   call start_clock ('com_drhous')
   allocate (evcr( dffts%nnr, nbnd))
-  IF (zeu.or.zue) allocate ( dpsi_save ( npwx*npol , nbnd))
+  IF (add_zstar) allocate ( dpsi_save ( npwx*npol , nbnd))
   !
   IF (zeu.or.zue) zstarue0  = (0.d0, 0.d0)
   drhous(:,:,:) = (0.d0, 0.d0)
@@ -126,15 +131,11 @@ subroutine compute_drhous_tpw (drhous, dbecsum, wgg, becq, alpq)
 !   implemented in compute_nldyn has a better scaling with the size
 !   of the system.  
 !  
-        IF (zeu.OR.zue.AND..NOT.done_start_zstar) THEN
+        IF (add_zstar) THEN
            dpsi_save=dpsi
            DO jpol=1,3
               dvpsi=(0.0,0.0)
               call dvpsi_e(ik, jpol)
-!
-! NB: The minus sign is due to the fact that dpsi_save contains
-!     -|psi_j><psi_j| dS/du |psi_i>
-!
 !
 ! NB: The minus sign is due to the fact that dpsi_save contains
 !     -|psi_j><psi_j| dS/du |psi_i>
@@ -148,10 +149,11 @@ subroutine compute_drhous_tpw (drhous, dbecsum, wgg, becq, alpq)
      enddo
   enddo
 
-  IF (zeu.OR.zue.AND..NOT.done_start_zstar) &
+  IF (add_zstar) &
          CALL mp_sum ( zstarue0, intra_bgrp_comm )
+
   deallocate(evcr)
-  IF (zeu.or.zue) DEALLOCATE(dpsi_save)
+  IF (add_zstar) DEALLOCATE(dpsi_save)
 
   call stop_clock ('com_drhous')
   return

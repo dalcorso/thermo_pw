@@ -34,6 +34,7 @@ SUBROUTINE phescf_tpw()
   USE freq_ph
   USE optical,         ONLY : current_w, fru, polarc, epsilonc, epsilonm1c, &
                               lr1dwf, iu1dwf, lcfreq
+  USE partial,         ONLY : comp_irr
   USE images_omega,    ONLY : comp_f
   USE ramanm,          ONLY : ramtns, lraman, elop, done_lraman, done_elop
   USE buffers,         ONLY : close_buffer, open_buffer
@@ -44,6 +45,9 @@ SUBROUTINE phescf_tpw()
   !
   LOGICAL :: exst_mem, exst
   !
+
+  IF ( .NOT. comp_irr(0)  ) RETURN
+
   IF ( rec_code_read >  1 ) THEN
      IF (done_epsil) call summarize_epsilon()
      IF (done_zeu) call summarize_zeu()

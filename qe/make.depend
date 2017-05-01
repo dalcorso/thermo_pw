@@ -10,6 +10,16 @@ add_dkmds.o : ../../Modules/noncol.o
 add_dkmds.o : ../../Modules/uspp.o
 add_dkmds.o : ../../PHonon/PH/phcom.o
 add_dkmds.o : ../../PW/src/pwcom.o
+add_zstar_ue.o : ../../LR_Modules/lrcom.o
+add_zstar_ue.o : ../../Modules/kind.o
+add_zstar_ue.o : ../../Modules/mp.o
+add_zstar_ue.o : ../../Modules/mp_global.o
+add_zstar_ue.o : ../../Modules/noncol.o
+add_zstar_ue.o : ../../Modules/uspp.o
+add_zstar_ue.o : ../../Modules/wavefunctions.o
+add_zstar_ue.o : ../../PHonon/PH/phcom.o
+add_zstar_ue.o : ../../PW/src/buffers.o
+add_zstar_ue.o : ../../PW/src/pwcom.o
 add_zstar_us.o : ../../LR_Modules/lrcom.o
 add_zstar_us.o : ../../Modules/becmod.o
 add_zstar_us.o : ../../Modules/cell_base.o

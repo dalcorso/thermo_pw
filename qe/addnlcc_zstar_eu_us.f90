@@ -21,7 +21,7 @@ SUBROUTINE addnlcc_zstar_eu_us_tpw( drhoscf )
   USE uspp,      ONLY : nlcc_any
   USE fft_base,  ONLY : dfftp
 
-  USE efield_mod, ONLY : zstareu0
+  USE zstar_add, ONLY : zstareu0_rec
   USE qpoint,    ONLY : xq
   USE modes,     ONLY : npert, nirr
   USE eqv,       ONLY : dmuxc
@@ -43,6 +43,7 @@ SUBROUTINE addnlcc_zstar_eu_us_tpw( drhoscf )
   COMPLEX(DP), ALLOCATABLE :: drhoc(:)
   COMPLEX(DP), ALLOCATABLE :: dvaux(:,:), zstareu0_wrk(:,:)
 
+  zstareu0_rec=(0.0_DP,0.0_DP)
   IF (.NOT.nlcc_any) RETURN
 
   ALLOCATE( drhoc(dfftp%nnr) )
@@ -82,7 +83,7 @@ SUBROUTINE addnlcc_zstar_eu_us_tpw( drhoscf )
 
            IF ( dft_is_gradient() ) &
               CALL dgradcorr (rho%of_r, grho, dvxc_rr, dvxc_sr, dvxc_ss, &
-              dvxc_s, xq, drhoscf (1, 1, ipert),  &
+              dvxc_s, xq, drhoscf (1, 1, ipol),  &
               dfftp%nnr, nspin_mag, nspin_gga, nl, ngm, g, alat, dvaux)
         
            DO is = 1, nspin_lsda
@@ -103,7 +104,7 @@ SUBROUTINE addnlcc_zstar_eu_us_tpw( drhoscf )
 !       All pools make the same calculation, so we do not need
 !       to collect the results over all pools.
 !
-  zstareu0=zstareu0+zstareu0_wrk
+  zstareu0_rec=zstareu0_rec+zstareu0_wrk
 
   DEALLOCATE( zstareu0_wrk )
   DEALLOCATE( drhoc )

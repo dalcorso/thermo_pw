@@ -21,7 +21,6 @@ SUBROUTINE phqscf_tpw
   USE io_global,  ONLY : stdout, ionode
   USE fft_base,   ONLY : dfftp
   USE uspp,  ONLY: okvan
-  USE efield_mod, ONLY : zstarue0, zstarue0_rec
   USE control_ph, ONLY : zue, convt, rec_code
   USE partial,    ONLY : done_irr, comp_irr
   USE modes,      ONLY : nirr, npert
@@ -90,15 +89,7 @@ SUBROUTINE phqscf_tpw
            !   add the contribution of the modes imode0+1 -> imode+npe
            !   to the effective charges Z(Us,E) (Us=scf,E=bare)
            !
-           IF (zue) CALL add_zstar_ue (imode0, npe )
-           IF (zue.AND. okvan) CALL add_zstar_ue_us(imode0, npe )
-           IF (zue) THEN
-
-              call mp_sum ( zstarue0_rec, intra_bgrp_comm )
-              call mp_sum ( zstarue0_rec, inter_pool_comm )
-
-              zstarue0(:,:)=zstarue0(:,:)+zstarue0_rec(:,:)
-           END IF
+           IF (zue) CALL add_zstar_ue_tpw (imode0, npe )
            !
            WRITE( stdout, '(/,5x,"Convergence has been achieved ")')
            done_irr (irr) = .TRUE.

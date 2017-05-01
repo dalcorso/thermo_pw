@@ -31,6 +31,7 @@ SUBROUTINE zstar_eu_us_tpw(dvscfin)
   USE lrus,       ONLY : int3_paw
   USE zstar_add,  ONLY : zstareu0_rec
   USE modes,      ONLY : npert, nirr
+  USE partial,    ONLY : done_irr, comp_irr
   USE units_ph,   ONLY : lrdrhous, iudrhous
   USE io_global,  ONLY : stdout
 
@@ -45,11 +46,11 @@ SUBROUTINE zstar_eu_us_tpw(dvscfin)
 
   COMPLEX(DP), INTENT(IN) :: dvscfin( dfftp%nnr , nspin_mag, 3)
   COMPLEX(DP), ALLOCATABLE :: drhoscfh (:,:)
+  COMPLEX(DP):: zstareu0_wrk (3,3*nat)
   COMPLEX(DP), EXTERNAL :: zdotc
 
   INTEGER :: icar, jcar
 
-  zstareu0_rec = ( 0.0_DP, 0.0_DP ) 
   IF (.NOT.okvan) RETURN
 
   CALL start_clock('zstar_eu_us')
@@ -62,6 +63,7 @@ SUBROUTINE zstar_eu_us_tpw(dvscfin)
 !
   imode0 = 0
   ALLOCATE(drhoscfh(dfftp%nnr,nspin_mag)) 
+  zstareu0_wrk=(0.0_DP, 0.0_DP)
 
   DO irr = 1, nirr
      npe = npert(irr)
@@ -71,7 +73,7 @@ SUBROUTINE zstar_eu_us_tpw(dvscfin)
            CALL get_buffer (drhoscfh, lrdrhous, iudrhous, mode)
         CALL mp_bcast(drhoscfh, root_pool, inter_pool_comm)
         DO jpol = 1, 3
-           zstareu0_rec(jpol,mode) =  zstareu0_rec(jpol,mode) -             &
+           zstareu0_wrk(jpol,mode) =  zstareu0_wrk(jpol,mode) -             &
                zdotc(dfftp%nnr*nspin_mag,dvscfin(1,1,jpol),1,drhoscfh,1) &
                * omega / DBLE(dfftp%nr1*dfftp%nr2*dfftp%nr3) 
         ENDDO
@@ -79,9 +81,10 @@ SUBROUTINE zstar_eu_us_tpw(dvscfin)
      imode0 = imode0 + npe
   ENDDO
 !
-!  Collect the contribution of all pools and of all g vectors
+!  Collect the contribution of all g vectors
 !
-  CALL mp_sum ( zstareu0_rec, intra_bgrp_comm )
+  CALL mp_sum ( zstareu0_wrk, intra_bgrp_comm )
+  zstareu0_rec= zstareu0_rec + zstareu0_wrk
 !
 !  Compute the PAW contribution. This term is present only in the PAW case.
 !

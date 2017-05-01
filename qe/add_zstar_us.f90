@@ -35,6 +35,7 @@ subroutine add_zstar_us_tpw()
   USE modes,     ONLY : u, nirr, npert
   USE buffers,   ONLY : get_buffer
   USE units_ph,  ONLY : lrcom, iucom, lrwfc, iuwfc
+  USE partial,   ONLY : done_irr, comp_irr
   USE io_global, ONLY : stdout
 
   USE mp_global, ONLY : inter_pool_comm, intra_bgrp_comm
@@ -53,6 +54,7 @@ subroutine add_zstar_us_tpw()
   COMPLEX(DP), ALLOCATABLE :: aux1(:,:)
 
 
+  IF ( .NOT. comp_irr(0) .OR. done_irr(0) ) RETURN
   IF (.NOT. (zeu.OR.zue).OR. done_start_zstar ) RETURN
   IF (rec_code_read > -30 ) RETURN
 
