@@ -22,6 +22,7 @@ USE io_global,       ONLY : ionode
 
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: xmin, xmax, ymin, ymax
+INTEGER :: ierr, system
 CHARACTER(LEN=*), INTENT(IN) :: data_filename, psfilename, xlabel, ylabel
 
 CHARACTER(LEN=256) :: gnu_filename, filename
@@ -46,8 +47,11 @@ CALL gnuplot_write_file_data(data_filename,'plot_width',colore,.TRUE.,.TRUE.,&
 CALL gnuplot_end()
 
 IF (lgnuplot.AND.ionode) &
-   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
-                                       //TRIM(gnu_filename), WAIT=.FALSE.)
+   ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+
+!IF (lgnuplot.AND.ionode) &
+!   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
+!                                       //TRIM(gnu_filename), WAIT=.FALSE.)
 
 RETURN
 END SUBROUTINE simple_plot

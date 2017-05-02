@@ -103,6 +103,7 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
   CHARACTER(LEN=11) :: group_name
 
   INTEGER :: find_free_unit
+  INTEGER :: ierr, system
 
   IF ( my_image_id /= root_image ) RETURN
 
@@ -851,8 +852,11 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
 
   CALL gnuplot_end()
   IF (lgnuplot.AND.ionode) &
-     CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '//TRIM(gnu_filename),&
-                                                             WAIT=.FALSE.)
+     ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+
+!  IF (lgnuplot.AND.ionode) &
+!     CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '//TRIM(gnu_filename),&
+!                                                             WAIT=.FALSE.)
 !
 !  First deallocate the variables that define the path read from file
 !

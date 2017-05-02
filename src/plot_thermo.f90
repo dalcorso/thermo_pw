@@ -25,6 +25,7 @@ USE mp_images,       ONLY : root_image, my_image_id
 USE io_global,       ONLY : ionode
 
 IMPLICIT NONE
+INTEGER :: ierr, system
 CHARACTER(LEN=256) :: gnu_filename, filename, filetherm
 
 IF ( my_image_id /= root_image ) RETURN
@@ -79,8 +80,11 @@ IF (ltherm_freq) &
 CALL gnuplot_end()
 
 IF (lgnuplot.AND.ionode) &
-   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
-                                       //TRIM(gnu_filename), WAIT=.FALSE.)
+   ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+
+!IF (lgnuplot.AND.ionode) &
+!   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
+!                                       //TRIM(gnu_filename), WAIT=.FALSE.)
 
 RETURN
 END SUBROUTINE plot_thermo
@@ -106,6 +110,7 @@ IMPLICIT NONE
 INTEGER, INTENT(IN) :: igeom
 CHARACTER(LEN=256) :: gnu_filename, filename, psfilename
 CHARACTER(LEN=6) :: int_to_char
+INTEGER :: ierr, system
 
 IF ( my_image_id /= root_image ) RETURN
 
@@ -139,8 +144,12 @@ CALL gnuplot_write_file_mul_data(filename,1,5,'color_blue',.TRUE.,.TRUE.,.FALSE.
 CALL gnuplot_end()
 
 IF (lgnuplot.AND.ionode) &
-   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
-                                       //TRIM(gnu_filename), WAIT=.FALSE.)
+   ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+
+!IF (lgnuplot.AND.ionode) &
+!   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
+!                                       //TRIM(gnu_filename), WAIT=.FALSE.)
+
 RETURN
 END SUBROUTINE plot_thermo_debye
 
@@ -164,6 +173,7 @@ USE io_global,        ONLY : ionode
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: gnu_filename, filename, psfilename
+INTEGER :: ierr, system
 
 IF ( my_image_id /= root_image ) RETURN
 
@@ -201,8 +211,11 @@ CALL gnuplot_write_file_mul_data(filename,1,6,'color_blue',.TRUE.,.TRUE.,.FALSE.
 CALL gnuplot_end()
 
 IF (lgnuplot.AND.ionode) &
-   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
-                                       //TRIM(gnu_filename), WAIT=.FALSE.)
+   ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+
+!IF (lgnuplot.AND.ionode) &
+!   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
+!                                       //TRIM(gnu_filename), WAIT=.FALSE.)
 
 RETURN
 END SUBROUTINE plot_el_thermo

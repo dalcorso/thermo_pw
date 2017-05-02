@@ -32,6 +32,7 @@ INTEGER :: n
 INTEGER :: iu_dos
 INTEGER :: find_free_unit
 REAL(DP) :: ymax, ymin, ymin1, ymax1, e1
+INTEGER :: ierr, system
 
 IF ( my_image_id /= root_image ) RETURN
 
@@ -150,8 +151,11 @@ IF (nspin==2) DEALLOCATE(ddos)
 DEALLOCATE(int_dos)
 
 IF (lgnuplot.AND.ionode) &
-  CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
-                                       //TRIM(gnu_filename), WAIT=.FALSE.)
+   ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+
+!IF (lgnuplot.AND.ionode) &
+!  CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
+!                                       //TRIM(gnu_filename), WAIT=.FALSE.)
 
 RETURN
 END SUBROUTINE plot_dos

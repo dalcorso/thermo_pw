@@ -53,6 +53,7 @@ IMPLICIT NONE
 CHARACTER(LEN=256) :: gnu_filename, filename, string
 CHARACTER(LEN=6), EXTERNAL :: int_to_char
 INTEGER :: im
+INTEGER :: ierr, system
 
 IF ( my_image_id /= root_image ) RETURN
 
@@ -134,8 +135,11 @@ END DO
 CALL gnuplot_end()
 
 IF (lgnuplot.AND.ionode) &
-   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
-                                       //TRIM(gnu_filename), WAIT=.FALSE.)
+   ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+
+!IF (lgnuplot.AND.ionode) &
+!   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
+!                                       //TRIM(gnu_filename), WAIT=.FALSE.)
 
 RETURN
 END SUBROUTINE plot_epsilon_omega_opt
@@ -167,6 +171,7 @@ IMPLICIT NONE
 CHARACTER(LEN=256) :: gnu_filename, filename, string
 CHARACTER(LEN=6), EXTERNAL :: int_to_char
 INTEGER :: im
+INTEGER :: ierr, system
 
 IF ( my_image_id /= root_image ) RETURN
 
@@ -198,8 +203,11 @@ CALL gnuplot_write_file_mul_data(filename,1,6,'color_red',.TRUE.,&
 CALL gnuplot_end()
 
 IF (lgnuplot.AND.ionode) &
-   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
-                                       //TRIM(gnu_filename), WAIT=.FALSE.)
+   ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+
+!IF (lgnuplot.AND.ionode) &
+!   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
+!                                       //TRIM(gnu_filename), WAIT=.FALSE.)
 
 RETURN
 END SUBROUTINE plot_epsilon_omega_q

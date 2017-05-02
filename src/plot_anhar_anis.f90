@@ -45,6 +45,7 @@ CHARACTER(LEN=256) :: gnu_filename, filename, filename1, filename2, &
                       filename7, filename8, filename9, filenameps
 CHARACTER(LEN=8) :: float_to_char
 LOGICAL :: lgrun
+INTEGER :: ierr, system
 
 IF ( my_image_id /= root_image ) RETURN
 
@@ -265,8 +266,11 @@ END IF
 CALL gnuplot_end()
 
 IF (lgnuplot.AND.ionode) &
-  CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
-                                       //TRIM(gnu_filename), WAIT=.FALSE.)
+   ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+
+!IF (lgnuplot.AND.ionode) &
+!  CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
+!                                       //TRIM(gnu_filename), WAIT=.FALSE.)
 
 RETURN
 END SUBROUTINE plot_anhar_anis

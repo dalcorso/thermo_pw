@@ -76,6 +76,7 @@ SUBROUTINE thermo_summary()
              code_group1
   INTEGER :: laue_class
   INTEGER :: find_free_unit
+  INTEGER :: ierr, system
   LOGICAL :: lpolar, lelc, lpiezo, check_group_ibrav
   CHARACTER(LEN=12)  :: spaceg_name
   CHARACTER(LEN=11)  :: gname, group_name
@@ -601,8 +602,11 @@ WRITE(stdout,'(5x,70("-"))')
                 label_list, asy_filename)
 
            IF (lasymptote.AND.ionode) &
-              CALL EXECUTE_COMMAND_LINE(TRIM(asymptote_command)//' '&
-                                       //TRIM(asy_filename), WAIT=.FALSE.)
+              ierr=system(TRIM(asymptote_command)//' '//TRIM(asy_filename))
+
+!           IF (lasymptote.AND.ionode) &
+!              CALL EXECUTE_COMMAND_LINE(TRIM(asymptote_command)//' '&
+!                                       //TRIM(asy_filename), WAIT=.FALSE.)
         ENDIF
 !
 !  Form factors of the atoms
@@ -650,8 +654,11 @@ WRITE(stdout,'(5x,70("-"))')
              letter, letter_path, npk_label, label_list, asy_filename)
 
         IF (lasymptote.AND.ionode) &
-           CALL EXECUTE_COMMAND_LINE(TRIM(asymptote_command)//' '&
-                                       //TRIM(asy_filename), WAIT=.FALSE.)
+           ierr=system(TRIM(asymptote_command)//' '//TRIM(asy_filename))
+
+!        IF (lasymptote.AND.ionode) &
+!           CALL EXECUTE_COMMAND_LINE(TRIM(asymptote_command)//' '&
+!                                       //TRIM(asy_filename), WAIT=.FALSE.)
      ENDIF
      !
   ENDIF

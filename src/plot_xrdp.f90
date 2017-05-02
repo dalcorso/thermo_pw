@@ -35,6 +35,7 @@ INTEGER, PARAMETER :: data_max=10000
 INTEGER :: miller(3,data_max), multiplicity(data_max)
 REAL(DP) :: theta2(data_max), dist(data_max), intensity(data_max), x(2), y(2)
 INTEGER :: ndata, idata, iunxrdp
+INTEGER :: ierr, system
 INTEGER :: find_free_unit
 
 IF ( my_image_id /= root_image ) RETURN
@@ -99,8 +100,10 @@ CALL gnuplot_write_command('plot x+1000',.FALSE.)
 CALL gnuplot_end()
 
 IF (lgnuplot.AND.ionode) &
-  CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
-                                       //TRIM(gnu_filename), WAIT=.FALSE.)
+  ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+!IF (lgnuplot.AND.ionode) &
+!  CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
+!                                       //TRIM(gnu_filename), WAIT=.FALSE.)
 
 RETURN
 END SUBROUTINE plot_xrdp

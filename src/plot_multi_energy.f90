@@ -48,6 +48,7 @@ SUBROUTINE plot_multi_energy()
   REAL(DP) :: xmin, xmax, ymin, ymax
   INTEGER :: nx, ny, icont, tot_n, iwork
   INTEGER :: compute_nwork
+  INTEGER :: ierr, system
 
   IF ( my_image_id /= root_image ) RETURN
 
@@ -188,8 +189,11 @@ SUBROUTINE plot_multi_energy()
   CALL gnuplot_end()
 
   IF (lgnuplot.AND.ionode) &
-     CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
-                                       //TRIM(gnu_filename), WAIT=.FALSE.)
+     ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+
+!  IF (lgnuplot.AND.ionode) &
+!     CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
+!                                       //TRIM(gnu_filename), WAIT=.FALSE.)
 
   RETURN
   END SUBROUTINE plot_multi_energy

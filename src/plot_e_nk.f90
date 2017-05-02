@@ -31,6 +31,7 @@ CHARACTER(LEN=256) :: gnu_filename, filename
 CHARACTER(LEN=6), EXTERNAL :: int_to_char
 INTEGER :: isigma
 REAL(DP) :: xmin, xmax
+INTEGER :: ierr, system
 
 IF ( my_image_id /= root_image ) RETURN
 
@@ -71,8 +72,12 @@ ENDDO
 CALL gnuplot_end()
 
 IF (lgnuplot.AND.ionode) &
-   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
-                                       //TRIM(gnu_filename), WAIT=.FALSE.)
+   ierr=system(TRIM(gnuplot_command)//' '&
+                                       //TRIM(gnu_filename))
+
+!IF (lgnuplot.AND.ionode) &
+!   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
+!                                       //TRIM(gnu_filename), WAIT=.FALSE.)
 
 RETURN
 END SUBROUTINE plot_e_nk
