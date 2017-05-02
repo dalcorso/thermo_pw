@@ -33,7 +33,7 @@ subroutine add_zstar_ue_tpw (imode0, npe)
 
   integer, intent(in) :: imode0, npe
 
-  integer :: ibnd, jpol, ipert, nrec, mode, ik, na, ipol
+  integer :: ibnd, jpol, ipert, nrec, mode, ik
   ! counter on bands
   ! counter on polarization
   ! counter on pertubations

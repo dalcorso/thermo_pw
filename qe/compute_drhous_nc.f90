@@ -38,6 +38,7 @@ subroutine compute_drhous_nc_tpw (drhous, dbecsum, wgg, becq, alpq)
   USE efield_mod, ONLY : zstarue0
   USE units_ph,   ONLY : lrwfc, iuwfc
   USE becmod,     ONLY : bec_type
+  USE partial,    ONLY : done_irr, comp_irr
   USE mp_bands,   ONLY : intra_bgrp_comm
   USE mp,         ONLY : mp_sum
 
@@ -74,13 +75,16 @@ subroutine compute_drhous_nc_tpw (drhous, dbecsum, wgg, becq, alpq)
   complex(DP), allocatable :: evcr (:,:,:), dpsi_save(:,:)
   ! the wavefunctions in real space
   COMPLEX(DP) :: zdotc
+  LOGICAL :: add_zstar
 
   if (.not.okvan) return
+  add_zstar= (zeu.OR.zue.AND.(.NOT.done_start_zstar)).AND.comp_irr(0).AND. &
+             (.NOT. done_irr(0))
 
   call start_clock ('com_drhous')
 
   allocate (evcr( dffts%nnr, npol, nbnd))
-  IF (zeu.or.zue) allocate ( dpsi_save ( npwx*npol , nbnd))
+  IF (add_zstar) allocate ( dpsi_save ( npwx*npol , nbnd))
   !
   zstarue0  = (0.d0, 0.d0)
   drhous(:,:,:) = (0.d0, 0.d0)
@@ -128,7 +132,7 @@ subroutine compute_drhous_nc_tpw (drhous, dbecsum, wgg, becq, alpq)
 !   to calculate the part of the effective charges that depends
 !   on this orthogonality term.
 !
-       IF (zeu.or.zue) THEN
+       IF (add_zstar) THEN
           dpsi_save = dpsi
           DO jpol=1,3
              dvpsi=(0.0,0.0)
@@ -148,11 +152,10 @@ subroutine compute_drhous_nc_tpw (drhous, dbecsum, wgg, becq, alpq)
      enddo
   enddo
 
-  IF (zeu.OR.zue.AND..NOT.done_start_zstar) &
-         CALL mp_sum ( zstarue0, intra_bgrp_comm )
+  IF (add_zstar) CALL mp_sum ( zstarue0, intra_bgrp_comm )
 
   deallocate(evcr)
-  IF (zeu.or.zue) deallocate ( dpsi_save )
+  IF (add_zstar) deallocate ( dpsi_save )
 
   call stop_clock ('com_drhous')
   return
