@@ -286,7 +286,6 @@ CALL gnuplot_write_command('pbs_border_width=2',.FALSE.)
 !
 ! pbs as a filled area
 !
-!
 DO ilines=1,nlines
    DO ik=start_point(ilines),last_point(ilines)-1
       DO ibnd=1,2*nbnd_plot(ik)-1
@@ -295,6 +294,13 @@ DO ilines=1,nlines
               .OR.lth(ibnd,ik+1))) &
             .OR. (MOD(ibnd,2)==0 .AND. lth(ibnd,ik) .AND.     &
             ( .NOT.lth(ibnd,ik+1) .AND. .NOT.lth(ibnd,ik-1) )))  
+         ELSEIF (ik==1) THEN
+            doif=(.NOT.(MOD(ibnd,2)==0 .AND.(lth(ibnd,ik)&
+              .OR.lth(ibnd,ik+1))) &
+            .OR. (MOD(ibnd,2)==0 .AND. lth(ibnd,ik) .AND.     &
+            ( .NOT.lth(ibnd,ik+1) ))  &
+            .OR. (MOD(ibnd,2)==0 .AND. lth(ibnd,ik+1).AND.   &
+            (.NOT.lth(ibnd,ik).AND..NOT.lth(ibnd,ik+2)) ) ) 
          ELSE
             doif=(.NOT.(MOD(ibnd,2)==0 .AND.(lth(ibnd,ik)&
               .OR.lth(ibnd,ik+1))) &
@@ -376,6 +382,7 @@ DO ilines=1,nlines
       END DO
    END DO
 END DO
+
 !
 ! the perimeter of PBS is plotted
 !
