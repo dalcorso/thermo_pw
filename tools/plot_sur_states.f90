@@ -54,6 +54,7 @@ CHARACTER(LEN=256) :: str, filename1
 CHARACTER(LEN=30) :: xlabel, ylabel
 CHARACTER(LEN=6) :: int_to_char
 CHARACTER(LEN=9) :: code='plot_surf_states'
+INTEGER :: system
 
 CALL mp_startup ( start_images=.true. )
 CALL environment_start ( code )
@@ -281,8 +282,11 @@ END DO
 CALL gnuplot_end()
 
   IF (ionode) &
-     CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
-                                       //TRIM(gnu_filename), WAIT=.FALSE.)
+     ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+
+!  IF (ionode) &
+!     CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
+!                                       //TRIM(gnu_filename), WAIT=.FALSE.)
 
 !
 !   If this file contains also the magnetization information plot it in
@@ -370,8 +374,11 @@ IF (nspin > 1) THEN
    CALL gnuplot_end()
 
    IF (ionode) &
-      CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
-                                       //TRIM(gnu_filename), WAIT=.FALSE.)
+      ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+
+!   IF (ionode) &
+!      CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
+!                                       //TRIM(gnu_filename), WAIT=.FALSE.)
 
    DEALLOCATE(mag)
    DEALLOCATE(k)
