@@ -481,6 +481,8 @@ MODULE control_paths
   INTEGER, ALLOCATABLE :: label_list(:)   ! correspondence label xqaux list
   INTEGER, ALLOCATABLE :: label_disp_q(:)   ! correspondence label disp_q list
   CHARACTER(LEN=10) :: point_label_type   ! type of point labels
+  REAL(DP)          :: path_fact          ! a factor used to multiply the
+                                          ! number of points of the default path
   LOGICAL, ALLOCATABLE :: high_sym_path(:)! high_symmetry points along the path
   LOGICAL  :: long_path      ! if .TRUE. use the complete path in the BZ
   LOGICAL  :: old_path      ! if .TRUE. use the alternative path in the BZ

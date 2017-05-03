@@ -46,7 +46,8 @@ SUBROUTINE thermo_readin()
                                    q2d, q_in_cryst_coord, point_label_type, &
                                    disp_q, disp_nqs, npx, &
                                    letter_path, nrap_plot_in, &
-                                   label_disp_q, rap_plot_in, long_path, old_path
+                                   label_disp_q, rap_plot_in, long_path, &
+                                   old_path, path_fact
   USE control_gnuplot,      ONLY : flgnuplot, gnuplot_command, lgnuplot
   USE postscript_files,     ONLY : flpsband, flpsdisp, flpsmur, flpsdos, &
                                    flpstherm, flpsanhar, flpskeconv, &
@@ -145,6 +146,7 @@ SUBROUTINE thermo_readin()
                             only_bands_plot,                &
                             enhance_plot, long_path,        &
                             old_path,                       &
+                            path_fact,                      &
                             q2d,                            &
                             q_in_band_form,                 &
                             q_in_cryst_coord,               &
@@ -306,6 +308,7 @@ SUBROUTINE thermo_readin()
   enhance_plot=.FALSE.
   long_path=.TRUE.
   old_path=.FALSE.
+  path_fact=1.0_DP
   filband='output_band.dat'
   flpband='output_pband.dat'
   flpsband='output_band.ps'

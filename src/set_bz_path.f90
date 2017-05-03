@@ -10,7 +10,8 @@ USE kinds,            ONLY : DP
 USE cell_base,        ONLY : ibrav, celldm
 USE control_paths,    ONLY : xqaux, wqaux, npk_label, letter,     &
                              label_list, nqaux, point_label_type, &
-                             label_disp_q, letter_path, long_path, old_path
+                             label_disp_q, letter_path, long_path, old_path, &
+                             path_fact
 USE bz_form,          ONLY : find_bz_type
 USE thermo_sym,       ONLY : sg_number
 USE thermo_mod,       ONLY : what
@@ -479,6 +480,7 @@ CASE (16)
    letter_path=letter
    point_label_type='SC'
 END SELECT
+wqaux(1:npk_label)=wqaux(1:npk_label)*path_fact
 
 RETURN
 END SUBROUTINE set_bz_path

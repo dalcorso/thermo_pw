@@ -517,6 +517,9 @@ long_path  : if .TRUE. plot the bands in all the Brillouin zone path.
 old_path   : if .TRUE. use an alternative path, usually more similar to the one
              used in experimental papers (available only for a few lattices).
              Default: .FALSE.
+path_fact  : A factor that can be used to multiply the number of points
+             along each line of the default path.
+             Default: real 1.0
 filband    : file where the bands are written in the QE format
              Default: character(len=*) 'output_band.dat'
 flpband    : file(s) where the bands are written in gnuplot format.

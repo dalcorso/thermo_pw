@@ -32,7 +32,8 @@ SUBROUTINE bcast_thermo_input()
   USE control_bands,   ONLY : emin_input, emax_input, nbnd_bands, lsym,       &
                               enhance_plot
   USE control_paths,   ONLY : q_in_band_form, q_in_cryst_coord, q2d,          &
-                              point_label_type, npx, long_path, old_path
+                              point_label_type, npx, long_path, old_path,     &
+                              path_fact
   USE control_2d_bands, ONLY : lprojpbs, nkz, sym_divide, identify_sur,       &
                                gap_thr, sur_layers, sur_thr, force_bands,     &
                                only_bands_plot, dump_states, subtract_vacuum
@@ -119,6 +120,7 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( enhance_plot, meta_ionode_id, world_comm )
   CALL mp_bcast( long_path, meta_ionode_id, world_comm )
   CALL mp_bcast( old_path, meta_ionode_id, world_comm )
+  CALL mp_bcast( path_fact, meta_ionode_id, world_comm )
   CALL mp_bcast( flpband, meta_ionode_id, world_comm )
   CALL mp_bcast( filband, meta_ionode_id, world_comm )
   CALL mp_bcast( flpsband, meta_ionode_id, world_comm )
