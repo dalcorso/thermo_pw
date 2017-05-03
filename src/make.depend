@@ -442,9 +442,7 @@ set_bz_path.o : ../../Modules/bz_form.o
 set_bz_path.o : ../../Modules/cell_base.o
 set_bz_path.o : ../../Modules/kind.o
 set_bz_path.o : thermo_mod.o
-set_dos_kpoints.o : ../../Modules/cell_base.o
 set_dos_kpoints.o : ../../PW/src/start_k.o
-set_dos_kpoints.o : ../../PW/src/symm_base.o
 set_dos_kpoints.o : thermo_mod.o
 set_elastic_cons_work.o : ../../Modules/kind.o
 set_elastic_cons_work.o : ../../thermo_pw/lib/elastic_const.o
@@ -652,14 +650,13 @@ write_gnuplot_energy.o : ../../Modules/cell_base.o
 write_gnuplot_energy.o : ../../Modules/io_global.o
 write_gnuplot_energy.o : ../../Modules/kind.o
 write_gnuplot_energy.o : ../../Modules/mp.o
-write_gnuplot_energy.o : ../../Modules/mp_world.o
+write_gnuplot_energy.o : ../../Modules/mp_images.o
 write_gnuplot_energy.o : thermo_mod.o
 write_gruneisen_band.o : ../../Modules/io_global.o
 write_gruneisen_band.o : ../../Modules/ions_base.o
 write_gruneisen_band.o : ../../Modules/kind.o
 write_gruneisen_band.o : ../../Modules/mp.o
 write_gruneisen_band.o : ../../Modules/mp_images.o
-write_gruneisen_band.o : ../../thermo_pw/lib/point_group.o
 write_gruneisen_band.o : io_bands.o
 write_gruneisen_band.o : thermo_mod.o
 write_gruneisen_band_anis.o : ../../Modules/cell_base.o
@@ -668,7 +665,6 @@ write_gruneisen_band_anis.o : ../../Modules/ions_base.o
 write_gruneisen_band_anis.o : ../../Modules/kind.o
 write_gruneisen_band_anis.o : ../../Modules/mp.o
 write_gruneisen_band_anis.o : ../../Modules/mp_images.o
-write_gruneisen_band_anis.o : ../../thermo_pw/lib/point_group.o
 write_gruneisen_band_anis.o : ../../thermo_pw/lib/quadratic_surfaces.o
 write_gruneisen_band_anis.o : io_bands.o
 write_gruneisen_band_anis.o : thermo_mod.o

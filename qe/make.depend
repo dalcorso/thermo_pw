@@ -63,6 +63,7 @@ addnlcc_zstar_eu_us.o : ../../Modules/recvec.o
 addnlcc_zstar_eu_us.o : ../../Modules/uspp.o
 addnlcc_zstar_eu_us.o : ../../PHonon/PH/phcom.o
 addnlcc_zstar_eu_us.o : ../../PW/src/scf_mod.o
+addnlcc_zstar_eu_us.o : control_qe.o
 addusddenseq.o : ../../FFTXlib/fft_interfaces.o
 addusddenseq.o : ../../LR_Modules/lrcom.o
 addusddenseq.o : ../../Modules/fft_base.o
@@ -102,6 +103,7 @@ compute_drhous.o : ../../FFTXlib/fft_interfaces.o
 compute_drhous.o : ../../LR_Modules/lrcom.o
 compute_drhous.o : ../../Modules/becmod.o
 compute_drhous.o : ../../Modules/fft_base.o
+compute_drhous.o : ../../Modules/io_global.o
 compute_drhous.o : ../../Modules/ions_base.o
 compute_drhous.o : ../../Modules/kind.o
 compute_drhous.o : ../../Modules/mp.o
