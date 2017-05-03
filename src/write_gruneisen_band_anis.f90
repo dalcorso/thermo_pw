@@ -24,7 +24,7 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
   USE ph_freq_anharmonic,  ONLY : celldmf_t
   USE control_grun,   ONLY : temp_ph, volume_ph, celldm_ph
   USE initial_conf,   ONLY : ibrav_save, amass_save, ityp_save
-  USE control_thermo, ONLY : ltherm_dos, ltherm_freq
+  USE control_thermo, ONLY : ltherm_dos, ltherm_freq, set_internal_path
   USE temperature,    ONLY : temp, ntemp
   USE quadratic_surfaces, ONLY : evaluate_fit_quadratic, &
                                  evaluate_fit_grad_quadratic
@@ -159,7 +159,7 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
 !  calculate the BZ path that corresponds to the cm parameters
 !
   celldm(:)=cm(:)
-  CALL set_bz_path()
+  IF (set_internal_path) CALL set_bz_path()
   IF (nqaux > 0) CALL set_paths_disp()
   IF (disp_nqs /= nks) &
      CALL errore('write_gruneisen_band_anis','Problem with the path',1)

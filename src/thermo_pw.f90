@@ -37,7 +37,8 @@ PROGRAM thermo_pw
                                lconv_ke_test, lconv_nk_test,               &
                                after_disp, lelastic_const,                 &
                                lpiezoelectric_tensor, lpolarization,       &
-                               lpart2_pw, ltherm, ltherm_dos, ltherm_freq
+                               lpart2_pw, ltherm, ltherm_dos, ltherm_freq, &
+                               set_internal_path
   USE control_pwrun,    ONLY : do_punch
   USE control_elastic_constants, ONLY : elastic_algorithm
   USE control_2d_bands, ONLY : only_bands_plot
@@ -287,7 +288,7 @@ PROGRAM thermo_pw
 !
            ibrav=ibrav_geo(igeom)
            celldm(:)=celldm_geo(:,igeom)
-           CALL set_bz_path()
+           IF (set_internal_path) CALL set_bz_path()
         ENDIF
 !
 !  Set the BZ path for the present geometry
