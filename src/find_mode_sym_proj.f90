@@ -229,7 +229,7 @@ SUBROUTINE find_mode_sym_proj (u, w2, tau, nat, nsym, s, sr, ft, gk, invs, &
         IF ((ABS(NINT(ABS(DBLE(times)))-DBLE(times)) > 1.d-4).OR. &
              (ABS(AIMAG(times)) > eps) ) THEN 
            IF (lstop) THEN
-              CALL errore('find_mode_sym','unknown mode symmetry',1)
+              CALL errore('find_mode_sym_proj','unknown mode symmetry',1)
            ELSE
               counter=counter + dim_rap(igroup)-1
               ierr=1
