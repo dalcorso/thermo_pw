@@ -109,7 +109,7 @@ IF (identify_sur) THEN
         INQUIRE( FILE = 'band_files/info_data', EXIST = exst )
      CALL mp_bcast(exst, ionode_id, intra_image_comm)
      IF (.NOT. exst) THEN
-!        CALL errore('read_minimal_info','info_data not present',1)
+         CALL errore('read_minimal_info','info_data not present',1)
          ef=0.0_DP
          ierr=-1
          RETURN
@@ -147,12 +147,12 @@ IF (identify_sur) THEN
      CALL mp_bcast(ef, ionode_id, intra_image_comm)
      CALL mp_bcast(label_disp_q, ionode_id, intra_image_comm)
      CALL mp_bcast(disp_nqs, ionode_id, intra_image_comm)
-     IF (nkz > 1) &
+     IF (nkz > 1 .AND. sym_divide) &
         CALL mp_bcast(nks_, ionode_id, intra_image_comm)
      IF (.NOT.ionode) THEN
         ALLOCATE(nrap_plot(disp_nqs))
         ALLOCATE(rap_plot(12,disp_nqs))
-        ALLOCATE(aux_ind_sur(nks_,nkz))
+        IF (nkz>1 .AND. sym_divide) ALLOCATE(aux_ind_sur(nks_,nkz))
      ENDIF
      CALL mp_bcast(nrap_plot, ionode_id, intra_image_comm)
      CALL mp_bcast(rap_plot, ionode_id, intra_image_comm)
@@ -183,7 +183,6 @@ IF (identify_sur) THEN
 400  CALL mp_bcast(ios,ionode_id,intra_image_comm)
      IF (ios /= 0) CALL errore('read_minimal_info','problems writing file',ABS(ios))
   ENDIF
-
 
   RETURN
   END SUBROUTINE read_minimal_info
