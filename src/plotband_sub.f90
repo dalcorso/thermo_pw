@@ -60,7 +60,7 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
 !
 ! effective path variables
 !
-  INTEGER :: tot_points
+  INTEGER :: tot_points, tot_points_
   REAL(DP), ALLOCATABLE :: kx(:), k_eff(:,:), e_eff(:,:), gaugek_eff(:,:)
   INTEGER, ALLOCATABLE  :: rap_eff(:,:), gcodek_eff(:), aux_ind_eff(:), &
                            gcodek_ext_eff(:), ptypek_eff(:,:), lprojk_eff(:), &
@@ -94,7 +94,8 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
 
   INTEGER :: code_group_line, code_group_ext_line, ilines, irap, ibnd, &
              i, n, ik, spe, lpe, nbc, iq, ishift, ir, count0, &
-             nrapp, cpe, start_shift, last_shift, ncentral, iunout, ios
+             nrapp, cpe, start_shift, last_shift, ncentral, nlines_, &
+             iunout, ios
 
   LOGICAL :: exist_rap, type1, lso, print_eref, norap
 
@@ -669,6 +670,28 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
         ENDDO
      ENDIF
   ENDDO
+!
+!  In the pbs case we cannot use the symmetry information of the first and
+!  last layer if sym_divide has not transformed them
+!
+  IF (nkz > 1 .AND. lprojpbs .AND. (.NOT.sym_divide) .AND. exist_rap ) THEN
+     nlines_=nlines / nkz
+     DO ilines=1,nlines_
+        DO i=1,3
+           point_group_path(ilines,i)=point_group_path(ilines+nlines_,i)
+           point_group_path(nlines-ilines+1,i)=&
+                 point_group_path(nlines-nlines_-ilines+1,i)
+        ENDDO  
+        projective(ilines)=projective(ilines+nlines_)
+        projective(nlines-ilines+1)=projective(nlines-nlines_-ilines+1)
+     ENDDO
+     tot_points_= tot_points/nkz
+     DO ik=1,tot_points_
+        lprojk_eff(ik)=lprojk_eff(ik+tot_points_)
+        lprojk_eff(tot_points-ik+1)=lprojk_eff(tot_points-tot_points_-ik+1)
+     ENDDO
+  ENDIF
+  
 !
 !   here try to estimate the size of the path
 !
