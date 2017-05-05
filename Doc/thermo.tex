@@ -380,7 +380,7 @@ $\zeta_2=\cos\alpha$.
 \newpage
 
 \section{\color{coral}The strain tensor}
-The strain applied to the solid is defined by a $3\times 3$ tensor
+The strain is defined by a $3\times 3$ tensor
 $\epsilon$. We say that a strain $\epsilon$ is applied
 to the solid if the three primitive vectors 
 ${\bf a}_1$, ${\bf a}_2$, and ${\bf a}_3$, of the equilibrium configuration are
@@ -406,10 +406,9 @@ u_{j,i})$. Notice that $\epsilon_{i,j}$ are not the Lagrangian strains
 $\eta_{i,k}={1\over 2} ( u_{i,j} + u_{j,i} + u_{k,i}u_{k,j})$, but they
 differ from them only for quadratic terms in $u_{i,j}$. 
 
-In general, a strain can change not only the size of the
-unit cell but also its shape changing the type of Bravais lattice 
-needed to describe the solid. In this section we consider the different 
-strain types that are of interest for our applications and
+In general, a strain changes both the size of the
+and the shape of the unit cell possibly changing the Bravais lattice. 
+In this section we consider some strains of interest for our applications and
 discuss the type of units cells that result. 
 We consider the following strains:
 \begin{equation}
@@ -433,8 +432,6 @@ same way.
 0, & 0, &  0
 \end{array}
 \right),
-\end{equation}
-\begin{equation}
 \epsilon_{B'}=\left( \begin{array}{ccc}
 \epsilon_{1,1},& 0, & 0 
 \\
@@ -443,9 +440,6 @@ same way.
 0, & 0, & \epsilon_{1,1}
 \end{array}
 \right),
-\end{equation}
-and
-\begin{equation}
 \epsilon_{B''}=\left( \begin{array}{ccc}
 0, & 0, & 0 
 \\
@@ -456,7 +450,7 @@ and
 \right),
 \end{equation}
 are three strains that modify the $xy$, $xz$, and $yz$ plane 
-isotropically, while they do not change the other direction.
+isotropically, without changing the other direction.
 The following three strains modify the length in one direction, 
 $x$, $y$, or $z$, so they are compressions or dilatations in these directions:
 \begin{equation}
@@ -499,6 +493,33 @@ Then we consider shear strains first in all three directions:
 \epsilon_{1,2}, & 0, & \epsilon_{1,2} 
 \\
 \epsilon_{1,2}, & \epsilon_{1,2}, & 0
+\end{array}
+\right),
+\end{equation}
+with the possibility to apply different a sign in one direction
+\begin{equation}
+\epsilon_{F'}=\left( \begin{array}{ccc}
+0, & -\epsilon_{1,2}, & \epsilon_{1,2}
+\\
+-\epsilon_{1,2}, & 0, & \epsilon_{1,2} 
+\\
+\epsilon_{1,2}, & \epsilon_{1,2}, & 0
+\end{array}
+\right),
+\epsilon_{F''}=\left( \begin{array}{ccc}
+0, & \epsilon_{1,2}, & -\epsilon_{1,2}
+\\
+\epsilon_{1,2}, & 0, & \epsilon_{1,2} 
+\\
+-\epsilon_{1,2}, & \epsilon_{1,2}, & 0
+\end{array}
+\right),
+\epsilon_{F'''}=\left( \begin{array}{ccc}
+0, & \epsilon_{1,2}, & \epsilon_{1,2}
+\\
+\epsilon_{1,2}, & 0, & -\epsilon_{1,2} 
+\\
+\epsilon_{1,2}, & -\epsilon_{1,2}, & 0
 \end{array}
 \right),
 \end{equation}
@@ -593,12 +614,11 @@ the $y$ and $z$ directions.
 \end{array}
 \right).
 \end{equation}
-The strain is a symmetric tensors so it is possible to introduce 
-the Voigt notation where
+The strain is a symmetric tensors. Introducing the Voigt notation 
 $\epsilon_1=\epsilon_{1,1}$,
 $\epsilon_2=\epsilon_{2,2}$, $\epsilon_3=\epsilon_{3,3}$, but
 $\epsilon_4=2 \epsilon_{2,3}$, $\epsilon_5=2 \epsilon_{1,3}$, and
-$\epsilon_6=2 \epsilon_{1,2}$ and we can write a generic strain as:
+$\epsilon_6=2 \epsilon_{1,2}$ and a generic strain is:
 \begin{equation}
 \epsilon=\left( \begin{array}{ccc}
 \epsilon_1, & \epsilon_6/2, & \epsilon_5/2 
@@ -641,18 +661,20 @@ a_t&=& a_c \sqrt{1+2\epsilon_{1,2}^2} \\
 \cos\alpha &=& {\epsilon_{1,2} (\epsilon_{1,2} + 2) \over 
 1 + 2 \epsilon_{1,2}^2 }
 \end{eqnarray}
-The face-centered cubic cell is transformed in a rhombohedral unit cell 
+The face-centered cubic cell is transformed by $\epsilon_{F''}$
+in a rhombohedral unit cell 
 with parameters:
 \begin{eqnarray}
 a_t&=& {a_c \over 2} \sqrt{6 \epsilon_{1,2}^2+4 \epsilon_{1,2} +2} \\
 \cos\alpha &=& {5\epsilon_{1,2}^2+ 6\epsilon_{1,2} + 1 \over 
 6\epsilon_{1,2}^2 + 4\epsilon_{1,2}+2 },
 \end{eqnarray}
-while the body-centered cubic cell is transformed in a rhombohedral unit cell
+while the body-centered cubic cell is transformed by 
+$\epsilon_{F'''}$ in a rhombohedral unit cell
 with parameters:
 \begin{eqnarray}
-a_t&=& {a_c \over 2} \sqrt{ 4\epsilon_{1,2}^2 - 4\epsilon_{1,2} + 3 } \\
-\cos\alpha &=& {4\epsilon_{1,2}-1 \over 4\epsilon_{1,2}^2-4\epsilon_{1,2}+3}
+a_t&=& {a_c \over 2} \sqrt{ 4\epsilon_{1,2}^2 + 4\epsilon_{1,2} + 3 } \\
+\cos\alpha &=& -{4\epsilon_{1,2}+1 \over 4\epsilon_{1,2}^2+4\epsilon_{1,2}+3}
 \end{eqnarray}
 
 It is of interest to apply $\epsilon_B$ that transforms the 
@@ -1345,7 +1367,7 @@ tensor depends on the Laue class obtained by adding an inversion center to
 the group operations. From this relationship we find that for finite
 and small strains the total energy can be written as:
 \begin{equation}
-U= {V \over 2} \sum_{i,l} \epsilon_i C_{i,l} \epsilon_l
+U= {V \over 2} \sum_{i,l} \epsilon_i C_{i,l} \epsilon_l.
 \end{equation}
 By choosing the form of the strain $\epsilon$ and fitting the
 energy with a quadratic function we can calculate the elastic constants.
@@ -1361,16 +1383,16 @@ are independent on the Laue class and are $C_{11}=C_{22}=C_{33}$,
 $C_{12}=C_{13}=C_{23}$ and $C_{44}=C_{55}=C_{66}$. [1]
 Applying a strain $\epsilon_E$ the cell becomes tetragonal and we have:
 \begin{equation}
-\sigma_{1} = C_{12} \epsilon_3
+\sigma_{1} = C_{12} \epsilon_3,
 \end{equation}
 \begin{equation}
-\sigma_{3} = C_{11} \epsilon_3
+\sigma_{3} = C_{11} \epsilon_3.
 \end{equation}
 To calculate $C_{44}$ we can apply $\epsilon_F$ that
 transforms the cubic cell into a rhombohedral cell as described above. In
 this case we obtain
 \begin{equation}
-\sigma_{4} = C_{44} \epsilon_4
+\sigma_{4} = C_{44} \epsilon_4,
 \end{equation}
 and $\sigma_{5} = \sigma_{6} = \sigma_{4}$. \\
 In order to calculate the elastic constant using only the energy
@@ -1380,7 +1402,7 @@ U_A = {3 V \over 2} (C_{11} + 2C_{12}) \epsilon_1^2.
 \end{equation}
 The energy for a strain $\epsilon_E$ gives
 \begin{equation}
-U_E = {V \over 2} C_{11} \epsilon_3^2.
+U_E = {V \over 2} C_{11} \epsilon_3^2,
 \end{equation}
 and from these two relationships we can obtain both $C_{11}$ and $C_{12}$.
 Finally to calculate $C_{44}$, we can apply a strain $\epsilon_F$ 
@@ -1412,75 +1434,83 @@ discussed above also the $C_{16}=-C_{26}$ components are non zero.
 By doing a strain $\epsilon_E$ that conserves the shape of the tetragonal
 cell we obtain
 \begin{equation}
-\sigma_{1} = C_{13} \epsilon_3 
+\sigma_{1} = C_{13} \epsilon_3,
 \end{equation}
 \begin{equation}
-\sigma_{3} = C_{33} \epsilon_3 
+\sigma_{3} = C_{33} \epsilon_3,
 \end{equation}
 and we obtain $C_{13}$ and $C_{33}$.
 To obtain the other components of the tensor we must change the shape of the 
 unit cell. $\epsilon_C$ transforms the tetragonal cell in an orthorhombic cell 
 and gives:
 \begin{equation}
-\sigma_{1} = C_{11} \epsilon_1 
+\sigma_{1} = C_{11} \epsilon_1, 
 \end{equation}
 \begin{equation}
-\sigma_{2} =  C_{12} \epsilon_1
+\sigma_{2} = C_{12} \epsilon_1.
 \end{equation}
 Applying $\epsilon_G$ we obtain:
 \begin{equation}
-\sigma_{6} = C_{66} \epsilon_6 
+\sigma_{6} = C_{66} \epsilon_6.
 \end{equation}
 Finally applying the strain $\epsilon_H$ we obtain
 \begin{equation}
-\sigma_{5} = C_{55} \epsilon_5
+\sigma_{5} = C_{55} \epsilon_5,
 \end{equation}
 that gives $C_{55}$. \\
 For the Laue class $C_{4h} (4/m)$ the strain $\epsilon_G$ gives also 
 \begin{equation}
-\sigma_{1} = C_{16} \epsilon_6 
+\sigma_{1} = C_{16} \epsilon_6.
 \end{equation}
 
 To use the energy as a function of strain 
 we need the following strains and relationships. 
 By applying $\epsilon_C$ we get:
 \begin{equation}
-U_C= {V \over 2} C_{11} \epsilon_1^2
+U_C= {V \over 2} C_{11} \epsilon_1^2.
 \end{equation}
 By applying $\epsilon_E$ we get:
 \begin{equation}
-U_E= {V \over 2} C_{33} \epsilon_3^2
+U_E= {V \over 2} C_{33} \epsilon_3^2.
 \end{equation}
 By applying $\epsilon_B$ we get
 \begin{equation}
-U_B= {2 V \over 2} (C_{11} + C_{12}) \epsilon_1^2
+U_B= {2 V \over 2} (C_{11} + C_{12}) \epsilon_1^2.
 \end{equation}
-By applying $\epsilon_B'$ we get
+By applying $\epsilon_{B'}$ we get
 \begin{equation}
-U_B= {V \over 2} (C_{11} + C_{33} + 2 C_{13}) \epsilon_1^2
+U_{B'}= {V \over 2} (C_{11} + C_{33} + 2 C_{13}) \epsilon_1^2.
 \end{equation}
 These strains transform the tetragonal into an orthorhombic cell 
 and allow us to get four elastic constants. 
 To obtain the last two elastic constants we 
-must apply $\epsilon_G$ and we get
+must apply $\epsilon_G$ and we get:
 \begin{equation}
 U_G= {V \over 2} C_{66} \epsilon_6^2,
 \end{equation}
-applying $\epsilon_H$ we obtain
+applying $\epsilon_H$ we get:
 \begin{equation}
-U_H= {V \over 2} C_{55} \epsilon_5^2,
+U_H= {V \over 2} C_{55} \epsilon_5^2.
 \end{equation}
 Solving these equations we obtain:
 \begin{eqnarray}
 C_{11}&=&{1 \over V} {d^2 U_C \over d \epsilon_1^2}, \\ 
 C_{33}&=&{1 \over V} {d^2 U_E \over d \epsilon_3^2}, \\ 
 C_{12}&=&{1 \over 2 V} {d^2 U_B \over d \epsilon_1^2} - C_{11}, \\
-C_{13}&=&{1 \over 2 V} {d^2 U_{B'} \over d \epsilon_1^2} - {C_{11} \over 2} 
-                                                         - {C_{33} \over 2}, \\
+C_{13}&=&{1 \over 2 V} {d^2 U_{B'} \over d \epsilon_1^2} - 
+{(C_{11} +C_{33})\over 2}, \\
 C_{44}&=&{1 \over V} {d^2 U_G \over d \epsilon_4^2}, \\
 C_{66}&=&{1 \over V} {d^2 U_H \over d \epsilon_6^2}.
 \end{eqnarray}
-For the groups that require $C_{16}$ we must apply a strain ...
+For the groups that require $C_{16}$ we must apply simultaneously $\epsilon_C$
+and $\epsilon_G$ which give:
+\begin{equation}
+U_{C+G}={V \over 2} (C_{11}+2C_{16}+C_{66})\epsilon^2,
+\end{equation}
+from which we obtain:
+\begin{equation}
+C_{16}={1 \over 2V} {d^2 U_{C+G} \over d \epsilon^2} - {(C_{11}+C_{66})\over 2}.
+\end{equation}
 
 \subsection{\color{web-blue}Orthorhombic system}
 In this system all solids belong to the $D_{2h} (mmm)$ Laue class so
@@ -1536,13 +1566,13 @@ By applying $\epsilon_B$ we get:
 \begin{equation}
 U_B= {V \over 2} (C_{11} + C_{22} + 2 C_{12}) \epsilon_1^2.
 \end{equation}
-By applying $\epsilon_B'$ we get: 
+By applying $\epsilon_{B'}$ we get: 
 \begin{equation}
-U_B= {V \over 2} (C_{11} + C_{33} + 2 C_{13}) \epsilon_1^2.
+U_{B'}= {V \over 2} (C_{11} + C_{33} + 2 C_{13}) \epsilon_1^2.
 \end{equation}
-By applying $\epsilon_B''$ we get:
+By applying $\epsilon_{B''}$ we get:
 \begin{equation}
-U_B= {V \over 2} (C_{22} + C_{33} + 2 C_{23}) \epsilon_2^2.
+U_{B''}= {V \over 2} (C_{22} + C_{33} + 2 C_{23}) \epsilon_2^2.
 \end{equation}
 These strains conserve the orthorhombic cell and allow us to get
 six elastic constants. To obtain the last three elastic constants we 
@@ -1563,10 +1593,12 @@ Solving these equations we have:
 C_{11}&=&{1 \over V} {d^2 U_C \over d \epsilon_1^2}, \\ 
 C_{22}&=&{1 \over V} {d^2 U_D \over d \epsilon_2^2}, \\ 
 C_{33}&=&{1 \over V} {d^2 U_E \over d \epsilon_3^2}, \\ 
-C_{12}&=&{1 \over 2 V} {d^2 U_B \over d \epsilon_1^2} - {C_{11}\over 2} - 
-{C_{22}\over 2}, \\
-C_{13}&=&{1 \over 2 V} {d^2 U_{B'} \over d \epsilon_1^2} - {C_{11}\over 2} - {C_{33} \over 2}, \\
-C_{23}&=&{1 \over 2 V} {d^2 U_{B''} \over d \epsilon_2^2} - {C_{22}\over 2} - {C_{33} \over 2}, \\
+C_{12}&=&{1 \over 2 V} {d^2 U_B \over d \epsilon_1^2} - 
+{(C_{11}+C_{22})\over 2}, \\
+C_{13}&=&{1 \over 2 V} {d^2 U_{B'} \over d \epsilon_1^2} - 
+{(C_{11}+C_{33})\over 2}, \\
+C_{23}&=&{1 \over 2 V} {d^2 U_{B''} \over d \epsilon_2^2} - 
+{(C_{22}+C_{33})\over 2}, \\
 C_{44}&=&{1 \over V} {d^2 U_I \over d \epsilon_4^2}, \\
 C_{55}&=&{1 \over V} {d^2 U_H \over d \epsilon_5^2}, \\
 C_{66}&=&{1 \over V} {d^2 U_G \over d \epsilon_6^2}.
@@ -1588,11 +1620,11 @@ Applying $\epsilon_C$ we obtain
 \end{eqnarray}
 Moreover
 \begin{eqnarray}
-\sigma_5&=&C_{15} \epsilon_1
+\sigma_5&=&C_{15} \epsilon_1,
 \end{eqnarray}
 for the $b$-unique cell and 
 \begin{eqnarray}
-\sigma_6&=&C_{16} \epsilon_1
+\sigma_6&=&C_{16} \epsilon_1,
 \end{eqnarray}
 for the $c$-unique cell. \\
 Applying $\epsilon_D$ we obtain
@@ -1602,24 +1634,24 @@ Applying $\epsilon_D$ we obtain
 \end{eqnarray}
 Moreover
 \begin{eqnarray}
-\sigma_5&=&C_{25} \epsilon_2.
+\sigma_5&=&C_{25} \epsilon_2,
 \end{eqnarray}
 for the $b$-unique cell and 
 \begin{eqnarray}
-\sigma_6&=&C_{26} \epsilon_2.
+\sigma_6&=&C_{26} \epsilon_2,
 \end{eqnarray}
 for the $c$-unique cell. \\
-Finally applying $\epsilon_E$ we obtain
+Finally applying $\epsilon_E$ we obtain:
 \begin{eqnarray}
 \sigma_3&=&C_{33} \epsilon_3.
 \end{eqnarray}
 Moreover 
 \begin{eqnarray}
-\sigma_5&=&C_{35} \epsilon_3
+\sigma_5&=&C_{35} \epsilon_3,
 \end{eqnarray}
 for the $b$-unique cell and 
 \begin{eqnarray}
-\sigma_6&=&C_{36} \epsilon_3
+\sigma_6&=&C_{36} \epsilon_3,
 \end{eqnarray}
 for the $c$-unique cell. \\
 Applying $\epsilon_I$ we obtain
@@ -1628,107 +1660,107 @@ Applying $\epsilon_I$ we obtain
 \end{eqnarray}
 Moreover
 \begin{eqnarray}
-\sigma_6&=&C_{46} \epsilon_4
+\sigma_6&=&C_{46} \epsilon_4,
 \end{eqnarray}
 for the $b$-unique cell and
 \begin{eqnarray}
-\sigma_5&=&C_{45} \epsilon_4
+\sigma_5&=&C_{45} \epsilon_4,
 \end{eqnarray}
 for the $c$-unique cell. \\
-Applying $\epsilon_H$ we obtain
+Applying $\epsilon_H$ we obtain:
 \begin{eqnarray}
 \sigma_5&=&C_{55} \epsilon_5,
 \end{eqnarray}
 and applying $\epsilon_G$ we obtain
 \begin{eqnarray}
-\sigma_6&=&C_{66} \epsilon_6,
+\sigma_6&=&C_{66} \epsilon_6.
 \end{eqnarray}
 
 \subsection{\color{web-blue}Triclinic system}
 In this case all the components of the elastic constant tensors are non zero.
 We can apply $\epsilon_C$ and obtain:
 \begin{eqnarray}
-\sigma_1&=&C_{11} \epsilon_1  \\
-\sigma_2&=&C_{12} \epsilon_1  \\
-\sigma_3&=&C_{13} \epsilon_1  \\
-\sigma_4&=&C_{14} \epsilon_1  \\
-\sigma_5&=&C_{15} \epsilon_1  \\
-\sigma_6&=&C_{16} \epsilon_1  \\
+\sigma_1&=&C_{11} \epsilon_1,  \\
+\sigma_2&=&C_{12} \epsilon_1,  \\
+\sigma_3&=&C_{13} \epsilon_1,  \\
+\sigma_4&=&C_{14} \epsilon_1,  \\
+\sigma_5&=&C_{15} \epsilon_1,  \\
+\sigma_6&=&C_{16} \epsilon_1,  \\
 \end{eqnarray}
 where we have used the symmetry of the elastic constants matrix.
 Applying $\epsilon_D$ we obtain:
 \begin{eqnarray}
-\sigma_2&=&C_{22} \epsilon_2  \\
-\sigma_3&=&C_{23} \epsilon_2  \\
-\sigma_4&=&C_{24} \epsilon_2  \\
-\sigma_5&=&C_{25} \epsilon_2  \\
-\sigma_6&=&C_{26} \epsilon_2  \\
+\sigma_2&=&C_{22} \epsilon_2,  \\
+\sigma_3&=&C_{23} \epsilon_2,  \\
+\sigma_4&=&C_{24} \epsilon_2,  \\
+\sigma_5&=&C_{25} \epsilon_2,  \\
+\sigma_6&=&C_{26} \epsilon_2.  \\
 \end{eqnarray}
 Applying $\epsilon_E$ we obtain:
 \begin{eqnarray}
-\sigma_3&=&C_{33} \epsilon_3  \\
-\sigma_4&=&C_{34} \epsilon_3  \\
-\sigma_5&=&C_{35} \epsilon_3  \\
-\sigma_6&=&C_{36} \epsilon_3  \\
+\sigma_3&=&C_{33} \epsilon_3,  \\
+\sigma_4&=&C_{34} \epsilon_3,  \\
+\sigma_5&=&C_{35} \epsilon_3,  \\
+\sigma_6&=&C_{36} \epsilon_3.  \\
 \end{eqnarray}
 Applying $\epsilon_I$ we obtain:
 \begin{eqnarray}
-\sigma_4&=&C_{44} \epsilon_4  \\
-\sigma_5&=&C_{45} \epsilon_4  \\
-\sigma_6&=&C_{46} \epsilon_4  \\
+\sigma_4&=&C_{44} \epsilon_4,  \\
+\sigma_5&=&C_{45} \epsilon_4,  \\
+\sigma_6&=&C_{46} \epsilon_4.  \\
 \end{eqnarray}
 Applying $\epsilon_H$ we obtain:
 \begin{eqnarray}
-\sigma_5&=&C_{55} \epsilon_5  \\
-\sigma_6&=&C_{56} \epsilon_5  \\
+\sigma_5&=&C_{55} \epsilon_5,  \\
+\sigma_6&=&C_{56} \epsilon_5.  \\
 \end{eqnarray}
 Applying $\epsilon_G$ we obtain:
 \begin{eqnarray}
-\sigma_6&=&C_{66} \epsilon_6  \\
+\sigma_6&=&C_{66} \epsilon_6.  \\
 \end{eqnarray}
 Clearly in all cases, independent of the lattice, these equations can be
-applied to calculate the elastic constant, neglecting any symmetry
+applied to calculate the elastic constants, neglecting any symmetry
 information, but the number of calculations is larger than that needed
 when symmetry is used.
 
 For using the energy in the calculation we use the following
-relationships. Applying $\epsilon_C$ we get:
+relationships. By applying $\epsilon_C$ we get:
 \begin{equation}
-U_C= {V \over 2} C_{11} \epsilon_1^2
+U_C= {V \over 2} C_{11} \epsilon_1^2.
 \end{equation}
 By applying $\epsilon_D$ we get:
 \begin{equation}
-U_D= {V \over 2} C_{22} \epsilon_2^2
+U_D= {V \over 2} C_{22} \epsilon_2^2.
 \end{equation}
 By applying $\epsilon_E$ we get:
 \begin{equation}
-U_E= {V \over 2} C_{33} \epsilon_3^2
+U_E= {V \over 2} C_{33} \epsilon_3^2.
 \end{equation}
-By applying $\epsilon_B$ we get
+By applying $\epsilon_B$ we get:
 \begin{equation}
-U_B= {V \over 2} (C_{11} + C_{22} + 2 C_{12}) \epsilon_1^2
+U_B= {V \over 2} (C_{11} + C_{22} + 2 C_{12}) \epsilon_1^2.
 \end{equation}
-By applying $\epsilon_B'$ in which only $\epsilon_1$ and
-$\epsilon_3=\epsilon_1$ are non zero, we have
+By applying $\epsilon_{B'}$ in which only $\epsilon_1$ and
+$\epsilon_3=\epsilon_1$ are non zero, we get:
 \begin{equation}
-U_{B'}= {V \over 2} (C_{11} + C_{33} + 2 C_{13}) \epsilon_1^2
+U_{B'}= {V \over 2} (C_{11} + C_{33} + 2 C_{13}) \epsilon_1^2.
 \end{equation}
-By applying $\epsilon_B''$ in which only $\epsilon_2$ and
-$\epsilon_3=\epsilon_2$ are non zero, we have
+By applying $\epsilon_{B''}$ in which only $\epsilon_2$ and
+$\epsilon_3=\epsilon_2$ are non zero, we get:
 \begin{equation}
-U_{B''}= {V \over 2} (C_{22} + C_{33} + 2 C_{23}) \epsilon_2^2
+U_{B''}= {V \over 2} (C_{22} + C_{33} + 2 C_{23}) \epsilon_2^2,
 \end{equation}
-And in this way we get six elastic constant. Continuing as in the
+and in this way we get six elastic constant. Continuing as in the
 orthorhombic case we can
-apply $\epsilon_G$ and we get
+apply $\epsilon_G$ and we get:
 \begin{equation}
-U_G= {V \over 2} C_{66} \epsilon_6^2,
+U_G= {V \over 2} C_{66} \epsilon_6^2.
 \end{equation}
-applying $\epsilon_H$ we obtain
+By applying $\epsilon_H$ we obtain:
 \begin{equation}
-U_H= {V \over 2} C_{55} \epsilon_5^2,
+U_H= {V \over 2} C_{55} \epsilon_5^2.
 \end{equation}
-applying $\epsilon_I$ we obtain
+By applying $\epsilon_I$ we obtain:
 \begin{equation}
 U_I= {V \over 2} C_{44} \epsilon_4^2.
 \end{equation}
@@ -1772,9 +1804,9 @@ U_{E+G}= {V \over 2} (C_{33}+2 C_{36} + C_{66}) \epsilon^2.
 Similarly applying $\epsilon_E + \epsilon_H$ taking
 $\epsilon_3=\epsilon_5=\epsilon$ and we obtain:
 \begin{equation}
-U_{E+H}= {V \over 2} (C_{33}+2 C_{35} + C_{55}) \epsilon^2.
+U_{E+H}= {V \over 2} (C_{33}+2 C_{35} + C_{55}) \epsilon^2,
 \end{equation}
-Similarly applying $\epsilon_E + \epsilon_I$ taking
+and applying $\epsilon_E + \epsilon_I$ taking
 $\epsilon_3=\epsilon_4=\epsilon$ and we obtain:
 \begin{equation}
 U_{E+I}= {V \over 2} (C_{33}+2 C_{34} + C_{44}) \epsilon^2.
@@ -1858,15 +1890,15 @@ By applying $\epsilon_E$, we get $C_{33}$:
 \begin{equation}
 U_E= {V \over 2} C_{33} \epsilon_3^2.
 \end{equation}
-By applying $\epsilon_B'$ in which only $\epsilon_1$ and 
+By applying $\epsilon_{B'}$ in which only $\epsilon_1$ and 
 $\epsilon_3=\epsilon_1$ are non zero, we have:
 \begin{equation}
-U_B= {V \over 2} (C_{11} + C_{33} + 2 C_{13}) \epsilon_1^2,
+U_{B'}= {V \over 2} (C_{11} + C_{33} + 2 C_{13}) \epsilon_1^2,
 \end{equation}
 and using the previously calculated elastic constants, we can obtain $C_{13}$.
 By applying $\epsilon_A$, we get
 \begin{equation}
-U_B= {V \over 2} (2C_{11} + C_{33} + 2 C_{12} + 4 C_{13}) \epsilon_1^2,
+U_A= {V \over 2} (2C_{11} + C_{33} + 2 C_{12} + 4 C_{13}) \epsilon_1^2,
 \end{equation}
 and using the previously calculated elastic constants, we can obtain $C_{12}$.
 Finally applying $\epsilon_H$, we obtain $C_{55}$:
@@ -1877,11 +1909,47 @@ Solving these equations we obtain:
 \begin{eqnarray}
 C_{11}&=&{1 \over V} {d^2 U_C \over d \epsilon_1^2}, \\ 
 C_{33}&=&{1 \over V} {d^2 U_E \over d \epsilon_3^2}, \\ 
-C_{13}&=&{1 \over 2 V} {d^2 U_{B'} \over d \epsilon_1^2} - C_{11}/2 - C_{33}/2, \\
-C_{12}&=&{1 \over 2 V} {d^2 U_A \over d \epsilon_1^2} - C_{11} - C_{33}/2
-- 2 C_{13}, \\
-C_{55}&=&{1 \over V} {d^2 U_I \over d \epsilon_5^2}, \\
+C_{13}&=&{1 \over 2 V} {d^2 U_{B'} \over d \epsilon_1^2} - 
+{(C_{11} + C_{33})\over 2}, \\
+C_{12}&=&{1 \over 2 V} {d^2 U_A \over d \epsilon_1^2} - C_{11} - 
+{C_{33} \over 2} - 2 C_{13}, \\
+C_{55}&=&{1 \over V} {d^2 U_I \over d \epsilon_5^2}. \\
 \end{eqnarray}
+
+\subsection{\color{web-blue}Trigonal system}
+In this case there are two possibilities depending on the Laue class. For
+the point groups $D_3(32)$, $C_{3v}(3m)$ and $D_{3d}(\bar 3m)$ (Laue class
+$D_{3d}(\bar 3m)$) the nonzero components of the elastic constant tensor
+are $C_{11}=C_{22}$, $C_{12}$, $C_{13}=C_{23}$, $C_{33}$, $C_{44}=C_{55}$, 
+$C_{66}={1\over 2} (C_{11}-C_{12})$, $C_{14}$, $C_{24}=-C_{14}$, and 
+$C_{56}=C_{14}$. For the point groups $C_3(3)$ and $S_6(\bar 3)$ (Laue
+class $S_6(\bar 3)$) there are other three nonzero components $C_{15}$, 
+$C_{25}=-C_{15}$ and $C_{46}=-C_{15}$. 
+By doing a strain $\epsilon_C$ we obtain:
+\begin{equation}
+\sigma_1=C_{11} \epsilon_1,
+\end{equation}
+\begin{equation}
+\sigma_2=C_{12} \epsilon_1,
+\end{equation}
+\begin{equation}
+\sigma_3=C_{13} \epsilon_1,
+\end{equation}
+\begin{equation}
+\sigma_4=C_{14} \epsilon_1.
+\end{equation}
+Applying $\epsilon_E$ we have:
+\begin{equation}
+\sigma_3=C_{33} \epsilon_3,
+\end{equation}
+Finally, applying $\epsilon_G$ we have:
+\begin{equation}
+\sigma_4=C_{44} \epsilon_4,
+\end{equation}
+For the class $S_6(\bar 3)$ we have also:
+\begin{equation}
+\sigma_5=C_{15} \epsilon_1.
+\end{equation}
 
 
 \newpage

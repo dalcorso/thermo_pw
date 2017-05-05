@@ -254,8 +254,9 @@ This is the list of the quantities that can be obtained in output
 and the \texttt{what} to use:
 
 \begin{verbatim}
-Space group number                             plot_bz 
+Space group number                             plot_bz, all others
 Equilibrium geometry                           mur_lc
+Density of the solid                           plot_bz, all others
 Total energy                                   scf, mur_lc
 Phonon frequencies at a given q                scf_ph, mur_lc_ph
 Dielectric constant (insulators only)          scf_ph, mur_lc_ph
@@ -766,11 +767,19 @@ For the Laue class $O_h$ and $T_h$, it contains
 \end{verbatim}
 For the Laue class $D_{6h}$ and $C_{6h}$, it contains
 \begin{verbatim}
-#   T     C_{11}   C_{12}    C_{13}    C_{33}    C_{44}    B
+#   T     C_{11}   C_{12}    C_{13}    C_{33}    C_{44}   B
+\end{verbatim}
+For the Laue class $D_{3d}$, it contains
+\begin{verbatim}
+#   T     C_{11}   C_{12}    C_{13}    C_{33}    C_{44}   C_{14}   B
+\end{verbatim}
+For the Laue class $S_{6}$, it contains
+\begin{verbatim}
+#   T     C_{11}   C_{12}    C_{13}    C_{33}    C_{44}   C_{14}   C_{25}  B
 \end{verbatim}
 For the Laue class $D_{4h}$, it contains
 \begin{verbatim}
-#   T     C_{11}   C_{12}    C_{13}    C_{33}    C_{44}    B
+#   T     C_{11}   C_{12}    C_{13}    C_{33}    C_{44}   B
 \end{verbatim}
 For the Laue class $D_{4h}$, it contains
 \begin{verbatim}
@@ -950,6 +959,24 @@ inside the \texttt{gnuplot} scripts.
 
 \end{itemize}
 
+\newpage
+\section{\color{coral}Master-slave approach to the asynchronous parallelization}
+
+The following scheme shows how a single loop composed of \texttt{nwork} tasks
+can be parallelized with a master-slave approach.
+
+\begin{figure*}[ht]
+  \begin{tabular}[t]{ll}
+    \hspace{-1cm}\includegraphics[height=0.80\textwidth]{flowmaster.pdf}
+    &\hspace{-1cm}\includegraphics[height=0.80\textwidth]{flowslave.pdf}\\
+  \end{tabular}
+ \caption{Comparison between the work-flow of the master image (left)
+ and of the slave images (right) in \texttt{thermo\_pw}. In the right
+part of the figure we show also the equivalent serial code. The green lines
+indicate the points of communication between the master and the slave images.
+}
+\label{figflow}
+\end{figure*}
 
 \end{document}
 

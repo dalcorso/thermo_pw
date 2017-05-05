@@ -59,17 +59,17 @@ It assumes that you have some familiarity with the \qe\ package.
 If not please consult the web site: \texttt{http://www.quantum-espresso.org}.
 
 \thermo\ is a \texttt{FORTRAN} code that computes material properties.
-It can be considered as a set of drivers that,
+It can be thought as a set of drivers that,
 at low level, call the \qe\ routines and, at high level, have pre-processing
-tools that reduce the number of information required to the user and
-post-processing tools that convert the output of \qe\ into plots of material 
+tools to reduce the information provided by the user and
+post-processing tools to convert the output of \qe\ into plots of material 
 properties directly comparable with experiment.
 
 \thermo\ has the following directory structure, contained in a subdirectory 
 \texttt{thermo\_pw/} that should be put in the main directory of the \qe\ tree:
 
 \begin{tabular}{ll}
-\texttt{Doc/}      & : contains this user\_guide and other documentation\\
+\texttt{Doc/}      & : contains this user's guide and other documentation\\
 \texttt{examples/} & : some running examples \\
 \texttt{inputs/}   & : a collection of useful inputs \\
 \texttt{pseudo\_test/} & : a collection of inputs to test a pseudopotential library\\
@@ -77,6 +77,7 @@ properties directly comparable with experiment.
 \texttt{lib/}      & : source files for modules used by \thermo\ \\
 \texttt{src/}      & : source files for \thermo\ \\
 \texttt{tools/}    & : source files for auxiliary tools \\
+\texttt{tools\_input/}  & : examples of inputs for the auxiliary tools \\
 \end{tabular}\\
 
 The \thermo\ package can calculate the following quantities:
@@ -154,7 +155,7 @@ band structure.
 the parallellization options of \qe. Moreover, \thermo\ can run using 
 several images.
 When possible, the image parallelization is used in an asynchronous way.
-One processor takes the role of master and distributes the work 
+One image takes the role of master and distributes the work 
 to all the images that carry it out independently. Presently 
 the total energies of several geometries for the determination of the 
 equilibrium geometry are calculated in parallel when
@@ -162,7 +163,9 @@ there are several images. Stresses or total energies at different strained
 geometries needed for the calculation of the elastic constants are 
 calculated in parallel. 
 The phonon calculations are carried out in parallel, each image doing one 
-representation of a {\bf q} point.
+representation of a {\bf q} point. For frequency dependent calculation,
+each frequency, or group of frequencies, can be calculated in parallel
+by different images.
 
 \section{\color{coral}People}
 The \thermo\ code is designed, written, and maintained by Andrea Dal Corso 
@@ -184,7 +187,7 @@ the main \qe\ directory.
 
 At this point you need the source code of the \thermo\ package. 
 \texttt{Thermo\_pw} can be downloaded from its main distribution page
-\texttt{http://people.sissa.it/\textasciitilde dalcorso/thermo\_pw\_dist.html}
+\texttt{http://people.sissa.it/\textasciitilde dalcorso/thermo\_pw\_dist. html}
 by downloading one of the \texttt{.tar.gz} files.
 The versions of \texttt{thermo\_pw} and of \qe\ must be carefully matched
 as illustrated in Table 1. 
@@ -208,6 +211,27 @@ contains also information on critical bugs found in the
 \texttt{thermo\_pw} packages and should be consulted before using 
 \texttt{thermo\_pw}.
 
+\subsection{\color{web-blue}Compiling}
+
+In order to compile \thermo\ the main \texttt{Makefile} and the files
+\texttt{install/makedeps.sh} and \texttt{install/plugins\_makefile}
+of \qe\ need to be changed. In the \texttt{thermo\_pw}
+directory give the command \texttt{make join\_qe}. This command exchanges
+the files contained in \texttt{thermo\_pw} with those of the \qe\ package.
+Typing \texttt{make thermo\_pw} from the main \qe\ directory, or \texttt{make} 
+from the \texttt{thermo\_pw}\ directory, produces the executable
+\texttt{thermo\_pw/src/thermo\_pw.x} that can be found in the 
+\qe\ \texttt{bin/} directory. A few other tool codes are produced as well
+and linked in the \texttt{bin/} directory of \qe.
+
+\thermo\ has been written on a PC with Linux operating system using the
+\texttt{gfortran} compiler with \texttt{openMPI} parallelization. It has
+been run in parallel on a Linux cluster with several hundreds processors.
+It has been tested with \texttt{Intel/15.0} + \texttt{mkl/11.2} +
+\texttt{openMPI} and with \texttt{Intel/13.1} + \texttt{mkl/11.2} +
+\texttt{openMPI/1.6.5}.
+Any other combination of computer/operating system has not been tested, but 
+usually \thermo\ runs on the same systems where \qe\ runs. 
 \begin{center}
 \begin{table}
 \begin{tabular}{ll}
@@ -231,28 +255,6 @@ contains also information on critical bugs found in the
 \end{table}
 \end{center}
 
-\subsection{\color{web-blue}Compiling}
-
-In order to compile \thermo\ the main \texttt{Makefile} and the files
-\texttt{install/makedeps.sh} and \texttt{install/plugins\_makefile}
-of \qe\ need to be changed. In the \texttt{thermo\_pw}
-directory give the command \texttt{make join\_qe}. This command exchanges
-the files contained in \texttt{thermo\_pw} with those of the \qe\ package.
-Typing \texttt{make thermo\_pw} from the main \qe\ directory, or \texttt{make} 
-from the \texttt{thermo\_pw}\ directory, produces the executable
-\texttt{thermo\_pw/src/thermo\_pw.x} that can be found in the 
-\qe\ \texttt{bin/} directory. A few other tool codes are produced as well
-and linked in the \texttt{bin/} directory of \qe.
-
-\thermo\ has been written on a PC with Linux operating system using the
-\texttt{gfortran} compiler with \texttt{openMPI} parallelization. It has
-been run in parallel on a Linux cluster with several hundreds processors.
-It has been tested with \texttt{Intel/15.0} + \texttt{mkl/11.2} +
-\texttt{openMPI} and with \texttt{Intel/13.1} + \texttt{mkl/11.2} +
-\texttt{openMPI/1.6.5}.
-Any other combination of computer/operating system has not been tested, but 
-usually \thermo\ runs on the same systems where \qe\ runs. 
-
 \subsection{\color{web-blue}Searching help and reporting bugs}
 If you have problems installing \texttt{thermo\_pw} or need help
 with some of its features, please subscribe to the \texttt{thermo\_pw-forum}
@@ -273,8 +275,11 @@ In order to use the \thermo\ code you need to create a file called
 the input of \texttt{pw.x} and, if requested by the task, to the
 input of \texttt{ph.x} that must be called \texttt{ph\_control}.
 The input of \texttt{pw.x} can have any name and is given as input to
-the \thermo\ code. It is not necessary to specify an \texttt{outdir} 
-directory in the \texttt{ph.x} input.
+the \thermo\ code. It is better not to specify an \texttt{outdir} 
+directory in the \texttt{ph.x} input. Specifing an \texttt{outdir}
+directory is not forbidden, but for some tasks \texttt{thermo\_pw.x} 
+might add a geometry number to \texttt{outdir} and the
+\texttt{outdir} written in the \texttt{ph.x} input must be consistent.
 
 A typical command for running \thermo\ is:
 \begin{verbatim}
@@ -345,7 +350,7 @@ flgnuplot   : initial part of the name of the files where gnuplot scripts
               Default: character(len=*) 'gnuplot.tmp'
 \end{verbatim}
 If you are running \thermo\ on a system that has not \texttt{gnuplot}
-you can disable the production of the postscript files and use some other
+you can disable the production of the postscript files and use other
 graphical tools to produce the plots from the output data. 
 
 \subsection{\color{web-blue}Temperature and pressure}
@@ -509,7 +514,8 @@ only_bands_plot: if the files with the bands and the representations
 lsym       : if .TRUE. does the symmetry analysis of the bands
              Default: .TRUE.
 enhance_plot: if .TRUE. writes on the band plot the point group labels,
-             and colors with differente colors lines at the zone border.
+             and colors with different background colors lines at the 
+             zone border.
              Default: .FALSE.
 long_path  : if .TRUE. plot the bands in all the Brillouin zone path. 
              Otherwise makes a faster calculation on a short path. 
@@ -517,8 +523,9 @@ long_path  : if .TRUE. plot the bands in all the Brillouin zone path.
 old_path   : if .TRUE. use an alternative path, usually more similar to the one
              used in experimental papers (available only for a few lattices).
              Default: .FALSE.
-path_fact  : A factor that can be used to multiply the number of points
-             along each line of the default path.
+path_fact  : A factor that multiply the number of points along each line of 
+             the default path. Note that this is a real number so you can 
+             also decrease the default number of points along each line.
              Default: real 1.0
 filband    : file where the bands are written in the QE format
              Default: character(len=*) 'output_band.dat'
@@ -558,6 +565,16 @@ If you give explicitly the path, be careful with options that require
 geometry changes (see below). Only automatic paths, or path given through 
 letter labels are easily recalculated. The other paths could turn out 
 to be correct only for one geometry.
+
+It is also possible to separate the self-consistent and the band calculation,
+by running first \texttt{thermo\_pw.x} using \texttt{what='scf'} and then
+running, on the same directory, \texttt{thermo\_pw.x} using 
+\texttt{what='scf\_bands'}. The same input can be used in the two 
+calculations, only the \texttt{thermo\_control} file need to be changed. 
+The number or processors and pools can be changed in the same cases in
+which this is possible in \texttt{pw.x}.
+You cannot however run twice \texttt{thermo\_pw.x} on the same 
+directory using \texttt{what='scf\_bands'} and two different paths.
 
 \subsection{\color{web-blue}\texttt{what='scf\_2d\_bands'}}
 With this option the code calculates the bands after a self-consistent 
@@ -671,7 +688,7 @@ plot the slab band structures and to the surface small point
 group of each {\bf k}-point when you plot a PBS.
 For a given {\bf k}-point parallel to the surface, the 
 point group of the slab might be larger than the one of the surface, because it 
-contain operations that exchange the two surfaces.
+contains operations that exchange the two surfaces.
 In this case the surface point group of a given {\bf k}-point parallel 
 to the surface can be found in the projected band structure calculation,
 for a {\bf k}-point with the same component parallel to the surface
@@ -702,8 +719,8 @@ the surface have $C_s$ symmetry, so you can separate both the PBS
 and the surface states in two different panels.
 
 There is no input variable to control or change the colors or style of the 
-plot. To change the defaults you can modify directly the gnuplot script,
-it is written in such a way that a change to a few variables can
+plot. To change the defaults you can modify directly the \texttt{gnuplot} 
+script, it is written in such a way that a change to a few variables can
 control the entire plot.
 
 \subsection{\color{web-blue}\texttt{what='scf\_dos'}}
@@ -746,7 +763,7 @@ are specified as with the option \texttt{what='scf\_bands'}.
 However with the present option no shift is applied to the bands
 and the minimum and maximum energies refer to the unshifted eigenvalues.
 Note that after a calculation with \texttt{what='scf\_dos'} you can
-run the tool code \texttt{epsilon\_twp.x} to evaluate the frequency
+run the tool code \texttt{epsilon\_tpw.x} to evaluate the frequency
 dependent dielectric constant (for insulators only). \\
 With this option, in the metallic case, 
 the code computes the electronic thermodynamic quantities of
@@ -912,6 +929,14 @@ omega_group : number of frequencies calculated together by each image.
 \end{verbatim}
 Number of tasks for frequency calculations: nfs/ omega\_group, the 
 number of frequencies, divided the number of frequencies in each group.
+
+It is also possible to separate the self-consistent and the phonon calculation,
+by running first \texttt{thermo\_pw.x} using \texttt{what='scf'} and then
+running, on the same directory, \texttt{thermo\_pw.x} using 
+{what='scf\_ph'}. The same input can be used in the two calculations, only
+the \texttt{thermo\_control} file need to be changed.
+The number or processors/pools/images can be changed in the same cases in
+which this is possible in Quantum ESPRESSO.
 
 \subsection{\color{web-blue}\texttt{what='scf\_disp'}}
 With this option the code makes a self-consistent calculation followed by
