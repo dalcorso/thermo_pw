@@ -277,7 +277,7 @@ CONTAINS
      gname=group_name(code_group)
   ENDIF
 
-  IF (verbosity) THEN
+!  IF (verbosity) THEN
      WRITE(stdout,'(/,5x," find ibrav for a1, a2, a3",/)') 
 
      WRITE(stdout,'(3f20.12)') a1(:)
@@ -288,7 +288,7 @@ CONTAINS
      IF (gname /= gname_at) &
         WRITE(stdout,'(/,5x,"Searching the ibrav among the lattices &
                       compatible with ",a11)') gname
-  END IF
+!  END IF
 !
 !  set the three cartesian directions
 !
@@ -650,8 +650,8 @@ CONTAINS
            ENDIF
         ENDDO
 
-        IF (ABS(emod(1)-emod(2))> eps1.OR. ABS(emod(1)-emod(3)) > eps1) &
-           CALL errore('find_ibrav_code','wrong cubic lattice',1)
+!        IF (ABS(emod(1)-emod(2))> eps1.OR. ABS(emod(1)-emod(3)) > eps1) &
+!           CALL errore('find_ibrav_code','wrong cubic lattice',1)
 
         celldm(1)=emod(1)
 
