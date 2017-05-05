@@ -216,6 +216,10 @@ electrons.o : ../../thermo_pw/lib/mp_asyn.o
 ev_xml.o : ../../Modules/constants.o
 ev_xml.o : ../../Modules/kind.o
 ev_xml.o : ../../iotk/src/iotk_module.o
+find_mode_sym.o : ../../Modules/constants.o
+find_mode_sym.o : ../../Modules/io_global.o
+find_mode_sym.o : ../../Modules/kind.o
+find_mode_sym.o : ../../PW/src/pwcom.o
 initialize_ph.o : ../../LR_Modules/lrcom.o
 initialize_ph.o : ../../PW/src/pwcom.o
 mix_pot.o : ../../Modules/io_files.o

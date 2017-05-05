@@ -227,11 +227,13 @@ manage_bands.o : ../../Modules/io_global.o
 manage_bands.o : ../../PW/src/pwcom.o
 manage_bands.o : thermo_mod.o
 manage_elastic_cons.o : ../../Modules/cell_base.o
+manage_elastic_cons.o : ../../Modules/constants.o
 manage_elastic_cons.o : ../../Modules/ions_base.o
 manage_elastic_cons.o : ../../Modules/kind.o
 manage_elastic_cons.o : ../../Modules/mp_images.o
 manage_elastic_cons.o : ../../thermo_pw/lib/debye_module.o
 manage_elastic_cons.o : ../../thermo_pw/lib/elastic_const.o
+manage_elastic_cons.o : ../../thermo_pw/lib/rotate.o
 manage_elastic_cons.o : thermo_mod.o
 manage_energy_minimum.o : ../../Modules/cell_base.o
 manage_energy_minimum.o : ../../Modules/io_global.o
@@ -472,6 +474,7 @@ set_piezo_tensor_work.o : ../../Modules/kind.o
 set_piezo_tensor_work.o : ../../PW/src/pwcom.o
 set_piezo_tensor_work.o : ../../thermo_pw/lib/elastic_const.o
 set_piezo_tensor_work.o : ../../thermo_pw/lib/piezoelectric_tensor.o
+set_piezo_tensor_work.o : ../../thermo_pw/lib/strain.o
 set_piezo_tensor_work.o : thermo_mod.o
 set_temperature.o : ../../Modules/constants.o
 set_temperature.o : ../../Modules/kind.o
@@ -491,6 +494,7 @@ set_thermo_work_todo.o : ../../PW/src/start_k.o
 set_thermo_work_todo.o : ../../thermo_pw/lib/elastic_const.o
 set_thermo_work_todo.o : ../../thermo_pw/lib/mp_asyn.o
 set_thermo_work_todo.o : ../../thermo_pw/lib/rotate.o
+set_thermo_work_todo.o : ../../thermo_pw/lib/strain.o
 set_thermo_work_todo.o : ../../thermo_pw/qe/control_qe.o
 set_thermo_work_todo.o : thermo_mod.o
 simple_nonanal.o : ../../Modules/constants.o
