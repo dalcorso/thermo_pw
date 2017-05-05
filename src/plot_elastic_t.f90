@@ -76,9 +76,10 @@ IF (laue==32.OR.laue==29) THEN
                                                      .TRUE.,.FALSE.)
 ENDIF
 
-IF (laue==2.OR.laue==18.OR.laue==19.OR.laue==20.OR.laue==22.OR.laue==23) THEN
+IF (laue==2.OR.laue==18.OR.laue==19.OR.laue==20.OR.laue==22.OR.laue==23.OR.&
+    laue==25.OR.laue==27) THEN
 !
-!  tetrahonal, hexagonal or orthorhombic
+!  tetrahonal, hexagonal, trigonal, or orthorhombic
 !
    CALL gnuplot_ylabel('C_{13} (kbar)',.FALSE.) 
    IF (lelastic) &
@@ -89,7 +90,7 @@ IF (laue==2.OR.laue==18.OR.laue==19.OR.laue==20.OR.laue==22.OR.laue==23) THEN
                                                      .TRUE.,.FALSE.)
 ENDIF
 
-IF (laue==18.OR.laue==22.OR.laue==19.OR.laue==23) THEN
+IF (laue==18.OR.laue==22.OR.laue==19.OR.laue==23.OR.laue==25.OR.laue==27) THEN
 !
 !  tetragonal or hexagonal
 !
@@ -108,6 +109,32 @@ IF (laue==18.OR.laue==22.OR.laue==19.OR.laue==23) THEN
    IF (lelasticf) &
       CALL gnuplot_write_file_mul_data(filename,1,6,'color_blue',.NOT.lelastic,&
                                                      .TRUE.,.FALSE.)
+ENDIF
+
+IF (laue==25.OR.laue==27) THEN
+!
+!  trigonal D_3d or S_6
+!
+   CALL gnuplot_ylabel('C_{14} (kbar)',.FALSE.) 
+   IF (lelastic) &
+      CALL gnuplot_write_file_mul_data(filelastic,1,7,'color_red',.TRUE.,&
+                                                     .NOT.lelasticf,.FALSE.)
+   IF (lelasticf) &
+      CALL gnuplot_write_file_mul_data(filename,1,7,'color_blue',.NOT.lelastic,&
+                                                       .TRUE.,.FALSE.)
+ENDIF
+
+IF (laue==27) THEN
+!
+!  trigonal S_6
+!
+   CALL gnuplot_ylabel('C_{25} (kbar)',.FALSE.) 
+   IF (lelastic) &
+      CALL gnuplot_write_file_mul_data(filelastic,1,8,'color_red',.TRUE.,&
+                                                     .NOT.lelasticf,.FALSE.)
+   IF (lelasticf) &
+      CALL gnuplot_write_file_mul_data(filename,1,8,'color_blue',.NOT.lelastic,&
+                                                         .TRUE.,.FALSE.)
 ENDIF
 
 IF (laue==18.OR.laue==22) THEN
