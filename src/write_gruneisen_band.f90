@@ -63,7 +63,7 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
   WRITE(stdout,*)
   non_cubic = (ibrav_save/=1.AND.ibrav_save/=2.AND.ibrav_save/=3)
 !
-!  In this routine we always use eigenvectors
+!  In this routine we always use eigenvalues
 !
   non_cubic =.TRUE.
 !

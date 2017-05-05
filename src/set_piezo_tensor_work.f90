@@ -9,7 +9,8 @@ SUBROUTINE set_piezo_tensor_work( nwork )
 USE kinds,               ONLY : DP
 USE cell_base,           ONLY : ibrav
 USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain
-USE elastic_constants,   ONLY : epsilon_voigt, epsilon_geo, trans_epsilon
+USE elastic_constants,   ONLY : epsilon_voigt, epsilon_geo
+USE strain_mod,          ONLY : trans_epsilon
 USE piezoelectric_tensor, ONLY : polar_geo
 USE rap_point_group,     ONLY : code_group
 IMPLICIT NONE

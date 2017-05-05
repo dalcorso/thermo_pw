@@ -53,7 +53,7 @@ CALL set_fft_mesh()
 omega0=omega
 at0(:,:)=at(:,:)
 !
-!   strain the initial tau uniformely to the new at and set the equilibrium tau
+!   strain the initial tau uniformly to the new at and set the equilibrium tau
 !   to the strained tau
 !
 CALL adjust_tau(tau_save_crys, tau, at)

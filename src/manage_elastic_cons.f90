@@ -8,6 +8,7 @@
 SUBROUTINE manage_elastic_cons(nwork, igeom)
 
 USE kinds,             ONLY : DP
+USE constants,         ONLY : ry_kbar
 USE thermo_mod,        ONLY : energy_geo, density
 USE control_elastic_constants, ONLY : ngeo_strain, frozen_ions,            &
                               elastic_algorithm, rot_mat, elcpvar
@@ -19,10 +20,10 @@ USE elastic_constants, ONLY : print_elastic_constants,                     &
                               compute_elastic_compliances,                 &
                               print_elastic_compliances, read_elastic,     &
                               write_elastic, print_macro_elasticity,       &
-                              compute_elastic_constants_adv,               &
                               compute_elastic_constants_ene,               &
                               print_sound_velocities
 USE equilibrium_conf,  ONLY : omega0
+USE rotate,            ONLY : rotate_tensors2
 USE control_macro_elasticity, ONLY : macro_el, vp, vb, vg, approx_debye_t
 USE debye_module,      ONLY : compute_debye_temperature,                   &
                               compute_debye_temperature_poisson
@@ -36,19 +37,29 @@ IMPLICIT NONE
 INTEGER, INTENT(IN) :: nwork, igeom
 
 REAL(DP) :: poisson, bulkm
+REAL(DP), ALLOCATABLE :: sigma_geo_aux(:,:,:)
+INTEGER :: iwork
 LOGICAL  :: exst
 CHARACTER(LEN=6)    :: int_to_char
 CHARACTER(LEN=256)  :: filelastic
+INTEGER :: ipol, jpol
 !
 !  the elastic constants are calculated here
 !
+ALLOCATE(sigma_geo_aux(3,3,nwork))
+
 IF (elastic_algorithm=='standard') THEN
-   CALL compute_elastic_constants(sigma_geo, epsilon_geo, nwork, &
+   sigma_geo_aux(1:3,1:3,1:nwork)=sigma_geo(1:3,1:3,1:nwork)
+ELSEIF (elastic_algorithm=='advanced') THEN
+   DO iwork=1,nwork
+      CALL rotate_tensors2(rot_mat(1,1,iwork), 1, sigma_geo(1,1,iwork), &
+                                                  sigma_geo_aux(1,1,iwork),-1)
+   ENDDO
+ENDIF
+
+IF (elastic_algorithm=='standard'.OR.elastic_algorithm=='advanced') THEN
+   CALL compute_elastic_constants(sigma_geo_aux, epsilon_geo, nwork, &
                           ngeo_strain, ibrav_save, laue, elcpvar)
-ELSE IF (elastic_algorithm=='advanced') THEN
-   CALL compute_elastic_constants_adv(sigma_geo, epsilon_geo, &
-                               nwork, ngeo_strain, ibrav_save, laue, rot_mat, &
-                                                   elcpvar)
 ELSE IF (elastic_algorithm=='energy') THEN
    CALL compute_elastic_constants_ene(energy_geo, epsilon_geo, &
                                nwork, ngeo_strain, ibrav_save, laue, omega0, &
@@ -88,6 +99,8 @@ CALL plot_thermo_debye(igeom)
 filelastic='elastic_constants/'//TRIM(fl_el_cons)//'.g'//&
                                                      TRIM(int_to_char(igeom))
 IF (my_image_id==root_image) CALL write_elastic(filelastic)
+
+DEALLOCATE(sigma_geo_aux)
 RETURN
 END SUBROUTINE manage_elastic_cons
 

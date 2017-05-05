@@ -390,12 +390,6 @@ MODULE control_elastic_constants
   REAL(DP), ALLOCATABLE :: rot_mat(:,:,:) ! rotation matrix between the
                                           ! cartesian coordinates of the
                                           ! strained and unstrained cell  
-  REAL(DP), ALLOCATABLE :: aap_mat(:,:,:) ! possible change of the definition
-                                          ! of the direct lattice vectors
-                                          ! a (old) in terms of a' (new)
-  REAL(DP), ALLOCATABLE :: apa_mat(:,:,:) ! possible change of the definition
-                                          ! of the direct lattice vectors
-                                          ! a' (new) in terms of a (old)
   INTEGER :: ngeo_strain        ! number of strain configurations
 
   LOGICAL :: frozen_ions        ! if .true. compute the elastic constant 
@@ -480,9 +474,9 @@ MODULE control_paths
   CHARACTER(LEN=3), ALLOCATABLE :: letter_path(:) ! the optional labels
   INTEGER, ALLOCATABLE :: label_list(:)   ! correspondence label xqaux list
   INTEGER, ALLOCATABLE :: label_disp_q(:)   ! correspondence label disp_q list
-  CHARACTER(LEN=10) :: point_label_type   ! type of point labels
   REAL(DP)          :: path_fact          ! a factor used to multiply the
                                           ! number of points of the default path
+  CHARACTER(LEN=10) :: point_label_type   ! type of point labels
   LOGICAL, ALLOCATABLE :: high_sym_path(:)! high_symmetry points along the path
   LOGICAL  :: long_path      ! if .TRUE. use the complete path in the BZ
   LOGICAL  :: old_path      ! if .TRUE. use the alternative path in the BZ
@@ -506,6 +500,7 @@ MODULE control_bands
   REAL(DP) :: emax_input     ! maximum energy of the plot (eV)
   LOGICAL  :: lsym           ! if .TRUE. does the symmetry analysis of the bands
   LOGICAL  :: enhance_plot   ! if .TRUE. an enhaced band plot is done
+  LOGICAL  :: only_bands     ! if .TRUE. skip the scf calculation
 
 END MODULE control_bands
 

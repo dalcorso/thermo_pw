@@ -26,7 +26,8 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
 !
 !  the library modules
 !
-  USE elastic_constants, ONLY : epsilon_geo, apply_strain, print_strain
+  USE elastic_constants, ONLY : epsilon_geo
+  USE strain_mod,        ONLY : apply_strain, print_strain
   USE mp_asyn,           ONLY : with_asyn_images
 !
 !  the pw variables that are set here or used to set the input
@@ -274,9 +275,9 @@ USE kinds,            ONLY : DP
 USE thermo_mod,       ONLY : celldm_geo, ibrav_geo
 
 USE control_thermo,   ONLY : outdir_thermo
-USE control_elastic_constants, ONLY : frozen_ions, &
-                             elastic_algorithm, rot_mat, aap_mat, apa_mat
-USE elastic_constants, ONLY : epsilon_geo, apply_strain, print_strain
+USE control_elastic_constants, ONLY : frozen_ions, elastic_algorithm, rot_mat
+USE elastic_constants, ONLY : epsilon_geo
+USE strain_mod,       ONLY : apply_strain, print_strain
 USE equilibrium_conf, ONLY : celldm0, at0, tau0, tau0_crys
 USE rotate,           ONLY : rotate_vect
 
@@ -310,66 +311,34 @@ CALL print_strain(epsilon_geo(:,:,iwork))
 !  Bravais lattice
 !
 !
-!    first bring tau in the strained lattice
+!    first strain the lattice
 !
-   zero=0.0_DP
-   IF (elastic_algorithm=='advanced' .OR. &
-                              elastic_algorithm=='energy') THEN
-      atp=0.0_DP
-      DO ipol=1,3
-         DO jpol=1,3
-            DO kpol=1,3
-            atp(ipol,jpol) = atp(ipol,jpol) + apa_mat(jpol,kpol,iwork)*&
-                                         at0(ipol,kpol)
-            END DO
-         END DO
-      ENDDO
-   ELSE
-      atp(:,:)=at0(:,:)
-   ENDIF
-
-   DO i=1, 3
-      CALL apply_strain(atp(1,i), at(1,i), epsilon_geo(1,1,iwork))
-   ENDDO
+DO i=1, 3
+   CALL apply_strain(at0(1,i), at(1,i), epsilon_geo(1,1,iwork))
+ENDDO
 !
-!  tau save are in crystal coordinates. A uniform strain of these coordinates
-!  means to keep them constant. We just rotate them in case the direct
-!  lattice vectors have changed
+!   Now find tau strained in cartesian coordinates using the strained at
 !
-   IF (elastic_algorithm=='advanced' .OR. &
-                              elastic_algorithm=='energy') THEN
-      tau=0.0_DP
-      DO na=1,nat
-         DO ipol=1,3
-            DO jpol=1,3
-               tau(ipol,na) = tau(ipol,na) + aap_mat(jpol,ipol,iwork)*&
-                                         tau0(jpol,na)
-            END DO
-         END DO
-      END DO
-   ELSE
-      tau=tau0
-   END IF
+tau=tau0_crys
+CALL cryst_to_cart( nat, tau, at, 1 )
 !
-!  bring tau to cartesian coordinates
-!
-   CALL cryst_to_cart( nat, tau, at, 1 )
-
-cell_units='alat'
+zero=0.0_DP
 IF (elastic_algorithm=='standard') THEN
    ibrav=0
    rd_ht = TRANSPOSE( at )
    trd_ht=.TRUE.
+   cell_units='alat'
    CALL cell_base_init ( ibrav, celldm0, zero, zero, zero, zero, &
                      zero, zero, trd_ht, rd_ht, cell_units )
 !
 !  the atomic coordinates are strained uniformely
 !
-   tau=tau0_crys
-   CALL cryst_to_cart( nat, tau, at, 1 )
    CALL set_fft_mesh()
 ELSEIF (elastic_algorithm=='advanced' .OR. &
                                         elastic_algorithm=='energy') THEN
+!
+!  bring tau to the cartesian coordinates using the strained at lattices
+!
    ibrav = ibrav_geo(iwork)
    celldm_(:)=celldm_geo(:,iwork)
    trd_ht=.FALSE.

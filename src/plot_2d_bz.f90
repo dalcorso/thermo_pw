@@ -51,7 +51,7 @@ CALL allocate_2d_bz(ibz, bz_2d_struc, celldm, at, bg, celldm_2d)
 IF (npx > bz_2d_struc%npx) bz_2d_struc%npx=npx
 CALL init_2d_bz(bz_2d_struc, celldm_2d)
 
-WRITE(stdout,'(/,5x,"Brillouin zone type",i5,/)') ibz
+WRITE(stdout,'(/,5x,"2D Brillouin zone type",i5,/)') ibz
 !
 !   allocate the variables to generate the asymptote script
 !

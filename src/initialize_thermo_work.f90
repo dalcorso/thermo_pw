@@ -10,9 +10,9 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
   !-----------------------------------------------------------------------
   !
   !  This routine is called by all images and initializes the global 
-  !  variables that select the job to do. All images must have the same
+  !  variables that select the tasks to do. All images must have the same
   !  information.
-  !  In addition to the variables that controls the run it allocates, for
+  !  In addition to the variables that control the run it allocates, for
   !  the tasks that require it:
   !  ibrav_geo, celldm_geo, omega_geo, energy_geo
   !  lpwscf, lstress, lberry, lphonon
@@ -326,18 +326,10 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            IF (ALLOCATED(energy_geo)) DEALLOCATE(energy_geo)
            IF (ALLOCATED(omega_geo))  DEALLOCATE(omega_geo)
 !
-!     set_elastic_constant_work or set_elastic_constants_work_adv 
-!     allocate ibrav_geo and celldm_geo
+!     set_elastic_constant_work allocates ibrav_geo and celldm_geo
 !
-           IF (elastic_algorithm=='standard') THEN
-              CALL set_elastic_cons_work(nwork)
-           ELSEIF (elastic_algorithm=='advanced'.OR. &
-                                       elastic_algorithm=='energy') THEN
-              CALL set_elastic_cons_work_adv(nwork)
-           ELSE
-              CALL errore('initialize_thermo_work',&
-                                        'elastic_algorithm unknown',1)
-           ENDIF
+           CALL set_elastic_cons_work(nwork)
+
            ALLOCATE(energy_geo(nwork))
            ALLOCATE(omega_geo(nwork))
            energy_geo=0.0_DP

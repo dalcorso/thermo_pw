@@ -126,7 +126,8 @@ SUBROUTINE thermal_stress(el_con_t,alpha_t,bths,ntemp)
 
 USE kinds, ONLY : DP
 USE constants, ONLY : ry_kbar
-USE elastic_constants, ONLY : el_cons_voigt, trans_epsilon
+USE elastic_constants, ONLY : el_cons_voigt
+USE strain_mod,  ONLY :  trans_epsilon
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ntemp
 REAL(DP), INTENT(IN) :: el_con_t(6,6,ntemp), alpha_t(6,ntemp) 
@@ -163,7 +164,8 @@ SUBROUTINE isostress_heat_capacity(volume,el_con_t,alpha_t,temp,cpmcv,ntemp)
 
 USE kinds, ONLY : DP
 USE constants, ONLY : ry_kbar
-USE elastic_constants, ONLY : el_cons_voigt, trans_epsilon
+USE elastic_constants, ONLY : el_cons_voigt
+USE strain_mod, ONLY :  trans_epsilon
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ntemp
 REAL(DP), INTENT(IN) :: el_con_t(6,6,ntemp), alpha_t(6,ntemp), temp(ntemp), &
