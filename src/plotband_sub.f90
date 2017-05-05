@@ -40,6 +40,7 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
   USE gnuplot,         ONLY : gnuplot_end, gnuplot_print_objects
   USE ions_base,     ONLY : nat
   USE spin_orb,      ONLY : lspinorb
+  USE thermo_sym,    ONLY : code_group_save
   USE io_bands,      ONLY : read_parameters, read_representations, read_bands
   USE mp,            ONLY : mp_bcast
   USE io_global,     ONLY : stdout, ionode, ionode_id
@@ -674,24 +675,9 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
 !  In the pbs case we cannot use the symmetry information of the first and
 !  last layer if sym_divide has not transformed them
 !
-  IF (nkz > 1 .AND. lprojpbs .AND. (.NOT.sym_divide) .AND. exist_rap ) THEN
-     nlines_=nlines / nkz
-     DO ilines=1,nlines_
-        DO i=1,3
-           point_group_path(ilines,i)=point_group_path(ilines+nlines_,i)
-           point_group_path(nlines-ilines+1,i)=&
-                 point_group_path(nlines-nlines_-ilines+1,i)
-        ENDDO  
-        projective(ilines)=projective(ilines+nlines_)
-        projective(nlines-ilines+1)=projective(nlines-nlines_-ilines+1)
-     ENDDO
-     tot_points_= tot_points/nkz
-     DO ik=1,tot_points_
-        lprojk_eff(ik)=lprojk_eff(ik+tot_points_)
-        lprojk_eff(tot_points-ik+1)=lprojk_eff(tot_points-tot_points_-ik+1)
-     ENDDO
-  ENDIF
-  
+  IF (nkz > 1 .AND. lprojpbs .AND. (.NOT.sym_divide) .AND. exist_rap ) &
+     CALL convert_proj_surface(nlines, tot_points, point_group_path,   &
+                               projective, lprojk_eff)
 !
 !   here try to estimate the size of the path
 !

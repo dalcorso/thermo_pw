@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2016 Andrea Dal Corso 
+! Copyright (C) 2016-2017 Andrea Dal Corso 
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -69,6 +69,52 @@ SUBROUTINE convert_rap_surface(nbnd, nks, nkz, high_symmetry, gcodek, aux_ind, &
   RETURN
   END SUBROUTINE convert_rap_surface
 
+SUBROUTINE convert_proj_surface(nlines, tot_points, point_group_path, &
+                               projective, lprojk_eff)
+
+USE control_2d_bands, ONLY : nkz
+USE point_group,      ONLY : has_sigma_h
+USE thermo_sym,       ONLY : code_group_save
+
+IMPLICIT NONE
+
+INTEGER, INTENT(IN) :: nlines, tot_points
+INTEGER, INTENT(INOUT) :: projective(nlines), lprojk_eff(tot_points) 
+CHARACTER(LEN=12) :: point_group_path(nlines, 3)
+
+INTEGER :: nlines_, tot_points_ 
+INTEGER :: ikz, ik, ike, ik2, ishift1, ishift2, ilines, ilinese, ilines2, i
+LOGICAL :: type1
+
+nlines_ = nlines / nkz
+tot_points_ = tot_points / nkz
+type1=has_sigma_h(code_group_save)
+IF (type1) THEN
+   ishift1=nlines_
+   ishift2=tot_points_
+ELSE
+   ishift1=0
+   ishift2=0
+ENDIF
+
+DO ikz=1, nkz
+   DO ilines=1,nlines_
+      ilinese=ilines + ishift1
+      ilines2=ilines + nlines_ * (ikz-1)
+      DO i=1,3
+         point_group_path(ilines2,i)=point_group_path(ilinese,i)
+      ENDDO  
+      projective(ilines2)=projective(ilinese)
+   ENDDO
+   DO ik=1,tot_points_
+      ike = ik + ishift2
+      ik2 = ik + tot_points_* (ikz-1)
+      lprojk_eff(ik2)=lprojk_eff(ike)
+   ENDDO
+ENDDO
+
+RETURN
+END SUBROUTINE convert_proj_surface
 
 SUBROUTINE identify_surface_states(nat, nbnd, nkstot, e, rap)
 !
