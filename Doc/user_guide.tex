@@ -663,14 +663,17 @@ representations of the slab small group of {\bf k}).
 In order to plot in different panels the different representations
 the user can specify \texttt{sym\_divide=} \texttt{.TRUE.}.
 By default this option is disabled and its use is rather tricky.
-In order to use this option you must indicate explicitly the
+In order to use it you must indicate explicitly the
 path on the two dimensional Brillouin zone using the option
 \texttt{q\_in\_band\_form=.TRUE.}. Close to the
-starting point of a given line you must indicate the number of 
+starting point of a given line you indicate the number of 
 representations for that line ($0$ means all representations) and which ones.
-For instance for a $(111)$ surface of an fcc metal you may
-want to plot separately the even and odd states in the direction 
-$\bar \Gamma-\bar M$. In order to do so you can specify the path as follows:
+For instance for a $(111)$ surface of an fcc metal in the direction 
+$\bar \Gamma-\bar M$ you may
+want to plot separately the states even or odd with respect to the mirror
+plane perpendicular to the surface that contains the $\bar \Gamma-\bar M$
+line.
+In order to do so you can specify the path as follows:
 \begin{verbatim}
 5
 gG   30  0
@@ -679,29 +682,47 @@ M    30  1  1
 gG   30  1  2
 M     1  0
 \end{verbatim}
-Which representation is indicated by its number (in this case $1$ or $2$).
+The representations to plot are indicated by their numbers 
+(in this case $1$ or $2$).
 The number of the representation and the small point group of each 
 {\bf k}-point can be found in the output of \texttt{thermo\_pw}.
-However you must be careful because these representation numbers refer
-to the slab small point group of each {\bf k}-point when you
-plot the slab band structures and to the surface small point 
-group of each {\bf k}-point when you plot a PBS.
-For a given {\bf k}-point parallel to the surface, the 
-point group of the slab might be larger than the one of the surface, because it 
-contains operations that exchange the two surfaces.
-In this case the surface point group of a given {\bf k}-point parallel 
-to the surface can be found in the projected band structure calculation,
-for a {\bf k}-point with the same component parallel to the surface
-and a generic {\bf k}$_z$. Actually the point group for this {\bf k}-point 
-does not contain operations that exchange {\bf k}$_z$ with $-${\bf k}$_z$.
-Therefore the symmetry separation of the PBS is done using the
-surface point groups. Some particular values of {\bf k}$_z$, such as 
-{\bf k}$_z=0$
-might have a different point group than a generic {\bf k}$_z$ and in this
+These representation numbers refer to the small point group of each 
+{\bf k}-point in the slab when you plot the slab band structures and 
+to the small point group of each {\bf k}-point in the bulk when you plot 
+a PBS. Some particular values of $k_z$, such as $k_z=0$
+might have a small point group in the bulk different from the small
+point group of a point with a generic $k_z$ but in this
 case the representations are transformed into those of the smaller
-group of the surface using the group-subgroup relationships and
+group using the group-subgroup relationships and
 the symmetry descent of the irreducible representations
-(only when \texttt{sym\_divide=.TRUE.}).
+(only when \texttt{sym\_divide=.TRUE.}). The representations of the
+smaller small point group have to be used in the PBS input.
+
+In general, the small point group of a {\bf k}-point 
+${\bf k}=({\bf k}_\parallel, 
+k_z)$ with component ${\bf k}_\parallel$ parallel to the surface 
+and a generic $k_z$ in the bulk is different 
+from the small point group of a {\bf k}-point ${\bf k}=({\bf k}_\parallel, 0)$ 
+in the slab. Moreover, experimentally one cannot consider symmetries
+of the slab that exchange the two surfaces, and therefore the small
+point group a {\bf k}-point ${\bf k}=({\bf k}_\parallel, 0)$ on the surface
+is a subgroup of the small point group of ${\bf k}=({\bf k}_\parallel, 0)$
+on the slab. The small point group ${\bf k}=({\bf k}_\parallel, k_z)$ 
+in the bulk does not contain operations that exchange $k_z$ 
+with $-k_z$
+but it might be larger than the small point group of 
+${\bf k}=({\bf k}_\parallel, 0)$ on the surface because
+it might contain symmetries of the bulk that require fractional translations
+perpendicular to the surface that are not symmetries neither of the slab nor of
+the surface.
+
+The small point group of a given {\bf k}-point ${\bf k}=({\bf k}_\parallel, 0)$
+on the surface can be found by removing from the corresponding slab small
+point group the
+operations that exchange the two surfaces. It is also the group formed
+from the intersection of the small point group of 
+${\bf k}=({\bf k}_\parallel, 0)$ in the slab and of the point 
+${\bf k}=({\bf k}_\parallel, k_z)$ in the bulk.
 It is the user responsibility to specify the same number of panels
 for the PBS and for the slab calculation and to assure that the
 representations plotted in each panel correspond to each other.
@@ -711,11 +732,12 @@ that the surface has not. Therefore you can plot with two different colors
 the bands that belong to the $A$ or $B$ representations of the slab,
 (states even or odd with respect to a $180^\circ$ rotation about
 the $x$ axis, an operation that exchanges the two surfaces)
-but you cannot separate the PBS along the $\bar \Gamma-\bar K$ direction into
-even or odd states. You might specify two different panels with the
+but you cannot separate the PBS into even or odd states with respect to 
+the $C_2$ symmetry. You might specify two different panels with the
 $A$ or $B$ bands in each, but the PBS in the two panels will be the same. 
-On the contrary, along the $\bar \Gamma-\bar M$ direction, both the slab and 
-the surface have $C_s$ symmetry, so you can separate both the PBS 
+On the contrary, for a {\bf k}-point along the $\bar \Gamma-\bar M$ direction, 
+the small point group has the $C_s$ symmetry both on the slab and on
+the surface, so you can separate both the PBS 
 and the surface states in two different panels.
 
 There is no input variable to control or change the colors or style of the 
