@@ -201,7 +201,7 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
 !    Last point. Here we save the last point of this line, but
 !    do not increase the number of lines
 !
-           last_point(nlines)=n
+           IF (.NOT. high_symmetry(n-1)) last_point(nlines)=n
         ELSEIF (MOD(n,nks_)==0) THEN
 !
 !   In this case do nothing. This is the last point of a graph, but we have
@@ -304,6 +304,7 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
 ! Now build the effective path and copy inside the relevant variables
 !
   ik=0
+  label_disp_q_eff=0
   DO ilines=1,nlines
      ncentral=(start_point(ilines)+last_point(ilines))/2
      DO n=start_point(ilines), last_point(ilines)
@@ -349,9 +350,9 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
         DO iq=1, nqaux
            IF (label_disp_q(iq)==n) label_disp_q_eff(iq)=ik
         ENDDO
-
      END DO
   END DO
+
   IF (ik /= tot_points) CALL errore('plotband_sub','Missing points',1)
 !
 !   Now set the limits of the y coordinate of the plot

@@ -158,10 +158,12 @@ DO ilines=1, nlines
 ENDDO
 !
 ! If q_in_band_form some additional label might need a vertical line. Put
-! it if it is not a starting or last point of a panel.
+! it if it is not a starting or last point of a panel. Do not put
+! lines when the label are outside the plot.
 !
 IF (q_in_band_form) THEN
    DO n=1, nqaux
+      IF (label_disp_q(n)==0) CYCLE
       IF (n/=1.AND.n/=nqaux.AND.colored_point(label_disp_q(n)) /= -1 ) &
       CALL gnuplot_write_vertical_line(kx(label_disp_q(n)), 1, 'front', &
                         color(color_map(label_disp_q(n))), .FALSE.)
@@ -238,9 +240,11 @@ IF (enhance_plot) THEN
    ENDDO    
 ENDIF
 !
-!  Finally the k point labels are written in black
+!  Finally the k point labels are written in black. Do not plot label
+!  that have no more a well defined position.
 !
 DO n=1, nqaux
+   IF (label_disp_q(n)==0) CYCLE
    IF (letter_path(n) /='') &
          CALL gnuplot_write_label_yl(kx(label_disp_q(n)), &
                           ' ymin + shift ', letter_path(n),.FALSE.)
