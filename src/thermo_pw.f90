@@ -322,13 +322,13 @@ PROGRAM thermo_pw
            !   writes the dynamical matrix
            !
            IF (trans) THEN
-              CALL collect_everything(auxdyn)
+              IF (with_asyn_images) CALL collect_everything(auxdyn)
            ELSEIF (fpol) THEN
               IF (lgamma) THEN
-                 IF (nimage>1) CALL collect_all_epsilon()
+                 IF (with_asyn_images) CALL collect_all_epsilon()
                  CALL plot_epsilon_omega_opt()
               ELSE
-                 IF (nimage>1) CALL collect_all_chi()
+                 IF (with_asyn_images) CALL collect_all_chi()
                  CALL plot_epsilon_omega_q()
               ENDIF
            ENDIF

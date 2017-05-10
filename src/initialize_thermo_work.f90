@@ -684,11 +684,15 @@ INTEGER :: iq, irr
 
 nwork=0
 IF (trans) THEN
-   DO iq=1,nqs
-      DO irr=0, irr_iq(iq)
-         nwork=nwork+1
+   IF (with_asyn_images) THEN
+      DO iq=1,nqs
+         DO irr=0, irr_iq(iq)
+            nwork=nwork+1
+         ENDDO
       ENDDO
-   ENDDO
+   ELSE
+      nwork=1
+   ENDIF
 ELSEIF (fpol) THEN
    IF (with_asyn_images) THEN
       nwork=nfs/omega_group

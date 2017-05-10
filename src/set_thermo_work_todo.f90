@@ -188,10 +188,26 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
                  comp_f=.TRUE.
              ENDIF
            ELSE
-              DO iq=1,nqs
-                 DO irr=0, irr_iq(iq)
-                    jwork=jwork+1
-                    IF (jwork==iwork) THEN
+              IF (with_asyn_images) THEN
+                 DO iq=1,nqs
+                    DO irr=0, irr_iq(iq)
+                       jwork=jwork+1
+                       IF (jwork==iwork) THEN
+                          IF (recover) THEN
+                             comp_irr_iq(irr,iq)=.NOT.done_irr_iq(irr,iq)
+                             comp_iq(iq)=.NOT.done_iq(iq)
+                          ELSE
+                             comp_irr_iq(irr,iq)=.TRUE.
+                             comp_iq(iq)=.TRUE.
+                          ENDIF
+                          iq_point=iq
+                          irr_value=irr
+                       ENDIF
+                    ENDDO
+                 ENDDO
+              ELSE
+                 DO iq=1,nqs
+                    DO irr=0, irr_iq(iq)
                        IF (recover) THEN
                           comp_irr_iq(irr,iq)=.NOT.done_irr_iq(irr,iq)
                           comp_iq(iq)=.NOT.done_iq(iq)
@@ -199,11 +215,11 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
                           comp_irr_iq(irr,iq)=.TRUE.
                           comp_iq(iq)=.TRUE.
                        ENDIF
-                       iq_point=iq
-                       irr_value=irr
-                    ENDIF
+                    ENDDO
                  ENDDO
-              ENDDO
+                 iq_point=0
+                 irr_value=0
+              ENDIF
            ENDIF
 !
 !    Here the elastic constant calculation
