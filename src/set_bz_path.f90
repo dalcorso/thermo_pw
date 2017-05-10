@@ -32,9 +32,13 @@ CALL find_bz_type(ibrav, celldm, bzt)
 !
 SELECT CASE (bzt) 
 
-CASE (1, 3) 
-     npk_label=8
-     IF (what=='mur_lc_t') npk_label=9
+CASE (1) 
+     IF (long_path) THEN
+        npk_label=8
+        IF (what=='mur_lc_t') npk_label=9
+     ELSE
+        npk_label=4
+     ENDIF
 CASE (2)
      IF (long_path) THEN
         npk_label=11
@@ -43,9 +47,16 @@ CASE (2)
         npk_label=6
         IF (what=='mur_lc_t') npk_label=7
      ENDIF
+CASE(3)
+     npk_label=8
+     IF (what=='mur_lc_t') npk_label=9
 CASE(4)
-     npk_label=12
-     IF (what=='mur_lc_t') npk_label=13
+     IF (long_path) THEN
+        npk_label=12
+        IF (what=='mur_lc_t') npk_label=13
+     ELSE
+        npk_label=4
+     ENDIF
 CASE(5) 
     IF (long_path) THEN
        npk_label=11
@@ -55,8 +66,12 @@ CASE(5)
        IF (what=='mur_lc_t') npk_label=6
     ENDIF
 CASE(7)
-     npk_label=16
-     IF (what=='mur_lc_t') npk_label=17
+     IF (long_path) THEN
+        npk_label=16
+        IF (what=='mur_lc_t') npk_label=17
+     ELSE
+        npk_label=5
+     ENDIF
 CASE (6) 
      npk_label=13
      IF (what=='mur_lc_t') npk_label=14
@@ -73,8 +88,12 @@ CASE (11)
      npk_label=15
      IF (what=='mur_lc_t') npk_label=16
 CASE (12) 
-     npk_label=12
-     IF (what=='mur_lc_t') npk_label=13
+     IF (long_path) THEN
+        npk_label=12
+        IF (what=='mur_lc_t') npk_label=13
+     ELSE
+        npk_label=6
+     ENDIF
 CASE (13) 
      IF (long_path.OR.old_path) THEN
         npk_label=12
@@ -87,7 +106,11 @@ CASE (14)
 CASE (15) 
      npk_label=7
 CASE (16) 
-     npk_label=7
+   IF (long_path.OR.ibrav==-12) THEN
+      npk_label=7
+   ELSE
+      npk_label=3
+   ENDIF
 END SELECT
 IF (npk_label==0) CALL errore('set_bz_path','bz_type not supported',1)
 nqaux=npk_label
@@ -116,17 +139,23 @@ CASE (1)
 !
 !  Simple cubic bz
 !
-   IF (what=='mur_lc_t') THEN
-      letter(1:npk_label)= (/ 'gG', 'X ', 'M ', 'gG', 'gG', 'R ', 'X ', &
-                              'R ', 'M ' /)
-      wqaux(1:npk_label) = (/  30,   30,   45,    0,   50,   45,     0, & 
-                               30,    1  /)
-      label_list(1:npk_label)=(/ ( i, i=1,npk_label) /)
+   IF (long_path) THEN
+      IF (what=='mur_lc_t') THEN
+         letter(1:npk_label)= (/ 'gG', 'X ', 'M ', 'gG', 'gG', 'R ', 'X ', &
+                                 'R ', 'M ' /)
+         wqaux(1:npk_label) = (/  30,   30,   45,    0,   50,   45,     0, & 
+                                  30,    1  /)
+         label_list(1:npk_label)=(/ ( i, i=1,npk_label) /)
+      ELSE
+         letter(1:npk_label)= (/ 'gG', 'X ', 'M ', 'gG', 'R ', 'X ', &
+                                 'R ', 'M '  /)
+         wqaux(1:npk_label) = (/  30,   30,   45,   50,   45,    0,  &
+                                  30,    1   /)
+         label_list(1:npk_label)=(/ ( i, i=1,npk_label) /)
+      ENDIF
    ELSE
-      letter(1:npk_label)= (/ 'gG', 'X ', 'M ', 'gG', 'R ', 'X ', &
-                              'R ', 'M '  /)
-      wqaux(1:npk_label) = (/  30,   30,   45,   50,   45,    0,  &
-                               30,    1   /)
+      letter(1:npk_label)= (/ 'gG', 'X ', 'M ', 'gG' /)
+      wqaux(1:npk_label) = (/  30,   30,   45,   1   /)
       label_list(1:npk_label)=(/ ( i, i=1,npk_label) /)
    ENDIF
    letter_path=letter
@@ -181,17 +210,23 @@ CASE (4)
 !
 ! simple tetragonal lattice
 !
-   IF (what=='mur_lc_t') THEN
-      letter(1:npk_label)= (/ 'gG', 'X ', 'M ', 'gG', 'gG', 'Z ', 'R ',  &
-                              'A ', 'Z ', 'X ', 'R ', 'M ', 'A '  /)  
-      wqaux(1:npk_label) =  (/  30,   30,   45,  0,  40,   30,  30, &
+   IF (long_path) THEN
+      IF (what=='mur_lc_t') THEN
+         letter(1:npk_label)= (/ 'gG', 'X ', 'M ', 'gG', 'gG', 'Z ', 'R ',  &
+                                 'A ', 'Z ', 'X ', 'R ', 'M ', 'A '  /)  
+         wqaux(1:npk_label) =  (/  30,   30,   45,  0,  40,   30,  30, &
                                 45,    0,   30,  0,  30,  1 /)
-      label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
-   ELSE
-      letter(1:npk_label)= (/ 'gG', 'X ', 'M ', 'gG', 'Z ', 'R ',  &
-                       'A ', 'Z ', 'X ', 'R ', 'M ', 'A ' /)  
-      wqaux(1:npk_label) =  (/  30,   30,   45,    40,   30,  30, &
+         label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
+      ELSE
+         letter(1:npk_label)= (/ 'gG', 'X ', 'M ', 'gG', 'Z ', 'R ',  &
+                          'A ', 'Z ', 'X ', 'R ', 'M ', 'A ' /)  
+         wqaux(1:npk_label) =  (/  30,   30,   45,    40,   30,  30, &
                          45,   0,  30,  0,  30,  1 /)
+         label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
+      ENDIF
+   ELSE
+      letter(1:npk_label)= (/ 'gG', 'X ', 'M ', 'gG' /)  
+      wqaux(1:npk_label) = (/  30,   30,   45,    1  /)
       label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
    ENDIF
    letter_path=letter
@@ -258,23 +293,30 @@ CASE (7)
 !
 !  Simple orthorhombic lattice
 !
-   IF (what=='mur_lc_t') THEN
-      letter(1:npk_label)= (/ 'gG', 'X ', 'S ', 'Y ', 'gG', 'gG', 'Z ', &
-                              'U ', 'R ', 'T ', 'Z ', 'X ', 'U ', 'Y ', &
-                              'T ', 'S ', 'R '  /)  
-      wqaux(1:npk_label) =  (/  30,   30,   30,   30,    0,   30,   30, &
-                                30,   30,   30,    0,   30,    0,   30, & 
-                                 0,   30,    1   /)
-      label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
+   IF (long_path) THEN
+      IF (what=='mur_lc_t') THEN
+         letter(1:npk_label)= (/ 'gG', 'X ', 'S ', 'Y ', 'gG', 'gG', 'Z ', &
+                                 'U ', 'R ', 'T ', 'Z ', 'X ', 'U ', 'Y ', &
+                                 'T ', 'S ', 'R '  /)  
+         wqaux(1:npk_label) =  (/  30,   30,   30,   30,    0,   30,   30, &
+                                   30,   30,   30,    0,   30,    0,   30, & 
+                                    0,   30,    1   /)
+         label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
+      ELSE
+         letter(1:npk_label)= (/ 'gG', 'X ', 'S ', 'Y ', 'gG', 'Z ',       &
+                                 'U ', 'R ', 'T ', 'Z ', 'X ', 'U ', 'Y ', & 
+                                 'T ', 'S ', 'R '  /)  
+         wqaux(1:npk_label) =  (/  30,   30,   30,  30,   30,  30,        &
+                                   30,   30,   30,   0,   30,    0,   30, &  
+                                    0,   30,    1   /)
+         label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
+      ENDIF
    ELSE
-      letter(1:npk_label)= (/ 'gG', 'X ', 'S ', 'Y ', 'gG', 'Z ',       &
-                              'U ', 'R ', 'T ', 'Z ', 'X ', 'U ', 'Y ', & 
-                              'T ', 'S ', 'R '  /)  
-      wqaux(1:npk_label) =  (/  30,   30,   30,  30,   30,  30,        &
-                                30,   30,   30,   0,   30,    0,   30, &  
-                                 0,   30,    1   /)
+      letter(1:npk_label)= (/ 'gG', 'X ', 'S ', 'Y ', 'gG' /)  
+      wqaux(1:npk_label) = (/  30,    30,   30,   30,   1  /)
       label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
    ENDIF
+
    letter_path=letter
    point_label_type='SC'
 CASE (8) 
@@ -381,27 +423,37 @@ CASE (12)
 !
 !  Base centered orthorhombic
 !
-   IF (what=='mur_lc_t') THEN
-      IF (celldm(2) >= 1.0_DP) THEN
-         letter(1:npk_label)= (/ 'gG', 'X ', 'S ', 'R ', 'A ', 'Z ', 'gG', &
-                                 'gG', 'Y ', 'X1', 'A1', 'T ', 'Y ' /)  
+   IF (long_path) THEN
+      IF (what=='mur_lc_t') THEN
+         IF (celldm(2) >= 1.0_DP) THEN
+            letter(1:npk_label)= (/ 'gG', 'X ', 'S ', 'R ', 'A ', 'Z ', 'gG', &
+                                    'gG', 'Y ', 'X1', 'A1', 'T ', 'Y ' /)  
+         ELSE
+            letter(1:npk_label)= (/ 'gG', 'Y ', 'S ', 'R ', 'T ', 'Z ', 'gG',  &
+                                    'gG', 'X ', 'Y1', 'A1', 'A ', 'X ' /)  
+         ENDIF
+         wqaux(1:npk_label) =  (/  30,   30,   30,   30,   30,   30,  30,  &
+                                    0,   30,   30,   30,   30,    1  /)
+         label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
       ELSE
-         letter(1:npk_label)= (/ 'gG', 'Y ', 'S ', 'R ', 'T ', 'Z ', 'gG',   &
-                                 'gG', 'X ', 'Y1', 'A1', 'A ', 'X ' /)  
+         IF (celldm(2) >= 1.0_DP) THEN
+            letter(1:npk_label)= (/ 'gG', 'X ', 'S ', 'R ', 'A ', 'Z ',    &
+                                    'gG', 'Y ', 'X1', 'A1', 'T ', 'Y ' /)  
+         ELSE
+            letter(1:npk_label)= (/ 'gG', 'Y ', 'S ', 'R ', 'T ', 'Z ',    &
+                                    'gG', 'X ', 'Y1', 'A1', 'A ', 'X ' /)  
+         ENDIF
+         wqaux(1:npk_label) =  (/  30,   30,   30,   30,   30,   30,    &
+                                   30,   30,   30,   30,   30,    1 /)
+         label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
       ENDIF
-      wqaux(1:npk_label) =  (/  30,   30,   30,   30,   30,   30,  30,  &
-                                 0,   30,   30,   30,   30,    1  /)
-      label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
    ELSE
       IF (celldm(2) >= 1.0_DP) THEN
-         letter(1:npk_label)= (/ 'gG', 'X ', 'S ', 'R ', 'A ', 'Z ',    &
-                                 'gG', 'Y ', 'X1', 'A1', 'T ', 'Y ' /)  
+         letter(1:npk_label)= (/ 'gG', 'X ', 'S ', 'X1', 'Y ', 'gG' /)  
       ELSE
-         letter(1:npk_label)= (/ 'gG', 'Y ', 'S ', 'R ', 'T ', 'Z ',    &
-                                 'gG', 'X ', 'Y1', 'A1', 'A ', 'X ' /)  
+         letter(1:npk_label)= (/ 'gG', 'X ', 'Y1', 'S ', 'Y ', 'gG' /) 
       ENDIF
-      wqaux(1:npk_label) =  (/  30,   30,   30,   30,   30,   30,    &
-                                30,   30,   30,   30,   30,    1 /)
+      wqaux(1:npk_label) =  (/  30,   30,   30,   30,   30,    1 /)
       label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
    ENDIF
    letter_path=letter
@@ -469,12 +521,19 @@ CASE (16)
 !
 !  simple monoclinic lattice
 !
-   IF (ibrav==12) THEN
-      letter(1:npk_label) = (/ 'gG', 'X ', 'A ', 'Z ', 'D ', 'Y ', 'gG' /)
-      wqaux(1:npk_label) =  (/  30,    30,   30,   30,   30,  30,    1 /)
+   IF (long_path.OR.ibrav==-12) THEN
+      IF (ibrav==12) THEN
+         letter(1:npk_label) = (/ 'gG', 'X ', 'A ', 'Z ', 'D ', 'Y ', 'gG' /)
+         wqaux(1:npk_label) =  (/  30,    30,   30,   30,   30,  30,    1 /)
+      ELSE
+         letter(1:npk_label) = (/ 'gG', 'X ', 'A ', 'Y ', 'D ', 'Z ', 'gG' /)
+         wqaux(1:npk_label) =  (/  30,    30,   30,   30,   30,  30,    1 /)
+      ENDIF
    ELSE
-      letter(1:npk_label) = (/ 'gG', 'X ', 'A ', 'Y ', 'D ', 'Z ', 'gG' /)
-      wqaux(1:npk_label) =  (/  30,    30,   30,   30,   30,  30,    1 /)
+      IF (ibrav==12) THEN
+         letter(1:npk_label) = (/ 'Y ', 'gG', 'X '  /)
+         wqaux(1:npk_label) =  (/  30,    30,   1   /)
+      ENDIF
    ENDIF
    label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
    letter_path=letter
