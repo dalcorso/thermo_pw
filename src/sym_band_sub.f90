@@ -43,7 +43,8 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   USE band_symmetry,        ONLY : find_band_sym_proj
   USE lattices,             ONLY : zone_border, same_star
   USE control_bands,        ONLY : lsym
-  USE control_paths,        ONLY : high_sym_path, disp_nqs, nrap_plot, rap_plot
+  USE control_paths,        ONLY : high_sym_path, disp_nqs, nrap_plot, &
+                                   rap_plot, dkmod_save
   USE data_files,           ONLY : flprojlayer
   USE uspp,                 ONLY : nkb, vkb
   USE spin_orb,             ONLY : domag
@@ -71,7 +72,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   REAL(DP), PARAMETER :: accuracy=1.d-4
   COMPLEX(DP) :: d_spink(2,2,48), d_spin_is(2,2,48), d_spin_in(2,2,48)
   COMPLEX(DP), ALLOCATABLE :: times(:,:,:)
-  REAL(DP) :: dxk(3), dkmod, dkmod_save, k1(3), k2(3), ps, &
+  REAL(DP) :: dxk(3), dkmod, k1(3), k2(3), ps, &
               gauge(48), argument(48,48), srk(3,3,48)
   INTEGER, ALLOCATABLE :: rap_et(:,:), code_group_k(:), aux_ind(:), &
                           code_group_ext_k(:), lprojk(:), nrapk(:), &
@@ -382,7 +383,6 @@ SUBROUTINE sym_band_sub(filband, spin_component)
         IF (ik == nks1tot) THEN
            IF (search_sym) CALL write_group_info(.true.)
            dxk(:) = xk(:,2) - xk(:,1)
-           dkmod_save = sqrt( dxk(1)**2 + dxk(2)**2 + dxk(3)**2 )
         ELSE
            IF (code_group_k(ik)/=code_group_k(ik-1).AND.search_sym) &
               CALL write_group_info(.true.)
@@ -409,11 +409,6 @@ SUBROUTINE sym_band_sub(filband, spin_component)
               IF (.NOT. high_symmetry(ik-1)) &
                  high_symmetry(ik) = code_group_k(ik) /= code_group_k(ik-1) &
                                   .OR. high_symmetry(ik)
-!
-!   avoid that a single too small dkmod makes all the other points appear
-!   distant. 
-!
-              dkmod_save= MAX( 0.5_DP * dkmod_save, dkmod)
            ELSE
 !
 !    Points are distant. They are all high symmetry

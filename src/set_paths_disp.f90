@@ -20,7 +20,7 @@ SUBROUTINE set_paths_disp()
                             q_in_cryst_coord, q2d, point_label_type, &
                             label_disp_q, disp_nqs, disp_q, disp_wq, &
                             nrap_plot, rap_plot, nrap_plot_in, rap_plot_in, &
-                            high_sym_path
+                            dkmod_save, high_sym_path
   USE control_2d_bands, ONLY : nkz, sym_divide
   USE thermo_mod,    ONLY : what
   USE cell_base,     ONLY : ibrav, celldm, bg
@@ -105,6 +105,7 @@ SUBROUTINE set_paths_disp()
 !
   ALLOCATE(high_sym_path(disp_nqs))
   high_sym_path=.FALSE.
+  dkmod_save=0.0_DP
   DO n=1,disp_nqs
      IF (n==1.OR.n==disp_nqs) THEN
 !
@@ -116,6 +117,7 @@ SUBROUTINE set_paths_disp()
         q2(:) = disp_q(:,n+1) - disp_q(:,n)
         modq1=sqrt( q1(1)*q1(1) + q1(2)*q1(2) + q1(3)*q1(3) )
         modq2=sqrt( q2(1)*q2(1) + q2(2)*q2(2) + q2(3)*q2(3) )
+        dkmod_save=dkmod_save+modq2
         IF (modq1 >1.d-6 .AND. modq2 > 1.d-6) THEN
            ps = ( q1(1)*q2(1) + q1(2)*q2(2) + q1(3)*q2(3) ) / &
                    modq1 / modq2
@@ -128,6 +130,7 @@ SUBROUTINE set_paths_disp()
                                               high_sym_path(n)=.TRUE.
      END IF
   END DO
+  dkmod_save=dkmod_save/(disp_nqs-1)
 
   RETURN
 END SUBROUTINE set_paths_disp

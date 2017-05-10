@@ -35,7 +35,7 @@ SUBROUTINE write_ph_dispersions()
   USE rap_point_group,  ONLY : code_group
   USE initial_conf, ONLY : nr1_save, nr2_save, nr3_save
   USE control_paths, ONLY : disp_q, disp_nqs, high_sym_path, nrap_plot, &
-                            rap_plot
+                            rap_plot, dkmod_save
   USE control_ph,    ONLY : xmldyn
   USE ifc,           ONLY : m_loc, has_zstar
   USE io_bands,      ONLY : write_bands, write_representations
@@ -48,7 +48,7 @@ SUBROUTINE write_ph_dispersions()
   INTEGER :: nqs, nta, ipol, ios, code_group_old, n, i, iq, nq, iout
   LOGICAL :: lo_to_split
   CHARACTER(LEN=15), ALLOCATABLE :: name_rap_mode(:)
-  REAL(DP) :: ps, qh, dq(3), q1(3), q2(3), modq1, modq2, dqmod, dqmod_save
+  REAL(DP) :: ps, qh, dq(3), q1(3), q2(3), modq1, modq2, dqmod
   REAL(DP), ALLOCATABLE :: w2(:,:)
   INTEGER, ALLOCATABLE :: num_rap_mode(:,:), qcode_group(:), aux_ind(:), &
                           qcode_group_ext(:), ptypeq(:,:), lprojq(:)
@@ -134,7 +134,6 @@ SUBROUTINE write_ph_dispersions()
         ELSE
            dq(:) = 0.0_DP
         END IF
-        dqmod_save = sqrt( dq(1)**2 + dq(2)**2 + dq(3)**2 )
         code_group_old=0
      ENDIF
   !
@@ -165,14 +164,13 @@ SUBROUTINE write_ph_dispersions()
               !   is the same
               high_sym(n)=high_sym(n-1)
               !
-           ELSE IF (dqmod < 5.0_DP * dqmod_save) THEN
+           ELSE IF (dqmod < 5.0_DP * dkmod_save) THEN
 !
 !    In this case the two points are considered close
 !
               IF (.NOT. high_sym(n-1)) &
                  high_sym(n) = code_group /= code_group_old .OR. high_sym(n)
 
-              dqmod_save= MAX(dqmod_save * 0.5_DP, dqmod)
            ELSE
               high_sym(n)=.TRUE.
            ENDIF
