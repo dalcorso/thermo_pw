@@ -204,17 +204,19 @@ CHARACTER(LEN=6) :: int_to_char
   gnu_filename="gnuplot_files/"//TRIM(gnu_filename)
 
   IF (icode==1) THEN
-     WRITE(stdout,'(5x,"Writing bands in gnuplot format to file ",a)') &
-                                                            TRIM(fileout)
+     WRITE(stdout,'(/,5x,"Writing bands in gnuplot format to file ")') 
+     WRITE(stdout,'(5x,a)') TRIM(fileout)
   ELSEIF (icode==2) THEN
-     WRITE(stdout,'(5x,"Writing phonons in gnuplot format to file ",a)') &
-                                                            TRIM(fileout)
+     WRITE(stdout,'(/,5x,"Writing phonons in gnuplot format to file ")') 
+     WRITE(stdout,'(5x,a)') TRIM(fileout)
   ELSEIF (icode==3) THEN
-     WRITE(stdout,'(5x,"Writing Gruneisen parameters in gnuplot format &
-                                            &to file ",a)') TRIM(fileout)
+     WRITE(stdout,'(/,5x,"Writing Gruneisen parameters in gnuplot format &
+                                            &to file ")')
+     WRITE(stdout,'(5x,a)') TRIM(fileout)
   ELSEIF (icode==4) THEN
-     WRITE(stdout,'(5x,"Writing interpolated phonons in gnuplot format  &
-                                            &to file ",a)') TRIM(fileout)
+     WRITE(stdout,'(/,5x,"Writing interpolated phonons in gnuplot format  &
+                                            &to file ")')
+     WRITE(stdout,'(5x,a)') TRIM(fileout)
   ENDIF
 
 
