@@ -194,8 +194,10 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
 !   first point. Initialize the number of lines
 !   and say that this line start at the first point
 !
-           nlines=1
-           start_point(1)=1
+           IF (.NOT. high_symmetry(n+1)) THEN
+              nlines=1
+              start_point(1)=1
+           ENDIF
         ELSEIF (n==nks) THEN
 !
 !    Last point. Here we save the last point of this line, but
