@@ -325,10 +325,10 @@ PROGRAM thermo_pw
               IF (with_asyn_images) CALL collect_everything(auxdyn)
            ELSEIF (fpol) THEN
               IF (lgamma) THEN
-                 IF (with_asyn_images) CALL collect_all_epsilon()
+                 CALL collect_all_epsilon()
                  CALL plot_epsilon_omega_opt()
               ELSE
-                 IF (with_asyn_images) CALL collect_all_chi()
+                 CALL collect_all_chi()
                  CALL plot_epsilon_omega_q()
               ENDIF
            ENDIF

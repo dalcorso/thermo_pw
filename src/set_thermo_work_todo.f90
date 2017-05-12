@@ -17,7 +17,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
 !
   USE kinds,            ONLY : DP
   USE thermo_mod,       ONLY : what, celldm_geo
-  USE control_thermo,   ONLY : outdir_thermo, lstress
+  USE control_thermo,   ONLY : outdir_thermo, lstress, lphonon
   USE control_elastic_constants, ONLY : frozen_ions
   USE control_conv,     ONLY : ke, keden, nk_test, sigma_test
   USE initial_conf,     ONLY : ibrav_save, tau_save_crys
@@ -45,6 +45,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
   USE start_k,     ONLY : init_start_k
   USE klist,       ONLY : degauss
   USE freq_ph,     ONLY : fpol, nfs
+  USE optical,     ONLY : start_freq, last_freq
   USE io_files,    ONLY : tmp_dir, wfc_dir
 !
 !   the phonon variables set here or used to set the input
@@ -186,7 +187,11 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
                  ENDDO
               ELSE
                  comp_f=.TRUE.
-             ENDIF
+              ENDIF
+              lphonon(iwork)=.FALSE.
+              DO i=start_freq,last_freq
+                 lphonon(iwork)=lphonon(iwork).OR.comp_f(i)
+              ENDDO
            ELSE
               IF (with_asyn_images) THEN
                  DO iq=1,nqs

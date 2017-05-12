@@ -82,11 +82,13 @@ SUBROUTINE run_thermo_asynchronously(nwork, part, igeom, auxdyn)
 !
               IF (iwork>0) THEN
                  CALL set_thermo_work_todo(iwork, part, iq, irr)
-                 WRITE(stdout,'(/,2x,76("+"))')
                  IF (lpwscf(iwork)) THEN
+                    WRITE(stdout,'(/,2x,76("+"))')
                     WRITE(stdout,'(5x,"I am the master and now I do geometry",&
                                                                   & i5)') iwork
+                    WRITE(stdout,'(2x,76("+"),/)')
                  ELSE IF (lphonon(iwork)) THEN
+                    WRITE(stdout,'(/,2x,76("+"))')
                     IF (fpol) THEN
                        WRITE(stdout,'(5x,"I am the master and now I do &
                             &frequency", i5)') iwork
@@ -94,8 +96,8 @@ SUBROUTINE run_thermo_asynchronously(nwork, part, igeom, auxdyn)
                        WRITE(stdout,'(5x,"I am the master and now I do point",&
                        & i5," irrep", i5, " of geometry", i5 )') iq, irr, igeom
                     ENDIF
+                    WRITE(stdout,'(2x,76("+"),/)')
                  END IF
-                 WRITE(stdout,'(2x,76("+"),/)')
                  IF (lpwscf(iwork)) THEN
                     CALL check_existence(iwork,part,igeom,run)
                     IF (run) THEN
@@ -139,11 +141,13 @@ SUBROUTINE run_thermo_asynchronously(nwork, part, igeom, auxdyn)
 !
            IF (iwork>0) THEN
               CALL set_thermo_work_todo(iwork, part, iq, irr)
-              WRITE(stdout,'(/,2x,76("+"))')
               IF (lpwscf(iwork)) THEN
+                 WRITE(stdout,'(/,2x,76("+"))')
                  WRITE(stdout,'(5x,"I am image ", i5, " and now I do &
                                        &geometry", i5)') my_image_id, iwork
+                 WRITE(stdout,'(2x,76("+"),/)')
               ELSE IF (lphonon(iwork)) THEN
+                 WRITE(stdout,'(/,2x,76("+"))')
                  IF (fpol) THEN
                     WRITE(stdout,'(5x,"I am image ",i5," and now I do &
                      &frequency", i5 )') my_image_id, iwork
@@ -152,10 +156,11 @@ SUBROUTINE run_thermo_asynchronously(nwork, part, igeom, auxdyn)
                      i5," irrep", i5, " of geometry", i5 )') my_image_id, iq, &
                                                           irr, igeom
                  END IF
+                 WRITE(stdout,'(2x,76("+"),/)')
               END IF
-              WRITE(stdout,'(2x,76("+"),/)')
  
               IF (lpwscf(iwork)) THEN
+                 WRITE(stdout,'(/,2x,76("+"))')
                  CALL check_existence(iwork,part,igeom,run)
                  IF (run) THEN
                     CALL do_pwscf(exit_status, .TRUE.)
@@ -165,6 +170,7 @@ SUBROUTINE run_thermo_asynchronously(nwork, part, igeom, auxdyn)
                     ENDIF
                     CALL save_existence(iwork,part,igeom)
                  ENDIF
+                 WRITE(stdout,'(2x,76("+"),/)')
               END IF
               IF (lberry(iwork)) CALL do_berry(exit_status, &
                                        polar_geo(1,iwork), nppl)
@@ -190,8 +196,8 @@ SUBROUTINE run_thermo_asynchronously(nwork, part, igeom, auxdyn)
               IF (fpol) THEN
                  WRITE(stdout,'(5x,"Doing frequency", i5)') iwork
               ELSE
-                 WRITE(stdout,'(5x,"Doing point", i5,  &
-                   & " irrep", i5, " of geometry", i5 )') iq, irr, igeom
+                 WRITE(stdout,'(5x,"Doing all calculation&
+                      & of geometry", i5 )') igeom
               END IF
            END IF
            WRITE(stdout,'(2x,76("+"),/)')

@@ -37,7 +37,7 @@ SUBROUTINE pheqscf()
                               intq, intq_nc, dmuxc_tran, chirr, chirz, chizz, &
                               chipm, chimp, chixx, chixy, chizr, lmagnon,     &
                               lall_tensor, lcharge, lchimag, epsm1,           &
-                              lr1dwf, iu1dwf
+                              lr1dwf, iu1dwf, start_freq, last_freq
   USE ramanm,          ONLY : ramtns, lraman, elop, done_lraman, done_elop
   USE buffers,         ONLY : close_buffer, open_buffer
   USE images_omega,    ONLY : comp_f
@@ -94,7 +94,7 @@ SUBROUTINE pheqscf()
      CALL open_buffer (iu1dwf, 'mwf', lr1dwf, io_level, exst_mem, &
                                                            exst, tmp_dir)
      !
-     DO iu = 1, nfs
+     DO iu = start_freq, last_freq
         !
         IF (.NOT. comp_f(iu) ) CYCLE
         current_w=CMPLX(fru(iu), fiu(iu))
@@ -290,13 +290,13 @@ IF (ionode) THEN
       ELSE
          OPEN (UNIT=iu_epsil, FILE=TRIM(filename), STATUS='unknown', &
                                                             FORM='formatted')
-         WRITE(iu_epsil,'("#    Re(w)     Im(w)     Re(1/eps)       Im(1/eps)&
+         WRITE(iu_epsil,'("#       Re(w)     Im(w)     Re(1/eps)      Im(1/eps)&
                         &      Re (eps)      Im(eps) ")')
       END IF
 
       epsi = (0.0_DP,0.0_DP)
       IF (ABS(epsm1(iu))>1.D-10) epsi = CMPLX(1.0_DP,0.0_DP) / epsm1(iu)
-         WRITE(iu_epsil,'(2f10.5, 4e15.7)') fru(iu), fiu(iu),   &
+         WRITE(iu_epsil,'(i6, 2f8.5, 4e14.6)') iu, fru(iu), fiu(iu),   &
                   DREAL(epsm1(iu)), DIMAG(epsm1(iu)), &
                   DREAL(epsi), DIMAG(epsi)
      
@@ -315,14 +315,15 @@ USE lsda_mod,  ONLY : lsda
 USE freq_ph,   ONLY : fiu, nfs
 USE optical,   ONLY : lcharge, fru, chirr, epsm1
 USE optical,   ONLY : fru, lcharge, chirr, chirz, chizz, &
-                      chipm, chimp, chixx, chixy, chizr, epsm1
+                      chipm, chimp, chixx, chixy, chizr, epsm1, start_freq, &
+                      last_freq
 USE io_global, ONLY : meta_ionode, ionode, ionode_id
 USE mp_images, ONLY : my_image_id, intra_image_comm, inter_image_comm
 USE mp,        ONLY : mp_bcast, mp_sum
 
 
 IMPLICIT NONE
-INTEGER :: iu_epsil, iuf, iu
+INTEGER :: iu_epsil, iuf, iu, idum
 LOGICAL :: exst
 REAL(DP) :: chirrr, chirri, epsir, epsii, epsm1r, epsm1i, ro, ri
 REAL(DP) :: chirzr, chizzr, chipmr, chimpr, chixxr, chixyr, chirzi, chizzi, &
@@ -331,6 +332,7 @@ REAL(DP), ALLOCATABLE :: chirrb(:), chirzb(:), chizzb(:), chipmb(:), &
                          chimpb(:), chixxb(:), chixyb(:), chirrc(:), &
                          chirzc(:), chizzc(:), chipmc(:), chimpc(:), &
                          chixxc(:), chixyc(:)
+INTEGER, ALLOCATABLE :: computed(:)
 CHARACTER(LEN=256) :: filename
 CHARACTER(LEN=6)   :: int_to_char
 
@@ -359,9 +361,11 @@ ALLOCATE(chipmc(nfs))
 ALLOCATE(chimpc(nfs))
 ALLOCATE(chixxc(nfs))
 ALLOCATE(chixyc(nfs))
+ALLOCATE(computed(nfs))
 
 chirr=0.0_DP
 epsm1=0.0_DP
+computed=0
 
 IF (ionode) THEN
    iu_epsil=2
@@ -384,6 +388,7 @@ IF (ionode) THEN
          DO iu=1,nfs
             IF ((ABS(ro-fru(iu))+ABS(ri-fiu(iu)))<1.D-4) THEN
                chirr(iu)=CMPLX(chirrr,chirri)
+               computed(iu)=1
                EXIT
             END IF
          END DO
@@ -414,6 +419,7 @@ IF (ionode) THEN
                chimpb(iu)=chimpr
                chixxb(iu)=chixxr
                chixyb(iu)=chixyr
+               computed(iu)=1
                EXIT
             ENDIF
          ENDDO
@@ -442,6 +448,7 @@ IF (ionode) THEN
                chimpc(iu)=chimpi
                chixxc(iu)=chixxi
                chixyc(iu)=chixyi
+               computed(iu)=1
                EXIT
             ENDIF
          ENDDO
@@ -477,11 +484,12 @@ IF (ionode) THEN
       END IF
 
       DO iuf=1,nfs
-         READ(iu_epsil,'(2f10.5, 4e15.7)',END=400) ro, ri, epsm1r, epsm1i, &
-                                                                   epsir, epsii
+         READ(iu_epsil,'(i6, 2f8.5, 4e14.6)',END=400) idum, ro, ri, epsm1r, &
+                                                      epsm1i, epsir, epsii
          DO iu=1,nfs
             IF ((ABS(ro-fru(iu))+ABS(ri-fiu(iu)))<1.D-4) THEN
                epsm1(iu)=CMPLX(epsm1r,epsm1i)
+               computed(iu)=1
                EXIT
             END IF
          END DO
@@ -494,9 +502,15 @@ ENDIF
 ! Now transfer the susceptibility and epsm1 to all nodes. First collect
 ! all the frequencies and then send to all the nodes of each image
 !
+CALL mp_sum(computed, inter_image_comm)
+CALL mp_bcast(computed, ionode_id, intra_image_comm)
+
 IF (nspin_mag==1) THEN
    CALL mp_sum(chirr, inter_image_comm)
    CALL mp_bcast(chirr, ionode_id, intra_image_comm)
+   DO iu=1,nfs
+      IF (computed(iu)>1) chirr(iu)=chirr(iu)/computed(iu)
+   ENDDO
 ELSEIF(nspin_mag==2) THEN
    CALL mp_sum(chirr, inter_image_comm)
    CALL mp_bcast(chirr, ionode_id, intra_image_comm)
@@ -512,6 +526,17 @@ ELSEIF(nspin_mag==2) THEN
    CALL mp_bcast(chixx, ionode_id, intra_image_comm)
    CALL mp_sum(chixy, inter_image_comm)
    CALL mp_bcast(chixy, ionode_id, intra_image_comm)
+   DO iu=1,nfs
+      IF (computed(iu)>1) THEN
+         chirr(iu)=chirr(iu)/computed(iu)
+         chirz(iu)=chirz(iu)/computed(iu)
+         chizz(iu)=chizz(iu)/computed(iu)
+         chipm(iu)=chimp(iu)/computed(iu)
+         chimp(iu)=chimp(iu)/computed(iu)
+         chixx(iu)=chixx(iu)/computed(iu)
+         chixy(iu)=chixy(iu)/computed(iu)
+      END IF
+   ENDDO
 ELSE
 
 ENDIF
@@ -519,6 +544,9 @@ ENDIF
 IF (.NOT.lsda.OR.lcharge) THEN
    CALL mp_sum(epsm1, inter_image_comm)
    CALL mp_bcast(epsm1, ionode_id, intra_image_comm)
+   DO iu=1,nfs
+      IF (computed(iu)>1) epsm1(iu)=epsm1(iu)/computed(iu)
+   ENDDO
 ENDIF
 !
 !  Now remove all the files created by the images
@@ -554,7 +582,7 @@ ENDIF
 !
 IF (meta_ionode) THEN
    DO iu=1,nfs
-      CALL write_chi_on_disk(iu)
+      IF (computed(iu)>0) CALL write_chi_on_disk(iu)
    END DO
 END IF
 
@@ -582,6 +610,8 @@ DEALLOCATE(chipmc)
 DEALLOCATE(chimpc)
 DEALLOCATE(chixxc)
 DEALLOCATE(chixyc)
+
+DEALLOCATE(computed)
 
 RETURN
 END SUBROUTINE collect_all_chi

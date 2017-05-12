@@ -185,19 +185,19 @@ CALL gnuplot_xlabel('{/Symbol w}  (eV)',.FALSE.)
 
 CALL gnuplot_ylabel('Re 1 / {/Symbol e} (q, {/Symbol w})',.FALSE.) 
 filename='dynamical_matrices/'//TRIM(flepsilon)
-CALL gnuplot_write_file_mul_data(filename,1,3,'color_red',.TRUE.,&
+CALL gnuplot_write_file_mul_data(filename,2,4,'color_red',.TRUE.,&
                                                 .TRUE.,.FALSE.)
 
 CALL gnuplot_ylabel('- Im 1 / {/Symbol e} (q, {/Symbol w})',.FALSE.) 
-CALL gnuplot_write_file_mul_data_minus(filename,1,4,'color_red',.TRUE.,&
+CALL gnuplot_write_file_mul_data_minus(filename,2,5,'color_red',.TRUE.,&
                                                 .TRUE.,.FALSE.)
 
 CALL gnuplot_ylabel('{/Symbol e}_1 (q, {/Symbol w})',.FALSE.) 
-CALL gnuplot_write_file_mul_data(filename,1,5,'color_red',.TRUE.,&
+CALL gnuplot_write_file_mul_data(filename,2,6,'color_red',.TRUE.,&
                                                 .TRUE.,.FALSE.)
 
 CALL gnuplot_ylabel('{/Symbol e}_2 (q, {/Symbol w})',.FALSE.) 
-CALL gnuplot_write_file_mul_data(filename,1,6,'color_red',.TRUE.,&
+CALL gnuplot_write_file_mul_data(filename,2,7,'color_red',.TRUE.,&
                                                 .TRUE.,.FALSE.)
 
 CALL gnuplot_end()

@@ -68,7 +68,7 @@ SUBROUTINE phq_readin_tpw()
   USE ramanm,        ONLY : eth_rps, eth_ns, lraman, elop, dek
   USE freq_ph,       ONLY : fpol, fiu, nfs
   USE optical,       ONLY : fru, lcfreq, freq_line, lmagnon, lcharge, &
-                            lall_tensor, lchimag
+                            lall_tensor, lchimag, start_freq, last_freq
   USE images_omega,   ONLY : comp_f
   USE cryst_ph,      ONLY : magnetic_sym
   USE ph_restart,    ONLY : ph_readfile
@@ -120,7 +120,7 @@ SUBROUTINE phq_readin_tpw()
                        drho_star, dvscf_star, only_init, only_wfc, freq_line, &
                        elph_nbnd_min, elph_nbnd_max, el_ph_ngauss,el_ph_nsigma, el_ph_sigma,  &
                        electron_phonon, &
-                       delta_freq,      &
+                       delta_freq, start_freq, last_freq,     &
                        lmagnon, lcharge, lall_tensor, lchimag, &
                        q_in_band_form, q2d, qplot, low_directory_check
 
@@ -279,6 +279,8 @@ SUBROUTINE phq_readin_tpw()
   lmagnon  = .TRUE.
   lchimag  = .FALSE. 
   lall_tensor = .FALSE.
+  start_freq=1
+  last_freq=0
   low_directory_check=.FALSE.
   search_sym   =.TRUE.
   delta_freq=(0.0_DP, 0.0_DP)
@@ -347,6 +349,8 @@ SUBROUTINE phq_readin_tpw()
   CALL mp_bcast(lcharge, meta_ionode_id, world_comm  )
   CALL mp_bcast(lchimag, meta_ionode_id, world_comm  )
   CALL mp_bcast(lall_tensor, meta_ionode_id, world_comm  )
+  CALL mp_bcast(start_freq, meta_ionode_id, world_comm  )
+  CALL mp_bcast(last_freq, meta_ionode_id, world_comm  )
   !
   tmp_dir = trimcheck (outdir)
   drho_star%dir=trimcheck(drho_star%dir)
@@ -527,6 +531,8 @@ SUBROUTINE phq_readin_tpw()
      CALL errore ('phq_readin', 'reading FREQUENCIES card', ABS(ios) )
      CALL mp_bcast(fru, meta_ionode_id, world_comm  )
      CALL mp_bcast(fiu, meta_ionode_id, world_comm  )
+     IF (start_freq<=0) start_freq=1
+     IF (last_freq<=0.OR.last_freq>nfs) last_freq=nfs
   ELSE
      nfs=1
      ALLOCATE(fru(1))

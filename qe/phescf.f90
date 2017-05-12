@@ -33,7 +33,7 @@ SUBROUTINE phescf_tpw()
   USE lrus,            ONLY : int3, int3_nc, int3_paw
   USE freq_ph
   USE optical,         ONLY : current_w, fru, polarc, epsilonc, epsilonm1c, &
-                              lr1dwf, iu1dwf, lcfreq
+                              lr1dwf, iu1dwf, lcfreq, start_freq, last_freq
   USE partial,         ONLY : comp_irr
   USE images_omega,    ONLY : comp_f
   USE ramanm,          ONLY : ramtns, lraman, elop, done_lraman, done_elop
@@ -84,7 +84,7 @@ SUBROUTINE phescf_tpw()
      ENDIF
      !
      epsilonm1c = (0.0_DP,0.0_DP)
-     DO iu = 1, nfs
+     DO iu = start_freq, last_freq
         !
         IF (.NOT.comp_f(iu)) CYCLE
         !
@@ -359,13 +359,17 @@ INTEGER :: iu_epsil, ipol, jpol, iuf, iu
 LOGICAL :: exst
 REAL(DP) :: buffer(3,3), alpha(3,3), epsilonr(3,3,nfs), epsiloni(3,3,nfs),&
             ro, ri
+INTEGER, ALLOCATABLE :: computed(:)
 CHARACTER(LEN=256) :: filename
 CHARACTER(LEN=6)   :: int_to_char
 
 ALLOCATE(epsilonc(3,3,nfs))
 ALLOCATE(epsilonm1c(3,3,nfs))
 ALLOCATE(polarc(3,3,nfs))
+ALLOCATE(computed(nfs))
 
+
+computed=0
 IF (ionode) THEN
 
    iu_epsil=2
@@ -388,6 +392,7 @@ IF (ionode) THEN
       DO iu=1,nfs
          IF ((ABS(ro-fru(iu))+ABS(ri-fiu(iu)))<1.D-4) THEN
             epsilonr(:,:,iu)=buffer(:,:)
+            computed(iu)=1
             EXIT
          ENDIF
       ENDDO       
@@ -415,6 +420,7 @@ IF (ionode) THEN
       DO iu=1,nfs
          IF ((ABS(ro-fru(iu))+ABS(ri-fiu(iu)))<1.D-4) THEN
             epsiloni(:,:,iu)=buffer(:,:)
+            computed(iu)=1
             EXIT
          ENDIF
       ENDDO
@@ -433,8 +439,13 @@ ENDIF
 ! Now transfer the dielectric constant to all nodes. First collect
 ! all frequencies and then send to all the nodes of each image
 !
+CALL mp_sum(computed, inter_image_comm) 
+CALL mp_bcast(computed, ionode_id, intra_image_comm)
 CALL mp_sum(epsilonc, inter_image_comm) 
 CALL mp_bcast(epsilonc, ionode_id, intra_image_comm)
+DO iu=1,nfs
+   IF (computed(iu)>1) epsilonc(:,:,iu) = epsilonc(:,:,iu) / computed(iu)
+END DO
 !
 !  compute epsilonm1 and polarc
 !
@@ -512,14 +523,14 @@ ENDIF
 !
 IF (meta_ionode) THEN
    DO iu=1,nfs
-      CALL write_epsilon_on_disk(iu)
+      IF (computed(iu)>0) CALL write_epsilon_on_disk(iu)
    END DO
 ENDIF
 
 DEALLOCATE(polarc)
 DEALLOCATE(epsilonc)
 DEALLOCATE(epsilonm1c)
-
+DEALLOCATE(computed)
 
 RETURN
 END SUBROUTINE collect_all_epsilon

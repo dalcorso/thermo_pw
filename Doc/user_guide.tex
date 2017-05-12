@@ -930,7 +930,12 @@ delta_freq : When freq_line is .TRUE. instead of giving the last frequency
             frequency. When delta_freq is not zero the last frequency 
             is not used and can be omitted.
             Default: complex, (0.0, 0.0).
-
+start_freq  : Number of the initial frequency calculated in the job in
+              the sequence of frequencies.
+            Default: integer  1
+last_freq   : Number of the final frequency calculated in the job in the
+              sequence of frequencies.
+            Default: integer nfs (total number of frequencies)
 \end{verbatim}
 When in the input of the phonon code a non zero wave-vector {\bf q}
 is specified, the previous options produce the inverse of the dielectric 

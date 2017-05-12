@@ -63,6 +63,9 @@ MODULE optical
                                               ! dielectric constant
 
   INTEGER :: iu1dwf, lr1dwf     ! unit for response wavefunctions at -w
+ 
+  INTEGER :: start_freq,    &   ! initial frequency in the job
+             last_freq          ! last frequency in the job
 
 END MODULE optical
 
