@@ -69,12 +69,15 @@ INTEGER, PARAMETER :: nmax=10000
 REAL(DP), PARAMETER :: eps=1.d-12
 REAL(DP) :: a1(3), a2(3), c(3), t(3), c1(3), t1(3), tau(3)
 REAL(DP) :: alat, fact, r, cmod, tmod, pi, phi, z, prod, prod1, xq
-INTEGER :: m, n, p, q, ip, nz, n1, m1, ia, na, nat, ibrav_2d, nat_2d
-REAL(DP) :: y(3,nmax), nano(3,nmax), alat_box, celldm_2d(3)
-REAL(DP), ALLOCATABLE :: tau_2d(:,:)
-CHARACTER(LEN=3), ALLOCATABLE :: atm_2d(:)
+INTEGER :: m, n, p, q, ip, nz, n1, m1, ia, na, nat, ibrav_2d, nat_2d, ntyp, &
+           found, ibrav_nano, nt
+INTEGER, ALLOCATABLE :: ityp(:)
+REAL(DP) :: y(3,nmax), nano(3,nmax), alat_box, celldm_2d(3), at(3,3), omega, &
+            celldm_nano(6)
+REAL(DP), ALLOCATABLE :: tau_2d(:,:), tau_nano(:,:)
+CHARACTER(LEN=3), ALLOCATABLE :: atm_2d(:), atm_typ(:)
 CHARACTER(LEN=3) :: atm(nmax)
-LOGICAL :: lwire, lrect
+LOGICAL :: lwire, lrect, lcrys
 INTEGER :: iuout
 INTEGER :: find_free_unit
 CHARACTER(LEN=256) :: filename
@@ -281,54 +284,120 @@ END DO
 IF (ionode) THEN
    iuout=find_free_unit()
    OPEN(unit=iuout, file=TRIM(filename), status='unknown', form='formatted')
+ENDIF
 
-   IF (.NOT.lwire) THEN
-      prod=c(1)*t(1)+c(2)*t(2)
-      IF (ABS(prod)<1.d-8) THEN
+celldm_nano=0.0_DP
+ALLOCATE(tau_nano(3,nat))
+ALLOCATE(atm_typ(nat))
+ALLOCATE(ityp(nat))
+tau_nano(1:3,1:nat)=y(1:3,1:nat)
+lcrys=.FALSE.
+IF (.NOT.lwire) THEN
+   prod=c(1)*t(1)+c(2)*t(2)
+   IF (ABS(prod)<1.d-8) THEN
 !
 !  vectors are orthogonal, a wire can be built
 !
+      ibrav_nano=8
+      celldm_nano(1)=cmod * alat
+      celldm_nano(2)=tmod/cmod
+      celldm_nano(3)=alat_box/cmod/alat
+
+      IF (ionode) THEN
          WRITE (iuout, '("ibrav=8")')
-         WRITE (iuout, '("celldm(1)= ",f15.8)') cmod * alat
-         WRITE (iuout, '("celldm(2)= ",f15.8)') tmod/cmod
-         WRITE (iuout, '("celldm(3)= ",f15.8)') alat_box/cmod/alat
-         WRITE (iuout, '("nat= ",i5)') nat
-      ELSE
-         WRITE (iuout, '("ibrav=12")')
-         WRITE (iuout, '("celldm(1)= ",f15.8)') cmod * alat
-         WRITE (iuout, '("celldm(2)= ",f15.8)') tmod/cmod
-         WRITE (iuout, '("celldm(3)= ",f15.8)') alat_box/cmod/alat
-         WRITE (iuout, '("celldm(4)= ",f15.8)') prod/cmod/tmod
+         WRITE (iuout, '("celldm(1)= ",f15.8)') celldm_nano(1)
+         WRITE (iuout, '("celldm(2)= ",f15.8)') celldm_nano(2)
+         WRITE (iuout, '("celldm(3)= ",f15.8)') celldm_nano(3)
       ENDIF
+   ELSE
+      ibrav_nano=12
+      celldm_nano(1)=cmod * alat
+      celldm_nano(2)=tmod/cmod
+      celldm_nano(3)=alat_box/cmod/alat
+      celldm_nano(4)=prod/cmod/tmod
+      IF (ionode) THEN
+         WRITE (iuout, '("ibrav=12")')
+         WRITE (iuout, '("celldm(1)= ",f15.8)') celldm_nano(1)
+         WRITE (iuout, '("celldm(2)= ",f15.8)') celldm_nano(2)
+         WRITE (iuout, '("celldm(3)= ",f15.8)') celldm_nano(3)
+         WRITE (iuout, '("celldm(4)= ",f15.8)') celldm_nano(4)
+      ENDIF
+   ENDIF
+   IF (ionode) THEN
       WRITE (iuout, '("nat= ",i5)') nat
       WRITE (iuout, '("ATOMIC_POSITIONS {crystal}")') 
       DO na=1,nat
          WRITE (iuout,'(a,3f18.10)') atm(na), y(1,na), y(2,na), y(3,na)
       ENDDO
-   ELSE
-      r=cmod / 2.0_DP / pi 
+      lcrys=.TRUE.
+   ENDIF
+ELSE
+   r=cmod / 2.0_DP / pi 
 
+   ibrav_nano=6
+   celldm_nano(1)=alat_box
+   celldm_nano(3)=tmod * alat / alat_box
+   DO na=1, nat
+      phi = 2.0_DP * pi * y(1,na) 
+      z = y(2,na) 
+      tau_nano(1,na)=(r + y(3,na))*COS(phi) * alat / alat_box
+      tau_nano(2,na)=(r + y(3,na))*SIN(phi) * alat / alat_box
+      tau_nano(3,na)=z * tmod * alat / alat_box
+   END DO
+   IF (ionode) THEN
       WRITE (iuout, '("wire radius r= ",f15.8, "  a.u.")') r * alat
       WRITE (iuout, '("ibrav=6")')
       WRITE (iuout, '("celldm(1)= ",f15.8)') alat_box
       WRITE (iuout, '("celldm(3)= ",f15.8)') tmod * alat / alat_box
       WRITE (iuout, '("nat= ",i5)') nat
       WRITE (iuout, '("ATOMIC_POSITIONS {alat}")') 
-      DO na=1, nat
-         phi = 2.0_DP * pi * y(1,na) 
-         z = y(2,na) 
-         WRITE(iuout, '(a, 3f18.10)' )  atm(na), &
-                                 (r + y(3,na))*COS(phi)*alat/alat_box, &
-                                 (r + y(3,na))*SIN(phi) * alat / alat_box, &
-                                 z * tmod * alat / alat_box
-      END DO
+      DO na=1,nat
+         WRITE(iuout, '(a, 3f18.10)' )  atm(na), tau_nano(1,na), &
+                                        tau_nano(2,na), tau_nano(3,na)
+      ENDDO
    ENDIF
-   CLOSE(UNIT=iuout,STATUS='keep')
 ENDIF
+IF (ionode) CLOSE(UNIT=iuout,STATUS='keep')
+
+!
+!  Count how many types we have and how they are called. This is needed
+!  for the production of the xsf file
+!
+ntyp=1
+atm_typ(1)=atm(1)
+ityp(1)=1
+DO ia=2, nat
+   found=0
+   DO nt=1, ntyp
+      IF ( TRIM( atm(ia) ) == TRIM( atm_typ(nt) ) ) THEN
+         ityp(ia)=nt
+         found=1
+      END IF
+   ENDDO
+   IF (found==0) THEN
+      ntyp = ntyp + 1
+      atm_typ(ntyp) = atm(ia)
+      ityp(ia)=ntyp
+   END IF
+END DO
+
+IF (ionode) &
+OPEN(unit=iuout, file=TRIM(filename)//'.xsf', status='unknown', &
+                                              form='formatted')
+
+CALL latgen(ibrav_nano, celldm_nano, at(1,1), at(1,2), at(1,3), omega)
+at=at/celldm_nano(1)
+IF (lcrys) CALL cryst_to_cart( nat, tau_nano, at, 1 )
+
+CALL xsf_struct (celldm_nano(1), at, nat, tau_nano, atm_typ, ityp, iuout)
+
+IF (ionode) CLOSE(iuout)
+
+DEALLOCATE(tau_nano)
+DEALLOCATE(atm_typ)
+DEALLOCATE(ityp)
 
 CALL environment_end( code )
 CALL mp_global_end ()
 
-
 END PROGRAM gener_nanowire
-
