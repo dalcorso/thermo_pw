@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2015 - 2016 Andrea Dal Corso 
+! Copyright (C) 2015 - 2017 Andrea Dal Corso 
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -34,13 +34,13 @@ MODULE lattices
 !                          describe the same lattice express the first
 !                          as a linear combination of the second.
 !
-!  is_bravais_lattice    : is a function that returns .TRUE. is a vector
+!  is_bravais_lattice    : is a function that returns .TRUE. if a vector
 !                          is a Bravais lattice vector.
 !
 !  same_lattice          : is a logical function that receives two sets of
 !                          primitive vectors and gives .TRUE. if the two sets 
 !                          give the same Bravais lattice. It generalizes find
-!                          combination because the two Bravais lattice
+!                          combination because the two Bravais lattices
 !                          are considered the same even if they are related
 !                          by a global rotation. The routine provides the
 !                          global rotation and the integer matrix that
@@ -57,9 +57,10 @@ MODULE lattices
 !
 !  bravais_dir :  is a function that receive the primitive lattice vectors
 !                 and a direction and gives .TRUE. if there is a bravais
-!                 lattice vector parallel to that direction. In output
+!                 lattice vector parallel to that direction within the
+!                 shell defined by -3 < n_i < 3.. In output
 !                 it gives also the lattice vector of shortest modulus and
-!                 the modulus.
+!                 its modulus.
 !
 !  compute_omega: receives three primitive lattice vectors and gives as
 !                 output the volume of the unit cell
@@ -68,16 +69,22 @@ MODULE lattices
 !
 !  lattice_name : receives the bravais lattice and gives the lattice name
 !
-!  zone_border : receives a vector in reciprocal space, the direct and
-!                reciprocal lattice vectors and gives .true. if the input
-!                vector is at zone border
+!  zone_border : receives a vector in direct or reciprocal space, 
+!                the direct and reciprocal lattice vectors and gives 
+!                .true. if the input vector is at zone border
 !
-!  is_compatible_group_ibrav : a function that check is a point group 
+!  is_compatible_group_ibrav : a function that check if a point group 
 !                is compatible with a given Bravais lattice and gives also 
 !                all the list of compatible lattices
 !  
 !  crystal_parameters : receives the Bravais lattice index and give the
 !                       number of required independent crystal parameters
+!
+!  same_star : receives two k vectors and the list of point group symmetries.
+!              It gives .TRUE. if the two k vectors belong to the same star.
+!
+!  print_bravais_description : receives the celldm of a given lattice 
+!              and writes a small description of the crystal parameters.
 !
   USE kinds,      ONLY : DP
   !
@@ -89,12 +96,16 @@ MODULE lattices
          is_bravais_lattice, same_lattice, lattice_point_group,        &
          compute_omega, conventional_ibrav, is_centered, lattice_name, &
          zone_border, same_star, is_compatible_group_ibrav,            &
-         print_bravais_description, crystal_parameters
+         bravais_dir, print_bravais_description, crystal_parameters
 
 CONTAINS
 
   SUBROUTINE compute_conventional(at, atp, ibrav)
-
+!
+!   This routine write the conventional vectors of a given centered
+!   bravais lattice. It assumes that the primitive vectors are defined
+!   as in the latgen routine of QE.
+!
   IMPLICIT NONE
   INTEGER, INTENT(IN) :: ibrav
   REAL(DP), INTENT(IN) :: at(3,3)
@@ -151,7 +162,10 @@ CONTAINS
   END SUBROUTINE compute_conventional
 
   SUBROUTINE conventional_ibrav(ibrav, cibrav)
-
+!
+! Given the ibrav of a given Bravais lattice gives the ibrav of the
+! conventional lattice.
+!
   IMPLICIT NONE
   INTEGER, INTENT(IN) :: ibrav
   INTEGER, INTENT(OUT) :: cibrav
@@ -171,7 +185,9 @@ CONTAINS
   END SUBROUTINE conventional_ibrav
 
   LOGICAL FUNCTION is_centered(ibrav)
-
+!
+!  Gives true if the input bravais lattice is centered
+!
   IMPLICIT NONE
   INTEGER, INTENT(IN) :: ibrav
 
@@ -226,7 +242,6 @@ CONTAINS
 !   that brings the main symmetry elements in the standard orientation.
 !   At that point we can find the conventional cell and therefore
 !   the ibrav and celldm. These variables are used to generate the at2
-!   and the routine
 !
 !   If the variable code_group_ext is set to zero the routine finds the
 !   code of the point group, otherwise it will search the Bravais lattice
@@ -242,7 +257,7 @@ CONTAINS
 
   IMPLICIT NONE
   REAL(DP), INTENT(IN) :: a1(3), a2(3), a3(3)
-  LOGICAL, INTENT(IN) :: verbosity
+  LOGICAL, INTENT(IN)  :: verbosity
   INTEGER, INTENT(OUT) :: ibrav
   INTEGER, INTENT(INOUT) :: code_group_ext
   REAL(DP), INTENT(OUT) :: celldm(6), global_s(3,3), ur(3,3)
@@ -392,7 +407,7 @@ CONTAINS
 
         ELSEIF ( ABS(ceangle(1))<eps2 ) THEN 
 !
-!  base centered monoclinic simulated with c unique whene at(:,1) is along
+!  base centered monoclinic simulated with c unique when at(:,1) is along
 !  a2
 !
            lm= - ceangle(3) / ceangle(2)
@@ -740,7 +755,7 @@ LOGICAL FUNCTION is_bravais_lattice(at, erre, setn)
 !   This routine receives three primitive vectors at and a 
 !   vector erre. It becomes .TRUE. if erre is a Bravais lattice vector
 !   of the Bravais lattice defined by the at. In any case it gives
-!   setn, the projection of erre along at.
+!   setn, the components of erre in the at basis.
 !
 USE kinds, ONLY : DP
 IMPLICIT NONE
@@ -798,7 +813,7 @@ INTEGER :: ipol, ivec, nx1, nx2, nx3, comb(3,3,max_comb), nc(3), i, j, k
 CALL compute_omega(at,omega0)
 CALL compute_omega(at2,omega)
 !
-!  if they have not, the  lattice is different.  
+!  if they have not, the two lattices are different.  
 !
 same_lattice=.FALSE.
 IF (ABS(omega-omega0)> eps2) RETURN
@@ -930,7 +945,7 @@ REAL(DP), PARAMETER :: eps1=1.D-7
 INTEGER, PARAMETER :: max_comb=96
 INTEGER :: ivec, nx1, nx2, nx3, i, j, k, nc(3), comb(3,3, max_comb), ipol
 !
-!  Start find the moduli of the input vectors 
+!  Start finding the moduli of the input vectors 
 !
 DO ivec=1,3
    amodulus(ivec)=at(1,ivec)**2 + at(2,ivec)**2 + at(3,ivec)**2
@@ -1115,14 +1130,14 @@ END SUBROUTINE lattice_name
 
 LOGICAL FUNCTION zone_border(vect,at,bg,iflag)
 !
-!   This function recieves a vector vect, the direct and reciprocal lattice
+!   This function receives a vector vect, the direct and reciprocal lattice
 !   vectors at and bg and a iflag=+-1.
 !   The vector vect is in cartesian coordinates. 
 !   When iflag is +1 it is supposed to be in real space and the
 !   function returns .TRUE. if more than one Bravais lattice point is
 !   at the same distance from vect.
 !   When iflag is -1 the vectors vect is supposed to be in reciprocal
-!   space and the function return .TRUE. is more than one reciprocal
+!   space and the function return .TRUE. if more than one reciprocal
 !   lattice vector is at the same distance from vect.
 !
 USE kinds, ONLY : DP

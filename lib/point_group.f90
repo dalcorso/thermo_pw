@@ -9,7 +9,7 @@ MODULE point_group
 !
 !  This module contains variables and routines to deal with the 
 !  crystallographic point group symmetry. It complements the routines 
-!  in find_group.f90, divide_class.f90 and divide_class_so.f90 in the 
+!  in find_group.f90, divide_class.f90, and divide_class_so.f90 in the 
 !  PW/src directory of the QE package.
 !  The conventions, such as the code group, the symmetry operation types,
 !  the irreducible representations etc. are the same.
@@ -28,12 +28,12 @@ MODULE point_group
 !  and a list of representations of the first point group, there is a routine
 !  that transforms it in a list of representations of the second group.
 !  Given two point groups, the second a subgroup of the first, 
-!  find which type it is. The different cases are discussed in the point-group
+!  find which type it is. The different types are discussed in the point-group
 !  manual in the thermo_pw/Doc directory. The routine find_aux_ind_two_groups,
 !  receives the rotation matrices of the two groups and gives an index that
-!  correspond to the case.
+!  correspond to the type.
 !  Double groups are supported, however in this case the distinction between
-!  different subgroup cases is irrelevant and not used.
+!  different subgroup types is irrelevant and not used.
 !
 !  There is also a routine able to transform the projective representations
 !  into the appropriate representations of the subgroup. A routine sets
@@ -53,7 +53,7 @@ MODULE point_group
 !
 !  Among the variables that are offered by the modulus there is a 
 !  list of colors for each irreducible representation and a short
-!  name of the symmetry operation.
+!  name of the symmetry operations.
 !
   USE kinds,      ONLY : DP
   !
@@ -169,7 +169,8 @@ MODULE point_group
          print_kronecker_table, write_group_table,  &
          print_ptype_info, find_factor_system, sym_jones, transform_group, &
          hex_op, cub_op, point_group_bravais, find_group_tags,  &
-         group_name_schoenflies, group_name_international
+         group_name_schoenflies, group_name_international, &
+         group_intersection
 
 CONTAINS
 
@@ -212,7 +213,7 @@ CONTAINS
   END SUBROUTINE convert_rap
  
   SUBROUTINE convert_rap_new(n, list_in, list_out, group_ext_in,  &
-                    group_ext_out, aux_ind, ptype_in, ptype_out, &
+                    group_ext_out, aux_ind, ptype_in, ptype_out,  &
                     gauge_in, gauge_out)
 
   USE kinds, ONLY : DP
@@ -497,7 +498,8 @@ CONTAINS
 !
 !  This routine can be used in the scalar relativistic case. For the
 !  fully relativistic case see the similar routine convert_one_rap_so
-!
+!  This routine deals only with the vector representations. For
+!  projective representations use convert_rap_proj.
 !
   USE io_global, ONLY : stdout
 
@@ -5600,6 +5602,8 @@ CONTAINS
 !
 !  This routine must be used in the fully relativistic case with spin-orbit,
 !  for the corresponding scalar relativistic routine use convert_one_rap.
+!  This routine deals only with vector representations. For projective
+!  representation use convert_rap_proj.
 !
 
 
@@ -8450,7 +8454,7 @@ CONTAINS
                                      group_a, group_b, aux_ind)
 !
 !  This routine assumes that the point group_b is a subgroup of point
-!  group_a and find the auxiliary index that tells which type of 
+!  group_a and finds the auxiliary index that tells which type of 
 !  subgroup it is. It receives as input the rotation matrices of 
 !  both groups and uses them when necessary to distinguish the different 
 !  options. The codes of the point group are:
@@ -10011,7 +10015,9 @@ CONTAINS
 !  same as in the symm_base routine of QE that lists 64 symmetry operations.
 !  The extended point group number is identified from the sum of the square 
 !  of the number of the symmetry operations that gives a unique signature 
-!  to the group.
+!  to the group except for groups 76 and 92 have the same hash value,
+!  but can be easily distinguished because they have a different number
+!  of elements.
 !  See also the point_group manual of thermo_pw for a table of the rotation
 !  matrices that correspond to each element.
 !
@@ -10042,7 +10048,7 @@ CONTAINS
 ! 25)   C_s  E  i2210    1  62      = 3845
 ! 26)   C_s  E  i2010    1  63      = 3970
 ! 27)   C_s  E  i2110    1  64      = 4097
-! 28)   C_i  E  i         1  33      = 1090
+! 28)   C_i  E  i        1  33      = 1090
 ! 29)   C_3  E  3xyz    3-x-y-z 1  21  17   = 731
 ! 30)   C_3  E  3-xyz   3x-y-z  1  18  23   = 854
 ! 31)   C_3  E  3-x-yz  3xy-z   1  24  19   = 938
@@ -11394,7 +11400,7 @@ SUBROUTINE group_generators(code_group, row, column, n, linv, columni)
 !  A^n1=E' and B^n2=E' and (AB)^2=E',
 !  this routine gives, for each point group, the following information:
 !  In column(i) the index in the list of the group operations (ordered
-!  as specified in find_group_info_ext)
+!  as specified in set_group_desc)
 !      i         operations
 !      1           A
 !      2           B
@@ -11408,7 +11414,7 @@ SUBROUTINE group_generators(code_group, row, column, n, linv, columni)
 !      2          B^(-1)
 !      3          AB
 !
-!  In n(1) we put n1, in n(2) we put n2.
+!  In n(1) we put n1, in n(2) n2.
 !
 !  If the group contains inversion, linv is set to .true. and
 !  columni(i) will contain the index in the list of the group operations
@@ -11418,7 +11424,7 @@ SUBROUTINE group_generators(code_group, row, column, n, linv, columni)
 !      3           IB
 !
 !  This should be sufficient to determine the factor system and the type
-!  of projective representation.
+!  of projective representations.
 !  In order to apply possible phase factors the group elements of uniaxial
 !  groups are all ordered in the form 
 !  E A A^2 A^3 ... A^(n1-1) B  AB A^2B .... A^{n1-1}B ..
@@ -11434,7 +11440,7 @@ SUBROUTINE group_generators(code_group, row, column, n, linv, columni)
 !                     
 !  For O the elements order keeps elements in the same class close. Note that
 !  A does not coincide with that of T. This order for the cubic group
-!  is taken from the book Kim (see below the complete reference).
+!  is taken from the book of Kim (see below the complete reference).
 !
 !    E BA^2B-1  ABA-1B A^2 B A-1A-1B B-1ABA-1 AB-1A B-1 B-1A^2 A^2B-1 A-1BA-1
 !    B-1A  A-1B  AB-1 BA-1 A-1 A A^2B-1A  AB A^2B-1AB  BA BA^2B-1A  BA-1B
@@ -14664,7 +14670,7 @@ SUBROUTINE  transform_s_to_cart( sk, sr, nsym, at, bg )
   !
   !  This functions receives 3 vectors a,b,c and gives as output true
   !  if they are oriented as x,y,z, .false. if they have the opposite
-  !  orientation. It calculates the determinant of the the matrix of
+  !  orientation. It calculates the determinant of the matrix of
   !  three vectors and gives true if it is positive. If it is zero
   !  the result is undermined
   !
@@ -16828,6 +16834,39 @@ angle_rot_tpw = angle * 180.0_DP / pi
 
 RETURN
 END FUNCTION angle_rot_tpw
+
+SUBROUTINE group_intersection(code_group_ext_a, code_group_ext_b,   &
+                             code_group_ext_c )
+!
+!   This routine receives the extended codes of two point group and
+!   gives as output the extended code of the intersection of the two
+!   point groups.
+!
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: code_group_ext_a, code_group_ext_b
+INTEGER, INTENT(OUT) :: code_group_ext_c
+
+INTEGER :: nsym_a, nsym_b, nsym_c
+INTEGER :: group_desc_a(48), group_desc_b(48), group_tags_c(48)
+INTEGER :: isym, jsym
+
+CALL set_group_desc(group_desc_a, nsym_a, code_group_ext_a)
+CALL set_group_desc(group_desc_b, nsym_b, code_group_ext_b)
+
+nsym_c=0
+DO isym=1,nsym_a
+   DO jsym=1,nsym_b
+      IF (group_desc_b(jsym)==group_desc_a(isym)) THEN
+         nsym_c=nsym_c+1
+         group_tags_c(nsym_c)=group_desc_a(isym)
+      ENDIF
+   ENDDO
+ENDDO
+CALL find_group_ext(group_tags_c, nsym_c, code_group_ext_c)
+
+RETURN
+END SUBROUTINE group_intersection
+
 
 END MODULE point_group
 

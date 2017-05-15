@@ -17,7 +17,8 @@ USE point_group,      ONLY : print_element_list, group_index_from_ext, &
                              print_compatibility_table, set_sym_o3, &
                              set_sym_su2, product_sym_su2, compute_classes, &
                              compute_classes_double, print_kronecker_table, &
-                             sym_jones, transform_group, hex_op, cub_op
+                             sym_jones, transform_group, hex_op, cub_op, &
+                             group_intersection
 USE io_global,        ONLY : stdout
 
 IMPLICIT NONE
@@ -32,6 +33,7 @@ INTEGER :: group_desc(48), epos(48,48), prd(48,48), ptype(3), ptype1(3), &
            ptype2(3), linvs
 INTEGER :: i, j, k, l, m, n, iepos, ksym, iclass, ielem, giin_ext, giout_ext
 INTEGER :: nclasses, nelem(24), elem(18,24), has_e(18,24)
+INTEGER :: group_index_a_ext, group_index_b_ext, group_index_c_ext
 REAL(DP):: mat(3,3)
 COMPLEX(DP) :: cmat(2,2)
 
@@ -57,6 +59,7 @@ WRITE(stdout,'(5x,"15) Write all compatibility tables")')
 WRITE(stdout,'(5x,"16) Decompose Kronecker products table (chi x chi)")')
 WRITE(stdout,'(5x,"17) Decompose Kronecker products table (chi^* x chi)")')
 WRITE(stdout,'(5x,"18) List conjugate groups")')
+WRITE(stdout,'(5x,"19) Find intersection between two groups")')
 
 READ(5,*) work_choice
 
@@ -319,7 +322,26 @@ ELSEIF (work_choice==18) THEN
          END IF
       END IF
    END DO
-END IF
+ELSEIF (work_choice==19) THEN
+   CALL read_group_index(group_desc,nsym,group_index_a_ext)
+   CALL read_group_index(group_desc,nsym,group_index_b_ext)
+
+   CALL group_intersection(group_index_a_ext, group_index_b_ext, &
+                                              group_index_c_ext)
+   WRITE(stdout,'(/,5x,"The intersection between group number",i5,3x,a11)') &
+                         group_index_a_ext,  &
+                         group_name(group_index_from_ext(group_index_a_ext))
+   WRITE(stdout,'(5x,"with elements")') 
+   CALL print_element_list(group_index_a_ext)
+   WRITE(stdout,'(/,5x,"and group number",i5,3x,a11)') group_index_b_ext, &
+                         group_name(group_index_from_ext(group_index_b_ext))
+   WRITE(stdout,'(5x,"with elements")') 
+   CALL print_element_list(group_index_b_ext)
+   WRITE(stdout,'(/,5x,"is group number",i5,3x,a11)') group_index_c_ext, &
+                         group_name(group_index_from_ext(group_index_c_ext))
+   WRITE(stdout,'(/,5x,"with elements")') 
+   CALL print_element_list(group_index_c_ext)
+ENDIF
 
 CALL environment_end( code )
 CALL mp_global_end ()
