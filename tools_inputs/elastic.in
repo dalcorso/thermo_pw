@@ -1,0 +1,14 @@
+4          ! ibrav
+3349       ! C_11 (the order of elastic constants depends on ibrav)
+341        ! C_12  All elastic constants in kbar.
+117        ! C_13
+4095       ! C_33
+1772       ! C_44
+0.0        ! density in kg/m^3
+
+!
+! This example shows the use of the code elastic.x to compute the
+! bulk modulus, Poisson ratio, Young Modulus and shear modulus from
+! the elastic constants of a solid.
+!  
+
