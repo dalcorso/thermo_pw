@@ -1,0 +1,33 @@
+5                   ! 2d bravais lattice see below.
+5.4265 0.0 0.0      ! sizes a, b, cos(ab) (if needed)
+1                   ! number of atoms in the 2d cell
+Au 0.0 0.0 0.0      ! atomic label and cartesian coordinates in unit a
+30.                 ! size (in a.u.) of the surpecell
+.TRUE.              ! lwire (if .TRUE. a wire is generated)
+.TRUE.              ! if .TRUE. p and q are calculated
+7 3                 ! m and n (if the previous flag is .FALSE. set also p and q)
+1                   ! nz number of cells along z
+nanowire_gold       ! name of the file with the pw.x input. 
+
+!
+!  This example shows the use of the code gener_nanowire.x.
+!  This input generates the coordinates of (7, 3) gold nanowire
+!  starting from the size a in atomic unit of the 2d hexagonal mesh.
+!  It writes on output the celldm to simulate this wire with a
+!  tetragonal Bravais lattice and 74 atoms.
+!
+!  The 2d Bravais lattices are
+!  1 - oblique
+!  2 - rectangular
+!  3 - centered rectangular
+!  4 - square
+!  5 - hexagonal
+!
+!  The sheet is composed of all the atoms between
+!  C = m a1 + n a2  and
+!  T = p a1 + q a2
+!
+!  Note that the size of the box is along z (distance between sheets)
+!  if lwire=.FALSE. or along x and y if lwire=.TRUE. The nanowire is 
+!  wrapped along C and has height nz |T| along z. 
+!
