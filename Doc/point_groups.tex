@@ -3574,7 +3574,8 @@ G_8-y    0.00      0.00      0.00     -1.73     1.73    3
 
 
 \newpage
-\section{\color{coral}Symmetry matrices}
+\section{\color{coral}Symmetry matrices
+\label{section_sym}}
 \subsection{\color{web-blue}O(3)}
 \qe\ uses internally the following symmetry matrices. Each one of these
 matrices is checked as a possible symmetry in the given order. The extended
@@ -4086,6 +4087,172 @@ $D_3$, $C_{3v}$, and $D_{3d}$ operations. For these groups we use the
 matrices written above changing the character table of the double point 
 groups accordingly. 
 
+\section{\color{coral}List of the $136$ point groups available in QE}
+
+This is the list of the $136$ realizations of the $32$ crystallographic 
+point groups that have been described in this guide and that can be built 
+using the symmetry matrices described in 
+Sec.~\ref{section_sym}. The first number is
+the extended code of the point group that must be given in the input 
+of the tool \texttt{crystal\_point\_group.x} to specify a well
+defined point group. Name is the Sch\"onflies name of one of the $32$
+crystallographic point groups that corresponds to a given realization while
+the list of the symmetry operations is given after the name.
+\begin{verbatim}
+  #  name  symmetry operations
+  1   C_1  E           
+  2   C_2  E  2z       
+  3   C_2  E  2y       
+  4   C_2  E  2x       
+  5   C_2  E  2xy      
+  6   C_2  E  2x-y     
+  7   C_2  E  2xz      
+  8   C_2  E  2x-z     
+  9   C_2  E  2yz      
+ 10   C_2  E  2y-z     
+ 11   C_2  E  21-10    
+ 12   C_2  E  2210     
+ 13   C_2  E  2010     
+ 14   C_2  E  2110     
+ 15   C_s  E  i2z      
+ 16   C_s  E  i2y      
+ 17   C_s  E  i2x      
+ 18   C_s  E  i2xy    
+ 19   C_s  E  i2x-y    
+ 20   C_s  E  i2xz     
+ 21   C_s  E  i2x-z    
+ 22   C_s  E  i2yz     
+ 23   C_s  E  i2y-z    
+ 24   C_s  E  i21-10   
+ 25   C_s  E  i2210    
+ 26   C_s  E  i2010    
+ 27   C_s  E  i2110    
+ 28   C_i  E  i        
+ 29   C_3  E  3xyz    3-x-y-z 
+ 30   C_3  E  3-xyz   3x-y-z  
+ 31   C_3  E  3-x-yz  3xy-z   
+ 32   C_3  E  3x-yz   3-xy-z  
+ 33   C_3  E  3z      3-z     
+ 34   C_4  E  4z  2z  4-z     
+ 35   C_4  E  4y  2y  4-y     
+ 36   C_4  E  4x  2x  4-x     
+ 37   C_6  E  6z  3z  2z  3-z 6-z 
+ 38   D_2  E  2z  2x  2y      
+ 39   D_2  E  2z  2x-y 2xy    
+ 40   D_2  E  2y  2x-z 2xz    
+ 41   D_2  E  2x  2yz 2y-z    
+ 42   D_2  E  2z  21-10 2110 
+ 43   D_2  E  2z  2010  2210 
+ 44   D_3  E  3z  3-z 2x 2110 2010   
+ 45   D_3  E  3z  3-z 2210  2y 21-10  
+ 46   D_3  E  3xyz   3-x-y-z 2y-z 2x-y 2x-z  
+ 47   D_3  E  3x-yz  3-xy-z 2yz 2x-z 2xy 
+ 48   D_3  E  3-xyz  3x-y-z 2xz 2xy 2y-z   
+ 49   D_3  E  3-x-yz 3xy-z  2xz 2yz 2x-y 
+ 50   D_4  E  4z 2z  4-z 2x 2xy 2y 2x-y 
+ 51   D_4  E  4y 2y  4-y 2z 2xz 2x 2x-z 
+ 52   D_4  E  4x 2x  4-x 2yz 2z 2y-z 2y 
+ 53   D_6  E  6z 3z 2z 3-z 6-z 2x 2210 2110 2y 2010 21-10 
+ 54   C_2v E  2x   i2y    i2z     
+ 55   C_2v E  2x   i2yz   i2y-z   
+ 56   C_2v E  2y   i2z    i2x     
+ 57   C_2v E  2y   i2x-z  i2xz    
+ 58   C_2v E  2z   i2x    i2y     
+ 59   C_2v E  2z   i2x-y  i2xy    
+ 60   C_2v E  2xy  i2z    i2x-y   
+ 61   C_2v E  2x-y i2xy   i2z     
+ 62   C_2v E  2xz  i2y    i2x-z   
+ 63   C_2v E  2x-z i2xz   i2y     
+ 64   C_2v E  2yz  i2y-z  i2x     
+ 65   C_2v E  2y-z i2x    i2yz    
+ 66   C_2v E  2z   i2010  i2210   
+ 67   C_2v E  2z   i21-10 i2110   
+ 68   C_2v E  2210  i2z   i2010   
+ 69   C_2v E  21-10 i2110 i2z     
+ 70   C_2v E  2110  i2z   i21-10  
+ 71   C_2v E  2010  i2210 i2z     
+ 72   C_3v E  3z 3-z i2x i2110 i2010 
+ 73   C_3v E  3z 3-z i2210 i2y i21-10  
+ 74   C_3v E  3xyz 3-x-y-z i2y-z i2x-y i2x-z 
+ 75   C_3v E  3x-yz 3-xy-z i2yz  i2x-z i2xy 
+ 76   C_3v E  3-xyz 3x-y-z i2xz i2xy  i2y-z  
+ 77   C_3v E  3-x-yz 3xy-z i2xz  i2yz i2x-y  
+ 78   C_4v E  4z 2z 4-z  i2x  i2xy  i2y i2x-y  
+ 79   C_4v E  4y 2y 4-y  i2z  i2xz  i2x i2x-z  
+ 80   C_4v E  4x 2x 4-x  i2yz  i2z i2y-z i2y   
+ 81   C_6v E  6z 3z 2z   3-z  6-z   i2x i2210  i2110  i2y i2010 i21-10 
+ 82   C_2h E  2z    i  i2z    
+ 83   C_2h E  2y    i  i2y    
+ 84   C_2h E  2x    i  i2x    
+ 85   C_2h E  2xy   i  i2xy   
+ 86   C_2h E  2x-y  i  i2x-y  
+ 87   C_2h E  2xz   i  i2xz   
+ 88   C_2h E  2x-z  i  i2x-z  
+ 89   C_2h E  2yz   i  i2yz   
+ 90   C_2h E  2y-z  i  i2y-z  
+ 91   C_2h E  2110  i  i2110  
+ 92   C_2h E  2010  i  i2010  
+ 93   C_2h E  2210  i  i2210  
+ 94   C_2h E  21-10 i  i21-10 
+ 95   C_3h E  i6z  3z i2z 3-z i6-z 
+ 96   C_4h E  4z 2z 4-z i i4z i2z i4-z 
+ 97   C_4h E  4y 2y 4-y i i4y i2y i4-y 
+ 98   C_4h E  4x 2x 4-x i i4x i2x i4-x 
+ 99   C_6h E  6z 3z 2z 3-z 6-z i i6z i3z i2z i3-z i6-z 
+100   D_2h E  2z 2x   2y    i i2z i2x   i2y  
+101   D_2h E  2x 2yz  2y-z  i i2x i2yz  i2y-z  
+102   D_2h E  2y 2x-z 2xz   i i2y i2x-z i2xz  
+103   D_2h E  2z 2x-y 2xy   i i2z i2x-y i2xy  
+104   D_2h E  2z 21-10 2110 i i2z i21-10 i2110 
+105   D_2h E  2z 2010 2210  i i2z i2010 i2210  
+106   D_3h E  i6z 3z i2z 3-z i6-z 2x i2210 2110 i2y 2010 i21-10   
+107   D_3h E  i6z 3z i2z 3-z i6-z i2x 2210 i2119 2y i2010  21-10    
+108   D_4h E  4z 2z 4-z 2x 2xy 2y 2x-y i i4z i2z i4-z i2x 
+           s_xy s_y s_x-y 
+109   D_4h E 4y 2y 4-y 2z 2xz 2x 2x-z  i i4y i2y i4-y i2z i2xz i2x i2x-z 
+110   D_4h E 4x 2x 4-x 2yz 2z 2y-z 2y i i4x i2x i4-x i2yz i2z i2y-z i2y
+111   D_6h E 6z 3z 2z 3-z 6-z 2x 2210 2110 2y 2010 21-10
+           i i6z i3z i2z i3-z i6-z i2x  i2210  i2110  i2y i2010 i21-10
+112   D_2d E i4z 2z i4-z 2x i2xy 2y i2x-y 
+113   D_2d E i4z 2z i4-z i2x 2xy i2y 2x-y 
+114   D_2d E i4y 2y i4-y 2z  i2xz  2x  i2x-z  
+115   D_2d E i4y 2y i4-y i2z 2xz i2x  2x-z 
+116   D_2d E i4x 2x i4-x i2yz 2z  i2y-z 2y 
+117   D_2d E i4x 2x i4-x 2yz i2z  2y-z i2y  
+118   D_3d E 3z 3-z 2x 2110 2010 i i3z i3-z i2x i2110 i2010
+119   D_3d E 3z 3-z 2210 2y 21-10 i i3z i3-z i2210  i2y i21-10  
+120   D_3d E 3xyz 3-x-y-z 2y-z 2x-y 2x-z i i3xyz i3-x-y-z i2x-y 
+           i2x-z i2y-z  
+121   D_3d E 3x-yz 3-xy-z 2yz 2x-z 2xy i i3x-yz i3-xy-z i2yz 
+           i2x-z i2xy  
+122   D_3d E 3-xyz 3x-y-z 2xz 2xy 2y-z  i i3-xyz i3x-y-z i2xz i2xy 
+           i2y-z  
+123   D_3d E 3-x-yz 3xy-z 2xz 2yz 2x-y i i3-x-yz i3xy-z i2xz 
+           i2yz i2x-y 
+124   S_4  E i4z 2z i4-z 
+125   S_4  E i4y 2y i4-y 
+126   S_4  E i4x 2x i4-x 
+127   S_6  E 3z 3-z i i3z i3-z 
+128   S_6  E 3xyz 3-x-y-z i i3xyz i3-x-y-z  
+129   S_6  E 3-xyz 3x-y-z i i3-xyz i3x-y-z  
+130   S_6  E 3-x-yz 3xy-z i i3-x-yz i3xy-z  
+131   S_6  E 3x-yz 3-xy-z i i3x-yz i3-xy-z  
+132   T    E 2z  2y 2x 3xyz 3x-y-z 3-x-yz 3x-yz 3-x-y-z 
+           3-xyz  3xy-z 3x-yz 
+133   T_h  E 2z 2y 2x 3xyz 3x-y-z 3-x-yz 3x-yz 3-x-y-z 
+           3-xyz  3xy-z 3x-yz i i2z i2y i2x i3xyz i3x-y-z i3-x-yz 
+           i3x-yz i3-x-y-z  i3-xyz  i3xy-z i3x-yz 
+134   T_d  E 2x 2y 2z 3xyz 3x-y-z 3-xy-z 3-x-yz 3-x-yz 3-x-y-z 3-xyz
+           3x-yz 3xy-z i4-x i4x i4-y i4y i4-z i4z i2y-z i2yz i2x-z i2xz 
+           i2x-y i2xy
+135   O    E 2x 2y 2z 3xyz 3x-y-z 3-xy-z 3-x-yz 3-x-yz 3-x-y-z 3-xyz
+           3x-yz 3xy-z 4-x 4x 4-y 4y 4-z 4z 2y-z 2yz 2x-z 2xz 2x-y 2xy
+136   O_h  E 2x 2y 2z 3xyz 3x-y-z 3-xy-z 3-x-yz 3-x-yz 3-x-y-z 3-xyz
+           3x-yz 3xy-z 4-x 4x 4-y 4y 4-z 4z 2y-z 2yz 2x-z 2xz 2x-y 2xy
+           i i2x i2y i2z i3xyz i3x-y-z i3-xy-z i3-x-yz i3-x-yz i3-x-y-z i3-xyz
+           i3x-yz i3xy-z i4-x i4x i4-y i4y i4-z i4z i2y-z i2yz i2x-z 
+           i2xz i2x-y i2xy
+\end{verbatim}
 \newpage
 \section{\color{coral}Bibliography}
 \begin{enumerate}
