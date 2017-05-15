@@ -11,7 +11,7 @@ MODULE gnuplot_color
 !  gnuplot supports 112 colors. This modules allows to define their
 !  names in the gnuplot scripts and use these names in the commands.
 !  Moreover it provides routines to print these colors to test them
-!  on the screen and on the 
+!  on the screen and on a printer
 !
     USE kinds, ONLY : DP
     USE io_global, ONLY : ionode

@@ -1681,6 +1681,7 @@ code and the \texttt{celldm} parameters of the input lattice. It
 can also read two sets of primitive vectors and decide if they describe
 the same Bravais lattice. In the positive case it gives the orientation
 of one lattice with respect to the other.
+For an example of its use see \texttt{tools\_input/bravais\_lattice.in}.
 
 \item \texttt{crystal\_point\_group.x} is a crystal point group calculator.
 It can give several information about the crystallographic point groups,
@@ -1698,6 +1699,7 @@ point groups.
 solid and computes the elastic compliances, the bulk modulus, and a few
 poly-crystalline averages. It uses the \thermo\ library so the output is the
 same. 
+For an example of its use see \texttt{tools\_input/elastic.in}.
 
 \item \texttt{epsilon\_tpw.x} generalizes the routine
 \texttt{epsilon.f90} of the \qe\ distribution. It calculates the 
@@ -1707,6 +1709,7 @@ using the LDA or GGA eigenvalues. It is limited to insulators, but supports
 norm-conserving, ultrasoft, and PAW pseudopotentials. It supports both scalar
 relativistic and fully relativistic pseudopotentials and it uses the point
 group symmetry of the solid to reduce the number of {\bf k}-points.
+For an example of its use see \texttt{example14}.
 
 \item \texttt{gener\_nanowire.x} reads a two dimensional (2D)
 Bravais lattice index and atomic coordinates an generates a sheet of type
@@ -1717,6 +1720,7 @@ can be also generated and wrapped about {\bf C} in a nanotube form
 lattice). 
 For lattices that allow it, $p$ and $q$ can be determined automatically so that 
 {\bf T} is perpendicular to {\bf C}.
+For an example of its use see \texttt{tools\_input/gener\_nanowire.in}.
 
 \item \texttt{gener\_2d\_slab.x} reads a two dimensional 
 Bravais lattice index and atomic coordinates an generates an infinite ribbon
@@ -1724,6 +1728,7 @@ perpendicular to {\bf G} $= m$ {\bf b}$_1 + n ${\bf b}$_2$, where
 {\bf b}$_1$ and {\bf b}$_2$ are the primitive reciprocal lattice vectors 
 of the 2D Bravais lattice. The number of rows of the ribbon, and the number of
 atoms per row are given as input variables.
+For an example of its use see \texttt{tools\_input/gener\_2d\_slab.in}.
 
 \item \texttt{gener\_3d\_slab.x} reads a three dimensional
 Bravais lattice index and atomic coordinates and generates an infinite slab
@@ -1732,6 +1737,7 @@ where {\bf b}$_1$, {\bf b}$_2$ and {\bf b}$_3$ are the primitive reciprocal
 lattice
 vectors of the Bravais lattice. The number of layers of each slab, and the
 size of the surface unit cell are given as input parameters.
+For an example of its use see \texttt{tools\_input/gener\_3d\_slab.in}.
 
 \item \texttt{hex\_trig.x} reads the values of $a$ and $c$
 of the conventional hexagonal cell of a rhombohedral lattice (in \AA ngstrom),
@@ -1772,6 +1778,7 @@ It is also possible to give the input Bravais lattice by using
 before generating the supercell, the code rotates the Bravais
 lattice so that it has the same orientation of the vectors described
 in the \texttt{thermo.pdf} guide.
+For an example of its use see \texttt{tools\_input/supercell.in}.
 
 \item \texttt{test\_colors.x} produces a postscript file with the 
 \texttt{gnuplot} colors that can be used in the plots.   
