@@ -1,0 +1,11 @@
+10       ! this choose the option to print the characters tables
+100      ! this is the extended group code
+
+!
+!  This example shows how to use the tool code crystal_point_group.x
+!  to print the character table of the point group number 100.
+!  The list of the extended codes can be found by using the option 4
+!  or in Sec.6 of the point_group manual.
+!  The character tables of the point group, double point group,
+!  and projective representations are printed.
+! 
