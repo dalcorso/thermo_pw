@@ -562,6 +562,7 @@ SUBROUTINE set_celldm_geo()
 !   (only when reduced_grid is true). It modifies only celldm_geo.
 !
 USE kinds,         ONLY : DP
+USE constants,     ONLY : pi
 USE thermo_mod,    ONLY : step_ngeo, ngeo, celldm_geo, reduced_grid, &
                           start_geo, jump_geo
 USE initial_conf,  ONLY : celldm_save
@@ -576,13 +577,13 @@ celldm_geo=0.0_DP
 total_work=0
 DO igeo6 = 1, ngeo(6)
    angle3 = ACOS(celldm_save(6)) +  &
-            (igeo6-(ngeo(6)+1.0_DP)/2.0_DP)*step_ngeo(6)
+            (igeo6-(ngeo(6)+1.0_DP)/2.0_DP)*step_ngeo(6)*pi/180.0_DP
    DO igeo5 = 1, ngeo(5)
       angle2 = ACOS(celldm_save(5)) +  &
-             (igeo5-(ngeo(5)+1.0_DP)/2.0_DP)*step_ngeo(5)
+             (igeo5-(ngeo(5)+1.0_DP)/2.0_DP)*step_ngeo(5)*pi/180.0_DP
       DO igeo4 = 1, ngeo(4)
          angle1 = ACOS(celldm_save(4)) +  &
-              (igeo4-(ngeo(4)+1.0_DP)/2.0_DP)*step_ngeo(4)
+              (igeo4-(ngeo(4)+1.0_DP)/2.0_DP)*step_ngeo(4)*pi/180.0_DP
          DO igeo3 = 1, ngeo(3)
             DO igeo2 = 1, ngeo(2)
                DO igeo1 = 1, ngeo(1)
