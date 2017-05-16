@@ -568,7 +568,7 @@ ELSEIF (ibrav==4 .OR. ibrav==6 .OR. ibrav==7 ) THEN
    END DO
 ELSEIF ( ibrav==5 ) THEN
    WRITE(iu_therm,'("#   T (K)   celldm(1)   celldm(4)    alpha_xx(x10^6)   alpha_zz (x10^6)")' )
-   DO itemp = 1, ntemp
+   DO itemp = 1, ntemp-1
       WRITE(iu_therm, '(e12.5,4e20.9)') temp(itemp), celldmf_t(1,itemp), &
                                                      celldmf_t(4,itemp), &
                                                      alpha_t(1,itemp)*1.D6, &
@@ -577,7 +577,7 @@ ELSEIF ( ibrav==5 ) THEN
 ELSEIF (ibrav==8 .OR. ibrav==9 .OR. ibrav==10 .OR. ibrav==11) THEN
    WRITE(iu_therm,'("#   T (K)   celldm(1)     celldm(2)    celldm(3) &
              &alpha_xx(x10^6)  alpha_yy(x10^6)   alpha_zz(x10^6)")' )
-   DO itemp = 1, ntemp
+   DO itemp = 1, ntemp-1
       WRITE(iu_therm, '(e12.5,6e20.9)') temp(itemp), celldmf_t(1,itemp), &
                                                      celldmf_t(2,itemp), &
                                                      celldmf_t(3,itemp), &
@@ -666,7 +666,7 @@ REAL(DP) :: fact1, fact2, deriv1, deriv2
                                         ( temp(itemp+1) - temp(itemp-1) )
             alpha_anis_t(1,itemp) = deriv1 / celldm_t(1, itemp) - deriv2 / fact1 
             alpha_anis_t(2,itemp) = alpha_anis_t(1,itemp)
-            alpha_anis_t(3,itemp) = deriv1 / celldm_t(2, itemp) + deriv2 / fact2
+            alpha_anis_t(3,itemp) = deriv1 / celldm_t(1, itemp) + deriv2 / fact2
          END DO
       CASE (8,9,10,11)
          DO itemp = 2, ntemp-1

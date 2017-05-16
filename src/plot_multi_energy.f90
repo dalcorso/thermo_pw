@@ -43,7 +43,8 @@ SUBROUTINE plot_multi_energy()
                         tablefile
   CHARACTER(LEN=6) :: int_to_char
   CHARACTER(LEN=8) :: float_to_char
-  CHARACTER(LEN=12) :: color(8), xlabel, ylabel
+  CHARACTER(LEN=12) :: color(8)
+  CHARACTER(LEN=50) :: xlabel, ylabel
   REAL(DP) :: emax, emin, deltae, ene_levels_int(ncontours)
   REAL(DP) :: xmin, xmax, ymin, ymax
   INTEGER :: nx, ny, icont, tot_n, iwork
@@ -115,7 +116,7 @@ SUBROUTINE plot_multi_energy()
         CALL gnuplot_write_file_mul_data(filename1,1,3,'color_red',.TRUE.,&
                                                               .TRUE.,.FALSE.)
 
-     CASE(4,6,7)
+     CASE(4,5,6,7)
         IF (ncontours==0) RETURN
         ene_levels_int(:)=ene_levels(:)
         IF (reduced_grid.OR.show_fit) THEN
@@ -123,7 +124,11 @@ SUBROUTINE plot_multi_energy()
            ny=nvol
         ELSE
            nx=ngeo(1)
-           ny=ngeo(3)
+           IF (ibrav_save==5) THEN
+              ny=ngeo(4)
+           ELSE
+              ny=ngeo(3)
+           ENDIF
         ENDIF
         tot_n=compute_nwork()
         xmin=1.d10
@@ -133,8 +138,13 @@ SUBROUTINE plot_multi_energy()
         DO iwork = 1, tot_n
            IF (celldm_geo(1,iwork) > xmax) xmax=celldm_geo(1,iwork)  
            IF (celldm_geo(1,iwork) < xmin) xmin=celldm_geo(1,iwork)  
-           IF (celldm_geo(3,iwork) > ymax) ymax=celldm_geo(3,iwork)  
-           IF (celldm_geo(3,iwork) < ymin) ymin=celldm_geo(3,iwork)  
+           IF (ibrav_save==5) THEN
+              IF (celldm_geo(4,iwork) > ymax) ymax=celldm_geo(4,iwork)  
+              IF (celldm_geo(4,iwork) < ymin) ymin=celldm_geo(4,iwork)  
+           ELSE
+              IF (celldm_geo(3,iwork) > ymax) ymax=celldm_geo(3,iwork)  
+              IF (celldm_geo(3,iwork) < ymin) ymin=celldm_geo(3,iwork)  
+           ENDIF
         END DO
         IF (ene_levels(1)==-1000._DP) THEN
            emin=1.d10
@@ -169,7 +179,11 @@ SUBROUTINE plot_multi_energy()
         ENDDO
         CALL gnuplot_close_2dplot_prep()
         xlabel='a (a.u.)'
-        ylabel='c/a '
+        IF (ibrav_save==5) THEN
+           ylabel='cos({/Symbol a})'
+        ELSE
+           ylabel='c/a '
+        ENDIF
 
         CALL gnuplot_do_2dplot(filenameps, xmin, xmax, ymin, ymax, xlabel, &
                                                   ylabel, tablefile)

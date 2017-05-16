@@ -101,8 +101,12 @@ IF (ltherm_freq) &
    CALL gnuplot_write_file_mul_data(filename3,1,2,'color_blue',&
                                              .NOT.ltherm_dos, .TRUE., .FALSE.)
 
-IF (ibrav_save==4.OR.ibrav_save==6.OR.ibrav_save==7) THEN
-   CALL gnuplot_ylabel('c/a ',.FALSE.) 
+IF (ibrav_save==4.OR.ibrav_save==5.OR.ibrav_save==6.OR.ibrav_save==7) THEN
+   IF (ibrav_save==5) THEN
+      CALL gnuplot_ylabel('cos({/Symbol a})',.FALSE.) 
+   ELSE
+      CALL gnuplot_ylabel('c/a ',.FALSE.) 
+   ENDIF
    IF (ltherm_dos) &
    CALL gnuplot_write_file_mul_data(filename2,1,3,'color_red',.TRUE., &
                                                      .NOT.ltherm_freq,.FALSE.)
