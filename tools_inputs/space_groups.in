@@ -1,0 +1,7 @@
+3       ! choose the option number 3
+165     ! number of the space group (as in the ITA tables)
+
+!
+!  This example shows how to use the tool space_groups.x to print the
+!  space group symmetry operations of space group 165.
+!
