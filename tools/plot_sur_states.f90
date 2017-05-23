@@ -7,26 +7,45 @@
 !
 PROGRAM plot_new_sur_states
 !
-!  This program reads in input a certain number of couples 
-!  k point - energy band
-!  and a file of planar averages of the states produced by
-!  the dump_states option of thermo_pw, and produces, for each couple, 
-!  a planar average of the selected states. It plots also an indication
-!  of the atomic positions
+!  This program reads in input a certain number of groups of states
+!  nk_plot       ! the number of k point and bands for this group
+!  k_point, energy band, label    ! 
+!  ..                      
+!  k_point, energy band, label    ! 
+!  where k_point is the number of the k point, energy band is the number of 
+!  the band and label is the label of the state to put on the plot. It
+!  must be the same for all the points within a given group nk_plot.
+!  Then the program expects the name of a file of planar averages of the 
+!  states produced by the dump_states option of thermo_pw, and produces, 
+!  for each group of states, a planar average of the sum of the charge of
+!  the selected states. It plots also an indication of the atomic positions.
+!  In the magnetic case it plots also a planar average of the sum of the
+!  magnetization.
 !  The output is a gnuplot script and a postscript file with all the
 !  requested planar averages.
 !  The user can control the plot by specifying:
 !  If all the cell has to be shown or only one part of it.
 !  Input variables:
-!  nstates        ! integer the number of ploted states.
-!  For each state:
-!  ik(state), ibnd(state)
+!  nstates  nmax    ! integer the number of plotted group of states and
+!                   ! the maximum number of states that compose a group
+!  For each group of states:
+!  nk_plot(state)   ! the number of states that compose this group
+!  ik(state), ibnd(state), label(state) ! the k point, the band and a label
 !  ...
-!  dump_file  : the name of the dump file that must be in the same directory
-!               where this code runs
+!  dump_file  : the name of the dump file that must be in a directory
+!               called dump in the same directory where this code runs
+!
+!  energy_band_file : the name of the file with the bands that must be
+!                     in the same directory where this code runs. By default
+!                     this file is found in the directory band_files and
+!                     is called output_band.dat. It is produced by the
+!                     same run of thermo_pw that produces the dump file.
 !  startz, endz : starting and ending points of the plot (from 0 to 1)
 !                 0 means beginning of the cell, 1 the end of the cell
 !  latoms      : .true. if you want an indication of the atomic positions
+!
+!  Note that this program needs also the band energies that must be
+!  in the running directory and 
 !
 USE kinds, ONLY : DP
 USE io_global,     ONLY : stdout, ionode
@@ -39,7 +58,7 @@ USE gnuplot, ONLY : gnuplot_start, gnuplot_end, gnuplot_xlabel, &
 IMPLICIT NONE
 
 CHARACTER(LEN=256) :: dump_file, gnu_filename, gnuplot_command, filename, &
-                      data_filename
+                      data_filename, energy_band_file
 REAL(DP) :: startz, endz, posz
 LOGICAL :: latoms
 INTEGER :: nstates, nmax, ibrav, nr3, nks, nbnd, nat, nspin, nlab
@@ -81,6 +100,8 @@ DO istate=1,nstates
 ENDDO
 WRITE(stdout,'(5x,"Name of the file with the planar averages")') 
 READ(5,'(a)')  dump_file
+WRITE(stdout,'(5x,"Name of the file with the bands")') 
+READ(5,'(a)')  energy_band_file
 WRITE(stdout,'(5x,a)')  TRIM(dump_file)
 WRITE(stdout,'(5x,"Starting and ending points of the plot")') 
 READ(5,*) startz, endz
@@ -93,10 +114,10 @@ WRITE(stdout,'(5x,l5)') latoms
 !
 WRITE(stdout,'(5x,2a)') 'Reading file ', TRIM(dump_file)
 iun=38
-filename1=TRIM(dump_file)
+filename1='dump/'//TRIM(dump_file)
 OPEN(UNIT=iun, FILE=TRIM(filename1), STATUS='OLD', ERR=100, IOSTAT=ios)
 100 IF (ios /= 0) THEN
-       WRITE(stdout,'(5x,"Problem opening the dump file ",a)') TRIM(dump_file)
+       WRITE(stdout,'(5x,"Problem opening the dump file ",a)') TRIM(filename1)
        STOP
 ENDIF
 
@@ -126,7 +147,7 @@ plan=0.0_DP
 DO istate=1,nstates
    DO iks=1,nk_plot(istate)
       ik=ik_plot(iks,istate)
-      filename1='state_k_'//TRIM(int_to_char(ik))
+      filename1='dump/state_k_'//TRIM(int_to_char(ik))
       OPEN(UNIT=iun,FILE=TRIM(filename1),STATUS='unknown',ERR=300,IOSTAT=ios)
 300   IF (ios /= 0) THEN
          WRITE(stdout,*) 'problem opening output_band.dat'
@@ -150,8 +171,8 @@ IF (nspin>1) THEN
 !
 !   read the output_band file with the k points
 !
-   OPEN(UNIT=1,FILE='output_band.dat',FORM='formatted',STATUS='OLD',ERR=10,&
-                                                  IOSTAT=ios)
+   OPEN(UNIT=1, FILE=TRIM(energy_band_file), FORM='formatted', STATUS='OLD',&
+                                             ERR=10, IOSTAT=ios)
 10 CONTINUE
    IF (ios /= 0) THEN
       WRITE(stdout,*) 'problem opening output_band.dat'

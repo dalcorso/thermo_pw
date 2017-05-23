@@ -1,0 +1,26 @@
+5  2              ! number of bands groups and maximum number per group
+1                 ! number of states of the first group
+32 12   B_0       ! kpoint, kband, label (this is a bulk state)
+1                 ! number of states of the second group
+32 29   S_1       ! kpoint, kband, label
+1
+32 30   S_2
+2                 ! number of states of the fourth group
+35 29   S_3       ! kpoint, kband, label
+35 30   S_3
+2
+36 29   S_4
+36 30   S_4
+dump_states       ! name of the file with the info on the planar averages
+output_band.dat   ! name of the file with 
+0.0    1.0
+.TRUE.
+
+!
+!   This example shows how to use the tool program plot_sur_states.x to plot
+!   the planar average of the charge density of the states of the slab.
+!   It assumes that in the working directory you have the directory dump
+!   produced by thermo_pw with the option dump_states=.TRUE. and a file
+!   with the energy eigenvalues called output_band.dat. To obtain these two 
+!   files run example19 with these options.
+!
