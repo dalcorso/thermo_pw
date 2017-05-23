@@ -573,6 +573,7 @@ SUBROUTINE thermo_readin()
 !
               DO k=j,256
                  IF (ICHAR(input_line(k:k)) == 39) THEN
+                    letter_path(iq)=''
                     letter_path(iq)(1:1) = input_line(k+1:k+1)
                     IF (ICHAR(input_line(k+2:k+2)) /= 39) &
                        letter_path(iq)(2:2) = input_line(k+2:k+2)
@@ -614,6 +615,20 @@ SUBROUTINE thermo_readin()
               ENDIF
 50            IF (ios /=0) CALL errore('thermo_readin',&
                                      'problem reading number of points',1)
+!
+!   search for a possible optional letter
+!
+              DO k=j+nch,256
+                 IF (ICHAR(input_line(k:k)) == 39) THEN
+                    letter_path(iq)=''
+                    letter_path(iq)(1:1) = input_line(k+1:k+1)
+                    IF (ICHAR(input_line(k+2:k+2)) /= 39) &
+                       letter_path(iq)(2:2) = input_line(k+2:k+2)
+                    IF (ICHAR(input_line(k+3:k+3)) /= 39) &
+                       letter_path(iq)(3:3) = input_line(k+3:k+3)
+                    EXIT
+                 ENDIF
+              ENDDO
               EXIT
            ENDIF
         ENDDO
