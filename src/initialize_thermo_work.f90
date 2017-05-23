@@ -25,7 +25,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
                              ltherm, lconv_ke_test, lconv_nk_test, &
                              lstress, lelastic_const, lpiezoelectric_tensor,&
                              lberry, lpolarization, lpart2_pw, do_scf_relax, &
-                             ldos_syn_1, ltherm_dos, ltherm_freq
+                             ldos_syn_1, ltherm_dos, ltherm_freq, after_disp
   USE control_pwrun,  ONLY : do_punch
   USE control_conv,   ONLY : nke, ke, deltake, nkeden, deltakeden, keden, &
                              nnk, nk_test, deltank, nsigma, sigma_test, &  
@@ -92,7 +92,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
         CASE ('scf_ph') 
            ALLOCATE(energy_geo(1))
-           lpwscf_syn_1=.TRUE.
+           lpwscf_syn_1=.NOT.after_disp
            lph=.TRUE.
            tot_ngeo=1
            ALLOCATE(no_ph(tot_ngeo))
@@ -101,7 +101,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
         CASE ('scf_disp')
            ALLOCATE(energy_geo(1))
-           lpwscf_syn_1=.TRUE.
+           lpwscf_syn_1=.NOT.after_disp
            lph=.TRUE.
            tot_ngeo=1
            ALLOCATE(no_ph(tot_ngeo))
@@ -208,7 +208,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
         CASE ('mur_lc_ph') 
            do_punch=.FALSE.
-           lpwscf_syn_1=.TRUE.
+           lpwscf_syn_1=.NOT.after_disp
            lev_syn_1=.TRUE.
            lph=.TRUE.
            CALL initialize_mur(nwork)
@@ -221,7 +221,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
         CASE ('mur_lc_disp')
            do_punch=.FALSE.
            lev_syn_1=.TRUE.
-           lpwscf_syn_1=.TRUE.
+           lpwscf_syn_1=.NOT.after_disp
            lph=.TRUE.
            CALL initialize_mur(nwork)
            tot_ngeo=1
@@ -697,7 +697,7 @@ IF (trans) THEN
 ELSEIF (fpol) THEN
    IF (with_asyn_images) THEN
       nwork=nfs/omega_group
-      IF (nwork*omega_group /= nfs) nwork=nwork+1
+      IF (nwork*omega_group /= nfs ) nwork=nwork+1
    ELSE
       nwork=1
    ENDIF
