@@ -149,7 +149,7 @@ SELECT CASE (laue)
             nstep = 3
             strain_list(1) = 'C '
             strain_list(2) = 'E '
-            strain_list(3) = 'G '
+            strain_list(3) = 'I '
          END IF
       END IF
    CASE (16)
