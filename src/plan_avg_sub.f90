@@ -34,6 +34,7 @@ SUBROUTINE plan_avg_sub(averag, vacuum, nat_, nbnd_, nks_, ninter, &
   USE io_global, ONLY : ionode, ionode_id
   USE mp_images, ONLY : intra_image_comm
   USE mp_bands,  ONLY : nbgrp, me_bgrp, root_bgrp, intra_bgrp_comm
+  USE mp_pools,  ONLY : me_pool, root_pool, intra_pool_comm
   USE mp,        ONLY : mp_bcast
   !
   IMPLICIT NONE
@@ -108,7 +109,7 @@ SUBROUTINE plan_avg_sub(averag, vacuum, nat_, nbnd_, nks_, ninter, &
 !
 !   to be checked if there is band parallelization
 !
-     IF (dump_states.AND.ionode) THEN
+     IF (dump_states.AND.me_pool==root_pool) THEN
         iun=find_free_unit()
         ik_index = find_global_ik(ik)
         filename='dump/state_k_'//TRIM(int_to_char(ik_index))
@@ -122,7 +123,8 @@ SUBROUTINE plan_avg_sub(averag, vacuum, nat_, nbnd_, nks_, ninter, &
         ENDDO
         CLOSE(iun)
      ENDIF
-300     CALL mp_bcast(ios,root_bgrp,intra_bgrp_comm)
+300     CALL mp_bcast(ios,root_pool,intra_pool_comm)
+        CALL mp_bcast(ios,root_bgrp,intra_bgrp_comm)
      IF (ios /= 0) CALL errore('plan_avg_sub','problems with dump of states',1)
   ENDDO
 
