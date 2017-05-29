@@ -43,7 +43,7 @@ SUBROUTINE initialize_plot_dispersion(kx, nks, xscale, ymin, ymax, eref,    &
 !
 
 USE kinds,           ONLY : DP
-USE control_paths,   ONLY : nqaux, letter_path, q_in_band_form
+USE control_paths,   ONLY : nqaux, letter_path, q_in_band_form, lbar_label
 USE control_2d_bands, ONLY : nkz
 USE control_bands,   ONLY : enhance_plot
 USE gnuplot,         ONLY : gnuplot_start, gnuplot_write_header,           &
@@ -52,6 +52,7 @@ USE gnuplot,         ONLY : gnuplot_start, gnuplot_write_header,           &
                             gnuplot_write_horizontal_segment,              &
                             gnuplot_put_label_yl, gnuplot_write_label,     &
                             gnuplot_write_label_yl, gnuplot_write_command, &
+                            gnuplot_write_label_yl_bar,                    &
                             gnuplot_set_eref, gnuplot_print_objects,       &
                             gnuplot_unset_border, gnuplot_unset_xticks,    &
                             gnuplot_rectangle_yl  
@@ -245,9 +246,13 @@ ENDIF
 !
 DO n=1, nqaux
    IF (label_disp_q(n)==0) CYCLE
-   IF (letter_path(n) /='') &
-         CALL gnuplot_write_label_yl(kx(label_disp_q(n)), &
+   IF (letter_path(n) /=''.AND.lbar_label) THEN
+      CALL gnuplot_write_label_yl_bar(kx(label_disp_q(n)), &
                           ' ymin + shift ', letter_path(n),.FALSE.)
+   ELSE
+      CALL gnuplot_write_label_yl(kx(label_disp_q(n)), &
+                          ' ymin + shift ', letter_path(n),.FALSE.)
+   ENDIF
 END DO
 
 RETURN

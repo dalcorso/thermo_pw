@@ -485,6 +485,8 @@ MODULE control_paths
   LOGICAL :: q_in_band_form
   LOGICAL :: q_in_cryst_coord
   LOGICAL :: q2d
+  LOGICAL :: lbar_label=.FALSE.  ! if .TRUE. put a bar on each label 
+                                 ! (needed for surface band plot)
 
 END MODULE control_paths
 

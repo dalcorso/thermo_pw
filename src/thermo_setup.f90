@@ -40,7 +40,7 @@ SUBROUTINE thermo_setup()
   USE control_eldos,        ONLY : deltae, ndose
   USE control_mur,          ONLY : lmurn
   USE equilibrium_conf,     ONLY : celldm0, at0, tau0, tau0_crys
-  USE control_paths,        ONLY : npk_label
+  USE control_paths,        ONLY : npk_label, lbar_label
   USE control_grun,         ONLY : temp_ph, volume_ph, celldm_ph
   USE control_xrdp,         ONLY : lambda, lambda_elem
   USE control_2d_bands,     ONLY : lprojpbs, nkz, sur_layers, identify_sur
@@ -287,6 +287,8 @@ SUBROUTINE thermo_setup()
   IF (what /= 'scf_2d_bands') THEN
      nkz=1
      lprojpbs=.FALSE.
+  ELSE
+     lbar_label=.TRUE.
   ENDIF
 
   IF (what=='scf_2d_bands'.AND.identify_sur) THEN

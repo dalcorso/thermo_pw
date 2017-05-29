@@ -24,6 +24,7 @@ MODULE gnuplot
            gnuplot_write_label, gnuplot_write_file_data, gnuplot_start, &
            gnuplot_set_eref, gnuplot_set_fact, gnuplot_set_gfact, &
            gnuplot_xlabel, gnuplot_ylabel, gnuplot_write_label_yl, &
+           gnuplot_write_label_yl_bar, &
            gnuplot_unset_xticks, gnuplot_unset_yticks, &
            gnuplot_unset_border, gnuplot_write_horizontal_segment,&
            gnuplot_set_xticks, gnuplot_set_yticks,    &
@@ -160,31 +161,9 @@ REAL(DP) :: xcoord, ycoord
 CHARACTER(LEN=3) :: label
 CHARACTER(LEN=20) :: ws
 CHARACTER(LEN=256) :: frt
-INTEGER :: lens
 LOGICAL :: comment
 
-lens=LEN_TRIM(label)
-IF (label=='gG ') THEN
-   ws="{/Symbol G}"
-ELSEIF (label=='gS ') THEN
-   ws="{/Symbol S}"
-ELSEIF (label=='gS0') THEN
-   ws="{/Symbol S_0}"
-ELSEIF (label=='gS1') THEN
-   ws="{/Symbol S_1}"
-ELSEIF (label=='gD0') THEN
-   ws="{/Symbol D_0}"
-ELSEIF (label=='gL0') THEN
-   ws="{/Symbol L_0}"
-ELSEIF (label=='Y1') THEN
-   ws="Y_1"
-ELSEIF (label=='Z1') THEN
-   ws="Z_1"
-ELSEIF (lens>1.AND.TRIM(label(lens:lens))/=' ') THEN
-   ws=label(lens-1:lens-1)//"_"//label(lens:lens)
-ELSE
-   ws=label
-ENDIF
+CALL set_ws_from_label(label, ws)
 
 frt='("set label """,a,""" at ", f12.4,"*xscale-xshift,",f12.4," center")'
 IF (comment) frt = '# ' // TRIM(frt)
@@ -266,39 +245,7 @@ CHARACTER(LEN=20) :: ws
 CHARACTER(LEN=256) :: frt
 LOGICAL :: comment
 
-IF (label=='gG ') THEN
-   ws="{/Symbol G}"
-ELSEIF (label=='gS ') THEN
-   ws="{/Symbol S}"
-ELSEIF (label=='gS0') THEN
-   ws="{/Symbol S_0}"
-ELSEIF (label=='gS1') THEN
-   ws="{/Symbol S_1}"
-ELSEIF (label=='gD0') THEN
-   ws="{/Symbol D_0}"
-ELSEIF (label=='gL0') THEN
-   ws="{/Symbol L_0}"
-ELSEIF (label=='A1') THEN
-   ws="A_1"
-ELSEIF (label=='B1') THEN
-   ws="B_1"
-ELSEIF (label=='L1') THEN
-   ws="L_1"
-ELSEIF (label=='P1') THEN
-   ws="P_1"
-ELSEIF (label=='P2') THEN
-   ws="P_2"
-ELSEIF (label=='X1') THEN
-   ws="X_1"
-ELSEIF (label=='Y1') THEN
-   ws="Y_1"
-ELSEIF (label=='Z1') THEN
-   ws="Z_1"
-ELSEIF (label(1:1)=='g') THEN
-    ws="{/Symbol "//label(2:3)//"}"
-ELSE
-    ws=label
-ENDIF
+CALL set_ws_from_label(label, ws)
 
 frt='("set label """,a,""" at ", f12.4,"*xscale-xshift,",a," center")'
 IF (comment) frt = '# ' // TRIM(frt)
@@ -307,6 +254,31 @@ IF (ionode) WRITE(iun_gnuplot, frt)  TRIM(ws), xcoord, TRIM(ylabel)
 
 RETURN
 END SUBROUTINE gnuplot_write_label_yl
+
+SUBROUTINE gnuplot_write_label_yl_bar(xcoord, ylabel, label, comment)
+!
+!   This subroutine puts a label in a y position calculated by the
+!   gnuplot script
+!
+IMPLICIT NONE
+REAL(DP), INTENT(IN) :: xcoord
+CHARACTER(LEN=*), INTENT(IN) :: ylabel
+CHARACTER(LEN=3), INTENT(IN) :: label
+CHARACTER(LEN=20) :: ws
+CHARACTER(LEN=256) :: frt
+LOGICAL :: comment
+
+CALL set_ws_from_label(label, ws)
+
+ws="~"//TRIM(ws)//"{0.6-}"
+
+frt='("set label """,a,""" at ", f12.4,"*xscale-xshift,",a," center")'
+IF (comment) frt = '# ' // TRIM(frt)
+
+IF (ionode) WRITE(iun_gnuplot, frt)  TRIM(ws), xcoord, TRIM(ylabel)
+
+RETURN
+END SUBROUTINE gnuplot_write_label_yl_bar
 
 SUBROUTINE gnuplot_ylabel(label, comment)
 IMPLICIT NONE
@@ -875,5 +847,50 @@ IF (ionode) CLOSE(UNIT=iun_gnuplot, STATUS='KEEP')
 
 RETURN
 END SUBROUTINE gnuplot_end
+
+SUBROUTINE set_ws_from_label(label, ws)
+IMPLICIT NONE
+CHARACTER(LEN=3), INTENT(IN) :: label
+CHARACTER(LEN=20), INTENT(OUT) :: ws
+INTEGER :: lens
+
+lens=LEN_TRIM(label)
+IF (label=='gG ') THEN
+   ws="{/Symbol G}"
+ELSEIF (label=='gS ') THEN
+   ws="{/Symbol S}"
+ELSEIF (label=='gS0') THEN
+   ws="{/Symbol S_0}"
+ELSEIF (label=='gS1') THEN
+   ws="{/Symbol S_1}"
+ELSEIF (label=='gD0') THEN
+   ws="{/Symbol D_0}"
+ELSEIF (label=='gL0') THEN
+   ws="{/Symbol L_0}"
+ELSEIF (label=='A1') THEN
+   ws="A_1"
+ELSEIF (label=='B1') THEN
+   ws="B_1"
+ELSEIF (label=='L1') THEN
+   ws="L_1"
+ELSEIF (label=='P1') THEN
+   ws="P_1"
+ELSEIF (label=='P2') THEN
+   ws="P_2"
+ELSEIF (label=='X1') THEN
+   ws="X_1"
+ELSEIF (label=='Y1') THEN
+   ws="Y_1"
+ELSEIF (label=='Z1') THEN
+   ws="Z_1"
+ELSEIF (label(1:1)=='g') THEN
+    ws="{/Symbol "//label(2:3)//"}"
+ELSEIF (lens>1.AND.TRIM(label(lens:lens))/=' ') THEN
+   ws=label(lens-1:lens-1)//"_"//label(lens:lens)
+ELSE
+    ws=label
+ENDIF
+RETURN
+END SUBROUTINE set_ws_from_label
 
 END MODULE gnuplot
