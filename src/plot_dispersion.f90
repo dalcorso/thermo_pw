@@ -246,12 +246,14 @@ ENDIF
 !
 DO n=1, nqaux
    IF (label_disp_q(n)==0) CYCLE
-   IF (letter_path(n) /=''.AND.lbar_label) THEN
-      CALL gnuplot_write_label_yl_bar(kx(label_disp_q(n)), &
+   IF (letter_path(n) /='') THEN
+      IF (lbar_label) THEN
+         CALL gnuplot_write_label_yl_bar(kx(label_disp_q(n)), &
                           ' ymin + shift ', letter_path(n),.FALSE.)
-   ELSE
-      CALL gnuplot_write_label_yl(kx(label_disp_q(n)), &
+      ELSE
+         CALL gnuplot_write_label_yl(kx(label_disp_q(n)), &
                           ' ymin + shift ', letter_path(n),.FALSE.)
+      ENDIF
    ENDIF
 END DO
 
