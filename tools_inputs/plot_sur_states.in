@@ -18,7 +18,7 @@ output_band.dat
 
 !
 !  dump_states is the name of the file with information on the planar average.
-!              this file is inside the directory dump
+!              This file is inside the directory dump
 !  output_band.dat is the name of the file that contains the bands.
 !
 
