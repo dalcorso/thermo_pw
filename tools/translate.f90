@@ -30,14 +30,13 @@ USE rotate, ONLY : is_rotation, rotate_vect
 IMPLICIT NONE
 INTEGER :: nat
 REAL(DP), ALLOCATABLE :: tau(:,:), tau0(:,:)
-REAL(DP) :: a(3), rot(3,3)
+REAL(DP) :: a(3), rot(3,3), original_units, final_units, fact
 INTEGER :: na, ipol, jpol, input_rot
 CHARACTER(LEN=3), ALLOCATABLE :: label(:)
 
 WRITE(6,'(5x," Translation vector? ")')
 READ(5,*) a(1), a(2), a(3)
 WRITE(6,'(3f15.8)') a(1), a(2), a(3)
-
 
 WRITE(6,'(5x," Rotation matrix? (0 to skip) ")')
 READ(5,*) input_rot
@@ -79,6 +78,19 @@ DO na=1, nat
                                      tau(3,na) + a(3)
 ENDDO
 
+WRITE(6,'(5x," change of units? (original units - final units, &
+                                & 0.0, 0.0 to skip)")')
+READ(5,*) original_units, final_units
+WRITE(6,'(2f16.7)') original_units, final_units
+
+IF (original_units>0.0_DP .AND. final_units>0.0_DP) THEN
+   fact=original_units/final_units
+   DO na=1, nat
+      WRITE(6,'(a3,3f20.12)') label(na), (tau(1,na) + a(1))*fact, &
+                                         (tau(2,na) + a(2))*fact, &
+                                         (tau(3,na) + a(3))*fact
+   ENDDO
+ENDIF
 
 DEALLOCATE(tau)
 DEALLOCATE(tau0)
