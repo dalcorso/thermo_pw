@@ -2638,6 +2638,9 @@ MODULE space_groups
         ELSE
           fft_fact(3)=2
         ENDIF
+     CASE(12)
+         fft_fact(1)=2
+         fft_fact(2)=2
      CASE(13)
         IF (unique==1) THEN
           fft_fact(3)=2
@@ -4875,6 +4878,8 @@ MODULE space_groups
             ENDIF
          ENDIF
   END SELECT
+
+  IF (verbosity) WRITE(stdout,'(/,5x,"Space group nymber",i5)') sg_number
 
   RETURN
   END SUBROUTINE find_space_group
