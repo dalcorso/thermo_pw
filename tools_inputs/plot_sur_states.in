@@ -11,10 +11,16 @@
 2
 36 29   S_4
 36 30   S_4
-dump_states       ! name of the file with the info on the planar averages
-output_band.dat   ! name of the file with 
+dump_states       
+output_band.dat    
 0.0    1.0
 .TRUE.
+
+!
+!  dump_states is the name of the file with information on the planar average.
+!              this file is inside the directory dump
+!  output_band.dat is the name of the file that contains the bands.
+!
 
 !
 !   This example shows how to use the tool program plot_sur_states.x to plot

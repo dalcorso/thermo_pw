@@ -61,18 +61,19 @@ CHARACTER(LEN=256) :: dump_file, gnu_filename, gnuplot_command, filename, &
                       data_filename, energy_band_file
 REAL(DP) :: startz, endz, posz
 LOGICAL :: latoms
-INTEGER :: nstates, nmax, ibrav, nr3, nks, nbnd, nat, nspin, nlab
+INTEGER :: nstates, nmax, ibrav, nr3, nks, nbnd, nat, nspin
 INTEGER :: istate, na, ik, i, ibnd, iks, idum, ir, ispin, ios, ierr, iun
 INTEGER, ALLOCATABLE :: nk_plot(:), ik_plot(:,:), ibnd_plot(:,:)
-REAL(DP), ALLOCATABLE :: plan(:,:,:), state(:,:), tau(:,:), mag(:,:), k(:,:), e(:,:)
-REAL(DP) :: xmin, xmax, ymin, ymax, dimz, delta, celldm(6), x(2), y(2), kcur(3), &
-            kmod
+REAL(DP), ALLOCATABLE :: plan(:,:,:), state(:,:), tau(:,:), mag(:,:), &
+                         k(:,:), e(:,:)
+REAL(DP) :: xmin, xmax, ymin, ymax, dimz, delta, celldm(6), x(2), y(2), &
+            kcur(3), kmod
 CHARACTER(LEN=3), ALLOCATABLE :: atm(:)
 CHARACTER(LEN=10), ALLOCATABLE :: label_plot(:)
 CHARACTER(LEN=256) :: str, filename1
 CHARACTER(LEN=30) :: xlabel, ylabel
 CHARACTER(LEN=6) :: int_to_char
-CHARACTER(LEN=9) :: code='plot_surf_states'
+CHARACTER(LEN=9) :: code='plot_surf'
 INTEGER :: system
 
 CALL mp_startup ( start_images=.true. )
@@ -136,8 +137,8 @@ ENDDO
 dimz=celldm(3)*celldm(1)
 
 READ(iun,*) nr3, nbnd, nks, nspin
-WRITE(stdout,'(5x,"nr3=",i6," nbnd=",i6," nks=",i6," nspin=",i6)') nr3, nbnd, nks, &
-                                                             nspin
+WRITE(stdout,'(5x,"nr3=",i6," nbnd=",i6," nks=",i6," nspin=",i6)') nr3, nbnd, &
+                                                   nks, nspin
 
 CLOSE(iun)
 ALLOCATE( plan(nr3,nspin,nstates) )
@@ -183,8 +184,8 @@ IF (nspin>1) THEN
    ALLOCATE(e(nbnd,nks))
    READ(1,*)
    DO ik=1,nks
-      READ(1,*,end=220,err=220,iostat=ios) (k(i,ik), i=1,3 )
-      READ(1,*,end=220,err=220,iostat=ios) (e(i,ik),i=1,nbnd)
+      READ(1,*,END=220,ERR=220,IOSTAT=ios) (k(i,ik), i=1,3 )
+      READ(1,*,END=220,ERR=220,IOSTAT=ios) (e(i,ik),i=1,nbnd)
    ENDDO
 220 CONTINUE
    IF (ios /= 0) THEN
