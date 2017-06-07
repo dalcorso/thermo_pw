@@ -293,15 +293,22 @@ END SUBROUTINE set_thermo_work_todo
 SUBROUTINE set_work_for_elastic_const(iwork)
 
 USE kinds,            ONLY : DP
-USE thermo_mod,       ONLY : celldm_geo, ibrav_geo
-
+!
+!  variables of thermo_pw
+!
 USE control_thermo,   ONLY : outdir_thermo
+USE equilibrium_conf, ONLY : celldm0, at0, tau0_crys
+USE thermo_mod,       ONLY : celldm_geo, ibrav_geo
 USE control_elastic_constants, ONLY : frozen_ions, elastic_algorithm, rot_mat
+!
+!  library routines
+!
 USE elastic_constants, ONLY : epsilon_geo
 USE strain_mod,       ONLY : apply_strain, print_strain
-USE equilibrium_conf, ONLY : celldm0, at0, tau0, tau0_crys
 USE rotate,           ONLY : rotate_vect
-
+!
+!  variables of qe
+!
 USE cell_base,        ONLY : cell_base_init, at
 USE ions_base,        ONLY : tau, nat
 USE io_files,         ONLY : tmp_dir, wfc_dir
@@ -310,9 +317,9 @@ USE io_global,        ONLY : stdout
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: iwork
 
-INTEGER  :: i, na, ipol, jpol, kpol, ibrav
+INTEGER  :: ivec, na, ipol, jpol, ibrav
 REAL(DP), ALLOCATABLE :: tau_ocoord(:,:)
-REAL(DP) :: atp(3,3), rd_ht(3,3), zero, celldm_(6)
+REAL(DP) :: rd_ht(3,3), zero, celldm_(6)
 LOGICAL  :: exst, parallelfs, trd_ht
 CHARACTER(LEN=256) :: outdir
 CHARACTER(LEN=10)  :: cell_units
@@ -328,14 +335,10 @@ CALL print_strain(epsilon_geo(:,:,iwork))
 !  tau0_crys that contains the crystal coordinates of the atoms. In 
 !  a uniform strain these coordinates do not change.
 !
-!  first strain the at0. If needed we pass to the new at for the new
-!  Bravais lattice
+!  first strain the at0. 
 !
-!
-!    first strain the lattice
-!
-DO i=1, 3
-   CALL apply_strain(at0(1,i), at(1,i), epsilon_geo(1,1,iwork))
+DO ivec=1, 3
+   CALL apply_strain(at0(1,ivec), at(1,ivec), epsilon_geo(1,1,iwork))
 ENDDO
 !
 !   Now find tau strained in cartesian coordinates using the strained at
@@ -352,13 +355,12 @@ IF (elastic_algorithm=='standard') THEN
    CALL cell_base_init ( ibrav, celldm0, zero, zero, zero, zero, &
                      zero, zero, trd_ht, rd_ht, cell_units )
 !
-!  the atomic coordinates are strained uniformely
+!  the atomic coordinates are strained uniformely and are not modified here
 !
-   CALL set_fft_mesh()
 ELSEIF (elastic_algorithm=='advanced' .OR. &
                                         elastic_algorithm=='energy') THEN
 !
-!  bring tau to the cartesian coordinates using the strained at lattices
+!  compute the at on the basis of ibrav_geo and celldm_geo
 !
    ibrav = ibrav_geo(iwork)
    celldm_(:)=celldm_geo(:,iwork)
@@ -366,14 +368,14 @@ ELSEIF (elastic_algorithm=='advanced' .OR. &
    rd_ht=0.0_DP
    CALL cell_base_init ( ibrav, celldm_, zero, zero, zero, zero, &
                          zero, zero, .FALSE., rd_ht, ' ' )
-   ALLOCATE(tau_ocoord(3,nat))
-
-   tau_ocoord=tau
 !
 !   In this scheme sometimes the cartesian axes of the strained 
-!   and unstrained cell are different. We rotate all the atomic positions
+!   and unstrained cells are different. We rotate all the atomic positions
 !   already strained to the new axis.
 !
+   ALLOCATE(tau_ocoord(3,nat))
+   tau_ocoord=tau
+
    CALL rotate_vect(rot_mat(1,1,iwork), nat, tau_ocoord, tau, 1)
    DEALLOCATE(tau_ocoord)
 !
@@ -385,6 +387,7 @@ ELSEIF (elastic_algorithm=='advanced' .OR. &
 !
    CALL find_fft_fact()
 ENDIF
+CALL set_fft_mesh()
 
 outdir=TRIM(outdir_thermo)//'/g'//TRIM(int_to_char(iwork))//'/'
 tmp_dir = TRIM ( outdir )
