@@ -318,7 +318,7 @@ The $c$-unique base-centered monoclinic lattice is:
 \nonumber
 \end{eqnarray}
 The volume of the unit cell is $\Omega = abc \sin\gamma/2$. \\
-The $b$ unique base-centered orthorhombic lattice is:
+The $b$ unique base-centered monoclinic lattice is:
 \begin{eqnarray}
 {\bf a}_1 &=& a ({1\over 2}, -{b \over 2 a}, 0), \nonumber \\
 {\bf a}_2 &=& a ({1\over 2}, {b \over 2 a}, 0), \nonumber \\
@@ -381,18 +381,16 @@ $\zeta_2=\cos\alpha$.
 
 \section{\color{coral}The strain tensor}
 The strain is defined by a $3\times 3$ tensor
-$\epsilon$. We say that a strain $\epsilon$ is applied
-to the solid if the three primitive vectors 
-${\bf a}_1$, ${\bf a}_2$, and ${\bf a}_3$, of the equilibrium configuration are
-transformed into 
-${\bf a}'_1$, ${\bf a}'_2$, and ${\bf a}'_3$ in the strained solid
-where:
+$\epsilon$. Applying a strain $\epsilon$ to a solid, 
+the three primitive vectors ${\bf a}_1$, ${\bf a}_2$, and ${\bf a}_3$
+becomes 
+${\bf a}'_1$, ${\bf a}'_2$, and ${\bf a}'_3$, where:
 \begin{equation}
 {\bf a}'_{j,i} = {\bf a}_{j,i} +  \sum_{k=1}^3 \epsilon_{j,k} {\bf a}_{k,i}.
 \end{equation}
 Here $i=1,2,3$ is the index of the primitive vector, while $k$ and $j$ run
-on the three coordinates. We consider only symmetric tensors
-$\epsilon_{i,j}=\epsilon_{j,i}$ removing any global rotation. 
+on the three Cartesian coordinates. We consider only symmetric tensors
+$\epsilon_{j,k}=\epsilon_{k,j}$ removing any global rotation. 
 In order to make the connection with the classical elasticity theory, we
 call ${\bf X}$ the coordinates of an unstrained solid and
 ${\bf x}({\bf X})$ the position of each point ${\bf X}$ in
@@ -400,17 +398,15 @@ the strained solid. Calling ${\bf u}= {\bf x} -{\bf X}$ the displacements
 of each point, the standard theory of elasticity defines the $3\times3$ matrix
 $\alpha_{i,j}=\delta_{i,j}+u_{i,j}$ where $u_{i,j}= {\partial u_i \over 
 \partial X_j}$ are the displacement gradients and 
-${\bf x}_i = \alpha_{i,j} {\bf X}_j$. With our definition $\epsilon_{i,k}$
-corresponds to the symmetrized tensor $\epsilon_{i,k}={1\over 2} ( u_{i,j} +
-u_{j,i})$. Notice that $\epsilon_{i,j}$ are not the Lagrangian strains
-$\eta_{i,k}={1\over 2} ( u_{i,j} + u_{j,i} + u_{k,i}u_{k,j})$, but they
-differ from them only for quadratic terms in $u_{i,j}$. 
+${\bf x}_i = \alpha_{i,j} {\bf X}_j$. With our definition $\epsilon_{j,k}$
+corresponds to the symmetrized tensor $\epsilon_{j,k}={1\over 2} ( u_{j,k} +
+u_{k,j})$. Notice that $\epsilon_{j,k}$ are not the Lagrangian strains
+$\eta_{j,k}={1\over 2} ( u_{j,k} + u_{k,j} + \sum_l u_{l,j}u_{l,k})$, but 
+differ for terms quadratic in $u_{i,j}$. 
 
-In general, a strain changes both the size of the
-and the shape of the unit cell possibly changing the Bravais lattice. 
-In this section we consider some strains of interest for our applications and
-discuss the type of units cells that result. 
-We consider the following strains:
+In general, a strain changes both the size 
+and the shape of the unit cell possibly changing the Bravais lattice. \\
+In this section we consider some strains of interest for our applications: 
 \begin{equation}
 \epsilon_A=\left( \begin{array}{ccc}
 \epsilon_{1,1}, & 0, & 0 
@@ -421,8 +417,8 @@ We consider the following strains:
 \end{array}
 \right),
 \end{equation}
-an isotropic strain that modifies the $x$, $y$, and $z$ directions in the
-same way.
+is an isotropic strain that modifies the $x$, $y$, and $z$ directions in the
+same way,
 \begin{equation}
 \epsilon_B=\left( \begin{array}{ccc}
 \epsilon_{1,1},& 0, & 0 
@@ -631,54 +627,15 @@ $\epsilon_6=2 \epsilon_{1,2}$ and a generic strain is:
 \end{equation}
 
 For each system (with the exception of the monoclinic and triclinic) 
-we consider two questions. Which strain is applied
-by changing the crystal parameters $\zeta_k$ and 
-how does the Bravais lattice change for a given strain. In the latter
-case we consider only the strains of interest for the given Bravais 
-lattice.
+we discuss how the Bravais lattice changes for a given strain limiting
+to the strains of interest for the following.
 
 \subsection{\color{web-blue}Cubic system}
-The only strain that keeps the shape of the unit cell cubic is an isotropic
-strain $\epsilon_A$.
-Changing the cubic lattice constant of $da$ is equivalent to apply a
-isotropic strain in which all diagonal components are equal to 
-$\epsilon_{i,i} = da / a$.
+The cell remains cubic only applying an isotropic strain $\epsilon_A$ that 
+changes the cubic lattice constant $a_c$ to $a=(1+\epsilon_{1,1})a_c$.
 
-Among the strains that change the shape of the unit cell we consider
-$\epsilon_E$ that transforms the cubic unit cell into a tetragonal unit cell.
-The cubic unit cell with edge $a_c$ is transformed into a 
-tetragonal unit cell with $a_t=a_c$ and $c_t=a_c(1+\epsilon_{3,3})$.
-The body-centered cubic unit cell is transformed into
-a centered tetragonal unit cell and the face-centered unit cell is
-transformed into a centered tetragonal cell with $a_t=a_c / \sqrt{2}$ 
-and $c_t=a_c(1+\epsilon_{3,3})$.
-
-Among the shear strain $\epsilon_F$
-transforms the cubic unit cell into a rhombohedral unit cell with
-parameters:
-\begin{eqnarray}
-a_t&=& a_c \sqrt{1+2\epsilon_{1,2}^2} \\
-\cos\alpha &=& {\epsilon_{1,2} (\epsilon_{1,2} + 2) \over 
-1 + 2 \epsilon_{1,2}^2 }
-\end{eqnarray}
-The face-centered cubic cell is transformed by $\epsilon_{F''}$
-in a rhombohedral unit cell 
-with parameters:
-\begin{eqnarray}
-a_t&=& {a_c \over 2} \sqrt{6 \epsilon_{1,2}^2+4 \epsilon_{1,2} +2} \\
-\cos\alpha &=& {5\epsilon_{1,2}^2+ 6\epsilon_{1,2} + 1 \over 
-6\epsilon_{1,2}^2 + 4\epsilon_{1,2}+2 },
-\end{eqnarray}
-while the body-centered cubic cell is transformed by 
-$\epsilon_{F'''}$ in a rhombohedral unit cell
-with parameters:
-\begin{eqnarray}
-a_t&=& {a_c \over 2} \sqrt{ 4\epsilon_{1,2}^2 + 4\epsilon_{1,2} + 3 } \\
-\cos\alpha &=& -{4\epsilon_{1,2}+1 \over 4\epsilon_{1,2}^2+4\epsilon_{1,2}+3}
-\end{eqnarray}
-
-It is of interest to apply $\epsilon_B$ that transforms the 
-cubic unit cell into a tetragonal unit cell with:
+Applying $\epsilon_B$, the simple (body-centered) cubic
+unit cell becomes (centered) tetragonal with:
 \begin{eqnarray}
 a&=&a_c (1+\epsilon_{1,1}), \\
 c&=&a_c.
@@ -686,60 +643,164 @@ c&=&a_c.
 The face-centered cubic lattice becomes a centered tetragonal lattice with
 \begin{eqnarray}
 a&=&a_c {\sqrt{2} \over 2} (1+\epsilon_{1,1}), \\
-c&=&a_c,
-\end{eqnarray}
-and the body-centered cubic lattice becomes a centered tetragonal
-lattice with parameters:
-\begin{eqnarray}
-a&=&a_c (1+\epsilon_{1,1}), \\
 c&=&a_c.
 \end{eqnarray}
+However the Cartesian reference system of the tetragonal cell
+is rotated with respect to that of the face-centered cubic cell. 
+A point of Cartesian coordinates ${\bf r}=(x_1,x_2,x_3)$ 
+in the reference system of the face-centered cubic cell 
+has coordinates 
+${\bf r}=(X_1,X_2,X_3)$ in the reference system of the centered tetragonal cell
+where $X_i=\sum_j R^A_{i,j} x_j$ and the rotation matrix $R_{i,j}$ is 
+\begin{equation}
+R^A=\left( \begin{array}{ccc}
+1/\sqrt{2}, & -1/\sqrt{2}, & 0 
+\\
+1/\sqrt{2}, & 1/\sqrt{2}, & 0 
+\\
+0, & 0, & 1
+\end{array}
+\right).
+\end{equation}
+
+Similarly, by applying $\epsilon_E$ the simple (body-centered) cubic
+cell becomes a (centered) tetragonal cell with
+\begin{eqnarray}
+a&=&a_c,   \\
+c&=&a_c (1+\epsilon_{3,3}).
+\end{eqnarray}
+The face-centered cubic lattice becomes a centered tetragonal lattice with
+\begin{eqnarray}
+a&=&a_c {\sqrt{2}\over 2},   \\
+c&=&a_c (1+\epsilon_{3,3}).
+\end{eqnarray}
+The reference system of the centered tetragonal
+cell is rotated with respect to the reference system of the face-centered
+cubic cell and the change of coordinates can be done with the same rotation 
+matrix written above.
+
+Among the shear strain $\epsilon_F$
+transforms the simple cubic unit cell into a rhombohedral cell with
+parameters:
+\begin{eqnarray}
+a_r&=& a_c \sqrt{1+2\epsilon_{1,2}^2} \\
+\cos\alpha &=& {\epsilon_{1,2} (\epsilon_{1,2} + 2) \over 
+1 + 2 \epsilon_{1,2}^2 }.
+\end{eqnarray}
+The reference system of the rhombohedral cell is rotated with respect to
+the reference system of the cubic cell. The change of coordinates can
+be written as above with the rotation matrix:
+\begin{equation}
+R^B=\left( \begin{array}{ccc}
+1/\sqrt{2}, & 0, & -1/\sqrt{2}
+\\
+-1/\sqrt{6}, & 2/\sqrt{6}, & -1/\sqrt{6}
+\\
+1/\sqrt{3}, & 1/\sqrt{3}, & 1/\sqrt{3}
+\end{array}
+\right).
+\end{equation}
+
+The face-centered cubic cell is transformed by $\epsilon_{F'''}$
+in a rhombohedral unit cell with parameters:
+\begin{eqnarray}
+a_r&=& {a_c \over 2} \sqrt{6 \epsilon_{1,2}^2-4 \epsilon_{1,2} +2}, \\
+\cos\alpha &=& {5\epsilon_{1,2}^2- 6\epsilon_{1,2} + 1 \over 
+6\epsilon_{1,2}^2 - 4\epsilon_{1,2}+2 },
+\end{eqnarray}
+The reference system of the rhombohedral cell is rotated with respect to
+the reference system of the face-centered cubic cell. 
+The change of coordinates can be written as above with the rotation matrix:
+\begin{equation}
+R^C=\left( \begin{array}{ccc}
+1/\sqrt{2}, & 1/\sqrt{2}, & 0 \\
+-1/\sqrt{6}, & 1/\sqrt{6}, & -2/\sqrt{6}
+\\
+-1/\sqrt{3}, & 1/\sqrt{3}, & 1/\sqrt{3}
+\end{array}
+\right).
+\end{equation}
+
+The body-centered cubic cell is transformed by 
+$\epsilon_{F'''}$ in a rhombohedral unit cell
+with parameters:
+\begin{eqnarray}
+a_r&=& {a_c \over 2} \sqrt{ 4\epsilon_{1,2}^2 + 4\epsilon_{1,2} + 3 }, \\
+\cos\alpha &=& -{4\epsilon_{1,2}+1 \over 4\epsilon_{1,2}^2+4\epsilon_{1,2}+3}.
+\end{eqnarray}
+The reference system of the rhombohedral cell is rotated with respect to
+the reference system of the body-centered cubic cell. 
+The change of coordinates can be written as above with the rotation matrix 
+$R^C$.
 
 \subsection{\color{web-blue}Tetragonal system}
-There are three strains that maintain the shape of the tetragonal cell 
-$\epsilon_A$, $\epsilon_B$, and $\epsilon_E$. $\epsilon_B$ changes the 
-lattice parameter $a$ into $a(1+\epsilon_{1,1})$. 
-Therefore changing the lattice constant $a$ of the tetragonal cell of $da$
-is equivalent to apply $\epsilon_B$  with $\epsilon_{1,1}=da/a$.
-$\epsilon_E$ changes the lattice constant $c$ into $c(1+\epsilon_{3,3})$. 
-Therefore changing the lattice constant $c$ of the tetragonal cell of $dc$
-is equivalent to apply $\epsilon_C$ with $\epsilon_{3,3}=dc/c$.
+Applying $\epsilon_A$, or $\epsilon_B$, or $\epsilon_E$ to a 
+(centered) tetragonal cell
+does not change its shape. $\epsilon_A$ changes $a_t$ into 
+$a_t(1+\epsilon_{1,1})$ and $c_t$ into $c_t(1+\epsilon_{1,1})$ so that the
+ration $c_t/a_t$ remains constant. 
+$\epsilon_B$ changes $a_t$ into $a_t(1+\epsilon_{1,1})$
+while $c_t$ does not change and $\epsilon_E$ changes  
+$c_t$ into $c_t(1+\epsilon_{3,3})$ while $a_t$ does not change.
 
-Among the strains that change the shape of the unit cell, we consider
-$\epsilon_C$ which transforms the tetragonal cell into an  
+Applying $\epsilon_{B'}$ to a simple tetragonal cell transforms it into an  
 orthorhombic cell with
-\begin{equation}
-a= a_t (1+\epsilon_{1,1}), \ \ \ \ \
-b= a_t, \ \ \ \ \
-c=c_t,
-\end{equation}
-and a centered tetragonal into a body-centered orthorhombic cell with the same
+\begin{eqnarray}
+a&=& a_t (1+\epsilon_{1,1}), \\
+b&=& a_t, \\
+c&=& c_t (1+\epsilon_{1,1}).
+\end{eqnarray}
+Applying $\epsilon_{B'}$ to a centered tetragonal cell transforms it
+into a body-centered orthorhombic cell with the same
+parameters. 
+
+Similarly, applying $\epsilon_C$ to a simple tetragonal cell transforms 
+it into an  orthorhombic cell with
+\begin{eqnarray}
+a&=&a_t (1+\epsilon_{1,1}), \\
+b&=&a_t, \\
+c&=&c_t,
+\end{eqnarray}
+and applying $\epsilon_C$ to a centered tetragonal cell transforms it
+into a body-centered orthorhombic cell with the same
 parameters.\\
 
-The shear strains of interest are $\epsilon_G$ and $\epsilon_H$.
-$\epsilon_G$ applied to the
-tetragonal cell transforms it into a base-centered orthorhombic cell,
-with parameters:
+$\epsilon_G$ applied to the simple tetragonal cell transforms it into a 
+base-centered orthorhombic cell, with parameters:
 \begin{eqnarray}
 a&=&\sqrt{2} a_t (1-\epsilon_{1,2}), \\
 b&=&\sqrt{2} a_t (1+\epsilon_{1,2}) , \\
 c&=&c_t.
 \end{eqnarray}
-The coordinate axes of the orthorhombic cell are rotated of $-45^\circ$ 
-about the $z$ axis with respect to the tetragonal cell. $\epsilon_H$ 
-transforms the tetragonal cell into a monoclinic (b-unique) cell with:
+The reference system of the orthorombic cell is rotated with respect to
+the reference system of the tetragonal cell. 
+The change of coordinates can be written as above with the rotation matrix 
+$R^A$.
+$\epsilon_G$ applied to the centered tetragonal cell transforms it into
+a face-centered orthorhombic cell with the same parameters written above
+and the same change of reference system.
+
+$\epsilon_H$ applied to the simple tetragonal cell transforms it into a 
+simple monoclinic (b-unique) cell with:
 \begin{eqnarray}
 a&=&a_t \sqrt{1+\epsilon_{1,3}^2}, \\
 b&=&a_t, \\
 c&=&c_t \sqrt{1+\epsilon_{1,3}^2}, \\
 \cos\beta &=& {2 \epsilon_{1,3} \over 1 + \epsilon_{1,3}^2}.
 \end{eqnarray}
+The reference system of the simple monoclinic cell is rotated with respect to
+the reference system of the tetragonal cell. 
+The change of coordinates can be written as above with the rotation matrix 
+\begin{equation}
+R^D=\left( \begin{array}{ccc}
+\cos\phi, & 0, & -\sin\phi \\
+0, & 1, & 0 \\
+\sin\phi, & 0, & \cos\phi  
+\end{array}
+\right)
+\end{equation}
+where $\tan \phi=-\epsilon_{1,3}$.
 
-$\epsilon_G$ applied to the centered tetragonal cell transforms it into
-a face centered orthorhombic cell rotated of $45^\circ$ with respect to 
-the tetragonal cell. The parameters of the face-centered orthorhombic cell 
-are the same as the parameters of the orthorhombic cell obtained by
-straining the tetragonal cell. 
 Applying $\epsilon_H$ transforms the centered tetragonal cell into 
 a base-centered $b$-unique monoclinic cell with
 \begin{eqnarray}
@@ -750,48 +811,71 @@ c&=&a_t \sqrt{1+\epsilon_{1,3}^2}, \\
 \sqrt{(a_t^2+c_t^2)(1+\epsilon_{1,3}^2)-4\epsilon_{1,3}a_tc_t} 
 \sqrt{(1+\epsilon_{1,3}^2)}}.
 \end{eqnarray}
-The coordinate system is rotated of an angle $\phi$ about the $y$ axis
-and 
+The reference system of the base-centered monoclinic cell is rotated with 
+respect to the reference system of the centered tetragonal cell. 
+The change of coordinates can be written as above with the rotation matrix 
+$R^D$ and the angle $\phi$ equal to
 \begin{equation}
 {\rm tg} \phi = -{\epsilon_{1,3} a_t - c_t \over a_t - \epsilon_{3,1} c_t}.
 \end{equation}
 
 \subsection{\color{web-blue}Orthorhombic system}
-$\epsilon_C$, $\epsilon_D$, $\epsilon_E$, $\epsilon_B$, $\epsilon_{B'}$,
-and $\epsilon_{B''}$ are six strains that maintain the shape of the 
-orthorhombic cell. $\epsilon_C$ changes the lattice constant $a$ into 
-$a(1+\epsilon_{1,1})$, $\epsilon_D$ changes the lattice constant $b$ 
-into $b(1+\epsilon_{2,2})$, and 
-$\epsilon_E$ changes the lattice constant $c$ into $c(1+\epsilon_{3,3})$. 
-Therefore changing the lattice constant $a$ of $da$,
-$b$ of $db$, and $c$ of $dc$ is equivalent to apply $\epsilon_C$
-with $\epsilon_{1,1}=da/a$, $\epsilon_D$ with $\epsilon_{2,2}=db/b$,
-and $\epsilon_E$ with $\epsilon_{3,3}=dc/c$, respectively.
-The application of $\epsilon_B$ means to change simultaneously
-$a$ and $b$ so that $da/a=db/b=\epsilon_{1,1}$. Similarly the application
-of $\epsilon_{B'}$ means to change $a$ and $c$ so that 
-$da/a=dc/c=\epsilon_{1,1}$, while the application of $\epsilon_{B''}$ 
-corresponds to change $b$ and $c$ so that $db/b=dc/c=\epsilon_{3,3}$.
+Applying $\epsilon_A$, $\epsilon_B$, $\epsilon_{B'}$, $\epsilon_{B''}$, 
+$\epsilon_C$, $\epsilon_D$, or $\epsilon_E$, to a (base-centered, 
+face-centered, or body-centered) orthorhombic cell does not change its shape. 
+$\epsilon_A$ changes $a_o$ into $a_o(1+\epsilon_{1,1})$, $b_o$ into
+$b_o(1+\epsilon_{1,1})$ and $c_o$ into $c_o(1+\epsilon_{1,1})$.
+$\epsilon_B$ changes $a_o$ into $a_o(1+\epsilon_{1,1})$ and $b_o$ into
+$b_o(1+\epsilon_{1,1})$ while $c_o$ remains constant.
+$\epsilon_{B'}$ changes $a_o$ into $a_o(1+\epsilon_{1,1})$ and $c_o$ into
+$c_o(1+\epsilon_{1,1})$ while $b_o$ remains constant.
+$\epsilon_{B''}$ changes $b_o$ into $b_o(1+\epsilon_{1,1})$ and $c_o$ into
+$c_o(1+\epsilon_{1,1})$ while $a_o$ remains constant.
+$\epsilon_C$ changes $a_o$ into 
+$a_o(1+\epsilon_{1,1})$, while $b_o$ and $c_o$ remain constant.
+$\epsilon_D$ changes $b_o$ into $b_o(1+\epsilon_{2,2})$ while
+$a_o$ and $c_o$ remain constant.
+$\epsilon_E$ changes $c_o$ into $c_o(1+\epsilon_{3,3})$ while $a_o$ and
+$b_o$ remain constant.
 
-Among the strains that change the shape of the unit cell we will consider
-the shear strains $\epsilon_G$, $\epsilon_H$, and $\epsilon_I$.
-$\epsilon_G$ transforms the orthorhombic cell into a 
-monoclinic ($c$-unique) cell with
+Applying $\epsilon_G$ to an simple orthorombic cell transforms it into a 
+simple monoclinic ($c$-unique) cell with
 \begin{eqnarray}
 a&=&a_o \sqrt{1+\epsilon_{1,2}^2}, \\
 b&=&b_o \sqrt{1+\epsilon_{1,2}^2}, \\
 c&=&c_o, \\
 \cos\gamma &=& {2 \epsilon_{1,2} \over 1 + \epsilon_{1,2}^2}.
 \end{eqnarray}
-Similarly $\epsilon_H$ transform the orthorhombic lattice into a 
-monoclinic lattice ($b$-unique) with 
+The reference system of the simple monoclinic cell is rotated with respect to
+the reference system of the orthorombic cell. 
+The change of coordinates can be written as above with the rotation matrix 
+\begin{equation}
+R^E=\left( \begin{array}{ccc}
+\cos\phi, & -\sin\phi, & 0 \\
+\sin\phi, &  \cos\phi, & 0 \\
+0, & 0, & 1 \\
+\end{array}
+\right),
+\end{equation}
+where $\tan \phi=-\epsilon_{1,2}$.
+
+Similarly, applying $\epsilon_H$ to a simple (base-centered) 
+orthorhombic lattice transforms
+it in a simple (base-centered) monoclinic lattice ($b$-unique) with 
 \begin{eqnarray}
 a&=&a_o \sqrt{1+\epsilon_{1,3}^2}, \\
 b&=&b_o, \\
 c&=&c_o \sqrt{1+\epsilon_{1,3}^2}, \\
 \cos\beta &=& {2 \epsilon_{1,3} \over 1 + \epsilon_{1,3}^2}. 
 \end{eqnarray}
-$\epsilon_I$ transforms the orthorhombic lattice in a monoclinic lattice that 
+The reference system of the simple (base-centered) monoclinic cell is 
+rotated with respect to the reference system of the simple (base-centered) 
+orthorombic cell. 
+The change of coordinates can be written as above with the rotation matrix 
+$R^D$ and $\tan \phi=-\epsilon_{1,3}$.
+
+$\epsilon_I$ transforms the simple (base-centered) orthorhombic lattice 
+in a simple (base-centered) monoclinic lattice that 
 however is $a$-unique and must be rotated to be simulated.
 For instance we can simulate the strained orthorhombic cell with a monoclinic
 $c$-unique lattice with
@@ -801,9 +885,12 @@ b&=&c_o \sqrt{1+\epsilon_{2,3}^2}, \\
 c&=&a_o, \\
 \cos\gamma &=& {2 \epsilon_{2,3} \over 1 + \epsilon_{2,3}^2}. 
 \end{eqnarray}
-With a rotation matrix
+The reference system of the simple (base-centered) monoclinic cell is 
+rotated with respect to
+the reference system of the simple (base-centered) orthorombic cell. 
+The change of coordinates can be written as above with the rotation matrix 
 \begin{equation}
-R=\left( \begin{array}{ccc}
+R^F=\left( \begin{array}{ccc}
 0, & \cos \phi, &  -\sin \phi
 \\
 0, & \sin \phi, & \cos \phi 
@@ -812,13 +899,10 @@ R=\left( \begin{array}{ccc}
 \end{array}
 \right),
 \end{equation}
-and ${\rm tg} \phi =-\epsilon_{2,3}$, that transforms the coordinates
-of a point expressed in the Cartesian basis of the orthorhombic system
-into the coordinates of a point in the Cartesian basis of the monoclinic
-system.
+and ${\rm tg} \phi =-\epsilon_{2,3}$. 
 
 The application of $\epsilon_G$ to a base-centered orthorhombic lattice
-transforms it into a $c$-unique monoclinic lattice with parameters:
+transforms it into a $c$-unique simple monoclinic lattice with parameters:
 \begin{eqnarray}
 a&=&a_o \sqrt{1+\epsilon_{1,2}^2}, \\
 b&=&{1\over 2} \sqrt{(a_o^2+b_o^2)(1+\epsilon_{1,2}^2)+4a_ob_o\epsilon_{1,2}}, \\
@@ -827,17 +911,10 @@ c&=&c_o,  \\
 \sqrt{1+\epsilon_{1,2}^2} \sqrt{(a_o^2+b_o^2)
 (1+\epsilon_{1,2}^2)+4a_ob_o\epsilon_{1,2}}}. 
 \end{eqnarray}
-A rotation of an angle $\phi$ about the $z$ axis with 
-${\rm tg}\phi=-\epsilon_{1,2}$ relates the two Cartesian systems.
-The application of $\epsilon_H$ to a base-centered orthorhombic lattice
-transforms it into a base-centered monoclinic lattice with the same parameters
-found for the application of $\epsilon_H$ to a primitive orthorhombic lattice.
-The application of $\epsilon_I$ to a base-centered orthorhombic lattice
-transforms it into a base-centered monoclinic lattice that however
-is $a$-unique. We can do the same rotation made in previous case
-and we obtain a base-centered $c$-unique monoclinic cell with 
-the same parameters as those found for the application of $\epsilon_I$ 
-to the orthorhombic cell.
+The reference system of the simple monoclinic cell is rotated with respect to
+the reference system of the orthorombic cell. 
+The change of coordinates can be written as above with the rotation matrix 
+$R^E$ and ${\rm tg}\phi=-\epsilon_{1,2}$.
 
 The application of $\epsilon_G$ to a face-centered orthorhombic lattice
 transforms it into a $c$-unique base-centered monoclinic lattice with 
@@ -850,8 +927,10 @@ c&=&c_o,  \\
 \sqrt{1+\epsilon_{1,2}^2} \sqrt{(a_o^2+b_o^2)
 (1+\epsilon_{1,2}^2)+4a_ob_o\epsilon_{1,2}}}. 
 \end{eqnarray}
-A rotation of an angle $\phi$ about the $z$ axis with 
-${\rm tg}\phi=-\epsilon_{1,2}$ relates the two Cartesian systems.
+The reference system of the base-centered monoclinic cell is rotated 
+with respect to the reference system of the face-centered orthorombic cell. 
+The change of coordinates can be written as above with the rotation matrix 
+$R^E$ and ${\rm tg}\phi=-\epsilon_{1,2}$.
 
 The application of $\epsilon_H$ to a face-centered orthorhombic lattice
 transforms it into a $b$-unique base-centered monoclinic lattice with
@@ -862,10 +941,12 @@ b&=&b_o,  \\
 c&=&{1\over 2} \sqrt{(a_o^2+c_o^2)(1+\epsilon_{1,3}^2)+4a_oc_o\epsilon_{1,3}}, \\
 \cos\gamma &=& {a_o (1+\epsilon_{1,3}^2)+2a_oc_o\epsilon_{1,3} \over
 \sqrt{1+\epsilon_{1,3}^2} \sqrt{(a_o^2+c_o^2)
-(1+\epsilon_{1,3}^2)+4a_oc_o\epsilon_{1,2}}}. 
+(1+\epsilon_{1,3}^2)+4a_oc_o\epsilon_{1,3}}}. 
 \end{eqnarray}
-A rotation of an angle $\phi$ about the $y$ axis with 
-${\rm tg}\phi=-\epsilon_{1,3}$ relates the two Cartesian systems.
+The reference system of the base-centered monoclinic cell is rotated 
+with respect to the reference system of the face-centered orthorombic cell. 
+The change of coordinates can be written as above with the rotation matrix 
+$R^D$ and ${\rm tg}\phi=-\epsilon_{1,3}$.
 
 The application of $\epsilon_I$ to a face-centered orthorhombic lattice
 transforms it into a base-centered monoclinic lattice that however is 
@@ -880,18 +961,11 @@ c&=&a_o,  \\
 \sqrt{1+\epsilon_{2,3}^2} \sqrt{(b_o^2+c_o^2)
 (1+\epsilon_{2,3}^2)+4b_oc_o\epsilon_{2,3}}}. 
 \end{eqnarray}
-With a rotation matrix
-\begin{equation}
-R=\left( \begin{array}{ccc}
-0, & \cos \phi, &  -\sin \phi
-\\
-0, & \sin \phi, & \cos \phi 
-\\
-1, & 0, & 0
-\end{array}
-\right),
-\end{equation}
-and ${\rm tg} \phi =-\epsilon_{2,3}$.
+The reference system of the base-centered monoclinic cell is rotated 
+with respect to the reference system of the face-centered orthorombic cell. 
+The change of coordinates can be written as above with the rotation matrix 
+$R^F$ and 
+${\rm tg}\phi=-\epsilon_{2,3}$.
 
 The application of $\epsilon_G$ to a body-centered orthorhombic lattice
 transforms it into a base-centered $c$-unique monoclinic lattice with 
@@ -904,11 +978,14 @@ c&=&c_o,  \\
 \sqrt{1+\epsilon_{1,2}^2} \sqrt{(a_o^2+b_o^2)
 (1+\epsilon_{1,2}^2)-4a_ob_o\epsilon_{1,2}}}, 
 \end{eqnarray}
-where the coordinate system is rotated of an angle $\phi$ about the $z$
-axis with
+The reference system of the base-centered monoclinic cell is rotated 
+with respect to the reference system of the body-centered orthorombic cell. 
+The change of coordinates can be written as above with the rotation matrix 
+$R^E$ and
 \begin{equation}
 {\rm tg} \phi = -{ \epsilon a_o - b_o \over a_o - \epsilon b_o }.
 \end{equation}
+
 The application of a strain $\epsilon_H$ to a body-centered orthorhombic
 lattice transforms it into a base-centered $b$-unique monoclinic lattice 
 \begin{eqnarray}
@@ -919,11 +996,14 @@ c&=&a_o \sqrt{1+\epsilon_{1,3}^2}, \\
 \sqrt{(a_o^2+c_o^2)(1+\epsilon_{1,3}^2)-4\epsilon_{1,3}a_oc_o} 
 \sqrt{(1+\epsilon_{1,3}^2)}}.
 \end{eqnarray}
-The coordinate system is rotated of an angle $\phi$ about the $y$ axis
-and
+The reference system of the base-centered monoclinic cell is rotated 
+with respect to the reference system of the body-centered orthorombic cell. 
+The change of coordinates can be written as above with the rotation matrix 
+$R^D$ and
 \begin{equation}
 {\rm tg} \phi = -{\epsilon_{1,3} a_o - c_o \over a_o - \epsilon_{3,1} c_o}.
 \end{equation}
+
 The application of a strain $\epsilon_I$ to a body-centered orthorhombic
 lattice transforms it into a base-centered monoclinic lattice that however
 is $a$-unique. In order to simulate it we must rotate it so that it
@@ -937,99 +1017,315 @@ c&=&a_o \\
 \sqrt{(b_o^2+c_o^2)(1+\epsilon_{2,3}^2)-4\epsilon_{2,3}b_oc_o} 
 \sqrt{(1+\epsilon_{2,3}^2)}}.
 \end{eqnarray}
-With a rotation matrix that transforms the coordinates of a point
-in the orthorhombic Cartesian coordinates to those of the monoclinic one
-\begin{equation}
-R=\left( \begin{array}{ccc}
-0, & \cos \phi, &  -\sin \phi
-\\
-0, & \sin \phi, & \cos \phi 
-\\
-1, & 0, & 0
-\end{array}
-\right),
-\end{equation}
+The reference system of the base-centered monoclinic cell is rotated 
+with respect to the reference system of the body-centered orthorombic cell. 
+The change of coordinates can be written as above with the rotation matrix 
+$R^F$ and
 and 
 \begin{equation}
 {\rm tg} \phi = -{\epsilon_{2,3} b_o - c_o \over b_o - \epsilon_{3,2} c_o}.
 \end{equation}
 
+\subsection{\color{web-blue} Monoclinic system}
+Applying $\epsilon_A$, $\epsilon_C$, $\epsilon_D$, $\epsilon_E$, or
+$\epsilon_G$ to a $c$-unique simple (base-centered) monoclinic cell does 
+not change its shape.
 
-%\subsection{\color{web-blue}Triclinic and Monoclinic system}
-%Let us start by considering the $c$-unique case. In this case 
-%$\epsilon_E$ changes the lattice constant $c$ into $c(1+\epsilon_{3,3})$,
-%but does not modify the shape of the unit cell.
-%Therefore changing the lattice constant $c$ of the monoclinic cell of $dc$
-%is equivalent to apply $\epsilon_E$ with $\epsilon_{3,3}=dc/c$.
-%$\epsilon_B$ changes simultaneously $a$ into $a(1+\epsilon_{1,1})$ and 
-%$b$ into $b(1+\epsilon_{1,1})$ keeping $\cos\gamma$ constant.
-%
-%Applying $\epsilon_C$ to a $c$-unique monoclinic lattice does not change
-%the Bravais lattice and the new parameters are:
-%\begin{eqnarray}
-%a&=&a_m(1+\epsilon_{1,1}), \\
-%b&=&b_m \sqrt{1+2 \epsilon_{1,1}\cos^2\gamma_m
-%+\epsilon_{1,1}^2 \cos^2\gamma_m}, \\
-%c&=&c_m \\
-%\cos\gamma &=& {(1+\epsilon_{1,1}) \cos\gamma_m \over 
-%\sqrt{1+2 \epsilon_{1,1}\cos^2\gamma_m
-%+\epsilon_{1,1}^2 \cos^2\gamma_m}},
-%\end{eqnarray}
-%where the index $m$ indicates the parameters of the unstrained lattice.
-%
-%Applying $\epsilon_D$ to a $c$-unique monoclinic lattice does not change
-%the Bravais lattice and the new parameters are:
-%\begin{eqnarray}
-%a&=&a_m, \\
-%b&=&b_m \sqrt{1+2 \epsilon_{2,2}\sin^2\gamma_m
-%+\epsilon_{2,2}^2 \sin^2\gamma_m}, \\
-%c&=&c_m \\
-%\cos\gamma &=& {\cos\gamma_m \over 
-%\sqrt{1+2 \epsilon_{2,2}\sin^2\gamma_m
-%+\epsilon_{2,2}^2 \sin^2\gamma_m}}.
-%\end{eqnarray}
-%
-%Applying $\epsilon_G$ to a $c$-unique monoclinic lattice does not change the
-%Bravais lattice and the new parameters are:
-%\begin{eqnarray}
-%a&=&a_m \sqrt{1+\epsilon_{1,2}^2}, \\
-%b&=&b_m \sqrt{(1+\epsilon_{1,2})^2
-%+4\epsilon_{1,2} \cos\gamma_m \sin\gamma_m}, \\
-%c&=&c_m \\
-%\cos\gamma &=& {\cos\gamma_m (1+\epsilon_{1,2}^2) + 2 \epsilon_{1,2} 
-%\sin \gamma_m \over \sqrt{1+\epsilon_{1,2}^2} 
-%\sqrt{(1+\epsilon_{1,2})^2+4\epsilon_{1,2} \cos\gamma_m \sin\gamma_m}}.
-%\end{eqnarray}
-%Moreover the Cartesian coordinate system is rotated and one must
-%apply a rotation of an angle $\phi$ about the $z$ axis with ${\rm tg} \phi
-%=-\epsilon_{1,2}$.
+Applying $\epsilon_A$ to a $c$-unique simple (base-centered) monoclinic 
+lattice changes
+$a_m$ to $a_m(1+\epsilon_{1,1})$, $b_m$ to $b_m(1+\epsilon_{1,1})$
+and $c_m$ to $c_m(1+\epsilon_{1,1})$ while $\cos \gamma_m$
+does not change.
 
-%Applying $\epsilon_H$ or $\epsilon_I$ to a $c$-unique monoclinic lattice 
-%transform it into a trigonal lattice with parameters that for 
+Applying $\epsilon_C$ to a $c$-unique simple (base-centered) monoclinic lattice 
+changes $a_m$, $b_m$, $c_m$, and $\cos \gamma_m$ to 
+\begin{eqnarray}
+a&=&a_m(1+\epsilon_{1,1}), \\
+b&=&b_m \sqrt{1+2 \epsilon_{1,1}\cos^2\gamma_m
++\epsilon_{1,1}^2 \cos^2\gamma_m}, \\
+c&=&c_m \\
+\cos\gamma &=& {(1+\epsilon_{1,1}) \cos\gamma_m \over 
+\sqrt{1+2 \epsilon_{1,1}\cos^2\gamma_m
++\epsilon_{1,1}^2 \cos^2\gamma_m}},
+\end{eqnarray}
 
-%\subsection{\color{web-blue}Triclinic system}
-%In this case any strain will mantain the shape of the unit cell and
-%it is interesting to apply $\epsilon_C$, $\epsilon_D$, $\epsilon_E$ and
-%the three shear strains $\epsilon_G$, $\epsilon_H$, $\epsilon_I$.
+Applying $\epsilon_D$ to a $c$-unique simple (base-centered) monoclinic lattice 
+changes $a_m$, $b_m$, $c_m$, and $\cos \gamma_m$ to 
+\begin{eqnarray}
+a&=&a_m, \\
+b&=&b_m \sqrt{1+2 \epsilon_{2,2}\sin^2\gamma_m
++\epsilon_{2,2}^2 \sin^2\gamma_m}, \\
+c&=&c_m \\
+\cos\gamma &=& {\cos\gamma_m \over 
+\sqrt{1+2 \epsilon_{2,2}\sin^2\gamma_m
++\epsilon_{2,2}^2 \sin^2\gamma_m}}.
+\end{eqnarray}
+
+Applying $\epsilon_E$ to a $c$-unique simple (base-centered) monoclinic 
+lattice changes
+only $c_m$ to $c_m(1+\epsilon_{3,3})$ while all the other crystal
+parameter do not change.
+
+Applying $\epsilon_G$ to a $c$-unique simple (base-centered) monoclinic lattice 
+changes $a_m$, $b_m$, $c_m$, and $\cos \gamma_m$ to 
+\begin{eqnarray}
+a&=&a_m \sqrt{1+\epsilon_{1,2}^2}, \\
+b&=&b_m \sqrt{1+\epsilon_{1,2}^2
++4\epsilon_{1,2} \cos\gamma_m \sin\gamma_m}, \\
+c&=&c_m, \\
+\cos\gamma &=& {\cos\gamma_m (1+\epsilon_{1,2}^2) + 2 \epsilon_{1,2} 
+\sin \gamma_m \over \sqrt{1+\epsilon_{1,2}^2}
+\sqrt{1+\epsilon_{1,2}^2+4\epsilon_{1,2} \cos\gamma_m \sin\gamma_m}}.
+\end{eqnarray}
+The reference system of the strained simple (base-centered) monoclinic 
+lattice is rotated 
+with respect to the reference system of the unstrained simple 
+(base-centered) monoclinic lattice. 
+The change of coordinates can be written as above with the rotation matrix 
+$R^E$ and ${\rm tg}\phi=-\epsilon_{1,2}$.
+
+Applying $\epsilon_H$ to a $c$-unique simple monoclinic lattice transforms
+it into a triclinic cell with parameters:
+\begin{eqnarray}
+a&=&a_m \sqrt{1+\epsilon_{1,3}^2}, \\
+b&=&b_m \sqrt{1+\epsilon_{1,3}^2 \cos^2\gamma_m}, \\
+c&=&c_m \sqrt{1+\epsilon_{1,3}^2}, \\
+\cos\alpha &=& {2 \epsilon_{1,3} \cos\gamma_m \over 
+\sqrt{1+\epsilon_{1,3}^2} \sqrt{1+\epsilon_{1,3}^2 \cos^2\gamma_m}}, \\
+\cos\beta &=& {2 \epsilon_{1,3}^2 \over 1+\epsilon_{1,3}^2}, \\
+\cos\gamma &=& {\cos\gamma_m \sqrt{1+\epsilon_{1,3}^2} \over
+\sqrt{1+\epsilon_{1,3}^2 \cos^2\gamma_m}}.
+\end{eqnarray}
+The reference system of the triclinic lattice is rotated 
+with respect to the reference system of the simple 
+monoclinic lattice. 
+The change of coordinates can be written as above with the rotation matrix 
+$R^D$ and ${\rm tg}\phi=-\epsilon_{1,3}$.
+
+Applying $\epsilon_I$ to a $c$-unique simple monoclinic lattice transforms
+it into a triclinic cell with parameters:
+\begin{eqnarray}
+a&=&a_m,  \\
+b&=&b_m \sqrt{1+\epsilon_{2,3}^2 \sin^2\gamma_m}, \\
+c&=&c_m \sqrt{1+\epsilon_{2,3}^2}, \\
+\cos\alpha &=& {2 \epsilon_{2,3} \sin\gamma_m \over 
+\sqrt{1+\epsilon_{2,3}^2} \sqrt{1+\epsilon_{2,3}^2 \sin^2\gamma_m}}, \\
+\cos\beta &=& 0, \\
+\cos\gamma &=& { \cos\gamma_m  \over
+\sqrt{1+\epsilon_{2,3}^2 \sin^2\gamma_m}}.
+\end{eqnarray}
+The reference system of the triclinic lattice is rotated 
+with respect to the reference system of the simple 
+monoclinic lattice. 
+The change of coordinates can be written as above with the rotation matrix 
+\begin{equation}
+R^G=\left( \begin{array}{ccc}
+1, & 0, & 0 \\
+0, & \cos \phi, &  -\sin \phi
+\\
+0, & \sin \phi, & \cos \phi 
+\end{array}
+\right),
+\end{equation}
+where  ${\rm tg}\phi=-\epsilon_{2,3}$.
+
+Applying $\epsilon_H$ to a $c$-unique base-centered monoclinic lattice 
+transforms it into a triclinic lattice with parameters:
+\begin{eqnarray}
+a&=&a_m \sqrt{1+\epsilon_{1,3}^2}, \\
+b&=&b_m \sqrt{1+\epsilon_{1,3}^2 \cos^2\gamma_m}, \\
+c&=&{1\over 2} \sqrt{(a_m^2+c_m^2)(1+\epsilon_{1,3}^2)+4\epsilon_{1,3}a_mc_m},\\
+\cos\alpha &=& {\cos\gamma_m (a_m (1+\epsilon_{1,3}^2)+2\epsilon_{1,3}c_m) 
+\over 
+\sqrt{1+\epsilon_{1,3}^2 \cos^2\gamma_m} \sqrt{(a_m^2+c_m^2)(1+\epsilon_{1,3}^2)+4\epsilon_{1,3}a_mc_m}}, \\
+\cos\beta &=& {a_m (1+\epsilon_{1,3}^2)+2\epsilon_{1,3}c_m 
+\over 
+\sqrt{1+\epsilon_{1,3}^2} \sqrt{(a_m^2+c_m^2)(1+\epsilon_{1,3}^2)+4\epsilon_{1,3}a_mc_m}}, \\
+\cos\gamma &=& {\cos\gamma_m \sqrt{1+\epsilon_{1,3}^2} \over
+\sqrt{1+\epsilon_{1,3}^2 \cos^2\gamma_m}}.
+\end{eqnarray}
+The reference system of the triclinic lattice is rotated 
+with respect to the reference system of the base-centered
+monoclinic lattice. 
+The change of coordinates can be written as above with the rotation matrix 
+$R^D$ and ${\rm tg}\phi=-\epsilon_{1,3}$.
+
+Applying $\epsilon_I$ to a $c$-unique base-centered monoclinic lattice 
+transforms it into a triclinic lattice with parameters:
+\begin{eqnarray}
+a&=&a_m, \\
+b&=&b_m \sqrt{1+\epsilon_{2,3}^2 \sin^2\gamma_m}, \\
+c&=&{1\over 2} \sqrt{a_m^2+c_m^2(1+\epsilon_{2,3}^2)},\\
+\cos\alpha &=& {a_m\cos\gamma_m +2\epsilon_{2,3}c_m \sin \gamma_m 
+\over 
+\sqrt{1+\epsilon_{2,3}^2 \sin^2\gamma_m} 
+\sqrt{a_m^2+c_m^2(1+\epsilon_{2,3}^2)}}, \\
+\cos\beta &=& {a_m  
+\over 
+\sqrt{a_m^2+c_m^2(1+\epsilon_{2,3}^2)}}, \\
+\cos\gamma &=& {\cos\gamma_m \over
+\sqrt{1+\epsilon_{2,3}^2 \sin^2\gamma_m}}.
+\end{eqnarray}
+The reference system of the triclinic lattice is rotated 
+with respect to the reference system of the base-centered
+monoclinic lattice. 
+The change of coordinates can be written as above with the rotation matrix 
+$R^G$ and ${\rm tg}\phi=-\epsilon_{2,3}$.
+
+Applying $\epsilon_A$, $\epsilon_C$, $\epsilon_D$, $\epsilon_E$, and
+$\epsilon_H$ to a $b$-unique simple (base-centered) monoclinic lattice
+does not change its shape.
+
+Applying $\epsilon_A$ to a $b$-unique simple (base-centered) monoclinic 
+lattice changes
+$a_m$ to $a_m(1+\epsilon_{1,1})$, $b_m$ to $b_m(1+\epsilon_{1,1})$
+and $c_m$ to $c_m(1+\epsilon_{1,1})$ while $\cos \beta_m$
+does not change.
+
+Applying $\epsilon_C$ to a $b$-unique simple (base-centered) monoclinic lattice 
+changes $a_m$, $b_m$, $c_m$, and $\cos \beta_m$ to 
+\begin{eqnarray}
+a&=&a_m(1+\epsilon_{1,1}), \\
+b&=&b_m \\
+c&=&c_m \sqrt{1+2 \epsilon_{1,1}\cos^2\beta_m
++\epsilon_{1,1}^2 \cos^2\beta_m}, \\
+\cos\beta &=& {(1+\epsilon_{1,1}) \cos\beta_m \over 
+\sqrt{1+2 \epsilon_{1,1}\cos^2\beta_m
++\epsilon_{1,1}^2 \cos^2\beta_m}},
+\end{eqnarray}
+
+Applying $\epsilon_D$ to a $b$-unique simple (base-centered) monoclinic 
+lattice changes
+only $b_m$ to $b_m(1+\epsilon_{2,2})$ while all the other crystal
+parameter do not change.
+
+Applying $\epsilon_E$ to a $b$-unique simple (base-centered) monoclinic lattice 
+changes $a_m$, $b_m$, $c_m$, and $\cos \beta_m$ to 
+\begin{eqnarray}
+a&=&a_m, \\
+b&=&b_m \\
+c&=&c_m \sqrt{1+2 \epsilon_{3,3}\sin^2\beta_m
++\epsilon_{3,3}^2 \sin^2\beta_m}, \\
+\cos\beta &=& {\cos\beta_m \over \sqrt{1+2 \epsilon_{3,3}\sin^2\beta_m
++\epsilon_{3,3}^2 \sin^2\beta_m}}.
+\end{eqnarray}
+
+Applying $\epsilon_H$ to a $b$-unique simple (base-centered) monoclinic lattice 
+changes $a_m$, $b_m$, $c_m$, and $\cos \beta_m$ to 
+\begin{eqnarray}
+a&=&a_m \sqrt{1+\epsilon_{1,3}^2}, \\
+b&=&b_m, \\
+c&=&c_m \sqrt{1+\epsilon_{1,3}^2
++4\epsilon_{1,3} \cos\beta_m \sin\beta_m}, \\
+\cos\beta &=& {\cos\beta_m (1+\epsilon_{1,3}^2) + 2 \epsilon_{1,3} 
+\sin \beta_m \over \sqrt{1+\epsilon_{1,3}^2}
+\sqrt{1+\epsilon_{1,3}^2+4\epsilon_{1,3} \cos\beta_m \sin\beta_m}}.
+\end{eqnarray}
+The reference system of the strained simple (base-centered) monoclinic 
+lattice is rotated 
+with respect to the reference system of the unstrained simple 
+(base-centered) monoclinic lattice. 
+The change of coordinates can be written as above with the rotation matrix 
+$R^D$ and ${\rm tg}\phi=-\epsilon_{1,3}$.
+
+Applying $\epsilon_G$ to a $b$-unique simple monoclinic lattice transforms
+it into a triclinic lattice with parameters:
+\begin{eqnarray}
+a&=&a_m \sqrt{1+\epsilon_{1,2}^2}, \\
+b&=&b_m \sqrt{1+\epsilon_{1,2}^2}, \\
+c&=&c_m \sqrt{1+\epsilon_{1,2}^2 \cos^2\beta_m}, \\
+\cos\alpha &=& {2 \epsilon_{1,2} \cos\beta_m \over 
+\sqrt{1+\epsilon_{1,2}^2} \sqrt{1+\epsilon_{1,2}^2 \cos^2\beta_m}}, \\
+\cos\beta &=& {\cos\beta_m \sqrt{1+\epsilon_{1,2}^2} \over
+\sqrt{1+\epsilon_{1,2}^2 \cos^2\beta_m}}, \\
+\cos\gamma &=& {2 \epsilon_{1,2}^2 \over 1+\epsilon_{1,2}^2}.
+\end{eqnarray}
+The reference system of the triclinic lattice is rotated 
+with respect to the reference system of the simple 
+monoclinic lattice. 
+The change of coordinates can be written as above with the rotation matrix 
+$R^E$ and ${\rm tg}\phi=-\epsilon_{1,2}$.
+
+Applying $\epsilon_I$ to a $b$-unique simple monoclinic lattice transforms
+it into a triclinic lattice with parameters:
+\begin{eqnarray}
+a&=&a_m,  \\
+b&=&b_m \sqrt{1+\epsilon_{2,3}^2}, \\
+c&=&c_m \sqrt{1+\epsilon_{2,3}^2 \sin^2\beta_m}, \\
+\cos\alpha &=& {2 \epsilon_{2,3} \sin\beta_m \over 
+\sqrt{1+\epsilon_{2,3}^2} \sqrt{1+\epsilon_{2,3}^2 \sin^2\beta_m}}, \\
+\cos\beta &=& { \cos\beta_m  \over
+\sqrt{1+\epsilon_{2,3}^2 \sin^2\beta_m}}, \\
+\cos\gamma &=& 0. 
+\end{eqnarray}
+The reference system of the triclinic lattice is rotated 
+with respect to the reference system of the simple 
+monoclinic lattice. 
+The change of coordinates can be written as above with the rotation matrix 
+$R^G$ and ${\rm tg}\phi=-\epsilon_{2,3}$.
+
+Applying $\epsilon_G$ to a $b$-unique base-centered monoclinic lattice 
+transforms it into a triclinic lattice with parameters:
+\begin{eqnarray}
+a&=&a_m \sqrt{1+\epsilon_{1,2}^2}, \\
+b&=&{1\over 2} \sqrt{(a_m^2+b_m^2)(1+\epsilon_{1,2}^2)+4\epsilon_{1,2}a_mb_m},\\
+c&=&c_m \sqrt{1+\epsilon_{1,2}^2 \cos^2\beta_m}, \\
+\cos\alpha &=& {\cos\beta_m (a_m (1+\epsilon_{1,2}^2)+2\epsilon_{1,2}b_m) 
+\over 
+\sqrt{1+\epsilon_{1,2}^2 \cos^2\beta_m} \sqrt{(a_m^2+b_m^2)(1+\epsilon_{1,2}^2)+4\epsilon_{1,2}a_mb_m}}, \\
+\cos\beta &=& {\cos\beta_m \sqrt{1+\epsilon_{1,2}^2} \over
+\sqrt{1+\epsilon_{1,2}^2 \cos^2\beta_m}}, \\
+\cos\gamma &=& {a_m (1+\epsilon_{1,2}^2)+2\epsilon_{1,2}b_m 
+\over 
+\sqrt{1+\epsilon_{1,2}^2} \sqrt{(a_m^2+b_m^2)(1+\epsilon_{1,2}^2)+4\epsilon_{1,2}a_mb_m}}.
+\end{eqnarray}
+The reference system of the triclinic lattice is rotated 
+with respect to the reference system of the base-centered
+monoclinic lattice. 
+The change of coordinates can be written as above with the rotation matrix 
+$R^E$ and ${\rm tg}\phi=-\epsilon_{1,2}$.
+
+Applying $\epsilon_I$ to a $b$-unique base-centered monoclinic lattice 
+transforms it into a triclinic lattice with parameters:
+\begin{eqnarray}
+a&=&a_m, \\
+b&=&{1\over 2} \sqrt{a_m^2+b_m^2(1+\epsilon_{2,3}^2)},\\
+c&=&c_m \sqrt{1+\epsilon_{2,3}^2 \sin^2\beta_m}, \\
+\cos\alpha &=& {a_m\cos\beta_m +2\epsilon_{2,3}b_m \sin \beta_m 
+\over 
+\sqrt{1+\epsilon_{2,3}^2 \sin^2\beta_m} 
+\sqrt{a_m^2+b_m^2(1+\epsilon_{2,3}^2)}}, \\
+\cos\beta &=& {\cos\beta_m \over
+\sqrt{1+\epsilon_{2,3}^2 \sin^2\beta_m}}, \\
+\cos\gamma &=& {a_m  
+\over 
+\sqrt{a_m^2+b_m^2(1+\epsilon_{2,3}^2)}}.
+\end{eqnarray}
+The reference system of the triclinic lattice is rotated 
+with respect to the reference system of the base-centered
+monoclinic lattice. 
+The change of coordinates can be written as above with the rotation matrix 
+$R^G$ and ${\rm tg}\phi=-\epsilon_{2,3}$.
+
+\subsection{\color{web-blue}Triclinic system}
+Any strain applied to a triclinic system will keep the shape of the
+unit cell. Only the crystal parameters change, but there is no advantage
+to use a rotated triclinic cell with respect to the cell obtained
+simply applying the strain directly to the primitive vectors. Therefore
+we do not discuss this case any further.
 
 \subsection{\color{web-blue}Hexagonal system}
-There are two strains that maintain the shape of the hexagonal cell,
-$\epsilon_B$ and $\epsilon_E$.
-$\epsilon_B$ changes the lattice constant $a$ into $a(1+\epsilon_{1,1})$. 
-Therefore changing the lattice constant $a$ of the hexagonal cell of $da$
-is equivalent to apply $\epsilon_B$ with $\epsilon_{1,1}=da/a$.
-$\epsilon_E$ changes the lattice constant $c$ into $c(1+\epsilon_{3,3})$. 
-Therefore changing the lattice constant $c$ of the hexagonal cell of $dc$
-is equivalent to apply $\epsilon_E$ with $\epsilon_{3,3}=dc/c$.
 
-A strain $\epsilon_C$ transforms the hexagonal cell into a base-centered 
-orthorhombic cell with:
-\begin{eqnarray}
-a&=&a_h (1+\epsilon_{1,1}), \\
-b&=&a_h \sqrt{3}, \\
-c&=&c_h.
-\end{eqnarray}
-Similarly the strain $\epsilon_{B'}$ transforms the hexagonal cell into
+Applying $\epsilon_A$, $\epsilon_B$, or $\epsilon_E$, to an hexagonal cell 
+does not change its shape.
+Applying $\epsilon_A$, $a_h$ becomes $a_h(1+\epsilon_{1,1})$ and
+$c_h$ becomes $c_h(1+\epsilon_{1,1})$ so the ratio $c_h/a_h$ does not
+change.
+Applying $\epsilon_B$, $a_h$ becomes $a_h(1+\epsilon_{1,1})$ and
+$c_h$ does not change, while applying $\epsilon_E$, $c_h$ 
+becomes $c_h(1+\epsilon_{3,3})$ and $a_h$ does not change.
+
+Applying $\epsilon_{B'}$ to an hexagonal lattice, it becomes
 a base-centered orthorhombic cell with:
 \begin{eqnarray}
 a&=&a_h (1+\epsilon_{1,1}), \\
@@ -1037,48 +1333,104 @@ b&=&a_h \sqrt{3}, \\
 c&=&c_h (1+\epsilon_{1,1}).
 \end{eqnarray}
 
-Of interest is also the strain $\epsilon_H$ that transforms the hexagonal
-cell in a base-centered $b$-unique monoclinic cell with
+Applying $\epsilon_C$ to an hexagonal lattice, it becomes a base-centered 
+orthorhombic lattice with:
+\begin{eqnarray}
+a&=&a_h (1+\epsilon_{1,1}), \\
+b&=&a_h \sqrt{3}, \\
+c&=&c_h.
+\end{eqnarray}
+
+Applying $\epsilon_H$ to an hexagonal lattice, it becomes a base-centered 
+$b$-unique monoclinic cell with
 \begin{eqnarray}
 a&=&a_h \sqrt{1 + \epsilon_{1,3}^2}, \\
 b&=&a_h \sqrt{3}, \\
 c&=&c_h \sqrt{1 + \epsilon_{1,3}^2}, \\
 \cos\alpha &=& {2 \epsilon_{1,3} \over 1+\epsilon_{1,3}^2}.
 \end{eqnarray}
-Furthermore due to the definition of the direct lattice vectors of the 
-base-centered monoclinic cell, since ${\bf a}_1$ and ${\bf a}_2$ are 
-in the $xy$ plane we must make a small rotation about the $y$ axis of an angle 
-${\rm tg} \phi = - \epsilon_{1,3}$.
+The reference system of the base-centered monoclinic cell is rotated 
+with respect to the reference system of the hexagonal cell. 
+The change of coordinates can be written as above with the rotation matrix 
+$R^D$ and ${\rm tg}\phi=-\epsilon_{1,3}$.
 
 \subsection{\color{web-blue}Trigonal system}
-A isotropic strain $\epsilon_A$ keeps the rhombohedral shape and
-changes the length of each primitive vector to
-$a(1+\epsilon_{1,1})$. Conversely a change of the lattice constant
-$a$ of the rhombohedral cell of $da$ corresponds to apply a uniform strain
-$\epsilon_A$ with $\epsilon_{1,1}=da/a$.
-If we apply a strain $\epsilon_M$, the cell remains rhombohedral, but both $a$ 
-and $\cos\alpha$ will change.
-It is simple to show that 
+
+Applying $\epsilon_A$ or $\epsilon_E$ to a rhombohedral lattice does
+not change its shape. 
+
+Applying $\epsilon_A$ changes $a_r$ to $a_r (1+\epsilon_{1,1})$ while the
+rhombohedral angle does not change.
+
+Applying $\epsilon_E$ changes both $a_r$ and the rhombohedral angle
+$\alpha_r$. We have 
 \begin{eqnarray}
-a'&=&a \sqrt{(1+\epsilon_{1,1})^2 \sin^2\theta+
-(1+\epsilon_{3,3})^2\cos^2\theta}  \\
-{\rm tan} \theta'&=& {(1+\epsilon_{1,1}) \sin \theta \over
-(1+\epsilon_{3,3}) \cos \theta}
+a&=&a_t \sqrt{\sin^2\theta_r + (1 + \epsilon_{1,1})^2 \cos^2\theta_r}, \\
+\cos\alpha &=& {
+2(1 + \epsilon_{1,1})^2 \cos^2\theta_r -\sin^2\theta_r  \over
+2 \left[\sin^2\theta_r+ (1 + \epsilon_{1,1})^2 \cos^2\theta_r\right]}
 \end{eqnarray}
-while the rhombohedral angle is linked to $\theta'$ by the relation
-$\cos\alpha=-3/2 \sin^2 \theta'+1$. Conversely, if we change $\cos \alpha$
-to $\cos\alpha+d \cos\alpha$, we are changing $\theta$ to $\theta'$ that
-can be calculated for instance as $\cos \theta'=\sqrt{2\over 3} 
-\sqrt{1-\cos\alpha-d\cos\alpha}$. Now requiring $a'=a$ and solving
-for $\epsilon_{3,3}$ and $\epsilon_{1,1}$ we obtain:
+where 
+$\sin{\theta_r}=\sqrt{2\over 3}\sqrt{1-\cos{\alpha_r}}$
+and $\cos{\theta_r}=\sqrt{1\over 3}\sqrt{1 + 2 \cos{\alpha_r}}$. \\
+
+Applying $\epsilon_C$ to a rhombohedral lattice transforms it into a
+base-centered $b$-unique monoclinic lattice with parameters:
 \begin{eqnarray}
-1+\epsilon_{3,3} &=& {\cos\theta \over \sqrt{{\rm tan}^2 \theta'+1}} \\
-1+\epsilon_{1,1} &=& (1+\epsilon_{3,3}){\cos\theta \over \sin\theta} 
-{\rm tan} \theta' 
+a&=&a_r \sqrt{1 + 3 \cos^2 \theta_r}, \\
+b&=&a_r \sqrt{3} (1 + \epsilon_{1,1}) \sin \theta_r, \\
+c&=&a_r, \\
+\cos\beta &=& {3 \cos^2 \theta_r -1 \over \sqrt{1 + 3 \cos^2 \theta_r} }
 \end{eqnarray}
-So a change of the angle $\alpha$ is equivalent to apply a strain
-$\epsilon_M$.
- 
+The reference system of the base-centered monoclinic lattice is rotated 
+with respect to the reference system of the rhombohedral lattice.
+The change of coordinates can be written as above with the rotation matrix 
+\begin{equation}
+R^H=\left( \begin{array}{ccc}
+0, & -{\sin\theta_r \over \sqrt{1 + 3 \cos^2 \theta_r}}, &  {2\cos\theta_r \over \sqrt{1 + 3 \cos^2 \theta_r}}\\
+1, & 0, & 0  
+\\
+0, & {2\cos\theta_r \over \sqrt{1 + 3 \cos^2 \theta_r}}, & 
+{\sin\theta_r \over \sqrt{1 + 3 \cos^2 \theta_r}} 
+\end{array}
+\right).
+\end{equation}
+
+Applying $\epsilon_I$ to a rhombohedral lattice transforms it into a
+base-centered $b$-unique monoclinic lattice with parameters:
+\begin{eqnarray}
+a&=&a_r \sqrt{(1+\epsilon_{2,3}^2)(1 + 3 \cos^2 \theta_r)-
+8\epsilon_{2,3}\sin \theta_r\cos \theta_r}, \\
+b&=&a_r \sqrt{3}\sin \theta_r, \\
+c&=&a_r \sqrt{1+\epsilon_{2,3}^2+4\epsilon_{2,3}\sin \theta_r\cos \theta_r}, \\
+\cos\beta &=& {(1+\epsilon_{2,3}^2) (3 \cos^2 \theta_r-1) 
++ 2 \epsilon_{2,3} \sin \theta_r\cos \theta_r
+\over \sqrt{(1+\epsilon_{2,3}^2)(1 + 3 \cos^2 \theta_r)-
+8\epsilon_{2,3}\sin \theta_r\cos \theta_r} \sqrt{1+\epsilon_{2,3}^2+4\epsilon_{2,3}\sin \theta_r\cos \theta_r}} 
+\end{eqnarray}
+
+The reference system of the base-centered monoclinic lattice is rotated 
+with respect to the reference system of the rhombohedral lattice.
+The change of coordinates can be written as above with the rotation matrix 
+\begin{equation}
+R^I=\left( \begin{array}{ccc}
+0, & a, &  b\\
+1, & 0, & 0  
+\\
+0, & b, & -a 
+\end{array}
+\right)
+\end{equation}
+where
+\begin{eqnarray}
+a&=& {2 \epsilon_{2,3} \cos \theta_r - \sin \theta_r \over 
+\sqrt{(1+\epsilon_{2,3}^2)(1 + 3 \cos^2 \theta_r)-
+8\epsilon_{2,3}\sin \theta_r\cos \theta_r}}, \\
+b&=& {2 \cos \theta_r - \epsilon_{2,3} \sin \theta_r \over 
+\sqrt{(1+\epsilon_{2,3}^2)(1 + 3 \cos^2 \theta_r)-
+8\epsilon_{2,3}\sin \theta_r\cos \theta_r}} 
+\end{eqnarray}
+
 \newpage
 \section{\color{coral}The stress tensor}
 
@@ -1222,19 +1574,35 @@ We can write
 \alpha_{i} = {d \epsilon_{i}(T) \over  d T }.
 \end{equation}
 We have only the crystal parameters $\zeta_k (T)$ and their derivatives
-with respect to $T$. In general these are not sufficient to deduce 
-${d \epsilon_{i}(T) \over  d T }$ for an arbitrary strain, but the strains
-induced by temperature must conserve the shape of the unit cell, so
-${d \zeta_k (T) \over d T}$ suffice to calculate the physically
-interesting strains. We discuss this point separately for each crystal
-system.
+with respect to $T$. These are sufficient to deduce the thermal expansion
+$\alpha_{\bf l}(T)$ where ${\bf l}$ is a versor ${\bf l}=(l_1,l_2,l_3)$ 
+perpendicular to a set of lattice planes. Considering 
+a given set of lattice planes we can write the thermal expansion in
+the direction perpendicular to the lattice planes in terms of the tensor 
+components $\alpha_{i,j}$
+of the thermal expansion as:
+\begin{equation}
+\alpha_{{\bf l}} = \sum_{ij} \alpha_{i,j} l_i l_j.
+\end{equation}
+Along the direction ${\bf l}$ we can write:
+\begin{equation}
+\alpha_{{\bf l}} = {1 \over d_{\bf l}} {d d_{\bf l} \over d T}
+\end{equation}
+where $d_{\bf l}$ is the interplanar distance for that set of lattice planes.
+In the most complex case, for a triclinic solid we need six directions
+to set up a linear system whose solution are the six independent components
+of the thermal expansion tensor, while for the other crystal systems 
+the thermal expansion can be determined in a simpler manner.
+We discuss this point separately for each crystal system.
 
 \subsection{\color{web-blue}Cubic system}
-In the cubic system $k=1$ and $\zeta_1=a$. By symmetry the strain that can
-be induced by a change of temperature is only $\epsilon_A$ and we have the 
-conditions ${d\epsilon_1}={d\epsilon_2}={d\epsilon_3}={da\over a(T)}$.
-All the other strains are zero. Therefore only $\alpha_1$, $\alpha_2$, 
-and $\alpha_3$ are nonvanishing and we have
+In the cubic system $k=1$ and $\zeta_1=a$. 
+The thermal expansion tensor is diagonal and the only nonzero components
+are all equal: $\alpha_1=\alpha_2=\alpha_3$. We can consider the 
+lattice planes perpendicular to ${\bf l}=(0,0,1)$ and the thermal expansion
+in the direction ${\bf l}$ is $\alpha_3$. The distance between planes
+$d_{\bf l}=a$ in the simple cubic and $d_{\bf l}=a/2$ in the face-centered
+and the body-centered cubic lattices so in all cases:  
 \begin{equation}
 \alpha_{i} =  {1\over a(T) } {d a(T) \over dT}.
 \end{equation}
@@ -1242,15 +1610,21 @@ and $\alpha_3$ are nonvanishing and we have
 \subsection{\color{web-blue}Tetragonal and hexagonal systems}
 In the tetragonal and hexagonal systems $k=2$, $\zeta_1=a$, $\zeta_2=c/a$.
 The only nonzero components of the thermal expansion are 
-$\alpha_{1}=\alpha_{2}$ and $\alpha_{3}$. A change of $a$ 
-corresponds to a strain $d\epsilon_1=d\epsilon_2={da\over a}$ while
-a change of $c$ corresponds to a strain 
-$d\epsilon_3 = {dc \over c}$.
-Therefore from the definition of the thermal expansion we have
-\begin{eqnarray}
-\alpha_1 &=& \alpha_2= {1\over a(T)} {d a \over dT}, \\ 
-\alpha_3 &=& {1\over c(T)} {d c \over dT}. 
-\end{eqnarray}
+$\alpha_{1}=\alpha_{2}$ and $\alpha_{3}$. We can consider the
+lattice planes perpendicular to ${\bf l}=(1,0,0)$ whose distance
+is $d_{\bf l}=a$ in the simple tetragonal lattice and $d_{\bf l}=a/2$ in 
+centered tetragonal and hexagonal case. 
+For this direction we have $\alpha_{\bf l}=\alpha_1$ and 
+\begin{equation}
+\alpha_1 = {1\over a(T)} {d a \over dT}
+\end{equation}
+Then we can consider the planes perpendicular to ${\bf l}=(0,0,1)$.
+The distance between these planes is $d_{\bf l}=c$ for the simple
+tetragonal and hexagonal lattices and $d_{\bf l}=c/2$ for the 
+centered tetragonal lattice. Since $\alpha_{\bf l}=\alpha_3$ we have
+\begin{equation}
+\alpha_3 = {1\over c(T)} {d c \over dT}. 
+\end{equation}
 Choosing $a$ and $c/a$ as parameters,
 we have to use the equations $c(T)=a(T) (c/a(T))$ and 
 \begin{equation}
@@ -1263,19 +1637,12 @@ and we have
 \end{equation}
 
 \subsection{\color{web-blue}Trigonal system}
-In the trigonal system $k=2$, $\zeta_1=a$, $\zeta_2=\cos\alpha$. The 
-strain allowed by symmetry is $\epsilon_M$. The thermal expansion tensor
-has three diagonal components and $\alpha_1=\alpha_2$. We can use the
-link between the hexagonal and the rhombohedral cell. A change of the 
-hexagonal parameter $a_h$ corresponds to a strain 
-${d\epsilon_1}={da_h \over a_h}$ and a change of $c_h$ corresponds to a
-strain ${d\epsilon_3}={d c_h \over c_h}$. Therefore 
-we have
-\begin{eqnarray}
-\alpha_1 &=& \alpha_2= {1\over a_h(T)} {d a_h \over dT}, \\
-\alpha_3 &=& {1\over c_h(T)} {dc_h \over d T}
-\end{eqnarray}
-Choosing as parameters $a$ and $\cos \alpha$ we must use the relationships:
+In the trigonal system $k=2$, $\zeta_1=a$, $\zeta_2=\cos\alpha$. 
+The thermal expansion tensor has three diagonal components 
+$\alpha_1=\alpha_2$ and $\alpha_3$. We can consider the rhombohedral
+lattice as a centered hexagonal lattice with three points per cell
+and parameters $a_h$ and $c_h$ related to the rhobohedral parameters
+by
 \begin{equation}
 a_h= a \sqrt{2} \sqrt{1-\cos\alpha}
 \end{equation}
@@ -1283,7 +1650,19 @@ and
 \begin{equation}
 c_h= a \sqrt{3} \sqrt{1+2\cos\alpha}
 \end{equation}
-and the corresponding temperature derivatives:
+Considering first the planes perpendicular to the direction
+${\bf l}=(1,0,0)$ we have that the distance between planes is
+$d_{\bf l}=a_h$ and $\alpha_{\bf l}=\alpha_1$. Therefore
+\begin{equation}
+\alpha_1 = {1\over a_h(T)} {d a_h \over dT},
+\end{equation}
+Then we can consider the planes perpendicular to the direction
+${\bf l}=(0,0,1)$ where the distance between planes is
+$d_{\bf l}=c_h/3$ and $\alpha_{\bf l}=\alpha_3$. Therefore
+\begin{equation}
+\alpha_3 = {1\over c_h(T)} {dc_h \over d T}.
+\end{equation}
+Choosing as parameters $a$ and $\cos \alpha$ we must use the relationships:
 \begin{equation}
 {d a_h \over d T}= {a_h \over a} {d a \over d T} - {a_h \over 2(1-\cos\alpha)}{d \cos\alpha \over d T}
 \end{equation}
@@ -1301,22 +1680,21 @@ to obtain
 In the orthorhombic system $k=3$, $\zeta_1=a$, $\zeta_2=b/a$, 
 $\zeta_3=c/a$. The nonzero components of the thermal expansion are 
 $\alpha_{1}$, $\alpha_{2}$, and $\alpha_{3}$. 
-A change of $a$ corresponds to a strain ${d\epsilon_1}={da\over a(T)}$,  
-a change of $b$ to a strain ${d\epsilon_2}={db\over b(T)}$,  
-and a chance of $c$ to a strain ${d\epsilon_3}={dc\over c(T)}$. 
-Therefore from the definition of thermal expansion we have:  
+Reasoning as in the previous cases and choosing as directions
+${\bf l}=(1,0,0)$, ${\bf l}=(0,1,0)$ and ${\bf l}=(0,0,1)$ we find:  
 \begin{eqnarray}
 \alpha_{1} &=&  {1\over a(T) } {d a \over dT}, \\ 
 \alpha_{2} &=&  {1\over b(T) } {d b \over dT}, \\
 \alpha_{3} &=&  {1\over c(T) } {d c \over dT}.
 \end{eqnarray}
+which is valid for the simple orthorombic lattice as well as for the
+base-centered, the face-centered, and the body-centered orthorombic lattices.
 Choosing $a$, $b/a$, and $c/a$ as parameters we find:
 \begin{eqnarray}
 \alpha_1 &=& {1\over a(T)} {d a \over dT}, \\
 \alpha_2 &=& {1\over a(T)} {da \over d T}  + {1\over b/a(T)} {d b/a \over dT}, \\
 \alpha_3 &=& {1\over a(T)} {da \over d T}  + {1\over c/a(T)} {d c/a \over dT}.
 \end{eqnarray}
-
 
 %\subsection{\color{web-blue}Monoclinic systems}
 %In the monoclinic system $k=4$, $\zeta_1=a$, $\zeta_2=b$, $\zeta_3=c$, 
@@ -1326,6 +1704,8 @@ Choosing $a$, $b/a$, and $c/a$ as parameters we find:
 %\alpha_{3,3}= {1\over c } {d c \over dT}
 %\end{equation}
 %For the other two.
+
+%\subsection{\color{web-blue}Triclinic systems}
 
 \newpage
 \section{\color{coral}The heat capacity}

@@ -29,7 +29,7 @@ USE thermo_sym,        ONLY : laue
 !  library helper modules
 !
 USE elastic_constants, ONLY : epsilon_voigt, sigma_geo, epsilon_geo
-USE strain_mod,        ONLY : apply_strain_adv, trans_epsilon
+USE strain_mod,        ONLY : set_strain_adv, trans_epsilon
 
 IMPLICIT NONE
 INTEGER, INTENT(OUT) :: nwork
@@ -59,7 +59,7 @@ SELECT CASE (laue)
          ENDIF
       ELSE
          CALL errore('set_elastic_cons_work',&
-                                   'Bravais lattice not available',1)
+                              'Uncorrect lattice for cubic system',1)
       ENDIF
    CASE (19,23)
 !
@@ -82,7 +82,7 @@ SELECT CASE (laue)
          ENDIF
       ELSE
          CALL errore('set_elastic_cons_work',&
-                                   'Bravais lattice not available',ibrav_save)
+                       'Uncorrect lattice for hexagonal system',ibrav_save)
       ENDIF
    CASE (18,22)
 !
@@ -107,7 +107,7 @@ SELECT CASE (laue)
          ENDIF
       ELSE
          CALL errore('set_elastic_cons_work',&
-                                   'Bravais lattice not correct',ibrav_save)
+                       'Uncorrect lattice for tetragonal system',ibrav_save)
       ENDIF
    CASE (20)
 !
@@ -138,28 +138,34 @@ SELECT CASE (laue)
          ENDIF
       ELSE
          CALL errore('set_elastic_cons_work',&
-                    'Bravais lattice and Laue class not compatible',ibrav_save)
+                    'Uncorrect lattice for orthorombic system',ibrav_save)
       ENDIF
    CASE (25,27)
 !
 !   D_3d and S_6 Trigonal system. Only the standard algorithm is available
 !
       IF (ibrav_save==5) THEN
-         IF (elastic_algorithm=='standard') THEN
+         IF (elastic_algorithm=='standard'&
+                       .OR.elastic_algorithm=='advanced') THEN
             nstep = 3
             strain_list(1) = 'C '
             strain_list(2) = 'E '
             strain_list(3) = 'I '
          END IF
+      ELSE
+         CALL errore('set_elastic_cons_work',&
+                    'Uncorrect lattice for trigonal system',ibrav_save)
       END IF
    CASE (16)
 !
-!   C_2h. Monoclinic system. Only the standard algorithm is available
+!   C_2h. Monoclinic system. Only the standard or advanced algorithm 
+!         are available
 !
       IF (ibrav_save==12.OR.ibrav_save==13.OR.ibrav_save==-12 &
                                           .OR.ibrav_save==-13) THEN
          ! both b and c-unique
-         IF (elastic_algorithm=='standard') THEN
+         IF (elastic_algorithm=='standard' &
+                .OR.elastic_algorithm=='advanced') THEN
             nstep = 6
             strain_list(1) = 'C '
             strain_list(2) = 'D '
@@ -168,6 +174,9 @@ SELECT CASE (laue)
             strain_list(5) = 'H '
             strain_list(6) = 'I '
          END IF
+      ELSE
+         CALL errore('set_elastic_cons_work',&
+                    'Uncorrect lattice for monoclinic system',ibrav_save)
       END IF
 
    CASE (2)
@@ -184,8 +193,10 @@ SELECT CASE (laue)
             strain_list(5) = 'H '
             strain_list(6) = 'I '
          END IF
+      ELSE
+         CALL errore('set_elastic_cons_work',&
+                    'Uncorrect lattice for triclinic system',ibrav_save)
       END IF
- 
    CASE DEFAULT
       CALL errore('set_elastic_cons_work','Laue class not available',1)
 END SELECT
@@ -209,7 +220,7 @@ DO istep=1,nstep
       IF (MOD(ngeo_strain,2)==1 .AND. igeo==(ngeo_strain/2 + 1)) epsil=epsil &
                                                           -epsilon_0
 
-      CALL apply_strain_adv(strain_list(istep), ibrav_save, celldm0, &
+      CALL set_strain_adv(strain_list(istep), ibrav_save, celldm0, &
            epsil, epsilon_voigt(1,base_ind+igeo), ibrav_geo(base_ind+igeo), &
            celldm_geo(1,base_ind+igeo), rot_mat(1,1,base_ind+igeo) )
    ENDDO
