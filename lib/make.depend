@@ -80,9 +80,10 @@ space_groups.o : ../../Modules/kind.o
 space_groups.o : lattices.o
 space_groups.o : linear_solvers.o
 space_groups.o : point_group.o
-strain.o : ../../Modules/invmat.o
+strain.o : ../../Modules/constants.o
 strain.o : ../../Modules/io_global.o
 strain.o : ../../Modules/kind.o
+strain.o : rotate.o
 xrdp.o : ../../Modules/constants.o
 xrdp.o : ../../Modules/io_global.o
 xrdp.o : ../../Modules/kind.o

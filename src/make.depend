@@ -189,6 +189,7 @@ generate_k_along_lines_kz.o : ../../Modules/cell_base.o
 generate_k_along_lines_kz.o : ../../Modules/kind.o
 generate_k_along_lines_kz.o : ../../thermo_pw/lib/point_group.o
 generate_k_along_lines_kz.o : thermo_mod.o
+initialize_thermo_work.o : ../../Modules/constants.o
 initialize_thermo_work.o : ../../Modules/gvecw.o
 initialize_thermo_work.o : ../../Modules/io_global.o
 initialize_thermo_work.o : ../../Modules/ions_base.o
