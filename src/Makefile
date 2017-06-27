@@ -16,6 +16,7 @@ bands_sub.o \
 bcast_thermo_input.o \
 check_existence.o \
 check_file_exists.o \
+check_all_geometries_done.o \
 clean_dfft.o \
 clean_path.o \
 collect_everything.o \

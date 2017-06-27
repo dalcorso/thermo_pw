@@ -19,7 +19,8 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
   !
   USE kinds,          ONLY : DP
   USE thermo_mod,     ONLY : what, step_ngeo, energy_geo, ngeo, &
-                             celldm_geo, omega_geo, ibrav_geo, tot_ngeo, no_ph
+                             celldm_geo, omega_geo, ibrav_geo, tot_ngeo, no_ph,&
+                             start_geometry, last_geometry
   USE control_thermo, ONLY : lpwscf, lphonon, lev_syn_1, lev_syn_2, &
                              lph, lpwscf_syn_1, lbands_syn_1, lq2r,   &
                              ltherm, lconv_ke_test, lconv_nk_test, &
@@ -301,6 +302,8 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
         CASE DEFAULT
            CALL errore('initialize_thermo_work','what not recognized',1)
      END SELECT
+     IF (start_geometry < 1) start_geometry=1
+     IF (last_geometry > tot_ngeo) last_geometry=tot_ngeo
 !
 !  part 2
 !

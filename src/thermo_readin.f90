@@ -27,7 +27,7 @@ SUBROUTINE thermo_readin()
 !
   USE thermo_mod,           ONLY : what, ngeo, step_ngeo, reduced_grid,    &
                                    fact_ngeo, max_geometries, start_geo,   &
-                                   jump_geo
+                                   jump_geo, start_geometry, last_geometry
   USE control_thermo,       ONLY : outdir_thermo, after_disp, with_eigen,  &
                                    do_scf_relax, ltherm_dos, ltherm_freq,  &
                                    continue_zero_ibrav, find_ibrav,        &
@@ -251,6 +251,8 @@ SUBROUTINE thermo_readin()
 !   recover features
 !
                             max_geometries,                 &
+                            start_geometry,                 &
+                            last_geometry,                  &
                             max_seconds                    
 
   !
@@ -443,6 +445,8 @@ SUBROUTINE thermo_readin()
   omega_group=1
 
   max_geometries=1000000
+  start_geometry=1
+  last_geometry=1000000
   max_seconds=1.D8
 
 

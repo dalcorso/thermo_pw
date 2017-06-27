@@ -59,6 +59,9 @@ MODULE thermo_mod
                                                 ! number of geometries for
                                                 ! which phonons are calculated
                                                 ! in each run
+  INTEGER :: start_geometry, last_geometry      ! These variables control
+                                                ! which geometries are done
+                                                ! in each run
 
 END MODULE thermo_mod
 

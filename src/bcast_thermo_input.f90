@@ -50,7 +50,8 @@ SUBROUTINE bcast_thermo_input()
   USE piezoelectric_tensor, ONLY : nppl
 
   USE thermo_mod,      ONLY : what, ngeo, step_ngeo, reduced_grid, fact_ngeo, &
-                              max_geometries, start_geo, jump_geo
+                              max_geometries, start_geo, jump_geo, &
+                              start_geometry, last_geometry
   USE control_quadratic_energy, ONLY : show_fit
   USE control_quartic_energy, ONLY : lquartic, lquartic_ph, lsolve
   USE control_mur,     ONLY : vmin_input, vmax_input, deltav, nvol, lmurn
@@ -276,6 +277,8 @@ SUBROUTINE bcast_thermo_input()
 !
   CALL mp_bcast( max_seconds, meta_ionode_id, world_comm )
   CALL mp_bcast( max_geometries, meta_ionode_id, world_comm )
+  CALL mp_bcast( start_geometry, meta_ionode_id, world_comm )
+  CALL mp_bcast( last_geometry, meta_ionode_id, world_comm )
 
   RETURN
 END SUBROUTINE bcast_thermo_input

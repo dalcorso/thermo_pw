@@ -15,6 +15,10 @@ IMPLICIT NONE
 
 INTEGER :: itemp
 CHARACTER(LEN=256) :: filedata, filerap, fileout, gnu_filename, filenameps
+LOGICAL :: all_geometry_done
+
+CALL check_all_geometry_done(all_geometry_done)
+IF (.NOT.all_geometry_done) RETURN
 
 DO itemp = 1, ntemp
    IF (ltherm_dos) CALL do_ev_t(itemp)
@@ -59,6 +63,10 @@ USE internal_files_names,  ONLY : flfrq_thermo, flvec_thermo
 IMPLICIT NONE
 INTEGER :: itemp
 CHARACTER(LEN=256) :: filedata, filerap, fileout, gnu_filename, filenameps
+LOGICAL :: all_geometry_done
+
+CALL check_all_geometry_done(all_geometry_done)
+IF (.NOT.all_geometry_done) RETURN
 !
 !    Anisotropic solid. Compute only the crystal parameters as a function
 !    of temperature and the thermal expansion tensor

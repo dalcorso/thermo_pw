@@ -31,7 +31,7 @@ PROGRAM thermo_pw
 
   USE thermo_mod,       ONLY : what, ngeo, energy_geo, tot_ngeo,           &
                                ibrav_geo, celldm_geo, density, no_ph,      &
-                               max_geometries
+                               max_geometries, start_geometry, last_geometry
   USE control_thermo,   ONLY : lev_syn_1, lev_syn_2, lpwscf_syn_1,         &
                                lbands_syn_1, lph, outdir_thermo, lq2r,     &
                                lconv_ke_test, lconv_nk_test,               &
@@ -266,7 +266,7 @@ PROGRAM thermo_pw
      ph_geometries=0
      always_run=.TRUE.
      CALL start_clock( 'PHONON' )
-     DO igeom=1,tot_ngeo
+     DO igeom=start_geometry,last_geometry
         IF (no_ph(igeom)) CYCLE
         write(stdout,'(/,5x,40("%"))') 
         write(stdout,'(5x,"Computing geometry ", i5)') igeom
