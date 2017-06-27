@@ -1624,7 +1624,9 @@ geometry for which the dynamical matrices are available are
 not redone. It is possible to stop \texttt{thermo\_pw} after the 
 calculation of the phonon dispersions for a fixed number of geometries 
 by setting the input variable \texttt{max\_geometries} in the 
-\texttt{THERMO\_CONTROL} namelist. 
+\texttt{THERMO\_CONTROL} namelist or also specify exactly which geometries
+to do in a given run using the variables \texttt{start\_geometry} and
+\texttt{last\_geometry}.
 Each routine checks if a file with the same name
 as the file that it would produce is already in the working directory,
 and if this happens, it reads its content and returns. This feature cannot be
@@ -1662,7 +1664,28 @@ max_geometries : the code stops after computing the dispersions in
               max_geometries.
               Default: integer 1000000
 
+start_geometry : the code starts doing the phonons for start_geometry.
+               Default: integer 1
+
+last_geometry : the code does only the phonons for geometries with index 
+               lower than last_geometry.
+               Default: integer total number of geometries.
 \end{verbatim}
+Note that the first time that you use \texttt{start\_geometry} and 
+\texttt{last\_geometry} the codes makes a self-consistent \texttt{pw.x} 
+run for all the geometries and saves the results in the \texttt{outdir}
+directory. If for any reason the \texttt{outdir} directory is removed 
+after computing some geometries, just remove also the
+\texttt{restart} directory and the code will recreate the information
+in \texttt{outdir} but will not recalculate the dynamical matrices 
+already available. In general it is not useful to use the image parallelization
+if have not a sufficient number of processors to calculate a complete
+phonon dispersion for at least one geometry in a given run. In this case
+you need to send several jobs to compute a complete phonon dispersions.
+In this case set \texttt{start\_geometry=last\_geometry},  
+\texttt{max\_seconds} in the \texttt{thermo\_pw} input, 
+and \texttt{recover=.TRUE.} in the \texttt{ph.x} input.
+
 \newpage
 \section{\color{coral}Tools}
 
@@ -1831,34 +1854,7 @@ the {\bf k}-point meshes used in these inputs are not converged. \\
 The directory \texttt{tools\_inputs} give some examples of the inputs of
 the auxiliary \texttt{tools} programs.
 
-\newpage
-\section{\color{coral}Documentation}
 
-In addition to this user's guide, this directory contains the following
-documents:
-
-\begin{itemize}
-
-\item
-\texttt{tutorial.pdf} : a short guide that indicates where to find the
-information needed to compute a given quantity. 
-
-\item
-\texttt{point\_groups.pdf} : a description of the crystallographic point 
-groups, character tables of the irreducible representations of groups and 
-of the double point groups and tables of the projective representations, 
-for the interpretation of the color codes in the band and phonon dispersion 
-plots.
-
-\item
-\texttt{thermo.pdf} : some notes on the thermodynamic expressions implemented
-in \texttt{thermo\_pw}.
-
-\item
-\texttt{developer\_guide.pdf} : some notes on the internal logic of
-\texttt{thermo\_pw}.
-
-\end{itemize}
 
 \newpage
 \section{\color{coral}Color codes}
@@ -1955,12 +1951,13 @@ figures each one showing one quantity. The curves are in \texttt{blue}
 and the word Debye appears in the $y$ axis label.
                                             
 \item
-Equilibrium volume, bulk modulus, pressure derivative of the bulk
+Equilibrium volume, Helmhotz (or Gibbs at finite pressure) free energy, 
+bulk modulus, pressure derivative of the bulk
 modulus, isochoric heat capacity, isobaric heat capacity,
 thermal expansion, isobaric-isochoric difference of the heat capacity,    
 isoentropic-isothermal difference of the bulk modulus, and 
 average Gr\"uneisen parameter as a function of T (\texttt{lmurn=.TRUE.}). 
-This is a plot composed by nine figures, each one containing a different
+This is a plot composed by ten figures, each one containing a different
 quantity in the order given above. In \texttt{red} the quantities 
 calculated using the phonon dos, in \texttt{blue} those
 obtained by a three dimensional integral over the Brillouin zone.
@@ -1969,7 +1966,8 @@ calculated using the mode Gr\"uneisen parameters and the result is plotted in
 \texttt{green}.
 
 \item
-Crystallographic parameters, volume, thermal expansion tensor, and 
+Crystallographic parameters, volume, Helmholtz (or Gibbs at finite pressure)
+free energy, thermal expansion tensor, and 
 volume thermal expansion as a function of temperature 
 (\texttt{lmurn=.FALSE.}). The number of
 pictures in this plot depends on the crystal system. It shows $a$, 
@@ -2033,5 +2031,35 @@ are in \texttt{red}, those calculated from integration over the
 Brillouin zone are in \texttt{blue}.
 
 \end{itemize}
+
+\newpage
+\section{\color{coral}Documentation}
+
+In addition to this user's guide, this directory contains the following
+documents:
+
+\begin{itemize}
+
+\item
+\texttt{tutorial.pdf} : a short guide that indicates where to find the
+information needed to compute a given quantity. 
+
+\item
+\texttt{point\_groups.pdf} : a description of the crystallographic point 
+groups, character tables of the irreducible representations of groups and 
+of the double point groups and tables of the projective representations, 
+for the interpretation of the color codes in the band and phonon dispersion 
+plots.
+
+\item
+\texttt{thermo.pdf} : some notes on the thermodynamic expressions implemented
+in \texttt{thermo\_pw}.
+
+\item
+\texttt{developer\_guide.pdf} : some notes on the internal logic of
+\texttt{thermo\_pw}.
+
+\end{itemize}
+
 
 \end{document}

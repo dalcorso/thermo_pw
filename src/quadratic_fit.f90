@@ -183,7 +183,7 @@ SUBROUTINE quadratic_fit_t(itemp)
   USE temperature, ONLY : temp
   USE control_pressure, ONLY : pressure, pressure_kb
   USE thermodynamics, ONLY : ph_free_ener
-  USE anharmonic,  ONLY : celldm_t
+  USE anharmonic,  ONLY : celldm_t, free_e_min_t
   USE io_global,   ONLY : stdout
   USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_two_fit_extremum, &
                           write_fit_hessian, evaluate_fit_quadratic,  &
@@ -305,6 +305,7 @@ SUBROUTINE quadratic_fit_t(itemp)
      END IF
   END IF
 
+  free_e_min_t(itemp)=ymin
   CALL set_celldm_from_xmin(ibrav, degree, x_pos_min, celldm_t(1,itemp))
 
   coeff_t(1:nvar,itemp) = coeff(1:nvar)
@@ -343,7 +344,7 @@ SUBROUTINE quadratic_fit_t_ph(itemp)
                                       lsolve
   USE control_pressure, ONLY : pressure, pressure_kb
   USE ph_freq_thermodynamics, ONLY : phf_free_ener
-  USE ph_freq_anharmonic, ONLY : celldmf_t
+  USE ph_freq_anharmonic, ONLY : celldmf_t, free_e_minf_t
   USE io_global,   ONLY : stdout
   USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_two_fit_extremum, &
                           write_fit_hessian, evaluate_fit_quadratic,  &
@@ -466,6 +467,7 @@ SUBROUTINE quadratic_fit_t_ph(itemp)
      END IF
   END IF
 
+  free_e_minf_t(itemp)=ymin
   CALL set_celldm_from_xmin(ibrav, degree, x_pos_min, celldmf_t(1,itemp))
 
   DEALLOCATE(x_pos_min)
@@ -545,7 +547,7 @@ SELECT CASE (ibrav)
       DO idata=1,ndata
          x(1,idata)=celldm_geo(1,idata)
          IF (ibrav==5) THEN
-            x(2,idata)=ACOS(celldm_geo(4,idata))
+            x(2,idata)=celldm_geo(4,idata)
          ELSE
             x(2,idata)=celldm_geo(3,idata)
          ENDIF
@@ -606,7 +608,7 @@ SELECT CASE (ibrav)
    CASE(4,5,6,7)
       celldm(1)=x(1)
       IF (ibrav==5) THEN
-         celldm(4)=COS(x(2))
+         celldm(4)=x(2)
       ELSE
          celldm(3)= x(2)
       ENDIF

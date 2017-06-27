@@ -1,16 +1,20 @@
 !
-! Copyright (C) 2013-2015 Andrea Dal Corso
+! Copyright (C) 2013-2017 Andrea Dal Corso
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 SUBROUTINE write_anharmonic()
+!
+!   This routine writes on output the anharmonic quantities calculated
+!   at the volume that minimize the free energy (computed from phonon dos)
+!
 USE kinds,          ONLY : DP
 USE temperature,    ONLY : ntemp, temp
 USE thermodynamics, ONLY : ph_cv
 USE anharmonic,     ONLY : alpha_t, beta_t, gamma_t, cp_t, cv_t, b0_s, &
-                           vmin_t, b0_t, b01_t
+                           vmin_t, free_e_min_t, b0_t, b01_t
 USE control_pressure, ONLY : pressure_kb
 USE data_files,     ONLY : flanhar
 USE mp_images,      ONLY : my_image_id, root_image
@@ -34,15 +38,31 @@ filename="anhar_files/"//TRIM(flanhar)
 IF (pressure_kb /= 0.0_DP) &
    filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 
-CALL write_murn_beta(temp, vmin_t, b0_t, b01_t, beta_t, ntemp, filename)
+CALL write_ener_beta(temp, vmin_t, free_e_min_t, beta_t, ntemp, filename)
 !
-!   here auxiliary quantities calculated from the phonon dos
+!   here the bulk modulus and the gruneisen parameter
 !
-filename="anhar_files/"//TRIM(flanhar)//'.aux'
+filename="anhar_files/"//TRIM(flanhar)//'.bulk_mod'
 IF (pressure_kb /= 0.0_DP) &
    filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 
-CALL write_aux_anharm(temp, gamma_t, cv_t, cp_t, b0_t, b0_s, ntemp, filename)
+CALL write_bulk_anharm(temp, gamma_t, b0_t, b0_s, ntemp, filename)
+!
+!   here the derivative of the bulk modulus with respect to pressure
+!
+filename="anhar_files/"//TRIM(flanhar)//'.dbulk_mod'
+IF (pressure_kb /= 0.0_DP) &
+   filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+
+CALL write_dbulk_anharm(temp, b01_t, ntemp, filename)
+!
+!   here the heat capacities (constant strain and constant stress)
+!
+filename="anhar_files/"//TRIM(flanhar)//'.heat'
+IF (pressure_kb /= 0.0_DP) &
+   filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+
+CALL write_heat_anharm(temp, cv_t, cp_t, ntemp, filename)
 
 RETURN
 END SUBROUTINE write_anharmonic
@@ -52,7 +72,7 @@ USE kinds,          ONLY : DP
 USE temperature,    ONLY : ntemp, temp
 USE ph_freq_thermodynamics, ONLY : phf_cv
 USE ph_freq_anharmonic, ONLY : alphaf_t, betaf_t, gammaf_t, cpf_t, cvf_t, &
-                        b0f_s, vminf_t, b0f_t, b01f_t
+                        b0f_s, free_e_minf_t, vminf_t, b0f_t, b01f_t
 USE control_pressure, ONLY : pressure_kb
 USE data_files,     ONLY : flanhar
 USE mp_images,      ONLY : my_image_id, root_image
@@ -77,16 +97,31 @@ filename="anhar_files/"//TRIM(flanhar)//'_ph'
 IF (pressure_kb /= 0.0_DP) &
    filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 
-CALL write_murn_beta(temp, vminf_t, b0f_t, b01f_t, betaf_t, ntemp, filename)
+CALL write_ener_beta(temp, vminf_t, free_e_minf_t, betaf_t, ntemp, filename)
 !
-!   here auxiliary quantities calculated from the phonon dos
+!   here the bulk modulus and the gruneisen parameter
 !
-filename="anhar_files/"//TRIM(flanhar)//'.aux_ph'
+filename="anhar_files/"//TRIM(flanhar)//'.bulk_mod_ph'
 IF (pressure_kb /= 0.0_DP) &
    filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 
-CALL write_aux_anharm(temp, gammaf_t, cvf_t, cpf_t, b0f_t, b0f_s, &
-                                                          ntemp, filename)
+CALL write_bulk_anharm(temp, gammaf_t, b0f_t, b0f_s, ntemp, filename)
+!
+!   here the derivative of the bulk modulus with respect to pressure
+!
+filename="anhar_files/"//TRIM(flanhar)//'.dbulk_mod_ph'
+IF (pressure_kb /= 0.0_DP) &
+   filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+
+CALL write_dbulk_anharm(temp, b01f_t, ntemp, filename)
+!
+!   here the heat capacities (constant strain and constant stress)
+!
+filename="anhar_files/"//TRIM(flanhar)//'.heat_ph'
+IF (pressure_kb /= 0.0_DP) &
+   filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+
+CALL write_heat_anharm(temp, cvf_t, cpf_t, ntemp, filename)
 
 RETURN
 END SUBROUTINE write_ph_freq_anharmonic
@@ -259,13 +294,12 @@ USE kinds, ONLY : DP
   RETURN
 END SUBROUTINE compute_beta
 
-SUBROUTINE write_murn_beta(temp, vmin, b0, b01, beta, ntemp, filename)
+SUBROUTINE write_ener_beta(temp, vmin, emin, beta, ntemp, filename)
 USE kinds,     ONLY : DP
 USE io_global, ONLY : ionode
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ntemp
-REAL(DP), INTENT(IN) :: temp(ntemp), vmin(ntemp), b0(ntemp), b01(ntemp), &
-                        beta(ntemp)
+REAL(DP), INTENT(IN) :: temp(ntemp), emin(ntemp), vmin(ntemp), beta(ntemp)
 CHARACTER(LEN=*) :: filename
 
 INTEGER :: itemp, iu_therm
@@ -276,18 +310,103 @@ IF (ionode) THEN
    OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
 
    WRITE(iu_therm,'("# beta is the volume thermal expansion ")')
-   WRITE(iu_therm,'("#   T (K)     V(T) (a.u.)^3   B (T) (kbar) &
-                   & d B (T) / dP  beta (10^(-6) K^(-1))")' )
+   WRITE(iu_therm,'("#   T (K)         V(T) (a.u.)^3          F (T) (Ry) &
+                   &      beta (10^(-6) K^(-1))")' )
 
    DO itemp = 2, ntemp-1
-      WRITE(iu_therm, '(e12.5,e20.13,2e14.6,e18.8)') temp(itemp), &
-                vmin(itemp), b0(itemp), b01(itemp), beta(itemp)*1.D6
+      WRITE(iu_therm, '(e12.5,2e23.13,e18.8)') temp(itemp), &
+                vmin(itemp), emin(itemp), beta(itemp)*1.D6
    END DO
   
    CLOSE(iu_therm)
 ENDIF
 RETURN
-END SUBROUTINE write_murn_beta
+END SUBROUTINE write_ener_beta
+
+SUBROUTINE write_bulk_anharm(temp, gammat, b0t, b0s, ntemp, filename)
+USE kinds,     ONLY : DP
+USE io_global, ONLY : ionode
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ntemp
+REAL(DP), INTENT(IN) :: temp(ntemp), gammat(ntemp), b0t(ntemp), b0s(ntemp)
+CHARACTER(LEN=*) :: filename
+
+INTEGER :: itemp, iu_therm
+INTEGER :: find_free_unit
+
+IF (ionode) THEN
+   iu_therm=find_free_unit()
+   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
+
+   WRITE(iu_therm,'("#  ")')
+   WRITE(iu_therm,'("#   T (K)          gamma(T)            B_T(T) (kbar)     &
+                                 & B_S(T)-B_T(T) (kbar) ")')
+
+   DO itemp = 2, ntemp-1
+      WRITE(iu_therm, '(e12.5,3e22.13)') temp(itemp), &
+                 gammat(itemp), b0t(itemp), b0s(itemp)-b0t(itemp)
+   END DO
+  
+   CLOSE(iu_therm)
+ENDIF
+RETURN
+END SUBROUTINE write_bulk_anharm
+
+SUBROUTINE write_dbulk_anharm(temp, b01t, ntemp, filename)
+USE kinds,     ONLY : DP
+USE io_global, ONLY : ionode
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ntemp
+REAL(DP), INTENT(IN) :: temp(ntemp), b01t(ntemp)
+CHARACTER(LEN=*) :: filename
+
+INTEGER :: itemp, iu_therm
+INTEGER :: find_free_unit
+
+IF (ionode) THEN
+   iu_therm=find_free_unit()
+   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
+
+   WRITE(iu_therm,'("#  ")')
+   WRITE(iu_therm,'("#   T (K)          dB/dT (T) ")')
+
+   DO itemp = 2, ntemp-1
+      WRITE(iu_therm, '(e12.5,e23.13)') temp(itemp), b01t(itemp)
+   END DO
+  
+   CLOSE(iu_therm)
+ENDIF
+RETURN
+END SUBROUTINE write_dbulk_anharm
+
+SUBROUTINE write_heat_anharm(temp, cvt, cpt, ntemp, filename)
+USE kinds,     ONLY : DP
+USE io_global, ONLY : ionode
+IMPLICIT NONE
+INTEGER,  INTENT(IN) :: ntemp
+REAL(DP), INTENT(IN) :: temp(ntemp), cvt(ntemp), cpt(ntemp)
+CHARACTER(LEN=*) :: filename
+
+INTEGER :: itemp, iu_therm
+INTEGER :: find_free_unit
+
+IF (ionode) THEN
+   iu_therm=find_free_unit()
+   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
+
+   WRITE(iu_therm,'("# ")')
+   WRITE(iu_therm,'("#   T (K)         C_V(T) (kbar)         C_P(T) (kbar)  &
+                                 &    C_P(T)-C_V(T) (kbar)")')
+
+   DO itemp = 2, ntemp-1
+      WRITE(iu_therm, '(e12.5,3e22.13)') temp(itemp), &
+                 cvt(itemp), cpt(itemp), cpt(itemp)-cvt(itemp)
+   END DO
+  
+   CLOSE(iu_therm)
+ENDIF
+RETURN
+END SUBROUTINE write_heat_anharm
 
 SUBROUTINE write_aux_anharm(temp, gamma_t, cv, cp, b0_t, b0_s, ntemp, filename)
 USE kinds, ONLY : DP
@@ -310,10 +429,8 @@ IF (ionode) THEN
                  &   (C_p - C_v)(T)      (B_S - B_T) (T) (kbar) " )' )
 
    DO itemp = 2, ntemp-1
-      WRITE(iu_therm, '(5e16.8)') temp(itemp),               &
-                               gamma_t(itemp), cv(itemp), &
-                               cp(itemp) - cv(itemp),   &
-                               b0_s(itemp) - b0_t(itemp)
+      WRITE(iu_therm, '(5e16.8)') temp(itemp),  gamma_t(itemp), cv(itemp), &
+                        cp(itemp)-cv(itemp),  b0_s(itemp)-b0_t(itemp)
    END DO
    CLOSE(iu_therm)
 ENDIF

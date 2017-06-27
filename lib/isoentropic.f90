@@ -126,7 +126,7 @@ SUBROUTINE thermal_stress(el_con_t,alpha_t,bths,ntemp)
 
 USE kinds, ONLY : DP
 USE constants, ONLY : ry_kbar
-USE elastic_constants, ONLY : el_cons_voigt
+USE elastic_constants, ONLY : to_voigt4
 USE strain_mod,  ONLY :  trans_epsilon
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ntemp
@@ -139,7 +139,7 @@ INTEGER :: itemp, i,j,m,n
 bths=0.0_DP
 DO itemp=2,ntemp-1
    aux(:,:)=el_con_t(:,:,itemp)
-   CALL el_cons_voigt(aux, elcon, .FALSE.)
+   CALL to_voigt4(aux, elcon, .FALSE.)
    CALL trans_epsilon(alpha_t(1,itemp), alp, 1)
    DO i=1,3 
       DO j=1,3
@@ -164,7 +164,7 @@ SUBROUTINE isostress_heat_capacity(volume,el_con_t,alpha_t,temp,cpmcv,ntemp)
 
 USE kinds, ONLY : DP
 USE constants, ONLY : ry_kbar
-USE elastic_constants, ONLY : el_cons_voigt
+USE elastic_constants, ONLY : to_voigt4
 USE strain_mod, ONLY :  trans_epsilon
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ntemp
@@ -178,7 +178,7 @@ INTEGER :: itemp, i, j, m, n
 cpmcv=0.0_DP
 DO itemp=2,ntemp-1
    aux(:,:)=el_con_t(:,:,itemp)
-   CALL el_cons_voigt(aux, elcon, .FALSE.)
+   CALL to_voigt4(aux, elcon, .FALSE.)
    CALL trans_epsilon(alpha_t(1,itemp), alp, 1)
    DO i=1,3 
       DO j=1,3
@@ -203,7 +203,7 @@ SUBROUTINE isoentropic_elastic_constants(volume,bths,cv_t,temp,csmct,ntemp)
 !
 USE kinds, ONLY : DP
 USE constants, ONLY : ry_kbar
-USE elastic_constants, ONLY : el_cons_voigt
+USE elastic_constants, ONLY : to_voigt4
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ntemp
 REAL(DP), INTENT(IN) :: volume(ntemp), bths(3,3,ntemp), cv_t(ntemp), &
@@ -228,7 +228,7 @@ DO itemp=2,ntemp-1
 !
 !  transform to voigt indeces and copy aux in csmct
 !
-   CALL el_cons_voigt(csmct(1,1,itemp), aux, .TRUE.) 
+   CALL to_voigt4(csmct(1,1,itemp), aux, .TRUE.) 
 END DO
 
 RETURN

@@ -15,7 +15,7 @@ USE temperature,    ONLY : ntemp, temp
 USE thermodynamics, ONLY : ph_cv
 USE anharmonic,     ONLY : alpha_anis_t, vmin_t, b0_t, celldm_t, beta_t, &
                            gamma_t, cv_t, cp_t, b0_s, cpmcv_anis, el_cons_t, &
-                           lelastic
+                           free_e_min_t, lelastic
 USE control_grun,   ONLY : lb0_t
 USE initial_conf,   ONLY : ibrav_save
 USE control_pressure, ONLY : pressure_kb
@@ -62,28 +62,8 @@ IF (ionode) THEN
    filename='anhar_files/'//flanhar
    IF (pressure_kb /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
-   iu_therm=find_free_unit()
-   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
-   WRITE(iu_therm,'("# beta is the volume thermal expansion ")')
-   IF (el_cons_t_available) THEN
-      WRITE(iu_therm,'("#   T (K)        V(T) (a.u.)^3       B_0(T) (kbar)    &
-                                                           &beta (x10^6)  ")' )
 
-      DO itemp = 2, ntemp-1
-         WRITE(iu_therm, '(e12.5,e20.13,2e15.6)') temp(itemp), vmin_t(itemp), &
-                                           b0_t(itemp), beta_t(itemp)*1.D6
-      END DO
-   ELSE
-      WRITE(iu_therm,'("#   T (K)        V(T) (a.u.)^3         &
-                                                        &  beta (x10^6)  ")' )
-
-      DO itemp = 2, ntemp-1
-         WRITE(iu_therm, '(e12.5,e20.13,e15.6)') temp(itemp), vmin_t(itemp), &
-                                                           beta_t(itemp)*1.D6
-      END DO
-   END IF
-
-   CLOSE(iu_therm)
+   CALL write_ener_beta(temp, vmin_t, free_e_min_t, beta_t, ntemp, filename)
 !
 !  Here we write on output the celldm parameters and their derivative
 !  with respect to temperature. 
@@ -98,24 +78,25 @@ IF (ionode) THEN
 !   here auxiliary quantities calculated from the phonon dos
 !
    IF (lelastic) THEN
-      filename='anhar_files/'//TRIM(flanhar)//'.aux'
-      OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', &
-                                                             FORM='FORMATTED')
-      WRITE(iu_therm,'("# gamma is the average Gruneisen parameter ")')
-      WRITE(iu_therm,'("#   T (K)       gamma(T)       C_v ( Ry / cell ) &
-                    &   (C_p - C_v)(T)      (B_S - B_T) (T) (kbar) " )' )
+      !
+      !   here the bulk modulus and the gruneisen parameter
+      !
+      filename="anhar_files/"//TRIM(flanhar)//'.bulk_mod'
+      IF (pressure_kb /= 0.0_DP) &
+         filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 
-      DO itemp = 2, ntemp-1
-         WRITE(iu_therm, '(5e16.8)') temp(itemp),                  &
-                                     gamma_t(itemp), cv_t(itemp),  &
-                                     cp_t(itemp) - cv_t(itemp),    &
-                                     b0_s(itemp) - b0_t(itemp)
-      END DO
-      CLOSE(iu_therm)
+      CALL write_bulk_anharm(temp, gamma_t, b0_t, b0_s, ntemp, filename)
+
+      filename="anhar_files/"//TRIM(flanhar)//'.heat'
+      IF (pressure_kb /= 0.0_DP) &
+         filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+
+      CALL write_heat_anharm(temp, cv_t, cp_t, ntemp, filename)
+
 !
 !  Here we write on output the anharmonic properties computed for
 !  anisotropic solids, using the thermal expansion tensor, as opposed
-!  to the volume thermal expansion used in the file aux
+!  to the volume thermal expansion used in the file heat
 !
       filename='anhar_files/'//TRIM(flanhar)//'.anis'
       IF (pressure_kb /= 0.0_DP) &
@@ -145,7 +126,8 @@ USE temperature,    ONLY : ntemp, temp
 USE ph_freq_thermodynamics, ONLY : phf_cv
 USE ph_freq_anharmonic, ONLY : alphaf_anis_t, vminf_t, b0f_t, celldmf_t, &
                                betaf_t, gammaf_t, cvf_t, cpf_t, b0f_s, &
-                               cpmcvf_anis, el_consf_t, lelasticf
+                               cpmcvf_anis, el_consf_t, lelasticf, &
+                               free_e_minf_t
 USE elastic_constants, ONLY : el_con
 USE control_grun,   ONLY : lb0_t
 USE initial_conf,   ONLY : ibrav_save
@@ -194,16 +176,8 @@ IF (ionode) THEN
    IF (pressure_kb /= 0.0_DP) &
       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 
-   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', &
-                                                  FORM='FORMATTED')
-   WRITE(iu_therm,'("# alpha is the linear thermal expansion ")')
-   WRITE(iu_therm,'("#   T (K)        V(T) (a.u.)^3           beta (x10^6)  ")' )
+   CALL write_ener_beta(temp, vminf_t, free_e_minf_t, betaf_t, ntemp, filename)
 
-   DO itemp = 2, ntemp-1
-      WRITE(iu_therm, '(e12.5,e20.13,e15.6)') temp(itemp), vminf_t(itemp), &
-                                              betaf_t(itemp)*1.D6
-   END DO
-   CLOSE(iu_therm)
 !
 !  Here we write on output the celldm parameters and their derivative
 !  with respect to temperature. 
@@ -218,19 +192,21 @@ IF (ionode) THEN
 !   here auxiliary quantities calculated from the phonon dos
 !
    IF (lelasticf) THEN
-      filename='anhar_files/'//TRIM(flanhar)//'.aux_ph'
-      OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
-      WRITE(iu_therm,'("# gamma is the average Gruneisen parameter ")')
-      WRITE(iu_therm,'("#   T (K)       gamma(T)       C_v ( Ry / cell ) &
-                    &   (C_p - C_v)(T)      (B_S - B_T) (T) (kbar) " )' )
+      !
+      !   here the bulk modulus and the gruneisen parameter
+      !
+      filename="anhar_files/"//TRIM(flanhar)//'.bulk_mod'
+      IF (pressure_kb /= 0.0_DP) &
+         filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 
-      DO itemp = 2, ntemp-1
-         WRITE(iu_therm, '(5e16.8)') temp(itemp),                  &
-                                     gammaf_t(itemp), cvf_t(itemp),  &
-                                     cpf_t(itemp) - cvf_t(itemp),    &
-                                     b0f_s(itemp) - b0f_t(itemp)
-      END DO
-      CLOSE(iu_therm)
+      CALL write_bulk_anharm(temp, gammaf_t, b0f_t, b0f_s, ntemp, filename)
+
+      filename="anhar_files/"//TRIM(flanhar)//'.heat'
+      IF (pressure_kb /= 0.0_DP) &
+         filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+
+      CALL write_heat_anharm(temp, cvf_t, cpf_t, ntemp, filename)
+
 !
 !  Here we write on output the anharmonic properties computed for
 !  anisotropic solids, using the thermal expansion tensor, as opposed

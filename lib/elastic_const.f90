@@ -46,7 +46,7 @@ MODULE elastic_constants
          write_elastic, read_elastic,     &            ! public I/O on file
          macro_elasticity, print_macro_elasticity, &   ! public auxiliary tools
          print_sound_velocities, &                     ! public auxiliary tools
-         compute_sound, voigt_index, el_cons_voigt     ! public auxiliary tools
+         compute_sound, voigt_index, to_voigt4     ! public auxiliary tools
 
 CONTAINS
 
@@ -1144,7 +1144,7 @@ CALL write_poli(alpha,m1)
 RETURN
 END SUBROUTINE el_cons_ij_ene
 
-SUBROUTINE el_cons_voigt(elconv, elcon, flag)
+SUBROUTINE to_voigt4(elconv, elcon, flag)
 !
 !  This routine transform an elastic constant tensor in the 6x6 Voigt
 !  form into a four index tensor 3x3x3x3 (flag=.false.) or viceversa 
@@ -1184,7 +1184,7 @@ ELSE
 ENDIF
 
 RETURN
-END SUBROUTINE el_cons_voigt
+END SUBROUTINE to_voigt4
 
 SUBROUTINE macro_elasticity( ibrav, cmn, smn, b0v,  &
                              e0v, g0v, nuv, b0r, e0r, g0r, nur )

@@ -120,7 +120,7 @@ USE kinds,          ONLY : DP
 USE constants,      ONLY : ry_kbar
 USE thermo_mod,     ONLY : ngeo, omega_geo, energy_geo, celldm_geo, &
                            central_geo, no_ph
-USE control_mur,    ONLY : vmin, b0, b01
+USE control_mur,    ONLY : vmin, b0, b01, emin
 USE thermodynamics, ONLY : ph_free_ener
 USE anharmonic,     ONLY : vmin_t, b0_t, b01_t, free_e_min_t
 USE temperature,    ONLY : ntemp, temp
@@ -137,6 +137,7 @@ REAL(DP) :: free_e, vm, celldm_(6)
 INTEGER, PARAMETER :: m1=5
 INTEGER :: idata, ndata, i1
 REAL(DP) :: a(m1), x(ngeo(1)), y(ngeo(1)), aux, aux1
+REAL(DP) :: compute_mur_fun
 
 
   IF (my_image_id /= root_image) RETURN
@@ -167,8 +168,7 @@ REAL(DP) :: a(m1), x(ngeo(1)), y(ngeo(1)), aux, aux1
   vmin_t(itemp)=vm
   b0_t(itemp)=aux
   b01_t(itemp)=aux1
-
-!  free_e_min_t(itemp)=free_e
+  free_e_min_t(itemp)=emin + compute_mur_fun(vm, vmin, b0/ry_kbar, b01, a, m1)
   !
   CALL compute_celldm_geo(vmin_t(itemp), celldm_, celldm_geo(1,central_geo), &
                                          omega_geo(central_geo))
@@ -181,6 +181,14 @@ REAL(DP) :: a(m1), x(ngeo(1)), y(ngeo(1)), aux, aux1
   WRITE(stdout,'(5x, "The bulk modulus is ",24x,f12.3,"  kbar")')  b0_t(itemp)
   WRITE(stdout,'(5x, "The pressure derivative of the bulk modulus is ",&
                                &f9.3)')  b01_t(itemp)
+  IF (pressure_kb /= 0.0_DP) THEN
+     WRITE(stdout,'(5x,"The Gibbs energy at the minimum is    ",&
+                                    6x,f20.9," Ry")') free_e_min_t(itemp)
+  ELSE
+     WRITE(stdout,'(5x,"The free energy at the minimum is",6x,f20.9," Ry")') &
+                                                 free_e_min_t(itemp)
+  END IF
+
   WRITE(stdout,'(2x,76("-"),/)')
 
   RETURN
@@ -196,7 +204,7 @@ USE thermo_mod,     ONLY : ngeo, omega_geo, energy_geo, celldm_geo, &
 USE constants,      ONLY : ry_kbar
 USE ph_freq_thermodynamics, ONLY : phf_free_ener
 USE ph_freq_anharmonic,     ONLY : vminf_t, b0f_t, b01f_t, free_e_minf_t
-USE control_mur,    ONLY : vmin, b0, b01
+USE control_mur,    ONLY : emin, vmin, b0, b01
 USE temperature,    ONLY : ntemp, temp
 USE control_pressure, ONLY : pressure_kb
 USE quadratic_surfaces, ONLY : polifit
@@ -212,6 +220,7 @@ REAL(DP) :: free_e, vm, celldm_(6)
 INTEGER, PARAMETER :: m1=5
 INTEGER :: idata, ndata, i1
 REAL(DP) :: a(m1), x(ngeo(1)), y(ngeo(1)), aux, aux1
+REAL(DP) :: compute_mur_fun
 
 
   IF (my_image_id /= root_image) RETURN
@@ -242,8 +251,7 @@ REAL(DP) :: a(m1), x(ngeo(1)), y(ngeo(1)), aux, aux1
   vminf_t(itemp)=vm
   b0f_t(itemp)=aux
   b01f_t(itemp)=aux1
-
-!  free_e_minf_t(itemp)=free_e
+  free_e_minf_t(itemp)=emin + compute_mur_fun(vm, vmin, b0/ry_kbar, b01, a, m1)
   !
   CALL compute_celldm_geo(vminf_t(itemp), celldm_, celldm_geo(1,central_geo), &
                                          omega_geo(central_geo))
@@ -257,6 +265,13 @@ REAL(DP) :: a(m1), x(ngeo(1)), y(ngeo(1)), aux, aux1
   WRITE(stdout,'(5x, "The bulk modulus is ",31x,f12.3,"  kbar")')  b0f_t(itemp)
   WRITE(stdout,'(5x, "The pressure derivative of the bulk modulus is ",5x,&
                                &f11.3)')  b01f_t(itemp)
+  IF (pressure_kb /= 0.0_DP) THEN
+     WRITE(stdout,'(5x,"The Gibbs energy at the minimum is    ",&
+                                    6x,f20.9," Ry")') free_e_minf_t(itemp)
+  ELSE
+     WRITE(stdout,'(5x,"The free energy at the minimum is",6x,f20.9," Ry")') &
+                                                 free_e_minf_t(itemp)
+  END IF
 
   WRITE(stdout,'(2x,76("+"),/)')
 
@@ -304,6 +319,10 @@ RETURN
 END SUBROUTINE find_min_mur_pol
 
 FUNCTION compute_fun(v, v0, b0, b01, a, m1)
+!
+!  This function computes the first derivative of the Murnaghan equation
+!  plus a polynomial of degree m1-1 with respect to the volume
+!
 USE kinds, ONLY : DP 
 IMPLICIT NONE
 REAL(DP) :: compute_fun
@@ -323,6 +342,10 @@ RETURN
 END FUNCTION compute_fun
 
 FUNCTION compute_fun_deriv(v, v0, b0, b01, a, m1)
+!
+!  This function computes the second derivative of the Murnaghan equation
+!  plus a polynomial of degree m1-1 with respect to the volume
+!
 USE kinds, ONLY : DP 
 IMPLICIT NONE
 REAL(DP) :: compute_fun_deriv
@@ -339,3 +362,27 @@ compute_fun_deriv=aux
 
 RETURN
 END FUNCTION compute_fun_deriv
+
+FUNCTION compute_mur_fun(v, v0, b0, b01, a, m1)
+!
+!   This function computes the sum of a Murnaghan equation and
+!   a polynomial. Compute fun computes the derivative with respect
+!   to the volume of this function.
+!
+USE kinds, ONLY : DP 
+IMPLICIT NONE
+REAL(DP) :: compute_mur_fun
+INTEGER, INTENT(IN) :: m1
+REAL(DP), INTENT(IN) :: v, v0, b0, b01, a(m1)
+REAL(DP) :: aux
+INTEGER :: i1
+
+aux = b0 * v0 * (( v0 / v )**(b01-1.0_DP) / (b01-1.0_DP) + (v/v0) )/b01 &
+           - v0 * b0 / (b01-1.0_DP) + a(1) 
+DO i1=2, m1
+   aux = aux +  a(i1) * v**(i1-1)
+ENDDO
+compute_mur_fun=aux
+
+RETURN
+END FUNCTION compute_mur_fun

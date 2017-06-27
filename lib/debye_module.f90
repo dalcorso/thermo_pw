@@ -45,7 +45,7 @@ SUBROUTINE compute_average_sound(elconv, density, average_sound_speed)
 !
 USE kinds, ONLY : DP
 USE constants, ONLY : pi
-USE elastic_constants, ONLY : el_cons_voigt, compute_sound
+USE elastic_constants, ONLY : to_voigt4, compute_sound
 IMPLICIT NONE
 
 REAL(DP), INTENT(INOUT) :: elconv(6,6)
@@ -62,7 +62,7 @@ INTEGER :: i, j, k, l
 !
 !  Transform the elastic constants in the tensor notation
 !
-CALL el_cons_voigt(elconv, elcon, .FALSE.)
+CALL to_voigt4(elconv, elcon, .FALSE.)
 !
 !  This is a two dimensional integral
 !
