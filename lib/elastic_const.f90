@@ -13,7 +13,6 @@ MODULE elastic_constants
 !   TODO : energy for the tetragonal of class C_4h
 !          energy for the monoclinic case
 !          rombohedral cell, both energy and stress for S_6 and D_3d
-!          Advanced: monoclinic and rombohedral both stress and energy C_2h
 !
 
 
@@ -46,7 +45,7 @@ MODULE elastic_constants
          write_elastic, read_elastic,     &            ! public I/O on file
          macro_elasticity, print_macro_elasticity, &   ! public auxiliary tools
          print_sound_velocities, &                     ! public auxiliary tools
-         compute_sound, voigt_index, to_voigt4     ! public auxiliary tools
+         compute_sound                                 ! public auxiliary tools
 
 CONTAINS
 
@@ -1053,37 +1052,10 @@ CALL invmat(6, cmn, smn)
 RETURN
 END SUBROUTINE compute_elastic_compliances
 
-SUBROUTINE voigt_index(m, n, mn, flag)
-!
-!  If flag is .true., this routine receives two indeces 1<= m, n <=3 and
-!  gives the voigt index 1<=mn<=6 corresponding to these two indices,
-!  If flag is .false. it receive mn and gives as output m and n, m<=n
-!
-IMPLICIT NONE
-INTEGER, INTENT(INOUT) :: m, n, mn
-LOGICAL, INTENT(IN) :: flag 
-INTEGER :: voigt(3,3), mind(6), nind(6)
-DATA voigt / 1, 6, 5, 6, 2, 4, 5, 4, 3 / 
-DATA mind  / 1, 2, 3, 2, 1, 1 /
-DATA nind  / 1, 2, 3, 3, 3, 2 /
-
-IF (flag) THEN
-   IF (m<1.OR.m>3.OR.n<1.OR.n>3) &
-      CALL errore('voigt_index','m or n out or range',1)
-   mn=voigt(m,n) 
-ELSE
-   IF (mn<1.OR.mn>6) &
-      CALL errore('voigt_index','mn out of range',1)
-   m=mind(mn)
-   n=nind(mn)
-ENDIF
-
-RETURN
-END SUBROUTINE voigt_index
-
 SUBROUTINE el_cons_ij(pq, mn, ngeo, epsil_geo, sigma_geo, m1)
 USE kinds, ONLY : DP
 USE quadratic_surfaces, ONLY : polifit, write_poli
+USE voigt, ONLY : voigt_index
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: mn, pq, ngeo
@@ -1143,48 +1115,6 @@ CALL write_poli(alpha,m1)
 
 RETURN
 END SUBROUTINE el_cons_ij_ene
-
-SUBROUTINE to_voigt4(elconv, elcon, flag)
-!
-!  This routine transform an elastic constant tensor in the 6x6 Voigt
-!  form into a four index tensor 3x3x3x3 (flag=.false.) or viceversa 
-!  (flag=.true.)
-!
-USE kinds, ONLY : DP
-IMPLICIT NONE
-
-REAL(DP), INTENT(INOUT) :: elcon(3,3,3,3)
-REAL(DP), INTENT(INOUT) :: elconv(6,6)
-LOGICAL, INTENT(IN) :: flag
-
-INTEGER :: ij, mn, i, j, m, n
-
-IF (flag) THEN
-   elconv=0.0_DP
-   DO ij=1,6
-      CALL voigt_index(i,j,ij,.FALSE.)
-      DO mn=1,6
-         CALL voigt_index(m,n,mn,.FALSE.)
-         elconv(ij,mn) = elcon(i,j,m,n) 
-      ENDDO
-   ENDDO
-ELSE
-   elcon=0.0_DP
-   DO i=1,3
-      DO j=1,3
-         CALL voigt_index(i,j,ij,.TRUE.)
-         DO m=1,3
-            DO n=1,3
-               CALL voigt_index(m,n,mn,.TRUE.)
-               elcon(i,j,m,n) = elconv(ij,mn)
-            ENDDO
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF
-
-RETURN
-END SUBROUTINE to_voigt4
 
 SUBROUTINE macro_elasticity( ibrav, cmn, smn, b0v,  &
                              e0v, g0v, nuv, b0r, e0r, g0r, nur )

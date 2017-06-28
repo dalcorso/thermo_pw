@@ -247,6 +247,9 @@ are calculated after the phonon dispersion calculation for the default
 temperature range ($1$ K - $800$ K) if this range
 is not given in the \thermo\ input. These quantities 
 as a function of temperature are found in the file \texttt{output\_therm.ps.g1}.
+These quantities are calculated at the fixed volume given as input
+to \texttt{pw.x}.
+
 
 \section{\color{coral}How do I calculate the elastic constants?}
 Use \texttt{what='scf\_elastic\_constants'}. See \texttt{example13}. The
@@ -312,6 +315,16 @@ solids if the name of the postscript file is not given in input.
 \section{\color{coral} How do I calculate the thermal expansion?}
 Use \texttt{what='mur\_lc\_t'}. See \texttt{example09}. The thermal expansions
 are shown as a function of temperature in the file \texttt{output\_anharm.ps}.
+
+\section{\color{coral}How do I calculate the Helmholtz (or Gibbs) free energy
+as a function of temperature keeping into account the thermal expansion?}
+Use \texttt{what='mur\_lc\_t'}. The Helmholtz (or Gibbs at finite pressure) 
+free energy is shown as a function of temperature in the file 
+\texttt{output\_anharm.ps}. Note that the absolute value of this energy
+depends on the pseudopotentials as the total energy. You can however
+compare the free energies for different crystal structures 
+and predict if a phase transition occurs and at which temperature (also 
+as a function of pressure).
 
 \section{\color{coral} How do I calculate the bulk modulus as a function of 
 temperature?}

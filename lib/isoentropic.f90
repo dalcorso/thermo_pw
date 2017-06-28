@@ -124,10 +124,10 @@ SUBROUTINE thermal_stress(el_con_t,alpha_t,bths,ntemp)
 !  constants
 !
 
-USE kinds, ONLY : DP
-USE constants, ONLY : ry_kbar
-USE elastic_constants, ONLY : to_voigt4
-USE strain_mod,  ONLY :  trans_epsilon
+USE kinds,      ONLY : DP
+USE constants,  ONLY : ry_kbar
+USE voigt,      ONLY : to_voigt4
+USE strain_mod, ONLY : trans_epsilon
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ntemp
 REAL(DP), INTENT(IN) :: el_con_t(6,6,ntemp), alpha_t(6,ntemp) 
@@ -162,10 +162,10 @@ SUBROUTINE isostress_heat_capacity(volume,el_con_t,alpha_t,temp,cpmcv,ntemp)
 !  between the constant stress and the constant strain heat capacity.
 !
 
-USE kinds, ONLY : DP
-USE constants, ONLY : ry_kbar
-USE elastic_constants, ONLY : to_voigt4
-USE strain_mod, ONLY :  trans_epsilon
+USE kinds,      ONLY : DP
+USE constants,  ONLY : ry_kbar
+USE voigt,      ONLY : to_voigt4
+USE strain_mod, ONLY : trans_epsilon
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ntemp
 REAL(DP), INTENT(IN) :: el_con_t(6,6,ntemp), alpha_t(6,ntemp), temp(ntemp), &
@@ -201,9 +201,9 @@ SUBROUTINE isoentropic_elastic_constants(volume,bths,cv_t,temp,csmct,ntemp)
 !  in Ry/cell and gives as output the correction to the elastic constants
 !  in kbar
 !
-USE kinds, ONLY : DP
+USE kinds,     ONLY : DP
 USE constants, ONLY : ry_kbar
-USE elastic_constants, ONLY : to_voigt4
+USE voigt,     ONLY : to_voigt4
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ntemp
 REAL(DP), INTENT(IN) :: volume(ntemp), bths(3,3,ntemp), cv_t(ntemp), &

@@ -45,7 +45,8 @@ SUBROUTINE compute_average_sound(elconv, density, average_sound_speed)
 !
 USE kinds, ONLY : DP
 USE constants, ONLY : pi
-USE elastic_constants, ONLY : to_voigt4, compute_sound
+USE elastic_constants, ONLY : compute_sound
+USE voigt, ONLY : to_voigt4
 IMPLICIT NONE
 
 REAL(DP), INTENT(INOUT) :: elconv(6,6)

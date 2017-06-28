@@ -29,6 +29,7 @@ quartic_surfaces.o \
 rotate.o \
 space_groups.o \
 strain.o \
+voigt.o \
 xrdp.o 
 
 all : thermo_lib.a

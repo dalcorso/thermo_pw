@@ -393,7 +393,7 @@ END SUBROUTINE compute_piezo_tensor
 SUBROUTINE piezo_ij(ialpha, mn, ngeo, epsil_geo, polar_geo)
 USE kinds, ONLY : DP
 USE quadratic_surfaces, ONLY : polifit
-USE elastic_constants, ONLY : voigt_index
+USE voigt, ONLY : voigt_index
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: mn, ialpha, ngeo

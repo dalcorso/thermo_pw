@@ -145,6 +145,8 @@ geometry or at the equilibrium geometry at a given temperature
 Bulk modulus and pressure derivative of the bulk modulus, isobaric heat 
 capacity, isoentropic bulk modulus, and average Gr\"uneisen parameter as 
 a function of temperature (limited to cubic systems).
+Minimum Helmholtz (or Gibbs at finite pressures) free energy 
+as a function of temperature.
 
 \item Surface band structure identification and plot of the projected bulk
 band structure.
@@ -1779,6 +1781,10 @@ by \thermo\ in a \texttt{what='scf\_2d\_bands'} calculation that
 contains the planar averages of the all the states, and plots
 the states with the {\bf k} point and the band numbers requested in input.
 For an example of its use see \texttt{tools\_input/plot\_sur\_states.in}.
+
+\item \texttt{rotate\_tensors.x} applies a rotation to a tensor
+of rank 1, 2, 3, or 4 defined in a coordinate system 1 and finds the form
+of the tensor in a new coordinate system 2. 
 
 \item \texttt{space\_groups.x} gives several information on space groups.
 It can give the names of the space group given the number reported in
