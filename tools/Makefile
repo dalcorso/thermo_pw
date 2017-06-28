@@ -82,6 +82,11 @@ gener_nanowire.x : gener_nanowire.o $(PWOBJS) $(LIBOBJS)
 		 $(LIBOBJS) $(PWOBJS) $(QEMODS) $(LIBOBJS) $(PWOBJS) $(LIBS)
 	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/gener_nanowire.x . )
 
+rotate_tensors.x : rotate_tensors.o $(PWOBJS) $(LIBOBJS)
+	$(LD) $(LDFLAGS) -o $@ rotate_tensors.o \
+	        $(LIBOBJS) $(PWOBJS) $(QEMODS) $(LIBOBJS) $(PWOBJS) $(LIBS)
+	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/rotate_tensors.x . )
+
 test_colors.x : test_colors.o $(PWOBJS) $(LIBOBJS)
 	$(LD) $(LDFLAGS) -o $@ test_colors.o \
 	         $(LIBOBJS) $(PWOBJS) $(QEMODS) $(LIBOBJS) $(PWOBJS) $(LIBS)
@@ -95,8 +100,11 @@ epsilon_tpw.x : epsilon_tpw.o $(PWOBJS) $(LIBOBJS)
 clean :
 	- /bin/rm -f *.x *.o *.a *~ *.F90 *.d *.mod *.i *.L
 	- /bin/rm -rf ../../bin/thermo_pw.x 
-	- /bin/rm -rf ../../bin/group_name.x 
-	- /bin/rm -rf ../../bin/group_number.x 
+	- /bin/rm -rf ../../bin/space_groups.x 
+	- /bin/rm -rf ../../bin/crystal_point_group.x 
+	- /bin/rm -rf ../../bin/hex_trig.x 
+	- /bin/rm -rf ../../bin/bravais_lattice.x 
+	- /bin/rm -rf ../../bin/kovalev.x 
 	- /bin/rm -rf ../../bin/supercell.x 
 	- /bin/rm -rf ../../bin/translate.x 
 	- /bin/rm -rf ../../bin/elastic.x 
@@ -104,6 +112,7 @@ clean :
 	- /bin/rm -rf ../../bin/gener_2d_slab.x 
 	- /bin/rm -rf ../../bin/gener_3d_slab.x 
 	- /bin/rm -rf ../../bin/gener_nanowire.x 
+	- /bin/rm -rf ../../bin/rotate_tensors.x 
 	- /bin/rm -rf ../../bin/test_colors.x 
 	- /bin/rm -rf ../../bin/epsilon_tpw.x 
 
