@@ -96,8 +96,10 @@ check_bands.o : ../../Modules/io_global.o
 check_bands.o : ../../Modules/kind.o
 check_bands.o : ../../Modules/mp.o
 check_bands.o : ../../Modules/mp_images.o
+check_bands.o : ../../Modules/qes_types.o
 check_bands.o : ../../Modules/qexml.o
 check_bands.o : ../../PHonon/PH/phcom.o
+check_bands.o : ../../PW/src/pw_restart_new.o
 check_bands.o : ../../iotk/src/iotk_module.o
 compute_drhous.o : ../../FFTXlib/fft_interfaces.o
 compute_drhous.o : ../../LR_Modules/lrcom.o
@@ -203,6 +205,7 @@ electrons.o : ../../Modules/uspp.o
 electrons.o : ../../PW/src/atomic_wfc_mod.o
 electrons.o : ../../PW/src/bp_mod.o
 electrons.o : ../../PW/src/esm.o
+electrons.o : ../../PW/src/extfield.o
 electrons.o : ../../PW/src/exx.o
 electrons.o : ../../PW/src/io_rho_xml.o
 electrons.o : ../../PW/src/ldaU.o

@@ -47,7 +47,7 @@ gener_3d_slab.o : ../../Modules/environment.o
 gener_3d_slab.o : ../../Modules/io_global.o
 gener_3d_slab.o : ../../Modules/kind.o
 gener_3d_slab.o : ../../Modules/mp_global.o
-gener_3d_slab.o : ../../PW/src/wyckoff.o
+gener_3d_slab.o : ../../Modules/wyckoff.o
 gener_nanowire.o : ../../Modules/environment.o
 gener_nanowire.o : ../../Modules/io_global.o
 gener_nanowire.o : ../../Modules/kind.o
@@ -81,8 +81,8 @@ supercell.o : ../../Modules/kind.o
 supercell.o : ../../Modules/mp_global.o
 supercell.o : ../../Modules/parser.o
 supercell.o : ../../Modules/wrappers.o
+supercell.o : ../../Modules/wyckoff.o
 supercell.o : ../../Modules/wypos.o
-supercell.o : ../../PW/src/wyckoff.o
 supercell.o : ../../thermo_pw/lib/lattices.o
 test_colors.o : ../../Modules/environment.o
 test_colors.o : ../../Modules/io_global.o

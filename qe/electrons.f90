@@ -17,6 +17,7 @@ SUBROUTINE electrons_tpw()
   USE check_stop,           ONLY : check_stop_now, stopped_by_user
   USE io_global,            ONLY : stdout, ionode
   USE fft_base,             ONLY : dfftp
+  USE ions_base,            ONLY : nat
   USE gvecs,                ONLY : doublegrid
   USE gvect,                ONLY : ecutrho
   USE lsda_mod,             ONLY : nspin, magtot, absmag
@@ -66,6 +67,7 @@ SUBROUTINE electrons_tpw()
       tr2_final     ! final threshold for exx minimization 
                     ! when using adaptive thresholds.
   LOGICAL :: first, exst, all_done_asyn
+  REAL(DP) :: etot_cmp_paw(nat,2,2)
   !
   !
   exxen = 0.0d0
@@ -115,7 +117,7 @@ SUBROUTINE electrons_tpw()
            !
            CALL v_of_rho( rho, rho_core, rhog_core, &
                ehart, etxc, vtxc, eth, etotefield, charge, v)
-           IF (okpaw) CALL PAW_potential(rho%bec, ddd_PAW, epaw)
+           IF (okpaw) CALL PAW_potential(rho%bec, ddd_PAW, epaw, etot_cmp_paw)
            CALL set_vrs( vrs, vltot, v%of_r, kedtau, v%kin_r, dfftp%nnr, &
                          nspin, doublegrid )
            !
@@ -186,7 +188,7 @@ SUBROUTINE electrons_tpw()
              ehart, etxc, vtxc, eth, etotefield, charge, v)
         etot = etot + etxc + exxen
         !
-        IF (okpaw) CALL PAW_potential(rho%bec, ddd_PAW, epaw)
+        IF (okpaw) CALL PAW_potential(rho%bec, ddd_PAW, epaw, etot_cmp_paw)
         CALL set_vrs( vrs, vltot, v%of_r, kedtau, v%kin_r, dfftp%nnr, &
              nspin, doublegrid )
         !
@@ -339,7 +341,7 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
   USE noncollin_module,     ONLY : noncolin, magtot_nc, i_cons,  bfield, &
                                    lambda, report
   USE spin_orb,             ONLY : domag
-  USE io_rho_xml,           ONLY : write_rho
+  USE io_rho_xml,           ONLY : write_scf
   USE uspp,                 ONLY : okvan
   USE mp_bands,             ONLY : intra_bgrp_comm
   USE mp_pools,             ONLY : root_pool, my_pool_id, inter_pool_comm
@@ -394,6 +396,7 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
   ! ... external functions
   !
   REAL(DP), EXTERNAL :: ewald, get_clock
+  REAL(DP) :: etot_cmp_paw(nat,2,2)
   !
   iter = 0
   dr2  = 0.0_dp
@@ -615,7 +618,7 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
            CALL v_of_rho( rhoin, rho_core, rhog_core, &
                           ehart, etxc, vtxc, eth, etotefield, charge, v)
            IF (okpaw) THEN
-              CALL PAW_potential(rhoin%bec, ddd_paw, epaw)
+              CALL PAW_potential(rhoin%bec, ddd_paw, epaw, etot_cmp_paw)
               CALL PAW_symmetrize_ddd(ddd_paw)
            ENDIF
            !
@@ -644,7 +647,7 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
            vnew%of_r(:,:) = v%of_r(:,:) - vnew%of_r(:,:)
            !
            IF (okpaw) THEN
-              CALL PAW_potential(rho%bec, ddd_paw, epaw)
+              CALL PAW_potential(rho%bec, ddd_paw, epaw,etot_cmp_paw)
               CALL PAW_symmetrize_ddd(ddd_paw)
            ENDIF
            !
@@ -811,7 +814,7 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
   ! ... exiting: write (unless disabled) the charge density to file
   ! ... (also write ldaU ns coefficients and PAW becsum)
   !
-  IF ( io_level > -1 ) CALL write_rho( rho, nspin )
+  IF ( io_level > -1 ) CALL write_scf( rho, nspin )
   !
   ! ... delete mixing info if converged, keep it if not
   !
@@ -1106,7 +1109,18 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
           IF ( tefield )            WRITE( stdout, 9061 ) etotefield
           IF ( lda_plus_u )         WRITE( stdout, 9065 ) eth
           IF ( ABS (descf) > eps8 ) WRITE( stdout, 9069 ) descf
-          IF ( okpaw )              WRITE( stdout, 9067 ) epaw
+          IF ( okpaw )  THEN
+            WRITE( stdout, 9067 ) epaw
+            ! Detailed printout of PAW energy components, if verbosity is high
+            IF(iverbosity>0)THEN
+            WRITE( stdout, 9068) SUM(etot_cmp_paw(:,1,1)), &
+                                 SUM(etot_cmp_paw(:,1,2)), &
+                                 SUM(etot_cmp_paw(:,2,1)), &
+                                 SUM(etot_cmp_paw(:,2,2)), &
+            SUM(etot_cmp_paw(:,1,1))+SUM(etot_cmp_paw(:,1,2))+ehart, &
+            SUM(etot_cmp_paw(:,2,1))+SUM(etot_cmp_paw(:,2,2))+etxc-etxcc
+            ENDIF
+          ENDIF
           !
           ! ... With Fermi-Dirac population factor, etot is the electronic
           ! ... free energy F = E - TS , demet is the -TS contribution
@@ -1164,6 +1178,12 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
 9061 FORMAT( '     electric field correction =',F17.8,' Ry' )
 9065 FORMAT( '     Hubbard energy            =',F17.8,' Ry' )
 9067 FORMAT( '     one-center paw contrib.   =',F17.8,' Ry' )
+9068 FORMAT( '      -> PAW hartree energy AE =',F17.8,' Ry' &
+            /'      -> PAW hartree energy PS =',F17.8,' Ry' &
+            /'      -> PAW xc energy AE      =',F17.8,' Ry' &
+            /'      -> PAW xc energy PS      =',F17.8,' Ry' &
+            /'      -> total E_H with PAW    =',F17.8,' Ry'& 
+            /'      -> total E_XC with PAW   =',F17.8,' Ry' )
 9069 FORMAT( '     scf correction            =',F17.8,' Ry' )
 9070 FORMAT( '     smearing contrib. (-TS)   =',F17.8,' Ry' )
 9071 FORMAT( '     Magnetic field            =',3F12.7,' Ry' )
