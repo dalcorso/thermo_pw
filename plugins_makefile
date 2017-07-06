@@ -64,11 +64,11 @@ uncompress-test-suite: touch-dummy
 # Examples
 ###########################################################
 
-examples: uncompress-examples
+#examples: uncompress-examples
 
-uncompress-examples: touch-dummy
-	$(call download_and_unpack,$(EXAMPLES),$(EXAMPLES_URL),Examples,Examples)
-	touch uncompress-examples
+#uncompress-examples: touch-dummy
+#	$(call download_and_unpack,$(EXAMPLES),$(EXAMPLES_URL),Examples,Examples)
+#	touch uncompress-examples
 
 ##########################################################
 # GIPAW
@@ -427,9 +427,9 @@ test-suite_veryclean: test-suite_clean
 test-suite_distclean:
 	rm -f ../archive/$(TESTSUITE).tar.gz
 
-examples_clean:
+#examples_clean:
 
-examples_veryclean: examples_clean
+#examples_veryclean: examples_clean
 
 ##########################################################
 # general cleaning
@@ -446,5 +446,5 @@ veryclean: w90_veryclean want_veryclean yambo_veryclean yambo-devel_veryclean \
 #distclean : veryclean
 distclean: w90_distclean want_distclean yambo_distclean yambo-devel_distclean \
   test-suite_distclean gipaw_distclean thermo_pw_distclean west_distclean \
-	sax_distclean d3q_distclean examples_distclean
+	sax_distclean d3q_distclean 
 
