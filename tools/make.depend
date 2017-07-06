@@ -63,6 +63,12 @@ plot_sur_states.o : ../../Modules/io_global.o
 plot_sur_states.o : ../../Modules/kind.o
 plot_sur_states.o : ../../Modules/mp_global.o
 plot_sur_states.o : ../../thermo_pw/lib/gnuplot.o
+rotate_tensors.o : ../../Modules/environment.o
+rotate_tensors.o : ../../Modules/io_global.o
+rotate_tensors.o : ../../Modules/kind.o
+rotate_tensors.o : ../../Modules/mp_global.o
+rotate_tensors.o : ../../thermo_pw/lib/rotate.o
+rotate_tensors.o : ../../thermo_pw/lib/voigt.o
 space_groups.o : ../../Modules/environment.o
 space_groups.o : ../../Modules/io_global.o
 space_groups.o : ../../Modules/kind.o

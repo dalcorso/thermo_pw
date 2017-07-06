@@ -14,6 +14,7 @@ debye_module.o : ../../Modules/kind.o
 debye_module.o : ../../Modules/mp.o
 debye_module.o : ../../Modules/mp_images.o
 debye_module.o : elastic_const.o
+debye_module.o : voigt.o
 elastic_const.o : ../../Modules/constants.o
 elastic_const.o : ../../Modules/invmat.o
 elastic_const.o : ../../Modules/io_global.o
@@ -21,6 +22,7 @@ elastic_const.o : ../../Modules/kind.o
 elastic_const.o : ../../Modules/mp.o
 elastic_const.o : ../../Modules/mp_images.o
 elastic_const.o : quadratic_surfaces.o
+elastic_const.o : voigt.o
 eldos_module.o : ../../Modules/constants.o
 eldos_module.o : ../../Modules/io_global.o
 eldos_module.o : ../../Modules/kind.o
@@ -36,8 +38,8 @@ isoentropic.o : ../../Modules/io_global.o
 isoentropic.o : ../../Modules/kind.o
 isoentropic.o : ../../Modules/mp.o
 isoentropic.o : ../../Modules/mp_images.o
-isoentropic.o : elastic_const.o
 isoentropic.o : strain.o
+isoentropic.o : voigt.o
 latgen_2d.o : ../../Modules/kind.o
 lattices.o : ../../Modules/constants.o
 lattices.o : ../../Modules/io_global.o
@@ -62,8 +64,8 @@ piezoelectric_tensor.o : ../../Modules/cell_base.o
 piezoelectric_tensor.o : ../../Modules/constants.o
 piezoelectric_tensor.o : ../../Modules/io_global.o
 piezoelectric_tensor.o : ../../Modules/kind.o
-piezoelectric_tensor.o : elastic_const.o
 piezoelectric_tensor.o : quadratic_surfaces.o
+piezoelectric_tensor.o : voigt.o
 point_group.o : ../../Modules/constants.o
 point_group.o : ../../Modules/io_global.o
 point_group.o : ../../Modules/kind.o
@@ -84,6 +86,8 @@ strain.o : ../../Modules/constants.o
 strain.o : ../../Modules/io_global.o
 strain.o : ../../Modules/kind.o
 strain.o : rotate.o
+voigt.o : ../../Modules/io_global.o
+voigt.o : ../../Modules/kind.o
 xrdp.o : ../../Modules/constants.o
 xrdp.o : ../../Modules/io_global.o
 xrdp.o : ../../Modules/kind.o

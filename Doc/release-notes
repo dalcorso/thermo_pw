@@ -1,8 +1,25 @@
-New in version 0.8.0
+06/07/2017 Version 0.7.9 of thermo_pw is now frozen.
+
+New in version 0.7.9
+
+The the minimum free energy as a function of temperature is written on file and
+plotted with the anharmonic quantities.
+
+Increased the number of strains that can be computed with the advanced
+algorithm for elastic constants.
 
 Some change in the mixing routine for the optical properties
 with Sternheimer equation.
 
+Introduced an enhanced plot of the bands that shows the small group of
+k in each point and line.
+Several bug fixes in the plot of the bands and of the surface states.
+
+Added examples of the inputs of the tools codes.
+
+Improved recover and timings of the phonon without images.
+
+18/03/2017 Version 0.7.0 of thermo_pw is now frozen.
 
 New in version 0.7.0:
 

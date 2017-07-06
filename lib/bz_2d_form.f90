@@ -43,10 +43,16 @@ END TYPE
 CONTAINS
 
 SUBROUTINE allocate_2d_bz(ibz, bz_struc, celldm, at, bg, celldm_2d)
+!
+!  This routine identify the 2d Brillouin zone (ibz) starting from the at
+!  and celldm and sets celldm_2d and the bz_struc data for the following
+!  routines
+!
 IMPLICIT NONE
 INTEGER, INTENT(OUT) :: ibz
 TYPE(bz_2d), INTENT(INOUT) :: bz_struc
-REAL(DP) :: celldm(6), at(3,3), bg(3,3), celldm_2d(3)
+REAL(DP), INTENT(IN) :: celldm(6), at(3,3), bg(3,3)
+REAL(DP), INTENT(OUT) ::  celldm_2d(3)
 INTEGER :: ibrav_2d
 
 CALL find_ibrav_2d(at,ibrav_2d,celldm,celldm_2d)
@@ -459,7 +465,7 @@ prod1 = at(1,1) * at(1,3) + at(2,1) * at(2,3) + at(3,1) * at(3,3)
 prod2 = at(1,2) * at(1,3) + at(2,2) * at(2,3) + at(3,2) * at(3,3) 
 
 IF (ABS(prod1) > eps .OR. ABS(prod2) > eps) &
-     CALL errore('init_2d_bz','a3 must be perpendicular to a1 and a2',1)
+     CALL errore('find_ibrav_2d','a3 must be perpendicular to a1 and a2',1)
 
 moda1 = SQRT(at(1,1) ** 2 + at(2,1) **2 + at(3,1) ** 2)
 moda2 = SQRT(at(1,2) ** 2 + at(2,2) **2 + at(3,2) ** 2)
@@ -528,10 +534,6 @@ INTEGER :: bzt, i
 REAL(DP) :: omega, at(3,3), bg(3,3), xk_buffer(3), celldm_2d(3)
 TYPE(bz_2d) :: bz_2d_struc
 !
-!    Find the Brillouin zone type
-!
-   CALL find_ibrav_2d(at, bzt, celldm, celldm_2d)
-!
 !    generate direct lattice vectors 
 !
    CALL latgen(ibrav,celldm,at(:,1),at(:,2),at(:,3),omega)
@@ -544,7 +546,8 @@ TYPE(bz_2d) :: bz_2d_struc
 !
    CALL recips( at(:,1), at(:,2), at(:,3), bg(:,1), bg(:,2), bg(:,3) )
 !
-! load the information on the Brillouin zone
+! load the information on the Brillouin zone in bz_2d_struc and identify 
+! the brillouin zone type (bzt) and the celldm_2d
 !
    CALL allocate_2d_bz(bzt, bz_2d_struc, celldm, at, bg, celldm_2d)
    CALL init_2d_bz(bz_2d_struc, celldm_2d)

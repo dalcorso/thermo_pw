@@ -29,6 +29,8 @@ bcast_thermo_input.o : ../../PHonon/PH/phcom.o
 bcast_thermo_input.o : ../../thermo_pw/lib/piezoelectric_tensor.o
 bcast_thermo_input.o : ../../thermo_pw/qe/control_qe.o
 bcast_thermo_input.o : thermo_mod.o
+check_all_geometries_done.o : ../../PHonon/PH/phcom.o
+check_all_geometries_done.o : thermo_mod.o
 check_el_cons.o : ../../Modules/cell_base.o
 check_el_cons.o : ../../Modules/io_global.o
 check_el_cons.o : ../../Modules/kind.o
