@@ -9,7 +9,8 @@ electrons_tpw: contains a call to asyn_master to have the master check for
 solve_linter_tpw: contains a call to asyn_master to have the master check for
                  slaves that need further work at each phonon iteration.
 
-phqscf_tpw : call solve_linter_tpw instead of solve_linter
+phqscf_tpw : call solve_linter_tpw instead of solve_linter. Uses the new
+             logic of the effective charges.
 
 prepare_q_tpw: use the variable tcollect_all to avoid the calculation of
          the bands in the final run that collects all the dynamical matrices.
@@ -21,7 +22,7 @@ run_nscf_tpw : call set_small_group_q also in the lgamma_iq case. This change
                that sets this variable.
 
 do_phonon_tpw : call phqscf_tpw instead of phqscf and prepare_q_tpw instead
-            of prepare_q.
+            of prepare_q. Now moved to the ../src directory.
 
 phescf_tpw : call the more general routine solve_e_fpolc in the case of finite
              frequency instead of solve_e_fpol.

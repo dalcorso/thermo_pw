@@ -29,7 +29,8 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   USE wavefunctions_module, ONLY : evc
   USE constants,            ONLY : degspin
   USE cell_base,            ONLY : at, tpiba2
-  USE klist,                ONLY : lgauss, degauss, ngauss, xk, wk, ngk, igk_k
+  USE klist,                ONLY : ltetra, lgauss, degauss, ngauss, &
+                                   xk, wk, ngk, igk_k
   USE gvect,                ONLY : g
   USE gvecs,                ONLY : doublegrid
   USE fft_base,             ONLY : dfftp, dffts, dtgs
@@ -92,7 +93,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   ! anorm : the norm of the error
   ! averlt: average number of iterations
   ! dr2   : self-consistency error
-  real(DP) :: dos_ef, weight
+  real(DP) :: dos_ef, weight, aux_avg (2)
   ! Misc variables for metals
   ! dos_ef: density of states at Ef
 
@@ -211,7 +212,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   ! if q=0 for a metal: allocate and compute local DOS at Ef
   !
 
-  lmetq0 = lgauss.and.lgamma
+  lmetq0 = (lgauss .OR. ltetra) .AND. lgamma
   if (lmetq0) then
      allocate ( ldos ( dfftp%nnr  , nspin_mag) )
      allocate ( ldoss( dffts%nnr , nspin_mag) )
@@ -527,10 +528,14 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
      !
      call newdq (dvscfin, npe)
 
-     call mp_sum ( ltaver, inter_pool_comm )
-     call mp_sum ( lintercall, inter_pool_comm )
-
+#if defined(__MPI)
+     aux_avg (1) = DBLE (ltaver)
+     aux_avg (2) = DBLE (lintercall)
+     call mp_sum ( aux_avg, inter_pool_comm )
+     averlt = aux_avg (1) / aux_avg (2)
+#else
      averlt = DBLE (ltaver) / lintercall
+#endif
 
      tcpu = get_clock ('PHONON')
 

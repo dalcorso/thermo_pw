@@ -20,25 +20,27 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   USE control_flags,   ONLY : restart, lscf
   USE check_stop,      ONLY : check_stop_now
   USE fft_base,        ONLY : dffts, dfftp
-  USE lr_symm_base,    ONLY : minus_q, nsymq, invsymq
-  USE disp,            ONLY : lgamma_iq
-  USE qpoint,          ONLY : xq
-  USE control_ph,      ONLY : reduce_io, recover, tmp_dir_phq, &
-                              ext_restart, bands_computed, newgrid, qplot, &
-                              only_wfc
-  USE io_global,       ONLY : stdout
-  USE save_ph,         ONLY : tmp_dir_save
   !!!
   USE fft_types, ONLY: fft_type_allocate
   USE cell_base, ONLY: at, bg
   USE gvect,     ONLY: gcutm
   USE gvecs,     ONLY: gcutms
   !!!
+  USE disp,            ONLY : lgamma_iq
+  USE control_ph,      ONLY : reduce_io, recover, tmp_dir_phq, &
+                              ext_restart, bands_computed, newgrid, qplot, &
+                              only_wfc
+  USE io_global,       ONLY : stdout
+  USE save_ph,         ONLY : tmp_dir_save
+  !!!
   USE grid_irr_iq,     ONLY : done_bands
   USE acfdtest,        ONLY : acfdt_is_active, acfdt_num_der, ir_point, delta_vrs
   USE scf,             ONLY : vrs
-  USE el_phon,         ONLY : elph_mat
+
+  USE lr_symm_base,    ONLY : minus_q, nsymq, invsymq
+  USE qpoint,          ONLY : xq
   USE mp_bands,        ONLY : intra_bgrp_comm
+  USE el_phon,         ONLY : elph_mat
  !
   IMPLICIT NONE
   !

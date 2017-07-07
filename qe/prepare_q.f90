@@ -24,15 +24,13 @@ SUBROUTINE prepare_q_tpw(auxdyn, do_band, do_iq, setup_pw, iq)
   !
   USE control_flags,   ONLY : modenum
   USE io_global,       ONLY : stdout, ionode
-  USE klist,           ONLY : lgauss
-  USE qpoint,          ONLY : xq
+  USE klist,           ONLY : lgauss, ltetra
   USE disp,            ONLY : x_q, done_iq, comp_iq, lgamma_iq
   USE grid_irr_iq,     ONLY : irr_iq, done_irr_iq, done_bands
   USE control_ph,      ONLY : ldisp, epsil, trans, zue, zeu, &
                               start_irr, last_irr, current_iq, newgrid, &
                               tmp_dir_ph, tmp_dir_phq, lqdir, qplot, &
                               always_run, where_rec, rec_code
-  USE control_lr,      ONLY : lgamma
   USE control_qe,      ONLY : tcollect_all
   USE ph_restart,      ONLY : ph_writefile
   USE io_files,        ONLY : prefix
@@ -40,6 +38,10 @@ SUBROUTINE prepare_q_tpw(auxdyn, do_band, do_iq, setup_pw, iq)
   USE freq_ph,         ONLY : fpol
   USE output,          ONLY : fildyn, fildvscf
   USE el_phon,         ONLY : elph_mat, wan_index_dyn, auxdvscf
+  USE dfpt_tetra_mod,  ONLY : dfpt_tetra_linit
+
+  USE qpoint,          ONLY : xq
+  USE control_lr,      ONLY : lgamma
   ! YAMBO >
   USE YAMBO,           ONLY : elph_yambo,yambo_elph_file_name,dvscf_yambo
   ! YAMBO <
@@ -132,7 +134,7 @@ SUBROUTINE prepare_q_tpw(auxdyn, do_band, do_iq, setup_pw, iq)
      !
      IF ( lgamma ) THEN
         !
-        IF ( .NOT. lgauss ) THEN
+        IF ( .NOT. (lgauss .OR. ltetra)) THEN
            !
            ! ... in the case of an insulator at q=0 one has to calculate
            ! ... the dielectric constant and the Born eff. charges
@@ -189,12 +191,12 @@ SUBROUTINE prepare_q_tpw(auxdyn, do_band, do_iq, setup_pw, iq)
   !     of q \= 0   we do make first a nscf run
   !
   setup_pw = (.NOT.lgamma .OR. modenum /= 0 .OR. newgrid) 
-!
-! with qplot we redo the bands at gamma if it is not the first point
-! of the list.
-!
+  !
+  ! with qplot we redo the bands at gamma if it is not the first point
+  ! of the list.
+  !
   IF ((qplot.AND.iq /= 1).OR.always_run) setup_pw=.true.
- ! YAMBO >
+  ! YAMBO >
   if (qplot.and.elph_yambo) setup_pw=.true.
   ! YAMBO <
 
@@ -205,15 +207,17 @@ SUBROUTINE prepare_q_tpw(auxdyn, do_band, do_iq, setup_pw, iq)
         EXIT
      ENDIF
   ENDDO
-!
-!  If this q has been already calculated we only diagonalize the dynamical 
-!  matrix
-!
+  !
+  !  If this q has been already calculated we only diagonalize the dynamical 
+  !  matrix
+  !
 
   IF ( done_iq(iq) ) do_band=.FALSE.
   IF (tcollect_all)  do_band=.FALSE.
   done_bands(iq) = check_bands(tmp_dir_ph, xq, iq)
-
+  !
+  IF(.NOT. setup_pw .AND. ltetra) dfpt_tetra_linit = .TRUE.
+  !
   RETURN
   !
 END SUBROUTINE prepare_q_tpw
