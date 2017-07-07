@@ -297,7 +297,7 @@ REAL(DP) :: fx, fxp, v1, v1old
 REAL(DP) :: compute_fun, compute_fun_deriv
 INTEGER :: istep
 
-v1=v0*0.8_DP
+v1=v0
 v1old=v1
 DO istep=1,maxstep
    fx = compute_fun(v1, v0, b0, b01, a, m1)
