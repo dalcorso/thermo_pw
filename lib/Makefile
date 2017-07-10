@@ -18,6 +18,7 @@ gnuplot.o \
 gnuplot_color.o \
 lattices.o \
 linear_solvers.o \
+magnetic_point_group.o \
 mp_asyn.o \
 nye.o \
 phdos_module.o \

@@ -887,6 +887,12 @@ It has routines that finds all the subgroups or supergroups of a given given
 point group.
 
 \item
+\texttt{magnetic\_point\_group.f90} contains routines to deal with crystallographic
+magnetic point groups. Presently it contains only the list of magnetic
+point groups and some routines to assign a code or an extended code to each
+magnetic point group.
+
+\item
 \texttt{eldos\_module.f90} contains routines to calculate the electronic
 excitation energy, free energy, entropy, and constant strain heat capacity
 from the electronic density of states, assuming a gas of independent 
@@ -909,6 +915,10 @@ Bravais lattice.
 \item
 \texttt{isoentropic.f90} contains routines to calculate the isoentropic
 quantities or the constant stress heat capacity.
+
+\item
+\texttt{voigt.f90} contains routines to pass from the usual form of tensors
+to the voigt notation or from tensors in voigt form to the usual form.
 
 \item
 \texttt{piezoelectric\_tensor.f90} contains routines to calculate the
