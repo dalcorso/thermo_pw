@@ -235,6 +235,8 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
   ENDDO
   WRITE(stdout,'(5x,"Number of lines:", i4, " Total number of points:",i8,/)') &
                                         nlines, tot_points
+  
+  IF (nlines==0) GOTO 300
 !
 !   First the variables that characterize the lines
 !
@@ -869,26 +871,7 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
 !  IF (lgnuplot.AND.ionode) &
 !     CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '//TRIM(gnu_filename),&
 !                                                             WAIT=.FALSE.)
-!
-!  First deallocate the variables that define the path read from file
-!
-  DEALLOCATE (e)
-  DEALLOCATE (k)
 
-  DEALLOCATE (high_symmetry)
-  DEALLOCATE (rap)
-  DEALLOCATE (gcodek)
-  DEALLOCATE (aux_ind)
-  DEALLOCATE (gcodek_ext)
-  DEALLOCATE (lprojk)
-  DEALLOCATE (gaugek)
-  DEALLOCATE (ptypek)
-  DEALLOCATE (same_next)
-!
-!  then the variables that define the lines
-!
-  DEALLOCATE (start_point)
-  DEALLOCATE (last_point)
   DEALLOCATE (point_group_path)
   DEALLOCATE (dorap)
   DEALLOCATE (is_in_range)
@@ -933,12 +916,35 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
 !  the x coordinate of the path and the k_rap
 !
   DEALLOCATE (kx) 
-  DEALLOCATE (k_rap)
 
   IF (identify_sur) THEN
      DEALLOCATE (lsurface_state_eff)
      DEALLOCATE (lsurface_state_rap)
   ENDIF
+
+!
+!  last deallocate the variables that define the path read from file
+!
+
+300 CONTINUE
+  DEALLOCATE (e)
+  DEALLOCATE (k)
+  DEALLOCATE (k_rap)
+
+  DEALLOCATE (high_symmetry)
+  DEALLOCATE (rap)
+  DEALLOCATE (gcodek)
+  DEALLOCATE (aux_ind)
+  DEALLOCATE (gcodek_ext)
+  DEALLOCATE (lprojk)
+  DEALLOCATE (gaugek)
+  DEALLOCATE (ptypek)
+  DEALLOCATE (same_next)
+!
+!  then the variables that define the lines
+!
+  DEALLOCATE (start_point)
+  DEALLOCATE (last_point)
 
   RETURN
 END SUBROUTINE plotband_sub
