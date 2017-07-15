@@ -170,7 +170,8 @@ MODULE point_group
          print_ptype_info, find_factor_system, sym_jones, transform_group, &
          hex_op, cub_op, point_group_bravais, find_group_tags,  &
          group_name_schoenflies, group_name_international, &
-         group_intersection
+         group_intersection, find_irreducible, set_rotations_character, &
+         set_irr_times_d
 
 CONTAINS
 
@@ -12995,8 +12996,10 @@ SELECT CASE (cge)
          char_mat_proj(9,2)= w1
          char_mat_proj(9,3)= w1**2
          char_mat_proj(9,4)= w1**3
-         char_mat_proj(9,5)= w1**4
-         char_mat_proj(9,6)= w1**5
+!         char_mat_proj(9,5)= w1**4
+!         char_mat_proj(9,6)= w1**5
+         char_mat_proj(9,5)= CONJG(w1**2)
+         char_mat_proj(9,6)= CONJG(w1)
          char_mat_proj(9,7:12)=-char_mat_proj(9,1:6)
 
          name_rap(10)='E_1*u   M_1u'
@@ -13004,28 +13007,36 @@ SELECT CASE (cge)
          char_mat_proj(10,2)= w
          char_mat_proj(10,3)= w**2
          char_mat_proj(10,4)= w**3
-         char_mat_proj(10,5)= w**4
-         char_mat_proj(10,6)= w**5
+!         char_mat_proj(10,5)= w**4
+!         char_mat_proj(10,6)= w**5
+         char_mat_proj(10,5)= CONJG(w**2)
+         char_mat_proj(10,6)= CONJG(w)
          char_mat_proj(10,7:12)=-char_mat_proj(10,1:6)
 
-         w1=CONJG(w**2)
+!         w1=CONJG(w**2)
+         w1=CMPLX(-0.5_DP, sqrt3*0.5_DP)
          name_rap(11)='E_2u    M-2u'
          char_mat_proj(11,1)=(1.0_DP,0.0_DP)
          char_mat_proj(11,2)= w1
          char_mat_proj(11,3)= w1**2
          char_mat_proj(11,4)= w1**3
-         char_mat_proj(11,5)= w1**4
-         char_mat_proj(11,6)= w1**5
+!         char_mat_proj(11,5)= w1**4
+!         char_mat_proj(11,6)= w1**5
+         char_mat_proj(11,5)= CONJG(w1**2)
+         char_mat_proj(11,6)= CONJG(w1)
          char_mat_proj(11,7:12)=-char_mat_proj(11,1:6)
 
-         w1=w**2
+!         w1=w**2
+         w1=CMPLX(-0.5_DP, -sqrt3*0.5_DP)
          name_rap(12)='E_2*u   M_2u'
          char_mat_proj(12,1)=(1.0_DP,0.0_DP)
          char_mat_proj(12,2)= w1
          char_mat_proj(12,3)= w1**2
          char_mat_proj(12,4)= w1**3
-         char_mat_proj(12,5)= w1**4
-         char_mat_proj(12,6)= w1**5
+!         char_mat_proj(12,5)= w1**4
+!         char_mat_proj(12,6)= w1**5
+         char_mat_proj(12,5)= CONJG(w1**2)
+         char_mat_proj(12,6)= CONJG(w1)
          char_mat_proj(12,7:12)=-char_mat_proj(12,1:6)
 
 
@@ -14322,7 +14333,7 @@ SELECT CASE (cge)
          char_mat_proj(3,9:12)= w 
          char_mat_proj(3,13:24)=char_mat_proj(3,1:12)
 
-         name_rap(4)='Tg'
+         name_rap(4)='T_g'
          char_mat_proj(4,1)=(3.0_DP,0.0_DP)
          char_mat_proj(4,2:4)=(-1.0_DP,0.0_DP) 
          char_mat_proj(4,13:24)=char_mat_proj(4,1:12)
@@ -14343,7 +14354,7 @@ SELECT CASE (cge)
          char_mat_proj(7,9:12)= w 
          char_mat_proj(7,13:24)=-char_mat_proj(7,1:12)
 
-         name_rap(8)='Tu'
+         name_rap(8)='T_u'
          char_mat_proj(8,1)=(3.0_DP,0.0_DP)
          char_mat_proj(8,2:4)=(-1.0_DP,0.0_DP) 
          char_mat_proj(8,13:24)=-char_mat_proj(8,1:12)
@@ -16867,6 +16878,149 @@ CALL find_group_ext(group_tags_c, nsym_c, code_group_ext_c)
 RETURN
 END SUBROUTINE group_intersection
 
+SUBROUTINE set_rotations_character(code_group_ext, character_rot, j, do_parity)
+!
+!  This routine sets the characters of the rotations in the representation of
+!  angular momentum j and with parity - (if do_parity is .true.) or 
+!  + (if do_parity is .false.).
+!
+USE constants, ONLY : pi
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: code_group_ext
+REAL(DP), INTENT(IN) :: j
+COMPLEX(DP), INTENT(OUT) :: character_rot(48)
+LOGICAL, INTENT(IN) :: do_parity
+
+INTEGER :: isym, nsym, group_desc(48)
+REAL(DP) :: arg
+
+IF ((NINT(2.0_DP*j)-2.0_DP*j) > 1.d-10) &
+           CALL errore('set_rotations_character','j must be integer or semi-integer',1)
+
+CALL set_group_desc(group_desc, nsym, code_group_ext)
+
+DO isym=1,nsym
+   arg=angle_op(group_desc(isym),1)
+!
+!   For half integer representations, rotations angles are  between -pi and pi
+!
+   IF (arg > pi) arg=arg-2.0_DP*pi
+   IF (ABS(arg)<1.D-8) THEN
+      character_rot(isym)=CMPLX(2.0_DP*j+1.0_DP,0.0_DP)
+   ELSE
+      character_rot(isym)= CMPLX(SIN((j+0.5_DP)*arg)/SIN(arg*0.5_DP),0.0_DP)
+   ENDIF
+   IF (group_desc(isym)> 32.AND.do_parity) character_rot(isym)=-character_rot(isym)
+ENDDO
+
+RETURN
+END SUBROUTINE set_rotations_character
+
+
+REAL(DP) FUNCTION angle_op(sym_code, flag)
+!
+!   This routine gives as output the rotation angle of each of the 64 symmetry
+!   operations defined in QE. When flag=1 the rotation angle is in radiants,
+!   otherwise it is in degrees
+!
+USE constants, ONLY : pi
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: sym_code, flag
+INTEGER :: sc
+REAL(DP) :: mat_rot(3,3)
+
+sc=sym_code
+IF (sym_code > 32) sc=sym_code-32
+CALL set_sym_o3(mat_rot, sc)
+angle_op = angle_rot_tpw(mat_rot)
+
+IF (flag==1) angle_op=angle_op * pi / 180.0_DP
+RETURN 
+END FUNCTION angle_op
+
+SUBROUTINE set_irr_times_d(code_group_ext, ptype, char_mat_proj, name_rap, &
+                                                    nrap, nsym, jang, do_parity)
+!
+!  This routine sets a character table for a given point group multiplying
+!  the characters in each representation for the characters of the
+!  representation of the rotation group with angular momentum j and parity
+!  + (if do_parity=.FALSE.) or - (if do_parity=.TRUE.)
+!  Only the representations of the group and of the double group are 
+!  allowed, depending on ptype(1).
+!
+IMPLICIT NONE
+INTEGER, INTENT(IN)  :: code_group_ext, ptype(3)
+INTEGER, INTENT(OUT) :: nrap, nsym
+CHARACTER(LEN=45)    :: name_rap(48)
+REAL(DP), INTENT(IN) :: jang
+LOGICAL, INTENT(IN)  :: do_parity
+COMPLEX(DP), INTENT(OUT) :: char_mat_proj(48,48)
+
+INTEGER :: irap, isym, group_desc(48)
+COMPLEX(DP) :: character_rot(48)
+
+CALL set_group_desc(group_desc, nsym, code_group_ext)
+CALL set_stand_irr_proj(code_group_ext, ptype, char_mat_proj, name_rap, nrap, nsym)
+CALL set_rotations_character(code_group_ext, character_rot, jang, do_parity)
+
+DO irap=1,nrap
+   DO isym=1,nsym
+      char_mat_proj(irap,isym) = char_mat_proj(irap,isym) * character_rot(isym)
+   ENDDO
+ENDDO
+
+RETURN
+END SUBROUTINE set_irr_times_d
+
+SUBROUTINE find_irreducible(code_group_ext, ptype, characters, rap_list, &
+                                            name_rap_list, nrap, nrapx)
+!
+!  This routine receives the extended code of a point group and an
+!  array of characters and decomposes the representation that corresponds
+!  to the array into irreducible representations. Projective representations
+!  are allowed. 
+!  To use the point group set ptype=1, 
+!  To use the double point group set ptype=1, ptype(1)=-1
+!
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: code_group_ext, nrapx, ptype(3)
+INTEGER, INTENT(OUT) :: nrap, rap_list(nrapx)
+CHARACTER(LEN=45), INTENT(OUT) :: name_rap_list(nrapx)
+COMPLEX(DP), INTENT(IN) :: characters(48)
+
+INTEGER :: isym, nsym, group_desc(48), nrap_proj, nsym_proj, ideg, i, irap
+COMPLEX(DP) :: char_mat_proj(48,48), prod
+CHARACTER(LEN=45) :: name_rap(48)
+
+CALL set_group_desc(group_desc, nsym, code_group_ext)
+CALL set_stand_irr_proj(code_group_ext, ptype, char_mat_proj, name_rap, nrap_proj, &
+                                                                   nsym_proj)
+
+IF (nsym /= nsym_proj) CALL errore('find_irreducible',' problem with nsym',1)
+
+nrap=0
+rap_list=0
+DO irap=1, nrap_proj
+   prod=(0.0_DP,0.0_DP)
+   DO isym=1,nsym
+      prod=prod + CONJG(char_mat_proj(irap, isym)) * characters(isym) 
+   ENDDO
+   prod=prod/nsym
+!   WRITE(6,*) irap, AIMAG(prod), NINT(REAL(prod))-REAL(prod)
+   IF (AIMAG(prod)>3.D-7) CALL errore('find_irreducible','imaginary product',1)
+   IF ((NINT(REAL(prod))-REAL(prod)) > 3.D-7) & 
+      CALL errore('find_irreducible','problem with input rap',1)
+   ideg=NINT(REAL(prod))
+   IF (nrap+ideg > nrapx) CALL errore('find_irreducible','increase nrapx',1)
+   DO i=1, ideg
+      rap_list(nrap+i)=irap      
+      name_rap_list(nrap+i)=name_rap(irap)
+   ENDDO
+   nrap=nrap+ideg
+ENDDO
+
+RETURN
+END SUBROUTINE find_irreducible
 
 END MODULE point_group
 

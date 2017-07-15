@@ -18,7 +18,8 @@ USE point_group,      ONLY : print_element_list, group_index_from_ext, &
                              set_sym_su2, product_sym_su2, compute_classes, &
                              compute_classes_double, print_kronecker_table, &
                              sym_jones, transform_group, hex_op, cub_op, &
-                             group_intersection
+                             group_intersection, find_irreducible, &
+                             set_rotations_character, set_irr_times_d
 USE io_global,        ONLY : stdout
 
 IMPLICIT NONE
@@ -33,9 +34,15 @@ INTEGER :: group_desc(48), epos(48,48), prd(48,48), ptype(3), ptype1(3), &
            ptype2(3), linvs
 INTEGER :: i, j, k, l, m, n, iepos, ksym, iclass, ielem, giin_ext, giout_ext
 INTEGER :: nclasses, nelem(24), elem(18,24), has_e(18,24)
-INTEGER :: group_index_a_ext, group_index_b_ext, group_index_c_ext
-REAL(DP):: mat(3,3)
-COMPLEX(DP) :: cmat(2,2)
+INTEGER :: group_index_a_ext, group_index_b_ext, group_index_c_ext, nrap, &
+           nrap_gp, irap, ndim, ncount, subwork_choice
+INTEGER, ALLOCATABLE :: rap_list(:)
+CHARACTER(LEN=45) :: name_rap(48)
+CHARACTER(LEN=45), ALLOCATABLE :: name_rap_list(:)
+CHARACTER(LEN=1) :: chparity
+REAL(DP):: mat(3,3), jang
+LOGICAL :: do_parity
+COMPLEX(DP) :: cmat(2,2), character_rap(48), char_mat_proj(48,48)
 
 CALL mp_startup ( start_images=.true. )
 CALL environment_start ( code )
@@ -56,10 +63,10 @@ WRITE(stdout,'(5x,"12) List supergroups")')
 WRITE(stdout,'(5x,"13) Write one compatibility table")')
 WRITE(stdout,'(5x,"14) Write all compatibility tables for one group")')
 WRITE(stdout,'(5x,"15) Write all compatibility tables")')
-WRITE(stdout,'(5x,"16) Decompose Kronecker products table (chi x chi)")')
-WRITE(stdout,'(5x,"17) Decompose Kronecker products table (chi^* x chi)")')
-WRITE(stdout,'(5x,"18) List conjugate groups")')
-WRITE(stdout,'(5x,"19) Find intersection between two groups")')
+WRITE(stdout,'(5x,"16) Decompose representations")')
+WRITE(stdout,'(5x,"17) List conjugate groups")')
+WRITE(stdout,'(5x,"18) Find intersection between two groups")')
+
 
 READ(5,*) work_choice
 
@@ -261,53 +268,200 @@ ELSEIF (work_choice == 13 .OR. work_choice == 14 .OR. work_choice==15) THEN
          END DO
       END DO
    END DO
-ELSEIF (work_choice == 16 .OR. work_choice==17) THEN
-   CALL read_group_index(group_desc,nsym,group_index_in_ext)
-   CALL read_group_index(group_desc,nsym,group_index_out_ext)
+ELSEIF (work_choice == 16) THEN
 
-!   DO group_index_in_ext=1,136
-!      DO group_index_out_ext=1,136
-         IF (is_subgroup(group_index_in_ext, group_index_out_ext)) THEN
-            WRITE(stdout,'(/,5x,"Group number   ", i4, 2x, a11, &
-                               &" : Subgroup number", i4, 2x, a11)')  &
-                    group_index_in_ext,   &
-                    group_name(group_index_from_ext(group_index_in_ext)), &
-                    group_index_out_ext,    &
-                    group_name(group_index_from_ext(group_index_out_ext))
+   WRITE(stdout,'(5x,"1) Decompose Kronecker products table (chi x chi)")')
+   WRITE(stdout,'(5x,"2) Decompose Kronecker products table (chi^* x chi)")')
+   WRITE(stdout,'(5x,"3) Find the representations of translations")')
+   WRITE(stdout,'(5x,"4) Find the representations of rotations")')
+   WRITE(stdout,'(5x,"5) Decompose the representations of the full &
+                                           &rotation group D(j)(+-)")')
+   WRITE(stdout,'(5x,"6) Decompose the product of the group representations &
+                                               &chi and D(1/2)(+)")')
+   WRITE(stdout,'(5x,"7) Decompose the product of the group representations &
+                                               &chi and D(j)(+-)")')
+   READ(5,*) subwork_choice 
+   IF (subwork_choice ==1 .OR. subwork_choice==2) THEN
+      CALL read_group_index(group_desc,nsym,group_index_in_ext)
+      CALL read_group_index(group_desc,nsym,group_index_out_ext)
 
-            DO k=1,-1,-2
-               DO j=1,-1,-2
-                  DO i=1,-1,-2
-                     DO l=1,-1,-2
-                        DO m=1,-1,-2
-                           DO n=1,-1,-2
-                              ptype1(1)=n
-                              ptype1(2)=l
-                              ptype1(3)=j
-                              ptype2(1)=m
-                              ptype2(2)=i
-                              ptype2(3)=k
-                              IF (m>n) CYCLE
-                              IF (i>l) CYCLE
-                              IF (k>j) CYCLE
-                              IF (work_choice==14) THEN
-                                 CALL print_kronecker_table(group_index_in_ext,&
+!     DO group_index_in_ext=1,136
+!        DO group_index_out_ext=1,136
+            IF (is_subgroup(group_index_in_ext, group_index_out_ext)) THEN
+               WRITE(stdout,'(/,5x,"Group number   ", i4, 2x, a11, &
+                                  &" : Subgroup number", i4, 2x, a11)')  &
+                       group_index_in_ext,   &
+                       group_name(group_index_from_ext(group_index_in_ext)), &
+                       group_index_out_ext,    &
+                       group_name(group_index_from_ext(group_index_out_ext))
+
+               DO k=1,-1,-2
+                  DO j=1,-1,-2
+                     DO i=1,-1,-2
+                        DO l=1,-1,-2
+                           DO m=1,-1,-2
+                              DO n=1,-1,-2
+                                 ptype1(1)=n
+                                 ptype1(2)=l
+                                 ptype1(3)=j
+                                 ptype2(1)=m
+                                 ptype2(2)=i
+                                 ptype2(3)=k
+                                 IF (m>n) CYCLE
+                                 IF (i>l) CYCLE
+                                 IF (k>j) CYCLE
+                                 IF (work_choice==14) THEN
+                                    CALL print_kronecker_table(group_index_in_ext,&
                                    ptype1,ptype2,group_index_out_ext,.FALSE.)
-                              ELSE
-                                 CALL print_kronecker_table(group_index_in_ext,&
-                                   ptype1,ptype2,group_index_out_ext,.TRUE.)
-                              END IF
+                                 ELSE
+                                    CALL print_kronecker_table(group_index_in_ext,&
+                                      ptype1,ptype2,group_index_out_ext,.TRUE.)
+                                 END IF
+                              END DO
                            END DO
                         END DO
                      END DO
                   END DO
                END DO
-            END DO
-         ENDIF
-!      ENDDO
-!   ENDDO
+            ENDIF
+!        ENDDO
+!     ENDDO
+   ELSEIF (subwork_choice==3.OR.subwork_choice==4) THEN
+      CALL read_group_index(group_desc,nsym,group_index_ext)
 
-ELSEIF (work_choice==18) THEN
+!DO group_index_ext=1,136
+!   WRITE(stdout,'(/,5x,"Group number   ", i4, 2x, a11)') &
+!                    group_index_ext,   &
+!                    group_name(group_index_from_ext(group_index_ext))
+!
+!
+!   translations are vectors, so they have the same character table of the rotations 
+!   with l=1 and odd parity, rotations are axial vectors so the parity is even
+!
+      IF (subwork_choice==3) THEN
+         CALL set_rotations_character(group_index_ext, character_rap,1.0_DP,.TRUE.)
+      ELSE
+         CALL set_rotations_character(group_index_ext, character_rap,1.0_DP,.FALSE.)
+      ENDIF
+
+      ndim=3
+      ALLOCATE(rap_list(ndim))
+      ALLOCATE(name_rap_list(ndim))
+      ptype=1
+      CALL find_irreducible(group_index_ext, ptype, character_rap, &
+                                rap_list, name_rap_list, nrap, ndim)
+
+      IF (subwork_choice==3) THEN
+         WRITE(stdout,'(/,5x,"Translations are:")') 
+      ELSE
+         WRITE(stdout,'(/,5x,"Rotations are:")') 
+      ENDIF
+      CALL print_rap(nrap, name_rap_list)
+      DEALLOCATE(name_rap_list)
+      DEALLOCATE(rap_list)
+!ENDDO
+   ELSEIF (subwork_choice==5) THEN
+      CALL read_group_index(group_desc,nsym,group_index_ext)
+
+      WRITE(stdout,'(5x,"Angular momentum j (0, 1, 2, 3, ... for s,p,d,f... &
+             or 0.5, 1.5, 2.5, ...) ?")')
+      READ(5,*) jang
+
+      WRITE(stdout,'(/,5x,"Parity of D(j): + or - ?")') 
+      READ(5,*) chparity
+      do_parity=.FALSE.
+      IF (chparity=='-') do_parity=.TRUE.
+
+!DO group_index_ext=1,136
+!   WRITE(stdout,'(/,5x,"Group number   ", i4, 2x, a11)') &
+!                    group_index_ext,   &
+!                    group_name(group_index_from_ext(group_index_ext))
+
+      CALL set_rotations_character(group_index_ext, character_rap, jang, do_parity)
+
+      ptype=1
+      ndim=NINT(2.0_DP*jang+1.0_DP)
+      ALLOCATE(rap_list(ndim))
+      ALLOCATE(name_rap_list(ndim))
+!
+!  Use the double group to decompose the half integer representations
+!
+      IF ((NINT(jang)-jang)> 1.D-8) ptype(1)=-1
+      CALL find_irreducible(group_index_ext, ptype, character_rap, &
+                                    rap_list, name_rap_list, nrap, ndim)
+
+      IF (do_parity) THEN
+         WRITE(stdout,'(/,5x,"D(",f6.2,"(-) decomposes into:")') jang
+      ELSE
+         WRITE(stdout,'(/,5x,"D(",f6.2,"(+) decomposes into:")') jang
+      ENDIF
+   
+      CALL print_rap(nrap, name_rap_list)
+
+      DEALLOCATE(rap_list)
+      DEALLOCATE(name_rap_list)
+!ENDDO
+   ELSEIF (subwork_choice==6.OR.subwork_choice==7) THEN
+      CALL read_group_index(group_desc,nsym,group_index_ext)
+!
+!   Spin does not change for parity so use the (+) representation
+!
+      ptype1=1
+      IF (subwork_choice==7) THEN
+         WRITE(stdout,'(/,5x,"Point group (1) or double point group (-1) &
+                                                      &representations?")')
+         READ(5,*) ptype1(1)
+         IF (ptype1(1)/=1.AND.ptype1(1)/=-1) ptype1(1)=1
+
+         WRITE(stdout,'(5x,"Angular momentum j (0, 1, 2, 3, ... for s,p,d,f... &
+             or 0.5, 1.5, 2.5, ...) ?")')
+         READ(5,*) jang
+
+         WRITE(stdout,'(5x,"Parity of D(j): + or - ?")')
+         READ(5,*) chparity
+         do_parity=.FALSE.
+         IF (chparity=='-') do_parity=.TRUE.
+      ELSE
+         jang=0.5_DP
+         do_parity=.FALSE.
+      ENDIF
+!DO group_index_ext=1,136
+!   WRITE(stdout,'(/,5x,"Group number   ", i4, 2x, a11)') &
+!                    group_index_ext,   &
+!                    group_name(group_index_from_ext(group_index_ext))
+
+      CALL set_irr_times_d(group_index_ext, ptype1, char_mat_proj, name_rap, &
+                                            nrap_gp, nsym, jang, do_parity)
+      ptype=ptype1
+      IF (MOD(NINT(2.0_DP*jang),2)==1) ptype(1)=-1*ptype1(1)
+      DO irap=1,nrap_gp
+         IF (subwork_choice==6) THEN
+            WRITE(stdout,'(/,5x,a," times D(1/2)(+) decomposes into:")') &
+                              TRIM(name_rap(irap)(1:8))
+         ELSE
+            IF (do_parity) THEN
+               WRITE(stdout,'(/,5x,a," times D(",f6.1,")(-) &
+                         &decomposes into:")') TRIM(name_rap(irap)(1:8)), jang
+            ELSE
+               WRITE(stdout,'(/,5x,a," times D(",f6.1,")(+) &
+                             &decomposes into:")')  TRIM(name_rap(irap)(1:8)),& 
+                             jang
+            ENDIF 
+         ENDIF
+         character_rap(1:nsym) = char_mat_proj(irap,1:nsym)
+         ndim=NINT(REAL(char_mat_proj(irap,1)))
+         ALLOCATE(rap_list(ndim))
+         ALLOCATE(name_rap_list(ndim))
+         CALL find_irreducible(group_index_ext, ptype, character_rap, &
+                                    rap_list, name_rap_list, nrap, ndim)
+         CALL print_rap(nrap, name_rap_list)
+
+         DEALLOCATE(rap_list)
+         DEALLOCATE(name_rap_list)
+      ENDDO
+!    ENDDO
+   ENDIF
+ELSEIF (work_choice==17) THEN
    CALL read_group_index(group_desc,nsym,group_index_in_ext)
 
    WRITE(stdout,*)
@@ -322,7 +476,7 @@ ELSEIF (work_choice==18) THEN
          END IF
       END IF
    END DO
-ELSEIF (work_choice==19) THEN
+ELSEIF (work_choice==18) THEN
    CALL read_group_index(group_desc,nsym,group_index_a_ext)
    CALL read_group_index(group_desc,nsym,group_index_b_ext)
 
@@ -341,6 +495,7 @@ ELSEIF (work_choice==19) THEN
                          group_name(group_index_from_ext(group_index_c_ext))
    WRITE(stdout,'(/,5x,"with elements")') 
    CALL print_element_list(group_index_c_ext)
+
 ENDIF
 
 CALL environment_end( code )
@@ -358,21 +513,49 @@ INTEGER :: group_index_ext, nsym
 INTEGER :: group_desc(48)
 INTEGER :: isym 
 CHARACTER(LEN=11) :: group_name
-WRITE(stdout,'(/,5x,"Extended point group code (see the list using 4)?")')
-WRITE(stdout,'(5x,"Set 0 to give the number of symmetry operations and &
-                                                    &their list.")')
-READ(5,*) group_index_ext
+WRITE(stdout,'(/,5x,"Extended point group code (1-136) (see the list using 4)?")')
 
-IF (group_index_ext==0) THEN
-   READ(5,*) nsym
-   READ(5,*) (group_desc(isym), isym=1,nsym)
-   CALL find_group_ext(group_desc,nsym,group_index_ext)
-ELSE
-   CALL set_group_desc(group_desc,nsym,group_index_ext)
-ENDIF
+READ(5,*) group_index_ext
+CALL set_group_desc(group_desc,nsym,group_index_ext)
 
 WRITE(stdout,'(/,5x,"Group number",i5,3x,a11)') group_index_ext, &
                           group_name(group_index_from_ext(group_index_ext)) 
 
 RETURN
 END SUBROUTINE read_group_index
+
+SUBROUTINE print_rap(nrap, name_rap_list)
+
+USE io_global, ONLY : stdout
+IMPLICIT NONE
+
+INTEGER, INTENT(IN) :: nrap
+CHARACTER(LEN=45) :: name_rap_list(nrap)
+
+INTEGER :: ncount, irap
+CHARACTER(LEN=45) :: current_name
+
+IF (nrap>0) THEN
+   ncount=1
+   current_name=name_rap_list(1)(1:8)
+ENDIF
+IF (nrap==1) WRITE(stdout,'(9x,a)') TRIM(current_name)
+DO irap=2, nrap
+   IF (name_rap_list(irap)(1:8) /= current_name) THEN
+      IF (ncount==1) THEN
+         WRITE(stdout,'(9x,a)') TRIM(current_name)
+      ELSE
+         WRITE(stdout,'(5x,i3,1x,a)') ncount, TRIM(current_name)
+      ENDIF
+      ncount=1
+      current_name=name_rap_list(irap)(1:8)
+      IF (irap==nrap) WRITE(stdout,'(9x,a)') TRIM(current_name)
+   ELSEIF (irap==nrap) THEN
+      ncount=ncount+1
+      WRITE(stdout,'(5x,i3,1x,a)') ncount, TRIM(current_name)
+   ELSE
+      ncount=ncount+1
+   ENDIF
+ENDDO
+RETURN
+END SUBROUTINE print_rap

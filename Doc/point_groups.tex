@@ -56,7 +56,7 @@
 solid, the symmetry of its physical properties, the symmetry
 of the electronic wavefunctions and of the phonon modes. The proper interpretation
 of these symmetry information requires the knowledge of the conventions on the 
-underlying point groups. This small guide illustrates these conventions
+underlying point groups. This guide illustrates these conventions
 for a better interpretation of the output of these codes. \\
 For each point group we give: 
 \begin{itemize}
@@ -113,6 +113,16 @@ and their $O(3)$ and $SU(2)$ matrices.
 \item A table of all the Kronecker products of the representations and
 their decomposition into the irreducible or projective representations
 of all the subgroups.
+
+\item The irreducible representations of the translations and of the rotations
+for each point group.
+
+\item The decomposition of all the integer or seminteger representations
+of the rotation group into irreducible representations of any of the point groups.
+
+\item The decomposition of all the products of the irreducible representations 
+of the group times the integer and seminteger representations of the 
+rotation group into irreducible representations of the point group.
 
 \end{itemize}
 It is assumed that the reader has a basic understanding of group theory and
@@ -4254,6 +4264,498 @@ the list of the symmetry operations is given after the name.
            i2xz i2x-y i2xy
 \end{verbatim}
 \newpage
+\section{\color{coral}Alternative names for the irreducible representations}
+Comparison of the output of \thermo\ and of \texttt{pw.x} and \texttt{ph.x} with
+previous literature is sometimes difficult due to the use of different names
+for the irreducible representations. As a rule we have used the names
+reported in Ref.~[1] for the representations of the point group and those
+of Ref.~[2] for the representation of the double point group. Alternative
+names are present in the literature expecially to classify the electronic
+band structures. Some of these alternative names are written on the output
+of \qe. In this section we explain the meaning of these alternative names and
+indicate their origin. Moreover we collect equivalence tables for the names
+of the irreducible representations. 
+We give a table for each point group and in each table the first column 
+contains the names of the representations used in this guide, followed 
+by the names used by \qe\ and by other references.
+
+\begin{verbatim}
+C_1         [QE]        [1,5]   [2]    [11]
+A           A           A       G_1             
+G_2         G_2                 G_2              
+\end{verbatim}
+
+\begin{verbatim}
+C_i         [QE]        [1,5]   [2]    [11] 
+A_g         A_g         A_g     G_1+   M_0g
+A_u         A_u         A_u     G_1-   M_0u
+G_2+        G_2+                G_2+   M_1/2g
+G_2-        G_2-                G_2-   M_1/2u
+\end{verbatim}
+
+\begin{verbatim}
+C_s         [QE]        [1,5]   [2]    [11] 
+A'          A'          A'      G_1    M_0
+A''         A''         A''     G_2    M_1
+G_3         G_3                 G_3    M_1/2
+G_4         G_4                 G_4    M_1/2*
+\end{verbatim}
+
+$C_s$ is the small group of ${\bf k}$ along the $\Sigma$ line of the 
+zinc-blend structure and in Ref.[15] its representations have been given
+particular names.
+\begin{verbatim}
+C_2         [QE]        [1,5]   [2]    [11]    [15]  
+A           A           A       G_1    M_0     S_1
+B           B           B       G_2    M_1     S_2
+G_3         G_3                 G_3    M_1/2   S_3
+G_4         G_4                 G_4    M_1/2*  S_4
+\end{verbatim}
+
+\begin{verbatim}
+C_3         [QE]        [1,5]   [2]    [11]
+A           A           A       G_1    M_0
+E           E           E       G_2    M_1*
+E*          E*          E*      G_3    M_1
+G_4         G_4                 G_4    M_1/2
+G_5         G_5                 G_5    M_1/2*
+G_6         G_6                 G_6    M_3/2
+\end{verbatim}
+
+\begin{verbatim}
+C_4         [QE]        [1,5]   [2]    [11]
+A           A           A       G_1    M_0
+B           B           B       G_2    M_2
+E           E           E       G_3    M_1*
+E*          E*          E       G_4    M_1
+G_5         G_5                 G_5    M_1/2*
+G_6         G_6                 G_6    M_1/2
+G_7         G_7                 G_7    M_3/2 
+G_8         G_8                 G_8    M_3/2*
+\end{verbatim}
+
+\begin{verbatim}
+C_6         [QE]        [1,5]   [2]    [11]    
+A           A           A       G_1    M_0
+B           B           B       G_4    M_3
+E_1         E_1         E_1     G_5    M_1*
+E_1*        E_1*        E_1     G_6    M_1
+E_2         E_2         E_2     G_3    M_2*
+E_2*        E_2*        E_2     G_2    M_2
+G_7         G_7                 G_7    M_1/2*
+G_8         G_8                 G_8    M_1/2
+G_9         G_9                 G_9    M_5/2
+G_10        G_10                G_10   M_5/2*
+G_11        G_11                G_11   M_3/2
+G_12        G_12                G_12   M_3/2*
+\end{verbatim}
+
+\begin{verbatim}
+D_2         [QE]        [1,5]   [2]    [11] 
+A           A           A       G_1    A
+B_1         B_1         B_1     G_3    B_1
+B_2         B_2         B_3     G_4    B_3
+B_3         B_3         B_2     G_2    B_2
+G_5         G_5                 G_5    E_1/2
+\end{verbatim}
+
+\begin{verbatim}
+D_3         [QE]        [1,5]   [2]    [11]  
+A_1         A_1         A_1     G_1    A_1
+A_2         A_2         A_2     G_2    A_2
+E           E           E       G_3    E
+G_4         G_4                 G_4    E_1/2
+G_5         G_5                 G_5    B_2
+G_6         G_6                 G_6    B_1
+\end{verbatim}
+
+\begin{verbatim}
+D_4         [QE]        [1,5]   [2]    [11] 
+A_1         A_1         A_1     G_1    A_1
+A_2         A_2         A_2     G_2    A_2
+B_1         B_1         B_1     G_3    B_1
+B_2         B_2         B_2     G_4    B_2
+E           E           E       G_5    E
+G_6         G_6                 G_6    E_1/2
+G_7         G_7                 G_7    E_3/2
+\end{verbatim}
+
+\begin{verbatim}
+D_6         [QE]        [1,5]   [2]    [11]
+A_1         A_1         A_1     G_1    A_1
+A_2         A_2         A_2     G_2    A_2
+B_1         B_1         B_1     G_3    B_1               
+B_2         B_2         B_2     G_4    B_2
+E_1         E_1         E_1     G_5    E_1
+E_2         E_2         E_2     G_6    E_2
+G_7         G_7                 G_7    E_1/2
+G_8         G_8                 G_8    E_5/2 
+G_9         G_9                 G_9    E_3/2  
+\end{verbatim}
+
+The representations of $C_{2v}$ are difficult to distinguish among different
+references. While $A_1$ and $A_2$ are distinguishable since the 
+$180^\circ$ rotation has character $1$, $B_1$, and $B_2$ depend on which 
+are the first and second mirrors. 
+We call $B_1$ the representation that has character $1$ on the first mirror and 
+$-1$ on the second, but for each group you have to refer to the $C_{2v}$ section
+to know which is the first and second mirror. This is also the small group
+of {\bf k} for the $\Sigma$ and $S$ lines of the simple cubic Brillouin 
+zone [14],
+for the line $Z$ of the simple cubic, for the line $G$ and $D$ of the bcc, 
+for the points $K$ and $U$ of the fcc [14]. $C_{2v}$ is the small group
+of ${\bf k}$ along the $\Delta$ line for a zinc-blend structure and
+its representations have been given special names in Ref.[15]. 
+\begin{verbatim}
+C_2v        [QE]        [1,5]   [2]    [11]    [14]      [15]
+A_1     A_1, D_1, S_1   A_1     G_1    A_1     S_1, Z_1  D_1
+A_2     A_2, D_2, S_2   A_2     G_3    A_2     S_2, Z_2  D_2
+B_1     B_1, D_3, S_3   B_1     G_2    B_1     S_4, Z_4  D_3
+B_2     B_2, D_4, S_4   B_2     G_4    B_2     S_3, Z_3  D_4
+G_5     G_5, D_5                G_5    E_1/2             D_5
+\end{verbatim}
+
+The representations of $C_{3v}$ are used to classify the states along the 
+$\Lambda$ line of the simple cubic and fcc Brillouin zone and therefore have
+received special names in Ref.[14]. It is the small group of the $\Lambda$ 
+line also for the zinc-blende structure and special names for the 
+representations of the double group have been given in Ref.[15].
+\begin{verbatim}
+C_3v        [QE]        [1,5]   [2]    [11]    [14]   [15]
+A_1       A_1, L_1      A_1     G_1    A_1     L_1     L_1
+A_2       A_2, L_2      A_2     G_2    A_2     L_2     L_2
+E         E, L_3         E      G_3    E       L_3     L_3
+G_4       G_4, L_6              G_4    E_1/2           L_6
+G_5       G_5, L_4              G_5    B_2             L_4
+G_6       G_6, L_5              G_6    B_1             L_5
+\end{verbatim}
+
+The group $C_{4v}$ is the small group of ${\bf k}$ along the $\Delta$ line of
+the simple cubic and fcc Brillouin zone so in Ref.[14] its representations have 
+been given special names.
+\begin{verbatim}
+C_4v        [QE]        [1,5]   [2]    [11]    [14]
+A_1     A_1, G_1, D_1   A_1     G_1    A_1     D_1
+A_2     A_2, G_2, D_1'  A_2     G_2    A_2     D_1'
+B_1     B_1, G_3, D_2   B_1     G_3    B_1     D_2
+B_2     B_2, G_4, D_2'  B_2     G_4    B_2     D_2'
+E       E, G_5, D_5     E       G_5    E       D_5
+G_6     G_6, D_6                G_6    E_1/2
+G_7     G_7, D_7                G_7    E_3/2
+\end{verbatim}
+
+\begin{verbatim}
+C_6v        [QE]        [1,5]   [2]    [11]
+A_1         A_1         A_1     G_1    A_1
+A_2         A_2         A_2     G_2    A_2
+B_1         B_1         B_1     G_3    B_1
+B_2         B_2         B_2     G_4    B_2
+E_1         E_1         E_1     G_5    E_1
+E_2         E_2         E_2     G_6    E_2
+G_7         G_7                 G_7    E_1/2
+G_8         G_8                 G_8    E_5/2
+G_9         G_9                 G_9    E_3/2
+\end{verbatim}
+
+\begin{verbatim}
+C_2h        [QE]        [1,5]   [2]    [11] 
+A_g         A_g         A_g     G_1+   M_0g
+B_g         B_g         B_g     G_2+   M_1g
+A_u         A_u         A_u     G_1-   M_0u
+B_u         B_u         B_u     G_2-   M_1u
+G_3+        G_3+                G_3+   M_1/2*g
+G_4+        G_4+                G_4+   M_1/2g
+G_3-        G_3-                G_3-   M_1/2*u
+G_4-        G_4-                G_4-   M_1/2u
+\end{verbatim}
+
+\begin{verbatim}
+C_3h        [QE]        [1,5]   [2]    [11] 
+A'          A'          A'      G_1    M_0
+E'          E'          E'      G_3    M_2*
+E'*         E'*         E'      G_2    M_2
+A''         A''         A''     G_4    M_3
+E''         E''         E''     G_5    M_1*
+E''*        E''*        E''     G_6    M_1
+G_7         G_7                 G_7    M_1/2*
+G_8         G_8                 G_8    M_1/2
+G_9         G_9                 G_9    M_5/2
+G_10        G_10                G_10   M_5/2*
+G_11        G_11                G_11   M_3/2
+G_12        G_12                G_12   M_3/2*
+\end{verbatim}
+
+\begin{verbatim}
+C_4h        [QE]        [1,5]   [2]    [11]
+A_g         A_g         A_g     G_1+   M_0g
+B_g         B_g         B_g     G_2+   M_2g
+E_g         E_g         E_g     G_3+   M_1g*
+E_g*        E_g*        E_g     G_4+   M_1g
+A_u         A_u         A_u     G_1-   M_0u
+B_u         B_u         B_u     G_2-   M_2u
+E_u         E_u         E_u     G_3-   M_1u*
+E_u*        E_u*        E_u     G_4-   M_1u
+G_5+        G_5+                G_5+   M_1/2g*
+G_6+        G_6+                G_6+   M_1/2g
+G_7+        G_7+                G_7+   M_3/2g
+G_8+        G_8+                G_8+   M_3/2g*
+G_5-        G_5-                G_5-   M_1/2u*
+G_6-        G_6-                G_6-   M_1/2u
+G_7-        G_7-                G_7-   M_3/2u
+G_8-        G_8-                G_8-   M_3/2u*
+\end{verbatim}
+
+\begin{verbatim}
+C_6h        [QE]        [1,5]   [2]    [11]
+A_g         A_g         A_g     G_1+   M_0g
+B_g         B_g         B_g     G_4+   M_3g
+E_1g        E_1g        E_1g    G_5+   M_1g*
+E1g*        E1g*        E1g*    G_6+   M_1g
+E_2g        E_2g        E_2g    G_3+   M_2g*
+E2g*        E2g*        E2g*    G_2+   M_2g
+A_u         A_u         A_u     G_1-   M_0u
+B_u         B_u         B_u     G_4-   M_3u
+E_1u        E_1u        E_1u    G_5-   M_1u*
+E1u*        E1u*        E1u*    G_6-   M_1u
+E_2u        E_2u        E_2u    G_3-   M_2u*
+E2u*        E2u*        E_2u*   G_2-   M_2u
+G_7+        G_7+                G_7+   M_1/2g*
+G_8+        G_8+                G_8+   M_1/2g
+G_9+        G_9+                G_9+   M_5/2g
+G_10+       G_10+               G_10+  M_5/2g*
+G_11+       G_11+               G_11+  M_3/2g
+G_12+       G_12+               G_12+  M_3/2g*
+G_7-        G_7-                G_7-   M_1/2u*
+G_8-        G_8-                G_8-   M_1/2u
+G_9-        G_9-                G_9-   M_5/2u
+G_10-       G_10-               G_10-  M_5/2u*
+G_11-       G_11-               G_11-  M_3/2u
+G_12-       G_12-               G_12-  M_3/2u*
+\end{verbatim}
+
+The representations of $D_{2h}$ are used to classify the states at the $N$
+point of bcc Brillouin zone and therefore have received special names 
+in Ref.[14].
+
+\begin{verbatim}
+D_2h        [QE]        [1,5]   [2]    [11]    [14]
+A_g         A_g         A_g     G_1+   A_g     N_1
+B_1g        B_1g        B_1g    G_3+   B_1g    N_4
+B_2g        B_2g        B_3g    G_4+   B_3g    N_2
+B_3g        B_3g        B_2g    G_2+   B_2g    N_3
+A_u         A_u         A_u     G_1-   A_u     N_1'
+B_1u        B_1g        B_1u    G_3-   B_1u    N_4'
+B_2u        B_2g        B_3u    G_4-   B_3u    N_2'
+B_3u        B_3g        B_2u    G_2-   B_2u    N_3'
+G_5+        G_5+                G_5+   E_1/2g
+G_5-        G_5-                G_5-   E_1/2u
+\end{verbatim}
+
+\begin{verbatim}
+D_3h        [QE]        [1,5]   [2]    [11]
+A'_1       A'_1         A'_1    G_1    A_1
+A'_2       A'_2         A'_2    G_2    A_2
+E'         E'           E'      G_6    E_1
+A''1       A''1         A''1    G_3    B_1
+A''2       A''2         A''2    G_4    B_2
+E''        E''          E''     G_5    E_2
+G_7        G_7                  G_7    E_1/2
+G_8        G_8                  G_8    E_5/2
+G_9        G_9                  G_9    E_3/2
+\end{verbatim}
+
+The group $D_{4h}$ is the small group of ${\bf k}$ at the $X$ and $M$
+point of the simple cubic Brillouin zone so in Ref.[14] its representations 
+have been given special names for the use with the $M$ point. The same names 
+with the exchange of $M$ with $X$ are used for the $X$ point. Note however
+that for the space group $221$ at $M$ Ref.[13] uses different names that
+are also widely used.
+\begin{verbatim}
+D_4h        [QE]        [1,5]   [2]    [11]    [14]   [13]
+A_1g   A_1g, X_1, M_1   A_1g    G_1+   A_1g    M_1    M_1+
+A_2g   A_2g, X_4, M_4   A_2g    G_2+   A_2g    M_4    M_3+
+B_1g   B_1g, X_2, M_2   B_1g    G_3+   B_1g    M_2    M_2+
+B_2g   B_2g, X_3, M_3   B_2g    G_4+   B_2g    M_3    M_4+
+E_g    E_g, X_5, M_5    E_g     G_5+   E_g     M_5    M_5+
+A_1u   A_1u, X_1', M_1' A_1u    G_1-   A_1u    M_1'   M_1-  
+A_2u   A_2u, X_4', M_4' A_2u    G_2-   A_2u    M_4'   M_3-
+B_1u   B_1u, X_2', M_2' B_1u    G_3-   B_1u    M_2'   M_2-
+B_2u   B_2u, X_3', M_3' B_2u    G_4-   B_2u    M_3'   M_4-
+E_u    E_u,  X_5', M_5' E_u     G_5-   E_u     M_5'   M_5-
+G_6+   G_6+, M_6+               G_6+   E_1/2g
+G_7+   G_7+, M_7+               G_7+   E_3/2g
+G_6-   G_6-, M_6-               G_6-   E_1/2u
+G_7-   G_7-, M_7-               G_7-   E_3/2u
+\end{verbatim}
+
+\begin{verbatim}
+D_6h        [QE]        [1,5]   [2]    [11]
+A_1g        A_1g        A_1g    G_1+   A_1g
+A_2g        A_2g        A_2g    G_2+   A_2g
+B_1g        B_1g        B_1g    G_3+   B_1g
+B_2g        B_2g        B_2g    G_4+   B_2g
+E_1g        E_1g        E_1g    G_5+   E_1g
+E_2g        E_2g        E_2g    G_6+   E_2g
+A_1u        A_1u        A_1u    G_1-   A_1u
+A_2u        A_2u        A_2u    G_2-   A_2u
+B_1u        B_1u        B_1u    G_3-   B_1u
+B_2u        B_2u        B_2u    G_4-   B_2u
+E_1u        E_1u        E_1u    G_5-   E_1u
+E_2u        E_2u        E_2u    G_6-   E_2u
+G_7+        G_7+                G_7+   E_1/2g
+G_8+        G_8+                G_8+   E_5/2g
+G_9+        G_9+                G_9+   E_3/2g
+G_7-        G_7-                G_7-   E_1/2u
+G_8-        G_8-                G_8-   E_5/2u
+G_9-        G_9-                G_9-   E_3/2u
+\end{verbatim}
+
+The representations of $D_{2d}$ are used to classify the states at the
+point $W$ of the fcc Brillouin zone and therefore have received special names 
+in Ref.[14]. The same group is also used to classify the states at the
+$X$ point of the Brillouin zone for a zincblend structure and the
+representations have names given in Ref.[15]
+\begin{verbatim}
+D_2d        [QE]        [1,5]   [2]    [11]    [14]   [15]
+A_1    A_1, X_1, W_1    A_1     G_1    A_1     W_1    X_1
+A_2    A_2, X_4, W_2'   A_2     G_2    A_2     W_2'   X_4
+B_1    B_1, X_2, W_1'   B_1     G_3    B_1     W_1'   X_2
+B_2    B_2, X_3, W_2    B_2     G_4    B_2     W_2    X_3
+E      E, X_5, W_3      E       G_5    E       W_3    X_5
+G_6    G_6, X_6, W_6            G_6    E_1/2          X_6
+G_7    G_7, X_7, W_7            G_7    E_3/2          X_7
+\end{verbatim}
+
+The representations of $D_{3d}$ are used to classify the states at the
+point $L$ of the fcc lattice and therefore have received special names 
+in Ref.[14].
+\begin{verbatim}
+D_3d        [QE]        [1,5]   [2]    [11]    [14]
+A_1g      A_1g, L_1     A_1g    G_1+   A_1g    L_1
+A_2g      A_2g, L_2     A_2g    G_2+   A_2g    L_2
+E_g       E_g, L_3      E_g     G_3+   E_g     L_3
+A_1u      A_1u, L_1'    A_1u    G_1-   A_1u    L_1'   
+A_2u      A_2u, L_2'    A_2u    G_2-   A_2u    L_2'
+E_u       E_u, L_3'     E_u     G_3-   E_u     L_3'
+G_4+      G_4+, L_6+            G_4+   E_1/2g
+G_5+      G_5+, L_4+            G_5+   B_2g
+G_6+      G_6+, L_5+            G_6+   B_1g
+G_4-      G_4-, L_6-            G_4-   E_1/2u
+G_5-      G_5-, L_4-            G_5-   B_2u
+G_6-      G_6-, L_5-            G_6-   B_1u
+\end{verbatim}
+
+\begin{verbatim}
+S_4         [QE]        [1,5]   [2]    [11]
+A           A           A       G_1    M_0
+B           B           B       G_2    M_2
+E           E           E       G_4    M_1
+E*          E*          E       G_3    M_1*
+G_5         G_5                 G_5    M_1/2*
+G_6         G_6                 G_6    M_1/2
+G_7         G_7                 G_7    M_3/2
+G_8         G_8                 G_8    M_3/2*
+\end{verbatim}
+
+\begin{verbatim}
+S_6         [QE]        [1,5]   [2]    [11]
+A_g         A_g         A_g     G_1+   M_0g
+E_g         E_g         E_g     G_2+   M_1g*
+E_g*        E_g*        E_g*    G_3+   M_1g
+A_u         A_u         A_u     G_1-   M_0u
+E_u         E_u         E_u     G_2-   M_1u*
+E_u*        E_u*        E_u*    G_3-   M_1u
+G_4+        G_4+                G_4+   M_1/2g
+G_5+        G_5+                G_5+   M_1/2g*
+G_6+        G_6+                G_6+   M_3/2g
+G_4-        G_4-                G_4-   M_1/2u
+G_5-        G_5-                G_5-   M_1/2u*
+G_6-        G_6-                G_6-   M_3/2u
+\end{verbatim}
+
+\begin{verbatim}
+T           [QE]        [1,5]   [2]    [11]
+A           A           A       G_1    A
+E           E           E       G_2    A'
+E*          E*          E       G_3    A''
+T           T           T       G_4    T
+G_5                             G_5    E_1/2
+G_6                             G_6    E_1/2''
+G_7                             G_7    E_1/2'
+\end{verbatim}
+
+\begin{verbatim}
+T_h         [QE]        [1,5]   [2]    [11]
+A_g         A_g         A_g     G_1+   A_g
+E_g         E_g         E_g     G_2+   A'_g
+E_g*        E_g*        E_g     G_3+   A''_g
+T_g         T_g         T_g     G_4+   T_g
+A_u         A_u         A_u     G_1-   A_u
+E_u         E_u         E_u     G_2-   A'_u
+E_u*        E_u*        E_u     G_3-   A''_u
+T_u         T_u         T_u     G_4-   T_u
+G_5+        G_5+                G_5+   E_1/2g
+G_6+        G_6+                G_6+   E_1/2''g 
+G_7+        G_7+                G_7+   E_1/2'g
+G_5-        G_5-                G_5-   E_1/2u
+G_6-        G_6-                G_6-   E_1/2''u
+G_7-        G_7-                G_7-   E_1/2'u
+\end{verbatim}
+
+The group $T_d$ is the small group of ${\bf k}$ for the point $P$ of the
+bcc Brillouin zone and for the point $\Gamma$ for a zincblend structure
+so in Ref.[14] and Ref.[15] its representations have been given 
+special names. 
+\begin{verbatim}
+T_d         [QE]        [1,5]   [2]    [11]    [14]   [15]
+A_1    A_1, G_1, P_1    A_1     G_1    A_1     P_1    G_1
+A_2    A_2, G_2, P_2    A_2     G_2    A_2     P_2    G_2
+E      E, G_12, P_3     E       G_3    E       P_3    G_12
+T_1    T_1, G_25, P_5   T_1     G_4    T_1     P_4    G_25
+T_2    T_2, G_15, P_4   T_2     G_5    T_2     P_5    G_15
+G_6       G_6, P_6              G_6    E_1/2
+G_7       G_7, P_7              G_7    E'_1/2
+G_8       G_8, P_8              G_8    Q
+\end{verbatim}
+
+\begin{verbatim}
+O           [QE]        [1,5]   [2]    [11]
+A_1         A_1          A_1    G_1    A_1
+A_2         A_2          A_2    G_2    A_2
+E            E           E      G_3    E
+T_1         T_1          T_1    G_4    T_1
+T_2         T_2          T_2    G_5    T_2
+G_6         G_6                 G_6    E_1/2
+G_7         G_7                 G_7    E'_1/2
+G_8         G_8                 G_8    Q
+\end{verbatim}
+
+The $O_h$ group is the small group of ${\bf k}$ for the $\Gamma$ point, 
+and the $R$ point of the simple cubic Brillouin zone and at
+the $H$ point of the body-centered cubic Brillouin zone and its irreducible
+representations have received special names in Ref.[14].
+\begin{verbatim}
+O_h         [QE]        [1,5]   [2]    [11]    [14]
+A_1g  A_1g, G_1, G_1+   A_1g    G_1+   A_1g    G_1
+A_2g  A_2g, G_2, G_2+   A_2g    G_2+   A_2g    G_2
+E_g   E_g, G_12, G_3+   E_g     G_3+   E_g     G_12
+T_1g  T_1g, G_15', G_4+ T_1g    G_4+   T_1g    G_15'
+T_2g  T_2g, G_25', G_5+ T_2g    G_5+   T_2g    G_25'
+A_1u  A_1u, G_1', G_1-  A_1u    G_1-   A_1u    G_1'
+A_2u  A_2u, G_2', G_2-  A_2u    G_2-   A_2u    G_2'
+E_u   E_u, G_12', G_3-  E_u     G_3-   E_u     G_12'
+T_1u  T_1u, G_15, G_4-  T_1u    G_4-   T_1u    G_15
+T_2u  T_2u, G_25, G_5-  T_2u    G_5-   T_2u    G_25
+G_6+        G_6+                G_6+   E_1/2g
+G_7+        G_7+                G_7+   E'_1/2g
+G_8+        G_8+                G_8+   Q_g
+G_6-        G_6-                G_6-   E_1/2u
+G_7-        G_7-                G_7-   E'_1/2u
+G_8-        G_8-                G_8-   Q_u
+\end{verbatim} 
+
+
+\newpage
 \section{\color{coral}Bibliography}
 \begin{enumerate}
 
@@ -4322,8 +4824,19 @@ representations of the space groups).
 M. I. Aroyo, A. Kirov, C. Capillas, J. M. Perez-Mato, and H. Wondratschek,
 ``Bilbao Crystallographic Server II: Representations of crystallographic 
 point groups and space groups'', Acta Cryst. A62, 115-128 (2006).
-(Detailed information on group-subgroups relationships).
+(Detailed information on group-subgroups relationships and names
+of many irreducible representations).
 
+\item
+L.P. Bouckaert, R. Smoluchowski, and E. Wigner, Phys. Rev. {\bf 50}, 58 (1936).
+(Symmetry properties of the wavefunctions in crystals. The original reference
+for the irreducible representations for simple-cubic, fcc and bcc
+Brillouin zones).
+
+\item
+R. H. Parmenter, Phys. Rev. {\bf 100}, 573 (1955).
+(Symmetry properties of the wavefunctions in crystals. The reference
+for the irreducible representations for zincblend structure).
 
 \end{enumerate}
 
