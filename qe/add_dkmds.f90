@@ -19,7 +19,7 @@ subroutine add_dkmds_tpw(ik,uact,jpol,becp2,alphadk,bedp,alphapp,weight,zstar)
   USE kinds, ONLY : DP
   USE constants, ONLY : eps12
   USE spin_orb, ONLY : lspinorb
-  USE uspp, ONLY : nkb, qq, qq_so
+  USE uspp, ONLY : nkb, qq_nt, qq_so
   USE cell_base, ONLY : at
   USE ions_base, ONLY : nat, ityp, ntyp => nsp
   USE noncollin_module, ONLY : noncolin, npol
@@ -128,12 +128,12 @@ subroutine add_dkmds_tpw(ik,uact,jpol,becp2,alphadk,bedp,alphapp,weight,zstar)
                                 do is=1,npol
                                    ps1_nc (ikb,is,ibnd,ipol)= &
                                         ps1_nc(ikb,is,ibnd,ipol)+  &
-                                      qq (ih, jh, nt) *                &
+                                      qq_nt (ih, jh, nt) *                &
                                       becp1(ik)%nc(jkb,is,ibnd)*  &
                                               uact (mu + ipol)
                                    ps2_nc(ikb,is,ibnd)=  &
                                              ps2_nc(ikb,is,ibnd) &
-                                     + qq(ih,jh,nt)* &
+                                     + qq_nt(ih,jh,nt)* &
                                         alphap(ipol,ik)%nc(jkb,is,ibnd)*  &
                                           uact (mu + ipol)
                                    ps3_nc(ikb,is,ibnd,ipol)=  &
@@ -151,11 +151,11 @@ subroutine add_dkmds_tpw(ik,uact,jpol,becp2,alphadk,bedp,alphapp,weight,zstar)
                           else
                              ps1 (ikb,ibnd,ipol)= &
                                 ps1(ikb,ibnd,ipol)+  &
-                                  qq (ih, jh, nt) *         &
+                                  qq_nt (ih, jh, nt) *         &
                                   becp1(ik)%k(jkb,ibnd) * uact (mu + ipol)
                              ps2 (ikb,ibnd)=  &
                                  ps2(ikb,ibnd) + &
-                                  qq(ih,jh,nt)* &
+                                  qq_nt(ih,jh,nt)* &
                                   alphap(ipol,ik)%k(jkb,ibnd)*uact (mu + ipol)
                              ps3(ikb,ibnd,ipol)=  &
                                  ps3(ikb,ibnd,ipol) &
