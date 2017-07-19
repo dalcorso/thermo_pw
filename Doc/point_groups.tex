@@ -4265,19 +4265,21 @@ the list of the symmetry operations is given after the name.
 \end{verbatim}
 \newpage
 \section{\color{coral}Alternative names for the irreducible representations}
-Comparison of the output of \thermo\ and of \texttt{pw.x} and \texttt{ph.x} with
-previous literature is sometimes difficult due to the use of different names
-for the irreducible representations. As a rule we have used the names
+Comparison of the output of \thermo\ and of \texttt{pw.x} and \texttt{ph.x} 
+with previous literature is sometimes difficult due to the use of different 
+names for the irreducible representations. As a rule we have used the names
 reported in Ref.~[1] for the representations of the point group and those
-of Ref.~[2] for the representation of the double point group. Alternative
+of Ref.~[2] for the representations of the double point group
+(except for the exchange of $B_1$ and $B_2$ in the names of the $C_{6v}$ 
+representations due to the isomorphism with $D_6$). Alternative
 names are present in the literature expecially to classify the electronic
-band structures. Some of these alternative names are written on the output
-of \qe. In this section we explain the meaning of these alternative names and
-indicate their origin. Moreover we collect equivalence tables for the names
-of the irreducible representations. 
-We give a table for each point group and in each table the first column 
-contains the names of the representations used in this guide, followed 
-by the names used by \qe\ and by other references.
+band structures. Some of these names are written on the output
+of \qe. In this Section we describe the origin of these names pointing to
+the original papers. Moreover we give a few equivalent names of the irreducible representations found in standard 
+group theory books. 
+We give a table for each point group. The first column gives the names 
+used in this guide, followed by the names used by \qe\ and by 
+other references.
 
 \begin{verbatim}
 C_1         [QE]        [1,5]   [2]    [11]
@@ -4297,8 +4299,8 @@ G_2-        G_2-                G_2-   M_1/2u
 C_s         [QE]        [1,5]   [2]    [11] 
 A'          A'          A'      G_1    M_0
 A''         A''         A''     G_2    M_1
-G_3         G_3                 G_3    M_1/2
-G_4         G_4                 G_4    M_1/2*
+G_3         G_3                 G_3    M_1/2*
+G_4         G_4                 G_4    M_1/2
 \end{verbatim}
 
 $C_s$ is the small group of ${\bf k}$ along the $\Sigma$ line of the 
@@ -4308,8 +4310,8 @@ particular names.
 C_2         [QE]        [1,5]   [2]    [11]    [15]  
 A           A           A       G_1    M_0     S_1
 B           B           B       G_2    M_1     S_2
-G_3         G_3                 G_3    M_1/2   S_3
-G_4         G_4                 G_4    M_1/2*  S_4
+G_3         G_3                 G_3    M_1/2*  S_3
+G_4         G_4                 G_4    M_1/2   S_4
 \end{verbatim}
 
 \begin{verbatim}
@@ -4317,8 +4319,8 @@ C_3         [QE]        [1,5]   [2]    [11]
 A           A           A       G_1    M_0
 E           E           E       G_2    M_1*
 E*          E*          E*      G_3    M_1
-G_4         G_4                 G_4    M_1/2
-G_5         G_5                 G_5    M_1/2*
+G_4         G_4                 G_4    M_1/2*
+G_5         G_5                 G_5    M_1/2
 G_6         G_6                 G_6    M_3/2
 \end{verbatim}
 
@@ -4349,7 +4351,10 @@ G_10        G_10                G_10   M_5/2*
 G_11        G_11                G_11   M_3/2
 G_12        G_12                G_12   M_3/2*
 \end{verbatim}
-
+The names of the representations of $D_2$ depend on the choice of the 
+three perpendicular axes $C_2$, $C_2'$ and $C_2''$. The following table 
+is purely indicative and corresponds to our choice $z$, $x$, and $y$ 
+for the three axes and the choice $z$, $y$, $x$ for Refs.[5,2,11].
 \begin{verbatim}
 D_2         [QE]        [1,5]   [2]    [11] 
 A           A           A       G_1    A
@@ -4384,8 +4389,8 @@ G_7         G_7                 G_7    E_3/2
 D_6         [QE]        [1,5]   [2]    [11]
 A_1         A_1         A_1     G_1    A_1
 A_2         A_2         A_2     G_2    A_2
-B_1         B_1         B_1     G_3    B_1               
-B_2         B_2         B_2     G_4    B_2
+B_1         B_1         B_1     G_3    B_2               
+B_2         B_2         B_2     G_4    B_1
 E_1         E_1         E_1     G_5    E_1
 E_2         E_2         E_2     G_6    E_2
 G_7         G_7                 G_7    E_1/2
@@ -4398,8 +4403,9 @@ references. While $A_1$ and $A_2$ are distinguishable since the
 $180^\circ$ rotation has character $1$, $B_1$, and $B_2$ depend on which 
 are the first and second mirrors. 
 We call $B_1$ the representation that has character $1$ on the first mirror and 
-$-1$ on the second, but for each group you have to refer to the $C_{2v}$ section
-to know which is the first and second mirror. This is also the small group
+$-1$ on the second, but for each group please refer to the $C_{2v}$ section
+above to know which are the first and second mirrors. 
+This is also the small group
 of {\bf k} for the $\Sigma$ and $S$ lines of the simple cubic Brillouin 
 zone [14],
 for the line $Z$ of the simple cubic, for the line $G$ and $D$ of the bcc, 
@@ -4410,8 +4416,8 @@ its representations have been given special names in Ref.[15].
 C_2v        [QE]        [1,5]   [2]    [11]    [14]      [15]
 A_1     A_1, D_1, S_1   A_1     G_1    A_1     S_1, Z_1  D_1
 A_2     A_2, D_2, S_2   A_2     G_3    A_2     S_2, Z_2  D_2
-B_1     B_1, D_3, S_3   B_1     G_2    B_1     S_4, Z_4  D_3
-B_2     B_2, D_4, S_4   B_2     G_4    B_2     S_3, Z_3  D_4
+B_1     B_1, D_3, S_3   B_2     G_4    B_2     S_3, Z_3  D_3
+B_2     B_2, D_4, S_4   B_1     G_2    B_1     S_4, Z_4  D_4
 G_5     G_5, D_5                G_5    E_1/2             D_5
 \end{verbatim}
 
@@ -4448,8 +4454,8 @@ G_7     G_7, D_7                G_7    E_3/2
 C_6v        [QE]        [1,5]   [2]    [11]
 A_1         A_1         A_1     G_1    A_1
 A_2         A_2         A_2     G_2    A_2
-B_1         B_1         B_1     G_3    B_1
-B_2         B_2         B_2     G_4    B_2
+B_1         B_1         B_2     G_3    B_2
+B_2         B_2         B_1     G_4    B_1
 E_1         E_1         E_1     G_5    E_1
 E_2         E_2         E_2     G_6    E_2
 G_7         G_7                 G_7    E_1/2
@@ -4463,17 +4469,17 @@ A_g         A_g         A_g     G_1+   M_0g
 B_g         B_g         B_g     G_2+   M_1g
 A_u         A_u         A_u     G_1-   M_0u
 B_u         B_u         B_u     G_2-   M_1u
-G_3+        G_3+                G_3+   M_1/2*g
+G_3+        G_3+                G_3+   M_1/2g*
 G_4+        G_4+                G_4+   M_1/2g
-G_3-        G_3-                G_3-   M_1/2*u
+G_3-        G_3-                G_3-   M_1/2u*
 G_4-        G_4-                G_4-   M_1/2u
 \end{verbatim}
 
 \begin{verbatim}
 C_3h        [QE]        [1,5]   [2]    [11] 
 A'          A'          A'      G_1    M_0
-E'          E'          E'      G_3    M_2*
-E'*         E'*         E'      G_2    M_2
+E'          E'          E'      G_2    M_2
+E'*         E'*         E'      G_3    M_2*
 A''         A''         A''     G_4    M_3
 E''         E''         E''     G_5    M_1*
 E''*        E''*        E''     G_6    M_1
@@ -4544,9 +4550,9 @@ B_1g        B_1g        B_1g    G_3+   B_1g    N_4
 B_2g        B_2g        B_3g    G_4+   B_3g    N_2
 B_3g        B_3g        B_2g    G_2+   B_2g    N_3
 A_u         A_u         A_u     G_1-   A_u     N_1'
-B_1u        B_1g        B_1u    G_3-   B_1u    N_4'
-B_2u        B_2g        B_3u    G_4-   B_3u    N_2'
-B_3u        B_3g        B_2u    G_2-   B_2u    N_3'
+B_1u        B_1u        B_1u    G_3-   B_1u    N_4'
+B_2u        B_2u        B_3u    G_4-   B_3u    N_2'
+B_3u        B_3u        B_2u    G_2-   B_2u    N_3'
 G_5+        G_5+                G_5+   E_1/2g
 G_5-        G_5-                G_5-   E_1/2u
 \end{verbatim}
@@ -4592,14 +4598,14 @@ G_7-   G_7-, M_7-               G_7-   E_3/2u
 D_6h        [QE]        [1,5]   [2]    [11]
 A_1g        A_1g        A_1g    G_1+   A_1g
 A_2g        A_2g        A_2g    G_2+   A_2g
-B_1g        B_1g        B_1g    G_3+   B_1g
-B_2g        B_2g        B_2g    G_4+   B_2g
+B_1g        B_1g        B_1g    G_3+   B_2g
+B_2g        B_2g        B_2g    G_4+   B_1g
 E_1g        E_1g        E_1g    G_5+   E_1g
 E_2g        E_2g        E_2g    G_6+   E_2g
 A_1u        A_1u        A_1u    G_1-   A_1u
 A_2u        A_2u        A_2u    G_2-   A_2u
-B_1u        B_1u        B_1u    G_3-   B_1u
-B_2u        B_2u        B_2u    G_4-   B_2u
+B_1u        B_1u        B_1u    G_3-   B_2u
+B_2u        B_2u        B_2u    G_4-   B_1u
 E_1u        E_1u        E_1u    G_5-   E_1u
 E_2u        E_2u        E_2u    G_6-   E_2u
 G_7+        G_7+                G_7+   E_1/2g
@@ -4649,8 +4655,8 @@ G_6-      G_6-, L_5-            G_6-   B_1u
 S_4         [QE]        [1,5]   [2]    [11]
 A           A           A       G_1    M_0
 B           B           B       G_2    M_2
-E           E           E       G_4    M_1
-E*          E*          E       G_3    M_1*
+E           E           E       G_3    M_1*
+E*          E*          E       G_4    M_1
 G_5         G_5                 G_5    M_1/2*
 G_6         G_6                 G_6    M_1/2
 G_7         G_7                 G_7    M_3/2
@@ -4665,19 +4671,19 @@ E_g*        E_g*        E_g*    G_3+   M_1g
 A_u         A_u         A_u     G_1-   M_0u
 E_u         E_u         E_u     G_2-   M_1u*
 E_u*        E_u*        E_u*    G_3-   M_1u
-G_4+        G_4+                G_4+   M_1/2g
-G_5+        G_5+                G_5+   M_1/2g*
+G_4+        G_4+                G_4+   M_1/2g*
+G_5+        G_5+                G_5+   M_1/2g
 G_6+        G_6+                G_6+   M_3/2g
-G_4-        G_4-                G_4-   M_1/2u
-G_5-        G_5-                G_5-   M_1/2u*
+G_4-        G_4-                G_4-   M_1/2u*
+G_5-        G_5-                G_5-   M_1/2u
 G_6-        G_6-                G_6-   M_3/2u
 \end{verbatim}
 
 \begin{verbatim}
 T           [QE]        [1,5]   [2]    [11]
 A           A           A       G_1    A
-E           E           E       G_2    A'
-E*          E*          E       G_3    A''
+E           E           E       G_2    A''
+E*          E*          E       G_3    A'
 T           T           T       G_4    T
 G_5                             G_5    E_1/2
 G_6                             G_6    E_1/2''
@@ -4687,12 +4693,12 @@ G_7                             G_7    E_1/2'
 \begin{verbatim}
 T_h         [QE]        [1,5]   [2]    [11]
 A_g         A_g         A_g     G_1+   A_g
-E_g         E_g         E_g     G_2+   A'_g
-E_g*        E_g*        E_g     G_3+   A''_g
+E_g         E_g         E_g     G_2+   A''_g
+E_g*        E_g*        E_g     G_3+   A'_g
 T_g         T_g         T_g     G_4+   T_g
 A_u         A_u         A_u     G_1-   A_u
-E_u         E_u         E_u     G_2-   A'_u
-E_u*        E_u*        E_u     G_3-   A''_u
+E_u         E_u         E_u     G_2-   A''_u
+E_u*        E_u*        E_u     G_3-   A'_u
 T_u         T_u         T_u     G_4-   T_u
 G_5+        G_5+                G_5+   E_1/2g
 G_6+        G_6+                G_6+   E_1/2''g 
