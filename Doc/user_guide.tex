@@ -169,14 +169,39 @@ representation of a {\bf q} point. For frequency dependent calculation,
 each frequency, or group of frequencies, can be calculated in parallel
 by different images.
 
+\newpage
 \section{\color{coral}People}
 The \thermo\ code is designed, written, and maintained by Andrea Dal Corso 
 (SISSA - Trieste). It is an open source code distributed, as is, within the GPL
 license.  
 
+\newpage
 \section{\color{coral}Installing, Compiling, and Running}
 
 \subsection{\color{web-blue}Installing}
+\begin{table}
+\begin{center}
+\begin{tabular}{ll}
+\hline
+\hline
+\texttt{thermo\_pw} & \qe  \\
+\hline
+0.8.0 & svn \\
+0.7.9 & 6.1 \\
+0.7.0 & 6.1 \\
+0.6.0 & 6.0.0 \\
+0.5.0 & 5.4.0 \\
+0.4.0 & 5.3.0 \\
+0.3.0 & 5.2.1, 5.2.0 \\
+0.2.0 & 5.1.2 \\
+0.1.0 & 5.1.1 \\
+\hline
+\hline
+\end{tabular}
+\caption{Compatibility between the versions of 
+\texttt{thermo\_pw} and of \texttt{QE}.}
+\end{center}
+\end{table}
 
 \thermo\ is a package tightly bound to \qe. It cannot be compiled without
 it. For instruction on how to download and compile \qe, please 
@@ -195,7 +220,7 @@ The versions of \texttt{thermo\_pw} and of \qe\ must be carefully matched
 as illustrated in Table 1. 
 There is no \texttt{thermo\_pw} package for the versions of \qe\ not listed 
 there. Unpacking the \texttt{.tar.gz} files in the main \qe\ directory, for
-instance with the command \texttt{tar -xzvf thermo\_pw.0.6.0.tar.gz}, you
+instance with the command \texttt{tar -xzvf thermo\_pw.0.8.0.tar.gz}, you
 obtain a directory \texttt{thermo\_pw} with the source files. \\
 It is also possible to download the \texttt{git} version of 
 \texttt{thermo\_pw} as described at
@@ -234,28 +259,6 @@ It has been tested with \texttt{Intel/15.0} + \texttt{mkl/11.2} +
 \texttt{openMPI/1.6.5}.
 Any other combination of computer/operating system has not been tested, but 
 usually \thermo\ runs on the same systems where \qe\ runs. 
-\begin{center}
-\begin{table}
-\begin{tabular}{ll}
-\hline
-\hline
-\texttt{thermo\_pw} & \qe  \\
-\hline
-0.8.0 & 6.1 \\
-0.7.0 & 6.1 \\
-0.6.0 & 6.0.0 \\
-0.5.0 & 5.4.0 \\
-0.4.0 & 5.3.0 \\
-0.3.0 & 5.2.1, 5.2.0 \\
-0.2.0 & 5.1.2 \\
-0.1.0 & 5.1.1 \\
-\hline
-\hline
-\end{tabular}
-\caption{Compatibility between the versions of 
-\texttt{thermo\_pw} and of \texttt{QE}.}
-\end{table}
-\end{center}
 
 \subsection{\color{web-blue}Searching help and reporting bugs}
 If you have problems installing \texttt{thermo\_pw} or need help
@@ -268,7 +271,9 @@ write directly to me (\texttt{dalcorso.at.sissa.it}).
 \subsection{\color{web-blue}Uninstalling}
 
 In order to remove \thermo, give the command \texttt{make leave\_qe} in the
-\texttt{thermo\_pw} directory. Then just remove the directory. 
+\texttt{thermo\_pw} directory. Then just remove the directory. Note that if
+you forget to give the command \texttt{make leave\_qe} the original files
+of \qe\ are not restored.
 
 \subsection{\color{web-blue}Running \thermo}
 
@@ -563,7 +568,7 @@ q2d              : the q points define a rectangle in reciprocal space.
 \end{verbatim}
 Note that the path cannot be given in the input of \texttt{pw.x} that
 must contain the information to generate the mesh of {\bf k} points 
-used in the self-consistent calculation. 
+for the self-consistent calculation. 
 An example of the use of this option can be found in \texttt{example02}.
 If you give explicitly the path, be careful with options that require
 geometry changes (see below). Only automatic paths, or path given through 
@@ -603,17 +608,17 @@ irreducible representations of the small group {\bf k} can be plotted
 in the same panel or on different panels.\\
 This option is controlled by the following variables:
 \begin{verbatim}
-lprojpbs : When .TRUE. the projected band structure (PBS) is calculated 
+lprojpbs: When .TRUE. the projected band structure (PBS) is calculated 
      if nkz > 1 otherwise it is read from file. Usually this variable is
      .TRUE.. Set it to .FALSE. if you do not want to see the PBS, 
      or if you want to see the bands of a bulk projected on the 
      surface Brillouin zone without the PBS.
      Default: logical .TRUE. (forced to .FALSE. if what is not 'scf_2d_bands')
-nkz  : The number of k_z values used for the PBS plot. 
+nkz: The number of k_z values used for the PBS plot. 
      If lprojpbs is .FALSE. a plot of the bulk bands projected on the 
      surface Brillouin zone is produced.
      Default: integer 4 (forced to 1 if what is not 'scf_2d_bands').
-gap_thr : minimum size (in eV) of the gaps in the PBS
+gap_thr: minimum size (in eV) of the gaps in the PBS
      Default: double precision 0.1 eV
 sym_divide: When .TRUE. the bands belonging to different irreducible 
      representations are plotted in different panels. This option
@@ -631,7 +636,7 @@ dump_states: If .TRUE. and identify_sur is .TRUE. dump on the file
 sur_layers: The number of surface layers on which we add the charge density of 
      each state to check if it is a surface state.
      Default : integer 2
-sur_thr : the threshold (in percentage) of the charge density that must be
+sur_thr: the threshold (in percentage) of the charge density that must be
      on the surface layers to identify a state as a surface state.
      Default: calculated from the actual charge density values of the states.
 subtract_vacuum: if .TRUE. the charge density of each state on vacuum is
@@ -647,10 +652,10 @@ only_bands_plot: if the files with the bands, the representations, the pbs
      do another plot without any additional calculation. If the files are
      missing and this variable is .TRUE. an error occurs.
      Default: logical .FALSE.
-flpbs : the name of the file that contains the information on the projected
+flpbs: the name of the file that contains the information on the projected
      band structure.
      Default: character(len=*) 'output_pbs'
-flprojlayer : the name of the file that contains the information of the
+flprojlayer: the name of the file that contains the information of the
      projection of the charge density of each state on each layer.
      Calculated only when identify_sur is .TRUE..
      Default: character(len=*) 'output_projlayer'
@@ -798,7 +803,9 @@ density of states and produces a postscript file
 with the electronic excitation energy, free energy, entropy,
 and constant strain heat capacity as a function of temperature. 
 The zero of the electronic energy is the energy at the smallest temperature 
-required in input when it is lower than $4$ K or $4$ K. 
+required in input when it is lower than $4$ K or $4$ K. \\
+
+Number of tasks for this option: 1.
 
 \subsection{\color{web-blue}\texttt{what='plot\_bz'}}
 With this option the code writes a script to make a plot
@@ -938,6 +945,14 @@ start_freq  : Number of the initial frequency calculated in the job in
 last_freq   : Number of the final frequency calculated in the job in the
               sequence of frequencies.
             Default: integer nfs (total number of frequencies)
+lfreq_ev    : If .TRUE. the units of the frequencies are eV instead of the
+              default Ry units.
+            Default: logical .FALSE.
+linear_im_freq: This option is used only when freq_line=.TRUE. 
+            When linear_freq_im is .TRUE., the imaginary part of each 
+            frequency is calculated as eta * freq where eta is the imaginary 
+            part of the first frequency on the frequency line.
+            Default: logical .FALSE.
 \end{verbatim}
 When in the input of the phonon code a non zero wave-vector {\bf q}
 is specified, the previous options produce the inverse of the dielectric 
