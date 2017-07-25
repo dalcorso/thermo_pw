@@ -18,6 +18,7 @@ SUBROUTINE phq_readin_tpw()
   !
   USE kinds,         ONLY : DP
   USE parameters,    ONLY : nsx
+  USE constants,     ONLY : rytoev
   USE ions_base,     ONLY : nat, ntyp => nsp
   USE mp,            ONLY : mp_bcast
   USE mp_world,      ONLY : world_comm
@@ -68,7 +69,8 @@ SUBROUTINE phq_readin_tpw()
   USE ramanm,        ONLY : eth_rps, eth_ns, lraman, elop, dek
   USE freq_ph,       ONLY : fpol, fiu, nfs
   USE optical,       ONLY : fru, lcfreq, freq_line, lmagnon, lcharge, &
-                            lall_tensor, lchimag, start_freq, last_freq
+                            lall_tensor, lchimag, start_freq, last_freq, &
+                            lfreq_ev, linear_im_freq
   USE images_omega,   ONLY : comp_f
   USE cryst_ph,      ONLY : magnetic_sym
   USE ph_restart,    ONLY : ph_readfile
@@ -119,7 +121,7 @@ SUBROUTINE phq_readin_tpw()
                        nk1, nk2, nk3, k1, k2, k3, &
                        drho_star, dvscf_star, only_init, only_wfc, freq_line, &
                        elph_nbnd_min, elph_nbnd_max, el_ph_ngauss,el_ph_nsigma, el_ph_sigma,  &
-                       electron_phonon, &
+                       electron_phonon, lfreq_ev, linear_im_freq,&
                        delta_freq, start_freq, last_freq,     &
                        lmagnon, lcharge, lall_tensor, lchimag, &
                        q_in_band_form, q2d, qplot, low_directory_check
@@ -285,6 +287,8 @@ SUBROUTINE phq_readin_tpw()
   search_sym   =.TRUE.
   delta_freq=(0.0_DP, 0.0_DP)
   freq_line=.FALSE.
+  linear_im_freq=.FALSE.
+  lfreq_ev=.FALSE.
   nk1       = 0
   nk2       = 0
   nk3       = 0
@@ -344,6 +348,8 @@ SUBROUTINE phq_readin_tpw()
   CALL mp_bcast(q2d, meta_ionode_id, world_comm  )
   CALL mp_bcast(q_in_band_form, meta_ionode_id, world_comm  )
   CALL mp_bcast(freq_line, meta_ionode_id, world_comm  )
+  CALL mp_bcast(lfreq_ev, meta_ionode_id, world_comm  )
+  CALL mp_bcast(linear_im_freq, meta_ionode_id, world_comm  )
   CALL mp_bcast(delta_freq, meta_ionode_id, world_comm  )
   CALL mp_bcast(lmagnon, meta_ionode_id, world_comm  )
   CALL mp_bcast(lcharge, meta_ionode_id, world_comm  )
@@ -512,6 +518,7 @@ SUBROUTINE phq_readin_tpw()
               ELSE
                  READ (5, *, iostat = ios) fru(nfs), fiu(nfs)
               END IF    
+              IF (linear_im_freq) fiu(nfs)=fiu(1)*fru(nfs)
               deltaf =(fru(nfs) - fru(1)) / (nfs -1)
               DO i=2,nfs-1
                  fru(i)=fru(1) + (i-1) * deltaf
@@ -524,6 +531,10 @@ SUBROUTINE phq_readin_tpw()
               DO i = 1, nfs
                  READ (5, *, iostat = ios) fru(i), fiu(i)
               END DO
+           ENDIF
+           IF (lfreq_ev) THEN
+              fru=fru/rytoev
+              fiu=fiu/rytoev
            ENDIF
         END IF
      END IF

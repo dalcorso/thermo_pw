@@ -67,6 +67,9 @@ MODULE optical
   INTEGER :: start_freq,    &   ! initial frequency in the job
              last_freq          ! last frequency in the job
 
+  LOGICAL :: linear_im_freq     ! if .TRUE. the imaginary part of the
+                                ! frequency grows linearly
+  LOGICAL :: lfreq_ev           ! when .TRUE. the frequencies are given in eV.
 END MODULE optical
 
 MODULE images_omega
