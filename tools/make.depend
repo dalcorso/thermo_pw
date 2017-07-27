@@ -26,7 +26,6 @@ epsilon_tpw.o : ../../Modules/io_files.o
 epsilon_tpw.o : ../../Modules/io_global.o
 epsilon_tpw.o : ../../Modules/ions_base.o
 epsilon_tpw.o : ../../Modules/kind.o
-epsilon_tpw.o : ../../Modules/mp.o
 epsilon_tpw.o : ../../Modules/mp_global.o
 epsilon_tpw.o : ../../Modules/mp_images.o
 epsilon_tpw.o : ../../Modules/mp_pools.o
@@ -37,6 +36,7 @@ epsilon_tpw.o : ../../Modules/uspp.o
 epsilon_tpw.o : ../../Modules/wavefunctions.o
 epsilon_tpw.o : ../../PW/src/pwcom.o
 epsilon_tpw.o : ../../PW/src/symme.o
+epsilon_tpw.o : ../../UtilXlib/mp.o
 epsilon_tpw.o : ../../thermo_pw/lib/gnuplot.o
 gener_2d_slab.o : ../../Modules/environment.o
 gener_2d_slab.o : ../../Modules/io_global.o
@@ -58,6 +58,12 @@ kovalev.o : ../../Modules/io_global.o
 kovalev.o : ../../Modules/kind.o
 kovalev.o : ../../thermo_pw/lib/point_group.o
 kovalev.o : ../../thermo_pw/lib/rotate.o
+mag_point_group.o : ../../Modules/environment.o
+mag_point_group.o : ../../Modules/io_global.o
+mag_point_group.o : ../../Modules/kind.o
+mag_point_group.o : ../../Modules/mp_global.o
+mag_point_group.o : ../../thermo_pw/lib/magnetic_point_group.o
+mag_point_group.o : ../../thermo_pw/lib/point_group.o
 plot_sur_states.o : ../../Modules/environment.o
 plot_sur_states.o : ../../Modules/io_global.o
 plot_sur_states.o : ../../Modules/kind.o
