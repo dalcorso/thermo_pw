@@ -90,7 +90,7 @@ PROGRAM thermo_pw
   !
   ! Initialize MPI, clocks, print initial messages
   !
-  CALL mp_startup ( start_images=.TRUE. )
+  CALL mp_startup ( start_images=.TRUE., diag_in_band_group = .TRUE. )
   CALL environment_start ( code )
   CALL start_clock( 'PWSCF' )
   with_asyn_images=(nimage > 1)

@@ -58,16 +58,22 @@ for dir in $dirs; do
              $LEVEL2/Modules"
     DEPEND3="$LEVEL2/include $LEVEL2/FFTXlib $LEVEL2/LAXlib $LEVEL2/UtilXlib"
     case $DIR in 
+        LAXlib )
+             DEPENDS="$DEPEND1 $LEVEL1/UtilXlib" ;;
         Modules )
-             DEPENDS="$DEPEND1" ;;
+             DEPENDS="$DEPEND1 $LEVEL1/UtilXlib" ;;
+        LAXlib )
+             DEPENDS="$DEPEND1 ../UtilXlib " ;;
         upftools )
              DEPENDS="$DEPEND1 $LEVEL1/Modules" ;;
         LR_Modules )
              DEPENDS="$DEPEND1 $LEVEL1/Modules $LEVEL1/PW/src" ;;
 	ACFDT/src ) 
              DEPENDS="$DEPEND2 $LEVEL2/PW/src $LEVEL2/PHonon/PH $LEVEL2/LR_Modules" ;;
-	PW/src | CPV/src | atomic/src | GWW/gww )
+	atomic/src | GWW/gww )
 	     DEPENDS="$DEPEND2" ;;
+	PW/src | CPV/src )
+	     DEPENDS="$DEPEND2 ../../KS_Solvers/Davidson ../../KS_Solvers/CG" ;;
 	KS_Solvers/Davidson | KS_Solvers/Davidson_RCI | KS_Solvers/CG )
 	     DEPENDS="$DEPEND3" ;;
 	PW/tools | PP/src | PWCOND/src | GWW/pw4gww | NEB/src )
@@ -109,6 +115,8 @@ for dir in $dirs; do
         # handle special cases: modules for C-fortran binding, hdf5, MPI
         sed '/@iso_c_binding@/d' make.depend > make.depend.tmp
         sed '/@hdf5@/d;/@mpi@/d' make.depend.tmp > make.depend
+        sed '/@fox_wxml@/d'      make.depend > make.depend.tmp 
+        sed '/@fox_dom@/d'       make.depend.tmp > make.depend
 
         if test "$DIR" = "FFTXlib"
         then

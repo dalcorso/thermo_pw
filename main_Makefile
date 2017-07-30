@@ -66,15 +66,15 @@ default :
 # If "|| exit 1" is not present, the error code from make in subdirectories
 # is not returned and make goes on even if compilation has failed
 
-pw : bindir libfft libla libutil mods liblapack libs libiotk 
+pw : bindir libfft libdavid libcg libla libutil mods liblapack libs libiotk 
 	if test -d PW ; then \
 	( cd PW ; $(MAKE) TLDEPS= all || exit 1) ; fi
 
-pw-lib : bindir libfft libla libutil mods liblapack libs libiotk
+pw-lib : bindir libdavid libcg libfft libla libutil mods liblapack libs libiotk
 	if test -d PW ; then \
 	( cd PW ; $(MAKE) TLDEPS= pw-lib || exit 1) ; fi
 
-cp : bindir libfft libla libutil mods liblapack libs libiotk
+cp : bindir libfft libla libutil mods liblapack libs libiotk libfox
 	if test -d CPV ; then \
 	( cd CPV ; $(MAKE) TLDEPS= all || exit 1) ; fi
 
@@ -167,6 +167,15 @@ all   : pwall cp ld1 upf tddfpt xspectra gwl
 # compile modules, libraries, directory for binaries, etc
 ###########################################################
 
+libdavid_rci : touch-dummy libla clib libutil
+	( cd KS_Solvers/Davidson_RCI ; $(MAKE) TLDEPS= all || exit 1 )
+
+libdavid : touch-dummy libla clib libutil
+	( cd KS_Solvers/Davidson ; $(MAKE) TLDEPS= all || exit 1 )
+ 
+libcg : touch-dummy libla clib libutil
+	( cd KS_Solvers/CG ; $(MAKE) TLDEPS= all || exit 1 )
+
 libla : touch-dummy liblapack
 	( cd LAXlib ; $(MAKE) TLDEPS= all || exit 1 )
 
@@ -176,7 +185,7 @@ libfft : touch-dummy
 libutil : touch-dummy
 	( cd UtilXlib ; $(MAKE) TLDEPS= all || exit 1 )
 
-mods : libiotk libla libfft libutil
+mods : libiotk libfox libla libfft libutil
 	( cd Modules ; $(MAKE) TLDEPS= all || exit 1 )
 
 libs : mods
@@ -200,6 +209,10 @@ liblapack: touch-dummy
 
 libiotk: touch-dummy
 	cd install ; $(MAKE) -f extlibs_makefile $@
+
+libfox: touch-dummy
+	cd install ; $(MAKE) -f extlibs_makefile $@
+
 
 # In case of trouble with iotk and compilers, add
 # FFLAGS="$(FFLAGS_NOOPT)" after $(MFLAGS)
