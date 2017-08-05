@@ -33,8 +33,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
                                    xk, wk, ngk, igk_k
   USE gvect,                ONLY : g
   USE gvecs,                ONLY : doublegrid
-  USE fft_base,             ONLY : dfftp, dffts, dtgs
-  USE fft_parallel,         ONLY : tg_cgather
+  USE fft_base,             ONLY : dfftp, dffts
   USE lsda_mod,             ONLY : lsda, nspin, current_spin, isk
   USE spin_orb,             ONLY : domag
   USE wvfct,                ONLY : nbnd, npwx, g2kin,  et
@@ -171,12 +170,12 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   allocate (aux2(npwx*npol, nbnd))
   allocate (drhoc(dfftp%nnr))
   incr=1
-  IF ( dtgs%have_task_groups ) THEN
+  IF ( dffts%have_task_groups ) THEN
      !
-     v_siz =  dtgs%tg_nnr * dtgs%nogrp
+     v_siz =  dffts%nnr_tg
      ALLOCATE( tg_dv   ( v_siz, nspin_mag ) )
      ALLOCATE( tg_psic( v_siz, npol ) )
-     incr = dtgs%nogrp
+     incr = dffts%nproc2
      !
   ENDIF
   !
@@ -286,24 +285,24 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
               ! dvscf_q from previous iteration (mix_potential)
               !
               call start_clock ('vpsifft')
-              IF( dtgs%have_task_groups ) THEN
+              IF( dffts%have_task_groups ) THEN
                  IF (noncolin) THEN
-                    CALL tg_cgather( dffts, dtgs, dvscfins(:,1,ipert), &
+                    CALL tg_cgather( dffts, dvscfins(:,1,ipert), &
                                                                 tg_dv(:,1))
                     IF (domag) THEN
                        DO ipol=2,4
-                          CALL tg_cgather( dffts, dtgs, dvscfins(:,ipol,ipert), &
+                          CALL tg_cgather( dffts, dvscfins(:,ipol,ipert), &
                                                              tg_dv(:,ipol))
                        ENDDO
                     ENDIF
                  ELSE
-                    CALL tg_cgather( dffts, dtgs, dvscfins(:,current_spin,ipert), &
+                    CALL tg_cgather( dffts, dvscfins(:,current_spin,ipert), &
                                                              tg_dv(:,1))
                  ENDIF
               ENDIF
               aux2=(0.0_DP,0.0_DP)
               do ibnd = 1, nbnd_occ (ikk), incr
-                 IF( dtgs%have_task_groups ) THEN
+                 IF( dffts%have_task_groups ) THEN
                     call cft_wave_tg (ik, evc, tg_psic, 1, v_siz, ibnd, &
                                       nbnd_occ (ikk) )
                     call apply_dpot(v_siz, tg_psic, tg_dv, 1)
@@ -604,7 +603,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   deallocate (dvscfin)
   deallocate(aux2)
   deallocate(drhoc)
-  IF ( dtgs%have_task_groups ) THEN
+  IF ( dffts%have_task_groups ) THEN
      DEALLOCATE( tg_dv )
      DEALLOCATE( tg_psic )
   ENDIF

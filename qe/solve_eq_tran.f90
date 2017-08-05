@@ -36,8 +36,7 @@ subroutine solve_eq_tran(iu, flag)
   USE klist,                 ONLY : lgauss, xk, wk, ngk, igk_k
   USE gvect,                 ONLY : g
   USE gvecs,                 ONLY : doublegrid
-  USE fft_base,              ONLY : dfftp, dffts, dtgs
-  USE fft_parallel,          ONLY : tg_cgather
+  USE fft_base,              ONLY : dfftp, dffts
   USE lsda_mod,              ONLY : lsda, nspin, current_spin, isk
   USE spin_orb,              ONLY : domag
   USE wvfct,                 ONLY : nbnd, npwx, g2kin,  et
@@ -196,12 +195,12 @@ subroutine solve_eq_tran(iu, flag)
      iter0 = 0
   endif
   incr=1
-  IF ( dtgs%have_task_groups ) THEN
+  IF ( dffts%have_task_groups ) THEN
      !
-     v_siz =  dtgs%tg_nnr * dtgs%nogrp
+     v_siz =  dffts%nnr_tg 
      ALLOCATE( tg_dv   ( v_siz, nspin_mag ) )
      ALLOCATE( tg_psic( v_siz, npol ) )
-     incr = dtgs%nogrp
+     incr = dffts%nproc2
      !
   ENDIF
   !
@@ -319,14 +318,14 @@ subroutine solve_eq_tran(iu, flag)
               ! calculates dvscf_q*psi_k in G_space, for all bands, k=kpoint
               ! dvscf_q from previous iteration (mix_potential)
               !
-              IF( dtgs%have_task_groups ) THEN
-                 CALL tg_cgather( dffts, dtgs, dvscfins(:,flag,ipol), &
+              IF( dffts%have_task_groups ) THEN
+                 CALL tg_cgather( dffts, dvscfins(:,flag,ipol), &
                                                              tg_dv(:,flag))
               ENDIF
 
               aux2=(0.0_DP,0.0_DP)
               do ibnd = 1, nbnd_occ (ikk), incr
-                 IF ( dtgs%have_task_groups ) THEN
+                 IF ( dffts%have_task_groups ) THEN
                     call cft_wave_tg (ik, evc, tg_psic, 1, v_siz, ibnd, &
                                       nbnd_occ (ikk) )
                     call apply_dpot(v_siz, tg_psic, tg_dv, 1)
@@ -647,7 +646,7 @@ subroutine solve_eq_tran(iu, flag)
   if (noncolin) deallocate(dbecsum_nc)
   deallocate (aux2)
   deallocate (save_ikqs)
-  IF ( dtgs%have_task_groups ) THEN
+  IF ( dffts%have_task_groups ) THEN
      !
      DEALLOCATE( tg_dv  )
      DEALLOCATE( tg_psic)

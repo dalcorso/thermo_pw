@@ -26,7 +26,7 @@ SUBROUTINE psym_dmageq (dvtosym)
   !
 #if defined (__MPI)
   !
-  INTEGER :: i, is, iper, npp0
+  INTEGER :: i, is, iper, ir3, ioff, ioff_tg, nxyp
 
   COMPLEX(DP), ALLOCATABLE :: ddvtosym (:,:)
   ! the potential to symm
@@ -34,18 +34,19 @@ SUBROUTINE psym_dmageq (dvtosym)
   CALL start_clock ('psym_dmageq')
 
   ALLOCATE (ddvtosym ( dfftp%nr1x * dfftp%nr2x * dfftp%nr3x, nspin))
-  npp0 = 1
-  DO i = 1, me_bgrp
-     npp0 = npp0 + dfftp%npp (i) * dfftp%nnp
-  ENDDO
   DO is = 1, nspin
      CALL cgather_sym (dfftp, dvtosym (:, is), ddvtosym (:, is) )
   ENDDO
 
   CALL sym_dmageq (ddvtosym)
+  nxyp = dfftp%nr1x * dfftp%my_nr2p
   DO is = 1, nspin
-     CALL zcopy (dfftp%npp (me_bgrp+1) * dfftp%nnp, ddvtosym (npp0, is), &
-             1, dvtosym (1, is), 1)
+     DO ir3 = 1, dfftp%my_nr3p
+        ioff    = dfftp%nr1x * dfftp%my_nr2p * (ir3-1)
+        ioff_tg = dfftp%nr1x * dfftp%nr2x* (dfftp%my_i0r3p+ir3-1) + &
+                               dfftp%nr1x * dfftp%my_i0r2p
+        CALL zcopy (nxyp, ddvtosym (ioff_tg+1, is), 1, dvtosym (ioff+1, is), 1)
+     ENDDO
   ENDDO
   DEALLOCATE (ddvtosym)
 
