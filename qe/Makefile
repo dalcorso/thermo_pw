@@ -36,6 +36,8 @@ ev_xml.o \
 find_mode_sym.o \
 initialize_ph.o \
 mix_pot.o \
+non_scf.o \
+c_bands.o \
 orthogonalize_omega.o \
 paw_add_onecenter.o \
 paw_add_symmetry.o \

@@ -984,6 +984,18 @@ the \texttt{thermo\_control} file need to be changed.
 The number or processors/pools/images can be changed in the same cases in
 which this is possible in Quantum ESPRESSO.
 
+Using images in a phonon calculation has an overhead because each image must 
+recalculate the band structure at each task, or check if the bands are 
+already on disk, calculated previously by the same images. On some systems 
+with slow disks it could be faster to recalculate the bands instead of 
+reading them from disk. 
+An input variable allows forcing the band calculation:
+\begin{verbatim}
+force_bands_calculation : if .TRUE. the bands are never read from disk but
+              recalculated when needed.
+              Default: logical .FALSE.
+\end{verbatim}
+
 \subsection{\color{web-blue}\texttt{what='scf\_disp'}}
 With this option the code makes a self-consistent calculation followed by
 a phonon dispersion calculation at a fixed geometry. The geometry is given in the 

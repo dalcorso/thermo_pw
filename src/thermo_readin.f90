@@ -80,6 +80,7 @@ SUBROUTINE thermo_readin()
   USE control_quartic_energy, ONLY : lquartic, lquartic_ph, lsolve
   USE piezoelectric_tensor, ONLY : nppl
   USE images_omega, ONLY : omega_group
+  USE control_qe,   ONLY : force_band_calculation
 !
 !  the QE variables needed here. max_seconds, zasr, xmldyn and fildyn
 !  could be set by this routine 
@@ -187,6 +188,7 @@ SUBROUTINE thermo_readin()
 !
                             flepsilon,                      &
                             flpsepsilon,                    &
+                            force_band_calculation,         &
 !
 !   scf_disp
 !
@@ -367,6 +369,7 @@ SUBROUTINE thermo_readin()
 
   flepsilon='epsilon'
   flpsepsilon='output_epsilon.ps'
+  force_band_calculation=.FALSE.
 
   freqmin_input=0.0_DP
   freqmax_input=0.0_DP

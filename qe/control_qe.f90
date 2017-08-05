@@ -18,6 +18,7 @@ MODULE control_qe
   SAVE
 
   LOGICAL  :: tcollect_all=.FALSE.
+  LOGICAL  :: force_band_calculation=.FALSE.
 
 END MODULE control_qe
 

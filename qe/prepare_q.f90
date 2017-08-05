@@ -31,7 +31,7 @@ SUBROUTINE prepare_q_tpw(auxdyn, do_band, do_iq, setup_pw, iq)
                               start_irr, last_irr, current_iq, newgrid, &
                               tmp_dir_ph, tmp_dir_phq, lqdir, qplot, &
                               always_run, where_rec, rec_code
-  USE control_qe,      ONLY : tcollect_all
+  USE control_qe,      ONLY : tcollect_all, force_band_calculation
   USE ph_restart,      ONLY : ph_writefile
   USE io_files,        ONLY : prefix
   USE ramanm,          ONLY : lraman, elop
@@ -213,8 +213,16 @@ SUBROUTINE prepare_q_tpw(auxdyn, do_band, do_iq, setup_pw, iq)
   !
 
   IF ( done_iq(iq) ) do_band=.FALSE.
-  IF (tcollect_all)  do_band=.FALSE.
-  done_bands(iq) = check_bands(tmp_dir_ph, xq, iq)
+  IF (tcollect_all) THEN
+     do_band=.FALSE.
+     done_bands(iq)=.FALSE.
+  ELSE
+     IF (force_band_calculation) THEN
+        done_bands(iq)=.FALSE.
+     ELSE
+        done_bands(iq) = check_bands(tmp_dir_ph, xq, iq)
+     ENDIF
+  ENDIF
   !
   IF(.NOT. setup_pw .AND. ltetra) dfpt_tetra_linit = .TRUE.
   !

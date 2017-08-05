@@ -20,6 +20,10 @@ run_nscf_tpw : call set_small_group_q also in the lgamma_iq case. This change
                before changing qe. Set lscf to .false. because thermo_pw
                reads the input of pw that sets lscf or can do a scf calculation
                that sets this variable.
+non_scf_tpw : call c_bands_nscf_tpw
+
+c_bands_nscf_tpw : call asyn_master so that during the band calculation the
+               master can assign tasks to the slaves.
 
 do_phonon_tpw : call phqscf_tpw instead of phqscf and prepare_q_tpw instead
             of prepare_q. Now moved to the ../src directory.
