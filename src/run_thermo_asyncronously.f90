@@ -111,7 +111,10 @@ SUBROUTINE run_thermo_asynchronously(nwork, part, igeom, auxdyn)
                  ENDIF
                  IF (lberry(iwork)) CALL do_berry(exit_status, &
                                        polar_geo(1,iwork),nppl)
-                 IF (lphonon(iwork)) CALL do_phonon_tpw(auxdyn) 
+                 IF (lphonon(iwork)) THEN
+                    CALL do_phonon_tpw(auxdyn) 
+                    CALL collect_grid_files_tpw()
+                 ENDIF
               ENDIF
            ENDIF
            !
@@ -176,7 +179,7 @@ SUBROUTINE run_thermo_asynchronously(nwork, part, igeom, auxdyn)
                                        polar_geo(1,iwork), nppl)
               IF (lphonon(iwork)) THEN
                  CALL do_phonon_tpw(auxdyn) 
-                 CALL collect_grid_files()
+                 CALL collect_grid_files_tpw()
               END IF
            END IF
         END DO

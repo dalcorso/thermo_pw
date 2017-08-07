@@ -21,6 +21,7 @@ add_zstar_us.o \
 apply_ac.o \
 allocate_phq.o \
 check_bands.o \
+collect_grid_files.o \
 compute_intq.o \
 compute_drhous.o \
 compute_drhous_nc.o \
