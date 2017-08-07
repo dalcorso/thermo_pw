@@ -122,13 +122,13 @@ LOGICAL :: with_eigen
 IF (ionode) THEN
    iunit=find_free_unit()
    OPEN(file=TRIM(filename), unit=iunit, status='old', &
-     form='formatted', err=100, iostat=ios)
+     form='unformatted', err=100, iostat=ios)
 ENDIF
 100  CALL mp_bcast(ios, ionode_id, intra_image_comm)
     IF (ios /= 0) CALL errore('read_ph_freq_data','opening file',ios)
 
-IF (ionode) READ(iunit, *) nat, nq1, nq2, nq3, nq
-IF (ionode) READ(iunit, *) with_eigen
+IF (ionode) READ(iunit) nat, nq1, nq2, nq3, nq
+IF (ionode) READ(iunit) with_eigen
 
 CALL mp_bcast(nat, ionode_id, intra_image_comm)
 CALL mp_bcast(nq1, ionode_id, intra_image_comm)
@@ -152,17 +152,11 @@ IF (with_eigen) ALLOCATE(ph_freq%displa(3*nat, 3*nat, nq))
 ALLOCATE(ph_freq%wg(nq))
 
 IF (ionode) THEN
-   DO iq=1,nq
-      READ(iunit, *, END=20, ERR=10, IOSTAT=ios) ph_freq%wg(iq)
-      DO imode=1,3*nat
-         ! nu(i) = frequencies (cm^{-1})
-         READ(iunit, *, END=20, ERR=10, IOSTAT=ios) ph_freq%nu(imode, iq)
-         IF (with_eigen) THEN
-            READ(iunit, '(6F13.7)', END=20, ERR=10, IOSTAT=ios) &
-                    (ph_freq%displa(jmode,imode,iq), jmode=1,3*nat)
-         ENDIF
-      END DO
-   END DO
+    READ(iunit, END=20, ERR=10, IOSTAT=ios) ph_freq%wg
+    ! nu(i) = frequencies (cm^{-1}) 
+    READ(iunit, END=20, ERR=10, IOSTAT=ios) ph_freq%nu
+    IF (with_eigen) &
+       READ(iunit, END=20, ERR=10, IOSTAT=ios) ph_freq%displa
 ENDIF
 20 CONTINUE
    ios=0
@@ -197,28 +191,23 @@ INTEGER :: find_free_unit
 IF (ionode) THEN
    iunit=find_free_unit()
    OPEN(FILE=TRIM(filename), UNIT=iunit, STATUS='unknown', &
-     FORM='formatted', ERR=100, IOSTAT=ios)
+     FORM='unformatted', ERR=100, IOSTAT=ios)
 ENDIF
 100  CALL mp_bcast(ios, ionode_id, intra_image_comm)
     IF (ios /= 0) CALL errore('write_ph_freq_data','opening file',ios)
 
-IF (ionode) WRITE(iunit, '(5i10)') ph_freq%nat, ph_freq%nq1, ph_freq%nq2, &
+IF (ionode) WRITE(iunit) ph_freq%nat, ph_freq%nq1, ph_freq%nq2, &
                                    ph_freq%nq3, ph_freq%nq
-IF (ionode) WRITE(iunit, '(l10)') ph_freq%with_eigen
+IF (ionode) WRITE(iunit) ph_freq%with_eigen
 nq = ph_freq%nq
 nat = ph_freq%nat
 IF (ionode) THEN
-   DO iq=1,nq
-      WRITE(iunit, '(E30.15)', ERR=10, IOSTAT=ios) ph_freq%wg(iq)
-      DO imode=1,3*nat
-         ! nu(i) = frequencies (cm^{-1}) 
-         WRITE(iunit,'(E20.13)',ERR=10,IOSTAT=ios) ph_freq%nu(imode, iq)
-         IF (ph_freq%with_eigen) &
-            WRITE(iunit, '(6F13.7)', ERR=10, IOSTAT=ios) &
-                    (ph_freq%displa(jmode, imode,iq),jmode=1,3*nat)
-      END DO
-   END DO
-END IF
+   WRITE(iunit, ERR=10, IOSTAT=ios) ph_freq%wg
+   ! nu(i) = frequencies (cm^{-1}) 
+   WRITE(iunit, ERR=10, IOSTAT=ios) ph_freq%nu 
+   IF (ph_freq%with_eigen) &
+      WRITE(iunit, ERR=10, IOSTAT=ios) ph_freq%displa
+ENDIF
 10 CALL mp_bcast( ios, ionode_id, intra_image_comm )
 IF (ios /= 0 ) CALL errore('write_ph_freq_data', 'problem reading phdos', 1)
 
