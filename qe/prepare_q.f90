@@ -69,13 +69,15 @@ SUBROUTINE prepare_q_tpw(auxdyn, do_band, do_iq, setup_pw, iq)
   !
   ! YAMBO >
   ! Output file
-  write (yambo_elph_file_name,'(a,i6.6)') 'elph_dir/s.dbph_',iq
+  IF (elph_yambo) THEN
+     WRITE (yambo_elph_file_name,'(a,i6.6)') 'elph_dir/s.dbph_',iq
   !
-  inquire(file=trim(yambo_elph_file_name),exist=l_exist)
+     INQUIRE(FILE=trim(yambo_elph_file_name),EXIST=l_exist)
   !
-  IF ( elph_yambo .and. l_exist ) then
-    do_iq=.FALSE.
-    RETURN
+     IF ( l_exist ) THEN
+        do_iq=.FALSE.
+        RETURN
+     ENDIF
   ENDIF
   ! YAMBO <
   !
