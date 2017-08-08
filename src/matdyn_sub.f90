@@ -63,6 +63,7 @@ SUBROUTINE matdyn_interp(disp_nqs, disp_q, with_eigen)
   !
   USE kinds,          ONLY : DP
   USE mp_images,      ONLY : my_image_id, root_image, intra_image_comm
+  USE mp_world,       ONLY : world_comm
   USE mp,             ONLY : mp_sum
   USE io_global,      ONLY : stdout
   USE ions_base,      ONLY : nat, tau, ityp, ntyp => nsp, amass
@@ -98,8 +99,6 @@ SUBROUTINE matdyn_interp(disp_nqs, disp_q, with_eigen)
   INTEGER :: n, i, it, nq, na, nqtot
   !
   LOGICAL :: xmlifc, lo_to_split, do_init
-
-  IF ( my_image_id /= root_image ) RETURN
 
   xmlifc=xmldyn
   filefrc="phdisp_files/"//TRIM(flfrc)
@@ -139,7 +138,7 @@ SUBROUTINE matdyn_interp(disp_nqs, disp_q, with_eigen)
   nq=nqtot
 
   do_init=.TRUE.
-  CALL divide(intra_image_comm,nq, nstart, nlast)
+  CALL divide(world_comm, nq, nstart, nlast)
   IF (with_eigen) z_save=(0.0_DP,0.0_DP)
   freq_save=0.0_DP
   DO n=nstart, nlast
@@ -211,8 +210,8 @@ SUBROUTINE matdyn_interp(disp_nqs, disp_q, with_eigen)
         IF (w2(i,n) < 0.0d0) freq_save(i,n) = -freq_save(i,n)
      END DO
   END DO
-  CALL mp_sum(freq_save, intra_image_comm)
-  IF (with_eigen) CALL mp_sum(z_save, intra_image_comm)
+  CALL mp_sum(freq_save, world_comm)
+  IF (with_eigen) CALL mp_sum(z_save, world_comm)
   !
   DEALLOCATE (z) 
   DEALLOCATE (w2) 

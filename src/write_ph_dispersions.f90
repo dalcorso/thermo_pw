@@ -67,7 +67,6 @@ SUBROUTINE write_ph_dispersions()
      RETURN
   ENDIF
 
-  IF ( my_image_id /= root_image ) RETURN
 
   WRITE(stdout,'(/,2x,76("+"))')
   WRITE(stdout,'(5x,"Interpolating the dynamical matrices")')
@@ -83,6 +82,13 @@ SUBROUTINE write_ph_dispersions()
 !  we always need the eigenvectors to make the symmetry analysis
 !
   CALL matdyn_interp(disp_nqs, disp_q, .TRUE.)
+
+  IF ( my_image_id /= root_image ) THEN
+     DEALLOCATE (freq_save) 
+     DEALLOCATE (z_save) 
+     DEALLOCATE (w2) 
+     RETURN
+  ENDIF
 
   iout=0
   IF (flvec/=' ') THEN

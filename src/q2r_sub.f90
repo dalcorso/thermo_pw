@@ -50,8 +50,9 @@ SUBROUTINE q2r_sub(fildyn)
   USE dynamicalq, ONLY : phiq, tau, ityp, zeu
   USE ifc,        ONLY : zasr
   USE fft_scalar, ONLY : cfft3d
-  USE io_global,  ONLY : ionode_id, ionode, stdout
+  USE io_global,  ONLY : ionode_id, ionode, stdout, meta_ionode, meta_ionode_id
   USE mp_images,  ONLY : intra_image_comm, root_image, my_image_id
+  USE mp_world,   ONLY : world_comm
   USE io_dyn_mat, ONLY : read_dyn_mat_param, read_dyn_mat_header, &
                          read_dyn_mat, read_dyn_mat_tail, &
                          write_dyn_mat_header, write_ifc
@@ -85,9 +86,9 @@ SUBROUTINE q2r_sub(fildyn)
   REAL(DP) :: q(3,48), omega, xq, amass(ntypx), resi
   REAL(DP) :: epsil(3,3), smat(3,3), angle_rot
   !
-  ! Only one image run this routine 
+  ! Only one image run this routine, but the results are broadcasted 
+  ! to all images
   !
-  IF ( my_image_id /= root_image ) RETURN
   IF (flfrc == ' '.OR. .NOT. ldisp) RETURN
   !
   filefrc="phdisp_files/"//TRIM(flfrc)
@@ -96,25 +97,24 @@ SUBROUTINE q2r_sub(fildyn)
   WRITE(stdout,'(5x,"Writing on file ",a)') TRIM(filefrc)
   WRITE(stdout,'(2x,76("+"),/)')
   !
-   
-  IF (ionode) THEN
+  IF (meta_ionode) THEN
      iundyn=find_free_unit()
      OPEN (UNIT=iundyn, FILE=TRIM(fildyn)//'0', STATUS='old', &
                                             FORM='formatted', IOSTAT=ierr)
   ENDIF
-  CALL mp_bcast(ierr, ionode_id, intra_image_comm)
-  IF (ionode) THEN
-     IF (ierr /= 0) CALL errore('q2r_sub','No grid information on file',1)
+  CALL mp_bcast(ierr, ionode_id, world_comm)
+  IF (ierr /= 0) CALL errore('q2r_sub','No grid information on file',1)
+  IF (meta_ionode) THEN
      WRITE (stdout,'(/,5x,"Reading q grid from file ")') 
      WRITE (stdout,'(5x,a)') TRIM(fildyn)//'0'
      READ (iundyn, *) nr1, nr2, nr3
      READ (iundyn, *) nfile
      CLOSE (UNIT=iundyn, STATUS='KEEP')
   ENDIF
-  CALL mp_bcast(nr1, ionode_id, intra_image_comm)
-  CALL mp_bcast(nr2, ionode_id, intra_image_comm)
-  CALL mp_bcast(nr3, ionode_id, intra_image_comm)
-  CALL mp_bcast(nfile, ionode_id, intra_image_comm)
+  CALL mp_bcast(nr1, ionode_id, world_comm)
+  CALL mp_bcast(nr2, ionode_id, world_comm)
+  CALL mp_bcast(nr3, ionode_id, world_comm)
+  CALL mp_bcast(nfile, ionode_id, world_comm)
      !
   IF (nr1 < 1 .OR. nr1 > 1024) CALL errore ('q2r_sub',' nr1 wrong or missing',1)
   IF (nr2 < 1 .OR. nr2 > 1024) CALL errore ('q2r_sub',' nr2 wrong or missing',1)
@@ -143,41 +143,72 @@ SUBROUTINE q2r_sub(fildyn)
      WRITE (stdout,'(5x,a)') TRIM(filin)
 
      IF (xmldyn) THEN
-        CALL read_dyn_mat_param(filin,ntyp,nat)
+        IF (my_image_id==0) CALL read_dyn_mat_param(filin,ntyp,nat)
+        CALL mp_bcast(ntyp,meta_ionode_id,world_comm)
+        CALL mp_bcast(nat,meta_ionode_id,world_comm)
+
         IF (ifile==1) THEN
            ALLOCATE (m_loc(3,nat))
            ALLOCATE (tau(3,nat))
            ALLOCATE (ityp(nat))
            ALLOCATE (zeu(3,3,nat))
         ENDIF
-        IF (ifile==1) THEN
-           CALL read_dyn_mat_header(ntyp, nat, ibrav, nspin_mag, &
-              celldm, at, bg, omega, atm, amass, tau, ityp, &
-              m_loc, nqs, lrigid, epsil, zeu )
-        ELSE
-           CALL read_dyn_mat_header(ntyp, nat, ibrav, nspin_mag, &
-              celldm, at, bg, omega, atm, amass, tau, ityp, m_loc, nqs)
+        IF (my_image_id==0) THEN
+           IF (ifile==1) THEN
+              CALL read_dyn_mat_header(ntyp, nat, ibrav, nspin_mag, &
+                  celldm, at, bg, omega, atm, amass, tau, ityp, &
+                  m_loc, nqs, lrigid, epsil, zeu )
+           ELSE
+              CALL read_dyn_mat_header(ntyp, nat, ibrav, nspin_mag, &
+                 celldm, at, bg, omega, atm, amass, tau, ityp, m_loc, nqs)
+           ENDIF
         ENDIF
+
+        IF (ifile==1) THEN
+           CALL mp_bcast(nspin_mag, meta_ionode_id, world_comm)
+           CALL mp_bcast(lrigid, meta_ionode_id, world_comm)
+           CALL mp_bcast(zeu, meta_ionode_id, world_comm)
+        ENDIF
+        CALL mp_bcast(nqs, meta_ionode_id, world_comm)
         ALLOCATE (phiq(3,3,nat,nat,nqs) )
-        DO iq=1,nqs
-           CALL read_dyn_mat(nat,iq,q(:,iq),phiq(:,:,:,:,iq))
-        ENDDO
-        CALL read_dyn_mat_tail(nat)
+        IF (my_image_id==0) THEN
+           DO iq=1,nqs
+              CALL read_dyn_mat(nat,iq,q(:,iq),phiq(:,:,:,:,iq))
+           ENDDO
+           CALL read_dyn_mat_tail(nat)
+        ENDIF
+        CALL mp_bcast(q, meta_ionode_id, world_comm)
+        CALL mp_bcast(phiq, meta_ionode_id, world_comm)
      ELSE
-        IF (ionode) THEN
+        IF (meta_ionode) THEN
            iundyn=find_free_unit()
            OPEN (UNIT=iundyn, FILE=TRIM(filin), STATUS='old', &
                                                 FORM='formatted', IOSTAT=ierr)
         ENDIF
-        CALL mp_bcast(ierr, ionode_id, intra_image_comm)
+        CALL mp_bcast(ierr, ionode_id, world_comm)
         IF (ierr /= 0) CALL errore('q2r_sub','file '//TRIM(filin)&
                                                            //' missing!',1)
-        CALL read_dyn_from_file_tpw (nqs, q, epsil, lrigid,  &
-                ntyp, nat, ibrav, celldm, at, atm, amass, ifile, iundyn)
+        IF (my_image_id==0) THEN
+           CALL read_dyn_from_file_tpw (nqs, q, epsil, lrigid,  &
+                    ntyp, nat, ibrav, celldm, at, atm, amass, ifile, iundyn)
+        ENDIF
+
         IF (ifile==1) ALLOCATE (m_loc(3,nat))
-        IF (ionode) CLOSE(unit=iundyn)
+        IF (meta_ionode) CLOSE(unit=iundyn)
      ENDIF
-     IF (ifile == 1) THEN
+     IF (ifile==1) THEN
+        CALL mp_bcast(ibrav, meta_ionode_id, world_comm)
+        CALL mp_bcast(celldm, meta_ionode_id, world_comm)
+        CALL mp_bcast(at, meta_ionode_id, world_comm)
+        CALL mp_bcast(atm, meta_ionode_id, world_comm)
+        CALL mp_bcast(amass, meta_ionode_id, world_comm)
+        CALL mp_bcast(tau, meta_ionode_id, world_comm)
+        CALL mp_bcast(ityp, meta_ionode_id, world_comm)
+        CALL mp_bcast(m_loc, meta_ionode_id, world_comm)
+        CALL mp_bcast(lrigid, meta_ionode_id, world_comm)
+        IF (lrigid) THEN
+           CALL mp_bcast(epsil, meta_ionode_id, world_comm)
+        ENDIF
         ! it must be allocated here because nat is read from file
         ALLOCATE (phid(nr1*nr2*nr3,3,3,nat,nat) )
         !
@@ -253,17 +284,19 @@ SUBROUTINE q2r_sub(fildyn)
   ! Real space force constants written to file (analytical part)
   !
   IF (xmldyn) THEN
-     IF (lrigid) THEN
-        CALL write_dyn_mat_header( filefrc, ntyp, nat, ibrav, nspin_mag,  &
-             celldm, at, bg, omega, atm, amass, tau, ityp,   &
-             m_loc, nqs, epsil, zeu)
-     ELSE
-        CALL write_dyn_mat_header( filefrc, ntyp, nat, ibrav, nspin_mag,  &
-             celldm, at, bg, omega, atm, amass, tau, ityp, m_loc, nqs)
+     IF (my_image_id==0) THEN
+        IF (lrigid) THEN
+           CALL write_dyn_mat_header( filefrc, ntyp, nat, ibrav, nspin_mag,  &
+                celldm, at, bg, omega, atm, amass, tau, ityp,   &
+                m_loc, nqs, epsil, zeu)
+        ELSE
+           CALL write_dyn_mat_header( filefrc, ntyp, nat, ibrav, nspin_mag,  &
+                celldm, at, bg, omega, atm, amass, tau, ityp, m_loc, nqs)
+        ENDIF
+        CALL write_ifc(nr1,nr2,nr3,nat,phid)
      ENDIF
-     CALL write_ifc(nr1,nr2,nr3,nat,phid)
   ELSE 
-     IF (ionode) THEN
+     IF (meta_ionode) THEN
         iunfrc=find_free_unit()
         OPEN(unit=iunfrc,file=filefrc,status='unknown',form='formatted')
         WRITE(iunfrc,'(i3,i5,i3,6f11.7)') ntyp,nat,ibrav,celldm
@@ -314,8 +347,10 @@ SUBROUTINE q2r_sub(fildyn)
                                                           &10^-12)')")
   END IF
   !
+
   CALL interface_with_tpw(phid, nr1, nr2, nr3, nat, ntyp, lrigid, zeu, &
                             epsil, atm, m_loc, tau, ityp, at, bg, omega)
+
   !
   DEALLOCATE(nc)
   DEALLOCATE(phid) 

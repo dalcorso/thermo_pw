@@ -23,7 +23,7 @@ SUBROUTINE write_ph_freq(igeom)
   !  cleanup these variables, among other things.
   !
   USE kinds,         ONLY : DP
-  USE mp_images,     ONLY : my_image_id, root_image
+  USE mp_images,     ONLY : my_image_id
   USE io_global,     ONLY : stdout
   USE ions_base,     ONLY : nat, tau, ityp, amass
   USE cell_base,     ONLY : ibrav, at, bg, celldm
@@ -54,7 +54,6 @@ SUBROUTINE write_ph_freq(igeom)
   file_exist=check_file_exists(filename)
   IF (.NOT.ALLOCATED(ph_freq_save)) ALLOCATE(ph_freq_save(tot_ngeo))
 
-  IF ( my_image_id /= root_image ) RETURN
   !
   ! Allocate space for the q points and the frequencies
   !
@@ -120,11 +119,13 @@ SUBROUTINE write_ph_freq(igeom)
         END DO
      END DO
   ELSE
-     WRITE(stdout,'(/,2x,76("+"))')
-     WRITE(stdout,'(5x,"Writing frequencies for BZ integration on file ")') 
-     WRITE(stdout,'(5x,a)') TRIM(filename)
-     WRITE(stdout,'(2x,76("+"),/)')
-     CALL write_ph_freq_data(ph_freq_save(igeom),filename)
+     IF (my_image_id==0) THEN
+        WRITE(stdout,'(/,2x,76("+"))')
+        WRITE(stdout,'(5x,"Writing frequencies for BZ integration on file ")') 
+        WRITE(stdout,'(5x,a)') TRIM(filename)
+        WRITE(stdout,'(2x,76("+"),/)')
+        CALL write_ph_freq_data(ph_freq_save(igeom),filename)
+     ENDIF
   END IF
   !
   RETURN

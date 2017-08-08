@@ -15,9 +15,9 @@ USE phdos_module,   ONLY : zero_point_energy, free_energy, vib_energy, &
 USE thermo_mod,     ONLY : tot_ngeo
 USE temperature,    ONLY : ntemp, temp
 USE thermodynamics, ONLY : ph_ener, ph_free_ener, ph_entropy, ph_cv, phdos_save
-USE mp_images,      ONLY : root_image, my_image_id, intra_image_comm
+USE mp_world,       ONLY : world_comm
 USE mp,             ONLY : mp_bcast, mp_sum
-USE io_global,      ONLY : ionode, ionode_id, stdout
+USE io_global,      ONLY : meta_ionode, meta_ionode_id, stdout
 USE data_files,     ONLY : fltherm
 
 IMPLICIT NONE
@@ -32,11 +32,10 @@ LOGICAL  :: check_file_exists, do_read
 do_read=.FALSE.
 filetherm="therm_files/"//TRIM(fltherm)
 IF ( check_file_exists(filetherm) ) do_read=.TRUE.
-IF (my_image_id /= root_image) RETURN
 IF ( igeom < 1 .OR. igeom > tot_ngeo ) CALL errore('write_thermo', & 
                                                'Too many geometries',1)
 IF (do_read) THEN
-   IF (ionode) THEN
+   IF (meta_ionode) THEN
       iu_therm=find_free_unit()
       OPEN (UNIT=iu_therm, FILE=TRIM(filetherm), STATUS='old',&
                                                      FORM='formatted')
@@ -50,10 +49,10 @@ IF (do_read) THEN
       END DO
       CLOSE(iu_therm)
    END IF
-   CALL mp_bcast(ph_ener(:,igeom), ionode_id, intra_image_comm)
-   CALL mp_bcast(ph_free_ener(:,igeom), ionode_id, intra_image_comm)
-   CALL mp_bcast(ph_entropy(:,igeom), ionode_id, intra_image_comm)
-   CALL mp_bcast(ph_cv(:,igeom), ionode_id, intra_image_comm)
+   CALL mp_bcast(ph_ener(:,igeom), meta_ionode_id, world_comm)
+   CALL mp_bcast(ph_free_ener(:,igeom), meta_ionode_id, world_comm)
+   CALL mp_bcast(ph_entropy(:,igeom), meta_ionode_id, world_comm)
+   CALL mp_bcast(ph_cv(:,igeom), meta_ionode_id, world_comm)
    RETURN
 END IF
 
@@ -67,7 +66,7 @@ CALL integrated_dos(phdos_save(igeom), tot_states)
 !
 !  Divide the temperatures among processors
 !
-CALL divide (intra_image_comm, ntemp, nstart, nlast)
+CALL divide (world_comm, ntemp, nstart, nlast)
 ph_free_ener(:,igeom)=0.0_DP
 ph_ener(:,igeom)=0.0_DP
 ph_cv(:,igeom)=0.0_DP
@@ -84,12 +83,12 @@ END DO
 !
 !  and collect the results
 !
-CALL mp_sum(ph_free_ener(1:ntemp,igeom),intra_image_comm)
-CALL mp_sum(ph_ener(1:ntemp,igeom),intra_image_comm)
-CALL mp_sum(ph_cv(1:ntemp,igeom),intra_image_comm)
+CALL mp_sum(ph_free_ener(1:ntemp,igeom),world_comm)
+CALL mp_sum(ph_ener(1:ntemp,igeom),world_comm)
+CALL mp_sum(ph_cv(1:ntemp,igeom),world_comm)
 
 ph_entropy(:,igeom)=(ph_ener(:, igeom) - ph_free_ener(:, igeom))/ temp(:)
-IF (ionode) &
+IF (meta_ionode) &
    CALL write_thermo_info(e0, tot_states, ntemp, temp, ph_ener(1,igeom), &
               ph_free_ener(1,igeom), ph_entropy(1,igeom), ph_cv(1,igeom),&
                                                              1,filetherm)
@@ -106,9 +105,9 @@ USE temperature,      ONLY : ntemp, temp
 USE ph_freq_thermodynamics, ONLY : phf_ener, phf_free_ener, phf_entropy, &
                              phf_cv, ph_freq_save
 USE thermo_mod,       ONLY : tot_ngeo
-USE mp_images,        ONLY : root_image, my_image_id, intra_image_comm
 USE mp,               ONLY : mp_bcast, mp_sum
-USE io_global,        ONLY : ionode, ionode_id, stdout
+USE mp_world,         ONLY : world_comm
+USE io_global,        ONLY : meta_ionode, meta_ionode_id, stdout
 USE data_files,       ONLY : fltherm
 
 IMPLICIT NONE
@@ -124,12 +123,11 @@ do_read=.FALSE.
 filename="therm_files/"//TRIM(fltherm)//'_ph'
 IF ( check_file_exists(filename) ) do_read=.TRUE.
 
-IF (my_image_id /= root_image) RETURN
 IF ( igeom < 1 .OR. igeom > tot_ngeo ) CALL errore('write_thermo', & 
                                                'Too many geometries',1)
 
 IF (do_read) THEN
-   IF (ionode) THEN
+   IF (meta_ionode) THEN
       iu_therm=find_free_unit()
       OPEN (UNIT=iu_therm, FILE=TRIM(filename), STATUS='old',&
                                                      FORM='formatted')
@@ -143,10 +141,10 @@ IF (do_read) THEN
       END DO
       CLOSE(iu_therm)
    END IF
-   CALL mp_bcast(phf_ener(:,igeom), ionode_id, intra_image_comm)
-   CALL mp_bcast(phf_free_ener(:,igeom), ionode_id, intra_image_comm)
-   CALL mp_bcast(phf_entropy(:,igeom), ionode_id, intra_image_comm)
-   CALL mp_bcast(phf_cv(:,igeom), ionode_id, intra_image_comm)
+   CALL mp_bcast(phf_ener(:,igeom), meta_ionode_id, world_comm)
+   CALL mp_bcast(phf_free_ener(:,igeom), meta_ionode_id, world_comm)
+   CALL mp_bcast(phf_entropy(:,igeom), meta_ionode_id, world_comm)
+   CALL mp_bcast(phf_cv(:,igeom), meta_ionode_id, world_comm)
    RETURN
 END IF
 
@@ -162,7 +160,7 @@ CALL zero_point_energy_ph(ph_freq_save(igeom), e0)
 !
 !  Divide the temperatures among processors
 !
-CALL divide (intra_image_comm, ntemp, nstart, nlast)
+CALL divide (world_comm, ntemp, nstart, nlast)
 phf_free_ener(:,igeom)=0.0_DP
 phf_ener(:,igeom)=0.0_DP
 phf_cv(:,igeom)=0.0_DP
@@ -182,12 +180,12 @@ END DO
 !
 !  and collect the results
 !
-CALL mp_sum(phf_free_ener(1:ntemp,igeom),intra_image_comm)
-CALL mp_sum(phf_ener(1:ntemp,igeom),intra_image_comm)
-CALL mp_sum(phf_cv(1:ntemp,igeom),intra_image_comm)
+CALL mp_sum(phf_free_ener(1:ntemp,igeom),world_comm)
+CALL mp_sum(phf_ener(1:ntemp,igeom),world_comm)
+CALL mp_sum(phf_cv(1:ntemp,igeom),world_comm)
 
 phf_entropy(:,igeom)=(phf_ener(:, igeom) - phf_free_ener(:, igeom))/temp(:)
- IF (ionode) &
+ IF (meta_ionode) &
      CALL write_thermo_info(e0, 0.0_DP, ntemp, temp, phf_ener(1,igeom), &
                 phf_free_ener(1,igeom), phf_entropy(1,igeom), phf_cv(1,igeom),& 
                                                             2,filename)

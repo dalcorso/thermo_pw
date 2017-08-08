@@ -19,9 +19,10 @@ SUBROUTINE write_phdos(igeom)
   !  phdos_save(igeom) variables and exits.
   !
   USE kinds,          ONLY : DP
-  USE mp,             ONLY : mp_sum
-  USE mp_images,      ONLY : my_image_id, root_image, intra_image_comm
-  USE io_global,      ONLY : ionode, stdout
+  USE mp,             ONLY : mp_sum, mp_bcast
+  USE mp_world,       ONLY : world_comm
+  USE mp_images,      ONLY : my_image_id, root_image 
+  USE io_global,      ONLY : meta_ionode, meta_ionode_id, stdout
   USE ions_base,      ONLY : nat
   USE control_dosq,   ONLY : phdos_sigma, deltafreq, freqmin, freqmax, &
                              ndos_input, freqmin_input, freqmax_input
@@ -53,12 +54,16 @@ SUBROUTINE write_phdos(igeom)
         WRITE(stdout,'(5x,a)') TRIM(filedos)
         WRITE(stdout,'(2x,76("-"),/)')
         CALL read_phdos_data(phdos_save(igeom),filedos)
-        CALL find_minimum_maximum(phdos_save(igeom), freqmin, freqmax)
-        RETURN
-     END IF
-  END IF
+     ENDIF
+     CALL mp_bcast(phdos_save(igeom)%number_of_points, meta_ionode_id, &
+                                                       world_comm)
+     CALL mp_bcast(phdos_save(igeom)%de, meta_ionode_id, world_comm)
+     CALL mp_bcast(phdos_save(igeom)%nu, meta_ionode_id, world_comm)
+     CALL mp_bcast(phdos_save(igeom)%phdos, meta_ionode_id, world_comm)
 
-  IF ( my_image_id /= root_image ) RETURN
+     CALL find_minimum_maximum(phdos_save(igeom), freqmin, freqmax)
+     RETURN
+  END IF
 
   WRITE(stdout,'(/,2x,76("+"))')
   WRITE(stdout,'(5x,"Writing phdos on file ",a)') 
@@ -99,7 +104,7 @@ SUBROUTINE write_phdos(igeom)
 !   Divide the calculation of the density of states among processors
 !   of one image
 !
-  CALL divide (intra_image_comm, ndos, nstart, nlast)
+  CALL divide (world_comm, ndos, nstart, nlast)
   phdos_save(igeom)%nu=0.0_DP
   phdos_save(igeom)%phdos=0.0_DP
   DO n= nstart, nlast
@@ -113,10 +118,10 @@ SUBROUTINE write_phdos(igeom)
 !
 !  and collect the results
 !
-  CALL mp_sum(phdos_save(igeom)%nu, intra_image_comm)
-  CALL mp_sum(phdos_save(igeom)%phdos, intra_image_comm)
+  CALL mp_sum(phdos_save(igeom)%nu, world_comm)
+  CALL mp_sum(phdos_save(igeom)%phdos, world_comm)
 
-  IF (ionode) THEN
+  IF (meta_ionode) THEN
      iundos=find_free_unit()
      OPEN (UNIT=iundos,FILE=filedos,STATUS='unknown',FORM='formatted')
      DO n=1, ndos 
