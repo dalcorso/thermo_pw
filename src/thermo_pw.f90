@@ -83,7 +83,7 @@ PROGRAM thermo_pw
   INTEGER  :: part, nwork, igeom, exit_status, ph_geometries, iaux
   REAL(DP) :: zero, rd_ht(3,3)
   LOGICAL  :: exst, parallelfs, run, trd_ht
-  LOGICAL  :: check_dyn_file_exists
+  LOGICAL  :: check_dyn_file_exists, do_ph
   CHARACTER (LEN=9)   :: code = 'THERMO_PW'
   CHARACTER (LEN=256) :: auxdyn=' '
   CHARACTER (LEN=6)   :: int_to_char
@@ -300,7 +300,9 @@ PROGRAM thermo_pw
         !
         auxdyn=fildyn
 
-        IF ( .NOT. check_dyn_file_exists(auxdyn)) THEN
+        do_ph=.TRUE.
+        IF (trans) do_ph=.NOT. check_dyn_file_exists(auxdyn)
+        IF ( do_ph ) THEN
 
            ph_geometries=ph_geometries+1
            IF (ph_geometries > max_geometries) THEN

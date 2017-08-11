@@ -117,7 +117,6 @@ INTEGER, INTENT(IN) :: proc_num_(0:nproc_-1)
 INTEGER :: iproc                ! counter on workers
 INTEGER :: ierr                 ! error variable
 
-
 CALL initialize_master(nproc_, nwork_, proc_num_, comm)
 
 IF (nworkers==0) RETURN
@@ -288,7 +287,7 @@ INTEGER :: iwork                    ! auxiliary
 CALL mpi_send(READY,1,MPI_INTEGER,master,tag,asyn_comm,ierr)
 !
 !  when the code arrives here the master has recognized that 
-!  this worker wants something to do and send the job to do
+!  this worker wants something to do and sends the job to do
 !
 CALL mpi_recv(iwork,1,MPI_INTEGER,master,tag,asyn_comm,status_,ierr)
 worker_work=iwork
@@ -299,7 +298,7 @@ END SUBROUTINE asyn_worker
 LOGICAL FUNCTION choose_next(iwork, work_finished)
 !
 !  This function chooses the next work to do.
-!  There are three possible outputs:
+!  There are two possible outputs:
 !  a) All works have been done. In this case work_finished becomes .TRUE.
 !  b) There is some work to do. In this case the function returns .TRUE.
 !     and iwork gives the work to do.
