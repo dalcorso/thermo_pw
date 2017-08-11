@@ -162,7 +162,11 @@ LOGICAL FUNCTION check_bands( outdir, xq, iq )
   CALL mp_bcast( exst, ionode_id, intra_image_comm )
   !
   exst_restart=.FALSE.
-  IF (exst) CALL check_restart_recover(exst_recover, exst_restart)
+  exst_recover=.FALSE.
+  IF (exst.AND.ionode) CALL check_restart_recover(exst_recover, exst_restart)
+  CALL mp_bcast( exst_restart, ionode_id, intra_image_comm ) 
+  CALL mp_bcast( exst_recover, ionode_id, intra_image_comm ) 
+
   !
   IF (exst .AND. .NOT. exst_restart) THEN
      CALL pw_readschema_file(ierr, output_obj)
