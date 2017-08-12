@@ -20,6 +20,7 @@ add_zstar_ue.o \
 add_zstar_us.o \
 apply_ac.o \
 allocate_phq.o \
+bcast_qes_module.o \
 check_bands.o \
 collect_grid_files.o \
 compute_intq.o \
@@ -57,6 +58,7 @@ psymeq.o \
 psym_dmage_fpol.o \
 run_nscf.o \
 read_dyn_from_file.o \
+read_file_new.o \
 realspace_grid_init.o \
 scal_prod.o \
 set_defaults_pw.o \

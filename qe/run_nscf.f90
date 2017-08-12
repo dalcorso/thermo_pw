@@ -57,7 +57,7 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
      CALL close_files(.true.)
      wfc_dir=tmp_dir_phq
      tmp_dir=tmp_dir_phq
-     CALL read_file()
+     CALL read_file_tpw()
      CALL set_small_group_of_q(nsymq,invsymq,minus_q)
      RETURN
   ENDIF

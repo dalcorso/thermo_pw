@@ -118,6 +118,8 @@ LOGICAL FUNCTION check_bands( outdir, xq, iq )
   USE io_global,  ONLY : ionode, ionode_id
   USE pw_restart_new,   ONLY : pw_readschema_file
   USE qes_types_module, ONLY : output_type
+  USE bcast_qes_types_module, ONLY : bcast_output_type
+  USE qes_libs_module,      ONLY :  qes_reset_output
   USE io_files,   ONLY : xmlpun_schema
   USE iotk_module, ONLY : iotk_free_unit
   USE mp,         ONLY : mp_bcast
@@ -166,11 +168,14 @@ LOGICAL FUNCTION check_bands( outdir, xq, iq )
   IF (exst.AND.ionode) CALL check_restart_recover(exst_recover, exst_restart)
   CALL mp_bcast( exst_restart, ionode_id, intra_image_comm ) 
   CALL mp_bcast( exst_recover, ionode_id, intra_image_comm ) 
-
+  
   !
   IF (exst .AND. .NOT. exst_restart) THEN
-     CALL pw_readschema_file(ierr, output_obj)
+     IF (ionode) &
+        CALL pw_readschema_file(ierr, output_obj)
+     CALL mp_bcast( ierr, ionode_id, intra_image_comm )
      CALL errore('check_bands','xmlfile not readable',ABS(ierr))
+     CALL bcast_output_type(output_obj, ionode_id, intra_image_comm )
      nks = output_obj%band_structure%nks 
      IF (nks > 1) THEN
 !
@@ -185,6 +190,7 @@ LOGICAL FUNCTION check_bands( outdir, xq, iq )
                                                        check_bands=.TRUE.  
         IF (lgamma_iq(iq).AND.wk(2)/=0.0_DP) check_bands=.TRUE.
      END IF
+     CALL qes_reset_output ( output_obj )
   END IF   
   !
   tmp_dir=tmp_dir_save

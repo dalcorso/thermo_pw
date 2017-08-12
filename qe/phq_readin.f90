@@ -648,7 +648,7 @@ SUBROUTINE phq_readin_tpw()
      END DO
   ENDIF
 
-  CALL read_file ( )
+  CALL read_file_tpw ( )
 
   magnetic_sym=noncolin .AND. domag
   !
