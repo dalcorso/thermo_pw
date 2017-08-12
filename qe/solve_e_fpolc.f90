@@ -377,6 +377,8 @@ SUBROUTINE solve_e_fpolc(iu)
            ! calculates dvscf, sum over k => dvscf_q_ipert
            !
            weight=wk(ik)
+           IF ( with_asyn_images.AND.my_image_id==root_image.AND.ionode ) &
+                              CALL asyn_master(all_done_asyn)
            IF (ldpsi1) THEN
 !
 !    complex frequency, two wavefunctions must be computed
@@ -415,9 +417,9 @@ SUBROUTINE solve_e_fpolc(iu)
               call incdrhoscf (dvscfout(1,current_spin,ipol), weight, &
                          ik, dbecsum(1,1,current_spin,ipol), dpsi)
            END IF
+           IF ( with_asyn_images.AND.my_image_id==root_image.AND.ionode ) &
+                              CALL asyn_master(all_done_asyn)
         enddo   ! on polarizations
-        IF ( with_asyn_images.AND.my_image_id==root_image.AND.ionode ) &
-                           CALL asyn_master(all_done_asyn)
      enddo      ! on k points
      current_w=w
 
@@ -463,6 +465,8 @@ SUBROUTINE solve_e_fpolc(iu)
            IF ( noncolin.and.domag ) CALL psym_dmage(dvscfout)
         ENDIF
      endif
+     IF ( with_asyn_images.AND.my_image_id==root_image.AND.ionode ) &
+                              CALL asyn_master(all_done_asyn)
      !
      !   save the symmetrized linear charge response to file
      !   calculate the corresponding linear potential response
@@ -490,7 +494,7 @@ SUBROUTINE solve_e_fpolc(iu)
         call mix_potential_tpw (2*3*dfftp%nnr*nspin_mag, dvscfout, dvscfin, alpha_mix ( &
           kter), dr2, 3 * tr2_ph / npol, iter, flmixdpot, convt)
      ENDIF
-
+ 
      if (doublegrid) then
         do is=1,nspin_mag
            do ipol = 1, 3
