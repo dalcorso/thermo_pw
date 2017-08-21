@@ -81,7 +81,9 @@ SUBROUTINE prepare_q_tpw(auxdyn, do_band, do_iq, setup_pw, iq)
   ENDIF
   ! YAMBO <
   !
-  WRITE( stdout, '(/,5X,"Calculation of q = ",3F12.7)') x_q(:,iq)
+  WRITE( stdout, '(/,26x,26("-"))')
+  WRITE( stdout, '(5X,"Calculation of q = ",3F12.7)') x_q(:,iq)
+  WRITE( stdout, '(26x,26("-"),/)')
   !
   !  Case 2) This q point is not calculated because it has too few
   !          representation and the starting representation is larger

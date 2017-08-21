@@ -63,7 +63,7 @@ SUBROUTINE phq_readin_tpw()
                             me_image, nproc_image
   USE mp_global,     ONLY : nproc_pool_file, &
                             nproc_bgrp_file, nproc_image_file
-  USE mp_pools,      ONLY : nproc_pool, npool 
+  USE mp_pools,      ONLY : nproc_pool, npool, kunit
   USE mp_bands,      ONLY : nproc_bgrp, ntask_groups
   USE paw_variables, ONLY : okpaw
   USE ramanm,        ONLY : eth_rps, eth_ns, lraman, elop, dek
@@ -120,7 +120,8 @@ SUBROUTINE phq_readin_tpw()
                        start_q, last_q, nogg, ldiag, search_sym, lqdir, &
                        nk1, nk2, nk3, k1, k2, k3, &
                        drho_star, dvscf_star, only_init, only_wfc, freq_line, &
-                       elph_nbnd_min, elph_nbnd_max, el_ph_ngauss,el_ph_nsigma, el_ph_sigma,  &
+                       elph_nbnd_min, elph_nbnd_max, el_ph_ngauss, &
+                       el_ph_nsigma, el_ph_sigma,  &
                        electron_phonon, lfreq_ev, linear_im_freq,&
                        delta_freq, start_freq, last_freq,     &
                        lmagnon, lcharge, lall_tensor, lchimag, &
@@ -572,6 +573,7 @@ SUBROUTINE phq_readin_tpw()
   ext_restart=.FALSE.
   ext_recover=.FALSE.
   rec_code_read=-1000
+  kunit=1
   IF (recover) THEN
 !
 !    With a recover run we read here the mesh of q points, the current iq,
@@ -606,7 +608,10 @@ SUBROUTINE phq_readin_tpw()
      !
      !  If this file exist we use it to recover the pw.x informations
      !
-     IF (exst) tmp_dir=tmp_dir_phq
+     IF (exst) THEN
+        tmp_dir=tmp_dir_phq
+        kunit=2
+     ENDIF
      u_from_file=.true.
   ENDIF
 1001 CONTINUE

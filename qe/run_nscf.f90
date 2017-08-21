@@ -40,6 +40,7 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   USE lr_symm_base,    ONLY : minus_q, nsymq, invsymq
   USE qpoint,          ONLY : xq
   USE mp_bands,        ONLY : intra_bgrp_comm
+  USE mp_pools,        ONLY : kunit
   USE el_phon,         ONLY : elph_mat
  !
   IMPLICIT NONE
@@ -57,6 +58,8 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
      CALL close_files(.true.)
      wfc_dir=tmp_dir_phq
      tmp_dir=tmp_dir_phq
+     kunit=2
+     IF (lgamma_iq(iq)) kunit=1
      CALL read_file_tpw()
      CALL set_small_group_of_q(nsymq,invsymq,minus_q)
      RETURN
