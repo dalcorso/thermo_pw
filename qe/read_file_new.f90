@@ -115,7 +115,7 @@ SUBROUTINE read_xml_file_tpw ( )
   USE lsda_mod,             ONLY : lsda, nspin, current_spin, isk
   USE wvfct,                ONLY : nbnd, nbndx, et, wg
   USE symm_base,            ONLY : irt, d1, d2, d3, checkallsym, nsym
-  USE extfield,             ONLY : forcefield, tefield, monopole, forcemono
+  USE extfield,             ONLY : forcefield, tefield, gate, forcegate
   USE cellmd,               ONLY : cell_factor, lmovecell
   USE fft_base,             ONLY : dfftp
   USE fft_interfaces,       ONLY : fwfft
@@ -148,11 +148,6 @@ SUBROUTINE read_xml_file_tpw ( )
   USE esm,                  ONLY : do_comp_esm, esm_init
   USE mp_bands,             ONLY : intra_bgrp_comm, nyfft
   USE mp_images,            ONLY : intra_image_comm
-  USE bcast_qes_types_module, ONLY : bcast_output_type, &
-                                     bcast_parallel_info_type, &
-                                     bcast_general_info_type 
-  USE mp,                   ONLY : mp_bcast
-  USE io_global,            ONLY : ionode, ionode_id
   !
   IMPLICIT NONE
 
@@ -187,7 +182,7 @@ SUBROUTINE read_xml_file_tpw ( )
   ALLOCATE( extfor(  3, nat ) )
   !
   IF ( tefield ) ALLOCATE( forcefield( 3, nat ) )
-  IF ( monopole ) ALLOCATE( forcemono( 3, nat ) ) ! TB
+  IF ( gate ) ALLOCATE( forcegate( 3, nat ) ) ! TB
   !
   ALLOCATE( irt( 48, nat ) )
   !
