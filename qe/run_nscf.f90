@@ -39,7 +39,7 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
 
   USE lr_symm_base,    ONLY : minus_q, nsymq, invsymq
   USE qpoint,          ONLY : xq
-  USE mp_bands,        ONLY : intra_bgrp_comm
+  USE mp_bands,        ONLY : intra_bgrp_comm, nyfft
   USE mp_pools,        ONLY : kunit
   USE el_phon,         ONLY : elph_mat
  !
@@ -83,8 +83,8 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   conv_ions=.true.
   !
   !!!
-  CALL fft_type_allocate ( dfftp, at, bg, gcutm, intra_bgrp_comm )
-  CALL fft_type_allocate ( dffts, at, bg, gcutms, intra_bgrp_comm)
+  CALL fft_type_allocate ( dfftp, at, bg, gcutm, intra_bgrp_comm, nyfft=nyfft )
+  CALL fft_type_allocate ( dffts, at, bg, gcutms, intra_bgrp_comm, nyfft=nyfft)
   !!!
   CALL setup_nscf_tpw ( newgrid, xq, elph_mat )
   CALL init_run()

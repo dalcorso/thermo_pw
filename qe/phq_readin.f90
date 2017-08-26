@@ -23,7 +23,8 @@ SUBROUTINE phq_readin_tpw()
   USE mp,            ONLY : mp_bcast
   USE mp_world,      ONLY : world_comm
   USE ions_base,     ONLY : amass, atm
-  USE input_parameters, ONLY : max_seconds, nk1, nk2, nk3, k1, k2, k3, outdir
+  USE input_parameters, ONLY : nk1, nk2, nk3, k1, k2, k3, outdir
+  USE check_stop,    ONLY : max_seconds
   USE start_k,       ONLY : reset_grid
   USE klist,         ONLY : xk, nks, nkstot, lgauss, two_fermi_energies, &
                             lgauss, ltetra

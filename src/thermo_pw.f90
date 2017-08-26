@@ -56,6 +56,7 @@ PROGRAM thermo_pw
 !  variables of pw or phonon used here
 !
   USE input_parameters, ONLY : outdir
+  USE check_stop,       ONLY : max_seconds
   USE ions_base,        ONLY : nat, tau
   USE cell_base,        ONLY : at, omega, ibrav, celldm
 
@@ -103,7 +104,7 @@ PROGRAM thermo_pw
   !
   CALL thermo_summary()
   !
-  CALL check_stop_init()
+  CALL check_stop_init(max_seconds)
   !
   part = 1
   !

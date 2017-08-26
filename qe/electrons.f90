@@ -40,8 +40,8 @@ SUBROUTINE electrons_tpw()
   USE noncollin_module,     ONLY : noncolin, magtot_nc, i_cons,  bfield, &
                                    lambda, report
   USE uspp,                 ONLY : okvan
-  USE exx,                  ONLY : exxinit, exxenergy2, exxenergy, exxbuff, &
-                                   fock0, fock1, fock2, dexx, use_ace
+  USE exx,                  ONLY : aceinit, exxinit, exxenergy2, exxenergy, exxbuff, &
+                                   fock0, fock1, fock2, dexx, use_ace, local_thr
   USE funct,                ONLY : dft_is_hybrid, exx_is_active
   USE control_flags,        ONLY : adapt_thr, tr2_init, tr2_multi, gamma_only
   !
@@ -51,6 +51,7 @@ SUBROUTINE electrons_tpw()
   USE paw_onecenter,        ONLY : PAW_potential
   USE paw_symmetry,         ONLY : PAW_symmetrize_ddd
   USE ions_base,            ONLY : nat
+  USE loc_scdm,             ONLY : use_scdm, localize_orbitals
   !
   !
   IMPLICIT NONE
@@ -72,8 +73,10 @@ SUBROUTINE electrons_tpw()
                     ! when using adaptive thresholds.
   LOGICAL :: first, exst, all_done_asyn
   REAL(DP) :: etot_cmp_paw(nat,2,2)
+  LOGICAL :: DoLoc
   !
   !
+  DoLoc = local_thr.gt.0.0d0
   exxen = 0.0d0
   iter = 0
   first = .true.
@@ -105,7 +108,7 @@ SUBROUTINE electrons_tpw()
         ELSE IF ( iter < 0 .OR. iter > niter ) THEN
            iter = 0
         ELSE 
-           READ (iunres, *) fock0, fock1, fock2
+           READ (iunres, *) exxen, fock0, fock1, fock2
            ! FIXME: et and wg should be read from xml file
            READ (iunres, *) (wg(1:nbnd,ik),ik=1,nks)
            READ (iunres, *) (et(1:nbnd,ik),ik=1,nks)
@@ -113,11 +116,13 @@ SUBROUTINE electrons_tpw()
            ! ... if restarting here, exx was already active
            ! ... initialize stuff for exx
            first = .false.
-           CALL exxinit()
+           CALL exxinit(DoLoc)
+           IF( DoLoc ) CALL localize_orbitals( )
            ! FIXME: ugly hack, overwrites exxbuffer from exxinit
            CALL seqopn (iunres, 'restart_exx', 'unformatted', exst)
            IF (exst) READ (iunres, iostat=ios) exxbuff
            IF (ios /= 0) WRITE(stdout,'(5x,"Error in EXX restart!")')
+           IF (use_ace) CALL aceinit ( )
            !
            CALL v_of_rho( rho, rho_core, rhog_core, &
                ehart, etxc, vtxc, eth, etotefield, charge, v)
@@ -154,7 +159,7 @@ SUBROUTINE electrons_tpw()
                         & i6)') iter
            CALL seqopn (iunres, 'restart_e', 'formatted', exst)
            WRITE (iunres, *) iter-1, tr2, dexx
-           WRITE (iunres, *) fock0, fock1, fock2
+           WRITE (iunres, *) exxen, fock0, fock1, fock2
            WRITE (iunres, *) (wg(1:nbnd,ik),ik=1,nks)
            WRITE (iunres, *) (et(1:nbnd,ik),ik=1,nks)
            CLOSE (unit=iunres, status='keep')
@@ -176,8 +181,10 @@ SUBROUTINE electrons_tpw()
         ! Activate exact exchange, set orbitals used in its calculation,
         ! then calculate exchange energy (will be useful at next step)
         !
-        CALL exxinit()
+        CALL exxinit(DoLoc)
+        IF( DoLoc ) CALL localize_orbitals( )
         IF ( use_ace) THEN
+           CALL aceinit ( )
            fock2 = exxenergyace()
         ELSE
            fock2 = exxenergy2()
@@ -209,7 +216,9 @@ SUBROUTINE electrons_tpw()
         !
         ! Set new orbitals for the calculation of the exchange term
         !
-        CALL exxinit()
+        CALL exxinit(DoLoc)
+        IF( DoLoc ) CALL localize_orbitals( )
+        IF (use_ace) CALL aceinit ( )
         !
         ! fock2 is the exchange energy calculated for orbitals at step n,
         !       using orbitals at step n in the expression of exchange 
@@ -227,13 +236,16 @@ SUBROUTINE electrons_tpw()
         ! the treatment of the divergence in exact exchange has failed. 
         !
         dexx = fock1 - 0.5D0*(fock0+fock2)
-        IF ( dexx < 0d0 ) THEN
-!           WRITE(stdout,'(5x,a,1e12.3)') "BEWARE: negative dexx:", dexx
-!           dexx = ABS(dexx)
-          WRITE( stdout, * ) "dexx:", dexx
-          CALL errore( 'electrons', 'dexx is negative! &
-           & Check that exxdiv_treatment is appropriate for the system,&
-           & or ecutfock may be too low', 1 )
+        !
+        IF ( dexx < 0.0_dp ) THEN
+           IF( Doloc ) THEN
+              WRITE(stdout,'(5x,a,1e12.3)') "BEWARE: negative dexx:", dexx
+              dexx = ABS ( dexx )
+           ELSE
+              CALL errore( 'electrons', 'dexx is negative! &
+                   & Check that exxdiv_treatment is appropriate for the system,&
+                   & or ecutfock may be too low', 1 )
+           ENDIF
         ENDIF
         !
         !   remove the estimate exchange energy exxen used in the inner SCF
@@ -375,6 +387,9 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
   USE wrappers,             ONLY : memstat
   !
   USE plugin_variables,     ONLY : plugin_etot
+  USE exx,                  ONLY : exxinit
+  USE loc_scdm,             ONLY : use_scdm, localize_orbitals
+  USE funct,                ONLY : dft_is_hybrid, stop_exx
   !
   IMPLICIT NONE
   !
