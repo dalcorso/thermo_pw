@@ -67,6 +67,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   USE mp_images,            ONLY : my_image_id, root_image
   USE mp,                   ONLY : mp_sum
   USE efermi_shift,         ONLY : ef_shift, ef_shift_paw,  def
+  USE fft_helper_subroutines, ONLY : fftx_ntgrp
 
   USE lrus,         ONLY : int3_paw
   USE lr_symm_base, ONLY : irotmq, minus_q, nsymq, rtau
@@ -175,7 +176,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
      v_siz =  dffts%nnr_tg
      ALLOCATE( tg_dv   ( v_siz, nspin_mag ) )
      ALLOCATE( tg_psic( v_siz, npol ) )
-     incr = dffts%nproc2
+     incr = fftx_ntgrp(dffts)
      !
   ENDIF
   !

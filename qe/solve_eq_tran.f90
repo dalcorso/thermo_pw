@@ -75,6 +75,8 @@ subroutine solve_eq_tran(iu, flag)
   USE mp_bands,              ONLY : intra_bgrp_comm, ntask_groups
   USE mp_images,             ONLY : root_image, my_image_id
   USE mp,                    ONLY : mp_sum
+  USE fft_helper_subroutines, ONLY : fftx_ntgrp
+
 
   implicit none
 
@@ -200,7 +202,8 @@ subroutine solve_eq_tran(iu, flag)
      v_siz =  dffts%nnr_tg 
      ALLOCATE( tg_dv   ( v_siz, nspin_mag ) )
      ALLOCATE( tg_psic( v_siz, npol ) )
-     incr = dffts%nproc2
+     incr = fftx_ntgrp(dffts)
+
      !
   ENDIF
   !

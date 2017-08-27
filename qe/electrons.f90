@@ -817,7 +817,7 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
         !
         ! ... print out ESM potentials if desired
         !
-        IF ( do_comp_esm ) CALL esm_printpot()
+        IF ( do_comp_esm ) CALL esm_printpot(rho%of_g)
         !
         WRITE( stdout, 9110 ) iter
         !
