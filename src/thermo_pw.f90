@@ -281,6 +281,7 @@ PROGRAM thermo_pw
         ENDIF
         CALL set_files_names(igeom)
 
+        auxdyn=fildyn
         IF (after_disp.AND.what=='mur_lc_t') THEN
 !
 !  The geometry is read by thermo_ph_readin from the output files of pw.x,
@@ -290,19 +291,16 @@ PROGRAM thermo_pw
            ibrav=ibrav_geo(igeom)
            celldm(:)=celldm_geo(:,igeom)
            IF (set_internal_path) CALL set_bz_path()
+           do_ph=.FALSE.
+        ELSE
+           do_ph=.TRUE.
+           IF (trans) do_ph=.NOT. check_dyn_file_exists(auxdyn)
         ENDIF
+
 !
 !  Set the BZ path for the present geometry
 !
         CALL set_paths_disp()
-        !
-        ! ... Checking the status of the calculation and if necessary initialize
-        ! ... the q mesh and all the representations
-        !
-        auxdyn=fildyn
-
-        do_ph=.TRUE.
-        IF (trans) do_ph=.NOT. check_dyn_file_exists(auxdyn)
         IF ( do_ph ) THEN
 
            ph_geometries=ph_geometries+1
@@ -311,6 +309,10 @@ PROGRAM thermo_pw
                                &i4)') max_geometries
               GOTO 1000
            ENDIF
+        !
+        ! ... Checking the status of the calculation and if necessary initialize
+        ! ... the q mesh and all the representations
+        !
            CALL check_initial_status(auxdyn)
            !
            part=2

@@ -50,7 +50,7 @@ SUBROUTINE q2r_sub(fildyn)
   USE dynamicalq, ONLY : phiq, tau, ityp, zeu
   USE ifc,        ONLY : zasr
   USE fft_scalar, ONLY : cfft3d
-  USE io_global,  ONLY : ionode_id, ionode, stdout, meta_ionode, meta_ionode_id
+  USE io_global,  ONLY : stdout, meta_ionode, meta_ionode_id
   USE mp_images,  ONLY : intra_image_comm, root_image, my_image_id
   USE mp_world,   ONLY : world_comm
   USE io_dyn_mat, ONLY : read_dyn_mat_param, read_dyn_mat_header, &
@@ -102,7 +102,7 @@ SUBROUTINE q2r_sub(fildyn)
      OPEN (UNIT=iundyn, FILE=TRIM(fildyn)//'0', STATUS='old', &
                                             FORM='formatted', IOSTAT=ierr)
   ENDIF
-  CALL mp_bcast(ierr, ionode_id, world_comm)
+  CALL mp_bcast(ierr, meta_ionode_id, world_comm)
   IF (ierr /= 0) CALL errore('q2r_sub','No grid information on file',1)
   IF (meta_ionode) THEN
      WRITE (stdout,'(/,5x,"Reading q grid from file ")') 
@@ -111,10 +111,10 @@ SUBROUTINE q2r_sub(fildyn)
      READ (iundyn, *) nfile
      CLOSE (UNIT=iundyn, STATUS='KEEP')
   ENDIF
-  CALL mp_bcast(nr1, ionode_id, world_comm)
-  CALL mp_bcast(nr2, ionode_id, world_comm)
-  CALL mp_bcast(nr3, ionode_id, world_comm)
-  CALL mp_bcast(nfile, ionode_id, world_comm)
+  CALL mp_bcast(nr1, meta_ionode_id, world_comm)
+  CALL mp_bcast(nr2, meta_ionode_id, world_comm)
+  CALL mp_bcast(nr3, meta_ionode_id, world_comm)
+  CALL mp_bcast(nfile, meta_ionode_id, world_comm)
      !
   IF (nr1 < 1 .OR. nr1 > 1024) CALL errore ('q2r_sub',' nr1 wrong or missing',1)
   IF (nr2 < 1 .OR. nr2 > 1024) CALL errore ('q2r_sub',' nr2 wrong or missing',1)
@@ -185,7 +185,7 @@ SUBROUTINE q2r_sub(fildyn)
            OPEN (UNIT=iundyn, FILE=TRIM(filin), STATUS='old', &
                                                 FORM='formatted', IOSTAT=ierr)
         ENDIF
-        CALL mp_bcast(ierr, ionode_id, world_comm)
+        CALL mp_bcast(ierr, meta_ionode_id, world_comm)
         IF (ierr /= 0) CALL errore('q2r_sub','file '//TRIM(filin)&
                                                            //' missing!',1)
         IF (my_image_id==0) THEN
