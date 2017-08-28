@@ -36,6 +36,7 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   USE grid_irr_iq,     ONLY : done_bands
   USE acfdtest,        ONLY : acfdt_is_active, acfdt_num_der, ir_point, delta_vrs
   USE scf,             ONLY : vrs
+  USE force_mod,       ONLY : lforce, lstres
 
   USE lr_symm_base,    ONLY : minus_q, nsymq, invsymq
   USE qpoint,          ONLY : xq
@@ -79,6 +80,8 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   starting_pot      = 'file'
   starting_wfc      = 'atomic'
   lscf              = .FALSE.
+  lforce            = .FALSE.
+  lstres            = .FALSE.
   restart = ext_restart
   conv_ions=.true.
   !
