@@ -55,7 +55,9 @@ clean_dfft.o : ../../Modules/input_parameters.o
 clean_path.o : ../../Modules/kind.o
 collect_everything.o : ../../Modules/io_global.o
 collect_everything.o : ../../Modules/mp_images.o
+collect_everything.o : ../../Modules/mp_world.o
 collect_everything.o : ../../PHonon/PH/phcom.o
+collect_everything.o : ../../UtilXlib/mp.o
 collect_everything.o : ../../thermo_pw/qe/control_qe.o
 compute_cp.o : ../../Modules/kind.o
 compute_cp.o : ../../thermo_pw/lib/isoentropic.o
@@ -267,6 +269,7 @@ matdyn_sub.o : ../../Modules/io_global.o
 matdyn_sub.o : ../../Modules/ions_base.o
 matdyn_sub.o : ../../Modules/kind.o
 matdyn_sub.o : ../../Modules/mp_images.o
+matdyn_sub.o : ../../Modules/mp_world.o
 matdyn_sub.o : ../../Modules/noncol.o
 matdyn_sub.o : ../../PHonon/PH/phcom.o
 matdyn_sub.o : ../../UtilXlib/mp.o
@@ -408,6 +411,7 @@ q2r_sub.o : ../../Modules/io_global.o
 q2r_sub.o : ../../Modules/ions_base.o
 q2r_sub.o : ../../Modules/kind.o
 q2r_sub.o : ../../Modules/mp_images.o
+q2r_sub.o : ../../Modules/mp_world.o
 q2r_sub.o : ../../PHonon/PH/io_dyn_mat.o
 q2r_sub.o : ../../PHonon/PH/io_dyn_mat_old.o
 q2r_sub.o : ../../PHonon/PH/phcom.o
@@ -715,6 +719,7 @@ write_phdos.o : ../../Modules/io_global.o
 write_phdos.o : ../../Modules/ions_base.o
 write_phdos.o : ../../Modules/kind.o
 write_phdos.o : ../../Modules/mp_images.o
+write_phdos.o : ../../Modules/mp_world.o
 write_phdos.o : ../../UtilXlib/mp.o
 write_phdos.o : ../../thermo_pw/lib/phdos_module.o
 write_phdos.o : thermo_mod.o
@@ -730,6 +735,7 @@ write_thermo.o : ../../Modules/io_global.o
 write_thermo.o : ../../Modules/ions_base.o
 write_thermo.o : ../../Modules/kind.o
 write_thermo.o : ../../Modules/mp_images.o
+write_thermo.o : ../../Modules/mp_world.o
 write_thermo.o : ../../UtilXlib/mp.o
 write_thermo.o : ../../thermo_pw/lib/debye_module.o
 write_thermo.o : ../../thermo_pw/lib/ph_freq_module.o

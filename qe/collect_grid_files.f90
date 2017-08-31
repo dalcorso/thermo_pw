@@ -51,7 +51,6 @@
                     &    // '.' // TRIM(int_to_char(irr)) // '.xml'
 
             IF (ima /= my_image_id) THEN
-               WRITE(6,*) 'move ', iq, irr, 'from ', my_image_id, 'to ', ima 
                INQUIRE (FILE = TRIM(file_input), EXIST = exst)
                IF (exst) ios = f_copy(file_input, file_output)
             ENDIF

@@ -228,6 +228,7 @@ SUBROUTINE prepare_q_tpw(auxdyn, do_band, do_iq, setup_pw, iq)
      ENDIF
   ENDIF
   !
+  dfpt_tetra_linit = .FALSE.
   IF(.NOT. setup_pw .AND. ltetra) dfpt_tetra_linit = .TRUE.
   !
   RETURN
