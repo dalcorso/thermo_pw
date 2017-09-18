@@ -75,7 +75,7 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
         CALL errore('write_gruneisen_band_anis','reading plot namelist',&
                                                                  ABS(ios))
      ELSE
-        WRITE(stdout, '("Reading ",i4," dispersions at ",i6," k-points for&
+        WRITE(stdout, '(5x, "Reading ",i4," dispersions at ",i6," k-points for&
                        & geometry",i4)') nbnd, nks, igeo
      ENDIF
 

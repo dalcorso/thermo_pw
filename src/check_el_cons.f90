@@ -18,7 +18,6 @@ SUBROUTINE check_el_cons()
   !
   !
   USE kinds,         ONLY : DP
-  USE mp_images,     ONLY : my_image_id, root_image
   USE thermo_mod,    ONLY : ibrav_geo, celldm_geo
   USE io_global,     ONLY : stdout
   USE cell_base,     ONLY : ibrav
@@ -31,6 +30,7 @@ SUBROUTINE check_el_cons()
   USE control_macro_elasticity, ONLY : macro_el
   USE thermo_mod, ONLY : tot_ngeo
   USE data_files,    ONLY : fl_el_cons
+  USE mp_images, ONLY : my_image_id, root_image
   !
   IMPLICIT NONE
   CHARACTER(LEN=256) :: filelastic

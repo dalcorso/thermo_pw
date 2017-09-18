@@ -31,7 +31,6 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
                               ext_restart, bands_computed, newgrid, qplot, &
                               only_wfc
   USE io_global,       ONLY : stdout
-  USE save_ph,         ONLY : tmp_dir_save
   !!!
   USE grid_irr_iq,     ONLY : done_bands
   USE acfdtest,        ONLY : acfdt_is_active, acfdt_num_der, ir_point, delta_vrs

@@ -12,7 +12,7 @@ SUBROUTINE check_existence(iwork, part, iaux, run)
   USE kinds,           ONLY : DP
   USE constants,       ONLY : ry_kbar
 
-  USE control_thermo,  ONLY : lpwscf, lstress
+  USE control_thermo,  ONLY : lstress
 
   USE thermo_mod,      ONLY : energy_geo
   USE elastic_constants, ONLY : sigma_geo
@@ -85,7 +85,7 @@ END SUBROUTINE check_existence
 
 SUBROUTINE save_existence(iwork, part, iaux)
 
-  USE control_thermo,  ONLY : lpwscf, lstress
+  USE control_thermo,  ONLY : lstress
 
   USE thermo_mod,      ONLY : energy_geo
   USE elastic_constants, ONLY : sigma_geo
@@ -93,9 +93,7 @@ SUBROUTINE save_existence(iwork, part, iaux)
   USE ener,            ONLY : etot
   USE force_mod,       ONLY : sigma
 
-  USE io_global,       ONLY : ionode, ionode_id, meta_ionode_id
-  USE mp_images,       ONLY : intra_image_comm
-  USE mp,              ONLY : mp_bcast
+  USE io_global,       ONLY : ionode
   !
   IMPLICIT NONE
   !

@@ -24,8 +24,6 @@ MODULE xrdp_module
 !
 USE kinds, ONLY : DP
 USE io_global, ONLY : stdout
-USE mp_images, ONLY : intra_image_comm
-USE mp, ONLY : mp_sum
 IMPLICIT NONE
 SAVE
 PRIVATE

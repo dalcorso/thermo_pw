@@ -22,10 +22,8 @@ CHARACTER(LEN=256) :: auxdyn
 all_geometry_done=.TRUE.
 DO igeom=1,tot_ngeo
    auxdyn=TRIM(fildyn)//'.g'//TRIM(int_to_char(igeom))//'.'
-   WRITE(6,*) 'auxdyn ', TRIM(auxdyn)
    IF (all_geometry_done) all_geometry_done=all_geometry_done.AND. &
                                          check_dyn_file_exists(auxdyn)
-   WRITE(6,*) 'igeom all_geometry_done', igeom, all_geometry_done
 ENDDO
 
 RETURN

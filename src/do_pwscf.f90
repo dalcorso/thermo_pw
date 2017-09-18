@@ -38,7 +38,6 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
                                conv_ions, istep, nstep, restart, lmd, lbfgs
   USE force_mod,        ONLY : lforce, lstres, sigma, force
   USE check_stop,       ONLY : check_stop_init, check_stop_now
-  USE mp_images,        ONLY : intra_image_comm
   USE extrapolation,    ONLY : update_file, update_pot
   !
   IMPLICIT NONE

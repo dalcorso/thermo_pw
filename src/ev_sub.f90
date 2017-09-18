@@ -52,8 +52,6 @@ SUBROUTINE ev_sub(vmin,b0,b01,emin_out,inputfile)
       USE kinds, ONLY: DP
       USE constants, ONLY: bohr_radius_angs, ry_kbar
       USE ev_xml,    ONLY : write_evdata_xml
-      USE mp_global, ONLY : mp_startup, mp_global_end
-      USE mp_world,  ONLY : world_comm
       USE mp,        ONLY : mp_bcast
       USE io_global, ONLY : ionode, ionode_id, stdout
       USE mp_images, ONLY : my_image_id, root_image, intra_image_comm
