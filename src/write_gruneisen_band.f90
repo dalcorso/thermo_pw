@@ -48,7 +48,7 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
   INTEGER :: poly_order
   INTEGER :: find_free_unit
   REAL(DP), ALLOCATABLE :: poly_grun(:,:), frequency(:,:), gruneisen(:,:)
-  REAL(DP) :: vm
+  REAL(DP) :: vm, f, g
   LOGICAL, ALLOCATABLE :: high_symmetry(:), is_gamma(:)
   LOGICAL :: copy_before, exist_rap, allocated_variables, non_cubic
   CHARACTER(LEN=256) :: filename, filedata, filegrun, filefreq
@@ -199,12 +199,14 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
 !  volume
 !
         DO ibnd=1,nbnd
-           DO i=1,poly_order
-              frequency(ibnd,n) = frequency(ibnd,n) + &
-                    poly_grun(i,ibnd) * vm**(i-1)
-              gruneisen(ibnd,n) = gruneisen(ibnd,n) - &
-                    poly_grun(i,ibnd) * vm**(i-1) * (i-1.0_DP)
+           f=poly_grun(poly_order,ibnd)
+           g=poly_grun(poly_order,ibnd)*(poly_order-1.0_DP)
+           DO i=poly_order-1,1,-1
+              f = poly_grun(i,ibnd) + f*vm
+              g = poly_grun(i,ibnd)*(i-1.0_DP) + g*vm
            END DO
+           frequency(ibnd,n)=f
+           gruneisen(ibnd,n)=g
            IF (frequency(ibnd,n) > 0.0_DP ) THEN
               gruneisen(ibnd,n) = gruneisen(ibnd,n) / frequency(ibnd,n)
            ELSE

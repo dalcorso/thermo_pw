@@ -16,8 +16,6 @@ MODULE ph_freq_module
 USE kinds, ONLY : DP
 USE constants, ONLY : k_boltzmann_ry, ry_to_cmm1
 USE io_global, ONLY : stdout
-USE mp_images, ONLY : intra_image_comm
-USE mp, ONLY : mp_bcast
 IMPLICIT NONE
 SAVE
 PRIVATE
@@ -46,7 +44,10 @@ REAL(DP), PARAMETER :: thr_taylor=1.D-3   ! When the argument of the functions
 TYPE ph_freq_type
    INTEGER :: number_of_points        ! the total number of frequencies
    INTEGER :: nqtot                   ! the total number of q points
-   INTEGER :: nq                      ! the points reduced by symmetry
+   INTEGER :: nq                      ! points reduced by symmetry
+   INTEGER :: nq_eff                  ! the points reduced by symmetry and
+                                      ! belonging to this processor
+   INTEGER :: startq, lastq           ! position of the q in the global q list
    INTEGER :: nq1, nq2, nq3           ! the number of points in the three
                                       ! reciprocal lattice directions
    INTEGER :: nat                     ! the number of atoms
@@ -60,23 +61,27 @@ END TYPE ph_freq_type
 
 PUBLIC :: ph_freq_type, zero_point_energy_ph, free_energy_ph, vib_energy_ph, &
           vib_entropy_ph, specific_heat_cv_ph, init_ph_freq, destroy_ph_freq, &
-          thermal_expansion_ph, read_ph_freq_data, write_ph_freq_data
+          thermal_expansion_ph, read_ph_freq_data, write_ph_freq_data, fecv_ph
 
 CONTAINS
 
-SUBROUTINE init_ph_freq(ph_freq, nat, nq1, nq2, nq3, nq, flag)
+SUBROUTINE init_ph_freq(ph_freq, nat, nq1, nq2, nq3, nq_eff, startq, lastq, &
+                                 nq, flag)
 !
 !  If flag is true save also the eigenvectors
 !
 IMPLICIT NONE
 
 TYPE(ph_freq_type), INTENT(INOUT) :: ph_freq
-INTEGER, INTENT(IN) :: nq1, nq2, nq3, nat, nq
+INTEGER, INTENT(IN) :: nq1, nq2, nq3, nat, nq_eff, startq, lastq, nq
 LOGICAL, INTENT(IN) :: flag
 INTEGER :: ndiv, nqtot
 
 nqtot = nq1 * nq2 * nq3
 ph_freq%nqtot=nqtot
+ph_freq%nq_eff=nq_eff
+ph_freq%startq=startq
+ph_freq%lastq=lastq
 ph_freq%nq=nq
 ph_freq%number_of_points = 3 * nat * nqtot
 ph_freq%nq1 = nq1
@@ -85,9 +90,9 @@ ph_freq%nq3 = nq3
 ph_freq%nat = nat
 ph_freq%with_eigen=flag
 ndiv = ph_freq%number_of_points 
-ALLOCATE(ph_freq%nu(3*nat, nq))
-IF (flag) ALLOCATE(ph_freq%displa(3*nat, 3*nat, nq))
-ALLOCATE(ph_freq%wg(nq))
+ALLOCATE(ph_freq%nu(3*nat, nq_eff))
+IF (flag) ALLOCATE(ph_freq%displa(3*nat, 3*nat, nq_eff))
+ALLOCATE(ph_freq%wg(nq_eff))
 
 RETURN
 END SUBROUTINE init_ph_freq
@@ -114,31 +119,25 @@ TYPE(ph_freq_type), INTENT(INOUT) :: ph_freq
 CHARACTER(LEN=256), INTENT(IN) :: filename
 INTEGER :: iunit, ios
 REAL(DP), ALLOCATABLE :: nu(:), dos(:)
-INTEGER :: nat, nq1, nq2, nq3, nq
+INTEGER :: nat, nq1, nq2, nq3, nq_eff, startq, lastq, nq
 INTEGER :: iq, imode, jmode, ndiv, nqtot
 INTEGER :: find_free_unit
 LOGICAL :: with_eigen
 
-IF (ionode) THEN
-   iunit=find_free_unit()
-   OPEN(file=TRIM(filename), unit=iunit, status='old', &
+iunit=find_free_unit()
+OPEN(file=TRIM(filename), unit=iunit, status='old', &
      form='unformatted', err=100, iostat=ios)
-ENDIF
-100  CALL mp_bcast(ios, ionode_id, intra_image_comm)
-    IF (ios /= 0) CALL errore('read_ph_freq_data','opening file',ios)
+100 CONTINUE
+IF (ios /= 0) CALL errore('read_ph_freq_data','opening file',ios)
 
-IF (ionode) READ(iunit) nat, nq1, nq2, nq3, nq
-IF (ionode) READ(iunit) with_eigen
-
-CALL mp_bcast(nat, ionode_id, intra_image_comm)
-CALL mp_bcast(nq1, ionode_id, intra_image_comm)
-CALL mp_bcast(nq2, ionode_id, intra_image_comm)
-CALL mp_bcast(nq3, ionode_id, intra_image_comm)
-CALL mp_bcast(nq, ionode_id, intra_image_comm)
-CALL mp_bcast(with_eigen, ionode_id, intra_image_comm)
+READ(iunit) nat, nq1, nq2, nq3, nq_eff, startq, lastq, nq
+READ(iunit) with_eigen
 
 nqtot = nq1 * nq2 * nq3
 ph_freq%nqtot=nqtot
+ph_freq%nq_eff=nq_eff
+ph_freq%startq=startq
+ph_freq%lastq=lastq
 ph_freq%nq=nq
 ph_freq%number_of_points = 3 * nat * nqtot
 ph_freq%nq1 = nq1
@@ -147,28 +146,20 @@ ph_freq%nq3 = nq3
 ph_freq%nat = nat
 ph_freq%with_eigen=with_eigen
 ndiv = ph_freq%number_of_points
-ALLOCATE(ph_freq%nu(3*nat, nq))
-IF (with_eigen) ALLOCATE(ph_freq%displa(3*nat, 3*nat, nq))
-ALLOCATE(ph_freq%wg(nq))
+ALLOCATE(ph_freq%nu(3*nat, nq_eff))
+IF (with_eigen) ALLOCATE(ph_freq%displa(3*nat, 3*nat, nq_eff))
+ALLOCATE(ph_freq%wg(nq_eff))
 
-IF (ionode) THEN
-    READ(iunit, END=20, ERR=10, IOSTAT=ios) ph_freq%wg
+READ(iunit, END=20, ERR=10, IOSTAT=ios) ph_freq%wg
     ! nu(i) = frequencies (cm^{-1}) 
-    READ(iunit, END=20, ERR=10, IOSTAT=ios) ph_freq%nu
-    IF (with_eigen) &
-       READ(iunit, END=20, ERR=10, IOSTAT=ios) ph_freq%displa
-ENDIF
+READ(iunit, END=20, ERR=10, IOSTAT=ios) ph_freq%nu
+IF (with_eigen) &
+   READ(iunit, END=20, ERR=10, IOSTAT=ios) ph_freq%displa
 20 CONTINUE
    ios=0
-10 CALL mp_bcast( ios, ionode_id, intra_image_comm )
-   IF (ios /= 0 ) CALL errore('read_ph_freq_data', 'problem reading phonon &
+10 IF (ios /= 0 ) CALL errore('read_ph_freq_data', 'problem reading phonon &
                                                              &frequencies', 1)
-   CALL mp_bcast( ph_freq%wg, ionode_id, intra_image_comm )
-   CALL mp_bcast( ph_freq%nu, ionode_id, intra_image_comm )
-   IF (with_eigen) CALL mp_bcast( ph_freq%displa, ionode_id, intra_image_comm )
-   CALL mp_bcast( ph_freq%with_eigen, ionode_id, intra_image_comm )
-
-   IF (ionode) CLOSE(iunit)
+CLOSE(iunit)
 
 RETURN
 END SUBROUTINE read_ph_freq_data
@@ -183,35 +174,28 @@ IMPLICIT NONE
 TYPE(ph_freq_type), INTENT(INOUT) :: ph_freq
 CHARACTER(LEN=256), INTENT(IN) :: filename
 INTEGER :: iunit, ios
-REAL(DP), ALLOCATABLE :: nu(:), dos(:)
-INTEGER :: nat, nq
-INTEGER :: iq, imode, jmode
 INTEGER :: find_free_unit
 
-IF (ionode) THEN
-   iunit=find_free_unit()
-   OPEN(FILE=TRIM(filename), UNIT=iunit, STATUS='unknown', &
+iunit=find_free_unit()
+OPEN(FILE=TRIM(filename), UNIT=iunit, STATUS='unknown', &
      FORM='unformatted', ERR=100, IOSTAT=ios)
-ENDIF
-100  CALL mp_bcast(ios, ionode_id, intra_image_comm)
-    IF (ios /= 0) CALL errore('write_ph_freq_data','opening file',ios)
+100 CONTINUE
+IF (ios /= 0) CALL errore('write_ph_freq_data','opening file',ios)
 
-IF (ionode) WRITE(iunit) ph_freq%nat, ph_freq%nq1, ph_freq%nq2, &
-                                   ph_freq%nq3, ph_freq%nq
-IF (ionode) WRITE(iunit) ph_freq%with_eigen
-nq = ph_freq%nq
-nat = ph_freq%nat
-IF (ionode) THEN
-   WRITE(iunit, ERR=10, IOSTAT=ios) ph_freq%wg
+WRITE(iunit) ph_freq%nat, ph_freq%nq1, ph_freq%nq2, &
+             ph_freq%nq3, ph_freq%nq_eff, ph_freq%startq, ph_freq%lastq, &
+             ph_freq%nq
+
+WRITE(iunit) ph_freq%with_eigen
+WRITE(iunit, ERR=10, IOSTAT=ios) ph_freq%wg
    ! nu(i) = frequencies (cm^{-1}) 
-   WRITE(iunit, ERR=10, IOSTAT=ios) ph_freq%nu 
-   IF (ph_freq%with_eigen) &
-      WRITE(iunit, ERR=10, IOSTAT=ios) ph_freq%displa
-ENDIF
-10 CALL mp_bcast( ios, ionode_id, intra_image_comm )
+WRITE(iunit, ERR=10, IOSTAT=ios) ph_freq%nu 
+IF (ph_freq%with_eigen) &
+   WRITE(iunit, ERR=10, IOSTAT=ios) ph_freq%displa
+10 CONTINUE
 IF (ios /= 0 ) CALL errore('write_ph_freq_data', 'problem reading phdos', 1)
 
-IF (ionode) CLOSE(iunit)
+CLOSE(iunit)
 
 RETURN
 END SUBROUTINE write_ph_freq_data
@@ -225,13 +209,13 @@ SUBROUTINE zero_point_energy_ph(ph_freq, ener)
 TYPE(ph_freq_type), INTENT(IN) :: ph_freq
 REAL(DP), INTENT(OUT) :: ener
 REAL(DP) :: wg, nu
-INTEGER :: nq, iq, imode, nat
+INTEGER :: nq_eff, iq, imode, nat
 
-nq=ph_freq%nq
+nq_eff=ph_freq%nq_eff
 nat=ph_freq%nat
 
 ener=0.0_DP
-DO iq=1, nq
+DO iq=1, nq_eff
    wg= ph_freq%wg(iq)
    DO imode=1, 3*nat
       nu=ph_freq%nu(imode, iq)
@@ -255,18 +239,18 @@ TYPE(ph_freq_type), INTENT(IN) :: ph_freq
 REAL(DP), INTENT(IN) :: temp
 REAL(DP), INTENT(OUT) :: free_ener
 
-INTEGER :: nq, iq, nat, imode, counter
+INTEGER :: nq_eff, iq, nat, imode, counter
 REAL(DP) :: nu, arg, wg, temp1, onesixth, one24
 
 free_ener=0.0_DP
 IF (temp <= 1.E-9_DP) RETURN
 temp1 = 1.0_DP / temp
-nq=ph_freq%nq
+nq_eff=ph_freq%nq_eff
 nat=ph_freq%nat
 onesixth=1.0_DP / 6.0_DP
 one24=1.0_DP /24.0_DP
 counter=0
-DO iq=1,nq
+DO iq=1,nq_eff
    wg=ph_freq%wg(iq)
    DO imode=1,3*nat
       nu=ph_freq%nu(imode,iq)
@@ -281,11 +265,7 @@ DO iq=1,nq
       ENDIF
    ENDDO
 ENDDO
-IF (counter > 3) THEN
-   WRITE(stdout,'(5x,"WARNING: Too many acoustic modes")')
-ELSEIF (counter<3) THEN
-   WRITE(stdout,'(5x,"WARNING: Too few acoustic modes")')
-ENDIF
+IF (counter > 3) WRITE(stdout,'(5x,"WARNING: Too many acoustic modes")')
 
 RETURN
 END SUBROUTINE free_energy_ph
@@ -302,7 +282,7 @@ TYPE(ph_freq_type), INTENT(IN) :: ph_freq
 REAL(DP), INTENT(IN) :: temp
 REAL(DP), INTENT(OUT) :: ener
 
-INTEGER :: nq, iq, imode, nat
+INTEGER :: nq_eff, iq, imode, nat
 REAL(DP) :: nu, temp1, arg, wg, onesixth, one24, earg
 
 ener=0.0_DP
@@ -310,9 +290,9 @@ IF (temp <= 1.E-9_DP) RETURN
 temp1 = 1.0_DP / temp
 onesixth=1.0_DP / 6.0_DP
 one24=1.0_DP /24.0_DP
-nq=ph_freq%nq
+nq_eff=ph_freq%nq_eff
 nat=ph_freq%nat
-DO iq=1,nq
+DO iq=1,nq_eff
    wg=ph_freq%wg(iq)
    DO imode=1, 3*nat
       nu=ph_freq%nu(imode,iq)
@@ -365,7 +345,7 @@ TYPE(ph_freq_type), INTENT(IN) :: ph_freq
 REAL(DP), INTENT(IN) :: temp
 REAL(DP), INTENT(OUT) :: cv
 
-INTEGER :: nq, iq, imode, nat
+INTEGER :: nq_eff, iq, imode, nat
 REAL(DP) :: nu, temp1, arg, wg, onesixth, one24, earg
 
 cv=0.0_DP
@@ -373,9 +353,9 @@ IF (temp <= 1.E-9_DP) RETURN
 onesixth=1.0_DP / 6.0_DP
 one24 = 1.0_DP / 24.0_DP
 temp1 = 1.0_DP / temp
-nq=ph_freq%nq
+nq_eff=ph_freq%nq_eff
 nat=ph_freq%nat
-DO iq=1,nq
+DO iq=1,nq_eff
    wg=ph_freq%wg(iq)
    DO imode=1,3*nat
       nu=ph_freq%nu(imode,iq)
@@ -408,7 +388,7 @@ TYPE(ph_freq_type), INTENT(IN) :: ph_freq, ph_grun
 REAL(DP), INTENT(IN)  :: temp
 REAL(DP), INTENT(OUT) :: betab
 
-INTEGER :: nq, iq, imode, nat
+INTEGER :: nq_eff, iq, imode, nat
 REAL(DP) :: nu, temp1, arg, gamman, wg, onesixth, one24, earg
 
 betab=0.0_DP
@@ -416,9 +396,9 @@ IF (temp <= 1.E-9_DP) RETURN
 onesixth=1.0_DP/6.0_DP
 one24=1.0_DP/24.0_DP
 temp1 = 1.0_DP / temp
-nq=ph_freq%nq
+nq_eff=ph_freq%nq_eff
 nat=ph_freq%nat
-DO iq=1, nq
+DO iq=1, nq_eff
    wg=ph_freq%wg(iq)
    DO imode=1, 3*nat
       nu=ph_freq%nu(imode,iq)
@@ -430,8 +410,8 @@ DO iq=1, nq
                             * earg * ( arg / ( 1.0_DP - earg )) ** 2 
       ELSEIF (nu > thr_ph) THEN
          betab = betab + wg * gamman * earg *  &
-                       (arg /( arg - arg**2*0.5_DP + arg**3*onesixth - &
-                        arg**4 * one24))**2
+                       (1.0_DP/( 1.0_DP + arg*(-0.5_DP + arg*(onesixth - &
+                        arg*one24))))**2
       ENDIF
    ENDDO
 ENDDO
@@ -439,5 +419,62 @@ betab = betab * kb
 
 RETURN
 END SUBROUTINE thermal_expansion_ph
+
+SUBROUTINE fecv_ph(ph_freq, temp, free_ener, ener, cv)
+!
+!  This routine receives as input a set of frequencies 
+!  and a temperature and gives as output the vibrational free energy,
+!  energy and heat capacity at that temperature. free_ener and ener contains
+!  only the vibrational contribution WITHOUT the zero point energy. 
+!  
+!
+TYPE(ph_freq_type), INTENT(IN) :: ph_freq
+REAL(DP), INTENT(IN) :: temp
+REAL(DP), INTENT(OUT) :: free_ener, ener, cv
+
+INTEGER :: nq_eff, iq, nat, imode, counter
+REAL(DP) :: nu, arg, earg, wg, temp1, onesixth, one24
+
+free_ener=0.0_DP
+ener=0.0_DP
+cv=0.0_DP
+IF (temp <= 1.E-9_DP) RETURN
+temp1 = 1.0_DP / temp
+nq_eff=ph_freq%nq_eff
+nat=ph_freq%nat
+onesixth=1.0_DP / 6.0_DP
+one24=1.0_DP /24.0_DP
+counter=0
+DO iq=1,nq_eff
+   wg=ph_freq%wg(iq)
+   DO imode=1,3*nat
+      nu=ph_freq%nu(imode,iq)
+      arg= kb1 * nu * temp1
+      earg = EXP(-arg)
+      IF (arg > thr_taylor) THEN
+         free_ener = free_ener +temp*wg*LOG(1.0_DP-earg)
+         ener = ener +  wg*nu*earg / ( 1.0_DP - earg ) 
+         cv = cv + wg * earg * ( arg / ( 1.0_DP - earg  ) ) ** 2 
+      ELSEIF (nu > thr_ph) THEN
+         free_ener = free_ener+temp*wg*(LOG( arg* (1.0_DP + arg*(-0.5_DP + &
+                                  arg* (onesixth - arg * one24))) )) 
+         cv = cv + wg * earg *  &
+                  (1.0_DP /( 1.0_DP + arg*(-0.5_DP + arg *( onesixth &
+                             - arg* one24))))**2 / arg
+         ener = ener +  wg*nu*earg/arg/(1.0_DP+arg*(-0.5_DP+arg*(onesixth &
+                                                    - arg * one24)))
+      ELSE 
+         counter=counter+1
+      ENDIF
+   ENDDO
+ENDDO
+IF (counter > 3) WRITE(stdout,'(5x,"WARNING: Too many acoustic modes")')
+
+free_ener=free_ener*kb
+ener = ener / ry_to_cmm1
+cv = cv * kb
+
+RETURN
+END SUBROUTINE fecv_ph
 
 END MODULE ph_freq_module

@@ -15,13 +15,17 @@ SUBROUTINE interpolate_cv(vmin_t, ph_cv, cv_t)
 USE kinds,          ONLY : DP
 USE thermo_mod,     ONLY : ngeo, omega_geo, no_ph, tot_ngeo
 USE temperature,    ONLY : ntemp
+USE mp_world,       ONLY : world_comm
+USE mp,             ONLY : mp_sum
 
 IMPLICIT NONE
 REAL(DP), INTENT(IN)  :: vmin_t(ntemp), ph_cv(ntemp, tot_ngeo)
 REAL(DP), INTENT(OUT) :: cv_t(ntemp)
-INTEGER :: itemp, igeo, igeo1, igeo2, jgeo
+INTEGER :: itemp, igeo, igeo1, igeo2, jgeo, startt, lastt
 
-DO itemp=1,ntemp
+CALL divide(world_comm, ntemp, startt, lastt)
+cv_t=0.0_DP
+DO itemp=startt,lastt
 !
 !  find the two volumes closer to omega_t
 !
@@ -51,6 +55,7 @@ internal:DO jgeo=igeo1+1, ngeo(1)
                  ph_cv(itemp,igeo1) ) * (vmin_t(itemp)-omega_geo(igeo1)) /  &
                                         (omega_geo(igeo2)-omega_geo(igeo1))
 ENDDO
+CALL mp_sum(cv_t, world_comm)
 !
 RETURN
 END SUBROUTINE interpolate_cv

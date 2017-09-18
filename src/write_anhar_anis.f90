@@ -23,8 +23,7 @@ USE control_elastic_constants, ONLY : el_cons_available, el_cons_t_available
 USE elastic_constants, ONLY : el_con
 USE isoentropic,    ONLY : isostress_heat_capacity
 USE data_files,     ONLY : flanhar
-USE io_global,      ONLY : ionode
-USE mp_images,      ONLY : my_image_id, root_image
+USE io_global,      ONLY : meta_ionode
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
@@ -32,8 +31,6 @@ INTEGER :: itemp, iu_therm
 INTEGER :: find_free_unit
 REAL(DP) :: compute_omega_geo
 CHARACTER(LEN=8) :: float_to_char
-
-IF (my_image_id /= root_image) RETURN
 
 CALL compute_alpha_anis(celldm_t, alpha_anis_t, temp, ntemp, ibrav_save)
 !
@@ -55,7 +52,7 @@ IF (lelastic) THEN
                                                          cpmcv_anis,ntemp)
 ENDIF
 
-IF (ionode) THEN
+IF (meta_ionode) THEN
 !
 !   here we plot the anharmonic quantities calculated from the phonon dos
 !
@@ -135,8 +132,7 @@ USE control_pressure, ONLY : pressure_kb
 USE control_elastic_constants, ONLY : el_cons_available
 USE isoentropic,    ONLY : isostress_heat_capacity
 USE data_files,     ONLY : flanhar
-USE io_global,      ONLY : ionode
-USE mp_images,      ONLY : my_image_id, root_image
+USE io_global,      ONLY : meta_ionode
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
@@ -145,7 +141,6 @@ INTEGER :: find_free_unit
 REAL(DP) :: compute_omega_geo, el_con_t(6,6,ntemp)
 CHARACTER(LEN=8) :: float_to_char
 
-IF (my_image_id /= root_image) RETURN
 
 CALL compute_alpha_anis(celldmf_t, alphaf_anis_t, temp, ntemp, ibrav_save)
 !
@@ -167,7 +162,7 @@ IF (lelasticf) THEN
                                                          cpmcvf_anis,ntemp)
 ENDIF
 
-IF (ionode) THEN
+IF (meta_ionode) THEN
 !
 !   here we plot the anharmonic quantities calculated from the phonon dos
 !
@@ -258,15 +253,15 @@ USE quadratic_surfaces, ONLY : evaluate_fit_quadratic,      &
                                evaluate_fit_grad_quadratic
 USE control_dosq,   ONLY : nq1_d, nq2_d, nq3_d
 USE data_files,     ONLY : flanhar, fl_el_cons
-USE io_global,      ONLY : ionode, stdout
-USE mp_images,      ONLY : my_image_id, root_image, intra_image_comm
+USE io_global,      ONLY : meta_ionode, stdout
+USE mp_world,       ONLY : world_comm
 USE mp,             ONLY : mp_sum
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
 CHARACTER(LEN=8) :: float_to_char
 INTEGER :: itemp, iu_therm, i, nq, imode, iq, degree, nvar, nwork
-INTEGER :: itens, jtens, nstart, nlast
+INTEGER :: itens, jtens, startq, lastq, nq_eff
 TYPE(ph_freq_type) :: ph_freq    ! the frequencies at the volumes at
                                  ! which the gruneisen parameters are 
                                  ! calculated
@@ -280,7 +275,6 @@ INTEGER :: find_free_unit
 LOGICAL :: exst
 
 done_grun=.FALSE.
-IF (my_image_id /= root_image) RETURN
 !
 !  Not implemented cases
 !
@@ -310,23 +304,27 @@ WRITE(stdout,'(2x,76("+"),/)')
 !      elastic compliances
 !
 nq=ph_freq_save(1)%nq
+startq=ph_freq_save(1)%startq
+lastq=ph_freq_save(1)%lastq
+nq_eff=ph_freq_save(1)%nq_eff
 CALL compute_degree(ibrav,degree,nvar)
 nwork=compute_nwork()
 
-CALL init_ph_freq(ph_freq, nat, nq1_d, nq2_d, nq3_d, nq, .FALSE.)
+CALL init_ph_freq(ph_freq, nat, nq1_d, nq2_d, nq3_d, nq_eff, startq, lastq,  &
+                                                               nq, .FALSE.)
 ALLOCATE(ph_grun(degree))
 ALLOCATE(grad(degree))
 ALLOCATE(x(degree))
 DO i=1, degree
-   CALL init_ph_freq(ph_grun(i), nat, nq1_d, nq2_d, nq3_d, nq, .FALSE.)
+   CALL init_ph_freq(ph_grun(i), nat, nq1_d, nq2_d, nq3_d, nq_eff, startq, &
+                                                    lastq, nq, .FALSE.)
 END DO
 
-CALL divide(intra_image_comm, ntemp, nstart, nlast)
 alpha_an_g=0.0_DP
-DO itemp = nstart, nlast
-   IF (MOD(itemp-nstart+1,30)==0) &
+DO itemp = 1, ntemp
+   IF (MOD(itemp,30)==0) &
              WRITE(6,'(5x,"Computing temperature ", i5 " / ",&
-       & i5, 4x," T=",f12.2," K")') itemp-nstart+1, nlast-nstart+1, temp(itemp)
+       & i5, 4x," T=",f12.2," K")') itemp, ntemp, temp(itemp)
    IF (lv0_t.AND.ltherm_freq) THEN
       cm(:)=celldmf_t(:,itemp)
       vm = vminf_t(itemp)
@@ -346,7 +344,7 @@ DO itemp = nstart, nlast
 !
 !  compute the frequencies once
 !
-   DO iq=1,nq
+   DO iq=startq, lastq
       DO imode=1,3*nat
          CALL evaluate_fit_quadratic(degree,nvar,x,f,poly_grun(1,imode,iq))
          CALL evaluate_fit_grad_quadratic(degree,nvar,x,grad,&
@@ -412,6 +410,7 @@ DO itemp = nstart, nlast
    CASE DEFAULT
        CALL errore('write_grun_anharmonic_anis','ibrav not programmed',1)
    END SELECT
+
 !
 !  The thermal expansion needs to be multiplied by the elastic compliances
 !
@@ -432,7 +431,8 @@ DO itemp = nstart, nlast
    END IF
    alpha_an_g(:,itemp) = -aux(:) * ry_kbar / vm
 END DO
-CALL mp_sum(alpha_an_g, intra_image_comm)
+
+CALL mp_sum(alpha_an_g, world_comm)
 
 betab(:)=alpha_an_g(1,:)+alpha_an_g(2,:)+alpha_an_g(3,:)
 
@@ -448,7 +448,7 @@ ELSE
                                                  b0_grun_s, grun_gamma_t)
 END IF
 
-IF (ionode) THEN
+IF (meta_ionode) THEN
 !
 !   here quantities calculated from the gruneisen parameters
 !
@@ -613,55 +613,55 @@ REAL(DP), INTENT(INOUT) :: alpha_anis_t(6,ntemp)
 INTEGER :: itemp
 REAL(DP) :: fact1, fact2, deriv1, deriv2
 
-   alpha_anis_t=0.0_DP
-   SELECT CASE (ibrav) 
-      CASE(1,2,3) 
-         DO itemp = 2, ntemp-1
-            alpha_anis_t(1,itemp) = (celldm_t(1,itemp+1)-celldm_t(1,itemp-1)) / &
-                            (temp(itemp+1)-temp(itemp-1)) / celldm_t(1,itemp)
-            alpha_anis_t(2,itemp) = alpha_anis_t(1,itemp)
-            alpha_anis_t(3,itemp) = alpha_anis_t(1,itemp)
-         END DO
-      CASE(4,6,7)
-          DO itemp = 2, ntemp-1
-             alpha_anis_t(1,itemp) = (celldm_t(1,itemp+1)-celldm_t(1,itemp-1)) / &
-                             (temp(itemp+1)-temp(itemp-1)) / celldm_t(1,itemp)
-             alpha_anis_t(2,itemp) = alpha_anis_t(1,itemp)
-             alpha_anis_t(3,itemp) = ( celldm_t(3,itemp+1)*celldm_t(1,itemp+1)-   &
-                                   celldm_t(3,itemp-1)*celldm_t(1,itemp-1) )/ &
-                            (temp(itemp+1)-temp(itemp-1))/(celldm_t(3,itemp)*  &
-                             celldm_t(1,itemp)) 
-         END DO
-      CASE(5)
-         DO itemp = 2, ntemp-1
-            fact1 = 2.0_DP * ( 1.0_DP - celldm_t(4,itemp) )
-            fact2 = 1.0_DP + 2.0_DP * celldm_t(4,itemp)
-            deriv1 = ( celldm_t(1,itemp+1) - celldm_t(1,itemp-1) )/      &
-                                        ( temp(itemp+1) - temp(itemp-1) )
-            deriv2 = ( celldm_t(4,itemp+1) - celldm_t(4,itemp-1)) /      &
-                                        ( temp(itemp+1) - temp(itemp-1) )
-            alpha_anis_t(1,itemp) = deriv1 / celldm_t(1, itemp) - deriv2 / fact1 
-            alpha_anis_t(2,itemp) = alpha_anis_t(1,itemp)
-            alpha_anis_t(3,itemp) = deriv1 / celldm_t(1, itemp) + deriv2 / fact2
-         END DO
-      CASE (8,9,10,11)
-         DO itemp = 2, ntemp-1
-            alpha_anis_t(1,itemp) = (celldm_t(1,itemp+1)-celldm_t(1,itemp-1)) / &
-                            (temp(itemp+1)-temp(itemp-1)) / celldm_t(1,itemp)
-            alpha_anis_t(2,itemp) = ( celldm_t(2,itemp+1)*celldm_t(1,itemp+1)-   &
+alpha_anis_t=0.0_DP
+SELECT CASE (ibrav) 
+   CASE(1,2,3) 
+      DO itemp = 2, ntemp-1
+         alpha_anis_t(1,itemp) = (celldm_t(1,itemp+1)-celldm_t(1,itemp-1)) / &
+                         (temp(itemp+1)-temp(itemp-1)) / celldm_t(1,itemp)
+         alpha_anis_t(2,itemp) = alpha_anis_t(1,itemp)
+         alpha_anis_t(3,itemp) = alpha_anis_t(1,itemp)
+      END DO
+   CASE(4,6,7)
+      DO itemp = 2, ntemp-1
+         alpha_anis_t(1,itemp) = (celldm_t(1,itemp+1)-celldm_t(1,itemp-1)) / &
+                         (temp(itemp+1)-temp(itemp-1)) / celldm_t(1,itemp)
+         alpha_anis_t(2,itemp) = alpha_anis_t(1,itemp)
+         alpha_anis_t(3,itemp) = ( celldm_t(3,itemp+1)*celldm_t(1,itemp+1)-   &
+                               celldm_t(3,itemp-1)*celldm_t(1,itemp-1) )/ &
+                         (temp(itemp+1)-temp(itemp-1))/(celldm_t(3,itemp)*  &
+                          celldm_t(1,itemp)) 
+      END DO
+   CASE(5)
+      DO itemp = 2, ntemp-1
+         fact1 = 2.0_DP * ( 1.0_DP - celldm_t(4,itemp) )
+         fact2 = 1.0_DP + 2.0_DP * celldm_t(4,itemp)
+         deriv1 = ( celldm_t(1,itemp+1) - celldm_t(1,itemp-1) )/      &
+                                     ( temp(itemp+1) - temp(itemp-1) )
+         deriv2 = ( celldm_t(4,itemp+1) - celldm_t(4,itemp-1)) /      &
+                                     ( temp(itemp+1) - temp(itemp-1) )
+         alpha_anis_t(1,itemp) = deriv1 / celldm_t(1, itemp) - deriv2 / fact1 
+         alpha_anis_t(2,itemp) = alpha_anis_t(1,itemp)
+         alpha_anis_t(3,itemp) = deriv1 / celldm_t(1, itemp) + deriv2 / fact2
+      END DO
+   CASE (8,9,10,11)
+      DO itemp = 2, ntemp-1
+         alpha_anis_t(1,itemp) = (celldm_t(1,itemp+1)-celldm_t(1,itemp-1)) / &
+                        (temp(itemp+1)-temp(itemp-1)) / celldm_t(1,itemp)
+         alpha_anis_t(2,itemp) = ( celldm_t(2,itemp+1)*celldm_t(1,itemp+1)-   &
                                    celldm_t(2,itemp-1)*celldm_t(1,itemp-1) )/ &
                             (temp(itemp+1)-temp(itemp-1))/(celldm_t(2,itemp)*  &
                              celldm_t(1,itemp)) 
-            alpha_anis_t(3,itemp) = ( celldm_t(3,itemp+1)*celldm_t(1,itemp+1)-   &
-                                      celldm_t(3,itemp-1)*celldm_t(1,itemp-1) )/ &
-                            (temp(itemp+1)-temp(itemp-1))/(celldm_t(3,itemp)*  &
-                             celldm_t(1,itemp)) 
-         END DO
-      CASE DEFAULT
-   !
-   !   In this case do nothing. The thermal expansion tensor is not written later
-   !
-   END SELECT
+         alpha_anis_t(3,itemp) = ( celldm_t(3,itemp+1)*celldm_t(1,itemp+1)-   &
+                                   celldm_t(3,itemp-1)*celldm_t(1,itemp-1) )/ &
+                         (temp(itemp+1)-temp(itemp-1))/(celldm_t(3,itemp)*  &
+                          celldm_t(1,itemp)) 
+      END DO
+   CASE DEFAULT
+! 
+!   In this case do nothing. The thermal expansion tensor is not written later
+!
+END SELECT
 
 RETURN
 END SUBROUTINE compute_alpha_anis

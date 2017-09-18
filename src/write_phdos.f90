@@ -19,7 +19,7 @@ SUBROUTINE write_phdos(igeom)
   !  phdos_save(igeom) variables and exits.
   !
   USE kinds,          ONLY : DP
-  USE mp,             ONLY : mp_sum, mp_bcast
+  USE mp,             ONLY : mp_sum, mp_bcast, mp_max, mp_min
   USE mp_world,       ONLY : world_comm
   USE mp_images,      ONLY : my_image_id, root_image 
   USE io_global,      ONLY : meta_ionode, meta_ionode_id, stdout
@@ -29,6 +29,7 @@ SUBROUTINE write_phdos(igeom)
   USE phonon_save,    ONLY : freq_save
   USE thermo_mod,     ONLY : tot_ngeo
   USE thermodynamics, ONLY : phdos_save
+  USE ph_freq_thermodynamics, ONLY : ph_freq_save
   USE control_dosq,   ONLY : dos_wq, dos_nqs
   USE data_files,     ONLY : fldos
   USE phdos_module,   ONLY : set_phdos, read_phdos_data, find_minimum_maximum
@@ -39,7 +40,7 @@ SUBROUTINE write_phdos(igeom)
 
   CHARACTER(LEN=256) :: filedos
   REAL(DP) :: e, emin, emax, dosofe(2)
-  INTEGER :: n, i, ndos, nq, nstart, nlast, iundos
+  INTEGER :: n, i, ndos, nq, startq, lastq, nq_eff, iundos
   INTEGER :: find_free_unit
   LOGICAL :: check_file_exists
 !
@@ -58,6 +59,12 @@ SUBROUTINE write_phdos(igeom)
      CALL mp_bcast(phdos_save(igeom)%number_of_points, meta_ionode_id, &
                                                        world_comm)
      CALL mp_bcast(phdos_save(igeom)%de, meta_ionode_id, world_comm)
+     IF ( my_image_id /= root_image ) THEN
+        IF (.NOT.ALLOCATED(phdos_save(igeom)%nu)) &
+          ALLOCATE(phdos_save(igeom)%nu(phdos_save(igeom)%number_of_points)) 
+        IF (.NOT.ALLOCATED(phdos_save(igeom)%phdos)) &
+          ALLOCATE(phdos_save(igeom)%phdos(phdos_save(igeom)%number_of_points)) 
+     END IF
      CALL mp_bcast(phdos_save(igeom)%nu, meta_ionode_id, world_comm)
      CALL mp_bcast(phdos_save(igeom)%phdos, meta_ionode_id, world_comm)
 
@@ -73,15 +80,18 @@ SUBROUTINE write_phdos(igeom)
 !
 ! compute the dos
 !
+  CALL divide(world_comm, nq, startq, lastq)
   emin = 0.0d0
   emax = 0.0d0
-  DO n=1,nq
+  DO n=startq, lastq
      DO i=1, 3*nat
         emin = MIN (emin, freq_save(i,n))
         emax = MAX (emax, freq_save(i,n))
      END DO
   END DO
   emax=emax*1.02_DP
+  CALL mp_max(emax, world_comm)
+  CALL mp_min(emin, world_comm)
   !
   IF (freqmin_input > 0.0_DP) emin=freqmin_input
   freqmin=emin
@@ -104,13 +114,15 @@ SUBROUTINE write_phdos(igeom)
 !   Divide the calculation of the density of states among processors
 !   of one image
 !
-  CALL divide (world_comm, ndos, nstart, nlast)
   phdos_save(igeom)%nu=0.0_DP
   phdos_save(igeom)%phdos=0.0_DP
-  DO n= nstart, nlast
+  nq_eff=ph_freq_save(igeom)%nq_eff
+  startq=ph_freq_save(igeom)%startq
+  DO n= 1, ndos
      e = emin + (n - 1) * deltafreq
      !
-     CALL dos_g(freq_save, 1, 3*nat, nq, dos_wq, phdos_sigma, 0, e, dosofe)
+     CALL dos_g(freq_save(1,startq), 1, 3*nat, nq_eff, dos_wq(startq), &
+                                         phdos_sigma, 0, e, dosofe)
      !
      phdos_save(igeom)%nu(n) = e
      phdos_save(igeom)%phdos(n) = dosofe(1)
@@ -118,7 +130,6 @@ SUBROUTINE write_phdos(igeom)
 !
 !  and collect the results
 !
-  CALL mp_sum(phdos_save(igeom)%nu, world_comm)
   CALL mp_sum(phdos_save(igeom)%phdos, world_comm)
 
   IF (meta_ionode) THEN

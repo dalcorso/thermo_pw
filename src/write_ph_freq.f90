@@ -9,7 +9,7 @@ SUBROUTINE write_ph_freq(igeom)
   !-----------------------------------------------------------------------
   !
   !  This routine allocates space for saving the frequences of the
-  !  igeom geometry and save them in this variable.
+  !  igeom geometry, computes and save them in this variable.
   !  The behaviour of the routine depends on
   !  the flag with_eigen. When with_eigen is .FALSE. before diagonalizing
   !  the dynamical matrices the routine checks if the frequencies are on
@@ -18,12 +18,11 @@ SUBROUTINE write_ph_freq(igeom)
   !  eigenvector are not saved on disk.
   !  The variables allocated by this routine:
   !  freq_save, z_save, dos_q, dos_wq they must be deallocated outside the
-  !  routine
-  !  separately after they have been used. A call to clean_ifc_variables
-  !  cleanup these variables, among other things.
+  !  routine after they have been used. 
+  !  Presently they are deallocated by this routine or by deallocate_q2r
+  !  at the end of the run.
   !
   USE kinds,         ONLY : DP
-  USE mp_images,     ONLY : my_image_id
   USE io_global,     ONLY : stdout
   USE ions_base,     ONLY : nat, tau, ityp, amass
   USE cell_base,     ONLY : ibrav, at, bg, celldm
@@ -35,7 +34,10 @@ SUBROUTINE write_ph_freq(igeom)
   USE ph_freq_thermodynamics, ONLY : ph_freq_save
   USE control_thermo, ONLY : with_eigen
   USE ph_freq_module, ONLY : init_ph_freq, read_ph_freq_data, &
-                             write_ph_freq_data
+                             write_ph_freq_data, ph_freq_type, destroy_ph_freq
+  USE mp,             ONLY : mp_sum, mp_bcast
+  USE mp_world,       ONLY : mpime, world_comm, nproc
+  USE io_global,      ONLY : meta_ionode, meta_ionode_id
   !
   IMPLICIT NONE
   !
@@ -43,17 +45,21 @@ SUBROUTINE write_ph_freq(igeom)
 
   CHARACTER(LEN=256) :: filename
 
-  INTEGER :: iq, na, nta, ipol, jmode, nq, nqx, ntetra
+  INTEGER :: iq, na, nta, ipol, jmode, nq, nqx, iq_eff, ntetra, &
+             startq, lastq, nq_eff, iproc
+  INTEGER, ALLOCATABLE :: nq_all(:)
+  INTEGER, ALLOCATABLE :: start_proc(:)
+  INTEGER, ALLOCATABLE :: last_proc(:)
   REAL(DP) :: masst
+  REAL(DP), ALLOCATABLE :: q(:,:), wq(:)
   LOGICAL  :: file_exist
-
+  TYPE(ph_freq_type) :: buffer
   CHARACTER(LEN=6) :: int_to_char
   LOGICAL :: check_file_exists
   !
   filename='phdisp_files/'//TRIM(fldosfrq)
   file_exist=check_file_exists(filename)
   IF (.NOT.ALLOCATED(ph_freq_save)) ALLOCATE(ph_freq_save(tot_ngeo))
-
   !
   ! Allocate space for the q points and the frequencies
   !
@@ -61,10 +67,6 @@ SUBROUTINE write_ph_freq(igeom)
   IF (ALLOCATED(dos_wq)) DEALLOCATE(dos_wq)
   ntetra = 6 * nq1_d * nq2_d * nq3_d
   nqx = nq1_d * nq2_d * nq3_d
-  ALLOCATE ( dos_q(3,nqx) )
-  ALLOCATE ( dos_wq(nqx) )
-  ALLOCATE ( freq_save(3*nat, nqx) )
-  IF (with_eigen) ALLOCATE ( z_save(3*nat, 3*nat, nqx) )
 
   IF (.NOT.with_eigen .AND. file_exist) THEN
 !
@@ -76,63 +78,133 @@ SUBROUTINE write_ph_freq(igeom)
      WRITE(stdout,'(5x,a)') TRIM(filename)
      WRITE(stdout,'(2x,76("-"),/)')
 
-     CALL read_ph_freq_data(ph_freq_save(igeom),filename)
-     nq=ph_freq_save(igeom)%nq
-     freq_save(:,1:nq) = ph_freq_save(igeom)%nu(:,1:nq)
-     dos_wq(1:nq) = ph_freq_save(igeom)%wg(1:nq)
+     IF (meta_ionode) CALL read_ph_freq_data(buffer,filename)
+     CALL mp_bcast(buffer%nq, meta_ionode_id, world_comm)
+     nq=buffer%nq
+     IF (.NOT.meta_ionode) THEN
+        ALLOCATE(buffer%nu(3*nat,nq))
+        ALLOCATE(buffer%wg(nq))
+     ENDIF
+     CALL mp_bcast(buffer%wg, meta_ionode_id, world_comm)
+     CALL mp_bcast(buffer%nu, meta_ionode_id, world_comm)
+     CALL divide(world_comm, buffer%nq, startq, lastq)
+     nq_eff=lastq-startq+1
+     CALL init_ph_freq(ph_freq_save(igeom), nat, nq1_d, nq2_d, nq3_d, nq_eff, &
+                                         startq, lastq, nq, with_eigen)
+
+     ALLOCATE ( freq_save(3*nat, startq:lastq ))
+     ALLOCATE(dos_wq(startq:lastq))
+     freq_save(:,startq:lastq) = buffer%nu(:,startq:lastq)
+     dos_wq(startq:lastq) = buffer%wg(startq:lastq)
      dos_nqs=nq
+     iq_eff=0
+     DO iq=startq,lastq
+        iq_eff=iq_eff+1
+        ph_freq_save(igeom)%nu(:,iq_eff)=buffer%nu(:,iq)
+        ph_freq_save(igeom)%wg(iq_eff)=buffer%wg(iq)
+     ENDDO
+     CALL destroy_ph_freq(buffer) 
      RETURN
   ELSE
 !
 !   otherwise recompute the q points, the weights and the frequencies
 !
-     CALL gen_qpoints (ibrav, at, bg, nat, tau, ityp, nq1_d, nq2_d, nq3_d, &
-          ntetra, nqx, nq, dos_q, dos_wq)
+     ALLOCATE(q(3,nqx))
+     ALLOCATE(wq(nqx))
+     CALL gen_qpoints_tpw (ibrav, at, bg, nat, tau, ityp, nq1_d, nq2_d, nq3_d, &
+          ntetra, nqx, nq, q, wq)
      dos_nqs=nq
-     CALL matdyn_interp(dos_nqs, dos_q, with_eigen)
+     CALL divide(world_comm, nq, startq, lastq)
+     ALLOCATE ( dos_q(3, nq) )
+     ALLOCATE ( dos_wq(startq:lastq) )
+     ALLOCATE ( freq_save(3*nat, startq:lastq) )
+     IF (with_eigen) ALLOCATE ( z_save(3*nat, 3*nat, startq:lastq) )
+!
+!  This avoid to keep allocated too much memory
+!
+     dos_q(1:3,1:nq)=q(:,1:nq)
+     dos_wq(startq:lastq)=wq(startq:lastq)
+     DEALLOCATE(q)
+     DEALLOCATE(wq)
+     CALL matdyn_interp(dos_nqs, dos_q, startq, lastq, with_eigen)
   END IF
 !
 !   initialize space to save the frequencies
 !
-  CALL init_ph_freq(ph_freq_save(igeom), nat, nq1_d, nq2_d, nq3_d, nq, &
-                                                              with_eigen)
+  nq_eff=lastq-startq+1
+  CALL init_ph_freq(ph_freq_save(igeom), nat, nq1_d, nq2_d, nq3_d, nq_eff, &
+                                         startq, lastq, nq, with_eigen)
 !
 !   save the frequencies
 !
-  DO iq=1, nq
-     ph_freq_save(igeom)%wg(iq)=dos_wq(iq)
-     ph_freq_save(igeom)%nu(:,iq)=freq_save(:,iq)
+  iq_eff=0
+  DO iq=startq, lastq
+     iq_eff=iq_eff+1
+     ph_freq_save(igeom)%wg(iq_eff)=dos_wq(iq)
+     ph_freq_save(igeom)%nu(:,iq_eff)=freq_save(:,iq)
   ENDDO
 
   IF (with_eigen) THEN
 !
 !  The eigenvectors are not saved on disk. They are recalculated each time.
 !
-     DO iq=1, nq
+     iq_eff=0
+     DO iq=startq, lastq
+        iq_eff=iq_eff+1
         DO na = 1,nat
            nta = ityp(na)
            masst=SQRT(amu_ry*amass(nta))
            DO ipol = 1,3
               jmode=(na-1)*3+ipol
-              ph_freq_save(igeom)%displa(jmode,:,iq)=z_save(jmode,:,iq)*masst
+              ph_freq_save(igeom)%displa(jmode,:,iq_eff)=&
+                                              z_save(jmode,:,iq)*masst
            END DO
         END DO
      END DO
   ELSE
-     IF (my_image_id==0) THEN
-        WRITE(stdout,'(/,2x,76("+"))')
-        WRITE(stdout,'(5x,"Writing frequencies for BZ integration on file ")') 
-        WRITE(stdout,'(5x,a)') TRIM(filename)
-        WRITE(stdout,'(2x,76("+"),/)')
-        CALL write_ph_freq_data(ph_freq_save(igeom),filename)
-     ENDIF
+     ALLOCATE(nq_all(nproc))
+     ALLOCATE(start_proc(nproc))
+     ALLOCATE(last_proc(nproc))
+     nq_all=0
+     nq_all(mpime+1) = ph_freq_save(igeom)%nq_eff
+     CALL mp_sum(nq_all,world_comm)
+     nq=0
+     DO iproc=1, nproc
+        start_proc(iproc)=nq+1
+        nq=nq+nq_all(iproc)
+        last_proc(iproc)=nq
+     ENDDO
+     
+     CALL init_ph_freq(buffer, nat, nq1_d, nq2_d, nq3_d, nq, 1, nq, &
+                                                         nq, with_eigen) 
+     
+     buffer%nu=0.0_DP
+     buffer%wg=0.0_DP
+     buffer%nu(:,start_proc(mpime+1):last_proc(mpime+1))=&
+                             ph_freq_save(igeom)%nu
+     buffer%wg(start_proc(mpime+1):last_proc(mpime+1))=&
+                             ph_freq_save(igeom)%wg
+
+     CALL mp_sum(buffer%nu,world_comm)
+     CALL mp_sum(buffer%wg,world_comm)
+
+     DEALLOCATE(nq_all)
+     DEALLOCATE(start_proc)
+     DEALLOCATE(last_proc)
+     
+     WRITE(stdout,'(/,2x,76("+"))')
+     WRITE(stdout,'(5x,"Writing frequencies for BZ integration on file ")') 
+     WRITE(stdout,'(5x,a)') TRIM(filename)
+     WRITE(stdout,'(2x,76("+"),/)')
+     IF (meta_ionode) CALL write_ph_freq_data(buffer,filename)
+     CALL destroy_ph_freq(buffer)
   END IF
   !
   RETURN
 END SUBROUTINE write_ph_freq
 !
 !-----------------------------------------------------------------------
-SUBROUTINE gen_qpoints (ibrav, at_, bg_, nat, tau, ityp, nk1, nk2, nk3, &
+SUBROUTINE gen_qpoints_tpw (ibrav, at_, bg_, nat, tau, ityp, nk1, nk2, nk3, &
      ntetra, nqx, nq, q, wq)
   !-----------------------------------------------------------------------
   !
@@ -142,10 +214,11 @@ SUBROUTINE gen_qpoints (ibrav, at_, bg_, nat, tau, ityp, nk1, nk2, nk3, &
                          nrot, t_rev, time_reversal,  sname, &
                          allfrac, remove_sym
   USE initial_conf, ONLY : nr1_save, nr2_save, nr3_save
+  USE mp_world,     ONLY : world_comm, mpime, nproc
   !
   IMPLICIT NONE
   ! input
-  INTEGER :: ibrav, nat, nk1, nk2, nk3, ntetra, ityp(*)
+  INTEGER :: ibrav, nat, nk1, nk2, nk3, ntetra, iq, ityp(*)
   REAL(DP) :: at_(3,3), bg_(3,3), tau(3,nat)
   ! output
   INTEGER :: nqx, nq, tetra(4,ntetra)
@@ -161,8 +234,8 @@ SUBROUTINE gen_qpoints (ibrav, at_, bg_, nat, tau, ityp, nk1, nk2, nk3, &
   bg = bg_
   CALL set_sym_bl ( )
   !
-  CALL kpoint_grid ( nrot, time_reversal, skip_equivalence, s, t_rev, bg, nqx, &
-                           0,0,0, nk1,nk2,nk3, nq, q, wq)
+  CALL kpoint_grid_tpw ( nrot, time_reversal, skip_equivalence, s, &
+        t_rev, bg, nqx, 0,0,0, nk1,nk2,nk3, nq, q, wq, world_comm, mpime, nproc)
   !
   CALL find_sym ( nat, tau, ityp, .NOT.time_reversal, mdum )
   IF ( .NOT. allfrac ) CALL remove_sym ( nr1_save, nr2_save, nr3_save )
@@ -178,5 +251,4 @@ SUBROUTINE gen_qpoints (ibrav, at_, bg_, nat, tau, ityp, nk1, nk2, nk3, &
 !       nk1, nk2, nk3, nq, q, ntetra, tetra)
   !
   RETURN
-END SUBROUTINE gen_qpoints
-!
+END SUBROUTINE gen_qpoints_tpw

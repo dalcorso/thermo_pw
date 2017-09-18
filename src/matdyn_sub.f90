@@ -7,7 +7,7 @@
 !
 !
 !---------------------------------------------------------------------
-SUBROUTINE matdyn_interp(disp_nqs, disp_q, with_eigen)
+SUBROUTINE matdyn_interp(nq, disp_q, startq, lastq, with_eigen)
   !-----------------------------------------------------------------------
   !  this program calculates the phonon frequencies for a list of generic
   !  q vectors starting from the interatomic force constants generated
@@ -38,9 +38,9 @@ SUBROUTINE matdyn_interp(disp_nqs, disp_q, with_eigen)
   !               In these cases the supplementary asr are cancelled
   !               during the orthonormalization procedure (see below).
   !  The input variables are:
-  !  disp_nqs     The number of q vectors in which the interpolation must
+  !  nq           The number of q vectors in which the interpolation must
   !               be done
-  !  disp_q(3,disp_nqs) ! the cartesian coordinates in units of 2 pi / a 
+  !  disp_q(3,nq) ! the cartesian coordinates in units of 2 pi / a 
   !               of the q vectors for which the dynamical matrix needs
   !               to be computed
   !  with_eigen   .TRUE. if the routine has to compute also the eigen
@@ -56,15 +56,17 @@ SUBROUTINE matdyn_interp(disp_nqs, disp_q, with_eigen)
   !  freq_save(3*nat, disp_nps) contains the frequencies in cm^-1 (a negative 
   !              number for the imaginary frequencies)
   !
-  !  z_save(3*nat, 3*nat, disp_nqs) ! this quantity must be allocated and
+  !  z_save(3*nat, 3*nat, nq) ! this quantity must be allocated and
   !              is given in output only if with_eigen is .true. 
   !              NB: these are the displacements as in the output of the
   !              dyndia routine, not the eigenvalues of the dynamical matrix.
+  !  NB: the nq vectors are set on the correct positions, but they
+  !      are not collected and only those belonging to this processors are
+  !      actually calculated. If the calling routine declared freq_save and
+  !      z_save of lenght nq, it has to collect all, otherwise the
+  !      frequencies remain distributed.
   !
   USE kinds,          ONLY : DP
-  USE mp_images,      ONLY : my_image_id, root_image, intra_image_comm
-  USE mp_world,       ONLY : world_comm
-  USE mp,             ONLY : mp_sum
   USE io_global,      ONLY : stdout
   USE ions_base,      ONLY : nat, tau, ityp, ntyp => nsp, amass
   USE cell_base,      ONLY : at, bg, celldm, omega, alat
@@ -80,8 +82,8 @@ SUBROUTINE matdyn_interp(disp_nqs, disp_q, with_eigen)
   IMPLICIT NONE
   !
   LOGICAL, INTENT(IN) :: with_eigen
-  INTEGER, INTENT(IN) :: disp_nqs
-  REAL(DP), INTENT(IN) :: disp_q(3,disp_nqs)
+  INTEGER, INTENT(IN) :: nq, startq, lastq
+  REAL(DP), INTENT(IN) :: disp_q(3,nq)
 
   INTEGER, PARAMETER:: nrwsx=200
   REAL(DP), PARAMETER :: eps=1.0d-6
@@ -96,7 +98,7 @@ SUBROUTINE matdyn_interp(disp_nqs, disp_q, with_eigen)
   !
   INTEGER :: nr1, nr2, nr3, ibrav, iq, nstart, nlast
   INTEGER :: nrws, nqs
-  INTEGER :: n, i, it, nq, na, nqtot
+  INTEGER :: n, i, it, na, nqtot
   !
   LOGICAL :: xmlifc, lo_to_split, do_init
 
@@ -128,22 +130,20 @@ SUBROUTINE matdyn_interp(disp_nqs, disp_q, with_eigen)
   !
   ! copy the q-point list in the local variables
   !
-  nqtot=disp_nqs
+  nqtot=nq
   ALLOCATE ( q(3,nqtot) )
   ALLOCATE ( dyn(3,3,nat,nat) )
   ALLOCATE ( z(3*nat,3*nat) )
   ALLOCATE ( w2(3*nat,nqtot) )
 
   q(:,1:nqtot)=disp_q(:,1:nqtot)
-  nq=nqtot
 
   do_init=.TRUE.
-  CALL divide(world_comm, nq, nstart, nlast)
   IF (with_eigen) z_save=(0.0_DP,0.0_DP)
   freq_save=0.0_DP
-  DO n=nstart, nlast
+  DO n=startq, lastq
      IF ( MOD(n-nstart+1,20000) == 0 ) WRITE(stdout, '(5x,"Computing q ",&
-                         &   i8, " /", i8 )') n-nstart+1, nlast-nstart+1
+                         &   i8, " /", i8 )') n-startq+1, lastq-startq+1
 
      dyn(:,:,:,:) = (0.d0, 0.d0)
      lo_to_split=.FALSE.
@@ -202,7 +202,7 @@ SUBROUTINE matdyn_interp(disp_nqs, disp_q, with_eigen)
 
   END DO  !nq
   !
-  DO n=nstart,nlast
+  DO n=startq,lastq
      ! freq_save(i,n) = frequencies in cm^(-1), with negative sign if 
      ! omega^2 is negative
      DO i=1,3*nat
@@ -210,8 +210,6 @@ SUBROUTINE matdyn_interp(disp_nqs, disp_q, with_eigen)
         IF (w2(i,n) < 0.0d0) freq_save(i,n) = -freq_save(i,n)
      END DO
   END DO
-  CALL mp_sum(freq_save, world_comm)
-  IF (with_eigen) CALL mp_sum(z_save, world_comm)
   !
   DEALLOCATE (z) 
   DEALLOCATE (w2) 

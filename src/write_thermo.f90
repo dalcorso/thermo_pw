@@ -10,8 +10,7 @@ SUBROUTINE write_thermo(igeom)
 !  This routine writes on file the harmonic thermodynamical quantities
 !
 USE kinds,          ONLY : DP
-USE phdos_module,   ONLY : zero_point_energy, free_energy, vib_energy, &
-                           specific_heat_cv, integrated_dos
+USE phdos_module,   ONLY : zero_point_energy, fecv, integrated_dos
 USE thermo_mod,     ONLY : tot_ngeo
 USE temperature,    ONLY : ntemp, temp
 USE thermodynamics, ONLY : ph_ener, ph_free_ener, ph_entropy, ph_cv, phdos_save
@@ -23,7 +22,7 @@ USE data_files,     ONLY : fltherm
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: igeom
 
-INTEGER  :: idum, itemp, nstart, nlast, iu_therm
+INTEGER  :: idum, itemp, startt, lastt, iu_therm
 INTEGER  :: find_free_unit
 REAL(DP) :: e0, tot_states
 CHARACTER(LEN=256) :: filetherm
@@ -66,19 +65,22 @@ CALL integrated_dos(phdos_save(igeom), tot_states)
 !
 !  Divide the temperatures among processors
 !
-CALL divide (world_comm, ntemp, nstart, nlast)
+CALL divide (world_comm, ntemp, startt, lastt)
 ph_free_ener(:,igeom)=0.0_DP
 ph_ener(:,igeom)=0.0_DP
 ph_cv(:,igeom)=0.0_DP
-DO itemp = nstart, nlast
-   IF (MOD(itemp-nstart+1,30)==0) &
+ph_entropy(:,igeom)=0.0_DP
+DO itemp = startt, lastt
+   IF (MOD(itemp-startt+1,30)==0) &
                      WRITE(6,'(5x,"Computing temperature ", i5 " / ",&
-       & i5, 4x," T=",f12.2," K")') itemp-nstart+1, nlast-nstart+1, temp(itemp)
-   CALL free_energy(phdos_save(igeom), temp(itemp), ph_free_ener(itemp,igeom))
-   CALL vib_energy(phdos_save(igeom), temp(itemp), ph_ener(itemp, igeom))
-   CALL specific_heat_cv(phdos_save(igeom), temp(itemp), ph_cv(itemp, igeom))
+       & i5, 4x," T=",f12.2," K")') itemp-startt+1, lastt-startt+1, temp(itemp)
+
+   CALL fecv(phdos_save(igeom), temp(itemp), ph_free_ener(itemp, igeom), &
+                                  ph_ener(itemp,igeom), ph_cv(itemp, igeom))
    ph_free_ener(itemp,igeom)=ph_free_ener(itemp,igeom)+e0
    ph_ener(itemp,igeom)=ph_ener(itemp,igeom)+e0
+   ph_entropy(itemp,igeom)=(ph_ener(itemp, igeom)-ph_free_ener(itemp,igeom))/&
+                            temp(itemp)
 END DO
 !
 !  and collect the results
@@ -86,8 +88,8 @@ END DO
 CALL mp_sum(ph_free_ener(1:ntemp,igeom),world_comm)
 CALL mp_sum(ph_ener(1:ntemp,igeom),world_comm)
 CALL mp_sum(ph_cv(1:ntemp,igeom),world_comm)
+CALL mp_sum(ph_entropy(1:ntemp,igeom),world_comm)
 
-ph_entropy(:,igeom)=(ph_ener(:, igeom) - ph_free_ener(:, igeom))/ temp(:)
 IF (meta_ionode) &
    CALL write_thermo_info(e0, tot_states, ntemp, temp, ph_ener(1,igeom), &
               ph_free_ener(1,igeom), ph_entropy(1,igeom), ph_cv(1,igeom),&
@@ -99,7 +101,7 @@ END SUBROUTINE write_thermo
 SUBROUTINE write_thermo_ph(igeom)
 
 USE kinds,            ONLY : DP
-USE ph_freq_module,   ONLY : ph_freq_type, zero_point_energy_ph, &
+USE ph_freq_module,   ONLY : ph_freq_type, zero_point_energy_ph, fecv_ph, &
                              free_energy_ph, vib_energy_ph, specific_heat_cv_ph
 USE temperature,      ONLY : ntemp, temp
 USE ph_freq_thermodynamics, ONLY : phf_ener, phf_free_ener, phf_entropy, &
@@ -115,7 +117,7 @@ INTEGER, INTENT(IN) :: igeom
 CHARACTER(LEN=256) :: filename
 LOGICAL :: check_file_exists, do_read
 
-INTEGER  :: idum, itemp, nstart, nlast, iu_therm
+INTEGER  :: idum, itemp, iu_therm
 INTEGER  :: find_free_unit
 REAL(DP) :: e0
 !
@@ -152,7 +154,6 @@ WRITE(stdout,'(/,2x,76("+"))')
 WRITE(stdout,'(5x,"Computing the thermodynamic properties from frequencies")')
 WRITE(stdout,'(5x,"Writing on file ",a)') TRIM(filename)
 WRITE(stdout,'(2x,76("+"),/)')
-
 !
 !  Allocate thermodynamic quantities
 !
@@ -160,34 +161,33 @@ CALL zero_point_energy_ph(ph_freq_save(igeom), e0)
 !
 !  Divide the temperatures among processors
 !
-CALL divide (world_comm, ntemp, nstart, nlast)
 phf_free_ener(:,igeom)=0.0_DP
 phf_ener(:,igeom)=0.0_DP
 phf_cv(:,igeom)=0.0_DP
-DO itemp = nstart, nlast
-   IF (MOD(itemp-nstart+1,30)==0) &
+phf_entropy(:,igeom)=0.0_DP
+DO itemp = 1, ntemp
+   IF (MOD(itemp,30)==0) &
         WRITE(stdout,'(5x,"Computing temperature ", i5 " / ",&
-        & i5,4x," T=",f12.2," K")') itemp-nstart+1, nlast-nstart+1, temp(itemp)
-   CALL free_energy_ph(ph_freq_save(igeom), temp(itemp), &
-                                       phf_free_ener(itemp,igeom))
-   CALL vib_energy_ph(ph_freq_save(igeom), temp(itemp), &
-                                       phf_ener(itemp, igeom))
-   CALL specific_heat_cv_ph(ph_freq_save(igeom), temp(itemp), &
-                                       phf_cv(itemp, igeom))
+        & i5,4x," T=",f12.2," K")') itemp, ntemp, temp(itemp)
+   CALL fecv_ph(ph_freq_save(igeom), temp(itemp), phf_free_ener(itemp,igeom), &
+                      phf_ener(itemp, igeom), phf_cv(itemp, igeom))
    phf_free_ener(itemp,igeom)=phf_free_ener(itemp,igeom)+e0
    phf_ener(itemp,igeom)=phf_ener(itemp,igeom)+e0
+   phf_entropy(itemp,igeom)=(phf_ener(itemp, igeom) - &
+                             phf_free_ener(itemp, igeom))/temp(itemp)
 END DO
 !
-!  and collect the results
+!  In ph_freq_save the frequencies are distributed among all processors
+!  so the resulting thermodynamical quantities must be collected
 !
 CALL mp_sum(phf_free_ener(1:ntemp,igeom),world_comm)
 CALL mp_sum(phf_ener(1:ntemp,igeom),world_comm)
 CALL mp_sum(phf_cv(1:ntemp,igeom),world_comm)
+CALL mp_sum(phf_entropy(1:ntemp,igeom),world_comm)
 
-phf_entropy(:,igeom)=(phf_ener(:, igeom) - phf_free_ener(:, igeom))/temp(:)
- IF (meta_ionode) &
-     CALL write_thermo_info(e0, 0.0_DP, ntemp, temp, phf_ener(1,igeom), &
-                phf_free_ener(1,igeom), phf_entropy(1,igeom), phf_cv(1,igeom),& 
+IF (meta_ionode) &
+   CALL write_thermo_info(e0, 0.0_DP, ntemp, temp, phf_ener(1,igeom), &
+              phf_free_ener(1,igeom), phf_entropy(1,igeom), phf_cv(1,igeom),& 
                                                             2,filename)
 RETURN
 END SUBROUTINE write_thermo_ph
@@ -201,9 +201,8 @@ USE debye_module,     ONLY : debye_e0, debye_vib_energy, debye_free_energy, &
 USE control_debye,    ONLY : deb_e0, deb_cv, deb_entropy, deb_energy, &
                              deb_free_energy, debye_t
 USE temperature,      ONLY : ntemp, temp
-USE mp_images,        ONLY : root_image, my_image_id, intra_image_comm
-USE mp,               ONLY : mp_bcast
-USE io_global,        ONLY : ionode, ionode_id, stdout
+USE mp_images,        ONLY : root_image, my_image_id
+USE io_global,        ONLY : ionode, stdout
 USE data_files,       ONLY : fltherm
 
 IMPLICIT NONE

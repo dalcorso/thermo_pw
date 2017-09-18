@@ -370,7 +370,12 @@ MODULE control_thermo
   !
   LOGICAL :: set_2d_path    ! the path provided by thermo_pw is used
   !
+  LOGICAL :: all_geometries_together ! if true phonon dispersions for all
+                            !  geometries are calculated together
   INTEGER :: spin_component ! the spin
+
+  REAL(DP) :: max_seconds_tpw ! used to stop the run after max_seconds with
+                              ! images
   !
 END MODULE control_thermo
 
@@ -584,8 +589,9 @@ MODULE control_eldos
                             ! used in the pw.x calculation
   LOGICAL :: legauss        ! if .true. use gaussian smearing for dos plot
   INTEGER :: save_ndos      ! number of points in the file 
-
-
+  REAL(DP), ALLOCATABLE :: dos_k(:,:)  
+  REAL(DP), ALLOCATABLE :: dos_wk(:)
+  
 END MODULE control_eldos
 
 MODULE control_grun
@@ -615,6 +621,7 @@ END MODULE control_grun
 
 MODULE initial_conf
   USE kinds, ONLY: DP
+  USE collect_info, ONLY : collect_info_type
   SAVE
 
   INTEGER  :: ibrav_save       ! save the Bravais lattice
@@ -631,6 +638,13 @@ MODULE initial_conf
                                ! from pw.x input in crystal coordinates
   INTEGER  :: nr1_save, nr2_save, nr3_save  ! save the fft dimensions
   LOGICAL :: nosym_save        ! save the input nosym
+
+  TYPE(collect_info_type), ALLOCATABLE :: collect_info_save(:)
+  INTEGER, ALLOCATABLE :: geometry(:)
+
+  LOGICAL :: epsil_save   ! save input epsil, changed in a dispersion run
+  LOGICAL :: zeu_save     ! save input_zeu, changed in dispersion run
+  LOGICAL :: zue_save     ! save input_zue, changed in dispersion run
 
 END MODULE initial_conf
 

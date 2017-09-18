@@ -41,7 +41,7 @@ TYPE phdos_type
 END TYPE phdos_type
 
 PUBLIC :: phdos_type, read_phdos_data, zero_point_energy, free_energy, &
-          vib_energy, vib_entropy, specific_heat_cv, &
+          vib_energy, vib_entropy, specific_heat_cv, fecv, &
           integrated_dos, set_phdos, destroy_phdos, find_minimum_maximum
           
 CONTAINS
@@ -269,6 +269,44 @@ cv = cv * phdos%de * kb
 
 RETURN
 END SUBROUTINE specific_heat_cv
+
+SUBROUTINE fecv(phdos, temp, free_ener, ener, cv)
+!
+!  This routine receives as input a phdos and a temperature and gives as 
+!  output the vibrational free energy at that temperature. ener contains
+!  only the vibrational contribution WITHOUT the zero point energy. 
+!  
+!
+TYPE(phdos_type), INTENT(IN) :: phdos
+REAL(DP), INTENT(IN) :: temp
+REAL(DP), INTENT(OUT) :: free_ener, ener, cv
+
+INTEGER :: ndiv, i
+REAL(DP) :: nu, arg, temp1, earg, g
+
+free_ener=0.0_DP
+ener=0.0_DP
+cv=0.0_DP
+IF (temp <= 1.E-9_DP) RETURN
+temp1 = 1.0_DP / temp
+ndiv=phdos%number_of_points
+DO i=1,ndiv
+   nu=phdos%nu(i)
+   g=phdos%phdos(i)
+   arg= kb1 * nu * temp1
+   earg = EXP( - arg )
+   IF (nu > 0.0_DP ) THEN
+      free_ener = free_ener + g * kb * temp * LOG( 1.0_DP - earg )
+      ener = ener + g * nu * earg / ( 1.0_DP - earg )
+      cv = cv + g * earg * ( arg / ( 1.0_DP - earg )) ** 2
+   ENDIF
+ENDDO
+free_ener = free_ener*phdos%de
+ener = ener * phdos%de / ry_to_cmm1
+cv = cv * phdos%de * kb
+
+RETURN
+END SUBROUTINE fecv
 
 SUBROUTINE integrated_dos(phdos, tot_dos)
 !

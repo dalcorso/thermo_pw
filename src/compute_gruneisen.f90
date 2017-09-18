@@ -21,16 +21,15 @@ SUBROUTINE compute_gruneisen()
   USE ph_freq_thermodynamics, ONLY : ph_freq_save
   USE grun_anharmonic,        ONLY : poly_grun, poly_order
   USE control_thermo,         ONLY : with_eigen
-  USE mp_images,              ONLY : root_image, my_image_id
+  USE mp_world,               ONLY : world_comm
+  USE mp,                     ONLY : mp_sum
 
   IMPLICIT NONE
 
   REAL(DP), ALLOCATABLE :: freq_geo(:,:)
   COMPLEX(DP), ALLOCATABLE ::  displa_geo(:,:,:)
   INTEGER, ALLOCATABLE :: rap_geo(:,:)
-  INTEGER :: n, igeo, nq
-
-  IF ( my_image_id /= root_image ) RETURN
+  INTEGER :: iq_eff, n, igeo, nq, startq, lastq
 !
 !  allocate space for the fit of the frequencies with respect to the
 !  volume
@@ -38,7 +37,9 @@ SUBROUTINE compute_gruneisen()
   nq=ph_freq_save(1)%nq
   poly_order=5
 
-  IF ( .NOT. ALLOCATED( poly_grun ) ) ALLOCATE(poly_grun(poly_order,3*nat,nq))
+  CALL divide (world_comm, nq, startq, lastq)
+  IF ( .NOT. ALLOCATED( poly_grun ) ) ALLOCATE(poly_grun(poly_order,3*nat,&
+                                                      startq:lastq))
 
   ALLOCATE(freq_geo(3*nat,ngeo(1)))
   ALLOCATE(rap_geo(3*nat,ngeo(1)))
@@ -47,13 +48,15 @@ SUBROUTINE compute_gruneisen()
 !  representations are not used here
 !
   rap_geo=-1
-
-  DO n = 1, nq
+  poly_grun=0.0_DP
+  iq_eff=0
+  DO n = startq, lastq
+     iq_eff=iq_eff+1
      DO igeo=1,ngeo(1)
         IF (.NOT. no_ph(igeo)) THEN
-           freq_geo(1:3*nat,igeo)=ph_freq_save(igeo)%nu(1:3*nat,n)
+           freq_geo(1:3*nat,igeo)=ph_freq_save(igeo)%nu(1:3*nat,iq_eff)
            IF (with_eigen) displa_geo(1:3*nat, 1:3*nat, igeo)= &
-                                ph_freq_save(igeo)%displa(1:3*nat,1:3*nat,n)
+                           ph_freq_save(igeo)%displa(1:3*nat,1:3*nat,iq_eff)
         ENDIF
      ENDDO
      IF (with_eigen) THEN
@@ -64,7 +67,9 @@ SUBROUTINE compute_gruneisen()
                                              no_ph, poly_order,poly_grun(1,1,n))
      END IF
   ENDDO
-
+!
+!  the poly_grun are still distributed
+!
   IF (with_eigen) DEALLOCATE ( displa_geo )
   DEALLOCATE ( freq_geo )
   DEALLOCATE ( rap_geo )

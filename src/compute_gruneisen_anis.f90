@@ -18,35 +18,37 @@ SUBROUTINE fit_frequencies_anis()
   USE ph_freq_thermodynamics, ONLY : ph_freq_save
   USE grun_anharmonic,        ONLY : poly_grun
   USE control_thermo,         ONLY : with_eigen
-  USE mp_images,              ONLY : root_image, my_image_id
 
   IMPLICIT NONE
 
   REAL(DP), ALLOCATABLE :: freq_geo(:,:)
   COMPLEX(DP), ALLOCATABLE ::  displa_geo(:,:,:)
-  INTEGER :: n, igeo, nq, degree, nvar, nwork
+  INTEGER :: n, igeo, nq, degree, nvar, nwork, startq, lastq, iq_eff
   INTEGER :: compute_nwork
-
-  IF ( my_image_id /= root_image ) RETURN
 !
 !  allocate space for the fit of the frequencies with respect to the
 !  celldm parameters
 !
   nq=ph_freq_save(1)%nq
+  startq=ph_freq_save(1)%startq
+  lastq=ph_freq_save(1)%lastq
   CALL compute_degree(ibrav,degree,nvar)
   nwork=compute_nwork()
 
-  IF ( .NOT. ALLOCATED( poly_grun ) ) ALLOCATE(poly_grun(nvar,3*nat,nq))
+  IF ( .NOT. ALLOCATED( poly_grun ) ) ALLOCATE(poly_grun(nvar,3*nat,&
+                                                              startq:lastq))
 
   ALLOCATE(freq_geo(3*nat,nwork))
   IF (with_eigen) ALLOCATE(displa_geo(3*nat,3*nat,nwork))
 !
-  DO n = 1, nq
+  iq_eff=0
+  DO n = startq, lastq
+     iq_eff=iq_eff+1
      DO igeo=1,nwork
         IF (.NOT. no_ph(igeo)) THEN
-           freq_geo(1:3*nat,igeo)=ph_freq_save(igeo)%nu(1:3*nat,n)
+           freq_geo(1:3*nat,igeo)=ph_freq_save(igeo)%nu(1:3*nat,iq_eff)
            IF (with_eigen) displa_geo(1:3*nat, 1:3*nat, igeo)= &
-                                ph_freq_save(igeo)%displa(1:3*nat,1:3*nat,n)
+                           ph_freq_save(igeo)%displa(1:3*nat,1:3*nat,iq_eff)
         ENDIF
      ENDDO
      IF (with_eigen) THEN

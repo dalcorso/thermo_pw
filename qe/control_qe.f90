@@ -19,6 +19,7 @@ MODULE control_qe
 
   LOGICAL  :: tcollect_all=.FALSE.
   LOGICAL  :: force_band_calculation=.FALSE.
+  LOGICAL  :: use_ph_images=.FALSE.
 
 END MODULE control_qe
 

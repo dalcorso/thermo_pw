@@ -81,7 +81,7 @@ SUBROUTINE write_ph_dispersions()
 !
 !  we always need the eigenvectors to make the symmetry analysis
 !
-  CALL matdyn_interp(disp_nqs, disp_q, .TRUE.)
+  CALL matdyn_interp(disp_nqs, disp_q, 1, disp_nqs, .TRUE.)
 
   IF ( my_image_id /= root_image ) THEN
      DEALLOCATE (freq_save) 

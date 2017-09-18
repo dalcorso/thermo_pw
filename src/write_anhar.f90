@@ -17,13 +17,10 @@ USE anharmonic,     ONLY : alpha_t, beta_t, gamma_t, cp_t, cv_t, b0_s, &
                            vmin_t, free_e_min_t, b0_t, b01_t
 USE control_pressure, ONLY : pressure_kb
 USE data_files,     ONLY : flanhar
-USE mp_images,      ONLY : my_image_id, root_image
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
 CHARACTER(LEN=8) :: float_to_char 
-
-IF (my_image_id /= root_image) RETURN
 
 CALL compute_beta(vmin_t, beta_t, temp, ntemp)
 
@@ -80,8 +77,6 @@ USE mp_images,      ONLY : my_image_id, root_image
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
 CHARACTER(LEN=8) :: float_to_char 
-
-IF (my_image_id /= root_image) RETURN
 
 CALL compute_beta(vminf_t, betaf_t, temp, ntemp)
 
@@ -144,34 +139,41 @@ USE control_mur,    ONLY : vmin, b0
 USE control_thermo, ONLY : ltherm_dos, ltherm_freq
 USE control_dosq,   ONLY : nq1_d, nq2_d, nq3_d
 USE data_files,     ONLY : flanhar
-USE io_global,      ONLY : ionode
-USE mp_images,      ONLY : my_image_id, root_image, intra_image_comm
+USE io_global,      ONLY : meta_ionode
+USE mp_world,       ONLY : world_comm
 USE mp,             ONLY : mp_sum
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
 CHARACTER(LEN=8) :: float_to_char 
-INTEGER :: itemp, iu_therm, i, nq, imode, iq, nstart, nlast
+INTEGER :: itemp, iu_therm, i, nq, imode, iq, startq, lastq, iq_eff, nq_eff
 TYPE(ph_freq_type) :: ph_freq    ! the frequencies at the volumes at
                                  ! which the gruneisen parameters are 
                                  ! calculated
 TYPE(ph_freq_type) :: ph_grun    ! the gruneisen parameters recomputed
                                  ! at each temperature at the volume
                                  ! corresponding to that temperature
-REAL(DP) :: vm
+REAL(DP) :: vm, f, g
 INTEGER :: find_free_unit
 
-IF (my_image_id /= root_image) RETURN
 !
 !  compute thermal expansion from gruneisen parameters. 
 !  NB: betab is multiplied by the bulk modulus
 !
 nq=ph_freq_save(1)%nq
-CALL init_ph_freq(ph_grun, nat, nq1_d, nq2_d, nq3_d, nq, .FALSE.)
-CALL init_ph_freq(ph_freq, nat, nq1_d, nq2_d, nq3_d, nq, .FALSE.)
-CALL divide(intra_image_comm, ntemp, nstart, nlast)
+startq=ph_freq_save(1)%startq
+lastq=ph_freq_save(1)%lastq
+nq_eff = ph_freq_save(1)%nq_eff
+CALL init_ph_freq(ph_grun, nat, nq1_d, nq2_d, nq3_d, nq_eff, startq, &
+                                                             lastq, nq, .FALSE.)
+CALL init_ph_freq(ph_freq, nat, nq1_d, nq2_d, nq3_d, nq_eff, startq, &
+                                                             lastq, nq, .FALSE.)
+DO iq=1, nq_eff
+   ph_freq%wg(iq)=ph_freq_save(1)%wg(iq)
+ENDDO
+
 betab=0.0_DP
-DO itemp = nstart, nlast
+DO itemp = 1, ntemp
    IF (lv0_t) THEN
       IF (ltherm_freq) THEN
          vm=vminf_t(itemp)
@@ -184,25 +186,25 @@ DO itemp = nstart, nlast
       vm=vmin
    ENDIF
    ph_freq%nu= 0.0_DP
-   ph_freq%wg=ph_freq_save(1)%wg
    ph_grun%nu= 0.0_DP
-   DO iq=1,nq
+   iq_eff=0
+   DO iq=startq, lastq
+      iq_eff=iq_eff+1
       DO imode=1,3*nat
-         DO i=1,poly_order
-            ph_freq%nu(imode,iq) = ph_freq%nu(imode,iq) + &
-                  poly_grun(i,imode,iq) * vm**(i-1)
-            ph_grun%nu(imode,iq) = ph_grun%nu(imode,iq) - &
-                  poly_grun(i,imode,iq) * vm**(i-2) * (i-1.0_DP)
+         f=poly_grun(poly_order,imode,iq)
+         g=poly_grun(poly_order,imode,iq)*(poly_order-1.0_DP)
+         DO i=poly_order-1,1,-1
+            f = poly_grun(i,imode,iq) + f*vm
+            g = poly_grun(i,imode,iq)*(i-1.0_DP) + g*vm
          END DO
-         IF (ph_freq%nu(imode,iq) > 0.0_DP ) THEN
-             ph_grun%nu(imode,iq) = ph_grun%nu(imode,iq) / &
-                                    ph_freq%nu(imode,iq)
+         ph_freq%nu(imode,iq_eff)=f
+         IF ( f > 0.0_DP) THEN 
+            ph_grun%nu(imode,iq_eff)=-g/vm/f
          ELSE
-            ph_grun%nu(imode,iq) = 0.0_DP
+            ph_grun%nu(imode,iq_eff) = 0.0_DP
          ENDIF
-      END DO
-   END DO
-      
+      ENDDO
+   ENDDO
    CALL thermal_expansion_ph(ph_freq, ph_grun, temp(itemp), betab(itemp))
    IF (lb0_t) THEN
       IF (ltherm_freq) THEN
@@ -216,8 +218,8 @@ DO itemp = nstart, nlast
       betab(itemp)=betab(itemp) * ry_kbar / b0
    ENDIF
 END DO
-CALL mp_sum(betab, intra_image_comm)
-
+CALL mp_sum(betab, world_comm)
+!
 IF (ltherm_freq) THEN
    CALL compute_cp(betab, vminf_t, b0f_t, cvf_t, cp_grun_t, &
                                                    b0_grun_s, grun_gamma_t)
@@ -232,7 +234,7 @@ ELSE
                                               b0_grun_s, grun_gamma_t)
 ENDIF
 
-IF (ionode) THEN
+IF (meta_ionode) THEN
 !
 !   here quantities calculated from the gruneisen parameters
 !
@@ -275,28 +277,33 @@ SUBROUTINE compute_beta(vmin_t, beta_t, temp, ntemp)
 !  In the first and last point the thermal expansion is not computed.
 !
 USE kinds, ONLY : DP
+USE mp,    ONLY : mp_sum
+USE mp_world, ONLY : world_comm
+
   IMPLICIT NONE
   INTEGER, INTENT(IN) :: ntemp
   REAL(DP), INTENT(IN) :: vmin_t(ntemp), temp(ntemp)
   REAL(DP), INTENT(OUT) :: beta_t(ntemp) 
 
-  INTEGER :: itemp
+  INTEGER :: itemp, startt, lastt
 
   beta_t=0.0_DP
+  CALL divide(world_comm, ntemp, startt, lastt)
 !
 !  just interpolate linearly
 !
-  DO itemp = 2, ntemp-1
+  DO itemp = max(2,startt), min(ntemp-1, lastt)
      beta_t(itemp) = (vmin_t(itemp+1)-vmin_t(itemp-1)) / &
                      (temp(itemp+1)-temp(itemp-1)) / vmin_t(itemp)
   END DO
+  CALL mp_sum(beta_t, world_comm)
 
   RETURN
 END SUBROUTINE compute_beta
 
 SUBROUTINE write_ener_beta(temp, vmin, emin, beta, ntemp, filename)
 USE kinds,     ONLY : DP
-USE io_global, ONLY : ionode
+USE io_global, ONLY : meta_ionode
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ntemp
 REAL(DP), INTENT(IN) :: temp(ntemp), emin(ntemp), vmin(ntemp), beta(ntemp)
@@ -305,7 +312,7 @@ CHARACTER(LEN=*) :: filename
 INTEGER :: itemp, iu_therm
 INTEGER :: find_free_unit
 
-IF (ionode) THEN
+IF (meta_ionode) THEN
    iu_therm=find_free_unit()
    OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
 
@@ -325,7 +332,7 @@ END SUBROUTINE write_ener_beta
 
 SUBROUTINE write_bulk_anharm(temp, gammat, b0t, b0s, ntemp, filename)
 USE kinds,     ONLY : DP
-USE io_global, ONLY : ionode
+USE io_global, ONLY : meta_ionode
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ntemp
 REAL(DP), INTENT(IN) :: temp(ntemp), gammat(ntemp), b0t(ntemp), b0s(ntemp)
@@ -334,7 +341,7 @@ CHARACTER(LEN=*) :: filename
 INTEGER :: itemp, iu_therm
 INTEGER :: find_free_unit
 
-IF (ionode) THEN
+IF (meta_ionode) THEN
    iu_therm=find_free_unit()
    OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
 
@@ -354,7 +361,7 @@ END SUBROUTINE write_bulk_anharm
 
 SUBROUTINE write_dbulk_anharm(temp, b01t, ntemp, filename)
 USE kinds,     ONLY : DP
-USE io_global, ONLY : ionode
+USE io_global, ONLY : meta_ionode
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ntemp
 REAL(DP), INTENT(IN) :: temp(ntemp), b01t(ntemp)
@@ -363,7 +370,7 @@ CHARACTER(LEN=*) :: filename
 INTEGER :: itemp, iu_therm
 INTEGER :: find_free_unit
 
-IF (ionode) THEN
+IF (meta_ionode) THEN
    iu_therm=find_free_unit()
    OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
 
@@ -381,7 +388,7 @@ END SUBROUTINE write_dbulk_anharm
 
 SUBROUTINE write_heat_anharm(temp, cvt, cpt, ntemp, filename)
 USE kinds,     ONLY : DP
-USE io_global, ONLY : ionode
+USE io_global, ONLY : meta_ionode
 IMPLICIT NONE
 INTEGER,  INTENT(IN) :: ntemp
 REAL(DP), INTENT(IN) :: temp(ntemp), cvt(ntemp), cpt(ntemp)
@@ -390,7 +397,7 @@ CHARACTER(LEN=*) :: filename
 INTEGER :: itemp, iu_therm
 INTEGER :: find_free_unit
 
-IF (ionode) THEN
+IF (meta_ionode) THEN
    iu_therm=find_free_unit()
    OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
 
@@ -410,7 +417,7 @@ END SUBROUTINE write_heat_anharm
 
 SUBROUTINE write_aux_anharm(temp, gamma_t, cv, cp, b0_t, b0_s, ntemp, filename)
 USE kinds, ONLY : DP
-USE io_global, ONLY : ionode
+USE io_global, ONLY : meta_ionode
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ntemp
 REAL(DP), INTENT(IN) :: temp(ntemp), gamma_t(ntemp), cv(ntemp), cp(ntemp), &
@@ -420,7 +427,7 @@ CHARACTER(LEN=*) :: filename
 INTEGER :: itemp, iu_therm
 INTEGER :: find_free_unit
 
-IF (ionode) THEN
+IF (meta_ionode) THEN
    iu_therm=find_free_unit()
    OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
 

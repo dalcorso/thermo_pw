@@ -7,9 +7,15 @@
 !
 SUBROUTINE manage_anhar()
 
-USE temperature,           ONLY : ntemp
-USE control_thermo,        ONLY : ltherm_dos, ltherm_freq
+USE kinds,                 ONLY : DP
+USE temperature,           ONLY : ntemp, temp
+USE control_thermo,        ONLY : ltherm_dos, ltherm_freq, set_internal_path
 USE internal_files_names,  ONLY : flfrq_thermo, flvec_thermo
+USE anharmonic,            ONLY : vmin_t, b0_t, b01_t, free_e_min_t
+USE ph_freq_anharmonic,    ONLY : vminf_t, b0f_t, b01f_t, free_e_minf_t
+USE mp_images,             ONLY : inter_image_comm
+USE mp,                    ONLY : mp_sum
+USE io_global,             ONLY : stdout
 
 IMPLICIT NONE
 
@@ -20,10 +26,33 @@ LOGICAL :: all_geometry_done
 CALL check_all_geometry_done(all_geometry_done)
 IF (.NOT.all_geometry_done) RETURN
 
-DO itemp = 1, ntemp
-   IF (ltherm_dos) CALL do_ev_t(itemp)
-   IF (ltherm_freq) CALL do_ev_t_ph(itemp)
-ENDDO
+IF (ltherm_dos) THEN
+   vmin_t=0.0_DP
+   b0_t=0.0_DP
+   b01_t=0.0_DP
+   free_e_min_t=0.0_DP
+   DO itemp=1, ntemp
+      CALL do_ev_t(itemp)
+   ENDDO
+   CALL mp_sum(vmin_t, inter_image_comm)
+   CALL mp_sum(b0_t, inter_image_comm)
+   CALL mp_sum(b01_t, inter_image_comm)
+   CALL mp_sum(free_e_min_t, inter_image_comm)
+ENDIF
+
+IF (ltherm_freq) THEN
+   vminf_t=0.0_DP
+   b0f_t=0.0_DP
+   b01f_t=0.0_DP
+   free_e_minf_t=0.0_DP
+   DO itemp = 1, ntemp
+      CALL do_ev_t_ph(itemp)
+   ENDDO
+   CALL mp_sum(vminf_t, inter_image_comm)
+   CALL mp_sum(b0f_t, inter_image_comm)
+   CALL mp_sum(b01f_t, inter_image_comm)
+   CALL mp_sum(free_e_minf_t, inter_image_comm)
+ENDIF
 !
 !    here we calculate several anharmonic quantities 
 !
@@ -56,9 +85,15 @@ END SUBROUTINE manage_anhar
 !
 SUBROUTINE manage_anhar_anis()
 
+USE kinds,                 ONLY : DP
 USE temperature,           ONLY : ntemp
 USE control_thermo,        ONLY : ltherm_dos, ltherm_freq
 USE internal_files_names,  ONLY : flfrq_thermo, flvec_thermo
+USE anharmonic,            ONLY : celldm_t
+USE ph_freq_anharmonic,    ONLY : celldmf_t
+USE io_global,             ONLY : ionode
+USE mp,                    ONLY : mp_sum
+USE mp_world,              ONLY : world_comm
 
 IMPLICIT NONE
 INTEGER :: itemp
@@ -67,14 +102,29 @@ LOGICAL :: all_geometry_done
 
 CALL check_all_geometry_done(all_geometry_done)
 IF (.NOT.all_geometry_done) RETURN
+
+CALL collect_all_geometries()
 !
 !    Anisotropic solid. Compute only the crystal parameters as a function
 !    of temperature and the thermal expansion tensor
 !
-DO itemp = 1, ntemp
-   IF (ltherm_dos) CALL quadratic_fit_t(itemp)
-   IF (ltherm_freq) CALL quadratic_fit_t_ph(itemp)
-ENDDO
+IF (ltherm_dos) THEN
+   celldm_t=0.0_DP
+   DO itemp = 1, ntemp
+      CALL quadratic_fit_t(itemp)
+   ENDDO
+   IF (.NOT.ionode) celldm_t=0.0_DP
+   CALL mp_sum(celldm_t, world_comm)
+ENDIF
+
+IF (ltherm_freq) THEN
+   celldmf_t=0.0_DP
+   DO itemp = 1, ntemp
+      CALL quadratic_fit_t_ph(itemp)
+   ENDDO
+   IF (.NOT.ionode) celldmf_t=0.0_DP
+   CALL mp_sum(celldmf_t, world_comm)
+ENDIF
 !
 !  Check if the elastic constants are on file. If they are, the code
 !  computes the elastic constants as a function of temperature interpolating
