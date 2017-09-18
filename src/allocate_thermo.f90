@@ -15,7 +15,8 @@ SUBROUTINE allocate_thermodynamics()
   USE thermo_mod,     ONLY : tot_ngeo
   USE temperature,    ONLY : ntemp
   USE thermodynamics, ONLY : ph_free_ener, ph_ener, ph_entropy, ph_cv
-  USE ph_freq_thermodynamics, ONLY : phf_free_ener, phf_ener, phf_entropy, phf_cv
+  USE ph_freq_thermodynamics, ONLY : phf_free_ener, phf_ener, phf_entropy, &
+                                     phf_cv
 
   IMPLICIT NONE
 
@@ -64,8 +65,6 @@ SUBROUTINE allocate_anharmonic()
   IF (.NOT. ALLOCATED (celldm_t) )      ALLOCATE(celldm_t(6,ntemp)) 
   IF (.NOT. ALLOCATED (alpha_anis_t) )  ALLOCATE(alpha_anis_t(6,ntemp)) 
   IF (.NOT. ALLOCATED (cpmcv_anis) )    ALLOCATE(cpmcv_anis(ntemp)) 
-  IF (.NOT. ALLOCATED (cpmcvf_anis) )   ALLOCATE(cpmcvf_anis(ntemp)) 
-  IF (.NOT. ALLOCATED (coeff_t) )       ALLOCATE(coeff_t(nvar,ntemp)) 
   IF (.NOT. ALLOCATED (el_cons_t) )     ALLOCATE(el_cons_t(6,6,ntemp)) 
   IF (.NOT. ALLOCATED (el_comp_t) )     ALLOCATE(el_comp_t(6,6,ntemp)) 
   IF (.NOT. ALLOCATED (macro_el_t) )    ALLOCATE(macro_el_t(8,ntemp)) 
@@ -80,16 +79,20 @@ SUBROUTINE allocate_anharmonic()
   IF (.NOT. ALLOCATED (alphaf_t) )      ALLOCATE(alphaf_t(ntemp)) 
   IF (.NOT. ALLOCATED (betaf_t) )       ALLOCATE(betaf_t(ntemp)) 
   IF (.NOT. ALLOCATED (gammaf_t) )      ALLOCATE(gammaf_t(ntemp)) 
-  IF (.NOT. ALLOCATED (betab) )         ALLOCATE(betab(ntemp))
-  IF (.NOT. ALLOCATED (alpha_an_g) )    ALLOCATE(alpha_an_g(6,ntemp)) 
-  IF (.NOT. ALLOCATED (cp_grun_t) )     ALLOCATE(cp_grun_t(ntemp)) 
-  IF (.NOT. ALLOCATED (b0_grun_s) )     ALLOCATE(b0_grun_s(ntemp)) 
-  IF (.NOT. ALLOCATED (grun_gamma_t) )  ALLOCATE(grun_gamma_t(ntemp)) 
   IF (.NOT. ALLOCATED (celldmf_t) )     ALLOCATE(celldmf_t(6,ntemp)) 
   IF (.NOT. ALLOCATED (alphaf_anis_t) ) ALLOCATE(alphaf_anis_t(6,ntemp)) 
+  IF (.NOT. ALLOCATED (cpmcvf_anis) )   ALLOCATE(cpmcvf_anis(ntemp)) 
   IF (.NOT. ALLOCATED (el_consf_t) )    ALLOCATE(el_consf_t(6,6,ntemp)) 
   IF (.NOT. ALLOCATED (el_compf_t) )    ALLOCATE(el_compf_t(6,6,ntemp)) 
   IF (.NOT. ALLOCATED (macro_elf_t) )   ALLOCATE(macro_elf_t(8,ntemp)) 
+
+  IF (.NOT. ALLOCATED (coeff_t) )       ALLOCATE(coeff_t(nvar,ntemp)) 
+
+  IF (.NOT. ALLOCATED (b0_grun_s) )     ALLOCATE(b0_grun_s(ntemp)) 
+  IF (.NOT. ALLOCATED (cp_grun_t) )     ALLOCATE(cp_grun_t(ntemp)) 
+  IF (.NOT. ALLOCATED (alpha_an_g) )    ALLOCATE(alpha_an_g(6,ntemp)) 
+  IF (.NOT. ALLOCATED (betab) )         ALLOCATE(betab(ntemp))
+  IF (.NOT. ALLOCATED (grun_gamma_t) )  ALLOCATE(grun_gamma_t(ntemp)) 
 
   RETURN
   !

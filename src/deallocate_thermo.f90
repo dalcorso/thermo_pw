@@ -12,7 +12,8 @@ SUBROUTINE deallocate_thermo()
   !  This routine deallocates the variables that control the thermo calculation
   !
   USE kinds,          ONLY : DP
-  USE thermo_mod,     ONLY : celldm_geo, energy_geo, omega_geo, no_ph
+  USE thermo_mod,     ONLY : celldm_geo, energy_geo, omega_geo, ibrav_geo, &
+                             no_ph, tot_ngeo
   USE thermodynamics, ONLY : ph_free_ener, ph_ener, ph_entropy, ph_cv
   USE ph_freq_thermodynamics, ONLY : phf_free_ener, phf_ener, phf_entropy, phf_cv
   USE anharmonic,     ONLY : vmin_t, b0_t, free_e_min_t, &
@@ -27,10 +28,11 @@ SUBROUTINE deallocate_thermo()
   USE control_paths,    ONLY : xqaux, wqaux, letter, label_list, letter_path, &
                                label_disp_q, disp_q, disp_wq, nrap_plot_in,   &
                                rap_plot_in, nrap_plot, rap_plot, high_sym_path
-  USE control_dosq,     ONLY : dos_q, dos_wq
   USE control_2d_bands, ONLY : averag, vacuum, aux_ind_sur
-  USE initial_conf,     ONLY : ityp_save, amass_save, tau_save, tau_save_crys
+  USE initial_conf,     ONLY : ityp_save, amass_save, tau_save, tau_save_crys, &
+                               collect_info_save, geometry
   USE equilibrium_conf, ONLY : tau0, tau0_crys
+  USE control_thermo,   ONLY : all_geometries_together
   USE temperature,      ONLY : temp
 
   USE control_conv,     ONLY : ke, keden, nk_test, sigma_test
@@ -40,13 +42,17 @@ SUBROUTINE deallocate_thermo()
                                deb_cv
   USE control_quadratic_energy, ONLY : coeff, hessian_v, hessian_e, x_pos_min
   USE control_quartic_energy, ONLY : coeff4, x_min_4
+  USE collect_info,  ONLY : destroy_collect_info_type
+  USE control_eldos, ONLY : dos_k, dos_wk
 
 
   IMPLICIT NONE
+  INTEGER :: igeom
   !
   IF ( ALLOCATED (energy_geo) )      DEALLOCATE(energy_geo)
   IF ( ALLOCATED (celldm_geo) )      DEALLOCATE(celldm_geo) 
   IF ( ALLOCATED (omega_geo) )       DEALLOCATE(omega_geo) 
+  IF ( ALLOCATED (ibrav_geo) )       DEALLOCATE(ibrav_geo) 
   IF ( ALLOCATED (no_ph) )           DEALLOCATE(no_ph) 
   IF ( ALLOCATED (vmin_t) )          DEALLOCATE(vmin_t) 
   IF ( ALLOCATED (ke) )              DEALLOCATE(ke) 
@@ -104,8 +110,6 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (label_disp_q) )    DEALLOCATE(label_disp_q)
   IF ( ALLOCATED (disp_q) )          DEALLOCATE(disp_q)
   IF ( ALLOCATED (disp_wq) )         DEALLOCATE(disp_wq)
-  IF ( ALLOCATED (dos_q) )           DEALLOCATE(dos_q)
-  IF ( ALLOCATED (dos_wq) )          DEALLOCATE(dos_wq)
 
   IF ( ALLOCATED (coeff) )           DEALLOCATE( coeff )
   IF ( ALLOCATED (hessian_v) )       DEALLOCATE( hessian_v )
@@ -136,6 +140,8 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (ityp_save) )       DEALLOCATE(ityp_save)
   IF ( ALLOCATED (amass_save) )      DEALLOCATE(amass_save)
 
+  IF ( ALLOCATED (geometry) ) DEALLOCATE(geometry)
+
   IF ( ALLOCATED (tau0) )            DEALLOCATE(tau0)
   IF ( ALLOCATED (tau0_crys) )       DEALLOCATE(tau0_crys)
 
@@ -144,7 +150,20 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (deb_entropy) )     DEALLOCATE( deb_entropy )
   IF ( ALLOCATED (deb_cv) )          DEALLOCATE( deb_cv )
 
+  IF ( ALLOCATED (dos_k) )           DEALLOCATE( dos_k )
+  IF ( ALLOCATED (dos_wk) )          DEALLOCATE( dos_wk )
 
+  CALL deallocate_q2r()
+  IF (ALLOCATED(collect_info_save)) THEN
+     IF (all_geometries_together) THEN
+        DO igeom=1, tot_ngeo
+           CALL destroy_collect_info_type(collect_info_save(igeom))
+        ENDDO
+     ELSE
+        CALL destroy_collect_info_type(collect_info_save(1))
+     ENDIF
+     DEALLOCATE(collect_info_save)
+  ENDIF
 
   ! 
   RETURN

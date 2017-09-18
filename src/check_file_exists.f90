@@ -38,49 +38,44 @@ LOGICAL FUNCTION check_dyn_file_exists(filename)
 !   If after_disp is true but the dynamical matrix files are not found, 
 !   this routine stops with an error.
 !
-USE io_global, ONLY : meta_ionode, meta_ionode_id
-USE mp_world,  ONLY : world_comm
-USE mp,        ONLY : mp_bcast
+USE mp,             ONLY : mp_bcast
 USE control_thermo, ONLY : after_disp
-USE control_ph, ONLY : ldisp, xmldyn
+USE control_ph,     ONLY : ldisp, xmldyn
+USE mp_world,       ONLY : world_comm
+USE io_global,      ONLY : meta_ionode_id, meta_ionode
 IMPLICIT NONE
 
 CHARACTER (LEN=256), INTENT(IN) :: filename
+LOGICAL :: ion
 CHARACTER (LEN=256) :: fildyn
 CHARACTER (LEN=6) :: int_to_char
 LOGICAL :: exst, exst_all
 INTEGER :: iq, nq1, nq2, nq3, nqs, iudyn
 INTEGER :: find_free_unit
 
-exst_all=.TRUE.
-nqs=0
-fildyn = TRIM( filename ) // '0'
-IF (meta_ionode) INQUIRE(FILE=TRIM(fildyn),EXIST=exst)
-CALL mp_bcast(exst, meta_ionode_id, world_comm)
-exst_all=exst_all.AND.exst
-IF (exst_all) THEN
-   IF (meta_ionode) THEN
+IF (meta_ionode) THEN
+   exst_all=.TRUE.
+   nqs=0
+   fildyn = TRIM( filename ) // '0'
+   INQUIRE(FILE=TRIM(fildyn),EXIST=exst)
+   exst_all=exst_all.AND.exst
+   IF (exst_all) THEN
       iudyn=find_free_unit()
       OPEN (UNIT=iudyn, FILE=TRIM(fildyn), STATUS='old',FORM='formatted')
       READ(iudyn,*) nq1, nq2, nq3
       READ(iudyn,*) nqs
       CLOSE(iudyn)
    END IF
-   CALL mp_bcast(nq1, meta_ionode_id, world_comm)
-   CALL mp_bcast(nq2, meta_ionode_id, world_comm)
-   CALL mp_bcast(nq3, meta_ionode_id, world_comm)
-   CALL mp_bcast(nqs, meta_ionode_id, world_comm)
-END IF
-
-DO iq=1,nqs
-   IF (exst_all) THEN
-      IF (ldisp) fildyn = TRIM( filename ) // TRIM( int_to_char( iq ) )
-      IF (xmldyn) fildyn = TRIM(fildyn) // '.xml'
-      IF (meta_ionode) INQUIRE(FILE=TRIM(fildyn),EXIST=exst)
-      CALL mp_bcast(exst, meta_ionode_id, world_comm)
-      exst_all=exst_all.AND.exst
-   ENDIF
-END DO
+   DO iq=1,nqs
+      IF (exst_all) THEN
+         IF (ldisp) fildyn = TRIM( filename ) // TRIM( int_to_char( iq ) )
+         IF (xmldyn) fildyn = TRIM(fildyn) // '.xml'
+         INQUIRE(FILE=TRIM(fildyn),EXIST=exst)
+         exst_all=exst_all.AND.exst
+      ENDIF
+   END DO
+ENDIF
+CALL mp_bcast(exst_all, meta_ionode_id, world_comm)
 
 IF (.NOT. exst_all .AND. after_disp) &
       CALL errore('check_dyn_file_exists','after_disp but dynamical matrix &

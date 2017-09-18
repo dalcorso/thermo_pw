@@ -14,7 +14,7 @@ SUBROUTINE bcast_thermo_input()
   !
   USE control_thermo,  ONLY : after_disp, with_eigen, do_scf_relax,           &
                               ltherm_dos, ltherm_freq, continue_zero_ibrav,   &
-                              find_ibrav
+                              find_ibrav, all_geometries_together
   USE data_files,      ONLY : flevdat, flfrc, flfrq, fldos, fltherm, flanhar, &
                               filband, flkeconv, flnkconv, flgrun, flpband,   &
                               flpgrun, flenergy, flprojlayer, flpbs, flvec,   &
@@ -48,7 +48,7 @@ SUBROUTINE bcast_thermo_input()
   USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, epsilon_0,&
                               frozen_ions, elastic_algorithm, poly_degree
   USE piezoelectric_tensor, ONLY : nppl
-  USE control_qe,      ONLY : force_band_calculation
+  USE control_qe,      ONLY : force_band_calculation, use_ph_images
 
   USE thermo_mod,      ONLY : what, ngeo, step_ngeo, reduced_grid, fact_ngeo, &
                               max_geometries, start_geo, jump_geo, &
@@ -169,7 +169,9 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( flasy, meta_ionode_id, world_comm )
   CALL mp_bcast( asymptote_command, meta_ionode_id, world_comm )
   CALL mp_bcast( npx, meta_ionode_id, world_comm )
-
+!
+!  xrdp
+!
   CALL mp_bcast( lambda, meta_ionode_id, world_comm )
   CALL mp_bcast( lambda_elem, meta_ionode_id, world_comm )
   CALL mp_bcast( flxrdp, meta_ionode_id, world_comm )
@@ -188,6 +190,7 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( flepsilon, meta_ionode_id, world_comm )
   CALL mp_bcast( flpsepsilon, meta_ionode_id, world_comm )
   CALL mp_bcast( force_band_calculation, meta_ionode_id, world_comm )
+  CALL mp_bcast( use_ph_images, meta_ionode_id, world_comm )
 !
 !  scf_disp
 !
@@ -264,12 +267,13 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( lquartic_ph, meta_ionode_id, world_comm )
   CALL mp_bcast( lv0_t, meta_ionode_id, world_comm )
   CALL mp_bcast( lb0_t, meta_ionode_id, world_comm )
+  CALL mp_bcast( all_geometries_together, meta_ionode_id, world_comm )
+  CALL mp_bcast( fact_ngeo, meta_ionode_id, world_comm )
   CALL mp_bcast( flpgrun, meta_ionode_id, world_comm )
   CALL mp_bcast( flgrun, meta_ionode_id, world_comm )
   CALL mp_bcast( flpsgrun, meta_ionode_id, world_comm )
   CALL mp_bcast( flanhar, meta_ionode_id, world_comm )
   CALL mp_bcast( flpsanhar, meta_ionode_id, world_comm )
-  CALL mp_bcast( fact_ngeo, meta_ionode_id, world_comm )
 !
 ! optical
 !

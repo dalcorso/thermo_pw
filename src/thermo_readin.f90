@@ -31,7 +31,8 @@ SUBROUTINE thermo_readin()
   USE control_thermo,       ONLY : outdir_thermo, after_disp, with_eigen,  &
                                    do_scf_relax, ltherm_dos, ltherm_freq,  &
                                    continue_zero_ibrav, find_ibrav,        &
-                                   set_internal_path, set_2d_path
+                                   set_internal_path, set_2d_path,         &
+                                   all_geometries_together, max_seconds_tpw
   USE data_files,           ONLY : flevdat, flfrc, flfrq, fldos, fltherm,  &
                                    flanhar, filband, flkeconv, flenergy,   &
                                    flpbs, flprojlayer, flnkconv, flgrun,   &
@@ -80,7 +81,7 @@ SUBROUTINE thermo_readin()
   USE control_quartic_energy, ONLY : lquartic, lquartic_ph, lsolve
   USE piezoelectric_tensor, ONLY : nppl
   USE images_omega, ONLY : omega_group
-  USE control_qe,   ONLY : force_band_calculation
+  USE control_qe,   ONLY : force_band_calculation, use_ph_images
 !
 !  the QE variables needed here. max_seconds, zasr, xmldyn and fildyn
 !  could be set by this routine 
@@ -189,6 +190,7 @@ SUBROUTINE thermo_readin()
                             flepsilon,                      &
                             flpsepsilon,                    &
                             force_band_calculation,         &
+                            use_ph_images,                  &
 !
 !   scf_disp
 !
@@ -245,6 +247,7 @@ SUBROUTINE thermo_readin()
                             flpgrun, flgrun, flpsgrun,      &
                             flanhar, flpsanhar,             &
                             fact_ngeo,                      &
+                            all_geometries_together,        &
 !
 !   optical
 !
@@ -370,6 +373,11 @@ SUBROUTINE thermo_readin()
   flepsilon='epsilon'
   flpsepsilon='output_epsilon.ps'
   force_band_calculation=.FALSE.
+  IF (nimage>1) THEN
+     use_ph_images=.FALSE.
+  ELSE
+     use_ph_images=.TRUE.
+  ENDIF
 
   freqmin_input=0.0_DP
   freqmax_input=0.0_DP
@@ -446,6 +454,7 @@ SUBROUTINE thermo_readin()
   flpsanhar='output_anhar.ps'
   fact_ngeo=1
   omega_group=1
+  all_geometries_together=.FALSE.
 
   max_geometries=1000000
   start_geometry=1
@@ -463,6 +472,14 @@ SUBROUTINE thermo_readin()
 !   Here a few consistency check on the input variables
 !
   IF (what==' ') CALL errore('thermo_readin','''what'' must be initialized',1)
+
+  IF (what/='mur_lc_t'.AND.all_geometries_together) &
+          CALL errore('thermo_readin','all_geometries_together requires &
+                                          &mur_lc_t',1)
+
+  IF (max_geometries /= 1000000 .AND.all_geometries_together) &
+          CALL errore('thermo_readin','all_geometries_together not compatible &
+                                          &with max_geometries',1)
   !
   IF (lmurn.AND.reduced_grid) CALL errore('thermo_readin',&
                              'lmurn and reduced_grid cannot be both .TRUE.',1)
@@ -476,6 +493,7 @@ SUBROUTINE thermo_readin()
                what=='mur_lc_t' .OR. what=='scf_2d_bands')
 
   IF (nimage==1) max_seconds_=max_seconds
+  max_seconds_tpw=max_seconds
   IF (after_disp) xmldyn=has_xml(fildyn)
 !
 !   here read the contour levels
@@ -737,7 +755,8 @@ SUBROUTINE thermo_ph_readin()
   !-----------------------------------------------------------------------
   !
   !  This routine reads the input of the ph.x code when the calculation
-  !  requires the use of the phonon routines.
+  !  requires the use of the phonon routines. It must be called by all the
+  !  CPUs.
   !
   USE thermo_mod, ONLY : what
   USE mp_world,   ONLY : world_comm
@@ -756,10 +775,7 @@ SUBROUTINE thermo_ph_readin()
   !  string '---'. It is assumed that the input of the ph.x code is
   !  written after this string.
   !
-  IF ( what == 'scf_ph' .OR. what== 'scf_disp' .OR. what == 'mur_lc_ph' &
-     .OR. what== 'mur_lc_disp' .OR. what == 'mur_lc_t') THEN
-
-     IF (meta_ionode) OPEN(UNIT=5, FILE='ph_control', STATUS='OLD', &
+  IF (meta_ionode) OPEN(UNIT=5, FILE='ph_control', STATUS='OLD', &
                  FORM='FORMATTED', ERR=20, IOSTAT=ios )
 20   CALL mp_bcast(ios, meta_ionode_id, world_comm)
      CALL errore('thermo_ph_readin','error opening file '//'ph_control',&
@@ -767,20 +783,19 @@ SUBROUTINE thermo_ph_readin()
 !
 !    be sure that pw variables are completely deallocated
 !
-     CALL clean_pw(.TRUE.)
+  CALL clean_all_pw()
 !
 !    save the outdir. NB phq_readin can change the outdir, and it is
 !    the responsability of the user to give the correct directory. Ideally
 !    outdir should not be given in the input of thermo_pw.
 !
-     outdir_in_ph=TRIM(outdir)
-     CALL phq_readin_tpw()
-     IF (meta_ionode) CLOSE(5,STATUS='KEEP')
-     IF (.NOT.ldisp.AND. what /= 'scf_ph' .AND. what /= 'mur_lc_ph' ) &
+  outdir_in_ph=TRIM(outdir)
+  CALL phq_readin_tpw()
+  IF (meta_ionode) CLOSE(5,STATUS='KEEP')
+  IF (.NOT.ldisp.AND. what /= 'scf_ph' .AND. what /= 'mur_lc_ph' ) &
         CALL errore('thermo_ph_readin','ldisp should be .TRUE.',1)
-     !
-  ENDIF
   !
   RETURN
   !
 END SUBROUTINE thermo_ph_readin
+

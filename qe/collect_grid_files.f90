@@ -43,16 +43,21 @@
                     & TRIM( prefix ) // '.phsave/dynmat.'  &
                     &  // TRIM(int_to_char(iq))&
                     &  // '.' // TRIM(int_to_char(irr)) // '.xml'
-
-            ima=MOD(iq, nimage)
-            file_output=TRIM( tmp_dir_save ) // '/_ph'//TRIM(int_to_char(ima)) &
-                    &    //'/'// TRIM( prefix ) // '.phsave/dynmat.' &
-                    &    // TRIM(int_to_char(iq))  &
-                    &    // '.' // TRIM(int_to_char(irr)) // '.xml'
-
-            IF (ima /= my_image_id) THEN
-               INQUIRE (FILE = TRIM(file_input), EXIST = exst)
-               IF (exst) ios = f_copy(file_input, file_output)
+!
+!   copy all that has been calculated in all the images, so we can restart
+!   without computing what is already available
+!
+            INQUIRE (FILE = TRIM(file_input), EXIST = exst)
+            IF (exst) THEN
+               DO ima=0, nimage-1
+!                 ima=MOD(iq, nimage)
+                  file_output=TRIM( tmp_dir_save ) // '/_ph'//&
+                       &      TRIM(int_to_char(ima)) &
+                       &    //'/'// TRIM( prefix ) // '.phsave/dynmat.' &
+                       &    // TRIM(int_to_char(iq))  &
+                       &    // '.' // TRIM(int_to_char(irr)) // '.xml'
+                  IF (ima /= my_image_id) ios = f_copy(file_input, file_output)
+               ENDDO
             ENDIF
             IF ( elph .AND. irr>0 ) THEN
 
@@ -75,13 +80,15 @@
          IF (lgamma_iq(iq).AND.comp_irr_iq(0,iq).AND.ionode) THEN
             file_input=TRIM( tmp_dir_ph ) // &
                       TRIM( prefix ) // '.phsave/tensors.xml'
+            INQUIRE (FILE = TRIM(file_input), EXIST = exst)
+            IF (exst) THEN
+               DO ima=0, nimage-1
+                  file_output=TRIM( tmp_dir_save ) // '/_ph'//&
+                              TRIM(int_to_char(ima)) &
+                      //'/'// TRIM( prefix ) // '.phsave/tensors.xml'
 
-            file_output=TRIM( tmp_dir_save ) // '/_ph'//TRIM(int_to_char(ima)) &
-                    //'/'// TRIM( prefix ) // '.phsave/tensors.xml'
-
-            IF (ima/=my_image_id) THEN
-               INQUIRE (FILE = TRIM(file_input), EXIST = exst)
-               IF (exst) ios = f_copy(file_input, file_output)
+                  IF (ima/=my_image_id) ios = f_copy(file_input, file_output)
+               ENDDO
             ENDIF
          ENDIF
       ENDIF

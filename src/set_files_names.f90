@@ -6,7 +6,6 @@
 !
 SUBROUTINE set_files_names(igeom)
 
-USE thermo_mod,        ONLY : start_geometry
 USE postscript_files,  ONLY : flpstherm, flpsdisp, flpsdos
 USE data_files,        ONLY : fltherm, flfrc, flfrq, fldos, flpband, flvec, &
                               fldosfrq
@@ -21,20 +20,6 @@ IMPLICIT NONE
 INTEGER, INTENT(IN) :: igeom
 CHARACTER(LEN=6) :: int_to_char
 
-IF (igeom==start_geometry) fildyn_thermo="dynamical_matrices/"//TRIM(fildyn)
-IF (igeom==start_geometry) flfrc_thermo=TRIM(flfrc)
-IF (igeom==start_geometry) flfrq_thermo=TRIM(flfrq)
-IF (igeom==start_geometry) flvec_thermo=TRIM(flvec)
-IF (igeom==start_geometry) fldos_thermo=TRIM(fldos)
-IF (igeom==start_geometry) fldosfrq_thermo=TRIM(fldosfrq)
-IF (igeom==start_geometry) fltherm_thermo=TRIM(fltherm)
-IF (igeom==start_geometry) flpband_thermo=TRIM(flpband)
-
-IF (igeom==start_geometry) flgnuplot_thermo=TRIM(flgnuplot)
-
-IF (igeom==start_geometry) flpsdos_thermo=TRIM(flpsdos)
-IF (igeom==start_geometry) flpstherm_thermo=TRIM(flpstherm)
-IF (igeom==start_geometry) flpsdisp_thermo=TRIM(flpsdisp)
 
 fildyn=TRIM(fildyn_thermo)//'.g'//TRIM(int_to_char(igeom))//'.'
 flfrc=TRIM(flfrc_thermo)//'.g'//TRIM(int_to_char(igeom))
@@ -53,6 +38,39 @@ flpsdisp=TRIM(flpsdisp_thermo)//'.g'//TRIM(int_to_char(igeom))
 
 RETURN
 END SUBROUTINE set_files_names
+
+
+SUBROUTINE initialize_file_names()
+
+USE postscript_files,  ONLY : flpstherm, flpsdisp, flpsdos
+USE data_files,        ONLY : fltherm, flfrc, flfrq, fldos, flpband, flvec, &
+                              fldosfrq
+USE control_gnuplot,   ONLY : flgnuplot
+USE internal_files_names, ONLY : fildyn_thermo, flfrc_thermo, flfrq_thermo, &
+                       fldos_thermo, fltherm_thermo, flpband_thermo,        &
+                       flpsdos_thermo, flpstherm_thermo, flgnuplot_thermo,  &
+                       flpsdisp_thermo, flvec_thermo, fldosfrq_thermo
+USE output,            ONLY : fildyn
+
+IMPLICIT NONE
+
+fildyn_thermo="dynamical_matrices/"//TRIM(fildyn)
+flfrc_thermo=TRIM(flfrc)
+flfrq_thermo=TRIM(flfrq)
+flvec_thermo=TRIM(flvec)
+fldos_thermo=TRIM(fldos)
+fldosfrq_thermo=TRIM(fldosfrq)
+fltherm_thermo=TRIM(fltherm)
+flpband_thermo=TRIM(flpband)
+
+flgnuplot_thermo=TRIM(flgnuplot)
+
+flpsdos_thermo=TRIM(flpsdos)
+flpstherm_thermo=TRIM(flpstherm)
+flpsdisp_thermo=TRIM(flpsdisp)
+
+RETURN
+END SUBROUTINE initialize_file_names
 
 !----------------------------------------------------------------------------
 SUBROUTINE restore_files_names()

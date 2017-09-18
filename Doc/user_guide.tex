@@ -984,16 +984,24 @@ the \texttt{thermo\_control} file need to be changed.
 The number or processors/pools/images can be changed in the same cases in
 which this is possible in Quantum ESPRESSO.
 
-Using images in a phonon calculation has an overhead because each image must 
-recalculate the band structure at each task, or check if the bands are 
-already on disk, calculated previously by the same images. On some systems 
+Using images in a phonon calculation with the master/slave approach
+has an overhead because each image must recalculate the initialization
+and the band structure at each task, or check if the bands are 
+already on disk, calculated previously by the same image. On some systems 
 with slow disks it could be faster to recalculate the bands instead of 
-reading them from disk. 
-An input variable allows forcing the band calculation:
+reading them from disk. It is also possible to use the image breaking
+suggested by the \texttt{ph.x} code that keeps, as much as possible, 
+on the same image the tasks that require the same initialization without
+recomputing it.
+The input variables that control this part of the calculation are:
 \begin{verbatim}
 force_bands_calculation : if .TRUE. the bands are never read from disk but
               recalculated when needed.
               Default: logical .FALSE.
+
+use_ph_images : if .TRUE. each image makes a set of tasks so as to minimize
+              the number of band calculations and phonon initialization.
+              Default: logical .FALSE. if nimage>1 .TRUE. nimage=1.
 \end{verbatim}
 
 \subsection{\color{web-blue}\texttt{what='scf\_disp'}}
@@ -1563,6 +1571,10 @@ fact_ngeo(1)...fact_ngeo(6) : With these factors the vibrational free energy
                 11        5            1,6,11
                 Defaults: integer 1,1,1,1,1,1
                 This option is not active when reduced_grid=.TRUE.
+all_geometries_together : if .TRUE. all the phonon calculation for
+                all the geometrie are used for the image parallelization.
+                To be used only if you have many images (and CPUs) available.
+                Default : logical .FALSE.
 \end{verbatim}
 The output files corresponding to different geometries can be identified
 by the presence of the letters \texttt{g1}, \texttt{g2}, ... in the filename.
@@ -1570,9 +1582,11 @@ To exploit all the features of this option please write the dynamical matrices
 in \texttt{.xml} format (using a \texttt{fildyn} with the \texttt{.xml}
 extension).
 An example of the use of this option can be found in \texttt{example09}. \\
-Number of tasks for this option: Maximum between the the number of tasks  
+Number of tasks for this option: Maximum between the number of tasks  
 needed by the \texttt{what='mur\_lc'} option and the number
 of tasks of the phonon code (see above the option \texttt{what='scf\_ph'}). \\
+When \texttt{all\_geometries\_together=.TRUE.}: number of tasks of the
+phonon code times the number of geometries. \\
 
 \subsection{\color{web-blue}\texttt{what='elastic\_constants\_t'}}
 
@@ -1627,9 +1641,11 @@ or \thermo\ stopped after doing some post-processing task. This second
 case comprises also the normal termination of
 \thermo\ and the necessity to change some details of the plot rerunning
 the post-processing tools without redoing the \qe\ calculations.
+
 Support for the first case is based on the recover features provided by 
-\qe\ routines. This restarting method needs files in the \texttt{outdir}
-directory and works only with one image. In this case \thermo\ behaves as \qe\ 
+\qe\ routines and usually works when images are not used. This restarting 
+method needs files in the \texttt{outdir}
+directory. In this case \thermo\ behaves as \qe\ 
 except for the fact that \texttt{max\_seconds} in the input of \texttt{pw.x} or
 of \texttt{ph.x} is not active. To run \texttt{thermo\_pw}
 for a fixed number of seconds \texttt{max\_seconds} must be set in the
@@ -1638,17 +1654,21 @@ for a fixed number of seconds \texttt{max\_seconds} must be set in the
 \texttt{pw.x} while if the code stopped inside \texttt{ph.x} routines
 \texttt{recover} must be set to \texttt{.TRUE.} in the input of \texttt{ph.x}.
 
-Instead when you are running \texttt{thermo\_pw} with several images the option 
-\texttt{max\_seconds} is disabled, \texttt{restart\_mode} must 
-be set to \texttt{'from\_scratch'} in the input of \texttt{pw.x} and
-\texttt{recover} must be set to \texttt{.FALSE.} in the input of \texttt{ph.x}.
-This does not mean that \texttt{thermo\_pw} cannot recover any of the previous
-calculations but a few calculations must be repeated. In general \thermo\ 
-does not recalculate the quantities contained in files that are already 
-in the working directory. If you are running \thermo\ in tasks that do 
-self-consistent calculations followed by phonon calculations, the 
-self-consistent calculation is not repeated 
-when completed and also completed phonon calculations at a given
+When running \texttt{thermo\_pw} with several images and
+calculating a phonon dispersion or using the \texttt{what='mur\_lc\_t'}
+option, \texttt{max\_seconds} is controlled by the image driver of 
+\texttt{thermo\_pw}. Presently, after \texttt{max\_seconds} a signal
+is sent to the asynchronous driver and the master stops sending new works 
+to the images. It stops the code when all the images have terminated their
+current task. Recovering from this point is possible without loosing 
+any previous work by keeping the \texttt{outdir} directory and by setting 
+\texttt{recover=.TRUE.} in the \texttt{ph.x} input.
+Note however that when \texttt{thermo\_pw} is stopped by the operating 
+system in an unclean way this restart method could not work.
+
+As a last resource you can remove the outdir directory, and \thermo\ 
+will not recalculate the quantities contained in files that are already 
+in the working directory. Completed phonon calculations at a given
 geometry for which the dynamical matrices are available are
 not redone. It is possible to stop \texttt{thermo\_pw} after the 
 calculation of the phonon dispersions for a fixed number of geometries 
@@ -1656,13 +1676,16 @@ by setting the input variable \texttt{max\_geometries} in the
 \texttt{THERMO\_CONTROL} namelist or also specify exactly which geometries
 to do in a given run using the variables \texttt{start\_geometry} and
 \texttt{last\_geometry}.
+
+In general the restart of \texttt{thermo\_pw} from a post-processing task
+is much easier.
 Each routine checks if a file with the same name
 as the file that it would produce is already in the working directory,
 and if this happens, it reads its content and returns. This feature cannot be
 disabled from input. In order to recalculate a given quantity, just remove
 the file that contains it from the working directory.
-
-In an anharmonic calculation, if you have already all the dynamical 
+For instance in an anharmonic calculation, if you have already all 
+the dynamical 
 matrices for all the geometries and you do not have any more the
 \texttt{outdir} directory, it is possible to skip entirely
 the phonon calculations and the reading of the files produced by
@@ -1707,13 +1730,27 @@ directory. If for any reason the \texttt{outdir} directory is removed
 after computing some geometries, just remove also the
 \texttt{restart} directory and the code will recreate the information
 in \texttt{outdir} but will not recalculate the dynamical matrices 
-already available. In general it is not useful to use the image parallelization
-if have not a sufficient number of processors to calculate a complete
-phonon dispersion for at least one geometry in a given run. In this case
-you need to send several jobs to compute a complete phonon dispersions.
-In this case set \texttt{start\_geometry=last\_geometry},  
-\texttt{max\_seconds} in the \texttt{thermo\_pw} input, 
-and \texttt{recover=.TRUE.} in the \texttt{ph.x} input.
+already available. 
+
+Finally we consider some typical runs of the most time consuming option
+\texttt{what='mur\_lc\_t'}, but what we say is valid also for the computation
+of the phonon dispersions at a single geometry.
+With a single processor or with a personal computer with a small number of 
+processors you can run the code without interuption.
+In general in these cases it is not useful to use the image parallelization
+before exploiting all the parallelization levels of \qe, since 
+images have an overhead due to the necessity of reinitialize the phonon
+calculation and recalculate the bands.
+If you cannot complete the calculation in a single run 
+you need to send several time the \thermo\ run. 
+In this case you can set \texttt{start\_geometry=last\_geometry},
+\texttt{max\_seconds} in the \texttt{thermo\_pw} input,
+and \texttt{recover=.TRUE.} in the \texttt{ph.x} input. You need to
+repeat this for all the geometries and finally you can collect the results
+and compute the anharmonic properties.
+
+
+
 
 \newpage
 \section{\color{coral}Tools}

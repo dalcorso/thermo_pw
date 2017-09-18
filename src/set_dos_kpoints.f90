@@ -10,22 +10,22 @@ SUBROUTINE set_dos_kpoints()
 !  This subroutine computes the mesh of k point for electronic dos
 !  calculation. 
 !
-  USE control_dosq,  ONLY : dos_q, dos_wq
-  USE control_eldos, ONLY : nk1_d, nk2_d, nk3_d, k1_d, k2_d, k3_d
+  USE control_eldos, ONLY : nk1_d, nk2_d, nk3_d, k1_d, k2_d, k3_d, dos_k, &
+                            dos_wk
   USE start_k,       ONLY : init_start_k
 
   IMPLICIT NONE
   INTEGER :: nqx
  
-  IF ( ALLOCATED(dos_q) )    DEALLOCATE (dos_q)
-  IF ( ALLOCATED(dos_wq) )   DEALLOCATE (dos_wq)
+  IF ( ALLOCATED(dos_k) )    DEALLOCATE (dos_k)
+  IF ( ALLOCATED(dos_wk) )   DEALLOCATE (dos_wk)
 
   nqx=1
-  ALLOCATE ( dos_q(3,nqx) )
-  ALLOCATE ( dos_wq(nqx) )
+  ALLOCATE ( dos_k(3,nqx) )
+  ALLOCATE ( dos_wk(nqx) )
 
   CALL init_start_k ( nk1_d, nk2_d, nk3_d, k1_d, k2_d, k3_d, 'automatic', 0,&
-                               dos_q, dos_wq )
+                               dos_k, dos_wk )
 
    RETURN
 END SUBROUTINE set_dos_kpoints

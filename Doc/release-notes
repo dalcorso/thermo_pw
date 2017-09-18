@@ -1,3 +1,23 @@
+New in version 0.8.0
+
+Added a stop signal to the asynchronous driver. max_seconds is now
+working with images.
+
+Recover of the phonon run stopped after max_seconds is now possible
+even with images.
+
+Added the possibility to use the images suggested by ph.x, instead
+of doing only one irrep per task.
+
+Added the possibility to make all q points and irrep of all geometries
+together, dividing all tasks among images.
+
+Some speedup of the calculation of harmonic and anharmonic quantities
+in parallel machines.
+
+31/08/2017 Version 0.8.0-beta is now frozen.
+
+
 06/07/2017 Version 0.7.9 of thermo_pw is now frozen.
 
 New in version 0.7.9

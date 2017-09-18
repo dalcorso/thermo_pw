@@ -674,28 +674,60 @@ SUBROUTINE initialize_ph_work(nwork)
 !
 !  This routine counts how many tasks there are in a phonon calculation.
 !
+USE control_thermo, ONLY : all_geometries_together
+USE thermo_mod,  ONLY : tot_ngeo, start_geometry, last_geometry
+USE ions_base,   ONLY : nat
 USE grid_irr_iq, ONLY : irr_iq
 USE disp,        ONLY : nqs
 USE freq_ph,     ONLY : nfs, fpol
 USE images_omega,ONLY : omega_group
+USE initial_conf, ONLY : geometry, collect_info_save
 USE control_ph,  ONLY : epsil, trans
+USE control_qe,  ONLY : use_ph_images
+USE mp_images,   ONLY : nimage
 USE mp_asyn,     ONLY : with_asyn_images
 
 IMPLICIT NONE
 INTEGER, INTENT(OUT) :: nwork
 
-INTEGER :: iq, irr
+INTEGER :: iq, irr, igeom, iwork, nqs_max, ngeometries
 
 nwork=0
 IF (trans) THEN
-   IF (with_asyn_images) THEN
-      DO iq=1,nqs
-         DO irr=0, irr_iq(iq)
-            nwork=nwork+1
+   IF (use_ph_images) THEN
+      IF (all_geometries_together) THEN
+         nwork=nimage*(last_geometry - start_geometry + 1)
+         ALLOCATE(geometry(nwork))
+         DO iwork=1, nwork
+            geometry(iwork)= (iwork-1) / nimage + start_geometry
          ENDDO
-      ENDDO
+      ELSE
+         nwork=nimage
+      ENDIF
    ELSE
-      nwork=1
+      IF (all_geometries_together) THEN
+         nqs_max=0
+         DO igeom=start_geometry, last_geometry
+            nqs_max=MAX(collect_info_save(igeom)%nqs, nqs_max)
+         ENDDO
+         ngeometries=last_geometry - start_geometry + 1
+         ALLOCATE(geometry((3*nat+1)*nqs_max*ngeometries))
+         nwork=0
+         DO igeom=start_geometry, last_geometry
+            DO iq=1, collect_info_save(igeom)%nqs
+               DO irr=0, collect_info_save(igeom)%irr_iq(iq)
+                  nwork=nwork+1
+                  geometry(nwork)=igeom
+               ENDDO
+            ENDDO
+         ENDDO
+      ELSE
+         DO iq=1,nqs
+            DO irr=0, irr_iq(iq)
+               nwork=nwork+1
+            ENDDO
+         ENDDO
+      ENDIF
    ENDIF
 ELSEIF (fpol) THEN
    IF (with_asyn_images) THEN

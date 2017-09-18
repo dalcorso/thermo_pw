@@ -55,8 +55,6 @@ nye.o : ../../Modules/kind.o
 ph_freq_module.o : ../../Modules/constants.o
 ph_freq_module.o : ../../Modules/io_global.o
 ph_freq_module.o : ../../Modules/kind.o
-ph_freq_module.o : ../../Modules/mp_images.o
-ph_freq_module.o : ../../UtilXlib/mp.o
 phdos_module.o : ../../Modules/constants.o
 phdos_module.o : ../../Modules/io_global.o
 phdos_module.o : ../../Modules/kind.o
@@ -93,6 +91,4 @@ voigt.o : ../../Modules/kind.o
 xrdp.o : ../../Modules/constants.o
 xrdp.o : ../../Modules/io_global.o
 xrdp.o : ../../Modules/kind.o
-xrdp.o : ../../Modules/mp_images.o
-xrdp.o : ../../UtilXlib/mp.o
 xrdp.o : lattices.o
