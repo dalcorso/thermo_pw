@@ -51,7 +51,7 @@ SUBROUTINE q2r_sub(fildyn)
   USE ifc,        ONLY : zasr
   USE fft_scalar, ONLY : cfft3d
   USE io_global,  ONLY : stdout, meta_ionode, meta_ionode_id
-  USE mp_images,  ONLY : intra_image_comm, root_image, my_image_id
+  USE mp_images,  ONLY : my_image_id
   USE mp_world,   ONLY : world_comm
   USE io_dyn_mat, ONLY : read_dyn_mat_param, read_dyn_mat_header, &
                          read_dyn_mat, read_dyn_mat_tail, &
@@ -141,7 +141,6 @@ SUBROUTINE q2r_sub(fildyn)
      filin = TRIM(fildyn) // TRIM( int_to_char( ifile ) )
      WRITE (stdout,'(/,5x,"Reading force constants from file")')
      WRITE (stdout,'(5x,a)') TRIM(filin)
-
      IF (xmldyn) THEN
         IF (my_image_id==0) CALL read_dyn_mat_param(filin,ntyp,nat)
         CALL mp_bcast(ntyp,meta_ionode_id,world_comm)
@@ -206,9 +205,7 @@ SUBROUTINE q2r_sub(fildyn)
         CALL mp_bcast(ityp, meta_ionode_id, world_comm)
         CALL mp_bcast(m_loc, meta_ionode_id, world_comm)
         CALL mp_bcast(lrigid, meta_ionode_id, world_comm)
-        IF (lrigid) THEN
-           CALL mp_bcast(epsil, meta_ionode_id, world_comm)
-        ENDIF
+        CALL mp_bcast(epsil, meta_ionode_id, world_comm)
         ! it must be allocated here because nat is read from file
         ALLOCATE (phid(nr1*nr2*nr3,3,3,nat,nat) )
         !
@@ -664,7 +661,6 @@ IF (ALLOCATED(zeu)) DEALLOCATE(zeu)
 IF (ALLOCATED(m_loc)) DEALLOCATE(m_loc)
 IF (ALLOCATED(freq_save)) DEALLOCATE (freq_save)
 IF (ALLOCATED(z_save)) DEALLOCATE (z_save)
-
 
 RETURN
 END SUBROUTINE clean_ifc_variables
