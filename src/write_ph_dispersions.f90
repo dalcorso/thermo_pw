@@ -37,6 +37,7 @@ SUBROUTINE write_ph_dispersions()
   USE control_paths, ONLY : disp_q, disp_nqs, high_sym_path, nrap_plot, &
                             rap_plot, dkmod_save
   USE control_ph,    ONLY : xmldyn
+  USE control_lr,    ONLY : lgamma
   USE ifc,           ONLY : m_loc, has_zstar
   USE io_bands,      ONLY : write_bands, write_representations
   USE noncollin_module, ONLY : nspin_mag
@@ -69,7 +70,7 @@ SUBROUTINE write_ph_dispersions()
 
 
   WRITE(stdout,'(/,2x,76("+"))')
-  WRITE(stdout,'(5x,"Interpolating the dynamical matrices")')
+  WRITE(stdout,'(5x,"Interpolating the dynamical matrices for dispersion")')
   WRITE(stdout,'(5x,"Frequencies written on file ")')
   WRITE(stdout,'(5x,a)') TRIM(filefrq)
   WRITE(stdout,'(2x,76("+"),/)')
@@ -77,7 +78,6 @@ SUBROUTINE write_ph_dispersions()
   ALLOCATE(freq_save(3*nat, disp_nqs))
   ALLOCATE(z_save(3*nat, 3*nat, disp_nqs))
   ALLOCATE(w2(3*nat, disp_nqs))
-
 !
 !  we always need the eigenvectors to make the symmetry analysis
 !
@@ -147,7 +147,12 @@ SUBROUTINE write_ph_dispersions()
   ! of the mode if there is an electric field.
   !
      qh = SQRT(disp_q(1,n)**2+disp_q(2,n)**2+disp_q(3,n)**2)
-     IF (qh < 1.d-9 .AND. has_zstar) lo_to_split=.TRUE.
+     IF (qh < 1.d-9) THEN
+        lgamma=.TRUE.
+        IF (has_zstar) lo_to_split=.TRUE.
+     ELSE
+        lgamma=.FALSE.
+     ENDIF
      WRITE(stdout, '(/,20x,"q=(",2(f10.5,","),f10.5,"  )")') disp_q(:,n)
      IF (xmldyn.AND..NOT.lo_to_split) THEN
         IF (n>1) qcode_old=qcode_group(n-1)
