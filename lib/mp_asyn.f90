@@ -63,8 +63,11 @@ LOGICAL, ALLOCATABLE :: done_proc(:) ! master use this array to know
 LOGICAL :: with_asyn_images=.FALSE. ! The calling program must set this
                                 ! variable to true to use this module
 
+LOGICAL :: stop_signal_activated=.FALSE.
+
 PUBLIC asyn_master_init, asyn_worker_init, asyn_close, asyn_master, &
-       asyn_worker, asyn_master_work, with_asyn_images
+       asyn_worker, asyn_master_work, with_asyn_images, asyn_stop, &
+       stop_signal_activated
 
 CONTAINS
 
@@ -314,7 +317,8 @@ choose_next = .FALSE.
 iwork=0
 work_finished=.TRUE.
 DO iw=1, nwork
-   work_finished = work_finished .AND. (sent(iw) /= -1)
+   work_finished = work_finished .AND. ((sent(iw) /= -1)&
+                                 .OR.stop_signal_activated)
 ENDDO
 IF (work_finished) RETURN
 !
@@ -346,5 +350,18 @@ DEALLOCATE(doing)
 
 RETURN
 END SUBROUTINE asyn_close
+
+SUBROUTINE asyn_stop()
+!
+! This routines activates the stop signal. When this signal is activated the
+! master sends the NO_WORK signal to all the slaves and exit smoothly together
+! with all images from the asynchronous loop as soon as possible.
+!
+IMPLICIT NONE
+
+stop_signal_activated=.TRUE.
+
+RETURN
+END SUBROUTINE asyn_stop
 
 END MODULE mp_asyn
