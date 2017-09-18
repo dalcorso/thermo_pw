@@ -22,6 +22,9 @@ apply_ac.o \
 allocate_phq.o \
 bcast_qes_module.o \
 check_bands.o \
+check_initial_status.o \
+check_initial_geometry.o \
+clean_all_pw.o \
 collect_grid_files.o \
 compute_intq.o \
 compute_drhous.o \
@@ -37,6 +40,7 @@ electrons.o \
 ev_xml.o \
 find_mode_sym.o \
 initialize_ph.o \
+kpoint_grid.o \
 mix_pot.o \
 non_scf.o \
 c_bands.o \
@@ -56,6 +60,7 @@ psyme_fpol.o \
 psym_dmageq.o \
 psymeq.o \
 psym_dmage_fpol.o \
+q_points.o \
 run_nscf.o \
 read_dyn_from_file.o \
 read_file_new.o \

@@ -19,9 +19,11 @@ bcast_thermo_input.o \
 check_existence.o \
 check_file_exists.o \
 check_all_geometries_done.o \
+check_geo_initial_status.o \
 clean_dfft.o \
 clean_path.o \
 collect_everything.o \
+collect_info.o \
 compute_cp.o \
 compute_density.o \
 compute_eref_band.o \
@@ -30,7 +32,7 @@ compute_gruneisen_anis.o \
 compute_omega_geo.o \
 deallocate_asyn.o \
 deallocate_thermo.o \
-deallocate_thermo.o \
+deallocate_q2r.o \
 do_pwscf.o \
 do_berry.o \
 do_phonon.o \
@@ -46,12 +48,15 @@ generate_k_along_lines_kz.o \
 initialize_thermo_work.o \
 interpolate_cv.o \
 io_bands.o \
+initialize_ph_geometry.o \
 local_dos1d_so.o \
 manage_anhar.o   \
 manage_bands.o   \
 manage_elastic_cons.o \
 manage_energy_minimum.o \
 manage_piezo_tensor.o \
+manage_ph.o \
+manage_all_geometries_ph.o \
 manage_ph_dispersions.o \
 manage_xrdp.o \
 matdyn_sub.o \
