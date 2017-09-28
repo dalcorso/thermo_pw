@@ -832,6 +832,11 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
   ELSE
      ymax=emax-eref
   ENDIF
+!
+!  print the Fermi level only if it is between the maximum and the minimum
+!  of the plot.
+!
+  print_eref=print_eref.AND.(ymin<0.0_DP).AND.(ymax>0.0_DP)
 
   xscale=tpiba / bohr_radius_si / 1.D10
   IF (icode==1) THEN
