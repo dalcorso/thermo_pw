@@ -402,8 +402,8 @@ IF (meta_ionode) THEN
    OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
 
    WRITE(iu_therm,'("# ")')
-   WRITE(iu_therm,'("#   T (K)         C_V(T) (kbar)         C_P(T) (kbar)  &
-                                 &    C_P(T)-C_V(T) (kbar)")')
+   WRITE(iu_therm,'("# T (K)        C_V(T) (Ry/cell/K)    C_P(T) (Ry/cell/K) &
+                                 &  C_P-C_V(T) (Ry/cell/K)")')
 
    DO itemp = 2, ntemp-1
       WRITE(iu_therm, '(e12.5,3e22.13)') temp(itemp), &
