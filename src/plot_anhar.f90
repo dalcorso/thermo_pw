@@ -21,7 +21,6 @@ USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,  &
                              gnuplot_ylabel,              &
                              gnuplot_xlabel,              &
                              gnuplot_write_file_mul_data, &
-                             gnuplot_write_file_mul_data_sum, &
                              gnuplot_write_file_mul_point,  &
                              gnuplot_write_horizontal_line, &
                              gnuplot_set_fact
@@ -155,15 +154,15 @@ IF (ltherm_freq) &
 CALL gnuplot_set_fact(1313313.0_DP,.FALSE.)
 CALL gnuplot_ylabel('Heat capacity C_p (J / K / N / mol)',.FALSE.) 
 IF (ltherm_dos) &
-   CALL gnuplot_write_file_mul_data_sum(filename_heat,1,3,4,'color_red',.TRUE.,&
+   CALL gnuplot_write_file_mul_data(filename_heat,1,3,'color_red',.TRUE.,&
                                           .NOT.ltherm_freq,.FALSE.)
 IF (ltherm_freq) THEN
-   CALL gnuplot_write_file_mul_data_sum(filename_heat_ph,1,3,4,'color_blue', &
+   CALL gnuplot_write_file_mul_data(filename_heat_ph,1,3,'color_blue', &
                                     .NOT.ltherm_dos,.TRUE.,.FALSE.)
 !
 !  put as a comment the possibility to plot also the experimental data
 !
-   CALL gnuplot_write_file_mul_data_sum(filename_heat,1,3,4,'color_blue',&
+   CALL gnuplot_write_file_mul_data(filename_heat,1,3,'color_blue',&
                                        .NOT.ltherm_dos,.FALSE.,.TRUE.)
    CALL gnuplot_write_file_mul_point('cv.exp',1,2,'color_red',.FALSE.,&
                                                               .TRUE.,.TRUE.)
