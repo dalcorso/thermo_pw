@@ -375,7 +375,7 @@ IF (meta_ionode) THEN
    OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
 
    WRITE(iu_therm,'("#  ")')
-   WRITE(iu_therm,'("#   T (K)          dB/dT (T) ")')
+   WRITE(iu_therm,'("#   T (K)          dB/dp (T) ")')
 
    DO itemp = 2, ntemp-1
       WRITE(iu_therm, '(e12.5,e23.13)') temp(itemp), b01t(itemp)

@@ -190,13 +190,13 @@ IF (meta_ionode) THEN
       !
       !   here the bulk modulus and the gruneisen parameter
       !
-      filename="anhar_files/"//TRIM(flanhar)//'.bulk_mod'
+      filename="anhar_files/"//TRIM(flanhar)//'.bulk_mod_ph'
       IF (pressure_kb /= 0.0_DP) &
          filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 
       CALL write_bulk_anharm(temp, gammaf_t, b0f_t, b0f_s, ntemp, filename)
 
-      filename="anhar_files/"//TRIM(flanhar)//'.heat'
+      filename="anhar_files/"//TRIM(flanhar)//'.heat_ph'
       IF (pressure_kb /= 0.0_DP) &
          filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 

@@ -67,9 +67,11 @@ This guide has been written by Andrea Dal Corso (SISSA - Trieste).
 \tpw\ is logically divided into parts. In some parts the different
 images run asynchronously doing different tasks and in some parts the
 run is synchronous. Usually in this synchronous parts results are 
-collected and only the first image is actually doing the work while
-the other images are blocked waiting for the results.
-Presently \tpw\ has two asynchronous runs each one followed
+collected, the image division of the processors is not used, and when possible
+the work is parallelized among all available processors. In some cases
+only the processors of the root image make the work while the others remain
+idle.
+Presently \tpw\ has two asyhnchronous runs each one followed
 by one or more synchronous parts. The parts that are activated in
 each run depend on the input variable \texttt{what}. After reading the input,
 and writing some summary, the code calls the routine 
@@ -110,15 +112,22 @@ many \texttt{pw.x} calculations are made (\texttt{lpart2\_pw=.TRUE.}) (G1)
 or a loop of asynchronous phonon runs (G2), one for each geometry calculated
 in A or at the minimum energy/enthalpy geometry
 found in D whose self-consistent calculation has been done in E.
-The G2 run is controlled by \texttt{lph=.TRUE.} and by 
-\texttt{tot\_ngeo} which is the number of geometries. For each geometry 
-one can calculate the phonon dispersions, the phonon dos and the 
+The G2 run is controlled by \texttt{lph=.TRUE.}, by \texttt{tot\_ngeo} which 
+is the number of geometries, and by the flag 
+\texttt{all\_geometries\_together}. When the latter is .FALSE.,
+for each geometry the code calculates the phonon dispersions, the phonon 
+dos and the 
 harmonic thermodynamic quantities. The geometry to do is controlled only 
 changing the \texttt{outdir} directory where the phonon run finds the
 files produced by the \texttt{pw.x} calculation. The final collection
 of the dynamical matrices, calculations of the phonon dispersions, phonon 
 dos and harmonic thermodynamic quantities are done in a synchronous way 
 within the loop over the geometries.
+When \texttt{all\_geometries\_together=.TRUE.} a single asynchronous run
+calculates all the irreducible representations of all geometries. After
+the phonon run, the phonon dispersions, phonon dos and harmonic 
+thermodynamic quatities are calculated synchronously in a loop over 
+the geometries.
 
 Following G1 or G2 there is another synchronous part. 
 After G1 the synchronous part will do one of the following:
@@ -137,7 +146,7 @@ L) \texttt{lpolarization=.TRUE.} polarization calculation.
 \end{itemize}
 
 After G2, depending on \texttt{what} the synchronous part will do nothing, 
-or if the phonons have been computed in several geometries it will do:
+or if the phonons have been computed for several geometries it will do:
 
 \begin{itemize}
 
@@ -322,10 +331,14 @@ mur_lc_t
         For cubic solids: 
                  write_anharmonic
                                  flanhar
-                                 flanhar(.aux)
+                                 flanhar(.bulk_mod)
+                                 flanhar(.dbulk_mod)
+                                 flanhar(.heat)
                  write_ph_freq_anharmonic
                                  flanhar(_ph)
-                                 flanhar(.aux_ph)
+                                 flanhar(.bulk_mod_ph)
+                                 flanhar(.dbulk_mod_ph)
+                                 flanhar(.heat_ph)
                  write_grun_anharmonic
                                  flanhar(.aux_grun)
                  plot_anhar                     flgnuplot(_anhar)   flpsanhar
@@ -339,9 +352,17 @@ mur_lc_t
                                                                  flpsgrun(_freq)
         For anisotropic solids:
                  write_anhar_anis
+                                 flanhar
                                  flanhar(.celldm)
+                                 flanhar(.bulk_mod)
+                                 flanhar(.heat)
+                                 flanhar(.anis)
                  write_ph_freq_anhar_anis
-                                 flanhar(_ph.celldm)
+                                 flanhar(_ph)
+                                 flanhar(.celldm_ph)
+                                 flanhar(.bulk_mod_ph)
+                                 flanhar(.heat_ph)
+                                 flanhar(.anis_ph)
                  write_grun_anharmonic_anis
                                  flanhar(.celldm_grun)
                                  flanhar(.aux_grun)
@@ -425,14 +446,15 @@ simultaneously.
 Note that the number of geometries used in the first or in the second
 asynchronous run coincide for some values of \texttt{what} and are
 different for other values. \\
-\texttt{What} that does not require different geometries, such as
-\texttt{what='scf\_ke'} create an \texttt{outdir} directory called
+\texttt{What}s that do not require different geometries but might be carried
+out asynchronously by different images, such as \texttt{what='scf\_ke'}, 
+create an \texttt{outdir} directory called
 \texttt{outdir/ke\#} for each different task, where \texttt{\#} is the
-task number. Similarly \texttt{what='scf\_ke'} uses outdir directories
+task number. Similarly, \texttt{what='scf\_nk'} uses outdir directories
 called \texttt{outdir/nk\#}.
 Recent versions of the \qe\ package allows also two different scratch
 directories, one for the wavefunctions and one for the other quantities.
-\thermo\ does not uses this feature and sets always the wavefunction
+\thermo\ does not use this feature and sets always the wavefunction
 directory coincident with the \texttt{outdir} directory.
 
 \newpage
@@ -442,7 +464,7 @@ Many data files produced by \texttt{thermo\_pw} are in a form readable
 by the \texttt{gnuplot} program and are therefore arranged in columns.
 Usually the first column is the temperature and the other columns are
 the physical quantities. Several other files are in a format exported
-from the Quantum ESPRESSO package and are usually readable by its 
+from the \qe\ package and are usually readable by its 
 programs. In this section we report a short list of the files produced
 by \texttt{thermo\_pw} and a short description of the quantities 
 saved in each file. 
@@ -453,8 +475,10 @@ saved in each file.
 \texttt{band\_files/filband(.rap)} (default name 
 \texttt{output\_band.dat(.rap)}) contains the band eigenvalues for each 
 {\bf k} point. The \texttt{.rap} file contains the number of the irreducible
-representation for each band. The format of these files is readable
-by the \texttt{plotband.f90} code of Quantum ESPRESSO.
+representation for each band. The format of these files is a generalization
+of the format used by the \texttt{plotband.f90} code of \qe. In addition
+it contains gauges informations for points at zone border in nonsymmorphic
+space groups.
 
 \item 
 \texttt{band\_files/flpband(.\#)(.\#)} 
@@ -462,7 +486,7 @@ by the \texttt{plotband.f90} code of Quantum ESPRESSO.
 These files contain the band eigenvalues along a line of the path 
 (and for one irreducible representation). 
 The format is readable by \texttt{gnuplot} and are similar to the files written
-by the \texttt{plotband.f90} code of Quantum ESPRESSO. The numbers in
+by the \texttt{plotband.f90} code of \qe. The numbers in
 the filename indicate the number of the line along the path and the number 
 of the irreducible representation.
 
@@ -470,7 +494,7 @@ of the irreducible representation.
 \texttt{band\_files/info\_data} (default name \texttt{info\_data}) This
 file contains the information needed by \texttt{thermo\_pw}
 to redo the plot without reading the files produced by \texttt{pw.x}
-when \texttt{only\_bands\_plot=.TRUE.}. It is written
+when\\ \texttt{only\_bands\_plot=.TRUE.}. It is written
 in a form readable by \texttt{thermo\_pw}. Among other things it
 contains the Fermi level.
 
@@ -501,7 +525,7 @@ pressure).
 (default name \texttt{output\_ev.dat.ev.out})
 This file contains the output information on the Murnaghan interpolation 
 in the same format as the output of the \texttt{ev.x} program of 
-Quantum ESPRESSO package. This file is written in two formats.
+\qe\ package. This file is written in two formats.
 There is also an \texttt{.xml} file where the same quantities are written 
 with more digits and in the \texttt{XML} format.
 
@@ -572,16 +596,17 @@ of the QE distribution.
 \item 
 \texttt{phdisp\_files/flfrq.g\#} (default name \texttt{output\_frq.dat.g\#})
 For each geometry for which a phonon dispersion is calculated this file
-contains the frequencies along the path. It is in a format readable by
-the code \texttt{plotband.f90} of the QE distribution.
+contains the frequencies along the path. It is in a format which is a 
+generalization of the file produced by the code \texttt{plotband.f90} of 
+the QE distribution.
 
 \item 
 \texttt{phdisp\_files/flpband.g\#(.\#)(.\#)} 
 (default name \texttt{output\_pband.dat.g\#(.\#)(.\#)})
 For each geometry for which a phonon dispersion is calculated these files
 contain the frequencies along the path. They are in a format readable by
-\texttt{gnuplot} as produced by the \texttt{plotband.f90} code of Quantum
-ESPRESSO. The numbers after the geometry indicate the number of the line 
+\texttt{gnuplot} as produced by the \texttt{plotband.f90} code of \qe.
+The numbers after the geometry indicate the number of the line 
 along the path and the number of the irreducible representation.
 
 \item 
@@ -646,12 +671,11 @@ these quantities have been calculated from the free energy obtained from
 direct integration over the Brilluoin zone (computing the phonon density
 of states). 
 
-\item 
 \item \texttt{anharm\_files/flanhar(.dbulk\_mod)(\_ph)} 
 (default name \texttt{output\_anharm.dat.aux})
 This file is present when \texttt{lmurn=.TRUE.}. It contains:
 \begin{verbatim}
-   T          dp(T) / dT    
+   T          dB / dp  (T)  
 \end{verbatim}
 The temperature and the derivative of the bulk modulus with respect 
 to pressure. 
@@ -677,13 +701,11 @@ from the free energy derivatives.
 \item 
 \texttt{anhar\_files/flanhar(.heat)(\_ph)} 
 (default name \texttt{output\_anhar.heat(\_ph)}). 
-This file contains the following quantities
-isostress (or constant pressure) heat capacity and the difference 
-between the two.
+This file contains the following quantities:
 \begin{verbatim}
 #   T       C_v(T)        C_p(T)        (C_p - C_v)(T)    
 \end{verbatim}
-the temperature, the isothermal heat capacity calculated 
+the temperature, the isochoric heat capacity calculated 
 by interpolating the heat capacity calculated at several geometries 
 at the geometry corresponding to a given temperature, the isostress
 heat capacity that results from the thermal expansion 
@@ -739,7 +761,7 @@ three dimensional integration over the Brillouin zone. The extension
 \texttt{(\_grun)} indicates that the thermal expansions have been
 calculated from the mode Gr\"uneisen parameters, while the \texttt{celldm}
 parameters are still obtained from the free energy minimization. Which
-one depend from the variable \texttt{ltherm\_dos} and \texttt{ltherm\_freq}.
+one depends from the variable \texttt{ltherm\_dos} and \texttt{ltherm\_freq}.
 If both are \texttt{.TRUE.} the second is used.
 
 \item 
@@ -749,22 +771,21 @@ parameters. In anisotropic crystal systems with \texttt{lmurn=.FALSE.} this
 file contains the derivative of the frequencies with respect to the
 crystal parameters. The optional number in the filename indicates which
 crystal parameter. The format of the file is readable by the program
-\texttt{plotband.f90} of the Quantum ESPRESSO package.
+\texttt{plotband.f90} of the \qe\ package.
 
 \item 
 \texttt{anhar\_files/flgrun(\_freq)} 
 (default name \texttt{output\_grun.dat\_freq)}).
 This file contains the phonon frequencies interpolated at the requested 
 temperature or volume. The format of the file is readable by the program
-\texttt{plotband.f90} of the Quantum ESPRESSO package.
+\texttt{plotband.f90} of the \qe\ package.
 
 \item 
 \texttt{anhar\_files/flpgrun(.\#)(.\#)} 
 (default name \texttt{output\_pgrun.dat(.\#)(.\#)})
 These files contains the mode Gr\"uneisen parameters along the path.
 They are in a format readable by \texttt{gnuplot} as produced by 
-the \texttt{plotband.f90} code of Quantum
-ESPRESSO. The numbers after the geometry indicate the number of the line 
+the \texttt{plotband.f90} code of \qe. The numbers after the geometry indicate the number of the line 
 along the path and the number of the irreducible representation.
 
 \item
