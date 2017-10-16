@@ -471,12 +471,10 @@ clean: w90_clean want_clean yambo_clean yambo-devel_clean plumed_clean \
 	sax_clean d3q_clean thermo_pw_clean #examples_clean
 
 veryclean: w90_veryclean want_veryclean yambo_veryclean yambo-devel_veryclean \
-	plumed_veryclean gipaw_veryclean thermo_pw_veryclean west_veryclean \
-        SternheimerGW_clean test-suite_veryclean sax_veryclean d3q_veryclean \
-        #examples_veryclean
+	plumed_veryclean gipaw_veryclean thermo_pw_veryclean west_veryclean SternheimerGW_veryclean \
+	test-suite_veryclean sax_veryclean d3q_veryclean #examples_veryclean
 
 #distclean : veryclean
 distclean: w90_distclean want_distclean yambo_distclean yambo-devel_distclean \
-  test-suite_distclean gipaw_distclean thermo_pw_distclean west_distclean \
-	SternheimerGW_distclean sax_distclean d3q_distclean 
+  test-suite_distclean gipaw_distclean thermo_pw_distclean west_distclean SternheimerGW_distclean sax_distclean d3q_distclean 
 
