@@ -8,7 +8,7 @@ MODFLAGS= $(MOD_FLAG)../../iotk/src $(MOD_FLAG)../../Modules \
           $(MOD_FLAG)../../UtilXlib \
           $(MOD_FLAG)../../KS_Solvers/Davidson $(MOD_FLAG)../../KS_Solvers/CG \
           $(MOD_FLAG)../../PW/src $(MOD_FLAG)../../LR_Modules \
-          $(MOD_FLAGS)../../dft-d3 $(MOD_FLAG)../../PHonon/PH \
+          $(MOD_FLAG)../../dft-d3 $(MOD_FLAG)../../PHonon/PH \
           $(MOD_FLAG)../lib $(MOD_FLAG)../qe $(MOD_FLAG).
 
 THERMOOBJS = \
