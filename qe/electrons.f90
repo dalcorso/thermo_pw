@@ -183,7 +183,7 @@ SUBROUTINE electrons_tpw()
         !
         CALL exxinit(DoLoc)
         IF( DoLoc ) CALL localize_orbitals( )
-        IF ( use_ace) THEN
+        IF (use_ace) THEN
            CALL aceinit ( )
            fock2 = exxenergyace()
         ELSE
@@ -208,7 +208,7 @@ SUBROUTINE electrons_tpw()
         ! fock1 is the exchange energy calculated for orbitals at step n,
         !       using orbitals at step n-1 in the expression of exchange
         !
-        IF ( use_ace) THEN
+        IF (use_ace) THEN
            fock1 = exxenergyace()
         ELSE
            fock1 = exxenergy2()
@@ -225,7 +225,7 @@ SUBROUTINE electrons_tpw()
         ! fock0 is fock2 at previous step
         !
         fock0 = fock2
-        IF ( use_ace) THEN
+        IF (use_ace) THEN
            fock2 = exxenergyace()
         ELSE
            fock2 = exxenergy2()
@@ -266,7 +266,11 @@ SUBROUTINE electrons_tpw()
         ENDIF
 
         WRITE( stdout, 9062 ) - fock1
-        WRITE( stdout, 9064 ) 0.5D0*fock2
+        IF (use_ace) THEN
+           WRITE( stdout, 9063 ) 0.5D0*fock2
+        ELSE
+           WRITE( stdout, 9064 ) 0.5D0*fock2
+        ENDIF
         !
         IF ( dexx < tr2_final ) THEN
            IF ( do_makov_payne ) CALL makov_payne( etot )
@@ -288,7 +292,7 @@ SUBROUTINE electrons_tpw()
         conv_elec=.FALSE.
         CALL seqopn (iunres, 'restart_e', 'formatted', exst)
         WRITE (iunres, *) iter, tr2, dexx
-        WRITE (iunres, *) fock0, fock1, fock2
+        WRITE (iunres, *) exxen, fock0, fock1, fock2
         ! FIXME: et and wg are written to xml file
         WRITE (iunres, *) (wg(1:nbnd,ik),ik=1,nks)
         WRITE (iunres, *) (et(1:nbnd,ik),ik=1,nks)
@@ -306,7 +310,8 @@ SUBROUTINE electrons_tpw()
   ! ... formats
   !
 9062 FORMAT( '     - averaged Fock potential =',0PF17.8,' Ry' )
-9064 FORMAT( '     + Fock energy             =',0PF17.8,' Ry' )
+9063 FORMAT( '     + Fock energy (ACE)       =',0PF17.8,' Ry' )
+9064 FORMAT( '     + Fock energy (full)      =',0PF17.8,' Ry' )
 9066 FORMAT(/,A2,'   total energy              =',0PF17.8,' Ry' &
             /'     Harris-Foulkes estimate   =',0PF17.8,' Ry' )
 9067 FORMAT('     est. exchange err (dexx)  =',0PF17.8,' Ry' )
