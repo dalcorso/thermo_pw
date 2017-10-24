@@ -8,7 +8,7 @@ MODFLAGS= $(MOD_FLAG)../../iotk/src $(MOD_FLAG)../../Modules \
           $(MOD_FLAG)../../UtilXlib \
           $(MOD_FLAG)../../KS_Solvers/Davidson $(MOD_FLAG)../../KS_Solvers/CG \
           $(MOD_FLAG)../../PW/src $(MOD_FLAG)../../LR_Modules \
-          $(MOD_FLAG)../../dft-d3 $(MOD_FLAG)../../PHonon/PH \
+          $(MOD_FLAG)../../PHonon/PH \
           $(MOD_FLAG)../lib $(MOD_FLAG)../qe $(MOD_FLAG).
 
 THERMOOBJS = \
@@ -128,7 +128,7 @@ write_thermo.o
 
 LRMODS = ../../LR_Modules/liblrmod.a
 PWOBJS = ../../PHonon/PH/libph.a ../../PP/src/libpp.a ../../PW/src/libpw.a 
-QEMODS = ../../Modules/libqemod.a ../../KS_Solvers/Davidson/libdavid.a ../../KS_Solvers/CG/libcg.a ../../FFTXlib/libqefft.a ../../LAXlib/libqela.a ../../UtilXlib/libutil.a ../../dft-d3/libdftd3qe.a
+QEMODS = ../../Modules/libqemod.a ../../KS_Solvers/Davidson/libdavid.a ../../KS_Solvers/CG/libcg.a ../../FFTXlib/libqefft.a ../../LAXlib/libqela.a ../../UtilXlib/libutil.a
 
 LIBOBJS	= ../lib/thermo_lib.a ../qe/thermo_qe.a ../lib/thermo_lib.a ../../PHonon/PH/libph.a ../../clib/clib.a ../../iotk/src/libiotk.a
 
