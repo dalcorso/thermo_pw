@@ -39,6 +39,8 @@ ELSE
    CALL quadratic_fit()
    CALL write_quadratic()
    CALL plot_multi_energy()
+   CALL write_e_omega()
+   CALL plot_mur()
 ENDIF
 CALL mp_bcast(celldm0, meta_ionode_id, world_comm)
 CALL mp_bcast(emin, meta_ionode_id, world_comm)
