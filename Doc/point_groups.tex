@@ -6,7 +6,7 @@
 %! or http://www.gnu.org/copyleft/gpl.txt .
 %!
 \documentclass[12pt,a4paper]{article}
-\def\version{0.8.0}
+\def\version{0.9.0}
 \def\qe{{\sc Quantum ESPRESSO}}
 \def\tpw{{\sc THERMO\_PW}}
 
@@ -4323,6 +4323,10 @@ G_4         G_4                 G_4    M_1/2*
 G_5         G_5                 G_5    M_1/2
 G_6         G_6                 G_6    M_3/2
 \end{verbatim}
+The representations of the $C_3$ group are sometimes labeled by an integer 
+$m$, such that the character of the $C_3$ operation is 
+$e^{i {2\pi \over 3} m}$. In this case, $A$ is indicated by $m=0$, $E$ and 
+$E^*$ by $m=1$ and $m=2$, respectively.
 
 \begin{verbatim}
 C_4         [QE]        [1,5]   [2]    [11]
@@ -4335,6 +4339,11 @@ G_6         G_6                 G_6    M_1/2
 G_7         G_7                 G_7    M_3/2 
 G_8         G_8                 G_8    M_3/2*
 \end{verbatim}
+The representations of $C_4$ are sometimes labeled by an integer $m$,
+such that the character of the $C_4$ operation is $e^{i {2\pi \over 4} m}$.
+In this case $A$ is indicated by $m=0$, $B$ by $m=2$, $E$ and $E^*$ 
+by $m=1$ and $m=3$, respectively.
+
 
 \begin{verbatim}
 C_6         [QE]        [1,5]   [2]    [11]    
@@ -4351,6 +4360,11 @@ G_10        G_10                G_10   M_5/2*
 G_11        G_11                G_11   M_3/2
 G_12        G_12                G_12   M_3/2*
 \end{verbatim}
+The representations of $C_6$ are sometimes labeled by an integer $m$,
+such that the character of the $C_6$ operation is $e^{i {2\pi \over 6} m}$.
+In this case $A$ is indicated by $m=0$, $B$ by $m=3$, $E_1$ and $E_1^*$ 
+by $m=1$ and $m=5$, and $E_2$ and $E_2^*$ by $m=2$ and $m=4$, respectively.
+
 The names of the representations of $D_2$ depend on the choice of the 
 three perpendicular axes $C_2$, $C_2'$ and $C_2''$. The following table 
 is purely indicative and corresponds to our choice $z$, $x$, and $y$ 
