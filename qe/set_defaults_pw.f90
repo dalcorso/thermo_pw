@@ -49,6 +49,8 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
   USE paw_variables,      ONLY : okpaw
   USE lr_symm_base,       ONLY : nsymq, invsymq, minus_q
   USE uspp_param,         ONLY : n_atom_wfc
+  USE band_computation,   ONLY : diago_bands, isym_bands, ik_origin, &
+                                 sym_for_diago
  
   !
   IMPLICIT NONE
@@ -119,14 +121,34 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
   ! ... If some symmetries of the lattice are missing in the crystal,
   ! ... "irreducible_BZ" computes the missing k-points.
   !
-  if(.not.elph_mat) &
-  CALL irreducible_BZ (nrot, s, nsymq, minus_q, magnetic_sym, &
+  IF(.NOT.elph_mat) THEN
+    IF (sym_for_diago) THEN
+       CALL irreducible_BZ_tpw (nrot, s, nsymq, minus_q, magnetic_sym, &
                        at, bg, npk, nkstot, xk, wk, t_rev)
+    ELSE
+       CALL irreducible_BZ(nrot, s, nsymq, minus_q, magnetic_sym, &
+                       at, bg, npk, nkstot, xk, wk, t_rev)
+    ENDIF
+  ENDIF
   !
   ! ... add k+q to the list of k
   !
-  CALL set_kplusq( xk, wk, xq, nkstot, npk )
-  !
+  IF (sym_for_diago) THEN
+     CALL set_kplusq_tpw( xk, wk, xq, nkstot, npk, diago_bands, isym_bands, &
+                                                 ik_origin )
+!
+!   diagonalize all the bands and forget what has been found by the
+!   the last two variables are not used, but we initialize them.
+!
+  ELSE
+     CALL set_kplusq_tpw( xk, wk, xq, nkstot, npk)
+     diago_bands(1:nkstot)=.TRUE.
+     isym_bands(1:nkstot)=1
+     ik_origin(1:nkstot)=1
+  ENDIF
+!
+!   use in any case set_kplusq_tpw. Needed for magnons.
+!
   IF ( lsda ) THEN
      !
      ! ... LSDA case: two different spin polarizations,
@@ -134,7 +156,8 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
      !
      if (nspin /= 2) call errore ('setup_nscf','nspin should be 2; check iosys',1)
      !
-     CALL set_kup_and_kdw_tpw( xk, wk, isk, nkstot, npk )
+     CALL set_kup_and_kdw_tpw( xk, wk, isk, nkstot, npk, lgamma, &
+                                         diago_bands, isym_bands, ik_origin )
      !
   ELSE IF ( noncolin ) THEN
      !
@@ -169,6 +192,7 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
   IF ( lgamma  ) THEN
      !
      kunit = 1
+     IF (lsda.AND.lmagnon) kunit = 2
      !
   ELSE
      !
@@ -179,7 +203,13 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
   !
   ! ... distribute k-points (and their weights and spin indices)
   !
-  CALL divide_et_impera( nkstot, xk, wk, isk, nks )
+  IF (sym_for_diago) THEN
+     CALL divide_et_impera_tpw( nkstot, xk, wk, isk, nks, diago_bands, &
+                                                isym_bands, ik_origin )
+  ELSE
+     CALL divide_et_impera( nkstot, xk, wk, isk, nks )
+  ENDIF
+       
   !
 #else
   !

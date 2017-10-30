@@ -82,6 +82,7 @@ SUBROUTINE thermo_readin()
   USE piezoelectric_tensor, ONLY : nppl
   USE images_omega, ONLY : omega_group
   USE control_qe,   ONLY : force_band_calculation, use_ph_images
+  USE band_computation, ONLY : sym_for_diago
 !
 !  the QE variables needed here. max_seconds, zasr, xmldyn and fildyn
 !  could be set by this routine 
@@ -191,6 +192,7 @@ SUBROUTINE thermo_readin()
                             flpsepsilon,                    &
                             force_band_calculation,         &
                             use_ph_images,                  &
+                            sym_for_diago,                  &
 !
 !   scf_disp
 !
@@ -378,6 +380,7 @@ SUBROUTINE thermo_readin()
   ELSE
      use_ph_images=.TRUE.
   ENDIF
+  sym_for_diago=.TRUE.
 
   freqmin_input=0.0_DP
   freqmax_input=0.0_DP

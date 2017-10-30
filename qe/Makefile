@@ -21,6 +21,7 @@ add_zstar_us.o \
 apply_ac.o \
 allocate_phq.o \
 bcast_qes_module.o \
+c_bands.o \
 check_bands.o \
 check_initial_status.o \
 check_initial_geometry.o \
@@ -32,6 +33,7 @@ compute_drhous_nc.o \
 control_qe.o \
 ccg_psi.o \
 deallocate_ph_tpw.o \
+divide_et_impera.o \
 drho.o \
 dveqpsi_us.o \
 dveqpsi_us_only.o \
@@ -42,9 +44,9 @@ find_band_sym.o \
 find_mode_sym.o \
 initialize_ph.o \
 kpoint_grid.o \
+irrek.o \
 mix_pot.o \
 non_scf.o \
-c_bands.o \
 orthogonalize_omega.o \
 paw_add_onecenter.o \
 paw_add_symmetry.o \
@@ -72,6 +74,7 @@ scal_prod.o \
 set_defaults_pw.o \
 set_fxc_tran.o \
 set_intq_nc.o \
+set_kplusq.o \
 set_kup_and_kdw.o \
 solve_e.o \
 solve_e_fpolc.o \

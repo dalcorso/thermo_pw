@@ -35,6 +35,13 @@ c_bands_nscf_tpw : call asyn_master so that during the band calculation the
 do_phonon_tpw : call phqscf_tpw instead of phqscf and prepare_q_tpw instead
             of prepare_q. Now moved to the ../src directory.
 
+irrek : Check if a k point can be obtained by another using symmetry.
+divide_et_impera : adds also the information of the symmetry and original k.
+set_kplusq : adds also the information on the symmetry and original k. Also
+             for k+q. With pools it tries to keep on the same pools the points
+             that can be computed by rotation. Do not yet exchange 
+             wavefunctions information among pools.
+
 phescf_tpw : call the more general routine solve_e_fpolc in the case of finite
              frequency instead of solve_e_fpol.
 

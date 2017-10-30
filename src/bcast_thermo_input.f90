@@ -49,6 +49,7 @@ SUBROUTINE bcast_thermo_input()
                               frozen_ions, elastic_algorithm, poly_degree
   USE piezoelectric_tensor, ONLY : nppl
   USE control_qe,      ONLY : force_band_calculation, use_ph_images
+  USE band_computation, ONLY : sym_for_diago
 
   USE thermo_mod,      ONLY : what, ngeo, step_ngeo, reduced_grid, fact_ngeo, &
                               max_geometries, start_geo, jump_geo, &
@@ -191,6 +192,7 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( flpsepsilon, meta_ionode_id, world_comm )
   CALL mp_bcast( force_band_calculation, meta_ionode_id, world_comm )
   CALL mp_bcast( use_ph_images, meta_ionode_id, world_comm )
+  CALL mp_bcast( sym_for_diago, meta_ionode_id, world_comm )
 !
 !  scf_disp
 !

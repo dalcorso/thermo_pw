@@ -92,3 +92,25 @@ MODULE zstar_add
   LOGICAL :: done_start_zstar=.FALSE.
 
 END MODULE zstar_add
+
+MODULE band_computation
+  USE kinds,      ONLY : DP
+  USE parameters, ONLY : npk
+
+  LOGICAL :: diago_bands(npk)    ! If .TRUE. this band is not available and
+                                 ! must be recomputed by diagonalization
+  INTEGER :: isym_bands(npk)     ! Symmetry operation to use to rotate the
+                                 ! wavefunctions of the original k
+  INTEGER :: ik_origin(npk)      ! Index of the original k use to generate
+                                 ! the wavefunctions of this k.
+  INTEGER :: nks0                ! number of k point after reduction with 
+                                 ! the point group of the solid.
+                                 ! In principle this is the total number of
+                                 ! k point in which we have to compute the
+                                 ! bands if the mesh of k+q coincides with 
+                                 ! that of k. 
+  LOGICAL :: sym_for_diago=.FALSE. ! if .TRUE. when possible the bands are
+                                 ! calculated by symmetrization instead of
+                                 ! diagonalization
+
+END MODULE band_computation
