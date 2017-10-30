@@ -6,6 +6,13 @@ Presently they are:
 electrons_tpw: contains a call to asyn_master to have the master check for
                  slaves that need further work at each electron iteration.
 
+find_band_sym_tpw : call rotate_all_psi_tpw.
+
+rotate_all_psi_tpw : an experimental version of rotate_all_psi that should
+                     require less memory and scale better with many
+                     processors. Moreover it works both for spinor and
+                     for scalar wavefunctions.
+
 solve_linter_tpw: contains a call to asyn_master to have the master check for
                  slaves that need further work at each phonon iteration.
 
@@ -39,6 +46,7 @@ initialize_ph_tpw.f90 : calls the new routine phq_summary_tpw, phq_init_tpw
                  and allocate_phq_tpw
 
 adddvepsi_us_tpw.f90 : added the number of occupated bands as an input.
+
 
 ev_xml : is identical to the QE routine, but it is copied here because files
          in the PW/tools directory are not linked to thermo_pw.
