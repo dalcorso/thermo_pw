@@ -195,12 +195,12 @@ PROGRAM thermo_pw
         part=2
         CALL initialize_thermo_work(nwork, part, iaux)
         !
-        !  Asyncronous work starts again. No communication is
+        !  Asynchronous work starts again. No communication is
         !  allowed except though the master workers mechanism
         !
         CALL run_thermo_asynchronously(nwork, part, igeom, auxdyn)
         !
-        ! here we return syncronized and calculate the elastic constants 
+        ! here we return synchronized and calculate the elastic constants 
         ! from energy or stress 
         !
         IF (lelastic_const) THEN

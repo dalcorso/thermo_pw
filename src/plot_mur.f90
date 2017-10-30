@@ -20,7 +20,7 @@ USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,  &
                              gnuplot_write_file_mul_data, &
                              gnuplot_write_file_mul_point
 USE data_files,       ONLY : flevdat
-USE control_mur,      ONLY : vmin_input, vmax_input
+USE control_mur,      ONLY : lmurn, vmin_input, vmax_input
 USE control_pressure, ONLY : pressure_kb
 USE mp_images,        ONLY : my_image_id, root_image
 USE io_global,        ONLY : ionode
@@ -58,9 +58,10 @@ IF (pressure_kb /= 0.0_DP) THEN
 ELSE
    CALL gnuplot_ylabel('Energy (Ry)',.FALSE.) 
 END IF
-CALL gnuplot_write_file_mul_data(filename1,1,2,'color_red',.TRUE.,.FALSE., &
+CALL gnuplot_write_file_mul_data(filename1,1,2,'color_red',.TRUE.,.NOT.lmurn, &
                                                                         .FALSE.)
-CALL gnuplot_write_file_mul_point(filename2,1,2,'color_red',.FALSE.,.TRUE.,&
+IF (lmurn) &
+   CALL gnuplot_write_file_mul_point(filename2,1,2,'color_red',.FALSE.,.TRUE.,&
                                                                         .FALSE.)
 
 CALL gnuplot_ylabel('Pressure (kbar)',.FALSE.) 

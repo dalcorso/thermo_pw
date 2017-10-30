@@ -12,7 +12,7 @@ SUBROUTINE write_mur(omega0, b0in, b01, emin)
 !
 USE kinds,            ONLY : DP
 USE data_files,       ONLY : flevdat
-USE thermo_mod,       ONLY : ngeo, omega_geo, energy_geo
+USE thermo_mod,       ONLY : ngeo, omega_geo
 USE control_mur,      ONLY : nvol, vmin_input, vmax_input, deltav
 USE control_pressure, ONLY : pressure_kb
 USE mp_images,        ONLY : root_image, my_image_id
@@ -52,7 +52,7 @@ IF (ionode) THEN
    iu_mur=find_free_unit()
    OPEN(UNIT=iu_mur, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
    IF (pressure_kb /= 0.0_DP) THEN
-      WRITE(iu_mur,'( "# omega (a.u.)**3      Gibbs energy (Ry)   pressure (kbar)" )')
+      WRITE(iu_mur,'( "# omega (a.u.)**3      enthalpy (Ry)   pressure (kbar)" )')
    ELSE
       WRITE(iu_mur,'( "# omega (a.u.)**3       energy (Ry)      pressure (kbar)" )')
    END IF
