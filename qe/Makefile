@@ -65,6 +65,8 @@ run_nscf.o \
 read_dyn_from_file.o \
 read_file_new.o \
 realspace_grid_init.o \
+rotate_all_psi.o \
+ruotaijk.o \
 scal_prod.o \
 set_defaults_pw.o \
 set_fxc_tran.o \
