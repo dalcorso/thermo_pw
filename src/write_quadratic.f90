@@ -61,16 +61,21 @@ IF (ibrav==1.OR.ibrav==2.OR.ibrav==3) THEN
    xmax=xmax*1.01_DP
    IF (nvol <= 1) nvol=50
    deltaa = (xmax - xmin)/(nvol-1)
-ELSEIF (ibrav==4.OR.ibrav==6.OR.ibrav==7) THEN
+ELSEIF (ibrav==4.OR.ibrav==5.OR.ibrav==6.OR.ibrav==7) THEN
    x2max=0.0_DP
    x2min=100000.0_DP
    DO iwork = 1, nwork
       IF (celldm_geo(1,iwork) > x2max(1)) x2max(1)=celldm_geo(1,iwork)
       IF (celldm_geo(1,iwork) < x2min(1)) x2min(1)=celldm_geo(1,iwork)
-      IF (celldm_geo(3,iwork) > x2max(2)) x2max(2)=celldm_geo(3,iwork)
-      IF (celldm_geo(3,iwork) < x2min(2)) x2min(2)=celldm_geo(3,iwork)
+      IF (ibrav==5) THEN
+         IF (celldm_geo(4,iwork) > x2max(2)) x2max(2)=ACOS(celldm_geo(4,iwork))
+         IF (celldm_geo(4,iwork) < x2min(2)) x2min(2)=ACOS(celldm_geo(4,iwork))
+      ELSE
+         IF (celldm_geo(3,iwork) > x2max(2)) x2max(2)=celldm_geo(3,iwork)
+         IF (celldm_geo(3,iwork) < x2min(2)) x2min(2)=celldm_geo(3,iwork)
+      ENDIF
    ENDDO
-   IF (nvol <= 1) nvol=50
+   IF (nvol <= 1) nvol=25
    delta2(1) = (x2max(1) - x2min(1))/(nvol-1)
    delta2(2) = (x2max(2) - x2min(2))/(nvol-1)
 ENDIF
@@ -97,11 +102,12 @@ IF (ionode) THEN
          p= - p * ry_kbar / (fact*3.0_DP * a(1)**2)
          WRITE(iu_mur,'(3f20.10)') a, e, p + pressure_kb
       ENDDO 
-   ELSEIF (ibrav==4.OR.ibrav==6.OR.ibrav==7) THEN
+   ELSEIF (ibrav==4.OR.ibrav==5.OR.ibrav==6.OR.ibrav==7) THEN
       DO i=1,nvol
          x2(1)=x2min(1)+delta2(1)*(i-1)
          DO j=1,nvol
             x2(2)=x2min(2)+delta2(2)*(j-1)
+            IF (ibrav==5) x2(2)=COS(x2(2))
             IF (lquartic) THEN
                CALL evaluate_fit_quartic(2,15,x2,e,coeff4)
             ELSE
