@@ -171,7 +171,6 @@ ev_sub.o : ../../Modules/random_numbers.o
 ev_sub.o : ../../UtilXlib/mp.o
 ev_sub.o : ../../thermo_pw/qe/ev_xml.o
 find_band_sym_proj.o : ../../FFTXlib/fft_interfaces.o
-find_band_sym_proj.o : ../../FFTXlib/scatter_mod.o
 find_band_sym_proj.o : ../../Modules/becmod.o
 find_band_sym_proj.o : ../../Modules/constants.o
 find_band_sym_proj.o : ../../Modules/fft_base.o
@@ -330,6 +329,7 @@ matdyn_sub.o : ../../Modules/ions_base.o
 matdyn_sub.o : ../../Modules/kind.o
 matdyn_sub.o : ../../Modules/noncol.o
 matdyn_sub.o : ../../PHonon/PH/phcom.o
+matdyn_sub.o : ../../PHonon/PH/rigid.o
 matdyn_sub.o : thermo_mod.o
 plan_avg_sub.o : ../../Modules/becmod.o
 plan_avg_sub.o : ../../Modules/cell_base.o
@@ -472,6 +472,7 @@ q2r_sub.o : ../../Modules/mp_world.o
 q2r_sub.o : ../../PHonon/PH/io_dyn_mat.o
 q2r_sub.o : ../../PHonon/PH/io_dyn_mat_old.o
 q2r_sub.o : ../../PHonon/PH/phcom.o
+q2r_sub.o : ../../PHonon/PH/rigid.o
 q2r_sub.o : ../../UtilXlib/mp.o
 q2r_sub.o : thermo_mod.o
 quadratic_fit.o : ../../Modules/cell_base.o
@@ -692,6 +693,14 @@ write_e_nk.o : ../../Modules/io_global.o
 write_e_nk.o : ../../Modules/kind.o
 write_e_nk.o : ../../Modules/mp_images.o
 write_e_nk.o : thermo_mod.o
+write_e_omega.o : ../../Modules/cell_base.o
+write_e_omega.o : ../../Modules/constants.o
+write_e_omega.o : ../../Modules/io_global.o
+write_e_omega.o : ../../Modules/kind.o
+write_e_omega.o : ../../Modules/mp_images.o
+write_e_omega.o : ../../thermo_pw/lib/quadratic_surfaces.o
+write_e_omega.o : ../../thermo_pw/lib/quartic_surfaces.o
+write_e_omega.o : thermo_mod.o
 write_el_thermo.o : ../../Modules/constants.o
 write_el_thermo.o : ../../Modules/io_global.o
 write_el_thermo.o : ../../Modules/kind.o

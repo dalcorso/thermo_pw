@@ -42,6 +42,12 @@ set_kplusq : adds also the information on the symmetry and original k. Also
              that can be computed by rotation. Do not yet exchange 
              wavefunctions information among pools.
 
+upf_tpw : Temporarily here to remove a bug introduced in QE 6.2.1 that broke
+          the image parallelization.
+
+read_pseudo_tpw: Temporarily here to call upf_tpw.
+
+
 phescf_tpw : call the more general routine solve_e_fpolc in the case of finite
              frequency instead of solve_e_fpol.
 

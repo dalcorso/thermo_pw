@@ -78,6 +78,7 @@ SUBROUTINE matdyn_interp(nq, disp_q, startq, lastq, with_eigen)
   USE disp,           ONLY : nq1, nq2, nq3
   USE phonon_save,    ONLY : freq_save, z_save
   USE data_files,     ONLY : flfrc
+  USE rigid,          ONLY : dyndiag
   !
   IMPLICIT NONE
   !
@@ -828,6 +829,8 @@ SUBROUTINE setupmat_simple (q,dyn,nat,at,bg,tau,omega,alat, &
   !
   USE kinds,      ONLY : DP
   USE constants,  ONLY : tpi
+  USE cell_base,  ONLY : celldm
+  USE rigid,      ONLY : rgd_blk
   !
   IMPLICIT NONE
   !
@@ -846,8 +849,8 @@ SUBROUTINE setupmat_simple (q,dyn,nat,at,bg,tau,omega,alat, &
   !
   dyn(:,:,:,:) = (0.d0,0.d0)
   CALL frc_blk (dyn,q,tau,nat,nr1,nr2,nr3,frc,at,bg,rws,nrws,do_init)
-  IF (has_zstar) &
-     CALL rgd_blk(nr1,nr2,nr3,nat,dyn,q,tau,epsil,zeu,bg,omega,+1.d0)
+  IF (has_zstar) CALL rgd_blk(nr1,nr2,nr3,nat,dyn,q,tau,epsil,zeu,bg,omega, &
+                               celldm(1),.false.,+1.d0)
   !
   RETURN
 END SUBROUTINE setupmat_simple

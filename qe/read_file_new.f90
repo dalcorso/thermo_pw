@@ -136,7 +136,7 @@ SUBROUTINE read_xml_file_tpw ( )
   USE qes_libs_module,      ONLY :  qes_reset_output, qes_reset_input, qes_reset_general_info, qes_reset_parallel_info 
   USE io_rho_xml,           ONLY : read_scf
   USE fft_rho,              ONLY : rho_g2r
-  USE read_pseudo_mod,      ONLY : readpp
+  USE read_pseudo_mod_tpw,  ONLY : readpp_tpw
   USE uspp,                 ONLY : becsum
   USE uspp_param,           ONLY : upf
   USE paw_variables,        ONLY : okpaw, ddd_PAW
@@ -255,7 +255,7 @@ SUBROUTINE read_xml_file_tpw ( )
   CALL init_vars_from_schema ( 'pseudo', ierr, output_obj, parinfo_obj, geninfo_obj ) 
   !
   dft_name = get_dft_name () ! already set, should not be set again
-  CALL readpp ( dft_name )
+  CALL readpp_tpw ( dft_name )
   !
   ! ... read the vdw kernel table if needed
   !

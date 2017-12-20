@@ -1,3 +1,9 @@
+New in version 0.9.1
+
+This version updates to QE 6.2.1 and corrects a small bug of QE 6.2.1 that
+prevents the use of images.
+
+
 New in version 0.9.0
 
 Added the possibility to plot the energy versus volume curve in
