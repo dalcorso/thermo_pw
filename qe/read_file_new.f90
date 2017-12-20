@@ -36,9 +36,6 @@ SUBROUTINE read_file_tpw()
   USE klist,                ONLY : init_igk
   USE gvect,                ONLY : ngm, g
   USE gvecw,                ONLY : gcutw
-#if defined (__HDF5)
-  USE hdf5_qe
-#endif
   !
   IMPLICIT NONE 
   INTEGER :: ierr
@@ -55,9 +52,6 @@ SUBROUTINE read_file_tpw()
      'Reading data from directory:', TRIM( dirname )
   !
   CALL read_xml_file_tpw ( )
-#if defined(__HDF5)
-  CALL initialize_hdf5()
-#endif
   !
   ! ... Open unit iunwfc, for Kohn-Sham orbitals - we assume that wfcs
   ! ... have been written to tmp_dir, not to a different directory!
@@ -147,11 +141,12 @@ SUBROUTINE read_xml_file_tpw ( )
   USE kernel_table,         ONLY : initialize_kernel_table
   USE esm,                  ONLY : do_comp_esm, esm_init
   USE mp_bands,             ONLY : intra_bgrp_comm, nyfft
+  USE Coul_cut_2D,          ONLY : do_cutoff_2D, cutoff_fact
   USE mp_images,            ONLY : intra_image_comm
   !
   IMPLICIT NONE
 
-  INTEGER  :: i, is, ik, ibnd, nb, nt, ios, isym, ierr, inlc, na
+  INTEGER  :: i, is, ik, ibnd, nb, nt, ios, isym, ierr, inlc
   REAL(DP) :: rdum(1,1), ehart, etxc, vtxc, etotefield, charge
   REAL(DP) :: sr(3,3,48)
   CHARACTER(LEN=20) dft_name
@@ -309,6 +304,9 @@ SUBROUTINE read_xml_file_tpw ( )
   ! ... and the core correction charge (if any) - This is done here
   ! ... for compatibility with the previous version of read_file
   !
+  !2D calculations: re-initialize cutoff fact before calculating potentials
+  IF(do_cutoff_2D) CALL cutoff_fact()
+
   CALL init_vloc()
   CALL struc_fact( nat, tau, nsp, ityp, ngm, g, bg, dfftp%nr1, dfftp%nr2, &
                    dfftp%nr3, strf, eigts1, eigts2, eigts3 )
