@@ -1,22 +1,35 @@
 5                                    ! 2d bravais lattice
 7.374 0.0 0.0                        ! 2d celldm (in a.u.)
-2                                    ! number of atoms
+2                                    ! number of atoms per cell
 Si  0.5000000   0.288675134   0.0    ! atomic cartesian coordinates (alat unit)
 Si  0.5000000  -0.288675134  -0.0    ! atomic cartesian coorsinates
 25.0                                 ! size of the box along z (in a.u.)
 2 -1                                 ! ribbon perpendicular to n_1 b1 + n_2 b2
-7                                    ! number of ribbon layers
-1                                    ! atoms per layer
-.FALSE.                              ! if .FALSE. distance between ribbon is used otherwise an integer number of layers closer to distance
+7                                    ! number of ribbon rows
+1                                    ! bravais lattice points per row
+.FALSE.                              ! if .TRUE. use the y distance given below otherwise an integer number of rows of size close to the y distance given below
 25.0                                 ! y distance between ribbons (in a.u.)
 'gener_2d_slab.out'                  ! name of the output file
 
 !
 ! This is an example of the input of the gener_2d_slab code.
 ! This example generates the coordinates of an armchair silicene ribbon 
-! with seven layers (14 atoms). 
-! The ribbon is inserted in a simple orthorombic cell and is
-! oriented parallel to x.
+! with seven layers (14 atoms). The ribbon is inserted in a simple 
+! orthorombic cell and is oriented parallel to x.
 !
 ! use the code gener_2d_slab.x < this_input
-! use xcrysdens --xsf gener_2di_slab.out.xsf to see the ribbon
+! use xcrysdens --xsf gener_2d_slab.out.xsf to see the ribbon
+
+!
+! To create a 2D sheet simulated by a ribbon with N rows, first discover
+! how many rows N_b perpendicular to the given direction are needed.
+! In some directions and with some lattices it is not possible to recover
+! the 2D sheet.
+! If it is possible N_b is written in the output provided that the
+! number of rows nrows is larger than N_b. Then create a ribbon with N_b lines,
+! put ldist_vacuum=.FALSE. and use a small vacuum distance so the code will
+! choose zero layers of vacuum.
+! Notice however that if the number of lines is not correct this procedure
+! could lead to almost overlapping atoms and a cell that cannot be simulated.
+!
+

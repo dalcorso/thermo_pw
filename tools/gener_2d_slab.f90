@@ -19,9 +19,8 @@ PROGRAM gener_2d_slab
 !  the coordinates of nrows x nat_row atoms and a unit cell sufficient
 !  to simulate the ribbon. The distance between repeated copies of the
 !  ribbon can be indicated as input (vacuum) in a.u. and the program 
-!  can put that distance
-!  (ldist_vacuum=.TRUE.) or a vacuum space equivalent to an integer 
-!  number of empty rows.
+!  can put that distance (ldist_vacuum=.TRUE.) or a vacuum space equivalent 
+!  to an integer number of empty rows.
 !  The atomic coordinates are written on output and periodic boundary
 !  conditions are assumed in the xy plane, while a unit cell that can be
 !  used by pw.x is calculated in such a way that the distance between
@@ -56,34 +55,32 @@ PROGRAM gener_2d_slab
 !  filename     output file name
 !
 USE kinds,       ONLY : DP
+USE constants,   ONLY : bohr_radius_si
 USE io_global,   ONLY : stdout, ionode
 USE mp_global,   ONLY : mp_startup, mp_global_end
 USE environment, ONLY : environment_start, environment_end
 
 IMPLICIT NONE
 
-INTEGER, PARAMETER :: nmax=10000
-
 REAL(DP) :: a1(3), a2(3), b1(3), b2(3), g(3), t(3), c(3), d(3), t1(3), c1(3)
 REAL(DP) :: alat, cmod, tmod, pi, prod1, prod2, vacuum, gmod, dist, dist1, &
             tau(3), b1eff(3), b2eff(3)
-INTEGER :: m, n, m1, n1, p, q, nrows, nat_row, nat, ibrav_2d, nat_2d, q0, p0, &
-           q1, ia, iat, j, itry, na, nt, ntyp, found, nspace, iuout
-REAL(DP) :: y(3,nmax), alat_box, celldm_2d(3), celldm(6), omega, at(3,3)
-INTEGER :: ps(nmax), qs(nmax)
-INTEGER, ALLOCATABLE :: ityp(:)
+INTEGER  :: m, n, m1, n1, p, q, nrows, nat_row, nat, ibrav_2d, nat_2d, q0, p0, &
+            p1, q1, ia, iat, j, itry, na, nt, ntyp, found, nspace, iuout
+REAL(DP) :: alat_box, celldm_2d(3), celldm(6), omega, at(3,3)
+INTEGER  :: direction, jbulk
+INTEGER, ALLOCATABLE :: ityp(:), ps(:), qs(:)
 INTEGER :: find_free_unit
-REAL(DP), ALLOCATABLE :: tau_2d(:,:), tau_ribbon(:,:)
+REAL(DP), ALLOCATABLE :: tau_2d(:,:), tau_ribbon(:,:), y(:,:)
 CHARACTER ( LEN=3 ), ALLOCATABLE :: atm_2d(:)
-CHARACTER ( LEN=3 ) :: atm(nmax)
-LOGICAL :: ldist_vacuum
+CHARACTER ( LEN=3 ), ALLOCATABLE :: atm(:)
+LOGICAL :: ldist_vacuum, invert
 CHARACTER(LEN=256) :: filename, xsf_filename
 CHARACTER(LEN=3) :: atm_typ(10)
 CHARACTER(LEN=9) :: code='2D_SLAB'
 
 CALL mp_startup ( start_images=.true. )
 CALL environment_start ( code )
-
 
 WRITE(stdout,'("ibrav_2d ")')
 WRITE(stdout,'("1 -- oblique, give a, b, cos(gamma) ")')
@@ -92,22 +89,24 @@ WRITE(stdout,'("3 -- centered rectangular, give a and b ")')
 WRITE(stdout,'("4 -- square, give a ")')
 WRITE(stdout,'("5 -- hexagonal, give a ")')
 WRITE(stdout,'("ibrav_2d?")')
+
 READ(5,*) ibrav_2d
 WRITE(stdout,'(i5)') ibrav_2d
 WRITE(stdout,'("a, b/a, COS(gamma)? ")')
+
 READ(5,*) celldm_2d(1), celldm_2d(2), celldm_2d(3)
 WRITE(stdout,'(3f15.6)') celldm_2d
 alat=celldm_2d(1)
 WRITE(stdout,'("Number of atoms in the 2d unit cell?")') 
+
 READ(5,*) nat_2d
 WRITE(stdout,'(i5)') nat_2d
-
 ALLOCATE(tau_2d(3,nat_2d))
 ALLOCATE(atm_2d(nat_2d))
 DO ia=1,nat_2d
    READ(5,*) atm_2d(ia), tau_2d(1,ia), tau_2d(2,ia), tau_2d(3,ia)
    WRITE(stdout,'(a3, 3f18.10)') atm_2d(ia), tau_2d(1,ia), tau_2d(2,ia), &
-                                              tau_2d(3,ia)
+                                             tau_2d(3,ia)
 ENDDO
 
 WRITE(stdout,'("Dimension of the box?")')
@@ -120,9 +119,6 @@ WRITE(stdout,'(2i5)') m,n
 
 WRITE(stdout,'("Number of rows ?")')
 READ(5,*) nrows
-IF ( MOD(nrows,2) == 0 ) THEN
-   nrows=nrows+1
-END IF
 WRITE(stdout,'(i5)') nrows
 
 WRITE(stdout,'("Number of atoms per row ?")')
@@ -153,6 +149,10 @@ CALL recips_2d(a1,a2,b1,b2)
 WRITE(stdout,'("Reciprocal lattice vectors")')
 WRITE(stdout,'("(",f15.6,",",f15.6,")")') b1(1), b1(2)
 WRITE(stdout,'("(",f15.6,",",f15.6,")")') b2(1), b2(2)
+
+nat=nrows * nat_row * nat_2d  
+ALLOCATE(y(3,nat))
+ALLOCATE(atm(nat))
 
 IF (ibrav_2d == 3)  THEN
 !
@@ -190,19 +190,38 @@ IF (.NOT.(ldist_vacuum)) THEN
    vacuum= nspace * alat / gmod
 END IF
 
+ALLOCATE(ps(-(nrows-1)/2:nrows/2))
+ALLOCATE(qs(-(nrows-1)/2:nrows/2))
+
+jbulk=10000000
 IF (m == 0) THEN
-   nat=0
-   DO j=-(nrows-1)/2, (nrows-1)/2
+   p0=1
+   q0=0
+   DO j=-(nrows-1)/2, nrows/2
       q = j
       p = - NINT ( j * prod2 / prod1 )   
-      DO ia=1,nat_2d
-         nat = nat + 1
-         y(:,nat) = p * a1(:) + q * a2(:) + tau_2d(:,ia)
-         atm(nat) = atm_2d(ia)
-      END DO
+      tau(:) = p * a1(:) + q * a2(:) 
+      dist= ABS(g(2) * tau(1) - g(1) * tau(2)) / gmod
+!      WRITE(stdout,*) 'p and q', p, q
+      WRITE(stdout,'(5x,"Layer j",i8," distance of the lattice",f15.7)') j, dist
+      IF (ABS(dist)<1.D-8.AND.ABS(j)<ABS(jbulk).AND.j/=0) jbulk=j
+      ps(j)=p
+      qs(j)=q
    END DO
-   p0=nat_row
-   q0=0
+ELSEIF (n == 0) THEN
+   p0=0
+   q0=1
+   DO j=-(nrows-1)/2, nrows/2
+      p = j
+      q = - NINT ( j * prod1 / prod2 )   
+      tau(:) = p * a1(:) + q * a2(:) 
+      dist= ABS(g(2) * tau(1) - g(1) * tau(2)) / gmod
+!      WRITE(stdout,*) 'p and q', p, q
+      WRITE(stdout,'(5x,"Layer j",i8," distance of the lattice",f15.7)') j, dist
+      IF (ABS(dist)<1.D-8.AND.ABS(j)<ABS(jbulk).AND.j/=0) jbulk=j
+      ps(j)=p
+      qs(j)=q
+   END DO
 ELSE
    DO itry=1,m
       IF ( MOD(itry * n, m) == 0 ) THEN
@@ -210,48 +229,83 @@ ELSE
          p0 = -q0 * n / m
       END IF
    END DO
-   nat=0
-   DO j=-(nrows-1)/2, (nrows-1)/2
-      q1 = NINT (  j * (g(1) * b2(1) + g(2) * b2(2)) / gmod )
+   DO j=-(nrows-1)/2, nrows/2     ! valid for even and for odd nrows
+      q1 =  j / n 
       found=0
-      DO itry=0,m
-         IF ( MOD( -( q1 + itry ) * n + j, m ) == 0 ) THEN
-            found=found+1
-            ps(found)= ( - ( q1 + itry ) * n + j ) / m
-            qs(found)= q1 + itry
-         END IF
+      DO itry=0,m-1
          IF ( MOD( -( q1 - itry ) * n + j, m ) == 0 ) THEN
-            found=found+1
-            ps(found)= ( -( q1 - itry ) * n + j ) / m
-            qs(found)= q1 - itry
+            p= ( - ( q1 + itry ) * n + j ) / m
+            q= q1 + itry
+            found=1
          END IF
+         IF (found==1) EXIT
       END DO
       IF ( found == 0  ) THEN
          WRITE(stdout,*) 'p and q not found'
          STOP
       END IF
 !
-!   compute the distance for all candidates p and q and take the shortest
+!   compute the distance for the candidate p and q 
 !
-      dist=1.d20
-      DO ia=1, found
-         tau(:) = ps(ia) * a1(:) + qs(ia) * a2(:) 
+      tau(:) = p * a1(:) + q * a2(:) 
+      dist= ABS(g(2) * tau(1) - g(1) * tau(2)) / gmod
+!      WRITE(stdout,'("p and q ",2i5)') p, q
+!      WRITE(stdout,'("tau ",2f15.8,"  dist=",f15.9)') tau(1:2), dist
+!
+!   now try in one direction and then in the opposite. When the distance
+!   grows we have found the minimum distance from the line passing through
+!   the origin and parallel to G/|G|
+!
+      direction=1
+      dist1=0.0_DP
+      invert=.TRUE.
+      DO WHILE (dist1 < dist) 
+         p1=p+p0*direction
+         q1=q+q0*direction
+         tau(:) = p1 * a1(:) + q1 * a2(:) 
          dist1= ABS(g(2) * tau(1) - g(1) * tau(2)) / gmod
+!         WRITE(stdout,'("p1 and q1 ",2i5)') p1, q1
+!         WRITE(stdout,'("tau ",2f15.8,"  dist1=",f15.9, i3)') tau(1:2), dist1, &
+
+!             direction
+
          IF (dist1 < dist) THEN
-            p=ps(ia)
-            q=qs(ia)
+            p=p1
+            q=q1
             dist=dist1
+            dist1=0.0_DP
+         ELSEIF (invert) THEN
+            direction=-1
+            dist1=0.0_DP
          ENDIF
+         invert=.FALSE.
       ENDDO
 !      WRITE(stdout,*) 'p and q', p, q
-      DO ia=1,nat_2d
-         nat = nat + 1
-         y(:,nat) = p * a1(:) + q * a2(:) + tau_2d(:,ia)
-         atm(nat) = atm_2d(ia)
-      END DO
+      WRITE(stdout,'(5x,"Layer j",i8," distance of the lattice",f15.7)') j, dist
+      IF (ABS(dist)<1.D-8.AND.ABS(j)<ABS(jbulk).AND.j/=0) jbulk=j 
+      ps(j)=p
+      qs(j)=q
    END DO
 END IF
+!
+!  create the ribbon with one lattice point per row
+!
+nat=0
+DO j=-(nrows-1)/2, nrows/2     ! valid for even and for odd nrows
+   DO ia=1,nat_2d
+      nat = nat + 1
+      y(:,nat) = ps(j) * a1(:) + qs(j) * a2(:) + tau_2d(:,ia)
+      atm(nat) = atm_2d(ia)
+   END DO
+ENDDO
 
+IF (jbulk<10000000) THEN
+   WRITE(stdout,'(/,5x,"The 2D sheet can be simulated with a &
+                                   &minimum of",i6," rows")') ABS(jbulk)
+ELSE
+   WRITE(stdout,'(/,5x,"Unknown size of the 2D sheet. Try to increase nrows &
+                          &to find it")') 
+ENDIF
 c(:) = p0 * a1(:) + q0 * a2(:)
 t(:) = ( (nrows - 1) * alat / gmod + vacuum ) * g(:) / gmod / alat
 
@@ -282,6 +336,8 @@ END IF
 CALL recips_2d(c,t,c1,t1)
 cmod = SQRT ( c(1)**2 + c(2)**2 )
 tmod = SQRT ( t(1)**2 + t(2)**2 )
+WRITE(stdout,'(/,5x,"The step periodicity is:",f15.8," a.u.", f15.8," A")') &
+                                     cmod*alat, cmod*alat*bohr_radius_si*1.D10
 !
 !  we use an orthorhombic cell
 !
@@ -348,6 +404,10 @@ IF (ionode) THEN
    CLOSE(iuout)
 ENDIF
 
+DEALLOCATE(y)
+DEALLOCATE(atm)
+DEALLOCATE(ps)
+DEALLOCATE(qs)
 DEALLOCATE(tau_ribbon)
 DEALLOCATE(ityp)
 
