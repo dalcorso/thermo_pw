@@ -141,7 +141,7 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
 !   the last two variables are not used, but we initialize them.
 !
   ELSE
-     CALL set_kplusq_tpw( xk, wk, xq, nkstot, npk)
+     CALL set_kplusq( xk, wk, xq, nkstot, npk)
      diago_bands(1:nkstot)=.TRUE.
      isym_bands(1:nkstot)=1
      ik_origin(1:nkstot)=1
