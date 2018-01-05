@@ -72,7 +72,7 @@ subroutine addusddenseq (drhoscf, dbecsum)
   !  And then we compute the additional charge in reciprocal space
   !
   call setqmod (ngm, xq, g, qmod, qpg)
-  call ylmr2 (lmaxq * lmaxq, ngm, qpg, gg, ylmk0)
+  call ylmr2 (lmaxq * lmaxq, ngm, qpg, qmod, ylmk0)
   do ig = 1, ngm
      qmod (ig) = sqrt (qmod (ig) )
   enddo
