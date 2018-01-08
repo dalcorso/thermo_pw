@@ -18,10 +18,12 @@ adddvscf_tran.o \
 addusddenseq.o \
 add_zstar_ue.o \
 add_zstar_us.o \
-apply_ac.o \
 allocate_phq.o \
+allocate_lanczos.o \
+apply_ac.o \
 bcast_qes_module.o \
 c_bands.o \
+calc_chi.o \
 check_bands.o \
 check_initial_status.o \
 check_initial_geometry.o \
@@ -34,6 +36,7 @@ control_qe.o \
 ccg_psi.o \
 deallocate_ph_tpw.o \
 divide_et_impera.o \
+do_lanczos.o \
 drho.o \
 dveqpsi_us.o \
 dveqpsi_us_only.o \
@@ -45,7 +48,11 @@ find_mode_sym.o \
 initialize_ph.o \
 kpoint_grid.o \
 irrek.o \
+lr_dot.o \
+lr_us.o  \
+lr_sm1_psi.o \
 mix_pot.o \
+nh_lanczos_step.o \
 non_scf.o \
 orthogonalize_omega.o \
 paw_add_onecenter.o \

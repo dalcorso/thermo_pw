@@ -34,10 +34,12 @@ SUBROUTINE phescf_tpw()
   USE freq_ph
   USE optical,         ONLY : current_w, fru, polarc, epsilonc, epsilonm1c, &
                               lr1dwf, iu1dwf, lcfreq, start_freq, last_freq
+  USE lr_lanczos,      ONLY : llanczos
   USE partial,         ONLY : comp_irr
   USE images_omega,    ONLY : comp_f
   USE ramanm,          ONLY : ramtns, lraman, elop, done_lraman, done_elop
   USE buffers,         ONLY : close_buffer, open_buffer
+  USE io_global,       ONLY : ionode
   !
   IMPLICIT NONE
   !
@@ -45,7 +47,6 @@ SUBROUTINE phescf_tpw()
   !
   LOGICAL :: exst_mem, exst
   !
-
   IF ( .NOT. comp_irr(0)  ) RETURN
 
   IF ( rec_code_read >  1 ) THEN
@@ -83,6 +84,26 @@ SUBROUTINE phescf_tpw()
                                                            exst, tmp_dir)
      ENDIF
      !
+     IF (llanczos) THEN
+        CALL allocate_lanczos()
+        CALL do_lanczos()
+        CALL extrapolate()
+        IF (ionode) THEN
+           DO iu=start_freq, last_freq
+              CALL calc_chi(fru(iu),fiu(iu),epsilonc(1,1,iu))
+              DO ipol=1,3
+                 DO jpol=1,3
+                    IF (ABS(epsilonc(ipol,jpol,iu))>1.D-8) THEN
+                       epsilonm1c(ipol,jpol,iu)=CMPLX(1.0_DP,0.0_DP) / &
+                        epsilonc(ipol,jpol,iu)
+                    END IF
+                 END DO
+              END DO
+              CALL write_epsilon_on_disk(iu)
+           ENDDO
+        ENDIF
+        CALL deallocate_lanczos()
+     ELSE
      epsilonm1c = (0.0_DP,0.0_DP)
      DO iu = start_freq, last_freq
         !
@@ -112,6 +133,7 @@ SUBROUTINE phescf_tpw()
         CALL write_epsilon_on_disk(iu)
 
      END DO 
+     ENDIF
 
      IF (lcfreq) CALL close_buffer(iu1dwf, 'delete')
 

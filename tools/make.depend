@@ -38,6 +38,7 @@ epsilon_tpw.o : ../../PW/src/pwcom.o
 epsilon_tpw.o : ../../PW/src/symme.o
 epsilon_tpw.o : ../../UtilXlib/mp.o
 epsilon_tpw.o : ../../thermo_pw/lib/gnuplot.o
+gener_2d_slab.o : ../../Modules/constants.o
 gener_2d_slab.o : ../../Modules/environment.o
 gener_2d_slab.o : ../../Modules/io_global.o
 gener_2d_slab.o : ../../Modules/kind.o

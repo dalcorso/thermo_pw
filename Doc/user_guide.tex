@@ -955,6 +955,18 @@ linear_im_freq: This option is used only when freq_line=.TRUE.
             frequency is calculated as eta * freq where eta is the imaginary 
             part of the first frequency on the frequency line.
             Default: logical .FALSE.
+llanczos: When this flag is .TRUE. at finite frequencies a Lanczos 
+          algorithm is used to solve the linear system. Can be very fast 
+          but might require much more memory than the standard algorithm.
+          Default : .FALSE.
+lanczos_steps: steps of the Lanczos chain.
+          Default : interger 2000
+lanczos_steps_ext:  steps of the extrapolated lanczos chain
+          Default: integer 10000
+extrapolation : extrapolation type. Presently only 'no' is active in 
+          this case no extrapolation is applied. Otherwise the average
+          of the beta and gamma is used.
+          Default: character 'average'
 \end{verbatim}
 When in the input of the phonon code a non zero wave-vector {\bf q}
 is specified, the previous options produce the inverse of the dielectric 

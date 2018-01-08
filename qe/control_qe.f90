@@ -77,6 +77,7 @@ END MODULE optical
 MODULE images_omega
   USE kinds,  ONLY : DP
 
+  SAVE
   LOGICAL, ALLOCATABLE :: comp_f(:)
 
   INTEGER :: omega_group
@@ -86,6 +87,7 @@ END MODULE images_omega
 MODULE zstar_add
   USE kinds,  ONLY : DP
 
+  SAVE
   COMPLEX (DP), ALLOCATABLE ::          &
                 zstareu0_rec(:,:)        ! 3, 3 * nat)
  
@@ -97,6 +99,7 @@ MODULE band_computation
   USE kinds,      ONLY : DP
   USE parameters, ONLY : npk
 
+  SAVE
   LOGICAL :: diago_bands(npk)    ! If .TRUE. this band is not available and
                                  ! must be recomputed by diagonalization
   INTEGER :: isym_bands(npk)     ! Symmetry operation to use to rotate the
@@ -114,3 +117,54 @@ MODULE band_computation
                                  ! diagonalization
 
 END MODULE band_computation
+
+MODULE lr_lanczos
+  USE kinds,      ONLY : DP
+  SAVE
+
+  LOGICAL :: llanczos  ! if .TRUE. the lanczos algorithm is used
+  INTEGER :: rpert     ! number of perturbations that have to be computed
+                       ! together in order to symmetrize
+
+  COMPLEX(KIND=DP), ALLOCATABLE :: &
+
+       evc1_old(:,:,:,:), &    ! response wavefunctions in the pw basis (last
+                               ! index 1: q' using rotated SBR 2: p')
+       evc1(:,:,:,:),     &    !  "    "
+       evc1_new(:,:,:,:), &    !  "    "
+
+       sevc1(:,:,:,:),    &    ! S * "    "
+       sevc1_new(:,:,:,:),&    ! S * "    "
+       d0psi(:,:,:,:),    &    ! for saving the original starting vectors
+       d0psi2(:,:,:)           ! for saving the original starting vectors 
+
+  COMPLEX(DP), ALLOCATABLE, TARGET :: &
+       evc0(:,:,:)             ! the ground state wavefunctions 
+
+  COMPLEX(DP), POINTER :: &
+       evq0(:,:,:)             ! the ground state wavefunctions 
+
+  COMPLEX(KIND=DP), POINTER :: &
+       sevc0(:,:,:)            ! S * ground state wavefunctions
+
+  REAL(KIND=DP), ALLOCATABLE ::      &  
+       beta_store(:),      &  ! coefficients of Lanczos chain
+       gamma_store(:),     &  ! coefficients of Lanczos chain
+       beta_store_ext(:),  &  ! extrapolated coefficients
+       gamma_store_ext(:)     ! extrapolated coefficients
+
+  COMPLEX(kind=dp), ALLOCATABLE :: zeta_store(:,:,:) ! perturbation projected 
+
+  INTEGER :: &
+       lanczos_steps, &  ! steps of the Lanczos chain
+       lanczos_steps_ext ! steps of the extrapolated lanczos chain
+
+  CHARACTER(LEN=256) :: extrapolation ! extrapolation type
+
+  INTEGER :: size_evc1   ! size of the Lanczos vectors
+
+  COMPLEX(KIND=DP), ALLOCATABLE :: bbk(:,:,:)  ! coefficients of S^{-1}
+  COMPLEX(KIND=DP), ALLOCATABLE :: bbnc(:,:,:) ! coefficients of the inverse
+                                               ! of S
+
+END MODULE lr_lanczos

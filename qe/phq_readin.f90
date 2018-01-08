@@ -72,6 +72,8 @@ SUBROUTINE phq_readin_tpw()
   USE optical,       ONLY : fru, lcfreq, freq_line, lmagnon, lcharge, &
                             lall_tensor, lchimag, start_freq, last_freq, &
                             lfreq_ev, linear_im_freq
+  USE lr_lanczos,    ONLY : llanczos, lanczos_steps, lanczos_steps_ext, &
+                            extrapolation
   USE images_omega,   ONLY : comp_f
   USE cryst_ph,      ONLY : magnetic_sym
   USE ph_restart,    ONLY : ph_readfile
@@ -124,6 +126,8 @@ SUBROUTINE phq_readin_tpw()
                        elph_nbnd_min, elph_nbnd_max, el_ph_ngauss, &
                        el_ph_nsigma, el_ph_sigma,  &
                        electron_phonon, lfreq_ev, linear_im_freq,&
+                       llanczos, lanczos_steps, lanczos_steps_ext, &
+                       extrapolation, &
                        delta_freq, start_freq, last_freq,     &
                        lmagnon, lcharge, lall_tensor, lchimag, &
                        q_in_band_form, q2d, qplot, low_directory_check
@@ -193,6 +197,10 @@ SUBROUTINE phq_readin_tpw()
   ! freq_line : the frequencies are given along a line. nfs remains
   ! the number of calculated frequencies but only the first and the
   ! last are read in input, the intermediate ones are computed
+  ! llanczos : a lanczos algorithm is used at finite frequencies
+  ! lanczos_steps : number of lanczos steps
+  ! lanczos_steps_ext : number of extrapolated lanczos steps
+  ! extrapolation : extrapolation method
   ! 
   ! Note: meta_ionode is a single processor that reads the input
   !       (ionode is also a single processor but per image)
@@ -291,6 +299,10 @@ SUBROUTINE phq_readin_tpw()
   freq_line=.FALSE.
   linear_im_freq=.FALSE.
   lfreq_ev=.FALSE.
+  llanczos=.FALSE.
+  lanczos_steps=2000
+  lanczos_steps_ext=10000
+  extrapolation='average'
   nk1       = 0
   nk2       = 0
   nk3       = 0
@@ -352,6 +364,10 @@ SUBROUTINE phq_readin_tpw()
   CALL mp_bcast(freq_line, meta_ionode_id, world_comm  )
   CALL mp_bcast(lfreq_ev, meta_ionode_id, world_comm  )
   CALL mp_bcast(linear_im_freq, meta_ionode_id, world_comm  )
+  CALL mp_bcast(llanczos, meta_ionode_id, world_comm  )
+  CALL mp_bcast(lanczos_steps, meta_ionode_id, world_comm  )
+  CALL mp_bcast(lanczos_steps_ext, meta_ionode_id, world_comm  )
+  CALL mp_bcast(extrapolation, meta_ionode_id, world_comm  )
   CALL mp_bcast(delta_freq, meta_ionode_id, world_comm  )
   CALL mp_bcast(lmagnon, meta_ionode_id, world_comm  )
   CALL mp_bcast(lcharge, meta_ionode_id, world_comm  )
