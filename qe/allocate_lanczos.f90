@@ -24,12 +24,15 @@
   size_evc1= npwx*npol*nbnd*nksq*rpert
 
   ALLOCATE(evc0(npwx*npol,nbnd,nksq))
-  IF (okvan.OR..NOT.lgamma) THEN
-     ALLOCATE(sevc0(npwx*npol,nbnd,nksq))
+  IF (.NOT.lgamma) THEN
      ALLOCATE(evq0(npwx*npol,nbnd,nksq))
   ELSE
-     sevc0 => evc0
      evq0 => evc0
+  ENDIF
+  IF (okvan) THEN
+     ALLOCATE(sevc0(npwx*npol,nbnd,nksq))
+  ELSE
+     sevc0 => evq0
   ENDIF
 
   ALLOCATE(evc1_old(npwx*npol,nbnd,nksq*rpert,2))
@@ -88,9 +91,19 @@
 
   IMPLICIT NONE
 
+  IF (ASSOCIATED(sevc0,evq0)) THEN
+     NULLIFY(sevc0)
+  ELSEIF(ASSOCIATED(sevc0)) THEN
+     DEALLOCATE(sevc0)
+  ENDIF
+
+  IF (ASSOCIATED(evq0,evc0)) THEN
+     NULLIFY(evq0)
+  ELSEIF(ASSOCIATED(evq0)) THEN
+     DEALLOCATE(evq0)
+  ENDIF
+
   IF (ALLOCATED(evc0)) DEALLOCATE(evc0)
-  IF (ASSOCIATED(evq0)) DEALLOCATE(evq0)
-  IF (ASSOCIATED(sevc0)) DEALLOCATE(sevc0)
 
   IF (ALLOCATED(evc1_old)) DEALLOCATE(evc1_old)
   IF (ALLOCATED(evc1)) DEALLOCATE(evc1)

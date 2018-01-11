@@ -33,6 +33,7 @@ SUBROUTINE do_lanczos()
   !
   USE kinds,                 ONLY : DP
   USE ions_base,             ONLY : nat
+  USE cell_base,             ONLY : at
   USE io_global,             ONLY : stdout, ionode
   USE klist,                 ONLY : xk, wk, ngk, igk_k
   USE qpoint,                ONLY : nksq, ikks, ikqs
@@ -82,7 +83,7 @@ SUBROUTINE do_lanczos()
              ich, inch, npw, npwq, incr, v_siz, ig
   ! counters or indices
 
-  REAL(DP) :: weight, alpha_pv0
+  REAL(DP) :: weight, alpha_pv0, anorm
   ! weight of k points and store alpha_pv
   REAL(DP) :: tcpu, get_clock
 
@@ -186,6 +187,8 @@ SUBROUTINE do_lanczos()
               !
               IF (lgamma) THEN
                  CALL dvpsi_e(ik,ipol)
+                 anorm = DSQRT(at(1,ipol)**2 + at(2,ipol)**2 + at(3,ipol)**2)
+                 dvpsi(:,:) = dvpsi(:,:) / anorm
               ELSE
                  CALL dveqpsi_us(ik)
                  d0psi2(:,:,ik)=dvpsi(:,:)

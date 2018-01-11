@@ -236,11 +236,12 @@ couples: IF (.NOT.done(ik)) THEN
                       per(start(ipool)+cur_pos(ipool))=ik
                       perm1(ik)=start(ipool)+cur_pos(ipool)
                       done(ik)=.TRUE. 
-                      EXIT couples
+                      GOTO 300
                    ENDIF
                 ENDDO
              ENDDO
           ENDIF couples
+300       CONTINUE
        ENDDO
 !
 !   And then sets were only one point needs to be diagonalized if in a
@@ -259,11 +260,12 @@ singles: IF (.NOT.done(ik)) THEN
                       per(start(ipool)+cur_pos(ipool))=ik
                       perm1(ik)=start(ipool)+cur_pos(ipool)
                       done(ik)=.TRUE. 
-                      EXIT singles
+                      GOTO 400
                    ENDIF
                 ENDDO
              ENDDO
           ENDIF singles
+400       CONTINUE
        ENDDO
 !
 !   Finally add the lone pairs, those k and k+q sets whose k0 are in a pool 
@@ -279,10 +281,11 @@ lone_pairs:IF (.NOT.done(ik)) THEN
                    per(start(ipool)+cur_pos(ipool))=ik
                    perm1(ik)=start(ipool)+cur_pos(ipool)
                    done(ik)=.TRUE. 
-                   EXIT lone_pairs
+                   GOTO 500
                 ENDDO
              ENDDO
           ENDIF lone_pairs
+500       CONTINUE
        ENDDO
 
        ALLOCATE(xk_save(3,nks))
