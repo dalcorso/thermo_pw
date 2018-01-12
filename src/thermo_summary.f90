@@ -675,6 +675,8 @@ FUNCTION check_group_ibrav(code_group, ibrav)
 USE kinds, ONLY : DP
 USE io_global, ONLY : stdout
 USE lattices, ONLY : lattice_name, is_compatible_group_ibrav
+USE noncollin_module, ONLY : noncolin
+USE spin_orb,         ONLY : domag
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: code_group, ibrav
 
@@ -724,6 +726,7 @@ ELSE
    WRITE(stdout,'(5x,"computed tensor components")') 
 100 CONTINUE
 ENDIF
+IF (noncolin.AND.domag) check_group_ibrav=.FALSE.
 
 RETURN
 END FUNCTION check_group_ibrav
