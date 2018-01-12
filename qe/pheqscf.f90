@@ -13,21 +13,25 @@ SUBROUTINE pheqscf()
   ! ... response to an electric field and related quantities.
   !
   USE kinds,           ONLY : DP
+  USE constants,       ONLY : fpi, e2
   USE io_global,       ONLY : stdout, meta_ionode
   USE paw_variables,   ONLY : okpaw
-  USE klist,           ONLY : lgauss
+  USE klist,           ONLY : lgauss, qnorm
   USE qpoint,          ONLY : xq
   USE uspp,            ONLY : okvan
   USE fft_base,        ONLY : dfftp
   USE wvfct,           ONLY : nbnd, npwx
   USE uspp_param,      ONLY : nhm
   USE ions_base,       ONLY : nat
+  USE cell_base,       ONLY : tpiba2, omega
   USE noncollin_module,ONLY : noncolin, nspin_mag, npol
   USE io_files,        ONLY : tmp_dir
   USE lsda_mod,        ONLY : nspin, lsda
   USE control_ph,      ONLY : convt, zeu, rec_code, rec_code_read, lnoloc, &
                               where_rec, done_epsil, done_zeu, epsil
   USE control_lr,      ONLY : lrpa
+  USE lr_lanczos,      ONLY : llanczos
+  USE io_global,       ONLY : ionode
   USE control_flags,   ONLY : io_level
   USE output,          ONLY : fildrho
   USE ph_restart,      ONLY : ph_writefile
@@ -94,6 +98,19 @@ SUBROUTINE pheqscf()
      CALL open_buffer (iu1dwf, 'mwf', lr1dwf, io_level, exst_mem, &
                                                            exst, tmp_dir)
      !
+     IF (llanczos) THEN
+        CALL allocate_lanczos()
+        CALL do_lanczos()
+        CALL extrapolate()
+        DO iu=start_freq, last_freq
+           CALL calc_chi(fru(iu),fiu(iu),chirr(iu))
+           chirr(iu)=chirr(iu) / omega
+           epsm1(iu)=CMPLX(1.0_DP,0.0_DP)+ chirr(iu)*fpi*e2/&
+                                                 qnorm**2/tpiba2
+           CALL write_chi_on_disk(iu)
+        ENDDO
+        CALL deallocate_lanczos()
+     ELSE
      DO iu = start_freq, last_freq
         !
         IF (.NOT. comp_f(iu) ) CYCLE
@@ -149,6 +166,7 @@ SUBROUTINE pheqscf()
         CALL write_chi_on_disk(iu)
         !
      END DO 
+     ENDIF
 
      DEALLOCATE(chirr)
      DEALLOCATE(chirz)
