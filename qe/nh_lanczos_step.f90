@@ -92,7 +92,7 @@ SUBROUTINE nh_lanczos_step(iter, flag)
        IF (rpert>1) THEN
           DO ipert = 1, rpert
              DO jpert=1, rpert
-                zeta = lr_dot0(d0psi(:,:,:,jpert),evc1(:,:,1+nks*(ipert-1),1))
+                zeta = lr_dot0(d0psi(1,1,1,jpert),evc1(1,1,1+nks*(ipert-1),1))
                 zeta_store (ipert,jpert,iter) = zeta
                 WRITE(stdout,'(5x,"z1= ",1x,2i6,2(1x,e22.15))')jpert,ipert, &
                                                        real(zeta), aimag(zeta)
