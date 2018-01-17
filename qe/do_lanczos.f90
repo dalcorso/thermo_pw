@@ -35,7 +35,7 @@ SUBROUTINE do_lanczos()
   USE ions_base,             ONLY : nat
   USE cell_base,             ONLY : at
   USE io_global,             ONLY : stdout, ionode
-  USE klist,                 ONLY : xk, wk, ngk, igk_k
+  USE klist,                 ONLY : xk, wk, ngk, igk_k, lgauss, ltetra
   USE qpoint,                ONLY : nksq, ikks, ikqs
   USE gvecs,                 ONLY : doublegrid
   USE fft_base,              ONLY : dfftp, dffts
@@ -82,6 +82,7 @@ SUBROUTINE do_lanczos()
   INTEGER :: kter, iter, iter0, ipol, jpol, ibnd, ik, ikp, ikk, ikq, is, &
              ich, inch, npw, npwq, incr, v_siz, ig
   ! counters or indices
+  LOGICAL :: lmet
 
   REAL(DP) :: weight, alpha_pv0, anorm
   ! weight of k points and store alpha_pv
@@ -90,6 +91,13 @@ SUBROUTINE do_lanczos()
   CALL start_clock ('do_lanczos')
 
   alpha_pv0=alpha_pv
+  lmet = (lgauss .OR. ltetra)
+  IF (lmet.AND.lgamma) THEN
+     CALL errore('do_lanczos','only q/=0 allowed for metals',1)
+  ELSE
+     IF (lmet) alpha_pv=0.0_DP
+  ENDIF
+
   iter0=0
 
   ALLOCATE (dvscfin( dfftp%nnr, nspin_mag, rpert))
@@ -232,7 +240,7 @@ SUBROUTINE do_lanczos()
                                     et(:,ikk), ik, nbnd_occ(ikk))
               CALL ch_psi_all (npwq, evc1(:,:,ikp,inch), sevc1(:,:,ikp,inch), &
                                     et(:,ikk), ik, nbnd_occ(ikk))
-              alpha_pv=alpha_pv0
+              IF (.NOT.lmet) alpha_pv=alpha_pv0
               !
               ! Now apply P_c^+ dV_Hxc. Note that since this is the
               ! iter-1 step, made at the iter step ich and inch must be
@@ -464,6 +472,7 @@ SUBROUTINE do_lanczos()
      DEALLOCATE( tg_dv  )
      DEALLOCATE( tg_psic)
   ENDIF
+  alpha_pv=alpha_pv0
 
   CALL stop_clock ('do_lanczos')
 
