@@ -192,7 +192,7 @@ SUBROUTINE c_bands_nscf_tpw( )
                  s(1,1,invs(isym_bands(ik))), t_rev(invs(isym_bands(ik))), gk)
               IF (noncolin) THEN
                  has_e=1
-                 CALL find_u(sr(1,1,invs(isym_bands(ik))),d_spin) 
+                 CALL find_u(sr(1,1,isym_bands(ik)),d_spin) 
               ENDIF
               CALL rotate_all_psi_tpw(ik,psic,evcr,s(1,1,invs(isym_bands(ik))),&
                      ftau(1,invs(isym_bands(ik))), d_spin, has_e, gk)
