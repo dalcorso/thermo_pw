@@ -16,8 +16,10 @@
 SUBROUTINE rotate_all_psi_tpw(ik,psic_nc,evcr,s,ftau,d_spin,has_e,gk)
   !
   !  This subroutine rotates one-component or two-component
-  !  wavefunctions according to the symmetry s (actually it applies s^-1). 
-  !  d_spin contains the 2x2 rotation matrix in spin space (it must be
+  !  wavefunctions according to the operator {S,f} (Actually O_{S,f} \psi(r)=
+  !  U_S \psi(S^{-1}r-S^{-1}f). In input the matrix s must contain the 3x3
+  !  operator S^{-1} in crystal coordinates while ftau contain S^{-1}f
+  !  d_spin contains the 2x2 rotation matrix U_S in spin space (it must be
   !  the d_spin that corresponds to the inverse of s).
   !  has_e=-1 means that also a 360 degrees rotation is applied in spin space.
   !  For one-component wavefunctions d_spin and has_e are not used.
