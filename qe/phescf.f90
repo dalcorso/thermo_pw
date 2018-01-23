@@ -34,16 +34,20 @@ SUBROUTINE phescf_tpw()
   USE freq_ph
   USE optical,         ONLY : current_w, fru, polarc, epsilonc, epsilonm1c, &
                               lr1dwf, iu1dwf, lcfreq, start_freq, last_freq
-  USE lr_lanczos,      ONLY : llanczos
+  USE lr_lanczos,      ONLY : llanczos, iulanczos, only_spectrum
   USE partial,         ONLY : comp_irr
   USE images_omega,    ONLY : comp_f
   USE ramanm,          ONLY : ramtns, lraman, elop, done_lraman, done_elop
   USE buffers,         ONLY : close_buffer, open_buffer
-  USE io_global,       ONLY : ionode
+  USE io_global,       ONLY : ionode, ionode_id
+  USE mp_images,       ONLY : intra_image_comm
+  USE mp,              ONLY : mp_bcast
   !
   IMPLICIT NONE
   !
-  INTEGER :: iu, ipol, jpol, iu_epsil, ierr
+  INTEGER :: iu, ipol, jpol, iu_epsil, ierr, ios
+  !
+  INTEGER :: find_free_unit
   !
   LOGICAL :: exst_mem, exst
   !
@@ -86,7 +90,18 @@ SUBROUTINE phescf_tpw()
      !
      IF (llanczos) THEN
         CALL allocate_lanczos()
-        CALL do_lanczos()
+        IF (ionode) THEN
+           iulanczos=find_free_unit()
+           OPEN(UNIT=iulanczos, FILE='dynamical_matrices/save_chain',&
+            STATUS='unknown', POSITION='append', ERR=100, IOSTAT=ios)
+        ENDIF
+100     CALL mp_bcast(ios,ionode_id,intra_image_comm)
+        CALL errore('phescf','opening save_chain file',ABS(ios))
+        IF (only_spectrum) THEN
+           CALL read_lanczos_chain()
+        ELSE
+           CALL do_lanczos()
+        ENDIF
         CALL extrapolate()
         IF (ionode) THEN
            DO iu=start_freq, last_freq
@@ -101,6 +116,7 @@ SUBROUTINE phescf_tpw()
               END DO
               CALL write_epsilon_on_disk(iu)
            ENDDO
+           CLOSE(UNIT=iulanczos, STATUS='keep')
         ENDIF
         CALL deallocate_lanczos()
      ELSE
@@ -116,6 +132,7 @@ SUBROUTINE phescf_tpw()
                 iu, nfs
         !
         CALL solve_e_fpolc( iu )
+
         IF ( convt ) CALL polarizc (iu)
         !
         !  Save also the inverse of the macroscopic dielectric constant

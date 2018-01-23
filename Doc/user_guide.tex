@@ -968,6 +968,10 @@ extrapolation : extrapolation type. Presently only 'no' is active in
           this case no extrapolation is applied. Otherwise the average
           of the beta and gamma is used.
           Default: character 'average'
+only_spectrum : Computes only the spectrum assuming that the Lanczos
+          chain coefficients are in a file. It gives error if the number
+          of requested Lanczos steps is larger than those available on file.
+          Default: logical .FALSE.
 \end{verbatim}
 When in the input of the phonon code a non zero wave-vector {\bf q}
 is specified, the previous options produce the inverse of the dielectric 

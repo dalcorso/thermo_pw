@@ -139,10 +139,10 @@ DO igeom=start_geometry,last_geometry
          IF (with_asyn_images) CALL collect_everything(auxdyn, igeom)
       ELSEIF (fpol) THEN
          IF (lgamma) THEN
-            CALL collect_all_epsilon()
+            IF (nimage>1) CALL collect_all_epsilon()
             CALL plot_epsilon_omega_opt()
          ELSE
-            CALL collect_all_chi()
+            IF (nimage>1) CALL collect_all_chi()
             CALL plot_epsilon_omega_q()
          ENDIF
       ENDIF

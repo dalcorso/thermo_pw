@@ -166,5 +166,9 @@ MODULE lr_lanczos
   COMPLEX(KIND=DP), ALLOCATABLE :: bbk(:,:,:)  ! coefficients of S^{-1}
   COMPLEX(KIND=DP), ALLOCATABLE :: bbnc(:,:,:) ! coefficients of the inverse
                                                ! of S
+  INTEGER :: iulanczos          ! iunit where the Lanczos chain is saved
+
+  LOGICAL :: only_spectrum      ! if .TRUE. assumes that the Lanczos chain
+                                ! coefficients are on file
 
 END MODULE lr_lanczos

@@ -30,8 +30,7 @@ SUBROUTINE pheqscf()
   USE control_ph,      ONLY : convt, zeu, rec_code, rec_code_read, lnoloc, &
                               where_rec, done_epsil, done_zeu, epsil
   USE control_lr,      ONLY : lrpa
-  USE lr_lanczos,      ONLY : llanczos
-  USE io_global,       ONLY : ionode
+  USE lr_lanczos,      ONLY : llanczos, iulanczos, only_spectrum
   USE control_flags,   ONLY : io_level
   USE output,          ONLY : fildrho
   USE ph_restart,      ONLY : ph_writefile
@@ -45,10 +44,15 @@ SUBROUTINE pheqscf()
   USE ramanm,          ONLY : ramtns, lraman, elop, done_lraman, done_elop
   USE buffers,         ONLY : close_buffer, open_buffer
   USE images_omega,    ONLY : comp_f
+  USE io_global,       ONLY : ionode, ionode_id
+  USE mp,              ONLY : mp_bcast
+  USE mp_images,       ONLY : intra_image_comm
+
   !
   IMPLICIT NONE
   !
-  INTEGER :: iu, ipol, jpol, iu_epsil, ierr
+  INTEGER :: iu, ipol, jpol, iu_epsil, ierr, ios
+  INTEGER, EXTERNAL :: find_free_unit
   COMPLEX(DP) :: epsi
   !
   LOGICAL :: exst_mem, exst
@@ -100,7 +104,18 @@ SUBROUTINE pheqscf()
      !
      IF (llanczos) THEN
         CALL allocate_lanczos()
-        CALL do_lanczos()
+        IF (ionode) THEN
+           iulanczos=find_free_unit()
+           OPEN(UNIT=iulanczos, FILE='dynamical_matrices/save_chain',&
+            STATUS='unknown', POSITION='append', ERR=100, IOSTAT=ios)
+        ENDIF
+100     CALL mp_bcast(ios,ionode_id,intra_image_comm)
+        CALL errore('pheqscf','opening save_chain file',ABS(ios))
+        IF (only_spectrum) THEN
+           CALL read_lanczos_chain()
+        ELSE
+           CALL do_lanczos()
+        ENDIF
         CALL extrapolate()
         DO iu=start_freq, last_freq
            CALL calc_chi(fru(iu),fiu(iu),chirr(iu))
@@ -110,6 +125,7 @@ SUBROUTINE pheqscf()
            CALL write_chi_on_disk(iu)
         ENDDO
         CALL deallocate_lanczos()
+        IF (ionode) CLOSE(UNIT=iulanczos, STATUS='keep')
      ELSE
      DO iu = start_freq, last_freq
         !
@@ -227,7 +243,7 @@ IF (ionode) THEN
        filename='dynamical_matrices/chirr'
        IF (my_image_id>0) filename=TRIM(filename)//'_'//int_to_char(my_image_id)
        INQUIRE(FILE=TRIM(filename), exist=exst)
-       IF (exst) THEN
+       IF (exst.AND.iu>1) THEN
           OPEN (UNIT=iu_epsil, FILE=TRIM(filename), STATUS='old', &
                                POSITION='append', FORM='formatted')
        ELSE
@@ -252,7 +268,7 @@ IF (ionode) THEN
       filename='dynamical_matrices/chimag_re'
       IF (my_image_id>0) filename=TRIM(filename)//'_'//int_to_char(my_image_id)
       INQUIRE(FILE=TRIM(filename), exist=exst)
-      IF (exst) THEN
+      IF (exst.AND.iu>1) THEN
          OPEN (UNIT=iu_epsil, FILE=TRIM(filename), &
                           STATUS='old', POSITION='append', FORM='formatted')
       ELSE
@@ -274,7 +290,7 @@ IF (ionode) THEN
       filename='dynamical_matrices/chimag_im'
       IF (my_image_id>0) filename=TRIM(filename)//'_'//int_to_char(my_image_id)
       INQUIRE(FILE=TRIM(filename), exist=exst)
-      IF (exst) THEN
+      IF (exst.AND.iu>1) THEN
          OPEN (UNIT=iu_epsil, FILE=TRIM(filename), &
                         STATUS='old', POSITION='append', FORM='formatted')
       ELSE
@@ -302,7 +318,7 @@ IF (ionode) THEN
       filename='dynamical_matrices/epsilon'
       IF (my_image_id>0) filename=TRIM(filename)//'_'//int_to_char(my_image_id)
       INQUIRE(FILE=TRIM(filename), exist=exst)
-      IF (exst) THEN
+      IF (exst.AND.iu>1) THEN
          OPEN (UNIT=iu_epsil, FILE=TRIM(filename), STATUS='old', &
                                POSITION='append', FORM='formatted')
       ELSE

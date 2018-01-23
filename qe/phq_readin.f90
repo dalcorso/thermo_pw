@@ -73,7 +73,7 @@ SUBROUTINE phq_readin_tpw()
                             lall_tensor, lchimag, start_freq, last_freq, &
                             lfreq_ev, linear_im_freq
   USE lr_lanczos,    ONLY : llanczos, lanczos_steps, lanczos_steps_ext, &
-                            extrapolation
+                            extrapolation, only_spectrum
   USE images_omega,   ONLY : comp_f
   USE cryst_ph,      ONLY : magnetic_sym
   USE ph_restart,    ONLY : ph_readfile
@@ -127,7 +127,7 @@ SUBROUTINE phq_readin_tpw()
                        el_ph_nsigma, el_ph_sigma,  &
                        electron_phonon, lfreq_ev, linear_im_freq,&
                        llanczos, lanczos_steps, lanczos_steps_ext, &
-                       extrapolation, &
+                       extrapolation, only_spectrum, &
                        delta_freq, start_freq, last_freq,     &
                        lmagnon, lcharge, lall_tensor, lchimag, &
                        q_in_band_form, q2d, qplot, low_directory_check
@@ -303,6 +303,7 @@ SUBROUTINE phq_readin_tpw()
   lanczos_steps=2000
   lanczos_steps_ext=10000
   extrapolation='average'
+  only_spectrum=.FALSE.
   nk1       = 0
   nk2       = 0
   nk3       = 0
@@ -368,6 +369,7 @@ SUBROUTINE phq_readin_tpw()
   CALL mp_bcast(lanczos_steps, meta_ionode_id, world_comm  )
   CALL mp_bcast(lanczos_steps_ext, meta_ionode_id, world_comm  )
   CALL mp_bcast(extrapolation, meta_ionode_id, world_comm  )
+  CALL mp_bcast(only_spectrum, meta_ionode_id, world_comm  )
   CALL mp_bcast(delta_freq, meta_ionode_id, world_comm  )
   CALL mp_bcast(lmagnon, meta_ionode_id, world_comm  )
   CALL mp_bcast(lcharge, meta_ionode_id, world_comm  )
@@ -407,6 +409,8 @@ SUBROUTINE phq_readin_tpw()
   IF (only_init.AND.only_wfc) CALL errore('phq_readin', &
                         'only_init or only_wfc can be .true.', 1)
 
+  IF (nimage>1.AND.llanczos) CALL errore('phq_reading','Lanczos algorithm &
+                                                  &needs one image (-ni=1)',1)
   IF (modenum < 0) CALL errore ('phq_readin', ' Wrong modenum ', 1)
   IF (dek <= 0.d0) CALL errore ( 'phq_readin', ' Wrong dek ', 1)
   !

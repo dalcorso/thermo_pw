@@ -72,6 +72,7 @@ SUBROUTINE nh_lanczos_step(iter, flag)
     gamma_store(iter) = dgamma
 !    WRITE(stdout,'(5X,"beta (",i8.8,")=",f15.6)') iter, beta
     WRITE(stdout,'(5X,"gamma(",i8.8,")=",f15.6)') iter, dgamma
+    IF (ionode) WRITE(iulanczos,'(i9,e25.15)') iter, dgamma
     !
     ! Renormalize q(i) and Lq(i), also p(i) and Lp(i) in the non-Hermitian case
     !
@@ -96,12 +97,14 @@ SUBROUTINE nh_lanczos_step(iter, flag)
                 zeta_store (ipert,jpert,iter) = zeta
                 WRITE(stdout,'(5x,"z1= ",1x,2i6,2(1x,e22.15))')jpert,ipert, &
                                                        real(zeta), aimag(zeta)
+                IF (ionode) WRITE(iulanczos,'(2e25.15)') zeta
              ENDDO
           ENDDO
        ELSE
           zeta = lr_dot(d0psi2(:,:,:),evc1(:,:,:,1))
           zeta_store (1,1,iter) = zeta
           WRITE(stdout,'(5x,"z1= ",2(1x,e22.15))') real(zeta), aimag(zeta)
+          IF (ionode) WRITE(iulanczos,'(2e25.15)') zeta
        ENDIF
        !
     ELSE

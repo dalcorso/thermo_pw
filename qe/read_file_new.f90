@@ -359,7 +359,7 @@ SUBROUTINE read_xml_file_tpw ( )
       gcutm = dual * ecutwfc / tpiba2
       ecutrho=dual * ecutwfc
       !
-      doublegrid = ( dual > 4.D0 )
+      doublegrid = ( (dual - 4.D0) > 1.D-10 )
       IF ( doublegrid ) THEN
          gcutms = 4.D0 * ecutwfc / tpiba2
       ELSE
