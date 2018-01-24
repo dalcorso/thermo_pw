@@ -23,6 +23,7 @@ SUBROUTINE dveqpsi_us (ik)
   USE wvfct,     ONLY : nbnd, npwx
 
   USE wavefunctions_module,  ONLY: evc
+  USE control_lr, ONLY : nbnd_occ
   USE eqv,       ONLY : dvpsi
   USE qpoint,    ONLY : ikks, ikqs
   USE klist,     ONLY : ngk, igk_k 
@@ -59,7 +60,7 @@ SUBROUTINE dveqpsi_us (ik)
   npw = ngk(ikk)
   npwq= ngk(ikq)
 
-  DO ibnd = 1, nbnd
+  DO ibnd = 1, nbnd_occ(ikk)
      aux2(:) = (0.D0, 0.D0)
      DO ig = 1, npw
         aux2 (nls (igk_k (ig,ikk) ) ) = evc (ig, ibnd)
