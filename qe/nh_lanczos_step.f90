@@ -29,7 +29,7 @@ SUBROUTINE nh_lanczos_step(iter, flag)
     USE qpoint,       ONLY : ikks, ikqs, nksq
     USE lr_lanczos,   ONLY : evc1, evc1_new, evc1_old, sevc1, evq0, sevc0, &
                              d0psi, d0psi2, beta_store, gamma_store, &
-                             zeta_store, size_evc1, rpert
+                             zeta_store, size_evc1, rpert, iulanczos
     !
     IMPLICIT NONE
     INTEGER, INTENT(IN) :: iter
