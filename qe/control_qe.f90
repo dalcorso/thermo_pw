@@ -145,7 +145,7 @@ MODULE lr_lanczos
        evq0(:,:,:)             ! the ground state wavefunctions 
 
   COMPLEX(KIND=DP), POINTER :: &
-       sevc0(:,:,:)            ! S * ground state wavefunctions
+       sevq0(:,:,:)            ! S * ground state wavefunctions
 
   REAL(KIND=DP), ALLOCATABLE ::      &  
        beta_store(:),      &  ! coefficients of Lanczos chain

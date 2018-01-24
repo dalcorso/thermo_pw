@@ -27,7 +27,7 @@ SUBROUTINE nh_lanczos_step(iter, flag)
     USE io_global,    ONLY : ionode, stdout
     USE klist,        ONLY : nks, ngk
     USE qpoint,       ONLY : ikks, ikqs, nksq
-    USE lr_lanczos,   ONLY : evc1, evc1_new, evc1_old, sevc1, evq0, sevc0, &
+    USE lr_lanczos,   ONLY : evc1, evc1_new, evc1_old, sevc1, evq0, sevq0, &
                              d0psi, d0psi2, beta_store, gamma_store, &
                              zeta_store, size_evc1, rpert, iulanczos
     !
@@ -138,9 +138,9 @@ SUBROUTINE nh_lanczos_step(iter, flag)
              ikq=ikqs(ik)
              ikp = ik + nksq * (ipert-1)
              CALL orthogonalize(evc1_new(:,:,ikp,1), evq0(:,:,ik), ikk, ikq, &
-                                             sevc0(:,:,ik),ngk(ikq),.TRUE.)
+                                             sevq0(:,:,ik),ngk(ikq),.TRUE.)
              CALL orthogonalize(evc1_new(:,:,ikp,2), evq0(:,:,ik), ikk, ikq, &
-                                        sevc0(:,:,ik),ngk(ikq),.TRUE.)
+                                        sevq0(:,:,ik),ngk(ikq),.TRUE.)
           ENDDO
        ENDDO
 !

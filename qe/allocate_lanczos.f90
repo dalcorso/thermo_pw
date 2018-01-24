@@ -9,7 +9,7 @@
   USE lrus,                 ONLY : bbg
   USE control_flags,        ONLY : gamma_only
 
-  USE lr_lanczos,   ONLY : evc1, evc1_new, evc1_old, sevc1, evc0, sevc0, &
+  USE lr_lanczos,   ONLY : evc1, evc1_new, evc1_old, sevc1, evc0, sevq0, &
                            evq0, d0psi, d0psi2, beta_store, gamma_store, &
                            zeta_store, beta_store_ext, gamma_store_ext, &
                            size_evc1, rpert, lanczos_steps, &
@@ -30,9 +30,9 @@
      evq0 => evc0
   ENDIF
   IF (okvan) THEN
-     ALLOCATE(sevc0(npwx*npol,nbnd,nksq))
+     ALLOCATE(sevq0(npwx*npol,nbnd,nksq))
   ELSE
-     sevc0 => evq0
+     sevq0 => evq0
   ENDIF
 
   ALLOCATE(evc1_old(npwx*npol,nbnd,nksq*rpert,2))
@@ -45,7 +45,7 @@
 
   evc0(:,:,:)       = (0.0d0,0.0d0)
   evq0(:,:,:)       = (0.0d0,0.0d0)
-  sevc0(:,:,:)      = (0.0d0,0.0d0)
+  sevq0(:,:,:)      = (0.0d0,0.0d0)
   evc1_old(:,:,:,:) = (0.0d0,0.0d0)
   evc1(:,:,:,:)     = (0.0d0,0.0d0)
   evc1_new(:,:,:,:) = (0.0d0,0.0d0)
@@ -84,17 +84,17 @@
 
   SUBROUTINE deallocate_lanczos()
 
-  USE lr_lanczos, ONLY : evc1, evc1_new, evc1_old, sevc1, evc0, evq0, sevc0, &
+  USE lr_lanczos, ONLY : evc1, evc1_new, evc1_old, sevc1, evc0, evq0, sevq0, &
                          d0psi, d0psi2, beta_store, gamma_store, zeta_store, &
                          beta_store_ext, gamma_store_ext, bbk, bbnc
   USE lrus,       ONLY : bbg
 
   IMPLICIT NONE
 
-  IF (ASSOCIATED(sevc0,evq0)) THEN
-     NULLIFY(sevc0)
-  ELSEIF(ASSOCIATED(sevc0)) THEN
-     DEALLOCATE(sevc0)
+  IF (ASSOCIATED(sevq0,evq0)) THEN
+     NULLIFY(sevq0)
+  ELSEIF(ASSOCIATED(sevq0)) THEN
+     DEALLOCATE(sevq0)
   ENDIF
 
   IF (ASSOCIATED(evq0,evc0)) THEN

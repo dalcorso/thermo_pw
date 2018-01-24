@@ -58,7 +58,7 @@ SUBROUTINE do_lanczos()
   USE control_lr,            ONLY : alpha_pv, nbnd_occ, lgamma
   USE lrus,                  ONLY : int3, int3_paw
   USE dv_of_drho_lr,         ONLY : dv_of_drho
-  USE lr_lanczos,            ONLY : rpert, lanczos_steps, evc0, evq0, sevc0, &
+  USE lr_lanczos,            ONLY : rpert, lanczos_steps, evc0, evq0, sevq0, &
                                     evc1, sevc1, evc1_new, d0psi, d0psi2
   USE units_ph,              ONLY : lrwfc, iuwfc
   USE buffers,               ONLY : get_buffer
@@ -165,9 +165,9 @@ SUBROUTINE do_lanczos()
            ENDIF
            IF (okvan) THEN
               CALL calbec (npwq, vkb, evq, becp, nbnd)
-              CALL s_psi (npwx, npwq, nbnd, evq, sevc0(1,1,ik))
+              CALL s_psi (npwx, npwq, nbnd, evq, sevq0(1,1,ik))
            ELSE
-              sevc0(:,:,ik)=evq(:,:)
+              sevq0(:,:,ik)=evq(:,:)
            ENDIF
         ELSE
            !
@@ -205,7 +205,7 @@ SUBROUTINE do_lanczos()
               ! Orthogonalize dvpsi to valence states: Apply P_c^+ and change
               ! sign.
               !
-              CALL orthogonalize(dvpsi, evq, ikk, ikq, sevc0(1,1,ik), npwq, &
+              CALL orthogonalize(dvpsi, evq, ikk, ikq, sevq0(1,1,ik), npwq, &
                                                                       .TRUE.)
               !
               !  save here P_c^+ V_ext u_kv needed to compute the 
@@ -284,7 +284,7 @@ SUBROUTINE do_lanczos()
               ! Apply -P_c^+
               !
               CALL orthogonalize(dvpsi, evq, ikk, ikq, &
-                                     & sevc0(:,:,ik), npwq, .TRUE.)
+                                     & sevq0(:,:,ik), npwq, .TRUE.)
               !
               !  the orthogonalize routine changes the sign of dvpsi, so here
               !  we subtract.
