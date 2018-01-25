@@ -35,6 +35,7 @@ SUBROUTINE phescf_tpw()
   USE optical,         ONLY : current_w, fru, polarc, epsilonc, epsilonm1c, &
                               lr1dwf, iu1dwf, lcfreq, start_freq, last_freq
   USE lr_lanczos,      ONLY : llanczos, iulanczos, only_spectrum
+  USE lr_global,       ONLY : pseudo_hermitian
   USE partial,         ONLY : comp_irr
   USE images_omega,    ONLY : comp_f
   USE ramanm,          ONLY : ramtns, lraman, elop, done_lraman, done_elop
@@ -100,7 +101,11 @@ SUBROUTINE phescf_tpw()
         IF (only_spectrum) THEN
            CALL read_lanczos_chain()
         ELSE
-           CALL do_lanczos()
+           IF (pseudo_hermitian) THEN
+              CALL do_lanczos_psh()
+           ELSE
+              CALL do_lanczos()
+           ENDIF
         ENDIF
         CALL extrapolate()
         IF (ionode) THEN

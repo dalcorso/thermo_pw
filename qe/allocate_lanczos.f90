@@ -9,7 +9,8 @@
   USE lrus,                 ONLY : bbg
   USE control_flags,        ONLY : gamma_only
 
-  USE lr_global,    ONLY : evc0, sevq0, evq0, d0psi, d0psi2, size_evc1, rpert
+  USE lr_global,    ONLY : evc0, sevq0, evq0, d0psi, d0psi2, size_evc1, rpert, &
+                           pseudo_hermitian
   USE lr_lanczos,   ONLY : evc1, evc1_new, evc1_old, sevc1, beta_store, &
                            gamma_store, zeta_store, beta_store_ext,     &
                            gamma_store_ext, lanczos_steps, lanczos_steps_ext, &
@@ -22,6 +23,7 @@
   rpert=1
   IF (lgamma) rpert=3
   ncopy=2
+  IF (pseudo_hermitian) ncopy=1
   size_evc1= npwx*npol*nbnd*nksq*rpert
 
   ALLOCATE(evc0(npwx*npol,nbnd,nksq))

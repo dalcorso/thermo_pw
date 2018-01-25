@@ -37,6 +37,7 @@ ccg_psi.o \
 deallocate_ph_tpw.o \
 divide_et_impera.o \
 do_lanczos.o \
+do_lanczos_psh.o \
 drho.o \
 dveqpsi_us.o \
 dveqpsi_us_only.o \
@@ -66,6 +67,7 @@ phq_summary.o \
 polarizc.o \
 prepare_q.o \
 print_symmetries.o \
+psh_lanczos_step.o \
 psyme_fpol.o \
 psym_dmageq.o \
 psymeq.o \
@@ -74,6 +76,7 @@ q_points.o \
 run_nscf.o \
 read_dyn_from_file.o \
 read_file_new.o \
+read_lanczos_chain.o \
 read_pseudo.o \
 realspace_grid_init.o \
 rotate_all_psi.o \

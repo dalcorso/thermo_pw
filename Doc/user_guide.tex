@@ -956,6 +956,7 @@ linear_im_freq: This option is used only when freq_line=.TRUE.
             part of the first frequency on the frequency line.
             Default: logical .FALSE.
 llanczos: When this flag is .TRUE. at finite frequencies a Lanczos 
+
           algorithm is used to solve the linear system. Can be very fast 
           but might require much more memory than the standard algorithm.
           Presently it is incompatible with images.
@@ -968,6 +969,10 @@ extrapolation : extrapolation type. Presently only 'no' is active in
           this case no extrapolation is applied. Otherwise the average
           of the beta and gamma is used.
           Default: character 'average'
+pseudo_hermitian : when .TRUE. a pseudo-hermitian algorithm is used to 
+          make the Lanczos steps. Should be twice faster than the default
+          non hermitian algorithm.
+          Default: .FALSE.
 only_spectrum : Computes only the spectrum assuming that the Lanczos
           chain coefficients are in a file. It gives error if the number
           of requested Lanczos steps is larger than those available on file.

@@ -30,6 +30,7 @@ SUBROUTINE pheqscf()
   USE control_ph,      ONLY : convt, zeu, rec_code, rec_code_read, lnoloc, &
                               where_rec, done_epsil, done_zeu, epsil
   USE control_lr,      ONLY : lrpa
+  USE lr_global,       ONLY : pseudo_hermitian
   USE lr_lanczos,      ONLY : llanczos, iulanczos, only_spectrum
   USE control_flags,   ONLY : io_level
   USE output,          ONLY : fildrho
@@ -114,7 +115,11 @@ SUBROUTINE pheqscf()
         IF (only_spectrum) THEN
            CALL read_lanczos_chain()
         ELSE
-           CALL do_lanczos()
+           IF (pseudo_hermitian) THEN
+              CALL do_lanczos_psh()
+           ELSE
+              CALL do_lanczos()
+           ENDIF
         ENDIF
         CALL extrapolate()
         DO iu=start_freq, last_freq
