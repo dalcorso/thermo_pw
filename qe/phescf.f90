@@ -36,6 +36,7 @@ SUBROUTINE phescf_tpw()
                               lr1dwf, iu1dwf, lcfreq, start_freq, last_freq
   USE lr_lanczos,      ONLY : llanczos, iulanczos, only_spectrum
   USE lr_global,       ONLY : pseudo_hermitian
+  USE lr_cg,           ONLY : lcg
   USE partial,         ONLY : comp_irr
   USE images_omega,    ONLY : comp_f
   USE ramanm,          ONLY : ramtns, lraman, elop, done_lraman, done_elop
@@ -173,7 +174,13 @@ SUBROUTINE phescf_tpw()
 
         WRITE( stdout, '(/,5X,"Electric Fields Calculation")' )
         !
-        CALL solve_e_tpw(drhoscfs)
+        IF (lcg) THEN
+           CALL allocate_cg(3,1)
+           CALL do_cg_e(drhoscfs)
+           CALL deallocate_cg()
+        ELSE
+           CALL solve_e_tpw(drhoscfs)
+        ENDIF
         !
         WRITE( stdout, '(/,5X,"End of electric fields calculation")' )
         !

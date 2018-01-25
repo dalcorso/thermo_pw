@@ -18,6 +18,7 @@ adddvscf_tran.o \
 addusddenseq.o \
 add_zstar_ue.o \
 add_zstar_us.o \
+allocate_cg.o \
 allocate_phq.o \
 allocate_lanczos.o \
 apply_ac.o \
@@ -36,6 +37,8 @@ control_qe.o \
 ccg_psi.o \
 deallocate_ph_tpw.o \
 divide_et_impera.o \
+do_cg_e.o \
+do_cg_ph.o \
 do_lanczos.o \
 do_lanczos_psh.o \
 drho.o \
@@ -46,6 +49,7 @@ electrons.o \
 ev_xml.o \
 find_band_sym.o \
 find_mode_sym.o \
+h_pcg_step.o \
 initialize_ph.o \
 kpoint_grid.o \
 irrek.o \

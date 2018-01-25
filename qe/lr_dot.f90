@@ -216,3 +216,41 @@ CONTAINS
 
 END FUNCTION lr_dot0
 
+SUBROUTINE lr_prec(res, pres)
+
+USE kinds,       ONLY : DP
+USE lr_cg,       ONLY : prec_vec
+USE klist,       ONLY : ngk
+USE qpoint,      ONLY : ikks, ikqs
+USE wvfct,       ONLY : npwx, nbnd
+USE control_lr,  ONLY : nbnd_occ
+USE noncollin_module, ONLY : noncolin, npol
+USE lr_global,   ONLY : rpert, sevq0, evq0
+USE qpoint,      ONLY : nksq
+
+IMPLICIT NONE
+COMPLEX(DP), INTENT(IN)  :: res(npwx*npol, nbnd, nksq*rpert)
+COMPLEX(DP), INTENT(OUT) :: pres(npwx*npol, nbnd, nksq*rpert)
+
+INTEGER :: ipert, ik, ikp, ikk, ikq, ig, npwq, ibnd
+
+pres=(0.0_DP, 0.0_DP)
+DO ipert=1, rpert
+   DO ik=1, nksq   
+      ikp = ik + nksq * (ipert-1)
+      ikk  = ikks(ik)
+      ikq  = ikqs(ik)
+      npwq = ngk(ikq)
+      DO ibnd=1,nbnd_occ(ikk)
+         pres(1:npwq,ibnd,ikp)=-prec_vec(1:npwq,ibnd,ik)*res(1:npwq,ibnd,ikp)
+         IF (noncolin) &
+            pres(npwx+1:npwx+npwq,ibnd,ikp)=&
+              -prec_vec(npwx+1:npwx+npwq,ibnd,ik)*res(npwx+1:npwx+npwq,ibnd,ikp)
+      ENDDO
+      CALL orthogonalize(pres(1,1,ikp), evq0(1,1,ik), ikk, ikq, &
+                                      sevq0(1,1,ik), npwq, .TRUE.)
+   ENDDO
+ENDDO
+
+RETURN
+END SUBROUTINE lr_prec

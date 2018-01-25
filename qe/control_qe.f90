@@ -184,3 +184,21 @@ MODULE lr_lanczos
 
 END MODULE lr_lanczos
 
+MODULE lr_cg
+  USE kinds,      ONLY : DP
+  SAVE
+
+  LOGICAL :: lcg  ! if .TRUE. the conjugate gradient algorithm is used where
+                  ! available
+
+  COMPLEX(KIND=DP), ALLOCATABLE ::  &
+      evc1(:,:,:,:),                &  ! current position
+      res(:,:,:,:),                 &  ! current residual
+      pres(:,:,:,:),                &  ! current preconditioned residual
+      dir(:,:,:,:),                 &  ! current direction
+      dir_new(:,:,:,:)                 ! A applied to the current direction
+
+  REAL(DP), ALLOCATABLE :: &
+      prec_vec(:,:,:)                  ! The preconditioning vector
+
+END MODULE lr_cg

@@ -29,6 +29,7 @@ SUBROUTINE phqscf_tpw
   USE eqv,        ONLY : drhoscfs
   USE paw_variables, ONLY : okpaw
   USE noncollin_module, ONLY : noncolin, nspin_mag
+  USE lr_cg,       ONLY : lcg
   USE recover_mod, ONLY : write_rec
 
   USE mp_pools,  ONLY : inter_pool_comm
@@ -77,8 +78,16 @@ SUBROUTINE phqscf_tpw
            IF (okpaw) ALLOCATE (int3_paw (nhm, nhm, nat, nspin_mag, npe))
            IF (noncolin) ALLOCATE(int3_nc( nhm, nhm, nat, nspin, npe))
         ENDIF
+        !
         WRITE( stdout, '(/,5x,"Self-consistent Calculation")')
-        CALL solve_linter_tpw (irr, imode0, npe, drhoscfs)
+        IF (lcg) THEN
+           CALL allocate_cg(npe,1)
+           CALL do_cg_ph (irr, imode0, drhoscfs)
+           CALL deallocate_cg()
+        ELSE
+           CALL solve_linter_tpw (irr, imode0, npe, drhoscfs)
+        ENDIF
+        !
         WRITE( stdout, '(/,5x,"End of self-consistent calculation")')
         !
         !   Add the contribution of this mode to the dynamical matrix

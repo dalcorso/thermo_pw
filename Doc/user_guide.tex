@@ -977,6 +977,11 @@ only_spectrum : Computes only the spectrum assuming that the Lanczos
           chain coefficients are in a file. It gives error if the number
           of requested Lanczos steps is larger than those available on file.
           Default: logical .FALSE.
+lcg:      When this flag is .TRUE. a global conjugate gradient algorithm
+          is used to compute the dielectric constant and the phonon 
+          frequencies. It will not require mixing, but will use more
+          memory than the standard algorithm.
+          Default : .FALSE.
 \end{verbatim}
 When in the input of the phonon code a non zero wave-vector {\bf q}
 is specified, the previous options produce the inverse of the dielectric 
