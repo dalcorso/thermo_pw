@@ -1,3 +1,13 @@
+New in version 1.0.0
+
+Added the possibility to use a Lanczos chain for solving the frequency
+dependent problems. 
+
+Added an experimental version of a global conjugate-gradient
+solver of the linear response problem for phonons and dielectric constant.
+
+
+20/12/2017 Version 0.9.0 is now frozen
 New in version 0.9.0
 
 This version updates to QE 6.2.1 and corrects a small bug of QE 6.2.1 that
