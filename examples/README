@@ -133,24 +133,22 @@ what=scf_dos : this example computes the electron density of states
                of silicon. The LDA bands and eigenfunctions are read by
                epsilon_tpw.x to calculate the frequency dependent
                dielectric constant of silicon (neglecting local fields).
-               (experimental)
 
 example15:
 what=scf_ph : this example computes the frequency dependent
               dielectric constant of silicon (neglecting local fields)
               using the non-self-consistent Sternheimer equation without
-              sums over the empty bands. (experimental)
+              sums over the empty bands. 
 
 example16:
 what=scf_ph : this example computes the frequency dependent
               dielectric constant of silicon within the TD-DFPT,
               using the self-consistent Sternheimer equation.
-              (experimental)
+
 example17:
 what=scf_ph : this example computes the inverse of the frequency dependent
               dielectric constant of aluminum at a given q within the TD-DFPT,
               using the self-consistent Sternheimer equation.
-              (experimental)
 
 example18:
 what=scf_dos : this example computes the electron density of states of aluminum
@@ -162,3 +160,13 @@ example19:
 what=scf_2d_bands : this example shows how to plot a projected density of 
              states (PBS) on a surface and the band structure of a slab on 
              top of the PBS.
+
+example20:
+what=scf_ph : this example computes the frequency dependent
+              dielectric constant of silicon within the TD-DFPT,
+              using a Lanczos chain.
+
+example21:
+what=scf_ph : this example computes the inverse of the frequency dependent
+              dielectric constant of aluminum at a given q within the TD-DFPT,
+              using a Lanczos chain.
