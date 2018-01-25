@@ -63,8 +63,11 @@ The ultimate reference for the use of \thermo\ is its user's guide,
 however the capabilities of the code are rapidly expanding and the 
 user's guide is becoming more and more complex, so if you do not want
 to read it entirely you can find here some indications about where
-to find the information that you need.
-This tutorial tells you also in which file to find the quantity that you need.
+to find the information you need.
+This tutorial tells you in which file to find the quantity that you need.
+There might be some limitations on the type of functionals that you can use 
+or the electronic structure scheme available to compute a given quantity.
+Please refer to the \qe\ documentation for this.
 
 \section{\color{coral}People}
 This tutorial has been written by Andrea Dal Corso (SISSA - Trieste). 
@@ -352,6 +355,17 @@ not given in the \thermo\ input. These quantities are found in the file
 file is not given in the \thermo\ input.
 Please keep the default value of \texttt{deltae} or the electronic
 thermodynamic properties could be wrong at low temperatures.
+
+\section{\color{coral} How do I calculate the frequency dependent dielectric
+constant of a material?}
+Use \texttt{what='scf\_ph'}. See \texttt{example16} and \texttt{example20}. 
+Please note that this calculation is made by the extended version of the
+phonon code available in \thermo, so you have to provide specific flags
+to the phonon input. See the user's guide for details. 
+The dielectric constant is in the file \texttt{output\_epsilon.ps}.
+Note that for metals you need to specify a finite wave-vector {\bf q} and you 
+cannot plot the dielectric constant at {\bf q}={\bf 0}.  
+See \texttt{example17} and \texttt{example21} for this case. 
 
 \section{\color{coral} Which is the meaning of the colors in
 the electronic bands and phonon dispersions plots?}
