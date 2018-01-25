@@ -58,8 +58,8 @@ SUBROUTINE do_lanczos()
   USE control_lr,            ONLY : alpha_pv, nbnd_occ, lgamma
   USE lrus,                  ONLY : int3, int3_paw
   USE dv_of_drho_lr,         ONLY : dv_of_drho
-  USE lr_lanczos,            ONLY : rpert, lanczos_steps, evc0, evq0, sevq0, &
-                                    evc1, sevc1, evc1_new, d0psi, d0psi2
+  USE lr_global,             ONLY : rpert, evc0, evq0, sevq0, d0psi, d0psi2
+  USE lr_lanczos,            ONLY : lanczos_steps, evc1, sevc1, evc1_new
   USE units_ph,              ONLY : lrwfc, iuwfc
   USE buffers,               ONLY : get_buffer
   USE mp_pools,              ONLY : inter_pool_comm
@@ -201,11 +201,12 @@ SUBROUTINE do_lanczos()
                  CALL dveqpsi_us(ik)
                  d0psi2(:,:,ik)=dvpsi(:,:)
               ENDIF
+
               !
               ! Orthogonalize dvpsi to valence states: Apply P_c^+ and change
               ! sign.
               !
-              CALL orthogonalize(dvpsi, evq, ikk, ikq, sevq0(1,1,ik), npwq, &
+              CALL orthogonalize(dvpsi, evq, ikk, ikq, sevq0(:,:,ik), npwq, &
                                                                       .TRUE.)
               !
               !  save here P_c^+ V_ext u_kv needed to compute the 
@@ -472,8 +473,8 @@ SUBROUTINE do_lanczos()
      DEALLOCATE( tg_dv  )
      DEALLOCATE( tg_psic)
   ENDIF
-  alpha_pv=alpha_pv0
 
+  alpha_pv=alpha_pv0
   CALL stop_clock ('do_lanczos')
 
   RETURN

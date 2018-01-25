@@ -19,7 +19,7 @@ SUBROUTINE lr_apply_s(vect, svect)
     USE klist,              ONLY : nks, xk, ngk, igk_k
     USE becmod,             ONLY : becp, calbec
     USE noncollin_module,   ONLY : npol
-    USE lr_lanczos,         ONLY : rpert
+    USE lr_global,          ONLY : rpert
     USE qpoint,             ONLY : nksq, ikks, ikqs
     USE control_lr,         ONLY : nbnd_occ
     

@@ -12,7 +12,8 @@ SUBROUTINE read_lanczos_chain()
 USE kinds,      ONLY : DP
 USE cell_base,  ONLY : omega
 USE lr_lanczos, ONLY : iulanczos, lanczos_steps, beta_store, gamma_store, &
-                       zeta_store, rpert
+                       zeta_store
+USE lr_global,  ONLY : rpert
 USE io_global,  ONLY : ionode, ionode_id
 USE mp,         ONLY : mp_bcast
 USE mp_images,  ONLY : intra_image_comm

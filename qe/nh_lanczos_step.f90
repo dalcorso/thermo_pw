@@ -27,9 +27,9 @@ SUBROUTINE nh_lanczos_step(iter, flag)
     USE io_global,    ONLY : ionode, stdout
     USE klist,        ONLY : nks, ngk
     USE qpoint,       ONLY : ikks, ikqs, nksq
-    USE lr_lanczos,   ONLY : evc1, evc1_new, evc1_old, sevc1, evq0, sevq0, &
-                             d0psi, d0psi2, beta_store, gamma_store, &
-                             zeta_store, size_evc1, rpert, iulanczos
+    USE lr_lanczos,   ONLY : evc1, evc1_new, evc1_old, sevc1, beta_store, &
+                             gamma_store, zeta_store, iulanczos
+    USE lr_global,    ONLY : evq0, sevq0, d0psi, d0psi2, size_evc1, rpert
     !
     IMPLICIT NONE
     INTEGER, INTENT(IN) :: iter

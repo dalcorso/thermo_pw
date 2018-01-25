@@ -18,7 +18,7 @@ FUNCTION lr_dot(x,y)
   USE klist,                ONLY : nks, wk, ngk
   USE wvfct,                ONLY : npwx, nbnd, wg
   USE control_flags,        ONLY : gamma_only
-  USE lr_lanczos,           ONLY : rpert
+  USE lr_global,            ONLY : rpert
   USE noncollin_module,     ONLY : noncolin, npol
   USE lsda_mod,             ONLY : nspin
   USE control_lr,           ONLY : nbnd_occ, lgamma
@@ -144,7 +144,7 @@ FUNCTION lr_dot0(x,y)
   USE klist,                ONLY : nks, wk, ngk
   USE wvfct,                ONLY : npwx, nbnd, wg
   USE control_flags,        ONLY : gamma_only
-  USE lr_lanczos,           ONLY : rpert
+  USE lr_global,            ONLY : rpert
   USE lsda_mod,             ONLY : nspin
   USE noncollin_module,     ONLY : noncolin, npol
   USE control_lr,           ONLY : nbnd_occ, lgamma
@@ -215,3 +215,4 @@ CONTAINS
   END SUBROUTINE lr_dot_k
 
 END FUNCTION lr_dot0
+

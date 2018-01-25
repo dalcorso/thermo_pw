@@ -9,7 +9,6 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !
-
 SUBROUTINE extrapolate()
   !-----------------------------------------------------------------------
   !
@@ -131,7 +130,8 @@ SUBROUTINE calc_chi(freq,broad,chi)
   USE kinds,      ONLY : DP
   USE constants,  ONLY : fpi
   USE lr_lanczos, ONLY : beta_store, beta_store_ext, gamma_store_ext, &
-                         zeta_store, rpert, lanczos_steps, lanczos_steps_ext
+                         zeta_store, lanczos_steps, lanczos_steps_ext
+  USE lr_global,  ONLY : rpert
   USE control_lr, ONLY : lgamma
   USE symme,      ONLY : symmatrix, crys_to_cart
   USE lsda_mod,   ONLY : nspin

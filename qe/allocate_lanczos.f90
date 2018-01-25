@@ -9,18 +9,19 @@
   USE lrus,                 ONLY : bbg
   USE control_flags,        ONLY : gamma_only
 
-  USE lr_lanczos,   ONLY : evc1, evc1_new, evc1_old, sevc1, evc0, sevq0, &
-                           evq0, d0psi, d0psi2, beta_store, gamma_store, &
-                           zeta_store, beta_store_ext, gamma_store_ext, &
-                           size_evc1, rpert, lanczos_steps, &
-                           lanczos_steps_ext, bbk, bbnc
+  USE lr_global,    ONLY : evc0, sevq0, evq0, d0psi, d0psi2, size_evc1, rpert
+  USE lr_lanczos,   ONLY : evc1, evc1_new, evc1_old, sevc1, beta_store, &
+                           gamma_store, zeta_store, beta_store_ext,     &
+                           gamma_store_ext, lanczos_steps, lanczos_steps_ext, &
+                           bbk, bbnc
+
   IMPLICIT NONE
 
-  IF (lgamma) THEN
-     rpert=3
-  ELSE
-     rpert=1
-  ENDIF
+  INTEGER :: ncopy
+
+  rpert=1
+  IF (lgamma) rpert=3
+  ncopy=2
   size_evc1= npwx*npol*nbnd*nksq*rpert
 
   ALLOCATE(evc0(npwx*npol,nbnd,nksq))
@@ -35,11 +36,11 @@
      sevq0 => evq0
   ENDIF
 
-  ALLOCATE(evc1_old(npwx*npol,nbnd,nksq*rpert,2))
-  ALLOCATE(evc1(npwx*npol,nbnd,nksq*rpert,2))
-  ALLOCATE(evc1_new(npwx*npol,nbnd,nksq*rpert,2))
+  ALLOCATE(evc1_old(npwx*npol,nbnd,nksq*rpert,ncopy))
+  ALLOCATE(evc1(npwx*npol,nbnd,nksq*rpert,ncopy))
+  ALLOCATE(evc1_new(npwx*npol,nbnd,nksq*rpert,ncopy))
   !
-  ALLOCATE(sevc1(npwx*npol,nbnd,nksq*rpert,2))
+  ALLOCATE(sevc1(npwx*npol,nbnd,nksq*rpert,ncopy))
   !
   ALLOCATE(d0psi(npwx*npol,nbnd,nksq,rpert))
 
@@ -84,9 +85,10 @@
 
   SUBROUTINE deallocate_lanczos()
 
-  USE lr_lanczos, ONLY : evc1, evc1_new, evc1_old, sevc1, evc0, evq0, sevq0, &
-                         d0psi, d0psi2, beta_store, gamma_store, zeta_store, &
-                         beta_store_ext, gamma_store_ext, bbk, bbnc
+  USE lr_global,  ONLY : evc0, sevq0, evq0, d0psi, d0psi2, size_evc1, rpert
+  USE lr_lanczos, ONLY : evc1, evc1_new, evc1_old, sevc1, beta_store, &
+                         gamma_store, zeta_store, beta_store_ext, &
+                         gamma_store_ext, bbk, bbnc
   USE lrus,       ONLY : bbg
 
   IMPLICIT NONE
