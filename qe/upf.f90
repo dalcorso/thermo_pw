@@ -90,7 +90,6 @@ SUBROUTINE read_upf_tpw(upf, grid, ierr, unit,  filename, xml_only) !
    ELSE IF (PRESENT(filename) ) THEN
        doc => parseFile(TRIM(filename), EX = ex )
        ierr = getExceptionCode( ex )
-       WRITE(6,*) 'read_upf ', TRIM(filename), ierr
        IF ( ierr ==  81 ) THEN 
           IF ( ionode ) CALL make_emended_upf_copy( TRIM(filename), &
               TRIM(tmp_dir)//'tmp.'//TRIM(int_to_char(my_image_id))//'.UPF') 
