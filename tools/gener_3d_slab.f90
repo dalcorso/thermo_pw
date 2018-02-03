@@ -92,14 +92,14 @@ REAL(DP) :: at(3,3), bg(3,3), g(3), t(3), c1(3), c2(3), d(3), bc1(3), bc2(3), &
             bt(3), beff(3,3), d1(3), d2(3), bd1(3), bd2(3), vprod(3), dz(3)
 REAL(DP) :: alat, c1mod, c2mod, tmod, prod1, prod2, prod3, vacuum, &
             gmod, dist, dist1, tau(3), det, omega, prod, area, super_area, &
-            alpha, c_alat, shiftz
+            alpha, c_alat, shiftz, scalar
 INTEGER  :: m, n, h, o, p, q, s, t11, t12, t21, t22, nlayers, nat, ibrav_3d, &
             nat_3d, p0, q0, s0, p01, q01, s01, p1, q1, s1, ia, iat, j, itry, &
             jtry, na, found, nspace, sign1, sign2, ia_first, m1, n1, o1, fact, &
             copies, min_j, lcryst, space_group_number, origin_choice, nt, &
-            ntyp, ibrav_sur, origin_shift
+            ntyp, ibrav_sur, origin_shift, i1
 
-REAL(DP) :: y(3,nmax), celldm(6), celldm_sur(6)
+REAL(DP) :: y(3,nmax), celldm(6), celldm_sur(6), gc(3)
 REAL(DP), PARAMETER :: eps=1.D-6
 INTEGER :: ps(nmax), qs(nmax), ss(nmax), ityp_all(nmax)
 INTEGER, ALLOCATABLE :: ityp(:), if_pos(:,:)
@@ -477,7 +477,10 @@ ELSE
 ENDIF
 gmod = SQRT( g(1)**2 + g(2)**2 + g(3)**2 )
 
-WRITE(stdout,'("G vector", 3f18.7)') g(1), g(2), g(3) 
+WRITE(stdout,'("G vector cartesian", 3f18.7)') g(1), g(2), g(3) 
+gc=g
+CALL cryst_to_cart(1,gc,at,-1)
+WRITE(stdout,'("G vector cryst", 3f18.7)') gc(1), gc(2), gc(3) 
 
 IF (.NOT.(ldist_vacuum)) THEN
 !
@@ -750,6 +753,22 @@ IF ( ABS( c1mod - c2mod ) < eps .AND. ABS( prod1 - 0.5_DP ) < eps ) THEN
                                                'some problem with c2mod',1)
    prod1 = ( c1(1) * c2(1) + c1(2) * c2(2) + c1(3) * c2(3) ) / c1mod / c2mod
 END IF
+!
+!  If c1 and c2 are not orthogonal, check if c1 and a linear combination of
+!  c1 and c2 have the same area and are orthogonal. Only a small number of
+!  combinations is tried. In that case take the linear combination as the
+!  new c2
+!
+IF (ABS(prod1) > 1.D-9) THEN
+   prod1 =   c1(1) * c2(1) + c1(2) * c2(2) + c1(3) * c2(3) 
+   DO i1=-8,8
+      scalar= prod1 + i1 * c1mod ** 2
+      IF (ABS(scalar)< 1.D-9) THEN
+         c2=i1 * c1 + c2 
+         EXIT
+      ENDIF 
+   ENDDO
+ENDIF
 !
 !  write all the periodic copies on the surface if the user asked for 
 !  a supercell
