@@ -6,6 +6,7 @@ dependent problems.
 Added an experimental version of a global conjugate-gradient
 solver of the linear response problem for phonons and dielectric constant.
 
+A cleanup of gener_3d_slab.f90. 
 
 20/12/2017 Version 0.9.0 is now frozen
 New in version 0.9.0
