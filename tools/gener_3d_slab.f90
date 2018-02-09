@@ -940,7 +940,7 @@ IF (ionode) THEN
    at(:,1)=c1(:)
    at(:,2)=c2(:)
    at(:,3)=t(:)
-   CALL xsf_struct (c_alat, at, nat, y, atm_typ, ityp_all, iuout)
+   CALL xsf_struct (alat, at, nat, y, atm_typ, ityp_all, iuout)
 
    CLOSE(iuout)
 ENDIF
