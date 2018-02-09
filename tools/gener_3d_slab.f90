@@ -875,7 +875,6 @@ ELSEIF (ABS(c1mod-c2mod) < eps ) THEN
 !
    alpha=ACOS(prod1) * 0.5_DP
    c_alat= 2.0_DP * c1mod * SIN(alpha) * alat
-   c_alat = c1mod * alat
    celldm_sur(1) = c_alat
    celldm_sur(2) = 2.0_DP*c1mod*COS(alpha)*alat / c_alat
    celldm_sur(3) = tmod * alat / c_alat
