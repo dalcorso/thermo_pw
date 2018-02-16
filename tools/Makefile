@@ -8,7 +8,7 @@ MODFLAGS= $(MOD_FLAG)../../iotk/src $(MOD_FLAG)../../Modules \
           $(MOD_FLAG)../../UtilXlib \
           $(MOD_FLAG)../../KS_Solvers/Davidson $(MOD_FLAG)../../KS_Solvers/CG \
           $(MOD_FLAG)../../PW/src $(MOD_FLAG)../../LR_Modules \
-          $(MOD_FLAG)../../PHonon/PH $(MOD_FLAG)../lib  $(MOD_FLAG).
+          $(MOD_FLAG)../../PHonon/PH $(MOD_FLAG)../lib $(MOD_FLAG).
 
 IFLAGS=
 
@@ -16,7 +16,7 @@ LRMODS = ../../LR_Modules/liblrmod.a
 PWOBJS = ../../PHonon/PH/libph.a ../../PP/src/libpp.a ../../PW/src/libpw.a 
 QEMODS = ../../Modules/libqemod.a ../../KS_Solvers/Davidson/libdavid.a ../../KS_Solvers/CG/libcg.a ../../FFTXlib/libqefft.a ../../LAXlib/libqela.a ../../UtilXlib/libutil.a
 
-LIBOBJS	= ../lib/thermo_lib.a ../qe/thermo_qe.a ../../PHonon/PH/libph.a ../../clib/clib.a ../../iotk/src/libiotk.a
+LIBOBJS	= ../lib/thermo_lib.a ../qe/thermo_qe.a ../../PHonon/PH/libph.a ../../PW/src/libpw.a ../../clib/clib.a ../../iotk/src/libiotk.a
 
 TLDEPS= bindir mods libs pw
 
@@ -81,7 +81,7 @@ gener_2d_slab.x : gener_2d_slab.o $(PWOBJS) $(LIBOBJS)
 
 gener_3d_slab.x : gener_3d_slab.o $(PWOBJS) $(LIBOBJS)
 	$(LD) $(LDFLAGS) -o $@ gener_3d_slab.o  \
-	$(PWOBJS) $(QEMODS) $(LIBOBJS) $(LIBS)
+	$(PWOBJS) $(QEMODS) $(LIBOBJS) $(QEMODS) $(LIBS)
 	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/gener_3d_slab.x . )
 
 gener_nanowire.x : gener_nanowire.o $(PWOBJS) $(LIBOBJS)

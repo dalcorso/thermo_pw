@@ -49,6 +49,7 @@ gener_3d_slab.o : ../../Modules/io_global.o
 gener_3d_slab.o : ../../Modules/kind.o
 gener_3d_slab.o : ../../Modules/mp_global.o
 gener_3d_slab.o : ../../Modules/wyckoff.o
+gener_3d_slab.o : ../../thermo_pw/lib/lattices.o
 gener_nanowire.o : ../../Modules/environment.o
 gener_nanowire.o : ../../Modules/io_global.o
 gener_nanowire.o : ../../Modules/kind.o
