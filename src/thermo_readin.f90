@@ -55,7 +55,7 @@ SUBROUTINE thermo_readin()
                                    flpsnkconv, flpsgrun,  flpsenergy, &
                                    flpsepsilon, flpseldos, flpseltherm
   USE control_2d_bands,     ONLY : lprojpbs, nkz, gap_thr, sym_divide, &
-                                   identify_sur, sur_layers, sur_thr, &
+                                   identify_sur, sur_layers, sur_thr, sp_min, &
                                    force_bands, only_bands_plot, dump_states, &
                                    subtract_vacuum
   USE control_asy,          ONLY : flasy, lasymptote, asymptote_command
@@ -91,6 +91,7 @@ SUBROUTINE thermo_readin()
                                    calculation
   USE control_ph,           ONLY : xmldyn
   USE ifc,                  ONLY : zasr
+  USE cell_base,            ONLY : alat
   USE output,               ONLY : fildyn
   USE mp_world,             ONLY : world_comm
   USE mp_images,            ONLY : nimage, my_image_id, root_image
@@ -163,6 +164,7 @@ SUBROUTINE thermo_readin()
                             sym_divide, identify_sur,       &
                             force_bands, dump_states,       &
                             sur_thr, sur_layers,            &
+                            sp_min,                         &
                             subtract_vacuum,                &
                             flpbs, flprojlayer,             &
 !
@@ -334,6 +336,7 @@ SUBROUTINE thermo_readin()
   dump_states=.FALSE.
   sur_layers=0
   sur_thr=0.0_DP
+  sp_min=0.0_DP
   subtract_vacuum=.TRUE.
   force_bands=.FALSE.
   flpbs='output_pbs'
@@ -745,6 +748,14 @@ SUBROUTINE thermo_readin()
      IF (calculation/='scf'.AND.calculation/='relax') &
         CALL errore('thermo_readin','thermo_pw requires scf or relax in &
                                                &pw input',1)
+  ENDIF
+!
+!  default value of sp_min if not given in input
+!
+  IF (sp_min==0.0_DP) THEN
+     sp_min=2.0_DP/alat
+  ELSE
+     sp_min=sp_min/alat
   ENDIF
 
   DEALLOCATE(input)

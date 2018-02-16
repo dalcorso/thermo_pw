@@ -36,7 +36,8 @@ SUBROUTINE bcast_thermo_input()
                               path_fact
   USE control_2d_bands, ONLY : lprojpbs, nkz, sym_divide, identify_sur,       &
                                gap_thr, sur_layers, sur_thr, force_bands,     &
-                               only_bands_plot, dump_states, subtract_vacuum
+                               only_bands_plot, dump_states, subtract_vacuum, &
+                               sp_min
   USE control_eldos,   ONLY : deltae, ndose, nk1_d, nk2_d, nk3_d, &
                               k1_d, k2_d, k3_d, sigmae, legauss
   USE control_asy,     ONLY : flasy, lasymptote, asymptote_command
@@ -142,6 +143,7 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( dump_states, meta_ionode_id, world_comm )
   CALL mp_bcast( sur_layers, meta_ionode_id, world_comm )
   CALL mp_bcast( sur_thr, meta_ionode_id, world_comm )
+  CALL mp_bcast( sp_min, meta_ionode_id, world_comm )
   CALL mp_bcast( subtract_vacuum, meta_ionode_id, world_comm )
   CALL mp_bcast( force_bands, meta_ionode_id, world_comm )
   CALL mp_bcast( flpbs, meta_ionode_id, world_comm )

@@ -150,6 +150,7 @@ SUBROUTINE prepare_plan_avg (ninter, zdim, i1, vacuum1, vacuum2, surface1, surfa
   !
   USE cell_base, ONLY: celldm, alat, tpiba2
   USE ions_base, ONLY: nat, ntyp=>nsp, ityp, tau
+  USE control_2d_bands, ONLY : sp_min
   USE io_global, ONLY : stdout
 
   IMPLICIT NONE
@@ -172,14 +173,12 @@ SUBROUTINE prepare_plan_avg (ninter, zdim, i1, vacuum1, vacuum2, surface1, surfa
   ! the number of tau per plane
   INTEGER, ALLOCATABLE :: distance(:)
 
-  REAL(DP) :: sp_min, avg (nat), z1 (nat)
-  ! minimum plane distance
+  REAL(DP) :: avg (nat), z1 (nat)
   ! the average position of each plane
   ! auxiliary for coordinates
 
   IF ( celldm(3) == 0.d0 ) celldm(3) = celldm(1)
   zdim = alat * celldm (3)
-  sp_min = 2.d0 / alat
   !
   !     Compute the number of planes and the coordinates on the mesh of the
   !     points which define each plane

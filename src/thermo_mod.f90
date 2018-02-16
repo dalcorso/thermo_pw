@@ -534,7 +534,8 @@ MODULE control_2d_bands
   INTEGER :: nlayers     ! number of layers identified by the code
   INTEGER :: surface1, surface2 ! tha surface layers
   REAL(DP) :: gap_thr, & ! energy gap in the PBS
-              sur_thr    ! minimum percentage of charge to be a surface state
+              sur_thr, & ! minimum percentage of charge to be a surface state
+              sp_min     ! minimum layer spacing. Given in input. 
 
   INTEGER, ALLOCATABLE  :: aux_ind_sur(:,:)
   REAL(DP), ALLOCATABLE :: averag(:,:,:,:)      ! charge density on each layer 

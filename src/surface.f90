@@ -153,7 +153,7 @@ ALLOCATE(plot(nlayers))
 !
 IF (sur_layers * 2 > nat ) &
    CALL errore('identify_surface_states','too many surface layers',1)
-WRITE(stdout,'(/, 5x, "Surface#1 is layer", i4, "Surface#2 is layer",i4)') &
+WRITE(stdout,'(/, 5x, "Surface#1 is layer", i4, " Surface#2 is layer",i4)') &
                     surface1, surface2
 plot=.FALSE.
 DO na=1, sur_layers
