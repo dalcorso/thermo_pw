@@ -123,6 +123,10 @@ PROGRAM gener_3d_slab
 !               be the one with negative z closest to the origin.  
 !               Set origin_shift=0 if you do not know what to do here.
 !
+!  do_shift     if .TRUE. apply a shift to slabs with an even number
+!               of layers so that the origin is in the middle of
+!               two slabs.
+!
 !  filename     the name of a file were the output coordinates and
 !               unit cell are written. Note that other two files 
 !               filename.xsf and filename.or.xsf will be written as 
@@ -147,7 +151,7 @@ REAL(DP) :: celldm_3d(6)
 REAL(DP), ALLOCATABLE :: tau_3d(:,:), extfor(:,:)
 INTEGER  :: m, n, h, o, t11, t12, t21, t22, nlayers, ibrav_3d, nat_3d, &
             origin_shift, lcryst, space_group_number, origin_choice 
-LOGICAL  :: ldist_vacuum, three_indices, uniqueb, rhombohedral
+LOGICAL  :: ldist_vacuum, three_indices, uniqueb, rhombohedral, do_shift
 CHARACTER ( LEN=3 ), ALLOCATABLE :: atm_3d(:)
 CHARACTER( LEN=256 ) :: filename          
 !
@@ -355,9 +359,13 @@ WRITE(stdout,'("Vacuum space in a.u. ?")')
 READ(5,*) vacuum
 WRITE(stdout,'(f15.6)') vacuum 
 
-WRITE(stdout,'("In which layer do you want to put the origin ?")')
+WRITE(stdout,'("In which layer do you want to put the origin?")')
 READ(5,*) origin_shift
 WRITE(stdout,'(i5)') origin_shift
+
+WRITE(stdout,'("Do you want to put the origin within two slabs?")')
+READ(5,*) do_shift
+WRITE(stdout,'(l5)') do_shift
 
 WRITE(stdout,'("Output file name?")')
 READ(5,*) filename
@@ -970,15 +978,12 @@ IF (ionode) THEN
    WRITE (iuout, '("ATOMIC_POSITIONS {crystal}")') 
 ENDIF
 !
-! For slabs with an even number of layers the origin goes in the center of
-! two layers. Moreover in any case shift the z coordinates of a distance 
-! equivalent to origin_shift layers.
+! For slabs with an even number of layers the origin can be moved
+! in the center of two layers. Moreover in any case shift the z coordinates 
+! of a distance equivalent to origin_shift layers.
 !
-IF ( MOD(nlayers,2) == 0 ) THEN
-   dz(:) = - (0.5_DP + origin_shift) * g(:) / gmod ** 2
-ELSE
-   dz(:) = - origin_shift * g(:) / gmod ** 2
-ENDIF
+dz(:) = - origin_shift * g(:) / gmod ** 2
+IF ( MOD(nlayers,2) == 0 .AND. do_shift ) dz(:)=dz(:)-0.5_DP*g(:)/gmod**2
 !
 !  Put dz in crystal coordinates. Note that it has only the component parallel
 !  to t.

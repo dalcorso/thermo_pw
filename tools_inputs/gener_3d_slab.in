@@ -9,6 +9,7 @@
 .FALSE.                    ! if .TRUE. the vacuum distance is given below
 15.0                       ! the vacuum distance in a.u.
 0                          ! origin shift 
+.TRUE.                     ! do the origin shift for slab with even layers
 'altau'                    ! name of the file with the output coordinates
 
 !
