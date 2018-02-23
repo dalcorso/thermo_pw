@@ -138,13 +138,15 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
   CALL read_representations(nks, nbnd, k_rap, rap, high_symmetry,      &
                     gcodek, aux_ind, gcodek_ext, ptypek, lprojk, &
                     same_next, gaugek, exist_rap, filerap)
-  DO n=1, nks
-     IF (ABS(k(1,n)-k_rap(1,n))+ABS(k(2,n)-k_rap(2,n))+  &
-         ABS(k(3,n)-k_rap(3,n)) > eps.AND.icode /=3.AND.icode/=4 ) THEN
-         WRITE(stdout,'(/,5x,"Incompatible k points in rap file")')
-         exist_rap=.FALSE.
-     END IF
-  ENDDO
+  IF (exist_rap) THEN
+     DO n=1, nks
+        IF (ABS(k(1,n)-k_rap(1,n))+ABS(k(2,n)-k_rap(2,n))+  &
+            ABS(k(3,n)-k_rap(3,n)) > eps.AND.icode /=3.AND.icode/=4 ) THEN
+            WRITE(stdout,'(/,5x,"Incompatible k points in rap file")')
+            exist_rap=.FALSE.
+        END IF
+     ENDDO
+  ENDIF
 !
 !   If we do not have a representation file we set default values 
 !   for the representations
@@ -705,7 +707,7 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
   ELSE
      sizec=1.0_DP
   ENDIF
-  factor_dx = MAX(6.0_DP, 2.0_DP * sizeb, 2.0_DP * sizec, &
+  factor_dx = MAX(8.0_DP, 2.0_DP * sizeb, 2.0_DP * sizec, &
                                        2.0_DP/sizeb, 2.0_DP/sizec)
 
   dxmod_save = SQRT( (k(1,2)-k(1,1))**2 +  &
