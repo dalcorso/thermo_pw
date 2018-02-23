@@ -96,7 +96,7 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
   INTEGER :: code_group_line, code_group_ext_line, ilines, irap, ibnd, &
              i, n, ik, spe, lpe, nbc, iq, ishift, ir, count0, &
              nrapp, cpe, start_shift, last_shift, ncentral, nlines_, &
-             iunout, ios
+             ikz, iunout, ios
 
   LOGICAL :: exist_rap, type1, lso, print_eref, norap
 
@@ -187,12 +187,12 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
   ALLOCATE (last_point(nks))
 
   nks_=nks / nkz
-  DO n=1,nks
+  DO n=1,nks_
      IF (high_symmetry(n)) THEN
         IF (n==1) THEN
 !
 !   first point. Initialize the number of lines
-!   and say that this line start at the first point
+!   and say that this line starts at the first point
 !
            IF (.NOT. high_symmetry(n+1)) THEN
               nlines=1
@@ -227,6 +227,14 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
         ENDIF
      ENDIF
   ENDDO
+  DO ikz=2,nkz
+     DO ilines=1,nlines
+        start_point(ilines+(ikz-1)*nlines)=start_point(ilines)+(ikz-1)*nks_
+        last_point(ilines+(ikz-1)*nlines)=last_point(ilines)+(ikz-1)*nks_
+     ENDDO
+  ENDDO
+  nlines=nlines*nkz
+
   tot_points=0
   DO ilines=1,nlines
      tot_points=tot_points+last_point(ilines)-start_point(ilines)+1
