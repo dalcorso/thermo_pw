@@ -68,21 +68,25 @@ IF (.NOT.only_bands_plot) THEN
    ENDIF
 ELSE
    CALL read_minimal_info(.TRUE., ierr)
+   CALL set_paths_disp()
    IF (ierr /= 0) THEN
 !
 !    The code might have only the punch files but not the bands files
 !
-      CALL set_paths_disp()
       nspin0=nspin
       IF (nspin==4) nspin0=1
       DO spin_component = 1, nspin0
          CALL bands_sub()
       END DO
    END IF
-   CALL set_files_for_plot(1, ' ', filedata, filerap, fileout,  &
+   nspin0=nspin
+   IF (nspin==4) nspin0=1
+   DO spin_component = 1, nspin0
+      CALL set_files_for_plot(1, ' ', filedata, filerap, fileout,  &
                                                 gnu_filename, filenameps)
-   CALL plotband_sub(1, filedata, filerap, fileout, &
+      CALL plotband_sub(1, filedata, filerap, fileout, &
                                                 gnu_filename, filenameps)
+   ENDDO
 ENDIF
 RETURN
 END SUBROUTINE manage_bands
