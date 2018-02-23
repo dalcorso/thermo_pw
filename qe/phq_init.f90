@@ -109,7 +109,7 @@ SUBROUTINE phq_init_tpw()
   !
   ! ... a0) compute rhocore for each atomic-type if needed for nlcc
   !
-  IF ( nlcc_any ) CALL set_drhoc( xq, drc )
+  IF ( nlcc_any.AND. (trans.OR.zeu) ) CALL set_drhoc( xq, drc )
   !
   ! ... b) the fourier components of the local potential at q+G
   !
@@ -255,7 +255,7 @@ SUBROUTINE phq_init_tpw()
   !
   DEALLOCATE( aux1 )
   !
-  CALL dvanqq()
+  IF (trans.OR.zeu) CALL dvanqq()
   !
   IF ( ( epsil .OR. zue .OR. l_head) .AND. okvan ) THEN
      CALL compute_qdipol(dpqq)
