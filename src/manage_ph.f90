@@ -76,14 +76,16 @@ DO igeom=start_geometry,last_geometry
    CALL set_files_names(igeom)
 
    auxdyn=fildyn
-   IF (after_disp.AND.what=='mur_lc_t') THEN
+   IF (after_disp) THEN
 !
 !  The geometry is read by thermo_ph_readin from the output files of pw.x,
 !  except in the case where after_disp=.TRUE.. In this case we have to
 !  set it here.
 !
-      ibrav=ibrav_geo(igeom)
-      celldm(:)=celldm_geo(:,igeom)
+      IF (what=='mur_lc_t') THEN
+         ibrav=ibrav_geo(igeom)
+         celldm(:)=celldm_geo(:,igeom)
+      ENDIF
       IF (set_internal_path) CALL set_bz_path()
       do_ph=.FALSE.
    ELSE
