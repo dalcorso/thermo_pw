@@ -91,6 +91,7 @@ set_fxc_tran.o \
 set_intq_nc.o \
 set_kplusq.o \
 set_kup_and_kdw.o \
+setup.o \
 solve_e.o \
 solve_e_fpolc.o \
 solve_eq.o \

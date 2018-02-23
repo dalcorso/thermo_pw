@@ -68,7 +68,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   !
   ! CALL check_stop_init()
   !
-  CALL setup ()
+  CALL setup_tpw ()
   !
   CALL init_run()
   !
