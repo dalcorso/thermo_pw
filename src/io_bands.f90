@@ -81,7 +81,7 @@ CONTAINS
 
   SUBROUTINE write_representations(nks, nbnd, xk, rap, high_symmetry,      &
                           gcodek, aux_ind, gcodek_ext, ptypek, lprojk, & 
-                          same_next, gaugek, filedata) 
+                          same_next, gaugek, filedata, ik0, nks_eff) 
 
   USE kinds, ONLY : DP
   USE constants, ONLY : pi
@@ -89,7 +89,7 @@ CONTAINS
 
   IMPLICIT NONE
 
-  INTEGER, INTENT(IN) :: nks, nbnd
+  INTEGER, INTENT(IN) :: nks, nbnd, ik0, nks_eff
   INTEGER, INTENT(IN) :: rap(nbnd, nks), gcodek(nks), gcodek_ext(nks), &
                          aux_ind(nks), ptypek(3,nks), lprojk(nks)
   LOGICAL, INTENT(IN) :: high_symmetry(nks), same_next(nks)
@@ -107,12 +107,11 @@ CONTAINS
   CALL mp_bcast( ios, ionode_id, intra_image_comm )
   IF ( ios /= 0 ) &
      CALL errore ('write_representations', 'Opening representation file', &
-                                                                     ABS(ios) )
-
+                                                                   ABS(ios) )
   IF (ionode) THEN
      WRITE (iunpun, '(" &plot_rap nbnd_rap=",i4,", nks_rap=",i6," /")') &
-                                                       nbnd, nks
-     DO ik=1, nks
+                                                       nbnd, nks_eff-ik0
+     DO ik=ik0+1, nks_eff
         WRITE (iunpun, '(10x,3f10.6,l5,7i4,l3)') xk(1:3,ik),  &
                high_symmetry(ik), gcodek(ik), aux_ind(ik), &
                gcodek_ext(ik), ptypek(1:3,ik), lprojk(ik), same_next(ik)

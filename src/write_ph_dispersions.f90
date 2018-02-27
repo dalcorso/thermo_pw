@@ -236,7 +236,7 @@ SUBROUTINE write_ph_dispersions()
      filename=TRIM(filefrq)//'.rap'
      CALL write_representations(nq, 3*nat, disp_q, num_rap_mode, high_sym,  &
                        qcode_group, aux_ind, qcode_group_ext, ptypeq, lprojq, &
-                       same_next, gaugeq, filename)
+                       same_next, gaugeq, filename, 0, nq)
 
      DEALLOCATE(same_next)
      DEALLOCATE(aux_ind)

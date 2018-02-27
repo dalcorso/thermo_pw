@@ -78,7 +78,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
                           code_group_ext_k(:), lprojk(:), nrapk(:), &
                           ptypek(:,:), ngroup(:), istart(:,:)
   INTEGER :: code_group1, code_group_ext, code_group_in, nsym_in, ptype(3), &
-             nr1, nr2, nr3, sg_number
+             nr1, nr2, nr3, sg_number, ik0, nks_eff
   INTEGER :: find_free_unit
   LOGICAL :: lwrite
   LOGICAL, ALLOCATABLE :: same_next(:)
@@ -551,9 +551,18 @@ SUBROUTINE sym_band_sub(filband, spin_component)
      ENDIF
   ENDIF
 
+  nks_eff=nkstot
+  ik0=0
+  IF (spin_component==2) THEN
+     ik0=nkstot/nspin
+     nks_eff=nkstot
+  ELSEIF (nspin==2) THEN
+     nks_eff=nkstot/nspin
+  ENDIF
+
   CALL write_representations(nkstot, nbnd, xk, rap_et, high_symmetry,      &
                         code_group_k, aux_ind, code_group_ext_k, ptypek, &
-                        lprojk, same_next, gaugek, namefile)
+                        lprojk, same_next, gaugek, namefile, ik0, nks_eff)
 
   IF (sym_divide.AND.nkz>1) &
      CALL mp_bcast(aux_ind_sur,ionode_id,intra_image_comm)
