@@ -164,7 +164,7 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
   END IF
 
   IF (identify_sur) CALL identify_surface_states(nat,nbnd,nks,e,rap)
-  WRITE(stdout,'(5x,"Starting the generation of the plot",/)') 
+  WRITE(stdout,'(/,5x,"Starting the generation of the plot",/)') 
 !
 !  at this point we have:
 !  k, e   for all k and bands
@@ -442,7 +442,7 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
 !                               ! minimum values among the points of a line.
 !
 !
-  WRITE(stdout,'(/,5x,"Representations per line:")')
+  IF (exist_rap) WRITE(stdout,'(/,5x,"Representations per line:")')
 
   nbnd_count=0
   start_rapk=0
@@ -680,7 +680,6 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
            ENDDO
         ENDIF
      ELSE
-        WRITE(stdout,'(5x, "Line ", i7, " Representations not available")')
         DO ibnd=1,nbnd
            IF (is_in_range(ibnd,ilines)) has_points(1,ilines)=.TRUE.
         ENDDO
