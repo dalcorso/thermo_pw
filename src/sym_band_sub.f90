@@ -89,7 +89,11 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   CHARACTER(LEN=45) :: snamek(48), name_out(12)
   CHARACTER(LEN=6) :: int_to_char
   CHARACTER (LEN=256) :: filband, namefile
-  !
+!
+!   Find which k points must be done by this pool
+!
+  CALL find_nks1nks2(1,nkstot,nks1tot,nks1,nks2tot,nks2,spin_component)
+!
   IF (.NOT.lsym) GOTO 450
   IF (spin_component/=1.and.nspin/=2) &
        CALL errore('sym_band_sub','incorrect spin_component',1)
@@ -123,10 +127,6 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   rap_et=-1
   times=(0.0_DP,0.0_DP)
   d_spin_in=(0.0_DP,0.0_DP)
-!
-!   Find which k points must be done by this pool
-!
-  CALL find_nks1nks2(1,nkstot,nks1tot,nks1,nks2tot,nks2,spin_component)
 !
 !  Make the symmetry analysis first
 !
