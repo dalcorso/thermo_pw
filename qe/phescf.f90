@@ -93,7 +93,9 @@ SUBROUTINE phescf_tpw()
      IF (llanczos) THEN
         CALL allocate_lanczos()
         IF (ionode) THEN
+           OPEN(UNIT=99, FILE='buffer') 
            iulanczos=find_free_unit()
+           CLOSE(UNIT=99, STATUS='delete') 
            OPEN(UNIT=iulanczos, FILE='dynamical_matrices/save_chain',&
             STATUS='unknown', POSITION='append', ERR=100, IOSTAT=ios)
         ENDIF
@@ -259,7 +261,7 @@ IF (ionode) THEN
    filename='dynamical_matrices/epsilon_re'
    IF (my_image_id>0) filename=TRIM(filename)//'_'//int_to_char(my_image_id)
    INQUIRE(FILE=TRIM(filename), exist=exst)
-   IF (exst) THEN
+   IF (exst.AND.iu>1) THEN
       OPEN (UNIT=iu_epsil, FILE=TRIM(filename), STATUS='old',&
                               POSITION='append', FORM='formatted')
    ELSE
@@ -280,7 +282,7 @@ IF (ionode) THEN
    filename='dynamical_matrices/epsilon_im'
    IF (my_image_id>0) filename=TRIM(filename)//'_'//int_to_char(my_image_id)
    INQUIRE(FILE=TRIM(filename), exist=exst)
-   IF (exst) THEN
+   IF (exst.AND.iu>1) THEN
       OPEN (UNIT=iu_epsil, FILE=TRIM(filename), STATUS='old',&
                              POSITION='append', FORM='formatted')
    ELSE
@@ -301,7 +303,7 @@ IF (ionode) THEN
    filename='dynamical_matrices/epsilonm1_re'
    IF (my_image_id>0) filename=TRIM(filename)//'_'//int_to_char(my_image_id)
    INQUIRE(FILE=TRIM(filename), exist=exst)
-   IF (exst) THEN
+   IF (exst.AND.iu>1) THEN
       OPEN (UNIT=iu_epsil, FILE=TRIM(filename), STATUS='old', &
                                        POSITION='append', FORM='formatted')
    ELSE
@@ -320,7 +322,7 @@ IF (ionode) THEN
    filename='dynamical_matrices/epsilonm1_im'
    IF (my_image_id>0) filename=TRIM(filename)//'_'//int_to_char(my_image_id)
    INQUIRE(FILE=TRIM(filename), exist=exst)
-   IF (exst) THEN
+   IF (exst.AND.iu>1) THEN
       OPEN (UNIT=iu_epsil, FILE=TRIM(filename), STATUS='old', &
                                       POSITION='append', FORM='formatted')
    ELSE
@@ -345,7 +347,7 @@ IF (ionode) THEN
       filename='dynamical_matrices/polariz_re'
       IF (my_image_id>0) filename=TRIM(filename)//'_'//int_to_char(my_image_id)
       INQUIRE(FILE=TRIM(filename), exist=exst)
-      IF (exst) THEN
+      IF (exst.AND.iu>1) THEN
          OPEN (UNIT=iu_epsil, FILE=TRIM(filename), STATUS='old', &
                               POSITION='append', FORM='formatted')
       ELSE
@@ -366,7 +368,7 @@ IF (ionode) THEN
       filename='dynamical_matrices/polariz_im'
       IF (my_image_id>0) filename=TRIM(filename)//'_'//int_to_char(my_image_id)
       INQUIRE(FILE=TRIM(filename), exist=exst)
-      IF (exst) THEN
+      IF (exst.AND.iu>1) THEN
          OPEN (UNIT=iu_epsil, FILE=TRIM(filename), STATUS='old', &
                               POSITION='append', FORM='formatted')
       ELSE

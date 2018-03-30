@@ -54,12 +54,15 @@ SUBROUTINE do_lanczos_psh()
   USE paw_onecenter,         ONLY : paw_dpotential
   USE paw_symmetry,          ONLY : paw_desymmetrize
   USE paw_add_symmetry,      ONLY : paw_deqsymmetrize
-  USE control_ph,            ONLY : lnoloc,  lgamma_gamma
+  USE control_ph,            ONLY : lnoloc, lgamma_gamma, rec_code, &
+                                    rec_code_read, ext_recover, recover, convt
   USE control_lr,            ONLY : alpha_pv, nbnd_occ, lgamma
   USE lrus,                  ONLY : int3, int3_paw
   USE dv_of_drho_lr,         ONLY : dv_of_drho
   USE lr_global,             ONLY : rpert, evc0, evq0, sevq0, d0psi, d0psi2
-  USE lr_lanczos,            ONLY : lanczos_steps, evc1, sevc1, evc1_new
+  USE lr_lanczos,            ONLY : lanczos_steps, evc1, sevc1, evc1_new,    &
+                                    nwordd0psi, lanczos_restart_step
+  USE recover_mod,           ONLY : read_rec, write_rec
   USE units_ph,              ONLY : lrwfc, iuwfc
   USE buffers,               ONLY : get_buffer
   USE mp_pools,              ONLY : inter_pool_comm
@@ -84,13 +87,15 @@ SUBROUTINE do_lanczos_psh()
   ! counters or indices
   LOGICAL :: lmet
 
-  REAL(DP) :: weight, alpha_pv0, anorm
+  REAL(DP) :: weight, alpha_pv0, anorm, dr2
   ! weight of k points and store alpha_pv
   REAL(DP) :: tcpu, get_clock
+  LOGICAL :: exst
 
   CALL start_clock ('do_lanczos')
-
+  nwordd0psi = 2 * nbnd * npwx * npol * nksq * rpert
   alpha_pv0=alpha_pv
+  convt=.FALSE.
   lmet = (lgauss .OR. ltetra)
   IF (lmet.AND.lgamma) THEN
      CALL errore('do_lanczos','only q/=0 allowed for metals',1)
@@ -98,7 +103,6 @@ SUBROUTINE do_lanczos_psh()
      IF (lmet) alpha_pv=0.0_DP
   ENDIF
 
-  iter0=0
 
   ALLOCATE (dvscfin( dfftp%nnr, nspin_mag, rpert))
   IF (doublegrid) THEN
@@ -122,13 +126,25 @@ SUBROUTINE do_lanczos_psh()
      incr = fftx_ntgrp(dffts)
      !
   ENDIF
+  IF (recover) THEN
+     IF (rec_code_read == -20.AND.ext_recover) THEN
+     ! restarting in Electric field calculation
+        CALL read_rec(dr2, iter0, rpert, dvscfin, dvscfins)
+     ENDIF
+     iter0=0
+     CALL lr_restart_tpw (iter0, recover)
+     iter0=iter0+1
+  ELSE
+     iter0=1
+     dr2=0.0_DP
+  ENDIF
   !
   !   The outside loop is over the lanczos steps
   !
-  DO kter = 1, lanczos_steps+1
+  DO kter = iter0, lanczos_steps+1
 
 !     write(6,*) 'kter', kter
-     iter = kter + iter0
+     iter = kter
 !
 !   A loop over k points
 !
@@ -141,7 +157,7 @@ SUBROUTINE do_lanczos_psh()
         !
         CALL init_us_2 (npwq, igk_k(1,ikq), xk (1, ikq), vkb)
         !
-        IF (iter==1) THEN
+        IF (iter==iter0) THEN
            !
            ! at the first iteration reads unperturbed wavefuctions psi_k 
            ! in G_space, for all bands. When q /= 0 reads also evq 
@@ -173,7 +189,7 @@ SUBROUTINE do_lanczos_psh()
         DO ipol = 1, rpert
            ikp = ik + nksq * (ipol - 1)  
            
-           IF (iter == 1) THEN
+           IF (iter == iter0) THEN
               !
               ! At the first iteration compute the right hand side of the
               ! linear systems and the starting vectors.
@@ -216,9 +232,10 @@ SUBROUTINE do_lanczos_psh()
               ! At the first iteration evc1 is not known and is set 
               ! to S^-1 P_c^+ V_ext u_kv
               !
-              evc1(:,:,ikp,1)=-dvpsi(:,:)
+              IF (iter==1) evc1(:,:,ikp,1)=-dvpsi(:,:)
               !
-           ELSE
+           ENDIF
+           IF (iter>1) THEN
               !
               !  Here we compute (H-eS) psi^1, at the iteration iter-1 
               !  Since ch_psi_all apply also alpha_pv Q, we set alpha_pv
@@ -301,7 +318,12 @@ SUBROUTINE do_lanczos_psh()
      !  here we do the lanczos step of iteration iter-1
      !
      IF (iter > 1) CALL psh_lanczos_step(iter-1,.FALSE.)
-     IF (iter==lanczos_steps+1) EXIT
+     !
+     !  and save the results to restart each lanczos_restart_step
+     !
+     IF ((lanczos_restart_step>0 .AND. iter /= 1 .AND. &
+         ( mod(iter-1,lanczos_restart_step)==0)).OR.(iter==lanczos_steps+1)) &
+                                CALL lanczos_write_restart_tpw(iter-1)
      !
      !  The independent particle approximation corresponds to set to zero 
      !  dV_Hxc
@@ -452,6 +474,11 @@ SUBROUTINE do_lanczos_psh()
                                   &" secs ")') iter, tcpu
      !
      FLUSH( stdout )
+1010 IF ((lanczos_restart_step>0 .AND. iter /= 1 .AND. &
+         (mod(iter-1,lanczos_restart_step)==0)).OR.iter==lanczos_steps+1) THEN
+        rec_code=-20
+        CALL write_rec('solve_e...', 0, dr2, iter, .FALSE., rpert, dvscfin)
+     ENDIF
      !
   ENDDO  ! Lanczos iterations
 

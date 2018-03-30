@@ -966,6 +966,11 @@ lanczos_steps: steps of the Lanczos chain.
           Default : interger 2000
 lanczos_steps_ext:  steps of the extrapolated lanczos chain
           Default: integer 10000
+lanczos_restart_steps: number of steps between saving of the Lanczos status.
+          If 0 the status is saved only at the end of the run. Use 
+          recover=.TRUE. to resume an interrupted lanczos chain or to
+          increase the number of steps.
+          Default: integer 0
 extrapolation : extrapolation type. Presently only 'no' is active in 
           this case no extrapolation is applied. Otherwise the average
           of the beta and gamma is used.

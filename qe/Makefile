@@ -53,9 +53,11 @@ h_pcg_step.o \
 initialize_ph.o \
 kpoint_grid.o \
 irrek.o \
+lanczos_write_restart.o \
 lr_dot.o \
-lr_us.o  \
+lr_restart.o \
 lr_sm1_psi.o \
+lr_us.o  \
 mix_pot.o \
 nh_lanczos_step.o \
 non_scf.o \

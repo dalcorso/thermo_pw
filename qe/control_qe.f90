@@ -168,8 +168,10 @@ MODULE lr_lanczos
   COMPLEX(kind=DP), ALLOCATABLE :: zeta_store(:,:,:) ! perturbation projected 
 
   INTEGER :: &
-       lanczos_steps, &  ! steps of the Lanczos chain
-       lanczos_steps_ext ! steps of the extrapolated lanczos chain
+       lanczos_steps,     & ! steps of the Lanczos chain
+       lanczos_steps_ext, & ! steps of the extrapolated lanczos chain
+       lanczos_restart_step ! interval for writing restart points. 0 means no
+                            ! restart points
 
   CHARACTER(LEN=256) :: extrapolation ! extrapolation type
 
@@ -177,7 +179,9 @@ MODULE lr_lanczos
   COMPLEX(KIND=DP), ALLOCATABLE :: bbk(:,:,:)  ! coefficients of S^{-1}
   COMPLEX(KIND=DP), ALLOCATABLE :: bbnc(:,:,:) ! coefficients of the inverse
                                                ! of S
-  INTEGER :: iulanczos          ! iunit where the Lanczos chain is saved
+  INTEGER :: iulanczos, iunrestart             ! iunit where the Lanczos 
+                                               ! chain are saved
+  INTEGER :: nwordd0psi, nwordrestart          ! size of the restart vectors
 
   LOGICAL :: only_spectrum      ! if .TRUE. assumes that the Lanczos chain
                                 ! coefficients are on file
@@ -202,3 +206,4 @@ MODULE lr_cg
       prec_vec(:,:,:)                  ! The preconditioning vector
 
 END MODULE lr_cg
+
