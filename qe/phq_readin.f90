@@ -305,7 +305,7 @@ SUBROUTINE phq_readin_tpw()
   lanczos_steps=2000
   lanczos_steps_ext=10000
   extrapolation='average'
-  pseudo_hermitian=.FALSE.
+  pseudo_hermitian=.TRUE.
   only_spectrum=.FALSE.
   lcg=.FALSE.
   nk1       = 0
