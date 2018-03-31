@@ -21,7 +21,7 @@ $(PDFS): %.pdf: %.tex
 
 clean:
 	- rm -f $(PDFS) $(AUXS) $(LOGS) $(OUTS) $(TOCS) *~
-	- rm -rf user_guide/ developer_guide/ 
+	- rm -rf user_guide/ developer_guide/ thermo/ point_groups/
 	- rm -rf input_xx.xsl
 	- rm -f INPUT_*.html INPUT_*.txt INPUT_*.xml
 	- rm -rf ../../Doc/INPUT_PW.*
@@ -41,6 +41,7 @@ user_guide: user_guide.pdf
                 cat /tmp/$$file | sed 's/HREF="http/NAME="http/g' | sed 's/mathend000#//g' - > $$file; \
                 rm -f /tmp/$$file; \
         done
+	cp user_guide.css user_guide
 	@echo ""
 	@echo "***"
 	@echo "*** User's Guide created in user_guide/user_guide.html"
@@ -61,9 +62,52 @@ developer_guide: developer_guide.pdf
                 cat /tmp/$$file | sed 's/HREF="http/NAME="http/g' | sed 's/mathend000#//g' - > $$file; \
                 rm -f /tmp/$$file; \
         done
+	cp user_guide.css developer_guide/developer_guide.css
 	@echo ""
 	@echo "***"
 	@echo "*** Developer's Guide created in developer_guide/developer_guide.html"
+	@echo "***"
+	@echo ""
+
+thermo: thermo.pdf
+	rm -rf thermo/
+	latex2html \
+                -t "Thermo guide for the Thermo_pw package" \
+                -html_version 3.2,math \
+                -toc_depth 5 -split 5 -toc_stars -show_section_numbers \
+                -local_icons -image_type png \
+                thermo.tex
+	cd thermo; \
+	for file in *.html; do \
+                cp $$file /tmp/$$file; \
+                cat /tmp/$$file | sed 's/HREF="http/NAME="http/g' | sed 's/mathend000#//g' - > $$file; \
+                rm -f /tmp/$$file; \
+        done
+	cp user_guide.css thermo/thermo.css
+	@echo ""
+	@echo "***"
+	@echo "*** Thermo Guide created in thermo/thermo.html"
+	@echo "***"
+	@echo ""
+
+point_groups: point_groups.pdf
+	rm -rf point_groups/
+	latex2html \
+                -t "Crystallographic point groups guide for the Thermo_pw package" \
+                -html_version 3.2,math \
+                -toc_depth 5 -split 5 -toc_stars -show_section_numbers \
+                -local_icons -image_type png \
+                point_groups.tex
+	cd point_groups; \
+	for file in *.html; do \
+                cp $$file /tmp/$$file; \
+                cat /tmp/$$file | sed 's/HREF="http/NAME="http/g' | sed 's/mathend000#//g' - > $$file; \
+                rm -f /tmp/$$file; \
+        done
+	cp user_guide.css point_groups/point_groups.css
+	@echo ""
+	@echo "***"
+	@echo "*** Point Groups Guide created in point_groups/point_groups.html"
 	@echo "***"
 	@echo ""
 
