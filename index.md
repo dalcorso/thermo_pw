@@ -142,6 +142,6 @@ thermo_pw.0.1.0.tar.gz</a>   (released 28-11-2014) compatible with QE-5.1.1.
 <br>
 <br>
 Please notice that the versions of thermo_pw and of QE must be carefully matched: Version 0.9.0 is for QE 6.2.1, 0.8.0 for QE 6.2, 0.8.0-beta for QE 6.2-beta, 0.7.9 and 0.7.0 for QE 6.1, 0.6.0 for QE 6.0, 0.5.0 for QE 5.4.0, version 0.4.0 for QE 5.3.0, version 0.3.0 for QE 5.2.0 and 5.2.1, version 0.2.0 for QE 5.1.2 and version 0.1.0 for QE 5.1.1.
-<br<>br>
+<br><br>
 
 </html>
