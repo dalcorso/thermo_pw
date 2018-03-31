@@ -23,12 +23,12 @@ Presently there is no reference work for citing <code>thermo_pw</code>. If you w
   The following papers have been written using thermo_pw:
 <br>
 <br>
-* Item 1 A. Urru and A. Dal Corso,
+A. Urru and A. Dal Corso,
 Clean Os(0001) electronic surface states: a first-principle fully relativistic investigation,
 <a href="https://www.sciencedirect.com/science/article/pii/S0039602817309469">Surf. Sci. <B> 671</B>, 17 (2018).</a>
 <br>
 <br>
-* Item 2 M. Palumbo and A. Dal Corso,
+M. Palumbo and A. Dal Corso,
 Lattice dynamics and thermophysical properties of h.c.p. Os and Ru from
 the quasi-harmonic approximation,
 <a href="http://iopscience.iop.org/article/10.1088/1361-648X/aa7dca">
