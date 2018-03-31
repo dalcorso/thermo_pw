@@ -1,4 +1,7 @@
-<html>
+<html> 
+ 
+ body{text-align: justify;}
+ 
  <body>
 Thermo_pw is a set of Fortran drivers for the parallel and/or automatic 
 computation of materials properties using Quantum ESPRESSO (QE) routines 
