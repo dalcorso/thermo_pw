@@ -1,9 +1,5 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
-<head>
-  <title>Distribution of thermo_pw</title>
-</head>
-
+  
 <br><br>
 Thermo_pw is a set of Fortran drivers for the parallel and/or automatic 
 computation of materials properties using Quantum ESPRESSO (QE) routines 
