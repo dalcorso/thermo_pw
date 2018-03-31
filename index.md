@@ -74,15 +74,15 @@ See also the presentation given at the Quantum-ESPRESSO developers meeting 2017:
 and at the Quantum-ESPRESSO developers meeting 2018:
 <br>
 <br>
-<a href=./thermo_pw_2018.pdf>Thermo_pw_2018.pdf</a>
+<a href="https://people.sissa.it/~dalcorso/thermo_pw_2018.pdf">Thermo_pw_2018.pdf</a>
 <br>
 <br>
 The latest developments of the <code>thermo_pw</code> software can be
-followed <a href=https://github.com/dalcorso/thermo_pw/commits/master>here</a>.
+followed <a href="https://github.com/dalcorso/thermo_pw/commits/master">here</a>.
 <br>
 <br>
 The <code>git</code> of the project is public. You can download the <code>git</code> version of <code>thermo_pw</code> but its use is not recommended.
-Please read the user's guide for information on how to download it or follow the instructions at <a href="http://people.sissa.it/~dalcorso/thermo_pw_help.html">
+Please read the user's guide for information on how to download it or follow the instructions at <a href="https://people.sissa.it/~dalcorso/thermo_pw_help.html">
 http://people.sissa.it/~dalcorso/thermo_pw_help.html</a>.
 Presently it is compatible with QE 6.2.1 that can be obtained from the QE web site.
 
@@ -102,10 +102,8 @@ in the examples directories.
 <br>
 
 <b>Thermo_pw downloads:</b>
-
-<table cellspacing=2 cellpadding=3 border=0>
-<tr>
-  <td align=left valign=center>
+<br>
+<br>
 - <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw-0.9.0.tar.gz">
 thermo_pw-0.9.0.tar.gz</a>  (released 20-12-2017) compatible with QE-6.2.1.
 <br>
@@ -148,11 +146,7 @@ thermo_pw.0.2.0.tar.gz</a>   (released 13-03-2015) compatible with QE-5.1.2.
 <br>
 - <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.0.1.0.tar.gz">
 thermo_pw.0.1.0.tar.gz</a>   (released 28-11-2014) compatible with QE-5.1.1.
-</td>
-</tr>
-</table>
-
-<hr><br> <br>
+<br> <br>
 
   
 </html>
