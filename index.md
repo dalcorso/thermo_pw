@@ -28,9 +28,7 @@ Presently there is no reference work for citing <code>thermo_pw</code>. If you w
 <br>
 A. Urru and A. Dal Corso,
 Clean Os(0001) electronic surface states: a first-principle fully relativistic investigation,
-<a href=https://www.sciencedirect.com/science/article/pii/S0039602817309469>
-Surf. Sci. <B> 671</B>, 17 (2018).
-</a>
+<a href="https://www.sciencedirect.com/science/article/pii/S0039602817309469">Surf. Sci. <B> 671</B>, 17 (2018).</a>
 
 <br>
 <br>
@@ -70,7 +68,7 @@ See also the presentation given at the Quantum-ESPRESSO developers meeting 2017:
 
 <br>
 <br>
-<a href=./thermo_pw_2017.pdf>Thermo_pw_2017.pdf</a>
+<a href="https://people.sissa.it/~dalcorso/thermo_pw_2017.pdf">Thermo_pw_2017.pdf</a>
 <br>
 <br>
 and at the Quantum-ESPRESSO developers meeting 2018:
@@ -84,7 +82,7 @@ followed <a href=https://github.com/dalcorso/thermo_pw/commits/master>here</a>.
 <br>
 <br>
 The <code>git</code> of the project is public. You can download the <code>git</code> version of <code>thermo_pw</code> but its use is not recommended.
-Please read the user's guide for information on how to download it or follow the instructions at <a href=http://people.sissa.it/~dalcorso/thermo_pw_help.html>
+Please read the user's guide for information on how to download it or follow the instructions at <a href="http://people.sissa.it/~dalcorso/thermo_pw_help.html">
 http://people.sissa.it/~dalcorso/thermo_pw_help.html</a>.
 Presently it is compatible with QE 6.2.1 that can be obtained from the QE web site.
 
@@ -93,8 +91,8 @@ Presently it is compatible with QE 6.2.1 that can be obtained from the QE web si
 For problems to compile or run <code>thermo_pw</code> or if you think
 that you have found a bug, please check the help page mentioned above, apply
 all the patches and if your problem is not solved, you can post it to the
-<a href=mailto:thermo_pw-forum@lists.quantum-espresso.org>thermo_pw-forum mailing list</a> or e-mail me: <a href="mailto:dalcorso .at. sissa.it">dalcorso .at. sissa.it</a>. To subscribe to the <code>thermo_pw-forum</code> mailing list
-click <a href=https://lists.quantum-espresso.org/mailman/listinfo/thermo_pw-forum>here</a>.
+<a href="mailto:thermo_pw-forum@lists.quantum-espresso.org">thermo_pw-forum mailing list</a> or e-mail me: <a href="mailto:dalcorso .at. sissa.it">dalcorso .at. sissa.it</a>. To subscribe to the <code>thermo_pw-forum</code> mailing list
+click <a href="https://lists.quantum-espresso.org/mailman/listinfo/thermo_pw-forum">here</a>.
 <br>
 Please do not send me questions about the input of <code>pw.x</code>.
 If you are new to QE, please ask to the
@@ -102,8 +100,9 @@ If you are new to QE, please ask to the
 in the examples directories.
 <br>
 <br>
-<p align=left><font size="+1"><b>Thermo_pw downloads:</b></font>
-</p>
+
+<b>Thermo_pw downloads:</b>
+
 <table cellspacing=2 cellpadding=3 border=0>
 <tr>
   <td align=left valign=center>
