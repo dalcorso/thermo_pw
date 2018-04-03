@@ -10,8 +10,9 @@ post-processing tools to produce plots directly comparable with experiment.</p>
 while the user's guide of <code>thermo_pw</code> version <code>0.9.0</code> 
 can be found <a href="https://people.sissa.it/dalcorso/thermo_pw/user_guide/index.html">here</a>.</p>
 <p align="justify"> Presently there is no reference work for citing <code>thermo_pw</code>. If you want to mention it in your work, you can put a reference to this web page.</p>
+<p align="justify">The following papers have been written using 
+<code>thermo_pw</code>:</p>
 <br>
-The following papers have been written using <code>thermo_pw</code>:
 <br>
 1. A. Urru and A. Dal Corso,
 Clean Os(0001) electronic surface states: a first-principle fully relativistic investigation,
@@ -55,11 +56,10 @@ and at the Quantum-ESPRESSO developers meeting 2018:
 <br>
 <br>
 <a href="https://people.sissa.it/~dalcorso/thermo_pw_2018.pdf">Thermo_pw_2018.pdf</a>
-<br>
-<br>
+
+<p align="justify">
 The latest developments of the <code>thermo_pw</code> software can be
-followed <a href="https://github.com/dalcorso/thermo_pw/commits/master">here</a>.
-<br>
+followed <a href="https://github.com/dalcorso/thermo_pw/commits/master">here</a>.</p>
 <p align="justify"> The <code>git</code> of the project is public. You can download the <code>git</code> version of <code>thermo_pw</code> but its use is not recommended.
 Please read the user's guide for information on how to download it or follow the instruction in the quick-help page.
 Presently it is compatible with QE 6.2.1 that can be obtained from the QE web site.</p>

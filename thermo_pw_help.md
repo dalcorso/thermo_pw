@@ -1,16 +1,14 @@
 # THERMO_PW QUICK HELP
 <br>
-The <code>thermo_pw</code> code is hosted at <a href="https://github.com/dalcorso/thermo_pw">https://github.com/dalcorso/thermo_pw</a>. To download it you need 
+<p align="justify"> The <code>thermo_pw</code> code is hosted at <a href="https://github.com/dalcorso/thermo_pw">https://github.com/dalcorso/thermo_pw</a>. To download it you need 
 the <code>git</code>
-package installed. Then you can give the command:
+package installed. Then you can give the command:</p>
 <br>
 <p align="center">
 <code>git clone https://github.com/dalcorso/thermo_pw</code>
 </p>
-and you should get a directory called <code>thermo_pw</code> that contains 
-the source code.
-<br>
-To compile the code you need a Fortran compiler, for instance
+<p align="justify"> and you should get a directory called <code>thermo_pw</code> that contains the source code.</p>
+<p align="justify"> To compile the code you need a Fortran compiler, for instance
 the <code>gcc</code> package and <code>gfortran</code> (or 
 <code>gcc-fortran</code> in some distributions),
 and the same libraries required by the 
@@ -19,12 +17,12 @@ The <code>git</code> version of <code>thermo_pw</code> is compatible only with t
 After getting <code>QE</code>, move the directory <code>thermo_pw</code> in the main <code>QE</code> 
 directory, cd to the directory <code>thermo_pw</code> and give the command 
 <code>make join_qe</code>. Then cd to the main <code>QE</code> 
-directory and compile <code>thermo_pw</code> with the command:
+directory and compile <code>thermo_pw</code> with the command:</p>
 <p align="center"><code>
 make thermo_pw
 </code></p>
 
-To run <code>thermo_pw</code> it is useful to have the 
+<p align="justify"> To run <code>thermo_pw</code> it is useful to have the 
 <a href="http://www.gnuplot.info/">gnuplot</a> package 
 installed, and to plot the Brillouin zone
 you need the <a href="http://asymptote.sourceforge.net/">asymptote</a> package. 
@@ -32,9 +30,9 @@ Both are available as precompiled packages in many distributions.
 For further information, please refer to the user's guide
 available in the <code>thermo_pw/Doc</code> directory.
 Please report any problem to
-<a href="mailto:dalcorso .at. sissa.it"> dalcorso .at. sissa.it</a>. 
-<br><br>
-Sometimes the <code>git</code> version of <code>thermo_pw</code> is not working 
+<a href="mailto:dalcorso .at. sissa.it"> dalcorso .at. sissa.it</a>.</p>
+<p align="justify"> Sometimes the <code>git</code> version of 
+<code>thermo_pw</code> is not working 
 properly and in any case its use is not recommended. 
 In order to run <code>thermo_pw</code> for more serious work
 it is better to download 
@@ -43,7 +41,7 @@ it is better to download
 <code>QE 6.2.1</code> and follow the instructions 
 given above to compile and run. Although now <code>thermo_pw</code> has been 
 used for several years and can be considered reasonably stable, it remains an 
-experimental code given as it is. 
+experimental code given as it is.</p> 
 <br><br>
 Before using <code>thermo_pw</code>, please apply the patches given 
 below. 
