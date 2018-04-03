@@ -6,7 +6,6 @@ an asynchronous image parallelization. Moreover, the code has a set of
 pre-processing tools to reduce the user input information and a set of 
 post-processing tools to produce plots directly comparable with experiment.</p>
 <br>
-<br>
 <p align="justify"> A quick introduction to the <code>thermo_pw</code> code can be found 
 <a href="https://dalcorso.github.io/thermo_pw/thermo_pw_help.html">here</a>,
 while the user's guide of <code>thermo_pw</code> version <code>0.9.0</code> 
@@ -15,9 +14,7 @@ can be found <a href="https://people.sissa.it/dalcorso/thermo_pw/user_guide/inde
 <br>
 <p align="justify"> Presently there is no reference work for citing <code>thermo_pw</code>. If you want to mention it in your work, you can put a reference to this web page.</p>
 <br>
-<br>
 The following papers have been written using <code>thermo_pw</code>:
-<br>
 <br>
 1. A. Urru and A. Dal Corso,
 Clean Os(0001) electronic surface states: a first-principle fully relativistic investigation,
@@ -53,12 +50,10 @@ Clean Ir(111) and Pt(111) electronic surface states: a first-principle fully rel
 
 See also the presentation given at the Quantum-ESPRESSO developers meeting 2017:
 <br>
-<br>
 <a href="https://people.sissa.it/~dalcorso/thermo_pw_2017.pdf">Thermo_pw_2017.pdf</a>
 <br>
 <br>
 and at the Quantum-ESPRESSO developers meeting 2018:
-<br>
 <br>
 <a href="https://people.sissa.it/~dalcorso/thermo_pw_2018.pdf">Thermo_pw_2018.pdf</a>
 <br>
@@ -70,7 +65,6 @@ followed <a href="https://github.com/dalcorso/thermo_pw/commits/master">here</a>
 <p align="justify"> The <code>git</code> of the project is public. You can download the <code>git</code> version of <code>thermo_pw</code> but its use is not recommended.
 Please read the user's guide for information on how to download it or follow the instruction in the quick-help page.
 Presently it is compatible with QE 6.2.1 that can be obtained from the QE web site.</p>
-
 <br>
 <p align="justify">For problems to compile or run <code>thermo_pw</code> or if you think
 that you have found a bug, please check the quick-help page mentioned above, 
@@ -135,4 +129,4 @@ thermo_pw.0.1.0.tar.gz</a>   (released 28-11-2014) compatible with QE-5.1.1.
 <p align="justify">Please note that the versions of <code>thermo_pw</code> and 
 of <code>QE</code> must be carefully matched as written above. Mixing two 
 unmatched versions leads to a compilation error.</p>
-<br><br>
+<br>
