@@ -1,5 +1,5 @@
 <html> 
- 
+
  <body>
 Thermo_pw is a set of Fortran drivers for the parallel and/or automatic 
 computation of materials properties using Quantum ESPRESSO (QE) routines 
@@ -8,6 +8,11 @@ QE work-flow for the most common tasks exploiting, when possible,
 an asynchronous image parallelization. Moreover, the code has a set of 
 pre-processing tools to reduce the user input information and a set of 
 post-processing tools to produce plots directly comparable with experiment.
+<br>
+<br>
+
+A rapid introduction to the <code>thermo_pw</code> code can be found 
+<a href="https://dalcorso.github.io/thermo_pw/thermo_pw_help.html">here</a>.
 <br>
 <br>
 
@@ -23,12 +28,13 @@ Presently there is no reference work for citing <code>thermo_pw</code>. If you w
   The following papers have been written using <code>thermo_pw</code>:
 <br>
 <br>
-A. Urru and A. Dal Corso,
+1. A. Urru and A. Dal Corso,
 Clean Os(0001) electronic surface states: a first-principle fully relativistic investigation,
 <a href="https://www.sciencedirect.com/science/article/pii/S0039602817309469">Surf. Sci. <B> 671</B>, 17 (2018).</a>
+
 <br>
 <br>
-M. Palumbo and A. Dal Corso,
+2. M. Palumbo and A. Dal Corso,
 Lattice dynamics and thermophysical properties of h.c.p. Os and Ru from
 the quasi-harmonic approximation,
 <a href="http://iopscience.iop.org/article/10.1088/1361-648X/aa7dca">
@@ -37,7 +43,7 @@ J. of Phys.: Condens. Matter <B>29</B>, 395401 (2017).
 
 <br>
 <br>
-M. Palumbo and A. Dal Corso,
+3. M. Palumbo and A. Dal Corso,
 Lattice dynamics and thermophysical properties of h.c.p. Re and Tc from
 the quasi-harmonic approximation,
 <a href="http://dx.doi.org/10.1002/pssb.201700101">Physica Status Solidi B:
@@ -46,13 +52,13 @@ Basic Solid State Physics <B>254</B>, 1700101 (2017).
 
 <br>
 <br>
-A. Dal Corso,
+4. A. Dal Corso,
 Elastic constants of Beryllium: a first-principles investigation,
 <a href="http://dx.doi.org/10.1088/0953-8984/28/7/075401"> J. Phys.: Condens. Matter <B>28</B>, 075401 (2016) </a>.
 
 <br>
 <br>
-A. Dal Corso,
+5. A. Dal Corso,
 Clean Ir(111) and Pt(111) electronic surface states: a first-principle fully relativistic investigation,
 <a href="http://www.sciencedirect.com/science/article/pii/S0039602815000734"> Surf. Sci. <B>637-638</B>, 106 (2015)</a>.
 <br>
@@ -75,10 +81,8 @@ followed <a href="https://github.com/dalcorso/thermo_pw/commits/master">here</a>
 <br>
 <br>
 The <code>git</code> of the project is public. You can download the <code>git</code> version of <code>thermo_pw</code> but its use is not recommended.
-Please read the user's guide for information on how to download it or follow the instructions at <a href="https://people.sissa.it/~dalcorso/thermo_pw_help.html">
-http://people.sissa.it/~dalcorso/thermo_pw_help.html</a>.
+Please read the user's guide for information on how to download it or follow the instruction in the quick-help guide.
 Presently it is compatible with QE 6.2.1 that can be obtained from the QE web site.
-
 
 <br>
 For problems to compile or run <code>thermo_pw</code> or if you think
