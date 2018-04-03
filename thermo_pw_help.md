@@ -3,7 +3,6 @@
 <p align="justify"> The <code>thermo_pw</code> code is hosted at <a href="https://github.com/dalcorso/thermo_pw">https://github.com/dalcorso/thermo_pw</a>. To download it you need 
 the <code>git</code>
 package installed. Then you can give the command:</p>
-<br>
 <p align="center">
 <code>git clone https://github.com/dalcorso/thermo_pw</code>
 </p>
@@ -42,17 +41,16 @@ it is better to download
 given above to compile and run. Although now <code>thermo_pw</code> has been 
 used for several years and can be considered reasonably stable, it remains an 
 experimental code given as it is.</p> 
-<br><br>
-Before using <code>thermo_pw</code>, please apply the patches given 
-below. 
-<br><br>
+<p align="justify"> Before using <code>thermo_pw</code>, please apply the 
+patches given below.</p>
+
 **Known problems of thermo_pw.0.9.0**:
 <br>
 * Phonons + tetrahedra are not working (not implemented yet).
 * Phonons + lsda are not working (use one of previous versions).
 <br>
 
-**Patches to thermo_pw.0.9.0**:
+**Patches for thermo_pw.0.9.0**:
 <br>
 * EELS with US-PP has still a bug. At line 75 of 
 <code>qe/addusddenseq.f90</code> change <code>gg</code> with <code>qmod</code>.
@@ -67,7 +65,7 @@ call to <code>set_kplusq</code>.
 * Some compilers could have problems to compile the routine <code>thermo_pw/qe/set_kplusq.f90</code>. Use the following <a href="http://people.sissa.it/~dalcorso/thermo_pw/set_kplusq.f90">set_kplusq.f90</a>.
 <br>
 
-**Patches to thermo_pw.0.8.0**:
+**Patches for thermo_pw.0.8.0**:
 <br>
 * A bug might create some differences for phonons and US and PAW-PP calculated 
 with images, so for these cases update to <code>thermo_pw.0.9.0</code> is 
@@ -75,7 +73,7 @@ recommended.
 It might affect also previous versions that use the new xml output.
 <br>
 
-**Patches to thermo_pw.0.7.0**:
+**Patches for thermo_pw.0.7.0**:
 <br>
 * With pools, all bands are red in the band plot. At line 550 of 
 <code>src/sym_band_sub.f90</code> substitute <code>nks</code> with 
@@ -89,7 +87,7 @@ in the patch
 <a href="https://github.com/dalcorso/thermo_pw/commit/c39f6f063433a4766dbd1999a51316f19adeebbd">c39f6f0</a>
 <br>
 
-**Patches to thermo_pw.0.6.0**:
+**Patches for thermo_pw.0.6.0**:
 <br>
 * There is a problem with anharmonic properties calculated recovering the run
 with <code>after_disp=.TRUE.</code> introduced in this version. Take the file
@@ -101,13 +99,13 @@ change 1D-8 with 1D-5.
 <code>thermo_pw</code> might run out of clocks.
 <br>
 
-**Patches to thermo_pw.0.5.0**:
+**Patches for thermo_pw.0.5.0**:
 <br>
 * Modules/clocks.f90 : line 41 set <code>maxclock=200</code> otherwise 
 <code>thermo_pw</code> might run out of clocks.
 <br>
 
-**Patches to thermo_pw.0.4.0**:
+**Patches for thermo_pw.0.4.0**:
 <br>
 * A problem with max_geometries: this is a bug. Add the instruction
 <code>ph_geometries=0</code> at the line 431 of the file 
@@ -119,7 +117,7 @@ check commit
 and make the same changes to <code>src/matdyn_sub.f90</code>.
 <br>
 
-**Patches to thermo_pw.0.3.0**:
+**Patches for thermo_pw.0.3.0**:
 <br>
 * With some compilers the code crashes at the beginning.
 Please change line 571 of <code>src/thermo_readin.f90</code> from 
@@ -131,7 +129,7 @@ Please change line 571 of <code>src/thermo_readin.f90</code> from
 <code>check_stop_init</code> not initialized. (Please apply commit 110838).
 <br>
 
-**Patches to thermo_pw.0.2.0**:
+**Patches for thermo_pw.0.2.0**:
 <br>
 * Problem in anharmonic properties: use <code>thermo_pw.0.3.0</code> or higher, 
 or make the same changes as in commit 
@@ -145,7 +143,7 @@ plots are double. Change as in commit
 19386</a>. 
 <br>
 
-**Patches to thermo_pw.0.1.0**:
+**Patches for thermo_pw.0.1.0**:
 <br>
 * src/Makefile : line 83 change <code>THERMO_PW</code> with 
 <code>thermo_pw</code>.

@@ -12,8 +12,7 @@ can be found <a href="https://people.sissa.it/dalcorso/thermo_pw/user_guide/inde
 <p align="justify"> Presently there is no reference work for citing <code>thermo_pw</code>. If you want to mention it in your work, you can put a reference to this web page.</p>
 <p align="justify">The following papers have been written using 
 <code>thermo_pw</code>:</p>
-<br>
-<br>
+
 1. A. Urru and A. Dal Corso,
 Clean Os(0001) electronic surface states: a first-principle fully relativistic investigation,
 <a href="https://www.sciencedirect.com/science/article/pii/S0039602817309469">Surf. Sci. <B> 671</B>, 17 (2018).</a>
@@ -73,8 +72,6 @@ Please do not send me questions about the input of <code>pw.x</code>.
 If you are new to QE, please ask to the
 <code>users@lists.quantum-espresso.org</code> mailing list or search
 in the examples directories.</p>
-<br>
-<br>
 
 **Thermo_pw downloads**:
 <br>
