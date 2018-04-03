@@ -1,20 +1,20 @@
-Thermo_pw is a set of Fortran drivers for the parallel and/or automatic 
+<p align="justify"> Thermo_pw is a set of Fortran drivers for the parallel and/or automatic 
 computation of materials properties using Quantum ESPRESSO (QE) routines 
 as the underlying engine. It provides an alternative organization of the 
 QE work-flow for the most common tasks exploiting, when possible, 
 an asynchronous image parallelization. Moreover, the code has a set of 
 pre-processing tools to reduce the user input information and a set of 
-post-processing tools to produce plots directly comparable with experiment.
+post-processing tools to produce plots directly comparable with experiment.</p>
 <br>
 <br>
 
-A quick introduction to the <code>thermo_pw</code> code can be found 
+<p align="justify">A quick introduction to the <code>thermo_pw</code> code can be found 
 <a href="https://dalcorso.github.io/thermo_pw/thermo_pw_help.html">here</a>,
 while the user's guide of <code>thermo_pw</code> version <code>0.9.0</code> 
 can be found <a href="https://people.sissa.it/dalcorso/thermo_pw/user_guide/index.html">here</a>.
 <br>
 <br>
-Presently there is no reference work for citing <code>thermo_pw</code>. If you want to mention it in your work, you can put a reference to this web page.
+Presently there is no reference work for citing <code>thermo_pw</code>. If you want to mention it in your work, you can put a reference to this web page.</p>
 <br>
 <br>
 
@@ -73,12 +73,12 @@ The latest developments of the <code>thermo_pw</code> software can be
 followed <a href="https://github.com/dalcorso/thermo_pw/commits/master">here</a>.
 <br>
 <br>
-The <code>git</code> of the project is public. You can download the <code>git</code> version of <code>thermo_pw</code> but its use is not recommended.
+<p align="justify"> The <code>git</code> of the project is public. You can download the <code>git</code> version of <code>thermo_pw</code> but its use is not recommended.
 Please read the user's guide for information on how to download it or follow the instruction in the quick-help page.
-Presently it is compatible with QE 6.2.1 that can be obtained from the QE web site.
+Presently it is compatible with QE 6.2.1 that can be obtained from the QE web site.</p>
 
 <br>
-For problems to compile or run <code>thermo_pw</code> or if you think
+<p align="justify">For problems to compile or run <code>thermo_pw</code> or if you think
 that you have found a bug, please check the quick-help page mentioned above, 
 apply all the patches and if your problem is not solved, post it to the
 <a href="mailto:thermo_pw-forum@lists.quantum-espresso.org">thermo_pw-forum mailing list</a> or e-mail me: <a href="mailto:dalcorso .at. sissa.it">dalcorso .at. sissa.it</a>. To subscribe to the <code>thermo_pw-forum</code> mailing list
@@ -87,11 +87,11 @@ click <a href="https://lists.quantum-espresso.org/mailman/listinfo/thermo_pw-for
 Please do not send me questions about the input of <code>pw.x</code>.
 If you are new to QE, please ask to the
 <code>users@lists.quantum-espresso.org</code> mailing list or search
-in the examples directories.
+in the examples directories.</p>
 <br>
 <br>
 
-<b>Thermo_pw downloads:</b>
+**Thermo_pw downloads**:
 <br>
 <br>
 - <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw-0.9.0.tar.gz">
@@ -138,6 +138,7 @@ thermo_pw.0.2.0.tar.gz</a>   (released 13-03-2015) compatible with QE-5.1.2.
 thermo_pw.0.1.0.tar.gz</a>   (released 28-11-2014) compatible with QE-5.1.1.
 <br>
 <br>
-Please note that the versions of <code>thermo_pw</code> and of <code>QE</code> must be carefully matched as written above. Mixing two unmatched versions 
-leads to a compilation error.
+<p align="justify">Please note that the versions of <code>thermo_pw</code> and 
+of <code>QE</code> must be carefully matched as written above. Mixing two 
+unmatched versions leads to a compilation error.</p>
 <br><br>
