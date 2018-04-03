@@ -13,7 +13,7 @@ TOCS = $(PDFS:.pdf=.toc)
 doc:  all
 all:  pdf html
 pdf: $(PDFS)
-html: user_guide developer_guide 
+html: user_guide developer_guide tutorial
 
 $(PDFS): %.pdf: %.tex
 	$(LATEX)  $<
@@ -108,6 +108,27 @@ point_groups: point_groups.pdf
 	@echo ""
 	@echo "***"
 	@echo "*** Point Groups Guide created in point_groups/point_groups.html"
+	@echo "***"
+	@echo ""
+
+tutorial: tutorial.pdf
+	rm -rf tutorial/
+	latex2html \
+                -t "Tutorial for the Thermo_pw package" \
+                -html_version 3.2,math \
+                -toc_depth 5 -split 5 -toc_stars -show_section_numbers \
+                -local_icons -image_type png \
+                tutorial.tex
+	cd tutorial; \
+	for file in *.html; do \
+                cp $$file /tmp/$$file; \
+                cat /tmp/$$file | sed 's/HREF="http/NAME="http/g' | sed 's/mathend000#//g' - > $$file; \
+                rm -f /tmp/$$file; \
+        done
+	cp user_guide.css tutorial/tutorial.css
+	@echo ""
+	@echo "***"
+	@echo "*** Tutorial created in tutorial/tutorial.html"
 	@echo "***"
 	@echo ""
 
