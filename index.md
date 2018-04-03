@@ -7,6 +7,7 @@ pre-processing tools to reduce the user input information and a set of
 post-processing tools to produce plots directly comparable with experiment.</p>
 <p align="justify"> A quick introduction to the <code>thermo_pw</code> code can be found 
 <a href="https://dalcorso.github.io/thermo_pw/thermo_pw_help.html">here</a>,
+a brief tutorial is available <a href="https://people.sissa.it/dalcorso/thermo_pw/tutorial/tutorial.html">here</a>,
 while the user's guide of <code>thermo_pw</code> version <code>0.9.0</code> 
 can be found <a href="https://people.sissa.it/dalcorso/thermo_pw/user_guide/index.html">here</a>.</p>
 <p align="justify"> Presently there is no reference work for citing <code>thermo_pw</code>. If you want to mention it in your work, you can put a reference to this web page.</p>
