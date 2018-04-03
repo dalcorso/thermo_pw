@@ -7,24 +7,21 @@ pre-processing tools to reduce the user input information and a set of
 post-processing tools to produce plots directly comparable with experiment.</p>
 <br>
 <br>
-
-<p align="justify">A quick introduction to the <code>thermo_pw</code> code can be found 
+<p align="justify"> A quick introduction to the <code>thermo_pw</code> code can be found 
 <a href="https://dalcorso.github.io/thermo_pw/thermo_pw_help.html">here</a>,
 while the user's guide of <code>thermo_pw</code> version <code>0.9.0</code> 
-can be found <a href="https://people.sissa.it/dalcorso/thermo_pw/user_guide/index.html">here</a>.
+can be found <a href="https://people.sissa.it/dalcorso/thermo_pw/user_guide/index.html">here</a>.</p>
 <br>
 <br>
-Presently there is no reference work for citing <code>thermo_pw</code>. If you want to mention it in your work, you can put a reference to this web page.</p>
+<p align="justify"> Presently there is no reference work for citing <code>thermo_pw</code>. If you want to mention it in your work, you can put a reference to this web page.</p>
 <br>
 <br>
-
-  The following papers have been written using <code>thermo_pw</code>:
+The following papers have been written using <code>thermo_pw</code>:
 <br>
 <br>
 1. A. Urru and A. Dal Corso,
 Clean Os(0001) electronic surface states: a first-principle fully relativistic investigation,
 <a href="https://www.sciencedirect.com/science/article/pii/S0039602817309469">Surf. Sci. <B> 671</B>, 17 (2018).</a>
-
 <br>
 <br>
 2. M. Palumbo and A. Dal Corso,
@@ -33,7 +30,6 @@ the quasi-harmonic approximation,
 <a href="http://iopscience.iop.org/article/10.1088/1361-648X/aa7dca">
 J. of Phys.: Condens. Matter <B>29</B>, 395401 (2017).
 </a>
-
 <br>
 <br>
 3. M. Palumbo and A. Dal Corso,
@@ -42,13 +38,11 @@ the quasi-harmonic approximation,
 <a href="http://dx.doi.org/10.1002/pssb.201700101">Physica Status Solidi B:
 Basic Solid State Physics <B>254</B>, 1700101 (2017).
 </a>
-
 <br>
 <br>
 4. A. Dal Corso,
 Elastic constants of Beryllium: a first-principles investigation,
 <a href="http://dx.doi.org/10.1088/0953-8984/28/7/075401"> J. Phys.: Condens. Matter <B>28</B>, 075401 (2016) </a>.
-
 <br>
 <br>
 5. A. Dal Corso,
@@ -56,8 +50,8 @@ Clean Ir(111) and Pt(111) electronic surface states: a first-principle fully rel
 <a href="http://www.sciencedirect.com/science/article/pii/S0039602815000734"> Surf. Sci. <B>637-638</B>, 106 (2015)</a>.
 <br>
 <br>
-See also the presentation given at the Quantum-ESPRESSO developers meeting 2017:
 
+See also the presentation given at the Quantum-ESPRESSO developers meeting 2017:
 <br>
 <br>
 <a href="https://people.sissa.it/~dalcorso/thermo_pw_2017.pdf">Thermo_pw_2017.pdf</a>
