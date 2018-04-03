@@ -148,7 +148,8 @@ plots are double. Change as in commit
 * src/Makefile : line 83 change <code>THERMO_PW</code> with 
 <code>thermo_pw</code>.
 * outdir: must end with a /, the other case is not dealt with correctly.
-<br> <br>
+<br> 
+
 **FAQ:**
 <br><br>
 0. How can I learn to use <code>thermo_pw</code>?
