@@ -1,46 +1,54 @@
 # THERMO_PW QUICK HELP
-<br>
-<p align="justify"> The <code>thermo_pw</code> code is hosted at <a href="https://github.com/dalcorso/thermo_pw">https://github.com/dalcorso/thermo_pw</a>. To download it you need 
-the <code>git</code>
-package installed. Then you can give the command:</p>
+
+<p align="justify"> In order to use the <code>thermo_pw</code> you need a
+working version of the <a href="http://www.quantum-espresso.org/">Quantum 
+ESPRESSO (QE)</a> package. <code>Thermo_pw</code> can be downloaded from its 
+<a href="http://dalcorso.github.io/thermo_pw/">main page</a> as 
+a <code>.tar.gz</code> file. The current production version is 
+<code>0.9.0</code> compatible with 
+<code>QE-6.2.1</code>. The <code>thermo_pw</code> file should be copied
+in the main (QE) directory and unpacked with the command:</p>
 <p align="center">
-<code>git clone https://github.com/dalcorso/thermo_pw</code>
+<code>tar -xzvf thermo_pw.0.9.0.tar.gz</code>
 </p>
-<p align="justify"> and you should get a directory called <code>thermo_pw</code> that contains the source code.</p>
-<p align="justify"> To compile the code you need a Fortran compiler, for instance
-the <code>gcc</code> package and <code>gfortran</code> (or 
+<p align="justify">This command produces a directory called 
+<code>thermo_pw</code>. To compile the code you need a Fortran compiler, for 
+instance the <code>gcc</code> package and <code>gfortran</code> (or 
 <code>gcc-fortran</code> in some distributions),
-and the same libraries required by the 
-<a href="http://www.quantum-espresso.org/">Quantum ESPRESSO (QE)</a> package. 
-The <code>git</code> version of <code>thermo_pw</code> is compatible only with the version of <code>QE</code> written in the <a href="http://dalcorso.github.io/thermo_pw/">main <code>thermo_pw</code> page</a>.
-After getting <code>QE</code>, move the directory <code>thermo_pw</code> in the main <code>QE</code> 
+and the same libraries required by <code>QE</code>. 
+After getting the directory <code>thermo_pw</code> in the main <code>QE</code> 
 directory, cd to the directory <code>thermo_pw</code> and give the command 
 <code>make join_qe</code>. Then cd to the main <code>QE</code> 
 directory and compile <code>thermo_pw</code> with the command:</p>
 <p align="center"><code>
 make thermo_pw
 </code></p>
-
 <p align="justify"> To run <code>thermo_pw</code> it is useful to have the 
-<a href="http://www.gnuplot.info/">gnuplot</a> package 
-installed, and to plot the Brillouin zone
+<a href="http://www.gnuplot.info/">gnuplot</a> package installed, and to plot 
+the Brillouin zone
 you need the <a href="http://asymptote.sourceforge.net/">asymptote</a> package. 
 Both are available as precompiled packages in many distributions.
 For further information, please refer to the user's guide
 available in the <code>thermo_pw/Doc</code> directory.
 Please report any problem to
 <a href="mailto:dalcorso .at. sissa.it"> dalcorso .at. sissa.it</a>.</p>
-<p align="justify"> Sometimes the <code>git</code> version of 
-<code>thermo_pw</code> is not working 
-properly and in any case its use is not recommended. 
-In order to run <code>thermo_pw</code> for more serious work
-it is better to download 
-<a href="http://dalcorso.github.io/thermo_pw/">
-<code>thermo_pw.0.9.0</code></a> compatible with
-<code>QE 6.2.1</code> and follow the instructions 
-given above to compile and run. Although now <code>thermo_pw</code> has been 
+
+<p align="justify"> The development version of <code>thermo_pw</code> is hosted at <a href="https://github.com/dalcorso/thermo_pw">https://github.com/dalcorso/thermo_pw</a>. To download it you need the <code>git</code>
+package installed. Then you can give the command:</p>
+<p align="center">
+<code>git clone https://github.com/dalcorso/thermo_pw</code>
+</p>
+<p align="justify"> and you should get a directory called <code>thermo_pw</code> that contains the source code.
+The <code>git</code> version can be used only together with the version of <code>QE</code> written in the <a href="http://dalcorso.github.io/thermo_pw/">main <code>thermo_pw</code> page</a>. Please note that sometimes the <code>git</code> version is not working properly and in any case its use is not recommended.</p> 
+
+<p align="justify"> Although <code>thermo_pw</code> has been 
 used for several years and can be considered reasonably stable, it remains an 
-experimental code given as it is.</p> 
+experimental code given as it is.
+If you are running a version of <code>QE</code> older than <code>6.2.1</cite>
+you can still use <code>thermo_pw</code> but you should carefully match the
+versions of <code>thermo_pw</code> and of <code>QE</code> as explained in the
+main <code>thermo_pw</code> page</a>.</p>
+
 <p align="justify"> Before using <code>thermo_pw</code>, please apply the 
 patches given below.</p>
 
@@ -178,7 +186,7 @@ For other physical properties some experiments started with version
 in general of the band structure using <code>thermo_pw</code>?
 <br>
 You can calculate the band structure at the crystal geometry that corresponds
-to a given temperature. In this way you evalute the effect of thermal
+to a given temperature. In this way you evaluate the effect of thermal
 expansion on the band structure or on the gap. However an important 
 temperature dependence of the band gaps and of the band structure
 comes from the electron-phonon interactions that are not included in 
