@@ -106,7 +106,9 @@ SUBROUTINE pheqscf()
      IF (llanczos) THEN
         CALL allocate_lanczos()
         IF (ionode) THEN
+           OPEN(UNIT=99, FILE='buffer')
            iulanczos=find_free_unit()
+           CLOSE(UNIT=99, STATUS='delete')
            OPEN(UNIT=iulanczos, FILE='dynamical_matrices/save_chain',&
             STATUS='unknown', POSITION='append', ERR=100, IOSTAT=ios)
         ENDIF

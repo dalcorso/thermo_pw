@@ -61,7 +61,7 @@ SUBROUTINE do_lanczos_psh()
   USE dv_of_drho_lr,         ONLY : dv_of_drho
   USE lr_global,             ONLY : rpert, evc0, evq0, sevq0, d0psi, d0psi2
   USE lr_lanczos,            ONLY : lanczos_steps, evc1, sevc1, evc1_new,    &
-                                    nwordd0psi, lanczos_restart_step
+                                    lanczos_restart_step
   USE recover_mod,           ONLY : read_rec, write_rec
   USE units_ph,              ONLY : lrwfc, iuwfc
   USE buffers,               ONLY : get_buffer
@@ -93,7 +93,6 @@ SUBROUTINE do_lanczos_psh()
   LOGICAL :: exst
 
   CALL start_clock ('do_lanczos')
-  nwordd0psi = 2 * nbnd * npwx * npol * nksq * rpert
   alpha_pv0=alpha_pv
   convt=.FALSE.
   lmet = (lgauss .OR. ltetra)
@@ -127,10 +126,8 @@ SUBROUTINE do_lanczos_psh()
      !
   ENDIF
   IF (recover) THEN
-     IF (rec_code_read == -20.AND.ext_recover) THEN
-     ! restarting in Electric field calculation
+     IF (rec_code_read == -20.AND.ext_recover) &
         CALL read_rec(dr2, iter0, rpert, dvscfin, dvscfins)
-     ENDIF
      iter0=0
      CALL lr_restart_tpw (iter0, recover)
      iter0=iter0+1
@@ -474,7 +471,7 @@ SUBROUTINE do_lanczos_psh()
                                   &" secs ")') iter, tcpu
      !
      FLUSH( stdout )
-1010 IF ((lanczos_restart_step>0 .AND. iter /= 1 .AND. &
+     IF ((lanczos_restart_step>0 .AND. iter /= 1 .AND. &
          (mod(iter-1,lanczos_restart_step)==0)).OR.iter==lanczos_steps+1) THEN
         rec_code=-20
         CALL write_rec('solve_e...', 0, dr2, iter, .FALSE., rpert, dvscfin)

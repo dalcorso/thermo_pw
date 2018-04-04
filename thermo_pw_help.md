@@ -24,7 +24,7 @@ directory and compile <code>thermo_pw</code> with the command:</p>
 make thermo_pw
 </code></p>
 <p align="justify"> To run <code>thermo_pw</code> it is useful to have the 
-<a href="http://www.gnuplot.info/">gnuplot</a> package installed, and to plot 
+<a href="http://www.gnuplot.info/">gnuplot</a> package, and to plot 
 the Brillouin zone
 you need the <a href="http://asymptote.sourceforge.net/">asymptote</a> package. 
 Both are available as precompiled packages in many distributions.
@@ -34,7 +34,7 @@ Please report any problem to
 <a href="mailto:dalcorso .at. sissa.it"> dalcorso .at. sissa.it</a>.</p>
 
 <p align="justify"> The development version of <code>thermo_pw</code> is hosted at <a href="https://github.com/dalcorso/thermo_pw">https://github.com/dalcorso/thermo_pw</a>. To download it you need the <code>git</code>
-package installed. Then you can give the command:</p>
+package. Then you can give the command:</p>
 <p align="center">
 <code>git clone https://github.com/dalcorso/thermo_pw</code>
 </p>

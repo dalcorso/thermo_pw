@@ -17,15 +17,14 @@ SUBROUTINE lanczos_write_restart_tpw(lr_iteration)
  USE lr_lanczos,           ONLY : evc1, evc1_new, evc1_old, sevc1, beta_store, &
                                   gamma_store, zeta_store, iulanczos, & 
                                   iunrestart, nwordrestart
- USE lr_global,            ONLY : rpert, size_evc1
- USE wvfct,                ONLY : nbnd, npwx
+ USE lr_global,            ONLY : pseudo_hermitian, size_evc1
  USE fft_base,             ONLY : dfftp
  USE io_global,            ONLY : ionode, stdout
  USE klist,                ONLY : nks, nelec
- USE noncollin_module,     ONLY : nspin_mag, noncolin, npol
+ USE noncollin_module,     ONLY : noncolin
  use lsda_mod,             ONLY : nspin
  USE cell_base,            ONLY : alat, omega
- USE qpoint,               ONLY : nksq, xq
+ USE qpoint,               ONLY : xq
  !
  IMPLICIT NONE
  CHARACTER(LEN=6), EXTERNAL :: int_to_char
@@ -36,7 +35,7 @@ SUBROUTINE lanczos_write_restart_tpw(lr_iteration)
  !
  INTEGER, EXTERNAL :: find_free_unit
  INTEGER, INTENT(IN) :: lr_iteration
- INTEGER :: i, j, pol_index, iunres
+ INTEGER :: i, j, pol_index, ncopy, iunres
  CHARACTER (len=24) :: bgz_suffix
  CHARACTER(len=256) :: tempfile, filename
  LOGICAL :: exst
@@ -125,7 +124,9 @@ SUBROUTINE lanczos_write_restart_tpw(lr_iteration)
  !
  ! Writing wavefuncion files for restart
  !
- nwordrestart = 2 * nbnd * npwx * npol * nksq * rpert
+ ncopy=2
+ IF (pseudo_hermitian) ncopy=1
+ nwordrestart = 2 * size_evc1 * ncopy
  !
  CALL diropn ( iunres,'restart_lanczos.'//trim(int_to_char(1)),&
                                                           nwordrestart, exst)

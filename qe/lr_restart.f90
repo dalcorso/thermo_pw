@@ -20,13 +20,10 @@ SUBROUTINE lr_restart_tpw(iter_restart,rflag)
                                    beta_store, gamma_store, zeta_store, &
                                    iulanczos, iunrestart, nwordrestart, &
                                    lanczos_steps
-  USE lr_global,            ONLY : rpert
-  USE wvfct,                ONLY : nbnd, npwx
+  USE lr_global,            ONLY : pseudo_hermitian, size_evc1
   USE io_global,            ONLY : ionode
   USE mp,                   ONLY : mp_bcast
   USE mp_images,            ONLY : intra_image_comm
-  USE noncollin_module,     ONLY : npol
-  USE qpoint,               ONLY : nksq
 
   IMPLICIT NONE
   !
@@ -40,7 +37,7 @@ SUBROUTINE lr_restart_tpw(iter_restart,rflag)
   ! local variables
   !
   INTEGER :: i, iunres
-  INTEGER :: ik, ig, ip
+  INTEGER :: ik, ig, ip, ncopy
   LOGICAL :: exst
   CHARACTER(len=256) :: tempfile, filename, tmp_dir_saved
   INTEGER :: pol_index
@@ -123,7 +120,9 @@ SUBROUTINE lr_restart_tpw(iter_restart,rflag)
   ! Note: Restart files are always in outdir
   ! Reading Lanczos vectors
   !
-  nwordrestart = 2 * nbnd * npwx * npol * nksq * rpert
+  ncopy=2
+  IF (pseudo_hermitian) ncopy=1
+  nwordrestart = 2 * size_evc1 * ncopy
   !
   CALL diropn( iunres, 'restart_lanczos.'//trim(int_to_char(1)), &
                                                          nwordrestart, exst)
