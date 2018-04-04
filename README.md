@@ -27,7 +27,7 @@ cd here and type
 make join_qe
 ```
 
-Go again in the main QE directory and type
+cd to the main QE directory and type
 
 ```
 ./configure
@@ -49,7 +49,7 @@ Then remove this directory.
 NB: This code substitutes the main Makefile, and the files install/makedeps.sh
 and install/plugins\_makefile of the QE distribution. Only after typing
 make leave\_qe the original files are copied in the QE distribution. If
-you just remove the thermo\_pw directory the files of QE package are not
+you just remove the thermo\_pw directory the files of the QE package are not
 restored and you could have problems to reinstall thermo\_pw.
 
 ## LICENSE
