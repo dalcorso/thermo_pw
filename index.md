@@ -60,9 +60,7 @@ and at the Quantum-ESPRESSO developers meeting 2018:
 <p align="justify">
 The latest developments of the <code>thermo_pw</code> software can be
 followed <a href="https://github.com/dalcorso/thermo_pw/commits/master">here</a>.</p>
-<p align="justify"> The <code>git</code> of the project is public. You can download the <code>git</code> version of <code>thermo_pw</code> but its use is not recommended.
-Please read the user's guide for information on how to download it or follow the instruction in the quick-help page.
-Presently it is compatible with QE 6.2.1 that can be obtained from the QE web site.</p>
+
 <p align="justify">For problems to compile or run <code>thermo_pw</code> or if you think
 that you have found a bug, please check the quick-help page mentioned above, 
 apply all the patches and if your problem is not solved, post it to the
