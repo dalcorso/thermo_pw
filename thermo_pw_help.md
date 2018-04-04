@@ -47,7 +47,7 @@ experimental code given as it is.
 If you are running a version of <code>QE</code> older than <code>6.2.1</code>
 you can still use <code>thermo_pw</code> but you should carefully match the
 versions of <code>thermo_pw</code> and of <code>QE</code> as explained in the
-main <code>thermo_pw</code> page</a>.</p>
+main <code>thermo_pw</code> page.</p>
 
 <p align="justify"> Before using <code>thermo_pw</code>, please apply the 
 patches given below.</p>
