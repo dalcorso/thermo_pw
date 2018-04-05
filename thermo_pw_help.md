@@ -164,27 +164,21 @@ correctly.
 0. How can I learn to use <code>thermo_pw</code>?
 <br>
 Please learn the basic use of <code>Quantum ESPRESSO</code> first. 
-Then you can read the <code>thermo_pw</code> user's guide and run 
+Then you can read the <code>thermo_pw</code> tutorial and user's guide and run 
 the examples. These <code>FAQ</code> assume that you have a basic 
 understanding of <code>thermo_pw</code> and contain miscellaneous information
 not available in the user's guide.
 <br><br>
 1. Can I study the thermal expansion of anisotropic solids using <code>thermo_pw</code>?
 <br>
-For some crystal systems the answer is yes, but not all systems are supported
-or tested. Read carefully the user's guide and use version <code>0.3.0</code> 
-or higher. Also use dynamical matrices in .xml format or the calculation
+For some crystal systems, yes, but not all systems are supported
+or tested. Read carefully the user's guide and use a version higher than 
+<code>0.3.0</code>. Also use dynamical matrices in <code>.xml</code> format 
+or the calculation
 of thermal expansion with Gruneisen parameters will not work with all 
 versions previous to <code>0.5.0</code>.
 <br><br>
-2. Can I introduce a finite pressure?
-<br>
-You can calculate the equilibrium structure at a given pressure.
-For other physical properties some experiments started with version
-<code>0.4.0</code> but in general this part of the code is still quite 
-experimental.
-<br><br>
-3. Can I calculate the temperature dependence of the band gap or
+2. Can I calculate the temperature dependence of the band gap or
 in general of the band structure using <code>thermo_pw</code>?
 <br>
 You can calculate the band structure at the crystal geometry that corresponds
@@ -195,32 +189,32 @@ comes from the electron-phonon interactions that are not included in
 <code>thermo_pw</code>. 
 For this purpose you should use another package.
 <br><br>
-4. Can I calculate the equilibrium geometry of a solid at a given temperature using <code>thermo_pw</code>?
+3. Can I calculate the equilibrium geometry of a solid at a given temperature using <code>thermo_pw</code>?
 <br>
 Yes, but the calculation is as heavy as computing the anharmonic properties
 and it will take a lot of time and resources. You need to learn how to use 
 <code>thermo_pw</code> before starting such a complex calculation.
 <br><br>
-5. Which is the difference between <code>examples</code> and <code>inputs</code>?
+4. Which is the difference between <code>examples</code> and <code>inputs</code>?
 <br>
 <code>Examples</code> illustrate the features of <code>thermo_pw</code> and are fast, but are not converged. <code>inputs</code> are more realistic examples.
 <br><br>
-6. Sometimes the examples of <code>thermo_pw</code> run correctly, sometimes they crash. Which is the problem?
+5. Sometimes the examples of <code>thermo_pw</code> run correctly, sometimes they crash. Which is the problem?
 <br>
 The most probable reason is that you have not removed the <code>results</code> 
 directory produced by a previous run of the example script.
 <br><br>
-7. <code>make thermo_pw</code> is not working. Compilation stops with some missing routines error. 
+6. <code>make thermo_pw</code> is not working. Compilation stops with some missing routines error. 
 <br>
 Most probably you have not matched the versions of <code>QE</code> and of <code>thermo_pw</code>.
 <br><br>
-8. I have compiled <code>thermo_pw</code> but as I run it, it stops immediately.
+7. I have compiled <code>thermo_pw</code> but as I run it, it stops immediately.
 I am using <code>thermo_pw.0.3.0</code>.
 <br>
 Most probably you have not applied the patch described above. Update to a
 newer version.
 <br><br>
-9. I cannot run the examples. I have problems using images. What 
+8. I cannot run the examples. I have problems using images. What 
 should I do?
 <br>
 If you want to run the examples without images 
@@ -228,26 +222,27 @@ edit the file <code>environment_variables</code> in the main <code>QE</code>
 directory. Search the two variables <code>PARA_IMAGE_PREFIX</code> and
 <code>PARA_IMAGE_POSTFIX</code> and set <code>-ni 1</code>. 
 <br><br>
-10. I have not a parallel computer. I do not know what <code>mpi</code> is. 
+9. I have not a parallel computer. I do not know what <code>mpi</code> is. 
 Can I run <code>thermo_pw</code>?
 <br>
 Only <code>thermo_pw.0.5.0</code> or later versions can be compiled in serial. All previous versions must be compiled together with <code>mpi</code>.
 <br><br>
-11. An ionic relaxation converges with <code>pw.x</code> but not with <code>thermo_pw.x</code> (version <code>0.4.0</code>).
+10. An ionic relaxation converges with <code>pw.x</code> but not with <code>thermo_pw.x</code> (version <code>0.4.0</code>).
 <br>
 This is a bug of version <code>0.4.0</code>. Please apply the same changes 
 as in the
 commit <a href="http://www.qe-forge.org/gf/project/thermo_pw/scmcvs/?action=ScmCommitDetail&scm_commit_id=197343">197343</a> or update to a newer version.
 <br><br>
-12. The plot of the phonon dispersions is very strange with several disjoint
+11. The plot of the phonon dispersions is very strange with several disjoint
 parts. Moreover the modes are not classified using symmetry. Why?
 <br>
 The mode symmetry analysis requires dynamical matrices in <code>.xml</code> 
-format. Please put the  <code>.xml</code> extension in <code>fildyn</code>.
+format. Please put the  <code>.xml</code> extension in the <code>fildyn</code>
+variable in the <code>ph.x</code> input.
 Symmetry matrices are needed also to recognize symmetry equivalent point
 on the Brillouin zone.
 <br><br>
-13. The plot of the Gruneisen parameters has strange crossings in some points.
+12. The plot of the Gruneisen parameters has strange crossings in some points.
 Why?
 <br>
 In some cases the plot of the Gruneisen parameters needs more accuracy 
@@ -257,7 +252,7 @@ parameter <code>5.D-2</code> at line 148 of
 <code>PHonon/PH/find_mode_sym.f90</code> to <code>1.D-2</code> or 
 less and recompile <code>thermo_pw</code>.
 <br><br>
-14. Thermo_pw does not compile and stops with an error saying that
+13. Thermo_pw does not compile and stops with an error saying that
 <code>html.sty</code> is missing or <code>latex2html</code> is missing.
 <br>
 This is not a problem of <code>thermo_pw</code>. In order to compile the
@@ -270,12 +265,12 @@ of QE. Only the documentation will be missing.
 You can also remove the error editing <code>thermo_pw/Makefile</code> 
 and removing the string <code>doc</code> at line 7. 
 <br><br>
-15. The plot of the projected band structure has some problems. Some gaps
+14. The plot of the projected band structure has some problems. Some gaps
 have the same color of the projected band structure. 
 <br>
 This is a problem of old versions of gnuplot. Update to gnuplot 5.0 or higher.
 <br><br>
-16. The phonon dispersion plot seems strange, some branches are missing.
+15. The phonon dispersion plot seems strange, some branches are missing.
 <br>
 Please check that you used enough digits for the atomic positions. A typical
 problem appear when you write 1/3 and 2/3 in single precision. The 
