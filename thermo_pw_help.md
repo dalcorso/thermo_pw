@@ -67,8 +67,8 @@ noncollinear/spin-orbit case. Use <code>sym_for_diago=.FALSE.</code> or use
 the following file for 
 <a href="http://people.sissa.it/~dalcorso/thermo_pw/c_bands.f90">qe/c_bands.f90</a>
 * The code stops using the old diagonalization in the phonon with the flag
-<code>sym_for_diago=.FALSE</code>.
-* At line 144 of <code>qe/set_defaults_pw.f90</code> remove the _tpw from the 
+<code>sym_for_diago=.FALSE</code>. At line 144 of 
+<code>qe/set_defaults_pw.f90</code> remove the <code>_tpw</code> from the 
 call to <code>set_kplusq</code>.
 * Some compilers could have problems to compile the routine <code>thermo_pw/qe/set_kplusq.f90</code>. Use the following <a href="http://people.sissa.it/~dalcorso/thermo_pw/set_kplusq.f90">set_kplusq.f90</a>.
 <br>
@@ -102,7 +102,7 @@ with <code>after_disp=.TRUE.</code> introduced in this version. Take the file
 <a href="./q2r_sub.f90">thermo_pw/src/q2r_sub.f90</a>, substitute the one 
 of <code>thermo_pw.0.6.0</code> and recompile.<br>
 Moreover, at lines 11307 and 11336 of <code>lib/point_group.f90</code>,
-change 1D-8 with 1D-5.
+change <code>1D-8</code> with <code>1D-5</code>.
 * Modules/clocks.f90 : line 41 set <code>maxclock=200</code> otherwise 
 <code>thermo_pw</code> might run out of clocks.
 <br>
@@ -115,13 +115,13 @@ change 1D-8 with 1D-5.
 
 **Patches for thermo_pw.0.4.0**:
 <br>
-* A problem with max_geometries: this is a bug. Add the instruction
+* A problem with <code>max_geometries</code>: this is a bug. Add the instruction
 <code>ph_geometries=0</code> at the line 431 of the file 
 <code>src/thermo_pw.f90</code> and recompile.
 * Compilation problem of <code>tools/test_colors.f90</code>: remove the RETURN command at the end of the file.
 * Error from <code>find_aux_ind_two_groups</code> in a phonon plot. Please 
 check commit
-<a href="https:/people.sissa.it/~dalcorso/matdyn_sub.f90">122688.</a>
+<a href="https:/people.sissa.it/~dalcorso/matdyn_sub.f90">122688</a>
 and make the same changes to <code>src/matdyn_sub.f90</code>.
 <br>
 
@@ -132,7 +132,7 @@ Please change line 571 of <code>src/thermo_readin.f90</code> from
 <code>CALL clean_ngeo()</code> to
 <code>CALL clean_ngeo(ngeo,ibrav)</code>. 
 * Anharmonic properties can be calculated only with the dynamical matrix in
-.xml format. Old format is not working. (See commit 110778).
+<code>.xml</code> format. Old format is not working. (See commit 110778).
 * The code is not recovering correctly and gives an error 
 <code>check_stop_init</code> not initialized. (Please apply commit 110838).
 <br>
@@ -155,7 +155,8 @@ plots are double. Change as in commit
 <br>
 * src/Makefile : line 83 change <code>THERMO_PW</code> with 
 <code>thermo_pw</code>.
-* outdir: must end with a /, the other case is not dealt with correctly.
+* outdir: must end with a <code>/</code>, the other case is not dealt with 
+correctly.
 <br> 
 
 **FAQ:**
@@ -180,7 +181,8 @@ versions previous to <code>0.5.0</code>.
 <br>
 You can calculate the equilibrium structure at a given pressure.
 For other physical properties some experiments started with version
-0.4.0 but in general this part of the code is still quite experimental.
+<code>0.4.0</code> but in general this part of the code is still quite 
+experimental.
 <br><br>
 3. Can I calculate the temperature dependence of the band gap or
 in general of the band structure using <code>thermo_pw</code>?
@@ -224,16 +226,17 @@ should I do?
 If you want to run the examples without images 
 edit the file <code>environment_variables</code> in the main <code>QE</code>
 directory. Search the two variables <code>PARA_IMAGE_PREFIX</code> and
-<code>PARA_IMAGE_POSTFIX</code> and set -ni 1. 
+<code>PARA_IMAGE_POSTFIX</code> and set <code>-ni 1</code>. 
 <br><br>
 10. I have not a parallel computer. I do not know what <code>mpi</code> is. 
 Can I run <code>thermo_pw</code>?
 <br>
 Only <code>thermo_pw.0.5.0</code> or later versions can be compiled in serial. All previous versions must be compiled together with <code>mpi</code>.
 <br><br>
-11. An ionic relaxation converges with <code>pw.x</code> but not with <code>thermo_pw.x</code> (version 0.4.0).
+11. An ionic relaxation converges with <code>pw.x</code> but not with <code>thermo_pw.x</code> (version <code>0.4.0</code>).
 <br>
-This is a bug of version 0.4.0. Please apply the same changes as in the
+This is a bug of version <code>0.4.0</code>. Please apply the same changes 
+as in the
 commit <a href="http://www.qe-forge.org/gf/project/thermo_pw/scmcvs/?action=ScmCommitDetail&scm_commit_id=197343">197343</a> or update to a newer version.
 <br><br>
 12. The plot of the phonon dispersions is very strange with several disjoint
@@ -250,7 +253,8 @@ Why?
 In some cases the plot of the Gruneisen parameters needs more accuracy 
 on the symmetry analysis than the phonon plot. Accidentally degenerate 
 frequencies might have very different Gruneisen parameters. Change the 
-parameter 5.D-2 at line 148 of PHonon/PH/find_mode_sym.f90 to 1.D-2 or 
+parameter <code>5.D-2</code> at line 148 of 
+<code>PHonon/PH/find_mode_sym.f90</code> to <code>1.D-2</code> or 
 less and recompile <code>thermo_pw</code>.
 <br><br>
 14. Thermo_pw does not compile and stops with an error saying that
