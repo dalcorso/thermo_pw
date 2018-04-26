@@ -98,11 +98,12 @@ SUBROUTINE thermo_readin()
   USE parser,               ONLY : read_line, parse_unit
   USE read_input,           ONLY : read_input_file
   USE command_line_options, ONLY : input_file_ 
+  USE check_stop,           ONLY : max_seconds_ => max_seconds
   USE io_global,            ONLY : ionode, meta_ionode, meta_ionode_id, stdout
   USE mp,                   ONLY : mp_bcast
   !
   IMPLICIT NONE
-  REAL(DP) :: wq0, max_seconds_
+  REAL(DP) :: wq0, save_max_seconds
   INTEGER, ALLOCATABLE :: iun_image(:)
   INTEGER :: image, iq, ipol, jpol, icont, iun_thermo, parse_unit_save, &
              nch, nrp, i, j, k, ios
@@ -271,7 +272,7 @@ SUBROUTINE thermo_readin()
   parse_unit_save=parse_unit
   IF (ionode) iun_thermo=find_free_unit()
   parse_unit=iun_thermo
-  max_seconds_=1.D8
+  save_max_seconds=1.D8
   IF (meta_ionode) THEN
      OPEN(UNIT=iun_thermo,FILE='thermo_control',STATUS='OLD', &
                                FORM='FORMATTED', ERR=10, IOSTAT=ios )
@@ -498,7 +499,7 @@ SUBROUTINE thermo_readin()
                what=='mur_lc_bands' .OR. what=='mur_lc_disp' .OR. &
                what=='mur_lc_t' .OR. what=='scf_2d_bands')
 
-  IF (nimage==1) max_seconds_=max_seconds
+  IF (nimage==1) save_max_seconds=max_seconds
   max_seconds_tpw=max_seconds
   IF (after_disp) xmldyn=has_xml(fildyn)
 !
@@ -716,7 +717,7 @@ SUBROUTINE thermo_readin()
   CALL read_input_file('PW',TRIM(input(my_image_id+1)))
   outdir_thermo=outdir
   CALL iosys()
-  max_seconds=max_seconds_
+  max_seconds_=save_max_seconds
 
 !
 !   Now delete the temporary input files
