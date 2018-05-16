@@ -314,6 +314,7 @@ do_lanczos.o : ../../Modules/recvec.o
 do_lanczos.o : ../../Modules/uspp.o
 do_lanczos.o : ../../Modules/wavefunctions.o
 do_lanczos.o : ../../PHonon/PH/phcom.o
+do_lanczos.o : ../../PHonon/PH/write_rec.o
 do_lanczos.o : ../../PW/src/buffers.o
 do_lanczos.o : ../../PW/src/paw_onecenter.o
 do_lanczos.o : ../../PW/src/paw_symmetry.o
@@ -321,6 +322,7 @@ do_lanczos.o : ../../PW/src/pwcom.o
 do_lanczos.o : ../../PW/src/scf_mod.o
 do_lanczos.o : ../../UtilXlib/mp.o
 do_lanczos.o : control_qe.o
+do_lanczos.o : dv_of_drho_clf.o
 do_lanczos.o : paw_add_symmetry.o
 do_lanczos_psh.o : ../../FFTXlib/fft_helper_subroutines.o
 do_lanczos_psh.o : ../../LR_Modules/dv_of_drho.o
@@ -347,6 +349,7 @@ do_lanczos_psh.o : ../../PW/src/pwcom.o
 do_lanczos_psh.o : ../../PW/src/scf_mod.o
 do_lanczos_psh.o : ../../UtilXlib/mp.o
 do_lanczos_psh.o : control_qe.o
+do_lanczos_psh.o : dv_of_drho_clf.o
 do_lanczos_psh.o : paw_add_symmetry.o
 drho.o : ../../LR_Modules/lrcom.o
 drho.o : ../../Modules/becmod.o
@@ -364,6 +367,14 @@ drho.o : ../../PHonon/PH/phcom.o
 drho.o : ../../PW/src/buffers.o
 drho.o : ../../PW/src/pwcom.o
 drho.o : ../../UtilXlib/mp.o
+dv_of_drho_clf.o : ../../FFTXlib/fft_interfaces.o
+dv_of_drho_clf.o : ../../LR_Modules/lrcom.o
+dv_of_drho_clf.o : ../../Modules/cell_base.o
+dv_of_drho_clf.o : ../../Modules/constants.o
+dv_of_drho_clf.o : ../../Modules/fft_base.o
+dv_of_drho_clf.o : ../../Modules/kind.o
+dv_of_drho_clf.o : ../../Modules/noncol.o
+dv_of_drho_clf.o : ../../Modules/recvec.o
 dv_of_drho_tran.o : ../../Modules/fft_base.o
 dv_of_drho_tran.o : ../../Modules/kind.o
 dv_of_drho_tran.o : control_qe.o
@@ -468,13 +479,11 @@ lr_dot.o : ../../Modules/recvec.o
 lr_dot.o : ../../PW/src/pwcom.o
 lr_dot.o : ../../UtilXlib/mp.o
 lr_dot.o : control_qe.o
-lr_restart.o : ../../LR_Modules/lrcom.o
 lr_restart.o : ../../Modules/control_flags.o
 lr_restart.o : ../../Modules/io_files.o
 lr_restart.o : ../../Modules/io_global.o
 lr_restart.o : ../../Modules/kind.o
 lr_restart.o : ../../Modules/mp_images.o
-lr_restart.o : ../../Modules/noncol.o
 lr_restart.o : ../../PW/src/pwcom.o
 lr_restart.o : ../../UtilXlib/mp.o
 lr_restart.o : control_qe.o
@@ -1001,6 +1010,7 @@ solve_eq.o : ../../UtilXlib/mp.o
 solve_eq.o : ../../thermo_pw/lib/linear_solvers.o
 solve_eq.o : ../../thermo_pw/lib/mp_asyn.o
 solve_eq.o : control_qe.o
+solve_eq.o : dv_of_drho_clf.o
 solve_eq.o : paw_add_symmetry.o
 solve_eq_tran.o : ../../FFTXlib/fft_helper_subroutines.o
 solve_eq_tran.o : ../../FFTXlib/fft_interfaces.o

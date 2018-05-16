@@ -44,6 +44,7 @@ do_lanczos_psh.o \
 drho.o \
 dveqpsi_us.o \
 dveqpsi_us_only.o \
+dv_of_drho_clf.o \
 dv_of_drho_tran.o \
 electrons.o \
 ev_xml.o \

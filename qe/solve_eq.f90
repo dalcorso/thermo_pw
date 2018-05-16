@@ -71,6 +71,7 @@ subroutine solve_eq(iu, flag)
   USE freq_ph,               ONLY : fiu
   USE linear_solvers,        ONLY : ccg_many_vectors
   USE dv_of_drho_lr,         ONLY : dv_of_drho
+  USE dv_of_drho_clf,        ONLY : dv_of_drho_nlf
   USE mp_asyn,               ONLY : asyn_master, with_asyn_images
   USE mp_pools,              ONLY : inter_pool_comm
   USE mp_bands,              ONLY : intra_bgrp_comm, ntask_groups
@@ -502,11 +503,9 @@ subroutine solve_eq(iu, flag)
      !   calculate the corresponding linear potential response
      !
      IF (lnoloc) THEN
-        dvscfout=(0.d0,0.d0)
-        convt=.TRUE.
-        GOTO 1001
+        CALL dv_of_drho_nlf (dvscfout (1, 1, 1))
      ELSE
-        call dv_of_drho (dvscfout (1, 1, 1), .false.)
+        CALL dv_of_drho (dvscfout (1, 1, 1), .FALSE.)
      ENDIF
      !
      !   mix the new potential with the old

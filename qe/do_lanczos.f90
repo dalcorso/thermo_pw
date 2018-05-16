@@ -59,6 +59,7 @@ SUBROUTINE do_lanczos()
   USE control_lr,            ONLY : alpha_pv, nbnd_occ, lgamma
   USE lrus,                  ONLY : int3, int3_paw
   USE dv_of_drho_lr,         ONLY : dv_of_drho
+  USE dv_of_drho_clf,        ONLY : dv_of_drho_nlf
   USE lr_global,             ONLY : rpert, evc0, evq0, sevq0, d0psi, d0psi2
   USE lr_lanczos,            ONLY : lanczos_steps, evc1, sevc1, evc1_new,    &
                                     lanczos_restart_step
@@ -337,9 +338,9 @@ SUBROUTINE do_lanczos()
 !     IF (iter==lanczos_steps+1) EXIT
      !
      !  The independent particle approximation corresponds to set to zero 
-     !  dV_Hxc
+     !  dV_Hxc at gamma
      !
-     IF (lnoloc) THEN
+     IF (lnoloc.AND.lgamma) THEN
         dvscfins=(0.d0,0.d0)
         IF (okvan) int3=(0.0_DP,0.0_DP)
         CYCLE
@@ -443,7 +444,11 @@ SUBROUTINE do_lanczos()
      !   calculate the corresponding linear potential response
      !
      DO ipol=1,rpert
-        CALL dv_of_drho (dvscfin (1, 1, ipol), .false.)
+        IF (lnoloc) THEN
+           CALL dv_of_drho_nlf (dvscfin (1, 1, ipol))
+        ELSE
+           CALL dv_of_drho (dvscfin (1, 1, ipol), .false.)
+        ENDIF
      ENDDO
      !
      !  And interpolate the potential on the smooth grid if needed
