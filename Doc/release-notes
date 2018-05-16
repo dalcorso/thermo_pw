@@ -8,6 +8,8 @@ solver of the linear response problem for phonons and dielectric constant.
 
 A cleanup of gener_3d_slab.f90. 
 
+lnoloc=.TRUE. + EELS was not correctly implemented (Contributed by O. Motornyi).
+
 20/12/2017 Version 0.9.0 is now frozen
 New in version 0.9.0
 
