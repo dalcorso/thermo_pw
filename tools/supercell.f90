@@ -92,8 +92,9 @@ INTEGER :: n1, n2, n3
 !
 !   the type of atoms
 !
+INTEGER, PARAMETER :: ntypx=10     ! maximum number of types of atoms  
 INTEGER :: ntyp         ! number of types of atoms  
-CHARACTER(LEN=3), ALLOCATABLE :: atm(:)  ! the name of each type
+CHARACTER(LEN=3):: atm(ntypx)  ! the name of each type
 !
 !  all atoms in the primitive unit cell
 !
@@ -263,29 +264,7 @@ IF (which_input==1) THEN
       ENDIF
    ENDDO
 
-   ntyp=0
-   DO na=1, ineq_nat
-      found=.TRUE.
-      DO nb=1, na-1
-         IF (label(na) == label(nb).AND.found) THEN
-            found=.FALSE.
-            ineq_ityp(na)=ineq_ityp(nb)
-         ENDIF
-      ENDDO
-      IF (found) THEN
-         ntyp=ntyp+1
-         ineq_ityp(na)=ntyp
-      ENDIF
-   ENDDO
-
-   ALLOCATE(atm(ntyp))
-   DO nt=1,ntyp
-      DO na=1,ineq_nat
-         IF (ineq_ityp(na)==nt) THEN
-            atm(nt)=label(na)
-         ENDIF
-      ENDDO
-   ENDDO
+   CALL find_ityp(ineq_nat, label, ntyp, ineq_ityp, atm, ntypx)
    
    rd_for=0.0_DP
    if_pos=0
@@ -320,29 +299,7 @@ ELSE
 !
 !   count the number of types and set ityp
 !
-   ntyp=0
-   DO na=1, nat
-      found=.TRUE.
-      DO nb=1, na-1
-         IF (label(na) == label(nb).AND.found) THEN
-            found=.FALSE.
-            ityp(na)=ityp(nb)
-         ENDIF
-      ENDDO
-      IF (found) THEN
-         ntyp=ntyp+1
-         ityp(na)=ntyp
-      ENDIF
-   ENDDO
-
-   ALLOCATE(atm(ntyp))
-   DO nt=1,ntyp
-      DO na=1,nat
-         IF (ityp(na)==nt) THEN
-            atm(nt)=label(na)
-         ENDIF
-      ENDDO
-   ENDDO
+   CALL find_ityp(nat, label, ntyp, ityp, atm, ntypx)
    !
    !  If coordinates are in alat units, transform to crystal coordinates
    !
@@ -640,7 +597,6 @@ IF (ionode) THEN
    CLOSE(iuout)
 ENDIF
 
-DEALLOCATE(atm)
 DEALLOCATE(ityp)
 DEALLOCATE(tau)
 DEALLOCATE(ityp_new)
