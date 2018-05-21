@@ -7,6 +7,7 @@ MODFLAGS= $(MOD_FLAG)../../Modules $(MOD_FLAG)../../FFTXlib $(MOD_FLAG)../../LAX
 
 MODULES = \
 asy.o \
+atomic_pos.o \
 debye_module.o \
 bz_2d_form.o \
 bz_asy.o \

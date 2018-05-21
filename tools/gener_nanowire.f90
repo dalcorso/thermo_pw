@@ -59,6 +59,7 @@ PROGRAM gener_nanowire
 !  nz           unit of repetition along z.
 !
 USE kinds,       ONLY : DP
+USE atomic_pos,  ONLY : find_ityp
 USE io_global,   ONLY : ionode, stdout
 USE mp_global,   ONLY : mp_startup, mp_global_end
 USE environment, ONLY : environment_start, environment_end
@@ -358,28 +359,11 @@ ELSE
    ENDIF
 ENDIF
 IF (ionode) CLOSE(UNIT=iuout,STATUS='keep')
-
 !
 !  Count how many types we have and how they are called. This is needed
 !  for the production of the xsf file
 !
-ntyp=1
-atm_typ(1)=atm(1)
-ityp(1)=1
-DO ia=2, nat
-   found=0
-   DO nt=1, ntyp
-      IF ( TRIM( atm(ia) ) == TRIM( atm_typ(nt) ) ) THEN
-         ityp(ia)=nt
-         found=1
-      END IF
-   ENDDO
-   IF (found==0) THEN
-      ntyp = ntyp + 1
-      atm_typ(ntyp) = atm(ia)
-      ityp(ia)=ntyp
-   END IF
-END DO
+CALL find_ityp(nat, atm, ntyp, ityp, atm_typ, nat)
 
 IF (ionode) &
 OPEN(unit=iuout, file=TRIM(filename)//'.xsf', status='unknown', &

@@ -56,6 +56,7 @@ PROGRAM gener_2d_slab
 !
 USE kinds,       ONLY : DP
 USE constants,   ONLY : bohr_radius_si
+USE atomic_pos,  ONLY : find_ityp
 USE io_global,   ONLY : stdout, ionode
 USE mp_global,   ONLY : mp_startup, mp_global_end
 USE environment, ONLY : environment_start, environment_end
@@ -67,6 +68,7 @@ REAL(DP) :: alat, cmod, tmod, pi, prod1, prod2, vacuum, gmod, dist, dist1, &
             tau(3), b1eff(3), b2eff(3)
 INTEGER  :: m, n, m1, n1, p, q, nrows, nat_row, nat, ibrav_2d, nat_2d, q0, p0, &
             p1, q1, ia, iat, j, itry, na, nt, ntyp, found, nspace, iuout
+INTEGER, PARAMETER :: ntypx=10
 REAL(DP) :: alat_box, celldm_2d(3), celldm(6), omega, at(3,3)
 INTEGER  :: direction, jbulk
 INTEGER, ALLOCATABLE :: ityp(:), ps(:), qs(:)
@@ -76,7 +78,7 @@ CHARACTER ( LEN=3 ), ALLOCATABLE :: atm_2d(:)
 CHARACTER ( LEN=3 ), ALLOCATABLE :: atm(:)
 LOGICAL :: ldist_vacuum, invert
 CHARACTER(LEN=256) :: filename, xsf_filename
-CHARACTER(LEN=3) :: atm_typ(10)
+CHARACTER(LEN=3) :: atm_typ(ntypx)
 CHARACTER(LEN=9) :: code='2D_SLAB'
 
 CALL mp_startup ( start_images=.true. )
@@ -367,27 +369,10 @@ IF (ionode) THEN
    ENDDO
    CLOSE(iuout)
 END IF
-
+!
 !  Count how many types of atoms we have and how they are called
 !
-ntyp=1
-atm_typ(1)=atm(1)
-ityp(1)=1
-DO ia=2, nat
-   found=0
-   DO nt=1, ntyp
-      IF ( TRIM( atm(ia) ) == TRIM( atm_typ(nt) ) ) THEN
-         ityp(ia)=nt
-         found=1
-      END IF
-   ENDDO
-   IF (found==0) THEN
-      ntyp = ntyp + 1
-      atm_typ(ntyp) = atm(ia)
-      ityp(ia)=ntyp
-   END IF
-END DO
-
+CALL find_ityp(nat, atm, ntyp, ityp, atm_typ, ntypx)
 
 IF (ionode) THEN
    iuout=find_free_unit()

@@ -137,6 +137,7 @@ USE constants,   ONLY : pi, bohr_radius_si
 USE wyckoff,     ONLY : nattot, tautot, ityptot, sup_spacegroup, &
                         clean_spacegroup
 USE lattices,    ONLY : is_centered, compute_conventional
+USE atomic_pos,  ONLY : find_ityp
 USE io_global,   ONLY : ionode, stdout
 USE mp_global,   ONLY : mp_startup, mp_global_end
 USE environment, ONLY : environment_start, environment_end
@@ -200,6 +201,7 @@ INTEGER  :: p, q, s,       & ! the indices of the R
             m1, n1, o1,    & ! auxiliary for m, n, o
             j,             & ! index of the layer
             min_j,         & ! index of the bulk layer 
+            idet,          & ! the number of surface unit cells
             itry, jtry, ktry, & ! grid of trying indices
             sign1, sign2,  & ! extend the grid to negative values
             ibrav_sur,     & ! Bravais lattice index of the slab
@@ -270,24 +272,7 @@ ENDDO
 !
 !  Count how many types we have and how they are called
 !
-ntyp=1
-atm_typ(1)=atm_3d(1)
-ityp(1)=1
-DO na=2, nat_3d
-   found=0
-   DO nt=1, ntyp 
-      IF ( TRIM( atm_3d(na) ) == TRIM( atm_typ(nt) ) ) THEN
-         ityp(na)=nt
-         found=1
-      END IF
-   ENDDO
-   IF (found==0) THEN
-      ntyp = ntyp + 1
-      IF (ntyp > ntypx) CALL errore('gener_3d_slab', 'too many atomic types',1)
-      atm_typ(ntyp) = atm_3d(na)
-      ityp(na)=ntyp
-   END IF
-END DO
+CALL find_ityp(nat_3d, atm_3d, ntyp, ityp, atm_typ, ntypx)
 
 IF (lcryst==2) THEN
 !
@@ -813,6 +798,12 @@ WRITE(stdout,'(5x,"In Ang. the moduli are:         ",3f14.7)') &
 d1(:) = t11 * c1(:) + t12 * c2(:)
 d2(:) = t21 * c1(:) + t22 * c2(:)
 
+idet = ABS(t11 * t22 - t21 * t12)
+
+IF (idet == 0) CALL errore('gener_3d_slab','uncorrect surface unit cell',1)
+IF (idet /= 1) &
+   WRITE(stdout,'(/,5x,"Surface cell has",i5," unit cells" )') idet 
+
 CALL recips( d1, d2, t, bd1, bd2, bt )
 !
 !  Now take all the R vectors within the super-cell of slabs and for each one
@@ -821,8 +812,8 @@ CALL recips( d1, d2, t, bd1, bd2, bt )
 !
 iat=nat
 copies = 1
-DO m1 = MIN(0, t11, t21, t11+t21), MAX(0, t11, t21, t11+t21)
-   DO n1 = MIN(0, t12, t22, t12+t22), MAX(0, t12, t22, t12+t22)
+DO m1 = MIN(t11, t21, t11+t21), MAX(t11, t21, t11+t21)
+   DO n1 = MIN(t12, t22, t12+t22), MAX(t12, t22, t12+t22)
       IF ( m1==0 .AND. n1==0 ) CYCLE
       tau(:) = m1 * c1(:) + n1 * c2(:) 
       prod = tau(1) * bd1(1) + tau(2) * bd1(2) + tau(3) * bd1(3)
@@ -839,6 +830,8 @@ DO m1 = MIN(0, t11, t21, t11+t21), MAX(0, t11, t21, t11+t21)
       END IF
    END DO
 END DO
+
+IF (copies /= idet) CALL errore('gener_3d_slab','error with the supercell',1)
 !
 !  Update the total number of atoms in the supercell.
 !
