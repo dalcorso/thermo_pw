@@ -833,7 +833,7 @@ DO m1 = MIN(0, t11, t21, t11+t21), MAX(0, t11, t21, t11+t21)
             iat=iat+1
             y(:,iat) = y(:,na) + tau(:)
             atm(iat) = atm(na)
-            ityp_all(iat)= ityp(na)
+            ityp_all(iat)= ityp_all(na)
          END DO
          copies=copies + 1
       END IF
