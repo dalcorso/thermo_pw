@@ -48,9 +48,42 @@ PROGRAM supercell_pos
 !      at(1,2), at(2,2), at(3,2)   ! second primitive vector
 !      at(1,3), at(2,3), at(3,3)   ! third primitive vector
 !  --- in all cases
-!  n1, n2, n3, integer : number of cells along a_1, a_2, a_3
 !  iconv, integer : 1   for centered cells convert atomic positions to 
 !                       the conventional unit cell
+!  format                          ! 1 to give n1, n2, n3
+!                                  ! 2 to give the matrix m_ij
+!                                  ! 3 to give vectors A_1, A_2, A_3 in 
+!                                  !   cartesian coordinates
+!  case format=1
+!  n1, n2, n3                      ! 
+!                                  ! The supercell is defined by
+!                                    A_1 = n1 a_1
+!                                    A_2 = n2 a_2
+!                                    A_3 = n3 a_3
+!
+!  case format=2
+!  m11, m12, m13, integer : 
+!  m21, m22, m23, integer : 
+!  m31, m32, m33, integer : 
+!                               The supercell is defined by the 
+!                               three primitive vectors
+!
+!                               A_1 = m11 a_1 + m12 a_2 + m13 a_3
+!                               A_2 = m21 a_1 + m22 a_2 + m23 a_3
+!                               A_3 = m31 a_1 + m32 a_2 + m33 a_3
+!
+!  case format=3
+!  A_1x, A_1y, A_1z
+!  A_2x, A_2y, A_2z
+!  A_3x, A_3y, A_3z
+!
+!                              Note that a_1, a_2, a_3 are those of the
+!                              input lattice if iconv=0, or those of
+!                              the conventional cell if iconv=1. 
+!                              In case format=3 A_1, A_2, and A_3 given
+!                              in input must have integer components
+!                              on a_1, a_2 and a_3.
+!
 !  icenter, integer : 0 no change to atomic coordinates
 !                   : 1 output atomic coordinates between -0.5 and 0.5 in
 !                       crystal coordinates
@@ -64,15 +97,17 @@ USE wyckoff,     ONLY : nattot, tautot, ityptot, extfortot, &
                         clean_spacegroup, sup_spacegroup
 USE wy_pos,      ONLY : wypos
 USE parser,      ONLY : read_line, get_field, field_count
-USE lattices,    ONLY : find_ibrav_code
 USE atomic_pos,  ONLY : find_ityp
+USE lattices,    ONLY : find_ibrav_code
 USE wrappers,    ONLY : feval_infix
 USE io_global,   ONLY : ionode, stdout
 USE mp_global,   ONLY : mp_startup, mp_global_end
 USE environment, ONLY : environment_start, environment_end
 
 IMPLICIT NONE
+INTEGER, PARAMETER :: ntypx = 10
 REAL(DP), PARAMETER :: onet = 1.0_DP / 3.0_DP, twot = 2.0_DP * onet
+REAL(DP), PARAMETER :: eps=1.D-9
 !
 !  variables for dealing with space group
 !
@@ -89,13 +124,12 @@ CHARACTER(LEN=3), ALLOCATABLE :: label(:)  ! the name of each inequivalent atom
 !
 !   variables to specify the geometry
 !
-INTEGER :: n1, n2, n3 
+INTEGER :: mm(3,3)   !  m_ij  see above for the definition of the supercell
 !
 !   the type of atoms
 !
-INTEGER, PARAMETER :: ntypx=10     ! maximum number of types of atoms  
 INTEGER :: ntyp         ! number of types of atoms  
-CHARACTER(LEN=3):: atm(ntypx)  ! the name of each type
+CHARACTER(LEN=3)   :: atm(ntypx)  ! the name of each type
 !
 !  all atoms in the primitive unit cell
 !
@@ -121,13 +155,20 @@ INTEGER, ALLOCATABLE :: all_ityp(:)     ! type of each atom
 INTEGER  :: ibrav
 REAL(DP) :: celldm(6), omega, at(3,3), bg(3,3), ur(3,3), global_s(3,3)
 !
+!   Description of the supercell size and shape
+!
+INTEGER :: ibravs
+REAL(DP) :: celldms(6), ats(3,3), bgs(3,3)
+!
 ! counters and auxiliary variables
 !
 INTEGER :: which_input, iconv, icenter, units
 INTEGER :: na, iat, ia, natoms, nt, nb, i1, i2, i3, iuout, nfield, idx, k, &
-           ivec, jvec, ipol, jpol, ierr, code_group_ext
+           ivec, jvec, ipol, jpol, ierr, code_group_ext, copies, idet, iv, &
+           n1, n2, n3, iformat
 INTEGER :: find_free_unit
-REAL(DP) :: a, cg, inp(3)
+REAL(DP) :: a, cg, inp(3), prod1, prod2, prod3, rmu(3), radius, rmod, v(3,7), &
+            rmm(3,3), check
 LOGICAL :: found
 CHARACTER (LEN=256) :: input_line, field_str, wp
 CHARACTER(LEN=9) :: code='SUPERCELL'
@@ -139,14 +180,18 @@ CALL environment_start ( code )
 
 WRITE(stdout,'(5x," Space group (1) or standard coordinates (2)? ")')
 READ(5,*) which_input
+WRITE(stdout,'(i5)') which_input
 
 IF (which_input==1) THEN
    units=2
    WRITE(stdout,'(5x," Space group number? ")')
    READ(5,*) space_group_code
+   WRITE(stdout,'(i5)') space_group_code
 
    WRITE(stdout,'(5x," Origin, unique axis b, trigonal or hexagonal? (default 1 1 1) ")')
    READ(5,*) or, unb, trig
+
+   WRITE(stdout,'(3i5)') or, unb, trig
    uniqueb=.FALSE.
    rhombohedral=.FALSE.
    IF (space_group_code > 2 .AND. space_group_code < 16 ) THEN 
@@ -157,31 +202,69 @@ IF (which_input==1) THEN
    origin_choice=or
    WRITE(stdout,'(5x,"celldm ? (For instance 1.0 0.0 0.0 0.0 0.0 0.0)  ")')
    READ(5,*) celldm(1), celldm(2), celldm(3), celldm(4), celldm(5), celldm(6)
+   WRITE(stdout,'(6f12.6)') celldm(1), celldm(2), celldm(3), celldm(4), &
+                            celldm(5), celldm(6)
 ELSE
    WRITE(stdout,'(5x," Bravais lattice code ibrav (as in QE)? ")')
    READ(5,*) ibrav
+   WRITE(stdout, '(i5)') ibrav
    WRITE(stdout,'(5x," Units (alat (1) or crystal coordinates (2)) ? ")')
    READ(5,*) units
+   WRITE(stdout, '(i5)') units
    IF (ibrav/=0) THEN
       WRITE(stdout,'(5x,"celldm ? (For instance 1.0 0.0 0.0 0.0 0.0 0.0)  ")')
       READ(5,*) celldm(1), celldm(2), celldm(3), celldm(4), celldm(5), celldm(6)
+      WRITE(stdout,'(6f12.6)') celldm(1), celldm(2), celldm(3), celldm(4), &
+                               celldm(5), celldm(6)
    ELSE
       celldm=0.0_DP
       WRITE(stdout,'(5x,"Units of at (at are multiplied by this number)? ")')
       READ(5,*) celldm(1)
+      WRITE(stdout,'(f12.6)') celldm(1)
       WRITE(stdout,'(5x,"at ? ")')
       DO ivec=1,3
          READ(5,*) at(:,ivec)
+         WRITE(stdout,'(3f12.6)') at(:,ivec)
       ENDDO 
       at=at*celldm(1)
    ENDIF
 ENDIF
 
-WRITE(stdout,'(5x,"n1, n2, n3? (for instance 1 1 1) ")') 
-READ(5,*) n1, n2, n3
-
 WRITE(stdout,'(5x,"Transform to conventional cell? (1=Yes, 0=No) ")') 
 READ(5,*) iconv
+WRITE(stdout,'(i5)') iconv
+WRITE(stdout,'(5x,"Format of the input supercell? (1, 2, or 3) ")') 
+READ(5,*) iformat
+WRITE(stdout,'(i5)') iformat
+IF (iformat==1) THEN
+   WRITE(stdout,'(5x,"n1, n2, n3? (for instance 1 1 1)")')
+   READ(5,*) n1, n2, n3
+   WRITE(stdout,'(3i5)') n1, n2, n3
+ELSEIF(iformat==2) THEN
+   WRITE(stdout,'(5x,"m11, m12, m13? (for instance 1 0 0)")') 
+   READ(5,*) (mm(1, ipol), ipol=1,3)
+   WRITE(stdout,'(3i6)') (mm(1, ipol), ipol=1,3)
+   WRITE(stdout,'(5x,"m21, m22, m23? (for instance 0 1 0)")') 
+   READ(5,*) (mm(2, ipol), ipol=1,3)
+   WRITE(stdout,'(3i6)') (mm(2, ipol), ipol=1,3)
+   WRITE(stdout,'(5x,"m31, m32, m33? (for instance 0 0 1)")') 
+   READ(5,*) (mm(3, ipol), ipol=1,3)
+   WRITE(stdout,'(3i6)') (mm(3, ipol), ipol=1,3)
+ELSEIF(iformat==3) THEN
+   WRITE(stdout,'(5x,"R_1x, R_1y, R_1z ? (for instance 1.0 0.0 0.0)")') 
+   READ(5,*) (ats(1, ipol), ipol=1,3)
+   WRITE(stdout,'(3f15.7)') (ats(1, ipol), ipol=1,3)
+   WRITE(stdout,'(5x,"R_2x, R_2y, R_2z ? (for instance 0.0 1.0 0.0)")') 
+   READ(5,*) (ats(2, ipol), ipol=1,3)
+   WRITE(stdout,'(3f15.7)') (ats(2, ipol), ipol=1,3)
+   WRITE(stdout,'(5x,"R_3x, R_3y, R_3z ? (for instance 0.0 0.0 1.0)")') 
+   READ(5,*) (ats(3, ipol), ipol=1,3)
+   WRITE(stdout,'(3f15.7)') (ats(3, ipol), ipol=1,3)
+ENDIF
+WRITE(stdout,'(5x,"Centered output crystal coordinates? &
+                 &(0=No, 1=Yes -0.5,0.5, 2=Yes 0,1) ")') 
+READ(5,*) icenter
+WRITE(stdout,'(i5)') icenter
 !
 !  now read atomic positions and compute all atoms in the primitive unit cell 
 !  count also the number of types of atoms and the label of each type
@@ -192,9 +275,6 @@ READ(5,*) iconv
 !  ityp
 !  atm
 !
-WRITE(stdout,'(5x,"Centered output crystal coordinates? &
-                 &(0=No, 1=Yes -0.5,0.5, 2=Yes 0,1) ")') 
-READ(5,*) icenter
 WRITE(stdout,'(5x," Number of atoms and atomic coordinates? ")')
 IF (which_input==1) THEN
    READ(5,*) ineq_nat
@@ -297,9 +377,8 @@ ELSE
    DO na=1, nat
       READ(5,*) label(na), tau(1,na), tau(2,na), tau(3,na)
    ENDDO
-!
-!   count the number of types and set ityp
-!
+
+
    CALL find_ityp(nat, label, ntyp, ityp, atm, ntypx)
    !
    !  If coordinates are in alat units, transform to crystal coordinates
@@ -527,40 +606,195 @@ ENDIF
 !  all_ityp
 !
 CALL latgen(ibrav, celldm, at(1,1), at(1,2), at(1,3), omega)
-all_nat=nat_new * n1 * n2 * n3
+at=at/celldm(1)
+!
+!   The primitive vectors of the bulk are
+!
+WRITE(stdout,'(/,5x,"Primitive lattice vectors")')
+WRITE(stdout,'(5x,"(",2(f15.6,","),f15.6,")")') at(:,1)
+WRITE(stdout,'(5x,"(",2(f15.6,","),f15.6,")")') at(:,2)
+WRITE(stdout,'(5x,"(",2(f15.6,","),f15.6,")")') at(:,3)
 
-WRITE(stdout,'(5x, "celldm(1)= ",f15.9)') celldm(1) * n1
-IF (celldm(2) > 0.0_DP ) &
-   WRITE(stdout,'(5x, "celldm(2)= ",f15.9)') (celldm(2) * n2) / n1
-IF (celldm(3) > 0.0_DP ) &
-   WRITE(stdout,'(5x, "celldm(3)= ",f15.9)') (celldm(3) * n3) / n1
-IF (celldm(4) /= 0.0_DP ) &
-   WRITE(stdout,'(5x, "celldm(4)= ",f15.9)') celldm(4) 
-IF (celldm(5) /= 0.0_DP ) &
-   WRITE(stdout,'(5x, "celldm(5)= ",f15.9)') celldm(5) 
-IF (celldm(6) /= 0.0_DP ) &
-   WRITE(stdout,'(5x, "celldm(6)= ",f15.9)') celldm(6) 
+CALL recips( at(1,1), at(1,2), at(1,3), bg(1,1), bg(1,2), bg(1,3) )
 
-WRITE(stdout,'(5x,"ibrav= ",i3)') ibrav
+IF (iformat==1) THEN
+   ats(:,1) = n1 * at(:,1)
+   ats(:,2) = n2 * at(:,2)
+   ats(:,3) = n3 * at(:,3)
+   mm=0
+   mm(1,1) = n1
+   mm(2,2) = n2
+   mm(3,3) = n3
+ELSEIF (iformat==2) THEN
+   ats=0.0_DP
+   DO ipol=1,3
+      DO jpol=1,3
+         ats(:,ipol) = ats(:,ipol) + mm(ipol,jpol) * at(:, jpol)
+      ENDDO
+   ENDDO
+ELSEIF (iformat==3) THEN
+!
+!  bring the ats to crystal coordinates
+!
+   rmm=ats
+   CALL cryst_to_cart(3, rmm, bg, -1)
+
+   mm=NINT(rmm)
+   check=0.0_DP
+   DO ipol=1,3
+      DO jpol=1,3
+         check=check+ABS(rmm(ipol, jpol)-mm(ipol,jpol))
+      ENDDO
+   ENDDO
+
+   IF (check > 1.D-8) CALL errore('supercell','input vectors not Bravais &
+                                                    &lattice vectors',1)
+   WRITE(stdout, '(/,5x,"Supercell primitive lattice vectors &
+                                            &in crystal coordinates ")') 
+   DO ipol=1,3
+      WRITE(stdout,'(3i6)') (mm(ipol, jpol), jpol=1,3)
+   ENDDO
+ENDIF
+!
+!  compute the at of the supercell
+!
+WRITE(stdout,'(/,5x,"Supercell primitive lattice vectors")')
+WRITE(stdout,'(5x,"(",2(f15.6,","),f15.6,")")') ats(:,1)
+WRITE(stdout,'(5x,"(",2(f15.6,","),f15.6,")")') ats(:,2)
+WRITE(stdout,'(5x,"(",2(f15.6,","),f15.6,")")') ats(:,3)
+!
+!  idet is the number of bulk cells inside the supercell
+!
+idet = mm(1,1) * ( mm(2,2) * mm(3,3) - mm(3,2) * mm(2,3) )-   &
+       mm(1,2) * ( mm(2,1) * mm(3,3) - mm(3,1) * mm(2,3) )+   &
+       mm(1,3) * ( mm(2,1) * mm(3,2) - mm(3,1) * mm(2,2) )
+
+IF (idet < 0) CALL errore('supercell','Left handed supercell vectors &
+                                                             &not allowed',1)
+IF (idet == 0) CALL errore('supercell','Parallel or zero supercell vectors',1)
+
+WRITE(stdout,'(/,5x,"The supercell contains",i5," bulk cells")') idet
+
+IF (iformat==1) THEN
+   ibravs=ibrav
+   celldms(1)=n1 
+   celldms(2)=( n2 * celldm(2) ) / n1
+   celldms(3)=( n3 * celldm(3) ) / n1
+   celldms(4)=celldm(4)
+   celldms(5)=celldm(5)
+   celldms(6)=celldm(6)
+ELSE
+!
+!  Now find the Bravais lattice and the celldm of the new cell
+!
+   code_group_ext=0
+   CALL find_ibrav_code(ats(1,1),ats(1,2),ats(1,3),ibravs,celldms, &
+                                 code_group_ext, ur, global_s, .FALSE.)
+!
+ENDIF
+
+CALL recips( ats(1,1), ats(1,2), ats(1,3), bgs(1,1), bgs(1,2), bgs(1,3) )
+
+
+IF (ionode) THEN
+   iuout=find_free_unit()
+   OPEN(unit=iuout, file='supercell.pwin', status='unknown', &
+                                              form='formatted')
+   CALL write_cell_info ( iuout, ibravs, celldm(1), celldms)
+ENDIF
+CALL write_cell_info ( stdout, ibravs, celldm(1), celldms)
+!
+!   bring tau_new to cartesian components
+!
+CALL cryst_to_cart( nat_new, tau_new, at, 1 )
+!
+!   compute the total number of atoms
+!
+all_nat=nat_new * idet
+
 WRITE(stdout,'(5x,"nat= ",i5)') all_nat
 
 ALLOCATE(all_tau(3,all_nat))
 ALLOCATE(all_ityp(all_nat))
 
-all_nat=0
-DO i1=-(n1-1)/2, n1/2
-   DO i2=-(n2-1)/2, n2/2
-      DO i3=-(n3-1)/2, n3/2
-         DO na=1,nat_new
-            all_nat=all_nat+1
-            all_tau(1,all_nat) = (tau_new(1,na) + i1) / n1 
-            all_tau(2,all_nat) = (tau_new(2,na) + i2) / n2
-            all_tau(3,all_nat) = (tau_new(3,na) + i3) / n3
-            all_ityp(all_nat) = ityp_new(na)
+IF (iformat==1) THEN
+   all_nat=0
+   DO i1=-(n1-1)/2, n1/2
+      DO i2=-(n2-1)/2, n2/2
+         DO i3=-(n3-1)/2, n3/2
+            DO na=1,nat_new
+               all_nat=all_nat+1
+               all_tau(1,all_nat) = (tau_new(1,na) + i1) / n1
+               all_tau(2,all_nat) = (tau_new(2,na) + i2) / n2
+               all_tau(3,all_nat) = (tau_new(3,na) + i3) / n3
+               all_ityp(all_nat) = ityp_new(na)
+            ENDDO
          ENDDO
       ENDDO
    ENDDO
-ENDDO
+ELSE
+   all_nat=nat_new
+   iat=nat
+   copies = 1
+   all_ityp(1:nat_new)=ityp_new(1:nat_new)
+   all_tau(:,1:nat_new)=tau_new(:,1:nat_new)
+!
+!  Build the vertices of the supercell
+!
+   v(:,1)=ats(:,1)
+   v(:,2)=ats(:,2)
+   v(:,3)=ats(:,3)
+   v(:,4)=ats(:,1) + ats(:,2)
+   v(:,5)=ats(:,1) + ats(:,3)
+   v(:,6)=ats(:,2) + ats(:,3)
+   v(:,7)=ats(:,1) + ats(:,2) + ats(:,3)
+!
+!  And find the most distant from the origin
+!
+   radius=0.0_DP
+   DO iv=1,7
+      rmod = v(1,iv) ** 2 + v(2,iv) ** 2 + v(3,iv) ** 2
+      IF (rmod>radius) radius=rmod
+   ENDDO
+!
+!  find the minimum n1, n2, n3 that contain the sphere
+!
+   n1=INT(sqrt(radius)*sqrt(bg(1,1)**2+bg(2,1)**2+bg(3,1)**2))+1
+   n2=INT(sqrt(radius)*sqrt(bg(1,2)**2+bg(2,2)**2+bg(3,2)**2))+1
+   n3=INT(sqrt(radius)*sqrt(bg(1,3)**2+bg(2,3)**2+bg(3,3)**2))+1
+!
+!  and search all the points within this cell
+!
+   DO i1= -n1, n1
+      DO i2= -n2, n2
+         DO i3= -n3, n3
+            IF ( i1==0 .AND. i2==0 .AND. i3==0) CYCLE
+            rmu(:) = i1 * at(:,1) + i2 * at(:,2) + i3 * at(:,3)
+            prod1 = rmu(1) * bgs(1,1) + rmu(2) * bgs(2,1) + rmu(3) * bgs(3,1)
+            prod2 = rmu(1) * bgs(1,2) + rmu(2) * bgs(2,2) + rmu(3) * bgs(3,2)
+            prod3 = rmu(1) * bgs(1,3) + rmu(2) * bgs(2,3) + rmu(3) * bgs(3,3)
+            IF ( prod1 >=-eps .AND. prod1 < (1.0_DP-eps) .AND. &
+                 prod2 >=-eps .AND. prod2 < (1.0_DP-eps) .AND. &
+                 prod3 >=-eps .AND. prod3 < (1.0_DP-eps) ) THEN
+
+               copies=copies+1
+               DO na=1,nat_new
+                  all_nat=all_nat+1
+                  all_tau(:,all_nat) = tau_new(:,na) + rmu(:) 
+                  all_ityp(all_nat) = ityp_new(na)
+               ENDDO
+            ENDIF
+         ENDDO
+      ENDDO
+   ENDDO
+
+   IF (copies /= idet) CALL errore('supercell','Some problem with copies',1)
+!
+!   Bring to crystal coordinates
+!
+   CALL cryst_to_cart( all_nat, all_tau, bgs, -1 )
+ENDIF
+
 IF (icenter == 1.OR.icenter==2) THEN
 !
 !   Bring all crystal coordinates between -0.5 and 0.5 or between 0 and 1
@@ -577,24 +811,24 @@ ENDIF
 !  and write on output the coordinates
 !
 WRITE(stdout,'("ATOMIC_POSITIONS (crystal)")')
+IF (ionode) WRITE(iuout,'("ATOMIC_POSITIONS (crystal)")')
 DO na=1,all_nat
    WRITE(stdout,'(a,3f21.13)') TRIM(atm(all_ityp(na))), all_tau(1,na), &
-                                                   all_tau(2,na), &
-                                                   all_tau(3,na) 
+                                                        all_tau(2,na), &
+                                                        all_tau(3,na) 
+   IF (ionode) WRITE(iuout,'(a,3f21.13)') TRIM(atm(all_ityp(na))), &
+                                                all_tau(1,na), &
+                                                all_tau(2,na), &
+                                                all_tau(3,na) 
 ENDDO
+IF (ionode) CLOSE(iuout)
 
 IF (ionode) THEN
-   iuout=find_free_unit()
    OPEN(unit=iuout, file='supercell.xsf', status='unknown', &
                                               form='formatted')
-   at=at/celldm(1)
-   at(:,1)=at(:,1)*n1
-   at(:,2)=at(:,2)*n2
-   at(:,3)=at(:,3)*n3
-   CALL cryst_to_cart( all_nat, all_tau, at, 1 )
 
-   CALL xsf_struct (celldm(1), at, all_nat, all_tau, atm, all_ityp, iuout)
-
+   CALL cryst_to_cart( all_nat, all_tau, ats, 1 )
+   CALL xsf_struct (celldm(1), ats, all_nat, all_tau, atm, all_ityp, iuout)
    CLOSE(iuout)
 ENDIF
 
@@ -790,3 +1024,26 @@ END DO
 
 RETURN
 END SUBROUTINE transform_ofc_mon_uniq_b
+
+SUBROUTINE write_cell_info ( iunout, ibrav, units, celldm)
+USE kinds, ONLY : DP
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: iunout, ibrav
+REAL(DP), INTENT(IN) :: units, celldm(6)
+
+WRITE(iunout,'(5x,"ibrav= ",i3)') ibrav
+WRITE(iunout,'(5x, "celldm(1)= ",f15.9)') celldm(1) * units
+IF (celldm(2) > 0.0_DP ) &
+   WRITE(iunout,'(5x, "celldm(2)= ",f15.9)') celldm(2) 
+IF (celldm(3) > 0.0_DP ) &
+   WRITE(iunout,'(5x, "celldm(3)= ",f15.9)') celldm(3)
+IF (celldm(4) /= 0.0_DP ) &
+   WRITE(iunout,'(5x, "celldm(4)= ",f15.9)') celldm(4) 
+IF (celldm(5) /= 0.0_DP ) &
+   WRITE(iunout,'(5x, "celldm(5)= ",f15.9)') celldm(5) 
+IF (celldm(6) /= 0.0_DP ) &
+   WRITE(iunout,'(5x, "celldm(6)= ",f15.9)') celldm(6) 
+
+RETURN
+
+END SUBROUTINE write_cell_info

@@ -264,13 +264,14 @@ CONTAINS
 
   REAL(DP), PARAMETER :: eps1=1.D-7, eps2=5.D-7
   REAL(DP) :: tmod(3), cangle(3), sp(3), e(3,3), emod(3), at(3,3), sr(3,3,48),&
-              ax(3,3), cc(3,3), at1(3,3), at2(3,3), ang, modulus,  &
-              omega, angle_rot, ps, e1(3,3), rot_mat(3,3), lm, ceangle(3), &
+              ax(3,3), cc(3,3), at1(3,3), at2(3,3), bg(3,3), ang, &
+              modulus, omega, angle_rot, ps, e1(3,3), rot_mat(3,3), lm, &
               celldm0(6)
   INTEGER :: ipol, jpol, ivec, code_group, nsym, isym, ts, tipo_sym, iperp, &
              ipar1, ipar2, enne(3), ind(3), ncount, code_group_, &
-             which_elem(48), group_desc(48), code_group_ext_
-  LOGICAL :: is_axis, parallel_axis
+             which_elem(48), group_desc(48), code_group_ext_, mm(3,3), idet, &
+             bgenne(3)
+  LOGICAL :: is_axis, parallel_axis, bunique
   CHARACTER(LEN=11) :: gname, gname_at, group_name
 !
 ! find the point group
@@ -292,18 +293,18 @@ CONTAINS
      gname=group_name(code_group)
   ENDIF
 
-!  IF (verbosity) THEN
+  IF (verbosity) THEN
      WRITE(stdout,'(/,5x," find ibrav for a1, a2, a3",/)') 
 
      WRITE(stdout,'(3f20.12)') a1(:)
      WRITE(stdout,'(3f20.12)') a2(:)
      WRITE(stdout,'(3f20.12)') a3(:)
+  END IF
 
-     WRITE(stdout,'(/,5x,"Point group of the at ",a11)') gname_at
-     IF (gname /= gname_at) &
-        WRITE(stdout,'(/,5x,"Searching the ibrav among the lattices &
-                      compatible with ",a11)') gname
-!  END IF
+  WRITE(stdout,'(/,5x,"Point group of the at ",a11,/)') gname_at
+  IF (gname /= gname_at) &
+     WRITE(stdout,'(5x,"Searching the ibrav among the lattices &
+                   compatible with ",a11)') gname
 !
 !  set the three cartesian directions
 !
@@ -356,119 +357,132 @@ CONTAINS
 !  monoclinic lattice  C_2h
 !
 !  the two-fold rotation axis or the perpendicular to the mirror will be the 
-!  z axis
+!  z axis. One of them is among the first three symmetry operations.
 !
-        DO isym=1,2
+        DO isym=1,3
            ts=tipo_sym(sr(1,1,isym))
-           IF (ts==3) THEN
+           IF (ts==4) THEN
               CALL versor(sr(1,1,isym), ax(1,3))
               IF (.NOT. bravais_dir(at, ax(1,3), enne, e(1,3), emod(3) ) ) &
                  CALL errore('find_ibrav_code','problem with monoclinic dir',1)
-           ELSE IF (ts==5) THEN
+              EXIT
+           ELSEIF (ts==5) THEN
               CALL mirror_axis(sr(1,1,isym), ax(1,3))
               IF (.NOT. bravais_dir(at, ax(1,3), enne, e(1,3), emod(3) ) ) &
                  CALL errore('find_ibrav_code','problem with monoclinic dir',1)
-           END IF
-        END DO
+              EXIT
+           ENDIF
+        ENDDO
+        bunique=is_axis(ax(1,3),2)
 !
-!   find the angle between the direction of the axis and the three vectors
+!   mm contains the matrix needed to write our vectors in terms of
+!   the input at vectors
 !
-        ceangle(1) = ( ax(1,3)*at(1,1) + ax(2,3)*at(2,1) + ax(3,3)*at(3,1) ) 
-        ceangle(2) = ( ax(1,3)*at(1,2) + ax(2,3)*at(2,2) + ax(3,3)*at(3,2) ) 
-        ceangle(3) = ( ax(1,3)*at(1,3) + ax(2,3)*at(2,3) + ax(3,3)*at(3,3) ) 
+        mm(:,3)=enne(:)
 
-        IF ( ABS(ceangle(1))<eps2 .AND. ABS(ceangle(2))<eps2 ) THEN 
+        CALL recips(at(1,1), at(1,2), at(1,3), bg(1,1), bg(1,2), bg(1,3))
 !
-!   simple monoclinic c unique
+!   find the shortest G vector parallel to the symmetry axis
 !
+        IF (.NOT. bravais_dir(bg, ax(:,3), bgenne, e(1,1), emod(1) ) ) &
+               CALL errore('find_ibrav_code','No g vector found ',1)
+!
+!   and find the two bravais lattice vectors closest to the origin
+!   in the plane perpendicular to the G vector. Together with the Bravais
+!   lattice vector parallel to the axis they form our first guess of the 
+!   monoclinic primitive vectors.
+!
+        CALL find_closest_at( bgenne, at, mm, 2, e )
+
+        idet = mm(1,1) * ( mm(2,2) * mm(3,3) - mm(3,2) * mm(2,3) )-   &
+               mm(1,2) * ( mm(2,1) * mm(3,3) - mm(3,1) * mm(2,3) )+   &
+               mm(1,3) * ( mm(2,1) * mm(3,2) - mm(3,1) * mm(2,2) )
+!
+!   If the determinant is negative our guessed vector have left hand
+!   orientation. Exchange e(:,1) and e(:,2).
+!
+        IF (idet < 0) THEN
+           e1(:,1)=e(:,1)
+           e(:,1)=e(:,2)
+           e(:,2)=e1(:,1)
+           idet=-idet
+        ENDIF
+!
+!    If idet=1 the lattice is simple monoclinic and we have found it
+!
+        IF (idet==1) THEN
            ibrav=12
-           celldm(1)=tmod(1)
-           celldm(2)=tmod(2)/tmod(1)
-           celldm(3)=tmod(3)/tmod(1)
-           celldm(4)=cangle(1)
-        ELSEIF ( ABS(ceangle(1))<eps2 .AND. ABS(ceangle(3))<eps2 ) THEN 
+           e1(:,:)=e(:,:)
 !
-!   simple monoclinic b unique 
+!   If idet==2 the lattice is centered and we must see if it is
+!   B, C or I. In all cases we transform it to B.
 !
-           ibrav=-12
-           celldm(1)=tmod(1)
-           celldm(2)=tmod(2)/tmod(1)
-           celldm(3)=tmod(3)/tmod(1)
-           celldm(5)=cangle(2)
-        ELSEIF ( ABS(ceangle(2))<eps2 .AND. ABS(ceangle(3))<eps2 ) THEN 
-!
-!   simple monoclinic a unique simulated with c unique
-!
-           ibrav=12
-           celldm(1)=tmod(2)
-           celldm(2)=tmod(3)/tmod(2)
-           celldm(3)=tmod(1)/tmod(2)
-           celldm(4)=cangle(3)
-
-        ELSEIF ( ABS(ceangle(1))<eps2 ) THEN 
-!
-!  base centered monoclinic simulated with c unique when at(:,1) is along
-!  a2
-!
-           lm= - ceangle(3) / ceangle(2)
-           ax(:,1) = lm*at(:,2) + at(:,3)
-           modulus=SQRT( ax(1,1)**2 + ax(2,1)**2 + ax(3,1)**2 )
-!
-!   ax is the direction of the x axis
-!
-           ax(:,1)=ax(:,1)/modulus
-           IF (.NOT. bravais_dir(at, ax, enne, e(1,1), emod(1) ) ) &
-                 CALL errore('find_ibrav_code','problem with x dir',1)
-
+        ELSEIF (idet==2) THEN
            ibrav=13
-           celldm(1)=emod(1)
-           celldm(2)=tmod(1)/celldm(1)
-           celldm(3)=emod(3)/celldm(1)
-           celldm(4) = (ax(1,1)*at(1,1) + ax(2,1)*at(2,1) + ax(3,1)*at(3,1))/&
-                        tmod(1)
-        ELSEIF ( ABS(ceangle(2))<eps2 ) THEN 
 !
-!  base centered monoclinic c unique 
+!   first check if it is B
 !
-           lm= - ceangle(3) / ceangle(1)
-           ax(:,1) = lm*at(:,1) + at(:,3)
-           modulus=SQRT( ax(1,1)**2 + ax(2,1)**2 + ax(3,1)**2 )
+           e1(:,1)=0.5_DP*(e(:,1) - e(:,3))
+           e1(:,2)=e(:,2) 
+           e1(:,3)=0.5_DP*(e(:,1) + e(:,3))
+           IF (same_lattice(e1, at, ur, at1, global_s)) GOTO 100
 !
-!   ax is the direction of the x axis
+!   otherwise check if it is C
 !
-           ax(:,1)=ax(:,1)/modulus
-           IF (.NOT. bravais_dir(at, ax, enne, e(1,1), emod(1) ) ) &
-               CALL errore('find_ibrav_code','problem with x dir',1)
+           e1(:,1)=0.5_DP*(e(:,2) + e(:,3))
+           e1(:,2)=e(:,1) 
+           e1(:,3)=0.5_DP*(e(:,2) - e(:,3))
+           IF (same_lattice(e1, at, ur, at1, global_s)) GOTO 100
+!
+!   If the codes arrive here it must be I
+!
+           e1(:,1)=0.5_DP*(e(:,1) +e(:,2) + e(:,3))
+           e1(:,2)=e(:,1) 
+           e1(:,3)=0.5_DP*(e(:,1) + e(:,2) - e(:,3))
 
-           ibrav=13
-           celldm(1)=emod(1)
-           celldm(2)=tmod(2)/celldm(1)
-           celldm(3)=emod(3)/celldm(1)
-           celldm(4) = (ax(1,1)*at(1,2) + ax(2,1)*at(2,2) + ax(3,1)*at(3,2))/&
-                        tmod(2)
-
-        ELSEIF ( ABS(ceangle(3))<eps2 ) THEN 
+           IF (same_lattice(e1, at, ur, at1, global_s)) GOTO 100
 !
-!  base centered monoclinic b unique 
+!   If the code arrives here, there is some problem. It should not happen.
 !
-           lm= - ceangle(2) / ceangle(1)
-           ax(:,1) = lm*at(:,1) + at(:,2)
-           modulus=SQRT( ax(1,1)**2 + ax(2,1)**2 + ax(3,1)**2 )
+           CALL errore('find_ibrav_code','problem1 with monoclinic',1)
+100        CONTINUE
 !
-!   ax is the direction of the x axis
+!    return to the conventional vectors to extract the size of the unit cell
 !
-           ax(:,1)=ax(:,1)/modulus
-           IF (.NOT. bravais_dir(at, ax, enne, e(1,1), emod(1) ) ) &
-               CALL errore('find_ibrav_code','problem with x dir',1)
-
-           ibrav=-13
+           ax(:,1)=e1(:,1)
+           e1(:,1)=e1(:,1) + e1(:,3)
+           e1(:,3)=ax(:,1) - e1(:,3)
+        ENDIF
+!
+!   Find the moduli of the vectors
+!
+        emod(1)=SQRT(e1(1,1)**2+e1(2,1)**2+e1(3,1)**2)
+        emod(2)=SQRT(e1(1,2)**2+e1(2,2)**2+e1(3,2)**2)
+        emod(3)=SQRT(e1(1,3)**2+e1(2,3)**2+e1(3,3)**2)
+!
+!  And set the dimensions of the unit cell. b-unique cells are
+!  used when the symmetry axis of the original lattice was parallel 
+!  to the y direction. In all other cases the lattice is cunique
+!
+        IF (bunique) THEN
+           ibrav=-ibrav
            celldm(1)=emod(1)
            celldm(2)=emod(3)/celldm(1)
-           celldm(3)=tmod(3)/celldm(1)
-           celldm(5) = (ax(1,1)*at(1,3) + ax(2,1)*at(2,3) + ax(3,1)*at(3,3))/&
-                        tmod(3)
+           celldm(3)=emod(2)/celldm(1)
+           celldm(5)= (e1(1,1)*e1(1,2)+e1(2,1)*e1(2,2)+e1(3,1)*e1(3,2)) / &
+                                            emod(1) / emod(2)
+        ELSE
+           celldm(1)=emod(1)
+           celldm(2)=emod(2)/celldm(1)
+           celldm(3)=emod(3)/celldm(1)
+           celldm(4)= (e1(1,1)*e1(1,2)+e1(2,1)*e1(2,2)+e1(3,1)*e1(3,2)) / &
+                                            emod(1) / emod(2)
         ENDIF
-
+!
+!   Now check that we found the correct lattice.
+!
+        IF (ibrav==0) &
+           CALL errore('find_ibrav_code','No lattice found',1)
         CALL latgen(ibrav,celldm,at2(1,1),at2(1,2),at2(1,3),omega)
 
         IF (.NOT. same_lattice(at, at2, ur, at1, global_s)) &
@@ -564,17 +578,25 @@ CONTAINS
 !
 !  tetragonal case D_4h
 !
-!  first find the direction of the z axis and of the two perpendicular
-!  twofold axis with the shorter Bravais lattice vectors
+!  first find the direction of the z axis 
 !
-        modulus=1.D8
         DO isym=1,nsym
            ts=tipo_sym(sr(1,1,isym))
            IF (ts==3 .AND. ABS(angle_rot(sr(1,1,isym))-90.0_DP)<eps1 ) THEN
               CALL versor(sr(1,1,isym), ax(1,3))
               IF (.NOT.bravais_dir(at, ax(1,3), enne, e(1,3), emod(3) )) &
                  CALL errore('find_ibrav_code','problem with tetragonal dir',1)
-           ELSEIF (ts==4) THEN
+              EXIT
+           ENDIF
+        ENDDO
+!
+!  Find the two perpendicular twofold axis with the shorter Bravais lattice 
+!  vectors
+!
+        modulus=1.D8
+        DO isym=1, nsym
+           ts=tipo_sym(sr(1,1,isym))
+           IF (ts==4) THEN
               CALL versor(sr(1,1,isym), ax(1,1))
               ps=ax(1,1)*ax(1,3)+ax(2,1)*ax(2,3)+ax(3,1)*ax(3,3)
 !
@@ -582,7 +604,7 @@ CONTAINS
 !
               IF (ABS(ps)>eps1) CYCLE
               IF (.NOT. bravais_dir(at, ax, enne, e(1,1), emod(1) ) ) &
-                 CALL errore('find_ibrav_code','problem with tetragonal dir',1)
+                 CALL errore('find_ibrav_code','problem with two-fold axis',1)
               IF (emod(1) < modulus) modulus=emod(1)
            ENDIF
         ENDDO
@@ -887,7 +909,7 @@ END DO
 !
 !   And now try all combinations with the correct modulus until one is found
 !   such that at and at1 are related by a pure rotation. Exclude the case
-!   in which the at are a supecell
+!   in which the at are a supercell
 !
 DO i=1,nc(1)
    DO j=1,nc(2)
@@ -1018,41 +1040,64 @@ LOGICAL FUNCTION bravais_dir(at, ax, enne, rvec_out, rvecmod_out )
 !
 !   This routine receives three primitive lattices at and a direction ax
 !   and finds the shorter Bravais lattice vector in the direction of 
-!   the versor ux. It checks only a shell with -3 < n_i < 3.
-!   The function gives .FALSE. if none of the computed vectors is in the
-!   direction of ax
+!   the versor ux. The function gives .FALSE. if none of the computed 
+!   vectors is in the direction of ax or if this vector has n1, n2, n3 
+!   outside the checked range.
 !
 USE kinds, ONLY : DP
 IMPLICIT NONE
-REAL(DP), INTENT(IN) :: at(3,3), ax(3)
+REAL(DP), INTENT(IN)  :: at(3,3), ax(3)
 REAL(DP), INTENT(OUT) :: rvec_out(3), rvecmod_out
-INTEGER, INTENT(OUT) :: enne(3)
+INTEGER, INTENT(OUT)  :: enne(3)
 
-INTEGER, PARAMETER :: npx=3
+INTEGER, PARAMETER  :: npx=150
 REAL(DP), PARAMETER :: eps1=1.d-8
-INTEGER :: i, j, k
-REAL(DP) :: rvec(3), rvecmod, ps, min_mod
+INTEGER  :: ipol, i1, i2, i3, n1, n2, n3
+REAL(DP) :: bg(3,3), rvec(3), rvecmod, ps, min_mod, proj(3), rn2, rn3
 
-bravais_dir=.FALSE.
-min_mod=1.D8
-DO i=npx,-npx,-1
-   DO j=npx,-npx,-1
-      DO k=npx,-npx,-1
-         rvec(:) = i * at(:,1) + j * at(:,2) + k * at(:,3)
-         rvecmod= SQRT(rvec(1)**2 + rvec(2)**2 + rvec(3)**2)
-         ps= rvec(1)*ax(1) + rvec(2)*ax(2) + rvec(3)*ax(3)
-         IF ( ( ABS(ps-rvecmod) < eps1 ).AND.(ps<min_mod).AND.ps>eps1) THEN
-            enne(1)=i 
-            enne(2)=j 
-            enne(3)=k 
-            min_mod=ps
-            rvec_out=rvec
-            rvecmod_out=rvecmod
-            bravais_dir=.TRUE.
-         ENDIF
-      END DO
-   END DO
+CALL recips(at(1,1), at(1,2), at(1,3), bg(1,1), bg(1,2), bg(1,3))
+
+DO ipol=1,3
+   proj(ipol)= bg(1, ipol) * ax(1) + bg(2, ipol) * ax(2) + bg(3, ipol) * ax(3)
 END DO
+
+IF (ABS(proj(1))>eps1) THEN
+   i1=1
+   i2=2
+   i3=3
+ELSEIF (ABS(proj(2))>eps1) THEN
+   i1=2
+   i2=3
+   i3=1
+ELSEIF (ABS(proj(3))>eps1) THEN
+   i1=3
+   i2=1
+   i3=2
+ELSE
+   CALL errore('bravais_dir',' versor is zero',1)
+ENDIF
+
+min_mod=1.D8
+bravais_dir=.FALSE.
+DO n1=npx, -npx, -1
+   rn2= n1 * proj(i2) / proj(i1) 
+   rn3= n1 * proj(i3) / proj(i1) 
+   IF (ABS(rn2 - NINT(rn2))< eps1 .AND. ABS(rn3 - NINT(rn3))< eps1) THEN
+      n2 = NINT(rn2)
+      n3 = NINT(rn3)
+      rvec(:) = n1 * at(:,i1) + n2 * at(:,i2) + n3 * at(:,i3)
+      ps= SQRT(rvec(1)**2 + rvec(2)**2 + rvec(3)**2)
+      IF (ps > eps1 .AND. ps<min_mod) THEN
+         enne(i1)=n1
+         enne(i2)=n2
+         enne(i3)=n3
+         min_mod=ps
+         rvec_out(:)=rvec(:)
+         rvecmod_out=ps
+         bravais_dir=.TRUE.
+      ENDIF
+   ENDIF
+ENDDO
 
 RETURN
 END FUNCTION bravais_dir
@@ -1553,5 +1598,120 @@ crystal_parameters=degree
 
 RETURN
 END FUNCTION crystal_parameters
+
+SUBROUTINE find_closest_at( gvec, at, enne, m, rmu )
+!
+!  This subroutine finds the m vectors of the Bravais lattice defined
+!  by the primitive vectors at, closest to the origin and belonging to 
+!  the lattice plane perpendicular to gvec (given in the basis of bg)
+!  Note that only a subset of the plane point are tested. Increase npx
+!  if this routine gives problems.
+!
+!
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: gvec(3), m
+REAL(DP), INTENT(IN) :: at(3,3)
+
+REAL(DP), INTENT(INOUT) :: rmu(3,m)
+INTEGER, INTENT(INOUT) :: enne(3,m)
+
+INTEGER, PARAMETER :: npx=10
+INTEGER :: nn, ip, iq, ir, i1, i2, i3, i, icount, nvecx, fact, ip1, iq1, ir1
+REAL(DP), ALLOCATABLE :: r(:,:), rmod(:)
+INTEGER,  ALLOCATABLE :: ind(:), renne(:,:)
+
+IF (gvec(1) /= 0) THEN
+   i1=1
+   i2=2
+   i3=3
+ELSEIF (gvec(2) /= 0) THEN
+   i1=2
+   i2=3
+   i3=1
+ELSE
+   i1=3
+   i2=1
+   i3=2
+ENDIF
+
+icount=0
+nn=ABS(gvec(i1))
+nvecx = (2 * npx * nn + 1) **2 
+ALLOCATE(r(3,nvecx))
+ALLOCATE(rmod(nvecx))
+ALLOCATE(renne(3,nvecx))
+ALLOCATE(ind(nvecx))
+DO iq=-npx*nn, npx*nn
+   DO ir=-npx*nn, npx*nn
+      ip= - ( iq * gvec(i2) + ir * gvec(i3) ) 
+!
+!  The condition ip>=0 removes one half of the points so as to avoid to have
+!  R and -R in the list. 
+!
+      IF ((MOD(ip, nn) == 0 .AND. ip > 0) .OR. (ip==0.AND.iq > 0) .OR. &
+              (ip==0.AND.iq==0.AND.ir>0) ) THEN
+!
+!   Avoid to take parallel vectors. Only when ip/nn, iq, and ir have no
+!   common factor the point is inserted in the list
+!
+         ip1=ip/nn
+         iq1=iq
+         ir1=ir
+         CALL remove_common_factors(ip1,iq1,ir1,fact)
+         IF (fact /= 1) CYCLE
+         icount=icount+1
+         r(:,icount)= ip * at(:,i1) / nn + iq * at(:,i2) + ir * at(:,i3)
+         renne(i1,icount)=ip / nn
+         renne(i2,icount)=iq
+         renne(i3,icount)=ir
+         rmod(icount)=SQRT(r(1,icount)**2+r(2,icount)**2+r(3,icount)**2)
+         ind(icount)=icount
+      ENDIF
+   ENDDO
+ENDDO
+
+IF (icount < m) CALL errore('find_closest_at','too few vectors increase npx',1)
+
+CALL hpsort(icount, rmod, ind)
+
+!DO i = 1, icount
+!   WRITE(6,'(5i8,f15.7)') i, ind(i), renne(1, ind(i)), renne(2, ind(i)), &
+!               renne(3, ind(i)), rmod(i)
+!END DO
+
+DO icount = 1, m
+   rmu(:,icount)=r(:,ind(icount))
+   enne(:,icount)=renne(:,ind(icount))
+ENDDO
+
+DEALLOCATE (r)
+DEALLOCATE (rmod)
+DEALLOCATE (renne)
+DEALLOCATE (ind)
+
+RETURN
+END SUBROUTINE find_closest_at
+
+SUBROUTINE remove_common_factors(m,n,o,fact)
+
+IMPLICIT NONE
+INTEGER, INTENT(INOUT) :: m, n, o
+INTEGER, INTENT(OUT) :: fact
+
+INTEGER :: ind
+
+fact=1
+DO ind=2,10
+   IF (MOD(m,ind)==0.AND.MOD(n,ind)==0.AND.MOD(o,ind)==0) THEN
+      m = m/ind
+      n = n/ind
+      o = o/ind
+      fact=fact*ind
+   END IF
+ENDDO
+
+RETURN
+END SUBROUTINE remove_common_factors
+
 
 END MODULE lattices
