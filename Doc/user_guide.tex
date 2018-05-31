@@ -110,7 +110,7 @@ of the complex frequency $\omega$ at fixed geometry.
 \item Phonon dispersions at fixed geometry and computation of the harmonic
 thermodynamic properties: vibrational energy, vibrational free energy,
 vibrational entropy, and constant volume heat capacity as a function of
-temperature.
+temperature. 
 
 \item Frozen ions and relaxed ions elastic constants at fixed geometry.
 
@@ -1056,6 +1056,9 @@ vibrational energy, vibrational free energy, vibrational entropy, and
 constant strain heat capacity.
 The same thermodynamic quantities are calculated also by direct 
 integration over the Brillouin zone and compared in the plots.
+When \texttt{with\_eigen=.TRUE.} the atomic B-factors are
+calculated as a function of temperature by a direct integration over 
+the Brillouin zone.
 Note that presently no interpolation formula is used at low temperatures
 so \texttt{thermo\_pw} can not be used to obtain thermodynamic 
 properties at very low temperatures. 
@@ -2054,6 +2057,14 @@ quantities obtained using the phonon density of states,
 in \texttt{blue} those obtained from three dimensional integrals over 
 the Brillouin zone. In some cases the \texttt{red} curve is not visible 
 because it is exactly below the \texttt{blue} one.
+
+\item
+Atomic B factors as a function of temperature. This plot is composed by
+one figure for each atom for cubic solids and by two figures for each atom
+in the other cases. One figure contains $B_{xx}$ (red), $B_{yy}$ (blue)
+and $B_{zz}$ (green) as a function of temperature. If the three curves
+coincide only the last one (green) will be visible. The second figure, 
+when plotted shows $B_{xy}$ (red), $B_{xz}$ (blue), and $B_{yz}$ (green).
 
 \item
 Debye vibrational energy, free energy, 

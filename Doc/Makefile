@@ -21,7 +21,7 @@ $(PDFS): %.pdf: %.tex
 
 clean:
 	- rm -f $(PDFS) $(AUXS) $(LOGS) $(OUTS) $(TOCS) *~
-	- rm -rf user_guide/ developer_guide/ thermo/ point_groups/
+	- rm -rf user_guide/ developer_guide/ thermo/ point_groups/ tutorial/
 	- rm -rf input_xx.xsl
 	- rm -f INPUT_*.html INPUT_*.txt INPUT_*.xml
 	- rm -rf ../../Doc/INPUT_PW.*
