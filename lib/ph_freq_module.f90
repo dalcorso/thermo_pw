@@ -61,7 +61,8 @@ END TYPE ph_freq_type
 
 PUBLIC :: ph_freq_type, zero_point_energy_ph, free_energy_ph, vib_energy_ph, &
           vib_entropy_ph, specific_heat_cv_ph, init_ph_freq, destroy_ph_freq, &
-          thermal_expansion_ph, read_ph_freq_data, write_ph_freq_data, fecv_ph
+          thermal_expansion_ph, read_ph_freq_data, write_ph_freq_data, &
+          fecv_ph, debye_waller_factor
 
 CONTAINS
 
@@ -477,4 +478,84 @@ cv = cv * kb
 RETURN
 END SUBROUTINE fecv_ph
 
+SUBROUTINE debye_waller_factor(ph_freq, temp, b_fact, nat, amass, ntyp, ityp)
+!
+! This subroutine receives as input a set of phonon frequencies and
+! respective displacements (eigenvalues and eigenvectors of dynamical
+! matrix) and computes the Debye Waller matrix for each atom.
+!      
+USE constants, ONLY : h_planck_si, c_si, bohr_radius_si, pi, amu_si
+
+IMPLICIT NONE
+TYPE(ph_freq_type), INTENT(IN) :: ph_freq
+INTEGER, INTENT(IN) :: nat, ntyp, ityp(nat)
+REAL(DP), INTENT(IN) :: temp, amass(ntyp)
+REAL(DP), INTENT(INOUT) :: b_fact(3,3,nat) 
+REAL(DP) :: wg, nu, temp1, arg, expt, tfact, ufact, fact
+COMPLEX(DP) :: u1, u2
+INTEGER :: nq_eff, iq, ipol, jpol, indi, indj, imode, na
+
+nq_eff=ph_freq%nq_eff
+IF (nat/=ph_freq%nat) CALL errore('debye_waller_factor','incompatible nat',1)
+temp1 = 1.0_DP / temp
+
+b_fact=0.0_DP
+!
+!   The input frequencies are supposed to be in cm^-1.
+!   c_si * 100 is the speed of light in cm / sec, and its multiplication
+!   for the frequency in cm^-1 trasforms it in Hz.
+!   amu_si converts the mass containd in amass (suppose to be in amu) in Kg 
+!   8 pi^2 comes from a factor 2 in the denominator of the formula,
+!   a 2 pi converts h_planck_si in hbar_si, and a 2pi 
+!   transforms the frequency into angular frequency.
+!
+!   NB: the B-factor is defined as 8 pi**2 the mean-square displacement,
+!       so we multiply by this factor and write on output the B-factor
+!       Switch the comments in the two following lines if you want
+!       to output the mean-square displacement.
+!       
+!
+!fact= h_planck_si * 1.D20 / c_si / 800.0_DP / amu_si / pi**2
+fact= h_planck_si * 1.D20 / c_si / 100.0_DP / amu_si 
+!
+!  The output B-factor is in Angstrom^2. Uncomment the following line
+!  if you want it in (a.u)^2
+!
+! fact= fact / 1.D20 / (bohr_radius_si)**2
+
+DO na=1, nat
+   DO ipol=1, 3
+      indi=3*(na-1)+ipol
+      DO jpol=1, 3
+         indj=3*(na-1)+jpol
+         DO iq=1, nq_eff
+            wg=ph_freq%wg(iq)
+            DO imode=1, 3*nat
+               nu=ph_freq%nu(imode, iq)
+               u1=ph_freq%displa(indi,imode,iq)
+               u2=ph_freq%displa(indj,imode,iq)
+               ufact = DREAL(u1*CONJG(u2))
+               arg = kb1 * nu * temp1 
+               IF (arg > thr_taylor) THEN
+                  expt = EXP(-arg)
+                  tfact = (1.0_DP+expt)/(1.0_DP-expt)
+                  b_fact(ipol,jpol,na)=b_fact(ipol,jpol,na)+ &
+                                     wg*ufact*tfact/nu
+               ELSEIF (nu > thr_ph) THEN
+                  b_fact(ipol,jpol,na)=b_fact(ipol,jpol,na)+ &
+                      wg*ufact * (2.0_DP - arg + arg**2*0.5_DP-arg**3/6.0_DP) &
+                      /arg/(1.0_DP-arg*0.5_DP+arg**2/6.0_DP) / nu
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDDO
+!
+!   Mass is in amu and the conversion factor is inside fact
+!
+   b_fact(:,:,na)=b_fact(:,:,na)*fact/amass(ityp(na))
+ENDDO   
+
+RETURN
+END SUBROUTINE debye_waller_factor
 END MODULE ph_freq_module

@@ -101,12 +101,16 @@ END SUBROUTINE write_thermo
 SUBROUTINE write_thermo_ph(igeom)
 
 USE kinds,            ONLY : DP
+USE ions_base,        ONLY : nat, nsp, ityp, amass
+USE symme,            ONLY : symtensor
 USE ph_freq_module,   ONLY : ph_freq_type, zero_point_energy_ph, fecv_ph, &
-                             free_energy_ph, vib_energy_ph, specific_heat_cv_ph
+                             free_energy_ph, vib_energy_ph, &
+                             specific_heat_cv_ph, debye_waller_factor
 USE temperature,      ONLY : ntemp, temp
 USE ph_freq_thermodynamics, ONLY : phf_ener, phf_free_ener, phf_entropy, &
                              phf_cv, ph_freq_save
 USE thermo_mod,       ONLY : tot_ngeo
+USE control_thermo,   ONLY : with_eigen
 USE mp,               ONLY : mp_bcast, mp_sum
 USE mp_world,         ONLY : world_comm
 USE io_global,        ONLY : meta_ionode, meta_ionode_id, stdout
@@ -117,9 +121,10 @@ INTEGER, INTENT(IN) :: igeom
 CHARACTER(LEN=256) :: filename
 LOGICAL :: check_file_exists, do_read
 
-INTEGER  :: idum, itemp, iu_therm
+INTEGER  :: idum, itemp, iu_therm, ipol, jpol, na
 INTEGER  :: find_free_unit
 REAL(DP) :: e0
+REAL(DP) :: b_fact(3,3,nat,ntemp)
 !
 do_read=.FALSE.
 filename="therm_files/"//TRIM(fltherm)//'_ph'
@@ -175,6 +180,11 @@ DO itemp = 1, ntemp
    phf_ener(itemp,igeom)=phf_ener(itemp,igeom)+e0
    phf_entropy(itemp,igeom)=(phf_ener(itemp, igeom) - &
                              phf_free_ener(itemp, igeom))/temp(itemp)
+   IF (with_eigen) THEN
+      CALL debye_waller_factor(ph_freq_save(igeom), temp(itemp), &
+                              b_fact(1,1,1,itemp), nat, amass, nsp, ityp)
+      CALL symtensor(nat, b_fact(1,1,1,itemp))
+   ENDIF
 END DO
 !
 !  In ph_freq_save the frequencies are distributed among all processors
@@ -184,11 +194,15 @@ CALL mp_sum(phf_free_ener(1:ntemp,igeom),world_comm)
 CALL mp_sum(phf_ener(1:ntemp,igeom),world_comm)
 CALL mp_sum(phf_cv(1:ntemp,igeom),world_comm)
 CALL mp_sum(phf_entropy(1:ntemp,igeom),world_comm)
+IF (with_eigen) CALL mp_sum(b_fact(1:3,1:3,1:nat,1:ntemp),world_comm)
 
 IF (meta_ionode) &
    CALL write_thermo_info(e0, 0.0_DP, ntemp, temp, phf_ener(1,igeom), &
               phf_free_ener(1,igeom), phf_entropy(1,igeom), phf_cv(1,igeom),& 
                                                             2,filename)
+IF (meta_ionode.AND.with_eigen) &
+   CALL write_dw_info(ntemp, temp, b_fact, nat, filename)
+
 RETURN
 END SUBROUTINE write_thermo_ph
 
@@ -295,3 +309,33 @@ CLOSE(iu_therm)
 
 RETURN
 END SUBROUTINE write_thermo_info
+
+SUBROUTINE write_dw_info(ntemp, temp, b_fact, nat, filename)
+USE kinds, ONLY : DP
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ntemp, nat
+REAL(DP), INTENT(IN) :: temp(ntemp), b_fact(3,3,nat,ntemp)
+CHARACTER(LEN=*) :: filename
+
+INTEGER :: iu_therm, itemp, na, ipol, jpol
+INTEGER :: find_free_unit
+CHARACTER(LEN=6) :: int_to_char
+
+iu_therm=find_free_unit()
+DO na=1,nat
+   OPEN (UNIT=iu_therm, FILE=TRIM(filename)//'.'//&
+                             TRIM(int_to_char(na))//'.dw', STATUS='unknown',&
+                                               FORM='formatted')
+   WRITE(iu_therm,'(6x,"T",14x,"B_11",14x,"B_12",14x,"B_13",14x,"B_22",&
+                        &14x,"B_23",14x,"B_33")')
+
+   DO itemp = 1, ntemp
+      WRITE(iu_therm, '(e16.8,6e18.8)') temp(itemp), &
+                        ((b_fact(ipol,jpol,na,itemp), jpol=ipol,3), ipol=1,3)
+   END DO
+   CLOSE(UNIT=iu_therm, STATUS='KEEP')
+END DO
+
+RETURN
+END SUBROUTINE write_dw_info
+
