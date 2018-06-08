@@ -8,10 +8,10 @@
 !-----------------------------------------------------------------------
 SUBROUTINE simple_nonanal(nat, epsil, q, zeu, omega, dyn )
   !-----------------------------------------------------------------------
-  !     add the nonanalytical term with macroscopic electric fields
+  !     add the nonanalytic term with macroscopic electric fields
   !
   USE kinds, ONLY: dp
-  USE constants, ONLY: pi, fpi, e2
+  USE constants, ONLY: fpi, e2
   USE io_global, ONLY : stdout
  IMPLICIT NONE
  INTEGER, INTENT(IN) :: nat
