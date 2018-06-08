@@ -42,8 +42,6 @@ SUBROUTINE manage_ph()
   USE mp_world,         ONLY : world_comm
   USE mp,               ONLY : mp_sum, mp_barrier
 
-  USE control_ph,       ONLY : recover
-
 IMPLICIT NONE
 
 INTEGER  :: part, nwork, igeom, exit_status, ph_geometries, iaux
