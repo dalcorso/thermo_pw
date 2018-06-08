@@ -2665,164 +2665,164 @@ at the equilibrium volume at each temperature, but an approximate expression
 can be obtained neglecting this dependence and using the $T=0$ values
 of the volume and of the compliances. 
 
-Again we have the problem that the phonon frequencies and hence their
-derivatives can be calculated only with respect to the crystal parameters,
-while we need the derivatives with respect to the strain. We discuss
-this point for each crystal system.
-
-\subsection{\color{web-blue}Cubic system}
-Assuming that the phonon frequencies ${\omega}_{{\bf q}\nu}$ are a function 
-of the set of strains $\{\epsilon_i\}$, it seems that the calculation of 
-the derivative of the frequency with respect to one strain component 
-$\epsilon_i$ require the simulation of a noncubic cell.  
-However we can consider in strain space, a six-dimensional space, the line 
-$\epsilon_1=\epsilon_2=\epsilon_3=\epsilon$ and 
-$\epsilon_4=\epsilon_5=\epsilon_6=0$ and consider the derivative of phonon
-frequencies along this line. Moving along this line means to keep the cell
-cubic and change the lattice constant $a$ so that $d\epsilon={da \over a}$
-therefore:
-\begin{equation}
-{d \omega_{{\bf q}\nu} \over d \epsilon} =a{d \omega_{{\bf q}\nu} \over d a},
-\end{equation}
-but along the line we have:
-\begin{equation}
-{d \omega_{{\bf q}\nu} \over d \epsilon} = {\partial \omega_{{\bf q}\nu} 
-\over \partial \epsilon_1} + {\partial \omega_{{\bf q}\nu} 
-\over \partial \epsilon_2} + {\partial \omega_{{\bf q}\nu} 
-\over \partial \epsilon_3} 
-\end{equation}
-Now using the fact that in a cubic system the three partial derivatives 
-are equal we have:
-\begin{equation}
-{\partial \omega_{{\bf q}\nu} 
-\over \partial \epsilon_1} = {a \over 3} {d \omega_{{\bf q}\nu} \over d a}.
-\end{equation}
-
-\subsection{\color{web-blue}Tetragonal and hexagonal systems}
-In these systems we can consider two lines in strain space. 
-The line $\epsilon_1=\epsilon_2=\epsilon_3=\epsilon$, and
-$\epsilon_4=\epsilon_5=\epsilon_6=0$ that means a change of $a$ at fixed
-$c/a$, and the line $\epsilon_3=\epsilon$ and 
-$\epsilon_1=\epsilon_2=\epsilon_4=\epsilon_5 =\epsilon_6=0$ that means 
-a change of $c/a$ at fixed $a$.
-Along the first line $d\epsilon={d a \over a}$, while along the second
-$d\epsilon={d c/a \over c/a}$.
-Along the first line we have:
-\begin{equation}
-{d \omega_{{\bf q}\nu} \over d \epsilon} = {\partial \omega_{{\bf q}\nu} 
-\over \partial \epsilon_1} + {\partial \omega_{{\bf q}\nu} 
-\over \partial \epsilon_2} + {\partial \omega_{{\bf q}\nu} 
-\over \partial \epsilon_3} = a {d \omega_{{\bf q}\nu} 
-\over d a},
-\end{equation}
-while along the second
-\begin{equation}
-{d \omega_{{\bf q}\nu} \over d \epsilon} = {\partial \omega_{{\bf q}\nu} 
-\over \partial \epsilon_3} = {c\over a} {d \omega_{{\bf q}\nu} 
-\over d c/a}.
-\end{equation}
-From the second equation we obtain ${\partial \omega_{{\bf q}\nu} 
-\over \partial \epsilon_3}$ that inserted in the first equation gives
-\begin{equation}
-2 {\partial \omega_{{\bf q}\nu} \over \partial \epsilon_1} = a  
-{d \omega_{{\bf q}\nu} \over d a} -
-{c\over a} {d \omega_{{\bf q}\nu} \over d c/a}
-\end{equation}
-where we used the fact that in tetragonal and hexagonal systems
-${\partial \omega_{{\bf q}\nu} \over \partial \epsilon_1}
-={\partial \omega_{{\bf q}\nu} \over \partial \epsilon_2}$.
- 
-\subsection{\color{web-blue}Trigonal system}
-We can use the analogy with the hexagonal system and the relationship
-between $a_h$ and $x=c_h/a_h$ and the parameters $a$ and $\cos \alpha$ of the
-trigonal system. 
-We have
-\begin{equation}
-a={a_h \over 3} \sqrt{3 + x^2}
-\end{equation}
-and
-\begin{equation}
-\cos\alpha={ 2 x^2 - 3 \over 6 + 2 x^2}.
-\end{equation}
-Using the relationship found at previous point for the hexagonal system:
-\begin{equation}
-{\partial \omega_{{\bf q}\nu} 
-\over \partial \epsilon_3} = x {d \omega_{{\bf q}\nu} 
-\over d x}
-\end{equation}
-and
-\begin{equation}
-{\partial \omega_{{\bf q}\nu} 
-\over \partial \epsilon_1} = 
-{1\over 2} \left(a_h {\partial \omega_{{\bf q}\nu} \over \partial a_h} - 
-{\partial \omega_{{\bf q}\nu} \over \partial 
-\epsilon_3} \right)
-\end{equation}
-and transforming to the trigonal variables using ${\partial a \over \partial
-a_h}={a\over a_h}$, ${\partial \cos \alpha \over \partial
-a_h}=0$, ${\partial a \over \partial x}={a_h^2 x \over 9 a}$ and
-${\partial \cos \alpha \over \partial
-x}={ a_h^4 x \over 9 a^4}$ we obtain:
-\begin{equation}
-{\partial \omega_{{\bf q}\nu} 
-\over \partial \epsilon_3} = {1\over 3} (1 + 2 \cos \alpha)
-\left[ a {\partial \omega_{{\bf q}\nu} \over \partial a} +
-2 (1-\cos\alpha) {\partial \omega_{{\bf q}\nu} \over \partial \cos \alpha}
-\right],
-\end{equation}
-and
-\begin{equation}
-{\partial \omega_{{\bf q}\nu} \over \partial \epsilon_1} = 
-{1\over 2} \left(a {\partial \omega_{{\bf q}\nu} \over \partial a} - {\partial 
-\omega_{{\bf q}\nu} \over \partial 
-\epsilon_3} \right) 
-\end{equation}
-
-\subsection{\color{web-blue}Orthorhombic system}
-In this system we can consider the three lines 
-$\epsilon_1=\epsilon_2=\epsilon_3=\epsilon$ and
-$\epsilon_4=\epsilon_5 =\epsilon_6=0$ obtained varying $a$ at fixed
-$b/a$ and $c/a$, 
-$\epsilon_2=\epsilon$ and
-$\epsilon_1=\epsilon_3=\epsilon_4=\epsilon_5 =\epsilon_6=0$, 
-obtained varying $b/a$ at fixed $a$ and $c/a$,
-and 
-$\epsilon_3=\epsilon$ and
-$\epsilon_1=\epsilon_2=\epsilon_4=\epsilon_5 =\epsilon_6=0$
-obtained varying $c/a$ at fixed $a$ and $b/a$.
-Along these three lines we have $d\epsilon={da \over a}$, 
-$d\epsilon={db \over b}$, and $d\epsilon={dc \over c}$, respectively.
-Along the first line we have
-\begin{equation}
-{d \omega_{{\bf q}\nu} \over d \epsilon} = {\partial \omega_{{\bf q}\nu} 
-\over \partial \epsilon_1} + {\partial \omega_{{\bf q}\nu} 
-\over \partial \epsilon_2} + {\partial \omega_{{\bf q}\nu} 
-\over \partial \epsilon_3} = a {d \omega_{{\bf q}\nu} 
-\over d a},
-\end{equation}
-along the second
-\begin{equation}
-{d \omega_{{\bf q}\nu} \over d \epsilon} = {\partial \omega_{{\bf q}\nu} 
-\over \partial \epsilon_2} = {b\over a} {d \omega_{{\bf q}\nu} 
-\over d b/a},
-\end{equation}
-and along the third
-\begin{equation}
-{d \omega_{{\bf q}\nu} \over d \epsilon} = {\partial \omega_{{\bf q}\nu} 
-\over \partial \epsilon_3} = {c\over a} {d \omega_{{\bf q}\nu} 
-\over d c/a}.
-\end{equation}
-Using the second and the third equation to calculate 
-${\partial \omega_{{\bf q}\nu} \over \partial \epsilon_2}$ and
-${\partial \omega_{{\bf q}\nu} \over \partial \epsilon_3}$, we can
-substitute in the first equation
-\begin{equation}
-{\partial \omega_{{\bf q}\nu} \over \partial \epsilon_1} 
- = a {d \omega_{{\bf q}\nu} \over da} - {b\over a} {d \omega_{{\bf q}\nu} 
-\over d b/a} - {c\over a} {d \omega_{{\bf q}\nu} 
-\over d c/a}
-\end{equation}
-
+%Again we have the problem that the phonon frequencies and hence their
+%derivatives can be calculated only with respect to the crystal parameters,
+%while we need the derivatives with respect to the strain. We discuss
+%this point for each crystal system.
+%
+%\subsection{\color{web-blue}Cubic system}
+%Assuming that the phonon frequencies ${\omega}_{{\bf q}\nu}$ are a function 
+%of the set of strains $\{\epsilon_i\}$, it seems that the calculation of 
+%the derivative of the frequency with respect to one strain component 
+%$\epsilon_i$ require the simulation of a noncubic cell.  
+%However we can consider in strain space, a six-dimensional space, the line 
+%$\epsilon_1=\epsilon_2=\epsilon_3=\epsilon$ and 
+%$\epsilon_4=\epsilon_5=\epsilon_6=0$ and consider the derivative of phonon
+%frequencies along this line. Moving along this line means to keep the cell
+%cubic and change the lattice constant $a$ so that $d\epsilon={da \over a}$
+%therefore:
+%\begin{equation}
+%{d \omega_{{\bf q}\nu} \over d \epsilon} =a{d \omega_{{\bf q}\nu} \over d a},
+%\end{equation}
+%but along the line we have:
+%\begin{equation}
+%{d \omega_{{\bf q}\nu} \over d \epsilon} = {\partial \omega_{{\bf q}\nu} 
+%\over \partial \epsilon_1} + {\partial \omega_{{\bf q}\nu} 
+%\over \partial \epsilon_2} + {\partial \omega_{{\bf q}\nu} 
+%\over \partial \epsilon_3} 
+%\end{equation}
+%Now using the fact that in a cubic system the three partial derivatives 
+%are equal we have:
+%\begin{equation}
+%{\partial \omega_{{\bf q}\nu} 
+%\over \partial \epsilon_1} = {a \over 3} {d \omega_{{\bf q}\nu} \over d a}.
+%\end{equation}
+%
+%\subsection{\color{web-blue}Tetragonal and hexagonal systems}
+%In these systems we can consider two lines in strain space. 
+%The line $\epsilon_1=\epsilon_2=\epsilon_3=\epsilon$, and
+%$\epsilon_4=\epsilon_5=\epsilon_6=0$ that means a change of $a$ at fixed
+%$c/a$, and the line $\epsilon_3=\epsilon$ and 
+%$\epsilon_1=\epsilon_2=\epsilon_4=\epsilon_5 =\epsilon_6=0$ that means 
+%a change of $c/a$ at fixed $a$.
+%Along the first line $d\epsilon={d a \over a}$, while along the second
+%$d\epsilon={d c/a \over c/a}$.
+%Along the first line we have:
+%\begin{equation}
+%{d \omega_{{\bf q}\nu} \over d \epsilon} = {\partial \omega_{{\bf q}\nu} 
+%\over \partial \epsilon_1} + {\partial \omega_{{\bf q}\nu} 
+%\over \partial \epsilon_2} + {\partial \omega_{{\bf q}\nu} 
+%\over \partial \epsilon_3} = a {d \omega_{{\bf q}\nu} 
+%\over d a},
+%\end{equation}
+%while along the second
+%\begin{equation}
+%{d \omega_{{\bf q}\nu} \over d \epsilon} = {\partial \omega_{{\bf q}\nu} 
+%\over \partial \epsilon_3} = {c\over a} {d \omega_{{\bf q}\nu} 
+%\over d c/a}.
+%\end{equation}
+%From the second equation we obtain ${\partial \omega_{{\bf q}\nu} 
+%\over \partial \epsilon_3}$ that inserted in the first equation gives
+%\begin{equation}
+%2 {\partial \omega_{{\bf q}\nu} \over \partial \epsilon_1} = a  
+%{d \omega_{{\bf q}\nu} \over d a} -
+%{c\over a} {d \omega_{{\bf q}\nu} \over d c/a}
+%\end{equation}
+%where we used the fact that in tetragonal and hexagonal systems
+%${\partial \omega_{{\bf q}\nu} \over \partial \epsilon_1}
+%={\partial \omega_{{\bf q}\nu} \over \partial \epsilon_2}$.
+% 
+%\subsection{\color{web-blue}Trigonal system}
+%We can use the analogy with the hexagonal system and the relationship
+%between $a_h$ and $x=c_h/a_h$ and the parameters $a$ and $\cos \alpha$ of the
+%trigonal system. 
+%We have
+%\begin{equation}
+%a={a_h \over 3} \sqrt{3 + x^2}
+%\end{equation}
+%and
+%\begin{equation}
+%\cos\alpha={ 2 x^2 - 3 \over 6 + 2 x^2}.
+%\end{equation}
+%Using the relationship found at previous point for the hexagonal system:
+%\begin{equation}
+%{\partial \omega_{{\bf q}\nu} 
+%\over \partial \epsilon_3} = x {d \omega_{{\bf q}\nu} 
+%\over d x}
+%\end{equation}
+%and
+%\begin{equation}
+%{\partial \omega_{{\bf q}\nu} 
+%\over \partial \epsilon_1} = 
+%{1\over 2} \left(a_h {\partial \omega_{{\bf q}\nu} \over \partial a_h} - 
+%{\partial \omega_{{\bf q}\nu} \over \partial 
+%\epsilon_3} \right)
+%\end{equation}
+%and transforming to the trigonal variables using ${\partial a \over \partial
+%a_h}={a\over a_h}$, ${\partial \cos \alpha \over \partial
+%a_h}=0$, ${\partial a \over \partial x}={a_h^2 x \over 9 a}$ and
+%${\partial \cos \alpha \over \partial
+%x}={ a_h^4 x \over 9 a^4}$ we obtain:
+%\begin{equation}
+%{\partial \omega_{{\bf q}\nu} 
+%\over \partial \epsilon_3} = {1\over 3} (1 + 2 \cos \alpha)
+%\left[ a {\partial \omega_{{\bf q}\nu} \over \partial a} +
+%2 (1-\cos\alpha) {\partial \omega_{{\bf q}\nu} \over \partial \cos \alpha}
+%\right],
+%\end{equation}
+%and
+%\begin{equation}
+%{\partial \omega_{{\bf q}\nu} \over \partial \epsilon_1} = 
+%{1\over 2} \left(a {\partial \omega_{{\bf q}\nu} \over \partial a} - {\partial 
+%\omega_{{\bf q}\nu} \over \partial 
+%\epsilon_3} \right) 
+%\end{equation}
+%
+%\subsection{\color{web-blue}Orthorhombic system}
+%In this system we can consider the three lines 
+%$\epsilon_1=\epsilon_2=\epsilon_3=\epsilon$ and
+%$\epsilon_4=\epsilon_5 =\epsilon_6=0$ obtained varying $a$ at fixed
+%$b/a$ and $c/a$, 
+%$\epsilon_2=\epsilon$ and
+%$\epsilon_1=\epsilon_3=\epsilon_4=\epsilon_5 =\epsilon_6=0$, 
+%obtained varying $b/a$ at fixed $a$ and $c/a$,
+%and 
+%$\epsilon_3=\epsilon$ and
+%$\epsilon_1=\epsilon_2=\epsilon_4=\epsilon_5 =\epsilon_6=0$
+%obtained varying $c/a$ at fixed $a$ and $b/a$.
+%Along these three lines we have $d\epsilon={da \over a}$, 
+%$d\epsilon={db \over b}$, and $d\epsilon={dc \over c}$, respectively.
+%Along the first line we have
+%\begin{equation}
+%{d \omega_{{\bf q}\nu} \over d \epsilon} = {\partial \omega_{{\bf q}\nu} 
+%\over \partial \epsilon_1} + {\partial \omega_{{\bf q}\nu} 
+%\over \partial \epsilon_2} + {\partial \omega_{{\bf q}\nu} 
+%\over \partial \epsilon_3} = a {d \omega_{{\bf q}\nu} 
+%\over d a},
+%\end{equation}
+%along the second
+%\begin{equation}
+%{d \omega_{{\bf q}\nu} \over d \epsilon} = {\partial \omega_{{\bf q}\nu} 
+%\over \partial \epsilon_2} = {b\over a} {d \omega_{{\bf q}\nu} 
+%\over d b/a},
+%\end{equation}
+%and along the third
+%\begin{equation}
+%{d \omega_{{\bf q}\nu} \over d \epsilon} = {\partial \omega_{{\bf q}\nu} 
+%\over \partial \epsilon_3} = {c\over a} {d \omega_{{\bf q}\nu} 
+%\over d c/a}.
+%\end{equation}
+%Using the second and the third equation to calculate 
+%${\partial \omega_{{\bf q}\nu} \over \partial \epsilon_2}$ and
+%${\partial \omega_{{\bf q}\nu} \over \partial \epsilon_3}$, we can
+%substitute in the first equation
+%\begin{equation}
+%{\partial \omega_{{\bf q}\nu} \over \partial \epsilon_1} 
+% = a {d \omega_{{\bf q}\nu} \over da} - {b\over a} {d \omega_{{\bf q}\nu} 
+%\over d b/a} - {c\over a} {d \omega_{{\bf q}\nu} 
+%\over d c/a}
+%\end{equation}
+%
 \newpage
 \section{\color{coral}Average Gr\"uneisen parameter}
 

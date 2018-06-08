@@ -181,7 +181,7 @@ MODULE lr_lanczos
                                                ! of S
   INTEGER :: iulanczos, iunrestart             ! iunit where the Lanczos 
                                                ! chain are saved
-  INTEGER :: nwordd0psi, nwordrestart          ! size of the restart vectors
+  INTEGER :: nwordrestart                      ! size of the restart vectors
 
   LOGICAL :: only_spectrum      ! if .TRUE. assumes that the Lanczos chain
                                 ! coefficients are on file
