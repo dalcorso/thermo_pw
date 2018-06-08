@@ -28,13 +28,14 @@ IMPLICIT NONE
   CONTAINS
 !-----------------------------------------------------------------------
     SUBROUTINE write_evdata_xml &
-        (npt,fac,v0,etot,efit,istat,par,npar,emin,chisq,filout, ierr)
+        (npt,fac,v0,etot,efit,istat,par,npar,emin,pressure_kb,chisq,filout,ierr)
 !-----------------------------------------------------------------------
 !
   USE constants, ONLY : ry_kbar, bohr_radius_angs
   IMPLICIT NONE
   INTEGER, INTENT(in) :: npt, istat, npar
-  REAL(DP), INTENT(in):: v0(npt), etot(npt), efit(npt), emin, chisq, fac
+  REAL(DP), INTENT(in):: v0(npt), etot(npt), efit(npt), emin, chisq, fac, &
+                         pressure_kb
   REAL(DP), INTENT(in):: par(npar)
   CHARACTER(len=256), INTENT(IN) :: filout
   INTEGER, INTENT(out) :: ierr
@@ -94,7 +95,7 @@ IMPLICIT NONE
      alldata (2,i) = etot(i) 
      alldata (3,i) = efit(i)
      alldata (4,i) = etot(i) - efit(i)
-     alldata (5,i) = p(i) 
+     alldata (5,i) = p(i) + pressure_kb
      alldata (6,i) = etot(i) + p(i) * v0(i) / ry_kbar
   ENDDO
 
@@ -107,6 +108,7 @@ IMPLICIT NONE
   CALL iotk_write_dat(iunout, "DERIVATIVE_BULK_MODULUS", par(3))
   CALL iotk_write_dat(iunout, "SECOND_DERIVATIVE_BULK_MODULUS", par(4))
   CALL iotk_write_dat(iunout, "MINIMUM_ENERGY_RY", emin)
+  CALL iotk_write_dat(iunout, "PRESSURE_KB", pressure_kb)
   CALL iotk_write_dat(iunout, "CELL_FACTOR", fac)
   IF (fac /= 0.0_DP) THEN
      a0(1) = (par(1)/fac)**(1d0/3d0)

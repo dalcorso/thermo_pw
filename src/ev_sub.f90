@@ -7,7 +7,7 @@
 !
 SUBROUTINE ev_sub(vmin,b0,b01,emin_out,inputfile)
 !
-!      fit of E(v) to an equation of state (EOS)
+!      fit of E(v) or H(V) at finite pressure to an equation of state (EOS)
 !
 !      Interactive input:
 !         au or Ang
@@ -52,6 +52,7 @@ SUBROUTINE ev_sub(vmin,b0,b01,emin_out,inputfile)
       USE kinds, ONLY: DP
       USE constants, ONLY: bohr_radius_angs, ry_kbar
       USE ev_xml,    ONLY : write_evdata_xml
+      USE control_pressure, ONLY : pressure_kb
       USE mp,        ONLY : mp_bcast
       USE io_global, ONLY : ionode, ionode_id, stdout
       USE mp_images, ONLY : my_image_id, root_image, intra_image_comm
@@ -170,7 +171,8 @@ SUBROUTINE ev_sub(vmin,b0,b01,emin_out,inputfile)
             fileout)
 !
       CALL write_evdata_xml  &
-           (npt,fac,v0,etot,efit,istat,par,npar,emin,chisq,fileout, ierr)
+           (npt,fac,v0,etot,efit,istat,par,npar,emin,pressure_kb,&
+                                                        chisq,fileout, ierr)
 
       IF (ierr /= 0) GO TO 99
     ENDIF
@@ -265,6 +267,7 @@ SUBROUTINE ev_sub(vmin,b0,b01,emin_out,inputfile)
              filout)
 !-----------------------------------------------------------------------
 !
+      USE control_pressure, ONLY : pressure_kb, pressure
       IMPLICIT NONE
       INTEGER, INTENT(in) :: npt, istat, npar
       REAL(DP), INTENT(in):: v0(npt), etot(npt), efit(npt), emin, chisq, fac
@@ -325,60 +328,85 @@ SUBROUTINE ev_sub(vmin,b0,b01,emin_out,inputfile)
 
       IF ( fac /= 0.0_dp ) THEN
 ! cubic case
-         WRITE(iun,'("# a0 =",f8.4," a.u., k0 =",i5," kbar, dk0 =", &
+         IF (pressure_kb /= 0.0_DP) THEN
+            WRITE(iun,'("# a0 =",f8.4," a.u., k0 =",i5," kbar, dk0 =", &
+                    &f6.2," d2k0 =",f7.3," Hmin =",f11.5)') &
+                  (par(1)/fac)**(1d0/3d0), int(par(2)), par(3), par(4), emin
+
+         ELSE
+            WRITE(iun,'("# a0 =",f8.4," a.u., k0 =",i5," kbar, dk0 =", &
                     &f6.2," d2k0 =",f7.3," emin =",f11.5)') &
-            (par(1)/fac)**(1d0/3d0), int(par(2)), par(3), par(4), emin
+                  (par(1)/fac)**(1d0/3d0), int(par(2)), par(3), par(4), emin
+         ENDIF
          WRITE(iun,'("# a0 =",f9.5," Ang, k0 =", f6.1," GPa,  V0 = ", &
                   & f7.3," (a.u.)^3,  V0 =", f7.3," A^3 ",/)') &
            & (par(1)/fac)**(1d0/3d0)*bohr_radius_angs, par(2)/gpa_kbar, &
              par(1), par(1)*bohr_radius_angs**3
 
         WRITE(iun,'(73("#"))')
-        WRITE(iun,'("# Lat.Par", 7x, "E_calc", 8x, "E_fit", 7x, &
+        IF (pressure_kb /= 0.0_DP) THEN
+           WRITE(iun,'("# Lat.Par", 4x, "(E+pV)_calc", 2x, "(E+pV)_fit", 3x, &
+             & "(E+pV)_diff", 2x, "Pressure", 6x, "Enthalpy")')
+        ELSE
+           WRITE(iun,'("# Lat.Par", 7x, "E_calc", 8x, "E_fit", 7x, &
              & "E_diff", 4x, "Pressure", 6x, "Enthalpy")')
+        ENDIF
         IF (in_angstrom) THEN
            WRITE(iun,'("# Ang", 13x, "Ry", 11x, "Ry", 12x, &
              & "Ry", 8x, "GPa", 11x, "Ry")')
            WRITE(iun,'(73("#"))')
            WRITE(iun,'(f9.5,2x,f12.5, 2x,f12.5, f12.5, 3x, f8.2, 3x,f12.5)') &
-              & ( (v0(i)/fac)**(1d0/3d0)*bohr_radius_angs, etot(i), efit(i),  &
-              & etot(i)-efit(i), p(i)/gpa_kbar, epv(i), i=1,npt )
+                ( (v0(i)/fac)**(1d0/3d0)*bohr_radius_angs, etot(i), efit(i),  &
+                etot(i)-efit(i), (p(i)+pressure_kb)/gpa_kbar, &
+                                epv(i), i=1,npt )
         ELSE
            WRITE(iun,'("# a.u.",12x, "Ry", 11x, "Ry", 12x, &
              & "Ry", 8x, "GPa", 11x, "Ry")')
            WRITE(iun,'(73("#"))')
            WRITE(iun,'(f9.5,2x,f12.5, 2x,f12.5, f12.5, 3x, f8.2, 3x,f12.5)') &
-              & ( (v0(i)/fac)**(1d0/3d0), etot(i), efit(i),  &
-              & etot(i)-efit(i), p(i)/gpa_kbar, epv(i), i=1,npt )
+                ( (v0(i)/fac)**(1d0/3d0), etot(i), efit(i),  &
+                etot(i)-efit(i), (p(i)+pressure_kb)/gpa_kbar,  &
+                                  epv(i), i=1,npt )
         ENDIF
 
       ELSE
 ! noncubic case
-         WRITE(iun,'("# V0 =",f8.2," a.u.^3,  k0 =",i5," kbar,  dk0 =", &
+         IF (pressure_kb /= 0.0_DP) THEN
+            WRITE(iun,'("# V0 =",f8.2," a.u.^3,  k0 =",i5," kbar,  dk0 =", &
+                    & f6.2,"  d2k0 =",f7.3,"  Hmin =",f11.5)') &
+                    & par(1), int(par(2)), par(3), par(4), emin
+         ELSE
+            WRITE(iun,'("# V0 =",f8.2," a.u.^3,  k0 =",i5," kbar,  dk0 =", &
                     & f6.2,"  d2k0 =",f7.3,"  emin =",f11.5)') &
                     & par(1), int(par(2)), par(3), par(4), emin
+         ENDIF
 
          WRITE(iun,'("# V0 =",f8.2,"  Ang^3,  k0 =",f6.1," GPa"/)') &
                     & par(1)*bohr_radius_angs**3, par(2)/gpa_kbar
 
         WRITE(iun,'(74("#"))')
-        WRITE(iun,'("# Vol.", 8x, "E_calc", 8x, "E_fit", 7x, &
+        IF (pressure_kb /= 0.0_DP) THEN
+           WRITE(iun,'("# Vol.", 6x, "(E+pV)_calc", 2x, "(E+pV)_fit", 4x, &
+             & "(E+pV)_diff", 2x, "Pressure", 6x, "Enthalpy")')
+        ELSE
+           WRITE(iun,'("# Vol.", 8x, "E_calc", 8x, "E_fit", 7x, &
              & "E_diff", 4x, "Pressure", 6x, "Enthalpy")')
+        ENDIF
         IF (in_angstrom) THEN
           WRITE(iun,'("# Ang^3", 9x, "Ry", 11x, "Ry", 12x, &
              & "Ry", 8x, "GPa", 11x, "Ry")')
           WRITE(iun,'(74("#"))')
-           WRITE(iun,'(f8.2,2x,f12.5, 2x,f12.5, f12.5, 3x, f8.2, 3x,f12.5)') &
+          WRITE(iun,'(f8.2,2x,f12.5, 2x,f12.5, f12.5, 3x, f8.2, 3x,f12.5)') &
               ( v0(i)*bohr_radius_angs**3, etot(i), efit(i),  &
-               etot(i)-efit(i), p(i)/gpa_kbar, epv(i), i=1,npt )
-         else
+               etot(i)-efit(i), (p(i)+pressure_kb)/gpa_kbar, epv(i), i=1,npt )
+        else
           WRITE(iun,'("# a.u.^3",8x, "Ry", 11x, "Ry", 12x, &
              & "Ry", 8x, "GPa", 11x, "Ry")')
           WRITE(iun,'(74("#"))')
-           WRITE(iun,'(f8.2,2x,f12.5, 2x,f12.5, f12.5, 3x, f8.2, 3x,f12.5)') &
+          WRITE(iun,'(f8.2,2x,f12.5, 2x,f12.5, f12.5, 3x, f8.2, 3x,f12.5)') &
               ( v0(i), etot(i), efit(i),  &
-               etot(i)-efit(i), p(i)/gpa_kbar, epv(i), i=1,npt )
-         end if
+               etot(i)-efit(i), (p(i)+pressure_kb)/gpa_kbar, epv(i), i=1,npt )
+        end if
 
       ENDIF
       IF(filout/=' ') CLOSE(UNIT=iun)
