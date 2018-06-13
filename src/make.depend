@@ -170,6 +170,7 @@ ev_sub.o : ../../Modules/mp_images.o
 ev_sub.o : ../../Modules/random_numbers.o
 ev_sub.o : ../../UtilXlib/mp.o
 ev_sub.o : ../../thermo_pw/qe/ev_xml.o
+ev_sub.o : thermo_mod.o
 find_band_sym_proj.o : ../../FFTXlib/fft_interfaces.o
 find_band_sym_proj.o : ../../Modules/becmod.o
 find_band_sym_proj.o : ../../Modules/constants.o
@@ -317,6 +318,13 @@ manage_piezo_tensor.o : ../../UtilXlib/mp.o
 manage_piezo_tensor.o : ../../thermo_pw/lib/elastic_const.o
 manage_piezo_tensor.o : ../../thermo_pw/lib/piezoelectric_tensor.o
 manage_piezo_tensor.o : thermo_mod.o
+manage_surface_states.o : ../../Modules/io_global.o
+manage_surface_states.o : ../../Modules/ions_base.o
+manage_surface_states.o : ../../Modules/kind.o
+manage_surface_states.o : ../../Modules/mp_images.o
+manage_surface_states.o : ../../PW/src/pwcom.o
+manage_surface_states.o : ../../UtilXlib/mp.o
+manage_surface_states.o : thermo_mod.o
 manage_xrdp.o : ../../Modules/cell_base.o
 manage_xrdp.o : ../../Modules/ions_base.o
 manage_xrdp.o : ../../Modules/kind.o
@@ -395,6 +403,12 @@ plot_e_nk.o : ../../Modules/kind.o
 plot_e_nk.o : ../../Modules/mp_images.o
 plot_e_nk.o : ../../thermo_pw/lib/gnuplot.o
 plot_e_nk.o : thermo_mod.o
+plot_ef.o : ../../Modules/constants.o
+plot_ef.o : ../../Modules/io_global.o
+plot_ef.o : ../../Modules/mp_images.o
+plot_ef.o : ../../PW/src/pwcom.o
+plot_ef.o : ../../thermo_pw/lib/gnuplot.o
+plot_ef.o : thermo_mod.o
 plot_elastic_t.o : ../../Modules/io_global.o
 plot_elastic_t.o : ../../Modules/kind.o
 plot_elastic_t.o : ../../Modules/mp_images.o
@@ -426,7 +440,9 @@ plot_mur.o : ../../thermo_pw/lib/gnuplot.o
 plot_mur.o : thermo_mod.o
 plot_phdos.o : ../../Modules/kind.o
 plot_phdos.o : thermo_mod.o
+plot_thermo.o : ../../Modules/cell_base.o
 plot_thermo.o : ../../Modules/io_global.o
+plot_thermo.o : ../../Modules/ions_base.o
 plot_thermo.o : ../../Modules/kind.o
 plot_thermo.o : ../../Modules/mp_images.o
 plot_thermo.o : ../../PW/src/pwcom.o
@@ -805,6 +821,7 @@ write_thermo.o : ../../Modules/ions_base.o
 write_thermo.o : ../../Modules/kind.o
 write_thermo.o : ../../Modules/mp_images.o
 write_thermo.o : ../../Modules/mp_world.o
+write_thermo.o : ../../PW/src/symme.o
 write_thermo.o : ../../UtilXlib/mp.o
 write_thermo.o : ../../thermo_pw/lib/debye_module.o
 write_thermo.o : ../../thermo_pw/lib/ph_freq_module.o
