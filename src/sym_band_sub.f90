@@ -37,9 +37,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
                                    find_projection_type, nsym_group,  &
                                    has_sigma_h
   USE thermo_sym,           ONLY : code_group_save
-  USE control_2d_bands,     ONLY : nkz, averag, vacuum, aux_ind_sur,  &
-                                   sym_divide, nlayers, identify_sur, &
-                                   surface1, surface2
+  USE control_2d_bands,     ONLY : nkz, aux_ind_sur, sym_divide
   USE band_symmetry,        ONLY : find_band_sym_proj
   USE lattices,             ONLY : zone_border, same_star
   USE control_bands,        ONLY : lsym
@@ -582,44 +580,6 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   DEALLOCATE(istart)
   !
 450 CONTINUE
-
-  IF (identify_sur) THEN
-     IF (ionode) &
-        INQUIRE( FILE = TRIM(flprojlayer), EXIST = exst )
-     CALL mp_bcast(exst,ionode_id,intra_image_comm)
-!
-!   the file with the projections is created here if it does not exist,
-!   otherwise we assume that it has been already calculated in a previous run
-!
-     IF (exst) GOTO 500
-     ALLOCATE(averag(nat, nspin, nbnd, nkstot))
-     ALLOCATE(vacuum(nspin, nbnd, nkstot))
-     CALL plan_avg_sub(averag, vacuum, nat, nbnd, nkstot, nlayers, &
-                               surface1, surface2)
-     IF (ionode) THEN
-        iun=find_free_unit()
-        OPEN(UNIT=iun,FILE=TRIM(flprojlayer),STATUS='unknown',ERR=400,&
-                                                           IOSTAT=ios)
-        WRITE(iun, '(5i8)') nat, nlayers, nbnd, nkstot, nspin     
-        WRITE(iun, '(4i8)') surface1, surface2    
-        DO ik=nks1tot,nks2tot
-           DO ibnd=1, nbnd
-              WRITE(iun,'(2i8)') ik, ibnd
-              DO ilayer=1,nlayers
-                WRITE(iun,'(i8,4f17.12)') ilayer, averag(ilayer, 1:nspin, &
-                                                  ibnd, ik)
-              ENDDO
-              WRITE(iun,'(4f20.12)') vacuum(1:nspin,ibnd, ik)
-           ENDDO
-        ENDDO
-        CLOSE(iun)
-     ENDIF
-400  CALL mp_bcast(ios,ionode_id,intra_image_comm)
-     IF (ios /= 0) CALL errore('sym_band_sub','problems with flprojlayer',1)
-     DEALLOCATE (vacuum)
-     DEALLOCATE (averag)
-  END IF
-500 CONTINUE
   !
   RETURN
 END SUBROUTINE sym_band_sub

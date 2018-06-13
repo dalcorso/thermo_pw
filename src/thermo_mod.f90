@@ -964,3 +964,15 @@ MODULE phonon_save
   COMPLEX(DP), ALLOCATABLE :: z_save(:,:,:)
 
 END MODULE phonon_save
+
+MODULE efermi_plot
+  USE kinds,  ONLY : DP
+
+  SAVE
+
+  INTEGER :: n1, n2     ! the number of k points of the 2d plot
+
+  REAL(DP) :: kxmin, kxmax, kymin, kymax ! the size of the plotted region
+
+  LOGICAL, ALLOCATABLE :: has_ef(:) ! say which bands cross ef
+END MODULE efermi_plot

@@ -39,8 +39,9 @@ REAL(DP), ALLOCATABLE :: el_cv(:)
 REAL(DP) :: ene0, mu0
 REAL(DP) ::  dos1, dos2, dosef, udosef, ddosef, ddos1, ddos2, &
              uddosde, dddosde, ddosde
-INTEGER :: n1, n2, n, ndos
+INTEGER :: n1, n2, n, ndos, idum
 INTEGER :: find_free_unit
+LOGICAL :: check_file_exists, do_read
 !
 IF (my_image_id /= root_image) RETURN
 !
@@ -48,6 +49,42 @@ IF (my_image_id /= root_image) RETURN
 !  For insulators return.
 !
 IF (degauss==0.0_DP.AND..NOT.ltetra) RETURN
+!
+!  check if the data are already on file
+!
+do_read=.FALSE.
+fileeltherm="therm_files/"//TRIM(fleltherm)
+IF (check_file_exists(fileeltherm)) do_read=.TRUE.
+
+ALLOCATE(el_mu(ntemp))
+ALLOCATE(el_free_ener(ntemp))
+ALLOCATE(el_ener(ntemp))
+ALLOCATE(el_entr(ntemp))
+ALLOCATE(el_cv(ntemp))
+
+IF (do_read) THEN
+   IF (ionode) THEN
+      iu_therm=find_free_unit()
+      fileeltherm='therm_files/'//TRIM(fleltherm)
+      OPEN (UNIT=iu_therm, FILE=TRIM(fileeltherm), STATUS='old', &
+                                                           FORM='formatted')
+      DO idum=1,12
+         READ(iu_therm,*)
+      ENDDO
+      DO itemp = 1, ntemp
+         READ(iu_therm, '(e16.8,5e20.12)') temp(itemp), &
+                    el_ener(itemp), el_free_ener(itemp), &
+                    el_entr(itemp), el_cv(itemp), el_mu(itemp)
+      END DO
+      CLOSE(iu_therm)
+   END IF
+   CALL mp_bcast(el_ener, ionode_id, intra_image_comm)
+   CALL mp_bcast(el_free_ener, ionode_id, intra_image_comm)
+   CALL mp_bcast(el_entr, ionode_id, intra_image_comm)
+   CALL mp_bcast(el_cv, ionode_id, intra_image_comm)
+   CALL mp_bcast(el_mu, ionode_id, intra_image_comm)
+   RETURN
+ENDIF
 
 WRITE(stdout,'(/,2x,76("+"))')
 WRITE(stdout,'(5x,"Computing the thermodynamic properties from electron dos")')
@@ -57,11 +94,6 @@ WRITE(stdout,'(2x,76("+"),/)')
 fileeldos='therm_files/'//TRIM(fleldos)
 CALL read_eldos_data(eldos, lsda, fileeldos)
 
-ALLOCATE(el_mu(ntemp))
-ALLOCATE(el_free_ener(ntemp))
-ALLOCATE(el_ener(ntemp))
-ALLOCATE(el_entr(ntemp))
-ALLOCATE(el_cv(ntemp))
 !
 !  The energy at very low temperature is consider as the zero of the energy
 !  The default low temperature is 4. K or the lowest temperature

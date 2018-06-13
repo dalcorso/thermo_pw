@@ -100,6 +100,10 @@ SUBROUTINE set_paths_disp()
       ENDDO
    ENDIF
 !
+!   For 2d plots we can return here.
+!
+   IF (q2d) RETURN
+!
 !  detect if some points are high symmetry points from the change
 !  of direction of the path
 !

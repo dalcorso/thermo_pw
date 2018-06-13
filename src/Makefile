@@ -60,6 +60,7 @@ manage_piezo_tensor.o \
 manage_ph.o \
 manage_all_geometries_ph.o \
 manage_ph_dispersions.o \
+manage_surface_states.o \
 manage_xrdp.o \
 matdyn_sub.o \
 plan_avg_sub.o \
@@ -70,6 +71,7 @@ plotband_sub.o \
 plot_2d_bz.o \
 plot_dispersion.o \
 plot_dos.o \
+plot_ef.o \
 plot_e_ke.o \
 plot_e_nk.o \
 plot_formf.o \

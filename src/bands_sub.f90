@@ -14,6 +14,7 @@ SUBROUTINE bands_sub()
   USE control_paths,    ONLY : q2d
   USE control_flags,    ONLY : gamma_only
   USE control_bands,    ONLY : lsym
+  USE control_2d_bands, ONLY : identify_sur
   USE klist,            ONLY : two_fermi_energies
   USE noncollin_module, ONLY : i_cons
   !
@@ -39,6 +40,9 @@ SUBROUTINE bands_sub()
      CALL write_bands_tpw(filband, spin_component)
      CALL sym_band_sub(filband,spin_component)
   END IF
+
+  IF (identify_sur) CALL manage_surface_states()
+
   CALL close_files(.TRUE.)
   CALL clean_pw(.FALSE.)
 
@@ -68,23 +72,26 @@ SUBROUTINE punch_band_2d_tpw(filband,spin_component)
    USE lsda_mod,  ONLY : nspin
    USE klist,     ONLY : xk, nkstot, nks
    USE wvfct,     ONLY : et, nbnd
+   USE ener,      ONLY : ef
    USE io_files,  ONLY : iuntmp
    USE io_global, ONLY : ionode, ionode_id
+   USE efermi_plot, ONLY : n1, n2, kxmin, kxmax, kymin, kymax, has_ef
    USE mp,        ONLY : mp_bcast
    USE mp_images, ONLY : intra_image_comm
 
    IMPLICIT NONE
    CHARACTER(LEN=256),INTENT(IN) :: filband
    INTEGER, INTENT(IN) :: spin_component
-   REAL(DP) :: xk0(3), xk1(3), xk2(3), dkx(3), dky(3), xkdum(3), mdkx, mdky
-   INTEGER :: n1, n2
-   INTEGER :: ik, i, i1, i2, ibnd, ijk, start_k, last_k, nks_eff, j, ios
+   REAL(DP) :: xk0(3), dkx(3), dky(3), xkdum(3), mdkx, mdky
+   INTEGER :: i1, i2, ik, ibnd, ijk, start_k, last_k, nks_eff, j, ios
    CHARACTER(LEN=256) :: filename
    CHARACTER(LEN=6), EXTERNAL :: int_to_char
    REAL(DP), ALLOCATABLE :: xk_collect(:,:), et_collect(:,:)
+   LOGICAL :: less_ef, more_ef
    
    ALLOCATE(xk_collect(3,nkstot))
    ALLOCATE(et_collect(nbnd,nkstot))
+   ALLOCATE(has_ef(nbnd))
    CALL poolcollect(    3, nks, xk, nkstot, xk_collect)
    CALL poolcollect( nbnd, nks, et, nkstot, et_collect)
 
@@ -128,26 +135,45 @@ loop_k:  DO j=start_k+2, nkstot
                                     'Problems with k points',1)
   mdkx = sqrt( dkx(1)**2 + dkx(2)**2 + dkx(3)**2 )
   mdky = sqrt( dky(1)**2 + dky(2)**2 + dky(3)**2 )
+!
+!  find which bands cross ef
+!
+  DO ibnd=1,nbnd
+     less_ef=.FALSE.
+     more_ef=.FALSE.
+     DO ik=1,n1*n2
+        IF (et_collect(ibnd,ik) < ef) less_ef=.TRUE.
+        IF (et_collect(ibnd,ik) > ef) more_ef=.TRUE.
+     ENDDO
+     has_ef(ibnd)=less_ef.AND.more_ef
+  ENDDO
 !   
 !  write the output, a band per file
 !
   DO ibnd=1,nbnd
-     filename=TRIM(filband) // '.' // TRIM(int_to_char(ibnd))
+     filename="band_files/"//TRIM(filband) // '.' // TRIM(int_to_char(ibnd))
      IF (ionode) &
      OPEN(UNIT=iuntmp,FILE=filename,STATUS='unknown', ERR=100, IOSTAT=ios)
      CALL mp_bcast(ios,ionode_id, intra_image_comm)
 100  CALL errore('punch_band_2d','Problem opening outputfile',ios)
-     ijk=0
-     DO i1=1,n1
-        DO i2=1,n2
-           ijk=ijk+1
-           IF (ionode) &
-           WRITE(iuntmp,'(3f16.6)') mdkx*(i1-1), mdky*(i2-1), &
+     IF (ionode) THEN
+        ijk=0
+        DO i1=1,n1
+           DO i2=1,n2
+              ijk=ijk+1
+              WRITE(iuntmp,'(3f16.6)') mdkx*(i1-1), mdky*(i2-1), &
                                     et_collect(ibnd,ijk)*rytoev
-        ENDDO 
-     ENDDO
-     IF (ionode) CLOSE(unit=iuntmp,status='KEEP')
+           ENDDO 
+           WRITE(iuntmp,'(3f16.6)')
+        ENDDO
+        CLOSE(unit=iuntmp,status='KEEP')
+     ENDIF
   ENDDO
+
+  kxmin=0.0_DP
+  kymin=0.0_DP
+  kxmax=mdkx*(n1-1)
+  kymax=mdky*(n1-1)
 
   DEALLOCATE(xk_collect)
   DEALLOCATE(et_collect)
