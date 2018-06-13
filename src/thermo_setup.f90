@@ -34,7 +34,7 @@ SUBROUTINE thermo_setup()
   USE thermo_mod,           ONLY : what, ngeo, fact_ngeo    
   USE temperature,          ONLY : tmin
   USE control_thermo,       ONLY : continue_zero_ibrav, find_ibrav, &
-                                   set_internal_path, set_2d_path, with_eigen
+                                   set_internal_path, set_2d_path
   USE control_elastic_constants, ONLY : ngeo_strain, elastic_algorithm, &
                                  poly_degree, elcpvar
   USE control_eldos,        ONLY : deltae, ndose
@@ -270,8 +270,6 @@ SUBROUTINE thermo_setup()
      ENDIF
   END IF
   CALL clean_ngeo(ngeo,fact_ngeo,ibrav)
-
-  with_eigen=with_eigen.AND.(ibrav==1.OR.ibrav==2.OR.ibrav==3)
 !
 !  setup for the electronic dos
 !
