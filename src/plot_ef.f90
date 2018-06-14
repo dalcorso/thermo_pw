@@ -14,6 +14,7 @@ SUBROUTINE plot_ef(filband, flgnuplot, filenameps)
   !
 USE constants, ONLY : rytoev
 USE control_gnuplot, ONLY : lgnuplot, gnuplot_command
+USE klist,     ONLY : ltetra, lgauss
 USE ener, ONLY : ef
 uSE gnuplot,   ONLY : gnuplot_start, gnuplot_end,             &
                       gnuplot_start_2dplot,                   &
@@ -37,6 +38,10 @@ CHARACTER(LEN=12)  :: color(8)
 CHARACTER(LEN=50)  :: xlabel, ylabel
 
 IF ( my_image_id /= root_image ) RETURN
+!
+! The plot is done only in the metallic case
+!
+IF (.NOT.(lgauss.OR.ltetra)) RETURN
 
 gnu_filename=TRIM(flgnuplot)//'_ef'
 color(1)='color_red'
