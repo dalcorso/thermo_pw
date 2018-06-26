@@ -61,8 +61,8 @@ subroutine set_kup_and_kdw_tpw (xk, wk, isk, nkstot, npk, lgamma, &
         diago_bands(2*ik)=diago_bands_save(ik)
         isym_bands(2*ik-1)=isym_bands_save(ik)
         isym_bands(2*ik)=isym_bands_save(ik)
-        ik_origin(2*ik-1)=ik_origin_save(ik)
-        ik_origin(2*ik)=ik_origin_save(ik)
+        ik_origin(2*ik-1)=2*ik_origin_save(ik)-1
+        ik_origin(2*ik)=2*ik_origin_save(ik)
      enddo
   ELSE
      do ik = 1, nkstot/2
@@ -86,13 +86,14 @@ subroutine set_kup_and_kdw_tpw (xk, wk, isk, nkstot, npk, lgamma, &
         isym_bands(4*ik-2)=isym_bands_save(2*ik)
         isym_bands(4*ik-1)=isym_bands_save(2*ik-1)
         isym_bands(4*ik)=isym_bands_save(2*ik)
-        ik_origin(4*ik-3)=ik_origin_save(2*ik-1)
-        ik_origin(4*ik-2)=ik_origin_save(2*ik)
-        ik_origin(4*ik-1)=ik_origin_save(2*ik-1)
-        ik_origin(4*ik)=ik_origin_save(2*ik)
+
+        ik_origin(4*ik-3)=2*(ik_origin_save(2*ik-1)+1)-3
+        ik_origin(4*ik-2)=2*(ik_origin_save(2*ik)+1)-3
+        ik_origin(4*ik-1)=2*(ik_origin_save(2*ik-1)+1)-1
+        ik_origin(4*ik)=2*(ik_origin_save(2*ik)+1)-1
      enddo
   ENDIF
   nkstot = 2 * nkstot
-
+  !
   return
 end subroutine set_kup_and_kdw_tpw

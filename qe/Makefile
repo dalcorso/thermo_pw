@@ -62,6 +62,7 @@ lr_us.o  \
 mix_pot.o \
 nh_lanczos_step.o \
 non_scf.o \
+openfilq.o \
 orthogonalize_omega.o \
 paw_add_onecenter.o \
 paw_add_symmetry.o \

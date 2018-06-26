@@ -72,6 +72,7 @@ SUBROUTINE divide_et_impera_tpw( nkstot, xk, wk, isk, nks, diago_bands, &
      wk (1:nks)  = wk(nbase+1:nbase+nks)
      isk(1:nks)  =isk(nbase+1:nbase+nks)
   ENDIF
+
   DO ik=1,nks
      IF ( ik_origin(nbase+ik)>nbase .AND. &
                           ik_origin(nbase+ik)<=nbase+nks ) THEN
@@ -83,8 +84,6 @@ SUBROUTINE divide_et_impera_tpw( nkstot, xk, wk, isk, nks, diago_bands, &
 !   If the original k point is not in this pool, diagonalizes
 !
         diago_bands(ik)=.TRUE.
-        isym_bands(ik)=1
-        ik_origin(ik)=ik
      ENDIF
   ENDDO
   !

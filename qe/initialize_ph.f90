@@ -61,7 +61,7 @@ SUBROUTINE initialize_ph_tpw()
   !
   !  Open the files of the phonon code
   !
-  CALL openfilq()
+  CALL openfilq_tpw()
   !
   !  Initialize all quantities which do not depend on the
   !  linear response to the perturbation
