@@ -123,7 +123,22 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
   !
   IF(.NOT.elph_mat) THEN
     IF (sym_for_diago) THEN
-       CALL irreducible_BZ_tpw (nrot, s, nsymq, minus_q, magnetic_sym, &
+!
+!      Reduce the k points with the point group of the solid, all these points
+!      must be explicitely diagonalized
+!
+       CALL irreducible_BZ(nrot, s, nsym, minus_q, magnetic_sym, &
+                       at, bg, npk, nkstot, xk, wk, t_rev)
+       diago_bands(1:nkstot)=.TRUE.
+       isym_bands(1:nkstot)=1
+       DO ik=1,nkstot
+          ik_origin(ik)=ik
+       ENDDO
+!
+!     Now reduce the k points with the small group of k. The k points added
+!     here can be calculated using the symmetry of the point group.
+!
+      CALL irreducible_BZ_tpw (nsym, s, nsymq, minus_q, magnetic_sym, &
                        at, bg, npk, nkstot, xk, wk, t_rev)
     ELSE
        CALL irreducible_BZ(nrot, s, nsymq, minus_q, magnetic_sym, &
