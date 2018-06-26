@@ -53,7 +53,7 @@ SUBROUTINE c_bands_nscf_tpw( )
   REAL(DP) :: avg_iter, ethr_
   ! average number of H*psi products
   INTEGER :: ik_, ik, ik_eff, ibnd, nkdum, npw, ios, ipol, ind1, ind2, gk(3)
-  INTEGER :: ishift, ik_diago, ik_sym
+  INTEGER :: ishift, ik_diago, ik_sym, nkdum
   ! ik_: k-point already done in a previous run
   ! ik : counter on k points
   LOGICAL :: all_done_asyn
@@ -92,7 +92,15 @@ SUBROUTINE c_bands_nscf_tpw( )
         CALL errore ('c_bands_tpw', 'file '//trim(prefix)//'.wfc not found', 1)
      END IF
   ENDIF
-
+!
+!  find the minimum number of k points diagonalized in all pools
+!
+  nkdum=0
+  DO ik=1,nks
+     IF (ik <= ik_) CYCLE
+     IF (diago_bands(ik)) nkdum=nkdum+1
+  ENDDO
+  CALL mp_min(nkdum,inter_pool_comm)
   !
   ! ... For each k point (except those already calculated if restarting)
   ! ... diagonalizes the hamiltonian
@@ -150,7 +158,6 @@ SUBROUTINE c_bands_nscf_tpw( )
            ! ... the loop on k-points before checking for stop condition
            !
 !           nkdum  = kunit * ( nkstot / kunit / npool )
-           nkdum  =  nks0 / npool 
            IF (ik_diago .le. nkdum) THEN
               !
               ! ... stop requested by user: save restart information,
