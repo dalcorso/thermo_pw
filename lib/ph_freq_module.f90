@@ -542,9 +542,11 @@ DO na=1, nat
                   b_fact(ipol,jpol,na)=b_fact(ipol,jpol,na)+ &
                                      wg*ufact*tfact/nu
                ELSEIF (nu > thr_ph) THEN
+!                  b_fact(ipol,jpol,na)=b_fact(ipol,jpol,na)+ &
+!                      wg*ufact * (2.0_DP - arg + arg**2*0.5_DP-arg**3/6.0_DP) &
+!                      /arg/(1.0_DP-arg*0.5_DP+arg**2/6.0_DP) / nu
                   b_fact(ipol,jpol,na)=b_fact(ipol,jpol,na)+ &
-                      wg*ufact * (2.0_DP - arg + arg**2*0.5_DP-arg**3/6.0_DP) &
-                      /arg/(1.0_DP-arg*0.5_DP+arg**2/6.0_DP) / nu
+                      wg*ufact *(2.0_DP/arg+arg/6.0_DP-arg**3/360.0_DP)/nu
                ENDIF
             ENDDO
          ENDDO
