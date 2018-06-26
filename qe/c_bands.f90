@@ -42,7 +42,7 @@ SUBROUTINE c_bands_nscf_tpw( )
   USE mp_asyn,              ONLY : asyn_master, with_asyn_images
   USE mp_images,            ONLY : my_image_id, root_image
   USE mp_pools,             ONLY : npool, kunit, inter_pool_comm
-  USE mp,                   ONLY : mp_sum
+  USE mp,                   ONLY : mp_sum, mp_min
   USE io_global,            ONLY : ionode
   USE check_stop,           ONLY : check_stop_now
   USE band_computation,     ONLY : diago_bands, isym_bands, ik_origin, nks0
@@ -53,7 +53,7 @@ SUBROUTINE c_bands_nscf_tpw( )
   REAL(DP) :: avg_iter, ethr_
   ! average number of H*psi products
   INTEGER :: ik_, ik, ik_eff, ibnd, nkdum, npw, ios, ipol, ind1, ind2, gk(3)
-  INTEGER :: ishift, ik_diago, ik_sym, nkdum
+  INTEGER :: ishift, ik_diago, ik_sym
   ! ik_: k-point already done in a previous run
   ! ik : counter on k points
   LOGICAL :: all_done_asyn

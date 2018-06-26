@@ -60,6 +60,7 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
   LOGICAL, INTENT (IN) :: elph_mat
   !
   REAL (DP), ALLOCATABLE :: rtau (:,:,:)
+  INTEGER  :: ik
   LOGICAL  :: magnetic_sym, sym(48)
   LOGICAL  :: skip_equivalence
   !
