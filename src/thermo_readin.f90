@@ -384,7 +384,7 @@ SUBROUTINE thermo_readin()
   ELSE
      use_ph_images=.TRUE.
   ENDIF
-  sym_for_diago=.TRUE.
+  sym_for_diago=.FALSE.
 
   freqmin_input=0.0_DP
   freqmax_input=0.0_DP
