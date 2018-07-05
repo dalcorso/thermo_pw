@@ -192,7 +192,18 @@ SUBROUTINE q2r_sub(fildyn)
            CALL read_dyn_from_file_tpw (nqs, q, epsil, lrigid,  &
                     ntyp, nat, ibrav, celldm, at, atm, amass, ifile, iundyn)
         ENDIF
-
+        CALL mp_bcast(nat, meta_ionode_id, world_comm)
+        CALL mp_bcast(ntyp, meta_ionode_id, world_comm)
+        CALL mp_bcast(nqs, meta_ionode_id, world_comm)
+        WRITE(6,*) nat
+        IF (my_image_id/=0.AND.ifile==1) THEN
+           ALLOCATE (tau(3,nat))
+           ALLOCATE (ityp(nat))
+           ALLOCATE (zeu(3,3,nat))
+           ALLOCATE (phiq(3,3,nat,nat,48))
+        ENDIF
+        CALL mp_bcast(phiq, meta_ionode_id, world_comm)
+        CALL mp_bcast(q, meta_ionode_id, world_comm)
         IF (ifile==1) ALLOCATE (m_loc(3,nat))
         IF (meta_ionode) CLOSE(unit=iundyn)
      ENDIF
@@ -348,7 +359,6 @@ SUBROUTINE q2r_sub(fildyn)
 
   CALL interface_with_tpw(phid, nr1, nr2, nr3, nat, ntyp, lrigid, zeu, &
                             epsil, atm, m_loc, tau, ityp, at, bg, omega)
-
   !
   DEALLOCATE(nc)
   DEALLOCATE(phid) 
