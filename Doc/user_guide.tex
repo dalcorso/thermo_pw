@@ -984,7 +984,7 @@ only_spectrum : Computes only the spectrum assuming that the Lanczos
 lcg:      When this flag is .TRUE. a global conjugate gradient algorithm
           is used to compute the dielectric constant and the phonon 
           frequencies. It will not require mixing, but will use more
-          memory than the standard algorithm.
+          memory than the standard algorithm (for insulators only).
           Default : .FALSE.
 \end{verbatim}
 When in the input of the phonon code a non zero wave-vector {\bf q}

@@ -99,6 +99,7 @@ SUBROUTINE do_cg_ph(irr, imode0, drhoscfs)
 
   CALL start_clock ('do_cg_ph')
 
+  IF (lgauss.OR.ltetra) CALL errore('do_cg_ph','cg not ready for metals',1)
   thresh=tr2_ph*rpert*nbnd*nkstot
   dr2=0.0_DP
   convt=.FALSE.
