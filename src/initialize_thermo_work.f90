@@ -89,6 +89,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            lpwscf_syn_1=.TRUE.
            lbands_syn_1=.TRUE.
            ldos_syn_1=.TRUE.
+           IF (meta_ionode) ios = f_mkdir_safe( 'band_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
         CASE ('scf_ph') 

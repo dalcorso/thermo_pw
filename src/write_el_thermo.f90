@@ -145,7 +145,11 @@ WRITE(stdout,'(/,5x,"Derivative of the dos (g'') at mu =",f14.8,&
 WRITE(stdout,'(/,5x,"g''/g at mu =", 21x, f15.8,&
                            &"  eV^(-1)")')  ddosde / dosef /rytoev
 
+WRITE(stdout,'(/,5x,"Computing the electronic thermodynamic properties",/)')
 DO itemp = 1, ntemp
+   IF (MOD(itemp,100)==0.OR.itemp==ntemp) &
+                  WRITE(stdout,'(5x, "Computing temperature ", i8,&
+                                                   &" /",i8)') itemp, ntemp
    CALL el_chem_pot(eldos, temp(itemp), nelec, el_mu(itemp))
    CALL el_free_energy(eldos, temp(itemp), el_mu(itemp), el_free_ener(itemp))
    CALL el_energy(eldos, temp(itemp), el_mu(itemp), el_ener(itemp))
