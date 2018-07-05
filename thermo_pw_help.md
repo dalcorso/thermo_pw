@@ -9,7 +9,7 @@ a <code>.tar.gz</code> file. The current production version is
 <code>QE-6.2.1</code>. The <code>thermo_pw</code> file should be copied
 in the main (QE) directory and unpacked with the command:</p>
 <p align="center">
-<code>tar -xzvf thermo_pw.0.9.0.tar.gz</code>
+<code>tar -xzvf thermo_pw.0.9.9.tar.gz</code>
 </p>
 <p align="justify">This command produces a directory called 
 <code>thermo_pw</code>. To compile the code you need a Fortran compiler, for 
@@ -51,6 +51,11 @@ main <code>thermo_pw</code> page.</p>
 
 <p align="justify"> Before using <code>thermo_pw</code>, please apply the 
 patches given below.</p>
+
+**Patches for thermo_pw.0.9.9**:
+<br>
+* None known so far
+<br>
 
 **Known problems of thermo_pw.0.9.0**:
 <br>

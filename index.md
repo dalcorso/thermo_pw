@@ -75,6 +75,10 @@ in the examples directories.</p>
 **Thermo_pw downloads**:
 <br>
 <br>
+- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw-0.9.9.tar.gz">
+thermo_pw-0.9.9.tar.gz</a>  (released 05-07-2018) compatible with QE-6.2.1.
+<br>
+<br>
 - <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw-0.9.0.tar.gz">
 thermo_pw-0.9.0.tar.gz</a>  (released 20-12-2017) compatible with QE-6.2.1.
 <br>
