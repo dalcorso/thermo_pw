@@ -293,7 +293,7 @@ SUBROUTINE phq_readin_tpw()
   only_init  = .FALSE.
   only_wfc    = .FALSE.
   lcharge  = .FALSE.
-  lmagnon  = .TRUE.
+  lmagnon  = .FALSE.
   lchimag  = .FALSE. 
   lall_tensor = .FALSE.
   start_freq=1

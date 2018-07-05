@@ -172,8 +172,16 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
      !
      if (nspin /= 2) call errore ('setup_nscf','nspin should be 2; check iosys',1)
      !
-     CALL set_kup_and_kdw_tpw( xk, wk, isk, nkstot, npk, lgamma, &
+     IF (lmagnon) THEN
+        CALL set_kup_and_kdw_lm_tpw( xk, wk, isk, nkstot, npk, lgamma, &
                                          diago_bands, isym_bands, ik_origin )
+     ELSEIF (sym_for_diago) THEN
+        CALL set_kup_and_kdw_tpw( xk, wk, isk, nkstot, npk, lgamma, &
+                                         diago_bands, isym_bands, ik_origin )
+     ELSE
+        CALL set_kup_and_kdw( xk, wk, isk, nkstot, npk, lgamma)
+        diago_bands(1:nkstot)=.TRUE.
+     ENDIF
      !
   ELSE IF ( noncolin ) THEN
      !
