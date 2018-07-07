@@ -83,9 +83,7 @@ psym_dmage_fpol.o \
 q_points.o \
 run_nscf.o \
 read_dyn_from_file.o \
-read_file_new.o \
 read_lanczos_chain.o \
-read_pseudo.o \
 realspace_grid_init.o \
 rotate_all_psi.o \
 ruotaijk.o \
@@ -108,7 +106,6 @@ sym_dmageq.o \
 transform_intq_nc.o \
 transform_intq_so.o  \
 write_group_info_ph.o \
-upf.o \
 zstar_eu.o          \
 zstar_eu_loc.o     \
 zstar_eu_us.o    

@@ -53,7 +53,7 @@ PROGRAM thermo_pw
   USE ions_base,        ONLY : nat, tau
   USE cell_base,        ONLY : at, omega, ibrav, celldm
 
-  USE io_files,         ONLY : tmp_dir, wfc_dir
+  USE io_files,         ONLY : tmp_dir, wfc_dir, check_tempdir
   USE check_stop,       ONLY : max_seconds
 !
 !  parallelization control 

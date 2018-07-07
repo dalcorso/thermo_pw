@@ -24,7 +24,6 @@ subroutine compute_drhous_tpw (drhous, dbecsum, wgg, becq, alpq)
   USE klist,      ONLY : xk, wk, ngk, igk_k
   USE fft_base,   ONLY: dffts, dfftp
   USE fft_interfaces, ONLY: invfft
-  USE gvecs,    ONLY : nls
   USE wvfct,      ONLY : nbnd, npwx
   USE noncollin_module, ONLY : npol
 
@@ -107,7 +106,7 @@ subroutine compute_drhous_tpw (drhous, dbecsum, wgg, becq, alpq)
      evcr(:,:) = (0.d0, 0.d0)
      do ibnd = 1, nbnd
         do ig = 1, npw
-           evcr (nls (igk_k(ig,ikk) ), ibnd) = evc (ig, ibnd)
+           evcr (dffts%nl (igk_k(ig,ikk) ), ibnd) = evc (ig, ibnd)
         enddo
         CALL invfft ('Wave', evcr (:, ibnd), dffts)
      enddo

@@ -19,7 +19,6 @@ SUBROUTINE find_band_sym_tpw (ik,evc,et,nsym,s,ftau,gk,invs,rap_et,times,&
   USE constants,       ONLY : rytoev
   USE rap_point_group, ONLY : code_group, nclass, nelem, elem, which_irr, &
        char_mat
-  USE gvect,           ONLY : nl
   USE wvfct,           ONLY : nbnd, npwx
   USE klist,           ONLY : ngk, igk_k
   USE uspp,            ONLY : vkb, nkb, okvan
@@ -100,8 +99,8 @@ SUBROUTINE find_band_sym_tpw (ik,evc,et,nsym,s,ftau,gk,invs,rap_et,times,&
   npw = ngk(ik)
   psic=(0.0_DP,0.0_DP)
   DO ibnd=1,nbnd
-     psic(nl(igk_k(1:npw,ik)),ibnd) = evc(1:npw,ibnd)
-     CALL invfft ('Dense', psic(:,ibnd), dfftp)
+     psic(dfftp%nl(igk_k(1:npw,ik)),ibnd) = evc(1:npw,ibnd)
+     CALL invfft ('Rho', psic(:,ibnd), dfftp)
   ENDDO
   !
   !  Find the character of one symmetry operation per class
@@ -215,7 +214,6 @@ SUBROUTINE find_band_sym_so_tpw (ik,evc,et,nsym,s,ftau,d_spin,gk, &
   USE rap_point_group,    ONLY : code_group, nclass
   USE rap_point_group_so, ONLY : nrap, nelem_so, elem_so, has_e, which_irr_so, &
        char_mat_so
-  USE gvect,              ONLY : nl
   USE wvfct,              ONLY : nbnd, npwx
   USE klist,              ONLY : ngk, igk_k
   USE fft_base,           ONLY : dfftp
@@ -286,8 +284,8 @@ SUBROUTINE find_band_sym_so_tpw (ik,evc,et,nsym,s,ftau,d_spin,gk, &
      ind1 = 1 + (ipol-1)*npwx
      ind2 = npw + (ipol-1)*npwx
      DO ibnd=1,nbnd
-        psic(nl(igk_k(1:npw,ik)),ipol,ibnd) = evc(ind1:ind2,ibnd)
-        CALL invfft ('Dense', psic(:,ipol,ibnd), dfftp)
+        psic(dfftp%nl(igk_k(1:npw,ik)),ipol,ibnd) = evc(ind1:ind2,ibnd)
+        CALL invfft ('Rho', psic(:,ipol,ibnd), dfftp)
      ENDDO
   ENDDO
   !

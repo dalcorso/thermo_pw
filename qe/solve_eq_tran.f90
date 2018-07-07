@@ -47,7 +47,7 @@ subroutine solve_eq_tran(iu, flag)
   USE uspp_param,            ONLY : upf, nhm
   USE noncollin_module,      ONLY : noncolin, npol, nspin_mag, nspin_lsda
   USE scf,                   ONLY : rho, v_of_0
-  USE gvect,                 ONLY : gg, nl
+  USE gvect,                 ONLY : gg
   USE paw_variables,         ONLY : okpaw
   USE paw_add_onecenter,     ONLY : paw_deqtranpotential
   USE paw_add_symmetry,      ONLY : paw_deqsymmetrize
@@ -76,7 +76,7 @@ subroutine solve_eq_tran(iu, flag)
   USE mp_images,             ONLY : root_image, my_image_id
   USE mp,                    ONLY : mp_sum
   USE fft_helper_subroutines, ONLY : fftx_ntgrp
-
+  USE fft_interfaces,        ONLY : fft_interpolate
 
   implicit none
 
@@ -197,7 +197,7 @@ subroutine solve_eq_tran(iu, flag)
      iter0 = 0
   endif
   incr=1
-  IF ( dffts%have_task_groups ) THEN
+  IF ( dffts%has_task_groups ) THEN
      !
      v_siz =  dffts%nnr_tg 
      ALLOCATE( tg_dv   ( v_siz, nspin_mag ) )
@@ -321,14 +321,14 @@ subroutine solve_eq_tran(iu, flag)
               ! calculates dvscf_q*psi_k in G_space, for all bands, k=kpoint
               ! dvscf_q from previous iteration (mix_potential)
               !
-              IF( dffts%have_task_groups ) THEN
+              IF( dffts%has_task_groups ) THEN
                  CALL tg_cgather( dffts, dvscfins(:,flag,ipol), &
                                                              tg_dv(:,flag))
               ENDIF
 
               aux2=(0.0_DP,0.0_DP)
               do ibnd = 1, nbnd_occ (ikk), incr
-                 IF ( dffts%have_task_groups ) THEN
+                 IF ( dffts%has_task_groups ) THEN
                     call cft_wave_tg (ik, evc, tg_psic, 1, v_siz, ibnd, &
                                       nbnd_occ (ikk) )
                     call apply_dpot(v_siz, tg_psic, tg_dv, 1)
@@ -479,7 +479,8 @@ subroutine solve_eq_tran(iu, flag)
      !
      call mp_sum ( dbecsum, intra_bgrp_comm )
 
-     if (doublegrid) call cinterpolate (dvscfout, dvscfout, 1)
+     if (doublegrid) call fft_interpolate (dffts, dvscfout(:,1,1), &
+                                           dfftp, dvscfout(:,1,1) )
      !
      nspin_mag=1
      call addusddenseq (dvscfout, dbecsum)
@@ -527,7 +528,8 @@ subroutine solve_eq_tran(iu, flag)
           kter), dr2,  tr2_ph / npol, iter, nmix_ph_eff, flmixdpot, convt)
      ENDIF
 
-     if (doublegrid) call cinterpolate (dvscfin,dvscfins,-1)
+     if (doublegrid) call fft_interpolate (dfftp, dvscfin(:,1,1), dffts, &
+                                                  dvscfins(:,1,1))
 
      IF (okpaw) THEN
         IF (noncolin.AND.domag) THEN
@@ -581,7 +583,7 @@ subroutine solve_eq_tran(iu, flag)
 !
 !  CALL compute_susceptibility(drhoscfout)
 
-  CALL fwfft ('Dense', drhoscfout, dfftp)
+  CALL fwfft ('Rho', drhoscfout, dfftp)
 
   IF (flag==1) chipm(iu)=(0.0_DP,0.0_DP)
 
@@ -593,9 +595,9 @@ subroutine solve_eq_tran(iu, flag)
 
   IF (ABS(gg(1))<1.d-8) THEN
      IF (flag==1) THEN
-        chipm(iu)=drhoscfout(nl(1))  
+        chipm(iu)=drhoscfout(dfftp%nl(1))  
      ELSE
-        chimp(iu)=drhoscfout(nl(1))  
+        chimp(iu)=drhoscfout(dfftp%nl(1))  
         IF (ABS(chipm(iu))>1.D-9) THEN
            chixx(iu)=(chipm(iu)+chimp(iu))*0.25_DP
            chixy(iu)=(chipm(iu)-chimp(iu))*0.25_DP *(0.0_DP,-1.0_DP)
@@ -649,7 +651,7 @@ subroutine solve_eq_tran(iu, flag)
   if (noncolin) deallocate(dbecsum_nc)
   deallocate (aux2)
   deallocate (save_ikqs)
-  IF ( dffts%have_task_groups ) THEN
+  IF ( dffts%has_task_groups ) THEN
      !
      DEALLOCATE( tg_dv  )
      DEALLOCATE( tg_psic)

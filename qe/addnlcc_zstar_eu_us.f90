@@ -14,8 +14,8 @@ SUBROUTINE addnlcc_zstar_eu_us_tpw( drhoscf )
   USE ions_base, ONLY : nat
   USE funct,     ONLY : dft_is_gradient
   USE scf,       ONLY : rho, rho_core
+  USE gvect,     ONLY : g
   USE cell_base, ONLY : omega, alat
-  USE gvect,     ONLY : ngm, nl, g
   USE fft_base,  ONLY : dfftp
   USE noncollin_module, ONLY : nspin_lsda, nspin_gga, nspin_mag
   USE uspp,      ONLY : nlcc_any
@@ -82,10 +82,9 @@ SUBROUTINE addnlcc_zstar_eu_us_tpw( drhoscf )
            !
 
            IF ( dft_is_gradient() ) &
-              CALL dgradcorr (rho%of_r, grho, dvxc_rr, dvxc_sr, dvxc_ss, &
-              dvxc_s, xq, drhoscf (1, 1, ipol),  &
-              dfftp%nnr, nspin_mag, nspin_gga, nl, ngm, g, alat, dvaux)
-        
+              CALL dgradcorr (dfftp, rho%of_r, grho, dvxc_rr, dvxc_sr, &
+              dvxc_ss, dvxc_s, xq, drhoscf (1, 1, ipol),  &
+              nspin_mag, nspin_gga, g, dvaux)
            DO is = 1, nspin_lsda
               zstareu0_wrk(ipol,mode) = zstareu0_wrk(ipol,mode) -             &
                    omega * fac / DBLE(nrtot) *         &

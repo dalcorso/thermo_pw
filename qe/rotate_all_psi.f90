@@ -29,7 +29,6 @@ SUBROUTINE rotate_all_psi_tpw(ik,psic_nc,evcr,s,ftau,d_spin,has_e,gk)
   USE fft_base,  ONLY : dfftp
   USE scatter_mod,  ONLY : cgather_sym
   USE fft_interfaces, ONLY : fwfft
-  USE gvect,     ONLY : nl
   USE wvfct,     ONLY : nbnd, npwx
   USE klist,     ONLY : ngk, igk_k
   USE noncollin_module, ONLY : npol
@@ -184,8 +183,8 @@ SUBROUTINE rotate_all_psi_tpw(ik,psic_nc,evcr,s,ftau,d_spin,has_e,gk)
               psir(ir)=psir_collect(rir(ir))
            ENDDO
         ENDIF
-        CALL fwfft ('Dense', psir, dfftp)
-        evcr(ind1(ipol):ind2(ipol),ibnd) = psir(nl(igk_k(1:npw,ik)))
+        CALL fwfft ('Rho', psir, dfftp)
+        evcr(ind1(ipol):ind2(ipol),ibnd) = psir(dfftp%nl(igk_k(1:npw,ik)))
      ENDDO
      IF (npol==2) THEN
         evcr_save(:)=evcr(:,ibnd)

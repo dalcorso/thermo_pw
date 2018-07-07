@@ -62,7 +62,7 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
      kunit=2
      IF (lgamma_iq(iq)) kunit=1
      qnorm = SQRT(xq(1)**2+xq(2)**2+xq(3)**2)
-     CALL read_file_tpw()
+     CALL read_file()
      CALL set_small_group_of_q(nsymq,invsymq,minus_q)
      RETURN
   ENDIF

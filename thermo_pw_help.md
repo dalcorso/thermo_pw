@@ -5,7 +5,7 @@ working version of the <a href="http://www.quantum-espresso.org/">Quantum
 ESPRESSO (QE)</a> package. <code>Thermo_pw</code> can be downloaded from its 
 <a href="http://dalcorso.github.io/thermo_pw/">main page</a> as 
 a <code>.tar.gz</code> file. The current production version is 
-<code>0.9.0</code> compatible with 
+<code>0.9.9</code> compatible with 
 <code>QE-6.2.1</code>. The <code>thermo_pw</code> file should be copied
 in the main (QE) directory and unpacked with the command:</p>
 <p align="center">
@@ -39,7 +39,7 @@ package. Then you can give the command:</p>
 <code>git clone https://github.com/dalcorso/thermo_pw</code>
 </p>
 <p align="justify"> and you should get a directory called <code>thermo_pw</code> that contains the source code.
-The <code>git</code> version can be used only together with the version of <code>QE</code> reported here: <code>6.2.1</code>. Please note that sometimes the <code>git</code> version is not working properly and in any case its use is not recommended.</p> 
+The <code>git</code> version can be used only together with the version of <code>QE</code> reported here: <code>6.3</code>. Please note that sometimes the <code>git</code> version is not working properly and in any case its use is not recommended.</p> 
 
 <p align="justify"> Although <code>thermo_pw</code> has been 
 used for several years and can be considered reasonably stable, it remains an 

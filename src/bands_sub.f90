@@ -24,7 +24,7 @@ SUBROUTINE bands_sub()
 
   CALL start_clock('bands')
   CALL clean_pw(.TRUE.)
-  CALL read_file_tpw()
+  CALL read_file()
   !
   IF (gamma_only) CALL errore('bands_sub','gamma_only case not implemented',1)
   !

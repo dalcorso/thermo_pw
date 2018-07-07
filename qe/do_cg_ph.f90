@@ -61,6 +61,8 @@ SUBROUTINE do_cg_ph(irr, imode0, drhoscfs)
   USE mp_pools,              ONLY : inter_pool_comm
   USE mp_bands,              ONLY : intra_bgrp_comm, ntask_groups
   USE mp,                    ONLY : mp_sum
+  USE fft_interfaces,        ONLY : fft_interpolate
+
 
   IMPLICIT NONE
   INTEGER, INTENT(IN) :: irr, imode0
@@ -99,7 +101,6 @@ SUBROUTINE do_cg_ph(irr, imode0, drhoscfs)
 
   CALL start_clock ('do_cg_ph')
 
-  IF (lgauss.OR.ltetra) CALL errore('do_cg_ph','cg not ready for metals',1)
   thresh=tr2_ph*rpert*nbnd*nkstot
   dr2=0.0_DP
   convt=.FALSE.
@@ -125,7 +126,7 @@ SUBROUTINE do_cg_ph(irr, imode0, drhoscfs)
   !  This routine is task group aware
   !
   incr=1
-  IF ( dffts%have_task_groups ) THEN
+  IF ( dffts%has_task_groups ) THEN
      !
      v_siz =  dffts%nnr_tg
      ALLOCATE( tg_dv( v_siz, nspin_mag ) )
@@ -252,7 +253,7 @@ SUBROUTINE do_cg_ph(irr, imode0, drhoscfs)
               ! reversed.
               ! First apply dV_Hxc.
               !
-              IF ( dffts%have_task_groups ) THEN
+              IF ( dffts%has_task_groups ) THEN
                  IF (noncolin) THEN
                     CALL tg_cgather( dffts, dvscfins(:,1,ipol), tg_dv(:,1))
                     IF (domag) THEN
@@ -268,7 +269,7 @@ SUBROUTINE do_cg_ph(irr, imode0, drhoscfs)
               ENDIF
               dvpsi=(0.0_DP,0.0_DP)
               DO ibnd = 1, nbnd_occ (ikk), incr
-                 IF ( dffts%have_task_groups ) THEN
+                 IF ( dffts%has_task_groups ) THEN
                     CALL cft_wave_tg (ik, evc, tg_psic, 1, v_siz, ibnd, &
                                          nbnd_occ (ikk) )
                     CALL apply_dpot(v_siz, tg_psic, tg_dv, 1)
@@ -373,7 +374,8 @@ SUBROUTINE do_cg_ph(irr, imode0, drhoscfs)
      IF (doublegrid) THEN
         DO ipol=1,rpert
            DO is=1,nspin_mag
-              CALL cinterpolate(drhoscf(1,is,ipol), drhoscfs(1,is,ipol), 1)
+              CALL fft_interpolate(dffts, drhoscfs(:,is,ipol), &
+                                   dfftp, drhoscf(:,is,ipol))
            ENDDO
         ENDDO
      ELSE
@@ -449,7 +451,8 @@ SUBROUTINE do_cg_ph(irr, imode0, drhoscfs)
      IF (doublegrid) THEN
         DO ipol = 1, rpert
            DO is=1,nspin_mag
-              CALL cinterpolate (dvscfin(1,is,ipol),dvscfins(1,is,ipol),-1)
+              CALL fft_interpolate (dfftp, dvscfin(:,is,ipol),dffts, &
+                                    dvscfins(:,is,ipol))
            ENDDO
         ENDDO
      ENDIF
@@ -496,7 +499,7 @@ SUBROUTINE do_cg_ph(irr, imode0, drhoscfs)
   DEALLOCATE (drhoscf)
   IF (doublegrid) DEALLOCATE (dvscfins)
   IF (noncolin) DEALLOCATE (dbecsum_nc)
-  IF ( dffts%have_task_groups ) THEN
+  IF ( dffts%has_task_groups ) THEN
      DEALLOCATE( tg_dv )
      DEALLOCATE( tg_psic )
   ENDIF

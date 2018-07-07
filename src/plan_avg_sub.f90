@@ -60,7 +60,7 @@ SUBROUTINE plan_avg_sub(averag, vacuum, nat_, nbnd_, nks_, ninter, &
   IF (nks_ /= nkstot) CALL errore('plan_avg_sub','inconsistent k points',1)
   CALL close_files(.TRUE.)
   CALL clean_pw(.TRUE.)
-  CALL read_file_tpw ( )
+  CALL read_file ( )
   IF (nat_ /= nat .OR. nbnd_ /= nbnd) &
                      CALL errore('plan_avg_sub','some problems',1)
   !

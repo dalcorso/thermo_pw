@@ -49,7 +49,7 @@ SUBROUTINE dos_sub()
   IF ( my_image_id /= root_image ) RETURN
   !
   CALL clean_pw(.TRUE.)
-  CALL read_xml_file_tpw( )
+  CALL read_xml_file( )
   !
   save_degauss=degauss
   save_ngauss=ngauss

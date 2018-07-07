@@ -22,7 +22,7 @@ SUBROUTINE local_dos1d_so (ik, kband, plan)
   USE ions_base, ONLY: nat, ntyp=>nsp, ityp
   USE fft_base,  ONLY: dffts, dfftp
   USE fft_interfaces, ONLY : fwfft, invfft
-  USE gvecs,   ONLY : nls, doublegrid
+  USE gvecs,   ONLY : doublegrid
   USE lsda_mod, ONLY: nspin, current_spin
   USE uspp, ONLY: becsum, okvan
   USE uspp_param, ONLY: upf, nh, nhm
@@ -32,6 +32,8 @@ SUBROUTINE local_dos1d_so (ik, kband, plan)
   USE spin_orb, ONLY: lspinorb, fcoef
   USE wavefunctions_module,  ONLY: evc, psic, psic_nc
   USE becmod, ONLY: bec_type, becp
+  USE fft_interfaces,        ONLY : fft_interpolate
+
   IMPLICIT NONE
   !
   ! input variables
@@ -89,8 +91,8 @@ SUBROUTINE local_dos1d_so (ik, kband, plan)
   IF (noncolin) THEN
      psic_nc = (0.d0,0.d0)
      DO ig = 1, npw
-        psic_nc (nls (igk_k (ig,ik) ), 1 ) = evc (ig     , kband)
-        psic_nc (nls (igk_k (ig,ik) ), 2 ) = evc (ig+npwx, kband)
+        psic_nc (dffts%nl (igk_k (ig,ik) ), 1 ) = evc (ig     , kband)
+        psic_nc (dffts%nl (igk_k (ig,ik) ), 2 ) = evc (ig+npwx, kband)
      ENDDO
      DO ipol=1,npol
         CALL invfft ('Wave', psic_nc(:,ipol), dffts)
@@ -120,7 +122,7 @@ SUBROUTINE local_dos1d_so (ik, kband, plan)
   ELSE
      psic(1:dffts%nnr) = (0.d0,0.d0)
      DO ig = 1, npw
-        psic (nls (igk_k (ig,ik) ) ) = evc (ig, kband)
+        psic (dffts%nl (igk_k (ig,ik) ) ) = evc (ig, kband)
      ENDDO
      CALL invfft ('Wave', psic, dffts)
 
@@ -217,12 +219,12 @@ SUBROUTINE local_dos1d_so (ik, kband, plan)
   !
   DO ispin=1, nspin
      IF (doublegrid) THEN
-        CALL interpolate (aux(1,ispin), aux(1,ispin), 1)
+        CALL fft_interpolate (dffts, aux(:,ispin), dfftp, aux(:,ispin))
      ENDIF
      DO ir = 1, dfftp%nnr
         prho (ir,ispin) = cmplx(aux (ir,ispin), 0.d0,kind=DP)
      ENDDO
-     CALL fwfft ('Dense', prho(:,ispin), dfftp)
+     CALL fwfft ('Rho', prho(:,ispin), dfftp)
   ENDDO
   !
   !    Here we add the US contribution to the charge for the atoms which have

@@ -165,7 +165,7 @@ USE control_ph,       ONLY : tmp_dir_ph, tmp_dir_phq, rec_code_read, recover
 USE ph_restart,       ONLY : ph_readfile
 USE output,           ONLY : fildyn
 USE save_ph,          ONLY : save_ph_input_variables, tmp_dir_save
-USE io_files,         ONLY : tmp_dir
+USE io_files,         ONLY : tmp_dir, check_tempdir
 USE mp_images,        ONLY : my_image_id
 USE mp_pools,         ONLY : kunit
 USE ions_base,        ONLY : nat
@@ -187,7 +187,7 @@ tmp_dir_ph= TRIM (tmp_dir) // '_ph' // TRIM(int_to_char(my_image_id)) //'/'
 CALL check_tempdir ( tmp_dir_ph, exst, parallelfs )
 tmp_dir_phq=tmp_dir_ph
 
-CALL read_file_tpw()
+CALL read_file()
 CALL allocate_part(nat)
 CALL allocate_ph_tpw()
 CALL save_ph_input_variables()

@@ -20,7 +20,7 @@ SUBROUTINE dv_of_drho_nlf (dvscf)
   USE constants,         ONLY : e2, fpi
   USE fft_base,          ONLY : dfftp
   USE fft_interfaces,    ONLY : fwfft, invfft
-  USE gvect,             ONLY : nl, gstart
+  USE gvect,             ONLY : gstart
   USE cell_base,         ONLY : alat, tpiba2, omega
   USE noncollin_module,  ONLY : nspin_lsda, nspin_mag
   USE qpoint,            ONLY : xq
@@ -55,8 +55,8 @@ SUBROUTINE dv_of_drho_nlf (dvscf)
      IF (gstart==2) THEN
         qg2 = xq(1)**2 + xq(2)**2 + xq(3)**2
         IF (qg2 > 1.d-8) THEN
-           dvaux(nl(1),is) = dvaux(nl(1),is) + &
-                                 & e2 * fpi * dvscf(nl(1),1) / (tpiba2 * qg2)
+           dvaux(dfftp%nl(1),is) = dvaux(dfftp%nl(1),is) + &
+                         & e2 * fpi * dvscf(dfftp%nl(1),1) / (tpiba2 * qg2)
         ENDIF
      ENDIF
      CALL invfft ('Dense', dvaux (:, is), dfftp)

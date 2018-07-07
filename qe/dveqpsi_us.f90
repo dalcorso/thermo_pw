@@ -18,7 +18,6 @@ SUBROUTINE dveqpsi_us (ik)
   USE cell_base, ONLY : tpiba
   USE fft_base,  ONLY: dfftp, dffts
   USE fft_interfaces, ONLY: fwfft, invfft
-  USE gvecs,     ONLY : nls
   USE noncollin_module, ONLY : noncolin
   USE wvfct,     ONLY : nbnd, npwx
 
@@ -63,18 +62,18 @@ SUBROUTINE dveqpsi_us (ik)
   DO ibnd = 1, nbnd_occ(ikk)
      aux2(:) = (0.D0, 0.D0)
      DO ig = 1, npw
-        aux2 (nls (igk_k (ig,ikk) ) ) = evc (ig, ibnd)
+        aux2 (dffts%nl (igk_k (ig,ikk) ) ) = evc (ig, ibnd)
      ENDDO
      DO ig = 1, npwq
-        dvpsi (ig, ibnd) = aux2 (nls (igk_k (ig,ikq) ) )
+        dvpsi (ig, ibnd) = aux2 (dffts%nl (igk_k (ig,ikq) ) )
      ENDDO
      IF (noncolin) THEN
         aux2(:) = (0.d0, 0.d0)
         DO ig = 1, npw
-           aux2 (nls (igk_k (ig,ikk) ) ) = evc (ig+npwx, ibnd)
+           aux2 (dffts%nl (igk_k (ig,ikk) ) ) = evc (ig+npwx, ibnd)
         ENDDO
         DO ig = 1, npwq
-           dvpsi (ig+npwx, ibnd) = aux2 (nls (igk_k (ig,ikq) ) )
+           dvpsi (ig+npwx, ibnd) = aux2 (dffts%nl (igk_k (ig,ikq) ) )
         ENDDO
      END IF
   ENDDO

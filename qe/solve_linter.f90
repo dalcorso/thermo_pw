@@ -75,6 +75,8 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   USE qpoint,       ONLY : xq, nksq, ikks, ikqs
   USE control_lr,   ONLY : alpha_pv, nbnd_occ, lgamma
   USE dv_of_drho_lr
+  USE fft_interfaces,        ONLY : fft_interpolate
+
 
   implicit none
 
@@ -171,7 +173,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   allocate (aux2(npwx*npol, nbnd))
   allocate (drhoc(dfftp%nnr))
   incr=1
-  IF ( dffts%have_task_groups ) THEN
+  IF ( dffts%has_task_groups ) THEN
      !
      v_siz =  dffts%nnr_tg
      ALLOCATE( tg_dv   ( v_siz, nspin_mag ) )
@@ -286,7 +288,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
               ! dvscf_q from previous iteration (mix_potential)
               !
               call start_clock ('vpsifft')
-              IF( dffts%have_task_groups ) THEN
+              IF( dffts%has_task_groups ) THEN
                  IF (noncolin) THEN
                     CALL tg_cgather( dffts, dvscfins(:,1,ipert), &
                                                                 tg_dv(:,1))
@@ -303,7 +305,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
               ENDIF
               aux2=(0.0_DP,0.0_DP)
               do ibnd = 1, nbnd_occ (ikk), incr
-                 IF( dffts%have_task_groups ) THEN
+                 IF( dffts%has_task_groups ) THEN
                     call cft_wave_tg (ik, evc, tg_psic, 1, v_siz, ibnd, &
                                       nbnd_occ (ikk) )
                     call apply_dpot(v_siz, tg_psic, tg_dv, 1)
@@ -406,7 +408,8 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
      if (doublegrid) then
         do is = 1, nspin_mag
            do ipert = 1, npe
-              call cinterpolate (drhoscfh(1,is,ipert), drhoscf(1,is,ipert), 1)
+              call fft_interpolate (dffts, drhoscf(:,is,ipert), dfftp, &
+                                           drhoscfh(:,is,ipert))
            enddo
         enddo
      else
@@ -513,7 +516,8 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
      if (doublegrid) then
         do ipert = 1, npe
            do is = 1, nspin_mag
-              call cinterpolate (dvscfin(1,is,ipert), dvscfins(1,is,ipert), -1)
+              call fft_interpolate (dfftp, dvscfin(:,is,ipert), dffts, &
+                                          dvscfins(:,is,ipert))
            enddo
         enddo
      endif
@@ -604,7 +608,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   deallocate (dvscfin)
   deallocate(aux2)
   deallocate(drhoc)
-  IF ( dffts%have_task_groups ) THEN
+  IF ( dffts%has_task_groups ) THEN
      DEALLOCATE( tg_dv )
      DEALLOCATE( tg_psic )
   ENDIF

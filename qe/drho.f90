@@ -44,6 +44,8 @@ subroutine drho_tpw
   USE mp_bands,   ONLY : intra_bgrp_comm
   USE mp,         ONLY : mp_sum
   USE becmod,     ONLY : bec_type, allocate_bec_type, deallocate_bec_type
+  USE fft_interfaces, ONLY : fft_interpolate
+
 
   implicit none
 
@@ -205,7 +207,8 @@ subroutine drho_tpw
      if (doublegrid) then
         do is = 1, nspin_mag
            do iper = 1, npe
-              call cinterpolate (drhoust(1,is,iper), drhous(1,is,mode+iper), 1)
+              call fft_interpolate (dffts, drhous(:,is,iper), dfftp, &
+                                                  drhous(:,is,mode+iper))
            enddo
         enddo
      else

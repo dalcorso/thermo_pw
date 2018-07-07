@@ -50,7 +50,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, auxdyn_loc)
   USE klist,       ONLY : degauss
   USE freq_ph,     ONLY : fpol, nfs
   USE optical,     ONLY : start_freq, last_freq
-  USE io_files,    ONLY : tmp_dir, wfc_dir
+  USE io_files,    ONLY : tmp_dir, wfc_dir, check_tempdir
 !
 !   the phonon variables set here or used to set the input
 !
@@ -353,7 +353,7 @@ USE rotate,           ONLY : rotate_vect
 !
 USE cell_base,        ONLY : cell_base_init, at
 USE ions_base,        ONLY : tau, nat
-USE io_files,         ONLY : tmp_dir, wfc_dir
+USE io_files,         ONLY : tmp_dir, wfc_dir, check_tempdir
 USE io_global,        ONLY : stdout
 
 IMPLICIT NONE

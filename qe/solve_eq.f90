@@ -33,6 +33,7 @@ subroutine solve_eq(iu, flag)
   USE io_files,              ONLY : prefix, diropn
   USE cell_base,             ONLY : tpiba2
   USE fft_interfaces,        ONLY : fwfft
+  USE fft_interfaces,        ONLY : fft_interpolate
   USE klist,                 ONLY : lgauss, xk, wk
   USE gvect,                 ONLY : g
   USE gvecs,                 ONLY : doublegrid
@@ -48,7 +49,7 @@ subroutine solve_eq(iu, flag)
   USE uspp_param,            ONLY : upf, nhm
   USE noncollin_module,      ONLY : noncolin, npol, nspin_mag, nspin_lsda
   USE scf,                   ONLY : rho, v_of_0
-  USE gvect,                 ONLY : gg, nl
+  USE gvect,                 ONLY : gg
   USE paw_variables,         ONLY : okpaw
   USE paw_onecenter,         ONLY : paw_dpotential
   USE paw_add_symmetry,      ONLY : paw_deqsymmetrize
@@ -191,7 +192,7 @@ subroutine solve_eq(iu, flag)
      iter0 = 0
   endif
   incr=1
-  IF ( dffts%have_task_groups ) THEN
+  IF ( dffts%has_task_groups ) THEN
      !
      v_siz =  dffts%nnr_tg
      ALLOCATE( tg_dv   ( v_siz, nspin_mag ) )
@@ -311,7 +312,7 @@ subroutine solve_eq(iu, flag)
               ! calculates dvscf_q*psi_k in G_space, for all bands, k=kpoint
               ! dvscf_q from previous iteration (mix_potential)
               !
-              IF( dffts%have_task_groups ) THEN
+              IF( dffts%has_task_groups ) THEN
                  IF (noncolin) THEN
                     CALL tg_cgather( dffts, dvscfins(:,1,ipol), &
                                                                 tg_dv(:,1))
@@ -328,7 +329,7 @@ subroutine solve_eq(iu, flag)
               ENDIF
               aux2=(0.0_DP,0.0_DP)
               do ibnd = 1, nbnd_occ (ikk), incr
-                 IF ( dffts%have_task_groups ) THEN
+                 IF ( dffts%has_task_groups ) THEN
                     call cft_wave_tg (ik, evc, tg_psic, 1, v_siz, ibnd, &
                                       nbnd_occ (ikk) )
                     call apply_dpot(v_siz, tg_psic, tg_dv, 1)
@@ -481,7 +482,8 @@ subroutine solve_eq(iu, flag)
 
      if (doublegrid) then
         do is=1,nspin_mag
-           call cinterpolate (dvscfout(1,is,1), dvscfout(1,is,1), 1)
+           call fft_interpolate (dffts, dvscfout(:,is,1), dfftp, &
+                                                      dvscfout(:,is,1))
         enddo
      endif
      !
@@ -528,7 +530,8 @@ subroutine solve_eq(iu, flag)
 
      if (doublegrid) then
         do is=1,nspin_mag
-           call cinterpolate (dvscfin(1,is,1),dvscfins(1,is,1),-1)
+           call fft_interpolate (dfftp, dvscfin(:,is,1), dffts, &
+                                               dvscfins(:,is,1))
         enddo
      endif
 
@@ -586,7 +589,7 @@ subroutine solve_eq(iu, flag)
 !  CALL compute_susceptibility(drhoscfout)
 
   DO is=1,nspin_mag
-     CALL fwfft ('Dense', drhoscfout(:,is), dfftp)
+     CALL fwfft ('Rho', drhoscfout(:,is), dfftp)
   END DO
   IF (flag==1) THEN
      chirr(iu)=(0.0_DP,0.0_DP)
@@ -599,13 +602,14 @@ subroutine solve_eq(iu, flag)
   xqmod2=(xq(1)**2+xq(2)**2+xq(3)**2)*tpiba2
   IF (ABS(gg(1))<1.d-8) THEN
      IF (flag==1) THEN
-        chirr(iu) = drhoscfout(nl(1),1) 
-        IF (lsda) chirr(iu) = chirr(iu) + drhoscfout(nl(1),2)
+        chirr(iu) = drhoscfout(dfftp%nl(1),1) 
+        IF (lsda) chirr(iu) = chirr(iu) + drhoscfout(dfftp%nl(1),2)
         epsm1(iu) = CMPLX(1.0_DP,0.0_DP)+ chirr(iu)*fpi*e2/xqmod2
-        IF (lsda) chizr(iu) = drhoscfout(nl(1),1) - drhoscfout(nl(1),2)
+        IF (lsda) chizr(iu) = drhoscfout(dfftp%nl(1),1) - &
+                              drhoscfout(dfftp%nl(1),2)
      ELSE IF (lsda) THEN
-        chizz(iu)=drhoscfout(nl(1),1)-drhoscfout(nl(1),2)
-        chirz(iu)=drhoscfout(nl(1),1)+drhoscfout(nl(1),2)
+        chizz(iu)=drhoscfout(dfftp%nl(1),1)-drhoscfout(dfftp%nl(1),2)
+        chirz(iu)=drhoscfout(dfftp%nl(1),1)+drhoscfout(dfftp%nl(1),2)
      END IF
   END IF
 
@@ -662,7 +666,7 @@ subroutine solve_eq(iu, flag)
   deallocate (dvscfin)
   if (noncolin) deallocate(dbecsum_nc)
   deallocate(aux2)
-  IF ( dffts%have_task_groups ) THEN
+  IF ( dffts%has_task_groups ) THEN
      !
      DEALLOCATE( tg_dv  )
      DEALLOCATE( tg_psic)

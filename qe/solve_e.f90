@@ -61,6 +61,8 @@ subroutine solve_e_tpw(drhoscf)
   USE eqv,                   ONLY : dpsi, dvpsi
   USE control_lr,            ONLY : nbnd_occ, lgamma
   USE dv_of_drho_lr
+  USE fft_interfaces,        ONLY : fft_interpolate
+
 
   implicit none
 
@@ -147,7 +149,7 @@ subroutine solve_e_tpw(drhoscf)
      iter0 = 0
   endif
   incr=1
-  IF ( dffts%have_task_groups ) THEN
+  IF ( dffts%has_task_groups ) THEN
      !
      v_siz =  dffts%nnr_tg 
      ALLOCATE( tg_dv   ( v_siz, nspin_mag ) )
@@ -216,7 +218,7 @@ subroutine solve_e_tpw(drhoscf)
               ! calculates dvscf_q*psi_k in G_space, for all bands, k=kpoint
               ! dvscf_q from previous iteration (mix_potential)
               !
-              IF( dffts%have_task_groups ) THEN
+              IF( dffts%has_task_groups ) THEN
                  IF (noncolin) THEN
                     CALL tg_cgather( dffts, dvscfins(:,1,ipol), &
                                                                 tg_dv(:,1))
@@ -233,7 +235,7 @@ subroutine solve_e_tpw(drhoscf)
               ENDIF
               aux2=(0.0_DP,0.0_DP)
               do ibnd = 1, nbnd_occ (ik), incr
-                 IF ( dffts%have_task_groups ) THEN
+                 IF ( dffts%has_task_groups ) THEN
                     call cft_wave_tg (ik, evc, tg_psic, 1, v_siz, ibnd, &
                                       nbnd_occ (ik) )
                     call apply_dpot(v_siz, tg_psic, tg_dv, 1)
@@ -323,7 +325,8 @@ subroutine solve_e_tpw(drhoscf)
      if (doublegrid) then
         do is=1,nspin_mag
            do ipol=1,3
-              call cinterpolate (drhoscfh(1,is,ipol), drhoscf(1,is,ipol), 1)
+              call fft_interpolate (dffts, drhoscf(:,is,ipol), &
+                                    dfftp, drhoscfh(:,is,ipol))
            enddo
         enddo
      else
@@ -381,7 +384,8 @@ subroutine solve_e_tpw(drhoscf)
      if (doublegrid) then
         do is=1,nspin_mag
            do ipol = 1, 3
-              call cinterpolate (dvscfin(1,is,ipol),dvscfins(1,is,ipol),-1)
+              call fft_interpolate (dfftp, dvscfin(:,is,ipol), dffts, &
+                                           dvscfins(:,is,ipol))
            enddo
         enddo
      endif
@@ -451,7 +455,7 @@ ENDIF
   deallocate (dvscfin)
   if (noncolin) deallocate(dbecsum_nc)
   deallocate(aux2)
-  IF ( dffts%have_task_groups ) THEN
+  IF ( dffts%has_task_groups ) THEN
      !
      DEALLOCATE( tg_dv  )
      DEALLOCATE( tg_psic)

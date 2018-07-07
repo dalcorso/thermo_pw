@@ -40,6 +40,7 @@ SUBROUTINE do_lanczos_psh()
   USE gvecs,                 ONLY : doublegrid
   USE fft_base,              ONLY : dfftp, dffts
   USE fft_helper_subroutines, ONLY : fftx_ntgrp
+  USE fft_interfaces,        ONLY : fft_interpolate
   USE lsda_mod,              ONLY : lsda, nspin, current_spin, isk
   USE spin_orb,              ONLY : domag
   USE noncollin_module,      ONLY : noncolin, npol, nspin_mag
@@ -118,7 +119,7 @@ SUBROUTINE do_lanczos_psh()
   !  This routine is task group aware
   !
   incr=1
-  IF ( dffts%have_task_groups ) THEN
+  IF ( dffts%has_task_groups ) THEN
      !
      v_siz =  dffts%nnr_tg
      ALLOCATE( tg_dv   ( v_siz, nspin_mag ) )
@@ -254,7 +255,7 @@ SUBROUTINE do_lanczos_psh()
               ! reversed.
               ! First apply dV_Hxc.
               !
-              IF ( dffts%have_task_groups ) THEN
+              IF ( dffts%has_task_groups ) THEN
                  IF (noncolin) THEN
                     CALL tg_cgather( dffts, dvscfins(:,1,ipol), tg_dv(:,1))
                     IF (domag) THEN
@@ -270,7 +271,7 @@ SUBROUTINE do_lanczos_psh()
               ENDIF
               dvpsi=(0.0_DP,0.0_DP)
               DO ibnd = 1, nbnd_occ (ikk), incr
-                 IF ( dffts%have_task_groups ) THEN
+                 IF ( dffts%has_task_groups ) THEN
                     CALL cft_wave_tg (ik, evc, tg_psic, 1, v_siz, ibnd, &
                                          nbnd_occ (ikk) )
                     CALL apply_dpot(v_siz, tg_psic, tg_dv, 1)
@@ -393,7 +394,8 @@ SUBROUTINE do_lanczos_psh()
      IF (doublegrid) THEN
         DO ipol=1,rpert
            DO is=1,nspin_mag
-              CALL cinterpolate (dvscfin(1,is,ipol), dvscfin(1,is,ipol), 1)
+              CALL fft_interpolate (dffts, dvscfin(:,is,ipol), dfftp, &
+                                                      dvscfin(:,is,ipol))
            ENDDO
         ENDDO
      ENDIF
@@ -444,7 +446,8 @@ SUBROUTINE do_lanczos_psh()
      IF (doublegrid) THEN
         DO ipol = 1, rpert
            DO is=1,nspin_mag
-              CALL cinterpolate (dvscfin(1,is,ipol),dvscfins(1,is,ipol),-1)
+              CALL fft_interpolate (dfftp, dvscfin(:,is,ipol), dffts, &
+                                           dvscfins(:,is,ipol))
            ENDDO
         ENDDO
      ENDIF
@@ -489,7 +492,7 @@ SUBROUTINE do_lanczos_psh()
   IF (doublegrid) DEALLOCATE (dvscfins)
   DEALLOCATE (dvscfin)
   IF (noncolin) DEALLOCATE(dbecsum_nc)
-  IF ( dffts%have_task_groups ) THEN
+  IF ( dffts%has_task_groups ) THEN
      DEALLOCATE( tg_dv  )
      DEALLOCATE( tg_psic)
   ENDIF

@@ -55,7 +55,7 @@ SUBROUTINE phq_readin_tpw()
   USE partial,       ONLY : atomo, nat_todo, nat_todo_input
   USE output,        ONLY : fildyn, fildvscf, fildrho
   USE disp,          ONLY : nq1, nq2, nq3, x_q, wq, nqs, lgamma_iq
-  USE io_files,      ONLY : tmp_dir, prefix
+  USE io_files,      ONLY : tmp_dir, prefix, create_directory, check_tempdir
   USE noncollin_module, ONLY : i_cons, noncolin
   USE ldaU,          ONLY : lda_plus_u
   USE control_flags, ONLY : iverbosity, modenum, twfcollect
@@ -79,7 +79,6 @@ SUBROUTINE phq_readin_tpw()
   USE images_omega,   ONLY : comp_f
   USE cryst_ph,      ONLY : magnetic_sym
   USE ph_restart,    ONLY : ph_readfile
-  USE xml_io_base,   ONLY : create_directory
   USE el_phon,       ONLY : elph,elph_mat,elph_simple,elph_nbnd_min, &
                             elph_nbnd_max, &
                             el_ph_sigma, el_ph_nsigma, el_ph_ngauss,auxdvscf
@@ -685,7 +684,7 @@ SUBROUTINE phq_readin_tpw()
      END DO
   ENDIF
 
-  CALL read_file_tpw ( )
+  CALL read_file ( )
 
   magnetic_sym=noncolin .AND. domag
   !

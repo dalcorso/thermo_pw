@@ -11,6 +11,7 @@ USE control_conv,   ONLY : nke, ke, nkeden, deltakeden, deltake
 USE initial_param,  ONLY : ecutrho0, ecutwfc0
 USE thermo_mod,     ONLY : energy_geo
 USE data_files,     ONLY : flkeconv
+USE io_files,       ONLY : check_tempdir
 USE io_global,      ONLY : ionode
 USE mp_images,      ONLY : my_image_id, root_image
 

@@ -28,7 +28,7 @@ SUBROUTINE c_bands_nscf_tpw( )
   USE symm_base,            ONLY : s, sr, ftau, invs, t_rev
   USE klist,                ONLY : nkstot, nks, xk, ngk, igk_k
   USE uspp,                 ONLY : vkb, nkb
-  USE gvect,                ONLY : g, nl, gg, ngm
+  USE gvect,                ONLY : g, gg, ngm
   USE fft_interfaces,       ONLY : invfft, fwfft
   USE wvfct,                ONLY : et, nbnd, npwx, current_k
   USE control_flags,        ONLY : ethr, restart, isolve, io_level, iverbosity
@@ -190,9 +190,9 @@ SUBROUTINE c_bands_nscf_tpw( )
                  ind1=1+(ipol-1)*npwx
                  ind2=npw+(ipol-1)*npwx
                  DO ibnd=1,nbnd
-                    psic(nl(igk_k(1:npw,ik_origin(ik))),ipol,ibnd) = &
+                    psic(dfftp%nl(igk_k(1:npw,ik_origin(ik))),ipol,ibnd) = &
                                                        evc(ind1:ind2,ibnd)
-                    CALL invfft ('Dense', psic(:,ipol,ibnd), dfftp)
+                    CALL invfft ('Rho', psic(:,ipol,ibnd), dfftp)
                  ENDDO
               ENDDO
               CALL compute_gk(xk(1,ik), xk(1,ik_origin(ik)), &

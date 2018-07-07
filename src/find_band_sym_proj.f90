@@ -32,7 +32,6 @@ SUBROUTINE find_band_sym_proj (ik,evc,et,nsym,s,ftau,d_spin,gk,invs, &
   !
   USE kinds,              ONLY : DP
   USE constants,          ONLY : rytoev, tpi
-  USE gvect,              ONLY : nl
   USE klist,              ONLY : ngk, igk_k
   USE wvfct,              ONLY : nbnd, npwx
   USE fft_base,           ONLY : dfftp
@@ -160,8 +159,8 @@ SUBROUTINE find_band_sym_proj (ik,evc,et,nsym,s,ftau,d_spin,gk,invs, &
      ind1 = 1 + (ipol-1)*npwx
      ind2 = npw + (ipol-1)*npwx
      DO ibnd=1,nbnd
-        psic_nc(nl(igk_k(1:npw,ik)),ipol,ibnd) = evc(ind1:ind2,ibnd)
-        CALL invfft ('Dense', psic_nc(:,ipol,ibnd), dfftp)
+        psic_nc(dfftp%nl(igk_k(1:npw,ik)),ipol,ibnd) = evc(ind1:ind2,ibnd)
+        CALL invfft ('Rho', psic_nc(:,ipol,ibnd), dfftp)
      ENDDO
   ENDDO
 
