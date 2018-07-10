@@ -1,14 +1,14 @@
-# Makefile for Modules
+# Makefile for thermo_pw/qe
 
 include ../../make.inc
 
 # location of needed modules
-MODFLAGS= $(MOD_FLAG)../../iotk/src $(MOD_FLAG)../../Modules \
-          $(MOD_FLAG)../../FFTXlib $(MOD_FLAG)../../LAXlib  \
-          $(MOD_FLAG)../../UtilXlib \
-          $(MOD_FLAG)../../KS_Solvers/Davidson $(MOD_FLAG)../../KS_Solvers/CG \
-          $(MOD_FLAG)../../PW/src $(MOD_FLAG)../../LR_Modules \
-          $(MOD_FLAG)../../PHonon/PH $(MOD_FLAG)../lib  $(MOD_FLAG).
+MODFLAGS= $(BASEMOD_FLAGS)  \
+          $(MOD_FLAG)../../PW/src \
+          $(MOD_FLAG)../../LR_Modules \
+          $(MOD_FLAG)../../PHonon/PH \
+          $(MOD_FLAG)../lib  \
+          $(MOD_FLAG).
 
 MODULES = \
 add_dkmds.o \
@@ -117,6 +117,6 @@ thermo_qe.a: 	$(MODULES)
 	$(RANLIB) $@    
 
 clean :
-	- /bin/rm -f *.o *.a *.d *.i *~ *.F90 *.mod *.L 
+	- /bin/rm -f *.o *.a *.d *.i *~ *_tmp.f90 *.mod *.L 
 
 include make.depend

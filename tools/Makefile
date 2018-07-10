@@ -1,28 +1,29 @@
-# Makefile for thermo_pw 
+# Makefile for thermo_pw/tools
 
 include ../../make.inc
 
 # location of needed modules and included files (if any)
-MODFLAGS= $(MOD_FLAG)../../iotk/src $(MOD_FLAG)../../Modules \
-          $(MOD_FLAG)../../FFTXlib $(MOD_FLAG)../../LAXlib  \
-          $(MOD_FLAG)../../UtilXlib \
-          $(MOD_FLAG)../../KS_Solvers/Davidson $(MOD_FLAG)../../KS_Solvers/CG \
-          $(MOD_FLAG)../../PW/src $(MOD_FLAG)../../LR_Modules \
-          $(MOD_FLAG)../../PHonon/PH $(MOD_FLAG)../lib $(MOD_FLAG).
+MODFLAGS= $(BASEMOD_FLAGS) \
+          $(MOD_FLAG)../../PW/src \
+          $(MOD_FLAG)../../LR_Modules \
+          $(MOD_FLAG)../../PHonon/PH \
+          $(MOD_FLAG)../lib \
+          $(MOD_FLAG).
 
 IFLAGS=
 
 LRMODS = ../../LR_Modules/liblrmod.a
 PWOBJS = ../../PHonon/PH/libph.a ../../PP/src/libpp.a ../../PW/src/libpw.a 
-QEMODS = ../../Modules/libqemod.a ../../KS_Solvers/Davidson/libdavid.a ../../KS_Solvers/CG/libcg.a ../../FFTXlib/libqefft.a ../../LAXlib/libqela.a ../../UtilXlib/libutil.a
+QEMODS = ../../Modules/libqemod.a ../../KS_Solvers/Davidson/libdavid.a \
+         ../../KS_Solvers/CG/libcg.a ../../FFTXlib/libqefft.a \
+         ../../LAXlib/libqela.a ../../UtilXlib/libutil.a
+LIBOBJS	= ../lib/thermo_lib.a ../qe/thermo_qe.a ../../PHonon/PH/libph.a \
+          ../../PW/src/libpw.a ../../clib/clib.a ../../iotk/src/libiotk.a
 
-LIBOBJS	= ../lib/thermo_lib.a ../qe/thermo_qe.a ../../PHonon/PH/libph.a ../../PW/src/libpw.a ../../clib/clib.a ../../iotk/src/libiotk.a
-
-TLDEPS= bindir mods libs pw
-
-all : crystal_point_group.x mag_point_group.x gener_2d_slab.x gener_3d_slab.x gener_nanowire.x supercell.x plot_sur_states.x translate.x elastic.x test_colors.x epsilon_tpw.x kovalev.x hex_trig.x bravais_lattices.x space_groups.x
-
-libs-ph : libph.a libphaux.a
+all : crystal_point_group.x mag_point_group.x gener_2d_slab.x gener_3d_slab.x \
+      gener_nanowire.x supercell.x plot_sur_states.x translate.x elastic.x \
+      test_colors.x epsilon_tpw.x kovalev.x hex_trig.x bravais_lattices.x \
+      space_groups.x
 
 space_groups.x : space_groups.o $(PWOBJS) $(LIBOBJS)
 	$(LD) $(LDFLAGS) -o $@ space_groups.o \
@@ -73,7 +74,6 @@ plot_sur_states.x : plot_sur_states.o $(PWOBJS) $(LIBOBJS)
 	$(PWOBJS) $(QEMODS) $(LIBOBJS) $(LIBS)
 	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/plot_sur_states.x . )
 
-
 gener_2d_slab.x : gener_2d_slab.o $(PWOBJS) $(LIBOBJS)
 	$(LD) $(LDFLAGS) -o $@ gener_2d_slab.o \
 		 $(LIBOBJS) $(PWOBJS) $(QEMODS) $(LIBOBJS) $(PWOBJS) $(LIBS)
@@ -105,12 +105,12 @@ epsilon_tpw.x : epsilon_tpw.o $(PWOBJS) $(LIBOBJS)
 	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/epsilon_tpw.x . )
 
 clean :
-	- /bin/rm -f *.x *.o *.a *~ *.F90 *.d *.mod *.i *.L
-	- /bin/rm -rf ../../bin/thermo_pw.x 
+	- /bin/rm -f *.x *.o *.a *~ *_tmp.f90 *.d *.mod *.i *.L
 	- /bin/rm -rf ../../bin/space_groups.x 
 	- /bin/rm -rf ../../bin/crystal_point_group.x 
+	- /bin/rm -rf ../../bin/mag_point_group.x 
 	- /bin/rm -rf ../../bin/hex_trig.x 
-	- /bin/rm -rf ../../bin/bravais_lattice.x 
+	- /bin/rm -rf ../../bin/bravais_lattices.x 
 	- /bin/rm -rf ../../bin/kovalev.x 
 	- /bin/rm -rf ../../bin/supercell.x 
 	- /bin/rm -rf ../../bin/translate.x 

@@ -1,9 +1,10 @@
-# Makefile for Modules
+# Makefile for thermo_pw/lib
 
 include ../../make.inc
 
 # location of needed modules
-MODFLAGS= $(MOD_FLAG)../../Modules $(MOD_FLAG)../../FFTXlib $(MOD_FLAG)../../LAXlib $(MOD_FLAG)../../UtilXlib $(MOD_FLAG).
+MODFLAGS= $(BASEMOD_FLAGS) \
+          $(MOD_FLAG).
 
 MODULES = \
 asy.o \
@@ -41,6 +42,6 @@ thermo_lib.a: 	$(MODULES)
 	$(RANLIB) $@    
 
 clean :
-	- /bin/rm -f *.o *.a *.d *.i *~ *.F90 *.mod *.L 
+	- /bin/rm -f *.o *.a *.d *.i *~ *_tmp.f90 *.mod *.L 
 
 include make.depend

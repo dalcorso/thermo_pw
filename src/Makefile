@@ -3,14 +3,14 @@
 include ../../make.inc
 
 # location of needed modules and included files (if any)
-MODFLAGS= $(MOD_FLAG)../../iotk/src $(MOD_FLAG)../../Modules \
-          $(MOD_FLAG)../../FFTXlib $(MOD_FLAG)../../LAXlib  \
-          $(MOD_FLAG)../../UtilXlib \
-          $(MOD_FLAG)../../KS_Solvers/Davidson $(MOD_FLAG)../../KS_Solvers/CG \
+MODFLAGS= $(BASEMOD_FLAGS) \
+          $(MOD_FLAG)../../PW/src  \
           $(MOD_FLAG)../../dft-d3/ \
-          $(MOD_FLAG)../../PW/src $(MOD_FLAG)../../LR_Modules \
+          $(MOD_FLAG)../../LR_Modules \
           $(MOD_FLAG)../../PHonon/PH \
-          $(MOD_FLAG)../lib $(MOD_FLAG)../qe $(MOD_FLAG).
+          $(MOD_FLAG)../lib \
+          $(MOD_FLAG)../qe \
+          $(MOD_FLAG).
 
 THERMOOBJS = \
 adjust_tau.o \
@@ -132,18 +132,20 @@ write_thermo.o
 
 LRMODS = ../../LR_Modules/liblrmod.a
 PWOBJS = ../../PHonon/PH/libph.a ../../PP/src/libpp.a ../../PW/src/libpw.a 
-QEMODS = ../../Modules/libqemod.a ../../KS_Solvers/Davidson/libdavid.a ../../KS_Solvers/CG/libcg.a ../../FFTXlib/libqefft.a ../../LAXlib/libqela.a ../../UtilXlib/libutil.a ../../dft-d3/libdftd3qe.a
-
-LIBOBJS	= ../lib/thermo_lib.a ../qe/thermo_qe.a ../lib/thermo_lib.a ../../PHonon/PH/libph.a ../../clib/clib.a ../../iotk/src/libiotk.a
+QEMODS = ../../Modules/libqemod.a ../../KS_Solvers/Davidson/libdavid.a \
+         ../../KS_Solvers/CG/libcg.a ../../FFTXlib/libqefft.a \
+         ../../LAXlib/libqela.a ../../UtilXlib/libutil.a \
+         ../../dft-d3/libdftd3qe.a
+LIBOBJS	=../qe/thermo_qe.a ../lib/thermo_lib.a ../../PHonon/PH/libph.a ../../clib/clib.a ../../iotk/src/libiotk.a
 
 all : libthermo_pw.a thermo_pw.x 
 
-libs-ph : libph.a libphaux.a
-
-thermo_pw.x : thermo_pw.o libthermo_pw.a $(QEMODS) $(LRMODS) $(PWOBJS) $(LIBOBJS)
+thermo_pw.x : thermo_pw.o libthermo_pw.a $(QEMODS) $(LRMODS) $(PWOBJS) \
+              $(LIBOBJS)
 	$(LD) $(LDFLAGS) -o $@ thermo_pw.o ../../PHonon/PH/rigid.o \
-                 ../../PHonon/PH/write_eigenvectors.o libthermo_pw.a \
-         $(PWOBJS) $(QEMODS) $(LIBOBJS) $(LRMODS) $(PWOBJS) $(QEMODS) $(LIBS) ../../clib/clib.a
+              ../../PHonon/PH/write_eigenvectors.o libthermo_pw.a \
+        $(PWOBJS) $(QEMODS) $(LIBOBJS) $(LRMODS) $(PWOBJS) $(QEMODS) \
+        $(LIBS) ../../clib/clib.a
 	- ( cd ../../bin ; ln -fs ../thermo_pw/src/thermo_pw.x . )
 
 libthermo_pw.a : $(THERMOOBJS) 
@@ -151,7 +153,7 @@ libthermo_pw.a : $(THERMOOBJS)
 	$(RANLIB) $@
 
 clean :
-	- /bin/rm -f *.x *.o *.a *~ *.F90 *.d *.mod *.i *.L
+	- /bin/rm -f *.x *.o *.a *~ *_tmp.f90 *.d *.mod *.i *.L
 	- /bin/rm -rf ../../bin/thermo_pw.x 
 
 include make.depend
