@@ -47,6 +47,7 @@ find_symmetry.o \
 find_band_sym_proj.o \
 find_mode_sym_proj.o \
 generate_k_along_lines_kz.o \
+generalized_phdos.o \
 initialize_thermo_work.o \
 interpolate_cv.o \
 io_bands.o \

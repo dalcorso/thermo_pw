@@ -10,10 +10,15 @@ SUBROUTINE write_thermo(igeom)
 !  This routine writes on file the harmonic thermodynamical quantities
 !
 USE kinds,          ONLY : DP
-USE phdos_module,   ONLY : zero_point_energy, fecv, integrated_dos
+USE ions_base,      ONLY : nat, nsp, ityp, amass
+!USE symme,          ONLY : symtensor
+USE phdos_module,   ONLY : zero_point_energy, fecv, integrated_dos, &
+                           phdos_debye_factor
 USE thermo_mod,     ONLY : tot_ngeo
 USE temperature,    ONLY : ntemp, temp
-USE thermodynamics, ONLY : ph_ener, ph_free_ener, ph_entropy, ph_cv, phdos_save
+USE thermodynamics, ONLY : ph_ener, ph_free_ener, ph_entropy, ph_cv, &
+                           phdos_save, gen_phdos_save
+USE control_thermo, ONLY : with_eigen
 USE mp_world,       ONLY : world_comm
 USE mp,             ONLY : mp_bcast, mp_sum
 USE io_global,      ONLY : meta_ionode, meta_ionode_id, stdout
@@ -25,6 +30,7 @@ INTEGER, INTENT(IN) :: igeom
 INTEGER  :: idum, itemp, startt, lastt, iu_therm
 INTEGER  :: find_free_unit
 REAL(DP) :: e0, tot_states
+REAL(DP) :: b_fact(3,3,nat,ntemp)
 CHARACTER(LEN=256) :: filetherm
 LOGICAL  :: check_file_exists, do_read
 !
@@ -70,6 +76,7 @@ ph_free_ener(:,igeom)=0.0_DP
 ph_ener(:,igeom)=0.0_DP
 ph_cv(:,igeom)=0.0_DP
 ph_entropy(:,igeom)=0.0_DP
+b_fact=0.0_DP
 DO itemp = startt, lastt
    IF (MOD(itemp-startt+1,30)==0) &
                      WRITE(6,'(5x,"Computing temperature ", i5 " / ",&
@@ -81,6 +88,12 @@ DO itemp = startt, lastt
    ph_ener(itemp,igeom)=ph_ener(itemp,igeom)+e0
    ph_entropy(itemp,igeom)=(ph_ener(itemp, igeom)-ph_free_ener(itemp,igeom))/&
                             temp(itemp)
+   IF (with_eigen) THEN
+      CALL phdos_debye_factor(gen_phdos_save, temp(itemp), &
+                              b_fact(1,1,1,itemp), nat, amass, nsp, ityp)
+!      CALL symtensor(nat, b_fact(1,1,1,itemp))
+   ENDIF
+
 END DO
 !
 !  and collect the results
@@ -89,11 +102,14 @@ CALL mp_sum(ph_free_ener(1:ntemp,igeom),world_comm)
 CALL mp_sum(ph_ener(1:ntemp,igeom),world_comm)
 CALL mp_sum(ph_cv(1:ntemp,igeom),world_comm)
 CALL mp_sum(ph_entropy(1:ntemp,igeom),world_comm)
+IF (with_eigen) CALL mp_sum(b_fact(1:3,1:3,1:nat,1:ntemp),world_comm)
 
 IF (meta_ionode) &
    CALL write_thermo_info(e0, tot_states, ntemp, temp, ph_ener(1,igeom), &
               ph_free_ener(1,igeom), ph_entropy(1,igeom), ph_cv(1,igeom),&
                                                              1,filetherm)
+IF (meta_ionode.AND.with_eigen) &
+   CALL write_dw_info(ntemp, temp, b_fact, nat, filetherm)
 
 RETURN
 END SUBROUTINE write_thermo

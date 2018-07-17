@@ -33,6 +33,16 @@ REAL(DP), PARAMETER :: kb=k_boltzmann_ry ! Boltzmann constant in Ry/K
 REAL(DP), PARAMETER :: kb1=1.0_DP/kb/ry_to_cmm1 ! inverse Boltzmann 
                                                 ! constant in cm^{-1}/K
 
+REAL(DP), PARAMETER :: thr_ph=1.D-3   ! a phonon with frequency smaller than
+                                      ! this is considered of zero frequency.
+REAL(DP), PARAMETER :: thr_taylor=1.D-3   ! When the argument of the functions
+                                          ! is smaller than this threshold use
+                                          ! a Taylor expansion expression 
+                                          ! to avoid the numerical error due
+                                          ! to the calculation of 
+                                          ! 1.0-(1.0-epsilon) 
+
+
 TYPE phdos_type
    INTEGER :: number_of_points    ! rhe number of points
    REAL(DP) :: de                 ! interval of the mesh of frequencies (cm-1)
@@ -40,9 +50,19 @@ TYPE phdos_type
    REAL(DP), ALLOCATABLE :: phdos(:)  ! the phdos (states/ cm-1)
 END TYPE phdos_type
 
+TYPE gen_phdos_type
+   INTEGER :: number_of_points    ! the number of points
+   INTEGER :: nat                 ! the number of atoms
+   REAL(DP) :: de                 ! interval of the mesh of frequencies (cm-1)
+   REAL(DP), ALLOCATABLE :: nu(:)     ! the frequencies (cm-1)
+   REAL(DP), ALLOCATABLE :: phdos(:,:,:)  ! the generalized phdos (states/ cm-1)
+END TYPE gen_phdos_type
+
 PUBLIC :: phdos_type, read_phdos_data, zero_point_energy, free_energy, &
           vib_energy, vib_entropy, specific_heat_cv, fecv, &
-          integrated_dos, set_phdos, destroy_phdos, find_minimum_maximum
+          phdos_debye_factor, integrated_dos, set_phdos, destroy_phdos, &
+          find_minimum_maximum, gen_phdos_type, set_gen_phdos, &
+          destroy_gen_phdos
           
 CONTAINS
 
@@ -60,6 +80,21 @@ ALLOCATE(phdos%phdos(ndiv))
 RETURN
 END SUBROUTINE set_phdos
 
+SUBROUTINE set_gen_phdos(phdos,ndiv,nat,deltanu)
+IMPLICIT NONE
+TYPE(gen_phdos_type), INTENT(INOUT) :: phdos
+INTEGER, INTENT(IN) :: ndiv, nat
+REAL(DP), INTENT(IN) :: deltanu
+
+phdos%number_of_points=ndiv
+phdos%nat=nat
+phdos%de=deltanu
+ALLOCATE(phdos%nu(ndiv))
+ALLOCATE(phdos%phdos(6,nat,ndiv))
+
+RETURN
+END SUBROUTINE set_gen_phdos
+
 SUBROUTINE destroy_phdos(phdos)
 IMPLICIT NONE
 TYPE(phdos_type), INTENT(INOUT) :: phdos
@@ -69,6 +104,16 @@ IF (ALLOCATED(phdos%phdos)) DEALLOCATE(phdos%phdos)
 
 RETURN
 END SUBROUTINE destroy_phdos
+
+SUBROUTINE destroy_gen_phdos(phdos)
+IMPLICIT NONE
+TYPE(gen_phdos_type), INTENT(INOUT) :: phdos
+
+IF (ALLOCATED(phdos%nu)) DEALLOCATE(phdos%nu)
+IF (ALLOCATED(phdos%phdos)) DEALLOCATE(phdos%phdos)
+
+RETURN
+END SUBROUTINE destroy_gen_phdos
 
 SUBROUTINE read_phdos_data(phdos, filename)
 !
@@ -307,6 +352,56 @@ cv = cv * phdos%de * kb
 
 RETURN
 END SUBROUTINE fecv
+
+SUBROUTINE phdos_debye_factor(phdos, temp, b_fact,  &
+                                              nat, amass, nsp, ityp)
+
+!
+USE constants, ONLY : h_planck_si, c_si, amu_si
+
+IMPLICIT NONE 
+TYPE(gen_phdos_type), INTENT(IN) :: phdos
+INTEGER :: nsp, nat, ityp(nat)
+REAL(DP), INTENT(IN) :: temp, amass(nsp)
+REAL(DP), INTENT(INOUT) :: b_fact(3,3,nat)
+
+INTEGER :: ndiv, i, na, ipol, jpol, ijpol
+REAL(DP) :: nu, g, temp1, arg, expt, fact, tfact
+
+b_fact = 0.0_DP
+IF (temp <= 1.E-9_DP) RETURN
+temp1 = 1.0_DP / temp
+ndiv = phdos%number_of_points
+
+fact = 1.D20 * h_planck_si / c_si / 100.0_DP / amu_si 
+
+DO na=1,nat
+   ijpol=0
+   DO ipol=1,3
+      DO jpol=ipol,3
+         ijpol=ijpol+1
+         DO i=1,ndiv
+            nu = phdos%nu(i)
+            g = phdos%phdos(ijpol,na,i)
+            arg = kb1 * nu * temp1
+            IF (arg > thr_taylor) THEN
+               expt = EXP(-arg)
+               tfact = (1.0_DP+expt)/(1.0_DP-expt)
+               b_fact(ipol,jpol,na) = b_fact(ipol,jpol,na) + tfact * g / nu
+            ELSEIF (nu > thr_ph) THEN
+               b_fact(ipol,jpol,na) = b_fact(ipol,jpol,na) + (2.0_DP/arg \
+                       + arg/6.0_DP - arg**3/360.0_DP) * g / nu
+            ENDIF
+         ENDDO
+         IF (ipol/=jpol) b_fact(jpol,ipol,na)=b_fact(ipol,jpol,na)
+      ENDDO
+   ENDDO
+   b_fact(:,:,na) = b_fact(:,:,na) * fact * phdos%de / amass(ityp(na))
+ENDDO
+
+RETURN
+END SUBROUTINE phdos_debye_factor
+
 
 SUBROUTINE integrated_dos(phdos, tot_dos)
 !

@@ -105,7 +105,7 @@ END MODULE control_mur
 MODULE thermodynamics
   !
   USE kinds, ONLY: DP
-  USE phdos_module, ONLY : phdos_type
+  USE phdos_module, ONLY : phdos_type, gen_phdos_type
   !
   ! ... The variables needed to save the thermodynmac quantities 
   !     calculated from the phonon dos
@@ -113,6 +113,8 @@ MODULE thermodynamics
   SAVE
 
   TYPE(phdos_type), ALLOCATABLE :: phdos_save(:) ! phdos for each geometry
+                                             ! geometry on a uniform mesh
+  TYPE(gen_phdos_type) :: gen_phdos_save     ! generalized phdos
                                              ! geometry on a uniform mesh
 
   REAL(DP), ALLOCATABLE :: ph_ener(:,:)      ! phonon total energy, T, geometry

@@ -22,27 +22,32 @@ SUBROUTINE write_phdos(igeom)
   USE mp,             ONLY : mp_sum, mp_bcast, mp_max, mp_min
   USE mp_world,       ONLY : world_comm
   USE mp_images,      ONLY : my_image_id, root_image 
+  USE constants,      ONLY : amu_ry
   USE io_global,      ONLY : meta_ionode, meta_ionode_id, stdout
-  USE ions_base,      ONLY : nat
+  USE ions_base,      ONLY : nat, amass
   USE control_dosq,   ONLY : phdos_sigma, deltafreq, freqmin, freqmax, &
                              ndos_input, freqmin_input, freqmax_input
-  USE phonon_save,    ONLY : freq_save
+  USE phonon_save,    ONLY : freq_save, z_save
   USE thermo_mod,     ONLY : tot_ngeo
-  USE thermodynamics, ONLY : phdos_save
+  USE control_thermo, ONLY : with_eigen
+  USE thermodynamics, ONLY : phdos_save, gen_phdos_save
   USE ph_freq_thermodynamics, ONLY : ph_freq_save
   USE control_dosq,   ONLY : dos_wq, dos_nqs
   USE data_files,     ONLY : fldos
-  USE phdos_module,   ONLY : set_phdos, read_phdos_data, find_minimum_maximum
+  USE phdos_module,   ONLY : set_phdos, read_phdos_data, find_minimum_maximum,&
+                             set_gen_phdos
   !
   IMPLICIT NONE
   !
   INTEGER, INTENT(IN) :: igeom
 
-  CHARACTER(LEN=256) :: filedos
+  CHARACTER(LEN=256) :: filedos, filename
   REAL(DP) :: e, emin, emax, dosofe(2)
-  INTEGER :: n, i, ndos, nq, startq, lastq, nq_eff, iundos
+  REAL(DP), ALLOCATABLE :: gen_dos(:,:)
+  INTEGER :: n, i, ndos, nq, startq, lastq, nq_eff, na, ijpol, iundos
   INTEGER :: find_free_unit
   LOGICAL :: check_file_exists
+  CHARACTER(LEN=6) :: int_to_char
 !
 !  If phdos is on file it is read
 !
@@ -127,6 +132,24 @@ SUBROUTINE write_phdos(igeom)
      phdos_save(igeom)%nu(n) = e
      phdos_save(igeom)%phdos(n) = dosofe(1)
   END DO
+
+  IF (with_eigen) THEN
+     ALLOCATE(gen_dos(6,nat))
+     CALL set_gen_phdos(gen_phdos_save,ndos,nat,deltafreq)
+     DO n= 1, ndos
+        e = emin + (n - 1) * deltafreq
+        CALL generalized_phdos(freq_save(1,startq), 3*nat, nq_eff, &
+                              dos_wq(startq), phdos_sigma, 0, e, &
+                              z_save(1,1,startq), nat, gen_dos)
+        gen_phdos_save%nu(n) = e
+        gen_phdos_save%phdos(:,:,n) = gen_dos(:,:)
+     ENDDO
+     CALL mp_sum(gen_phdos_save%phdos, world_comm)
+     DO n= 1, ndos
+        CALL symmetrize_gen_phdos(gen_phdos_save%phdos(1,1,n),nat)
+     ENDDO
+     DEALLOCATE(gen_dos)
+  ENDIF
 !
 !  and collect the results
 !
@@ -140,8 +163,56 @@ SUBROUTINE write_phdos(igeom)
                                              phdos_save(igeom)%phdos(n)
      ENDDO
      CLOSE(UNIT=iundos,STATUS='keep')
-  END IF
+
+     IF (with_eigen) THEN
+        DO na=1,nat
+           filename=TRIM(filedos)//'.'//TRIM(int_to_char(na))
+           OPEN (UNIT=iundos,FILE=filename,STATUS='unknown',FORM='formatted')
+           DO n=1, ndos 
+              WRITE (iundos, '(ES20.13, 6ES20.13)') gen_phdos_save%nu(n),  &
+                                (gen_phdos_save%phdos(ijpol,na,n),ijpol=1,6)
+           ENDDO
+           CLOSE(UNIT=iundos,STATUS='keep')
+        ENDDO
+     ENDIF
+  ENDIF
   !
   RETURN
 END SUBROUTINE write_phdos
 !
+SUBROUTINE symmetrize_gen_phdos(phdos, nat)
+USE kinds, ONLY : DP
+USE symme, ONLY : symtensor
+
+IMPLICIT NONE
+INTEGER :: nat
+REAL(DP) :: phdos(6,nat)
+
+REAL(DP) :: tot_phdos(3,3,nat)
+
+INTEGER :: ipol, jpol, ijpol, na
+
+DO na=1,nat
+   ijpol=0
+   DO ipol=1,3
+      DO jpol=ipol,3
+         ijpol=ijpol+1
+         tot_phdos(ipol,jpol, na)= phdos(ijpol,na)
+         IF (ipol/=jpol) tot_phdos(jpol, ipol, na)=tot_phdos(ipol, jpol, na)
+      ENDDO
+   ENDDO
+ENDDO
+CALL symtensor(nat, tot_phdos)
+
+DO na=1,nat
+   ijpol=0
+   DO ipol=1,3
+      DO jpol=ipol,3
+         ijpol=ijpol+1
+         phdos(ijpol, na)= tot_phdos(ipol,jpol,na)
+      ENDDO
+   ENDDO
+ENDDO
+
+RETURN
+END SUBROUTINE symmetrize_gen_phdos

@@ -664,6 +664,9 @@ SUBROUTINE clean_ifc_variables()
 USE kinds,          ONLY : DP
 USE ifc,            ONLY : frc, atm, zeu, m_loc
 USE phonon_save,    ONLY : freq_save, z_save
+USE thermodynamics, ONLY : gen_phdos_save
+USE control_thermo, ONLY : with_eigen
+USE phdos_module,   ONLY : destroy_gen_phdos
 IMPLICIT NONE
 
 IF (ALLOCATED(frc)) DEALLOCATE(frc)
@@ -672,6 +675,7 @@ IF (ALLOCATED(zeu)) DEALLOCATE(zeu)
 IF (ALLOCATED(m_loc)) DEALLOCATE(m_loc)
 IF (ALLOCATED(freq_save)) DEALLOCATE (freq_save)
 IF (ALLOCATED(z_save)) DEALLOCATE (z_save)
+IF (with_eigen) CALL destroy_gen_phdos(gen_phdos_save)
 
 RETURN
 END SUBROUTINE clean_ifc_variables

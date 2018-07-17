@@ -46,11 +46,11 @@ SUBROUTINE write_ph_freq(igeom)
   CHARACTER(LEN=256) :: filename
 
   INTEGER :: iq, na, nta, ipol, jmode, nq, nqx, iq_eff, ntetra, &
-             startq, lastq, nq_eff, iproc
+             startq, lastq, nq_eff, iproc, imode
   INTEGER, ALLOCATABLE :: nq_all(:)
   INTEGER, ALLOCATABLE :: start_proc(:)
   INTEGER, ALLOCATABLE :: last_proc(:)
-  REAL(DP) :: masst
+  REAL(DP) :: masst, unorm(3*nat)
   REAL(DP), ALLOCATABLE :: q(:,:), wq(:)
   LOGICAL  :: file_exist
   TYPE(ph_freq_type) :: buffer
@@ -151,6 +151,7 @@ SUBROUTINE write_ph_freq(igeom)
      iq_eff=0
      DO iq=startq, lastq
         iq_eff=iq_eff+1
+        unorm=0.0_DP
         DO na = 1,nat
            nta = ityp(na)
            masst=SQRT(amu_ry*amass(nta))
@@ -158,8 +159,15 @@ SUBROUTINE write_ph_freq(igeom)
               jmode=(na-1)*3+ipol
               ph_freq_save(igeom)%displa(jmode,:,iq_eff)=&
                                               z_save(jmode,:,iq)*masst
+              unorm(:)=unorm(:)+ABS(ph_freq_save(igeom)&
+                                        %displa(jmode,:,iq_eff))**2
            END DO
         END DO
+        DO imode=1,3*nat
+           ph_freq_save(igeom)%displa(:,imode,iq_eff)=&
+              ph_freq_save(igeom)%displa(:,imode,iq_eff)/SQRT(unorm(imode))
+        ENDDO
+        z_save(:,:,iq)= ph_freq_save(igeom)%displa(:,:,iq_eff)             
      END DO
   ELSE
      ALLOCATE(nq_all(nproc))
@@ -242,6 +250,8 @@ SUBROUTINE gen_qpoints_tpw (ibrav, at_, bg_, nat, tau, ityp, nk1, nk2, nk3, &
   !
   CALL irreducible_BZ (nrot, s, nsym, time_reversal, magnetic_sym, &
                        at, bg, nqx, nq, q, wq, t_rev)
+
+
   !
 !  IF (ntetra /= 6 * nk1 * nk2 * nk3) &
 !       CALL errore ('gen_qpoints','inconsistent ntetra',1)

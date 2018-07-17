@@ -526,7 +526,7 @@ fact= h_planck_si * 1.D20 / c_si / 100.0_DP / amu_si
 DO na=1, nat
    DO ipol=1, 3
       indi=3*(na-1)+ipol
-      DO jpol=1, 3
+      DO jpol=ipol, 3
          indj=3*(na-1)+jpol
          DO iq=1, nq_eff
             wg=ph_freq%wg(iq)
@@ -550,6 +550,7 @@ DO na=1, nat
                ENDIF
             ENDDO
          ENDDO
+         IF (ipol/=jpol) b_fact(jpol,ipol,na)=b_fact(ipol,jpol,na)
       ENDDO
    ENDDO
 !
