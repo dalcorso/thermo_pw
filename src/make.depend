@@ -124,12 +124,16 @@ do_phonon.o : ../../PHonon/PH/phcom.o
 do_phonon.o : ../../PHonon/PH/yambo.o
 do_pwscf.o : ../../Modules/cell_base.o
 do_pwscf.o : ../../Modules/check_stop.o
+do_pwscf.o : ../../Modules/command_line_options.o
 do_pwscf.o : ../../Modules/control_flags.o
+do_pwscf.o : ../../Modules/fft_base.o
 do_pwscf.o : ../../Modules/io_global.o
-do_pwscf.o : ../../Modules/kind.o
+do_pwscf.o : ../../Modules/mp_images.o
 do_pwscf.o : ../../Modules/parameters.o
+do_pwscf.o : ../../Modules/qexsd.o
 do_pwscf.o : ../../PW/src/atomic_wfc_mod.o
 do_pwscf.o : ../../PW/src/pwcom.o
+do_pwscf.o : ../../PW/src/scf_mod.o
 do_pwscf.o : ../../PW/src/update_pot.o
 do_pwscf.o : thermo_mod.o
 dos_sub.o : ../../Modules/constants.o
@@ -179,7 +183,6 @@ find_band_sym_proj.o : ../../Modules/io_global.o
 find_band_sym_proj.o : ../../Modules/kind.o
 find_band_sym_proj.o : ../../Modules/mp_bands.o
 find_band_sym_proj.o : ../../Modules/noncol.o
-find_band_sym_proj.o : ../../Modules/recvec.o
 find_band_sym_proj.o : ../../Modules/uspp.o
 find_band_sym_proj.o : ../../PW/src/pwcom.o
 find_band_sym_proj.o : ../../UtilXlib/mp.o
@@ -206,6 +209,7 @@ find_symmetry.o : ../../Modules/recvec.o
 find_symmetry.o : ../../PW/src/pwcom.o
 find_symmetry.o : ../../PW/src/symm_base.o
 float_to_char.o : ../../Modules/kind.o
+generalized_phdos.o : ../../Modules/kind.o
 generate_k_along_lines_kz.o : ../../Modules/cell_base.o
 generate_k_along_lines_kz.o : ../../Modules/kind.o
 generate_k_along_lines_kz.o : ../../thermo_pw/lib/point_group.o
@@ -447,6 +451,7 @@ plot_thermo.o : ../../Modules/kind.o
 plot_thermo.o : ../../Modules/mp_images.o
 plot_thermo.o : ../../PW/src/pwcom.o
 plot_thermo.o : ../../thermo_pw/lib/gnuplot.o
+plot_thermo.o : ../../thermo_pw/lib/gnuplot_color.o
 plot_thermo.o : thermo_mod.o
 plot_xrdp.o : ../../Modules/io_global.o
 plot_xrdp.o : ../../Modules/kind.o
@@ -490,6 +495,7 @@ q2r_sub.o : ../../PHonon/PH/io_dyn_mat_old.o
 q2r_sub.o : ../../PHonon/PH/phcom.o
 q2r_sub.o : ../../PHonon/PH/rigid.o
 q2r_sub.o : ../../UtilXlib/mp.o
+q2r_sub.o : ../../thermo_pw/lib/phdos_module.o
 q2r_sub.o : thermo_mod.o
 quadratic_fit.o : ../../Modules/cell_base.o
 quadratic_fit.o : ../../Modules/io_global.o
@@ -703,10 +709,12 @@ write_anhar_anis.o : ../../thermo_pw/lib/isoentropic.o
 write_anhar_anis.o : ../../thermo_pw/lib/ph_freq_module.o
 write_anhar_anis.o : ../../thermo_pw/lib/quadratic_surfaces.o
 write_anhar_anis.o : thermo_mod.o
+write_e_ke.o : ../../Modules/io_files.o
 write_e_ke.o : ../../Modules/io_global.o
 write_e_ke.o : ../../Modules/kind.o
 write_e_ke.o : ../../Modules/mp_images.o
 write_e_ke.o : thermo_mod.o
+write_e_nk.o : ../../Modules/io_files.o
 write_e_nk.o : ../../Modules/io_global.o
 write_e_nk.o : ../../Modules/kind.o
 write_e_nk.o : ../../Modules/mp_images.o
@@ -800,11 +808,13 @@ write_ph_freq.o : ../../PW/src/symm_base.o
 write_ph_freq.o : ../../UtilXlib/mp.o
 write_ph_freq.o : ../../thermo_pw/lib/ph_freq_module.o
 write_ph_freq.o : thermo_mod.o
+write_phdos.o : ../../Modules/constants.o
 write_phdos.o : ../../Modules/io_global.o
 write_phdos.o : ../../Modules/ions_base.o
 write_phdos.o : ../../Modules/kind.o
 write_phdos.o : ../../Modules/mp_images.o
 write_phdos.o : ../../Modules/mp_world.o
+write_phdos.o : ../../PW/src/symme.o
 write_phdos.o : ../../UtilXlib/mp.o
 write_phdos.o : ../../thermo_pw/lib/phdos_module.o
 write_phdos.o : thermo_mod.o
