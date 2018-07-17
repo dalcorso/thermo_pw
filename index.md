@@ -8,7 +8,7 @@ post-processing tools to produce plots directly comparable with experiment.</p>
 <p align="justify"> A quick introduction to the <code>thermo_pw</code> code can be found 
 <a href="https://dalcorso.github.io/thermo_pw/thermo_pw_help.html">here</a>,
 a brief tutorial is available <a href="https://people.sissa.it/dalcorso/thermo_pw/tutorial/tutorial.html">here</a>,
-while the user's guide of <code>thermo_pw</code> version <code>0.9.0</code> 
+while the user's guide of <code>thermo_pw</code> version <code>1.0.0</code> 
 can be found <a href="https://people.sissa.it/dalcorso/thermo_pw/user_guide/index.html">here</a>.</p>
 <p align="justify"> Presently there is no reference work for citing <code>thermo_pw</code>. If you want to mention it in your work, you can put a reference to this web page.</p>
 <p align="justify">The following papers have been written using 
@@ -73,6 +73,10 @@ If you are new to QE, please ask to the
 in the examples directories.</p>
 
 **Thermo_pw downloads**:
+<br>
+<br>
+- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.0.0.tar.gz">
+thermo_pw.1.0.0.tar.gz</a>  (released 17-07-2018) compatible with QE-6.3.
 <br>
 <br>
 - <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw-0.9.9.tar.gz">
