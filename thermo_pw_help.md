@@ -278,7 +278,7 @@ This is a problem of old versions of gnuplot. Update to gnuplot 5.0 or higher.
 15. The phonon dispersion plot seems strange, some branches are missing.
 <br>
 Please check that you used enough digits for the atomic positions. A typical
-problem appear when you write 1/3 and 2/3 in single precision. The 
+problem appears when you write 1/3 and 2/3 in single precision. The 
 <code>pw.x</code> code finds more symmetry that it is actually present in 
 the final modes and the routine that identifies the mode symmetry gets 
 confused.

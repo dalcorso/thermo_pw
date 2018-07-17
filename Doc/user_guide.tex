@@ -6,7 +6,7 @@
 %! or http://www.gnu.org/copyleft/gpl.txt .
 %!
 \documentclass[12pt,a4paper]{article}
-\def\version{1.0.0}
+\def\version{1.1.0}
 \def\qe{{\sc Quantum ESPRESSO}}
 \def\tpw{{\sc THERMO\_PW}}
 
@@ -175,6 +175,11 @@ The \thermo\ code is designed, written, and maintained by Andrea Dal Corso
 (SISSA - Trieste). It is an open source code distributed, as is, within the GPL
 license.  
 
+I would like to thank all the people that contributed with comments, requests
+of improvements, and bug reports. Some people also found bug corrections or
+wrote new routines and shared their improvements with me. In particular I would 
+like to mention M. Palumbo, O. Motornyi, A. Urru, and C. Malica.
+
 \newpage
 \section{\color{coral}Installing, Compiling, and Running}
 
@@ -209,14 +214,10 @@ license.
 
 \thermo\ is a package tightly bound to \qe. It cannot be compiled without
 it. For instruction on how to download and compile \qe, please 
-refer to the general User's Guide, available in file \texttt{Doc/user\_guide.pdf}
+refer to the general User's Guide, available in the file \texttt{Doc/user\_guide.pdf}
 under the main \qe\ directory, or in the web site 
 \texttt{http://www.quantum-espresso.org}.
-When \qe\ is correctly configured, you need to download the \PHonon\ 
-package. This can be done automatically typing \texttt{make ph} in
-the main \qe\ directory.
 
-At this point you need the source code of the \thermo\ package. 
 \texttt{Thermo\_pw} can be downloaded from its main distribution page
 \texttt{https://dalcorso.github.io/thermo\_pw/}
 by downloading one of the \texttt{.tar.gz} files.
@@ -224,14 +225,14 @@ The versions of \texttt{thermo\_pw} and of \qe\ must be carefully matched
 as illustrated in Table 1. 
 There is no \texttt{thermo\_pw} package for the versions of \qe\ not listed 
 there. Unpacking the \texttt{.tar.gz} files in the main \qe\ directory, for
-instance with the command \texttt{tar -xzvf thermo\_pw.0.8.0.tar.gz}, you
+instance with the command \texttt{tar -xzvf thermo\_pw.1.0.0.tar.gz}, you
 obtain a directory \texttt{thermo\_pw} with the source files. \\
 It is also possible to download the \texttt{git} version of 
 \texttt{thermo\_pw} as described at
 the web page: 
 \texttt{https://dalcorso.github.io/thermo\_pw/thermo\_pw\_help.html}.
 The \texttt{git} version of \texttt{thermo\_pw} contains the most recent
-features and bug fixes but it might work only with the \texttt{SVN} 
+features and bug fixes but it might work only with the \texttt{git} 
 version of \qe\ and its use is not advised. \\
 Please read the web page: 
 \texttt{http://dalcorso.github.io/thermo\_pw/} 
@@ -239,7 +240,7 @@ to have updated information about the compatibility between the \texttt{git}
 version of \texttt{thermo\_pw} and \qe. \\
 The web page \texttt{https://dalcorso.github.io/thermo\_pw/thermo\_pw\_help.html}
 contains also information on critical bugs found in the 
-\texttt{thermo\_pw} packages and should be consulted before using 
+\texttt{thermo\_pw} package and should be consulted before using 
 \texttt{thermo\_pw}.
 
 \subsection{\color{web-blue}Compiling}
@@ -249,6 +250,7 @@ In order to compile \thermo\ the main \texttt{Makefile} and the files
 of \qe\ need to be changed. In the \texttt{thermo\_pw}
 directory give the command \texttt{make join\_qe}. This command exchanges
 the files contained in \texttt{thermo\_pw} with those of the \qe\ package.
+
 Typing \texttt{make thermo\_pw} from the main \qe\ directory, or \texttt{make} 
 from the \texttt{thermo\_pw}\ directory, produces the executable
 \texttt{thermo\_pw/src/thermo\_pw.x} that can be found in the 
@@ -285,7 +287,7 @@ the input of \texttt{pw.x} and, if requested by the task, to the
 input of \texttt{ph.x} that must be called \texttt{ph\_control}.
 The input of \texttt{pw.x} can have any name and is given as input to
 the \thermo\ code. It is better not to specify an \texttt{outdir} 
-directory in the \texttt{ph.x} input. Specifing an \texttt{outdir}
+directory in the \texttt{ph.x} input. Specifying an \texttt{outdir}
 directory is not forbidden, but for some tasks \texttt{thermo\_pw.x} 
 might add a geometry number to \texttt{outdir} and the
 \texttt{outdir} written in the \texttt{ph.x} input must be consistent.
@@ -397,13 +399,13 @@ For this reason it is not recommended to use \texttt{ibrav=0} in the
 \texttt{pw.x} input. The preferred method is to give the value of 
 \texttt{ibrav} using primitive vectors provided by \qe.
 It is also possible to specify the \texttt{space\_group} number and 
-the coordinates of the inequivalent atoms. When the 
+the coordinates of the nonequivalent atoms. When the 
 \texttt{pw.x} input contains the \texttt{ibrav=0} option, 
 \texttt{thermo\_pw} writes on output
 the values of \texttt{ibrav}, \texttt{celldm}, and of the atomic coordinates
 that should be used in the input of \texttt{pw.x} to simulate the same 
 solid and stops. There are however two input variables of \texttt{thermo\_pw} 
-that can modify this behaviour:
+that can modify this behavior:
 \begin{verbatim}
 continue_zero_ibrav : when ibrav=0 in the input of pw.x and this variable 
              is set to .TRUE. thermo_pw runs with ibrav=0 (not recommended
@@ -842,7 +844,7 @@ that can read the input file of \texttt{pw.x}. You can find the code at
 \texttt{xsf} format called \texttt{prefix.xsf}, where the variable 
 \texttt{prefix}
 is given in the input of \texttt{pw.x}. This can be useful when
-the inequivalent atomic positions and the space group are given in the input
+the nonequivalent atomic positions and the space group are given in the input
 of \texttt{pw.x}. To see an \texttt{xsf} file, give the command
 \texttt{xcrysden --xsf file.xsf}.
 
@@ -1612,7 +1614,7 @@ fact_ngeo(1)...fact_ngeo(6) : With these factors the vibrational free energy
                 Defaults: integer 1,1,1,1,1,1
                 This option is not active when reduced_grid=.TRUE.
 all_geometries_together : if .TRUE. all the phonon calculation for
-                all the geometrie are used for the image parallelization.
+                all the geometries are used for the image parallelization.
                 To be used only if you have many images (and CPUs) available.
                 Default : logical .FALSE.
 \end{verbatim}
@@ -1745,10 +1747,10 @@ in the working directory, it is possible to set the input variable
 bands calculation. Note however that in this case it is not possible 
 to change the Brillouin zone path. \\
 The following variables can be used to stop \thermo\ before it concludes all
-the calcultions:
+the calculations:
 \begin{verbatim}
 max_seconds : the code stops after max_seconds have elapsed. Note
-              that the check is not done continously so the clean stop
+              that the check is not done continuously so the clean stop
               might occur a few minutes after max_seconds.
               Default: real 10E8
 
@@ -1776,7 +1778,7 @@ Finally we consider some typical runs of the most time consuming option
 \texttt{what='mur\_lc\_t'}, but what we say is valid also for the computation
 of the phonon dispersions at a single geometry.
 With a single processor or with a personal computer with a small number of 
-processors you can run the code without interuption.
+processors you can run the code without interruption.
 In general in these cases it is not useful to use the image parallelization
 before exploiting all the parallelization levels of \qe, since 
 images have an overhead due to the necessity of reinitialize the phonon
@@ -1908,10 +1910,10 @@ cell and produces a supercell with $n1 \times n2 \times n3$ cells of the origina
 unit cell. For centered cells there is the option to consider $n1$, $n2$,
 and $n3$ in the conventional or in the centered cell.
 The input unit cell can be specified also by giving the space group and
-the coordinates of the inequivalents atoms.
+the coordinates of the nonequivalents atoms.
 It can be useful to study defects or to calculate all the 
 atomic positions starting from the space-group and the 
-inequivalents positions.
+nonequivalent positions.
 It is also possible to give the input Bravais lattice by using
 \texttt{ibrav=0} and the three principal vectors. In this case,
 before generating the supercell, the code rotates the Bravais
@@ -1962,7 +1964,7 @@ ordered by the space group number that are used to test the space
 groups routines. These inputs are also examples of the use of the
 keyword \texttt{space\_group} and of the Wyckoff positions to give the
 atomic coordinates in the \texttt{pw.x} input. You can also use these
-strutures for your calculations, but note that the cut-off energies and
+structures for your calculations, but note that the cut-off energies and
 the {\bf k}-point meshes used in these inputs are not converged. \\
 The directory \texttt{tools\_inputs} give some examples of the inputs of
 the auxiliary \texttt{tools} programs.
@@ -2025,6 +2027,15 @@ their irreducible representation. Each line of the path can have a different
 point group and set of representations. See the \texttt{point\_groups.pdf} file
 for the list of representations and their color code. 
 When the symmetry analysis is not done all the bands are \texttt{red}.
+
+\item
+Energy bands with \texttt{enhance\_plot=.TRUE.}. In this case 
+the background color of the panels with lines at the zone border are 
+gray, yellow, or pink. Gray means that the point group (or double point
+group) representations are used, yellow or pink means that projective
+representations are used. A yellow background indicates that no switch 
+from the point group to the double point group or viceversa was made, 
+while a pink background means that such a switch was necessary.
                               
 \item
 Electron density of states. This is a plot composed by two figures,
@@ -2124,7 +2135,7 @@ is the same as in the \texttt{blue} curve if \texttt{ltherm\_freq=.TRUE.}
 or as in the \texttt{red} curve if \texttt{ltherm\_freq=.FALSE.}.
 When both \texttt{ltherm\_freq=.FALSE.} and \texttt{ltherm\_dos=.FALSE.}
 the volume is kept fixed at the equilibrium volume at $T=0$ K.
-The difference $C_\sigma-C_\epsilon$ of the heat capaticities computed at
+The difference $C_\sigma-C_\epsilon$ of the heat capacities computed at
 constant stress or constant strain is computed also using the anisotropic
 formula, without introducing the bulk modulus. In this case it is
 plotted in \texttt{yellow} (\texttt{orange}) when the crystallographic 
