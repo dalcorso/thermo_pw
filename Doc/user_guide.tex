@@ -219,7 +219,7 @@ under the main \qe\ directory, or in the web site
 \texttt{http://www.quantum-espresso.org}.
 
 \texttt{Thermo\_pw} can be downloaded from its main distribution page
-\texttt{https://dalcorso.github.io/thermo\_pw/}
+\texttt{https://dalcorso.github.} \texttt{io/thermo\_pw/}
 by downloading one of the \texttt{.tar.gz} files.
 The versions of \texttt{thermo\_pw} and of \qe\ must be carefully matched
 as illustrated in Table 1. 
@@ -503,8 +503,8 @@ by a band structure calculation. There is no image parallelization and no
 advantage to use several images. The output of the band structure 
 calculation is further processed in order to produce a plot of the band 
 structure.
-In insulators the zero of the energy is the highest valence band 
-of the first {\bf k} point, in metals the Fermi energy. \\
+The zero of the energy is the highest valence band 
+of the first {\bf k} point in insulators and the Fermi energy in metals. \\
 The energy bands plot can be modified by the following variables:
 
 \begin{verbatim}
@@ -922,7 +922,8 @@ $3 N_{at}$, where $N_{at}$ is the number of atoms in the unit cell). \\
 compute the complex dielectric constant tensor of insulators as a function 
 of a complex frequency for the study of optical properties within 
 time-dependent density functional perturbation theory (TD-DFPT). 
-The TD-DFPT algorithm uses the Sternheimer equation and a self-consistent loop.
+As a default the TD-DFPT algorithm uses the Sternheimer equation and 
+a self-consistent loop, but it is also possible to use a Lanczos chain.
 The option is activated in the \texttt{ph.x} input by setting 
 \texttt{epsil=.TRUE.} and \texttt{fpol=.TRUE.}, but at variance with
 the \texttt{ph.x} code, the frequencies must be specified as complex numbers.
@@ -1058,7 +1059,8 @@ constant strain heat capacity.
 The same thermodynamic quantities are calculated also by direct 
 integration over the Brillouin zone and compared in the plots.
 When \texttt{with\_eigen=.TRUE.} the atomic B-factors are
-calculated as a function of temperature by a direct integration over 
+calculated as a function of temperature by the generalized vibrational 
+density of states or by a direct integration over 
 the Brillouin zone.
 Note that presently no interpolation formula is used at low temperatures
 so \texttt{thermo\_pw} can not be used to obtain thermodynamic 
@@ -1784,7 +1786,7 @@ before exploiting all the parallelization levels of \qe, since
 images have an overhead due to the necessity of reinitialize the phonon
 calculation and recalculate the bands.
 If you cannot complete the calculation in a single run 
-you need to send several time the \thermo\ run. 
+you need to send several times the \thermo\ run. 
 In this case you can set \texttt{start\_geometry=last\_geometry},
 \texttt{max\_seconds} in the \texttt{thermo\_pw} input,
 and \texttt{recover=.TRUE.} in the \texttt{ph.x} input. You need to
@@ -1887,7 +1889,7 @@ groups.
 
 \item \texttt{plot\_sur\_states.x} reads the dump file produced
 by \thermo\ in a \texttt{what='scf\_2d\_bands'} calculation that
-contains the planar averages of the all the states, and plots
+contains the planar averages of all the states, and plots
 the states with the {\bf k} point and the band numbers requested in input.
 For an example of its use see \texttt{tools\_input/plot\_sur\_states.in}.
 
@@ -1906,8 +1908,11 @@ For an example of its use see \texttt{tools\_input/space\_groups.in}.
 
 \item \texttt{supercell.x} reads a three dimensional
 Bravais lattice index and the atomic coordinates of the atoms inside a unit
-cell and produces a supercell with $n1 \times n2 \times n3$ cells of the original
-unit cell. For centered cells there is the option to consider $n1$, $n2$,
+cell and produces a supercell with $n1 \times n2 \times n3$ cells of 
+the original
+unit cell or a supercell delimited by three arbitrary Bravais lattice
+vectors given in crystal or cartesian coordinates. For centered cells 
+there is the option to consider $n1$, $n2$,
 and $n3$ in the conventional or in the centered cell.
 The input unit cell can be specified also by giving the space group and
 the coordinates of the nonequivalents atoms.
@@ -1934,7 +1939,7 @@ For a detailed description of the input variables please look at the beginning
 of the \texttt{fortran} sources of each code.
 
 \newpage
-\section{\color{coral}Examples, inputs, pseudo\_test, space\_groups, \\
+\section{\color{coral}Examples, inputs, pseudo\_test, space\_groups,\\ 
 tools\_inputs}
 
 The directories \texttt{examples}, \texttt{inputs}, \texttt{pseudo\_tests}, 
@@ -2032,8 +2037,9 @@ When the symmetry analysis is not done all the bands are \texttt{red}.
 Energy bands with \texttt{enhance\_plot=.TRUE.}. In this case 
 the background color of the panels with lines at the zone border are 
 gray, yellow, or pink. Gray means that the point group (or double point
-group) representations are used, yellow or pink means that projective
-representations are used. A yellow background indicates that no switch 
+group) representations are used, yellow or pink means that a gauge 
+transformation was applied and projective representations might have been used. 
+A yellow background indicates that no switch 
 from the point group to the double point group or viceversa was made, 
 while a pink background means that such a switch was necessary.
                               
