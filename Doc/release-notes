@@ -1,4 +1,11 @@
+17/07/2018 Version 1.0.0 is now frozen
 New in version 1.0.0
+
+This version is identical to version 0.9.9, but it is compatible
+with QE 6.3
+
+05/07/2018 Version 0.9.9 is now frozen
+New in Version 0.9.9
 
 Added the possibility to use a Lanczos chain for solving the frequency
 dependent problems. 
@@ -6,7 +13,7 @@ dependent problems.
 Added an experimental version of a global conjugate-gradient
 solver of the linear response problem for phonons and dielectric constant.
 
-A cleanup of gener_3d_slab.f90. 
+A cleanup of gener_3d_slab.f90 and of supercell.f90. 
 
 lnoloc=.TRUE. + EELS was not correctly implemented (Contributed by O. Motornyi).
 
