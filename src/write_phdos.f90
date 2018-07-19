@@ -169,7 +169,7 @@ SUBROUTINE write_phdos(igeom)
            filename=TRIM(filedos)//'.'//TRIM(int_to_char(na))
            OPEN (UNIT=iundos,FILE=filename,STATUS='unknown',FORM='formatted')
            DO n=1, ndos 
-              WRITE (iundos, '(ES20.13, 6ES20.13)') gen_phdos_save%nu(n),  &
+              WRITE (iundos, '(ES20.11, 6ES20.11)') gen_phdos_save%nu(n),  &
                                 (gen_phdos_save%phdos(ijpol,na,n),ijpol=1,6)
            ENDDO
            CLOSE(UNIT=iundos,STATUS='keep')
