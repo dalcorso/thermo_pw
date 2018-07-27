@@ -238,6 +238,7 @@ Phonon dispersions                             scf_disp, mur_lc_disp
 Phonon dos                                     scf_disp, mur_lc_disp
 Vibrational energy, free energy, entropy,      
 isochoric heat capacity                        scf_disp, mur_lc_disp
+Atomic B factors                               scf_disp, mur_lc_disp
 Debye vibrational energy, free energy, 
 entropy and isochoric heat capacity            scf_elastic_constants, 
                                                mur_lc_elastic_constants
@@ -1011,8 +1012,8 @@ can be parallelized with a master-slave approach.
 
 \begin{figure*}[ht]
   \begin{tabular}[t]{ll}
-    \hspace{-1cm}\includegraphics[height=0.80\textwidth]{flowmaster.pdf}
-    &\hspace{-1cm}\includegraphics[height=0.80\textwidth]{flowslave.pdf}\\
+    \includegraphics[height=0.80\textwidth]{flowmaster.png}
+    &\includegraphics[height=0.80\textwidth]{flowslave.png}\\
   \end{tabular}
  \caption{Comparison between the work-flow of the master image (left)
  and of the slave images (right) in \texttt{thermo\_pw}. In the right
