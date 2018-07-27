@@ -71,7 +71,7 @@ collected, the image division of the processors is not used, and when possible
 the work is parallelized among all available processors. In some cases
 only the processors of the root image make the work while the others remain
 idle.
-Presently \tpw\ has two asyhnchronous runs each one followed
+Presently \tpw\ has two asynchronous runs each one followed
 by one or more synchronous parts. The parts that are activated in
 each run depend on the input variable \texttt{what}. After reading the input,
 and writing some summary, the code calls the routine 
@@ -126,7 +126,7 @@ within the loop over the geometries.
 When \texttt{all\_geometries\_together=.TRUE.} a single asynchronous run
 calculates all the irreducible representations of all geometries. After
 the phonon run, the phonon dispersions, phonon dos and harmonic 
-thermodynamic quatities are calculated synchronously in a loop over 
+thermodynamic quantities are calculated synchronously in a loop over 
 the geometries.
 
 Following G1 or G2 there is another synchronous part. 
@@ -478,7 +478,7 @@ saved in each file.
 {\bf k} point. The \texttt{.rap} file contains the number of the irreducible
 representation for each band. The format of these files is a generalization
 of the format used by the \texttt{plotband.f90} code of \qe. In addition
-it contains gauges informations for points at zone border in nonsymmorphic
+it contains gauges information for points at zone border in nonsymmorphic
 space groups.
 
 \item 
@@ -885,7 +885,7 @@ assuming that one sets is the rotated of the other set.
 
 \item
 \texttt{space\_groups.f90} contains routines to detect the space group,
-to set the FFT indeces compatible with a given space group, to find the
+to set the FFT indices compatible with a given space group, to find the
 space group number given the name, or the name given the number etc.
 
 \item
