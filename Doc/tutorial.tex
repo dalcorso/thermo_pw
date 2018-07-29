@@ -83,7 +83,7 @@ requires mainly five information:
 
 \item The cut-off energies.
 
-\item The {\bf k}-point mesh that the code should use to make integrations over
+\item The {\bf k}-point mesh used to make integrations over
 the Brillouin zone. The smearing parameter for metals. 
 \end{itemize}
 
@@ -105,9 +105,10 @@ After setting the correct
 \texttt{ibrav} and \texttt{celldm}, \texttt{thermo\_pw} might still tell you
 that the Bravais lattice is not compatible with the point group. This
 can happen, for instance, if you have isolated molecules, amorphous solids,
-or defects. In these cases you can still continue but symmetry will not be 
-used to reduce the number of components of the tensors that represent 
-the physical quantities. In order to use the residual symmetry, you have to
+defects, or supercells. In these cases you can still continue but symmetry 
+will not be 
+used to reduce the number of components of the physical quantities tensors. 
+In order to use the residual symmetry, you have to
 use one of the suggested \texttt{ibrav}, adjusting the \texttt{celldm} to
 the parameters of your cell. For instance if you have a cubic cell, but
 the symmetry requires a tetragonal lattice, you have to use a tetragonal
@@ -121,10 +122,10 @@ equal to the largest one.
 
 The positions of the atoms inside the unit cell are defined by an integer
 number \texttt{nat} (the number of atoms) and by \texttt{nat} 
-three-dimensional vectors as specified in the file \texttt{PW/Doc/INPUT\_PW}.
-You can use several units, specify the coordinates in Cartesian or on the
+three-dimensional vectors as explained in the file \texttt{PW/Doc/INPUT\_PW}.
+You can use several units, give the coordinates in the Cartesian or in the
 crystal basis or you can give the space group number and the
-coordinates of the inequivalent atoms. 
+coordinates of the nonequivalent atoms. 
 These options are supported by \thermo. See the \texttt{pw.x} manual
 for details. \\
 
@@ -141,19 +142,24 @@ and on the accuracy of your calculation. You can
 find some hints about the required cut-offs inside the pseudopotentials files,
 but you need to check the convergence of your results with the cut-off 
 energies. Many tests of the kinetic energy cut-offs can be found also at 
-\texttt{https://www.materialscloud.org/discover/sssp/} \\
+\texttt{https://www.materialscloud.org/discover/sssp/}. \\
 
 The {\bf k}-point mesh is given by three integer numbers and possible
 shifts (0 or 1) in the three directions. The convergence of the results
-with this mesh should be tested. \\
+with this mesh should be tested. For metals you have also to specify a
+smearing method (for instance \texttt{occupations='smearing'}, 
+\texttt{smearing='mp'}) and a value of the smearing parameter (in Ry) 
+(see the variable \texttt{degauss} in the file \texttt{PW/Doc/INPUT\_PW}). 
+Note that the convergence with respect to the {\bf k}-points depends on
+the value of \texttt{degauss} and must be tested for each \texttt{degauss}. \\
 
 Once you have an input for \texttt{pw.x}, in order to run \thermo\ you
-have to write a file called \texttt{thermo\_control} that contains a single
+have to write a file called \texttt{thermo\_control} that contains a
 namelist called \texttt{INPUT\_THERMO}. This namelist contains a keyword
-\texttt{what} that controls the type of calculation performed by 
-\thermo. Ideally you should set only \texttt{what} and make a calculation
-similar to \texttt{pw.x} calling instead the executable \texttt{thermo\_pw.x}
-and giving as input the input prepared for \texttt{pw.x}.
+\texttt{what} that controls the calculation performed by 
+\thermo. Ideally you need to set only \texttt{what} and call 
+\texttt{thermo\_pw.x} instead of \texttt{pw.x}, giving as input the 
+input prepared for \texttt{pw.x}.
 
 \section{\color{coral}How do I make a self-consistent calculation?}
 Use \texttt{what='scf'}. See \texttt{example01}. The calculation is
@@ -176,10 +182,10 @@ given in the \texttt{pw.x} input and then a band calculation along a
 path chosen by \thermo, or along a path given by the user
 after the \texttt{INPUT\_THERMO} namelist. The path can be given as
 in the \texttt{pw.x} input, but see the user's guide for additional details.
-A few other parameters control the band plot. The most useful are 
+There are a few parameters that you can give in the \texttt{INPUT\_THERMO} namelist to control the band plot. The most useful are 
 \texttt{emin\_input} and \texttt{emax\_input} that allow you to plot the 
-bands in a given energy range. The bands can be found 
-in a file called \texttt{output\_band.ps} if you do not specify the name 
+bands in a given energy range. At the end of the run, the figure of the bands is
+in a file called \texttt{output\_band.ps}, if you do not change the name 
 of the postscript file in the \thermo\ input.
 Check also the option \texttt{what='scf\_2d\_bands'} if you need
 to plot the surface band structure.
@@ -187,20 +193,21 @@ to plot the surface band structure.
 \section{\color{coral}How do I plot of the electronic density of states?}
 Use \texttt{what='scf\_dos'}. See \texttt{example18}. With this option
 \thermo\ calls twice \texttt{pw.x} making first a self-consistent calculation
-followed by a non self-consistent calculation on a regular mesh of 
-{\bf k} points.
+followed by a non self-consistent calculation on a uniform {\bf k}-point mesh.
 This mesh can be specified in the \thermo\ input (if none is given \thermo\ 
-uses the default values). The density of
-states can be found in a file called \texttt{output\_eldos.ps} if you do not
+uses the default values). At the end of the run, the figure of the density of
+states is in a file called \texttt{output\_eldos.ps} if you do not
 specify the name of the postscript file in the \thermo\ input.
 
 \section{\color{coral}How can I see the crystal structure?}
-\thermo\ is not a crystal structure viewer, but you can use a code such
-as \texttt{XCrySDen} that is able to read the \texttt{pw.x} input and
+\thermo\ is not a crystal structure viewer, but you can use the code 
+\texttt{XCrySDen} that reads the \texttt{pw.x} input to
 see the crystal structure. If you use \texttt{what='plot\_bz'}, 
 \thermo\ produces a \texttt{.xsf} file that contains the structure given in
 input and can be read directly by \texttt{XCrySDen}. This could
-be useful if you have the space group and the inequivalents atomic positions.
+be useful when you give the space group number and the nonequivalents 
+atomic positions since this input is presently not readable by 
+\texttt{XCrySDen}.
 The generated \texttt{.xsf} file contains all the symmetry equivalent 
 atomic positions. For the same purpose you could also use the output
 of \texttt{pw.x}.
@@ -219,58 +226,62 @@ spectrum corresponding to a relaxed structure using for instance
 \texttt{what='scf'}, asking for an atomic (cell) relaxation in the \texttt{pw.x}
 input and using \texttt{lxrdp=.TRUE.} variable in the \thermo\ input.
 The X-ray powder diffraction spectrum is shown in a file called 
-\texttt{output\_xrdp.ps} if the name of the postscript file is not
+\texttt{output\_xrdp.ps}, if the name of the postscript file is not
 given in the \thermo\ input. The scattering angles and intensities
-are also written in a file called \texttt{output\_xrdp.dat} if the filename
+are also written in a file called \texttt{output\_xrdp.dat}, if the filename
 is not given in the \thermo\ input.
 
 \section{\color{coral}How can I find the space group of my crystal?}
 Use \texttt{what='plot\_bz'} and look at the output. The space group is
 identified. In the case you have a structure with \texttt{ibrav=0} and
 the primitive lattice vectors use the option \texttt{find\_ibrav=.TRUE.} 
-in the \texttt{thermo\_pw} input (See the user guide in the subsection
-{\it Coordinates and structure}).
+in the \texttt{thermo\_pw} input (see the \texttt{thermo\_pw} user's guide 
+in the subsection
+{\it Coordinates and structure}). This option has presently some limitations.
+It does not work for noncollinear magnetic system, or for supercells, or
+when the Bravais lattice and the point group are incompatible.
 
 \section{\color{coral}How do I plot the phonon dispersions?}
 Use \texttt{what='scf\_disp'}. See \texttt{example04}. In this case you
 have to prepare an input for the \texttt{ph.x} code that must be
 called \texttt{ph\_control}. The required information in this input
-is the {\bf q}-point mesh used to interpolate the dynamical matrices and
-the name of the dynamical matrix files.
+is the {\bf q}-point mesh on which the dynamical matrices are computed
+and the name of the files where the dynamical matrices are written.
 See the \texttt{ph.x} guide if you need information on this point.
-The phonon dispersions are found in a file called \texttt{output\_disp.ps.g1}
+At the end of the run, the phonon dispersions are found in a file 
+called \texttt{output\_disp.ps.g1},
 if the name of the postscript file is not given in the \thermo\ input.
 The vibrational density of states is found in a file called 
-\texttt{output\_dos.ps.g1} if the name of the postscript file in not
+\texttt{output\_dos.ps.g1}, if the name of the postscript file in not
 given in the \thermo\ input.
 
 \section{\color{coral}How do I calculate the vibrational energy, free energy, entropy, and heat capacity?}
 Use \texttt{what='scf\_disp'}. See \texttt{example04}. These quantities
 are calculated after the phonon dispersion calculation for the default 
-temperature range ($1$ K - $800$ K) if this range
-is not given in the \thermo\ input. These quantities 
-as a function of temperature are found in the file \texttt{output\_therm.ps.g1}.
-These quantities are calculated at the fixed volume given as input
-to \texttt{pw.x}.
+temperature range ($1$ K - $800$ K) or for the range
+given in the \thermo\ input. The figure of these quantities is in the file 
+\texttt{output\_therm.ps.g1}.
+Note that they are calculated at the geometry given in the input
+of \texttt{pw.x}.
 
 
 \section{\color{coral}How do I calculate the elastic constants?}
 Use \texttt{what='scf\_elastic\_constants'}. See \texttt{example13}. The
 elastic constants appear in the output of \thermo\ and also in a file
-called \texttt{output\_el\_cons.dat} if the name of the file is not
-specified in input. This file can be read by \thermo\ for the options
+called \texttt{output\_el\_cons.dat}, if the name of the file is not
+given in input. This file can be read by \thermo\ for the options
 that require the knowledge of the elastic constants.
 
 \section{\color{coral}How do I calculate the Debye temperature?}
 Use \texttt{what='scf\_elastic\_constants'}. See \texttt{example13}. The
 Debye temperature appears in the output of \thermo. A file called
-\texttt{output\_therm.ps\_debye} contains a plot of the vibrational
-energy, free energy, entropy and heat capacity computed within the 
+\texttt{output\_therm.ps\_debye} contains plots of the vibrational
+energy, free energy, entropy, and heat capacity computed within the 
 Debye model.
 
 \section{\color{coral}How do I calculate the equilibrium structure?}
 Use \texttt{what='mur\_lc'}. See \texttt{example05}. Refer to the user's
-guide if you have an anisotropic solid. The crystal
+guide for anisotropic solids. The crystal
 parameters are written in the \thermo\ output file. Note that the structure is
 searched interpolating with a polynomial or with the Murnaghan
 equation the energy calculated for several geometries close to the geometry 
@@ -298,9 +309,9 @@ Use \texttt{what='mur\_lc'} and specify \texttt{pressure=value} in kbar in the
 give a geometry which is as close as possible to the equilibrium value
 found by the code at the given pressure (see above).
 
-\section{\color{coral} How do I specify the interval of temperatures that 
-I need?}
-See the user's guide in the subsection {\it Temperature and Pressure}.
+\section{\color{coral} How do I specify the temperature range} 
+See the \texttt{thermo\_pw} user's guide in the subsection 
+{\it Temperature and Pressure}.
 
 \section{\color{coral} How do I calculate the crystal parameters as a function
 of temperature?}
@@ -346,7 +357,7 @@ changed while the other crystal parameters are kept constant.
 of a metal?}
 Use \texttt{what='scf\_dos'}. See \texttt{example18}. In the metallic
 case in addition to a plot of the density of states this option produces
-also a plot of the electronic energy, free energy, entropy, heat capacity
+also a plot of the electronic energy, free energy, entropy, heat capacity,
 and chemical potential in the standard temperature range if this range is
 not given in the \thermo\ input. These quantities are found in the file
 \texttt{output\_eltherm.ps} if the name of the postscript
@@ -362,13 +373,13 @@ phonon code available in \thermo, so you have to provide specific flags
 to the phonon input. See the user's guide for details. 
 The dielectric constant is in the file \texttt{output\_epsilon.ps}.
 Note that for metals you need to specify a finite wave-vector {\bf q} and you 
-cannot plot the dielectric constant at {\bf q}={\bf 0}.  
+cannot plot the dielectric constant when {\bf q} is the $\Gamma$ point.  
 See \texttt{example17} and \texttt{example21} for this case. 
 
 \section{\color{coral} Which is the meaning of the colors in
 the electronic bands and phonon dispersions plots?}
 Different colors correspond to different irreducible representations of 
-the small point group of the {\bf k} or {\bf q} wavevector. To see the
+the point co-group of the {\bf k} or {\bf q} wavevector. To see the
 correspondence color-representation see the \texttt{point\_groups.pdf} 
 manual. The point group used for each {\bf k} or {\bf q} point is
 written in the \thermo\ output and also in the plot if you set

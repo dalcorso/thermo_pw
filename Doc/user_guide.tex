@@ -58,12 +58,11 @@ This guide covers the installation and usage of the \thermo\ package.
 It assumes that you have some familiarity with the \qe\ package. 
 If not please consult the web site: \texttt{http://www.quantum-espresso.org}.
 
-\thermo\ is a \texttt{FORTRAN} code that computes material properties.
-It can be thought as a set of drivers that,
-at low level, call the \qe\ routines and, at high level, have pre-processing
+\thermo\ computes material properties.
+At low level it calls \qe\ routines and, at high level, it has pre-processing
 tools to reduce the information provided by the user and
 post-processing tools to convert the output of \qe\ into plots of material 
-properties directly comparable with experiment.
+properties directly comparable with experiment. 
 
 \thermo\ has the following directory structure, contained in a subdirectory 
 \texttt{thermo\_pw/} that should be put in the main directory of the \qe\ tree:
@@ -165,7 +164,8 @@ there are several images. Stresses or total energies at different strained
 geometries needed for the calculation of the elastic constants are 
 calculated in parallel. 
 The phonon calculations are carried out in parallel, each image doing one 
-representation of a {\bf q} point. For frequency dependent calculation,
+irreducible representation of one {\bf q} point. For frequency dependent 
+calculation,
 each frequency, or group of frequencies, can be calculated in parallel
 by different images.
 
@@ -224,7 +224,7 @@ by downloading one of the \texttt{.tar.gz} files.
 The versions of \texttt{thermo\_pw} and of \qe\ must be carefully matched
 as illustrated in Table 1. 
 There is no \texttt{thermo\_pw} package for the versions of \qe\ not listed 
-there. Unpacking the \texttt{.tar.gz} files in the main \qe\ directory, for
+there. Unpacking the \texttt{.tar.gz} file in the main \qe\ directory, for
 instance with the command \texttt{tar -xzvf thermo\_pw.1.0.0.tar.gz}, you
 obtain a directory \texttt{thermo\_pw} with the source files. \\
 It is also possible to download the \texttt{git} version of 
@@ -233,7 +233,7 @@ the web page:
 \texttt{https://dalcorso.github.io/thermo\_pw/thermo\_pw\_help.html}.
 The \texttt{git} version of \texttt{thermo\_pw} contains the most recent
 features and bug fixes but it might work only with the \texttt{git} 
-version of \qe\ and its use is not advised. \\
+version of \qe\ and its use for production runs is not advised. \\
 Please read the web page: 
 \texttt{http://dalcorso.github.io/thermo\_pw/} 
 to have updated information about the compatibility between the \texttt{git} 
@@ -269,7 +269,8 @@ usually \thermo\ runs on the same systems where \qe\ runs.
 \subsection{\color{web-blue}Searching help and reporting bugs}
 For problems installing \texttt{thermo\_pw} or for help
 with some of its features, please subscribe to the \texttt{thermo\_pw-forum}
-mailing list. Requests of new features are also welcome. If you think to have found a bug 
+mailing list. Requests of new features are also welcome. If you think you have
+found a bug 
 in \texttt{thermo\_pw} you can report it to the mailing list or 
 write directly to me (\texttt{dalcorso.at.sissa.it}).
 
@@ -600,15 +601,15 @@ There are three options: Plot of the projected band structure (PBS);
 plot of the bands of the slab; plot of the bands of the slab above the
 projected band structure (the Fermi energies are aligned). In the first 
 case the code computes several paths
-of {\bf k}-points parallel to the surface (at different {\bf k}$_z$) and does 
+of {\bf k}-points parallel to the surface (at different k$_z$) and does 
 not plot the individual bands but selects the energy regions in which 
 there are bulk states. The second case is similar to a standard band plot. 
 The default path contains only {\bf k}-points parallel to the 
-surface (with {\bf k}$_z=0$). The third case assumes that the projected band 
+surface (with k$_z=0$). The third case assumes that the projected band 
 structure has been already calculated and the information to plot it 
 can be found on the file \texttt{flpbs}. For the rest it is 
 similar to case two. For each direction, bands belonging to different 
-irreducible representations of the small group {\bf k} can be plotted 
+irreducible representations of the point co-group of {\bf k} can be plotted 
 in the same panel or on different panels.\\
 This option is controlled by the following variables:
 \begin{verbatim}
@@ -623,7 +624,7 @@ nkz: The number of k_z values used for the PBS plot.
      surface Brillouin zone is produced.
      Default: integer 4 (forced to 1 if what is not 'scf_2d_bands').
 gap_thr: minimum size (in eV) of the gaps in the PBS
-     Default: double precision 0.1 eV
+     Default: real 0.1 eV
 sym_divide: When .TRUE. the bands belonging to different irreducible 
      representations are plotted in different panels. This option
      can be controlled by variables specified in the path (see below)
@@ -672,7 +673,7 @@ not useful with this option.
 By default the symmetry separation is not carried out. The code plots the
 bands of the slab on the same panel with a different color for each 
 representation as in the bulk band structure plot (color refer to the 
-representations of the slab small group of {\bf k}). 
+representations of the slab point co-group of {\bf k}). 
 In order to plot in different panels the different representations
 the user can specify \texttt{sym\_divide=} \texttt{.TRUE.}.
 By default this option is disabled and its use is rather tricky.
@@ -697,43 +698,43 @@ M     1  0
 \end{verbatim}
 The representations to plot are indicated by their numbers 
 (in this case $1$ or $2$).
-The number of the representation and the small point group of each 
+The number of the representation and the point co-group of each 
 {\bf k}-point can be found in the output of \texttt{thermo\_pw}.
-These representation numbers refer to the small point group of each 
+These representation numbers refer to the point co-group of each 
 {\bf k}-point in the slab when you plot the slab band structures and 
-to the small point group of each {\bf k}-point in the bulk when you plot 
+to the point co-group of each {\bf k}-point in the bulk when you plot 
 a PBS. Some particular values of $k_z$, such as $k_z=0$
-might have a small point group in the bulk different from the small
-point group of a point with a generic $k_z$ but in this
+might have a point co-group in the bulk different from the 
+point co-group of a point with a generic $k_z$ but in this
 case the representations are transformed into those of the smaller
 group using the group-subgroup relationships and
 the symmetry descent of the irreducible representations
 (only when \texttt{sym\_divide=.TRUE.}). The representations of the
-smaller small point group have to be used in the PBS input.
+smaller point co-group have to be used in the PBS input.
 
-In general, the small point group of a {\bf k}-point 
+In general, the point co-group of a {\bf k}-point 
 ${\bf k}=({\bf k}_\parallel, 
 k_z)$ with component ${\bf k}_\parallel$ parallel to the surface 
 and a generic $k_z$ in the bulk is different 
-from the small point group of a {\bf k}-point ${\bf k}=({\bf k}_\parallel, 0)$ 
+from the point co-group of a {\bf k}-point ${\bf k}=({\bf k}_\parallel, 0)$ 
 in the slab. Moreover, experimentally one cannot consider symmetries
-of the slab that exchange the two surfaces, and therefore the small
-point group a {\bf k}-point ${\bf k}=({\bf k}_\parallel, 0)$ on the surface
-is a subgroup of the small point group of ${\bf k}=({\bf k}_\parallel, 0)$
-on the slab. The small point group ${\bf k}=({\bf k}_\parallel, k_z)$ 
+of the slab that exchange the two surfaces, and therefore the 
+point co-group a {\bf k}-point ${\bf k}=({\bf k}_\parallel, 0)$ on the surface
+is a subgroup of the point co-group of ${\bf k}=({\bf k}_\parallel, 0)$
+on the slab. The point co-group ${\bf k}=({\bf k}_\parallel, k_z)$ 
 in the bulk does not contain operations that exchange $k_z$ 
 with $-k_z$
-but it might be larger than the small point group of 
+but it might be larger than the point co-group of 
 ${\bf k}=({\bf k}_\parallel, 0)$ on the surface because
 it might contain symmetries of the bulk that require fractional translations
 perpendicular to the surface that are not symmetries neither of the slab nor of
 the surface.
 
-The small point group of a given {\bf k}-point ${\bf k}=({\bf k}_\parallel, 0)$
-on the surface can be found by removing from the corresponding slab small
-point group the
+The point co-group of a given {\bf k}-point ${\bf k}=({\bf k}_\parallel, 0)$
+on the surface can be found by removing from the corresponding slab 
+point co-group the
 operations that exchange the two surfaces. It is also the group formed
-from the intersection of the small point group of 
+from the intersection of the point co-group of 
 ${\bf k}=({\bf k}_\parallel, 0)$ in the slab and of the point 
 ${\bf k}=({\bf k}_\parallel, k_z)$ in the bulk.
 It is the user responsibility to specify the same number of panels
@@ -749,7 +750,7 @@ but you cannot separate the PBS into even or odd states with respect to
 the $C_2$ symmetry. You might specify two different panels with the
 $A$ or $B$ bands in each, but the PBS in the two panels will be the same. 
 On the contrary, for a {\bf k}-point along the $\bar \Gamma-\bar M$ direction, 
-the small point group has the $C_s$ symmetry both on the slab and on
+the point co-group has the $C_s$ symmetry both for the slab and for
 the surface, so you can separate both the PBS 
 and the surface states in two different panels.
 
@@ -767,7 +768,7 @@ This option is controlled by the following variables:
 \begin{verbatim} 
 deltae        : energy interval for electron dos plot (in Ry).
                 Default: real 0.01 Ry.
-ndose         : number of frequency points in the dos plot.
+ndose         : number of energy points in the dos plot.
                 Default: determined from previous data
 nk1_d, nk2_d, nk3_d : thick mesh for dos calculation.
                 Default: integer 16, 16, 16
@@ -795,7 +796,7 @@ flpseltherm    : name of the postscript file that contains the picture of the
 \end{verbatim}
 The minimum and maximum energy, as well as the number of bands,
 are specified as with the option \texttt{what='scf\_bands'}.
-However with the present option no shift is applied to the bands
+However with the present option no energy shift is applied to the bands
 and the minimum and maximum energies refer to the unshifted eigenvalues.
 Note that after a calculation with \texttt{what='scf\_dos'} you can
 run the tool code \texttt{epsilon\_tpw.x} to evaluate the frequency
@@ -913,11 +914,7 @@ by a phonon calculation. The phonon calculation is controlled by the file
 {\bf q} points. 
 The different representations are calculated in parallel when several images 
 are available. No other input variable is necessary. The outputs of this 
-calculation are the dynamical matrices files.
-An example of the use of this option can be found in \texttt{example03}. \\
-Number of tasks for this option: number of parallelizable tasks of the 
-phonon code (smaller but of the order of the number of {\bf q} points times 
-$3 N_{at}$, where $N_{at}$ is the number of atoms in the unit cell). \\
+calculation are the dynamical matrices files. \\
 \texttt{thermo\_pw} adds to the \texttt{ph.x} code the ability to
 compute the complex dielectric constant tensor of insulators as a function 
 of a complex frequency for the study of optical properties within 
@@ -930,36 +927,35 @@ the \texttt{ph.x} code, the frequencies must be specified as complex numbers.
 The following additional variables can be put in the input of the \texttt{ph.x}
 code, to select the frequency range and the number of frequencies to compute:
 \begin{verbatim}
-freq_line : if this variable is .TRUE. the FREQUENCY keyword has the number 
-            of frequency points and the starting and final frequencies. 
-            If .FALSE. the number of frequencies and a list of frequencies 
-            are given. The frequencies are complex numbers and are given 
-            with a real and an imaginary part (in Ry), without parenthesis.
-            Default: .FALSE.
-
+freq_line : if this variable is .TRUE., after the FREQUENCY keyword
+          the code expects the number of frequency points and the 
+          starting and final frequencies. 
+          If .FALSE. the number of frequencies and a list of frequencies 
+          are given. The frequencies are complex numbers and are given 
+          with a real and an imaginary part (in Ry), without parenthesis.
+          Default: .FALSE.
 delta_freq : When freq_line is .TRUE. instead of giving the last frequency 
-            of the line one can give the distance between two frequency points
-            delta_freq as a complex number. The last point of the line is 
-            calculated using the number of frequencies nfs and the first 
-            frequency. When delta_freq is not zero the last frequency 
-            is not used and can be omitted.
-            Default: complex, (0.0, 0.0).
-start_freq  : Number of the initial frequency calculated in the job in
-              the sequence of frequencies.
-            Default: integer  1
-last_freq   : Number of the final frequency calculated in the job in the
-              sequence of frequencies.
-            Default: integer nfs (total number of frequencies)
-lfreq_ev    : If .TRUE. the units of the frequencies are eV instead of the
-              default Ry units.
-            Default: logical .FALSE.
+          of the line one can give the distance between two frequency points
+          delta_freq as a complex number. The last point of the line is 
+          calculated using the number of frequencies nfs and the first 
+          frequency. When delta_freq is not zero the last frequency 
+          is not used and can be omitted.
+          Default: complex, (0.0, 0.0).
+start_freq : Number of the initial frequency calculated in the job in
+          the sequence of frequencies.
+          Default: integer  1
+last_freq : Number of the final frequency calculated in the job in the
+          sequence of frequencies.
+          Default: integer nfs (total number of frequencies)
+lfreq_ev  : If .TRUE. the units of the frequencies are eV instead of the
+          default Ry units.
+          Default: logical .FALSE.
 linear_im_freq: This option is used only when freq_line=.TRUE. 
-            When linear_freq_im is .TRUE., the imaginary part of each 
-            frequency is calculated as eta * freq where eta is the imaginary 
-            part of the first frequency on the frequency line.
-            Default: logical .FALSE.
+          When linear_freq_im is .TRUE., the imaginary part of each 
+          frequency is calculated as eta * freq where eta is the imaginary 
+          part of the first frequency on the frequency line.
+          Default: logical .FALSE.
 llanczos: When this flag is .TRUE. at finite frequencies a Lanczos 
-
           algorithm is used to solve the linear system. Can be very fast 
           but might require much more memory than the standard algorithm.
           Presently it is incompatible with images.
@@ -973,9 +969,9 @@ lanczos_restart_steps: number of steps between saving of the Lanczos status.
           recover=.TRUE. to resume an interrupted lanczos chain or to
           increase the number of steps.
           Default: integer 0
-extrapolation : extrapolation type. Presently only 'no' is active in 
-          this case no extrapolation is applied. Otherwise the average
-          of the beta and gamma is used.
+extrapolation : extrapolation type. Presently only 'no' or 'average' are
+          available. In the first case no extrapolation is applied, in
+          the second the average of the beta and gamma is used.
           Default: character 'average'
 pseudo_hermitian : when .TRUE. a pseudo-hermitian algorithm is used to 
           make the Lanczos steps. Should be twice faster than the default
@@ -989,6 +985,7 @@ lcg:      When this flag is .TRUE. a global conjugate gradient algorithm
           is used to compute the dielectric constant and the phonon 
           frequencies. It will not require mixing, but will use more
           memory than the standard algorithm (for insulators only).
+          It is not available for the frequency dependent case.
           Default : .FALSE.
 \end{verbatim}
 When in the input of the phonon code a non zero wave-vector {\bf q}
@@ -1000,18 +997,27 @@ where the frequency dependent dielectric constant is written and plotted
 and how the images divide the work:
 \begin{verbatim}
 flepsilon : beginning of the name of the file where the frequency dependent 
-            dielectric constant is written (the code adds the extensions _re
-            and _im)
-            Default: character(len=*) 'epsilon'
+          dielectric constant is written (the code adds the extensions _re
+          and _im)
+          Default: character(len=*) 'epsilon'
 flpsepsilon : name of the postscript file where the frequency dependent 
-              dielectric constant is plotted.
-            Default: character(len=*) 'output_epsilon.ps'
+          dielectric constant is plotted.
+          Default: character(len=*) 'output_epsilon.ps'
 omega_group : number of frequencies calculated together by each image.
-            This variables is used only with images.
-            Default: integer 1.
+          This variables is used only with images.
+          Default: integer 1.
 \end{verbatim}
-Number of tasks for frequency calculations: nfs/ omega\_group, the 
-number of frequencies, divided the number of frequencies in each group.
+An example of the use of this option can be found in \texttt{example03},
+\texttt{example16}, \texttt{example17}, \texttt{example20}, and 
+\texttt{example21}. \\
+Number of tasks for this option: for a phonon calculation the
+number of parallelizable tasks of the 
+phonon code (smaller but of the order of the number of {\bf q} points times 
+$3 N_{at}$, where $N_{at}$ is the number of atoms in the unit cell), 
+for a dielectric constant calculation using Sternheimer equation
+nfs/omega\_group, number of frequencies, divided the number of 
+frequencies in each group, for a dielectric constant calculation
+using Lanczos 1 (images not allowed). \\
 
 It is also possible to separate the self-consistent and the phonon calculation,
 by running first \texttt{thermo\_pw.x} using \texttt{what='scf'} and then
@@ -1040,7 +1046,7 @@ use_ph_images : if .TRUE. each image makes a set of tasks so as to minimize
               Default: logical .FALSE. if nimage>1 .TRUE. nimage=1.
 sym_for_diago : When .TRUE. use symmetry to calculate the bands and the 
               unperturbed wavefunctions instead of diagonalizing 
-              the Hamiltonian (Work in progress).
+              the Hamiltonian.
               Default: logical .FALSE.
 \end{verbatim}
 
@@ -1122,6 +1128,7 @@ flpsdos       : postscript file of the phonon dos
 flpstherm     : postscript file of the harmonic thermodynamic quantities
                 Default: character(len=*) 'output_therm.ps'
 \end{verbatim}
+This option requires \texttt{ldisp=.TRUE.} in the phonon input. \\
 An example of the use of this option can be found in \texttt{example04}. \\
 Number of tasks for this option: number of parallelizable tasks of the 
 phonon code (smaller but of the order of number of {\bf q} points times 
@@ -1215,7 +1222,7 @@ formula evaluating the average sound
 velocity from the angular average of the sound velocities calculated 
 for each propagation direction solving the Christoffel wave equation.
 The exact Debye temperature is used within the Debye model to calculate the
-Debye's vibrational energy, free energy, entropy and constant strain heat
+Debye's vibrational energy, free energy, entropy, and constant strain heat
 capacity. These quantities are plotted in a postscript file as a function
 of temperature.
 
@@ -1383,7 +1390,7 @@ Number of tasks for this option: \\
 
 \subsection{\color{web-blue}\texttt{what='mur\_lc\_bands'}}
 With this option the code computes the band structure at the geometry 
-that minimizes the energy. See the options 
+that minimizes the energy. See  
 \texttt{what='scf\_bands'} and \texttt{what='mur\_lc'} for a list of 
 the variables that control these two options. 
 With this option the pressure control is active. You can specify a
@@ -1396,7 +1403,7 @@ Number of tasks for this option: see \texttt{what='mur\_lc'} and
 
 \subsection{\color{web-blue}\texttt{what='mur\_lc\_dos'}}
 With this option the code computes the electronic dos at the geometry 
-that minimizes the energy. See the options 
+that minimizes the energy. See  
 \texttt{what='scf\_dos'} and \texttt{what='mur\_lc'} for a list of 
 the variables that control these two options. 
 With this option the pressure control is active. You can specify a
@@ -1409,7 +1416,7 @@ Number of tasks for this option: see \texttt{what='mur\_lc'} and
 \subsection{\color{web-blue}\texttt{what='mur\_lc\_ph'}}
 This option is similar to \texttt{what='scf\_ph'} but the phonon calculation
 is made at the geometry that minimizes the energy.
-See the options \texttt{what='scf\_ph'} and \texttt{what='mur\_lc'} for a
+See \texttt{what='scf\_ph'} and \texttt{what='mur\_lc'} for a
 list of the variables that control these two options. 
 With this option the pressure control is active. You can specify a
 finite pressure and the enthalpy is minimized instead of the
@@ -1423,7 +1430,7 @@ of tasks of the phonon code (see above the option \texttt{what='scf\_ph'}).
 \subsection{\color{web-blue}\texttt{what='mur\_lc\_disp'}}
 This option is similar to \texttt{what='scf\_disp'} but the phonon calculation
 is made at the geometry that minimizes the energy.
-See the options \texttt{what='scf\_disp'} and \texttt{what='mur\_lc'} for a
+See \texttt{what='scf\_disp'} and \texttt{what='mur\_lc'} for a
 list of the variables that control these two options. 
 With this option the pressure control is active. You can specify a
 finite pressure and the enthalpy is minimized instead of the
@@ -1913,7 +1920,7 @@ the original
 unit cell or a supercell delimited by three arbitrary Bravais lattice
 vectors given in crystal or cartesian coordinates. For centered cells 
 there is the option to consider $n1$, $n2$,
-and $n3$ in the conventional or in the centered cell.
+and $n3$ for the primitive or for the centered Bravais lattices.
 The input unit cell can be specified also by giving the space group and
 the coordinates of the nonequivalents atoms.
 It can be useful to study defects or to calculate all the 
@@ -1970,7 +1977,7 @@ groups routines. These inputs are also examples of the use of the
 keyword \texttt{space\_group} and of the Wyckoff positions to give the
 atomic coordinates in the \texttt{pw.x} input. You can also use these
 structures for your calculations, but note that the cut-off energies and
-the {\bf k}-point meshes used in these inputs are not converged. \\
+the {\bf k}-point meshes are not converged. \\
 The directory \texttt{tools\_inputs} give some examples of the inputs of
 the auxiliary \texttt{tools} programs.
 
