@@ -632,7 +632,8 @@ The frequency and the phonon density of states.
 \texttt{therm\_files/fltherm.g\#(\_ph)} (default name 
 \texttt{output\_therm.dat.g\#(\_ph)}). For each geometry for which 
 a complete phonon dispersion is calculated (and whose number is given
-by \texttt{g\#}) the code produces one of these files that contain the harmonic 
+by \texttt{g\#}) the code produces one of these files that contains 
+the harmonic 
 thermodynamic quantities as a function of temperature. It contains:
 \begin{verbatim}
 #   T       energy       free energy       entropy      C_v 
@@ -642,6 +643,22 @@ isochoric heat capacity. The extension \texttt{(\_ph)} indicates
 quantities calculated from the direct integration over the Brillouin zone,
 while no extension indicates quantities obtained from the phonon density 
 of states.
+
+\item 
+\texttt{therm\_files/fltherm.g\#(\_ph).\#na.dw} (default name 
+\texttt{output\_therm.dat.g\#(\_ph).\#na.dw}). 
+If \texttt{with\_eigen=.TRUE.}, for each geometry for which 
+a complete phonon dispersion is calculated (and whose number is given
+by \texttt{g\#}) the code produces for each atom \texttt{.\#na} one of these 
+files that contains the atomic $B$ factor tensor as a function of 
+temperature. It contains:
+\begin{verbatim}
+#   T      B_{11}     B_{12}     B_{13}     B_{22}     B_{23}     B_{33}
+\end{verbatim}
+The extension \texttt{(\_ph)} indicates 
+quantities calculated from the direct integration over the Brillouin zone,
+while no extension indicates quantities obtained from the generalized phonon 
+density of states.
 
 \item 
 \texttt{anhar\_files/flanhar(\_ph)} (default name \texttt{output\_anhar.dat}).
