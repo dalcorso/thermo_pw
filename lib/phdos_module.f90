@@ -389,7 +389,7 @@ DO na=1,nat
                tfact = (1.0_DP+expt)/(1.0_DP-expt)
                b_fact(ipol,jpol,na) = b_fact(ipol,jpol,na) + tfact * g / nu
             ELSEIF (nu > thr_ph) THEN
-               b_fact(ipol,jpol,na) = b_fact(ipol,jpol,na) + (2.0_DP/arg \
+               b_fact(ipol,jpol,na) = b_fact(ipol,jpol,na) + (2.0_DP/arg &
                        + arg/6.0_DP - arg**3/360.0_DP) * g / nu
             ENDIF
          ENDDO
