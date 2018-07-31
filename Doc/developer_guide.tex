@@ -629,6 +629,17 @@ states is calculated (when \texttt{ltherm\_dos=.TRUE.}) this file contains:
 The frequency and the phonon density of states. 
 
 \item 
+\texttt{phdisp\_files/fldos.g\#.\#na} (default name 
+\texttt{output\_dos.dat.g\#.\#na}). For each geometry for which a phonon 
+density of states is calculated (when \texttt{ltherm\_dos=.TRUE.} and
+\texttt{with\_eigen=.TRUE.}) and for each atom (\#na) this file contains: 
+\begin{verbatim}
+#   Frequency       g_xx    g_xy    g_xz    g_yy    g_yz     g_zz
+\end{verbatim}
+The frequency and the six components of the generalized phonon density of 
+states for atom \#na. 
+
+\item 
 \texttt{therm\_files/fltherm.g\#(\_ph)} (default name 
 \texttt{output\_therm.dat.g\#(\_ph)}). For each geometry for which 
 a complete phonon dispersion is calculated (and whose number is given
