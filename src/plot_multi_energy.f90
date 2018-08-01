@@ -40,14 +40,14 @@ SUBROUTINE plot_multi_energy()
 
   IMPLICIT NONE
   CHARACTER(LEN=256) :: gnu_filename, filename, filename1, label, filenameps, &
-                        tablefile
+                        tablefile, fileout
   CHARACTER(LEN=6) :: int_to_char
   CHARACTER(LEN=8) :: float_to_char
   CHARACTER(LEN=12) :: color(8)
   CHARACTER(LEN=50) :: xlabel, ylabel
   REAL(DP) :: emax, emin, deltae, ene_levels_int(ncontours)
   REAL(DP) :: xmin, xmax, ymin, ymax
-  INTEGER :: nx, ny, icont, tot_n, iwork
+  INTEGER :: nx, ny, icont, ifile, tot_n, iwork
   INTEGER :: compute_nwork
   INTEGER :: ierr, system
 
@@ -172,7 +172,6 @@ SUBROUTINE plot_multi_energy()
         ENDDO
 
         CALL gnuplot_start_2dplot(ncontours, nx, ny)
-  
         DO icont=1,ncontours
            CALL gnuplot_set_contour(filename,ene_levels_int(icont), &
                                             color_levels(icont),tablefile)
@@ -195,7 +194,69 @@ SUBROUTINE plot_multi_energy()
                                        x_pos_min(2),.FALSE.,'color_blue')
         ENDIF
      CASE (8,9,91,10,11) 
-        RETURN
+        IF (ncontours==0) RETURN
+        ene_levels_int(:)=ene_levels(:)
+        IF (reduced_grid.OR.show_fit) THEN
+           nx=nvol
+           ny=nvol
+        ELSE
+           nx=ngeo(1)
+           ny=ngeo(2)
+        ENDIF
+        tot_n=compute_nwork()
+        xmin=1.d10
+        xmax=-1.d10
+        ymin=1.d10
+        ymax=-1.d10
+        DO iwork = 1, tot_n
+           IF (celldm_geo(1,iwork) > xmax) xmax=celldm_geo(1,iwork)  
+           IF (celldm_geo(1,iwork) < xmin) xmin=celldm_geo(1,iwork)  
+           IF (celldm_geo(2,iwork) > ymax) ymax=celldm_geo(2,iwork)  
+           IF (celldm_geo(2,iwork) < ymin) ymin=celldm_geo(2,iwork)  
+        END DO
+        IF (ene_levels(1)==-1000._DP) THEN
+           emin=1.d10
+           emax=-1.d10
+           DO iwork = 1, tot_n
+              IF ( energy_geo(iwork) + pressure * omega_geo(iwork) > emax ) &
+                 emax = energy_geo(iwork) + pressure * omega_geo(iwork)
+              IF ( energy_geo(iwork) + pressure * omega_geo(iwork) < emin ) &
+                 emin = energy_geo(iwork) + pressure * omega_geo(iwork)
+           ENDDO
+!
+!    emax and emin are not used as contours 
+!
+           deltae = (emax-emin) / (ncontours+1)
+           DO icont = 1, ncontours
+              ene_levels_int(icont) = emin + icont * deltae
+              color_levels(icont) = color(MOD((icont-1)/3,8)+1)
+           END DO
+        END IF
+
+        WRITE(stdout,'(/,5x,"The plot will have ",i5," levels")') ncontours
+        DO icont=1, ncontours
+           WRITE(stdout,'(5x,"Level ",i5," Energy= ",f15.8," ", a)') icont, &
+                          ene_levels_int(icont), TRIM(color_levels(icont))
+        ENDDO
+        DO ifile=1,ngeo(3)
+           filenameps=TRIM(flpsenergy)//int_to_char(ifile)
+           fileout='energy_files/'//TRIM(flenergy)//int_to_char(ifile)
+           IF (pressure /= 0.0_DP) THEN
+              fileout = TRIM(fileout)//'.'//TRIM(float_to_char(pressure_kb,1))
+              filenameps = TRIM(filenameps)//'.'//  &
+                           TRIM(float_to_char(pressure_kb,1))
+           END IF
+           CALL gnuplot_start_2dplot(ncontours, nx, ny)
+           DO icont=1,ncontours
+              CALL gnuplot_set_contour(fileout,ene_levels_int(icont), &
+                                            color_levels(icont),tablefile)
+           ENDDO
+           CALL gnuplot_close_2dplot_prep()
+           xlabel='a (a.u.)'
+           ylabel='b/a '
+           CALL gnuplot_do_2dplot(filenameps, xmin, xmax, ymin, ymax, xlabel, &
+                                                  ylabel, tablefile)
+        ENDDO
      CASE DEFAULT
         RETURN
   END SELECT
