@@ -60,7 +60,7 @@ IF ( my_image_id /= root_image ) RETURN
 gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_epsilon'
 CALL gnuplot_start(gnu_filename)
 
-filename=TRIM(flpsepsilon)
+filename=TRIM(flpsepsilon)//'.ps'
 CALL gnuplot_write_header(filename, 0.0_DP, 0.0_DP, 0.0_DP, 0.0_DP, rytoev ) 
 
 CALL gnuplot_xlabel('{/Symbol w}  (eV)',.FALSE.) 
@@ -178,7 +178,7 @@ IF ( my_image_id /= root_image ) RETURN
 gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_epsilon'
 CALL gnuplot_start(gnu_filename)
 
-filename=TRIM(flpsepsilon)
+filename=TRIM(flpsepsilon)//'.ps'
 CALL gnuplot_write_header(filename, 0.0_DP, 0.0_DP, 0.0_DP, 0.0_DP, rytoev ) 
 
 CALL gnuplot_xlabel('{/Symbol w}  (eV)',.FALSE.) 

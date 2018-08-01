@@ -16,10 +16,11 @@ USE control_thermo,   ONLY : with_eigen
 USE postscript_files, ONLY : flpsdos
 
 IMPLICIT NONE
-CHARACTER(LEN=256) :: filedos
+CHARACTER(LEN=256) :: filedos, filepsdos
 
 filedos="phdisp_files/"//TRIM(fldos)
-CALL simple_plot('_dos', filedos, flpsdos, 'frequency (cm^{-1})', &
+filepsdos=TRIM(flpsdos)//'.ps'
+CALL simple_plot('_dos', filedos, filepsdos, 'frequency (cm^{-1})', &
                 'DOS (states / cm^{-1} / cell)', 'color_red', freqmin, &
                                    freqmax, 0.0_DP, 0.0_DP)
 IF (with_eigen) CALL plot_gen_phdos()

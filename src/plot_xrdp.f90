@@ -76,7 +76,7 @@ gnu_filename=TRIM(flgnuplot)//TRIM(exten)//'_xrdp'
 IF (pressure_kb /= 0.0_DP) gnu_filename=TRIM(gnu_filename)//'.'//&
                                      TRIM(float_to_char(pressure_kb,1))
 CALL gnuplot_start(gnu_filename)
-filename=TRIM(flpsxrdp)//TRIM(exten)
+filename=TRIM(flpsxrdp)//TRIM(exten)//'.ps'
 IF (pressure_kb /= 0.0_DP) &
    filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 CALL gnuplot_write_header(TRIM(filename), 0.0_DP, 180.0_DP, 0.0_DP, &

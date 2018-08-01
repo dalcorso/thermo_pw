@@ -38,7 +38,7 @@ IF ( my_image_id /= root_image ) RETURN
 gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_keconv'
 CALL gnuplot_start(gnu_filename)
 
-filename=TRIM(flpskeconv)
+filename=TRIM(flpskeconv)//'.ps'
 CALL gnuplot_write_header(filename, ke(1), ke(ncutoffene), 0.0_DP, &
                                                            0.0_DP, 1.0_DP ) 
 CALL gnuplot_xlabel('Kinetic energy (Ry)',.FALSE.) 

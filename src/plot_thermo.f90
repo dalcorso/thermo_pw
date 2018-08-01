@@ -26,7 +26,7 @@ USE io_global,       ONLY : ionode
 
 IMPLICIT NONE
 INTEGER :: ierr, system
-CHARACTER(LEN=256) :: gnu_filename, filename, filetherm
+CHARACTER(LEN=256) :: gnu_filename, filename, filetherm, filepstherm
 
 IF ( my_image_id /= root_image ) RETURN
 
@@ -35,10 +35,11 @@ IF (.NOT.(ltherm_freq.OR.ltherm_dos)) RETURN
 gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//'_therm'
 CALL gnuplot_start(gnu_filename)
 
+filepstherm=TRIM(flpstherm)//'.ps'
 IF (tmin ==1._DP) THEN
-   CALL gnuplot_write_header(flpstherm, 0.0_DP, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
+   CALL gnuplot_write_header(filepstherm, 0.0_DP, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
 ELSE
-   CALL gnuplot_write_header(flpstherm, tmin, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
+   CALL gnuplot_write_header(filepstherm, tmin, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
 ENDIF
 filetherm="therm_files/"//TRIM(fltherm)
 filename=TRIM(filetherm)//'_ph'
@@ -121,7 +122,7 @@ gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_debye.g'//&
                                                    TRIM(int_to_char(igeom))
 CALL gnuplot_start(gnu_filename)
 
-psfilename=TRIM(flpstherm)//'_debye.g'//TRIM(int_to_char(igeom))
+psfilename=TRIM(flpstherm)//'_debye.g'//TRIM(int_to_char(igeom))//'.ps'
 IF (tmin ==1._DP) THEN
    CALL gnuplot_write_header(psfilename, 0.0_DP, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
 ELSE
@@ -184,7 +185,7 @@ IF (degauss==0.0_DP.AND..NOT.ltetra) RETURN
 gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_eltherm'
 CALL gnuplot_start(gnu_filename)
 
-psfilename=TRIM(flpseltherm)
+psfilename=TRIM(flpseltherm)//'.ps'
 IF (tmin ==1._DP) THEN
    CALL gnuplot_write_header(psfilename, 0.0_DP, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
 ELSE
@@ -254,7 +255,7 @@ IF ( my_image_id /= root_image ) RETURN
 gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_dw'
 CALL gnuplot_start(gnu_filename)
 
-psfilename=TRIM(flpstherm)//'_dw'
+psfilename=TRIM(flpstherm)//'_dw.ps'
 IF (tmin ==1._DP) THEN
    CALL gnuplot_write_header(psfilename, 0.0_DP, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
 ELSE

@@ -303,14 +303,14 @@ SUBROUTINE thermo_readin()
   nkeden=1
   deltakeden=100.0_DP
   flkeconv='output_keconv.dat'
-  flpskeconv='output_keconv.ps'
+  flpskeconv='output_keconv'
 
   nnk=5
   deltank=2 
   nsigma=1  
   deltasigma=0.005_DP
   flnkconv='output_nkconv.dat'
-  flpsnkconv='output_nkconv.ps'
+  flpsnkconv='output_nkconv'
 
   emin_input=0.0_DP
   emax_input=0.0_DP
@@ -323,7 +323,7 @@ SUBROUTINE thermo_readin()
   path_fact=1.0_DP
   filband='output_band.dat'
   flpband='output_pband.dat'
-  flpsband='output_band.ps'
+  flpsband='output_band'
   q2d=.FALSE.
   q_in_band_form=.TRUE.
   q_in_cryst_coord=.FALSE.
@@ -354,9 +354,9 @@ SUBROUTINE thermo_readin()
   sigmae=0.0_DP
   legauss=.FALSE.
   fleldos='output_eldos.dat'
-  flpseldos='output_eldos.ps'
+  flpseldos='output_eldos'
   fleltherm='output_eltherm.dat'
-  flpseltherm='output_eltherm.ps'
+  flpseltherm='output_eltherm'
 
   flasy='asy_tmp'
   lasymptote=.FALSE.
@@ -366,7 +366,7 @@ SUBROUTINE thermo_readin()
   lambda=0.0_DP
   lambda_elem=' '
   flxrdp='output_xrdp.dat'
-  flpsxrdp='output_xrdp.ps'
+  flpsxrdp='output_xrdp'
   lxrdp=.FALSE.
   lformf=.FALSE.
   smin=0.0_DP
@@ -374,10 +374,10 @@ SUBROUTINE thermo_readin()
   nspoint=200
   lcm=.FALSE.
   flformf='output_formf.dat'
-  flpsformf='output_formf.ps'
+  flpsformf='output_formf'
 
   flepsilon='epsilon'
-  flpsepsilon='output_epsilon.ps'
+  flpsepsilon='output_epsilon'
   force_band_calculation=.FALSE.
   IF (nimage>1) THEN
      use_ph_images=.FALSE.
@@ -405,9 +405,9 @@ SUBROUTINE thermo_readin()
   fldos='output_dos.dat'
   fldosfrq='save_frequencies.dat'
   fltherm='output_therm.dat'
-  flpsdisp='output_disp.ps'
-  flpsdos='output_dos.ps'
-  flpstherm='output_therm.ps'
+  flpsdisp='output_disp'
+  flpsdos='output_dos'
+  flpstherm='output_therm'
 
   frozen_ions=.FALSE.
   ngeo_strain=0
@@ -438,10 +438,10 @@ SUBROUTINE thermo_readin()
   lquartic=.TRUE.
   lsolve=2
   flevdat='output_ev.dat'
-  flpsmur='output_mur.ps'
+  flpsmur='output_mur'
   ncontours=0
   flenergy='output_energy'
-  flpsenergy='output_energy.ps'
+  flpsenergy='output_energy'
 
   do_scf_relax=.FALSE.
 
@@ -456,9 +456,9 @@ SUBROUTINE thermo_readin()
   lb0_t=.TRUE.
   flpgrun='output_pgrun.dat'
   flgrun='output_grun.dat'
-  flpsgrun='output_grun.ps'
+  flpsgrun='output_grun'
   flanhar='output_anhar.dat'
-  flpsanhar='output_anhar.ps'
+  flpsanhar='output_anhar'
   fact_ngeo=1
   omega_group=1
   all_geometries_together=.FALSE.

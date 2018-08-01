@@ -38,7 +38,7 @@ IF ( my_image_id /= root_image ) RETURN
 gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_nkconv'
 CALL gnuplot_start(gnu_filename)
 
-filename=TRIM(flpsnkconv)
+filename=TRIM(flpsnkconv)//'.ps'
 xmin = nk_test(1,1)
 xmax = nk_test(1,nnk)
 CALL gnuplot_write_header(filename, xmin, xmax, 0.0_DP, 0.0_DP, 1.0_DP ) 

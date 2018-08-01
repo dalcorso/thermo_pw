@@ -122,7 +122,7 @@ EOF
 
 $ECHO "  running the thermo_pw calculation for Aluminum..."
 $ECHO "  creating the postscript file output_dos.ps..."
-$ECHO "  creating the postscript file output_therm.ps_el_therm...\c"
+$ECHO "  creating the postscript file output_eltherm.ps...\c"
 $THERMO_PW_COMMAND < al.dos.in > al.dos.out
 check_failure $?
 $ECHO " done"

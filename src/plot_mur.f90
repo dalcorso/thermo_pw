@@ -34,7 +34,7 @@ INTEGER :: ierr, system
 IF ( my_image_id /= root_image ) RETURN
 
 gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//'_mur'
-filename=TRIM(flpsmur)
+filename=TRIM(flpsmur)//'.ps'
 IF (pressure_kb /= 0.0_DP) THEN
    gnu_filename=TRIM(gnu_filename)//'.'//TRIM(float_to_char(pressure_kb,1))
    filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))

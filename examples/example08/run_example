@@ -127,9 +127,9 @@ phonons of Silicon
 /
 EOF
 $ECHO " running the thermo mur_lc_disp calculation for Si,"
-$ECHO " dispersions can be found in output_disp.ps.g1,"
-$ECHO " phonon_dos in output_dos.ps.g1,"
-$ECHO " harmonic thermodynamic properties in output_therm.ps.g1...\c"
+$ECHO " dispersions can be found in output_disp.g1.ps,"
+$ECHO " phonon_dos in output_dos.g1.ps,"
+$ECHO " harmonic thermodynamic properties in output_therm.g1.ps...\c"
 $THERMO_PW_COMMAND < si.mur_lc_disp.in > si.mur_lc_disp.out
 check_failure $?
 $ECHO " done"

@@ -49,6 +49,7 @@ CALL gnuplot_start(gnu_filename)
 filename=TRIM(flpsanhar)
 IF (pressure_kb /= 0.0_DP) &
        filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+filename=TRIM(filename)//'.ps'
 IF (tmin /= 1.0_DP) THEN
    CALL gnuplot_write_header(filename, tmin, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
 ELSE

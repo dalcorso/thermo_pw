@@ -464,7 +464,7 @@ flkeconv   : name of the file where the data with the total energy as a
              Default: character(len=*) 'output_keconv.dat'
 flpskeconv : name of the postscript file with the plot of the total energy as
              a function of the kinetic energy cut-off.
-             Default: character(len=*) 'output_keconv.ps'
+             Default: character(len=*) 'output_keconv'
 \end{verbatim}
 An example of the use of this option can be found in \texttt{example10}. \\
 Number of tasks for this option: \texttt{nke * nkedens}.
@@ -493,7 +493,7 @@ deltasigma : the distance between different smearing values.
 flnkconv   : file where the data with the k point convergence is written
              Default: character(len=*) 'output_nkconv.dat'
 flpsnkconv : name of the postscript file with the k points convergence plot.
-             Default: character(len=*) 'output_nkconv.ps'
+             Default: character(len=*) 'output_nkconv'
 \end{verbatim}
 An example of the use of this option can be found in \texttt{example11}. \\
 Number of tasks for this option: \texttt{nnk * nsigma}.
@@ -546,7 +546,7 @@ filband    : file where the bands are written in the QE format
 flpband    : file(s) where the bands are written in gnuplot format.
              Default: character(len=*) 'output_pband.dat'
 flpsband   : postscript file with the electronic band structure
-             Default: character(len=*) 'output_band.ps'
+             Default: character(len=*) 'output_band'
 \end{verbatim}
 Number of tasks for this option: \texttt{1}.
 
@@ -787,12 +787,12 @@ fleldos        : name of the file that contains the electron dos data
                 Default: character output_eldos.dat
 flpseldos      : name of the postscript file that contains the electron 
                 dos picture
-                Default: character output_eldos.ps
+                Default: character output_eldos
 fleltherm      : name of the file that contains the electron thermodynamic data 
                 Default: character output_eltherm.dat
 flpseltherm    : name of the postscript file that contains the picture of the
                 electron thermodynamic quantities
-                Default: character output_eltherm.ps
+                Default: character 'output_eltherm'
 \end{verbatim}
 The minimum and maximum energy, as well as the number of bands,
 are specified as with the option \texttt{what='scf\_bands'}.
@@ -874,7 +874,7 @@ flxrdp      : name of the file where the scattering angles and intensities
               Default: character 'output_xrdp.dat'
 flpsxrdp    : name of the postscript file with the X-ray diffraction
               spectrum.
-              Defaults: character 'output_xrdp.ps'
+              Defaults: character 'output_xrdp'
 lxrdp       : if .TRUE. compute the xrdp also after the cell optimization
               with all the options mur_lc_... with the uniformly strained
               atomic positions and after the scf calculation if supported
@@ -904,7 +904,7 @@ flformf     : name of the file in which the atomic form factor is written.
 flpsformf   : name of the postscript file with the atomic form factor.  
               The code adds a number to each file name and creates a file
               per atom type.
-              Defaults: character 'output_formf.ps'
+              Defaults: character 'output_formf'
 \end{verbatim}
 
 \subsection{\color{web-blue}\texttt{what='scf\_ph'}}
@@ -1002,7 +1002,7 @@ flepsilon : beginning of the name of the file where the frequency dependent
           Default: character(len=*) 'epsilon'
 flpsepsilon : name of the postscript file where the frequency dependent 
           dielectric constant is plotted.
-          Default: character(len=*) 'output_epsilon.ps'
+          Default: character(len=*) 'output_epsilon'
 omega_group : number of frequencies calculated together by each image.
           This variables is used only with images.
           Default: integer 1.
@@ -1122,11 +1122,11 @@ fldos         : file where the phonon dos is written
 fltherm       : file where the harmonic thermodynamic quantities are written
                 Default: character(len=*) 'output_therm.dat.g1'
 flpsdisp      : postscript file of the phonon dispersions
-                Default: character(len=*) 'output_disp.ps'
+                Default: character(len=*) 'output_disp'
 flpsdos       : postscript file of the phonon dos
-                Default: character(len=*) 'output_dos.ps'
+                Default: character(len=*) 'output_dos'
 flpstherm     : postscript file of the harmonic thermodynamic quantities
-                Default: character(len=*) 'output_therm.ps'
+                Default: character(len=*) 'output_therm'
 \end{verbatim}
 This option requires \texttt{ldisp=.TRUE.} in the phonon input. \\
 An example of the use of this option can be found in \texttt{example04}. \\
@@ -1359,7 +1359,7 @@ flevdat    : file where the Murnaghan equation is written. The results of the
              Murnaghan fit are then written in flevdat.ev.out.
              Default: character(len=*) 'output_ev.dat'
 flpsmur    : postscript file of the Murnaghan plot
-             Default: character(len=*) 'output_mur.ps'
+             Default: character(len=*) 'output_mur'
 ncontours  : the number of contours in the energy plot. These levels can
              be determined automatically by the code or defined by the user.
              The energy levels can be defined after the INPUT_THERMO namelist 
@@ -1377,7 +1377,7 @@ flenergy   : name of the file that contains the energy in a form that
              Defaults: character(len=*) 'output_energy'
 flpsenergy : file with the contour plots of the energy as a function of the
              crystal parameters.
-             Default: character(len=*) 'output_energy.ps'
+             Default: character(len=*) 'output_energy'
 \end{verbatim}
 An example of the use of this option can be found in \texttt{example05}.\\
 Number of tasks for this option: \\
@@ -1598,11 +1598,11 @@ flgrun        : file where the Gruneisen parameters in a plotable form are
 flpsgrun      : name of the postscript file with the Gruneisen parameters plot.
                 The frequencies are written in the file with the same name 
                 plus the string _freq.
-                Default: character(len=*) 'output_grun.ps'
+                Default: character(len=*) 'output_grun'
 flanhar       : file where the anharmonic thermodynamic quantities are written.
                 Default: character(len=*) 'output_anhar.dat'
 flpsanhar     : postscript file of the anharmonic quantities.
-                Default: character(len=*) 'output_anhar.ps'
+                Default: character(len=*) 'output_anhar'
 fact_ngeo(1)...fact_ngeo(6) : With these factors the vibrational free energy 
                 is interpolated using a smaller number of geometries 
                 with respect to the total energy. The phonons are always 
@@ -2035,7 +2035,7 @@ for each value of $c/a$ on the grid. In each figure there is a countour
 plot of the energy as a function of $a$ and $b/a$. The colors of the levels
 follow the same conventions of the previous case. When the levels are chosen
 by the code the entire energy range (for all $c/a$) is divided into nine
-levels so each figure might have less that nine levels.
+levels so each figure might have less that nine curves.
 For crystal systems with more crystallographic parameters, this figure is
 not available.
 

@@ -38,7 +38,7 @@ ibrav=el_con_ibrav_geo(1)
 gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_el_cons"
 CALL gnuplot_start(gnu_filename)
 
-filenameps=TRIM(flpsanhar)//".el_cons"
+filenameps=TRIM(flpsanhar)//".el_cons.ps"
 IF (tmin ==1._DP) THEN
    CALL gnuplot_write_header(filenameps, 0.0_DP, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
 ELSE

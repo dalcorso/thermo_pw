@@ -83,7 +83,7 @@ ymax1=ymax1*1.1_DP
 gnu_filename = 'gnuplot_files/'//TRIM(flgnuplot)//'_eldos'
 CALL gnuplot_start(gnu_filename)
 
-filename=TRIM(flpseldos)
+filename=TRIM(flpseldos)//'.ps'
 
 xlabel='Energy (eV)'
 e1=e(1)

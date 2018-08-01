@@ -65,6 +65,7 @@ SUBROUTINE plot_multi_energy()
      filename=TRIM(filename)//'.'// TRIM(float_to_char(pressure_kb,1))
      filenameps=TRIM(filenameps)//'.'//TRIM(float_to_char(pressure_kb,1))
   END IF
+  filenameps=TRIM(filenameps)//'.ps'
 
   color(1)='color_red'
   color(2)='color_green'
@@ -239,7 +240,7 @@ SUBROUTINE plot_multi_energy()
                           ene_levels_int(icont), TRIM(color_levels(icont))
         ENDDO
         DO ifile=1,ngeo(3)
-           filenameps=TRIM(flpsenergy)//int_to_char(ifile)
+           filenameps=TRIM(flpsenergy)//int_to_char(ifile)//'.ps'
            fileout='energy_files/'//TRIM(flenergy)//int_to_char(ifile)
            IF (pressure /= 0.0_DP) THEN
               fileout = TRIM(fileout)//'.'//TRIM(float_to_char(pressure_kb,1))

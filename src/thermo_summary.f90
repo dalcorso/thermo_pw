@@ -35,7 +35,7 @@ SUBROUTINE thermo_summary()
   USE control_asy,          ONLY : flasy, lasymptote, asymptote_command
   USE control_elastic_constants, ONLY : frozen_ions, ngeo_strain, &
                                    elastic_algorithm
-  USE control_xrdp,         ONLY : lambda, flxrdp, flpsxrdp, lformf, &
+  USE control_xrdp,         ONLY : lambda, flxrdp, lformf, &
                                    flformf, smin, smax, nspoint, lcm
   USE xrdp_module,          ONLY : write_form_factor, compute_xrdp
   USE control_2d_bands,     ONLY : lprojpbs

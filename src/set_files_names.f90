@@ -219,6 +219,7 @@ CHARACTER(LEN=6) :: int_to_char
   ELSEIF (icode==4) THEN
      filenameps=TRIM(flpsgrun)//'_freq'
   ENDIF
+  filenameps=TRIM(filenameps)//'.ps'
 
   gnu_filename="gnuplot_files/"//TRIM(gnu_filename)
 

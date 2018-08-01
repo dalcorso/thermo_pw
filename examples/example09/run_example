@@ -129,11 +129,11 @@ ciao
 EOF
 
 $ECHO " running the thermo mur_lc_t calculation for Si,"
-$ECHO " dispersions can be found in output_disp.ps.g#,"
-$ECHO " phonon_dos in output_dos.ps.g#,"
-$ECHO " harmonic thermodynamic properties in output_therm.ps.g#,"
+$ECHO " dispersions can be found in output_disp.g#.ps,"
+$ECHO " phonon_dos in output_dos.g#.ps,"
+$ECHO " harmonic thermodynamic properties in output_therm.g#.ps,"
 $ECHO " gruneisen parameters in output_grun.ps, "
-$ECHO " phonon frequencies interpolated at T = 4 K volume in output_grun.ps_freq, "
+$ECHO " phonon frequencies interpolated at T = 4 K volume in output_grun_freq.ps, "
 $ECHO " anharmonic thermodynamic properties in output_anhar.ps...\c"
 
 $THERMO_PW_COMMAND < si.mur_lc_t.in > si.mur_lc_t.out
