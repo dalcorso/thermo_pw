@@ -48,7 +48,7 @@ SUBROUTINE thermo_readin()
                                    disp_q, disp_nqs, npx, &
                                    letter_path, nrap_plot_in, &
                                    label_disp_q, rap_plot_in, long_path, &
-                                   old_path, path_fact
+                                   old_path, path_fact, is_a_path
   USE control_gnuplot,      ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
   USE postscript_files,     ONLY : flpsband, flpsdisp, flpsmur, flpsdos, &
                                    flpstherm, flpsanhar, flpskeconv, &
@@ -152,7 +152,7 @@ SUBROUTINE thermo_readin()
                             enhance_plot, long_path,        &
                             old_path,                       &
                             path_fact,                      &
-                            q2d,                            &
+                            q2d, is_a_path,                 &
                             q_in_band_form,                 &
                             q_in_cryst_coord,               &
                             point_label_type,               &
@@ -326,6 +326,7 @@ SUBROUTINE thermo_readin()
   flpband='output_pband.dat'
   flpsband='output_band'
   q2d=.FALSE.
+  is_a_path=.TRUE.
   q_in_band_form=.TRUE.
   q_in_cryst_coord=.FALSE.
   point_label_type='SC'
@@ -505,6 +506,7 @@ SUBROUTINE thermo_readin()
   IF (nimage==1) save_max_seconds=max_seconds
   max_seconds_tpw=max_seconds
   IF (after_disp) xmldyn=has_xml(fildyn)
+  IF (q2d) is_a_path=.FALSE.
 !
 !   here read the contour levels
 !

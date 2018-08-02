@@ -13,7 +13,7 @@ SUBROUTINE manage_bands()
 USE control_thermo,   ONLY : ldos_syn_1, spin_component
 USE control_bands,    ONLY : nbnd_bands
 USE control_2d_bands, ONLY : only_bands_plot
-USE control_paths,    ONLY : q2d
+USE control_paths,    ONLY : q2d, is_a_path
 
 USE wvfct,            ONLY : nbnd
 USE lsda_mod,         ONLY : nspin
@@ -78,14 +78,14 @@ ELSE
 !  If the code arrives here it could read the bands and possibly analyze
 !  their symmetry. Plot them on output if they are on a path
 !
-   IF (.NOT.q2d) THEN
+   IF (is_a_path) THEN
       DO spin_component = 1, nspin0
          CALL set_files_for_plot(1, ' ', filedata, filerap, &
                                            fileout, gnu_filename, filenameps)
          CALL plotband_sub(1,filedata, filerap, fileout, &
                                            gnu_filename, filenameps)
       ENDDO
-   ELSE
+   ELSEIF (q2d) THEN
       spin_component=1
       CALL set_files_for_plot(1, ' ', filedata, filerap, &
                                            fileout, gnu_filename, filenameps)

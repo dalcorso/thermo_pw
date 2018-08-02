@@ -494,7 +494,8 @@ MODULE control_paths
   LOGICAL  :: old_path      ! if .TRUE. use the alternative path in the BZ
   LOGICAL :: q_in_band_form
   LOGICAL :: q_in_cryst_coord
-  LOGICAL :: q2d
+  LOGICAL :: q2d                 ! if .true. the k are in a 2d grid
+  LOGICAL :: is_a_path=.TRUE.    ! if .true. the k point are in a path
   LOGICAL :: lbar_label=.FALSE.  ! if .TRUE. put a bar on each label 
                                  ! (needed for surface band plot)
 

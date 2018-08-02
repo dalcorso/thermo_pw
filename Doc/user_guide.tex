@@ -568,14 +568,20 @@ The following variables control the path:
 q_in_band_form   : only the first and last point of each k path are given.
                  The weight of each k point is an integer, the number of 
                  points in the line that starts at this k point.
-                 Default: .TRUE.
+                 Default: logical .TRUE.
 q_in_cryst_coord : the k - points are given in crystal coordinates.
-                 Default: .FALSE.
+                 Default: logical .FALSE.
 point_label_type : the label definition (see the BZ manual)
                  Default: SC
 q2d              : the q points define a rectangle in reciprocal space.
                    See the QE guide for more details.
-                 Default: .FALSE.
+                 Default: logical .FALSE.
+is_a_path        : if .TRUE. the q points are in a path in reciprocal 
+                   space. This is usually the case except when q2d=.TRUE. 
+                   or when the input points are in an arbitrary order.
+                   Set this to .FALSE. only if you want to skip the plot
+                   of the bands.
+                 Default: logical .TRUE.
 \end{verbatim}
 Note that the path cannot be given in the input of \texttt{pw.x} that
 must contain the information to generate the mesh of {\bf k} points 
