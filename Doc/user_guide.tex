@@ -310,7 +310,8 @@ is divided and the number of images must not
 be larger than the number of tasks (see below an indication of this number
 for each option). If you have doubts on this point use one image.
 
-The outputs of the \thermo\ code are one or more \texttt{postscript} files 
+The outputs of the \thermo\ code are one or more \texttt{postscript} or
+\texttt{pdf} files 
 with plots of the material properties. \thermo\ produces also files with 
 the data of 
 the plot and scripts for the \texttt{gnuplot} program. 
@@ -343,26 +344,31 @@ the basic \thermo\ tasks and you are not supposed to set any variable except
 on the calculation and can be used to tune its accuracy.
 
 \thermo\ actually writes on file the data to plot and writes a script to plot
-these data. The output postscript files are produced by invoking the 
+these data. The output \texttt{postscript} or \texttt{pdf} files are produced 
+by invoking the 
 \texttt{gnuplot} program within the code. Usually any modern Linux 
 distribution provides a package to install this code, or has it already 
 installed. If not, you can download it from 
 \texttt{http://www.gnuplot.info/}. \\
-Three input variables of \thermo\ control 
-the use of the \texttt{gnuplot} code:
+The following input variables control the use of the \texttt{gnuplot} code:
 
 \begin{verbatim}
 lgnuplot    : if .TRUE. gnuplot is called from within the program
-              and the postscript files are immediately available
+              and the postscript or pdf files are immediately available
               Default: logical .TRUE.
 gnuplot_command  : the command used to call gnuplot.
               Default: character(len=*) 'gnuplot'
 flgnuplot   : initial part of the name of the files where gnuplot scripts 
               are written.
               Default: character(len=*) 'gnuplot.tmp'
+flext       : extension of the output files. Presently .ps and .pdf are
+              supported for postscript or pdf output. The latter is
+              available only if gnuplot supports the pdfcairo terminal.
+              Default: character(len=*) '.ps'
 \end{verbatim}
 If you are running \thermo\ on a system that has not \texttt{gnuplot}
-you can disable the production of the postscript files and use other
+you can disable the production of the \texttt{postscript} or 
+\texttt{pdf} files and use other
 graphical tools to produce the plots from the output data. 
 
 \subsection{\color{web-blue}Temperature and pressure}

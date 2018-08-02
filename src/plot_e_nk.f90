@@ -10,7 +10,7 @@ SUBROUTINE plot_e_nk()
 !  This is a driver to plot the quantities written inside flnkconv
 !
 USE kinds,            ONLY : DP
-USE control_gnuplot,  ONLY : flgnuplot, lgnuplot, gnuplot_command
+USE control_gnuplot,  ONLY : flgnuplot, lgnuplot, gnuplot_command, flext
 USE postscript_files, ONLY : flpsnkconv
 USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,  &
                              gnuplot_write_header,        &
@@ -38,10 +38,10 @@ IF ( my_image_id /= root_image ) RETURN
 gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_nkconv'
 CALL gnuplot_start(gnu_filename)
 
-filename=TRIM(flpsnkconv)//'.ps'
+filename=TRIM(flpsnkconv)//TRIM(flext)
 xmin = nk_test(1,1)
 xmax = nk_test(1,nnk)
-CALL gnuplot_write_header(filename, xmin, xmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
+CALL gnuplot_write_header(filename, xmin, xmax, 0.0_DP, 0.0_DP, 1.0_DP, flext ) 
 
 CALL gnuplot_xlabel(' nk ',.FALSE.) 
 CALL gnuplot_ylabel('Total energy error (mRy)',.FALSE.) 

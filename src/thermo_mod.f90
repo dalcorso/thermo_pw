@@ -818,6 +818,8 @@ MODULE control_gnuplot
 
   CHARACTER(LEN=256) :: flgnuplot ! the name of file with the gnuplot script
   CHARACTER(LEN=256) :: gnuplot_command ! the gnuplot command
+  CHARACTER(LEN=8) :: flext ! presently .ps or .pdf for output postscript of
+                            ! pdf files
 
   LOGICAL :: lgnuplot    ! set to false not to use gnuplot
 

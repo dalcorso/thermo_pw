@@ -12,7 +12,7 @@ SUBROUTINE plot_xrdp(exten)
 !  
 !
 USE kinds,            ONLY : DP
-USE control_gnuplot,  ONLY : flgnuplot, lgnuplot, gnuplot_command
+USE control_gnuplot,  ONLY : flgnuplot, lgnuplot, gnuplot_command, flext
 USE control_xrdp,     ONLY : flxrdp, flpsxrdp
 USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,  &
                             gnuplot_write_header,        &
@@ -76,11 +76,11 @@ gnu_filename=TRIM(flgnuplot)//TRIM(exten)//'_xrdp'
 IF (pressure_kb /= 0.0_DP) gnu_filename=TRIM(gnu_filename)//'.'//&
                                      TRIM(float_to_char(pressure_kb,1))
 CALL gnuplot_start(gnu_filename)
-filename=TRIM(flpsxrdp)//TRIM(exten)//'.ps'
+filename=TRIM(flpsxrdp)//TRIM(exten)//TRIM(flext)
 IF (pressure_kb /= 0.0_DP) &
    filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
 CALL gnuplot_write_header(TRIM(filename), 0.0_DP, 180.0_DP, 0.0_DP, &
-                                                  125.0_DP, 1.0_DP) 
+                                                  125.0_DP, 1.0_DP,flext) 
 
 CALL gnuplot_xlabel('2 {/Symbol q} (degrees)',.FALSE.) 
 CALL gnuplot_ylabel('Intensity (arbitrary units)',.FALSE.) 

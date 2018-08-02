@@ -15,7 +15,7 @@ SUBROUTINE plot_anhar_anis()
 !  
 !
 USE kinds,           ONLY : DP
-USE control_gnuplot, ONLY : flgnuplot, gnuplot_command, lgnuplot
+USE control_gnuplot, ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
 USE postscript_files, ONLY : flpsanhar
 USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
                             gnuplot_write_header,        &
@@ -59,11 +59,13 @@ CALL gnuplot_start(gnu_filename)
 filenameps=TRIM(flpsanhar)
 IF (pressure_kb /= 0.0_DP) &
    filenameps=TRIM(filenameps)//'.'//float_to_char(pressure_kb,1)
-filenameps=TRIM(filenameps)//'.ps'
+filenameps=TRIM(filenameps)//TRIM(flext)
 IF (tmin /= 1.0_DP) THEN
-   CALL gnuplot_write_header(filenameps, tmin, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
+   CALL gnuplot_write_header(filenameps, tmin, tmax, 0.0_DP, 0.0_DP, 1.0_DP, &
+                                                            flext ) 
 ELSE
-   CALL gnuplot_write_header(filenameps, 0.0_DP, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
+   CALL gnuplot_write_header(filenameps, 0.0_DP, tmax, 0.0_DP, 0.0_DP, 1.0_DP, &
+                                                            flext ) 
 ENDIF
 
 filename='anhar_files/'//TRIM(flanhar)

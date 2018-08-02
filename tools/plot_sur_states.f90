@@ -263,7 +263,7 @@ CALL gnuplot_start(gnu_filename)
 filename='output_states.ps'
 xmin=dimz * startz
 xmax=dimz * endz
-CALL gnuplot_write_header(filename, xmin, xmax, 0.0_DP, ymax, 1.0_DP )
+CALL gnuplot_write_header(filename, xmin, xmax, 0.0_DP, ymax, 1.0_DP, '.ps' )
 CALL gnuplot_write_command('set size 1.0,0.7 ',.FALSE.)
 
 ylabel='|{/Symbol y}(z)|^2 (a.u.^{-1})'
@@ -324,7 +324,7 @@ IF (nspin > 1) THEN
    filename='output_mag_states.ps'
    xmin=dimz * startz
    xmax=dimz * endz
-   CALL gnuplot_write_header(filename, xmin, xmax, ymin, ymax, 1.0_DP )
+   CALL gnuplot_write_header(filename, xmin, xmax, ymin, ymax, 1.0_DP, '.ps' )
    CALL gnuplot_write_command('set size 1.0,0.7 ',.FALSE.)
 
    ylabel='m(z) ({/Symbol m}_B / a.u.)'

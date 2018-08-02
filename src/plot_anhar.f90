@@ -13,7 +13,7 @@ SUBROUTINE plot_anhar()
 !  
 !
 USE kinds,            ONLY : DP
-USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot
+USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
 USE control_thermo,   ONLY : ltherm, ltherm_dos, ltherm_freq
 USE postscript_files, ONLY : flpsanhar
 USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,  &
@@ -49,11 +49,13 @@ CALL gnuplot_start(gnu_filename)
 filename=TRIM(flpsanhar)
 IF (pressure_kb /= 0.0_DP) &
        filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
-filename=TRIM(filename)//'.ps'
+filename=TRIM(filename)//TRIM(flext)
 IF (tmin /= 1.0_DP) THEN
-   CALL gnuplot_write_header(filename, tmin, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
+   CALL gnuplot_write_header(filename, tmin, tmax, 0.0_DP, 0.0_DP, 1.0_DP, &
+                                                                   flext ) 
 ELSE
-   CALL gnuplot_write_header(filename, 0.0_DP, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
+   CALL gnuplot_write_header(filename, 0.0_DP, tmax, 0.0_DP, 0.0_DP, 1.0_DP, &
+                                                                   flext ) 
 ENDIF
 
 filename="anhar_files/"//TRIM(flanhar)//'_ph'

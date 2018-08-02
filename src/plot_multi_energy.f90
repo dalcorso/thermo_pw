@@ -18,7 +18,7 @@ SUBROUTINE plot_multi_energy()
   USE thermo_mod,           ONLY : ngeo, celldm_geo, energy_geo, omega_geo, &
                                    reduced_grid
   USE initial_conf,         ONLY : ibrav_save
-  USE control_gnuplot,      ONLY : flgnuplot, gnuplot_command, lgnuplot
+  USE control_gnuplot,      ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
   USE data_files,           ONLY : flenergy, flevdat
   USE postscript_files,     ONLY : flpsenergy
   USE control_energy_plot,  ONLY : ncontours, ene_levels, color_levels
@@ -65,7 +65,7 @@ SUBROUTINE plot_multi_energy()
      filename=TRIM(filename)//'.'// TRIM(float_to_char(pressure_kb,1))
      filenameps=TRIM(filenameps)//'.'//TRIM(float_to_char(pressure_kb,1))
   END IF
-  filenameps=TRIM(filenameps)//'.ps'
+  filenameps=TRIM(filenameps)//TRIM(flext)
 
   color(1)='color_red'
   color(2)='color_green'
@@ -90,7 +90,7 @@ SUBROUTINE plot_multi_energy()
         xmin=xmin*0.99_DP
         xmax=xmax*1.01_DP
         CALL gnuplot_write_header(filenameps, xmin, xmax, 0.0_DP, 0.0_DP, &
-                                                                  1.0_DP)
+                                                          1.0_DP, flext)
         CALL gnuplot_xlabel('a (a.u.)',.FALSE.)
 
         IF (pressure /= 0.0_DP) THEN
@@ -186,7 +186,7 @@ SUBROUTINE plot_multi_energy()
         ENDIF
 
         CALL gnuplot_do_2dplot(filenameps, xmin, xmax, ymin, ymax, xlabel, &
-                                                  ylabel, tablefile)
+                                                  ylabel, tablefile, flext)
 
         IF (degree==2) THEN
            CALL gnuplot_line_v(hessian_v(1,1), hessian_v(2,1), x_pos_min(1),  &
@@ -240,13 +240,14 @@ SUBROUTINE plot_multi_energy()
                           ene_levels_int(icont), TRIM(color_levels(icont))
         ENDDO
         DO ifile=1,ngeo(3)
-           filenameps=TRIM(flpsenergy)//int_to_char(ifile)//'.ps'
+           filenameps=TRIM(flpsenergy)//int_to_char(ifile)
            fileout='energy_files/'//TRIM(flenergy)//int_to_char(ifile)
            IF (pressure /= 0.0_DP) THEN
               fileout = TRIM(fileout)//'.'//TRIM(float_to_char(pressure_kb,1))
               filenameps = TRIM(filenameps)//'.'//  &
                            TRIM(float_to_char(pressure_kb,1))
            END IF
+           filenameps=TRIM(filenameps)//TRIM(flext)
            CALL gnuplot_start_2dplot(ncontours, nx, ny)
            DO icont=1,ncontours
               CALL gnuplot_set_contour(fileout,ene_levels_int(icont), &
@@ -256,7 +257,7 @@ SUBROUTINE plot_multi_energy()
            xlabel='a (a.u.)'
            ylabel='b/a '
            CALL gnuplot_do_2dplot(filenameps, xmin, xmax, ymin, ymax, xlabel, &
-                                                  ylabel, tablefile)
+                                                  ylabel, tablefile, flext)
         ENDDO
      CASE DEFAULT
         RETURN

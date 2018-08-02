@@ -39,7 +39,7 @@ MODULE gnuplot
 
 CONTAINS
 
-SUBROUTINE gnuplot_write_header(filename, xmin, xmax, ymin, ymax, xscale)
+SUBROUTINE gnuplot_write_header(filename, xmin, xmax, ymin, ymax, xscale, flext)
 !
 !  This routine sets the dimensions of the plot. It recives:
 !  filename : the name of the postscript file where the gnuplot script writes
@@ -50,11 +50,18 @@ SUBROUTINE gnuplot_write_header(filename, xmin, xmax, ymin, ymax, xscale)
 !
 IMPLICIT NONE
 CHARACTER(LEN=*) :: filename
+CHARACTER(LEN=*) :: flext
 REAL(DP), INTENT(IN) :: xmin, xmax, ymin, ymax, xscale
 
 IF (ionode) THEN
    WRITE(iun_gnuplot,'("set encoding iso_8859_15")')
-   WRITE(iun_gnuplot,'("set terminal postscript enhanced solid color ""AvantGarde-Book"" 20")')
+   IF (flext=='.pdf') THEN
+      WRITE(iun_gnuplot,'("set terminal pdf enhanced solid &
+                        &color font ""AvantGarde-Book"" fontscale 0.5")')
+   ELSE
+      WRITE(iun_gnuplot,'("set terminal postscript enhanced solid &
+                                             &color ""AvantGarde-Book"" 20")')
+   ENDIF
    WRITE(iun_gnuplot,'("set output """, a, """")') TRIM(filename) 
    WRITE(iun_gnuplot,*)
    WRITE(iun_gnuplot,'("set key off")')
@@ -674,16 +681,16 @@ RETURN
 END SUBROUTINE gnuplot_close_2dplot_prep
 
 SUBROUTINE gnuplot_do_2dplot(filename, xmin, xmax, ymin, ymax, xlabel, &
-                                       ylabel, tablefile)
+                                       ylabel, tablefile, flext)
 
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: xmin, xmax, ymin, ymax
-CHARACTER(LEN=*), INTENT(IN) :: filename, xlabel, ylabel
+CHARACTER(LEN=*), INTENT(IN) :: filename, flext, xlabel, ylabel
 CHARACTER(LEN=256) :: filename1, tablefile
 CHARACTER(LEN=6) :: int_to_char
 INTEGER :: iplot
 
-CALL gnuplot_write_header(filename, xmin, xmax, ymin, ymax, 1.0_DP)
+CALL gnuplot_write_header(filename, xmin, xmax, ymin, ymax, 1.0_DP, flext)
 CALL gnuplot_xlabel(xlabel,.FALSE.)
 CALL gnuplot_ylabel(ylabel,.FALSE.)
 

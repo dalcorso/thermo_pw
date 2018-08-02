@@ -33,7 +33,7 @@ SUBROUTINE plot_epsilon_omega_opt()
 !
 USE kinds,            ONLY : DP
 USE constants,        ONLY : rytoev
-USE control_gnuplot,  ONLY : flgnuplot, lgnuplot, gnuplot_command
+USE control_gnuplot,  ONLY : flgnuplot, lgnuplot, gnuplot_command, flext
 USE postscript_files, ONLY : flpsepsilon
 USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,   &
                             gnuplot_write_header,          &
@@ -60,8 +60,9 @@ IF ( my_image_id /= root_image ) RETURN
 gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_epsilon'
 CALL gnuplot_start(gnu_filename)
 
-filename=TRIM(flpsepsilon)//'.ps'
-CALL gnuplot_write_header(filename, 0.0_DP, 0.0_DP, 0.0_DP, 0.0_DP, rytoev ) 
+filename=TRIM(flpsepsilon)//TRIM(flext)
+CALL gnuplot_write_header(filename, 0.0_DP, 0.0_DP, 0.0_DP, 0.0_DP, &
+                                                    rytoev, flext ) 
 
 CALL gnuplot_xlabel('{/Symbol w}  (eV)',.FALSE.) 
 
@@ -153,7 +154,7 @@ SUBROUTINE plot_epsilon_omega_q()
 !
 USE kinds,            ONLY : DP
 USE constants,        ONLY : rytoev
-USE control_gnuplot,  ONLY : flgnuplot, lgnuplot, gnuplot_command
+USE control_gnuplot,  ONLY : flgnuplot, lgnuplot, gnuplot_command, flext
 USE postscript_files, ONLY : flpsepsilon
 USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,   &
                             gnuplot_write_header,          &
@@ -178,8 +179,9 @@ IF ( my_image_id /= root_image ) RETURN
 gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_epsilon'
 CALL gnuplot_start(gnu_filename)
 
-filename=TRIM(flpsepsilon)//'.ps'
-CALL gnuplot_write_header(filename, 0.0_DP, 0.0_DP, 0.0_DP, 0.0_DP, rytoev ) 
+filename=TRIM(flpsepsilon)//TRIM(flext)
+CALL gnuplot_write_header(filename, 0.0_DP, 0.0_DP, 0.0_DP, 0.0_DP, &
+                                                               rytoev, flext ) 
 
 CALL gnuplot_xlabel('{/Symbol w}  (eV)',.FALSE.) 
 

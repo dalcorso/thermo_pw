@@ -13,7 +13,7 @@ SUBROUTINE plot_ef(filband, flgnuplot, filenameps)
   !  countour plot of the fermi energy. 
   !
 USE constants, ONLY : rytoev
-USE control_gnuplot, ONLY : lgnuplot, gnuplot_command
+USE control_gnuplot, ONLY : lgnuplot, gnuplot_command, flext
 USE klist,     ONLY : ltetra, lgauss
 USE ener, ONLY : ef
 uSE gnuplot,   ONLY : gnuplot_start, gnuplot_end,             &
@@ -72,9 +72,9 @@ CALL gnuplot_close_2dplot_prep()
 xlabel=' '
 ylabel=' '
 
-flnameps=TRIM(filenameps)//'_ef'
+flnameps=TRIM(filenameps)//'_ef'//TRIM(flext)
 CALL gnuplot_do_2dplot(flnameps, kxmin, kxmax, kymin, kymax, xlabel, &
-                                                  ylabel, tablefile)
+                                                  ylabel, tablefile, flext)
 CALL gnuplot_end()
 
 IF (lgnuplot.AND.ionode) &

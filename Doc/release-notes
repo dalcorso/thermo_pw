@@ -1,6 +1,7 @@
 New in version 1.1.0
 
-
+Added the possibility to use the pdf terminal of gnuplot 
+to produce output in pdf files.
 
 17/07/2018 Version 1.0.0 is now frozen
 New in version 1.0.0

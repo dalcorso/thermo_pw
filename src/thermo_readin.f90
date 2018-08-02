@@ -49,7 +49,7 @@ SUBROUTINE thermo_readin()
                                    letter_path, nrap_plot_in, &
                                    label_disp_q, rap_plot_in, long_path, &
                                    old_path, path_fact
-  USE control_gnuplot,      ONLY : flgnuplot, gnuplot_command, lgnuplot
+  USE control_gnuplot,      ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
   USE postscript_files,     ONLY : flpsband, flpsdisp, flpsmur, flpsdos, &
                                    flpstherm, flpsanhar, flpskeconv, &
                                    flpsnkconv, flpsgrun,  flpsenergy, &
@@ -120,7 +120,7 @@ SUBROUTINE thermo_readin()
 !  gnuplot
 !
                             lgnuplot, gnuplot_command,      &
-                            flgnuplot,                      &
+                            flgnuplot, flext,                     &
 !
 !  temperature and pressure
 !
@@ -288,6 +288,7 @@ SUBROUTINE thermo_readin()
   flgnuplot='gnuplot.tmp'
   lgnuplot=.TRUE.
   gnuplot_command='gnuplot'
+  flext='.ps'
 
   tmin=1.0_DP
   tmax=800.0_DP
@@ -483,6 +484,8 @@ SUBROUTINE thermo_readin()
   IF (what/='mur_lc_t'.AND.all_geometries_together) &
           CALL errore('thermo_readin','all_geometries_together requires &
                                           &mur_lc_t',1)
+
+  IF (flext/='.pdf') flext='.ps'
 
   IF (max_geometries /= 1000000 .AND.all_geometries_together) &
           CALL errore('thermo_readin','all_geometries_together not compatible &

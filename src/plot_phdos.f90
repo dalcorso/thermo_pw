@@ -14,12 +14,13 @@ USE control_dosq,     ONLY : freqmin, freqmax
 USE data_files,       ONLY : fldos
 USE control_thermo,   ONLY : with_eigen
 USE postscript_files, ONLY : flpsdos
+USE control_gnuplot,  ONLY : flext
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filedos, filepsdos
 
 filedos="phdisp_files/"//TRIM(fldos)
-filepsdos=TRIM(flpsdos)//'.ps'
+filepsdos=TRIM(flpsdos)//TRIM(flext)
 CALL simple_plot('_dos', filedos, filepsdos, 'frequency (cm^{-1})', &
                 'DOS (states / cm^{-1} / cell)', 'color_red', freqmin, &
                                    freqmax, 0.0_DP, 0.0_DP)
@@ -35,7 +36,7 @@ SUBROUTINE plot_gen_phdos()
 USE kinds,            ONLY : DP
 USE ions_base,        ONLY : nat
 USE cell_base,        ONLY : ibrav
-USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot
+USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
 USE postscript_files, ONLY : flpsdos
 USE control_dosq,     ONLY : freqmin, freqmax
 USE gnuplot,          ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
@@ -56,9 +57,10 @@ IF ( my_image_id /= root_image ) RETURN
 gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_gphdos'
 CALL gnuplot_start(gnu_filename)
 
-psfilename=TRIM(flpsdos)//'_gphdos'
+psfilename=TRIM(flpsdos)//'_gphdos'//TRIM(flext)
 
-CALL gnuplot_write_header(psfilename, freqmin, freqmax, 0.0_DP, 0.0_DP, 1.0_DP )
+CALL gnuplot_write_header(psfilename, freqmin, freqmax, 0.0_DP, 0.0_DP, &
+                                                        1.0_DP, flext )
 
 CALL gnuplot_xlabel('frequency (cm^{-1})', .FALSE.)
 

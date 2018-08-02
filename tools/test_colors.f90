@@ -122,7 +122,7 @@ SELECT CASE (icolor)
       GOTO 100
 END SELECT
 filename=TRIM(psfilename)
-CALL gnuplot_write_header(filename, xmin, xmax, ymin, ymax, 1.0_DP ) 
+CALL gnuplot_write_header(filename, xmin, xmax, ymin, ymax, 1.0_DP, '.ps' ) 
 CALL gnuplot_write_command('unset border',.FALSE.)
 CALL gnuplot_write_command('unset xtics',.FALSE.)
 CALL gnuplot_write_command('unset ytics',.FALSE.)

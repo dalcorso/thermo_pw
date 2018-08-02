@@ -13,7 +13,7 @@ SUBROUTINE simple_plot(ext, data_filename, psfilename, xlabel, ylabel, &
 !  in a postscript file called psfilename.
 !
 USE kinds,           ONLY : DP
-USE control_gnuplot, ONLY : flgnuplot, gnuplot_command, lgnuplot
+USE control_gnuplot, ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
 USE gnuplot,         ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
                             gnuplot_write_file_data, gnuplot_ylabel, &
                             gnuplot_xlabel, gnuplot_write_command
@@ -35,7 +35,7 @@ gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//TRIM(ext)
 CALL gnuplot_start(gnu_filename)
 
 filename=TRIM(psfilename)
-CALL gnuplot_write_header(filename, xmin, xmax, ymin, ymax, 1.0_DP ) 
+CALL gnuplot_write_header(filename, xmin, xmax, ymin, ymax, 1.0_DP, flext ) 
 
 CALL gnuplot_ylabel(TRIM(ylabel), .FALSE.) 
 CALL gnuplot_xlabel(TRIM(xlabel), .FALSE.) 

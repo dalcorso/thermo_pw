@@ -10,7 +10,7 @@ SUBROUTINE plot_mur()
 !  This is a driver to plot the energy and pressure as a function of volume
 !
 USE kinds,            ONLY : DP
-USE control_gnuplot,  ONLY : flgnuplot, lgnuplot, gnuplot_command
+USE control_gnuplot,  ONLY : flgnuplot, lgnuplot, gnuplot_command, flext
 USE postscript_files, ONLY : flpsmur
 USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,  &
                              gnuplot_write_header,        &
@@ -34,7 +34,7 @@ INTEGER :: ierr, system
 IF ( my_image_id /= root_image ) RETURN
 
 gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//'_mur'
-filename=TRIM(flpsmur)//'.ps'
+filename=TRIM(flpsmur)//TRIM(flext)
 IF (pressure_kb /= 0.0_DP) THEN
    gnu_filename=TRIM(gnu_filename)//'.'//TRIM(float_to_char(pressure_kb,1))
    filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
@@ -43,7 +43,7 @@ END IF
 CALL gnuplot_start(gnu_filename)
 
 CALL gnuplot_write_header(filename, vmin_input, vmax_input, 0.0_DP, 0.0_DP, &
-                          1.0_DP ) 
+                          1.0_DP, flext ) 
 
 CALL gnuplot_xlabel('Volume ((a.u.)^3)',.FALSE.) 
 

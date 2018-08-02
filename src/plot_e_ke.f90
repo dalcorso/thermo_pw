@@ -11,7 +11,7 @@ SUBROUTINE plot_e_ke()
 !  
 !
 USE kinds,            ONLY : DP
-USE control_gnuplot,  ONLY : flgnuplot, lgnuplot, gnuplot_command
+USE control_gnuplot,  ONLY : flgnuplot, lgnuplot, gnuplot_command, flext
 USE postscript_files, ONLY : flpskeconv
 USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,  &
                              gnuplot_write_header,        &
@@ -38,9 +38,9 @@ IF ( my_image_id /= root_image ) RETURN
 gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_keconv'
 CALL gnuplot_start(gnu_filename)
 
-filename=TRIM(flpskeconv)//'.ps'
+filename=TRIM(flpskeconv)//TRIM(flext)
 CALL gnuplot_write_header(filename, ke(1), ke(ncutoffene), 0.0_DP, &
-                                                           0.0_DP, 1.0_DP ) 
+                                                   0.0_DP, 1.0_DP, flext ) 
 CALL gnuplot_xlabel('Kinetic energy (Ry)',.FALSE.) 
 CALL gnuplot_ylabel('Total energy (mRy)',.FALSE.) 
 CALL gnuplot_set_eref(energy_geo(ncutoffene),.FALSE.) 

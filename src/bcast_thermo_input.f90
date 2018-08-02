@@ -24,7 +24,7 @@ SUBROUTINE bcast_thermo_input()
                               flpstherm,  flpsanhar, flpsmur, flpskeconv,     &
                               flpsnkconv, flpsgrun, flpsenergy, flpsepsilon,  &
                               flpseldos, flpseltherm
-  USE control_gnuplot, ONLY : flgnuplot, lgnuplot, gnuplot_command
+  USE control_gnuplot, ONLY : flgnuplot, lgnuplot, gnuplot_command, flext
   USE temperature,     ONLY : tmin, tmax, deltat, ntemp
   USE control_pressure, ONLY : pressure
   USE control_conv,    ONLY : nke, deltake, nkeden, deltakeden,               &
@@ -82,6 +82,7 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( lgnuplot, meta_ionode_id, world_comm )
   CALL mp_bcast( gnuplot_command, meta_ionode_id, world_comm )
   CALL mp_bcast( flgnuplot, meta_ionode_id, world_comm )
+  CALL mp_bcast( flext, meta_ionode_id, world_comm )
 !
 !   temperature and pressure
 !

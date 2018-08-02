@@ -13,7 +13,7 @@ USE gnuplot,   ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
                       gnuplot_xlabel, gnuplot_ylabel, gnuplot_write_command, &
                       gnuplot_write_file_mul_data, &
                       gnuplot_write_file_mul_data_minus
-USE control_gnuplot, ONLY : gnuplot_command, lgnuplot, flgnuplot
+USE control_gnuplot, ONLY : gnuplot_command, lgnuplot, flgnuplot, flext
 USE control_eldos,   ONLY : save_ndos
 USE control_bands,   ONLY : emin_input
 USE data_files, ONLY : fleldos
@@ -83,16 +83,18 @@ ymax1=ymax1*1.1_DP
 gnu_filename = 'gnuplot_files/'//TRIM(flgnuplot)//'_eldos'
 CALL gnuplot_start(gnu_filename)
 
-filename=TRIM(flpseldos)//'.ps'
+filename=TRIM(flpseldos)//TRIM(flext)
 
 xlabel='Energy (eV)'
 e1=e(1)
 IF (emin_input /= 0.0_DP) e1=emin_input
 IF (nspin==2) THEN
-   CALL gnuplot_write_header(filename, e1, e(save_ndos), -ymax, ymax, 1.0_DP )
+   CALL gnuplot_write_header(filename, e1, e(save_ndos), -ymax, ymax, &
+                            1.0_DP, flext)
    ylabel='dos (states / (spin  eV  cell) )'
 ELSE
-   CALL gnuplot_write_header(filename, e1, e(save_ndos), ymin, ymax, 1.0_DP )
+   CALL gnuplot_write_header(filename, e1, e(save_ndos), ymin, ymax, &
+                            1.0_DP, flext )
    ylabel='dos (states / (eV cell))'
 ENDIF
 

@@ -11,7 +11,7 @@ SUBROUTINE plot_thermo()
 !  
 !
 USE kinds,            ONLY : DP
-USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot
+USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
 USE control_thermo,   ONLY : ltherm_dos, ltherm_freq, with_eigen
 USE postscript_files, ONLY : flpstherm
 USE gnuplot,          ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
@@ -35,11 +35,13 @@ IF (.NOT.(ltherm_freq.OR.ltherm_dos)) RETURN
 gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//'_therm'
 CALL gnuplot_start(gnu_filename)
 
-filepstherm=TRIM(flpstherm)//'.ps'
+filepstherm=TRIM(flpstherm)//TRIM(flext)
 IF (tmin ==1._DP) THEN
-   CALL gnuplot_write_header(filepstherm, 0.0_DP, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
+   CALL gnuplot_write_header(filepstherm, 0.0_DP, tmax, 0.0_DP, 0.0_DP, &
+                                                        1.0_DP, flext ) 
 ELSE
-   CALL gnuplot_write_header(filepstherm, tmin, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
+   CALL gnuplot_write_header(filepstherm, tmin, tmax, 0.0_DP, 0.0_DP, &
+                                                        1.0_DP, flext ) 
 ENDIF
 filetherm="therm_files/"//TRIM(fltherm)
 filename=TRIM(filetherm)//'_ph'
@@ -98,7 +100,7 @@ SUBROUTINE plot_thermo_debye(igeom)
 !  This is a driver to plot the quantities written inside fltherm_debye
 !
 USE kinds,            ONLY : DP
-USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot
+USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
 USE postscript_files, ONLY : flpstherm
 USE gnuplot,          ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
                              gnuplot_ylabel, &
@@ -122,11 +124,13 @@ gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_debye.g'//&
                                                    TRIM(int_to_char(igeom))
 CALL gnuplot_start(gnu_filename)
 
-psfilename=TRIM(flpstherm)//'_debye.g'//TRIM(int_to_char(igeom))//'.ps'
+psfilename=TRIM(flpstherm)//'_debye.g'//TRIM(int_to_char(igeom))//TRIM(flext)
 IF (tmin ==1._DP) THEN
-   CALL gnuplot_write_header(psfilename, 0.0_DP, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
+   CALL gnuplot_write_header(psfilename, 0.0_DP, tmax, 0.0_DP, 0.0_DP, &
+                                                            1.0_DP, flext) 
 ELSE
-   CALL gnuplot_write_header(psfilename, tmin, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
+   CALL gnuplot_write_header(psfilename, tmin, tmax, 0.0_DP, 0.0_DP, &
+                                                             1.0_DP, flext ) 
 ENDIF
 filename='therm_files/'//TRIM(fltherm)//'_debye.g'//TRIM(int_to_char(igeom))
 CALL gnuplot_xlabel('T (K)', .FALSE.) 
@@ -162,7 +166,7 @@ SUBROUTINE plot_el_thermo()
 !  This is a driver to plot the quantities written inside fltherm_el_thermo
 !
 USE kinds,            ONLY : DP
-USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot
+USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
 USE postscript_files, ONLY : flpseltherm
 USE gnuplot,          ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
                              gnuplot_ylabel, &
@@ -185,11 +189,13 @@ IF (degauss==0.0_DP.AND..NOT.ltetra) RETURN
 gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_eltherm'
 CALL gnuplot_start(gnu_filename)
 
-psfilename=TRIM(flpseltherm)//'.ps'
+psfilename=TRIM(flpseltherm)//TRIM(flext)
 IF (tmin ==1._DP) THEN
-   CALL gnuplot_write_header(psfilename, 0.0_DP, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
+   CALL gnuplot_write_header(psfilename, 0.0_DP, tmax, 0.0_DP, 0.0_DP, &
+                                                       1.0_DP, flext ) 
 ELSE
-   CALL gnuplot_write_header(psfilename, tmin, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
+   CALL gnuplot_write_header(psfilename, tmin, tmax, 0.0_DP, 0.0_DP, &
+                                                       1.0_DP, flext ) 
 ENDIF
 filename='therm_files/'//TRIM(fleltherm)
 
@@ -233,7 +239,7 @@ USE kinds,            ONLY : DP
 USE ions_base,        ONLY : nat
 USE cell_base,        ONLY : ibrav
 USE control_thermo,   ONLY : ltherm_dos, ltherm_freq
-USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot
+USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
 USE postscript_files, ONLY : flpstherm
 USE gnuplot,          ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
                              gnuplot_ylabel, &
@@ -255,11 +261,13 @@ IF ( my_image_id /= root_image ) RETURN
 gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_dw'
 CALL gnuplot_start(gnu_filename)
 
-psfilename=TRIM(flpstherm)//'_dw.ps'
+psfilename=TRIM(flpstherm)//'_dw'//TRIM(flext)
 IF (tmin ==1._DP) THEN
-   CALL gnuplot_write_header(psfilename, 0.0_DP, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
+   CALL gnuplot_write_header(psfilename, 0.0_DP, tmax, 0.0_DP, 0.0_DP, &
+                                                       1.0_DP, flext ) 
 ELSE
-   CALL gnuplot_write_header(psfilename, tmin, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
+   CALL gnuplot_write_header(psfilename, tmin, tmax, 0.0_DP, 0.0_DP, &
+                                                       1.0_DP, flext ) 
 ENDIF
 CALL gnuplot_set_greens()
 CALL gnuplot_xlabel('T (K)', .FALSE.) 

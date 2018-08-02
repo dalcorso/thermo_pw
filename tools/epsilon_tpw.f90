@@ -670,7 +670,8 @@ ELSE
    filename=TRIM(fileps)
 ENDIF
 
-CALL gnuplot_write_header(filename, wgrid(1), wgrid(nw), ymin, ymax, rytoev )
+CALL gnuplot_write_header(filename, wgrid(1), wgrid(nw), ymin, ymax, rytoev, &
+                                                          '.ps' )
 
 xlabel='{/Symbol w} (eV)'
 ylabel='joint-dos (states/ spin / (Ry N_c N_v ))'
@@ -720,7 +721,8 @@ CALL gnuplot_start(gnu_filename)
 
 filename=TRIM(fileps)
 
-CALL gnuplot_write_header(filename,wgrid(1),wgrid(nw),0.0_DP,0.0_DP,rytoev)
+CALL gnuplot_write_header(filename,wgrid(1),wgrid(nw),0.0_DP,0.0_DP,rytoev,&
+                                                                    '.ps')
 
 xlabel='{/Symbol w} (eV)'
 ylabel='{/Symbol e}_1 ({/Symbol w})'

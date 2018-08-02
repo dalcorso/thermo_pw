@@ -56,6 +56,7 @@ USE gnuplot,         ONLY : gnuplot_start, gnuplot_write_header,           &
                             gnuplot_set_eref, gnuplot_print_objects,       &
                             gnuplot_unset_border, gnuplot_unset_xticks,    &
                             gnuplot_rectangle_yl  
+USE control_gnuplot, ONLY : flext
 
 USE io_global,     ONLY : ionode
 
@@ -82,7 +83,8 @@ CHARACTER(LEN=256) :: command
 !
 nks_=nks/nkz
 CALL gnuplot_start(gnu_filename)
-CALL gnuplot_write_header(filenameps, kx(1), kx(nks_), ymin, ymax, xscale ) 
+CALL gnuplot_write_header(filenameps, kx(1), kx(nks_), ymin, ymax, xscale, &
+                                                                   flext ) 
 CALL gnuplot_write_command('band_lw=2',.FALSE.)
 !
 !  shift above the maximum or the baseline of the point groups names

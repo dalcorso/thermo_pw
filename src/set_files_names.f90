@@ -129,7 +129,7 @@ USE lsda_mod,         ONLY : nspin
 
 USE data_files,       ONLY : flpgrun, flpband, filband, flfrq, flgrun
 USE postscript_files, ONLY : flpsband, flpsdisp, flpsgrun
-USE control_gnuplot,  ONLY : flgnuplot
+USE control_gnuplot,  ONLY : flgnuplot, flext
 
 USE io_global,        ONLY : stdout
 
@@ -219,7 +219,7 @@ CHARACTER(LEN=6) :: int_to_char
   ELSEIF (icode==4) THEN
      filenameps=TRIM(flpsgrun)//'_freq'
   ENDIF
-  filenameps=TRIM(filenameps)//'.ps'
+  filenameps=TRIM(filenameps)//TRIM(flext)
 
   gnu_filename="gnuplot_files/"//TRIM(gnu_filename)
 

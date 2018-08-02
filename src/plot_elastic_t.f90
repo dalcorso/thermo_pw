@@ -11,7 +11,7 @@ SUBROUTINE plot_elastic_t()
 !  temperature
 !
 USE kinds,            ONLY : DP
-USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot
+USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
 USE gnuplot,          ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
                              gnuplot_ylabel, &
                              gnuplot_xlabel, &
@@ -38,11 +38,13 @@ ibrav=el_con_ibrav_geo(1)
 gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_el_cons"
 CALL gnuplot_start(gnu_filename)
 
-filenameps=TRIM(flpsanhar)//".el_cons.ps"
+filenameps=TRIM(flpsanhar)//".el_cons"//TRIM(flext)
 IF (tmin ==1._DP) THEN
-   CALL gnuplot_write_header(filenameps, 0.0_DP, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
+   CALL gnuplot_write_header(filenameps, 0.0_DP, tmax, 0.0_DP, 0.0_DP, &
+                                                       1.0_DP, flext ) 
 ELSE
-   CALL gnuplot_write_header(filenameps, tmin, tmax, 0.0_DP, 0.0_DP, 1.0_DP ) 
+   CALL gnuplot_write_header(filenameps, tmin, tmax, 0.0_DP, 0.0_DP, &
+                                                       1.0_DP, flext ) 
 ENDIF
 filelastic="anhar_files/"//TRIM(flanhar)//".el_cons"
 filename=TRIM(filelastic)//"_ph"
