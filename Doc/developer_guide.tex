@@ -1137,5 +1137,23 @@ indicate the points of communication between the master and the slave images.
 \label{figflow}
 \end{figure*}
 
+\newpage
+\section{\color{coral}The directory qe}
+
+The directory \texttt{qe} contains several routines of \qe\ that need to
+be modified or improved to be used in \texttt{thermo\_pw}. This
+directory is used to add new functionalities to \qe. Note that this directory
+does not link the \texttt{thermo\_pw} variables and cannot use them, while
+\texttt{thermo\_pw} links the library produced in this directory and can
+call these routines instead of those of \qe. The routines in this directory
+can call all the routines or use the variables of all the libraries
+of \qe: \texttt{pwlib},
+\texttt{phlib}, \texttt{pplib} and all lower level libraries.
+As a rule the routines here should have the same names of those in \qe\ with
+the extension \texttt{\_tpw}. This directory contains also many routines
+of \qe\ that have no modification except the call to the \texttt{\_tpw}
+routines. The additional global variables needed by these routines are
+contained in the file \texttt{control\_qe.f90} and should be added there.
+
 \end{document}
 
