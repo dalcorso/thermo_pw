@@ -434,6 +434,8 @@ electrons.o : ../../PW/src/pwcom.o
 electrons.o : ../../PW/src/scf_mod.o
 electrons.o : ../../PW/src/xdm_dispersion.o
 electrons.o : ../../UtilXlib/mp.o
+electrons.o : ../../dft-d3/api.o
+electrons.o : ../../dft-d3/dftd3_qe.o
 electrons.o : ../../thermo_pw/lib/mp_asyn.o
 ev_xml.o : ../../Modules/constants.o
 ev_xml.o : ../../Modules/kind.o

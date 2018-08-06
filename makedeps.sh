@@ -85,7 +85,7 @@ for dir in $dirs; do
         thermo_pw/lib )
              DEPENDS="$DEPEND2 $LEVEL2/PW/src $LEVEL2/PHonon/PH $LEVEL2/LR_Modules" ;;
         thermo_pw/qe )
-             DEPENDS="$DEPEND2 $LEVEL2/PW/src $LEVEL2/PHonon/PH \
+             DEPENDS="$DEPEND2 $LEVEL2/PW/src $LEVEL2/dft-d3 $LEVEL2/PHonon/PH \
                       $LEVEL2/LR_Modules $LEVEL2/thermo_pw/lib " ;;
         thermo_pw/src )
              DEPENDS="$DEPEND2 $LEVEL2/PW/src $LEVEL2/PHonon/PH 

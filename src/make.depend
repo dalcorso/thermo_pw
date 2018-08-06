@@ -442,7 +442,12 @@ plot_mur.o : ../../Modules/kind.o
 plot_mur.o : ../../Modules/mp_images.o
 plot_mur.o : ../../thermo_pw/lib/gnuplot.o
 plot_mur.o : thermo_mod.o
+plot_phdos.o : ../../Modules/cell_base.o
+plot_phdos.o : ../../Modules/io_global.o
+plot_phdos.o : ../../Modules/ions_base.o
 plot_phdos.o : ../../Modules/kind.o
+plot_phdos.o : ../../Modules/mp_images.o
+plot_phdos.o : ../../thermo_pw/lib/gnuplot.o
 plot_phdos.o : thermo_mod.o
 plot_thermo.o : ../../Modules/cell_base.o
 plot_thermo.o : ../../Modules/io_global.o
