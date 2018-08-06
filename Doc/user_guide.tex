@@ -1384,6 +1384,13 @@ ncontours  : the number of contours in the energy plot. These levels can
              script.
              energy_level is in Ry units.
              Default: integer 9
+do_scf_relax : if .TRUE. the code makes a self-consistent relax calculation at
+             the equilibrium geometry to find the optimized atomic 
+             coordinates. This step is needed only for solids that have 
+             internal degrees of freedom in the unstrained configuration. 
+             If .FALSE. the coordinates of the input geometry are strained 
+             uniformly to the equilibrium geometry.
+             Default: logical .FALSE. 
 flenergy   : name of the file that contains the energy in a form that
              can be used by gnuplot to make contour plots.
              Defaults: character(len=*) 'output_energy'
@@ -1464,17 +1471,6 @@ minimum is distant from the starting configuration its associated error
 can be large, larger for the quadratic than for the Murnaghan interpolation. 
 An example of the use of this 
 option can be found in \texttt{example13}. \\
-One additional input variable controls this option.
-\begin{verbatim}
-do_scf_relax : if .TRUE. the code makes a self-consistent relax calculation at
-               the equilibrium geometry to find the optimized atomic 
-               coordinates, before computing the elastic constants.
-               This step is needed only for solids that have internal
-               degrees of freedom in the unstrained configuration. 
-               If .FALSE. the coordinates of the input geometry are strained 
-               uniformly to the equilibrium geometry.
-               Default: logical .FALSE. 
-\end{verbatim}
 Number of tasks for this option: Maximum between the number of tasks
 needed by the \texttt{what='mur\_lc'} option and the number of tasks
 needed for the \texttt{what='scf\_elastic\_constants'} option.

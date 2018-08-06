@@ -185,6 +185,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
 !
         CASE ('mur_lc')
            lev_syn_1=.TRUE.
+           lpwscf_syn_1=do_scf_relax
            do_punch=.FALSE.
            CALL initialize_mur(nwork)
            IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
