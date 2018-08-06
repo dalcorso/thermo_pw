@@ -5,6 +5,7 @@ include ../../make.inc
 # location of needed modules
 MODFLAGS= $(BASEMOD_FLAGS)  \
           $(MOD_FLAG)../../PW/src \
+          $(MOD_FLAG)../../dft-d3 \
           $(MOD_FLAG)../../LR_Modules \
           $(MOD_FLAG)../../PHonon/PH \
           $(MOD_FLAG)../lib  \

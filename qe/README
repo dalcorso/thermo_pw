@@ -1,179 +1,252 @@
-This directory contains few routines of Quantum ESPRESSO that need to
-be modified to be used in thermo_pw.
+This directory contains routines of Quantum ESPRESSO that need to be modified 
+to be used in thermo_pw and new routines that add new capabilities to
+QE. The name of the files with the QE routines remain unchanged but the 
+actual routine inside the file has the _tpw extension.
 
 Presently they are:
 
 electrons_tpw: contains a call to asyn_master to have the master check for
-                 slaves that need further work at each electron iteration.
+               slaves that need further work at each electron iteration.
 
 find_band_sym_tpw : call rotate_all_psi_tpw.
 
-rotate_all_psi_tpw : an experimental version of rotate_all_psi that should
-                     require less memory and scale better with many
-                     processors. Moreover it works both for spinor and
-                     for scalar wavefunctions.
+rotate_all_psi_tpw : an improved version of rotate_all_psi that 
+               requires less memory and scale better with the CPUs.
+               It works both for spinor and scalar wavefunctions.
+
+setup_tpw : limits the minimum value of ethr to 10^-13 in a band canculation.
+            Sometimes the bands do not converge because this value becomes 
+            too small.
 
 solve_linter_tpw: contains a call to asyn_master to have the master check for
-                 slaves that need further work at each phonon iteration.
+            slaves that need further work at each phonon iteration.
 
 phqscf_tpw : call solve_linter_tpw instead of solve_linter. Uses the new
-             logic of the effective charges.
+            logic of the effective charges. Call do_cg_ph if lcg is .TRUE..
 
 prepare_q_tpw: use the variable tcollect_all to avoid the calculation of
-         the bands in the final run that collects all the dynamical matrices.
+            the bands in the final run that collects all the dynamical 
+            matrices.
 
-run_nscf_tpw : call set_small_group_q also in the lgamma_iq case. This change
-               can probably be done also in the phonon, but it is tested here
-               before changing qe. Set lscf to .false. because thermo_pw
-               reads the input of pw that sets lscf or can do a scf calculation
-               that sets this variable.
+run_nscf_tpw : call set_small_group_q also in the lgamma_iq case.
+            Set lscf to .false. because thermo_pw reads the input of pw 
+            that sets lscf or can do a scf calculation that sets this variable.
+
 non_scf_tpw : call c_bands_nscf_tpw
 
 c_bands_nscf_tpw : call asyn_master so that during the band calculation the
-               master can assign tasks to the slaves.
+            master can assign tasks to the slaves.
+            Some wavefunctions can be computed by applying a symmetry
+            operator when sym_for_diago is .TRUE.
 
 do_phonon_tpw : call phqscf_tpw instead of phqscf and prepare_q_tpw instead
             of prepare_q. Now moved to the ../src directory.
 
-irrek : Check if a k point can be obtained by another using symmetry.
-divide_et_impera : adds also the information of the symmetry and original k.
-set_kplusq : adds also the information on the symmetry and original k. Also
-             for k+q. With pools it tries to keep on the same pools the points
-             that can be computed by rotation. Do not yet exchange 
-             wavefunctions information among pools.
+irrek_tpw : Check if a k point can be obtained by another using symmetry.
+            This routine sets the three arrays diago_bands, isym_band, 
+            ik_origin.
 
-upf_tpw : Temporarily here to remove a bug introduced in QE 6.2.1 that broke
-          the image parallelization.
+divide_et_impera_tpw : adds the information of the symmetry and original k.
 
-read_pseudo_tpw: Temporarily here to call upf_tpw.
-
+set_kplusq_tpw : adds also the information on the symmetry and original k. Also
+            for k+q. 
 
 phescf_tpw : call the more general routine solve_e_fpolc in the case of finite
-             frequency instead of solve_e_fpol.
+            frequency instead of solve_e_fpol.
+            Call the lanczos routines when llanczos=.TRUE..
+            In the static case calls the routine do_cg_e when lcg=.TRUE..
+            Uses the new logics for computing the effective charges.  
 
 ccg_psi_tpw : uses the new conventions for the noncollinear case.
 
 phq_summary_tpw : summarize the frequencies in complex form
 
-initialize_ph_tpw.f90 : calls the new routine phq_summary_tpw, phq_init_tpw
-                 and allocate_phq_tpw
+initialize_ph_tpw : calls the new routine phq_summary_tpw, phq_init_tpw
+            and allocate_phq_tpw
 
-adddvepsi_us_tpw.f90 : added the number of occupated bands as an input.
+adddvepsi_us_tpw : added the number of occupated bands as an input.
 
+ev_xml_tpw : is identical to the QE routine, but it is copied here 
+            because files in the PW/tools directory are not linked to thermo_pw.
 
-ev_xml : is identical to the QE routine, but it is copied here because files
-         in the PW/tools directory are not linked to thermo_pw.
+read_dyn_from_file_tpw : in the routine of PH there is an implicit dependence
+            on first. Since thermo_pw calls this routine for several
+            geometries, the first file of each geometry should be considered as
+            first. Removed the dependence on first.
 
-read_dyn_from_file : in the routine of PH there is an implicit dependence
-         on first. The routine makes two different things if it is called
-         for the first time. Since thermo_pw calls this routine for several
-         geometry, the first file of each geometry should be considered as
-         first. Removed the dependence on first.
+drho_tpw : must call compute_drhous_tpw and compute_drhous_nc_tpw
+            instead of compute_drho_us and compute_drhous_nc.
 
-usnldiagq.f90 generalizes usnldiag.f90. It computes the diagonal elements 
-              of the Hamiltonian at k+q (except the kinetic energy).
-
-drho_tpw.f90 must call compute_drhous_tpw and compute_drhous_nc_tpw
-             instead of compute_drho_us and compute_drhous_nc.
-
-mix_pot_tpw.f90 it is derived from that of QE, but does not reset the
+mix_pot_tpw : it is derived from that of QE, but does not reset the
             history. Seems better for optical properties. 
 
-phq_init_tpw.f90 call drho_tpw instead of drho and call add_zstar_us_tpw
+phq_init_tpw : call drho_tpw instead of drho and call add_zstar_us_tpw
             which computes the part of the effective charges independent
             on the response.
 
-phq_readin_tpw.f90 reads all the additional variables of the phonon, 
-            such as the real part of the frequency.
+phq_readin_tpw : reads all the additional variables of the phonon, 
+            such as the real part of the frequency, llanczos and the
+            variables that control the option, lcg etc.
+
+collect_grid_files_tpw : uses the fact that the images can divide the 
+            collection work.
+
+check_initial_status_tpw : calls some of the tpw routines and call the ph image
+            generator if with_ph_images=.TRUE.
+
+kpoint_grid_tpw : is parallelized among the processors
+
+q_points_tpw : only the meta_ionode writes the q points in the dynamical
+            matrix file (better scaling with images).
+
+realspace_grid_init_tpw : It became a private routine in QE so we copied it 
+            here to use in thermo_pw.
+
+ruotaijk_tpw : receives the ss matrices instead of s.
+
+print_symmetries_tpw : output slightly improved. Writes the Cayley-Klein 
+            parameters for each symmetry.
+
+find_mode_sym_tpw : similar to the one of QE but does not need a threshold to
+            choose the degenerate modes.
 
 
-This directory contains also some routines that are new, or generalize
-those of QE. They are still experimental.
 
-solve_e_fpolc.f90 : equivalent of solve_e, but computes the +w and -w
-                    frequencies. Used to compute the complex
-                    macroscopic dielectric constant at finite frequency.
+The new routines contained in this directory are:
 
-apply_ac.f90
-Apply H-eS-wS+a_c Q to a generic function, with the new conventions
-required by the linear solvers. The c indicates a non Hermitian matrix 
-(used when omega /=0 is complex).
+solve_e_fpolc : equivalent of solve_e, but computes the +w and -w
+            frequencies. Used to compute the complex
+            dielectric constant at finite frequency (q=0).
 
-scal_prod.f90 Makes the scalar products between wavefunctions.
-Nedeed by the linear solver routines.
+apply_ac : Apply H-eS-wS+a_c Q to a generic function, with the new conventions
+            required by the linear solvers. The c indicates a non Hermitian 
+            matrix (used when omega /=0 is complex).
 
-polarizc.f90     ! computes the complex polarizability and writes it on
-                 ! output.
+scal_prod : Makes the scalar products between wavefunctions.
+            Nedeed by the linear solver routines.
 
-pheqscf.f90      ! compute the susceptibility at finite q and frequency.
+polarizc  : computes the complex polarizability and writes it on
+            output.
 
+pheqscf : compute the susceptibility at finite q and frequency.
 
-set_intq_nc.f90        !
-compute_intq.f90       !  These routines compute the integral of the 
-transform_intq_nc.f90  !  augmentation function and e^iqr for the study of
-transform_intq_so.f90  !  EELS with US PPs or PAW
-                       !
+set_intq_nc :       
+compute_intq :       These routines compute the integral of the 
+transform_intq_nc :  augmentation function and e^iqr for the study of
+transform_intq_so :  EELS with US PPs or PAW
 
-solve_eq.f90      : This routine computes the charge-charge susceptibility
-                    at finite q and frequency and the inverse of the
-                    dielectric constant.
+solve_eq : This routine computes the charge-charge susceptibility
+            at finite q and frequency and the inverse of the dielectric 
+            constant.
 
-solve_eq_tran.f90 : computes the magnetic susceptibilities in the lsda
-                    case (still totally untested).
+solve_eq_tran : computes the magnetic susceptibilities in the lsda
+            case (still totally untested).
 
-orthogonalize_omega.f90 : generalize orthogonalize for the case of
-                          metals at finite frequency w when the alpha_pv 
-                          term is included.
+orthogonalize_omega : generalize orthogonalize for the case of metals at 
+            finite frequency w when the alpha_pv term is included.
 
-paw_add_symmetry.f90   : symmetrize the PAW term in the case of a e^iqr
-                         perturbation.
+paw_add_symmetry : symmetrize the PAW term in the case of a e^iqr
+            perturbation.
 
-dveqpsi_us.f90       ! computes e^iqr |psi_n>
-dveqpsi_us_only.f90  ! computes the US contribution to e^iqr K |psi_kn>
+dveqpsi_us :  computes e^iqr |psi_n>
 
-addusddenseq.f90   ! add the augmentation charge in the case of a single
-                   ! e^iqr perturbation.
+dveqpsi_us_only : computes the US contribution to e^iqr K |psi_kn>
 
-add_dkmds.f90      ! used to compute effective charges. Similar to the one
-                   ! of QE, but partially rewritten with the new logics.
-addnlcc_zstar_eu_us.f90
-add_zstar_ue.f90   ! new logics for effective charges with US-PP.
-add_zstar_us_tpw.f90   ! new logics for effective cgarges with US-PP.
-allocate_phq_tpw.f90 ! allocate a variable for effective charges.
-compute_drhous_tpw.f90    ! compute also a part of effective charges
-compute_drhous_nc_tpw.f90 ! compute also a part of the effective charges
-zstar_eu_tpw.f90 ! new logics for effective charges
-zstar_eu_loc.f90 ! new routine for effective charges
-zstar_eu_us_tpw.f90 ! new routine for effective charges
+addusddenseq : add the augmentation charge in the case of a single
+            e^iqr perturbation.
 
-adddvscf_tran.f90  ! add the self consistent potential in the magnetic case.
-dv_of_drho_tran.f90 ! compute dv from drho for the magnetic case.
+add_dkmds : used to compute effective charges. Similar to the one
+            of QE, but partially rewritten with the new logics.
 
-psyme_fpol.f90     ! parallel driver of the following
-syme_fpol.f90      ! similar to syme.f90, but used in the optical case
-                   ! does not assume that the potential is real.
+addnlcc_zstar_eu_us : new logics for effective charges with US-PP.
 
-psymeq.f90         ! parallel driver of the following
-symeq.f90          ! similar to syme_fpol.f90, but used for EELS and
-                   ! symmetrize only one susceptibility.
+add_zstar_ue : new logics for effective charges with US-PP.
 
-psym_dmage_fpol.f90 ! parallel driver of the following
-sym_dmage_fpol.f90  ! similar to sym_dmag.f90, but used in the optical case
-                      does not assume that the potential is real.
+add_zstar_us_tpw : new logics for effective cgarges with US-PP.
 
-psym_dmageq.f90   ! parallel driver of the following
-sym_dmageq.f90    ! similar to sym_dmage.f90, but used for EELS and only
-                    one perturbation is made.
+allocate_phq_tpw : allocate new variables in control_qe.
 
-check_bands.f90   ! a function that tests if the files with bands are already
-                  ! in the outdir directory
-control_qe.f90    ! contains new variables for the modified routines
-deallocate_ph_tpw.f90 ! deallocate the new variables of the these routines
+compute_drhous_tpw : compute also a part of effective charges
 
-write_group_info_ph.f90 ! write the point group information, but writes 
-                   ! always the point group tables since for phonon
-                   ! we must use the point group tables also in the 
-                   ! relativistic case
+compute_drhous_nc_tpw : compute also a part of the effective charges
 
-setup_kup_kdw_tpw.f90 ! a different order of the k, k+q (up), k, k+q (down) is
-                   ! needed in the magnetic case. 
+zstar_eu_tpw : new logics for effective charges
+
+zstar_eu_loc : new routine for effective charges
+
+zstar_eu_us_tpw : new routine for effective charges
+
+adddvscf_tran : add the self consistent potential in the magnetic case.
+
+dv_of_drho_tran : compute dv from drho for the magnetic case.
+
+psyme_fpol : parallel driver of the following
+
+syme_fpol : similar to syme, but used in the optical case
+            does not assume that the potential is real.
+
+psymeq : parallel driver of the following.
+
+symeq : similar to syme_fpol, but used for EELS and symmetrize only 
+            one susceptibility.
+
+psym_dmage_fpol : parallel driver of the following.
+
+sym_dmage_fpol : similar to sym_dmag, but used in the optical case
+            does not assume that the potential is real.
+
+psym_dmageq : parallel driver of the following
+
+sym_dmageq : similar to sym_dmage.f90, but used for EELS and only one 
+            perturbation is made.
+
+check_bands : a function that tests if the files with bands are already
+            in the outdir directory
+
+control_qe : contains new variables for the modified routines
+
+deallocate_ph_tpw : deallocate the new variables of the these routines
+
+write_group_info_ph : write the point group information, but writes always 
+            the point group tables since for phonon we must use the point 
+            group tables also in the relativistic case
+
+setup_kup_kdw_tpw : a different order of the k, k+q (up), k, k+q (down) is
+            needed in the magnetic case. When sym_for_diago=.TRUE. it doubles
+            also the diago_bands, ik_origin, isym_band arrays.
+
+do_cg_e : two global cg solutors of the linear system for the electric field 
+            and the phonon calculation.
+
+do_cg_ph : do not use the self-consistent cycle but require more memory.
+
+allocate_cg : allocate variables for the cg case.
+
+h_pcg_step : does a cg step.
+
+lr_dot : does the scalar product for global variables.
+
+do_lanczos : the driver of the lanczos iteration (nonhermitian case)
+
+nh_lanczos_step : makes a lanczos step in the nonhermitian case
+
+do_lanczos_psh : the driver of the lanczos iteration (pseudohermitian case)
+
+psh_lanzos_step : makes a lanczos step in the nonhermitian case
+
+lr_sm1_psi : this routine apply S^-1. Generalizes the same routine of QE.
+
+lr_us.f90 : apply the S operator. Simplify the one of QE.
+
+lr_restart.f90 : read the information for lanczos restart.
+
+read_lanczos_chain : read the information for lanczos restart.
+
+lanczos_write_restart : writes the information for lanczos restart.
+
+check_initial_geometry : is used by the routines that make all geometries 
+            together
+
+scal_prod : makes the scalar product of two wavefunctions.
+
+clean_all_pw : clean all pw variables.

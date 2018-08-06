@@ -69,7 +69,7 @@ SUBROUTINE check_initial_status_tpw(auxdyn)
   USE io_global,       ONLY : stdout
   USE control_flags,   ONLY : modenum
   USE ions_base,       ONLY : nat
-  USE io_files,        ONLY : tmp_dir
+  USE io_files,        ONLY : tmp_dir, postfix
   USE lsda_mod,        ONLY : nspin
   USE scf,             ONLY : rho
   USE disp,            ONLY : nqs, x_q, comp_iq, nq1, nq2, nq3, &
@@ -105,6 +105,7 @@ SUBROUTINE check_initial_status_tpw(auxdyn)
   IMPLICIT NONE
   !
   CHARACTER (LEN=256) :: auxdyn, filename
+  CHARACTER (LEN=256), EXTERNAL :: trimcheck
   CHARACTER (LEN=6), EXTERNAL :: int_to_char
   LOGICAL :: exst
   INTEGER :: iq, iq_start, ierr
@@ -196,8 +197,8 @@ SUBROUTINE check_initial_status_tpw(auxdyn)
 !  If a recover or a restart file exists the first q point is the current one.
 !
      IF ((.NOT.lgamma_iq(current_iq).OR. newgrid).AND.lqdir) THEN
-        tmp_dir_phq= TRIM (tmp_dir_ph) //TRIM(prefix)//&
-                          & '.q_' // TRIM(int_to_char(current_iq))//'/'
+        tmp_dir_phq= trimcheck ( TRIM (tmp_dir_ph) // TRIM(prefix) // &
+                               & '.q_' // int_to_char(current_iq) )
         tmp_dir=tmp_dir_phq
         CALL check_restart_recover(ext_recover, ext_restart)
         tmp_dir=tmp_dir_ph
@@ -305,9 +306,10 @@ SUBROUTINE check_initial_status_tpw(auxdyn)
      ! here and copy the charge density inside
      !
      IF ((.NOT.lgamma.OR. newgrid).AND.lqdir) THEN
-        tmp_dir_phq= TRIM (tmp_dir_ph) //TRIM(prefix)//&
-                          & '.q_' // TRIM(int_to_char(iq))//'/'
-        filename=TRIM(tmp_dir_phq)//TRIM(prefix)//'.save/charge-density.dat'
+        tmp_dir_phq= trimcheck ( TRIM (tmp_dir_ph) // TRIM(prefix) // &
+                                & '.q_' // int_to_char(iq) ) 
+        filename=TRIM(tmp_dir_phq)//TRIM(prefix)//TRIM(postfix)//&
+                                                 '/charge-density.dat'
         IF (ionode) inquire (file =TRIM(filename), exist = exst)
         !
         CALL mp_bcast( exst, ionode_id, intra_image_comm )

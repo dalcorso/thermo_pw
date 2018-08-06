@@ -32,15 +32,22 @@
    LOGICAL :: exst
    CHARACTER(LEN=256) :: file_input, file_output
    CHARACTER(LEN=6), EXTERNAL :: int_to_char
+   CHARACTER(LEN=8) :: phpostfix
 
    CALL mp_barrier(intra_image_comm)
    IF (nimage==1) RETURN
+
+#if defined (_WIN32)
+   phpostfix='.phsave\'
+#else
+   phpostfix='.phsave/'
+#endif
 
    DO iq=1,nqs
       DO irr=0, irr_iq(iq)
          IF (comp_irr_iq(irr,iq).and.ionode) THEN
             file_input=TRIM( tmp_dir_ph ) // &
-                    & TRIM( prefix ) // '.phsave/dynmat.'  &
+                    & TRIM( prefix ) // phpostfix //'dynmat.'  &
                     &  // TRIM(int_to_char(iq))&
                     &  // '.' // TRIM(int_to_char(irr)) // '.xml'
 !
@@ -53,7 +60,7 @@
 !                 ima=MOD(iq, nimage)
                   file_output=TRIM( tmp_dir_save ) // '/_ph'//&
                        &      TRIM(int_to_char(ima)) &
-                       &    //'/'// TRIM( prefix ) // '.phsave/dynmat.' &
+                       &    //'/'// TRIM( prefix ) // phpostfix //'dynmat.' &
                        &    // TRIM(int_to_char(iq))  &
                        &    // '.' // TRIM(int_to_char(irr)) // '.xml'
                   IF (ima /= my_image_id) ios = f_copy(file_input, file_output)
@@ -62,12 +69,12 @@
             IF ( elph .AND. irr>0 ) THEN
 
                file_input=TRIM( tmp_dir_ph ) // &
-                    & TRIM( prefix ) // '.phsave/elph.'  &
+                    & TRIM( prefix ) // phpostfix //'elph.'  &
                     &  // TRIM(int_to_char(iq))&
                     &  // '.' // TRIM(int_to_char(irr)) // '.xml'
 
                file_output=TRIM( tmp_dir_save ) // '/_ph0/' // &
-                    &   TRIM( prefix ) // '.phsave/elph.' &
+                    &   TRIM( prefix ) // phpostfix //'elph.' &
                     &    // TRIM(int_to_char(iq))  &
                     &    // '.' // TRIM(int_to_char(irr)) // '.xml'
 
@@ -79,13 +86,13 @@
       IF ((ldisp.AND..NOT. (lgauss .OR. ltetra)).OR.(epsil.OR.zeu.OR.zue)) THEN
          IF (lgamma_iq(iq).AND.comp_irr_iq(0,iq).AND.ionode) THEN
             file_input=TRIM( tmp_dir_ph ) // &
-                      TRIM( prefix ) // '.phsave/tensors.xml'
+                      TRIM( prefix ) // phpostfix //'tensors.xml'
             INQUIRE (FILE = TRIM(file_input), EXIST = exst)
             IF (exst) THEN
                DO ima=0, nimage-1
                   file_output=TRIM( tmp_dir_save ) // '/_ph'//&
                               TRIM(int_to_char(ima)) &
-                      //'/'// TRIM( prefix ) // '.phsave/tensors.xml'
+                      //'/'// TRIM( prefix ) // phpostfix //'tensors.xml'
 
                   IF (ima/=my_image_id) ios = f_copy(file_input, file_output)
                ENDDO

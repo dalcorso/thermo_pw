@@ -54,7 +54,7 @@ patches given below.</p>
 
 **Patches for thermo_pw.1.0.0**:
 <br>
-* None known so far
+Grimme-d3 not implemented. 
 <br>
 
 **Known problems of thermo_pw.0.9.0**:

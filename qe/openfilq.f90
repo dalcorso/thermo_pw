@@ -39,7 +39,7 @@ SUBROUTINE openfilq_tpw()
   USE spin_orb,        ONLY : domag
   USE noncollin_module, ONLY : noncolin
   USE io_global,       ONLY : ionode,stdout
-  USE buffers,         ONLY : open_buffer
+  USE buffers,         ONLY : open_buffer, close_buffer
   USE ramanm,          ONLY : lraman, elop, iuchf, iud2w, iuba2, lrchf, lrd2w, lrba2
   USE acfdtest,        ONLY : acfdt_is_active, acfdt_num_der
   USE input_parameters,ONLY : nk1, nk2, nk3
@@ -88,7 +88,15 @@ SUBROUTINE openfilq_tpw()
   lrwfc = nbnd * npwx * npol
   CALL open_buffer (iuwfc, 'wfc', lrwfc, io_level, exst_mem, exst, tmp_dir)
   IF (.NOT.exst.AND..NOT.exst_mem.and..not.all_done) THEN
-     CALL errore ('openfilq', 'file '//trim(prefix)//'.wfc not found', 1)
+     tmp_dir = tmp_dir_phq
+     !FIXME in case the starting computation has been done twfcollect=.true.
+     ! run_nscf saves the wave functions in tmp_dir_phq and not in tmp_dir 
+     ! we have to find a way to have them in the same place in both cases
+     ! not now because release is tomorrow (29 june 2018). Dirty fix if
+     ! open_buffer fails in tmp_dir go back to tmp_dir_phq and try again. 
+     CALL close_buffer(iuwfc, 'delete')
+     CALL open_buffer (iuwfc, 'wfc', lrwfc, io_level, exst_mem, exst, tmp_dir)
+     IF (.NOT.exst.AND..NOT.exst_mem) CALL errore ('openfilq', 'file '//trim(prefix)//'.wfc not found', 1)
   END IF
   IF (elph_mat) then
      iunwfcwann=733
