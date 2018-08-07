@@ -46,8 +46,6 @@ irrek_tpw : Check if a k point can be obtained by another using symmetry.
             This routine sets the three arrays diago_bands, isym_band, 
             ik_origin.
 
-divide_et_impera_tpw : adds the information of the symmetry and original k.
-
 set_kplusq_tpw : adds also the information on the symmetry and original k. Also
             for k+q. 
 

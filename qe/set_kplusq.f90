@@ -59,20 +59,19 @@ subroutine set_kplusq_tpw (xk, wk, xq, nks, npk, diago_bands, &
   !
   logical :: lgamma, samev
   ! true if xq is the gamma point
-  integer :: ik, jk, kpol, isym, jsym, j, nk, set_pos, ipool, resto
+  integer :: ik, jk, kpol, isym, jsym, j, nk
   ! counter on k
   ! counter
   REAL(DP), ALLOCATABLE :: xk_save(:,:), wk_new(:)
-  INTEGER, ALLOCATABLE :: isym_bands_new(:), ik_origin_new(:), per(:), perm1(:)
-  INTEGER, ALLOCATABLE :: start(:), nksp(:), nks0p(:), cur_pos(:)
-  LOGICAL, ALLOCATABLE :: diago_bands_new(:), done(:)
   REAL(DP) :: xkq(3), xks(3)
   INTEGER :: invs(3,3,48), table(48,48)
+  LOGICAL :: diago_bands_save(nks)
   !
   eps = 1.d-12
   !
   ! shift the k points in the odd positions and fill the even ones with k+
   !
+  diago_bands_save(1:nks)=diago_bands(1:nks)
 
   lgamma = abs (xq (1) ) .lt.eps.and.abs (xq (2) ) .lt.eps.and.abs ( &
        xq (3) ) .lt.eps
@@ -112,7 +111,8 @@ subroutine set_kplusq_tpw (xk, wk, xq, nks, npk, diago_bands, &
 !
         xkq(:) = xk(:, 2*ik)
         CALL cryst_to_cart(1, xkq, at, -1)
-        DO jk=1,nks0
+        DO jk=1,nks
+           IF (.NOT.diago_bands_save(jk)) CYCLE
            DO isym= 1, nsym
               DO kpol = 1, 3
                  xks (kpol) = invs(kpol, 1, isym)*xk_save (1,jk) + &

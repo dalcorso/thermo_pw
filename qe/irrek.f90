@@ -47,6 +47,7 @@ subroutine irreducible_BZ_tpw (nrot, s, nsym, minus_q, magnetic_sym, at, bg, &
   !    Find the coset in the point group of the Bravais lattice
   !
   IF ( magnetic_sym ) THEN
+     nks0=nks
      call irrek_nc_tpw(at, bg, nrot, invs, nsym, irg, npk, nks, xk, &
                    wk, t_rev, diago_bands, isym_bands, ik_origin)
   ELSE

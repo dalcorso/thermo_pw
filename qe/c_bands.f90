@@ -22,46 +22,52 @@ SUBROUTINE c_bands_nscf_tpw( )
   USE kinds,                ONLY : DP
   USE io_global,            ONLY : stdout
   USE io_files,             ONLY : iunhub, iunwfc, nwordwfc, nwordwfcU
-  USE buffers,              ONLY : get_buffer, save_buffer, close_buffer
+  USE buffers,              ONLY : get_buffer, save_buffer, open_buffer, &
+                                   close_buffer
   USE basis,                ONLY : starting_wfc
   USE fft_base,             ONLY : dfftp
-  USE symm_base,            ONLY : s, sr, ftau, invs, t_rev
   USE klist,                ONLY : nkstot, nks, xk, ngk, igk_k
   USE uspp,                 ONLY : vkb, nkb
   USE gvect,                ONLY : g, gg, ngm
-  USE fft_interfaces,       ONLY : invfft, fwfft
+  USE fft_interfaces,       ONLY : invfft
   USE wvfct,                ONLY : et, nbnd, npwx, current_k
   USE control_flags,        ONLY : ethr, restart, isolve, io_level, iverbosity
   USE save_ph,              ONLY : tmp_dir_save
   USE io_files,             ONLY : tmp_dir, prefix
-  USE buffers,              ONLY : open_buffer, close_buffer
   USE ldaU,                 ONLY : lda_plus_u, U_projection, wfcU
   USE lsda_mod,             ONLY : current_spin, lsda, isk
   USE wavefunctions_module, ONLY : evc
   USE control_lr,           ONLY : lgamma
   USE mp_asyn,              ONLY : asyn_master, with_asyn_images
-  USE mp_images,            ONLY : my_image_id, root_image
-  USE mp_pools,             ONLY : npool, kunit, inter_pool_comm
-  USE mp,                   ONLY : mp_sum, mp_min
+  USE mp_images,            ONLY : my_image_id, root_image, intra_image_comm
+  USE mp_pools,             ONLY : npool, kunit, inter_pool_comm, my_pool_id
+  USE mp_orthopools,        ONLY : intra_orthopool_comm, mp_start_orthopools,&
+                                   mp_stop_orthopools, me_orthopool
+  USE mp,                   ONLY : mp_sum, mp_min, mp_get
   USE io_global,            ONLY : ionode
   USE check_stop,           ONLY : check_stop_now
-  USE band_computation,     ONLY : diago_bands, isym_bands, ik_origin, nks0
-  USE noncollin_module,     ONLY : noncolin, npol
+  USE band_computation,     ONLY : diago_bands, ik_origin, sym_for_diago
+  USE noncollin_module,     ONLY : npol
   !
   IMPLICIT NONE
   !
   REAL(DP) :: avg_iter, ethr_
   ! average number of H*psi products
   INTEGER :: ik_, ik, ik_eff, ibnd, nkdum, npw, ios, ipol, ind1, ind2, gk(3)
-  INTEGER :: ishift, ik_diago, ik_sym
   ! ik_: k-point already done in a previous run
   ! ik : counter on k points
+  INTEGER :: ik_diago, ik_sym, ikk
   LOGICAL :: all_done_asyn
   !
   REAL(DP), EXTERNAL :: get_clock
-  COMPLEX(DP), ALLOCATABLE :: psic(:,:,:), evcr(:,:)
-  COMPLEX(DP) :: d_spin(2,2)
-  INTEGER :: has_e, ig, iuawfc, lrawfc
+  COMPLEX(DP), ALLOCATABLE :: psic(:,:,:), evcr(:,:,:), evcbuffer(:,:,:,:), &
+                              evcrecv(:,:,:,:)
+  REAL(DP), ALLOCATABLE :: aux_xk(:,:), aux_et(:,:)
+  INTEGER, ALLOCATABLE :: working_pool(:), ikd(:), need(:,:), index_send(:), &
+                          index_recv(:)
+  INTEGER, EXTERNAL :: local_kpoint_index, global_kpoint_index
+  INTEGER :: ig, iks, ik1, ikg, ikdiag, ikdiag_loc, nkdiag, nkdiag_loc, &
+             nkrecv_loc, ipool, iuawfc, lrawfc
   LOGICAL :: exst_mem, exst
   !
   CALL start_clock( 'c_bands' )
@@ -98,7 +104,8 @@ SUBROUTINE c_bands_nscf_tpw( )
   nkdum=0
   DO ik=1,nks
      IF (ik <= ik_) CYCLE
-     IF (diago_bands(ik)) nkdum=nkdum+1
+     ikk=global_kpoint_index(nkstot,ik)
+     IF (diago_bands(ikk)) nkdum=nkdum+1
   ENDDO
   CALL mp_min(nkdum,inter_pool_comm)
   !
@@ -107,112 +114,272 @@ SUBROUTINE c_bands_nscf_tpw( )
   !
   ik_diago=0
   ik_sym=0
-  DO ishift=0,1
-     IF ( ik_>0 .AND. MOD(ik_,2)==0 .AND. ishift==0) CYCLE
-!
-!  first compute the k vectors (odd index) and then the k+q
-!
-     k_loop: DO ik = ik_+1+ishift, nks, 2
+  k_loop: DO ik = ik_+1, nks
      !
      ! ... Set k-point, spin, kinetic energy, needed by Hpsi
      !
-        IF (diago_bands(ik)) THEN
-           ik_diago=ik_diago+1
-           current_k = ik
-           IF ( lsda ) current_spin = isk(ik)
-           call g2_kin( ik )
-           ! 
-           ! ... More stuff needed by the hamiltonian: nonlocal projectors
+     ikk=global_kpoint_index(nkstot,ik)
+     IF (diago_bands(ikk)) THEN
+        ik_diago=ik_diago+1
+        current_k = ik
+        IF ( lsda ) current_spin = isk(ik)
+        call g2_kin( ik )
+        ! 
+        ! ... More stuff needed by the hamiltonian: nonlocal projectors
+        !
+        IF ( nkb > 0 ) CALL init_us_2( ngk(ik), igk_k(1,ik), xk(1,ik), vkb )
+        !
+        ! ... Needed for LDA+U
+        !
+        IF ( nks > 1 .AND. lda_plus_u .AND. (U_projection .NE. 'pseudo') ) &
+            CALL get_buffer ( wfcU, nwordwfcU, iunhub, ik )
+        !
+        ! ... calculate starting  wavefunctions
+        !
+        IF ( iverbosity > 0 ) WRITE( stdout, 9001 ) ik
+        !
+        IF ( TRIM(starting_wfc) == 'file' ) THEN
            !
-           IF ( nkb > 0 ) CALL init_us_2( ngk(ik), igk_k(1,ik), xk(1,ik), vkb )
-           !
-           ! ... Needed for LDA+U
-           !
-           IF ( nks > 1 .AND. lda_plus_u .AND. (U_projection .NE. 'pseudo') ) &
-               CALL get_buffer ( wfcU, nwordwfcU, iunhub, ik )
-           !
-           ! ... calculate starting  wavefunctions
-           !
-           IF ( iverbosity > 0 ) WRITE( stdout, 9001 ) ik
-           !
-           IF ( TRIM(starting_wfc) == 'file' ) THEN
-              !
-              CALL get_buffer ( evc, nwordwfc, iunwfc, ik )
-              !
-           ELSE
-              !
-              CALL init_wfc ( ik )
-              !
-           END IF
-           !
-           ! ... diagonalization of bands for k-point ik
-           !
-           call diag_bands ( 1, ik, avg_iter )
-           !
-           ! ... save wave-functions (unless disabled in input)
-           !
-           IF ( io_level > -1 ) CALL save_buffer ( evc, nwordwfc, iunwfc, ik )
-           !
-           ! ... beware: with pools, if the number of k-points on different
-           ! ... pools differs, make sure that all processors are still in
-           ! ... the loop on k-points before checking for stop condition
-           !
-!           nkdum  = kunit * ( nkstot / kunit / npool )
-           IF (ik_diago .le. nkdum) THEN
-              !
-              ! ... stop requested by user: save restart information,
-              ! ... save wavefunctions to file
-              !
-              IF (check_stop_now()) THEN
-                 CALL save_in_cbands(ik, ethr, avg_iter, et )
-                 RETURN
-              END IF
-           ENDIF
-           !
-           ! report about timing
-           !
-           IF ( iverbosity > 0 ) THEN
-              WRITE( stdout, 9000 ) get_clock( 'PWSCF' )
-              FLUSH( stdout )
-           ENDIF
-           IF ( with_asyn_images.AND.my_image_id==root_image.AND.ionode ) &
-                        CALL asyn_master(all_done_asyn)
+           CALL get_buffer ( evc, nwordwfc, iunwfc, ik )
            !
         ELSE
-           IF (ik_origin(ik)/=ik) THEN
-              ik_sym=ik_sym+1
-              CALL get_buffer ( evc, nwordwfc, iunwfc, ik_origin(ik) )
-              ALLOCATE(psic(dfftp%nnr, npol, nbnd))
-              ALLOCATE(evcr(npwx*npol, nbnd))
-              npw=ngk(ik_origin(ik))
-              psic=(0.0_DP,0.0_DP)
-              DO ipol=1, npol
-                 ind1=1+(ipol-1)*npwx
-                 ind2=npw+(ipol-1)*npwx
-                 DO ibnd=1,nbnd
-                    psic(dfftp%nl(igk_k(1:npw,ik_origin(ik))),ipol,ibnd) = &
-                                                       evc(ind1:ind2,ibnd)
-                    CALL invfft ('Rho', psic(:,ipol,ibnd), dfftp)
-                 ENDDO
-              ENDDO
-              CALL compute_gk(xk(1,ik), xk(1,ik_origin(ik)), &
-                 s(1,1,invs(isym_bands(ik))), t_rev(invs(isym_bands(ik))), gk)
-              IF (noncolin) THEN
-                 has_e=1
-                 CALL find_u(sr(1,1,isym_bands(ik)),d_spin) 
-              ENDIF
-              CALL rotate_all_psi_tpw(ik,psic,evcr,s(1,1,invs(isym_bands(ik))),&
-                     ftau(1,invs(isym_bands(ik))), d_spin, has_e, gk)
-              CALL save_buffer ( evcr, nwordwfc, iunwfc, ik )
-              et(1:nbnd,ik)=et(1:nbnd,ik_origin(ik))
-              DEALLOCATE(evcr)
-              DEALLOCATE(psic)
+           !
+           CALL init_wfc ( ik )
+           !
+        END IF
+        !
+        ! ... diagonalization of bands for k-point ik
+        !
+        call diag_bands ( 1, ik, avg_iter )
+        !
+        ! ... save wave-functions (unless disabled in input)
+        !
+        IF ( io_level > -1 ) CALL save_buffer ( evc, nwordwfc, iunwfc, ik )
+        !
+        ! ... beware: with pools, if the number of k-points on different
+        ! ... pools differs, make sure that all processors are still in
+        ! ... the loop on k-points before checking for stop condition
+        !
+!        nkdum  = kunit * ( nkstot / kunit / npool )
+        IF (ik_diago .le. nkdum) THEN
+           !
+           ! ... stop requested by user: save restart information,
+           ! ... save wavefunctions to file
+           !
+           IF (check_stop_now()) THEN
+              CALL save_in_cbands(ik, ethr, avg_iter, et )
+              RETURN
+           END IF
+        ENDIF
+        !
+        ! report about timing
+        !
+        IF ( iverbosity > 0 ) THEN
+           WRITE( stdout, 9000 ) get_clock( 'PWSCF' )
+           FLUSH( stdout )
+        ENDIF
+        IF ( with_asyn_images.AND.my_image_id==root_image.AND.ionode ) &
+                     CALL asyn_master(all_done_asyn)
+     ENDIF
+  ENDDO k_loop
+
+  IF (sym_for_diago) THEN
+     CALL mp_start_orthopools(intra_image_comm)
+     !
+     !   et and xk collected on all pools
+     !
+     ALLOCATE(aux_et(nbnd,nkstot))
+     ALLOCATE(aux_xk(3,nkstot))
+     CALL poolcollect(    3, nks, xk, nkstot, aux_xk)
+     CALL poolcollect( nbnd, nks, et, nkstot, aux_et)
+!
+!   count how many points have been diagonalized and prepare the indices
+!   to transfer them among pools.
+!
+     nkdiag=0
+     DO ik=1, nkstot
+        IF (diago_bands(ik)) nkdiag=nkdiag+1
+     ENDDO
+!
+!   This part sets: 
+!   need, for each pool and each k points is 1 if the pool needs it, or 0. 
+!   (all pools have the same info, ipool from 1 to npool). 
+!   index_recv, each pool has its own and is the position on the receive
+!   vector of the k point ikdiag
+!   index_send, each pool has it own and is the position on the send vector
+!   of the k point ikdiag
+!   working_pool is the pool that has diagonalized (from 1 to npool) ikdiag
+!   ikd is the global index of the k point in the nkdiag list (all pools
+!   have the same info).
+!
+     ALLOCATE(index_recv(nkdiag))     
+     ALLOCATE(index_send(nkdiag))     
+     ALLOCATE(need(nkdiag,npool))     
+     ALLOCATE(working_pool(nkdiag))
+     ALLOCATE(ikd(nkdiag))
+
+     nkdiag=0
+     need=0
+     index_send=0
+     index_recv=0
+     nkdiag_loc=0
+     nkrecv_loc=0
+     working_pool=0
+     DO ik=1, nkstot
+        IF (diago_bands(ik)) THEN
+           nkdiag=nkdiag+1
+           ikd(nkdiag)=ik
+           ikk=local_kpoint_index(nkstot,ik)
+           IF (ikk /=-1) THEN
+              nkdiag_loc=nkdiag_loc+1
+              index_send(nkdiag)=nkdiag_loc
+              working_pool(nkdiag)=my_pool_id+1
            ELSE
-             CALL errore('c_bands','Problem the code should not arrive here',1)
+              nks_loop: DO ikk=1,nks
+                 ikg=global_kpoint_index(nkstot,ikk)
+                 IF (.NOT.diago_bands(ikg).AND.ik_origin(ikg)==ik) THEN
+                    nkrecv_loc=nkrecv_loc+1
+                    need(nkdiag, me_orthopool+1)=1
+                    index_recv(nkdiag)=nkrecv_loc
+                    EXIT nks_loop
+                 ENDIF
+              ENDDO nks_loop     
            ENDIF
         ENDIF
-     END DO k_loop
-  ENDDO
+     ENDDO
+     CALL mp_sum(need, intra_orthopool_comm)
+     CALL mp_sum(working_pool, intra_orthopool_comm)
+
+     ALLOCATE(psic(dfftp%nnr, npol, nbnd))
+     ALLOCATE(evcr(dfftp%nnr, npol, nbnd))
+
+     IF (npool>1) THEN
+        IF (nkdiag_loc==0) nkdiag_loc=1
+        IF (nkrecv_loc==0) nkrecv_loc=1
+        ALLOCATE(evcbuffer(dfftp%nnr,npol,nbnd,nkdiag_loc))
+        ALLOCATE(evcrecv(dfftp%nnr,npol,nbnd,nkrecv_loc))
+        evcbuffer=(0.0_DP, 0.0_DP)
+        evcrecv=(0.0_DP, 0.0_DP)
+     ENDIF
+     ikdiag_loc=0
+!
+!   Here brings the diagonalized wavefunction in real space and put them 
+!   in the evcbuffer if there are pools, otherwise rotate and save them
+!
+     DO ikdiag=1, nkdiag
+        ikk=local_kpoint_index(nkstot, ikd(ikdiag))
+        IF (ikk /=-1) THEN
+           ikdiag_loc=ikdiag_loc+1
+           CALL get_buffer ( evc, nwordwfc, iunwfc, ikk )
+           npw=ngk(ikk)
+           psic=(0.0_DP,0.0_DP)
+           DO ipol=1, npol
+              ind1=1+(ipol-1)*npwx
+              ind2=npw+(ipol-1)*npwx
+              DO ibnd=1,nbnd
+                 psic(dfftp%nl(igk_k(1:npw,ikk)),ipol,ibnd) = &
+                                                   evc(ind1:ind2,ibnd)
+                 CALL invfft ('Rho', psic(:,ipol,ibnd), dfftp)
+              ENDDO
+           ENDDO
+           IF (npool==1) THEN
+              DO ik1 = 1, nks
+                 ik=global_kpoint_index(nkstot, ik1)
+                 IF (diago_bands(ik)) CYCLE
+                 IF (ik_origin(ik)/=ikd(ikdiag)) CYCLE
+                 ik_sym=ik_sym+1
+                 CALL rotate_and_save_psic(psic, evcr, aux_xk, ik, ik1, &
+                                                               ik_origin(ik))
+                 et(1:nbnd,ik1)=aux_et(1:nbnd,ik_origin(ik))
+              ENDDO
+           ELSE
+              evcbuffer(:,:,:,ikdiag_loc)=psic(:,:,:)
+           ENDIF
+        ENDIF
+     ENDDO
+
+     IF (npool>1) THEN
+!
+!   pools receive the wavefunction that they need to obtain the
+!   rotated ones from the pools that have computed them
+!
+        DO ikdiag=1,nkdiag
+           DO ipool=1, npool
+              IF (need(ikdiag,ipool)==1) THEN
+                 IF (me_orthopool==(working_pool(ikdiag)-1)) THEN
+!
+!    I am the pool that calculated the wavefunction. Send it to the
+!    pool that needs it
+!
+                    DO ibnd=1,nbnd
+                       CALL mp_get(evcbuffer(:,:,ibnd,index_send(ikdiag)), &
+                                evcbuffer(:,:,ibnd,index_send(ikdiag)), &
+                                me_orthopool, ipool-1, working_pool(ikdiag)-1, &
+                                ibnd, intra_orthopool_comm)
+                    ENDDO
+                 ELSEIF (me_orthopool==(ipool-1)) THEN
+!
+!   I am the pool that needs the ikdiag wavefunctions so I receive them 
+!   here
+!
+                    DO ibnd=1,nbnd
+                       CALL mp_get(evcrecv(:,:,ibnd,index_recv(ikdiag)), &
+                                evcrecv(:,:,ibnd,index_recv(ikdiag)), &
+                                me_orthopool, ipool-1, working_pool(ikdiag)-1, &
+                                ibnd, intra_orthopool_comm)
+                    ENDDO
+                 ELSE
+!
+!  I am not interested in ikdiag, but call mp_get due to the presence of
+!  a barrier. I do not communicate here. 
+!
+                    DO ibnd=1,nbnd
+                       CALL mp_get(evcrecv(:,:,ibnd,1), evcrecv(:,:,ibnd,1), &
+                                me_orthopool, ipool-1, working_pool(ikdiag)-1, &
+                                ibnd, intra_orthopool_comm)
+                    ENDDO
+                 ENDIF
+              ENDIF
+           ENDDO
+        ENDDO
+!
+!   finally use the received wavefunction to obtain the rotated ones
+!
+        DO ikdiag=1, nkdiag
+           DO ikk = 1, nks
+              ik=global_kpoint_index(nkstot, ikk)
+              IF (diago_bands(ik)) CYCLE
+              IF (ik_origin(ik)/=ikd(ikdiag)) CYCLE
+              ik_sym=ik_sym+1
+              IF (need(ikdiag,me_orthopool+1)==1) THEN
+                 psic(:,:,:)=evcrecv(:,:,:,index_recv(ikdiag))
+              ELSE
+                 psic(:,:,:)=evcbuffer(:,:,:,index_send(ikdiag))
+              ENDIF
+              CALL rotate_and_save_psic(psic, evcr, aux_xk, ik, ikk, &
+                                                    ik_origin(ik))
+              et(1:nbnd,ikk)=aux_et(1:nbnd,ik_origin(ik))
+           ENDDO
+        ENDDO
+     ENDIF
+
+     CALL mp_stop_orthopools()
+     !
+     DEALLOCATE(evcr)
+     DEALLOCATE(psic)
+     DEALLOCATE(ikd)
+     DEALLOCATE(aux_et)
+     DEALLOCATE(aux_xk)
+     DEALLOCATE(working_pool)
+     DEALLOCATE(index_recv)     
+     DEALLOCATE(index_send)     
+     DEALLOCATE(need)     
+     IF (npool>1) THEN
+        DEALLOCATE(evcbuffer)
+        DEALLOCATE(evcrecv)
+     ENDIF
+     !
+  ENDIF
   !
   CALL mp_sum( avg_iter, inter_pool_comm )
   CALL mp_sum( ik_diago, inter_pool_comm )
@@ -264,3 +431,63 @@ gk = NINT(xks - xkc)
 
 RETURN
 END SUBROUTINE compute_gk
+
+SUBROUTINE rotate_and_save_psic(psic, evcr, aux_xk, ik, ikk, iko) 
+!
+!  Input variables: psic with the wavefunction to rotate in real space
+!  evcr : where the rotated function is written in reciprocal space
+!  aux_xk all the list of k points for all pools
+!  ik global index of the current k point
+!  iko global index of the k point that rotated gives the current k point
+!  ikk local index of the current k point
+
+USE kinds,      ONLY : DP
+USE symm_base,  ONLY : s, sr, ftau, invs, t_rev
+USE fft_base,   ONLY : dfftp
+USE klist,      ONLY : xk, nkstot, ngk, igk_k
+USE wvfct,      ONLY : nbnd, npwx
+USE wavefunctions_module, ONLY : evc
+USE fft_interfaces,       ONLY : fwfft
+USE io_files,          ONLY : iunwfc, nwordwfc
+USE band_computation,  ONLY : isym_bands
+USE noncollin_module,  ONLY : noncolin, npol
+USE buffers,           ONLY : save_buffer
+
+IMPLICIT NONE
+
+INTEGER :: ik, iko, ikk
+REAL(DP) :: aux_xk(3,nkstot)
+COMPLEX(DP) :: psic(dfftp%nnr, npol, nbnd), evcr(dfftp%nnr, npol, nbnd)
+COMPLEX(DP) :: d_spin(2,2)
+INTEGER :: has_e, ibnd, ipol, ig, npw, gk(3)
+
+CALL compute_gk(xk(1,ikk), aux_xk(1,iko), &
+          s(1,1,invs(isym_bands(ik))), t_rev(invs(isym_bands(ik))), gk)
+
+IF (noncolin) THEN
+   has_e=1
+   CALL find_u(sr(1,1,isym_bands(ik)),d_spin) 
+ENDIF
+
+CALL rotate_all_psi_r_tpw(psic, evcr, s(1,1,invs(isym_bands(ik))),&
+                ftau(1,invs(isym_bands(ik))), d_spin, has_e, gk)
+
+DO ibnd=1,nbnd
+   DO ipol=1,npol
+      CALL fwfft ('Rho', evcr(:,ipol,ibnd), dfftp)
+   ENDDO
+ENDDO
+
+npw=ngk(ikk)
+evc=(0.0_DP,0.0_DP)
+DO ibnd=1,nbnd
+   DO ig=1, npw
+      evc(ig, ibnd)=evcr(dfftp%nl(igk_k(ig,ikk)),1,ibnd)
+      IF (npol==2) &
+         evc(ig+npwx, ibnd)=evcr(dfftp%nl(igk_k(ig,ikk)),2,ibnd)
+   ENDDO
+ENDDO
+CALL save_buffer ( evc, nwordwfc, iunwfc, ikk )
+
+RETURN
+END SUBROUTINE rotate_and_save_psic

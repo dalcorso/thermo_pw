@@ -37,7 +37,6 @@ compute_drhous_nc.o \
 control_qe.o \
 ccg_psi.o \
 deallocate_ph_tpw.o \
-divide_et_impera.o \
 do_cg_e.o \
 do_cg_ph.o \
 do_lanczos.o \
@@ -87,6 +86,7 @@ read_dyn_from_file.o \
 read_lanczos_chain.o \
 realspace_grid_init.o \
 rotate_all_psi.o \
+rotate_all_psi_r.o \
 ruotaijk.o \
 scal_prod.o \
 set_defaults_pw.o \

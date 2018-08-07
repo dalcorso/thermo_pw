@@ -50,7 +50,7 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
   USE lr_symm_base,       ONLY : nsymq, invsymq, minus_q
   USE uspp_param,         ONLY : n_atom_wfc
   USE band_computation,   ONLY : diago_bands, isym_bands, ik_origin, &
-                                 sym_for_diago
+                                 sym_for_diago, nks0
  
   !
   IMPLICIT NONE
@@ -132,14 +132,16 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
           ik_origin(ik)=ik
        ENDDO
 !
-!     Now reduce the k points with the small group of k. The k points added
-!     here can be calculated using the symmetry of the point group.
+!     Now reduce the k points with the small group of q. The k points added
+!     here can be calculated using the symmetries of the point group.
 !
-      CALL irreducible_BZ_tpw (nsym, s, nsymq, minus_q, magnetic_sym, &
+       CALL irreducible_BZ_tpw (nsym, s, nsymq, minus_q, magnetic_sym, &
                        at, bg, npk, nkstot, xk, wk, t_rev)
+       CALL distribute_diago()
     ELSE
        CALL irreducible_BZ(nrot, s, nsymq, minus_q, magnetic_sym, &
                        at, bg, npk, nkstot, xk, wk, t_rev)
+       diago_bands(1:nkstot)=.TRUE.
     ENDIF
   ENDIF
   !
@@ -152,11 +154,14 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
 !   diagonalize all the bands and forget what has been found by the
 !   the last two variables are not used, but we initialize them.
 !
+!     DO ik=1,nkstot
+!        WRITE(6,*) 'ik, idiago_bands, ik_origin', ik, diago_bands(ik), &
+!                                                      ik_origin(ik)
+!     ENDDO
   ELSE
      CALL set_kplusq( xk, wk, xq, nkstot, npk)
      diago_bands(1:nkstot)=.TRUE.
-     isym_bands(1:nkstot)=1
-     ik_origin(1:nkstot)=1
+     nks0=nkstot
   ENDIF
 !
 !   use in any case set_kplusq_tpw. Needed for magnons.
@@ -223,13 +228,7 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
   !
   ! ... distribute k-points (and their weights and spin indices)
   !
-  IF (sym_for_diago) THEN
-     CALL divide_et_impera_tpw( nkstot, xk, wk, isk, nks, diago_bands, &
-                                                isym_bands, ik_origin )
-  ELSE
-     CALL divide_et_impera( nkstot, xk, wk, isk, nks )
-  ENDIF
-       
+  CALL divide_et_impera( nkstot, xk, wk, isk, nks )
   !
 #else
   !
@@ -240,3 +239,65 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
   RETURN
   !
 END SUBROUTINE setup_nscf_tpw
+
+SUBROUTINE distribute_diago()
+!
+!   This routine distributes the k points that must be diagonalized as
+!   uniformely as possible among the k points, so that if the k points
+!   are divided in pools each pool receives a similar number of k points
+!   to diagonalize
+!
+USE kinds, ONLY : DP
+USE klist, ONLY : nkstot, xk, wk
+USE band_computation,  ONLY : diago_bands, isym_bands, ik_origin, nks0
+
+IMPLICIT NONE
+
+INTEGER :: ik, ik1, nstep, nstep1, resto, iktarget
+REAL(DP) :: buffer(3), wb
+LOGICAL :: lb
+INTEGER :: ib
+
+nstep = nkstot / nks0
+nstep1= nstep+1
+resto = MOD(nkstot,nks0)
+
+DO ik=nks0, 1, -1
+   IF (ik<=resto) THEN
+      iktarget= (ik-1)*nstep1 + 1
+   ELSE
+      iktarget= resto*nstep1 + (ik-resto-1)*nstep + 1
+   ENDIF 
+   IF (ik /= iktarget) THEN
+      buffer(:)=xk(:,iktarget)
+      xk(:,iktarget)=xk(:,ik)
+      xk(:,ik)=buffer(:)
+
+      wb=wk(iktarget)
+      wk(iktarget)=wk(ik)
+      wk(ik)=wb
+
+      lb=diago_bands(iktarget)
+      diago_bands(iktarget)=diago_bands(ik)
+      diago_bands(ik)=lb
+
+      ib=ik_origin(iktarget)
+      ik_origin(iktarget)=ik_origin(ik)
+      ik_origin(ik)=ib
+
+      ib=isym_bands(iktarget)     
+      isym_bands(iktarget)=isym_bands(ik)
+      isym_bands(ik)=ib
+
+      DO ik1=1, nkstot
+         IF (ik_origin(ik1)==ik) THEN
+            ik_origin(ik1)=iktarget
+         ELSEIF (ik_origin(ik1)==iktarget) THEN
+            ik_origin(ik1)=ik
+         ENDIF
+      ENDDO
+   ENDIF
+ENDDO
+
+RETURN
+END SUBROUTINE distribute_diago
