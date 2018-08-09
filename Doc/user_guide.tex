@@ -656,6 +656,11 @@ sur_layers: The number of surface layers on which we add the charge density of
 sur_thr: the threshold (in percentage) of the charge density that must be
      on the surface layers to identify a state as a surface state.
      Default: calculated from the actual charge density values of the states.
+sp_min : minimun distance between layers. Two atoms form different layers
+     only if their distance along z is larger than this number.
+     Should be smaller than the interplanar distance (in a.u.) written by 
+     the tool gener_3d_slab.
+     Default : real 2.0 a.u.
 subtract_vacuum: if .TRUE. the charge density of each state on vacuum is
      subtracted (to remove the vacuum states that are confused with surface
      states)
