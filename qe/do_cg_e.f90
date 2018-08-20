@@ -18,12 +18,10 @@ SUBROUTINE do_cg_e(drhoscfs)
   !    It performs the following tasks:
   !     a) computes the bare potential term  V_ext | psi > at the first
   !        iteration.
-  !     b) applies P_c^+ (orthogonalization to valence states) and possibly
-  !        S^-1.
+  !     b) applies P_c^+ (orthogonalization to valence states) 
   !     c) computes Delta rho, Delta V_{SCF} and symmetrizes them
   !     d) computes (H-Se) dpsi
   !     e) adds to it the screening term P_c^+ Delta V_{SCF} | psi > if needed
-  !     f) apply S^-1 if needed
   !
   USE kinds,                 ONLY : DP
   USE ions_base,             ONLY : nat
@@ -75,10 +73,11 @@ SUBROUTINE do_cg_e(drhoscfs)
                    tg_dv(:,:),         &   ! task group variables
                    tg_psic(:,:)          
   COMPLEX(DP), ALLOCATABLE ::          &
-                   drhoscf (:,:,:)         ! The change of the scf charge
+                   drhoscf (:,:,:)     ! The change of the scf charge, thick
+                                       ! mesh
   COMPLEX(DP), POINTER ::      &
                    dvscfins (:,:,:)    ! change of the scf potential (smooth)
-  REAL(DP), ALLOCATABLE :: h_dia(:,:), &
+  REAL(DP), ALLOCATABLE :: h_dia(:,:), & ! used to build the preconditioning
                            s_dia(:,:)
 
 
@@ -92,21 +91,25 @@ SUBROUTINE do_cg_e(drhoscfs)
 
   CALL start_clock ('do_cg_e')
 
+  IF (.NOT.lgamma) CALL errore('do_cg_e','Called in the wrong case',1)
+
   thresh=tr2_ph*rpert*nbnd*nkstot
   dr2=0.0_DP
   convt=.FALSE.
   iter0=0
 
-  ALLOCATE (dvscfin( dfftp%nnr, nspin_mag, rpert))
+  ALLOCATE (drhoscf(dfftp%nnr, nspin_mag, rpert))
+  ALLOCATE (dvscfin(dfftp%nnr, nspin_mag, rpert))
+
   IF (doublegrid) THEN
      ALLOCATE (dvscfins(dffts%nnr, nspin_mag, rpert))
   ELSE
      dvscfins => dvscfin
   ENDIF
+
   ALLOCATE (dbecsum( nhm*(nhm+1)/2, nat, nspin_mag, rpert))
   IF (noncolin) ALLOCATE (dbecsum_nc (nhm, nhm, nat, nspin, rpert))
 
-  ALLOCATE (drhoscf(dfftp%nnr, nspin_mag, rpert))
   ALLOCATE (aux1(dffts%nnr,npol))
   ALLOCATE (h_dia(npwx,npol))
   ALLOCATE (s_dia(npwx,npol))
@@ -141,6 +144,7 @@ SUBROUTINE do_cg_e(drhoscfs)
         IF (lsda) current_spin = isk (ikk)
         !
         CALL init_us_2 (npwq, igk_k(1,ikq), xk (1, ikq), vkb)
+        CALL g2_kin(ikq)
         !
         IF (iter==1) THEN
            !
@@ -149,26 +153,12 @@ SUBROUTINE do_cg_e(drhoscfs)
            !
            IF (nksq>1) CALL get_buffer (evc, lrwfc, iuwfc, ikk)
            evc0(:,:,ik)=evc(:,:)
-           IF (.NOT.lgamma) THEN
-              IF (nksq>1) CALL get_buffer (evq, lrwfc, iuwfc, ikq)
-              evq0(:,:,ik)=evq(:,:)
-           ENDIF
            IF (okvan) THEN
               CALL calbec (npwq, vkb, evq, becp, nbnd)
               CALL s_psi (npwx, npwq, nbnd, evq, sevq0(1,1,ik))
            ELSE
               sevq0(:,:,ik)=evq(:,:)
            ENDIF
-        ELSE
-           !
-           !  At the following iterations only copy the correct wavefunction
-           !
-           evc(:,:)=evc0(:,:,ik)
-           IF (.NOT.lgamma .AND.nksq.gt.1) evq(:,:)=evq0(:,:,ik)
-        ENDIF
-        !
-        CALL g2_kin(ikq)
-        IF (iter==1) THEN
 !
 !   At the first iteration compute the preconditioning
 !
@@ -178,11 +168,17 @@ SUBROUTINE do_cg_e(drhoscfs)
 
            DO ibnd = 1, nbnd_occ (ikk)
               DO ig = 1, npwq
-                 aa=g2kin(ig)+v_of_0+h_dia(ig,1)- &
-                    et(ibnd,ikk)*s_dia(ig,1)
+                 aa=g2kin(ig)+v_of_0+h_dia(ig,1)-et(ibnd,ikk)*s_dia(ig,1)
                  prec_vec(ig,ibnd,ik)= 1.0_DP/ MAX(1.0_DP, aa)
+                 IF (noncolin) &
+                     prec_vec(ig+npwx,ibnd,ik)= 1.0_DP/ MAX(1.0_DP, aa)
               ENDDO
            ENDDO
+        ELSE
+           !
+           !  At the following iterations only copy the correct wavefunction
+           !
+           evc(:,:)=evc0(:,:,ik)
         ENDIF
         !
         !  And a loop over the perturbations
@@ -199,17 +195,12 @@ SUBROUTINE do_cg_e(drhoscfs)
               ! at q/=0 it is e^{iqr}. In the US case there is also an
               ! augmentation term computed here.
               !
-              IF (lgamma) THEN
-                 CALL dvpsi_e(ik,ipol)
-              ELSE
-                 CALL dveqpsi_us(ik)
-                 d0psi2(:,:,ik)=dvpsi(:,:)
-              ENDIF
+              CALL dvpsi_e(ik,ipol)
               !
               ! Orthogonalize dvpsi to valence states: Apply P_c^+ and change
               ! sign.
               !
-              CALL orthogonalize(dvpsi, evq, ikk, ikq, sevq0(1,1,ik), npwq, &
+              CALL orthogonalize(dvpsi, evq0(1,1,ik), ikk, ikq, sevq0(1,1,ik), npwq, &
                                                                       .TRUE.)
               !
               !  save here P_c^+ V_ext u_kv needed to compute the 
@@ -218,7 +209,7 @@ SUBROUTINE do_cg_e(drhoscfs)
               d0psi(:,:,ik,ipol)=dvpsi(:,:)
               !
               ! At the first iteration evc1 is not known and is set to zero
-              ! the residual and the direction to -P_c^+ V_ext u_kv
+              ! the residual to -P_c^+ V_ext u_kv
               !
               evc1(:,:,ikp,1)=(0.0_DP, 0.0_DP)
               res(:,:,ikp,1)=dvpsi(:,:)
@@ -232,9 +223,7 @@ SUBROUTINE do_cg_e(drhoscfs)
               CALL ch_psi_all (npwq, dir(:,:,ikp,1), dir_new(:,:,ikp,1), &
                                     et(:,ikk), ik, nbnd_occ(ikk))
               !
-              ! Now apply P_c^+ dV_Hxc. Note that since this is the
-              ! iter-1 step, made at the iter step ich and inch must be
-              ! reversed.
+              ! Now apply P_c^+ dV_Hxc. 
               ! First apply dV_Hxc.
               !
               IF ( dffts%has_task_groups ) THEN
@@ -273,8 +262,8 @@ SUBROUTINE do_cg_e(drhoscfs)
               !
               ! Apply -P_c^+
               !
-              CALL orthogonalize(dvpsi, evq, ikk, ikq, &
-                                     & sevq0(:,:,ik), npwq, .TRUE.)
+              CALL orthogonalize(dvpsi, evq0(1,1,ik), ikk, ikq, &
+                                     & sevq0(1,1,ik), npwq, .TRUE.)
               !
               !  the orthogonalize routine changes the sign of dvpsi, so here
               !  we subtract.
@@ -323,16 +312,17 @@ SUBROUTINE do_cg_e(drhoscfs)
         !
         IF (okvan) CALL init_us_2 (npwq, igk_k(1,ikq), xk (1, ikq), vkb)
         !
+        evc(:,:)=evc0(:,:,ik)
+        !
         !  and on perturbations
         !
         DO ipol = 1, rpert
            ikp = ik + nksq * (ipol - 1)  
            !
-           evc(:,:)=evc0(:,:,ik)
-           !
            !  At self consistence we compute the charge density with
            !  the solution of the linear system, during the iterations
            !  with the vector to which we apply the matrix
+
            !
            IF (convt) THEN
               dpsi(:,:)=evc1(:,:,ikp,1)
@@ -381,11 +371,7 @@ SUBROUTINE do_cg_e(drhoscfs)
      !
      !  And add the augmentation part of the induced charge    
      !
-     IF (lgamma) THEN
-        CALL addusddense (drhoscf, dbecsum)
-     ELSE
-        CALL addusddenseq (drhoscf, dbecsum)
-     ENDIF
+     CALL addusddense (drhoscf, dbecsum)
      !
      !  Collect the contribution of all pools. At self-consistence 
      !  the uncollected charge is needed
@@ -398,13 +384,8 @@ SUBROUTINE do_cg_e(drhoscfs)
      !   q /= 0 case) - symmetrize it
      !
      IF (.NOT.lgamma_gamma) THEN
-        IF (lgamma) THEN
-           CALL psyme (drhoscf)
-           IF ( noncolin.and.domag ) CALL psym_dmage(drhoscf)
-        ELSE
-           CALL psymeq (drhoscf)
-           IF ( noncolin.AND.domag ) CALL psym_dmageq(drhoscf)
-        ENDIF
+        CALL psyme (drhoscf)
+        IF ( noncolin.and.domag ) CALL psym_dmage(drhoscf)
      ENDIF
      !
      !   calculate the corresponding linear potential response
@@ -433,11 +414,7 @@ SUBROUTINE do_cg_e(drhoscfs)
 !           CALL PAW_dpotential(dbecsum_nc,becsum_nc,int3_paw,3)
         ELSE
            dbecsum=2.0_DP * dbecsum
-           IF (lgamma) THEN
-              IF (.NOT. lgamma_gamma) CALL PAW_desymmetrize(dbecsum)
-           ELSE
-              CALL PAW_deqsymmetrize(dbecsum)
-           ENDIF
+           IF (.NOT. lgamma_gamma) CALL PAW_desymmetrize(dbecsum)
            CALL PAW_dpotential(dbecsum,rho%bec,int3_paw,rpert)
         ENDIF
      ENDIF

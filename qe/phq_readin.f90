@@ -423,8 +423,6 @@ SUBROUTINE phq_readin_tpw()
                                                   &needs one image (-ni=1)',1)
   IF (modenum < 0) CALL errore ('phq_readin', ' Wrong modenum ', 1)
   IF (dek <= 0.d0) CALL errore ( 'phq_readin', ' Wrong dek ', 1)
-  IF (lcg.AND.okvan) CALL errore('phq_readin', &
-                         'lcg=.TRUE. is presently limited to NC-PPs',1)
   !
   SELECT CASE( trim( electron_phonon ) )
   CASE( 'simple'  )

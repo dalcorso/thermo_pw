@@ -91,6 +91,7 @@ ruotaijk.o \
 scal_prod.o \
 set_defaults_pw.o \
 set_fxc_tran.o \
+set_int3q.o \
 set_intq_nc.o \
 set_kplusq.o \
 set_kup_and_kdw.o \

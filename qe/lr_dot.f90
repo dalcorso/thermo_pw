@@ -220,7 +220,7 @@ SUBROUTINE lr_prec(res, pres)
 
 USE kinds,       ONLY : DP
 USE lr_cg,       ONLY : prec_vec
-USE klist,       ONLY : ngk
+USE klist,       ONLY : ngk, lgauss, ltetra
 USE qpoint,      ONLY : ikks, ikqs
 USE wvfct,       ONLY : npwx, nbnd
 USE control_lr,  ONLY : nbnd_occ
@@ -233,6 +233,9 @@ COMPLEX(DP), INTENT(IN)  :: res(npwx*npol, nbnd, nksq*rpert)
 COMPLEX(DP), INTENT(OUT) :: pres(npwx*npol, nbnd, nksq*rpert)
 
 INTEGER :: ipert, ik, ikp, ikk, ikq, ig, npwq, ibnd
+LOGICAL :: lmet
+
+lmet= (ltetra .OR. lgauss)
 
 pres=(0.0_DP, 0.0_DP)
 DO ipert=1, rpert
@@ -247,10 +250,16 @@ DO ipert=1, rpert
             pres(npwx+1:npwx+npwq,ibnd,ikp)=&
               -prec_vec(npwx+1:npwx+npwq,ibnd,ik)*res(npwx+1:npwx+npwq,ibnd,ikp)
       ENDDO
-      CALL orthogonalize(pres(1,1,ikp), evq0(1,1,ik), ikk, ikq, &
-                                      sevq0(1,1,ik), npwq, .TRUE.)
+!
+!  For metals the solution is not orthogonalized to the valence states.
+!  In the US case we apply P_c, not P_c^+.
+!
+      IF (.NOT.(lmet)) & 
+         CALL orthogonalize(pres(1,1,ikp), sevq0(1,1,ik), ikk, ikq, &
+                                      evq0(1,1,ik), npwq, .TRUE.)
    ENDDO
 ENDDO
+IF (lmet) pres=-pres
 
 RETURN
 END SUBROUTINE lr_prec
