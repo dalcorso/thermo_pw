@@ -31,10 +31,8 @@ subroutine solve_eq_tran(iu, flag)
   USE ions_base,             ONLY : nat
   USE io_global,             ONLY : stdout, ionode
   USE io_files,              ONLY : prefix, diropn
-  USE cell_base,             ONLY : tpiba2
   USE fft_interfaces,        ONLY : fwfft
   USE klist,                 ONLY : lgauss, xk, wk, ngk, igk_k
-  USE gvect,                 ONLY : g
   USE gvecs,                 ONLY : doublegrid
   USE fft_base,              ONLY : dfftp, dffts
   USE lsda_mod,              ONLY : lsda, nspin, current_spin, isk
@@ -44,7 +42,7 @@ subroutine solve_eq_tran(iu, flag)
   USE buffers,               ONLY : get_buffer, save_buffer
   USE wavefunctions_module,  ONLY : evc
   USE uspp,                  ONLY : okvan, vkb
-  USE uspp_param,            ONLY : upf, nhm
+  USE uspp_param,            ONLY : nhm
   USE noncollin_module,      ONLY : noncolin, npol, nspin_mag, nspin_lsda
   USE scf,                   ONLY : rho, v_of_0
   USE gvect,                 ONLY : gg
@@ -72,7 +70,7 @@ subroutine solve_eq_tran(iu, flag)
   USE linear_solvers,        ONLY : ccg_many_vectors
   USE mp_asyn,               ONLY : asyn_master, with_asyn_images
   USE mp_pools,              ONLY : inter_pool_comm
-  USE mp_bands,              ONLY : intra_bgrp_comm, ntask_groups
+  USE mp_bands,              ONLY : intra_bgrp_comm
   USE mp_images,             ONLY : root_image, my_image_id
   USE mp,                    ONLY : mp_sum
   USE fft_helper_subroutines, ONLY : fftx_ntgrp

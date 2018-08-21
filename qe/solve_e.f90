@@ -23,9 +23,7 @@ subroutine solve_e_tpw(drhoscf)
   USE ions_base,             ONLY : nat
   USE io_global,             ONLY : stdout, ionode
   USE io_files,              ONLY : prefix, diropn
-  USE cell_base,             ONLY : tpiba2
   USE klist,                 ONLY : ltetra, lgauss, xk, wk, ngk, igk_k
-  USE gvect,                 ONLY : g
   USE gvecs,                 ONLY : doublegrid
   USE fft_base,              ONLY : dfftp, dffts
   USE lsda_mod,              ONLY : lsda, nspin, current_spin, isk
@@ -35,7 +33,7 @@ subroutine solve_e_tpw(drhoscf)
   USE buffers,               ONLY : get_buffer, save_buffer
   USE wavefunctions_module,  ONLY : evc
   USE uspp,                  ONLY : okvan, vkb, nlcc_any
-  USE uspp_param,            ONLY : upf, nhm
+  USE uspp_param,            ONLY : nhm
   USE noncollin_module,      ONLY : noncolin, npol, nspin_mag
   USE scf,                   ONLY : rho
   USE paw_variables,         ONLY : okpaw
@@ -52,7 +50,7 @@ subroutine solve_e_tpw(drhoscf)
   USE recover_mod,           ONLY : read_rec, write_rec
 
   USE mp_pools,              ONLY : inter_pool_comm
-  USE mp_bands,              ONLY : intra_bgrp_comm, ntask_groups
+  USE mp_bands,              ONLY : intra_bgrp_comm
   USE mp,                    ONLY : mp_sum
   USE fft_helper_subroutines, ONLY : fftx_ntgrp
 

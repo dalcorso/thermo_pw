@@ -30,9 +30,7 @@ SUBROUTINE solve_e_fpolc(iu)
   USE ions_base,             ONLY : nat
   USE io_global,             ONLY : stdout, ionode
   USE io_files,              ONLY : diropn
-  USE cell_base,             ONLY : tpiba2
   USE klist,                 ONLY : lgauss, xk, wk
-  USE gvect,                 ONLY : g
   USE gvecs,                 ONLY : doublegrid
   USE fft_base,              ONLY : dfftp, dffts
   USE lsda_mod,              ONLY : lsda, nspin, current_spin, isk
@@ -43,7 +41,7 @@ SUBROUTINE solve_e_fpolc(iu)
   USE buffers,               ONLY : get_buffer, save_buffer
   USE wavefunctions_module,  ONLY : evc
   USE uspp,                  ONLY : okvan, vkb
-  USE uspp_param,            ONLY : upf, nhm
+  USE uspp_param,            ONLY : nhm
   USE noncollin_module,      ONLY : noncolin, npol, nspin_mag
   USE scf,                   ONLY : rho, v_of_0
   USE paw_variables,         ONLY : okpaw
@@ -68,7 +66,7 @@ SUBROUTINE solve_e_fpolc(iu)
   USE mp_asyn,               ONLY : asyn_master, with_asyn_images
   USE mp_images,             ONLY : my_image_id, root_image
   USE mp_pools,              ONLY : inter_pool_comm
-  USE mp_bands,              ONLY : intra_bgrp_comm, ntask_groups
+  USE mp_bands,              ONLY : intra_bgrp_comm
   USE mp,                    ONLY : mp_sum
   USE fft_helper_subroutines, ONLY : fftx_ntgrp
   USE fft_interfaces,         ONLY : fft_interpolate

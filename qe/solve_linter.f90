@@ -28,10 +28,8 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   USE check_stop,           ONLY : check_stop_now
   USE wavefunctions_module, ONLY : evc
   USE constants,            ONLY : degspin
-  USE cell_base,            ONLY : at, tpiba2
-  USE klist,                ONLY : ltetra, lgauss, degauss, ngauss, &
-                                   xk, wk, ngk, igk_k
-  USE gvect,                ONLY : g
+  USE cell_base,            ONLY : at
+  USE klist,                ONLY : ltetra, lgauss, xk, wk, ngk, igk_k
   USE gvecs,                ONLY : doublegrid
   USE fft_base,             ONLY : dfftp, dffts
   USE lsda_mod,             ONLY : lsda, nspin, current_spin, isk
@@ -39,7 +37,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   USE wvfct,                ONLY : nbnd, npwx, g2kin,  et
   USE scf,                  ONLY : rho
   USE uspp,                 ONLY : okvan, vkb
-  USE uspp_param,           ONLY : upf, nhm, nh
+  USE uspp_param,           ONLY : nhm, nh
   USE noncollin_module,     ONLY : noncolin, npol, nspin_mag
   USE paw_variables,        ONLY : okpaw
   USE paw_onecenter,        ONLY : paw_dpotential
@@ -62,7 +60,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   USE save_ph,              ONLY : tmp_dir_save
   ! used oly to write the restart file
   USE mp_pools,             ONLY : inter_pool_comm
-  USE mp_bands,             ONLY : intra_bgrp_comm, ntask_groups, me_bgrp
+  USE mp_bands,             ONLY : intra_bgrp_comm, me_bgrp
   USE mp_asyn,              ONLY : asyn_master, with_asyn_images
   USE mp_images,            ONLY : my_image_id, root_image
   USE mp,                   ONLY : mp_sum
