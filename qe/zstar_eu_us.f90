@@ -69,9 +69,9 @@ SUBROUTINE zstar_eu_us_tpw(dvscfin)
      npe = npert(irr)
      DO imode = 1, npe
         mode = imode0 + imode
-        IF (my_pool_id==0) &
+!        IF (my_pool_id==0) &
            CALL get_buffer (drhoscfh, lrdrhous, iudrhous, mode)
-        CALL mp_bcast(drhoscfh, root_pool, inter_pool_comm)
+!        CALL mp_bcast(drhoscfh, root_pool, inter_pool_comm)
         DO jpol = 1, 3
            zstareu0_wrk(jpol,mode) =  zstareu0_wrk(jpol,mode) -             &
                zdotc(dfftp%nnr*nspin_mag,dvscfin(1,1,jpol),1,drhoscfh,1) &
@@ -84,6 +84,7 @@ SUBROUTINE zstar_eu_us_tpw(dvscfin)
 !  Collect the contribution of all g vectors
 !
   CALL mp_sum ( zstareu0_wrk, intra_bgrp_comm )
+  CALL mp_sum ( zstareu0_wrk, inter_pool_comm )
   zstareu0_rec= zstareu0_rec + zstareu0_wrk
 !
 !  Compute the PAW contribution. This term is present only in the PAW case.
