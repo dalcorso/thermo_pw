@@ -339,7 +339,6 @@ subroutine solve_e_tpw(drhoscf)
      !   for the three polarizations - symmetrize it
      !
      call mp_sum ( drhoscfh, inter_pool_comm )
-     call mp_sum ( dbecsum, inter_pool_comm )
      IF (okpaw) call mp_sum ( dbecsum, inter_pool_comm )
      if (.not.lgamma_gamma) then
         call psyme (drhoscfh)
