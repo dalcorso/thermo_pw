@@ -55,6 +55,8 @@ patches given below.</p>
 **Patches for thermo_pw.1.0.0**:
 <br>
 Grimme-d3 not implemented. 
+zeu+US+pools not working. Apply the changes described in 
+<a href="https://github.com/dalcorso/thermo_pw/commit/6c70c8f68abb017b90da9d4ce4ab0fb7620a3308">commit 6c70c8f</a> 
 <br>
 
 **Known problems of thermo_pw.0.9.0**:
