@@ -108,6 +108,7 @@ print_symmetries_tpw : output slightly improved. Writes the Cayley-Klein
 find_mode_sym_tpw : similar to the one of QE but does not need a threshold to
             choose the degenerate modes.
 
+newdq_tpw : fixed a bug in the FR-PAW case.
 
 
 The new routines contained in this directory are:

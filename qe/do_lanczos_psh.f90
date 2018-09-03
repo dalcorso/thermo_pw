@@ -472,7 +472,7 @@ SUBROUTINE do_lanczos_psh()
 !   In the US and PAW case computes the integral of dV_Hxc and the 
 !   augmentation function. This quantity is needed in adddvscf.
 !
-     CALL newdq(dvscfin,rpert)
+     CALL newdq_tpw(dvscfin,rpert)
 
      tcpu = get_clock ('PHONON')
      WRITE( stdout, '(/,5x," iter # ",i8," total cpu time :",f8.1,&

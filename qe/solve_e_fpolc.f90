@@ -519,7 +519,7 @@ SUBROUTINE solve_e_fpolc(iu)
         ENDIF
      ENDIF
 
-     call newdq(dvscfin,3)
+     call newdq_tpw(dvscfin,3)
 
 1001 CONTINUE
 

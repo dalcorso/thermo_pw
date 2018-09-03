@@ -528,7 +528,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
      !     with the new change of the potential we compute the integrals
      !     of the change of potential and Q
      !
-     call newdq (dvscfin, npe)
+     call newdq_tpw (dvscfin, npe)
 
 #if defined(__MPI)
      aux_avg (1) = DBLE (ltaver)

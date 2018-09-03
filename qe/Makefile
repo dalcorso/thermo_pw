@@ -60,6 +60,7 @@ lr_restart.o \
 lr_sm1_psi.o \
 lr_us.o  \
 mix_pot.o \
+newdq.o \
 nh_lanczos_step.o \
 non_scf.o \
 openfilq.o \

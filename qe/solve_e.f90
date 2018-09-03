@@ -396,7 +396,7 @@ subroutine solve_e_tpw(drhoscf)
         call PAW_dpotential(dbecsum,rho%bec,int3_paw,3)
      ENDIF
 
-     call newdq(dvscfin,3)
+     call newdq_tpw(dvscfin,3)
 
      CALL mp_sum(ltaver, inter_pool_comm)
      CALL mp_sum(lintercall, inter_pool_comm)
