@@ -56,7 +56,9 @@ patches given below.</p>
 <br>
 * Grimme-d3 not implemented. 
 * zeu+US+pools not working. Apply the changes described in 
-<a href="https://github.com/dalcorso/thermo_pw/commit/6c70c8f68abb017b90da9d4ce4ab0fb7620a3308">commit 6c70c8f</a> 
+<a href="https://github.com/dalcorso/thermo_pw/commit/6c70c8f68abb017b90da9d4ce4ab0fb7620a3308">commit 6c70c8f</a>. 
+* The plotted Gruneisen parameters have the wrong sign when
+lmurn=.TRUE.. Apply the change described in <a href="https://github.com/dalcorso/thermo_pw/commit/d78859e8719894646ee4b416a401676c40ff8eff">commit d78859e</a>.
 <br>
 
 **Known problems of thermo_pw.0.9.0**:
@@ -78,6 +80,8 @@ the following file for
 <code>qe/set_defaults_pw.f90</code> remove the <code>_tpw</code> from the 
 call to <code>set_kplusq</code>.
 * Some compilers could have problems to compile the routine <code>thermo_pw/qe/set_kplusq.f90</code>. Use the following <a href="http://people.sissa.it/~dalcorso/thermo_pw/set_kplusq.f90">set_kplusq.f90</a>.
+* The plotted Gruneisen parameters have the wrong sign when lmurn=.TRUE.. 
+Apply the change described in <a href="https://github.com/dalcorso/thermo_pw/commit/d78859e8719894646ee4b416a401676c40ff8eff">commit d78859e</a>.  
 <br>
 
 **Patches for thermo_pw.0.8.0**:
