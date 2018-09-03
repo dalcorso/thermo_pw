@@ -108,6 +108,7 @@ sym_dmage_fpol.o \
 sym_dmageq.o \
 transform_intq_nc.o \
 transform_intq_so.o  \
+tra_write_zstar.o \
 write_group_info_ph.o \
 zstar_eu.o          \
 zstar_eu_loc.o     \

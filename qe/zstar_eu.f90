@@ -104,54 +104,17 @@ subroutine zstar_eu_tpw(drhoscf)
   call mp_sum ( zstareu0_wrk, inter_pool_comm )
 
 !  write(6,*) ' term Z^{(1} wrk'
-!  DO na = 1, nat
-!     WRITE( stdout, '(10x," atom ",i6, a6)') na, atm(ityp(na))
-!     WRITE( stdout, '(6x,"Ex  (",6f10.5," )")')  (zstareu0_wrk (1,3*(na-1)+jpol), &
-!            jpol = 1, 3)
-!     WRITE( stdout, '(6x,"Ey  (",6f10.5," )")')  (zstareu0_wrk (2,3*(na-1)+jpol), &
-!            jpol = 1, 3)
-!     WRITE( stdout, '(6x,"Ez  (",6f10.5," )")')  (zstareu0_wrk (3,3*(na-1)+jpol), &
-!            jpol = 1, 3)
-!  ENDDO
+!  CALL tra_write_zstar(zstareu0_wrk, zstareu, .TRUE.)
 !  write(6,*) ' term Z^{(1} 0'
-!  DO na = 1, nat
-!     WRITE( stdout, '(10x," atom ",i6, a6)') na, atm(ityp(na))
-!     WRITE( stdout, '(6x,"Ex  (",6f10.5," )")')  (zstareu0 (1,3*(na-1)+jpol), &
-!            jpol = 1, 3)
-!     WRITE( stdout, '(6x,"Ey  (",6f10.5," )")')  (zstareu0 (2,3*(na-1)+jpol), &
-!            jpol = 1, 3)
-!     WRITE( stdout, '(6x,"Ez  (",6f10.5," )")')  (zstareu0 (3,3*(na-1)+jpol), &
-!            jpol = 1, 3)
-!  ENDDO
-!
+!  CALL tra_write_zstar(zstareu0, zstareu, .TRUE.)
 !  write(6,*) ' term Z^{(1} rec'
-!  DO na = 1, nat
-!     WRITE( stdout, '(10x," atom ",i6, a6)') na, atm(ityp(na))
-!     WRITE( stdout, '(6x,"Ex  (",6f10.5," )")')  (zstareu0_rec (1,3*(na-1)+jpol), &
-!            jpol = 1, 3)
-!     WRITE( stdout, '(6x,"Ey  (",6f10.5," )")')  (zstareu0_rec (2,3*(na-1)+jpol), &
-!            jpol = 1, 3)
-!     WRITE( stdout, '(6x,"Ez  (",6f10.5," )")')  (zstareu0_rec (3,3*(na-1)+jpol), &
-!            jpol = 1, 3)
-!  ENDDO
+!  CALL tra_write_zstar(zstareu0_rec, zstareu, .TRUE.)
 
   zstareu0_wrk = zstareu0 + zstareu0_wrk + zstareu0_rec 
   !
   ! bring the mode index to cartesian coordinates
   !
-  zstareu (:,:,:) = 0.d0
-  do jpol = 1, 3
-     do mu = 1, 3 * nat
-        na = (mu - 1) / 3 + 1
-        icart = mu - 3 * (na - 1)
-        do nu = 1, 3 * nat
-           zstareu (jpol, icart, na) = zstareu (jpol, icart, na) + &
-                CONJG(u (mu, nu) ) * ( zstareu0_wrk (1,nu) * bg(jpol,1) + &
-                                       zstareu0_wrk (2,nu) * bg(jpol,2) + &
-                                       zstareu0_wrk (3,nu) * bg(jpol,3) )
-        enddo
-     enddo
-  enddo
+  CALL tra_write_zstar(zstareu0_wrk, zstareu, .FALSE.)
   !
   !  symmetrize
   !
