@@ -96,43 +96,24 @@ SUBROUTINE zstar_eu_us_tpw(dvscfin)
            mode = mode0 + ipert
            DO nt=1,ntyp
               IF (upf(nt)%tpawp) THEN
-                 IF (noncolin) THEN
-                    ijh=0
-                    DO ih=1,nh(nt)
-                       DO jh=1,nh(nt)
-                          ijh=ijh+1
-                          DO na=1,nat
-                             IF (ityp(na)==nt) THEN
-                                DO jpol = 1, 3
-                                   DO is=1,nspin_mag
-                                     zstareu0_rec(jpol,mode)=zstareu0_rec(jpol,mode)  &
-                                       -int3_paw(ih,jh,na,is,jpol)* &
-                                               becsumort(ijh,na,is,mode)
-                                   ENDDO
+                 ijh=0
+                 DO ih=1,nh(nt)
+                    DO jh=ih,nh(nt)
+                       ijh=ijh+1
+                       DO na=1,nat
+                          IF (ityp(na)==nt) THEN
+                             DO jpol = 1, 3
+                                DO is=1,nspin_mag
+                                 zstareu0_rec(jpol,mode)=&
+                                            zstareu0_rec(jpol,mode)  &
+                                    -int3_paw(ih,jh,na,is,jpol)* &
+                                            becsumort(ijh,na,is,mode)
                                 ENDDO
-                             ENDIF
-                          ENDDO
+                             ENDDO
+                          ENDIF
                        ENDDO
                     ENDDO
-                 ELSE
-                    ijh=0
-                    DO ih=1,nh(nt)
-                       DO jh=ih,nh(nt)
-                          ijh=ijh+1
-                          DO na=1,nat
-                             IF (ityp(na)==nt) THEN
-                                DO jpol = 1, 3
-                                   DO is=1,nspin_mag
-                                    zstareu0_rec(jpol,mode)=zstareu0_rec(jpol,mode)  &
-                                       -int3_paw(ih,jh,na,is,jpol)* &
-                                               becsumort(ijh,na,is,mode)
-                                   ENDDO
-                                ENDDO
-                             ENDIF
-                          ENDDO
-                       ENDDO
-                    ENDDO
-                 ENDIF
+                 ENDDO
               ENDIF
            ENDDO
         ENDDO
