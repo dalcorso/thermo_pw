@@ -207,8 +207,12 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
            END DO
            frequency(ibnd,n)=f
            gruneisen(ibnd,n)=g
+!
+!     g here is V d w / d V. We change sign and divide by the frequency w 
+!     to get the gruneisen parameter.
+!
            IF (frequency(ibnd,n) > 0.0_DP ) THEN
-              gruneisen(ibnd,n) = gruneisen(ibnd,n) / frequency(ibnd,n)
+              gruneisen(ibnd,n) = - gruneisen(ibnd,n) / frequency(ibnd,n)
            ELSE
               gruneisen(ibnd,n) = 0.0_DP
            ENDIF
