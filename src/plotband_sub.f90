@@ -708,58 +708,23 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
   ENDIF
   factor_dx = MAX(8.0_DP, 2.0_DP * sizeb, 2.0_DP * sizec, &
                                        2.0_DP/sizeb, 2.0_DP/sizec)
-
-  dxmod_save = SQRT( (k(1,2)-k(1,1))**2 +  &
-                     (k(2,2)-k(2,1))**2 +  &
+  dxmod_save = SQRT( (k(1,2)-k(1,1))**2+ &
+                     (k(2,2)-k(2,1))**2+ &
                      (k(3,2)-k(3,1))**2 )
-!
-!  and set a spacing for panels that are not contiguous.
-!
-  dgap=15.0_DP * dxmod_save
-  IF (.NOT.long_path) dgap=0.0_DP
-!
-!  now compute the x coordinate on the plot, but use the effective k
-!  points
-!
-  kx(1) = 0.d0
-  nks_=tot_points/nkz
-  DO n=2,tot_points
-     dxmod=sqrt ( (k_eff(1,n)-k_eff(1,n-1))**2 + &
-                  (k_eff(2,n)-k_eff(2,n-1))**2 + &
-                  (k_eff(3,n)-k_eff(3,n-1))**2 )
-     IF (MOD(n-1,nks_)==0) THEN
-!
-!   This is a PBS calculation and now we switch to the next plot
-!
-         kx(n)=0.0_DP
-     ELSEIF (dxmod > factor_dx*dxmod_save) THEN
-!
-!   A big jump in dxmod is a sign that the point k(:,n) and k(:,n-1)
-!   are quite distant and belong to two different lines. We put them on
-!   the same point in the graph if the two k point belong to the same star
-!   up to a reciprocal lattice vector, or we introduce a gap.
-!
-        IF (same_next_eff(n-1)) THEN
-           kx(n)=kx(n-1) 
-        ELSE
-           kx(n)=kx(n-1) + dgap
-        ENDIF
-     ELSEIF (dxmod > 1.d-5) THEN
-!
-!  This is the usual case. The two points k(:,n) and k(:,n-1) are in the
-!  same path.
-!
-        kx(n) = kx(n-1) + dxmod
-        dxmod_save = dxmod
-     ELSE
-!
-!  This is the case in which dxmod is almost zero. The two points coincide
-!  in the graph, but we do not save dxmod.
-!
-        kx(n) = kx(n-1) +  dxmod
+  dgap=0.0_DP
+  CALL find_total_plot_length(tot_points, k_eff, kx, same_next_eff, &
+                              nkz, dxmod_save, factor_dx, dgap)
 
-     ENDIF
-  ENDDO
+  IF (long_path) THEN
+!
+!  and set a spacing for panels that are not contiguous to 1/15 of the
+!  total lenght
+!
+     dgap= kx(tot_points)/15.0_DP
+     CALL find_total_plot_length(tot_points, k_eff, kx, same_next_eff, &
+                              nkz, dxmod_save, factor_dx, dgap)
+  ENDIF
+
 
   IF (nkz>1) WRITE(stdout,'(/,5x,"Projected band structure calculation, &
                       &nkz=",i5,/)') nkz
@@ -962,4 +927,65 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
 
   RETURN
 END SUBROUTINE plotband_sub
+
+SUBROUTINE find_total_plot_length(tot_points, k_eff, kx, same_next_eff, &
+                                       nkz, dxmod_save, factor_dx, dgap)
+!
+!  now compute the x coordinate on the plot, but use the effective k
+!  points
+!
+USE kinds, ONLY : DP
+
+IMPLICIT NONE
+INTEGER :: tot_points, nkz
+
+REAL(DP) :: dxmod_save, factor_dx, dgap
+REAL(DP) :: k_eff(3,tot_points), kx(tot_points)
+LOGICAL  :: same_next_eff(tot_points)
+
+REAL(DP) :: dxmod
+INTEGER  :: nks_, n
+
+kx(1) = 0.d0
+nks_=tot_points/nkz
+DO n=2,tot_points
+   dxmod=SQRT((k_eff(1,n)-k_eff(1,n-1))**2 + &
+              (k_eff(2,n)-k_eff(2,n-1))**2 + &
+              (k_eff(3,n)-k_eff(3,n-1))**2 )
+   IF (MOD(n-1,nks_)==0) THEN
+!
+!   This is a PBS calculation and now we switch to the next plot
+!
+       kx(n)=0.0_DP
+   ELSEIF (dxmod > factor_dx*dxmod_save) THEN
+!
+!   A big jump in dxmod is a sign that the point k(:,n) and k(:,n-1)
+!   are quite distant and belong to two different lines. We put them on
+!   the same point in the graph if the two k point belong to the same star
+!   up to a reciprocal lattice vector, or we introduce a gap.
+!
+        IF (same_next_eff(n-1)) THEN
+           kx(n)=kx(n-1) 
+        ELSE
+           kx(n)=kx(n-1) + dgap
+        ENDIF
+     ELSEIF (dxmod > 1.d-5) THEN
+!
+!  This is the usual case. The two points k(:,n) and k(:,n-1) are in the
+!  same path.
+!
+        kx(n) = kx(n-1) + dxmod
+        dxmod_save = dxmod
+     ELSE
+!
+!  This is the case in which dxmod is almost zero. The two points coincide
+!  in the graph, but we do not save dxmod.
+!
+        kx(n) = kx(n-1) +  dxmod
+
+     ENDIF
+  ENDDO
+
+RETURN
+END SUBROUTINE find_total_plot_length
 
