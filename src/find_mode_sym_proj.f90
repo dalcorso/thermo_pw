@@ -85,8 +85,9 @@ SUBROUTINE find_mode_sym_proj (u, w2, tau, nat, nsym, s, sr, ft, gk, invs, &
 
   COMPLEX(DP), EXTERNAL :: zdotc
   REAL(DP), ALLOCATABLE :: w1(:)
-  REAL(DP) :: arg
-  COMPLEX(DP), ALLOCATABLE ::  rmode(:,:), trace(:,:), z(:,:), sym_mat(:,:,:)
+  REAL(DP) :: arg, sumt
+  COMPLEX(DP), ALLOCATABLE ::  rmode(:,:), trace(:,:), z(:,:), sym_mat(:,:,:), &
+                               w(:,:)
   COMPLEX(DP) :: factor(48,48)
   LOGICAL :: is_linear
   INTEGER :: counter, counter_s, isym, jsym
@@ -103,6 +104,7 @@ SUBROUTINE find_mode_sym_proj (u, w2, tau, nat, nsym, s, sr, ft, gk, invs, &
   ALLOCATE(w1(nmodes))
   ALLOCATE(rmode(nmodes,nmodes))
   ALLOCATE(trace(48,nmodes))
+  ALLOCATE(w(48,nmodes))
 
   IF (flag==1) THEN
      !
@@ -133,61 +135,53 @@ SUBROUTINE find_mode_sym_proj (u, w2, tau, nat, nsym, s, sr, ft, gk, invs, &
      istart(1)=7
      IF(is_linear(nat,tau)) istart(1)=6
   ENDIF
-!
-! The other modes are divided into groups of degenerate modes
-!
-  DO imode=istart(1)+1,nmodes
-     IF (ABS(w1(imode)-w1(imode-1)) > 1.0d-2) THEN
-        ngroup=ngroup+1
-        istart(ngroup)=imode
-     END IF
-  END DO
-  istart(ngroup+1)=nmodes+1
   !
   !  Find the character of all the symmetry operations 
   !
+  DO isym=1,nsym
+     CALL rotate_mod(z,rmode,sr(1,1,isym),irt,rtau,xq,nat,invs(isym))
+     arg = tpi * ( gk(1,invs(isym))*ft(1,isym) +  &
+                   gk(2,invs(isym))*ft(2,isym) +  &
+                   gk(3,invs(isym))*ft(3,isym) )
+     phase=CMPLX(COS(arg),SIN(arg),KIND=DP)
+     rmode=rmode*phase
+     DO nu_i=istart(1), 3*nat
+        w(isym,nu_i)=ZDOTC(3*nat,z(1,nu_i),1,rmode(1,nu_i),1)
+     ENDDO
+  ENDDO
+  !
+  ! The other modes are divided into groups of degenerate modes
+  ! This is done by computing the trace for each group of degenerate modes.
+  ! We continue to add diagonal elements to the trace, until we
+  ! find a set of traces whose sum of square moduli is an integer
+  ! multiple of the group order. 
+  ! 
+  trace=(0.d0,0.d0)
+  ngroup=1
+  DO nu_i=istart(1), nmodes
+     DO isym=1,nsym
+        trace(isym,ngroup)=trace(isym,ngroup) + w(isym, nu_i)
+     ENDDO
+     sumt=0.0_DP
+     DO isym=1,nsym
+        sumt=sumt+ABS(trace(isym,ngroup))**2
+     ENDDO
+     sumt=sumt/nsym
+!
+!    If sumt is an integer we found an irreducible representation or
+!    an integer number of irreducible representations.
+!    We can start to identify a new group of modes.
+!
+     IF (ABS(NINT(sumt)-sumt) < 1.d-5) THEN
+        ngroup=ngroup+1
+        istart(ngroup)=nu_i+1
+     ENDIF
+  ENDDO
+  ngroup=ngroup-1
+
 !  igroup_t=1
 !  dim_rap_t=istart(igroup_t+1) - istart(igroup_t)
 !  ALLOCATE(sym_mat(dim_rap_t,dim_rap_t,48))
-
-  DO igroup=1,ngroup
-     dim_rap(igroup)=istart(igroup+1)-istart(igroup)
-     DO irot=1,nsym
-!
-!    rotate all modes together
-!
-        CALL rotate_mod(z,rmode,sr(1,1,irot),irt,rtau,xq,nat,invs(irot))
-
-        arg=tpi * ( gk(1,invs(irot))*ft(1,irot) +  &
-                    gk(2,invs(irot))*ft(2,irot) +  &
-                    gk(3,invs(irot))*ft(3,irot) )
-        phase=cmplx(cos(arg),sin(arg),kind=DP)
-        rmode=rmode*phase
-
-        trace(irot,igroup)=(0.d0,0.d0)
-        DO i=1,dim_rap(igroup)
-           nu_i=istart(igroup)+i-1
-           trace(irot,igroup)=trace(irot,igroup) + &
-                zdotc(3*nat,z(1,nu_i),1,rmode(1,nu_i),1)
-        END DO
-!
-!       write(6,*) 'group,class',igroup, irot, trace(irot,igroup)
-!
-!   For testing purposes it is possible to compute the complete matrix 
-!   of the representation and to study the factor system
-!
-!
-!        DO i=1,dim_rap_t
-!           nu_i=istart(igroup)+i-1
-!           DO j=1,dim_rap_t
-!              nu_j=istart(igroup)+j-1
-!              sym_mat(i,j,which_elem(irot)) = zdotc(3*nat,z(1,nu_i),1, &
-!                                                          rmode(1,nu_j),1)
-!           END DO
-!        END DO
-
-     END DO
-  END DO
 
 !  WRITE(stdout,'(/,5x,"The factor system of the phonon representation",/)')
 !  CALL find_factor_system(sym_mat, dim_rap_t, nsym, code_groupq_ext, &
