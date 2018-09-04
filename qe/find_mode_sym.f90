@@ -166,7 +166,6 @@ SUBROUTINE find_mode_sym_tpw (u, w2, tau, nat, nsym, s, sr, irt, xq,    &
   trace=(0.d0,0.d0)
   ngroup=1
   DO nu_i=istart(1), nmodes
-     sumt=0.0_DP
      DO iclass=1,nclass
         trace(iclass,ngroup)=trace(iclass,ngroup) + w(iclass, nu_i)
      ENDDO
