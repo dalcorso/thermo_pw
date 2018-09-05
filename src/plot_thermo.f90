@@ -320,7 +320,7 @@ DO na=1,nat
 
       IF (ltherm_freq) THEN
          CALL gnuplot_write_file_mul_data(filename,1,3,'color_pink', &
-                                               .NOT.ltherm_dos,.TRUE.,.FALSE.)
+                                               .NOT.ltherm_dos,.FALSE.,.FALSE.)
 
          CALL gnuplot_write_file_mul_data(filename,1,4,'color_light_blue', &
                                                .FALSE.,.FALSE.,.FALSE.)
