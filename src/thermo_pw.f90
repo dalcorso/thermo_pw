@@ -44,14 +44,14 @@ PROGRAM thermo_pw
 !
 !  library helper routines and variables
 !
-  USE elastic_constants, ONLY : epsilon_geo, sigma_geo
+  USE elastic_constants, ONLY : sigma_geo
   USE piezoelectric_tensor, ONLY : polar_geo 
 !
 !  variables of pw or phonon used here
 !
   USE input_parameters, ONLY : outdir
-  USE ions_base,        ONLY : nat, tau
-  USE cell_base,        ONLY : at, omega, ibrav, celldm
+  USE ions_base,        ONLY : tau
+  USE cell_base,        ONLY : at, omega, celldm
 
   USE io_files,         ONLY : tmp_dir, wfc_dir, check_tempdir
   USE check_stop,       ONLY : max_seconds
@@ -70,8 +70,7 @@ PROGRAM thermo_pw
   IMPLICIT NONE
   !
   INTEGER  :: part, nwork, igeom, exit_status, iaux
-  REAL(DP) :: zero, rd_ht(3,3)
-  LOGICAL  :: exst, parallelfs, run, trd_ht
+  LOGICAL  :: exst, parallelfs, run
   CHARACTER (LEN=9)   :: code = 'THERMO_PW'
   CHARACTER (LEN=256) :: auxdyn=' '
   !

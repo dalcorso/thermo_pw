@@ -71,7 +71,6 @@ SUBROUTINE matdyn_interp(nq, disp_q, startq, lastq, with_eigen)
   USE ions_base,      ONLY : nat, tau, ityp, ntyp => nsp, amass
   USE cell_base,      ONLY : at, bg, celldm, omega, alat
   USE constants,      ONLY : RY_TO_CMM1, amu_ry
-  USE noncollin_module, ONLY : nspin_mag
   USE ifc,            ONLY : frc, atm, has_zstar, zeu, epsil_ifc, m_loc, &
                              zasr, wscache
   USE control_ph,     ONLY : xmldyn

@@ -14,7 +14,7 @@ SUBROUTINE write_quadratic()
 !
 USE kinds,          ONLY : DP
 USE data_files,     ONLY : flevdat
-USE thermo_mod,     ONLY : ngeo, energy_geo, celldm_geo
+USE thermo_mod,     ONLY : ngeo, celldm_geo
 USE cell_base,      ONLY : ibrav
 USE control_mur,    ONLY : nvol
 USE control_quadratic_energy, ONLY : coeff
