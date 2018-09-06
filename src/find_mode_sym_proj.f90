@@ -86,8 +86,8 @@ SUBROUTINE find_mode_sym_proj (u, w2, tau, nat, nsym, s, sr, ft, gk, invs, &
   COMPLEX(DP), EXTERNAL :: zdotc
   REAL(DP), ALLOCATABLE :: w1(:)
   REAL(DP) :: arg, sumt
-  COMPLEX(DP), ALLOCATABLE ::  rmode(:,:), trace(:,:), z(:,:), sym_mat(:,:,:), &
-                               w(:,:)
+  COMPLEX(DP), ALLOCATABLE ::  rmode(:,:), trace(:,:), z(:,:), &
+                               sym_mat(:,:,:), w(:,:)
   COMPLEX(DP) :: factor(48,48)
   LOGICAL :: is_linear
   INTEGER :: counter, counter_s, isym, jsym
@@ -135,9 +135,9 @@ SUBROUTINE find_mode_sym_proj (u, w2, tau, nat, nsym, s, sr, ft, gk, invs, &
      istart(1)=7
      IF(is_linear(nat,tau)) istart(1)=6
   ENDIF
-  !
-  !  Find the character of all the symmetry operations 
-  !
+!
+!  Find the character of each symmetry operation on all the modes
+!
   DO isym=1,nsym
      CALL rotate_mod(z,rmode,sr(1,1,isym),irt,rtau,xq,nat,invs(isym))
      arg = tpi * ( gk(1,invs(isym))*ft(1,isym) +  &
@@ -151,10 +151,11 @@ SUBROUTINE find_mode_sym_proj (u, w2, tau, nat, nsym, s, sr, ft, gk, invs, &
   ENDDO
   !
   ! The other modes are divided into groups of degenerate modes
-  ! This is done by computing the trace for each group of degenerate modes.
-  ! We continue to add diagonal elements to the trace, until we
-  ! find a set of traces whose sum of square moduli is an integer
-  ! multiple of the group order. 
+  !
+  !  Computes the trace for each group of degenerate modes.
+  !  We continue to add diagonal elements to the trace, until we
+  !  find a set of traces whose sum of square moduli is an integer
+  !  multiple of the group order. 
   ! 
   trace=(0.d0,0.d0)
   ngroup=1
@@ -168,7 +169,7 @@ SUBROUTINE find_mode_sym_proj (u, w2, tau, nat, nsym, s, sr, ft, gk, invs, &
      ENDDO
      sumt=sumt/nsym
 !
-!    If sumt is an integer we found an irreducible representation or
+!    If sumt is an integer we have found an irreducible representation or
 !    an integer number of irreducible representations.
 !    We can start to identify a new group of modes.
 !
@@ -178,25 +179,6 @@ SUBROUTINE find_mode_sym_proj (u, w2, tau, nat, nsym, s, sr, ft, gk, invs, &
      ENDIF
   ENDDO
   ngroup=ngroup-1
-
-!  igroup_t=1
-!  dim_rap_t=istart(igroup_t+1) - istart(igroup_t)
-!  ALLOCATE(sym_mat(dim_rap_t,dim_rap_t,48))
-
-!  WRITE(stdout,'(/,5x,"The factor system of the phonon representation",/)')
-!  CALL find_factor_system(sym_mat, dim_rap_t, nsym, code_groupq_ext, &
-!                          factor, .TRUE.)
-!  DEALLOCATE(sym_mat)
-!
-!  DO igroup=1,ngroup
-!     DO isym=1,nsym
-!        DO jsym=1,nsym
-!           IF (which_elem(jsym)==isym) &
-!              WRITE(stdout,'(2i5,4f11.8)') igroup,jsym,trace(jsym,igroup) 
-!        ENDDO
-!     ENDDO
-!     WRITE(stdout,*)
-!  ENDDO
   !
   !  And now use the character table to identify the symmetry representation
   !  of each group of modes
@@ -252,6 +234,7 @@ SUBROUTINE find_mode_sym_proj (u, w2, tau, nat, nsym, s, sr, ft, gk, invs, &
   DEALLOCATE(trace)
   DEALLOCATE(z)
   DEALLOCATE(w1)
+  DEALLOCATE(w)
   DEALLOCATE(rmode)
   DEALLOCATE(dim_rap)
   DEALLOCATE(istart)
@@ -318,7 +301,7 @@ ENDDO
 RETURN
 END SUBROUTINE print_mode_sym_proj
 
-SUBROUTINE prepare_sym_analysis_proj(nsymq,s,sr,ft,gii,ptype,gcode_old)
+SUBROUTINE prepare_sym_analysis_proj(nsymq,s,sr,ft,gii,t_rev,ptype,gcode_old)
 !
 !  set gcode_old to -1 to avoid any output writing from this routine
 !
@@ -329,16 +312,16 @@ USE proj_rap_point_group, ONLY : which_elem, group_desc, char_mat_proj, &
                           name_rap_proj, nrap_proj, code_groupq_ext, & 
                           qptype, qgauge 
 USE rap_point_group, ONLY : code_group, gname
+USE rap_point_group_is, ONLY : code_group_is, gname_is
+USE noncollin_module, ONLY : nspin_mag
 
 IMPLICIT NONE
 
 INTEGER :: nsymq, gcode_old
-INTEGER :: s(3,3,48), gii(3,48), ptype(3)
-REAL(DP) :: sr(3,3,48), ft(3,48), argument(48,48), gauge(48)
-INTEGER :: code_group_ext
+INTEGER :: s(3,3,48), gii(3,48), ptype(3), t_rev(48)
+REAL(DP) :: sr(3,3,48), ft(3,48), argument(48,48), gauge(48), sr_is(3,3,48)
+INTEGER :: code_group_ext, isym, nsym_is
 LOGICAL :: lwrite
-
-CALL find_group(nsymq,sr,gname,code_group)
 lwrite=.FALSE.
 IF (code_group/=gcode_old .AND. gcode_old /= -1 ) lwrite=.TRUE.
 
@@ -354,6 +337,22 @@ CALL find_irr_proj(code_group_ext,char_mat_proj,name_rap_proj, &
 qptype(:)=ptype(:)
 qgauge(:)=gauge(:)
 code_groupq_ext=code_group_ext
+!
+!  If some symmetry needs the time reversal check which group is formed
+!  by the operations that do not need time reversal.
+!
+IF (nspin_mag==4) THEN
+   nsym_is=0
+   DO isym=1,nsymq
+      IF (t_rev(isym)==0) THEN
+         nsym_is=nsym_is+1
+         sr_is(:,:,nsym_is) = sr(:,:,isym)
+      ENDIF
+   ENDDO
+   CALL find_group(nsym_is,sr_is,gname_is,code_group_is)
+ENDIF
+!
+CALL find_group(nsymq,sr,gname,code_group)
 
 RETURN
 END SUBROUTINE prepare_sym_analysis_proj

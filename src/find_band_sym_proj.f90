@@ -99,8 +99,9 @@ SUBROUTINE find_band_sym_proj (ik,evc,et,nsym,s,ftau,d_spin,gk,invs, &
        factor(48,48), &! the factor system of the representation
        pha             ! the phase to be applied at zone border
 
-  REAL(DP) :: &
+  REAL(DP) ::  &
        arg,    &       ! the argument of the phase
+       sumt,   &       ! the modulus square of the sum of the characters
        ft(3,48)        ! the fractional translations in crystal coordinates
 
   REAL(DP), ALLOCATABLE ::  &
@@ -110,6 +111,7 @@ SUBROUTINE find_band_sym_proj (ik,evc,et,nsym,s,ftau,d_spin,gk,invs, &
        psic_nc(:,:,:),    & ! wavefunctions in real space
        evcr(:,:),         & ! the rotated of each wave function in rec. space
        trace(:,:),        & ! the trace of the symmetry matrix
+       w(:,:),            & ! the diagonal of the big representation
        sym_mat(:,:,:)       ! the matrices of one representation
 
 !
@@ -119,6 +121,7 @@ SUBROUTINE find_band_sym_proj (ik,evc,et,nsym,s,ftau,d_spin,gk,invs, &
   ALLOCATE(evcr(npwx*npol,nbnd))
   ALLOCATE(psic_nc(dfftp%nnr,npol,nbnd))
   ALLOCATE(trace(96,nbnd))
+  ALLOCATE(w(48,nbnd))
   IF (okvan) CALL allocate_bec_type ( nkb, nbnd, becp )
   !
   !  A few initializations
@@ -126,19 +129,6 @@ SUBROUTINE find_band_sym_proj (ik,evc,et,nsym,s,ftau,d_spin,gk,invs, &
   rap_et=-1
   w1=et*rytoev
   has_e=1
-  !
-  !  divide the energies in groups of degenerate eigenvalues. Two eigenvalues
-  !  are assumed to be degenerate if their difference is less than 0.0001 eV.
-  !
-  ngroup=1
-  istart(ngroup)=1
-  DO ibnd=2,nbnd
-     IF (abs(w1(ibnd)-w1(ibnd-1)) > 0.0001d0) THEN
-        ngroup=ngroup+1
-        istart(ngroup)=ibnd
-     ENDIF
-  ENDDO
-  istart(ngroup+1)=nbnd+1
 !
 !  Compute the fractional translations 
 !
@@ -190,7 +180,7 @@ SUBROUTINE find_band_sym_proj (ik,evc,et,nsym,s,ftau,d_spin,gk,invs, &
      arg = tpi * ( gk(1,invs(irot))*ft(1,irot) +  &
                    gk(2,invs(irot))*ft(2,irot) +  &
                    gk(3,invs(irot))*ft(3,irot) )
-     pha=CMPLX(COS(arg), SIN(arg),kind=DP)
+     pha=CMPLX(COS(arg), SIN(arg), KIND=DP)
      evcr(:,1:nbnd)=evcr(:,1:nbnd)*pha
      !
      !   and apply S in the US case.
@@ -199,35 +189,43 @@ SUBROUTINE find_band_sym_proj (ik,evc,et,nsym,s,ftau,d_spin,gk,invs, &
         CALL calbec( npw, vkb, evcr, becp )
         CALL s_psi( npwx, npw, nbnd, evcr, evcr )
      ENDIF
-     !
-     !  Compute the trace of the representation for each group of bands
-     !
-     DO igroup=1,ngroup
-        dim_rap=istart(igroup+1)-istart(igroup)
-        DO i=1,dim_rap
-           ibnd=istart(igroup)+i-1
-           trace(irot,igroup)=trace(irot,igroup) +            &
-                zdotc(npol*npwx,evc(1,ibnd),1,evcr(1,ibnd),1)
-        ENDDO
-        !      write(stdout,*) igroup, irot, dim_rap, trace(irot,igroup)
+
+     DO ibnd=1, nbnd
+        w(irot,ibnd)=ZDOTC(npol*npwx,evc(1,ibnd),1,evcr(1,ibnd),1)
      ENDDO
-!
-! For testing purposes we can compute all the matrix of the 
-! representation for group igroup. Set igroup_t with the group of interest
-! The matrices sym_mat are saved already in the correct position
-! using the stanrdar order of the point groups
-!
-!     DO i=1,dim_rap_t
-!        ibnd=istart(igroup_t)+i-1
-!        DO j=1,dim_rap_t
-!           jbnd=istart(igroup_t)+j-1
-!           sym_mat(i,j,which_elem(irot))= zdotc(npol*npwx,evc(1,ibnd),1,&
-!                                                evcr(1,jbnd),1)
-!        ENDDO
-!     ENDDO
   ENDDO
+  CALL mp_sum(w,intra_bgrp_comm)
   !
-  CALL mp_sum(trace,intra_bgrp_comm)
+  ! The bands are divided into groups of degenerate bands
+  !
+  !  Computes the trace for each group of degenerate bands.
+  !  We continue to add diagonal elements to the trace, until we
+  !  find a set of traces whose sum of square moduli is an integer
+  !  multiple of the group order. 
+  ! 
+  trace=(0.d0,0.d0)
+  ngroup=1
+  istart(1)=1
+  DO ibnd=1, nbnd
+     DO irot=1,nsym
+        trace(irot,ngroup)=trace(irot,ngroup) + w(irot, ibnd)
+     ENDDO
+     sumt=0.0_DP
+     DO irot=1,nsym
+        sumt=sumt+ABS(trace(irot,ngroup))**2
+     ENDDO
+     sumt=sumt/nsym
+!
+!    If sumt is an integer we have found an irreducible representation or
+!    an integer number of irreducible representations. We can start to 
+!    identify a new group of modes.
+!
+     IF (ABS(NINT(sumt)-sumt) < 1.d-5) THEN
+        ngroup=ngroup+1
+        istart(ngroup)=ibnd+1
+     ENDIF
+  ENDDO
+  ngroup=ngroup-1
   !
 !  CALL mp_sum(sym_mat,intra_bgrp_comm)
 !  WRITE(stdout,'(/,5x,"The factor system of the band representation",/)')
@@ -303,6 +301,7 @@ SUBROUTINE find_band_sym_proj (ik,evc,et,nsym,s,ftau,d_spin,gk,invs, &
 
   DEALLOCATE(trace)
   DEALLOCATE(w1)
+  DEALLOCATE(w)
   DEALLOCATE(evcr)
   DEALLOCATE(psic_nc)
   IF (okvan) CALL deallocate_bec_type ( becp )

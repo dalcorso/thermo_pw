@@ -24,7 +24,7 @@ SUBROUTINE find_mode_sym_tpw (u, w2, tau, nat, nsym, s, sr, irt, xq,    &
   !
   USE io_global,  ONLY : stdout
   USE kinds, ONLY : DP
-  USE constants, ONLY : amu_ry, RY_TO_CMM1
+  USE constants, ONLY : amu_ry, ry_to_cmm1
   USE rap_point_group, ONLY : code_group, nclass, nelem, elem, which_irr, &
        char_mat, name_rap, name_class, gname, ir_ram
   USE rap_point_group_is, ONLY : gname_is
@@ -72,19 +72,19 @@ SUBROUTINE find_mode_sym_tpw (u, w2, tau, nat, nsym, s, sr, irt, xq,    &
        irot,      &   ! select a rotation
        irap,      &   ! counter on representations
        iclass,    &   ! counter on classes
+       mult,      &   ! multiplicity of the representation
        na,        &   ! counter on atoms
        i              ! generic counter
 
-  INTEGER, ALLOCATABLE :: istart(:), dim_rap(:)
+  INTEGER, ALLOCATABLE :: istart(:)
 
   COMPLEX(DP) :: times              ! safe dimension
   ! in case of accidental degeneracy
   COMPLEX(DP), EXTERNAL :: zdotc
-  REAL(DP), ALLOCATABLE :: w1(:)
   REAL(DP) :: sumt
   COMPLEX(DP), ALLOCATABLE ::  rmode(:,:), trace(:,:), z(:,:), w(:,:)
   LOGICAL :: is_linear
-  INTEGER :: counter, counter_s
+  INTEGER :: counter, counter_s, dim_rap
   LOGICAL :: found
   INTEGER :: invs(48), ss(3,3), isym, jsym
   !
@@ -95,9 +95,7 @@ SUBROUTINE find_mode_sym_tpw (u, w2, tau, nat, nsym, s, sr, irt, xq,    &
   nmodes=3*nat
 
   ALLOCATE(istart(nmodes+1))
-  ALLOCATE(dim_rap(nmodes))
   ALLOCATE(z(nmodes,nmodes))
-  ALLOCATE(w1(nmodes))
   ALLOCATE(rmode(nmodes,nmodes))
   ALLOCATE(w(12,nmodes))
   ALLOCATE(trace(12,nmodes))
@@ -130,10 +128,6 @@ SUBROUTINE find_mode_sym_tpw (u, w2, tau, nat, nsym, s, sr, irt, xq,    &
      ENDDO
      IF ( .NOT.found) CALL errore ('inverse_s', ' Not a group', 1)
   ENDDO
-!
-!  Compute the mode frequency in cm-1.
-! 
-  w1(:)=SIGN(SQRT(ABS(w2(:)))*RY_TO_CMM1,w2(:))
 !
 !  The symmetry of these modes is not computed
 !
@@ -191,11 +185,11 @@ SUBROUTINE find_mode_sym_tpw (u, w2, tau, nat, nsym, s, sr, irt, xq,    &
   !
   DO igroup=1,ngroup
      counter=istart(igroup)
-     dim_rap(igroup)=istart(igroup+1)-istart(igroup)
+     dim_rap=istart(igroup+1)-istart(igroup)
 !
 !   If the frequency is so small probably it has not been calculated.
 !
-     IF (ABS(w1(counter))<1.d-3) CYCLE
+     IF (SQRT(ABS(w2(counter)))*ry_to_cmm1<1.d-3) CYCLE
      DO irap=1,nclass
         times=(0.d0,0.d0)
         DO iclass=1,nclass
@@ -204,16 +198,17 @@ SUBROUTINE find_mode_sym_tpw (u, w2, tau, nat, nsym, s, sr, irt, xq,    &
            !         write(6,*) igroup, irap, iclass, which_irr(iclass)
         ENDDO
         times=times/nsym
+        mult=NINT(ABS(DBLE(times)))
 !
 !   times must be a positive integer or zero, otherwise some error occured
 !   somewhere
 !
-        IF ((ABS(NINT(ABS(DBLE(times)))-DBLE(times)) > 1.d-4).OR. &
+        IF ((ABS(mult-DBLE(times)) > 1.d-4).OR. &
              (ABS(AIMAG(times)) > eps) ) THEN 
            IF (lstop) THEN
               CALL errore('find_mode_sym','unknown mode symmetry',1)
            ELSE
-              counter=counter + dim_rap(igroup)-1
+              counter=counter + dim_rap - 1
               ierr=1
            ENDIF
         ELSE
@@ -222,9 +217,9 @@ SUBROUTINE find_mode_sym_tpw (u, w2, tau, nat, nsym, s, sr, irt, xq,    &
 !    symmetry for all the modes of the group
 !
            IF (ABS(times) > eps) THEN
-              IF (ABS(NINT(DBLE(times))-DBLE(times)) < 1.d-4) THEN
+              IF (ABS(mult-DBLE(times)) < 1.d-4) THEN
                  counter_s=counter
-                 DO imode=counter_s, counter_s+NINT(DBLE(times))*&
+                 DO imode=counter_s, counter_s+mult*&
                                               NINT(DBLE(char_mat(irap,1)))-1
                     num_rap_mode(imode) = irap
                     counter=counter+1
@@ -240,9 +235,7 @@ SUBROUTINE find_mode_sym_tpw (u, w2, tau, nat, nsym, s, sr, irt, xq,    &
   DEALLOCATE(trace)
   DEALLOCATE(z)
   DEALLOCATE(w)
-  DEALLOCATE(w1)
   DEALLOCATE(rmode)
-  DEALLOCATE(dim_rap)
   DEALLOCATE(istart)
 
   RETURN

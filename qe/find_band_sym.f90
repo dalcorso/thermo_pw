@@ -5,25 +5,25 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-SUBROUTINE find_band_sym_tpw (ik,evc,et,nsym,s,ftau,gk,invs,rap_et,times,&
-                          ngroup,istart,accuracy)
+SUBROUTINE find_band_sym_tpw (ik,evc,nsym,s,ftau,gk,invs,rap_et,times,&
+                              ngroup,istart,accuracy)
   !
   !   This subroutine finds the irreducible representations which give
   !   the transformation properties of the wavefunctions.
-  !   Presently it does NOT work at zone border if the space group of
+  !   The output is in rap_et. rap_et contains the number of the 
+  !   representation or zero if the latter could not be found.
+  !   This routine does not support points at zone border if the space group of
   !   the crystal has fractionary translations (non-symmorphic space groups).
   !
   !
   USE io_global,       ONLY : stdout
   USE kinds,           ONLY : DP
-  USE constants,       ONLY : rytoev
-  USE rap_point_group, ONLY : code_group, nclass, nelem, elem, which_irr, &
-       char_mat
+  USE rap_point_group, ONLY : nclass, nelem, elem, which_irr, char_mat
   USE wvfct,           ONLY : nbnd, npwx
   USE klist,           ONLY : ngk, igk_k
   USE uspp,            ONLY : vkb, nkb, okvan
-  USE becmod,          ONLY : bec_type, becp, calbec, &
-       allocate_bec_type, deallocate_bec_type
+  USE becmod,          ONLY : bec_type, becp, calbec, allocate_bec_type, &
+                              deallocate_bec_type
   USE fft_base,        ONLY : dfftp
   USE fft_interfaces,  ONLY : invfft
   USE mp_bands,        ONLY : intra_bgrp_comm
@@ -31,8 +31,8 @@ SUBROUTINE find_band_sym_tpw (ik,evc,et,nsym,s,ftau,gk,invs,rap_et,times,&
 
   IMPLICIT NONE
 
-  INTEGER, INTENT(in) :: ik
-  REAL(DP), INTENT(in) :: accuracy
+  INTEGER,  INTENT(IN) :: ik
+  REAL(DP), INTENT(IN) :: accuracy
 
   INTEGER ::                  &
        nsym,             &
@@ -42,17 +42,12 @@ SUBROUTINE find_band_sym_tpw (ik,evc,et,nsym,s,ftau,gk,invs,rap_et,times,&
        s(3,3,48),        &
        invs(48),         &
        ngroup,           &  ! number of different frequencies groups
-       istart(nbnd+1)
+       istart(nbnd+1)       ! position of the first band of each group
 
-  REAL(DP) ::                 &
-       et(nbnd)
-
-  COMPLEX(DP) ::  &
+  COMPLEX(DP) ::         &
        d_spin_dum(2, 2), &
-       times(nbnd,24), &
+       times(nbnd,24),   &
        evc(npwx, nbnd)
-
-  REAL(DP), PARAMETER :: eps=1.d-5
 
   INTEGER ::      &
        ibnd,      &
@@ -62,37 +57,29 @@ SUBROUTINE find_band_sym_tpw (ik,evc,et,nsym,s,ftau,gk,invs,rap_et,times,&
        irap,      &
        iclass,    &
        shift,     &
-       na, i, j,  &
-       ig, dimen, &
+       mult,      &
+       i,         &
+       dimen,     &
        nrxx, npw, &
        has_e_dum
 
   COMPLEX(DP) :: zdotc
 
-  REAL(DP), ALLOCATABLE ::  w1(:)
-  COMPLEX(DP), ALLOCATABLE ::  evcr(:,:), trace(:,:), psic(:,:)
+  REAL(DP) :: sumt
+  COMPLEX(DP), ALLOCATABLE ::  evcr(:,:), trace(:,:), psic(:,:), w(:,:)
   !
   !    Divide the bands on the basis of the band degeneracy.
   !
   nrxx=dfftp%nnr
-  ALLOCATE(w1(nbnd))
   ALLOCATE(evcr(npwx,nbnd))
   ALLOCATE(psic(nrxx,nbnd))
   ALLOCATE(trace(48,nbnd))
+  ALLOCATE(w(48,nbnd))
   IF (okvan) CALL allocate_bec_type ( nkb, nbnd, becp )
 
-  rap_et=-1
-  w1=et*rytoev
-
-  ngroup=1
-  istart(ngroup)=1
-  DO ibnd=2,nbnd
-     IF (abs(w1(ibnd)-w1(ibnd-1)) > 0.0001d0) THEN
-        ngroup=ngroup+1
-        istart(ngroup)=ibnd
-     ENDIF
-  ENDDO
-  istart(ngroup+1)=nbnd+1
+  rap_et=0
+  has_e_dum=1
+  d_spin_dum=(0.0_DP,0.0_DP)
 !
 !   bring all the bands in real space
 !
@@ -109,8 +96,7 @@ SUBROUTINE find_band_sym_tpw (ik,evc,et,nsym,s,ftau,gk,invs,rap_et,times,&
      irot=elem(1,iclass)
      !
      !   Rotate all the bands together.
-     !   NB: rotate_psi assume that s is in the small group of k. It does not
-     !       rotate the k point.
+     !   NB: rotate_psi assume that s is in the small group of k. 
      !
      !
      IF (irot==1) THEN
@@ -127,32 +113,54 @@ SUBROUTINE find_band_sym_tpw (ik,evc,et,nsym,s,ftau,gk,invs,rap_et,times,&
         CALL s_psi( npwx, npw, nbnd, evcr, evcr )
      ENDIF
      !
-     !  Compute the trace of the representation for each group of bands
+     !  find the diagonal element of the representation of dimension nbnd
      !
-     DO igroup=1,ngroup
-        dim_rap=istart(igroup+1)-istart(igroup)
-        trace(iclass,igroup)=(0.d0,0.d0)
-        DO i=1,dim_rap
-           ibnd=istart(igroup)+i-1
-           trace(iclass,igroup)=trace(iclass,igroup) + &
-                zdotc(npw,evc(1,ibnd),1,evcr(1,ibnd),1)
-        ENDDO
-        !      write(6,*) igroup, iclass, trace(iclass,igroup)
+     DO ibnd=1,nbnd
+        w(iclass,ibnd) = ZDOTC(npw,evc(1,ibnd),1,evcr(1,ibnd),1)
      ENDDO
   ENDDO
   !
-  CALL mp_sum( trace, intra_bgrp_comm )
+  CALL mp_sum( w, intra_bgrp_comm )
+  !
+  !  Divide the bands in groups of degenerate eigenvalues. 
+  !  Computes the trace for each group of degenerate modes.
+  !  We continue to add diagonal elements to the trace, until we
+  !  find a set of traces whose sum of square moduli over all elements
+  !  of the group is an integer multiple of the group order. 
+  !
+  ! 
+  ngroup=1
+  istart(ngroup)=1
+  trace=(0.d0,0.d0)
+  DO ibnd=1, nbnd
+     DO iclass=1,nclass
+        trace(iclass,ngroup)=trace(iclass,ngroup) + w(iclass, ibnd)
+     ENDDO
+     sumt=0.0_DP
+     DO iclass=1,nclass
+        sumt=sumt+ABS(trace(iclass,ngroup))**2*nelem(iclass)
+     ENDDO
+     sumt=sumt/nsym
+!
+!    If sumt is an integer we have found an irreducible representation or
+!    an integer number of irreducible representations. We can start to 
+!    identify a new group of modes.
+!
+     IF (ABS(NINT(sumt)-sumt) < 1.d-5) THEN
+        ngroup=ngroup+1
+        istart(ngroup)=ibnd+1
+     ENDIF
+  ENDDO
+  ngroup=ngroup-1
 
   !DO iclass=1,nclass
   !   write(6,'(i5,3(2f11.8,1x))') iclass,trace(iclass,4),trace(iclass,5), &
   !                                       trace(iclass,6)
   !ENDDO
-
   !
   !  And now use the character table to identify the symmetry representation
   !  of each group of bands
   !
-
   DO igroup=1,ngroup
      dim_rap=istart(igroup+1)-istart(igroup)
      shift=0
@@ -164,33 +172,25 @@ SUBROUTINE find_band_sym_tpw (ik,evc,et,nsym,s,ftau,gk,invs,rap_et,times,&
                 *nelem(iclass)
         ENDDO
         times(igroup,irap)=times(igroup,irap)/nsym
-        IF ((abs(nint(dble(times(igroup,irap)))-dble(times(igroup,irap))) &
-             > accuracy).OR. (abs(aimag(times(igroup,irap))) > eps) ) THEN
-           ibnd=istart(igroup)
-           IF (rap_et(ibnd)==-1) THEN
-              DO i=1,dim_rap
-                 ibnd=istart(igroup)+i-1
-                 rap_et(ibnd)=0
-              ENDDO
-           ENDIF
+        mult=NINT(DBLE(times(igroup,irap)))
+        IF ((ABS(mult-DBLE(times(igroup,irap))) > accuracy).OR. &
+            (ABS(AIMAG(times(igroup,irap))) > accuracy) ) THEN
            GOTO 300
-        ELSEIF (abs(times(igroup,irap)) > accuracy) THEN
+        ELSEIF (ABS(times(igroup,irap)) > accuracy) THEN
            ibnd=istart(igroup)+shift
-           dimen=nint(dble(char_mat(irap,1)))
-           IF (rap_et(ibnd)==-1) THEN
-              DO i=1,dimen*nint(dble(times(igroup,irap)))
-                 ibnd=istart(igroup)+shift+i-1
-                 rap_et(ibnd)=irap
-              ENDDO
-              shift=shift+dimen*nint(dble(times(igroup,irap)))
-           ENDIF
+           dimen=NINT(DBLE(char_mat(irap,1)))
+           DO i=1,dimen*mult
+              ibnd=istart(igroup)+shift+i-1
+              rap_et(ibnd)=irap
+           ENDDO
+           shift=shift+dimen*mult
         ENDIF
      ENDDO
 300  CONTINUE
   ENDDO
 
   DEALLOCATE(trace)
-  DEALLOCATE(w1)
+  DEALLOCATE(w)
   DEALLOCATE(evcr)
   DEALLOCATE(psic)
   IF (okvan) CALL deallocate_bec_type (becp)
@@ -198,39 +198,39 @@ SUBROUTINE find_band_sym_tpw (ik,evc,et,nsym,s,ftau,gk,invs,rap_et,times,&
   RETURN
 END SUBROUTINE find_band_sym_tpw
 
-SUBROUTINE find_band_sym_so_tpw (ik,evc,et,nsym,s,ftau,d_spin,gk, &
-     invs,rap_et,times,ngroup,istart,accuracy)
+SUBROUTINE find_band_sym_so_tpw (ik,evc,nsym,s,ftau,d_spin,gk, &
+                                 invs,rap_et,times,ngroup,istart,accuracy)
   !
   !   This subroutine finds the irreducible representations of the
   !   double group which give the transformation properties of the
   !   spinor wavefunctions evc.
-  !   Presently it does NOT work at zone border if the space group of
+  !   The output is in rap_et. rap_et contains the number of the 
+  !   representation or zero if the latter could not be found.
+  !   This routine does not support points at zone border if the space group of
   !   the crystal has fractionary translations (non-symmorphic space groups).
-  !
   !
   USE io_global,          ONLY : stdout
   USE kinds,              ONLY : DP
-  USE constants,          ONLY : rytoev
-  USE rap_point_group,    ONLY : code_group, nclass
+  USE rap_point_group,    ONLY : nclass
   USE rap_point_group_so, ONLY : nrap, nelem_so, elem_so, has_e, which_irr_so, &
-       char_mat_so
+                                 char_mat_so
   USE wvfct,              ONLY : nbnd, npwx
   USE klist,              ONLY : ngk, igk_k
   USE fft_base,           ONLY : dfftp
   USE fft_interfaces,     ONLY : invfft
-  USE spin_orb,           ONLY : domag
   USE uspp,               ONLY : vkb, nkb, okvan
   USE noncollin_module,   ONLY : npol
-  USE becmod,             ONLY : bec_type, becp, calbec, allocate_bec_type, deallocate_bec_type
+  USE becmod,             ONLY : bec_type, becp, calbec, allocate_bec_type, &
+                                 deallocate_bec_type
   USE mp_bands,           ONLY : intra_bgrp_comm
   USE mp,                 ONLY : mp_sum
 
   IMPLICIT NONE
 
-  INTEGER, INTENT(in) :: ik
-  REAL(DP), INTENT(in) :: accuracy
+  INTEGER,  INTENT(IN) :: ik
+  REAL(DP), INTENT(IN) :: accuracy
 
-  INTEGER ::                  &
+  INTEGER ::             &
        nsym,             &
        ngroup,           &
        istart(nbnd+1),   &
@@ -240,17 +240,12 @@ SUBROUTINE find_band_sym_so_tpw (ik,evc,et,nsym,s,ftau,d_spin,gk, &
        invs(48),         &
        s(3,3,48)
 
-  REAL(DP) ::                 &
-       et(nbnd)
-
-  COMPLEX(DP) ::  &
-       times(nbnd,24), &
-       d_spin(2,2,48), &
+  COMPLEX(DP) ::         &
+       times(nbnd,24),   &
+       d_spin(2,2,48),   &
        evc(npwx*npol, nbnd)
 
-  REAL(DP), PARAMETER :: eps=1.d-5
-
-  INTEGER ::         &
+  INTEGER ::      &
        ibnd,      &
        igroup,    &
        dim_rap,   &  ! counters
@@ -258,26 +253,31 @@ SUBROUTINE find_band_sym_so_tpw (ik,evc,et,nsym,s,ftau,d_spin,gk, &
        irap,      &
        shift,     &
        iclass,    &
-       na, i, j, ig, ipol, jpol, jrap, dimen, npw, ind1, ind2
+       mult,      &
+       i,         &
+       ipol,      & 
+       dimen,     &
+       npw,       &
+       ind1, ind2
 
-  COMPLEX(DP) :: zdotc          ! moltiplication factors
+  COMPLEX(DP) :: zdotc   ! scalar product routine
 
-  REAL(DP), ALLOCATABLE ::  w1(:)      ! list of energy eigenvalues in eV
+  REAL(DP) :: sumt
+
   COMPLEX(DP), ALLOCATABLE ::  evcr(:,:), & ! the rotated of each wave function
        psic(:,:,:),   &! the wavefunctions in real space
-       trace(:,:)   ! the trace of the symmetry matrix
-  ! within a given group
+       w(:,:),        &! the diagonals of the big representation
+       trace(:,:)      ! the trace of the symmetry matrix
   !
-  !    Divide the bands on the basis of the band degeneracy.
-  !
-  ALLOCATE(w1(nbnd))
   ALLOCATE(evcr(npwx*npol,nbnd))
   ALLOCATE(psic(dfftp%nnr,npol,nbnd))
   ALLOCATE(trace(48,nbnd))
+  ALLOCATE(w(48,nbnd))
   IF (okvan) CALL allocate_bec_type ( nkb, nbnd, becp )
-
-  rap_et=-1
-  w1=et*rytoev
+  !
+  !  Bring each wavefunction in real space on the thick mesh
+  !
+  rap_et=0
   npw = ngk(ik)
   psic=(0.0_DP,0.0_DP)
   DO ipol=1, npol
@@ -289,27 +289,16 @@ SUBROUTINE find_band_sym_so_tpw (ik,evc,et,nsym,s,ftau,d_spin,gk, &
      ENDDO
   ENDDO
   !
-  !  divide the energies in groups of degenerate eigenvalues. Two eigenvalues
-  !  are assumed to be degenerate if their difference is less than 0.0001 eV.
+  !  Rotate each band with a symmetry element per class and find the
+  !  diagonal element of the matrix representation of dimension nbnd
   !
-  ngroup=1
-  istart(ngroup)=1
-  DO ibnd=2,nbnd
-     IF (abs(w1(ibnd)-w1(ibnd-1)) > 0.0001d0) THEN
-        ngroup=ngroup+1
-        istart(ngroup)=ibnd
-     ENDIF
-  ENDDO
-  istart(ngroup+1)=nbnd+1
-
-  trace=(0.d0,0.d0)
   DO iclass=1,nclass
      irot=elem_so(1,iclass)
      !
      !   Rotate all the bands together.
-     !   NB: rotate_psi assumes that s is in the small group of k. It does not
-     !       rotate the k point.
+     !   NB: rotate_psi assumes that s is in the small group of k. 
      !
+      evcr=(0.0_DP,0.0_DP)
       CALL rotate_all_psi_tpw(ik,psic,evcr,s(1,1,invs(irot)),        &
            ftau(1,invs(irot)),d_spin(1,1,irot),has_e(1,iclass),gk(1,invs(irot)))
      !
@@ -320,26 +309,53 @@ SUBROUTINE find_band_sym_so_tpw (ik,evc,et,nsym,s,ftau,d_spin,gk, &
         CALL s_psi( npwx, npw, nbnd, evcr, evcr )
      ENDIF
      !
-     !  Compute the trace of the representation for each group of bands
+     !  find the diagonal element of the representation of dimension nbnd
      !
-     DO igroup=1,ngroup
-        dim_rap=istart(igroup+1)-istart(igroup)
-        DO i=1,dim_rap
-           ibnd=istart(igroup)+i-1
-           trace(iclass,igroup)=trace(iclass,igroup) +            &
-                zdotc(2*npwx,evc(1,ibnd),1,evcr(1,ibnd),1)
-        ENDDO
-        !      write(6,*) igroup, iclass, dim_rap, trace(iclass,igroup)
+     DO ibnd=1,nbnd
+        w(iclass,ibnd) = ZDOTC(npwx*npol,evc(1,ibnd),1,evcr(1,ibnd),1)
      ENDDO
   ENDDO
   !
-  CALL mp_sum(trace,intra_bgrp_comm)
+  CALL mp_sum(w,intra_bgrp_comm)
+  !
+  !  Divide the bands in groups of degenerate eigenvalues. 
+  !  Computes the trace for each group of degenerate modes.
+  !  We continue to add diagonal elements to the trace, until we
+  !  find a set of traces whose sum of square moduli over all elements
+  !  of the group is an integer multiple of the group order. 
+  !
+  ngroup=1
+  istart(ngroup)=1
+  trace=(0.d0,0.d0)
+  DO ibnd=1, nbnd
+     DO iclass=1,nclass
+        trace(iclass,ngroup)=trace(iclass,ngroup) + w(iclass, ibnd)
+     ENDDO
+     sumt=0.0_DP
+     DO iclass=1,nclass
+        sumt=sumt+ABS(trace(iclass,ngroup))**2*DBLE(nelem_so(iclass))
+     ENDDO
+     sumt=sumt/(2*nsym)
+!
+!    If sumt is an integer we have found an irreducible representation or
+!    an integer number of irreducible representations. We can start to 
+!    identify a new group of modes.
+!
+     IF (ABS(NINT(sumt)-sumt) < 1.d-5) THEN
+        ngroup=ngroup+1
+        istart(ngroup)=ibnd+1
+     ENDIF
+  ENDDO
+  ngroup=ngroup-1
   !
 !  DO iclass=1,nclass
 !     write(6,'(i5,3(2f11.8,1x))') iclass,trace(iclass,1),trace(iclass,2), &
 !                                         trace(iclass,3)
 !  ENDDO
-
+!
+!  Use the character tables of the irreducible representation to identify
+!  the symmetry of the representation for each group of degenerate bands
+!
   DO igroup=1,ngroup
      dim_rap=istart(igroup+1)-istart(igroup)
      shift=0
@@ -351,35 +367,26 @@ SUBROUTINE find_band_sym_so_tpw (ik,evc,et,nsym,s,ftau,d_spin,gk, &
                 which_irr_so(iclass)))*DBLE(nelem_so(iclass))
         ENDDO
         times(igroup,irap)=times(igroup,irap)/2/nsym
-
-        IF ((abs(nint(dble(times(igroup,irap)))-dble(times(igroup,irap)))&
-             > accuracy).or. (abs(aimag(times(igroup,irap))) > accuracy) ) THEN
-           ibnd=istart(igroup)
-           IF (rap_et(ibnd)==-1) THEN
-              DO i=1,dim_rap
-                 ibnd=istart(igroup)+i-1
-                 rap_et(ibnd)=0
-              ENDDO
-           ENDIF
+        mult=NINT(DBLE(times(igroup,irap)))
+        IF ((ABS(mult-DBLE(times(igroup,irap)))> accuracy).OR. &
+            (ABS(AIMAG(times(igroup,irap))) > accuracy) ) THEN
            GOTO 300
         ENDIF
-        IF (abs(times(igroup,irap)) > accuracy) THEN
-           dimen=nint(dble(char_mat_so(irap,1)))
+        IF (ABS(times(igroup,irap)) > accuracy) THEN
+           dimen=NINT(DBLE(char_mat_so(irap,1)))
            ibnd=istart(igroup) + shift
-           IF (rap_et(ibnd)==-1) THEN
-              DO i=1,dimen*nint(dble(times(igroup,irap)))
-                 ibnd=istart(igroup)+shift+i-1
-                 rap_et(ibnd)=irap
-              ENDDO
-              shift=shift+dimen*nint(dble(times(igroup,irap)))
-           ENDIF
+           DO i=1,dimen*mult
+              ibnd=istart(igroup)+shift+i-1
+              rap_et(ibnd)=irap
+           ENDDO
+           shift=shift+dimen*mult
         ENDIF
      ENDDO
 300  CONTINUE
   ENDDO
 
   DEALLOCATE(trace)
-  DEALLOCATE(w1)
+  DEALLOCATE(w)
   DEALLOCATE(psic)
   DEALLOCATE(evcr)
   IF (okvan) CALL deallocate_bec_type ( becp )
