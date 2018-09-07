@@ -16,8 +16,8 @@ SUBROUTINE generalized_phdos(et, nbnd, nks, wk, degauss, ngauss, e, &
   IMPLICIT NONE
   INTEGER :: nks, nbnd, ngauss
 
-  REAL(DP) :: wk(nks), et(nbnd, nks), Degauss, E, dosg(6,nat)
-  REAL(DP) :: w0gauss
+  REAL(DP) :: wk(nks), et(nbnd, nks), degauss, e, dosg(6,nat)
+  REAL(DP) :: w0gauss, weight
   INTEGER :: n, ns, nk0, nk, ik
   INTEGER :: nspin0
   COMPLEX(DP) :: displa(3*nat,3*nat,nks)
@@ -28,28 +28,27 @@ SUBROUTINE generalized_phdos(et, nbnd, nks, wk, degauss, ngauss, e, &
   nk = nks
   !
   dosg = 0.0_DP
-  DO na=1, nat
-     ijpol=0
-     DO ipol=1, 3
-        indi=3*(na-1)+ipol
-        DO jpol=ipol, 3
-           indj=3*(na-1)+jpol
-           ijpol=ijpol+1
-           DO ik = 1, nk
-              DO n = 1, nbnd
+  DO ik = 1, nk
+     DO n = 1, nbnd
+        weight = w0gauss ( (E-et(n,ik) ) / Degauss, ngauss)
+        DO na=1, nat
+           ijpol=0
+           DO ipol=1, 3
+              indi=3*(na-1)+ipol
+              DO jpol=ipol, 3
+                 indj=3*(na-1)+jpol
+                 ijpol=ijpol+1
                  u1=displa(indi,n,ik)
                  u2=displa(indj,n,ik)
                  ufact = DREAL(u1*CONJG(u2))
-                 dosg(ijpol,na)=dosg(ijpol,na) + wk(ik) &
-                     *ufact*w0gauss ( (E-et(n,ik) ) / Degauss, ngauss)
+                 dosg(ijpol,na)=dosg(ijpol,na) + wk(ik)*ufact*weight
               ENDDO
            ENDDO
         ENDDO
      ENDDO
-     !
-     dosg(:,na) = dosg(:,na) / Degauss
-     !
   ENDDO
+  !
+  dosg = dosg / degauss
   !
   RETURN
 END SUBROUTINE generalized_phdos
