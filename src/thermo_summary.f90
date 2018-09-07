@@ -39,6 +39,8 @@ SUBROUTINE thermo_summary()
                                    flformf, smin, smax, nspoint, lcm
   USE xrdp_module,          ONLY : write_form_factor, compute_xrdp
   USE control_2d_bands,     ONLY : lprojpbs
+  USE control_thermo,       ONLY : with_eigen
+
 !
 !  variables set by this routine
 !
@@ -51,7 +53,8 @@ SUBROUTINE thermo_summary()
   USE lattices,             ONLY : print_bravais_description
   USE point_group,          ONLY : find_group_info_ext
   USE nye,                  ONLY : print_vectors_shape, print_tensor2_shape, &
-                                   print_el_cons_shape, print_piezo_shape
+                                   print_el_cons_shape, print_piezo_shape, &
+                                   print_b_fact_shape
 !
 !  pw modules and variables, set from input or in thermo_setup
 !
@@ -74,7 +77,7 @@ SUBROUTINE thermo_summary()
   INTEGER :: it, ia, na, ipol, jpol, iuout, &
              group_desc(48), which_elem(48), isym, code_group_ext,     &
              code_group1
-  INTEGER :: laue_class
+  INTEGER :: laue_class, b_rest(nat)
   INTEGER :: find_free_unit
   INTEGER :: ierr, system
   LOGICAL :: lpolar, lelc, lpiezo, check_group_ibrav
@@ -573,6 +576,28 @@ SUBROUTINE thermo_summary()
              6*ngeo_strain 
        ENDIF
     ENDIF
+ENDIF
+
+!
+!  B factor matrix
+! 
+IF (( what=='scf_disp'.OR.what=='scf_ph'.OR.what=='mur_lc_ph'.OR. &
+      what=='mur_lc_disp'.OR.what=='mur_lc_t'.OR.what=='plot_bz') &
+      .AND.with_eigen ) THEN
+
+   WRITE(stdout,'(/,5x,"B factor matrix:")')
+   
+   CALL b_factor_reduction(b_rest)
+   
+   DO na=1,nat
+    
+      WRITE(stdout,'(/,5x,"Site n.",i5,", atom",a6,":")') na, &
+                                                          TRIM(atm(ityp(na)))
+      !WRITE(stdout,'(/,5x,"case n.",i3)') b_rest(na)
+
+      CALL print_b_fact_shape(b_rest(na))
+
+   ENDDO
 ENDIF
 
 WRITE(stdout,'(/,5x,70("-"))')

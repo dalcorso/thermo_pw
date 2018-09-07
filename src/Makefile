@@ -18,6 +18,7 @@ addusdens1d_so.o \
 allocate_thermo.o \
 bands_sub.o \
 bcast_thermo_input.o \
+b_factor_reduction.o \
 check_existence.o \
 check_file_exists.o \
 check_all_geometries_done.o \

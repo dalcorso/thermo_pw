@@ -17,7 +17,7 @@ MODULE nye
   SAVE
 
   PUBLIC print_vectors_shape, print_tensor2_shape, print_piezo_shape, &
-         print_el_cons_shape
+         print_el_cons_shape, print_b_fact_shape
 
 CONTAINS
 
@@ -465,7 +465,7 @@ SELECT CASE (laue_)
 !  Triclinic or generic
 !
       IF (laue /=2) &
-         WRITE(stdout,'(5x,"Laue class not programmed or ibrav=0 using C_i")') 
+      WRITE(stdout,'(5x,"Laue class not programmed or ibrav=0 using C_i")') 
       WRITE(stdout,'(/,5x,"( c11  c12  c13  c14  c15  c16 )")') 
       WRITE(stdout,'(  5x,"( c12  c22  c23  c24  c25  c26 )")') 
       WRITE(stdout,'(  5x,"( c13  c23  c33  c34  c35  c36 )")') 
@@ -476,5 +476,120 @@ END SELECT
 
 RETURN
 END SUBROUTINE print_el_cons_shape
+
+SUBROUTINE print_b_fact_shape(b_rest)
+!
+!  This routine prints on output the shape of the B factor tensor. 
+!
+USE io_global, ONLY : stdout
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: b_rest
+
+INTEGER :: b_rest_
+
+b_rest_=b_rest
+
+!WRITE(stdout,'(/,5x,"case n.",i3)') b_rest_
+
+SELECT CASE (b_rest_)
+
+   CASE (1)
+      WRITE(stdout,'(/,5x,"( b11   .   b13 )")')
+      WRITE(stdout,'(  5x,"(  .   b22   .  )")')
+      WRITE(stdout,'(  5x,"( b13   .   b11 )")')
+
+   CASE (2)
+      WRITE(stdout,'(/,5x,"( b11  b12   .  )")')
+      WRITE(stdout,'(  5x,"( b12  b22   .  )")')
+      WRITE(stdout,'(  5x,"(  .    .   b33 )")')
+
+   CASE (3)
+      WRITE(stdout,'(/,5x,"( b11   .    .  )")')
+      WRITE(stdout,'(  5x,"(  .   b22  b23 )")')
+      WRITE(stdout,'(  5x,"(  .   b23  b33 )")')
+
+   CASE (4)
+      WRITE(stdout,'(/,5x,"( b11   .    .  )")')
+      WRITE(stdout,'(  5x,"(  .   b22   .  )")')
+      WRITE(stdout,'(  5x,"(  .    .   b33 )")')
+
+   CASE (5)
+      WRITE(stdout,'(/,5x,"( b11  b12   .  )")')
+      WRITE(stdout,'(  5x,"( b12  b11   .  )")')
+      WRITE(stdout,'(  5x,"(  .    .   b33 )")')
+
+   CASE (6)
+      WRITE(stdout,'(/,5x,"( b11  b12  b13 )")')
+      WRITE(stdout,'(  5x,"( b12  b11  b13 )")')
+      WRITE(stdout,'(  5x,"( b13  b13  b33 )")')
+
+   CASE (7)
+      WRITE(stdout,'(/,5x,"( b11   b12   b13 )")')
+      WRITE(stdout,'(  5x,"( b12   b11  -b13 )")')
+      WRITE(stdout,'(  5x,"( b13  -b13   b33 )")')
+
+   CASE (8)
+      WRITE(stdout,'(/,5x,"( b11   .    .  )")')
+      WRITE(stdout,'(  5x,"(  .   b11   .  )")')
+      WRITE(stdout,'(  5x,"(  .    .   b33 )")')
+
+   CASE (9)
+      WRITE(stdout,'(/,5x,"( b11   .    .  )")')
+      WRITE(stdout,'(  5x,"(  .   b22  b23 )")')
+      WRITE(stdout,'(  5x,"(  .   b23  b22 )")')
+
+   CASE (10)
+      WRITE(stdout,'(/,5x,"( b11  b12  b12 )")')
+      WRITE(stdout,'(  5x,"( b12  b22  b23 )")')
+      WRITE(stdout,'(  5x,"( b12  b23  b22 )")')
+
+   CASE (11)
+      WRITE(stdout,'(/,5x,"(  b11  b12  -b12 )")')
+      WRITE(stdout,'(  5x,"(  b12  b22   b23 )")')
+      WRITE(stdout,'(  5x,"( -b12  b23   b22 )")')
+
+   CASE (12)
+      WRITE(stdout,'(/,5x,"( b11   .    .  )")')
+      WRITE(stdout,'(  5x,"(  .   b22   .  )")')
+      WRITE(stdout,'(  5x,"(  .    .   b22 )")')
+
+   CASE (13)
+      WRITE(stdout,'(/,5x,"( b11  b22  b13 )")')
+      WRITE(stdout,'(  5x,"( b22  b22   .  )")')
+      WRITE(stdout,'(  5x,"( b13   .   b33 )")')
+
+   CASE (14)
+      WRITE(stdout,'(/,5x,"( b11  b22   .  )")')
+      WRITE(stdout,'(  5x,"( b22  b22   .  )")')
+      WRITE(stdout,'(  5x,"(  .    .   b33 )")')
+
+   CASE (15)
+      WRITE(stdout,'(/,5x,"( b11   b22   b13 )")')
+      WRITE(stdout,'(  5x,"( b22   b22  2b13 )")')
+      WRITE(stdout,'(  5x,"( b13  2b13   b33 )")')
+
+   CASE (16)
+      WRITE(stdout,'(/,5x,"( b11  b11   .  )")')
+      WRITE(stdout,'(  5x,"( b11  b11   .  )")')
+      WRITE(stdout,'(  5x,"(  .    .   b33 )")')
+
+   CASE (17)
+      WRITE(stdout,'(/,5x,"( b11   .    .  )")')
+      WRITE(stdout,'(  5x,"(  .   b11   .  )")')
+      WRITE(stdout,'(  5x,"(  .    .   b11 )")')
+
+   CASE (18)
+      WRITE(stdout,'(/,5x,"( b11  b12  b12 )")')
+      WRITE(stdout,'(  5x,"( b12  b11  b12 )")')
+      WRITE(stdout,'(  5x,"( b12  b12  b11 )")')
+
+   CASE DEFAULT
+      WRITE(stdout,'(/,5x,"( b11  b12  b13 )")')
+      WRITE(stdout,'(  5x,"( b12  b22  b23 )")')
+      WRITE(stdout,'(  5x,"( b13  b23  b33 )")')
+END SELECT
+   
+END SUBROUTINE print_b_fact_shape
+
 
 END MODULE nye
