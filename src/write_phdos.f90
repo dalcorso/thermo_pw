@@ -35,7 +35,7 @@ SUBROUTINE write_phdos(igeom)
   USE control_dosq,   ONLY : dos_wq, dos_nqs
   USE data_files,     ONLY : fldos
   USE phdos_module,   ONLY : set_phdos, read_phdos_data, find_minimum_maximum,&
-                             set_gen_phdos
+                             set_gen_phdos, read_genphdos_data
   !
   IMPLICIT NONE
   !
@@ -60,20 +60,37 @@ SUBROUTINE write_phdos(igeom)
         WRITE(stdout,'(5x,a)') TRIM(filedos)
         WRITE(stdout,'(2x,76("-"),/)')
         CALL read_phdos_data(phdos_save(igeom),filedos)
+        IF (with_eigen) CALL read_genphdos_data(gen_phdos_save,nat,filedos)
      ENDIF
      CALL mp_bcast(phdos_save(igeom)%number_of_points, meta_ionode_id, &
                                                        world_comm)
      CALL mp_bcast(phdos_save(igeom)%de, meta_ionode_id, world_comm)
+
+     IF (with_eigen) THEN
+        CALL mp_bcast(gen_phdos_save%number_of_points, meta_ionode_id, &
+                                                              world_comm)
+        CALL mp_bcast(gen_phdos_save%de, meta_ionode_id, world_comm)
+     ENDIF
+
      IF ( my_image_id /= root_image ) THEN
         IF (.NOT.ALLOCATED(phdos_save(igeom)%nu)) &
           ALLOCATE(phdos_save(igeom)%nu(phdos_save(igeom)%number_of_points)) 
         IF (.NOT.ALLOCATED(phdos_save(igeom)%phdos)) &
           ALLOCATE(phdos_save(igeom)%phdos(phdos_save(igeom)%number_of_points)) 
+        IF (.NOT.ALLOCATED(gen_phdos_save%nu)) &
+            ALLOCATE(gen_phdos_save%nu(gen_phdos_save%number_of_points))
+        IF (.NOT.ALLOCATED(gen_phdos_save%phdos)) &
+          ALLOCATE(gen_phdos_save%phdos(6,nat,gen_phdos_save%number_of_points))
      END IF
      CALL mp_bcast(phdos_save(igeom)%nu, meta_ionode_id, world_comm)
      CALL mp_bcast(phdos_save(igeom)%phdos, meta_ionode_id, world_comm)
 
      CALL find_minimum_maximum(phdos_save(igeom), freqmin, freqmax)
+     IF (with_eigen) THEN
+        CALL mp_bcast(gen_phdos_save%nu, meta_ionode_id, world_comm)
+        CALL mp_bcast(gen_phdos_save%phdos, meta_ionode_id, world_comm)
+     ENDIF   
+
      RETURN
   END IF
 
@@ -132,6 +149,10 @@ SUBROUTINE write_phdos(igeom)
      phdos_save(igeom)%nu(n) = e
      phdos_save(igeom)%phdos(n) = dosofe(1)
   END DO
+!
+!  and collect the results
+!
+  CALL mp_sum(phdos_save(igeom)%phdos, world_comm)
 
   IF (with_eigen) THEN
      ALLOCATE(gen_dos(6,nat))
@@ -150,10 +171,6 @@ SUBROUTINE write_phdos(igeom)
      ENDDO
      DEALLOCATE(gen_dos)
   ENDIF
-!
-!  and collect the results
-!
-  CALL mp_sum(phdos_save(igeom)%phdos, world_comm)
 
   IF (meta_ionode) THEN
      iundos=find_free_unit()
