@@ -78,9 +78,8 @@ SUBROUTINE print_symmetries_tpw ( iverbosity, noncolin, domag )
                  ftau_is(:,nsym_is)=ftau(:,isym)
                  sname_is(nsym_is)=sname(isym)
               ENDIF
-           ELSE
-              CALL find_u(sr(1,1,isym),d_spin(1,1,isym))
-           END IF
+           ENDIF
+           CALL find_u(sr(1,1,isym),d_spin(1,1,isym))
         END IF
         IF (noncolin) THEN
 
