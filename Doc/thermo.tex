@@ -683,7 +683,7 @@ Among the shear strain $\epsilon_F$
 transforms the simple cubic unit cell into a rhombohedral cell with
 parameters:
 \begin{eqnarray}
-a_r&=& a_c \sqrt{1+2\epsilon_{1,2}^2} \\
+a_r&=& a_c \sqrt{1+2\epsilon_{1,2}^2}, \\
 \cos\alpha &=& {\epsilon_{1,2} (\epsilon_{1,2} + 2) \over 
 1 + 2 \epsilon_{1,2}^2 }.
 \end{eqnarray}
@@ -1380,7 +1380,7 @@ base-centered $b$-unique monoclinic lattice with parameters:
 a&=&a_r \sqrt{1 + 3 \cos^2 \theta_r}, \\
 b&=&a_r \sqrt{3} (1 + \epsilon_{1,1}) \sin \theta_r, \\
 c&=&a_r, \\
-\cos\beta &=& {3 \cos^2 \theta_r -1 \over \sqrt{1 + 3 \cos^2 \theta_r} }
+\cos\beta &=& {3 \cos^2 \theta_r -1 \over \sqrt{1 + 3 \cos^2 \theta_r} }.
 \end{eqnarray}
 The reference system of the base-centered monoclinic lattice is rotated 
 with respect to the reference system of the rhombohedral lattice.
@@ -1406,7 +1406,7 @@ c&=&a_r \sqrt{1+\epsilon_{2,3}^2+4\epsilon_{2,3}\sin \theta_r\cos \theta_r}, \\
 \cos\beta &=& {(1+\epsilon_{2,3}^2) (3 \cos^2 \theta_r-1) 
 + 2 \epsilon_{2,3} \sin \theta_r\cos \theta_r
 \over \sqrt{(1+\epsilon_{2,3}^2)(1 + 3 \cos^2 \theta_r)-
-8\epsilon_{2,3}\sin \theta_r\cos \theta_r} \sqrt{1+\epsilon_{2,3}^2+4\epsilon_{2,3}\sin \theta_r\cos \theta_r}} 
+8\epsilon_{2,3}\sin \theta_r\cos \theta_r} \sqrt{1+\epsilon_{2,3}^2+4\epsilon_{2,3}\sin \theta_r\cos \theta_r}}.
 \end{eqnarray}
 
 The reference system of the base-centered monoclinic lattice is rotated 
@@ -1428,7 +1428,7 @@ a&=& {2 \epsilon_{2,3} \cos \theta_r - \sin \theta_r \over
 8\epsilon_{2,3}\sin \theta_r\cos \theta_r}}, \\
 b&=& {2 \cos \theta_r - \epsilon_{2,3} \sin \theta_r \over 
 \sqrt{(1+\epsilon_{2,3}^2)(1 + 3 \cos^2 \theta_r)-
-8\epsilon_{2,3}\sin \theta_r\cos \theta_r}} 
+8\epsilon_{2,3}\sin \theta_r\cos \theta_r}}.
 \end{eqnarray}
 
 \newpage
@@ -1447,7 +1447,7 @@ is acting.
 We consider only uniform stresses
 that do not depend on the position of the volume $dV$ on the solid.
 The force on the other surface perpendicular to $x_i$ is 
-${\bf f}_i=-(f_{1,i}, f_{2,i}, f_{3,i})$. With this definition a positive
+$-{\bf f}_i=-(f_{1,i}, f_{2,i}, f_{3,i})$. With this definition a positive
 stress pulls outward on the surface of the volume.
 
 The stress is a symmetric tensor so it is possible to use the Voigt
@@ -1472,7 +1472,7 @@ volume of the solid so it pushes on the surfaces.
 The thermodynamic functions can be introduced by using the first law
 of thermodynamics and the definition of the entropy ($S$). The heat 
 given reversibly to the solid can be written as $dQ=TdS$ where $T$ is
-the temperature of the solid and $dS$ is its entropy change. The change 
+the temperature of the solid and $dS$ its entropy change. The change 
 of the internal energy is given by $dU = TdS - dW$ where $dW$ is 
 the work done by the solid. If the strain changes by $d\epsilon$ and 
 the stress is $\sigma$ then $dW=-V \sum_i \sigma_i d\epsilon_i$, where $V$
@@ -1525,7 +1525,8 @@ G= F - V \sum_{i=1}^6 \sigma_i \epsilon_i.
 \end{equation}
 We have:
 \begin{equation}
-{1\over V} {\partial G \over \partial \epsilon_i}\Bigg |_T = {1\over V} {\partial F \over \partial \epsilon_i}\Bigg |_T - \sigma_i = 0.
+{1\over V} {\partial G \over \partial \epsilon_i}\Bigg |_T = {1\over V} 
+{\partial F \over \partial \epsilon_i}\Bigg |_T - \sigma_i = 0.
 \end{equation}
 $G$ is called the Gibbs free energy of the solid.
 
@@ -1546,7 +1547,7 @@ $\zeta_k$ and to check the minimum condition:
 \begin{equation}
 {\partial U \over \partial \zeta_k}=0.
 \end{equation}
-Similarly at temperature $T$ the equations that define the lattice 
+Similarly, at the temperature $T$, the equations that define the lattice 
 parameters are:
 \begin{equation}
 {\partial F \over \partial \zeta_k}=0.
@@ -1586,7 +1587,7 @@ of the thermal expansion as:
 \end{equation}
 Along the direction ${\bf l}$ we can write:
 \begin{equation}
-\alpha_{{\bf l}} = {1 \over d_{\bf l}} {d d_{\bf l} \over d T}
+\alpha_{{\bf l}} = {1 \over d_{\bf l}} {d d_{\bf l} \over d T},
 \end{equation}
 where $d_{\bf l}$ is the interplanar distance for that set of lattice planes.
 In the most complex case, for a triclinic solid we need six directions
@@ -1616,7 +1617,7 @@ is $d_{\bf l}=a$ in the simple tetragonal lattice and $d_{\bf l}=a/2$ in
 centered tetragonal and hexagonal case. 
 For this direction we have $\alpha_{\bf l}=\alpha_1$ and 
 \begin{equation}
-\alpha_1 = {1\over a(T)} {d a \over dT}
+\alpha_1 = {1\over a(T)} {d a \over dT}.
 \end{equation}
 Then we can consider the planes perpendicular to ${\bf l}=(0,0,1)$.
 The distance between these planes is $d_{\bf l}=c$ for the simple
@@ -1648,13 +1649,13 @@ a_h= a \sqrt{2} \sqrt{1-\cos\alpha}
 \end{equation}
 and 
 \begin{equation}
-c_h= a \sqrt{3} \sqrt{1+2\cos\alpha}
+c_h= a \sqrt{3} \sqrt{1+2\cos\alpha}.
 \end{equation}
 Considering first the planes perpendicular to the direction
 ${\bf l}=(1,0,0)$ we have that the distance between planes is
 $d_{\bf l}=a_h$ and $\alpha_{\bf l}=\alpha_1$. Therefore
 \begin{equation}
-\alpha_1 = {1\over a_h(T)} {d a_h \over dT},
+\alpha_1 = {1\over a_h(T)} {d a_h \over dT}.
 \end{equation}
 Then we can consider the planes perpendicular to the direction
 ${\bf l}=(0,0,1)$ where the distance between planes is
@@ -1664,16 +1665,16 @@ $d_{\bf l}=c_h/3$ and $\alpha_{\bf l}=\alpha_3$. Therefore
 \end{equation}
 Choosing as parameters $a$ and $\cos \alpha$ we must use the relationships:
 \begin{equation}
-{d a_h \over d T}= {a_h \over a} {d a \over d T} - {a_h \over 2(1-\cos\alpha)}{d \cos\alpha \over d T}
+{d a_h \over d T}= {a_h \over a} {d a \over d T} - {a_h \over 2(1-\cos\alpha)}{d \cos\alpha \over d T},
 \end{equation}
 \begin{equation}
-{d c_h \over d T}= {c_h \over a} {d a \over d T} + {c_h \over 1+2\cos\alpha}{d \cos\alpha \over d T}
+{d c_h \over d T}= {c_h \over a} {d a \over d T} + {c_h \over 1+2\cos\alpha}{d \cos\alpha \over d T},
 \end{equation}
 to obtain
 \begin{eqnarray}
 \alpha_1 &=& \alpha_2= {1\over a(T)} {d a \over dT} - {1 \over 2(1-\cos\alpha)}{d \cos\alpha \over d T}, \\
 \alpha_3 &=& {1\over a(T)} {d a \over dT} + {1 \over 1+2\cos\alpha}
-{d \cos\alpha \over d T}
+{d \cos\alpha \over d T}.
 \end{eqnarray}
 
 \subsection{\color{web-blue}Orthorhombic systems}
@@ -1716,7 +1717,7 @@ C_\epsilon= T {d S \over dT}\Big|_\epsilon = { d U \over d T}\Big|_\epsilon.
 \end{equation}
 Since only the entropy of the ionic displacements is taken into consideration,
 the only term that is derived is $U_{ph}$. Once the phonon dispersions 
-have been calculated this quantity can be obtained by deriving Eq.~\ref{uvib}
+have been calculated this quantity can be obtained by deriving Eq.~\ref{uvib}.
 
 Note that for metals the electronic contribution, while not large, is important 
 and must be accounted for before comparing with experiment. Presently,
@@ -2359,12 +2360,12 @@ values of $B_{ij,kl}$ and to call them the elastic constants of a
 solid under pressure. We can write out the relationship for the Voigt 
 components:
 \begin{eqnarray}
-B_{44} &=& C_{44} - {1\over 2} p \\
-B_{55} &=& C_{55} - {1\over 2} p \\
-B_{66} &=& C_{66} - {1\over 2} p \\
-B_{12} &=& C_{12} + p \\
-B_{13} &=& C_{13} + p \\
-B_{23} &=& C_{23} + p 
+B_{44} &=& C_{44} - {1\over 2} p, \\
+B_{55} &=& C_{55} - {1\over 2} p, \\
+B_{66} &=& C_{66} - {1\over 2} p, \\
+B_{12} &=& C_{12} + p, \\
+B_{13} &=& C_{13} + p, \\
+B_{23} &=& C_{23} + p, 
 \end{eqnarray}
 while for all the other components $B_{ij}=C_{ij}$.
 Note however that for a generic stress, as opposed to 
@@ -2578,7 +2579,7 @@ of $C_{ij,kl}$. In general they cannot be written using the Voigt notation.
 The relationship between stress and strain can be inverted. A stress 
 applied to a solid produces a strain proportional to the stress:
 \begin{equation}
-\epsilon_{i} =\sum_{il} S_{i,l} \sigma_l 
+\epsilon_{i} =\sum_{il} S_{i,l} \sigma_l, 
 \end{equation}
 where the tensor $S_{i,l}$ is known as elastic compliances. It is the
 inverse of the elastic constant tensor: 
@@ -2594,7 +2595,7 @@ The isothermal compressibility is defined as the derivative of the
 equilibrium volume with respect to pressure divided by the volume,
 calculated at constant temperature.
 \begin{equation}
-K_T = - {1 \over V} {d V \over d p}\Bigg|_T
+K_T = - {1 \over V} {d V \over d p}\Bigg|_T.
 \end{equation}
 The bulk modulus is the inverse of the compressibility. 
 
@@ -2831,7 +2832,7 @@ $B_T$, and the volume of unit cell $V$, divided by the constant volume
 heat capacity $C_V$ is the average Gr\"uneisen parameter $\gamma$
 that we can calculate as:
 \begin{equation}
-\gamma = {V B_T \beta \over C_V}
+\gamma = {V B_T \beta \over C_V},
 \end{equation}
 and this can be calculated even for anisotropic solids if we have
 calculated the bulk modulus as written above.
@@ -2840,36 +2841,36 @@ For anisotropic solids we can generalize this concept by introducing
 the thermal stresses, as products of the elastic constants and the
 thermal expansion:
 \begin{equation}
-b_{ij} = -\sum_{lm} C_{ij,lm} \alpha_{lm}
+b_{ij} = -\sum_{lm} C_{ij,lm} \alpha_{lm}.
 \end{equation}
 Multiplying this quantity by the ratio between the volume and the
 constant strain heat capacity we obtain the generalized Gr\"uneisen
 parameters:
 \begin{equation}
-\gamma_{ij} =  {V b_{ij} \over C_\epsilon}
+\gamma_{ij} =  {V b_{ij} \over C_\epsilon}.
 \end{equation}
 
 \newpage
 \section{\color{coral}Constant stress heat capacity}
 
-The difference between the heat capacity calculated at constant strain 
-and that calculated at constant stress is given by:
+The difference between the heat capacity calculated at constant stress
+and at constant strain is given by:
 \begin{equation}
-C^\sigma - C^\epsilon = - T V \sum_{ij} \alpha_{ij} b_{ij}
+C^\sigma - C^\epsilon = - T V \sum_{ij} \alpha_{ij} b_{ij}.
 \end{equation}
 
 \newpage
 \section{\color{coral}Adiabatic quantities}
 
-Similarly the difference between isothermal and adiabatic
+Similarly the difference between adiabatic and isothermal 
 elastic compliances is given by (Voigt notation):
 \begin{equation}
-S^S_{i,l} - S^T_{i,l} = - {T V \alpha_{i} \alpha_{l} \over C^\sigma}
+S^S_{i,l} - S^T_{i,l} = - {T V \alpha_{i} \alpha_{l} \over C^\sigma},
 \end{equation}
-While the difference between isothermal and adiabatic elastic constants
+while the difference between adiabatic and isothermal elastic constants
 is given by
 \begin{equation}
-C^S_{ij,lm} - C^T_{ij,lm} =  {T V b_{ij} b_{lm} \over C^\epsilon}
+C^S_{ij,lm} - C^T_{ij,lm} =  {T V b_{ij} b_{lm} \over C^\epsilon}.
 \end{equation}
 
 \newpage
