@@ -121,6 +121,7 @@ MODULE thermodynamics
   REAL(DP), ALLOCATABLE :: ph_free_ener(:,:) ! phonon free_energy, T, geometry
   REAL(DP), ALLOCATABLE :: ph_entropy(:,:)   ! phonon entropy, T, geometry
   REAL(DP), ALLOCATABLE :: ph_cv(:,:)        ! phonon specific heat, T, geometry
+  REAL(DP), ALLOCATABLE :: ph_b_fact(:,:,:,:,:)! atomic B factor
 
 END MODULE thermodynamics
 
@@ -142,6 +143,7 @@ MODULE ph_freq_thermodynamics
   REAL(DP), ALLOCATABLE :: phf_free_ener(:,:) ! phonon free_energy, T, geometry
   REAL(DP), ALLOCATABLE :: phf_entropy(:,:)   ! phonon entropy, T, geometry
   REAL(DP), ALLOCATABLE :: phf_cv(:,:)        ! phonon specific heat, T, geometry
+  REAL(DP), ALLOCATABLE :: phf_b_fact(:,:,:,:,:) ! atomic B factor
 
   REAL(DP), ALLOCATABLE :: vminf_t(:), b0f_t(:), b01f_t(:), free_e_minf_t(:) 
                            ! the parameters of the minimum of the  
@@ -712,8 +714,11 @@ MODULE control_debye
 
   REAL(DP) :: debye_t, deb_e0
 
-  REAL(DP), ALLOCATABLE :: deb_energy(:), deb_free_energy(:),  &
-                           deb_entropy(:), deb_cv(:)
+  REAL(DP), ALLOCATABLE :: deb_energy(:),       &  ! Debye vibrational energy
+                           deb_free_energy(:),  &  ! Debye free energy
+                           deb_entropy(:),      &  ! Debye entropy
+                           deb_cv(:),           &  ! Debye cv
+                           deb_b_fact(:,:,:,:)     ! Debye atomic B factors
 
 END MODULE control_debye
 

@@ -8,21 +8,21 @@
 SUBROUTINE write_thermo(igeom)
 !
 !  This routine writes on file the harmonic thermodynamical quantities
+!  calculated using the phonon dos
 !
 USE kinds,          ONLY : DP
 USE ions_base,      ONLY : nat, nsp, ityp, amass
-!USE symme,          ONLY : symtensor
 USE phdos_module,   ONLY : zero_point_energy, fecv, integrated_dos, &
                            phdos_debye_factor
 USE thermo_mod,     ONLY : tot_ngeo
 USE temperature,    ONLY : ntemp, temp
 USE thermodynamics, ONLY : ph_ener, ph_free_ener, ph_entropy, ph_cv, &
-                           phdos_save, gen_phdos_save
+                           ph_b_fact, phdos_save, gen_phdos_save
 USE control_thermo, ONLY : with_eigen
-USE mp_world,       ONLY : world_comm
-USE mp,             ONLY : mp_bcast, mp_sum
-USE io_global,      ONLY : meta_ionode, meta_ionode_id, stdout
 USE data_files,     ONLY : fltherm
+USE mp_world,       ONLY : world_comm
+USE mp,             ONLY : mp_sum
+USE io_global,      ONLY : meta_ionode, stdout
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: igeom
@@ -30,36 +30,17 @@ INTEGER, INTENT(IN) :: igeom
 INTEGER  :: idum, itemp, startt, lastt, iu_therm
 INTEGER  :: find_free_unit
 REAL(DP) :: e0, tot_states
-REAL(DP) :: b_fact(3,3,nat,ntemp)
 CHARACTER(LEN=256) :: filetherm
-LOGICAL  :: check_file_exists, do_read
+LOGICAL  :: do_read
 !
-do_read=.FALSE.
-filetherm="therm_files/"//TRIM(fltherm)
-IF ( check_file_exists(filetherm) ) do_read=.TRUE.
 IF ( igeom < 1 .OR. igeom > tot_ngeo ) CALL errore('write_thermo', & 
                                                'Too many geometries',1)
-IF (do_read) THEN
-   IF (meta_ionode) THEN
-      iu_therm=find_free_unit()
-      OPEN (UNIT=iu_therm, FILE=TRIM(filetherm), STATUS='old',&
-                                                     FORM='formatted')
-      DO idum=1,12
-         READ(iu_therm,*)
-      ENDDO
-      DO itemp = 1, ntemp
-         READ(iu_therm, '(e16.8,4e20.12)') temp(itemp), &
-                    ph_ener(itemp,igeom), ph_free_ener(itemp,igeom), &
-                    ph_entropy(itemp,igeom), ph_cv(itemp,igeom)
-      END DO
-      CLOSE(iu_therm)
-   END IF
-   CALL mp_bcast(ph_ener(:,igeom), meta_ionode_id, world_comm)
-   CALL mp_bcast(ph_free_ener(:,igeom), meta_ionode_id, world_comm)
-   CALL mp_bcast(ph_entropy(:,igeom), meta_ionode_id, world_comm)
-   CALL mp_bcast(ph_cv(:,igeom), meta_ionode_id, world_comm)
-   RETURN
-END IF
+
+filetherm='therm_files/'//TRIM(fltherm)
+CALL read_thermo(ntemp, temp, ph_ener(1,igeom), ph_free_ener(1,igeom), &
+                 ph_entropy(1,igeom), ph_cv(1,igeom), &
+                 ph_b_fact(1,1,1,1,igeom), do_read, filetherm)
+IF (do_read) RETURN
 
 WRITE(stdout,'(/,2x,76("+"))')
 WRITE(stdout,'(5x,"Computing the thermodynamic properties from phonon dos")')
@@ -76,7 +57,7 @@ ph_free_ener(:,igeom)=0.0_DP
 ph_ener(:,igeom)=0.0_DP
 ph_cv(:,igeom)=0.0_DP
 ph_entropy(:,igeom)=0.0_DP
-b_fact=0.0_DP
+ph_b_fact(:,:,:,:,igeom)=0.0_DP
 DO itemp = startt, lastt
    IF (MOD(itemp-startt+1,30)==0) &
                      WRITE(6,'(5x,"Computing temperature ", i5 " / ",&
@@ -90,8 +71,7 @@ DO itemp = startt, lastt
                             temp(itemp)
    IF (with_eigen) THEN
       CALL phdos_debye_factor(gen_phdos_save, temp(itemp), &
-                              b_fact(1,1,1,itemp), nat, amass, nsp, ityp)
-!      CALL symtensor(nat, b_fact(1,1,1,itemp))
+                          ph_b_fact(1,1,1,itemp,igeom), nat, amass, nsp, ityp)
    ENDIF
 
 END DO
@@ -102,14 +82,14 @@ CALL mp_sum(ph_free_ener(1:ntemp,igeom),world_comm)
 CALL mp_sum(ph_ener(1:ntemp,igeom),world_comm)
 CALL mp_sum(ph_cv(1:ntemp,igeom),world_comm)
 CALL mp_sum(ph_entropy(1:ntemp,igeom),world_comm)
-IF (with_eigen) CALL mp_sum(b_fact(1:3,1:3,1:nat,1:ntemp),world_comm)
+IF (with_eigen) CALL mp_sum(ph_b_fact(1:3,1:3,1:nat,1:ntemp,igeom),world_comm)
 
 IF (meta_ionode) &
    CALL write_thermo_info(e0, tot_states, ntemp, temp, ph_ener(1,igeom), &
               ph_free_ener(1,igeom), ph_entropy(1,igeom), ph_cv(1,igeom),&
                                                              1,filetherm)
 IF (meta_ionode.AND.with_eigen) &
-   CALL write_dw_info(ntemp, temp, b_fact, nat, filetherm)
+   CALL write_dw_info(ntemp, temp, ph_b_fact(1,1,1,1,igeom), nat, filetherm)
 
 RETURN
 END SUBROUTINE write_thermo
@@ -124,52 +104,30 @@ USE ph_freq_module,   ONLY : ph_freq_type, zero_point_energy_ph, fecv_ph, &
                              specific_heat_cv_ph, debye_waller_factor
 USE temperature,      ONLY : ntemp, temp
 USE ph_freq_thermodynamics, ONLY : phf_ener, phf_free_ener, phf_entropy, &
-                             phf_cv, ph_freq_save
+                             phf_cv, phf_b_fact, ph_freq_save
 USE thermo_mod,       ONLY : tot_ngeo
 USE control_thermo,   ONLY : with_eigen
-USE mp,               ONLY : mp_bcast, mp_sum
-USE mp_world,         ONLY : world_comm
-USE io_global,        ONLY : meta_ionode, meta_ionode_id, stdout
 USE data_files,       ONLY : fltherm
+USE mp,               ONLY : mp_sum
+USE mp_world,         ONLY : world_comm
+USE io_global,        ONLY : meta_ionode, stdout
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: igeom
 CHARACTER(LEN=256) :: filename
-LOGICAL :: check_file_exists, do_read
+LOGICAL :: do_read
 
 INTEGER  :: idum, itemp, iu_therm, ipol, jpol, na
 INTEGER  :: find_free_unit
 REAL(DP) :: e0
-REAL(DP) :: b_fact(3,3,nat,ntemp)
 !
-do_read=.FALSE.
-filename="therm_files/"//TRIM(fltherm)//'_ph'
-IF ( check_file_exists(filename) ) do_read=.TRUE.
-
 IF ( igeom < 1 .OR. igeom > tot_ngeo ) CALL errore('write_thermo', & 
                                                'Too many geometries',1)
-
-IF (do_read) THEN
-   IF (meta_ionode) THEN
-      iu_therm=find_free_unit()
-      OPEN (UNIT=iu_therm, FILE=TRIM(filename), STATUS='old',&
-                                                     FORM='formatted')
-      DO idum=1,11
-         READ(iu_therm,*)
-      ENDDO
-      DO itemp = 1, ntemp
-         READ(iu_therm, '(e16.8,4e20.12)') temp(itemp), &
-                    phf_ener(itemp,igeom), phf_free_ener(itemp,igeom), &
-                    phf_entropy(itemp,igeom), phf_cv(itemp,igeom)
-      END DO
-      CLOSE(iu_therm)
-   END IF
-   CALL mp_bcast(phf_ener(:,igeom), meta_ionode_id, world_comm)
-   CALL mp_bcast(phf_free_ener(:,igeom), meta_ionode_id, world_comm)
-   CALL mp_bcast(phf_entropy(:,igeom), meta_ionode_id, world_comm)
-   CALL mp_bcast(phf_cv(:,igeom), meta_ionode_id, world_comm)
-   RETURN
-END IF
+filename='therm_files/'//TRIM(fltherm)//'_ph'
+CALL read_thermo(ntemp, temp, phf_ener(1,igeom), phf_free_ener(1,igeom), &
+                 phf_entropy(1,igeom), phf_cv(1,igeom), &
+                 phf_b_fact(1,1,1,1,igeom), do_read, filename)
+IF (do_read) RETURN
 
 WRITE(stdout,'(/,2x,76("+"))')
 WRITE(stdout,'(5x,"Computing the thermodynamic properties from frequencies")')
@@ -198,8 +156,8 @@ DO itemp = 1, ntemp
                              phf_free_ener(itemp, igeom))/temp(itemp)
    IF (with_eigen) THEN
       CALL debye_waller_factor(ph_freq_save(igeom), temp(itemp), &
-                              b_fact(1,1,1,itemp), nat, amass, nsp, ityp)
-      CALL symtensor(nat, b_fact(1,1,1,itemp))
+                          phf_b_fact(1,1,1,itemp,igeom), nat, amass, nsp, ityp)
+      CALL symtensor(nat, phf_b_fact(1,1,1,itemp,igeom))
    ENDIF
 END DO
 !
@@ -210,14 +168,14 @@ CALL mp_sum(phf_free_ener(1:ntemp,igeom),world_comm)
 CALL mp_sum(phf_ener(1:ntemp,igeom),world_comm)
 CALL mp_sum(phf_cv(1:ntemp,igeom),world_comm)
 CALL mp_sum(phf_entropy(1:ntemp,igeom),world_comm)
-IF (with_eigen) CALL mp_sum(b_fact(1:3,1:3,1:nat,1:ntemp),world_comm)
+IF (with_eigen) CALL mp_sum(phf_b_fact(1:3,1:3,1:nat,1:ntemp,igeom),world_comm)
 
 IF (meta_ionode) &
    CALL write_thermo_info(e0, 0.0_DP, ntemp, temp, phf_ener(1,igeom), &
               phf_free_ener(1,igeom), phf_entropy(1,igeom), phf_cv(1,igeom),& 
                                                             2,filename)
 IF (meta_ionode.AND.with_eigen) &
-   CALL write_dw_info(ntemp, temp, b_fact, nat, filename)
+   CALL write_dw_info(ntemp, temp, phf_b_fact(1,1,1,1,igeom), nat, filename)
 
 RETURN
 END SUBROUTINE write_thermo_ph
@@ -229,7 +187,7 @@ USE ions_base,        ONLY : nat
 USE debye_module,     ONLY : debye_e0, debye_vib_energy, debye_free_energy, &
                              debye_entropy, debye_cv
 USE control_debye,    ONLY : deb_e0, deb_cv, deb_entropy, deb_energy, &
-                             deb_free_energy, debye_t
+                             deb_free_energy, deb_b_fact, debye_t
 USE temperature,      ONLY : ntemp, temp
 USE mp_images,        ONLY : root_image, my_image_id
 USE io_global,        ONLY : ionode, stdout
@@ -242,8 +200,13 @@ CHARACTER(LEN=6) :: int_to_char
 
 INTEGER  :: idum
 INTEGER  :: itemp
+LOGICAL  :: do_read
 !
 filename='therm_files/'//TRIM(fltherm)//'_debye.g'//TRIM(int_to_char(igeom))
+
+CALL read_thermo(ntemp, temp, deb_energy, deb_free_energy, deb_entropy, &
+                        deb_cv, deb_b_fact, do_read, filename)
+IF (do_read) RETURN
 
 IF (my_image_id /= root_image) RETURN
 
@@ -300,8 +263,11 @@ IF (iflag==3) THEN
 ELSE
    WRITE(iu_therm,'("# Temperature T in K, ")')
 ENDIF
-IF (iflag==1) &
-WRITE(iu_therm,'("# Total number of states is:", f15.5,",")') tot_states
+IF (iflag==1) THEN
+   WRITE(iu_therm,'("# Total number of states is:", f15.5,",")') tot_states
+ELSE
+   WRITE(iu_therm,'("# ")') 
+ENDIF
 WRITE(iu_therm,'("# Energy and free energy in Ry/cell,")')
 WRITE(iu_therm,'("# Entropy in Ry/cell/K,")')
 WRITE(iu_therm,'("# Heat capacity Cv in Ry/cell/K.")')
@@ -321,13 +287,14 @@ DO itemp = 1, ntemp
    WRITE(iu_therm, '(e16.8,4e20.12)') temp(itemp), energy(itemp), &
                  free_energy(itemp), entropy(itemp), cv(itemp)
 END DO
-CLOSE(iu_therm)
+CLOSE(UNIT=iu_therm, STATUS='KEEP')
 
 RETURN
 END SUBROUTINE write_thermo_info
 
 SUBROUTINE write_dw_info(ntemp, temp, b_fact, nat, filename)
 USE kinds, ONLY : DP
+
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ntemp, nat
 REAL(DP), INTENT(IN) :: temp(ntemp), b_fact(3,3,nat,ntemp)
@@ -354,4 +321,72 @@ END DO
 
 RETURN
 END SUBROUTINE write_dw_info
+
+SUBROUTINE read_thermo(ntemp, temp, ph_ener, ph_free_ener, ph_entropy, &
+                       ph_cv, b_fact, do_read, filetherm)
+
+USE kinds,            ONLY : DP
+USE ions_base,        ONLY : nat
+USE io_global,        ONLY : meta_ionode, meta_ionode_id
+USE control_thermo,   ONLY : with_eigen
+USE mp_world,         ONLY : world_comm
+USE mp,               ONLY : mp_bcast
+
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ntemp
+REAL(DP), INTENT(INOUT) :: temp(ntemp), ph_ener(ntemp), ph_free_ener(ntemp),&
+                           ph_entropy(ntemp), ph_cv(ntemp), &
+                           b_fact(3,3,nat,ntemp)
+LOGICAL, INTENT(OUT) :: do_read
+
+CHARACTER(LEN=*) :: filetherm
+CHARACTER(LEN=256) :: filename_loc
+INTEGER :: iu_therm, idum, itemp, na, ipol, jpol, find_free_unit
+LOGICAL  :: check_file_exists
+CHARACTER(LEN=6) :: int_to_char
+
+do_read=.FALSE.
+IF ( check_file_exists(filetherm) ) do_read=.TRUE.
+IF (do_read) THEN
+   IF (meta_ionode) THEN
+      iu_therm=find_free_unit()
+      OPEN (UNIT=iu_therm, FILE=TRIM(filetherm), STATUS='old',&
+                                                     FORM='formatted')
+      DO idum=1,12
+         READ(iu_therm,*)
+      ENDDO
+      DO itemp = 1, ntemp
+         READ(iu_therm, '(e16.8,4e20.12)') temp(itemp), &
+                    ph_ener(itemp), ph_free_ener(itemp), &
+                    ph_entropy(itemp), ph_cv(itemp)
+      END DO
+      CLOSE(UNIT=iu_therm, STATUS='KEEP')
+   END IF
+   CALL mp_bcast(ph_ener, meta_ionode_id, world_comm)
+   CALL mp_bcast(ph_free_ener, meta_ionode_id, world_comm)
+   CALL mp_bcast(ph_entropy, meta_ionode_id, world_comm)
+   CALL mp_bcast(ph_cv, meta_ionode_id, world_comm)
+
+   IF (with_eigen) THEN
+      DO na=1,nat
+         filename_loc=TRIM(filetherm)//'.'//TRIM(int_to_char(na))//'.dw'
+         IF (meta_ionode) THEN
+            OPEN (UNIT=iu_therm, FILE=TRIM(filename_loc), STATUS='unknown',&
+                                             FORM='formatted')
+            READ(iu_therm, *)
+            DO itemp = 1, ntemp
+               READ(iu_therm, '(e16.8,6e18.8)') temp(itemp), &
+                     ((b_fact(ipol,jpol,na,itemp), jpol=ipol,3), ipol=1,3)
+            END DO
+            CLOSE(UNIT=iu_therm, STATUS='KEEP')
+         ENDIF
+      ENDDO
+      CALL mp_bcast(b_fact, meta_ionode_id, world_comm)
+   ELSE
+      b_fact=0.0_DP
+   ENDIF
+END IF
+
+RETURN
+END SUBROUTINE read_thermo
 

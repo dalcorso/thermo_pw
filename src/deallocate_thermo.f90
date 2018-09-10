@@ -14,8 +14,10 @@ SUBROUTINE deallocate_thermo()
   USE kinds,          ONLY : DP
   USE thermo_mod,     ONLY : celldm_geo, energy_geo, omega_geo, ibrav_geo, &
                              no_ph, tot_ngeo
-  USE thermodynamics, ONLY : ph_free_ener, ph_ener, ph_entropy, ph_cv
-  USE ph_freq_thermodynamics, ONLY : phf_free_ener, phf_ener, phf_entropy, phf_cv
+  USE thermodynamics, ONLY : ph_free_ener, ph_ener, ph_entropy, ph_cv, &
+                             ph_b_fact
+  USE ph_freq_thermodynamics, ONLY : phf_free_ener, phf_ener, phf_entropy, &
+                             phf_b_fact, phf_cv
   USE anharmonic,     ONLY : vmin_t, b0_t, free_e_min_t, &
                              alpha_t, beta_t, gamma_t, cv_t, cp_t, b0_s, &
                              celldm_t, alpha_anis_t, cpmcv_anis, el_cons_t, &
@@ -39,7 +41,7 @@ SUBROUTINE deallocate_thermo()
   USE elastic_constants, ONLY : epsilon_geo, sigma_geo, epsilon_voigt
   USE control_elastic_constants, ONLY : rot_mat, el_con_geo
   USE control_debye,    ONLY : deb_energy, deb_free_energy, deb_entropy, &
-                               deb_cv
+                               deb_cv, deb_b_fact
   USE control_quadratic_energy, ONLY : coeff, hessian_v, hessian_e, x_pos_min
   USE control_quartic_energy, ONLY : coeff4, x_min_4
   USE collect_info,  ONLY : destroy_collect_info_type
@@ -64,10 +66,12 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED(ph_ener) )          DEALLOCATE(ph_ener)
   IF ( ALLOCATED(ph_entropy) )       DEALLOCATE(ph_entropy)
   IF ( ALLOCATED(ph_cv) )            DEALLOCATE(ph_cv)
+  IF ( ALLOCATED(ph_b_fact) )        DEALLOCATE(ph_b_fact)
   IF ( ALLOCATED(phf_free_ener) )    DEALLOCATE(phf_free_ener)
   IF ( ALLOCATED(phf_ener) )         DEALLOCATE(phf_ener)
   IF ( ALLOCATED(phf_entropy) )      DEALLOCATE(phf_entropy)
   IF ( ALLOCATED(phf_cv) )           DEALLOCATE(phf_cv)
+  IF ( ALLOCATED(phf_b_fact) )       DEALLOCATE(phf_b_fact)
 
   IF ( ALLOCATED (b0_t) )            DEALLOCATE(b0_t) 
   IF ( ALLOCATED (b0_s) )            DEALLOCATE(b0_s) 
@@ -140,7 +144,7 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (ityp_save) )       DEALLOCATE(ityp_save)
   IF ( ALLOCATED (amass_save) )      DEALLOCATE(amass_save)
 
-  IF ( ALLOCATED (geometry) ) DEALLOCATE(geometry)
+  IF ( ALLOCATED (geometry) )        DEALLOCATE(geometry)
 
   IF ( ALLOCATED (tau0) )            DEALLOCATE(tau0)
   IF ( ALLOCATED (tau0_crys) )       DEALLOCATE(tau0_crys)
@@ -149,6 +153,7 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (deb_free_energy) ) DEALLOCATE( deb_free_energy )
   IF ( ALLOCATED (deb_entropy) )     DEALLOCATE( deb_entropy )
   IF ( ALLOCATED (deb_cv) )          DEALLOCATE( deb_cv )
+  IF ( ALLOCATED (deb_b_fact) )      DEALLOCATE( deb_b_fact )
 
   IF ( ALLOCATED (dos_k) )           DEALLOCATE( dos_k )
   IF ( ALLOCATED (dos_wk) )          DEALLOCATE( dos_wk )

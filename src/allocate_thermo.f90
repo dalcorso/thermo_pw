@@ -12,11 +12,12 @@ SUBROUTINE allocate_thermodynamics()
   !  This routine deallocates the variables that control the thermo calculation
   !
   USE kinds,          ONLY : DP
+  USE ions_base,      ONLY : nat
   USE thermo_mod,     ONLY : tot_ngeo
   USE temperature,    ONLY : ntemp
-  USE thermodynamics, ONLY : ph_free_ener, ph_ener, ph_entropy, ph_cv
+  USE thermodynamics, ONLY : ph_free_ener, ph_ener, ph_entropy, ph_cv, ph_b_fact
   USE ph_freq_thermodynamics, ONLY : phf_free_ener, phf_ener, phf_entropy, &
-                                     phf_cv
+                                     phf_cv, phf_b_fact
 
   IMPLICIT NONE
 
@@ -24,11 +25,13 @@ SUBROUTINE allocate_thermodynamics()
   IF (.NOT.ALLOCATED(ph_ener))       ALLOCATE(ph_ener(ntemp,tot_ngeo))
   IF (.NOT.ALLOCATED(ph_entropy))    ALLOCATE(ph_entropy(ntemp,tot_ngeo))
   IF (.NOT.ALLOCATED(ph_cv))         ALLOCATE(ph_cv(ntemp,tot_ngeo))
+  IF (.NOT.ALLOCATED(ph_b_fact))     ALLOCATE(ph_b_fact(3,3,nat,ntemp,tot_ngeo))
 
   IF (.NOT.ALLOCATED(phf_free_ener)) ALLOCATE(phf_free_ener(ntemp,tot_ngeo))
   IF (.NOT.ALLOCATED(phf_ener))      ALLOCATE(phf_ener(ntemp,tot_ngeo))
   IF (.NOT.ALLOCATED(phf_entropy))   ALLOCATE(phf_entropy(ntemp,tot_ngeo))
   IF (.NOT.ALLOCATED(phf_cv))        ALLOCATE(phf_cv(ntemp,tot_ngeo))
+  IF (.NOT.ALLOCATED(phf_b_fact))    ALLOCATE(phf_b_fact(3,3,nat,ntemp,tot_ngeo))
 
   RETURN
   !
@@ -100,8 +103,10 @@ END SUBROUTINE allocate_anharmonic
 
 SUBROUTINE allocate_debye()
 
+USE ions_base,     ONLY : nat
 USE temperature,   ONLY : ntemp
-USE control_debye, ONLY : deb_energy, deb_free_energy, deb_entropy, deb_cv
+USE control_debye, ONLY : deb_energy, deb_free_energy, deb_entropy, deb_cv, &
+                          deb_b_fact
 
 IMPLICIT NONE
 
@@ -109,6 +114,7 @@ IF (.NOT. ALLOCATED (deb_energy) )       ALLOCATE( deb_energy(ntemp) )
 IF (.NOT. ALLOCATED (deb_free_energy) )  ALLOCATE( deb_free_energy(ntemp) )
 IF (.NOT. ALLOCATED (deb_entropy) )      ALLOCATE( deb_entropy(ntemp) )
 IF (.NOT. ALLOCATED (deb_cv) )           ALLOCATE( deb_cv(ntemp) )
+IF (.NOT. ALLOCATED (deb_b_fact) )       ALLOCATE( deb_b_fact(3,3,nat,ntemp) )
 
 RETURN
 END SUBROUTINE allocate_debye
