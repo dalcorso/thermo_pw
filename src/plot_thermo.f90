@@ -81,9 +81,10 @@ IF (ltherm_dos) &
 IF (ltherm_freq) &
    CALL gnuplot_write_file_mul_data(filename,1,5,'color_blue',.NOT.ltherm_dos,&
                                                            .TRUE.,.FALSE.)
+CALL gnuplot_end()
+
 IF (with_eigen) CALL plot_dw()
 
-CALL gnuplot_end()
 
 IF (lgnuplot.AND.ionode) &
    ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
