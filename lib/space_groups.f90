@@ -4879,7 +4879,7 @@ MODULE space_groups
          ENDIF
   END SELECT
 
-  IF (verbosity) WRITE(stdout,'(/,5x,"Space group nymber",i5)') sg_number
+  IF (verbosity) WRITE(stdout,'(/,5x,"Space group number",i5)') sg_number
 
   RETURN
   END SUBROUTINE find_space_group
