@@ -102,8 +102,6 @@ LOGICAL :: all_geometry_done
 
 CALL check_all_geometry_done(all_geometry_done)
 IF (.NOT.all_geometry_done) RETURN
-
-CALL collect_all_geometries()
 !
 !    Anisotropic solid. Compute only the crystal parameters as a function
 !    of temperature and the thermal expansion tensor
