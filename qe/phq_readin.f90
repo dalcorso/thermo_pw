@@ -24,7 +24,6 @@ SUBROUTINE phq_readin_tpw()
   USE mp_world,      ONLY : world_comm
   USE ions_base,     ONLY : amass, atm
   USE input_parameters, ONLY : nk1, nk2, nk3, k1, k2, k3, outdir
-  USE check_stop,    ONLY : max_seconds
   USE start_k,       ONLY : reset_grid
   USE klist,         ONLY : xk, nks, nkstot, lgauss, two_fermi_energies, &
                             lgauss, ltetra
@@ -111,7 +110,7 @@ SUBROUTINE phq_readin_tpw()
   LOGICAL :: exst, parallelfs
   REAL(DP), ALLOCATABLE :: xqaux(:,:)
   INTEGER, ALLOCATABLE :: wqaux(:)
-  REAL(DP) :: deltaf
+  REAL(DP) :: deltaf, max_seconds
   COMPLEX(DP) :: delta_freq
   INTEGER :: nqaux, iq
   !
