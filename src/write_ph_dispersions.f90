@@ -36,7 +36,7 @@ SUBROUTINE write_ph_dispersions()
   USE initial_conf, ONLY : nr1_save, nr2_save, nr3_save
   USE control_paths, ONLY : disp_q, disp_nqs, high_sym_path, nrap_plot, &
                             rap_plot, dkmod_save
-  USE control_ph,    ONLY : xmldyn
+  USE control_ph,    ONLY : xmldyn, search_sym
   USE control_lr,    ONLY : lgamma
   USE ifc,           ONLY : m_loc, has_zstar
   USE io_bands,      ONLY : write_bands, write_representations
@@ -129,7 +129,7 @@ SUBROUTINE write_ph_dispersions()
 ! the bands. If there some symmetry change is detected change also 
 ! high_symmetry
 !
-  IF (nq > 0) WRITE(stdout,'(/,5x,70("*"))')
+  IF (nq > 0.AND.search_sym) WRITE(stdout,'(/,5x,70("*"))')
   qcode_old=0
   DO n=1, nq
      lo_to_split=.FALSE.
@@ -153,7 +153,8 @@ SUBROUTINE write_ph_dispersions()
      ELSE
         lgamma=.FALSE.
      ENDIF
-     WRITE(stdout, '(/,20x,"q=(",2(f10.5,","),f10.5,"  )")') disp_q(:,n)
+     IF (search_sym) WRITE(stdout, '(/,20x,"q=(",2(f10.5,","),f10.5,"  )")') &
+                                                                   disp_q(:,n)
      IF (xmldyn.AND..NOT.lo_to_split) THEN
         IF (n>1) qcode_old=qcode_group(n-1)
         CALL find_representations_mode_q(nat,nsp,disp_q(:,n), &
@@ -187,7 +188,7 @@ SUBROUTINE write_ph_dispersions()
            ENDIF
            code_group_old=code_group
         ENDIF
-        WRITE(stdout,'(/,5x,70("*"))')
+        IF (search_sym) WRITE(stdout,'(/,5x,70("*"))')
 !     WRITE(stdout,'(2i5, 3f15.5,l5)') n, qcode_group(n), q(:,n), high_sym(n)
      ELSEIF (lo_to_split) THEN
 !
@@ -199,9 +200,11 @@ SUBROUTINE write_ph_dispersions()
         lprojq(n)=0
         gaugeq(:,n)=0.0_DP
 
-        WRITE(stdout, '(/,5x,"Mode symmetry analysis not available &
+        IF (search_sym) THEN
+           WRITE(stdout, '(/,5x,"Mode symmetry analysis not available &
                                                       &for this point")') 
-        WRITE(stdout, '(/,5x,70("*"))')
+           WRITE(stdout, '(/,5x,70("*"))')
+        ENDIF
      ENDIF
   END DO
   !
@@ -211,7 +214,7 @@ SUBROUTINE write_ph_dispersions()
   !  If the force constants are in the xml format we write also
   !  the file with the representations of each mode
   !
-  IF (flfrq.NE.' '.AND.xmldyn) THEN
+  IF (flfrq.NE.' '.AND.xmldyn.AND.search_sym) THEN
      ALLOCATE(aux_ind(nq))
      ALLOCATE(same_next(nq))
      aux_ind=0
