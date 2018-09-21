@@ -72,6 +72,7 @@ phqscf.o \
 pheqscf.o \
 phq_init.o \
 phq_readin.o \
+phq_setup.o \
 phq_summary.o \
 polarizc.o \
 prepare_q.o \

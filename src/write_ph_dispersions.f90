@@ -274,6 +274,7 @@ SUBROUTINE find_representations_mode_q ( nat, ntyp, xq, w2, u, tau, ityp, &
                                    code_groupq_ext
   USE lattices,    ONLY : zone_border
   USE point_group, ONLY : find_group_info_ext
+  USE control_ph,  ONLY : search_sym
   USE io_global, ONLY : stdout
 
   IMPLICIT NONE
@@ -289,11 +290,12 @@ SUBROUTINE find_representations_mode_q ( nat, ntyp, xq, w2, u, tau, ityp, &
   INTEGER :: gii(3, 48), ptype(3)
   REAL(DP) :: argument(48,48)
   INTEGER :: irotmq, isym, i, ierr
-  LOGICAL :: minus_q, search_sym, sym(48), magnetic_sym
+  LOGICAL :: minus_q, sym(48), magnetic_sym
   LOGICAL :: symmorphic_or_nzb, lwrite
 !
 !  find the small group of q
 !
+  IF (.NOT. search_sym) RETURN
   time_reversal=.TRUE.
   minus_q=.TRUE.
   IF (.NOT.time_reversal) minus_q=.FALSE.
@@ -308,36 +310,30 @@ SUBROUTINE find_representations_mode_q ( nat, ntyp, xq, w2, u, tau, ityp, &
   CALL cryst_to_cart (nsymq, wrk, at, -1)
   gii(:,1:nsymq)=NINT(wrk(:,1:nsymq))
 !
-!  if the small group of q is non symmorphic,
-!  search the symmetries only if there are no G such that Sq -> q+G
-!
-  search_sym=symmorphic_or_nzb()
-!
 !  Set the representations tables of the small group of q and
 !  find the mode symmetry
 !
-  IF (search_sym) THEN
+  IF (symmorphic_or_nzb()) THEN
      lqproj=0
      IF (zone_border(xq,at,bg,-1)) lqproj=2
      qptype=1
      magnetic_sym=(nspin_mag==4)
      CALL prepare_sym_analysis(nsymq,sr,t_rev,magnetic_sym)
      CALL find_group_info_ext(nsymq,sr,code_group,code_groupq_ext, &
-                                                    which_elem, group_desc)
+                                                 which_elem, group_desc)
      sym (1:nsym) = .TRUE.
      CALL sgam_ph_new (at, bg, nsym, s, irt, tau, rtau, nat)
      CALL find_mode_sym_tpw (u, w2, tau, nat, nsymq, s, sr, irt, xq,    &
-             rtau, amass, ntyp, ityp, 1, .FALSE., .FALSE., num_rap_mode, ierr)
+          rtau, amass, ntyp, ityp, 1, .FALSE., .FALSE., num_rap_mode, ierr)
 
      IF (code_group/=qcode_old) THEN
         CALL set_class_el_name(nsymq,sname,nclass,nelem,elem,elem_name)
         CALL write_group_info_ph(.TRUE.)
      ENDIF
      CALL print_mode_sym(w2, num_rap_mode, .FALSE.)
-     
   ELSE
      WRITE(stdout,'(/,5x,"Zone border point and nonsymmorphic operations. &
-                                                                   &Using")')
+                                                                &Using")')
 
      DO isym = 1, nsymq
         ft(1,isym) = DBLE(ftau(1,isym)) / DBLE(nr1_save)

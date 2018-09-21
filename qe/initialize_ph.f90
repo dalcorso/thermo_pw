@@ -49,7 +49,7 @@ SUBROUTINE initialize_ph_tpw()
   !
   !  Set the main control variable of the phonon code
   !
-  CALL phq_setup()
+  CALL phq_setup_tpw()
   !
   !  Recover the status if available
   !
