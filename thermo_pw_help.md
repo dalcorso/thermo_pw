@@ -59,6 +59,7 @@ patches given below.</p>
 <a href="https://github.com/dalcorso/thermo_pw/commit/6c70c8f68abb017b90da9d4ce4ab0fb7620a3308">commit 6c70c8f</a>. 
 * The plotted Gruneisen parameters have the wrong sign when
 lmurn=.TRUE.. Apply the change described in <a href="https://github.com/dalcorso/thermo_pw/commit/d78859e8719894646ee4b416a401676c40ff8eff">commit d78859e</a>.
+* Ionic relaxations are working only the first time pw.x is called. Apply the change described in <a href="https://github.com/dalcorso/thermo_pw/commit/6a1a5d8464be36d9d4ce9435f2165bd8484a6acf">commit 6a1a5d8</a>.
 <br>
 
 **Known problems of thermo_pw.0.9.0**:
