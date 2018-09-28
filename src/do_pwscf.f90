@@ -58,13 +58,14 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   !! checks if first string is contained in the second
   INTEGER :: idone 
   !! counter of electronic + ionic steps done in this run
-  INTEGER :: ions_status = 3
+  INTEGER :: ions_status 
   !!    ions_status =  3  not yet converged
   !!    ions_status =  2  converged, restart with nonzero magnetization
   !!    ions_status =  1  converged, final step with current cell needed
   !!    ions_status =  0  converged, exiting
   !
   exit_status = 0
+  ions_status = 3
   IF ( ionode ) WRITE( unit = stdout, FMT = 9010 ) ntypx, npk, lmaxx
   !
   IF ( gamma_only ) WRITE( UNIT = stdout, &
