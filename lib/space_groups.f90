@@ -4884,7 +4884,6 @@ MODULE space_groups
   RETURN
   END SUBROUTINE find_space_group
 
-
   SUBROUTINE transform_fcc_axis(tau_aux,naux)
   INTEGER, INTENT(IN) :: naux
   REAL(DP), INTENT(INOUT) :: tau_aux(3,naux)
@@ -5220,7 +5219,7 @@ MODULE space_groups
   SUBROUTINE roto_shift_sg(sr,ft,at,bg,rot,s0,srnew,ftnew)
 !
 !  This subroutine receives as input a space group operation in the
-!  form of a rotation matric sr (in cartesian coordinates) and a 
+!  form of a rotation matrix sr (in cartesian coordinates) and a 
 !  fractional translation (in crystal coordinates), a shift of the
 !  origin s0 (in crystal coordinates) and a rotation matrix rot
 !  and gives as output the rotation matrix and the fractional

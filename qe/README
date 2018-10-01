@@ -11,7 +11,7 @@ electrons_tpw: contains a call to asyn_master to have the master check for
 find_band_sym_tpw : call rotate_all_psi_tpw.
 
 rotate_all_psi_tpw : an improved version of rotate_all_psi that 
-               requires less memory and scale better with the CPUs.
+               requires less memory and scales better with the CPUs.
                It works both for spinor and scalar wavefunctions.
 
 setup_tpw : limits the minimum value of ethr to 10^-13 in a band canculation.

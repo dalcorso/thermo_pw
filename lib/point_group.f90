@@ -14683,7 +14683,7 @@ SUBROUTINE  transform_s_to_cart( sk, sr, nsym, at, bg )
   !  if they are oriented as x,y,z, .false. if they have the opposite
   !  orientation. It calculates the determinant of the matrix of
   !  three vectors and gives true if it is positive. If it is zero
-  !  the result is undermined
+  !  the result is undetermined
   !
   USE kinds, ONLY : DP
   IMPLICIT NONE
@@ -15308,7 +15308,7 @@ SUBROUTINE find_irr_proj(code_group_ext,char_mat_proj,name_rap,nrap_proj,&
 !
 !  This routine receives the arguments of the phases (gauge) of a given 
 !  gauge. It sets the character tables that correspond to the standard factor
-!  system and transform them into the characters of the symmetry operations 
+!  system and transforms them into the characters of the symmetry operations 
 !  written in the new gauge. 
 !
 !  ptype selects which representations are set:
@@ -16599,7 +16599,7 @@ END SUBROUTINE print_ptype_info
 
 SUBROUTINE find_factor_system(sym_mat, dim_rap, nsym, cge, phase, verbosity)
 !
-!  This routine receives a set of nsym routines of dimensions dim_rap that
+!  This routine receives a set of nsym matrices of dimensions dim_rap that
 !  are supposed to be a representation (possibly projective) of the point 
 !  group given by the extended code group and gives as output the factor 
 !  system of the representation. If verbosity=.TRUE. it writes on 
@@ -16705,7 +16705,7 @@ END SUBROUTINE point_group_bravais
 
 SUBROUTINE transform_group(code_group_ext_in, op_code, code_group_ext_out)
 !
-!  This routine find the group conjugate of the input group according to
+!  This routine finds the group conjugate of the input group according to
 !  the operation op_code
 !
 USE kinds, ONLY : DP
@@ -16789,7 +16789,7 @@ END SUBROUTINE group_name_international
 FUNCTION angle_rot_tpw(smat)
 !
 !   This routine receives a rotation matrix and computes the rotation
-!   angle. It slightly different from the one contained in QE.
+!   angle. It is slightly different from the one contained in QE.
 !   The rotation angle is between 0 and 2 pi and the convention for 
 !   the axis is that it points from the origin to the positive z emisphere.
 !   For an axis on the plane z=0 it points in the positive y direction
