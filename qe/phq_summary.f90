@@ -273,9 +273,9 @@ subroutine phq_summary_tpw
           WRITE( stdout, '(5x,"Electro-optic tensor")')
      IF (fpol)  THEN
         WRITE( stdout, '(5x,"Frequency Dependent Polarizability at (Ry) ")' )
-        DO iu=1,nfs
-           WRITE( stdout,'(5x,f9.4," +",f10.4" i  Ry")') fru(iu), fiu(iu)
-        ENDDO
+        WRITE( stdout,'(5x,i6," frequencies between")') nfs
+        WRITE( stdout,'(5x,f9.4," +",f10.4" i  Ry")') fru(1), fiu(1)
+        WRITE( stdout,'(5x,f9.4," +",f10.4" i  Ry")') fru(nfs), fiu(nfs)
      ENDIF
   ENDIF
 
