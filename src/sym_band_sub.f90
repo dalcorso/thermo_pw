@@ -203,12 +203,12 @@ SUBROUTINE sym_band_sub(filband, spin_component)
 !    This part uses the standard routines of QE
 !
         IF (noncolin) THEN
-           CALL find_band_sym_so_tpw(ik,evc,et(1,ik),nsym_in, &
+           CALL find_band_sym_so_tpw(ik,evc,nsym_in, &
                    sk_in,ftau_in,d_spin_in,gk_in,invs_in,&
                    rap_et(1,ik),times(1,1,ik), &
                    ngroup(ik),istart(1,ik),accuracy)
         ELSE
-           CALL find_band_sym_tpw (ik, evc, et(1,ik), nsymk, sk, ftauk, gk, &
+           CALL find_band_sym_tpw (ik, evc, nsymk, sk, ftauk, gk, &
                 invsk, rap_et(1,ik), times(1,1,ik), ngroup(ik), &
                 istart(1,ik),accuracy)
         ENDIF
