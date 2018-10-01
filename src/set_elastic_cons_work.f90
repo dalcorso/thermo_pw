@@ -144,13 +144,14 @@ SELECT CASE (laue)
 !
 !   D_3d and S_6 Trigonal system. Only the standard algorithm is available
 !
-      IF (ibrav_save==5) THEN
+      IF (ibrav_save==4.OR.ibrav_save==5) THEN
          IF (elastic_algorithm=='standard'&
                        .OR.elastic_algorithm=='advanced') THEN
             nstep = 3
             strain_list(1) = 'C '
             strain_list(2) = 'E '
-            strain_list(3) = 'I '
+            strain_list(3) = 'H '
+            IF (ibrav_save==5) strain_list(3) = 'I '
          END IF
       ELSE
          CALL errore('set_elastic_cons_work',&

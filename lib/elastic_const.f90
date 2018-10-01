@@ -203,7 +203,7 @@ SUBROUTINE compute_elastic_constants(sigma_geo, epsil_geo, nwork, ngeo_strain, &
 !  19,23 C_6h, D_6h    4               C  E  H  
 !  18,22 C_4h, D_4h    6,7             C  E  H  G
 !  20    D_2h          8,9,10,11       C  D  E  G  H  I
-!  25,27 D_3d, S_6     5               C  E  I
+!  25,27 D_3d, S_6     4, 5            C  E  I
 !  16    C_2h          12,-12, 13,-13  C  D  E  G  H  I
 !  2     C_i           14              C  D  E  G  H  I
 !
@@ -411,12 +411,14 @@ SELECT CASE (laue)
 !
 !  c_14 
 !
-      CALL el_cons_ij(4, 1, ngeo_strain, epsil_geo, sigma_geo, m1)
-      el_con(1,4) = el_con(4,1)
-      el_con(2,4) = -el_con(1,4)
-      el_con(4,2) = el_con(2,4)
-      el_con(5,6) = el_con(1,4)
-      el_con(6,5) = el_con(5,6)
+      IF (ibrav/=4) THEN
+         CALL el_cons_ij(4, 1, ngeo_strain, epsil_geo, sigma_geo, m1)
+         el_con(1,4) = el_con(4,1)
+         el_con(2,4) = -el_con(1,4)
+         el_con(4,2) = el_con(2,4)
+         el_con(5,6) = el_con(1,4)
+         el_con(6,5) = el_con(5,6)
+      ENDIF
 !
 !  c_33 
 !
@@ -427,9 +429,15 @@ SELECT CASE (laue)
 !  c_44 = c_55
 !
       npos=2*ngeo_strain+1
-      CALL el_cons_ij(4, 4, ngeo_strain, epsil_geo(1,1,npos), &
+      IF (ibrav==4) THEN
+         CALL el_cons_ij(5, 5, ngeo_strain, epsil_geo(1,1,npos), &
                                          sigma_geo(1,1,npos), m1)
-      el_con(5,5) = el_con(4,4)
+         el_con(4,4) = el_con(5,5)
+      ELSE
+         CALL el_cons_ij(4, 4, ngeo_strain, epsil_geo(1,1,npos), &
+                                         sigma_geo(1,1,npos), m1)
+         el_con(5,5) = el_con(4,4)
+      ENDIF
 
       el_con(6,6) = 0.5_DP * ( el_con(1,1) - el_con(1,2) )
 !
