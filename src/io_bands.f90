@@ -192,7 +192,7 @@ CONTAINS
   CALL mp_bcast(nbnd, ionode_id, intra_image_comm)
   !
   IF (nks /= nks_ .or. nbnd /= nks_) THEN
-     CALL errore('read_bands','uncorrect dimensions',ABS(ios))
+     CALL errore('read_bands','incorrect dimensions',ABS(ios))
   ELSE
      WRITE(stdout, '(/,5x,"Reading ",i4," bands at ",i6," k-points")') nbnd, nks
   ENDIF

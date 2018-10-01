@@ -800,7 +800,7 @@ d2(:) = t21 * c1(:) + t22 * c2(:)
 
 idet = ABS(t11 * t22 - t21 * t12)
 
-IF (idet == 0) CALL errore('gener_3d_slab','uncorrect surface unit cell',1)
+IF (idet == 0) CALL errore('gener_3d_slab','incorrect surface unit cell',1)
 IF (idet /= 1) &
    WRITE(stdout,'(/,5x,"Surface cell has",i5," unit cells" )') idet 
 

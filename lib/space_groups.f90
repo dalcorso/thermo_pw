@@ -2797,7 +2797,7 @@ MODULE space_groups
                                                   which_elem, group_desc) 
 
   IF (.NOT.check_code_group_ext(code_group_ext)) &
-     CALL errore('find_space_group','point group orientation uncorrect',1)
+     CALL errore('find_space_group','point group orientation incorrect',1)
 
   IF (verbosity) THEN
      WRITE(stdout,'(/,5x,"Space group identification, ",i3," symmetries:")') &

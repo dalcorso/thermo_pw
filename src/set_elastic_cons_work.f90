@@ -59,7 +59,7 @@ SELECT CASE (laue)
          ENDIF
       ELSE
          CALL errore('set_elastic_cons_work',&
-                              'Uncorrect lattice for cubic system',1)
+                              'Incorrect lattice for cubic system',1)
       ENDIF
    CASE (19,23)
 !
@@ -82,7 +82,7 @@ SELECT CASE (laue)
          ENDIF
       ELSE
          CALL errore('set_elastic_cons_work',&
-                       'Uncorrect lattice for hexagonal system',ibrav_save)
+                       'Incorrect lattice for hexagonal system',ibrav_save)
       ENDIF
    CASE (18,22)
 !
@@ -107,7 +107,7 @@ SELECT CASE (laue)
          ENDIF
       ELSE
          CALL errore('set_elastic_cons_work',&
-                       'Uncorrect lattice for tetragonal system',ibrav_save)
+                       'Incorrect lattice for tetragonal system',ibrav_save)
       ENDIF
    CASE (20)
 !
@@ -138,7 +138,7 @@ SELECT CASE (laue)
          ENDIF
       ELSE
          CALL errore('set_elastic_cons_work',&
-                    'Uncorrect lattice for orthorombic system',ibrav_save)
+                    'Incorrect lattice for orthorombic system',ibrav_save)
       ENDIF
    CASE (25,27)
 !
@@ -154,7 +154,7 @@ SELECT CASE (laue)
          END IF
       ELSE
          CALL errore('set_elastic_cons_work',&
-                    'Uncorrect lattice for trigonal system',ibrav_save)
+                    'Incorrect lattice for trigonal system',ibrav_save)
       END IF
    CASE (16)
 !
@@ -176,7 +176,7 @@ SELECT CASE (laue)
          END IF
       ELSE
          CALL errore('set_elastic_cons_work',&
-                    'Uncorrect lattice for monoclinic system',ibrav_save)
+                    'Incorrect lattice for monoclinic system',ibrav_save)
       END IF
 
    CASE (2)
@@ -195,12 +195,12 @@ SELECT CASE (laue)
          END IF
       ELSE
          CALL errore('set_elastic_cons_work',&
-                    'Uncorrect lattice for triclinic system',ibrav_save)
+                    'Incorrect lattice for triclinic system',ibrav_save)
       END IF
    CASE DEFAULT
       CALL errore('set_elastic_cons_work','Laue class not available',1)
 END SELECT
-IF (nstep<1) CALL errore('set_elastic_cons_work', 'Uncorrect nstep, &
+IF (nstep<1) CALL errore('set_elastic_cons_work', 'Incorrect nstep, &
                                              &use standard algorithm',1)
 nwork = nstep * ngeo_strain
 

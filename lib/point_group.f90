@@ -5566,7 +5566,7 @@ CONTAINS
         sub_table(31,1,10,3)=5
         sub_table(31,1,10,4)=5
      CASE DEFAULT 
-        CALL errore('convert_one_rap','Input point group uncorrect',1)
+        CALL errore('convert_one_rap','Input point group incorrect',1)
   END SELECT
 
   ndeg = sub_table(group_out, aux_ind, rap, 1)
@@ -8433,7 +8433,7 @@ CONTAINS
         sub_table(31,1,6,5)=3
 
      CASE DEFAULT 
-        CALL errore('convert_one_rap_so','Input point group uncorrect',1)
+        CALL errore('convert_one_rap_so','Input point group incorrect',1)
   END SELECT
 
   ndeg = sub_table(group_out, 1, rap, 1)

@@ -190,7 +190,7 @@ REAL(DP), INTENT(OUT) :: x(degree), f
 REAL(DP) :: amat(degree, degree), v(degree)
 
 IF (degree > 6 .OR. degree < 1 ) &
-   CALL errore('find_fit_extremum','uncorrect degree',1)
+   CALL errore('find_fit_extremum','incorrect degree',1)
 IF (nvar /= (degree + 1)*(degree + 2) / 2) &
    CALL errore('find_fit_extremum','nvar and degree not compatible',1)
 
