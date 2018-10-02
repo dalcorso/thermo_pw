@@ -415,32 +415,3 @@ ENDIF
 RETURN
 END SUBROUTINE write_heat_anharm
 
-SUBROUTINE write_aux_anharm(temp, gamma_t, cv, cp, b0_t, b0_s, ntemp, filename)
-USE kinds, ONLY : DP
-USE io_global, ONLY : meta_ionode
-IMPLICIT NONE
-INTEGER, INTENT(IN) :: ntemp
-REAL(DP), INTENT(IN) :: temp(ntemp), gamma_t(ntemp), cv(ntemp), cp(ntemp), &
-                  b0_s(ntemp), b0_t(ntemp)
-CHARACTER(LEN=*) :: filename
-
-INTEGER :: itemp, iu_therm
-INTEGER :: find_free_unit
-
-IF (meta_ionode) THEN
-   iu_therm=find_free_unit()
-   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
-
-   WRITE(iu_therm,'("# gamma is the average gruneisen parameter ")')
-   WRITE(iu_therm,'("#   T (K)       gamma(T)     C_v ( Ry / cell / K ) &
-                 &   (C_p - C_v)(T)      (B_S - B_T) (T) (kbar) " )' )
-
-   DO itemp = 2, ntemp-1
-      WRITE(iu_therm, '(5e16.8)') temp(itemp),  gamma_t(itemp), cv(itemp), &
-                        cp(itemp)-cv(itemp),  b0_s(itemp)-b0_t(itemp)
-   END DO
-   CLOSE(iu_therm)
-ENDIF
-
-RETURN
-END SUBROUTINE write_aux_anharm
