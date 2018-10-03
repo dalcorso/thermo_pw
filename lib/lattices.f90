@@ -96,7 +96,8 @@ MODULE lattices
          is_bravais_lattice, same_lattice, lattice_point_group,        &
          compute_omega, conventional_ibrav, is_centered, lattice_name, &
          zone_border, same_star, is_compatible_group_ibrav,            &
-         bravais_dir, print_bravais_description, crystal_parameters
+         bravais_dir, print_bravais_description, crystal_parameters,   &
+         compress_celldm
 
 CONTAINS
 
@@ -1713,5 +1714,50 @@ ENDDO
 RETURN
 END SUBROUTINE remove_common_factors
 
+SUBROUTINE compress_celldm(cm,x,degree,ibrav)
+
+USE kinds, ONLY : DP
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: degree, ibrav
+REAL(DP), INTENT(IN) :: cm(6)
+REAL(DP), INTENT(INOUT) :: x(degree)
+
+SELECT CASE (ibrav)
+   CASE(1,2,3)
+      x(1) = cm(1)
+   CASE(4,5,6,7)
+      x(1) = cm(1)
+      x(2) = cm(3)
+      IF (ibrav==5) x(2) = ACOS(cm(4))
+   CASE(8,9,91,10,11)
+      x(1) = cm(1)
+      x(2) = cm(2)
+      x(3) = cm(3)
+   CASE(12,-12,13,-13)
+      x(1) = cm(1)
+      x(2) = cm(2)
+      x(3) = cm(3)
+      IF (ibrav>0) THEN
+!
+!   c unique
+!
+         x(4) = ACOS(cm(4))
+      ELSE
+!
+!   b unique
+!
+         x(4) = ACOS(cm(5))
+      ENDIF
+   CASE DEFAULT
+      x(1) = cm(1)
+      x(2) = cm(2)
+      x(3) = cm(3)
+      x(4) = ACOS( cm(4) )
+      x(5) = ACOS( cm(5) )
+      x(6) = ACOS( cm(6) )
+END SELECT
+
+RETURN
+END SUBROUTINE compress_celldm
 
 END MODULE lattices
