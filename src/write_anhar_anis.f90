@@ -12,13 +12,14 @@ SUBROUTINE write_anhar_anis()
 !
 USE kinds,          ONLY : DP
 USE temperature,    ONLY : ntemp, temp
-USE thermodynamics, ONLY : ph_cv
+USE thermodynamics, ONLY : ph_cv, ph_b_fact
 USE anharmonic,     ONLY : alpha_anis_t, vmin_t, b0_t, celldm_t, beta_t, &
                            gamma_t, cv_t, cp_t, b0_s, cpmcv_anis, el_cons_t, &
-                           free_e_min_t, lelastic
+                           free_e_min_t, bfact_t, lelastic
 USE control_grun,   ONLY : lb0_t
 USE initial_conf,   ONLY : ibrav_save
 USE control_elastic_constants, ONLY : el_cons_available, el_cons_t_available
+USE control_thermo, ONLY : with_eigen
 USE elastic_constants, ONLY : el_con
 USE isoentropic,    ONLY : isostress_heat_capacity
 USE data_files,     ONLY : flanhar
@@ -103,6 +104,13 @@ IF (meta_ionode) THEN
    END IF
 END IF
 
+IF (with_eigen) THEN
+   CALL interpolate_b_fact_anis(celldm_t, ph_b_fact, bfact_t)
+   filename="anhar_files/"//TRIM(flanhar)//'.anis'
+   CALL add_pressure(filename)
+   CALL write_anharm_bfact(temp, bfact_t, ntemp, filename)
+END IF
+
 
 RETURN
 END SUBROUTINE write_anhar_anis
@@ -115,14 +123,15 @@ SUBROUTINE write_ph_freq_anhar_anis()
 !
 USE kinds,          ONLY : DP
 USE temperature,    ONLY : ntemp, temp
-USE ph_freq_thermodynamics, ONLY : phf_cv
+USE ph_freq_thermodynamics, ONLY : phf_cv, phf_b_fact
 USE ph_freq_anharmonic, ONLY : alphaf_anis_t, vminf_t, b0f_t, celldmf_t, &
                                betaf_t, gammaf_t, cvf_t, cpf_t, b0f_s, &
                                cpmcvf_anis, el_consf_t, lelasticf, &
-                               free_e_minf_t
+                               free_e_minf_t, bfactf_t
 USE elastic_constants, ONLY : el_con
 USE control_grun,   ONLY : lb0_t
 USE initial_conf,   ONLY : ibrav_save
+USE control_thermo, ONLY : with_eigen
 USE control_elastic_constants, ONLY : el_cons_available
 USE isoentropic,    ONLY : isostress_heat_capacity
 USE data_files,     ONLY : flanhar
@@ -209,6 +218,13 @@ IF (meta_ionode) THEN
       CLOSE(iu_therm)
    END IF
 ENDIF
+
+IF (with_eigen) THEN
+   CALL interpolate_b_fact_anis(celldmf_t, phf_b_fact, bfactf_t)
+   filename="anhar_files/"//TRIM(flanhar)//'.anis_ph'
+   CALL add_pressure(filename)
+   CALL write_anharm_bfact(temp, bfactf_t, ntemp, filename)
+END IF
 
 
 RETURN

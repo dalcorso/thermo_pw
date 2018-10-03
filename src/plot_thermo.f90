@@ -83,15 +83,13 @@ IF (ltherm_freq) &
                                                            .TRUE.,.FALSE.)
 CALL gnuplot_end()
 
-IF (with_eigen) CALL plot_dw()
-
-
 IF (lgnuplot.AND.ionode) &
    ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
 
 !IF (lgnuplot.AND.ionode) &
 !   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
 !                                       //TRIM(gnu_filename), WAIT=.FALSE.)
+IF (with_eigen) CALL plot_dw()
 
 RETURN
 END SUBROUTINE plot_thermo

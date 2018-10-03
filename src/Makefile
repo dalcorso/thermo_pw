@@ -89,6 +89,7 @@ print_polarization.o \
 proj_band_structure.o \
 q2r_sub.o \
 quadratic_fit.o \
+quasi_harm_bfact.o \
 readmodes.o \
 read_state_densities.o \
 run_thermo_asyncronously.o \

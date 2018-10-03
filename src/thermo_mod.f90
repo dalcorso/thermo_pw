@@ -178,6 +178,8 @@ MODULE anharmonic
 
   REAL(DP), ALLOCATABLE :: cpmcv_anis(:) ! difference cp-cv computed from
                                          ! elastic constants
+  REAL(DP), ALLOCATABLE :: bfact_t(:,:,:)! b factor as a function of 
+                                         ! temperature
 
   LOGICAL :: lelastic=.FALSE.            ! elastic constants available in
                                          ! some approximation
@@ -217,6 +219,9 @@ MODULE ph_freq_anharmonic
 
   REAL(DP), ALLOCATABLE :: cpmcvf_anis(:) ! difference cp-cv computed from
                                           ! elastic constants
+  REAL(DP), ALLOCATABLE :: bfactf_t(:,:,:)! b factor as a function of 
+                                          ! temperature
+
   LOGICAL :: lelasticf=.FALSE.           ! elastic constants available in
                                          ! some approximation
   REAL(DP), ALLOCATABLE :: el_consf_t(:,:,:) ! elastic constants as a function

@@ -40,15 +40,16 @@ END SUBROUTINE allocate_thermodynamics
 SUBROUTINE allocate_anharmonic()
 
   USE temperature,         ONLY : ntemp
+  USE ions_base,           ONLY : nat
   USE anharmonic,          ONLY : vmin_t, b0_t, b01_t, free_e_min_t,          &
                                   alpha_t, beta_t, gamma_t, cv_t, cp_t, b0_s, &
                                   celldm_t, alpha_anis_t, cpmcv_anis,        &
-                                  el_cons_t, el_comp_t, macro_el_t
+                                  el_cons_t, el_comp_t, macro_el_t, bfact_t
   USE ph_freq_anharmonic,  ONLY : vminf_t, b0f_t, b01f_t, free_e_minf_t,     &
                                   alphaf_t, betaf_t, gammaf_t, cvf_t, cpf_t, &
                                   b0f_s, celldmf_t, alphaf_anis_t,           &
                                   cpmcvf_anis, el_consf_t, el_compf_t, &
-                                  macro_elf_t
+                                  macro_elf_t, bfactf_t
   USE grun_anharmonic,     ONLY : betab, alpha_an_g, cp_grun_t, &
                                   b0_grun_s, grun_gamma_t
   USE control_quadratic_energy, ONLY : nvar, coeff_t
@@ -65,6 +66,7 @@ SUBROUTINE allocate_anharmonic()
   IF (.NOT. ALLOCATED (alpha_t) )       ALLOCATE(alpha_t(ntemp)) 
   IF (.NOT. ALLOCATED (beta_t) )        ALLOCATE(beta_t(ntemp)) 
   IF (.NOT. ALLOCATED (gamma_t) )       ALLOCATE(gamma_t(ntemp)) 
+  IF (.NOT. ALLOCATED (bfact_t))        ALLOCATE(bfact_t(6,nat,ntemp))
   IF (.NOT. ALLOCATED (celldm_t) )      ALLOCATE(celldm_t(6,ntemp)) 
   IF (.NOT. ALLOCATED (alpha_anis_t) )  ALLOCATE(alpha_anis_t(6,ntemp)) 
   IF (.NOT. ALLOCATED (cpmcv_anis) )    ALLOCATE(cpmcv_anis(ntemp)) 
@@ -83,6 +85,7 @@ SUBROUTINE allocate_anharmonic()
   IF (.NOT. ALLOCATED (betaf_t) )       ALLOCATE(betaf_t(ntemp)) 
   IF (.NOT. ALLOCATED (gammaf_t) )      ALLOCATE(gammaf_t(ntemp)) 
   IF (.NOT. ALLOCATED (celldmf_t) )     ALLOCATE(celldmf_t(6,ntemp)) 
+  IF (.NOT. ALLOCATED (bfactf_t))       ALLOCATE(bfactf_t(6,nat,ntemp))
   IF (.NOT. ALLOCATED (alphaf_anis_t) ) ALLOCATE(alphaf_anis_t(6,ntemp)) 
   IF (.NOT. ALLOCATED (cpmcvf_anis) )   ALLOCATE(cpmcvf_anis(ntemp)) 
   IF (.NOT. ALLOCATED (el_consf_t) )    ALLOCATE(el_consf_t(6,6,ntemp)) 

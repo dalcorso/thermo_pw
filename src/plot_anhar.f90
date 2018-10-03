@@ -14,7 +14,7 @@ SUBROUTINE plot_anhar()
 !
 USE kinds,            ONLY : DP
 USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
-USE control_thermo,   ONLY : ltherm, ltherm_dos, ltherm_freq
+USE control_thermo,   ONLY : ltherm, ltherm_dos, ltherm_freq, with_eigen
 USE postscript_files, ONLY : flpsanhar
 USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,  &
                              gnuplot_write_header,        &
@@ -212,7 +212,119 @@ IF (lgnuplot.AND.ionode) &
 !IF (lgnuplot.AND.ionode) &
 !   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
 !                                       //TRIM(gnu_filename), WAIT=.FALSE.)
+IF (with_eigen) CALL plot_dw_anhar()
 
 RETURN
 END SUBROUTINE plot_anhar
 
+! Copyright (C) 2018 Cristiano Malica
+
+SUBROUTINE plot_dw_anhar()
+!
+!  This is a driver to plot the quantities written inside 
+!
+USE kinds,            ONLY : DP
+USE ions_base,        ONLY : nat
+USE cell_base,        ONLY : ibrav
+USE control_thermo,   ONLY : ltherm_dos, ltherm_freq
+USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
+USE postscript_files, ONLY : flpsanhar
+USE gnuplot,          ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
+                             gnuplot_ylabel, &
+                             gnuplot_xlabel, &
+                             gnuplot_write_file_mul_data
+USE gnuplot_color,    ONLY : gnuplot_set_greens
+USE data_files,       ONLY : flanhar
+USE temperature,      ONLY : tmin, tmax
+USE mp_images,        ONLY : root_image, my_image_id
+USE io_global,        ONLY : ionode
+
+IMPLICIT NONE
+CHARACTER(LEN=256) :: gnu_filename, filename, psfilename, filetherm
+INTEGER :: ierr, system, na
+CHARACTER(LEN=6) :: int_to_char
+
+IF ( my_image_id /= root_image ) RETURN
+
+gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_anhar_dw'
+CALL gnuplot_start(gnu_filename)
+
+psfilename=TRIM(flpsanhar)//'_dw'//TRIM(flext)
+IF (tmin ==1._DP) THEN
+   CALL gnuplot_write_header(psfilename, 0.0_DP, tmax, 0.0_DP, 0.0_DP, &
+                                                       1.0_DP, flext )
+ELSE
+   CALL gnuplot_write_header(psfilename, tmin, tmax, 0.0_DP, 0.0_DP, &
+                                                       1.0_DP, flext )
+ENDIF
+CALL gnuplot_set_greens()
+CALL gnuplot_xlabel('T (K)', .FALSE.)
+DO na=1,nat
+
+   filename='anhar_files/'//TRIM(flanhar)//'_ph.'//TRIM(int_to_char(na))//'.dw'
+   filetherm='anhar_files/'//TRIM(flanhar)//'.'//TRIM(int_to_char(na))//'.dw'
+
+!
+!   First the diagonal components
+!
+   CALL gnuplot_ylabel('B_{ii} ({\305}^2) (atom '// &
+                                        TRIM(int_to_char(na))//')',.FALSE.)
+
+   IF (ltherm_dos) THEN
+      CALL gnuplot_write_file_mul_data(filetherm,1,2,'color_red',.TRUE., &
+                                                   .FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filetherm,1,5,'color_blue',.FALSE., &
+                                                   .FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filetherm,1,7,'color_dark_spring_green',&
+                                   .FALSE., .NOT.ltherm_freq,.FALSE.)
+   ENDIF
+
+   IF (ltherm_freq) THEN
+      CALL gnuplot_write_file_mul_data(filename,1,2,'color_pink', &
+                                               .NOT.ltherm_dos,.FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filename,1,5,'color_light_blue', &
+                                               .FALSE., .FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filename,1,7,'color_green', &
+                                               .FALSE.,.TRUE.,.FALSE.)
+   ENDIF
+!
+!  And then the off diagonal, only for noncubic solids
+!
+   IF (ibrav/=1.AND.ibrav/=2.AND.ibrav/=3) THEN
+
+      IF (ltherm_dos) THEN
+         CALL gnuplot_write_file_mul_data(filetherm,1,3,'color_red',.TRUE., &
+                                                   .FALSE.,.FALSE.)
+         CALL gnuplot_write_file_mul_data(filetherm,1,4,'color_blue',.FALSE., &
+                                                   .FALSE.,.FALSE.)
+         CALL gnuplot_write_file_mul_data(filetherm,1,6,&
+                      'color_dark_spring_green',.FALSE., &
+                                                 .NOT.ltherm_freq,.FALSE.)
+      ENDIF
+
+      IF (ltherm_freq) THEN
+         CALL gnuplot_write_file_mul_data(filename,1,3,'color_pink', &
+                                               .NOT.ltherm_dos,.FALSE.,.FALSE.)
+
+         CALL gnuplot_write_file_mul_data(filename,1,4,'color_light_blue', &
+                                               .FALSE.,.FALSE.,.FALSE.)
+
+         CALL gnuplot_write_file_mul_data(filename,1,6,'color_green', &
+                                               .FALSE.,.TRUE.,.FALSE.)
+      ENDIF
+
+   ENDIF
+
+ENDDO
+
+CALL gnuplot_end()
+
+IF (lgnuplot.AND.ionode) &
+   ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+
+RETURN
+END SUBROUTINE plot_dw_anhar

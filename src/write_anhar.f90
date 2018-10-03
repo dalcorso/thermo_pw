@@ -12,10 +12,11 @@ SUBROUTINE write_anharmonic()
 !
 USE kinds,          ONLY : DP
 USE temperature,    ONLY : ntemp, temp
-USE thermodynamics, ONLY : ph_cv
+USE thermodynamics, ONLY : ph_cv, ph_b_fact
 USE anharmonic,     ONLY : alpha_t, beta_t, gamma_t, cp_t, cv_t, b0_s, &
-                           vmin_t, free_e_min_t, b0_t, b01_t
+                           vmin_t, free_e_min_t, b0_t, b01_t, bfact_t
 USE data_files,     ONLY : flanhar
+USE control_thermo, ONLY : with_eigen
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
@@ -55,15 +56,28 @@ CALL add_pressure(filename)
 
 CALL write_heat_anharm(temp, cv_t, cp_t, ntemp, filename)
 
+!
+!   here the b factors
+!
+IF (with_eigen) THEN
+   CALL interpolate_b_fact(vmin_t, ph_b_fact, bfact_t)
+   filename="anhar_files/"//TRIM(flanhar)
+   CALL add_pressure(filename)
+   CALL write_anharm_bfact(temp, bfact_t, ntemp, filename)
+END IF
+
+
 RETURN
 END SUBROUTINE write_anharmonic
 
 SUBROUTINE write_ph_freq_anharmonic()
 USE kinds,          ONLY : DP
 USE temperature,    ONLY : ntemp, temp
-USE ph_freq_thermodynamics, ONLY : phf_cv
+USE control_thermo, ONLY : with_eigen
+USE ph_freq_thermodynamics, ONLY : phf_cv, phf_b_fact
 USE ph_freq_anharmonic, ONLY : alphaf_t, betaf_t, gammaf_t, cpf_t, cvf_t, &
-                        b0f_s, free_e_minf_t, vminf_t, b0f_t, b01f_t
+                        b0f_s, free_e_minf_t, vminf_t, b0f_t, b01f_t, &
+                        bfactf_t
 USE data_files,     ONLY : flanhar
 
 IMPLICIT NONE
@@ -104,6 +118,16 @@ filename="anhar_files/"//TRIM(flanhar)//'.heat_ph'
 CALL add_pressure(filename)
 
 CALL write_heat_anharm(temp, cvf_t, cpf_t, ntemp, filename)
+!
+!   here the b factors
+!
+IF (with_eigen) THEN
+   CALL interpolate_b_fact(vminf_t, phf_b_fact, bfactf_t)
+   filename="anhar_files/"//TRIM(flanhar)//'_ph'
+   CALL add_pressure(filename)
+   CALL write_anharm_bfact(temp, bfactf_t, ntemp, filename)
+END IF
+
 
 RETURN
 END SUBROUTINE write_ph_freq_anharmonic
@@ -401,4 +425,47 @@ IF (meta_ionode) THEN
 ENDIF
 RETURN
 END SUBROUTINE write_heat_anharm
+!
+! Copyright (C) 2018 Cristiano Malica
+!
+SUBROUTINE write_anharm_bfact(temp, bfact_t, ntemp, filename)
+
+USE ions_base, ONLY : nat
+USE kinds,     ONLY : DP
+USE io_global, ONLY : meta_ionode
+IMPLICIT NONE
+INTEGER,  INTENT(IN) :: ntemp 
+REAL(DP), INTENT(IN) :: temp(ntemp), bfact_t(6,nat,ntemp)
+CHARACTER(LEN=*) :: filename
+
+INTEGER :: na, ijpol
+INTEGER :: itemp, iu_therm
+INTEGER :: find_free_unit
+
+CHARACTER(LEN=6) :: int_to_char
+
+IF (meta_ionode) THEN
+   iu_therm=find_free_unit()
+   
+   DO na=1, nat
+
+      OPEN(UNIT=iu_therm, FILE=TRIM(filename)//'.'//&
+                                 TRIM(int_to_char(na))//'.dw', STATUS='UNKNOWN', &
+                                                      FORM='FORMATTED')
+      WRITE(iu_therm,'("# ")')
+
+      WRITE(iu_therm,'(6x,"T",14x,"B_11",14x,"B_12",14x,"B_13",14x,"B_22",&
+                           &14x,"B_23",14x,"B_33")')
+
+      DO itemp = 1, ntemp
+      WRITE(iu_therm, '(e16.8,6e18.8)') temp(itemp), (bfact_t(ijpol,na,itemp), ijpol=1,6)
+      END DO
+
+      CLOSE(UNIT=iu_therm, STATUS='KEEP')
+   END DO
+
+ENDIF
+RETURN
+END SUBROUTINE write_anharm_bfact
+
 
