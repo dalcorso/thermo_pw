@@ -1,7 +1,16 @@
 New in version 1.1.0
 
+Conjugate gradient solver extended to US and PAW.
+
+Added the calculation of the B factor at fixed geometry and its interpolation 
+at the temperature dependent geometry (contributed by C. Malica).
+
 Added the possibility to use the pdf terminal of gnuplot 
 to produce output in pdf files.
+
+Sym_for_diago with pools improved (in collaboration with A. Urru).
+
+Nonmagnetic linear response with FR-PAW corrected.
 
 17/07/2018 Version 1.0.0 is now frozen
 New in version 1.0.0
