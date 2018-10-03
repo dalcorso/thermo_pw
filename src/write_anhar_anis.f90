@@ -18,7 +18,6 @@ USE anharmonic,     ONLY : alpha_anis_t, vmin_t, b0_t, celldm_t, beta_t, &
                            free_e_min_t, lelastic
 USE control_grun,   ONLY : lb0_t
 USE initial_conf,   ONLY : ibrav_save
-USE control_pressure, ONLY : pressure_kb
 USE control_elastic_constants, ONLY : el_cons_available, el_cons_t_available
 USE elastic_constants, ONLY : el_con
 USE isoentropic,    ONLY : isostress_heat_capacity
@@ -30,7 +29,6 @@ CHARACTER(LEN=256) :: filename
 INTEGER :: itemp, iu_therm
 INTEGER :: find_free_unit
 REAL(DP) :: compute_omega_geo
-CHARACTER(LEN=8) :: float_to_char
 
 CALL compute_alpha_anis(celldm_t, alpha_anis_t, temp, ntemp, ibrav_save)
 !
@@ -57,8 +55,7 @@ IF (meta_ionode) THEN
 !   here we plot the anharmonic quantities calculated from the phonon dos
 !
    filename='anhar_files/'//flanhar
-   IF (pressure_kb /= 0.0_DP) &
-      filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+   CALL add_pressure(filename)
 
    CALL write_ener_beta(temp, vmin_t, free_e_min_t, beta_t, ntemp, filename)
 !
@@ -66,8 +63,7 @@ IF (meta_ionode) THEN
 !  with respect to temperature. 
 !
    filename='anhar_files/'//TRIM(flanhar)//'.celldm'
-   IF (pressure_kb /= 0.0_DP) &
-      filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+   CALL add_pressure(filename)
 
    CALL write_alpha_anis(ibrav_save, celldm_t, alpha_anis_t, temp, ntemp, &
                                                                    filename )
@@ -79,14 +75,12 @@ IF (meta_ionode) THEN
       !   here the bulk modulus and the gruneisen parameter
       !
       filename="anhar_files/"//TRIM(flanhar)//'.bulk_mod'
-      IF (pressure_kb /= 0.0_DP) &
-         filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+      CALL add_pressure(filename)
 
       CALL write_bulk_anharm(temp, gamma_t, b0_t, b0_s, ntemp, filename)
 
       filename="anhar_files/"//TRIM(flanhar)//'.heat'
-      IF (pressure_kb /= 0.0_DP) &
-         filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+      CALL add_pressure(filename)
 
       CALL write_heat_anharm(temp, cv_t, cp_t, ntemp, filename)
 
@@ -96,8 +90,8 @@ IF (meta_ionode) THEN
 !  to the volume thermal expansion used in the file heat
 !
       filename='anhar_files/'//TRIM(flanhar)//'.anis'
-      IF (pressure_kb /= 0.0_DP) &
-         filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+      CALL add_pressure(filename)
+
       OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', &
                                                           FORM='FORMATTED')
       WRITE(iu_therm,'("#   T (K)       (C_p - C_v)(T)  " )' )
@@ -108,6 +102,7 @@ IF (meta_ionode) THEN
       CLOSE(iu_therm)
    END IF
 END IF
+
 
 RETURN
 END SUBROUTINE write_anhar_anis
@@ -128,7 +123,6 @@ USE ph_freq_anharmonic, ONLY : alphaf_anis_t, vminf_t, b0f_t, celldmf_t, &
 USE elastic_constants, ONLY : el_con
 USE control_grun,   ONLY : lb0_t
 USE initial_conf,   ONLY : ibrav_save
-USE control_pressure, ONLY : pressure_kb
 USE control_elastic_constants, ONLY : el_cons_available
 USE isoentropic,    ONLY : isostress_heat_capacity
 USE data_files,     ONLY : flanhar
@@ -139,7 +133,6 @@ CHARACTER(LEN=256) :: filename
 INTEGER :: itemp, iu_therm
 INTEGER :: find_free_unit
 REAL(DP) :: compute_omega_geo, el_con_t(6,6,ntemp)
-CHARACTER(LEN=8) :: float_to_char
 
 
 CALL compute_alpha_anis(celldmf_t, alphaf_anis_t, temp, ntemp, ibrav_save)
@@ -168,8 +161,7 @@ IF (meta_ionode) THEN
 !
    iu_therm=find_free_unit()
    filename='anhar_files/'//TRIM(flanhar)//'_ph'
-   IF (pressure_kb /= 0.0_DP) &
-      filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+   CALL add_pressure(filename)
 
    CALL write_ener_beta(temp, vminf_t, free_e_minf_t, betaf_t, ntemp, filename)
 
@@ -178,8 +170,7 @@ IF (meta_ionode) THEN
 !  with respect to temperature. 
 !
    filename='anhar_files/'//TRIM(flanhar)//'.celldm_ph'
-   IF (pressure_kb /= 0.0_DP) &
-      filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+   CALL add_pressure(filename)
 
    CALL write_alpha_anis(ibrav_save, celldmf_t, alphaf_anis_t, temp, ntemp, &
                                                                filename )
@@ -191,14 +182,12 @@ IF (meta_ionode) THEN
       !   here the bulk modulus and the gruneisen parameter
       !
       filename="anhar_files/"//TRIM(flanhar)//'.bulk_mod_ph'
-      IF (pressure_kb /= 0.0_DP) &
-         filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+      CALL add_pressure(filename)
 
       CALL write_bulk_anharm(temp, gammaf_t, b0f_t, b0f_s, ntemp, filename)
 
       filename="anhar_files/"//TRIM(flanhar)//'.heat_ph'
-      IF (pressure_kb /= 0.0_DP) &
-         filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+      CALL add_pressure(filename)
 
       CALL write_heat_anharm(temp, cvf_t, cpf_t, ntemp, filename)
 
@@ -208,8 +197,8 @@ IF (meta_ionode) THEN
 !  to the volume thermal expansion used in the file aux
 !
       filename='anhar_files/'//TRIM(flanhar)//'.anis_ph'
-      IF (pressure_kb /= 0.0_DP) &
-         filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+      CALL add_pressure(filename)
+
       OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', &
                                                           FORM='FORMATTED')
       WRITE(iu_therm,'("#   T (K)       (C_p - C_v)(T)  " )' )
@@ -219,8 +208,8 @@ IF (meta_ionode) THEN
       END DO
       CLOSE(iu_therm)
    END IF
-
 ENDIF
+
 
 RETURN
 END SUBROUTINE write_ph_freq_anhar_anis
@@ -232,7 +221,6 @@ USE ions_base,      ONLY : nat
 USE cell_base,      ONLY : ibrav
 USE thermo_mod,     ONLY : ngeo
 USE temperature,    ONLY : ntemp, temp
-USE control_pressure, ONLY : pressure_kb
 USE control_grun,   ONLY : lv0_t
 USE equilibrium_conf, ONLY : celldm0, omega0
 USE control_mur,    ONLY : vmin
@@ -245,6 +233,7 @@ USE grun_anharmonic, ONLY : alpha_an_g, grun_gamma_t, poly_grun, done_grun, &
                             cp_grun_t, b0_grun_s, betab
 USE ph_freq_module, ONLY : thermal_expansion_ph, ph_freq_type,  &
                            destroy_ph_freq, init_ph_freq
+USE lattices,       ONLY : compress_celldm
 USE control_grun,     ONLY : lb0_t
 USE control_thermo, ONLY : ltherm_dos, ltherm_freq
 USE elastic_constants, ONLY :  el_compliances
@@ -259,7 +248,6 @@ USE mp,             ONLY : mp_sum
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
-CHARACTER(LEN=8) :: float_to_char
 INTEGER :: itemp, iu_therm, i, nq, imode, iq, degree, nvar, nwork
 INTEGER :: itens, jtens, startq, lastq, nq_eff
 TYPE(ph_freq_type) :: ph_freq    ! the frequencies at the volumes at
@@ -335,7 +323,7 @@ DO itemp = 1, ntemp
       cm(:)=celldm0(:)
       vm = omega0
    END IF
-   CALL compute_x(cm,x,degree,ibrav)
+   CALL compress_celldm(cm,x,degree,ibrav)
    ph_freq%nu= 0.0_DP
    DO i=1,degree
       ph_grun(i)%nu= 0.0_DP
@@ -453,8 +441,8 @@ IF (meta_ionode) THEN
 !   here quantities calculated from the gruneisen parameters
 !
    filename='anhar_files/'//TRIM(flanhar)//'.celldm_grun'
-   IF (pressure_kb /= 0.0_DP) &
-      filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+   CALL add_pressure(filename)
+
    IF (ltherm_freq) THEN
       CALL write_alpha_anis(ibrav, celldmf_t, alpha_an_g, temp, ntemp, &
                                                                 filename )
@@ -476,8 +464,8 @@ IF (meta_ionode) THEN
 
 
    filename="anhar_files/"//TRIM(flanhar)//'.aux_grun'
-   IF (pressure_kb /= 0.0_DP) &
-      filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+   CALL add_pressure(filename)
+
    iu_therm=find_free_unit()
    OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', &
                                                          FORM='FORMATTED')

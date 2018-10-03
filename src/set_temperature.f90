@@ -52,3 +52,17 @@ pressure=pressure_kb/ry_kbar
 RETURN
 END SUBROUTINE set_pressure
 
+SUBROUTINE add_pressure(filename)
+
+USE kinds, ONLY : DP
+USE control_pressure, ONLY : pressure_kb
+
+IMPLICIT NONE
+CHARACTER(LEN=256) :: filename
+CHARACTER(LEN=8) :: float_to_char
+
+IF (pressure_kb /= 0.0_DP) &
+   filename=TRIM(filename) //'.'//TRIM(float_to_char(pressure_kb,1))
+
+RETURN
+END SUBROUTINE add_pressure

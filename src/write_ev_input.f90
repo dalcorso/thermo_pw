@@ -56,15 +56,13 @@ USE control_pressure, ONLY : pressure_kb
 IMPLICIT NONE
 CHARACTER(LEN=256), INTENT(IN) :: file_dat
 CHARACTER(LEN=256) :: filename
-CHARACTER(LEN=8) :: float_to_char
 INTEGER :: iu_ev
 INTEGER :: find_free_unit
 !
 IF (ionode) THEN
    iu_ev=find_free_unit()
    filename='energy_files/input_ev'
-   IF (pressure_kb /= 0.0_DP) &
-      filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+   CALL add_pressure(filename)
      
    OPEN(UNIT=iu_ev, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
    WRITE(iu_ev,'("au")')
@@ -92,14 +90,11 @@ USE mp,          ONLY : mp_bcast
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: file_dat, filename
-CHARACTER(LEN=8) :: float_to_char
 
   file_dat="energy_files/"//TRIM(flevdat) 
+  CALL add_pressure(file_dat)
   filename='energy_files/input_ev'
-  IF (pressure_kb /= 0.0_DP) THEN
-      file_dat=TRIM(file_dat)//'.'//TRIM(float_to_char(pressure_kb,1))
-      filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
-  ENDIF
+  CALL add_pressure(filename)
 
   CALL write_ev_input(file_dat)
   CALL ev_sub(vmin, b0, b01, emin, filename )

@@ -28,6 +28,7 @@ USE control_elastic_constants, ONLY : el_con_geo, el_con_celldm_geo, &
 USE elastic_constants, ONLY : print_macro_elasticity, &
                               compute_elastic_compliances, el_con
 USE control_grun,   ONLY : lb0_t
+USE lattices,       ONLY : compress_celldm
 USE equilibrium_conf,    ONLY : celldm0
 USE control_thermo, ONLY : ltherm_dos, ltherm_freq
 USE control_macro_elasticity, ONLY: macro_el
@@ -141,7 +142,7 @@ ENDDO
 
 IF (ltherm_dos) THEN
    DO itemp=1,ntemp
-      CALL compute_x(celldm_t(:,itemp),xfit,degree,ibrav)
+      CALL compress_celldm(celldm_t(:,itemp),xfit,degree,ibrav)
       DO i=1,6
          DO j=i,6
             IF (el_con_geo(i,j,1)>0.1_DP) THEN
@@ -171,7 +172,7 @@ ENDIF
 
 IF (ltherm_freq) THEN
    DO itemp=1,ntemp
-      CALL compute_x(celldmf_t(:,itemp),xfit,degree,ibrav)
+      CALL compress_celldm(celldmf_t(:,itemp),xfit,degree,ibrav)
       DO i=1,6
          DO j=i,6
             IF (el_con_geo(i,j,1)>0.1_DP) THEN

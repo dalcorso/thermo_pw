@@ -23,7 +23,6 @@ IMPLICIT NONE
 
 REAL(DP), INTENT(IN) :: emin, omega0, b0in, b01
 CHARACTER(LEN=256)   :: filename
-CHARACTER(LEN=8)     :: float_to_char
 REAL(DP) :: omega, e, p, b0
 INTEGER  :: i, iu_mur
 INTEGER  :: find_free_unit
@@ -31,8 +30,7 @@ INTEGER  :: find_free_unit
 IF (my_image_id /= root_image) RETURN
 
 filename="energy_files/"//TRIM(flevdat)//'_mur'
-IF (pressure_kb /= 0.0_DP) &
-   filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+CALL add_pressure(filename)
 
 b0 = b0in / ry_kbar
 IF (vmin_input == 0.0_DP) vmin_input=omega_geo(1) * 0.98_DP

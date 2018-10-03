@@ -42,13 +42,12 @@ INTEGER :: ierr, system
 IF ( my_image_id /= root_image ) RETURN
 
 gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//'_anhar'
-IF (pressure_kb /= 0.0_DP) &
-       gnu_filename=TRIM(gnu_filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+CALL add_pressure(gnu_filename)
+
 CALL gnuplot_start(gnu_filename)
 
 filename=TRIM(flpsanhar)
-IF (pressure_kb /= 0.0_DP) &
-       filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+CALL add_pressure(filename)
 filename=TRIM(filename)//TRIM(flext)
 IF (tmin /= 1.0_DP) THEN
    CALL gnuplot_write_header(filename, tmin, tmax, 0.0_DP, 0.0_DP, 1.0_DP, &
@@ -59,27 +58,23 @@ ELSE
 ENDIF
 
 filename="anhar_files/"//TRIM(flanhar)//'_ph'
+CALL add_pressure(filename)
 filename0="anhar_files/"//TRIM(flanhar)
+CALL add_pressure(filename0)
 filename3="anhar_files/"//TRIM(flanhar)//'.aux_grun'
+CALL add_pressure(filename3)
 filename_bulk="anhar_files/"//TRIM(flanhar)//'.bulk_mod'
+CALL add_pressure(filename_bulk)
 filename_bulk_ph="anhar_files/"//TRIM(flanhar)//'.bulk_mod_ph'
+CALL add_pressure(filename_bulk_ph)
 filename_dbulk="anhar_files/"//TRIM(flanhar)//'.dbulk_mod'
+CALL add_pressure(filename_dbulk)
 filename_dbulk_ph="anhar_files/"//TRIM(flanhar)//'.dbulk_mod_ph'
+CALL add_pressure(filename_dbulk_ph)
 filename_heat="anhar_files/"//TRIM(flanhar)//'.heat'
+CALL add_pressure(filename_heat)
 filename_heat_ph="anhar_files/"//TRIM(flanhar)//'.heat_ph'
-
-IF (pressure_kb /= 0.0_DP) THEN
-   filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
-   filename0=TRIM(filename0)//'.'//TRIM(float_to_char(pressure_kb,1))
-   filename_bulk=TRIM(filename3)//'.'//TRIM(float_to_char(pressure_kb,1))
-   filename_bulk_ph=TRIM(filename3)//'.'//TRIM(float_to_char(pressure_kb,1))
-   filename_dbulk=TRIM(filename_dbulk)//'.'//TRIM(float_to_char(pressure_kb,1))
-   filename_dbulk_ph=TRIM(filename_dbulk_ph)//'.'//&
-                                            TRIM(float_to_char(pressure_kb,1))
-   filename_heat=TRIM(filename_heat)//'.'//TRIM(float_to_char(pressure_kb,1))
-   filename_heat_ph=TRIM(filename_heat_ph)//'.'//&
-                                        TRIM(float_to_char(pressure_kb,1))
-END IF
+CALL add_pressure(filename_heat_ph)
 
 CALL gnuplot_xlabel('T (K)',.FALSE.) 
 CALL gnuplot_set_fact(1.0_DP,.FALSE.)

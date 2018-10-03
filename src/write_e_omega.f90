@@ -44,11 +44,9 @@ REAL(DP), ALLOCATABLE :: coeff(:), f(:), x(:,:), x_pos_min(:), x_min_4(:), &
 IF (my_image_id /= root_image) RETURN
 
 filename="energy_files/"//TRIM(flevdat)//'_mur'
+CALL add_pressure(filename)
 filename1="energy_files/"//TRIM(flevdat)//'_mur_celldm'
-IF (pressure_kb /= 0.0_DP) &
-   filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
-IF (pressure_kb /= 0.0_DP) &
-   filename1=TRIM(filename1)//'.'//TRIM(float_to_char(pressure_kb,1))
+CALL add_pressure(filename1)
 
 npress=51
 ndata=compute_nwork()

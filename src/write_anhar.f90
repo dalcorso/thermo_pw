@@ -15,12 +15,10 @@ USE temperature,    ONLY : ntemp, temp
 USE thermodynamics, ONLY : ph_cv
 USE anharmonic,     ONLY : alpha_t, beta_t, gamma_t, cp_t, cv_t, b0_s, &
                            vmin_t, free_e_min_t, b0_t, b01_t
-USE control_pressure, ONLY : pressure_kb
 USE data_files,     ONLY : flanhar
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
-CHARACTER(LEN=8) :: float_to_char 
 
 CALL compute_beta(vmin_t, beta_t, temp, ntemp)
 
@@ -32,32 +30,28 @@ CALL compute_cp(beta_t, vmin_t, b0_t, cv_t, cp_t, b0_s, gamma_t)
 !   here we plot the quantities calculated from the phonon dos
 !
 filename="anhar_files/"//TRIM(flanhar)
-IF (pressure_kb /= 0.0_DP) &
-   filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+CALL add_pressure(filename)
 
 CALL write_ener_beta(temp, vmin_t, free_e_min_t, beta_t, ntemp, filename)
 !
 !   here the bulk modulus and the gruneisen parameter
 !
 filename="anhar_files/"//TRIM(flanhar)//'.bulk_mod'
-IF (pressure_kb /= 0.0_DP) &
-   filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+CALL add_pressure(filename)
 
 CALL write_bulk_anharm(temp, gamma_t, b0_t, b0_s, ntemp, filename)
 !
 !   here the derivative of the bulk modulus with respect to pressure
 !
 filename="anhar_files/"//TRIM(flanhar)//'.dbulk_mod'
-IF (pressure_kb /= 0.0_DP) &
-   filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+CALL add_pressure(filename)
 
 CALL write_dbulk_anharm(temp, b01_t, ntemp, filename)
 !
 !   here the heat capacities (constant strain and constant stress)
 !
 filename="anhar_files/"//TRIM(flanhar)//'.heat'
-IF (pressure_kb /= 0.0_DP) &
-   filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+CALL add_pressure(filename)
 
 CALL write_heat_anharm(temp, cv_t, cp_t, ntemp, filename)
 
@@ -70,13 +64,10 @@ USE temperature,    ONLY : ntemp, temp
 USE ph_freq_thermodynamics, ONLY : phf_cv
 USE ph_freq_anharmonic, ONLY : alphaf_t, betaf_t, gammaf_t, cpf_t, cvf_t, &
                         b0f_s, free_e_minf_t, vminf_t, b0f_t, b01f_t
-USE control_pressure, ONLY : pressure_kb
 USE data_files,     ONLY : flanhar
-USE mp_images,      ONLY : my_image_id, root_image
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
-CHARACTER(LEN=8) :: float_to_char 
 
 CALL compute_beta(vminf_t, betaf_t, temp, ntemp)
 
@@ -89,32 +80,28 @@ CALL compute_cp(betaf_t, vminf_t, b0f_t, cvf_t, cpf_t, b0f_s, gammaf_t)
 !   here we plot the quantities calculated from the phonon dos
 !
 filename="anhar_files/"//TRIM(flanhar)//'_ph'
-IF (pressure_kb /= 0.0_DP) &
-   filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+CALL add_pressure(filename)
 
 CALL write_ener_beta(temp, vminf_t, free_e_minf_t, betaf_t, ntemp, filename)
 !
 !   here the bulk modulus and the gruneisen parameter
 !
 filename="anhar_files/"//TRIM(flanhar)//'.bulk_mod_ph'
-IF (pressure_kb /= 0.0_DP) &
-   filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+CALL add_pressure(filename)
 
 CALL write_bulk_anharm(temp, gammaf_t, b0f_t, b0f_s, ntemp, filename)
 !
 !   here the derivative of the bulk modulus with respect to pressure
 !
 filename="anhar_files/"//TRIM(flanhar)//'.dbulk_mod_ph'
-IF (pressure_kb /= 0.0_DP) &
-   filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+CALL add_pressure(filename)
 
 CALL write_dbulk_anharm(temp, b01f_t, ntemp, filename)
 !
 !   here the heat capacities (constant strain and constant stress)
 !
 filename="anhar_files/"//TRIM(flanhar)//'.heat_ph'
-IF (pressure_kb /= 0.0_DP) &
-   filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+CALL add_pressure(filename)
 
 CALL write_heat_anharm(temp, cvf_t, cpf_t, ntemp, filename)
 
@@ -133,7 +120,6 @@ USE grun_anharmonic, ONLY : betab, cp_grun_t, b0_grun_s, &
                             grun_gamma_t, poly_grun, poly_order
 USE ph_freq_module, ONLY : thermal_expansion_ph, ph_freq_type,  &
                            destroy_ph_freq, init_ph_freq
-USE control_pressure, ONLY : pressure_kb
 USE control_grun,     ONLY : lv0_t, lb0_t
 USE control_mur,    ONLY : vmin, b0
 USE control_thermo, ONLY : ltherm_dos, ltherm_freq
@@ -145,7 +131,6 @@ USE mp,             ONLY : mp_sum
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
-CHARACTER(LEN=8) :: float_to_char 
 INTEGER :: itemp, iu_therm, i, nq, imode, iq, startq, lastq, iq_eff, nq_eff
 TYPE(ph_freq_type) :: ph_freq    ! the frequencies at the volumes at
                                  ! which the gruneisen parameters are 
@@ -197,6 +182,9 @@ DO itemp = 1, ntemp
             f = poly_grun(i,imode,iq) + f*vm
             g = poly_grun(i,imode,iq)*(i-1.0_DP) + g*vm
          END DO
+!
+!     g here is V d w / d V 
+!
          ph_freq%nu(imode,iq_eff)=f
          IF ( f > 0.0_DP) THEN 
             ph_grun%nu(imode,iq_eff)=-g/vm/f
@@ -239,8 +227,7 @@ IF (meta_ionode) THEN
 !   here quantities calculated from the gruneisen parameters
 !
    filename="anhar_files/"//TRIM(flanhar)//'.aux_grun'
-   IF (pressure_kb /= 0.0_DP) &
-      filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+   CALL add_pressure(filename)
 
    iu_therm=find_free_unit()
    OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')

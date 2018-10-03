@@ -29,7 +29,7 @@ USE data_files,  ONLY : flanhar
 USE grun_anharmonic, ONLY : done_grun
 USE control_grun,  ONLY : lb0_t
 USE initial_conf,  ONLY : ibrav_save
-USE control_thermo,  ONLY : ltherm_dos, ltherm_freq
+USE control_thermo,  ONLY : ltherm_dos, ltherm_freq, with_eigen
 USE control_elastic_constants, ONLY : el_cons_t_available
 USE anharmonic, ONLY : lelastic
 USE ph_freq_anharmonic, ONLY : lelasticf
@@ -44,21 +44,18 @@ CHARACTER(LEN=256) :: gnu_filename, filename, filename1, filename2, &
                       filename3, filename4, filename7, filename8,   &
                       filename9, filename_bulk, filename_bulk_ph,   &
                       filename_heat, filename_heat_ph, filenameps
-CHARACTER(LEN=8) :: float_to_char
 LOGICAL :: lgrun
 INTEGER :: ierr, system
 
 IF ( my_image_id /= root_image ) RETURN
 
 gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_anhar'
-IF (pressure_kb /= 0.0_DP) &
-   gnu_filename=TRIM(gnu_filename)//'.'//float_to_char(pressure_kb,1)
+CALL add_pressure(gnu_filename)
 
 CALL gnuplot_start(gnu_filename)
 
 filenameps=TRIM(flpsanhar)
-IF (pressure_kb /= 0.0_DP) &
-   filenameps=TRIM(filenameps)//'.'//float_to_char(pressure_kb,1)
+CALL add_pressure(filenameps)
 filenameps=TRIM(filenameps)//TRIM(flext)
 IF (tmin /= 1.0_DP) THEN
    CALL gnuplot_write_header(filenameps, tmin, tmax, 0.0_DP, 0.0_DP, 1.0_DP, &
@@ -69,34 +66,31 @@ ELSE
 ENDIF
 
 filename='anhar_files/'//TRIM(flanhar)
+CALL add_pressure(filename)
 filename1='anhar_files/'//TRIM(flanhar)//'_ph'
+CALL add_pressure(filename1)
 filename2='anhar_files/'//TRIM(flanhar)//'.celldm'
+CALL add_pressure(filename2)
 filename3='anhar_files/'//TRIM(flanhar)//'.celldm_ph'
+CALL add_pressure(filename3)
 filename4='anhar_files/'//TRIM(flanhar)//'.celldm_grun'
+CALL add_pressure(filename4)
 filename_bulk='anhar_files/'//TRIM(flanhar)//'.bulk_mod'
+CALL add_pressure(filename_bulk)
 filename_bulk_ph='anhar_files/'//TRIM(flanhar)//'.bulk_mod_ph'
+CALL add_pressure(filename_bulk_ph)
 filename_heat='anhar_files/'//TRIM(flanhar)//'.heat'
+CALL add_pressure(filename_heat)
 filename_heat_ph='anhar_files/'//TRIM(flanhar)//'.heat_ph'
+CALL add_pressure(filename_heat_ph)
 filename7='anhar_files/'//TRIM(flanhar)//'.aux_grun'
+CALL add_pressure(filename7)
 filename8='anhar_files/'//TRIM(flanhar)//'.anis'
+CALL add_pressure(filename8)
 filename9='anhar_files/'//TRIM(flanhar)//'.anis_ph'
+CALL add_pressure(filename9)
 
 lgrun = lelastic .OR. lelasticf
-
-IF (pressure_kb /= 0.0_DP) THEN
-   filename=TRIM(filename)//'.'//float_to_char(pressure_kb,1)
-   filename1=TRIM(filename1)//'.'//float_to_char(pressure_kb,1)
-   filename2=TRIM(filename2)//'.'//float_to_char(pressure_kb,1)
-   filename3=TRIM(filename3)//'.'//float_to_char(pressure_kb,1)
-   filename4=TRIM(filename4)//'.'//float_to_char(pressure_kb,1)
-   filename_bulk=TRIM(filename_bulk)//'.'//float_to_char(pressure_kb,1)
-   filename_bulk_ph=TRIM(filename_bulk_ph)//'.'//float_to_char(pressure_kb,1)
-   filename_heat=TRIM(filename_heat)//'.'//float_to_char(pressure_kb,1)
-   filename_heat_ph=TRIM(filename_heat_ph)//'.'//float_to_char(pressure_kb,1)
-   filename7=TRIM(filename7)//'.'//float_to_char(pressure_kb,1)
-   filename8=TRIM(filename8)//'.'//float_to_char(pressure_kb,1)
-   filename9=TRIM(filename9)//'.'//float_to_char(pressure_kb,1)
-END IF
 
 CALL gnuplot_xlabel('T (K)',.FALSE.) 
 CALL gnuplot_set_fact(1.0_DP,.FALSE.)

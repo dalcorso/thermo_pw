@@ -28,6 +28,7 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
   USE temperature,    ONLY : temp, ntemp
   USE quadratic_surfaces, ONLY : evaluate_fit_quadratic, &
                                  evaluate_fit_grad_quadratic
+  USE lattices,       ONLY : compress_celldm
   USE io_bands,       ONLY : read_bands, read_parameters, &
                              read_representations, write_bands
   USE mp,             ONLY : mp_bcast
@@ -154,7 +155,7 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
   ELSE
      cm=celldm_ph(:)
   ENDIF
-  CALL compute_x(cm,x,degree,ibrav_save)
+  CALL compress_celldm(cm,x,degree,ibrav_save)
 !
 !  calculate the BZ path that corresponds to the cm parameters
 !
@@ -310,48 +311,3 @@ cm(:) = celldmf_t(:,itemp0) + (temp_ph - temp(itemp0)) *           &
 RETURN
 END SUBROUTINE evaluate_celldm
 
-SUBROUTINE compute_x(cm,x,degree,ibrav)
-
-USE kinds, ONLY : DP
-IMPLICIT NONE
-INTEGER, INTENT(IN) :: degree, ibrav
-REAL(DP), INTENT(IN) :: cm(6)
-REAL(DP), INTENT(INOUT) :: x(degree)
-
-SELECT CASE (ibrav)
-   CASE(1,2,3)
-      x(1) = cm(1)
-   CASE(4,5,6,7)
-      x(1) = cm(1)
-      x(2) = cm(3)
-      IF (ibrav==5) x(2) = ACOS(cm(4))
-   CASE(8,9,91,10,11)
-      x(1) = cm(1)
-      x(2) = cm(2)
-      x(3) = cm(3)
-   CASE(12,-12,13,-13)
-      x(1) = cm(1)
-      x(2) = cm(2)
-      x(3) = cm(3)
-      IF (ibrav>0) THEN
-!
-!   c unique
-!
-         x(4) = ACOS(cm(4))
-      ELSE
-!
-!   b unique
-!
-         x(4) = ACOS(cm(5))
-      ENDIF
-   CASE DEFAULT
-      x(1) = cm(1)
-      x(2) = cm(2)
-      x(3) = cm(3)
-      x(4) = ACOS( cm(4) )
-      x(5) = ACOS( cm(5) )
-      x(6) = ACOS( cm(6) )
-END SELECT
-
-RETURN
-END SUBROUTINE compute_x

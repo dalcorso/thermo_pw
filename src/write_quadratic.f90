@@ -31,7 +31,6 @@ USE io_global,      ONLY : ionode
 IMPLICIT NONE
 
 CHARACTER(LEN=256) :: filename
-CHARACTER(LEN=8) :: float_to_char
 REAL(DP) :: a(1), e, p(1), fact, xmax, xmin, deltaa, x2max(2), x2min(2), x2(2),&
             delta2(2)
 INTEGER :: i, j, iu_mur, iwork, nwork
@@ -47,8 +46,7 @@ IF (ibrav==3) fact=0.5_DP
 nwork=compute_nwork()
 
 filename='energy_files/'//TRIM(flevdat)//'_quadratic'
-IF (pressure_kb /= 0.0_DP) &
-   filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
+CALL add_pressure(filename)
 
 IF (ibrav==1.OR.ibrav==2.OR.ibrav==3) THEN
    xmax=0.0_DP

@@ -34,11 +34,10 @@ INTEGER :: ierr, system
 IF ( my_image_id /= root_image ) RETURN
 
 gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//'_mur'
-filename=TRIM(flpsmur)//TRIM(flext)
-IF (pressure_kb /= 0.0_DP) THEN
-   gnu_filename=TRIM(gnu_filename)//'.'//TRIM(float_to_char(pressure_kb,1))
-   filename=TRIM(filename)//'.'//TRIM(float_to_char(pressure_kb,1))
-END IF
+CALL add_pressure(gnu_filename)
+filename=TRIM(flpsmur)
+CALL add_pressure(filename)
+filename=TRIM(filename)//TRIM(flext)
 
 CALL gnuplot_start(gnu_filename)
 
@@ -49,10 +48,9 @@ CALL gnuplot_xlabel('Volume ((a.u.)^3)',.FALSE.)
 
 filename1="energy_files/"//TRIM(flevdat)//'_mur'
 filename2="energy_files/"//TRIM(flevdat)
-
+CALL add_pressure(filename1)
+CALL add_pressure(filename2)
 IF (pressure_kb /= 0.0_DP) THEN
-   filename1=TRIM(filename1)//'.'//TRIM(float_to_char(pressure_kb,1))
-   filename2=TRIM(filename2)//'.'//TRIM(float_to_char(pressure_kb,1))
    label='Enthalpy (Ry)    p= '//TRIM(float_to_char(pressure_kb,1))//' kbar'
    CALL gnuplot_ylabel(TRIM(label),.FALSE.) 
 ELSE

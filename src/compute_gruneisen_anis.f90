@@ -73,19 +73,19 @@ SUBROUTINE compute_freq_derivative_anis_eigen(ngeo,freq_geo,celldm_geo,&
 USE kinds, ONLY : DP
 USE ions_base, ONLY : nat
 USE quadratic_surfaces, ONLY : fit_multi_quadratic
+USE lattices,  ONLY : compress_celldm
 IMPLICIT NONE
 INTEGER,  INTENT(IN) :: ngeo, degree, nvar, ibrav
 REAL(DP), INTENT(IN) :: freq_geo(3*nat,ngeo), celldm_geo(6,ngeo)
 COMPLEX(DP), INTENT(IN) :: displa_geo(3*nat,3*nat,ngeo)
-LOGICAL, INTENT(IN) :: no_ph(ngeo)
+LOGICAL,  INTENT(IN) :: no_ph(ngeo)
 REAL(DP), INTENT(INOUT) :: poly_grun(nvar,3*nat)
 
-REAL(DP), ALLOCATABLE :: frequences(:), x(:,:), f(:)
+REAL(DP), ALLOCATABLE :: x(:,:), f(:)
 REAL(DP) :: overlap
 INTEGER :: imode, jmode, igeo, idata, central_geo, ndata
 COMPLEX(DP), EXTERNAL :: ZDOTC
 
-ALLOCATE (frequences(ngeo))
 ALLOCATE (x(degree,ngeo))
 ALLOCATE (f(ngeo))
 
@@ -100,207 +100,81 @@ IF (no_ph(central_geo)) THEN
    ENDDO
 ENDIF
 
+ndata=0
+DO idata=1,ngeo
+   IF (.NOT. no_ph(idata)) THEN
+      ndata=ndata+1
+      CALL compress_celldm(celldm_geo(1,idata),x(1,idata),degree,ibrav)
+   ENDIF
+ENDDO
+
 DO imode=1, 3*nat
-   frequences=0.0_DP
+   f=0.0_DP
+   ndata=0
    DO igeo=1, ngeo
       IF (.NOT. no_ph(igeo)) THEN
+         ndata=ndata+1
          IF (igeo /= central_geo) THEN
             DO jmode=1,3*nat
                overlap=ABS(ZDOTC(3*nat,displa_geo(1,jmode,igeo),1,&
                                          displa_geo(1,imode,central_geo),1))**2
-               frequences(igeo)=frequences(igeo) + &
-                                       freq_geo(jmode,igeo)* overlap
+               f(ndata)=f(ndata) + freq_geo(jmode,igeo)* overlap
             ENDDO
          ELSE
-            frequences(igeo)=freq_geo(imode,igeo)
+            f(ndata)=freq_geo(imode,igeo)
          ENDIF
       ENDIF
-   END DO
-!
-   SELECT CASE (ibrav)
-      CASE(1,2,3)
-         ndata=0
-         DO idata=1,ngeo
-            IF (.NOT. no_ph(idata)) THEN
-               ndata=ndata+1
-               x(1,ndata)=celldm_geo(1,idata)
-               f(ndata)=frequences(idata)
-            ENDIF
-         ENDDO
-      CASE(4,5,6,7)
-         ndata=0
-         DO idata=1,ngeo
-            IF (.NOT. no_ph(idata)) THEN
-               ndata=ndata+1
-               x(1,ndata)=celldm_geo(1,idata)
-               IF (ibrav==5) THEN
-                  x(2,ndata)=ACOS(celldm_geo(4,idata))
-               ELSE
-                  x(2,ndata)=celldm_geo(3,idata)
-               ENDIF
-               f(ndata)=frequences(idata)
-            END IF
-         END DO
-      CASE(8,9,91,10,11)
-         ndata=0
-         DO idata=1,ngeo
-            IF (.NOT. no_ph(idata)) THEN
-               ndata=ndata+1
-               x(1,ndata)=celldm_geo(1,idata)
-               x(2,ndata)=celldm_geo(2,idata)
-               x(3,ndata)=celldm_geo(3,idata)
-               f(ndata)=frequences(idata)
-            ENDIF
-         ENDDO
-      CASE(12,-12,13,-13)
-         ndata=0
-         DO idata=1,ngeo
-            IF (.NOT. no_ph(idata)) THEN
-               ndata=ndata+1
-               x(1,ndata)=celldm_geo(1,idata)
-               x(2,ndata)=celldm_geo(2,idata)
-               x(3,ndata)=celldm_geo(3,idata)
-               IF (ibrav>0) THEN
-!
-!   c unique
-!
-                  x(4,ndata)=ACOS(celldm_geo(4,idata))
-               ELSE
-!
-!   b unique
-!
-                  x(4,ndata)=ACOS(celldm_geo(5,idata))
-               ENDIF
-               f(ndata)=frequences(idata)
-            ENDIF
-         END DO
-      CASE DEFAULT
-         ndata=0
-         DO idata=1,ngeo
-            IF (.NOT. no_ph(idata)) THEN
-               ndata=ndata+1
-               x(1,ndata)=celldm_geo(1,idata)
-               x(2,ndata)=celldm_geo(2,idata)
-               x(3,ndata)=celldm_geo(3,idata)
-               x(4,ndata)=ACOS(celldm_geo(4,idata))
-               x(5,ndata)=ACOS(celldm_geo(5,idata))
-               x(6,ndata)=ACOS(celldm_geo(6,idata))
-               f(ndata)=frequences(idata) 
-            ENDIF
-         ENDDO
-   END SELECT
+   ENDDO
    CALL fit_multi_quadratic(ndata,degree,nvar,x,f,poly_grun(:,imode))
 ENDDO
 
 DEALLOCATE ( x )
 DEALLOCATE ( f )
-DEALLOCATE ( frequences )
 
 RETURN
 END SUBROUTINE compute_freq_derivative_anis_eigen
 
 SUBROUTINE compute_freq_derivative_anis(ngeo,freq_geo,celldm_geo,degree,nvar,&
                                              ibrav,no_ph,poly_grun)
-USE kinds, ONLY : DP
+USE kinds,     ONLY : DP
 USE ions_base, ONLY : nat
 USE quadratic_surfaces, ONLY : fit_multi_quadratic
+USE lattices,  ONLY : compress_celldm
+
 IMPLICIT NONE
 INTEGER,  INTENT(IN) :: ngeo, degree, nvar, ibrav
 REAL(DP), INTENT(IN) :: freq_geo(3*nat,ngeo), celldm_geo(6,ngeo)
-LOGICAL, INTENT(IN) :: no_ph(ngeo)
+LOGICAL,  INTENT(IN) :: no_ph(ngeo)
 REAL(DP), INTENT(INOUT) :: poly_grun(nvar,3*nat)
 
-REAL(DP), ALLOCATABLE :: frequences(:), x(:,:), f(:)
+REAL(DP), ALLOCATABLE :: x(:,:), f(:)
 INTEGER :: imode, igeo, idata, ndata
 
-ALLOCATE (frequences(ngeo))
 ALLOCATE (x(degree,ngeo))
 ALLOCATE (f(ngeo))
 
+ndata=0
+DO idata=1,ngeo
+   IF (.NOT. no_ph(idata)) THEN
+      ndata=ndata+1
+      CALL compress_celldm(celldm_geo(1,idata),x(1,idata),degree,ibrav)
+   ENDIF
+ENDDO
+
 DO imode=1, 3*nat
-   frequences=0.0_DP
+   f=0.0_DP
+   ndata=0
    DO igeo=1, ngeo
-      IF (.NOT. no_ph(igeo)) frequences(igeo)=freq_geo(imode,igeo)
+      IF (.NOT. no_ph(igeo)) THEN
+         ndata=ndata+1
+         f(ndata)=freq_geo(imode,igeo)
+      ENDIF
    ENDDO
-!
-   SELECT CASE (ibrav)
-      CASE(1,2,3)
-         ndata=0
-         DO idata=1,ngeo
-            IF (.NOT. no_ph(idata)) THEN
-               ndata=ndata+1
-               x(1,ndata)=celldm_geo(1,idata)
-               f(ndata)=frequences(idata)
-            ENDIF
-         ENDDO
-      CASE(4,5,6,7)
-         ndata=0
-         DO idata=1,ngeo
-            IF (.NOT. no_ph(idata)) THEN
-               ndata=ndata+1
-               x(1,ndata)=celldm_geo(1,idata)
-               IF (ibrav==5) THEN
-                  x(2,ndata)=ACOS(celldm_geo(4,idata))
-               ELSE
-                  x(2,ndata)=celldm_geo(3,idata)
-               ENDIF
-               f(ndata)=frequences(idata)
-            ENDIF
-         END DO
-      CASE(8,9,91,10,11)
-         ndata=0
-         DO idata=1,ngeo
-            IF (.NOT. no_ph(idata)) THEN
-               ndata=ndata+1
-               x(1,ndata)=celldm_geo(1,idata)
-               x(2,ndata)=celldm_geo(2,idata)
-               x(3,ndata)=celldm_geo(3,idata)
-               f(ndata)=frequences(idata)
-            ENDIF
-         ENDDO
-      CASE(12,-12,13,-13)
-         ndata=0
-         DO idata=1,ngeo
-            IF (.NOT. no_ph(idata)) THEN
-               ndata=ndata+1
-               x(1,ndata)=celldm_geo(1,idata)
-               x(2,ndata)=celldm_geo(2,idata)
-               x(3,ndata)=celldm_geo(3,idata)
-               IF (ibrav>0) THEN
-!
-!   c unique
-!
-                  x(4,ndata)=ACOS(celldm_geo(4,idata))
-               ELSE
-!
-!   b unique
-!
-                  x(4,ndata)=ACOS(celldm_geo(5,idata))
-               ENDIF
-               f(ndata)=frequences(idata)
-            END IF
-         END DO
-      CASE DEFAULT
-         ndata=0
-         DO idata=1,ngeo
-            IF (.NOT. no_ph(idata)) THEN
-               ndata=ndata+1
-               x(1,ndata)=celldm_geo(1,idata)
-               x(2,ndata)=celldm_geo(2,idata)
-               x(3,ndata)=celldm_geo(3,idata)
-               x(4,ndata)=ACOS(celldm_geo(4,idata))
-               x(5,ndata)=ACOS(celldm_geo(5,idata))
-               x(6,ndata)=ACOS(celldm_geo(6,idata))
-               f(ndata)=frequences(idata) 
-            END IF
-         ENDDO
-   END SELECT
    CALL fit_multi_quadratic(ndata,degree,nvar,x,f,poly_grun(:,imode))
 ENDDO
 
 DEALLOCATE ( x )
 DEALLOCATE ( f )
-DEALLOCATE ( frequences )
 
 RETURN
 END SUBROUTINE compute_freq_derivative_anis

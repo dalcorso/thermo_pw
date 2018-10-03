@@ -54,17 +54,15 @@ SUBROUTINE plot_multi_energy()
   IF ( my_image_id /= root_image ) RETURN
 
   gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_energy'
+  CALL add_pressure(gnu_filename)
   IF (reduced_grid.OR.show_fit) THEN
      filename='energy_files/'//TRIM(flevdat)//'_quadratic'
   ELSE
      filename='energy_files/'//TRIM(flenergy)//int_to_char(1)
   ENDIF
+  CALL add_pressure(filename)
   filenameps=TRIM(flpsenergy)
-  IF (pressure /= 0.0_DP) THEN
-     gnu_filename=TRIM(gnu_filename)//'.'//TRIM(float_to_char(pressure_kb,1))
-     filename=TRIM(filename)//'.'// TRIM(float_to_char(pressure_kb,1))
-     filenameps=TRIM(filenameps)//'.'//TRIM(float_to_char(pressure_kb,1))
-  END IF
+  CALL add_pressure(filenameps)
   filenameps=TRIM(filenameps)//TRIM(flext)
 
   color(1)='color_red'
@@ -241,12 +239,9 @@ SUBROUTINE plot_multi_energy()
         ENDDO
         DO ifile=1,ngeo(3)
            filenameps=TRIM(flpsenergy)//int_to_char(ifile)
+           CALL add_pressure(filenameps)
            fileout='energy_files/'//TRIM(flenergy)//int_to_char(ifile)
-           IF (pressure /= 0.0_DP) THEN
-              fileout = TRIM(fileout)//'.'//TRIM(float_to_char(pressure_kb,1))
-              filenameps = TRIM(filenameps)//'.'//  &
-                           TRIM(float_to_char(pressure_kb,1))
-           END IF
+           CALL add_pressure(fileout)
            filenameps=TRIM(filenameps)//TRIM(flext)
            CALL gnuplot_start_2dplot(ncontours, nx, ny)
            DO icont=1,ncontours
