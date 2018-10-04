@@ -97,17 +97,8 @@ ALLOCATE (level(12,ngeo))
 ALLOCATE (frequences(ngeo))
 ALLOCATE (omega_data(ngeo))
 
-central_geo=ngeo/2
-IF (MOD(ngeo,2)==1) central_geo=central_geo+1
-IF (no_ph(central_geo)) THEN
-   DO igeo=1,ngeo/2
-      central_geo=central_geo-igeo
-      IF (.NOT. no_ph(central_geo)) EXIT
-      central_geo=central_geo+2*igeo
-      IF (.NOT. no_ph(central_geo)) EXIT
-      central_geo=central_geo-igeo
-   ENDDO
-ENDIF
+CALL find_central_geo(ngeo, no_ph, central_geo)
+
 ndata=0
 DO igeo=1,ngeo
    IF (.NOT. no_ph(igeo)) THEN
@@ -182,20 +173,8 @@ INTEGER :: ibnd, igeo, central_geo, jmode, ndata
 ALLOCATE (frequences(ngeo))
 ALLOCATE(omega_data(ngeo))
 
-central_geo=ngeo/2
-IF (MOD(ngeo,2)==1) central_geo=central_geo+1
-!
-!  find the central_geo closer to this value that has been calculated
-!
-IF (no_ph(central_geo)) THEN
-   DO igeo=1,ngeo/2
-      central_geo=central_geo-igeo
-      IF (.NOT. no_ph(central_geo)) EXIT 
-      central_geo=central_geo+2*igeo
-      IF (.NOT. no_ph(central_geo)) EXIT 
-      central_geo=central_geo-igeo
-   ENDDO
-ENDIF
+CALL find_central_geo(ngeo, no_ph, central_geo)
+
 ndata=0
 DO igeo=1,ngeo
    IF (.NOT. no_ph(igeo)) THEN
@@ -203,6 +182,7 @@ DO igeo=1,ngeo
       omega_data(ndata)=omega_geo(igeo)
    ENDIF
 ENDDO
+
 
 DO ibnd=1, 3*nat
    frequences=0.0_DP
@@ -233,6 +213,7 @@ DO ibnd=1, 3*nat
          ENDIF
       END IF
    END DO
+
    CALL polifit( omega_data, frequences, ndata,  &
                                      poly_grun(:,ibnd), poly_order )
 ENDDO

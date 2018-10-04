@@ -853,3 +853,27 @@ count_energies=icount
 
 RETURN
 END FUNCTION count_energies
+
+SUBROUTINE find_central_geo(ngeo, no_ph, central_geo)
+
+IMPLICIT NONE
+INTEGER :: ngeo
+LOGICAL :: no_ph(ngeo)
+INTEGER :: central_geo
+
+INTEGER :: igeo
+
+central_geo=ngeo/2
+IF (MOD(ngeo,2)==1) central_geo=central_geo+1
+IF (no_ph(central_geo)) THEN
+   DO igeo=1,ngeo/2
+      central_geo=central_geo-igeo
+      IF (.NOT. no_ph(central_geo)) EXIT
+      central_geo=central_geo+2*igeo
+      IF (.NOT. no_ph(central_geo)) EXIT
+      central_geo=central_geo-igeo
+   ENDDO
+ENDIF
+
+RETURN
+END SUBROUTINE find_central_geo

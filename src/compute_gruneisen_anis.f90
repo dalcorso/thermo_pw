@@ -89,16 +89,7 @@ COMPLEX(DP), EXTERNAL :: ZDOTC
 ALLOCATE (x(degree,ngeo))
 ALLOCATE (f(ngeo))
 
-central_geo=ngeo/2+1
-IF (no_ph(central_geo)) THEN
-   DO igeo=1,ngeo/2
-      central_geo=central_geo-igeo
-      IF (.NOT. no_ph(central_geo)) EXIT
-      central_geo=central_geo+2*igeo
-      IF (.NOT. no_ph(central_geo)) EXIT
-      central_geo=central_geo-igeo
-   ENDDO
-ENDIF
+CALL find_central_geo(ngeo, no_ph, central_geo)
 
 ndata=0
 DO idata=1,ngeo
