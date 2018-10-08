@@ -7,9 +7,11 @@
 !
 SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
   !
-  ! read data files produced by "bands_sub" for ngeo geometries, writes
+  ! reads data files produced by write_ph_dispersions for ngeo geometries, 
+  ! interpolates them with a quadratic polynomial, computes an writes 
   ! several files with the Gruneisen parameters: the derivatives of the 
-  ! phonon dispersions with respect to the celldm parameters.
+  ! logarithm of the phonon frequencies with respect to the logarithm of
+  ! the relevant celldm parameters.
   ! This is calculated at the celldm given in input or at the celldm
   ! that corresponds to the temperature given in input.
   ! 
@@ -19,18 +21,18 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
   USE data_files,     ONLY : flgrun
   USE control_paths,  ONLY : nqaux, disp_q, disp_nqs
   USE equilibrium_conf, ONLY : celldm0
-  USE thermo_mod,     ONLY : ngeo, omega_geo, celldm_geo, no_ph
+  USE thermo_mod,     ONLY : celldm_geo, no_ph
   USE anharmonic,     ONLY : celldm_t
   USE ph_freq_anharmonic,  ONLY : celldmf_t
-  USE control_grun,   ONLY : temp_ph, volume_ph, celldm_ph
+  USE control_grun,   ONLY : temp_ph, celldm_ph
   USE initial_conf,   ONLY : ibrav_save, amass_save, ityp_save
   USE control_thermo, ONLY : ltherm_dos, ltherm_freq, set_internal_path
+  USE freq_interpolate, ONLY : interp_freq_anis_eigen
   USE temperature,    ONLY : temp, ntemp
   USE quadratic_surfaces, ONLY : evaluate_fit_quadratic, &
                                  evaluate_fit_grad_quadratic
   USE lattices,       ONLY : compress_celldm
-  USE io_bands,       ONLY : read_bands, read_parameters, &
-                             read_representations, write_bands
+  USE io_bands,       ONLY : read_bands, read_parameters, write_bands
   USE mp,             ONLY : mp_bcast
   USE io_global,      ONLY : stdout, ionode, ionode_id
   USE mp_images,      ONLY : intra_image_comm, root_image, my_image_id
@@ -39,33 +41,28 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
 
   CHARACTER(LEN=256), INTENT(IN) :: file_disp, file_vec
 
-  REAL(DP) :: eps=1.d-4
-  REAL(DP), ALLOCATABLE :: freq_geo(:,:,:), k(:,:), k_rap(:,:), gaugek(:,:)
-  REAL(DP), ALLOCATABLE :: frequency_geo(:,:)
-  COMPLEX(DP), ALLOCATABLE :: displa_geo(:,:,:,:)
-  INTEGER, ALLOCATABLE :: rap_geo(:,:,:), repres_geo(:,:), gcodek(:), &
-                          aux_ind(:), gcodek_ext(:), ptypek(:,:), lprojk(:)
-  LOGICAL, ALLOCATABLE :: same_next(:)
-  INTEGER :: nks, nbnd, nks_rap, nbnd_rap 
-  INTEGER :: ibnd, ios, i, n, ierr, igeo, nwork
-  INTEGER :: iumode
-  INTEGER :: nvar, degree, icrys, compute_nwork
-  REAL(DP), ALLOCATABLE :: poly_grun(:,:), frequency(:,:), gruneisen(:,:,:)
-  REAL(DP) :: vm, cm(6), f
-  REAL(DP), ALLOCATABLE :: grad(:), x(:)
-  LOGICAL, ALLOCATABLE :: high_symmetry(:), is_gamma(:)
-  LOGICAL :: copy_before, exist_rap, allocated_variables
-  CHARACTER(LEN=256) :: filename, filedata, filegrun
+  REAL(DP), ALLOCATABLE :: freq_geo(:,:,:), k(:,:), frequency_geo(:,:), &
+                           x_data(:,:), poly_grun(:,:), frequency(:,:), &
+                           gruneisen(:,:,:), grad(:), x(:)
+  COMPLEX(DP), ALLOCATABLE :: displa_geo(:,:,:,:), displa(:,:,:)
+  INTEGER :: nks, nbnd, cgeo_eff, central_geo, ibnd, ios, i, n, igeo, &
+             nwork, idata, ndata, iumode, nvar, degree, icrys
+  INTEGER :: find_free_unit, compute_nwork
+  REAL(DP) :: cm(6), f
+  LOGICAL, ALLOCATABLE :: is_gamma(:)
+  LOGICAL :: copy_before, allocated_variables
+  CHARACTER(LEN=256) :: filename, filedata, filegrun, filefreq
   CHARACTER(LEN=6), EXTERNAL :: int_to_char
 
   IF ( my_image_id /= root_image ) RETURN
-
   IF (flgrun == ' ') RETURN
 
-  iumode=22
-  exist_rap=.TRUE.
-  allocated_variables=.FALSE.
+  IF (ionode) iumode=find_free_unit()
   nwork=compute_nwork()
+!
+!  Part one: Reads the frequencies and the displacements from file.
+!
+  allocated_variables=.FALSE.
   DO igeo = 1, nwork
      
      IF (no_ph(igeo)) CYCLE
@@ -83,41 +80,16 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
      IF (.NOT.allocated_variables) THEN
         ALLOCATE (freq_geo(nbnd,nks,nwork))
         ALLOCATE (displa_geo(nbnd,nbnd,nwork,nks))
-        ALLOCATE (rap_geo(nbnd,nks,nwork))
         ALLOCATE (k(3,nks))
-        ALLOCATE (k_rap(3,nks))
-        ALLOCATE (high_symmetry(nks))
-        ALLOCATE (gcodek(nks))
-        ALLOCATE (gcodek_ext(nks))
-        ALLOCATE (aux_ind(nks))
-        ALLOCATE (ptypek(3,nks))
-        ALLOCATE (lprojk(nks))
-        ALLOCATE (same_next(nks))
-        ALLOCATE (gaugek(48,nks))
-        ALLOCATE (is_gamma(nks))
         allocated_variables=.TRUE.
      ENDIF
      CALL read_bands(nks, nbnd, k, freq_geo(1,1,igeo), filedata)
-
-     filename=TRIM(filedata)//".rap"
-     k_rap(:,:)=k(:,:)
-     rap_geo(:,:,igeo)=-1
-     CALL read_representations(nks, nbnd, k_rap, rap_geo(1,1,igeo),     &
-                          high_symmetry, gcodek, aux_ind, gcodek_ext,   &
-                          ptypek, lprojk, same_next, gaugek, exist_rap, &
-                          filename)
-     nks_rap=nks
-     nbnd_rap=nbnd
-     DO n=1,nks
-        is_gamma(n) = (( k(1,n)**2 + k(2,n)**2 + k(3,n)**2) < 1.d-12)
-     ENDDO
 
      filename='phdisp_files/'//TRIM(file_vec)//".g"//TRIM(int_to_char(igeo))
      IF (ionode) OPEN(UNIT=iumode, FILE=TRIM(filename), FORM='formatted', &
                    STATUS='old', ERR=200, IOSTAT=ios)
 200  CALL mp_bcast(ios, ionode_id, intra_image_comm)
      CALL errore('write_gruneisen_band_anis','modes are needed',ABS(ios))
-
      !
      IF (ionode) THEN
 !
@@ -130,20 +102,40 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
      ENDIF
   ENDDO
   CALL mp_bcast(displa_geo, ionode_id, intra_image_comm)
+  ALLOCATE (is_gamma(nks))
+  DO n=1,nks
+     is_gamma(n) = (( k(1,n)**2 + k(2,n)**2 + k(3,n)**2) < 1.d-12)
+  ENDDO
 !
 !  Part two: Compute the Gruneisen parameters
 !
-  copy_before=.FALSE.
   CALL compute_degree(ibrav_save,degree,nvar)
-  
-  ALLOCATE(frequency_geo(nbnd,nwork))
-  ALLOCATE(poly_grun(nvar,nbnd))
-  ALLOCATE(frequency(nbnd,nks))
-  ALLOCATE(gruneisen(nbnd,nks,degree))
+!
+!  find how many geometries have been really calculated
+! 
+  ndata=0
+  DO idata=1, nwork
+     IF (.NOT.no_ph(idata)) ndata=ndata+1
+  ENDDO
+!
+!  And find the central geometry in this list of phonon. Prepare also the
+!  x data for the computed geometries
+!
+  CALL find_central_geo(nwork,no_ph,central_geo)
+  ALLOCATE(x_data(degree,ndata))
+  ndata=0
+  DO idata=1, nwork
+     IF (.NOT.no_ph(idata)) THEN
+        ndata=ndata+1
+        IF (central_geo==idata) cgeo_eff=ndata
+        CALL compress_celldm(celldm_geo(1,idata),x_data(1,ndata),degree, &
+                                                                   ibrav_save)
+     ENDIF
+  ENDDO 
+!
+!  find the celldm at which we compute the Gruneisen parameters and compress
+!  it
   ALLOCATE(x(degree))
-  ALLOCATE(grad(degree))
-  frequency(:,:)= 0.0_DP
-  gruneisen(:,:,:)= 0.0_DP
   IF (celldm_ph(1)==0.0_DP) THEN
      IF (ltherm_freq) THEN
         CALL evaluate_celldm(temp_ph, cm, ntemp, temp, celldmf_t)
@@ -169,7 +161,25 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
   WRITE(stdout,'(5x,6f12.7)') cm 
   IF (celldm_ph(1)==0.0_DP.AND.(ltherm_freq.OR.ltherm_dos)) &
             WRITE(stdout,'(5x,"Corresponding to T=",f17.8)') temp_ph
-
+!
+! Now allocate space to save the frequencies to interpolate and the
+! coeffieints of the polynomial. Allocate also space to save the
+! interpolated frequencies and the gruneisen parameters
+!
+  ALLOCATE(frequency_geo(nbnd,ndata))
+  ALLOCATE(displa(nbnd,nbnd,ndata))
+  ALLOCATE(poly_grun(nvar,nbnd))
+  ALLOCATE(frequency(nbnd,nks))
+  ALLOCATE(gruneisen(nbnd,nks,degree))
+  ALLOCATE(grad(degree))
+!
+!  then intepolates and computes the derivatives of the polynomial.
+!  At the gamma point the gruneisen parameters are not defined, so
+!  we copy those of the previous or the next point
+!
+  copy_before=.FALSE.
+  frequency(:,:)= 0.0_DP
+  gruneisen(:,:,:)= 0.0_DP
   DO n = 1,nks
      IF (is_gamma(n)) THEN
 !
@@ -181,7 +191,7 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
         copy_before=.FALSE.
         IF (n==1) THEN
            copy_before=.TRUE.
-        ELSEIF (is_gamma(n-1)) THEN
+        ELSEIF(is_gamma(n-1)) THEN
            copy_before=.TRUE.
         ELSE
            DO ibnd=1,nbnd
@@ -189,25 +199,30 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
               frequency(ibnd,n)=frequency(ibnd,n-1)
            END DO
 !
-!  At the gamma point the first three frequencies vanishes
+!  At the gamma point the first three frequencies vanish
 !
            DO ibnd=1,3
               frequency(ibnd,n)=0.0_DP
            END DO
         ENDIF
      ELSE
-        frequency_geo(1:nbnd,1:nwork)=freq_geo(1:nbnd,n,1:nwork)
-        CALL compute_freq_derivative_anis_eigen(nwork, frequency_geo,&
-              celldm_geo, displa_geo(1,1,1,n), degree, nvar, ibrav_save, &
-                                                       no_ph, poly_grun)
+        ndata=0
+        DO idata=1,nwork
+           IF (.NOT.no_ph(idata)) THEN
+              ndata=ndata+1
+              frequency_geo(1:nbnd,ndata)=freq_geo(1:nbnd,n,idata)
+              displa(1:nbnd,1:nbnd,ndata)=displa_geo(1:nbnd,1:nbnd,idata,n)
+           ENDIF
+        ENDDO
+        CALL interp_freq_anis_eigen(nwork, frequency_geo, x_data, cgeo_eff, &
+                                    displa, degree, nvar, poly_grun)
 !
-!  frequencies and gruneisen parameters are calculated at the chosen
-!  volume
+!  frequencies and gruneisen parameters are calculated at the chosen volume
 !
         DO ibnd=1,nbnd
            CALL evaluate_fit_quadratic(degree,nvar,x,f,poly_grun(1,ibnd))
-           CALL evaluate_fit_grad_quadratic(degree,nvar,x,grad,&
-                                                          poly_grun(1,ibnd))
+           CALL evaluate_fit_grad_quadratic(degree,nvar,x,grad, &
+                                                        poly_grun(1,ibnd))
            frequency(ibnd,n) = f 
            gruneisen(ibnd,n,:) = -grad(:)
            IF (frequency(ibnd,n) > 0.0_DP ) THEN
@@ -244,33 +259,24 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
 !
 !  writes frequencies at the chosen geometry on file
 !
-filegrun='anhar_files/'//TRIM(flgrun)//'_freq'
-CALL write_bands(nks, nbnd, disp_q, frequency, 1.0_DP, filegrun)
+  filefreq='anhar_files/'//TRIM(flgrun)//'_freq'
+  CALL write_bands(nks, nbnd, disp_q, frequency, 1.0_DP, filefreq)
 
-DEALLOCATE ( is_gamma )
-DEALLOCATE ( gcodek )
-DEALLOCATE ( gcodek_ext )
-DEALLOCATE ( aux_ind )
-DEALLOCATE ( ptypek )
-DEALLOCATE ( lprojk )
-DEALLOCATE ( same_next )
-DEALLOCATE ( gaugek )
-DEALLOCATE ( high_symmetry )
-DEALLOCATE ( k ) 
-DEALLOCATE ( frequency_geo )
-DEALLOCATE ( freq_geo )
-DEALLOCATE ( displa_geo )
-DEALLOCATE ( poly_grun )
-DEALLOCATE ( frequency )
-DEALLOCATE ( gruneisen )
-DEALLOCATE ( x )
-DEALLOCATE ( grad )
-DEALLOCATE ( k_rap )
-DEALLOCATE ( rap_geo )
+  DEALLOCATE( grad )
+  DEALLOCATE( gruneisen )
+  DEALLOCATE( frequency )
+  DEALLOCATE( poly_grun )
+  DEALLOCATE( displa )
+  DEALLOCATE( frequency_geo )
+  DEALLOCATE( x )
+  DEALLOCATE( x_data )
+  DEALLOCATE( is_gamma )
+  DEALLOCATE( k ) 
+  DEALLOCATE( displa_geo )
+  DEALLOCATE( freq_geo )
 
 RETURN
 END SUBROUTINE write_gruneisen_band_anis
-
 
 SUBROUTINE evaluate_celldm(temp_ph, cm, ntemp, temp, celldmf_t)
 

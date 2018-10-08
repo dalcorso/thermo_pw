@@ -69,11 +69,11 @@ CALL set_files_for_plot(4, flfrq_thermo, filedata, filerap,  &
                                        fileout, gnu_filename, filenameps)
 CALL plotband_sub(4, filedata, filerap, fileout, gnu_filename, filenameps)
 !
-!    here we compute the Gruneisen parameters on the dos mesh
+!    here we fit the frequencies of the dos mesh with a polynomial
 !
-CALL compute_gruneisen()
+CALL fit_frequencies()
 !
-!    here we calculate several anharmonic quantities and plot them
+!    here we calculate the Gruneisen parameters and the anharmonic quantities
 !
 CALL write_grun_anharmonic()
 CALL plot_anhar() 

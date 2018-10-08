@@ -133,18 +133,25 @@ RETURN
 END SUBROUTINE write_ph_freq_anharmonic
 
 SUBROUTINE write_grun_anharmonic()
+!
+!  This routine computes the anharmonic properties from the Gruneisen
+!  parameters. Used when lmurn=.TRUE.. (Assumes to have the volume and
+!  the bulk modulus as a function of temperature).
+!  
+!
 USE kinds,          ONLY : DP
 USE constants,      ONLY : ry_kbar
 USE ions_base,      ONLY : nat
 USE temperature,    ONLY : ntemp, temp
 USE ph_freq_thermodynamics, ONLY : ph_freq_save, phf_cv
 USE anharmonic,     ONLY :  vmin_t, b0_t, cv_t
-USE ph_freq_anharmonic,     ONLY :  vminf_t, cvf_t, b0f_t, cpf_t, b0f_s
+USE ph_freq_anharmonic, ONLY :  vminf_t, cvf_t, b0f_t, cpf_t, b0f_s
 USE grun_anharmonic, ONLY : betab, cp_grun_t, b0_grun_s, &
                             grun_gamma_t, poly_grun, poly_order
 USE ph_freq_module, ONLY : thermal_expansion_ph, ph_freq_type,  &
                            destroy_ph_freq, init_ph_freq
-USE control_grun,     ONLY : lv0_t, lb0_t
+USE freq_interpolate, ONLY : compute_polynomial, compute_polynomial_der
+USE control_grun,   ONLY : lv0_t, lb0_t
 USE control_mur,    ONLY : vmin, b0
 USE control_thermo, ONLY : ltherm_dos, ltherm_freq
 USE control_dosq,   ONLY : nq1_d, nq2_d, nq3_d
@@ -164,15 +171,15 @@ TYPE(ph_freq_type) :: ph_grun    ! the gruneisen parameters recomputed
                                  ! corresponding to that temperature
 REAL(DP) :: vm, f, g
 INTEGER :: find_free_unit
-
 !
-!  compute thermal expansion from gruneisen parameters. 
-!  NB: betab is multiplied by the bulk modulus
+!  divide the q vectors among the processors. Allocate space to save the
+!  frequencies and the gruneisen parameter on a part of the mesh of q points.
 !
 nq=ph_freq_save(1)%nq
 startq=ph_freq_save(1)%startq
 lastq=ph_freq_save(1)%lastq
 nq_eff = ph_freq_save(1)%nq_eff
+
 CALL init_ph_freq(ph_grun, nat, nq1_d, nq2_d, nq3_d, nq_eff, startq, &
                                                              lastq, nq, .FALSE.)
 CALL init_ph_freq(ph_freq, nat, nq1_d, nq2_d, nq3_d, nq_eff, startq, &
@@ -183,6 +190,9 @@ ENDDO
 
 betab=0.0_DP
 DO itemp = 1, ntemp
+!
+!  Compute the volume at this temperature.
+!
    IF (lv0_t) THEN
       IF (ltherm_freq) THEN
          vm=vminf_t(itemp)
@@ -194,20 +204,22 @@ DO itemp = 1, ntemp
    ELSE
       vm=vmin
    ENDIF
+!
+!  Use the fitting polynomials to find the frequencies and the gruneisen
+!  parameters at this volume.
+!
    ph_freq%nu= 0.0_DP
    ph_grun%nu= 0.0_DP
    iq_eff=0
    DO iq=startq, lastq
       iq_eff=iq_eff+1
       DO imode=1,3*nat
-         f=poly_grun(poly_order,imode,iq)
-         g=poly_grun(poly_order,imode,iq)*(poly_order-1.0_DP)
-         DO i=poly_order-1,1,-1
-            f = poly_grun(i,imode,iq) + f*vm
-            g = poly_grun(i,imode,iq)*(i-1.0_DP) + g*vm
-         END DO
+         CALL compute_polynomial(vm, poly_order, poly_grun(:,imode,iq),f)
+         CALL compute_polynomial_der(vm, poly_order, poly_grun(:,imode,iq),g)
 !
 !     g here is V d w / d V 
+!     ph_grun%nu will contain the gruneisen parameter divided by the volume
+!     as requested by the thermal_expansion_ph routine
 !
          ph_freq%nu(imode,iq_eff)=f
          IF ( f > 0.0_DP) THEN 
@@ -217,7 +229,14 @@ DO itemp = 1, ntemp
          ENDIF
       ENDDO
    ENDDO
+!
+!  computes thermal expansion from gruneisen parameters. 
+!  this routine gives betab multiplied by the bulk modulus
+!
    CALL thermal_expansion_ph(ph_freq, ph_grun, temp(itemp), betab(itemp))
+!
+!  divide by the bulk modulus
+!
    IF (lb0_t) THEN
       IF (ltherm_freq) THEN
          betab(itemp)=betab(itemp) * ry_kbar / b0f_t(itemp)
@@ -231,6 +250,8 @@ DO itemp = 1, ntemp
    ENDIF
 END DO
 CALL mp_sum(betab, world_comm)
+!
+!  computes the other anharmonic quantities
 !
 IF (ltherm_freq) THEN
    CALL compute_cp(betab, vminf_t, b0f_t, cvf_t, cp_grun_t, &
@@ -291,25 +312,25 @@ USE kinds, ONLY : DP
 USE mp,    ONLY : mp_sum
 USE mp_world, ONLY : world_comm
 
-  IMPLICIT NONE
-  INTEGER, INTENT(IN) :: ntemp
-  REAL(DP), INTENT(IN) :: vmin_t(ntemp), temp(ntemp)
-  REAL(DP), INTENT(OUT) :: beta_t(ntemp) 
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ntemp
+REAL(DP), INTENT(IN) :: vmin_t(ntemp), temp(ntemp)
+REAL(DP), INTENT(OUT) :: beta_t(ntemp) 
 
-  INTEGER :: itemp, startt, lastt
+INTEGER :: itemp, startt, lastt
 
-  beta_t=0.0_DP
-  CALL divide(world_comm, ntemp, startt, lastt)
+beta_t=0.0_DP
+CALL divide(world_comm, ntemp, startt, lastt)
 !
 !  just interpolate linearly
 !
-  DO itemp = max(2,startt), min(ntemp-1, lastt)
-     beta_t(itemp) = (vmin_t(itemp+1)-vmin_t(itemp-1)) / &
-                     (temp(itemp+1)-temp(itemp-1)) / vmin_t(itemp)
-  END DO
-  CALL mp_sum(beta_t, world_comm)
+DO itemp = max(2,startt), min(ntemp-1, lastt)
+   beta_t(itemp) = (vmin_t(itemp+1)-vmin_t(itemp-1)) / &
+                   (temp(itemp+1)-temp(itemp-1)) / vmin_t(itemp)
+END DO
+CALL mp_sum(beta_t, world_comm)
 
-  RETURN
+RETURN
 END SUBROUTINE compute_beta
 
 SUBROUTINE write_ener_beta(temp, vmin, emin, beta, ntemp, filename)
@@ -446,24 +467,20 @@ CHARACTER(LEN=6) :: int_to_char
 
 IF (meta_ionode) THEN
    iu_therm=find_free_unit()
-   
    DO na=1, nat
-
       OPEN(UNIT=iu_therm, FILE=TRIM(filename)//'.'//&
-                                 TRIM(int_to_char(na))//'.dw', STATUS='UNKNOWN', &
-                                                      FORM='FORMATTED')
+           TRIM(int_to_char(na))//'.dw', STATUS='UNKNOWN', FORM='FORMATTED')
       WRITE(iu_therm,'("# ")')
 
       WRITE(iu_therm,'(6x,"T",14x,"B_11",14x,"B_12",14x,"B_13",14x,"B_22",&
                            &14x,"B_23",14x,"B_33")')
 
       DO itemp = 1, ntemp
-      WRITE(iu_therm, '(e16.8,6e18.8)') temp(itemp), (bfact_t(ijpol,na,itemp), ijpol=1,6)
-      END DO
-
+      WRITE(iu_therm, '(e16.8,6e18.8)') temp(itemp), (bfact_t(ijpol,na,itemp),&
+                                        ijpol=1,6)
+      ENDDO
       CLOSE(UNIT=iu_therm, STATUS='KEEP')
-   END DO
-
+   ENDDO
 ENDIF
 RETURN
 END SUBROUTINE write_anharm_bfact

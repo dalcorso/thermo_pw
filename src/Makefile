@@ -30,8 +30,6 @@ collect_info.o \
 compute_cp.o \
 compute_density.o \
 compute_eref_band.o \
-compute_gruneisen.o \
-compute_gruneisen_anis.o \
 compute_omega_geo.o \
 deallocate_asyn.o \
 deallocate_thermo.o \
@@ -47,6 +45,8 @@ float_to_char.o \
 find_symmetry.o \
 find_band_sym_proj.o \
 find_mode_sym_proj.o \
+fit_frequencies.o \
+freq_interpolate.o \
 generate_k_along_lines_kz.o \
 generalized_phdos.o \
 initialize_thermo_work.o \

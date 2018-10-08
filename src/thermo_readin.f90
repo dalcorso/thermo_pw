@@ -80,6 +80,7 @@ SUBROUTINE thermo_readin()
   USE control_quadratic_energy, ONLY : show_fit
   USE control_quartic_energy, ONLY : lquartic, lquartic_ph, lsolve
   USE piezoelectric_tensor, ONLY : nppl
+  USE grun_anharmonic,      ONLY : poly_order
   USE images_omega, ONLY : omega_group
   USE control_qe,   ONLY : force_band_calculation, use_ph_images
   USE band_computation, ONLY : sym_for_diago
@@ -418,6 +419,8 @@ SUBROUTINE thermo_readin()
   epsilon_0=0.0_DP
   poly_degree=0
   fl_el_cons='output_el_cons.dat'
+
+  poly_order=5
 
   nppl=51
 

@@ -47,7 +47,7 @@ CALL compute_beta(vmin_t, beta_t, temp, ntemp)
 CALL interpolate_cv(vmin_t, ph_cv, cv_t)
 IF (lelastic) THEN
    CALL compute_cp(beta_t, vmin_t, b0_t, cv_t, cp_t, b0_s, gamma_t)
-   CALL isostress_heat_capacity(vmin_t,el_cons_t,alpha_anis_t,temp,&
+   CALL isostress_heat_capacity(vmin_t,el_cons_t,alpha_anis_t,temp, &
                                                          cpmcv_anis,ntemp)
 ENDIF
 
@@ -84,7 +84,6 @@ IF (meta_ionode) THEN
       CALL add_pressure(filename)
 
       CALL write_heat_anharm(temp, cv_t, cp_t, ntemp, filename)
-
 !
 !  Here we write on output the anharmonic properties computed for
 !  anisotropic solids, using the thermal expansion tensor, as opposed
@@ -142,7 +141,6 @@ CHARACTER(LEN=256) :: filename
 INTEGER :: itemp, iu_therm
 INTEGER :: find_free_unit
 REAL(DP) :: compute_omega_geo, el_con_t(6,6,ntemp)
-
 
 CALL compute_alpha_anis(celldmf_t, alphaf_anis_t, temp, ntemp, ibrav_save)
 !
@@ -240,24 +238,23 @@ USE temperature,    ONLY : ntemp, temp
 USE control_grun,   ONLY : lv0_t
 USE equilibrium_conf, ONLY : celldm0, omega0
 USE control_mur,    ONLY : vmin
-USE thermodynamics,         ONLY : ph_cv
+USE thermodynamics, ONLY : ph_cv
 USE ph_freq_thermodynamics, ONLY : ph_freq_save, phf_cv
-USE anharmonic,             ONLY : celldm_t, vmin_t, b0_t, cv_t, lelastic, &
-                                   el_comp_t
-USE ph_freq_anharmonic,     ONLY : celldmf_t, vminf_t, b0f_t, cvf_t, lelasticf
+USE anharmonic,     ONLY : celldm_t, vmin_t, b0_t, cv_t, lelastic, el_comp_t
+USE ph_freq_anharmonic, ONLY : celldmf_t, vminf_t, b0f_t, cvf_t, lelasticf
 USE grun_anharmonic, ONLY : alpha_an_g, grun_gamma_t, poly_grun, done_grun, &
                             cp_grun_t, b0_grun_s, betab
 USE ph_freq_module, ONLY : thermal_expansion_ph, ph_freq_type,  &
                            destroy_ph_freq, init_ph_freq
 USE lattices,       ONLY : compress_celldm
-USE control_grun,     ONLY : lb0_t
+USE control_grun,   ONLY : lb0_t
 USE control_thermo, ONLY : ltherm_dos, ltherm_freq
 USE elastic_constants, ONLY :  el_compliances
 USE control_elastic_constants, ONLY : el_cons_available, el_cons_t_available
 USE quadratic_surfaces, ONLY : evaluate_fit_quadratic,      &
                                evaluate_fit_grad_quadratic
 USE control_dosq,   ONLY : nq1_d, nq2_d, nq3_d
-USE data_files,     ONLY : flanhar, fl_el_cons
+USE data_files,     ONLY : flanhar
 USE io_global,      ONLY : meta_ionode, stdout
 USE mp_world,       ONLY : world_comm
 USE mp,             ONLY : mp_sum
@@ -276,7 +273,6 @@ REAL(DP) :: cm(6), aux(6), alpha_aux(6), alpha(6), f, vm
 REAL(DP), ALLOCATABLE :: grad(:), x(:)
 INTEGER :: compute_nwork
 INTEGER :: find_free_unit
-LOGICAL :: exst
 
 done_grun=.FALSE.
 !
@@ -287,8 +283,8 @@ IF ( ibrav<1 .OR. ibrav>11 ) THEN
                      & not available")' )
    RETURN
 END IF
-!  If the elastic constants are not available, this calculation cannot be
-!  don_ge
+!
+!  If the elastic constants are not available, this calculation cannot be done
 !
 IF ( .NOT.(lelastic.OR.lelasticf) ) THEN
    WRITE(stdout,'(5x,"The elastic constants are needed to compute ")')
@@ -303,19 +299,22 @@ WRITE(stdout,'(5x,"Writing on file anhar_files/",a)') TRIM(flanhar)// &
                                                                   '.aux_grun'
 WRITE(stdout,'(2x,76("+"),/)')
 !
-!  compute thermal expansion from gruneisen parameters. 
-!  NB: alpha_an calculated by thermal_expansion_ph is multiplied by the 
-!      elastic compliances
+! divide the q points among the processors. Each processor has only a part
+! of the q points and computes the contribution of these points to the
+! anharmonic properties
 !
 nq=ph_freq_save(1)%nq
 startq=ph_freq_save(1)%startq
 lastq=ph_freq_save(1)%lastq
 nq_eff=ph_freq_save(1)%nq_eff
-CALL compute_degree(ibrav,degree,nvar)
-nwork=compute_nwork()
-
 CALL init_ph_freq(ph_freq, nat, nq1_d, nq2_d, nq3_d, nq_eff, startq, lastq,  &
                                                                nq, .FALSE.)
+ph_freq%wg=ph_freq_save(1)%wg
+!
+! now allocate space for each set of gruneisen parameters
+!
+CALL compute_degree(ibrav,degree,nvar)
+nwork=compute_nwork()
 ALLOCATE(ph_grun(degree))
 ALLOCATE(grad(degree))
 ALLOCATE(x(degree))
@@ -323,12 +322,18 @@ DO i=1, degree
    CALL init_ph_freq(ph_grun(i), nat, nq1_d, nq2_d, nq3_d, nq_eff, startq, &
                                                     lastq, nq, .FALSE.)
 END DO
-
+!
+!  computes the anharmonic quantities at each temperature
+!
 alpha_an_g=0.0_DP
 DO itemp = 1, ntemp
    IF (MOD(itemp,30)==0) &
              WRITE(6,'(5x,"Computing temperature ", i5 " / ",&
        & i5, 4x," T=",f12.2," K")') itemp, ntemp, temp(itemp)
+!
+!  Computes the volume at which the Gruneisen parameters and the frequencies
+!  are interpolated
+!
    IF (lv0_t.AND.ltherm_freq) THEN
       cm(:)=celldmf_t(:,itemp)
       vm = vminf_t(itemp)
@@ -340,14 +345,14 @@ DO itemp = 1, ntemp
       vm = omega0
    END IF
    CALL compress_celldm(cm,x,degree,ibrav)
+!
+!  compute the frequencies and the gruneisen parameters from the interpolating 
+!  polynomial
+!
    ph_freq%nu= 0.0_DP
    DO i=1,degree
       ph_grun(i)%nu= 0.0_DP
    END DO
-   ph_freq%wg=ph_freq_save(1)%wg
-!
-!  compute the frequencies once
-!
    DO iq=startq, lastq
       DO imode=1,3*nat
          CALL evaluate_fit_quadratic(degree,nvar,x,f,poly_grun(1,imode,iq))
@@ -366,12 +371,13 @@ DO itemp = 1, ntemp
       END DO
    END DO
 !
-!  Loop over the number of independent crystal parameters for this
-!  Bravais lattice
+!  Compute thermal expansion from Gruneisen parameters. Loop over the number 
+!  of independent crystal parameters for this Bravais lattice
+!  alpha calculated by thermal_expansion_ph is not multiplied by the elastic 
+!  compliances
 !
    DO i=1,degree
-      CALL thermal_expansion_ph(ph_freq, ph_grun(i), temp(itemp), &
-                                           alpha_aux(i))
+      CALL thermal_expansion_ph(ph_freq, ph_grun(i), temp(itemp), alpha_aux(i))
    END DO
 !
 !  Here convert from derivatives with respect to crystal parameters to
@@ -414,16 +420,14 @@ DO itemp = 1, ntemp
    CASE DEFAULT
        CALL errore('write_grun_anharmonic_anis','ibrav not programmed',1)
    END SELECT
-
 !
-!  The thermal expansion needs to be multiplied by the elastic compliances
+!  To get the thermal expansion we need to multiply by the elastic compliances
 !
    aux=0.0_DP
    IF (el_cons_t_available) THEN
       DO itens=1,6
          DO jtens=1,6
-            aux(itens)=aux(itens) + el_comp_t(itens,jtens,itemp) &
-                                                 *alpha(jtens)
+            aux(itens)=aux(itens) + el_comp_t(itens,jtens,itemp)*alpha(jtens)
          END DO
       END DO
    ELSEIF (el_cons_available) THEN
@@ -437,9 +441,14 @@ DO itemp = 1, ntemp
 END DO
 
 CALL mp_sum(alpha_an_g, world_comm)
-
+!
+!  here compute the volume thermal expansion as the trace of the thermal
+!  expansion tensor
+!
 betab(:)=alpha_an_g(1,:)+alpha_an_g(2,:)+alpha_an_g(3,:)
-
+!
+!  computes the other anharmonic quantities
+!
 IF (ltherm_freq) THEN
    CALL compute_cp(betab, vminf_t, b0f_t, cvf_t, cp_grun_t, b0_grun_s, &
                                                                grun_gamma_t)
@@ -478,7 +487,6 @@ IF (meta_ionode) THEN
       celldm_t=0.0_DP
    ENDIF
 
-
    filename="anhar_files/"//TRIM(flanhar)//'.aux_grun'
    CALL add_pressure(filename)
 
@@ -491,13 +499,13 @@ IF (meta_ionode) THEN
 
    IF (ltherm_freq) THEN
       DO itemp = 2, ntemp-1
-         WRITE(iu_therm, '(5e16.8)') temp(itemp), betab(itemp)*1.D6,   &
+         WRITE(iu_therm, '(5e16.8)') temp(itemp), betab(itemp)*1.D6,       &
                      grun_gamma_t(itemp), cp_grun_t(itemp) - cvf_t(itemp), &
                      b0_grun_s(itemp) - b0f_t(itemp)
       END DO
    ELSE
       DO itemp = 2, ntemp-1
-         WRITE(iu_therm, '(5e16.8)') temp(itemp), betab(itemp)*1.D6,    &
+         WRITE(iu_therm, '(5e16.8)') temp(itemp), betab(itemp)*1.D6,      &
                      grun_gamma_t(itemp), cp_grun_t(itemp) - cv_t(itemp), &
                      b0_grun_s(itemp) - b0_t(itemp)
       END DO
@@ -511,6 +519,7 @@ CALL destroy_ph_freq(ph_freq)
 DO i=1,degree
    CALL destroy_ph_freq(ph_grun(i))
 END DO
+
 DEALLOCATE(ph_grun)
 DEALLOCATE(grad)
 DEALLOCATE(x)
@@ -522,8 +531,7 @@ SUBROUTINE write_alpha_anis(ibrav, celldmf_t, alpha_t, temp, ntemp, filename)
 USE kinds, ONLY : DP
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ibrav, ntemp
-REAL(DP), INTENT(IN) :: celldmf_t(6,ntemp), alpha_t(6,ntemp), &
-                        temp(ntemp)
+REAL(DP), INTENT(IN) :: celldmf_t(6,ntemp), alpha_t(6,ntemp), temp(ntemp)
 CHARACTER(LEN=*), INTENT(IN) :: filename
 INTEGER :: itemp, iu_therm
 INTEGER :: find_free_unit
