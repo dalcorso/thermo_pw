@@ -55,7 +55,9 @@ MODULE quartic_surfaces
             compute_quartic_var, find_quartic_extremum, &
             find_quartic_quadratic_extremum, evaluate_quartic_quadratic, &
             evaluate_two_quartic, find_two_quartic_extremum, &
-            print_quartic_polynomial, introduce_quartic_fit
+            print_quartic_polynomial, introduce_quartic_fit, &
+            print_chisq_quartic, print_chisq_two_quartic,    &
+            print_chisq_quartic_quadratic
 
 CONTAINS
 
@@ -2161,5 +2163,73 @@ WRITE(stdout,'(5x,"Number of fitting data:",7x,i5,/)')  ndata
 
 RETURN
 END SUBROUTINE introduce_quartic_fit
+
+
+SUBROUTINE print_chisq_quartic(ndata, degree, nvar, x, f, coeff)
+USE kinds, ONLY : DP
+IMPLICIT NONE
+
+INTEGER  :: ndata, degree, nvar
+REAL(DP) :: x(degree, ndata), f(ndata), coeff(nvar)
+
+REAL(DP) :: chisq, perc, aux
+INTEGER  :: idata
+
+chisq=0.0_DP
+perc=0.0_DP
+DO idata=1,ndata
+   CALL evaluate_fit_quartic(degree,nvar,x(1,idata),aux,coeff)
+!     WRITE(stdout,'(3f19.12)') f(idata), aux, f(idata)-aux
+   chisq = chisq + (aux - f(idata))**2
+   IF (ABS(f(idata))>1.D-12) perc= perc + ABS((f(idata)-aux) / f(idata))
+ENDDO
+
+WRITE(stdout,'(5x,"chi square=",e18.5," relative error",e18.5,&
+                                     &" %",/)') chisq, perc / ndata
+RETURN
+END SUBROUTINE print_chisq_quartic
+
+SUBROUTINE print_chisq_two_quartic(ndata, degree, nvar, x, f, coeff, coeff1)
+
+USE kinds, ONLY : DP
+IMPLICIT NONE
+INTEGER  :: ndata, degree, nvar
+REAL(DP) :: x(degree, ndata), f(ndata), coeff(nvar), coeff1(nvar)
+
+REAL(DP) :: chisq, aux
+INTEGER  :: idata
+
+chisq=0.0_DP
+DO idata=1,ndata
+   CALL evaluate_two_quartic(degree,nvar,x(1,idata),aux,coeff,coeff1)
+!  WRITE(stdout,'(3f19.12)') f(idata), aux, f(idata)-aux
+   chisq = chisq + (aux - f(idata))**2
+ENDDO
+WRITE(stdout,'(5x,"chi square=",e18.5,/)') chisq
+
+RETURN
+END SUBROUTINE print_chisq_two_quartic
+
+SUBROUTINE print_chisq_quartic_quadratic(ndata, degree, nvar4, nvar, x, &
+                                                          f, coeff4, coeff)
+USE kinds, ONLY : DP
+IMPLICIT NONE
+INTEGER  :: ndata, degree, nvar4, nvar
+REAL(DP) :: x(degree, ndata), f(ndata), coeff4(nvar4), coeff(nvar)
+
+REAL(DP) :: chisq, aux
+INTEGER  :: idata
+
+chisq=0.0_DP
+DO idata=1,ndata
+   CALL evaluate_quartic_quadratic(degree, nvar4, nvar, x(1,idata), aux, &
+                                                        coeff4, coeff)
+!  WRITE(stdout,'(3f19.12)') f(idata), aux, f(idata)-aux
+   chisq = chisq + (aux - f(idata))**2
+ENDDO
+WRITE(stdout,'(5x,"chi square=",e18.5,/)') chisq
+
+RETURN
+END SUBROUTINE print_chisq_quartic_quadratic
 
 END MODULE quartic_surfaces

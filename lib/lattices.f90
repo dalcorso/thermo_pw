@@ -97,7 +97,7 @@ MODULE lattices
          compute_omega, conventional_ibrav, is_centered, lattice_name, &
          zone_border, same_star, is_compatible_group_ibrav,            &
          bravais_dir, print_bravais_description, crystal_parameters,   &
-         compress_celldm
+         compress_celldm, expand_celldm
 
 CONTAINS
 
@@ -1759,5 +1759,60 @@ END SELECT
 
 RETURN
 END SUBROUTINE compress_celldm
+
+
+SUBROUTINE expand_celldm(cm, x, degree, ibrav)
+!
+!  This routine receives a set of compressed crystallographic parameters 
+!  in the array x(degree) and transforms them in the celldm array
+!
+USE kinds, ONLY : DP
+
+IMPLICIT NONE
+INTEGER,  INTENT(IN)    :: ibrav, degree
+REAL(DP), INTENT(IN)    :: x(degree)
+REAL(DP), INTENT(INOUT) :: cm(6)
+
+cm=0.0_DP
+SELECT CASE (ibrav)
+   CASE(1,2,3) 
+      cm(1)=x(1)
+   CASE(4,5,6,7)
+      cm(1)=x(1)
+      IF (ibrav==5) THEN
+         cm(4)=x(2)
+      ELSE
+         cm(3)= x(2)
+      ENDIF
+   CASE(8,9,91,10,11)
+      cm(1)=x(1)
+      cm(2)=x(2)
+      cm(3)=x(3)
+   CASE(12,-12,13,-13) 
+      cm(1)=x(1)
+      cm(2)=x(2)
+      cm(3)=x(3)
+      IF (ibrav>0) THEN
+!
+!   c unique
+!
+         cm(4)=COS(x(4))
+      ELSE
+!
+!   b unique
+!
+         cm(5)=COS(x(4))
+      ENDIF
+   CASE DEFAULT
+      cm(1)=x(1)
+      cm(2)=x(2)
+      cm(3)=x(3)
+      cm(4)=COS(x(4))
+      cm(5)=COS(x(5))
+      cm(6)=COS(x(6))
+END SELECT
+
+RETURN
+END SUBROUTINE expand_celldm
 
 END MODULE lattices

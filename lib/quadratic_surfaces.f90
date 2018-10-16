@@ -59,7 +59,7 @@ MODULE quadratic_surfaces
             find_two_fit_extremum, &
             evaluate_fit_grad_quadratic, polifit, write_poli, &
             print_quadratic_polynomial, summarize_fitting_data, &
-            write_vector, introduce_quadratic_fit
+            write_vector, introduce_quadratic_fit, print_chisq_quadratic
 
 CONTAINS
 
@@ -697,5 +697,28 @@ INTEGER, INTENT(IN) :: degree, nvar, ndata
 RETURN
 END SUBROUTINE introduce_quadratic_fit
 
+SUBROUTINE print_chisq_quadratic(ndata, degree, nvar, x, f, coeff)
+
+USE kinds, ONLY : DP
+IMPLICIT NONE
+
+INTEGER :: ndata, degree, nvar
+REAL(DP) :: x(degree, ndata), f(ndata), coeff(nvar)
+
+REAL(DP) :: chisq, perc, aux
+INTEGER :: idata
+
+chisq=0.0_DP
+perc=0.0_DP
+DO idata=1,ndata
+   CALL evaluate_fit_quadratic(degree,nvar,x(1,idata),aux,coeff)
+!  WRITE(stdout,'(3f19.12)') f(idata), aux, f(idata)-aux
+   chisq = chisq + (aux - f(idata))**2
+   IF (ABS(f(idata))>1.D-12) perc= perc + ABS((f(idata)-aux) / f(idata))
+ENDDO
+WRITE(stdout,'(5x,"chi square=",e18.5," relative error",e18.5,&
+                                     &" %",/)') chisq, perc / ndata
+RETURN
+END SUBROUTINE print_chisq_quadratic
 
 END MODULE quadratic_surfaces
