@@ -46,7 +46,7 @@ CALL compute_beta(vmin_t, beta_t, temp, ntemp)
 
 CALL interpolate_cv(vmin_t, ph_cv, cv_t)
 IF (lelastic) THEN
-   CALL compute_cp(beta_t, vmin_t, b0_t, cv_t, cp_t, b0_s, gamma_t)
+   CALL compute_cp_bs_g(beta_t, vmin_t, b0_t, cv_t, cp_t, b0_s, gamma_t)
    CALL isostress_heat_capacity(vmin_t,el_cons_t,alpha_anis_t,temp, &
                                                          cpmcv_anis,ntemp)
 ENDIF
@@ -157,7 +157,7 @@ CALL compute_beta(vminf_t, betaf_t, temp, ntemp)
 
 IF (lelasticf) THEN
    CALL interpolate_cv(vminf_t, phf_cv, cvf_t)
-   CALL compute_cp(betaf_t, vminf_t, b0f_t, cvf_t, cpf_t, b0f_s, gammaf_t)
+   CALL compute_cp_bs_g(betaf_t, vminf_t, b0f_t, cvf_t, cpf_t, b0f_s, gammaf_t)
    CALL isostress_heat_capacity(vminf_t,el_consf_t,alphaf_anis_t,temp,&
                                                          cpmcvf_anis,ntemp)
 ENDIF
@@ -450,14 +450,14 @@ betab(:)=alpha_an_g(1,:)+alpha_an_g(2,:)+alpha_an_g(3,:)
 !  computes the other anharmonic quantities
 !
 IF (ltherm_freq) THEN
-   CALL compute_cp(betab, vminf_t, b0f_t, cvf_t, cp_grun_t, b0_grun_s, &
+   CALL compute_cp_bs_g(betab, vminf_t, b0f_t, cvf_t, cp_grun_t, b0_grun_s, &
                                                                grun_gamma_t)
 ELSEIF (ltherm_dos) THEN
-   CALL compute_cp(betab, vmin_t, b0_t, cv_t, cp_grun_t, b0_grun_s, &
+   CALL compute_cp_bs_g(betab, vmin_t, b0_t, cv_t, cp_grun_t, b0_grun_s, &
                                                                grun_gamma_t)
 ELSE
    CALL interpolate_cv(vmin_t, phf_cv, cv_t)
-   CALL compute_cp(betab, vmin_t, b0_t, cv_t, cp_grun_t, &
+   CALL compute_cp_bs_g(betab, vmin_t, b0_t, cv_t, cp_grun_t, &
                                                  b0_grun_s, grun_gamma_t)
 END IF
 

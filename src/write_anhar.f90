@@ -26,7 +26,7 @@ CALL compute_beta(vmin_t, beta_t, temp, ntemp)
 alpha_t = beta_t / 3.0_DP
 
 CALL interpolate_cv(vmin_t, ph_cv, cv_t) 
-CALL compute_cp(beta_t, vmin_t, b0_t, cv_t, cp_t, b0_s, gamma_t)
+CALL compute_cp_bs_g(beta_t, vmin_t, b0_t, cv_t, cp_t, b0_s, gamma_t)
 !
 !   here we plot the quantities calculated from the phonon dos
 !
@@ -88,7 +88,7 @@ CALL compute_beta(vminf_t, betaf_t, temp, ntemp)
 alphaf_t = betaf_t / 3.0_DP
 
 CALL interpolate_cv(vminf_t, phf_cv, cvf_t) 
-CALL compute_cp(betaf_t, vminf_t, b0f_t, cvf_t, cpf_t, b0f_s, gammaf_t)
+CALL compute_cp_bs_g(betaf_t, vminf_t, b0f_t, cvf_t, cpf_t, b0f_s, gammaf_t)
 
 !
 !   here we plot the quantities calculated from the phonon dos
@@ -254,16 +254,16 @@ CALL mp_sum(betab, world_comm)
 !  computes the other anharmonic quantities
 !
 IF (ltherm_freq) THEN
-   CALL compute_cp(betab, vminf_t, b0f_t, cvf_t, cp_grun_t, &
+   CALL compute_cp_bs_g(betab, vminf_t, b0f_t, cvf_t, cp_grun_t, &
                                                    b0_grun_s, grun_gamma_t)
 ELSEIF (ltherm_dos) THEN
-   CALL compute_cp(betab, vmin_t, b0_t, cv_t, cp_grun_t, &
+   CALL compute_cp_bs_g(betab, vmin_t, b0_t, cv_t, cp_grun_t, &
                                                    b0_grun_s, grun_gamma_t)
 ELSE
    vmin_t(1:ntemp)=vmin
    b0_t(1:ntemp)=b0
    CALL interpolate_cv(vmin_t, phf_cv, cv_t)
-   CALL compute_cp(betab, vmin_t, b0_t, cv_t, cp_grun_t, &
+   CALL compute_cp_bs_g(betab, vmin_t, b0_t, cv_t, cp_grun_t, &
                                               b0_grun_s, grun_gamma_t)
 ENDIF
 
