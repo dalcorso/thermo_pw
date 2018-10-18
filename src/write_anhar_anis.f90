@@ -16,7 +16,6 @@ USE thermodynamics, ONLY : ph_cv, ph_b_fact
 USE anharmonic,     ONLY : alpha_anis_t, vmin_t, b0_t, celldm_t, beta_t, &
                            gamma_t, cv_t, cp_t, b0_s, cpmcv_anis, el_cons_t, &
                            free_e_min_t, bfact_t, lelastic
-USE control_grun,   ONLY : lb0_t
 USE initial_conf,   ONLY : ibrav_save
 USE control_elastic_constants, ONLY : el_cons_available, el_cons_t_available
 USE control_thermo, ONLY : with_eigen
@@ -128,7 +127,6 @@ USE ph_freq_anharmonic, ONLY : alphaf_anis_t, vminf_t, b0f_t, celldmf_t, &
                                cpmcvf_anis, el_consf_t, lelasticf, &
                                free_e_minf_t, bfactf_t
 USE elastic_constants, ONLY : el_con
-USE control_grun,   ONLY : lb0_t
 USE initial_conf,   ONLY : ibrav_save
 USE control_thermo, ONLY : with_eigen
 USE control_elastic_constants, ONLY : el_cons_available
@@ -228,15 +226,14 @@ END IF
 RETURN
 END SUBROUTINE write_ph_freq_anhar_anis
 
-SUBROUTINE write_grun_anharmonic_anis()
+SUBROUTINE write_grun_anhar_anis()
 USE kinds,          ONLY : DP
 USE constants,      ONLY : ry_kbar
 USE ions_base,      ONLY : nat
 USE cell_base,      ONLY : ibrav
 USE thermo_mod,     ONLY : ngeo
 USE temperature,    ONLY : ntemp, temp
-USE control_grun,   ONLY : lv0_t
-USE equilibrium_conf, ONLY : celldm0, omega0
+USE control_grun,   ONLY : vgrun_t, celldm_grun_t, b0_grun_t, cv_grun_t
 USE control_mur,    ONLY : vmin
 USE thermodynamics, ONLY : ph_cv
 USE ph_freq_thermodynamics, ONLY : ph_freq_save, phf_cv
@@ -247,7 +244,6 @@ USE grun_anharmonic, ONLY : alpha_an_g, grun_gamma_t, poly_grun, done_grun, &
 USE ph_freq_module, ONLY : thermal_expansion_ph, ph_freq_type,  &
                            destroy_ph_freq, init_ph_freq
 USE lattices,       ONLY : compress_celldm
-USE control_grun,   ONLY : lb0_t
 USE control_thermo, ONLY : ltherm_dos, ltherm_freq
 USE elastic_constants, ONLY :  el_compliances
 USE control_elastic_constants, ONLY : el_cons_available, el_cons_t_available
@@ -262,7 +258,7 @@ USE mp,             ONLY : mp_sum
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
 INTEGER :: itemp, iu_therm, i, nq, imode, iq, degree, nvar, nwork
-INTEGER :: itens, jtens, startq, lastq, nq_eff
+INTEGER :: itens, jtens, startq, lastq, nq_eff, iq_eff
 TYPE(ph_freq_type) :: ph_freq    ! the frequencies at the volumes at
                                  ! which the gruneisen parameters are 
                                  ! calculated
@@ -271,8 +267,7 @@ TYPE(ph_freq_type), ALLOCATABLE :: ph_grun(:)  ! the gruneisen parameters
                                  ! geometry corresponding to that temperature
 REAL(DP) :: cm(6), aux(6), alpha_aux(6), alpha(6), f, vm
 REAL(DP), ALLOCATABLE :: grad(:), x(:)
-INTEGER :: compute_nwork
-INTEGER :: find_free_unit
+INTEGER :: compute_nwork, find_free_unit
 
 done_grun=.FALSE.
 !
@@ -334,16 +329,9 @@ DO itemp = 1, ntemp
 !  Computes the volume at which the Gruneisen parameters and the frequencies
 !  are interpolated
 !
-   IF (lv0_t.AND.ltherm_freq) THEN
-      cm(:)=celldmf_t(:,itemp)
-      vm = vminf_t(itemp)
-   ELSEIF (lv0_t.AND.ltherm_dos) THEN
-      cm(:)=celldm_t(:,itemp)
-      vm = vmin_t(itemp)
-   ELSE
-      cm(:)=celldm0(:)
-      vm = omega0
-   END IF
+   cm(:)=celldm_grun_t(:,itemp)
+   vm = vmin_t(itemp)
+
    CALL compress_celldm(cm,x,degree,ibrav)
 !
 !  compute the frequencies and the gruneisen parameters from the interpolating 
@@ -353,19 +341,21 @@ DO itemp = 1, ntemp
    DO i=1,degree
       ph_grun(i)%nu= 0.0_DP
    END DO
+   iq_eff=0
    DO iq=startq, lastq
+      iq_eff=iq_eff+1
       DO imode=1,3*nat
          CALL evaluate_fit_quadratic(degree,nvar,x,f,poly_grun(1,imode,iq))
          CALL evaluate_fit_grad_quadratic(degree,nvar,x,grad,&
                                                      poly_grun(1,imode,iq))
-         ph_freq%nu(imode,iq) = f 
+         ph_freq%nu(imode,iq_eff) = f 
          IF (f > 0.0_DP ) THEN
             DO i=1,degree
-               ph_grun(i)%nu(imode,iq)=grad(i) / f
+               ph_grun(i)%nu(imode,iq_eff)=grad(i) / f
             END DO
          ELSE
             DO i=1,degree
-               ph_grun(i)%nu(imode,iq)=0.0_DP
+               ph_grun(i)%nu(imode,iq_eff)=0.0_DP
             END DO
          END IF
       END DO
@@ -384,42 +374,7 @@ DO itemp = 1, ntemp
 !  derivative with respect to strain. 
 !  NB: This is just the derivative of stress with respect to temperature.
 !
-   alpha(:)=0.0_DP
-   SELECT CASE(ibrav)
-       CASE(1,2,3)
-!
-!  cubic 
-!
-           alpha(1)=alpha_aux(1) * cm(1) / 3.0_DP              
-           alpha(2)=alpha_aux(1) * cm(1) / 3.0_DP            
-           alpha(3)=alpha_aux(1) * cm(1) / 3.0_DP            
-       CASE(4,6,7)
-!
-!  hexagonal or tetragonal
-!
-           alpha(1)=(alpha_aux(1) * cm(1) - alpha_aux(2) * cm(3) ) / 2.0_DP   
-           alpha(2)=alpha(1)             
-           alpha(3)=alpha_aux(2) * cm(3)             
-       CASE(5)
-!
-!  trigonal 
-!
-           alpha(3)=( 1.0_DP + 2.0_DP * cm(4) ) * ( alpha_aux(1) * cm(1) + &
-                      2.0_DP * ( 1.0_DP - cm(4) ) * alpha_aux(2) ) / 3.0_DP
-
-           alpha(1)=(alpha_aux(1) * cm(1) - alpha(3) ) / 2.0_DP   
-           alpha(2)=alpha(1)             
-       CASE(8,9,10,11)
-!
-!   orthorhombic case
-!
-           alpha(1)=alpha_aux(1) * cm(1) - alpha_aux(2) * cm(2) &
-                                         - alpha_aux(3) * cm(3)
-           alpha(2)=alpha_aux(2) * cm(2)             
-           alpha(3)=alpha_aux(3) * cm(3)             
-   CASE DEFAULT
-       CALL errore('write_grun_anharmonic_anis','ibrav not programmed',1)
-   END SELECT
+   CALL convert_ac_alpha(alpha_aux, alpha, cm, ibrav)
 !
 !  To get the thermal expansion we need to multiply by the elastic compliances
 !
@@ -442,24 +397,15 @@ END DO
 
 CALL mp_sum(alpha_an_g, world_comm)
 !
-!  here compute the volume thermal expansion as the trace of the thermal
-!  expansion tensor
+!  compute the volume thermal expansion as the trace of the thermal expansion 
+!  tensor
 !
 betab(:)=alpha_an_g(1,:)+alpha_an_g(2,:)+alpha_an_g(3,:)
 !
 !  computes the other anharmonic quantities
 !
-IF (ltherm_freq) THEN
-   CALL compute_cp_bs_g(betab, vminf_t, b0f_t, cvf_t, cp_grun_t, b0_grun_s, &
-                                                               grun_gamma_t)
-ELSEIF (ltherm_dos) THEN
-   CALL compute_cp_bs_g(betab, vmin_t, b0_t, cv_t, cp_grun_t, b0_grun_s, &
-                                                               grun_gamma_t)
-ELSE
-   CALL interpolate_cv(vmin_t, phf_cv, cv_t)
-   CALL compute_cp_bs_g(betab, vmin_t, b0_t, cv_t, cp_grun_t, &
-                                                 b0_grun_s, grun_gamma_t)
-END IF
+CALL compute_cp_bs_g(betab, vgrun_t, b0_grun_t, cv_grun_t, &
+                                      cp_grun_t, b0_grun_s, grun_gamma_t)
 
 IF (meta_ionode) THEN
 !
@@ -468,24 +414,8 @@ IF (meta_ionode) THEN
    filename='anhar_files/'//TRIM(flanhar)//'.celldm_grun'
    CALL add_pressure(filename)
 
-   IF (ltherm_freq) THEN
-      CALL write_alpha_anis(ibrav, celldmf_t, alpha_an_g, temp, ntemp, &
+   CALL write_alpha_anis(ibrav, celldm_grun_t, alpha_an_g, temp, ntemp, &
                                                                 filename )
-   ELSEIF (ltherm_dos) THEN
-      CALL write_alpha_anis(ibrav, celldm_t, alpha_an_g, temp, ntemp, &
-                                                                filename )
-   ELSE
-!
-!     here we plot the celldm that has been used to compute the thermal
-!     expansion, not the celldm that results from the thermal expansion.
-!
-      DO itemp=1,ntemp
-         celldm_t(:,itemp)=celldm0(:)
-      ENDDO
-      CALL write_alpha_anis(ibrav, celldm_t, alpha_an_g, temp, ntemp, &
-                                                                filename )
-      celldm_t=0.0_DP
-   ENDIF
 
    filename="anhar_files/"//TRIM(flanhar)//'.aux_grun'
    CALL add_pressure(filename)
@@ -497,19 +427,11 @@ IF (meta_ionode) THEN
    WRITE(iu_therm,'("#   T (K)     beta(T)    gamma(T)      &
               &   (C_p - C_v)(T)      (B_S - B_T) (T) (kbar) " )' )
 
-   IF (ltherm_freq) THEN
-      DO itemp = 2, ntemp-1
-         WRITE(iu_therm, '(5e16.8)') temp(itemp), betab(itemp)*1.D6,       &
-                     grun_gamma_t(itemp), cp_grun_t(itemp) - cvf_t(itemp), &
-                     b0_grun_s(itemp) - b0f_t(itemp)
-      END DO
-   ELSE
-      DO itemp = 2, ntemp-1
-         WRITE(iu_therm, '(5e16.8)') temp(itemp), betab(itemp)*1.D6,      &
-                     grun_gamma_t(itemp), cp_grun_t(itemp) - cv_t(itemp), &
-                     b0_grun_s(itemp) - b0_t(itemp)
-      END DO
-   END IF
+   DO itemp = 2, ntemp-1
+      WRITE(iu_therm, '(5e16.8)') temp(itemp), betab(itemp)*1.D6,       &
+             grun_gamma_t(itemp), cp_grun_t(itemp) - cv_grun_t(itemp), &
+             b0_grun_s(itemp) - b0_grun_t(itemp)
+   END DO
    CLOSE(iu_therm)
 END IF
 
@@ -525,7 +447,7 @@ DEALLOCATE(grad)
 DEALLOCATE(x)
 
 RETURN
-END SUBROUTINE write_grun_anharmonic_anis
+END SUBROUTINE write_grun_anhar_anis
 
 SUBROUTINE write_alpha_anis(ibrav, celldmf_t, alpha_t, temp, ntemp, filename)
 USE kinds, ONLY : DP
@@ -677,3 +599,55 @@ END SELECT
 
 RETURN
 END SUBROUTINE compute_alpha_anis
+
+SUBROUTINE convert_ac_alpha(alpha_aux, alpha, cm, ibrav)
+!
+!  this subroutine receives the thermal expansion calculated with the
+!  gruneisen parameters which are derivatives of the frequencies with 
+!  respect to the crystal parameters and transforms it into a thermal
+!  expansion tensor.
+!
+USE kinds, ONLY : DP
+IMPLICIT NONE
+
+INTEGER :: ibrav
+REAL(DP) :: alpha(6), alpha_aux(6), cm(6)
+
+alpha(:)=0.0_DP
+SELECT CASE(ibrav)
+   CASE(1,2,3)
+!
+!  cubic 
+!
+      alpha(1)=alpha_aux(1) * cm(1) / 3.0_DP              
+      alpha(2)=alpha_aux(1) * cm(1) / 3.0_DP            
+      alpha(3)=alpha_aux(1) * cm(1) / 3.0_DP            
+   CASE(4,6,7)
+!
+!  hexagonal or tetragonal
+!
+      alpha(1)=(alpha_aux(1) * cm(1) - alpha_aux(2) * cm(3) ) / 2.0_DP   
+      alpha(2)=alpha(1)             
+      alpha(3)=alpha_aux(2) * cm(3)             
+   CASE(5)
+!
+!  trigonal 
+!
+      alpha(3)=( 1.0_DP + 2.0_DP * cm(4) ) * ( alpha_aux(1) * cm(1) + &
+                 2.0_DP * ( 1.0_DP - cm(4) ) * alpha_aux(2) ) / 3.0_DP
+
+      alpha(1)=(alpha_aux(1)*cm(1) - alpha(3) ) / 2.0_DP   
+      alpha(2)=alpha(1)             
+   CASE(8,9,10,11)
+!
+!   orthorhombic case
+!
+      alpha(1)=alpha_aux(1)*cm(1) - alpha_aux(2)*cm(2) - alpha_aux(3)*cm(3)
+      alpha(2)=alpha_aux(2)*cm(2)             
+      alpha(3)=alpha_aux(3)*cm(3)             
+CASE DEFAULT
+   CALL errore('convert_ac_alpha','ibrav not programmed',1)
+END SELECT
+
+RETURN
+END SUBROUTINE convert_ac_alpha

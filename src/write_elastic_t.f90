@@ -13,15 +13,13 @@ SUBROUTINE write_elastic_t( )
 !
 USE kinds, ONLY : DP
 USE io_global, ONLY : stdout
-USE mp_images, ONLY : my_image_id, root_image
-USE thermo_mod, ONLY : tot_ngeo
 USE control_quartic_energy, ONLY :  nvar4, lquartic, lsolve
-USE quadratic_surfaces, ONLY : evaluate_fit_quadratic, fit_multi_quadratic, &
+USE quadratic_surfaces, ONLY : print_chisq_quadratic, fit_multi_quadratic, &
                              introduce_quadratic_fit, summarize_fitting_data, &
-                             print_quadratic_polynomial
-USE quartic_surfaces, ONLY : compute_quartic_var, evaluate_fit_quartic, &
+                             print_quadratic_polynomial, evaluate_fit_quadratic
+USE quartic_surfaces, ONLY : compute_quartic_var, print_chisq_quartic, &
                              fit_multi_quartic, introduce_quartic_fit, &
-                             print_quartic_polynomial
+                             print_quartic_polynomial, evaluate_fit_quartic
 USE control_elastic_constants, ONLY : el_con_geo, el_con_celldm_geo, &
                                       el_con_ibrav_geo, el_cons_available, &
                                       el_cons_t_available
@@ -45,10 +43,9 @@ CHARACTER(LEN=256) :: filelastic
 INTEGER :: igeo, ibrav, degree, nvar, ndata
 REAL(DP), ALLOCATABLE :: el_cons_coeff(:,:,:), x(:,:), f(:), xfit(:), &
                          el_cons_coeff4(:,:,:)
-REAL(DP) :: chisq, perc, aux
+REAL(DP) :: aux
 INTEGER :: iu_el_cons, i, j, idata, itemp, ios
-
-IF ( my_image_id /= root_image ) RETURN
+INTEGER :: compute_nwork
 
 IF (.NOT.lb0_t.AND.el_cons_available) THEN
    IF (.NOT. (ltherm_dos.OR.ltherm_freq)) THEN
@@ -72,7 +69,7 @@ IF (.NOT.el_cons_t_available) RETURN
 ibrav=el_con_ibrav_geo(1)
 CALL compute_degree(ibrav,degree,nvar)
 
-ndata=tot_ngeo
+ndata=compute_nwork()
 ALLOCATE(x(degree,ndata))
 ALLOCATE(f(ndata))
 ALLOCATE(el_cons_coeff(nvar,6,6))
@@ -101,18 +98,8 @@ DO i=1,6
          CALL fit_multi_quadratic(ndata,degree,nvar,x,f,el_cons_coeff(:,i,j))
          CALL print_quadratic_polynomial(degree, nvar, el_cons_coeff(:,i,j))
 
-         chisq=0.0_DP
-         perc=0.0_DP
-         DO idata=1,ndata
-            CALL evaluate_fit_quadratic(degree,nvar,x(1,idata),aux,&
-                                                   el_cons_coeff(:,i,j))
-            WRITE(stdout,'(3f19.12)') f(idata), aux, f(idata)-aux
-            chisq = chisq + (aux - f(idata))**2 
-            perc= perc + ABS((f(idata)-aux) / f(idata)) 
-         ENDDO
-         WRITE(stdout,'(5x,"chi square=",e18.5," relative error",e18.5,&
-                                     &" %",/)') chisq / ndata, perc / ndata
-
+         CALL print_chisq_quadratic(ndata, degree, nvar, x, f, &
+                                                        el_cons_coeff(:,i,j))
          IF (lquartic) THEN
 
             CALL introduce_quartic_fit(degree, nvar4, ndata)
@@ -122,19 +109,8 @@ DO i=1,6
             CALL print_quartic_polynomial(degree, nvar4, el_cons_coeff4(:,i,j))
        !    WRITE(stdout,'(/,7x,"Energy (1)    Fitted energy (2)   &
        !                                                   &DeltaE (1)-(2)")') 
-            chisq=0.0_DP
-            perc=0.0_DP
-            DO idata=1,ndata
-               CALL evaluate_fit_quartic(degree,nvar4,x(1,idata),aux,&
-                                                         el_cons_coeff4(:,i,j))
-!
-!              WRITE(stdout,'(2f10.4,2f19.12,e19.12)') x(1,idata), x(2,idata),
-!                                   f(idata), aux, f(idata)-aux
-               chisq = chisq + (aux - f(idata))**2
-               perc= perc + ABS((f(idata)-aux) / f(idata)) 
-            ENDDO
-            WRITE(stdout,'(5x,"chi square=",e18.5," relative error",e18.5,&
-                           & " %",/)') chisq / ndata, perc / ndata
+            CALL print_chisq_quartic(ndata, degree, nvar4, x, f, &
+                                                      el_cons_coeff4(:,i,j))
          ENDIF
       ENDIF
    ENDDO
@@ -213,8 +189,8 @@ SUBROUTINE write_el_cons_on_file(temp, ntemp, laue, ibrav, el_cons_t, &
                                                            b0_t, filename)
 
 USE kinds,     ONLY : DP
-USE io_global, ONLY : ionode, ionode_id, stdout
-USE mp_images, ONLY : intra_image_comm
+USE io_global, ONLY : meta_ionode, meta_ionode_id, stdout
+USE mp_world,  ONLY : world_comm
 USE mp,        ONLY : mp_bcast
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ntemp, laue, ibrav
@@ -225,14 +201,14 @@ INTEGER :: itemp, iu_el_cons, ios
 INTEGER :: find_free_unit
 
 iu_el_cons=find_free_unit()
-IF (ionode) &
+IF (meta_ionode) &
    OPEN(UNIT=iu_el_cons, FILE=TRIM(filename), FORM='formatted', &
                                        STATUS='UNKNOWN', ERR=30, IOSTAT=ios)
-30 CALL mp_bcast(ios, ionode_id, intra_image_comm)
+30 CALL mp_bcast(ios, meta_ionode_id, world_comm)
    CALL errore('write_el_cons_on_file','opening elastic constants (T) file',&
                                                              ABS(ios))
 
-IF (ionode) THEN
+IF (meta_ionode) THEN
    SELECT CASE (laue)
       CASE(29,32)
          WRITE(iu_el_cons,'("#",5x,"   T  ", 10x, " C_11 ", 9x, "  C_12 ",&

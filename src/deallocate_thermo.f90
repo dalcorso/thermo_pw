@@ -36,6 +36,7 @@ SUBROUTINE deallocate_thermo()
                                collect_info_save, geometry
   USE equilibrium_conf, ONLY : tau0, tau0_crys
   USE control_thermo,   ONLY : all_geometries_together
+  USE control_grun,     ONLY : vgrun_t, b0_grun_t, celldm_grun_t, cv_grun_t
   USE temperature,      ONLY : temp
 
   USE control_conv,     ONLY : ke, keden, nk_test, sigma_test
@@ -105,6 +106,10 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (betab) )           DEALLOCATE(betab) 
   IF ( ALLOCATED (alpha_an_g) )      DEALLOCATE(alpha_an_g) 
   IF ( ALLOCATED (poly_grun) )       DEALLOCATE(poly_grun) 
+  IF ( ALLOCATED (vgrun_t) )         DEALLOCATE(vgrun_t) 
+  IF ( ALLOCATED (b0_grun_t) )       DEALLOCATE(b0_grun_t) 
+  IF ( ALLOCATED (celldm_grun_t) )   DEALLOCATE(celldm_grun_t) 
+  IF ( ALLOCATED (cv_grun_t) )       DEALLOCATE(cv_grun_t) 
   IF ( ALLOCATED (cp_grun_t) )       DEALLOCATE(cp_grun_t) 
   IF ( ALLOCATED (b0_grun_s) )       DEALLOCATE(b0_grun_s) 
   IF ( ALLOCATED (grun_gamma_t) )    DEALLOCATE(grun_gamma_t) 

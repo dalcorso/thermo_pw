@@ -609,25 +609,42 @@ MODULE control_grun
 
   USE kinds, ONLY: DP
   SAVE
-
                                  
   REAL(DP) :: grunmin_input, &  ! minimum value for gruneisen plot
               grunmax_input     ! maximum value for gruneisen plot
-
+                                !
   REAL(DP) :: volume_ph         ! volume at which the phonon frequencies
-                                ! and the Gruneisen parameters are 
-                                ! interpolated
-  REAL(DP) :: celldm_ph(6)      ! cell parameters at which the phonon
-                                ! frequencies and the Gruneisen parameter
+                                ! and the Gruneisen parameters dispersions
                                 ! are interpolated.
-  REAL(DP) :: temp_ph           ! when volume_ph=0.0_DP we use the volume
-                                ! corresponding to this temperature
+                                ! 
+  REAL(DP) :: celldm_ph(6)      ! cell parameters at which the phonon
+                                ! frequencies and the Gruneisen parameters
+                                ! dispersions are interpolated.
+                                !
+  REAL(DP) :: temp_ph           ! when volume_ph=0.0_DP or celldm_ph=0.0_DP
+                                ! we use the volume or celldm at this 
+                                ! temperature
+                                !
   LOGICAL :: lv0_t,    &        ! if .TRUE. use the temperature dependent
-                                ! volume from free energy minimization
+                                ! volume for the calculation of anharmonic
+                                ! quantities from gruneisen parameters
              lb0_t              ! if .TRUE. use the temperature dependent
-                                ! bulk modulus from energy minimization
-
-
+                                ! bulk modulus for the calculation of 
+                                ! anharmonic quantities from gruneisen 
+                                ! parameters
+                                !
+  REAL(DP), ALLOCATABLE :: vgrun_t(:), &   ! temperature dependent volume for
+                                ! thermodynamic quantities with gruneisen 
+                                ! parameters 
+                           b0_grun_t(:), & ! temperature dependent bulk modulus
+                                ! for thermodynamic quantities with gruneisen
+                                ! parameters
+                           celldm_grun_t(:,:) ! temperature_dependent celldm
+                                ! for thermodynamic quantities with gruneisen
+                                ! parameters
+  REAL(DP), ALLOCATABLE :: cv_grun_t(:) ! the specific heat used for 
+                                ! thermodynamic quantities with gruneisen 
+                                ! parameters
 END MODULE control_grun
 
 MODULE initial_conf
@@ -748,9 +765,7 @@ MODULE control_quadratic_energy
   REAL(DP), ALLOCATABLE :: hessian_v(:,:), &   ! hessian eigenvectors
                            hessian_e(:),   &   ! hessian eigenvalues
                            x_pos_min(:),   &   ! coordinates of the minimum
-                           coeff(:),       &   ! coefficients of quadratic fit
-                           coeff_t(:,:)        ! coefficients at each
-                                               ! temperature
+                           coeff(:)            ! coefficients of quadratic fit
   LOGICAL :: show_fit            ! if .TRUE. show the countour plots of the
                                  ! fitted polynomial
 END MODULE control_quadratic_energy

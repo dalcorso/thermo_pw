@@ -1603,6 +1603,10 @@ lb0_t         : if .TRUE. the calculation of the thermal expansion with
                 otherwise the bulk modulus computed at T=0 K. For anisotropic
                 solids only lb0_t=.FALSE. is implemented.
                 Default: logical .TRUE.
+poly_order    : number of coefficients of the polynomial used to intepolate 
+                the frequencies (Used only when lmurn=.TRUE. otherwise it is 3).
+                It is the degree of the polynomial + 1.
+                Default: 5
 flpgrun       : file where the values of the Gruneisen parameters are written. 
                 Default: character(len=*) 'output_pgrun.dat'
 flgrun        : file where the Gruneisen parameters in a plotable form are

@@ -8,7 +8,7 @@
 SUBROUTINE write_anharmonic()
 !
 !   This routine writes on output the anharmonic quantities calculated
-!   at the volume that minimize the free energy (computed from phonon dos)
+!   at the volume that minimizes the free energy (computed from phonon dos)
 !
 USE kinds,          ONLY : DP
 USE temperature,    ONLY : ntemp, temp
@@ -55,7 +55,6 @@ filename="anhar_files/"//TRIM(flanhar)//'.heat'
 CALL add_pressure(filename)
 
 CALL write_heat_anharm(temp, cv_t, cp_t, ntemp, filename)
-
 !
 !   here the b factors
 !
@@ -66,7 +65,6 @@ IF (with_eigen) THEN
    CALL write_anharm_bfact(temp, bfact_t, ntemp, filename)
 END IF
 
-
 RETURN
 END SUBROUTINE write_anharmonic
 
@@ -76,8 +74,7 @@ USE temperature,    ONLY : ntemp, temp
 USE control_thermo, ONLY : with_eigen
 USE ph_freq_thermodynamics, ONLY : phf_cv, phf_b_fact
 USE ph_freq_anharmonic, ONLY : alphaf_t, betaf_t, gammaf_t, cpf_t, cvf_t, &
-                        b0f_s, free_e_minf_t, vminf_t, b0f_t, b01f_t, &
-                        bfactf_t
+                  b0f_s, free_e_minf_t, vminf_t, b0f_t, b01f_t, bfactf_t
 USE data_files,     ONLY : flanhar
 
 IMPLICIT NONE
@@ -151,7 +148,7 @@ USE grun_anharmonic, ONLY : betab, cp_grun_t, b0_grun_s, &
 USE ph_freq_module, ONLY : thermal_expansion_ph, ph_freq_type,  &
                            destroy_ph_freq, init_ph_freq
 USE freq_interpolate, ONLY : compute_polynomial, compute_polynomial_der
-USE control_grun,   ONLY : lv0_t, lb0_t
+USE control_grun,   ONLY : vgrun_t, b0_grun_t
 USE control_mur,    ONLY : vmin, b0
 USE control_thermo, ONLY : ltherm_dos, ltherm_freq
 USE control_dosq,   ONLY : nq1_d, nq2_d, nq3_d
@@ -191,19 +188,9 @@ ENDDO
 betab=0.0_DP
 DO itemp = 1, ntemp
 !
-!  Compute the volume at this temperature.
+!  Set the volume at this temperature.
 !
-   IF (lv0_t) THEN
-      IF (ltherm_freq) THEN
-         vm=vminf_t(itemp)
-      ELSEIF (ltherm_dos) THEN
-         vm=vmin_t(itemp)
-      ELSE
-         vm=vmin
-      ENDIF
-   ELSE
-      vm=vmin
-   ENDIF
+   vm=vgrun_t(itemp)
 !
 !  Use the fitting polynomials to find the frequencies and the gruneisen
 !  parameters at this volume.
@@ -237,17 +224,8 @@ DO itemp = 1, ntemp
 !
 !  divide by the bulk modulus
 !
-   IF (lb0_t) THEN
-      IF (ltherm_freq) THEN
-         betab(itemp)=betab(itemp) * ry_kbar / b0f_t(itemp)
-      ELSEIF(ltherm_dos) THEN 
-         betab(itemp)=betab(itemp) * ry_kbar / b0_t(itemp)
-      ELSE
-         betab(itemp)=betab(itemp) * ry_kbar / b0
-      ENDIF
-   ELSE
-      betab(itemp)=betab(itemp) * ry_kbar / b0
-   ENDIF
+   betab(itemp)=betab(itemp) * ry_kbar / b0_grun_t(itemp)
+
 END DO
 CALL mp_sum(betab, world_comm)
 !
@@ -457,7 +435,7 @@ USE io_global, ONLY : meta_ionode
 IMPLICIT NONE
 INTEGER,  INTENT(IN) :: ntemp 
 REAL(DP), INTENT(IN) :: temp(ntemp), bfact_t(6,nat,ntemp)
-CHARACTER(LEN=*) :: filename
+CHARACTER(LEN=256) :: filename
 
 INTEGER :: na, ijpol
 INTEGER :: itemp, iu_therm
@@ -485,4 +463,47 @@ ENDIF
 RETURN
 END SUBROUTINE write_anharm_bfact
 
+SUBROUTINE set_volume_b0_cv_grun()
 
+USE control_grun,       ONLY : lv0_t, lb0_t, vgrun_t, celldm_grun_t, &
+                               b0_grun_t, cv_grun_t
+USE control_thermo,     ONLY : ltherm_dos, ltherm_freq
+USE temperature,        ONLY : ntemp
+USE anharmonic,         ONLY : vmin_t, celldm_t, b0_t, cv_t
+USE ph_freq_anharmonic, ONLY : vminf_t, celldmf_t, b0f_t, cvf_t
+USE equilibrium_conf,   ONLY : celldm0
+USE control_mur,        ONLY : vmin, b0
+
+IMPLICIT NONE
+
+INTEGER :: itemp
+
+DO itemp=1, ntemp
+   IF (lv0_t.AND.ltherm_freq) THEN
+      vgrun_t(itemp)=vminf_t(itemp)
+      celldm_grun_t(:,itemp)=celldmf_t(:,itemp)
+   ELSEIF (lv0_t.AND.ltherm_dos) THEN
+      vgrun_t(itemp)=vmin_t(itemp)
+      celldm_grun_t(:,itemp)=celldm_t(:,itemp)
+   ELSE
+      vgrun_t(itemp)=vmin
+      celldm_grun_t(:,itemp)=celldm0(:)
+   ENDIF
+
+   IF (lb0_t.AND.ltherm_freq) THEN
+      b0_grun_t(itemp)=b0f_t(itemp)
+   ELSEIF(lb0_t.AND.ltherm_dos) THEN
+      b0_grun_t(itemp)=b0_t(itemp)
+   ELSE
+      b0_grun_t(itemp)=b0
+   ENDIF
+
+   IF (ltherm_freq) THEN
+      cv_grun_t(itemp)= cvf_t(itemp)
+   ELSEIF(ltherm_dos) THEN
+      cv_grun_t(itemp)= cv_t(itemp)
+   ENDIF
+ENDDO
+
+RETURN
+END SUBROUTINE set_volume_b0_cv_grun
