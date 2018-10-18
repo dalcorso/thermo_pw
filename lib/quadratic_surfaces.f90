@@ -588,33 +588,33 @@ REAL(DP), INTENT(IN) :: coeff(nvar)
 
 
   WRITE(stdout,'(/,5x,"Quadratic polynomial:")') 
-  WRITE(stdout,'(5x,f13.7,"         +",f13.7," x1       +",f13.7," x1^2")') &
+  WRITE(stdout,'(5x,e15.7,"         +",e15.7," x1       +",e15.7," x1^2")') &
                                      coeff(1), coeff(2), coeff(3)
   IF (degree>1) THEN
-     WRITE(stdout,'(4x,"+",f13.7," x2      +",f13.7," x2^2     +",f13.7,&
+     WRITE(stdout,'(4x,"+",e15.7," x2      +",e15.7," x2^2     +",e15.7,&
                          &" x1*x2")') coeff(4), coeff(5), coeff(6)
   ENDIF
 
   IF (degree>2) THEN
-     WRITE(stdout,'(4x,"+",f13.7," x3 +",f13.7," x3^2 +",f13.7," x1*x3 +&
-              &",f13.7," x2*x3")') coeff(7), coeff(8), coeff(9), coeff(10)
+     WRITE(stdout,'(4x,"+",e15.7," x3 +",e15.7," x3^2 +",e15.7," x1*x3 +&
+              &",e15.7," x2*x3")') coeff(7), coeff(8), coeff(9), coeff(10)
   ENDIF
 
   IF (degree>3) THEN
-     WRITE(stdout,'(4x,"+",f13.7," x4 +",f13.7," x4^2 +",f13.7," x1*x4 +&
-              &",f13.7," x2*x4",f13.7," x3*x4")') coeff(11), coeff(12), &
+     WRITE(stdout,'(4x,"+",e15.7," x4 +",e15.7," x4^2 +",e15.7," x1*x4 +&
+              &",e15.7," x2*x4",e15.7," x3*x4")') coeff(11), coeff(12), &
                                        coeff(13), coeff(14), coeff(15)
   ENDIF
 
   IF (degree>4) THEN
-     WRITE(stdout,'(4x,"+",f13.7," x5 +",f13.7," x5^2 +",f13.7," x1*x5 +&
-              &",f13.7," x2*x5",f13.7," x3*x5", f13.7, " x4*x5")') &
+     WRITE(stdout,'(4x,"+",e15.7," x5 +",e15.7," x5^2 +",e15.7," x1*x5 +&
+              &",e15.7," x2*x5",e15.7," x3*x5",e15.7, " x4*x5")') &
               coeff(16), coeff(17), coeff(18), coeff(19), coeff(20), coeff(21)
   ENDIF
   IF (degree>5) THEN
-     WRITE(stdout,'(f13.7," x6 +",f13.7," x6^2 +",f13.7," x1*x6 +&
-              &",f13.7," x2*x6",f13.7," x3*x6", f13.7, " x4*x6",&
-              &f13.7," x5*x6")') coeff(22), coeff(23), coeff(24), &
+     WRITE(stdout,'(e15.7," x6 +",e15.7," x6^2 +",e15.7," x1*x6 +&
+              &",e15.7," x2*x6",e15.7," x3*x6",e15.7, " x4*x6",&
+              &e15.7," x5*x6")') coeff(22), coeff(23), coeff(24), &
                                  coeff(25), coeff(26), coeff(27), coeff(28)
   ENDIF
 
