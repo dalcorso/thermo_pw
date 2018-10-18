@@ -27,6 +27,7 @@ USE control_quartic_energy, ONLY : lquartic, lsolve
 USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_fit_extremum
 USE quartic_surfaces, ONLY : fit_multi_quartic, compute_quartic_var, &
                              find_quartic_extremum
+USE lattices,         ONLY : compress_celldm, expand_celldm
 USE mp_images,        ONLY : root_image, my_image_id
 USE io_global,        ONLY : ionode
 
@@ -75,19 +76,19 @@ DO ipress=1, npress
    p(ipress) = press_min + ( ipress - 1 ) * deltap
    DO idata=1, ndata
      f(idata)=energy_geo(idata) + p(ipress) * omega_geo(idata)
+     CALL compress_celldm(celldm_geo(1,idata), x(1,idata), degree, ibrav)
    END DO
-   CALL set_x_from_celldm(ibrav, degree, ndata, x, celldm_geo)
    CALL fit_multi_quadratic(ndata,degree,nvar,x,f,coeff)
    CALL find_fit_extremum(degree,nvar,x_pos_min,ymin,coeff)
    IF (lquartic) THEN
       CALL fit_multi_quartic(ndata,degree,nvar4,lsolve,x,f,coeff4)
       x_min_4=x_pos_min
       CALL find_quartic_extremum(degree,nvar4,x_min_4,ymin4,coeff4)
-      CALL set_celldm_from_xmin(ibrav, degree, x_min_4, celldmp(1,ipress))
+      CALL expand_celldm(celldmp(1,ipress), x_min_4, degree, ibrav)
       omega(ipress)=compute_omega_geo(ibrav,celldmp(1,ipress))
       e(ipress)=ymin4 - p(ipress) * omega(ipress)
    ELSE
-      CALL set_celldm_from_xmin(ibrav, degree, x_pos_min, celldmp(1,ipress))
+      CALL expand_celldm(celldmp(1,ipress), x_pos_min, degree, ibrav)
       omega(ipress)=compute_omega_geo(ibrav,celldmp(1,ipress))
       e(ipress) = ymin - p(ipress) * omega(ipress)
    ENDIF
