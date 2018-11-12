@@ -56,6 +56,7 @@
 \section{{\color{coral}Introduction}}
 These notes describe the thermodynamics of crystals implemented in \tpw. 
 
+\newpage
 \section{\color{coral}People}
 These notes have been written by Andrea Dal Corso (SISSA - Trieste). \\
 Disclaimer: I am not an expert of crystal thermodynamics. 
@@ -66,6 +67,7 @@ simply, please let me know, I would like to learn more.
 You can contact me directly: \texttt{dalcorso@sissa.it} or send an
 e-mail to the \texttt{thermo\_pw-forum} mailing list.
 
+\newpage
 \section{\color{coral}Overview}
 The properties of a solid addressed by \tpw\ are described by the thermodynamic
 theory of the elastic solid. In this theory a solid is characterized by an
@@ -400,12 +402,14 @@ $\alpha_{i,j}=\delta_{i,j}+u_{i,j}$ where $u_{i,j}= {\partial u_i \over
 \partial X_j}$ are the displacement gradients and 
 ${\bf x}_i = \alpha_{i,j} {\bf X}_j$. With our definition $\epsilon_{j,k}$
 corresponds to the symmetrized tensor $\epsilon_{j,k}={1\over 2} ( u_{j,k} +
-u_{k,j})$. Notice that $\epsilon_{j,k}$ are not the Lagrangian strains
-$\eta_{j,k}={1\over 2} ( u_{j,k} + u_{k,j} + \sum_l u_{l,j}u_{l,k})$, but 
-differ for terms quadratic in $u_{i,j}$. 
+u_{k,j})$. $\epsilon_{j,k}$ do not coincide with the Lagrangian strains
+$\eta_{j,k}={1\over 2} ( u_{j,k} + u_{k,j} + \sum_l u_{l,j}u_{l,k})$ but 
+differ only for terms quadratic in $u_{i,j}$. As the Lagrangian strains, 
+$\epsilon_{j,k}$ do not contain any rotation and to leading order can 
+be identified with $\eta_{j,k}$.
 
 In general, a strain changes both the size 
-and the shape of the unit cell possibly changing the Bravais lattice. \\
+and the shape of the unit cell and might change the Bravais lattice. \\
 In this section we consider some strains of interest for our applications: 
 \begin{equation}
 \epsilon_A=\left( \begin{array}{ccc}
@@ -2828,14 +2832,15 @@ of the volume and of the compliances.
 \section{\color{coral}Average Gr\"uneisen parameter}
 
 The product of the thermal expansion coefficient $\beta$, the bulk modulus
-$B_T$, and the volume of unit cell $V$, divided by the constant volume
+$B_T$, and the volume of unit cell $V$, divided by the isochoric
 heat capacity $C_V$ is the average Gr\"uneisen parameter $\gamma$
 that we can calculate as:
 \begin{equation}
 \gamma = {V B_T \beta \over C_V},
 \end{equation}
 and this can be calculated even for anisotropic solids if we have
-calculated the bulk modulus as written above.
+calculated the bulk modulus as written above and $C_V$ as discussed in
+the next section.
 
 For anisotropic solids we can generalize this concept by introducing
 the thermal stresses, as products of the elastic constants and the
@@ -2851,13 +2856,32 @@ parameters:
 \end{equation}
 
 \newpage
-\section{\color{coral}Constant stress heat capacity}
+\section{\color{coral}Constant stress, isobaric, and isochoric 
+heat capacities}
 
 The difference between the heat capacity calculated at constant stress
 and at constant strain is given by:
 \begin{equation}
-C^\sigma - C^\epsilon = - T V \sum_{ij} \alpha_{ij} b_{ij}.
+C_\sigma - C_\epsilon = - T V \sum_{ij} \alpha_{ij} b_{ij}.
 \end{equation}
+
+Since a uniform pressure can be identified with a constant stress, $C_\sigma$
+is also the measured isobaric heat capacity ($C_P=C_\sigma$).
+
+The difference between the isobaric and the isochoric heat capacities 
+is given by:
+\begin{equation}
+C_P - C_V = T V \beta^2 B_T.
+\end{equation}
+
+The difference between these two equations gives the difference between
+constant strain and isochoric heat capacities:
+
+\begin{equation}
+C_\epsilon - C_V =  T V \left( \sum_{ij} \alpha_{ij} b_{ij} + \beta^2 B_T
+\right),
+\end{equation}
+which vanishes for cubic crystals.
 
 \newpage
 \section{\color{coral}Adiabatic quantities}
