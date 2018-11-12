@@ -298,4 +298,12 @@ space group identification is not implemented but no check is done in versions
 up to 0.9.0. Please make the same changes as commit a68e6cb of 18 January 2018.
 If you find this error, you are using ibrav/=0, and your system is collinear,
 please send me your input.
-
+<br><br>
+17. <code>what='scf_disp'</code> and partial phonon computations with
+<code>start_q</code>, <code>last_q</code> or <code>start_irr</code> 
+<code>last_irr</code> gives strange error messages.
+<br>
+The option <code>what='scf_disp'</code> requires all the dynamical matrices
+files in the <code>dynamical_matrices</code> directory. Use 
+<code>what='scf_ph'</code> until you collect all the dynamical matrices
+and do a final run with <code>what='scf_disp'</code>.
