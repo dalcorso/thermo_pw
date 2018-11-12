@@ -18,7 +18,7 @@ USE elastic_constants, ONLY : print_elastic_constants,                     &
                               compute_elastic_constants, epsilon_geo,      &
                               sigma_geo, el_con, el_compliances,           &
                               compute_elastic_compliances,                 &
-                              print_elastic_compliances, read_elastic,     &
+                              print_elastic_compliances,                   &
                               write_elastic, print_macro_elasticity,       &
                               compute_elastic_constants_ene,               &
                               print_sound_velocities
@@ -39,10 +39,8 @@ INTEGER, INTENT(IN) :: nwork, igeom
 REAL(DP) :: poisson, bulkm
 REAL(DP), ALLOCATABLE :: sigma_geo_aux(:,:,:)
 INTEGER :: iwork
-LOGICAL  :: exst
 CHARACTER(LEN=6)    :: int_to_char
 CHARACTER(LEN=256)  :: filelastic
-INTEGER :: ipol, jpol
 !
 !  the elastic constants are calculated here
 !

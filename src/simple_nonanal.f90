@@ -35,7 +35,7 @@ SUBROUTINE simple_nonanal(nat, epsil, q, zeu, omega, dyn )
  !
  IF (qeq < 1.d-8) THEN
     WRITE(stdout,'(5x,"A direction for q was not specified:", &
-      &          "TO-LO splitting will be absent")')
+      &          " TO-LO splitting will be absent")')
     RETURN
  END IF
  !
