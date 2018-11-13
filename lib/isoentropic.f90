@@ -77,11 +77,13 @@ REAL(DP), INTENT(IN) :: volume(ntemp), b0_t(ntemp), beta_t(ntemp), &
 REAL(DP), INTENT(INOUT) :: bsmbt(ntemp)
 
 INTEGER :: itemp
+REAL(DP) :: aux
 
 bsmbt=0.0_DP
 DO itemp=2,ntemp-1
-   bsmbt(itemp) =  temp(itemp) * volume(itemp) * beta_t(itemp)**2 * &
-                   b0_t(itemp)**2 / cp_t(itemp) / ry_kbar
+   aux = temp(itemp) * volume(itemp) * beta_t(itemp)**2 * b0_t(itemp) &
+                                               / cp_t(itemp) / ry_kbar
+   bsmbt(itemp) =  b0_t(itemp) * aux / ( 1.0_DP - aux )
 END DO
 
 RETURN
