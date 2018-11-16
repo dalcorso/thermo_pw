@@ -46,11 +46,13 @@ find_symmetry.o \
 find_band_sym_proj.o \
 find_mode_sym_proj.o \
 fit_frequencies.o \
-freq_interpolate.o \
 generate_k_along_lines_kz.o \
 generalized_phdos.o \
 initialize_thermo_work.o \
+interpolate_bfact.o \
 interpolate_cv.o \
+interpolate_el_cons.o \
+interpolate_freq.o \
 io_bands.o \
 initialize_ph_geometry.o \
 local_dos1d_so.o \
@@ -89,7 +91,6 @@ print_polarization.o \
 proj_band_structure.o \
 q2r_sub.o \
 quadratic_fit.o \
-quasi_harm_bfact.o \
 readmodes.o \
 read_state_densities.o \
 run_thermo_asyncronously.o \

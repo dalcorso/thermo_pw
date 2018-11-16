@@ -7,12 +7,12 @@
 !
 SUBROUTINE plot_anhar_anis()
 !
-!  This is a driver to plot the quantities written inside flanhar for the
-!  case of anisotropic systems. Presently plots celldm (one parameter &
-!  per plot), the thermal expansion tensor !  components (all in the same 
-!  plot), the volume, and the volume thermal expansion as a function 
-!  of temperature.
-!  
+!  This is a driver to plot the quantities written inside flanhar,
+!  flanhar//'_ph', flanhar//'.celldm', flanhar//'.celldm_ph', 
+!  flanhar//'.bulk_mod', flanhar//'.bulk_mod_ph', 
+!  flanhar//'.heat', flanhar//'.heat_ph', and flanhar//'.aux_grun'.
+!  flanhar//'.heat_anis', flanhar//'.heat_anis_ph', flanhar//'.heat_anis_grun'
+!  flanhar//'.gamma', flanhar//'.gamma_ph', flanhar//'.gamma_grun'
 !
 USE kinds,           ONLY : DP
 USE control_gnuplot, ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
@@ -27,7 +27,6 @@ USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
                             gnuplot_set_fact
 USE data_files,  ONLY : flanhar
 USE grun_anharmonic, ONLY : done_grun
-USE control_grun,  ONLY : lb0_t
 USE initial_conf,  ONLY : ibrav_save
 USE control_thermo,  ONLY : ltherm_dos, ltherm_freq, with_eigen
 USE control_elastic_constants, ONLY : el_cons_t_available
@@ -41,14 +40,18 @@ USE io_global,       ONLY : ionode
 IMPLICIT NONE
 
 CHARACTER(LEN=256) :: gnu_filename, filename, filename1, filename2, &
-                      filename3, filename4, filename7, filename8,   &
-                      filename9, filename_bulk, filename_bulk_ph,   &
-                      filename_heat, filename_heat_ph, filenameps
-LOGICAL :: lgrun
+                      filename3, filename4, filename_aux_grun,    &
+                      filename_bulk, filename_bulk_ph,   &
+                      filename_heat, filename_heat_ph, filename_heat_anis,  &
+                      filename_heat_anis_ph, filename_heat_anis_grun,       &
+                      filename_gamma, filename_gamma_ph, filename_gamma_grun, &
+                      filenameps
 INTEGER :: ierr, system
+LOGICAL :: isoent_avail
 
 IF ( my_image_id /= root_image ) RETURN
 
+isoent_avail=lelastic.OR.lelasticf
 gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_anhar'
 CALL add_pressure(gnu_filename)
 
@@ -83,16 +86,25 @@ filename_heat='anhar_files/'//TRIM(flanhar)//'.heat'
 CALL add_pressure(filename_heat)
 filename_heat_ph='anhar_files/'//TRIM(flanhar)//'.heat_ph'
 CALL add_pressure(filename_heat_ph)
-filename7='anhar_files/'//TRIM(flanhar)//'.aux_grun'
-CALL add_pressure(filename7)
-filename8='anhar_files/'//TRIM(flanhar)//'.anis'
-CALL add_pressure(filename8)
-filename9='anhar_files/'//TRIM(flanhar)//'.anis_ph'
-CALL add_pressure(filename9)
-
-lgrun = lelastic .OR. lelasticf
+filename_aux_grun='anhar_files/'//TRIM(flanhar)//'.aux_grun'
+CALL add_pressure(filename_aux_grun)
+filename_heat_anis='anhar_files/'//TRIM(flanhar)//'.heat_anis'
+CALL add_pressure(filename_heat_anis)
+filename_heat_anis_ph='anhar_files/'//TRIM(flanhar)//'.heat_anis_ph'
+CALL add_pressure(filename_heat_anis_ph)
+filename_heat_anis_grun='anhar_files/'//TRIM(flanhar)//'.heat_anis_grun'
+CALL add_pressure(filename_heat_anis_grun)
+filename_gamma='anhar_files/'//TRIM(flanhar)//'.gamma'
+CALL add_pressure(filename_gamma)
+filename_gamma_ph='anhar_files/'//TRIM(flanhar)//'.gamma_ph'
+CALL add_pressure(filename_gamma_ph)
+filename_gamma_grun='anhar_files/'//TRIM(flanhar)//'.gamma_grun'
+CALL add_pressure(filename_gamma_grun)
 
 CALL gnuplot_xlabel('T (K)',.FALSE.) 
+!
+!  Part 1: celldm parameters
+!
 CALL gnuplot_set_fact(1.0_DP,.FALSE.)
 CALL gnuplot_ylabel('a (a.u.)',.FALSE.) 
 IF (ltherm_dos) &
@@ -114,7 +126,9 @@ IF (ibrav_save==4.OR.ibrav_save==5.OR.ibrav_save==6.OR.ibrav_save==7) THEN
    IF (ltherm_freq) &
    CALL gnuplot_write_file_mul_data(filename3,1,3,'color_blue',&
                                .NOT.ltherm_dos, .TRUE.,.FALSE.)
-ELSEIF (ibrav_save==8.OR.ibrav_save==9.OR.ibrav_save==10.OR.ibrav_save==11) THEN
+ELSEIF (ibrav_save==8.OR.ibrav_save==9.OR.ibrav_save==10.OR.ibrav_save==11&
+        .OR.ibrav_save==12.OR.ibrav_save==-12.OR.ibrav_save==13.OR. &
+            ibrav_save==-13.OR.ibrav_save==14) THEN
    CALL gnuplot_ylabel('b/a ',.FALSE.) 
    IF (ltherm_dos) &
       CALL gnuplot_write_file_mul_data(filename2,1,3,'color_red',.TRUE., &
@@ -129,7 +143,49 @@ ELSEIF (ibrav_save==8.OR.ibrav_save==9.OR.ibrav_save==10.OR.ibrav_save==11) THEN
    IF (ltherm_freq) &
       CALL gnuplot_write_file_mul_data(filename3,1,4,'color_blue', &
                                              .NOT.ltherm_dos, .TRUE.,.FALSE.)
+   IF (ibrav_save==12.OR.ibrav_save==13) THEN
+      CALL gnuplot_ylabel('cos({/Symbol a})',.FALSE.) 
+      IF (ltherm_dos) &
+         CALL gnuplot_write_file_mul_data(filename2,1,5,'color_red',.TRUE., &
+                                             .NOT.ltherm_freq,.FALSE.)
+      IF (ltherm_freq) &
+         CALL gnuplot_write_file_mul_data(filename3,1,5,'color_blue', &
+                                             .NOT.ltherm_dos, .TRUE.,.FALSE.)
+   ELSEIF (ibrav_save==-12.OR.ibrav_save==-13) THEN
+      CALL gnuplot_ylabel('cos({/Symbol b})',.FALSE.) 
+      IF (ltherm_dos) &
+         CALL gnuplot_write_file_mul_data(filename2,1,5,'color_red',.TRUE., &
+                                             .NOT.ltherm_freq,.FALSE.)
+      IF (ltherm_freq) &
+         CALL gnuplot_write_file_mul_data(filename3,1,5,'color_blue', &
+                                             .NOT.ltherm_dos, .TRUE.,.FALSE.)
+   ELSEIF (ibrav_save==14) THEN
+      CALL gnuplot_ylabel('cos({/Symbol a})',.FALSE.) 
+      IF (ltherm_dos) &
+         CALL gnuplot_write_file_mul_data(filename2,1,5,'color_red',.TRUE., &
+                                             .NOT.ltherm_freq,.FALSE.)
+      IF (ltherm_freq) &
+         CALL gnuplot_write_file_mul_data(filename3,1,5,'color_blue', &
+                                             .NOT.ltherm_dos, .TRUE.,.FALSE.)
+      CALL gnuplot_ylabel('cos({/Symbol b})',.FALSE.) 
+      IF (ltherm_dos) &
+         CALL gnuplot_write_file_mul_data(filename2,1,6,'color_red',.TRUE., &
+                                             .NOT.ltherm_freq,.FALSE.)
+      IF (ltherm_freq) &
+         CALL gnuplot_write_file_mul_data(filename3,1,6,'color_blue', &
+                                             .NOT.ltherm_dos, .TRUE.,.FALSE.)
+      CALL gnuplot_ylabel('cos({/Symbol c})',.FALSE.) 
+      IF (ltherm_dos) &
+         CALL gnuplot_write_file_mul_data(filename2,1,7,'color_red',.TRUE., &
+                                             .NOT.ltherm_freq,.FALSE.)
+      IF (ltherm_freq) &
+         CALL gnuplot_write_file_mul_data(filename3,1,7,'color_blue', &
+                                             .NOT.ltherm_dos, .TRUE.,.FALSE.)
+   ENDIF
 ENDIF
+!
+!  Part 2: Volume
+!
 CALL gnuplot_ylabel('Volume ((a.u.)^3)',.FALSE.) 
 IF (ltherm_dos) &
    CALL gnuplot_write_file_mul_data(filename,1,2,'color_red',.TRUE., &
@@ -137,7 +193,9 @@ IF (ltherm_dos) &
 IF (ltherm_freq) &
    CALL gnuplot_write_file_mul_data(filename1,1,2,'color_blue',&
                                              .NOT.ltherm_dos, .TRUE., .FALSE.)
-
+!
+!  Part 3: Helmholtz (or Gibbs) free energy
+!
 IF (pressure_kb /= 0.0_DP) THEN
    CALL gnuplot_ylabel('Gibbs free energy (Ry)',.FALSE.) 
 ELSE
@@ -149,9 +207,10 @@ IF (ltherm_dos) &
 IF (ltherm_freq) &
    CALL gnuplot_write_file_mul_data(filename1,1,3,'color_blue',&
                                              .NOT.ltherm_dos, .TRUE., .FALSE.)
-
-
-CALL gnuplot_ylabel('Linear thermal expansion {/Symbol a} x 10^6 (K^{-1})',.FALSE.) 
+!
+!  Part 4: Thermal expansion
+!
+CALL gnuplot_ylabel('Thermal expansion {/Symbol a} x 10^6 (K^{-1})',.FALSE.) 
 IF (ibrav_save==1.OR.ibrav_save==2.OR.ibrav_save==3) THEN
    IF (done_grun) &
       CALL gnuplot_write_file_mul_data(filename4,1,3,'color_green',.TRUE., &
@@ -215,67 +274,117 @@ ELSEIF (ibrav_save==8.OR.ibrav_save==9.OR.ibrav_save==10.OR.ibrav_save==11) THEN
                                                .TRUE.,.FALSE.)
    ENDIF
 END IF
-
+!
+!  Part 5: Volume thermal expansion
+!
 CALL gnuplot_ylabel('Volume thermal expansion {/Symbol b} x 10^6 (K^{-1})',.FALSE.) 
 
-IF (ltherm_dos) THEN
+IF (ltherm_dos) &
    CALL gnuplot_write_file_mul_data(filename,1,4,'color_red',.TRUE., &
-                           .NOT.(ltherm_freq.OR.lgrun), .FALSE.)
-END IF
+                           .NOT.(ltherm_freq.OR.done_grun), .FALSE.)
+
 IF (ltherm_freq) &
    CALL gnuplot_write_file_mul_data(filename1,1,4,'color_blue', &
-                                    .NOT.ltherm_dos,.NOT.lgrun, .FALSE.)
+                                    .NOT.ltherm_dos,.NOT.done_grun, .FALSE.)
 
-IF (lgrun) THEN
-      CALL gnuplot_write_file_mul_data(filename7,1,2,'color_green', &
+IF (done_grun) &
+   CALL gnuplot_write_file_mul_data(filename_aux_grun,1,2,'color_green', &
                   .NOT.(ltherm_dos.OR.ltherm_freq),.TRUE., .FALSE.)
-
+!
+!  Part 6: C_e heat capacity
+!
+CALL gnuplot_set_fact(1313313.0_DP,.FALSE.)
+CALL gnuplot_ylabel('Heat capacity C_{/Symbol e} (J / K / N / mol)',.FALSE.)
+IF (ltherm_dos) &
+   CALL gnuplot_write_file_mul_data(filename_heat,1,2,'color_red',.TRUE.,&
+                                         .NOT.ltherm_freq,.FALSE.)
+IF (ltherm_freq) &
+   CALL gnuplot_write_file_mul_data(filename_heat_ph,1,2,'color_blue',&
+                                         .NOT.ltherm_dos,.TRUE.,.FALSE.)
+!
+!  Part 7: C_p Heat capacity
+!
+IF (isoent_avail) THEN
    CALL gnuplot_set_fact(1313313.0_DP,.FALSE.)
-   CALL gnuplot_ylabel('Heat capacity C_v (J / K / N / mol)',.FALSE.)
+   CALL gnuplot_ylabel('Heat capacity C_p (J / K / N / mol)',.FALSE.)
    IF (ltherm_dos) &
-      CALL gnuplot_write_file_mul_data(filename_heat,1,2,'color_red',.TRUE.,&
-                                            .NOT.ltherm_freq,.FALSE.)
+      CALL gnuplot_write_file_mul_data(filename_heat_anis,1,3,'color_red',  &
+                            .TRUE.,.NOT.(ltherm_freq.OR.done_grun),.FALSE.)
    IF (ltherm_freq) &
-      CALL gnuplot_write_file_mul_data(filename_heat_ph,1,2,'color_blue',&
-                                            .NOT.ltherm_dos,.TRUE.,.FALSE.)
-
+      CALL gnuplot_write_file_mul_data(filename_heat_anis,1,3,'color_blue', &
+                                 .NOT.ltherm_dos,.NOT.done_grun,.FALSE.)
+   IF (done_grun) &
+      CALL gnuplot_write_file_mul_data(filename_heat_anis_grun,1,3,         &
+             'color_green',.NOT.(ltherm_dos.OR.ltherm_freq), .TRUE.,.FALSE.)
+ENDIF
+!
+!  Part 8: C_p -C_e Heat capacity
+!
+IF (isoent_avail) THEN
    CALL gnuplot_set_fact(1313313.0_DP,.FALSE.)
-   CALL gnuplot_ylabel('C_p - C_v (J / K / N / mol)',.FALSE.)
+   CALL gnuplot_ylabel('C_{/Symbol s} - C_{/Symbol e} (J / K / N / mol)',&
+                                                                   .FALSE.)
+   IF (ltherm_dos) &
+      CALL gnuplot_write_file_mul_data(filename_heat_anis,1,2,'color_red',&
+                             .TRUE., .NOT.(ltherm_freq.OR.done_grun),.FALSE.)
+   IF (ltherm_freq) &
+      CALL gnuplot_write_file_mul_data(filename_heat_anis_ph,1,2,'color_blue',&
+                                      .NOT.ltherm_dos, .NOT.done_grun,.FALSE.)
+   IF (done_grun) &
+      CALL gnuplot_write_file_mul_data(filename_heat_anis_grun,1,2,&
+             'color_green',.NOT.(ltherm_dos.OR.ltherm_freq), .TRUE.,.FALSE.)
+ENDIF
+!
+!  Part 10: Difference C_V-C_e heat capacity
+!
+IF (isoent_avail) THEN
+   CALL gnuplot_set_fact(1313313.0_DP,.FALSE.)
+   CALL gnuplot_ylabel('C_{V} - C_{/Symbol e} (J / K / N / mol)',.FALSE.)
+   IF (ltherm_dos) &
+      CALL gnuplot_write_file_mul_data(filename_heat_anis,1,4,'color_red',&
+                              .TRUE., .NOT.(ltherm_freq.OR.done_grun),.FALSE.)
+   IF (ltherm_freq) &
+      CALL gnuplot_write_file_mul_data(filename_heat_anis_ph,1,4,'color_blue',&
+                                      .NOT.ltherm_dos, .NOT.done_grun,.FALSE.)
+   IF (done_grun) &
+      CALL gnuplot_write_file_mul_data(filename_heat_anis_grun,1,4,&
+             'color_green',.NOT.(ltherm_dos.OR.ltherm_freq), .TRUE.,.FALSE.)
+ENDIF
+!
+!  Part 10: Difference between isoentropic and isothermal bulk modulus
+!
+IF (isoent_avail) THEN
+   CALL gnuplot_set_fact(1._DP,.FALSE.)
+   CALL gnuplot_ylabel('B_S - B_T (kbar)',.FALSE.)
+   IF (ltherm_dos) &
+      CALL gnuplot_write_file_mul_data(filename_bulk,1,4,'color_red',.TRUE.,&
+                               .NOT.(ltherm_freq.OR.done_grun),.FALSE.)
+   IF (ltherm_freq) &
+      CALL gnuplot_write_file_mul_data(filename_bulk_ph,1,4,'color_blue',&
+                                  .NOT.ltherm_dos,.NOT.done_grun,.FALSE.)
 
-   IF (ltherm_dos) THEN
-      CALL gnuplot_write_file_mul_data(filename_heat,1,4,'color_red',.TRUE., &
-                                  .FALSE.,.FALSE.)
-      IF (lgrun) &
-      CALL gnuplot_write_file_mul_data(filename8,1,2,'color_gold',.FALSE., &
-                                  .FALSE.,.FALSE.)
-   ENDIF   
-   IF (ltherm_freq) THEN
-      CALL gnuplot_write_file_mul_data(filename_heat_ph,1,4,'color_blue',&
-                                  .NOT.ltherm_dos,.NOT.lgrun,.FALSE.)
-
-      IF (lgrun) &
-         CALL gnuplot_write_file_mul_data(filename9,1,2,'color_orange',&
-                                                .FALSE., .FALSE.,.FALSE.)
-
-   ENDIF
-   IF (lgrun) &
-      CALL gnuplot_write_file_mul_data(filename7,1,4,'color_green',&
-                    .NOT.(ltherm_dos.OR.ltherm_freq),.TRUE.,.FALSE.)
-
+   IF (done_grun) &
+      CALL gnuplot_write_file_mul_data(filename_aux_grun,1,4,'color_green', &
+                              .NOT.(ltherm_dos.OR.ltherm_freq),.TRUE.,.FALSE.)
+ENDIF
+!
+!  Part 11: Average gruneisen parameter
+!
+IF (isoent_avail) THEN
    CALL gnuplot_set_fact(1.0_DP,.FALSE.)
    CALL gnuplot_ylabel('Gr\374neisen parameter ({/Symbol g})',.FALSE.)
    CALL gnuplot_write_horizontal_line(0.0_DP, 2, 'front', 'color_black', &
                                                                   .FALSE.)
    IF (ltherm_dos) &
-      CALL gnuplot_write_file_mul_data(filename_bulk,1,2,'color_red',.TRUE.,&
-                                                        .FALSE.,.FALSE.)
+      CALL gnuplot_write_file_mul_data(filename_gamma,1,2,'color_red',.TRUE.,&
+                                .NOT.(done_grun.OR.ltherm_freq),.FALSE.)
    IF (ltherm_freq) &
-      CALL gnuplot_write_file_mul_data(filename_bulk_ph,1,2,'color_blue',&
-                                        .NOT.ltherm_dos,.NOT.lgrun,.FALSE.)
-
-      CALL gnuplot_write_file_mul_data(filename7,1,3,'color_green',&
+      CALL gnuplot_write_file_mul_data(filename_gamma_ph,1,2,'color_blue',&
+                                     .NOT.ltherm_dos,.NOT.done_grun,.FALSE.)
+   IF (done_grun) &
+      CALL gnuplot_write_file_mul_data(filename_gamma_grun,1,2,'color_green',&
                           .NOT.(ltherm_dos.OR.ltherm_freq),.TRUE.,.FALSE.)
-END IF
+ENDIF
 
 CALL gnuplot_end()
 

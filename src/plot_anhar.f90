@@ -8,8 +8,10 @@
 SUBROUTINE plot_anhar()
 !
 !  This is a driver to plot the quantities written inside flanhar,
-!  flanhar//'_ph', flanhar//'.aux', flanhar//'.aux_ph' and 
-!  flanhar//'.aux_grun'
+!  flanhar//'_ph', flanhar//'.bulk_mod', flanhar//'.bulk_mod_ph', 
+!  flanhar//'.dbulk_mod', flanhar//'.dbulk_mod_ph', flanhar//'.heat', 
+!  flanhar//'.heat_ph', flanhar//'.aux_grun', flanhar//'.gamma', 
+!  flanhar//'.gamma_ph', flanhar//'.gamma_grun'.
 !  
 !
 USE kinds,            ONLY : DP
@@ -32,10 +34,11 @@ USE io_global,        ONLY : ionode
 
 IMPLICIT NONE
 
-CHARACTER(LEN=256) :: gnu_filename, filename, filename0, filename3,  &
+CHARACTER(LEN=256) :: gnu_filename, filename, filename0, filename_aux_grun,  &
                       filename_bulk, filename_bulk_ph,               &
                       filename_dbulk, filename_dbulk_ph,             &
-                      filename_heat, filename_heat_ph 
+                      filename_heat, filename_heat_ph,               &
+                      filename_gamma, filename_gamma_ph, filename_gamma_grun 
 CHARACTER(LEN=8) :: float_to_char
 INTEGER :: ierr, system
 
@@ -57,12 +60,12 @@ ELSE
                                                                    flext ) 
 ENDIF
 
-filename="anhar_files/"//TRIM(flanhar)//'_ph'
-CALL add_pressure(filename)
 filename0="anhar_files/"//TRIM(flanhar)
 CALL add_pressure(filename0)
-filename3="anhar_files/"//TRIM(flanhar)//'.aux_grun'
-CALL add_pressure(filename3)
+filename="anhar_files/"//TRIM(flanhar)//'_ph'
+CALL add_pressure(filename)
+filename_aux_grun="anhar_files/"//TRIM(flanhar)//'.aux_grun'
+CALL add_pressure(filename_aux_grun)
 filename_bulk="anhar_files/"//TRIM(flanhar)//'.bulk_mod'
 CALL add_pressure(filename_bulk)
 filename_bulk_ph="anhar_files/"//TRIM(flanhar)//'.bulk_mod_ph'
@@ -75,7 +78,15 @@ filename_heat="anhar_files/"//TRIM(flanhar)//'.heat'
 CALL add_pressure(filename_heat)
 filename_heat_ph="anhar_files/"//TRIM(flanhar)//'.heat_ph'
 CALL add_pressure(filename_heat_ph)
-
+filename_gamma="anhar_files/"//TRIM(flanhar)//'.gamma'
+CALL add_pressure(filename_gamma)
+filename_gamma_ph="anhar_files/"//TRIM(flanhar)//'.gamma_ph'
+CALL add_pressure(filename_gamma_ph)
+filename_gamma_grun="anhar_files/"//TRIM(flanhar)//'.gamma_grun'
+CALL add_pressure(filename_gamma_grun)
+!
+!  Part 1: Volume
+!
 CALL gnuplot_xlabel('T (K)',.FALSE.) 
 CALL gnuplot_set_fact(1.0_DP,.FALSE.)
 CALL gnuplot_ylabel('Volume ((a.u.)^3)',.FALSE.) 
@@ -86,6 +97,9 @@ IF (ltherm_freq) &
    CALL gnuplot_write_file_mul_data(filename,1,2,'color_blue',&
                                         .NOT.ltherm_dos,.TRUE.,.FALSE.)
 
+!
+!  Part 2: Helmholtz (or Gibbs) free energy
+!
 CALL gnuplot_set_fact(1.0_DP,.FALSE.)
 
 IF (pressure_kb /= 0.0_DP) THEN
@@ -100,7 +114,9 @@ IF (ltherm_dos) &
 IF (ltherm_freq) &
    CALL gnuplot_write_file_mul_data(filename,1,3,'color_blue',&
                                         .NOT.ltherm_dos,.TRUE.,.FALSE.)
-
+!
+!  Part 3: bulk modulus
+!
 CALL gnuplot_set_fact(1.0_DP,.FALSE.)
 CALL gnuplot_ylabel('Bulk modulus (kbar)',.FALSE.) 
 
@@ -110,7 +126,9 @@ IF (ltherm_dos) &
 IF (ltherm_freq) &
    CALL gnuplot_write_file_mul_data(filename_bulk_ph,1,3,'color_blue',&
                                                 .NOT.ltherm_dos,.TRUE.,.FALSE.)
-
+!
+!  Part 4: pressure derivative of the bulk modulus
+!
 CALL gnuplot_set_fact(1.0_DP,.FALSE.)
 CALL gnuplot_ylabel('d B / d p',.FALSE.) 
 
@@ -120,7 +138,9 @@ IF (ltherm_dos) &
 IF (ltherm_freq) &
    CALL gnuplot_write_file_mul_data(filename_dbulk_ph,1,2,'color_blue',&
                                                .NOT.ltherm_dos,.TRUE.,.FALSE.)
-
+!
+!  Part 5: Volume thermal expansion
+!
 CALL gnuplot_set_fact(1.0_DP,.FALSE.)
 CALL gnuplot_ylabel('Thermal expansion ({/Symbol b} x 10^{6}) (K^{-1})',.FALSE.) 
 IF (ltherm_dos) &
@@ -130,16 +150,18 @@ IF (ltherm_freq) &
    CALL gnuplot_write_file_mul_data(filename,1,4,'color_blue',&
                                             .NOT.ltherm_dos,.FALSE.,.FALSE.)
 
-CALL gnuplot_write_file_mul_data(filename3,1,2,'color_green',&
+CALL gnuplot_write_file_mul_data(filename_aux_grun,1,2,'color_green',&
                                 .NOT.(ltherm_dos.OR.ltherm_freq),.TRUE.,.FALSE.)
 !
 !  put as a comment the possibility to plot also the experimental data
 !
-CALL gnuplot_write_file_mul_data(filename3,1,2,'color_green',&
+CALL gnuplot_write_file_mul_data(filename_aux_grun,1,2,'color_green',&
                                                .NOT.ltherm,.FALSE.,.TRUE.)
 CALL gnuplot_write_file_mul_point('anhar.exp',1,2,'color_red',.FALSE.,&
                                                             .TRUE.,.TRUE.)
-
+!
+!  Part 6: isochoric heat capacity
+!
 CALL gnuplot_set_fact(1313313.0_DP,.FALSE.)
 CALL gnuplot_ylabel('Heat capacity C_v (J / K / N / mol)',.FALSE.) 
 IF (ltherm_dos) &
@@ -148,37 +170,42 @@ IF (ltherm_dos) &
 IF (ltherm_freq) &
    CALL gnuplot_write_file_mul_data(filename_heat_ph,1,2,'color_blue',&
                                             .NOT.ltherm_dos,.TRUE.,.FALSE.)
-
+!
+!  Part 7: isobaric heat capacity
+!
 CALL gnuplot_set_fact(1313313.0_DP,.FALSE.)
 CALL gnuplot_ylabel('Heat capacity C_p (J / K / N / mol)',.FALSE.) 
 IF (ltherm_dos) &
-   CALL gnuplot_write_file_mul_data(filename_heat,1,3,'color_red',.TRUE.,&
+   CALL gnuplot_write_file_mul_data(filename_heat,1,4,'color_red',.TRUE.,&
                                           .NOT.ltherm_freq,.FALSE.)
-IF (ltherm_freq) THEN
-   CALL gnuplot_write_file_mul_data(filename_heat_ph,1,3,'color_blue', &
+IF (ltherm_freq) &
+   CALL gnuplot_write_file_mul_data(filename_heat_ph,1,4,'color_blue', &
                                     .NOT.ltherm_dos,.TRUE.,.FALSE.)
 !
 !  put as a comment the possibility to plot also the experimental data
 !
-   CALL gnuplot_write_file_mul_data(filename_heat,1,3,'color_blue',&
+   CALL gnuplot_write_file_mul_data(filename_heat,1,4,'color_blue',&
                                        .NOT.ltherm_dos,.FALSE.,.TRUE.)
    CALL gnuplot_write_file_mul_point('cv.exp',1,2,'color_red',.FALSE.,&
                                                               .TRUE.,.TRUE.)
-ENDIF
-
+!
+!  Part 8: isobaric -isochoric heat capacity
+!
 CALL gnuplot_set_fact(1313313.0_DP,.FALSE.)
 CALL gnuplot_ylabel('C_p - C_v (J / K / N / mol)',.FALSE.) 
 
 IF (ltherm_dos) &
-   CALL gnuplot_write_file_mul_data(filename_heat,1,4,'color_red',.TRUE., &
+   CALL gnuplot_write_file_mul_data(filename_heat,1,3,'color_red',.TRUE., &
                                                    .FALSE.,.FALSE.)
 IF (ltherm_freq) &
-   CALL gnuplot_write_file_mul_data(filename_heat_ph,1,4,'color_blue',&
+   CALL gnuplot_write_file_mul_data(filename_heat_ph,1,3,'color_blue',&
                                                .NOT.ltherm_dos,.FALSE.,.FALSE.)
 
-CALL gnuplot_write_file_mul_data(filename3,1,4,'color_green', &
+CALL gnuplot_write_file_mul_data(filename_aux_grun,1,3,'color_green', &
                               .NOT.(ltherm_dos.OR.ltherm_freq),.TRUE.,.FALSE.)
-
+!
+!  Part 8: isoentropic-isothermal bulk modulus
+!
 CALL gnuplot_set_fact(1._DP,.FALSE.)
 CALL gnuplot_ylabel('B_S - B_T (kbar)',.FALSE.) 
 IF (ltherm_dos) &
@@ -188,20 +215,23 @@ IF (ltherm_freq) &
    CALL gnuplot_write_file_mul_data(filename_bulk_ph,1,4,'color_blue',&
                                            .NOT.ltherm_dos,.FALSE.,.FALSE.)
 
-CALL gnuplot_write_file_mul_data(filename3,1,5,'color_green', &
+CALL gnuplot_write_file_mul_data(filename_aux_grun,1,4,'color_green', &
                               .NOT.(ltherm_dos.OR.ltherm_freq),.TRUE.,.FALSE.)
 
+!
+!  Part 10: average gruneisen parameter
+!
 CALL gnuplot_set_fact(1.0_DP,.FALSE.)
 CALL gnuplot_ylabel('Gr\374neisen parameter ({/Symbol g})',.FALSE.) 
 CALL gnuplot_write_horizontal_line(0.0_DP, 2, 'front', 'color_black', .FALSE.)
 IF (ltherm_dos) &
-   CALL gnuplot_write_file_mul_data(filename_bulk,1,2,'color_red',.TRUE.,&
+   CALL gnuplot_write_file_mul_data(filename_gamma,1,2,'color_red',.TRUE.,&
                                                      .FALSE.,.FALSE.)
 IF (ltherm_freq) &
-   CALL gnuplot_write_file_mul_data(filename_bulk_ph,1,2,'color_blue',&
+   CALL gnuplot_write_file_mul_data(filename_gamma_ph,1,2,'color_blue',&
                          .NOT.ltherm_dos,.FALSE.,.FALSE.)
 
-   CALL gnuplot_write_file_mul_data(filename3,1,3,'color_green', &
+CALL gnuplot_write_file_mul_data(filename_gamma_grun,1,2,'color_green', &
                      .NOT.(ltherm_dos.OR.ltherm_freq),.TRUE.,.FALSE.)
 
 CALL gnuplot_end()

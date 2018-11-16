@@ -25,29 +25,21 @@ SUBROUTINE check_el_cons()
                            print_macro_elasticity, print_elastic_constants, &
                            print_elastic_compliances
   USE control_elastic_constants, ONLY : el_cons_available, frozen_ions, &
-                                        el_cons_t_available, el_con_geo, &
-                                        el_con_celldm_geo, el_con_ibrav_geo
+                                        el_cons_t_available, el_con_geo
   USE control_macro_elasticity, ONLY : macro_el
-  USE thermo_mod, ONLY : tot_ngeo
+  USE control_grun,  ONLY : lb0_t
+  USE thermo_mod,    ONLY : tot_ngeo, no_ph
   USE data_files,    ONLY : fl_el_cons
-  USE mp_images, ONLY : my_image_id, root_image
   !
   IMPLICIT NONE
   CHARACTER(LEN=256) :: filelastic
   CHARACTER(LEN=6) :: int_to_char
-  INTEGER :: igeo
+  INTEGER :: igeo, central_geo
   !
-  LOGICAL  :: exst1, exst
+  LOGICAL  :: exst
   !
-  IF ( my_image_id /= root_image ) RETURN
-  !
-  ALLOCATE( el_con_ibrav_geo(tot_ngeo) )
-  ALLOCATE( el_con_celldm_geo(6,tot_ngeo) )
   ALLOCATE( el_con_geo(6,6,tot_ngeo) )
-  DO igeo=1, tot_ngeo
-     el_con_ibrav_geo(igeo) = ibrav_geo(igeo)
-     el_con_celldm_geo(:,igeo) = celldm_geo(:,igeo)
-  END DO
+  IF (.NOT.lb0_t) CALL find_central_geo(tot_ngeo,no_ph,central_geo)
 
   DO igeo = 1, tot_ngeo
      filelastic='elastic_constants/'//TRIM(fl_el_cons)//'.g'//&
@@ -69,6 +61,7 @@ SUBROUTINE check_el_cons()
      CALL print_elastic_compliances(el_compliances, frozen_ions)
      CALL print_macro_elasticity(ibrav,el_con,el_compliances,macro_el,.TRUE.)
      IF (igeo==1) el_cons_available=.TRUE.
+     IF (.NOT.lb0_t.AND.igeo==central_geo) EXIT
   ENDDO
   el_cons_t_available=.TRUE.
 

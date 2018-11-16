@@ -162,8 +162,9 @@ MODULE anharmonic
 !   here all the quantities obtained from the free energy calculated from
 !   the phonon dos
 !
-  REAL(DP), ALLOCATABLE :: cp_t(:)     ! isobaric specific heat (T)
-  REAL(DP), ALLOCATABLE :: cv_t(:)     ! isocoric specific heat (T)
+  REAL(DP), ALLOCATABLE :: cp_t(:)     ! isobaric heat capacity (T)
+  REAL(DP), ALLOCATABLE :: cv_t(:)     ! isocoric heat capacity (T)
+  REAL(DP), ALLOCATABLE :: ce_t(:)     ! constant strain heat capacity (T)
   REAL(DP), ALLOCATABLE :: b0_s(:)     ! constant entropy bulk modulus
   REAL(DP), ALLOCATABLE :: alpha_t(:)  ! linear thermal expansion coefficient
   REAL(DP), ALLOCATABLE :: beta_t(:)   ! volume thermal expansion coefficient
@@ -176,7 +177,7 @@ MODULE anharmonic
                            ! function of temperature
   REAL(DP), ALLOCATABLE :: alpha_anis_t(:,:)  ! thermal expansion tensor
 
-  REAL(DP), ALLOCATABLE :: cpmcv_anis(:) ! difference cp-cv computed from
+  REAL(DP), ALLOCATABLE :: cpmce_anis(:) ! difference cp-ce computed from
                                          ! elastic constants
   REAL(DP), ALLOCATABLE :: bfact_t(:,:,:)! b factor as a function of 
                                          ! temperature
@@ -203,8 +204,9 @@ MODULE ph_freq_anharmonic
 !   here all the quantities obtained from the free energy calculated from
 !   the frequencies 
 !
-  REAL(DP), ALLOCATABLE :: cpf_t(:)     ! isobaric specific heat (T)
-  REAL(DP), ALLOCATABLE :: cvf_t(:)     ! isocoric specific heat (T)
+  REAL(DP), ALLOCATABLE :: cpf_t(:)     ! isobaric heat capacity (T)
+  REAL(DP), ALLOCATABLE :: cvf_t(:)     ! isocoric heat capacity (T)
+  REAL(DP), ALLOCATABLE :: cef_t(:)     ! constant strain heat capacity (T)
   REAL(DP), ALLOCATABLE :: b0f_s(:)     ! constant entropy bulk modulus
   REAL(DP), ALLOCATABLE :: alphaf_t(:)  ! linear thermal expansion coefficient
   REAL(DP), ALLOCATABLE :: betaf_t(:)   ! volume thermal expansion coefficient
@@ -217,7 +219,7 @@ MODULE ph_freq_anharmonic
                            ! function of temperature
   REAL(DP), ALLOCATABLE :: alphaf_anis_t(:,:)  ! thermal expansion tensor
 
-  REAL(DP), ALLOCATABLE :: cpmcvf_anis(:) ! difference cp-cv computed from
+  REAL(DP), ALLOCATABLE :: cpmcef_anis(:) ! difference cp-ce computed from
                                           ! elastic constants
   REAL(DP), ALLOCATABLE :: bfactf_t(:,:,:)! b factor as a function of 
                                           ! temperature
@@ -248,9 +250,16 @@ MODULE grun_anharmonic
                                         !    temperature
   REAL(DP), ALLOCATABLE :: cp_grun_t(:) ! isobaric heat capacity as a 
                                         ! function of temperature
+  REAL(DP), ALLOCATABLE :: ce_grun_t(:) ! constant strain heat capacity 
+                                        ! used for thermodynamic quantities 
+                                        ! with gruneisen parameters
+  REAL(DP), ALLOCATABLE :: cv_grun_t(:) ! isochoric heat capacity as a
+                                        ! function of temperature
   REAL(DP), ALLOCATABLE :: b0_grun_s(:) ! isoentropic bulk modulus as a 
                                         ! function of temperature
   REAL(DP), ALLOCATABLE :: grun_gamma_t(:)  ! average gruneisen parameter
+  REAL(DP), ALLOCATABLE :: grun_cpmce_anis(:) ! difference cp-c_epsilon 
+                                          ! computed from elastic constants
 
   REAL(DP), ALLOCATABLE :: poly_grun(:,:,:) ! For each band and each q point
                                         ! these are the coefficients of 
@@ -641,9 +650,6 @@ MODULE control_grun
                                 ! parameters
                            celldm_grun_t(:,:) ! temperature_dependent celldm
                                 ! for thermodynamic quantities with gruneisen
-                                ! parameters
-  REAL(DP), ALLOCATABLE :: cv_grun_t(:) ! the specific heat used for 
-                                ! thermodynamic quantities with gruneisen 
                                 ! parameters
 END MODULE control_grun
 

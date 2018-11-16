@@ -8,13 +8,14 @@
 SUBROUTINE write_anharmonic()
 !
 !   This routine writes on output the anharmonic quantities calculated
-!   at the volume that minimizes the free energy (computed from phonon dos)
+!   at the volume that minimize the free energy (computed from phonon dos)
 !
 USE kinds,          ONLY : DP
 USE temperature,    ONLY : ntemp, temp
 USE thermodynamics, ONLY : ph_cv, ph_b_fact
 USE anharmonic,     ONLY : alpha_t, beta_t, gamma_t, cp_t, cv_t, b0_s, &
-                           vmin_t, free_e_min_t, b0_t, b01_t, bfact_t
+                           vmin_t, free_e_min_t, b0_t, b01_t, bfact_t, &
+                           celldm_t
 USE data_files,     ONLY : flanhar
 USE control_thermo, ONLY : with_eigen
 
@@ -25,7 +26,7 @@ CALL compute_beta(vmin_t, beta_t, temp, ntemp)
 
 alpha_t = beta_t / 3.0_DP
 
-CALL interpolate_cv(vmin_t, ph_cv, cv_t) 
+CALL interpolate_cv(vmin_t, celldm_t, ph_cv, cv_t) 
 CALL compute_cp_bs_g(beta_t, vmin_t, b0_t, cv_t, cp_t, b0_s, gamma_t)
 !
 !   here we plot the quantities calculated from the phonon dos
@@ -40,7 +41,7 @@ CALL write_ener_beta(temp, vmin_t, free_e_min_t, beta_t, ntemp, filename)
 filename="anhar_files/"//TRIM(flanhar)//'.bulk_mod'
 CALL add_pressure(filename)
 
-CALL write_bulk_anharm(temp, gamma_t, b0_t, b0_s, ntemp, filename)
+CALL write_bulk_anharm(temp, b0_t, b0_s, ntemp, filename)
 !
 !   here the derivative of the bulk modulus with respect to pressure
 !
@@ -54,7 +55,14 @@ CALL write_dbulk_anharm(temp, b01_t, ntemp, filename)
 filename="anhar_files/"//TRIM(flanhar)//'.heat'
 CALL add_pressure(filename)
 
-CALL write_heat_anharm(temp, cv_t, cp_t, ntemp, filename)
+CALL write_heat_anharm(temp, cv_t, cv_t, cp_t, ntemp, filename)
+!
+!  here the average Gruneisen parameter and the quantities that form it
+!
+filename="anhar_files/"//TRIM(flanhar)//'.gamma'
+CALL add_pressure(filename)
+
+CALL write_gamma_anharm(temp, gamma_t, cv_t, beta_t, b0_t, ntemp, filename)
 !
 !   here the b factors
 !
@@ -65,6 +73,7 @@ IF (with_eigen) THEN
    CALL write_anharm_bfact(temp, bfact_t, ntemp, filename)
 END IF
 
+
 RETURN
 END SUBROUTINE write_anharmonic
 
@@ -74,7 +83,8 @@ USE temperature,    ONLY : ntemp, temp
 USE control_thermo, ONLY : with_eigen
 USE ph_freq_thermodynamics, ONLY : phf_cv, phf_b_fact
 USE ph_freq_anharmonic, ONLY : alphaf_t, betaf_t, gammaf_t, cpf_t, cvf_t, &
-                  b0f_s, free_e_minf_t, vminf_t, b0f_t, b01f_t, bfactf_t
+                        b0f_s, free_e_minf_t, vminf_t, b0f_t, b01f_t, &
+                        bfactf_t, celldmf_t
 USE data_files,     ONLY : flanhar
 
 IMPLICIT NONE
@@ -84,7 +94,7 @@ CALL compute_beta(vminf_t, betaf_t, temp, ntemp)
 
 alphaf_t = betaf_t / 3.0_DP
 
-CALL interpolate_cv(vminf_t, phf_cv, cvf_t) 
+CALL interpolate_cv(vminf_t, celldmf_t, phf_cv, cvf_t) 
 CALL compute_cp_bs_g(betaf_t, vminf_t, b0f_t, cvf_t, cpf_t, b0f_s, gammaf_t)
 
 !
@@ -100,7 +110,7 @@ CALL write_ener_beta(temp, vminf_t, free_e_minf_t, betaf_t, ntemp, filename)
 filename="anhar_files/"//TRIM(flanhar)//'.bulk_mod_ph'
 CALL add_pressure(filename)
 
-CALL write_bulk_anharm(temp, gammaf_t, b0f_t, b0f_s, ntemp, filename)
+CALL write_bulk_anharm(temp, b0f_t, b0f_s, ntemp, filename)
 !
 !   here the derivative of the bulk modulus with respect to pressure
 !
@@ -114,7 +124,14 @@ CALL write_dbulk_anharm(temp, b01f_t, ntemp, filename)
 filename="anhar_files/"//TRIM(flanhar)//'.heat_ph'
 CALL add_pressure(filename)
 
-CALL write_heat_anharm(temp, cvf_t, cpf_t, ntemp, filename)
+CALL write_heat_anharm(temp, cvf_t, cvf_t, cpf_t, ntemp, filename)
+!
+!  here the average Gruneisen parameter and the quantities that form it
+!
+filename="anhar_files/"//TRIM(flanhar)//'.gamma_ph'
+CALL add_pressure(filename)
+
+CALL write_gamma_anharm(temp, gammaf_t, cvf_t, betaf_t, b0f_t, ntemp, filename)
 !
 !   here the b factors
 !
@@ -141,7 +158,7 @@ USE constants,      ONLY : ry_kbar
 USE ions_base,      ONLY : nat
 USE temperature,    ONLY : ntemp, temp
 USE ph_freq_thermodynamics, ONLY : ph_freq_save, phf_cv
-USE anharmonic,     ONLY :  vmin_t, b0_t, cv_t
+USE anharmonic,     ONLY :  vmin_t, b0_t, cv_t, celldm_t
 USE ph_freq_anharmonic, ONLY :  vminf_t, cvf_t, b0f_t, cpf_t, b0f_s
 USE grun_anharmonic, ONLY : betab, cp_grun_t, b0_grun_s, &
                             grun_gamma_t, poly_grun, poly_order
@@ -240,7 +257,7 @@ ELSEIF (ltherm_dos) THEN
 ELSE
    vmin_t(1:ntemp)=vmin
    b0_t(1:ntemp)=b0
-   CALL interpolate_cv(vmin_t, phf_cv, cv_t)
+   CALL interpolate_cv(vmin_t, celldm_t, phf_cv, cv_t)
    CALL compute_cp_bs_g(betab, vmin_t, b0_t, cv_t, cp_grun_t, &
                                               b0_grun_s, grun_gamma_t)
 ENDIF
@@ -251,28 +268,26 @@ IF (meta_ionode) THEN
 !
    filename="anhar_files/"//TRIM(flanhar)//'.aux_grun'
    CALL add_pressure(filename)
-
-   iu_therm=find_free_unit()
-   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
-   WRITE(iu_therm,'("# gamma is the average gruneisen parameter ")')
-   WRITE(iu_therm,'("#   T (K)   beta(T)x10^6    gamma(T)      &
-                 &   (C_p - C_v)(T)      (B_S - B_T) (T) (kbar) " )' )
-
    IF (ltherm_freq) THEN
-      DO itemp = 2, ntemp-1
-         WRITE(iu_therm, '(5e16.8)') temp(itemp), betab(itemp)*1.D6,    &
-                        grun_gamma_t(itemp), cp_grun_t(itemp)-cvf_t(itemp),   &
-                        b0_grun_s(itemp) - b0f_t(itemp)
-      END DO
+      CALL write_aux_grun(temp, betab, cp_grun_t, cvf_t, b0_grun_s, b0f_t, &
+                                                  ntemp, filename) 
    ELSE
-      DO itemp = 2, ntemp-1
-         WRITE(iu_therm, '(5e16.8)') temp(itemp), betab(itemp)*1.D6,    &
-                        grun_gamma_t(itemp), cp_grun_t(itemp) - cv_t(itemp), &
-                        b0_grun_s(itemp) - b0_t(itemp)
-      END DO
+      CALL write_aux_grun(temp, betab, cp_grun_t, cv_t, b0_grun_s, b0_t, &
+                                                  ntemp, filename) 
    ENDIF
-   CLOSE(iu_therm)
-END IF
+!
+!  Here the average Gruneisen parameter and the quantities that form it
+!
+   filename="anhar_files/"//TRIM(flanhar)//'.gamma_grun'
+   CALL add_pressure(filename)
+   IF (ltherm_freq) THEN
+      CALL write_gamma_anharm(temp, grun_gamma_t, cvf_t, betab, b0f_t, ntemp, &
+                                                                filename)
+   ELSE
+      CALL write_gamma_anharm(temp, grun_gamma_t, cv_t, betab, b0_t, ntemp, &
+                                                                filename)
+   ENDIF
+ENDIF
 
 CALL destroy_ph_freq(ph_freq)
 CALL destroy_ph_freq(ph_grun)
@@ -340,12 +355,12 @@ ENDIF
 RETURN
 END SUBROUTINE write_ener_beta
 
-SUBROUTINE write_bulk_anharm(temp, gammat, b0t, b0s, ntemp, filename)
+SUBROUTINE write_bulk_anharm(temp, b0t, b0s, ntemp, filename)
 USE kinds,     ONLY : DP
 USE io_global, ONLY : meta_ionode
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ntemp
-REAL(DP), INTENT(IN) :: temp(ntemp), gammat(ntemp), b0t(ntemp), b0s(ntemp)
+REAL(DP), INTENT(IN) :: temp(ntemp), b0t(ntemp), b0s(ntemp)
 CHARACTER(LEN=*) :: filename
 
 INTEGER :: itemp, iu_therm
@@ -356,12 +371,12 @@ IF (meta_ionode) THEN
    OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
 
    WRITE(iu_therm,'("#  ")')
-   WRITE(iu_therm,'("#   T (K)          gamma(T)            B_T(T) (kbar)     &
-                                 & B_S(T)-B_T(T) (kbar) ")')
+   WRITE(iu_therm,'("#   T (K)        B_T(T) (kbar)        B_S(T) (kbar) &
+                                 &       B_S(T)-B_T(T) (kbar) ")')
 
    DO itemp = 2, ntemp-1
       WRITE(iu_therm, '(e12.5,3e22.13)') temp(itemp), &
-                 gammat(itemp), b0t(itemp), b0s(itemp)-b0t(itemp)
+                 b0t(itemp), b0s(itemp), b0s(itemp)-b0t(itemp)
    END DO
   
    CLOSE(iu_therm)
@@ -396,12 +411,13 @@ ENDIF
 RETURN
 END SUBROUTINE write_dbulk_anharm
 
-SUBROUTINE write_heat_anharm(temp, cvt, cpt, ntemp, filename)
+SUBROUTINE write_gamma_anharm(temp, gammat, cvt, beta, b0t, ntemp, filename)
 USE kinds,     ONLY : DP
 USE io_global, ONLY : meta_ionode
 IMPLICIT NONE
 INTEGER,  INTENT(IN) :: ntemp
-REAL(DP), INTENT(IN) :: temp(ntemp), cvt(ntemp), cpt(ntemp)
+REAL(DP), INTENT(IN) :: temp(ntemp), gammat(ntemp), cvt(ntemp), beta(ntemp), &
+                                     b0t(ntemp)
 CHARACTER(LEN=*) :: filename
 
 INTEGER :: itemp, iu_therm
@@ -412,18 +428,126 @@ IF (meta_ionode) THEN
    OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
 
    WRITE(iu_therm,'("# ")')
-   WRITE(iu_therm,'("# T (K)        C_V(T) (Ry/cell/K)    C_P(T) (Ry/cell/K) &
-                                 &  C_P-C_V(T) (Ry/cell/K)")')
+   WRITE(iu_therm,'("# T (K)          gamma(T)             C_V(T) &
+                              &(Ry/cell/K)    beta B_T (kbar/K)")')
+
+   DO itemp = 2, ntemp-1
+      WRITE(iu_therm, '(e12.5,3e22.13)') temp(itemp), gammat(itemp), &
+                                         cvt(itemp), beta(itemp)*b0t(itemp)
+   ENDDO
+   CLOSE(iu_therm)
+ENDIF
+
+RETURN
+END SUBROUTINE write_gamma_anharm
+
+SUBROUTINE write_heat_anharm(temp, cet, cvt, cpt, ntemp, filename)
+USE kinds,     ONLY : DP
+USE io_global, ONLY : meta_ionode
+IMPLICIT NONE
+INTEGER,  INTENT(IN) :: ntemp
+REAL(DP), INTENT(IN) :: temp(ntemp), cet(ntemp), cvt(ntemp), cpt(ntemp)
+CHARACTER(LEN=*) :: filename
+
+INTEGER :: itemp, iu_therm
+INTEGER :: find_free_unit
+
+IF (meta_ionode) THEN
+   iu_therm=find_free_unit()
+   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
+
+   WRITE(iu_therm,'("# ")')
+   WRITE(iu_therm,'("# T (K)        C_e(T) (Ry/cell/K)    (C_P-C_V)(T) &
+                              &(Ry/cell/K)     C_e+C_P-C_V(T) (Ry/cell/K)")')
 
    DO itemp = 2, ntemp-1
       WRITE(iu_therm, '(e12.5,3e22.13)') temp(itemp), &
-                 cvt(itemp), cpt(itemp), cpt(itemp)-cvt(itemp)
-   END DO
-  
+                 cet(itemp), cpt(itemp)-cvt(itemp), cet(itemp)+cpt(itemp)&
+                                                              -cvt(itemp)
+   ENDDO
    CLOSE(iu_therm)
 ENDIF
+
 RETURN
 END SUBROUTINE write_heat_anharm
+
+SUBROUTINE write_aux_grun(temp, betab, cp_grun_t, cv_grun_t, b0_grun_s, b0_t, &
+                                                           ntemp, filename) 
+USE kinds,     ONLY : DP
+USE io_global, ONLY : meta_ionode
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ntemp
+REAL(DP), INTENT(IN) :: temp(ntemp), betab(ntemp), cp_grun_t(ntemp), &
+                        cv_grun_t(ntemp), b0_grun_s(ntemp), b0_t(ntemp)
+
+CHARACTER(LEN=*) :: filename
+
+INTEGER :: itemp, iu_therm
+INTEGER :: find_free_unit
+
+IF (meta_ionode) THEN
+   iu_therm=find_free_unit()
+   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
+   WRITE(iu_therm,'("# gamma is the average gruneisen parameter ")')
+   WRITE(iu_therm,'("#   T (K)         beta(T)x10^6 &
+            &   (C_p - C_v)(T)   (B_S - B_T) (T) (kbar) " )' )
+
+   DO itemp = 2, ntemp-1
+      WRITE(iu_therm, '(4e16.8)') temp(itemp), betab(itemp)*1.D6,    &
+                        cp_grun_t(itemp)-cv_grun_t(itemp),   &
+                        b0_grun_s(itemp) - b0_t(itemp)
+   ENDDO
+   CLOSE(iu_therm)
+END IF
+
+RETURN
+END SUBROUTINE write_aux_grun
+
+SUBROUTINE set_volume_b0_cv_grun()
+
+USE control_grun,       ONLY : lv0_t, lb0_t, vgrun_t, celldm_grun_t, &
+                               b0_grun_t
+USE control_thermo,     ONLY : ltherm_dos, ltherm_freq
+USE temperature,        ONLY : ntemp
+USE anharmonic,         ONLY : vmin_t, celldm_t, b0_t, ce_t
+USE ph_freq_anharmonic, ONLY : vminf_t, celldmf_t, b0f_t, cef_t
+USE grun_anharmonic,    ONLY : ce_grun_t
+USE equilibrium_conf,   ONLY : celldm0
+USE control_mur,        ONLY : vmin, b0
+
+IMPLICIT NONE
+
+INTEGER :: itemp
+
+DO itemp=1, ntemp
+   IF (lv0_t.AND.ltherm_freq) THEN
+      vgrun_t(itemp)=vminf_t(itemp)
+      celldm_grun_t(:,itemp)=celldmf_t(:,itemp)
+   ELSEIF (lv0_t.AND.ltherm_dos) THEN
+      vgrun_t(itemp)=vmin_t(itemp)
+      celldm_grun_t(:,itemp)=celldm_t(:,itemp)
+   ELSE
+      vgrun_t(itemp)=vmin
+      celldm_grun_t(:,itemp)=celldm0(:)
+   ENDIF
+
+   IF (lb0_t.AND.ltherm_freq) THEN
+      b0_grun_t(itemp)=b0f_t(itemp)
+   ELSEIF(lb0_t.AND.ltherm_dos) THEN
+      b0_grun_t(itemp)=b0_t(itemp)
+   ELSE
+      b0_grun_t(itemp)=b0
+   ENDIF
+
+   IF (ltherm_freq) THEN
+      ce_grun_t(itemp)= cef_t(itemp)
+   ELSEIF(ltherm_dos) THEN
+      ce_grun_t(itemp)= ce_t(itemp)
+   ENDIF
+ENDDO
+
+RETURN
+END SUBROUTINE set_volume_b0_cv_grun
 !
 ! Copyright (C) 2018 Cristiano Malica
 !
@@ -463,47 +587,3 @@ ENDIF
 RETURN
 END SUBROUTINE write_anharm_bfact
 
-SUBROUTINE set_volume_b0_cv_grun()
-
-USE control_grun,       ONLY : lv0_t, lb0_t, vgrun_t, celldm_grun_t, &
-                               b0_grun_t, cv_grun_t
-USE control_thermo,     ONLY : ltherm_dos, ltherm_freq
-USE temperature,        ONLY : ntemp
-USE anharmonic,         ONLY : vmin_t, celldm_t, b0_t, cv_t
-USE ph_freq_anharmonic, ONLY : vminf_t, celldmf_t, b0f_t, cvf_t
-USE equilibrium_conf,   ONLY : celldm0
-USE control_mur,        ONLY : vmin, b0
-
-IMPLICIT NONE
-
-INTEGER :: itemp
-
-DO itemp=1, ntemp
-   IF (lv0_t.AND.ltherm_freq) THEN
-      vgrun_t(itemp)=vminf_t(itemp)
-      celldm_grun_t(:,itemp)=celldmf_t(:,itemp)
-   ELSEIF (lv0_t.AND.ltherm_dos) THEN
-      vgrun_t(itemp)=vmin_t(itemp)
-      celldm_grun_t(:,itemp)=celldm_t(:,itemp)
-   ELSE
-      vgrun_t(itemp)=vmin
-      celldm_grun_t(:,itemp)=celldm0(:)
-   ENDIF
-
-   IF (lb0_t.AND.ltherm_freq) THEN
-      b0_grun_t(itemp)=b0f_t(itemp)
-   ELSEIF(lb0_t.AND.ltherm_dos) THEN
-      b0_grun_t(itemp)=b0_t(itemp)
-   ELSE
-      b0_grun_t(itemp)=b0
-   ENDIF
-
-   IF (ltherm_freq) THEN
-      cv_grun_t(itemp)= cvf_t(itemp)
-   ELSEIF(ltherm_dos) THEN
-      cv_grun_t(itemp)= cv_t(itemp)
-   ENDIF
-ENDDO
-
-RETURN
-END SUBROUTINE set_volume_b0_cv_grun

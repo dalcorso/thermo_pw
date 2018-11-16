@@ -52,7 +52,7 @@ MODULE quartic_surfaces
 
   PUBLIC :: fit_multi_quartic,  evaluate_fit_quartic, &
             evaluate_fit_grad_quartic, evaluate_fit_hess_quartic, &
-            compute_quartic_var, find_quartic_extremum, &
+            quartic_var, find_quartic_extremum, &
             find_quartic_quadratic_extremum, evaluate_quartic_quadratic, &
             evaluate_two_quartic, find_two_quartic_extremum, &
             print_quartic_polynomial, introduce_quartic_fit, &
@@ -1920,30 +1920,30 @@ END IF
 RETURN
 END SUBROUTINE set_quartic_coefficients
 
-FUNCTION compute_quartic_var(degree)  
+FUNCTION quartic_var(degree)  
 
 IMPLICIT NONE
-INTEGER :: compute_quartic_var
+INTEGER :: quartic_var
 INTEGER, INTENT(IN) :: degree
 
 IF (degree==1) THEN
-   compute_quartic_var=5
+   quartic_var=5
 ELSEIF (degree==2) THEN
-   compute_quartic_var=15
+   quartic_var=15
 ELSEIF (degree==3) THEN
-   compute_quartic_var=35
+   quartic_var=35
 ELSEIF (degree==4) THEN
-   compute_quartic_var=70
+   quartic_var=70
 ELSEIF (degree==5) THEN
-   compute_quartic_var=126
+   quartic_var=126
 ELSEIF (degree==6) THEN
-   compute_quartic_var=210
+   quartic_var=210
 ELSE
-   compute_quartic_var=0
+   quartic_var=0
 ENDIF
 
 RETURN
-END FUNCTION compute_quartic_var
+END FUNCTION quartic_var
 
 SUBROUTINE print_quartic_polynomial(degree, nvar, coeff)
 
