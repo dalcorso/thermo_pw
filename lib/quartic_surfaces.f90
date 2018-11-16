@@ -2227,7 +2227,7 @@ DO idata=1,ndata
 !  WRITE(stdout,'(3f19.12)') f(idata), aux, f(idata)-aux
    chisq = chisq + (aux - f(idata))**2
 ENDDO
-WRITE(stdout,'(5x,"chi square=",e18.5,/)') chisq
+WRITE(stdout,'(5x,"chi square quartic=",e18.5,/)') chisq
 
 RETURN
 END SUBROUTINE print_chisq_quartic_quadratic

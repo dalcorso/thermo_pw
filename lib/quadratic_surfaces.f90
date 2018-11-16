@@ -59,7 +59,8 @@ MODULE quadratic_surfaces
             find_two_fit_extremum, &
             evaluate_fit_grad_quadratic, polifit, write_poli, &
             print_quadratic_polynomial, summarize_fitting_data, &
-            write_vector, introduce_quadratic_fit, print_chisq_quadratic
+            write_vector, introduce_quadratic_fit, print_chisq_quadratic, &
+            quadratic_var
 
 CONTAINS
 
@@ -716,9 +717,19 @@ DO idata=1,ndata
    chisq = chisq + (aux - f(idata))**2
    IF (ABS(f(idata))>1.D-12) perc= perc + ABS((f(idata)-aux) / f(idata))
 ENDDO
-WRITE(stdout,'(5x,"chi square=",e18.5," relative error",e18.5,&
+WRITE(stdout,'(5x,"chi square quadratic=",e18.5," relative error",e18.5,&
                                      &" %",/)') chisq, perc / ndata
 RETURN
 END SUBROUTINE print_chisq_quadratic
+
+FUNCTION quadratic_var(degree)
+
+IMPLICIT NONE
+INTEGER :: quadratic_var
+INTEGER, INTENT(IN) :: degree
+
+quadratic_var = (1 + degree)*(degree + 2) / 2
+
+END FUNCTION quadratic_var
 
 END MODULE quadratic_surfaces
