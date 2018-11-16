@@ -30,8 +30,8 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
   USE freq_interpolate, ONLY : interp_freq_anis_eigen
   USE temperature,    ONLY : temp, ntemp
   USE quadratic_surfaces, ONLY : evaluate_fit_quadratic, &
-                                 evaluate_fit_grad_quadratic
-  USE lattices,       ONLY : compress_celldm
+                                 evaluate_fit_grad_quadratic, quadratic_var
+  USE lattices,       ONLY : compress_celldm, crystal_parameters
   USE io_bands,       ONLY : read_bands, read_parameters, write_bands
   USE mp,             ONLY : mp_bcast
   USE io_global,      ONLY : stdout, ionode, ionode_id
@@ -109,7 +109,8 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
 !
 !  Part two: Compute the Gruneisen parameters
 !
-  CALL compute_degree(ibrav_save,degree,nvar)
+  degree=crystal_parameters(ibrav_save)
+  nvar=quadratic_var(degree)
 !
 !  find how many geometries have been really calculated
 ! 

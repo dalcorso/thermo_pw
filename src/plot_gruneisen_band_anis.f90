@@ -18,6 +18,7 @@ USE control_gnuplot, ONLY : flgnuplot
 USE postscript_files, ONLY : flpsgrun
 USE data_files,      ONLY : flgrun, flpgrun
 USE initial_conf,    ONLY : ibrav_save
+USE lattices,        ONLY : crystal_parameters
 USE mp_images,       ONLY : root_image, my_image_id
 
 IMPLICIT NONE
@@ -28,11 +29,11 @@ CHARACTER(LEN=256) :: filename, save_flpsgrun, save_flgrun, save_flgnuplot, &
 CHARACTER(LEN=256) :: filedata, filerap, fileout, gnu_filename, filenameps
 
 CHARACTER(LEN=6), EXTERNAL :: int_to_char
-INTEGER :: degree, nvar, icrys
+INTEGER :: degree, icrys
 
 IF ( my_image_id /= root_image ) RETURN
 
-CALL compute_degree(ibrav_save, degree, nvar)
+degree=crystal_parameters(ibrav_save)
 
 save_flgrun=flgrun
 save_flpgrun=flpgrun

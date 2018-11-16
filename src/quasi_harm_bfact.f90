@@ -112,12 +112,13 @@ USE ions_base,      ONLY : nat
 USE thermo_mod,     ONLY : ngeo, tot_ngeo, celldm_geo
 USE temperature,    ONLY : ntemp, temp
 USE io_global,      ONLY : stdout
-USE lattices,       ONLY : compress_celldm
+USE lattices,       ONLY : compress_celldm, crystal_parameters
 USE mp_world,       ONLY : world_comm
 USE mp,             ONLY : mp_sum
 USE quadratic_surfaces, ONLY : fit_multi_quadratic, evaluate_fit_quadratic, &
                     introduce_quadratic_fit, summarize_fitting_data,        &
-                    print_quadratic_polynomial, print_chisq_quadratic
+                    print_quadratic_polynomial, print_chisq_quadratic, &
+                    quadratic_var
 USE quartic_surfaces, ONLY : fit_multi_quartic, evaluate_fit_quartic, &
                     introduce_quartic_fit, compute_quartic_var,       &
                     print_quartic_polynomial, print_chisq_quartic 
@@ -131,7 +132,8 @@ INTEGER :: itemp, startt, lastt
 INTEGER :: na, ipol, jpol, ijpol, idata, ndata, degree, nvar, nvar4, lsolve
 INTEGER :: compute_nwork
 
-CALL compute_degree(ibrav, degree, nvar)
+degree=crystal_parameters(ibrav)
+nvar=quadratic_var(degree)
 nvar4=compute_quartic_var(degree)
 ndata = compute_nwork()
 lsolve=2

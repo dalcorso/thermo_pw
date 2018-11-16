@@ -243,12 +243,12 @@ USE grun_anharmonic, ONLY : alpha_an_g, grun_gamma_t, poly_grun, done_grun, &
                             cp_grun_t, b0_grun_s, betab
 USE ph_freq_module, ONLY : thermal_expansion_ph, ph_freq_type,  &
                            destroy_ph_freq, init_ph_freq
-USE lattices,       ONLY : compress_celldm
+USE lattices,       ONLY : compress_celldm, crystal_parameters
 USE control_thermo, ONLY : ltherm_dos, ltherm_freq
 USE elastic_constants, ONLY :  el_compliances
 USE control_elastic_constants, ONLY : el_cons_available, el_cons_t_available
 USE quadratic_surfaces, ONLY : evaluate_fit_quadratic,      &
-                               evaluate_fit_grad_quadratic
+                               evaluate_fit_grad_quadratic, quadratic_var
 USE control_dosq,   ONLY : nq1_d, nq2_d, nq3_d
 USE data_files,     ONLY : flanhar
 USE io_global,      ONLY : meta_ionode, stdout
@@ -308,7 +308,9 @@ ph_freq%wg=ph_freq_save(1)%wg
 !
 ! now allocate space for each set of gruneisen parameters
 !
-CALL compute_degree(ibrav,degree,nvar)
+degree=crystal_parameters(ibrav)
+nvar=quadratic_var(degree)
+
 nwork=compute_nwork()
 ALLOCATE(ph_grun(degree))
 ALLOCATE(grad(degree))

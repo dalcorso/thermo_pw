@@ -26,7 +26,7 @@ USE control_elastic_constants, ONLY : el_con_geo, el_con_celldm_geo, &
 USE elastic_constants, ONLY : print_macro_elasticity, &
                               compute_elastic_compliances, el_con
 USE control_grun,   ONLY : lb0_t
-USE lattices,       ONLY : compress_celldm
+USE lattices,       ONLY : compress_celldm, crystal_parameters
 USE equilibrium_conf,    ONLY : celldm0
 USE control_thermo, ONLY : ltherm_dos, ltherm_freq
 USE control_macro_elasticity, ONLY: macro_el
@@ -67,7 +67,7 @@ END IF
 IF (.NOT.el_cons_t_available) RETURN
 
 ibrav=el_con_ibrav_geo(1)
-CALL compute_degree(ibrav,degree,nvar)
+degree=crystal_parameters(ibrav)
 
 ndata=compute_nwork()
 ALLOCATE(x(degree,ndata))

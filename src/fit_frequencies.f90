@@ -114,9 +114,10 @@ SUBROUTINE fit_frequencies_anis()
   USE cell_base,              ONLY : ibrav
   USE ph_freq_thermodynamics, ONLY : ph_freq_save
   USE grun_anharmonic,        ONLY : poly_grun
+  USE quadratic_surfaces,     ONLY : quadratic_var
   USE control_thermo,         ONLY : with_eigen
   USE freq_interpolate,       ONLY : interp_freq_anis, interp_freq_anis_eigen
-  USE lattices,               ONLY : compress_celldm
+  USE lattices,               ONLY : compress_celldm, crystal_parameters
 
   IMPLICIT NONE
 
@@ -129,7 +130,8 @@ SUBROUTINE fit_frequencies_anis()
 !  Finds how many data have been calculated
 !
   nwork=compute_nwork()
-  CALL compute_degree(ibrav,degree,nvar)
+  degree=crystal_parameters(ibrav)
+  nvar=quadratic_var(degree)
   ndata=0
   DO igeo=1,nwork
      IF (.NOT.no_ph(igeo)) ndata=ndata+1

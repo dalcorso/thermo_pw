@@ -24,10 +24,11 @@ USE thermo_mod,       ONLY : omega_geo, celldm_geo, energy_geo
 USE control_pressure, ONLY : pressure_kb
 USE control_mur,      ONLY : vmin_input, vmax_input
 USE control_quartic_energy, ONLY : lquartic, lsolve
-USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_fit_extremum
-USE quartic_surfaces, ONLY : fit_multi_quartic, compute_quartic_var, &
+USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_fit_extremum, &
+                               quadratic_var
+USE quartic_surfaces, ONLY : fit_multi_quartic, quartic_var, &
                              find_quartic_extremum
-USE lattices,         ONLY : compress_celldm, expand_celldm
+USE lattices,         ONLY : compress_celldm, expand_celldm, crystal_parameters
 USE mp_images,        ONLY : root_image, my_image_id
 USE io_global,        ONLY : ionode
 
@@ -55,7 +56,8 @@ press_min=-50.0_DP / ry_kbar
 press_max=80.0_DP / ry_kbar
 deltap= ( press_max - press_min ) / npress
 
-CALL compute_degree(ibrav,degree,nvar)
+degree=crystal_parameters(ibrav)
+nvar=quadratic_var(degree)
 
 ALLOCATE(x(degree,ndata))
 ALLOCATE(x_pos_min(degree))
@@ -67,7 +69,7 @@ ALLOCATE(omega(npress))
 ALLOCATE(celldmp(6,npress))
 
 IF (lquartic) THEN
-   nvar4=compute_quartic_var(degree)
+   nvar4=quartic_var(degree)
    ALLOCATE(x_min_4(degree))
    ALLOCATE(coeff4(nvar4))
 ENDIF

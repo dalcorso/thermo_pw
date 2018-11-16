@@ -29,12 +29,13 @@ SUBROUTINE quadratic_fit()
   USE control_quadratic_energy, ONLY : hessian_v, hessian_e, x_pos_min, &
                                coeff, degree
   USE control_quartic_energy, ONLY : nvar4, coeff4, x_min_4, lquartic, lsolve
-  USE lattices,     ONLY : expand_celldm
-  USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_fit_extremum, &
-                          write_fit_hessian, print_quadratic_polynomial, &
-                          summarize_fitting_data, write_vector, &
-                          introduce_quadratic_fit, print_chisq_quadratic
-  USE quartic_surfaces, ONLY : fit_multi_quartic, compute_quartic_var, &
+  USE lattices,     ONLY : expand_celldm, crystal_parameters
+  USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_fit_extremum,  &
+                          write_fit_hessian, print_quadratic_polynomial,  &
+                          summarize_fitting_data, write_vector,           &
+                          introduce_quadratic_fit, print_chisq_quadratic, &
+                          quadratic_var
+  USE quartic_surfaces, ONLY : fit_multi_quartic, quartic_var, &
                           find_quartic_extremum, print_quartic_polynomial, &
                           print_chisq_quartic, introduce_quartic_fit
   USE io_global,    ONLY : stdout
@@ -52,7 +53,8 @@ SUBROUTINE quadratic_fit()
   !
   WRITE(stdout,'(/,5x,71("-"))')
   !
-  CALL compute_degree(ibrav,degree,nvar)
+  degree=crystal_parameters(ibrav)
+  nvar=quadratic_var(degree)
   !
   ndata = compute_nwork()
 
@@ -99,7 +101,7 @@ SUBROUTINE quadratic_fit()
   !
   IF (lquartic) THEN
 
-     nvar4=compute_quartic_var(degree)
+     nvar4=quartic_var(degree)
      CALL introduce_quartic_fit(degree, nvar4, ndata)
 
      ALLOCATE(x_min_4(degree))
@@ -154,11 +156,11 @@ SUBROUTINE quadratic_fit_t(itemp, celldm_t, free_e_min_t, ph_free_ener, &
   USE control_quadratic_energy, ONLY : degree, nvar, enthalpy_coeff => coeff
   USE control_quartic_energy, ONLY :  nvar4, coeff4, lquartic, lquartic_ph, &
                                       lsolve
-  USE lattices,    ONLY : compress_celldm, expand_celldm
+  USE lattices,    ONLY : compress_celldm, expand_celldm, crystal_parameters
   USE io_global,   ONLY : stdout
 
   USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_two_fit_extremum, &
-                      print_quadratic_polynomial, &
+                      print_quadratic_polynomial, quadratic_var, &
                       summarize_fitting_data, write_vector, &
                       introduce_quadratic_fit, print_chisq_quadratic
 
@@ -175,7 +177,8 @@ SUBROUTINE quadratic_fit_t(itemp, celldm_t, free_e_min_t, ph_free_ener, &
   INTEGER  :: idata
   INTEGER  :: compute_nwork, compute_nwork_ph
   !
-  CALL compute_degree(ibrav, degree, nvar)
+  degree=crystal_parameters(ibrav)
+  nvar=quadratic_var(degree)
   !
   ndata = compute_nwork_ph(no_ph,ndatatot)
 
@@ -243,31 +246,6 @@ SUBROUTINE quadratic_fit_t(itemp, celldm_t, free_e_min_t, ph_free_ener, &
   RETURN
   !
 END SUBROUTINE quadratic_fit_t
-
-SUBROUTINE compute_degree(ibrav, degree, nvar)
-!
-!  For each Bravais lattice this routine gives the number of independent
-!  crystallographic parameters and the number of variables of a 
-!  quadratic polynomial of these variables
-!
-!  degrees       nvar
-!  1               3, 
-!  2               6, 
-!  3              10, 
-!  4              15, 
-!  5              21, 
-!  6              28
-!
-USE lattices, ONLY : crystal_parameters
-IMPLICIT NONE
-INTEGER, INTENT(IN)  :: ibrav
-INTEGER, INTENT(OUT) :: degree, nvar
-
-degree = crystal_parameters(ibrav)
-nvar = (1 + degree)*(degree + 2) / 2
-
-RETURN
-END SUBROUTINE compute_degree
 
 INTEGER FUNCTION compute_nwork_ph(no_ph,ndatatot)
 IMPLICIT NONE

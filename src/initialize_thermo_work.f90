@@ -34,10 +34,13 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
   USE equilibrium_conf, ONLY : celldm0, omega0
   USE initial_conf,   ONLY : celldm_save, ibrav_save
   USE piezoelectric_tensor, ONLY : polar_geo
-  USE control_elastic_constants, ONLY : elastic_algorithm
+  USE control_elastic_constants, ONLY : elastic_algorithm, rot_mat
+  USE elastic_constants, ONLY : epsilon_voigt, sigma_geo, epsilon_geo
   USE gvecw,          ONLY : ecutwfc
   USE gvect,          ONLY : ecutrho
   USE control_quadratic_energy, ONLY : nvar, degree
+  USE lattices,       ONLY : crystal_parameters
+  USE quadratic_surfaces, ONLY : quadratic_var
   USE start_k,        ONLY : nk1, nk2, nk3
   USE klist,          ONLY : degauss
   USE wrappers,       ONLY : f_mkdir_safe
@@ -280,7 +283,8 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            tot_ngeo=nwork
            ALLOCATE(no_ph(tot_ngeo))
            CALL initialize_no_ph(no_ph, tot_ngeo)
-           CALL compute_degree(ibrav_save, degree, nvar)
+           degree=crystal_parameters(ibrav_save)
+           nvar=quadratic_var(degree)
            CALL allocate_thermodynamics()
            CALL allocate_anharmonic()
            IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
@@ -326,10 +330,15 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            CALL initialize_ph_work(nwork)
         CASE ('scf_elastic_constants', 'mur_lc_elastic_constants',&
                                        'elastic_constants_t')
+
            IF (ALLOCATED(ibrav_geo))  DEALLOCATE(ibrav_geo)
            IF (ALLOCATED(celldm_geo)) DEALLOCATE(celldm_geo)
            IF (ALLOCATED(energy_geo)) DEALLOCATE(energy_geo)
            IF (ALLOCATED(omega_geo))  DEALLOCATE(omega_geo)
+           IF (ALLOCATED(epsilon_voigt)) DEALLOCATE(epsilon_voigt)
+           IF (ALLOCATED(epsilon_geo)) DEALLOCATE(epsilon_geo)
+           IF (ALLOCATED(sigma_geo))  DEALLOCATE(sigma_geo)
+           IF (ALLOCATED(rot_mat))    DEALLOCATE(rot_mat)
 !
 !     set_elastic_constant_work allocates ibrav_geo and celldm_geo
 !
