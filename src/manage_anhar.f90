@@ -108,8 +108,9 @@ INTEGER :: compute_nwork
 CALL check_all_geometry_done(all_geometry_done)
 IF (.NOT.all_geometry_done) RETURN
 !
-!    Anisotropic solid. Compute only the crystal parameters as a function
-!    of temperature and the thermal expansion tensor
+!    Anisotropic solid. Compute the crystal parameters, the thermal expansion 
+!    tensor and the Helmholtz (or Gibbs) free energy as a function 
+!    of temperature.
 !
 ndata= compute_nwork()
 ALLOCATE(phf(ndata))
@@ -188,6 +189,8 @@ CALL fit_frequencies_anis()
 !
 CALL set_volume_b0_cv_grun()
 CALL write_grun_anhar_anis()
+
+
 CALL plot_anhar_anis()
 
 RETURN

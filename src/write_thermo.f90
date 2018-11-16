@@ -7,7 +7,7 @@
 !
 SUBROUTINE write_thermo(igeom)
 !
-!  This routine writes on file the harmonic thermodynamical quantities
+!  This routine writes on file the harmonic thermodynamic quantities
 !  calculated using the phonon dos
 !
 USE kinds,          ONLY : DP
@@ -134,11 +134,13 @@ WRITE(stdout,'(5x,"Computing the thermodynamic properties from frequencies")')
 WRITE(stdout,'(5x,"Writing on file ",a)') TRIM(filename)
 WRITE(stdout,'(2x,76("+"),/)')
 !
-!  Allocate thermodynamic quantities
+!  Compute the zero point energy
 !
 CALL zero_point_energy_ph(ph_freq_save(igeom), e0)
 !
-!  Divide the temperatures among processors
+!  Now compute the other thermodynamic quantities. Note that the each
+!  processor adds its own q points so the thermodynamic quantities need
+!  to be collected among processors.
 !
 phf_free_ener(:,igeom)=0.0_DP
 phf_ener(:,igeom)=0.0_DP

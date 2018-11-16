@@ -307,3 +307,10 @@ The option <code>what='scf_disp'</code> requires all the dynamical matrices
 files in the <code>dynamical_matrices</code> directory. Use 
 <code>what='scf_ph'</code> until you collect all the dynamical matrices
 and do a final run with <code>what='scf_disp'</code>.
+<br><br>
+19. I am computing a phonon dispersion but some <B>q</B> points are not 
+computed.
+<br>
+Most probably you have not cleaned the outdir directory. Note that the 
+<code>thermo_pw</code> always tries to use the content of the 
+<code>outdir</code> directory if present.
