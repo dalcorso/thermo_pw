@@ -125,7 +125,6 @@ SUBROUTINE thermal_stress(el_con_t,alpha_t,bths,ntemp)
 !  On output thermal stresses are in the same units of the elastic
 !  constants
 !
-
 USE kinds,      ONLY : DP
 USE constants,  ONLY : ry_kbar
 USE voigt,      ONLY : to_voigt4
@@ -236,17 +235,19 @@ END DO
 RETURN
 END SUBROUTINE isoentropic_elastic_constants
 
-SUBROUTINE gen_average_gruneisen(volume,bths,cv_t,temp,ggamma_t,ntemp)
+SUBROUTINE gen_average_gruneisen(volume,bths,ce_t,temp,ggamma_t,ntemp)
 !
 !  This routine receives the thermal stress, the constant strain specific
 !  heat and gives the generalized average Gruneisen parameters.
 !  Note that we use here the definition reported in 
 !  D.C. Wallace, Thermodynamics of Crystals.
+!  See also Phys. Rev. B 29, 1741 (1984) for an alternative definition.
 !
 USE kinds, ONLY : DP
+USE constants, ONLY : ry_kbar
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ntemp
-REAL(DP), INTENT(IN) :: volume(ntemp), bths(3,3,ntemp), cv_t(ntemp), &
+REAL(DP), INTENT(IN) :: volume(ntemp), bths(3,3,ntemp), ce_t(ntemp), &
                         temp(ntemp)
 REAL(DP), INTENT(INOUT) :: ggamma_t(3,3,ntemp)
 
@@ -256,7 +257,8 @@ ggamma_t=0.0_DP
 DO itemp = 2,ntemp-1
    DO i = 1,3
       DO j = 1,3
-         ggamma_t(i,j,itemp) = volume(itemp) * bths(i,j,itemp) / cv_t(itemp)
+         ggamma_t(i,j,itemp) = - volume(itemp) * bths(i,j,itemp) / &
+                                                 ce_t(itemp) / ry_kbar
       END DO
    END DO 
 END DO
