@@ -456,7 +456,7 @@ SUBROUTINE thermo_readin()
   celldm_ph=0.0_DP
   temp_ph=0.0_DP
   with_eigen=.FALSE.
-  lquartic_ph=.FALSE.
+  lquartic_ph=.TRUE.
   lv0_t=.TRUE.
   lb0_t=.TRUE.
   flpgrun='output_pgrun.dat'

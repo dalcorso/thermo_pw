@@ -256,7 +256,9 @@ also the following quantities are plotted:
 Bulk modulus as a function of T                mur_lc_t
 Difference isobaric-isochoric heat capacity    mur_lc_t
 Difference isoentropic-isothermal bulk modulus mur_lc_t
+Thermal stresses as a function of T            mur_lc_t
 Average Gruneisen parameter                    mur_lc_t
+Generalized Average Gruneisen parameters       mur_lc_t     
 
 \end{verbatim}
 
@@ -330,20 +332,26 @@ mur_lc           do_ev           flevdat        (input_ev)
                  plot_multi_energy              flgnuplot(_energy)  flpsenergy
 
 mur_lc_t        
-        For cubic solids: 
+        When lmurn=.TRUE.: 
                  write_anharmonic
                                  flanhar
                                  flanhar(.bulk_mod)
                                  flanhar(.dbulk_mod)
                                  flanhar(.heat)
+                                 flanhar(.gamma)
+                                 flanhar(.anis.#na.dw)
                  write_ph_freq_anharmonic
                                  flanhar(_ph)
                                  flanhar(.bulk_mod_ph)
                                  flanhar(.dbulk_mod_ph)
                                  flanhar(.heat_ph)
+                                 flanhar(.gamma_ph)
                  write_grun_anharmonic
                                  flanhar(.aux_grun)
+                                 flanhar(.gamma_grun)
                  plot_anhar                     flgnuplot(_anhar)   flpsanhar
+                                                flgnuplot(anhar_dw) 
+                                                            flpsanhar(_dw)
                  write_gruneisen_bands
                                  flgrun
                                  flgrun(_freq)
@@ -352,23 +360,37 @@ mur_lc_t
                  write_gnuplot_file             flgnuplot(_grun)    flpsgrun
                                                 flgnuplot(_grun_freq) 
                                                                  flpsgrun(_freq)
-        For anisotropic solids:
+        When lmurn=.FALSE.:
                  write_anhar_anis
                                  flanhar
                                  flanhar(.celldm)
                                  flanhar(.bulk_mod)
                                  flanhar(.heat)
-                                 flanhar(.anis)
+                                 flanhar(.heat_anis)
+                                 flanhar(.tstress)
+                                 flanhar(.gamma)
+                                 flanhar(.ggamma)
+                                 flanhar(.anis.#na.dw)
                  write_ph_freq_anhar_anis
                                  flanhar(_ph)
                                  flanhar(.celldm_ph)
                                  flanhar(.bulk_mod_ph)
                                  flanhar(.heat_ph)
-                                 flanhar(.anis_ph)
+                                 flanhar(.heat_anis_ph)
+                                 flanhar(.tstress_ph)
+                                 flanhar(.gamma_ph)
+                                 flanhar(.ggamma_ph)
+                                 flanhar(.anis_ph.#na.dw)
                  write_grun_anharmonic_anis
                                  flanhar(.celldm_grun)
                                  flanhar(.aux_grun)
                  plot_anhar_anis                flgnuplot(_anhar)   flpsanhar
+                                                flgnuplot(anhar_anis_dw) 
+                                                            flpsanhar.anis_dw
+                                                flgnuplot(.tstress)  
+                                                            flpsanhar.tstress
+                                                flgnuplot(.ggamma)  
+                                                            flpsanhar.ggamma
                  write_gruneisen_bands_anis
                                  flgrun(_#)
                                  flgrun(_freq)
@@ -382,7 +404,9 @@ mur_lc_t
                                  flanhar(.el_cons_ph)
                  plot_elastic_t                 flgnuplot(_el_cons)  
                                                            flpsanhar(.el_cons)
+
 # is an integer from 1 to the number of crystal parameters
+#na is an integer from 1 to the number of atoms in the unit cell
 \end{verbatim} 
 
 \newpage
@@ -854,6 +878,42 @@ from a three dimensional Brillouin zone integration, or using the
 mode Gr\"uneisen parameters is used to calculate the quantities 
 contained in the file.
 
+\item
+\texttt{anhar\_files/flanhar.anis(\_ph).\#na.dw} (default name
+\texttt{output\_therm.dat.anis(\_ph).\#na.dw}).
+If \texttt{with\_eigen=.TRUE.}, the code produces for each atom 
+\texttt{.\#na} one of these
+files that contains the atomic $B$ factor tensor as a function of
+temperature. The atomic $B$ factor is interpolated at the equilibrium
+geometry at that temperature. The file contains:
+\begin{verbatim}
+#   T      B_{11}     B_{12}     B_{13}     B_{22}     B_{23}     B_{33}
+\end{verbatim}
+The extension \texttt{(\_ph)} indicates interpolation of
+quantities calculated from the direct integration over the Brillouin zone,
+while no extension indicates interpolation of quantities obtained
+from the generalized phonon density of states.
+
+
+\item
+\texttt{anhar\_files/flanhar.tstress(\_ph)} (default name 
+\texttt{output\_therm.dat.tstress(\_ph)}).
+This file is printed when \texttt{lmurn=.FALSE.} and the elastic constants 
+of one or more configurations are on file.
+The thermal stresses are computed as a function of temperature from the
+elastic constants and the thermal expansion.
+The file contains:
+\begin{verbatim}
+#   T      b_{11}     b_{12}     b_{13}     b_{22}     b_{23}     b_{33}
+\end{verbatim}
+The extension \texttt{(\_ph)} indicates interpolation of
+the elastic constants at the equilibrium geometry calculated from the 
+minimum of the free energy obtained by direct integration over the 
+Brillouin zone,
+while no extension indicates interpolation of the elastic constants at
+the equilibrium geometry obtained from the minimum of the free energy 
+calculated from the phonon density of states.
+
 \item 
 \texttt{anhar\_files/flanhar(.gamma)(\_ph)(\_grun)} 
 (default name \\ \texttt{output\_anhar.gamma(\_ph)(\_grun)}). 
@@ -873,6 +933,23 @@ free energy calculated from phonon density of states,
 a three dimensional Brillouin zone integration, or using the
 mode Gr\"uneisen parameters is used to calculate the quantities 
 contained in the file.
+
+\item
+\texttt{anhar\_files/flanhar.ggamma(\_ph)} (default name
+\texttt{output\_therm.dat.ggamma(\_ph)}).
+This file is printed when \texttt{lmurn=.FALSE.} and the elastic constants 
+of one or more configurations are on file.
+The generalized Gr\"uneisen parameters are computed as a function of 
+temperature from the thermal stresses the volume and the 
+constant strain heat capacity.
+The file contains:
+\begin{verbatim}
+#   T      g_{11}     g_{12}     g_{13}     g_{22}     g_{23}     g_{33}
+\end{verbatim}
+The extension \texttt{(\_ph)} indicates the use of quantities 
+calculated by direct integration over the Brillouin zone,
+while no extension indicates quantities calculated from the phonon 
+density of states.
 
 \item 
 \texttt{anhar\_files/flanhar.celldm(\_ph)(\_grun)} 

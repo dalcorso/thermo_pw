@@ -12,15 +12,17 @@ SUBROUTINE write_anhar_anis()
 !
 USE kinds,          ONLY : DP
 USE temperature,    ONLY : ntemp, temp
-USE thermodynamics, ONLY : ph_cv, ph_b_fact
+USE thermodynamics, ONLY : ph_ce, ph_b_fact
 USE anharmonic,     ONLY : alpha_anis_t, vmin_t, b0_t, celldm_t, beta_t, &
-                           gamma_t, cv_t, ce_t, cp_t, b0_s, cpmce_anis, &
-                           el_cons_t, free_e_min_t, bfact_t, lelastic
+                           gamma_t, cv_t, ce_t, cp_t, b0_s, cpmce_anis,  &
+                           el_cons_t, free_e_min_t, bths_t, ggamma_t,    &
+                           bfact_t, lelastic
 USE initial_conf,   ONLY : ibrav_save
 USE control_elastic_constants, ONLY : el_cons_available, el_cons_t_available
 USE control_thermo, ONLY : with_eigen
 USE elastic_constants, ONLY : el_con
-USE isoentropic,    ONLY : isostress_heat_capacity
+USE isoentropic,    ONLY : isostress_heat_capacity, thermal_stress,      &
+                           gen_average_gruneisen
 USE data_files,     ONLY : flanhar
 USE io_global,      ONLY : meta_ionode
 
@@ -43,12 +45,15 @@ ENDDO
 !
 CALL compute_beta(vmin_t, beta_t, temp, ntemp)
 
-CALL interpolate_cv(vmin_t, celldm_t, ph_cv, ce_t)
+CALL interpolate_cv(vmin_t, celldm_t, ph_ce, ce_t)
 IF (lelastic) THEN
    CALL isostress_heat_capacity(vmin_t,el_cons_t,alpha_anis_t,temp, &
                                                          cpmce_anis,ntemp)
    cp_t=ce_t+cpmce_anis
    CALL compute_cv_bs_g(beta_t, vmin_t, b0_t, cv_t, cp_t, b0_s, gamma_t)
+
+   CALL thermal_stress(el_cons_t,alpha_anis_t,bths_t,ntemp)
+   CALL gen_average_gruneisen(vmin_t,bths_t,cv_t,temp,ggamma_t,ntemp)
 ENDIF
 
 IF (meta_ionode) THEN
@@ -96,6 +101,12 @@ IF (meta_ionode) THEN
       CALL add_pressure(filename)
       CALL write_heat_anharm_anis(temp, ce_t, cv_t, cp_t, ntemp, filename)
 !
+!   Here the thermal stresses
+!
+      filename='anhar_files/'//TRIM(flanhar)//'.tstress'
+      CALL add_pressure(filename)
+      CALL write_thermal_stress(temp, bths_t, ntemp, filename)
+!
 !   Here the average Gruneisen paramater and the quantities that contribute
 !   to it
 !
@@ -103,6 +114,12 @@ IF (meta_ionode) THEN
       CALL add_pressure(filename)
       CALL write_gamma_anharm(temp, gamma_t, cv_t, beta_t, b0_t, ntemp, &
                                                                  filename)
+!
+!   Here the generalized Gruneisen parameters
+!
+      filename='anhar_files/'//TRIM(flanhar)//'.ggamma'
+      CALL add_pressure(filename)
+      CALL write_generalized_gamma(temp, ggamma_t, ntemp, filename)
    ELSE
 !
 !   only the interpolated heat capacity is available
@@ -131,16 +148,17 @@ SUBROUTINE write_ph_freq_anhar_anis()
 !
 USE kinds,          ONLY : DP
 USE temperature,    ONLY : ntemp, temp
-USE ph_freq_thermodynamics, ONLY : phf_cv, phf_b_fact
+USE ph_freq_thermodynamics, ONLY : phf_ce, phf_b_fact
 USE ph_freq_anharmonic, ONLY : alphaf_anis_t, vminf_t, b0f_t, celldmf_t, &
                                betaf_t, gammaf_t, cvf_t, cef_t, cpf_t, b0f_s, &
-                               cpmcef_anis, el_consf_t, lelasticf, &
-                               free_e_minf_t, bfactf_t
+                               cpmcef_anis, el_consf_t, lelasticf,       &
+                               free_e_minf_t, bthsf_t, ggammaf_t, bfactf_t
 USE elastic_constants, ONLY : el_con
 USE initial_conf,   ONLY : ibrav_save
 USE control_thermo, ONLY : with_eigen
 USE control_elastic_constants, ONLY : el_cons_available
-USE isoentropic,    ONLY : isostress_heat_capacity
+USE isoentropic,    ONLY : isostress_heat_capacity, thermal_stress,      &
+                           gen_average_gruneisen
 USE data_files,     ONLY : flanhar
 USE io_global,      ONLY : meta_ionode
 
@@ -163,12 +181,14 @@ ENDDO
 !
 CALL compute_beta(vminf_t, betaf_t, temp, ntemp)
 
-CALL interpolate_cv(vminf_t, celldmf_t, phf_cv, cef_t)
+CALL interpolate_cv(vminf_t, celldmf_t, phf_ce, cef_t)
 IF (lelasticf) THEN
    CALL isostress_heat_capacity(vminf_t,el_consf_t,alphaf_anis_t,temp,&
                                                          cpmcef_anis,ntemp)
    cpf_t=cef_t+cpmcef_anis
    CALL compute_cv_bs_g(betaf_t, vminf_t, b0f_t, cvf_t, cpf_t, b0f_s, gammaf_t)
+   CALL thermal_stress(el_consf_t,alphaf_anis_t,bthsf_t,ntemp)
+   CALL gen_average_gruneisen(vminf_t,bthsf_t,cvf_t,temp,ggammaf_t,ntemp)
 ENDIF
 
 IF (meta_ionode) THEN
@@ -209,6 +229,12 @@ IF (meta_ionode) THEN
 
       CALL write_heat_anharm(temp, cef_t, cvf_t, cpf_t, ntemp, filename)
 !
+!   Here the thermal stresses
+!
+      filename='anhar_files/'//TRIM(flanhar)//'.tstress_ph'
+      CALL add_pressure(filename)
+      CALL write_thermal_stress(temp, bthsf_t, ntemp, filename)
+!
 !   Here the average Gruneisen paramater and the quantities that contribute
 !   to it
 !
@@ -224,6 +250,13 @@ IF (meta_ionode) THEN
       filename='anhar_files/'//TRIM(flanhar)//'.heat_anis_ph'
       CALL add_pressure(filename)
       CALL write_heat_anharm_anis(temp, cef_t, cvf_t, cpf_t, ntemp, filename)
+!
+!   Here the generalized Gruneisen parameters
+!
+      filename='anhar_files/'//TRIM(flanhar)//'.ggamma_ph'
+      CALL add_pressure(filename)
+      CALL write_generalized_gamma(temp, ggammaf_t, ntemp, filename)
+
    ELSE
 !
 !   only the interpolated heat capacity is available
@@ -254,8 +287,7 @@ USE thermo_mod,     ONLY : ngeo
 USE temperature,    ONLY : ntemp, temp
 USE control_grun,   ONLY : vgrun_t, celldm_grun_t, b0_grun_t, lb0_t
 USE control_mur,    ONLY : vmin
-USE thermodynamics, ONLY : ph_cv
-USE ph_freq_thermodynamics, ONLY : ph_freq_save, phf_cv
+USE ph_freq_thermodynamics, ONLY : ph_freq_save
 USE anharmonic,     ONLY : celldm_t, vmin_t, b0_t, cv_t, lelastic, el_comp_t, &
                            el_cons_t
 USE ph_freq_anharmonic, ONLY : celldmf_t, vminf_t, b0f_t, cvf_t, lelasticf, &
@@ -746,3 +778,64 @@ ENDIF
 
 RETURN
 END SUBROUTINE write_heat_anharm_small
+
+SUBROUTINE write_thermal_stress(temp, bths_t, ntemp, filename)
+USE kinds,     ONLY : DP
+USE io_global, ONLY : meta_ionode
+IMPLICIT NONE
+INTEGER,  INTENT(IN) :: ntemp
+REAL(DP), INTENT(IN) :: temp(ntemp), bths_t(3,3,ntemp)
+CHARACTER(LEN=*) :: filename
+
+INTEGER :: itemp, iu_therm
+INTEGER :: find_free_unit
+
+IF (meta_ionode) THEN
+   iu_therm=find_free_unit()
+   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
+
+   WRITE(iu_therm,'("# Thermal stresses in (kbar)      ")')
+   WRITE(iu_therm,'("# T (K)",5x," b_11", 9x," b_12", 9x," b_13", 9x,&
+                       " b_22", 9x, " b_23", 9x, " b_33")')
+
+   DO itemp = 2, ntemp-1
+      WRITE(iu_therm, '(e12.5,6e14.6)') temp(itemp), bths_t(1,1,itemp),   &
+                  bths_t(1,2,itemp), bths_t(1,3,itemp), bths_t(2,2,itemp), &
+                  bths_t(2,3,itemp), bths_t(3,3,itemp) 
+   ENDDO
+   CLOSE(iu_therm)
+ENDIF
+
+RETURN
+END SUBROUTINE write_thermal_stress
+
+SUBROUTINE write_generalized_gamma(temp, ggamma_t, ntemp, filename)
+USE kinds,     ONLY : DP
+USE io_global, ONLY : meta_ionode
+
+IMPLICIT NONE
+INTEGER,  INTENT(IN) :: ntemp
+REAL(DP), INTENT(IN) :: temp(ntemp), ggamma_t(3,3,ntemp)
+CHARACTER(LEN=*) :: filename
+
+INTEGER :: itemp, iu_therm
+INTEGER :: find_free_unit
+
+IF (meta_ionode) THEN
+   iu_therm=find_free_unit()
+   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
+
+   WRITE(iu_therm,'("# Generalized Gruneisen parameter      ")')
+   WRITE(iu_therm,'("# T (K)",5x," g_11", 9x," g_12", 9x," g_13", 9x,&
+                       " g_22", 9x, " g_23", 9x, " g_33")')
+
+   DO itemp = 2, ntemp-1
+      WRITE(iu_therm, '(e12.5,6e14.6)') temp(itemp),   ggamma_t(1,1,itemp), &
+             ggamma_t(1,2,itemp), ggamma_t(1,3,itemp), ggamma_t(2,2,itemp), &
+             ggamma_t(2,3,itemp), ggamma_t(3,3,itemp) 
+   ENDDO
+   CLOSE(iu_therm)
+ENDIF
+
+RETURN
+END SUBROUTINE write_generalized_gamma

@@ -1593,7 +1593,7 @@ with_eigen    : if .TRUE. use the eigenvectors of the dynamical matrix to
                 Default: logical .FALSE. 
 lquartic_ph   : if .TRUE. fit the vibrational free energy with a fourth
                 order polynomial, otherwise with a second order polynomial
-                Default: logical .FALSE.
+                Default: logical .TRUE.
 lv0_t         : if .TRUE.  the calculation of the thermal expansion with 
                 Gruneisen parameters uses the equilibrium volume as a 
                 function of temperature computed from the free energy 
@@ -2111,17 +2111,21 @@ Phonon dos. There is one picture with a single \texttt{red} curve.
 Vibrational energy, free energy, entropy, and isochoric heat capacity. This plot
 is composed of four figures each one showing one quantity. In \texttt{red} the 
 quantities obtained using the phonon density of states, 
-in \texttt{blue} those obtained from three dimensional integrals over 
+in \texttt{blue} those obtained from integration over 
 the Brillouin zone. In some cases the \texttt{red} curve is not visible 
 because it is exactly below the \texttt{blue} one.
 
 \item
 Atomic B factors as a function of temperature. This plot is composed of 
-one figure for each atom for cubic solids and by two figures for each atom
-in the other cases. One figure contains $B_{xx}$ (red), $B_{yy}$ (blue)
-and $B_{zz}$ (green) as a function of temperature. If the three curves
-coincide only the last one (green) will be visible. The second figure, 
-when plotted shows $B_{xy}$ (red), $B_{xz}$ (blue), and $B_{yz}$ (green).
+one figure for each atom for cubic solids and of two figures for each atom
+in the other cases. One figure contains $B_{xx}$ (red, pink), $B_{yy}$ 
+(blue, light\_blue) and $B_{zz}$ (dark\_green, green) as a function of 
+temperature. The first color refers to quantities calculated from 
+generalized phonon density of states while the second refers to quantities 
+calculated by Brillouin zone integration.
+If the curves coincide, only the last one (green) will be visible. The second 
+figure, when plotted shows $B_{xy}$ (red, pink), $B_{xz}$ (blue, light\_blue), 
+and $B_{yz}$ (dark\_green, green).
 
 \item
 Debye vibrational energy, free energy, 
@@ -2212,10 +2216,35 @@ the average Gr\"uneisen parameter are plotted only in presence of
 one or more elastic constants file. 
 
 \item
+Thermal stresses as a function of temperature. This plot is composed of
+one figure in cubic solids and of two figures in the other cases. 
+One figure contains $b_{xx}$ (red, pink), $b_{yy}$ (blue, light\_blue)
+and $b_{zz}$ (dark\_green, green) as a function of temperature. 
+The first color refers to quantities calculated from phonon density of states
+while the second refers to quantities calculated by Brillouin zone
+integration. If the curves coincide, only the last one (green) will 
+be visible. The second figure, when plotted, shows $b_{xy}$ (red, pink), 
+$b_{xz}$ (blue, light\_blue), and $b_{yz}$ (dark\_green, green).
+
+\item
 Mode Gr\"uneisen parameters. In this plot the mode Gr\"uneisen parameters have
 the color of the irreducible representation of the phonon dispersion curve
 of which they are the derivative.
 The same comments made for the band structure plot apply here.
+
+\item
+Generalized average Gr\"uneisen parameters as a function of temperature. 
+This plot is composed of one figure in cubic solids and of two figures in 
+the other cases. 
+One figure contains $\gamma_{xx}$ (red, pink), $\gamma_{yy}$ (blue, light\_blue)
+and $\gamma_{zz}$ (dark\_green, green) as a function of temperature. 
+The first color refers to quantities calculated from phonon density of states
+while the second color refers to quantities calculated by Brillouin zone
+integration.
+If the curves coincide, only the last one (green) will be visible. 
+The second figure, 
+when plotted shows $\gamma_{xy}$ (red, pink), $\gamma_{xz}$ 
+(blue, light\_blue), and $\gamma_{yz}$ (dark\_green, green).
 
 \item
 Phonon dispersions at the geometry that corresponds to a given temperature. 

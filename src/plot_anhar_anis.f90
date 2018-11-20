@@ -47,7 +47,7 @@ CHARACTER(LEN=256) :: gnu_filename, filename, filename1, filename2, &
                       filename_gamma, filename_gamma_ph, filename_gamma_grun, &
                       filenameps
 INTEGER :: ierr, system
-LOGICAL :: isoent_avail
+LOGICAL :: isoent_avail, noncubic
 
 IF ( my_image_id /= root_image ) RETURN
 
@@ -337,7 +337,8 @@ ENDIF
 !
 !  Part 10: Difference C_V-C_e heat capacity
 !
-IF (isoent_avail) THEN
+noncubic=(ibrav_save/=1.AND.ibrav_save/=2.AND.ibrav_save/=3)
+IF (isoent_avail.AND.noncubic) THEN
    CALL gnuplot_set_fact(1313313.0_DP,.FALSE.)
    CALL gnuplot_ylabel('C_{V} - C_{/Symbol e} (J / K / N / mol)',.FALSE.)
    IF (ltherm_dos) &
@@ -385,7 +386,6 @@ IF (isoent_avail) THEN
       CALL gnuplot_write_file_mul_data(filename_gamma_grun,1,2,'color_green',&
                           .NOT.(ltherm_dos.OR.ltherm_freq),.TRUE.,.FALSE.)
 ENDIF
-
 CALL gnuplot_end()
 
 IF (lgnuplot.AND.ionode) &
@@ -396,8 +396,220 @@ IF (lgnuplot.AND.ionode) &
 !                                       //TRIM(gnu_filename), WAIT=.FALSE.)
 IF (with_eigen) CALL plot_dw_anhar_anis()
 
+IF (isoent_avail) THEN
+   CALL plot_thermal_stress()
+   CALL plot_generalized_gruneisen()
+ENDIF
+
 RETURN
 END SUBROUTINE plot_anhar_anis
+
+SUBROUTINE plot_thermal_stress()
+!
+!  This routine plot the thermal stress tensor
+!
+USE kinds,            ONLY : DP
+USE ions_base,        ONLY : nat
+USE cell_base,        ONLY : ibrav
+USE control_thermo,   ONLY : ltherm_dos, ltherm_freq
+USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
+USE postscript_files, ONLY : flpsanhar
+USE gnuplot,          ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
+                             gnuplot_ylabel, &
+                             gnuplot_xlabel, &
+                             gnuplot_write_file_mul_data
+USE gnuplot_color,    ONLY : gnuplot_set_greens
+USE data_files,       ONLY : flanhar
+USE temperature,      ONLY : tmin, tmax
+USE mp_images,        ONLY : root_image, my_image_id
+USE io_global,        ONLY : ionode
+
+IMPLICIT NONE
+CHARACTER(LEN=256) :: gnu_filename, filename, psfilename, filenameph
+INTEGER :: ierr, system, na
+CHARACTER(LEN=6) :: int_to_char
+
+IF ( my_image_id /= root_image ) RETURN
+
+gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'.tstress'
+CALL gnuplot_start(gnu_filename)
+
+psfilename=TRIM(flpsanhar)//'.tstress'//TRIM(flext)
+IF (tmin ==1._DP) THEN
+   CALL gnuplot_write_header(psfilename, 0.0_DP, tmax, 0.0_DP, 0.0_DP, &
+                                                       1.0_DP, flext )
+ELSE
+   CALL gnuplot_write_header(psfilename, tmin, tmax, 0.0_DP, 0.0_DP, &
+                                                       1.0_DP, flext )
+ENDIF
+CALL gnuplot_set_greens()
+CALL gnuplot_xlabel('T (K)', .FALSE.)
+
+filename='anhar_files/'//TRIM(flanhar)//'.tstress'
+filenameph='anhar_files/'//TRIM(flanhar)//'.tstress_ph'
+!
+!   First the diagonal components
+!
+CALL gnuplot_ylabel('Thermal stress b_{ii} (kbar)',.FALSE.)
+
+IF (ltherm_dos) THEN
+   CALL gnuplot_write_file_mul_data(filename,1,2,'color_red',.TRUE., &
+                                                   .FALSE.,.FALSE.)
+
+   CALL gnuplot_write_file_mul_data(filename,1,5,'color_blue',.FALSE., &
+                                                   .FALSE.,.FALSE.)
+
+   CALL gnuplot_write_file_mul_data(filename,1,7,'color_dark_spring_green',&
+                                .FALSE., .NOT.ltherm_freq,.FALSE.)
+ENDIF
+
+IF (ltherm_freq) THEN
+   CALL gnuplot_write_file_mul_data(filenameph,1,2,'color_pink', &
+                                               .NOT.ltherm_dos,.FALSE.,.FALSE.)
+
+   CALL gnuplot_write_file_mul_data(filenameph,1,5,'color_light_blue', &
+                                               .FALSE., .FALSE.,.FALSE.)
+
+   CALL gnuplot_write_file_mul_data(filenameph,1,7,'color_green', &
+                                               .FALSE.,.TRUE.,.FALSE.)
+ENDIF
+!
+!  And then the off diagonal, only for noncubic solids
+!
+IF (ibrav/=1.AND.ibrav/=2.AND.ibrav/=3) THEN
+   CALL gnuplot_ylabel('Thermal stress b_{ij} (kbar)',.FALSE.)
+
+   IF (ltherm_dos) THEN
+      CALL gnuplot_write_file_mul_data(filename,1,3,'color_red',.TRUE., &
+                                               .FALSE.,.FALSE.)
+      CALL gnuplot_write_file_mul_data(filename,1,4,'color_blue',.FALSE., &
+                                                .FALSE.,.FALSE.)
+      CALL gnuplot_write_file_mul_data(filename,1,6,&
+                   'color_dark_spring_green',.FALSE.,.NOT.ltherm_freq,.FALSE.)
+   ENDIF
+
+   IF (ltherm_freq) THEN
+      CALL gnuplot_write_file_mul_data(filenameph,1,3,'color_pink', &
+                                               .NOT.ltherm_dos,.FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filenameph,1,4,'color_light_blue', &
+                                               .FALSE.,.FALSE.,.FALSE.)
+
+      CALL gnuplot_write_file_mul_data(filenameph,1,6,'color_green', &
+                                               .FALSE.,.TRUE.,.FALSE.)
+   ENDIF
+ENDIF
+
+CALL gnuplot_end()
+
+IF (lgnuplot.AND.ionode) &
+   ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+
+RETURN
+END SUBROUTINE plot_thermal_stress
+
+SUBROUTINE plot_generalized_gruneisen()
+!
+!  This routine plot the thermal stress tensor
+!
+USE kinds,            ONLY : DP
+USE ions_base,        ONLY : nat
+USE cell_base,        ONLY : ibrav
+USE control_thermo,   ONLY : ltherm_dos, ltherm_freq
+USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
+USE postscript_files, ONLY : flpsanhar
+USE gnuplot,          ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
+                             gnuplot_ylabel, &
+                             gnuplot_xlabel, &
+                             gnuplot_write_file_mul_data
+USE gnuplot_color,    ONLY : gnuplot_set_greens
+USE data_files,       ONLY : flanhar
+USE temperature,      ONLY : tmin, tmax
+USE mp_images,        ONLY : root_image, my_image_id
+USE io_global,        ONLY : ionode
+
+IMPLICIT NONE
+CHARACTER(LEN=256) :: gnu_filename, filename, psfilename, filenameph
+INTEGER :: ierr, system, na
+CHARACTER(LEN=6) :: int_to_char
+
+IF ( my_image_id /= root_image ) RETURN
+
+gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'.ggamma'
+CALL gnuplot_start(gnu_filename)
+
+psfilename=TRIM(flpsanhar)//'.ggamma'//TRIM(flext)
+IF (tmin ==1._DP) THEN
+   CALL gnuplot_write_header(psfilename, 0.0_DP, tmax, 0.0_DP, 0.0_DP, &
+                                                       1.0_DP, flext )
+ELSE
+   CALL gnuplot_write_header(psfilename, tmin, tmax, 0.0_DP, 0.0_DP, &
+                                                       1.0_DP, flext )
+ENDIF
+CALL gnuplot_set_greens()
+CALL gnuplot_xlabel('T (K)', .FALSE.)
+
+filename='anhar_files/'//TRIM(flanhar)//'.ggamma'
+filenameph='anhar_files/'//TRIM(flanhar)//'.ggamma_ph'
+!
+!   First the diagonal components
+!
+CALL gnuplot_ylabel('Gr\374neisen parameters ({/Symbol g}_{ii})',.FALSE.)
+
+IF (ltherm_dos) THEN
+   CALL gnuplot_write_file_mul_data(filename,1,2,'color_red',.TRUE., &
+                                                   .FALSE.,.FALSE.)
+
+   CALL gnuplot_write_file_mul_data(filename,1,5,'color_blue',.FALSE., &
+                                                   .FALSE.,.FALSE.)
+
+   CALL gnuplot_write_file_mul_data(filename,1,7,'color_dark_spring_green',&
+                                .FALSE., .NOT.ltherm_freq,.FALSE.)
+ENDIF
+
+IF (ltherm_freq) THEN
+   CALL gnuplot_write_file_mul_data(filenameph,1,2,'color_pink', &
+                                               .NOT.ltherm_dos,.FALSE.,.FALSE.)
+
+   CALL gnuplot_write_file_mul_data(filenameph,1,5,'color_light_blue', &
+                                               .FALSE., .FALSE.,.FALSE.)
+
+   CALL gnuplot_write_file_mul_data(filenameph,1,7,'color_green', &
+                                               .FALSE.,.TRUE.,.FALSE.)
+ENDIF
+!
+!  And then the off diagonal, only for noncubic solids
+!
+IF (ibrav/=1.AND.ibrav/=2.AND.ibrav/=3) THEN
+
+   CALL gnuplot_ylabel('Gr\374neisen parameters ({/Symbol g}_{ij})',.FALSE.)
+
+   IF (ltherm_dos) THEN
+      CALL gnuplot_write_file_mul_data(filename,1,3,'color_red',.TRUE., &
+                                               .FALSE.,.FALSE.)
+      CALL gnuplot_write_file_mul_data(filename,1,4,'color_blue',.FALSE., &
+                                                .FALSE.,.FALSE.)
+      CALL gnuplot_write_file_mul_data(filename,1,6,&
+                   'color_dark_spring_green',.FALSE.,.NOT.ltherm_freq,.FALSE.)
+   ENDIF
+
+   IF (ltherm_freq) THEN
+      CALL gnuplot_write_file_mul_data(filenameph,1,3,'color_pink', &
+                                               .NOT.ltherm_dos,.FALSE.,.FALSE.)
+      CALL gnuplot_write_file_mul_data(filenameph,1,4,'color_light_blue', &
+                                               .FALSE.,.FALSE.,.FALSE.)
+      CALL gnuplot_write_file_mul_data(filenameph,1,6,'color_green', &
+                                               .FALSE.,.TRUE.,.FALSE.)
+   ENDIF
+ENDIF
+
+CALL gnuplot_end()
+
+IF (lgnuplot.AND.ionode) &
+   ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+
+RETURN
+END SUBROUTINE plot_generalized_gruneisen
 
 ! Copyright (C) 2018 Cristiano Malica
 
@@ -428,10 +640,10 @@ CHARACTER(LEN=6) :: int_to_char
 
 IF ( my_image_id /= root_image ) RETURN
 
-gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_anhar_anis_dw'
+gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'.anhar_anis_dw'
 CALL gnuplot_start(gnu_filename)
 
-psfilename=TRIM(flpsanhar)//'_anis_dw'//TRIM(flext)
+psfilename=TRIM(flpsanhar)//'.anis_dw'//TRIM(flext)
 IF (tmin ==1._DP) THEN
    CALL gnuplot_write_header(psfilename, 0.0_DP, tmax, 0.0_DP, 0.0_DP, &
                                                        1.0_DP, flext )
@@ -445,7 +657,6 @@ DO na=1,nat
 
    filename='anhar_files/'//TRIM(flanhar)//'.anis_ph.'//TRIM(int_to_char(na))//'.dw'
    filetherm='anhar_files/'//TRIM(flanhar)//'.anis.'//TRIM(int_to_char(na))//'.dw'
-
 !
 !   First the diagonal components
 !
@@ -477,6 +688,11 @@ DO na=1,nat
 !  And then the off diagonal, only for noncubic solids
 !
    IF (ibrav/=1.AND.ibrav/=2.AND.ibrav/=3) THEN
+!
+!   Then the off diagonal components
+!
+      CALL gnuplot_ylabel('B_{ij} ({\305}^2) (atom '// &
+                                        TRIM(int_to_char(na))//')',.FALSE.)
 
       IF (ltherm_dos) THEN
          CALL gnuplot_write_file_mul_data(filetherm,1,3,'color_red',.TRUE., &

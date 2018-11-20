@@ -15,22 +15,22 @@ SUBROUTINE allocate_thermodynamics()
   USE ions_base,      ONLY : nat
   USE thermo_mod,     ONLY : tot_ngeo
   USE temperature,    ONLY : ntemp
-  USE thermodynamics, ONLY : ph_free_ener, ph_ener, ph_entropy, ph_cv, ph_b_fact
+  USE thermodynamics, ONLY : ph_free_ener, ph_ener, ph_entropy, ph_ce, ph_b_fact
   USE ph_freq_thermodynamics, ONLY : phf_free_ener, phf_ener, phf_entropy, &
-                                     phf_cv, phf_b_fact
+                                     phf_ce, phf_b_fact
 
   IMPLICIT NONE
 
   IF (.NOT.ALLOCATED(ph_free_ener))  ALLOCATE(ph_free_ener(ntemp,tot_ngeo))
   IF (.NOT.ALLOCATED(ph_ener))       ALLOCATE(ph_ener(ntemp,tot_ngeo))
   IF (.NOT.ALLOCATED(ph_entropy))    ALLOCATE(ph_entropy(ntemp,tot_ngeo))
-  IF (.NOT.ALLOCATED(ph_cv))         ALLOCATE(ph_cv(ntemp,tot_ngeo))
+  IF (.NOT.ALLOCATED(ph_ce))         ALLOCATE(ph_ce(ntemp,tot_ngeo))
   IF (.NOT.ALLOCATED(ph_b_fact))     ALLOCATE(ph_b_fact(3,3,nat,ntemp,tot_ngeo))
 
   IF (.NOT.ALLOCATED(phf_free_ener)) ALLOCATE(phf_free_ener(ntemp,tot_ngeo))
   IF (.NOT.ALLOCATED(phf_ener))      ALLOCATE(phf_ener(ntemp,tot_ngeo))
   IF (.NOT.ALLOCATED(phf_entropy))   ALLOCATE(phf_entropy(ntemp,tot_ngeo))
-  IF (.NOT.ALLOCATED(phf_cv))        ALLOCATE(phf_cv(ntemp,tot_ngeo))
+  IF (.NOT.ALLOCATED(phf_ce))        ALLOCATE(phf_ce(ntemp,tot_ngeo))
   IF (.NOT.ALLOCATED(phf_b_fact))    ALLOCATE(phf_b_fact(3,3,nat,ntemp,tot_ngeo))
 
   RETURN
@@ -45,12 +45,13 @@ SUBROUTINE allocate_anharmonic()
                                   alpha_t, beta_t, gamma_t, cv_t, ce_t, &
                                   cp_t, b0_s, &
                                   celldm_t, alpha_anis_t, cpmce_anis,        &
-                                  el_cons_t, el_comp_t, macro_el_t, bfact_t
+                                  el_cons_t, el_comp_t, macro_el_t,          &
+                                  bths_t, ggamma_t, bfact_t
   USE ph_freq_anharmonic,  ONLY : vminf_t, b0f_t, b01f_t, free_e_minf_t,     &
                                   alphaf_t, betaf_t, gammaf_t, cvf_t, cef_t, &
                                   cpf_t, b0f_s, celldmf_t, alphaf_anis_t,    & 
                                   cpmcef_anis, el_consf_t, el_compf_t,       &
-                                  macro_elf_t, bfactf_t
+                                  macro_elf_t, bthsf_t, ggammaf_t, bfactf_t
   USE grun_anharmonic,     ONLY : betab, alpha_an_g, cp_grun_t, cv_grun_t, &
                                   ce_grun_t, b0_grun_s, grun_gamma_t,      &
                                   grun_cpmce_anis
@@ -70,6 +71,8 @@ SUBROUTINE allocate_anharmonic()
   IF (.NOT. ALLOCATED (alpha_t) )       ALLOCATE(alpha_t(ntemp)) 
   IF (.NOT. ALLOCATED (beta_t) )        ALLOCATE(beta_t(ntemp)) 
   IF (.NOT. ALLOCATED (gamma_t) )       ALLOCATE(gamma_t(ntemp)) 
+  IF (.NOT. ALLOCATED (bths_t) )        ALLOCATE(bths_t(3,3,ntemp)) 
+  IF (.NOT. ALLOCATED (ggamma_t) )      ALLOCATE(ggamma_t(3,3,ntemp)) 
   IF (.NOT. ALLOCATED (bfact_t))        ALLOCATE(bfact_t(6,nat,ntemp))
   IF (.NOT. ALLOCATED (celldm_t) )      ALLOCATE(celldm_t(6,ntemp)) 
   IF (.NOT. ALLOCATED (alpha_anis_t) )  ALLOCATE(alpha_anis_t(6,ntemp)) 
@@ -89,6 +92,8 @@ SUBROUTINE allocate_anharmonic()
   IF (.NOT. ALLOCATED (alphaf_t) )      ALLOCATE(alphaf_t(ntemp)) 
   IF (.NOT. ALLOCATED (betaf_t) )       ALLOCATE(betaf_t(ntemp)) 
   IF (.NOT. ALLOCATED (gammaf_t) )      ALLOCATE(gammaf_t(ntemp)) 
+  IF (.NOT. ALLOCATED (bthsf_t) )       ALLOCATE(bthsf_t(3,3,ntemp)) 
+  IF (.NOT. ALLOCATED (ggammaf_t) )     ALLOCATE(ggammaf_t(3,3,ntemp)) 
   IF (.NOT. ALLOCATED (celldmf_t) )     ALLOCATE(celldmf_t(6,ntemp)) 
   IF (.NOT. ALLOCATED (bfactf_t))       ALLOCATE(bfactf_t(6,nat,ntemp))
   IF (.NOT. ALLOCATED (alphaf_anis_t) ) ALLOCATE(alphaf_anis_t(6,ntemp)) 

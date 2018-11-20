@@ -16,7 +16,7 @@ USE phdos_module,   ONLY : zero_point_energy, fecv, integrated_dos, &
                            phdos_debye_factor
 USE thermo_mod,     ONLY : tot_ngeo
 USE temperature,    ONLY : ntemp, temp
-USE thermodynamics, ONLY : ph_ener, ph_free_ener, ph_entropy, ph_cv, &
+USE thermodynamics, ONLY : ph_ener, ph_free_ener, ph_entropy, ph_ce, &
                            ph_b_fact, phdos_save, gen_phdos_save
 USE control_thermo, ONLY : with_eigen
 USE data_files,     ONLY : fltherm
@@ -38,7 +38,7 @@ IF ( igeom < 1 .OR. igeom > tot_ngeo ) CALL errore('write_thermo', &
 
 filetherm='therm_files/'//TRIM(fltherm)
 CALL read_thermo(ntemp, temp, ph_ener(1,igeom), ph_free_ener(1,igeom), &
-                 ph_entropy(1,igeom), ph_cv(1,igeom), &
+                 ph_entropy(1,igeom), ph_ce(1,igeom), &
                  ph_b_fact(1,1,1,1,igeom), do_read, filetherm)
 IF (do_read) RETURN
 
@@ -55,7 +55,7 @@ CALL integrated_dos(phdos_save(igeom), tot_states)
 CALL divide (world_comm, ntemp, startt, lastt)
 ph_free_ener(:,igeom)=0.0_DP
 ph_ener(:,igeom)=0.0_DP
-ph_cv(:,igeom)=0.0_DP
+ph_ce(:,igeom)=0.0_DP
 ph_entropy(:,igeom)=0.0_DP
 ph_b_fact(:,:,:,:,igeom)=0.0_DP
 DO itemp = startt, lastt
@@ -64,7 +64,7 @@ DO itemp = startt, lastt
        & i5, 4x," T=",f12.2," K")') itemp-startt+1, lastt-startt+1, temp(itemp)
 
    CALL fecv(phdos_save(igeom), temp(itemp), ph_free_ener(itemp, igeom), &
-                                  ph_ener(itemp,igeom), ph_cv(itemp, igeom))
+                                  ph_ener(itemp,igeom), ph_ce(itemp, igeom))
    ph_free_ener(itemp,igeom)=ph_free_ener(itemp,igeom)+e0
    ph_ener(itemp,igeom)=ph_ener(itemp,igeom)+e0
    ph_entropy(itemp,igeom)=(ph_ener(itemp, igeom)-ph_free_ener(itemp,igeom))/&
@@ -80,13 +80,13 @@ END DO
 !
 CALL mp_sum(ph_free_ener(1:ntemp,igeom),world_comm)
 CALL mp_sum(ph_ener(1:ntemp,igeom),world_comm)
-CALL mp_sum(ph_cv(1:ntemp,igeom),world_comm)
+CALL mp_sum(ph_ce(1:ntemp,igeom),world_comm)
 CALL mp_sum(ph_entropy(1:ntemp,igeom),world_comm)
 IF (with_eigen) CALL mp_sum(ph_b_fact(1:3,1:3,1:nat,1:ntemp,igeom),world_comm)
 
 IF (meta_ionode) &
    CALL write_thermo_info(e0, tot_states, ntemp, temp, ph_ener(1,igeom), &
-              ph_free_ener(1,igeom), ph_entropy(1,igeom), ph_cv(1,igeom),&
+              ph_free_ener(1,igeom), ph_entropy(1,igeom), ph_ce(1,igeom),&
                                                              1,filetherm)
 IF (meta_ionode.AND.with_eigen) &
    CALL write_dw_info(ntemp, temp, ph_b_fact(1,1,1,1,igeom), nat, filetherm)
@@ -104,7 +104,7 @@ USE ph_freq_module,   ONLY : ph_freq_type, zero_point_energy_ph, fecv_ph, &
                              specific_heat_cv_ph, debye_waller_factor
 USE temperature,      ONLY : ntemp, temp
 USE ph_freq_thermodynamics, ONLY : phf_ener, phf_free_ener, phf_entropy, &
-                             phf_cv, phf_b_fact, ph_freq_save
+                             phf_ce, phf_b_fact, ph_freq_save
 USE thermo_mod,       ONLY : tot_ngeo
 USE control_thermo,   ONLY : with_eigen
 USE data_files,       ONLY : fltherm
@@ -125,7 +125,7 @@ IF ( igeom < 1 .OR. igeom > tot_ngeo ) CALL errore('write_thermo', &
                                                'Too many geometries',1)
 filename='therm_files/'//TRIM(fltherm)//'_ph'
 CALL read_thermo(ntemp, temp, phf_ener(1,igeom), phf_free_ener(1,igeom), &
-                 phf_entropy(1,igeom), phf_cv(1,igeom), &
+                 phf_entropy(1,igeom), phf_ce(1,igeom), &
                  phf_b_fact(1,1,1,1,igeom), do_read, filename)
 IF (do_read) RETURN
 
@@ -144,14 +144,14 @@ CALL zero_point_energy_ph(ph_freq_save(igeom), e0)
 !
 phf_free_ener(:,igeom)=0.0_DP
 phf_ener(:,igeom)=0.0_DP
-phf_cv(:,igeom)=0.0_DP
+phf_ce(:,igeom)=0.0_DP
 phf_entropy(:,igeom)=0.0_DP
 DO itemp = 1, ntemp
    IF (MOD(itemp,30)==0) &
         WRITE(stdout,'(5x,"Computing temperature ", i5 " / ",&
         & i5,4x," T=",f12.2," K")') itemp, ntemp, temp(itemp)
    CALL fecv_ph(ph_freq_save(igeom), temp(itemp), phf_free_ener(itemp,igeom), &
-                      phf_ener(itemp, igeom), phf_cv(itemp, igeom))
+                      phf_ener(itemp, igeom), phf_ce(itemp, igeom))
    phf_free_ener(itemp,igeom)=phf_free_ener(itemp,igeom)+e0
    phf_ener(itemp,igeom)=phf_ener(itemp,igeom)+e0
    phf_entropy(itemp,igeom)=(phf_ener(itemp, igeom) - &
@@ -168,13 +168,13 @@ END DO
 !
 CALL mp_sum(phf_free_ener(1:ntemp,igeom),world_comm)
 CALL mp_sum(phf_ener(1:ntemp,igeom),world_comm)
-CALL mp_sum(phf_cv(1:ntemp,igeom),world_comm)
+CALL mp_sum(phf_ce(1:ntemp,igeom),world_comm)
 CALL mp_sum(phf_entropy(1:ntemp,igeom),world_comm)
 IF (with_eigen) CALL mp_sum(phf_b_fact(1:3,1:3,1:nat,1:ntemp,igeom),world_comm)
 
 IF (meta_ionode) &
    CALL write_thermo_info(e0, 0.0_DP, ntemp, temp, phf_ener(1,igeom), &
-              phf_free_ener(1,igeom), phf_entropy(1,igeom), phf_cv(1,igeom),& 
+              phf_free_ener(1,igeom), phf_entropy(1,igeom), phf_ce(1,igeom),& 
                                                             2,filename)
 IF (meta_ionode.AND.with_eigen) &
    CALL write_dw_info(ntemp, temp, phf_b_fact(1,1,1,1,igeom), nat, filename)
@@ -325,7 +325,7 @@ RETURN
 END SUBROUTINE write_dw_info
 
 SUBROUTINE read_thermo(ntemp, temp, ph_ener, ph_free_ener, ph_entropy, &
-                       ph_cv, b_fact, do_read, filetherm)
+                       ph_ce, b_fact, do_read, filetherm)
 
 USE kinds,            ONLY : DP
 USE ions_base,        ONLY : nat
@@ -337,7 +337,7 @@ USE mp,               ONLY : mp_bcast
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ntemp
 REAL(DP), INTENT(INOUT) :: temp(ntemp), ph_ener(ntemp), ph_free_ener(ntemp),&
-                           ph_entropy(ntemp), ph_cv(ntemp), &
+                           ph_entropy(ntemp), ph_ce(ntemp), &
                            b_fact(3,3,nat,ntemp)
 LOGICAL, INTENT(OUT) :: do_read
 
@@ -360,14 +360,14 @@ IF (do_read) THEN
       DO itemp = 1, ntemp
          READ(iu_therm, '(e16.8,4e20.12)') temp(itemp), &
                     ph_ener(itemp), ph_free_ener(itemp), &
-                    ph_entropy(itemp), ph_cv(itemp)
+                    ph_entropy(itemp), ph_ce(itemp)
       END DO
       CLOSE(UNIT=iu_therm, STATUS='KEEP')
    END IF
    CALL mp_bcast(ph_ener, meta_ionode_id, world_comm)
    CALL mp_bcast(ph_free_ener, meta_ionode_id, world_comm)
    CALL mp_bcast(ph_entropy, meta_ionode_id, world_comm)
-   CALL mp_bcast(ph_cv, meta_ionode_id, world_comm)
+   CALL mp_bcast(ph_ce, meta_ionode_id, world_comm)
 
    IF (with_eigen) THEN
       DO na=1,nat

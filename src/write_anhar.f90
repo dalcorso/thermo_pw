@@ -12,7 +12,7 @@ SUBROUTINE write_anharmonic()
 !
 USE kinds,          ONLY : DP
 USE temperature,    ONLY : ntemp, temp
-USE thermodynamics, ONLY : ph_cv, ph_b_fact
+USE thermodynamics, ONLY : ph_ce, ph_b_fact
 USE anharmonic,     ONLY : alpha_t, beta_t, gamma_t, cp_t, cv_t, b0_s, &
                            vmin_t, free_e_min_t, b0_t, b01_t, bfact_t, &
                            celldm_t
@@ -26,7 +26,7 @@ CALL compute_beta(vmin_t, beta_t, temp, ntemp)
 
 alpha_t = beta_t / 3.0_DP
 
-CALL interpolate_cv(vmin_t, celldm_t, ph_cv, cv_t) 
+CALL interpolate_cv(vmin_t, celldm_t, ph_ce, cv_t) 
 CALL compute_cp_bs_g(beta_t, vmin_t, b0_t, cv_t, cp_t, b0_s, gamma_t)
 !
 !   here we plot the quantities calculated from the phonon dos
@@ -81,7 +81,7 @@ SUBROUTINE write_ph_freq_anharmonic()
 USE kinds,          ONLY : DP
 USE temperature,    ONLY : ntemp, temp
 USE control_thermo, ONLY : with_eigen
-USE ph_freq_thermodynamics, ONLY : phf_cv, phf_b_fact
+USE ph_freq_thermodynamics, ONLY : phf_ce, phf_b_fact
 USE ph_freq_anharmonic, ONLY : alphaf_t, betaf_t, gammaf_t, cpf_t, cvf_t, &
                         b0f_s, free_e_minf_t, vminf_t, b0f_t, b01f_t, &
                         bfactf_t, celldmf_t
@@ -94,7 +94,7 @@ CALL compute_beta(vminf_t, betaf_t, temp, ntemp)
 
 alphaf_t = betaf_t / 3.0_DP
 
-CALL interpolate_cv(vminf_t, celldmf_t, phf_cv, cvf_t) 
+CALL interpolate_cv(vminf_t, celldmf_t, phf_ce, cvf_t) 
 CALL compute_cp_bs_g(betaf_t, vminf_t, b0f_t, cvf_t, cpf_t, b0f_s, gammaf_t)
 
 !
@@ -157,7 +157,7 @@ USE kinds,          ONLY : DP
 USE constants,      ONLY : ry_kbar
 USE ions_base,      ONLY : nat
 USE temperature,    ONLY : ntemp, temp
-USE ph_freq_thermodynamics, ONLY : ph_freq_save, phf_cv
+USE ph_freq_thermodynamics, ONLY : ph_freq_save, phf_ce
 USE anharmonic,     ONLY :  vmin_t, b0_t, cv_t, celldm_t
 USE ph_freq_anharmonic, ONLY :  vminf_t, cvf_t, b0f_t, cpf_t, b0f_s
 USE grun_anharmonic, ONLY : betab, cp_grun_t, b0_grun_s, &
@@ -257,7 +257,7 @@ ELSEIF (ltherm_dos) THEN
 ELSE
    vmin_t(1:ntemp)=vmin
    b0_t(1:ntemp)=b0
-   CALL interpolate_cv(vmin_t, celldm_t, phf_cv, cv_t)
+   CALL interpolate_cv(vmin_t, celldm_t, phf_ce, cv_t)
    CALL compute_cp_bs_g(betab, vmin_t, b0_t, cv_t, cp_grun_t, &
                                               b0_grun_s, grun_gamma_t)
 ENDIF

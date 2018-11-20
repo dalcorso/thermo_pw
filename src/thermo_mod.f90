@@ -120,7 +120,7 @@ MODULE thermodynamics
   REAL(DP), ALLOCATABLE :: ph_ener(:,:)      ! phonon total energy, T, geometry
   REAL(DP), ALLOCATABLE :: ph_free_ener(:,:) ! phonon free_energy, T, geometry
   REAL(DP), ALLOCATABLE :: ph_entropy(:,:)   ! phonon entropy, T, geometry
-  REAL(DP), ALLOCATABLE :: ph_cv(:,:)        ! phonon specific heat, T, geometry
+  REAL(DP), ALLOCATABLE :: ph_ce(:,:)        ! phonon specific heat, T, geometry
   REAL(DP), ALLOCATABLE :: ph_b_fact(:,:,:,:,:)! atomic B factor
 
 END MODULE thermodynamics
@@ -142,7 +142,7 @@ MODULE ph_freq_thermodynamics
   REAL(DP), ALLOCATABLE :: phf_ener(:,:)      ! phonon total energy, T, geometry
   REAL(DP), ALLOCATABLE :: phf_free_ener(:,:) ! phonon free_energy, T, geometry
   REAL(DP), ALLOCATABLE :: phf_entropy(:,:)   ! phonon entropy, T, geometry
-  REAL(DP), ALLOCATABLE :: phf_cv(:,:)        ! phonon specific heat, T, geometry
+  REAL(DP), ALLOCATABLE :: phf_ce(:,:)        ! phonon specific heat, T, geometry
   REAL(DP), ALLOCATABLE :: phf_b_fact(:,:,:,:,:) ! atomic B factor
 
   REAL(DP), ALLOCATABLE :: vminf_t(:), b0f_t(:), b01f_t(:), free_e_minf_t(:) 
@@ -169,6 +169,9 @@ MODULE anharmonic
   REAL(DP), ALLOCATABLE :: alpha_t(:)  ! linear thermal expansion coefficient
   REAL(DP), ALLOCATABLE :: beta_t(:)   ! volume thermal expansion coefficient
   REAL(DP), ALLOCATABLE :: gamma_t(:)  ! average gruneisen parameter
+  REAL(DP), ALLOCATABLE :: bths_t(:,:,:)   ! thermal stress
+  REAL(DP), ALLOCATABLE :: ggamma_t(:,:,:) ! generalized average gruneisen 
+                                       ! parameter
 
   REAL(DP), ALLOCATABLE :: vmin_t(:), b0_t(:), b01_t(:), free_e_min_t(:) 
                            ! the parameters of the minimum of the  
@@ -211,6 +214,9 @@ MODULE ph_freq_anharmonic
   REAL(DP), ALLOCATABLE :: alphaf_t(:)  ! linear thermal expansion coefficient
   REAL(DP), ALLOCATABLE :: betaf_t(:)   ! volume thermal expansion coefficient
   REAL(DP), ALLOCATABLE :: gammaf_t(:)  ! average gruneisen parameter
+  REAL(DP), ALLOCATABLE :: bthsf_t(:,:,:)   ! thermal stress
+  REAL(DP), ALLOCATABLE :: ggammaf_t(:,:,:) ! generalized average gruneisen 
+                                       ! parameter
 
   REAL(DP), ALLOCATABLE :: vminf_t(:), b0f_t(:), b01f_t(:), free_e_minf_t(:) 
                            ! the parameters of the minimum of the  
