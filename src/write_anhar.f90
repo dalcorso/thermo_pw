@@ -264,7 +264,7 @@ ENDIF
 
 IF (meta_ionode) THEN
 !
-!   here quantities calculated from the gruneisen parameters
+!   here quantities calculated from the mode Gruneisen parameters
 !
    filename="anhar_files/"//TRIM(flanhar)//'.aux_grun'
    CALL add_pressure(filename)
@@ -572,9 +572,9 @@ IF (meta_ionode) THEN
    DO na=1, nat
       OPEN(UNIT=iu_therm, FILE=TRIM(filename)//'.'//&
            TRIM(int_to_char(na))//'.dw', STATUS='UNKNOWN', FORM='FORMATTED')
-      WRITE(iu_therm,'("# ")')
+      WRITE(iu_therm,'("# A^2")')
 
-      WRITE(iu_therm,'(6x,"T",14x,"B_11",14x,"B_12",14x,"B_13",14x,"B_22",&
+      WRITE(iu_therm,'("#",5x,"T (K)",10x,"B_11",14x,"B_12",14x,"B_13",14x,"B_22",&
                            &14x,"B_23",14x,"B_33")')
 
       DO itemp = 1, ntemp

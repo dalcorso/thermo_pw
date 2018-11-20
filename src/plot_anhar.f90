@@ -279,7 +279,7 @@ IF ( my_image_id /= root_image ) RETURN
 gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_anhar_dw'
 CALL gnuplot_start(gnu_filename)
 
-psfilename=TRIM(flpsanhar)//'_dw'//TRIM(flext)
+psfilename=TRIM(flpsanhar)//'.dw'//TRIM(flext)
 IF (tmin ==1._DP) THEN
    CALL gnuplot_write_header(psfilename, 0.0_DP, tmax, 0.0_DP, 0.0_DP, &
                                                        1.0_DP, flext )

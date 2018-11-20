@@ -339,7 +339,7 @@ mur_lc_t
                                  flanhar(.dbulk_mod)
                                  flanhar(.heat)
                                  flanhar(.gamma)
-                                 flanhar(.anis.#na.dw)
+                                 flanhar(.#na.dw)
                  write_ph_freq_anharmonic
                                  flanhar(_ph)
                                  flanhar(.bulk_mod_ph)
@@ -349,9 +349,9 @@ mur_lc_t
                  write_grun_anharmonic
                                  flanhar(.aux_grun)
                                  flanhar(.gamma_grun)
-                 plot_anhar                     flgnuplot(_anhar)   flpsanhar
-                                                flgnuplot(anhar_dw) 
-                                                            flpsanhar(_dw)
+                 plot_anhar                     flgnuplot(_anhar)  flpsanhar
+                                                flgnuplot(_anhar_dw) 
+                                                            flpsanhar(.dw)
                  write_gruneisen_bands
                                  flgrun
                                  flgrun(_freq)
