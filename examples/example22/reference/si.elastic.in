@@ -1,0 +1,25 @@
+ &control
+    calculation = 'scf'
+    restart_mode='from_scratch',
+    prefix='silicon',
+    pseudo_dir = '/home/espresso/pslibrary.1.0.0/pz/PSEUDOPOTENTIALS//',
+    outdir='/home/espresso/QE63/q-e-qe-6.3/tempdir/'
+    forc_conv_thr=1.d-5
+ /
+ &system
+    ibrav=  2, 
+    celldm(1) =10.20, 
+    nat= 2, 
+    ntyp= 1,
+    ecutwfc=34.0,
+ /
+ &electrons
+    conv_thr =  1.0d-8
+ /
+ATOMIC_SPECIES
+ Si  28.086  Si.pz-vbc.UPF
+ATOMIC_POSITIONS (alat)
+ Si 0.00 0.00 0.00
+ Si 0.25 0.25 0.25
+K_POINTS AUTOMATIC
+8 8 8 1 1 1 

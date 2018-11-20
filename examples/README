@@ -58,7 +58,7 @@ ngeo = # of geom.  plot of the band structure at the equilibrium lattice
 example07:
 what = mur_lc_ph : This example computes all as in example05 and produces also
 ngeo = # of geom.  the frequencies and displacements at a single q at the 
-                   minimum of the murmaghan.
+                   minimum of the Murnaghan.
                    If calculated with several images each image runs 
                    asynchronously and calculates a different geometry.
                    Then the root image computes the lattice constant at the
@@ -170,3 +170,10 @@ example21:
 what=scf_ph : this example computes the inverse of the frequency dependent
               dielectric constant of aluminum at a given q within the TD-DFPT,
               using a Lanczos chain.
+
+example22:
+what=elastic_constants_t: this example computes the elastic constants on the
+              same set of geometries that would be used with what='mur_lc_t'.
+              The files with elastic constants can be used in another run
+              to modify the behavior of what='mur_lc_t' and to interpolate
+              the elastic constants within the "quasi-static approximation".
