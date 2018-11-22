@@ -89,6 +89,7 @@ IF (lgnuplot.AND.ionode) &
 !IF (lgnuplot.AND.ionode) &
 !   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
 !                                       //TRIM(gnu_filename), WAIT=.FALSE.)
+
 IF (with_eigen) CALL plot_dw()
 
 RETURN
@@ -99,6 +100,7 @@ SUBROUTINE plot_thermo_debye(igeom)
 !  This is a driver to plot the quantities written inside fltherm_debye
 !
 USE kinds,            ONLY : DP
+USE ions_base,        ONLY : nsp
 USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
 USE postscript_files, ONLY : flpstherm
 USE gnuplot,          ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
@@ -121,6 +123,7 @@ IF ( my_image_id /= root_image ) RETURN
 
 gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_debye.g'//&
                                                    TRIM(int_to_char(igeom))
+
 CALL gnuplot_start(gnu_filename)
 
 psfilename=TRIM(flpstherm)//'_debye.g'//TRIM(int_to_char(igeom))//TRIM(flext)
@@ -156,6 +159,7 @@ IF (lgnuplot.AND.ionode) &
 !IF (lgnuplot.AND.ionode) &
 !   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
 !                                       //TRIM(gnu_filename), WAIT=.FALSE.)
+IF (nsp==1) CALL plot_debye_dw(igeom)
 
 RETURN
 END SUBROUTINE plot_thermo_debye
@@ -229,7 +233,9 @@ IF (lgnuplot.AND.ionode) &
 
 RETURN
 END SUBROUTINE plot_el_thermo
-
+!
+! Copyright (C) 2018 Cristiano Malica
+!
 SUBROUTINE plot_dw()
 !
 !  This is a driver to plot the quantities written inside fltherm_el_thermo
@@ -343,4 +349,52 @@ IF (lgnuplot.AND.ionode) &
 
 RETURN
 END SUBROUTINE plot_dw
+
+SUBROUTINE plot_debye_dw(igeom)
+
+USE kinds,            ONLY : DP
+USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
+USE postscript_files, ONLY : flpstherm
+USE gnuplot,          ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
+                             gnuplot_ylabel, &
+                             gnuplot_xlabel, &
+                             gnuplot_write_file_mul_data, &
+                             gnuplot_set_fact
+USE temperature,      ONLY : tmin, tmax
+USE data_files,       ONLY : fltherm
+USE io_global,        ONLY : ionode
+
+IMPLICIT NONE
+
+INTEGER :: igeom
+
+INTEGER :: ierr, system
+CHARACTER(LEN=256) :: gnu_filename_dw, filename_dw, psfilename_dw
+CHARACTER(LEN=6) :: int_to_char
+
+gnu_filename_dw='gnuplot_files/'//TRIM(flgnuplot)//'_debye.g'//&
+                                      TRIM(int_to_char(igeom))//'.dw'
+
+CALL gnuplot_start(gnu_filename_dw)
+
+psfilename_dw=TRIM(flpstherm)//'_debye.dw.g'//TRIM(int_to_char(igeom))//TRIM(flext)
+IF (tmin ==1._DP) THEN
+   CALL gnuplot_write_header(psfilename_dw, 0.0_DP, tmax, 0.0_DP, 0.0_DP, &
+                                                            1.0_DP, flext)
+ELSE
+   CALL gnuplot_write_header(psfilename_dw, tmin, tmax, 0.0_DP, 0.0_DP, &
+                                                             1.0_DP, flext )
+ENDIF
+
+filename_dw='therm_files/'//TRIM(fltherm)//'_debye.g'//TRIM(int_to_char(igeom))//'.dw'
+CALL gnuplot_xlabel('T (K)', .FALSE.)
+CALL gnuplot_ylabel('B_{D} ({\305}^2)',.FALSE.)
+CALL gnuplot_write_file_mul_data(filename_dw,1,2,'color_blue',.TRUE.,.TRUE.,.FALSE.)
+CALL gnuplot_end()
+
+IF (lgnuplot.AND.ionode) &
+   ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename_dw))
+
+RETURN
+END SUBROUTINE plot_debye_dw
 

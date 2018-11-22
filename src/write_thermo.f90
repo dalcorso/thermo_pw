@@ -27,7 +27,7 @@ USE io_global,      ONLY : meta_ionode, stdout
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: igeom
 
-INTEGER  :: idum, itemp, startt, lastt, iu_therm
+INTEGER  :: itemp, startt, lastt, iu_therm
 INTEGER  :: find_free_unit
 REAL(DP) :: e0, tot_states
 CHARACTER(LEN=256) :: filetherm
@@ -117,7 +117,7 @@ INTEGER, INTENT(IN) :: igeom
 CHARACTER(LEN=256) :: filename
 LOGICAL :: do_read
 
-INTEGER  :: idum, itemp, iu_therm, ipol, jpol, na
+INTEGER  :: itemp, iu_therm, ipol, jpol, na
 INTEGER  :: find_free_unit
 REAL(DP) :: e0
 !
@@ -185,11 +185,11 @@ END SUBROUTINE write_thermo_ph
 SUBROUTINE write_thermo_debye(igeom)
 
 USE kinds,            ONLY : DP
-USE ions_base,        ONLY : nat
+USE ions_base,        ONLY : nat, nsp, amass, ityp
 USE debye_module,     ONLY : debye_e0, debye_vib_energy, debye_free_energy, &
-                             debye_entropy, debye_cv
+                             debye_entropy, debye_cv, debye_b_factor
 USE control_debye,    ONLY : deb_e0, deb_cv, deb_entropy, deb_energy, &
-                             deb_free_energy, deb_b_fact, debye_t
+                             deb_free_energy, deb_b_fact, deb_bfact, debye_t
 USE temperature,      ONLY : ntemp, temp
 USE mp_images,        ONLY : root_image, my_image_id
 USE io_global,        ONLY : ionode, stdout
@@ -200,7 +200,6 @@ INTEGER, INTENT(IN) :: igeom
 CHARACTER(LEN=256) :: filename
 CHARACTER(LEN=6) :: int_to_char
 
-INTEGER  :: idum
 INTEGER  :: itemp
 LOGICAL  :: do_read
 !
@@ -224,6 +223,7 @@ CALL debye_cv (debye_t, temp, ntemp, nat, deb_cv)
 CALL debye_vib_energy (debye_t, temp, ntemp, nat, deb_energy)
 CALL debye_free_energy (debye_t, temp, ntemp, nat, deb_free_energy)
 CALL debye_entropy (debye_t, temp, ntemp, nat, deb_entropy)
+IF (nsp==1) CALL debye_b_factor(debye_t, temp, ntemp, amass(1), deb_bfact)
 !
 !  Add the zero point energy
 !
@@ -234,9 +234,11 @@ END DO
 !
 !  Write on file
 !
- IF (ionode) &
-    CALL write_thermo_info(deb_e0, debye_t, ntemp, temp, deb_energy, &
+IF (ionode) THEN
+   CALL write_thermo_info(deb_e0, debye_t, ntemp, temp, deb_energy, &
                deb_free_energy, deb_entropy, deb_cv, 3, filename)
+   IF (nsp==1) CALL write_dw_debye(ntemp, temp, deb_bfact, filename)
+END IF
 
 RETURN
 END SUBROUTINE write_thermo_debye
@@ -311,7 +313,7 @@ DO na=1,nat
    OPEN (UNIT=iu_therm, FILE=TRIM(filename)//'.'//&
                              TRIM(int_to_char(na))//'.dw', STATUS='unknown',&
                                                FORM='formatted')
-   WRITE(iu_therm,'(6x,"T",14x,"B_11",14x,"B_12",14x,"B_13",14x,"B_22",&
+   WRITE(iu_therm,'("#",6x,"T",14x,"B_11",14x,"B_12",14x,"B_13",14x,"B_22",&
                         &14x,"B_23",14x,"B_33")')
 
    DO itemp = 1, ntemp
@@ -391,4 +393,31 @@ END IF
 
 RETURN
 END SUBROUTINE read_thermo
+!
+!  Copyright (C) 2018 Cristiano Malica
+!
+SUBROUTINE write_dw_debye(ntemp, temp, deb_bfact, filename)
+USE kinds, ONLY : DP
+
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ntemp
+REAL(DP), INTENT(IN) :: temp(ntemp), deb_bfact(ntemp)
+CHARACTER(LEN=*) :: filename
+
+INTEGER :: iu_therm, itemp, na, ipol, jpol
+INTEGER :: find_free_unit
+CHARACTER(LEN=6) :: int_to_char
+
+iu_therm=find_free_unit()
+
+OPEN (UNIT=iu_therm, FILE=TRIM(filename)//'.dw', STATUS='unknown', FORM='formatted')
+WRITE(iu_therm,'("#",6x,"T",14x,"B_33")')
+
+DO itemp = 1, ntemp
+   WRITE(iu_therm, '(e16.8,6e18.8)') temp(itemp), deb_bfact(itemp) 
+END DO
+CLOSE(UNIT=iu_therm, STATUS='KEEP')
+
+RETURN
+END SUBROUTINE write_dw_debye
 

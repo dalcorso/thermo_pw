@@ -123,7 +123,7 @@ SUBROUTINE allocate_debye()
 USE ions_base,     ONLY : nat
 USE temperature,   ONLY : ntemp
 USE control_debye, ONLY : deb_energy, deb_free_energy, deb_entropy, deb_cv, &
-                          deb_b_fact
+                          deb_b_fact, deb_bfact
 
 IMPLICIT NONE
 
@@ -131,6 +131,7 @@ IF (.NOT. ALLOCATED (deb_energy) )       ALLOCATE( deb_energy(ntemp) )
 IF (.NOT. ALLOCATED (deb_free_energy) )  ALLOCATE( deb_free_energy(ntemp) )
 IF (.NOT. ALLOCATED (deb_entropy) )      ALLOCATE( deb_entropy(ntemp) )
 IF (.NOT. ALLOCATED (deb_cv) )           ALLOCATE( deb_cv(ntemp) )
+IF (.NOT. ALLOCATED (deb_bfact) )        ALLOCATE( deb_bfact(ntemp) )
 IF (.NOT. ALLOCATED (deb_b_fact) )       ALLOCATE( deb_b_fact(3,3,nat,ntemp) )
 
 RETURN

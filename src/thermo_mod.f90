@@ -752,7 +752,8 @@ MODULE control_debye
                            deb_free_energy(:),  &  ! Debye free energy
                            deb_entropy(:),      &  ! Debye entropy
                            deb_cv(:),           &  ! Debye cv
-                           deb_b_fact(:,:,:,:)     ! Debye atomic B factors
+                           deb_b_fact(:,:,:,:), &  ! axiliary B factor
+                           deb_bfact(:)            ! Debye atomic B factors
 
 END MODULE control_debye
 

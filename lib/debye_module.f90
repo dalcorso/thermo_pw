@@ -33,7 +33,7 @@ INTEGER, PARAMETER :: npt=1000  ! the number of points used to make
 
 PUBLIC  compute_debye_temperature, compute_average_sound, debye_vib_energy, &
         debye_free_energy, debye_entropy, debye_cv, debye_e0, &
-        compute_debye_temperature_poisson
+        compute_debye_temperature_poisson, debye_b_factor
 
 CONTAINS
 
@@ -275,6 +275,7 @@ END DO
 RETURN
 END SUBROUTINE debye_cv
 
+
 SUBROUTINE debye_e0(debye_t, nat, deb_e0)
 
 IMPLICIT NONE
@@ -286,6 +287,7 @@ deb_e0 = 9.0_DP * nat * k_boltzmann_ry * debye_t / 8.0_DP
 
 RETURN
 END SUBROUTINE debye_e0
+
 
 
 FUNCTION deb_int_cv(y)
@@ -406,5 +408,57 @@ WRITE(stdout, '(/,5x,"The approximate Debye temperature is ",f12.3," K" )') &
 
 RETURN
 END SUBROUTINE compute_debye_temperature_poisson
+!
+! Copyright (C) 2018 Cristiano Malica
+!
+SUBROUTINE debye_b_factor(debye_t, temp, ntemp, amass, deb_bfact)
+!
+!  The Debye temperature is in K, the temperature is in K, deb_bfact is
+!  the B-factor in Angstrom^2 
+!
+
+USE constants, ONLY : amu_si
+
+IMPLICIT NONE
+INTEGER :: ntemp, na, i
+REAL(DP), INTENT(IN) :: debye_t
+REAL(DP), INTENT(IN) :: temp(ntemp), amass(1)
+REAL(DP), INTENT(INOUT) :: deb_bfact(ntemp)
+
+REAL(DP) :: theta_over_t(ntemp), fact
+
+fact = 1.D20 * 1.5_DP * h_planck_si**2 / k_boltzmann_si / debye_t / amass(1) &
+                                                        / amu_si
+DO i=1,ntemp
+   theta_over_t(i) = debye_t / temp(i)
+END DO
+
+DO i=1,ntemp
+   deb_bfact(i) = fact * (1.0_DP + 4.0_DP * deb_int_bfact(theta_over_t(i))) 
+END DO
+
+RETURN
+END SUBROUTINE debye_b_factor
+
+FUNCTION deb_int_bfact(y)
+
+IMPLICIT NONE
+REAL(DP) :: y, deb_int_bfact
+
+REAL(DP) :: deltax, integral, x
+INTEGER :: i
+!
+deltax=y/npt
+
+integral=0.0_DP
+DO i=1,npt
+   x = deltax * i
+   integral = integral + x / ( EXP(x) - 1.0_DP) 
+END DO
+
+deb_int_bfact = integral * deltax / y**2
+
+RETURN
+END FUNCTION deb_int_bfact
 
 END MODULE debye_module
