@@ -768,6 +768,19 @@ while no extension indicates quantities obtained from the phonon density
 of states.
 
 \item 
+\texttt{therm\_files/fltherm.debye\_g\#} (default name 
+\texttt{output\_therm.dat.debye\_g\#}). For each geometry for which 
+the elastic constants are calculated (and whose number is given
+by \texttt{g\#}) the code produces a file that contains 
+the harmonic thermodynamic quantities as a function of temperature computed
+within the Debye model. It contains:
+\begin{verbatim}
+#   T       energy       free energy       entropy      C_v 
+\end{verbatim}
+The temperature, the vibrational energy, free energy, entropy, and
+isochoric heat capacity.  
+
+\item 
 \texttt{therm\_files/fltherm.g\#(\_ph).\#na.dw} (default name 
 \texttt{output\_therm.dat.g\#(\_ph).\#na.dw}). 
 If \texttt{with\_eigen=.TRUE.}, for each geometry for which 
@@ -782,6 +795,17 @@ The extension \texttt{(\_ph)} indicates
 quantities calculated from the direct integration over the Brillouin zone,
 while no extension indicates quantities obtained from the generalized phonon 
 density of states.
+
+\item 
+\texttt{therm\_files/fltherm.debye\_g\#.dw} (default name 
+\texttt{output\_therm.dat.debye\_g\#.dw}). This file is produced
+only if the solid has one atomic type. For each geometry for which 
+the elastic constants are calculated (and whose number is given
+by \texttt{g\#}) the code produces a file that contains 
+the atomic $B$ factor calculated within the Debye model. It contains:
+\begin{verbatim}
+#   T       B_33 
+\end{verbatim}
 
 \item 
 \texttt{anhar\_files/flanhar(\_ph)} (default name \texttt{output\_anhar.dat}).

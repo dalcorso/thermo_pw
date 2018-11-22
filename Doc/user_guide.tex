@@ -1504,7 +1504,7 @@ function of temperature.
 The frequencies at all the calculated geometries are interpolated
 by quadratic or quartic polynomials of the crystal parameters
 and can be shown at crystal parameters given in input or at those that
-minimize the free energy at a the temperature given in input. The 
+minimize the free energy at a temperature given in input. The 
 interpolated frequencies  
 are shown on the same path used for the phonon dispersions.
 In addition to the frequencies the code produces also several plots of
@@ -1547,9 +1547,10 @@ are computed as a function of temperature within the ``quasi-static
 approximation" and are used
 to calculate the other thermodynamic properties. In addition to the
 quantities plotted for cubic solids, the code plots also the elastic
-constants as a function of the temperature and the difference between
-elastic constants calculated at constant temperature or at constant
-entropy. These possibilities are implemented only for cubic, tetragonal, 
+constants and the bulk modulus as a function of the temperature. 
+Moreover the thermal stresses and the generalized average Gr\"uneisen
+parameters are plotted.
+These possibilities are implemented only for cubic, tetragonal, 
 hexagonal, trigonal, and orthorhombic systems. \\
 With this option the pressure control is active. You can specify a
 finite pressure and the Gibbs energy is minimized instead of the

@@ -314,3 +314,13 @@ computed.
 Most probably you have not cleaned the outdir directory. Note that the 
 <code>thermo_pw</code> always tries to use the content of the 
 <code>outdir</code> directory if present.
+<br><br>
+20. I made a calculation with <code>with_eigen=.FALSE.</code>. Is it possible
+to restart with <code>with_eigen=.TRUE.</code>?
+<br>
+Yes, but you have to remove both the <code>phdisp_files</code> and the 
+<code>therm_files</code> directories, while keeping the 
+<code>dynamical_matrices</code> and the <code>restart</code> directories.
+If you removed the <code>outdir</code> directory, use 
+<code>after_disp=.TRUE.</code> and set <code>fildyn</code> with the
+name of the dynamical matrices.
