@@ -1865,6 +1865,14 @@ can list the conjugate groups and calculate the intersection of two
 point groups.
 For an example of its use see \texttt{tools\_input/crystal\_point\_group.in}.
 
+\item \texttt{debye.x} reads from input the Debye temperature and the
+number of atoms per unit cell and writes in a file the thermodynamic
+quantities (vibrational energy, free energy, entropy, and heat capacity) as
+a function of temperature computed using the Debye model. When the
+system has only one atomic type it writes the atomic $B$ factor
+as a function of temperature computed using the Debye model.
+For an example of its use see \texttt{tools\_input/debye.in}.
+
 \item \texttt{elastic.x} reads the elastic constants of a
 solid and computes the elastic compliances, the bulk modulus, and a few
 poly-crystalline averages. It uses the \thermo\ library so the output is the

@@ -1,0 +1,15 @@
+633.0                       ! debye temperature (in K)
+2                           ! atoms per cell
+1                           ! type of atoms per cell
+28.0855                     ! atomic mass of the first type (in a.m.u.)
+1.0                         ! starting temperature of the plot (in K)
+800.0                       ! maximum temperature of the plot (in K)
+3.0                         ! delta T on the plot (in K)
+'output_debye.dat'
+
+!
+!  This example shows how to use the tool code debye.x
+!  to print the thermodynamic properties calculated within
+!  the Debye model. The output quantities are written in the file
+!  'output_debye.dat'
+!

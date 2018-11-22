@@ -23,7 +23,7 @@ LIBOBJS	= ../lib/thermo_lib.a ../qe/thermo_qe.a ../../PHonon/PH/libph.a \
 all : crystal_point_group.x mag_point_group.x gener_2d_slab.x gener_3d_slab.x \
       gener_nanowire.x supercell.x plot_sur_states.x translate.x elastic.x \
       test_colors.x epsilon_tpw.x kovalev.x hex_trig.x bravais_lattices.x \
-      space_groups.x
+      space_groups.x debye.x
 
 space_groups.x : space_groups.o $(PWOBJS) $(LIBOBJS)
 	$(LD) $(LDFLAGS) -o $@ space_groups.o \
@@ -88,6 +88,11 @@ gener_nanowire.x : gener_nanowire.o $(PWOBJS) $(LIBOBJS)
 	$(LD) $(LDFLAGS) -o $@ gener_nanowire.o \
 		 $(LIBOBJS) $(PWOBJS) $(QEMODS) $(LIBOBJS) $(PWOBJS) $(LIBS)
 	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/gener_nanowire.x . )
+
+debye.x : debye.o $(PWOBJS) $(LIBOBJS) 
+	$(LD) $(LDFLAGS) -o $@ debye.o  \
+		 $(LIBOBJS) $(PWOBJS) $(QEMODS) $(LIBOBJS) $(PWOBJS) $(LIBS)
+	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/debye.x . )
 
 rotate_tensors.x : rotate_tensors.o $(PWOBJS) $(LIBOBJS)
 	$(LD) $(LDFLAGS) -o $@ rotate_tensors.o \
