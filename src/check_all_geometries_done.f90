@@ -7,7 +7,7 @@
 !
 SUBROUTINE check_all_geometry_done(all_geometry_done)
 
-USE thermo_mod, ONLY : tot_ngeo
+USE thermo_mod, ONLY : tot_ngeo, no_ph
 USE output, ONLY : fildyn
 
 IMPLICIT NONE
@@ -21,6 +21,7 @@ CHARACTER(LEN=256) :: auxdyn
 
 all_geometry_done=.TRUE.
 DO igeom=1,tot_ngeo
+   IF (no_ph(igeom)) CYCLE
    auxdyn=TRIM(fildyn)//'.g'//TRIM(int_to_char(igeom))//'.'
    IF (all_geometry_done) all_geometry_done=all_geometry_done.AND. &
         check_dyn_file_exists(auxdyn)
