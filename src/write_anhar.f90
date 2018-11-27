@@ -512,8 +512,8 @@ USE temperature,        ONLY : ntemp
 USE anharmonic,         ONLY : vmin_t, celldm_t, b0_t, ce_t
 USE ph_freq_anharmonic, ONLY : vminf_t, celldmf_t, b0f_t, cef_t
 USE grun_anharmonic,    ONLY : ce_grun_t
-USE equilibrium_conf,   ONLY : celldm0
-USE control_mur,        ONLY : vmin, b0
+USE equilibrium_conf,   ONLY : celldm0, omega0
+USE control_mur,        ONLY : b0
 
 IMPLICIT NONE
 
@@ -527,7 +527,7 @@ DO itemp=1, ntemp
       vgrun_t(itemp)=vmin_t(itemp)
       celldm_grun_t(:,itemp)=celldm_t(:,itemp)
    ELSE
-      vgrun_t(itemp)=vmin
+      vgrun_t(itemp)=omega0
       celldm_grun_t(:,itemp)=celldm0(:)
    ENDIF
 
