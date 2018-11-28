@@ -22,6 +22,7 @@ USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
                             gnuplot_ylabel,              &
                             gnuplot_xlabel,              &
                             gnuplot_write_file_mul_data, &
+                            gnuplot_write_file_mul_data_times, &
                             gnuplot_write_file_mul_point, &
                             gnuplot_write_horizontal_line, &
                             gnuplot_set_fact
@@ -126,6 +127,15 @@ IF (ibrav_save==4.OR.ibrav_save==5.OR.ibrav_save==6.OR.ibrav_save==7) THEN
    IF (ltherm_freq) &
    CALL gnuplot_write_file_mul_data(filename3,1,3,'color_blue',&
                                .NOT.ltherm_dos, .TRUE.,.FALSE.)
+   IF (ibrav_save==4.OR.ibrav_save==6.OR.ibrav_save==7) THEN
+      CALL gnuplot_ylabel('c (a.u.) ',.FALSE.) 
+      IF (ltherm_dos) &
+         CALL gnuplot_write_file_mul_data_times(filename2,1,2,3,&
+                               'color_red',.TRUE., .NOT.ltherm_freq,.FALSE.)
+      IF (ltherm_freq) &
+         CALL gnuplot_write_file_mul_data_times(filename3,1,2,3,'color_blue',&
+                               .NOT.ltherm_dos, .TRUE.,.FALSE.)
+   ENDIF
 ELSEIF (ibrav_save==8.OR.ibrav_save==9.OR.ibrav_save==10.OR.ibrav_save==11&
         .OR.ibrav_save==12.OR.ibrav_save==-12.OR.ibrav_save==13.OR. &
             ibrav_save==-13.OR.ibrav_save==14) THEN
@@ -136,6 +146,13 @@ ELSEIF (ibrav_save==8.OR.ibrav_save==9.OR.ibrav_save==10.OR.ibrav_save==11&
    IF (ltherm_freq) & 
       CALL gnuplot_write_file_mul_data(filename3,1,3,'color_blue',&
                                              .NOT.ltherm_dos,.TRUE.,.FALSE.)
+   CALL gnuplot_ylabel('b (a.u.) ',.FALSE.) 
+   IF (ltherm_dos) &
+      CALL gnuplot_write_file_mul_data_times(filename2,1,2,3,&
+                               'color_red',.TRUE., .NOT.ltherm_freq,.FALSE.)
+   IF (ltherm_freq) &
+      CALL gnuplot_write_file_mul_data_times(filename3,1,2,3,'color_blue',&
+                               .NOT.ltherm_dos, .TRUE.,.FALSE.)
    CALL gnuplot_ylabel('c/a ',.FALSE.) 
    IF (ltherm_dos) &
       CALL gnuplot_write_file_mul_data(filename2,1,4,'color_red',.TRUE., &
@@ -143,6 +160,14 @@ ELSEIF (ibrav_save==8.OR.ibrav_save==9.OR.ibrav_save==10.OR.ibrav_save==11&
    IF (ltherm_freq) &
       CALL gnuplot_write_file_mul_data(filename3,1,4,'color_blue', &
                                              .NOT.ltherm_dos, .TRUE.,.FALSE.)
+   CALL gnuplot_ylabel('c (a.u.) ',.FALSE.) 
+   IF (ltherm_dos) &
+      CALL gnuplot_write_file_mul_data_times(filename2,1,2,4,&
+                               'color_red',.TRUE., .NOT.ltherm_freq,.FALSE.)
+   IF (ltherm_freq) &
+      CALL gnuplot_write_file_mul_data_times(filename3,1,2,4,'color_blue',&
+                               .NOT.ltherm_dos, .TRUE.,.FALSE.)
+
    IF (ibrav_save==12.OR.ibrav_save==13) THEN
       CALL gnuplot_ylabel('cos({/Symbol a})',.FALSE.) 
       IF (ltherm_dos) &

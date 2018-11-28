@@ -29,6 +29,7 @@ MODULE gnuplot
            gnuplot_unset_border, gnuplot_write_horizontal_segment,&
            gnuplot_set_xticks, gnuplot_set_yticks,    &
            gnuplot_write_file_mul_data_minus, &
+           gnuplot_write_file_mul_data_times, &
            gnuplot_write_file_mul_data, gnuplot_write_file_mul_point, &
            gnuplot_write_file_mul_data_sum, gnuplot_write_command, &
            gnuplot_end, gnuplot_do_2dplot, gnuplot_start_2dplot, &
@@ -478,6 +479,33 @@ IF (ionode) &
 
 RETURN
 END SUBROUTINE gnuplot_write_file_mul_data_sum
+
+SUBROUTINE gnuplot_write_file_mul_data_times(data_file, col1, col2, col3,&
+                     color, start, last, comment)
+IMPLICIT NONE
+
+CHARACTER(LEN=*), INTENT(IN) :: data_file
+INTEGER, INTENT(IN) :: col1, col2, col3
+CHARACTER(LEN=*), INTENT(IN) :: color
+LOGICAL, INTENT(IN) :: start, last
+
+CHARACTER(LEN=256) :: string
+CHARACTER(LEN=6) :: int_to_char
+LOGICAL :: comment
+
+string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//"*xscale-xshift):(($"// &
+              TRIM(int_to_char(col2)) //"* $"//TRIM(int_to_char(col3)) &
+            //")*fact-eref)*gfact w l lw 3 lc rgb "//TRIM(color)
+
+IF (start) string="plot "//TRIM(string)
+IF (.NOT.last) string=TRIM(string)//", \"
+IF (comment) string = '# ' // TRIM(string)
+
+IF (ionode) &
+   WRITE(iun_gnuplot,'(a)') TRIM(string)
+
+RETURN
+END SUBROUTINE gnuplot_write_file_mul_data_times
 
 SUBROUTINE gnuplot_write_file_mul_data(data_file, col1, col2, color, start, &
                                        last, comment)
