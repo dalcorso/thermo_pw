@@ -126,12 +126,11 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
   ALLOCATE(x_data(degree,ndata))
   ndata=0
   DO idata=1, nwork
-     IF (.NOT.no_ph(idata)) THEN
-        ndata=ndata+1
-        IF (central_geo==idata) cgeo_eff=ndata
-        CALL compress_celldm(celldm_geo(1,idata),x_data(1,ndata),degree, &
-                                                                   ibrav_save)
-     ENDIF
+     IF (no_ph(idata)) CYCLE
+     ndata=ndata+1
+     IF (central_geo==idata) cgeo_eff=ndata
+     CALL compress_celldm(celldm_geo(1,idata),x_data(1,ndata),degree, &
+                                                                ibrav_save)
   ENDDO 
 !
 !  find the celldm at which we compute the Gruneisen parameters and compress
@@ -209,11 +208,10 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
      ELSE
         ndata=0
         DO idata=1,nwork
-           IF (.NOT.no_ph(idata)) THEN
-              ndata=ndata+1
-              frequency_geo(1:nbnd,ndata)=freq_geo(1:nbnd,n,idata)
-              displa(1:nbnd,1:nbnd,ndata)=displa_geo(1:nbnd,1:nbnd,idata,n)
-           ENDIF
+           IF (no_ph(idata)) CYCLE
+           ndata=ndata+1
+           frequency_geo(1:nbnd,ndata)=freq_geo(1:nbnd,n,idata)
+           displa(1:nbnd,1:nbnd,ndata)=displa_geo(1:nbnd,1:nbnd,idata,n)
         ENDDO
         CALL interp_freq_anis_eigen(nwork, frequency_geo, x_data, cgeo_eff, &
                                     displa, degree, nvar, poly_grun)

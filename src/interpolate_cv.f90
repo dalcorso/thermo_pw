@@ -57,13 +57,12 @@ ALLOCATE(coeff(nvar))
 !
 ndata=0
 DO igeo=1, tot_ngeo
-   IF (.NOT.no_ph(igeo)) THEN
-      ndata=ndata+1
-      IF (lmurn) THEN
-         x(1,ndata)=omega_geo(igeo)
-      ELSE
-         CALL compress_celldm(celldm_geo(1,igeo), x(1,ndata), degree, ibrav)
-      ENDIF
+   IF (no_ph(igeo)) CYCLE
+   ndata=ndata+1
+   IF (lmurn) THEN
+      x(1,ndata)=omega_geo(igeo)
+   ELSE
+      CALL compress_celldm(celldm_geo(1,igeo), x(1,ndata), degree, ibrav)
    ENDIF
 ENDDO
 !
@@ -77,10 +76,9 @@ DO itemp=startt,lastt
 !
    ndata=0
    DO igeo=1, tot_ngeo
-      IF (.NOT.no_ph(igeo)) THEN
-         ndata=ndata+1
-         f(ndata)= ph_cv(itemp,igeo)
-      ENDIF
+      IF (no_ph(igeo)) CYCLE
+      ndata=ndata+1
+      f(ndata)= ph_cv(itemp,igeo)
    ENDDO
 !
 !  compute the geometry corresponding to this temperature.

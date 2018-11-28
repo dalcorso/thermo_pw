@@ -193,11 +193,10 @@ SUBROUTINE quadratic_fit_t(itemp, celldm_t, free_e_min_t, ph_free_ener, &
 
   ndata=0
   DO idata=1,ndatatot
-     IF (.NOT. no_ph(idata)) THEN
-        ndata=ndata+1
-        CALL compress_celldm(celldm_geo(1,idata), x(1,ndata), degree, ibrav)
-        f(ndata)=ph_free_ener(idata)
-     END IF
+     IF (no_ph(idata)) CYCLE
+     ndata=ndata+1
+     CALL compress_celldm(celldm_geo(1,idata), x(1,ndata), degree, ibrav)
+     f(ndata)=ph_free_ener(idata)
   END DO
   !
   !CALL summarize_fitting_data(degree, ndata, x, f)

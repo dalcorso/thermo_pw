@@ -140,12 +140,11 @@ REAL(DP) :: compute_mur_fun
 !  WRITE(stdout,*) 
   ndata=0
   DO idata=1,ngeo(1)
-     IF (.NOT. no_ph(idata)) THEN
-        ndata=ndata+1
-        x(ndata)=omega_geo(idata)
-        y(ndata)=ph_free_ener(itemp,idata)
-!       WRITE(stdout,'(2f25.14)') x(ndata), y(ndata)
-     ENDIF
+     IF (no_ph(idata)) CYCLE
+     ndata=ndata+1
+     x(ndata)=omega_geo(idata)
+     y(ndata)=ph_free_ener(itemp,idata)
+!    WRITE(stdout,'(2f25.14)') x(ndata), y(ndata)
   ENDDO
   CALL polifit(x, y, ndata, a, m1)
 
@@ -223,12 +222,11 @@ REAL(DP) :: compute_mur_fun
 !  WRITE(stdout,*) 
   ndata=0
   DO idata=1,ngeo(1)
-     IF (.NOT. no_ph(idata)) THEN
-        ndata=ndata+1
-        x(ndata)=omega_geo(idata)
-        y(ndata)=phf_free_ener(itemp,idata) 
-!       WRITE(stdout,'(2f25.14)') x(ndata), y(ndata)
-     ENDIF
+     IF (no_ph(idata)) CYCLE
+     ndata=ndata+1
+     x(ndata)=omega_geo(idata)
+     y(ndata)=phf_free_ener(itemp,idata) 
+!    WRITE(stdout,'(2f25.14)') x(ndata), y(ndata)
   ENDDO
   CALL polifit(x, y, ndata, a, m1)
 

@@ -56,10 +56,9 @@ WRITE(stdout,'(5x,"B FACTOR INTERPOLATION")')
 !
 ndata=0
 DO igeo=1, tot_ngeo
-   IF (.NOT.no_ph(igeo)) THEN
-      ndata=ndata+1
-      x(ndata)=omega_geo(igeo)
-   ENDIF
+   IF (no_ph(igeo)) CYCLE
+   ndata=ndata+1
+   x(ndata)=omega_geo(igeo)
 ENDDO
 
 CALL divide(world_comm, ntemp, startt, lastt)
@@ -75,11 +74,10 @@ DO itemp=startt,lastt
             asum=0.0_DP
             ndata=0
             DO igeo=1, tot_ngeo
-               IF (.NOT.no_ph(igeo)) THEN
-                  ndata=ndata+1
-                  b(ndata)=ph_b_fact(ipol,jpol,na,itemp,igeo)
-                  asum=asum+b(ndata)**2
-               ENDIF
+               IF (no_ph(igeo)) CYCLE
+               ndata=ndata+1
+               b(ndata)=ph_b_fact(ipol,jpol,na,itemp,igeo)
+               asum=asum+b(ndata)**2
             ENDDO
             IF (asum<1.D-10) CYCLE
 !            WRITE(stdout,'(5x,"atom n.",i4,",   B component: ",i1)') na, ijpol
@@ -165,10 +163,9 @@ WRITE(stdout,'(5x,"B FACTOR INTERPOLATION")')
 !
 ndata=0
 DO igeo=1, tot_ngeo
-   IF (.NOT.no_ph(igeo)) THEN
-      ndata=ndata+1
-      CALL compress_celldm(celldm_geo(1,igeo), x(1,ndata), degree, ibrav)
-   ENDIF
+   IF (no_ph(igeo)) CYCLE
+   ndata=ndata+1
+   CALL compress_celldm(celldm_geo(1,igeo), x(1,ndata), degree, ibrav)
 ENDDO
 
 CALL divide(world_comm, ntemp, startt, lastt)
@@ -185,11 +182,10 @@ DO itemp=startt,lastt
             asum=0.0_DP
             ndata=0
             DO igeo=1, tot_ngeo
-               IF (.NOT.no_ph(igeo)) THEN
-                  ndata=ndata+1
-                  b(ndata)=ph_b_fact(ipol,jpol,na,itemp,igeo)
-                  asum=asum+b(ndata)**2
-               ENDIF
+               IF (no_ph(igeo)) CYCLE
+               ndata=ndata+1
+               b(ndata)=ph_b_fact(ipol,jpol,na,itemp,igeo)
+               asum=asum+b(ndata)**2
             ENDDO
             IF (asum<1.D-10) CYCLE
 !            WRITE(stdout,'(5x,"Atom n.",i4,",   B component: ",i1)') na, ijpol

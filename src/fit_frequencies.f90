@@ -40,11 +40,10 @@ SUBROUTINE fit_frequencies()
   CALL find_central_geo(ngeo, no_ph, central_geo)
   ndata=0
   DO igeo=1,ngeo(1)
-     IF (.NOT. no_ph(igeo)) THEN
-         ndata=ndata+1
-         IF (igeo==central_geo) cgeo_eff=ndata
-         omega_data(ndata)=omega_geo(igeo)
-     ENDIF
+     IF (no_ph(igeo)) CYCLE
+     ndata=ndata+1
+     IF (igeo==central_geo) cgeo_eff=ndata
+     omega_data(ndata)=omega_geo(igeo)
   ENDDO
 !
 !  divides the q vectors among all processors. Each processor computes
@@ -72,12 +71,11 @@ SUBROUTINE fit_frequencies()
 !
      ndata=0
      DO igeo=1,ngeo(1)
-        IF (.NOT. no_ph(igeo)) THEN
-           ndata=ndata+1
-           freq_geo(1:3*nat,ndata)=ph_freq_save(igeo)%nu(1:3*nat,iq_eff)
-           IF (with_eigen) displa_geo(1:3*nat, 1:3*nat, ndata)= &
+        IF (no_ph(igeo)) CYCLE
+        ndata=ndata+1
+        freq_geo(1:3*nat,ndata)=ph_freq_save(igeo)%nu(1:3*nat,iq_eff)
+        IF (with_eigen) displa_geo(1:3*nat, 1:3*nat, ndata)= &
                            ph_freq_save(igeo)%displa(1:3*nat,1:3*nat,iq_eff)
-        ENDIF
      ENDDO
 !
 !  and interpolates the data
@@ -144,11 +142,10 @@ SUBROUTINE fit_frequencies_anis()
   CALL find_central_geo(nwork,no_ph,central_geo)
   ndata=0
   DO igeo=1,nwork
-     IF (.NOT.no_ph(igeo)) THEN
-        ndata=ndata+1
-        IF (central_geo==igeo) cgeo_eff=ndata
-        CALL compress_celldm(celldm_geo(1,igeo),x(1,ndata),degree,ibrav)
-     ENDIF
+     IF (no_ph(igeo)) CYCLE
+     ndata=ndata+1
+     IF (central_geo==igeo) cgeo_eff=ndata
+     CALL compress_celldm(celldm_geo(1,igeo),x(1,ndata),degree,ibrav)
   ENDDO
 !
 !  divides the q vectors among all processors. Each processor computes
@@ -175,12 +172,11 @@ SUBROUTINE fit_frequencies_anis()
 !
      ndata=0
      DO igeo=1,nwork
-        IF (.NOT.no_ph(igeo)) THEN
-           ndata=ndata+1
-           freq_geo(1:3*nat,ndata)=ph_freq_save(igeo)%nu(1:3*nat,iq_eff)
-           IF (with_eigen) displa_geo(1:3*nat, 1:3*nat, ndata)= &
+        IF (no_ph(igeo)) CYCLE
+        ndata=ndata+1
+        freq_geo(1:3*nat,ndata)=ph_freq_save(igeo)%nu(1:3*nat,iq_eff)
+        IF (with_eigen) displa_geo(1:3*nat, 1:3*nat, ndata)= &
                            ph_freq_save(igeo)%displa(1:3*nat,1:3*nat,iq_eff)
-        ENDIF
      ENDDO
 !
 !   and interpolates the data

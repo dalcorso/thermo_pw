@@ -109,11 +109,10 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
   CALL find_central_geo(ngeo,no_ph,central_geo)
   ndata=0
   DO igeo=1, ngeo(1)
-     IF (.NOT.no_ph(igeo)) THEN
-        ndata=ndata+1
-        IF (central_geo==igeo) cgeo_eff=ndata
-        omega_data(ndata)=omega_geo(igeo)
-     ENDIF
+     IF (no_ph(igeo)) CYCLE
+     ndata=ndata+1
+     IF (central_geo==igeo) cgeo_eff=ndata
+     omega_data(ndata)=omega_geo(igeo)
   ENDDO
 !
 !  Compute the volume at which the Gruneisen parameters and the frequencies
@@ -179,11 +178,10 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
 !
         ndata=0
         DO igeo=1, ngeo(1)
-           IF (.NOT.no_ph(igeo)) THEN
-              ndata=ndata+1
-              frequency_geo(1:nbnd,ndata)=freq_geo(1:nbnd,n,igeo)
-              displa(1:nbnd,1:nbnd,ndata) = displa_geo(1:nbnd,1:nbnd,igeo,n)
-           ENDIF
+           IF (no_ph(igeo)) CYCLE
+           ndata=ndata+1
+           frequency_geo(1:nbnd,ndata)=freq_geo(1:nbnd,n,igeo)
+           displa(1:nbnd,1:nbnd,ndata) = displa_geo(1:nbnd,1:nbnd,igeo,n)
         ENDDO
         CALL interp_freq_eigen(ndata, frequency_geo, omega_data, &
                           cgeo_eff, displa, poly_order, poly_grun)
