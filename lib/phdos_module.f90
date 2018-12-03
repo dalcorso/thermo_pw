@@ -31,7 +31,7 @@ PRIVATE
 
 REAL(DP), PARAMETER :: kb=k_boltzmann_ry ! Boltzmann constant in Ry/K
 REAL(DP), PARAMETER :: kb1=1.0_DP/kb/ry_to_cmm1 ! inverse Boltzmann 
-                                                ! constant in cm^{-1}/K
+                                                ! constant in K/cm^{-1}
 
 REAL(DP), PARAMETER :: thr_ph=1.D-3   ! a phonon with frequency smaller than
                                       ! this is considered of zero frequency.
@@ -435,7 +435,6 @@ END SUBROUTINE fecv
 
 SUBROUTINE phdos_debye_factor(phdos, temp, b_fact,  &
                                               nat, amass, nsp, ityp)
-
 !
 USE constants, ONLY : h_planck_si, c_si, amu_si
 
