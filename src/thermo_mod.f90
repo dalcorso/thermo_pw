@@ -188,9 +188,13 @@ MODULE anharmonic
   LOGICAL :: lelastic=.FALSE.            ! elastic constants available in
                                          ! some approximation
   REAL(DP), ALLOCATABLE :: el_cons_t(:,:,:) ! elastic constants as a function
-                                         ! of temperature
+                                         ! of temperature (constant T)
   REAL(DP), ALLOCATABLE :: el_comp_t(:,:,:) ! elastic compliances as a function
-                                         ! of temperature
+                                         ! of temperature (constant T)
+  REAL(DP), ALLOCATABLE :: el_cons_s(:,:,:) ! elastic constants as a function
+                                         ! of temperature (constant entropy)
+  REAL(DP), ALLOCATABLE :: el_comp_s(:,:,:) ! elastic compliances as a function
+                                         ! of temperature (constant entropy)
   REAL(DP), ALLOCATABLE :: macro_el_t(:,:) ! macroscopic elasticity as a 
                                          ! function of t
 
@@ -236,6 +240,10 @@ MODULE ph_freq_anharmonic
                                           ! of temperature
   REAL(DP), ALLOCATABLE :: el_compf_t(:,:,:) ! elastic compliances as a function
                                          ! of temperature
+  REAL(DP), ALLOCATABLE :: el_consf_s(:,:,:) ! elastic constants as a function
+                                         ! of temperature (constant entropy)
+  REAL(DP), ALLOCATABLE :: el_compf_s(:,:,:) ! elastic compliances as a function
+                                         ! of temperature (constant entropy)
   REAL(DP), ALLOCATABLE :: macro_elf_t(:,:) ! macroscopic elasticity as a 
                                          ! function of t
 

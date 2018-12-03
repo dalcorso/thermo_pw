@@ -121,10 +121,10 @@ CALL gnuplot_set_fact(1.0_DP,.FALSE.)
 CALL gnuplot_ylabel('Bulk modulus (kbar)',.FALSE.) 
 
 IF (ltherm_dos) &
-   CALL gnuplot_write_file_mul_data(filename_bulk,1,3,'color_red',.TRUE., &
+   CALL gnuplot_write_file_mul_data(filename_bulk,1,2,'color_red',.TRUE., &
                                                 .NOT.ltherm_freq,.FALSE.)
 IF (ltherm_freq) &
-   CALL gnuplot_write_file_mul_data(filename_bulk_ph,1,3,'color_blue',&
+   CALL gnuplot_write_file_mul_data(filename_bulk_ph,1,2,'color_blue',&
                                                 .NOT.ltherm_dos,.TRUE.,.FALSE.)
 !
 !  Part 4: pressure derivative of the bulk modulus

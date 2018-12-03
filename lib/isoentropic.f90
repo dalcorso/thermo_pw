@@ -220,8 +220,8 @@ DO itemp=2,ntemp-1
       DO j=1,3
          DO m=1,3
             DO n=1,3
-               aux(i,j,m,n)= - temp(itemp) * volume(itemp) * bths(i,j,itemp)* &
-                               bths(m,n,itemp) / cv_t(itemp) / ry_kbar
+               aux(i,j,m,n)= temp(itemp) * volume(itemp) * bths(i,j,itemp)* &
+                             bths(m,n,itemp) / cv_t(itemp) / ry_kbar
             END DO
          END DO
       END DO

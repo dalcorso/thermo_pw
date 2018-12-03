@@ -1,5 +1,10 @@
 New in version 1.1.0
 
+Added the plot of the isoentropic elastic constants.
+
+Added the plot of the thermal stresses and of the generalized Gruneisen
+parameters.
+
 Conjugate gradient solver extended to US and PAW.
 
 Added the calculation of the B factor at fixed geometry and its interpolation 
@@ -42,7 +47,6 @@ anisotropic cases when lmurn=.FALSE..
 
 Experimental use of symmetry to compute the bands within the phonon 
 code.
-
 
 24/10/2017 Version 0.8.0 is now frozen.
 

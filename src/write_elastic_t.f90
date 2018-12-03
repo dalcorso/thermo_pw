@@ -114,6 +114,7 @@ IF (ltherm_dos) THEN
    lelastic=.TRUE.
    filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons'
    CALL write_el_cons_on_file(temp, ntemp, ibrav, el_cons_t, b0_t, filelastic)
+
 ENDIF
 
 IF (ltherm_freq) THEN
@@ -159,7 +160,7 @@ IF (meta_ionode) THEN
       CASE(29,32)
          WRITE(iu_el_cons,'("#",5x,"   T  ", 10x, " B ", 9x, " C_11 ", &
                   & 9x, "     C_12 ", 9x, "     C_44 ")')
-         DO itemp=1,ntemp
+         DO itemp=2,ntemp-1
             WRITE(iu_el_cons,'(e16.8,4e20.12)') temp(itemp), b0_t(itemp), &
                  el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
                  el_cons_t(4,4,itemp)
@@ -171,7 +172,7 @@ IF (meta_ionode) THEN
          WRITE(iu_el_cons,'("#",5x,"   T  ", 10x, " B ", 9x, " C_11 ", &
                   & 9x, " C_12 ", 9x, " C_13 ", 9x, " C_33 ", 9x, &
                        &" C_44 ", 9x, " C_14")')
-         DO itemp=1,ntemp
+         DO itemp=2,ntemp-1
             WRITE(iu_el_cons,'(e16.8,7e20.12)') temp(itemp), b0_t(itemp), &
                   el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
                   el_cons_t(1,3,itemp), el_cons_t(3,3,itemp), &
@@ -184,7 +185,7 @@ IF (meta_ionode) THEN
          WRITE(iu_el_cons,'("#",5x,"   T  ", 10x, " B ", " C_11 ", 9x, &
                   &" C_12 ", 9x, " C_13 ", 9x, " C_33 ", 9x, "C_44", 9x, &
                   &" C_14", 9x, "C_25" )')
-         DO itemp=1,ntemp
+         DO itemp=2,ntemp-1
             WRITE(iu_el_cons,'(e16.8,8e20.12)')  temp(itemp), b0_t(itemp), &
                   el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
                   el_cons_t(1,3,itemp), el_cons_t(3,3,itemp), &
@@ -194,7 +195,7 @@ IF (meta_ionode) THEN
       CASE(19,23)
          WRITE(iu_el_cons,'("#",5x,"   T  ", 10x, " B ", 9x, " C_11 ", 9x, &
                   &" C_12 ", 9x, " C_13 ", 9x, " C_33 ", 9x, "C_44" )')
-         DO itemp=1,ntemp
+         DO itemp=2,ntemp-1
             WRITE(iu_el_cons,'(e16.8,6e20.12)') temp(itemp),  b0_t(itemp), &
                   el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
                   el_cons_t(1,3,itemp), el_cons_t(3,3,itemp), &
@@ -205,7 +206,7 @@ IF (meta_ionode) THEN
                   &" C_12 ",&
                   & 9x, " C_13 ", 9x, " C_33 ", 9x, "C_44", 9x, & 
                   &     " C_66 " )')
-         DO itemp=1,ntemp
+         DO itemp=2,ntemp-1
             WRITE(iu_el_cons,'(e16.8,7e20.12)') temp(itemp), b0_t(itemp), &
                   el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
                   el_cons_t(1,3,itemp), el_cons_t(3,3,itemp), &
@@ -216,7 +217,7 @@ IF (meta_ionode) THEN
                   &" C_12 ", &
                   & 9x, " C_13 ", 9x, " C_22 ", 9x, " C_23 ", 9x, " C_33 ",  &
                   & 9x, " C_44 ", 9x, " C_55 ", 9x, " C_66 ")')
-         DO itemp=1,ntemp
+         DO itemp=2,ntemp-1
             WRITE(iu_el_cons,'(e16.8,10e20.12)') temp(itemp), b0_t(itemp), &
                   el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
                   el_cons_t(1,3,itemp), el_cons_t(2,2,itemp), &
@@ -230,7 +231,7 @@ IF (meta_ionode) THEN
                   & 9x, " C_13 ", 9x, " C_33 ", 9x, "C_44", 9x, &
                   &     " C_66 ", 9x, " C_16 ", 9x, " B " )')
 
-         DO itemp=1,ntemp
+         DO itemp=2,ntemp-1
             WRITE(iu_el_cons,'(e16.8,8e20.12)') temp(itemp), b0_t(itemp), &
                   el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
                   el_cons_t(1,3,itemp), el_cons_t(3,3,itemp), &
@@ -247,7 +248,7 @@ IF (meta_ionode) THEN
                   & 9x, " C_13 ", 9x, " C_22 ", 9x, " C_23 ", 9x, " C_33 ",  &
                   & 9x, " C_44 ", 9x, " C_55 ", 9x, " C_66 ", 9x, " C_15 ",  &
                   & 9x, " C_25 ", 9x, " C_35 ", 9x, " C_46 ")')
-            DO itemp=1,ntemp
+            DO itemp=2,ntemp-1
                WRITE(iu_el_cons,'(e16.8,14e20.12)') temp(itemp), b0_t(itemp),&
                      el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
                      el_cons_t(1,3,itemp), el_cons_t(2,2,itemp), &
@@ -266,7 +267,7 @@ IF (meta_ionode) THEN
                   & 9x, " C_13 ", 9x, " C_22 ", 9x, " C_23 ", 9x, " C_33 ",  &
                   & 9x, " C_44 ", 9x, " C_55 ", 9x, " C_66 ", 9x, " C_16 ",  &
                   & 9x, " C_26 ", 9x, " C_36 ", 9x, " C_45 ")')
-            DO itemp=1,ntemp
+            DO itemp=2,ntemp-1
                WRITE(iu_el_cons,'(e16.8,14e20.12)') temp(itemp), b0_t(itemp),&
                      el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
                      el_cons_t(1,3,itemp), el_cons_t(2,2,itemp), &
@@ -287,7 +288,7 @@ IF (meta_ionode) THEN
                   & 9x, " C_34 ", 9x, " C_35 ", 9x, " C_36 ", 9x, &
                   & 9x, " C_45 ", 9x, " C_46 ", 9x, " C_55 ", 9x, &
                   & 9x, " C_56 ", 9x, " C_66 " )')
-         DO itemp=1,ntemp
+         DO itemp=2,ntemp-1
             WRITE(iu_el_cons,'(e16.8,24e20.12)') temp(itemp), b0_t(itemp), &
                   el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
                   el_cons_t(1,3,itemp), el_cons_t(2,2,itemp), &

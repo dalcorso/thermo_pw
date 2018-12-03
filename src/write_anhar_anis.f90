@@ -12,25 +12,26 @@ SUBROUTINE write_anhar_anis()
 !
 USE kinds,          ONLY : DP
 USE temperature,    ONLY : ntemp, temp
+USE thermo_mod,     ONLY : ibrav_geo
 USE thermodynamics, ONLY : ph_ce, ph_b_fact
 USE anharmonic,     ONLY : alpha_anis_t, vmin_t, b0_t, celldm_t, beta_t, &
                            gamma_t, cv_t, ce_t, cp_t, b0_s, cpmce_anis,  &
                            el_cons_t, free_e_min_t, bths_t, ggamma_t,    &
-                           bfact_t, lelastic
+                           bfact_t, lelastic, el_cons_s
 USE initial_conf,   ONLY : ibrav_save
 USE control_elastic_constants, ONLY : el_cons_available, el_cons_t_available
 USE control_thermo, ONLY : with_eigen
 USE elastic_constants, ONLY : el_con
 USE isoentropic,    ONLY : isostress_heat_capacity, thermal_stress,      &
-                           gen_average_gruneisen
+                           gen_average_gruneisen, isoentropic_elastic_constants
 USE data_files,     ONLY : flanhar
 USE io_global,      ONLY : meta_ionode
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
-INTEGER :: itemp, iu_therm
+INTEGER :: itemp, iu_therm, ibrav
 INTEGER :: find_free_unit
-REAL(DP) :: compute_omega_geo
+REAL(DP) :: compute_omega_geo, csmct(6,6,ntemp)
 
 CALL compute_alpha_anis(celldm_t, alpha_anis_t, temp, ntemp, ibrav_save)
 !
@@ -54,8 +55,12 @@ IF (lelastic) THEN
 
    CALL thermal_stress(el_cons_t,alpha_anis_t,bths_t,ntemp)
    CALL gen_average_gruneisen(vmin_t,bths_t,cv_t,temp,ggamma_t,ntemp)
+
+   CALL isoentropic_elastic_constants(vmin_t,bths_t,cv_t,temp,csmct,ntemp)
+   el_cons_s=el_cons_t + csmct
 ENDIF
 
+ibrav=ibrav_geo(1)
 IF (meta_ionode) THEN
 !
 !   here we write the anharmonic quantities calculated from the phonon dos
@@ -129,6 +134,14 @@ IF (meta_ionode) THEN
       CALL write_heat_anharm_small(temp, ce_t, ntemp, filename)
    ENDIF
 ENDIF
+IF (lelastic) THEN
+!
+!   Here the elastic constants at constant entropy
+!
+   filename='anhar_files/'//TRIM(flanhar)//'.el_cons_s'
+   CALL add_pressure(filename)
+   CALL write_el_cons_on_file(temp, ntemp, ibrav, el_cons_s, b0_s, filename)
+ENDIF
 
 IF (with_eigen) THEN
    CALL interpolate_b_fact_anis(celldm_t, ph_b_fact, bfact_t)
@@ -148,25 +161,27 @@ SUBROUTINE write_ph_freq_anhar_anis()
 !
 USE kinds,          ONLY : DP
 USE temperature,    ONLY : ntemp, temp
+USE thermo_mod,     ONLY : ibrav_geo
 USE ph_freq_thermodynamics, ONLY : phf_ce, phf_b_fact
 USE ph_freq_anharmonic, ONLY : alphaf_anis_t, vminf_t, b0f_t, celldmf_t, &
                                betaf_t, gammaf_t, cvf_t, cef_t, cpf_t, b0f_s, &
                                cpmcef_anis, el_consf_t, lelasticf,       &
-                               free_e_minf_t, bthsf_t, ggammaf_t, bfactf_t
+                               free_e_minf_t, bthsf_t, ggammaf_t, bfactf_t, &
+                               el_consf_s
 USE elastic_constants, ONLY : el_con
 USE initial_conf,   ONLY : ibrav_save
 USE control_thermo, ONLY : with_eigen
 USE control_elastic_constants, ONLY : el_cons_available
 USE isoentropic,    ONLY : isostress_heat_capacity, thermal_stress,      &
-                           gen_average_gruneisen
+                           gen_average_gruneisen, isoentropic_elastic_constants
 USE data_files,     ONLY : flanhar
 USE io_global,      ONLY : meta_ionode
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
 INTEGER :: itemp, iu_therm
-INTEGER :: find_free_unit
-REAL(DP) :: compute_omega_geo, el_con_t(6,6,ntemp)
+INTEGER :: find_free_unit, ibrav
+REAL(DP) :: compute_omega_geo, el_con_t(6,6,ntemp), csmct(6,6,ntemp)
 
 CALL compute_alpha_anis(celldmf_t, alphaf_anis_t, temp, ntemp, ibrav_save)
 !
@@ -189,8 +204,12 @@ IF (lelasticf) THEN
    CALL compute_cv_bs_g(betaf_t, vminf_t, b0f_t, cvf_t, cpf_t, b0f_s, gammaf_t)
    CALL thermal_stress(el_consf_t,alphaf_anis_t,bthsf_t,ntemp)
    CALL gen_average_gruneisen(vminf_t,bthsf_t,cvf_t,temp,ggammaf_t,ntemp)
+
+   CALL isoentropic_elastic_constants(vminf_t,bthsf_t,cvf_t,temp,csmct,ntemp)
+   el_consf_s=el_consf_t + csmct
 ENDIF
 
+ibrav=ibrav_geo(1)
 IF (meta_ionode) THEN
 !
 !   here we plot the anharmonic quantities calculated from the phonon dos
@@ -256,7 +275,6 @@ IF (meta_ionode) THEN
       filename='anhar_files/'//TRIM(flanhar)//'.ggamma_ph'
       CALL add_pressure(filename)
       CALL write_generalized_gamma(temp, ggammaf_t, ntemp, filename)
-
    ELSE
 !
 !   only the interpolated heat capacity is available
@@ -265,6 +283,15 @@ IF (meta_ionode) THEN
       CALL add_pressure(filename)
       CALL write_heat_anharm_small(temp, cef_t, ntemp, filename)
    ENDIF
+ENDIF
+
+IF (lelasticf) THEN
+!
+!   Here the elastic constants at constant entropy
+!
+   filename='anhar_files/'//TRIM(flanhar)//'.el_cons_s_ph'
+   CALL add_pressure(filename)
+   CALL write_el_cons_on_file(temp, ntemp, ibrav, el_consf_s, b0f_s, filename)
 ENDIF
 
 IF (with_eigen) THEN

@@ -168,10 +168,10 @@ DEALLOCATE(phf)
 !
 CALL check_el_cons()
 CALL write_elastic_t()
-CALL plot_elastic_t()
 
 IF (ltherm_dos) CALL write_anhar_anis()
 IF (ltherm_freq) CALL write_ph_freq_anhar_anis()
+CALL plot_elastic_t()
 !
 !    calculate and plot the Gruneisen parameters along the given path.
 !
