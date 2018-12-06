@@ -286,8 +286,9 @@ This is a problem of old versions of gnuplot. Update to gnuplot 5.0 or higher.
 <br>
 Please check that you used enough digits for the atomic positions. A typical
 problem appears when you write 1/3 and 2/3 in single precision. The 
-<code>pw.x</code> code finds more symmetry that it is actually present in 
-the final modes and the routine that identifies the mode symmetry gets 
+<code>pw.x</code> code finds more symmetries than those that are
+actually present in the final modes and the routine that identifies the 
+mode symmetry gets 
 confused.
 <br><br>
 17. The code fails to identify the space group and stops with an error
