@@ -1550,7 +1550,11 @@ are computed as a function of temperature within the ``quasi-static
 approximation" and are used
 to calculate the other thermodynamic properties. In addition to the
 quantities plotted for cubic solids, the code plots also the elastic
-constants and the bulk modulus as a function of the temperature. 
+constants and the bulk modulus as a function of the temperature and
+the elastic compliances and the compressibility as a function of temperature.
+The elastic constants are interpolated with a quadratic 
+(\texttt{lquartic=.FALSE.}) or quartic (\texttt{lquartic=.TRUE.}) polynomial
+of the crystal parameters.
 Moreover the thermal stresses and the generalized average Gr\"uneisen
 parameters are plotted.
 These possibilities are implemented only for cubic, tetragonal, 
