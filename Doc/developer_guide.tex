@@ -1045,63 +1045,132 @@ the \texttt{plotband.f90} code of \qe. The numbers after the geometry indicate t
 along the path and the number of the irreducible representation.
 
 \item
-\texttt{anhar\_files/flanhar.el\_cons(\_ph)}
-(default name \texttt{output\_anhar.dat.el\_cons(\_ph)}). This file
+\texttt{anhar\_files/flanhar.el\_cons(\_s)(\_ph)}
+(default name \texttt{output\_anhar.dat.el\_cons(\_s)(\_ph)}). This file
 contains the elastic constants as a functions of temperature. The number
-of columns depends on the Laue class. The first column is always the 
-temperature while the last one is the bulk modulus. The others are the
+of columns depends on the Laue class. The first column is the 
+temperature and the second is the bulk modulus. The others are the
 non zero elements of the elastic constants tensor. \\ 
-For the Laue class $O_h$ and $T_h$, it contains
+For the Laue class $O_h$ and $T_h$, it contains:
 \begin{verbatim}
-#   T     C_{11}   C_{12}    C_{44}    B
+# T  B  C_{11} C_{12} C_{44}   
 \end{verbatim}
-For the Laue class $D_{6h}$ and $C_{6h}$, it contains
+For the Laue class $D_{6h}$ and $C_{6h}$, it contains:
 \begin{verbatim}
-#   T     C_{11}   C_{12}    C_{13}    C_{33}    C_{44}   B
+# T  B  C_{11} C_{12} C_{13} C_{33} C_{44}  
 \end{verbatim}
-For the Laue class $D_{3d}$, it contains
+For the Laue class $D_{3d}$, it contains:
 \begin{verbatim}
-#   T     C_{11}   C_{12}    C_{13}    C_{33}    C_{44}   C_{14}   B
+# T  B  C_{11} C_{12} C_{13} C_{33} C_{44} C_{14}  
 \end{verbatim}
-For the Laue class $S_{6}$, it contains
+For the Laue class $S_{6}$, it contains:
 \begin{verbatim}
-#   T     C_{11}   C_{12}    C_{13}    C_{33}    C_{44}   C_{14}   C_{25}  B
+# T  B  C_{11} C_{12} C_{13} C_{33} C_{44} C_{14} C_{25}  
 \end{verbatim}
-For the Laue class $D_{4h}$, it contains
+For the Laue class $D_{4h}$, it contains:
 \begin{verbatim}
-#   T     C_{11}   C_{12}    C_{13}    C_{33}    C_{44}   B
+# T  B  C_{11} C_{12} C_{13} C_{33} C_{44}  
 \end{verbatim}
-For the Laue class $D_{4h}$, it contains
+For the Laue class $D_{4h}$, it contains:
 \begin{verbatim}
-#   T     C_{11}   C_{12}    C_{13}    C_{33}    C_{44}    C_{66}   B
+# T  B  C_{11} C_{12} C_{13} C_{33} C_{44} C_{66} 
 \end{verbatim}
-For the Laue class $D_{2h}$, it contains
+For the Laue class $D_{2h}$, it contains:
 \begin{verbatim}
-#   T  C_{11} C_{12} C_{13} C_{22} C_{23} C_{33} C_{44} C_{55} C_{66} B
+# T  B  C_{11} C_{12} C_{13} C_{22} C_{23} C_{33} C_{44} C_{55} C_{66}
 \end{verbatim}
-For the Laue class $C_{4h}$, it contains
+For the Laue class $C_{4h}$, it contains:
 \begin{verbatim}
-#   T  C_{11}   C_{12}   C_{13}   C_{33}   C_{44}   C_{66}   C_{16}  B
+# T  B  C_{11} C_{12} C_{13} C_{33} C_{44} C_{66} C_{16}  
 \end{verbatim}
 For the Laue class $C_{2h}$, the content depends on the Bravais lattice. 
 If the lattice is $b$-unique the file contains:
 \begin{verbatim}
-#   T C_{11} C_{12} C_{13} C_{22} C_{23} C_{33} C_{44} C_{55} C_{66} 
-      C_{15} C_{25} C_{35} C_{46} B
+# T  B  C_{11} C_{12} C_{13} C_{22} C_{23} C_{33} C_{44} C_{55} C_{66} 
+        C_{15} C_{25} C_{35} C_{46} 
 \end{verbatim}
 If the lattice is $c$-unique the file contains:
 \begin{verbatim}
-#   T C_{11} C_{12} C_{13} C_{22} C_{23} C_{33} C_{44} C_{55} C_{66} 
-      C_{16} C_{26} C_{36} C_{45} B
+# T  B  C_{11} C_{12} C_{13} C_{22} C_{23} C_{33} C_{44} C_{55} C_{66} 
+        C_{16} C_{26} C_{36} C_{45} 
 \end{verbatim}
-For the Laue class $C_i$, it contains
+For the Laue class $C_i$, it contains:
 \begin{verbatim}
-#   T C_{11} C_{12} C_{13} C_{22} C_{23} C_{33} C_{44} C_{55} C_{66} 
-      C_{14} C_{15} C_{16} C_{24} C_{25} C_{26} C_{34} C_{35} C_{36}
-      C_{45} C_{46} C_{55} C_{56} C_{66} B
+# T  B  C_{11} C_{12} C_{13} C_{22} C_{23} C_{33} C_{44} C_{55} C_{66} 
+        C_{14} C_{15} C_{16} C_{24} C_{25} C_{26} C_{34} C_{35} C_{36}
+        C_{45} C_{46} C_{55} C_{56} C_{66} 
+\end{verbatim}
+No extension or the \texttt{(\_ph)} extension means that the elastic
+constants have been interpolated at the geometry that minimizes the
+free energy calculated by the phonon density of states or by Brillouin
+zone integration, respectively. 
+The \texttt{\_s} extension indicates isoentropic elastic constants.
+No extension means isothermal elastic constants.
+
+\item
+\texttt{anhar\_files/flanhar.el\_comp(\_s)(\_ph)}
+(default name \texttt{output\_anhar.dat.el\_comp(\_s)(\_ph)}). This file
+contains the elastic compliances as a functions of temperature. 
+The number of columns depends on the Laue class. The first column is the 
+temperature and the second is the compressibility. The others are the
+non zero elements of the elastic compliances tensor. \\ 
+For the Laue class $O_h$ and $T_h$, it contains:
+\begin{verbatim}
+# T  K  S_{11} S_{12} S_{44}   
+\end{verbatim}
+For the Laue class $D_{6h}$ and $C_{6h}$, it contains:
+\begin{verbatim}
+# T  K  S_{11} S_{12} S_{13} S_{33} S_{44}  
+\end{verbatim}
+For the Laue class $D_{3d}$, it contains:
+\begin{verbatim}
+# T  K  S_{11} S_{12} S_{13} S_{33} S_{44} S_{14}  
+\end{verbatim}
+For the Laue class $S_{6}$, it contains:
+\begin{verbatim}
+# T  K  S_{11} S_{12} S_{13} S_{33} S_{44} S_{14} S_{25}  
+\end{verbatim}
+For the Laue class $D_{4h}$, it contains:
+\begin{verbatim}
+# T  K  S_{11} S_{12} S_{13} S_{33} S_{44}
+\end{verbatim}
+For the Laue class $D_{4h}$, it contains:
+\begin{verbatim}
+# T  K  S_{11} S_{12} S_{13} S_{33} S_{44} S_{66} 
+\end{verbatim}
+For the Laue class $D_{2h}$, it contains:
+\begin{verbatim}
+# T  K  S_{11} S_{12} S_{13} S_{22} S_{23} S_{33} S_{44} S_{55} S_{66}
+\end{verbatim}
+For the Laue class $C_{4h}$, it contains:
+\begin{verbatim}
+# T  K  S_{11} S_{12} S_{13} S_{33} S_{44} S_{66} S_{16}  
+\end{verbatim}
+For the Laue class $C_{2h}$, the content depends on the Bravais lattice. 
+If the lattice is $b$-unique the file contains:
+\begin{verbatim}
+# T  K  S_{11} S_{12} S_{13} S_{22} S_{23} S_{33} S_{44} S_{55} S_{66} 
+        S_{15} S_{25} S_{35} S_{46} 
+\end{verbatim}
+If the lattice is $c$-unique the file contains:
+\begin{verbatim}
+# T  K  S_{11} S_{12} S_{13} S_{22} S_{23} S_{33} S_{44} S_{55} S_{66} 
+        S_{16} S_{26} S_{36} S_{45} 
+\end{verbatim}
+For the Laue class $C_i$, it contains:
+\begin{verbatim}
+# T  K  S_{11} S_{12} S_{13} S_{22} S_{23} S_{33} S_{44} S_{55} S_{66} 
+        S_{14} S_{15} S_{16} S_{24} S_{25} S_{26} S_{34} S_{35} S_{36}
+        S_{45} S_{46} S_{55} S_{56} S_{66} 
 \end{verbatim}
 
 \end{itemize}
+No extension or the \texttt{(\_ph)} extension means that the elastic
+compliances have been interpolated at the geometry that minimizes the
+free energy calculated by the phonon density of states or by Brillouin
+zone integration, respectively. 
+The \texttt{\_s} extension indicates isoentropic elastic constants.
+No extension means isothermal elastic constants.
 
 \newpage
 \section{\color{coral}Library}

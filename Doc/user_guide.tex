@@ -147,6 +147,9 @@ a function of temperature (limited to cubic systems).
 Minimum Helmholtz (or Gibbs at finite pressures) free energy 
 as a function of temperature.
 
+\item Elastic constants and elastic compliances as a function of temperature 
+within the ``quasi-static'' approximation.
+
 \item Surface band structure identification and plot of the projected bulk
 band structure.
 
@@ -2266,8 +2269,22 @@ each mode. The same comments made for the band structure plot apply here.
 Temperature dependence of the isothermal and isoentropic elastic constants 
 within the 
 `Quasi-static Approximation'. There is a plot for each non-zero
-elastic constant and the number of plots depends on the Laue class. 
+elastic constant and a plot of the bulk modulus. The number of plots 
+depends on the Laue class. 
 Elastic constants 
+interpolated at the geometry computed using the phonon density of states 
+are in \texttt{red} (isothermal) and \texttt{green} (isoentropic), 
+those calculated from integration over the 
+Brillouin zone are in \texttt{blue} (isothermal) and \texttt{orange} 
+(isoentropic).
+
+\item
+Temperature dependence of the isothermal and isoentropic elastic compliances
+within the 
+`Quasi-static Approximation'. There is a plot for each non-zero
+elastic compliance and a plot of the compressibility. The number of plots 
+depends on the Laue class. 
+Elastic compliances
 interpolated at the geometry computed using the phonon density of states 
 are in \texttt{red} (isothermal) and \texttt{green} (isoentropic), 
 those calculated from integration over the 
