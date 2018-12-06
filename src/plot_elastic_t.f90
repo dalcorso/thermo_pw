@@ -5,7 +5,7 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-SUBROUTINE plot_elastic_t()
+SUBROUTINE plot_elastic_t(iflag)
 !
 !  This is a driver to plot the elastic constants as a function of
 !  temperature
@@ -31,7 +31,7 @@ USE io_global,        ONLY : ionode
 IMPLICIT NONE
 CHARACTER(LEN=256) :: gnu_filename, filename, filenameps, filelastic, &
                       filelastic_s, filename_s
-INTEGER :: ibrav
+INTEGER :: ibrav, iflag
 INTEGER :: ierr, system
 
 IF ( my_image_id /= root_image ) RETURN
@@ -39,10 +39,19 @@ IF (.NOT.(lelastic.OR.lelasticf).OR..NOT.lb0_t) RETURN
 
 ibrav=ibrav_geo(1)
 
-gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_el_cons"
+IF (iflag==0) THEN
+   gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_el_cons"
+   filenameps=TRIM(flpsanhar)//".el_cons"//TRIM(flext)
+   filelastic="anhar_files/"//TRIM(flanhar)//".el_cons"
+   filelastic_s="anhar_files/"//TRIM(flanhar)//".el_cons_s"
+ELSE
+   gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_el_comp"
+   filenameps=TRIM(flpsanhar)//".el_comp"//TRIM(flext)
+   filelastic="anhar_files/"//TRIM(flanhar)//".el_comp"
+   filelastic_s="anhar_files/"//TRIM(flanhar)//".el_comp_s"
+ENDIF
 CALL gnuplot_start(gnu_filename)
 
-filenameps=TRIM(flpsanhar)//".el_cons"//TRIM(flext)
 IF (tmin ==1._DP) THEN
    CALL gnuplot_write_header(filenameps, 0.0_DP, tmax, 0.0_DP, 0.0_DP, &
                                                        1.0_DP, flext ) 
@@ -50,15 +59,17 @@ ELSE
    CALL gnuplot_write_header(filenameps, tmin, tmax, 0.0_DP, 0.0_DP, &
                                                        1.0_DP, flext ) 
 ENDIF
-filelastic="anhar_files/"//TRIM(flanhar)//".el_cons"
 filename=TRIM(filelastic)//"_ph"
-filelastic_s="anhar_files/"//TRIM(flanhar)//".el_cons_s"
 filename_s=TRIM(filelastic_s)//"_ph"
 
 CALL gnuplot_xlabel('T (K)', .FALSE.) 
-CALL gnuplot_ylabel('C_{11} (kbar)',.FALSE.) 
-
-CALL gnuplot_set_fact(1.0_DP, .FALSE.) 
+IF (iflag==0) THEN
+   CALL gnuplot_ylabel('C_{11} (kbar)',.FALSE.) 
+   CALL gnuplot_set_fact(1.0_DP, .FALSE.) 
+ELSE
+   CALL gnuplot_ylabel('S_{11} (Mbar^{-1})',.FALSE.) 
+   CALL gnuplot_set_fact(1.D3, .FALSE.) 
+ENDIF
 
 IF (lelastic) THEN
    CALL gnuplot_write_file_mul_data(filelastic,1,3,'color_red',.TRUE.,&
@@ -73,7 +84,11 @@ IF (lelasticf) THEN
    CALL gnuplot_write_file_mul_data(filename_s,1,3,'color_orange',.FALSE.,&
                                                      .TRUE.,.FALSE.)
 ENDIF
-CALL gnuplot_ylabel('C_{12} (kbar)',.FALSE.) 
+IF (iflag==0) THEN
+   CALL gnuplot_ylabel('C_{12} (kbar)',.FALSE.) 
+ELSE
+   CALL gnuplot_ylabel('S_{12} (Mbar^{-1})',.FALSE.) 
+ENDIF
 IF (lelastic) THEN
    CALL gnuplot_write_file_mul_data(filelastic,1,4,'color_red',.TRUE.,&
                                                      .FALSE.,.FALSE.)
@@ -87,7 +102,11 @@ IF (lelasticf) THEN
                                                      .TRUE.,.FALSE.)
 ENDIF
 IF (laue==32.OR.laue==29) THEN
-   CALL gnuplot_ylabel('C_{44} (kbar)',.FALSE.) 
+   IF (iflag==0) THEN
+      CALL gnuplot_ylabel('C_{44} (kbar)',.FALSE.) 
+   ELSE
+      CALL gnuplot_ylabel('S_{44} (Mbar^{-1})',.FALSE.) 
+   ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,5,'color_red',.TRUE.,&
                                                      .FALSE.,.FALSE.)
@@ -107,7 +126,11 @@ IF (laue==2.OR.laue==18.OR.laue==19.OR.laue==20.OR.laue==22.OR.laue==23.OR.&
 !
 !  tetragonal, hexagonal, trigonal, or orthorhombic
 !
-   CALL gnuplot_ylabel('C_{13} (kbar)',.FALSE.) 
+   IF (iflag==0) THEN
+      CALL gnuplot_ylabel('C_{13} (kbar)',.FALSE.) 
+   ELSE
+      CALL gnuplot_ylabel('S_{13} (Mbar^{-1})',.FALSE.) 
+   ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,5,'color_red',.TRUE.,&
                                                      .FALSE.,.FALSE.)
@@ -126,7 +149,11 @@ IF (laue==18.OR.laue==22.OR.laue==19.OR.laue==23.OR.laue==25.OR.laue==27) THEN
 !
 !  tetragonal or hexagonal
 !
-   CALL gnuplot_ylabel('C_{33} (kbar)',.FALSE.) 
+   IF (iflag==0) THEN
+      CALL gnuplot_ylabel('C_{33} (kbar)',.FALSE.) 
+   ELSE
+      CALL gnuplot_ylabel('S_{33} (Mbar^{-1})',.FALSE.) 
+   ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,6,'color_red',.TRUE.,&
                                                      .FALSE.,.FALSE.)
@@ -139,7 +166,11 @@ IF (laue==18.OR.laue==22.OR.laue==19.OR.laue==23.OR.laue==25.OR.laue==27) THEN
       CALL gnuplot_write_file_mul_data(filename_s,1,6,'color_orange',.FALSE.,&
                                                      .TRUE.,.FALSE.)
    ENDIF
-   CALL gnuplot_ylabel('C_{44} (kbar)',.FALSE.) 
+   IF (iflag==0) THEN
+      CALL gnuplot_ylabel('C_{44} (kbar)',.FALSE.) 
+   ELSE
+      CALL gnuplot_ylabel('S_{44} (Mbar^{-1})',.FALSE.) 
+   ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,7,'color_red',.TRUE.,&
                                                      .FALSE.,.FALSE.)
@@ -158,7 +189,11 @@ IF (laue==25.OR.laue==27) THEN
 !
 !  trigonal D_3d or S_6
 !
-   CALL gnuplot_ylabel('C_{14} (kbar)',.FALSE.) 
+   IF (iflag==0) THEN
+      CALL gnuplot_ylabel('C_{14} (kbar)',.FALSE.) 
+   ELSE
+      CALL gnuplot_ylabel('S_{14} (Mbar^{-1})',.FALSE.) 
+   ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,8,'color_red',.TRUE.,&
                                                      .FALSE.,.FALSE.)
@@ -177,7 +212,11 @@ IF (laue==27) THEN
 !
 !  trigonal S_6
 !
-   CALL gnuplot_ylabel('C_{25} (kbar)',.FALSE.) 
+   IF (iflag==0) THEN
+      CALL gnuplot_ylabel('C_{25} (kbar)',.FALSE.) 
+   ELSE
+      CALL gnuplot_ylabel('S_{25} (Mbar^{-1})',.FALSE.) 
+   ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,9,'color_red',.TRUE.,&
                                                      .FALSE.,.FALSE.)
@@ -196,7 +235,12 @@ IF (laue==18.OR.laue==22) THEN
 !
 !  tetragonal C_4h or D_4h
 !
-   CALL gnuplot_ylabel('C_{66} (kbar)',.FALSE.) 
+   IF (iflag==0) THEN
+      CALL gnuplot_ylabel('C_{66} (kbar)',.FALSE.) 
+   ELSE
+      CALL gnuplot_ylabel('S_{66} (Mbar^{-1})',.FALSE.) 
+   ENDIF
+
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,8,'color_red',.TRUE.,&
                                                      .FALSE.,.FALSE.)
@@ -215,7 +259,11 @@ IF (laue==18) THEN
 !
 !  tetragonal C_4h
 !
-   CALL gnuplot_ylabel('C_{16} (kbar)',.FALSE.) 
+   IF (iflag==0) THEN
+      CALL gnuplot_ylabel('C_{16} (kbar)',.FALSE.) 
+   ELSE
+      CALL gnuplot_ylabel('S_{16} (Mbar^{-1})',.FALSE.) 
+   ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,9,'color_red',.TRUE.,&
                                                      .FALSE.,.FALSE.)
@@ -234,7 +282,11 @@ IF (laue==2.OR.laue==16.OR.laue==20) THEN
 !
 !  triclinic C_i, monoclinic C_2h, or orthorhombic D_2h
 !
-   CALL gnuplot_ylabel('C_{22} (kbar)',.FALSE.) 
+   IF (iflag==0) THEN
+      CALL gnuplot_ylabel('C_{22} (kbar)',.FALSE.) 
+   ELSE
+      CALL gnuplot_ylabel('S_{22} (Mbar^{-1})',.FALSE.) 
+   ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,6,'color_red',.TRUE.,&
                                                      .FALSE.,.FALSE.)
@@ -248,7 +300,11 @@ IF (laue==2.OR.laue==16.OR.laue==20) THEN
                                                      .TRUE.,.FALSE.)
    ENDIF
 
-   CALL gnuplot_ylabel('C_{23} (kbar)',.FALSE.) 
+   IF (iflag==0) THEN
+      CALL gnuplot_ylabel('C_{23} (kbar)',.FALSE.) 
+   ELSE
+      CALL gnuplot_ylabel('S_{23} (Mbar^{-1})',.FALSE.) 
+   ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,7,'color_red',.TRUE.,&
                                                      .FALSE.,.FALSE.)
@@ -262,7 +318,11 @@ IF (laue==2.OR.laue==16.OR.laue==20) THEN
                                                      .TRUE.,.FALSE.)
    ENDIF
 
-   CALL gnuplot_ylabel('C_{33} (kbar)',.FALSE.) 
+   IF (iflag==0) THEN
+      CALL gnuplot_ylabel('C_{33} (kbar)',.FALSE.) 
+   ELSE
+      CALL gnuplot_ylabel('S_{33} (Mbar^{-1})',.FALSE.) 
+   ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,8,'color_red',.TRUE.,&
                                                      .FALSE.,.FALSE.)
@@ -275,7 +335,11 @@ IF (laue==2.OR.laue==16.OR.laue==20) THEN
       CALL gnuplot_write_file_mul_data(filename_s,1,8,'color_orange',.FALSE.,&
                                                      .TRUE.,.FALSE.)
    ENDIF
-   CALL gnuplot_ylabel('C_{44} (kbar)',.FALSE.) 
+   IF (iflag==0) THEN
+      CALL gnuplot_ylabel('C_{44} (kbar)',.FALSE.) 
+   ELSE
+      CALL gnuplot_ylabel('S_{44} (Mbar^{-1})',.FALSE.) 
+   ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,9,'color_red',.TRUE.,&
                                                      .FALSE.,.FALSE.)
@@ -288,7 +352,11 @@ IF (laue==2.OR.laue==16.OR.laue==20) THEN
       CALL gnuplot_write_file_mul_data(filename_s,1,9,'color_orange',.FALSE.,&
                                                      .TRUE.,.FALSE.)
    ENDIF
-   CALL gnuplot_ylabel('C_{55} (kbar)',.FALSE.) 
+   IF (iflag==0) THEN
+      CALL gnuplot_ylabel('C_{55} (kbar)',.FALSE.) 
+   ELSE
+      CALL gnuplot_ylabel('S_{55} (Mbar^{-1})',.FALSE.) 
+   ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,10,'color_red',.TRUE.,&
                                                      .FALSE.,.FALSE.)
@@ -301,7 +369,11 @@ IF (laue==2.OR.laue==16.OR.laue==20) THEN
       CALL gnuplot_write_file_mul_data(filename_s,1,10,'color_orange',.FALSE.,&
                                                      .TRUE.,.FALSE.)
    ENDIF
-   CALL gnuplot_ylabel('C_{66} (kbar)',.FALSE.) 
+   IF (iflag==0) THEN
+      CALL gnuplot_ylabel('C_{66} (kbar)',.FALSE.) 
+   ELSE
+      CALL gnuplot_ylabel('S_{66} (Mbar^{-1})',.FALSE.) 
+   ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,11,'color_red',.TRUE.,&
                                                      .FALSE.,.FALSE.)
@@ -318,9 +390,17 @@ END IF
 
 IF (laue==16) THEN
    IF (ibrav>0) THEN
-      CALL gnuplot_ylabel('C_{15} (kbar)',.FALSE.) 
+      IF (iflag==0) THEN
+         CALL gnuplot_ylabel('C_{15} (kbar)',.FALSE.) 
+      ELSE
+         CALL gnuplot_ylabel('S_{15} (Mbar^{-1})',.FALSE.) 
+      ENDIF
    ELSE
-      CALL gnuplot_ylabel('C_{16} (kbar)',.FALSE.) 
+      IF (iflag==0) THEN
+         CALL gnuplot_ylabel('C_{16} (kbar)',.FALSE.) 
+      ELSE
+         CALL gnuplot_ylabel('S_{16} (Mbar^{-1})',.FALSE.) 
+      ENDIF
    ENDIF
 
    IF (lelastic) THEN
@@ -336,9 +416,17 @@ IF (laue==16) THEN
                                               .FALSE.,.TRUE.,.FALSE.)
    ENDIF
    IF (ibrav>0) THEN
-      CALL gnuplot_ylabel('C_{25} (kbar)',.FALSE.) 
+      IF (iflag==0) THEN
+         CALL gnuplot_ylabel('C_{25} (kbar)',.FALSE.) 
+      ELSE
+         CALL gnuplot_ylabel('S_{25} (Mbar^{-1})',.FALSE.) 
+      ENDIF
    ELSE
-      CALL gnuplot_ylabel('C_{26} (kbar)',.FALSE.) 
+      IF (iflag==0) THEN
+         CALL gnuplot_ylabel('C_{26} (kbar)',.FALSE.) 
+      ELSE
+         CALL gnuplot_ylabel('S_{26} (Mbar^{-1})',.FALSE.) 
+      ENDIF
    ENDIF
 
    IF (lelastic) THEN
@@ -355,9 +443,17 @@ IF (laue==16) THEN
    ENDIF
   
    IF (ibrav>0) THEN
-      CALL gnuplot_ylabel('C_{35} (kbar)',.FALSE.) 
+      IF (iflag==0) THEN
+         CALL gnuplot_ylabel('C_{35} (kbar)',.FALSE.) 
+      ELSE
+         CALL gnuplot_ylabel('S_{35} (Mbar^{-1})',.FALSE.) 
+      ENDIF
    ELSE
-      CALL gnuplot_ylabel('C_{36} (kbar)',.FALSE.) 
+      IF (iflag==0) THEN
+         CALL gnuplot_ylabel('C_{36} (kbar)',.FALSE.) 
+      ELSE
+         CALL gnuplot_ylabel('S_{36} (Mbar^{-1})',.FALSE.) 
+      ENDIF
    ENDIF
 
    IF (lelastic) THEN
@@ -374,9 +470,17 @@ IF (laue==16) THEN
    ENDIF 
 
    IF (ibrav>0) THEN
-      CALL gnuplot_ylabel('C_{46} (kbar)',.FALSE.) 
+      IF (iflag==0) THEN
+         CALL gnuplot_ylabel('C_{46} (kbar)',.FALSE.) 
+      ELSE
+         CALL gnuplot_ylabel('S_{46} (Mbar^{-1})',.FALSE.) 
+      ENDIF
    ELSE
-      CALL gnuplot_ylabel('C_{45} (kbar)',.FALSE.) 
+      IF (iflag==0) THEN
+         CALL gnuplot_ylabel('C_{45} (kbar)',.FALSE.) 
+      ELSE
+         CALL gnuplot_ylabel('S_{45} (Mbar^{-1})',.FALSE.) 
+      ENDIF
    ENDIF
 
    IF (lelastic) THEN
@@ -394,7 +498,11 @@ IF (laue==16) THEN
 ENDIF
 
 IF (laue==2) THEN
-   CALL gnuplot_ylabel('C_{14} (kbar)',.FALSE.) 
+   IF (iflag==0) THEN
+      CALL gnuplot_ylabel('C_{14} (kbar)',.FALSE.) 
+   ELSE
+      CALL gnuplot_ylabel('S_{14} (Mbar^{-1})',.FALSE.) 
+   ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,12,'color_red',.TRUE.,&
                                                      .FALSE.,.FALSE.)
@@ -408,7 +516,11 @@ IF (laue==2) THEN
                                               .FALSE.,.TRUE.,.FALSE.)
    ENDIF
 
-   CALL gnuplot_ylabel('C_{15} (kbar)',.FALSE.) 
+   IF (iflag==0) THEN
+      CALL gnuplot_ylabel('C_{15} (kbar)',.FALSE.) 
+   ELSE
+      CALL gnuplot_ylabel('S_{15} (Mbar^{-1})',.FALSE.) 
+   ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,13,'color_red',.TRUE.,&
                                                      .FALSE.,.FALSE.)
@@ -422,7 +534,11 @@ IF (laue==2) THEN
                                               .FALSE.,.TRUE.,.FALSE.)
    ENDIF
 
-   CALL gnuplot_ylabel('C_{16} (kbar)',.FALSE.) 
+   IF (iflag==0) THEN
+      CALL gnuplot_ylabel('C_{16} (kbar)',.FALSE.) 
+   ELSE
+      CALL gnuplot_ylabel('S_{16} (Mbar^{-1})',.FALSE.) 
+   ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,14,'color_red',.TRUE.,&
                                                      .FALSE.,.FALSE.)
@@ -436,7 +552,11 @@ IF (laue==2) THEN
                                               .FALSE.,.TRUE.,.FALSE.)
    ENDIF
 
-   CALL gnuplot_ylabel('C_{24} (kbar)',.FALSE.) 
+   IF (iflag==0) THEN
+      CALL gnuplot_ylabel('C_{24} (kbar)',.FALSE.) 
+   ELSE
+      CALL gnuplot_ylabel('S_{24} (Mbar^{-1})',.FALSE.) 
+   ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,15,'color_red',.TRUE.,&
                                                      .FALSE.,.FALSE.)
@@ -449,7 +569,11 @@ IF (laue==2) THEN
       CALL gnuplot_write_file_mul_data(filename_s,1,15,'color_orange', &
                                               .FALSE.,.TRUE.,.FALSE.)
    ENDIF
-   CALL gnuplot_ylabel('C_{25} (kbar)',.FALSE.) 
+   IF (iflag==0) THEN
+      CALL gnuplot_ylabel('C_{25} (kbar)',.FALSE.) 
+   ELSE
+      CALL gnuplot_ylabel('S_{25} (Mbar^{-1})',.FALSE.) 
+   ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,16,'color_red',.TRUE.,&
                                                      .FALSE.,.FALSE.)
@@ -463,7 +587,11 @@ IF (laue==2) THEN
                                               .FALSE.,.TRUE.,.FALSE.)
 
    ENDIF
-   CALL gnuplot_ylabel('C_{26} (kbar)',.FALSE.) 
+   IF (iflag==0) THEN
+      CALL gnuplot_ylabel('C_{26} (kbar)',.FALSE.) 
+   ELSE
+      CALL gnuplot_ylabel('S_{26} (Mbar^{-1})',.FALSE.) 
+   ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,17,'color_red',.TRUE.,&
                                                      .FALSE.,.FALSE.)
@@ -476,7 +604,11 @@ IF (laue==2) THEN
       CALL gnuplot_write_file_mul_data(filename_s,1,17,'color_orange', &
                                               .FALSE.,.TRUE.,.FALSE.)
    ENDIF
-   CALL gnuplot_ylabel('C_{34} (kbar)',.FALSE.) 
+   IF (iflag==0) THEN
+      CALL gnuplot_ylabel('C_{34} (kbar)',.FALSE.) 
+   ELSE
+      CALL gnuplot_ylabel('S_{34} (Mbar^{-1})',.FALSE.) 
+   ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,18,'color_red',.TRUE.,&
                                                      .FALSE.,.FALSE.)
@@ -490,7 +622,11 @@ IF (laue==2) THEN
                                               .FALSE.,.TRUE.,.FALSE.)
    ENDIF
 
-   CALL gnuplot_ylabel('C_{35} (kbar)',.FALSE.) 
+   IF (iflag==0) THEN
+      CALL gnuplot_ylabel('C_{35} (kbar)',.FALSE.) 
+   ELSE
+      CALL gnuplot_ylabel('S_{35} (Mbar^{-1})',.FALSE.) 
+   ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,19,'color_red',.TRUE.,&
                                                      .FALSE.,.FALSE.)
@@ -504,7 +640,11 @@ IF (laue==2) THEN
                                               .FALSE.,.TRUE.,.FALSE.)
    ENDIF
 
-   CALL gnuplot_ylabel('C_{36} (kbar)',.FALSE.) 
+   IF (iflag==0) THEN
+      CALL gnuplot_ylabel('C_{36} (kbar)',.FALSE.) 
+   ELSE
+      CALL gnuplot_ylabel('S_{36} (Mbar^{-1})',.FALSE.) 
+   ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,20,'color_red',.TRUE.,&
                                                      .FALSE.,.FALSE.)
@@ -517,7 +657,11 @@ IF (laue==2) THEN
       CALL gnuplot_write_file_mul_data(filename_s,1,20,'color_orange', &
                                               .FALSE.,.TRUE.,.FALSE.)
    ENDIF
-   CALL gnuplot_ylabel('C_{45} (kbar)',.FALSE.) 
+   IF (iflag==0) THEN
+      CALL gnuplot_ylabel('C_{45} (kbar)',.FALSE.) 
+   ELSE
+      CALL gnuplot_ylabel('S_{45} (Mbar^{-1})',.FALSE.) 
+   ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,21,'color_red',.TRUE.,&
                                                      .FALSE.,.FALSE.)
@@ -531,7 +675,11 @@ IF (laue==2) THEN
                                               .FALSE.,.TRUE.,.FALSE.)
    ENDIF
 
-   CALL gnuplot_ylabel('C_{46} (kbar)',.FALSE.) 
+   IF (iflag==0) THEN
+      CALL gnuplot_ylabel('C_{46} (kbar)',.FALSE.) 
+   ELSE
+      CALL gnuplot_ylabel('S_{46} (Mbar^{-1})',.FALSE.) 
+   ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,22,'color_red',.TRUE.,&
                                                      .FALSE.,.FALSE.)
@@ -544,7 +692,11 @@ IF (laue==2) THEN
       CALL gnuplot_write_file_mul_data(filename_s,1,22,'color_orange', &
                                               .FALSE.,.TRUE.,.FALSE.)
    ENDIF
-   CALL gnuplot_ylabel('C_{56} (kbar)',.FALSE.) 
+   IF (iflag==0) THEN
+      CALL gnuplot_ylabel('C_{56} (kbar)',.FALSE.) 
+   ELSE
+      CALL gnuplot_ylabel('S_{56} (Mbar^{-1})',.FALSE.) 
+   ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,23,'color_red',.TRUE.,&
                                                      .FALSE.,.FALSE.)
@@ -559,9 +711,14 @@ IF (laue==2) THEN
    ENDIF
 ENDIF
 
-CALL gnuplot_ylabel('B (kbar)',.FALSE.)
+IF (iflag==0) THEN
+   CALL gnuplot_ylabel('Bulk modulus B (kbar)',.FALSE.)
+   CALL gnuplot_set_fact(1.0_DP, .FALSE.)
+ELSE
+   CALL gnuplot_ylabel('Compressibility K (Mbar^{-1})',.FALSE.)
+   CALL gnuplot_set_fact(1.D3, .FALSE.)
+ENDIF
 
-CALL gnuplot_set_fact(1.0_DP, .FALSE.)
 
 IF (lelastic) THEN
    CALL gnuplot_write_file_mul_data(filelastic,1,2,'color_red',.TRUE.,&

@@ -21,12 +21,14 @@ SUBROUTINE deallocate_thermo()
   USE anharmonic,     ONLY : vmin_t, b0_t, free_e_min_t, &
                              alpha_t, beta_t, gamma_t, cv_t, ce_t, cp_t, b0_s, &
                              celldm_t, alpha_anis_t, cpmce_anis, el_cons_t, &
-                             el_comp_t, macro_el_t, bths_t, ggamma_t, bfact_t
+                             el_comp_t, macro_el_t, bths_t, ggamma_t, bfact_t, &
+                             el_cons_s, el_comp_s
   USE ph_freq_anharmonic, ONLY : vminf_t, b0f_t, free_e_minf_t, &
                              alphaf_t, betaf_t, gammaf_t, cvf_t, cef_t, &
                              cpf_t, b0f_s, &
                              celldmf_t, alphaf_anis_t, cpmcef_anis, &
-                             el_consf_t, bthsf_t, ggammaf_t, bfactf_t
+                             el_consf_t, el_compf_t, bthsf_t, ggammaf_t, &
+                             el_consf_s, el_compf_s, bfactf_t
   USE grun_anharmonic,  ONLY : betab, alpha_an_g, cp_grun_t, cv_grun_t, &
                                ce_grun_t, b0_grun_s, &
                                grun_gamma_t, poly_grun, grun_cpmce_anis
@@ -93,6 +95,7 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (cpmce_anis) )      DEALLOCATE(cpmce_anis) 
   IF ( ALLOCATED (cpmcef_anis) )     DEALLOCATE(cpmcef_anis) 
   IF ( ALLOCATED (free_e_min_t) )    DEALLOCATE(free_e_min_t) 
+
   IF ( ALLOCATED (b0f_t) )           DEALLOCATE(b0f_t) 
   IF ( ALLOCATED (b0f_s) )           DEALLOCATE(b0f_s) 
   IF ( ALLOCATED (cvf_t) )           DEALLOCATE(cvf_t) 
@@ -100,8 +103,9 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (cpf_t) )           DEALLOCATE(cpf_t) 
   IF ( ALLOCATED (el_cons_t) )       DEALLOCATE(el_cons_t)
   IF ( ALLOCATED (el_comp_t) )       DEALLOCATE(el_comp_t)
+  IF ( ALLOCATED (el_cons_s) )       DEALLOCATE(el_cons_s)
+  IF ( ALLOCATED (el_comp_s) )       DEALLOCATE(el_comp_s)
   IF ( ALLOCATED (macro_el_t) )      DEALLOCATE(macro_el_t)
-  IF ( ALLOCATED (el_consf_t) )      DEALLOCATE(el_consf_t)
 
   IF ( ALLOCATED (alphaf_t) )        DEALLOCATE(alphaf_t) 
   IF ( ALLOCATED (betaf_t) )         DEALLOCATE(betaf_t) 
@@ -111,6 +115,11 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (celldmf_t) )       DEALLOCATE(celldmf_t) 
   IF ( ALLOCATED (bfactf_t) )        DEALLOCATE(bfactf_t) 
   IF ( ALLOCATED (alphaf_anis_t) )   DEALLOCATE(alphaf_anis_t) 
+  IF ( ALLOCATED (el_consf_t) )      DEALLOCATE(el_consf_t)
+  IF ( ALLOCATED (el_compf_t) )      DEALLOCATE(el_compf_t)
+  IF ( ALLOCATED (el_consf_s) )      DEALLOCATE(el_consf_s)
+  IF ( ALLOCATED (el_compf_s) )      DEALLOCATE(el_compf_s)
+
   IF ( ALLOCATED (betab) )           DEALLOCATE(betab) 
   IF ( ALLOCATED (alpha_an_g) )      DEALLOCATE(alpha_an_g) 
   IF ( ALLOCATED (poly_grun) )       DEALLOCATE(poly_grun) 

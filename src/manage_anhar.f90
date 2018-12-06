@@ -171,7 +171,11 @@ CALL write_elastic_t()
 
 IF (ltherm_dos) CALL write_anhar_anis()
 IF (ltherm_freq) CALL write_ph_freq_anhar_anis()
-CALL plot_elastic_t()
+!
+!  Plot elastic constants and compliances
+!
+CALL plot_elastic_t(0)
+CALL plot_elastic_t(1)
 !
 !    calculate and plot the Gruneisen parameters along the given path.
 !

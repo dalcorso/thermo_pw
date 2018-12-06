@@ -17,11 +17,11 @@ USE thermodynamics, ONLY : ph_ce, ph_b_fact
 USE anharmonic,     ONLY : alpha_anis_t, vmin_t, b0_t, celldm_t, beta_t, &
                            gamma_t, cv_t, ce_t, cp_t, b0_s, cpmce_anis,  &
                            el_cons_t, free_e_min_t, bths_t, ggamma_t,    &
-                           bfact_t, lelastic, el_cons_s
+                           bfact_t, lelastic, el_cons_s, el_comp_s
 USE initial_conf,   ONLY : ibrav_save
 USE control_elastic_constants, ONLY : el_cons_available, el_cons_t_available
 USE control_thermo, ONLY : with_eigen
-USE elastic_constants, ONLY : el_con
+USE elastic_constants, ONLY : compute_elastic_compliances
 USE isoentropic,    ONLY : isostress_heat_capacity, thermal_stress,      &
                            gen_average_gruneisen, isoentropic_elastic_constants
 USE data_files,     ONLY : flanhar
@@ -58,6 +58,10 @@ IF (lelastic) THEN
 
    CALL isoentropic_elastic_constants(vmin_t,bths_t,cv_t,temp,csmct,ntemp)
    el_cons_s=el_cons_t + csmct
+   DO itemp=2, ntemp-1
+      CALL compute_elastic_compliances(el_cons_s(:,:,itemp), &
+                                                   el_comp_s(:,:,itemp))
+   ENDDO
 ENDIF
 
 ibrav=ibrav_geo(1)
@@ -140,7 +144,13 @@ IF (lelastic) THEN
 !
    filename='anhar_files/'//TRIM(flanhar)//'.el_cons_s'
    CALL add_pressure(filename)
-   CALL write_el_cons_on_file(temp, ntemp, ibrav, el_cons_s, b0_s, filename)
+   CALL write_el_cons_on_file(temp, ntemp, ibrav, el_cons_s, b0_s, filename, 0)
+!
+!  and here the elastic compliances
+!
+   filename='anhar_files/'//TRIM(flanhar)//'.el_comp_s'
+   CALL add_pressure(filename)
+   CALL write_el_cons_on_file(temp, ntemp, ibrav, el_comp_s, b0_s, filename, 1)
 ENDIF
 
 IF (with_eigen) THEN
@@ -167,8 +177,8 @@ USE ph_freq_anharmonic, ONLY : alphaf_anis_t, vminf_t, b0f_t, celldmf_t, &
                                betaf_t, gammaf_t, cvf_t, cef_t, cpf_t, b0f_s, &
                                cpmcef_anis, el_consf_t, lelasticf,       &
                                free_e_minf_t, bthsf_t, ggammaf_t, bfactf_t, &
-                               el_consf_s
-USE elastic_constants, ONLY : el_con
+                               el_consf_s, el_compf_s
+USE elastic_constants, ONLY : compute_elastic_compliances
 USE initial_conf,   ONLY : ibrav_save
 USE control_thermo, ONLY : with_eigen
 USE control_elastic_constants, ONLY : el_cons_available
@@ -207,6 +217,10 @@ IF (lelasticf) THEN
 
    CALL isoentropic_elastic_constants(vminf_t,bthsf_t,cvf_t,temp,csmct,ntemp)
    el_consf_s=el_consf_t + csmct
+   DO itemp=2, ntemp-1
+      CALL compute_elastic_compliances(el_consf_s(:,:,itemp), &
+                                                        el_compf_s(:,:,itemp))
+   ENDDO
 ENDIF
 
 ibrav=ibrav_geo(1)
@@ -291,7 +305,15 @@ IF (lelasticf) THEN
 !
    filename='anhar_files/'//TRIM(flanhar)//'.el_cons_s_ph'
    CALL add_pressure(filename)
-   CALL write_el_cons_on_file(temp, ntemp, ibrav, el_consf_s, b0f_s, filename)
+   CALL write_el_cons_on_file(temp, ntemp, ibrav, el_consf_s, b0f_s, &
+                                                              filename, 0)
+!
+!   and here the elastic compliances at constant entropy
+!
+   filename='anhar_files/'//TRIM(flanhar)//'.el_comp_s_ph'
+   CALL add_pressure(filename)
+   CALL write_el_cons_on_file(temp, ntemp, ibrav, el_compf_s, b0f_s, &
+                                                              filename, 1)
 ENDIF
 
 IF (with_eigen) THEN
@@ -455,7 +477,6 @@ DO itemp = 1, ntemp
 !
 !  Here convert from derivatives with respect to crystal parameters to
 !  derivative with respect to strain. 
-!  NB: This is just the derivative of stress with respect to temperature.
 !
    CALL convert_ac_alpha(alpha_aux, alpha, cm, ibrav)
 !
