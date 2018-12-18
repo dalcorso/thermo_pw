@@ -248,6 +248,7 @@ SUBROUTINE thermo_readin()
                             grunmin_input, grunmax_input,   &
                             volume_ph, celldm_ph, temp_ph,  &
                             with_eigen,                     &
+                            poly_order,                     &
                             lquartic_ph,                    &
                             lv0_t, lb0_t,                   &
                             flpgrun, flgrun, flpsgrun,      &
