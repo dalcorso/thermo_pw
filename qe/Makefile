@@ -103,6 +103,8 @@ solve_e_fpolc.o \
 solve_eq.o \
 solve_eq_tran.o \
 solve_linter.o  \
+stress.o \
+stres_gradcorr.o \
 syme_fpol.o     \
 symeq.o \
 sym_dmage_fpol.o \

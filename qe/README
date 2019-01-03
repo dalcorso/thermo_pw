@@ -18,6 +18,11 @@ setup_tpw : limits the minimum value of ethr to 10^-13 in a band canculation.
             Sometimes the bands do not converge because this value becomes 
             too small.
 
+stress_tpw : call stress_gradcorr_tpw
+
+stress_gradcorr_tpw : stress now works also for the noncollinear/spin-orbit i
+             case.
+
 solve_linter_tpw: contains a call to asyn_master to have the master check for
             slaves that need further work at each phonon iteration.
 

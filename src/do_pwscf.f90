@@ -163,7 +163,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
      !
      ! ... stress calculation
      !
-     IF ( lstres ) CALL stress ( sigma )
+     IF ( lstres ) CALL stress_tpw ( sigma )
      !
      ! ... send out forces to MM code in QM/MM run
      !
