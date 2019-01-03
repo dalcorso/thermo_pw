@@ -392,21 +392,29 @@ ${\bf a}'_1$, ${\bf a}'_2$, and ${\bf a}'_3$, where:
 \end{equation}
 Here $i=1,2,3$ is the index of the primitive vector, while $k$ and $j$ run
 on the three Cartesian coordinates. We consider only symmetric tensors
-$\epsilon_{j,k}=\epsilon_{k,j}$ removing any global rotation. 
-In order to make the connection with the classical elasticity theory, we
-call ${\bf X}$ the coordinates of an unstrained solid and
+$\epsilon_{j,k}=\epsilon_{k,j}$ removing any rotation. 
+In the classical elasticity theory, one
+calls ${\bf X}$ the coordinates of an unstrained solid and
 ${\bf x}({\bf X})$ the position of each point ${\bf X}$ in
 the strained solid. Calling ${\bf u}= {\bf x} -{\bf X}$ the displacements
-of each point, the standard theory of elasticity defines the $3\times3$ matrix
+of each point, the theory of elasticity defines the $3\times3$ matrix
 $\alpha_{i,j}=\delta_{i,j}+u_{i,j}$ where $u_{i,j}= {\partial u_i \over 
 \partial X_j}$ are the displacement gradients and 
-${\bf x}_i = \alpha_{i,j} {\bf X}_j$. With our definition $\epsilon_{j,k}$
-corresponds to the symmetrized tensor $\epsilon_{j,k}={1\over 2} ( u_{j,k} +
+${\bf x}_i = \sum_j\alpha_{i,j} {\bf X}_j$. $\epsilon_{j,k}$
+is the symmetrized tensor $\epsilon_{j,k}={1\over 2} ( u_{j,k} +
 u_{k,j})$. $\epsilon_{j,k}$ do not coincide with the Lagrangian strains
 $\eta_{j,k}={1\over 2} ( u_{j,k} + u_{k,j} + \sum_l u_{l,j}u_{l,k})$ but 
 differ only for terms quadratic in $u_{i,j}$. As the Lagrangian strains, 
-$\epsilon_{j,k}$ do not contain any rotation and to leading order can 
-be identified with $\eta_{j,k}$.
+$\epsilon_{j,k}$ do not contain any rotation and to first order it can 
+be identified with $\eta_{j,k}$. At first order in $\epsilon_{j,k}$ we have
+also the following useful relations for the reciprocal lattice vectors:
+\begin{equation}
+{\bf b}'_{j,i} = {\bf b}_{j,i} -  \sum_{k=1}^3 \epsilon_{j,k} {\bf b}_{k,i},
+\end{equation}
+and for the unit cell volume:
+\begin{equation}
+\Omega'=\Omega \left( 1+\sum_{i=1}^3 \epsilon_{i,i} \right).
+\end{equation}
 
 In general, a strain changes both the size 
 and the shape of the unit cell and might change the Bravais lattice. \\
