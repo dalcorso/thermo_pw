@@ -50,9 +50,6 @@ MODULE thermo_mod
   LOGICAL :: reduced_grid                       ! if .TRUE. use a reduced
                                                 ! grid to interpolate the
                                                 ! geometry
-  INTEGER :: start_geo                          ! initial geometry
-  INTEGER :: jump_geo                           ! jumped geometries in the
-                                                ! reduced grid
   REAL(DP) :: density                           ! the density of the solid
 
   INTEGER :: max_geometries                     ! This value controls the

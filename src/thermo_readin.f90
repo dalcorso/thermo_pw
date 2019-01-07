@@ -26,8 +26,8 @@ SUBROUTINE thermo_readin()
 !  variable read by this routine
 !
   USE thermo_mod,           ONLY : what, ngeo, step_ngeo, reduced_grid,    &
-                                   fact_ngeo, max_geometries, start_geo,   &
-                                   jump_geo, start_geometry, last_geometry
+                                   fact_ngeo, max_geometries,   &
+                                   start_geometry, last_geometry
   USE control_thermo,       ONLY : outdir_thermo, after_disp, with_eigen,  &
                                    do_scf_relax, ltherm_dos, ltherm_freq,  &
                                    continue_zero_ibrav, find_ibrav,        &
@@ -229,7 +229,6 @@ SUBROUTINE thermo_readin()
                             ngeo, step_ngeo,                &
                             lmurn,                          &
                             reduced_grid,                   &
-                            start_geo, jump_geo,            &
                             show_fit,                       &
                             vmin_input, vmax_input, deltav, &
                             nvol,                           &
@@ -434,8 +433,6 @@ SUBROUTINE thermo_readin()
   step_ngeo(6) = 0.5_DP
   lmurn=.TRUE.
   reduced_grid =.FALSE.
-  start_geo=1
-  jump_geo=1
   show_fit=.FALSE.
   vmin_input=0.0_DP
   vmax_input=0.0_DP

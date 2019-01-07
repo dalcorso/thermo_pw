@@ -1346,15 +1346,9 @@ lmurn       : if .TRUE. the Murnaghan fit is done. Only ngeo(1) values of
              minimum energy and the optimal celldm are given in output. 
              Default: .TRUE. 
 reduced_grid: if .TRUE. the number of energies used for the quadratic fit 
-             are reduced using the variables start_geo and jump_geo. 
+             are reduced. 
              This option is used only when lmurn=.FALSE.
              Default: logical .FALSE.
-start_geo  : The first geometry of the reduced_grid.
-             Default: integer 1
-jump_geo   : jump_geo-1 geometries are not computed when reduced_grid
-             is .TRUE. For instance when jump_geo=3 and start_geo=1 the
-             computed geometries are 1,4,7,10 etc.
-             Default: integer 1
 show_fit   : if .TRUE. show the contour plot of the fitted energy instead
              of the energy. Used by default when reduced_grid is .TRUE.
              Default: logical .FALSE.

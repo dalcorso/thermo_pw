@@ -19,6 +19,8 @@ Sym_for_diago with pools improved (in collaboration with A. Urru).
 
 Nonmagnetic linear response with FR-PAW corrected.
 
+Stress in the noncollinear/spin-orbit case with GGA imported and corrected.
+
 17/07/2018 Version 1.0.0 is now frozen
 New in version 1.0.0
 

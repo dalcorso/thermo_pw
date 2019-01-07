@@ -571,14 +571,12 @@ END SUBROUTINE clean_ngeo
 
 SUBROUTINE set_celldm_geo()
 !
-!   This routine sets the grid of values on celldm_geo. It is able to
-!   reduce the grid according to the values of start_geo and jump_geo.
-!   (only when reduced_grid is true). It modifies only celldm_geo.
+!   This routine sets the grid of values on celldm_geo. 
+!   It modifies only celldm_geo.
 !
 USE kinds,         ONLY : DP
 USE constants,     ONLY : pi
-USE thermo_mod,    ONLY : step_ngeo, ngeo, celldm_geo, reduced_grid, &
-                          start_geo, jump_geo
+USE thermo_mod,    ONLY : step_ngeo, ngeo, celldm_geo, reduced_grid
 USE initial_conf,  ONLY : celldm_save
 
 IMPLICIT NONE
@@ -602,8 +600,6 @@ DO igeo6 = 1, ngeo(6)
             DO igeo2 = 1, ngeo(2)
                DO igeo1 = 1, ngeo(1)
                   total_work=total_work+1
-                  IF (reduced_grid.AND.((total_work - start_geo) < 0 .OR. &
-                          MOD((total_work - start_geo), jump_geo)/=0)) CYCLE
                   iwork=iwork+1
                   celldm_geo(1,iwork)=celldm_save(1)+&
                         (igeo1-(ngeo(1)+1.0_DP)/2.0_DP)*step_ngeo(1)
@@ -628,7 +624,7 @@ INTEGER FUNCTION compute_nwork()
 !
 !  This function computes the number of tasks needed for energy minimization
 !
-USE thermo_mod, ONLY : ngeo, reduced_grid, central_geo, start_geo, jump_geo
+USE thermo_mod, ONLY : ngeo, reduced_grid, central_geo
 USE control_mur, ONLY : lmurn
 
 IMPLICIT NONE
@@ -636,7 +632,6 @@ IMPLICIT NONE
 INTEGER :: iwork, auxgeo
 
 auxgeo=ngeo(1)*ngeo(2)*ngeo(3)*ngeo(4)*ngeo(5)*ngeo(6)
-IF (reduced_grid) auxgeo=(auxgeo - start_geo)/jump_geo + 1
 IF (lmurn) auxgeo=ngeo(1)
 
 central_geo=auxgeo/2
