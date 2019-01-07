@@ -15,8 +15,7 @@ SUBROUTINE plot_multi_energy()
   !
   !
   USE kinds,                ONLY : DP
-  USE thermo_mod,           ONLY : ngeo, celldm_geo, energy_geo, omega_geo, &
-                                   reduced_grid
+  USE thermo_mod,           ONLY : ngeo, celldm_geo, energy_geo, omega_geo
   USE initial_conf,         ONLY : ibrav_save
   USE control_gnuplot,      ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
   USE data_files,           ONLY : flenergy, flevdat
@@ -55,7 +54,7 @@ SUBROUTINE plot_multi_energy()
 
   gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_energy'
   CALL add_pressure(gnu_filename)
-  IF (reduced_grid.OR.show_fit) THEN
+  IF (show_fit) THEN
      filename='energy_files/'//TRIM(flevdat)//'_quadratic'
   ELSE
      filename='energy_files/'//TRIM(flenergy)//int_to_char(1)
@@ -118,7 +117,7 @@ SUBROUTINE plot_multi_energy()
      CASE(4,5,6,7)
         IF (ncontours==0) RETURN
         ene_levels_int(:)=ene_levels(:)
-        IF (reduced_grid.OR.show_fit) THEN
+        IF (show_fit) THEN
            nx=nvol
            ny=nvol
         ELSE
@@ -195,7 +194,7 @@ SUBROUTINE plot_multi_energy()
      CASE (8,9,91,10,11) 
         IF (ncontours==0) RETURN
         ene_levels_int(:)=ene_levels(:)
-        IF (reduced_grid.OR.show_fit) THEN
+        IF (show_fit) THEN
            nx=nvol
            ny=nvol
         ELSE

@@ -86,6 +86,12 @@ MODULE lattices
 !  print_bravais_description : receives the celldm of a given lattice 
 !              and writes a small description of the crystal parameters.
 !
+!  compress_celldm : receives celldm and ibrav and produces a vector with
+!                  the variable crystal parameters for that ibrav
+!
+!  expand_celldm : receives a vector with the variable crystal parameters
+!                  for a given ibrav and sets the celldm vector
+!
   USE kinds,      ONLY : DP
   !
   IMPLICIT NONE
@@ -1759,7 +1765,6 @@ END SELECT
 
 RETURN
 END SUBROUTINE compress_celldm
-
 
 SUBROUTINE expand_celldm(cm, x, degree, ibrav)
 !

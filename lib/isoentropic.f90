@@ -7,18 +7,19 @@
 !
 MODULE isoentropic
 !
-!   this module contains the support routines for the calculation
+!   This module contains the support routines for the calculation
 !   of the isoentropic quantities given the corresponding isothermal
 !   quantities and the parameters that link the two.
 !   It can calculate:
 !   The isoentropic elastic constants given the isothermal elastic constants,
 !   the isoentropic bulk modulus given the isothermal bulk modulus,
-!   the isobaric specific heat given the isochoric one,
-!   the average gruneisen parameter.
-!   The routine does not receive the isothermal quantities and
-!   provide only the difference between isoentropic and isothermal
-!   quantities. 
-!
+!   the isobaric heat capacity given the isochoric one,
+!   the isostress heat capacity given the constant strain one,
+!   the average Gruneisen parameter,
+!   the thermal stresses,
+!   the generalized average Gruneisen parameters.
+!   The routines do not receive the isothermal quantities and provide only 
+!   the difference between isoentropic and isothermal quantities. 
 !
   USE kinds,     ONLY : DP
   USE io_global, ONLY : stdout, ionode, ionode_id
@@ -29,8 +30,7 @@ MODULE isoentropic
   SAVE
 
   PUBLIC  isobaric_heat_capacity, isoentropic_bulk_modulus,  &
-          isostress_heat_capacity,                           &
-          average_gruneisen, thermal_stress,                 &
+          isostress_heat_capacity, average_gruneisen, thermal_stress,  &
           isoentropic_elastic_constants, gen_average_gruneisen
 
 CONTAINS
