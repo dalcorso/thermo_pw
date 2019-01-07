@@ -1345,10 +1345,6 @@ lmurn       : if .TRUE. the Murnaghan fit is done. Only ngeo(1) values of
              x ngeo(4) x ngeo(5) x ngeo(6). In this case only the 
              minimum energy and the optimal celldm are given in output. 
              Default: .TRUE. 
-reduced_grid: if .TRUE. the number of energies used for the quadratic fit 
-             are reduced. 
-             This option is used only when lmurn=.FALSE.
-             Default: logical .FALSE.
 show_fit   : if .TRUE. show the contour plot of the fitted energy instead
              of the energy. Used by default when reduced_grid is .TRUE.
              Default: logical .FALSE.
@@ -1650,11 +1646,40 @@ fact_ngeo(1)...fact_ngeo(6) : With these factors the vibrational free energy
                 11        2            1,3,5,7,9,11
                 11        5            1,6,11
                 Defaults: integer 1,1,1,1,1,1
-                This option is not active when reduced_grid=.TRUE.
+                This option is not active when one of the ngeo_ph(i) is 
+                different from ngeo(i).
+ngeo_ph(1),...,ngeo_ph(6) These variables are set to compute the phonon
+                dispersions in a subset of the geometries used to compute
+                the total energy. All values must be smaller than the 
+                corresponding ngeo and even or odd as the corresponding ngeo. 
+                step_ngeo remains the same for the two meshes.
+                The following table gives a few examples:
+                ngeo  ngeo_ph     phonon calculated in geometries
+                5        3            2,3,4
+                6        2            3,4
+                6        4            2,3,4,5
+                7        3            3,4,5
+                7        5            2,3,4,5,6
+                9        3            4,5,6
+                9        5            3,4,5,6,7
+                Defaults: integer ngeo(1),...,ngeo(6)
+reduced_grid: if .TRUE. the computed geometries are only along one dimensional 
+             lines. So each parameter is varied indipendently keeping 
+             the others fixed at the input values. 
+             This option sets ltherm_freq=.FALSE., ltherm_dos=.FALSE., 
+             lv0_t=.FALSE. and lb0_t=.FALSE..
+             With this option the thermal expansion is calculated only
+             using the Gruneisen parameters at the input geometry.
+             The multidimensional fit of the free energy is not done so
+             this method should be faster than the default one, but it
+             is less precise. This option is used only with lmurn=.FALSE. 
+             and requires a file with the elastic constants at the input 
+             geometry.
+             Default: logical .FALSE.
 all_geometries_together : if .TRUE. all the phonon calculation for
-                all the geometries are used for the image parallelization.
-                To be used only if you have many images (and CPUs) available.
-                Default : logical .FALSE.
+             all the geometries are used for the image parallelization.
+             To be used only if you have many images (and CPUs) available.
+             Default : logical .FALSE.
 \end{verbatim}
 The output files corresponding to different geometries can be identified
 by the presence of the letters \texttt{g1}, \texttt{g2}, ... in the filename.

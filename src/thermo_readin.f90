@@ -27,7 +27,8 @@ SUBROUTINE thermo_readin()
 !
   USE thermo_mod,           ONLY : what, ngeo, step_ngeo, reduced_grid,    &
                                    fact_ngeo, max_geometries,   &
-                                   start_geometry, last_geometry
+                                   start_geometry, last_geometry, &
+                                   ngeo_ph
   USE control_thermo,       ONLY : outdir_thermo, after_disp, with_eigen,  &
                                    do_scf_relax, ltherm_dos, ltherm_freq,  &
                                    continue_zero_ibrav, find_ibrav,        &
@@ -247,12 +248,12 @@ SUBROUTINE thermo_readin()
                             grunmin_input, grunmax_input,   &
                             volume_ph, celldm_ph, temp_ph,  &
                             with_eigen,                     &
-                            poly_order,                     &
                             lquartic_ph,                    &
                             lv0_t, lb0_t,                   &
+                            poly_order,                     &
                             flpgrun, flgrun, flpsgrun,      &
                             flanhar, flpsanhar,             &
-                            fact_ngeo,                      &
+                            fact_ngeo, ngeo_ph,             &
                             all_geometries_together,        &
 !
 !   optical
@@ -463,6 +464,7 @@ SUBROUTINE thermo_readin()
   flanhar='output_anhar.dat'
   flpsanhar='output_anhar'
   fact_ngeo=1
+  ngeo_ph=0
   omega_group=1
   all_geometries_together=.FALSE.
 

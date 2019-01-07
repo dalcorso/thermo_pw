@@ -45,7 +45,7 @@ SUBROUTINE manage_ph()
 IMPLICIT NONE
 
 INTEGER  :: part, nwork, igeom, exit_status, ph_geometries, iaux
-LOGICAL  :: check_dyn_file_exists, do_ph
+LOGICAL  :: check_dyn_file_exists, do_ph, fninit
 CHARACTER(LEN=6) :: int_to_char
 
 CHARACTER (LEN=256) :: auxdyn=' '
@@ -55,6 +55,7 @@ ph_geometries=0
 always_run=.TRUE.
 CALL start_clock( 'PHONON' )
 IF (use_ph_images) ALLOCATE(collect_info_save(1))
+fninit=.FALSE.
 DO igeom=start_geometry,last_geometry
    IF (no_ph(igeom).OR.stop_signal_activated) CYCLE
    WRITE(stdout,'(/,5x,40("%"))') 
@@ -70,7 +71,10 @@ DO igeom=start_geometry,last_geometry
       CALL thermo_ph_readin()
       CALL save_ph_variables()
    ENDIF
-   IF (igeom==start_geometry) CALL initialize_file_names()
+   IF (.NOT.fninit) THEN
+      CALL initialize_file_names()
+      fninit=.TRUE.
+   ENDIF
    CALL set_files_names(igeom)
 
    auxdyn=fildyn
@@ -90,7 +94,6 @@ DO igeom=start_geometry,last_geometry
       do_ph=.TRUE.
       IF (trans) do_ph=.NOT. check_dyn_file_exists(auxdyn) 
    ENDIF
-
 !
 !  Set the BZ path for the present geometry
 !

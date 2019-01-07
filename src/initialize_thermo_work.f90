@@ -20,7 +20,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
   USE kinds,          ONLY : DP
   USE thermo_mod,     ONLY : what, step_ngeo, energy_geo, ngeo, &
                              celldm_geo, omega_geo, ibrav_geo, tot_ngeo, no_ph,&
-                             start_geometry, last_geometry
+                             start_geometry, last_geometry, reduced_grid
   USE control_thermo, ONLY : lpwscf, lphonon, lev_syn_1, lev_syn_2, &
                              lph, lpwscf_syn_1, lbands_syn_1, lq2r,   &
                              ltherm, lconv_ke_test, lconv_nk_test, &
@@ -274,7 +274,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
 !    Here all the cases that compute the free energy and minimize it
 !
         CASE ('mur_lc_t')
-           lev_syn_1=.TRUE.
+           lev_syn_1=.NOT.reduced_grid
            lph = .TRUE.
            lq2r = .TRUE.
            ltherm = .TRUE.
@@ -283,6 +283,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            tot_ngeo=nwork
            ALLOCATE(no_ph(tot_ngeo))
            CALL initialize_no_ph(no_ph, tot_ngeo)
+           CALL summarize_geometries(nwork)
            degree=crystal_parameters(ibrav_save)
            nvar=quadratic_var(degree)
            CALL allocate_thermodynamics()
@@ -461,7 +462,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
   RETURN
 END SUBROUTINE initialize_thermo_work
 
-SUBROUTINE clean_ngeo(ngeo,fact_ngeo,ibrav)
+SUBROUTINE clean_ngeo(ngeo,fact_ngeo,ngeo_ph,ibrav)
 !
 !  This routine cleans the ngeo variable, setting 1 on all the values
 !  that correspond to crystallographic parameters that are fixed in
@@ -473,9 +474,10 @@ USE control_mur, ONLY : lmurn
 IMPLICIT NONE
 
 INTEGER, INTENT(IN)    :: ibrav
-INTEGER, INTENT(INOUT) :: ngeo(6), fact_ngeo(6)
+INTEGER, INTENT(INOUT) :: ngeo(6), fact_ngeo(6), ngeo_ph(6)
 
 INTEGER :: i, ndefault, ngeo_aux(6), fact_ngeo_aux(6)
+LOGICAL :: clean_fact
 
 ngeo_aux=1
 ngeo_aux(1)=ngeo(1)
@@ -565,18 +567,30 @@ ENDIF
 
 ngeo=ngeo_aux
 fact_ngeo=fact_ngeo_aux
+!
+!  if ngeo_ph has been set, check if it is compatible with ngeo and
+!  clean fact_ngeo which is not used.
+!
+clean_fact=.FALSE.
+DO i=1,6
+   IF (ngeo_ph(i)<=0) ngeo_ph(i)=ngeo(i)
+   IF (ngeo_ph(i)>ngeo(i)) ngeo_ph(i)=ngeo(i)
+   IF (MOD(ngeo_ph(i),2) /= MOD(ngeo(i),2)) &
+               CALL errore('clean_ngeo','ngeo_ph incompatible with ngeo',1)
+   IF (ngeo_ph(i)/=ngeo(i)) clean_fact=.TRUE.
+ENDDO
+IF (clean_fact) fact_ngeo=1
 
 RETURN
 END SUBROUTINE clean_ngeo
 
 SUBROUTINE set_celldm_geo()
 !
-!   This routine sets the grid of values on celldm_geo. 
-!   It modifies only celldm_geo.
+!   This routine sets the grid of values on celldm_geo.
 !
 USE kinds,         ONLY : DP
 USE constants,     ONLY : pi
-USE thermo_mod,    ONLY : step_ngeo, ngeo, celldm_geo, reduced_grid
+USE thermo_mod,    ONLY : step_ngeo, ngeo, celldm_geo
 USE initial_conf,  ONLY : celldm_save
 
 IMPLICIT NONE
@@ -620,22 +634,55 @@ ENDDO
 RETURN
 END SUBROUTINE set_celldm_geo
 
+SUBROUTINE summarize_geometries(nwork)
+USE thermo_mod,    ONLY : celldm_geo, no_ph
+USE initial_conf,  ONLY : celldm_save
+USE io_global,     ONLY : stdout
+
+IMPLICIT NONE
+INTEGER :: nwork
+INTEGER :: igeo
+
+WRITE(stdout,'(/,75("-"))')
+WRITE(stdout,'(/,2x,"Number of geometries to compute:", i5)') nwork
+WRITE(stdout,'(/,2x,"Input celldm:", 7x, 6f9.5,/)') celldm_save(:)
+
+DO igeo=1,nwork
+   WRITE(stdout,'(2x,"Geometry ",i3,", celldm", 6f9.5,l2)') igeo, &
+                                   celldm_geo(:,igeo), .NOT.no_ph(igeo)
+ENDDO
+WRITE(stdout,'(/,75("-"))')
+
+RETURN
+END SUBROUTINE summarize_geometries
+
 INTEGER FUNCTION compute_nwork()
 !
 !  This function computes the number of tasks needed for energy minimization
 !
-USE thermo_mod, ONLY : ngeo, reduced_grid, central_geo
+USE thermo_mod,  ONLY : ngeo, central_geo, reduced_grid
 USE control_mur, ONLY : lmurn
 
 IMPLICIT NONE
 
-INTEGER :: iwork, auxgeo
+INTEGER :: i, auxgeo
 
-auxgeo=ngeo(1)*ngeo(2)*ngeo(3)*ngeo(4)*ngeo(5)*ngeo(6)
-IF (lmurn) auxgeo=ngeo(1)
-
-central_geo=auxgeo/2
-IF (MOD(auxgeo,2)==1) central_geo=central_geo+1
+IF (reduced_grid) THEN
+   auxgeo=ngeo(1)+ngeo(2)+ngeo(3)+ngeo(4)+ngeo(5)+ngeo(6) + 1
+   DO i=1,6
+      IF (MOD(ngeo(i),2)==1) auxgeo=auxgeo-1
+   ENDDO
+   IF (MOD(auxgeo,2)==1) THEN
+      central_geo=1
+   ELSE
+      central_geo=ngeo(1)/2
+   ENDIF
+ELSE
+   auxgeo=ngeo(1)*ngeo(2)*ngeo(3)*ngeo(4)*ngeo(5)*ngeo(6)
+   IF (lmurn) auxgeo=ngeo(1)
+   central_geo=auxgeo/2
+   IF (MOD(auxgeo,2)==1) central_geo=central_geo+1
+ENDIF
 
 compute_nwork=auxgeo
 
@@ -650,7 +697,8 @@ SUBROUTINE initialize_mur(nwork)
 !   in each task.
 !
 USE kinds,         ONLY : DP
-USE thermo_mod,    ONLY : ibrav_geo, celldm_geo, energy_geo, omega_geo
+USE thermo_mod,    ONLY : ibrav_geo, celldm_geo, energy_geo, omega_geo, &
+                          reduced_grid
 USE initial_conf,  ONLY : ibrav_save
 
 IMPLICIT NONE
@@ -752,7 +800,7 @@ RETURN
 END SUBROUTINE initialize_ph_work
 
 SUBROUTINE initialize_no_ph(no_ph, tot_ngeo)
-USE thermo_mod, ONLY : ngeo, fact_ngeo, reduced_grid
+USE thermo_mod, ONLY : ngeo, fact_ngeo, ngeo_ph, reduced_grid
 !
 !   This routine is used to skip phonon calculations in those geometries
 !   that are not on the grid used to compute the vibrational energy.
@@ -763,7 +811,12 @@ INTEGER, INTENT(IN)    :: tot_ngeo
 LOGICAL, INTENT(INOUT) :: no_ph(tot_ngeo)
 
 LOGICAL :: todo(6)
-INTEGER :: igeo1, igeo2, igeo3, igeo4, igeo5, igeo6, count_ngeo
+INTEGER :: igeo1, igeo2, igeo3, igeo4, igeo5, igeo6, start, count_ngeo
+
+IF (reduced_grid) THEN
+   no_ph=.FALSE.
+   RETURN
+ENDIF
 !
 !  test the compatibility of ngeo and fact_ngeo
 !
@@ -775,21 +828,36 @@ IF (MOD(ngeo(1)-1, fact_ngeo(1))/=0 .OR. &
     MOD(ngeo(6)-1, fact_ngeo(6))/=0 ) CALL errore('initialize_no_ph', &
                                           'fact_ngeo incompatible with ngeo',1) 
 no_ph=.FALSE.
-IF (reduced_grid) RETURN
-
+!
+!  Here we set no_ph based on ngeo_ph. Note that fact_ngeo should all
+!  be 1 in this case
+!
 count_ngeo=0
 DO igeo6 = 1, ngeo(6)
    todo(6)= (MOD(igeo6-1, fact_ngeo(6))==0)
+   start = (ngeo(6)-ngeo_ph(6))/2
+   todo(6)= todo(6).AND.(igeo6>start).AND.(igeo6<=start+ngeo_ph(6))
    DO igeo5 = 1, ngeo(5)
       todo(5)= (MOD(igeo5-1, fact_ngeo(5))==0)
+      start = (ngeo(5)-ngeo_ph(5))/2
+      todo(5)= todo(5).AND.(igeo5>start).AND.(igeo5<=start+ngeo_ph(5))
       DO igeo4 = 1, ngeo(4)
          todo(4)= (MOD(igeo4-1, fact_ngeo(4))==0)
+         start = (ngeo(4)-ngeo_ph(4))/2
+         todo(4)= todo(4).AND.(igeo4>start).AND.(igeo4<=start+ngeo_ph(4))
          DO igeo3 = 1, ngeo(3)
             todo(3)= (MOD(igeo3-1, fact_ngeo(3))==0)
+            start = (ngeo(3)-ngeo_ph(3))/2
+            todo(3)= todo(3).AND.(igeo3>start).AND.(igeo3<=start+ngeo_ph(3))
             DO igeo2 = 1, ngeo(2)
                todo(2)= (MOD(igeo2-1, fact_ngeo(2))==0)
+               start = (ngeo(2)-ngeo_ph(2))/2
+               todo(2)= todo(2).AND.(igeo2>start).AND.(igeo2<=start+ngeo_ph(2))
                DO igeo1 = 1, ngeo(1)
                   todo(1)= (MOD(igeo1-1, fact_ngeo(1))==0)
+                  start = (ngeo(1)-ngeo_ph(1))/2
+                  todo(1)= todo(1).AND.(igeo1>start).AND.&
+                                       (igeo1<=start+ngeo_ph(1))
                   count_ngeo = count_ngeo + 1       
                   no_ph(count_ngeo)= .NOT. (todo(1).AND.todo(2).AND.todo(3) &
                                      .AND.todo(4).AND.todo(5).AND.todo(6))

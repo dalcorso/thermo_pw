@@ -26,6 +26,8 @@ MODULE thermo_mod
   INTEGER :: fact_ngeo(6)               ! factors used to reduce the
                                         ! size of the grid where phonons
                                         ! are interpolated
+  INTEGER :: ngeo_ph(6)                 ! mesh where the phonon are calculated
+                                        ! can be smaller than ngeo
   LOGICAL, ALLOCATABLE :: no_ph(:)      ! decide in which phonon geometries
                                         ! the phonons are calculated
 

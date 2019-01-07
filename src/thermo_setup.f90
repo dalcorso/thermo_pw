@@ -31,7 +31,7 @@ SUBROUTINE thermo_setup()
   !
   USE kinds,                ONLY : DP
   USE constants,            ONLY : k_boltzmann_ry
-  USE thermo_mod,           ONLY : what, ngeo, fact_ngeo    
+  USE thermo_mod,           ONLY : what, ngeo, fact_ngeo, ngeo_ph    
   USE temperature,          ONLY : tmin
   USE control_thermo,       ONLY : continue_zero_ibrav, find_ibrav, &
                                    set_internal_path, set_2d_path
@@ -269,7 +269,7 @@ SUBROUTINE thermo_setup()
         ENDIF
      ENDIF
   END IF
-  CALL clean_ngeo(ngeo,fact_ngeo,ibrav)
+  CALL clean_ngeo(ngeo,fact_ngeo,ngeo_ph,ibrav)
 !
 !  setup for the electronic dos
 !

@@ -17,7 +17,7 @@ SUBROUTINE write_gnuplot_energy(nwork)
   !
   !
   USE kinds,      ONLY : DP
-  USE thermo_mod, ONLY : energy_geo, ngeo, celldm_geo, omega_geo, reduced_grid
+  USE thermo_mod, ONLY : energy_geo, ngeo, celldm_geo, omega_geo
   USE cell_base,  ONLY : ibrav
   USE data_files, ONLY : flenergy
   USE control_pressure, ONLY : pressure, pressure_kb
@@ -77,21 +77,12 @@ SUBROUTINE write_gnuplot_energy(nwork)
                       energy_geo(iwork) + pressure * omega_geo(iwork)
               ENDDO
            CASE(8,9,91,10,11)
-              IF (.NOT. reduced_grid) THEN
-                 DO iwork=1+(ifiles-1)*ngeo(1)*ngeo(2), ifiles*ngeo(1)*ngeo(2)
-                    WRITE(iu_ev,'(3e25.12)', ERR=20, IOSTAT=ios) &
-                        celldm_geo(1,iwork), &
-                        celldm_geo(2,iwork), energy_geo(iwork) &  
-                                 + pressure * omega_geo(iwork)
-                 ENDDO
-              ELSE
-                 DO iwork = 1, nwork
-                    WRITE(iu_ev,'(4e20.12)', ERR=20, IOSTAT=ios)  &
-                        celldm_geo(1,iwork), celldm_geo(2,iwork), &
-                        celldm_geo(3,iwork), energy_geo(iwork)    &  
-                                 + pressure * omega_geo(iwork)
-                 ENDDO
-              END IF
+              DO iwork=1+(ifiles-1)*ngeo(1)*ngeo(2), ifiles*ngeo(1)*ngeo(2)
+                 WRITE(iu_ev,'(3e25.12)', ERR=20, IOSTAT=ios) &
+                     celldm_geo(1,iwork), &
+                     celldm_geo(2,iwork), energy_geo(iwork) &  
+                              + pressure * omega_geo(iwork)
+              ENDDO
            CASE DEFAULT
               DO iwork = 1, nwork
                  WRITE(iu_ev,'(7e20.12)', ERR=20, IOSTAT=ios)  &

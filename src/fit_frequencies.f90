@@ -49,9 +49,9 @@ SUBROUTINE fit_frequencies()
 !  divides the q vectors among all processors. Each processor computes
 !  the polynomials for the wave vectors q that belong to it
 !
-  n=ph_freq_save(1)%nq
-  startq=ph_freq_save(1)%startq
-  lastq=ph_freq_save(1)%lastq
+  n=ph_freq_save(central_geo)%nq
+  startq=ph_freq_save(central_geo)%startq
+  lastq=ph_freq_save(central_geo)%lastq
 !
 !  allocates space for the fit of the frequencies with respect to the
 !  volume. Note that poly_grun is not deallocated and is the output of 
@@ -151,9 +151,9 @@ SUBROUTINE fit_frequencies_anis()
 !  divides the q vectors among all processors. Each processor computes
 !  the polynomials for the wave vectors q that belong to it
 !
-  n=ph_freq_save(1)%nq
-  startq=ph_freq_save(1)%startq
-  lastq=ph_freq_save(1)%lastq
+  n=ph_freq_save(central_geo)%nq
+  startq=ph_freq_save(central_geo)%startq
+  lastq=ph_freq_save(central_geo)%lastq
 !
 !  allocates space for the fit of the frequencies with respect to the
 !  crystal parameters. Note that poly_grun is not deallocated and 
@@ -197,3 +197,4 @@ SUBROUTINE fit_frequencies_anis()
 
   RETURN
 END SUBROUTINE fit_frequencies_anis
+!

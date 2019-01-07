@@ -157,6 +157,7 @@ USE kinds,          ONLY : DP
 USE constants,      ONLY : ry_kbar
 USE ions_base,      ONLY : nat
 USE temperature,    ONLY : ntemp, temp
+USE thermo_mod,     ONLY : ngeo, no_ph
 USE ph_freq_thermodynamics, ONLY : ph_freq_save, phf_ce
 USE anharmonic,     ONLY :  vmin_t, b0_t, cv_t, celldm_t
 USE ph_freq_anharmonic, ONLY :  vminf_t, cvf_t, b0f_t, cpf_t, b0f_s
@@ -165,6 +166,7 @@ USE grun_anharmonic, ONLY : betab, cp_grun_t, b0_grun_s, &
 USE ph_freq_module, ONLY : thermal_expansion_ph, ph_freq_type,  &
                            destroy_ph_freq, init_ph_freq
 USE freq_interpolate, ONLY : compute_polynomial, compute_polynomial_der
+USE isoentropic,    ONLY : isobaric_heat_capacity
 USE control_grun,   ONLY : vgrun_t, b0_grun_t
 USE control_mur,    ONLY : vmin, b0
 USE control_thermo, ONLY : ltherm_dos, ltherm_freq
@@ -184,22 +186,23 @@ TYPE(ph_freq_type) :: ph_grun    ! the gruneisen parameters recomputed
                                  ! at each temperature at the volume
                                  ! corresponding to that temperature
 REAL(DP) :: vm, f, g
-INTEGER :: find_free_unit
+INTEGER :: find_free_unit, central_geo
 !
 !  divide the q vectors among the processors. Allocate space to save the
 !  frequencies and the gruneisen parameter on a part of the mesh of q points.
 !
-nq=ph_freq_save(1)%nq
-startq=ph_freq_save(1)%startq
-lastq=ph_freq_save(1)%lastq
-nq_eff = ph_freq_save(1)%nq_eff
+CALL find_central_geo(ngeo,no_ph,central_geo)
+nq=ph_freq_save(central_geo)%nq
+startq=ph_freq_save(central_geo)%startq
+lastq=ph_freq_save(central_geo)%lastq
+nq_eff = ph_freq_save(central_geo)%nq_eff
 
 CALL init_ph_freq(ph_grun, nat, nq1_d, nq2_d, nq3_d, nq_eff, startq, &
                                                              lastq, nq, .FALSE.)
 CALL init_ph_freq(ph_freq, nat, nq1_d, nq2_d, nq3_d, nq_eff, startq, &
                                                              lastq, nq, .FALSE.)
 DO iq=1, nq_eff
-   ph_freq%wg(iq)=ph_freq_save(1)%wg(iq)
+   ph_freq%wg(iq)=ph_freq_save(central_geo)%wg(iq)
 ENDDO
 
 betab=0.0_DP
@@ -257,9 +260,13 @@ ELSEIF (ltherm_dos) THEN
 ELSE
    vmin_t(1:ntemp)=vmin
    b0_t(1:ntemp)=b0
-   CALL interpolate_cv(vmin_t, celldm_t, phf_ce, cv_t)
+   b0_grun_s(1:ntemp)=0.0_DP
+   grun_gamma_t(1:ntemp)=0.0_DP
+!
+!  here cv is not available but we can compute the difference cp-cv
+!
    CALL compute_cp_bs_g(betab, vmin_t, b0_t, cv_t, cp_grun_t, &
-                                              b0_grun_s, grun_gamma_t)
+                                                   b0_grun_s, grun_gamma_t)
 ENDIF
 
 IF (meta_ionode) THEN
@@ -509,6 +516,7 @@ USE control_grun,       ONLY : lv0_t, lb0_t, vgrun_t, celldm_grun_t, &
                                b0_grun_t
 USE control_thermo,     ONLY : ltherm_dos, ltherm_freq
 USE temperature,        ONLY : ntemp
+USE ph_freq_thermodynamics, ONLY : phf_ce
 USE anharmonic,         ONLY : vmin_t, celldm_t, b0_t, ce_t
 USE ph_freq_anharmonic, ONLY : vminf_t, celldmf_t, b0f_t, cef_t
 USE grun_anharmonic,    ONLY : ce_grun_t
@@ -543,6 +551,8 @@ DO itemp=1, ntemp
       ce_grun_t(itemp)= cef_t(itemp)
    ELSEIF(ltherm_dos) THEN
       ce_grun_t(itemp)= ce_t(itemp)
+   ELSE
+      CALL interpolate_cv(vgrun_t, celldm_grun_t, phf_ce, ce_grun_t)
    ENDIF
 ENDDO
 
