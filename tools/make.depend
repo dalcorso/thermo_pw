@@ -10,6 +10,11 @@ crystal_point_group.o : ../../Modules/io_global.o
 crystal_point_group.o : ../../Modules/kind.o
 crystal_point_group.o : ../../Modules/mp_global.o
 crystal_point_group.o : ../../thermo_pw/lib/point_group.o
+debye.o : ../../Modules/environment.o
+debye.o : ../../Modules/io_global.o
+debye.o : ../../Modules/kind.o
+debye.o : ../../Modules/mp_global.o
+debye.o : ../../thermo_pw/lib/debye_module.o
 elastic.o : ../../Modules/environment.o
 elastic.o : ../../Modules/io_global.o
 elastic.o : ../../Modules/kind.o
