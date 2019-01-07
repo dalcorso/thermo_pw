@@ -198,3 +198,119 @@ SUBROUTINE fit_frequencies_anis()
   RETURN
 END SUBROUTINE fit_frequencies_anis
 !
+!--------------------------------------------------------------------------
+SUBROUTINE fit_frequencies_anis_reduced()
+!--------------------------------------------------------------------------
+  !
+  ! Computes the coefficients of a second order polynomial of the crystal 
+  ! parameters and fits the phonon frequencies calculated for nwork geometries. 
+  ! 
+  USE kinds,                  ONLY : DP
+  USE thermo_mod,             ONLY : celldm_geo, no_ph, start_geo_red, &
+                                     last_geo_red
+  USE ions_base,              ONLY : nat
+  USE cell_base,              ONLY : ibrav
+  USE ph_freq_thermodynamics, ONLY : ph_freq_save
+  USE grun_anharmonic,        ONLY : poly_grun_red, poly_order
+  USE quadratic_surfaces,     ONLY : quadratic_var
+  USE control_thermo,         ONLY : with_eigen
+  USE freq_interpolate,       ONLY : interp_freq, interp_freq_eigen
+  USE lattices,               ONLY : compress_celldm, crystal_parameters
+
+  IMPLICIT NONE
+
+  REAL(DP),    ALLOCATABLE :: freq_geo(:,:), x(:,:), xd(:)
+  COMPLEX(DP), ALLOCATABLE :: displa_geo(:,:,:)
+  INTEGER :: n, igeo, degree, nvar, nwork, startq, lastq, iq_eff, ndata, &
+             cgeo_eff, central_geo, i
+  INTEGER :: compute_nwork
+!
+!  Finds how many data have been calculated
+!
+  nwork=compute_nwork()
+  degree=crystal_parameters(ibrav)
+  nvar=quadratic_var(degree)
+  ndata=0
+  DO igeo=1,nwork
+     IF (.NOT.no_ph(igeo)) ndata=ndata+1
+  ENDDO
+  ALLOCATE(x(degree,ndata))
+  ALLOCATE(xd(ndata))
+!
+!  finds the central geometry among those calculated and extracts 
+!  from celldm_geo the relevant crystal parameters
+!
+  CALL find_central_geo(nwork,no_ph,central_geo)
+  ndata=0
+  DO igeo=1,nwork
+     IF (no_ph(igeo)) CYCLE
+     ndata=ndata+1
+     IF (central_geo==igeo) cgeo_eff=ndata
+     CALL compress_celldm(celldm_geo(1,igeo),x(1,ndata),degree,ibrav)
+  ENDDO
+!
+!  divides the q vectors among all processors. Each processor computes
+!  the polynomials for the wave vectors q that belong to it
+!
+  n=ph_freq_save(central_geo)%nq
+  startq=ph_freq_save(central_geo)%startq
+  lastq=ph_freq_save(central_geo)%lastq
+!
+!  allocates space for the fit of the frequencies with respect to the
+!  crystal parameters. Note that poly_grun is not deallocated and 
+!  is the output of this routine, used in the following ones.
+!
+  ALLOCATE(poly_grun_red(poly_order,3*nat,degree,startq:lastq))
+  ALLOCATE(freq_geo(3*nat,ndata))
+  IF (with_eigen) ALLOCATE(displa_geo(3*nat,3*nat,ndata))
+!
+  iq_eff=0
+  DO n = startq, lastq
+     iq_eff=iq_eff+1
+!
+!  for each q point selects only the frequencies and eigenvectors
+!  of the geometries that have been calculated
+!
+     DO i=1, degree
+        ndata=0
+        DO igeo=start_geo_red(i),last_geo_red(i)
+           IF (no_ph(igeo)) CYCLE
+           ndata=ndata+1
+           freq_geo(1:3*nat,ndata)=ph_freq_save(igeo)%nu(1:3*nat,iq_eff)
+           IF (with_eigen) displa_geo(1:3*nat, 1:3*nat, ndata)= &
+                           ph_freq_save(igeo)%displa(1:3*nat,1:3*nat,iq_eff)
+
+           xd(ndata)=x(i,igeo)
+        ENDDO
+        IF (MOD(last_geo_red(i)-start_geo_red(i)+1, 2)==0) THEN
+           ndata=ndata+1
+           freq_geo(1:3*nat,ndata)=ph_freq_save(1)%nu(1:3*nat,iq_eff)
+           IF (with_eigen) displa_geo(1:3*nat,1:3*nat,ndata)=&
+                                 ph_freq_save(1)%displa(1:3*nat,1:3*nat,iq_eff)
+           xd(ndata)=x(i,1)
+           cgeo_eff=ndata
+        ELSE
+           cgeo_eff=ndata/2
+        ENDIF
+!
+!   and interpolates the data
+!
+        IF (with_eigen) THEN
+           CALL interp_freq_eigen(ndata,freq_geo,xd,cgeo_eff,displa_geo, &
+                           poly_order,poly_grun_red(1,1,i,n))
+        ELSE
+           CALL interp_freq(ndata,freq_geo,xd,poly_order,&
+                                      poly_grun_red(1,1,i,n))
+        ENDIF
+     ENDDO
+  ENDDO
+!
+!  deallocates space
+!
+  IF (with_eigen) DEALLOCATE (displa_geo)
+  DEALLOCATE(freq_geo)
+  DEALLOCATE(x)
+  DEALLOCATE(xd)
+
+  RETURN
+END SUBROUTINE fit_frequencies_anis_reduced

@@ -86,6 +86,7 @@ END SUBROUTINE manage_anhar
 SUBROUTINE manage_anhar_anis()
 
 USE kinds,                 ONLY : DP
+USE thermo_mod,            ONLY : reduced_grid
 USE temperature,           ONLY : ntemp, temp
 USE control_pressure,      ONLY : pressure_kb
 USE control_thermo,        ONLY : ltherm_dos, ltherm_freq
@@ -179,7 +180,11 @@ CALL plot_elastic_t(1)
 !
 !    calculate and plot the Gruneisen parameters along the given path.
 !
-CALL write_gruneisen_band_anis(flfrq_thermo,flvec_thermo)
+IF (reduced_grid) THEN
+   CALL write_gruneisen_band_anis_reduced(flfrq_thermo,flvec_thermo)
+ELSE
+   CALL write_gruneisen_band_anis(flfrq_thermo,flvec_thermo)
+ENDIF
 CALL set_files_for_plot(4, flfrq_thermo, filedata, filerap, &
                                           fileout, gnu_filename, filenameps)
 CALL plotband_sub(4, filedata, filerap, fileout, gnu_filename, filenameps)
@@ -187,15 +192,20 @@ CALL plot_gruneisen_band_anis(flfrq_thermo)
 !
 !    fit the frequencies of the dos mesh with a polynomial
 !
-CALL fit_frequencies_anis()
+CALL set_volume_b0_cv_grun()
+IF (reduced_grid) THEN
+   CALL fit_frequencies_anis_reduced()
+   CALL write_grun_anhar_anis_reduced()
+ELSE
+   CALL fit_frequencies_anis()
 !
 !    calculate the Gruneisen parameters and the anharmonic quantities
 !
-CALL set_volume_b0_cv_grun()
-CALL write_grun_anhar_anis()
-
+   CALL write_grun_anhar_anis()
+ENDIF
 
 CALL plot_anhar_anis()
+
 
 RETURN
 END SUBROUTINE manage_anhar_anis

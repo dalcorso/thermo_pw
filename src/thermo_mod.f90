@@ -26,9 +26,11 @@ MODULE thermo_mod
   INTEGER :: fact_ngeo(6)               ! factors used to reduce the
                                         ! size of the grid where phonons
                                         ! are interpolated
+
   INTEGER :: ngeo_ph(6)                 ! mesh where the phonon are calculated
                                         ! can be smaller than ngeo
-  LOGICAL, ALLOCATABLE :: no_ph(:)      ! decide in which phonon geometries
+                                        !
+  LOGICAL, ALLOCATABLE :: no_ph(:)      ! decide in which geometries
                                         ! the phonons are calculated
 
   INTEGER :: tot_ngeo                   ! total number of geometries for
@@ -52,6 +54,12 @@ MODULE thermo_mod
   LOGICAL :: reduced_grid                       ! if .TRUE. use a reduced
                                                 ! grid to interpolate the
                                                 ! geometry
+  INTEGER :: start_geo_red(6)                   ! for each degree of freedom
+                                                ! the starting geometry in the
+                                                ! reduced list
+  INTEGER :: last_geo_red(6)                    ! for each degree of freedom
+                                                ! the last geometry in the
+                                                ! reduced list
   REAL(DP) :: density                           ! the density of the solid
 
   INTEGER :: max_geometries                     ! This value controls the
@@ -278,6 +286,11 @@ MODULE grun_anharmonic
                                         ! these are the coefficients of 
                                         ! polynomial which fit the frequency
                                         ! as a function of volume
+  REAL(DP), ALLOCATABLE :: poly_grun_red(:,:,:,:) ! For each band, each q point
+                                        ! and each crystal parameter
+                                        ! these are the coefficients of 
+                                        ! polynomial which fit the frequency
+                                        ! as a function of crystal parameter
   INTEGER :: poly_order                 ! order of the polynomial + 1 
 
   LOGICAL :: done_grun=.FALSE.          ! the anharmonic quantities with

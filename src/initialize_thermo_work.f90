@@ -634,6 +634,52 @@ ENDDO
 RETURN
 END SUBROUTINE set_celldm_geo
 
+SUBROUTINE set_celldm_geo_reduced()
+!
+!   This routine sets the values on celldm_geo with the option
+!   reduced_grid=.TRUE.
+!
+USE kinds,         ONLY : DP
+USE constants,     ONLY : pi
+USE thermo_mod,    ONLY : step_ngeo, ngeo, celldm_geo, start_geo_red, &
+                          last_geo_red
+USE initial_conf,  ONLY : celldm_save
+
+IMPLICIT NONE
+INTEGER  :: iwork, degree, i, igeo, nwork
+REAL(DP) :: angle
+INTEGER  :: compute_nwork 
+
+nwork=compute_nwork()
+DO igeo=1,nwork
+   celldm_geo(:,igeo)=celldm_save(:)
+ENDDO
+
+iwork=MOD(nwork,2)
+degree=1
+DO i=1,6
+   start_geo_red(degree)=iwork+1
+   DO igeo = 1, ngeo(i)
+      IF (ABS(igeo-(ngeo(i)+1.0_DP)/2.0_DP)<1.D-5) CYCLE
+      iwork=iwork+1
+      IF (i<4) THEN
+         celldm_geo(i,iwork)=celldm_save(i)+&
+                        (igeo-(ngeo(i)+1.0_DP)/2.0_DP)*step_ngeo(i)
+      ELSE
+         angle = ACOS(celldm_save(i)) +  &
+                (igeo-(ngeo(i)+1.0_DP)/2.0_DP)*step_ngeo(i)*pi/180.0_DP
+         celldm_geo(i,iwork)= COS(angle)
+      ENDIF
+   ENDDO
+   last_geo_red(degree)=iwork
+   IF (ngeo(i)>1) degree=degree+1
+ENDDO
+
+IF (iwork /= nwork) CALL errore('set_celldm_geo_reduced','wrong nwork',1)
+
+RETURN
+END SUBROUTINE set_celldm_geo_reduced
+
 SUBROUTINE summarize_geometries(nwork)
 USE thermo_mod,    ONLY : celldm_geo, no_ph
 USE initial_conf,  ONLY : celldm_save
@@ -714,7 +760,11 @@ ALLOCATE(ibrav_geo(nwork))
 ALLOCATE(celldm_geo(6,nwork))
 ALLOCATE(energy_geo(nwork))
 ALLOCATE(omega_geo(nwork))
-CALL set_celldm_geo()
+IF (reduced_grid) THEN
+   CALL set_celldm_geo_reduced()
+ELSE
+   CALL set_celldm_geo()
+ENDIF
 DO igeom = 1, nwork
    omega_geo(igeom)=compute_omega_geo(ibrav_save,celldm_geo(:,igeom))
 ENDDO
