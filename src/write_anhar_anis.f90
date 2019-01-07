@@ -456,7 +456,7 @@ DO itemp = 1, ntemp
          ph_freq%nu(imode,iq_eff) = f 
          IF (f > 0.0_DP ) THEN
             DO i=1,degree
-               ph_grun(i)%nu(imode,iq_eff)=grad(i) / f
+               ph_grun(i)%nu(imode,iq_eff)=-grad(i) / f
             END DO
          ELSE
             DO i=1,degree
@@ -496,7 +496,7 @@ DO itemp = 1, ntemp
          END DO
       END DO
    END IF
-   alpha_an_g(:,itemp) = -aux(:) * ry_kbar / vm
+   alpha_an_g(:,itemp) = aux(:) * ry_kbar / vm
 END DO
 
 CALL mp_sum(alpha_an_g, world_comm)
