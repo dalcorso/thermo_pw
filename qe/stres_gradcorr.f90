@@ -43,7 +43,7 @@ subroutine stres_gradcorr_tpw( rho, rhog, rho_core, rhog_core, kedtau, nspin, &
        v1xup, v1xdw, v2xup, v2xdw, v1cup, v1cdw, v2cup, v2cdw, v2cud, &
        zeta, rh, rup, rdw, grhoup, grhodw, grhoud, grup, grdw, &
        sigma_gradcorr (3, 3)
-  COMPLEX(DP), ALLOCATABLE :: rhogout(:,:), rhogsum(:,:)
+  COMPLEX(DP), ALLOCATABLE :: rhogout(:,:)
   logical :: igcc_is_lyp
   !dummy variables for meta-gga
   real(DP) :: v3x,v3c,v3xup,v3xdw,v3cup,v3cdw
@@ -69,7 +69,7 @@ subroutine stres_gradcorr_tpw( rho, rhog, rho_core, rhog_core, kedtau, nspin, &
   fac = 1.d0 / DBLE (nspin0)
 
   ALLOCATE(grho(3, nrxx, nspin0))    
-  ALLOCATE(rhogsum( ngm, nspin0))
+  ALLOCATE(rhogout( ngm, nspin0))
   ALLOCATE(rhoout( nrxx, nspin0))
   IF (nspin==4.AND.domag) ALLOCATE( segni( nrxx ) )
 
