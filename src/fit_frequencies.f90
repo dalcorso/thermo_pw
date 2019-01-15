@@ -222,7 +222,7 @@ SUBROUTINE fit_frequencies_anis_reduced()
   REAL(DP),    ALLOCATABLE :: freq_geo(:,:), x(:,:), xd(:)
   COMPLEX(DP), ALLOCATABLE :: displa_geo(:,:,:)
   INTEGER :: n, igeo, degree, nvar, nwork, startq, lastq, iq_eff, ndata, &
-             cgeo_eff, central_geo, i
+             cgeo_eff, i
   INTEGER :: compute_nwork
 !
 !  Finds how many data have been calculated
@@ -234,27 +234,23 @@ SUBROUTINE fit_frequencies_anis_reduced()
   DO igeo=1,nwork
      IF (.NOT.no_ph(igeo)) ndata=ndata+1
   ENDDO
-  ALLOCATE(x(degree,ndata))
+  ALLOCATE(x(degree,nwork))
   ALLOCATE(xd(ndata))
 !
 !  finds the central geometry among those calculated and extracts 
 !  from celldm_geo the relevant crystal parameters
 !
-  CALL find_central_geo(nwork,no_ph,central_geo)
-  ndata=0
   DO igeo=1,nwork
      IF (no_ph(igeo)) CYCLE
-     ndata=ndata+1
-     IF (central_geo==igeo) cgeo_eff=ndata
-     CALL compress_celldm(celldm_geo(1,igeo),x(1,ndata),degree,ibrav)
+     CALL compress_celldm(celldm_geo(1,igeo),x(1,igeo),degree,ibrav)
   ENDDO
 !
 !  divides the q vectors among all processors. Each processor computes
 !  the polynomials for the wave vectors q that belong to it
 !
-  n=ph_freq_save(central_geo)%nq
-  startq=ph_freq_save(central_geo)%startq
-  lastq=ph_freq_save(central_geo)%lastq
+  n=ph_freq_save(1)%nq
+  startq=ph_freq_save(1)%startq
+  lastq=ph_freq_save(1)%lastq
 !
 !  allocates space for the fit of the frequencies with respect to the
 !  crystal parameters. Note that poly_grun is not deallocated and 

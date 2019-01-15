@@ -512,6 +512,7 @@ END SUBROUTINE write_aux_grun
 
 SUBROUTINE set_volume_b0_cv_grun()
 
+USE thermo_mod,         ONLY : reduced_grid
 USE control_grun,       ONLY : lv0_t, lb0_t, vgrun_t, celldm_grun_t, &
                                b0_grun_t
 USE control_thermo,     ONLY : ltherm_dos, ltherm_freq
@@ -552,7 +553,11 @@ DO itemp=1, ntemp
    ELSEIF(ltherm_dos) THEN
       ce_grun_t(itemp)= ce_t(itemp)
    ELSE
-      CALL interpolate_cv(vgrun_t, celldm_grun_t, phf_ce, ce_grun_t)
+      IF (reduced_grid) THEN
+         ce_grun_t(:)=phf_ce(:,1)
+      ELSE
+         CALL interpolate_cv(vgrun_t, celldm_grun_t, phf_ce, ce_grun_t)
+      ENDIF
    ENDIF
 ENDDO
 

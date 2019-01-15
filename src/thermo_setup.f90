@@ -39,7 +39,7 @@ SUBROUTINE thermo_setup()
                                  poly_degree, elcpvar
   USE control_eldos,        ONLY : deltae, ndose
   USE control_mur,          ONLY : lmurn
-  USE equilibrium_conf,     ONLY : celldm0, at0, tau0, tau0_crys
+  USE equilibrium_conf,     ONLY : tau0, tau0_crys
   USE control_paths,        ONLY : npk_label, lbar_label
   USE control_grun,         ONLY : temp_ph, volume_ph, celldm_ph
   USE control_xrdp,         ONLY : lambda, lambda_elem

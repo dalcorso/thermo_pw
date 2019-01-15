@@ -131,7 +131,7 @@ SUBROUTINE write_gruneisen_band_anis_reduced(file_disp, file_vec)
      IF (no_ph(idata)) CYCLE
      ndata=ndata+1
      IF (central_geo==idata) cgeo_eff=ndata
-     CALL compress_celldm(celldm_geo(1,idata),x_data(1,ndata),degree, &
+     CALL compress_celldm(celldm_geo(1,idata),x_data(1,idata),degree, &
                                                                 ibrav_save)
   ENDDO 
 !
@@ -213,7 +213,7 @@ SUBROUTINE write_gruneisen_band_anis_reduced(file_disp, file_vec)
            DO idata=start_geo_red(i),last_geo_red(i)
               IF (no_ph(idata)) CYCLE
               ndata=ndata+1
-              xd(ndata)=x_data(i,ndata)
+              xd(ndata)=x_data(i,idata)
               frequency_geo(1:nbnd,ndata)=freq_geo(1:nbnd,n,idata)
               displa(1:nbnd,1:nbnd,ndata)=displa_geo(1:nbnd,1:nbnd,idata,n)
            ENDDO

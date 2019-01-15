@@ -332,7 +332,7 @@ USE kinds,          ONLY : DP
 USE constants,      ONLY : ry_kbar
 USE ions_base,      ONLY : nat
 USE cell_base,      ONLY : ibrav
-USE thermo_mod,     ONLY : ngeo
+USE thermo_mod,     ONLY : ngeo, central_geo
 USE temperature,    ONLY : ntemp, temp
 USE control_grun,   ONLY : vgrun_t, celldm_grun_t, b0_grun_t, lb0_t
 USE control_mur,    ONLY : vmin
@@ -402,13 +402,13 @@ WRITE(stdout,'(2x,76("+"),/)')
 ! of the q points and computes the contribution of these points to the
 ! anharmonic properties
 !
-nq=ph_freq_save(1)%nq
-startq=ph_freq_save(1)%startq
-lastq=ph_freq_save(1)%lastq
-nq_eff=ph_freq_save(1)%nq_eff
+nq=ph_freq_save(central_geo)%nq
+startq=ph_freq_save(central_geo)%startq
+lastq=ph_freq_save(central_geo)%lastq
+nq_eff=ph_freq_save(central_geo)%nq_eff
 CALL init_ph_freq(ph_freq, nat, nq1_d, nq2_d, nq3_d, nq_eff, startq, lastq,  &
                                                                nq, .FALSE.)
-ph_freq%wg=ph_freq_save(1)%wg
+ph_freq%wg=ph_freq_save(central_geo)%wg
 !
 ! now allocate space for each set of gruneisen parameters
 !
@@ -435,7 +435,7 @@ DO itemp = 1, ntemp
 !  are interpolated
 !
    cm(:)=celldm_grun_t(:,itemp)
-   vm = vmin_t(itemp)
+   vm = vgrun_t(itemp)
 
    CALL compress_celldm(cm,x,degree,ibrav)
 !
@@ -514,6 +514,9 @@ IF (ltherm_freq) THEN
 ELSEIF(ltherm_dos) THEN
    CALL isostress_heat_capacity(vgrun_t,el_cons_t,alpha_an_g,temp,&
                                                     grun_cpmce_anis,ntemp)
+ELSE
+   CALL isostress_heat_capacity(vgrun_t,el_consf_t,alpha_an_g,temp,&
+                                                    grun_cpmce_anis,ntemp)
 ENDIF
 cp_grun_t = ce_grun_t + grun_cpmce_anis
 CALL compute_cv_bs_g(betab, vgrun_t, b0_grun_t, cv_grun_t, &
@@ -576,23 +579,17 @@ USE cell_base,      ONLY : ibrav
 USE thermo_mod,     ONLY : ngeo
 USE temperature,    ONLY : ntemp, temp
 USE control_grun,   ONLY : vgrun_t, celldm_grun_t, b0_grun_t, lb0_t
-USE control_mur,    ONLY : vmin
 USE ph_freq_thermodynamics, ONLY : ph_freq_save
-USE anharmonic,     ONLY : celldm_t, vmin_t, b0_t, cv_t, lelastic, el_comp_t, &
-                           el_cons_t
-USE ph_freq_anharmonic, ONLY : celldmf_t, vminf_t, b0f_t, cvf_t, lelasticf, &
-                           el_consf_t
+USE anharmonic,     ONLY : lelastic, el_comp_t
+USE ph_freq_anharmonic, ONLY : el_consf_t, lelasticf
 USE grun_anharmonic, ONLY : alpha_an_g, grun_gamma_t, poly_grun_red, done_grun, &
                             cp_grun_t, b0_grun_s, betab, grun_cpmce_anis,   &
                             cv_grun_t, ce_grun_t, poly_order
 USE ph_freq_module, ONLY : thermal_expansion_ph, ph_freq_type,  &
                            destroy_ph_freq, init_ph_freq
 USE lattices,       ONLY : compress_celldm, crystal_parameters
-USE control_thermo, ONLY : ltherm_dos, ltherm_freq
 USE elastic_constants, ONLY :  el_compliances
 USE control_elastic_constants, ONLY : el_cons_available, el_cons_t_available
-USE quadratic_surfaces, ONLY : evaluate_fit_quadratic,      &
-                               evaluate_fit_grad_quadratic, quadratic_var
 USE freq_interpolate, ONLY : compute_polynomial, compute_polynomial_der
 USE isoentropic,    ONLY : isostress_heat_capacity
 USE control_dosq,   ONLY : nq1_d, nq2_d, nq3_d
@@ -603,7 +600,7 @@ USE mp,             ONLY : mp_sum
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
-INTEGER :: itemp, iu_therm, i, nq, imode, iq, degree, nvar, nwork
+INTEGER :: itemp, iu_therm, i, nq, imode, iq, degree, nwork
 INTEGER :: itens, jtens, startq, lastq, nq_eff, iq_eff
 TYPE(ph_freq_type) :: ph_freq    ! the frequencies at the volumes at
                                  ! which the gruneisen parameters are 
@@ -655,7 +652,6 @@ ph_freq%wg=ph_freq_save(1)%wg
 ! now allocate space for each set of gruneisen parameters
 !
 degree=crystal_parameters(ibrav)
-nvar=quadratic_var(degree)
 nwork=compute_nwork()
 ALLOCATE(ph_grun(degree))
 ALLOCATE(grad(degree))
@@ -719,7 +715,6 @@ DO itemp = 1, ntemp
    DO i=1,degree
       CALL thermal_expansion_ph(ph_freq, ph_grun(i), temp(itemp), alpha_aux(i))
    END DO
-
 !
 !  Here convert from derivatives with respect to crystal parameters to
 !  derivative with respect to strain. 

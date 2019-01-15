@@ -275,6 +275,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
 !
         CASE ('mur_lc_t')
            lev_syn_1=.NOT.reduced_grid
+           IF (.NOT.(ltherm_freq.OR.ltherm_dos)) lev_syn_1=.FALSE.
            lph = .TRUE.
            lq2r = .TRUE.
            ltherm = .TRUE.
@@ -978,6 +979,7 @@ END FUNCTION count_energies
 
 SUBROUTINE find_central_geo(ngeo, no_ph, central_geo)
 
+USE thermo_mod, ONLY : reduced_grid
 IMPLICIT NONE
 INTEGER :: ngeo
 LOGICAL :: no_ph(ngeo)
@@ -996,6 +998,7 @@ IF (no_ph(central_geo)) THEN
       central_geo=central_geo-igeo
    ENDDO
 ENDIF
+IF (reduced_grid) central_geo=1
 
 RETURN
 END SUBROUTINE find_central_geo

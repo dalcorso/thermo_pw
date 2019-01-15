@@ -497,6 +497,10 @@ SUBROUTINE thermo_readin()
   !
   IF (lmurn.AND.reduced_grid) CALL errore('thermo_readin',&
                              'lmurn and reduced_grid cannot be both .TRUE.',1)
+  IF (reduced_grid) THEN
+     ltherm_dos=.FALSE.
+     ltherm_freq=.FALSE.
+  ENDIF
 
   IF (what=='elastic_constants_t' .AND. elastic_algorithm/='standard') &
      CALL errore('thermo_readin','Only the standard algorithm is working &
