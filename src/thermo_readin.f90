@@ -500,6 +500,8 @@ SUBROUTINE thermo_readin()
   IF (reduced_grid) THEN
      ltherm_dos=.FALSE.
      ltherm_freq=.FALSE.
+     lv0_t=.FALSE.
+     lb0_t=.FALSE.
   ENDIF
 
   IF (what=='elastic_constants_t' .AND. elastic_algorithm/='standard') &

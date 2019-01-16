@@ -456,6 +456,8 @@ CHARACTER(LEN=6) :: int_to_char
 
 IF ( my_image_id /= root_image ) RETURN
 
+IF (.NOT.(ltherm_freq.OR.ltherm_dos)) RETURN
+
 gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'.tstress'
 CALL gnuplot_start(gnu_filename)
 
@@ -559,6 +561,7 @@ INTEGER :: ierr, system, na
 CHARACTER(LEN=6) :: int_to_char
 
 IF ( my_image_id /= root_image ) RETURN
+IF (.NOT.(ltherm_freq.OR.ltherm_dos)) RETURN
 
 gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'.ggamma'
 CALL gnuplot_start(gnu_filename)

@@ -103,7 +103,7 @@ MODULE lattices
          compute_omega, conventional_ibrav, is_centered, lattice_name, &
          zone_border, same_star, is_compatible_group_ibrav,            &
          bravais_dir, print_bravais_description, crystal_parameters,   &
-         compress_celldm, expand_celldm
+         compress_celldm, expand_celldm, compress_int_vect
 
 CONTAINS
 
@@ -1765,6 +1765,33 @@ END SELECT
 
 RETURN
 END SUBROUTINE compress_celldm
+
+SUBROUTINE compress_int_vect(inv,x,n,ibrav)
+
+USE kinds, ONLY : DP
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: n, ibrav
+INTEGER, INTENT(IN) :: inv(n)
+INTEGER, INTENT(INOUT) :: x(n)
+
+INTEGER :: i
+
+x=inv
+SELECT CASE (ibrav)
+   CASE(4,5,6,7)
+      DO i=1,n
+         IF (inv(i)==3) x(i)=2
+         IF (inv(i)==4) x(i)=2 
+      ENDDO
+   CASE(12,-12,13,-13)
+      DO i=1,n
+         IF (inv(i)==5) x(i)=4
+      ENDDO
+   CASE DEFAULT
+END SELECT
+
+RETURN
+END SUBROUTINE compress_int_vect
 
 SUBROUTINE expand_celldm(cm, x, degree, ibrav)
 !

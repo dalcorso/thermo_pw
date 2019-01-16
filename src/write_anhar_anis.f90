@@ -576,7 +576,7 @@ USE kinds,          ONLY : DP
 USE constants,      ONLY : ry_kbar
 USE ions_base,      ONLY : nat
 USE cell_base,      ONLY : ibrav
-USE thermo_mod,     ONLY : ngeo
+USE thermo_mod,     ONLY : ngeo, red_central_geo
 USE temperature,    ONLY : ntemp, temp
 USE control_grun,   ONLY : vgrun_t, celldm_grun_t, b0_grun_t, lb0_t
 USE ph_freq_thermodynamics, ONLY : ph_freq_save
@@ -641,13 +641,13 @@ WRITE(stdout,'(2x,76("+"),/)')
 ! of the q points and computes the contribution of these points to the
 ! anharmonic properties
 !
-nq=ph_freq_save(1)%nq
-startq=ph_freq_save(1)%startq
-lastq=ph_freq_save(1)%lastq
-nq_eff=ph_freq_save(1)%nq_eff
+nq=ph_freq_save(red_central_geo)%nq
+startq=ph_freq_save(red_central_geo)%startq
+lastq=ph_freq_save(red_central_geo)%lastq
+nq_eff=ph_freq_save(red_central_geo)%nq_eff
 CALL init_ph_freq(ph_freq, nat, nq1_d, nq2_d, nq3_d, nq_eff, startq, lastq,  &
                                                                nq, .FALSE.)
-ph_freq%wg=ph_freq_save(1)%wg
+ph_freq%wg=ph_freq_save(red_central_geo)%wg
 !
 ! now allocate space for each set of gruneisen parameters
 !

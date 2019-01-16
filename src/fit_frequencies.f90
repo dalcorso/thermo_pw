@@ -206,8 +206,8 @@ SUBROUTINE fit_frequencies_anis_reduced()
   ! parameters and fits the phonon frequencies calculated for nwork geometries. 
   ! 
   USE kinds,                  ONLY : DP
-  USE thermo_mod,             ONLY : celldm_geo, no_ph, start_geo_red, &
-                                     last_geo_red
+  USE thermo_mod,             ONLY : celldm_geo, no_ph, in_degree, &
+                                     red_central_geo
   USE ions_base,              ONLY : nat
   USE cell_base,              ONLY : ibrav
   USE ph_freq_thermodynamics, ONLY : ph_freq_save
@@ -248,9 +248,9 @@ SUBROUTINE fit_frequencies_anis_reduced()
 !  divides the q vectors among all processors. Each processor computes
 !  the polynomials for the wave vectors q that belong to it
 !
-  n=ph_freq_save(1)%nq
-  startq=ph_freq_save(1)%startq
-  lastq=ph_freq_save(1)%lastq
+  n=ph_freq_save(red_central_geo)%nq
+  startq=ph_freq_save(red_central_geo)%startq
+  lastq=ph_freq_save(red_central_geo)%lastq
 !
 !  allocates space for the fit of the frequencies with respect to the
 !  crystal parameters. Note that poly_grun is not deallocated and 
@@ -269,25 +269,19 @@ SUBROUTINE fit_frequencies_anis_reduced()
 !
      DO i=1, degree
         ndata=0
-        DO igeo=start_geo_red(i),last_geo_red(i)
-           IF (no_ph(igeo)) CYCLE
-           ndata=ndata+1
-           freq_geo(1:3*nat,ndata)=ph_freq_save(igeo)%nu(1:3*nat,iq_eff)
-           IF (with_eigen) displa_geo(1:3*nat, 1:3*nat, ndata)= &
+        cgeo_eff=0
+        DO igeo=1, nwork
+           IF (in_degree(igeo)==i.OR.igeo==red_central_geo) THEN
+              ndata=ndata+1
+              freq_geo(1:3*nat,ndata)=ph_freq_save(igeo)%nu(1:3*nat,iq_eff)
+              IF (with_eigen) displa_geo(1:3*nat, 1:3*nat, ndata)= &
                            ph_freq_save(igeo)%displa(1:3*nat,1:3*nat,iq_eff)
 
-           xd(ndata)=x(i,igeo)
+              xd(ndata)=x(i,igeo)
+              IF (igeo==red_central_geo) cgeo_eff=ndata
+           ENDIF
         ENDDO
-        IF (MOD(last_geo_red(i)-start_geo_red(i)+1, 2)==0) THEN
-           ndata=ndata+1
-           freq_geo(1:3*nat,ndata)=ph_freq_save(1)%nu(1:3*nat,iq_eff)
-           IF (with_eigen) displa_geo(1:3*nat,1:3*nat,ndata)=&
-                                 ph_freq_save(1)%displa(1:3*nat,1:3*nat,iq_eff)
-           xd(ndata)=x(i,1)
-           cgeo_eff=ndata
-        ELSE
-           cgeo_eff=ndata/2
-        ENDIF
+        IF (cgeo_eff==0) cgeo_eff=ndata/2
 !
 !   and interpolates the data
 !

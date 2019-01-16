@@ -1400,8 +1400,9 @@ An example of the use of this option can be found in \texttt{example05}.\\
 Number of tasks for this option: \\
 \texttt{ngeo(1)} when \texttt{lmurn=.TRUE.}, \\
 \texttt{ngeo(1)}$\times$\texttt{ngeo(2)}$\times$\texttt{ngeo(3)}$\times$\texttt{ngeo(4)}$\times$\texttt{ngeo(5)}$\times$\texttt{ngeo(6)} when 
-\texttt{lmurn=.FALSE.} and \texttt{reduced\_grid=.FALSE.}\\
-\texttt{ngeo(1)}$+$\texttt{(ngeo(2)-1)}$+$\texttt{(ngeo(3)-1)}$+$\texttt{(ngeo(4)}-1)$+$\texttt{(ngeo(5)-1)}$+$\texttt{(ngeo(6)-1)} when 
+\texttt{lmurn=.FALSE.} and \\
+\texttt{reduced\_grid=.FALSE.}
+\texttt{ngeo(1)}$+$\texttt{ngeo(2)}$+$\texttt{ngeo(3)}$+$\texttt{ngeo(4)}$+$\texttt{ngeo(5)}$+$\texttt{ngeo(6)}-5$ when 
 \texttt{lmurn=.FALSE.} and \texttt{reduced\_grid=.TRUE.}.
 
 
@@ -1593,9 +1594,11 @@ lquartic_ph   : if .TRUE. fit the vibrational free energy with a fourth
                 order polynomial, otherwise with a second order polynomial
                 Default: logical .TRUE.
 lv0_t         : if .TRUE.  the calculation of the thermal expansion with 
-                Gruneisen parameters uses the equilibrium volume as a 
+                Gruneisen parameters uses the equilibrium geometry as a 
                 function of temperature computed from the free energy 
-                minimization, otherwise the volume at T=0 K.
+                minimization, otherwise the equilibrium geometry at T=0 K. 
+                If reduced_grid=.TRUE. we must have  lv0_t=.FALSE. and
+                the input geometry is used. 
                 Default: logical .TRUE.
 lb0_t         : if .TRUE. the calculation of the thermal expansion with 
                 Gruneisen parameters uses the bulk modulus as a function of 

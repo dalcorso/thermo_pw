@@ -54,12 +54,12 @@ MODULE thermo_mod
   LOGICAL :: reduced_grid                       ! if .TRUE. use a reduced
                                                 ! grid to interpolate the
                                                 ! geometry
-  INTEGER :: start_geo_red(6)                   ! for each degree of freedom
-                                                ! the starting geometry in the
-                                                ! reduced list
-  INTEGER :: last_geo_red(6)                    ! for each degree of freedom
-                                                ! the last geometry in the
-                                                ! reduced list
+  INTEGER, ALLOCATABLE :: in_degree(:)          ! for each geometry says to
+                                                ! which degree it belongs in 
+                                                ! the reduced grid
+  INTEGER :: red_central_geo                    ! With the reduced_grid option
+                                                ! this is the central geometry
+                                                ! used by all degrees
   REAL(DP) :: density                           ! the density of the solid
 
   INTEGER :: max_geometries                     ! This value controls the

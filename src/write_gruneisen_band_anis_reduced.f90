@@ -21,7 +21,7 @@ SUBROUTINE write_gruneisen_band_anis_reduced(file_disp, file_vec)
   USE data_files,     ONLY : flgrun
   USE control_paths,  ONLY : nqaux, disp_q, disp_nqs
   USE equilibrium_conf, ONLY : celldm0
-  USE thermo_mod,     ONLY : celldm_geo, no_ph, start_geo_red, last_geo_red
+  USE thermo_mod,     ONLY : celldm_geo, no_ph, in_degree, red_central_geo
   USE anharmonic,     ONLY : celldm_t
   USE ph_freq_anharmonic,  ONLY : celldmf_t
   USE control_grun,   ONLY : temp_ph, celldm_ph
@@ -125,7 +125,7 @@ SUBROUTINE write_gruneisen_band_anis_reduced(file_disp, file_vec)
 !  x data for the computed geometries
 !
   CALL find_central_geo(nwork,no_ph,central_geo)
-  ALLOCATE(x_data(degree,ndata))
+  ALLOCATE(x_data(degree,nwork))
   ndata=0
   DO idata=1, nwork
      IF (no_ph(idata)) CYCLE
@@ -210,22 +210,17 @@ SUBROUTINE write_gruneisen_band_anis_reduced(file_disp, file_vec)
      ELSE
         DO i=1, degree
            ndata=0
-           DO idata=start_geo_red(i),last_geo_red(i)
-              IF (no_ph(idata)) CYCLE
-              ndata=ndata+1
-              xd(ndata)=x_data(i,idata)
-              frequency_geo(1:nbnd,ndata)=freq_geo(1:nbnd,n,idata)
-              displa(1:nbnd,1:nbnd,ndata)=displa_geo(1:nbnd,1:nbnd,idata,n)
+           cgeo_eff=0
+           DO idata=1,nwork
+              IF (in_degree(idata)==i.OR.idata==red_central_geo) THEN
+                 ndata=ndata+1
+                 xd(ndata)=x_data(i,idata)
+                 frequency_geo(1:nbnd,ndata)=freq_geo(1:nbnd,n,idata)
+                 displa(1:nbnd,1:nbnd,ndata)=displa_geo(1:nbnd,1:nbnd,idata,n)
+                 IF (idata==red_central_geo) cgeo_eff=ndata
+              ENDIF
            ENDDO
-           IF (MOD(last_geo_red(i)-start_geo_red(i)+1, 2)==0) THEN
-              ndata=ndata+1
-              frequency_geo(1:nbnd,ndata)=freq_geo(1:nbnd,n,1)
-              displa(1:nbnd,1:nbnd,ndata)=displa_geo(1:nbnd,1:nbnd,1,n)
-              xd(ndata)=x_data(i,1)
-              cgeo_eff=ndata
-           ELSE
-              cgeo_eff=ndata/2
-           ENDIF
+           IF (cgeo_eff==0) cgeo_eff=ndata/2
            CALL interp_freq_eigen(ndata, frequency_geo, xd, cgeo_eff, displa, &
                                   poly_order, poly_grun)
 !

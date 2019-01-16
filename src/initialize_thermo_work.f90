@@ -20,7 +20,8 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
   USE kinds,          ONLY : DP
   USE thermo_mod,     ONLY : what, step_ngeo, energy_geo, ngeo, &
                              celldm_geo, omega_geo, ibrav_geo, tot_ngeo, no_ph,&
-                             start_geometry, last_geometry, reduced_grid
+                             start_geometry, last_geometry, reduced_grid, &
+                             in_degree
   USE control_thermo, ONLY : lpwscf, lphonon, lev_syn_1, lev_syn_2, &
                              lph, lpwscf_syn_1, lbands_syn_1, lq2r,   &
                              ltherm, lconv_ke_test, lconv_nk_test, &
@@ -50,10 +51,9 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
   INTEGER, INTENT(OUT) :: nwork, iaux
   INTEGER, INTENT(IN) :: part
 
-  INTEGER :: igeom, ike, iden, icount, ink, isigma, ios
+  INTEGER :: igeom, ike, iden, icount, ink, isigma, iwork, ios
   INTEGER :: count_energies
   REAL(DP) :: compute_omega_geo, dual, kev, kedenv
-  !
 !
 !   the restart directory is used in all cases
 !
@@ -275,7 +275,6 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
 !
         CASE ('mur_lc_t')
            lev_syn_1=.NOT.reduced_grid
-           IF (.NOT.(ltherm_freq.OR.ltherm_dos)) lev_syn_1=.FALSE.
            lph = .TRUE.
            lq2r = .TRUE.
            ltherm = .TRUE.
@@ -283,7 +282,8 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            CALL initialize_mur(nwork)
            tot_ngeo=nwork
            ALLOCATE(no_ph(tot_ngeo))
-           CALL initialize_no_ph(no_ph, tot_ngeo)
+           IF (reduced_grid) ALLOCATE(in_degree(tot_ngeo))
+           CALL initialize_no_ph(no_ph, tot_ngeo, ibrav_save)
            CALL summarize_geometries(nwork)
            degree=crystal_parameters(ibrav_save)
            nvar=quadratic_var(degree)
@@ -425,6 +425,11 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
               'mur_lc_piezoelectric_tensor', &
               'mur_lc_polarization' )
            lpwscf(1:nwork)=.TRUE.
+           IF (reduced_grid) THEN
+              DO iwork=1,nwork
+                 IF (no_ph(iwork)) lpwscf(iwork)=.FALSE.
+              ENDDO
+           ENDIF
         CASE DEFAULT
           CALL errore('initialize_thermo_work','unknown what',1)
      END SELECT
@@ -591,40 +596,58 @@ SUBROUTINE set_celldm_geo()
 !
 USE kinds,         ONLY : DP
 USE constants,     ONLY : pi
-USE thermo_mod,    ONLY : step_ngeo, ngeo, celldm_geo
+USE thermo_mod,    ONLY : step_ngeo, ngeo, celldm_geo, reduced_grid
 USE initial_conf,  ONLY : celldm_save
 
 IMPLICIT NONE
 INTEGER  :: igeo1, igeo2, igeo3, igeo4, igeo5, igeo6
-INTEGER  :: iwork, total_work
-REAL(DP) :: angle1, angle2, angle3
+INTEGER  :: iwork, i, total_work
+REAL(DP) :: angle1, angle2, angle3, delta(6)
+
+delta(6)=0.0_DP
+DO i=1,6
+   IF (MOD(ngeo(i),2)==0) delta(i)=step_ngeo(i)/2.0_DP
+ENDDO
 
 iwork=0
 celldm_geo=0.0_DP
 total_work=0
-DO igeo6 = 1, ngeo(6)
-   angle3 = ACOS(celldm_save(6)) +  &
-            (igeo6-(ngeo(6)+1.0_DP)/2.0_DP)*step_ngeo(6)*pi/180.0_DP
-   DO igeo5 = 1, ngeo(5)
-      angle2 = ACOS(celldm_save(5)) +  &
-             (igeo5-(ngeo(5)+1.0_DP)/2.0_DP)*step_ngeo(5)*pi/180.0_DP
-      DO igeo4 = 1, ngeo(4)
-         angle1 = ACOS(celldm_save(4)) +  &
-              (igeo4-(ngeo(4)+1.0_DP)/2.0_DP)*step_ngeo(4)*pi/180.0_DP
-         DO igeo3 = 1, ngeo(3)
-            DO igeo2 = 1, ngeo(2)
-               DO igeo1 = 1, ngeo(1)
+DO igeo6 = -ngeo(6)/2, (ngeo(6)-1)/2
+   angle3 = ACOS(celldm_save(6))+(igeo6*step_ngeo(6))*pi/180.0_DP
+   DO igeo5 = -ngeo(5)/2, (ngeo(5)-1)/2
+      angle2 = ACOS(celldm_save(5))+(igeo5*step_ngeo(5))*pi/180.0_DP
+      DO igeo4 = -ngeo(4)/2, (ngeo(4)-1)/2
+         angle1 = ACOS(celldm_save(4))+(igeo4*step_ngeo(4))*pi/180.0_DP
+         DO igeo3 = -ngeo(3)/2, (ngeo(3)-1)/2
+            DO igeo2 = -ngeo(2)/2, (ngeo(2)-1)/2
+               DO igeo1 = -ngeo(1)/2, (ngeo(1)-1)/2
                   total_work=total_work+1
                   iwork=iwork+1
-                  celldm_geo(1,iwork)=celldm_save(1)+&
-                        (igeo1-(ngeo(1)+1.0_DP)/2.0_DP)*step_ngeo(1)
-                  celldm_geo(2,iwork)=celldm_save(2)+&
-                        (igeo2-(ngeo(2)+1.0_DP)/2.0_DP)*step_ngeo(2)
-                  celldm_geo(3,iwork)=celldm_save(3)+&
-                        (igeo3-(ngeo(3)+1.0_DP)/2.0_DP)*step_ngeo(3)
-                  celldm_geo(4,iwork)= COS(angle1)
-                  celldm_geo(5,iwork)= COS(angle2)
-                  celldm_geo(6,iwork)= COS(angle3)
+                  celldm_geo(1,iwork)=celldm_save(1)+igeo1*step_ngeo(1)
+                  celldm_geo(2,iwork)=celldm_save(2)+igeo2*step_ngeo(2)
+                  celldm_geo(3,iwork)=celldm_save(3)+igeo3*step_ngeo(3)
+                  IF (reduced_grid.AND.(ABS(igeo1)+ABS(igeo2)+ABS(igeo3)+  &
+                            ABS(igeo4)+ABS(igeo5)+ABS(igeo6)==1)) THEN
+                     IF (igeo1/=0) celldm_geo(1,iwork)=celldm_geo(1,iwork) &
+                                                                  +delta(1)
+                     IF (igeo2/=0) celldm_geo(2,iwork)=celldm_geo(2,iwork) &
+                                                                  +delta(2)
+                     IF (igeo3/=0) celldm_geo(3,iwork)=celldm_geo(3,iwork) &
+                                                                  +delta(3)
+                     IF (igeo4/=0) angle1=angle1+delta(4)*pi/180.0_DP
+                     IF (igeo5/=0) angle2=angle2+delta(5)*pi/180.0_DP
+                     IF (igeo6/=0) angle3=angle3+delta(6)*pi/180.0_DP
+                  ELSEIF(.NOT.reduced_grid) THEN
+                     celldm_geo(1,iwork)=celldm_geo(1,iwork)+delta(1)
+                     celldm_geo(2,iwork)=celldm_geo(2,iwork)+delta(2)
+                     celldm_geo(3,iwork)=celldm_geo(3,iwork)+delta(3)
+                     angle1=angle1+delta(4)*pi/180.0_DP
+                     angle2=angle2+delta(5)*pi/180.0_DP
+                     angle3=angle3+delta(6)*pi/180.0_DP
+                  ENDIF
+                  celldm_geo(4,iwork)=COS(angle1)
+                  celldm_geo(5,iwork)=COS(angle2)
+                  celldm_geo(6,iwork)=COS(angle3)
                ENDDO
             ENDDO
          ENDDO
@@ -635,52 +658,6 @@ ENDDO
 RETURN
 END SUBROUTINE set_celldm_geo
 
-SUBROUTINE set_celldm_geo_reduced()
-!
-!   This routine sets the values on celldm_geo with the option
-!   reduced_grid=.TRUE.
-!
-USE kinds,         ONLY : DP
-USE constants,     ONLY : pi
-USE thermo_mod,    ONLY : step_ngeo, ngeo, celldm_geo, start_geo_red, &
-                          last_geo_red
-USE initial_conf,  ONLY : celldm_save
-
-IMPLICIT NONE
-INTEGER  :: iwork, degree, i, igeo, nwork
-REAL(DP) :: angle
-INTEGER  :: compute_nwork 
-
-nwork=compute_nwork()
-DO igeo=1,nwork
-   celldm_geo(:,igeo)=celldm_save(:)
-ENDDO
-
-iwork=MOD(nwork,2)
-degree=1
-DO i=1,6
-   start_geo_red(degree)=iwork+1
-   DO igeo = 1, ngeo(i)
-      IF (ABS(igeo-(ngeo(i)+1.0_DP)/2.0_DP)<1.D-5) CYCLE
-      iwork=iwork+1
-      IF (i<4) THEN
-         celldm_geo(i,iwork)=celldm_save(i)+&
-                        (igeo-(ngeo(i)+1.0_DP)/2.0_DP)*step_ngeo(i)
-      ELSE
-         angle = ACOS(celldm_save(i)) +  &
-                (igeo-(ngeo(i)+1.0_DP)/2.0_DP)*step_ngeo(i)*pi/180.0_DP
-         celldm_geo(i,iwork)= COS(angle)
-      ENDIF
-   ENDDO
-   last_geo_red(degree)=iwork
-   IF (ngeo(i)>1) degree=degree+1
-ENDDO
-
-IF (iwork /= nwork) CALL errore('set_celldm_geo_reduced','wrong nwork',1)
-
-RETURN
-END SUBROUTINE set_celldm_geo_reduced
-
 SUBROUTINE summarize_geometries(nwork)
 USE thermo_mod,    ONLY : celldm_geo, no_ph
 USE initial_conf,  ONLY : celldm_save
@@ -688,10 +665,16 @@ USE io_global,     ONLY : stdout
 
 IMPLICIT NONE
 INTEGER :: nwork
-INTEGER :: igeo
+INTEGER :: igeo, phcount
+
+phcount=0
+DO igeo=1,nwork
+   IF(.NOT.no_ph(igeo)) phcount=phcount+1
+ENDDO
 
 WRITE(stdout,'(/,75("-"))')
 WRITE(stdout,'(/,2x,"Number of geometries to compute:", i5)') nwork
+WRITE(stdout,'(2x,"Phonons computed in:", 12x, i5, " geometries")') phcount
 WRITE(stdout,'(/,2x,"Input celldm:", 7x, 6f9.5,/)') celldm_save(:)
 
 DO igeo=1,nwork
@@ -707,29 +690,17 @@ INTEGER FUNCTION compute_nwork()
 !
 !  This function computes the number of tasks needed for energy minimization
 !
-USE thermo_mod,  ONLY : ngeo, central_geo, reduced_grid
+USE thermo_mod,  ONLY : ngeo, central_geo
 USE control_mur, ONLY : lmurn
 
 IMPLICIT NONE
 
 INTEGER :: i, auxgeo
 
-IF (reduced_grid) THEN
-   auxgeo=ngeo(1)+ngeo(2)+ngeo(3)+ngeo(4)+ngeo(5)+ngeo(6) + 1
-   DO i=1,6
-      IF (MOD(ngeo(i),2)==1) auxgeo=auxgeo-1
-   ENDDO
-   IF (MOD(auxgeo,2)==1) THEN
-      central_geo=1
-   ELSE
-      central_geo=ngeo(1)/2
-   ENDIF
-ELSE
-   auxgeo=ngeo(1)*ngeo(2)*ngeo(3)*ngeo(4)*ngeo(5)*ngeo(6)
-   IF (lmurn) auxgeo=ngeo(1)
-   central_geo=auxgeo/2
-   IF (MOD(auxgeo,2)==1) central_geo=central_geo+1
-ENDIF
+auxgeo=ngeo(1)*ngeo(2)*ngeo(3)*ngeo(4)*ngeo(5)*ngeo(6)
+IF (lmurn) auxgeo=ngeo(1)
+central_geo=auxgeo/2
+IF (MOD(auxgeo,2)==1) central_geo=central_geo+1
 
 compute_nwork=auxgeo
 
@@ -744,8 +715,7 @@ SUBROUTINE initialize_mur(nwork)
 !   in each task.
 !
 USE kinds,         ONLY : DP
-USE thermo_mod,    ONLY : ibrav_geo, celldm_geo, energy_geo, omega_geo, &
-                          reduced_grid
+USE thermo_mod,    ONLY : ibrav_geo, celldm_geo, energy_geo, omega_geo
 USE initial_conf,  ONLY : ibrav_save
 
 IMPLICIT NONE
@@ -761,11 +731,7 @@ ALLOCATE(ibrav_geo(nwork))
 ALLOCATE(celldm_geo(6,nwork))
 ALLOCATE(energy_geo(nwork))
 ALLOCATE(omega_geo(nwork))
-IF (reduced_grid) THEN
-   CALL set_celldm_geo_reduced()
-ELSE
-   CALL set_celldm_geo()
-ENDIF
+CALL set_celldm_geo()
 DO igeom = 1, nwork
    omega_geo(igeom)=compute_omega_geo(ibrav_save,celldm_geo(:,igeom))
 ENDDO
@@ -850,22 +816,55 @@ ENDIF
 RETURN
 END SUBROUTINE initialize_ph_work
 
-SUBROUTINE initialize_no_ph(no_ph, tot_ngeo)
-USE thermo_mod, ONLY : ngeo, fact_ngeo, ngeo_ph, reduced_grid
+SUBROUTINE initialize_no_ph(no_ph, tot_ngeo, ibrav)
+USE thermo_mod, ONLY : ngeo, fact_ngeo, ngeo_ph, reduced_grid, &
+                       red_central_geo, in_degree
+USE lattices, ONLY : compress_int_vect
+
 !
 !   This routine is used to skip phonon calculations in those geometries
 !   that are not on the grid used to compute the vibrational energy.
 !
 IMPLICIT NONE
 
-INTEGER, INTENT(IN)    :: tot_ngeo
+INTEGER, INTENT(IN)    :: tot_ngeo, ibrav
 LOGICAL, INTENT(INOUT) :: no_ph(tot_ngeo)
 
-LOGICAL :: todo(6)
-INTEGER :: igeo1, igeo2, igeo3, igeo4, igeo5, igeo6, start, count_ngeo
+LOGICAL :: todo(6), in_grid
+INTEGER :: igeo1, igeo2, igeo3, igeo4, igeo5, igeo6, start, count_ngeo, &
+           aux_deg(tot_ngeo)
 
 IF (reduced_grid) THEN
-   no_ph=.FALSE.
+   count_ngeo=0
+   no_ph=.TRUE.
+   aux_deg=0
+   DO igeo6 = -ngeo(6)/2, (ngeo(6)-1)/2
+      DO igeo5 = -ngeo(5)/2, (ngeo(5)-1)/2
+         DO igeo4 = -ngeo(4)/2, (ngeo(4)-1)/2
+            DO igeo3 = -ngeo(3)/2, (ngeo(3)-1)/2
+               DO igeo2 = -ngeo(2)/2, (ngeo(2)-1)/2
+                  DO igeo1 = -ngeo(1)/2, (ngeo(1)-1)/2
+                     count_ngeo=count_ngeo+1
+                     IF (in_grid(igeo1,igeo2,igeo3,igeo4,igeo5,igeo6)) THEN
+                        no_ph(count_ngeo)=.FALSE. 
+                        IF (igeo1/=0) aux_deg(count_ngeo)=1
+                        IF (igeo2/=0) aux_deg(count_ngeo)=2
+                        IF (igeo3/=0) aux_deg(count_ngeo)=3
+                        IF (igeo4/=0) aux_deg(count_ngeo)=4
+                        IF (igeo5/=0) aux_deg(count_ngeo)=5
+                        IF (igeo6/=0) aux_deg(count_ngeo)=6
+                     ELSEIF ((ABS(igeo1)+ABS(igeo2)+ABS(igeo3)+ABS(igeo4)+ &
+                                     ABS(igeo5)+ABS(igeo6))==0) THEN
+                        no_ph(count_ngeo)=.FALSE. 
+                        red_central_geo=count_ngeo
+                     ENDIF 
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDDO
+   CALL compress_int_vect(aux_deg,in_degree,tot_ngeo,ibrav)
    RETURN
 ENDIF
 !
@@ -978,14 +977,20 @@ RETURN
 END FUNCTION count_energies
 
 SUBROUTINE find_central_geo(ngeo, no_ph, central_geo)
-
-USE thermo_mod, ONLY : reduced_grid
+!
+USE thermo_mod, ONLY : reduced_grid, red_central_geo
+!
 IMPLICIT NONE
 INTEGER :: ngeo
 LOGICAL :: no_ph(ngeo)
 INTEGER :: central_geo
 
 INTEGER :: igeo
+
+IF (reduced_grid) THEN
+   central_geo=red_central_geo
+   RETURN
+ENDIF
 
 central_geo=ngeo/2
 IF (MOD(ngeo,2)==1) central_geo=central_geo+1
@@ -998,7 +1003,29 @@ IF (no_ph(central_geo)) THEN
       central_geo=central_geo-igeo
    ENDDO
 ENDIF
-IF (reduced_grid) central_geo=1
 
 RETURN
 END SUBROUTINE find_central_geo
+
+FUNCTION in_grid(igeo1, igeo2, igeo3, igeo4, igeo5, igeo6)
+!
+!  This logical function returns .TRUE. if only one of the six igeo 
+!  is different from zero. These are the geometries at which the phonon
+!  dispersions are calculated when reduced_grid=.TRUE.
+!
+IMPLICIT NONE
+LOGICAL :: in_grid
+INTEGER :: igeo1, igeo2, igeo3, igeo4, igeo5, igeo6, nzero
+
+nzero=0
+IF (igeo1 /= 0) nzero=nzero+1
+IF (igeo2 /= 0) nzero=nzero+1
+IF (igeo3 /= 0) nzero=nzero+1
+IF (igeo4 /= 0) nzero=nzero+1
+IF (igeo5 /= 0) nzero=nzero+1
+IF (igeo6 /= 0) nzero=nzero+1
+
+in_grid=(nzero==1)
+
+RETURN
+END FUNCTION in_grid
