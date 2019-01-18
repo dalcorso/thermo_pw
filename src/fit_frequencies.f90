@@ -202,8 +202,9 @@ END SUBROUTINE fit_frequencies_anis
 SUBROUTINE fit_frequencies_anis_reduced()
 !--------------------------------------------------------------------------
   !
-  ! Computes the coefficients of a second order polynomial of the crystal 
-  ! parameters and fits the phonon frequencies calculated for nwork geometries. 
+  ! Computes the coefficients of a polynomial of the crystal parameters 
+  ! (one at a time) and fits the phonon frequencies calculated for 
+  ! nwork geometries. 
   ! 
   USE kinds,                  ONLY : DP
   USE thermo_mod,             ONLY : celldm_geo, no_ph, in_degree, &
@@ -212,7 +213,6 @@ SUBROUTINE fit_frequencies_anis_reduced()
   USE cell_base,              ONLY : ibrav
   USE ph_freq_thermodynamics, ONLY : ph_freq_save
   USE grun_anharmonic,        ONLY : poly_grun_red, poly_order
-  USE quadratic_surfaces,     ONLY : quadratic_var
   USE control_thermo,         ONLY : with_eigen
   USE freq_interpolate,       ONLY : interp_freq, interp_freq_eigen
   USE lattices,               ONLY : compress_celldm, crystal_parameters
@@ -221,7 +221,7 @@ SUBROUTINE fit_frequencies_anis_reduced()
 
   REAL(DP),    ALLOCATABLE :: freq_geo(:,:), x(:,:), xd(:)
   COMPLEX(DP), ALLOCATABLE :: displa_geo(:,:,:)
-  INTEGER :: n, igeo, degree, nvar, nwork, startq, lastq, iq_eff, ndata, &
+  INTEGER :: n, igeo, degree, nwork, startq, lastq, iq_eff, ndata, &
              cgeo_eff, i
   INTEGER :: compute_nwork
 !
@@ -229,13 +229,11 @@ SUBROUTINE fit_frequencies_anis_reduced()
 !
   nwork=compute_nwork()
   degree=crystal_parameters(ibrav)
-  nvar=quadratic_var(degree)
   ndata=0
   DO igeo=1,nwork
      IF (.NOT.no_ph(igeo)) ndata=ndata+1
   ENDDO
   ALLOCATE(x(degree,nwork))
-  ALLOCATE(xd(ndata))
 !
 !  finds the central geometry among those calculated and extracts 
 !  from celldm_geo the relevant crystal parameters
@@ -257,6 +255,7 @@ SUBROUTINE fit_frequencies_anis_reduced()
 !  is the output of this routine, used in the following ones.
 !
   ALLOCATE(poly_grun_red(poly_order,3*nat,degree,startq:lastq))
+  ALLOCATE(xd(ndata))
   ALLOCATE(freq_geo(3*nat,ndata))
   IF (with_eigen) ALLOCATE(displa_geo(3*nat,3*nat,ndata))
 !

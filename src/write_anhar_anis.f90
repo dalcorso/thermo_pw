@@ -340,7 +340,7 @@ USE ph_freq_thermodynamics, ONLY : ph_freq_save
 USE anharmonic,     ONLY : celldm_t, vmin_t, b0_t, cv_t, lelastic, el_comp_t, &
                            el_cons_t
 USE ph_freq_anharmonic, ONLY : celldmf_t, vminf_t, b0f_t, cvf_t, lelasticf, &
-                           el_consf_t
+                           el_consf_t, el_compf_t
 USE grun_anharmonic, ONLY : alpha_an_g, grun_gamma_t, poly_grun, done_grun, &
                             cp_grun_t, b0_grun_s, betab, grun_cpmce_anis,   &
                             cv_grun_t, ce_grun_t
@@ -483,7 +483,13 @@ DO itemp = 1, ntemp
 !  To get the thermal expansion we need to multiply by the elastic compliances
 !
    aux=0.0_DP
-   IF (el_cons_t_available.AND.lb0_t) THEN
+   IF (lelasticf.AND.lb0_t) THEN
+      DO itens=1,6
+         DO jtens=1,6
+            aux(itens)=aux(itens) + el_compf_t(itens,jtens,itemp)*alpha(jtens)
+         END DO
+      END DO
+   ELSEIF (lelastic.AND.lb0_t) THEN
       DO itens=1,6
          DO jtens=1,6
             aux(itens)=aux(itens) + el_comp_t(itens,jtens,itemp)*alpha(jtens)
@@ -724,13 +730,7 @@ DO itemp = 1, ntemp
 !  To get the thermal expansion we need to multiply by the elastic compliances
 !
    aux=0.0_DP
-   IF (el_cons_t_available.AND.lb0_t) THEN
-      DO itens=1,6
-         DO jtens=1,6
-            aux(itens)=aux(itens) + el_comp_t(itens,jtens,itemp)*alpha(jtens)
-         END DO
-      END DO
-   ELSEIF (el_cons_available) THEN
+   IF (el_cons_available) THEN
       DO itens=1,6
          DO jtens=1,6
             aux(itens)=aux(itens) + el_compliances(itens,jtens)*alpha(jtens)
