@@ -101,7 +101,7 @@ DO imode=1, 3*nat
    DO igeo=1, ngeo
       IF (igeo /= central_geo) THEN
 !
-!   It can be shown that the frequency function defined below has the same 
+!   The frequency function defined below has the same 
 !   derivatives of the real frequency at the central geometry.
 !   For other geometries these frequencies often differ from the real 
 !   frequencies for a term quadratic in the difference between the 
@@ -110,7 +110,8 @@ DO imode=1, 3*nat
 !   geometry. In some particular points the difference can be large.
 !   Gruneisen parameters calculated using this formula should be the
 !   same as those calculated as the expectation value of the derivative 
-!   of the dynamical matrix on the central geometry eigenvectors.
+!   of the square root of the dynamical matrix on the central geometry 
+!   eigenvectors.
 !
          DO jmode=1,3*nat
             overlap=ABS(ZDOTC(3*nat,displa(1,jmode,igeo),1,&

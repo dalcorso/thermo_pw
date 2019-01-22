@@ -56,7 +56,8 @@ SUBROUTINE allocate_anharmonic()
                                   macro_elf_t, bthsf_t, ggammaf_t, bfactf_t
   USE grun_anharmonic,     ONLY : betab, alpha_an_g, cp_grun_t, cv_grun_t,   &
                                   ce_grun_t, b0_grun_s, grun_gamma_t,        &
-                                  grun_cpmce_anis
+                                  grun_cpmce_anis, el_cons_grun_t,           &
+                                  el_comp_grun_t
   USE control_grun,        ONLY : vgrun_t, celldm_grun_t, b0_grun_t
   USE control_quadratic_energy, ONLY : nvar
 
@@ -111,6 +112,8 @@ SUBROUTINE allocate_anharmonic()
   IF (.NOT. ALLOCATED (vgrun_t) )       ALLOCATE(vgrun_t(ntemp)) 
   IF (.NOT. ALLOCATED (b0_grun_t) )     ALLOCATE(b0_grun_t(ntemp)) 
   IF (.NOT. ALLOCATED (celldm_grun_t) ) ALLOCATE(celldm_grun_t(6,ntemp)) 
+  IF (.NOT. ALLOCATED (el_cons_grun_t) )ALLOCATE(el_cons_grun_t(6,6,ntemp))
+  IF (.NOT. ALLOCATED (el_comp_grun_t) )ALLOCATE(el_comp_grun_t(6,6,ntemp))
   IF (.NOT. ALLOCATED (b0_grun_s) )     ALLOCATE(b0_grun_s(ntemp)) 
   IF (.NOT. ALLOCATED (cp_grun_t) )     ALLOCATE(cp_grun_t(ntemp)) 
   IF (.NOT. ALLOCATED (ce_grun_t) )     ALLOCATE(ce_grun_t(ntemp)) 

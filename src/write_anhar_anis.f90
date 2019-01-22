@@ -19,7 +19,6 @@ USE anharmonic,     ONLY : alpha_anis_t, vmin_t, b0_t, celldm_t, beta_t, &
                            el_cons_t, free_e_min_t, bths_t, ggamma_t,    &
                            bfact_t, lelastic, el_cons_s, el_comp_s
 USE initial_conf,   ONLY : ibrav_save
-USE control_elastic_constants, ONLY : el_cons_available, el_cons_t_available
 USE control_thermo, ONLY : with_eigen
 USE elastic_constants, ONLY : compute_elastic_compliances
 USE isoentropic,    ONLY : isostress_heat_capacity, thermal_stress,      &
@@ -181,7 +180,6 @@ USE ph_freq_anharmonic, ONLY : alphaf_anis_t, vminf_t, b0f_t, celldmf_t, &
 USE elastic_constants, ONLY : compute_elastic_compliances
 USE initial_conf,   ONLY : ibrav_save
 USE control_thermo, ONLY : with_eigen
-USE control_elastic_constants, ONLY : el_cons_available
 USE isoentropic,    ONLY : isostress_heat_capacity, thermal_stress,      &
                            gen_average_gruneisen, isoentropic_elastic_constants
 USE data_files,     ONLY : flanhar
@@ -332,24 +330,19 @@ USE kinds,          ONLY : DP
 USE constants,      ONLY : ry_kbar
 USE ions_base,      ONLY : nat
 USE cell_base,      ONLY : ibrav
-USE thermo_mod,     ONLY : ngeo, central_geo
+USE thermo_mod,     ONLY : ngeo, no_ph, reduced_grid
 USE temperature,    ONLY : ntemp, temp
 USE control_grun,   ONLY : vgrun_t, celldm_grun_t, b0_grun_t, lb0_t
-USE control_mur,    ONLY : vmin
 USE ph_freq_thermodynamics, ONLY : ph_freq_save
-USE anharmonic,     ONLY : celldm_t, vmin_t, b0_t, cv_t, lelastic, el_comp_t, &
-                           el_cons_t
-USE ph_freq_anharmonic, ONLY : celldmf_t, vminf_t, b0f_t, cvf_t, lelasticf, &
-                           el_consf_t, el_compf_t
 USE grun_anharmonic, ONLY : alpha_an_g, grun_gamma_t, poly_grun, done_grun, &
-                            cp_grun_t, b0_grun_s, betab, grun_cpmce_anis,   &
-                            cv_grun_t, ce_grun_t
+                           cp_grun_t, b0_grun_s, betab, grun_cpmce_anis,   &
+                           cv_grun_t, ce_grun_t, lelastic_grun, &
+                           el_cons_grun_t, el_comp_grun_t, lelastic_grun, &
+                           poly_order, poly_grun_red
+USE freq_interpolate, ONLY : compute_polynomial, compute_polynomial_der
 USE ph_freq_module, ONLY : thermal_expansion_ph, ph_freq_type,  &
                            destroy_ph_freq, init_ph_freq
 USE lattices,       ONLY : compress_celldm, crystal_parameters
-USE control_thermo, ONLY : ltherm_dos, ltherm_freq
-USE elastic_constants, ONLY :  el_compliances
-USE control_elastic_constants, ONLY : el_cons_available, el_cons_t_available
 USE quadratic_surfaces, ONLY : evaluate_fit_quadratic,      &
                                evaluate_fit_grad_quadratic, quadratic_var
 USE isoentropic,    ONLY : isostress_heat_capacity
@@ -369,9 +362,9 @@ TYPE(ph_freq_type) :: ph_freq    ! the frequencies at the volumes at
 TYPE(ph_freq_type), ALLOCATABLE :: ph_grun(:)  ! the gruneisen parameters 
                                  ! recomputed at each temperature at the 
                                  ! geometry corresponding to that temperature
-REAL(DP) :: cm(6), aux(6), alpha_aux(6), alpha(6), f, vm
+REAL(DP) :: cm(6), aux(6), alpha_aux(6), alpha(6), f, g, vm
 REAL(DP), ALLOCATABLE :: grad(:), x(:)
-INTEGER :: compute_nwork, find_free_unit
+INTEGER :: compute_nwork, central_geo, find_free_unit
 
 done_grun=.FALSE.
 !
@@ -385,7 +378,7 @@ END IF
 !
 !  If the elastic constants are not available, this calculation cannot be done
 !
-IF ( .NOT.(lelastic.OR.lelasticf) ) THEN
+IF (.NOT.lelastic_grun ) THEN
    WRITE(stdout,'(5x,"The elastic constants are needed to compute ")')
    WRITE(stdout,'(5x,"thermal expansions from Gruneisen parameters")')
    RETURN
@@ -402,6 +395,7 @@ WRITE(stdout,'(2x,76("+"),/)')
 ! of the q points and computes the contribution of these points to the
 ! anharmonic properties
 !
+CALL find_central_geo(ngeo, no_ph, central_geo)
 nq=ph_freq_save(central_geo)%nq
 startq=ph_freq_save(central_geo)%startq
 lastq=ph_freq_save(central_geo)%lastq
@@ -449,21 +443,42 @@ DO itemp = 1, ntemp
    iq_eff=0
    DO iq=startq, lastq
       iq_eff=iq_eff+1
-      DO imode=1,3*nat
-         CALL evaluate_fit_quadratic(degree,nvar,x,f,poly_grun(1,imode,iq))
-         CALL evaluate_fit_grad_quadratic(degree,nvar,x,grad,&
+      IF (reduced_grid) THEN
+         DO i=1,degree
+            DO imode=1,3*nat
+               CALL compute_polynomial(x(i), poly_order, &
+                                            poly_grun_red(1,imode,i,iq),f)
+!
+!  this function gives the derivative with respect to x(i) multiplied by x(i)
+!
+               CALL compute_polynomial_der(x(i), poly_order, &
+                                             poly_grun_red(1,imode,i,iq),g)
+
+               ph_freq%nu(imode,iq_eff) = f
+               IF (f > 0.0_DP ) THEN
+                  ph_grun(i)%nu(imode,iq_eff)= - g / f / x(i)
+               ELSE
+                  ph_grun(i)%nu(imode,iq_eff)=0.0_DP
+               END IF
+            ENDDO
+         ENDDO
+      ELSE
+         DO imode=1,3*nat
+            CALL evaluate_fit_quadratic(degree,nvar,x,f,poly_grun(1,imode,iq))
+            CALL evaluate_fit_grad_quadratic(degree,nvar,x,grad,&
                                                      poly_grun(1,imode,iq))
-         ph_freq%nu(imode,iq_eff) = f 
-         IF (f > 0.0_DP ) THEN
-            DO i=1,degree
-               ph_grun(i)%nu(imode,iq_eff)=-grad(i) / f
-            END DO
-         ELSE
-            DO i=1,degree
-               ph_grun(i)%nu(imode,iq_eff)=0.0_DP
-            END DO
-         END IF
-      END DO
+            ph_freq%nu(imode,iq_eff) = f 
+            IF (f > 0.0_DP ) THEN
+               DO i=1,degree
+                  ph_grun(i)%nu(imode,iq_eff)=-grad(i) / f
+               END DO
+            ELSE
+               DO i=1,degree
+                  ph_grun(i)%nu(imode,iq_eff)=0.0_DP
+               END DO
+            END IF
+         END DO
+      ENDIF
    END DO
 !
 !  Compute thermal expansion from Gruneisen parameters. Loop over the number 
@@ -472,40 +487,27 @@ DO itemp = 1, ntemp
 !  compliances
 !
    DO i=1,degree
-      CALL thermal_expansion_ph(ph_freq, ph_grun(i), temp(itemp), alpha_aux(i))
+      CALL thermal_expansion_ph(ph_freq, ph_grun(i), temp(itemp), &
+                                alpha_aux(i), ce_grun_t(itemp))
    END DO
 !
 !  Here convert from derivatives with respect to crystal parameters to
-!  derivative with respect to strain. 
+!  derivatives with respect to strain. 
 !
    CALL convert_ac_alpha(alpha_aux, alpha, cm, ibrav)
 !
 !  To get the thermal expansion we need to multiply by the elastic compliances
 !
    aux=0.0_DP
-   IF (lelasticf.AND.lb0_t) THEN
-      DO itens=1,6
-         DO jtens=1,6
-            aux(itens)=aux(itens) + el_compf_t(itens,jtens,itemp)*alpha(jtens)
-         END DO
+   DO itens=1,6
+      DO jtens=1,6
+         aux(itens)=aux(itens) + el_comp_grun_t(itens,jtens,itemp)*alpha(jtens)
       END DO
-   ELSEIF (lelastic.AND.lb0_t) THEN
-      DO itens=1,6
-         DO jtens=1,6
-            aux(itens)=aux(itens) + el_comp_t(itens,jtens,itemp)*alpha(jtens)
-         END DO
-      END DO
-   ELSEIF (el_cons_available) THEN
-      DO itens=1,6
-         DO jtens=1,6
-            aux(itens)=aux(itens) + el_compliances(itens,jtens)*alpha(jtens)
-         END DO
-      END DO
-   END IF
+   END DO
    alpha_an_g(:,itemp) = aux(:) * ry_kbar / vm
 END DO
-
 CALL mp_sum(alpha_an_g, world_comm)
+CALL mp_sum(ce_grun_t, world_comm)
 !
 !  compute the volume thermal expansion as the trace of the thermal expansion 
 !  tensor
@@ -514,19 +516,11 @@ betab(:)=alpha_an_g(1,:)+alpha_an_g(2,:)+alpha_an_g(3,:)
 !
 !  computes the other anharmonic quantities
 
-IF (ltherm_freq) THEN
-   CALL isostress_heat_capacity(vgrun_t,el_consf_t,alpha_an_g,temp,&
+CALL isostress_heat_capacity(vgrun_t,el_cons_grun_t,alpha_an_g,temp,&
                                                     grun_cpmce_anis,ntemp)
-ELSEIF(ltherm_dos) THEN
-   CALL isostress_heat_capacity(vgrun_t,el_cons_t,alpha_an_g,temp,&
-                                                    grun_cpmce_anis,ntemp)
-ELSE
-   CALL isostress_heat_capacity(vgrun_t,el_consf_t,alpha_an_g,temp,&
-                                                    grun_cpmce_anis,ntemp)
-ENDIF
 cp_grun_t = ce_grun_t + grun_cpmce_anis
 CALL compute_cv_bs_g(betab, vgrun_t, b0_grun_t, cv_grun_t, &
-                                      cp_grun_t, b0_grun_s, grun_gamma_t)
+                                     cp_grun_t, b0_grun_s, grun_gamma_t)
 
 IF (meta_ionode) THEN
 !
@@ -576,233 +570,6 @@ DEALLOCATE(x)
 
 RETURN
 END SUBROUTINE write_grun_anhar_anis
-
-SUBROUTINE write_grun_anhar_anis_reduced()
-USE kinds,          ONLY : DP
-USE constants,      ONLY : ry_kbar
-USE ions_base,      ONLY : nat
-USE cell_base,      ONLY : ibrav
-USE thermo_mod,     ONLY : ngeo, red_central_geo
-USE temperature,    ONLY : ntemp, temp
-USE control_grun,   ONLY : vgrun_t, celldm_grun_t, b0_grun_t, lb0_t
-USE ph_freq_thermodynamics, ONLY : ph_freq_save
-USE anharmonic,     ONLY : lelastic, el_comp_t
-USE ph_freq_anharmonic, ONLY : el_consf_t, lelasticf
-USE grun_anharmonic, ONLY : alpha_an_g, grun_gamma_t, poly_grun_red, done_grun, &
-                            cp_grun_t, b0_grun_s, betab, grun_cpmce_anis,   &
-                            cv_grun_t, ce_grun_t, poly_order
-USE ph_freq_module, ONLY : thermal_expansion_ph, ph_freq_type,  &
-                           destroy_ph_freq, init_ph_freq
-USE lattices,       ONLY : compress_celldm, crystal_parameters
-USE elastic_constants, ONLY :  el_compliances
-USE control_elastic_constants, ONLY : el_cons_available, el_cons_t_available
-USE freq_interpolate, ONLY : compute_polynomial, compute_polynomial_der
-USE isoentropic,    ONLY : isostress_heat_capacity
-USE control_dosq,   ONLY : nq1_d, nq2_d, nq3_d
-USE data_files,     ONLY : flanhar
-USE io_global,      ONLY : meta_ionode, stdout
-USE mp_world,       ONLY : world_comm
-USE mp,             ONLY : mp_sum
-
-IMPLICIT NONE
-CHARACTER(LEN=256) :: filename
-INTEGER :: itemp, iu_therm, i, nq, imode, iq, degree, nwork
-INTEGER :: itens, jtens, startq, lastq, nq_eff, iq_eff
-TYPE(ph_freq_type) :: ph_freq    ! the frequencies at the volumes at
-                                 ! which the gruneisen parameters are 
-                                 ! calculated
-TYPE(ph_freq_type), ALLOCATABLE :: ph_grun(:)  ! the gruneisen parameters 
-                                 ! recomputed at each temperature at the 
-                                 ! geometry corresponding to that temperature
-REAL(DP) :: cm(6), aux(6), alpha_aux(6), alpha(6), f, g, vm
-REAL(DP), ALLOCATABLE :: grad(:), x(:)
-INTEGER :: compute_nwork, find_free_unit
-
-done_grun=.FALSE.
-!
-!  Not implemented cases
-!
-IF ( ibrav<1 .OR. ibrav>11 ) THEN
-   WRITE(stdout,'(5x,"Thermal expansions from Gruneisen parameters &
-                     & not available")' )
-   RETURN
-END IF
-!
-!  If the elastic constants are not available, this calculation cannot be done
-!
-IF ( .NOT.(lelastic.OR.lelasticf) ) THEN
-   WRITE(stdout,'(5x,"The elastic constants are needed to compute ")')
-   WRITE(stdout,'(5x,"thermal expansions from Gruneisen parameters")')
-   RETURN
-ENDIF
-
-WRITE(stdout,'(/,2x,76("+"))')
-WRITE(stdout,'(5x,"Computing the anharmonic properties from &
-                                                   &Gruneisen parameters")')
-WRITE(stdout,'(5x,"Writing on file anhar_files/",a)') TRIM(flanhar)// &
-                                                                  '.aux_grun'
-WRITE(stdout,'(2x,76("+"),/)')
-!
-! divide the q points among the processors. Each processor has only a part
-! of the q points and computes the contribution of these points to the
-! anharmonic properties
-!
-nq=ph_freq_save(red_central_geo)%nq
-startq=ph_freq_save(red_central_geo)%startq
-lastq=ph_freq_save(red_central_geo)%lastq
-nq_eff=ph_freq_save(red_central_geo)%nq_eff
-CALL init_ph_freq(ph_freq, nat, nq1_d, nq2_d, nq3_d, nq_eff, startq, lastq,  &
-                                                               nq, .FALSE.)
-ph_freq%wg=ph_freq_save(red_central_geo)%wg
-!
-! now allocate space for each set of gruneisen parameters
-!
-degree=crystal_parameters(ibrav)
-nwork=compute_nwork()
-ALLOCATE(ph_grun(degree))
-ALLOCATE(grad(degree))
-ALLOCATE(x(degree))
-DO i=1, degree
-   CALL init_ph_freq(ph_grun(i), nat, nq1_d, nq2_d, nq3_d, nq_eff, startq, &
-                                                    lastq, nq, .FALSE.)
-END DO
-!
-!  computes the anharmonic quantities at each temperature
-!
-alpha_an_g=0.0_DP
-DO itemp = 1, ntemp
-   IF (MOD(itemp,30)==0) &
-             WRITE(6,'(5x,"Computing temperature ", i5 " / ",&
-       & i5, 4x," T=",f12.2," K")') itemp, ntemp, temp(itemp)
-!
-!  Computes the volume at which the Gruneisen parameters and the frequencies
-!  are interpolated
-!
-   cm(:)=celldm_grun_t(:,itemp)
-   vm = vgrun_t(itemp)
-
-   CALL compress_celldm(cm,x,degree,ibrav)
-!
-!  compute the frequencies and the gruneisen parameters from the interpolating 
-!  polynomial
-!
-   ph_freq%nu= 0.0_DP
-   DO i=1,degree
-      ph_grun(i)%nu= 0.0_DP
-   END DO
-   iq_eff=0
-   DO iq=startq, lastq
-      iq_eff=iq_eff+1
-      DO i=1,degree
-         DO imode=1,3*nat
-            CALL compute_polynomial(x(i), poly_order, &
-                                            poly_grun_red(1,imode,i,iq),f)
-!
-!  this function gives the derivative with respect to x(i) multiplied by x(i)
-!
-           CALL compute_polynomial_der(x(i), poly_order, &
-                                             poly_grun_red(1,imode,i,iq),g)
-
-            ph_freq%nu(imode,iq_eff) = f 
-            IF (f > 0.0_DP ) THEN
-               ph_grun(i)%nu(imode,iq_eff)= - g / f / x(i)
-            ELSE
-               ph_grun(i)%nu(imode,iq_eff)=0.0_DP
-            END IF
-         ENDDO
-      ENDDO
-   ENDDO
-!
-!  Compute thermal expansion from Gruneisen parameters. Loop over the number 
-!  of independent crystal parameters for this Bravais lattice
-!  alpha calculated by thermal_expansion_ph is not multiplied by the elastic 
-!  compliances
-!
-   DO i=1,degree
-      CALL thermal_expansion_ph(ph_freq, ph_grun(i), temp(itemp), alpha_aux(i))
-   END DO
-!
-!  Here convert from derivatives with respect to crystal parameters to
-!  derivative with respect to strain. 
-!
-   CALL convert_ac_alpha(alpha_aux, alpha, cm, ibrav)
-!
-!  To get the thermal expansion we need to multiply by the elastic compliances
-!
-   aux=0.0_DP
-   IF (el_cons_available) THEN
-      DO itens=1,6
-         DO jtens=1,6
-            aux(itens)=aux(itens) + el_compliances(itens,jtens)*alpha(jtens)
-         END DO
-      END DO
-   END IF
-   alpha_an_g(:,itemp) = aux(:) * ry_kbar / vm
-END DO
-
-CALL mp_sum(alpha_an_g, world_comm)
-!
-!  compute the volume thermal expansion as the trace of the thermal expansion 
-!  tensor
-!
-betab(:)=alpha_an_g(1,:)+alpha_an_g(2,:)+alpha_an_g(3,:)
-!
-!  computes the other anharmonic quantities
-
-CALL isostress_heat_capacity(vgrun_t,el_consf_t,alpha_an_g,temp,&
-                                                    grun_cpmce_anis,ntemp)
-cp_grun_t = ce_grun_t + grun_cpmce_anis
-CALL compute_cv_bs_g(betab, vgrun_t, b0_grun_t, cv_grun_t, &
-                                      cp_grun_t, b0_grun_s, grun_gamma_t)
-
-IF (meta_ionode) THEN
-!
-!   here quantities calculated from the gruneisen parameters
-!
-   filename='anhar_files/'//TRIM(flanhar)//'.celldm_grun'
-   CALL add_pressure(filename)
-
-   CALL write_alpha_anis(ibrav, celldm_grun_t, alpha_an_g, temp, ntemp, &
-                                                                filename )
-!
-!  Here the average Gruneisen parameter and the quantities that form it
-!
-   filename="anhar_files/"//TRIM(flanhar)//'.aux_grun'
-   CALL add_pressure(filename)
-   CALL write_aux_grun(temp, betab, cp_grun_t, cv_grun_t, b0_grun_s, &
-                                               b0_grun_t, ntemp, filename)
-!
-!  Here the average Gruneisen paramater and the quantities that contribute
-!  to it
-!
-   filename='anhar_files/'//TRIM(flanhar)//'.gamma_grun'
-   CALL add_pressure(filename)
-   CALL write_gamma_anharm(temp, grun_gamma_t, cv_grun_t, betab, &
-                                               b0_grun_t, ntemp, filename)
-!
-!  Here we write on output the anharmonic properties computed for
-!  anisotropic solids, using the thermal expansion tensor, as opposed
-!  to the volume thermal expansion used in the file aux
-!
-   filename='anhar_files/'//TRIM(flanhar)//'.heat_anis_grun'
-   CALL add_pressure(filename)
-   CALL write_heat_anharm_anis(temp, ce_grun_t, cv_grun_t, cp_grun_t, &
-                                                           ntemp, filename)
-ENDIF
-
-done_grun=.TRUE.
-
-CALL destroy_ph_freq(ph_freq)
-DO i=1,degree
-   CALL destroy_ph_freq(ph_grun(i))
-END DO
-
-DEALLOCATE(ph_grun)
-DEALLOCATE(grad)
-DEALLOCATE(x)
-
-RETURN
-END SUBROUTINE write_grun_anhar_anis_reduced
 
 SUBROUTINE write_alpha_anis(ibrav, celldmf_t, alpha_t, temp, ntemp, filename)
 USE kinds, ONLY : DP

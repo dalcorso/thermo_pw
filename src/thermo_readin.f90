@@ -79,7 +79,7 @@ SUBROUTINE thermo_readin()
                                    lxrdp, lambda_elem
   USE control_energy_plot,  ONLY : ncontours, color_levels, ene_levels 
   USE control_quadratic_energy, ONLY : show_fit
-  USE control_quartic_energy, ONLY : lquartic, lquartic_ph, lsolve
+  USE control_quartic_energy, ONLY : lquartic, lquartic_ph, lquartic_elc, lsolve
   USE piezoelectric_tensor, ONLY : nppl
   USE grun_anharmonic,      ONLY : poly_order
   USE images_omega, ONLY : omega_group
@@ -249,6 +249,7 @@ SUBROUTINE thermo_readin()
                             volume_ph, celldm_ph, temp_ph,  &
                             with_eigen,                     &
                             lquartic_ph,                    &
+                            lquartic_elc,                   &
                             lv0_t, lb0_t,                   &
                             poly_order,                     &
                             flpgrun, flgrun, flpsgrun,      &
@@ -455,7 +456,8 @@ SUBROUTINE thermo_readin()
   celldm_ph=0.0_DP
   temp_ph=0.0_DP
   with_eigen=.FALSE.
-  lquartic_ph=.TRUE.
+  lquartic_ph=.FALSE.
+  lquartic_elc=.TRUE.
   lv0_t=.TRUE.
   lb0_t=.TRUE.
   flpgrun='output_pgrun.dat'

@@ -41,7 +41,7 @@ SUBROUTINE check_el_cons()
   ALLOCATE( el_con_geo(6,6,tot_ngeo) )
 
   el_con_geo=0.0_DP
-  found(igeo)=.FALSE.
+  found=.FALSE.
   el_cons_available=.FALSE.
   el_cons_t_available=.FALSE.
   DO igeo = 1, tot_ngeo

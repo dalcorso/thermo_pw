@@ -14,7 +14,7 @@ SUBROUTINE write_elastic_t( )
 USE kinds,      ONLY : DP
 USE io_global,  ONLY : stdout
 USE thermo_mod, ONLY : ngeo, ibrav_geo, celldm_geo
-USE control_quartic_energy, ONLY : lquartic_ph, lsolve
+USE control_quartic_energy, ONLY : lquartic_elc, lsolve
 USE quadratic_surfaces, ONLY : print_chisq_quadratic, fit_multi_quadratic,    &
                              introduce_quadratic_fit, summarize_fitting_data, &
                              print_quadratic_polynomial, quadratic_var
@@ -25,13 +25,14 @@ USE control_elastic_constants, ONLY : el_con_geo,  el_cons_available, &
                                       el_cons_t_available
 USE control_grun,   ONLY : lb0_t
 USE control_mur,    ONLY : b0
-USE elastic_constants, ONLY : el_con
+USE elastic_constants, ONLY : el_con, el_compliances
 USE lattices,       ONLY : crystal_parameters
 USE control_thermo, ONLY : ltherm_dos, ltherm_freq
 USE control_macro_elasticity, ONLY: macro_el
 USE anharmonic,     ONLY : celldm_t, el_cons_t, el_comp_t, b0_t, lelastic
 USE ph_freq_anharmonic, ONLY : celldmf_t, el_consf_t, el_compf_t, b0f_t, &
                            lelasticf
+USE grun_anharmonic, ONLY : el_cons_grun_t, el_comp_grun_t, lelastic_grun
 USE data_files, ONLY : flanhar
 USE temperature, ONLY : ntemp, temp
 IMPLICIT NONE
@@ -48,9 +49,12 @@ IF (.NOT.lb0_t.AND.el_cons_available) THEN
    DO itemp=1,ntemp
       el_cons_t(:,:,itemp)=el_con(:,:)
       el_consf_t(:,:,itemp)=el_con(:,:)
+      el_cons_grun_t(:,:,itemp)=el_con(:,:)
+      el_comp_grun_t(:,:,itemp)=el_compliances(:,:)
    END DO
    lelastic=.TRUE.
    lelasticf=.TRUE.
+   lelastic_grun=.TRUE.
    RETURN
 END IF
 
@@ -63,7 +67,7 @@ ndata=compute_nwork()
 ALLOCATE(x(degree,ndata))
 ALLOCATE(f(ndata))
 
-IF (lquartic_ph) THEN
+IF (lquartic_elc) THEN
    nvar=quartic_var(degree)
 ELSE
    nvar=quadratic_var(degree)
@@ -83,7 +87,7 @@ DO i=1,6
             f(idata)=el_con_geo(i,j,idata)
          END DO
 
-         IF (lquartic_ph) THEN
+         IF (lquartic_elc) THEN
 !            CALL introduce_quartic_fit(degree, nvar, ndata)
             CALL fit_multi_quartic(ndata,degree,nvar,lsolve,x,f,&
                                                    el_cons_coeff(:,i,j))
@@ -110,20 +114,27 @@ ENDDO
 !
 IF (ltherm_dos) THEN
    CALL interpolate_el_cons(celldm_t, nvar, degree, ibrav, el_cons_coeff,&
-                            lquartic_ph, el_cons_t, el_comp_t, b0_t)
+                            lquartic_elc, el_cons_t, el_comp_t, b0_t)
+   el_cons_grun_t=el_cons_t
+   el_comp_grun_t=el_comp_t
    lelastic=.TRUE.
+   lelastic_grun=.TRUE.
    filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons'
    CALL write_el_cons_on_file(temp, ntemp, ibrav, el_cons_t, b0_t, &
                                                        filelastic, 0)
    filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp'
    CALL write_el_cons_on_file(temp, ntemp, ibrav, el_comp_t, b0_t, & 
                                                        filelastic, 1)
+   
 ENDIF
 
 IF (ltherm_freq) THEN
    CALL interpolate_el_cons(celldmf_t, nvar, degree, ibrav, el_cons_coeff,&
-                                  lquartic_ph, el_consf_t, el_compf_t, b0f_t)
+                                  lquartic_elc, el_consf_t, el_compf_t, b0f_t)
+   el_cons_grun_t=el_consf_t
+   el_comp_grun_t=el_compf_t
    lelasticf=.TRUE.
+   lelastic_grun=.TRUE.
    filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_ph'
    CALL write_el_cons_on_file(temp, ntemp, ibrav, el_consf_t, b0f_t, &
                                                           filelastic, 0)

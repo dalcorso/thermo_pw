@@ -1398,13 +1398,12 @@ flpsenergy : file with the contour plots of the energy as a function of the
 \end{verbatim}
 An example of the use of this option can be found in \texttt{example05}.\\
 Number of tasks for this option: \\
-\texttt{ngeo(1)} when \texttt{lmurn=.TRUE.}, \\
-\texttt{ngeo(1)}$\times$\texttt{ngeo(2)}$\times$\texttt{ngeo(3)}$\times$\texttt{ngeo(4)}$\times$\texttt{ngeo(5)}$\times$\texttt{ngeo(6)} when 
-\texttt{lmurn=.FALSE.} and \\
-\texttt{reduced\_grid=.FALSE.}
-\texttt{ngeo(1)}$+$\texttt{ngeo(2)}$+$\texttt{ngeo(3)}$+$\texttt{ngeo(4)}$+$\texttt{ngeo(5)}$+$\texttt{ngeo(6)}-5$ when 
-\texttt{lmurn=.FALSE.} and \texttt{reduced\_grid=.TRUE.}.
-
+\texttt{ngeo(1)} when \texttt{lmurn=.TRUE.}, 
+\texttt{ngeo(1)}$\times$\texttt{ngeo(2)}$\times$\texttt{ngeo(3)}$\times$\texttt{ngeo(4)}$\times$\texttt{ngeo(5)}$\times$\texttt{ngeo(6)} \\ when 
+\texttt{lmurn=.FALSE.} and 
+\texttt{reduced\_grid=.FALSE.}, \\
+\texttt{ngeo(1)}$+$\texttt{ngeo(2)}$+$\texttt{ngeo(3)}$+$\texttt{ngeo(4)}$+$\texttt{ngeo(5)}$+$\texttt{ngeo(6)}$-5$ \\
+when \texttt{lmurn=.FALSE.} and \texttt{reduced\_grid=.TRUE.}.
 
 \subsection{\color{web-blue}\texttt{what='mur\_lc\_bands'}}
 With this option the code computes the band structure at the geometry 
@@ -1592,13 +1591,19 @@ with_eigen    : if .TRUE. use the eigenvectors of the dynamical matrix to
                 Default: logical .FALSE. 
 lquartic_ph   : if .TRUE. fit the vibrational free energy with a fourth
                 order polynomial, otherwise with a second order polynomial
+                Active only if lquartic=.TRUE.. Used also for the interpolation
+                of the heat capacity and of the B factor.
+                Default: logical .TRUE.
+lquartic_elc  : if .TRUE. fit the elastic constants with a fourth
+                order polynomial, otherwise with a second order polynomial
                 Default: logical .TRUE.
 lv0_t         : if .TRUE.  the calculation of the thermal expansion with 
                 Gruneisen parameters uses the equilibrium geometry as a 
                 function of temperature computed from the free energy 
                 minimization, otherwise the equilibrium geometry at T=0 K. 
-                If reduced_grid=.TRUE. we must have  lv0_t=.FALSE. and
-                the input geometry is used. 
+                If reduced_grid=.TRUE. or both ltherm_freq=.FALSE. and 
+                ltherm_dos=.FALSE. the input geometry is used when 
+                lv0_t=.FALSE.
                 Default: logical .TRUE.
 lb0_t         : if .TRUE. the calculation of the thermal expansion with 
                 Gruneisen parameters uses the bulk modulus as a function of 
@@ -1716,7 +1721,10 @@ The parameters that control this option are the same as those used with
 \texttt{what='mur\_lc'} for the choice of the geometries and with
 \texttt{what='scf\_elastic\_constants'} for the control of the elastic
 constants. Note however that only \texttt{elastic\_algoritm='standard'}
-is presently working with this option.
+is presently working with this option. \\
+Number of tasks for this option: \texttt{ngeo\_strain} times the number of
+independent strains. The different geometries are computed in sequence one
+after the other.
 
 %\subsection{\color{web-blue}\texttt{what='scf\_polarization'}}
 %With this option the code calculates the spontaneous polarization.

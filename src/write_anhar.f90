@@ -13,7 +13,7 @@ SUBROUTINE write_anharmonic()
 USE kinds,          ONLY : DP
 USE temperature,    ONLY : ntemp, temp
 USE thermodynamics, ONLY : ph_ce, ph_b_fact
-USE anharmonic,     ONLY : alpha_t, beta_t, gamma_t, cp_t, cv_t, b0_s, &
+USE anharmonic,     ONLY : alpha_t, beta_t, gamma_t, cp_t, cv_t, ce_t, b0_s, &
                            vmin_t, free_e_min_t, b0_t, b01_t, bfact_t, &
                            celldm_t
 USE data_files,     ONLY : flanhar
@@ -26,7 +26,8 @@ CALL compute_beta(vmin_t, beta_t, temp, ntemp)
 
 alpha_t = beta_t / 3.0_DP
 
-CALL interpolate_cv(vmin_t, celldm_t, ph_ce, cv_t) 
+CALL interpolate_cv(vmin_t, celldm_t, ph_ce, ce_t) 
+cv_t=ce_t
 CALL compute_cp_bs_g(beta_t, vmin_t, b0_t, cv_t, cp_t, b0_s, gamma_t)
 !
 !   here we plot the quantities calculated from the phonon dos
@@ -82,8 +83,8 @@ USE kinds,          ONLY : DP
 USE temperature,    ONLY : ntemp, temp
 USE control_thermo, ONLY : with_eigen
 USE ph_freq_thermodynamics, ONLY : phf_ce, phf_b_fact
-USE ph_freq_anharmonic, ONLY : alphaf_t, betaf_t, gammaf_t, cpf_t, cvf_t, &
-                        b0f_s, free_e_minf_t, vminf_t, b0f_t, b01f_t, &
+USE ph_freq_anharmonic, ONLY : alphaf_t, betaf_t, gammaf_t, cpf_t, cvf_t,    &
+                        cef_t, b0f_s, free_e_minf_t, vminf_t, b0f_t, b01f_t, &
                         bfactf_t, celldmf_t
 USE data_files,     ONLY : flanhar
 
@@ -94,9 +95,9 @@ CALL compute_beta(vminf_t, betaf_t, temp, ntemp)
 
 alphaf_t = betaf_t / 3.0_DP
 
-CALL interpolate_cv(vminf_t, celldmf_t, phf_ce, cvf_t) 
+CALL interpolate_cv(vminf_t, celldmf_t, phf_ce, cef_t) 
+cvf_t=cef_t
 CALL compute_cp_bs_g(betaf_t, vminf_t, b0f_t, cvf_t, cpf_t, b0f_s, gammaf_t)
-
 !
 !   here we plot the quantities calculated from the phonon dos
 !
@@ -158,18 +159,15 @@ USE constants,      ONLY : ry_kbar
 USE ions_base,      ONLY : nat
 USE temperature,    ONLY : ntemp, temp
 USE thermo_mod,     ONLY : ngeo, no_ph
-USE ph_freq_thermodynamics, ONLY : ph_freq_save, phf_ce
-USE anharmonic,     ONLY :  vmin_t, b0_t, cv_t, celldm_t
-USE ph_freq_anharmonic, ONLY :  vminf_t, cvf_t, b0f_t, cpf_t, b0f_s
+USE ph_freq_thermodynamics, ONLY : ph_freq_save
 USE grun_anharmonic, ONLY : betab, cp_grun_t, b0_grun_s, &
-                            grun_gamma_t, poly_grun, poly_order
+                           grun_gamma_t, poly_grun, poly_order, &
+                           ce_grun_t, cv_grun_t
 USE ph_freq_module, ONLY : thermal_expansion_ph, ph_freq_type,  &
                            destroy_ph_freq, init_ph_freq
 USE freq_interpolate, ONLY : compute_polynomial, compute_polynomial_der
 USE isoentropic,    ONLY : isobaric_heat_capacity
 USE control_grun,   ONLY : vgrun_t, b0_grun_t
-USE control_mur,    ONLY : vmin, b0
-USE control_thermo, ONLY : ltherm_dos, ltherm_freq
 USE control_dosq,   ONLY : nq1_d, nq2_d, nq3_d
 USE data_files,     ONLY : flanhar
 USE io_global,      ONLY : meta_ionode
@@ -240,7 +238,8 @@ DO itemp = 1, ntemp
 !  computes thermal expansion from gruneisen parameters. 
 !  this routine gives betab multiplied by the bulk modulus
 !
-   CALL thermal_expansion_ph(ph_freq, ph_grun, temp(itemp), betab(itemp))
+   CALL thermal_expansion_ph(ph_freq, ph_grun, temp(itemp), betab(itemp), &
+                                                            ce_grun_t(itemp))
 !
 !  divide by the bulk modulus
 !
@@ -248,52 +247,28 @@ DO itemp = 1, ntemp
 
 END DO
 CALL mp_sum(betab, world_comm)
+CALL mp_sum(ce_grun_t, world_comm)
+cv_grun_t=ce_grun_t
 !
 !  computes the other anharmonic quantities
 !
-IF (ltherm_freq) THEN
-   CALL compute_cp_bs_g(betab, vminf_t, b0f_t, cvf_t, cp_grun_t, &
-                                                   b0_grun_s, grun_gamma_t)
-ELSEIF (ltherm_dos) THEN
-   CALL compute_cp_bs_g(betab, vmin_t, b0_t, cv_t, cp_grun_t, &
-                                                   b0_grun_s, grun_gamma_t)
-ELSE
-   vmin_t(1:ntemp)=vmin
-   b0_t(1:ntemp)=b0
-   b0_grun_s(1:ntemp)=0.0_DP
-   grun_gamma_t(1:ntemp)=0.0_DP
-!
-!  here cv is not available but we can compute the difference cp-cv
-!
-   CALL compute_cp_bs_g(betab, vmin_t, b0_t, cv_t, cp_grun_t, &
-                                                   b0_grun_s, grun_gamma_t)
-ENDIF
-
+CALL compute_cp_bs_g(betab, vgrun_t, b0_grun_t, cv_grun_t, cp_grun_t, &
+                                                 b0_grun_s, grun_gamma_t)
 IF (meta_ionode) THEN
 !
 !   here quantities calculated from the mode Gruneisen parameters
 !
    filename="anhar_files/"//TRIM(flanhar)//'.aux_grun'
    CALL add_pressure(filename)
-   IF (ltherm_freq) THEN
-      CALL write_aux_grun(temp, betab, cp_grun_t, cvf_t, b0_grun_s, b0f_t, &
-                                                  ntemp, filename) 
-   ELSE
-      CALL write_aux_grun(temp, betab, cp_grun_t, cv_t, b0_grun_s, b0_t, &
-                                                  ntemp, filename) 
-   ENDIF
+   CALL write_aux_grun(temp, betab, cp_grun_t, ce_grun_t, b0_grun_s, &
+                                               b0_grun_t, ntemp, filename) 
 !
 !  Here the average Gruneisen parameter and the quantities that form it
 !
    filename="anhar_files/"//TRIM(flanhar)//'.gamma_grun'
    CALL add_pressure(filename)
-   IF (ltherm_freq) THEN
-      CALL write_gamma_anharm(temp, grun_gamma_t, cvf_t, betab, b0f_t, ntemp, &
-                                                                filename)
-   ELSE
-      CALL write_gamma_anharm(temp, grun_gamma_t, cv_t, betab, b0_t, ntemp, &
-                                                                filename)
-   ENDIF
+   CALL write_gamma_anharm(temp, grun_gamma_t, ce_grun_t, betab, &
+                                               b0_grun_t, ntemp, filename)
 ENDIF
 
 CALL destroy_ph_freq(ph_freq)
@@ -510,17 +485,14 @@ END IF
 RETURN
 END SUBROUTINE write_aux_grun
 
-SUBROUTINE set_volume_b0_cv_grun()
+SUBROUTINE set_volume_b0_grun()
 
-USE thermo_mod,         ONLY : reduced_grid, red_central_geo
 USE control_grun,       ONLY : lv0_t, lb0_t, vgrun_t, celldm_grun_t, &
                                b0_grun_t
 USE control_thermo,     ONLY : ltherm_dos, ltherm_freq
 USE temperature,        ONLY : ntemp
-USE ph_freq_thermodynamics, ONLY : phf_ce
-USE anharmonic,         ONLY : vmin_t, celldm_t, b0_t, ce_t
-USE ph_freq_anharmonic, ONLY : vminf_t, celldmf_t, b0f_t, cef_t
-USE grun_anharmonic,    ONLY : ce_grun_t
+USE anharmonic,         ONLY : vmin_t, celldm_t, b0_t
+USE ph_freq_anharmonic, ONLY : vminf_t, celldmf_t, b0f_t
 USE equilibrium_conf,   ONLY : celldm0, omega0
 USE control_mur,        ONLY : b0
 
@@ -547,22 +519,10 @@ DO itemp=1, ntemp
    ELSE
       b0_grun_t(itemp)=b0
    ENDIF
-
-   IF (ltherm_freq) THEN
-      ce_grun_t(itemp)= cef_t(itemp)
-   ELSEIF(ltherm_dos) THEN
-      ce_grun_t(itemp)= ce_t(itemp)
-   ELSE
-      IF (reduced_grid) THEN
-         ce_grun_t(:)=phf_ce(:,red_central_geo)
-      ELSE
-         CALL interpolate_cv(vgrun_t, celldm_grun_t, phf_ce, ce_grun_t)
-      ENDIF
-   ENDIF
 ENDDO
 
 RETURN
-END SUBROUTINE set_volume_b0_cv_grun
+END SUBROUTINE set_volume_b0_grun
 !
 ! Copyright (C) 2018 Cristiano Malica
 !

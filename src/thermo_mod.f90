@@ -296,6 +296,14 @@ MODULE grun_anharmonic
   LOGICAL :: done_grun=.FALSE.          ! the anharmonic quantities with
                                         ! Gruneisen parameters have been 
                                         ! calculated
+  LOGICAL :: lelastic_grun=.FALSE.      ! elastic constants available in
+                                        ! some approximation
+  REAL(DP), ALLOCATABLE :: el_cons_grun_t(:,:,:) ! temperature dependent
+                                ! elastic constant for thermodynamic quantities
+                                ! with gruneisen parameters
+  REAL(DP), ALLOCATABLE :: el_comp_grun_t(:,:,:) ! temperature dependent
+                                ! elastic compliances for thermodynamic 
+                                ! quantities with gruneisen parameters
 
 END MODULE grun_anharmonic
 
@@ -674,7 +682,7 @@ MODULE control_grun
                            b0_grun_t(:), & ! temperature dependent bulk modulus
                                 ! for thermodynamic quantities with gruneisen
                                 ! parameters
-                           celldm_grun_t(:,:) ! temperature_dependent celldm
+                           celldm_grun_t(:,:)  ! temperature_dependent celldm
                                 ! for thermodynamic quantities with gruneisen
                                 ! parameters
 END MODULE control_grun
@@ -810,9 +818,11 @@ MODULE control_quartic_energy
 
   LOGICAL :: lquartic                        ! if .TRUE. fit the energy/enthalpy
                                              ! with a quartic polynomium
-
   LOGICAL :: lquartic_ph                     ! if .TRUE. fit the vibrational 
                                              ! free_energy with a quartic
+                                             ! polynomium
+  LOGICAL :: lquartic_elc                    ! if .TRUE. fit the elastic
+                                             ! constants with a quartic
                                              ! polynomium
   INTEGER :: nvar4                           ! number of variables of 
                                              ! the polynomial fit

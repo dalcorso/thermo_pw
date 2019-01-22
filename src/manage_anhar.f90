@@ -74,7 +74,7 @@ CALL fit_frequencies()
 !
 !    calculate the Gruneisen parameters and the anharmonic quantities
 !
-CALL set_volume_b0_cv_grun()
+CALL set_volume_b0_grun()
 CALL write_grun_anharmonic()
 CALL plot_anhar() 
 
@@ -192,18 +192,17 @@ CALL plot_gruneisen_band_anis(flfrq_thermo)
 !
 !    fit the frequencies of the dos mesh with a polynomial
 !
-CALL set_volume_b0_cv_grun()
+CALL set_volume_b0_grun()
 IF (reduced_grid) THEN
    CALL fit_frequencies_anis_reduced()
-   CALL write_grun_anhar_anis_reduced()
 ELSE
    CALL fit_frequencies_anis()
+ENDIF
 !
 !    calculate the Gruneisen parameters and the anharmonic quantities
+!    and plot them
 !
-   CALL write_grun_anhar_anis()
-ENDIF
-
+CALL write_grun_anhar_anis()
 CALL plot_anhar_anis()
 
 

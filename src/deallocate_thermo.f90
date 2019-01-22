@@ -30,9 +30,9 @@ SUBROUTINE deallocate_thermo()
                              el_consf_t, el_compf_t, bthsf_t, ggammaf_t, &
                              el_consf_s, el_compf_s, bfactf_t
   USE grun_anharmonic,  ONLY : betab, alpha_an_g, cp_grun_t, cv_grun_t, &
-                               ce_grun_t, b0_grun_s, &
-                               grun_gamma_t, poly_grun, poly_grun_red, &
-                               grun_cpmce_anis
+                             ce_grun_t, b0_grun_s, &
+                             grun_gamma_t, poly_grun, poly_grun_red, &
+                             grun_cpmce_anis, el_cons_grun_t, el_comp_grun_t
   USE control_paths,    ONLY : xqaux, wqaux, letter, label_list, letter_path, &
                                label_disp_q, disp_q, disp_wq, nrap_plot_in,   &
                                rap_plot_in, nrap_plot, rap_plot, high_sym_path
@@ -128,6 +128,8 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (poly_grun_red) )   DEALLOCATE(poly_grun_red) 
   IF ( ALLOCATED (vgrun_t) )         DEALLOCATE(vgrun_t) 
   IF ( ALLOCATED (b0_grun_t) )       DEALLOCATE(b0_grun_t) 
+  IF ( ALLOCATED (el_cons_grun_t) )  DEALLOCATE(el_cons_grun_t) 
+  IF ( ALLOCATED (el_comp_grun_t) )  DEALLOCATE(el_comp_grun_t) 
   IF ( ALLOCATED (celldm_grun_t) )   DEALLOCATE(celldm_grun_t) 
   IF ( ALLOCATED (cp_grun_t) )       DEALLOCATE(cp_grun_t) 
   IF ( ALLOCATED (cv_grun_t) )       DEALLOCATE(cv_grun_t) 

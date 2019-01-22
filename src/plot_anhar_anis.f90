@@ -30,7 +30,6 @@ USE data_files,  ONLY : flanhar
 USE grun_anharmonic, ONLY : done_grun
 USE initial_conf,  ONLY : ibrav_save
 USE control_thermo,  ONLY : ltherm_dos, ltherm_freq, with_eigen
-USE control_elastic_constants, ONLY : el_cons_t_available
 USE anharmonic, ONLY : lelastic
 USE ph_freq_anharmonic, ONLY : lelasticf
 USE temperature,     ONLY : tmin, tmax
