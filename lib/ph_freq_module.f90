@@ -365,7 +365,7 @@ DO iq=1,nq_eff
       IF (arg > thr_taylor ) THEN
           cv = cv + wg * earg * ( arg / ( 1.0_DP - earg  ) ) ** 2 
       ELSEIF (nu > thr_ph) THEN
-             cv = cv + wg * earg *  &
+          cv = cv + wg * earg *  &
                   (arg /( arg - arg**2*0.5_DP + arg**3 * onesixth &
                              - arg**4 * one24))**2
       ENDIF
@@ -376,23 +376,25 @@ cv = cv * kb
 RETURN
 END SUBROUTINE specific_heat_cv_ph
 
-SUBROUTINE thermal_expansion_ph(ph_freq, ph_grun, temp, betab)
+SUBROUTINE thermal_expansion_ph(ph_freq, ph_grun, temp, betab, cv)
 !
 !  This routine receives as input a set of phonon frequencies
 !  on a uniform q mesh, the gruneisen parameters divided by the cell volume
 !  on the same mesh and a temperature and gives as output the volume 
-!  thermal expansion multiplied by the bulk modulus at that temperature. 
+!  thermal expansion multiplied by the bulk modulus at that temperature 
+!  and the isostrain heat capacity.
 !  The output is in Ry / (a.u.)^3 / K. To obtain the volume thermal expansion 
 !  divide by the bulk modulus in Ry / (a.u.)^3.
 !
 TYPE(ph_freq_type), INTENT(IN) :: ph_freq, ph_grun
 REAL(DP), INTENT(IN)  :: temp
-REAL(DP), INTENT(OUT) :: betab
+REAL(DP), INTENT(OUT) :: betab, cv
 
 INTEGER :: nq_eff, iq, imode, nat
-REAL(DP) :: nu, temp1, arg, gamman, wg, onesixth, one24, earg
+REAL(DP) :: nu, temp1, arg, gamman, wg, onesixth, one24, earg, aux
 
 betab=0.0_DP
+cv=0.0_DP
 IF (temp <= 1.E-9_DP) RETURN
 onesixth=1.0_DP/6.0_DP
 one24=1.0_DP/24.0_DP
@@ -407,15 +409,18 @@ DO iq=1, nq_eff
       arg= kb1 * nu * temp1
       earg=EXP(-arg)
       IF (arg > thr_taylor ) THEN
-          betab = betab + wg * gamman &
-                            * earg * ( arg / ( 1.0_DP - earg )) ** 2 
+         aux= wg * earg * ( arg / ( 1.0_DP - earg  ) ) ** 2
+         cv = cv + aux
+         betab = betab +  gamman * aux
       ELSEIF (nu > thr_ph) THEN
-         betab = betab + wg * gamman * earg *  &
-                       (1.0_DP/( 1.0_DP + arg*(-0.5_DP + arg*(onesixth - &
+         aux= wg * earg * (1.0_DP/( 1.0_DP + arg*(-0.5_DP + arg*(onesixth - &
                         arg*one24))))**2
+         cv = cv +  aux 
+         betab = betab + gamman * aux 
       ENDIF
    ENDDO
 ENDDO
+cv = cv * kb
 betab = betab * kb
 
 RETURN
