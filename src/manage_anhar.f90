@@ -180,11 +180,7 @@ CALL plot_elastic_t(1)
 !
 !    calculate and plot the Gruneisen parameters along the given path.
 !
-IF (reduced_grid) THEN
-   CALL write_gruneisen_band_anis_reduced(flfrq_thermo,flvec_thermo)
-ELSE
-   CALL write_gruneisen_band_anis(flfrq_thermo,flvec_thermo)
-ENDIF
+CALL write_gruneisen_band_anis(flfrq_thermo,flvec_thermo)
 CALL set_files_for_plot(4, flfrq_thermo, filedata, filerap, &
                                           fileout, gnu_filename, filenameps)
 CALL plotband_sub(4, filedata, filerap, fileout, gnu_filename, filenameps)

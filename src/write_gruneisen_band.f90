@@ -42,7 +42,7 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
                            omega_data(:), poly_grun(:,:), frequency(:,:), &
                            gruneisen(:,:)
   COMPLEX(DP), ALLOCATABLE :: displa_geo(:,:,:,:), displa(:,:,:)
-  INTEGER :: nks, nbnd, cgeo_eff, central_geo, ibnd, ios, i, n, igeo, ndata, &
+  INTEGER :: nks, nmodes, cgeo_eff, central_geo, imode, ios, n, igeo, ndata, &
              iumode
   INTEGER :: find_free_unit
   REAL(DP) :: vm, f, g
@@ -61,20 +61,20 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
   DO igeo = 1, ngeo(1)
      IF (no_ph(igeo)) CYCLE
      filedata = "phdisp_files/"//TRIM(file_disp)//'.g'//TRIM(int_to_char(igeo))
-     CALL read_parameters(nks, nbnd, filedata)
-     IF (nks <= 0 .or. nbnd <= 0) THEN
+     CALL read_parameters(nks, nmodes, filedata)
+     IF (nks <= 0 .OR. nmodes <= 0) THEN
         CALL errore('write_gruneisen_band','reading plot namelist',ABS(ios))
      ELSE
         WRITE(stdout, '(5x,"Reading ",i4," dispersions at ",i6," k-points for&
-                       & geometry",i4)') nbnd, nks, igeo
+                       & geometry",i4)') nmodes, nks, igeo
      ENDIF
      IF (.NOT.allocated_variables) THEN
-        ALLOCATE (freq_geo(nbnd,nks,ngeo(1)))
-        ALLOCATE (displa_geo(nbnd,nbnd,ngeo(1),nks))
+        ALLOCATE (freq_geo(nmodes,nks,ngeo(1)))
+        ALLOCATE (displa_geo(nmodes,nmodes,ngeo(1),nks))
         ALLOCATE (k(3,nks)) 
         allocated_variables=.TRUE.
      ENDIF
-     CALL read_bands(nks, nbnd, k, freq_geo(1,1,igeo), filedata)
+     CALL read_bands(nks, nmodes, k, freq_geo(1,1,igeo), filedata)
 
      filename="phdisp_files/"//TRIM(file_vec)//".g"//TRIM(int_to_char(igeo))
      IF (ionode) OPEN(UNIT=iumode, FILE=TRIM(filename), FORM='formatted', &
@@ -137,11 +137,11 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
 !
 !  Allocate space for interpolating the frequencies
 !
-  ALLOCATE(frequency_geo(nbnd,ndata))
-  ALLOCATE(displa(nbnd,nbnd,ndata))
-  ALLOCATE(poly_grun(poly_order,nbnd))
-  ALLOCATE(frequency(nbnd,nks))
-  ALLOCATE(gruneisen(nbnd,nks))
+  ALLOCATE(frequency_geo(nmodes,ndata))
+  ALLOCATE(displa(nmodes,nmodes,ndata))
+  ALLOCATE(poly_grun(poly_order,nmodes))
+  ALLOCATE(frequency(nmodes,nks))
+  ALLOCATE(gruneisen(nmodes,nks))
 
   copy_before=.FALSE.
   frequency(:,:)= 0.0_DP
@@ -160,15 +160,13 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
         ELSEIF (is_gamma(n-1)) THEN
            copy_before=.TRUE.
         ELSE
-           DO ibnd=1,nbnd
-              gruneisen(ibnd,n)=gruneisen(ibnd,n-1)
-              frequency(ibnd,n)=frequency(ibnd,n-1)
-           ENDDO
+           gruneisen(1:nmodes,n)=gruneisen(1:nmodes,n-1)
+           frequency(1:nmodes,n)=frequency(1:nmodes,n-1)
 !
 !  At the gamma point the first three frequencies vanishes
 !
-           DO ibnd=1,3
-              frequency(ibnd,n)=0.0_DP
+           DO imode=1,3
+              frequency(imode,n)=0.0_DP
            ENDDO
         ENDIF
      ELSE
@@ -180,8 +178,8 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
         DO igeo=1, ngeo(1)
            IF (no_ph(igeo)) CYCLE
            ndata=ndata+1
-           frequency_geo(1:nbnd,ndata)=freq_geo(1:nbnd,n,igeo)
-           displa(1:nbnd,1:nbnd,ndata) = displa_geo(1:nbnd,1:nbnd,igeo,n)
+           frequency_geo(1:nmodes,ndata)=freq_geo(1:nmodes,n,igeo)
+           displa(1:nmodes,1:nmodes,ndata) = displa_geo(1:nmodes,1:nmodes,igeo,n)
         ENDDO
         CALL interp_freq_eigen(ndata, frequency_geo, omega_data, &
                           cgeo_eff, displa, poly_order, poly_grun)
@@ -189,22 +187,22 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
 !  frequencies and gruneisen parameters are calculated at the chosen
 !  volume using the intepolating polynomial
 !
-        DO ibnd=1,nbnd
-           CALL compute_polynomial(vm, poly_order, poly_grun(:,ibnd),f)
-           CALL compute_polynomial_der(vm, poly_order, poly_grun(:,ibnd),g)
-           frequency(ibnd,n)=f
+        DO imode=1,nmodes
+           CALL compute_polynomial(vm, poly_order, poly_grun(:,imode),f)
+           CALL compute_polynomial_der(vm, poly_order, poly_grun(:,imode),g)
+           frequency(imode,n)=f
 !
 !     g here is V d w / d V. We change sign and divide by the frequency w 
 !     to get the gruneisen parameter.
 !
            IF (f > 0.0_DP ) THEN
-              gruneisen(ibnd,n) = - g / f
+              gruneisen(imode,n) = - g / f
            ELSE
-              gruneisen(ibnd,n) = 0.0_DP
+              gruneisen(imode,n) = 0.0_DP
            ENDIF
            IF (copy_before) THEN
-              gruneisen(ibnd,n-1) = gruneisen(ibnd,n)
-              frequency(ibnd,n-1) = frequency(ibnd,n)
+              gruneisen(imode,n-1) = gruneisen(imode,n)
+              frequency(imode,n-1) = frequency(imode,n)
            ENDIF 
         ENDDO
         copy_before=.FALSE.
@@ -212,8 +210,8 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
 !  At the gamma point the first three frequencies vanishes
 !
         IF (n>1.AND.is_gamma(n-1)) THEN
-           DO ibnd=1,3
-              frequency(ibnd,n-1)=0.0_DP
+           DO imode=1,3
+              frequency(imode,n-1)=0.0_DP
            ENDDO
         ENDIF
      ENDIF
@@ -222,12 +220,12 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
 !  Third part: writes Gruneisen parameters on file
 !
    filegrun="anhar_files/"//TRIM(flgrun)
-   CALL write_bands(nks, nbnd, k, gruneisen, 1.0_DP, filegrun)
+   CALL write_bands(nks, nmodes, k, gruneisen, 1.0_DP, filegrun)
 !
 !  writes frequencies at the chosen volume on file
 !
    filefreq=TRIM(filegrun)//'_freq'
-   CALL write_bands(nks, nbnd, k, frequency, 1.0_DP, filefreq)
+   CALL write_bands(nks, nmodes, k, frequency, 1.0_DP, filefreq)
 
    DEALLOCATE( gruneisen )
    DEALLOCATE( frequency )

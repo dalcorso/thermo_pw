@@ -125,7 +125,6 @@ write_ev_input.o \
 write_elastic_t.o \
 write_gruneisen_band.o \
 write_gruneisen_band_anis.o \
-write_gruneisen_band_anis_reduced.o \
 write_gnuplot_energy.o \
 write_minimum_energy_data.o \
 write_mur.o \
