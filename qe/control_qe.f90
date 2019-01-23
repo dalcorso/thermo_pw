@@ -21,6 +21,8 @@ MODULE control_qe
   LOGICAL  :: force_band_calculation=.FALSE.
   LOGICAL  :: use_ph_images=.FALSE.
 
+  LOGICAL, ALLOCATABLE :: this_pcxpsi_is_on_file_tpw(:,:,:)
+
 END MODULE control_qe
 
 MODULE optical
@@ -90,7 +92,7 @@ MODULE zstar_add
   SAVE
   COMPLEX (DP), ALLOCATABLE ::          &
                 zstareu0_rec(:,:)        ! 3, 3 * nat)
- 
+
   LOGICAL :: done_start_zstar=.FALSE.
 
 END MODULE zstar_add
@@ -206,4 +208,29 @@ MODULE lr_cg
       prec_vec(:,:,:)                  ! The preconditioning vector
 
 END MODULE lr_cg
+
+MODULE qpoint_aux
+  USE kinds,      ONLY : DP
+  USE becmod,     ONLY : bec_type
+  SAVE
+  
+  INTEGER, ALLOCATABLE :: ikmks(:)    ! index of -k for magnetic calculations
+
+  INTEGER, ALLOCATABLE :: ikmkmqs(:)  ! index of -k-q for magnetic calculations
+
+  TYPE(bec_type), ALLOCATABLE :: becpt(:), alphapt(:,:)
+
+END MODULE qpoint_aux
+
+MODULE nc_mag_aux
+  USE kinds,      ONLY : DP
+  SAVE
+  
+  COMPLEX (DP), ALLOCATABLE ::  &
+                               deeq_nc_save(:,:,:,:,:), &
+                               int1_nc_save(:,:,:,:,:,:), &
+                               int3_save(:, :, :, :, :, :)
+END MODULE nc_mag_aux
+
+
 

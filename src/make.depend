@@ -826,17 +826,6 @@ write_gruneisen_band_anis.o : ../../thermo_pw/lib/quadratic_surfaces.o
 write_gruneisen_band_anis.o : interpolate_freq.o
 write_gruneisen_band_anis.o : io_bands.o
 write_gruneisen_band_anis.o : thermo_mod.o
-write_gruneisen_band_anis_reduced.o : ../../Modules/cell_base.o
-write_gruneisen_band_anis_reduced.o : ../../Modules/io_global.o
-write_gruneisen_band_anis_reduced.o : ../../Modules/ions_base.o
-write_gruneisen_band_anis_reduced.o : ../../Modules/kind.o
-write_gruneisen_band_anis_reduced.o : ../../Modules/mp_images.o
-write_gruneisen_band_anis_reduced.o : ../../UtilXlib/mp.o
-write_gruneisen_band_anis_reduced.o : ../../thermo_pw/lib/lattices.o
-write_gruneisen_band_anis_reduced.o : ../../thermo_pw/lib/quadratic_surfaces.o
-write_gruneisen_band_anis_reduced.o : interpolate_freq.o
-write_gruneisen_band_anis_reduced.o : io_bands.o
-write_gruneisen_band_anis_reduced.o : thermo_mod.o
 write_minimum_energy_data.o : ../../Modules/io_global.o
 write_minimum_energy_data.o : ../../Modules/kind.o
 write_minimum_energy_data.o : thermo_mod.o
