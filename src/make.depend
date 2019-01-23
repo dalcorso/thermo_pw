@@ -160,6 +160,7 @@ dynmatrix_tpw.o : ../../PHonon/PH/ph_restart.o
 dynmatrix_tpw.o : ../../PHonon/PH/phcom.o
 dynmatrix_tpw.o : ../../PHonon/PH/ramanm.o
 dynmatrix_tpw.o : ../../PW/src/symm_base.o
+dynmatrix_tpw.o : manage_ph_symmetry.o
 dynmatrix_tpw.o : thermo_mod.o
 elastic_constants_t.o : ../../Modules/cell_base.o
 elastic_constants_t.o : ../../Modules/io_global.o
@@ -349,6 +350,19 @@ manage_ph.o : collect_info.o
 manage_ph.o : thermo_mod.o
 manage_ph_dispersions.o : ../../Modules/ions_base.o
 manage_ph_dispersions.o : thermo_mod.o
+manage_ph_symmetry.o : ../../LR_Modules/lrcom.o
+manage_ph_symmetry.o : ../../Modules/cell_base.o
+manage_ph_symmetry.o : ../../Modules/fft_base.o
+manage_ph_symmetry.o : ../../Modules/io_global.o
+manage_ph_symmetry.o : ../../Modules/ions_base.o
+manage_ph_symmetry.o : ../../Modules/kind.o
+manage_ph_symmetry.o : ../../Modules/noncol.o
+manage_ph_symmetry.o : ../../PHonon/PH/phcom.o
+manage_ph_symmetry.o : ../../PW/src/pwcom.o
+manage_ph_symmetry.o : ../../PW/src/symm_base.o
+manage_ph_symmetry.o : ../../thermo_pw/lib/lattices.o
+manage_ph_symmetry.o : ../../thermo_pw/lib/point_group.o
+manage_ph_symmetry.o : thermo_mod.o
 manage_piezo_tensor.o : ../../Modules/io_global.o
 manage_piezo_tensor.o : ../../Modules/mp_images.o
 manage_piezo_tensor.o : ../../Modules/mp_world.o
@@ -849,6 +863,7 @@ write_ph_dispersions.o : ../../PW/src/symm_base.o
 write_ph_dispersions.o : ../../thermo_pw/lib/lattices.o
 write_ph_dispersions.o : ../../thermo_pw/lib/point_group.o
 write_ph_dispersions.o : io_bands.o
+write_ph_dispersions.o : manage_ph_symmetry.o
 write_ph_dispersions.o : thermo_mod.o
 write_ph_freq.o : ../../Modules/cell_base.o
 write_ph_freq.o : ../../Modules/constants.o

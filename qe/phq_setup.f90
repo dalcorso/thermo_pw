@@ -57,13 +57,14 @@ subroutine phq_setup_tpw
   USE klist,         ONLY : xk, nks, nkstot
   USE lsda_mod,      ONLY : nspin, starting_magnetization
   USE scf,           ONLY : v, vrs, vltot, kedtau
+  USE dfunct,        ONLY : newd
   USE fft_base,      ONLY : dfftp
   USE gvect,         ONLY : ngm
   USE gvecs,       ONLY : doublegrid
   USE symm_base,     ONLY : nrot, nsym, s, ftau, irt, t_rev, time_reversal, &
-                            sr, invs, inverse_s
+                            sr, invs, inverse_s, sname
   USE uspp_param,    ONLY : upf
-  USE uspp,          ONLY : nlcc_any
+  USE uspp,          ONLY : nlcc_any, deeq_nc, okvan
   USE spin_orb,      ONLY : domag
   USE noncollin_module, ONLY : noncolin, m_loc, angle1, angle2, ux
   USE nlcc_ph,       ONLY : drc
@@ -98,6 +99,7 @@ subroutine phq_setup_tpw
 
   USE lr_symm_base,  ONLY : gi, gimq, irotmq, minus_q, invsymq, nsymq, rtau
   USE qpoint,        ONLY : xq, xk_col
+  USE nc_mag_aux,    ONLY : deeq_nc_save
   USE control_lr,    ONLY : lgamma
 
   implicit none
@@ -135,7 +137,6 @@ subroutine phq_setup_tpw
   ! 1) Computes the total local potential (external+scf) on the smooth grid
   !
 !!!!!!!!!!!!!!!!!!!!!!!! ACFDT TEST !!!!!!!!!!!!!!!!
-!  write(*,*) " acfdt_is_active ",acfdt_is_active, " acfdt_num_der ", acfdt_num_der
   IF (acfdt_is_active) THEN
      ! discard set_vrs for numerical derivatives
      if (.not.acfdt_num_der) then 
@@ -167,6 +168,18 @@ subroutine phq_setup_tpw
      END DO
      ux=0.0_DP
      if (dft_is_gradient()) call compute_ux(m_loc,ux,nat)
+     IF (okvan) THEN
+!
+!  Change the sign of the magnetic field in the screened US coefficients
+!  and save also the coefficients computed with -B_xc.
+!
+        deeq_nc_save(:,:,:,:,1)=deeq_nc(:,:,:,:)
+        v%of_r(:,2:4)=-v%of_r(:,2:4)
+        CALL newd()
+        v%of_r(:,2:4)=-v%of_r(:,2:4)
+        deeq_nc_save(:,:,:,:,2)=deeq_nc(:,:,:,:)
+        deeq_nc(:,:,:,:)=deeq_nc_save(:,:,:,:,1)
+     ENDIF
   ENDIF
   !
   ! 3) Computes the derivative of the XC potential
@@ -216,7 +229,7 @@ subroutine phq_setup_tpw
   !   not been calculated by set_nscf because this is a recover run. 
   !   We recalculate here the small group of q.
   !
-  IF (nsymq==0) CALL set_small_group_of_q(nsymq, invsymq, minus_q)
+  IF (nsymq==0) CALL set_small_group_of_q_tpw(nsymq, invsymq, minus_q)
   IF ( .NOT. time_reversal ) minus_q = .FALSE.
   !
   !
@@ -233,17 +246,17 @@ subroutine phq_setup_tpw
   !    and calculate the vectors G associated to the symmetry Sq = q + G
   !    if minus_q is true calculate also irotmq and the G associated to Sq=-g+G
   !
-  CALL set_giq (xq,s,nsymq,nsym,irotmq,minus_q,gi,gimq)
+  CALL set_giq_tpw (xq,s,nsymq,nsym,irotmq,minus_q,gi,gimq)
 
   num_rap_mode=-1
-  IF (search_sym .AND. symmorphic_or_nzb()) &
-                   CALL prepare_sym_analysis(nsymq,sr,t_rev,magnetic_sym)
+  IF (search_sym.AND.symmorphic_or_nzb()) CALL prepare_sym_analysis_tpw(nsymq,&
+                                                  sr,sname,t_rev,magnetic_sym)
 
   IF (.NOT.u_from_file) THEN
-     CALL find_irrep()
+     CALL find_irrep_tpw()
      CALL ph_writefile('data_u',current_iq,0,ierr)
   ENDIF
-  CALL find_irrep_sym()
+  CALL find_irrep_sym_tpw()
 
 
   IF (lgamma_gamma) THEN

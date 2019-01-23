@@ -13,7 +13,7 @@ SUBROUTINE q_points_tpw ( )
   USE io_global,  ONLY :  stdout, meta_ionode, meta_ionode_id
   USE disp,  ONLY : nq1, nq2, nq3, x_q, nqs, lgamma_iq
   USE output, ONLY : fildyn
-  USE symm_base, ONLY : nsym, s, time_reversal, t_rev, invs
+  USE symm_base, ONLY : nsym, s, t_rev, invs
   USE cell_base, ONLY : at, bg
   USE control_ph, ONLY : search_sym
   USE mp_world,  ONLY : world_comm
@@ -31,7 +31,6 @@ SUBROUTINE q_points_tpw ( )
   !
   !  calculate the Monkhorst-Pack grid
   !
-
   if( nq1 <= 0 .or. nq2 <= 0 .or. nq3 <= 0 ) &
        call errore('q_points','nq1 or nq2 or nq3 <= 0',1)
 
@@ -40,10 +39,10 @@ SUBROUTINE q_points_tpw ( )
   allocate (wq(nqmax))
   allocate (xq(3,nqmax))
   if(lshift_q) then
-     call kpoint_grid( nsym, time_reversal, skip_equivalence, s, t_rev, bg, nqmax,&
+     call kpoint_grid( nsym, .TRUE., skip_equivalence, s, t_rev, bg, nqmax,&
      &                  1,1,1, nq1,nq2,nq3, nqs, xq, wq )
   else
-     call kpoint_grid( nsym, time_reversal, skip_equivalence, s, t_rev, bg, nqmax,&
+     call kpoint_grid( nsym, .TRUE., skip_equivalence, s, t_rev, bg, nqmax,&
      &                  0,0,0, nq1,nq2,nq3, nqs, xq, wq )
   end if
   allocate(x_q(3,nqs))

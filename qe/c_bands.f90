@@ -47,7 +47,8 @@ SUBROUTINE c_bands_nscf_tpw( )
   USE io_global,            ONLY : ionode
   USE check_stop,           ONLY : check_stop_now
   USE band_computation,     ONLY : diago_bands, ik_origin, sym_for_diago
-  USE noncollin_module,     ONLY : npol
+  USE noncollin_module,     ONLY : noncolin, npol
+  USE spin_orb,             ONLY : domag
   !
   IMPLICIT NONE
   !
@@ -152,16 +153,24 @@ SUBROUTINE c_bands_nscf_tpw( )
         !
         call diag_bands ( 1, ik, avg_iter )
         !
+        !  In the noncolinear magnetic case we have k, k+q, -k -k-q and
+        !  to the last two wavefunctions we must apply t_rev.
+        !  When lgamma is true we have only k and -k
+        !
+        IF (noncolin.AND.domag) THEN
+           IF (lgamma.AND. MOD(ik,2)==0) THEN
+              CALL apply_trev(evc, ik, ik-1)
+           ELSEIF (.NOT.lgamma.AND.(MOD(ik,4)==3.OR.MOD(ik,4)==0)) THEN
+              CALL apply_trev(evc, ik, ik-2)
+           ENDIF
+        ENDIF
+        !
         ! ... save wave-functions (unless disabled in input)
         !
         IF ( io_level > -1 ) CALL save_buffer ( evc, nwordwfc, iunwfc, ik )
         !
-        ! ... beware: with pools, if the number of k-points on different
-        ! ... pools differs, make sure that all processors are still in
-        ! ... the loop on k-points before checking for stop condition
         !
-!        nkdum  = kunit * ( nkstot / kunit / npool )
-        IF (ik_diago .le. nkdum) THEN
+        IF (ik_diago .LE. nkdum) THEN
            !
            ! ... stop requested by user: save restart information,
            ! ... save wavefunctions to file
@@ -343,7 +352,7 @@ SUBROUTINE c_bands_nscf_tpw( )
            ENDDO
         ENDDO
 !
-!   finally use the received wavefunction to obtain the rotated ones
+!   finally use the received wavefunctions to obtain the rotated ones
 !
         DO ikdiag=1, nkdiag
            DO ikk = 1, nks
@@ -428,6 +437,14 @@ END DO
 IF (t_rev==1) xks = - xks
 
 gk = NINT(xks - xkc)
+!
+!   Note that rotate_all_psi applies only the symmetry without 
+!   time reversal. So instead of gk we have to give here -gk.
+!   Here we cannot ignore completely time reversal because only TSk=k+G.
+!   So to apply completely the symmetry one has to use apply_trev on the
+!   output of rotate_all_psi calculated with -G.
+!
+IF (t_rev==1) gk=-gk
 
 RETURN
 END SUBROUTINE compute_gk
@@ -451,6 +468,8 @@ USE fft_interfaces,       ONLY : fwfft
 USE io_files,          ONLY : iunwfc, nwordwfc
 USE band_computation,  ONLY : isym_bands
 USE noncollin_module,  ONLY : noncolin, npol
+USE control_lr,        ONLY : lgamma
+USE spin_orb,          ONLY : domag
 USE buffers,           ONLY : save_buffer
 
 IMPLICIT NONE
@@ -459,7 +478,7 @@ INTEGER :: ik, iko, ikk
 REAL(DP) :: aux_xk(3,nkstot)
 COMPLEX(DP) :: psic(dfftp%nnr, npol, nbnd), evcr(dfftp%nnr, npol, nbnd)
 COMPLEX(DP) :: d_spin(2,2)
-INTEGER :: has_e, ibnd, ipol, ig, npw, gk(3)
+INTEGER :: has_e, ibnd, ipol, ig, iks, npw, gk(3)
 
 CALL compute_gk(xk(1,ikk), aux_xk(1,iko), &
           s(1,1,invs(isym_bands(ik))), t_rev(invs(isym_bands(ik))), gk)
@@ -469,8 +488,47 @@ IF (noncolin) THEN
    CALL find_u(sr(1,1,isym_bands(ik)),d_spin) 
 ENDIF
 
-CALL rotate_all_psi_r_tpw(psic, evcr, s(1,1,invs(isym_bands(ik))),&
-                ftau(1,invs(isym_bands(ik))), d_spin, has_e, gk)
+iks=0
+IF (noncolin.AND.domag) THEN
+   IF (t_rev(isym_bands(ik))==0) THEN
+      !
+      ! In this case the symmetry has no time reversal, but
+      ! we need the time reversed wavefunctions for -k and -k-q
+      !
+      CALL rotate_all_psi_r_tpw(psic,evcr, s(1,1,invs(isym_bands(ik))), &
+                           ftau(1,invs(isym_bands(ik))), d_spin, has_e, gk)
+      IF (lgamma.AND. MOD(ik,2)==0) THEN
+         CALL apply_trev_r(evcr)
+         iks=-1
+      ELSEIF (.NOT.lgamma.AND.(MOD(ik,4)==3.OR.MOD(ik,4)==0)) THEN
+         CALL apply_trev_r(evcr)
+         iks=-2
+      ENDIF
+   ELSE
+   !
+   ! In this case the symmetry has time reversal, and
+   ! we need the time reversed wavefunctions for -k and -k-q
+   ! so for these case we do not apply any time reversal
+   ! but must use the k indeces of k and k+q
+   ! for obtaining k+q we must apply time reversal because
+   ! the symmetry has it
+   !
+      CALL rotate_all_psi_r_tpw(psic,evcr, s(1,1,invs(isym_bands(ik))),&
+                            ftau(1,invs(isym_bands(ik))), d_spin, has_e, gk)
+      IF (lgamma.AND.MOD(ik,2)==0) THEN
+         iks=-1
+      ELSEIF (lgamma.AND.MOD(ik,2)==1) THEN
+         CALL apply_trev_r(evcr)
+      ELSEIF (.NOT.lgamma.AND.(MOD(ik,4)==1.OR.MOD(ik,4)==2)) THEN
+         CALL apply_trev_r(evcr)
+      ELSEIF (.NOT.lgamma.AND.(MOD(ik,4)==3.OR.MOD(ik,4)==0)) THEN
+         iks=-2
+      ENDIF
+   ENDIF
+ELSE
+   CALL rotate_all_psi_r_tpw(psic, evcr, s(1,1,invs(isym_bands(ik))),&
+                   ftau(1,invs(isym_bands(ik))), d_spin, has_e, gk)
+ENDIF
 
 DO ibnd=1,nbnd
    DO ipol=1,npol
@@ -478,13 +536,13 @@ DO ibnd=1,nbnd
    ENDDO
 ENDDO
 
-npw=ngk(ikk)
+npw=ngk(ikk+iks)
 evc=(0.0_DP,0.0_DP)
 DO ibnd=1,nbnd
    DO ig=1, npw
-      evc(ig, ibnd)=evcr(dfftp%nl(igk_k(ig,ikk)),1,ibnd)
+      evc(ig, ibnd)=evcr(dfftp%nl(igk_k(ig,ikk+iks)),1,ibnd)
       IF (npol==2) &
-         evc(ig+npwx, ibnd)=evcr(dfftp%nl(igk_k(ig,ikk)),2,ibnd)
+         evc(ig+npwx, ibnd)=evcr(dfftp%nl(igk_k(ig,ikk+iks)),2,ibnd)
    ENDDO
 ENDDO
 CALL save_buffer ( evc, nwordwfc, iunwfc, ikk )

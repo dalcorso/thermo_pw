@@ -60,9 +60,10 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
   LOGICAL, INTENT (IN) :: elph_mat
   !
   REAL (DP), ALLOCATABLE :: rtau (:,:,:)
-  INTEGER  :: ik
+  INTEGER  :: t_rev_eff(48), ik
   LOGICAL  :: magnetic_sym, sym(48)
-  LOGICAL  :: skip_equivalence, check_para_diag
+  LOGICAL  :: skip_equivalence
+  LOGICAL, EXTERNAL  :: check_para_diag
   !
   IF ( .NOT. ALLOCATED( force ) ) ALLOCATE( force( 3, nat ) )
   !
@@ -89,7 +90,7 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
   ! ... smallg_q flags in symmetry operations of the crystal
   ! ... that are not symmetry operations of the small group of q
   !
-  CALL set_small_group_of_q(nsymq,invsymq,minus_q)
+  CALL set_small_group_of_q_tpw(nsymq,invsymq,minus_q)
   !
   ! ... Input k-points are assumed to be  given in the IBZ of the Bravais
   ! ... lattice, with the full point symmetry of the lattice.
@@ -110,7 +111,8 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
      ! wannier functions the k-points should not be reduced
      !
      skip_equivalence = elph_mat
-     CALL kpoint_grid ( nrot, time_reversal, skip_equivalence, s, t_rev, &
+     t_rev_eff=0
+     CALL kpoint_grid ( nrot, time_reversal, skip_equivalence, s, t_rev_eff, &
                       bg, nk1*nk2*nk3, k1,k2,k3, nk1,nk2,nk3, nkstot, xk, wk)
   endif
 
@@ -131,6 +133,7 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
        DO ik=1,nkstot
           ik_origin(ik)=ik
        ENDDO
+       nks0=nkstot
 !
 !     Now reduce the k points with the small group of q. The k points added
 !     here can be calculated using the symmetries of the point group.
@@ -148,8 +151,13 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
   ! ... add k+q to the list of k
   !
   IF (sym_for_diago) THEN
-     CALL set_kplusq_tpw( xk, wk, xq, nkstot, npk, diago_bands, isym_bands, &
-                                                 ik_origin )
+     IF (noncolin.AND.domag) THEN
+        CALL set_kplusq_nc_tpw( xk, wk, xq, nkstot, npk, diago_bands, &
+                                                isym_bands, ik_origin)
+     ELSE
+        CALL set_kplusq_tpw( xk, wk, xq, nkstot, npk, diago_bands, isym_bands, &
+                                                ik_origin )
+     ENDIF
 !
 !   diagonalize all the bands and forget what has been found by the
 !   the last two variables are not used, but we initialize them.
@@ -159,7 +167,11 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
 !                                                      ik_origin(ik)
 !     ENDDO
   ELSE
-     CALL set_kplusq( xk, wk, xq, nkstot, npk)
+     IF (noncolin.AND.domag) THEN
+        CALL set_kplusq_nc( xk, wk, xq, nkstot, npk)
+     ELSE
+        CALL set_kplusq( xk, wk, xq, nkstot, npk)
+     ENDIF
      diago_bands(1:nkstot)=.TRUE.
      nks0=nkstot
   ENDIF
@@ -217,12 +229,12 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
   IF ( lgamma  ) THEN
      !
      kunit = 1
-     IF (lsda.AND.lmagnon) kunit = 2
+     IF ((noncolin.AND.domag).OR.(lsda.AND.lmagnon)) kunit = 2
      !
   ELSE
      !
      kunit = 2
-     IF (lsda.AND.lmagnon) kunit = 4
+     IF ((noncolin.AND.domag).OR.(lsda.AND.lmagnon)) kunit = 4
      !
   ENDIF
   !

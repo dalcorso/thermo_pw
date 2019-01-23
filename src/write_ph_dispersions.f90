@@ -28,7 +28,8 @@ SUBROUTINE write_ph_dispersions()
   USE point_group,ONLY : nsym_group
   USE constants,  ONLY : ry_to_cmm1
   USE ions_base,  ONLY : nat, tau, ityp, nsp, amass
-  USE symm_base,  ONLY : set_sym, nsym, s, allfrac, remove_sym
+  USE symm_base,  ONLY : set_sym, nsym, s, allfrac, remove_sym, ftau
+  USE fft_base,   ONLY : dfftp
   USE cell_base,  ONLY : at
   USE phonon_save, ONLY : freq_save, z_save
   USE thermo_sym, ONLY : code_group_save
@@ -38,10 +39,12 @@ SUBROUTINE write_ph_dispersions()
                             rap_plot, dkmod_save
   USE control_ph,    ONLY : xmldyn, search_sym
   USE control_lr,    ONLY : lgamma
+  USE lr_symm_base,  ONLY : rtau
   USE ifc,           ONLY : m_loc, has_zstar
   USE io_bands,      ONLY : write_bands, write_representations
   USE noncollin_module, ONLY : nspin_mag
   USE data_files,     ONLY : flfrq, flvec
+  USE ph_symmetry,    ONLY : initialize_gcode_old
   !
   IMPLICIT NONE
   !
@@ -105,6 +108,7 @@ SUBROUTINE write_ph_dispersions()
   IF (iout/=0.AND.ionode) CLOSE(unit=iout)
   
   nq=disp_nqs
+  ALLOCATE ( rtau(3,48,nat) )
   ALLOCATE ( num_rap_mode(3*nat,nq) )
   ALLOCATE ( high_sym(nq) )
   ALLOCATE ( qcode_group(nq) )
@@ -116,7 +120,7 @@ SUBROUTINE write_ph_dispersions()
 
   IF (xmldyn) THEN
      CALL set_sym(nat, tau, ityp, nspin_mag, m_loc)
-     IF ( .NOT. allfrac ) CALL remove_sym ( nr1_save, nr2_save, nr3_save )
+     IF ( .NOT. allfrac ) CALL remove_sym ( dfftp%nr1, dfftp%nr2, dfftp%nr3 )
   ENDIF
 
   num_rap_mode=-1
@@ -141,6 +145,7 @@ SUBROUTINE write_ph_dispersions()
            dq(:) = 0.0_DP
         END IF
         code_group_old=0
+        CALL initialize_gcode_old(0)
      ENDIF
   !
   ! Cannot use the small group of \Gamma to analize the symmetry
@@ -154,11 +159,11 @@ SUBROUTINE write_ph_dispersions()
         lgamma=.FALSE.
      ENDIF
      IF (search_sym) WRITE(stdout, '(/,20x,"q=(",2(f10.5,","),f10.5,"  )")') &
-                                                                   disp_q(:,n)
+                                                                 disp_q(:,n)
      IF (xmldyn.AND..NOT.lo_to_split) THEN
         IF (n>1) qcode_old=qcode_group(n-1)
         CALL find_representations_mode_q(nat,nsp,disp_q(:,n), &
-                    w2(:,n),z_save(:,:,n),tau,ityp,amass,name_rap_mode, &
+                    w2(:,n),z_save(:,:,n),tau,ityp,amass, &
                     num_rap_mode(:,n), nspin_mag, qcode_old)
         qcode_group(n)=code_group
         qcode_group_ext(n)=code_groupq_ext
@@ -255,105 +260,56 @@ SUBROUTINE write_ph_dispersions()
   DEALLOCATE (ptypeq)
   DEALLOCATE (qcode_group_ext)
   DEALLOCATE (lprojq)
+  DEALLOCATE (rtau)
   disp_nqs=0
   !
   RETURN
 END SUBROUTINE write_ph_dispersions
 !
 SUBROUTINE find_representations_mode_q ( nat, ntyp, xq, w2, u, tau, ityp, &
-                  amass, name_rap_mode, num_rap_mode, nspin_mag, qcode_old )
+                  amass, num_rap_mode, nspin_mag, qcode_old )
 
-  USE kinds,      ONLY : DP
-  USE cell_base,  ONLY : at, bg
-  USE symm_base,  ONLY : find_sym, s, invs, sr, ftau, irt, nsym, &
-                         nrot, t_rev, time_reversal, sname, copy_sym, &
-                         s_axis_to_cart, inverse_s
-  USE fft_base,   ONLY : dfftp
-  USE initial_conf, ONLY : nr1_save, nr2_save, nr3_save
-  USE lr_symm_base, ONLY : gi, nsymq
-  USE rap_point_group,  ONLY : code_group, gname, nclass, nelem, elem, elem_name
-
-  USE proj_rap_point_group, ONLY : lqproj, qptype, which_elem, group_desc, &
-                                   code_groupq_ext
-  USE lattices,    ONLY : zone_border
-  USE point_group, ONLY : find_group_info_ext
-  USE control_ph,  ONLY : search_sym
-  USE io_global, ONLY : stdout
+  USE kinds,        ONLY : DP
+  USE cell_base,    ONLY : at, bg
+  USE symm_base,    ONLY : s, ftau, irt, nsym, time_reversal, copy_sym, &
+                           s_axis_to_cart, inverse_s
+  USE lr_symm_base, ONLY : gi, nsymq, rtau
+  USE control_ph,   ONLY : search_sym
+  USE ph_symmetry,  ONLY : manage_ph_symmetry
 
   IMPLICIT NONE
-  INTEGER, INTENT(IN) :: nat, ntyp, nspin_mag, qcode_old
+  INTEGER, INTENT(IN)  :: nat, ntyp, nspin_mag, qcode_old
   REAL(DP), INTENT(IN) :: xq(3), amass(ntyp), tau(3,nat)
   REAL(DP), INTENT(IN) :: w2(3*nat)
-  INTEGER, INTENT(IN) :: ityp(nat)
+  INTEGER, INTENT(IN)  :: ityp(nat)
   COMPLEX(DP), INTENT(IN) :: u(3*nat,3*nat)
-  CHARACTER(15), INTENT(OUT) :: name_rap_mode(3*nat)
   INTEGER, INTENT(OUT) :: num_rap_mode(3*nat)
-  REAL(DP) :: gimq (3), sr_is(3,3,48), rtau(3,48,nat), ft(3,48), &
-              wrk(3,48)
-  INTEGER :: gii(3, 48), ptype(3)
-  REAL(DP) :: argument(48,48)
-  INTEGER :: irotmq, isym, i, ierr
+
+  REAL(DP) :: gimq (3)
+  INTEGER :: irotmq
   LOGICAL :: minus_q, sym(48), magnetic_sym
-  LOGICAL :: symmorphic_or_nzb, lwrite
+  LOGICAL :: symmorphic_or_nzb
 !
-!  find the small group of q
+!  find the small group of q and set the quantities needed to
+!  symmetrize a phonon mode
 !
-  IF (.NOT. search_sym) RETURN
-  time_reversal=.TRUE.
+  IF (.NOT.search_sym) RETURN
+  time_reversal=(nspin_mag/=4)
   minus_q=.TRUE.
-  IF (.NOT.time_reversal) minus_q=.FALSE.
+  IF (nspin_mag/=4) minus_q=.FALSE.
 
   sym(1:nsym)=.true.
-  call smallg_q (xq, 0, at, bg, nsym, s, ftau, sym, minus_q)
-  nsymq=copy_sym(nsym,sym )
+  call smallg_q_tpw (xq, 0, at, bg, nsym, s, ftau, sym, minus_q)
+  nsymq=copy_sym(nsym,sym)
   CALL s_axis_to_cart ()
-  CALL set_giq (xq,s,nsymq,nsym,irotmq,minus_q,gi,gimq)
+  CALL set_giq_tpw (xq,s,nsymq,nsym,irotmq,minus_q,gi,gimq)
   CALL inverse_s()
-  wrk(:,1:nsymq)=gi(:,1:nsymq)
-  CALL cryst_to_cart (nsymq, wrk, at, -1)
-  gii(:,1:nsymq)=NINT(wrk(:,1:nsymq))
+  CALL sgam_ph_new (at, bg, nsymq, s, irt, tau, rtau, nat)
 !
-!  Set the representations tables of the small group of q and
-!  find the mode symmetry
+!  if the small group of q is non symmorphic,
+!  search the symmetries only if there are no G such that Sq -> q+G
 !
-  IF (symmorphic_or_nzb()) THEN
-     lqproj=0
-     IF (zone_border(xq,at,bg,-1)) lqproj=2
-     qptype=1
-     magnetic_sym=(nspin_mag==4)
-     CALL prepare_sym_analysis(nsymq,sr,t_rev,magnetic_sym)
-     CALL find_group_info_ext(nsymq,sr,code_group,code_groupq_ext, &
-                                                 which_elem, group_desc)
-     sym (1:nsym) = .TRUE.
-     CALL sgam_ph_new (at, bg, nsym, s, irt, tau, rtau, nat)
-     CALL find_mode_sym_tpw (u, w2, tau, nat, nsymq, s, sr, irt, xq,    &
-          rtau, amass, ntyp, ityp, 1, .FALSE., .FALSE., num_rap_mode, ierr)
-
-     IF (code_group/=qcode_old) THEN
-        CALL set_class_el_name(nsymq,sname,nclass,nelem,elem,elem_name)
-        CALL write_group_info_ph(.TRUE.)
-     ENDIF
-     CALL print_mode_sym(w2, num_rap_mode, .FALSE.)
-  ELSE
-     WRITE(stdout,'(/,5x,"Zone border point and nonsymmorphic operations. &
-                                                                &Using")')
-
-     DO isym = 1, nsymq
-        ft(1,isym) = DBLE(ftau(1,isym)) / DBLE(nr1_save)
-        ft(2,isym) = DBLE(ftau(2,isym)) / DBLE(nr2_save)
-        ft(3,isym) = DBLE(ftau(3,isym)) / DBLE(nr3_save)
-     END DO
-     lqproj=1
-
-     CALL prepare_sym_analysis_proj(nsymq,s,sr,ft,gii,ptype,qcode_old)
-
-     CALL sgam_ph_new (at, bg, nsym, s, irt, tau, rtau, nat)
-     CALL find_mode_sym_proj (u, w2, tau, nat, nsymq, s, sr, ft, gii, invs, &
-                           irt, xq, rtau, amass, ntyp, ityp, 1, .FALSE., &
-                           .FALSE., num_rap_mode, ierr)
-
-     CALL print_mode_sym_proj(w2, num_rap_mode, ptype)
-  ENDIF
+  CALL manage_ph_symmetry(u, w2, num_rap_mode, xq, .TRUE.)
 
   RETURN
 END SUBROUTINE find_representations_mode_q

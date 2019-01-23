@@ -25,9 +25,11 @@ stress_gradcorr_tpw : stress now works also for the noncollinear/spin-orbit i
 
 solve_linter_tpw: contains a call to asyn_master to have the master check for
             slaves that need further work at each phonon iteration.
+            Generalized to the noncollinear magnetic case.
 
 phqscf_tpw : call solve_linter_tpw instead of solve_linter. Uses the new
             logic of the effective charges. Call do_cg_ph if lcg is .TRUE..
+            call drhodv_tpw.
 
 prepare_q_tpw: use the variable tcollect_all to avoid the calculation of
             the bands in the final run that collects all the dynamical 
@@ -113,8 +115,75 @@ print_symmetries_tpw : output slightly improved. Writes the Cayley-Klein
 find_mode_sym_tpw : similar to the one of QE but does not need a threshold to
             choose the degenerate modes.
 
-newdq_tpw : fixed a bug in the FR-PAW case.
+newdq_tpw : fixed a bug in the FR-PAW case
 
+set_small_group_of_q.f90 : generalized to deal with t_rev symmetry
+
+set_giq.f90 : generalized to deal with t_rev symmetry
+
+symdynph_gq.f90 : generalized to deal with t_rev symmetry
+
+symdyn_munu.f90 : call symdynph_gq_tpw
+
+dynmat0.f90 : call symdyn_munu_tpw.
+
+tra_write_matrix.f90 : call symdyn_munu_tpw.
+
+star_q.f90 : generalized to deal with t_rev symmetry
+
+rotate_and_add_dyn.f90 : generalized to deal with t_rev symmetry
+
+q2qstar_ph.f90 : call rotate_and_add_dyn_tpw
+
+set_kplusq_nc.f90 : generalized to deal with t_rev symmetry
+
+drhodv.f90 : generalized to the noncollinear magnetic case.
+
+drhodvnl.f90 : generalized to the noncollinear magnetic case.
+
+set_int12_nc.f90 : generalized to the noncollinear magnetic case.
+
+dvanqq.f90 : call set_int12_nc_tpw.
+
+phq_setup.f90 : call symmetrization routines that account for t_rev.
+
+set_irr_sym.f90 : generalized to deal with t_rev symmetry
+
+set_irr.f90 : call the generalized symmetrization routines.
+
+prepare_sym_analysis : manage the use of the subgroup that has not t_rev
+              for the symmetry analysis of the phonons of a magnetic system.
+
+find_irrep.f90 : call set_irr_tpw.
+
+find_inverse_s.f90 : has explicit argumets and can be called independently from
+                 the symmetry modulus.
+
+clean_pw_ph.f90 : has the possibility to choose if to remove the phonon files
+               when closing. In the lanczos chain the files are not removed
+               so other steps can be done in the next run.
+
+adddvscf.f90 : generalized to the noncollinear magnetic case.
+
+dvqpsi_us.f90 : generalized to the noncollinear magnetic case.
+
+dvqpsi_usi_only.f90 : generalized to the noncollinear magnetic case.
+
+incdrhoscf_nc.f90 : generalized to the noncollinear magnetic case.
+
+symdvscf.f90 : generalized to the noncollinear magnetic case.
+
+psymdvscf.f90 : call symdvscf_tpw.
+
+sym_dmag.f90 : generalized to the noncollinear magnetic case.
+
+psym_dmag.f90 : call sym_dmag_tpw.
+
+drhodvus.f90 : call tra_write_matrix_tpw.
+
+addusdbec_nc.f90 : generalized to the noncollinear magnetic case.
+
+init_representations.f90 : call the tpw symmetrization routines.
 
 The new routines contained in this directory are:
 

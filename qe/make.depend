@@ -107,8 +107,13 @@ allocate_lanczos.o : ../../Modules/noncol.o
 allocate_lanczos.o : ../../Modules/uspp.o
 allocate_lanczos.o : ../../PW/src/pwcom.o
 allocate_lanczos.o : control_qe.o
+allocate_phq.o : ../../LR_Modules/lrcom.o
+allocate_phq.o : ../../Modules/becmod.o
 allocate_phq.o : ../../Modules/ions_base.o
 allocate_phq.o : ../../Modules/kind.o
+allocate_phq.o : ../../Modules/noncol.o
+allocate_phq.o : ../../Modules/uspp.o
+allocate_phq.o : ../../PW/src/pwcom.o
 allocate_phq.o : control_qe.o
 apply_ac.o : ../../LR_Modules/lrcom.o
 apply_ac.o : ../../Modules/becmod.o
@@ -626,7 +631,9 @@ init_representations.o : ../../PHonon/PH/phcom.o
 init_representations.o : ../../PW/src/symm_base.o
 init_representations.o : ../../UtilXlib/mp.o
 initialize_ph.o : ../../LR_Modules/lrcom.o
+initialize_ph.o : ../../Modules/noncol.o
 initialize_ph.o : ../../PW/src/pwcom.o
+initialize_ph.o : control_qe.o
 irrek.o : ../../Modules/kind.o
 irrek.o : control_qe.o
 kpoint_grid.o : ../../Modules/kind.o
@@ -846,6 +853,7 @@ phq_init.o : ../../PW/src/Coul_cut_2D.o
 phq_init.o : ../../PW/src/buffers.o
 phq_init.o : ../../PW/src/pwcom.o
 phq_init.o : ../../UtilXlib/mp.o
+phq_init.o : control_qe.o
 phq_readin.o : ../../LR_Modules/lrcom.o
 phq_readin.o : ../../Modules/constants.o
 phq_readin.o : ../../Modules/control_flags.o
@@ -896,10 +904,12 @@ phq_setup.o : ../../PHonon/PH/elph_tetra_mod.o
 phq_setup.o : ../../PHonon/PH/ph_restart.o
 phq_setup.o : ../../PHonon/PH/phcom.o
 phq_setup.o : ../../PHonon/PH/ramanm.o
+phq_setup.o : ../../PW/src/newd.o
 phq_setup.o : ../../PW/src/pwcom.o
 phq_setup.o : ../../PW/src/scf_mod.o
 phq_setup.o : ../../PW/src/symm_base.o
 phq_setup.o : ../../UtilXlib/mp.o
+phq_setup.o : control_qe.o
 phq_summary.o : ../../LR_Modules/lrcom.o
 phq_summary.o : ../../Modules/cell_base.o
 phq_summary.o : ../../Modules/control_flags.o
@@ -1044,6 +1054,7 @@ run_nscf.o : ../../Modules/io_files.o
 run_nscf.o : ../../Modules/io_global.o
 run_nscf.o : ../../Modules/mp_bands.o
 run_nscf.o : ../../Modules/mp_pools.o
+run_nscf.o : ../../Modules/noncol.o
 run_nscf.o : ../../Modules/recvec.o
 run_nscf.o : ../../PHonon/PH/acfdtest.o
 run_nscf.o : ../../PHonon/PH/elph.o
@@ -1313,13 +1324,11 @@ solve_linear_system.o : ../../Modules/uspp.o
 solve_linear_system.o : ../../PW/src/pwcom.o
 solve_linear_system.o : ../../PW/src/scf_mod.o
 solve_linear_system.o : control_qe.o
-solve_linter.o : ../../FFTXlib/fft_helper_subroutines.o
 solve_linter.o : ../../FFTXlib/fft_interfaces.o
 solve_linter.o : ../../LR_Modules/dv_of_drho.o
 solve_linter.o : ../../LR_Modules/lrcom.o
 solve_linter.o : ../../Modules/cell_base.o
 solve_linter.o : ../../Modules/check_stop.o
-solve_linter.o : ../../Modules/constants.o
 solve_linter.o : ../../Modules/fft_base.o
 solve_linter.o : ../../Modules/io_files.o
 solve_linter.o : ../../Modules/io_global.o
@@ -1341,11 +1350,11 @@ solve_linter.o : ../../PHonon/PH/save_ph_input.o
 solve_linter.o : ../../PHonon/PH/write_rec.o
 solve_linter.o : ../../PW/src/buffers.o
 solve_linter.o : ../../PW/src/paw_onecenter.o
-solve_linter.o : ../../PW/src/paw_symmetry.o
 solve_linter.o : ../../PW/src/pwcom.o
 solve_linter.o : ../../PW/src/scf_mod.o
 solve_linter.o : ../../UtilXlib/mp.o
 solve_linter.o : ../../thermo_pw/lib/mp_asyn.o
+solve_linter.o : control_qe.o
 star_q.o : ../../Modules/io_global.o
 star_q.o : ../../Modules/kind.o
 stres_gradcorr.o : ../../FFTXlib/fft_interfaces.o
@@ -1440,6 +1449,7 @@ transform_intq_so.o : ../../Modules/uspp.o
 transform_intq_so.o : ../../PW/src/pwcom.o
 transform_intq_so.o : control_qe.o
 write_group_info_ph.o : ../../Modules/io_global.o
+write_group_info_ph.o : ../../Modules/noncol.o
 write_group_info_ph.o : ../../PW/src/pwcom.o
 zstar_eu.o : ../../LR_Modules/lrcom.o
 zstar_eu.o : ../../Modules/cell_base.o

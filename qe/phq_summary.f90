@@ -245,7 +245,7 @@ subroutine phq_summary_tpw
 
   CALL print_ps_info ( )
   IF (search_sym.AND.iverbosity==1) THEN
-     CALL write_group_info(.true.)
+     CALL write_group_info_ph(.true.)
   ELSE IF (search_sym) THEN
      WRITE(stdout,'(/,5x,"Mode symmetry, ",a11," point group:")') gname  
   ENDIF

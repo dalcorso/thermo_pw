@@ -301,7 +301,7 @@ ENDDO
 RETURN
 END SUBROUTINE print_mode_sym_proj
 
-SUBROUTINE prepare_sym_analysis_proj(nsymq,s,sr,ft,gii,ptype,gcode_old)
+SUBROUTINE prepare_sym_analysis_proj(nsymq,s,sr,ft,gii,t_rev,ptype,gcode_old)
 !
 !  set gcode_old to -1 to avoid any output writing from this routine
 !
@@ -312,19 +312,22 @@ USE proj_rap_point_group, ONLY : which_elem, group_desc, char_mat_proj, &
                           name_rap_proj, nrap_proj, code_groupq_ext, & 
                           qptype, qgauge 
 USE rap_point_group, ONLY : code_group, gname
+USE rap_point_group_is, ONLY : code_group_is, gname_is
+USE noncollin_module, ONLY : nspin_mag
 
 IMPLICIT NONE
 
 INTEGER :: nsymq, gcode_old
-INTEGER :: s(3,3,48), gii(3,48), ptype(3)
+INTEGER :: s(3,3,48), gii(3,48), ptype(3), t_rev(48)
 REAL(DP) :: sr(3,3,48), ft(3,48), argument(48,48), gauge(48), sr_is(3,3,48)
-INTEGER :: code_group_ext
+INTEGER :: code_group_ext, isym, nsym_is
 LOGICAL :: lwrite
 lwrite=.FALSE.
 IF (code_group/=gcode_old .AND. gcode_old /= -1 ) lwrite=.TRUE.
 
 CALL find_group_info_ext(nsymq,sr,code_group,code_group_ext, &
                                                     which_elem, group_desc)
+
 CALL set_factor_system(argument, s, ft, gii, nsymq, &
                             which_elem, .FALSE., .FALSE., code_group_ext)
 
@@ -336,6 +339,21 @@ qptype(:)=ptype(:)
 qgauge(:)=gauge(:)
 code_groupq_ext=code_group_ext
 !
+!  If some symmetry needs the time reversal check which group is formed
+!  by the operations that do not need time reversal.
+!
+IF (nspin_mag==4) THEN
+   nsym_is=0
+   DO isym=1,nsymq
+      IF (t_rev(isym)==0) THEN
+         nsym_is=nsym_is+1
+         sr_is(:,:,nsym_is) = sr(:,:,isym)
+      ENDIF
+   ENDDO
+   CALL find_group(nsym_is,sr_is,gname_is,code_group_is)
+ENDIF
+!
+CALL find_group(nsymq,sr,gname,code_group)
 
 RETURN
 END SUBROUTINE prepare_sym_analysis_proj

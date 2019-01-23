@@ -14,12 +14,14 @@ SUBROUTINE write_group_info_ph(flag)
 ! writes also the elements of each class.
 ! This routine differs from the one contained in divide_class_so because
 ! it never uses the information on the double point group, since the phonon
-! are classified with the representations of the point group
+! are classified with the representations of the point group.
 !
 !
 USE rap_point_group,      ONLY : code_group, nclass, nelem, elem, which_irr, &
                                  char_mat, name_rap, name_class, gname,      &
                                  elem_name
+USE rap_point_group_is,   ONLY : code_group_is, gname_is
+USE noncollin_module,     ONLY : nspin_mag
 USE io_global,            ONLY : stdout
 
 IMPLICIT NONE
@@ -27,7 +29,18 @@ IMPLICIT NONE
 INTEGER :: iclass, irot, i, idx, irap
 LOGICAL :: is_complex, is_complex_so, flag
 
-WRITE(stdout,'(/,5x,"point group ",a11)') gname
+IF (nspin_mag==4) THEN
+   WRITE(stdout,'(/,5x,"The magnetic double point group is ", &
+                     & a11," [",a11,"]")') &
+                      gname, gname_is
+   WRITE(stdout,'(5x,"using the point group ",a11," to symmetrize")') &
+                                                                    gname
+   WRITE(stdout,'(5x,"and the point group ",a11," to classify the modes")') &
+                                                                    gname_is
+ELSE
+   WRITE(stdout,'(/,5x,"Using the point group ",a11," to classify the modes")')&
+                                                                    gname
+ENDIF
 WRITE(stdout,'(5x, "there are", i3," classes")') nclass
 
 WRITE(stdout,'(5x, "the character table:")')
@@ -37,6 +50,7 @@ DO iclass=1,nclass
       (REAL(char_mat(iclass,irot)),irot=1,nclass)
 ENDDO
 idx=code_group
+IF (nspin_mag==4) idx=code_group_is
 IF (is_complex(idx)) THEN
    WRITE(stdout,'(5x,"imaginary part")')
    DO iclass=1,nclass

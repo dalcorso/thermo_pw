@@ -151,7 +151,7 @@ SUBROUTINE check_initial_status_tpw(auxdyn)
      !
      !   Initialize the representations and write them on file.
      !
-     CALL init_representations()
+     CALL init_representations_tpw()
      !
      IF ((start_irr==0).AND.(last_irr==0)) THEN
         where_rec='init_rep..'

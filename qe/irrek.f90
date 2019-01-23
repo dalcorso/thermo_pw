@@ -61,10 +61,6 @@ subroutine irreducible_BZ_tpw (nrot, s, nsym, minus_q, magnetic_sym, at, bg, &
      nks0=nks
      call irrek_tpw (at, bg, nrot, invs, nsym, irg, minus_q, npk, nks, xk, &
                  wk, t_rev, diago_bands, isym_bands, ik_origin)
-!     DO ik=1,nks
-!        WRITE(6,*) diago_bands(ik), isym_bands(ik), ik_origin(ik)
-!        diago_bands(ik)=.TRUE.
-!     ENDDO
   ENDIF
   !
   return
@@ -298,6 +294,7 @@ subroutine irrek_nc_tpw (at, bg, nrot, invs, nsym, irg, npk, &
         xks (:) = invs (:, 1, irot) * xkg (1) + &
                   invs (:, 2, irot) * xkg (2) + &
                   invs (:, 3, irot) * xkg (3)
+        IF (t_rev(irot)==1) xks =-xks
         ! 
         !  Now check if there is an operation of the subgroup that
         !  makes xks equivalent to some other already found k point
@@ -324,8 +321,8 @@ subroutine irrek_nc_tpw (at, bg, nrot, invs, nsym, irg, npk, &
         IF (nks > npk) CALL errore('irrek_nc','too many k points',1)
         xk_new(:,nks)=xks
         wk_new(nks)=wk(jk)
-        isym_bands(nks)=irot
-        ik_origin(nks)=jk
+        isym_bands_new(nks)=irot
+        ik_origin_new(nks)=jk
 100     CONTINUE
      ENDDO
      start_k=nks

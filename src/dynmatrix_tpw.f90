@@ -24,7 +24,7 @@ subroutine dynmatrix_tpw(iq_)
   USE io_global,     ONLY : stdout
   USE control_flags, ONLY : modenum
   USE cell_base,     ONLY : at, bg, celldm, ibrav, omega
-  USE symm_base,     ONLY : s, sr, irt, ftau, nsym, invs
+  USE symm_base,     ONLY : s, sr, irt, ftau, nsym, invs, sname, t_rev
   USE fft_base,      ONLY : dfftp
   USE dynmat,        ONLY : dyn, w2
   USE noncollin_module, ONLY : nspin_mag
@@ -48,6 +48,7 @@ subroutine dynmatrix_tpw(iq_)
   USE ramanm,        ONLY : lraman, ramtns
 
   USE lr_symm_base,  ONLY : gi, minus_q, irotmq, nsymq, rtau
+  USE ph_symmetry,   ONLY : manage_ph_symmetry
   USE qpoint,        ONLY : xq
   USE control_lr,    ONLY : lgamma
 
@@ -66,7 +67,6 @@ subroutine dynmatrix_tpw(iq_)
   real(DP), allocatable :: zstar(:,:,:)
   integer :: icart, jcart, ierr, gii(3,48), ptype(3), isym
   logical :: ldiag_loc
-  LOGICAL :: symmorphic_or_nzb
   !
   call start_clock('dynmatrix')
   ldiag_loc=ldiag.OR.(nat_todo_input > 0).OR.all_comp
@@ -117,7 +117,7 @@ subroutine dynmatrix_tpw(iq_)
                        n_diff_sites, equiv_atoms, has_equivalent, dyn)
      IF (asr) CALL set_asr_c(nat,nasr,dyn)
   ELSE
-     CALL symdyn_munu_new (dyn, u, xq, s, invs, rtau, irt, at, bg, &
+     CALL symdyn_munu_tpw (dyn, u, xq, s, invs, rtau, irt, at, bg, &
           nsymq, nat, irotmq, minus_q)
   ENDIF
   !
@@ -151,7 +151,7 @@ subroutine dynmatrix_tpw(iq_)
   !
   !   Generates the star of q
   !
-  call star_q (xq, at, bg, nsym, s, invs, nq, sxq, isq, imq, .TRUE. )
+  call star_q_tpw (xq, at, bg, nsym, s, invs, t_rev, nq, sxq, isq, imq, .TRUE. )
   !
   ! write on file information on the system
   !
@@ -172,7 +172,7 @@ subroutine dynmatrix_tpw(iq_)
   !
   !   Rotates and writes on iudyn the dynamical matrices of the star of q
   !
-  call q2qstar_ph (dyn, at, bg, nat, nsym, s, invs, irt, rtau, &
+  call q2qstar_ph_tpw (dyn, at, bg, nat, nsym, s, invs, irt, rtau, &
        nq, sxq, isq, imq, iudyn)
 
   !
@@ -223,32 +223,7 @@ subroutine dynmatrix_tpw(iq_)
   !
   IF (ldiag_loc) THEN
      call dyndia (xq, nmodes, nat, ntyp, ityp, amass, iudyn, dyn, w2)
-     IF (search_sym) THEN
-        IF (symmorphic_or_nzb()) THEN
-            CALL find_mode_sym_tpw (dyn, w2, tau, nat, nsymq, s, sr, irt, xq, &
-                 rtau, amass, ntyp, ityp, 1, lgamma_gamma, .FALSE., &
-                 num_rap_mode, ierr)
-            CALL print_mode_sym(w2, num_rap_mode, lgamma)
-        ELSE
-           WRITE(stdout,'(/,5x,"Zone border point and nonsymmorphic &
-                                           &operations. Using")')
-           DO isym = 1, nsymq
-              ft(1,isym) = DBLE(ftau(1,isym)) / DBLE(dfftp%nr1)
-              ft(2,isym) = DBLE(ftau(2,isym)) / DBLE(dfftp%nr2)
-              ft(3,isym) = DBLE(ftau(3,isym)) / DBLE(dfftp%nr3)
-           END DO
-           wrk(:,1:nsymq)=gi(:,1:nsymq)
-           CALL cryst_to_cart (nsymq, wrk, at, -1)
-           gii(:,1:nsymq)=NINT(wrk(:,1:nsymq))
-           CALL prepare_sym_analysis_proj(nsymq,s,sr,ft,gii,ptype,-1)
-
-           CALL sgam_ph_new (at, bg, nsym, s, irt, tau, rtau, nat)
-           CALL find_mode_sym_proj (dyn, w2, tau, nat, nsymq, s, sr, ft, gii, &
-                                 invs, irt, xq, rtau, amass, ntyp, ityp, 1, &
-                                 .FALSE., .FALSE., num_rap_mode, ierr)
-           CALL print_mode_sym_proj(w2, num_rap_mode, ptype)
-        ENDIF
-     ENDIF
+     CALL manage_ph_symmetry(dyn, w2, num_rap_mode, xq, search_sym)
      IF (qplot) omega_disp(:,current_iq)=w2(:)
   END IF
 !

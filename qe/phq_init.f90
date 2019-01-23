@@ -43,7 +43,7 @@ SUBROUTINE phq_init_tpw()
   USE io_global,            ONLY : stdout
   USE atom,                 ONLY : msh, rgrid
   USE vlocal,               ONLY : strf
-  USE spin_orb,             ONLY : lspinorb
+  USE spin_orb,             ONLY : lspinorb, domag
   USE wvfct,                ONLY : npwx, nbnd
   USE gvecw,                ONLY : gcutw
   USE wavefunctions_module, ONLY : evc
@@ -68,6 +68,7 @@ SUBROUTINE phq_init_tpw()
 
   USE lrus,                 ONLY : becp1, dpqq, dpqq_so
   USE qpoint,               ONLY : xq, nksq, eigqts, ikks, ikqs
+  USE qpoint_aux,           ONLY : becpt, alphapt, ikmks
   USE eqv,                  ONLY : vlocq, evq
   USE control_lr,           ONLY : nbnd_occ, lgamma
   !
@@ -88,7 +89,7 @@ SUBROUTINE phq_init_tpw()
   INTEGER :: npw, npwq
   REAL(DP) :: arg
     ! the argument of the phase
-  COMPLEX(DP), ALLOCATABLE :: aux1(:,:)
+  COMPLEX(DP), ALLOCATABLE :: aux1(:,:), tevc(:,:)
     ! used to compute alphap
   INTEGER :: icar, jcar
   !
@@ -159,6 +160,7 @@ SUBROUTINE phq_init_tpw()
   endif
   !
   ALLOCATE( aux1( npwx*npol, nbnd ) )
+  IF (noncolin.AND.domag) ALLOCATE(tevc(npwx*npol,nbnd))
   !
   DO ik = 1, nksq
      !
@@ -195,14 +197,16 @@ SUBROUTINE phq_init_tpw()
 !       CALL davcio (evc, lrwfc, iunwfcwann, ik, - 1)
     else
        CALL get_buffer( evc, lrwfc, iuwfc, ikk )
+       IF (noncolin.AND.domag) THEN
+          CALL get_buffer( tevc, lrwfc, iuwfc, ikmks(ik) )
+          CALL calbec (npw, vkb, tevc, becpt(ik) )
+       ENDIF
     endif
      !
      ! ... e) we compute the becp terms which are used in the rest of
      ! ...    the code
      !
-
      CALL calbec (npw, vkb, evc, becp1(ik) )
-
      !
      ! ... e') we compute the derivative of the becp term with respect to an
      !         atomic displacement
@@ -223,6 +227,25 @@ SUBROUTINE phq_init_tpw()
         END DO
         CALL calbec (npw, vkb, aux1, alphap(ipol,ik) )
      END DO
+     !
+     IF (noncolin.AND.domag) THEN
+        DO ipol = 1, 3
+           aux1=(0.d0,0.d0)
+           DO ibnd = 1, nbnd
+              DO ig = 1, npw
+                 aux1(ig,ibnd) = tevc(ig,ibnd) * tpiba * ( 0.D0, 1.D0 ) * &
+                              ( xk(ipol,ikk) + g(ipol,igk_k(ig,ikk)) )
+              END DO
+              IF (noncolin) THEN
+                 DO ig = 1, npw
+                    aux1(ig+npwx,ibnd)=tevc(ig+npwx,ibnd)*tpiba*(0.D0,1.D0)*&
+                           ( xk(ipol,ikk) + g(ipol,igk_k(ig,ikk)) )
+                 END DO
+              END IF
+           END DO
+           CALL calbec (npw, vkb, aux1, alphapt(ipol,ik) )
+        END DO
+     ENDIF
      !
 !!!!!!!!!!!!!!!!!!!!!!!! ACFDT TEST !!!!!!!!!!!!!!!!
   IF (acfdt_is_active) THEN
@@ -253,9 +276,10 @@ SUBROUTINE phq_init_tpw()
      !
   END DO
   !
+  IF (noncolin.AND.domag) DEALLOCATE(tevc)
   DEALLOCATE( aux1 )
   !
-  IF (trans.OR.zeu) CALL dvanqq()
+  IF (trans.OR.zeu) CALL dvanqq_tpw()
   !
   IF ( ( epsil .OR. zue .OR. l_head) .AND. okvan ) THEN
      CALL compute_qdipol(dpqq)
@@ -270,7 +294,7 @@ SUBROUTINE phq_init_tpw()
   !
   CALL add_zstar_us_tpw()
   !
-  IF ( trans ) CALL dynmat0_new()
+  IF ( trans ) CALL dynmat0_tpw()
   !
   CALL stop_clock( 'phq_init' )
   !

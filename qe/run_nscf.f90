@@ -40,6 +40,8 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
 
   USE lr_symm_base,    ONLY : minus_q, nsymq, invsymq
   USE qpoint,          ONLY : xq
+  USE noncollin_module,ONLY : noncolin
+  USE spin_orb,        ONLY : domag
   USE mp_bands,        ONLY : intra_bgrp_comm, nyfft
   USE mp_pools,        ONLY : kunit
   USE el_phon,         ONLY : elph_mat
@@ -61,9 +63,13 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
      tmp_dir=tmp_dir_phq
      kunit=2
      IF (lgamma_iq(iq)) kunit=1
+     IF ((noncolin.AND.domag)) THEN
+        kunit=4
+        IF (lgamma_iq(iq)) kunit=2
+     ENDIF
      qnorm = SQRT(xq(1)**2+xq(2)**2+xq(3)**2)
      CALL read_file()
-     CALL set_small_group_of_q(nsymq,invsymq,minus_q)
+     CALL set_small_group_of_q_tpw(nsymq,invsymq,minus_q)
      RETURN
   ENDIF
   !
