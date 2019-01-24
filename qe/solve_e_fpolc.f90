@@ -460,11 +460,9 @@ SUBROUTINE solve_e_fpolc(iu)
      IF (okpaw) call mp_sum ( dbecsum, inter_pool_comm )
      if (.not.lgamma_gamma) then
         IF (ldpsi1) THEN
-           call psyme_fpol (dvscfout)
-           IF ( noncolin.and.domag ) CALL psym_dmage_fpol(dvscfout)
+           CALL symmetrize_drho(dvscfout, dbecsum, 0, 3, 4)
         ELSE
-           call psyme (dvscfout)
-           IF ( noncolin.and.domag ) CALL psym_dmage(dvscfout)
+           CALL symmetrize_drho(dvscfout, dbecsum, 0, 3, 2)
         ENDIF
      endif
      IF ( with_asyn_images.AND.my_image_id==root_image.AND.ionode ) &

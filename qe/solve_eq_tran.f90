@@ -494,7 +494,9 @@ subroutine solve_eq_tran(iu, flag)
 !   the y component of the magnetization is obtained multiplying by -i
 !
      dvscfout(:,1,1) = 2.0_DP*dvscfout(:,1,1)
-     CALL psymeq(dvscfout)
+!     CALL psymeq(dvscfout)
+     CALL symmetrize_drho(dvscfout, dbecsum, 0, 3, 3) 
+
      drhoscfout(:) = dvscfout(:,1,1)
      !
      !   save the symmetrized linear charge response to file

@@ -423,11 +423,13 @@ SUBROUTINE do_lanczos_psh()
      !
      IF (.NOT.lgamma_gamma) THEN
         IF (lgamma) THEN
-           CALL psyme (dvscfin)
-           IF ( noncolin.and.domag ) CALL psym_dmage(dvscfin)
+           CALL symmetrize_drho(dvscfin, dbecsum, 0, 3, 2 )
+!           CALL psyme (dvscfin)
+!           IF ( noncolin.and.domag ) CALL psym_dmage(dvscfin)
         ELSE
-           CALL psymeq (dvscfin)
-           IF ( noncolin.AND.domag ) CALL psym_dmageq(dvscfin)
+           CALL symmetrize_drho(dvscfin, dbecsum, 0, 3, 3 )
+!           CALL psymeq (dvscfin)
+!           IF ( noncolin.AND.domag ) CALL psym_dmageq(dvscfin)
         ENDIF
      ENDIF
      !

@@ -496,8 +496,9 @@ subroutine solve_eq(iu, flag)
      call mp_sum ( dvscfout, inter_pool_comm )
      
      IF (okpaw) call mp_sum ( dbecsum, inter_pool_comm )
-     call psymeq (dvscfout)
-     IF ( noncolin.and.domag ) CALL psym_dmageq(dvscfout)
+
+     CALL symmetrize_drho(dvscfout, dbecsum, 0, 3, 3)
+
      drhoscfout(:,:)=dvscfout(:,:,1)
      !
      !   save the symmetrized linear charge response to file

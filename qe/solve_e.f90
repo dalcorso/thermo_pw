@@ -340,10 +340,11 @@ subroutine solve_e_tpw(drhoscf)
      !
      call mp_sum ( drhoscfh, inter_pool_comm )
      IF (okpaw) call mp_sum ( dbecsum, inter_pool_comm )
-     if (.not.lgamma_gamma) then
-        call psyme (drhoscfh)
-        IF ( noncolin.and.domag ) CALL psym_dmage(drhoscfh)
-     endif
+     CALL symmetrize_drho(drhoscfh, dbecsum, 0, 3, 2)
+!     if (.not.lgamma_gamma) then
+!        call psyme (drhoscfh)
+!        IF ( noncolin.and.domag ) CALL psym_dmage(drhoscfh)
+!     endif
      !
      !   save the symmetrized linear charge response to file
      !   calculate the corresponding linear potential response
