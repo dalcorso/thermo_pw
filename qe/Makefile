@@ -98,10 +98,6 @@ prepare_q.o \
 prepare_sym_analysis.o \
 print_symmetries.o \
 psh_lanczos_step.o \
-psyme_fpol.o \
-psym_dmageq.o \
-psymeq.o \
-psym_dmage_fpol.o \
 q_points.o \
 q2qstar_ph.o \
 rotate_and_add_dyn.o \
@@ -137,11 +133,7 @@ stress.o \
 stres_gradcorr.o \
 symdyn_munu.o \
 symdynph_gq.o \
-syme_fpol.o     \
-symeq.o \
 symmetrize_drho.o \
-sym_dmage_fpol.o \
-sym_dmageq.o \
 transform_intq_nc.o \
 transform_intq_so.o  \
 tra_write_matrix.o \
