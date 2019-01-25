@@ -175,10 +175,6 @@ symdvscf.f90 : generalized to the noncollinear magnetic case.
 
 psymdvscf.f90 : call symdvscf_tpw.
 
-sym_dmag.f90 : generalized to the noncollinear magnetic case.
-
-psym_dmag.f90 : call sym_dmag_tpw.
-
 drhodvus.f90 : call tra_write_matrix_tpw.
 
 addusdbec_nc.f90 : generalized to the noncollinear magnetic case.
@@ -257,21 +253,6 @@ psyme_fpol : parallel driver of the following
 
 syme_fpol : similar to syme, but used in the optical case
             does not assume that the potential is real.
-
-psymeq : parallel driver of the following.
-
-symeq : similar to syme_fpol, but used for EELS and symmetrize only 
-            one susceptibility.
-
-psym_dmage_fpol : parallel driver of the following.
-
-sym_dmage_fpol : similar to sym_dmag, but used in the optical case
-            does not assume that the potential is real.
-
-psym_dmageq : parallel driver of the following
-
-sym_dmageq : similar to sym_dmage.f90, but used for EELS and only one 
-            perturbation is made.
 
 check_bands : a function that tests if the files with bands are already
             in the outdir directory
