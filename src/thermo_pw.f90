@@ -29,7 +29,8 @@ PROGRAM thermo_pw
 
   USE kinds,            ONLY : DP
 
-  USE thermo_mod,       ONLY : what, ngeo, energy_geo, tot_ngeo, density
+  USE thermo_mod,       ONLY : what, ngeo, energy_geo, tot_ngeo, density,  &
+                               start_geometry, last_geometry
   USE control_thermo,   ONLY : lev_syn_1, lev_syn_2, lpwscf_syn_1,         &
                                lbands_syn_1, lph, outdir_thermo, lq2r,     &
                                lconv_ke_test, lconv_nk_test,               &
@@ -187,7 +188,7 @@ PROGRAM thermo_pw
 !   calculation of elastic constants. We allow the calculation for several
 !   geometries
 !
-     DO igeom=1,tot_ngeo
+     DO igeom=start_geometry,last_geometry
 
         IF (tot_ngeo > 1) CALL set_geometry_el_cons(igeom)
 
