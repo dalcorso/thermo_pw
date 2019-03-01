@@ -166,7 +166,7 @@ SUBROUTINE quadratic_fit_t(itemp, celldm_t, free_e_min_t, ph_free_ener, &
 
   USE quartic_surfaces, ONLY : find_quartic_quadratic_extremum, &
                       fit_multi_quartic, find_two_quartic_extremum,  &
-                      print_chisq_two_quartic, print_chisq_quartic_quadratic
+                      print_chisq_quartic
 
   IMPLICIT NONE
   INTEGER  :: itemp
@@ -217,14 +217,11 @@ SUBROUTINE quadratic_fit_t(itemp, celldm_t, free_e_min_t, ph_free_ener, &
      IF (lquartic_ph) THEN
         WRITE(stdout,'(/,5x, "Fit improved with a fourth order polynomial")') 
         CALL fit_multi_quartic(ndata,degree,nvar4,lsolve,x,f,coefft4)
-        CALL print_chisq_two_quartic(ndata, degree, nvar4, x, f, &
-                                                           coeff4, coefft4)
+        CALL print_chisq_quartic(ndata, degree, nvar4, x, f, coefft4)
         CALL find_two_quartic_extremum(degree,nvar4,x_pos_min,&
                                                        ymin,coeff4,coefft4)
      ELSE
         WRITE(stdout,'(/,5x,"Quartic fit used only a T=0:")')
-        CALL print_chisq_quartic_quadratic(ndata, degree, nvar4, nvar, &
-                                                x, f, coeff4, coeff)
         CALL find_quartic_quadratic_extremum(degree,nvar4,nvar,x_pos_min,&
                                                            ymin,coeff4,coeff)
      ENDIF
