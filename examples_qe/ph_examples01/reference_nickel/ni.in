@@ -1,0 +1,29 @@
+ &control
+    calculation = 'scf'
+    restart_mode='from_scratch',
+    prefix='ni',
+    pseudo_dir = '/home/espresso/pslibrary.1.0.0/pbe/PSEUDOPOTENTIALS//',
+    outdir='/home/espresso/QE64_TRIS/tempdir/'
+ /
+ &system
+    ibrav=2, 
+    celldm(1)=6.65, 
+    nat=1, 
+    ntyp=1,
+    nspin=2,
+    starting_magnetization(1)=0.5,
+    degauss=0.02,
+    smearing='mp',
+    occupations='smearing',
+    ecutwfc =27.0
+    ecutrho =300.0
+ /
+ &electrons
+    conv_thr =  1.0d-12
+ /
+ATOMIC_SPECIES
+Ni  58.6934  Ni.pbe-n-rrkjus_psl.0.1.UPF
+ATOMIC_POSITIONS {crystal}
+Ni 0.0 0.0 0.0
+K_POINTS {automatic}
+ 4 4 4 1 1 1

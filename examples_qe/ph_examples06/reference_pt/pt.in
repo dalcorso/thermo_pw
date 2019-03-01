@@ -1,0 +1,27 @@
+ &control
+    calculation = 'scf'
+    restart_mode='from_scratch',
+    prefix='pt',
+    pseudo_dir = '/home/espresso/pslibrary.1.0.0/rel-pz/PSEUDOPOTENTIALS//',
+    outdir='/home/espresso/QE64_TRIS/tempdir/'
+ /
+ &system
+    ibrav=  2, celldm(1) =7.42, nat=  1, ntyp= 1,
+    lspinorb=.true.,
+    noncolin=.true.,
+    starting_magnetization=0.0,
+    occupations='smearing',
+    degauss=0.02,
+    smearing='mp',
+    ecutwfc =30.0,
+    ecutrho =250.0,
+ /
+ &electrons
+    conv_thr =  1.0d-12
+ /
+ATOMIC_SPECIES
+Pt  0.0    Pt.rel-pz-n-rrkjus_psl.1.0.0.UPF
+ATOMIC_POSITIONS {crystal}
+Pt 0.0 0.0 0.0
+K_POINTS {automatic}
+ 4 4 4 1 1 1

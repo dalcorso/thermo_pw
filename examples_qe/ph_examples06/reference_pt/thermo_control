@@ -1,0 +1,5 @@
+ &INPUT_THERMO
+  what='scf_disp',
+  fildyn='pt.dyn.xml',
+  after_disp=.TRUE.
+ /

@@ -1,0 +1,20 @@
+The examples in this directory are those of the QE distribution that are
+supposed to run also with thermo_pw. These examples are used to check 
+that all the QE functionalities are not broken by thermo_pw. Moreover 
+this directory contains a set of examples needed to check the additional
+features of thermo_pw not yet exported in QE.
+
+Inside each example a reference directory contains the correct output.
+
+Available examples:
+
+ph_example01 : phonon dispersion of carbon with US-PP, Ni with US-PP and pbe
+
+ph_example02 : phonon dispersions of AlAs with norm-conserving PPs
+
+ph_example06 : phonon dispersions of Pt with fully relativistic US-PPs
+
+ph_example08 : phonon dispersions of carbon with PAW-PP, Ni with PAW-PP and pbe
+
+ph_example11 : phonon dispersions of Pt with fully relativistic PAW-PPs.
+
