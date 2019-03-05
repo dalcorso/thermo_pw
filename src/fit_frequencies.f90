@@ -185,7 +185,7 @@ SUBROUTINE fit_frequencies_anis()
         CALL interp_freq_anis_eigen(ndata,freq_geo,x,cgeo_eff,displa_geo, &
                            degree,nvar,poly_grun(1,1,n))
      ELSE
-        CALL interp_freq_anis(nwork,freq_geo,x,degree,nvar,poly_grun(1,1,n))
+        CALL interp_freq_anis(ndata,freq_geo,x,degree,nvar,poly_grun(1,1,n))
      ENDIF
   ENDDO
 !

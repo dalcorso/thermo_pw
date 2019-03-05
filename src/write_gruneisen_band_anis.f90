@@ -258,7 +258,7 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
               frequency_geo(1:nmodes,ndata)=freq_geo(1:nmodes,n,idata)
               displa(1:nmodes,1:nmodes,ndata)=displa_geo(1:nmodes,1:nmodes,idata,n)
            ENDDO
-           CALL interp_freq_anis_eigen(nwork, frequency_geo, x_data, cgeo_eff, &
+           CALL interp_freq_anis_eigen(ndata, frequency_geo, x_data, cgeo_eff, &
                                     displa, degree, nvar, poly_grun)
 !
 !  frequencies and gruneisen parameters are calculated at the chosen volume
