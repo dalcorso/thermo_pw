@@ -264,6 +264,16 @@ given in the \thermo\ input. The figure of these quantities is in the file
 Note that they are calculated at the geometry given in the input
 of \texttt{pw.x}.
 
+\section{\color{coral}How do I calculate the atomic B-factor of a solid?}
+Use \texttt{what='scf\_disp'} as in \texttt{example04} and add the
+flag \texttt{with\_eigen=.TRUE.}. These quantities
+are calculated after the phonon dispersion calculation for the default 
+temperature range ($1$ K - $800$ K) or for the range
+given in the \thermo\ input. The figure of these quantities is in the file 
+\texttt{output\_therm.ps.g1.dw}.
+Note that they are calculated at the geometry given in the input
+of \texttt{pw.x}.
+
 
 \section{\color{coral}How do I calculate the elastic constants?}
 Use \texttt{what='scf\_elastic\_constants'}. See \texttt{example13}. The
@@ -357,10 +367,12 @@ changed while the other crystal parameters are kept constant.
 as a function of temperature?}
 This is a two step calculation. First use 
 \texttt{what='elastic\_constants\_t'}. This option computes the elastic
-constants for all the geometries used by \texttt{what='mur\_lc\_t'}.
-Then copy the directory \texttt{elastic\_constants} in a new directory 
-and with the same input for \texttt{pw.x}, run again \texttt{thermo\_pw}
-using \texttt{what='mur\_lc\_t'}.
+constants for all the geometries used by \texttt{what='mur\_lc\_t'} and
+saves them in the directory \texttt{elastic\_constants}.  
+In the second step use the same input for \texttt{pw.x} and run again 
+\texttt{thermo\_pw} using \texttt{what='mur\_lc\_t'} and copying in your
+working directory the directory \texttt{elastic\_constants} obtained 
+in the previous step.
 Presently the code computes the temperature dependent elastic constants
 only within the ``quasi-static'' approximation, meaning that it interpolates
 the elastic constants found in the first step at the geometry that
