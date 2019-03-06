@@ -2022,13 +2022,13 @@ For a detailed description of the input variables please look at the beginning
 of the \texttt{fortran} sources of each code.
 
 \newpage
-\section{\color{coral}Examples, inputs, pseudo\_test, space\_groups,\\ 
-tools\_inputs}
+\section{\color{coral}Examples, examples\_qe, inputs, pseudo\_test, space\_groups, tools\_inputs}
 
-The directories \texttt{examples}, \texttt{inputs}, \texttt{pseudo\_tests}, 
-\texttt{space\_groups} and \texttt{tools\_inputs} contain a set
-of examples that can be studied in order to learn how to use the \thermo\ 
-package. The \texttt{examples} directory contains inputs that run in a few
+The directories \texttt{examples}, \texttt{examples\_qe}, \texttt{inputs}, 
+\texttt{pseudo\_tests}, \texttt{space\_groups} and \texttt{tools\_inputs} 
+contain a set of examples that can be studied in order to learn how to 
+use the \thermo\ package. The \texttt{examples} directory contains inputs 
+that run in a few
 seconds but do not give converged results. These examples can be studied 
 to see how the \thermo\ code works in the different cases. The
 reference directory of each example contains all the output
@@ -2036,9 +2036,12 @@ files produced by the run. A one-to-one comparison with the output
 produced by running the example script is however not possible due to the
 asynchronous nature of the runs. Only the plotted physical quantities 
 should be the same. \\
+The directory \texttt{examples\_qe} is used by developers. It
+contains examples mostly imported from \qe\ that are used to check that
+\qe\ functionalities are not spoiled by \texttt{thermo\_pw}. \\
 The directory \texttt{inputs} contains a set
 of realistic inputs and reasonably converged results. Not all
-output files are reported in the reference directory of each run.
+output files are reported in the reference directory of each run. 
 The \texttt{inputs} examples are divided according to the structure type
 and many material properties are calculated for each structure.
 This directory can be seen as a gallery of the results that can be
