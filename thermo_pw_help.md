@@ -264,7 +264,8 @@ parameter <code>5.D-2</code> at line 148 of
 <code>PHonon/PH/find_mode_sym.f90</code> to <code>1.D-2</code> or 
 less and recompile <code>thermo_pw</code>.
 <br><br>
-14. Thermo_pw does not compile and stops with an error saying that
+14. Thermo_pw documentation does not compile and stops with an error 
+saying that
 <code>html.sty</code> is missing or <code>latex2html</code> is missing.
 <br>
 This is not a problem of <code>thermo_pw</code>. In order to compile the
@@ -274,8 +275,6 @@ the web and copy it inside <code>thermo_pw/Doc</code> directory and you
 can install <code>latex2html</code>. Even if you do not solve this problem, 
 <code>thermo_pw.x</code> will be available in the <code>bin</code> directory 
 of QE. Only the documentation will be missing. 
-You can also remove the error editing <code>thermo_pw/Makefile</code> 
-and removing the string <code>doc</code> at line 7. 
 <br><br>
 15. The plot of the projected band structure has some problems. Some gaps
 have the same color of the projected band structure. 
