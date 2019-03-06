@@ -43,10 +43,10 @@ subroutine solve_eq(iu, flag)
   USE klist,                 ONLY : ngk, igk_k
   USE check_stop,            ONLY : check_stop_now
   USE buffers,               ONLY : get_buffer, save_buffer
-  USE wavefunctions_module,  ONLY : evc
+  USE wavefunctions,         ONLY : evc
   USE uspp,                  ONLY : okvan, vkb
   USE uspp_param,            ONLY : nhm
-  USE noncollin_module,      ONLY : noncolin, npol, nspin_mag, nspin_lsda
+  USE noncollin_module,      ONLY : noncolin, npol, nspin_mag
   USE scf,                   ONLY : rho, v_of_0
   USE gvect,                 ONLY : gg
   USE paw_variables,         ONLY : okpaw
@@ -54,8 +54,8 @@ subroutine solve_eq(iu, flag)
   USE paw_add_symmetry,      ONLY : paw_deqsymmetrize
 
   USE eqv,                   ONLY : dpsi, dvpsi, evq
-  USE units_ph,              ONLY : lrdwf, iudwf, lrwfc, iuwfc, lrdrho, &
-                                    iudrho, lrbar, iubar
+  USE units_lr,              ONLY : lrwfc, iuwfc
+  USE units_ph,              ONLY : lrdwf, iudwf, lrdrho, iudrho, lrbar, iubar
   USE output,                ONLY : fildrho
   USE control_ph,            ONLY : ext_recover, rec_code, &
                                     lnoloc, convt, tr2_ph, &

@@ -31,6 +31,7 @@ subroutine dynmat0_tpw
   USE dynmat,        ONLY : dyn, dyn00, dyn_rec
   USE london_module, ONLY : init_london, dealloca_london
   USE lr_symm_base,  ONLY : minus_q, irotmq, nsymq, rtau
+  USE ldaU,          ONLY : lda_plus_u
 
   implicit none
 
@@ -67,6 +68,10 @@ subroutine dynmat0_tpw
   !   Add non-linear core-correction (NLCC) contribution (if any)
   !
   call dynmatcc()
+  !
+  ! DFPT+U: calculate the bare Hubbard dynamical matrix
+  !
+  IF (lda_plus_u) CALL dynmat_hub_bare()
   !
   !   Symmetrizes the dynamical matrix w.r.t. the small group of q and of
   !   mode. This is done here, because this part of the dynmical matrix is

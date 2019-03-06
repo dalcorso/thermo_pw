@@ -47,7 +47,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   USE uspp,                 ONLY : nkb, vkb
   USE spin_orb,             ONLY : domag
   USE noncollin_module,     ONLY : noncolin
-  USE wavefunctions_module, ONLY : evc
+  USE wavefunctions,        ONLY : evc
   USE io_bands,             ONLY : write_representations
   USE io_global,            ONLY : ionode, ionode_id, stdout
   USE mp,                   ONLY : mp_bcast

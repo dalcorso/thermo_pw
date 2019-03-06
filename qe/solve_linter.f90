@@ -26,7 +26,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   USE io_global,            ONLY : stdout, ionode
   USE io_files,             ONLY : prefix, diropn
   USE check_stop,           ONLY : check_stop_now
-  USE wavefunctions_module, ONLY : evc
+  USE wavefunctions,        ONLY : evc
   USE cell_base,            ONLY : at
   USE klist,                ONLY : ltetra, lgauss, xk, wk, ngk, igk_k
   USE gvecs,                ONLY : doublegrid
@@ -48,7 +48,8 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   USE modes,                ONLY : u
   USE uspp,                 ONLY : nlcc_any
   USE units_ph,             ONLY : iudrho, lrdrho, iudwf, lrdwf, iubar, lrbar, &
-                                   iuwfc, lrwfc, iudvscf, iuint3paw, lint3paw
+                                   iudvscf, iuint3paw, lint3paw
+  USE units_lr,             ONLY : iuwfc, lrwfc
   USE output,               ONLY : fildrho, fildvscf
   USE phus,                 ONLY : becsumort, alphap, int1_nc
   USE recover_mod,          ONLY : read_rec, write_rec
@@ -71,6 +72,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   USE nc_mag_aux,   ONLY : int1_nc_save, deeq_nc_save, int3_save
   USE dv_of_drho_lr, ONLY : dv_of_drho
   USE fft_interfaces, ONLY : fft_interpolate
+  USE ldaU,         ONLY : lda_plus_u
 
   implicit none
 
@@ -210,7 +212,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
      allocate ( ldos ( dfftp%nnr  , nspin_mag) )
      allocate ( ldoss( dffts%nnr , nspin_mag) )
      allocate (becsum1 ( (nhm * (nhm + 1))/2 , nat , nspin_mag))
-     call localdos_paw ( ldos , ldoss , becsum1, dos_ef )
+     call localdos ( ldos , ldoss , becsum1, dos_ef )
      IF (.NOT.okpaw) deallocate(becsum1)
   endif
   !
@@ -231,6 +233,12 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
      drhoscf(:,:,:) = (0.d0, 0.d0)
      dbecsum(:,:,:,:) = (0.d0, 0.d0)
      IF (noncolin) dbecsum_nc = (0.d0, 0.d0)
+     !
+     ! DFPT+U: at each ph iteration calculate dnsscf,
+     ! i.e. the scf variation of the occupation matrix ns.
+     !
+     IF (lda_plus_u .AND. (iter.NE.1)) &
+        CALL dnsq_scf (npe, lmetq0, imode0, irr, .true.)
      !
      do ik = 1, nksq
         ikk = ikks(ik)
@@ -299,6 +307,12 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
                  !
                  IF (isolv==1) THEN
                     call dvqpsi_us_tpw (ik, u (1, mode),.false., becp1, alphap )
+                    ! DFPT+U: At the first ph iteration the bare perturbed 
+                    ! Hubbard potential dvbare_hub_q * psi_kpoint 
+                    ! is calculated and added to dvpsi.
+                    !
+                    IF (lda_plus_u) call dvqhub_barepsi_us (ik, u(1,mode))
+                    !
                  ELSE
                     IF (okvan) THEN
                        deeq_nc(:,:,:,:)=deeq_nc_save(:,:,:,:,2)

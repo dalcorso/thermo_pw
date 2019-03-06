@@ -69,10 +69,6 @@ CONTAINS
     !          outside of this routine.
     !
     USE becmod,   ONLY : bec_type,becp,calbec
-    USE realus,   ONLY : real_space, invfft_orbital_gamma,          &
-                         initialisation_level, fwfft_orbital_gamma, &
-                         calbec_rs_gamma, add_vuspsir_gamma,        &
-                         v_loc_psir, s_psir_gamma, real_space_debug
     USE lrus,     ONLY : bbg
     !
     IMPLICIT NONE
@@ -89,16 +85,7 @@ CONTAINS
     !
     IF ( nkb == 0 .OR. .NOT. okvan ) RETURN
     !
-    IF (real_space_debug>3) THEN 
-       !
-       DO ibnd=1,m,2
-          CALL invfft_orbital_gamma(psi,ibnd,m)
-          CALL calbec_rs_gamma(ibnd,m,becp%r)
-       ENDDO
-       !
-    ELSE
-       CALL calbec(n,vkb,psi,becp,m)
-    ENDIF
+    CALL calbec(n,vkb,psi,becp,m)
     !
     ! Use the array ps as a workspace
     ALLOCATE(ps(nkb,m))

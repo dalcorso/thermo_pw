@@ -25,14 +25,15 @@ subroutine zstar_eu_tpw(drhoscf)
   USE uspp,      ONLY : vkb
   USE fft_base,  ONLY : dffts
   use noncollin_module, ONLY : nspin_mag, noncolin
-  USE wavefunctions_module,  ONLY: evc
+  USE wavefunctions,  ONLY: evc
 
   USE modes,     ONLY : u, nirr, npert
   USE qpoint,    ONLY : npwq, nksq
   USE eqv,       ONLY : dvpsi, dpsi
   USE efield_mod,   ONLY : zstareu0, zstareu
   USE zstar_add, ONLY : zstareu0_rec
-  USE units_ph,  ONLY : iudwf, lrdwf, iuwfc, lrwfc
+  USE units_ph,  ONLY : iudwf, lrdwf
+  USE units_lr,  ONLY : lrwfc, iuwfc
   USE control_ph,ONLY : done_zeu
   USE control_lr,ONLY : nbnd_occ
   USE ph_restart, ONLY : ph_writefile
@@ -40,7 +41,9 @@ subroutine zstar_eu_tpw(drhoscf)
 
   USE mp_pools,  ONLY : inter_pool_comm
   USE mp_bands,  ONLY : intra_bgrp_comm
-  USE mp,                    ONLY : mp_sum
+  USE mp,        ONLY : mp_sum
+  USE ldaU,      ONLY : lda_plus_u
+
 
   implicit none
 
@@ -77,6 +80,11 @@ subroutine zstar_eu_tpw(drhoscf)
            ! recalculate  DeltaV*psi(ion) for mode nu
            !
            call dvqpsi_us_only (ik, u (1, mode))
+           !
+           ! DFPT+U: add the bare variation of the Hubbard potential 
+           !
+           IF (lda_plus_u) CALL dvqhub_barepsi_us (ik, u(:,mode))
+           !
            do jpol = 1, 3
               nrec = (jpol - 1) * nksq + ik
               !

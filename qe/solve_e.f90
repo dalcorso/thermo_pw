@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2001-2016 Quantum ESPRESSO group
+! Copyright (C) 2001-2019 Quantum ESPRESSO group
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -15,9 +15,13 @@ subroutine solve_e_tpw(drhoscf)
   !    It performs the following tasks:
   !     a) computes the bare potential term  x | psi >
   !     b) adds to it the screening term Delta V_{SCF} | psi >
+  !        If lda_plus_u=.true. compute also the SCF part
+  !        of the response Hubbard potential.
   !     c) applies P_c^+ (orthogonalization to valence states)
   !     d) calls cgsolve_all to solve the linear system
   !     e) computes Delta rho, Delta V_{SCF} and symmetrizes them
+  !     f) If lda_plus_u=.true. compute also the response occupation
+  !        matrices dnsscf
   !
   USE kinds,                 ONLY : DP
   USE ions_base,             ONLY : nat
@@ -31,7 +35,7 @@ subroutine solve_e_tpw(drhoscf)
   USE wvfct,                 ONLY : nbnd, npwx, g2kin, et
   USE check_stop,            ONLY : check_stop_now
   USE buffers,               ONLY : get_buffer, save_buffer
-  USE wavefunctions_module,  ONLY : evc
+  USE wavefunctions,         ONLY : evc
   USE uspp,                  ONLY : okvan, vkb, nlcc_any
   USE uspp_param,            ONLY : nhm
   USE noncollin_module,      ONLY : noncolin, npol, nspin_mag
@@ -40,8 +44,8 @@ subroutine solve_e_tpw(drhoscf)
   USE paw_onecenter,         ONLY : paw_dpotential
   USE paw_symmetry,          ONLY : paw_desymmetrize
 
-  USE units_ph,              ONLY : lrdwf, iudwf, lrwfc, iuwfc, lrdrho, &
-                                    iudrho
+  USE units_ph,              ONLY : lrdwf, iudwf, lrdrho,  iudrho
+  USE units_lr,              ONLY : lrwfc, iuwfc
   USE output,                ONLY : fildrho
   USE control_ph,            ONLY : ext_recover, rec_code, &
                                     lnoloc, convt, tr2_ph, nmix_ph, zeu, &
@@ -60,7 +64,7 @@ subroutine solve_e_tpw(drhoscf)
   USE control_lr,            ONLY : nbnd_occ, lgamma
   USE dv_of_drho_lr
   USE fft_interfaces,        ONLY : fft_interpolate
-
+  USE ldaU,                  ONLY : lda_plus_u
 
   implicit none
 
@@ -185,7 +189,13 @@ subroutine solve_e_tpw(drhoscf)
      drhoscf(:,:,:)=(0.d0,0.d0)
      dbecsum(:,:,:,:)=(0.d0,0.d0)
      IF (noncolin) dbecsum_nc=(0.d0,0.d0)
-
+     !
+     ! DFPT+U: at each iteration calculate dnsscf,
+     ! i.e. the scf variation of the occupation matrix ns.
+     !
+     IF (lda_plus_u .AND. (iter.NE.1)) &
+        CALL dnsq_scf (3, .false., 0, 1, .false.)
+     !
      do ik = 1, nksq
         npw = ngk(ik)
         npwq= npw     ! q=0 always in this routine
@@ -248,6 +258,11 @@ subroutine solve_e_tpw(drhoscf)
               dvpsi=dvpsi+aux2
               !
               call adddvscf(ipol,ik)
+              !
+              ! DFPT+U: add to dvpsi the scf part of the response
+              ! Hubbard potential dV_hub
+              !
+              if (lda_plus_u) call adddvhubscf (ipol, ik)
               !
            endif
            !

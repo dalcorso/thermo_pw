@@ -26,7 +26,7 @@ SUBROUTINE add_dvscf_rhs( dvscfins, isolv, ipert, ik, npe )
 USE kinds,          ONLY : DP
 USE fft_base,       ONLY : dffts
 USE wvfct,          ONLY : nbnd, npwx
-USE wavefunctions_module, ONLY : evc
+USE wavefunctions,  ONLY : evc
 USE noncollin_module,  ONLY : noncolin, npol, nspin_mag
 USE control_lr,     ONLY : nbnd_occ
 USE spin_orb,       ONLY : domag
@@ -38,6 +38,8 @@ USE nc_mag_aux,     ONLY : int3_save
 USE fft_helper_subroutines, ONLY : fftx_ntgrp
 USE qpoint,         ONLY : ikks 
 USE eqv,            ONLY : dvpsi
+USE ldaU,           ONLY : lda_plus_u
+
 
 IMPLICIT NONE
 
@@ -117,6 +119,11 @@ CALL stop_clock ('vpsifft')
 !
 IF (isolv==1) THEN
    CALL adddvscf_tpw (ipert, ik, becp1)
+   !
+   ! DFPT+U: add to dvpsi the scf part of the response
+   ! Hubbard potential dV_hub
+   !
+   IF (lda_plus_u) call adddvhubscf (ipert, ik)
 ELSE
    CALL adddvscf_tpw (ipert, ik, becpt)
 ENDIF

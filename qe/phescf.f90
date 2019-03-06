@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2009 Quantum ESPRESSO group
+! Copyright (C) 2009-2019 Quantum ESPRESSO group
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -44,6 +44,11 @@ SUBROUTINE phescf_tpw()
   USE io_global,       ONLY : ionode, ionode_id
   USE mp_images,       ONLY : intra_image_comm
   USE mp,              ONLY : mp_bcast
+  USE ldaU,            ONLY : lda_plus_u, Hubbard_lmax
+  USE ldaU_ph,         ONLY : dnsscf, dnsscf_all_modes
+  USE control_flags,   ONLY : iverbosity
+  USE write_hub
+
   !
   IMPLICIT NONE
   !
@@ -70,6 +75,17 @@ SUBROUTINE phescf_tpw()
   ENDIF
   !
   ALLOCATE (drhoscfs( dffts%nnr, nspin_mag, 3))
+  !
+  ! DFPT+U: dnsscf in the electric field calculation
+  ! is the scf change of atomic occupations ns induced by the electric field.
+  ! dnsscf_all_modes = dnsscf because nirr=1, number of perturbations = 3.
+  !
+  IF (lda_plus_u) THEN
+     ALLOCATE (dnsscf(2*Hubbard_lmax+1,2*Hubbard_lmax+1,nspin,nat,3))
+     ALLOCATE (dnsscf_all_modes(2*Hubbard_lmax+1,2*Hubbard_lmax+1,nspin,nat,3))
+     dnsscf = (0.d0, 0.d0)
+     dnsscf_all_modes = (0.d0, 0.d0)
+  ENDIF
   !
   IF (fpol) THEN    ! calculate freq. dependent polarizability
      !
@@ -234,6 +250,20 @@ SUBROUTINE phescf_tpw()
 
   DEALLOCATE (drhoscfs)
   !
+  ! DFPT+U
+  !
+  IF (lda_plus_u) THEN
+     !
+     ! Write dnsscf_all_modes in the cartesian coordinates
+     ! to the standard output
+     !
+     IF (iverbosity==1) CALL write_dnsscf_e()
+     !
+     DEALLOCATE (dnsscf)
+     DEALLOCATE (dnsscf_all_modes)
+     !
+  ENDIF
+
   RETURN
   !
 END SUBROUTINE phescf_tpw

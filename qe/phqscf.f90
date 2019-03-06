@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2001-2008 Quantum_ESPRESSO group
+! Copyright (C) 2001-2018 Quantum_ESPRESSO group
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -15,26 +15,33 @@ SUBROUTINE phqscf_tpw
   !     change of the self-consistent potential due to a phonon of
   !     fixed q.
   !
-  USE kinds, ONLY : DP
-  USE ions_base, ONLY : nat
-  USE lsda_mod, ONLY : nspin
-  USE io_global,  ONLY : stdout, ionode
-  USE fft_base,   ONLY : dfftp
-  USE uspp,  ONLY: okvan
-  USE control_ph, ONLY : zue, convt, rec_code
-  USE partial,    ONLY : done_irr, comp_irr
-  USE modes,      ONLY : nirr, npert
-  USE lrus,       ONLY : int3, int3_nc, int3_paw
-  USE uspp_param, ONLY : nhm
-  USE eqv,        ONLY : drhoscfs
-  USE paw_variables, ONLY : okpaw
+  USE kinds,            ONLY : DP
+  USE ions_base,        ONLY : nat
+  USE lsda_mod,         ONLY : nspin
+  USE io_global,        ONLY : stdout, ionode
+  USE fft_base,         ONLY : dfftp
+  USE uspp,             ONLY : okvan
+  USE control_ph,       ONLY : zue, convt, rec_code
+  USE partial,          ONLY : done_irr, comp_irr
+  USE modes,            ONLY : nirr, npert
+  USE lrus,             ONLY : int3, int3_nc, int3_paw
+  USE uspp_param,       ONLY : nhm
+  USE eqv,              ONLY : drhoscfs
+  USE paw_variables,    ONLY : okpaw
   USE noncollin_module, ONLY : noncolin, nspin_mag
-  USE lr_cg,       ONLY : lcg
-  USE recover_mod, ONLY : write_rec
+  USE lr_cg,            ONLY : lcg
+  USE recover_mod,      ONLY : write_rec
 
-  USE mp_pools,  ONLY : inter_pool_comm
-  USE mp_bands,  ONLY : intra_bgrp_comm
-  USE mp,         ONLY : mp_sum
+  USE mp_pools,         ONLY : inter_pool_comm
+  USE mp_bands,         ONLY : intra_bgrp_comm
+  USE mp,               ONLY : mp_sum
+  USE dynmat,           ONLY : dyn_hub_scf
+  USE ldaU,             ONLY : lda_plus_u, Hubbard_lmax
+  USE ldaU_ph,          ONLY : dnsscf, dnsscf_all_modes
+  USE units_ph,         ONLY : iundnsscf
+  USE control_flags,    ONLY : iverbosity
+  USE write_hub
+
 
   IMPLICIT NONE
 
@@ -52,8 +59,17 @@ SUBROUTINE phqscf_tpw
 
   CALL start_clock ('phqscf')
   !
-  !    For each irreducible representation we compute the change
-  !    of the wavefunctions
+  ! DFPT+U
+  !
+  IF (lda_plus_u) THEN
+     ALLOCATE (dnsscf_all_modes(2*Hubbard_lmax+1,2*Hubbard_lmax+1,nspin,nat,3*nat))
+     ALLOCATE (dyn_hub_scf(3*nat,3*nat))
+     dnsscf_all_modes = (0.d0, 0.d0)
+     dyn_hub_scf      = (0.d0, 0.d0)
+  ENDIF
+  !
+  ! For each irreducible representation we compute the change
+  ! of the wavefunctions
   !
   DO irr = 1, nirr
      IF ( (comp_irr (irr)) .AND. (.NOT.done_irr (irr)) ) THEN
@@ -79,6 +95,15 @@ SUBROUTINE phqscf_tpw
            IF (noncolin) ALLOCATE(int3_nc( nhm, nhm, nat, nspin, npe))
         ENDIF
         !
+        ! DFPT+U: dnsscf in the phonon calculation
+        ! is the scf change of atomic occupations ns 
+        ! induced by atomic displacements.
+        !
+        IF (lda_plus_u) THEN
+           ALLOCATE (dnsscf(2*Hubbard_lmax+1,2*Hubbard_lmax+1,nspin,nat,npe))
+           dnsscf = (0.d0, 0.d0)
+        ENDIF
+        !
         WRITE( stdout, '(/,5x,"Self-consistent Calculation")')
         IF (lcg) THEN
            CALL allocate_cg(npe,1)
@@ -99,6 +124,12 @@ SUBROUTINE phqscf_tpw
            !   to the effective charges Z(Us,E) (Us=scf,E=bare)
            !
            IF (zue) CALL add_zstar_ue_tpw (imode0, npe )
+           !
+           ! DFPT+U: calculate the scf part of the Hubbard dynamical matrix
+           IF (lda_plus_u) THEN
+              CALL dynmat_hub_scf (irr, imode0, npe)
+              DEALLOCATE (dnsscf)
+           ENDIF
            !
            WRITE( stdout, '(/,5x,"Convergence has been achieved ")')
            done_irr (irr) = .TRUE.
@@ -121,6 +152,31 @@ SUBROUTINE phqscf_tpw
      ENDIF
 
   ENDDO
+  !
+  ! DFPT+U
+  !
+  IF (lda_plus_u) THEN
+     !
+     ! Write dnsscf_all_modes in the pattern basis u to file,
+     ! because it is needed for el-ph calculations
+     !
+     IF (ionode) WRITE(iundnsscf,*) dnsscf_all_modes
+     !
+     ! Write dnsscf_all_modes in the cartesian coordinates
+     ! to the standard output
+     !
+     IF (iverbosity==1) CALL write_dnsscf_ph()
+     !
+     ! Write the SCF and total Hubbard dynamical matrix
+     ! to the standard output
+     !
+     IF (iverbosity==1) CALL write_dynmat_hub()
+     !
+     DEALLOCATE (dnsscf_all_modes)
+     DEALLOCATE (dyn_hub_scf)
+     !
+  ENDIF
+
 
   CALL stop_clock ('phqscf')
   RETURN

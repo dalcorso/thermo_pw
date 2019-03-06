@@ -304,7 +304,7 @@ SUBROUTINE find_representations_mode_q ( nat, ntyp, xq, w2, u, tau, ityp, &
   CALL s_axis_to_cart ()
   CALL set_giq_tpw (xq,s,nsymq,nsym,irotmq,minus_q,gi,gimq)
   CALL inverse_s()
-  CALL sgam_ph_new (at, bg, nsymq, s, irt, tau, rtau, nat)
+  CALL sgam_lr (at, bg, nsymq, s, irt, tau, rtau, nat)
 !
 !  if the small group of q is non symmorphic,
 !  search the symmetries only if there are no G such that Sq -> q+G

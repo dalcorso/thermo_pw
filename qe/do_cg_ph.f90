@@ -33,7 +33,7 @@ SUBROUTINE do_cg_ph(irr, imode0, drhoscfs)
   USE spin_orb,              ONLY : domag
   USE noncollin_module,      ONLY : noncolin, npol, nspin_mag
   USE wvfct,                 ONLY : nbnd, npwx, g2kin, et
-  USE wavefunctions_module,  ONLY : evc
+  USE wavefunctions,         ONLY : evc
   USE eqv,                   ONLY : dpsi, dvpsi, evq
   USE becmod,                ONLY : becp, calbec
   USE scf,                   ONLY : rho, v_of_0
@@ -53,7 +53,8 @@ SUBROUTINE do_cg_ph(irr, imode0, drhoscfs)
   USE lr_cg,                 ONLY : evc1, res, pres, dir, dir_new, prec_vec
   USE lr_symm_base,          ONLY : irotmq, minus_q, nsymq, rtau
   USE efermi_shift,          ONLY : ef_shift, ef_shift_paw,  def
-  USE units_ph,              ONLY : lrwfc, iuwfc, lrdwf, iudwf, iubar, lrbar
+  USE units_ph,              ONLY : lrdwf, iudwf, iubar, lrbar
+  USE units_lr,              ONLY : lrwfc, iuwfc
   USE buffers,               ONLY : get_buffer, save_buffer
   USE mp_pools,              ONLY : inter_pool_comm
   USE mp_bands,              ONLY : intra_bgrp_comm, ntask_groups
@@ -141,7 +142,7 @@ SUBROUTINE do_cg_ph(irr, imode0, drhoscfs)
      ALLOCATE ( ldos (dfftp%nnr, nspin_mag) )
      ALLOCATE ( ldoss(dffts%nnr, nspin_mag) )
      ALLOCATE (becsum1( (nhm * (nhm + 1))/2 , nat , nspin_mag))
-     CALL localdos_paw( ldos, ldoss, becsum1, dos_ef )
+     CALL localdos( ldos, ldoss, becsum1, dos_ef )
      IF (.NOT.okpaw) DEALLOCATE(becsum1)
   ENDIF
   CALL set_int3q(irr, imode0, rpert, drhoscf0, int3_paw0, dvscfin0)

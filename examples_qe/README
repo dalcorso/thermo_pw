@@ -6,6 +6,12 @@ features of thermo_pw not yet exported in QE.
 
 Inside each example a reference directory contains the correct output.
 
+
+Please note that some PPs are not downloadable from the QE website
+so you need to update the variable PSEUDO_DIR in the environment_variables
+file to point to your pslibrary directory 
+(see https://dalcorso.github.io/pslibrary).
+
 Available examples:
 
 ph_example01 : phonon dispersion of carbon with US-PP, Ni with US-PP and pbe

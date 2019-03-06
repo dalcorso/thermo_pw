@@ -17,14 +17,15 @@ subroutine add_zstar_ue_tpw (imode0, npe)
   USE klist, ONLY : xk, wk, ngk, igk_k
   USE uspp,  ONLY : vkb
   USE wvfct, ONLY : npwx, npw
-  USE wavefunctions_module,  ONLY: evc
+  USE wavefunctions,  ONLY: evc
   USE noncollin_module,      ONLY: noncolin
   USE buffers,  ONLY: get_buffer
   USE qpoint,   ONLY: npwq, nksq
   USE eqv,      ONLY: dpsi, dvpsi
   USE efield_mod, ONLY: zstarue0_rec, zstarue0
   USE control_lr, ONLY : nbnd_occ
-  USE units_ph,   ONLY : iudwf, lrdwf, iuwfc, lrwfc
+  USE units_ph,   ONLY : iudwf, lrdwf
+  USE units_lr,   ONLY : iuwfc, lrwfc
 
   USE mp_global,  ONLY : inter_pool_comm, intra_bgrp_comm
   USE mp,         ONLY : mp_sum

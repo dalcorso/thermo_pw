@@ -28,7 +28,6 @@ allocate_lanczos.o \
 apply_ac.o \
 apply_trev.o \
 apply_trev_r.o \
-bcast_qes_module.o \
 c_bands.o \
 calc_chi.o \
 check_bands.o \

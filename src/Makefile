@@ -137,20 +137,23 @@ write_thermo.o
 
 LRMODS = ../../LR_Modules/liblrmod.a
 PWOBJS = ../../PHonon/PH/libph.a ../../PP/src/libpp.a ../../PW/src/libpw.a 
-QEMODS = ../../Modules/libqemod.a ../../KS_Solvers/Davidson/libdavid.a \
-         ../../KS_Solvers/CG/libcg.a ../../FFTXlib/libqefft.a \
-         ../../LAXlib/libqela.a ../../UtilXlib/libutil.a \
+QEMODS = ../../Modules/libqemod.a \
+         ../../KS_Solvers/libks_solvers.a \
+         ../../FFTXlib/libqefft.a \
+         ../../LAXlib/libqela.a   \
+         ../../UtilXlib/libutil.a \
          ../../dft-d3/libdftd3qe.a
+
 LIBOBJS	=../qe/thermo_qe.a ../lib/thermo_lib.a ../../PHonon/PH/libph.a ../../clib/clib.a ../../iotk/src/libiotk.a
 
 all : libthermo_pw.a thermo_pw.x 
 
 thermo_pw.x : thermo_pw.o libthermo_pw.a $(QEMODS) $(LRMODS) $(PWOBJS) \
-              $(LIBOBJS)
+              $(LIBOBJS) 
 	$(LD) $(LDFLAGS) -o $@ thermo_pw.o ../../PHonon/PH/rigid.o \
               ../../PHonon/PH/write_eigenvectors.o libthermo_pw.a \
         $(PWOBJS) $(QEMODS) $(LIBOBJS) $(LRMODS) $(PWOBJS) $(QEMODS) \
-        $(LIBS) ../../clib/clib.a
+        $(LIBS) $(QELIBS) ../../clib/clib.a
 	- ( cd ../../bin ; ln -fs ../thermo_pw/src/thermo_pw.x . )
 
 libthermo_pw.a : $(THERMOOBJS) 

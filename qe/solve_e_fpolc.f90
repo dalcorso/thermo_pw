@@ -39,7 +39,7 @@ SUBROUTINE solve_e_fpolc(iu)
   USE klist,                 ONLY : ngk, igk_k
   USE check_stop,            ONLY : check_stop_now
   USE buffers,               ONLY : get_buffer, save_buffer
-  USE wavefunctions_module,  ONLY : evc
+  USE wavefunctions,         ONLY : evc
   USE uspp,                  ONLY : okvan, vkb
   USE uspp_param,            ONLY : nhm
   USE noncollin_module,      ONLY : noncolin, npol, nspin_mag
@@ -48,8 +48,8 @@ SUBROUTINE solve_e_fpolc(iu)
   USE paw_onecenter,         ONLY : paw_dpotential
   USE paw_symmetry,          ONLY : paw_desymmetrize
   USE eqv,                   ONLY : dpsi, dvpsi
-  USE units_ph,              ONLY : lrdwf, iudwf, lrwfc, iuwfc, lrdrho, &
-                                    iudrho
+  USE units_ph,              ONLY : lrdwf, iudwf, lrdrho, iudrho
+  USE units_lr,              ONLY : lrwfc, iuwfc
   USE output,                ONLY : fildrho
   USE control_ph,            ONLY : ext_recover, rec_code, &
                                     lnoloc, convt, tr2_ph, nmix_ph, &

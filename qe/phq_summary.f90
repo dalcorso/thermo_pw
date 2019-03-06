@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2001-2016 Quantum ESPRESSO group
+! Copyright (C) 2001-2018 Quantum ESPRESSO group
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -24,17 +24,16 @@ subroutine phq_summary_tpw
   USE klist,         ONLY : lgauss, smearing, degauss, ngauss, nkstot, xk, wk
   USE fft_base,      ONLY : dfftp
   USE gvect,         ONLY : gcutm, ngm
-  USE gvecs,       ONLY : doublegrid, dual, gcutms, ngms
+  USE gvecs,         ONLY : doublegrid, dual, gcutms, ngms
   USE fft_base,      ONLY : dffts
   USE symm_base,     ONLY : s, sr, ftau, sname, t_rev
   USE noncollin_module, ONLY : noncolin
   USE spin_orb,      ONLY : lspinorb, domag
   USE funct,         ONLY : write_dft_name
-  USE run_info, ONLY : title
+  USE run_info,      ONLY : title
   USE gamma_gamma,   ONLY : with_symmetry, nasr
   USE control_ph,    ONLY : lgamma_gamma, lnoloc, zue, epsil, ldisp, &
                             nmix_ph, alpha_mix, tr2_ph, zeu, search_sym
-  USE control_lr,    ONLY : lrpa
   USE freq_ph,       ONLY : fpol, nfs, fiu
   USE partial,       ONLY : atomo, nat_todo, all_comp, done_irr, comp_irr
   USE modes,         ONLY : u, npert, nirr, name_rap_mode
@@ -45,11 +44,14 @@ subroutine phq_summary_tpw
   USE control_flags, ONLY : iverbosity
   USE gvecw,         ONLY : ecutwfc
   USE lr_symm_base,  ONLY : irotmq, minus_q, nsymq
-
-
+  USE constants,     ONLY : rytoev
+  USE ldaU_ph,       ONLY : effU
+  USE ldaU,          ONLY : lda_plus_u, Hubbard_U, Hubbard_J0, &
+                            lda_plus_u_kind, is_hubbard
+ 
   implicit none
 
-  integer :: i, mu, nu, ipol, apol, na, isymq, isym, nsymtot, &
+  integer :: i, mu, nu, ipol, apol, na, nt, isymq, isym, nsymtot, &
        ik, irr, imode0, iu
   ! generic counter
   ! counter on modes
@@ -87,6 +89,26 @@ subroutine phq_summary_tpw
 
   CALL write_dft_name ( )
 
+  !
+  ! DFPT+U: Information about the Hubbard parameters
+  !
+  IF (lda_plus_u) THEN
+     WRITE (stdout,'(6x,a)') 'Hubbard parameters:'
+     IF (lda_plus_u_kind.EQ.0) THEN
+        DO nt = 1, ntyp
+           IF (is_hubbard(nt)) THEN
+              WRITE(stdout,'(6x,a,i2,a,f12.8)') 'U (',nt,')     =', &
+                                                 Hubbard_U(nt)*rytoev
+              IF (Hubbard_J0(nt).NE.0.d0 ) THEN
+                 WRITE(stdout,'(6x,a,i2,a,f12.8)') 'J0(',nt,')    =', &
+                                                   Hubbard_J0(nt)*rytoev
+                 WRITE(stdout,'(6x,a,i2,a,f12.8)') 'Effective Hubbard U-J0(',nt,')     =',&
+                                                   effU(nt)*rytoev
+              ENDIF
+           ENDIF
+        ENDDO
+     ENDIF
+  ENDIF
   !
   !  Here add a message if this is a noncollinear or a spin_orbit calculation
   !

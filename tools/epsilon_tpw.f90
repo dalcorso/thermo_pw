@@ -500,7 +500,7 @@ SUBROUTINE dipole_calc( ik, dipole_aux, nbndmin, nbndmax, shift )
   USE constants,            ONLY : pi, degspin
   USE wvfct,                ONLY : wg, nbnd, g2kin, npwx, et
   USE gvecw,                ONLY : ecutwfc
-  USE wavefunctions_module, ONLY : evc
+  USE wavefunctions,        ONLY : evc
   USE ener,                 ONLY : ef
   USE klist,                ONLY : xk, wk, nelec, ngk, igk_k
   USE noncollin_module,     ONLY : noncolin, npol

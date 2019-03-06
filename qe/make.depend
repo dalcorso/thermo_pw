@@ -17,6 +17,7 @@ add_dvscf_rhs.o : ../../Modules/kind.o
 add_dvscf_rhs.o : ../../Modules/noncol.o
 add_dvscf_rhs.o : ../../Modules/uspp.o
 add_dvscf_rhs.o : ../../Modules/wavefunctions.o
+add_dvscf_rhs.o : ../../PW/src/ldaU.o
 add_dvscf_rhs.o : ../../PW/src/pwcom.o
 add_dvscf_rhs.o : control_qe.o
 add_zstar_ue.o : ../../LR_Modules/lrcom.o
@@ -126,7 +127,6 @@ apply_ac.o : ../../Modules/recvec.o
 apply_ac.o : ../../Modules/uspp.o
 apply_ac.o : ../../Modules/wavefunctions.o
 apply_ac.o : ../../PW/src/pwcom.o
-apply_ac.o : ../../PW/src/realus.o
 apply_ac.o : ../../UtilXlib/mp.o
 apply_ac.o : control_qe.o
 apply_trev.o : ../../FFTXlib/fft_interfaces.o
@@ -138,10 +138,6 @@ apply_trev_r.o : ../../Modules/fft_base.o
 apply_trev_r.o : ../../Modules/kind.o
 apply_trev_r.o : ../../Modules/noncol.o
 apply_trev_r.o : ../../PW/src/pwcom.o
-bcast_qes_module.o : ../../Modules/io_global.o
-bcast_qes_module.o : ../../Modules/kind.o
-bcast_qes_module.o : ../../Modules/qes_types.o
-bcast_qes_module.o : ../../UtilXlib/mp.o
 c_bands.o : ../../FFTXlib/fft_interfaces.o
 c_bands.o : ../../LR_Modules/lrcom.o
 c_bands.o : ../../Modules/cell_base.o
@@ -176,14 +172,13 @@ calc_chi.o : ../../PW/src/symme.o
 calc_chi.o : control_qe.o
 ccg_psi.o : ../../Modules/kind.o
 ccg_psi.o : ../../Modules/noncol.o
-check_bands.o : ../../Modules/bcast_qes_module.o
 check_bands.o : ../../Modules/io_files.o
 check_bands.o : ../../Modules/io_global.o
 check_bands.o : ../../Modules/kind.o
 check_bands.o : ../../Modules/mp_images.o
-check_bands.o : ../../Modules/qes_libs.o
-check_bands.o : ../../Modules/qes_types.o
-check_bands.o : ../../Modules/qexml.o
+check_bands.o : ../../Modules/qes_bcast_module.o
+check_bands.o : ../../Modules/qes_libs_module.o
+check_bands.o : ../../Modules/qes_types_module.o
 check_bands.o : ../../PHonon/PH/phcom.o
 check_bands.o : ../../PW/src/pw_restart_new.o
 check_bands.o : ../../UtilXlib/mp.o
@@ -538,6 +533,7 @@ dynmat0.o : ../../Modules/mm_dispersion.o
 dynmat0.o : ../../Modules/recvec.o
 dynmat0.o : ../../PHonon/PH/ph_restart.o
 dynmat0.o : ../../PHonon/PH/phcom.o
+dynmat0.o : ../../PW/src/ldaU.o
 dynmat0.o : ../../PW/src/symm_base.o
 electrons.o : ../../Modules/cell_base.o
 electrons.o : ../../Modules/check_stop.o
@@ -570,6 +566,7 @@ electrons.o : ../../PW/src/exx.o
 electrons.o : ../../PW/src/io_rho_xml.o
 electrons.o : ../../PW/src/ldaU.o
 electrons.o : ../../PW/src/loc_scdm.o
+electrons.o : ../../PW/src/loc_scdm_k.o
 electrons.o : ../../PW/src/newd.o
 electrons.o : ../../PW/src/paw_onecenter.o
 electrons.o : ../../PW/src/paw_symmetry.o
@@ -674,7 +671,6 @@ lr_sm1_psi.o : ../../Modules/mp_global.o
 lr_sm1_psi.o : ../../Modules/noncol.o
 lr_sm1_psi.o : ../../Modules/uspp.o
 lr_sm1_psi.o : ../../PW/src/pwcom.o
-lr_sm1_psi.o : ../../PW/src/realus.o
 lr_sm1_psi.o : ../../UtilXlib/mp.o
 lr_sm1_psi.o : control_qe.o
 lr_sym_mod.o : ../../FFTXlib/scatter_mod.o
@@ -755,6 +751,7 @@ openfilq.o : ../../PHonon/PH/phcom.o
 openfilq.o : ../../PHonon/PH/ramanm.o
 openfilq.o : ../../PHonon/PH/save_ph_input.o
 openfilq.o : ../../PW/src/buffers.o
+openfilq.o : ../../PW/src/ldaU.o
 openfilq.o : ../../PW/src/pwcom.o
 orthogonalize_omega.o : ../../LR_Modules/lrcom.o
 orthogonalize_omega.o : ../../Modules/becmod.o
@@ -825,7 +822,9 @@ phescf.o : ../../Modules/uspp.o
 phescf.o : ../../PHonon/PH/ph_restart.o
 phescf.o : ../../PHonon/PH/phcom.o
 phescf.o : ../../PHonon/PH/ramanm.o
+phescf.o : ../../PHonon/PH/write_hub.o
 phescf.o : ../../PW/src/buffers.o
+phescf.o : ../../PW/src/ldaU.o
 phescf.o : ../../PW/src/pwcom.o
 phescf.o : ../../UtilXlib/mp.o
 phescf.o : control_qe.o
@@ -851,6 +850,7 @@ phq_init.o : ../../PHonon/PH/elph.o
 phq_init.o : ../../PHonon/PH/phcom.o
 phq_init.o : ../../PW/src/Coul_cut_2D.o
 phq_init.o : ../../PW/src/buffers.o
+phq_init.o : ../../PW/src/ldaU.o
 phq_init.o : ../../PW/src/pwcom.o
 phq_init.o : ../../UtilXlib/mp.o
 phq_init.o : control_qe.o
@@ -870,12 +870,12 @@ phq_readin.o : ../../Modules/mp_images.o
 phq_readin.o : ../../Modules/mp_pools.o
 phq_readin.o : ../../Modules/mp_world.o
 phq_readin.o : ../../Modules/noncol.o
-phq_readin.o : ../../Modules/parameters.o
 phq_readin.o : ../../Modules/paw_variables.o
 phq_readin.o : ../../Modules/run_info.o
 phq_readin.o : ../../Modules/uspp.o
 phq_readin.o : ../../PHonon/PH/dfile_star.o
 phq_readin.o : ../../PHonon/PH/elph.o
+phq_readin.o : ../../PHonon/PH/elph_tetra_mod.o
 phq_readin.o : ../../PHonon/PH/ph_restart.o
 phq_readin.o : ../../PHonon/PH/phcom.o
 phq_readin.o : ../../PHonon/PH/ramanm.o
@@ -883,10 +883,12 @@ phq_readin.o : ../../PHonon/PH/save_ph_input.o
 phq_readin.o : ../../PW/src/ldaU.o
 phq_readin.o : ../../PW/src/pwcom.o
 phq_readin.o : ../../PW/src/start_k.o
+phq_readin.o : ../../PW/src/tetra.o
 phq_readin.o : ../../UtilXlib/mp.o
 phq_readin.o : control_qe.o
 phq_setup.o : ../../LR_Modules/lrcom.o
 phq_setup.o : ../../Modules/cell_base.o
+phq_setup.o : ../../Modules/constants.o
 phq_setup.o : ../../Modules/control_flags.o
 phq_setup.o : ../../Modules/fft_base.o
 phq_setup.o : ../../Modules/funct.o
@@ -904,6 +906,7 @@ phq_setup.o : ../../PHonon/PH/elph_tetra_mod.o
 phq_setup.o : ../../PHonon/PH/ph_restart.o
 phq_setup.o : ../../PHonon/PH/phcom.o
 phq_setup.o : ../../PHonon/PH/ramanm.o
+phq_setup.o : ../../PW/src/ldaU.o
 phq_setup.o : ../../PW/src/newd.o
 phq_setup.o : ../../PW/src/pwcom.o
 phq_setup.o : ../../PW/src/scf_mod.o
@@ -912,6 +915,7 @@ phq_setup.o : ../../UtilXlib/mp.o
 phq_setup.o : control_qe.o
 phq_summary.o : ../../LR_Modules/lrcom.o
 phq_summary.o : ../../Modules/cell_base.o
+phq_summary.o : ../../Modules/constants.o
 phq_summary.o : ../../Modules/control_flags.o
 phq_summary.o : ../../Modules/fft_base.o
 phq_summary.o : ../../Modules/funct.o
@@ -924,10 +928,12 @@ phq_summary.o : ../../Modules/recvec.o
 phq_summary.o : ../../Modules/run_info.o
 phq_summary.o : ../../PHonon/PH/phcom.o
 phq_summary.o : ../../PHonon/PH/ramanm.o
+phq_summary.o : ../../PW/src/ldaU.o
 phq_summary.o : ../../PW/src/pwcom.o
 phq_summary.o : ../../PW/src/symm_base.o
 phq_summary.o : control_qe.o
 phqscf.o : ../../LR_Modules/lrcom.o
+phqscf.o : ../../Modules/control_flags.o
 phqscf.o : ../../Modules/fft_base.o
 phqscf.o : ../../Modules/io_global.o
 phqscf.o : ../../Modules/ions_base.o
@@ -938,7 +944,9 @@ phqscf.o : ../../Modules/noncol.o
 phqscf.o : ../../Modules/paw_variables.o
 phqscf.o : ../../Modules/uspp.o
 phqscf.o : ../../PHonon/PH/phcom.o
+phqscf.o : ../../PHonon/PH/write_hub.o
 phqscf.o : ../../PHonon/PH/write_rec.o
+phqscf.o : ../../PW/src/ldaU.o
 phqscf.o : ../../PW/src/pwcom.o
 phqscf.o : ../../UtilXlib/mp.o
 phqscf.o : control_qe.o
@@ -1164,8 +1172,8 @@ setup.o : ../../Modules/mp_pools.o
 setup.o : ../../Modules/noncol.o
 setup.o : ../../Modules/parameters.o
 setup.o : ../../Modules/paw_variables.o
-setup.o : ../../Modules/qes_libs.o
-setup.o : ../../Modules/qes_types.o
+setup.o : ../../Modules/qes_libs_module.o
+setup.o : ../../Modules/qes_types_module.o
 setup.o : ../../Modules/recvec.o
 setup.o : ../../Modules/uspp.o
 setup.o : ../../PW/src/atomic_wfc_mod.o
@@ -1174,7 +1182,6 @@ setup.o : ../../PW/src/extfield.o
 setup.o : ../../PW/src/exx.o
 setup.o : ../../PW/src/exx_base.o
 setup.o : ../../PW/src/ldaU.o
-setup.o : ../../PW/src/pw_restart.o
 setup.o : ../../PW/src/pw_restart_new.o
 setup.o : ../../PW/src/pwcom.o
 setup.o : ../../PW/src/start_k.o
@@ -1200,6 +1207,7 @@ solve_e.o : ../../Modules/wavefunctions.o
 solve_e.o : ../../PHonon/PH/phcom.o
 solve_e.o : ../../PHonon/PH/write_rec.o
 solve_e.o : ../../PW/src/buffers.o
+solve_e.o : ../../PW/src/ldaU.o
 solve_e.o : ../../PW/src/paw_onecenter.o
 solve_e.o : ../../PW/src/paw_symmetry.o
 solve_e.o : ../../PW/src/pwcom.o
@@ -1329,6 +1337,7 @@ solve_linter.o : ../../PHonon/PH/phcom.o
 solve_linter.o : ../../PHonon/PH/save_ph_input.o
 solve_linter.o : ../../PHonon/PH/write_rec.o
 solve_linter.o : ../../PW/src/buffers.o
+solve_linter.o : ../../PW/src/ldaU.o
 solve_linter.o : ../../PW/src/paw_onecenter.o
 solve_linter.o : ../../PW/src/pwcom.o
 solve_linter.o : ../../PW/src/scf_mod.o
@@ -1422,6 +1431,7 @@ zstar_eu.o : ../../Modules/wavefunctions.o
 zstar_eu.o : ../../PHonon/PH/ph_restart.o
 zstar_eu.o : ../../PHonon/PH/phcom.o
 zstar_eu.o : ../../PW/src/buffers.o
+zstar_eu.o : ../../PW/src/ldaU.o
 zstar_eu.o : ../../PW/src/pwcom.o
 zstar_eu.o : ../../PW/src/symme.o
 zstar_eu.o : ../../UtilXlib/mp.o

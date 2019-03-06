@@ -108,7 +108,7 @@ uncompress-w90:
 
 configure-w90: 
 	cd ../W90 ; \
-	if (test -e ../install/make_wannier90.sys) || (test -d ../W90); then \
+	if (test -e ../install/make_wannier90.inc) || (test -d ../W90); then \
 	(cp ../install/make_wannier90.inc ../W90/make.inc); fi 
 	touch ./configure-w90
 
@@ -282,7 +282,7 @@ uncompress-west:
 
 ###########################################################
 # SternheimerGW
-# ###########################################################
+###########################################################
 
 SternheimerGW: extlibs uncompress-SternheimerGW
 	if test -d ../SternheimerGW; then \
@@ -428,8 +428,8 @@ west_distclean:
 	   rm -f ../archive/$(WEST).tar.gz
 
 SternheimerGW_clean:
-	if test -d ../SternheimerGW/src; then \
-	  cd ../SternheimerGW/src ; $(MAKE) clean ; \
+	if test -d ../SternheimerGW; then \
+	  cd ../SternheimerGW ; $(MAKE) clean ; \
 	fi
 	- rm -rf ./make-SternheimerGW
 
@@ -451,6 +451,9 @@ test-suite_veryclean: test-suite_clean
 test-suite_distclean:
 	rm -f ../archive/$(TESTSUITE).tar.gz
 
+#examples_clean:
+
+#examples_veryclean: examples_clean
 
 ##########################################################
 # general cleaning
@@ -458,7 +461,7 @@ test-suite_distclean:
 
 clean: w90_clean want_clean yambo_clean yambo-devel_clean plumed_clean \
 	gipaw_clean west_clean SternheimerGW_clean test-suite_clean \
-	sax_clean d3q_clean thermo_pw_clean 
+	sax_clean d3q_clean thermo_pw_clean #examples_clean
 
 veryclean: w90_veryclean want_veryclean yambo_veryclean yambo-devel_veryclean \
 	plumed_veryclean gipaw_veryclean thermo_pw_veryclean west_veryclean SternheimerGW_veryclean \

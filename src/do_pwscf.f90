@@ -37,7 +37,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   USE parameters,       ONLY : ntypx, npk, lmaxx
   USE initial_param,    ONLY : ethr0
   USE cell_base,        ONLY : fix_volume, fix_area
-  USE control_flags,    ONLY : conv_elec, gamma_only, ethr, lscf, twfcollect
+  USE control_flags,    ONLY : conv_elec, gamma_only, ethr, lscf
   USE control_flags,    ONLY : conv_ions, istep, nstep, restart, lmd, lbfgs
   USE command_line_options, ONLY : command_line
   USE force_mod,        ONLY : lforce, lstres, sigma, force
@@ -48,7 +48,10 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   USE scf,              ONLY : rho
   USE lsda_mod,         ONLY : nspin
   USE fft_base,         ONLY : dfftp
-  USE qexsd_module,     ONLY:   qexsd_set_status
+  USE qmmm,             ONLY : qmmm_initialization, qmmm_shutdown, &
+                               qmmm_update_positions, qmmm_update_forces
+  USE qexsd_module,     ONLY : qexsd_set_status
+  USE funct,            ONLY : dft_is_hybrid, stop_exx
   !
   IMPLICIT NONE
   INTEGER, INTENT(OUT) :: exit_status
@@ -95,6 +98,8 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   !
   CALL setup_tpw ()
   !
+  CALL qmmm_update_positions()
+  !
   ! ... dry run: code will stop here if called with exit file present
   ! ... useful for a quick and automated way to check input data
   !
@@ -104,7 +109,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
      CALL summary()
      CALL memory_report()
      CALL qexsd_set_status(255)
-     CALL punch( 'config' )
+     CALL punch( 'init-config' )
      exit_status = 255
      RETURN
   ENDIF
@@ -135,7 +140,6 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
         IF ( .NOT. conv_elec )  exit_status =  2
         CALL qexsd_set_status(exit_status)
         ! workaround for the case of a single k-point
-        twfcollect = .FALSE.
         CALL punch( 'config' )
         RETURN
      ENDIF
@@ -188,9 +192,14 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
             CALL punch( 'config' )
         END IF
         !
+        IF (dft_is_hybrid() )  CALL stop_exx()
      END IF
      !
      CALL stop_clock( 'ions' ); !write(*,*)' stop ions' ; FLUSH(6)
+     !
+     ! ... send out forces to MM code in QM/MM run
+     !
+     CALL qmmm_update_forces( force, rho%of_r, nspin, dfftp)
      !
      ! ... exit condition (ionic convergence) is checked here
      !
@@ -198,6 +207,8 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
      IF ( conv_ions ) EXIT main_loop
      !
      ! ... receive new positions from MM code in QM/MM run
+     !
+     CALL qmmm_update_positions()
      !
      ! ... terms of the hamiltonian depending upon nuclear positions
      ! ... are reinitialized here
@@ -244,6 +255,8 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   CALL punch('all')
   !
   IF ( .NOT. conv_ions )  exit_status =  3
+  !
+  CALL qmmm_shutdown()
   !
   CALL close_files(.TRUE.)
   !

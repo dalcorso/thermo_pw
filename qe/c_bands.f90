@@ -36,7 +36,7 @@ SUBROUTINE c_bands_nscf_tpw( )
   USE io_files,             ONLY : tmp_dir, prefix
   USE ldaU,                 ONLY : lda_plus_u, U_projection, wfcU
   USE lsda_mod,             ONLY : current_spin, lsda, isk
-  USE wavefunctions_module, ONLY : evc
+  USE wavefunctions,        ONLY : evc
   USE control_lr,           ONLY : lgamma
   USE mp_asyn,              ONLY : asyn_master, with_asyn_images
   USE mp_images,            ONLY : my_image_id, root_image, intra_image_comm
@@ -463,7 +463,7 @@ USE symm_base,  ONLY : s, sr, ftau, invs, t_rev
 USE fft_base,   ONLY : dfftp
 USE klist,      ONLY : xk, nkstot, ngk, igk_k
 USE wvfct,      ONLY : nbnd, npwx
-USE wavefunctions_module, ONLY : evc
+USE wavefunctions, ONLY : evc
 USE fft_interfaces,       ONLY : fwfft
 USE io_files,          ONLY : iunwfc, nwordwfc
 USE band_computation,  ONLY : isym_bands

@@ -33,7 +33,7 @@ SUBROUTINE apply_ac (ndmx, n, h, ah, ik, m, indi, iflag)
 
   !Needed only for TDDFPT
   USE control_flags,        ONLY : gamma_only, tddfpt
-  USE wavefunctions_module, ONLY : evc
+  USE wavefunctions,        ONLY : evc
 
   IMPLICIT NONE
 
@@ -192,8 +192,6 @@ CONTAINS
   SUBROUTINE ch_psi_all_gamma()
     
     USE becmod, ONLY : becp,  calbec
-    USE realus, ONLY : real_space, real_space_debug, invfft_orbital_gamma, &
-         fwfft_orbital_gamma, calbec_rs_gamma,  s_psir_gamma
     use gvect,                only : gstart
 
     IMPLICIT NONE
@@ -222,17 +220,8 @@ CONTAINS
     !
     !    And apply S again
     !
-    IF (real_space_debug >6 ) THEN
-       DO ibnd=1,m,2
-          CALL invfft_orbital_gamma(hpsi,ibnd,m)
-          CALL calbec_rs_gamma(ibnd,m,becp%r)
-          CALL s_psir_gamma(ibnd,m)
-          CALL fwfft_orbital_gamma(spsi,ibnd,m)
-       ENDDO
-    ELSE
-       CALL calbec (n, vkb, hpsi, becp, m)
-       CALL s_psi (npwx, n, m, hpsi, spsi)
-    ENDIF
+    CALL calbec (n, vkb, hpsi, becp, m)
+    CALL s_psi (npwx, n, m, hpsi, spsi)
     DO ibnd = 1, m
        DO ig = 1, n
           ah (ig, ibnd) = ah (ig, ibnd) + spsi (ig, ibnd)

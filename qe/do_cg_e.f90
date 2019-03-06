@@ -35,7 +35,7 @@ SUBROUTINE do_cg_e(drhoscfs)
   USE spin_orb,              ONLY : domag
   USE noncollin_module,      ONLY : noncolin, npol, nspin_mag
   USE wvfct,                 ONLY : nbnd, npwx, g2kin, et
-  USE wavefunctions_module,  ONLY : evc
+  USE wavefunctions,         ONLY : evc
   USE eqv,                   ONLY : dpsi, dvpsi, evq
   USE becmod,                ONLY : becp, calbec
   USE scf,                   ONLY : rho, v_of_0
@@ -53,7 +53,8 @@ SUBROUTINE do_cg_e(drhoscfs)
   USE lr_global,             ONLY : rpert, evc0, evq0, sevq0, &
                                     d0psi, d0psi2
   USE lr_cg,                 ONLY : evc1, res, pres, dir, dir_new, prec_vec
-  USE units_ph,              ONLY : lrwfc, iuwfc, lrdwf, iudwf
+  USE units_ph,              ONLY : lrdwf, iudwf
+  USE units_lr,              ONLY : lrwfc, iuwfc
   USE buffers,               ONLY : get_buffer, save_buffer
   USE mp_pools,              ONLY : inter_pool_comm
   USE mp_bands,              ONLY : intra_bgrp_comm, ntask_groups

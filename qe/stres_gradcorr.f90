@@ -16,7 +16,7 @@ subroutine stres_gradcorr_tpw( rho, rhog, rho_core, rhog_core, kedtau, nspin, &
   USE funct,            ONLY : gcxc, gcx_spin, gcc_spin, gcc_spin_more, &
                                dft_is_gradient, dft_is_meta, get_igcc,  &
                                tau_xc, tau_xc_spin
-  USE wavefunctions_module, ONLY : psic
+  USE wavefunctions,    ONLY : psic
   USE spin_orb,         ONLY : domag
   USE fft_interfaces,   ONLY : fwfft
   USE mp_bands,         ONLY : intra_bgrp_comm

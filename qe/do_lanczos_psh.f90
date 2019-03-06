@@ -45,7 +45,7 @@ SUBROUTINE do_lanczos_psh()
   USE spin_orb,              ONLY : domag
   USE noncollin_module,      ONLY : noncolin, npol, nspin_mag
   USE wvfct,                 ONLY : nbnd, npwx,  et
-  USE wavefunctions_module,  ONLY : evc
+  USE wavefunctions,         ONLY : evc
   USE eqv,                   ONLY : dpsi, dvpsi, evq
   USE becmod,                ONLY : becp, calbec
   USE scf,                   ONLY : rho
@@ -65,7 +65,7 @@ SUBROUTINE do_lanczos_psh()
   USE lr_lanczos,            ONLY : lanczos_steps, evc1, sevc1, evc1_new,    &
                                     lanczos_restart_step
   USE recover_mod,           ONLY : read_rec, write_rec
-  USE units_ph,              ONLY : lrwfc, iuwfc
+  USE units_lr,              ONLY : lrwfc, iuwfc
   USE buffers,               ONLY : get_buffer
   USE mp_pools,              ONLY : inter_pool_comm
   USE mp_bands,              ONLY : intra_bgrp_comm, ntask_groups

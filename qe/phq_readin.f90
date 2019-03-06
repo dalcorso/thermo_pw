@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2001-2013 Quantum ESPRESSO group
+! Copyright (C) 2001-2018 Quantum ESPRESSO group
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -17,7 +17,6 @@ SUBROUTINE phq_readin_tpw()
   !
   !
   USE kinds,         ONLY : DP
-  USE parameters,    ONLY : nsx
   USE constants,     ONLY : rytoev
   USE ions_base,     ONLY : nat, ntyp => nsp
   USE mp,            ONLY : mp_bcast
@@ -26,17 +25,17 @@ SUBROUTINE phq_readin_tpw()
   USE input_parameters, ONLY : nk1, nk2, nk3, k1, k2, k3, outdir
   USE start_k,       ONLY : reset_grid
   USE klist,         ONLY : xk, nks, nkstot, lgauss, two_fermi_energies, &
-                            lgauss, ltetra
-  USE control_flags, ONLY : gamma_only, tqr, restart, lkpoint_dir, io_level, &
-                            llondon, ts_vdw
-  USE funct,         ONLY : dft_is_nonlocc, dft_is_hybrid
+                            ltetra
+  USE control_flags, ONLY : gamma_only, tqr, restart, io_level, &
+                            ts_vdw, ldftd3, lxdm  
+  USE funct,         ONLY : dft_is_meta, dft_is_hybrid
   USE uspp,          ONLY : okvan
   USE fixed_occ,     ONLY : tfixed_occ
   USE lsda_mod,      ONLY : lsda, nspin
   USE fft_base,      ONLY : dffts
   USE spin_orb,      ONLY : domag
   USE cellmd,        ONLY : lmovecell
-  USE run_info, ONLY : title
+  USE run_info,      ONLY : title
   USE control_ph,    ONLY : maxter, alpha_mix, lgamma_gamma, epsil, &
                             zue, zeu, xmldyn, newgrid,                      &
                             trans, reduce_io, tr2_ph, niter_ph,       &
@@ -54,10 +53,10 @@ SUBROUTINE phq_readin_tpw()
   USE partial,       ONLY : atomo, nat_todo, nat_todo_input
   USE output,        ONLY : fildyn, fildvscf, fildrho
   USE disp,          ONLY : nq1, nq2, nq3, x_q, wq, nqs, lgamma_iq
-  USE io_files,      ONLY : tmp_dir, prefix, create_directory, check_tempdir
+  USE io_files,      ONLY : tmp_dir, prefix, postfix, create_directory, &
+                            check_tempdir, xmlpun_schema
   USE noncollin_module, ONLY : i_cons, noncolin
-  USE ldaU,          ONLY : lda_plus_u
-  USE control_flags, ONLY : iverbosity, modenum, twfcollect
+  USE control_flags, ONLY : iverbosity, modenum
   USE io_global,     ONLY : meta_ionode, meta_ionode_id, ionode, ionode_id, stdout
   USE mp_images,     ONLY : nimage, my_image_id, intra_image_comm,   &
                             me_image, nproc_image
@@ -78,10 +77,14 @@ SUBROUTINE phq_readin_tpw()
   USE images_omega,   ONLY : comp_f
   USE cryst_ph,      ONLY : magnetic_sym
   USE ph_restart,    ONLY : ph_readfile
-  USE el_phon,       ONLY : elph,elph_mat,elph_simple,elph_nbnd_min, &
+  USE el_phon,       ONLY : elph,elph_mat,elph_simple,elph_epa,elph_nbnd_min, &
                             elph_nbnd_max, &
                             el_ph_sigma, el_ph_nsigma, el_ph_ngauss,auxdvscf
+  USE elph_tetra_mod,ONLY : elph_tetra, lshift_q, in_alpha2f
+  USE ktetra,        ONLY : tetra_type
   USE dfile_star,    ONLY : drho_star, dvscf_star
+  USE ldaU,          ONLY : lda_plus_u, U_projection, lda_plus_u_kind
+  USE ldaU_ph,       ONLY : read_dns_bare, d2ns_type
   !
   IMPLICIT NONE
   !
@@ -93,7 +96,7 @@ SUBROUTINE phq_readin_tpw()
     ! counter on iterations
     ! counter on atoms
     ! counter on types
-  REAL(DP) :: amass_input(nsx)
+  REAL(DP), ALLOCATABLE :: amass_input(:)
     ! save masses read from input here
   CHARACTER (LEN=256) :: filename
   CHARACTER (LEN=8)   :: verbosity
@@ -132,7 +135,8 @@ SUBROUTINE phq_readin_tpw()
                        extrapolation, only_spectrum, pseudo_hermitian, lcg, &
                        delta_freq, start_freq, last_freq,     &
                        lmagnon, lcharge, lall_tensor, lchimag, &
-                       q_in_band_form, q2d, qplot, low_directory_check
+                       q_in_band_form, q2d, qplot, low_directory_check, &
+                       lshift_q
 
   ! tr2_ph       : convergence threshold
   ! amass        : atomic masses
@@ -204,6 +208,22 @@ SUBROUTINE phq_readin_tpw()
   ! lanczos_steps_ext : number of extrapolated lanczos steps
   ! lanczos_restart_steps : number of steps before saving lanczos status
   ! extrapolation : extrapolation method
+  !
+  ! read_dns_bare : If .true. the code tries to read three files in DFPT+U
+  ! calculations:
+  !                 dnsorth, dnsbare, d2nsbare 
+  ! d2ns_type     : DFPT+U - the 2nd bare derivative of occupation matrices ns 
+  !                 (d2ns_bare matrix). Experimental! This is why it is not
+  !                 documented in Doc.
+  !                 d2ns_type='full': matrix calculated with no approximation. 
+  !                 d2ns_type='fmmp': assume a m <=> m' symmetry. 
+  !                 d2ns_type='diag': if okvan=.true. the matrix is calculated
+  !                 retaining only
+  !                                     for <\beta_J|\phi_I> products where for
+  !                                     J==I.   
+  !                 d2ns_type='dmmp': same as 'diag', but also assuming a m <=>
+  !                 m'.
+  ! 
   ! 
   ! Note: meta_ionode is a single processor that reads the input
   !       (ionode is also a single processor but per image)
@@ -324,6 +344,10 @@ SUBROUTINE phq_readin_tpw()
   CALL get_environment_variable( 'ESPRESSO_FILDRHO_DIR', drho_star%dir)
   IF ( TRIM( drho_star%dir ) == ' ' ) &
       drho_star%dir = TRIM(outdir)//"/Rotated_DRHO/"
+
+  lshift_q=.FALSE.
+  read_dns_bare =.false.
+  d2ns_type = 'full'
   !
   dvscf_star%open = .FALSE.
   dvscf_star%basis = 'modes'
@@ -423,6 +447,7 @@ SUBROUTINE phq_readin_tpw()
   IF (modenum < 0) CALL errore ('phq_readin', ' Wrong modenum ', 1)
   IF (dek <= 0.d0) CALL errore ( 'phq_readin', ' Wrong dek ', 1)
   !
+  elph_tetra = 0
   SELECT CASE( trim( electron_phonon ) )
   CASE( 'simple'  )
      elph=.true.
@@ -593,6 +618,7 @@ SUBROUTINE phq_readin_tpw()
   !   amass will also be read from file:
   !   save its content in auxiliary variables
   !
+  ALLOCATE ( amass_input( SIZE(amass) ) )
   amass_input(:)= amass(:)
   !
   tmp_dir_save=tmp_dir
@@ -631,7 +657,7 @@ SUBROUTINE phq_readin_tpw()
         IF (.NOT.ext_recover.AND..NOT.ext_restart) tmp_dir_phq=tmp_dir_ph
      ENDIF
      !
-     filename=TRIM(tmp_dir_phq)//TRIM(prefix)//'.save/data-file.xml'
+     filename=TRIM(tmp_dir_phq)//TRIM(prefix)//postfix//xmlpun_schema
      IF (ionode) inquire (file =TRIM(filename), exist = exst)
      !
      CALL mp_bcast( exst, ionode_id, intra_image_comm )
@@ -700,26 +726,31 @@ SUBROUTINE phq_readin_tpw()
   IF (gamma_only) CALL errore('phq_readin',&
      'cannot start from pw.x data file using Gamma-point tricks',1)
 
-  IF (lda_plus_u) CALL errore('phq_readin',&
-     'The phonon code with LDA+U is not yet available',1)
-
-  IF (llondon) CALL errore('phq_readin',&
-     'The phonon code with DFT-D is not yet available',1)
+  IF (lda_plus_u) THEN
+     ! 
+     WRITE(stdout,'(/5x,a)') "Phonon calculation with DFPT+U; please cite"
+     WRITE(stdout,'(5x,a)')  "A. Floris et al., Phys. Rev. B 84, 161102(R) (2011)"
+     WRITE(stdout,'(5x,a)')  "in publications or presentations arising from this work."
+     ! 
+     IF (U_projection.NE."atomic") CALL errore("phq_readin", &
+          " The phonon code for this U_projection_type is not implemented",1)
+     IF (lda_plus_u_kind.NE.0) CALL errore("phq_readin", &
+          " The phonon code for this lda_plus_u_kind is not implemented",1)
+     IF (elph) CALL errore("phq_readin", &
+          " Electron-phonon with Hubbard U is not supported",1)
+     IF (lraman) CALL errore("phq_readin", &
+          " The phonon code with Raman and Hubbard U is not implemented",1)
+     !
+  ENDIF
 
   IF (ts_vdw) CALL errore('phq_readin',&
      'The phonon code with TS-VdW is not yet available',1)
-
-!  IF ( dft_is_nonlocc() ) CALL errore('phq_readin',&
-!     'The phonon code with non-local vdW functionals is not yet available',1)
 
   IF ( dft_is_hybrid() ) CALL errore('phq_readin',&
      'The phonon code with hybrid functionals is not yet available',1)
 
   IF (okpaw.and.(lraman.or.elop)) CALL errore('phq_readin',&
      'The phonon code with paw and raman or elop is not yet available',1)
-
-  IF (okpaw.and.noncolin.and.domag) CALL errore('phq_readin',&
-     'The phonon code with paw and domag is not available yet',1)
 
   IF (okvan.and.(lraman.or.elop)) CALL errore('phq_readin',&
      'The phonon code with US-PP and raman or elop not yet available',1)
@@ -732,17 +763,6 @@ SUBROUTINE phq_readin_tpw()
 
   IF (reduce_io) io_level=0
 
-!  IF (nproc_image /= nproc_image_file .and. .not. twfcollect)  &
-!     CALL errore('phq_readin',&
-!     'pw.x run with a different number of processors. Use wf_collect=.true.',1)
-
-!  IF (nproc_pool /= nproc_pool_file .and. .not. twfcollect)  &
-!     CALL errore('phq_readin',&
-!     'pw.x run with a different number of pools. Use wf_collect=.true.',1)
-
-!  IF (nproc_bgrp_file /= nproc_bgrp .AND. .NOT. twfcollect) &
-!     CALL errore('phq_readin','pw.x run with different band parallelization',1)
-  
   if(elph_mat.and.fildvscf.eq.' ') call errore('phq_readin',&
        'el-ph with wannier requires fildvscf',1)
 
@@ -785,7 +805,6 @@ SUBROUTINE phq_readin_tpw()
   ! If a band structure calculation needs to be done do not open a file
   ! for k point
   !
-  lkpoint_dir=.FALSE.
   restart = recover
   !
   !  set masses to values read from input, if available;
@@ -797,6 +816,7 @@ SUBROUTINE phq_readin_tpw()
      IF (amass_input(it) > 0.D0) amass(it) = amass_input(it)
      IF (amass(it) <= 0.D0) CALL errore ('phq_readin', 'Wrong masses', it)
   ENDDO
+  DEALLOCATE (amass_input)
   lgamma_gamma=.FALSE.
   IF (.NOT.ldisp) THEN
      IF (nkstot==1.OR.(nkstot==2.AND.nspin==2)) THEN
@@ -841,7 +861,7 @@ SUBROUTINE phq_readin_tpw()
   ENDIF
   nat_todo_input=nat_todo
 
-  IF ((epsil.AND..NOT.fpol).AND.lgauss) &
+  IF ((epsil.AND..NOT.fpol).AND.(lgauss.OR.ltetra)) &
         CALL errore ('phq_readin', 'no elec. field with metals', 1)
   IF (modenum > 0) THEN
      IF ( ldisp ) &
@@ -849,7 +869,15 @@ SUBROUTINE phq_readin_tpw()
           & single mode calculation not possibile !',1)
      nat_todo = 0
   ENDIF
-
+  !
+  ! Tetrahedron method for DFPT and El-Ph
+  !
+  IF(ltetra .AND. tetra_type == 0) &
+  &  CALL errore ('phq_readin', 'DFPT with the Blochl correction is not implemented', 1)
+  !
+  IF(.NOT. ltetra .AND. elph_tetra /= 0) &
+  &  CALL errore ('phq_readin', '"electron_phonon" and "occupation" are inconsistent.', 1)
+  !
   IF (modenum > 0 .OR. lraman ) lgamma_gamma=.FALSE.
   IF (.NOT.lgamma_gamma) asr=.FALSE.
   !

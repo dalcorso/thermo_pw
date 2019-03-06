@@ -16,7 +16,7 @@ subroutine compute_drhous_tpw (drhous, dbecsum, wgg, becq, alpq)
   
   USE kinds,      ONLY : DP
   USE ions_base,  ONLY : nat, ityp, atm
-  USE wavefunctions_module,  ONLY: evc
+  USE wavefunctions,  ONLY: evc
   USE buffers,    ONLY : get_buffer
   USE uspp,       ONLY : okvan, nkb, vkb
   USE uspp_param, ONLY : nhm
@@ -34,7 +34,7 @@ subroutine compute_drhous_tpw (drhous, dbecsum, wgg, becq, alpq)
 
   USE zstar_add,  ONLY : done_start_zstar
   USE efield_mod, ONLY : zstarue0
-  USE units_ph,   ONLY : iuwfc, lrwfc
+  USE units_lr,   ONLY : iuwfc, lrwfc
   USE becmod,     ONLY : bec_type
   USE partial,    ONLY : done_irr, comp_irr
   USE io_global,  ONLY : stdout

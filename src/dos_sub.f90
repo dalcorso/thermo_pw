@@ -42,14 +42,14 @@ SUBROUTINE dos_sub()
   REAL(DP) :: save_degauss, ef1
   REAL(DP), EXTERNAL :: efermig, efermit
   INTEGER  :: save_ngauss
-  LOGICAL  :: save_lgauss, save_ltetra
+  LOGICAL  :: save_lgauss, save_ltetra, wfc_is_collected
   INTEGER  :: n, ndos, iu_dos
   INTEGER  :: find_free_unit
   !
   IF ( my_image_id /= root_image ) RETURN
   !
   CALL clean_pw(.TRUE.)
-  CALL read_xml_file( )
+  CALL read_xml_file( wfc_is_collected )
   !
   save_degauss=degauss
   save_ngauss=ngauss

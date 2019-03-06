@@ -13,7 +13,7 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   ! ... phonon code.
   !
   !
-  USE control_flags,   ONLY : conv_ions, twfcollect
+  USE control_flags,   ONLY : conv_ions
   USE basis,           ONLY : starting_wfc, starting_pot, startingconfig
   USE io_files,        ONLY : prefix, tmp_dir, wfc_dir, seqopn
   USE lsda_mod,        ONLY : nspin
@@ -120,12 +120,14 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
 
   !
   IF (.NOT.reduce_io.and.do_band) THEN
-!
-!  If only_wfc flag is true, we use the same twfcollect as in the pw.x
-!  calculation.
-!
-     IF (.NOT. only_wfc) twfcollect=.FALSE.
-     CALL punch( 'all' )
+     IF ( only_wfc ) THEN
+        ! write wavefunctions to file in portable format
+        CALL punch( 'all' )
+     ELSE
+        ! do not write wavefunctions: not sure why, I think
+        ! they are written anyway in internal format - PG
+        CALL punch( 'config' )
+     END IF
   ENDIF
   !
   CALL seqopn( 4, 'restart', 'UNFORMATTED', exst )

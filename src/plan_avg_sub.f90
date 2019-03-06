@@ -323,7 +323,7 @@ SUBROUTINE do_plan_avg (ik, averag, vacuum, plan, zdim, ninter, i1, &
   USE wvfct, ONLY: npwx, nbnd, wg, g2kin
   USE gvecw, ONLY : ecutwfc
   USE klist, ONLY : ngk, igk_k
-  USE wavefunctions_module,  ONLY: evc
+  USE wavefunctions,  ONLY: evc
   USE noncollin_module, ONLY : noncolin, npol
   USE io_files, ONLY: iunwfc, nwordwfc
   USE io_global, ONLY : stdout

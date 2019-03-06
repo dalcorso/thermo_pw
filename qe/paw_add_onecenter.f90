@@ -845,7 +845,7 @@ SUBROUTINE PAW_deqtranpotential(dbecsum, becsum, int3)
    USE atom,              ONLY : g => rgrid
    USE ions_base,         ONLY : nat, ityp
    USE mp,                ONLY : mp_comm_split, mp_comm_free, mp_size, mp_rank
-   USE noncollin_module,  ONLY : nspin_lsda, nspin_mag
+   USE noncollin_module,  ONLY : nspin_mag
    USE lsda_mod,          ONLY : nspin
    USE uspp_param,        ONLY : nh, nhm, upf
 

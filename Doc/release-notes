@@ -1,3 +1,6 @@
+New in Version 1.1.0
+
+
 06/03/2019 Version 1.0.9 is now frozen 
 New in Version 1.0.9
 
@@ -9,6 +12,9 @@ Added the plot of the thermal stresses and of the generalized Gruneisen
 parameters.
 
 Conjugate gradient solver extended to US and PAW.
+
+Phonon in the noncollinear/spin-orbit case extended to magnetic solids
+(only metals and experimental).
 
 Added the calculation of the B factor at fixed geometry and its interpolation 
 at the temperature dependent geometry (contributed by C. Malica).

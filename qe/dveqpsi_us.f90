@@ -21,7 +21,7 @@ SUBROUTINE dveqpsi_us (ik)
   USE noncollin_module, ONLY : noncolin
   USE wvfct,     ONLY : nbnd, npwx
 
-  USE wavefunctions_module,  ONLY: evc
+  USE wavefunctions,  ONLY: evc
   USE control_lr, ONLY : nbnd_occ
   USE eqv,       ONLY : dvpsi
   USE qpoint,    ONLY : ikks, ikqs

@@ -65,8 +65,12 @@ PROGRAM thermo_pw
   USE mp_images,        ONLY : nimage, nproc_image, my_image_id, root_image
   USE io_global,        ONLY : stdout, meta_ionode_id
   USE mp_world,         ONLY : world_comm
+  USE mp_pools,         ONLY : intra_pool_comm
+  USE mp_bands,         ONLY : intra_bgrp_comm, inter_bgrp_comm
+  USE mp_diag,          ONLY : mp_start_diag
   USE mp_asyn,          ONLY : with_asyn_images, stop_signal_activated
   USE mp,               ONLY : mp_sum, mp_bcast, mp_barrier
+  USE command_line_options,  ONLY : ndiag_
   !
   IMPLICIT NONE
   !
@@ -77,7 +81,11 @@ PROGRAM thermo_pw
   !
   ! Initialize MPI, clocks, print initial messages
   !
-  CALL mp_startup ( start_images=.TRUE., diag_in_band_group = .TRUE. )
+  CALL mp_startup ( start_images=.TRUE. )
+  CALL mp_start_diag ( ndiag_, world_comm, intra_bgrp_comm, &
+       do_distr_diag_inside_bgrp_ = .true. )
+  CALL set_mpi_comm_4_solvers( intra_pool_comm, intra_bgrp_comm, &
+       inter_bgrp_comm )
   CALL environment_start ( code )
   CALL start_clock( 'PWSCF' )
   with_asyn_images=(nimage > 1)

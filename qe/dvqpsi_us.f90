@@ -30,10 +30,10 @@ subroutine dvqpsi_us_tpw (ik, uact, addnlcc, becp1, alphap)
   USE gvecs,     ONLY : ngms, doublegrid
   USE lsda_mod,  ONLY : lsda, isk
   USE scf,       ONLY : rho, rho_core
-  USE noncollin_module, ONLY : nspin_lsda, nspin_gga, nspin_mag, npol
+  USE noncollin_module, ONLY : nspin_gga, nspin_mag, npol
   use uspp_param,ONLY : upf
   USE wvfct,     ONLY : nbnd, npwx
-  USE wavefunctions_module,  ONLY: evc
+  USE wavefunctions,  ONLY: evc
   USE nlcc_ph,    ONLY : drc
   USE uspp,       ONLY : nlcc_any
   USE eqv,        ONLY : dvpsi, dmuxc, vlocq
@@ -154,10 +154,7 @@ subroutine dvqpsi_us_tpw (ik, uact, addnlcc, becp1, alphap)
          enddo
       endif
 
-      fac = 1.d0 / DBLE (nspin_lsda)
-      DO is = 1, nspin_lsda
-         rho%of_r(:,is) = rho%of_r(:,is) + fac * rho_core
-      END DO
+      rho%of_r(:,1) = rho%of_r(:,1) + rho_core
 
       IF ( dft_is_gradient() ) &
          CALL dgradcorr (dfftp, rho%of_r, grho, &
@@ -167,9 +164,7 @@ subroutine dvqpsi_us_tpw (ik, uact, addnlcc, becp1, alphap)
       IF (dft_is_nonlocc()) &
          CALL dnonloccorr(rho%of_r, drhoc, xq, aux)
 
-      DO is = 1, nspin_lsda
-         rho%of_r(:,is) = rho%of_r(:,is) - fac * rho_core
-      END DO
+      rho%of_r(:,1) = rho%of_r(:,1) - rho_core
 
       CALL fwfft ('Rho', aux, dfftp)
 ! 

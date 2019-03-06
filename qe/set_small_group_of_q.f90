@@ -42,7 +42,7 @@
 !   in itself
 !
      ALLOCATE(rtau (3, 48, nat))
-     CALL sgam_ph_new (at, bg, nsym, s, irt, tau, rtau, nat)
+     CALL sgam_lr (at, bg, nsym, s, irt, tau, rtau, nat)
      CALL mode_group (modenum, xq, at, bg, nat, nsym, s, irt, minus_q, &
                                                             rtau, sym)
      DEALLOCATE(rtau)

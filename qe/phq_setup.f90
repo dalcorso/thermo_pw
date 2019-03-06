@@ -60,9 +60,9 @@ subroutine phq_setup_tpw
   USE dfunct,        ONLY : newd
   USE fft_base,      ONLY : dfftp
   USE gvect,         ONLY : ngm
-  USE gvecs,       ONLY : doublegrid
+  USE gvecs,         ONLY : doublegrid
   USE symm_base,     ONLY : nrot, nsym, s, ftau, irt, t_rev, time_reversal, &
-                            sr, invs, inverse_s, sname
+                            sr, invs, inverse_s, sname, d1, d2, d3
   USE uspp_param,    ONLY : upf
   USE uspp,          ONLY : nlcc_any, deeq_nc, okvan
   USE spin_orb,      ONLY : domag
@@ -101,12 +101,16 @@ subroutine phq_setup_tpw
   USE qpoint,        ONLY : xq, xk_col
   USE nc_mag_aux,    ONLY : deeq_nc_save
   USE control_lr,    ONLY : lgamma
+  USE ldaU,          ONLY : lda_plus_u, Hubbard_U, Hubbard_J0
+  USE ldaU_ph,       ONLY : effU
+  USE constants,     ONLY : rytoev
+
 
   implicit none
 
   real(DP) :: sr_is(3,3,48)
 
-  integer :: isym, jsym, irot, ik, ibnd, ipol, &
+  integer :: isym, jsym, irot, ik, ibnd, ipol, nah, &
        mu, nu, imode0, irr, ipert, na, it, nt, nsym_is, last_irr_eff
   ! counters
 
@@ -241,7 +245,7 @@ subroutine phq_setup_tpw
   ! allocate and calculate rtau, the bravais lattice vector associated
   ! to a rotation
   !
-  call sgam_ph_new (at, bg, nsym, s, irt, tau, rtau, nat)
+  call sgam_lr (at, bg, nsym, s, irt, tau, rtau, nat)
   !
   !    and calculate the vectors G associated to the symmetry Sq = q + G
   !    if minus_q is true calculate also irotmq and the G associated to Sq=-g+G
@@ -421,6 +425,29 @@ subroutine phq_setup_tpw
      call mp_max(elph_nbnd_max, inter_pool_comm)
      !
   END IF
+  IF (lda_plus_u) THEN
+     !
+     ! Define effU     
+     !
+     effU = 0.d0
+     DO nah = 1, nat
+        nt = ityp(nah)
+        ! For U only calculations
+        effU(nt) = Hubbard_U(nt)
+        ! When there is also Hubbard_J0/=0
+        IF (Hubbard_J0(nt).NE.0.d0) &
+           effU(nt) = Hubbard_U(nt) - Hubbard_J0(nt)
+     ENDDO
+     !
+     ! Initialize d1, d2, d3 to rotate the spherical harmonics
+     !
+     CALL d_matrix (d1, d2, d3)
+     ! 
+     ! Calculate the offset of beta functions for all atoms. 
+     !
+     CALL setup_offset_beta()
+     !
+  ENDIF
   !
   CALL stop_clock ('phq_setup')
   RETURN

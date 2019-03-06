@@ -12,7 +12,7 @@ SUBROUTINE addnlcc_zstar_eu_us_tpw( drhoscf )
 
   USE kinds,     ONLY : DP
   USE ions_base, ONLY : nat
-  USE funct,     ONLY : dft_is_gradient
+  USE funct,     ONLY : dft_is_gradient, dft_is_nonlocc
   USE scf,       ONLY : rho, rho_core
   USE gvect,     ONLY : g
   USE cell_base, ONLY : omega, alat
@@ -51,11 +51,9 @@ SUBROUTINE addnlcc_zstar_eu_us_tpw( drhoscf )
   ALLOCATE( zstareu0_wrk(3,3*nat)  )
 
   nrtot = dfftp%nr1 * dfftp%nr2 * dfftp%nr3
-  fac = 1.d0 / DBLE (nspin_lsda)
   zstareu0_wrk=(0.0_DP, 0.0_DP)
-  DO is = 1, nspin_lsda
-     rho%of_r(:,is) = rho%of_r(:,is) + fac * rho_core(:)
-  END DO
+  fac = 1.d0 / DBLE (nspin_lsda)
+  rho%of_r(:,1) = rho%of_r(:,1) + rho_core(:)
   DO ipol = 1, 3
      imode0 = 0
      DO irr = 1, nirr
@@ -85,6 +83,9 @@ SUBROUTINE addnlcc_zstar_eu_us_tpw( drhoscf )
               CALL dgradcorr (dfftp, rho%of_r, grho, dvxc_rr, dvxc_sr, &
               dvxc_ss, dvxc_s, xq, drhoscf (1, 1, ipol),  &
               nspin_mag, nspin_gga, g, dvaux)
+           IF (dft_is_nonlocc()) CALL dnonloccorr( rho%of_r, & 
+                                      drhoscf(1, 1, ipol), xq, dvaux )
+
            DO is = 1, nspin_lsda
               zstareu0_wrk(ipol,mode) = zstareu0_wrk(ipol,mode) -             &
                    omega * fac / DBLE(nrtot) *         &
@@ -94,9 +95,7 @@ SUBROUTINE addnlcc_zstar_eu_us_tpw( drhoscf )
         imode0 = imode0 + npe
      END DO
   END DO
-  DO is = 1, nspin_lsda
-     rho%of_r(:,is) = rho%of_r(:,is) - fac * rho_core
-  END DO
+  rho%of_r(:,1) = rho%of_r(:,1) - rho_core
   call mp_sum ( zstareu0_wrk, intra_bgrp_comm )
 !
 ! Note: drhoscf is already collected among pools.

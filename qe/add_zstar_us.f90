@@ -25,7 +25,7 @@ subroutine add_zstar_us_tpw()
   USE becmod,    ONLY : calbec, bec_type, allocate_bec_type, &
                         deallocate_bec_type, becscal
   USE noncollin_module, ONLY : noncolin, npol
-  USE wavefunctions_module, ONLY : evc
+  USE wavefunctions, ONLY : evc
   USE uspp,      ONLY : vkb, nkb, okvan
   USE qpoint,    ONLY : nksq, npwq
   USE efield_mod, ONLY : zstarue0, zstareu0, zstarue0_rec
@@ -34,7 +34,8 @@ subroutine add_zstar_us_tpw()
   USE eqv,       ONLY : dpsi
   USE modes,     ONLY : u, nirr, npert
   USE buffers,   ONLY : get_buffer
-  USE units_ph,  ONLY : lrcom, iucom, lrwfc, iuwfc
+  USE units_ph,  ONLY : lrcom, iucom
+  USE units_lr,  ONLY : iuwfc, lrwfc
   USE partial,   ONLY : done_irr, comp_irr
   USE io_global, ONLY : stdout
 
