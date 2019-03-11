@@ -284,6 +284,7 @@ PROGRAM thermo_pw
 1000  CALL deallocate_thermo()
   !
   CALL environment_end( code )
+  CALL unset_mpi_comm_4_solvers()
   !
   CALL mp_global_end ()
   !

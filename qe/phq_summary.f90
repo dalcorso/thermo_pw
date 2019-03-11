@@ -244,7 +244,7 @@ subroutine phq_summary_tpw
           &             a," smearing, width (Ry)=",f8.4)') &
           &             nkstot, TRIM(smearing), degauss
   endif
-  IF (iverbosity==1 .or. (nkstot < 100 .and. .not.ldisp) ) then
+  IF (iverbosity==1 .or. (nkstot < 20 .and. .not.ldisp) ) then
      WRITE( stdout, '(23x,"cart. coord. in units 2pi/alat")')
      do ik = 1, nkstot
         WRITE( stdout, '(8x,"k(",i5,") = (",3f12.7,"), wk =",f12.7)') ik, &

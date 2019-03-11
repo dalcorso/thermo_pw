@@ -94,8 +94,6 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   !
   CALL plugin_initialization()
   !
-  CALL check_stop_init()
-  !
   CALL setup_tpw ()
   !
   CALL qmmm_update_positions()

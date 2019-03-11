@@ -114,7 +114,7 @@ K_POINTS AUTOMATIC
 EOF
 
 cat > ph_control << EOF
-ciao
+ph_title
 &inputph
   tr2_ph=1.0d-12,
   prefix='silicon'
