@@ -1758,7 +1758,7 @@ INTEGER, INTENT(IN) :: degree, nvar
 REAL(DP),INTENT(INOUT) :: x(degree), f
 REAL(DP),INTENT(IN) :: coeff(nvar)
 
-INTEGER, PARAMETER :: maxiter=100
+INTEGER, PARAMETER :: maxiter=300
 
 INTEGER :: iter, ideg
 REAL(DP), PARAMETER :: tol=2.D-11
