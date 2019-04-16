@@ -14,18 +14,24 @@ can be found <a href="https://people.sissa.it/dalcorso/thermo_pw/user_guide/inde
 <p align="justify">The following papers have been written using 
 <code>thermo_pw</code>:</p>
 
-1. O. Motornyi, M. Raynaud, A. Dal Corso, and N. Vast,
+<br>
+1. A. Urru and A. Dal Corso,
+Spin-polarized electronic surface states of Re(0001): an ab-initio investigation,
+<a href="https://doi.org/10.1016/j.susc.2019.03.008">Surf. Sci. <B>686</B>, 22 (2019).</a>
+<br>
+<br>
+2. O. Motornyi, M. Raynaud, A. Dal Corso, and N. Vast,
 Simulation of electron energy loss spectra with the turboEELS and
 thermo&#95;pw codes,
 <a href="https://iopscience.iop.org/article/10.1088/1742-6596/1136/1/012008/meta">J. Phys.: Conf. Ser. <B>1136</B>, 012008 (2018).</a>
 <br>
 <br>
-2. A. Urru and A. Dal Corso,
+3. A. Urru and A. Dal Corso,
 Clean Os(0001) electronic surface states: a first-principle fully relativistic investigation,
 <a href="https://www.sciencedirect.com/science/article/pii/S0039602817309469">Surf. Sci. <B> 671</B>, 17 (2018).</a>
 <br>
 <br>
-3. M. Palumbo and A. Dal Corso,
+4. M. Palumbo and A. Dal Corso,
 Lattice dynamics and thermophysical properties of h.c.p. Os and Ru from
 the quasi-harmonic approximation,
 <a href="http://iopscience.iop.org/article/10.1088/1361-648X/aa7dca">
@@ -33,7 +39,7 @@ J. of Phys.: Condens. Matter <B>29</B>, 395401 (2017).
 </a>
 <br>
 <br>
-4. M. Palumbo and A. Dal Corso,
+5. M. Palumbo and A. Dal Corso,
 Lattice dynamics and thermophysical properties of h.c.p. Re and Tc from
 the quasi-harmonic approximation,
 <a href="http://dx.doi.org/10.1002/pssb.201700101">Physica Status Solidi B:
@@ -41,12 +47,12 @@ Basic Solid State Physics <B>254</B>, 1700101 (2017).
 </a>
 <br>
 <br>
-5. A. Dal Corso,
+6. A. Dal Corso,
 Elastic constants of Beryllium: a first-principles investigation,
 <a href="http://dx.doi.org/10.1088/0953-8984/28/7/075401"> J. Phys.: Condens. Matter <B>28</B>, 075401 (2016) </a>.
 <br>
 <br>
-6. A. Dal Corso,
+7. A. Dal Corso,
 Clean Ir(111) and Pt(111) electronic surface states: a first-principle fully relativistic investigation,
 <a href="http://www.sciencedirect.com/science/article/pii/S0039602815000734"> Surf. Sci. <B>637-638</B>, 106 (2015)</a>.
 <br>
