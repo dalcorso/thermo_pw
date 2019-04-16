@@ -23,6 +23,7 @@ SUBROUTINE addusdens1d_so (plan, prho)
   USE cell_base,  ONLY: alat, omega, celldm
   USE ions_base,  ONLY: nat, ntyp => nsp, ityp
   USE fft_base,   ONLY: dfftp
+  USE fft_scalar, ONLY: cft_1z
   USE gvect,      ONLY: eigts1, eigts2, eigts3, mill
   USE lsda_mod,   ONLY: nspin, current_spin
   USE uspp,       ONLY: becsum
@@ -60,7 +61,7 @@ SUBROUTINE addusdens1d_so (plan, prho)
   ! imaginary part of qg
   ! the spherical harmonics
 
-  COMPLEX(DP) :: skk, qg (dfftp%nr3x, nspin)
+  COMPLEX(DP) :: skk, qg (dfftp%nr3x, nspin), qgout (dfftp%nr3)
   ! auxiliary variable
   ! auxiliary space for the charge
   ! auxiliary variable for FFT
@@ -121,13 +122,9 @@ SUBROUTINE addusdens1d_so (plan, prho)
   CALL mp_sum(  qg, intra_bgrp_comm )
   dimz = alat * celldm (3)
   DO ispin=1,nspin
+     CALL cft_1z (qg(:,ispin), 1, dfftp%nr3, dfftp%nr3x, 1, qgout)
      DO ig = 1, dfftp%nr3
-        qgr (ig) =  dble (qg (ig, ispin) )
-        qgi (ig) = aimag (qg (ig, ispin) )
-     ENDDO
-     CALL cft (qgr, qgi, dfftp%nr3, dfftp%nr3, dfftp%nr3, 1)
-     DO ig = 1, dfftp%nr3
-        plan (ig,ispin) = qgr (ig) * omega / dimz
+        plan (ig,ispin) = DBLE(qgout (ig)) * omega / dimz
      ENDDO
   ENDDO
   DEALLOCATE (aux, qgm)

@@ -17,7 +17,7 @@ then
            PHonon/Gamma PHonon/PH PHonon/FD HP/src atomic/src \
            EPW/src XSpectra/src ACFDT/src NEB/src TDDFPT/src \
            GWW/pw4gww GWW/gww GWW/head GWW/bse GWW/simple \
->          GWW/simple_bse GWW/simple_ip thermo_pw/src \
+           GWW/simple_bse GWW/simple_ip thermo_pw/src \
            thermo_pw/lib thermo_pw/tools thermo_pw/qe" 
           
 elif
@@ -139,8 +139,8 @@ for dir in $dirs; do
 
         if test "$DIR" = "UtilXlib"
         then
-            sed '/@elpa1@/d' make.depend > make.depend.tmp
-            sed '/@ifcore@/d;/@cudafor@/d' make.depend.tmp > make.depend
+            sed '/@ifcore@/d' make.depend > make.depend.tmp
+            sed '/@cudafor@/d' make.depend.tmp > make.depend
         fi
 
         if test "$DIR" = "KS_Solvers/Davidson"
@@ -192,13 +192,9 @@ for dir in $dirs; do
         if test "$DIR" = "EPW/src"
         then
             sed '/@f90_unix_io@/d' make.depend > make.depend.tmp
-            cp make.depend.tmp make.depend
-            sed '/@f90_unix_env@/d' make.depend > make.depend.tmp
-            cp make.depend.tmp make.depend
+            sed '/@f90_unix_env@/d' make.depend.tmp > make.depend
             sed '/@w90_io@/d' make.depend > make.depend.tmp
-            cp make.depend.tmp make.depend
-            sed '/@ifport@/d' make.depend > make.depend.tmp
-            cp make.depend.tmp make.depend
+            sed '/@ifport@/d' make.depend.tmp > make.depend
         fi
 
         rm -f make.depend.tmp
