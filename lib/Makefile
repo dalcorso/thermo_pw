@@ -12,6 +12,7 @@ atomic_pos.o \
 debye_module.o \
 bz_2d_form.o \
 bz_asy.o \
+cubic_surfaces.o \
 elastic_const.o \
 eldos_module.o \
 isoentropic.o \
