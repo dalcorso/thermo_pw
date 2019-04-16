@@ -2,6 +2,7 @@ set encoding iso_8859_15
 set terminal postscript enhanced solid color "AvantGarde-Book" 20
 set output "figure_hex.ps"
 
+set nokey
 set size 1.0,1.0
 a=1.0
 sqrt3=sqrt(3.0)
