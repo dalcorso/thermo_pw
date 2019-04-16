@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2018 C. Malica
+! Copyright (C) 2018-2019 C. Malica
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -45,13 +45,8 @@ MODULE cubic_surfaces
 !
 !    To interpolate the function it is better to give to
 !    multi_cubic a number of points equal or larger than
-!    to the number of coefficients. The routines makes a least square fit
-!    of the data.
-!
-!    In the following I adopt the same convenction used in pre-existent
-!    modules (quadratic_surfaces and quartic_surfaces): the variable
-!    "degree" indicates the number of variables in the polynomial (from 1 
-!    till 6), while the variable "nvar" indicates the number of coefficients.
+!    to the number of coefficients. The routines makes a 
+!    least square fit of the data.
 !
 !
   USE kinds, ONLY : DP
