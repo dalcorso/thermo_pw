@@ -8,6 +8,10 @@ bz_asy.o : ../../Modules/bz_form.o
 bz_asy.o : ../../Modules/kind.o
 bz_asy.o : asy.o
 bz_asy.o : bz_2d_form.o
+cubic_surfaces.o : ../../Modules/io_global.o
+cubic_surfaces.o : ../../Modules/kind.o
+cubic_surfaces.o : linear_solvers.o
+cubic_surfaces.o : quartic_surfaces.o
 debye_module.o : ../../Modules/constants.o
 debye_module.o : ../../Modules/io_global.o
 debye_module.o : ../../Modules/kind.o

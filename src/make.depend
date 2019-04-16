@@ -1,3 +1,4 @@
+addusdens1d_so.o : ../../FFTXlib/fft_scalar.o
 addusdens1d_so.o : ../../Modules/cell_base.o
 addusdens1d_so.o : ../../Modules/fft_base.o
 addusdens1d_so.o : ../../Modules/ions_base.o
