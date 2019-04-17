@@ -57,11 +57,10 @@ MODULE cubic_surfaces
 
   PUBLIC :: fit_multi_cubic,  evaluate_fit_cubic, &
             evaluate_fit_grad_cubic, evaluate_fit_hess_cubic, &
-            compute_cubic_var, find_cubic_extremum, &
+            cubic_var, find_cubic_extremum, &
             find_quartic_cubic_extremum, evaluate_quartic_cubic, &
-            !evaluate_two_quartic, find_two_quartic_extremum, &
             print_cubic_polynomial, introduce_cubic_fit, &
-            print_chisq_cubic, & !print_chisq_two_quartic,    &
+            print_chisq_cubic, & 
             print_chisq_quartic_cubic
 
 CONTAINS
@@ -921,30 +920,30 @@ END IF
 RETURN
 END SUBROUTINE set_quartic_cubic_coefficients
 
-FUNCTION compute_cubic_var(degree)  
+FUNCTION cubic_var(degree)  
 
 IMPLICIT NONE
-INTEGER :: compute_cubic_var
+INTEGER :: cubic_var
 INTEGER, INTENT(IN) :: degree
 
 IF (degree==1) THEN
-   compute_cubic_var=4
+   cubic_var=4
 ELSEIF (degree==2) THEN
-   compute_cubic_var=10
+   cubic_var=10
 ELSEIF (degree==3) THEN
-   compute_cubic_var=20
+   cubic_var=20
 ELSEIF (degree==4) THEN
-   compute_cubic_var=35
+   cubic_var=35
 ELSEIF (degree==5) THEN
-   compute_cubic_var=56
+   cubic_var=56
 ELSEIF (degree==6) THEN
-   compute_cubic_var=84
+   cubic_var=84
 ELSE
-   compute_cubic_var=0
+   cubic_var=0
 ENDIF
 
 RETURN
-END FUNCTION compute_cubic_var
+END FUNCTION cubic_var
 
 SUBROUTINE print_cubic_polynomial(degree, nvar, coeff)
 
