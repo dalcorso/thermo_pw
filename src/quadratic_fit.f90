@@ -137,15 +137,15 @@ SUBROUTINE quadratic_fit_t(itemp, celldm_t, free_e_min_t, ph_free_ener, &
                                   ndatatot )
   !-----------------------------------------------------------------------
   !
-  !   This routine receives the total free energy for several values of 
-  !   celldm and fits them with a quadratic function of dimension 
-  !   equal to the number of indipendent parameters in celldm. 
-  !   Then it adds the quadratic polynomium that fits the energy
+  !   This routine receives the free energy at temperature itemp
+  !   for several values of celldm and fits it with a quadratic function 
+  !   of dimension equal to the number of indipendent parameters in celldm. 
+  !   Then it adds the quadratic polynomial that fits the energy
   !   (or enthalphy) and finds the minimum.
-  !   If lquartic and lquartic_ph are both true it interpolates the
-  !   data with a quartic polynomium, adds the quartic polynomium that
-  !   fits the energy (or enthalphy) and finds its minimum starting from
-  !   the minimum of the quadratic polynomium.
+  !   If lquartic is true it interpolates the free energy with a polynomial 
+  !   of degree poly_degree_ph, adds the quartic polynomial that fits 
+  !   the energy (or enthalpy) and finds its minimum starting from
+  !   the minimum of the quadratic polynomial.
   !
   !   The output of this routine is celldm_t at the given temperature itemp
   !   and the free energy at the minimum free_e_min_t
@@ -154,17 +154,21 @@ SUBROUTINE quadratic_fit_t(itemp, celldm_t, free_e_min_t, ph_free_ener, &
   USE cell_base,   ONLY : ibrav
   USE thermo_mod,  ONLY : celldm_geo, no_ph
   USE control_quadratic_energy, ONLY : degree, nvar, enthalpy_coeff => coeff
-  USE control_quartic_energy, ONLY :  nvar4, coeff4, lquartic, lquartic_ph, &
+  USE control_quartic_energy, ONLY :  nvar4, coeff4, lquartic, poly_degree_ph,&
                                       lsolve
   USE lattices,    ONLY : compress_celldm, expand_celldm, crystal_parameters
   USE io_global,   ONLY : stdout
 
   USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_two_fit_extremum, &
                       print_quadratic_polynomial, quadratic_var, &
-                      summarize_fitting_data, write_vector, &
+                      summarize_fitting_data, write_vector,      &
                       introduce_quadratic_fit, print_chisq_quadratic
 
-  USE quartic_surfaces, ONLY : find_quartic_quadratic_extremum, &
+  USE cubic_surfaces, ONLY : find_quartic_cubic_extremum,   &
+                      fit_multi_cubic, print_chisq_cubic, &
+                      cubic_var
+
+  USE quartic_surfaces, ONLY : find_quartic_quadratic_extremum,      &
                       fit_multi_quartic, find_two_quartic_extremum,  &
                       print_chisq_quartic
 
@@ -172,9 +176,10 @@ SUBROUTINE quadratic_fit_t(itemp, celldm_t, free_e_min_t, ph_free_ener, &
   INTEGER  :: itemp
   INTEGER  :: ndata, ndatatot
   REAL(DP) :: ph_free_ener(ndatatot), celldm_t(6), free_e_min_t
-  REAL(DP), ALLOCATABLE :: x(:,:), f(:), coeff(:), x_pos_min(:), coefft4(:)
+  REAL(DP), ALLOCATABLE :: x(:,:), f(:), coeff(:), x_pos_min(:), coefft4(:), &
+              coefft3(:)
   REAL(DP) :: ymin
-  INTEGER  :: idata
+  INTEGER  :: idata, nvar3
   INTEGER  :: compute_nwork, compute_nwork_ph
   !
   degree=crystal_parameters(ibrav)
@@ -189,7 +194,6 @@ SUBROUTINE quadratic_fit_t(itemp, celldm_t, free_e_min_t, ph_free_ener, &
   ALLOCATE(x_pos_min(degree))
   ALLOCATE(f(ndata))
   ALLOCATE(coeff(nvar))
-  ALLOCATE(coefft4(nvar4))
 
   ndata=0
   DO idata=1,ndatatot
@@ -214,18 +218,30 @@ SUBROUTINE quadratic_fit_t(itemp, celldm_t, free_e_min_t, ph_free_ener, &
   CALL print_genergy(ymin)
 
   IF (lquartic) THEN
-     IF (lquartic_ph) THEN
+     IF (poly_degree_ph==4) THEN
         WRITE(stdout,'(/,5x, "Fit improved with a fourth order polynomial")') 
-        CALL fit_multi_quartic(ndata,degree,nvar4,lsolve,x,f,coefft4)
+        ALLOCATE(coefft4(nvar4))
+        CALL fit_multi_quartic(ndata, degree, nvar4, lsolve, x, f, coefft4)
         CALL print_chisq_quartic(ndata, degree, nvar4, x, f, coefft4)
-        CALL find_two_quartic_extremum(degree,nvar4,x_pos_min,&
-                                                       ymin,coeff4,coefft4)
+        CALL find_two_quartic_extremum(degree, nvar4, x_pos_min,           &
+                                                      ymin, coeff4, coefft4)
+        DEALLOCATE(coefft4)
+        WRITE(stdout,'(/,5x,"Extremum of the quartic found at:")')
+     ELSEIF (poly_degree_ph==3) THEN
+        WRITE(stdout,'(/,5x, "Fit improved with a third order polynomial")') 
+        nvar3=cubic_var(degree)
+        ALLOCATE(coefft3(nvar3))
+        CALL fit_multi_cubic(ndata, degree, nvar3, lsolve, x, f, coefft3)
+        CALL print_chisq_cubic(ndata, degree, nvar3, x, f, coefft3)
+        CALL find_quartic_cubic_extremum(degree, nvar4, nvar3, x_pos_min,&
+                                                        ymin, coeff4, coefft3)
+        DEALLOCATE(coefft3)
+        WRITE(stdout,'(/,5x,"Extremum of the cubic found at:")')
      ELSE
         WRITE(stdout,'(/,5x,"Quartic fit used only a T=0:")')
-        CALL find_quartic_quadratic_extremum(degree,nvar4,nvar,x_pos_min,&
-                                                           ymin,coeff4,coeff)
+        CALL find_quartic_quadratic_extremum(degree, nvar4, nvar, x_pos_min,&
+                                                        ymin, coeff4, coeff)
      ENDIF
-     WRITE(stdout,'(/,5x,"Extremum of the quartic found at:")')
      CALL write_vector(degree,x_pos_min)
      CALL print_genergy(ymin)
   ENDIF
@@ -233,10 +249,9 @@ SUBROUTINE quadratic_fit_t(itemp, celldm_t, free_e_min_t, ph_free_ener, &
   free_e_min_t=ymin
   CALL expand_celldm(celldm_t, x_pos_min, degree, ibrav)
 
-  DEALLOCATE(x_pos_min)
-  DEALLOCATE(coefft4)
   DEALLOCATE(coeff)
   DEALLOCATE(f)
+  DEALLOCATE(x_pos_min)
   DEALLOCATE(x)
   !
   RETURN

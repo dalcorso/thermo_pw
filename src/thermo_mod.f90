@@ -816,14 +816,17 @@ MODULE control_quartic_energy
   USE kinds, ONLY: DP
   SAVE
 
-  LOGICAL :: lquartic                        ! if .TRUE. fit the energy/enthalpy
-                                             ! with a quartic polynomium
-  LOGICAL :: lquartic_ph                     ! if .TRUE. fit the vibrational 
-                                             ! free_energy with a quartic
-                                             ! polynomium
-  LOGICAL :: lquartic_elc                    ! if .TRUE. fit the elastic
-                                             ! constants with a quartic
-                                             ! polynomium
+  LOGICAL :: lquartic                        ! if .TRUE. fit the energy/
+                                             ! enthalpy
+                                             ! with a quartic polynomial
+  INTEGER :: poly_degree_ph                  ! degree of the polynomial that 
+                                             ! fits the free energy.
+  INTEGER :: poly_degree_cv                  ! degree of the polynomial that 
+                                             ! fits the heat capacity
+  INTEGER :: poly_degree_bfact               ! degree of the polynomial that 
+                                             ! fits the b factor
+  INTEGER :: poly_degree_elc                 ! degree of the polynomial that 
+                                             ! fits the elastic constants
   INTEGER :: nvar4                           ! number of variables of 
                                              ! the polynomial fit
   REAL(DP), ALLOCATABLE :: x_min_4(:),   &   ! coordinates of the minimum
@@ -831,7 +834,6 @@ MODULE control_quartic_energy
   INTEGER :: lsolve                          ! 1, 2, 3 controls the method
                                              ! used to find the polynomial
                                              ! coefficients (Default 2)
-
 END MODULE control_quartic_energy
 
 MODULE control_pressure

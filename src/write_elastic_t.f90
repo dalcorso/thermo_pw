@@ -14,13 +14,14 @@ SUBROUTINE write_elastic_t( )
 USE kinds,      ONLY : DP
 USE io_global,  ONLY : stdout
 USE thermo_mod, ONLY : ngeo, ibrav_geo, celldm_geo
-USE control_quartic_energy, ONLY : lquartic_elc, lsolve
+USE control_quartic_energy, ONLY : lsolve, poly_degree_elc
 USE quadratic_surfaces, ONLY : print_chisq_quadratic, fit_multi_quadratic,    &
                              introduce_quadratic_fit, summarize_fitting_data, &
                              print_quadratic_polynomial, quadratic_var
 USE quartic_surfaces, ONLY : quartic_var, print_chisq_quartic,         &
                              fit_multi_quartic, introduce_quartic_fit, &
                              print_quartic_polynomial
+USE cubic_surfaces,   ONLY : cubic_var, fit_multi_cubic
 USE control_elastic_constants, ONLY : el_con_geo,  el_cons_available, &
                                       el_cons_t_available
 USE control_grun,   ONLY : lb0_t
@@ -67,8 +68,10 @@ ndata=compute_nwork()
 ALLOCATE(x(degree,ndata))
 ALLOCATE(f(ndata))
 
-IF (lquartic_elc) THEN
+IF (poly_degree_elc==4) THEN
    nvar=quartic_var(degree)
+ELSEIF(poly_degree_elc==3) THEN
+   nvar=cubic_var(degree)
 ELSE
    nvar=quadratic_var(degree)
 ENDIF
@@ -87,7 +90,7 @@ DO i=1,6
             f(idata)=el_con_geo(i,j,idata)
          END DO
 
-         IF (lquartic_elc) THEN
+         IF (poly_degree_elc==4) THEN
 !            CALL introduce_quartic_fit(degree, nvar, ndata)
             CALL fit_multi_quartic(ndata,degree,nvar,lsolve,x,f,&
                                                    el_cons_coeff(:,i,j))
@@ -96,6 +99,9 @@ DO i=1,6
        !                                                   &DeltaE (1)-(2)")') 
 !            CALL print_chisq_quartic(ndata, degree, nvar, x, f, &
 !                                                      el_cons_coeff(:,i,j))
+         ELSEIF (poly_degree_elc==3) THEN
+            CALL fit_multi_cubic(ndata,degree,nvar,lsolve,x,f,&
+                                                   el_cons_coeff(:,i,j))
          ELSE
 !            CALL introduce_quadratic_fit(degree, nvar, ndata)
 !            CALL summarize_fitting_data(degree, ndata, x, f)
@@ -114,7 +120,7 @@ ENDDO
 !
 IF (ltherm_dos) THEN
    CALL interpolate_el_cons(celldm_t, nvar, degree, ibrav, el_cons_coeff,&
-                            lquartic_elc, el_cons_t, el_comp_t, b0_t)
+                            poly_degree_elc, el_cons_t, el_comp_t, b0_t)
    el_cons_grun_t=el_cons_t
    el_comp_grun_t=el_comp_t
    lelastic=.TRUE.
@@ -130,7 +136,7 @@ ENDIF
 
 IF (ltherm_freq) THEN
    CALL interpolate_el_cons(celldmf_t, nvar, degree, ibrav, el_cons_coeff,&
-                                  lquartic_elc, el_consf_t, el_compf_t, b0f_t)
+                               poly_degree_elc, el_consf_t, el_compf_t, b0f_t)
    el_cons_grun_t=el_consf_t
    el_comp_grun_t=el_compf_t
    lelasticf=.TRUE.

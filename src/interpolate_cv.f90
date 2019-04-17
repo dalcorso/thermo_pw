@@ -7,8 +7,8 @@
 !
 SUBROUTINE interpolate_cv(vmin_t, celldm_t, ph_cv, cv_t)
 !
-!  This subroutine receives the isochoric heat capacity at
-!  several geometries, the equilibrium volume (or celldm) as a function 
+!  This subroutine receives the isochoric heat capacity at several 
+!  geometries, the equilibrium volume (or celldm) as a function 
 !  of temperature, and interpolates the isochoric heat capacity at the 
 !  equilibrium volume (or celldm) at each temperature.
 !  The routine is parallelized over temperatures and must be called
@@ -23,7 +23,8 @@ USE quadratic_surfaces, ONLY : fit_multi_quadratic, evaluate_fit_quadratic, &
                            quadratic_var
 USE quartic_surfaces, ONLY : fit_multi_quartic, evaluate_fit_quartic, & 
                            quartic_var
-USE control_quartic_energy, ONLY : lsolve, lquartic_ph
+USE cubic_surfaces, ONLY : fit_multi_cubic, evaluate_fit_cubic, cubic_var
+USE control_quartic_energy, ONLY : lsolve, poly_degree_cv
 USE lattices,       ONLY : compress_celldm, crystal_parameters
 USE mp_world,       ONLY : world_comm
 USE mp,             ONLY : mp_sum
@@ -38,9 +39,11 @@ INTEGER :: compute_nwork_ph
 REAL(DP), ALLOCATABLE :: x(:,:), x_pos_min(:), f(:), coeff(:)
 
 degree=crystal_parameters(ibrav)
-IF (lmurn) degree=1  ! ibkt rge volume is variable in this case
-IF (lquartic_ph) THEN
+IF (lmurn) degree=1         ! only the volume is variable in this case
+IF (poly_degree_cv==4) THEN
    nvar=quartic_var(degree)
+ELSEIF (poly_degree_cv==3) THEN
+   nvar=cubic_var(degree)
 ELSE
    nvar=quadratic_var(degree)
 ENDIF
@@ -52,8 +55,8 @@ ALLOCATE(x_pos_min(degree))
 ALLOCATE(f(ndata))
 ALLOCATE(coeff(nvar))
 !
-!  collect the geometrical data geometries for which phonon dispersions have
-!  been calculated
+!  collect the geometrical data of the geometries for which phonon dispersions
+!  have been calculated
 !
 ndata=0
 DO igeo=1, tot_ngeo
@@ -89,7 +92,7 @@ DO itemp=startt,lastt
       CALL compress_celldm(celldm_t(1,itemp), x_pos_min, degree, ibrav)
    ENDIF
 
-   IF (lquartic_ph) THEN
+   IF (poly_degree_cv==4) THEN
 !
 !   compute the coefficients of the quartic polynomial
 !
@@ -98,6 +101,15 @@ DO itemp=startt,lastt
 !  and evaluate the polynomial
 !
       CALL evaluate_fit_quartic(degree, nvar, x_pos_min, cv_t(itemp), coeff)
+   ELSEIF( poly_degree_cv==3) THEN
+!
+!   compute the coefficients of the cubic polynomial
+!
+      CALL fit_multi_cubic(ndata, degree, nvar, lsolve, x, f, coeff)
+!
+!  and evaluate the polynomial
+!
+      CALL evaluate_fit_cubic(degree, nvar, x_pos_min, cv_t(itemp), coeff)
    ELSE
 !
 !   compute the coefficients of the quadratic polynomial
@@ -115,10 +127,10 @@ ENDDO
 !
 CALL mp_sum(cv_t, world_comm)
 
-DEALLOCATE(x)
-DEALLOCATE(x_pos_min)
-DEALLOCATE(f)
 DEALLOCATE(coeff)
+DEALLOCATE(f)
+DEALLOCATE(x_pos_min)
+DEALLOCATE(x)
 !
 RETURN
 END SUBROUTINE interpolate_cv

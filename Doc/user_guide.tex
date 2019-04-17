@@ -1593,14 +1593,22 @@ with_eigen    : if .TRUE. use the eigenvectors of the dynamical matrix to
                 the plotted Gruneisen bands (both in cubic and anisotropic
                 solids).
                 Default: logical .FALSE. 
-lquartic_ph   : if .TRUE. fit the vibrational free energy with a fourth
-                order polynomial, otherwise with a second order polynomial
-                Active only if lquartic=.TRUE.. Used also for the interpolation
-                of the heat capacity and of the B factor.
-                Default: logical .TRUE.
-lquartic_elc  : if .TRUE. fit the elastic constants with a fourth
-                order polynomial, otherwise with a second order polynomial
-                Default: logical .TRUE.
+poly_degree_ph : degree of the polynomial used to interpolate the vibrational
+                free energy. Presently only the values 2, 3, or 4 are 
+                available for anisotropic solids. 
+                Default: integer 4
+poly_degree_cv : degree of the polynomial used to interpolate the 
+                heat capacity. Presently only the values 2, 3, or 4 are 
+                available for anisotropic solids.
+                Default: integer 4
+poly_degree_bfact : degree of the polynomial used to interpolate the 
+                b factor. Presently only the values 2, 3, or 4 are 
+                available for anisotropic solids.
+                Default: integer 4
+poly_degree_elc : degree of the polynomial used to interpolate the 
+                elastic constants. Presently only the values 2, 3, or 4 are 
+                available for anisotropic solids.
+                Default: integer 4
 lv0_t         : if .TRUE.  the calculation of the thermal expansion with 
                 Gruneisen parameters uses the equilibrium geometry as a 
                 function of temperature computed from the free energy 

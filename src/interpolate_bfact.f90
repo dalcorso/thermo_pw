@@ -24,8 +24,10 @@ USE quadratic_surfaces, ONLY : fit_multi_quadratic, evaluate_fit_quadratic, &
                         introduce_quadratic_fit, quadratic_var
 USE quartic_surfaces, ONLY : fit_multi_quartic, evaluate_fit_quartic,   &
                         introduce_quartic_fit, quartic_var,             &
-                        print_quartic_polynomial, print_chisq_quartic
-USE control_quartic_energy, ONLY : lsolve, lquartic_ph
+                        print_chisq_quartic
+USE cubic_surfaces, ONLY : fit_multi_cubic, evaluate_fit_cubic, cubic_var, &
+                        introduce_cubic_fit
+USE control_quartic_energy, ONLY : lsolve, poly_degree_bfact
 IMPLICIT NONE
 REAL(DP), INTENT(IN)  :: vmin_t(ntemp), ph_b_fact(3,3,nat,ntemp,tot_ngeo)
 REAL(DP), INTENT(OUT) :: bfact_t(6,nat,ntemp)
@@ -40,8 +42,10 @@ INTEGER :: compute_nwork_ph
 !
 degree=1
 ndata = compute_nwork_ph(no_ph,tot_ngeo)
-IF (lquartic_ph) THEN
+IF (poly_degree_bfact==4) THEN
    nvar=quartic_var(degree)
+ELSEIF (poly_degree_bfact==3) THEN
+   nvar=cubic_var(degree)
 ELSE
    nvar=quadratic_var(degree)
 ENDIF
@@ -82,12 +86,18 @@ DO itemp=startt,lastt
             IF (asum<1.D-10) CYCLE
 !            WRITE(stdout,'(5x,"atom n.",i4,",   B component: ",i1)') na, ijpol
 
-            IF (lquartic_ph) THEN
+            IF (poly_degree_bfact==4) THEN
                IF (itemp==startt) CALL introduce_quartic_fit(degree, nvar, &
                                                               ndata)
                CALL fit_multi_quartic(ndata, degree, nvar, lsolve, x, b,   &
                                                                      coeff)
                CALL evaluate_fit_quartic(degree, nvar, vmin_t(itemp),      &
+                                            bfact_t(ijpol,na,itemp), coeff)
+            ELSEIF(poly_degree_bfact==3) THEN
+               IF (itemp==startt) CALL introduce_cubic_fit(degree, nvar, &
+                                                              ndata)
+               CALL fit_multi_cubic(ndata, degree, nvar, lsolve, x, b, coeff)
+               CALL evaluate_fit_cubic(degree, nvar, vmin_t(itemp),      &
                                             bfact_t(ijpol,na,itemp), coeff)
             ELSE
                IF (itemp==startt) CALL introduce_quadratic_fit(degree, nvar, &
@@ -123,14 +133,16 @@ USE kinds,          ONLY : DP
 USE cell_base,      ONLY : ibrav
 USE ions_base,      ONLY : nat
 USE thermo_mod,     ONLY : tot_ngeo, celldm_geo, no_ph
-USE temperature,    ONLY : ntemp, temp
+USE temperature,    ONLY : ntemp
 USE io_global,      ONLY : stdout
 USE lattices,       ONLY : compress_celldm, crystal_parameters
 USE quadratic_surfaces, ONLY : fit_multi_quadratic, evaluate_fit_quadratic, &
                            introduce_quadratic_fit, quadratic_var
 USE quartic_surfaces, ONLY : fit_multi_quartic, evaluate_fit_quartic, &
-                   introduce_quartic_fit, quartic_var, print_quartic_polynomial
-USE control_quartic_energy, ONLY : lsolve, lquartic_ph
+                           introduce_quartic_fit, quartic_var
+USE cubic_surfaces,   ONLY : fit_multi_cubic, evaluate_fit_cubic, &
+                             introduce_cubic_fit, cubic_var
+USE control_quartic_energy, ONLY : lsolve, poly_degree_bfact
 USE mp_world,       ONLY : world_comm
 USE mp,             ONLY : mp_sum
 
@@ -145,8 +157,10 @@ INTEGER :: compute_nwork_ph
 
 degree=crystal_parameters(ibrav)
 ndata = compute_nwork_ph(no_ph,tot_ngeo)
-IF (lquartic_ph) THEN
+IF (poly_degree_bfact==4) THEN
    nvar=quartic_var(degree)
+ELSEIF (poly_degree_bfact==3) THEN
+   nvar=cubic_var(degree)
 ELSE
    nvar=quadratic_var(degree)
 ENDIF
@@ -190,19 +204,22 @@ DO itemp=startt,lastt
             IF (asum<1.D-10) CYCLE
 !            WRITE(stdout,'(5x,"Atom n.",i4,",   B component: ",i1)') na, ijpol
             
-            IF (lquartic_ph) THEN
+            IF (poly_degree_bfact==4) THEN
                IF (itemp==startt) CALL introduce_quartic_fit(degree, nvar, &
                                                                      ndata)
-               CALL fit_multi_quartic(ndata, degree, nvar, lsolve, &
-                                                            x, b, coeff)
-!              CALL print_quartic_polynomial(degree, nvar, coeff)
+               CALL fit_multi_quartic(ndata, degree, nvar, lsolve, x, b, coeff)
                CALL evaluate_fit_quartic(degree, nvar, y, &
+                                         bfact_t(ijpol,na,itemp), coeff)
+
+            ELSEIF (poly_degree_bfact==3) THEN
+               IF (itemp==startt) CALL introduce_cubic_fit(degree, nvar, ndata)
+               CALL fit_multi_cubic(ndata, degree, nvar, lsolve, x, b, coeff)
+               CALL evaluate_fit_cubic(degree, nvar, y, &
                                          bfact_t(ijpol,na,itemp), coeff)
             ELSE
                IF (itemp==startt) CALL introduce_quadratic_fit(degree, nvar, &
                                                                      ndata)
                CALL fit_multi_quadratic(ndata, degree, nvar, x, b, coeff)
-!              CALL print_quadratic_polynomial(degree, nvar, coeff)
                CALL evaluate_fit_quadratic(degree, nvar, y, &
                                          bfact_t(ijpol,na,itemp), coeff)
             ENDIF
