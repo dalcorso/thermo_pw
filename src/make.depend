@@ -255,6 +255,7 @@ interpolate_bfact.o : ../../Modules/ions_base.o
 interpolate_bfact.o : ../../Modules/kind.o
 interpolate_bfact.o : ../../Modules/mp_world.o
 interpolate_bfact.o : ../../UtilXlib/mp.o
+interpolate_bfact.o : ../../thermo_pw/lib/cubic_surfaces.o
 interpolate_bfact.o : ../../thermo_pw/lib/lattices.o
 interpolate_bfact.o : ../../thermo_pw/lib/quadratic_surfaces.o
 interpolate_bfact.o : ../../thermo_pw/lib/quartic_surfaces.o
@@ -263,6 +264,7 @@ interpolate_cv.o : ../../Modules/cell_base.o
 interpolate_cv.o : ../../Modules/kind.o
 interpolate_cv.o : ../../Modules/mp_world.o
 interpolate_cv.o : ../../UtilXlib/mp.o
+interpolate_cv.o : ../../thermo_pw/lib/cubic_surfaces.o
 interpolate_cv.o : ../../thermo_pw/lib/lattices.o
 interpolate_cv.o : ../../thermo_pw/lib/quadratic_surfaces.o
 interpolate_cv.o : ../../thermo_pw/lib/quartic_surfaces.o
@@ -270,6 +272,7 @@ interpolate_cv.o : thermo_mod.o
 interpolate_el_cons.o : ../../Modules/kind.o
 interpolate_el_cons.o : ../../Modules/mp_world.o
 interpolate_el_cons.o : ../../UtilXlib/mp.o
+interpolate_el_cons.o : ../../thermo_pw/lib/cubic_surfaces.o
 interpolate_el_cons.o : ../../thermo_pw/lib/elastic_const.o
 interpolate_el_cons.o : ../../thermo_pw/lib/lattices.o
 interpolate_el_cons.o : ../../thermo_pw/lib/quadratic_surfaces.o
@@ -563,6 +566,7 @@ q2r_sub.o : thermo_mod.o
 quadratic_fit.o : ../../Modules/cell_base.o
 quadratic_fit.o : ../../Modules/io_global.o
 quadratic_fit.o : ../../Modules/kind.o
+quadratic_fit.o : ../../thermo_pw/lib/cubic_surfaces.o
 quadratic_fit.o : ../../thermo_pw/lib/lattices.o
 quadratic_fit.o : ../../thermo_pw/lib/quadratic_surfaces.o
 quadratic_fit.o : ../../thermo_pw/lib/quartic_surfaces.o
@@ -809,6 +813,7 @@ write_elastic_t.o : ../../Modules/io_global.o
 write_elastic_t.o : ../../Modules/kind.o
 write_elastic_t.o : ../../Modules/mp_world.o
 write_elastic_t.o : ../../UtilXlib/mp.o
+write_elastic_t.o : ../../thermo_pw/lib/cubic_surfaces.o
 write_elastic_t.o : ../../thermo_pw/lib/elastic_const.o
 write_elastic_t.o : ../../thermo_pw/lib/lattices.o
 write_elastic_t.o : ../../thermo_pw/lib/quadratic_surfaces.o
