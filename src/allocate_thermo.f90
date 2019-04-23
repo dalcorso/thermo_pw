@@ -59,7 +59,6 @@ SUBROUTINE allocate_anharmonic()
                                   grun_cpmce_anis, el_cons_grun_t,           &
                                   el_comp_grun_t
   USE control_grun,        ONLY : vgrun_t, celldm_grun_t, b0_grun_t
-  USE control_quadratic_energy, ONLY : nvar
 
   IMPLICIT NONE
 
