@@ -24,9 +24,9 @@ USE thermo_mod,       ONLY : omega_geo, celldm_geo, energy_geo
 USE control_pressure, ONLY : pressure_kb
 USE control_mur,      ONLY : vmin_input, vmax_input
 USE control_quartic_energy, ONLY : lquartic, lsolve
-USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_fit_extremum, &
-                               quadratic_var
-USE quartic_surfaces, ONLY : fit_multi_quartic, quartic_var, &
+USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_quadratic_extremum, &
+                               quadratic_ncoeff
+USE quartic_surfaces, ONLY : fit_multi_quartic, quartic_ncoeff, &
                              find_quartic_extremum
 USE lattices,         ONLY : compress_celldm, expand_celldm, crystal_parameters
 USE mp_images,        ONLY : root_image, my_image_id
@@ -36,7 +36,7 @@ IMPLICIT NONE
 
 CHARACTER(LEN=256) :: filename, filename1
 CHARACTER(LEN=8)   :: float_to_char
-INTEGER  :: i, iu_mur, npress, ipress, idata, degree, nvar, nvar4, ndata
+INTEGER  :: i, iu_mur, npress, ipress, idata, nvar, ncoeff, ncoeff4, ndata
 INTEGER  :: find_free_unit, compute_nwork
 REAL(DP) :: press_min, press_max, deltap, ymin, ymin4
 REAL(DP) :: compute_omega_geo
@@ -56,41 +56,41 @@ press_min=-50.0_DP / ry_kbar
 press_max=80.0_DP / ry_kbar
 deltap= ( press_max - press_min ) / npress
 
-degree=crystal_parameters(ibrav)
-nvar=quadratic_var(degree)
+nvar=crystal_parameters(ibrav)
+ncoeff=quadratic_ncoeff(nvar)
 
-ALLOCATE(x(degree,ndata))
-ALLOCATE(x_pos_min(degree))
+ALLOCATE(x(nvar,ndata))
+ALLOCATE(x_pos_min(nvar))
 ALLOCATE(f(ndata))
-ALLOCATE(coeff(nvar))
+ALLOCATE(coeff(ncoeff))
 ALLOCATE(p(npress))
 ALLOCATE(e(npress))
 ALLOCATE(omega(npress))
 ALLOCATE(celldmp(6,npress))
 
 IF (lquartic) THEN
-   nvar4=quartic_var(degree)
-   ALLOCATE(x_min_4(degree))
-   ALLOCATE(coeff4(nvar4))
+   ncoeff4=quartic_ncoeff(nvar)
+   ALLOCATE(x_min_4(nvar))
+   ALLOCATE(coeff4(ncoeff4))
 ENDIF
 
 DO ipress=1, npress
    p(ipress) = press_min + ( ipress - 1 ) * deltap
    DO idata=1, ndata
      f(idata)=energy_geo(idata) + p(ipress) * omega_geo(idata)
-     CALL compress_celldm(celldm_geo(1,idata), x(1,idata), degree, ibrav)
+     CALL compress_celldm(celldm_geo(1,idata), x(1,idata), nvar, ibrav)
    END DO
-   CALL fit_multi_quadratic(ndata,degree,nvar,x,f,coeff)
-   CALL find_fit_extremum(degree,nvar,x_pos_min,ymin,coeff)
+   CALL fit_multi_quadratic(ndata,nvar,ncoeff,x,f,coeff)
+   CALL find_quadratic_extremum(nvar,ncoeff,x_pos_min,ymin,coeff)
    IF (lquartic) THEN
-      CALL fit_multi_quartic(ndata,degree,nvar4,lsolve,x,f,coeff4)
+      CALL fit_multi_quartic(ndata,nvar,ncoeff4,lsolve,x,f,coeff4)
       x_min_4=x_pos_min
-      CALL find_quartic_extremum(degree,nvar4,x_min_4,ymin4,coeff4)
-      CALL expand_celldm(celldmp(1,ipress), x_min_4, degree, ibrav)
+      CALL find_quartic_extremum(nvar,ncoeff4,x_min_4,ymin4,coeff4)
+      CALL expand_celldm(celldmp(1,ipress), x_min_4, nvar, ibrav)
       omega(ipress)=compute_omega_geo(ibrav,celldmp(1,ipress))
       e(ipress)=ymin4 - p(ipress) * omega(ipress)
    ELSE
-      CALL expand_celldm(celldmp(1,ipress), x_pos_min, degree, ibrav)
+      CALL expand_celldm(celldmp(1,ipress), x_pos_min, nvar, ibrav)
       omega(ipress)=compute_omega_geo(ibrav,celldmp(1,ipress))
       e(ipress) = ymin - p(ipress) * omega(ipress)
    ENDIF

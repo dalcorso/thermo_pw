@@ -21,7 +21,7 @@ SUBROUTINE plot_multi_energy()
   USE data_files,           ONLY : flenergy, flevdat
   USE postscript_files,     ONLY : flpsenergy
   USE control_energy_plot,  ONLY : ncontours, ene_levels, color_levels
-  USE control_quadratic_energy, ONLY : x_pos_min, hessian_v, degree, show_fit
+  USE control_quadratic_energy, ONLY : x_pos_min, hessian_v, nvar, show_fit
   USE control_mur,          ONLY : nvol
   USE control_pressure,     ONLY : pressure, pressure_kb
   USE mp_images,            ONLY : my_image_id, root_image
@@ -185,7 +185,7 @@ SUBROUTINE plot_multi_energy()
         CALL gnuplot_do_2dplot(filenameps, xmin, xmax, ymin, ymax, xlabel, &
                                                   ylabel, tablefile, flext)
 
-        IF (degree==2) THEN
+        IF (nvar==2) THEN
            CALL gnuplot_line_v(hessian_v(1,1), hessian_v(2,1), x_pos_min(1),  &
                                        x_pos_min(2),.FALSE.,'color_blue')
            CALL gnuplot_line_v(hessian_v(1,2), hessian_v(2,2), x_pos_min(1),  &

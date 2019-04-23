@@ -112,7 +112,7 @@ SUBROUTINE fit_frequencies_anis()
   USE cell_base,              ONLY : ibrav
   USE ph_freq_thermodynamics, ONLY : ph_freq_save
   USE grun_anharmonic,        ONLY : poly_grun
-  USE quadratic_surfaces,     ONLY : quadratic_var
+  USE quadratic_surfaces,     ONLY : quadratic_ncoeff
   USE control_thermo,         ONLY : with_eigen
   USE freq_interpolate,       ONLY : interp_freq_anis, interp_freq_anis_eigen
   USE lattices,               ONLY : compress_celldm, crystal_parameters
@@ -121,20 +121,20 @@ SUBROUTINE fit_frequencies_anis()
 
   REAL(DP),    ALLOCATABLE :: freq_geo(:,:), x(:,:)
   COMPLEX(DP), ALLOCATABLE :: displa_geo(:,:,:)
-  INTEGER :: n, igeo, degree, nvar, nwork, startq, lastq, iq_eff, ndata, &
+  INTEGER :: n, igeo, nvar, ncoeff, nwork, startq, lastq, iq_eff, ndata, &
              cgeo_eff, central_geo
   INTEGER :: compute_nwork
 !
 !  Finds how many data have been calculated
 !
   nwork=compute_nwork()
-  degree=crystal_parameters(ibrav)
-  nvar=quadratic_var(degree)
+  nvar=crystal_parameters(ibrav)
+  ncoeff=quadratic_ncoeff(nvar)
   ndata=0
   DO igeo=1,nwork
      IF (.NOT.no_ph(igeo)) ndata=ndata+1
   ENDDO
-  ALLOCATE(x(degree,ndata))
+  ALLOCATE(x(nvar,ndata))
 !
 !  finds the central geometry among those calculated and extracts 
 !  from celldm_geo the relevant crystal parameters
@@ -145,7 +145,7 @@ SUBROUTINE fit_frequencies_anis()
      IF (no_ph(igeo)) CYCLE
      ndata=ndata+1
      IF (central_geo==igeo) cgeo_eff=ndata
-     CALL compress_celldm(celldm_geo(1,igeo),x(1,ndata),degree,ibrav)
+     CALL compress_celldm(celldm_geo(1,igeo),x(1,ndata),nvar,ibrav)
   ENDDO
 !
 !  divides the q vectors among all processors. Each processor computes
@@ -159,7 +159,7 @@ SUBROUTINE fit_frequencies_anis()
 !  crystal parameters. Note that poly_grun is not deallocated and 
 !  is the output of this routine, used in the following ones.
 !
-  ALLOCATE(poly_grun(nvar,3*nat,startq:lastq))
+  ALLOCATE(poly_grun(ncoeff,3*nat,startq:lastq))
   ALLOCATE(freq_geo(3*nat,ndata))
   IF (with_eigen) ALLOCATE(displa_geo(3*nat,3*nat,ndata))
 !
@@ -183,9 +183,9 @@ SUBROUTINE fit_frequencies_anis()
 !
      IF (with_eigen) THEN
         CALL interp_freq_anis_eigen(ndata,freq_geo,x,cgeo_eff,displa_geo, &
-                           degree,nvar,poly_grun(1,1,n))
+                           nvar,ncoeff,poly_grun(1,1,n))
      ELSE
-        CALL interp_freq_anis(ndata,freq_geo,x,degree,nvar,poly_grun(1,1,n))
+        CALL interp_freq_anis(ndata,freq_geo,x,nvar,ncoeff,poly_grun(1,1,n))
      ENDIF
   ENDDO
 !
@@ -221,26 +221,26 @@ SUBROUTINE fit_frequencies_anis_reduced()
 
   REAL(DP),    ALLOCATABLE :: freq_geo(:,:), x(:,:), xd(:)
   COMPLEX(DP), ALLOCATABLE :: displa_geo(:,:,:)
-  INTEGER :: n, igeo, degree, nwork, startq, lastq, iq_eff, ndata, &
+  INTEGER :: n, igeo, nvar, nwork, startq, lastq, iq_eff, ndata, &
              cgeo_eff, i
   INTEGER :: compute_nwork
 !
 !  Finds how many data have been calculated
 !
   nwork=compute_nwork()
-  degree=crystal_parameters(ibrav)
+  nvar=crystal_parameters(ibrav)
   ndata=0
   DO igeo=1,nwork
      IF (.NOT.no_ph(igeo)) ndata=ndata+1
   ENDDO
-  ALLOCATE(x(degree,nwork))
+  ALLOCATE(x(nvar,nwork))
 !
 !  finds the central geometry among those calculated and extracts 
 !  from celldm_geo the relevant crystal parameters
 !
   DO igeo=1,nwork
      IF (no_ph(igeo)) CYCLE
-     CALL compress_celldm(celldm_geo(1,igeo),x(1,igeo),degree,ibrav)
+     CALL compress_celldm(celldm_geo(1,igeo),x(1,igeo),nvar,ibrav)
   ENDDO
 !
 !  divides the q vectors among all processors. Each processor computes
@@ -254,7 +254,7 @@ SUBROUTINE fit_frequencies_anis_reduced()
 !  crystal parameters. Note that poly_grun is not deallocated and 
 !  is the output of this routine, used in the following ones.
 !
-  ALLOCATE(poly_grun_red(poly_order,3*nat,degree,startq:lastq))
+  ALLOCATE(poly_grun_red(poly_order,3*nat,nvar,startq:lastq))
   ALLOCATE(xd(ndata))
   ALLOCATE(freq_geo(3*nat,ndata))
   IF (with_eigen) ALLOCATE(displa_geo(3*nat,3*nat,ndata))
@@ -266,7 +266,7 @@ SUBROUTINE fit_frequencies_anis_reduced()
 !  for each q point selects only the frequencies and eigenvectors
 !  of the geometries that have been calculated
 !
-     DO i=1, degree
+     DO i=1, nvar
         ndata=0
         cgeo_eff=0
         DO igeo=1, nwork

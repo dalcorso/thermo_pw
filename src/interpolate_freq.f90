@@ -188,20 +188,20 @@ RETURN
 END SUBROUTINE interp_freq_rap
 
 !-------------------------------------------------------------------------
-SUBROUTINE interp_freq_anis(ngeo,freq,x,degree,nvar,poly_grun)
+SUBROUTINE interp_freq_anis(ngeo,freq,x,nvar,ncoeff,poly_grun)
 !-------------------------------------------------------------------------
 
 USE quadratic_surfaces, ONLY : fit_multi_quadratic
 
 IMPLICIT NONE
-INTEGER,  INTENT(IN) :: ngeo, degree, nvar
-REAL(DP), INTENT(IN) :: freq(3*nat,ngeo), x(degree,ngeo)
-REAL(DP), INTENT(INOUT) :: poly_grun(nvar,3*nat)
+INTEGER,  INTENT(IN) :: ngeo, nvar, ncoeff
+REAL(DP), INTENT(IN) :: freq(3*nat,ngeo), x(nvar,ngeo)
+REAL(DP), INTENT(INOUT) :: poly_grun(ncoeff,3*nat)
 
 INTEGER :: imode
 
 DO imode=1,3*nat
-   CALL fit_multi_quadratic(ngeo, degree, nvar, x, freq(imode,:), &
+   CALL fit_multi_quadratic(ngeo, nvar, ncoeff, x, freq(imode,:), &
                                                    poly_grun(:,imode))
 ENDDO
 
@@ -210,16 +210,16 @@ END SUBROUTINE interp_freq_anis
 
 !--------------------------------------------------------------------------
 SUBROUTINE interp_freq_anis_eigen(ngeo,freq,x,central_geo,displa,&
-                                  degree,nvar,poly_grun)
+                                  nvar,ncoeff,poly_grun)
 !--------------------------------------------------------------------------
 !
 USE quadratic_surfaces, ONLY : fit_multi_quadratic
 
 IMPLICIT NONE
-INTEGER,  INTENT(IN) :: ngeo, degree, nvar, central_geo
-REAL(DP), INTENT(IN) :: freq(3*nat,ngeo), x(degree,ngeo)
+INTEGER,  INTENT(IN) :: ngeo, nvar, ncoeff, central_geo
+REAL(DP), INTENT(IN) :: freq(3*nat,ngeo), x(nvar,ngeo)
 COMPLEX(DP), INTENT(IN) :: displa(3*nat,3*nat,ngeo)
-REAL(DP), INTENT(INOUT) :: poly_grun(nvar,3*nat)
+REAL(DP), INTENT(INOUT) :: poly_grun(ncoeff,3*nat)
 
 REAL(DP), ALLOCATABLE :: f(:)
 REAL(DP) :: overlap
@@ -241,7 +241,7 @@ DO imode=1, 3*nat
          f(igeo)=freq(imode,igeo)
       ENDIF
    ENDDO
-   CALL fit_multi_quadratic(ngeo, degree, nvar, x, f, poly_grun(:,imode))
+   CALL fit_multi_quadratic(ngeo, nvar, ncoeff, x, f, poly_grun(:,imode))
 ENDDO
 
 DEALLOCATE(f)

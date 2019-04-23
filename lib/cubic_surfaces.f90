@@ -8,25 +8,28 @@
 MODULE cubic_surfaces
 !
 !   this module contains the support routines for dealing with cubic
-!   surfaces interpolation up to dimension 6. It is used to interpolate 
-!   the total energy as a function of the celldm parameters. 
+!   surfaces interpolation with a number of variables from 1 up to 6. 
+!
 !   It provides the following routines:
 !
-!   fit_multi_cubic that receives as input the coordinates of some
+!   fit_multi_cubic receives as input the coordinates of some
 !   points and the value of the cubic function in these points and
 !   finds the coefficients of the cubic polynomial that passes through
 !   the points.
+!
 !   evaluate_fit_cubic, given the coordinates of a point, and the
 !   coefficients of the cubic polynomial, evaluates the cubic polynomial
 !   at that point.
+!
 !   evaluate_fit_grad_cubic, given the coordinates of a point, and the
 !   coefficients of the cubic polynomial, evaluates the gradient of the 
-!   function at that point.
+!   cubic polynomial at that point.
+!
 !   evaluate_fit_hess_cubic, given the coordinates of a point, and the
 !   coefficients of the cubic polynomial, evaluates the hessian of the 
-!   function at that point.
+!   cubic polynomial at that point.
 !
-!   find_cubic_extremum, find the extremum closest to the input point
+!   find_cubic_extremum, find the extremum closest to the input point.
 !
 !   The number of coefficients of a multivariate polynomial is 
 !   (n+d)!/n!/d! where d is the degree of the polynomial (in the cubic
@@ -57,7 +60,7 @@ MODULE cubic_surfaces
 
   PUBLIC :: fit_multi_cubic,  evaluate_fit_cubic, &
             evaluate_fit_grad_cubic, evaluate_fit_hess_cubic, &
-            cubic_var, find_cubic_extremum, &
+            cubic_ncoeff, find_cubic_extremum, &
             find_quartic_cubic_extremum, evaluate_quartic_cubic, &
             print_cubic_polynomial, introduce_cubic_fit, &
             print_chisq_cubic, & 
@@ -65,15 +68,14 @@ MODULE cubic_surfaces
 
 CONTAINS
 
-SUBROUTINE fit_multi_cubic(ndata,degree,nvar,lsolve,x,f,coeff)
+SUBROUTINE fit_multi_cubic(ndata,nvar,ncoeff,lsolve,x,f,coeff)
 !
-!  This routine receives as input a set of vectors x(degree,ndata) and
+!  This routine receives as input a set of vectors x(nvar,ndata) and
 !  function values f(ndata) and gives as output the coefficients of
-!  a cubic interpolating polynomial coeff(nvar). In input
-!  ndata is the number of data points. degree is the number of degrees of
-!  freedom or equivalently the number of independent parameters (the
-!  maximum is 6), and nvar is the number of coefficients of the
-!  intepolating cubic polynomial. 
+!  a cubic interpolating polynomial coeff(ncoeff). In input
+!  ndata is the number of data points. nvar is the number of 
+!  independent variables (the maximum is 6), and ncoeff is the number 
+!  of coefficients of the intepolating cubic polynomial. 
 !        
 !  lsolve can be 1, 2 or 3. It chooses the method to compute the
 !  polynomial coefficients. Using 1 a matrix nvar x nvar is calculated
@@ -133,20 +135,19 @@ SUBROUTINE fit_multi_cubic(ndata,degree,nvar,lsolve,x,f,coeff)
 !      + a_83 x(3,i) * x(5,i) * x(6,i) 
 !      + a_84 x(4,i) * x(5,i) * x(6,i) 
 !
-USE kinds, ONLY : DP
 USE linear_solvers,     ONLY : linsolvx, linsolvms, linsolvsvd
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: degree, nvar, ndata
+INTEGER, INTENT(IN) :: nvar, ncoeff, ndata
 INTEGER, INTENT(INOUT) :: lsolve
-REAL(DP), INTENT(IN) :: x(degree,ndata), f(ndata)
-REAL(DP), INTENT(INOUT) :: coeff(nvar)
+REAL(DP), INTENT(IN) :: x(nvar,ndata), f(ndata)
+REAL(DP), INTENT(INOUT) :: coeff(ncoeff)
 
-REAL(DP) :: amat(ndata,nvar), aa(nvar,nvar), b(nvar) 
+REAL(DP) :: amat(ndata,ncoeff), aa(ncoeff,ncoeff), b(ncoeff) 
 
 INTEGER :: ivar, jvar, idata, nv
 
-IF (degree>4.OR.degree<1) &
-   CALL errore('multi_cubic','degree must be from 1 to 3',1)
+IF (nvar>6.OR.nvar<1) &
+   CALL errore('multi_cubic','nvar must be from 1 to 6',1)
 IF (ndata < 3) &
    CALL errore('multi_cubic','Too few sampling data',1)
 IF (ndata < nvar) &
@@ -162,7 +163,7 @@ DO idata=1,ndata
    amat(idata,3) = x(1,idata)*x(1,idata)
    amat(idata,4) = x(1,idata)*x(1,idata)*x(1,idata)
 
-   IF (degree>1) THEN
+   IF (nvar>1) THEN
       amat(idata,5)  = x(2,idata)
       amat(idata,6)  = x(2,idata)*x(2,idata)
       amat(idata,7)  = x(2,idata)*x(2,idata)*x(2,idata)
@@ -172,7 +173,7 @@ DO idata=1,ndata
 
    ENDIF
 
-   IF (degree>2) THEN
+   IF (nvar>2) THEN
       amat(idata,11) = x(3,idata)
       amat(idata,12) = x(3,idata)**2
       amat(idata,13) = x(3,idata)**3
@@ -186,7 +187,7 @@ DO idata=1,ndata
 
    ENDIF
 
-   IF (degree>3) THEN
+   IF (nvar>3) THEN
       amat(idata,21) = x(4,idata)
       amat(idata,22) = x(4,idata)**2
       amat(idata,23) = x(4,idata)**3
@@ -205,7 +206,7 @@ DO idata=1,ndata
 
    ENDIF
 
-   IF (degree>4) THEN
+   IF (nvar>4) THEN
       amat(idata,36) = x(5,idata)
       amat(idata,37) = x(5,idata)**2
       amat(idata,38) = x(5,idata)**3
@@ -230,7 +231,7 @@ DO idata=1,ndata
 
    ENDIF
 
-   IF (degree>5) THEN
+   IF (nvar>5) THEN
       amat(idata,57) = x(6,idata)
       amat(idata,58) = x(6,idata)**2
       amat(idata,59) = x(6,idata)**3
@@ -266,8 +267,8 @@ ENDDO
 
 aa=0.0_DP
 b =0.0_DP
-DO ivar=1,nvar
-   DO jvar=1,nvar 
+DO ivar=1,ncoeff
+   DO jvar=1,ncoeff
       DO idata=1,ndata
          aa(ivar,jvar)= aa(ivar,jvar) + amat(idata,ivar) * amat(idata,jvar)
       END DO
@@ -284,30 +285,31 @@ IF (lsolve<1.OR.lsolve>3) lsolve=2
 IF (lsolve==1) THEN
    WRITE(stdout,'(5x,"Finding the cubic polynomial using &
                                                    &nvar x nvar matrix")')  
-   CALL linsolvx(aa,nvar,b,coeff)
+   CALL linsolvx(aa,ncoeff,b,coeff)
 ELSEIF(lsolve==2) THEN
    WRITE(stdout,'(5x,"Finding the cubic polynomial using &
                                                    &QR factorization")')  
-   CALL linsolvms(amat,ndata,nvar,f,coeff)
+   CALL linsolvms(amat,ndata,ncoeff,f,coeff)
 ELSEIF(lsolve==3) THEN
    WRITE(stdout,'(5x,"Finding the cubic polynomial using SVD")')  
-   CALL linsolvsvd(amat,ndata,nvar,f,coeff)
+   CALL linsolvsvd(amat,ndata,ncoeff,f,coeff)
 ENDIF
 
-DO nv=1,nvar
+DO nv=1,ncoeff
    WRITE(stdout,'(5x, "coeff :",e15.7)') coeff(nv)
 ENDDO
 
 RETURN
 END SUBROUTINE fit_multi_cubic
 
-SUBROUTINE evaluate_fit_cubic(degree,nvar,x,f,coeff)
-
-USE kinds, ONLY : DP
+SUBROUTINE evaluate_fit_cubic(nvar,ncoeff,x,f,coeff)
+!
+!  This routine evaluates the cubic polynomial at the point x
+!
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: degree, nvar
-REAL(DP), INTENT(IN) :: x(degree)
-REAL(DP), INTENT(IN) :: coeff(nvar)
+INTEGER, INTENT(IN) :: nvar, ncoeff
+REAL(DP), INTENT(IN) :: x(nvar)
+REAL(DP), INTENT(IN) :: coeff(ncoeff)
 REAL(DP), INTENT(INOUT) :: f
 
 REAL(DP) :: aux
@@ -318,14 +320,14 @@ aux = coeff(1) + x(1)*(coeff(2)+x(1)*(coeff(3)+x(1)*coeff(4)))
 !
 !  two variables
 !
-IF (degree>1) THEN
+IF (nvar>1) THEN
    aux = aux + x(2)*(coeff(5)+x(2)*(coeff(6)+x(2)*coeff(7)+x(1)*coeff(9))  &
                      + x(1)*(coeff(8)+x(1)*coeff(10)))
 ENDIF
 !
 !  three variabl
 !
-IF (degree>2) THEN
+IF (nvar>2) THEN
    aux = aux + coeff(11)*x(3) + coeff(12)*x(3)**2 + coeff(13)*x(3)**3                 &
              + coeff(14)*x(1)*x(3) + coeff(15)*x(1)*x(3)**2 + coeff(16)*x(1)**2*x(3)  &
              + coeff(17)*x(2)*x(3) + coeff(18)*x(2)*x(3)**2 + coeff(19)*x(2)**2*x(3)  &
@@ -334,7 +336,7 @@ ENDIF
 !
 !  four variables
 !
-IF (degree>3) THEN
+IF (nvar>3) THEN
    aux = aux + coeff(21)*x(4) + coeff(22)*x(4)**2 + coeff(23)*x(4)**3   &
              + coeff(24)*x(1)*x(4) + coeff(25)*x(1)*x(4)**2 + coeff(26)*x(1)**2*x(4)  &
              + coeff(27)*x(2)*x(4) + coeff(28)*x(2)*x(4)**2 + coeff(29)*x(2)**2*x(4)  &
@@ -346,7 +348,7 @@ ENDIF
 !
 !  five variables
 !
-IF (degree>4) THEN
+IF (nvar>4) THEN
    aux = aux + coeff(36)*x(5) + coeff(37)*x(5)**2 + coeff(38)*x(5)**3  &
              + coeff(39)*x(1)*x(5) + coeff(40)*x(1)*x(5)**2 + coeff(41)*x(1)**2*x(5)  &
              + coeff(42)*x(2)*x(5) + coeff(43)*x(2)*x(5)**2 + coeff(44)*x(2)**2*x(5)  &
@@ -362,7 +364,7 @@ ENDIF
 !
 !  six variables
 !
-IF (degree>5) THEN
+IF (nvar>5) THEN
    aux = aux + coeff(57)*x(6) + coeff(58)*x(6)**2 + coeff(59)*x(6)**3  &
              + coeff(60)*x(1)*x(6) + coeff(61)*x(1)*x(6)**2 + coeff(62)*x(1)**2*x(6)  &
              + coeff(63)*x(2)*x(6) + coeff(64)*x(2)*x(6)**2 + coeff(65)*x(2)**2*x(6)  &
@@ -387,31 +389,31 @@ f=aux
 RETURN
 END SUBROUTINE evaluate_fit_cubic
 
-SUBROUTINE evaluate_fit_grad_cubic(degree,nvar,x,f,coeff)
+SUBROUTINE evaluate_fit_grad_cubic(nvar,ncoeff,x,f,coeff)
 !
-!  computes the gradient of the cubic polynomial, up to 6 variables.
+!  computes the gradient of the cubic polynomial at the point x, 
+!  the number of variables nvar can vary from 1 to 6.
 !
-USE kinds, ONLY : DP
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: degree, nvar
-REAL(DP), INTENT(IN) :: x(degree)
-REAL(DP), INTENT(IN) :: coeff(nvar)
-REAL(DP), INTENT(INOUT) :: f(degree)
+INTEGER, INTENT(IN) :: nvar, ncoeff
+REAL(DP), INTENT(IN) :: x(nvar)
+REAL(DP), INTENT(IN) :: coeff(ncoeff)
+REAL(DP), INTENT(INOUT) :: f(nvar)
 
-REAL(DP) :: aux(degree)
+REAL(DP) :: aux(nvar)
 
-IF (degree>6) CALL errore('evaluate_fit_grad_cubic','gradient not availble',1)
+IF (nvar>6) CALL errore('evaluate_fit_grad_cubic','gradient not availble',1)
 
 aux(1) = coeff(2) + 2.0_DP*coeff(3)*x(1) + 3.0_DP*coeff(4)*x(1)**2
 
-IF (degree>1) THEN
+IF (nvar>1) THEN
    aux(1) = aux(1) + coeff(8)*x(2) + coeff(9)*x(2)**2 + 2.0_DP*coeff(10)*x(1)*x(2)
                      
    aux(2) = coeff(5) + 2.0_DP*coeff(6)*x(2) + 3.0_DP*coeff(7)*x(2)**2  &
             + coeff(8)*x(1) + 2.0_DP*coeff(9)*x(1)*x(2) + coeff(10)*x(1)**2 
 ENDIF
 
-IF (degree>2) THEN
+IF (nvar>2) THEN
    aux(1) = aux(1) + coeff(14)*x(3) + coeff(15)*x(3)**2 + 2.0_DP*coeff(16)*x(1)*x(3) &
                    + coeff(20)*x(2)*x(3) 
  
@@ -425,7 +427,7 @@ IF (degree>2) THEN
 ENDIF
 
 
-IF (degree>3) THEN
+IF (nvar>3) THEN
    aux(1) = aux(1) + coeff(24)*x(4) + coeff(25)*x(4)**2 + 2.0_DP*coeff(26)*x(1)*x(4)  &
                    + coeff(33)*x(2)*x(4)  &
                    + coeff(34)*x(3)*x(4)
@@ -448,7 +450,7 @@ IF (degree>3) THEN
 
 ENDIF
 
-IF (degree>4) THEN
+IF (nvar>4) THEN
    aux(1) = aux(1) + coeff(39)*x(5) + coeff(40)*x(5)**2 + 2.0_DP*coeff(41)*x(1)*x(5)  &
                    + coeff(51)*x(2)*x(5)  &
                    + coeff(52)*x(3)*x(5)  &
@@ -483,7 +485,7 @@ IF (degree>4) THEN
             + coeff(56)*x(3)*x(4)                
 ENDIF
 
-IF (degree>5) THEN
+IF (nvar>5) THEN
    aux(1) = aux(1) + coeff(60)*x(6) + coeff(61)*x(6)**2 + 2.0_DP*coeff(62)*x(1)*x(6)  &
                    + coeff(75)*x(2)*x(6)  & 
                    + coeff(76)*x(3)*x(6)  &
@@ -538,27 +540,29 @@ f=aux
 RETURN
 END SUBROUTINE evaluate_fit_grad_cubic
 
-SUBROUTINE evaluate_fit_hess_cubic(degree,nvar,x,f,coeff)
-
-USE kinds, ONLY : DP
+SUBROUTINE evaluate_fit_hess_cubic(nvar,ncoeff,x,f,coeff)
+!
+!  computes the hessian of the cubic polynomial at the point x, 
+!  the number of variables nvar can vary from 1 to 6.
+!
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: degree, nvar
-REAL(DP), INTENT(IN) :: x(degree)
-REAL(DP), INTENT(IN) :: coeff(nvar)
-REAL(DP), INTENT(INOUT) :: f(degree,degree)
+INTEGER, INTENT(IN) :: nvar, ncoeff
+REAL(DP), INTENT(IN) :: x(nvar)
+REAL(DP), INTENT(IN) :: coeff(ncoeff)
+REAL(DP), INTENT(INOUT) :: f(nvar,nvar)
 
-REAL(DP) :: aux(degree,degree)
+REAL(DP) :: aux(nvar,nvar)
 
 aux(1,1) = 2.0_DP*coeff(3) + 6.0_DP*coeff(4)*x(1)
 
-IF (degree>1) THEN
+IF (nvar>1) THEN
    aux(1,1) = aux(1,1) + 2.0_DP*coeff(10)*x(2) 
    aux(1,2) = coeff(8) + 2.0_DP*coeff(9)*x(2) + 2.0_DP*coeff(10)*x(1)
    aux(2,1) = aux(1,2)
    aux(2,2) = 2.0_DP*coeff(6) + 6.0_DP*coeff(7)*x(2) + 2.0_DP*coeff(9)*x(1) 
 ENDIF
 
-IF (degree>2) THEN
+IF (nvar>2) THEN
    aux(1,1) = aux(1,1) + 2.0_DP*coeff(16)*x(3) 
    aux(1,2) = aux(1,2) + coeff(20)*x(3)     
    aux(2,1) = aux(1,2)
@@ -574,7 +578,7 @@ IF (degree>2) THEN
               + 2.0_DP*coeff(18)*x(2)
 ENDIF
 
-IF (degree>3) THEN
+IF (nvar>3) THEN
    aux(1,1) = aux(1,1) + 2.0_DP*coeff(26)*x(4)
    aux(1,2) = aux(1,2) + coeff(33)*x(4)
    aux(2,1) = aux(1,2)
@@ -602,7 +606,7 @@ IF (degree>3) THEN
               + 2.0_DP*coeff(31)*x(3)
 ENDIF
 
-IF (degree>4) THEN
+IF (nvar>4) THEN
    aux(1,1) = aux(1,1) + 2.0_DP*coeff(41)*x(5) 
    aux(1,2) = aux(1,2) + coeff(51)*x(5) 
    aux(2,1) = aux(1,2)
@@ -646,7 +650,7 @@ IF (degree>4) THEN
               + 2.0_DP*coeff(49)*x(4) 
 ENDIF
 
-IF (degree>5) THEN
+IF (nvar>5) THEN
    aux(1,1) = aux(1,1) + 2.0_DP*coeff(62)*x(6) 
    aux(1,2) = aux(1,2) + coeff(75)*x(6)
    aux(2,1) = aux(1,2)
@@ -715,7 +719,7 @@ f(:,:)=aux(:,:)
 RETURN
 END SUBROUTINE evaluate_fit_hess_cubic
 
-SUBROUTINE find_cubic_extremum(degree,nvar,x,f,coeff)
+SUBROUTINE find_cubic_extremum(nvar,ncoeff,x,f,coeff)
 !
 !  This routine starts from the point x and finds the extremum closest
 !  to x. In output x are the coordinates of the extremum and f 
@@ -723,33 +727,33 @@ SUBROUTINE find_cubic_extremum(degree,nvar,x,f,coeff)
 !
 USE linear_solvers, ONLY : linsolvx
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: degree, nvar
-REAL(DP),INTENT(INOUT) :: x(degree), f
-REAL(DP),INTENT(IN) :: coeff(nvar)
+INTEGER, INTENT(IN) :: nvar, ncoeff
+REAL(DP),INTENT(INOUT) :: x(nvar), f
+REAL(DP),INTENT(IN) :: coeff(ncoeff)
 
-INTEGER, PARAMETER :: maxiter=100
+INTEGER, PARAMETER :: maxiter=300
 
 INTEGER :: iter, ideg
 REAL(DP), PARAMETER :: tol=2.D-11
-REAL(DP) :: g(degree), y(degree), xold(degree)
-REAL(DP) :: j(degree, degree) 
+REAL(DP) :: g(nvar), y(nvar), xold(nvar)
+REAL(DP) :: j(nvar, nvar) 
 REAL(DP) :: deltax, fmod
 
 xold(:)=x(:)
 DO iter=1,maxiter
    !
-   CALL evaluate_fit_grad_cubic(degree,nvar,x,g,coeff)
+   CALL evaluate_fit_grad_cubic(nvar,ncoeff,x,g,coeff)
    !
-   CALL evaluate_fit_hess_cubic(degree,nvar,x,j,coeff)
+   CALL evaluate_fit_hess_cubic(nvar,ncoeff,x,j,coeff)
    !
-   CALL linsolvx(j, degree, g, y)
+   CALL linsolvx(j, nvar, g, y)
    !
    !  Use Newton's method to find the zero of the gradient
    !
    x(:)= x(:) - y(:)
    fmod=0.0_DP
    deltax=0.0_DP
-   DO ideg=1,degree
+   DO ideg=1,nvar
       fmod = fmod + g(ideg)**2
       deltax = deltax + (xold(ideg)-x(ideg))**2
    END DO
@@ -761,59 +765,67 @@ DO iter=1,maxiter
 END DO
 CALL errore('find_cubic_extremum','extremum not found',1)
 100 CONTINUE
-CALL evaluate_fit_cubic(degree,nvar,x,f,coeff)
+CALL evaluate_fit_cubic(nvar,ncoeff,x,f,coeff)
 
 RETURN
 END SUBROUTINE find_cubic_extremum
 
-SUBROUTINE find_quartic_cubic_extremum(degree,nvar4,nvar,x,f,coeff4,coeff)
+SUBROUTINE find_quartic_cubic_extremum(nvar,ncoeff4,ncoeff,x,f,coeff4,coeff)
 !
-!   This subroutines adds the coefficients of a quartic polynomium
-!   to those of a cubic polynomium and finds the minimum of the sum
-!   of the two
+!   This subroutines adds the coefficients of a quartic polynomial
+!   to those of a cubic polynomial and finds the extremum of the sum
+!   of the two closest to the input value of x.
+!
 USE quartic_surfaces, ONLY : find_quartic_extremum
 !
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: degree, nvar, nvar4
-REAL(DP), INTENT(IN) :: coeff(nvar), coeff4(nvar4) 
-REAL(DP), INTENT(INOUT) :: x(degree), f
+INTEGER, INTENT(IN) :: nvar, ncoeff, ncoeff4
+REAL(DP), INTENT(IN) :: coeff(ncoeff), coeff4(ncoeff4) 
+REAL(DP), INTENT(INOUT) :: x(nvar), f
 
-REAL(DP) :: coeffadd4(nvar4)
+REAL(DP) :: coeffadd4(ncoeff4)
 
-CALL set_quartic_cubic_coefficients(degree, nvar4, nvar, coeffadd4, &
+CALL set_quartic_cubic_coefficients(nvar, ncoeff4, ncoeff, coeffadd4, &
                                                    coeff4, coeff)
-
-CALL find_quartic_extremum(degree,nvar4,x,f,coeffadd4)
+CALL find_quartic_extremum(nvar,ncoeff4,x,f,coeffadd4)
 
 RETURN
 END SUBROUTINE find_quartic_cubic_extremum
 
-SUBROUTINE evaluate_quartic_cubic(degree,nvar4,nvar,x,f,coeff4,coeff)
-
+SUBROUTINE evaluate_quartic_cubic(nvar,ncoeff4,ncoeff,x,f,coeff4,coeff)
+!
+!   This subroutines adds the coefficients of a quartic polynomial
+!   to those of a cubic polynomial and evaluates the resulting polynomial
+!   at the point x.
+!
 USE quartic_surfaces, ONLY : evaluate_fit_quartic
 IMPLICIT NONE
 
-INTEGER, INTENT(IN) :: degree, nvar, nvar4
-REAL(DP), INTENT(IN) :: coeff(nvar), coeff4(nvar4) 
-REAL(DP), INTENT(INOUT) :: x(degree), f
+INTEGER, INTENT(IN) :: nvar, ncoeff, ncoeff4
+REAL(DP), INTENT(IN) :: coeff(ncoeff), coeff4(ncoeff4) 
+REAL(DP), INTENT(INOUT) :: x(nvar), f
 
-REAL(DP) :: coeffadd4(nvar4)
+REAL(DP) :: coeffadd4(ncoeff4)
 
-CALL set_quartic_cubic_coefficients(degree, nvar4, nvar, coeffadd4, coeff4, &
-                                                                    coeff)
+CALL set_quartic_cubic_coefficients(nvar, ncoeff4, ncoeff, coeffadd4, &
+                                                             coeff4, coeff)
 
-CALL evaluate_fit_quartic(degree,nvar4,x,f,coeffadd4)
+CALL evaluate_fit_quartic(nvar,ncoeff4,x,f,coeffadd4)
 
 RETURN
 END SUBROUTINE evaluate_quartic_cubic
 
-SUBROUTINE set_quartic_cubic_coefficients(degree, nvar4, nvar, coeffadd4, &
+SUBROUTINE set_quartic_cubic_coefficients(nvar, ncoeff4, ncoeff, coeffadd4, &
                                                                coeff4, coeff)
+!
+!   This subroutines adds the coefficients of a quartic polynomial
+!   to those of a cubic polynomial,
+!
 IMPLICIT NONE
 
-INTEGER, INTENT(IN) :: degree, nvar4, nvar
-REAL(DP), INTENT(IN) :: coeff4(nvar4), coeff(nvar)
-REAL(DP), INTENT(INOUT) :: coeffadd4(nvar4)
+INTEGER, INTENT(IN) :: nvar, ncoeff4, ncoeff
+REAL(DP), INTENT(IN) :: coeff4(ncoeff4), coeff(ncoeff)
+REAL(DP), INTENT(INOUT) :: coeffadd4(ncoeff4)
 
 coeffadd4 = coeff4
 coeffadd4(1) = coeffadd4(1) + coeff(1)
@@ -821,7 +833,7 @@ coeffadd4(2) = coeffadd4(2) + coeff(2)
 coeffadd4(3) = coeffadd4(3) + coeff(3)
 coeffadd4(4) = coeffadd4(4) + coeff(4)
 
-IF (degree > 1) THEN
+IF (nvar > 1) THEN
    coeffadd4(6)  =  coeffadd4(6) +  coeff(5)
    coeffadd4(7)  =  coeffadd4(7) +  coeff(6)
    coeffadd4(8)  =  coeffadd4(8) +  coeff(7)
@@ -830,7 +842,7 @@ IF (degree > 1) THEN
    coeffadd4(13) = coeffadd4(13) + coeff(10)
 ENDIF
 
-IF (degree > 2) THEN
+IF (nvar > 2) THEN
    coeffadd4(16) = coeffadd4(16) + coeff(11)
    coeffadd4(17) = coeffadd4(17) + coeff(12)
    coeffadd4(18) = coeffadd4(18) + coeff(13)
@@ -844,7 +856,7 @@ IF (degree > 2) THEN
    coeffadd4(32) = coeffadd4(32) + coeff(20)
 END IF
 
-IF (degree > 3) THEN
+IF (nvar > 3) THEN
    coeffadd4(36) = coeffadd4(36) + coeff(21)
    coeffadd4(37) = coeffadd4(37) + coeff(22)
    coeffadd4(38) = coeffadd4(38) + coeff(23)
@@ -862,7 +874,7 @@ IF (degree > 3) THEN
    coeffadd4(66) = coeffadd4(66) + coeff(35)
 END IF
 
-IF (degree > 4) THEN
+IF (nvar > 4) THEN
    coeffadd4(71) = coeffadd4(71) + coeff(36)
    coeffadd4(72) = coeffadd4(72) + coeff(37)
    coeffadd4(73) = coeffadd4(73) + coeff(38)
@@ -886,7 +898,7 @@ IF (degree > 4) THEN
    coeffadd4(119) = coeffadd4(119) + coeff(56)
 END IF
 
-IF (degree > 5) THEN
+IF (nvar > 5) THEN
    coeffadd4(127) = coeffadd4(127) + coeff(57)
    coeffadd4(128) = coeffadd4(128) + coeff(58)
    coeffadd4(129) = coeffadd4(129) + coeff(59)
@@ -920,64 +932,69 @@ END IF
 RETURN
 END SUBROUTINE set_quartic_cubic_coefficients
 
-FUNCTION cubic_var(degree)  
-
+FUNCTION cubic_ncoeff(nvar)  
+!
+!   This function gives the number of coefficients of the cubic
+!   polynomial receiving as input the number of independent variables.
+!
 IMPLICIT NONE
-INTEGER :: cubic_var
-INTEGER, INTENT(IN) :: degree
+INTEGER :: cubic_ncoeff
+INTEGER, INTENT(IN) :: nvar
 
-IF (degree==1) THEN
-   cubic_var=4
-ELSEIF (degree==2) THEN
-   cubic_var=10
-ELSEIF (degree==3) THEN
-   cubic_var=20
-ELSEIF (degree==4) THEN
-   cubic_var=35
-ELSEIF (degree==5) THEN
-   cubic_var=56
-ELSEIF (degree==6) THEN
-   cubic_var=84
+IF (nvar==1) THEN
+   cubic_ncoeff=4
+ELSEIF (nvar==2) THEN
+   cubic_ncoeff=10
+ELSEIF (nvar==3) THEN
+   cubic_ncoeff=20
+ELSEIF (nvar==4) THEN
+   cubic_ncoeff=35
+ELSEIF (nvar==5) THEN
+   cubic_ncoeff=56
+ELSEIF (nvar==6) THEN
+   cubic_ncoeff=84
 ELSE
-   cubic_var=0
+   cubic_ncoeff=0
 ENDIF
 
 RETURN
-END FUNCTION cubic_var
+END FUNCTION cubic_ncoeff
 
-SUBROUTINE print_cubic_polynomial(degree, nvar, coeff)
-
-USE kinds, ONLY : DP
-USE io_global, ONLY : stdout
+SUBROUTINE print_cubic_polynomial(nvar, ncoeff, coeff)
+!
+!  This subroutine prints the coefficients of a cubic polynomial.
+!
 IMPLICIT NONE
 
-INTEGER, INTENT(IN) :: degree, nvar
-REAL(DP), INTENT(IN) :: coeff(nvar)
+INTEGER, INTENT(IN) :: nvar, ncoeff
+REAL(DP), INTENT(IN) :: coeff(ncoeff)
 
   WRITE(stdout,'(/,5x,"Cubic polynomial:",/)') 
   WRITE(stdout,'(5x,    e20.7,11x,"+",e20.7," x1 ")') coeff(1), coeff(2) 
-  WRITE(stdout,'(4x,"+",e20.7," x1^2",6x,"+",e20.7," x1^3")') coeff(3), coeff(4)
+  WRITE(stdout,'(4x,"+",e20.7," x1^2",6x,"+",e20.7," x1^3")') coeff(3), & 
+                                                                  coeff(4)
   
-  IF (degree>1) THEN
+  IF (nvar>1) THEN
      WRITE(stdout,'(4x,"+",e20.7," x2",8x,"+",e20.7," x2^2")')  coeff(5), &
                                                                 coeff(6)
      WRITE(stdout,'(4x,"+",e20.7," x2^3",6x,"+",e20.7," x1 x2")') coeff(7), &
                                                                   coeff(8)
-     WRITE(stdout,'(4x,"+",e20.7," x1 x2^2",6x,"+",e20.7," x1^2 x2")') coeff(9), &
-                                                                       coeff(10)
+     WRITE(stdout,'(4x,"+",e20.7," x1 x2^2",6x,"+",e20.7," x1^2 x2")') &
+                                                       coeff(9), coeff(10)
   ENDIF
 
-  IF (degree>2) THEN
+  IF (nvar>2) THEN
      WRITE(stdout,'(4x,"+",e15.7," x3       +",e15.7," x3^2      +",&
                         &e15.7," x3^3")') coeff(11), coeff(12), coeff(13)
      WRITE(stdout,'(4x,"+",e15.7," x1 x3     +",e15.7," x1 x3^2   +",e13.7,&
                               &" x1^2 x3")') coeff(14), coeff(15), coeff(16)
-     WRITE(stdout,'(4x,"+",e15.7," x2 x3    +",e15.7," x2 x3^2   +",& 
-                          &e15.7," x2^2 x3  ")') coeff(17), coeff(18), coeff(19)
+     WRITE(stdout,'(4x,"+",e15.7," x2 x3    +",e15.7," x2 x3^2   +",   & 
+                          &e15.7," x2^2 x3  ")') coeff(17), coeff(18), &
+                                                 coeff(19)
      WRITE(stdout,'(4x,"+",e15.7," x1 x2 x3  ")') coeff(20)
   ENDIF
 
-  IF (degree>3) THEN
+  IF (nvar>3) THEN
      WRITE(stdout,'(4x,"+",e15.7," x4       +",e15.7," x4^2      +",&
                         &e15.7," x4^3")') coeff(21), coeff(22), coeff(23)
      WRITE(stdout,'(4x,"+",e15.7," x1 x4    +",e15.7," x1 x4^2   +",e15.7,&
@@ -990,7 +1007,7 @@ REAL(DP), INTENT(IN) :: coeff(nvar)
                         &e15.7," x2 x3 x4")') coeff(33), coeff(34), coeff(35)
   ENDIF
 
-  IF (degree>4) THEN
+  IF (nvar>4) THEN
      WRITE(stdout,'(4x,"+",e15.7," x5       +",e15.7," x5^2      +",&
                           &e15.7," x5^3")') coeff(36), coeff(37), coeff(38)
      WRITE(stdout,'(4x,"+",e15.7," x1 x5    +",e15.7," x1 x5^2   +",e15.7,&
@@ -1007,7 +1024,7 @@ REAL(DP), INTENT(IN) :: coeff(nvar)
                           &e15.7," x3 x4 x5")') coeff(54), coeff(55), coeff(56)
   ENDIF
 
-  IF (degree>5) THEN
+  IF (nvar>5) THEN
      WRITE(stdout,'(4x,"+",e15.7," x6       +",e15.7," x6^2      +",      &
                         &e15.7," x6^3")') coeff(57), coeff(58), coeff(59)
      WRITE(stdout,'(4x,"+",e15.7," x1 x6    +",e15.7," x1 x6^2   +",e15.7,&
@@ -1016,13 +1033,13 @@ REAL(DP), INTENT(IN) :: coeff(nvar)
                &e15.7," x2^2 x6")') coeff(63), coeff(64), coeff(65)
      WRITE(stdout,'(4x,"+",e15.7," x3 x6    +",e15.7," x3 x6^2   +",      &
                &e15.7," x3^2 x6  ")') coeff(66), coeff(67), coeff(68)
-     WRITE(stdout,'(4x,"+",e15.7,"  x4 x6  +",e15.7," x4 x6^2 +",      & 
+     WRITE(stdout,'(4x,"+",e15.7,"  x4 x6  +",e15.7," x4 x6^2 +",         & 
                &e15.7," x4^2 x6")') coeff(69), coeff(70), coeff(71)
      WRITE(stdout,'(4x,"+",e15.7," x5 x6    +",e15.7," x5 x6^2   +",      &
                &e15.7," x5^2 x6  ")') coeff(72), coeff(73), coeff(74)
      WRITE(stdout,'(4x,"+",e15.7," x1 x2 x6  +",e15.7," x1 x3 x6 +",      & 
                &e15.7," x1 x4 x6")') coeff(75), coeff(76), coeff(77)
-     WRITE(stdout,'(4x,"+",e15.7," x1 x5 x6   +",e15.7," x2 x3 x6  +",      &
+     WRITE(stdout,'(4x,"+",e15.7," x1 x5 x6   +",e15.7," x2 x3 x6  +",    &
                &e15.7," x2 x4 x6 ")') coeff(78), coeff(79), coeff(80)
      WRITE(stdout,'(4x,"+",e15.7," x2 x5 x6  +",e15.7," x3 x4 x6 +",      & 
                &e15.7," x3 x5 x6")') coeff(81), coeff(82), coeff(83)
@@ -1032,26 +1049,35 @@ REAL(DP), INTENT(IN) :: coeff(nvar)
 RETURN
 END SUBROUTINE print_cubic_polynomial
 
-SUBROUTINE introduce_cubic_fit(degree, nvar, ndata)
+SUBROUTINE introduce_cubic_fit(nvar, ncoeff, ndata)
+!
+!  This subroutine prints a few information on the cubic polynomial
+!
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: degree, nvar, ndata
+INTEGER, INTENT(IN) :: nvar, ncoeff, ndata
 
 WRITE(stdout,'(/,5x,"Fitting the data with a cubic polynomial:")')
 
-WRITE(stdout,'(/,5x,"Number of variables:",8x,i5)')  degree
-WRITE(stdout,'(5x,"Coefficients of the cubic:",2x,i5)')  nvar
+WRITE(stdout,'(/,5x,"Number of variables:",8x,i5)')  nvar
+WRITE(stdout,'(5x,"Coefficients of the cubic polynomial:",2x,i5)')  ncoeff
 WRITE(stdout,'(5x,"Number of fitting data:",5x,i5,/)')  ndata
 
 RETURN
 END SUBROUTINE introduce_cubic_fit
 
 
-SUBROUTINE print_chisq_cubic(ndata, degree, nvar, x, f, coeff)
-USE kinds, ONLY : DP
+SUBROUTINE print_chisq_cubic(ndata, nvar, ncoeff, x, f, coeff)
+!
+!   This routine receives as input the values of a function f for ndata
+!   values of the independent variables x, a set of ncoeff coefficients
+!   of a cubic interpolating polynomial and writes as output
+!   the sum of the squares of the differences between the values of
+!   the function and of the interpolating polynomial 
+!
 IMPLICIT NONE
 
-INTEGER  :: ndata, degree, nvar
-REAL(DP) :: x(degree, ndata), f(ndata), coeff(nvar)
+INTEGER  :: ndata, nvar, ncoeff
+REAL(DP) :: x(nvar, ndata), f(ndata), coeff(ncoeff)
 
 REAL(DP) :: chisq, perc, aux
 INTEGER  :: idata
@@ -1059,7 +1085,7 @@ INTEGER  :: idata
 chisq=0.0_DP
 perc=0.0_DP
 DO idata=1,ndata
-   CALL evaluate_fit_cubic(degree,nvar,x(1,idata),aux,coeff)
+   CALL evaluate_fit_cubic(nvar,ncoeff,x(1,idata),aux,coeff)
    WRITE(stdout,'(3f19.12)') f(idata), aux, f(idata)-aux
    chisq = chisq + (aux - f(idata))**2
    IF (ABS(f(idata))>1.D-12) perc= perc + ABS((f(idata)-aux) / f(idata))
@@ -1070,19 +1096,23 @@ WRITE(stdout,'(5x,"chi square cubic=",e18.5," relative error",e18.5,&
 RETURN
 END SUBROUTINE print_chisq_cubic
 
-SUBROUTINE print_chisq_quartic_cubic(ndata, degree, nvar4, nvar, x, &
+SUBROUTINE print_chisq_quartic_cubic(ndata, nvar, ncoeff4, ncoeff, x, &
                                                           f, coeff4, coeff)
-USE kinds, ONLY : DP
+!
+!  This routine writes on output the chi square of the sum of a
+!  cubic and a quartic polynomials that interpolate the function f in 
+!  the ndata points x.
+!
 IMPLICIT NONE
-INTEGER  :: ndata, degree, nvar4, nvar
-REAL(DP) :: x(degree, ndata), f(ndata), coeff4(nvar4), coeff(nvar)
+INTEGER  :: ndata, nvar, ncoeff4, ncoeff
+REAL(DP) :: x(nvar, ndata), f(ndata), coeff4(ncoeff4), coeff(ncoeff)
 
 REAL(DP) :: chisq, aux
 INTEGER  :: idata
 
 chisq=0.0_DP
 DO idata=1,ndata
-   CALL evaluate_quartic_cubic(degree, nvar4, nvar, x(1,idata), aux, &
+   CALL evaluate_quartic_cubic(nvar, ncoeff4, ncoeff, x(1,idata), aux, &
                                                         coeff4, coeff)
 !  WRITE(stdout,'(3f19.12)') f(idata), aux, f(idata)-aux
    chisq = chisq + (aux - f(idata))**2

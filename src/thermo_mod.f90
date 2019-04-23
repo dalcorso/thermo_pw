@@ -801,8 +801,8 @@ MODULE control_quadratic_energy
   USE kinds, ONLY: DP
   SAVE
 
-  INTEGER :: degree              ! number of degrees of freedom
-  INTEGER :: nvar                ! number of variables of the polynomial fit
+  INTEGER :: nvar                ! number of independent variables
+  INTEGER :: ncoeff              ! number of coefficients of the polynomial fit
   REAL(DP), ALLOCATABLE :: hessian_v(:,:), &   ! hessian eigenvectors
                            hessian_e(:),   &   ! hessian eigenvalues
                            x_pos_min(:),   &   ! coordinates of the minimum
@@ -827,7 +827,7 @@ MODULE control_quartic_energy
                                              ! fits the b factor
   INTEGER :: poly_degree_elc                 ! degree of the polynomial that 
                                              ! fits the elastic constants
-  INTEGER :: nvar4                           ! number of variables of 
+  INTEGER :: ncoeff4                         ! number of coefficients of 
                                              ! the polynomial fit
   REAL(DP), ALLOCATABLE :: x_min_4(:),   &   ! coordinates of the minimum
                            coeff4(:)         ! coefficients of quartic fit

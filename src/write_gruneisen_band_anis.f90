@@ -32,7 +32,7 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
                              compute_polynomial, compute_polynomial_der
   USE temperature,    ONLY : temp, ntemp
   USE quadratic_surfaces, ONLY : evaluate_fit_quadratic, &
-                                 evaluate_fit_grad_quadratic, quadratic_var
+                                 evaluate_fit_grad_quadratic, quadratic_ncoeff
   USE lattices,       ONLY : compress_celldm, crystal_parameters
   USE io_bands,       ONLY : read_bands, read_parameters, write_bands
   USE mp,             ONLY : mp_bcast
@@ -48,7 +48,7 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
                            gruneisen(:,:,:), grad(:), x(:), xd(:)
   COMPLEX(DP), ALLOCATABLE :: displa_geo(:,:,:,:), displa(:,:,:)
   INTEGER :: nks, nmodes, cgeo_eff, central_geo, imode, ios, n, igeo, &
-             nwork, idata, ndata, iumode, nvar, degree, icrys
+             nwork, idata, ndata, iumode, ncoeff, nvar, icrys
   INTEGER :: find_free_unit, compute_nwork
   REAL(DP) :: cm(6), f, g
   LOGICAL, ALLOCATABLE :: is_gamma(:)
@@ -111,35 +111,35 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
 !
 !  Part two: Compute the Gruneisen parameters
 !
-  degree=crystal_parameters(ibrav_save)
+  nvar=crystal_parameters(ibrav_save)
   IF (reduced_grid) THEN
-     nvar=poly_order
+     ncoeff=poly_order
   ELSE
-     nvar=quadratic_var(degree)
+     ncoeff=quadratic_ncoeff(nvar)
   ENDIF
 !
 !  find the central geometry in this list of phonons. Prepare also the
 !  x data for the computed geometries
 !
   CALL find_central_geo(nwork,no_ph,central_geo)
-  ALLOCATE(x_data(degree,nwork))
+  ALLOCATE(x_data(nvar,nwork))
   ndata=0
   DO idata=1, nwork
      IF (no_ph(idata)) CYCLE
      ndata=ndata+1
      IF (central_geo==idata) cgeo_eff=ndata
      IF (reduced_grid) THEN
-        CALL compress_celldm(celldm_geo(1,idata),x_data(1,idata),degree, &
+        CALL compress_celldm(celldm_geo(1,idata),x_data(1,idata),nvar, &
                                                                 ibrav_save)
      ELSE
-        CALL compress_celldm(celldm_geo(1,idata),x_data(1,ndata),degree, &
+        CALL compress_celldm(celldm_geo(1,idata),x_data(1,ndata),nvar, &
                                                                 ibrav_save)
      ENDIF
   ENDDO 
 !
 !  find the celldm at which we compute the Gruneisen parameters and compress it
 !
-  ALLOCATE(x(degree))
+  ALLOCATE(x(nvar))
   IF (celldm_ph(1)==0.0_DP) THEN
      IF (ltherm_freq) THEN
         CALL evaluate_celldm(temp_ph, cm, ntemp, temp, celldmf_t)
@@ -151,7 +151,7 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
   ELSE
      cm=celldm_ph(:)
   ENDIF
-  CALL compress_celldm(cm,x,degree,ibrav_save)
+  CALL compress_celldm(cm,x,nvar,ibrav_save)
 !
 !  calculate the BZ path that corresponds to the cm parameters
 !
@@ -172,11 +172,11 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
 !
   ALLOCATE(frequency_geo(nmodes,ndata))
   ALLOCATE(displa(nmodes,nmodes,ndata))
-  ALLOCATE(poly_grun(nvar,nmodes))
+  ALLOCATE(poly_grun(ncoeff,nmodes))
   ALLOCATE(frequency(nmodes,nks))
-  ALLOCATE(gruneisen(nmodes,nks,degree))
+  ALLOCATE(gruneisen(nmodes,nks,nvar))
   ALLOCATE(xd(ndata))
-  ALLOCATE(grad(degree))
+  ALLOCATE(grad(nvar))
 !
 !  then intepolates and computes the derivatives of the polynomial.
 !  At the gamma point the gruneisen parameters are not defined, so
@@ -215,7 +215,7 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
 !
 !  with reduced grid each degree of freedom is calculated separately
 !
-           DO icrys=1, degree
+           DO icrys=1, nvar
               ndata=0
               cgeo_eff=0
               DO idata=1,nwork
@@ -259,18 +259,18 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
               displa(1:nmodes,1:nmodes,ndata)=displa_geo(1:nmodes,1:nmodes,idata,n)
            ENDDO
            CALL interp_freq_anis_eigen(ndata, frequency_geo, x_data, cgeo_eff, &
-                                    displa, degree, nvar, poly_grun)
+                                    displa, nvar, ncoeff, poly_grun)
 !
 !  frequencies and gruneisen parameters are calculated at the chosen volume
 !
            DO imode=1, nmodes
-              CALL evaluate_fit_quadratic(degree,nvar,x,f,poly_grun(1,imode))
-              CALL evaluate_fit_grad_quadratic(degree,nvar,x,grad, &
+              CALL evaluate_fit_quadratic(nvar,ncoeff,x,f,poly_grun(1,imode))
+              CALL evaluate_fit_grad_quadratic(nvar,ncoeff,x,grad, &
                                                         poly_grun(1,imode))
               frequency(imode,n) = f 
               gruneisen(imode,n,:) = -grad(:)
               IF (frequency(imode,n) > 0.0_DP ) THEN
-                 DO icrys=1,degree
+                 DO icrys=1,nvar
                     gruneisen(imode,n,icrys) = x(icrys) * gruneisen(imode,n,icrys) /  &
                                                  frequency(imode,n)
                  END DO
@@ -280,7 +280,7 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
            ENDDO
         ENDIF
         IF (copy_before) THEN
-           gruneisen(1:nmodes,n-1,1:degree) = gruneisen(1:nmodes,n,1:degree)
+           gruneisen(1:nmodes,n-1,1:nvar) = gruneisen(1:nmodes,n,1:nvar)
            frequency(1:nmodes,n-1) = frequency(1:nmodes,n)
         ENDIF
         copy_before=.FALSE.
@@ -297,7 +297,7 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
 !
 !  Writes Gruneisen parameters on file
 !
-  DO icrys=1, degree
+  DO icrys=1, nvar
      filegrun='anhar_files/'//TRIM(flgrun)//'_'//TRIM(INT_TO_CHAR(icrys))
      CALL write_bands(nks, nmodes, disp_q, gruneisen(1,1,icrys), 1.0_DP, filegrun)
   END DO

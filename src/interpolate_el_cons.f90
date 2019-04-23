@@ -5,7 +5,7 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-SUBROUTINE interpolate_el_cons(celldm_t, nvar, degree, ibrav, el_cons_coeff,&
+SUBROUTINE interpolate_el_cons(celldm_t, ncoeff, nvar, ibrav, el_cons_coeff,&
                                  poly_degree_elc, el_cons_t, el_comp_t, b0_t)
 !
 ! This routine receives as input the coeffients of polynomials which 
@@ -27,9 +27,9 @@ USE mp_world,           ONLY : world_comm
 USE mp,                 ONLY : mp_sum
 
 IMPLICIT NONE
-INTEGER :: nvar, ibrav, degree
+INTEGER :: ncoeff, ibrav, nvar
 INTEGER :: poly_degree_elc
-REAL(DP) :: celldm_t(6, ntemp), el_cons_coeff(nvar,6,6), el_cons_t(6,6,ntemp),&
+REAL(DP) :: celldm_t(6, ntemp), el_cons_coeff(ncoeff,6,6), el_cons_t(6,6,ntemp),&
             el_comp_t(6,6,ntemp), b0_t(ntemp)
 
 REAL(DP), ALLOCATABLE :: xfit(:)
@@ -37,24 +37,24 @@ REAL(DP), ALLOCATABLE :: xfit(:)
 INTEGER  :: i, j, itemp, startt, lastt
 REAL(DP) :: aux, macro_el(8)
 
-ALLOCATE(xfit(degree))
+ALLOCATE(xfit(nvar))
 CALL divide(world_comm, ntemp, startt, lastt)
 el_cons_t=0.0_DP
 el_comp_t=0.0_DP
 b0_t=0.0_DP
 DO itemp=startt,lastt
-   CALL compress_celldm(celldm_t(:,itemp),xfit,degree,ibrav)
+   CALL compress_celldm(celldm_t(:,itemp),xfit,nvar,ibrav)
    DO i=1,6
       DO j=i,6
          IF (el_con_geo(i,j,1)>0.1_DP) THEN
             IF (poly_degree_elc==4) THEN
-               CALL evaluate_fit_quartic(degree,nvar,xfit,aux,&
+               CALL evaluate_fit_quartic(nvar,ncoeff,xfit,aux,&
                                                   el_cons_coeff(:,i,j))
             ELSEIF(poly_degree_elc==3) THEN
-               CALL evaluate_fit_cubic(degree,nvar,xfit,aux,&
+               CALL evaluate_fit_cubic(nvar,ncoeff,xfit,aux,&
                                                   el_cons_coeff(:,i,j))
             ELSE
-               CALL evaluate_fit_quadratic(degree,nvar,xfit,aux,&
+               CALL evaluate_fit_quadratic(nvar,ncoeff,xfit,aux,&
                                                 el_cons_coeff(:,i,j))
             ENDIF
             el_cons_t(i,j,itemp)=aux

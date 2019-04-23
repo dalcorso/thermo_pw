@@ -344,7 +344,7 @@ USE ph_freq_module, ONLY : thermal_expansion_ph, ph_freq_type,  &
                            destroy_ph_freq, init_ph_freq
 USE lattices,       ONLY : compress_celldm, crystal_parameters
 USE quadratic_surfaces, ONLY : evaluate_fit_quadratic,      &
-                               evaluate_fit_grad_quadratic, quadratic_var
+                               evaluate_fit_grad_quadratic, quadratic_ncoeff
 USE isoentropic,    ONLY : isostress_heat_capacity
 USE control_dosq,   ONLY : nq1_d, nq2_d, nq3_d
 USE data_files,     ONLY : flanhar
@@ -354,7 +354,7 @@ USE mp,             ONLY : mp_sum
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
-INTEGER :: itemp, iu_therm, i, nq, imode, iq, degree, nvar, nwork
+INTEGER :: itemp, iu_therm, i, nq, imode, iq, nvar, ncoeff, nwork
 INTEGER :: itens, jtens, startq, lastq, nq_eff, iq_eff
 TYPE(ph_freq_type) :: ph_freq    ! the frequencies at the volumes at
                                  ! which the gruneisen parameters are 
@@ -406,13 +406,13 @@ ph_freq%wg=ph_freq_save(central_geo)%wg
 !
 ! now allocate space for each set of gruneisen parameters
 !
-degree=crystal_parameters(ibrav)
-nvar=quadratic_var(degree)
+nvar=crystal_parameters(ibrav)
+ncoeff=quadratic_ncoeff(nvar)
 nwork=compute_nwork()
-ALLOCATE(ph_grun(degree))
-ALLOCATE(grad(degree))
-ALLOCATE(x(degree))
-DO i=1, degree
+ALLOCATE(ph_grun(nvar))
+ALLOCATE(grad(nvar))
+ALLOCATE(x(nvar))
+DO i=1, nvar
    CALL init_ph_freq(ph_grun(i), nat, nq1_d, nq2_d, nq3_d, nq_eff, startq, &
                                                     lastq, nq, .FALSE.)
 END DO
@@ -431,20 +431,20 @@ DO itemp = 1, ntemp
    cm(:)=celldm_grun_t(:,itemp)
    vm = vgrun_t(itemp)
 
-   CALL compress_celldm(cm,x,degree,ibrav)
+   CALL compress_celldm(cm,x,nvar,ibrav)
 !
 !  compute the frequencies and the gruneisen parameters from the interpolating 
 !  polynomial
 !
    ph_freq%nu= 0.0_DP
-   DO i=1,degree
+   DO i=1,nvar
       ph_grun(i)%nu= 0.0_DP
    END DO
    iq_eff=0
    DO iq=startq, lastq
       iq_eff=iq_eff+1
       IF (reduced_grid) THEN
-         DO i=1,degree
+         DO i=1,nvar
             DO imode=1,3*nat
                CALL compute_polynomial(x(i), poly_order, &
                                             poly_grun_red(1,imode,i,iq),f)
@@ -464,16 +464,17 @@ DO itemp = 1, ntemp
          ENDDO
       ELSE
          DO imode=1,3*nat
-            CALL evaluate_fit_quadratic(degree,nvar,x,f,poly_grun(1,imode,iq))
-            CALL evaluate_fit_grad_quadratic(degree,nvar,x,grad,&
+            CALL evaluate_fit_quadratic(nvar,ncoeff,x,f,&
+                                                     poly_grun(1,imode,iq))
+            CALL evaluate_fit_grad_quadratic(nvar,ncoeff,x,grad,&
                                                      poly_grun(1,imode,iq))
             ph_freq%nu(imode,iq_eff) = f 
             IF (f > 0.0_DP ) THEN
-               DO i=1,degree
+               DO i=1,nvar
                   ph_grun(i)%nu(imode,iq_eff)=-grad(i) / f
                END DO
             ELSE
-               DO i=1,degree
+               DO i=1,nvar
                   ph_grun(i)%nu(imode,iq_eff)=0.0_DP
                END DO
             END IF
@@ -486,7 +487,7 @@ DO itemp = 1, ntemp
 !  alpha calculated by thermal_expansion_ph is not multiplied by the elastic 
 !  compliances
 !
-   DO i=1,degree
+   DO i=1,nvar
       CALL thermal_expansion_ph(ph_freq, ph_grun(i), temp(itemp), &
                                 alpha_aux(i), ce_grun_t(itemp))
    END DO
@@ -560,7 +561,7 @@ ENDIF
 done_grun=.TRUE.
 
 CALL destroy_ph_freq(ph_freq)
-DO i=1,degree
+DO i=1,nvar
    CALL destroy_ph_freq(ph_grun(i))
 END DO
 

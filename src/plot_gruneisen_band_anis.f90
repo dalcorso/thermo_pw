@@ -29,18 +29,18 @@ CHARACTER(LEN=256) :: filename, save_flpsgrun, save_flgrun, save_flgnuplot, &
 CHARACTER(LEN=256) :: filedata, filerap, fileout, gnu_filename, filenameps
 
 CHARACTER(LEN=6), EXTERNAL :: int_to_char
-INTEGER :: degree, icrys
+INTEGER :: nvar, icrys
 
 IF ( my_image_id /= root_image ) RETURN
 
-degree=crystal_parameters(ibrav_save)
+nvar=crystal_parameters(ibrav_save)
 
 save_flgrun=flgrun
 save_flpgrun=flpgrun
 save_flpsgrun=flpsgrun
 save_flgnuplot=flgnuplot
 
-DO icrys=1,degree
+DO icrys=1,nvar
    flpsgrun = TRIM(save_flpsgrun)//'_'//TRIM(int_to_char(icrys))
    flgrun = TRIM(save_flgrun)//'_'//TRIM(int_to_char(icrys))
    flpgrun = TRIM(save_flpgrun)//'_'//TRIM(int_to_char(icrys))

@@ -17,11 +17,11 @@ USE thermo_mod, ONLY : ngeo, ibrav_geo, celldm_geo
 USE control_quartic_energy, ONLY : lsolve, poly_degree_elc
 USE quadratic_surfaces, ONLY : print_chisq_quadratic, fit_multi_quadratic,    &
                              introduce_quadratic_fit, summarize_fitting_data, &
-                             print_quadratic_polynomial, quadratic_var
-USE quartic_surfaces, ONLY : quartic_var, print_chisq_quartic,         &
+                             print_quadratic_polynomial, quadratic_ncoeff
+USE quartic_surfaces, ONLY : quartic_ncoeff, print_chisq_quartic,         &
                              fit_multi_quartic, introduce_quartic_fit, &
                              print_quartic_polynomial
-USE cubic_surfaces,   ONLY : cubic_var, fit_multi_cubic
+USE cubic_surfaces,   ONLY : cubic_ncoeff, fit_multi_cubic
 USE control_elastic_constants, ONLY : el_con_geo,  el_cons_available, &
                                       el_cons_t_available
 USE control_grun,   ONLY : lb0_t
@@ -38,7 +38,7 @@ USE data_files, ONLY : flanhar
 USE temperature, ONLY : ntemp, temp
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filelastic
-INTEGER :: igeo, ibrav, degree, nvar, ndata
+INTEGER :: igeo, ibrav, nvar, ncoeff, ndata
 REAL(DP), ALLOCATABLE :: el_cons_coeff(:,:,:), x(:,:), f(:)
 INTEGER :: i, j, idata, itemp
 INTEGER :: compute_nwork
@@ -62,24 +62,24 @@ END IF
 IF (.NOT.el_cons_t_available) RETURN
 
 ibrav=ibrav_geo(1)
-degree=crystal_parameters(ibrav)
+nvar=crystal_parameters(ibrav)
 
 ndata=compute_nwork()
-ALLOCATE(x(degree,ndata))
+ALLOCATE(x(nvar,ndata))
 ALLOCATE(f(ndata))
 
 IF (poly_degree_elc==4) THEN
-   nvar=quartic_var(degree)
+   ncoeff=quartic_ncoeff(nvar)
 ELSEIF(poly_degree_elc==3) THEN
-   nvar=cubic_var(degree)
+   ncoeff=cubic_ncoeff(nvar)
 ELSE
-   nvar=quadratic_var(degree)
+   ncoeff=quadratic_ncoeff(nvar)
 ENDIF
-ALLOCATE(el_cons_coeff(nvar,6,6))
+ALLOCATE(el_cons_coeff(ncoeff,6,6))
 !
 !  Part 1 evaluation of the polynomial coefficients
 !
-CALL set_x_from_celldm(ibrav, degree, ndata, x, celldm_geo)
+CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
 
 DO i=1,6
    DO j=i,6
@@ -91,23 +91,23 @@ DO i=1,6
          END DO
 
          IF (poly_degree_elc==4) THEN
-!            CALL introduce_quartic_fit(degree, nvar, ndata)
-            CALL fit_multi_quartic(ndata,degree,nvar,lsolve,x,f,&
+!            CALL introduce_quartic_fit(nvar, ncoeff, ndata)
+            CALL fit_multi_quartic(ndata,nvar,ncoeff,lsolve,x,f,&
                                                    el_cons_coeff(:,i,j))
-!            CALL print_quartic_polynomial(degree, nvar, el_cons_coeff(:,i,j))
+!            CALL print_quartic_polynomial(nvar,ncoeff,el_cons_coeff(:,i,j))
        !    WRITE(stdout,'(/,7x,"Energy (1)    Fitted energy (2)   &
        !                                                   &DeltaE (1)-(2)")') 
-!            CALL print_chisq_quartic(ndata, degree, nvar, x, f, &
+!            CALL print_chisq_quartic(ndata, nvar, ncoeff, x, f, &
 !                                                      el_cons_coeff(:,i,j))
          ELSEIF (poly_degree_elc==3) THEN
-            CALL fit_multi_cubic(ndata,degree,nvar,lsolve,x,f,&
+            CALL fit_multi_cubic(ndata,nvar,ncoeff,lsolve,x,f,&
                                                    el_cons_coeff(:,i,j))
          ELSE
-!            CALL introduce_quadratic_fit(degree, nvar, ndata)
-!            CALL summarize_fitting_data(degree, ndata, x, f)
-            CALL fit_multi_quadratic(ndata,degree,nvar,x,f,el_cons_coeff(:,i,j))
-!            CALL print_quadratic_polynomial(degree, nvar, el_cons_coeff(:,i,j))
-!            CALL print_chisq_quadratic(ndata, degree, nvar, x, f, &
+!            CALL introduce_quadratic_fit(nvar, ncoeff, ndata)
+!            CALL summarize_fitting_data(nvar, ndata, x, f)
+            CALL fit_multi_quadratic(ndata,nvar,ncoeff,x,f,el_cons_coeff(:,i,j))
+!            CALL print_quadratic_polynomial(nvar, ncoeff, el_cons_coeff(:,i,j))
+!            CALL print_chisq_quadratic(ndata, nvar, ncoeff, x, f, &
 !                                                        el_cons_coeff(:,i,j))
          ENDIF
       ENDIF
@@ -119,7 +119,7 @@ ENDDO
 !          bulk modulus
 !
 IF (ltherm_dos) THEN
-   CALL interpolate_el_cons(celldm_t, nvar, degree, ibrav, el_cons_coeff,&
+   CALL interpolate_el_cons(celldm_t, ncoeff, nvar, ibrav, el_cons_coeff,&
                             poly_degree_elc, el_cons_t, el_comp_t, b0_t)
    el_cons_grun_t=el_cons_t
    el_comp_grun_t=el_comp_t
@@ -135,7 +135,7 @@ IF (ltherm_dos) THEN
 ENDIF
 
 IF (ltherm_freq) THEN
-   CALL interpolate_el_cons(celldmf_t, nvar, degree, ibrav, el_cons_coeff,&
+   CALL interpolate_el_cons(celldmf_t, ncoeff, nvar, ibrav, el_cons_coeff,&
                                poly_degree_elc, el_consf_t, el_compf_t, b0f_t)
    el_cons_grun_t=el_consf_t
    el_comp_grun_t=el_compf_t

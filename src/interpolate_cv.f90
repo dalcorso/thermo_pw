@@ -20,10 +20,10 @@ USE thermo_mod,     ONLY : celldm_geo, omega_geo, no_ph, tot_ngeo
 USE control_mur,    ONLY : lmurn
 USE temperature,    ONLY : ntemp
 USE quadratic_surfaces, ONLY : fit_multi_quadratic, evaluate_fit_quadratic, &
-                           quadratic_var
+                           quadratic_ncoeff
 USE quartic_surfaces, ONLY : fit_multi_quartic, evaluate_fit_quartic, & 
-                           quartic_var
-USE cubic_surfaces, ONLY : fit_multi_cubic, evaluate_fit_cubic, cubic_var
+                           quartic_ncoeff
+USE cubic_surfaces, ONLY : fit_multi_cubic, evaluate_fit_cubic, cubic_ncoeff
 USE control_quartic_energy, ONLY : lsolve, poly_degree_cv
 USE lattices,       ONLY : compress_celldm, crystal_parameters
 USE mp_world,       ONLY : world_comm
@@ -34,26 +34,26 @@ REAL(DP), INTENT(IN)  :: vmin_t(ntemp), ph_cv(ntemp, tot_ngeo), &
                          celldm_t(6,ntemp)
 REAL(DP), INTENT(OUT) :: cv_t(ntemp)
 
-INTEGER :: itemp, igeo, degree, nvar, ndata, startt, lastt
+INTEGER :: itemp, igeo, nvar, ncoeff, ndata, startt, lastt
 INTEGER :: compute_nwork_ph
 REAL(DP), ALLOCATABLE :: x(:,:), x_pos_min(:), f(:), coeff(:)
 
-degree=crystal_parameters(ibrav)
-IF (lmurn) degree=1         ! only the volume is variable in this case
+nvar=crystal_parameters(ibrav)
+IF (lmurn) nvar=1         ! only the volume is variable in this case
 IF (poly_degree_cv==4) THEN
-   nvar=quartic_var(degree)
+   ncoeff=quartic_ncoeff(nvar)
 ELSEIF (poly_degree_cv==3) THEN
-   nvar=cubic_var(degree)
+   ncoeff=cubic_ncoeff(nvar)
 ELSE
-   nvar=quadratic_var(degree)
+   ncoeff=quadratic_ncoeff(nvar)
 ENDIF
 !
 ndata = compute_nwork_ph(no_ph,tot_ngeo)
 
-ALLOCATE(x(degree,ndata))
-ALLOCATE(x_pos_min(degree))
+ALLOCATE(x(nvar,ndata))
+ALLOCATE(x_pos_min(nvar))
 ALLOCATE(f(ndata))
-ALLOCATE(coeff(nvar))
+ALLOCATE(coeff(ncoeff))
 !
 !  collect the geometrical data of the geometries for which phonon dispersions
 !  have been calculated
@@ -65,7 +65,7 @@ DO igeo=1, tot_ngeo
    IF (lmurn) THEN
       x(1,ndata)=omega_geo(igeo)
    ELSE
-      CALL compress_celldm(celldm_geo(1,igeo), x(1,ndata), degree, ibrav)
+      CALL compress_celldm(celldm_geo(1,igeo), x(1,ndata), nvar, ibrav)
    ENDIF
 ENDDO
 !
@@ -89,36 +89,36 @@ DO itemp=startt,lastt
    IF (lmurn) THEN
       x_pos_min(1)=vmin_t(itemp)
    ELSE
-      CALL compress_celldm(celldm_t(1,itemp), x_pos_min, degree, ibrav)
+      CALL compress_celldm(celldm_t(1,itemp), x_pos_min, nvar, ibrav)
    ENDIF
 
    IF (poly_degree_cv==4) THEN
 !
 !   compute the coefficients of the quartic polynomial
 !
-      CALL fit_multi_quartic(ndata, degree, nvar, lsolve, x, f, coeff)
+      CALL fit_multi_quartic(ndata, nvar, ncoeff, lsolve, x, f, coeff)
 !
 !  and evaluate the polynomial
 !
-      CALL evaluate_fit_quartic(degree, nvar, x_pos_min, cv_t(itemp), coeff)
+      CALL evaluate_fit_quartic(nvar, ncoeff, x_pos_min, cv_t(itemp), coeff)
    ELSEIF( poly_degree_cv==3) THEN
 !
 !   compute the coefficients of the cubic polynomial
 !
-      CALL fit_multi_cubic(ndata, degree, nvar, lsolve, x, f, coeff)
+      CALL fit_multi_cubic(ndata, nvar, ncoeff, lsolve, x, f, coeff)
 !
 !  and evaluate the polynomial
 !
-      CALL evaluate_fit_cubic(degree, nvar, x_pos_min, cv_t(itemp), coeff)
+      CALL evaluate_fit_cubic(nvar, ncoeff, x_pos_min, cv_t(itemp), coeff)
    ELSE
 !
 !   compute the coefficients of the quadratic polynomial
 !
-      CALL fit_multi_quadratic(ndata, degree, nvar, x, f, coeff)
+      CALL fit_multi_quadratic(ndata, nvar, ncoeff, x, f, coeff)
 !
 !  and evaluate the polynomial
 !
-      CALL evaluate_fit_quadratic(degree, nvar, x_pos_min, cv_t(itemp), coeff)
+      CALL evaluate_fit_quadratic(nvar, ncoeff, x_pos_min, cv_t(itemp), coeff)
 
    ENDIF
 ENDDO
