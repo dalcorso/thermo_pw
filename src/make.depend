@@ -280,6 +280,7 @@ interpolate_el_cons.o : ../../thermo_pw/lib/quartic_surfaces.o
 interpolate_el_cons.o : thermo_mod.o
 interpolate_freq.o : ../../Modules/ions_base.o
 interpolate_freq.o : ../../Modules/kind.o
+interpolate_freq.o : ../../thermo_pw/lib/polyfit.o
 interpolate_freq.o : ../../thermo_pw/lib/quadratic_surfaces.o
 io_bands.o : ../../Modules/constants.o
 io_bands.o : ../../Modules/io_global.o
@@ -570,6 +571,7 @@ quadratic_fit.o : ../../thermo_pw/lib/cubic_surfaces.o
 quadratic_fit.o : ../../thermo_pw/lib/lattices.o
 quadratic_fit.o : ../../thermo_pw/lib/quadratic_surfaces.o
 quadratic_fit.o : ../../thermo_pw/lib/quartic_surfaces.o
+quadratic_fit.o : ../../thermo_pw/lib/vector.o
 quadratic_fit.o : thermo_mod.o
 read_state_densities.o : ../../Modules/io_global.o
 read_state_densities.o : ../../Modules/ions_base.o
@@ -825,7 +827,7 @@ write_ev_input.o : ../../Modules/kind.o
 write_ev_input.o : ../../Modules/mp_images.o
 write_ev_input.o : ../../Modules/mp_world.o
 write_ev_input.o : ../../UtilXlib/mp.o
-write_ev_input.o : ../../thermo_pw/lib/quadratic_surfaces.o
+write_ev_input.o : ../../thermo_pw/lib/polyfit.o
 write_ev_input.o : thermo_mod.o
 write_gnuplot_energy.o : ../../Modules/cell_base.o
 write_gnuplot_energy.o : ../../Modules/io_global.o

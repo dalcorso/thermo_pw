@@ -162,8 +162,6 @@ SUBROUTINE quadratic_fit_t(itemp, celldm_t, free_e_min_t, ph_free_ener, &
   USE lattices,    ONLY : compress_celldm, expand_celldm, crystal_parameters
   USE io_global,   ONLY : stdout
 
-  USE linear_surfaces,    ONLY : fit_multi_linear, print_chisq_linear, &
-                                 linear_ncoeff
   USE quadratic_surfaces, ONLY : fit_multi_quadratic, &
                       find_two_quadratic_extremum, &
                       print_quadratic_polynomial, quadratic_ncoeff, &
@@ -175,8 +173,7 @@ SUBROUTINE quadratic_fit_t(itemp, celldm_t, free_e_min_t, ph_free_ener, &
 
   USE quartic_surfaces, ONLY : find_quartic_quadratic_extremum,      &
                       fit_multi_quartic, find_two_quartic_extremum,  &
-                      find_quartic_cubic_extremum, print_chisq_quartic, &
-                      find_quartic_linear_extremum
+                      find_quartic_cubic_extremum, print_chisq_quartic
 
   USE vector_mod, ONLY : write_vector
 
@@ -246,16 +243,6 @@ SUBROUTINE quadratic_fit_t(itemp, celldm_t, free_e_min_t, ph_free_ener, &
                                                         ymin, coeff4, coefft3)
         DEALLOCATE(coefft3)
         WRITE(stdout,'(/,5x,"Extremum of the quartic+cubic found at:")')
-     ELSEIF (poly_degree_ph==1) THEN
-        WRITE(stdout,'(/,5x, "Fit with a fist order polynomial")') 
-        ncoeff1=linear_ncoeff(nvar)
-        ALLOCATE(coefft1(ncoeff1))
-        CALL fit_multi_linear(ndata, nvar, ncoeff1, x, f, coefft1)
-        CALL print_chisq_linear(ndata, nvar, ncoeff1, x, f, coefft1)
-        CALL find_quartic_linear_extremum(nvar, ncoeff4, ncoeff1, x_pos_min,&
-                                                        ymin, coeff4, coefft1)
-        DEALLOCATE(coefft1)
-        WRITE(stdout,'(/,5x,"Extremum of the quartic+linear found at:")')
      ELSE
         WRITE(stdout,'(/,5x,"Quartic fit used only a T=0:")')
         CALL find_quartic_quadratic_extremum(nvar, ncoeff4, ncoeff, &
