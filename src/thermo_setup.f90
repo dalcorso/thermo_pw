@@ -295,6 +295,12 @@ SUBROUTINE thermo_setup()
      ENDIF
   ENDIF
 
+  IF (what=='elastic_constants_qha'.AND. &
+     .NOT.(ibrav==1.OR.ibrav==2.OR.ibrav==3)) &
+         CALL errore('thermo_setup','quasi-harmonic elastic constants &
+                       &available only for cubic solids',1)
+
+
   RETURN
   !
   END SUBROUTINE thermo_setup
