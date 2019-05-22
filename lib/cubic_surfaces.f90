@@ -21,15 +21,16 @@ MODULE cubic_surfaces
 !   coefficients of the cubic polynomial, evaluates the cubic polynomial
 !   at that point.
 !
-!   evaluate_fit_grad_cubic, given the coordinates of a point, and the
+!   evaluate_cubic_grad, given the coordinates of a point, and the
 !   coefficients of the cubic polynomial, evaluates the gradient of the 
 !   cubic polynomial at that point.
 !
-!   evaluate_fit_hess_cubic, given the coordinates of a point, and the
+!   evaluate_cubic_hessian, given the coordinates of a point, and the
 !   coefficients of the cubic polynomial, evaluates the hessian of the 
 !   cubic polynomial at that point.
 !
-!   find_cubic_extremum, find the extremum closest to the input point.
+!   cubic_ncoeff, given the number of variables of the polynomial gives
+!   the number of coefficients of the cubic polynomial
 !
 !   The number of coefficients of a multivariate polynomial is 
 !   (n+d)!/n!/d! where d is the degree of the polynomial (in the cubic
@@ -51,6 +52,16 @@ MODULE cubic_surfaces
 !    to the number of coefficients. The routines makes a 
 !    least square fit of the data.
 !
+!   find_cubic_extremum, find the extremum closest to the input point.
+!
+!   print_cubic_polynomial, writes on output the coefficients of a 
+!   cubic polynomial
+!
+!   introduce_cubic_fit writes a message with a few information on the
+!   cubic polynomial and the number of data used to fit it.
+!
+!   print_chisq_cubic, writes on output the chi square of a given cubic 
+!   polynomial interpolation
 !
   USE kinds, ONLY : DP
   USE io_global, ONLY : stdout
@@ -58,13 +69,11 @@ MODULE cubic_surfaces
   PRIVATE
   SAVE
 
-  PUBLIC :: fit_multi_cubic,  evaluate_fit_cubic, &
-            evaluate_fit_grad_cubic, evaluate_fit_hess_cubic, &
+  PUBLIC :: fit_multi_cubic, evaluate_fit_cubic, &
+            evaluate_cubic_grad, evaluate_cubic_hessian, &
             cubic_ncoeff, find_cubic_extremum, &
-            find_quartic_cubic_extremum, evaluate_quartic_cubic, &
             print_cubic_polynomial, introduce_cubic_fit, &
-            print_chisq_cubic, & 
-            print_chisq_quartic_cubic
+            print_chisq_cubic 
 
 CONTAINS
 
@@ -389,7 +398,7 @@ f=aux
 RETURN
 END SUBROUTINE evaluate_fit_cubic
 
-SUBROUTINE evaluate_fit_grad_cubic(nvar,ncoeff,x,f,coeff)
+SUBROUTINE evaluate_cubic_grad(nvar,ncoeff,x,f,coeff)
 !
 !  computes the gradient of the cubic polynomial at the point x, 
 !  the number of variables nvar can vary from 1 to 6.
@@ -402,7 +411,7 @@ REAL(DP), INTENT(INOUT) :: f(nvar)
 
 REAL(DP) :: aux(nvar)
 
-IF (nvar>6) CALL errore('evaluate_fit_grad_cubic','gradient not availble',1)
+IF (nvar>6) CALL errore('evaluate_cubic_grad','gradient not availble',1)
 
 aux(1) = coeff(2) + 2.0_DP*coeff(3)*x(1) + 3.0_DP*coeff(4)*x(1)**2
 
@@ -538,9 +547,9 @@ ENDIF
 f=aux
 
 RETURN
-END SUBROUTINE evaluate_fit_grad_cubic
+END SUBROUTINE evaluate_cubic_grad
 
-SUBROUTINE evaluate_fit_hess_cubic(nvar,ncoeff,x,f,coeff)
+SUBROUTINE evaluate_cubic_hessian(nvar,ncoeff,x,f,coeff)
 !
 !  computes the hessian of the cubic polynomial at the point x, 
 !  the number of variables nvar can vary from 1 to 6.
@@ -717,13 +726,13 @@ ENDIF
 f(:,:)=aux(:,:)
 
 RETURN
-END SUBROUTINE evaluate_fit_hess_cubic
+END SUBROUTINE evaluate_cubic_hessian
 
 SUBROUTINE find_cubic_extremum(nvar,ncoeff,x,f,coeff)
 !
 !  This routine starts from the point x and finds the extremum closest
 !  to x. In output x are the coordinates of the extremum and f 
-!  the value of the cubic function at the minimum
+!  the value of the cubic function at the extremum
 !
 USE linear_solvers, ONLY : linsolvx
 IMPLICIT NONE
@@ -742,9 +751,9 @@ REAL(DP) :: deltax, fmod
 xold(:)=x(:)
 DO iter=1,maxiter
    !
-   CALL evaluate_fit_grad_cubic(nvar,ncoeff,x,g,coeff)
+   CALL evaluate_cubic_grad(nvar,ncoeff,x,g,coeff)
    !
-   CALL evaluate_fit_hess_cubic(nvar,ncoeff,x,j,coeff)
+   CALL evaluate_cubic_hessian(nvar,ncoeff,x,j,coeff)
    !
    CALL linsolvx(j, nvar, g, y)
    !
@@ -769,168 +778,6 @@ CALL evaluate_fit_cubic(nvar,ncoeff,x,f,coeff)
 
 RETURN
 END SUBROUTINE find_cubic_extremum
-
-SUBROUTINE find_quartic_cubic_extremum(nvar,ncoeff4,ncoeff,x,f,coeff4,coeff)
-!
-!   This subroutines adds the coefficients of a quartic polynomial
-!   to those of a cubic polynomial and finds the extremum of the sum
-!   of the two closest to the input value of x.
-!
-USE quartic_surfaces, ONLY : find_quartic_extremum
-!
-IMPLICIT NONE
-INTEGER, INTENT(IN) :: nvar, ncoeff, ncoeff4
-REAL(DP), INTENT(IN) :: coeff(ncoeff), coeff4(ncoeff4) 
-REAL(DP), INTENT(INOUT) :: x(nvar), f
-
-REAL(DP) :: coeffadd4(ncoeff4)
-
-CALL set_quartic_cubic_coefficients(nvar, ncoeff4, ncoeff, coeffadd4, &
-                                                   coeff4, coeff)
-CALL find_quartic_extremum(nvar,ncoeff4,x,f,coeffadd4)
-
-RETURN
-END SUBROUTINE find_quartic_cubic_extremum
-
-SUBROUTINE evaluate_quartic_cubic(nvar,ncoeff4,ncoeff,x,f,coeff4,coeff)
-!
-!   This subroutines adds the coefficients of a quartic polynomial
-!   to those of a cubic polynomial and evaluates the resulting polynomial
-!   at the point x.
-!
-USE quartic_surfaces, ONLY : evaluate_fit_quartic
-IMPLICIT NONE
-
-INTEGER, INTENT(IN) :: nvar, ncoeff, ncoeff4
-REAL(DP), INTENT(IN) :: coeff(ncoeff), coeff4(ncoeff4) 
-REAL(DP), INTENT(INOUT) :: x(nvar), f
-
-REAL(DP) :: coeffadd4(ncoeff4)
-
-CALL set_quartic_cubic_coefficients(nvar, ncoeff4, ncoeff, coeffadd4, &
-                                                             coeff4, coeff)
-
-CALL evaluate_fit_quartic(nvar,ncoeff4,x,f,coeffadd4)
-
-RETURN
-END SUBROUTINE evaluate_quartic_cubic
-
-SUBROUTINE set_quartic_cubic_coefficients(nvar, ncoeff4, ncoeff, coeffadd4, &
-                                                               coeff4, coeff)
-!
-!   This subroutines adds the coefficients of a quartic polynomial
-!   to those of a cubic polynomial,
-!
-IMPLICIT NONE
-
-INTEGER, INTENT(IN) :: nvar, ncoeff4, ncoeff
-REAL(DP), INTENT(IN) :: coeff4(ncoeff4), coeff(ncoeff)
-REAL(DP), INTENT(INOUT) :: coeffadd4(ncoeff4)
-
-coeffadd4 = coeff4
-coeffadd4(1) = coeffadd4(1) + coeff(1)
-coeffadd4(2) = coeffadd4(2) + coeff(2)
-coeffadd4(3) = coeffadd4(3) + coeff(3)
-coeffadd4(4) = coeffadd4(4) + coeff(4)
-
-IF (nvar > 1) THEN
-   coeffadd4(6)  =  coeffadd4(6) +  coeff(5)
-   coeffadd4(7)  =  coeffadd4(7) +  coeff(6)
-   coeffadd4(8)  =  coeffadd4(8) +  coeff(7)
-   coeffadd4(10) = coeffadd4(10) +  coeff(8)
-   coeffadd4(11) = coeffadd4(11) +  coeff(9)
-   coeffadd4(13) = coeffadd4(13) + coeff(10)
-ENDIF
-
-IF (nvar > 2) THEN
-   coeffadd4(16) = coeffadd4(16) + coeff(11)
-   coeffadd4(17) = coeffadd4(17) + coeff(12)
-   coeffadd4(18) = coeffadd4(18) + coeff(13)
-   coeffadd4(20) = coeffadd4(20) + coeff(14)
-   coeffadd4(21) = coeffadd4(21) + coeff(15)
-   coeffadd4(23) = coeffadd4(23) + coeff(16)
-   coeffadd4(26) = coeffadd4(26) + coeff(17)
-   coeffadd4(20) = coeffadd4(20) + coeff(14)
-   coeffadd4(27) = coeffadd4(27) + coeff(18)
-   coeffadd4(29) = coeffadd4(29) + coeff(19)
-   coeffadd4(32) = coeffadd4(32) + coeff(20)
-END IF
-
-IF (nvar > 3) THEN
-   coeffadd4(36) = coeffadd4(36) + coeff(21)
-   coeffadd4(37) = coeffadd4(37) + coeff(22)
-   coeffadd4(38) = coeffadd4(38) + coeff(23)
-   coeffadd4(40) = coeffadd4(40) + coeff(24)
-   coeffadd4(41) = coeffadd4(41) + coeff(25)
-   coeffadd4(43) = coeffadd4(43) + coeff(26)
-   coeffadd4(46) = coeffadd4(46) + coeff(27)
-   coeffadd4(47) = coeffadd4(47) + coeff(28)
-   coeffadd4(49) = coeffadd4(49) + coeff(29)
-   coeffadd4(52) = coeffadd4(52) + coeff(30)
-   coeffadd4(53) = coeffadd4(53) + coeff(31)
-   coeffadd4(55) = coeffadd4(55) + coeff(32)
-   coeffadd4(58) = coeffadd4(58) + coeff(33)
-   coeffadd4(62) = coeffadd4(62) + coeff(34)
-   coeffadd4(66) = coeffadd4(66) + coeff(35)
-END IF
-
-IF (nvar > 4) THEN
-   coeffadd4(71) = coeffadd4(71) + coeff(36)
-   coeffadd4(72) = coeffadd4(72) + coeff(37)
-   coeffadd4(73) = coeffadd4(73) + coeff(38)
-   coeffadd4(75) = coeffadd4(75) + coeff(39)
-   coeffadd4(76) = coeffadd4(76) + coeff(40)
-   coeffadd4(78) = coeffadd4(78) + coeff(41)
-   coeffadd4(81) = coeffadd4(81) + coeff(42)
-   coeffadd4(82) = coeffadd4(82) + coeff(43)
-   coeffadd4(84) = coeffadd4(84) + coeff(44)
-   coeffadd4(87) = coeffadd4(87) + coeff(45)
-   coeffadd4(88) = coeffadd4(88) + coeff(46)
-   coeffadd4(90) = coeffadd4(90) + coeff(47)
-   coeffadd4(93) = coeffadd4(93) + coeff(48)
-   coeffadd4(94) = coeffadd4(94) + coeff(49)
-   coeffadd4(96) = coeffadd4(96) + coeff(50)
-   coeffadd4(99) = coeffadd4(99) + coeff(51)
-   coeffadd4(103) = coeffadd4(103) + coeff(52)
-   coeffadd4(107) = coeffadd4(107) + coeff(53)
-   coeffadd4(111) = coeffadd4(111) + coeff(54)
-   coeffadd4(115) = coeffadd4(115) + coeff(55)
-   coeffadd4(119) = coeffadd4(119) + coeff(56)
-END IF
-
-IF (nvar > 5) THEN
-   coeffadd4(127) = coeffadd4(127) + coeff(57)
-   coeffadd4(128) = coeffadd4(128) + coeff(58)
-   coeffadd4(129) = coeffadd4(129) + coeff(59)
-   coeffadd4(131) = coeffadd4(131) + coeff(60)
-   coeffadd4(132) = coeffadd4(132) + coeff(61)
-   coeffadd4(134) = coeffadd4(134) + coeff(62)
-   coeffadd4(137) = coeffadd4(137) + coeff(63)
-   coeffadd4(138) = coeffadd4(138) + coeff(64)
-   coeffadd4(140) = coeffadd4(140) + coeff(65)
-   coeffadd4(143) = coeffadd4(143) + coeff(66)
-   coeffadd4(144) = coeffadd4(144) + coeff(67)
-   coeffadd4(146) = coeffadd4(146) + coeff(68)
-   coeffadd4(149) = coeffadd4(149) + coeff(69)
-   coeffadd4(150) = coeffadd4(150) + coeff(70)
-   coeffadd4(152) = coeffadd4(152) + coeff(71)
-   coeffadd4(155) = coeffadd4(155) + coeff(72)
-   coeffadd4(156) = coeffadd4(156) + coeff(73)
-   coeffadd4(158) = coeffadd4(158) + coeff(74)
-   coeffadd4(161) = coeffadd4(161) + coeff(75)
-   coeffadd4(165) = coeffadd4(165) + coeff(76)
-   coeffadd4(169) = coeffadd4(169) + coeff(77)
-   coeffadd4(173) = coeffadd4(173) + coeff(78)
-   coeffadd4(177) = coeffadd4(177) + coeff(79)
-   coeffadd4(181) = coeffadd4(181) + coeff(80)
-   coeffadd4(185) = coeffadd4(185) + coeff(81)
-   coeffadd4(189) = coeffadd4(189) + coeff(82)
-   coeffadd4(193) = coeffadd4(193) + coeff(83)
-   coeffadd4(197) = coeffadd4(197) + coeff(84)
-END IF
-
-RETURN
-END SUBROUTINE set_quartic_cubic_coefficients
 
 FUNCTION cubic_ncoeff(nvar)  
 !
@@ -1065,7 +912,6 @@ WRITE(stdout,'(5x,"Number of fitting data:",5x,i5,/)')  ndata
 RETURN
 END SUBROUTINE introduce_cubic_fit
 
-
 SUBROUTINE print_chisq_cubic(ndata, nvar, ncoeff, x, f, coeff)
 !
 !   This routine receives as input the values of a function f for ndata
@@ -1095,31 +941,5 @@ WRITE(stdout,'(5x,"chi square cubic=",e18.5," relative error",e18.5,&
                                      &" %",/)') chisq, perc / ndata
 RETURN
 END SUBROUTINE print_chisq_cubic
-
-SUBROUTINE print_chisq_quartic_cubic(ndata, nvar, ncoeff4, ncoeff, x, &
-                                                          f, coeff4, coeff)
-!
-!  This routine writes on output the chi square of the sum of a
-!  cubic and a quartic polynomials that interpolate the function f in 
-!  the ndata points x.
-!
-IMPLICIT NONE
-INTEGER  :: ndata, nvar, ncoeff4, ncoeff
-REAL(DP) :: x(nvar, ndata), f(ndata), coeff4(ncoeff4), coeff(ncoeff)
-
-REAL(DP) :: chisq, aux
-INTEGER  :: idata
-
-chisq=0.0_DP
-DO idata=1,ndata
-   CALL evaluate_quartic_cubic(nvar, ncoeff4, ncoeff, x(1,idata), aux, &
-                                                        coeff4, coeff)
-!  WRITE(stdout,'(3f19.12)') f(idata), aux, f(idata)-aux
-   chisq = chisq + (aux - f(idata))**2
-ENDDO
-WRITE(stdout,'(5x,"chi square quartic cubic=",e18.5,/)') chisq
-
-RETURN
-END SUBROUTINE print_chisq_quartic_cubic
 
 END MODULE cubic_surfaces

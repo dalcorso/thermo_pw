@@ -46,7 +46,7 @@ MODULE quadratic_surfaces
 !   coefficients of the quadratic function, evaluates the quadratic function 
 !   on that point.
 !
-!   write_fit_hessian, given the coefficient of the quadratic function,
+!   write_quadratic_hessian, given the coefficient of the quadratic function,
 !   writes them on output as the Hessian of the polynomial and
 !   diagonalizes it finding its eigenvalues and eigenvectors.
 !
@@ -61,12 +61,14 @@ MODULE quadratic_surfaces
   PRIVATE
   SAVE
 
-  PUBLIC :: evaluate_fit_quadratic, write_fit_hessian,                     &
-            fit_multi_quadratic, find_quadratic_extremum,                  &
-            find_two_quadratic_extremum, evaluate_fit_grad_quadratic,      &
-            polifit, write_poli, print_quadratic_polynomial,               &
-            summarize_fitting_data, write_vector, introduce_quadratic_fit, &
-            print_chisq_quadratic, quadratic_ncoeff
+  PUBLIC :: fit_multi_quadratic, evaluate_fit_quadratic,              &
+            evaluate_quadratic_grad, write_quadratic_hessian,         &
+            quadratic_ncoeff, find_quadratic_extremum,                &
+            print_quadratic_polynomial,                               &
+            introduce_quadratic_fit,                                  &
+            print_chisq_quadratic,                                    &
+            find_two_quadratic_extremum,                              &
+            summarize_fitting_data
 
 CONTAINS
 
@@ -77,7 +79,7 @@ SUBROUTINE fit_multi_quadratic(ndata,nvar,ncoeff,x,f,coeff)
 !  a quadratic interpolating polynomial coeff(ncoeff). In input
 !  ndata is the number of data points, nvar is the number of variables
 !  (the maximum is 6) and ncoeff is the number of coefficients of the
-!  intepolating quadrating polynomial. ncoeff= (nvar+1) * (nvar+2) / 2. 
+!  intepolating quadratic polynomial. ncoeff= (nvar+1) * (nvar+2) / 2. 
 !  The coefficients are organized as follows:
 !  a_1 + a_2  x(1,i) + a_3  x(1,i)**2                                
 !      + a_4  x(2,i) + a_5  x(2,i)**2 + a_6  x(1,i)*x(2,i) +         2
@@ -108,9 +110,9 @@ REAL(DP) :: amat(ndata,ncoeff), aa(ncoeff,ncoeff), b(ncoeff)
 INTEGER :: ivar, jvar, idata
 
 IF (ncoeff /= (nvar+1)*(nvar + 2) / 2) &
-   CALL errore('multi_quadratic','nvar and degree not compatible',1)
+   CALL errore('multi_quadratic','ncoeff and nvar not compatible',1)
 IF (nvar>6.OR.nvar<1) &
-   CALL errore('multi_quadratic','degree must be from 1 to 6',1)
+   CALL errore('multi_quadratic','nvar must be from 1 to 6',1)
 IF (ndata < 3) &
    CALL errore('multi_quadratic','Too few sampling data',1)
 IF (ndata < ncoeff) &
@@ -183,113 +185,7 @@ CALL linsolvx(aa,ncoeff,b,coeff)
 
 RETURN
 END SUBROUTINE fit_multi_quadratic
-
-SUBROUTINE find_quadratic_extremum(nvar,ncoeff,x,f,coeff)
 !
-!   This routine finds the extremum of quadratic polynomial with
-!   coefficients coeff. The number of variables can vary from 1 to 6.
-!
-USE linear_solvers, ONLY : linsolvx
-IMPLICIT NONE
-INTEGER, INTENT(IN) :: nvar, ncoeff
-REAL(DP), INTENT(IN) :: coeff(ncoeff)
-REAL(DP), INTENT(OUT) :: x(nvar), f
-
-REAL(DP) :: amat(nvar, nvar), v(nvar)
-
-IF (nvar > 6 .OR. nvar < 1 ) &
-   CALL errore('find_quadratic_extremum','incorrect degree',1)
-IF (ncoeff /= (nvar + 1)*(nvar + 2) / 2) &
-   CALL errore('find_quadratic_extremum','ncoeff and nvar not compatible',1)
-
-amat=0.0_DP
-v=0.0_DP
-
-v(1)= - coeff(2)
-amat(1,1) = 2.0_DP * coeff(3)
-
-IF (nvar > 1) THEN
-   v(2) = - coeff(4)
-   amat(1,2) = coeff(6)
-   amat(2,1) = coeff(6)
-   amat(2,2) = 2.0_DP * coeff(5)
-ENDIF
-
-IF (nvar > 2) THEN
-   v(3) = - coeff(7)
-   amat(1,3) = coeff(9)
-   amat(3,1) = amat(1,3)
-   amat(2,3) = coeff(10)
-   amat(3,2) = amat(2,3)
-   amat(3,3) = 2.0_DP * coeff(8)
-ENDIF
-
-IF (nvar > 3) THEN
-   v(4) = - coeff(11)
-   amat(1,4) = coeff(13)
-   amat(4,1) = amat(1,4)
-   amat(2,4) = coeff(14)
-   amat(4,2) = amat(2,4)
-   amat(3,4) = coeff(15)
-   amat(4,3) = amat(3,4)
-   amat(4,4) = 2.0_DP * coeff(12)
-ENDIF
-
-IF (nvar > 4) THEN
-   v(5) = - coeff(16)
-   amat(1,5) = coeff(18)
-   amat(5,1) = amat(1,5)
-   amat(2,5) = coeff(19)
-   amat(5,2) = amat(2,5)
-   amat(3,5) = coeff(20)
-   amat(5,3) = amat(3,5)
-   amat(4,5) = coeff(21)
-   amat(5,4) = amat(4,5)
-   amat(5,5) = 2.0_DP * coeff(17)
-ENDIF
-
-IF (nvar > 5) THEN
-   v(6) = - coeff(22)
-   amat(1,6) = coeff(24)
-   amat(6,1) = amat(1,6)
-   amat(2,6) = coeff(25)
-   amat(6,2) = amat(2,6)
-   amat(3,6) = coeff(26)
-   amat(6,3) = amat(3,6)
-   amat(4,6) = coeff(27)
-   amat(6,4) = amat(4,6)
-   amat(5,6) = coeff(28)
-   amat(6,5) = amat(5,6)
-   amat(6,6) = 2.0_DP * coeff(23)
-ENDIF
-
-CALL linsolvx(amat,nvar,v,x)
-
-CALL evaluate_fit_quadratic(nvar,ncoeff,x,f,coeff)
-
-RETURN
-END SUBROUTINE find_quadratic_extremum
-
-SUBROUTINE find_two_quadratic_extremum(nvar,ncoeff,x,f,coeff,coeff1)
-!
-! This routine finds the extremum of the sum of two quadratic polynomials
-! described by the coefficients coeff and coeff1. The number of variables
-! can vary from 1 to 6.
-!
-IMPLICIT NONE
-INTEGER, INTENT(IN) :: nvar, ncoeff
-REAL(DP), INTENT(IN) :: coeff(ncoeff), coeff1(ncoeff)
-REAL(DP), INTENT(OUT) :: x(nvar), f
-
-REAL(DP) :: coeff2(ncoeff)
-
-coeff2(:) = coeff(:) + coeff1(:)
-
-CALL find_quadratic_extremum(nvar,ncoeff,x,f,coeff2)
-
-RETURN
-END SUBROUTINE find_two_quadratic_extremum
-
 SUBROUTINE evaluate_fit_quadratic(nvar,ncoeff,x,f,coeff)
 !
 !  This routine evaluates the quadratic polynomial at the point x
@@ -338,7 +234,7 @@ f=aux
 RETURN
 END SUBROUTINE evaluate_fit_quadratic
 
-SUBROUTINE evaluate_fit_grad_quadratic(nvar,ncoeff,x,f,coeff)
+SUBROUTINE evaluate_quadratic_grad(nvar,ncoeff,x,f,coeff)
 !
 !   This routine evaluates the gradient of the quadratic polynomial
 !   at the point x.
@@ -400,13 +296,14 @@ ENDIF
 f=aux
 
 RETURN
-END SUBROUTINE evaluate_fit_grad_quadratic
+END SUBROUTINE evaluate_quadratic_grad
 
-SUBROUTINE write_fit_hessian(nvar, ncoeff, coeff, v, e)
+SUBROUTINE write_quadratic_hessian(nvar, ncoeff, coeff, v, e)
 !
 !  This routine writes the hessian of the quadratic polynomial and
 !  its eigenvalues and eigenvectors
 !
+USE diagonalize, ONLY : diagonalize_r
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: nvar, ncoeff
 REAL(DP), INTENT(IN) :: coeff(ncoeff)
@@ -481,129 +378,107 @@ ENDIF
 WRITE(stdout,*)
 
 RETURN
-END SUBROUTINE write_fit_hessian
-
-SUBROUTINE diagonalize_r (npw,nbnd,h,e,v)
+END SUBROUTINE write_quadratic_hessian
 !
-! f90 interface to LAPACK routine ZHEEVX which calculates
-! nbnd eigenvalues and eigenvectors of a complex hermitean matrix h. 
-! 
+FUNCTION quadratic_ncoeff(nvar)
+!
+!   This function gives the number of coefficients of the quadratic
+!   polynomial receiving as input the number of independent variables.
+!
 IMPLICIT NONE
+INTEGER :: quadratic_ncoeff
+INTEGER, INTENT(IN) :: nvar
 
-INTEGER, INTENT(IN) :: npw
-INTEGER, INTENT(IN) :: nbnd
+quadratic_ncoeff = (1 + nvar)*(nvar + 2) / 2
 
-REAL(DP), INTENT(INOUT) :: h(npw,npw)   ! matrix to be diagonalized
-REAL(DP), INTENT(OUT)   :: e(nbnd)      ! eigenvalues
-REAL(DP), INTENT(OUT)   :: v(npw,nbnd)  ! eigenvectors (column-wise)
-
-INTEGER  :: lwork,  &! auxiliary variable
-            info,   &! flag saying if LAPACK execution was OK
-            m        ! number of eigenvalues
-
-CHARACTER(LEN=1) :: jobz, range, uplo  ! select the task in LAPACK
-
-REAL(DP), ALLOCATABLE    :: work(:)      ! as above
-INTEGER, ALLOCATABLE     :: iwork(:)     !    "
-INTEGER, ALLOCATABLE     :: ifail(:)     !    "
-REAL(DP)                 :: rdummy, zero ! dummy variable, zero
-REAL(DP), ALLOCATABLE    :: ee(:)        ! axiliary space for eigenvalues
+END FUNCTION quadratic_ncoeff
 !
-!   Initialize flags
+SUBROUTINE find_quadratic_extremum(nvar,ncoeff,x,f,coeff)
 !
-jobz  = 'V' ! compute eigenvalues and eigenvectors
-uplo  = 'U' ! LAPACK routines use the upper triangle of the input matrix
-range = 'I' ! compute bands from 1 to nbnd
-
-zero = 0.0_DP
-v(:,:) = 0.0_DP
-!
-! allocate arrays of known size
-!
-ALLOCATE( ee(npw) )
-ALLOCATE( iwork(5*npw) )
-ALLOCATE( ifail(npw) )
-ALLOCATE( work(16*npw) )
-lwork=16*npw
-!
-! and diagonalize the matrix
-!
-CALL dsyevx(jobz, range, uplo, npw, h, npw, rdummy, rdummy, 1, nbnd, zero, &
-            m, ee, v, npw, work, lwork, iwork, ifail, info)
-!
-IF (ABS(info) /= 0) THEN
-   WRITE(stdout,'("Error in the diagonalization, info= ", i5)') info
-   STOP 1
-ENDIF
-!
-!
-!  NB: h is overwritten by this routine. We save the eigenvalues on e
-!      for plotting
-!
-e(1:nbnd)=ee(1:nbnd) 
-       
-DEALLOCATE(work)
-DEALLOCATE(iwork)
-DEALLOCATE(ifail)
-DEALLOCATE(ee)
-
-RETURN
-END SUBROUTINE diagonalize_r
-!
-SUBROUTINE polifit(x,y,ndati,a,ncoeff)
-!
-!  This routine fits a set of data with a polynomial of one variable and
-!  arbitrary degree. ncoeff is the number of coefficients equal to the degree+1
+!   This routine finds the extremum of quadratic polynomial with
+!   coefficients coeff. The number of variables can vary from 1 to 6.
 !
 USE linear_solvers, ONLY : linsolvx
 IMPLICIT NONE
-INTEGER, INTENT(IN)   ::   ndati, &  ! number of data points
-                           ncoeff    ! number polynomial coefficients 
+INTEGER, INTENT(IN) :: nvar, ncoeff
+REAL(DP), INTENT(IN) :: coeff(ncoeff)
+REAL(DP), INTENT(OUT) :: x(nvar), f
 
-REAL(DP), INTENT(IN)  :: x(ndati), y(ndati)
-REAL(DP), INTENT(OUT) :: a(ncoeff)
+REAL(DP) :: amat(nvar, nvar), v(nvar)
 
-REAL(DP) :: amat(ncoeff,ncoeff), bvec(ncoeff), eigv(ncoeff,ncoeff)
-INTEGER  ::  i, j, k       ! counters
+IF (nvar > 6 .OR. nvar < 1 ) &
+   CALL errore('find_quadratic_extremum','incorrect nvar',1)
+IF (ncoeff /= (nvar + 1)*(nvar + 2) / 2) &
+   CALL errore('find_quadratic_extremum','ncoeff and nvar not compatible',1)
 
-DO k=1,ncoeff
-   DO j=1,ncoeff
-      amat(k,j)=0.d0
-      DO i=1,ndati
-         amat(k,j)=amat(k,j)+x(i)**(j-1)*x(i)**(k-1)
-      ENDDO
-   ENDDO
-   bvec(k)=0.d0
-   DO i=1,ndati
-      bvec(k)=bvec(k)+y(i)*x(i)**(k-1)
-   ENDDO
-ENDDO
+amat=0.0_DP
+v=0.0_DP
 
-CALL linsolvx(amat,ncoeff,bvec,a)
+v(1)= - coeff(2)
+amat(1,1) = 2.0_DP * coeff(3)
+
+IF (nvar > 1) THEN
+   v(2) = - coeff(4)
+   amat(1,2) = coeff(6)
+   amat(2,1) = coeff(6)
+   amat(2,2) = 2.0_DP * coeff(5)
+ENDIF
+
+IF (nvar > 2) THEN
+   v(3) = - coeff(7)
+   amat(1,3) = coeff(9)
+   amat(3,1) = amat(1,3)
+   amat(2,3) = coeff(10)
+   amat(3,2) = amat(2,3)
+   amat(3,3) = 2.0_DP * coeff(8)
+ENDIF
+
+IF (nvar > 3) THEN
+   v(4) = - coeff(11)
+   amat(1,4) = coeff(13)
+   amat(4,1) = amat(1,4)
+   amat(2,4) = coeff(14)
+   amat(4,2) = amat(2,4)
+   amat(3,4) = coeff(15)
+   amat(4,3) = amat(3,4)
+   amat(4,4) = 2.0_DP * coeff(12)
+ENDIF
+
+IF (nvar > 4) THEN
+   v(5) = - coeff(16)
+   amat(1,5) = coeff(18)
+   amat(5,1) = amat(1,5)
+   amat(2,5) = coeff(19)
+   amat(5,2) = amat(2,5)
+   amat(3,5) = coeff(20)
+   amat(5,3) = amat(3,5)
+   amat(4,5) = coeff(21)
+   amat(5,4) = amat(4,5)
+   amat(5,5) = 2.0_DP * coeff(17)
+ENDIF
+
+IF (nvar > 5) THEN
+   v(6) = - coeff(22)
+   amat(1,6) = coeff(24)
+   amat(6,1) = amat(1,6)
+   amat(2,6) = coeff(25)
+   amat(6,2) = amat(2,6)
+   amat(3,6) = coeff(26)
+   amat(6,3) = amat(3,6)
+   amat(4,6) = coeff(27)
+   amat(6,4) = amat(4,6)
+   amat(5,6) = coeff(28)
+   amat(6,5) = amat(5,6)
+   amat(6,6) = 2.0_DP * coeff(23)
+ENDIF
+
+CALL linsolvx(amat,nvar,v,x)
+
+CALL evaluate_fit_quadratic(nvar,ncoeff,x,f,coeff)
 
 RETURN
-END SUBROUTINE polifit
-
-SUBROUTINE write_poli(a,ncoeff)
+END SUBROUTINE find_quadratic_extremum
 !
-!   This routine writes on output the coefficients of a polynomial of
-!   one variable
-!
-IMPLICIT NONE
-INTEGER, INTENT(IN) :: ncoeff
-REAL(DP), INTENT(IN) :: a(ncoeff)
-
-INTEGER :: i
-CHARACTER(LEN=6) :: int_to_char
-
-WRITE(stdout,'(/,5x,"Polynomial coefficients")')
-DO i=1,ncoeff
-   WRITE(stdout,'(5x,a,e20.12)') "a"//TRIM(INT_TO_CHAR(i))//"=", a(i)
-END DO
-
-RETURN
-END SUBROUTINE write_poli
-
 SUBROUTINE print_quadratic_polynomial(nvar, ncoeff, coeff)
 !
 !  This routine writes on output the coefficients of the quadratic
@@ -649,6 +524,72 @@ REAL(DP), INTENT(IN) :: coeff(ncoeff)
 
 RETURN
 END SUBROUTINE print_quadratic_polynomial
+
+SUBROUTINE introduce_quadratic_fit(nvar, ncoeff, ndata)
+!
+!   This routine writes a small message with the informations on 
+!   the quadratic polynomial
+!
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: nvar, ncoeff, ndata
+
+  WRITE(stdout,'(/,5x,"Fitting the data with a quadratic polynomial:")')
+
+  WRITE(stdout,'(/,5x,"Number of variables:",10x,i5)')  nvar
+  WRITE(stdout,'(5x,"Coefficients of the quadratic polynomial:",i5)')  ncoeff
+  WRITE(stdout,'(5x,"Number of fitting data:",7x,i5,/)')  ndata
+
+RETURN
+END SUBROUTINE introduce_quadratic_fit
+
+SUBROUTINE print_chisq_quadratic(ndata, nvar, ncoeff, x, f, coeff)
+!
+!   This routine receives as input the values of a function f for ndata
+!   values of the independent variables x, a set of ncoeff coefficients
+!   of a quadratic interpolating polynomial and writes as output
+!   the sum of the squares of the differences between the values of
+!   the function and of the interpolating polynomial 
+!
+IMPLICIT NONE
+
+INTEGER :: ndata, nvar, ncoeff
+REAL(DP) :: x(nvar, ndata), f(ndata), coeff(ncoeff)
+
+REAL(DP) :: chisq, perc, aux
+INTEGER :: idata
+
+chisq=0.0_DP
+perc=0.0_DP
+DO idata=1,ndata
+   CALL evaluate_fit_quadratic(nvar,ncoeff,x(1,idata),aux,coeff)
+!  WRITE(stdout,'(3f19.12)') f(idata), aux, f(idata)-aux
+   chisq = chisq + (aux - f(idata))**2
+   IF (ABS(f(idata))>1.D-12) perc= perc + ABS((f(idata)-aux) / f(idata))
+ENDDO
+WRITE(stdout,'(5x,"chi square quadratic=",e18.5," relative error",e18.5,&
+                                     &" %",/)') chisq, perc / ndata
+RETURN
+END SUBROUTINE print_chisq_quadratic
+
+SUBROUTINE find_two_quadratic_extremum(nvar,ncoeff,x,f,coeff,coeff1)
+!
+! This routine finds the extremum of the sum of two quadratic polynomials
+! described by the coefficients coeff and coeff1. The number of variables
+! can vary from 1 to 6.
+!
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: nvar, ncoeff
+REAL(DP), INTENT(IN) :: coeff(ncoeff), coeff1(ncoeff)
+REAL(DP), INTENT(OUT) :: x(nvar), f
+
+REAL(DP) :: coeff2(ncoeff)
+
+coeff2(:) = coeff(:) + coeff1(:)
+
+CALL find_quadratic_extremum(nvar,ncoeff,x,f,coeff2)
+
+RETURN
+END SUBROUTINE find_two_quadratic_extremum
 
 SUBROUTINE summarize_fitting_data(nvar, ndata, x, f)
 !
@@ -697,81 +638,5 @@ INTEGER :: idata
 
 RETURN
 END SUBROUTINE summarize_fitting_data
-
-SUBROUTINE write_vector(nvar, x)
-!
-!   This routine writes on output a vector of dimension nvar
-!
-IMPLICIT NONE
-INTEGER, INTENT(IN) :: nvar
-REAL(DP) :: x(nvar)
-
-INTEGER :: i
-
-DO i=1, nvar
-   WRITE(stdout,'(23x,"x",i1,"=",f16.9)') i, x(i)
-END DO
-
-RETURN
-END SUBROUTINE write_vector
-
-SUBROUTINE introduce_quadratic_fit(nvar, ncoeff, ndata)
-!
-!   This routine writes a small message with the informations on 
-!   the quadratic polynomial
-!
-IMPLICIT NONE
-INTEGER, INTENT(IN) :: nvar, ncoeff, ndata
-
-  WRITE(stdout,'(/,5x,"Fitting the data with a quadratic polynomial:")')
-
-  WRITE(stdout,'(/,5x,"Number of variables:",10x,i5)')  nvar
-  WRITE(stdout,'(5x,"Coefficients of the quadratic polynomial:",i5)')  ncoeff
-  WRITE(stdout,'(5x,"Number of fitting data:",7x,i5,/)')  ndata
-
-RETURN
-END SUBROUTINE introduce_quadratic_fit
-
-SUBROUTINE print_chisq_quadratic(ndata, nvar, ncoeff, x, f, coeff)
-!
-!   This routine receives as input the values of a function f for ndata
-!   values of the independent variables x, a set of ncoeff coefficients
-!   of a quadratic interpolating polynomial and writes as output
-!   the sum of the squares of the differences between the values of
-!   the function and of the interpolating polynomial 
-!
-IMPLICIT NONE
-
-INTEGER :: ndata, nvar, ncoeff
-REAL(DP) :: x(nvar, ndata), f(ndata), coeff(ncoeff)
-
-REAL(DP) :: chisq, perc, aux
-INTEGER :: idata
-
-chisq=0.0_DP
-perc=0.0_DP
-DO idata=1,ndata
-   CALL evaluate_fit_quadratic(nvar,ncoeff,x(1,idata),aux,coeff)
-!  WRITE(stdout,'(3f19.12)') f(idata), aux, f(idata)-aux
-   chisq = chisq + (aux - f(idata))**2
-   IF (ABS(f(idata))>1.D-12) perc= perc + ABS((f(idata)-aux) / f(idata))
-ENDDO
-WRITE(stdout,'(5x,"chi square quadratic=",e18.5," relative error",e18.5,&
-                                     &" %",/)') chisq, perc / ndata
-RETURN
-END SUBROUTINE print_chisq_quadratic
-
-FUNCTION quadratic_ncoeff(nvar)
-!
-!   This function gives the number of coefficients of the quadratic
-!   polynomial receiving as input the number of independent variables.
-!
-IMPLICIT NONE
-INTEGER :: quadratic_ncoeff
-INTEGER, INTENT(IN) :: nvar
-
-quadratic_ncoeff = (1 + nvar)*(nvar + 2) / 2
-
-END FUNCTION quadratic_ncoeff
 
 END MODULE quadratic_surfaces

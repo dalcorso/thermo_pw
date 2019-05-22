@@ -32,7 +32,7 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
                              compute_polynomial, compute_polynomial_der
   USE temperature,    ONLY : temp, ntemp
   USE quadratic_surfaces, ONLY : evaluate_fit_quadratic, &
-                                 evaluate_fit_grad_quadratic, quadratic_ncoeff
+                                 evaluate_quadratic_grad, quadratic_ncoeff
   USE lattices,       ONLY : compress_celldm, crystal_parameters
   USE io_bands,       ONLY : read_bands, read_parameters, write_bands
   USE mp,             ONLY : mp_bcast
@@ -265,7 +265,7 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
 !
            DO imode=1, nmodes
               CALL evaluate_fit_quadratic(nvar,ncoeff,x,f,poly_grun(1,imode))
-              CALL evaluate_fit_grad_quadratic(nvar,ncoeff,x,grad, &
+              CALL evaluate_quadratic_grad(nvar,ncoeff,x,grad, &
                                                         poly_grun(1,imode))
               frequency(imode,n) = f 
               gruneisen(imode,n,:) = -grad(:)

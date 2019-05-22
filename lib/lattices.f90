@@ -1586,22 +1586,22 @@ INTEGER FUNCTION crystal_parameters(ibrav)
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ibrav
 
-INTEGER :: degree
+INTEGER :: nvar
 
 SELECT CASE (ibrav)
    CASE(1,2,3)
-      degree=1
+      nvar=1
    CASE(4,5,6,7)
-      degree=2
+      nvar=2
    CASE(8,9,91,10,11)
-      degree=3
+      nvar=3
    CASE(12,-12,13,-13)
-      degree=4
+      nvar=4
    CASE DEFAULT
-      degree=6
+      nvar=6
 END SELECT
 
-crystal_parameters=degree
+crystal_parameters=nvar
 
 RETURN
 END FUNCTION crystal_parameters
@@ -1720,13 +1720,13 @@ ENDDO
 RETURN
 END SUBROUTINE remove_common_factors
 
-SUBROUTINE compress_celldm(cm,x,degree,ibrav)
+SUBROUTINE compress_celldm(cm,x,nvar,ibrav)
 
 USE kinds, ONLY : DP
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: degree, ibrav
+INTEGER, INTENT(IN) :: nvar, ibrav
 REAL(DP), INTENT(IN) :: cm(6)
-REAL(DP), INTENT(INOUT) :: x(degree)
+REAL(DP), INTENT(INOUT) :: x(nvar)
 
 SELECT CASE (ibrav)
    CASE(1,2,3)
@@ -1793,16 +1793,16 @@ END SELECT
 RETURN
 END SUBROUTINE compress_int_vect
 
-SUBROUTINE expand_celldm(cm, x, degree, ibrav)
+SUBROUTINE expand_celldm(cm, x, nvar, ibrav)
 !
 !  This routine receives a set of compressed crystallographic parameters 
-!  in the array x(degree) and transforms them in the celldm array
+!  in the array x(nvar) and transforms them in the celldm array
 !
 USE kinds, ONLY : DP
 
 IMPLICIT NONE
-INTEGER,  INTENT(IN)    :: ibrav, degree
-REAL(DP), INTENT(IN)    :: x(degree)
+INTEGER,  INTENT(IN)    :: ibrav, nvar
+REAL(DP), INTENT(IN)    :: x(nvar)
 REAL(DP), INTENT(INOUT) :: cm(6)
 
 cm=0.0_DP

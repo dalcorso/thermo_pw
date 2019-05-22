@@ -344,7 +344,7 @@ USE ph_freq_module, ONLY : thermal_expansion_ph, ph_freq_type,  &
                            destroy_ph_freq, init_ph_freq
 USE lattices,       ONLY : compress_celldm, crystal_parameters
 USE quadratic_surfaces, ONLY : evaluate_fit_quadratic,      &
-                               evaluate_fit_grad_quadratic, quadratic_ncoeff
+                               evaluate_quadratic_grad, quadratic_ncoeff
 USE isoentropic,    ONLY : isostress_heat_capacity
 USE control_dosq,   ONLY : nq1_d, nq2_d, nq3_d
 USE data_files,     ONLY : flanhar
@@ -466,7 +466,7 @@ DO itemp = 1, ntemp
          DO imode=1,3*nat
             CALL evaluate_fit_quadratic(nvar,ncoeff,x,f,&
                                                      poly_grun(1,imode,iq))
-            CALL evaluate_fit_grad_quadratic(nvar,ncoeff,x,grad,&
+            CALL evaluate_quadratic_grad(nvar,ncoeff,x,grad,&
                                                      poly_grun(1,imode,iq))
             ph_freq%nu(imode,iq_eff) = f 
             IF (f > 0.0_DP ) THEN

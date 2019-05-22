@@ -30,15 +30,17 @@ SUBROUTINE quadratic_fit()
                                coeff, nvar
   USE control_quartic_energy, ONLY : ncoeff4, coeff4, x_min_4, lquartic, lsolve
   USE lattices,     ONLY : expand_celldm, crystal_parameters
-  USE quadratic_surfaces, ONLY : fit_multi_quadratic, &
-                          find_quadratic_extremum,  &
-                          write_fit_hessian, print_quadratic_polynomial,  &
-                          summarize_fitting_data, write_vector,           &
+  USE quadratic_surfaces, ONLY : fit_multi_quadratic,  &
+                          find_quadratic_extremum,     &
+                          write_quadratic_hessian,     &
+                          print_quadratic_polynomial,  &
+                          summarize_fitting_data,      &
                           introduce_quadratic_fit, print_chisq_quadratic, &
                           quadratic_ncoeff
   USE quartic_surfaces, ONLY : fit_multi_quartic, quartic_ncoeff, &
                           find_quartic_extremum, print_quartic_polynomial, &
                           print_chisq_quartic, introduce_quartic_fit
+  USE vector_mod,       ONLY : write_vector
   USE io_global,    ONLY : stdout
   IMPLICIT NONE
 
@@ -95,7 +97,7 @@ SUBROUTINE quadratic_fit()
   CALL write_vector(nvar,x_pos_min)
   CALL print_energy(ymin)
   !
-  CALL write_fit_hessian(nvar,ncoeff,coeff,hessian_v,hessian_e)
+  CALL write_quadratic_hessian(nvar,ncoeff,coeff,hessian_v,hessian_e)
   !
   CALL expand_celldm(celldm0, x_pos_min, nvar, ibrav)
   emin=ymin
@@ -160,28 +162,32 @@ SUBROUTINE quadratic_fit_t(itemp, celldm_t, free_e_min_t, ph_free_ener, &
   USE lattices,    ONLY : compress_celldm, expand_celldm, crystal_parameters
   USE io_global,   ONLY : stdout
 
+  USE linear_surfaces,    ONLY : fit_multi_linear, print_chisq_linear, &
+                                 linear_ncoeff
   USE quadratic_surfaces, ONLY : fit_multi_quadratic, &
                       find_two_quadratic_extremum, &
                       print_quadratic_polynomial, quadratic_ncoeff, &
-                      summarize_fitting_data, write_vector,      &
+                      summarize_fitting_data,      &
                       introduce_quadratic_fit, print_chisq_quadratic
 
-  USE cubic_surfaces, ONLY : find_quartic_cubic_extremum,   &
-                      fit_multi_cubic, print_chisq_cubic, &
+  USE cubic_surfaces, ONLY : fit_multi_cubic, print_chisq_cubic, &
                       cubic_ncoeff
 
   USE quartic_surfaces, ONLY : find_quartic_quadratic_extremum,      &
                       fit_multi_quartic, find_two_quartic_extremum,  &
-                      print_chisq_quartic
+                      find_quartic_cubic_extremum, print_chisq_quartic, &
+                      find_quartic_linear_extremum
+
+  USE vector_mod, ONLY : write_vector
 
   IMPLICIT NONE
   INTEGER  :: itemp
   INTEGER  :: ndata, ndatatot
   REAL(DP) :: ph_free_ener(ndatatot), celldm_t(6), free_e_min_t
   REAL(DP), ALLOCATABLE :: x(:,:), f(:), coeff(:), x_pos_min(:), coefft4(:), &
-              coefft3(:)
+              coefft3(:), coefft1(:)
   REAL(DP) :: ymin
-  INTEGER  :: idata, ncoeff3
+  INTEGER  :: idata, ncoeff3, ncoeff1
   INTEGER  :: compute_nwork, compute_nwork_ph
   !
   nvar=crystal_parameters(ibrav)
@@ -239,7 +245,17 @@ SUBROUTINE quadratic_fit_t(itemp, celldm_t, free_e_min_t, ph_free_ener, &
         CALL find_quartic_cubic_extremum(nvar, ncoeff4, ncoeff3, x_pos_min,&
                                                         ymin, coeff4, coefft3)
         DEALLOCATE(coefft3)
-        WRITE(stdout,'(/,5x,"Extremum of the cubic found at:")')
+        WRITE(stdout,'(/,5x,"Extremum of the quartic+cubic found at:")')
+     ELSEIF (poly_degree_ph==1) THEN
+        WRITE(stdout,'(/,5x, "Fit with a fist order polynomial")') 
+        ncoeff1=linear_ncoeff(nvar)
+        ALLOCATE(coefft1(ncoeff1))
+        CALL fit_multi_linear(ndata, nvar, ncoeff1, x, f, coefft1)
+        CALL print_chisq_linear(ndata, nvar, ncoeff1, x, f, coefft1)
+        CALL find_quartic_linear_extremum(nvar, ncoeff4, ncoeff1, x_pos_min,&
+                                                        ymin, coeff4, coefft1)
+        DEALLOCATE(coefft1)
+        WRITE(stdout,'(/,5x,"Extremum of the quartic+linear found at:")')
      ELSE
         WRITE(stdout,'(/,5x,"Quartic fit used only a T=0:")')
         CALL find_quartic_quadratic_extremum(nvar, ncoeff4, ncoeff, &

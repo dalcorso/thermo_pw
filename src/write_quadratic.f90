@@ -21,9 +21,9 @@ USE control_quadratic_energy, ONLY : coeff
 USE control_quartic_energy, ONLY : coeff4, lquartic
 USE control_pressure,   ONLY : pressure_kb
 USE quadratic_surfaces, ONLY : evaluate_fit_quadratic, &
-                               evaluate_fit_grad_quadratic
+                               evaluate_quadratic_grad
 USE quartic_surfaces,   ONLY : evaluate_fit_quartic, &
-                               evaluate_fit_grad_quartic
+                               evaluate_quartic_grad
 USE mp_images,      ONLY : root_image, my_image_id
 USE constants,      ONLY : ry_kbar
 USE io_global,      ONLY : ionode
@@ -92,10 +92,10 @@ IF (ionode) THEN
          a= xmin + deltaa * (i-1)
          IF (lquartic) THEN
             CALL evaluate_fit_quartic(1,5,a,e,coeff4)
-            CALL evaluate_fit_grad_quartic(1,5,a,p,coeff4)
+            CALL evaluate_quartic_grad(1,5,a,p,coeff4)
          ELSE
             CALL evaluate_fit_quadratic(1,3,a,e,coeff)
-            CALL evaluate_fit_grad_quadratic(1,3,a,p,coeff)
+            CALL evaluate_quadratic_grad(1,3,a,p,coeff)
          ENDIF
          p= - p * ry_kbar / (fact*3.0_DP * a(1)**2)
          WRITE(iu_mur,'(3f20.10)') a, e, p + pressure_kb

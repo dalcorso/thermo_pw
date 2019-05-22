@@ -13,6 +13,7 @@ debye_module.o \
 bz_2d_form.o \
 bz_asy.o \
 cubic_surfaces.o \
+diagonalize.o \
 elastic_const.o \
 eldos_module.o \
 isoentropic.o \
@@ -28,11 +29,13 @@ phdos_module.o \
 ph_freq_module.o \
 piezoelectric_tensor.o \
 point_group.o \
+polyfit.o \
 quadratic_surfaces.o \
 quartic_surfaces.o \
 rotate.o \
 space_groups.o \
 strain.o \
+vector.o \
 voigt.o \
 xrdp.o 
 

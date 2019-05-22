@@ -121,7 +121,7 @@ USE anharmonic,     ONLY : vmin_t, b0_t, b01_t, free_e_min_t
 USE temperature,    ONLY : ntemp, temp
 USE control_pressure, ONLY : pressure_kb
 USE data_files,     ONLY : flevdat
-USE quadratic_surfaces, ONLY : polifit
+USE polyfit_mod,    ONLY : polyfit
 USE io_global,      ONLY : stdout
 USE mp_images,      ONLY : my_image_id, root_image
 
@@ -146,7 +146,7 @@ REAL(DP) :: compute_mur_fun
      y(ndata)=ph_free_ener(itemp,idata)
 !    WRITE(stdout,'(2f25.14)') x(ndata), y(ndata)
   ENDDO
-  CALL polifit(x, y, ndata, a, m1)
+  CALL polyfit(x, y, ndata, a, m1)
 
   CALL find_min_mur_pol(vmin, b0 / ry_kbar, b01, a, m1, vm)
   aux = (vmin / vm)**b01 * b0
@@ -201,7 +201,7 @@ USE ph_freq_anharmonic,     ONLY : vminf_t, b0f_t, b01f_t, free_e_minf_t
 USE control_mur,    ONLY : emin, vmin, b0, b01
 USE temperature,    ONLY : ntemp, temp
 USE control_pressure, ONLY : pressure_kb
-USE quadratic_surfaces, ONLY : polifit
+USE polyfit_mod,    ONLY : polyfit
 USE data_files,     ONLY : flevdat
 USE io_global,      ONLY : stdout
 USE mp_images,      ONLY : my_image_id, root_image
@@ -228,7 +228,7 @@ REAL(DP) :: compute_mur_fun
      y(ndata)=phf_free_ener(itemp,idata) 
 !    WRITE(stdout,'(2f25.14)') x(ndata), y(ndata)
   ENDDO
-  CALL polifit(x, y, ndata, a, m1)
+  CALL polyfit(x, y, ndata, a, m1)
 
   CALL find_min_mur_pol(vmin, b0 / ry_kbar, b01, a, m1, vm)
   aux = (vmin / vm)**b01 * b0

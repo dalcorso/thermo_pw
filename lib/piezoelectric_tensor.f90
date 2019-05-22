@@ -392,7 +392,7 @@ END SUBROUTINE compute_piezo_tensor
 
 SUBROUTINE piezo_ij(ialpha, mn, ngeo, epsil_geo, polar_geo)
 USE kinds, ONLY : DP
-USE quadratic_surfaces, ONLY : polifit
+USE polyfit_mod, ONLY : polyfit
 USE voigt, ONLY : voigt_index
 
 IMPLICIT NONE
@@ -412,7 +412,7 @@ DO igeo=1,ngeo
    y(igeo)=polar_geo(ialpha,igeo)
    WRITE(stdout,'(2f15.10)') x(igeo), y(igeo)
 ENDDO
-CALL polifit( x, y, ngeo, alpha, m1 )
+CALL polyfit( x, y, ngeo, alpha, m1 )
 g_piezo_tensor(ialpha, mn) = alpha(2)
 WRITE(stdout,'(/,20x,40("-"),/)')
 !

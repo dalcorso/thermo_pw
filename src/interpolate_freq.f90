@@ -59,7 +59,7 @@ CONTAINS
 SUBROUTINE interp_freq(ngeo,freq,omega,poly_order,poly_grun)
 !-------------------------------------------------------------------------
 
-USE quadratic_surfaces, ONLY : polifit
+USE polyfit_mod, ONLY : polyfit
 
 IMPLICIT NONE
 INTEGER,  INTENT(IN) :: ngeo, poly_order
@@ -72,7 +72,7 @@ DO imode=1, 3*nat
 !
 !    Fits the frequencies as a function of the volume
 !
-   CALL polifit( omega, freq(imode,:), ngeo, poly_grun(:,imode), poly_order )
+   CALL polyfit( omega, freq(imode,:), ngeo, poly_grun(:,imode), poly_order )
 ENDDO
 
 RETURN
@@ -82,7 +82,7 @@ END SUBROUTINE interp_freq
 SUBROUTINE interp_freq_eigen(ngeo, freq, omega, central_geo, &
                                            displa, poly_order, poly_grun)
 !-------------------------------------------------------------------------
-USE quadratic_surfaces, ONLY : polifit
+USE polyfit_mod, ONLY : polyfit
 IMPLICIT NONE
 INTEGER,  INTENT(IN) :: ngeo, central_geo, poly_order
 REAL(DP), INTENT(IN) :: freq(3*nat,ngeo), omega(ngeo)
@@ -125,7 +125,7 @@ DO imode=1, 3*nat
 !
 !    Fits the frequencies as a function of the volume
 !
-   CALL polifit( omega, frequences, ngeo, poly_grun(:,imode), poly_order )
+   CALL polyfit( omega, frequences, ngeo, poly_grun(:,imode), poly_order )
 ENDDO
 
 DEALLOCATE(frequences)
@@ -137,7 +137,7 @@ END SUBROUTINE interp_freq_eigen
 SUBROUTINE interp_freq_rap(ngeo, freq, omega, central_geo, &
                                          rap, poly_order, poly_grun)
 !-------------------------------------------------------------------------
-USE quadratic_surfaces, ONLY : polifit
+USE polyfit_mod, ONLY : polyfit
 
 IMPLICIT NONE
 INTEGER,  INTENT(IN) :: ngeo, poly_order, central_geo
@@ -179,7 +179,7 @@ DO imode=1, 3*nat
 !
 !    Fits the frequencies as a function of the volume
 !
-   CALL polifit(omega, frequences, ngeo, poly_grun(:,imode), poly_order)
+   CALL polyfit(omega, frequences, ngeo, poly_grun(:,imode), poly_order)
 ENDDO
 
 DEALLOCATE( level )

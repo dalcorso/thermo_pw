@@ -1062,7 +1062,7 @@ END SUBROUTINE compute_elastic_compliances
 
 SUBROUTINE el_cons_ij(pq, mn, ngeo, epsil_geo, sigma_geo, m1)
 USE kinds, ONLY : DP
-USE quadratic_surfaces, ONLY : polifit, write_poli
+USE polyfit_mod, ONLY : polyfit, write_poly
 USE voigt, ONLY : voigt_index
 
 IMPLICIT NONE
@@ -1085,8 +1085,8 @@ DO igeo=1,ngeo
    y(igeo)=sigma_geo(p,q,igeo)
    WRITE(stdout,'(2f18.10)') x(igeo), y(igeo)*ry_kbar
 ENDDO
-CALL polifit( x, y, ngeo, alpha, m1 )
-CALL write_poli(alpha,m1)
+CALL polyfit( x, y, ngeo, alpha, m1 )
+CALL write_poly(alpha,m1)
 el_con(pq, mn) = -alpha(2)
 !
 !  The elastic constant tensor relates the stress to the strain in voigt
@@ -1101,7 +1101,7 @@ END SUBROUTINE el_cons_ij
 
 SUBROUTINE el_cons_ij_ene(m, n, label, ngeo, epsil_geo, energy_geo, alpha, m1)
 USE kinds, ONLY : DP
-USE quadratic_surfaces, ONLY : polifit, write_poli
+USE polyfit_mod, ONLY : polyfit, write_poly
 
 IMPLICIT NONE
 CHARACTER(LEN=*) :: label
@@ -1118,8 +1118,8 @@ DO igeo=1,ngeo
    y(igeo)=energy_geo(igeo)
    WRITE(stdout,'(2f18.10)') x(igeo), y(igeo)
 ENDDO
-CALL polifit( x, y, ngeo, alpha, m1 )
-CALL write_poli(alpha,m1)
+CALL polyfit( x, y, ngeo, alpha, m1 )
+CALL write_poly(alpha,m1)
 
 RETURN
 END SUBROUTINE el_cons_ij_ene
