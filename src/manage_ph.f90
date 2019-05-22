@@ -34,7 +34,7 @@ SUBROUTINE manage_ph()
   USE io_global,        ONLY : meta_ionode, stdout, meta_ionode_id
   USE output,           ONLY : fildyn
   USE control_thermo,   ONLY : outdir_thermo, after_disp, set_internal_path, &
-                               lq2r
+                               lq2r, lecqha
   USE control_qe,       ONLY : use_ph_images
   USE collect_info,     ONLY : comm_collect_info, init_collect_info, &
                                destroy_collect_info_type
@@ -94,6 +94,8 @@ DO igeom=start_geometry,last_geometry
       do_ph=.TRUE.
       IF (trans) do_ph=.NOT. check_dyn_file_exists(auxdyn) 
    ENDIF
+
+   IF (lecqha.AND.set_internal_path) CALL set_bz_path()
 !
 !  Set the BZ path for the present geometry
 !

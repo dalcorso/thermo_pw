@@ -34,7 +34,7 @@ PROGRAM thermo_pw
   USE control_thermo,   ONLY : lev_syn_1, lev_syn_2, lpwscf_syn_1,         &
                                lbands_syn_1, lph, outdir_thermo, lq2r,     &
                                lconv_ke_test, lconv_nk_test,               &
-                               lelastic_const,                             &
+                               lelastic_const, lecqha,                        &
                                lpiezoelectric_tensor, lpolarization,       &
                                lpart2_pw, all_geometries_together
   USE control_pwrun,    ONLY : do_punch
@@ -150,6 +150,8 @@ PROGRAM thermo_pw
      IF (lxrdp) CALL manage_xrdp(' ')
 
   ENDIF
+
+  IF (lecqha) CALL manage_elastic_cons(nwork, 1)
 
   CALL deallocate_asyn()
 
@@ -279,6 +281,9 @@ PROGRAM thermo_pw
            CALL manage_anhar_anis()
         ENDIF
      ENDIF
+
+     IF (lecqha) CALL manage_elastic_cons_qha()
+
   ENDIF
   !
 1000  CALL deallocate_thermo()

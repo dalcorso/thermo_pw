@@ -27,7 +27,8 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
                              ltherm, lconv_ke_test, lconv_nk_test, &
                              lstress, lelastic_const, lpiezoelectric_tensor,&
                              lberry, lpolarization, lpart2_pw, do_scf_relax, &
-                             ldos_syn_1, ltherm_dos, ltherm_freq, after_disp
+                             ldos_syn_1, ltherm_dos, ltherm_freq, after_disp, &
+                             lecqha
   USE control_pwrun,  ONLY : do_punch
   USE control_conv,   ONLY : nke, ke, deltake, nkeden, deltakeden, keden, &
                              nnk, nk_test, deltank, nsigma, sigma_test, &  
@@ -307,6 +308,25 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
            nwork=0
            lev_syn_1=.FALSE.
+        CASE ('elastic_constants_qha')
+           lecqha=.TRUE.
+           lph=.TRUE.
+           lq2r = .TRUE.
+           ltherm = .TRUE.
+           CALL set_elastic_cons_work(nwork)
+           tot_ngeo=nwork
+           ALLOCATE(energy_geo(tot_ngeo))
+           ALLOCATE(no_ph(tot_ngeo))
+           CALL initialize_no_ph(no_ph, tot_ngeo, ibrav_save)
+           CALL allocate_thermodynamics()
+           CALL allocate_debye()
+           CALL allocate_anharmonic()
+           IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'anhar_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'dynamical_matrices' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'phdisp_files' )
         CASE DEFAULT
            CALL errore('initialize_thermo_work','what not recognized',1)
      END SELECT
@@ -329,6 +349,8 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
         CASE ('mur_lc_disp') 
            CALL initialize_ph_work(nwork)
         CASE ('mur_lc_t')
+           CALL initialize_ph_work(nwork)
+        CASE ('elastic_constants_qha')
            CALL initialize_ph_work(nwork)
         CASE ('scf_elastic_constants', 'mur_lc_elastic_constants',&
                                        'elastic_constants_t')
@@ -421,6 +443,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
               'mur_lc_ph',                   &
               'mur_lc_disp',                 &
               'mur_lc_t',                    &
+              'elastic_constants_qha',       &
               'mur_lc_elastic_constants',    &
               'mur_lc_piezoelectric_tensor', &
               'mur_lc_polarization' )
@@ -444,7 +467,9 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
               'scf_disp',         &
               'mur_lc_ph',        &
               'mur_lc_disp',      &
-              'mur_lc_t')
+              'mur_lc_t',         &
+              'elastic_constants_qha')
+
            lphonon(1:nwork)=.TRUE.
 !
 !  Here the cases in which there are pwscf calculation in the second part

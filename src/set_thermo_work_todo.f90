@@ -164,7 +164,31 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, auxdyn_loc)
            CALL check_tempdir ( tmp_dir, exst, parallelfs )
 
            IF (.NOT.frozen_ions) CALL clean_bfgs_history()
-
+!
+!    the case of quasi-harmonic elastic constants
+!
+        CASE ('elastic_constants_qha')
+           WRITE(stdout,'(/,2x,76("-"))')
+           WRITE(stdout,'(/,2x,76("-"))')
+           WRITE(stdout,'(/,2x,76("-"))')
+           WRITE(stdout,'(/,2x,76("-"))')
+           WRITE(stdout,'(/,2x,("Sono dentro"))')
+           WRITE(stdout,'(/,2x,76("-"))')
+           WRITE(stdout,'(/,2x,76("-"))')
+           niter = electron_maxstep
+           IF (frozen_ions) THEN
+              lstres=lstress(iwork)
+              lbfgs=.FALSE.
+           ELSE
+              lforce=.TRUE.
+              lstres=lstress(iwork)
+              lbfgs = .TRUE.
+              nstep = 20
+              epse = etot_conv_thr
+              epsf = forc_conv_thr
+           ENDIF
+           CALL set_work_for_elastic_const(iwork)
+     
         CASE DEFAULT
            CALL errore('set_thermo_work_todo','unknown what',1)
      END SELECT
@@ -178,7 +202,8 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, auxdyn_loc)
               'scf_disp',       &
               'mur_lc_ph',      &
               'mur_lc_disp',    &
-              'mur_lc_t')
+              'mur_lc_t',       &
+              'elastic_constants_qha')
            IF (all_geometries_together) THEN
               igeom=geometry(iwork)
               std=something_to_do_all(iwork, igeom, iq_point, irr_value)

@@ -414,7 +414,8 @@ MODULE control_thermo
 
   LOGICAL :: find_ibrav     ! if .TRUE. continue the calculation with the
                             ! converted input
-
+  LOGICAL :: lecqha=.FALSE. ! if .true. compute the elastic constants 
+                            ! within the qha
   !
   CHARACTER(LEN=256) :: outdir_thermo ! the outdir read from the input
   !
@@ -472,6 +473,10 @@ MODULE control_elastic_constants
                                 ! means that the elastic constants for each 
                                 ! geometry are available and can be 
                                 ! interpolated at each temperature
+  LOGICAL :: el_cons_qha_available=.FALSE. ! when this flag becomes true it
+                                ! means that the elastic constants computed 
+                                ! within quasi harmonic approximation 
+                                ! are available 
   REAL(DP), ALLOCATABLE :: el_con_geo(:,:,:)  ! the elastic constants at
                                 ! each geometry
   INTEGER, ALLOCATABLE :: el_con_ibrav_geo(:) ! the ibrav at each geometry

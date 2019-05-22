@@ -41,6 +41,7 @@ dos_sub.o \
 dynmatrix_tpw.o \
 elastic_constants_t.o \
 ev_sub.o \
+expand_el_cons.o \
 float_to_char.o \
 find_symmetry.o \
 find_band_sym_proj.o \
@@ -59,6 +60,7 @@ local_dos1d_so.o \
 manage_anhar.o   \
 manage_bands.o   \
 manage_elastic_cons.o \
+manage_elastic_cons_qha.o \
 manage_energy_minimum.o \
 manage_piezo_tensor.o \
 manage_ph.o \
@@ -82,6 +84,7 @@ plot_e_nk.o \
 plot_formf.o \
 plot_gruneisen_band_anis.o \
 plot_elastic_t.o \
+plot_elastic_t_qha.o \
 plot_epsilon_omega.o \
 plot_multi_energy.o \
 plot_mur.o \
@@ -92,6 +95,7 @@ print_polarization.o \
 proj_band_structure.o \
 q2r_sub.o \
 quadratic_fit.o \
+read_elastic_qha.o \
 readmodes.o \
 read_state_densities.o \
 run_thermo_asyncronously.o \

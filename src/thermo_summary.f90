@@ -156,6 +156,9 @@ SUBROUTINE thermo_summary()
                                   &all geometries ")')
           ENDIF
           lelc = .TRUE.
+     CASE ('elastic_constants_qha')
+          WRITE(stdout,'(5x,"Computing the temperature dependent elastic" )')
+          WRITE(stdout,'(5x,"constants within quasi-harmonic approximation" )')
      CASE ('scf_piezoelectric_tensor') 
           IF (frozen_ions) THEN
              WRITE(stdout,'(5x,"Computing the frozen ions piezoelectric &

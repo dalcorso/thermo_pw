@@ -1,5 +1,9 @@
 New in version 1.2.0
 
+Added the computation of the temperature dependent elastic constants
+from the derivatives of the free energy with respect to strain within
+the quasi-harmonic approximation (experimental version, in 
+collaboration with C. Malica).
 
 16/04/2019 Version 1.1.1 is now frozen.
 

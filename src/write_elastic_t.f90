@@ -404,3 +404,164 @@ ENDIF
 
 RETURN
 END SUBROUTINE write_el_cons_on_file
+!
+! Copyright (C) 2019 Cristiano Malica
+!
+
+SUBROUTINE read_el_cons_from_file(temp, ntemp, ibrav, el_cons_t, b0_t, &
+                                                             filename)
+!
+USE kinds,      ONLY : DP
+USE io_global,  ONLY : meta_ionode, meta_ionode_id, stdout
+USE thermo_sym, ONLY : laue
+USE mp_world,   ONLY : world_comm
+USE mp,         ONLY : mp_bcast
+
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ntemp, ibrav
+REAL(DP), INTENT(IN) :: temp(ntemp)
+REAL(DP), INTENT(INOUT) :: b0_t(ntemp), el_cons_t(6,6,ntemp)
+CHARACTER(LEN=*), INTENT(IN) :: filename
+
+REAL(DP) :: rdum
+
+INTEGER :: itemp, iu_el_cons, ios
+INTEGER :: find_free_unit
+
+iu_el_cons=find_free_unit()
+IF (meta_ionode) &
+   OPEN(UNIT=iu_el_cons, FILE=TRIM(filename), FORM='formatted', &
+                                       STATUS='UNKNOWN', ERR=30, IOSTAT=ios)
+30 CALL mp_bcast(ios, meta_ionode_id, world_comm)
+   CALL errore('read_el_cons_on_file','opening elastic constants (T) file',&
+                                                             ABS(ios))
+
+el_cons_t=0.0_DP
+
+IF (meta_ionode) THEN
+   SELECT CASE (laue)
+      CASE(29,32)
+         READ(iu_el_cons,*) 
+         DO itemp=2,ntemp-1
+            READ(iu_el_cons,'(e16.8,4e20.12)') rdum, b0_t(itemp), &
+                 el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
+                 el_cons_t(4,4,itemp)
+
+            IF (ABS(rdum-temp(itemp))>1D-5) CALL errore('read_el_cons_on_file', &
+                                                        'uncorrect temperature', 1) 
+         ENDDO
+      CASE(25)
+!
+!     D_3d
+!            
+         READ(iu_el_cons,*) 
+         DO itemp=2,ntemp-1
+            READ(iu_el_cons,'(e16.8,7e20.12)') rdum, b0_t(itemp), &
+                  el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
+                  el_cons_t(1,3,itemp), el_cons_t(3,3,itemp), &
+                  el_cons_t(4,4,itemp), el_cons_t(1,4,itemp)
+         ENDDO
+      CASE(27)
+!
+!     S_6
+!            
+         READ(iu_el_cons,*) 
+         DO itemp=2,ntemp-1
+            READ(iu_el_cons,'(e16.8,8e20.12)') rdum, b0_t(itemp), &
+                  el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
+                  el_cons_t(1,3,itemp), el_cons_t(3,3,itemp), &
+                  el_cons_t(4,4,itemp), el_cons_t(1,4,itemp), &
+                  el_cons_t(2,5,itemp)
+         ENDDO
+      CASE(19,23)
+         READ(iu_el_cons,*) 
+         DO itemp=2,ntemp-1
+            READ(iu_el_cons,'(e16.8,6e20.12)') rdum,  b0_t(itemp), &
+                  el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
+                  el_cons_t(1,3,itemp), el_cons_t(3,3,itemp), &
+                  el_cons_t(4,4,itemp)
+         ENDDO
+      CASE(22)
+         READ(iu_el_cons,*) 
+         DO itemp=2,ntemp-1
+            READ(iu_el_cons,'(e16.8,7e20.12)') rdum, b0_t(itemp), &
+                  el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
+                  el_cons_t(1,3,itemp), el_cons_t(3,3,itemp), &
+                  el_cons_t(4,4,itemp), el_cons_t(6,6,itemp)
+         ENDDO
+      CASE(20)
+         READ(iu_el_cons,*) 
+         DO itemp=2,ntemp-1
+            READ(iu_el_cons,'(e16.8,10e20.12)') rdum, b0_t(itemp), &
+                  el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
+                  el_cons_t(1,3,itemp), el_cons_t(2,2,itemp), &
+                  el_cons_t(2,3,itemp), el_cons_t(3,3,itemp), &
+                  el_cons_t(4,4,itemp), el_cons_t(5,5,itemp), &
+                  el_cons_t(6,6,itemp)
+         ENDDO
+      CASE(18)
+         READ(iu_el_cons,*) 
+         DO itemp=2,ntemp-1
+            READ(iu_el_cons,'(e16.8,8e20.12)') rdum, b0_t(itemp), &
+                  el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
+                  el_cons_t(1,3,itemp), el_cons_t(3,3,itemp), &
+                  el_cons_t(4,4,itemp), el_cons_t(6,6,itemp), &
+                  el_cons_t(1,6,itemp)
+         ENDDO
+      CASE(16)
+         IF (ibrav > 0) THEN
+            !
+            !  b unique
+            !
+            READ(iu_el_cons,*) 
+            DO itemp=2,ntemp-1
+               READ(iu_el_cons,'(e16.8,14e20.12)') rdum, b0_t(itemp),&
+                     el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
+                     el_cons_t(1,3,itemp), el_cons_t(2,2,itemp), &
+                     el_cons_t(2,3,itemp), el_cons_t(3,3,itemp), &
+                     el_cons_t(4,4,itemp), el_cons_t(5,5,itemp), &
+                     el_cons_t(6,6,itemp), el_cons_t(1,5,itemp), &
+                     el_cons_t(2,5,itemp), el_cons_t(3,5,itemp), &
+                     el_cons_t(4,6,itemp)
+            ENDDO
+         ELSE
+            !
+            !  c unique
+            !
+            READ(iu_el_cons,*) 
+            DO itemp=2,ntemp-1
+               READ(iu_el_cons,'(e16.8,14e20.12)') rdum, b0_t(itemp),&
+                     el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
+                     el_cons_t(1,3,itemp), el_cons_t(2,2,itemp), &
+                     el_cons_t(2,3,itemp), el_cons_t(3,3,itemp), &
+                     el_cons_t(4,4,itemp), el_cons_t(5,5,itemp), &
+                     el_cons_t(6,6,itemp), el_cons_t(1,6,itemp), &
+                     el_cons_t(2,6,itemp), el_cons_t(3,6,itemp), &
+                     el_cons_t(4,5,itemp)
+            ENDDO
+         ENDIF
+      CASE(2)
+         READ(iu_el_cons,*) 
+         DO itemp=2,ntemp-1
+            READ(iu_el_cons,'(e16.8,24e20.12)') rdum, b0_t(itemp), &
+                  el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
+                  el_cons_t(1,3,itemp), el_cons_t(2,2,itemp), &
+                  el_cons_t(2,3,itemp), el_cons_t(3,3,itemp), &
+                  el_cons_t(4,4,itemp), el_cons_t(5,5,itemp), &
+                  el_cons_t(6,6,itemp), el_cons_t(1,4,itemp), &
+                  el_cons_t(1,5,itemp), el_cons_t(1,6,itemp), &
+                  el_cons_t(2,4,itemp), el_cons_t(2,5,itemp), &
+                  el_cons_t(2,6,itemp), el_cons_t(3,4,itemp), &
+                  el_cons_t(3,5,itemp), el_cons_t(3,6,itemp), &
+                  el_cons_t(4,5,itemp), el_cons_t(4,6,itemp), &
+                  el_cons_t(5,5,itemp), el_cons_t(5,6,itemp), &
+                  el_cons_t(6,6,itemp)
+         ENDDO
+   END SELECT
+   CLOSE(iu_el_cons)
+   CALL expand_el_cons(el_cons_t, laue, ibrav)
+ENDIF
+CALL mp_bcast(el_cons_t, meta_ionode_id, world_comm)
+
+RETURN
+END SUBROUTINE read_el_cons_from_file

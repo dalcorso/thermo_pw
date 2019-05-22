@@ -150,6 +150,9 @@ as a function of temperature.
 \item Elastic constants and elastic compliances as a function of temperature 
 within the ``quasi-static'' approximation.
 
+\item Elastic constants and elastic compliances as a function of temperature 
+within the ``quasi-harmonic'' approximation.
+
 \item Surface band structure identification and plot of the projected bulk
 band structure.
 
@@ -1738,6 +1741,16 @@ Number of tasks for this option: \texttt{ngeo\_strain} times the number of
 independent strains. The different geometries are computed in sequence one
 after the other.
 
+\subsection{\color{web-blue}\texttt{what='elastic\_constants\_qha'}}
+
+With this option the code computes the elastic constants and elastic
+compliances as a function of temperature using the quasi-harmonic
+approximation. For the same geometries that are used to compute the
+elastic constants with the \texttt{elastic\_algorithm='energy'}, the code 
+computes the phonon dispersions and computes the elastic constants
+at each temperature as the second derivatives of the Helmholtz free energy 
+with respect to strain.  
+
 %\subsection{\color{web-blue}\texttt{what='scf\_polarization'}}
 %With this option the code calculates the spontaneous polarization.
 %The code makes a self-consistent calculation followed by three Berry
@@ -1877,8 +1890,6 @@ In this case you can set \texttt{start\_geometry=last\_geometry},
 and \texttt{recover=.TRUE.} in the \texttt{ph.x} input. You need to
 repeat this for all the geometries and finally you can collect the results
 and compute the anharmonic properties.
-
-
 
 
 \newpage
