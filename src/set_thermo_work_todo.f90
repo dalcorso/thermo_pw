@@ -169,12 +169,6 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, auxdyn_loc)
 !
         CASE ('elastic_constants_qha')
            WRITE(stdout,'(/,2x,76("-"))')
-           WRITE(stdout,'(/,2x,76("-"))')
-           WRITE(stdout,'(/,2x,76("-"))')
-           WRITE(stdout,'(/,2x,76("-"))')
-           WRITE(stdout,'(/,2x,("Sono dentro"))')
-           WRITE(stdout,'(/,2x,76("-"))')
-           WRITE(stdout,'(/,2x,76("-"))')
            niter = electron_maxstep
            IF (frozen_ions) THEN
               lstres=lstress(iwork)

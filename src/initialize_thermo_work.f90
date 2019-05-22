@@ -317,6 +317,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            tot_ngeo=nwork
            ALLOCATE(energy_geo(tot_ngeo))
            ALLOCATE(no_ph(tot_ngeo))
+           energy_geo=0.0_DP
            CALL initialize_no_ph(no_ph, tot_ngeo, ibrav_save)
            CALL allocate_thermodynamics()
            CALL allocate_debye()

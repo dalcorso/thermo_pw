@@ -177,3 +177,28 @@ what=elastic_constants_t: this example computes the elastic constants on the
               The files with elastic constants can be used in another run
               to modify the behavior of what='mur_lc_t' and to interpolate
               the elastic constants within the "quasi-static approximation".
+
+example23:
+what=mur_lc_t : this example computes the temperature dependent elastic
+              constants within "quasi-static approximation".
+              It assumes that in the directory elastic_constats many files 
+              with elastic constants computed as in the example22 are 
+              present (one for each geometry).
+              The code computes the temperature dependent isothermal
+              and adiabatic elastic constants, elastic compliaces, bulk
+              modulus and compressibility. The anharmonic quantities are
+              derived as explained in example09 but the comparison with
+              those computed from Gruneisen parameters is added.
+
+example24:
+what=elastic_constants_qha: this example computes the elastic constants 
+              as a function of temperature within the 'quasi-harmonic
+              approximation' by doing the second derivatives
+              of the Helmholtz free energy with respect to strain.
+
+example25:
+what=mur_lc_t : this example uses the temperature dependent elastic
+              constants computed in example24 to compute the anharmonic 
+              properties within the quasi-harmonic approximation. It assumes
+              that the directory anhar_files contains the elastic constants 
+              computed in example24. 
