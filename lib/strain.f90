@@ -30,6 +30,24 @@ MODULE strain_mod
 !       0 -e  0         0  0  0        0  e  0
 !       0  0  0         0  0 -e        0  0 -e
 
+!  and some strain that are the composition of two of the previous 
+!
+!   CG  e  e  0     CH  e  0  e    CI  e  0  0 
+!       e  0  0         0  0  0        0  0  e
+!       0  0  0         e  0  0        0  e  0
+!
+!   DG  0  e  0     DH  0  0  e    DI  0  0  0
+!       e  e  0         0  e  0        0  e  e 
+!       0  0  0         e  0  0        0  e  0
+!
+!   EG  0  e  0     EH  0  0  e    EI  0  0  0
+!       e  0  0         0  0  0        0  0  e
+!       0  0  e         e  0  e        0  e  e
+!
+!   GH  0  e  e     GI  0  e  0    IH  0  0  e
+!       e  0  0         e  0  e        0  0  e
+!       e  0  0         0  e  0        e  e  0
+!
 !
 ! Not all strains are available for all Bravais lattices. 
 !
@@ -144,6 +162,42 @@ ELSEIF (strain_code=='O ') THEN
 ELSEIF (strain_code=='P ') THEN
    epsilon_voigt(2) = epsil
    epsilon_voigt(3) = -epsil
+ELSEIF (strain_code=='CG') THEN
+   epsilon_voigt(1) = epsil
+   epsilon_voigt(6) = epsil
+ELSEIF (strain_code=='CH') THEN
+   epsilon_voigt(1) = epsil
+   epsilon_voigt(5) = epsil
+ELSEIF (strain_code=='CI') THEN
+   epsilon_voigt(1) = epsil
+   epsilon_voigt(4) = epsil
+ELSEIF (strain_code=='DG') THEN
+   epsilon_voigt(2) = epsil
+   epsilon_voigt(6) = epsil
+ELSEIF (strain_code=='DH') THEN
+   epsilon_voigt(2) = epsil
+   epsilon_voigt(5) = epsil
+ELSEIF (strain_code=='DI') THEN
+   epsilon_voigt(2) = epsil
+   epsilon_voigt(4) = epsil
+ELSEIF (strain_code=='EG') THEN
+   epsilon_voigt(3) = epsil
+   epsilon_voigt(6) = epsil
+ELSEIF (strain_code=='EH') THEN
+   epsilon_voigt(3) = epsil
+   epsilon_voigt(5) = epsil
+ELSEIF (strain_code=='EI') THEN
+   epsilon_voigt(3) = epsil
+   epsilon_voigt(4) = epsil
+ELSEIF (strain_code=='GH') THEN
+   epsilon_voigt(4) = epsil
+   epsilon_voigt(5) = epsil
+ELSEIF (strain_code=='GI') THEN
+   epsilon_voigt(4) = epsil
+   epsilon_voigt(6) = epsil
+ELSEIF (strain_code=='HI') THEN
+   epsilon_voigt(5) = epsil
+   epsilon_voigt(6) = epsil
 ELSE
    WRITE(stdout,'(a2)') strain_code 
    CALL errore('set_strain','strain not programmed',1)
@@ -154,6 +208,21 @@ END SUBROUTINE set_strain
 
 SUBROUTINE set_strain_adv(strain_code, ibrav, celldm, epsil, epsilon_voigt, &
                      ibrav_strain, celldm_strain, rot )
+!
+!  This routine sets for every Bravais lattice the strain and
+!  the new Bravais lattice and celldm of the strained system.
+!  If needed it sets also the rotation matrix from the cartesian
+!  axis of the unstrained lattice to those of the strained lattice.
+!  
+!  TODO:      ibrav        strain
+!               5           B1, CI, CG
+!               6,7         CG
+!               12,13       B B1 B2 CG DG EG HI
+!              -12,-13      B B1 B2 CH DH EH GI
+!               14          B B1 B2 C  D  E  G
+!                           H I  CG CH CI DG DH DI
+!                           EG EH EI GH IH IG
+!
 
 USE constants,        ONLY : pi
 USE rotate,           ONLY : set_rot_xyz

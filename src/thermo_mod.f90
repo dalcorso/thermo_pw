@@ -457,7 +457,8 @@ MODULE control_elastic_constants
                                 ! keeping the ions frozen at the strained
                                 ! positions
 
-  CHARACTER(LEN=12) :: elastic_algorithm ! can be standard, advanced or energy
+  CHARACTER(LEN=12) :: elastic_algorithm ! can be standard, advanced, 
+                                ! energy_std or energy
                                 ! it chooses the routines to use to 
                                 ! calculate elastic constants.
   INTEGER :: elcpvar,     &     ! number of variables of the polynomial function

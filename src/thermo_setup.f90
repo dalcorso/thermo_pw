@@ -94,7 +94,8 @@ SUBROUTINE thermo_setup()
   !
   IF (ngeo_strain<4) THEN
      ngeo_strain=4
-     IF (elastic_algorithm=='energy') ngeo_strain=6
+     IF (elastic_algorithm=='energy_std'.OR.elastic_algorithm=='energy') &
+                                                           ngeo_strain=6
   ENDIF
   !
   !   The default of the interpolation polynomial for elastic constants, if
@@ -102,10 +103,12 @@ SUBROUTINE thermo_setup()
   !
   IF (poly_degree < 2 ) THEN
      poly_degree = 3
-     IF (elastic_algorithm=='energy') poly_degree=4
+     IF (elastic_algorithm=='energy_std'.OR.elastic_algorithm=='energy') &
+                                                            poly_degree=4
      IF (ngeo_strain < 6) THEN
        poly_degree = 2
-       IF (elastic_algorithm=='energy') poly_degree=3
+       IF (elastic_algorithm=='energy_std'.OR.elastic_algorithm=='energy') &
+                                                            poly_degree=3
      ENDIF
   ENDIF
   elcpvar=poly_degree+1
@@ -294,12 +297,6 @@ SUBROUTINE thermo_setup()
         sur_layers=MIN(2, nat/2)
      ENDIF
   ENDIF
-
-  IF (what=='elastic_constants_qha'.AND. &
-     .NOT.(ibrav==1.OR.ibrav==2.OR.ibrav==3)) &
-         CALL errore('thermo_setup','quasi-harmonic elastic constants &
-                       &available only for cubic solids',1)
-
 
   RETURN
   !

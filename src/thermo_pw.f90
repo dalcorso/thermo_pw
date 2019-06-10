@@ -214,7 +214,8 @@ PROGRAM thermo_pw
         ! from energy or stress 
         !
         IF (lelastic_const) THEN
-           IF (elastic_algorithm == 'energy') THEN
+           IF (elastic_algorithm == 'energy_std'.OR. &
+                            elastic_algorithm=='energy') THEN
         !
         !   recover the energy calculated by all images
         !

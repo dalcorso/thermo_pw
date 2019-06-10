@@ -9,10 +9,11 @@ SUBROUTINE set_elastic_cons_work( nwork )
 !
 !  This routine sets the work to do for computing the elastic constants for
 !  each Laue class. 
-!  With the standard algorithm it computes only the strain (both in Voigt 
-!  and in matrix form), while with the advanced and energy algorithms 
-!  it computes also the Bravais lattice and the new celldm parameters 
-!  for each strain (only for the lattices for which this option is available).
+!  With the standard or energy_std algorithm it computes only the strain 
+!  (both in Voigt and in matrix form), while with the advanced and energy 
+!  algorithms it computes also the Bravais lattice and the new celldm 
+!  parameters for each strain (only for the lattices for which this 
+!  option is available).
 !  In the latter case it gives also the rotation matrix that brings the
 !  coordinates of a point in the unstrained cartesian axis into the
 !  coordinates in the cartesian axis of the strained system.
@@ -35,7 +36,7 @@ IMPLICIT NONE
 INTEGER, INTENT(OUT) :: nwork
 REAL(DP) :: epsilon_min, epsil
 INTEGER  :: igeo, iwork, base_ind, istep, nstep
-CHARACTER(LEN=2) :: strain_list(9)
+CHARACTER(LEN=2) :: strain_list(21)
 
 nstep=0
 SELECT CASE (laue) 
@@ -50,7 +51,8 @@ SELECT CASE (laue)
             strain_list(1) = 'E '
             strain_list(2) = 'F3'
             IF (ibrav_save==1) strain_list(2) = 'F '
-         ELSEIF (elastic_algorithm=='energy') THEN
+         ELSEIF (elastic_algorithm=='energy_std'.OR.&
+                           elastic_algorithm=='energy') THEN
             nstep = 3
             strain_list(1) = 'A '
             strain_list(2) = 'E '
@@ -72,7 +74,8 @@ SELECT CASE (laue)
             strain_list(1) = 'C '
             strain_list(2) = 'E '
             strain_list(3) = 'H '
-         ELSEIF (elastic_algorithm=='energy') THEN
+         ELSEIF (elastic_algorithm=='energy_std'.OR. &
+                                    elastic_algorithm=='energy') THEN
             nstep = 5
             strain_list(1) = 'C '
             strain_list(2) = 'E '
@@ -96,7 +99,8 @@ SELECT CASE (laue)
             strain_list(2) = 'E '
             strain_list(3) = 'H '
             strain_list(4) = 'G '
-         ELSEIF (elastic_algorithm=='energy') THEN
+         ELSEIF (elastic_algorithm=='energy_std'.OR.&
+                                elastic_algorithm=='energy') THEN
             nstep = 6
             strain_list(1) = 'E '
             strain_list(2) = 'C '
@@ -104,6 +108,11 @@ SELECT CASE (laue)
             strain_list(4) = 'B1'
             strain_list(5) = 'G '
             strain_list(6) = 'H '
+            IF (laue==18) THEN
+               nstep = 7
+               strain_list(7) = 'CG'
+               IF (elastic_algorithm=='energy') nstep=0
+            ENDIF
          ENDIF
       ELSE
          CALL errore('set_elastic_cons_work',&
@@ -124,7 +133,8 @@ SELECT CASE (laue)
             strain_list(4) = 'G '
             strain_list(5) = 'H '
             strain_list(6) = 'I '
-         ELSEIF (elastic_algorithm=='energy') THEN
+         ELSEIF (elastic_algorithm=='energy_std'.OR.&
+                                  elastic_algorithm=='energy') THEN
             nstep = 9
             strain_list(1) = 'C '
             strain_list(2) = 'D '
@@ -142,7 +152,7 @@ SELECT CASE (laue)
       ENDIF
    CASE (25,27)
 !
-!   D_3d and S_6 Trigonal system. Only the standard algorithm is available
+!   D_3d and S_6 Trigonal system (hexagonal or trigonal lattice). 
 !
       IF (ibrav_save==4.OR.ibrav_save==5) THEN
          IF (elastic_algorithm=='standard'&
@@ -152,6 +162,23 @@ SELECT CASE (laue)
             strain_list(2) = 'E '
             strain_list(3) = 'H '
             IF (ibrav_save==5) strain_list(3) = 'I '
+         ELSEIF (elastic_algorithm=='energy_std'.OR. &
+                                      elastic_algorithm=='energy') THEN
+            nstep=5
+            strain_list(1) = 'C '
+            strain_list(2) = 'E '
+            strain_list(3) = 'B1'
+            strain_list(4) = 'A '
+            strain_list(5) = 'H '
+            IF (ibrav_save==5) THEN
+               nstep = 6
+               strain_list(6) = 'CI'
+               IF (laue==27) THEN
+                  nstep = 7
+                  strain_list(7) = 'CG'
+               ENDIF
+               IF (elastic_algorithm=='energy') nstep=0
+            END IF
          END IF
       ELSE
          CALL errore('set_elastic_cons_work',&
@@ -174,6 +201,34 @@ SELECT CASE (laue)
             strain_list(4) = 'G '
             strain_list(5) = 'H '
             strain_list(6) = 'I '
+         ELSEIF (elastic_algorithm=='energy_std') THEN
+            nstep=13
+            strain_list(1) = 'C '
+            strain_list(2) = 'D '
+            strain_list(3) = 'E '
+            strain_list(4) = 'B '
+            strain_list(5) = 'B1'
+            strain_list(6) = 'B2'
+            strain_list(7) = 'G '
+            strain_list(8) = 'H '
+            strain_list(9) = 'I '
+            IF (ibrav_save>0) THEN
+!
+!   c unique
+!
+               strain_list(10) = 'CG'
+               strain_list(11) = 'DG'
+               strain_list(12) = 'EG'
+               strain_list(13) = 'HI'
+            ELSE
+!
+!   b unique
+!
+               strain_list(10) = 'CH'
+               strain_list(11) = 'DH'
+               strain_list(12) = 'EH'
+               strain_list(13) = 'GI'
+            ENDIF
          END IF
       ELSE
          CALL errore('set_elastic_cons_work',&
@@ -182,7 +237,7 @@ SELECT CASE (laue)
 
    CASE (2)
 !
-!   C_i   Triclinic system. Only the standard algorithm is available
+!   C_i   Triclinic system. 
 !
       IF (ibrav_save==14.OR.ibrav_save==0) THEN
          IF (elastic_algorithm=='standard') THEN
@@ -193,6 +248,29 @@ SELECT CASE (laue)
             strain_list(4) = 'G '
             strain_list(5) = 'H '
             strain_list(6) = 'I '
+         ELSEIF (elastic_algorithm=='energy_std') THEN
+            nstep = 21
+            strain_list(1) = 'C '
+            strain_list(2) = 'D '
+            strain_list(3) = 'E '
+            strain_list(4) = 'B '
+            strain_list(5) = 'B1'
+            strain_list(6) = 'B2'
+            strain_list(7) = 'G '
+            strain_list(8) = 'H '
+            strain_list(9) = 'I '
+            strain_list(10) = 'CG'
+            strain_list(11) = 'CH'
+            strain_list(12) = 'CI'
+            strain_list(13) = 'DG'
+            strain_list(14) = 'DH'
+            strain_list(15) = 'DI'
+            strain_list(16) = 'EG'
+            strain_list(17) = 'EH'
+            strain_list(18) = 'EI'
+            strain_list(19) = 'GH'
+            strain_list(20) = 'IH'
+            strain_list(21) = 'IG'
          END IF
       ELSE
          CALL errore('set_elastic_cons_work',&
@@ -201,8 +279,15 @@ SELECT CASE (laue)
    CASE DEFAULT
       CALL errore('set_elastic_cons_work','Laue class not available',1)
 END SELECT
-IF (nstep<1) CALL errore('set_elastic_cons_work', 'Incorrect nstep, &
+IF (nstep<1.AND.elastic_algorithm=='advanced') &
+   CALL errore('set_elastic_cons_work', 'Incorrect nstep, &
                                              &use standard algorithm',1)
+IF (nstep<1.AND.elastic_algorithm=='energy') &
+   CALL errore('set_elastic_cons_work', 'Incorrect nstep, &
+                                             &use energy_std algorithm',1)
+IF (nstep<1) &
+   CALL errore('set_elastic_cons_work', 'Incorrect nstep, &
+                                             &check elastic_algorithm',1)
 nwork = nstep * ngeo_strain
 
 ALLOCATE( epsilon_voigt(6, nwork) )

@@ -1164,7 +1164,7 @@ $3 N_{at}$, where $N_{at}$ is the number of atoms in the unit cell).
 \subsection{\color{web-blue}\texttt{what='scf\_elastic\_constants'}}
 With this option the code calculates the elastic constants of the solid
 at the geometry given as input to \texttt{pw.x}. 
-There are three different algorithms that at convergence should give the
+There are four different algorithms that at convergence should give the
 same results. In two of them, depending on the Laue class, the code 
 calculates the nonzero components of the stress tensor for a set of strains
 and obtains the elastic constants from the numerical first derivative
@@ -1180,12 +1180,18 @@ of needed {\bf k}-points is reduced. Moreover it identifies the
 Bravais lattice of the strained solid and recalculates the primitive
 vectors with the conventions of \qe. When available this should be the
 most efficient method.
-The third algorithm is called \texttt{energy}.
-Using the \texttt{energy} algorithm the elastic constants are calculated 
-from the quadratic fit of the total energy as a function of strain
-without computing stress. This option is available only for selected 
-lattices and usually requires more independent strains. It can be
-used when stress calculation is not implemented in \qe.\\
+The other two algorithms are called \texttt{energy\_std} and \texttt{energy}.
+Using the \texttt{energy\_std} or \texttt{energy} algorithm the elastic 
+constants are calculated 
+from the fit of the total energy as a function of strain with a polynomial
+without computing stress. This option usually requires more independent 
+strains. It can be used when stress calculation is not implemented in \qe.
+The difference between \texttt{energy\_std} and \texttt{energy} is 
+the same between the algorithms that use the stress. With
+\texttt{energy\_std} the code applies the strain using \texttt{ibrav=0},
+while with \texttt{energy} an optimized cell is used. As the
+\texttt{advanced} algorithm the \texttt{energy} algorithm is available
+only for selected Bravais lattices.\\
 For all methods the number of strains is \texttt{ngeo\_strain}
 for each independent strain. 
 For each strain, the code relaxes the ions to their equilibrium 
@@ -1205,7 +1211,8 @@ frozen_ions: if .TRUE. the elastic constants are calculated
 ngeo_strain: the number of strained configurations used to calculate each
              derivative. 
              Default: integer 4 ('standard' and 'advanced'), 6 ('energy')
-elastic_algorithm: 'standard', 'advanced', or 'energy'. See discussion above.
+elastic_algorithm: 'standard', 'advanced', 'energy_std' or 'energy'. 
+             See discussion above.
              Default: character 'standard' 
 delta_epsilon: the interval of strain values between two geometries.
              To avoid a zero strain geometry that might have a
@@ -1749,9 +1756,7 @@ approximation. For the same geometries that are used to compute the
 elastic constants with the \texttt{elastic\_algorithm='energy'}, the code 
 computes the phonon dispersions and computes the elastic constants
 at each temperature as the second derivatives of the Helmholtz free energy 
-with respect to strain. Note however that the plotted elastic constants
-are those obtained from the stress-strain relationship. Presently this 
-option can be used only for cubic solids. 
+with respect to strain.  
 
 %\subsection{\color{web-blue}\texttt{what='scf\_polarization'}}
 %With this option the code calculates the spontaneous polarization.

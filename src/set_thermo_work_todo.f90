@@ -408,7 +408,7 @@ tau=tau0_crys
 CALL cryst_to_cart( nat, tau, at, 1 )
 !
 zero=0.0_DP
-IF (elastic_algorithm=='standard') THEN
+IF (elastic_algorithm=='standard'.OR.elastic_algorithm=='energy_std') THEN
    ibrav=0
    rd_ht = TRANSPOSE( at )
    trd_ht=.TRUE.
@@ -419,7 +419,7 @@ IF (elastic_algorithm=='standard') THEN
 !  the atomic coordinates are strained uniformely and are not modified here
 !
 ELSEIF (elastic_algorithm=='advanced' .OR. &
-                                        elastic_algorithm=='energy') THEN
+                                 elastic_algorithm=='energy') THEN
 !
 !  compute the at on the basis of ibrav_geo and celldm_geo
 !

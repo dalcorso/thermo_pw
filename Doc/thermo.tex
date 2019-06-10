@@ -623,6 +623,7 @@ the $y$ and $z$ directions.
 \end{array}
 \right).
 \end{equation}
+
 The strain is a symmetric tensors. Introducing the Voigt notation 
 $\epsilon_1=\epsilon_{1,1}$,
 $\epsilon_2=\epsilon_{2,2}$, $\epsilon_3=\epsilon_{3,3}$, but
@@ -1749,10 +1750,13 @@ stress tensor is proportional to the strain and we have:
 \sigma_{i} =\sum_{il} C_{i,l} \epsilon_l 
 \end{equation}
 $C_{i,l}$ is the tensor of elastic constants. 
-At zero temperature we can write:
+At zero temperature and pressure we can write:
 \begin{equation}
-C_{i,l}= {\partial \sigma_i \over \partial \epsilon_{l}}=
+C_{i,l}= {\partial \sigma_i \over \partial \epsilon_{l}}\Bigg|_{\epsilon=0}=
 {1 \over V}{\partial^2 U \over \partial \epsilon_i \partial \epsilon_l}
+\Bigg|_{\epsilon=0} = 
+{1 \over V}{\partial^2 U \over \partial \eta_i \partial \eta_l}
+\Bigg|_{\eta=0}
 .
 \end{equation}
 The nonzero components of the elastic constant tensor for each crystal point
@@ -1804,8 +1808,10 @@ which gives:
 \begin{equation}
 U_F = {3 V \over 2} C_{44} \epsilon_4^2.
 \end{equation}
-By fitting the energy with a quadratic function for these three cases,
-we can calculate the elastic constants as:
+By fitting the energy with a polynomial and taking the coefficient of
+the quadratic term for these three cases, we can calculate the elastic 
+constants as (here and in the following all derivatives are calculated
+at $\epsilon=0$):
 \begin{eqnarray}
 C_{11}&=&{1 \over V} {d^2 U_E \over d \epsilon_3^2}, \\ 
 C_{12}&=&{1 \over 6 V} {d^2 U_A \over d \epsilon_1^2}  - {1\over 2} C_{11}, \\
@@ -2006,68 +2012,169 @@ $C_{55}$, and $C_{66}$ are always different from zero, while for the
 $b$-unique cell also the $C_{15}$, $C_{25}$, $C_{35}$, and $C_{46}$ components
 are different from zero. For the $c$-unique cell, instead, $C_{16}$, $C_{26}$, 
 $C_{36}$, and $C_{45}$ are different from zero. \\
-Applying $\epsilon_C$ we obtain
+Applying $\epsilon_C$ we obtain:
 \begin{eqnarray}
 \sigma_1&=&C_{11} \epsilon_1,  \\
 \sigma_2&=&C_{12} \epsilon_1,  \\
 \sigma_3&=&C_{13} \epsilon_1.  
 \end{eqnarray}
-Moreover
-\begin{eqnarray}
-\sigma_5&=&C_{15} \epsilon_1,
-\end{eqnarray}
-for the $b$-unique cell and 
-\begin{eqnarray}
-\sigma_6&=&C_{16} \epsilon_1,
-\end{eqnarray}
-for the $c$-unique cell. \\
-Applying $\epsilon_D$ we obtain
+Applying $\epsilon_D$ we obtain:
 \begin{eqnarray}
 \sigma_2&=&C_{22} \epsilon_2,  \\
 \sigma_3&=&C_{23} \epsilon_2.  
 \end{eqnarray}
-Moreover
-\begin{eqnarray}
-\sigma_5&=&C_{25} \epsilon_2,
-\end{eqnarray}
-for the $b$-unique cell and 
-\begin{eqnarray}
-\sigma_6&=&C_{26} \epsilon_2,
-\end{eqnarray}
-for the $c$-unique cell. \\
 Finally applying $\epsilon_E$ we obtain:
 \begin{eqnarray}
 \sigma_3&=&C_{33} \epsilon_3.
 \end{eqnarray}
-Moreover 
+Applying $\epsilon_I$ we obtain:
 \begin{eqnarray}
-\sigma_5&=&C_{35} \epsilon_3,
+\sigma_4&=&C_{44} \epsilon_4,
 \end{eqnarray}
-for the $b$-unique cell and 
-\begin{eqnarray}
-\sigma_6&=&C_{36} \epsilon_3,
-\end{eqnarray}
-for the $c$-unique cell. \\
-Applying $\epsilon_I$ we obtain
-\begin{eqnarray}
-\sigma_4&=&C_{44} \epsilon_4.
-\end{eqnarray}
-Moreover
-\begin{eqnarray}
-\sigma_6&=&C_{46} \epsilon_4,
-\end{eqnarray}
-for the $b$-unique cell and
-\begin{eqnarray}
-\sigma_5&=&C_{45} \epsilon_4,
-\end{eqnarray}
-for the $c$-unique cell. \\
-Applying $\epsilon_H$ we obtain:
+applying $\epsilon_H$ we obtain:
 \begin{eqnarray}
 \sigma_5&=&C_{55} \epsilon_5,
 \end{eqnarray}
-and applying $\epsilon_G$ we obtain
+and applying $\epsilon_G$ we obtain:
 \begin{eqnarray}
-\sigma_6&=&C_{66} \epsilon_6.
+\sigma_6&=&C_{66} \epsilon_6. 
+\end{eqnarray}
+Moreover, for the $b$-unique cell: 
+\begin{eqnarray}
+\sigma_5&=&C_{15} \epsilon_1,
+\end{eqnarray}
+\begin{eqnarray}
+\sigma_5&=&C_{25} \epsilon_2,
+\end{eqnarray}
+\begin{eqnarray}
+\sigma_5&=&C_{35} \epsilon_3,
+\end{eqnarray}
+\begin{eqnarray}
+\sigma_6&=&C_{46} \epsilon_4,
+\end{eqnarray}
+while for the $c$-unique cell we have:
+\begin{eqnarray}
+\sigma_6&=&C_{16} \epsilon_1,
+\end{eqnarray}
+\begin{eqnarray}
+\sigma_6&=&C_{26} \epsilon_2,
+\end{eqnarray}
+\begin{eqnarray}
+\sigma_6&=&C_{36} \epsilon_3,
+\end{eqnarray}
+\begin{eqnarray}
+\sigma_5&=&C_{45} \epsilon_4.
+\end{eqnarray}
+
+Having only the energy we can use the following
+relationships. By applying $\epsilon_C$ we get:
+\begin{equation}
+U_C= {V \over 2} C_{11} \epsilon_1^2.
+\end{equation}
+By applying $\epsilon_D$ we get:
+\begin{equation}
+U_D= {V \over 2} C_{22} \epsilon_2^2.
+\end{equation}
+By applying $\epsilon_E$ we get:
+\begin{equation}
+U_E= {V \over 2} C_{33} \epsilon_3^2.
+\end{equation}
+By applying $\epsilon_B$ we get:
+\begin{equation}
+U_B= {V \over 2} (C_{11} + C_{22} + 2 C_{12}) \epsilon_1^2.
+\end{equation}
+By applying $\epsilon_{B'}$ in which only $\epsilon_1$ and
+$\epsilon_3=\epsilon_1$ are non zero, we get:
+\begin{equation}
+U_{B'}= {V \over 2} (C_{11} + C_{33} + 2 C_{13}) \epsilon_1^2.
+\end{equation}
+By applying $\epsilon_{B''}$ in which only $\epsilon_2$ and
+$\epsilon_3=\epsilon_2$ are non zero, we get:
+\begin{equation}
+U_{B''}= {V \over 2} (C_{22} + C_{33} + 2 C_{23}) \epsilon_2^2,
+\end{equation}
+and in this way we get six elastic constants. Continuing as in the
+orthorhombic case we can
+apply $\epsilon_G$ and we get:
+\begin{equation}
+U_G= {V \over 2} C_{66} \epsilon_6^2.
+\end{equation}
+By applying $\epsilon_H$ we obtain:
+\begin{equation}
+U_H= {V \over 2} C_{55} \epsilon_5^2.
+\end{equation}
+By applying $\epsilon_I$ we obtain:
+\begin{equation}
+U_I= {V \over 2} C_{44} \epsilon_4^2.
+\end{equation}
+In the monoclinic system the elastic constants have other four non zero 
+components.
+Applying simultaneously two strains we can get combinations of these 
+elastic constants with those already calculated. \\
+For instance, in the $c$-unique case, applying $\epsilon_C$ and 
+$\epsilon_G$ we obtain:
+\begin{equation}
+U_{C+G}= {V \over 2} (C_{11}+2 C_{16} + C_{66}) \epsilon^2,
+\end{equation}
+applying $\epsilon_D$ and $\epsilon_G$ we obtain:
+\begin{equation}
+U_{D+G}= {V \over 2} (C_{22}+2 C_{26} + C_{66}) \epsilon^2,
+\end{equation}
+and applying $\epsilon_E$ and $\epsilon_G$ we obtain:
+\begin{equation}
+U_{E+G}= {V \over 2} (C_{33}+2 C_{36} + C_{66}) \epsilon^2.
+\end{equation}
+In order to calculate the last component we need to apply
+simultaneously two shear strains. 
+Applying $\epsilon_H$ and $\epsilon_I$ we obtain:
+\begin{equation}
+U_{H+I}= {V \over 2} (C_{44}+2 C_{45} + C_{55}) \epsilon^2.
+\end{equation}
+Similarly, in the $b$-unique case, applying $\epsilon_C$ and 
+$\epsilon_H$ we obtain:
+\begin{equation}
+U_{C+H}= {V \over 2} (C_{11}+2 C_{15} + C_{55}) \epsilon^2,
+\end{equation}
+applying $\epsilon_D$ and $\epsilon_H$ we obtain:
+\begin{equation}
+U_{D+H}= {V \over 2} (C_{22}+2 C_{25} + C_{55}) \epsilon^2,
+\end{equation}
+and applying $\epsilon_E$ and $\epsilon_H$ we obtain:
+\begin{equation}
+U_{E+H}= {V \over 2} (C_{33}+2 C_{35} + C_{55}) \epsilon^2.
+\end{equation}
+Finally, applying $\epsilon_G$ and $\epsilon_I$ we obtain:
+\begin{equation}
+U_{G+I}= {V \over 2} (C_{44}+2 C_{46} + C_{66}) \epsilon^2.
+\end{equation}
+Solving these equations we obtain:
+\begin{eqnarray}
+C_{11}&=&{1 \over V} {d^2 U_C \over d \epsilon_1^2}, \\ 
+C_{22}&=&{1 \over V} {d^2 U_D \over d \epsilon_2^2}, \\ 
+C_{33}&=&{1 \over V} {d^2 U_E \over d \epsilon_3^2}, \\ 
+C_{12}&=&{1 \over 2 V} {d^2 U_B \over d \epsilon_1^2} - 
+                             {(C_{11}+ C_{22})\over 2}, \\
+C_{13}&=&{1 \over 2 V} {d^2 U_{B'} \over d \epsilon_1^2} - 
+                             {(C_{11} + C_{33})\over 2}, \\
+C_{23}&=&{1 \over 2 V} {d^2 U_{B''} \over d \epsilon_2^2} - 
+                             {(C_{22} - C_{33})\over 2}, \\
+C_{44}&=&{1 \over V} {d^2 U_I \over d \epsilon_4^2}, \\
+C_{55}&=&{1 \over V} {d^2 U_H \over d \epsilon_5^2}, \\
+C_{66}&=&{1 \over V} {d^2 U_G \over d \epsilon_6^2}.
+\end{eqnarray}
+In the $c$-unique case we have:
+\begin{eqnarray}
+C_{16}&=&{1 \over 2 V} {d^2 U_{C+G} \over d \epsilon^2} - {(C_{11} + C_{66})\over 2}, \\
+C_{26}&=&{1 \over 2 V} {d^2 U_{D+G} \over d \epsilon^2} - {(C_{22} + C_{66})\over 2}, \\
+C_{36}&=&{1 \over 2 V} {d^2 U_{E+G} \over d \epsilon^2} - {(C_{33} + C_{66})\over 2}, \\
+C_{45}&=&{1 \over 2 V} {d^2 U_{H+I} \over d \epsilon^2} - {(C_{44} + C_{55})\over 2},
+\end{eqnarray}
+while in the $b$-unique case:
+\begin{eqnarray}
+C_{15}&=&{1 \over 2 V} {d^2 U_{C+H} \over d \epsilon^2} - {(C_{11} + C_{55})\over 2}, \\
+C_{25}&=&{1 \over 2 V} {d^2 U_{D+H} \over d \epsilon^2} - {(C_{22} + C_{55})\over 2}, \\
+C_{35}&=&{1 \over 2 V} {d^2 U_{E+H} \over d \epsilon^2} - {(C_{33} + C_{55})\over 2}, \\
+C_{46}&=&{1 \over 2 V} {d^2 U_{G+I} \over d \epsilon^2} - {(C_{44} + C_{66})\over 2}. 
 \end{eqnarray}
 
 \subsection{\color{web-blue}Triclinic system}
@@ -2117,7 +2224,7 @@ applied to calculate the elastic constants, neglecting any symmetry
 information, but the number of calculations is larger than that needed
 when symmetry is used.
 
-For using the energy in the calculation we use the following
+To use the energy in the calculation we use the following
 relationships. By applying $\epsilon_C$ we get:
 \begin{equation}
 U_C= {V \over 2} C_{11} \epsilon_1^2.
@@ -2158,7 +2265,7 @@ By applying $\epsilon_I$ we obtain:
 \begin{equation}
 U_I= {V \over 2} C_{44} \epsilon_4^2.
 \end{equation}
-The triclinic case twelve components. Applying simultaneously two strains
+The triclinic case has twelve components. Applying simultaneously two strains
 we can get combinations of other elastic constants with those already
 calculated. For instance applying $\epsilon_C + \epsilon_G$ and taking
 $\epsilon_1=\epsilon_6=\epsilon$ we obtain:
@@ -2232,9 +2339,9 @@ C_{13}&=&{1 \over 2 V} {d^2 U_{B'} \over d \epsilon_1^2} -
                              {(C_{11} + C_{33})\over 2}, \\
 C_{23}&=&{1 \over 2 V} {d^2 U_{B''} \over d \epsilon_2^2} - 
                              {(C_{22} - C_{33})\over 2}, \\
-C_{44}&=&{1 \over 3 V} {d^2 U_I \over d \epsilon_4^2}, \\
-C_{55}&=&{1 \over 3 V} {d^2 U_H \over d \epsilon_5^2}, \\
-C_{66}&=&{1 \over 3 V} {d^2 U_G \over d \epsilon_6^2}, \\
+C_{44}&=&{1 \over V} {d^2 U_I \over d \epsilon_4^2}, \\
+C_{55}&=&{1 \over V} {d^2 U_H \over d \epsilon_5^2}, \\
+C_{66}&=&{1 \over V} {d^2 U_G \over d \epsilon_6^2}, \\
 C_{14}&=&{1 \over 2 V} {d^2 U_{C+I} \over d \epsilon^2} - {(C_{11} + C_{44})\over 2}, \\
 C_{15}&=&{1 \over 2 V} {d^2 U_{C+H} \over d \epsilon^2} - {(C_{11} + C_{55})\over 2}, \\
 C_{16}&=&{1 \over 2 V} {d^2 U_{C+G} \over d \epsilon^2} - {(C_{11} + C_{66})\over 2}, \\
@@ -2340,51 +2447,136 @@ Finally, applying $\epsilon_G$ we have:
 \begin{equation}
 \sigma_4=C_{44} \epsilon_4,
 \end{equation}
-For the class $S_6(\bar 3)$ we have also:
+For the Laue class $S_6(\bar 3)$ we have also:
 \begin{equation}
 \sigma_5=C_{15} \epsilon_1.
 \end{equation}
 
+To use the energy as a function of strain 
+we need the following strains and relationships. \\
+By applying $\epsilon_C$ we get $C_{11}$:
+\begin{equation}
+U_C = {V \over 2} C_{11} \epsilon_1^2. 
+\end{equation}
+By applying $\epsilon_E$ we get $C_{33}$:
+\begin{equation}
+U_E = {V \over 2} C_{33} \epsilon_3^2. 
+\end{equation}
+By applying $\epsilon_B'$ in which only $\epsilon_1$ and 
+$\epsilon_3=\epsilon_1$ we have:
+\begin{equation}
+U_{B'} = {V \over 2} (C_{11}+C_{33}+2C_{13}) \epsilon_1^2, 
+\end{equation}
+and using the previously calculated elastic constants, we can obtain
+$C_{13}$. By applying $\epsilon_A$ we get:
+\begin{equation}
+U_{A} = {V \over 2} (2C_{11}+C_{33}+2C_{12}+4C_{13}) \epsilon_1^2,
+\end{equation}
+and using the previously calculated elastic constants we obtain $C_{12}$.
+Applying $\epsilon_H$ we obtain $C_{44}$:
+\begin{equation}
+U_{H} = {V \over 2} C_{44} \epsilon_5^2.
+\end{equation}
+Finally applying $\epsilon_C$ and $\epsilon_I$ we obtain:
+\begin{equation}
+U_{C+I} = {V \over 2} (C_{11} + C_{44}+ 2 C_{14}) \epsilon_1^2 
+\end{equation}
+and using the previously calculated elastic constants we obtain $C_{14}$. \\
+Solving these equations we obtain:
+\begin{eqnarray}
+C_{11} &=& {1 \over V} {d^2 U_C \over d \epsilon_1^2}, \\
+C_{33} &=& {1 \over V} {d^2 U_E \over d \epsilon_3^2}, \\
+C_{13} &=& {1 \over 2 V} {d^2 U_{B'} \over d \epsilon_1^2} - 
+{(C_{11} + C_{33})\over 2}, \\
+C_{12} &=& {1 \over 2 V} {d^2 U_{A} \over d \epsilon_1^2} - 
+C_{11} - {C_{33}\over 2} - 2 C_{13}, \\
+C_{44} &=& {1 \over V} {d^2 U_H \over d \epsilon_5^2}, \\
+C_{14} &=& {1 \over 2 V} {d^2 U_{C+I} \over d \epsilon_1^2} - 
+{(C_{11} + C_{44})\over 2}. 
+\end{eqnarray}
+
+For the Laue class $S_6(\bar 3)$ we can apply 
+$\epsilon_C$ and $\epsilon_G$ and we get:
+\begin{equation}
+U_{C+G} = {V \over 2} (C_{11} + C_{44}+ 2 C_{25}) \epsilon_1^2. 
+\end{equation}
+Solving this equation we obtain:
+\begin{equation}
+C_{25} = {1 \over 2 V} {d^2 U_{C+G} \over d \epsilon_1^2} - 
+{(C_{11} + C_{44})\over 2}.
+\end{equation}
 
 \newpage
-\section{\color{coral}Pressure dependent elastic constants}
+\section{\color{coral}Stress and pressure dependent elastic constants}
 
-The elastic constants of a solid on which we apply a pressure $p$ can still
+The elastic constants of a solid on which we apply a stress 
+$\sigma^{(0)}_{ij}$ can still
 be defined from the linear relationship between applied strain and 
 induced stress: 
 \begin{equation}
 \sigma_{ij} =\sigma^{(0)}_{ij}+\sum_{kl} B_{ij,kl} \epsilon_{kl}.
 \end{equation}
 However since the solid is already in a strained state
-to balance the pressure $p$, the elastic constants defined as
+to balance the stress $\sigma^{(0)}_{ij}$, the second derivatives of
+the energy with respect to the strains:
 \begin{equation}
-C_{ij,kl}= 
-{1 \over V}{\partial^2 U \over \partial \epsilon_{ij} \partial \epsilon_{kl}},
+{1 \over V}{\partial^2 U \over \partial \epsilon_{ij} \partial \epsilon_{kl}}
+\Bigg|_{\epsilon=0},
 \end{equation}
-do not coincide with $B_{ij,kl}$. Actually there is a simple 
-relationship between the two:
+do not coincide neither with the elastic constant
+$C_{ij,kl}={1 \over V}{\partial^2 U \over \partial \eta_{ij} \partial 
+\eta_{kl}}\big|_{\eta=0}$ nor with $B_{ij,kl}$. Actually there is a simple 
+relationship between $B_{ij,kl}$ and the calculated
+second derivatives of the energy:
 \begin{equation}
-B_{ij,kl} = C_{ij,kl} + {1\over 2} p (2 \delta_{ij} \delta_{kl} - 
+B_{ij,kl} = {1 \over V}{\partial^2 U \over \partial \epsilon_{ij} 
+\partial \epsilon_{kl}}\Bigg|_{\epsilon=0} - 
+{1\over 2} (2 \sigma^{(0)}_{ij} \delta_{kl} 
+-{1\over 2} \sigma^{(0)}_{ik} \delta_{jl} 
+-{1\over 2} \sigma^{(0)}_{il} \delta_{jk} 
+-{1\over 2} \sigma^{(0)}_{jk} \delta_{il} 
+-{1\over 2} \sigma^{(0)}_{jl} \delta_{ik} ).
+\label{eqsd2}
+\end{equation}
+
+To find the elastic constants of a solid under pressure we can specialize
+this formula to the case in which $\sigma^{(0)}_{ij}=-p \delta_{ij}$. We
+have:
+
+\begin{equation}
+B_{ij,kl} = {1 \over V}{\partial^2 U \over \partial \epsilon_{ij} 
+\partial \epsilon_{kl}}\Bigg|_{\epsilon=0} + 
+{1\over 2} p (2 \delta_{ij} \delta_{kl} - 
  \delta_{il} \delta_{jk} - \delta_{ik} \delta_{jl} ).
 \end{equation}
 Since experimental measurements of elastic constants are usually done 
 using the stress-strain relationship it is common to give the numerical
 values of $B_{ij,kl}$ and to call them the elastic constants of a
-solid under pressure. We can write out the relationship for the Voigt 
-components:
-\begin{eqnarray}
-B_{44} &=& C_{44} - {1\over 2} p, \\
-B_{55} &=& C_{55} - {1\over 2} p, \\
-B_{66} &=& C_{66} - {1\over 2} p, \\
-B_{12} &=& C_{12} + p, \\
-B_{13} &=& C_{13} + p, \\
-B_{23} &=& C_{23} + p, 
-\end{eqnarray}
-while for all the other components $B_{ij}=C_{ij}$.
-Note however that for a generic stress, as opposed to 
-an isotropic pressure, the $B_{ij,kl}$ have not the same symmetry properties 
-of $C_{ij,kl}$. In general they cannot be written using the Voigt notation.
+solid under pressure. 
 
+We can write out the relationship for the Voigt components:
+\begin{eqnarray}
+B_{44} &=& {1 \over V}{\partial^2 U \over \partial \epsilon^2_{4}}\Bigg|_{\epsilon=0} - {1\over 2} p, \\
+B_{55} &=& {1 \over V}{\partial^2 U \over \partial \epsilon^2_{5} 
+}\Bigg|_{\epsilon=0} - {1\over 2} p, \\
+B_{66} &=& {1 \over V}{\partial^2 U \over \partial \epsilon^2_{6} 
+}\Bigg|_{\epsilon=0} - {1\over 2} p, \\
+B_{12} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{1} 
+\partial \epsilon_{2}}\Bigg|_{\epsilon=0} + p, \\
+B_{13} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{1} 
+\partial \epsilon_{3}}\Bigg|_{\epsilon=0} + p, \\
+B_{23} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{2} 
+\partial \epsilon_{3}}\Bigg|_{\epsilon=0} + p, 
+\end{eqnarray}
+while for all the other components $B_{ij}=
+{1 \over V}{\partial^2 U \over \partial \epsilon_{i} 
+\partial \epsilon_{j}}\big|_{\epsilon=0}$.
+
+For a generic stress, as opposed to an isotropic pressure, the $B_{ij,kl}$ 
+have not the same symmetry properties of $C_{ij,kl}$. In general they 
+cannot be written in the Voigt notation.
+
+\newpage
 %\section{\color{coral}Temperature dependent elastic constants}
 %In principle to calculate the elastic constants at each temperature it
 %is sufficient to substitute the Helmholtz free energy to the total energy
@@ -2393,13 +2585,17 @@ of $C_{ij,kl}$. In general they cannot be written using the Voigt notation.
 %readily available at finite temperatures and therefore we can use only the
 %energy expressions. The second is that, at each temperature, the strain must be
 %applied taking as equilibrium (unstrained) geometry the one that 
-%minimizes the free energy at temperature $T$ and the volume that appears in
-%the equations should be the equilibrium one at temperature $T$.
+%minimizes the free energy at temperature $T$. 
 %We have:
 %\begin{equation}
 %C_{i,l}^T= {1 \over V(T)}{\partial^2 F \over \partial \epsilon_i \partial \epsilon_l}
 %\Bigg|_T.
 %\end{equation}
+%One approximation consists in computing the elastic constants as a function 
+%of temperature taking as unstrained geometry the equilibrium one
+%at $T=0$. The disadvantage of this approach is that at each temperature
+%the solid has a stress.
+%
 %Since we cannot make an elastic constant calculation for each temperature, it
 %is convenient to calculate the Helmholtz free energy in a regular grid in
 %a space whose dimension are the parameters $\zeta_k$ that define the 

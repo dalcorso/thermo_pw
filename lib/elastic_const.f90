@@ -10,11 +10,6 @@ MODULE elastic_constants
 !   this module contains the support routines for the calculation
 !   of the elastic constant
 !
-!   TODO : energy for the tetragonal of class C_4h
-!          energy for the monoclinic case
-!          rombohedral cell, both energy and stress for S_6 and D_3d
-!
-
 
   USE kinds,     ONLY : DP
   USE constants, ONLY : ry_kbar
@@ -33,6 +28,7 @@ MODULE elastic_constants
   REAL(DP), ALLOCATABLE :: epsilon_voigt(:,:) ! the strain tensor as a 6D array
                                             ! for each geometry
   REAL(DP) :: press=0.0_DP                  ! estimated pressure
+  REAL(DP) :: strs(3,3)=0.0_DP              ! estimated stress
 
 
   PUBLIC sigma_geo, epsilon_geo,  epsilon_voigt, &     ! public variables
@@ -45,7 +41,11 @@ MODULE elastic_constants
          write_elastic, read_elastic,     &            ! public I/O on file
          macro_elasticity, print_macro_elasticity, &   ! public auxiliary tools
          print_sound_velocities, &                     ! public auxiliary tools
-         compute_sound                                 ! public auxiliary tools
+         compute_sound, &                              ! public auxiliary tools
+         correct_for_stress,  &                        ! corrects the second
+                                         ! energy derivatives to give the
+                                         ! stress-strain elastic constants
+         correct_for_pressure            ! corrects for pressure
 
 CONTAINS
 
@@ -187,12 +187,13 @@ exists=.TRUE.
 RETURN
 END SUBROUTINE read_elastic
 
-SUBROUTINE compute_elastic_constants(sigma_geo, epsil_geo, nwork, ngeo_strain, &
+SUBROUTINE compute_elastic_constants(sigma_geo, epsil_geo, nwork, ngeo_strain,&
                                      ibrav, laue, m1)
 !
 !  This routine computes the elastic constants by fitting the stress-strain
-!  relationship with a polynomial of order m1-1. This is calculated
-!  on the basis of the Bravais lattice and Laue type.
+!  relationship with a polynomial of degree m1-1. The nonvanishing
+!  components of the tensor are calculated on the basis of the Bravais 
+!  lattice and Laue type.
 !  With reference to the strain indicated in the strain.f90 module the
 !  the routine expects to find in sigma_geo the stress that corresponds
 !  to the following strain: 
@@ -207,8 +208,8 @@ SUBROUTINE compute_elastic_constants(sigma_geo, epsil_geo, nwork, ngeo_strain, &
 !  16    C_2h          12,-12, 13,-13  C  D  E  G  H  I
 !  2     C_i           14              C  D  E  G  H  I
 !
-!  For each strain the routine expects ngeo_strain values of strain for a total
-!  of nwork values.
+!  For each strain the routine expects ngeo_strain values of strain 
+!  for a total of nwork values.
 !  Both sigma_geo and epsilon_geo are in cartesian coordinates in the
 !  axis of the unstrained lattice.
 !
@@ -256,17 +257,15 @@ SELECT CASE (laue)
       CALL el_cons_ij(1, 1, ngeo_strain, epsil_geo, sigma_geo, m1)
       el_con(2,2) = el_con(1,1)
 !
-!  c_12
+!  c_21 = c_12
 !
       CALL el_cons_ij(2, 1, ngeo_strain, epsil_geo, sigma_geo, m1)
       el_con(1,2) = el_con(2,1)
 !
-!  c_13
+!  c_31
 !
       CALL el_cons_ij(3, 1, ngeo_strain, epsil_geo, sigma_geo, m1)
-      el_con(1,3) = el_con(3,1)
-      el_con(2,3) = el_con(1,3)
-      el_con(3,2) = el_con(2,3)
+      el_con(3,2) = el_con(3,1)
 !
 !  c_33
 !
@@ -274,7 +273,13 @@ SELECT CASE (laue)
       CALL el_cons_ij(3, 3, ngeo_strain, epsil_geo(1,1,npos), &
                                          sigma_geo(1,1,npos), m1)
 !
-!  c_44
+!  c_13  could be different from c_31 if the cell has a stress
+!
+      CALL el_cons_ij(1, 3, ngeo_strain, epsil_geo(1,1,npos), &
+                                         sigma_geo(1,1,npos), m1)
+      el_con(2,3) = el_con(1,3)
+!
+!  c_44 = c_55
 !
       npos=2*ngeo_strain+1
       CALL el_cons_ij(5, 5, ngeo_strain, epsil_geo(1,1,npos), &
@@ -291,23 +296,27 @@ SELECT CASE (laue)
       CALL el_cons_ij(1, 1, ngeo_strain, epsil_geo, sigma_geo, m1)
       el_con(2,2) = el_con(1,1)
 !
-!  c_12 
+!  c_21 = c_12
 !
       CALL el_cons_ij(2, 1, ngeo_strain, epsil_geo, sigma_geo, m1)
       el_con(1,2) = el_con(2,1)
 !
-! c_13
+! c_31
 !
       CALL el_cons_ij(3, 1, ngeo_strain, epsil_geo, sigma_geo, m1)
-      el_con(1,3) = el_con(3,1)
-      el_con(2,3) = el_con(3,1)
-      el_con(3,2) = el_con(2,3)
+      el_con(3,2) = el_con(3,1)
 !
 ! c_33
 !
       npos=ngeo_strain+1
       CALL el_cons_ij(3, 3, ngeo_strain, epsil_geo(1,1,npos), &
                                          sigma_geo(1,1,npos), m1)
+!
+! c_13 could be different from c_31 if the cell has a stress
+!
+      CALL el_cons_ij(1, 3, ngeo_strain, epsil_geo(1,1,npos), &
+                                         sigma_geo(1,1,npos), m1)
+      el_con(2,3) = el_con(1,3)
 !
 ! c_44 = c_55
 !
@@ -328,29 +337,29 @@ SELECT CASE (laue)
 !
 ! c_16, c_26
 !
-         CALL el_cons_ij(6, 1, ngeo_strain, epsil_geo, sigma_geo, m1)
-         el_con(1,6) = el_con(6,1)
-         el_con(2,6) = - el_con(1,6)
-         el_con(6,2) = el_con(2,6)
+         CALL el_cons_ij(1, 6, ngeo_strain, epsil_geo(1,1,npos), &
+                                            sigma_geo(1,1,npos), m1)
+         el_con(6,1) = el_con(1,6)
+         el_con(6,2) = -el_con(1,6)
+         el_con(2,6) = el_con(6,2)
+
      END IF
 
    CASE (20)
 !
 !  orthorhombic case, (D_2h Laue class)
 !
-!  c_11 
+! c_11 
 !
       CALL el_cons_ij(1, 1, ngeo_strain, epsil_geo, sigma_geo, m1)
 !
-!  c_12
+! c_21
 !
       CALL el_cons_ij(2, 1, ngeo_strain, epsil_geo, sigma_geo, m1)
-      el_con(1,2) = el_con(2,1)
 !
-! c_13
+! c_31
 !
       CALL el_cons_ij(3, 1, ngeo_strain, epsil_geo, sigma_geo, m1)
-      el_con(1,3) = el_con(3,1)
 !
 ! c_22
 !
@@ -358,16 +367,30 @@ SELECT CASE (laue)
       CALL el_cons_ij(2, 2, ngeo_strain, epsil_geo(1,1,npos), &
                                          sigma_geo(1,1,npos), m1)
 !
-! c_23
+! c_12 could be different from c_21 if the cell has a stress
+!
+      CALL el_cons_ij(1, 2, ngeo_strain, epsil_geo(1,1,npos), &
+                                         sigma_geo(1,1,npos), m1)
+!
+! c_32
 !
       CALL el_cons_ij(3, 2, ngeo_strain, epsil_geo(1,1,npos), &
                                          sigma_geo(1,1,npos), m1)
-      el_con(2,3) = el_con(3,2)
 !
 ! c_33
 !
       npos=2*ngeo_strain+1
       CALL el_cons_ij(3, 3, ngeo_strain, epsil_geo(1, 1, npos), &
+                                         sigma_geo(1, 1, npos), m1)
+!
+! c_13 could be different from c_31 if the cell has a stress
+!
+      CALL el_cons_ij(1, 3, ngeo_strain, epsil_geo(1, 1, npos), &
+                                         sigma_geo(1, 1, npos), m1)
+!
+! c_23 could be different from c_32 if the cell has a stress
+!
+      CALL el_cons_ij(2, 3, ngeo_strain, epsil_geo(1, 1, npos), & 
                                          sigma_geo(1, 1, npos), m1)
 !
 ! c_66
@@ -397,19 +420,17 @@ SELECT CASE (laue)
       CALL el_cons_ij(1, 1, ngeo_strain, epsil_geo, sigma_geo, m1)
       el_con(2,2) = el_con(1,1)
 !
-!  c_12 
+!  c_21 = c_12 
 !
       CALL el_cons_ij(2, 1, ngeo_strain, epsil_geo, sigma_geo, m1)
       el_con(1,2) = el_con(2,1)
 !
-!  c_13 = c_23
+!  c_31 = c_32
 !
       CALL el_cons_ij(3, 1, ngeo_strain, epsil_geo, sigma_geo, m1)
-      el_con(1,3) = el_con(3,1)
-      el_con(2,3) = el_con(1,3)
-      el_con(3,2) = el_con(2,3)
+      el_con(3,2) = el_con(3,1)
 !
-!  c_14 
+!  c_41 = c_14 
 !
       IF (ibrav/=4) THEN
          CALL el_cons_ij(4, 1, ngeo_strain, epsil_geo, sigma_geo, m1)
@@ -425,34 +446,42 @@ SELECT CASE (laue)
       npos=ngeo_strain+1
       CALL el_cons_ij(3, 3, ngeo_strain, epsil_geo(1,1,npos), &
                                          sigma_geo(1,1,npos), m1)
+
+!
+!  c_13 could be different from c_31 if the cell has a stress
+!
+      CALL el_cons_ij(1, 3, ngeo_strain, epsil_geo(1,1,npos), &
+                                         sigma_geo(1,1,npos), m1)
+      el_con(2,3)=el_con(1,3)
 !
 !  c_44 = c_55
 !
       npos=2*ngeo_strain+1
       IF (ibrav==4) THEN
          CALL el_cons_ij(5, 5, ngeo_strain, epsil_geo(1,1,npos), &
-                                         sigma_geo(1,1,npos), m1)
+                                            sigma_geo(1,1,npos), m1)
          el_con(4,4) = el_con(5,5)
       ELSE
          CALL el_cons_ij(4, 4, ngeo_strain, epsil_geo(1,1,npos), &
-                                         sigma_geo(1,1,npos), m1)
+                                            sigma_geo(1,1,npos), m1)
          el_con(5,5) = el_con(4,4)
-      ENDIF
-
-      el_con(6,6) = 0.5_DP * ( el_con(1,1) - el_con(1,2) )
 !
-!   This part need to be computed only in the S_6 Laue class
+!  This part needs to be computed only in the S_6 Laue class for the
+!  trigonal lattice
 !
 !  c_15 
 !
-      IF (laue==27) THEN
-         CALL el_cons_ij(5, 1, ngeo_strain, epsil_geo, sigma_geo, m1)
-         el_con(1,5) = el_con(5,1)
-         el_con(2,5) = -el_con(1,5)
-         el_con(5,2) = el_con(2,5)
-         el_con(4,6) = el_con(2,5)
-         el_con(6,4) = el_con(4,6)
-      END IF
+         IF (laue==27) THEN
+            CALL el_cons_ij(5, 1, ngeo_strain, epsil_geo, sigma_geo, m1)
+            el_con(1,5) = el_con(5,1)
+            el_con(2,5) = -el_con(1,5)
+            el_con(5,2) = el_con(2,5)
+            el_con(4,6) = el_con(2,5)
+            el_con(6,4) = el_con(4,6)
+         END IF
+      ENDIF
+
+      el_con(6,6) = 0.5_DP * ( el_con(1,1) - el_con(1,2) )
 
    CASE (16)
 !
@@ -462,15 +491,13 @@ SELECT CASE (laue)
 !
       CALL el_cons_ij(1, 1, ngeo_strain, epsil_geo, sigma_geo, m1)
 !
-!  c_12
+!  c_21
 !
       CALL el_cons_ij(2, 1, ngeo_strain, epsil_geo, sigma_geo, m1)
-      el_con(1,2) = el_con(2,1)
 !
-! c_13
+! c_31
 !
       CALL el_cons_ij(3, 1, ngeo_strain, epsil_geo, sigma_geo, m1)
-      el_con(1,3) = el_con(3,1)
 !
 ! c_22
 !
@@ -478,16 +505,30 @@ SELECT CASE (laue)
       CALL el_cons_ij(2, 2, ngeo_strain, epsil_geo(1,1,npos), &
                                          sigma_geo(1,1,npos), m1)
 !
-! c_23
+! c_12 could be different from c_21 if the cell has a stress
+!
+      CALL el_cons_ij(1, 2, ngeo_strain, epsil_geo(1,1,npos), &
+                                         sigma_geo(1,1,npos), m1)
+!
+! c_32
 !
       CALL el_cons_ij(3, 2, ngeo_strain, epsil_geo(1,1,npos), &
                                          sigma_geo(1,1,npos), m1)
-      el_con(2,3) = el_con(3,2)
 !
 ! c_33
 !
       npos=2*ngeo_strain+1
       CALL el_cons_ij(3, 3, ngeo_strain, epsil_geo(1,1,npos), &
+                                         sigma_geo(1,1,npos), m1)
+!
+! c_13 could be different from c_31 if the cell has a stress
+!
+      CALL el_cons_ij(1, 3, ngeo_strain, epsil_geo(1,1,npos), &
+                                         sigma_geo(1,1,npos), m1)
+!
+! c_23 could be different from c_32 if the cell has a stress
+!
+      CALL el_cons_ij(2, 3, ngeo_strain, epsil_geo(1,1,npos), &
                                          sigma_geo(1,1,npos), m1)
 !
 ! c_66
@@ -507,71 +548,106 @@ SELECT CASE (laue)
       npos=5*ngeo_strain+1
       CALL el_cons_ij(4, 4, ngeo_strain, epsil_geo(1,1,npos), &
                                          sigma_geo(1,1,npos), m1)
+
+      IF (ibrav==12.OR.ibrav==13) THEN
 !
-!  c15
+!  monoclinic case unique axis c
 !
+!
+!  c_61
+!
+         CALL el_cons_ij(6, 1, ngeo_strain, epsil_geo, sigma_geo, m1)
+!
+!  c_62
+!
+         npos=ngeo_strain+1
+         CALL el_cons_ij(6, 2, ngeo_strain, epsil_geo(1,1,npos), &
+                                            sigma_geo(1,1,npos), m1)
+!
+!  c63
+!
+         npos=2*ngeo_strain+1
+         CALL el_cons_ij(6, 3, ngeo_strain, epsil_geo(1,1,npos), &
+                                            sigma_geo(1,1,npos), m1)
+!
+!  c_54
+!
+         npos=5*ngeo_strain+1
+         CALL el_cons_ij(5, 4, ngeo_strain, epsil_geo(1,1,npos), &
+                                            sigma_geo(1,1,npos), m1)
+!
+!  c_16
+!
+         npos=3*ngeo_strain+1
+         CALL el_cons_ij(1, 6, ngeo_strain, epsil_geo(1,1,npos), &
+                                            sigma_geo(1,1,npos), m1)
+!
+!  c_26
+!
+         CALL el_cons_ij(2, 6, ngeo_strain, epsil_geo(1,1,npos), &
+                                            sigma_geo(1,1,npos), m1)
+!
+!  c_36
+!
+         CALL el_cons_ij(3, 6, ngeo_strain, epsil_geo(1,1,npos), &
+                                            sigma_geo(1,1,npos), m1)
+!
+!  c_45
+!
+         npos=4*ngeo_strain+1
+         CALL el_cons_ij(4, 5, ngeo_strain, epsil_geo(1,1,npos), &
+                                            sigma_geo(1,1,npos), m1)
+
+      ENDIF
+
       IF (ibrav==-12.OR.ibrav==-13) THEN
 !
 !  monoclinic case unique axis b
 !
 !
-!  c15
+!   c_15
+!
+         npos=4*ngeo_strain+1
+         CALL el_cons_ij(1, 5, ngeo_strain, epsil_geo(1,1,npos), &
+                                            sigma_geo(1,1,npos), m1)
+!
+!   c_25
+!
+         CALL el_cons_ij(2, 5, ngeo_strain, epsil_geo(1,1,npos), &
+                                            sigma_geo(1,1,npos), m1)
+!
+!   c_35
+!
+         CALL el_cons_ij(3, 5, ngeo_strain, epsil_geo(1,1,npos), &
+                                            sigma_geo(1,1,npos), m1)
+!
+!  c_64
+!
+         npos=5*ngeo_strain+1
+         CALL el_cons_ij(6, 4, ngeo_strain, epsil_geo(1,1,npos), &
+                                            sigma_geo(1,1,npos), m1)
+!
+!  c_51
 !
          CALL el_cons_ij(5, 1, ngeo_strain, epsil_geo, sigma_geo, m1)
-         el_con(1,5) = el_con(5,1)
 !
-!  c25
+!  c_52
 !
          npos=ngeo_strain+1
          CALL el_cons_ij(5, 2, ngeo_strain, epsil_geo(1,1,npos), &
                                             sigma_geo(1,1,npos), m1)
-         el_con(2,5) = el_con(5,2)
 !
-!  c35
+!  c_53
 !
          npos=2*ngeo_strain+1
          CALL el_cons_ij(5, 3, ngeo_strain, epsil_geo(1,1,npos), &
                                             sigma_geo(1,1,npos), m1)
-         el_con(3,5) = el_con(5,3)
 !
-!  c46
+!  c_46
 !
          npos=3*ngeo_strain+1
          CALL el_cons_ij(4, 6, ngeo_strain, epsil_geo(1,1,npos), &
                                             sigma_geo(1,1,npos), m1)
-         el_con(6,4) = el_con(4,6)
-
-      ELSE
-!
-!  monoclinic case unique axis c
-!
-!  c16
-!
-         CALL el_cons_ij(6, 1, ngeo_strain, epsil_geo, sigma_geo, m1)
-         el_con(1,6) = el_con(6,1)
-!
-!  c26
-!
-         npos=ngeo_strain+1
-         CALL el_cons_ij(6, 2, ngeo_strain, epsil_geo(1,1,npos), &
-                                            sigma_geo(1,1,npos), m1)
-         el_con(2,6) = el_con(6,2)
-!
-!  c36
-!
-         npos=2*ngeo_strain+1
-         CALL el_cons_ij(6, 3, ngeo_strain, epsil_geo(1,1,npos), &
-                                            sigma_geo(1,1,npos), m1)
-
-         el_con(3,6) = el_con(6,3)
-!
-!  c45
-!
-         npos=5*ngeo_strain+1
-         CALL el_cons_ij(5, 4, ngeo_strain, epsil_geo(1,1,npos), &
-                                            sigma_geo(1,1,npos), m1)
-         el_con(4,5) = el_con(5,4)
-
       END IF
 
    CASE(2) 
@@ -584,30 +660,25 @@ SELECT CASE (laue)
 !
       CALL el_cons_ij(1, 1, ngeo_strain, epsil_geo, sigma_geo, m1)
 !
-!  c_12 
+!  c_21 
 !
       CALL el_cons_ij(2, 1, ngeo_strain, epsil_geo, sigma_geo, m1)
-      el_con(1,2) = el_con(2,1)
 !
-!  c_13 
+!  c_31 
 !
       CALL el_cons_ij(3, 1, ngeo_strain, epsil_geo, sigma_geo, m1)
-      el_con(1,3) = el_con(3,1)
 !
-!  c_14 
+!  c_41 
 !
       CALL el_cons_ij(4, 1, ngeo_strain, epsil_geo, sigma_geo, m1)
-      el_con(1,4) = el_con(4,1)
 !
-!  c_15 
+!  c_51 
 !
       CALL el_cons_ij(5, 1, ngeo_strain, epsil_geo, sigma_geo, m1)
-      el_con(1,5) = el_con(5,1)
 !
-!  c_16 
+!  c_61 
 !
       CALL el_cons_ij(6, 1, ngeo_strain, epsil_geo, sigma_geo, m1)
-      el_con(1,6) = el_con(6,1)
 !
 !  c_22 
 !
@@ -615,29 +686,30 @@ SELECT CASE (laue)
       CALL el_cons_ij(2, 2, ngeo_strain, epsil_geo(1,1,npos), &
                                          sigma_geo(1,1,npos), m1)
 !
-!  c_23 
+!  c_12 
+!
+      CALL el_cons_ij(1, 2, ngeo_strain, epsil_geo(1,1,npos), &
+                                         sigma_geo(1,1,npos), m1)
+!
+!  c_32
 !
       CALL el_cons_ij(3, 2, ngeo_strain, epsil_geo(1,1,npos), &
                                          sigma_geo(1,1,npos), m1)
-      el_con(2,3) = el_con(3,2)
 !  
-!  c_24 
+!  c_42 
 !
       CALL el_cons_ij(4, 2, ngeo_strain, epsil_geo(1,1,npos), &
                                          sigma_geo(1,1,npos), m1)
-      el_con(2,4) = el_con(4,2)
 !  
-!  c_25 
+!  c_52 
 !
       CALL el_cons_ij(5, 2, ngeo_strain, epsil_geo(1,1,npos), &
                                          sigma_geo(1,1,npos), m1)
-      el_con(2,5) = el_con(5,2)
 !  
-!  c_26 
+!  c_62 
 !
-      CALL el_cons_ij( 6, 2, ngeo_strain, epsil_geo(1,1,npos), &
-                                          sigma_geo(1,1,npos), m1)
-      el_con(2,6) = el_con(6,2)
+      CALL el_cons_ij(6, 2, ngeo_strain, epsil_geo(1,1,npos), &
+                                         sigma_geo(1,1,npos), m1)
 !  
 !  c_33 
 !
@@ -645,23 +717,30 @@ SELECT CASE (laue)
       CALL el_cons_ij(3, 3, ngeo_strain, epsil_geo(1,1,npos), &
                                          sigma_geo(1,1,npos), m1)
 !  
-!  c_34 
+!  c_13 
+!
+      CALL el_cons_ij(1, 3, ngeo_strain, epsil_geo(1,1,npos), &
+                                         sigma_geo(1,1,npos), m1)
+!  
+!  c_23 
+!
+      CALL el_cons_ij(2, 3, ngeo_strain, epsil_geo(1,1,npos), &
+                                         sigma_geo(1,1,npos), m1)
+!  
+!  c_43 
 !
       CALL el_cons_ij(4, 3, ngeo_strain, epsil_geo(1,1,npos), &
                                          sigma_geo(1,1,npos), m1)
-      el_con(3,4) = el_con(4,3)
 !  
-!  c_35 
+!  c_53
 !
       CALL el_cons_ij(5, 3, ngeo_strain, epsil_geo(1,1,npos), &
                                          sigma_geo(1,1,npos), m1)
-      el_con(3,5) = el_con(5,3)
 !  
-!  c_36 
+!  c_63 
 !
       CALL el_cons_ij(6, 3, ngeo_strain, epsil_geo(1,1,npos), &
                                          sigma_geo(1,1,npos), m1)
-      el_con(3,6) = el_con(6,3)
 !  
 !  c_44
 !
@@ -669,17 +748,30 @@ SELECT CASE (laue)
       CALL el_cons_ij(4, 4, ngeo_strain, epsil_geo(1,1,npos), &
                                          sigma_geo(1,1,npos), m1)
 !  
-!  c_45 
+!  c_14
+!
+      CALL el_cons_ij(1, 4, ngeo_strain, epsil_geo(1,1,npos), &
+                                         sigma_geo(1,1,npos), m1)
+!  
+!  c_24
+!
+      CALL el_cons_ij(2, 4, ngeo_strain, epsil_geo(1,1,npos), &
+                                         sigma_geo(1,1,npos), m1)
+!  
+!  c_34
+!
+      CALL el_cons_ij(3, 4, ngeo_strain, epsil_geo(1,1,npos), &
+                                         sigma_geo(1,1,npos), m1)
+!  
+!  c_54 
 !
       CALL el_cons_ij(5, 4, ngeo_strain, epsil_geo(1,1,npos), &
                                          sigma_geo(1,1,npos), m1)
-      el_con(4,5) = el_con(5,4)
 !  
-!  c_46 
+!  c_64 
 !
       CALL el_cons_ij(6, 4, ngeo_strain, epsil_geo(1,1,npos), &
                                          sigma_geo(1,1,npos), m1)
-      el_con(4,6) = el_con(6,4)
 !  
 !  c_55 
 !
@@ -687,17 +779,62 @@ SELECT CASE (laue)
       CALL el_cons_ij(5, 5, ngeo_strain, epsil_geo(1,1,npos), &
                                          sigma_geo(1,1,npos), m1)
 !  
-!  c_56 
+!  c_15 
+!
+      CALL el_cons_ij(1, 5, ngeo_strain, epsil_geo(1,1,npos), &
+                                         sigma_geo(1,1,npos), m1)
+!  
+!  c_25 
+!
+      CALL el_cons_ij(2, 5, ngeo_strain, epsil_geo(1,1,npos), &
+                                         sigma_geo(1,1,npos), m1)
+!  
+!  c_35 
+!
+      CALL el_cons_ij(3, 5, ngeo_strain, epsil_geo(1,1,npos), &
+                                         sigma_geo(1,1,npos), m1)
+!  
+!  c_45 
+!
+      CALL el_cons_ij(4, 5, ngeo_strain, epsil_geo(1,1,npos), &
+                                         sigma_geo(1,1,npos), m1)
+!  
+!  c_65 
 !
       CALL el_cons_ij(6, 5, ngeo_strain, epsil_geo(1,1,npos), &
                                          sigma_geo(1,1,npos), m1)
-      el_con(5,6) = el_con(6,5)
 !  
 !  c_66 
 !
       npos=3*ngeo_strain+1
       CALL el_cons_ij(6, 6, ngeo_strain, epsil_geo(1,1,npos), &
                                          sigma_geo(1,1,npos), m1)
+!  
+!  c_16 
+!
+      CALL el_cons_ij(1, 6, ngeo_strain, epsil_geo(1,1,npos), &
+                                         sigma_geo(1,1,npos), m1)
+!  
+!  c_26 
+!
+      CALL el_cons_ij(2, 6, ngeo_strain, epsil_geo(1,1,npos), &
+                                         sigma_geo(1,1,npos), m1)
+!  
+!  c_36 
+!
+      CALL el_cons_ij(3, 6, ngeo_strain, epsil_geo(1,1,npos), &
+                                         sigma_geo(1,1,npos), m1)
+!  
+!  c_46 
+!
+      CALL el_cons_ij(4, 6, ngeo_strain, epsil_geo(1,1,npos), &
+                                         sigma_geo(1,1,npos), m1)
+!  
+!  c_56 
+!
+      CALL el_cons_ij(5, 6, ngeo_strain, epsil_geo(1,1,npos), &
+                                         sigma_geo(1,1,npos), m1)
+
 CASE DEFAULT
    CALL errore('compute_elastic_constants', 'Unknown Laue class ', 1)
 END SELECT
@@ -712,37 +849,46 @@ SUBROUTINE compute_elastic_constants_ene(energy_geo, epsil_geo, nwork, &
 !  This routine computes the elastic constants by fitting the total
 !  energy-strain relation with a polynomial of order m1-1. 
 !  The components of the strain and the elastic constant tensors are
-!  set on the basis of the Bravais lattice and Laue class.
-!  The pressure is estimated and the calculated elastic constants are
-!  corrected to keep into account for the difference between stress-strain
-!  coefficients and energy coefficients. The output of this routine are
-!  the elastic constants defined from the linear relationship between
-!  stress and strain.
+!  set on the basis of the Bravais lattice and the Laue class.
+!  The stress is estimated and the calculated elastic constants are
+!  corrected keeping into account the difference between stress-strain
+!  coefficients and second derivatives of the energy with respect to
+!  strain. The output of this routine are the stress-strain elastic 
+!  constants.
 !
 !  With reference to the strain indicated in the strain.f90 module the
-!  the routine expects to find in energy_geo the total energy that corresponds
-!  to the following strain: 
+!  routine expects to find in energy_geo the total energy that 
+!  corresponds to the following strain: 
 !
 !  Laue class         ibrav            strain
-!  29,32 T_h,  O_h     1               A   E   F 
-!  29,32 T_h,  O_h     2,3             A   E   F3 
-!  19,23 C_6h, D_6h    4               C   E   B1  A  H  
-!  18,22 C_4h, D_4h    6,7             E   C   B   B1 G  H
-!  20    D_2h          8,9,10,11       C   D   E   B  B1 B2  G  H  I
-!  25,27 D_3d, S_6     5               Not available yet
-!  16    C_2h          12,-12, 13,-13  Not available yet
-!  2     C_i           14              Not available yet
+!  29,32 T_h,  O_h     1               A   E   F
+!  29,32 T_h,  O_h     2,3             A   E   F3
+!  19,23 C_6h, D_6h    4               C   E   B1  A   H
+!  22    D_4h          6,7             E   C   B   B1  G   H
+!  18    C_4h          6,7             E   C   B   B1  G   H   CG
+!  20    D_2h          8,9,10,11       C   D   E   B   B1  B2  G   H  I
+!  25,27 D_3d,S_6      4               C   E   B1  A   H
+!  25,   D_3d,         5               C   E   B1  A   H   CI
+!  27,   S_6           5               C   E   B1  A   H   CI  CG
+!  16    C_2h          12, 13,         C   D   E   B   B1  B2  G   H  I
+!                                      CG  DG  EG  HI
+!  16    C_2h          -12,-13,        C   D   E   B   B1  B2  G   H  I
+!                                      CH  DH  EH  GI 
+!  2     C_i           14              C   D   E   B   B1  B2  G   H   I
+!                                      CG  CH  CI  DG  DH  DI  EG  EH  EI
+!                                      GH  IH  IG
 !
 !  For each strain the routine expects the energy for ngeo_strain values of 
 !  strain for a total of nwork values.
-!  epsilon_geo is in cartesian coordinates in the axis of the unstrained lattice.
+!  epsilon_geo is in cartesian coordinates in the axis of the unstrained 
+!  lattice.
 !
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: epsil_geo(3,3,nwork), omega
 REAL(DP), INTENT(IN) :: energy_geo(nwork)
 INTEGER,  INTENT(IN) :: nwork, ngeo_strain, ibrav, laue, m1
 REAL(DP) :: alpha(m1)
-REAL(DP) :: b0, a0, aux
+REAL(DP) :: b0, a0, s11, s22, s33, s12, s13, s23, bmat(6,6)
 INTEGER  :: base_data
 CHARACTER(LEN=41), PARAMETER :: FRMT='(/,5x,"Estimated pressure",f12.5," kbar")'
 
@@ -802,63 +948,63 @@ SELECT CASE (laue)
       el_con(5,5)=el_con(4,4)
       el_con(6,6)=el_con(4,4)
 
+      strs=0.0_DP
+      strs(1,1)=-press
+      strs(2,2)=-press
+      strs(3,3)=-press
+
    CASE (19,23)
 !
 !  hexagonal case, (C_6h and D_6h)
 !
+!  C_11=C_22
+!
       CALL el_cons_ij_ene(1, 1, 'C_11', ngeo_strain, epsil_geo, &
                                                  energy_geo, alpha, m1)
 
-      press=- alpha(2) / omega
-      WRITE(stdout,FRMT) press*ry_kbar
-!
-!  C_11=C_22
-!
+      s11= alpha(2) / omega
+      WRITE(stdout,'("S11=",f15.8," kbar")') s11*ry_kbar
       el_con(1,1) = 1.0_DP / omega * ( 2.0_DP * alpha(3) )
       el_con(2,2) = el_con(1,1)
-
+!
+! C_33
+!
       base_data=ngeo_strain+1
       CALL el_cons_ij_ene(3, 3, 'C_33', ngeo_strain, &
              epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
 
-      press=- alpha(2) / omega
-      WRITE(stdout,FRMT) press*ry_kbar
-!
-! C_33
-!
+      s33= alpha(2) / omega
+      WRITE(stdout,'("S33=",f15.8," kbar")') s33*ry_kbar
       el_con(3,3) = 1.0_DP / omega * ( 2.0_DP * alpha(3) )
-
+!
+!  C_13=C_23
+!
       base_data=2*ngeo_strain+1
       CALL el_cons_ij_ene(1, 1, 'C_13', ngeo_strain, &
              epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
 
       press=- alpha(2) / omega / 2.0_DP
-      WRITE(stdout,FRMT) press*ry_kbar
-!
-!  C_13=C_23
-!
-      aux = 1.0_DP / omega * ( 2.0_DP * alpha(3) )
-      el_con(1,3) = (aux - el_con(1,1) - el_con(3,3)) * 0.5_DP + press
+      WRITE(stdout,'("-(S11+S33)/2",f15.8," kbar",f15.8," kbar")') &
+                                 press*ry_kbar, -(s11+s33)*0.5_DP*ry_kbar
+
+      el_con(1,3) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(1,1) &
+                                                     - el_con(3,3)) * 0.5_DP 
       el_con(3,1) = el_con(1,3)
       el_con(2,3) = el_con(1,3)
       el_con(3,2) = el_con(2,3)
-
-      base_data=3*ngeo_strain+1
-      CALL el_cons_ij_ene(1, 1, 'C_12', ngeo_strain, &
-             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
-
-      press=- alpha(2) / omega / 3.0_DP
-      WRITE(stdout,FRMT) press*ry_kbar
-      aux = 1.0_DP / omega * ( 2.0_DP * alpha(3) )
 !
 !  C_12
 !
-!  pressure is added 3 times because in the expression we should
-!  use C, while el_con(1,3) is B_13. To bring it to C_13 we must subtract P
-!  so adding 2P we get C_12, to print in output B_12 we add another P.
-!
-      el_con(1,2) = (aux - 2.0_DP * el_con(1,1) - el_con(3,3) &
-                         - 4.0_DP * el_con(1,3) ) * 0.5_DP + 3.0_DP * press
+      base_data=3*ngeo_strain+1
+      CALL el_cons_ij_ene(1, 1, 'C_12', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+      press=- alpha(2) / omega / 3.0_DP
+      WRITE(stdout,'("-(2*S11+S33)/3", f15.8," kbar", f15.8, " kbar")') &
+                            press*ry_kbar, -(2.0_DP*s11+s33)/3.0_DP*ry_kbar
+
+      el_con(1,2) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) &
+                             - 2.0_DP * el_con(1,1) - el_con(3,3) &
+                             - 4.0_DP * el_con(1,3) ) * 0.5_DP 
       el_con(2,1) = el_con(1,2)
 
 !
@@ -868,10 +1014,126 @@ SELECT CASE (laue)
       CALL el_cons_ij_ene(1, 3, 'C_55', ngeo_strain, &
              epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
 
-      el_con(5,5) = 0.25_DP / omega * ( 2.0_DP * alpha(3) ) - 0.5_DP * press
+      el_con(5,5) = 0.25_DP / omega * ( 2.0_DP * alpha(3) ) 
       el_con(4,4) = el_con(5,5)
 
       el_con(6,6) = (el_con(1,1) - el_con(1,2)) * 0.5_DP
+
+      strs=0.0_DP
+      strs(1,1)=s11
+      strs(2,2)=s11
+      strs(3,3)=s33
+      CALL correct_for_stress(bmat,el_con,strs)
+      el_con=bmat
+         
+   CASE(25,27)
+!
+!   Trigonal and hexagonal systems (D_3d and S_6)
+!
+!  C_11=C_22
+!
+      CALL el_cons_ij_ene(1, 1, 'C_11', ngeo_strain, epsil_geo, &
+                                                 energy_geo, alpha, m1)
+
+      s11= alpha(2) / omega
+      WRITE(stdout,'("S11=",f15.8," kbar")') s11*ry_kbar
+      el_con(1,1) = 1.0_DP / omega * ( 2.0_DP * alpha(3) )
+      el_con(2,2) = el_con(1,1)
+!
+! C_33
+!
+      base_data=ngeo_strain+1
+      CALL el_cons_ij_ene(3, 3, 'C_33', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+      s33= alpha(2) / omega
+      WRITE(stdout,'("S33=",f15.8, " kbar")') s33*ry_kbar
+      el_con(3,3) = 1.0_DP / omega * ( 2.0_DP * alpha(3) )
+!
+!  C_13=C_23
+!
+      base_data=2*ngeo_strain+1
+      CALL el_cons_ij_ene(1, 1, 'C_13', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+      press=- alpha(2) / omega / 2.0_DP
+      WRITE(stdout,'("-(S11+S33)/2",f15.8," kbar",f15.8," kbar")') &
+                                press*ry_kbar, -(s11+s33)*0.5_DP*ry_kbar
+
+      el_con(1,3) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(1,1) &
+                                                     - el_con(3,3)) * 0.5_DP 
+      el_con(3,1) = el_con(1,3)
+      el_con(2,3) = el_con(1,3)
+      el_con(3,2) = el_con(2,3)
+!
+!  C_12
+!
+      base_data=3*ngeo_strain+1
+      CALL el_cons_ij_ene(1, 1, 'C_12', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+      press=- alpha(2) / omega / 3.0_DP
+      WRITE(stdout,'("-(2*S11+S33)/3", f15.8," kbar", f15.8," kbar")') &
+                     press*ry_kbar, -(2.0_DP*s11+s33)/3.0_DP*ry_kbar
+
+      el_con(1,2) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - &
+                                2.0_DP * el_con(1,1) - el_con(3,3) &
+                              - 4.0_DP * el_con(1,3) ) * 0.5_DP 
+      el_con(2,1) = el_con(1,2)
+!
+!  C_44=C_55. The factor 1/4 is due to the definition of epsilon_4
+!
+      base_data=4*ngeo_strain+1
+      CALL el_cons_ij_ene(1, 3, 'C_55', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+      el_con(5,5) = 0.25_DP / omega * ( 2.0_DP * alpha(3) ) 
+      el_con(4,4) = el_con(5,5)
+
+      el_con(6,6) = (el_con(1,1) - el_con(1,2)) * 0.5_DP
+!
+!  C_14 = -C_24 = C_56
+!
+      IF (ibrav==5) THEN
+         base_data=5*ngeo_strain+1
+         CALL el_cons_ij_ene(1, 1, 'C_14', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+         el_con(1,4) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(1,1) &
+                                                       - el_con(4,4))*0.5_DP
+         el_con(4,1) = el_con(1,4)
+
+         el_con(2,4) = -el_con(1,4) 
+         el_con(4,2) = el_con(2,4)
+
+         el_con(5,6) = el_con(1,4) 
+         el_con(6,5) = el_con(5,6)
+
+         IF (laue==27) THEN
+!
+!  C_25 = -C_15 = C_46
+!
+            base_data=6*ngeo_strain+1
+            CALL el_cons_ij_ene(2, 2, 'C_25', ngeo_strain, &
+                epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+            el_con(2,5) = ( 1.0_DP / omega * (2.0_DP * alpha(3) ) &
+                                     - el_con(2,2) - el_con(5,5))*0.5_DP
+            el_con(5,2) = el_con(2,5)
+
+            el_con(1,5) = -el_con(2,5) 
+            el_con(5,1) = el_con(1,5)
+
+            el_con(4,6) = el_con(2,5) 
+            el_con(6,4) = el_con(4,6)
+         ENDIF
+      ENDIF
+
+      strs=0.0_DP
+      strs(1,1)=s11
+      strs(2,2)=s11
+      strs(3,3)=s33
+      CALL correct_for_stress(bmat,el_con,strs)
+      el_con=bmat
 
    CASE(18,22)
 !
@@ -882,8 +1144,8 @@ SELECT CASE (laue)
       CALL el_cons_ij_ene(3, 3, 'C_33', ngeo_strain, epsil_geo, &
                                                  energy_geo, alpha, m1)
 
-      press=- alpha(2) / omega
-      WRITE(stdout,FRMT) press*ry_kbar
+      s33=alpha(2) / omega
+      WRITE(stdout,'("S33=",f15.9," kbar")') s33*ry_kbar
       el_con(3,3) = 1.0_DP / omega * ( 2.0_DP * alpha(3) )
 !
 !  C_11 = C_22
@@ -891,8 +1153,8 @@ SELECT CASE (laue)
       base_data=ngeo_strain+1
       CALL el_cons_ij_ene(1, 1, 'C_11', ngeo_strain, &
              epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
-      press=- alpha(2) / omega
-      WRITE(stdout,FRMT) press*ry_kbar
+      s11=alpha(2) / omega
+      WRITE(stdout,'("S11=",f15.9," kbar")') s11*ry_kbar
       el_con(1,1) = 1.0_DP / omega * ( 2.0_DP * alpha(3) )
       el_con(2,2) = el_con(1,1)
 !
@@ -902,9 +1164,9 @@ SELECT CASE (laue)
       CALL el_cons_ij_ene(1, 1, 'C_12', ngeo_strain, &
              epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
       press=- alpha(2) / omega
-      WRITE(stdout,FRMT) press*ry_kbar
-      el_con(1,2) = 1.0_DP/omega*( 2.0_DP*alpha(3) )*0.5_DP-el_con(1,1) + &
-                                                                     press 
+      WRITE(stdout,'("-S11=", f15.8," kbar", f15.8," kbar")') &
+                                         press*ry_kbar, -s11*ry_kbar
+      el_con(1,2) = 0.5_DP/omega*( 2.0_DP*alpha(3) ) - el_con(1,1) 
       el_con(2,1) = el_con(1,2)
 !
 !  C_13=C_23
@@ -914,20 +1176,21 @@ SELECT CASE (laue)
              epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
 
       press=- alpha(2) / omega
-      WRITE(stdout,FRMT) press*ry_kbar
+      WRITE(stdout,'("-(2 S11+S33)/2",f15.8," kbar",f15.8," kbar" )') &
+                       press*ry_kbar, -(2.0_DP*s11+s33)/2.0_DP*ry_kbar
       el_con(1,3) = (1.0_DP/omega*(2.0_DP*alpha(3)) - el_con(3,3) &
-                                              -el_con(1,1)) * 0.5_DP + press
+                                              -el_con(1,1)) * 0.5_DP 
       el_con(3,1) = el_con(1,3)
       el_con(2,3) = el_con(1,3)
       el_con(3,2) = el_con(2,3)
 !
-!  C_66
+!  C_66 the factor 1/4 is for the definition of \epsilon_4
 !
       base_data=4*ngeo_strain+1
       CALL el_cons_ij_ene(1, 2, 'C_66', ngeo_strain, &
              epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
 
-      el_con(6,6) = 0.25_DP/omega*(2.0_DP*alpha(3)) - 0.5_DP * press
+      el_con(6,6) = 0.25_DP/omega*(2.0_DP*alpha(3)) 
 !
 !  C_44=C_55
 !
@@ -935,109 +1198,634 @@ SELECT CASE (laue)
       CALL el_cons_ij_ene(1, 3, 'C_55', ngeo_strain, &
              epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
 
-      el_con(5,5) = 0.25_DP/omega*(2.0_DP*alpha(3)) - 0.5_DP * press
+      el_con(5,5) = 0.25_DP/omega*(2.0_DP*alpha(3))
       el_con(4,4) = el_con(5,5)
+      IF (laue==18) THEN
+!
+!   C_16
+!
+         base_data=6*ngeo_strain+1
+         CALL el_cons_ij_ene(1, 1, 'C_16', ngeo_strain, &
+              epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+         el_con(1,6) = (1.0_DP/omega*(2.0_DP*alpha(3)) - el_con(1,1) &
+                                                       - el_con(6,6) )* 0.5_DP
+         el_con(6,1) = el_con(1,6)
+         el_con(2,6) = -el_con(1,6)
+         el_con(6,2) = el_con(2,6)
+      ENDIF
+
+      strs=0.0_DP
+      strs(1,1)=s11
+      strs(2,2)=s11
+      strs(3,3)=s33
+      CALL correct_for_stress(bmat,el_con,strs)
+      el_con=bmat
 
    CASE(20)
 !
 !  Orthorombic case (D_2h Laue class)  
 !
+!  C_11
+!
       CALL el_cons_ij_ene(1, 1, 'C_11', ngeo_strain, epsil_geo, &
                                                  energy_geo, alpha, m1)
 
-      press=- alpha(2) / omega
-      WRITE(stdout,FRMT) press*ry_kbar
-!
-!  C_11
-!
+      s11=alpha(2) / omega
+      WRITE(stdout,'("S11=",f15.8," kbar")') s11*ry_kbar
       el_con(1,1) = 1.0_DP / omega * ( 2.0_DP * alpha(3) )
-
+!
+!  C_22
+!
       base_data=ngeo_strain+1
       CALL el_cons_ij_ene(2, 2, 'C_22', ngeo_strain, &
              epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
 
-      press=- alpha(2) / omega
-      WRITE(stdout,FRMT) press*ry_kbar
-!
-!  C_22
-!
+      s22=alpha(2) / omega
+      WRITE(stdout,'("S22=",f15.9," kbar")') s22*ry_kbar
       el_con(2,2) = 1.0_DP / omega * ( 2.0_DP * alpha(3) )
-
+!
+!  C_33
+!
       base_data=2*ngeo_strain+1
       CALL el_cons_ij_ene(3, 3, 'C_33', ngeo_strain, &
              epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
 
-      press=- alpha(2) / omega
-      WRITE(stdout,FRMT) press*ry_kbar
-!
-!  C_33
-!
+      s33=alpha(2) / omega
+      WRITE(stdout,'("S33= ",f15.9," kbar")') s33*ry_kbar
       el_con(3,3) = 1.0_DP / omega * ( 2.0_DP * alpha(3) )
-
+!
+!  C_12
+!
       base_data = 3*ngeo_strain+1
       CALL el_cons_ij_ene(1, 1, 'C_12', ngeo_strain, &
              epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
 
       press=- alpha(2) / omega
-      WRITE(stdout,FRMT) press*ry_kbar
+      WRITE(stdout,'("-(S11+S12)/2",f15.8," kbar",f15.8," kbar")') &
+                                   press*ry_kbar, -(s11+s22)/2.0_DP*ry_kbar
       el_con(1,2) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(1,1) &
-                                   - el_con(2,2) ) * 0.5_DP + press
+                                   - el_con(2,2) ) * 0.5_DP 
       el_con(2,1)=el_con(1,2)
-
+!
+!  C_13
+!
       base_data = 4*ngeo_strain+1
       CALL el_cons_ij_ene(1, 1, 'C_13', ngeo_strain, &
              epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
 
       press=- alpha(2) / omega
-      WRITE(stdout,FRMT) press*ry_kbar
-!
-!  C_13
-!
+      WRITE(stdout,'("-(S11+S33)/2",f15.8," kbar",f15.8," kbar")') &
+                                  press*ry_kbar, -(s11+s33)/2.0_DP*ry_kbar
       el_con(1,3) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(1,1) &
-                                   - el_con(3,3) ) * 0.5_DP + press
+                                   - el_con(3,3) ) * 0.5_DP 
       el_con(3,1)=el_con(1,3)
-
-      base_data = 5*ngeo_strain+1
-      CALL el_cons_ij_ene(2, 2, 'C_23', ngeo_strain, &
-             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
-
-      press=- alpha(2) / omega
-      WRITE(stdout,FRMT) press*ry_kbar
 !
 !  C_23
 !
+      base_data = 5*ngeo_strain+1
+      CALL el_cons_ij_ene(2, 2, 'C_23', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+      press=- alpha(2) / omega
+      WRITE(stdout,'("-(S11+S33)/2",f15.8," kbar",f15.8," kbar")') &
+                               press*ry_kbar, -(s22+s33)/2.0_DP*ry_kbar
       el_con(2,3) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(2,2) &
-                                   - el_con(3,3) ) * 0.5_DP + press
+                                   - el_con(3,3) ) * 0.5_DP 
       el_con(3,2)=el_con(2,3)
-
+!
+!  C_66. The factor 1/4 is due to the definition of \epsilon_6
+!
       base_data = 6*ngeo_strain+1
       CALL el_cons_ij_ene(1, 2, 'C_66', ngeo_strain, &
              epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
-!
-!  C_66
-!
-      el_con(6,6) = 0.25_DP / omega * ( 2.0_DP * alpha(3) ) - 0.5_DP * press
-
-      base_data = 7*ngeo_strain+1
-      CALL el_cons_ij_ene(1, 3, 'C_55', ngeo_strain, &
-             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+      el_con(6,6) = 0.25_DP / omega * ( 2.0_DP * alpha(3) ) 
 !
 !  C_55
 !
-      el_con(5,5) = 0.25_DP / omega * ( 2.0_DP * alpha(3) ) - 0.5_DP * press
-
-      base_data = 8*ngeo_strain+1
-      CALL el_cons_ij_ene(2, 3, 'C_44', ngeo_strain, &
+      base_data = 7*ngeo_strain+1
+      CALL el_cons_ij_ene(1, 3, 'C_55', ngeo_strain, &
              epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+      el_con(5,5) = 0.25_DP / omega * ( 2.0_DP * alpha(3) ) 
 !
 !  C_44
 !
-      el_con(4,4) = 0.25_DP / omega * ( 2.0_DP * alpha(3) ) - 0.5_DP * press
+      base_data = 8*ngeo_strain+1
+      CALL el_cons_ij_ene(2, 3, 'C_44', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+      el_con(4,4) = 0.25_DP / omega * ( 2.0_DP * alpha(3) ) 
+
+      strs=0.0_DP
+      strs(1,1)=s11
+      strs(2,2)=s22
+      strs(3,3)=s33
+      CALL correct_for_stress(bmat,el_con,strs)
+      el_con=bmat
+
+   CASE(16)
+!
+!   Monoclinic (C_2h Laue class)
+!
+!
+!  C_11
+!
+      CALL el_cons_ij_ene(1, 1, 'C_11', ngeo_strain, epsil_geo, &
+                                                 energy_geo, alpha, m1)
+
+      s11=alpha(2) / omega
+      WRITE(stdout,'("S11=",f15.8," kbar")') s11*ry_kbar
+      el_con(1,1) = 1.0_DP / omega * ( 2.0_DP * alpha(3) )
+!
+!  C_22
+!
+      base_data=ngeo_strain+1
+      CALL el_cons_ij_ene(2, 2, 'C_22', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+      s22=alpha(2) / omega
+      WRITE(stdout,'("S22=",f15.8," kbar")') s22*ry_kbar
+      el_con(2,2) = 1.0_DP / omega * ( 2.0_DP * alpha(3) )
+!
+!  C_33
+!
+      base_data=2*ngeo_strain+1
+      CALL el_cons_ij_ene(3, 3, 'C_33', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+      s33=alpha(2) / omega
+      WRITE(stdout,'("S33=",f15.8," kbar")') s33*ry_kbar
+      el_con(3,3) = 1.0_DP / omega * ( 2.0_DP * alpha(3) )
+!
+!  C_12
+!
+      base_data = 3*ngeo_strain+1
+      CALL el_cons_ij_ene(1, 1, 'C_12', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+      press=- alpha(2) / omega
+      WRITE(stdout,'("-(S11+S22)/2",f15.8," kbar",f15.8," kbar")') &
+                              press*ry_kbar, -(s11+s22)/2.0_DP*ry_kbar
+      el_con(1,2) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(1,1) &
+                                   - el_con(2,2) ) * 0.5_DP 
+      el_con(2,1)=el_con(1,2)
+!
+!  C_13
+!
+      base_data = 4*ngeo_strain+1
+      CALL el_cons_ij_ene(1, 1, 'C_13', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+      press=- alpha(2) / omega
+      WRITE(stdout,'("-(S11+S33)/2",f15.8," kbar", f15.8," kbar")') &
+                                  press*ry_kbar, -(s11+s33)/2.0_DP*ry_kbar
+      el_con(1,3) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(1,1) &
+                                   - el_con(3,3) ) * 0.5_DP 
+      el_con(3,1)=el_con(1,3)
+!
+!  C_23
+!
+      base_data = 5*ngeo_strain+1
+      CALL el_cons_ij_ene(2, 2, 'C_23', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+      press=- alpha(2) / omega
+      WRITE(stdout,'("-(S22+S33)/2",f15.8," kbar",f15.8," kbar")') &
+                              press*ry_kbar, -(s22+s33)/2.0_DP*ry_kbar
+      el_con(2,3) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(2,2) &
+                                   - el_con(3,3) ) * 0.5_DP 
+      el_con(3,2)=el_con(2,3)
+!
+!  C_66
+!
+      base_data = 6*ngeo_strain+1
+      CALL el_cons_ij_ene(1, 2, 'C_66', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+      s12=- alpha(2) / omega
+      WRITE(stdout,'("S12=",f15.8," kbar")') s12*ry_kbar
+      el_con(6,6) = 0.25_DP / omega * ( 2.0_DP * alpha(3) ) 
+!
+!  C_55
+!
+      base_data = 7*ngeo_strain+1
+      CALL el_cons_ij_ene(1, 3, 'C_55', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+      s13=- alpha(2) / omega
+      WRITE(stdout,'("S13=",f15.8," kbar")') s13*ry_kbar
+      el_con(5,5) = 0.25_DP / omega * ( 2.0_DP * alpha(3) ) 
+!
+!  C_44
+!
+      base_data = 8*ngeo_strain+1
+      CALL el_cons_ij_ene(2, 3, 'C_44', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+      s23=- alpha(2) / omega
+      WRITE(stdout,'("S23=",f15.8," kbar")') s23*ry_kbar
+      el_con(4,4) = 0.25_DP / omega * ( 2.0_DP * alpha(3) ) 
+
+      IF (ibrav>0) THEN
+!
+!   Monoclinic lattice: unique axis c
+!
+!
+!  C_16 
+!
+         base_data = 9*ngeo_strain+1
+         CALL el_cons_ij_ene(1, 1, 'C_16', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+         press=- alpha(2) / omega
+         WRITE(stdout,'("-(S11+S12)",f15.8," kbar",f15.8," kbar")') &
+                   press*ry_kbar, -(s11+s12)*ry_kbar 
+         el_con(1,6) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(1,1) &
+                                               - el_con(6,6)) *0.5_DP
+         el_con(6,1) = el_con(1,6)
+!
+!  C_26
+!
+         base_data = 10*ngeo_strain+1
+         CALL el_cons_ij_ene(2, 2, 'C_26', ngeo_strain, &
+                epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+         press=- alpha(2) / omega
+         WRITE(stdout,'("-(S22+S12)",f15.8," kbar",f15.8," kbar")') &
+                                           press*ry_kbar, -(s22+s12)*ry_kbar 
+         el_con(2,6) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(2,2) &
+                                                  - el_con(6,6)) *0.5_DP
+         el_con(6,2) = el_con(2,6)
+!
+!  C_36 
+!
+         base_data = 11*ngeo_strain+1
+         CALL el_cons_ij_ene(3, 3, 'C_36', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+         press=- alpha(2) / omega
+         WRITE(stdout,'("-(S33+S12)",f15.8," kbar",f15.8," kbar")') & 
+                                          press*ry_kbar, -(s33+s12)*ry_kbar 
+         el_con(3,6) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(3,3) &
+                                               - el_con(6,6)) *0.5_DP
+         el_con(6,3) = el_con(3,6)
+!
+!  C_45
+!
+         base_data = 12*ngeo_strain+1
+         CALL el_cons_ij_ene(1, 3, 'C_45', ngeo_strain, &
+               epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+         press=- alpha(2) / omega
+         WRITE(stdout,'("(S13+S23)",f15.8," kbar",f15.8," kbar")') &
+                                        press*ry_kbar, -(s13+s23)*ry_kbar 
+         el_con(4,5) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(4,4) &
+                                                  - el_con(5,5) ) * 0.5_DP
+         el_con(5,4) = el_con(4,5)
+      ELSE
+!
+!   Monoclinic case: unique axis b
+!
+!
+!  C_15 
+!
+         base_data = 9*ngeo_strain+1
+         CALL el_cons_ij_ene(1, 1, 'C_15', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+         press=- alpha(2) / omega
+         WRITE(stdout,'("-(S11+S13)",f15.8," kbar",f15.8," kbar")') &
+                                         press*ry_kbar, -(s11+s13)*ry_kbar 
+         el_con(1,5) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(1,1) &
+                                               - el_con(5,5)) *0.5_DP
+         el_con(5,1) = el_con(1,5)
+!
+!  C_25  
+!
+         base_data = 10*ngeo_strain+1
+         CALL el_cons_ij_ene(2, 2, 'C_25', ngeo_strain, &
+               epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+         press=- alpha(2) / omega
+         WRITE(stdout,'("-(S22+S13)",f15.8," kbar",f15.8," kbar")') &
+                                         press*ry_kbar, -(s22+s13)*ry_kbar 
+         el_con(2,5) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(2,2) &
+                                                - el_con(5,5)) *0.5_DP
+         el_con(5,2) = el_con(2,5)
+!
+!  C_35
+!
+         base_data = 11*ngeo_strain+1
+         CALL el_cons_ij_ene(1, 1, 'C_35', ngeo_strain, &
+                epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+         press=- alpha(2) / omega
+         WRITE(stdout,'("-(S33+S13)",f15.8," kbar",f15.8," kbar")') &
+                                         press*ry_kbar, -(s33+s13)*ry_kbar 
+         el_con(3,5) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(3,3) &
+                                                  - el_con(5,5)) *0.5_DP
+         el_con(5,3) = el_con(3,5)
+!
+!  C_46 
+!
+         base_data = 12*ngeo_strain+1
+         CALL el_cons_ij_ene(1, 2, 'C_46', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+         press=- alpha(2) / omega
+         WRITE(stdout,'("-(S23+S12)",f15.8," kbar",f15.8," kbar")') &
+                                         press*ry_kbar, -(s23+s12)*ry_kbar 
+         el_con(4,6) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(4,4) &
+                                                  - el_con(6,6)) *0.5_DP
+         el_con(6,4) = el_con(4,6)
+      ENDIF
+
+      strs=0.0_DP
+      strs(1,1)=s11
+      strs(2,2)=s22
+      strs(3,3)=s33
+      strs(1,2)=s12
+      strs(2,1)=s12
+      strs(1,3)=s13
+      strs(3,1)=s13
+      strs(2,3)=s23
+      strs(3,2)=s23
+      CALL correct_for_stress(bmat,el_con,strs)
+      el_con=bmat
+
+   CASE(2)
+!
+!   Triclinic (C_i Laue class)
+!
+!
+!  C_11
+!
+      CALL el_cons_ij_ene(1, 1, 'C_11', ngeo_strain, epsil_geo, &
+                                                 energy_geo, alpha, m1)
+
+      s11=alpha(2) / omega
+      WRITE(stdout,'("S11=",f15.8," kbar")') s11*ry_kbar
+      el_con(1,1) = 1.0_DP / omega * ( 2.0_DP * alpha(3) )
+!
+!  C_22
+!
+      base_data=ngeo_strain+1
+      CALL el_cons_ij_ene(2, 2, 'C_22', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+      s22=alpha(2) / omega
+      WRITE(stdout,'("S22=",f15.8," kbar")') s22*ry_kbar
+      el_con(2,2) = 1.0_DP / omega * ( 2.0_DP * alpha(3) )
+!
+!  C_33
+!
+      base_data=2*ngeo_strain+1
+      CALL el_cons_ij_ene(3, 3, 'C_33', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+      s33=alpha(2) / omega
+      WRITE(stdout,'("S33=",f15.8," kbar")') s33*ry_kbar
+      el_con(3,3) = 1.0_DP / omega * ( 2.0_DP * alpha(3) )
+!
+!  C_12
+!
+      base_data = 3*ngeo_strain+1
+      CALL el_cons_ij_ene(1, 1, 'C_12', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+      press=- alpha(2) / omega
+      WRITE(stdout,'("-(S11+S12)/2",f15.8," kbar",f15.8," kbar")') &
+                                  press*ry_kbar, -(s11+s22)/2.0_DP*ry_kbar
+      el_con(1,2) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(1,1) &
+                                   - el_con(2,2) ) * 0.5_DP 
+      el_con(2,1)=el_con(1,2)
+!
+!  C_13
+!
+      base_data = 4*ngeo_strain+1
+      CALL el_cons_ij_ene(1, 1, 'C_13', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+      press=- alpha(2) / omega
+      WRITE(stdout,'("-(S11+S33)/2",f15.8," kbar",f15.8," kbar")') &
+                                 press*ry_kbar, -(s11+s33)/2.0_DP*ry_kbar
+      el_con(1,3) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(1,1) &
+                                   - el_con(3,3) ) * 0.5_DP 
+      el_con(3,1)=el_con(1,3)
+!
+!  C_23
+!
+      base_data = 5*ngeo_strain+1
+      CALL el_cons_ij_ene(2, 2, 'C_23', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+      press=- alpha(2) / omega
+      WRITE(stdout,'("-(S22+S33)/2",f15.8," kbar",f15.8," kbar")') &
+                                  press*ry_kbar, -(s22+s33)/2.0_DP*ry_kbar
+      el_con(2,3) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(2,2) &
+                                   - el_con(3,3) ) * 0.5_DP 
+      el_con(3,2)=el_con(2,3)
+!
+!  C_66
+!
+      base_data = 6*ngeo_strain+1
+      CALL el_cons_ij_ene(1, 2, 'C_66', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+      s12=- alpha(2) / omega
+      WRITE(stdout,'("S12=",f15.8," kbar")') s12*ry_kbar
+      el_con(6,6) = 0.25_DP / omega * ( 2.0_DP * alpha(3) ) 
+!
+!  C_55
+!
+      base_data = 7*ngeo_strain+1
+      CALL el_cons_ij_ene(1, 3, 'C_55', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+      s13=- alpha(2) / omega
+      WRITE(stdout,'("S13=",f15.8," kbar")') s13*ry_kbar
+      el_con(5,5) = 0.25_DP / omega * ( 2.0_DP * alpha(3) ) 
+!
+!  C_44
+!
+      base_data = 8*ngeo_strain+1
+      CALL el_cons_ij_ene(2, 3, 'C_44', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+      s23=- alpha(2) / omega
+      WRITE(stdout,'("S12=",f15.8," kbar")') s23*ry_kbar
+      el_con(4,4) = 0.25_DP / omega * ( 2.0_DP * alpha(3) ) 
+!
+!  C_16
+!
+      base_data = 9*ngeo_strain+1
+      CALL el_cons_ij_ene(1, 1, 'C_16', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+      press=- alpha(2) / omega
+      WRITE(stdout,'("-(S11+S12)",f15.8," kbar",f15.8," kbar")') &
+                                          press*ry_kbar, -(s11+s12)*ry_kbar 
+      el_con(1,6) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(1,1) &
+                                               - el_con(6,6)) *0.5_DP
+      el_con(6,1) = el_con(1,6)
+!
+!  C_15
+!
+      base_data = 10*ngeo_strain+1
+      CALL el_cons_ij_ene(1, 1, 'C_15', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+      press=- alpha(2) / omega
+      WRITE(stdout,'("-(S11+S13)",f15.8," kbar",f15.8," kbar")') &
+                                          press*ry_kbar, -(s11+s13)*ry_kbar 
+      el_con(1,5) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(1,1) &
+                                               - el_con(5,5)) *0.5_DP
+      el_con(5,1) = el_con(1,5)
+!
+!  C_14
+!
+      base_data = 11*ngeo_strain+1
+      CALL el_cons_ij_ene(1, 1, 'C_14', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+      press=- alpha(2) / omega
+      WRITE(stdout,'("-(S11+S23)",f15.8," kbar",f15.8," kbar")') &
+                                          press*ry_kbar, -(s11+s23)*ry_kbar 
+      el_con(1,4) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(1,1) &
+                                               - el_con(4,4) ) * 0.5_DP
+      el_con(4,1) = el_con(1,4)
+!
+!  C_26
+!
+      base_data = 12*ngeo_strain+1
+      CALL el_cons_ij_ene(2, 2, 'C_26', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+      press=- alpha(2) / omega
+      WRITE(stdout,'("-(S22+S12)",f15.8," kbar",f15.8," kbar")') &
+                                          press*ry_kbar, -(s22+s12)*ry_kbar 
+      el_con(2,6) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(2,2) &
+                                               - el_con(6,6)) *0.5_DP
+      el_con(6,2) = el_con(2,6)
+!
+!  C_25
+!
+      base_data = 13*ngeo_strain+1
+      CALL el_cons_ij_ene(2, 2, 'C_25', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+      press=- alpha(2) / omega
+      WRITE(stdout,'("-(S22+S13)",f15.8," kbar",f15.8," kbar")') &
+                                          press*ry_kbar, -(s22+s13)*ry_kbar 
+      el_con(2,5) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(2,2) &
+                                               - el_con(5,5)) *0.5_DP
+      el_con(5,2) = el_con(2,5)
+!
+!  C_24
+!
+      base_data = 14*ngeo_strain+1
+      CALL el_cons_ij_ene(2, 2, 'C_24', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+      press=- alpha(2) / omega
+      WRITE(stdout,'("-(S22+S23)",f15.8," kbar",f15.8," kbar")') &
+                                          press*ry_kbar, -(s22+s23)*ry_kbar 
+      el_con(2,4) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(2,2) &
+                                               - el_con(4,4) ) * 0.5_DP
+      el_con(4,2) = el_con(2,4)
+!
+!  C_36
+!
+      base_data = 15*ngeo_strain+1
+      CALL el_cons_ij_ene(3, 3, 'C_36', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+      press=- alpha(2) / omega
+      WRITE(stdout,'("-(S33+S12)",f15.8," kbar",f15.8," kbar")') &
+                                          press*ry_kbar, -(s33+s12)*ry_kbar 
+      el_con(3,6) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(3,3) &
+                                               - el_con(6,6)) *0.5_DP
+      el_con(6,3) = el_con(3,6)
+!
+!  C_35
+!
+      base_data = 16*ngeo_strain+1
+      CALL el_cons_ij_ene(1, 1, 'C_35', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+      press=- alpha(2) / omega
+      WRITE(stdout,'("-(S33+S13)",f15.8," kbar",f15.8," kbar")') &
+                                          press*ry_kbar, -(s33+s13)*ry_kbar 
+      el_con(3,5) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(3,3) &
+                                               - el_con(5,5)) *0.5_DP
+      el_con(5,3) = el_con(3,5)
+!
+!  C_34
+!
+      base_data = 17*ngeo_strain+1
+      CALL el_cons_ij_ene(1, 1, 'C_34', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+      press=- alpha(2) / omega
+      WRITE(stdout,'("-(S33+S23)",f15.8," kbar",f15.8," kbar")') &
+                                          press*ry_kbar, -(s33+s23)*ry_kbar
+      el_con(3,4) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(3,3) &
+                                               - el_con(4,4) ) * 0.5_DP
+      el_con(4,3) = el_con(3,4)
+!
+!  C_56
+!
+      base_data = 18*ngeo_strain+1
+      CALL el_cons_ij_ene(1, 2, 'C_56', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+      press=- alpha(2) / omega
+      WRITE(stdout,'("-(S12+S23)",f15.8," kbar",f15.8," kbar")') &
+                                          press*ry_kbar, -(s12+s23)*ry_kbar
+      el_con(5,6) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(5,5) &
+                                               - el_con(6,6)) *0.5_DP
+      el_con(6,5) = el_con(5,6)
+!
+!  C_46
+!
+      base_data = 19*ngeo_strain+1
+      CALL el_cons_ij_ene(1, 2, 'C_46', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+      press=- alpha(2) / omega
+      WRITE(stdout,'("-(S23+S12)",f15.8," kbar",f15.8," kbar")') &
+                                          press*ry_kbar, -(s23+s12)*ry_kbar
+      el_con(4,6) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(4,4) &
+                                               - el_con(6,6)) *0.5_DP
+      el_con(6,4) = el_con(4,6)
+!
+!  C_45
+!
+      base_data = 20*ngeo_strain+1
+      CALL el_cons_ij_ene(1, 3, 'C_45', ngeo_strain, &
+             epsil_geo(1,1,base_data), energy_geo(base_data), alpha, m1)
+
+      press=- alpha(2) / omega
+      WRITE(stdout,'("-(S13+S23)",f15.8," kbar",f15.8," kbar")') &
+                                          press*ry_kbar, -(s13+s23)*ry_kbar
+      el_con(4,5) = (1.0_DP / omega * ( 2.0_DP * alpha(3) ) - el_con(4,4) &
+                                               - el_con(5,5) ) * 0.5_DP
+      el_con(5,4) = el_con(4,5)
+
+      strs=0.0_DP
+      strs(1,1)=s11
+      strs(2,2)=s22
+      strs(3,3)=s33
+      strs(1,2)=s12
+      strs(2,1)=s12
+      strs(1,3)=s13
+      strs(3,1)=s13
+      strs(2,3)=s23
+      strs(3,2)=s23
+      CALL correct_for_stress(bmat,el_con,strs)
+      el_con=bmat
 
    CASE DEFAULT
       CALL errore('compute_elastic_constants_ene',&
                                    'Case not yet available',1)
 END SELECT
+press = (strs(1,1) + strs(2,2) + strs(3,3))/ 3.0_DP
 el_con = el_con * ry_kbar
 
 RETURN
@@ -1353,5 +2141,78 @@ ENDDO
 
 RETURN
 END SUBROUTINE compute_sound
+
+SUBROUTINE correct_for_stress(bmat, el_cons_, stres)
+!
+!  This routine receives as input the second derivatives of the 
+!  energy with respect to strain in el_cons(6,6) and gives as output
+!  the stress-strain elastic constants contained in the matrix 
+!  bmat(6,6). It receives also the stress of the unperturbed system
+!  in stres(3,3)
+!
+USE voigt, ONLY : voigt_index
+IMPLICIT NONE
+
+REAL(DP), INTENT(IN) :: el_cons_(6,6)
+REAL(DP), INTENT(IN) :: stres(3,3)
+REAL(DP), INTENT(INOUT) :: bmat(6,6)
+
+INTEGER :: ij, kl, ijm, klm, i, j, k, l
+
+DO ij=1,6
+   ijm=ij
+   CALL voigt_index(i,j,ijm,.FALSE.)
+   DO kl=1,6
+      klm=kl
+      CALL voigt_index(k,l,klm,.FALSE.)
+      bmat(ij,kl)= el_cons_(ij,kl) - 0.5_DP * (2.0_DP*stres(i,j)*delta(k,l) &
+                    -0.5_DP*(stres(j,l)*delta(i,k) +      &
+                             stres(j,k)*delta(i,l) +      &
+                             stres(i,l)*delta(j,k) +      &
+                             stres(i,k)*delta(j,l) ) )
+   ENDDO
+ENDDO
+
+RETURN
+END SUBROUTINE correct_for_stress
+
+SUBROUTINE correct_for_pressure(bmat, el_cons_, pressure)
+!
+!  This routine receives as input the second derivatives of the 
+!  energy with respect to strain in el_cons(6,6) and gives as output
+!  the stress-strain elastic constants contained in the matrix 
+!  bmat(3,3,3,3). It receives also the pressure of the unperturbed system
+!  and assumes that this is the only stress present on the system
+!
+IMPLICIT NONE
+
+REAL(DP), INTENT(IN) :: el_cons_(6,6)
+REAL(DP), INTENT(IN) :: pressure
+REAL(DP), INTENT(INOUT) :: bmat(6,6)
+
+REAL(DP) :: stres(3,3)
+INTEGER :: i
+
+stres=0.0_DP
+DO i=1,3
+   stres(i,i)=-pressure
+ENDDO
+
+CALL correct_for_stress(bmat, el_cons_, stres)
+
+RETURN
+END SUBROUTINE correct_for_pressure
+
+INTEGER FUNCTION delta(i,j)
+!
+!   delta function between two integers
+!
+INTEGER, INTENT(IN) :: i, j
+
+delta=0
+IF (i==j) delta=1
+
+RETURN
+END FUNCTION delta
 
 END MODULE elastic_constants

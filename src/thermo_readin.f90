@@ -529,7 +529,8 @@ SUBROUTINE thermo_readin()
      CALL errore('thermo_readin','Only the standard algorithm is working &
                                           &in this case',1)
 
-  IF (what=='elastic_constants_qha' .AND. elastic_algorithm/='energy') &
+   IF (what=='elastic_constants_qha' .AND. elastic_algorithm/='energy_std'&
+                    .AND. elastic_algorithm/='energy') &
      CALL errore('thermo_readin','Only the energy algorithm is available &
                                           &in this case',1)
 

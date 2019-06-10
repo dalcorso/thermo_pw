@@ -11,7 +11,7 @@ USE kinds,             ONLY : DP
 USE constants,         ONLY : ry_kbar
 USE thermo_mod,        ONLY : energy_geo, tot_ngeo, density
 USE control_elastic_constants, ONLY : ngeo_strain, frozen_ions,            &
-                              elastic_algorithm, rot_mat, elcpvar
+                              rot_mat, elcpvar
 USE initial_conf,      ONLY : ibrav_save
 USE thermo_sym,        ONLY : laue
 USE elastic_constants, ONLY : print_elastic_constants,                     &

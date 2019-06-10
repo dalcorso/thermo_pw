@@ -372,7 +372,8 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            ALLOCATE(energy_geo(nwork))
            ALLOCATE(omega_geo(nwork))
            energy_geo=0.0_DP
-           IF (elastic_algorithm=='energy') THEN
+           IF (elastic_algorithm=='energy'.OR. &
+                                   elastic_algorithm=='energy_std') THEN
               DO igeom = 1, nwork
                  omega_geo(igeom)=compute_omega_geo(ibrav_geo(igeom),&
                                                     celldm_geo(1,igeom))

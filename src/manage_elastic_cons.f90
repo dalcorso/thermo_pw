@@ -58,7 +58,7 @@ ENDIF
 IF (elastic_algorithm=='standard'.OR.elastic_algorithm=='advanced') THEN
    CALL compute_elastic_constants(sigma_geo_aux, epsilon_geo, nwork, &
                           ngeo_strain, ibrav_save, laue, elcpvar)
-ELSE IF (elastic_algorithm=='energy') THEN
+ELSE IF (elastic_algorithm=='energy_std'.OR.elastic_algorithm=='energy') THEN
    CALL compute_elastic_constants_ene(energy_geo, epsilon_geo, &
                                nwork, ngeo_strain, ibrav_save, laue, omega0, &
                                                                elcpvar)
