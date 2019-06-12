@@ -8,42 +8,32 @@
 SUBROUTINE manage_elastic_cons_qha()
 
 USE kinds,             ONLY : DP
-USE constants,         ONLY : ry_kbar
-USE thermo_mod,        ONLY : energy_geo, tot_ngeo, density
-USE control_elastic_constants, ONLY : ngeo_strain, frozen_ions,            &
-                              rot_mat, elcpvar
+USE thermo_mod,        ONLY : energy_geo, tot_ngeo
+USE control_elastic_constants, ONLY : ngeo_strain, frozen_ions, elcpvar
 USE initial_conf,      ONLY : ibrav_save
 USE thermo_sym,        ONLY : laue
-USE elastic_constants, ONLY : print_elastic_constants,                     &
-                              compute_elastic_constants, epsilon_geo,      &
-                              sigma_geo, el_con, el_compliances,           &
+USE elastic_constants, ONLY : print_elastic_constants, epsilon_geo,        &
+                              el_con, el_compliances,                      &
                               compute_elastic_compliances,                 &
-                              print_elastic_compliances,                   &
-                              write_elastic, print_macro_elasticity,       &
+                              print_macro_elasticity,                      &
                               compute_elastic_constants_ene
 USE equilibrium_conf,  ONLY : omega0
-USE rotate,            ONLY : rotate_tensors2
-USE control_macro_elasticity, ONLY : macro_el, vp, vb, vg, approx_debye_t
+USE control_macro_elasticity, ONLY : macro_el
 USE temperature,       ONLY : ntemp, temp
-USE data_files,        ONLY : fl_el_cons, flanhar
-USE ions_base,         ONLY : nat
-USE cell_base,         ONLY : omega
+USE data_files,        ONLY : flanhar
 USE io_global,         ONLY : stdout
-USE mp_images,         ONLY : my_image_id, root_image
 USE mp_world,          ONLY : world_comm
 USE mp,                ONLY : mp_sum
 USE thermodynamics,        ONLY : ph_free_ener
 USE ph_freq_thermodynamics,  ONLY : phf_free_ener
-USE anharmonic,            ONLY : el_cons_t, el_comp_t, b0_t, lelastic
-USE ph_freq_anharmonic,    ONLY : el_consf_t, el_compf_t, b0f_t, lelasticf
-USE control_thermo,        ONLY : ltherm_dos, ltherm_freq
+USE anharmonic,        ONLY : el_cons_t, el_comp_t, b0_t, lelastic
+USE ph_freq_anharmonic,ONLY : el_consf_t, el_compf_t, b0f_t, lelasticf
+USE control_thermo,    ONLY : ltherm_dos, ltherm_freq
 
 IMPLICIT NONE
 
-REAL(DP) :: poisson, bulkm
 REAL(DP), ALLOCATABLE :: free_energy_geo(:)
-INTEGER :: iwork, itemp, startt, lastt
-CHARACTER(LEN=6)    :: int_to_char
+INTEGER :: itemp, startt, lastt
 CHARACTER(LEN=256)  :: filelastic
 !
 !  the elastic constants are calculated here
@@ -89,7 +79,9 @@ DO itemp = startt, lastt
       CALL print_elastic_constants(el_con, frozen_ions)
    ENDIF 
 ENDDO
-
+!
+!  Now collect the results on all processors and write them on file.
+!
 IF (ltherm_dos) THEN
    CALL mp_sum(el_cons_t, world_comm)
    CALL mp_sum(el_comp_t, world_comm)
@@ -117,8 +109,8 @@ IF (ltherm_freq) THEN
                                                            filelastic,1)
 ENDIF
 !
-CALL plot_elastic_t_qha(0)
-CALL plot_elastic_t_qha(1)
+CALL plot_elastic_t(0)
+CALL plot_elastic_t(1)
 
 DEALLOCATE(free_energy_geo)
 

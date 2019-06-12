@@ -84,7 +84,6 @@ plot_e_nk.o \
 plot_formf.o \
 plot_gruneisen_band_anis.o \
 plot_elastic_t.o \
-plot_elastic_t_qha.o \
 plot_epsilon_omega.o \
 plot_multi_energy.o \
 plot_mur.o \

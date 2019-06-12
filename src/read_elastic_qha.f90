@@ -7,9 +7,6 @@
 SUBROUTINE read_elastic_qha()
 
 USE kinds,            ONLY : DP
-USE io_global,        ONLY : meta_ionode, meta_ionode_id
-USE mp_world,         ONLY : world_comm
-USE mp,               ONLY : mp_bcast
 USE cell_base,        ONLY : ibrav
 USE temperature,      ONLY : ntemp, temp
 USE grun_anharmonic,  ONLY : el_cons_grun_t, el_comp_grun_t, lelastic_grun
@@ -23,10 +20,7 @@ IMPLICIT NONE
 
 REAL(DP) :: k0_t(ntemp)
 CHARACTER(LEN=256) :: filelastic, filelastic_comp
-CHARACTER(LEN=256) :: filename_loc          
-INTEGER :: iu_therm, idum, itemp, na, ipol, jpol, find_free_unit
 LOGICAL  :: check_file_exists
-CHARACTER(LEN=6) :: int_to_char
 
 el_cons_qha_available=.FALSE.
 
