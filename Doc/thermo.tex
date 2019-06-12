@@ -70,7 +70,7 @@ e-mail to the \texttt{thermo\_pw-forum} mailing list.
 \newpage
 \section{\color{coral}Overview}
 The properties of a solid addressed by \tpw\ are described by the thermodynamic
-theory of the elastic solid. In this theory a solid is characterized by an
+theory of the elastic solid.[1,2] In this theory a solid is characterized by an
 equilibrium configuration that depends on the temperature $T$ and on an
 external stress $\sigma$ (assumed constant) that describes the forces 
 that act on the surface. The state
@@ -406,7 +406,7 @@ is the symmetrized tensor $\epsilon_{j,k}={1\over 2} ( u_{j,k} +
 u_{k,j})$. $\epsilon_{j,k}$ do not coincide with the Lagrangian strains
 $\eta_{j,k}={1\over 2} ( u_{j,k} + u_{k,j} + \sum_l u_{l,j}u_{l,k})$ but 
 differ only for terms quadratic in $u_{i,j}$. As the Lagrangian strains, 
-$\epsilon_{j,k}$ do not contain any rotation and to first order it can 
+$\epsilon_{j,k}$ do not contain any rotation and to first order they can 
 be identified with $\eta_{j,k}$. At first order in $\epsilon_{j,k}$ we have
 also the following useful relations for the reciprocal lattice vectors:
 \begin{equation}
@@ -2518,16 +2518,17 @@ induced stress:
 \end{equation}
 However since the solid is already in a strained state
 to balance the stress $\sigma^{(0)}_{ij}$, the second derivatives of
-the energy with respect to the strains:
+the energy with respect to the strain:
 \begin{equation}
 {1 \over V}{\partial^2 U \over \partial \epsilon_{ij} \partial \epsilon_{kl}}
 \Bigg|_{\epsilon=0},
 \end{equation}
-do not coincide neither with the elastic constant
+do not coincide neither with the elastic constants
 $C_{ij,kl}={1 \over V}{\partial^2 U \over \partial \eta_{ij} \partial 
 \eta_{kl}}\big|_{\eta=0}$ nor with $B_{ij,kl}$. Actually there is a simple 
-relationship between $B_{ij,kl}$ and the calculated
-second derivatives of the energy:
+relationship between $B_{ij,kl}$ and the 
+second derivatives of the energy with respect to the strains
+$\epsilon_{ij}$ and $\epsilon_{kl}$ [3]:
 \begin{equation}
 B_{ij,kl} = {1 \over V}{\partial^2 U \over \partial \epsilon_{ij} 
 \partial \epsilon_{kl}}\Bigg|_{\epsilon=0} - 
@@ -2538,45 +2539,172 @@ B_{ij,kl} = {1 \over V}{\partial^2 U \over \partial \epsilon_{ij}
 -{1\over 2} \sigma^{(0)}_{jl} \delta_{ik} ).
 \label{eqsd2}
 \end{equation}
-
-To find the elastic constants of a solid under pressure we can specialize
-this formula to the case in which $\sigma^{(0)}_{ij}=-p \delta_{ij}$. We
+To find the elastic constants of a solid under pressure we can
+put in this formula $\sigma^{(0)}_{ij}=-p \delta_{ij}$ and we
 have:
-
 \begin{equation}
 B_{ij,kl} = {1 \over V}{\partial^2 U \over \partial \epsilon_{ij} 
 \partial \epsilon_{kl}}\Bigg|_{\epsilon=0} + 
 {1\over 2} p (2 \delta_{ij} \delta_{kl} - 
  \delta_{il} \delta_{jk} - \delta_{ik} \delta_{jl} ).
 \end{equation}
-Since experimental measurements of elastic constants are usually done 
-using the stress-strain relationship it is common to give the numerical
-values of $B_{ij,kl}$ and to call them the elastic constants of a
-solid under pressure. 
+Since experiments usually measure the stress-strain elastic constants,
+it is common to give the numerical values of $B_{ij,kl}$ and to call them 
+the elastic constants of a solid under pressure. 
 
-We can write out the relationship for the Voigt components:
+We can write out the relationship for the Voigt components 
+(in this section we switch between standard and Voigt notations.
+It should be clear from the number of indexes which notation we are using):
 \begin{eqnarray}
-B_{44} &=& {1 \over V}{\partial^2 U \over \partial \epsilon^2_{4}}\Bigg|_{\epsilon=0} - {1\over 2} p, \\
-B_{55} &=& {1 \over V}{\partial^2 U \over \partial \epsilon^2_{5} 
+B_{4,4} &=& {1 \over V}{\partial^2 U \over \partial \epsilon^2_{4}}\Bigg|_{\epsilon=0} - {1\over 2} p, \\
+B_{5,5} &=& {1 \over V}{\partial^2 U \over \partial \epsilon^2_{5} 
 }\Bigg|_{\epsilon=0} - {1\over 2} p, \\
-B_{66} &=& {1 \over V}{\partial^2 U \over \partial \epsilon^2_{6} 
+B_{6,6} &=& {1 \over V}{\partial^2 U \over \partial \epsilon^2_{6} 
 }\Bigg|_{\epsilon=0} - {1\over 2} p, \\
-B_{12} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{1} 
+B_{1,2} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{1} 
 \partial \epsilon_{2}}\Bigg|_{\epsilon=0} + p, \\
-B_{13} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{1} 
+B_{1,3} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{1} 
 \partial \epsilon_{3}}\Bigg|_{\epsilon=0} + p, \\
-B_{23} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{2} 
+B_{2,3} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{2} 
 \partial \epsilon_{3}}\Bigg|_{\epsilon=0} + p, 
 \end{eqnarray}
-while for all the other components $B_{ij}=
+while for all the other components $B_{i,j}=
 {1 \over V}{\partial^2 U \over \partial \epsilon_{i} 
 \partial \epsilon_{j}}\big|_{\epsilon=0}$.
 
 For a generic stress, as opposed to an isotropic pressure, the $B_{ij,kl}$ 
-have not the same symmetry properties of $C_{ij,kl}$. In general they 
-cannot be written in the Voigt notation.
+have not the same symmetry properties of $C_{ij,kl}$. In general, for a 
+symmetric $\sigma^{(0)}_{ij}$ we have $B_{ij,kl}=B_{ji,kl}=B_{ij,lk}$,
+but $B_{ij,kl}$ could be different from $B_{kl,ij}$, so we can use
+the Voigt notation but in some cases $B_{i,j}$ could be a non symmetric
+matrix.
+For the different crystal systems, it is interesting to consider 
+the stress present when the crystal parameters are not the equilibrium ones
+and which is the influence of this stress on the relationship between 
+$B_{ij,kl}$ and 
+${1 \over V}{\partial^2 U \over \partial \epsilon_{ij} 
+\partial \epsilon_{kl}}\Bigg|_{\epsilon=0}$. We consider each case
+separately and write only the components that need to be corrected.
 
-\newpage
+\subsection{\color{web-blue}Cubic system}
+When the unit cell remains cubic, we can change only the parameter 
+$a$ and the stress is always an isotropic pressure, so we can use the 
+relationships written above.
+
+\subsection{\color{web-blue}Tetragonal, Hexagonal, and Trigonal systems}
+In the tetragonal, hexagonal, and trigonal systems the nonzero components 
+of the stress tensor present when $a$ and $c/a$ (or $a$ and $\alpha$ in
+the trigonal case) are not the equilibrium ones are
+$\sigma^{(0)}_{11}$, $\sigma^{(0)}_{22}=\sigma^{(0)}_{11}$, and
+$\sigma^{(0)}_{33}$.
+Applying Eq.~\ref{eqsd2} we have:
+\begin{eqnarray}
+B_{11,22} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{11} 
+\partial \epsilon_{22}}\Bigg|_{\epsilon=0} - \sigma^{(0)}_{11}, \\
+B_{11,33} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{11} 
+\partial \epsilon_{33}}\Bigg|_{\epsilon=0} - \sigma^{(0)}_{11}, \\
+B_{22,11} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{22} 
+\partial \epsilon_{11}}\Bigg|_{\epsilon=0} - \sigma^{(0)}_{11}, \\
+B_{22,33} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{22} 
+\partial \epsilon_{33}}\Bigg|_{\epsilon=0} - \sigma^{(0)}_{11}, \\
+B_{33,11} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{33} 
+\partial \epsilon_{11}}\Bigg|_{\epsilon=0} - \sigma^{(0)}_{33}, \\
+B_{33,22} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{33} 
+\partial \epsilon_{22}}\Bigg|_{\epsilon=0} - \sigma^{(0)}_{33}, \\
+B_{12,12} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{12}^2 }\Bigg|_{\epsilon=0} + {1\over 2} \sigma^{(0)}_{11}, \\
+B_{13,13} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{13}^2}\Bigg|_{\epsilon=0} + {1\over 4} (\sigma^{(0)}_{11}+\sigma^{(0)}_{33}), \\
+B_{23,23} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{23}^2 }\Bigg|_{\epsilon=0} + {1\over 4} (\sigma^{(0)}_{11}+\sigma^{(0)}_{33}).
+\end{eqnarray}
+
+\subsection{\color{web-blue}Orthorhombic system}
+In the orthorhombic system the nonzero components of the stress tensor 
+present when $a$, $b/a$ and $c/a$ are not the equilibrium ones are
+$\sigma^{(0)}_{11}$, $\sigma^{(0)}_{22}$, and $\sigma^{(0)}_{33}$.
+Applying Eq.~\ref{eqsd2} we have:
+\begin{eqnarray}
+B_{11,22} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{11} 
+\partial \epsilon_{22}}\Bigg|_{\epsilon=0} - \sigma^{(0)}_{11}, \\
+B_{11,33} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{11} 
+\partial \epsilon_{33}}\Bigg|_{\epsilon=0} - \sigma^{(0)}_{11}, \\
+B_{22,11} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{22} 
+\partial \epsilon_{11}}\Bigg|_{\epsilon=0} - \sigma^{(0)}_{22}, \\
+B_{22,33} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{22} 
+\partial \epsilon_{33}}\Bigg|_{\epsilon=0} - \sigma^{(0)}_{22}, \\
+B_{33,11} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{33} 
+\partial \epsilon_{11}}\Bigg|_{\epsilon=0} - \sigma^{(0)}_{33}, \\
+B_{33,22} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{33} 
+\partial \epsilon_{22}}\Bigg|_{\epsilon=0} - \sigma^{(0)}_{33}, \\
+B_{12,12} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{12}^2 }\Bigg|_{\epsilon=0} + {1\over 4} (\sigma^{(0)}_{11} +\sigma^{(0)}_{22}), \\
+B_{13,13} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{13}^2}\Bigg|_{\epsilon=0} + {1\over 4} (\sigma^{(0)}_{11}+\sigma^{(0)}_{33}), \\
+B_{23,23} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{23}^2 }\Bigg|_{\epsilon=0} + {1\over 4} (\sigma^{(0)}_{22}+\sigma^{(0)}_{33}).
+\end{eqnarray}
+
+\subsection{\color{web-blue}Monoclinic system}
+In this case the stress tensor differs for the $b$-unique or $c$-unique
+lattices. In both cases the non-zero components can be $\sigma^{(0)}_{11}$, 
+$\sigma^{(0)}_{22}$, and $\sigma^{(0)}_{33}$. In the $b$-unique case 
+also $\sigma^{(0)}_{13}$ (and $\sigma^{(0)}_{31}$) can be nonvanishing, 
+while in the $b$-unique case $\sigma^{(0)}_{12}$ 
+(and $\sigma^{(0)}_{21}$) can be nonvanishing.
+In addition to the corrections found for the orthorhombic lattice 
+we have also in the $b$-unique case:
+\begin{eqnarray}
+B_{11,13} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{11}
+\partial \epsilon_{13}}\Bigg|_{\epsilon=0} +{1\over 2}\sigma^{(0)}_{13}, \\
+B_{13,11} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{13}
+\partial \epsilon_{11}}\Bigg|_{\epsilon=0} -{1\over 2}\sigma^{(0)}_{13}, \\
+B_{13,22} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{13}
+\partial \epsilon_{22}}\Bigg|_{\epsilon=0} -\sigma^{(0)}_{13}, \\
+B_{33,13} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{33}
+\partial \epsilon_{13}}\Bigg|_{\epsilon=0} +{1\over 2}\sigma^{(0)}_{13}, \\
+B_{13,33} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{13}
+\partial \epsilon_{33}}\Bigg|_{\epsilon=0} -{1\over 2}\sigma^{(0)}_{13}, \\
+B_{21,23} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{21}
+\partial \epsilon_{23}}\Bigg|_{\epsilon=0} + {1\over 4}\sigma^{(0)}_{13}, \\
+B_{23,21} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{23}
+\partial \epsilon_{21}}\Bigg|_{\epsilon=0} +{1\over 4}\sigma^{(0)}_{13}. 
+\end{eqnarray}
+while for the $c$-unique case:
+\begin{eqnarray}
+B_{11,12} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{11}
+\partial \epsilon_{12}}\Bigg|_{\epsilon=0} +{1\over 2}\sigma^{(0)}_{12}, \\
+B_{12,11} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{12}
+\partial \epsilon_{11}}\Bigg|_{\epsilon=0} -{1\over 2}\sigma^{(0)}_{12}, \\
+B_{12,33} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{12}
+\partial \epsilon_{33}}\Bigg|_{\epsilon=0} -\sigma^{(0)}_{12}, \\
+B_{22,12} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{22}
+\partial \epsilon_{12}}\Bigg|_{\epsilon=0} +{1\over 2}\sigma^{(0)}_{12}, \\
+B_{12,22} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{12}
+\partial \epsilon_{22}}\Bigg|_{\epsilon=0} -{1\over 2}\sigma^{(0)}_{12}, \\
+B_{31,32} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{31}
+\partial \epsilon_{32}}\Bigg|_{\epsilon=0} + {1\over 4}\sigma^{(0)}_{12}, \\
+B_{32,31} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{32}
+\partial \epsilon_{31}}\Bigg|_{\epsilon=0} +{1\over 4}\sigma^{(0)}_{12}. 
+\end{eqnarray}
+
+\subsection{\color{web-blue}Triclinic system}
+In this case the stress tensor can have any component. 
+Taking for $i$, $j$, and $k$ different values, the general formula can 
+be rewritten in the form:
+\begin{eqnarray}
+B_{ii,jj} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{ii}
+\partial \epsilon_{jj}}\Bigg|_{\epsilon=0} - \sigma^{(0)}_{ii}, \\
+B_{ij,ij} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{ij}^2 
+}\Bigg|_{\epsilon=0} + {1\over 4} \left(\sigma^{(0)}_{ii} 
++ \sigma^{(0)}_{jj}\right), \\
+B_{ij,ik} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{ij} 
+\partial \epsilon_{ik}}\Bigg|_{\epsilon=0} +{1\over 4}\sigma^{(0)}_{jk}, \\
+B_{ij,kj} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{ij} 
+\partial \epsilon_{kj}}\Bigg|_{\epsilon=0} +{1\over 4} \sigma^{(0)}_{ik}, \\
+B_{ii,ik} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{ii} 
+\partial \epsilon_{ik}}\Bigg|_{\epsilon=0} +{1\over 2} \sigma^{(0)}_{ik}, \\
+B_{ik,ii} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{ik} 
+\partial \epsilon_{ii}}\Bigg|_{\epsilon=0} -{1\over 2} \sigma^{(0)}_{ik}, \\
+B_{ij,kk} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{ij}
+\epsilon_{kk} }\Bigg|_{\epsilon=0} - \sigma^{(0)}_{ij}. 
+\end{eqnarray}
+
+%\newpage
 %\section{\color{coral}Temperature dependent elastic constants}
 %In principle to calculate the elastic constants at each temperature it
 %is sufficient to substitute the Helmholtz free energy to the total energy
@@ -3265,14 +3393,17 @@ Rombohedral cell (in term of the hexagonal cell):
 \section{\color{coral}Bibliography}
 \begin{enumerate}
 
+
 \item
-J.F. Nye, Physical properties of crystals, Oxford University press, 
+[1] J.F. Nye, Physical properties of crystals, Oxford University press, 
 Oxford (1957)
 
 \item
-D.C. Wallace, Thermodynamics of crystals, J. Wiley and Sons, (1972),
+[2] D.C. Wallace, Thermodynamics of crystals, J. Wiley and Sons, (1972),
 Dover edition (1998).
 
+\item
+[3] T.H.K. Barron and M.L. Klein, Proc. Phys. Soc. {\bf 85}, 523 (1965).
 \end{enumerate}
 
 \end{document}
