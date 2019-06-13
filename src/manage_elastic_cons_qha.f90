@@ -109,8 +109,8 @@ IF (ltherm_freq) THEN
                                                            filelastic,1)
 ENDIF
 !
-CALL plot_elastic_t(0)
-CALL plot_elastic_t(1)
+CALL plot_elastic_t(0,.FALSE.)
+CALL plot_elastic_t(1,.FALSE.)
 
 DEALLOCATE(free_energy_geo)
 

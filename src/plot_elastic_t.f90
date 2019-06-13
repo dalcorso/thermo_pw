@@ -5,7 +5,7 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-SUBROUTINE plot_elastic_t(iflag)
+SUBROUTINE plot_elastic_t(iflag, with_s)
 !
 !  This is a driver to plot the elastic constants as a function of
 !  temperature
@@ -29,9 +29,11 @@ USE mp_images,        ONLY : root_image, my_image_id
 USE io_global,        ONLY : ionode
 
 IMPLICIT NONE
+INTEGER :: iflag
+LOGICAL :: with_s
 CHARACTER(LEN=256) :: gnu_filename, filename, filenameps, filelastic, &
                       filelastic_s, filename_s
-INTEGER :: ibrav, iflag
+INTEGER :: ibrav
 INTEGER :: ierr, system
 
 IF ( my_image_id /= root_image ) RETURN
@@ -73,15 +75,17 @@ ENDIF
 
 IF (lelastic) THEN
    CALL gnuplot_write_file_mul_data(filelastic,1,3,'color_red',.TRUE.,&
-                                                     .FALSE.,.FALSE.)
-   CALL gnuplot_write_file_mul_data(filelastic_s,1,3,'color_green',.FALSE.,&
+                                                     .NOT.with_s,.FALSE.)
+   IF (with_s) &
+      CALL gnuplot_write_file_mul_data(filelastic_s,1,3,'color_green',.FALSE.,&
                                                      .NOT.lelasticf,.FALSE.)
 ENDIF
 
 IF (lelasticf) THEN
    CALL gnuplot_write_file_mul_data(filename,1,3,'color_blue',.NOT.lelastic,&
-                                                     .FALSE.,.FALSE.)
-   CALL gnuplot_write_file_mul_data(filename_s,1,3,'color_orange',.FALSE.,&
+                                                     .NOT.with_s,.FALSE.)
+   IF (with_s) &
+      CALL gnuplot_write_file_mul_data(filename_s,1,3,'color_orange',.FALSE.,&
                                                      .TRUE.,.FALSE.)
 ENDIF
 IF (iflag==0) THEN
@@ -91,14 +95,16 @@ ELSE
 ENDIF
 IF (lelastic) THEN
    CALL gnuplot_write_file_mul_data(filelastic,1,4,'color_red',.TRUE.,&
-                                                     .FALSE.,.FALSE.)
-   CALL gnuplot_write_file_mul_data(filelastic_s,1,4,'color_green',.FALSE.,&
+                                                     .NOT.with_s,.FALSE.)
+   IF (with_s) &
+      CALL gnuplot_write_file_mul_data(filelastic_s,1,4,'color_green',.FALSE.,&
                                                      .NOT.lelasticf,.FALSE.)
 ENDIF
 IF (lelasticf) THEN
    CALL gnuplot_write_file_mul_data(filename,1,4,'color_blue',.NOT.lelastic,&
-                                                     .FALSE.,.FALSE.)
-   CALL gnuplot_write_file_mul_data(filename_s,1,4,'color_orange',.FALSE.,&
+                                                     .NOT.with_s,.FALSE.)
+   IF (with_s) &
+      CALL gnuplot_write_file_mul_data(filename_s,1,4,'color_orange',.FALSE.,&
                                                      .TRUE.,.FALSE.)
 ENDIF
 IF (laue==32.OR.laue==29) THEN
@@ -109,15 +115,17 @@ IF (laue==32.OR.laue==29) THEN
    ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,5,'color_red',.TRUE.,&
-                                                     .FALSE.,.FALSE.)
+                                                     .NOT.with_s,.FALSE.)
+      IF (with_s) &
       CALL gnuplot_write_file_mul_data(filelastic_s,1,5,'color_green',.FALSE.,&
                                                      .NOT.lelasticf,.FALSE.)
    ENDIF
    IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,5,'color_blue',.NOT.lelastic,&
-                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename_s,1,5,'color_orange',.FALSE.,&
-                                                     .TRUE.,.FALSE.)
+      CALL gnuplot_write_file_mul_data(filename,1,5,'color_blue', &
+                                     .NOT.lelastic,.NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filename_s,1,5,'color_orange',&
+                                                      .FALSE.,.TRUE.,.FALSE.)
    ENDIF
 ENDIF
 
@@ -133,15 +141,17 @@ IF (laue==2.OR.laue==18.OR.laue==19.OR.laue==20.OR.laue==22.OR.laue==23.OR.&
    ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,5,'color_red',.TRUE.,&
-                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filelastic_s,1,5,'color_green',.FALSE.,&
-                                                     .NOT.lelasticf,.FALSE.)
+                                                  .NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filelastic_s,1,5,'color_green',&
+                                         .FALSE.,.NOT.lelasticf,.FALSE.)
    ENDIF
    IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,5,'color_blue',.NOT.lelastic,&
-                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename_s,1,5,'color_orange',.FALSE.,&
-                                                     .TRUE.,.FALSE.)
+      CALL gnuplot_write_file_mul_data(filename,1,5,'color_blue', &
+                                  .NOT.lelastic,.NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filename_s,1,5,'color_orange',&
+                                                   .FALSE.,.TRUE.,.FALSE.)
    ENDIF
 ENDIF
 
@@ -156,15 +166,17 @@ IF (laue==18.OR.laue==22.OR.laue==19.OR.laue==23.OR.laue==25.OR.laue==27) THEN
    ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,6,'color_red',.TRUE.,&
-                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filelastic_s,1,6,'color_green',.FALSE.,&
-                                                     .NOT.lelasticf,.FALSE.)
+                                                     .NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filelastic_s,1,6,'color_green', &
+                                 .FALSE.,.NOT.lelasticf,.FALSE.)
    ENDIF
    IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,6,'color_blue',.NOT.lelastic,&
-                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename_s,1,6,'color_orange',.FALSE.,&
-                                                     .TRUE.,.FALSE.)
+      CALL gnuplot_write_file_mul_data(filename,1,6,'color_blue',&
+                               .NOT.lelastic,.NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filename_s,1,6,'color_orange', &
+                                                 .FALSE.,.TRUE.,.FALSE.)
    ENDIF
    IF (iflag==0) THEN
       CALL gnuplot_ylabel('C_{44} (kbar)',.FALSE.) 
@@ -173,15 +185,17 @@ IF (laue==18.OR.laue==22.OR.laue==19.OR.laue==23.OR.laue==25.OR.laue==27) THEN
    ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,7,'color_red',.TRUE.,&
-                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filelastic_s,1,7,'color_green',.FALSE.,&
-                                                     .NOT.lelasticf,.FALSE.)
+                                                     .NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filelastic_s,1,7,'color_green', &
+                                         .FALSE.,.NOT.lelasticf,.FALSE.)
    ENDIF
    IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,7,'color_blue',.NOT.lelastic,&
-                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename_s,1,7,'color_orange',.FALSE.,&
-                                                     .TRUE.,.FALSE.)
+      CALL gnuplot_write_file_mul_data(filename,1,7,'color_blue', &
+                                         .NOT.lelastic, .NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filename_s,1,7,'color_orange', &
+                                       .FALSE.,.TRUE.,.FALSE.)
    ENDIF
 ENDIF
 
@@ -196,15 +210,17 @@ IF (laue==25.OR.laue==27) THEN
    ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,8,'color_red',.TRUE.,&
-                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filelastic_s,1,8,'color_green',.FALSE.,&
-                                                     .NOT.lelasticf,.FALSE.)
+                                                     .NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filelastic_s,1,8,'color_green', &
+                                            .FALSE.,.NOT.lelasticf,.FALSE.)
    ENDIF
    IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,8,'color_blue',.NOT.lelastic,&
-                                                       .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename_s,1,8,'color_orange',.FALSE.,&
-                                                       .TRUE.,.FALSE.)
+      CALL gnuplot_write_file_mul_data(filename,1,8,'color_blue',&
+                                          .NOT.lelastic,.NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filename_s,1,8,'color_orange', &
+                                            .FALSE.,.TRUE.,.FALSE.)
    ENDIF
 ENDIF
 
@@ -219,15 +235,17 @@ IF (laue==27) THEN
    ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,9,'color_red',.TRUE.,&
-                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filelastic_s,1,9,'color_green',.FALSE.,&
-                                                     .NOT.lelasticf,.FALSE.)
+                                                     .NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filelastic_s,1,9,'color_green', &
+                                            .FALSE.,.NOT.lelasticf,.FALSE.)
    ENDIF
    IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,9,'color_blue',.NOT.lelastic,&
-                                                         .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename_s,1,9,'color_orange',.FALSE.,&
-                                                         .TRUE.,.FALSE.)
+      CALL gnuplot_write_file_mul_data(filename,1,9,'color_blue', &
+                                      .NOT.lelastic,.NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filename_s,1,9,'color_orange', &
+                                                  .FALSE.,.TRUE.,.FALSE.)
    ENDIF
 ENDIF
 
@@ -243,15 +261,17 @@ IF (laue==18.OR.laue==22) THEN
 
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,8,'color_red',.TRUE.,&
-                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filelastic_s,1,8,'color_green',.FALSE.,&
-                                                     .NOT.lelasticf,.FALSE.)
+                                                     .NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filelastic_s,1,8,'color_green',&
+                                   .FALSE.,.NOT.lelasticf,.FALSE.)
    ENDIF
    IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,8,'color_blue',.NOT.lelastic,&
-                                                         .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename_s,1,8,'color_orange',.FALSE.,&
-                                                         .TRUE.,.FALSE.)
+      CALL gnuplot_write_file_mul_data(filename,1,8,'color_blue', &
+                                          .NOT.lelastic,.NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filename_s,1,8,'color_orange', &
+                                      .FALSE.,.TRUE.,.FALSE.)
    ENDIF
 ENDIF
 
@@ -266,15 +286,17 @@ IF (laue==18) THEN
    ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,9,'color_red',.TRUE.,&
-                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filelastic_s,1,9,'color_green',.FALSE.,&
-                                                     .NOT.lelasticf,.FALSE.)
+                                                     .NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filelastic_s,1,9,'color_green', &
+                                     .FALSE.,.NOT.lelasticf,.FALSE.)
    ENDIF
    IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,9,'color_blue',.NOT.lelastic,&
-                                                         .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename_s,1,9,'color_orange',.FALSE.,&
-                                                         .TRUE.,.FALSE.)
+      CALL gnuplot_write_file_mul_data(filename,1,9,'color_blue', &
+                                     .NOT.lelastic,.NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filename_s,1,9,'color_orange', &
+                                                 .FALSE.,.TRUE.,.FALSE.)
    ENDIF
 ENDIF
 
@@ -289,15 +311,17 @@ IF (laue==2.OR.laue==16.OR.laue==20) THEN
    ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,6,'color_red',.TRUE.,&
-                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filelastic_s,1,6,'color_green',.FALSE.,&
-                                                     .NOT.lelasticf,.FALSE.)
+                                                     .NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filelastic_s,1,6,'color_green',&
+                                          .FALSE.,.NOT.lelasticf,.FALSE.)
    ENDIF
    IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,6,'color_blue',.NOT.lelastic,&
-                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename_s,1,6,'color_orange',.FALSE.,&
-                                                     .TRUE.,.FALSE.)
+      CALL gnuplot_write_file_mul_data(filename,1,6,'color_blue', &
+                                .NOT.lelastic,.NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filename_s,1,6,'color_orange', &
+                                   .FALSE.,.TRUE.,.FALSE.)
    ENDIF
 
    IF (iflag==0) THEN
@@ -307,15 +331,17 @@ IF (laue==2.OR.laue==16.OR.laue==20) THEN
    ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,7,'color_red',.TRUE.,&
-                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filelastic_s,1,7,'color_green',.FALSE.,&
-                                                     .NOT.lelasticf,.FALSE.)
+                                                     .NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filelastic_s,1,7,'color_green', &
+                                   .FALSE.,.NOT.lelasticf,.FALSE.)
    ENDIF
    IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,7,'color_blue',.NOT.lelastic,&
-                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename_s,1,7,'color_orange',.FALSE.,&
-                                                     .TRUE.,.FALSE.)
+      CALL gnuplot_write_file_mul_data(filename,1,7,'color_blue', &
+                                  .NOT.lelastic,.NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filename_s,1,7,'color_orange', &
+                                      .FALSE.,.TRUE.,.FALSE.)
    ENDIF
 
    IF (iflag==0) THEN
@@ -325,15 +351,17 @@ IF (laue==2.OR.laue==16.OR.laue==20) THEN
    ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,8,'color_red',.TRUE.,&
-                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filelastic_s,1,8,'color_green',.FALSE.,&
-                                                     .NOT.lelasticf,.FALSE.)
+                                                     .NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filelastic_s,1,8,'color_green',&
+                                              .FALSE.,.NOT.lelasticf,.FALSE.)
    ENDIF
    IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,8,'color_blue',.NOT.lelastic,&
-                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename_s,1,8,'color_orange',.FALSE.,&
-                                                     .TRUE.,.FALSE.)
+      CALL gnuplot_write_file_mul_data(filename,1,8,'color_blue', &
+                                           .NOT.lelastic,.NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filename_s,1,8,'color_orange', &
+                                                      .FALSE.,.TRUE.,.FALSE.)
    ENDIF
    IF (iflag==0) THEN
       CALL gnuplot_ylabel('C_{44} (kbar)',.FALSE.) 
@@ -342,15 +370,17 @@ IF (laue==2.OR.laue==16.OR.laue==20) THEN
    ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,9,'color_red',.TRUE.,&
-                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filelastic_s,1,9,'color_green',.FALSE.,&
-                                                     .NOT.lelasticf,.FALSE.)
+                                                     .NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filelastic_s,1,9,'color_green', &
+                                           .FALSE.,.NOT.lelasticf,.FALSE.)
    ENDIF
    IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,9,'color_blue',.NOT.lelastic,&
-                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename_s,1,9,'color_orange',.FALSE.,&
-                                                     .TRUE.,.FALSE.)
+      CALL gnuplot_write_file_mul_data(filename,1,9,'color_blue', &
+                                   .NOT.lelastic,.NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filename_s,1,9,'color_orange', &
+                               .FALSE.,.TRUE.,.FALSE.)
    ENDIF
    IF (iflag==0) THEN
       CALL gnuplot_ylabel('C_{55} (kbar)',.FALSE.) 
@@ -359,15 +389,17 @@ IF (laue==2.OR.laue==16.OR.laue==20) THEN
    ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,10,'color_red',.TRUE.,&
-                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filelastic_s,1,10,'color_green',.FALSE.,&
-                                                     .NOT.lelasticf,.FALSE.)
+                                                     .NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filelastic_s,1,10,'color_green',&
+                               .FALSE.,.NOT.lelasticf,.FALSE.)
    ENDIF
    IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,10,'color_blue',.NOT.lelastic,&
-                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename_s,1,10,'color_orange',.FALSE.,&
-                                                     .TRUE.,.FALSE.)
+      CALL gnuplot_write_file_mul_data(filename,1,10,'color_blue', &
+                                 .NOT.lelastic,.NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filename_s,1,10,'color_orange', &
+                                      .FALSE.,.TRUE.,.FALSE.)
    ENDIF
    IF (iflag==0) THEN
       CALL gnuplot_ylabel('C_{66} (kbar)',.FALSE.) 
@@ -376,14 +408,16 @@ IF (laue==2.OR.laue==16.OR.laue==20) THEN
    ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,11,'color_red',.TRUE.,&
-                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filelastic_s,1,11,'color_green',.FALSE.,&
-                                                     .NOT.lelasticf,.FALSE.)
+                                                     .NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filelastic_s,1,11,'color_green',&
+                                           .FALSE.,.NOT.lelasticf,.FALSE.)
    ENDIF
    IF (lelasticf) THEN
       CALL gnuplot_write_file_mul_data(filename,1,11,'color_blue', &
-                                              .NOT.lelastic,.FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename_s,1,11,'color_orange', &
+                                         .NOT.lelastic,.NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filename_s,1,11,'color_orange', &
                                               .FALSE.,.TRUE.,.FALSE.)
    ENDIF
 END IF
@@ -405,14 +439,16 @@ IF (laue==16) THEN
 
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,12,'color_red',.TRUE.,&
-                                                  .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filelastic_s,1,12,'color_green',.FALSE.,&
-                                                  .NOT.lelasticf,.FALSE.)
+                                                  .NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filelastic_s,1,12,'color_green', &
+                                              .FALSE.,.NOT.lelasticf,.FALSE.)
    ENDIF
    IF (lelasticf) THEN
       CALL gnuplot_write_file_mul_data(filename,1,12,'color_blue', &
-                                              .NOT.lelastic,.FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename_s,1,12,'color_orange', &
+                                         .NOT.lelastic,.NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filename_s,1,12,'color_orange', &
                                               .FALSE.,.TRUE.,.FALSE.)
    ENDIF
    IF (ibrav>0) THEN
@@ -431,14 +467,16 @@ IF (laue==16) THEN
 
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,13,'color_red',.TRUE.,&
-                                                  .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filelastic_s,1,13,'color_green',.FALSE.,&
-                                                  .NOT.lelasticf,.FALSE.)
+                                                  .NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filelastic_s,1,13,'color_green', &
+                                          .FALSE.,.NOT.lelasticf,.FALSE.)
    ENDIF
    IF (lelasticf) THEN
       CALL gnuplot_write_file_mul_data(filename,1,13,'color_blue', &
-                                              .NOT.lelastic,.FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename_s,1,13,'color_orange', &
+                                          .NOT.lelastic,.NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filename_s,1,13,'color_orange', &
                                               .FALSE.,.TRUE.,.FALSE.)
    ENDIF
   
@@ -458,14 +496,16 @@ IF (laue==16) THEN
 
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,14,'color_red',.TRUE.,&
-                                                  .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filelastic_s,1,14,'color_green',.FALSE.,&
-                                                  .NOT.lelasticf,.FALSE.)
+                                                  .NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filelastic_s,1,14,'color_green', &
+                                       .FALSE.,.NOT.lelasticf,.FALSE.)
    ENDIF
    IF (lelasticf) THEN
       CALL gnuplot_write_file_mul_data(filename,1,14,'color_blue', &
-                                              .NOT.lelastic,.FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename_s,1,14,'color_orange', &
+                                         .NOT.lelastic,.NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filename_s,1,14,'color_orange', &
                                               .FALSE.,.TRUE.,.FALSE.)
    ENDIF 
 
@@ -485,14 +525,16 @@ IF (laue==16) THEN
 
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,15,'color_red',.TRUE.,&
-                                                  .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filelastic_s,1,15,'color_green',.FALSE.,&
-                                                  .NOT.lelasticf,.FALSE.)
+                                                  .NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filelastic_s,1,15,'color_green',&
+                                         .FALSE.,.NOT.lelasticf,.FALSE.)
    ENDIF
    IF (lelasticf) THEN
       CALL gnuplot_write_file_mul_data(filename,1,15,'color_blue', &
-                                              .NOT.lelastic,.FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename_s,1,15,'color_orange', &
+                                        .NOT.lelastic,.NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filename_s,1,15,'color_orange', &
                                               .FALSE.,.TRUE.,.FALSE.)
    ENDIF
 ENDIF
@@ -505,14 +547,16 @@ IF (laue==2) THEN
    ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,12,'color_red',.TRUE.,&
-                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filelastic_s,1,12,'color_green',.FALSE.,&
-                                                     .NOT.lelasticf,.FALSE.)
+                                                     .NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filelastic_s,1,12,'color_green', &
+                                    .FALSE.,.NOT.lelasticf,.FALSE.)
    ENDIF
    IF (lelasticf) THEN
       CALL gnuplot_write_file_mul_data(filename,1,12,'color_blue', &
-                                              .NOT.lelastic,.FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename_s,1,12,'color_orange', &
+                                         .NOT.lelastic,.NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filename_s,1,12,'color_orange', &
                                               .FALSE.,.TRUE.,.FALSE.)
    ENDIF
 
@@ -523,14 +567,16 @@ IF (laue==2) THEN
    ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,13,'color_red',.TRUE.,&
-                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filelastic_s,1,13,'color_green',.FALSE.,&
-                                                     .NOT.lelasticf,.FALSE.)
+                                                     .NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filelastic_s,1,13,'color_green',&
+                                      .FALSE.,.NOT.lelasticf,.FALSE.)
    ENDIF
    IF (lelasticf) THEN
       CALL gnuplot_write_file_mul_data(filename,1,13,'color_blue', &
-                                              .NOT.lelastic,.FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename_s,1,13,'color_orange', &
+                                        .NOT.lelastic,.NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filename_s,1,13,'color_orange', &
                                               .FALSE.,.TRUE.,.FALSE.)
    ENDIF
 
@@ -541,14 +587,16 @@ IF (laue==2) THEN
    ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,14,'color_red',.TRUE.,&
-                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filelastic_s,1,14,'color_green',.FALSE.,&
-                                                     .NOT.lelasticf,.FALSE.)
+                                                  .NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filelastic_s,1,14,'color_green',&
+                                          .FALSE.,.NOT.lelasticf,.FALSE.)
    ENDIF
    IF (lelasticf) THEN
       CALL gnuplot_write_file_mul_data(filename,1,14,'color_blue', &
-                                              .NOT.lelastic,.FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename_s,1,14,'color_orange', &
+                                          .NOT.lelastic,.NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filename_s,1,14,'color_orange', &
                                               .FALSE.,.TRUE.,.FALSE.)
    ENDIF
 
@@ -559,14 +607,16 @@ IF (laue==2) THEN
    ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,15,'color_red',.TRUE.,&
-                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filelastic_s,1,15,'color_green',.FALSE.,&
-                                                     .NOT.lelasticf,.FALSE.)
+                                                     .NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filelastic_s,1,15,'color_green', &
+                                       .FALSE.,.NOT.lelasticf,.FALSE.)
    ENDIF
    IF (lelasticf) THEN
       CALL gnuplot_write_file_mul_data(filename,1,15,'color_blue', &
-                                              .NOT.lelastic,.FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename_s,1,15,'color_orange', &
+                                          .NOT.lelastic,.NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filename_s,1,15,'color_orange', &
                                               .FALSE.,.TRUE.,.FALSE.)
    ENDIF
    IF (iflag==0) THEN
@@ -576,14 +626,16 @@ IF (laue==2) THEN
    ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,16,'color_red',.TRUE.,&
-                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filelastic_s,1,16,'color_green',.FALSE.,&
-                                                     .NOT.lelasticf,.FALSE.)
+                                                     .NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filelastic_s,1,16,'color_green',&
+                                  .FALSE.,.NOT.lelasticf,.FALSE.)
    ENDIF
    IF (lelasticf) THEN
       CALL gnuplot_write_file_mul_data(filename,1,16,'color_blue', &
-                                              .NOT.lelastic,.FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename_s,1,16,'color_orange', &
+                                         .NOT.lelastic,.NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filename_s,1,16,'color_orange', &
                                               .FALSE.,.TRUE.,.FALSE.)
 
    ENDIF
@@ -594,14 +646,16 @@ IF (laue==2) THEN
    ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,17,'color_red',.TRUE.,&
-                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filelastic_s,1,17,'color_green',.FALSE.,&
-                                                     .NOT.lelasticf,.FALSE.)
+                                                  .NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filelastic_s,1,17,'color_green',&
+                               .FALSE.,.NOT.lelasticf,.FALSE.)
    ENDIF
    IF (lelasticf) THEN
       CALL gnuplot_write_file_mul_data(filename,1,17,'color_blue', &
-                                              .NOT.lelastic,.FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename_s,1,17,'color_orange', &
+                                          .NOT.lelastic,.NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filename_s,1,17,'color_orange', &
                                               .FALSE.,.TRUE.,.FALSE.)
    ENDIF
    IF (iflag==0) THEN
@@ -611,14 +665,16 @@ IF (laue==2) THEN
    ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,18,'color_red',.TRUE.,&
-                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filelastic_s,1,18,'color_green',.FALSE.,&
-                                                     .NOT.lelasticf,.FALSE.)
+                                                     .NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filelastic_s,1,18,'color_green',&
+                                             .FALSE.,.NOT.lelasticf,.FALSE.)
    ENDIF
    IF (lelasticf) THEN
       CALL gnuplot_write_file_mul_data(filename,1,18,'color_blue', &
-                                              .NOT.lelastic,.FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename_s,1,18,'color_blue', &
+                                          .NOT.lelastic,.NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filename_s,1,18,'color_blue', &
                                               .FALSE.,.TRUE.,.FALSE.)
    ENDIF
 
@@ -629,14 +685,16 @@ IF (laue==2) THEN
    ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,19,'color_red',.TRUE.,&
-                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filelastic_s,1,19,'color_green',.FALSE.,&
-                                                     .NOT.lelasticf,.FALSE.)
+                                                     .NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filelastic_s,1,19,'color_green',&
+                                      .FALSE.,.NOT.lelasticf,.FALSE.)
    ENDIF
    IF (lelasticf) THEN
       CALL gnuplot_write_file_mul_data(filename,1,19,'color_blue', &
-                                              .NOT.lelastic,.FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename_s,1,19,'color_orange', &
+                                          .NOT.lelastic,.NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filename_s,1,19,'color_orange', &
                                               .FALSE.,.TRUE.,.FALSE.)
    ENDIF
 
@@ -647,14 +705,16 @@ IF (laue==2) THEN
    ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,20,'color_red',.TRUE.,&
-                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filelastic_s,1,20,'color_green',.FALSE.,&
-                                                     .NOT.lelasticf,.FALSE.)
+                                                  .NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filelastic_s,1,20,'color_green',&
+                           .FALSE.,.NOT.lelasticf,.FALSE.)
    ENDIF
    IF (lelasticf) THEN
       CALL gnuplot_write_file_mul_data(filename,1,20,'color_blue', &
-                                              .NOT.lelastic,.FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename_s,1,20,'color_orange', &
+                                         .NOT.lelastic,.NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filename_s,1,20,'color_orange', &
                                               .FALSE.,.TRUE.,.FALSE.)
    ENDIF
    IF (iflag==0) THEN
@@ -664,14 +724,16 @@ IF (laue==2) THEN
    ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,21,'color_red',.TRUE.,&
-                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filelastic_s,1,21,'color_green',.FALSE.,&
-                                                     .NOT.lelasticf,.FALSE.)
+                                                     .NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filelastic_s,1,21,'color_green',&
+                                        .FALSE.,.NOT.lelasticf,.FALSE.)
    ENDIF
    IF (lelasticf) THEN
       CALL gnuplot_write_file_mul_data(filename,1,21,'color_blue', &
-                                              .NOT.lelastic,.FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename_s,1,21,'color_orange', &
+                                           .NOT.lelastic,.NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filename_s,1,21,'color_orange', &
                                               .FALSE.,.TRUE.,.FALSE.)
    ENDIF
 
@@ -682,14 +744,16 @@ IF (laue==2) THEN
    ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,22,'color_red',.TRUE.,&
-                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filelastic_s,1,22,'color_green',.FALSE.,&
-                                                     .NOT.lelasticf,.FALSE.)
+                                                  .NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filelastic_s,1,22,'color_green',&
+                                          .FALSE.,.NOT.lelasticf,.FALSE.)
    ENDIF
    IF (lelasticf) THEN
       CALL gnuplot_write_file_mul_data(filename,1,22,'color_blue', &
-                                              .NOT.lelastic,.FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename_s,1,22,'color_orange', &
+                                          .NOT.lelastic,.NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filename_s,1,22,'color_orange', &
                                               .FALSE.,.TRUE.,.FALSE.)
    ENDIF
    IF (iflag==0) THEN
@@ -699,14 +763,16 @@ IF (laue==2) THEN
    ENDIF
    IF (lelastic) THEN
       CALL gnuplot_write_file_mul_data(filelastic,1,23,'color_red',.TRUE.,&
-                                                     .FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filelastic_s,1,23,'color_green',.FALSE.,&
-                                                     .NOT.lelasticf,.FALSE.)
+                                                     .NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filelastic_s,1,23,'color_green',&
+                                             .FALSE.,.NOT.lelasticf,.FALSE.)
    ENDIF
    IF (lelasticf) THEN
       CALL gnuplot_write_file_mul_data(filename,1,23,'color_blue', &
-                                              .NOT.lelastic,.FALSE.,.FALSE.)
-      CALL gnuplot_write_file_mul_data(filename_s,1,23,'color_orange', &
+                                         .NOT.lelastic,.NOT.with_s,.FALSE.)
+      IF (with_s) &
+         CALL gnuplot_write_file_mul_data(filename_s,1,23,'color_orange', &
                                               .FALSE.,.TRUE.,.FALSE.)
    ENDIF
 ENDIF
@@ -722,14 +788,16 @@ ENDIF
 
 IF (lelastic) THEN
    CALL gnuplot_write_file_mul_data(filelastic,1,2,'color_red',.TRUE.,&
-                                                     .FALSE.,.FALSE.)
-   CALL gnuplot_write_file_mul_data(filelastic_s,1,2,'color_green',.FALSE.,&
+                                                     .NOT.with_s,.FALSE.)
+   IF (with_s) &
+      CALL gnuplot_write_file_mul_data(filelastic_s,1,2,'color_green',.FALSE.,&
                                                      .NOT.lelasticf,.FALSE.)
 ENDIF
 IF (lelasticf) THEN
    CALL gnuplot_write_file_mul_data(filename,1,2,'color_blue',.NOT.lelastic,&
-                                                     .FALSE.,.FALSE.)
-   CALL gnuplot_write_file_mul_data(filename_s,1,2,'color_orange',.FALSE.,&
+                                                  .NOT.with_s,.FALSE.)
+   IF (with_s) &
+      CALL gnuplot_write_file_mul_data(filename_s,1,2,'color_orange',.FALSE.,&
                                                      .TRUE.,.FALSE.)
 ENDIF
 CALL gnuplot_end()
