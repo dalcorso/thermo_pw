@@ -450,9 +450,8 @@ IF (meta_ionode) THEN
             READ(iu_el_cons,'(e16.8,4e20.12)') rdum, b0_t(itemp), &
                  el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
                  el_cons_t(4,4,itemp)
-
-            IF (ABS(rdum-temp(itemp))>1D-5) CALL errore('read_el_cons_on_file', &
-                                                        'uncorrect temperature', 1) 
+            IF (ABS(rdum-temp(itemp))>1D-5) &
+               CALL errore('read_el_cons_on_file','uncorrect temperature', 1) 
          ENDDO
       CASE(25)
 !
@@ -464,6 +463,8 @@ IF (meta_ionode) THEN
                   el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
                   el_cons_t(1,3,itemp), el_cons_t(3,3,itemp), &
                   el_cons_t(4,4,itemp), el_cons_t(1,4,itemp)
+            IF (ABS(rdum-temp(itemp))>1D-5) &
+               CALL errore('read_el_cons_on_file','uncorrect temperature', 1) 
          ENDDO
       CASE(27)
 !
@@ -476,6 +477,8 @@ IF (meta_ionode) THEN
                   el_cons_t(1,3,itemp), el_cons_t(3,3,itemp), &
                   el_cons_t(4,4,itemp), el_cons_t(1,4,itemp), &
                   el_cons_t(2,5,itemp)
+            IF (ABS(rdum-temp(itemp))>1D-5) &
+               CALL errore('read_el_cons_on_file','uncorrect temperature', 1) 
          ENDDO
       CASE(19,23)
          READ(iu_el_cons,*) 
@@ -484,6 +487,8 @@ IF (meta_ionode) THEN
                   el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
                   el_cons_t(1,3,itemp), el_cons_t(3,3,itemp), &
                   el_cons_t(4,4,itemp)
+            IF (ABS(rdum-temp(itemp))>1D-5) &
+               CALL errore('read_el_cons_on_file','uncorrect temperature', 1) 
          ENDDO
       CASE(22)
          READ(iu_el_cons,*) 
@@ -492,6 +497,8 @@ IF (meta_ionode) THEN
                   el_cons_t(1,1,itemp), el_cons_t(1,2,itemp), &
                   el_cons_t(1,3,itemp), el_cons_t(3,3,itemp), &
                   el_cons_t(4,4,itemp), el_cons_t(6,6,itemp)
+            IF (ABS(rdum-temp(itemp))>1D-5) &
+               CALL errore('read_el_cons_on_file','uncorrect temperature', 1) 
          ENDDO
       CASE(20)
          READ(iu_el_cons,*) 
@@ -502,6 +509,8 @@ IF (meta_ionode) THEN
                   el_cons_t(2,3,itemp), el_cons_t(3,3,itemp), &
                   el_cons_t(4,4,itemp), el_cons_t(5,5,itemp), &
                   el_cons_t(6,6,itemp)
+            IF (ABS(rdum-temp(itemp))>1D-5) &
+               CALL errore('read_el_cons_on_file','uncorrect temperature', 1) 
          ENDDO
       CASE(18)
          READ(iu_el_cons,*) 
@@ -511,9 +520,11 @@ IF (meta_ionode) THEN
                   el_cons_t(1,3,itemp), el_cons_t(3,3,itemp), &
                   el_cons_t(4,4,itemp), el_cons_t(6,6,itemp), &
                   el_cons_t(1,6,itemp)
+            IF (ABS(rdum-temp(itemp))>1D-5) &
+               CALL errore('read_el_cons_on_file','uncorrect temperature', 1) 
          ENDDO
       CASE(16)
-         IF (ibrav > 0) THEN
+         IF (ibrav < 0) THEN
             !
             !  b unique
             !
@@ -527,6 +538,9 @@ IF (meta_ionode) THEN
                      el_cons_t(6,6,itemp), el_cons_t(1,5,itemp), &
                      el_cons_t(2,5,itemp), el_cons_t(3,5,itemp), &
                      el_cons_t(4,6,itemp)
+               IF (ABS(rdum-temp(itemp))>1D-5) &
+                  CALL errore('read_el_cons_on_file','uncorrect temperature',&
+                                                                         1) 
             ENDDO
          ELSE
             !
@@ -542,6 +556,9 @@ IF (meta_ionode) THEN
                      el_cons_t(6,6,itemp), el_cons_t(1,6,itemp), &
                      el_cons_t(2,6,itemp), el_cons_t(3,6,itemp), &
                      el_cons_t(4,5,itemp)
+               IF (ABS(rdum-temp(itemp))>1D-5) &
+                  CALL errore('read_el_cons_on_file','uncorrect temperature',&
+                                                                         1) 
             ENDDO
          ENDIF
       CASE(2)
@@ -558,8 +575,9 @@ IF (meta_ionode) THEN
                   el_cons_t(2,6,itemp), el_cons_t(3,4,itemp), &
                   el_cons_t(3,5,itemp), el_cons_t(3,6,itemp), &
                   el_cons_t(4,5,itemp), el_cons_t(4,6,itemp), &
-                  el_cons_t(5,5,itemp), el_cons_t(5,6,itemp), &
-                  el_cons_t(6,6,itemp)
+                  el_cons_t(5,6,itemp)
+            IF (ABS(rdum-temp(itemp))>1D-5) &
+               CALL errore('read_el_cons_on_file','uncorrect temperature',1) 
          ENDDO
    END SELECT
    CLOSE(iu_el_cons)
