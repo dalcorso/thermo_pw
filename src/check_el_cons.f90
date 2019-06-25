@@ -26,7 +26,8 @@ SUBROUTINE check_el_cons()
                                 print_elastic_compliances
   USE control_elastic_constants, ONLY : el_cons_available, frozen_ions, &
                                         el_cons_t_available, el_con_geo, &
-                                        el_cons_qha_available
+                                        el_cons_qha_available,          &
+                                        el_cons_qha_available_ph
   USE control_macro_elasticity, ONLY : macro_el
   USE control_grun,     ONLY : lb0_t
   USE thermo_mod,       ONLY : tot_ngeo, no_ph
@@ -39,8 +40,8 @@ SUBROUTINE check_el_cons()
   !
   LOGICAL  :: exst, found(tot_ngeo)
   !
-  CALL read_elastic_qha()
-  IF (el_cons_qha_available) RETURN
+  CALL check_el_cons_qha()
+  IF (el_cons_qha_available.OR.el_cons_qha_available_ph) RETURN
 
   ALLOCATE( el_con_geo(6,6,tot_ngeo) )
   el_con_geo=0.0_DP

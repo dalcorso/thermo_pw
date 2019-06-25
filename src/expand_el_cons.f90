@@ -1,3 +1,9 @@
+! Copyright (C) 2019 C. Malica
+! This file is distributed under the terms of the
+! GNU General Public License. See the file `License'
+! in the root directory of the present distribution,
+! or http://www.gnu.org/copyleft/gpl.txt .
+!
 SUBROUTINE expand_el_cons(el_cons_t, laue, ibrav)
 
 USE kinds,      ONLY : DP

@@ -47,6 +47,8 @@ SUBROUTINE deallocate_thermo()
   USE control_conv,     ONLY : ke, keden, nk_test, sigma_test
   USE elastic_constants, ONLY : epsilon_geo, sigma_geo, epsilon_voigt
   USE control_elastic_constants, ONLY : rot_mat, el_con_geo
+  USE control_elastic_constants_qha, ONLY : ibrav_save_qha, celldm0_qha, &
+                               tau_crys_qha
   USE control_debye,    ONLY : deb_energy, deb_free_energy, deb_entropy, &
                                deb_cv, deb_b_fact, deb_bfact
   USE control_quadratic_energy, ONLY : coeff, hessian_v, hessian_e, x_pos_min
@@ -170,6 +172,7 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (epsilon_geo) )     DEALLOCATE(epsilon_geo)
   IF ( ALLOCATED (sigma_geo) )       DEALLOCATE(sigma_geo)
   IF ( ALLOCATED (rot_mat) )         DEALLOCATE(rot_mat)
+  IF ( ALLOCATED (el_con_geo) )      DEALLOCATE(el_con_geo)
 
   IF ( ALLOCATED (tau_save) )        DEALLOCATE(tau_save)
   IF ( ALLOCATED (tau_save_crys) )   DEALLOCATE(tau_save_crys)
@@ -190,6 +193,10 @@ SUBROUTINE deallocate_thermo()
 
   IF ( ALLOCATED (dos_k) )           DEALLOCATE( dos_k )
   IF ( ALLOCATED (dos_wk) )          DEALLOCATE( dos_wk )
+
+  IF ( ALLOCATED (ibrav_save_qha) )  DEALLOCATE( ibrav_save_qha )  
+  IF ( ALLOCATED (celldm0_qha) )     DEALLOCATE( celldm0_qha )  
+  IF ( ALLOCATED (tau_crys_qha) )    DEALLOCATE( tau_crys_qha )  
 
   CALL deallocate_q2r()
   IF (ALLOCATED(collect_info_save)) THEN

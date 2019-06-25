@@ -49,7 +49,7 @@ el_compf_t=0.0_DP
 b0f_t=0.0_DP
 DO itemp = startt, lastt
    WRITE(stdout,'(5x, 70("-"))') 
-   WRITE(stdout,*) 'Computing elastic constant at temperature', itemp, &
+   WRITE(stdout,*) 'Computing elastic constants at temperature', itemp, &
                                                                 temp(itemp)
    IF (ltherm_dos) THEN
       free_energy_geo(:)=energy_geo(:)+ph_free_ener(itemp,:)

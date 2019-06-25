@@ -2507,7 +2507,7 @@ C_{25} = {1 \over 2 V} {d^2 U_{C+G} \over d \epsilon_1^2} -
 \end{equation}
 
 \newpage
-\section{\color{coral}Stress and pressure dependent elastic constants}
+\section{\color{coral}Stress or pressure dependent elastic constants}
 
 The elastic constants of a solid on which we apply a stress 
 $\sigma^{(0)}_{ij}$ can still
@@ -2552,25 +2552,23 @@ Since experiments usually measure the stress-strain elastic constants,
 it is common to give the numerical values of $B_{ij,kl}$ and to call them 
 the elastic constants of a solid under pressure. 
 
-We can write out the relationship for the Voigt components 
-(in this section we switch between standard and Voigt notations.
-It should be clear from the number of indexes which notation we are using):
+We can write out the relationship for each component: 
 \begin{eqnarray}
-B_{4,4} &=& {1 \over V}{\partial^2 U \over \partial \epsilon^2_{4}}\Bigg|_{\epsilon=0} - {1\over 2} p, \\
-B_{5,5} &=& {1 \over V}{\partial^2 U \over \partial \epsilon^2_{5} 
+B_{12,12} &=& {1 \over V}{\partial^2 U \over \partial \epsilon^2_{12}}\Bigg|_{\epsilon=0} - {1\over 2} p, \\
+B_{13,13} &=& {1 \over V}{\partial^2 U \over \partial \epsilon^2_{13} 
 }\Bigg|_{\epsilon=0} - {1\over 2} p, \\
-B_{6,6} &=& {1 \over V}{\partial^2 U \over \partial \epsilon^2_{6} 
+B_{23,23} &=& {1 \over V}{\partial^2 U \over \partial \epsilon^2_{23} 
 }\Bigg|_{\epsilon=0} - {1\over 2} p, \\
-B_{1,2} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{1} 
-\partial \epsilon_{2}}\Bigg|_{\epsilon=0} + p, \\
-B_{1,3} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{1} 
-\partial \epsilon_{3}}\Bigg|_{\epsilon=0} + p, \\
-B_{2,3} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{2} 
-\partial \epsilon_{3}}\Bigg|_{\epsilon=0} + p, 
+B_{11,22} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{11} 
+\partial \epsilon_{22}}\Bigg|_{\epsilon=0} + p, \\
+B_{11,33} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{11} 
+\partial \epsilon_{33}}\Bigg|_{\epsilon=0} + p, \\
+B_{22,33} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{22} 
+\partial \epsilon_{33}}\Bigg|_{\epsilon=0} + p, 
 \end{eqnarray}
-while for all the other components $B_{i,j}=
-{1 \over V}{\partial^2 U \over \partial \epsilon_{i} 
-\partial \epsilon_{j}}\big|_{\epsilon=0}$.
+while for all the other components $B_{ij,kj}=
+{1 \over V}{\partial^2 U \over \partial \epsilon_{ij} 
+\partial \epsilon_{kl}}\big|_{\epsilon=0}$.
 
 For a generic stress, as opposed to an isotropic pressure, the $B_{ij,kl}$ 
 have not the same symmetry properties of $C_{ij,kl}$. In general, for a 
@@ -2704,212 +2702,67 @@ B_{ij,kk} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{ij}
 \epsilon_{kk} }\Bigg|_{\epsilon=0} - \sigma^{(0)}_{ij}. 
 \end{eqnarray}
 
+\newpage
+\section{\color{coral}Temperature dependent elastic constants}
+In principle to calculate the elastic constants at each temperature it
+is sufficient to substitute the Helmholtz free energy to the total energy
+in the equations of the previous section. 
+There are however two complications
+that make the calculation more difficult. One is that the stress is not
+readily available at finite temperature and therefore we can use only the
+energy expressions. The second is that, at each temperature, the strain should
+be applied to an unstrained geometry that minimizes the Helmholtz free energy 
+at temperature $T$. 
+We have:
+\begin{equation}
+C_{ij,kl}^T= {1 \over V(T)}{\partial^2 F \over \partial \epsilon_{ij} 
+\partial \epsilon_{kl}}\Bigg|_{\epsilon=0,T}.
+\end{equation}
+Since making an elastic constant calculation for each temperature is
+quite heavy, it is necessary to approximate this expression.
+
+One approximation known in the literature as ``quasi-static'' 
+uses the energy instead of the Helmholtz free energy 
+in the above expression computing the elastic constants in a regular grid of
+crystal parameters and interpolating at each temperature at the geometry
+that minimizes the Helmholtz free energy.
+
+Another approximation consists in computing the derivatives of the
+Helmholtz free energy but taking a fixed unstrained geometry, for instance 
+the geometry that minimize the energy (i.e. the equilibrium geometry 
+at $T=0$). In this approach, at each temperature, the solid has a different 
+stress and we have to use the expressions written in the previous section 
+in order to obtain the stress-strain elastic constants. We call 
+this ``fixed-geometry quasi-harmonic'' approximation.
+
+A third possibility consists in combining the previous two approaches,
+computing the elastic constants as derivatives of the Helmholtz free
+energies for a regular grid of unstrained geometries and interpolating at 
+each temperature at the geometry that minimizes the Helmholtz free energy.
+We call this ``quasi-harmonic'' approximation.
+
 %\newpage
-%\section{\color{coral}Temperature dependent elastic constants}
-%In principle to calculate the elastic constants at each temperature it
-%is sufficient to substitute the Helmholtz free energy to the total energy
-%in the equations of the previous section. There are however two complications
-%that make the calculation more difficult. One is that the stress is not
-%readily available at finite temperatures and therefore we can use only the
-%energy expressions. The second is that, at each temperature, the strain must be
-%applied taking as equilibrium (unstrained) geometry the one that 
-%minimizes the free energy at temperature $T$. 
-%We have:
-%\begin{equation}
-%C_{i,l}^T= {1 \over V(T)}{\partial^2 F \over \partial \epsilon_i \partial \epsilon_l}
-%\Bigg|_T.
-%\end{equation}
-%One approximation consists in computing the elastic constants as a function 
-%of temperature taking as unstrained geometry the equilibrium one
-%at $T=0$. The disadvantage of this approach is that at each temperature
-%the solid has a stress.
-%
-%Since we cannot make an elastic constant calculation for each temperature, it
-%is convenient to calculate the Helmholtz free energy in a regular grid in
-%a space whose dimension are the parameters $\zeta_k$ that define the 
-%unstrained lattice plus an additional parameter that define the strain necessary
-%to calculate the given elastic constant. Sometimes this strain can be applied
-%simply changing the parameters $\zeta_k$, but in some cases it is an
-%additional parameter that increases of one the dimension of 
-%the parameter space, or equivalently lowers the symmetry of the cell so
-%that we need more parameters to determine it (however all the additional
-%parameters are a function of the strain amplitude).
-%The free energy is then fitted by a quadratic polynomial in this extended space
-%at each temperature and the minimum of the quadratic polynomial gives
-%the equilibrium geometry at that temperature. In principle for a solid
-%that is stable at that temperature the minimum is obtained at
-%zero strain. Then the same free energy values are fitted with a quartic
-%polynomial and the second derivatives of the free energy with respect
-%to strain are calculated at the minimum.
-%It is important to use a fourth-order polynomial to calculate the
-%second derivatives. A second order polynomial is sufficient to determine
-%the minimum but not the second derivatives. Under pressure instead of the
-%Helmholtz free energy we minimize the Gibbs free energy. The second
-%derivatives of the Gibbs free energy gives:
-%\begin{equation}
-%B_{i,l}^T= {1 \over V(T)}{\partial^2 G \over \partial \epsilon_i \partial \epsilon_l}
-%\Bigg|_T.
-%\end{equation}
-%This equation is sufficient to calculate the elastic constant at a 
-%given pressure and temperature, but not at a given generic stress. In the
-%latter case $B_{i,l}^T$ cannot be written using the Voigt notation.
-%
-%Let us consider separately the different Bravais lattices.
-%
-%\subsection{\color{web-blue}Cubic system}
-%The application of $\epsilon_A$ is equivalent to the change of the lattice 
-%constant $a$, so the calculation of $C_{11}+2 C_{12}$ can be done by fitting
-%$F(a)$ with the quadratic function
-%$F(a) = g_1 + g_3 (a-a_0)^2$ where $a_0$ is the parameter $a$ that minimizes
-%the free energy at each temperature. Since
-%\begin{equation}
-%F(\epsilon_A)= {3 V(T) \over 2} \epsilon_1^2 (C_{11}+2C_{12}) 
-%\end{equation}
-%and $\epsilon_1=(a-a_0)/a_0$ we have:
-%\begin{equation}
-%C^T_{11}+2C^T_{12}= {1 \over 3 V(T)}  a_0^2 2 g_3
-%\end{equation}
-%
-%Let us now consider $\epsilon_E$. To apply this strain we have to transform
-%the cubic cell in a tetragonal cell. At $T=0$ it was sufficient to change only
-%the parameter $c/a$ keeping $a$ fixed to calculate $C_{11}$, now instead we
-%have to vary both $a$ and $c/a$. Fitting the free energy
-%$F(a, \epsilon_3) = g_1 + g_3 (a-a_0)^2 + g_5 \epsilon_3^2 
-%+ g_6 (a-a_0) \epsilon_3$.
-%At the minimum $a_0$ and $\epsilon_{30}$ we should have
-%$F(\epsilon_3) = {V\over 2} C_{11} \epsilon_3^2$.
-%Since the strain $\epsilon_E$ does not change $a$ we have simply:
-%\begin{equation}
-%C^T_{11} = {1 \over V(T)} 2 g_5
-%\end{equation}
-%but $g_5$ must be obtained from a two-dimensional fit of the free energy
-%as a function of both $a$ and $\epsilon_3$ at each temperature.
-%
-%Let us now consider $\epsilon_F$. To apply this strain we have to transform the
-%unit cell in a trigonal cell and we must study a strain 
-%$\epsilon_4=\epsilon_5=\epsilon_6=\epsilon$. In this case we must vary both 
-%$a_t$ and $\cos\alpha$ of the trigonal cell.
-%Using the relationships between trigonal and strained cubic cell we can write
-%the free energy as:
-%\begin{equation}
-%F(a, \epsilon) = g_1 + g_3 (a-a_0)^2 + g_5 \epsilon^2 + g_6 (a-a_0) \epsilon.
-%\end{equation}
-%where $a$ is the size of the cubic cell and we already used the fact that
-%the minimum should be obtained for $\epsilon=0$. We therefore compute the free energy
-%in a uniform mesh of values of $a$ and $\epsilon$ and from the coefficients
-%of the interpolating polynomial and the equation:
-%\begin{equation}
-%F(\epsilon) = { 3 V \over 2} C_{44} \epsilon^2
-%\end{equation}
-%we obtain 
-%\begin{equation}
-%C_{44}= { 1\over 3 V } 2 g_5 
-%\end{equation}
-%If the fit is made with $N_g$ free energy evaluations per parameter, the cost of
-%this procedure is $N_g + 2 N_g^2$ free energy evaluations.
-%
-%\subsection{\color{web-blue}Hexagonal system}
-%The application of $\epsilon_C$ means that we transform the hexagonal cell
-%into a base-centered orthorhombic cell. This cell is defined by three 
-%parameters $a_o$, $b_o/a_o$ and $c_o/a_o$. We can fit the Helmholtz free 
-%energy with a quadratic function of three parameters $a$, $c/a$, and 
-%$\epsilon_1$, where $a$ and $c/a$ are the parameters of the hexagonal
-%cell as:
-%\begin{eqnarray}
-%F(a, c/a, \epsilon_1) = g_1 &+& g_3 (a-a_0)^2 + g_5 (c/a-c_0/a_0)^2
-%+ g_6 (a-a_0) (c/a-c_0/a_0) \nonumber \\ &+& g_8 \epsilon_1^2 + g_9 (a-a_0) \epsilon_1
-%+g_{10} (c/a-c_0/a_0) \epsilon_1, 
-%\label{quadratic_3}
-%\end{eqnarray}
-%The conversion between the orthorhombic parameters and the hexagonal ones
-%plus strain has been given above.
-%At the minimum of the free energy $\epsilon_1=0$ while $a$ and $c/a$ have
-%the equilibrium values at the temperature $T$. At the minimum 
-%\begin{equation}
-%F(\epsilon_1) = { V \over 2} C_{11} \epsilon_1^2
-%\end{equation}
-%so we obtain
-%\begin{equation}
-%C_{11}= { 1\over V } 2 g_8 
-%\end{equation}
-%
-%In order to calculate $C_{33}$ at any temperature we can apply $\epsilon_E$.
-%We keep the hexagonal cell and change $a$ and $c/a$ fitting the free energy 
-%as a function of $a$ and $\epsilon_3$ with a second order polynomial. We can 
-%write:
-%\begin{equation}
-%F(a, \epsilon_3) = g_1 + g_3 (a-a_0)^2 + 
-%                         g_5 (\epsilon_3-\epsilon_{30})^2 + 
-%                         g_6 (a-a_0) (\epsilon_3-\epsilon_{30})
-%\end{equation}
-%$a_0$ and $\epsilon_{30}$ will give the equilibrium configuration at
-%each temperature. $\epsilon_{30}$ will depend on the reference configuration
-%chosen to make the fit.
-%At the minimum:
-%\begin{equation}
-%F(\epsilon_3) = { V \over 2} C_{33} (\epsilon_3-\epsilon_{30})^2
-%\end{equation}
-%so that 
-%\begin{equation}
-%C_{33}= { 1\over V } 2 g_5 
-%\end{equation}
-%
-%Then we can calculate the combination $C_{11}+C_{33}+2C_{13}$ by repeating
-%the procedure seen above for the strain $\epsilon_{B'}$ and writing the
-%orthorhombic parameters in terms of $a$, $c/a$ and $\epsilon_1$. This time
-%the functional dependence of the orthorhombic parameters will be the
-%one appropriate to the strain $\epsilon_{B'}$, and we get:
-%\begin{equation}
-%C_{11}+C_{33}+2C_{13}= { 1\over V } 2 g_8 
-%\end{equation}
-%
-%Then we calculate the combination $2C_{11}+C_{33}+2C_{12}+4C_{13}$ by 
-%applying a strain $\epsilon_A$. We can write the free energy as a function
-%of $a$ and $\epsilon_1$:
-%\begin{equation}
-%F(a, \epsilon_1) = g_1 + g_3 (a-a_0)^2 + 
-%                         g_5 (\epsilon_1-\epsilon_{10})^2 + 
-%                         g_6 (a-a_0) (\epsilon_1-\epsilon_{10})
-%\end{equation}
-%and at the minimum $a_0$ and $\epsilon_1$ gives the values of $a$ and $c/a$
-%that correspond to the given temperature and at the minimum:
-%\begin{equation}
-%2C_{11}+C_{33}+2C_{12}+4C_{13}= { 1\over V } 2 g_5 
-%\end{equation}
-%
-%Finally we have to make a strain $\epsilon_H$ to determine $C_{55}$. Since
-%now both $a$ and $c/a$ might vary, we link the four parameters of the 
-%monoclinic lattice with $a$, $c/a$ and $\epsilon_5$. A quadratic fit of
-%this function of three parameters similar to Eq.~\ref{quadratic_3}
-%will give:
-%\begin{equation}
-%C_{55}= { 1\over V } 2 g_8 
-%\end{equation}
-%
-%\section{\color{coral}Pressure and temperature dependent elastic constants}
-%
+%\section{\color{coral}Pressure and temperature dependent elastic 
+%constants}
+
 %Under pressure instead of using the Helmholtz free energy we can minimize 
-%the Gibbs free energy. The second
-%derivatives of the Gibbs free energy are the elastic constants:
+%the Gibbs free energy. It is possible to prove that the second derivatives 
+%of the Gibbs free energy are the stress-strain elastic constants:
 %\begin{equation}
-%B_{i,l}^T= {1 \over V(T)}{\partial^2 G \over \partial 
-%\epsilon_i \partial \epsilon_l}
-%\Bigg|_T.
+%B_{ij,kl}^T= {1 \over V(T)}{\partial^2 G \over \partial 
+%\epsilon_{ij} \partial \epsilon_{kl}}
+%\Bigg|_{\epsilon=0,T}.
 %\end{equation}
-%This equation is sufficient to calculate the elastic constant at a
-%given pressure and temperature, but not at a given generic stress. In the
-%latter case $B_{i,l}^T$ cannot be written using the Voigt notation.
-%In general if the interval of parameters used to explore the free energy
-%surface is sufficiently large we can fit the Gibbs free energy
-%with a second order polynomial and find the minimum at any pressure
-%without additional energy or phonon calculations. However the quadratic
-%fit is sufficient to determine the new minimum for a range of pressures,
-%but not to determine the second derivatives. To have sufficient accuracy 
-%the Gibbs free energy must be fitted with a quartic
-%polynomial and the second derivatives of the free energy with respect
-%to strain of this polynomial must be calculated at the minimum.
-%The range of pressures for which this approach works can be tested changing
-%the starting configuration.
+%This equation is sufficient to calculate the elastic constants at a
+%given pressure and temperature. 
+%In general if we compute these stress-strain elastic constants on a
+%grid of crystal parameters and then interpolate them at the geometry
+%that minimize the Gibbs free energy, we can calculate the 
+%pressure and temperature dependent elastic constants for a 
+%certain range of pressures without additional energy or phonon
+%calculations.
+%The range of pressures for which this approach works has to be tested changing
+%the size and thickness of the grid of equilibrium configurations.
 
 \newpage
 \section{\color{coral}The elastic compliances}
@@ -3395,15 +3248,15 @@ Rombohedral cell (in term of the hexagonal cell):
 
 
 \item
-[1] J.F. Nye, Physical properties of crystals, Oxford University press, 
-Oxford (1957)
+[1.] J.F. Nye, Physical properties of crystals, Oxford University press, 
+Oxford (1957).
 
 \item
-[2] D.C. Wallace, Thermodynamics of crystals, J. Wiley and Sons, (1972),
+[2.] D.C. Wallace, Thermodynamics of crystals, J. Wiley and Sons (1972),
 Dover edition (1998).
 
 \item
-[3] T.H.K. Barron and M.L. Klein, Proc. Phys. Soc. {\bf 85}, 523 (1965).
+[3.] T.H.K. Barron and M.L. Klein, Proc. Phys. Soc. {\bf 85}, 523 (1965).
 \end{enumerate}
 
 \end{document}

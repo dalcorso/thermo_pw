@@ -156,9 +156,16 @@ SUBROUTINE thermo_summary()
                                   &all geometries ")')
           ENDIF
           lelc = .TRUE.
-     CASE ('elastic_constants_qha')
+     CASE ('scf_elastic_constants_qha')
           WRITE(stdout,'(5x,"Computing the temperature dependent elastic" )')
           WRITE(stdout,'(5x,"constants within quasi-harmonic approximation" )')
+          WRITE(stdout,'(5x,"for one unperturbed geometry" )')
+          IF (frozen_ions) WRITE(stdout,'(5x,"The ions are frozen" )')
+     CASE ('elastic_constants_t_qha')
+          WRITE(stdout,'(5x,"Computing the temperature dependent elastic" )')
+          WRITE(stdout,'(5x,"constants within quasi-harmonic approximation" )')
+          WRITE(stdout,'(5x,"for all geometries" )')
+          IF (frozen_ions) WRITE(stdout,'(5x,"The ions are frozen" )')
      CASE ('scf_piezoelectric_tensor') 
           IF (frozen_ions) THEN
              WRITE(stdout,'(5x,"Computing the frozen ions piezoelectric &
@@ -456,6 +463,8 @@ SUBROUTINE thermo_summary()
 !    monoclinic case, class C_2h (2/m), orthorhombic D_2h (mmm) 
 !
              CALL print_el_cons_shape(laue,ibrav)
+!             CALL print_el_cons_info(elastic_algorithm, laue, ibrav)
+
              IF (elastic_algorithm=='standard'.OR. &
                                     elastic_algorithm=='advanced') THEN
                 WRITE(stdout,'(/,5x,"It requires all six strains")') 
@@ -467,6 +476,7 @@ SUBROUTINE thermo_summary()
 !  tetragonal C_4h (4/m),  tetragonal D_4h (4/mmm)
 !
              CALL print_el_cons_shape(laue,ibrav)
+!             CALL print_el_cons_info(elastic_algorithm, laue, ibrav)
              IF (elastic_algorithm=='standard'.OR. &
                                     elastic_algorithm=='advanced') THEN
                 WRITE(stdout,'(/,5x,"It requires four strains: e1, e3, &
@@ -481,6 +491,7 @@ SUBROUTINE thermo_summary()
 !  hexagonal C_6h (6/m), D_6h (6/mmm)
 !
              CALL print_el_cons_shape(laue,ibrav)
+!             CALL print_el_cons_info(elastic_algorithm, laue, ibrav)
              IF (elastic_algorithm=='standard'.OR. &
                                     elastic_algorithm=='advanced') THEN
                 WRITE(stdout,'(/,5x,"It requires three strains: e1, e3, &
@@ -493,6 +504,7 @@ SUBROUTINE thermo_summary()
 !  cubic T_h (m-3), O_h (m-3m)
 !
              CALL print_el_cons_shape(laue,ibrav)
+!             CALL print_el_cons_info(elastic_algorithm, laue, ibrav)
              IF (elastic_algorithm=='standard'.OR. &
                                     elastic_algorithm=='advanced') THEN
                 WRITE(stdout,'(/,5x,"It requires two strains: e1 and e4")') 
@@ -501,6 +513,7 @@ SUBROUTINE thermo_summary()
              ENDIF
           CASE DEFAULT
              CALL print_el_cons_shape(laue,ibrav)
+!             CALL print_el_cons_info(elastic_algorithm, laue, ibrav)
              IF (elastic_algorithm=='standard'.OR. &
                                     elastic_algorithm=='advanced') THEN
                 WRITE(stdout,'(/,5x,"It requires all six strains")') 

@@ -167,7 +167,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, auxdyn_loc)
 !
 !    the case of quasi-harmonic elastic constants
 !
-        CASE ('elastic_constants_qha')
+        CASE ('scf_elastic_constants_qha','elastic_constants_t_qha')
            WRITE(stdout,'(/,2x,76("-"))')
            niter = electron_maxstep
            IF (frozen_ions) THEN
@@ -194,10 +194,11 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, auxdyn_loc)
 !
         CASE ('scf_ph',         &
               'scf_disp',       &
+              'scf_elastic_constants_qha', &
               'mur_lc_ph',      &
               'mur_lc_disp',    &
               'mur_lc_t',       &
-              'elastic_constants_qha')
+              'elastic_constants_t_qha')
            IF (all_geometries_together) THEN
               igeom=geometry(iwork)
               std=something_to_do_all(iwork, igeom, iq_point, irr_value)
@@ -361,6 +362,7 @@ USE control_thermo,   ONLY : outdir_thermo
 USE equilibrium_conf, ONLY : celldm0, at0, tau0_crys
 USE thermo_mod,       ONLY : celldm_geo, ibrav_geo
 USE control_elastic_constants, ONLY : frozen_ions, elastic_algorithm, rot_mat
+USE control_elastic_constants_qha, ONLY : ngeom
 !
 !  library routines
 !
@@ -388,6 +390,8 @@ CHARACTER(LEN=6)   :: int_to_char
 
 WRITE(stdout,'(/,2x,76("-"))')
 CALL print_strain(epsilon_geo(:,:,iwork))
+
+IF (ngeom>1) CALL set_geometry_el_cons_qha(iwork)
 !
 !  entering here we have:
 !  

@@ -204,6 +204,7 @@ MODULE anharmonic
                                          ! of temperature (constant entropy)
   REAL(DP), ALLOCATABLE :: macro_el_t(:,:) ! macroscopic elasticity as a 
                                          ! function of t
+  REAL(DP), ALLOCATABLE :: el_con_geo_t(:,:,:,:)
 
 END MODULE anharmonic
 
@@ -253,6 +254,7 @@ MODULE ph_freq_anharmonic
                                          ! of temperature (constant entropy)
   REAL(DP), ALLOCATABLE :: macro_elf_t(:,:) ! macroscopic elasticity as a 
                                          ! function of t
+  REAL(DP), ALLOCATABLE :: el_con_geo_t_ph(:,:,:,:)
 
 END MODULE ph_freq_anharmonic
 
@@ -416,6 +418,8 @@ MODULE control_thermo
                             ! converted input
   LOGICAL :: lecqha=.FALSE. ! if .true. compute the elastic constants 
                             ! within the qha
+  LOGICAL :: lectqha=.FALSE. ! if .true. compute the elastic constants 
+                            ! within the qha at many geometries
   !
   CHARACTER(LEN=256) :: outdir_thermo ! the outdir read from the input
   !
@@ -489,8 +493,29 @@ MODULE control_elastic_constants
   REAL(DP), ALLOCATABLE :: el_con_tau_geo(:,:,:) ! the atomic coordinates at
                                 ! each geometry for which the elastic 
                                 ! constants are calculated
+  LOGICAL ::       &
+             el_cons_qha_available_ph
+
+  LOGICAL :: el_cons_qha_geo_available,      &
+             el_cons_qha_geo_available_ph
 
 END MODULE control_elastic_constants
+
+MODULE control_elastic_constants_qha
+  USE kinds,  ONLY : DP
+  !
+  INTEGER, ALLOCATABLE :: ibrav_save_qha(:) ! the ibrav of each unperturbed
+                                ! lattice.
+  REAL(DP), ALLOCATABLE :: celldm0_qha(:,:) ! the celldm0 of each unperturbed
+                                ! lattice.
+  REAL(DP), ALLOCATABLE :: omega0_qha(:) ! the volume of each unperturbed cell
+  REAL(DP), ALLOCATABLE :: tau_crys_qha(:,:,:)   ! the atomic positions of each
+                                ! unperturbed lattice.
+  INTEGER :: ngeom=1            ! the number of geometries
+
+  INTEGER :: work_base          ! number of works for one set of
+                                ! elastic constants
+END MODULE control_elastic_constants_qha
   !
 MODULE control_conv
   USE kinds,  ONLY : DP

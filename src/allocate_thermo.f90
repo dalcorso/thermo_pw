@@ -39,6 +39,7 @@ END SUBROUTINE allocate_thermodynamics
 
 SUBROUTINE allocate_anharmonic()
 
+  USE thermo_mod,          ONLY : tot_ngeo
   USE temperature,         ONLY : ntemp
   USE ions_base,           ONLY : nat
   USE anharmonic,          ONLY : vmin_t, b0_t, b01_t, free_e_min_t,         &
@@ -47,13 +48,14 @@ SUBROUTINE allocate_anharmonic()
                                   celldm_t, alpha_anis_t, cpmce_anis,        &
                                   el_cons_t, el_comp_t, macro_el_t,          &
                                   el_cons_s, el_comp_s,                      &
-                                  bths_t, ggamma_t, bfact_t
+                                  bths_t, ggamma_t, bfact_t, el_con_geo_t
   USE ph_freq_anharmonic,  ONLY : vminf_t, b0f_t, b01f_t, free_e_minf_t,     &
                                   alphaf_t, betaf_t, gammaf_t, cvf_t, cef_t, &
                                   cpf_t, b0f_s, celldmf_t, alphaf_anis_t,    & 
                                   cpmcef_anis, el_consf_t, el_compf_t,       &
                                   el_consf_s, el_compf_s,                    &
-                                  macro_elf_t, bthsf_t, ggammaf_t, bfactf_t
+                                  macro_elf_t, bthsf_t, ggammaf_t, bfactf_t, &
+                                  el_con_geo_t_ph
   USE grun_anharmonic,     ONLY : betab, alpha_an_g, cp_grun_t, cv_grun_t,   &
                                   ce_grun_t, b0_grun_s, grun_gamma_t,        &
                                   grun_cpmce_anis, el_cons_grun_t,           &
@@ -84,6 +86,8 @@ SUBROUTINE allocate_anharmonic()
   IF (.NOT. ALLOCATED (el_cons_s) )     ALLOCATE(el_cons_s(6,6,ntemp)) 
   IF (.NOT. ALLOCATED (el_comp_s) )     ALLOCATE(el_comp_s(6,6,ntemp)) 
   IF (.NOT. ALLOCATED (macro_el_t) )    ALLOCATE(macro_el_t(8,ntemp)) 
+  IF (.NOT. ALLOCATED (el_con_geo_t) )  ALLOCATE(el_con_geo_t(6,6,ntemp,&
+                                                                   tot_ngeo)) 
 
   IF (.NOT. ALLOCATED (vminf_t) )       ALLOCATE(vminf_t(ntemp)) 
   IF (.NOT. ALLOCATED (b0f_t) )         ALLOCATE(b0f_t(ntemp)) 
@@ -107,6 +111,8 @@ SUBROUTINE allocate_anharmonic()
   IF (.NOT. ALLOCATED (el_consf_s) )    ALLOCATE(el_consf_s(6,6,ntemp)) 
   IF (.NOT. ALLOCATED (el_compf_s) )    ALLOCATE(el_compf_s(6,6,ntemp)) 
   IF (.NOT. ALLOCATED (macro_elf_t) )   ALLOCATE(macro_elf_t(8,ntemp)) 
+  IF (.NOT. ALLOCATED (el_con_geo_t_ph) ) ALLOCATE(el_con_geo_t_ph(6,6,&
+                                                           ntemp,tot_ngeo)) 
 
   IF (.NOT. ALLOCATED (vgrun_t) )       ALLOCATE(vgrun_t(ntemp)) 
   IF (.NOT. ALLOCATED (b0_grun_t) )     ALLOCATE(b0_grun_t(ntemp)) 

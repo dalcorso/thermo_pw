@@ -34,7 +34,7 @@ PROGRAM thermo_pw
   USE control_thermo,   ONLY : lev_syn_1, lev_syn_2, lpwscf_syn_1,         &
                                lbands_syn_1, lph, outdir_thermo, lq2r,     &
                                lconv_ke_test, lconv_nk_test,               &
-                               lelastic_const, lecqha,                        &
+                               lelastic_const, lecqha, lectqha,            &
                                lpiezoelectric_tensor, lpolarization,       &
                                lpart2_pw, all_geometries_together
   USE control_pwrun,    ONLY : do_punch
@@ -253,8 +253,6 @@ PROGRAM thermo_pw
 !
 !   This part makes one or several phonon calculations, using the
 !   image feature of this code and running asynchronously.
-!   Different geometries are made in sequence. This should be improved,
-!   there should be no need to resynchronize after each geometry
 !
   IF (lph) THEN
 
@@ -265,7 +263,7 @@ PROGRAM thermo_pw
      ENDIF
      IF (stop_signal_activated) GOTO 1000
 !
-!     Here the Helmholtz free energy at each lattice constant is available.
+!     Here the Helmholtz free energy at each geometry is available.
 !     We can write on file the free energy as a function of the volume at
 !     any temperature. For each temperature we can fit the free energy
 !     or the Gibbs energy if we have a finite pressure with a 
@@ -284,6 +282,7 @@ PROGRAM thermo_pw
      ENDIF
 
      IF (lecqha) CALL manage_elastic_cons_qha()
+     IF (lectqha) CALL manage_elastic_cons_t_qha()
 
   ENDIF
   !

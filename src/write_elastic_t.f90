@@ -23,7 +23,8 @@ USE quartic_surfaces, ONLY : quartic_ncoeff, print_chisq_quartic,         &
                              print_quartic_polynomial
 USE cubic_surfaces,   ONLY : cubic_ncoeff, fit_multi_cubic
 USE control_elastic_constants, ONLY : el_con_geo,  el_cons_available, &
-                                      el_cons_t_available
+                                      el_cons_t_available, el_cons_qha_available, &
+                                      el_cons_qha_available_ph
 USE control_grun,   ONLY : lb0_t
 USE control_mur,    ONLY : b0
 USE elastic_constants, ONLY : el_con, el_compliances
@@ -42,6 +43,11 @@ INTEGER :: igeo, ibrav, nvar, ncoeff, ndata
 REAL(DP), ALLOCATABLE :: el_cons_coeff(:,:,:), x(:,:), f(:)
 INTEGER :: i, j, idata, itemp
 INTEGER :: compute_nwork
+
+IF (el_cons_qha_available.OR.el_cons_qha_available_ph) THEN
+   CALL interpolate_el_qha()
+   RETURN
+ENDIF 
 
 IF (.NOT.lb0_t.AND.el_cons_available) THEN
    b0=macro_el(5)

@@ -28,7 +28,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
                              lstress, lelastic_const, lpiezoelectric_tensor,&
                              lberry, lpolarization, lpart2_pw, do_scf_relax, &
                              ldos_syn_1, ltherm_dos, ltherm_freq, after_disp, &
-                             lecqha
+                             lecqha, lectqha
   USE control_pwrun,  ONLY : do_punch
   USE control_conv,   ONLY : nke, ke, deltake, nkeden, deltakeden, keden, &
                              nnk, nk_test, deltank, nsigma, sigma_test, &  
@@ -37,6 +37,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
   USE initial_conf,   ONLY : celldm_save, ibrav_save
   USE piezoelectric_tensor, ONLY : polar_geo
   USE control_elastic_constants, ONLY : elastic_algorithm, rot_mat
+  USE control_elastic_constants_qha, ONLY : ngeom
   USE elastic_constants, ONLY : epsilon_voigt, sigma_geo, epsilon_geo
   USE gvecw,          ONLY : ecutwfc
   USE gvect,          ONLY : ecutrho
@@ -177,6 +178,26 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
+        CASE ('scf_elastic_constants_qha')
+           lecqha=.TRUE.
+           lph=.TRUE.
+           lq2r = .TRUE.
+           ltherm = .TRUE.
+           CALL set_elastic_cons_work(1,nwork)
+           tot_ngeo=nwork
+           ALLOCATE(energy_geo(tot_ngeo))
+           ALLOCATE(no_ph(tot_ngeo))
+           energy_geo=0.0_DP
+           CALL initialize_no_ph(no_ph, tot_ngeo, ibrav_save)
+           CALL allocate_thermodynamics()
+           CALL allocate_debye()
+           CALL allocate_anharmonic()
+           IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'anhar_files' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'dynamical_matrices' )
+           IF (meta_ionode) ios = f_mkdir_safe( 'phdisp_files' )
         CASE ('scf_piezoelectric_tensor')
            lpart2_pw=.TRUE.
            tot_ngeo=1
@@ -308,17 +329,19 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
            nwork=0
            lev_syn_1=.FALSE.
-        CASE ('elastic_constants_qha')
-           lecqha=.TRUE.
+        CASE ('elastic_constants_t_qha')
+           lectqha=.TRUE.
            lph=.TRUE.
            lq2r = .TRUE.
            ltherm = .TRUE.
-           CALL set_elastic_cons_work(nwork)
+           CALL initialize_mur_qha(ngeom)
+           CALL set_elastic_cons_work(ngeom, nwork)
            tot_ngeo=nwork
            ALLOCATE(energy_geo(tot_ngeo))
            ALLOCATE(no_ph(tot_ngeo))
            energy_geo=0.0_DP
-           CALL initialize_no_ph(no_ph, tot_ngeo, ibrav_save)
+!           CALL initialize_no_ph(no_ph, tot_ngeo, ibrav_save)
+           no_ph=.FALSE.
            CALL allocate_thermodynamics()
            CALL allocate_debye()
            CALL allocate_anharmonic()
@@ -351,7 +374,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            CALL initialize_ph_work(nwork)
         CASE ('mur_lc_t')
            CALL initialize_ph_work(nwork)
-        CASE ('elastic_constants_qha')
+        CASE ('scf_elastic_constants_qha', 'elastic_constants_t_qha')
            CALL initialize_ph_work(nwork)
         CASE ('scf_elastic_constants', 'mur_lc_elastic_constants',&
                                        'elastic_constants_t')
@@ -367,7 +390,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
 !
 !     set_elastic_constant_work allocates ibrav_geo and celldm_geo
 !
-           CALL set_elastic_cons_work(nwork)
+           CALL set_elastic_cons_work(1,nwork)
 
            ALLOCATE(energy_geo(nwork))
            ALLOCATE(omega_geo(nwork))
@@ -446,6 +469,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
               'mur_lc_disp',                 &
               'mur_lc_t',                    &
               'elastic_constants_qha',       &
+              'elastic_constants_t_qha',     &
               'mur_lc_elastic_constants',    &
               'mur_lc_piezoelectric_tensor', &
               'mur_lc_polarization' )
@@ -470,7 +494,8 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
               'mur_lc_ph',        &
               'mur_lc_disp',      &
               'mur_lc_t',         &
-              'elastic_constants_qha')
+              'elastic_constants_qha', &
+              'elastic_constants_t_qha')
 
            lphonon(1:nwork)=.TRUE.
 !
@@ -617,16 +642,19 @@ IF (clean_fact) fact_ngeo=1
 RETURN
 END SUBROUTINE clean_ngeo
 
-SUBROUTINE set_celldm_geo()
+SUBROUTINE set_celldm_geo(celldm_geo, nwork)
 !
 !   This routine sets the grid of values on celldm_geo.
 !
 USE kinds,         ONLY : DP
 USE constants,     ONLY : pi
-USE thermo_mod,    ONLY : step_ngeo, ngeo, celldm_geo, reduced_grid
+USE thermo_mod,    ONLY : step_ngeo, ngeo, reduced_grid
 USE initial_conf,  ONLY : celldm_save
 
 IMPLICIT NONE
+INTEGER, INTENT(IN) :: nwork
+REAL(DP), INTENT(INOUT) :: celldm_geo(6,nwork)
+
 INTEGER  :: igeo1, igeo2, igeo3, igeo4, igeo5, igeo6
 INTEGER  :: iwork, i, total_work
 REAL(DP) :: angle1, angle2, angle3, delta(6)
@@ -758,7 +786,7 @@ ALLOCATE(ibrav_geo(nwork))
 ALLOCATE(celldm_geo(6,nwork))
 ALLOCATE(energy_geo(nwork))
 ALLOCATE(omega_geo(nwork))
-CALL set_celldm_geo()
+CALL set_celldm_geo(celldm_geo, nwork)
 DO igeom = 1, nwork
    omega_geo(igeom)=compute_omega_geo(ibrav_save,celldm_geo(:,igeom))
 ENDDO
@@ -767,6 +795,44 @@ ibrav_geo=ibrav_save
 
 RETURN
 END SUBROUTINE initialize_mur
+
+SUBROUTINE initialize_mur_qha(nwork)
+!
+!   this routine sets the unperturbed geometries for the computation
+!   of the elastic constants within the quasiharmonic approximation.
+!   minimization. It allocates the variables ibrav_save_qha, 
+!   celldm0_qha. 
+!
+USE kinds,         ONLY : DP
+USE ions_base,     ONLY : nat
+USE control_elastic_constants_qha, ONLY : ibrav_save_qha, celldm0_qha, &
+                                          tau_crys_qha, omega0_qha
+USE initial_conf,  ONLY : ibrav_save, tau_save_crys
+
+IMPLICIT NONE
+
+INTEGER, INTENT(OUT) :: nwork
+
+INTEGER              :: igeom, iwork
+INTEGER              :: compute_nwork
+REAL(DP)             :: compute_omega_geo
+
+nwork=compute_nwork()
+WRITE(6,*) 'allocating nwork, nat, ibrav_save', nwork, nat, ibrav_save 
+FLUSH(6)
+ALLOCATE(ibrav_save_qha(nwork))
+ALLOCATE(celldm0_qha(6,nwork))
+ALLOCATE(omega0_qha(nwork))
+ALLOCATE(tau_crys_qha(3,nat,nwork))
+CALL set_celldm_geo(celldm0_qha, nwork)
+ibrav_save_qha(:)=ibrav_save
+DO iwork=1,nwork
+   tau_crys_qha(:,:,iwork)=tau_save_crys(:,:)
+   omega0_qha(iwork)=compute_omega_geo(ibrav_save, celldm0_qha(:,iwork))
+ENDDO
+
+RETURN
+END SUBROUTINE initialize_mur_qha
 
 SUBROUTINE initialize_ph_work(nwork)
 !

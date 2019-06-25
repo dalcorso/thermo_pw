@@ -525,19 +525,16 @@ SUBROUTINE thermo_readin()
             CALL errore('thermo_readin','poly_degree_elc must be between &
                                                                &2 and 4',1)
 
-  IF (what=='elastic_constants_t' .AND. elastic_algorithm/='standard') &
-     CALL errore('thermo_readin','Only the standard algorithm is working &
-                                          &in this case',1)
-
-   IF (what=='elastic_constants_qha' .AND. elastic_algorithm/='energy_std'&
-                    .AND. elastic_algorithm/='energy') &
+  IF ((what=='scf_elastic_constants_qha'.OR.what=='elastic_constants_t_qha') &
+       .AND.elastic_algorithm/='energy_std'.AND.elastic_algorithm/='energy') &
      CALL errore('thermo_readin','Only the energy algorithm is available &
                                           &in this case',1)
 
   read_paths=( what=='scf_bands'.OR.what=='scf_disp'.OR.what=='plot_bz'.OR. &
                what=='mur_lc_bands' .OR. what=='mur_lc_disp' .OR. &
                what=='mur_lc_t' .OR. what=='scf_2d_bands'.OR. &
-               what=='elastic_constants_qha')
+               what=='scf_elastic_constants_qha'.OR. &
+               what=='elastic_constants_t_qha')
 
   IF (nimage==1) save_max_seconds=max_seconds
   max_seconds_tpw=max_seconds

@@ -5,7 +5,7 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-SUBROUTINE set_elastic_cons_work( nwork )
+SUBROUTINE set_elastic_cons_work( ngeom, nwork )
 !
 !  This routine sets the work to do for computing the elastic constants for
 !  each Laue class. 
@@ -23,6 +23,8 @@ USE kinds,             ONLY : DP
 USE thermo_mod,        ONLY : ibrav_geo, celldm_geo
 USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, rot_mat, &
                                elastic_algorithm, epsilon_0
+USE control_elastic_constants_qha, ONLY : ibrav_save_qha, celldm0_qha, &
+                              work_base
 USE initial_conf,      ONLY : ibrav_save
 USE equilibrium_conf,  ONLY : celldm0
 USE thermo_sym,        ONLY : laue
@@ -33,9 +35,10 @@ USE elastic_constants, ONLY : epsilon_voigt, sigma_geo, epsilon_geo
 USE strain_mod,        ONLY : set_strain_adv, trans_epsilon
 
 IMPLICIT NONE
+INTEGER, INTENT(IN) :: ngeom
 INTEGER, INTENT(OUT) :: nwork
 REAL(DP) :: epsilon_min, epsil
-INTEGER  :: igeo, iwork, base_ind, istep, nstep
+INTEGER  :: igeo, iwork, igeom, base_ind, istep, nstep
 CHARACTER(LEN=2) :: strain_list(21)
 
 nstep=0
@@ -288,7 +291,8 @@ IF (nstep<1.AND.elastic_algorithm=='energy') &
 IF (nstep<1) &
    CALL errore('set_elastic_cons_work', 'Incorrect nstep, &
                                              &check elastic_algorithm',1)
-nwork = nstep * ngeo_strain
+nwork = nstep * ngeo_strain * ngeom
+work_base = nstep * ngeo_strain
 
 ALLOCATE( epsilon_voigt(6, nwork) )
 ALLOCATE( epsilon_geo(3, 3, nwork) )
@@ -297,18 +301,28 @@ ALLOCATE( ibrav_geo(nwork) )
 ALLOCATE( celldm_geo(6,nwork) )
 ALLOCATE( rot_mat(3,3,nwork) )
 
+IF (ngeom==1) THEN
+   ALLOCATE(ibrav_save_qha(1))
+   ALLOCATE(celldm0_qha(6,1))
+   ibrav_save_qha(1)=ibrav_save
+   celldm0_qha(:,1)=celldm0(:)
+ENDIF
+base_ind=0
 epsilon_min= - delta_epsilon * (ngeo_strain - 1 ) / 2.0_DP - epsilon_0
-DO istep=1,nstep
-   base_ind = (istep-1) * ngeo_strain
-   DO igeo=1,ngeo_strain
-      epsil=epsilon_min + delta_epsilon * ( igeo - 1 )
-      IF (igeo > ngeo_strain/2) epsil=epsil + 2.0_DP*epsilon_0
-      IF (MOD(ngeo_strain,2)==1 .AND. igeo==(ngeo_strain/2 + 1)) epsil=epsil &
-                                                          -epsilon_0
+DO igeom=1, ngeom
+   DO istep=1,nstep
+      DO igeo=1,ngeo_strain
+         epsil=epsilon_min + delta_epsilon * ( igeo - 1 )
+         IF (igeo > ngeo_strain/2) epsil=epsil + 2.0_DP*epsilon_0
+         IF (MOD(ngeo_strain,2)==1 .AND. igeo==(ngeo_strain/2 + 1)) &
+                                                epsil=epsil-epsilon_0
 
-      CALL set_strain_adv(strain_list(istep), ibrav_save, celldm0, &
-           epsil, epsilon_voigt(1,base_ind+igeo), ibrav_geo(base_ind+igeo), &
-           celldm_geo(1,base_ind+igeo), rot_mat(1,1,base_ind+igeo) )
+         CALL set_strain_adv(strain_list(istep), ibrav_save_qha(igeom),  &
+              celldm0_qha(1,igeom), epsil, epsilon_voigt(1,base_ind+igeo), &
+              ibrav_geo(base_ind+igeo), celldm_geo(1,base_ind+igeo),     &
+              rot_mat(1,1,base_ind+igeo) )
+      ENDDO
+      base_ind = base_ind + ngeo_strain
    ENDDO
 ENDDO
 

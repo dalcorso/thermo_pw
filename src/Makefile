@@ -22,6 +22,8 @@ b_factor_reduction.o \
 check_existence.o \
 check_file_exists.o \
 check_all_geometries_done.o \
+check_el_cons.o \
+check_el_cons_qha.o \
 check_geo_initial_status.o \
 clean_dfft.o \
 clean_path.o \
@@ -53,6 +55,7 @@ initialize_thermo_work.o \
 interpolate_bfact.o \
 interpolate_cv.o \
 interpolate_el_cons.o \
+interpolate_el_qha.o \
 interpolate_freq.o \
 io_bands.o \
 initialize_ph_geometry.o \
@@ -61,6 +64,7 @@ manage_anhar.o   \
 manage_bands.o   \
 manage_elastic_cons.o \
 manage_elastic_cons_qha.o \
+manage_elastic_cons_t_qha.o \
 manage_energy_minimum.o \
 manage_piezo_tensor.o \
 manage_ph.o \
@@ -118,7 +122,6 @@ thermo_readin.o \
 thermo_setup.o \
 thermo_pw.o \
 thermo_summary.o \
-check_el_cons.o \
 write_anhar.o \
 write_anhar_anis.o \
 write_e_nk.o \

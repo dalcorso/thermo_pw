@@ -1748,7 +1748,7 @@ Number of tasks for this option: \texttt{ngeo\_strain} times the number of
 independent strains. The different geometries are computed in sequence one
 after the other.
 
-\subsection{\color{web-blue}\texttt{what='elastic\_constants\_qha'}}
+\subsection{\color{web-blue}\texttt{what='scf\_elastic\_constants\_qha'}}
 
 With this option the code computes the elastic constants and elastic
 compliances as a function of temperature using the quasi-harmonic
@@ -1756,7 +1756,29 @@ approximation. For the same geometries that are used to compute the
 elastic constants with the \texttt{elastic\_algorithm='energy'}, the code 
 computes the phonon dispersions and computes the elastic constants
 at each temperature as the second derivatives of the Helmholtz free energy 
-with respect to strain.  
+with respect to strain. The second derivatives are corrected so that
+the stress-strain elastic constants are shown in the plots and in output. 
+Only one unperturbed geometry, the one given in input is used with 
+this option.
+
+\subsection{\color{web-blue}\texttt{what='elastic\_constants\_t\_qha'}}
+
+This option is similar to \texttt{what='scf\_elastic\_constants\_qha'} but
+makes the temperature dependent elastic constants calculation on a regular 
+grid of unperturbed geometries, the same geometries chosen with the option
+\texttt{what='mur\_lc\_t'}, and writes them on separate files, one for
+each unperturbed geometry, inside the directory \texttt{anhar\_files}.
+In order to plot the elastic constants as a function of temperature 
+it is necessary to make a calculation with \texttt{what='mur\_lc\_t'} 
+having on files the elastic constants calculated for each geometry 
+with the present option. 
+In this case \texttt{thermo\_pw} will be able to calculate the anharmonic 
+properties using temperature dependent elastic constants and bulk moduli 
+obtained by interpolating the ``quasi-harmonic'' elastic constants computed 
+by this option at the crystal parameters found at each temperature from 
+the minimization of the free energy.
+This option is presently limited to cubic crystals and it is 
+very experimental.
 
 %\subsection{\color{web-blue}\texttt{what='scf\_polarization'}}
 %With this option the code calculates the spontaneous polarization.
