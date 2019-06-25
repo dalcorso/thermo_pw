@@ -315,7 +315,7 @@ IF (meta_ionode) THEN
                   el_cons_t(1,6,itemp)
          ENDDO
       CASE(16)
-         IF (ibrav > 0) THEN
+         IF (ibrav < 0) THEN
             !
             !  b unique
             !
