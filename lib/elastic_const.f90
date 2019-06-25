@@ -31,12 +31,14 @@ MODULE elastic_constants
   REAL(DP) :: strs(3,3)=0.0_DP              ! estimated stress
 
 
-  PUBLIC sigma_geo, epsilon_geo,  epsilon_voigt, &     ! public variables
+  PUBLIC sigma_geo, epsilon_geo, epsilon_voigt, &      ! public variables
          el_con, el_compliances, press,   &            ! public variables
-         compute_elastic_constants,       &            !
+         compute_elastic_constants,       &            ! 
+         elastic_constants_from_compliances, &         !
          compute_elastic_constants_ene,   &            ! computing routines
          compute_elastic_compliances,     &            !
-         print_elastic_constants,         &            ! public printing routines
+         print_elastic_constants,         &            ! public printing 
+                                                       ! routines
          print_elastic_compliances,       &            !
          write_elastic, read_elastic,     &            ! public I/O on file
          macro_elasticity, print_macro_elasticity, &   ! public auxiliary tools
@@ -1847,6 +1849,23 @@ CALL invmat(6, cmn, smn)
 
 RETURN
 END SUBROUTINE compute_elastic_compliances
+
+SUBROUTINE elastic_constants_from_compliances(cmn,smn)
+!
+! This routine receives as input the elastic compliances matrix smn
+! and computes its inverse, the elastic constants matrix
+!
+USE kinds, ONLY : DP
+USE matrix_inversion, ONLY : invmat
+IMPLICIT NONE
+
+REAL(DP), INTENT(INOUT) :: smn(6,6)
+REAL(DP), INTENT(INOUT) :: cmn(6,6)
+
+CALL invmat(6, smn, cmn)
+
+RETURN
+END SUBROUTINE elastic_constants_from_compliances
 
 SUBROUTINE el_cons_ij(pq, mn, ngeo, epsil_geo, sigma_geo, m1)
 USE kinds, ONLY : DP
