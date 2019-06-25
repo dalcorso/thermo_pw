@@ -379,16 +379,14 @@ IF (meta_ionode) THEN
                & 13x, " C_33 ", 13x, " C_44 ", 13x, " C_55 ", 13x, " C_66 ", &
                & 13x, " C_14 ", 13x, " C_15 ", 13x, " C_16 ", 13x, " C_24 ", &
                & 13x, " C_25 ", 13x, " C_26 ", 13x, " C_34 ", 13x, " C_35 ", &
-               & 13x, " C_36 ", 13x, " C_45 ", 13x, " C_46 ", 13x, " C_55 ", &
-               & 13x, " C_56 ", 13x, " C_66 " )')
+               & 13x, " C_36 ", 13x, " C_45 ", 13x, " C_46 ", 13x, " C_56 ")')
          ELSE
             WRITE(iu_el_cons,'("#",5x,"   T  ", 10x, " K ", 13x, " S_11 ", &
                & 13x, " S_12 ", 13x, " S_13 ", 13x, " S_22 ", 13x, " S_23 ", &
                & 13x, " S_33 ", 13x, " S_44 ", 13x, " S_55 ", 13x, " S_66 ", &
                & 13x, " S_14 ", 13x, " S_15 ", 13x, " S_16 ", 13x, " S_24 ", &
                & 13x, " S_25 ", 13x, " S_26 ", 13x, " S_34 ", 13x, " S_35 ", &
-               & 13x, " S_36 ", 13x, " S_45 ", 13x, " S_46 ", 13x, " S_55 ", &
-               & 13x, " S_56 ", 13x, " S_66 " )')
+               & 13x, " S_36 ", 13x, " S_45 ", 13x, " S_46 ", 13x, " S_56 ")')
          ENDIF
          DO itemp=2,ntemp-1
             WRITE(iu_el_cons,'(e16.8,24e20.12)') temp(itemp), b0_t(itemp), &
@@ -402,8 +400,7 @@ IF (meta_ionode) THEN
                   el_cons_t(2,6,itemp), el_cons_t(3,4,itemp), &
                   el_cons_t(3,5,itemp), el_cons_t(3,6,itemp), &
                   el_cons_t(4,5,itemp), el_cons_t(4,6,itemp), &
-                  el_cons_t(5,5,itemp), el_cons_t(5,6,itemp), &
-                  el_cons_t(6,6,itemp)
+                  el_cons_t(5,6,itemp)
          ENDDO
    END SELECT
    CLOSE(iu_el_cons)
