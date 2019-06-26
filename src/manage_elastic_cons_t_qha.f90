@@ -99,11 +99,11 @@ DO igeom=1, ngeom
       CALL mp_sum(b0_t, world_comm)
       lelastic=.TRUE.
       filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons.g'//&
-                                                     int_to_char(igeom)
+                                                  TRIM(int_to_char(igeom))
       CALL write_el_cons_on_file(temp, ntemp, ibrav_save, el_cons_t, b0_t, &
                                                        filelastic, 0)
       filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp.g'//&
-                                                     int_to_char(igeom)
+                                                  TRIM(int_to_char(igeom))
       CALL write_el_cons_on_file(temp, ntemp, ibrav_save, el_comp_t, b0_t, &
                                                        filelastic, 1)
    ENDIF
@@ -114,12 +114,12 @@ DO igeom=1, ngeom
       CALL mp_sum(b0f_t, world_comm)
       lelasticf=.TRUE.
       filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons.g'//&
-                                               int_to_char(igeom)//'_ph'
+                                           TRIM(int_to_char(igeom))//'_ph'
       CALL write_el_cons_on_file(temp, ntemp, ibrav_save, el_consf_t, b0f_t, &
                                                           filelastic, 0)
 
       filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp.g'//&
-                                               int_to_char(igeom)//'_ph'
+                                           TRIM(int_to_char(igeom))//'_ph'
       CALL write_el_cons_on_file(temp, ntemp, ibrav_save, el_compf_t, b0f_t, &
                                                            filelastic,1)
    ENDIF

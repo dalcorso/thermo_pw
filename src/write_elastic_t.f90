@@ -97,24 +97,13 @@ DO i=1,6
          END DO
 
          IF (poly_degree_elc==4) THEN
-!            CALL introduce_quartic_fit(nvar, ncoeff, ndata)
             CALL fit_multi_quartic(ndata,nvar,ncoeff,lsolve,x,f,&
                                                    el_cons_coeff(:,i,j))
-!            CALL print_quartic_polynomial(nvar,ncoeff,el_cons_coeff(:,i,j))
-       !    WRITE(stdout,'(/,7x,"Energy (1)    Fitted energy (2)   &
-       !                                                   &DeltaE (1)-(2)")') 
-!            CALL print_chisq_quartic(ndata, nvar, ncoeff, x, f, &
-!                                                      el_cons_coeff(:,i,j))
          ELSEIF (poly_degree_elc==3) THEN
             CALL fit_multi_cubic(ndata,nvar,ncoeff,lsolve,x,f,&
                                                    el_cons_coeff(:,i,j))
          ELSE
-!            CALL introduce_quadratic_fit(nvar, ncoeff, ndata)
-!            CALL summarize_fitting_data(nvar, ndata, x, f)
             CALL fit_multi_quadratic(ndata,nvar,ncoeff,x,f,el_cons_coeff(:,i,j))
-!            CALL print_quadratic_polynomial(nvar, ncoeff, el_cons_coeff(:,i,j))
-!            CALL print_chisq_quadratic(ndata, nvar, ncoeff, x, f, &
-!                                                        el_cons_coeff(:,i,j))
          ENDIF
       ENDIF
    ENDDO
