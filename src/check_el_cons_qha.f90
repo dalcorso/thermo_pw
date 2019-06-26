@@ -60,7 +60,7 @@ SUBROUTINE check_el_cons_qha()
   IF (ltherm_dos) THEN
      el_con_geo_t=0.0_DP
      DO igeo = 1, tot_ngeo
-        filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons'//&
+        filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons.g'//&
                                                  TRIM(int_to_char(igeo))
         exst=check_file_exists(filelastic)
         IF (.NOT.exst) CYCLE
@@ -82,8 +82,8 @@ SUBROUTINE check_el_cons_qha()
   IF (ltherm_freq) THEN
      el_con_geo_t_ph=0.0_DP
      DO igeo=1, tot_ngeo
-        filelastic_ph='anhar_files/'//TRIM(flanhar)//'.el_cons_ph'//&
-                                                 TRIM(int_to_char(igeo))
+        filelastic_ph='anhar_files/'//TRIM(flanhar)//'.el_cons.g'//&
+                                            TRIM(int_to_char(igeo))//'_ph'
         exst=check_file_exists(filelastic_ph)
         IF (.NOT.exst) CYCLE
 
