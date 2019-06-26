@@ -113,6 +113,9 @@ temperature. Atomic Debye-Waller factors as a function of temperature.
 
 \item Frozen ions and relaxed ions elastic constants at fixed geometry.
 
+\item Relaxed ions temperature dependent elastic constants at fixed 
+unperturbed geometry.
+
 \item Fit of the total energy as a function of the lattice parameters with
 a quadratic or quartic polynomial and determination of equilibrium lattice 
 parameters. Murnaghan fit.
@@ -147,11 +150,13 @@ a function of temperature (limited to cubic systems).
 Minimum Helmholtz (or Gibbs at finite pressures) free energy 
 as a function of temperature.
 
-\item Elastic constants and elastic compliances as a function of temperature 
-within the ``quasi-static'' approximation.
+\item Constant temperature and isoentropic elastic constants and 
+elastic compliances as a function of temperature within the ``quasi-static'' 
+approximation.
 
-\item Elastic constants and elastic compliances as a function of temperature 
-within the ``quasi-harmonic'' approximation.
+\item Constant temperature and isoentropic elastic constants and 
+elastic compliances as a function of temperature within the 
+``quasi-harmonic'' approximation.
 
 \item Surface band structure identification and plot of the projected bulk
 band structure.
@@ -1260,6 +1265,20 @@ Debye's vibrational energy, free energy, entropy, and constant strain heat
 capacity. These quantities are plotted in a postscript file as a function
 of temperature.
 
+\subsection{\color{web-blue}\texttt{what='scf\_elastic\_constants\_qha'}}
+
+With this option the code computes the elastic constants and elastic
+compliances as a function of temperature using the quasi-harmonic
+approximation. For the same geometries that are used to compute the
+elastic constants with the \texttt{elastic\_algorithm='energy\_std'} or
+\texttt{elastic\_algorithm='energy'}, the code computes the phonon 
+dispersions and computes the elastic constants at each temperature 
+as the second derivatives of the Helmholtz free energy 
+with respect to strain. The second derivatives are corrected so that
+the stress-strain elastic constants are shown in the plots and in output. 
+Only one unperturbed geometry, the one given in input is used with 
+this option.
+
 %\subsection{\color{web-blue}\texttt{what='scf\_piezoelectric\_tensor'}}
 %With this option the code calculates the piezoelectric tensor 
 %($g_{\alpha,m}$ $\alpha=1,3,\ m=1,6$) of the solid.
@@ -1744,39 +1763,29 @@ The parameters that control this option are the same as those used with
 \texttt{what='scf\_elastic\_constants'} for the control of the elastic
 constants. Note however that only \texttt{elastic\_algoritm='standard'}
 is presently working with this option. \\
+With this option the pressure control is not active. \\
 Number of tasks for this option: \texttt{ngeo\_strain} times the number of
 independent strains. The different geometries are computed in sequence one
 after the other.
-
-\subsection{\color{web-blue}\texttt{what='scf\_elastic\_constants\_qha'}}
-
-With this option the code computes the elastic constants and elastic
-compliances as a function of temperature using the quasi-harmonic
-approximation. For the same geometries that are used to compute the
-elastic constants with the \texttt{elastic\_algorithm='energy'}, the code 
-computes the phonon dispersions and computes the elastic constants
-at each temperature as the second derivatives of the Helmholtz free energy 
-with respect to strain. The second derivatives are corrected so that
-the stress-strain elastic constants are shown in the plots and in output. 
-Only one unperturbed geometry, the one given in input is used with 
-this option.
 
 \subsection{\color{web-blue}\texttt{what='elastic\_constants\_t\_qha'}}
 
 This option is similar to \texttt{what='scf\_elastic\_constants\_qha'} but
 makes the temperature dependent elastic constants calculation on a regular 
 grid of unperturbed geometries, the same geometries chosen with the option
-\texttt{what='mur\_lc\_t'}, and writes them on separate files, one for
+\texttt{what='mur\_lc'}, and writes them on separate files, one for
 each unperturbed geometry, inside the directory \texttt{anhar\_files}.
 In order to plot the elastic constants as a function of temperature 
+within the `quasi-harmonic' approximation,
 it is necessary to make a calculation with \texttt{what='mur\_lc\_t'} 
 having on files the elastic constants calculated for each geometry 
 with the present option. 
 In this case \texttt{thermo\_pw} will be able to calculate the anharmonic 
 properties using temperature dependent elastic constants and bulk moduli 
-obtained by interpolating the ``quasi-harmonic'' elastic constants computed 
-by this option at the crystal parameters found at each temperature from 
-the minimization of the free energy.
+obtained by interpolating the ``fixed-geometry quasi-harmonic'' elastic 
+constants computed by this option at the crystal parameters found at 
+each temperature from the minimization of the free energy. \\
+With this option the pressure control is not active. \\
 This option is presently limited to cubic crystals and it is 
 very experimental.
 
@@ -2351,13 +2360,13 @@ when plotted shows $\gamma_{xy}$ (red, pink), $\gamma_{xz}$
 
 \item
 Phonon dispersions at the geometry that corresponds to a given temperature. 
-The color are assigned on the basis of the irreducible representation of
+The colors are assigned on the basis of the irreducible representation of
 each mode. The same comments made for the band structure plot apply here.
 
 \item
 Temperature dependence of the isothermal and isoentropic elastic constants 
-within the 
-`Quasi-static Approximation'. There is a plot for each non-zero
+within the `Quasi-static', `Fixed geometry quasi-harmonic' or
+'Quasi-harmonic approximation'. There is a plot for each non-zero
 elastic constant and a plot of the bulk modulus. The number of plots 
 depends on the Laue class. 
 Elastic constants 
@@ -2369,8 +2378,8 @@ Brillouin zone are in \texttt{blue} (isothermal) and \texttt{orange}
 
 \item
 Temperature dependence of the isothermal and isoentropic elastic compliances
-within the 
-`Quasi-static Approximation'. There is a plot for each non-zero
+within the `Quasi-static', `Fixed geometry quasi-harmonic' or
+'Quasi-harmonic approximation'. There is a plot for each non-zero
 elastic compliance and a plot of the compressibility. The number of plots 
 depends on the Laue class. 
 Elastic compliances

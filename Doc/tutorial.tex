@@ -365,21 +365,42 @@ changed while the other crystal parameters are kept constant.
 
 \section{\color{coral} How do I calculate the elastic constants 
 as a function of temperature?}
-This is a two step calculation. First use 
+There are two ways. Both of them are a two step calculation. 
+The fastest method uses the ``quasi-static'' approximation but it
+is less accurate.
+First use 
 \texttt{what='elastic\_constants\_t'}. This option computes the elastic
 constants for all the geometries used by \texttt{what='mur\_lc\_t'} and
 saves them in the directory \texttt{elastic\_constants}.  
 In the second step use the same input for \texttt{pw.x} and run again 
 \texttt{thermo\_pw} using \texttt{what='mur\_lc\_t'} and copying in your
 working directory the directory \texttt{elastic\_constants} obtained 
-in the previous step.
-Presently the code computes the temperature dependent elastic constants
-only within the ``quasi-static'' approximation, meaning that it interpolates
+in the previous step. Elastic constants are read only with 
+\texttt{lmurn=.FALSE.}.
+The ``quasi-static'' approximation means that the code interpolates
 the elastic constants found in the first step at the geometry that
-minimizes the Helmholtz (or Gibbs at finite pressure) free energy. The plot 
-of the elastic constants will be found in \texttt{output\_ahar.el\_cons.ps}.
-Note that this approach used with the option \texttt{lmurn=.FALSE.} can
-calculate the thermodynamic properties of non-cubic solids.
+minimizes the Helmholtz (or Gibbs at finite pressure) free energy. \\
+The second method uses the ``quasi-harmonic'' approximation and
+requires many phonon calculations at many geometries.
+First use 
+\texttt{what='elastic\_constants\_t\_qha'}. This option computes the 
+temperature dependent elastic constants taking as unperturbed geometries 
+those used by \texttt{what='mur\_lc\_t'} and saves them in the directory 
+\texttt{anhar\_files}.  
+In the second step use the same input for \texttt{pw.x} and run again 
+\texttt{thermo\_pw} using \texttt{what='mur\_lc\_t'} and copying in your
+working directory the directory \texttt{anhar\_files} obtained 
+in the previous step. Elastic constants are read only with 
+\texttt{lmurn=.FALSE.}. 
+The ``quasi-harmonic'' approximation means that the code interpolates
+the temperature dependent elastic constants found in the first step as
+second derivatives of the Helmholtz free energy, at the geometry that
+minimizes the Helmholtz free energy. \\
+The plot of the elastic constants will be found in 
+\texttt{output\_anhar.el\_cons.ps}.
+Note that these approaches used with the option \texttt{lmurn=.FALSE.} can
+calculate the thermodynamic properties of non-cubic solids, but the
+second method is still experimental and limited to cubic solids.
 
 \section{\color{coral} How do I calculate the electronic heat capacity
 of a metal?}
