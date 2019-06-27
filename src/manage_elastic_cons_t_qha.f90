@@ -37,6 +37,10 @@ REAL(DP), ALLOCATABLE :: free_energy_geo(:), epsilon_geo_loc(:,:,:)
 INTEGER :: itemp, startt, lastt, igeom, base_ind
 CHARACTER(LEN=256)  :: filelastic
 CHARACTER(LEN=6) :: int_to_char
+LOGICAL :: all_geometry_done
+
+CALL check_all_geometry_done(all_geometry_done)
+IF (.NOT.all_geometry_done) RETURN
 !
 !  the elastic constants are calculated here
 !  for each temperature
@@ -123,9 +127,6 @@ DO igeom=1, ngeom
       CALL write_el_cons_on_file(temp, ntemp, ibrav_save, el_compf_t, b0f_t, &
                                                            filelastic,1)
    ENDIF
-   !
-   CALL plot_elastic_t(0,.FALSE.)
-   CALL plot_elastic_t(1,.FALSE.)
 ENDDO
 
 DEALLOCATE(free_energy_geo)

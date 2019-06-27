@@ -86,7 +86,7 @@ END SUBROUTINE manage_anhar
 SUBROUTINE manage_anhar_anis()
 
 USE kinds,                 ONLY : DP
-USE thermo_mod,            ONLY : reduced_grid
+USE thermo_mod,            ONLY : reduced_grid, what
 USE temperature,           ONLY : ntemp, temp
 USE control_pressure,      ONLY : pressure_kb
 USE control_thermo,        ONLY : ltherm_dos, ltherm_freq
@@ -175,8 +175,10 @@ IF (ltherm_freq) CALL write_ph_freq_anhar_anis()
 !
 !  Plot elastic constants and compliances
 !
-CALL plot_elastic_t(0,.TRUE.)
-CALL plot_elastic_t(1,.TRUE.)
+IF (what=='mur_lc_t') THEN
+   CALL plot_elastic_t(0,.TRUE.)
+   CALL plot_elastic_t(1,.TRUE.)
+ENDIF
 !
 !    calculate and plot the Gruneisen parameters along the given path.
 !

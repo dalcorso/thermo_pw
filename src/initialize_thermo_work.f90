@@ -348,7 +348,6 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'anhar_files' )
-           IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
            IF (meta_ionode) ios = f_mkdir_safe( 'dynamical_matrices' )
            IF (meta_ionode) ios = f_mkdir_safe( 'phdisp_files' )
         CASE DEFAULT
