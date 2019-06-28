@@ -63,8 +63,6 @@ local_dos1d_so.o \
 manage_anhar.o   \
 manage_bands.o   \
 manage_elastic_cons.o \
-manage_elastic_cons_qha.o \
-manage_elastic_cons_t_qha.o \
 manage_energy_minimum.o \
 manage_piezo_tensor.o \
 manage_ph.o \
@@ -129,7 +127,9 @@ write_e_ke.o  \
 write_e_omega.o \
 write_el_thermo.o \
 write_ev_input.o \
+write_elastic_qha.o \
 write_elastic_t.o \
+write_elastic_t_qha.o \
 write_gruneisen_band.o \
 write_gruneisen_band_anis.o \
 write_gnuplot_energy.o \

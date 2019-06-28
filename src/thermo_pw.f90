@@ -281,8 +281,8 @@ PROGRAM thermo_pw
         ENDIF
      ENDIF
 
-     IF (lecqha) CALL manage_elastic_cons_qha()
-     IF (lectqha) CALL manage_elastic_cons_t_qha()
+     IF (lecqha) CALL write_elastic_qha()
+     IF (lectqha) CALL write_elastic_t_qha()
 
   ENDIF
   !

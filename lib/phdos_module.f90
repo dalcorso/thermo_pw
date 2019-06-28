@@ -150,7 +150,7 @@ IF (ionode) THEN
        ! nu(i) = frequencies (cm^{-1}), dos(i) in states/cm^{-1} 
       READ(iunit, *, END=20, ERR=10, IOSTAT=ios) nu(i),dos(i)
       IF ( nu(i) < -1.d0 ) THEN
-         write(stdout,*) i, nu(i), dos(i)
+         WRITE(stdout,*) i, nu(i), dos(i)
          CALL errore('read_phdos_data','negative frequencies',1)
       ELSE IF ( nu(i) < 0.d0 ) THEN
          nu(i) = 0.d0

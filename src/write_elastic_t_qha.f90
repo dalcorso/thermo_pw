@@ -5,7 +5,7 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-SUBROUTINE manage_elastic_cons_t_qha()
+SUBROUTINE write_elastic_t_qha()
 
 USE kinds,             ONLY : DP
 USE thermo_mod,        ONLY : energy_geo, tot_ngeo
@@ -133,4 +133,4 @@ DEALLOCATE(free_energy_geo)
 DEALLOCATE(epsilon_geo_loc)
 
 RETURN
-END SUBROUTINE manage_elastic_cons_t_qha
+END SUBROUTINE write_elastic_t_qha

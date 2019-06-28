@@ -161,10 +161,16 @@ zone and their plot.
 \item
 O) Calculation of the anharmonic quantities such as the thermal expansion
 from the numerical differentiation of the crystal parameters. Calculation
-of the isoentropic quantities when available.
+of the isoentropic quantities when enough information is available. 
+Calculation of the temperature dependent elastic constants within 
+the `quasi-harmonic' approximation when enough information is available.
 
 \item
-P) Calculation of the Gr\"uneisen parameters on a uniform mesh of {\bf q} 
+P) Calculation of the temperature dependent elastic constants within the
+`fixed-geometry quasi-harmonic'.
+
+\item
+Q) Calculation of the Gr\"uneisen parameters on a uniform mesh of {\bf q} 
 points and calculation of the thermal expansion from the Gr\"uneisen parameters.
 Calculation of the isoentropic quantities when available.
 
@@ -180,7 +186,7 @@ all \texttt{what} options.
 The different \texttt{what} activates the following parts of the code:
 
 \begin{verbatim}
-what         A   B   C   D   E    F     G1    H    I   L   G2   M   N   O   P
+what         A   B   C   D   E    F     G1    H    I   L   G2   M  N  O  P  Q
 
 plot_bz
 scf                          *
@@ -191,7 +197,9 @@ scf_2d_bands                 *    *
 scf_dos                      *    *
 scf_ph                       *                              *
 scf_disp                     *                              *
-scf_elastic_constants                    *     *
+scf_elastic_constants                    *    *
+scf_elastic_constants_qha     
+             *                                              *            *
 scf_piezoelectric_tensor                 *          +
 scf_polarization                         *              +
 mur_lc       *           *
@@ -200,13 +208,15 @@ mur_lc_dos   *           *   *    *
 mur_lc_ph    *           *   *                              *
 mur_lc_disp  *           *   *                              *
 mur_lc_elastic_constants
-             *           *               *      *
+             *           *               *    *
 mur_lc_piezoelectric_tensor
              *           *               *          +
 mur_lc_polarization
              *           *               *               +
-mur_lc_t     *           *                                   *     *  *   *  *
-elastic_constants_t                      *      *  
+mur_lc_t     *           *                                  *   *  *  *     *
+elastic_constants_t                      *    *  
+elastic_constants_t_qha
+             *                                              *            * 
 
 + not yet active or working.
 \end{verbatim}
@@ -248,7 +258,10 @@ Thermal expansion as a function of T           mur_lc_t
 Mode Gruneisen parameters                      mur_lc_t
 Phonon dispersions at the geometry 
 that corresponds to a given temperature        mur_lc_t
-Elastic constants as a function of temperature mur_lc_t, elastic_constant_t
+Elastic constants and bulk modulus
+as a function of temperature                   mur_lc_t, scf_elastic_constants_qha
+Elastic compliances and compressibility
+as a function of temperature                   mur_lc_t, scf_elastic_constants_qha
 
 For cubic systems, or when elastic constants are on file,
 also the following quantities are plotted:
@@ -262,7 +275,6 @@ Generalized Average Gruneisen parameters       mur_lc_t
 
 \end{verbatim}
 
-\newpage
 This is the list of the quantities that can be obtained in output
 and the \texttt{what} to use:
 
@@ -321,6 +333,12 @@ scf_disp                         fildyn
                  write_thermo    fltherm
                  write_thermo_ph fltherm(_ph)
                  plot_thermo                    flgnuplot(_therm)   flpstherm
+scf_elastic_constants_qha
+                 write_elastic_qha
+                                 flanhar.el_cons
+                                 flanhar.el_cons_ph
+                                 flanhar.el_comp
+                                 flanhar.el_comp_ph
 
 mur_lc           do_ev           flevdat        (input_ev)
                                  flevdat(.ev.out)
@@ -403,11 +421,22 @@ mur_lc_t
                                                                  flpsgrun(_freq)
                  write_elastic_t flanhar(.el_cons)
                                  flanhar(.el_cons_ph)
+                                 flanhar(.el_comp)
+                                 flanhar(.el_comp_ph)
                  plot_elastic_t                 flgnuplot(_el_cons)  
                                                            flpsanhar(.el_cons)
+                                                flgnuplot(_el_comp)  
+                                                           flpsanhar(.el_comp)
+elastic_constants_t_qha
+                 write_elastic_t_qha
+                                 flanhar.el_cons.g#g
+                                 flanhar.el_cons.g#g_ph
+                                 flanhar.el_comp.g#g
+                                 flanhar.el_comp.g#g_ph
 
 # is an integer from 1 to the number of crystal parameters
 #na is an integer from 1 to the number of atoms in the unit cell
+#g is an interger from 1 to the number of geometries
 \end{verbatim} 
 
 \newpage
@@ -454,6 +483,8 @@ anhar_files     : a directory that contains the files with the anharmonic
                   parameters readable by the gnuplot code, together with the 
                   interpolated frequencies and the files with these frequencies
                   readable by the gnuplot code.
+                  The 'quasi-static', 'fixed geometry quasi-harmonic' and
+                  'quasi-harmonic' elastic constants are saved here.
 
 elastic_constants : a directory that contains the elastic constants files.
 \end{verbatim}
@@ -1045,7 +1076,7 @@ the \texttt{plotband.f90} code of \qe. The numbers after the geometry indicate t
 along the path and the number of the irreducible representation.
 
 \item
-\texttt{anhar\_files/flanhar.el\_cons(\_s)(\_ph)}
+\texttt{anhar\_files/flanhar.el\_cons(.g\#g)(\_s)(\_ph)}
 (default name \texttt{output\_anhar.dat.el\_cons(\_s)(\_ph)}). This file
 contains the elastic constants as a functions of temperature. The number
 of columns depends on the Laue class. The first column is the 
@@ -1098,7 +1129,7 @@ For the Laue class $C_i$, it contains:
 \begin{verbatim}
 # T  B  C_{11} C_{12} C_{13} C_{22} C_{23} C_{33} C_{44} C_{55} C_{66} 
         C_{14} C_{15} C_{16} C_{24} C_{25} C_{26} C_{34} C_{35} C_{36}
-        C_{45} C_{46} C_{55} C_{56} C_{66} 
+        C_{45} C_{46} C_{56} 
 \end{verbatim}
 No extension or the \texttt{(\_ph)} extension means that the elastic
 constants have been interpolated at the geometry that minimizes the
@@ -1106,9 +1137,12 @@ free energy calculated by the phonon density of states or by Brillouin
 zone integration, respectively. 
 The \texttt{\_s} extension indicates isoentropic elastic constants.
 No extension means isothermal elastic constants.
+The \texttt{.g\#g} extension means that these are `fixed geometry
+quasi-harmonic' elastic constants calculated on a grid of geometries
+and \texttt{\#g} is the number of the geometry.
 
 \item
-\texttt{anhar\_files/flanhar.el\_comp(\_s)(\_ph)}
+\texttt{anhar\_files/flanhar.el\_comp(.g\#g)(\_s)(\_ph)}
 (default name \texttt{output\_anhar.dat.el\_comp(\_s)(\_ph)}). This file
 contains the elastic compliances as a functions of temperature. 
 The number of columns depends on the Laue class. The first column is the 
@@ -1161,7 +1195,7 @@ For the Laue class $C_i$, it contains:
 \begin{verbatim}
 # T  K  S_{11} S_{12} S_{13} S_{22} S_{23} S_{33} S_{44} S_{55} S_{66} 
         S_{14} S_{15} S_{16} S_{24} S_{25} S_{26} S_{34} S_{35} S_{36}
-        S_{45} S_{46} S_{55} S_{56} S_{66} 
+        S_{45} S_{46} S_{56}
 \end{verbatim}
 
 \end{itemize}
@@ -1171,6 +1205,9 @@ free energy calculated by the phonon density of states or by Brillouin
 zone integration, respectively. 
 The \texttt{\_s} extension indicates isoentropic elastic constants.
 No extension means isothermal elastic constants.
+The \texttt{.g\#g} extension means that these are `fixed geometry
+quasi-harmonic' elastic compliances calculated on a grid of geometries
+and \texttt{\#g} is the number of the geometry.
 
 \newpage
 \section{\color{coral}Library}
