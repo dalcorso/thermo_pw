@@ -188,7 +188,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            ALLOCATE(energy_geo(tot_ngeo))
            ALLOCATE(no_ph(tot_ngeo))
            energy_geo=0.0_DP
-           CALL initialize_no_ph(no_ph, tot_ngeo, ibrav_save)
+           no_ph=.FALSE.
            CALL allocate_thermodynamics()
            CALL allocate_debye()
            CALL allocate_anharmonic()
@@ -340,7 +340,6 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            ALLOCATE(energy_geo(tot_ngeo))
            ALLOCATE(no_ph(tot_ngeo))
            energy_geo=0.0_DP
-!           CALL initialize_no_ph(no_ph, tot_ngeo, ibrav_save)
            no_ph=.FALSE.
            CALL allocate_thermodynamics()
            CALL allocate_debye()
