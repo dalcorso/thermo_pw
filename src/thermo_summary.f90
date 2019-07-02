@@ -55,6 +55,7 @@ SUBROUTINE thermo_summary()
   USE nye,                  ONLY : print_vectors_shape, print_tensor2_shape, &
                                    print_el_cons_shape, print_piezo_shape, &
                                    print_b_fact_shape
+  USE elastic_constants,    ONLY : print_el_cons_info
 !
 !  pw modules and variables, set from input or in thermo_setup
 !
@@ -457,70 +458,8 @@ SUBROUTINE thermo_summary()
 
     IF (lelc.OR.what=='plot_bz') THEN
        WRITE(stdout,'(/,5x,"In this class the elastic tensor is")') 
-       SELECT CASE (laue) 
-          CASE (16,20)
-!
-!    monoclinic case, class C_2h (2/m), orthorhombic D_2h (mmm) 
-!
-             CALL print_el_cons_shape(laue,ibrav)
-!             CALL print_el_cons_info(elastic_algorithm, laue, ibrav)
-
-             IF (elastic_algorithm=='standard'.OR. &
-                                    elastic_algorithm=='advanced') THEN
-                WRITE(stdout,'(/,5x,"It requires all six strains")') 
-                WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
-                          6*ngeo_strain 
-             ENDIF
-          CASE (18)
-!
-!  tetragonal C_4h (4/m),  tetragonal D_4h (4/mmm)
-!
-             CALL print_el_cons_shape(laue,ibrav)
-!             CALL print_el_cons_info(elastic_algorithm, laue, ibrav)
-             IF (elastic_algorithm=='standard'.OR. &
-                                    elastic_algorithm=='advanced') THEN
-                WRITE(stdout,'(/,5x,"It requires four strains: e1, e3, &
-                                                                  &e4, e6")') 
-                WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
-                          4*ngeo_strain 
-             ENDIF
-
-          CASE (27,25,19,23)
-!
-!  trigonal S_6 (-3), D_3d (-3m)
-!  hexagonal C_6h (6/m), D_6h (6/mmm)
-!
-             CALL print_el_cons_shape(laue,ibrav)
-!             CALL print_el_cons_info(elastic_algorithm, laue, ibrav)
-             IF (elastic_algorithm=='standard'.OR. &
-                                    elastic_algorithm=='advanced') THEN
-                WRITE(stdout,'(/,5x,"It requires three strains: e1, e3, &
-                                                             &and e4")') 
-                WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
-                          3*ngeo_strain 
-             ENDIF
-          CASE (29,32)
-!
-!  cubic T_h (m-3), O_h (m-3m)
-!
-             CALL print_el_cons_shape(laue,ibrav)
-!             CALL print_el_cons_info(elastic_algorithm, laue, ibrav)
-             IF (elastic_algorithm=='standard'.OR. &
-                                    elastic_algorithm=='advanced') THEN
-                WRITE(stdout,'(/,5x,"It requires two strains: e1 and e4")') 
-                WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
-                          2*ngeo_strain 
-             ENDIF
-          CASE DEFAULT
-             CALL print_el_cons_shape(laue,ibrav)
-!             CALL print_el_cons_info(elastic_algorithm, laue, ibrav)
-             IF (elastic_algorithm=='standard'.OR. &
-                                    elastic_algorithm=='advanced') THEN
-                WRITE(stdout,'(/,5x,"It requires all six strains")') 
-                WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
-                          6*ngeo_strain 
-             ENDIF
-       END SELECT
+       CALL print_el_cons_shape(laue,ibrav)
+       CALL print_el_cons_info(elastic_algorithm, laue, ibrav, ngeo_strain)
     ENDIF
  ELSE
 !

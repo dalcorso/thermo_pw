@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2014-2015 Andrea Dal Corso 
+! Copyright (C) 2014-2019 Andrea Dal Corso 
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -40,6 +40,8 @@ MODULE elastic_constants
          print_elastic_constants,         &            ! public printing 
                                                        ! routines
          print_elastic_compliances,       &            !
+         print_el_cons_info,              &            ! print the number
+                                                       ! of calculations 
          write_elastic, read_elastic,     &            ! public I/O on file
          macro_elasticity, print_macro_elasticity, &   ! public auxiliary tools
          print_sound_velocities, &                     ! public auxiliary tools
@@ -2233,5 +2235,116 @@ IF (i==j) delta=1
 
 RETURN
 END FUNCTION delta
+
+SUBROUTINE print_el_cons_info(elastic_algorithm, laue, ibrav, ngeo_strain)
+
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: laue, ibrav, ngeo_strain
+CHARACTER(LEN=*), INTENT(IN) :: elastic_algorithm
+
+INTEGER :: nstrain
+
+IF (elastic_algorithm=='standard'.OR.elastic_algorithm=='advanced') THEN
+   SELECT CASE (laue) 
+!
+!  cubic T_h (m-3), O_h (m-3m)
+!
+      CASE (29,32)
+         WRITE(stdout,'(/,5x,"It requires two strains: e1 and e4")') 
+         nstrain=2
+      CASE (27,25)
+!
+!  trigonal S_6 (-3), D_3d (-3m)
+!
+         WRITE(stdout,'(/,5x,"It requires three strains: e1, e3, and e4.")') 
+         nstrain=3
+      CASE (19,23)
+! 
+!  hexagonal C_6h (6/m), D_6h (6/mmm)
+!
+         WRITE(stdout,'(/,5x,"It requires three strains: e1, e3, and e5.")') 
+         nstrain=3
+      CASE (18,22)
+!
+!  tetragonal C_4h (4/m),  tetragonal D_4h (4/mmm)
+!
+         WRITE(stdout,'(/,5x,"It requires four strains: e1, e3, e4, e6")') 
+         nstrain=4
+      CASE (16,20,2)
+!
+!    monoclinic case, class C_2h (2/m), orthorhombic D_2h (mmm) 
+!    triclinic case, class C_i(-1)
+!
+         WRITE(stdout,'(/,5x,"It requires all six strains.")') 
+         nstrain=6
+
+   END SELECT
+ELSE
+   SELECT CASE (laue) 
+!
+!  cubic T_h (m-3), O_h (m-3m)
+!
+      CASE (29,32)
+         WRITE(stdout,'(/,5x,"It requires three strains.")') 
+         nstrain=3
+      CASE (25)
+         IF (ibrav==4) THEN
+            WRITE(stdout,'(/,5x,"It requires five strains.")') 
+            nstrain=5
+         ELSE
+            WRITE(stdout,'(/,5x,"It requires six strains.")') 
+            nstrain=6
+         ENDIF
+      CASE (27)
+         IF (ibrav==4) THEN
+            WRITE(stdout,'(/,5x,"It requires five strains.")') 
+            nstrain=5
+         ELSE
+            WRITE(stdout,'(/,5x,"It requires seven strains.")') 
+            nstrain=7
+         ENDIF
+      CASE (19,23)
+!
+!  hexagonal C_6h (6/m), D_6h (6/mmm)
+!
+         WRITE(stdout,'(/,5x,"It requires five strains.")') 
+         nstrain=5
+      CASE (22)
+!
+!  tetragonal D_4h (4/mmm)
+!
+         WRITE(stdout,'(/,5x,"It requires six strains.")') 
+         nstrain=6
+      CASE (18)
+!
+!  tetragonal C_4h (4/m).
+!
+         WRITE(stdout,'(/,5x,"It requires seven strains.")') 
+         nstrain=7
+      CASE (20)
+!
+!  orthorhombic D_2h (mmm) 
+!
+         WRITE(stdout,'(/,5x,"It requires nine strains.")') 
+         nstrain=9
+      CASE (16)
+!
+!    monoclinic case, class C_2h (2/m), orthorhombic D_2h (mmm) 
+!
+         WRITE(stdout,'(/,5x,"It requires 13 strains.")') 
+         nstrain=13
+      CASE (2)
+!
+!    triclinic case, class C_i (-1)
+!
+         WRITE(stdout,'(/,5x,"It requires 21 strains.")') 
+         nstrain=21
+   END SELECT
+ENDIF
+
+WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
+                         nstrain*ngeo_strain 
+RETURN
+END SUBROUTINE print_el_cons_info
 
 END MODULE elastic_constants
