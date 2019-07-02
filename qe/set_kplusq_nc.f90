@@ -242,11 +242,6 @@ subroutine set_kplusq_nc_tpw (xk, wk, xq, nks, npk, diago_bands, &
 
   DEALLOCATE(xk_save)
 
-  WRITE(6,*) 'Exiting set_kplus_q', nks0, nks
-  DO ik=1,nks
-     WRITE(6,*) diago_bands(ik), ik_origin(ik), isym_bands(ik)
-  ENDDO
-
   return
 end subroutine set_kplusq_nc_tpw
 
