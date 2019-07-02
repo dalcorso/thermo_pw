@@ -530,6 +530,10 @@ SUBROUTINE thermo_readin()
      CALL errore('thermo_readin','Only the energy algorithm is available &
                                           &in this case',1)
 
+  IF ((what=='scf_elastic_constants_qha'.OR.what=='elastic_constants_t_qha') &
+      .AND.ABS(pressure)>1.D-7) &
+       CALL errore('thermo_readin','pressure not programmed',1)
+
   read_paths=( what=='scf_bands'.OR.what=='scf_disp'.OR.what=='plot_bz'.OR. &
                what=='mur_lc_bands' .OR. what=='mur_lc_disp' .OR. &
                what=='mur_lc_t' .OR. what=='scf_2d_bands'.OR. &
