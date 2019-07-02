@@ -52,23 +52,24 @@ SUBROUTINE c_bands_nscf_tpw( )
   !
   IMPLICIT NONE
   !
-  REAL(DP) :: avg_iter, ethr_
+  REAL(DP) :: avg_iter, ethr_, mem_to_alloc, max_mem, t_trev
   ! average number of H*psi products
   INTEGER :: ik_, ik, ik_eff, ibnd, nkdum, npw, ios, ipol, ind1, ind2, gk(3)
+
   ! ik_: k-point already done in a previous run
   ! ik : counter on k points
-  INTEGER :: ik_diago, ik_sym, ikk
+  INTEGER :: ik_diago, ik_sym, ikk, divide, queue
   LOGICAL :: all_done_asyn
   !
   REAL(DP), EXTERNAL :: get_clock
   COMPLEX(DP), ALLOCATABLE :: psic(:,:,:), evcr(:,:,:), evcbuffer(:,:,:,:), &
                               evcrecv(:,:,:,:)
-  REAL(DP), ALLOCATABLE :: aux_xk(:,:), aux_et(:,:)
-  INTEGER, ALLOCATABLE :: working_pool(:), ikd(:), need(:,:), index_send(:), &
-                          index_recv(:)
+  REAL(DP), ALLOCATABLE :: aux_xk(:,:), aux_et(:,:), mem(:)
+  INTEGER, ALLOCATABLE :: working_pool(:), ikd(:), need(:,:), index_send(:,:), &
+                          index_recv(:,:), ticket(:), nkdiag_loc(:), nkrecv_loc(:)
   INTEGER, EXTERNAL :: local_kpoint_index, global_kpoint_index
-  INTEGER :: ig, iks, ik1, ikg, ikdiag, ikdiag_loc, nkdiag, nkdiag_loc, &
-             nkrecv_loc, ipool, iuawfc, lrawfc
+  INTEGER :: ig, iks, ik1, ikg, ikdiag, ikdiag_loc, nkdiag, ipool, iuawfc, & 
+             lrawfc
   LOGICAL :: exst_mem, exst
   !
   CALL start_clock( 'c_bands' )
@@ -159,9 +160,13 @@ SUBROUTINE c_bands_nscf_tpw( )
         !
         IF (noncolin.AND.domag) THEN
            IF (lgamma.AND. MOD(ik,2)==0) THEN
+              CALL start_clock( 't_rev' )
               CALL apply_trev(evc, ik, ik-1)
+              CALL stop_clock( 't_rev' )
            ELSEIF (.NOT.lgamma.AND.(MOD(ik,4)==3.OR.MOD(ik,4)==0)) THEN
+              CALL start_clock( 't_rev' )
               CALL apply_trev(evc, ik, ik-2)
+              CALL stop_clock( 't_rev' )
            ENDIF
         ENDIF
         !
@@ -220,157 +225,209 @@ SUBROUTINE c_bands_nscf_tpw( )
 !   working_pool is the pool that has diagonalized (from 1 to npool) ikdiag
 !   ikd is the global index of the k point in the nkdiag list (all pools
 !   have the same info).
+!   ticket is used to divide the sending and receiving array into
+!   smaller pieces of a maximum size of 1 GByte
 !
-     ALLOCATE(index_recv(nkdiag))     
-     ALLOCATE(index_send(nkdiag))     
+!
      ALLOCATE(need(nkdiag,npool))     
      ALLOCATE(working_pool(nkdiag))
      ALLOCATE(ikd(nkdiag))
+     ALLOCATE(ticket(nkdiag))
 
-     nkdiag=0
-     need=0
-     index_send=0
-     index_recv=0
-     nkdiag_loc=0
-     nkrecv_loc=0
-     working_pool=0
-     DO ik=1, nkstot
-        IF (diago_bands(ik)) THEN
-           nkdiag=nkdiag+1
-           ikd(nkdiag)=ik
-           ikk=local_kpoint_index(nkstot,ik)
-           IF (ikk /=-1) THEN
-              nkdiag_loc=nkdiag_loc+1
-              index_send(nkdiag)=nkdiag_loc
-              working_pool(nkdiag)=my_pool_id+1
-           ELSE
-              nks_loop: DO ikk=1,nks
-                 ikg=global_kpoint_index(nkstot,ikk)
-                 IF (.NOT.diago_bands(ikg).AND.ik_origin(ikg)==ik) THEN
-                    nkrecv_loc=nkrecv_loc+1
-                    need(nkdiag, me_orthopool+1)=1
-                    index_recv(nkdiag)=nkrecv_loc
-                    EXIT nks_loop
+     max_mem=1._DP   ! in Gbytes
+
+     DO divide=1, nkdiag
+
+        working_pool=0
+        need=0
+        ticket=0
+
+        ALLOCATE(index_send(nkdiag,divide))             
+        ALLOCATE(index_recv(nkdiag,divide))     
+        ALLOCATE(nkdiag_loc(divide))     
+        ALLOCATE(nkrecv_loc(divide))     
+        ALLOCATE(mem(divide))
+
+        index_send=0
+        index_recv=0
+        nkdiag_loc=0
+        nkrecv_loc=0
+
+        DO ikdiag=1, nkdiag
+           ticket(ikdiag)=INT(dfloat((ikdiag-1))/nkdiag*divide+1)
+        END DO
+
+        DO queue=1, divide
+           nkdiag=0
+           DO ik=1, nkstot
+              IF (diago_bands(ik)) THEN
+                 nkdiag=nkdiag+1
+                 ikd(nkdiag)=ik
+                 ikk=local_kpoint_index(nkstot,ik)
+                 IF (ikk /=-1) THEN
+                    IF (ticket(nkdiag)==queue) THEN
+                       nkdiag_loc(queue)=nkdiag_loc(queue)+1
+                       index_send(nkdiag,queue)=nkdiag_loc(queue)
+                       working_pool(nkdiag)=my_pool_id+1
+                    END IF
+                 ELSE
+                    nks_loop: DO ikk=1,nks
+                       IF (ticket(nkdiag)==queue) THEN
+                          ikg=global_kpoint_index(nkstot,ikk)
+                          IF (.NOT.diago_bands(ikg).AND.ik_origin(ikg)==ik) THEN
+                             nkrecv_loc(queue)=nkrecv_loc(queue)+1
+                             need(nkdiag, me_orthopool+1)=1
+                             index_recv(nkdiag,queue)=nkrecv_loc(queue)
+                             EXIT nks_loop
+                          ENDIF
+                       END IF
+                    ENDDO nks_loop
                  ENDIF
-              ENDDO nks_loop     
-           ENDIF
-        ENDIF
-     ENDDO
+              ENDIF
+           ENDDO
+           mem(queue)=dfftp%nnr*npol*nbnd*&
+                      (nkdiag_loc(queue)+nkrecv_loc(queue))*16.0_DP/1.D9
+        END DO
+
+        mem_to_alloc=maxval(mem)
+
+        IF (mem_to_alloc<=max_mem) THEN 
+           EXIT
+        ELSE
+           DEALLOCATE(index_recv)     
+           DEALLOCATE(index_send)     
+           DEALLOCATE(nkdiag_loc)     
+           DEALLOCATE(nkrecv_loc)     
+        END IF
+
+        DEALLOCATE(mem)
+     END DO
+
      CALL mp_sum(need, intra_orthopool_comm)
      CALL mp_sum(working_pool, intra_orthopool_comm)
 
      ALLOCATE(psic(dfftp%nnr, npol, nbnd))
      ALLOCATE(evcr(dfftp%nnr, npol, nbnd))
 
-     IF (npool>1) THEN
-        IF (nkdiag_loc==0) nkdiag_loc=1
-        IF (nkrecv_loc==0) nkrecv_loc=1
-        ALLOCATE(evcbuffer(dfftp%nnr,npol,nbnd,nkdiag_loc))
-        ALLOCATE(evcrecv(dfftp%nnr,npol,nbnd,nkrecv_loc))
-        evcbuffer=(0.0_DP, 0.0_DP)
-        evcrecv=(0.0_DP, 0.0_DP)
-     ENDIF
-     ikdiag_loc=0
+     DO queue=1,divide
+        IF (npool>1) THEN
+           IF (nkdiag_loc(queue)==0) nkdiag_loc(queue)=1
+           IF (nkrecv_loc(queue)==0) nkrecv_loc(queue)=1
+           ALLOCATE(evcbuffer(dfftp%nnr,npol,nbnd,nkdiag_loc(queue)))
+           ALLOCATE(evcrecv(dfftp%nnr,npol,nbnd,nkrecv_loc(queue)))
+           evcbuffer=(0.0_DP, 0.0_DP)
+           evcrecv=(0.0_DP, 0.0_DP)
+        ENDIF
 !
 !   Here brings the diagonalized wavefunction in real space and put them 
 !   in the evcbuffer if there are pools, otherwise rotate and save them
 !
-     DO ikdiag=1, nkdiag
-        ikk=local_kpoint_index(nkstot, ikd(ikdiag))
-        IF (ikk /=-1) THEN
-           ikdiag_loc=ikdiag_loc+1
-           CALL get_buffer ( evc, nwordwfc, iunwfc, ikk )
-           npw=ngk(ikk)
-           psic=(0.0_DP,0.0_DP)
-           DO ipol=1, npol
-              ind1=1+(ipol-1)*npwx
-              ind2=npw+(ipol-1)*npwx
-              DO ibnd=1,nbnd
-                 psic(dfftp%nl(igk_k(1:npw,ikk)),ipol,ibnd) = &
-                                                   evc(ind1:ind2,ibnd)
-                 CALL invfft ('Rho', psic(:,ipol,ibnd), dfftp)
+        ikdiag_loc=0
+        DO ikdiag=1, nkdiag
+           IF (ticket(ikdiag)/=queue) CYCLE
+           ikk=local_kpoint_index(nkstot, ikd(ikdiag))
+           IF (ikk /=-1) THEN
+              ikdiag_loc=ikdiag_loc+1
+              CALL get_buffer ( evc, nwordwfc, iunwfc, ikk )
+              npw=ngk(ikk)
+              psic=(0.0_DP,0.0_DP)
+              DO ipol=1, npol
+                 ind1=1+(ipol-1)*npwx
+                 ind2=npw+(ipol-1)*npwx
+                 DO ibnd=1,nbnd
+                    psic(dfftp%nl(igk_k(1:npw,ikk)),ipol,ibnd) = &
+                         evc(ind1:ind2,ibnd)
+                    CALL invfft ('Rho', psic(:,ipol,ibnd), dfftp)
+                 ENDDO
               ENDDO
-           ENDDO
-           IF (npool==1) THEN
-              DO ik1 = 1, nks
-                 ik=global_kpoint_index(nkstot, ik1)
-                 IF (diago_bands(ik)) CYCLE
-                 IF (ik_origin(ik)/=ikd(ikdiag)) CYCLE
-                 ik_sym=ik_sym+1
-                 CALL rotate_and_save_psic(psic, evcr, aux_xk, ik, ik1, &
-                                                               ik_origin(ik))
-                 et(1:nbnd,ik1)=aux_et(1:nbnd,ik_origin(ik))
-              ENDDO
-           ELSE
-              evcbuffer(:,:,:,ikdiag_loc)=psic(:,:,:)
+              IF (npool==1) THEN
+                 DO ik1 = 1, nks
+                    ik=global_kpoint_index(nkstot, ik1)
+                    IF (diago_bands(ik)) CYCLE
+                    IF (ik_origin(ik)/=ikd(ikdiag)) CYCLE
+                    ik_sym=ik_sym+1
+                    CALL rotate_and_save_psic(psic, evcr, aux_xk, ik, ik1, &
+                         ik_origin(ik))
+                    et(1:nbnd,ik1)=aux_et(1:nbnd,ik_origin(ik))
+                 ENDDO
+              ELSE
+                 evcbuffer(:,:,:,ikdiag_loc)=psic(:,:,:)
+              ENDIF
            ENDIF
-        ENDIF
-     ENDDO
-
-     IF (npool>1) THEN
+        ENDDO
+        
+        IF (npool>1) THEN
 !
 !   pools receive the wavefunction that they need to obtain the
 !   rotated ones from the pools that have computed them
 !
-        DO ikdiag=1,nkdiag
-           DO ipool=1, npool
-              IF (need(ikdiag,ipool)==1) THEN
-                 IF (me_orthopool==(working_pool(ikdiag)-1)) THEN
+
+           DO ikdiag=1,nkdiag
+              IF (ticket(ikdiag)/=queue) CYCLE
+              DO ipool=1, npool
+                 IF (need(ikdiag,ipool)==1) THEN
+                    IF (me_orthopool==(working_pool(ikdiag)-1)) THEN
 !
 !    I am the pool that calculated the wavefunction. Send it to the
 !    pool that needs it
 !
-                    DO ibnd=1,nbnd
-                       CALL mp_get(evcbuffer(:,:,ibnd,index_send(ikdiag)), &
-                                evcbuffer(:,:,ibnd,index_send(ikdiag)), &
-                                me_orthopool, ipool-1, working_pool(ikdiag)-1, &
-                                ibnd, intra_orthopool_comm)
-                    ENDDO
-                 ELSEIF (me_orthopool==(ipool-1)) THEN
+                       DO ibnd=1,nbnd
+                          CALL mp_get(evcbuffer(:,:,ibnd,index_send(ikdiag,queue)), &
+                               evcbuffer(:,:,ibnd,index_send(ikdiag,queue)), &
+                               me_orthopool, ipool-1, working_pool(ikdiag)-1, &
+                               ibnd, intra_orthopool_comm)
+                       ENDDO
+                    ELSEIF (me_orthopool==(ipool-1)) THEN
 !
 !   I am the pool that needs the ikdiag wavefunctions so I receive them 
 !   here
 !
-                    DO ibnd=1,nbnd
-                       CALL mp_get(evcrecv(:,:,ibnd,index_recv(ikdiag)), &
-                                evcrecv(:,:,ibnd,index_recv(ikdiag)), &
-                                me_orthopool, ipool-1, working_pool(ikdiag)-1, &
-                                ibnd, intra_orthopool_comm)
-                    ENDDO
-                 ELSE
+                       DO ibnd=1,nbnd
+                          CALL mp_get(evcrecv(:,:,ibnd,index_recv(ikdiag,queue)), &
+                               evcrecv(:,:,ibnd,index_recv(ikdiag,queue)), &
+                               me_orthopool, ipool-1, working_pool(ikdiag)-1, &
+                               ibnd, intra_orthopool_comm)
+                       ENDDO
+                    ELSE
 !
 !  I am not interested in ikdiag, but call mp_get due to the presence of
 !  a barrier. I do not communicate here. 
 !
-                    DO ibnd=1,nbnd
-                       CALL mp_get(evcrecv(:,:,ibnd,1), evcrecv(:,:,ibnd,1), &
-                                me_orthopool, ipool-1, working_pool(ikdiag)-1, &
-                                ibnd, intra_orthopool_comm)
-                    ENDDO
+                       DO ibnd=1,nbnd
+                          CALL mp_get(evcrecv(:,:,ibnd,1), evcrecv(:,:,ibnd,1), &
+                               me_orthopool, ipool-1, working_pool(ikdiag)-1, &
+                               ibnd, intra_orthopool_comm)
+                       ENDDO
+                    ENDIF
                  ENDIF
-              ENDIF
+              ENDDO
            ENDDO
-        ENDDO
 !
 !   finally use the received wavefunctions to obtain the rotated ones
 !
-        DO ikdiag=1, nkdiag
-           DO ikk = 1, nks
-              ik=global_kpoint_index(nkstot, ikk)
-              IF (diago_bands(ik)) CYCLE
-              IF (ik_origin(ik)/=ikd(ikdiag)) CYCLE
-              ik_sym=ik_sym+1
-              IF (need(ikdiag,me_orthopool+1)==1) THEN
-                 psic(:,:,:)=evcrecv(:,:,:,index_recv(ikdiag))
-              ELSE
-                 psic(:,:,:)=evcbuffer(:,:,:,index_send(ikdiag))
-              ENDIF
-              CALL rotate_and_save_psic(psic, evcr, aux_xk, ik, ikk, &
-                                                    ik_origin(ik))
-              et(1:nbnd,ikk)=aux_et(1:nbnd,ik_origin(ik))
+           DO ikdiag=1, nkdiag
+              IF(ticket(ikdiag)/=queue) CYCLE
+              DO ikk = 1, nks
+                 ik=global_kpoint_index(nkstot, ikk)
+                 IF (diago_bands(ik)) CYCLE
+                 IF (ik_origin(ik)/=ikd(ikdiag)) CYCLE
+                 ik_sym=ik_sym+1
+                 IF (need(ikdiag,me_orthopool+1)==1) THEN
+                    psic(:,:,:)=evcrecv(:,:,:,index_recv(ikdiag,queue))
+                 ELSE
+                    psic(:,:,:)=evcbuffer(:,:,:,index_send(ikdiag,queue))
+                 ENDIF
+                 CALL rotate_and_save_psic(psic, evcr, aux_xk, ik, ikk, &
+                      ik_origin(ik))
+                 et(1:nbnd,ikk)=aux_et(1:nbnd,ik_origin(ik))
+              ENDDO
            ENDDO
-        ENDDO
-     ENDIF
+        ENDIF
+        IF (npool>1) THEN
+           DEALLOCATE(evcbuffer)
+           DEALLOCATE(evcrecv)
+        ENDIF
+     END DO
 
      CALL mp_stop_orthopools()
      !
@@ -381,12 +438,11 @@ SUBROUTINE c_bands_nscf_tpw( )
      DEALLOCATE(aux_xk)
      DEALLOCATE(working_pool)
      DEALLOCATE(index_recv)     
-     DEALLOCATE(index_send)     
-     DEALLOCATE(need)     
-     IF (npool>1) THEN
-        DEALLOCATE(evcbuffer)
-        DEALLOCATE(evcrecv)
-     ENDIF
+     DEALLOCATE(index_send)
+     DEALLOCATE(nkdiag_loc)     
+     DEALLOCATE(nkrecv_loc)          
+     DEALLOCATE(need)
+     DEALLOCATE(ticket)
      !
   ENDIF
   !
@@ -404,6 +460,8 @@ SUBROUTINE c_bands_nscf_tpw( )
   IF (tmp_dir /= tmp_dir_save) CALL close_buffer(iuawfc,'keep')
   !
   CALL stop_clock( 'c_bands' )
+ 
+  CALL print_clock( 't_rev' )
   !
   RETURN
   !
@@ -498,10 +556,14 @@ IF (noncolin.AND.domag) THEN
       CALL rotate_all_psi_r_tpw(psic,evcr, s(1,1,invs(isym_bands(ik))), &
                            ftau(1,invs(isym_bands(ik))), d_spin, has_e, gk)
       IF (lgamma.AND. MOD(ik,2)==0) THEN
+         CALL start_clock( 't_rev' )
          CALL apply_trev_r(evcr)
+         CALL stop_clock( 't_rev' )
          iks=-1
       ELSEIF (.NOT.lgamma.AND.(MOD(ik,4)==3.OR.MOD(ik,4)==0)) THEN
+         CALL start_clock( 't_rev' )
          CALL apply_trev_r(evcr)
+         CALL stop_clock( 't_rev' )
          iks=-2
       ENDIF
    ELSE
