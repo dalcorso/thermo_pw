@@ -26,7 +26,8 @@ MODULE piezoelectric_tensor
 
   PUBLIC g_piezo_tensor, polar_geo, compute_piezo_tensor, &
          print_d_piezo_tensor, print_g_piezo_tensor,      &
-         compute_d_piezo_tensor, d_piezo_tensor, nppl 
+         compute_d_piezo_tensor, d_piezo_tensor, nppl,    &
+         print_piezo_info
 
 CONTAINS
 !
@@ -448,5 +449,98 @@ ENDDO
 
 RETURN
 END SUBROUTINE compute_d_piezo_tensor
+
+SUBROUTINE print_piezo_info(code_group,ibrav,ngeo_strain)
+
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: code_group, ibrav, ngeo_strain
+
+INTEGER :: nstrain
+
+SELECT CASE (code_group) 
+   CASE (2,16,18,19,20,22,23,25,27,29,32) 
+      nstrain=0
+   CASE (3)
+!
+!  C_s   Monoclinic
+!
+      WRITE(stdout,'(/,5x,"It requires five strains: e1, e2, e3, e4, and e5")')
+      nstrain=5
+   CASE (4)
+!
+!  C_2   Monoclinic
+!
+      WRITE(stdout,'(/,5x,"It requires all six strains")')
+      nstrain=6
+   CASE (6,7)
+!
+!  C_4, tetragonal, C_6 hexagonal
+!
+      WRITE(stdout,'(/,5x,"It requires four strains: e1, e3, e4, and e5")')
+      nstrain=4
+   CASE (8)
+!
+!  D_2 (222) Orthorombic
+!
+      WRITE(stdout,'(/,5x,"It requires two strains: e4, e5, and e6")')
+      nstrain=3
+   CASE (9)
+!
+! D_3  Trigonal 
+!
+      WRITE(stdout,'(/,5x,"It requires two strains: e1 and e4")')
+      nstrain=2
+   CASE (10,11,28,30)
+!
+! D_4  tetragonal, D_6 hexagonal, T, T_d cubic
+!
+      WRITE(stdout,'(/,5x,"It requires one strain: e4")')
+      nstrain=1
+   CASE (12)
+!
+! C_2v  Orthorombic
+!
+      WRITE(stdout,'(/,5x,"It requires five strains: e1, e2, e3, e4, &
+                                                               &and e5 ")')
+      nstrain=5
+   CASE (13,14,15)
+!
+! C_3v  Trigonal. Assuming m perpendicular to x1
+! C_4v tetragonal, C_6v hexagonal
+!
+      WRITE(stdout,'(/,5x,"It requires three strain: e1, e3, and e4 ")')
+      nstrain=3
+   CASE (17,21)
+!
+! C_3h or D_3h hexagonal
+!
+      WRITE(stdout,'(/,5x,"It requires one strain: e1 ")')
+      nstrain=1
+   CASE (24)
+!
+! D_2d tetragonal: axis 2 || x1
+!
+      WRITE(stdout,'(/,5x,"It requires two strains: e4 and e6")')
+      nstrain=2
+   CASE (26)
+!
+! S_4 tetragonal
+!
+      WRITE(stdout,'(/,5x,"It requires three strains: e1, e4, and e6")')
+      nstrain=1
+   CASE (31)
+      nstrain=0
+   CASE DEFAULT
+!
+!  C_1 
+!
+      WRITE(stdout,'(/,5x,"It requires all six strains")')
+      nstrain=6
+   END SELECT
+
+   IF(nstrain>0) WRITE(stdout,'(5x,"for a total of",i3,&
+                                  &" scf calculations")') nstrain*ngeo_strain
+RETURN
+END SUBROUTINE print_piezo_info
 
 END MODULE piezoelectric_tensor

@@ -56,6 +56,7 @@ SUBROUTINE thermo_summary()
                                    print_el_cons_shape, print_piezo_shape, &
                                    print_b_fact_shape
   USE elastic_constants,    ONLY : print_el_cons_info
+  USE piezoelectric_tensor, ONLY : print_piezo_info
 !
 !  pw modules and variables, set from input or in thermo_setup
 !
@@ -331,125 +332,9 @@ SUBROUTINE thermo_summary()
                              &derivative of the polarization ")')
         WRITE(stdout,'(5x,"with respect to strain (in zero electric field) &
                                                                  &is:")')
-        SELECT CASE (code_group) 
-          CASE(2,16,18,19,20,22,23,25,27,29,32) 
-              CALL print_piezo_shape(code_group,ibrav)
-          CASE(3)
-!
-!  C_s   Monoclinic
-!
-             CALL print_piezo_shape(code_group,ibrav)
-             WRITE(stdout,'(/,5x,"It requires five strains: e1, e2, e3, e4, &
-                                                            &and e5")')
-             WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
-                          5*ngeo_strain
-
-          CASE(4)
-!
-!  C_2   Monoclinic
-!
-             CALL print_piezo_shape(code_group,ibrav)
-             WRITE(stdout,'(/,5x,"It requires all six strains")')
-             WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
-                          4*ngeo_strain
-
-          CASE(6,7)
-!
-!  C_4, tetragonal, C_6 hexagonal
-!
-             CALL print_piezo_shape(code_group,ibrav)
-             WRITE(stdout,'(/,5x,"It requires four strains: e1, e3, &
-                                                              &e4, and e5")')
-             WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
-                          4*ngeo_strain
-
-          CASE(8)
-!
-!  D_2 (222) Orthorombic
-!
-             CALL print_piezo_shape(code_group,ibrav)
-             WRITE(stdout,'(/,5x,"It requires two strains: e4, e5, and e6")')
-             WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
-                          3*ngeo_strain
-
-         CASE(9)
-!
-! D_3  Trigonal 
-!
-             CALL print_piezo_shape(code_group,ibrav)
-             WRITE(stdout,'(/,5x,"It requires two strains: e1 and e4")')
-             WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
-                          2*ngeo_strain
-
-         CASE(10,11,28,30)
-!
-! D_4  tetragonal, D_6 hexagonal, T, T_d cubic
-!
-             CALL print_piezo_shape(code_group,ibrav)
-             WRITE(stdout,'(/,5x,"It requires one strain: e4")')
-             WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
-                          ngeo_strain
-
-         CASE(12)
-!
-! C_2v  Orthorombic
-!
-             CALL print_piezo_shape(code_group,ibrav)
-             WRITE(stdout,'(/,5x,"It requires five strains: e1, e2, e3, e4,&
-                               & and e5 ")')
-             WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
-                          5*ngeo_strain
-
-         CASE(13,14,15)
-!
-! C_3v  Trigonal. Assuming m perpendicular to x1
-! C_4v tetragonal, C_6v hexagonal
-!
-             CALL print_piezo_shape(code_group,ibrav)
-             WRITE(stdout,'(/,5x,"It requires three strain: e1, e3, and e4 ")')
-             WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
-                          3*ngeo_strain
-
-         CASE(17,21)
-!
-! C_3h or D_3h hexagonal
-!
-             CALL print_piezo_shape(code_group,ibrav)
-             WRITE(stdout,'(/,5x,"It requires one strain: e1 ")')
-             WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
-                          ngeo_strain
-
-         CASE(24)
-!
-! D_2d tetragonal: axis 2 || x1
-!
-             CALL print_piezo_shape(code_group,ibrav)
-             WRITE(stdout,'(/,5x,"It requires two strains: e4 and e6")')
-             WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
-                          2*ngeo_strain
-
-         CASE(26)
-!
-! S_4 tetragonal
-!
-             CALL print_piezo_shape(code_group,ibrav)
-             WRITE(stdout,'(/,5x,"It requires three strains: e1, e4, and e6")')
-             WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
-                          3*ngeo_strain
-
-         CASE(31)
-             CALL print_piezo_shape(code_group,ibrav)
-
-         CASE DEFAULT
-!
-!  C_1 
-!
-             CALL print_piezo_shape(code_group,ibrav)
-             WRITE(stdout,'(/,5x,"It requires all six strains")')
-             WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
-                          6*ngeo_strain
-       END SELECT
-    ENDIF
+        CALL print_piezo_shape(code_group,ibrav)
+        CALL print_piezo_info(code_group,ibrav,ngeo_strain)
+     ENDIF
 !
 !  Fourth rank tensors: elastic constants
 ! 
