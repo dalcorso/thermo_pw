@@ -52,7 +52,8 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   USE units_lr,             ONLY : iuwfc, lrwfc
   USE output,               ONLY : fildrho, fildvscf
   USE phus,                 ONLY : becsumort, alphap, int1_nc
-  USE recover_mod,          ONLY : read_rec, write_rec
+  USE recover_mod,          ONLY : write_rec
+  USE recover_mod_tpw,      ONLY : read_rec_tpw
   ! used to write fildrho:
   USE dfile_autoname,       ONLY : dfile_name
   USE save_ph,              ONLY : tmp_dir_save
@@ -179,7 +180,8 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   if (rec_code_read == 10.AND.ext_recover) then
      ! restart from Phonon calculation
      IF (okpaw) THEN
-        CALL read_rec(dr2, iter0, npe, dvscfin, dvscfins, drhoscfh, dbecsum)
+        CALL read_rec_tpw(dr2, iter0, npe, dvscfin, dvscfins, drhoscfh, &
+                                                              dbecsum)
         IF (convt) THEN
            CALL PAW_dpotential(dbecsum,rho%bec,int3_paw,npe)
         ELSE
@@ -187,7 +189,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
            (nhm*(nhm+1)*nat*nspin_mag*npe)/2,mixin,dvscfin,dbecsum,ndim,-1)
         ENDIF
      ELSE
-        CALL read_rec(dr2, iter0, npe, dvscfin, dvscfins, drhoscfh)
+        CALL read_rec_tpw(dr2, iter0, npe, dvscfin, dvscfins, drhoscfh)
      ENDIF
      rec_code=0
   else

@@ -138,6 +138,7 @@ transform_intq_so.o  \
 tra_write_matrix.o \
 tra_write_zstar.o \
 write_group_info_ph.o \
+write_rec.o \
 zstar_eu.o          \
 zstar_eu_loc.o     \
 zstar_eu_us.o    
