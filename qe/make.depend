@@ -1344,6 +1344,7 @@ solve_linter.o : ../../PW/src/scf_mod.o
 solve_linter.o : ../../UtilXlib/mp.o
 solve_linter.o : ../../thermo_pw/lib/mp_asyn.o
 solve_linter.o : control_qe.o
+solve_linter.o : write_rec.o
 star_q.o : ../../Modules/io_global.o
 star_q.o : ../../Modules/kind.o
 stres_gradcorr.o : ../../FFTXlib/fft_interfaces.o
@@ -1417,6 +1418,17 @@ transform_intq_so.o : control_qe.o
 write_group_info_ph.o : ../../Modules/io_global.o
 write_group_info_ph.o : ../../Modules/noncol.o
 write_group_info_ph.o : ../../PW/src/pwcom.o
+write_rec.o : ../../FFTXlib/fft_interfaces.o
+write_rec.o : ../../LR_Modules/lrcom.o
+write_rec.o : ../../Modules/fft_base.o
+write_rec.o : ../../Modules/io_files.o
+write_rec.o : ../../Modules/ions_base.o
+write_rec.o : ../../Modules/kind.o
+write_rec.o : ../../Modules/noncol.o
+write_rec.o : ../../Modules/recvec.o
+write_rec.o : ../../Modules/uspp.o
+write_rec.o : ../../PHonon/PH/phcom.o
+write_rec.o : ../../PW/src/pwcom.o
 zstar_eu.o : ../../LR_Modules/lrcom.o
 zstar_eu.o : ../../Modules/cell_base.o
 zstar_eu.o : ../../Modules/fft_base.o
