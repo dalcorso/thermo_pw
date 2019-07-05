@@ -251,19 +251,23 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, auxdyn_loc)
                  iq_point=iwork
                  irr_value=0
               ELSE
-                 startge=1
-                 lastge=1
-                 target_nqs=nqs
                  IF (all_geometries_together) THEN
                     startge=start_geometry
                     lastge=last_geometry
-                    target_nqs=collect_info_save(igeom)%nqs
+                 ELSE
+                    startge=1
+                    lastge=1
+                    target_nqs=nqs
                  ENDIF
                  DO igeom=startge,lastge
+                    IF (all_geometries_together) &
+                       target_nqs=collect_info_save(igeom)%nqs
                     DO iq=1, target_nqs
-                       target_irr_iq=irr_iq(iq)
-                       IF (all_geometries_together) &
+                       IF (all_geometries_together) THEN
                           target_irr_iq=collect_info_save(igeom)%irr_iq(iq)
+                       ELSE
+                          target_irr_iq=irr_iq(iq)
+                       ENDIF
                        DO irr=0, target_irr_iq
                           jwork=jwork+1
                           IF (jwork==iwork) THEN

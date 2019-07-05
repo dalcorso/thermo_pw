@@ -30,7 +30,7 @@ SUBROUTINE manage_all_geometries_ph()
   USE mp_world,         ONLY : world_comm
   USE output,           ONLY : fildyn
   USE control_thermo,   ONLY : outdir_thermo, after_disp, set_internal_path, &
-                               lq2r
+                               lq2r, lecqha, lectqha
   USE io_global,        ONLY : stdout
 
 IMPLICIT NONE
@@ -74,7 +74,8 @@ ENDIF
 !  otherwise some partial dynamical matrix could be missing.
 !
 CALL mp_barrier(world_comm)
-IF (.NOT.(after_disp.AND.what=='mur_lc_t')) THEN
+IF (.NOT.(after_disp.AND.(what=='mur_lc_t'.OR. &
+                               what=='elastic_constants_t_qha'))) THEN
    DO igeom=start_geometry, last_geometry
       IF (no_ph(igeom)) CYCLE
       CALL check_stc_g(igeom, nimage, my_image_id, std)
@@ -123,7 +124,8 @@ DO igeom=start_geometry, last_geometry
    !
    ! ... reads the phonon input
    !
-   IF (after_disp.AND.what=='mur_lc_t') THEN
+   IF (after_disp.AND.(what=='mur_lc_t'.OR.&
+                                what=='elastic_constants_t_qha')) THEN
 !
 !  The geometry is read by thermo_ph_readin from the output files of pw.x,
 !  except in the case where after_disp=.TRUE.. In this case we have to
@@ -133,7 +135,8 @@ DO igeom=start_geometry, last_geometry
       celldm(:)=celldm_geo(:,igeom)
       IF (set_internal_path) CALL set_bz_path()
       IF (igeom==1) CALL initialize_file_names()
-
+   ELSE
+      IF ((lecqha.OR.lectqha).AND.set_internal_path) CALL set_bz_path()
    ENDIF
    CALL set_files_names(igeom)
    auxdyn=fildyn

@@ -493,9 +493,10 @@ SUBROUTINE thermo_readin()
 !
   IF (what==' ') CALL errore('thermo_readin','''what'' must be initialized',1)
 
-  IF (what/='mur_lc_t'.AND.all_geometries_together) &
-          CALL errore('thermo_readin','all_geometries_together requires &
-                                          &mur_lc_t',1)
+  IF (what/='mur_lc_t'.AND.what/='scf_elastic_constants_qha'.AND. &
+      what/='elastic_constants_t_qha'.AND.all_geometries_together) &
+          CALL errore('thermo_readin','all_geometries_together used in the&
+                                     &wrong case',1) 
 
   IF (flext/='.pdf') flext='.ps'
 

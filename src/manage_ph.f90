@@ -84,7 +84,7 @@ DO igeom=start_geometry,last_geometry
 !  except in the case where after_disp=.TRUE.. In this case we have to
 !  set it here.
 !
-      IF (what=='mur_lc_t') THEN
+      IF (what=='mur_lc_t'.OR.what=='elastic_constants_t_qha') THEN
          ibrav=ibrav_geo(igeom)
          celldm(:)=celldm_geo(:,igeom)
       ENDIF
@@ -93,9 +93,9 @@ DO igeom=start_geometry,last_geometry
    ELSE
       do_ph=.TRUE.
       IF (trans) do_ph=.NOT. check_dyn_file_exists(auxdyn) 
+      IF ((lecqha.OR.lectqha).AND.set_internal_path) CALL set_bz_path()
    ENDIF
 
-   IF ((lecqha.OR.lectqha).AND.set_internal_path) CALL set_bz_path()
 !
 !  Set the BZ path for the present geometry
 !
