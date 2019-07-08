@@ -816,8 +816,6 @@ INTEGER              :: compute_nwork
 REAL(DP)             :: compute_omega_geo
 
 nwork=compute_nwork()
-WRITE(6,*) 'allocating nwork, nat, ibrav_save', nwork, nat, ibrav_save 
-FLUSH(6)
 ALLOCATE(ibrav_save_qha(nwork))
 ALLOCATE(celldm0_qha(6,nwork))
 ALLOCATE(omega0_qha(nwork))
