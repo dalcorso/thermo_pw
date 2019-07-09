@@ -302,8 +302,8 @@ ALLOCATE( celldm_geo(6,nwork) )
 ALLOCATE( rot_mat(3,3,nwork) )
 
 IF (ngeom==1) THEN
-   ALLOCATE(ibrav_save_qha(1))
-   ALLOCATE(celldm0_qha(6,1))
+   IF (.NOT. ALLOCATED(ibrav_save_qha)) ALLOCATE(ibrav_save_qha(1))
+   IF (.NOT. ALLOCATED(celldm0_qha)) ALLOCATE(celldm0_qha(6,1))
    ibrav_save_qha(1)=ibrav_save
    celldm0_qha(:,1)=celldm0(:)
 ENDIF
