@@ -54,6 +54,9 @@ patches given below.</p>
 
 **Patches for thermo_pw.1.1.1**:
 <br>
+* A bug in src/initialize_thermo_work.f90 could give wrong
+geometries for mur_lc_t for odd ngeo. Change line 607 of this 
+file to delta=0.0_DP. (Only in versions 1.1.1 and 1.1.0).
 
 **Patches for thermo_pw.1.0.0**:
 <br>

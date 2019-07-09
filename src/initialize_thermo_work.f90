@@ -657,7 +657,7 @@ INTEGER  :: igeo1, igeo2, igeo3, igeo4, igeo5, igeo6
 INTEGER  :: iwork, i, total_work
 REAL(DP) :: angle1, angle2, angle3, delta(6)
 
-delta(6)=0.0_DP
+delta=0.0_DP
 DO i=1,6
    IF (MOD(ngeo(i),2)==0) delta(i)=step_ngeo(i)/2.0_DP
 ENDDO
