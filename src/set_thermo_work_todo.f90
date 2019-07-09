@@ -88,8 +88,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, auxdyn_loc)
               'scf_bands',        &
               'scf_dos',          &
               'scf_ph',           &
-              'scf_disp',         &
-              'elastic_constants_t') 
+              'scf_disp') 
 !
 !  then the cases in which we set the kinetic energy and the k points
 !
@@ -167,7 +166,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, auxdyn_loc)
 !
 !    the case of quasi-harmonic elastic constants
 !
-        CASE ('scf_elastic_constants_qha','elastic_constants_t_qha')
+        CASE ('elastic_constants_t')
            WRITE(stdout,'(/,2x,76("-"))')
            niter = electron_maxstep
            IF (frozen_ions) THEN
@@ -194,11 +193,10 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, auxdyn_loc)
 !
         CASE ('scf_ph',         &
               'scf_disp',       &
-              'scf_elastic_constants_qha', &
               'mur_lc_ph',      &
               'mur_lc_disp',    &
               'mur_lc_t',       &
-              'elastic_constants_t_qha')
+              'elastic_constants_t')
            IF (all_geometries_together) THEN
               igeom=geometry(iwork)
               std=something_to_do_all(iwork, igeom, iq_point, irr_value)
@@ -295,8 +293,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, auxdyn_loc)
 !
 !    Here the elastic constant calculation
 !
-        CASE ('scf_elastic_constants', 'mur_lc_elastic_constants', &
-                                                      'elastic_constants_t')
+        CASE ('scf_elastic_constants', 'mur_lc_elastic_constants')
            niter = electron_maxstep
            IF (frozen_ions) THEN
               lstres=lstress(iwork)

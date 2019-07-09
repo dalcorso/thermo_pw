@@ -149,25 +149,12 @@ SUBROUTINE thermo_summary()
                                   &minimum volume ")')
           ENDIF
           lelc = .TRUE.
-     CASE ('elastic_constants_t') 
-          IF (frozen_ions) THEN
-             WRITE(stdout,'(5x,"Computing the frozen ions elastic constants &
-                         &at all geometries")')
-          ELSE
-             WRITE(stdout,'(5x,"Computing the elastic constants at &
-                                  &all geometries ")')
-          ENDIF
-          lelc = .TRUE.
-     CASE ('scf_elastic_constants_qha')
-          WRITE(stdout,'(5x,"Computing the temperature dependent elastic" )')
-          WRITE(stdout,'(5x,"constants within quasi-harmonic approximation" )')
-          WRITE(stdout,'(5x,"for one unperturbed geometry" )')
-          IF (frozen_ions) WRITE(stdout,'(5x,"The ions are frozen" )')
-     CASE ('elastic_constants_t_qha')
+     CASE ('elastic_constants_t')
           WRITE(stdout,'(5x,"Computing the temperature dependent elastic" )')
           WRITE(stdout,'(5x,"constants within quasi-harmonic approximation" )')
           WRITE(stdout,'(5x,"for all geometries" )')
           IF (frozen_ions) WRITE(stdout,'(5x,"The ions are frozen" )')
+          lelc = .TRUE.
      CASE ('scf_piezoelectric_tensor') 
           IF (frozen_ions) THEN
              WRITE(stdout,'(5x,"Computing the frozen ions piezoelectric &

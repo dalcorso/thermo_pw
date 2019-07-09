@@ -34,7 +34,7 @@ SUBROUTINE manage_ph()
   USE io_global,        ONLY : meta_ionode, stdout, meta_ionode_id
   USE output,           ONLY : fildyn
   USE control_thermo,   ONLY : outdir_thermo, after_disp, set_internal_path, &
-                               lq2r, lecqha, lectqha
+                               lq2r, lectqha
   USE control_qe,       ONLY : use_ph_images
   USE collect_info,     ONLY : comm_collect_info, init_collect_info, &
                                destroy_collect_info_type
@@ -84,7 +84,7 @@ DO igeom=start_geometry,last_geometry
 !  except in the case where after_disp=.TRUE.. In this case we have to
 !  set it here.
 !
-      IF (what=='mur_lc_t'.OR.what=='elastic_constants_t_qha') THEN
+      IF (what=='mur_lc_t'.OR.what=='elastic_constants_t') THEN
          ibrav=ibrav_geo(igeom)
          celldm(:)=celldm_geo(:,igeom)
       ENDIF
@@ -93,7 +93,7 @@ DO igeom=start_geometry,last_geometry
    ELSE
       do_ph=.TRUE.
       IF (trans) do_ph=.NOT. check_dyn_file_exists(auxdyn) 
-      IF ((lecqha.OR.lectqha).AND.set_internal_path) CALL set_bz_path()
+      IF (lectqha.AND.set_internal_path) CALL set_bz_path()
    ENDIF
 
 !

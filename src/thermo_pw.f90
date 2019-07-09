@@ -34,7 +34,7 @@ PROGRAM thermo_pw
   USE control_thermo,   ONLY : lev_syn_1, lev_syn_2, lpwscf_syn_1,         &
                                lbands_syn_1, lph, outdir_thermo, lq2r,     &
                                lconv_ke_test, lconv_nk_test,               &
-                               lelastic_const, lecqha, lectqha,            &
+                               lelastic_const, lectqha,            &
                                lpiezoelectric_tensor, lpolarization,       &
                                lpart2_pw, all_geometries_together
   USE control_pwrun,    ONLY : do_punch
@@ -151,7 +151,7 @@ PROGRAM thermo_pw
 
   ENDIF
 
-  IF (lecqha) CALL manage_elastic_cons(nwork, 1)
+  IF (lectqha) CALL manage_elastic_cons_t_qha(nwork)
 
   CALL deallocate_asyn()
 
@@ -198,55 +198,50 @@ PROGRAM thermo_pw
 !   calculation of elastic constants. We allow the calculation for several
 !   geometries
 !
-     DO igeom=start_geometry,last_geometry
+    part=2
+    CALL initialize_thermo_work(nwork, part, iaux)
+    !
+    !  Asynchronous work starts again. No communication is
+    !  allowed except though the master workers mechanism
+    !
+    CALL run_thermo_asynchronously(nwork, part, igeom, auxdyn)
+    !
+    ! here we return synchronized and calculate the elastic constants 
+    ! from energy or stress 
+    !
+    IF (lelastic_const) THEN
+       IF (elastic_algorithm == 'energy_std'.OR. &
+                        elastic_algorithm=='energy') THEN
+    !
+    !   recover the energy calculated by all images
+    !
+          CALL mp_sum(energy_geo, world_comm)
+          energy_geo=energy_geo / nproc_image
+       ELSE
+    !
+    !   recover the stress tensors calculated by all images
+    !
+          CALL mp_sum(sigma_geo, world_comm)
+          sigma_geo=sigma_geo / nproc_image
+       ENDIF
 
-        IF (tot_ngeo > 1) CALL set_geometry_el_cons(igeom)
+       CALL manage_elastic_cons(nwork, igeom)
+    ENDIF
 
-        part=2
-        CALL initialize_thermo_work(nwork, part, iaux)
-        !
-        !  Asynchronous work starts again. No communication is
-        !  allowed except though the master workers mechanism
-        !
-        CALL run_thermo_asynchronously(nwork, part, igeom, auxdyn)
-        !
-        ! here we return synchronized and calculate the elastic constants 
-        ! from energy or stress 
-        !
-        IF (lelastic_const) THEN
-           IF (elastic_algorithm == 'energy_std'.OR. &
-                            elastic_algorithm=='energy') THEN
-        !
-        !   recover the energy calculated by all images
-        !
-              CALL mp_sum(energy_geo, world_comm)
-              energy_geo=energy_geo / nproc_image
-           ELSE
-        !
-        !   recover the stress tensors calculated by all images
-        !
-              CALL mp_sum(sigma_geo, world_comm)
-              sigma_geo=sigma_geo / nproc_image
-           ENDIF
+    IF (lpiezoelectric_tensor) THEN
+       CALL mp_sum(polar_geo, world_comm)
+       polar_geo=polar_geo / nproc_image
 
-           CALL manage_elastic_cons(nwork, igeom)
-        ENDIF
+       CALL manage_piezo_tensor(nwork)
+    END IF
 
-        IF (lpiezoelectric_tensor) THEN
-           CALL mp_sum(polar_geo, world_comm)
-           polar_geo=polar_geo / nproc_image
+    IF (lpolarization) THEN
+       CALL mp_sum(polar_geo, world_comm)
+       polar_geo=polar_geo / nproc_image
+       CALL print_polarization(polar_geo(:,1), .TRUE. )
+    ENDIF
 
-           CALL manage_piezo_tensor(nwork)
-        END IF
-
-        IF (lpolarization) THEN
-           CALL mp_sum(polar_geo, world_comm)
-           polar_geo=polar_geo / nproc_image
-           CALL print_polarization(polar_geo(:,1), .TRUE. )
-        ENDIF
-
-        CALL deallocate_asyn()
-     ENDDO
+    CALL deallocate_asyn()
   ENDIF
 
   IF (what(1:8) /= 'mur_lc_t') ngeo=1
@@ -280,10 +275,7 @@ PROGRAM thermo_pw
            CALL manage_anhar_anis()
         ENDIF
      ENDIF
-
-     IF (lecqha) CALL write_elastic_qha()
      IF (lectqha) CALL write_elastic_t_qha()
-
   ENDIF
   !
 1000  CALL deallocate_thermo()

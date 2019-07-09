@@ -74,6 +74,7 @@ SUBROUTINE thermo_readin()
   USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, &
                                    frozen_ions, elastic_algorithm, &
                                    poly_degree, epsilon_0
+  USE control_elastic_constants_qha, ONLY : use_free_energy
   USE control_xrdp,         ONLY : lambda, flxrdp, flpsxrdp, lformf, smin, &
                                    smax, nspoint, flformf, flpsformf, lcm, &
                                    lxrdp, lambda_elem
@@ -260,6 +261,10 @@ SUBROUTINE thermo_readin()
                             flanhar, flpsanhar,             &
                             fact_ngeo, ngeo_ph,             &
                             all_geometries_together,        &
+!
+!   elastic_constants_t
+!
+                            use_free_energy,                &
 !
 !   optical
 !
@@ -476,6 +481,8 @@ SUBROUTINE thermo_readin()
   omega_group=1
   all_geometries_together=.FALSE.
 
+  use_free_energy=.FALSE.
+
   max_geometries=1000000
   start_geometry=1
   last_geometry=1000000
@@ -493,10 +500,12 @@ SUBROUTINE thermo_readin()
 !
   IF (what==' ') CALL errore('thermo_readin','''what'' must be initialized',1)
 
-  IF (what/='mur_lc_t'.AND.what/='scf_elastic_constants_qha'.AND. &
-      what/='elastic_constants_t_qha'.AND.all_geometries_together) &
-          CALL errore('thermo_readin','all_geometries_together used in the&
-                                     &wrong case',1) 
+  IF (what/='mur_lc_t'.AND.what/='elastic_constants_t'&
+                             .AND.all_geometries_together) &
+          CALL errore('thermo_readin','all_geometries_together requires &
+                                          &mur_lc_t',1)
+  IF (what=='elastic_constants_t'.AND.ABS(pressure)>1.D-7) &
+          CALL errore('thermo_readin','pressure not programmed',1)
 
   IF (flext/='.pdf') flext='.ps'
 
@@ -526,20 +535,15 @@ SUBROUTINE thermo_readin()
             CALL errore('thermo_readin','poly_degree_elc must be between &
                                                                &2 and 4',1)
 
-  IF ((what=='scf_elastic_constants_qha'.OR.what=='elastic_constants_t_qha') &
-       .AND.elastic_algorithm/='energy_std'.AND.elastic_algorithm/='energy') &
+  IF (what=='elastic_constants_t'.AND.elastic_algorithm/='energy_std' &
+      .AND.elastic_algorithm/='energy') &
      CALL errore('thermo_readin','Only the energy algorithm is available &
                                           &in this case',1)
-
-  IF ((what=='scf_elastic_constants_qha'.OR.what=='elastic_constants_t_qha') &
-      .AND.ABS(pressure)>1.D-7) &
-       CALL errore('thermo_readin','pressure not programmed',1)
 
   read_paths=( what=='scf_bands'.OR.what=='scf_disp'.OR.what=='plot_bz'.OR. &
                what=='mur_lc_bands' .OR. what=='mur_lc_disp' .OR. &
                what=='mur_lc_t' .OR. what=='scf_2d_bands'.OR. &
-               what=='scf_elastic_constants_qha'.OR. &
-               what=='elastic_constants_t_qha')
+               what=='elastic_constants_t')
 
   IF (nimage==1) save_max_seconds=max_seconds
   max_seconds_tpw=max_seconds

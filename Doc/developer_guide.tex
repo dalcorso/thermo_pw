@@ -333,13 +333,6 @@ scf_disp                         fildyn
                  write_thermo    fltherm
                  write_thermo_ph fltherm(_ph)
                  plot_thermo                    flgnuplot(_therm)   flpstherm
-scf_elastic_constants_qha
-                 write_elastic_qha
-                                 flanhar.el_cons
-                                 flanhar.el_cons_ph
-                                 flanhar.el_comp
-                                 flanhar.el_comp_ph
-
 mur_lc           do_ev           flevdat        (input_ev)
                                  flevdat(.ev.out)
                  write_mur       flevdat(_mur)
@@ -427,7 +420,7 @@ mur_lc_t
                                                            flpsanhar(.el_cons)
                                                 flgnuplot(_el_comp)  
                                                            flpsanhar(.el_comp)
-elastic_constants_t_qha
+elastic_constants_t
                  write_elastic_t_qha
                                  flanhar.el_cons.g#g
                                  flanhar.el_cons.g#g_ph

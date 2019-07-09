@@ -416,8 +416,6 @@ MODULE control_thermo
 
   LOGICAL :: find_ibrav     ! if .TRUE. continue the calculation with the
                             ! converted input
-  LOGICAL :: lecqha=.FALSE. ! if .true. compute the elastic constants 
-                            ! within the qha
   LOGICAL :: lectqha=.FALSE. ! if .true. compute the elastic constants 
                             ! within the qha at many geometries
   !
@@ -515,6 +513,8 @@ MODULE control_elastic_constants_qha
 
   INTEGER :: work_base          ! number of works for one set of
                                 ! elastic constants
+  LOGICAL :: use_free_energy    ! if true makes the qha approximation 
+                                ! otherwise the quasi-static one.
 END MODULE control_elastic_constants_qha
   !
 MODULE control_conv

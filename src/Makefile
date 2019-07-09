@@ -127,7 +127,6 @@ write_e_ke.o  \
 write_e_omega.o \
 write_el_thermo.o \
 write_ev_input.o \
-write_elastic_qha.o \
 write_elastic_t.o \
 write_elastic_t_qha.o \
 write_gruneisen_band.o \

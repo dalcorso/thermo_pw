@@ -48,6 +48,7 @@ SUBROUTINE bcast_thermo_input()
                               freqmin_input, freqmax_input, phdos_sigma
   USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, epsilon_0,&
                               frozen_ions, elastic_algorithm, poly_degree
+  USE control_elastic_constants_qha, ONLY : use_free_energy
   USE piezoelectric_tensor, ONLY : nppl
   USE control_qe,      ONLY : force_band_calculation, use_ph_images
   USE band_computation, ONLY : sym_for_diago
@@ -286,6 +287,10 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( flpsgrun, meta_ionode_id, world_comm )
   CALL mp_bcast( flanhar, meta_ionode_id, world_comm )
   CALL mp_bcast( flpsanhar, meta_ionode_id, world_comm )
+!
+!  elastic_constants_t
+!
+  CALL mp_bcast( use_free_energy, meta_ionode_id, world_comm )
 !
 ! optical
 !
