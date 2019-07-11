@@ -172,23 +172,13 @@ what=scf_ph : this example computes the inverse of the frequency dependent
               using a Lanczos chain.
 
 example22:
-what=elastic_constants_t: this example computes the elastic constants on the
+what=elastic_constants_t:
+what=mur_lc_t: this example computes the elastic constants on the
               same set of geometries that would be used with what='mur_lc_t'.
-              The files with elastic constants can be used in another run
-              to modify the behavior of what='mur_lc_t' and to interpolate
-              the elastic constants within the "quasi-static approximation".
-
-example23:
-what=mur_lc_t : this example computes the temperature dependent elastic
-              constants within "quasi-static approximation".
-              It assumes that in the directory elastic_constats many files 
-              with elastic constants computed as in the example22 are 
-              present (one for each geometry).
-              The code computes the temperature dependent isothermal
-              and adiabatic elastic constants, elastic compliaces, bulk
-              modulus and compressibility. The anharmonic quantities are
-              derived as explained in example09 but the comparison with
-              those computed from Gruneisen parameters is added.
+              The files with elastic constants are then used in another run
+              to modify the behavior of what='mur_lc_t' and to calculate
+              the temperature dependent elastic constants within the
+              "quasi-static approximation".
 
 example24:
 what=elastic_constants_qha: this example computes the elastic constants 
