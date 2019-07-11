@@ -445,7 +445,6 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
               'mur_lc_ph',                   &
               'mur_lc_disp',                 &
               'mur_lc_t',                    &
-              'elastic_constants_t',     &
               'mur_lc_elastic_constants',    &
               'mur_lc_piezoelectric_tensor', &
               'mur_lc_polarization' )
@@ -455,6 +454,10 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
                  IF (no_ph(iwork)) lpwscf(iwork)=.FALSE.
               ENDDO
            ENDIF
+        CASE ('elastic_constants_t')  
+           lpwscf(1:nwork)=.TRUE.
+           lstress(1:nwork)=( elastic_algorithm=='standard' .OR. &
+                              elastic_algorithm=='advanced')
         CASE DEFAULT
           CALL errore('initialize_thermo_work','unknown what',1)
      END SELECT

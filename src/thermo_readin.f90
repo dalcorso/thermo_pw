@@ -503,9 +503,7 @@ SUBROUTINE thermo_readin()
   IF (what/='mur_lc_t'.AND.what/='elastic_constants_t'&
                              .AND.all_geometries_together) &
           CALL errore('thermo_readin','all_geometries_together requires &
-                                          &mur_lc_t',1)
-  IF (what=='elastic_constants_t'.AND.ABS(pressure)>1.D-7) &
-          CALL errore('thermo_readin','pressure not programmed',1)
+                          &mur_lc_t or elastci_constants_t',1)
 
   IF (flext/='.pdf') flext='.ps'
 
@@ -536,7 +534,7 @@ SUBROUTINE thermo_readin()
                                                                &2 and 4',1)
 
   IF (what=='elastic_constants_t'.AND.elastic_algorithm/='energy_std' &
-      .AND.elastic_algorithm/='energy') &
+      .AND.elastic_algorithm/='energy'.AND.use_free_energy) &
      CALL errore('thermo_readin','Only the energy algorithm is available &
                                           &in this case',1)
 

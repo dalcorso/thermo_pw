@@ -128,7 +128,9 @@ USE control_debye,     ONLY : debye_t
 USE data_files,        ONLY : fl_el_cons
 USE ions_base,         ONLY : nat
 USE cell_base,         ONLY : omega
-USE mp_images,         ONLY : my_image_id, root_image
+USE mp,                ONLY : mp_sum
+USE mp_images,         ONLY : my_image_id, root_image, nproc_image
+USE mp_world,          ONLY : world_comm
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: nwork
@@ -141,7 +143,15 @@ CHARACTER(LEN=256)  :: filelastic
 !
 !  the elastic constants are calculated here
 !
+!  First collect the stress if it has been calculated
+!
+   IF (elastic_algorithm=='standard'.OR.elastic_algorithm=='advanced') THEN
+      CALL mp_sum(sigma_geo, world_comm)
+      sigma_geo=sigma_geo / nproc_image
+   ENDIF
+!
 !  nwork1 is the nwork to compute the elastic constants of one geometry
+!
 nwork1=nwork/ngeom
 ALLOCATE(sigma_geo_aux(3,3,nwork1))
 DO igeom=1,ngeom
