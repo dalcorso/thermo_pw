@@ -1,0 +1,5 @@
+ &INPUT_THERMO
+  what='mur_lc_t',
+  deltat=3.,
+  lmurn=.FALSE.
+ /

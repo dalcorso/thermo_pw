@@ -1,0 +1,5 @@
+ &INPUT_THERMO
+  what='elastic_constants_t',
+  frozen_ions=.FALSE.
+  lmurn=.FALSE.
+ /

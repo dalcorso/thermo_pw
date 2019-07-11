@@ -35,12 +35,12 @@ for DIR in "$BIN_DIR" "$PSEUDO_DIR" ; do
         exit 1
     fi
 done
-for DIR in "$TMP_DIR" "$EXAMPLE_DIR/results" ; do
+for DIR in "$TMP_DIR" "$EXAMPLE_DIR/results_elct" ; do
     if test ! -d $DIR ; then
         mkdir $DIR
     fi
 done
-cd $EXAMPLE_DIR/results
+cd $EXAMPLE_DIR/results_elct
 
 # check for executables
 for FILE in $BIN_LIST ; do
@@ -82,6 +82,7 @@ cat > thermo_control << EOF
  &INPUT_THERMO
   what='elastic_constants_t',
   frozen_ions=.FALSE.
+  lmurn=.FALSE.
  /
 EOF
 
@@ -99,7 +100,7 @@ cat > si.elastic_t.in << EOF
     celldm(1) =10.20, 
     nat= 2, 
     ntyp= 1,
-    ecutwfc=34.0,
+    ecutwfc=24.0,
  /
  &electrons
     conv_thr =  1.0d-8
@@ -110,11 +111,14 @@ ATOMIC_POSITIONS (alat)
  Si 0.00 0.00 0.00
  Si 0.25 0.25 0.25
 K_POINTS AUTOMATIC
-8 8 8 1 1 1 
+4 4 4 1 1 1 
 EOF
-$ECHO "  running the thermo elastic_constants_t calculation" 
+
+$ECHO "  Running the thermo elastic_constants_t calculation " 
 $ECHO "  to calculate the elastic constants of silicon at "
-$ECHO "  several lattice constant. The results are in si.elastic.out... \c"
+$ECHO "  several lattice constant. The results are in si.elastic.out "
+$ECHO "  and in the directory elastic_constants... \c "
+
 $THERMO_PW_COMMAND < si.elastic_t.in > si.elastic_t.out
 check_failure $?
 $ECHO " done"
