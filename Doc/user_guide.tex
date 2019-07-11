@@ -1755,7 +1755,7 @@ obtained by interpolating the ``fixed-geometry quasi-harmonic'' elastic
 constants computed by this option at the crystal parameters found at 
 each temperature from the minimization of the free energy. 
 The variables \texttt{fact\_ngeo} and \texttt{ngeo\_ph} are not 
-implemented with this option and the pressure control is not active. 
+available with this option. 
 Using \texttt{start\_geometry} and \texttt{last\_geometry} it is
 possible to compute the temperature dependent elastic constants for
 selected or for a single unperturbed configuration.
@@ -1764,8 +1764,7 @@ quite heavy, it has to be requested explicitely using the flag
 \texttt{use\_free\_energy=.TRUE.}. \\
 By default, the code computes only the elastic constants at $T=0$ 
 as second derivatives of the energy and writes them on files in the 
-directory \texttt{elastic\_constants}.
-A run of \texttt{thermo\_pw} using 
+directory \texttt{elastic\_constants}. A run of \texttt{thermo\_pw} using 
 \texttt{what='mur\_lc\_t'} having on files the $T=0$ elastic constants
 contained in the directory \texttt{elastic\_constants}
 allows the calculation of the anharmonic properties using temperature
@@ -1785,6 +1784,20 @@ use_free_energy : when .TRUE. computes the elastic constants as second
               algorithms.
               Default .FALSE.
 \end{verbatim}
+An example of the use of this option with \texttt{use\_free\_energy=.FALSE.}
+can be found in \texttt{example22} while an example with
+\texttt{use\_free\_energy=.TRUE.} can be found in \texttt{example23}. \\
+Number of tasks for this option: The product of the number of tasks  
+needed by the \texttt{what='scf\_elastic\_constants'} option 
+and the number of geometries used with \texttt{mur\_lc\_t} when
+\texttt{use\_free\_energy=.FALSE.}. When \texttt{use\_free\_energy=.TRUE.}
+and \texttt{all\_geometries\_together=.TRUE.} the number of tasks of the
+previous case is further multiplied by the number of tasks needed to 
+compute a phonon dispersion (see above the option \texttt{what='scf\_ph'}). \\
+When \texttt{use\_free\_energy=.TRUE.} and 
+\texttt{all\_geometries\_together=.FALSE.} the number of tasks of this
+option is equal to the number of tasks needed to compute a phonon dispersion.
+
 
 %\subsection{\color{web-blue}\texttt{what='scf\_polarization'}}
 %With this option the code calculates the spontaneous polarization.
