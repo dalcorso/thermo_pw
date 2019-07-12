@@ -11,7 +11,8 @@ $ECHO
 $ECHO "$EXAMPLE_DIR : starting"
 $ECHO
 $ECHO "This example shows how to use thermo_pw.x to calculate"
-$ECHO "the elastic constants of Silicon at several geometries."
+$ECHO "the elastic constants of Silicon as a function of temperature"
+$ECHO "within the quasi-static approximation."
 
 # set the needed environment variables
 . ../../../environment_variables
