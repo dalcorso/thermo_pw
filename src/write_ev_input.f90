@@ -116,6 +116,7 @@ USE constants,      ONLY : ry_kbar
 USE thermo_mod,     ONLY : ngeo, omega_geo, energy_geo, celldm_geo, &
                            central_geo, no_ph
 USE control_mur,    ONLY : vmin, b0, b01, emin
+USE control_quartic_energy, ONLY : poly_degree_ph
 USE thermodynamics, ONLY : ph_free_ener
 USE anharmonic,     ONLY : vmin_t, b0_t, b01_t, free_e_min_t
 USE temperature,    ONLY : ntemp, temp
@@ -129,14 +130,15 @@ IMPLICIT NONE
 INTEGER, INTENT(IN) :: itemp
 INTEGER :: igeom, iu_ev
 REAL(DP) :: free_e, vm, celldm_(6)
-INTEGER, PARAMETER :: m1=5
+INTEGER  :: m1
 INTEGER :: idata, ndata, i1
-REAL(DP) :: a(m1), x(ngeo(1)), y(ngeo(1)), aux, aux1
+REAL(DP) :: a(poly_degree_ph+1), x(ngeo(1)), y(ngeo(1)), aux, aux1
 REAL(DP) :: compute_mur_fun
 
 
   IF (my_image_id /= root_image) RETURN
 
+  m1=poly_degree_ph+1
 !  WRITE(stdout,*) 
   ndata=0
   DO idata=1,ngeo(1)
@@ -199,6 +201,7 @@ USE constants,      ONLY : ry_kbar
 USE ph_freq_thermodynamics, ONLY : phf_free_ener
 USE ph_freq_anharmonic,     ONLY : vminf_t, b0f_t, b01f_t, free_e_minf_t
 USE control_mur,    ONLY : emin, vmin, b0, b01
+USE control_quartic_energy, ONLY : poly_degree_ph
 USE temperature,    ONLY : ntemp, temp
 USE control_pressure, ONLY : pressure_kb
 USE polyfit_mod,    ONLY : polyfit
@@ -211,14 +214,15 @@ INTEGER, INTENT(IN) :: itemp
 INTEGER :: igeom, iu_ev
 CHARACTER(LEN=6) :: int_to_char
 REAL(DP) :: free_e, vm, celldm_(6)
-INTEGER, PARAMETER :: m1=5
+INTEGER :: m1
 INTEGER :: idata, ndata, i1
-REAL(DP) :: a(m1), x(ngeo(1)), y(ngeo(1)), aux, aux1
+REAL(DP) :: a(poly_degree_ph+1), x(ngeo(1)), y(ngeo(1)), aux, aux1
 REAL(DP) :: compute_mur_fun
 
 
   IF (my_image_id /= root_image) RETURN
 
+  m1=poly_degree_ph+1
 !  WRITE(stdout,*) 
   ndata=0
   DO idata=1,ngeo(1)
