@@ -36,7 +36,7 @@ for DIR in "$BIN_DIR" "$PSEUDO_DIR" ; do
         exit 1
     fi
 done
-for DIR in "$TMP_DIR" "$EXAMPLE_DIR/results_elct" ; do
+for DIR in "$TMP_DIR" "$EXAMPLE_DIR/results_elct" "$EXAMPLE_DIR/results" ; do
     if test ! -d $DIR ; then
         mkdir $DIR
     fi
@@ -136,5 +136,43 @@ $THERMO_PW_COMMAND < si.elastic_qha.in > si.elastic_qha.out
 check_failure $?
 $ECHO " done"
 
+$ECHO "  cleaning $TMP_DIR...\c"
+rm -rf $TMP_DIR/g*/silicon*
+rm -rf $TMP_DIR/g*/_ph*/silicon*
+$ECHO " done"
+
+$ECHO " This is the thermo mur_lc_t calculation for Si"
+$ECHO " when the files of the elastic constants computed"
+$ECHO " within the quasi-harmonic approximation are present"
+$ECHO " in the directory anhar_files."
+$ECHO " Quasi-harmonic isothermal and adiabatic elastic constants and"
+$ECHO " bulk modulus are in output_anhar.el_cons.ps."
+$ECHO " Quasi-harmonic isothermal and adiabatic elastic compliances and"
+$ECHO " compressibility are in output_anhar.el_comp.ps."
+$ECHO " Thermal stresses are in output_tstress.ps."
+$ECHO " Generalized average Gruneisen parameter is in output_anhar.ggamma.ps."
+$ECHO " The other quantities are analogous to those presented in example09"
+$ECHO " but anharmonic quantities are also derived from Gruneisen parameters"
+$ECHO " with a bulk modulus obtained from elastic compliances."
+$ECHO " Running..."
+
+cd ../results
+
+cat > thermo_control << EOF
+ &INPUT_THERMO
+  what='mur_lc_t',
+  deltat=3.,
+  lmurn=.FALSE.
+ /
+EOF
+
+cp ../results_elct/si.elastic_qha.in ./si.mur_lc_t.in
+cp ../results_elct/ph_control .
+cp -R ../results_elct/anhar_files/ .
+
+$THERMO_PW_COMMAND < si.mur_lc_t.in > si.mur_lc_t.out
+check_failure $?
+$ECHO " done"
 $ECHO
-$ECHO "$EXAMPLE_DIR : done"
+$ECHO "$EXAMPLE_DIR: done"
+

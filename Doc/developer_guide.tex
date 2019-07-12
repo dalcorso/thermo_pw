@@ -105,6 +105,10 @@ calculation.
 F) \texttt{lband\_syn\_1=.TRUE.} makes a non self-consistent \texttt{pw.x}
 calculation to compute the band structure.
 
+\item
+H0) \texttt{lectqha=.TRUE.} it computes the elastic constants at $T=0$
+as second derivatives of the energy or from the stress strain relationship. 
+
 \end{itemize}
 
 The second part can have an asynchronous part in which
@@ -146,7 +150,8 @@ L) \texttt{lpolarization=.TRUE.} polarization calculation.
 \end{itemize}
 
 After G2, depending on \texttt{what} the synchronous part will do nothing, 
-or if the phonons have been computed for several geometries it will do:
+or if the phonons have been computed for several geometries and
+\texttt{l\_ev\_syn2=.TRUE.} it will do:
 
 \begin{itemize}
 
@@ -166,13 +171,15 @@ Calculation of the temperature dependent elastic constants within
 the `quasi-harmonic' approximation when enough information is available.
 
 \item
-P) Calculation of the temperature dependent elastic constants within the
-`fixed-geometry quasi-harmonic'.
-
-\item
-Q) Calculation of the Gr\"uneisen parameters on a uniform mesh of {\bf q} 
+P) Calculation of the Gr\"uneisen parameters on a uniform mesh of {\bf q} 
 points and calculation of the thermal expansion from the Gr\"uneisen parameters.
 Calculation of the isoentropic quantities when available.
+\end{itemize}
+
+Instead if \texttt{lectqha=.TRUE.} the code will do:
+\item
+Q) Calculation of the temperature dependent elastic constants within the
+`fixed-geometry quasi-harmonic'.
 
 \end{itemize}
 There is also an initial routine (\texttt{thermo\_summary}) that can carry
@@ -186,7 +193,7 @@ all \texttt{what} options.
 The different \texttt{what} activates the following parts of the code:
 
 \begin{verbatim}
-what         A   B   C   D   E    F     G1    H    I   L   G2   M  N  O  P  Q
+what         A   B   C   D   E    F  H0  G1    H    I   L   G2   M  N  O  P  Q
 
 plot_bz
 scf                          *
@@ -198,8 +205,6 @@ scf_dos                      *    *
 scf_ph                       *                              *
 scf_disp                     *                              *
 scf_elastic_constants                    *    *
-scf_elastic_constants_qha     
-             *                                              *            *
 scf_piezoelectric_tensor                 *          +
 scf_polarization                         *              +
 mur_lc       *           *
@@ -213,10 +218,9 @@ mur_lc_piezoelectric_tensor
              *           *               *          +
 mur_lc_polarization
              *           *               *               +
-mur_lc_t     *           *                                  *   *  *  *     *
-elastic_constants_t                      *    *  
-elastic_constants_t_qha
-             *                                              *            * 
+mur_lc_t     *           *                                  *   *  *  *  *
+elastic_constants_t
+             *                       *                      *               * 
 
 + not yet active or working.
 \end{verbatim}
@@ -259,9 +263,9 @@ Mode Gruneisen parameters                      mur_lc_t
 Phonon dispersions at the geometry 
 that corresponds to a given temperature        mur_lc_t
 Elastic constants and bulk modulus
-as a function of temperature                   mur_lc_t, scf_elastic_constants_qha
+as a function of temperature                   mur_lc_t, elastic_constants_t
 Elastic compliances and compressibility
-as a function of temperature                   mur_lc_t, scf_elastic_constants_qha
+as a function of temperature                   mur_lc_t, elastic_constants_t
 
 For cubic systems, or when elastic constants are on file,
 also the following quantities are plotted:
