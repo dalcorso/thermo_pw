@@ -14,6 +14,11 @@ can be found <a href="https://people.sissa.it/dalcorso/thermo_pw/user_guide/inde
 <p align="justify">The following papers have been written using 
 <code>thermo_pw</code>:</p>
 
+8. C. Malica and A. Dal Corso,
+Temperature dependent atomic B-factor: an ab-initio calculation,
+<a href="https://doi.org/10.1107/S205327331900514X">Acta Cryst. A <B>75</B>, 624 (2019).</a>
+<br>
+<br>
 7. A. Urru and A. Dal Corso,
 Spin-polarized electronic surface states of Re(0001): an ab-initio investigation,
 <a href="https://doi.org/10.1016/j.susc.2019.03.008">Surf. Sci. <B>686</B>, 22 (2019).</a>
