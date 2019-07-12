@@ -1,0 +1,7 @@
+ &INPUT_THERMO
+   what='elastic_constants_t',
+   frozen_ions=.FALSE.
+   elastic_algorithm='energy'
+   use_free_energy=.TRUE.
+   lmurn=.FALSE.
+ /

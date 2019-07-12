@@ -36,12 +36,12 @@ for DIR in "$BIN_DIR" "$PSEUDO_DIR" ; do
         exit 1
     fi
 done
-for DIR in "$TMP_DIR" "$EXAMPLE_DIR/results" ; do
+for DIR in "$TMP_DIR" "$EXAMPLE_DIR/results_elct" ; do
     if test ! -d $DIR ; then
         mkdir $DIR
     fi
 done
-cd $EXAMPLE_DIR/results
+cd $EXAMPLE_DIR/results_elct
 
 # check for executables
 for FILE in $BIN_LIST ; do
@@ -81,9 +81,11 @@ $ECHO " done"
 
 cat > thermo_control << EOF
  &INPUT_THERMO
-  what='elastic_constants_qha',
-  frozen_ions=.FALSE.
-  elastic_algorithm='energy'
+   what='elastic_constants_t',
+   frozen_ions=.FALSE.
+   elastic_algorithm='energy'
+   use_free_energy=.TRUE.
+   lmurn=.FALSE.
  /
 EOF
 
@@ -98,10 +100,10 @@ cat > si.elastic_qha.in << EOF
  /
  &system
     ibrav=  2, 
-    celldm(1) =10.289, 
+    celldm(1) =10.20, 
     nat= 2, 
     ntyp= 1,
-    ecutwfc=30.0,
+    ecutwfc=24.0,
  /
  &electrons
     conv_thr =  1.0d-8
@@ -126,9 +128,10 @@ cat > ph_control << EOF
 /
 EOF
 
-$ECHO "  running the thermo elastic_constants_qha calculation" 
+$ECHO "  running the thermo elastic_constants_t calculation" 
 $ECHO "  to calculate the elastic constants of silicon as "
-$ECHO "  a function of temperature. ... \c"
+$ECHO "  a function of temperature as derivatives of the free energy "
+$ECHO "  in a regular mesh of geometries ... \c"
 $THERMO_PW_COMMAND < si.elastic_qha.in > si.elastic_qha.out
 check_failure $?
 $ECHO " done"

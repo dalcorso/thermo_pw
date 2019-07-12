@@ -1,0 +1,44 @@
+set encoding iso_8859_15
+set terminal postscript enhanced solid color "AvantGarde-Book" 20
+set output "output_therm.g134.ps"
+
+set key off
+xscale=       1.000000
+xshift=0.0
+xmin=       0.000000
+xmax=     800.000000
+set xrange [xmin*xscale-xshift:xmax*xscale-xshift]
+set border lw 2
+eref=0.0
+fact=1.0
+gfact=1.0
+point_size=1.0
+color_red="red"
+color_green="green"
+color_blue="blue"
+color_cyan="cyan"
+color_magenta="magenta"
+color_gold="gold"
+color_pink="pink"
+color_black="black"
+color_olive="olive"
+color_brown="brown"
+color_gray="gray"
+color_light_blue="light-blue"
+color_orange="orange"
+color_yellow="yellow"
+ set xlabel "T (K)"
+set ylabel "Vibrational energy (kJ / (N mol))"
+fact=      0.13133130E+04
+plot  "therm_files/output_therm.dat.g134" u ($1*xscale-xshift):($2*fact-eref)*gfact w l lw 3 lc rgb color_red, \
+ "therm_files/output_therm.dat.g134_ph" u ($1*xscale-xshift):($2*fact-eref)*gfact w l lw 3 lc rgb color_blue
+set ylabel "Vibrational free energy (kJ / (N mol))"
+plot  "therm_files/output_therm.dat.g134" u ($1*xscale-xshift):($3*fact-eref)*gfact w l lw 3 lc rgb color_red, \
+ "therm_files/output_therm.dat.g134_ph" u ($1*xscale-xshift):($3*fact-eref)*gfact w l lw 3 lc rgb color_blue
+fact=      0.13133130E+07
+set ylabel "Entropy (J / K / (N mol))"
+plot  "therm_files/output_therm.dat.g134" u ($1*xscale-xshift):($4*fact-eref)*gfact w l lw 3 lc rgb color_red, \
+ "therm_files/output_therm.dat.g134_ph" u ($1*xscale-xshift):($4*fact-eref)*gfact w l lw 3 lc rgb color_blue
+set ylabel "Heat capacity C_v (J / K / (N mol))"
+plot  "therm_files/output_therm.dat.g134" u ($1*xscale-xshift):($5*fact-eref)*gfact w l lw 3 lc rgb color_red, \
+ "therm_files/output_therm.dat.g134_ph" u ($1*xscale-xshift):($5*fact-eref)*gfact w l lw 3 lc rgb color_blue
