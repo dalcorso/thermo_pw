@@ -202,10 +202,10 @@ IF (ltherm_dos) THEN
    el_comp_grun_t=el_comp_t
    lelastic=.TRUE.
    lelastic_grun=.TRUE.
-   filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_qha'
+   filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons'
    CALL write_el_cons_on_file(temp, ntemp, ibrav, el_cons_t, b0_t, &
                                                        filelastic, 0)
-   filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp_qha'
+   filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp'
    CALL write_el_cons_on_file(temp, ntemp, ibrav, el_comp_t, b0_t, & 
                                                        filelastic, 1)
 ENDIF
@@ -228,11 +228,11 @@ IF (ltherm_freq) THEN
    el_comp_grun_t=el_compf_t
    lelasticf=.TRUE.
    lelastic_grun=.TRUE.
-   filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_ph_qha'
+   filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_ph'
    CALL write_el_cons_on_file(temp, ntemp, ibrav, el_consf_t, b0f_t, &
                                                           filelastic, 0)
 
-   filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp_ph_qha'
+   filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp_ph'
    CALL write_el_cons_on_file(temp, ntemp, ibrav, el_compf_t, b0f_t, &
                                                            filelastic,1)
 ENDIF
