@@ -5,7 +5,7 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-SUBROUTINE set_geometry_el_cons_qha(iwork)
+SUBROUTINE set_geometry_el_cons(iwork)
 !
 !  This routine receives as input the current unperturbed geometry
 !  and set the variables of pw with this unperturbed geometry.
@@ -13,8 +13,8 @@ SUBROUTINE set_geometry_el_cons_qha(iwork)
 USE kinds, ONLY : DP
 USE cell_base, ONLY : ibrav, celldm
 USE ions_base, ONLY : tau, nat, atm, ityp
-USE control_elastic_constants_qha, ONLY : ibrav_save_qha, celldm0_qha, &
-                                   tau_crys_qha, work_base
+USE control_elastic_constants, ONLY : el_con_ibrav_geo, el_con_celldm_geo, &
+                                el_con_tau_crys_geo, work_base
 USE io_global, ONLY : stdout
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: iwork
@@ -23,11 +23,11 @@ REAL(DP) :: omega, at(3,3)
 INTEGER  :: igeom, ipol, na
 
 igeom= (iwork-1)/work_base + 1
-ibrav=ibrav_save_qha(igeom)
-celldm(:)=celldm0_qha(:,igeom)
+ibrav=el_con_ibrav_geo(igeom)
+celldm(:)=el_con_celldm_geo(:,igeom)
 CALL latgen(ibrav,celldm,at(1,1),at(1,2),at(1,3),omega)
 at=at/celldm(1)
-tau(:,:)=tau_crys_qha(:,:,igeom)
+tau(:,:)=el_con_tau_crys_geo(:,:,igeom)
 CALL cryst_to_cart( nat, tau, at, 1 )
 CALL set_equilibrium_conf( celldm, tau, at, omega )
 
@@ -43,4 +43,4 @@ WRITE( stdout, '(6x,i4,8x,a6," tau(",i4,") = (",3f12.7,"  )")') &
 WRITE(stdout,'(80("*"),/)')
 
 RETURN
-END SUBROUTINE set_geometry_el_cons_qha
+END SUBROUTINE set_geometry_el_cons

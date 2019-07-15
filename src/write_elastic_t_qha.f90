@@ -9,8 +9,8 @@ SUBROUTINE write_elastic_t_qha()
 
 USE kinds,             ONLY : DP
 USE thermo_mod,        ONLY : energy_geo, tot_ngeo
-USE control_elastic_constants, ONLY : ngeo_strain, frozen_ions, elcpvar
-USE control_elastic_constants_qha, ONLY : ngeom, work_base, omega0_qha
+USE control_elastic_constants, ONLY : ngeo_strain, frozen_ions, elcpvar, &
+                              ngeom, work_base, el_con_omega_geo
 USE initial_conf,      ONLY : ibrav_save
 USE thermo_sym,        ONLY : laue
 USE elastic_constants, ONLY : print_elastic_constants, epsilon_geo,        &
@@ -68,7 +68,7 @@ DO igeom=1, ngeom
          epsilon_geo_loc(:,:,:)=epsilon_geo(:,:,base_ind+1:base_ind+work_base)
          CALL compute_elastic_constants_ene(free_energy_geo, epsilon_geo_loc, &
                             tot_ngeo, ngeo_strain, ibrav_save, laue,          &
-                            omega0_qha(igeom), elcpvar)
+                            el_con_omega_geo(igeom), elcpvar)
          CALL compute_elastic_compliances(el_con,el_compliances)
          CALL print_macro_elasticity(ibrav_save,el_con, el_compliances,&
                                                    macro_el,.FALSE.)
@@ -84,7 +84,7 @@ DO igeom=1, ngeom
          epsilon_geo_loc(:,:,:)=epsilon_geo(:,:,base_ind+1:base_ind+work_base)
          CALL compute_elastic_constants_ene(free_energy_geo, epsilon_geo_loc, &
                          tot_ngeo, ngeo_strain, ibrav_save, laue,       &
-                         omega0_qha(igeom), elcpvar)
+                         el_con_omega_geo(igeom), elcpvar)
          CALL compute_elastic_compliances(el_con,el_compliances)
          CALL print_macro_elasticity(ibrav_save,el_con, el_compliances, &
                                                 macro_el,.FALSE.)

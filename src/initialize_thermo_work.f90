@@ -36,8 +36,8 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
   USE equilibrium_conf, ONLY : celldm0, omega0
   USE initial_conf,   ONLY : celldm_save, ibrav_save
   USE piezoelectric_tensor, ONLY : polar_geo
-  USE control_elastic_constants, ONLY : elastic_algorithm, rot_mat
-  USE control_elastic_constants_qha, ONLY : ngeom, use_free_energy
+  USE control_elastic_constants, ONLY : elastic_algorithm, rot_mat, ngeom, &
+                             use_free_energy
   USE elastic_constants, ONLY : epsilon_voigt, sigma_geo, epsilon_geo
   USE gvecw,          ONLY : ecutwfc
   USE gvect,          ONLY : ecutrho
@@ -780,12 +780,12 @@ SUBROUTINE initialize_mur_qha(nwork)
 !
 !   this routine sets the unperturbed geometries for the computation
 !   of the elastic constants within the quasiharmonic approximation.
-!   It allocates the variables ibrav_save_qha and celldm0_qha. 
+!   It allocates the variables el_con_ibrav_geo and el_con_celldm_geo. 
 !
 USE kinds,         ONLY : DP
 USE ions_base,     ONLY : nat
-USE control_elastic_constants_qha, ONLY : ibrav_save_qha, celldm0_qha, &
-                                          tau_crys_qha, omega0_qha
+USE control_elastic_constants, ONLY : el_con_ibrav_geo, el_con_celldm_geo, &
+                                      el_con_tau_crys_geo, el_con_omega_geo
 USE initial_conf,  ONLY : ibrav_save, tau_save_crys
 USE io_global, ONLY : stdout
 
@@ -798,16 +798,16 @@ INTEGER              :: compute_nwork
 REAL(DP)             :: compute_omega_geo
 
 nwork=compute_nwork()
-ALLOCATE(ibrav_save_qha(nwork))
-ALLOCATE(celldm0_qha(6,nwork))
-ALLOCATE(omega0_qha(nwork))
-ALLOCATE(tau_crys_qha(3,nat,nwork))
-celldm0_qha=0.0_DP
-CALL set_celldm_geo(celldm0_qha(:,:), nwork)
-ibrav_save_qha(:)=ibrav_save
+ALLOCATE(el_con_ibrav_geo(nwork))
+ALLOCATE(el_con_celldm_geo(6,nwork))
+ALLOCATE(el_con_omega_geo(nwork))
+ALLOCATE(el_con_tau_crys_geo(3,nat,nwork))
+el_con_celldm_geo=0.0_DP
+CALL set_celldm_geo(el_con_celldm_geo(:,:), nwork)
+el_con_ibrav_geo(:)=ibrav_save
 DO iwork=1,nwork
-   tau_crys_qha(:,:,iwork)=tau_save_crys(:,:)
-   omega0_qha(iwork)=compute_omega_geo(ibrav_save, celldm0_qha(:,iwork))
+   el_con_tau_crys_geo(:,:,iwork)=tau_save_crys(:,:)
+   el_con_omega_geo(iwork)=compute_omega_geo(ibrav_save, el_con_celldm_geo(:,iwork))
 ENDDO
 
 WRITE(stdout,'(/,5x,70("-"))')
@@ -815,7 +815,7 @@ WRITE(stdout,'(/,5x,"The celldm of the",i5," unperturbed geometries &
                                               &are:",/)') nwork
 DO iwork=1,nwork
    WRITE(stdout,'(5x,i5,": ", 6f10.5)') iwork, &
-                                   celldm0_qha(1:6,iwork)
+                                   el_con_celldm_geo(1:6,iwork)
 ENDDO
 WRITE(stdout,'(/,5x,70("-"))')
 

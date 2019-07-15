@@ -47,8 +47,8 @@ SUBROUTINE bcast_thermo_input()
   USE control_dosq,    ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq,     &
                               freqmin_input, freqmax_input, phdos_sigma
   USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, epsilon_0,&
-                              frozen_ions, elastic_algorithm, poly_degree
-  USE control_elastic_constants_qha, ONLY : use_free_energy
+                              frozen_ions, elastic_algorithm, poly_degree, &
+                              use_free_energy
   USE piezoelectric_tensor, ONLY : nppl
   USE control_qe,      ONLY : force_band_calculation, use_ph_images
   USE band_computation, ONLY : sym_for_diago

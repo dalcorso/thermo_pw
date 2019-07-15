@@ -22,9 +22,8 @@ SUBROUTINE set_elastic_cons_work( ngeom, nwork )
 USE kinds,             ONLY : DP
 USE thermo_mod,        ONLY : ibrav_geo, celldm_geo
 USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, rot_mat, &
-                               elastic_algorithm, epsilon_0
-USE control_elastic_constants_qha, ONLY : ibrav_save_qha, celldm0_qha, &
-                              work_base
+                               elastic_algorithm, epsilon_0,               &
+                               el_con_ibrav_geo, el_con_celldm_geo, work_base
 USE initial_conf,      ONLY : ibrav_save
 USE equilibrium_conf,  ONLY : celldm0
 USE thermo_sym,        ONLY : laue
@@ -302,10 +301,10 @@ ALLOCATE( celldm_geo(6,nwork) )
 ALLOCATE( rot_mat(3,3,nwork) )
 
 IF (ngeom==1) THEN
-   IF (.NOT. ALLOCATED(ibrav_save_qha)) ALLOCATE(ibrav_save_qha(1))
-   IF (.NOT. ALLOCATED(celldm0_qha)) ALLOCATE(celldm0_qha(6,1))
-   ibrav_save_qha(1)=ibrav_save
-   celldm0_qha(:,1)=celldm0(:)
+   IF (.NOT. ALLOCATED(el_con_ibrav_geo)) ALLOCATE(el_con_ibrav_geo(1))
+   IF (.NOT. ALLOCATED(el_con_celldm_geo)) ALLOCATE(el_con_celldm_geo(6,1))
+   el_con_ibrav_geo(1)=ibrav_save
+   el_con_celldm_geo(:,1)=celldm0(:)
 ENDIF
 base_ind=0
 epsilon_min= - delta_epsilon * (ngeo_strain - 1 ) / 2.0_DP - epsilon_0
@@ -317,10 +316,10 @@ DO igeom=1, ngeom
          IF (MOD(ngeo_strain,2)==1 .AND. igeo==(ngeo_strain/2 + 1)) &
                                                 epsil=epsil-epsilon_0
 
-         CALL set_strain_adv(strain_list(istep), ibrav_save_qha(igeom),  &
-              celldm0_qha(1,igeom), epsil, epsilon_voigt(1,base_ind+igeo), &
-              ibrav_geo(base_ind+igeo), celldm_geo(1,base_ind+igeo),     &
-              rot_mat(1,1,base_ind+igeo) )
+         CALL set_strain_adv(strain_list(istep), el_con_ibrav_geo(igeom),  &
+              el_con_celldm_geo(1,igeom), epsil, &
+              epsilon_voigt(1,base_ind+igeo), ibrav_geo(base_ind+igeo), &
+              celldm_geo(1,base_ind+igeo), rot_mat(1,1,base_ind+igeo) )
       ENDDO
       base_ind = base_ind + ngeo_strain
    ENDDO

@@ -362,8 +362,8 @@ USE kinds,            ONLY : DP
 USE control_thermo,   ONLY : outdir_thermo
 USE equilibrium_conf, ONLY : celldm0, at0, tau0_crys
 USE thermo_mod,       ONLY : celldm_geo, ibrav_geo
-USE control_elastic_constants, ONLY : frozen_ions, elastic_algorithm, rot_mat
-USE control_elastic_constants_qha, ONLY : ngeom
+USE control_elastic_constants, ONLY : frozen_ions, elastic_algorithm,  &
+                             rot_mat, ngeom
 !
 !  library routines
 !
@@ -392,7 +392,7 @@ CHARACTER(LEN=6)   :: int_to_char
 WRITE(stdout,'(/,2x,76("-"))')
 CALL print_strain(epsilon_geo(:,:,iwork))
 
-IF (ngeom>1) CALL set_geometry_el_cons_qha(iwork)
+IF (ngeom>1) CALL set_geometry_el_cons(iwork)
 !
 !  entering here we have:
 !  

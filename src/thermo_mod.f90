@@ -463,10 +463,14 @@ MODULE control_elastic_constants
                                 ! energy_std or energy
                                 ! it chooses the routines to use to 
                                 ! calculate elastic constants.
-  INTEGER :: elcpvar,     &     ! number of variables of the polynomial function
-                                ! that interpolates stress or energy
-             poly_degree        ! degree of the polynomial interpolation
-
+  INTEGER :: elcpvar            ! number of variables of the polynomial 
+                                ! function that interpolates stress or energy
+  INTEGER :: poly_degree        ! the order of the polynomial to interpolate
+                                ! the stress-strain or the energy-strain
+                                ! functions. Could differ from poly_degree_elc
+                                ! which is the order of the polynomial
+                                ! that interpolates the elastic constants
+                                ! among different geometries
 
   LOGICAL :: el_cons_available=.FALSE.  ! when this flag becomes true it
                                 ! means that the elastic constant have been
@@ -476,46 +480,41 @@ MODULE control_elastic_constants
                                 ! means that the elastic constants for each 
                                 ! geometry are available and can be 
                                 ! interpolated at each temperature
-  LOGICAL :: el_cons_qha_available=.FALSE. ! when this flag becomes true it
-                                ! means that the elastic constants computed 
+  LOGICAL :: el_cons_qha_available=.FALSE. ! when this flag becomes true 
+                                ! the elastic constants computed 
                                 ! within quasi harmonic approximation 
-                                ! are available 
+                                ! and BZ integrations with phdos are available 
+                                ! at least for one geometry
+  LOGICAL :: el_cons_qha_available_ph=.FALSE. ! when this flag becomes true
+                                ! the elastic constants computed 
+                                ! within quasi harmonic approximation 
+                                ! and BZ integrations are available at least
+                                ! for one geometry
+  LOGICAL :: el_cons_qha_geo_available=.FALSE. ! when this flag becomes true
+                                ! the QHA elastic constants computed with
+                                ! phdos are available for all geometries
+  LOGICAL :: el_cons_qha_geo_available_ph=.FALSE. ! when this flag becomes
+                                ! true the QHA with BZ integration 
+                                ! elastic constants are available for 
+                                ! all geometries
+
   REAL(DP), ALLOCATABLE :: el_con_geo(:,:,:)  ! the elastic constants at
                                 ! each geometry
-  INTEGER, ALLOCATABLE :: el_con_ibrav_geo(:) ! the ibrav at each geometry
-                                ! for which the elastic constants are 
-                                ! calculated
-  REAL(DP), ALLOCATABLE :: el_con_celldm_geo(:,:) ! the celldm at each geometry
-                                ! for which the elastic constants are 
-                                ! calculated
-  REAL(DP), ALLOCATABLE :: el_con_tau_geo(:,:,:) ! the atomic coordinates at
-                                ! each geometry for which the elastic 
-                                ! constants are calculated
-  LOGICAL ::       &
-             el_cons_qha_available_ph
-
-  LOGICAL :: el_cons_qha_geo_available,      &
-             el_cons_qha_geo_available_ph
-
-END MODULE control_elastic_constants
-
-MODULE control_elastic_constants_qha
-  USE kinds,  ONLY : DP
-  !
-  INTEGER, ALLOCATABLE :: ibrav_save_qha(:) ! the ibrav of each unperturbed
+  INTEGER, ALLOCATABLE :: el_con_ibrav_geo(:) ! the ibrav of each unperturbed
                                 ! lattice.
-  REAL(DP), ALLOCATABLE :: celldm0_qha(:,:) ! the celldm0 of each unperturbed
-                                ! lattice.
-  REAL(DP), ALLOCATABLE :: omega0_qha(:) ! the volume of each unperturbed cell
-  REAL(DP), ALLOCATABLE :: tau_crys_qha(:,:,:)   ! the atomic positions of each
+  REAL(DP), ALLOCATABLE :: el_con_celldm_geo(:,:) ! the celldm of each 
                                 ! unperturbed lattice.
+  REAL(DP), ALLOCATABLE :: el_con_tau_crys_geo(:,:,:) ! the atomic positions of each
+  REAL(DP), ALLOCATABLE :: el_con_omega_geo(:) ! the volume of each 
+                                ! unperturbed cell.
   INTEGER :: ngeom=1            ! the number of geometries
 
   INTEGER :: work_base          ! number of works for one set of
                                 ! elastic constants
+
   LOGICAL :: use_free_energy    ! if true makes the qha approximation 
                                 ! otherwise the quasi-static one.
-END MODULE control_elastic_constants_qha
+END MODULE control_elastic_constants
   !
 MODULE control_conv
   USE kinds,  ONLY : DP
@@ -579,9 +578,7 @@ MODULE control_paths
   LOGICAL :: is_a_path=.TRUE.    ! if .true. the k point are in a path
   LOGICAL :: lbar_label=.FALSE.  ! if .TRUE. put a bar on each label 
                                  ! (needed for surface band plot)
-
 END MODULE control_paths
-
 
 MODULE control_bands
   USE kinds,  ONLY : DP
@@ -658,8 +655,6 @@ MODULE proj_rap_point_group
   CHARACTER(LEN=45)  :: name_rap_proj(48)  ! the name of each projective
                                  ! irreducible projective representation
 END MODULE proj_rap_point_group
-
-
 
 MODULE control_eldos
 
@@ -762,7 +757,6 @@ MODULE initial_param
 
 END MODULE initial_param
 
-
 MODULE equilibrium_conf
   USE kinds, ONLY: DP
   SAVE
@@ -783,7 +777,6 @@ MODULE control_pwrun
 
   USE kinds, ONLY: DP
   SAVE
-
 
   LOGICAL  :: do_punch=.TRUE.  ! set this variable to .FALSE. if pw has
                                ! not to save the punch files.

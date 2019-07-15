@@ -73,8 +73,7 @@ SUBROUTINE thermo_readin()
                                    lmurn
   USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, &
                                    frozen_ions, elastic_algorithm, &
-                                   poly_degree, epsilon_0
-  USE control_elastic_constants_qha, ONLY : use_free_energy
+                                   poly_degree, epsilon_0, use_free_energy
   USE control_xrdp,         ONLY : lambda, flxrdp, flpsxrdp, lformf, smin, &
                                    smax, nspoint, flformf, flpsformf, lcm, &
                                    lxrdp, lambda_elem

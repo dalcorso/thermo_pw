@@ -108,7 +108,8 @@ USE kinds,             ONLY : DP
 USE constants,         ONLY : ry_kbar
 USE thermo_mod,        ONLY : energy_geo, density
 USE control_elastic_constants, ONLY : ngeo_strain, frozen_ions,            &
-                              elastic_algorithm, rot_mat, elcpvar
+                              elastic_algorithm, rot_mat, elcpvar,         &
+                              el_con_omega_geo, ngeom
 USE initial_conf,      ONLY : ibrav_save
 USE thermo_sym,        ONLY : laue
 USE elastic_constants, ONLY : print_elastic_constants,                     &
@@ -119,7 +120,6 @@ USE elastic_constants, ONLY : print_elastic_constants,                     &
                               write_elastic, print_macro_elasticity,       &
                               compute_elastic_constants_ene,               &
                               print_sound_velocities
-USE control_elastic_constants_qha,  ONLY : omega0_qha, ngeom
 USE rotate,            ONLY : rotate_tensors2
 USE control_macro_elasticity, ONLY : macro_el, vp, vb, vg, approx_debye_t
 USE debye_module,      ONLY : compute_debye_temperature,                   &
@@ -174,7 +174,7 @@ DO igeom=1,ngeom
                                                                        THEN
       CALL compute_elastic_constants_ene(energy_geo(base_ind+1), &
            epsilon_geo(1,1,base_ind+1), nwork1, ngeo_strain, ibrav_save, &
-                            laue, omega0_qha(igeom), elcpvar)
+                            laue, el_con_omega_geo(igeom), elcpvar)
    END IF
    CALL print_elastic_constants(el_con, frozen_ions)
 !
