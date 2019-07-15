@@ -36,7 +36,7 @@ for DIR in "$BIN_DIR" "$PSEUDO_DIR" ; do
         exit 1
     fi
 done
-for DIR in "$TMP_DIR" "$EXAMPLE_DIR/results_elct" "$EXAMPLE_DIR/results" ; do
+for DIR in "$TMP_DIR" "$EXAMPLE_DIR/results_elct" ; do
     if test ! -d $DIR ; then
         mkdir $DIR
     fi
@@ -77,6 +77,7 @@ $ECHO
 
 $ECHO "  cleaning $TMP_DIR...\c"
 rm -rf $TMP_DIR/g*/silicon*
+rm -rf $TMP_DIR/g*/_ph*/silicon*
 $ECHO " done"
 
 cat > thermo_control << EOF
@@ -124,51 +125,6 @@ $THERMO_PW_COMMAND < si.elastic_t.in > si.elastic_t.out
 check_failure $?
 $ECHO " done"
 $ECHO ""
-
-$ECHO "  cleaning $TMP_DIR...\c"
-rm -rf $TMP_DIR/g*/silicon*
-$ECHO " done"
-
-cd ../results
-
-cat > thermo_control << EOF
- &INPUT_THERMO
-  what='mur_lc_t',
-  deltat=3.,
-  lmurn=.FALSE.
- /
-EOF
-
-cat > ph_control << EOF
-ph_title
- &inputph
-  tr2_ph=1.0d-12,
-  prefix='silicon',
-  fildyn='si.dyn.xml',
-  ldisp=.TRUE.
-  nq1=4, nq2=4, nq3=4,
-/
-EOF
-
-cp ../results_elct/si.elastic_t.in ./si.mur_lc_t.in
-cp -R ../results_elct/elastic_constants/ .
-
-$ECHO " This is the thermo mur_lc_t calculation for Si"
-$ECHO " whereby the files of elastic constants computed at"
-$ECHO " different geometries are present in the directory"
-$ECHO " elastic_constants."
-$ECHO " Quasi-static isothermal and adiabatic elastic constants and"
-$ECHO " bulk modulus are in output_anhar.el_cons.ps."
-$ECHO " Quasi-static isothermal and adiabatic elastic compliances and"
-$ECHO " compressibility are in output_anhar.el_comp.ps."
-$ECHO " Thermal stresses are in output_tstress.ps."
-$ECHO " Generalized average Gruneisen parameter is in output_anhar.ggamma.ps."
-$ECHO " The other quantities are analogous to those presented in example09"
-$ECHO " but anharmonic quantities are also derived from Gruneisen parameters"
-$ECHO " with a bulk modulus obtained from elastic compliances."
-$ECHO " Running..."
-
-$THERMO_PW_COMMAND < si.mur_lc_t.in > si.mur_lc_t.out
 
 $ECHO
 $ECHO "$EXAMPLE_DIR : done"
