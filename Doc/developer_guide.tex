@@ -1241,6 +1241,11 @@ Bravais lattices. Presently it contains the routines to generate the
 primitive vectors of these lattices and their reciprocal lattice vectors.
 
 \item
+\texttt{atomic\_pos.f90} contains routines to deal with the atomic positions.
+Presently it contains the routines to find, from a list of atomic positions,
+how many types of atoms there are and which ones.
+
+\item
 \texttt{bz\_2d\_form.f90} contains the information required to make a
 plot of the two-dimensional Brillouin zones.
 
@@ -1290,12 +1295,13 @@ electrons.
 \item
 \texttt{ph\_freq\_module.f90} contains routines to calculate the vibrational
 energy, free energy, entropy, and constant strain heat capacity from the
-phonon frequencies.   
+phonon frequencies. It computes also the atomic B factors.
 
 \item
 \texttt{phdos\_module.f90} contains routines to calculate the vibrational
 energy, free energy, entropy, and constant strain heat capacity from the
-phonon density of states.
+phonon density of states. It computes also the atomic B factors from the
+generalized phonon density of states.
 
 \item
 \texttt{strain.f90} contains routines to apply a given strain to a given
@@ -1315,7 +1321,8 @@ piezoelectric tensor given the strain and the induced polarization.
 
 \item
 \texttt{elastic\_const.f90} contains routines to calculate the elastic
-constants given the strain and the induced stress. It can also compute
+constants given the strain and the induced stress or the strain and
+the energy or the Helmholtz free energy. It can also compute
 quantities dependent on the elastic constants, such as the elastic 
 compliances, the bulk moduli, the sound speeds or the Voigt-Reuss-Hill 
 averages. It has also routines to transform from the Voigt to the 
@@ -1337,6 +1344,13 @@ a given point and to find the minimum of the quadratic function.
 The number of independent variables can vary from one to six.
 
 \item
+\texttt{cubic\_surfaces.f90} contains routines to fit a set of data
+with a cubic polynomial, to find the gradient or the hessian in 
+a given point and to find the local minimum of the cubic polynomial
+closest to a given guess of its position. 
+The number of independent variables can vary from one to six.
+
+\item
 \texttt{quartic\_surfaces.f90} contains routines to fit a set of data
 with a quartic polynomial, to find the gradient or the hessian in 
 a given point and to find the minimum of the quartic function given a 
@@ -1344,9 +1358,25 @@ reasonably good guess of its position.
 The number of independent variables can vary from one to six.
 
 \item
+\texttt{polyfit.f90} contains routines to deal with polynomial
+interpolation of arbitrary degree but for a single variable. Presently
+it contains only a routine to find the polynomial that interpolates
+a set of data.
+
+\item
 \texttt{linear\_solvers.f90} contains routines that solve iteratively
 a linear system. It contains also a few drivers that calls LAPACK routines
 and do not require workspace information. 
+
+\item
+\texttt{diagonalize.f90} contains routines that diagonalize a matrix.
+Presently it contains a driver that calls LAPACK routines
+for real symmetric matrices.
+
+\item
+\texttt{vector.f90} contains routines to deal with vectors.
+Presently it has only a routine to write on output the components of
+a vector.
 
 \item
 \texttt{mp\_asyn.f90} contains the routines needed to run many 
