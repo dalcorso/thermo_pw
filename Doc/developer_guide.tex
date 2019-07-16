@@ -106,7 +106,7 @@ F) \texttt{lband\_syn\_1=.TRUE.} makes a non self-consistent \texttt{pw.x}
 calculation to compute the band structure.
 
 \item
-H0) \texttt{lectqha=.TRUE.} it computes the elastic constants at $T=0$
+H0) \texttt{lectqha=.TRUE.} computes the elastic constants at $T=0$
 as second derivatives of the energy or from the stress strain relationship. 
 
 \end{itemize}
@@ -165,10 +165,11 @@ zone and their plot.
 
 \item
 O) Calculation of the anharmonic quantities such as the thermal expansion
-from the numerical differentiation of the crystal parameters. Calculation
-of the isoentropic quantities when enough information is available. 
+from the numerical differentiation of the crystal parameters. 
 Calculation of the temperature dependent elastic constants within 
-the `quasi-harmonic' approximation when enough information is available.
+the `quasi-static' or the `quasi-harmonic' approximation when enough 
+information is available. Calculation of the isoentropic quantities when 
+enough information is available. 
 
 \item
 P) Calculation of the Gr\"uneisen parameters on a uniform mesh of {\bf q} 
@@ -177,15 +178,17 @@ Calculation of the isoentropic quantities when available.
 \end{itemize}
 
 Instead if \texttt{lectqha=.TRUE.} the code will do:
+\begin{itemize}
 \item
 Q) Calculation of the temperature dependent elastic constants within the
-`fixed-geometry quasi-harmonic'.
-
+`fixed-geometry quasi-harmonic' approximation.
 \end{itemize}
-There is also an initial routine (\texttt{thermo\_summary}) that can carry
-out preprocessing tasks, such as finding the space group or suggesting
-alternative \texttt{ibrav} and \texttt{celldm}. This routine is called by
-all \texttt{what} options.
+There are also two initial routines (\texttt{thermo\_setup} and 
+\texttt{thermo\_summary}) that can carry out preprocessing tasks, such as 
+finding the space group or suggesting alternative \texttt{ibrav} and 
+\texttt{celldm}. The two routines are called by all \texttt{what} options.
+The first is used to initialize variables and the second to write messages 
+on output.
 
 \newpage
 \section{\color{coral}Activated parts}
@@ -221,12 +224,11 @@ mur_lc_polarization
 mur_lc_t     *           *                                  *   *  *  *  *
 elastic_constants_t
              *                       *                      *               * 
-
 + not yet active or working.
 \end{verbatim}
 
-\newpage
 
+\newpage
 \section{\color{coral}Plots and physical quantities}
 This is the list of the plots that can be obtained and 
 the \texttt{what} to use:
@@ -255,8 +257,12 @@ Vibrational energy, free energy, entropy,
 isochoric heat capacity                        scf_disp, mur_lc_disp
 Atomic B factors                               scf_disp, mur_lc_disp
 Debye vibrational energy, free energy, 
-entropy and isochoric heat capacity            scf_elastic_constants, 
-                                               mur_lc_elastic_constants
+entropy, isochoric heat capacity               scf_elastic_constants, 
+                                               mur_lc_elastic_constants,
+                                               elastic_constants_t
+Debye atomic B factor                          scf_elastic_constants,
+                                               mur_lc_elastic_constants,
+                                               elastic_constants_t
 Lattice parameters as a function of T          mur_lc_t
 Thermal expansion as a function of T           mur_lc_t 
 Mode Gruneisen parameters                      mur_lc_t
@@ -276,7 +282,6 @@ Difference isoentropic-isothermal bulk modulus mur_lc_t
 Thermal stresses as a function of T            mur_lc_t
 Average Gruneisen parameter                    mur_lc_t
 Generalized Average Gruneisen parameters       mur_lc_t     
-
 \end{verbatim}
 
 This is the list of the quantities that can be obtained in output
@@ -292,6 +297,7 @@ Dielectric constant (insulators only)          scf_ph, mur_lc_ph
 Born effective charges (insulators only)       scf_ph, mur_lc_ph
 Elastic constant tensor                        scf_elastic_constants, 
                                                mur_lc_elastic_constants
+                                               elastic_constants_t
 \end{verbatim}
 
 \newpage
@@ -483,7 +489,8 @@ anhar_files     : a directory that contains the files with the anharmonic
                   The 'quasi-static', 'fixed geometry quasi-harmonic' and
                   'quasi-harmonic' elastic constants are saved here.
 
-elastic_constants : a directory that contains the elastic constants files.
+elastic_constants : a directory that contains the elastic constants files
+                    at T=0.
 \end{verbatim}
 The postscript files with the physical quantities are all written in
 the \texttt{working} directory. \\
@@ -557,7 +564,7 @@ In order to insert a new flow-chart in the \texttt{thermo\_pw} code it
 is necessary to set a new option for the variable \texttt{what}. The
 new option will control what happens in the following routines:
 \begin{verbatim}
-thermo_summary.f90, initialize_thermo_work.f90, set_thermo_work_todo.f90
+thermo_setup.f90, thermo_summary.f90, initialize_thermo_work.f90, set_thermo_work_todo.f90
 \end{verbatim}
 and the software that controls the option must be added to these routines.
 In addition new variables needed to control the option can be added
@@ -578,10 +585,12 @@ file and a routine that plots these data. The former should be called
 \texttt{write\_...} while the latter will be \texttt{plot\_...}.
 These can be called from a manager routine which is called where needed
 in the \texttt{thermo\_pw.f90} main driver. \\
-\texttt{thermo\_summary.f90} is a routine that is called at the beginning of the
-run and summarizes the calculation to do. Here one can add some message
-to the output to illustrate what the new option will do, or call 
-preprocessing routines that works on the input variables of the option. \\
+\texttt{thermo\_setup.f90} and \texttt{thermo\_summary.f90} are two routines 
+that are called at the beginning of the run. The first
+can save input variables or call preprocessing routines that work on 
+the input variables of the option while the second summarizes the 
+calculation to do. Here one can add some message to the output to 
+illustrate what the new option will do. \\ 
 \texttt{initialize\_thermo\_work.f90} will set for each options the
 number of tasks to do in the first and second asynchronous runs and
 for each run it sets the variables needed to construct the
