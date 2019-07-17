@@ -72,6 +72,8 @@ properties directly comparable with experiment.
 \begin{tabular}{ll}
 \texttt{Doc/}      & : contains this user's guide and other documentation\\
 \texttt{examples/} & : some running examples \\
+\texttt{examples\_qe/} & : some examples of \qe\ run using 
+\texttt{thermo\_pw} \\
 \texttt{inputs/}   & : a collection of useful inputs \\
 \texttt{pseudo\_test/} & : a collection of inputs to test a pseudopotential library\\
 \texttt{space\_groups/} & : a collection of structures for many space groups \\
@@ -152,11 +154,11 @@ a function of temperature (limited to cubic systems).
 Minimum Helmholtz (or Gibbs at finite pressures) free energy 
 as a function of temperature.
 
-\item Constant temperature and isoentropic elastic constants and 
+\item Isothermal and isoentropic elastic constants and 
 elastic compliances as a function of temperature within the ``quasi-static'' 
 approximation.
 
-\item Constant temperature and isoentropic elastic constants and 
+\item Isothermal and isoentropic elastic constants and 
 elastic compliances as a function of temperature within the 
 ``quasi-harmonic'' approximation.
 
@@ -178,9 +180,12 @@ geometries needed for the calculation of the elastic constants are
 calculated in parallel. 
 The phonon calculations are carried out in parallel, each image doing one 
 irreducible representation of one {\bf q} point. For frequency dependent 
-calculation,
-each frequency, or group of frequencies, can be calculated in parallel
-by different images.
+calculation, each frequency, or group of frequencies, can be calculated 
+in parallel by different images.
+The phonon dispersions of several geometries needed
+for the quasi-harmonic calculation of the thermodynamic properties or
+of the elastic constants can be calculated in parallel (one geometry at 
+a time or all geometries together).
 
 \newpage
 \section{\color{coral}People}
