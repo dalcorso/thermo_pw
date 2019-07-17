@@ -463,6 +463,7 @@ MODULE control_elastic_constants
                                 ! energy_std or energy
                                 ! it chooses the routines to use to 
                                 ! calculate elastic constants.
+  LOGICAL :: elalgen=.FALSE.    ! elastic_algorithm requires energy
   INTEGER :: elcpvar            ! number of variables of the polynomial 
                                 ! function that interpolates stress or energy
   INTEGER :: poly_degree        ! the order of the polynomial to interpolate

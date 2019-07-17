@@ -36,7 +36,7 @@ SUBROUTINE thermo_setup()
   USE control_thermo,       ONLY : continue_zero_ibrav, find_ibrav, &
                                    set_internal_path, set_2d_path
   USE control_elastic_constants, ONLY : ngeo_strain, elastic_algorithm, &
-                                 poly_degree, elcpvar
+                                  elcpvar, poly_degree, elalgen
   USE control_eldos,        ONLY : deltae, ndose
   USE control_mur,          ONLY : lmurn
   USE equilibrium_conf,     ONLY : tau0, tau0_crys
@@ -92,10 +92,10 @@ SUBROUTINE thermo_setup()
   !   ngeo_strain cannot be too small and the energy algorithm requires a
   !   few more points
   !
+  elalgen=elastic_algorithm=='energy_std'.OR.elastic_algorithm=='energy'
   IF (ngeo_strain<4) THEN
      ngeo_strain=4
-     IF (elastic_algorithm=='energy_std'.OR.elastic_algorithm=='energy') &
-                                                           ngeo_strain=6
+     IF (elalgen) ngeo_strain=6
   ENDIF
   !
   !   The default of the interpolation polynomial for elastic constants, if
@@ -103,12 +103,10 @@ SUBROUTINE thermo_setup()
   !
   IF (poly_degree < 2 ) THEN
      poly_degree = 3
-     IF (elastic_algorithm=='energy_std'.OR.elastic_algorithm=='energy') &
-                                                            poly_degree=4
+     IF (elalgen) poly_degree=4
      IF (ngeo_strain < 6) THEN
        poly_degree = 2
-       IF (elastic_algorithm=='energy_std'.OR.elastic_algorithm=='energy') &
-                                                            poly_degree=3
+       IF (elalgen) poly_degree=3
      ENDIF
   ENDIF
   elcpvar=poly_degree+1

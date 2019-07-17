@@ -23,7 +23,8 @@ USE kinds,             ONLY : DP
 USE thermo_mod,        ONLY : ibrav_geo, celldm_geo
 USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, rot_mat, &
                                elastic_algorithm, epsilon_0,               &
-                               el_con_ibrav_geo, el_con_celldm_geo, work_base
+                               el_con_ibrav_geo, el_con_celldm_geo,        &
+                               work_base, elalgen
 USE initial_conf,      ONLY : ibrav_save
 USE equilibrium_conf,  ONLY : celldm0
 USE thermo_sym,        ONLY : laue
@@ -47,14 +48,12 @@ SELECT CASE (laue)
 !  cubic system (T_h or O_h Laue classes)
 !
       IF (ibrav_save==1.OR.ibrav_save==2.OR.ibrav_save==3) THEN    
-         IF (elastic_algorithm=='standard'.OR.&
-                              elastic_algorithm=='advanced') THEN
+         IF (.NOT.elalgen) THEN
             nstep = 2
             strain_list(1) = 'E '
             strain_list(2) = 'F3'
             IF (ibrav_save==1) strain_list(2) = 'F '
-         ELSEIF (elastic_algorithm=='energy_std'.OR.&
-                           elastic_algorithm=='energy') THEN
+         ELSE
             nstep = 3
             strain_list(1) = 'A '
             strain_list(2) = 'E '
@@ -70,14 +69,12 @@ SELECT CASE (laue)
 !  hexagonal system (C_6h or D_6h Laue classes)
 !
       IF (ibrav_save==4) THEN    
-         IF (elastic_algorithm=='standard'.OR.&
-                              elastic_algorithm=='advanced') THEN
+         IF (.NOT.elalgen) THEN
             nstep = 3
             strain_list(1) = 'C '
             strain_list(2) = 'E '
             strain_list(3) = 'H '
-         ELSEIF (elastic_algorithm=='energy_std'.OR. &
-                                    elastic_algorithm=='energy') THEN
+         ELSE
             nstep = 5
             strain_list(1) = 'C '
             strain_list(2) = 'E '
@@ -94,15 +91,13 @@ SELECT CASE (laue)
 !   tetragonal system, (C_4h or D_4h Laue classes)
 !
       IF (ibrav_save==6.OR.ibrav_save==7) THEN
-         IF (elastic_algorithm=='standard'.OR.&
-                              elastic_algorithm=='advanced') THEN
+         IF (.NOT.elalgen) THEN
             nstep = 4
             strain_list(1) = 'C '
             strain_list(2) = 'E '
             strain_list(3) = 'H '
             strain_list(4) = 'G '
-         ELSEIF (elastic_algorithm=='energy_std'.OR.&
-                                elastic_algorithm=='energy') THEN
+         ELSE
             nstep = 6
             strain_list(1) = 'E '
             strain_list(2) = 'C '
@@ -126,8 +121,7 @@ SELECT CASE (laue)
 !
       IF (ibrav_save==8.OR.ibrav_save==9.OR.ibrav_save==10&
                                                     .OR.ibrav_save==11) THEN
-         IF (elastic_algorithm=='standard'.OR.&
-                              elastic_algorithm=='advanced') THEN
+         IF (.NOT.elalgen) THEN
             nstep = 6
             strain_list(1) = 'C '
             strain_list(2) = 'D '
@@ -135,8 +129,7 @@ SELECT CASE (laue)
             strain_list(4) = 'G '
             strain_list(5) = 'H '
             strain_list(6) = 'I '
-         ELSEIF (elastic_algorithm=='energy_std'.OR.&
-                                  elastic_algorithm=='energy') THEN
+         ELSE
             nstep = 9
             strain_list(1) = 'C '
             strain_list(2) = 'D '
@@ -157,15 +150,13 @@ SELECT CASE (laue)
 !   D_3d and S_6 Trigonal system (hexagonal or trigonal lattice). 
 !
       IF (ibrav_save==4.OR.ibrav_save==5) THEN
-         IF (elastic_algorithm=='standard'&
-                       .OR.elastic_algorithm=='advanced') THEN
+         IF (.NOT.elalgen) THEN
             nstep = 3
             strain_list(1) = 'C '
             strain_list(2) = 'E '
             strain_list(3) = 'H '
             IF (ibrav_save==5) strain_list(3) = 'I '
-         ELSEIF (elastic_algorithm=='energy_std'.OR. &
-                                      elastic_algorithm=='energy') THEN
+         ELSE
             nstep=5
             strain_list(1) = 'C '
             strain_list(2) = 'E '
@@ -194,8 +185,7 @@ SELECT CASE (laue)
       IF (ibrav_save==12.OR.ibrav_save==13.OR.ibrav_save==-12 &
                                           .OR.ibrav_save==-13) THEN
          ! both b and c-unique
-         IF (elastic_algorithm=='standard' &
-                .OR.elastic_algorithm=='advanced') THEN
+         IF (.NOT.elalgen) THEN
             nstep = 6
             strain_list(1) = 'C '
             strain_list(2) = 'D '

@@ -34,7 +34,7 @@ SUBROUTINE thermo_summary()
                                    letter_path, label_list, point_label_type
   USE control_asy,          ONLY : flasy, lasymptote, asymptote_command
   USE control_elastic_constants, ONLY : frozen_ions, ngeo_strain, &
-                                   elastic_algorithm
+                                   elastic_algorithm, elalgen
   USE control_xrdp,         ONLY : lambda, flxrdp, lformf, &
                                    flformf, smin, smax, nspoint, lcm
   USE xrdp_module,          ONLY : write_form_factor, compute_xrdp
@@ -396,8 +396,7 @@ SUBROUTINE thermo_summary()
     IF (lelc.OR.what=='plot_bz') THEN
        WRITE(stdout,'(/,5x,"I will use elastic constants with the form")')
        CALL print_el_cons_shape(laue,ibrav)
-       IF (elastic_algorithm=='standard'.OR. &
-                                    elastic_algorithm=='advanced') THEN
+       IF (.NOT.elalgen) THEN
           WRITE(stdout,'(/,5x,"It requires all six strains")') 
           WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
              6*ngeo_strain 

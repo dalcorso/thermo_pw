@@ -36,8 +36,8 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
   USE equilibrium_conf, ONLY : celldm0, omega0
   USE initial_conf,   ONLY : celldm_save, ibrav_save
   USE piezoelectric_tensor, ONLY : polar_geo
-  USE control_elastic_constants, ONLY : elastic_algorithm, rot_mat, ngeom, &
-                             use_free_energy
+  USE control_elastic_constants, ONLY : rot_mat, ngeom, use_free_energy, &
+                                   elalgen
   USE elastic_constants, ONLY : epsilon_voigt, sigma_geo, epsilon_geo
   USE gvecw,          ONLY : ecutwfc
   USE gvect,          ONLY : ecutrho
@@ -373,8 +373,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            ALLOCATE(energy_geo(nwork))
            ALLOCATE(omega_geo(nwork))
            energy_geo=0.0_DP
-           IF (elastic_algorithm=='energy'.OR. &
-                                   elastic_algorithm=='energy_std') THEN
+           IF (elalgen) THEN
               DO igeom = 1, nwork
                  omega_geo(igeom)=compute_omega_geo(ibrav_geo(igeom),&
                                                     celldm_geo(1,igeom))
@@ -456,8 +455,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            ENDIF
         CASE ('elastic_constants_t')  
            lpwscf(1:nwork)=.TRUE.
-           lstress(1:nwork)=( elastic_algorithm=='standard' .OR. &
-                              elastic_algorithm=='advanced')
+           lstress(1:nwork)=.NOT.elalgen
         CASE DEFAULT
           CALL errore('initialize_thermo_work','unknown what',1)
      END SELECT
@@ -481,7 +479,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
 !
         CASE ('scf_elastic_constants', 'mur_lc_elastic_constants')
            lpwscf(1:nwork)=.TRUE.
-           IF (elastic_algorithm=='standard'.OR.elastic_algorithm=='advanced')&
+           IF (.NOT.elalgen)&
               lstress(1:nwork)=.TRUE.
 !
 !  Here the cases in which there are pwscf and berry phase calculation 

@@ -38,7 +38,7 @@ PROGRAM thermo_pw
                                lpiezoelectric_tensor, lpolarization,       &
                                lpart2_pw, all_geometries_together
   USE control_pwrun,    ONLY : do_punch
-  USE control_elastic_constants, ONLY : elastic_algorithm
+  USE control_elastic_constants, ONLY : elalgen, ngeom
   USE control_2d_bands, ONLY : only_bands_plot
   USE control_mur,      ONLY : lmurn
   USE control_xrdp,     ONLY : lxrdp
@@ -151,7 +151,7 @@ PROGRAM thermo_pw
 
   ENDIF
 
-  IF (lectqha) CALL manage_elastic_cons_t_qha(nwork)
+  IF (lectqha) CALL manage_elastic_cons(nwork,ngeom)
 
   CALL deallocate_asyn()
 
@@ -204,28 +204,20 @@ PROGRAM thermo_pw
     !  Asynchronous work starts again. No communication is
     !  allowed except though the master workers mechanism
     !
-    CALL run_thermo_asynchronously(nwork, part, igeom, auxdyn)
+    CALL run_thermo_asynchronously(nwork, part, 1, auxdyn)
     !
     ! here we return synchronized and calculate the elastic constants 
     ! from energy or stress 
     !
     IF (lelastic_const) THEN
-       IF (elastic_algorithm == 'energy_std'.OR. &
-                        elastic_algorithm=='energy') THEN
+       IF (elalgen) THEN
     !
     !   recover the energy calculated by all images
     !
           CALL mp_sum(energy_geo, world_comm)
           energy_geo=energy_geo / nproc_image
-       ELSE
-    !
-    !   recover the stress tensors calculated by all images
-    !
-          CALL mp_sum(sigma_geo, world_comm)
-          sigma_geo=sigma_geo / nproc_image
        ENDIF
-
-       CALL manage_elastic_cons(nwork, igeom)
+       CALL manage_elastic_cons(nwork, 1)
     ENDIF
 
     IF (lpiezoelectric_tensor) THEN
