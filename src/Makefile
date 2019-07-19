@@ -43,7 +43,6 @@ dos_sub.o \
 dynmatrix_tpw.o \
 elastic_constants_t.o \
 ev_sub.o \
-expand_el_cons.o \
 float_to_char.o \
 find_symmetry.o \
 find_band_sym_proj.o \
@@ -55,7 +54,6 @@ initialize_thermo_work.o \
 interpolate_bfact.o \
 interpolate_cv.o \
 interpolate_el_cons.o \
-interpolate_el_qha.o \
 interpolate_freq.o \
 io_bands.o \
 initialize_ph_geometry.o \
@@ -63,6 +61,7 @@ local_dos1d_so.o \
 manage_anhar.o   \
 manage_bands.o   \
 manage_elastic_cons.o \
+manage_elastic_cons_qha.o \
 manage_energy_minimum.o \
 manage_piezo_tensor.o \
 manage_ph.o \
@@ -103,6 +102,7 @@ run_thermo_asyncronously.o \
 set_2d_bz_path.o \
 set_bz_path.o \
 set_dos_kpoints.o \
+set_elastic_constants_t.o \
 set_elastic_cons_work.o \
 set_files_names.o \
 set_fft_mesh.o \

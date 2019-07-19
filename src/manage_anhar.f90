@@ -163,12 +163,15 @@ IF (ltherm_freq) THEN
 ENDIF
 DEALLOCATE(phf)
 !
-!  Check if the elastic constants are on file. If they are, the code
+!  Check if the elastic constants are on file. 
+!
+CALL check_el_cons()
+!
+!  If the elastic constants are on file, the code
 !  computes the elastic constants as a function of temperature interpolating
 !  at the crystal parameters found in the quadratic/quartic fit
 !
-CALL check_el_cons()
-CALL write_elastic_t()
+CALL set_elastic_constants_t()
 
 IF (ltherm_dos) CALL write_anhar_anis()
 IF (ltherm_freq) CALL write_ph_freq_anhar_anis()
@@ -191,6 +194,7 @@ CALL plot_gruneisen_band_anis(flfrq_thermo)
 !    fit the frequencies of the dos mesh with a polynomial
 !
 CALL set_volume_b0_grun()
+CALL set_elastic_grun()
 IF (reduced_grid) THEN
    CALL fit_frequencies_anis_reduced()
 ELSE
@@ -202,7 +206,6 @@ ENDIF
 !
 CALL write_grun_anhar_anis()
 CALL plot_anhar_anis()
-
 
 RETURN
 END SUBROUTINE manage_anhar_anis

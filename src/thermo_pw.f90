@@ -195,8 +195,7 @@ PROGRAM thermo_pw
   IF (lpart2_pw) THEN
 !
 !   here the second part does not use the phonon code. This is for the
-!   calculation of elastic constants. We allow the calculation for several
-!   geometries
+!   calculation of elastic constants. 
 !
     part=2
     CALL initialize_thermo_work(nwork, part, iaux)
@@ -267,7 +266,7 @@ PROGRAM thermo_pw
            CALL manage_anhar_anis()
         ENDIF
      ENDIF
-     IF (lectqha) CALL write_elastic_t_qha()
+     IF (lectqha) CALL manage_elastic_cons_qha()
   ENDIF
   !
 1000  CALL deallocate_thermo()

@@ -10,6 +10,7 @@ SUBROUTINE manage_ph_dispersions(auxdyn, igeom)
 USE ions_base,        ONLY : nsp, amass
 USE initial_conf,     ONLY : amass_save
 USE control_thermo,   ONLY : ltherm, ltherm_dos, ltherm_freq
+USE control_paths,    ONLY :  disp_nqs
 
 IMPLICIT NONE
 CHARACTER(LEN=256), INTENT(IN) :: auxdyn
@@ -28,7 +29,7 @@ amass_save(1:nsp)=amass(1:nsp)
 CALL write_ph_dispersions()
 CALL set_files_for_plot(2, ' ', filedata, filerap, fileout, &
                                                     gnu_filename, filenameps)
-CALL plotband_sub(2, filedata, filerap, fileout, &
+IF (disp_nqs>0) CALL plotband_sub(2, filedata, filerap, fileout, &
                                                     gnu_filename, filenameps)
 IF (ltherm) THEN
 !

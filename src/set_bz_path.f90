@@ -21,6 +21,7 @@ INTEGER :: bzt, i
 !
 !  skip unsupported ibrav
 !
+nqaux=0
 IF (ibrav==91 .OR. ibrav==-13 .OR. ibrav==13 .OR. ibrav==14 .OR. ibrav==0) &
                                                RETURN
 !

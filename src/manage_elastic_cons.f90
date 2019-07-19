@@ -8,7 +8,6 @@
 SUBROUTINE manage_elastic_cons(nwork,ngeom)
 
 USE kinds,             ONLY : DP
-USE constants,         ONLY : ry_kbar
 USE thermo_mod,        ONLY : energy_geo, density
 USE control_elastic_constants, ONLY : ngeo_strain, frozen_ions,            &
                               elastic_algorithm, rot_mat, elcpvar,         &
@@ -119,4 +118,3 @@ DEALLOCATE(sigma_geo_aux)
 
 RETURN
 END SUBROUTINE manage_elastic_cons
-

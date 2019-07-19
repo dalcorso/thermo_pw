@@ -9,7 +9,7 @@ SUBROUTINE check_el_cons()
   !-----------------------------------------------------------------------
   !
   !  This routine tries to read the elastic constants from file for all
-  !  the geometries considered in the calculation
+  !  the geometries considered in the calculation.
   !  If it finds one geometry it sets el_cons_available to true.
   !  If it finds all geometries it sets also el_cons_t_available to true.
   !  In the variables el_cons and el_compliances and macro_el it sets

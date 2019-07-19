@@ -26,8 +26,10 @@ SUBROUTINE check_el_cons_qha()
                                 compute_elastic_compliances,  &
                                 print_macro_elasticity,  &
                                 print_elastic_constants, &
-                                print_elastic_compliances
+                                print_elastic_compliances, &
+                                read_el_cons_from_file
 
+  USE thermo_sym,         ONLY : laue
   USE anharmonic,         ONLY : el_cons_t, el_comp_t, b0_t, el_con_geo_t
   USE ph_freq_anharmonic, ONLY : el_consf_t, el_compf_t, b0f_t, el_con_geo_t_ph
 
@@ -66,7 +68,7 @@ SUBROUTINE check_el_cons_qha()
         IF (.NOT.exst) CYCLE
 
         !The loop on temperatures is inside read_el_cons_from_file
-        CALL read_el_cons_from_file(temp, ntemp, ibrav, &
+        CALL read_el_cons_from_file(temp, ntemp, ibrav, laue, &
                   el_con_geo_t(:,:,:,igeo), b0_t(:), filelastic)
 
         found_dos(igeo)=.TRUE.
@@ -88,7 +90,7 @@ SUBROUTINE check_el_cons_qha()
         IF (.NOT.exst) CYCLE
 
         !The loop on temperatures is inside read_el_cons_from_file
-        CALL read_el_cons_from_file(temp, ntemp, ibrav,& 
+        CALL read_el_cons_from_file(temp, ntemp, ibrav, laue, & 
                 el_con_geo_t_ph(:,:,:,igeo), b0f_t(:), filelastic_ph)
       
         found_ph(igeo)=.TRUE.
@@ -153,7 +155,6 @@ SUBROUTINE compute_elastic_compliances_t(el_cons_t, el_comp_t, b0_t)
  REAL(DP) :: el_cons_t(6,6,ntemp), el_comp_t(6,6,ntemp), b0_t(ntemp)
  REAL(DP) :: macro_el(8)
  INTEGER  :: itemp, startt, lastt
- INTEGER  :: i, j
 
  CALL divide(world_comm, ntemp, startt, lastt)
  el_comp_t=0.0_DP

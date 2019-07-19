@@ -71,6 +71,7 @@ SUBROUTINE write_ph_dispersions()
      RETURN
   ENDIF
 
+  IF (disp_nqs==0) RETURN
 
   WRITE(stdout,'(/,2x,76("+"))')
   WRITE(stdout,'(5x,"Interpolating the dynamical matrices for dispersion")')

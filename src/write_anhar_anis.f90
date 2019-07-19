@@ -13,6 +13,7 @@ SUBROUTINE write_anhar_anis()
 USE kinds,          ONLY : DP
 USE temperature,    ONLY : ntemp, temp
 USE thermo_mod,     ONLY : ibrav_geo
+USE thermo_sym,     ONLY : laue
 USE thermodynamics, ONLY : ph_ce, ph_b_fact
 USE anharmonic,     ONLY : alpha_anis_t, vmin_t, b0_t, celldm_t, beta_t, &
                            gamma_t, cv_t, ce_t, cp_t, b0_s, cpmce_anis,  &
@@ -20,7 +21,8 @@ USE anharmonic,     ONLY : alpha_anis_t, vmin_t, b0_t, celldm_t, beta_t, &
                            bfact_t, lelastic, el_cons_s, el_comp_s
 USE initial_conf,   ONLY : ibrav_save
 USE control_thermo, ONLY : with_eigen
-USE elastic_constants, ONLY : compute_elastic_compliances
+USE elastic_constants, ONLY : compute_elastic_compliances, &
+                              write_el_cons_on_file
 USE isoentropic,    ONLY : isostress_heat_capacity, thermal_stress,      &
                            gen_average_gruneisen, isoentropic_elastic_constants
 USE data_files,     ONLY : flanhar
@@ -143,13 +145,15 @@ IF (lelastic) THEN
 !
    filename='anhar_files/'//TRIM(flanhar)//'.el_cons_s'
    CALL add_pressure(filename)
-   CALL write_el_cons_on_file(temp, ntemp, ibrav, el_cons_s, b0_s, filename, 0)
+   CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, el_cons_s, &
+                                                  b0_s, filename, 0)
 !
 !  and here the elastic compliances
 !
    filename='anhar_files/'//TRIM(flanhar)//'.el_comp_s'
    CALL add_pressure(filename)
-   CALL write_el_cons_on_file(temp, ntemp, ibrav, el_comp_s, b0_s, filename, 1)
+   CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, el_comp_s, &
+                                                     b0_s, filename, 1)
 ENDIF
 
 IF (with_eigen) THEN
@@ -171,13 +175,15 @@ SUBROUTINE write_ph_freq_anhar_anis()
 USE kinds,          ONLY : DP
 USE temperature,    ONLY : ntemp, temp
 USE thermo_mod,     ONLY : ibrav_geo
+USE thermo_sym,     ONLY : laue
 USE ph_freq_thermodynamics, ONLY : phf_ce, phf_b_fact
 USE ph_freq_anharmonic, ONLY : alphaf_anis_t, vminf_t, b0f_t, celldmf_t, &
                                betaf_t, gammaf_t, cvf_t, cef_t, cpf_t, b0f_s, &
                                cpmcef_anis, el_consf_t, lelasticf,       &
                                free_e_minf_t, bthsf_t, ggammaf_t, bfactf_t, &
                                el_consf_s, el_compf_s
-USE elastic_constants, ONLY : compute_elastic_compliances
+USE elastic_constants, ONLY : compute_elastic_compliances, &
+                              write_el_cons_on_file
 USE initial_conf,   ONLY : ibrav_save
 USE control_thermo, ONLY : with_eigen
 USE isoentropic,    ONLY : isostress_heat_capacity, thermal_stress,      &
@@ -303,14 +309,14 @@ IF (lelasticf) THEN
 !
    filename='anhar_files/'//TRIM(flanhar)//'.el_cons_s_ph'
    CALL add_pressure(filename)
-   CALL write_el_cons_on_file(temp, ntemp, ibrav, el_consf_s, b0f_s, &
+   CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, el_consf_s, b0f_s, &
                                                               filename, 0)
 !
 !   and here the elastic compliances at constant entropy
 !
    filename='anhar_files/'//TRIM(flanhar)//'.el_comp_s_ph'
    CALL add_pressure(filename)
-   CALL write_el_cons_on_file(temp, ntemp, ibrav, el_compf_s, b0f_s, &
+   CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, el_compf_s, b0f_s, &
                                                               filename, 1)
 ENDIF
 
@@ -320,7 +326,6 @@ IF (with_eigen) THEN
    CALL add_pressure(filename)
    CALL write_anharm_bfact(temp, bfactf_t, ntemp, filename)
 END IF
-
 
 RETURN
 END SUBROUTINE write_ph_freq_anhar_anis
@@ -891,3 +896,34 @@ ENDIF
 
 RETURN
 END SUBROUTINE write_generalized_gamma
+
+SUBROUTINE set_elastic_grun()
+
+USE anharmonic,         ONLY : lelastic
+USE ph_freq_anharmonic, ONLY : lelasticf
+USE grun_anharmonic,    ONLY : el_cons_grun_t, el_comp_grun_t, lelastic_grun
+USE temperature,        ONLY : ntemp
+USE anharmonic,         ONLY : el_cons_t, el_comp_t
+USE ph_freq_anharmonic, ONLY : el_consf_t, el_compf_t
+
+IMPLICIT NONE
+
+INTEGER :: itemp
+
+lelastic_grun=.FALSE.
+IF (lelasticf) THEN
+   DO itemp=1, ntemp
+      el_cons_grun_t(:,:,itemp)=el_consf_t(:,:,itemp)
+      el_comp_grun_t(:,:,itemp)=el_compf_t(:,:,itemp)
+   ENDDO
+   lelastic_grun=.TRUE.
+ELSEIF(lelastic) THEN
+   DO itemp=1, ntemp
+      el_cons_grun_t(:,:,itemp)=el_cons_t(:,:,itemp)
+      el_comp_grun_t(:,:,itemp)=el_comp_t(:,:,itemp)
+   ENDDO
+   lelastic_grun=.TRUE.
+ENDIF
+
+RETURN
+END SUBROUTINE set_elastic_grun
