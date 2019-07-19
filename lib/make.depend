@@ -25,6 +25,7 @@ elastic_const.o : ../../Modules/invmat.o
 elastic_const.o : ../../Modules/io_global.o
 elastic_const.o : ../../Modules/kind.o
 elastic_const.o : ../../Modules/mp_images.o
+elastic_const.o : ../../Modules/mp_world.o
 elastic_const.o : ../../UtilXlib/mp.o
 elastic_const.o : polyfit.o
 elastic_const.o : voigt.o
