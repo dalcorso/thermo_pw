@@ -155,7 +155,7 @@ loop_k:  DO j=start_k+2, nkstot
      IF (ionode) &
      OPEN(UNIT=iuntmp,FILE=filename,STATUS='unknown', ERR=100, IOSTAT=ios)
      CALL mp_bcast(ios,ionode_id, intra_image_comm)
-100  CALL errore('punch_band_2d','Problem opening outputfile',ios)
+100  CALL errore('punch_band_2d_tpw','Problem opening outputfile',ios)
      IF (ionode) THEN
         ijk=0
         DO i1=1,n1

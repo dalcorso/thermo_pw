@@ -172,9 +172,9 @@ CONTAINS
 
   NAMELIST /plot/ nks, nbnd
 
-  IF ((nks_==0).OR.(nbnd_==0)) CALL errore('read_band',&
+  IF ((nks_==0).OR.(nbnd_==0)) CALL errore('read_bands',&
                       'Parameters not initialized',1)
-  IF ((nks /= nks_) .OR. (nbnd/=nbnd_)) CALL errore('read_band',&
+  IF ((nks /= nks_) .OR. (nbnd/=nbnd_)) CALL errore('read_bands',&
                       'Wrong parameters',1)
   
   IF (ionode) THEN

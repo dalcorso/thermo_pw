@@ -534,7 +534,7 @@ SUBROUTINE thermo_readin()
 
   IF (what=='elastic_constants_t'.AND.elastic_algorithm/='energy_std' &
       .AND.elastic_algorithm/='energy'.AND.use_free_energy) &
-     CALL errore('thermo_readin','Only the energy algorithm is available &
+     CALL errore('thermo_readin','Only the energy algorithms are available &
                                           &in this case',1)
 
   read_paths=( what=='scf_bands'.OR.what=='scf_disp'.OR.what=='plot_bz'.OR. &
