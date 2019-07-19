@@ -45,7 +45,6 @@ PROGRAM thermo_pw
 !
 !  library helper routines and variables
 !
-  USE elastic_constants, ONLY : sigma_geo
   USE piezoelectric_tensor, ONLY : polar_geo 
 !
 !  variables of pw or phonon used here
@@ -74,7 +73,7 @@ PROGRAM thermo_pw
   !
   IMPLICIT NONE
   !
-  INTEGER  :: part, nwork, igeom, exit_status, iaux
+  INTEGER  :: part, nwork, exit_status, iaux
   LOGICAL  :: exst, parallelfs, run
   CHARACTER (LEN=9)   :: code = 'THERMO_PW'
   CHARACTER (LEN=256) :: auxdyn=' '

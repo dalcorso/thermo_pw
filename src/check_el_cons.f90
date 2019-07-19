@@ -25,11 +25,8 @@ SUBROUTINE check_el_cons()
                                 print_elastic_constants, &
                                 print_elastic_compliances
   USE control_elastic_constants, ONLY : el_cons_available, frozen_ions, &
-                                        el_cons_t_available, el_con_geo, &
-                                        el_cons_qha_available,          &
-                                        el_cons_qha_available_ph
+                                        el_cons_t_available, el_con_geo
   USE control_macro_elasticity, ONLY : macro_el
-  USE control_grun,     ONLY : lb0_t
   USE thermo_mod,       ONLY : tot_ngeo, no_ph
   USE data_files,       ONLY : fl_el_cons
   !
@@ -40,9 +37,6 @@ SUBROUTINE check_el_cons()
   !
   LOGICAL  :: exst, found(tot_ngeo)
   !
-  CALL check_el_cons_qha()
-  IF (el_cons_qha_available.OR.el_cons_qha_available_ph) RETURN
-
   ALLOCATE( el_con_geo(6,6,tot_ngeo) )
   el_con_geo=0.0_DP
   found=.FALSE.
@@ -64,7 +58,6 @@ SUBROUTINE check_el_cons()
 !  set the el_cons and el_compliances of that geometry. Otherwise
 !  they are those of the last geometry read.
 !
-  el_cons_t_available=.TRUE.
   CALL find_central_geo(tot_ngeo,no_ph,central_geo) 
   IF (found(central_geo)) THEN
      el_con(:,:)=el_con_geo(:,:,central_geo)
@@ -74,11 +67,11 @@ SUBROUTINE check_el_cons()
   CALL print_elastic_constants(el_con, frozen_ions)
   CALL print_elastic_compliances(el_compliances, frozen_ions)
   CALL print_macro_elasticity(ibrav,el_con,el_compliances,macro_el,.TRUE.)
-  IF (.NOT.lb0_t) RETURN
 !
-!  If the code arrives here to have the temperature dependent elastic
-!  constants we need the elastic constants at all geometries
+!  If the code arrives here we check if the elastic constants have been
+!  found for all geometries and in that case set the appropriate flag.
 ! 
+  el_cons_t_available=.TRUE.
   DO igeo=1,tot_ngeo
      el_cons_t_available=el_cons_t_available.AND.found(igeo)
   ENDDO     

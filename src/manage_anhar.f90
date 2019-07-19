@@ -90,6 +90,8 @@ USE thermo_mod,            ONLY : reduced_grid, what
 USE temperature,           ONLY : ntemp, temp
 USE control_pressure,      ONLY : pressure_kb
 USE control_thermo,        ONLY : ltherm_dos, ltherm_freq
+USE control_elastic_constants, ONLY : el_cons_qha_available, &
+                                  el_cons_qha_available_ph
 USE thermodynamics,        ONLY : ph_free_ener
 USE ph_freq_thermodynamics, ONLY : phf_free_ener
 USE internal_files_names,  ONLY : flfrq_thermo, flvec_thermo
@@ -164,11 +166,17 @@ ENDIF
 DEALLOCATE(phf)
 !
 !  Check if the elastic constants are on file. 
+!  First look for the quasi-harmonic ones
 !
-CALL check_el_cons()
+CALL check_el_cons_qha()
 !
-!  If the elastic constants are on file, the code
-!  computes the elastic constants as a function of temperature interpolating
+!  If not found search those at T=0 in the elastic_constants directory
+!
+IF (.NOT.(el_cons_qha_available.OR.el_cons_qha_available_ph)) &
+                                                CALL check_el_cons()
+!
+!  If the elastic constants are on file and the user allows it, the code 
+!  computes the elastic constants as a function of temperature interpolating 
 !  at the crystal parameters found in the quadratic/quartic fit
 !
 CALL set_elastic_constants_t()

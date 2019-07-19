@@ -149,7 +149,7 @@ ENDDO
 !
 IF (ltherm_dos) THEN
    CALL mp_sum(el_cons_t, world_comm)
-   CALL compute_elastic_compliances_t(el_cons_t,el_comp_t,b0_t)
+   CALL compute_el_comp_t(el_cons_t,el_comp_t,b0_t)
    lelastic=.TRUE.
    filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons'
    CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, el_cons_t, b0_t, &
@@ -161,7 +161,7 @@ ENDIF
 
 IF (ltherm_freq) THEN
    CALL mp_sum(el_consf_t, world_comm)
-   CALL compute_elastic_compliances_t(el_consf_t,el_compf_t,b0f_t)
+   CALL compute_el_comp_t(el_consf_t,el_compf_t,b0f_t)
    lelasticf=.TRUE.
    filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_ph'
    CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, el_consf_t, b0f_t, &

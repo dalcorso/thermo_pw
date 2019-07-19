@@ -31,6 +31,7 @@ collect_everything.o \
 collect_info.o \
 compute_cp.o \
 compute_density.o \
+compute_el_comp_t.o \
 compute_eref_band.o \
 compute_omega_geo.o \
 deallocate_asyn.o \

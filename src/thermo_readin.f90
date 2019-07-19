@@ -502,7 +502,7 @@ SUBROUTINE thermo_readin()
   IF (what/='mur_lc_t'.AND.what/='elastic_constants_t'&
                              .AND.all_geometries_together) &
           CALL errore('thermo_readin','all_geometries_together requires &
-                          &mur_lc_t or elastci_constants_t',1)
+                          &mur_lc_t or elastic_constants_t',1)
 
   IF (flext/='.pdf') flext='.ps'
 
