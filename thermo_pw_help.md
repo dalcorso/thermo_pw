@@ -52,6 +52,14 @@ main <code>thermo_pw</code> page.</p>
 <p align="justify"> Before using <code>thermo_pw</code>, please apply the 
 patches given below.</p>
 
+**Patches for the git version:
+
+When what='elastic_costants_t' a bug in QE prevents the use of 
+use_free_energy=.TRUE. and elastic_algorithm='energy_std'.
+Add the instruction:
+ibrav_ => NULL()
+at line 490 of Modules/qexsd.f90 of QE version 6.4.1.
+
 **Patches for thermo_pw.1.1.1**:
 <br>
 * A bug in src/initialize_thermo_work.f90 could give wrong
