@@ -21,14 +21,14 @@ SUBROUTINE deallocate_thermo()
   USE anharmonic,     ONLY : vmin_t, b0_t, free_e_min_t, &
                              alpha_t, beta_t, gamma_t, cv_t, ce_t, cp_t, b0_s, &
                              celldm_t, alpha_anis_t, cpmce_anis, el_cons_t, &
-                             el_comp_t, macro_el_t, bths_t, ggamma_t, bfact_t, &
-                             el_cons_s, el_comp_s, el_con_geo_t
+                             el_comp_t, macro_el_t, bths_t, ggamma_t, &
+                             el_cons_s, el_comp_s, bfact_t, el_con_geo_t
   USE ph_freq_anharmonic, ONLY : vminf_t, b0f_t, free_e_minf_t, &
                              alphaf_t, betaf_t, gammaf_t, cvf_t, cef_t, &
                              cpf_t, b0f_s, &
                              celldmf_t, alphaf_anis_t, cpmcef_anis, &
-                             el_consf_t, el_compf_t, bthsf_t, ggammaf_t, &
-                             el_consf_s, el_compf_s, bfactf_t,      &
+                             el_consf_t, el_compf_t, macro_elf_t, bthsf_t, &
+                             ggammaf_t, el_consf_s, el_compf_s, bfactf_t,  &
                              el_conf_geo_t
   USE grun_anharmonic,  ONLY : betab, alpha_an_g, cp_grun_t, cv_grun_t, &
                              ce_grun_t, b0_grun_s, &
@@ -98,8 +98,12 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (celldm_t) )        DEALLOCATE(celldm_t) 
   IF ( ALLOCATED (alpha_anis_t) )    DEALLOCATE(alpha_anis_t) 
   IF ( ALLOCATED (cpmce_anis) )      DEALLOCATE(cpmce_anis) 
-  IF ( ALLOCATED (cpmcef_anis) )     DEALLOCATE(cpmcef_anis) 
   IF ( ALLOCATED (free_e_min_t) )    DEALLOCATE(free_e_min_t) 
+  IF ( ALLOCATED (el_cons_t) )       DEALLOCATE(el_cons_t)
+  IF ( ALLOCATED (el_comp_t) )       DEALLOCATE(el_comp_t)
+  IF ( ALLOCATED (el_cons_s) )       DEALLOCATE(el_cons_s)
+  IF ( ALLOCATED (el_comp_s) )       DEALLOCATE(el_comp_s)
+  IF ( ALLOCATED (macro_el_t) )      DEALLOCATE(macro_el_t)
   IF ( ALLOCATED (el_con_geo_t) )    DEALLOCATE(el_con_geo_t) 
 
   IF ( ALLOCATED (b0f_t) )           DEALLOCATE(b0f_t) 
@@ -107,25 +111,22 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (cvf_t) )           DEALLOCATE(cvf_t) 
   IF ( ALLOCATED (cef_t) )           DEALLOCATE(cef_t) 
   IF ( ALLOCATED (cpf_t) )           DEALLOCATE(cpf_t) 
-  IF ( ALLOCATED (el_cons_t) )       DEALLOCATE(el_cons_t)
-  IF ( ALLOCATED (el_comp_t) )       DEALLOCATE(el_comp_t)
-  IF ( ALLOCATED (el_cons_s) )       DEALLOCATE(el_cons_s)
-  IF ( ALLOCATED (el_comp_s) )       DEALLOCATE(el_comp_s)
-  IF ( ALLOCATED (macro_el_t) )      DEALLOCATE(macro_el_t)
-  IF ( ALLOCATED (el_conf_geo_t) )   DEALLOCATE(el_conf_geo_t) 
-
   IF ( ALLOCATED (alphaf_t) )        DEALLOCATE(alphaf_t) 
   IF ( ALLOCATED (betaf_t) )         DEALLOCATE(betaf_t) 
   IF ( ALLOCATED (gammaf_t) )        DEALLOCATE(gammaf_t) 
   IF ( ALLOCATED (bthsf_t) )         DEALLOCATE(bthsf_t) 
   IF ( ALLOCATED (ggammaf_t) )       DEALLOCATE(ggammaf_t) 
-  IF ( ALLOCATED (celldmf_t) )       DEALLOCATE(celldmf_t) 
   IF ( ALLOCATED (bfactf_t) )        DEALLOCATE(bfactf_t) 
+  IF ( ALLOCATED (celldmf_t) )       DEALLOCATE(celldmf_t) 
   IF ( ALLOCATED (alphaf_anis_t) )   DEALLOCATE(alphaf_anis_t) 
+  IF ( ALLOCATED (cpmcef_anis) )     DEALLOCATE(cpmcef_anis) 
+  IF ( ALLOCATED (free_e_minf_t) )   DEALLOCATE(free_e_minf_t) 
   IF ( ALLOCATED (el_consf_t) )      DEALLOCATE(el_consf_t)
   IF ( ALLOCATED (el_compf_t) )      DEALLOCATE(el_compf_t)
   IF ( ALLOCATED (el_consf_s) )      DEALLOCATE(el_consf_s)
   IF ( ALLOCATED (el_compf_s) )      DEALLOCATE(el_compf_s)
+  IF ( ALLOCATED (macro_elf_t) )     DEALLOCATE(macro_elf_t)
+  IF ( ALLOCATED (el_conf_geo_t) )   DEALLOCATE(el_conf_geo_t) 
 
   IF ( ALLOCATED (betab) )           DEALLOCATE(betab) 
   IF ( ALLOCATED (alpha_an_g) )      DEALLOCATE(alpha_an_g) 
@@ -142,7 +143,7 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (b0_grun_s) )       DEALLOCATE(b0_grun_s) 
   IF ( ALLOCATED (grun_cpmce_anis) ) DEALLOCATE(grun_cpmce_anis) 
   IF ( ALLOCATED (grun_gamma_t) )    DEALLOCATE(grun_gamma_t) 
-  IF ( ALLOCATED (free_e_minf_t) )   DEALLOCATE(free_e_minf_t) 
+
   IF ( ALLOCATED (xqaux) )           DEALLOCATE(xqaux)
   IF ( ALLOCATED (wqaux) )           DEALLOCATE(wqaux)
   IF ( ALLOCATED (letter) )          DEALLOCATE(letter)

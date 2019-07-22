@@ -37,6 +37,11 @@ IF (lb0_t) THEN
       CALL write_elastic_t_qha()
    ELSEIF (el_cons_t_available) THEN
       CALL write_elastic_t()
+   ELSEIF(el_cons_qha_available.OR.el_consf_qha_available) THEN
+!
+!  In this case do nothing because el_cons_t and el_comp_t or
+!  el_consf_t and el_compf_t have been already set 
+!
    ELSE
       CALL errore('manage_anhar_anis','Temperature dependent elastic &
                    &constants not available',1)
@@ -44,15 +49,15 @@ IF (lb0_t) THEN
 ELSEIF(el_cons_qha_available.OR.el_consf_qha_available) THEN
    IF (ltherm_dos.AND.el_cons_qha_available) THEN
       DO itemp=1,ntemp
-         el_cons_t(:,:,itemp)=el_cons_t(:,:,1)
-         el_comp_t(:,:,itemp)=el_comp_t(:,:,1)
+         el_cons_t(:,:,itemp)=el_cons_t(:,:,2)
+         el_comp_t(:,:,itemp)=el_comp_t(:,:,2)
       ENDDO
       lelastic=.TRUE.
    ENDIF
    IF (ltherm_freq.AND.el_consf_qha_available) THEN
       DO itemp=1,ntemp
-         el_consf_t(:,:,itemp)=el_consf_t(:,:,1)
-         el_compf_t(:,:,itemp)=el_compf_t(:,:,1)
+         el_consf_t(:,:,itemp)=el_consf_t(:,:,2)
+         el_compf_t(:,:,itemp)=el_compf_t(:,:,2)
       ENDDO
       lelasticf=.TRUE.
    ENDIF
