@@ -55,7 +55,7 @@ SUBROUTINE allocate_anharmonic()
                                   cpmcef_anis, el_consf_t, el_compf_t,       &
                                   el_consf_s, el_compf_s,                    &
                                   macro_elf_t, bthsf_t, ggammaf_t, bfactf_t, &
-                                  el_con_geo_t_ph
+                                  el_conf_geo_t
   USE grun_anharmonic,     ONLY : betab, alpha_an_g, cp_grun_t, cv_grun_t,   &
                                   ce_grun_t, b0_grun_s, grun_gamma_t,        &
                                   grun_cpmce_anis, el_cons_grun_t,           &
@@ -111,7 +111,7 @@ SUBROUTINE allocate_anharmonic()
   IF (.NOT. ALLOCATED (el_consf_s) )    ALLOCATE(el_consf_s(6,6,ntemp)) 
   IF (.NOT. ALLOCATED (el_compf_s) )    ALLOCATE(el_compf_s(6,6,ntemp)) 
   IF (.NOT. ALLOCATED (macro_elf_t) )   ALLOCATE(macro_elf_t(8,ntemp)) 
-  IF (.NOT. ALLOCATED (el_con_geo_t_ph) ) ALLOCATE(el_con_geo_t_ph(6,6,&
+  IF (.NOT. ALLOCATED (el_conf_geo_t) ) ALLOCATE(el_conf_geo_t(6,6,&
                                                            ntemp,tot_ngeo)) 
 
   IF (.NOT. ALLOCATED (vgrun_t) )       ALLOCATE(vgrun_t(ntemp)) 

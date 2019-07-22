@@ -29,7 +29,7 @@ SUBROUTINE deallocate_thermo()
                              celldmf_t, alphaf_anis_t, cpmcef_anis, &
                              el_consf_t, el_compf_t, bthsf_t, ggammaf_t, &
                              el_consf_s, el_compf_s, bfactf_t,      &
-                             el_con_geo_t_ph
+                             el_conf_geo_t
   USE grun_anharmonic,  ONLY : betab, alpha_an_g, cp_grun_t, cv_grun_t, &
                              ce_grun_t, b0_grun_s, &
                              grun_gamma_t, poly_grun, poly_grun_red, &
@@ -112,7 +112,7 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (el_cons_s) )       DEALLOCATE(el_cons_s)
   IF ( ALLOCATED (el_comp_s) )       DEALLOCATE(el_comp_s)
   IF ( ALLOCATED (macro_el_t) )      DEALLOCATE(macro_el_t)
-  IF ( ALLOCATED (el_con_geo_t_ph) ) DEALLOCATE(el_con_geo_t_ph) 
+  IF ( ALLOCATED (el_conf_geo_t) )   DEALLOCATE(el_conf_geo_t) 
 
   IF ( ALLOCATED (alphaf_t) )        DEALLOCATE(alphaf_t) 
   IF ( ALLOCATED (betaf_t) )         DEALLOCATE(betaf_t) 

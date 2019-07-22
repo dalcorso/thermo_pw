@@ -105,7 +105,8 @@ MODULE control_mur
                                ! fit of the energy as a function of the volume
                                ! otherwise makes a fit of the energy as a 
                                ! function of the celldm parameters, with a
-                               ! quadratic function of dimension up to 6
+                               ! quadratic or quartic polynomial of dimension 
+                               ! up to 6
 
 END MODULE control_mur
 
@@ -254,7 +255,7 @@ MODULE ph_freq_anharmonic
                                          ! of temperature (constant entropy)
   REAL(DP), ALLOCATABLE :: macro_elf_t(:,:) ! macroscopic elasticity as a 
                                          ! function of t
-  REAL(DP), ALLOCATABLE :: el_con_geo_t_ph(:,:,:,:)
+  REAL(DP), ALLOCATABLE :: el_conf_geo_t(:,:,:,:)
 
 END MODULE ph_freq_anharmonic
 
@@ -486,7 +487,7 @@ MODULE control_elastic_constants
                                 ! within quasi harmonic approximation 
                                 ! and BZ integrations with phdos are available 
                                 ! at least for one geometry
-  LOGICAL :: el_cons_qha_available_ph=.FALSE. ! when this flag becomes true
+  LOGICAL :: el_consf_qha_available=.FALSE. ! when this flag becomes true
                                 ! the elastic constants computed 
                                 ! within quasi harmonic approximation 
                                 ! and BZ integrations are available at least
@@ -494,7 +495,7 @@ MODULE control_elastic_constants
   LOGICAL :: el_cons_qha_geo_available=.FALSE. ! when this flag becomes true
                                 ! the QHA elastic constants computed with
                                 ! phdos are available for all geometries
-  LOGICAL :: el_cons_qha_geo_available_ph=.FALSE. ! when this flag becomes
+  LOGICAL :: el_consf_qha_geo_available=.FALSE. ! when this flag becomes
                                 ! true the QHA with BZ integration 
                                 ! elastic constants are available for 
                                 ! all geometries

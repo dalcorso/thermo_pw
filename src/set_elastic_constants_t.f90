@@ -26,14 +26,14 @@ USE elastic_constants,     ONLY : el_con, el_compliances
 USE control_elastic_constants, ONLY : el_cons_available, el_cons_t_available, &
                                   el_cons_qha_available,                 &
                                   el_cons_qha_geo_available,             &
-                                  el_cons_qha_available_ph,              &
-                                  el_cons_qha_geo_available_ph
+                                  el_consf_qha_available,                &
+                                  el_consf_qha_geo_available
 IMPLICIT NONE
 
 INTEGER :: itemp
 
 IF (lb0_t) THEN
-   IF (el_cons_qha_geo_available.OR.el_cons_qha_geo_available_ph) THEN
+   IF (el_cons_qha_geo_available.OR.el_consf_qha_geo_available) THEN
       CALL write_elastic_t_qha()
    ELSEIF (el_cons_t_available) THEN
       CALL write_elastic_t()
@@ -41,7 +41,7 @@ IF (lb0_t) THEN
       CALL errore('manage_anhar_anis','Temperature dependent elastic &
                    &constants not available',1)
    ENDIF
-ELSEIF(el_cons_qha_available.OR.el_cons_qha_available_ph) THEN
+ELSEIF(el_cons_qha_available.OR.el_consf_qha_available) THEN
    IF (ltherm_dos.AND.el_cons_qha_available) THEN
       DO itemp=1,ntemp
          el_cons_t(:,:,itemp)=el_cons_t(:,:,1)
@@ -49,7 +49,7 @@ ELSEIF(el_cons_qha_available.OR.el_cons_qha_available_ph) THEN
       ENDDO
       lelastic=.TRUE.
    ENDIF
-   IF (ltherm_freq.AND.el_cons_qha_available_ph) THEN
+   IF (ltherm_freq.AND.el_consf_qha_available) THEN
       DO itemp=1,ntemp
          el_consf_t(:,:,itemp)=el_consf_t(:,:,1)
          el_compf_t(:,:,itemp)=el_compf_t(:,:,1)

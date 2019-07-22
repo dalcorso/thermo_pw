@@ -28,11 +28,11 @@ SUBROUTINE check_el_cons_qha()
   USE elastic_constants, ONLY : read_el_cons_from_file
   USE thermo_sym,        ONLY : laue
   USE anharmonic,        ONLY : el_cons_t, el_comp_t, b0_t, el_con_geo_t
-  USE ph_freq_anharmonic,ONLY : el_consf_t, el_compf_t, b0f_t, el_con_geo_t_ph
+  USE ph_freq_anharmonic,ONLY : el_consf_t, el_compf_t, b0f_t, el_conf_geo_t
   USE control_elastic_constants, ONLY : el_cons_qha_available,     &
-                                        el_cons_qha_available_ph,  &
+                                        el_consf_qha_available,    &
                                         el_cons_qha_geo_available, &
-                                        el_cons_qha_geo_available_ph
+                                        el_consf_qha_geo_available
   USE control_thermo,    ONLY : ltherm_dos, ltherm_freq 
   USE data_files,        ONLY : flanhar 
   USE thermo_mod,        ONLY : tot_ngeo, no_ph
@@ -46,7 +46,7 @@ SUBROUTINE check_el_cons_qha()
   LOGICAL  :: exst, found_dos(tot_ngeo), found_ph(tot_ngeo) 
   !
   el_cons_qha_available=.FALSE.
-  el_cons_qha_available_ph=.FALSE.
+  el_consf_qha_available=.FALSE.
   found_ph=.FALSE.  
   found_dos=.FALSE.  
 
@@ -74,7 +74,7 @@ SUBROUTINE check_el_cons_qha()
   END IF
 
   IF (ltherm_freq) THEN
-     el_con_geo_t_ph=0.0_DP
+     el_conf_geo_t=0.0_DP
      DO igeo=1, tot_ngeo
         filelastic_ph='anhar_files/'//TRIM(flanhar)//'.el_cons.g'//&
                                             TRIM(int_to_char(igeo))//'_ph'
@@ -84,19 +84,19 @@ SUBROUTINE check_el_cons_qha()
         ! The loop on temperatures is inside read_el_cons_from_file
         !
         CALL read_el_cons_from_file(temp, ntemp, ibrav, laue, & 
-                el_con_geo_t_ph(:,:,:,igeo), b0f_t(:), filelastic_ph)
+                el_conf_geo_t(:,:,:,igeo), b0f_t(:), filelastic_ph)
       
         found_ph(igeo)=.TRUE.
-        el_consf_t(:,:,:)=el_con_geo_t_ph(:,:,:,igeo)
+        el_consf_t(:,:,:)=el_conf_geo_t(:,:,:,igeo)
 
         WRITE(stdout,'(/,5x,"Geometry number",i5," of elastic constants &
                    computed via ltherm_freq found")') igeo
     
-        el_cons_qha_available_ph=.TRUE.
+        el_consf_qha_available=.TRUE.
      END DO 
   END IF
  
-  IF ((.NOT.el_cons_qha_available).AND.(.NOT.el_cons_qha_available_ph)) RETURN
+  IF ((.NOT.el_cons_qha_available).AND.(.NOT.el_consf_qha_available)) RETURN
 !
 !  If there are the elastic constants of the central geometry we
 !  set the el_cons_t, el_comp_t, and b0_t of that geometry. Otherwise
@@ -113,7 +113,7 @@ SUBROUTINE check_el_cons_qha()
 
   IF (ltherm_freq) THEN
      IF (found_ph(central_geo)) el_consf_t(:,:,:)= &
-                                    el_con_geo_t_ph(:,:,:,central_geo)
+                                    el_conf_geo_t(:,:,:,central_geo)
      CALL compute_el_comp_t(el_consf_t,el_compf_t, b0f_t)
   ENDIF
 !
@@ -122,11 +122,10 @@ SUBROUTINE check_el_cons_qha()
 !  flag so that the following routines can do the interpolation.
 ! 
   el_cons_qha_geo_available=.TRUE.
-  el_cons_qha_geo_available_ph=.TRUE.
+  el_consf_qha_geo_available=.TRUE.
   DO igeo=1,tot_ngeo
      el_cons_qha_geo_available=el_cons_qha_geo_available.AND.found_dos(igeo)
-     el_cons_qha_geo_available_ph=el_cons_qha_geo_available_ph.AND.&
-                                                              found_ph(igeo)
+     el_consf_qha_geo_available=el_consf_qha_geo_available.AND.found_ph(igeo)
   ENDDO
 !
   RETURN

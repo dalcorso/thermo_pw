@@ -91,7 +91,7 @@ USE temperature,           ONLY : ntemp, temp
 USE control_pressure,      ONLY : pressure_kb
 USE control_thermo,        ONLY : ltherm_dos, ltherm_freq
 USE control_elastic_constants, ONLY : el_cons_qha_available, &
-                                  el_cons_qha_available_ph
+                                  el_consf_qha_available
 USE thermodynamics,        ONLY : ph_free_ener
 USE ph_freq_thermodynamics, ONLY : phf_free_ener
 USE internal_files_names,  ONLY : flfrq_thermo, flvec_thermo
@@ -172,7 +172,7 @@ CALL check_el_cons_qha()
 !
 !  If not found search those at T=0 in the elastic_constants directory
 !
-IF (.NOT.(el_cons_qha_available.OR.el_cons_qha_available_ph)) &
+IF (.NOT.(el_cons_qha_available.OR.el_consf_qha_available)) &
                                                 CALL check_el_cons()
 !
 !  If the elastic constants are on file and the user allows it, the code 

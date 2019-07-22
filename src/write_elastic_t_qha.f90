@@ -23,7 +23,7 @@ USE quartic_surfaces, ONLY : quartic_ncoeff,  fit_multi_quartic,       &
                              evaluate_fit_quartic
 USE cubic_surfaces,   ONLY : cubic_ncoeff, fit_multi_cubic, evaluate_fit_cubic
 USE control_elastic_constants, ONLY : el_cons_qha_geo_available, &
-                                      el_cons_qha_geo_available_ph  
+                                      el_consf_qha_geo_available  
 USE lattices,       ONLY : compress_celldm
 USE elastic_constants, ONLY : el_con, el_compliances, write_el_cons_on_file
 USE lattices,       ONLY : crystal_parameters
@@ -31,7 +31,7 @@ USE control_thermo, ONLY : ltherm_dos, ltherm_freq
 USE anharmonic,     ONLY : celldm_t, el_cons_t, el_comp_t, b0_t, lelastic, &
                            el_con_geo_t
 USE ph_freq_anharmonic, ONLY : celldmf_t, el_consf_t, el_compf_t, b0f_t, &
-                           lelasticf, el_con_geo_t_ph
+                           lelasticf, el_conf_geo_t
 USE data_files, ONLY : flanhar
 USE temperature, ONLY : ntemp, temp
 USE mp,                    ONLY : mp_sum
@@ -110,18 +110,18 @@ DO itemp=startt,lastt
       ENDDO
    END IF
 
-   IF (el_cons_qha_geo_available_ph) THEN
+   IF (el_consf_qha_geo_available) THEN
       CALL compress_celldm(celldmf_t(:,itemp),xfit,nvar,ibrav)
       el_cons_coeff=0.0_DP
       f=0.0_DP
       DO i=1,6
          DO j=i,6
-            IF (el_con_geo_t_ph(i,j,itemp,1)>0.1_DP) THEN
+            IF (el_conf_geo_t(i,j,itemp,1)>0.1_DP) THEN
                WRITE(stdout,'(/,5x,"Fitting elastic constants C(",i4,",",i4,")")') i,j
                WRITE(stdout,'(/,5x,"at Temperature",f15.5,"K")') temp(itemp)
 
                DO idata=1,ndata
-                  f(idata)=el_con_geo_t_ph(i,j,itemp,idata)
+                  f(idata)=el_conf_geo_t(i,j,itemp,idata)
                END DO
 
                IF (poly_degree_elc==4) THEN
