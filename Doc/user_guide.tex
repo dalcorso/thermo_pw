@@ -1763,9 +1763,13 @@ constants computed by this option at the crystal parameters found at
 each temperature from the minimization of the free energy. 
 The variables \texttt{fact\_ngeo} and \texttt{ngeo\_ph} are not 
 available with this option. 
-Using \texttt{start\_geometry} and \texttt{last\_geometry} it is
+Using \texttt{start\_geometry\_qha} and \texttt{last\_geometry\_qha} it is
 possible to compute the temperature dependent elastic constants for
-selected or for a single unperturbed configuration.
+selected or for a single unperturbed configuration. 
+The use of \texttt{start\_geometry} and \texttt{last\_geometry} is
+also allowed but it refers to the global number of geometries necessary 
+to compute the elastic constants in all the grid. 
+
 Since the calculation of the Helmholtz free energy derivatives is
 quite heavy, it has to be requested explicitely using the flag 
 \texttt{use\_free\_energy=.TRUE.}. \\
@@ -1790,6 +1794,14 @@ use_free_energy : when .TRUE. computes the elastic constants as second
               second derivatives of the energy or using the stress-strain
               algorithms.
               Default .FALSE.
+start_geometry_qha : Among the geometries considered by the option
+              mur_lc_t the calculations of elastic constants are done 
+              starting from this geometry.
+              Default, integer 1
+last_geometry_qha : Among the geometries considered by the option
+              mur_lc_t the calculations of elastic constants are done
+              only up to this geometry.
+              Default, integer total number of geometries.
 \end{verbatim}
 An example of the use of this option with \texttt{use\_free\_energy=.FALSE.}
 can be found in \texttt{example22} while an example with
@@ -1867,12 +1879,15 @@ As a last resource you can remove the outdir directory, and \thermo\
 will not recalculate the quantities contained in files that are already 
 in the working directory. Completed phonon calculations at a given
 geometry for which the dynamical matrices are available are
-not redone. It is possible to stop \texttt{thermo\_pw} after the 
+not redone if you put the \texttt{fildyn} name in the 
+\texttt{thermo\_control} namelist. It is possible to stop 
+\texttt{thermo\_pw} after the 
 calculation of the phonon dispersions for a fixed number of geometries 
 by setting the input variable \texttt{max\_geometries} in the 
 \texttt{THERMO\_CONTROL} namelist or also specify exactly which geometries
 to do in a given run using the variables \texttt{start\_geometry} and
-\texttt{last\_geometry}.
+\texttt{last\_geometry} or \texttt{start\_geometry\_qha} and 
+\texttt{last\_geometry\_qha}. 
 
 In general the restart of \texttt{thermo\_pw} from a post-processing task
 is much easier.
@@ -2405,6 +2420,32 @@ are in \texttt{red} (isothermal) and \texttt{green} (isoentropic),
 those calculated from integration over the 
 Brillouin zone are in \texttt{blue} (isothermal) and \texttt{orange} 
 (isoentropic).
+
+\item
+Temperature dependence of the isothermal elastic constants within the 
+`Fixed geometry quasi-harmonic approximation' for all the geometries of
+the mesh. There is a plot for each non-zero
+elastic constant and a plot of the bulk modulus. The number of plots 
+depends on the Laue class. 
+Elastic constants of the different geometries are in the sequence 
+\texttt{red}, \texttt{green}, \texttt{blue}, \texttt{yellow}, 
+\texttt{pink}, \texttt{cyan}, \texttt{orange}, \texttt{black}. When there
+are more than eight geometries the sequence is repeated. 
+The same colors are used for the elastic constants obtained with the
+phonon density of states or from the integration over the Brillouin zone.
+
+\item
+Temperature dependence of the isothermal elastic compliances within the 
+`Fixed geometry quasi-harmonic approximation' for all the geometries of
+the mesh. There is a plot for each non-zero
+elastic compliance and a plot of the compressibility. The number of plots 
+depends on the Laue class. 
+Elastic compliances of the different geometries are in the sequence 
+\texttt{red}, \texttt{green}, \texttt{blue}, \texttt{yellow}, 
+\texttt{pink}, \texttt{cyan}, \texttt{orange}, \texttt{black}. When there
+are more than eight geometries the sequence is repeated. 
+The same colors are used for the elastic compliances obtained with the
+phonon density of states or from the integration over the Brillouin zone.
 
 \end{itemize}
 

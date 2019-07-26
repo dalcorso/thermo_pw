@@ -135,7 +135,7 @@ SUBROUTINE check_initial_geometry(auxdyn)
      !
      !   Initialize the representations and write them on file.
      !
-     CALL init_representations()
+     CALL init_representations_tpw()
      !
   ENDIF
 
