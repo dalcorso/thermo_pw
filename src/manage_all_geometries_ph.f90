@@ -37,7 +37,7 @@ IMPLICIT NONE
 
 INTEGER  :: part, nwork, igeom, ph_geometries, iaux
 CHARACTER(LEN=6) :: int_to_char
-LOGICAL :: std, ldcs
+LOGICAL :: std, ldcs, after_disp_save, check_dyn_file_exists, something_todo
 
 CHARACTER (LEN=256) :: auxdyn=' '
 
@@ -51,21 +51,23 @@ ELSE
 !  Initialize the work of all the geometries and analyze what is on disk
 !  This routine must be called by all processors
 !
-   CALL check_geo_initial_status()
+   CALL check_geo_initial_status(something_todo)
 !
 !  Initialize the asynchronous work
 !
-   auxdyn=fildyn
-   part=2
-   CALL initialize_thermo_work(nwork, part, iaux)
+   IF (something_todo) THEN
+      auxdyn=fildyn
+      part=2
+      CALL initialize_thermo_work(nwork, part, iaux)
 !
 !  Asynchronous work starts here. No communication is
 !  allowed except though the master/slave mechanism
 !  
-   CALL run_thermo_asynchronously(nwork, part, 1, auxdyn)
+      CALL run_thermo_asynchronously(nwork, part, 1, auxdyn)
 
-   CALL deallocate_asyn()
-   IF (stop_signal_activated) GOTO 100
+      CALL deallocate_asyn()
+      IF (stop_signal_activated) GOTO 100
+   ENDIF
 ENDIF
 !
 !  Now all calculations are done, we collect the results. 
@@ -77,7 +79,11 @@ CALL mp_barrier(world_comm)
 IF (.NOT.(after_disp.AND.(what=='mur_lc_t'.OR. &
                                what=='elastic_constants_t'))) THEN
    DO igeom=start_geometry, last_geometry
-      IF (no_ph(igeom)) CYCLE
+      IF (no_ph(igeom).OR..NOT.something_todo) CYCLE
+      auxdyn=TRIM(fildyn)//'.g'//TRIM(int_to_char(igeom))//'.'
+      IF (auxdyn(1:18)/='dynamical_matrices') &
+          auxdyn='dynamical_matrices/'//TRIM(auxdyn)
+      IF (check_dyn_file_exists(auxdyn)) CYCLE
       CALL check_stc_g(igeom, nimage, my_image_id, std)
       IF (.NOT.std) CYCLE
       WRITE(stdout,'(/,5x,40("%"))') 
@@ -115,8 +121,14 @@ ENDIF
 !
 CALL mp_barrier(world_comm)
 
+after_disp_save=after_disp
 DO igeom=start_geometry, last_geometry
    IF (no_ph(igeom)) CYCLE
+   after_disp=after_disp_save
+   auxdyn=TRIM(fildyn)//'.g'//TRIM(int_to_char(igeom))//'.'
+   IF (auxdyn(1:18)/='dynamical_matrices') &
+          auxdyn='dynamical_matrices/'//TRIM(auxdyn)
+   IF (check_dyn_file_exists(auxdyn)) after_disp=.TRUE.
    WRITE(stdout,'(/,5x,40("%"))') 
    WRITE(stdout,'(5x,"Computing thermodynamic properties", i5)') igeom
    WRITE(stdout,'(5x,40("%"),/)') 
@@ -134,7 +146,7 @@ DO igeom=start_geometry, last_geometry
       ibrav=ibrav_geo(igeom)
       celldm(:)=celldm_geo(:,igeom)
       IF (set_internal_path) CALL set_bz_path()
-      IF (igeom==1) CALL initialize_file_names()
+      IF (igeom==start_geometry) CALL initialize_file_names()
    ELSE
       IF (lectqha.AND.set_internal_path) CALL set_bz_path()
    ENDIF
@@ -149,8 +161,10 @@ DO igeom=start_geometry, last_geometry
 !
    IF (lq2r) CALL manage_ph_dispersions(auxdyn, igeom)
 
+   CALL restore_files_names()
 ENDDO
 100 CONTINUE
+after_disp=after_disp_save
 CALL restore_files_names()
 
 RETURN

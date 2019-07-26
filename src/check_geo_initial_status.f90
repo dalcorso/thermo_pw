@@ -6,7 +6,7 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !--------------------------------------------------------------------------
-SUBROUTINE check_geo_initial_status()
+SUBROUTINE check_geo_initial_status(something_todo)
 !--------------------------------------------------------------------------
 !
 !  This routine analyses in sequence all the xml files written by
@@ -55,22 +55,36 @@ USE mp_world,         ONLY : world_comm
 
 IMPLICIT NONE
 
+LOGICAL  :: something_todo
+
 INTEGER  :: igeom
 INTEGER  :: nima, pos
 CHARACTER(LEN=6) :: int_to_char
 CHARACTER (LEN=256) :: auxdyn=' '
+LOGICAL :: fninit, check_dyn_file_exists
 
 ALLOCATE(collect_info_save(tot_ngeo))
 !
 !  loop on all the geometries calculated in this run
 !
+fninit=.FALSE.
+something_todo=.FALSE.
+DO igeom=1, tot_ngeo
+   collect_info_save(igeom)%nqs=0
+ENDDO
 DO igeom=start_geometry,last_geometry
    IF (no_ph(igeom)) CYCLE
+   auxdyn=TRIM(fildyn)//'.g'//TRIM(int_to_char(igeom))//'.'
+   IF (auxdyn(1:18)/='dynamical_matrices') &
+          auxdyn='dynamical_matrices/'//TRIM(auxdyn)
+   IF (check_dyn_file_exists(auxdyn)) CYCLE
+   something_todo=.TRUE.
+   auxdyn=' '
    outdir=TRIM(outdir_thermo)//'/g'//TRIM(int_to_char(igeom))//'/'
    !
    ! ... reads the phonon input and generate q grid and modes
    !
-   IF (igeom==start_geometry) THEN
+   IF (.NOT.fninit) THEN
       CALL thermo_ph_readin()
       CALL save_ph_variables()
       CALL initialize_file_names()
@@ -78,6 +92,7 @@ DO igeom=start_geometry,last_geometry
 
       auxdyn=fildyn
       CALL check_initial_geometry(auxdyn)
+      fninit=.TRUE.
    ELSE
       CALL initialize_geometry_and_ph(recover, igeom, auxdyn)
       CALL check_initial_geometry(auxdyn)
@@ -96,7 +111,9 @@ DO igeom=start_geometry,last_geometry
                          comp_irr_iq, done_irr_iq, comp_iq, done_iq, irr_iq)
 
    CALL close_ph_geometry(.FALSE.)
+   CALL restore_files_names()
 ENDDO
+IF (.NOT.fninit) CALL initialize_file_names()
 !
 !  If the phonon images are used, all images must have the same information 
 !  on what must be calculated by each image, so the collect_info structure 
@@ -105,7 +122,12 @@ ENDDO
 !
 IF (use_ph_images) THEN 
    DO igeom=start_geometry, last_geometry
+      auxdyn=TRIM(fildyn)//'.g'//TRIM(int_to_char(igeom))//'.'
+      IF (auxdyn(1:18)/='dynamical_matrices') &
+          auxdyn='dynamical_matrices/'//TRIM(auxdyn)
+      IF (check_dyn_file_exists(auxdyn)) CYCLE
       CALL comm_collect_info(collect_info_save(igeom), inter_image_comm)
+      CALL restore_files_names()
    ENDDO
 ELSE
    CALL mp_barrier(world_comm)
@@ -118,14 +140,17 @@ END SUBROUTINE check_geo_initial_status
 
 SUBROUTINE save_ph_variables()
 
-USE control_ph,   ONLY : epsil, zeu, zue
-USE initial_conf, ONLY : epsil_save, zeu_save, zue_save
+USE control_ph,   ONLY : epsil, zeu, zue, start_q, last_q
+USE initial_conf, ONLY : epsil_save, zeu_save, zue_save, start_q_save, &
+                         last_q_save
 
 IMPLICIT NONE
 
 epsil_save=epsil
 zeu_save=zeu
 zue_save=zue
+start_q_save=start_q
+last_q_save=last_q
 
 RETURN
 END SUBROUTINE save_ph_variables

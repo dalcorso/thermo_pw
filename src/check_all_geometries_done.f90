@@ -8,24 +8,30 @@
 SUBROUTINE check_all_geometry_done(all_geometry_done)
 
 USE thermo_mod, ONLY : tot_ngeo, no_ph
+USE control_elastic_constants, ONLY : start_geometry_qha, last_geometry_qha, &
+                       ngeom
 USE output, ONLY : fildyn
 
 IMPLICIT NONE
 
 LOGICAL, INTENT(OUT) :: all_geometry_done
 
-INTEGER :: igeom
+INTEGER :: igeom, igeom_qha, iwork, work_base
 LOGICAL  :: check_dyn_file_exists
 CHARACTER(LEN=6) :: int_to_char
 CHARACTER(LEN=256) :: auxdyn
 
 all_geometry_done=.TRUE.
-DO igeom=1,tot_ngeo
-   IF (no_ph(igeom)) CYCLE
-   auxdyn=TRIM(fildyn)//'.g'//TRIM(int_to_char(igeom))//'.'
-   IF (all_geometry_done) all_geometry_done=all_geometry_done.AND. &
-        check_dyn_file_exists(auxdyn)
-   IF (.NOT.all_geometry_done) RETURN
+work_base=tot_ngeo/ngeom
+DO igeom_qha=start_geometry_qha, last_geometry_qha
+   DO iwork=1,work_base
+      igeom=(igeom_qha-1)*work_base+iwork
+      IF (no_ph(igeom)) CYCLE
+      auxdyn=TRIM(fildyn)//'.g'//TRIM(int_to_char(igeom))//'.'
+      IF (all_geometry_done) all_geometry_done=all_geometry_done.AND. &
+           check_dyn_file_exists(auxdyn)
+      IF (.NOT.all_geometry_done) RETURN
+   ENDDO
 ENDDO
 !
 !  When start_geometry and last_geometry are used and we arrive here the
@@ -38,9 +44,10 @@ RETURN
 END SUBROUTINE check_all_geometry_done
 
 SUBROUTINE collect_all_geometries()
-
 USE thermo_mod,            ONLY : tot_ngeo, ibrav_geo, celldm_geo, no_ph, &
                                   max_geometries, start_geometry, last_geometry
+USE control_elastic_constants, ONLY : start_geometry_qha, last_geometry_qha, &
+                                  ngeom
 USE cell_base,             ONLY : ibrav, celldm
 USE control_ph,            ONLY : ldisp
 USE control_thermo,        ONLY : set_internal_path, lq2r
@@ -48,26 +55,30 @@ USE output,                ONLY : fildyn
 USE io_global,             ONLY : stdout
 
 IMPLICIT NONE
-INTEGER :: igeom
+INTEGER :: igeom, igeom_qha, iwork, work_base
 CHARACTER(LEN=256) :: auxdyn
 
-DO igeom=1, tot_ngeo
-   IF (no_ph(igeom)) CYCLE
-   IF ((igeom<start_geometry.OR.igeom>last_geometry.OR.&
+work_base=tot_ngeo/ngeom
+DO igeom_qha=start_geometry_qha, last_geometry_qha
+   DO iwork=1,work_base
+      igeom=(igeom_qha-1)*work_base+iwork
+      IF (no_ph(igeom)) CYCLE
+      IF ((igeom<start_geometry.OR.igeom>last_geometry.OR.&
                                  max_geometries<tot_ngeo).AND.lq2r) THEN
-      WRITE(stdout,'(/,5x,40("%"))')
-      WRITE(stdout,'(5x,"Recomputing geometry ", i5)') igeom
-      WRITE(stdout,'(5x,40("%"),/)')
-      ldisp=.TRUE.
-      ibrav=ibrav_geo(igeom)
-      celldm(:)=celldm_geo(:,igeom)
-      IF (set_internal_path) CALL set_bz_path()
-      CALL set_paths_disp()
-      CALL set_files_names(igeom)
-      auxdyn=fildyn
-      CALL manage_ph_dispersions(auxdyn, igeom)
-   ENDIF
-ENDDO   
+         WRITE(stdout,'(/,5x,40("%"))')
+         WRITE(stdout,'(5x,"Recomputing geometry ", i5)') igeom
+         WRITE(stdout,'(5x,40("%"),/)')
+         ldisp=.TRUE.
+         ibrav=ibrav_geo(igeom)
+         celldm(:)=celldm_geo(:,igeom)
+         IF (set_internal_path) CALL set_bz_path()
+         CALL set_paths_disp()
+         CALL set_files_names(igeom)
+         auxdyn=fildyn
+         CALL manage_ph_dispersions(auxdyn, igeom)
+      ENDIF
+   ENDDO   
+ENDDO
 
 RETURN
 END SUBROUTINE collect_all_geometries

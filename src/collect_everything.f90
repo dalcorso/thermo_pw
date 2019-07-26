@@ -73,7 +73,7 @@ SUBROUTINE check_stc(nqs, igeom, nat, nimage, my_image_id, comp_iq, &
 !  This subroutine checks if this image has something to collect
 !  in the current geometry and sets the appropriate comp_iq and comp_irr_iq
 !
-USE thermo_mod,   ONLY : tot_ngeo
+USE thermo_mod,   ONLY : tot_ngeo, start_geometry, last_geometry
 USE initial_conf, ONLY : collect_info_save
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: nqs, nat, igeom, nimage, my_image_id
@@ -89,7 +89,7 @@ comp_irr_iq=.TRUE.
 comp_iq=.FALSE.
 std=.FALSE.
 task=0
-DO jgeom=1, tot_ngeo
+DO jgeom=start_geometry, last_geometry
    DO iq=1,collect_info_save(jgeom)%nqs
       task = task+1
       IF (task >=start_task(my_image_id+1).AND.task<=last_task(my_image_id+1)&
@@ -112,7 +112,7 @@ SUBROUTINE check_stc_g(igeom, nimage, my_image_id, std)
 !  in the current geometry, but does not set the comp_irr_iq and comp_iq 
 !  flags
 !
-USE thermo_mod,   ONLY : tot_ngeo
+USE thermo_mod,   ONLY : tot_ngeo, start_geometry, last_geometry
 USE initial_conf, ONLY : collect_info_save
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: igeom, nimage, my_image_id
@@ -125,7 +125,7 @@ CALL compute_total_task_and_divide(start_task, last_task, nimage)
 
 std=.FALSE.
 task=0
-DO jgeom=1, tot_ngeo
+DO jgeom=start_geometry, last_geometry
    DO iq=1,collect_info_save(jgeom)%nqs
       task = task+1
       IF (task >=start_task(my_image_id+1).AND.task<=last_task(my_image_id+1)&
@@ -144,7 +144,7 @@ SUBROUTINE compute_total_task_and_divide(start_task, last_task, nimage)
 !  in order to minimize the number of geometries that are initialized 
 !  again by each image. 
 !
-USE thermo_mod,   ONLY : tot_ngeo
+USE thermo_mod,   ONLY : tot_ngeo, start_geometry, last_geometry
 USE initial_conf, ONLY : collect_info_save
 IMPLICIT NONE
 
@@ -154,7 +154,7 @@ INTEGER, INTENT(INOUT) :: start_task(nimage), last_task(nimage)
 INTEGER :: iq, jgeom, image, total_task, task_per_image, resto, task
 
 total_task=0
-DO jgeom=1, tot_ngeo
+DO jgeom=start_geometry, last_geometry
    DO iq=1,collect_info_save(jgeom)%nqs
       total_task = total_task+1
    ENDDO

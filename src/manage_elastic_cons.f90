@@ -11,7 +11,8 @@ USE kinds,             ONLY : DP
 USE thermo_mod,        ONLY : energy_geo, density
 USE control_elastic_constants, ONLY : ngeo_strain, frozen_ions,            &
                               elastic_algorithm, rot_mat, elcpvar,         &
-                              el_con_omega_geo, elalgen
+                              el_con_omega_geo, elalgen, start_geometry_qha, &
+                              last_geometry_qha
 USE initial_conf,      ONLY : ibrav_save
 USE thermo_sym,        ONLY : laue
 USE elastic_constants, ONLY : print_elastic_constants,                     &
@@ -39,7 +40,7 @@ INTEGER, INTENT(IN) :: nwork, ngeom
 
 REAL(DP) :: poisson, bulkm
 REAL(DP), ALLOCATABLE :: sigma_geo_aux(:,:,:)
-INTEGER :: iwork, nwork1, igeom, base_ind
+INTEGER :: iwork, work_base, igeom, base_ind
 CHARACTER(LEN=6)    :: int_to_char
 CHARACTER(LEN=256)  :: filelastic
 !
@@ -52,17 +53,17 @@ CHARACTER(LEN=256)  :: filelastic
       sigma_geo=sigma_geo / nproc_image
    ENDIF
 !
-!  nwork1 is the nwork to compute the elastic constants of one geometry
+!  work_base is the nwork to compute the elastic constants of one geometry
 !
-nwork1=nwork/ngeom
-ALLOCATE(sigma_geo_aux(3,3,nwork1))
-DO igeom=1,ngeom
-   base_ind=(igeom-1)*nwork1 
+work_base=nwork/ngeom
+ALLOCATE(sigma_geo_aux(3,3,work_base))
+DO igeom=start_geometry_qha, last_geometry_qha
+   base_ind=(igeom-1)*work_base
    IF (elastic_algorithm=='standard') THEN
-      sigma_geo_aux(1:3,1:3,1:nwork1)=sigma_geo(1:3,1:3, &
-                                         base_ind+1:base_ind+nwork1)
+      sigma_geo_aux(1:3,1:3,1:work_base)=sigma_geo(1:3,1:3, &
+                                         base_ind+1:base_ind+work_base)
    ELSEIF (elastic_algorithm=='advanced') THEN
-      DO iwork=1,nwork1
+      DO iwork=1,work_base
          CALL rotate_tensors2(rot_mat(1,1,base_ind+iwork), 1, &
                  sigma_geo(1,1,base_ind+iwork), sigma_geo_aux(1,1,iwork),-1)
       ENDDO
@@ -71,10 +72,10 @@ DO igeom=1,ngeom
    IF (.NOT.elalgen) THEN
       CALL compute_elastic_constants(sigma_geo_aux, &
                        epsilon_geo(1,1,base_ind+1), &
-                       nwork1, ngeo_strain, ibrav_save, laue, elcpvar)
+                       work_base, ngeo_strain, ibrav_save, laue, elcpvar)
    ELSE
       CALL compute_elastic_constants_ene(energy_geo(base_ind+1), &
-           epsilon_geo(1,1,base_ind+1), nwork1, ngeo_strain, ibrav_save, &
+           epsilon_geo(1,1,base_ind+1), work_base, ngeo_strain, ibrav_save, &
                             laue, el_con_omega_geo(igeom), elcpvar)
    END IF
    CALL print_elastic_constants(el_con, frozen_ions)

@@ -54,7 +54,11 @@ USE output,            ONLY : fildyn
 
 IMPLICIT NONE
 
-fildyn_thermo="dynamical_matrices/"//TRIM(fildyn)
+IF (fildyn(1:18)=='dynamical_matrices') THEN
+   fildyn_thermo=TRIM(fildyn)
+ELSE
+   fildyn_thermo="dynamical_matrices/"//TRIM(fildyn)
+ENDIF
 flfrc_thermo=TRIM(flfrc)
 flfrq_thermo=TRIM(flfrq)
 flvec_thermo=TRIM(flvec)
@@ -87,7 +91,7 @@ USE output,            ONLY : fildyn
   !
 IMPLICIT NONE
 
-fildyn = TRIM(fildyn_thermo)
+fildyn = fildyn_thermo
 flfrc = TRIM(flfrc_thermo)
 flfrq = TRIM(flfrq_thermo)
 fldos = TRIM(fldos_thermo)

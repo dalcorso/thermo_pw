@@ -18,7 +18,7 @@ SUBROUTINE manage_ph()
   USE thermo_mod,       ONLY : what, ibrav_geo, celldm_geo, no_ph,      &
                                max_geometries, start_geometry, last_geometry
   USE control_ph,       ONLY : with_ext_images, always_run, ldisp, trans, &
-                               rec_code_read
+                               rec_code_read, xmldyn
   USE initial_conf,     ONLY : collect_info_save
   USE disp,             ONLY : nqs, comp_iq, done_iq
   USE grid_irr_iq,      ONLY : comp_irr_iq, done_irr_iq, irr_iq
@@ -45,10 +45,10 @@ SUBROUTINE manage_ph()
 IMPLICIT NONE
 
 INTEGER  :: part, nwork, igeom, exit_status, ph_geometries, iaux
-LOGICAL  :: check_dyn_file_exists, do_ph, fninit
+LOGICAL  :: check_dyn_file_exists, do_ph, has_xml, fninit, after_disp_save
 CHARACTER(LEN=6) :: int_to_char
 
-CHARACTER (LEN=256) :: auxdyn=' '
+CHARACTER (LEN=256) :: auxdyn
 
 with_ext_images=with_asyn_images
 ph_geometries=0
@@ -56,8 +56,15 @@ always_run=.TRUE.
 CALL start_clock( 'PHONON' )
 IF (use_ph_images) ALLOCATE(collect_info_save(1))
 fninit=.FALSE.
+after_disp_save=after_disp
 DO igeom=start_geometry,last_geometry
    IF (no_ph(igeom).OR.stop_signal_activated) CYCLE
+   after_disp=after_disp_save
+   auxdyn=TRIM(fildyn)//'.g'//TRIM(int_to_char(igeom))//'.'
+   IF (auxdyn(1:18)/='dynamical_matrices') &
+          auxdyn='dynamical_matrices/'//TRIM(auxdyn)
+   IF (check_dyn_file_exists(auxdyn)) after_disp=.TRUE.
+   auxdyn=' '
    WRITE(stdout,'(/,5x,40("%"))') 
    WRITE(stdout,'(5x,"Computing geometry ", i5)') igeom
    WRITE(stdout,'(5x,40("%"),/)') 
@@ -95,7 +102,6 @@ DO igeom=start_geometry,last_geometry
       IF (trans) do_ph=.NOT. check_dyn_file_exists(auxdyn) 
       IF (lectqha.AND.set_internal_path) CALL set_bz_path()
    ENDIF
-
 !
 !  Set the BZ path for the present geometry
 !
@@ -165,10 +171,18 @@ DO igeom=start_geometry,last_geometry
       CALL deallocate_ph_tpw()
       CALL deallocate_part()
       IF (use_ph_images) CALL destroy_collect_info_type(collect_info_save(1))
+   ELSE
+      CALL restore_files_names()
    ENDIF
 ENDDO
+after_disp=after_disp_save
+IF (.NOT.fninit) THEN
+   CALL initialize_file_names()
+   fninit=.TRUE.
+ENDIF
 CALL restore_files_names()
 1000 CONTINUE
+
 RETURN
 END SUBROUTINE manage_ph
 

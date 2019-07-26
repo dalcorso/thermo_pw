@@ -37,7 +37,8 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
   USE initial_conf,   ONLY : celldm_save, ibrav_save
   USE piezoelectric_tensor, ONLY : polar_geo
   USE control_elastic_constants, ONLY : rot_mat, ngeom, use_free_energy, &
-                                   elalgen
+                                   elalgen, work_base, start_geometry_qha, &
+                                   last_geometry_qha, elastic_algorithm
   USE elastic_constants, ONLY : epsilon_voigt, sigma_geo, epsilon_geo
   USE gvecw,          ONLY : ecutwfc
   USE gvect,          ONLY : ecutrho
@@ -53,7 +54,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
   INTEGER, INTENT(OUT) :: nwork, iaux
   INTEGER, INTENT(IN) :: part
 
-  INTEGER :: igeom, ike, iden, icount, ink, isigma, iwork, ios
+  INTEGER :: igeom, igeom_qha, ike, iden, icount, ink, isigma, iwork, ios
   INTEGER :: count_energies
   REAL(DP) :: compute_omega_geo, dual, kev, kedenv
 !
@@ -69,6 +70,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
   nwork=0
   iaux=0
   IF (part == 1) THEN
+     ngeom=1
      SELECT CASE (TRIM(what))
 !
 !   In these cases we do not do any asynchronous work in the first part
@@ -304,13 +306,19 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            lq2r = use_free_energy
            ltherm = use_free_energy
            CALL initialize_mur_qha(ngeom)
+           IF (start_geometry_qha<1) start_geometry_qha=1
+           IF (last_geometry_qha>ngeom) start_geometry_qha=ngeom
            CALL set_elastic_cons_work(ngeom, nwork)
+           start_geometry=MAX((start_geometry_qha-1)*work_base+1, &
+                                                       start_geometry)
+           last_geometry=MIN(last_geometry_qha*work_base, last_geometry)
            tot_ngeo=nwork
            ALLOCATE(energy_geo(tot_ngeo))
            ALLOCATE(no_ph(tot_ngeo))
            energy_geo=0.0_DP
            no_ph=.FALSE.
-           CALL summarize_geometries(nwork)
+           IF (elastic_algorithm=='advanced'.OR.elastic_algorithm=='energy') &
+              CALL summarize_geometries(nwork)
            IF (use_free_energy) THEN
               CALL allocate_thermodynamics()
               CALL allocate_anharmonic()
@@ -329,6 +337,8 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
         CASE DEFAULT
            CALL errore('initialize_thermo_work','what not recognized',1)
      END SELECT
+     IF (start_geometry_qha<1) start_geometry_qha=1
+     IF (last_geometry_qha>ngeom) start_geometry_qha=ngeom
      IF (start_geometry < 1) start_geometry=1
      IF (last_geometry > tot_ngeo) last_geometry=tot_ngeo
 !
@@ -454,7 +464,12 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
               ENDDO
            ENDIF
         CASE ('elastic_constants_t')  
-           lpwscf(1:nwork)=.TRUE.
+           DO igeom_qha=start_geometry_qha, last_geometry_qha
+              DO iwork=1,work_base
+                 igeom= (igeom_qha-1)*work_base + iwork
+                 lpwscf(igeom)=.TRUE.
+              ENDDO
+           ENDDO
            lstress(1:nwork)=.NOT.elalgen
         CASE DEFAULT
           CALL errore('initialize_thermo_work','unknown what',1)

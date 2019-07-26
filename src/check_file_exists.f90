@@ -40,7 +40,7 @@ LOGICAL FUNCTION check_dyn_file_exists(filename)
 !
 USE mp,             ONLY : mp_bcast
 USE control_thermo, ONLY : after_disp
-USE control_ph,     ONLY : ldisp, xmldyn
+USE control_ph,     ONLY : xmldyn
 USE mp_world,       ONLY : world_comm
 USE io_global,      ONLY : meta_ionode_id, meta_ionode
 IMPLICIT NONE
@@ -68,7 +68,7 @@ IF (meta_ionode) THEN
    END IF
    DO iq=1,nqs
       IF (exst_all) THEN
-         IF (ldisp) fildyn = TRIM( filename ) // TRIM( int_to_char( iq ) )
+         fildyn = TRIM( filename ) // TRIM( int_to_char( iq ) )
          IF (xmldyn) fildyn = TRIM(fildyn) // '.xml'
          INQUIRE(FILE=TRIM(fildyn),EXIST=exst)
          exst_all=exst_all.AND.exst

@@ -10,16 +10,17 @@ SUBROUTINE manage_elastic_cons_qha()
 USE kinds,             ONLY : DP
 USE thermo_mod,        ONLY : energy_geo, tot_ngeo 
 USE control_elastic_constants, ONLY : ngeo_strain, elcpvar, ngeom, &
-                              work_base, el_con_omega_geo
+                              work_base, el_con_omega_geo,         &
+                              start_geometry_qha, last_geometry_qha
 USE initial_conf,      ONLY : ibrav_save
 USE thermo_sym,        ONLY : laue
 USE elastic_constants, ONLY : epsilon_geo, el_con, el_compliances,         &
                               compute_elastic_constants_ene,               &
-                              write_el_cons_on_file
+                              write_el_cons_on_file  
 USE thermodynamics,    ONLY : ph_free_ener
 USE ph_freq_thermodynamics, ONLY : phf_free_ener
-USE anharmonic,        ONLY : el_cons_t, el_comp_t, b0_t
-USE ph_freq_anharmonic,ONLY : el_consf_t, el_compf_t, b0f_t
+USE anharmonic,        ONLY : el_cons_t, el_comp_t, b0_t, lelastic
+USE ph_freq_anharmonic,ONLY : el_consf_t, el_compf_t, b0f_t, lelasticf
 USE control_thermo,    ONLY : ltherm_dos, ltherm_freq
 USE temperature,       ONLY : ntemp, temp
 USE data_files,        ONLY : flanhar
@@ -45,16 +46,16 @@ CALL divide(world_comm, ntemp, startt, lastt)
 ALLOCATE(free_energy_geo(work_base))
 ALLOCATE(epsilon_geo_loc(3,3,work_base))
 
-DO igeom=1,ngeom
+DO igeom=start_geometry_qha, last_geometry_qha
    base_ind=(igeom-1)*work_base
    el_cons_t=0.0_DP
    el_consf_t=0.0_DP
    DO itemp = startt, lastt
       WRITE(stdout,'(5x, 70("-"))') 
-      WRITE(stdout,*) 'Computing elastic constants at temperature', itemp, &
-                                                                temp(itemp)
+      WRITE(stdout,'(5x,"Computing elastic constants at temperature",&
+                                           &i5, f15.5)') itemp, temp(itemp)
       IF (ltherm_dos) THEN
-         WRITE(stdout,*) 'From vibrational density of states'
+         WRITE(stdout,'(5x,"From vibrational density of states")')
          free_energy_geo(:)=energy_geo(base_ind+1:base_ind+work_base) &
                           +ph_free_ener(itemp,base_ind+1:base_ind+work_base)
          epsilon_geo_loc(:,:,:)=epsilon_geo(:,:,base_ind+1:base_ind+work_base)
@@ -64,7 +65,7 @@ DO igeom=1,ngeom
          el_cons_t(:,:,itemp) = el_con(:,:)
       ENDIF
       IF (ltherm_freq) THEN
-         WRITE(stdout,*) 'Using Brillouin zone integrals'
+         WRITE(stdout, '(5x, "Using Brillouin zone integrals")')
          free_energy_geo(:)=energy_geo(base_ind+1:base_ind+work_base) &
                           +phf_free_ener(itemp,base_ind+1:base_ind+work_base)
          epsilon_geo_loc(:,:,:)=epsilon_geo(:,:,base_ind+1:base_ind+work_base)
@@ -88,6 +89,7 @@ DO igeom=1,ngeom
                                                   TRIM(int_to_char(igeom))
       CALL write_el_cons_on_file(temp, ntemp, ibrav_save, laue, el_comp_t, &
                                               b0_t, filelastic, 1)
+      lelastic=.TRUE.
    ENDIF
 
    IF (ltherm_freq) THEN
@@ -102,11 +104,15 @@ DO igeom=1,ngeom
                                            TRIM(int_to_char(igeom))//'_ph'
       CALL write_el_cons_on_file(temp, ntemp, ibrav_save, laue, el_compf_t, &
                                                     b0f_t, filelastic, 1)
+      lelasticf=.TRUE.
    ENDIF
 ENDDO
 
 DEALLOCATE(free_energy_geo)
 DEALLOCATE(epsilon_geo_loc)
+
+CALL plot_elastic_t(0,.FALSE.)
+CALL plot_elastic_t(1,.FALSE.)
 
 RETURN
 END SUBROUTINE manage_elastic_cons_qha

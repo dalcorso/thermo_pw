@@ -73,7 +73,8 @@ SUBROUTINE thermo_readin()
                                    lmurn
   USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, &
                                    frozen_ions, elastic_algorithm, &
-                                   poly_degree, epsilon_0, use_free_energy
+                                   poly_degree, epsilon_0, use_free_energy, &
+                                   start_geometry_qha, last_geometry_qha
   USE control_xrdp,         ONLY : lambda, flxrdp, flpsxrdp, lformf, smin, &
                                    smax, nspoint, flformf, flpsformf, lcm, &
                                    lxrdp, lambda_elem
@@ -264,6 +265,8 @@ SUBROUTINE thermo_readin()
 !   elastic_constants_t
 !
                             use_free_energy,                &
+                            start_geometry_qha,             &
+                            last_geometry_qha,              &
 !
 !   optical
 !
@@ -481,6 +484,8 @@ SUBROUTINE thermo_readin()
   all_geometries_together=.FALSE.
 
   use_free_energy=.FALSE.
+  start_geometry_qha=1
+  last_geometry_qha=1000000
 
   max_geometries=1000000
   start_geometry=1
@@ -544,7 +549,7 @@ SUBROUTINE thermo_readin()
 
   IF (nimage==1) save_max_seconds=max_seconds
   max_seconds_tpw=max_seconds
-  IF (after_disp) xmldyn=has_xml(fildyn)
+  xmldyn=has_xml(fildyn)
   IF (q2d) is_a_path=.FALSE.
 !
 !   here read the contour levels

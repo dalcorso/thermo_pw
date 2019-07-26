@@ -321,5 +321,10 @@ DO iwork = 1, nwork
    CALL trans_epsilon(epsilon_voigt(1,iwork), epsilon_geo(1,1,iwork), 1)
 ENDDO
 
+IF (elastic_algorithm=='standard'.OR.elastic_algorithm=='energy_std') THEN
+   ibrav_geo=0
+   celldm_geo=0.0_DP
+ENDIF
+
 RETURN
 END SUBROUTINE set_elastic_cons_work

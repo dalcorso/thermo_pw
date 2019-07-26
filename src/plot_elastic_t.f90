@@ -13,10 +13,8 @@ SUBROUTINE plot_elastic_t(iflag, with_s)
 USE kinds,            ONLY : DP
 USE thermo_mod,       ONLY : ibrav_geo
 USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
-USE gnuplot,          ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
-                             gnuplot_ylabel, &
-                             gnuplot_xlabel, &
-                             gnuplot_write_file_mul_data, &
+USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,           &
+                             gnuplot_write_header, gnuplot_xlabel, &
                              gnuplot_set_fact
 USE data_files,       ONLY : flanhar
 USE postscript_files, ONLY : flpsanhar
@@ -31,8 +29,7 @@ USE io_global,        ONLY : ionode
 IMPLICIT NONE
 INTEGER :: iflag
 LOGICAL :: with_s
-CHARACTER(LEN=256) :: gnu_filename, filename, filenameps, filelastic, &
-                      filelastic_s, filename_s
+CHARACTER(LEN=256) :: gnu_filename, filenameps, filelastic, filelastic_s
 INTEGER :: ibrav
 INTEGER :: ierr, system
 
@@ -61,71 +58,33 @@ ELSE
    CALL gnuplot_write_header(filenameps, tmin, tmax, 0.0_DP, 0.0_DP, &
                                                        1.0_DP, flext ) 
 ENDIF
-filename=TRIM(filelastic)//"_ph"
-filename_s=TRIM(filelastic_s)//"_ph"
 
 CALL gnuplot_xlabel('T (K)', .FALSE.) 
 IF (iflag==0) THEN
-   CALL gnuplot_ylabel('C_{11} (kbar)',.FALSE.) 
    CALL gnuplot_set_fact(1.0_DP, .FALSE.) 
+   CALL plot_one_elastic_constant(1, 3, 'C_{11} (kbar)', lelastic,  & 
+             lelasticf, filelastic, filelastic_s, with_s)
 ELSE
-   CALL gnuplot_ylabel('S_{11} (Mbar^{-1})',.FALSE.) 
    CALL gnuplot_set_fact(1.D3, .FALSE.) 
+   CALL plot_one_elastic_constant(1, 3, 'S_{11} (Mbar^{-1})', lelastic,  & 
+             lelasticf, filelastic, filelastic_s, with_s)
 ENDIF
 
-IF (lelastic) THEN
-   CALL gnuplot_write_file_mul_data(filelastic,1,3,'color_red',.TRUE.,&
-                                                     .NOT.with_s,.FALSE.)
-   IF (with_s) &
-      CALL gnuplot_write_file_mul_data(filelastic_s,1,3,'color_green',.FALSE.,&
-                                                     .NOT.lelasticf,.FALSE.)
-ENDIF
-
-IF (lelasticf) THEN
-   CALL gnuplot_write_file_mul_data(filename,1,3,'color_blue',.NOT.lelastic,&
-                                                     .NOT.with_s,.FALSE.)
-   IF (with_s) &
-      CALL gnuplot_write_file_mul_data(filename_s,1,3,'color_orange',.FALSE.,&
-                                                     .TRUE.,.FALSE.)
-ENDIF
 IF (iflag==0) THEN
-   CALL gnuplot_ylabel('C_{12} (kbar)',.FALSE.) 
+   CALL plot_one_elastic_constant(1, 4, 'C_{12} (kbar)', lelastic,  & 
+             lelasticf, filelastic, filelastic_s, with_s)
 ELSE
-   CALL gnuplot_ylabel('S_{12} (Mbar^{-1})',.FALSE.) 
+   CALL plot_one_elastic_constant(1, 4, 'S_{12} (Mbar^{-1})', lelastic, &
+             lelasticf, filelastic, filelastic_s, with_s)
 ENDIF
-IF (lelastic) THEN
-   CALL gnuplot_write_file_mul_data(filelastic,1,4,'color_red',.TRUE.,&
-                                                     .NOT.with_s,.FALSE.)
-   IF (with_s) &
-      CALL gnuplot_write_file_mul_data(filelastic_s,1,4,'color_green',.FALSE.,&
-                                                     .NOT.lelasticf,.FALSE.)
-ENDIF
-IF (lelasticf) THEN
-   CALL gnuplot_write_file_mul_data(filename,1,4,'color_blue',.NOT.lelastic,&
-                                                     .NOT.with_s,.FALSE.)
-   IF (with_s) &
-      CALL gnuplot_write_file_mul_data(filename_s,1,4,'color_orange',.FALSE.,&
-                                                     .TRUE.,.FALSE.)
-ENDIF
+
 IF (laue==32.OR.laue==29) THEN
    IF (iflag==0) THEN
-      CALL gnuplot_ylabel('C_{44} (kbar)',.FALSE.) 
+      CALL plot_one_elastic_constant(1, 5, 'C_{44} (kbar)', lelastic,  & 
+             lelasticf, filelastic, filelastic_s, with_s)
    ELSE
-      CALL gnuplot_ylabel('S_{44} (Mbar^{-1})',.FALSE.) 
-   ENDIF
-   IF (lelastic) THEN
-      CALL gnuplot_write_file_mul_data(filelastic,1,5,'color_red',.TRUE.,&
-                                                     .NOT.with_s,.FALSE.)
-      IF (with_s) &
-      CALL gnuplot_write_file_mul_data(filelastic_s,1,5,'color_green',.FALSE.,&
-                                                     .NOT.lelasticf,.FALSE.)
-   ENDIF
-   IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,5,'color_blue', &
-                                     .NOT.lelastic,.NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filename_s,1,5,'color_orange',&
-                                                      .FALSE.,.TRUE.,.FALSE.)
+      CALL plot_one_elastic_constant(1, 5, 'S_{44} (Mbar^{-1})', lelastic, &
+             lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
 ENDIF
 
@@ -135,23 +94,11 @@ IF (laue==2.OR.laue==18.OR.laue==19.OR.laue==20.OR.laue==22.OR.laue==23.OR.&
 !  tetragonal, hexagonal, trigonal, or orthorhombic
 !
    IF (iflag==0) THEN
-      CALL gnuplot_ylabel('C_{13} (kbar)',.FALSE.) 
+      CALL plot_one_elastic_constant(1, 5, 'C_{13} (kbar)', lelastic,  & 
+             lelasticf, filelastic, filelastic_s, with_s)
    ELSE
-      CALL gnuplot_ylabel('S_{13} (Mbar^{-1})',.FALSE.) 
-   ENDIF
-   IF (lelastic) THEN
-      CALL gnuplot_write_file_mul_data(filelastic,1,5,'color_red',.TRUE.,&
-                                                  .NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filelastic_s,1,5,'color_green',&
-                                         .FALSE.,.NOT.lelasticf,.FALSE.)
-   ENDIF
-   IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,5,'color_blue', &
-                                  .NOT.lelastic,.NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filename_s,1,5,'color_orange',&
-                                                   .FALSE.,.TRUE.,.FALSE.)
+      CALL plot_one_elastic_constant(1, 5, 'S_{13} (Mbar^{-1})', lelastic, &
+             lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
 ENDIF
 
@@ -160,42 +107,19 @@ IF (laue==18.OR.laue==22.OR.laue==19.OR.laue==23.OR.laue==25.OR.laue==27) THEN
 !  tetragonal or hexagonal
 !
    IF (iflag==0) THEN
-      CALL gnuplot_ylabel('C_{33} (kbar)',.FALSE.) 
+      CALL plot_one_elastic_constant(1, 6, 'C_{33} (kbar)', lelastic,  & 
+             lelasticf, filelastic, filelastic_s, with_s)
    ELSE
-      CALL gnuplot_ylabel('S_{33} (Mbar^{-1})',.FALSE.) 
+      CALL plot_one_elastic_constant(1, 6, 'S_{33} (Mbar^{-1})', lelastic, &
+             lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
-   IF (lelastic) THEN
-      CALL gnuplot_write_file_mul_data(filelastic,1,6,'color_red',.TRUE.,&
-                                                     .NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filelastic_s,1,6,'color_green', &
-                                 .FALSE.,.NOT.lelasticf,.FALSE.)
-   ENDIF
-   IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,6,'color_blue',&
-                               .NOT.lelastic,.NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filename_s,1,6,'color_orange', &
-                                                 .FALSE.,.TRUE.,.FALSE.)
-   ENDIF
+
    IF (iflag==0) THEN
-      CALL gnuplot_ylabel('C_{44} (kbar)',.FALSE.) 
+      CALL plot_one_elastic_constant(1, 7, 'C_{44} (kbar)', lelastic,  & 
+             lelasticf, filelastic, filelastic_s, with_s)
    ELSE
-      CALL gnuplot_ylabel('S_{44} (Mbar^{-1})',.FALSE.) 
-   ENDIF
-   IF (lelastic) THEN
-      CALL gnuplot_write_file_mul_data(filelastic,1,7,'color_red',.TRUE.,&
-                                                     .NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filelastic_s,1,7,'color_green', &
-                                         .FALSE.,.NOT.lelasticf,.FALSE.)
-   ENDIF
-   IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,7,'color_blue', &
-                                         .NOT.lelastic, .NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filename_s,1,7,'color_orange', &
-                                       .FALSE.,.TRUE.,.FALSE.)
+      CALL plot_one_elastic_constant(1, 7, 'S_{44} (Mbar^{-1})', lelastic, &
+             lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
 ENDIF
 
@@ -204,23 +128,11 @@ IF (laue==25.OR.laue==27) THEN
 !  trigonal D_3d or S_6
 !
    IF (iflag==0) THEN
-      CALL gnuplot_ylabel('C_{14} (kbar)',.FALSE.) 
+      CALL plot_one_elastic_constant(1, 8, 'C_{14} (kbar)', lelastic,  & 
+             lelasticf, filelastic, filelastic_s, with_s)
    ELSE
-      CALL gnuplot_ylabel('S_{14} (Mbar^{-1})',.FALSE.) 
-   ENDIF
-   IF (lelastic) THEN
-      CALL gnuplot_write_file_mul_data(filelastic,1,8,'color_red',.TRUE.,&
-                                                     .NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filelastic_s,1,8,'color_green', &
-                                            .FALSE.,.NOT.lelasticf,.FALSE.)
-   ENDIF
-   IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,8,'color_blue',&
-                                          .NOT.lelastic,.NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filename_s,1,8,'color_orange', &
-                                            .FALSE.,.TRUE.,.FALSE.)
+      CALL plot_one_elastic_constant(1, 8, 'S_{14} (Mbar^{-1})', lelastic, &
+             lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
 ENDIF
 
@@ -229,23 +141,11 @@ IF (laue==27) THEN
 !  trigonal S_6
 !
    IF (iflag==0) THEN
-      CALL gnuplot_ylabel('C_{25} (kbar)',.FALSE.) 
+      CALL plot_one_elastic_constant(1, 9, 'C_{25} (kbar)', lelastic,  & 
+             lelasticf, filelastic, filelastic_s, with_s)
    ELSE
-      CALL gnuplot_ylabel('S_{25} (Mbar^{-1})',.FALSE.) 
-   ENDIF
-   IF (lelastic) THEN
-      CALL gnuplot_write_file_mul_data(filelastic,1,9,'color_red',.TRUE.,&
-                                                     .NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filelastic_s,1,9,'color_green', &
-                                            .FALSE.,.NOT.lelasticf,.FALSE.)
-   ENDIF
-   IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,9,'color_blue', &
-                                      .NOT.lelastic,.NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filename_s,1,9,'color_orange', &
-                                                  .FALSE.,.TRUE.,.FALSE.)
+      CALL plot_one_elastic_constant(1, 9, 'S_{25} (Mbar^{-1})', lelastic, &
+             lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
 ENDIF
 
@@ -254,24 +154,11 @@ IF (laue==18.OR.laue==22) THEN
 !  tetragonal C_4h or D_4h
 !
    IF (iflag==0) THEN
-      CALL gnuplot_ylabel('C_{66} (kbar)',.FALSE.) 
+      CALL plot_one_elastic_constant(1, 8, 'C_{66} (kbar)', lelastic,  & 
+             lelasticf, filelastic, filelastic_s, with_s)
    ELSE
-      CALL gnuplot_ylabel('S_{66} (Mbar^{-1})',.FALSE.) 
-   ENDIF
-
-   IF (lelastic) THEN
-      CALL gnuplot_write_file_mul_data(filelastic,1,8,'color_red',.TRUE.,&
-                                                     .NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filelastic_s,1,8,'color_green',&
-                                   .FALSE.,.NOT.lelasticf,.FALSE.)
-   ENDIF
-   IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,8,'color_blue', &
-                                          .NOT.lelastic,.NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filename_s,1,8,'color_orange', &
-                                      .FALSE.,.TRUE.,.FALSE.)
+      CALL plot_one_elastic_constant(1, 8, 'S_{66} (Mbar^{-1})', lelastic, &
+             lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
 ENDIF
 
@@ -280,23 +167,11 @@ IF (laue==18) THEN
 !  tetragonal C_4h
 !
    IF (iflag==0) THEN
-      CALL gnuplot_ylabel('C_{16} (kbar)',.FALSE.) 
+      CALL plot_one_elastic_constant(1, 9, 'C_{16} (kbar)', lelastic,  & 
+             lelasticf, filelastic, filelastic_s, with_s)
    ELSE
-      CALL gnuplot_ylabel('S_{16} (Mbar^{-1})',.FALSE.) 
-   ENDIF
-   IF (lelastic) THEN
-      CALL gnuplot_write_file_mul_data(filelastic,1,9,'color_red',.TRUE.,&
-                                                     .NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filelastic_s,1,9,'color_green', &
-                                     .FALSE.,.NOT.lelasticf,.FALSE.)
-   ENDIF
-   IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,9,'color_blue', &
-                                     .NOT.lelastic,.NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filename_s,1,9,'color_orange', &
-                                                 .FALSE.,.TRUE.,.FALSE.)
+      CALL plot_one_elastic_constant(1, 9, 'S_{16} (Mbar^{-1})', lelastic, &
+             lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
 ENDIF
 
@@ -305,501 +180,234 @@ IF (laue==2.OR.laue==16.OR.laue==20) THEN
 !  triclinic C_i, monoclinic C_2h, or orthorhombic D_2h
 !
    IF (iflag==0) THEN
-      CALL gnuplot_ylabel('C_{22} (kbar)',.FALSE.) 
+      CALL plot_one_elastic_constant(1, 6, 'C_{22} (kbar)', lelastic,  & 
+             lelasticf, filelastic, filelastic_s, with_s)
    ELSE
-      CALL gnuplot_ylabel('S_{22} (Mbar^{-1})',.FALSE.) 
-   ENDIF
-   IF (lelastic) THEN
-      CALL gnuplot_write_file_mul_data(filelastic,1,6,'color_red',.TRUE.,&
-                                                     .NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filelastic_s,1,6,'color_green',&
-                                          .FALSE.,.NOT.lelasticf,.FALSE.)
-   ENDIF
-   IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,6,'color_blue', &
-                                .NOT.lelastic,.NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filename_s,1,6,'color_orange', &
-                                   .FALSE.,.TRUE.,.FALSE.)
+      CALL plot_one_elastic_constant(1, 6, 'S_{22} (Mbar^{-1})', lelastic, &
+             lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
 
    IF (iflag==0) THEN
-      CALL gnuplot_ylabel('C_{23} (kbar)',.FALSE.) 
+      CALL plot_one_elastic_constant(1, 7, 'C_{23} (kbar)', lelastic,  & 
+             lelasticf, filelastic, filelastic_s, with_s)
    ELSE
-      CALL gnuplot_ylabel('S_{23} (Mbar^{-1})',.FALSE.) 
-   ENDIF
-   IF (lelastic) THEN
-      CALL gnuplot_write_file_mul_data(filelastic,1,7,'color_red',.TRUE.,&
-                                                     .NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filelastic_s,1,7,'color_green', &
-                                   .FALSE.,.NOT.lelasticf,.FALSE.)
-   ENDIF
-   IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,7,'color_blue', &
-                                  .NOT.lelastic,.NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filename_s,1,7,'color_orange', &
-                                      .FALSE.,.TRUE.,.FALSE.)
+      CALL plot_one_elastic_constant(1, 7, 'S_{23} (Mbar^{-1})', lelastic, &
+             lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
 
    IF (iflag==0) THEN
-      CALL gnuplot_ylabel('C_{33} (kbar)',.FALSE.) 
+      CALL plot_one_elastic_constant(1, 8, 'C_{33} (kbar)', lelastic,  & 
+             lelasticf, filelastic, filelastic_s, with_s)
    ELSE
-      CALL gnuplot_ylabel('S_{33} (Mbar^{-1})',.FALSE.) 
+      CALL plot_one_elastic_constant(1, 8, 'S_{33} (Mbar^{-1})', lelastic, &
+             lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
-   IF (lelastic) THEN
-      CALL gnuplot_write_file_mul_data(filelastic,1,8,'color_red',.TRUE.,&
-                                                     .NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filelastic_s,1,8,'color_green',&
-                                              .FALSE.,.NOT.lelasticf,.FALSE.)
-   ENDIF
-   IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,8,'color_blue', &
-                                           .NOT.lelastic,.NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filename_s,1,8,'color_orange', &
-                                                      .FALSE.,.TRUE.,.FALSE.)
-   ENDIF
+
    IF (iflag==0) THEN
-      CALL gnuplot_ylabel('C_{44} (kbar)',.FALSE.) 
+      CALL plot_one_elastic_constant(1, 9, 'C_{44} (kbar)', lelastic,  & 
+             lelasticf, filelastic, filelastic_s, with_s)
    ELSE
-      CALL gnuplot_ylabel('S_{44} (Mbar^{-1})',.FALSE.) 
+      CALL plot_one_elastic_constant(1, 9, 'S_{44} (Mbar^{-1})', lelastic, &
+             lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
-   IF (lelastic) THEN
-      CALL gnuplot_write_file_mul_data(filelastic,1,9,'color_red',.TRUE.,&
-                                                     .NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filelastic_s,1,9,'color_green', &
-                                           .FALSE.,.NOT.lelasticf,.FALSE.)
-   ENDIF
-   IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,9,'color_blue', &
-                                   .NOT.lelastic,.NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filename_s,1,9,'color_orange', &
-                               .FALSE.,.TRUE.,.FALSE.)
-   ENDIF
+
    IF (iflag==0) THEN
-      CALL gnuplot_ylabel('C_{55} (kbar)',.FALSE.) 
+      CALL plot_one_elastic_constant(1, 10, 'C_{55} (kbar)', lelastic,  & 
+             lelasticf, filelastic, filelastic_s, with_s)
    ELSE
-      CALL gnuplot_ylabel('S_{55} (Mbar^{-1})',.FALSE.) 
+      CALL plot_one_elastic_constant(1, 10, 'S_{55} (Mbar^{-1})', lelastic, &
+             lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
-   IF (lelastic) THEN
-      CALL gnuplot_write_file_mul_data(filelastic,1,10,'color_red',.TRUE.,&
-                                                     .NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filelastic_s,1,10,'color_green',&
-                               .FALSE.,.NOT.lelasticf,.FALSE.)
-   ENDIF
-   IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,10,'color_blue', &
-                                 .NOT.lelastic,.NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filename_s,1,10,'color_orange', &
-                                      .FALSE.,.TRUE.,.FALSE.)
-   ENDIF
+
    IF (iflag==0) THEN
-      CALL gnuplot_ylabel('C_{66} (kbar)',.FALSE.) 
+      CALL plot_one_elastic_constant(1, 11, 'C_{66} (kbar)', lelastic,  & 
+             lelasticf, filelastic, filelastic_s, with_s)
    ELSE
-      CALL gnuplot_ylabel('S_{66} (Mbar^{-1})',.FALSE.) 
-   ENDIF
-   IF (lelastic) THEN
-      CALL gnuplot_write_file_mul_data(filelastic,1,11,'color_red',.TRUE.,&
-                                                     .NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filelastic_s,1,11,'color_green',&
-                                           .FALSE.,.NOT.lelasticf,.FALSE.)
-   ENDIF
-   IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,11,'color_blue', &
-                                         .NOT.lelastic,.NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filename_s,1,11,'color_orange', &
-                                              .FALSE.,.TRUE.,.FALSE.)
+      CALL plot_one_elastic_constant(1, 11, 'S_{66} (Mbar^{-1})', lelastic, &
+             lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
 END IF
 
 IF (laue==16) THEN
    IF (ibrav>0) THEN
       IF (iflag==0) THEN
-         CALL gnuplot_ylabel('C_{15} (kbar)',.FALSE.) 
+         CALL plot_one_elastic_constant(1, 12, 'C_{15} (kbar)', lelastic,  & 
+             lelasticf, filelastic, filelastic_s, with_s)
       ELSE
-         CALL gnuplot_ylabel('S_{15} (Mbar^{-1})',.FALSE.) 
+         CALL plot_one_elastic_constant(1, 12, 'S_{15} (Mbar^{-1})', &
+         lelastic, lelasticf, filelastic, filelastic_s, with_s)
       ENDIF
    ELSE
       IF (iflag==0) THEN
-         CALL gnuplot_ylabel('C_{16} (kbar)',.FALSE.) 
+         CALL plot_one_elastic_constant(1, 12, 'C_{16} (kbar)', lelastic,  & 
+             lelasticf, filelastic, filelastic_s, with_s)
       ELSE
-         CALL gnuplot_ylabel('S_{16} (Mbar^{-1})',.FALSE.) 
+         CALL plot_one_elastic_constant(1, 12, 'S_{16} (Mbar^{-1})', &
+         lelastic, lelasticf, filelastic, filelastic_s, with_s)
       ENDIF
    ENDIF
 
-   IF (lelastic) THEN
-      CALL gnuplot_write_file_mul_data(filelastic,1,12,'color_red',.TRUE.,&
-                                                  .NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filelastic_s,1,12,'color_green', &
-                                              .FALSE.,.NOT.lelasticf,.FALSE.)
-   ENDIF
-   IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,12,'color_blue', &
-                                         .NOT.lelastic,.NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filename_s,1,12,'color_orange', &
-                                              .FALSE.,.TRUE.,.FALSE.)
-   ENDIF
    IF (ibrav>0) THEN
       IF (iflag==0) THEN
-         CALL gnuplot_ylabel('C_{25} (kbar)',.FALSE.) 
+         CALL plot_one_elastic_constant(1, 13, 'C_{25} (kbar)', lelastic,  & 
+             lelasticf, filelastic, filelastic_s, with_s)
       ELSE
-         CALL gnuplot_ylabel('S_{25} (Mbar^{-1})',.FALSE.) 
+         CALL plot_one_elastic_constant(1, 13, 'S_{25} (Mbar^{-1})', &
+         lelastic, lelasticf, filelastic, filelastic_s, with_s)
       ENDIF
    ELSE
       IF (iflag==0) THEN
-         CALL gnuplot_ylabel('C_{26} (kbar)',.FALSE.) 
+         CALL plot_one_elastic_constant(1, 13, 'C_{26} (kbar)', lelastic,  & 
+             lelasticf, filelastic, filelastic_s, with_s)
       ELSE
-         CALL gnuplot_ylabel('S_{26} (Mbar^{-1})',.FALSE.) 
+         CALL plot_one_elastic_constant(1, 13, 'S_{26} (Mbar^{-1})', &
+         lelastic, lelasticf, filelastic, filelastic_s, with_s)
       ENDIF
-   ENDIF
-
-   IF (lelastic) THEN
-      CALL gnuplot_write_file_mul_data(filelastic,1,13,'color_red',.TRUE.,&
-                                                  .NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filelastic_s,1,13,'color_green', &
-                                          .FALSE.,.NOT.lelasticf,.FALSE.)
-   ENDIF
-   IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,13,'color_blue', &
-                                          .NOT.lelastic,.NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filename_s,1,13,'color_orange', &
-                                              .FALSE.,.TRUE.,.FALSE.)
    ENDIF
   
    IF (ibrav>0) THEN
       IF (iflag==0) THEN
-         CALL gnuplot_ylabel('C_{35} (kbar)',.FALSE.) 
+         CALL plot_one_elastic_constant(1, 14, 'C_{35} (kbar)', lelastic,  & 
+             lelasticf, filelastic, filelastic_s, with_s)
       ELSE
-         CALL gnuplot_ylabel('S_{35} (Mbar^{-1})',.FALSE.) 
+         CALL plot_one_elastic_constant(1, 14, 'S_{35} (Mbar^{-1})', &
+         lelastic, lelasticf, filelastic, filelastic_s, with_s)
       ENDIF
    ELSE
       IF (iflag==0) THEN
-         CALL gnuplot_ylabel('C_{36} (kbar)',.FALSE.) 
+         CALL plot_one_elastic_constant(1, 14, 'C_{36} (kbar)', lelastic,  & 
+             lelasticf, filelastic, filelastic_s, with_s)
       ELSE
-         CALL gnuplot_ylabel('S_{36} (Mbar^{-1})',.FALSE.) 
+         CALL plot_one_elastic_constant(1, 14, 'S_{36} (Mbar^{-1})', &
+         lelastic, lelasticf, filelastic, filelastic_s, with_s)
       ENDIF
    ENDIF
-
-   IF (lelastic) THEN
-      CALL gnuplot_write_file_mul_data(filelastic,1,14,'color_red',.TRUE.,&
-                                                  .NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filelastic_s,1,14,'color_green', &
-                                       .FALSE.,.NOT.lelasticf,.FALSE.)
-   ENDIF
-   IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,14,'color_blue', &
-                                         .NOT.lelastic,.NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filename_s,1,14,'color_orange', &
-                                              .FALSE.,.TRUE.,.FALSE.)
-   ENDIF 
 
    IF (ibrav>0) THEN
       IF (iflag==0) THEN
-         CALL gnuplot_ylabel('C_{46} (kbar)',.FALSE.) 
+         CALL plot_one_elastic_constant(1, 15, 'C_{46} (kbar)', lelastic,  & 
+             lelasticf, filelastic, filelastic_s, with_s)
       ELSE
-         CALL gnuplot_ylabel('S_{46} (Mbar^{-1})',.FALSE.) 
+         CALL plot_one_elastic_constant(1, 15, 'S_{46} (Mbar^{-1})', &
+         lelastic, lelasticf, filelastic, filelastic_s, with_s)
       ENDIF
    ELSE
       IF (iflag==0) THEN
-         CALL gnuplot_ylabel('C_{45} (kbar)',.FALSE.) 
+         CALL plot_one_elastic_constant(1, 15, 'C_{45} (kbar)', lelastic,  & 
+             lelasticf, filelastic, filelastic_s, with_s)
       ELSE
-         CALL gnuplot_ylabel('S_{45} (Mbar^{-1})',.FALSE.) 
+         CALL plot_one_elastic_constant(1, 15, 'S_{45} (Mbar^{-1})', &
+         lelastic, lelasticf, filelastic, filelastic_s, with_s)
       ENDIF
-   ENDIF
-
-   IF (lelastic) THEN
-      CALL gnuplot_write_file_mul_data(filelastic,1,15,'color_red',.TRUE.,&
-                                                  .NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filelastic_s,1,15,'color_green',&
-                                         .FALSE.,.NOT.lelasticf,.FALSE.)
-   ENDIF
-   IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,15,'color_blue', &
-                                        .NOT.lelastic,.NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filename_s,1,15,'color_orange', &
-                                              .FALSE.,.TRUE.,.FALSE.)
    ENDIF
 ENDIF
 
 IF (laue==2) THEN
    IF (iflag==0) THEN
-      CALL gnuplot_ylabel('C_{14} (kbar)',.FALSE.) 
+      CALL plot_one_elastic_constant(1, 12, 'C_{14} (kbar)', lelastic,  & 
+           lelasticf, filelastic, filelastic_s, with_s)
    ELSE
-      CALL gnuplot_ylabel('S_{14} (Mbar^{-1})',.FALSE.) 
-   ENDIF
-   IF (lelastic) THEN
-      CALL gnuplot_write_file_mul_data(filelastic,1,12,'color_red',.TRUE.,&
-                                                     .NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filelastic_s,1,12,'color_green', &
-                                    .FALSE.,.NOT.lelasticf,.FALSE.)
-   ENDIF
-   IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,12,'color_blue', &
-                                         .NOT.lelastic,.NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filename_s,1,12,'color_orange', &
-                                              .FALSE.,.TRUE.,.FALSE.)
+      CALL plot_one_elastic_constant(1, 12, 'S_{14} (Mbar^{-1})', lelastic, &
+           lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
 
    IF (iflag==0) THEN
-      CALL gnuplot_ylabel('C_{15} (kbar)',.FALSE.) 
+      CALL plot_one_elastic_constant(1, 13, 'C_{15} (kbar)', lelastic,  & 
+           lelasticf, filelastic, filelastic_s, with_s)
    ELSE
-      CALL gnuplot_ylabel('S_{15} (Mbar^{-1})',.FALSE.) 
-   ENDIF
-   IF (lelastic) THEN
-      CALL gnuplot_write_file_mul_data(filelastic,1,13,'color_red',.TRUE.,&
-                                                     .NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filelastic_s,1,13,'color_green',&
-                                      .FALSE.,.NOT.lelasticf,.FALSE.)
-   ENDIF
-   IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,13,'color_blue', &
-                                        .NOT.lelastic,.NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filename_s,1,13,'color_orange', &
-                                              .FALSE.,.TRUE.,.FALSE.)
+      CALL plot_one_elastic_constant(1, 13, 'S_{15} (Mbar^{-1})', lelastic, &
+           lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
 
    IF (iflag==0) THEN
-      CALL gnuplot_ylabel('C_{16} (kbar)',.FALSE.) 
+      CALL plot_one_elastic_constant(1, 14, 'C_{16} (kbar)', lelastic,  & 
+           lelasticf, filelastic, filelastic_s, with_s)
    ELSE
-      CALL gnuplot_ylabel('S_{16} (Mbar^{-1})',.FALSE.) 
-   ENDIF
-   IF (lelastic) THEN
-      CALL gnuplot_write_file_mul_data(filelastic,1,14,'color_red',.TRUE.,&
-                                                  .NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filelastic_s,1,14,'color_green',&
-                                          .FALSE.,.NOT.lelasticf,.FALSE.)
-   ENDIF
-   IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,14,'color_blue', &
-                                          .NOT.lelastic,.NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filename_s,1,14,'color_orange', &
-                                              .FALSE.,.TRUE.,.FALSE.)
+      CALL plot_one_elastic_constant(1, 14, 'S_{16} (Mbar^{-1})', lelastic, &
+           lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
 
    IF (iflag==0) THEN
-      CALL gnuplot_ylabel('C_{24} (kbar)',.FALSE.) 
+      CALL plot_one_elastic_constant(1, 15, 'C_{24} (kbar)', lelastic,  & 
+           lelasticf, filelastic, filelastic_s, with_s)
    ELSE
-      CALL gnuplot_ylabel('S_{24} (Mbar^{-1})',.FALSE.) 
-   ENDIF
-   IF (lelastic) THEN
-      CALL gnuplot_write_file_mul_data(filelastic,1,15,'color_red',.TRUE.,&
-                                                     .NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filelastic_s,1,15,'color_green', &
-                                       .FALSE.,.NOT.lelasticf,.FALSE.)
-   ENDIF
-   IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,15,'color_blue', &
-                                          .NOT.lelastic,.NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filename_s,1,15,'color_orange', &
-                                              .FALSE.,.TRUE.,.FALSE.)
-   ENDIF
-   IF (iflag==0) THEN
-      CALL gnuplot_ylabel('C_{25} (kbar)',.FALSE.) 
-   ELSE
-      CALL gnuplot_ylabel('S_{25} (Mbar^{-1})',.FALSE.) 
-   ENDIF
-   IF (lelastic) THEN
-      CALL gnuplot_write_file_mul_data(filelastic,1,16,'color_red',.TRUE.,&
-                                                     .NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filelastic_s,1,16,'color_green',&
-                                  .FALSE.,.NOT.lelasticf,.FALSE.)
-   ENDIF
-   IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,16,'color_blue', &
-                                         .NOT.lelastic,.NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filename_s,1,16,'color_orange', &
-                                              .FALSE.,.TRUE.,.FALSE.)
-
-   ENDIF
-   IF (iflag==0) THEN
-      CALL gnuplot_ylabel('C_{26} (kbar)',.FALSE.) 
-   ELSE
-      CALL gnuplot_ylabel('S_{26} (Mbar^{-1})',.FALSE.) 
-   ENDIF
-   IF (lelastic) THEN
-      CALL gnuplot_write_file_mul_data(filelastic,1,17,'color_red',.TRUE.,&
-                                                  .NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filelastic_s,1,17,'color_green',&
-                               .FALSE.,.NOT.lelasticf,.FALSE.)
-   ENDIF
-   IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,17,'color_blue', &
-                                          .NOT.lelastic,.NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filename_s,1,17,'color_orange', &
-                                              .FALSE.,.TRUE.,.FALSE.)
-   ENDIF
-   IF (iflag==0) THEN
-      CALL gnuplot_ylabel('C_{34} (kbar)',.FALSE.) 
-   ELSE
-      CALL gnuplot_ylabel('S_{34} (Mbar^{-1})',.FALSE.) 
-   ENDIF
-   IF (lelastic) THEN
-      CALL gnuplot_write_file_mul_data(filelastic,1,18,'color_red',.TRUE.,&
-                                                     .NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filelastic_s,1,18,'color_green',&
-                                             .FALSE.,.NOT.lelasticf,.FALSE.)
-   ENDIF
-   IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,18,'color_blue', &
-                                          .NOT.lelastic,.NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filename_s,1,18,'color_blue', &
-                                              .FALSE.,.TRUE.,.FALSE.)
+      CALL plot_one_elastic_constant(1, 15, 'S_{24} (Mbar^{-1})', lelastic, &
+           lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
 
    IF (iflag==0) THEN
-      CALL gnuplot_ylabel('C_{35} (kbar)',.FALSE.) 
+      CALL plot_one_elastic_constant(1, 16, 'C_{25} (kbar)', lelastic,  & 
+           lelasticf, filelastic, filelastic_s, with_s)
    ELSE
-      CALL gnuplot_ylabel('S_{35} (Mbar^{-1})',.FALSE.) 
-   ENDIF
-   IF (lelastic) THEN
-      CALL gnuplot_write_file_mul_data(filelastic,1,19,'color_red',.TRUE.,&
-                                                     .NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filelastic_s,1,19,'color_green',&
-                                      .FALSE.,.NOT.lelasticf,.FALSE.)
-   ENDIF
-   IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,19,'color_blue', &
-                                          .NOT.lelastic,.NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filename_s,1,19,'color_orange', &
-                                              .FALSE.,.TRUE.,.FALSE.)
+      CALL plot_one_elastic_constant(1, 16, 'S_{25} (Mbar^{-1})', lelastic, &
+           lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
 
    IF (iflag==0) THEN
-      CALL gnuplot_ylabel('C_{36} (kbar)',.FALSE.) 
+      CALL plot_one_elastic_constant(1, 17, 'C_{26} (kbar)', lelastic,  & 
+           lelasticf, filelastic, filelastic_s, with_s)
    ELSE
-      CALL gnuplot_ylabel('S_{36} (Mbar^{-1})',.FALSE.) 
-   ENDIF
-   IF (lelastic) THEN
-      CALL gnuplot_write_file_mul_data(filelastic,1,20,'color_red',.TRUE.,&
-                                                  .NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filelastic_s,1,20,'color_green',&
-                           .FALSE.,.NOT.lelasticf,.FALSE.)
-   ENDIF
-   IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,20,'color_blue', &
-                                         .NOT.lelastic,.NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filename_s,1,20,'color_orange', &
-                                              .FALSE.,.TRUE.,.FALSE.)
+      CALL plot_one_elastic_constant(1, 17, 'S_{26} (Mbar^{-1})', lelastic, &
+           lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
    IF (iflag==0) THEN
-      CALL gnuplot_ylabel('C_{45} (kbar)',.FALSE.) 
+      CALL plot_one_elastic_constant(1, 18, 'C_{34} (kbar)', lelastic,  & 
+           lelasticf, filelastic, filelastic_s, with_s)
    ELSE
-      CALL gnuplot_ylabel('S_{45} (Mbar^{-1})',.FALSE.) 
-   ENDIF
-   IF (lelastic) THEN
-      CALL gnuplot_write_file_mul_data(filelastic,1,21,'color_red',.TRUE.,&
-                                                     .NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filelastic_s,1,21,'color_green',&
-                                        .FALSE.,.NOT.lelasticf,.FALSE.)
-   ENDIF
-   IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,21,'color_blue', &
-                                           .NOT.lelastic,.NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filename_s,1,21,'color_orange', &
-                                              .FALSE.,.TRUE.,.FALSE.)
+      CALL plot_one_elastic_constant(1, 18, 'S_{34} (Mbar^{-1})', lelastic, &
+           lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
 
    IF (iflag==0) THEN
-      CALL gnuplot_ylabel('C_{46} (kbar)',.FALSE.) 
+      CALL plot_one_elastic_constant(1, 19, 'C_{35} (kbar)', lelastic,  & 
+           lelasticf, filelastic, filelastic_s, with_s)
    ELSE
-      CALL gnuplot_ylabel('S_{46} (Mbar^{-1})',.FALSE.) 
+      CALL plot_one_elastic_constant(1, 19, 'S_{35} (Mbar^{-1})', lelastic, &
+           lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
-   IF (lelastic) THEN
-      CALL gnuplot_write_file_mul_data(filelastic,1,22,'color_red',.TRUE.,&
-                                                  .NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filelastic_s,1,22,'color_green',&
-                                          .FALSE.,.NOT.lelasticf,.FALSE.)
-   ENDIF
-   IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,22,'color_blue', &
-                                          .NOT.lelastic,.NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filename_s,1,22,'color_orange', &
-                                              .FALSE.,.TRUE.,.FALSE.)
+
+   IF (iflag==0) THEN
+      CALL plot_one_elastic_constant(1, 20, 'C_{36} (kbar)', lelastic,  & 
+           lelasticf, filelastic, filelastic_s, with_s)
+   ELSE
+      CALL plot_one_elastic_constant(1, 20, 'S_{36} (Mbar^{-1})', lelastic, &
+           lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
    IF (iflag==0) THEN
-      CALL gnuplot_ylabel('C_{56} (kbar)',.FALSE.) 
+      CALL plot_one_elastic_constant(1, 21, 'C_{45} (kbar)', lelastic,  & 
+           lelasticf, filelastic, filelastic_s, with_s)
    ELSE
-      CALL gnuplot_ylabel('S_{56} (Mbar^{-1})',.FALSE.) 
+      CALL plot_one_elastic_constant(1, 21, 'S_{45} (Mbar^{-1})', lelastic, &
+           lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
-   IF (lelastic) THEN
-      CALL gnuplot_write_file_mul_data(filelastic,1,23,'color_red',.TRUE.,&
-                                                     .NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filelastic_s,1,23,'color_green',&
-                                             .FALSE.,.NOT.lelasticf,.FALSE.)
+
+   IF (iflag==0) THEN
+      CALL plot_one_elastic_constant(1, 22, 'C_{46} (kbar)', lelastic,  & 
+           lelasticf, filelastic, filelastic_s, with_s)
+   ELSE
+      CALL plot_one_elastic_constant(1, 22, 'S_{46} (Mbar^{-1})', lelastic, &
+           lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
-   IF (lelasticf) THEN
-      CALL gnuplot_write_file_mul_data(filename,1,23,'color_blue', &
-                                         .NOT.lelastic,.NOT.with_s,.FALSE.)
-      IF (with_s) &
-         CALL gnuplot_write_file_mul_data(filename_s,1,23,'color_orange', &
-                                              .FALSE.,.TRUE.,.FALSE.)
+
+   IF (iflag==0) THEN
+      CALL plot_one_elastic_constant(1, 23, 'C_{56} (kbar)', lelastic,  & 
+           lelasticf, filelastic, filelastic_s, with_s)
+   ELSE
+      CALL plot_one_elastic_constant(1, 23, 'S_{56} (Mbar^{-1})', lelastic, &
+           lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
 ENDIF
 
 IF (iflag==0) THEN
-   CALL gnuplot_ylabel('Bulk modulus B (kbar)',.FALSE.)
    CALL gnuplot_set_fact(1.0_DP, .FALSE.)
+   CALL plot_one_elastic_constant(1, 2, 'Bulk modulus B (kbar)', lelastic,  & 
+        lelasticf, filelastic, filelastic_s, with_s)
 ELSE
-   CALL gnuplot_ylabel('Compressibility K (Mbar^{-1})',.FALSE.)
+   CALL plot_one_elastic_constant(1, 2, 'Compressibility K (Mbar^{-1})', &
+        lelastic, lelasticf, filelastic, filelastic_s, with_s)
    CALL gnuplot_set_fact(1.D3, .FALSE.)
 ENDIF
 
-
-IF (lelastic) THEN
-   CALL gnuplot_write_file_mul_data(filelastic,1,2,'color_red',.TRUE.,&
-                                                     .NOT.with_s,.FALSE.)
-   IF (with_s) &
-      CALL gnuplot_write_file_mul_data(filelastic_s,1,2,'color_green',.FALSE.,&
-                                                     .NOT.lelasticf,.FALSE.)
-ENDIF
-IF (lelasticf) THEN
-   CALL gnuplot_write_file_mul_data(filename,1,2,'color_blue',.NOT.lelastic,&
-                                                  .NOT.with_s,.FALSE.)
-   IF (with_s) &
-      CALL gnuplot_write_file_mul_data(filename_s,1,2,'color_orange',.FALSE.,&
-                                                     .TRUE.,.FALSE.)
-ENDIF
 CALL gnuplot_end()
 
 IF (lgnuplot.AND.ionode) &
@@ -811,3 +419,76 @@ IF (lgnuplot.AND.ionode) &
 
 RETURN
 END SUBROUTINE plot_elastic_t
+
+SUBROUTINE plot_one_elastic_constant(i, j, label, lelastic, lelasticf, &
+                                           filelastic, filelastic_s, with_s)
+USE gnuplot, ONLY : gnuplot_ylabel, &
+                    gnuplot_write_file_mul_data
+
+USE control_elastic_constants, ONLY : ngeom
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: i, j
+LOGICAL, INTENT(IN) :: lelastic, lelasticf, with_s
+CHARACTER(LEN=*) :: label
+CHARACTER(LEN=256), INTENT(IN) :: filelastic, filelastic_s
+
+INTEGER :: igeom
+CHARACTER(LEN=256) :: filename, filename_s
+CHARACTER(LEN=6) :: int_to_char
+
+CHARACTER(LEN=12) :: color(8)
+INTEGER :: ic
+
+color(1)='color_red'
+color(2)='color_green'
+color(3)='color_blue'
+color(4)='color_yellow'
+color(5)='color_pink'
+color(6)='color_cyan'
+color(7)='color_orange'
+color(8)='color_black'
+
+IF (with_s.AND.ngeom>1) CALL errore('plot_one_elastic_constant',&
+                      &'with_s and ngeom>1 are incompatible',1)
+filename=TRIM(filelastic)//"_ph"
+filename_s=TRIM(filelastic_s)//"_ph"
+
+CALL gnuplot_ylabel(TRIM(label),.FALSE.) 
+IF (lelastic) THEN
+   IF (ngeom==1) THEN
+      CALL gnuplot_write_file_mul_data(filename,i,j,'color_red', .TRUE.,&
+                                                      .NOT.with_s,.FALSE.)
+   ELSE
+      DO igeom=1, ngeom
+         filename=TRIM(filelastic)//".g"//TRIM(int_to_char(igeom))
+         ic=MOD(igeom-1,8)+1
+         CALL gnuplot_write_file_mul_data(filelastic,i,j,color(ic),&
+                   (igeom==1), (igeom==ngeom).AND..NOT.lelasticf,.FALSE.)
+      END DO
+   ENDIF
+   IF (with_s) &
+      CALL gnuplot_write_file_mul_data(filelastic_s,i,j,'color_green',.FALSE.,&
+                                                     .NOT.lelasticf,.FALSE.)
+ENDIF
+IF (lelasticf) THEN
+   IF (ngeom==1) THEN
+      CALL gnuplot_write_file_mul_data(filename,i,j,'color_blue', &
+                                        .NOT.lelastic,.NOT.with_s,.FALSE.)
+   ELSE
+!
+!   In this case with_s is false
+!
+      DO igeom=1, ngeom
+         filename=TRIM(filelastic)//".g"//TRIM(int_to_char(igeom))//"_ph"
+         ic=MOD(igeom-1,8)+1
+         CALL gnuplot_write_file_mul_data(filename,i,j,color(ic), &
+             .NOT.lelastic.AND.(igeom==1), (igeom==ngeom),.FALSE.)
+      ENDDO
+   ENDIF
+   IF (with_s) &
+      CALL gnuplot_write_file_mul_data(filename_s,i,j,'color_orange',.FALSE.,&
+                                                     .TRUE.,.FALSE.)
+ENDIF
+
+RETURN
+END SUBROUTINE plot_one_elastic_constant

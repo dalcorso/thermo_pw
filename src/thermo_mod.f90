@@ -516,6 +516,10 @@ MODULE control_elastic_constants
 
   LOGICAL :: use_free_energy    ! if true makes the qha approximation 
                                 ! otherwise the quasi-static one.
+  INTEGER :: start_geometry_qha ! initial geometry calculated in this run
+
+  INTEGER :: last_geometry_qha  ! last_geometry calculated in this run 
+
 END MODULE control_elastic_constants
   !
 MODULE control_conv
@@ -741,6 +745,7 @@ MODULE initial_conf
   LOGICAL :: epsil_save   ! save input epsil, changed in a dispersion run
   LOGICAL :: zeu_save     ! save input_zeu, changed in dispersion run
   LOGICAL :: zue_save     ! save input_zue, changed in dispersion run
+  INTEGER :: start_q_save, last_q_save ! save start_q and last_q
 
 END MODULE initial_conf
 

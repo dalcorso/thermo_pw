@@ -62,8 +62,10 @@ SUBROUTINE close_ph_geometry(close_ph)
 USE ph_restart,       ONLY : destroy_status_run
 USE save_ph,          ONLY : clean_input_variables
 USE control_ph,       ONLY : done_epsil, done_zeu, done_zue, done_start_zstar, &
-                             rec_code, rec_code_read, epsil, zeu, zue
-USE initial_conf,     ONLY : epsil_save, zeu_save, zue_save
+                             rec_code, rec_code_read, epsil, zeu, zue, &
+                             start_q, last_q
+USE initial_conf,     ONLY : epsil_save, zeu_save, zue_save, start_q_save, &
+                             last_q_save
 USE ramanm,           ONLY : done_lraman, done_elop
 
 IMPLICIT NONE
@@ -86,6 +88,8 @@ done_elop=.FALSE.
 epsil=epsil_save
 zeu=zeu_save
 zue=zue_save
+start_q=start_q_save
+last_q=last_q_save
 rec_code_read=-1000
 rec_code=-1000
 
