@@ -307,7 +307,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            ltherm = use_free_energy
            CALL initialize_mur_qha(ngeom)
            IF (start_geometry_qha<1) start_geometry_qha=1
-           IF (last_geometry_qha>ngeom) start_geometry_qha=ngeom
+           IF (last_geometry_qha>ngeom) last_geometry_qha=ngeom
            CALL set_elastic_cons_work(ngeom, nwork)
            start_geometry=MAX((start_geometry_qha-1)*work_base+1, &
                                                        start_geometry)
