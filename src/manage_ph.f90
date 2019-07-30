@@ -16,7 +16,8 @@ SUBROUTINE manage_ph()
 
   USE ions_base,        ONLY : nat
   USE thermo_mod,       ONLY : what, ibrav_geo, celldm_geo, no_ph,      &
-                               max_geometries, start_geometry, last_geometry
+                               max_geometries, start_geometry, last_geometry, &
+                               phgeo_on_file
   USE control_ph,       ONLY : with_ext_images, always_run, ldisp, trans, &
                                rec_code_read, xmldyn
   USE initial_conf,     ONLY : collect_info_save
@@ -55,15 +56,13 @@ ph_geometries=0
 always_run=.TRUE.
 CALL start_clock( 'PHONON' )
 IF (use_ph_images) ALLOCATE(collect_info_save(1))
+CALL check_phgeo_on_file()
 fninit=.FALSE.
 after_disp_save=after_disp
 DO igeom=start_geometry,last_geometry
    IF (no_ph(igeom).OR.stop_signal_activated) CYCLE
    after_disp=after_disp_save
-   auxdyn=TRIM(fildyn)//'.g'//TRIM(int_to_char(igeom))//'.'
-   IF (auxdyn(1:18)/='dynamical_matrices') &
-          auxdyn='dynamical_matrices/'//TRIM(auxdyn)
-   IF (check_dyn_file_exists(auxdyn)) after_disp=.TRUE.
+   IF (phgeo_on_file(igeom)) after_disp=.TRUE.
    auxdyn=' '
    WRITE(stdout,'(/,5x,40("%"))') 
    WRITE(stdout,'(5x,"Computing geometry ", i5)') igeom
@@ -102,10 +101,6 @@ DO igeom=start_geometry,last_geometry
       IF (trans) do_ph=.NOT. check_dyn_file_exists(auxdyn) 
       IF (lectqha.AND.set_internal_path) CALL set_bz_path()
    ENDIF
-!
-!  Set the BZ path for the present geometry
-!
-   CALL set_paths_disp()
 
    IF ( do_ph ) THEN
       ph_geometries=ph_geometries+1

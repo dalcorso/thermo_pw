@@ -70,6 +70,10 @@ SUBROUTINE write_ph_dispersions()
      WRITE(stdout,'(2x,76("-"),/)')
      RETURN
   ENDIF
+!
+!  Set the BZ path for the present geometry
+!
+  CALL set_paths_disp()
 
   IF (disp_nqs==0) RETURN
 
@@ -262,7 +266,6 @@ SUBROUTINE write_ph_dispersions()
   DEALLOCATE (qcode_group_ext)
   DEALLOCATE (lprojq)
   DEALLOCATE (rtau)
-  disp_nqs=0
   !
   RETURN
 END SUBROUTINE write_ph_dispersions

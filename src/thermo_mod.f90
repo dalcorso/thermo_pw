@@ -32,6 +32,8 @@ MODULE thermo_mod
                                         !
   LOGICAL, ALLOCATABLE :: no_ph(:)      ! decide in which geometries
                                         ! the phonons are calculated
+  LOGICAL, ALLOCATABLE :: phgeo_on_file(:) ! set to .TRUE. if the phonons
+                                        ! of this geometry are on file
 
   INTEGER :: tot_ngeo                   ! total number of geometries for
                                         ! which we calculate the phonon

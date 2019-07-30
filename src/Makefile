@@ -25,6 +25,7 @@ check_all_geometries_done.o \
 check_el_cons.o \
 check_el_cons_qha.o \
 check_geo_initial_status.o \
+check_phgeo_on_file.o \
 clean_dfft.o \
 clean_path.o \
 collect_everything.o \

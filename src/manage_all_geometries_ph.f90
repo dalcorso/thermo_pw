@@ -18,7 +18,7 @@ SUBROUTINE manage_all_geometries_ph()
   USE input_parameters, ONLY : outdir
 
   USE thermo_mod,       ONLY : what, ibrav_geo, celldm_geo, no_ph,      &
-                               max_geometries, start_geometry, last_geometry
+                               start_geometry, last_geometry, phgeo_on_file
   USE control_ph,       ONLY : always_run, ldisp, trans, low_directory_check
   USE freq_ph,          ONLY : fpol
   USE control_lr,       ONLY : lgamma
@@ -35,15 +35,15 @@ SUBROUTINE manage_all_geometries_ph()
 
 IMPLICIT NONE
 
-INTEGER  :: part, nwork, igeom, ph_geometries, iaux
+INTEGER  :: part, nwork, igeom, iaux
 CHARACTER(LEN=6) :: int_to_char
 LOGICAL :: std, ldcs, after_disp_save, check_dyn_file_exists, something_todo
 
 CHARACTER (LEN=256) :: auxdyn=' '
 
-ph_geometries=0
 always_run=.TRUE.
 CALL start_clock( 'PHONON' )
+CALL check_phgeo_on_file()
 IF (after_disp) THEN
    ldisp=.TRUE.
 ELSE
@@ -79,11 +79,8 @@ CALL mp_barrier(world_comm)
 IF (.NOT.(after_disp.AND.(what=='mur_lc_t'.OR. &
                                what=='elastic_constants_t'))) THEN
    DO igeom=start_geometry, last_geometry
-      IF (no_ph(igeom).OR..NOT.something_todo) CYCLE
-      auxdyn=TRIM(fildyn)//'.g'//TRIM(int_to_char(igeom))//'.'
-      IF (auxdyn(1:18)/='dynamical_matrices') &
-          auxdyn='dynamical_matrices/'//TRIM(auxdyn)
-      IF (check_dyn_file_exists(auxdyn)) CYCLE
+      IF (no_ph(igeom)) CYCLE
+      IF (phgeo_on_file(igeom)) CYCLE
       CALL check_stc_g(igeom, nimage, my_image_id, std)
       IF (.NOT.std) CYCLE
       WRITE(stdout,'(/,5x,40("%"))') 
@@ -125,10 +122,7 @@ after_disp_save=after_disp
 DO igeom=start_geometry, last_geometry
    IF (no_ph(igeom)) CYCLE
    after_disp=after_disp_save
-   auxdyn=TRIM(fildyn)//'.g'//TRIM(int_to_char(igeom))//'.'
-   IF (auxdyn(1:18)/='dynamical_matrices') &
-          auxdyn='dynamical_matrices/'//TRIM(auxdyn)
-   IF (check_dyn_file_exists(auxdyn)) after_disp=.TRUE.
+   IF (phgeo_on_file(igeom)) after_disp=.TRUE.
    WRITE(stdout,'(/,5x,40("%"))') 
    WRITE(stdout,'(5x,"Computing thermodynamic properties", i5)') igeom
    WRITE(stdout,'(5x,40("%"),/)') 
@@ -153,11 +147,7 @@ DO igeom=start_geometry, last_geometry
    CALL set_files_names(igeom)
    auxdyn=fildyn
 !
-!  Set the BZ path for the present geometry
-!
-   CALL set_paths_disp()
-!
-!  And compute the thermodynamic properties
+!  Compute the dispersions and the thermodynamic properties
 !
    IF (lq2r) CALL manage_ph_dispersions(auxdyn, igeom)
 

@@ -72,7 +72,6 @@ DO igeom_qha=start_geometry_qha, last_geometry_qha
          ibrav=ibrav_geo(igeom)
          celldm(:)=celldm_geo(:,igeom)
          IF (set_internal_path) CALL set_bz_path()
-         CALL set_paths_disp()
          CALL set_files_names(igeom)
          auxdyn=fildyn
          CALL manage_ph_dispersions(auxdyn, igeom)

@@ -35,7 +35,7 @@ SUBROUTINE check_geo_initial_status(something_todo)
 USE input_parameters, ONLY : outdir
 
 USE thermo_mod,       ONLY : no_ph, start_geometry, last_geometry, &
-                             tot_ngeo
+                             tot_ngeo, phgeo_on_file
 USE ions_base,        ONLY : nat
 USE disp,             ONLY : nqs, comp_iq, done_iq
 USE grid_irr_iq,      ONLY : comp_irr_iq, done_irr_iq, irr_iq
@@ -61,7 +61,7 @@ INTEGER  :: igeom
 INTEGER  :: nima, pos
 CHARACTER(LEN=6) :: int_to_char
 CHARACTER (LEN=256) :: auxdyn=' '
-LOGICAL :: fninit, check_dyn_file_exists
+LOGICAL :: fninit
 
 ALLOCATE(collect_info_save(tot_ngeo))
 !
@@ -74,10 +74,7 @@ DO igeom=1, tot_ngeo
 ENDDO
 DO igeom=start_geometry,last_geometry
    IF (no_ph(igeom)) CYCLE
-   auxdyn=TRIM(fildyn)//'.g'//TRIM(int_to_char(igeom))//'.'
-   IF (auxdyn(1:18)/='dynamical_matrices') &
-          auxdyn='dynamical_matrices/'//TRIM(auxdyn)
-   IF (check_dyn_file_exists(auxdyn)) CYCLE
+   IF (phgeo_on_file(igeom)) CYCLE
    something_todo=.TRUE.
    auxdyn=' '
    outdir=TRIM(outdir_thermo)//'/g'//TRIM(int_to_char(igeom))//'/'
@@ -122,10 +119,7 @@ IF (.NOT.fninit) CALL initialize_file_names()
 !
 IF (use_ph_images) THEN 
    DO igeom=start_geometry, last_geometry
-      auxdyn=TRIM(fildyn)//'.g'//TRIM(int_to_char(igeom))//'.'
-      IF (auxdyn(1:18)/='dynamical_matrices') &
-          auxdyn='dynamical_matrices/'//TRIM(auxdyn)
-      IF (check_dyn_file_exists(auxdyn)) CYCLE
+      IF (phgeo_on_file(igeom)) CYCLE
       CALL comm_collect_info(collect_info_save(igeom), inter_image_comm)
       CALL restore_files_names()
    ENDDO
