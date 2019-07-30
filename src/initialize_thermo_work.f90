@@ -38,7 +38,8 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
   USE piezoelectric_tensor, ONLY : polar_geo
   USE control_elastic_constants, ONLY : rot_mat, ngeom, use_free_energy, &
                                    elalgen, work_base, start_geometry_qha, &
-                                   last_geometry_qha, elastic_algorithm
+                                   last_geometry_qha, elastic_algorithm, &
+                                   el_con_omega_geo
   USE elastic_constants, ONLY : epsilon_voigt, sigma_geo, epsilon_geo
   USE gvecw,          ONLY : ecutwfc
   USE gvect,          ONLY : ecutrho
@@ -338,7 +339,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            CALL errore('initialize_thermo_work','what not recognized',1)
      END SELECT
      IF (start_geometry_qha<1) start_geometry_qha=1
-     IF (last_geometry_qha>ngeom) start_geometry_qha=ngeom
+     IF (last_geometry_qha>ngeom) last_geometry_qha=ngeom
      IF (start_geometry < 1) start_geometry=1
      IF (last_geometry > tot_ngeo) last_geometry=tot_ngeo
 !
@@ -382,13 +383,15 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
 
            ALLOCATE(energy_geo(nwork))
            ALLOCATE(omega_geo(nwork))
+           ALLOCATE(el_con_omega_geo(1))
            energy_geo=0.0_DP
            IF (elalgen) THEN
               DO igeom = 1, nwork
                  omega_geo(igeom)=compute_omega_geo(ibrav_geo(igeom),&
                                                     celldm_geo(1,igeom))
               ENDDO
-              omega0 = compute_omega_geo(ibrav_save, celldm0)
+              omega0= compute_omega_geo(ibrav_save, celldm0)
+              el_con_omega_geo(1)=omega0
            ENDIF
            lelastic_const=.TRUE.
            do_punch=.FALSE.
