@@ -19,13 +19,13 @@ USE cell_base,      ONLY : ibrav
 USE thermo_mod,     ONLY : celldm_geo, omega_geo, no_ph, tot_ngeo
 USE control_mur,    ONLY : lmurn
 USE temperature,    ONLY : ntemp
-USE quadratic_surfaces, ONLY : fit_multi_quadratic, evaluate_fit_quadratic, &
-                           quadratic_ncoeff
-USE quartic_surfaces, ONLY : fit_multi_quartic, evaluate_fit_quartic, & 
-                           quartic_ncoeff
-USE cubic_surfaces, ONLY : fit_multi_cubic, evaluate_fit_cubic, cubic_ncoeff
+USE linear_surfaces, ONLY : fit_multi_linear, evaluate_fit_linear
+USE quadratic_surfaces, ONLY : fit_multi_quadratic, evaluate_fit_quadratic
+USE cubic_surfaces, ONLY : fit_multi_cubic, evaluate_fit_cubic
+USE quartic_surfaces, ONLY : fit_multi_quartic, evaluate_fit_quartic
 USE control_quartic_energy, ONLY : lsolve, poly_degree_cv
 USE lattices,       ONLY : compress_celldm, crystal_parameters
+USE polynomial,     ONLY : poly1, poly2, poly3, poly4, init_poly, clean_poly
 USE mp_world,       ONLY : world_comm
 USE mp,             ONLY : mp_sum
 
@@ -34,26 +34,22 @@ REAL(DP), INTENT(IN)  :: vmin_t(ntemp), ph_cv(ntemp, tot_ngeo), &
                          celldm_t(6,ntemp)
 REAL(DP), INTENT(OUT) :: cv_t(ntemp)
 
-INTEGER :: itemp, igeo, nvar, ncoeff, ndata, startt, lastt
+INTEGER :: itemp, igeo, nvar, ndata, startt, lastt
 INTEGER :: compute_nwork_ph
-REAL(DP), ALLOCATABLE :: x(:,:), x_pos_min(:), f(:), coeff(:)
+REAL(DP), ALLOCATABLE :: x(:,:), x_pos_min(:), f(:)
+TYPE(poly1) :: p1
+TYPE(poly2) :: p2
+TYPE(poly3) :: p3
+TYPE(poly4) :: p4
 
 nvar=crystal_parameters(ibrav)
 IF (lmurn) nvar=1         ! only the volume is variable in this case
-IF (poly_degree_cv==4) THEN
-   ncoeff=quartic_ncoeff(nvar)
-ELSEIF (poly_degree_cv==3) THEN
-   ncoeff=cubic_ncoeff(nvar)
-ELSE
-   ncoeff=quadratic_ncoeff(nvar)
-ENDIF
 !
 ndata = compute_nwork_ph(no_ph,tot_ngeo)
 
 ALLOCATE(x(nvar,ndata))
 ALLOCATE(x_pos_min(nvar))
 ALLOCATE(f(ndata))
-ALLOCATE(coeff(ncoeff))
 !
 !  collect the geometrical data of the geometries for which phonon dispersions
 !  have been calculated
@@ -96,29 +92,47 @@ DO itemp=startt,lastt
 !
 !   compute the coefficients of the quartic polynomial
 !
-      CALL fit_multi_quartic(ndata, nvar, ncoeff, lsolve, x, f, coeff)
+      CALL init_poly(nvar,p4)
+      CALL fit_multi_quartic(ndata, nvar, lsolve, x, f, p4)
 !
 !  and evaluate the polynomial
 !
-      CALL evaluate_fit_quartic(nvar, ncoeff, x_pos_min, cv_t(itemp), coeff)
+
+      CALL evaluate_fit_quartic(nvar, x_pos_min, cv_t(itemp), p4)
+      CALL clean_poly(p4)
    ELSEIF( poly_degree_cv==3) THEN
 !
 !   compute the coefficients of the cubic polynomial
 !
-      CALL fit_multi_cubic(ndata, nvar, ncoeff, lsolve, x, f, coeff)
+      CALL init_poly(nvar,p3)
+      CALL fit_multi_cubic(ndata, nvar, lsolve, x, f, p3)
 !
 !  and evaluate the polynomial
 !
-      CALL evaluate_fit_cubic(nvar, ncoeff, x_pos_min, cv_t(itemp), coeff)
-   ELSE
+      CALL evaluate_fit_cubic(nvar, x_pos_min, cv_t(itemp), p3)
+      CALL clean_poly(p3)
+   ELSEIF (poly_degree_cv == 2) THEN
 !
 !   compute the coefficients of the quadratic polynomial
 !
-      CALL fit_multi_quadratic(ndata, nvar, ncoeff, x, f, coeff)
+      CALL init_poly(nvar,p2)
+      CALL fit_multi_quadratic(ndata, nvar, x, f, p2)
 !
 !  and evaluate the polynomial
 !
-      CALL evaluate_fit_quadratic(nvar, ncoeff, x_pos_min, cv_t(itemp), coeff)
+      CALL evaluate_fit_quadratic(nvar, x_pos_min, cv_t(itemp), p2)
+      CALL clean_poly(p2)
+   ELSEIF (poly_degree_cv == 1) THEN
+!
+!   compute the coefficients of the linear polynomial
+!
+      CALL init_poly(nvar,p1)
+      CALL fit_multi_linear(ndata, nvar, x, f, p1)
+!
+!  and evaluate the polynomial
+!
+      CALL evaluate_fit_linear(nvar, x_pos_min, cv_t(itemp), p1)
+      CALL clean_poly(p1)
 
    ENDIF
 ENDDO
@@ -127,7 +141,6 @@ ENDDO
 !
 CALL mp_sum(cv_t, world_comm)
 
-DEALLOCATE(coeff)
 DEALLOCATE(f)
 DEALLOCATE(x_pos_min)
 DEALLOCATE(x)

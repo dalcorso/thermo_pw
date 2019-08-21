@@ -9,8 +9,8 @@ MODULE polyfit_mod
 !
 !  This module contains routines for polynomial interpolation.
 !  The degree of the polynomial is arbitrary but there is only one 
-!  variable. For multivariable polynomial see quadratic_surfaces,
-!  cubic_surfaces and quartic_surfaces.
+!  variable. For multivariable polynomial see linear_surfaces, 
+!  quadratic_surfaces, cubic_surfaces and quartic_surfaces.
 ! 
 !  Presently the modulus contains the routines
 !

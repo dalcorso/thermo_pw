@@ -52,11 +52,11 @@ SUBROUTINE deallocate_thermo()
                              el_con_tau_crys_geo, el_con_omega_geo
   USE control_debye,    ONLY : deb_energy, deb_free_energy, deb_entropy, &
                                deb_cv, deb_b_fact, deb_bfact
-  USE control_quadratic_energy, ONLY : coeff, hessian_v, hessian_e, x_pos_min
-  USE control_quartic_energy, ONLY : coeff4, x_min_4
+  USE control_quadratic_energy, ONLY : p2, hessian_v, hessian_e, x_pos_min
+  USE control_quartic_energy, ONLY :  p4, x_min_4
   USE collect_info,  ONLY : destroy_collect_info_type
   USE control_eldos, ONLY : dos_k, dos_wk
-
+  USE polynomial,    ONLY : clean_poly
 
   IMPLICIT NONE
   INTEGER :: igeom
@@ -153,12 +153,12 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (disp_q) )          DEALLOCATE(disp_q)
   IF ( ALLOCATED (disp_wq) )         DEALLOCATE(disp_wq)
 
-  IF ( ALLOCATED (coeff) )           DEALLOCATE( coeff )
+  CALL clean_poly(p2)
   IF ( ALLOCATED (hessian_v) )       DEALLOCATE( hessian_v )
   IF ( ALLOCATED (hessian_e) )       DEALLOCATE( hessian_e )
   IF ( ALLOCATED (x_pos_min) )       DEALLOCATE( x_pos_min )
   IF ( ALLOCATED (x_min_4) )         DEALLOCATE( x_min_4 )
-  IF ( ALLOCATED (coeff4) )          DEALLOCATE( coeff4 )
+  CALL clean_poly(p4)
 
   IF ( ALLOCATED (temp) )            DEALLOCATE(temp)
 

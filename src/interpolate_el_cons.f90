@@ -5,11 +5,11 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-SUBROUTINE interpolate_el_cons(celldm_t, ncoeff, nvar, ibrav, el_cons_coeff,&
-                                 poly_degree_elc, el_cons_t, el_comp_t, b0_t)
+SUBROUTINE interpolate_el_cons(celldm_t, nvar, ibrav, ec_p1, ec_p2, &
+                    ec_p3, ec_p4, poly_degree_elc, el_cons_t, el_comp_t, b0_t)
 !
 ! This routine receives as input the coeffients of polynomials which 
-! interpolate the lattice constants on a grid of geometries,  
+! interpolate the elastic constants on a grid of geometries,  
 ! the celldm that correspond to each temperature and gives as output
 ! the elastic constants, the elastic compliances and the bulk modulus
 ! interpolated at the celldm that corresponds to each temperature.
@@ -19,18 +19,24 @@ USE temperature,        ONLY : ntemp
 USE elastic_constants,  ONLY : print_macro_elasticity, &
                               compute_elastic_compliances, el_con
 USE control_elastic_constants, ONLY : el_con_geo
+USE linear_surfaces,    ONLY : evaluate_fit_linear
 USE quadratic_surfaces, ONLY : evaluate_fit_quadratic
 USE cubic_surfaces,     ONLY : evaluate_fit_cubic
 USE quartic_surfaces,   ONLY : evaluate_fit_quartic
 USE lattices,           ONLY : compress_celldm
+USE polynomial,         ONLY : poly1, poly2, poly3, poly4
 USE mp_world,           ONLY : world_comm
 USE mp,                 ONLY : mp_sum
 
 IMPLICIT NONE
-INTEGER :: ncoeff, ibrav, nvar
+INTEGER :: ibrav, nvar
 INTEGER :: poly_degree_elc
-REAL(DP) :: celldm_t(6, ntemp), el_cons_coeff(ncoeff,6,6), el_cons_t(6,6,ntemp),&
-            el_comp_t(6,6,ntemp), b0_t(ntemp)
+REAL(DP) :: celldm_t(6, ntemp), el_cons_t(6,6,ntemp), el_comp_t(6,6,ntemp), &
+            b0_t(ntemp)
+TYPE(poly1) :: ec_p1(6,6)
+TYPE(poly2) :: ec_p2(6,6)
+TYPE(poly3) :: ec_p3(6,6)
+TYPE(poly4) :: ec_p4(6,6)
 
 REAL(DP), ALLOCATABLE :: xfit(:)
 
@@ -48,14 +54,15 @@ DO itemp=startt,lastt
       DO j=i,6
          IF (el_con_geo(i,j,1)>0.1_DP) THEN
             IF (poly_degree_elc==4) THEN
-               CALL evaluate_fit_quartic(nvar,ncoeff,xfit,aux,&
-                                                  el_cons_coeff(:,i,j))
-            ELSEIF(poly_degree_elc==3) THEN
-               CALL evaluate_fit_cubic(nvar,ncoeff,xfit,aux,&
-                                                  el_cons_coeff(:,i,j))
+               CALL evaluate_fit_quartic(nvar,xfit,aux,ec_p4(i,j)) 
+            ELSEIF (poly_degree_elc==3) THEN
+               CALL evaluate_fit_cubic(nvar,xfit,aux,ec_p3(i,j))
+            ELSEIF (poly_degree_elc==2) THEN
+               CALL evaluate_fit_quadratic(nvar,xfit,aux,ec_p2(i,j))
+            ELSEIF (poly_degree_elc==1) THEN
+               CALL evaluate_fit_linear(nvar,xfit,aux,ec_p1(i,j))
             ELSE
-               CALL evaluate_fit_quadratic(nvar,ncoeff,xfit,aux,&
-                                                el_cons_coeff(:,i,j))
+               CALL errore('interpolate_el_cons','wrong poly_degree_elc',1)
             ENDIF
             el_cons_t(i,j,itemp)=aux
             el_cons_t(j,i,itemp)=aux

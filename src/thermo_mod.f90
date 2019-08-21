@@ -263,6 +263,7 @@ END MODULE ph_freq_anharmonic
 
 MODULE grun_anharmonic
   USE kinds, ONLY: DP
+  USE polynomial, ONLY : poly2
   USE ph_freq_module, ONLY : ph_freq_type
   !
   !  This module contains all the quantities calculated from the gruneisen
@@ -287,15 +288,18 @@ MODULE grun_anharmonic
   REAL(DP), ALLOCATABLE :: grun_cpmce_anis(:) ! difference cp-c_epsilon 
                                           ! computed from elastic constants
 
-  REAL(DP), ALLOCATABLE :: poly_grun(:,:,:) ! For each band and each q point
-                                        ! these are the coefficients of 
-                                        ! polynomial which fit the frequency
-                                        ! as a function of volume
+  TYPE(poly2), ALLOCATABLE :: p_grun_p2(:,:) ! For each band and each q point
+                                             ! these are the coefficients of 
+                                             ! polynomial which fit the 
+                                             ! frequencies as a function of
+                                             ! the crystal parameters
+  REAL(DP), ALLOCATABLE :: poly_grun(:,:,:)
   REAL(DP), ALLOCATABLE :: poly_grun_red(:,:,:,:) ! For each band, each q point
                                         ! and each crystal parameter
                                         ! these are the coefficients of 
                                         ! polynomial which fit the frequency
                                         ! as a function of crystal parameter
+                                        ! this is for the reduced_grid case
   INTEGER :: poly_order                 ! order of the polynomial + 1 
 
   LOGICAL :: done_grun=.FALSE.          ! the anharmonic quantities with
@@ -832,14 +836,17 @@ END MODULE control_macro_elasticity
 MODULE control_quadratic_energy
 
   USE kinds, ONLY: DP
+  USE polynomial, ONLY : poly2
   SAVE
 
   INTEGER :: nvar                ! number of independent variables
   INTEGER :: ncoeff              ! number of coefficients of the polynomial fit
+  INTEGER :: ncoeff2             ! number of coefficient of the quadratic
+                                 ! part of the polynomial
   REAL(DP), ALLOCATABLE :: hessian_v(:,:), &   ! hessian eigenvectors
                            hessian_e(:),   &   ! hessian eigenvalues
-                           x_pos_min(:),   &   ! coordinates of the minimum
-                           coeff(:)            ! coefficients of quadratic fit
+                           x_pos_min(:)        ! coordinates of the minimum
+  TYPE(poly2)           :: p2
   LOGICAL :: show_fit            ! if .TRUE. show the countour plots of the
                                  ! fitted polynomial
 END MODULE control_quadratic_energy
@@ -847,6 +854,7 @@ END MODULE control_quadratic_energy
 MODULE control_quartic_energy
 
   USE kinds, ONLY: DP
+  USE polynomial, ONLY : poly4
   SAVE
 
   LOGICAL :: lquartic                        ! if .TRUE. fit the energy/
@@ -867,6 +875,8 @@ MODULE control_quartic_energy
   INTEGER :: lsolve                          ! 1, 2, 3 controls the method
                                              ! used to find the polynomial
                                              ! coefficients (Default 2)
+  TYPE(poly4) :: p4                          ! coefficients of the polynomial
+
 END MODULE control_quartic_energy
 
 MODULE control_pressure

@@ -1,5 +1,11 @@
 New in version 1.2.0
 
+Major revision on the multivariate polynomial interpolations. 
+Now the routine can deal with an arbitrary number of variables.
+
+Added a polynomial module to deal with multivariate polynomial 
+of degree from 1 to 4.
+
 Added the computation of the temperature dependent elastic constants
 from the derivatives of the free energy with respect to strain within
 the quasi-harmonic approximation (experimental version, in 

@@ -43,9 +43,8 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
   USE elastic_constants, ONLY : epsilon_voigt, sigma_geo, epsilon_geo
   USE gvecw,          ONLY : ecutwfc
   USE gvect,          ONLY : ecutrho
-  USE control_quadratic_energy, ONLY : ncoeff, nvar
+  USE control_quadratic_energy, ONLY : nvar
   USE lattices,       ONLY : crystal_parameters
-  USE quadratic_surfaces, ONLY : quadratic_ncoeff
   USE start_k,        ONLY : nk1, nk2, nk3
   USE klist,          ONLY : degauss
   USE wrappers,       ONLY : f_mkdir_safe
@@ -291,7 +290,6 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            CALL initialize_no_ph(no_ph, tot_ngeo, ibrav_save)
            CALL summarize_geometries(nwork)
            nvar=crystal_parameters(ibrav_save)
-           ncoeff=quadratic_ncoeff(nvar)
            CALL allocate_thermodynamics()
            CALL allocate_anharmonic()
            IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )

@@ -17,13 +17,12 @@ USE io_global,  ONLY : stdout
 USE thermo_mod, ONLY : ngeo, ibrav_geo, celldm_geo
 USE thermo_sym, ONLY : laue
 USE control_quartic_energy, ONLY : lsolve, poly_degree_elc
-USE quadratic_surfaces, ONLY : quadratic_ncoeff, fit_multi_quadratic,  &
-                             evaluate_fit_quadratic
-USE quartic_surfaces, ONLY : quartic_ncoeff,  fit_multi_quartic,       &
-                             evaluate_fit_quartic
-USE cubic_surfaces,   ONLY : cubic_ncoeff, fit_multi_cubic, evaluate_fit_cubic
+USE linear_surfaces,    ONLY : fit_multi_linear, evaluate_fit_linear
+USE quadratic_surfaces, ONLY : fit_multi_quadratic, evaluate_fit_quadratic
+USE cubic_surfaces,   ONLY : fit_multi_cubic, evaluate_fit_cubic
+USE quartic_surfaces, ONLY : fit_multi_quartic, evaluate_fit_quartic
 USE control_elastic_constants, ONLY : el_cons_qha_geo_available, &
-                                      el_consf_qha_geo_available  
+                             el_consf_qha_geo_available  
 USE lattices,       ONLY : compress_celldm
 USE elastic_constants, ONLY : el_con, el_compliances, write_el_cons_on_file
 USE lattices,       ONLY : crystal_parameters
@@ -32,15 +31,21 @@ USE anharmonic,     ONLY : celldm_t, el_cons_t, el_comp_t, b0_t, lelastic, &
                            el_con_geo_t
 USE ph_freq_anharmonic, ONLY : celldmf_t, el_consf_t, el_compf_t, b0f_t, &
                            lelasticf, el_conf_geo_t
+USE polynomial, ONLY : poly1, poly2, poly3, poly4, init_poly, clean_poly
 USE data_files, ONLY : flanhar
 USE temperature, ONLY : ntemp, temp
-USE mp,                    ONLY : mp_sum
-USE mp_world,              ONLY : world_comm
+USE mp,          ONLY : mp_sum
+USE mp_world,    ONLY : world_comm
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filelastic
-INTEGER :: igeo, ibrav, nvar, ncoeff, ndata
-REAL(DP), ALLOCATABLE :: el_cons_coeff(:), x(:,:), f(:), xfit(:)
+INTEGER :: igeo, ibrav, nvar, ndata
+REAL(DP), ALLOCATABLE :: x(:,:), f(:), xfit(:)
+TYPE(poly1) :: ec_p1
+TYPE(poly2) :: ec_p2
+TYPE(poly3) :: ec_p3
+TYPE(poly4) :: ec_p4
+
 INTEGER :: i, j, idata, itemp, startt, lastt
 INTEGER :: compute_nwork 
 
@@ -50,15 +55,6 @@ ndata=compute_nwork()
 
 ALLOCATE(x(nvar,ndata))
 ALLOCATE(f(ndata))
-
-IF (poly_degree_elc==4) THEN
-   ncoeff=quartic_ncoeff(nvar)
-ELSEIF(poly_degree_elc==3) THEN
-   ncoeff=cubic_ncoeff(nvar)
-ELSE
-   ncoeff=quadratic_ncoeff(nvar)
-ENDIF
-ALLOCATE(el_cons_coeff(ncoeff))
 !
 !  Part 1 evaluation of the polynomial coefficients
 !
@@ -75,7 +71,6 @@ DO itemp=startt,lastt
    
    IF (el_cons_qha_geo_available) THEN
       CALL compress_celldm(celldm_t(:,itemp),xfit,nvar,ibrav)
-      el_cons_coeff=0.0_DP
       f=0.0_DP
       DO i=1,6
          DO j=i,6
@@ -88,22 +83,32 @@ DO itemp=startt,lastt
                END DO
 
                IF (poly_degree_elc==4) THEN
-                  CALL fit_multi_quartic(ndata,nvar,ncoeff,lsolve,x,f,&
-                                                         el_cons_coeff)
-                  CALL evaluate_fit_quartic(nvar,ncoeff,xfit, &
-                                           el_cons_t(i,j,itemp),el_cons_coeff)
+                  CALL init_poly(nvar,ec_p4)
+                  CALL fit_multi_quartic(ndata,nvar,lsolve,x,f,ec_p4) 
+                  CALL evaluate_fit_quartic(nvar, xfit, el_cons_t(i,j,itemp),&
+                                         ec_p4)
+                  CALL clean_poly(ec_p4)
                ELSEIF (poly_degree_elc==3) THEN
-                  CALL fit_multi_cubic(ndata,nvar,ncoeff,lsolve,x,f,&
-                                                 el_cons_coeff)
-                  CALL evaluate_fit_cubic(nvar,ncoeff,xfit, &
-                               el_cons_t(i,j,itemp), el_cons_coeff)
+                  CALL init_poly(nvar,ec_p3)
+                  CALL fit_multi_cubic(ndata,nvar,lsolve,x,f,ec_p3)
+                  CALL evaluate_fit_cubic(nvar,xfit, el_cons_t(i,j,itemp), &
+                       ec_p3)
+                  CALL clean_poly(ec_p3)
+               ELSEIF (poly_degree_elc==2) THEN
+                  CALL init_poly(nvar,ec_p2)
+                  CALL fit_multi_quadratic(ndata,nvar,x,f, ec_p2)
+                  CALL evaluate_fit_quadratic(nvar,xfit,el_cons_t(i,j,itemp), &
+                                      ec_p2)
+                  CALL clean_poly(ec_p2)
+               ELSEIF (poly_degree_elc==1) THEN
+                  CALL init_poly(nvar,ec_p1)
+                  CALL fit_multi_linear(ndata,nvar,x,f,ec_p1)
+                  CALL evaluate_fit_linear(nvar, xfit, el_cons_t(i,j,itemp), &
+                                                       ec_p1)
+                  CALL clean_poly(ec_p1)
                ELSE
-                  CALL fit_multi_quadratic(ndata,nvar,ncoeff,x,f,&
-                                     el_cons_coeff)
-                  CALL evaluate_fit_quadratic(nvar,ncoeff,xfit,&
-                              el_cons_t(i,j,itemp),el_cons_coeff)
+                  CALL errore('write_elastic_t_qha','wrong poly_degree_elc',1)
                ENDIF
-
             ENDIF
             IF (i/=j) el_cons_t(j,i,itemp)=el_cons_t(i,j,itemp)
          ENDDO
@@ -112,7 +117,6 @@ DO itemp=startt,lastt
 
    IF (el_consf_qha_geo_available) THEN
       CALL compress_celldm(celldmf_t(:,itemp),xfit,nvar,ibrav)
-      el_cons_coeff=0.0_DP
       f=0.0_DP
       DO i=1,6
          DO j=i,6
@@ -125,20 +129,31 @@ DO itemp=startt,lastt
                END DO
 
                IF (poly_degree_elc==4) THEN
-                  CALL fit_multi_quartic(ndata,nvar,ncoeff,lsolve,x,f,&
-                                              el_cons_coeff)
-                  CALL evaluate_fit_quartic(nvar,ncoeff,xfit, &
-                                el_consf_t(i,j,itemp),el_cons_coeff)
+                  CALL init_poly(nvar,ec_p4)
+                  CALL fit_multi_quartic(ndata,nvar, lsolve, x, f, ec_p4)
+                  CALL evaluate_fit_quartic(nvar,xfit,el_consf_t(i,j,itemp), &
+                                                                      ec_p4) 
+                  CALL clean_poly(ec_p4)
                ELSEIF (poly_degree_elc==3) THEN
-                  CALL fit_multi_cubic(ndata,nvar,ncoeff,lsolve,x,f,&
-                                                      el_cons_coeff)
-                  CALL evaluate_fit_cubic(nvar,ncoeff,xfit,&
-                                   el_consf_t(i,j,itemp),el_cons_coeff)
+                  CALL init_poly(nvar,ec_p3)
+                  CALL fit_multi_cubic(ndata,nvar,lsolve,x,f,ec_p3)
+                  CALL evaluate_fit_cubic(nvar,xfit, el_consf_t(i,j,itemp), &
+                      ec_p3)
+                  CALL clean_poly(ec_p3)
+               ELSEIF (poly_degree_elc==2) THEN
+                  CALL init_poly(nvar,ec_p2)
+                  CALL fit_multi_quadratic(ndata, nvar, x, f, ec_p2)
+                  CALL evaluate_fit_quadratic(nvar,xfit, &
+                                   el_consf_t(i,j,itemp), ec_p2)
+                  CALL clean_poly(ec_p2)
+               ELSEIF (poly_degree_elc==1) THEN
+                  CALL init_poly(nvar,ec_p1)
+                  CALL fit_multi_linear(ndata,nvar,x,f,ec_p1)
+                  CALL evaluate_fit_linear(nvar,xfit,el_consf_t(i,j,itemp), &
+                                 ec_p1)
+                  CALL clean_poly(ec_p1)
                ELSE
-                  CALL fit_multi_quadratic(ndata,nvar,ncoeff,x,f, &
-                         el_cons_coeff)
-                  CALL evaluate_fit_quadratic(nvar,ncoeff,xfit,&
-                            el_consf_t(i,j,itemp),el_cons_coeff)
+                  CALL errore('write_elastic_t_qha','wrong poly_degree_elc',1)
                ENDIF
             ENDIF
             IF (i/=j) el_consf_t(j,i,itemp)=el_consf_t(i,j,itemp)
@@ -174,7 +189,6 @@ ENDIF
 
 DEALLOCATE(x)
 DEALLOCATE(f)
-DEALLOCATE(el_cons_coeff)
 
 RETURN
 END SUBROUTINE write_elastic_t_qha

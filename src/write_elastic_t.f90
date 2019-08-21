@@ -16,9 +16,12 @@ USE io_global,  ONLY : stdout
 USE thermo_mod, ONLY : ngeo, ibrav_geo, celldm_geo
 USE thermo_sym, ONLY : laue
 USE control_quartic_energy, ONLY : lsolve, poly_degree_elc
-USE quadratic_surfaces, ONLY : quadratic_ncoeff, fit_multi_quadratic
-USE quartic_surfaces, ONLY : quartic_ncoeff, fit_multi_quartic
-USE cubic_surfaces,   ONLY : cubic_ncoeff, fit_multi_cubic
+
+USE linear_surfaces, ONLY : fit_multi_linear
+USE quadratic_surfaces, ONLY : fit_multi_quadratic
+USE cubic_surfaces, ONLY : fit_multi_cubic
+USE quartic_surfaces, ONLY : fit_multi_quartic
+
 USE elastic_constants, ONLY : write_el_cons_on_file
 USE control_elastic_constants, ONLY : el_con_geo
 USE lattices,       ONLY : crystal_parameters
@@ -27,12 +30,17 @@ USE control_macro_elasticity, ONLY: macro_el
 USE anharmonic,     ONLY : celldm_t, el_cons_t, el_comp_t, b0_t, lelastic
 USE ph_freq_anharmonic, ONLY : celldmf_t, el_consf_t, el_compf_t, b0f_t, &
                            lelasticf
+USE polynomial, ONLY : poly1, poly2, poly3, poly4, init_poly, clean_poly
 USE data_files, ONLY : flanhar
 USE temperature, ONLY : ntemp, temp
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filelastic
-INTEGER :: igeo, ibrav, nvar, ncoeff, ndata
-REAL(DP), ALLOCATABLE :: el_cons_coeff(:,:,:), x(:,:), f(:)
+INTEGER :: igeo, ibrav, nvar, ndata
+REAL(DP), ALLOCATABLE :: x(:,:), f(:)
+TYPE(poly1), ALLOCATABLE :: ec_p1(:,:)
+TYPE(poly2), ALLOCATABLE :: ec_p2(:,:)
+TYPE(poly3), ALLOCATABLE :: ec_p3(:,:)
+TYPE(poly4), ALLOCATABLE :: ec_p4(:,:)
 INTEGER :: i, j, idata, itemp
 INTEGER :: compute_nwork
 
@@ -42,15 +50,19 @@ nvar=crystal_parameters(ibrav)
 ndata=compute_nwork()
 ALLOCATE(x(nvar,ndata))
 ALLOCATE(f(ndata))
+ALLOCATE(ec_p1(6,6))
+ALLOCATE(ec_p2(6,6))
+ALLOCATE(ec_p3(6,6))
+ALLOCATE(ec_p4(6,6))
 
-IF (poly_degree_elc==4) THEN
-   ncoeff=quartic_ncoeff(nvar)
-ELSEIF(poly_degree_elc==3) THEN
-   ncoeff=cubic_ncoeff(nvar)
-ELSE
-   ncoeff=quadratic_ncoeff(nvar)
-ENDIF
-ALLOCATE(el_cons_coeff(ncoeff,6,6))
+DO i=1,6
+   DO j=i,6
+      CALL init_poly(nvar,ec_p1(i,j))
+      CALL init_poly(nvar,ec_p2(i,j))
+      CALL init_poly(nvar,ec_p3(i,j))
+      CALL init_poly(nvar,ec_p4(i,j))
+   ENDDO
+ENDDO
 !
 !  Part 1 evaluation of the polynomial coefficients
 !
@@ -66,13 +78,15 @@ DO i=1,6
          END DO
 
          IF (poly_degree_elc==4) THEN
-            CALL fit_multi_quartic(ndata,nvar,ncoeff,lsolve,x,f,&
-                                                   el_cons_coeff(:,i,j))
+            CALL fit_multi_quartic(ndata,nvar,lsolve,x,f,ec_p4(i,j)) 
          ELSEIF (poly_degree_elc==3) THEN
-            CALL fit_multi_cubic(ndata,nvar,ncoeff,lsolve,x,f,&
-                                                   el_cons_coeff(:,i,j))
+            CALL fit_multi_cubic(ndata,nvar,lsolve,x,f,ec_p3(i,j)) 
+         ELSEIF (poly_degree_elc==2) THEN
+            CALL fit_multi_quadratic(ndata,nvar,x,f,ec_p2(i,j))      
+         ELSEIF (poly_degree_elc==1) THEN
+            CALL fit_multi_linear(ndata,nvar,x,f,ec_p1(i,j))
          ELSE
-            CALL fit_multi_quadratic(ndata,nvar,ncoeff,x,f,el_cons_coeff(:,i,j))
+            CALL errore('write_elastic_t','wrong poly_degree_elc',1)
          ENDIF
       ENDIF
    ENDDO
@@ -83,8 +97,8 @@ ENDDO
 !          bulk modulus
 !
 IF (ltherm_dos) THEN
-   CALL interpolate_el_cons(celldm_t, ncoeff, nvar, ibrav, el_cons_coeff,&
-                            poly_degree_elc, el_cons_t, el_comp_t, b0_t)
+   CALL interpolate_el_cons(celldm_t, nvar, ibrav, ec_p1, ec_p2, ec_p3, &
+               ec_p4, poly_degree_elc, el_cons_t, el_comp_t, b0_t)
    lelastic=.TRUE.
    filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons'
    CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, el_cons_t, b0_t, &
@@ -96,8 +110,8 @@ IF (ltherm_dos) THEN
 ENDIF
 
 IF (ltherm_freq) THEN
-   CALL interpolate_el_cons(celldmf_t, ncoeff, nvar, ibrav, el_cons_coeff,&
-                               poly_degree_elc, el_consf_t, el_compf_t, b0f_t)
+   CALL interpolate_el_cons(celldmf_t, nvar, ibrav, ec_p1, ec_p2, ec_p3, &
+               ec_p4, poly_degree_elc, el_consf_t, el_compf_t, b0f_t)
    lelasticf=.TRUE.
    filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_ph'
    CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, el_consf_t, b0f_t, &
@@ -110,7 +124,18 @@ ENDIF
 
 DEALLOCATE(x)
 DEALLOCATE(f)
-DEALLOCATE(el_cons_coeff)
+DO i=1,6
+   DO j=i,6
+      CALL clean_poly(ec_p1(i,j))
+      CALL clean_poly(ec_p2(i,j))
+      CALL clean_poly(ec_p3(i,j))
+      CALL clean_poly(ec_p4(i,j))
+   ENDDO
+ENDDO
+DEALLOCATE(ec_p1)
+DEALLOCATE(ec_p2)
+DEALLOCATE(ec_p3)
+DEALLOCATE(ec_p4)
 
 RETURN
 END SUBROUTINE write_elastic_t

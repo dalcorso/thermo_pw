@@ -339,19 +339,20 @@ USE thermo_mod,     ONLY : ngeo, no_ph, reduced_grid
 USE temperature,    ONLY : ntemp, temp
 USE control_grun,   ONLY : vgrun_t, celldm_grun_t, b0_grun_t, lb0_t
 USE ph_freq_thermodynamics, ONLY : ph_freq_save
-USE grun_anharmonic, ONLY : alpha_an_g, grun_gamma_t, poly_grun, done_grun, &
-                           cp_grun_t, b0_grun_s, betab, grun_cpmce_anis,   &
-                           cv_grun_t, ce_grun_t, lelastic_grun, &
+USE grun_anharmonic, ONLY : alpha_an_g, grun_gamma_t, done_grun,          &
+                           cp_grun_t, b0_grun_s, betab, grun_cpmce_anis,  &
+                           cv_grun_t, ce_grun_t, lelastic_grun,           &
                            el_cons_grun_t, el_comp_grun_t, lelastic_grun, &
-                           poly_order, poly_grun_red
+                           poly_order, p_grun_p2, poly_grun_red
 USE freq_interpolate, ONLY : compute_polynomial, compute_polynomial_der
 USE ph_freq_module, ONLY : thermal_expansion_ph, ph_freq_type,  &
                            destroy_ph_freq, init_ph_freq
 USE lattices,       ONLY : compress_celldm, crystal_parameters
 USE quadratic_surfaces, ONLY : evaluate_fit_quadratic,      &
-                               evaluate_quadratic_grad, quadratic_ncoeff
+                               evaluate_quadratic_grad
 USE isoentropic,    ONLY : isostress_heat_capacity
 USE control_dosq,   ONLY : nq1_d, nq2_d, nq3_d
+USE polynomial,     ONLY : clean_poly
 USE data_files,     ONLY : flanhar
 USE io_global,      ONLY : meta_ionode, stdout
 USE mp_world,       ONLY : world_comm
@@ -359,7 +360,7 @@ USE mp,             ONLY : mp_sum
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
-INTEGER :: itemp, iu_therm, i, nq, imode, iq, nvar, ncoeff, nwork
+INTEGER :: itemp, iu_therm, i, nq, imode, iq, nvar, nwork
 INTEGER :: itens, jtens, startq, lastq, nq_eff, iq_eff
 TYPE(ph_freq_type) :: ph_freq    ! the frequencies at the volumes at
                                  ! which the gruneisen parameters are 
@@ -412,7 +413,6 @@ ph_freq%wg=ph_freq_save(central_geo)%wg
 ! now allocate space for each set of gruneisen parameters
 !
 nvar=crystal_parameters(ibrav)
-ncoeff=quadratic_ncoeff(nvar)
 nwork=compute_nwork()
 ALLOCATE(ph_grun(nvar))
 ALLOCATE(grad(nvar))
@@ -469,10 +469,8 @@ DO itemp = 1, ntemp
          ENDDO
       ELSE
          DO imode=1,3*nat
-            CALL evaluate_fit_quadratic(nvar,ncoeff,x,f,&
-                                                     poly_grun(1,imode,iq))
-            CALL evaluate_quadratic_grad(nvar,ncoeff,x,grad,&
-                                                     poly_grun(1,imode,iq))
+            CALL evaluate_fit_quadratic(nvar,x,f,p_grun_p2(imode,iq))
+            CALL evaluate_quadratic_grad(nvar,x,grad,p_grun_p2(imode,iq))
             ph_freq%nu(imode,iq_eff) = f 
             IF (f > 0.0_DP ) THEN
                DO i=1,nvar
@@ -569,8 +567,17 @@ CALL destroy_ph_freq(ph_freq)
 DO i=1,nvar
    CALL destroy_ph_freq(ph_grun(i))
 END DO
-
 DEALLOCATE(ph_grun)
+
+IF (.NOT.reduced_grid) THEN
+   DO imode=1,3*nat
+      DO iq=startq, lastq
+         CALL clean_poly(p_grun_p2(imode,iq))
+      ENDDO
+   ENDDO
+   DEALLOCATE(p_grun_p2)
+ENDIF
+
 DEALLOCATE(grad)
 DEALLOCATE(x)
 

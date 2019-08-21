@@ -1340,24 +1340,32 @@ temperature, the vibrational energy, free-energy, and entropy according
 to the Debye's model.
 
 \item
+\texttt{polynomial.f90} contains routines to define a multivariate 
+polynomial, to allocate space to save its coefficients and to free this
+space. It contains also functions that count the number of coefficients 
+of the polynomials.
+
+\item
+\texttt{linear\_surfaces.f90} contains routines to fit a set of data
+with a linear polynomial, to compute it, and to set its gradient.  
+
+\item
 \texttt{quadratic\_surfaces.f90} contains routines to fit a set of data
-with a quadratic polynomial, to find the gradient or the hessian in 
-a given point and to find the minimum of the quadratic function. 
-The number of independent variables can vary from one to six.
+with a quadratic polynomial, it compute it, to find its gradient or 
+the hessian in a given point and to find the extremum of the quadratic 
+polynomial. 
 
 \item
 \texttt{cubic\_surfaces.f90} contains routines to fit a set of data
 with a cubic polynomial, to find the gradient or the hessian in 
-a given point and to find the local minimum of the cubic polynomial
-closest to a given guess of its position. 
-The number of independent variables can vary from one to six.
+a given point and to find the local extremum of the cubic polynomial
+closest to a given input point. 
 
 \item
 \texttt{quartic\_surfaces.f90} contains routines to fit a set of data
 with a quartic polynomial, to find the gradient or the hessian in 
-a given point and to find the minimum of the quartic function given a 
-reasonably good guess of its position.
-The number of independent variables can vary from one to six.
+a given point and to find the extremum of the quartic polynomial
+closest to a given input point. 
 
 \item
 \texttt{polyfit.f90} contains routines to deal with polynomial

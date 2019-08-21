@@ -524,18 +524,18 @@ SUBROUTINE thermo_readin()
      lb0_t=.FALSE.
   ENDIF
 
-  IF (poly_degree_ph<2 .OR. poly_degree_ph>4) &
+  IF (poly_degree_ph<1 .OR. poly_degree_ph>4) &
             CALL errore('thermo_readin','poly_degree_ph must be between &
-                                                              & 2 and 4',1)
-  IF (poly_degree_cv<2 .OR. poly_degree_cv>4) &
+                                                              & 1 and 4',1)
+  IF (poly_degree_cv<1 .OR. poly_degree_cv>4) &
             CALL errore('thermo_readin','poly_degree_cv must be between & 
-                                                               &2 and 4',1)
-  IF (poly_degree_bfact<2 .OR. poly_degree_bfact>4) &
+                                                               &1 and 4',1)
+  IF (poly_degree_bfact<1 .OR. poly_degree_bfact>4) &
             CALL errore('thermo_readin','poly_degree_bcast must be between &
-                                                               &2 and 4',1)
-  IF (poly_degree_elc<2 .OR. poly_degree_elc>4) &
+                                                               &1 and 4',1)
+  IF (poly_degree_elc<1 .OR. poly_degree_elc>4) &
             CALL errore('thermo_readin','poly_degree_elc must be between &
-                                                               &2 and 4',1)
+                                                               &1 and 4',1)
 
   IF (what=='elastic_constants_t'.AND.elastic_algorithm/='energy_std' &
       .AND.elastic_algorithm/='energy'.AND.use_free_energy) &

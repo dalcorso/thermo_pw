@@ -27,24 +27,25 @@ SUBROUTINE quadratic_fit()
   USE thermo_mod,   ONLY : celldm_geo, omega_geo, energy_geo
   USE control_pressure, ONLY : pressure, pressure_kb
   USE control_quadratic_energy, ONLY : hessian_v, hessian_e, x_pos_min, &
-                               coeff, nvar
-  USE control_quartic_energy, ONLY : ncoeff4, coeff4, x_min_4, lquartic, lsolve
+                                       p2, nvar
+  USE control_quartic_energy, ONLY : p4, x_min_4, lquartic, lsolve
   USE lattices,     ONLY : expand_celldm, crystal_parameters
   USE quadratic_surfaces, ONLY : fit_multi_quadratic,  &
                           find_quadratic_extremum,     &
                           write_quadratic_hessian,     &
                           print_quadratic_polynomial,  &
                           summarize_fitting_data,      &
-                          introduce_quadratic_fit, print_chisq_quadratic, &
-                          quadratic_ncoeff
-  USE quartic_surfaces, ONLY : fit_multi_quartic, quartic_ncoeff, &
+                          compare_quadratic_fit,       &
+                          introduce_quadratic_fit, print_chisq_quadratic
+  USE quartic_surfaces, ONLY : fit_multi_quartic, &
                           find_quartic_extremum, print_quartic_polynomial, &
                           print_chisq_quartic, introduce_quartic_fit
+  USE polynomial,   ONLY : init_poly
   USE vector_mod,       ONLY : write_vector
   USE io_global,    ONLY : stdout
   IMPLICIT NONE
 
-  INTEGER  :: ncoeff, ndata
+  INTEGER  :: tncoeff4, ndata, ncoeff
   REAL(DP), ALLOCATABLE :: x(:,:), y(:), f(:)
   REAL(DP) :: ymin, ymin4
   INTEGER  :: compute_nwork
@@ -57,7 +58,6 @@ SUBROUTINE quadratic_fit()
   WRITE(stdout,'(/,5x,71("-"))')
   !
   nvar=crystal_parameters(ibrav)
-  ncoeff=quadratic_ncoeff(nvar)
   !
   ndata = compute_nwork()
 
@@ -68,58 +68,59 @@ SUBROUTINE quadratic_fit()
      WRITE(stdout,'(/,5x,"Energy")') 
   ENDIF
 
-  CALL introduce_quadratic_fit(nvar, ncoeff, ndata)
 
   ALLOCATE(x(nvar,ndata))
   ALLOCATE(x_pos_min(nvar))
   ALLOCATE(hessian_e(nvar))
   ALLOCATE(hessian_v(nvar, nvar))
   ALLOCATE(f(ndata))
-  ALLOCATE(coeff(ncoeff))
+
+  CALL init_poly(nvar,p2)
+  ncoeff=1+nvar+p2%ncoeff2
+  CALL introduce_quadratic_fit(nvar, ncoeff, ndata)
 
   f(:)=energy_geo(:) + pressure * omega_geo(:)
 
   CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
   !
-  CALL summarize_fitting_data(nvar, ndata, x, f)
+!  CALL summarize_fitting_data(nvar, ndata, x, f)
 
-  CALL fit_multi_quadratic(ndata,nvar,ncoeff,x,f,coeff)
-  
-  CALL print_quadratic_polynomial(nvar, ncoeff, coeff)
+  CALL fit_multi_quadratic(ndata,nvar,x,f,p2)
+ 
+  CALL print_quadratic_polynomial(nvar, p2)
 
-!  WRITE(stdout,'(/,7x,"Energy (1)      Fitted energy (2)   DeltaE (1)-(2)")') 
-  CALL print_chisq_quadratic(ndata, nvar, ncoeff, x, f, coeff)
+  WRITE(stdout,'(/,7x,"Energy (1)      Fitted energy (2)   DeltaE (1)-(2)")') 
+  CALL compare_quadratic_fit(ndata, nvar, x, f, p2)
+  CALL print_chisq_quadratic(ndata, nvar, x, f, p2)
 
-  CALL find_quadratic_extremum(nvar,ncoeff,x_pos_min,ymin,coeff)
+  CALL find_quadratic_extremum(nvar,x_pos_min,ymin,p2)
   !
   WRITE(stdout,'(/,5x,"Extremum of the quadratic found at:")')
 
   CALL write_vector(nvar,x_pos_min)
   CALL print_energy(ymin)
   !
-  CALL write_quadratic_hessian(nvar,ncoeff,coeff,hessian_v,hessian_e)
+  CALL write_quadratic_hessian(nvar,p2,hessian_v,hessian_e)
   !
   CALL expand_celldm(celldm0, x_pos_min, nvar, ibrav)
   emin=ymin
   !
   IF (lquartic) THEN
-
-     ncoeff4=quartic_ncoeff(nvar)
-     CALL introduce_quartic_fit(nvar, ncoeff4, ndata)
-
      ALLOCATE(x_min_4(nvar))
-     ALLOCATE(coeff4(ncoeff4))
+     CALL init_poly(nvar,p4)
+     tncoeff4=1+nvar+p4%ncoeff2+p4%ncoeff3+p4%ncoeff4
+     CALL introduce_quartic_fit(nvar,tncoeff4,ndata)
 
-     CALL fit_multi_quartic(ndata,nvar,ncoeff4,lsolve,x,f,coeff4)
+     CALL fit_multi_quartic(ndata,nvar,lsolve,x,f,p4)
      !
-     CALL print_quartic_polynomial(nvar, ncoeff4, coeff4)
+     CALL print_quartic_polynomial(nvar,p4) 
 !    WRITE(stdout,'(/,7x,"Energy (1)    Fitted energy (2)   DeltaE (1)-(2)")') 
-     CALL print_chisq_quartic(ndata, nvar, ncoeff, x, f, coeff4)
+     CALL print_chisq_quartic(ndata, nvar, x, f, p4)
 !
 !   searching the minimum starting from the minimum of the quadratic
 !
      x_min_4=x_pos_min
-     CALL find_quartic_extremum(nvar,ncoeff4,x_min_4,ymin4,coeff4)
+     CALL find_quartic_extremum(nvar,x_min_4,ymin4,p4)
 
      WRITE(stdout,'(/,5x,"Extremum of the quartic found at:")')
      CALL write_vector(nvar,x_min_4)
@@ -156,49 +157,52 @@ SUBROUTINE quadratic_fit_t(itemp, celldm_t, free_e_min_t, ph_free_ener, &
   USE kinds,       ONLY : DP
   USE cell_base,   ONLY : ibrav
   USE thermo_mod,  ONLY : celldm_geo, no_ph
-  USE control_quadratic_energy, ONLY : nvar, ncoeff, enthalpy_coeff => coeff
-  USE control_quartic_energy, ONLY :  ncoeff4, coeff4, lquartic, &
-                                      poly_degree_ph, lsolve
+  USE control_quadratic_energy, ONLY : nvar, enthalpy_p2 => p2
+  USE control_quartic_energy, ONLY :  p4, lquartic, poly_degree_ph, lsolve
   USE lattices,    ONLY : compress_celldm, expand_celldm, crystal_parameters
   USE io_global,   ONLY : stdout
 
+  USE linear_surfaces,  ONLY : fit_multi_linear, print_chisq_linear
   USE quadratic_surfaces, ONLY : fit_multi_quadratic, &
-                      find_two_quadratic_extremum, &
-                      print_quadratic_polynomial, quadratic_ncoeff, &
-                      summarize_fitting_data,      &
+                      find_two_quadratic_extremum,    &
+                      print_quadratic_polynomial,     &
+                      summarize_fitting_data,         &
                       introduce_quadratic_fit, print_chisq_quadratic
 
-  USE cubic_surfaces, ONLY : fit_multi_cubic, print_chisq_cubic, &
-                      cubic_ncoeff
+  USE cubic_surfaces, ONLY : fit_multi_cubic, print_chisq_cubic
+  USE quartic_surfaces, ONLY : find_quartic_quadratic_extremum,     &
+                      fit_multi_quartic, find_two_quartic_extremum,     &
+                      find_quartic_cubic_extremum, print_chisq_quartic, &
+                      find_quartic_linear_extremum
 
-  USE quartic_surfaces, ONLY : find_quartic_quadratic_extremum,      &
-                      fit_multi_quartic, find_two_quartic_extremum,  &
-                      find_quartic_cubic_extremum, print_chisq_quartic
-
+  USE polynomial, ONLY : poly1, poly2, poly3, poly4, init_poly, clean_poly
   USE vector_mod, ONLY : write_vector
 
   IMPLICIT NONE
   INTEGER  :: itemp
-  INTEGER  :: ndata, ndatatot
+  INTEGER  :: ndata, ndatatot 
   REAL(DP) :: ph_free_ener(ndatatot), celldm_t(6), free_e_min_t
-  REAL(DP), ALLOCATABLE :: x(:,:), f(:), coeff(:), x_pos_min(:), coefft4(:), &
-              coefft3(:), coefft1(:)
+  REAL(DP), ALLOCATABLE :: x(:,:), f(:), x_pos_min(:)
+  TYPE(poly1) :: pt1
+  TYPE(poly2) :: pt2
+  TYPE(poly3) :: pt3             
+  TYPE(poly4) :: pt4             
   REAL(DP) :: ymin
-  INTEGER  :: idata, ncoeff3, ncoeff1
+  INTEGER  :: idata, ncoeff
   INTEGER  :: compute_nwork, compute_nwork_ph
   !
   nvar=crystal_parameters(ibrav)
-  ncoeff=quadratic_ncoeff(nvar)
   !
   ndata = compute_nwork_ph(no_ph,ndatatot)
-
-  IF (MOD(itemp-1,50)==0) &
-     CALL introduce_quadratic_fit(nvar, ncoeff, ndata)
 
   ALLOCATE(x(nvar,ndata))
   ALLOCATE(x_pos_min(nvar))
   ALLOCATE(f(ndata))
-  ALLOCATE(coeff(ncoeff))
+  CALL init_poly(nvar,pt2)
+
+  ncoeff=1+nvar+pt2%ncoeff2
+  IF (MOD(itemp-1,50)==0) &
+     CALL introduce_quadratic_fit(nvar, ncoeff, ndata)
 
   ndata=0
   DO idata=1,ndatatot
@@ -210,15 +214,14 @@ SUBROUTINE quadratic_fit_t(itemp, celldm_t, free_e_min_t, ph_free_ener, &
   !
   !CALL summarize_fitting_data(nvar, ndata, x, f)
   !
-  CALL fit_multi_quadratic(ndata,nvar,ncoeff,x,f,coeff)
+  CALL fit_multi_quadratic(ndata, nvar, x, f, pt2)
 
-  CALL print_quadratic_polynomial(nvar, ncoeff, coeff)
+  CALL print_quadratic_polynomial(nvar, pt2)
 
 !  WRITE(stdout,'(/,7x,"Energy (1)      Fitted energy (2)   DeltaE (1)-(2)")') 
-  CALL print_chisq_quadratic(ndata, nvar, ncoeff, x, f, coeff)
+  CALL print_chisq_quadratic(ndata, nvar, x, f, pt2)
 
-  CALL find_two_quadratic_extremum(nvar,ncoeff,x_pos_min,ymin,&
-                                                         enthalpy_coeff,coeff)
+  CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, enthalpy_p2, pt2)
   WRITE(stdout,'(/,5x,"Extremum of the quadratic found at:")')
   CALL write_vector(nvar,x_pos_min)
   CALL print_genergy(ymin)
@@ -226,27 +229,31 @@ SUBROUTINE quadratic_fit_t(itemp, celldm_t, free_e_min_t, ph_free_ener, &
   IF (lquartic) THEN
      IF (poly_degree_ph==4) THEN
         WRITE(stdout,'(/,5x, "Fit improved with a fourth order polynomial")') 
-        ALLOCATE(coefft4(ncoeff4))
-        CALL fit_multi_quartic(ndata, nvar, ncoeff4, lsolve, x, f, coefft4)
-        CALL print_chisq_quartic(ndata, nvar, ncoeff4, x, f, coefft4)
-        CALL find_two_quartic_extremum(nvar, ncoeff4, x_pos_min,           &
-                                                      ymin, coeff4, coefft4)
-        DEALLOCATE(coefft4)
+        CALL init_poly(nvar,pt4)
+        CALL fit_multi_quartic(ndata, nvar, lsolve, x, f, pt4)
+        CALL print_chisq_quartic(ndata, nvar, x, f, pt4)
+        CALL find_two_quartic_extremum(nvar, x_pos_min, ymin, p4, pt4) 
+        CALL clean_poly(pt4)
         WRITE(stdout,'(/,5x,"Extremum of the quartic found at:")')
      ELSEIF (poly_degree_ph==3) THEN
         WRITE(stdout,'(/,5x, "Fit improved with a third order polynomial")') 
-        ncoeff3=cubic_ncoeff(nvar)
-        ALLOCATE(coefft3(ncoeff3))
-        CALL fit_multi_cubic(ndata, nvar, ncoeff3, lsolve, x, f, coefft3)
-        CALL print_chisq_cubic(ndata, nvar, ncoeff3, x, f, coefft3)
-        CALL find_quartic_cubic_extremum(nvar, ncoeff4, ncoeff3, x_pos_min,&
-                                                        ymin, coeff4, coefft3)
-        DEALLOCATE(coefft3)
+        CALL init_poly(nvar,pt3)
+        CALL fit_multi_cubic(ndata, nvar, lsolve, x, f, pt3)
+        CALL print_chisq_cubic(ndata, nvar, x, f, pt3)
+        CALL find_quartic_cubic_extremum(nvar, x_pos_min, ymin, p4, pt3)
+        CALL clean_poly(pt3)
         WRITE(stdout,'(/,5x,"Extremum of the quartic+cubic found at:")')
+     ELSEIF (poly_degree_ph==1) THEN
+        WRITE(stdout,'(/,5x, "Fit with a fist order polynomial")') 
+        CALL init_poly(nvar,pt1)
+        CALL fit_multi_linear(ndata, nvar, x, f, pt1)
+        CALL print_chisq_linear(ndata, nvar, x, f, pt1)
+        CALL find_quartic_linear_extremum(nvar, x_pos_min, ymin, p4, pt1)
+        CALL clean_poly(pt1)
+        WRITE(stdout,'(/,5x,"Extremum of the quartic+linear found at:")')
      ELSE
         WRITE(stdout,'(/,5x,"Quartic fit used only a T=0:")')
-        CALL find_quartic_quadratic_extremum(nvar, ncoeff4, ncoeff, &
-                                                x_pos_min,ymin, coeff4, coeff)
+        CALL find_quartic_quadratic_extremum(nvar, x_pos_min, ymin, p4, pt2)
      ENDIF
      CALL write_vector(nvar,x_pos_min)
      CALL print_genergy(ymin)
@@ -255,7 +262,7 @@ SUBROUTINE quadratic_fit_t(itemp, celldm_t, free_e_min_t, ph_free_ener, &
   free_e_min_t=ymin
   CALL expand_celldm(celldm_t, x_pos_min, nvar, ibrav)
 
-  DEALLOCATE(coeff)
+  CALL clean_poly(pt2)
   DEALLOCATE(f)
   DEALLOCATE(x_pos_min)
   DEALLOCATE(x)
@@ -330,9 +337,9 @@ IMPLICIT NONE
 REAL(DP) :: ymin
 
 IF (pressure > 0.0_DP) THEN
-   WRITE(stdout,'(5x,"Enthalpy at the extremum",f18.12)') ymin
+   WRITE(stdout,'(5x,"Enthalpy at the extremum",f21.12)') ymin
 ELSE
-   WRITE(stdout,'(5x,"Energy at the extremum",f18.12)') ymin
+   WRITE(stdout,'(5x,"Energy at the extremum",f21.12)') ymin
 ENDIF
 
 RETURN
