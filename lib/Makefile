@@ -22,6 +22,7 @@ gnuplot.o \
 gnuplot_color.o \
 lattices.o \
 linear_solvers.o \
+linear_surfaces.o \
 magnetic_point_group.o \
 mp_asyn.o \
 nye.o \
@@ -30,6 +31,7 @@ ph_freq_module.o \
 piezoelectric_tensor.o \
 point_group.o \
 polyfit.o \
+polynomial.o \
 quadratic_surfaces.o \
 quartic_surfaces.o \
 rotate.o \
