@@ -15,7 +15,8 @@ MODULE linear_solvers
   !
   PRIVATE
 
-  PUBLIC  ccg_many_vectors, cg_many_vectors, linsolvx, linsolvms, linsolvsvd
+  PUBLIC  ccg_many_vectors, cg_many_vectors, linsolvx, linsolvx_sym, &
+          linsolvms, linsolvsvd
 
 
 CONTAINS
@@ -650,6 +651,37 @@ DEALLOCATE( iwork )
 
 RETURN
 END SUBROUTINE linsolvx
+!
+!-------------------------------------------------------------------
+SUBROUTINE linsolvx_sym(hc,n,vc,alpha)
+!-------------------------------------------------------------------
+!
+!    This routine is a driver for the corresponding lapack routine
+!    which solves a linear system of equations with real coefficients
+!    for a symmetric matrix hc. On input the matrix is contained in the
+!    upper triangular part of hc, the right hand side in vc, on output 
+!    the solution is on alpha.
+!
+!
+USE kinds, ONLY : DP
+IMPLICIT NONE
 
+INTEGER, INTENT(IN)  :: n        ! input: logical dimension of hc
+
+REAL(DP), INTENT(IN)  ::  hc(n,n),  &  ! input: the matrix to solve
+                          vc(n)        ! input: the known part of the system
+
+REAL(DP), INTENT(INOUT) ::  alpha(n)     ! output: the solution
+
+REAL(DP) :: work(n)
+INTEGER :: ipiv(n)
+INTEGER :: info
+
+alpha=vc
+CALL dsysv('U',n,1,hc,n,ipiv,alpha,n,work,n,info)
+CALL errore('linsolvx_sym','error in factorization',abs(info))
+ 
+RETURN
+END SUBROUTINE linsolvx_sym
 
 END MODULE linear_solvers
