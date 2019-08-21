@@ -44,7 +44,7 @@ IF (lb0_t) THEN
 !
    ELSE
       CALL errore('manage_anhar_anis','Temperature dependent elastic &
-                   &constants not available',1)
+                   &constants not available',-1)
    ENDIF
 ELSEIF(el_cons_qha_available.OR.el_consf_qha_available) THEN
    IF (ltherm_dos.AND.el_cons_qha_available) THEN
