@@ -1388,7 +1388,8 @@ lquartic   : if .TRUE. fit the energy with a quartic polynomial.
              Default : logical .TRUE.
 lsolve     : choose the algorithm used to fit the quartic polynomial parameters.
              Allowed values:
-             1 explicitly minimize chi^2
+             1 explicitly minimize chi^2 (usually less accurate than the
+                            other two. Should be used only for tests).
              2 Use the QR algorithm to minimize chi^2 (lapack routine dgels)
              3 Use the SVD algorithm to minimize chi^2 (lapack routine dgelss)
              Default: integer 2

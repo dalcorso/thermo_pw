@@ -228,8 +228,8 @@ IF (lsolve<1.OR.lsolve>3) lsolve=2
 IF (lsolve==1) THEN
    WRITE(stdout,'(5x,"Finding the quartic polynomial using &
                                               &ncoeff x ncoeff matrix")')  
-!   CALL linsolvx(aa,ncoeff,b,coeff)
-   CALL linsolvx_sym(aa,ncoeff,b,coeff)
+   CALL linsolvx(aa,ncoeff,b,coeff)
+!   CALL linsolvx_sym(aa,ncoeff,b,coeff)
 
 ELSEIF(lsolve==2) THEN
    WRITE(stdout,'(5x,"Finding the quartic polynomial using &

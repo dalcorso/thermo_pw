@@ -110,7 +110,7 @@ SUBROUTINE fit_multi_cubic(ndata,nvar,lsolve,x,f,p3)
 !                 using SVD decomposition
 !    If lsolve is not one of these values method 2 is used.
 !
-USE linear_solvers,     ONLY : linsolvx_sym, linsolvms, linsolvsvd
+USE linear_solvers,     ONLY : linsolvx, linsolvx_sym, linsolvms, linsolvsvd
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: nvar, ndata
 INTEGER, INTENT(INOUT) :: lsolve
@@ -175,7 +175,8 @@ IF (lsolve<1.OR.lsolve>3) lsolve=2
 IF (lsolve==1) THEN
    WRITE(stdout,'(5x,"Finding the cubic polynomial using &
                                                    &nvar x nvar matrix")')  
-   CALL linsolvx_sym(aa,ncoeff,b,coeff)
+   CALL linsolvx(aa,ncoeff,b,coeff)
+!   CALL linsolvx_sym(aa,ncoeff,b,coeff)
 ELSEIF(lsolve==2) THEN
    WRITE(stdout,'(5x,"Finding the cubic polynomial using &
                                                    &QR factorization")')  
