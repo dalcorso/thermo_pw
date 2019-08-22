@@ -165,7 +165,7 @@ USE grun_anharmonic, ONLY : betab, cp_grun_t, b0_grun_s, &
                            ce_grun_t, cv_grun_t
 USE ph_freq_module, ONLY : thermal_expansion_ph, ph_freq_type,  &
                            destroy_ph_freq, init_ph_freq
-USE freq_interpolate, ONLY : compute_polynomial, compute_polynomial_der
+USE polyfit_mod,    ONLY : compute_poly, compute_poly_deriv
 USE isoentropic,    ONLY : isobaric_heat_capacity
 USE control_grun,   ONLY : vgrun_t, b0_grun_t
 USE control_dosq,   ONLY : nq1_d, nq2_d, nq3_d
@@ -219,16 +219,16 @@ DO itemp = 1, ntemp
    DO iq=startq, lastq
       iq_eff=iq_eff+1
       DO imode=1,3*nat
-         CALL compute_polynomial(vm, poly_order, poly_grun(:,imode,iq),f)
-         CALL compute_polynomial_der(vm, poly_order, poly_grun(:,imode,iq),g)
+         CALL compute_poly(vm, poly_order, poly_grun(:,imode,iq),f)
+         CALL compute_poly_deriv(vm, poly_order, poly_grun(:,imode,iq),g)
 !
-!     g here is V d w / d V 
+!     g here is d w / d V 
 !     ph_grun%nu will contain the gruneisen parameter divided by the volume
 !     as requested by the thermal_expansion_ph routine
 !
          ph_freq%nu(imode,iq_eff)=f
          IF ( f > 0.0_DP) THEN 
-            ph_grun%nu(imode,iq_eff)=-g/vm/f
+            ph_grun%nu(imode,iq_eff)=-g/f
          ELSE
             ph_grun%nu(imode,iq_eff) = 0.0_DP
          ENDIF

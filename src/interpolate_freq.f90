@@ -37,12 +37,6 @@ MODULE freq_interpolate
 ! interp_freq_anis_eigen it is similar to interp_freq_eigen but
 !              frequencies are given as a function of the crystal parameters. 
 !
-! The module offers also two routines to compute the polynomial 
-! or its derivative with respect to the volume
-! 
-! compute_polynomial
-! compute_polynomial_der
-!
   USE kinds,     ONLY : DP
   USE ions_base, ONLY : nat
   !
@@ -51,7 +45,7 @@ MODULE freq_interpolate
   PRIVATE
 
   PUBLIC interp_freq, interp_freq_eigen, interp_freq_rap, interp_freq_anis, &
-         interp_freq_anis_eigen, compute_polynomial, compute_polynomial_der
+         interp_freq_anis_eigen
 
 CONTAINS
 
@@ -249,46 +243,5 @@ DEALLOCATE(f)
 
 RETURN
 END SUBROUTINE interp_freq_anis_eigen
-
-!--------------------------------------------------------------------------
-SUBROUTINE compute_polynomial(vm, poly_order, poly, f)
-!--------------------------------------------------------------------------
-!
-USE kinds, ONLY : DP
-IMPLICIT NONE
-INTEGER :: poly_order
-REAL(DP) :: poly(poly_order), vm, f
-
-INTEGER :: i
-
-f=poly(poly_order)
-DO i=poly_order-1,1,-1
-   f = poly(i) + f*vm
-ENDDO
-
-RETURN
-END SUBROUTINE compute_polynomial
-
-!--------------------------------------------------------------------------
-SUBROUTINE compute_polynomial_der(vm, poly_order, poly, g)
-!--------------------------------------------------------------------------
-!
-! gives as output the derivative of the polynomial with respect to vm,
-! multiplied by vm.
-! 
-USE kinds, ONLY : DP
-IMPLICIT NONE
-INTEGER :: poly_order
-REAL(DP) :: poly(poly_order), vm, g
-
-INTEGER :: i
-
-g=poly(poly_order)*(poly_order-1.0_DP)
-DO i=poly_order-1,1,-1
-   g = poly(i)*(i-1.0_DP) + g*vm
-ENDDO
-
-RETURN
-END SUBROUTINE compute_polynomial_der
 
 END MODULE freq_interpolate

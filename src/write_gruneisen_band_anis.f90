@@ -28,8 +28,8 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
   USE control_grun,   ONLY : temp_ph, celldm_ph
   USE initial_conf,   ONLY : ibrav_save, amass_save, ityp_save
   USE control_thermo, ONLY : ltherm_dos, ltherm_freq, set_internal_path
-  USE freq_interpolate, ONLY : interp_freq_anis_eigen, interp_freq_eigen, &
-                             compute_polynomial, compute_polynomial_der
+  USE freq_interpolate, ONLY : interp_freq_anis_eigen, interp_freq_eigen
+  USE polyfit_mod,    ONLY : compute_poly, compute_poly_deriv
   USE temperature,    ONLY : temp, ntemp
   USE quadratic_surfaces, ONLY : evaluate_fit_quadratic, &
                                  evaluate_quadratic_grad
@@ -232,16 +232,16 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
               CALL interp_freq_eigen(ndata, frequency_geo, xd, cgeo_eff, &
                                   displa, poly_order, poly_grun)
               DO imode=1,nmodes
-                 CALL compute_polynomial(x(icrys), poly_order, poly_grun(:,imode),f)
+                 CALL compute_poly(x(icrys), poly_order, poly_grun(:,imode),f)
 !
 !  this function gives the derivative with respect to x(i) multiplied by x(i)
 !
-                 CALL compute_polynomial_der(x(icrys), poly_order, &
+                 CALL compute_poly_deriv(x(icrys), poly_order, &
                                                    poly_grun(:,imode),g)
                  frequency(imode,n) = f
-                 gruneisen(imode,n,icrys) = -g
-                 IF (frequency(imode,n) > 0.0_DP ) THEN
-                    gruneisen(imode,n,icrys) = gruneisen(imode,n,icrys)/frequency(imode,n)
+                 gruneisen(imode,n,icrys) = - x(icrys) * g
+                 IF (f > 0.0_DP ) THEN
+                    gruneisen(imode,n,icrys) = gruneisen(imode,n,icrys)/f
                  ELSE
                     gruneisen(imode,n,icrys) = 0.0_DP
                  ENDIF

@@ -344,7 +344,7 @@ USE grun_anharmonic, ONLY : alpha_an_g, grun_gamma_t, done_grun,          &
                            cv_grun_t, ce_grun_t, lelastic_grun,           &
                            el_cons_grun_t, el_comp_grun_t, lelastic_grun, &
                            poly_order, p_grun_p2, poly_grun_red
-USE freq_interpolate, ONLY : compute_polynomial, compute_polynomial_der
+USE polyfit_mod,    ONLY : compute_poly, compute_poly_deriv
 USE ph_freq_module, ONLY : thermal_expansion_ph, ph_freq_type,  &
                            destroy_ph_freq, init_ph_freq
 USE lattices,       ONLY : compress_celldm, crystal_parameters
@@ -451,17 +451,17 @@ DO itemp = 1, ntemp
       IF (reduced_grid) THEN
          DO i=1,nvar
             DO imode=1,3*nat
-               CALL compute_polynomial(x(i), poly_order, &
+               CALL compute_poly(x(i), poly_order, &
                                             poly_grun_red(1,imode,i,iq),f)
 !
 !  this function gives the derivative with respect to x(i) multiplied by x(i)
 !
-               CALL compute_polynomial_der(x(i), poly_order, &
+               CALL compute_poly_deriv(x(i), poly_order, &
                                              poly_grun_red(1,imode,i,iq),g)
 
                ph_freq%nu(imode,iq_eff) = f
                IF (f > 0.0_DP ) THEN
-                  ph_grun(i)%nu(imode,iq_eff)= - g / f / x(i)
+                  ph_grun(i)%nu(imode,iq_eff)= - g / f 
                ELSE
                   ph_grun(i)%nu(imode,iq_eff)=0.0_DP
                END IF

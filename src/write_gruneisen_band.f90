@@ -27,8 +27,8 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
   USE control_mur,    ONLY : vmin
   USE control_thermo, ONLY : ltherm_dos, ltherm_freq
   USE temperature,    ONLY : temp, ntemp
-  USE freq_interpolate, ONLY : interp_freq_eigen, compute_polynomial, &
-                               compute_polynomial_der
+  USE freq_interpolate, ONLY : interp_freq_eigen 
+  USE polyfit_mod,    ONLY : compute_poly, compute_poly_deriv
   USE io_bands,       ONLY : read_bands, read_parameters, write_bands
   USE mp,             ONLY : mp_bcast
   USE io_global,      ONLY : stdout, ionode, ionode_id
@@ -188,15 +188,15 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
 !  volume using the intepolating polynomial
 !
         DO imode=1,nmodes
-           CALL compute_polynomial(vm, poly_order, poly_grun(:,imode),f)
-           CALL compute_polynomial_der(vm, poly_order, poly_grun(:,imode),g)
+           CALL compute_poly(vm, poly_order, poly_grun(:,imode),f)
+           CALL compute_poly_deriv(vm, poly_order, poly_grun(:,imode),g)
            frequency(imode,n)=f
 !
 !     g here is V d w / d V. We change sign and divide by the frequency w 
 !     to get the gruneisen parameter.
 !
            IF (f > 0.0_DP ) THEN
-              gruneisen(imode,n) = - g / f
+              gruneisen(imode,n) = - vm * g / f
            ELSE
               gruneisen(imode,n) = 0.0_DP
            ENDIF

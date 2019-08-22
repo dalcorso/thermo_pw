@@ -172,7 +172,6 @@ INTEGER, ALLOCATABLE :: ipiv(:)
 INTEGER :: i, j, k, l, m, n, o, ivar, jvar, idata, ncoeff, info
 
 ncoeff=1+nvar+p4%ncoeff2+p4%ncoeff3+p4%ncoeff4
-WRITE(6,*) ncoeff, ndata
 
 ALLOCATE(amat(ndata,ncoeff))
 ALLOCATE(coeff(ncoeff))

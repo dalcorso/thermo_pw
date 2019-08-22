@@ -25,11 +25,13 @@ MODULE polyfit_mod
   PRIVATE
   SAVE
 
-  PUBLIC :: polyfit, write_poly
+  PUBLIC :: polyfit, compute_poly, compute_poly_deriv, write_poly
 
 CONTAINS
 
+!--------------------------------------------------------------------------
 SUBROUTINE polyfit(x,y,ndati,a,ncoeff)
+!--------------------------------------------------------------------------
 !
 !  This routine fits a set of data with a polynomial of one variable and
 !  arbitrary degree. ncoeff is the number of coefficients equal 
@@ -43,7 +45,7 @@ INTEGER, INTENT(IN)   ::   ndati, &  ! number of data points
 REAL(DP), INTENT(IN)  :: x(ndati), y(ndati)
 REAL(DP), INTENT(OUT) :: a(ncoeff)
 
-REAL(DP) :: amat(ncoeff,ncoeff), bvec(ncoeff), eigv(ncoeff,ncoeff)
+REAL(DP) :: amat(ncoeff,ncoeff), bvec(ncoeff)
 INTEGER  ::  i, j, k       ! counters
 
 DO k=1,ncoeff
@@ -63,8 +65,53 @@ CALL linsolvx(amat,ncoeff,bvec,a)
 
 RETURN
 END SUBROUTINE polyfit
+!
+!--------------------------------------------------------------------------
+SUBROUTINE compute_poly(x, ncoeff, poly, f)
+!--------------------------------------------------------------------------
+!
+USE kinds, ONLY : DP
+IMPLICIT NONE
+INTEGER :: ncoeff
+REAL(DP), INTENT(IN) :: poly(ncoeff), x
+REAL(DP), INTENT(OUT) :: f
 
+INTEGER :: i
+
+f=poly(ncoeff)
+DO i=ncoeff-1,1,-1
+   f = poly(i) + f*x
+ENDDO
+
+RETURN
+END SUBROUTINE compute_poly
+
+!--------------------------------------------------------------------------
+SUBROUTINE compute_poly_deriv(x, ncoeff, poly, g)
+!--------------------------------------------------------------------------
+!
+! gives as output the derivative of the polynomial with respect to x
+! 
+USE kinds, ONLY : DP
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ncoeff
+REAL(DP), INTENT(IN) :: poly(ncoeff), x
+
+REAL(DP), INTENT(OUT) :: g
+
+INTEGER :: i
+
+g=poly(ncoeff)*(ncoeff-1.0_DP)
+DO i=ncoeff-1,2,-1
+   g = poly(i)*(i-1.0_DP) + g*x
+ENDDO
+
+RETURN
+END SUBROUTINE compute_poly_deriv
+
+!--------------------------------------------------------------------------
 SUBROUTINE write_poly(a,ncoeff)
+!--------------------------------------------------------------------------
 !
 !   This routine writes on output the coefficients of a polynomial of
 !   one variable
