@@ -11,6 +11,7 @@ bz_asy.o : bz_2d_form.o
 cubic_surfaces.o : ../../Modules/io_global.o
 cubic_surfaces.o : ../../Modules/kind.o
 cubic_surfaces.o : linear_solvers.o
+cubic_surfaces.o : polynomial.o
 debye_module.o : ../../Modules/constants.o
 debye_module.o : ../../Modules/io_global.o
 debye_module.o : ../../Modules/kind.o
@@ -54,6 +55,10 @@ lattices.o : point_group.o
 lattices.o : rotate.o
 linear_solvers.o : ../../Modules/io_global.o
 linear_solvers.o : ../../Modules/kind.o
+linear_surfaces.o : ../../Modules/io_global.o
+linear_surfaces.o : ../../Modules/kind.o
+linear_surfaces.o : linear_solvers.o
+linear_surfaces.o : polynomial.o
 magnetic_point_group.o : ../../Modules/kind.o
 magnetic_point_group.o : point_group.o
 nye.o : ../../Modules/io_global.o
@@ -78,13 +83,16 @@ point_group.o : ../../Modules/kind.o
 polyfit.o : ../../Modules/io_global.o
 polyfit.o : ../../Modules/kind.o
 polyfit.o : linear_solvers.o
+polynomial.o : ../../Modules/kind.o
 quadratic_surfaces.o : ../../Modules/io_global.o
 quadratic_surfaces.o : ../../Modules/kind.o
 quadratic_surfaces.o : diagonalize.o
 quadratic_surfaces.o : linear_solvers.o
+quadratic_surfaces.o : polynomial.o
 quartic_surfaces.o : ../../Modules/io_global.o
 quartic_surfaces.o : ../../Modules/kind.o
 quartic_surfaces.o : linear_solvers.o
+quartic_surfaces.o : polynomial.o
 rotate.o : ../../Modules/kind.o
 space_groups.o : ../../Modules/constants.o
 space_groups.o : ../../Modules/io_global.o
