@@ -13,7 +13,7 @@ SUBROUTINE deallocate_thermo()
   !
   USE kinds,          ONLY : DP
   USE thermo_mod,     ONLY : celldm_geo, energy_geo, omega_geo, ibrav_geo, &
-                             no_ph, tot_ngeo, in_degree
+                             no_ph, tot_ngeo, in_degree, phgeo_on_file
   USE thermodynamics, ONLY : ph_free_ener, ph_ener, ph_entropy, ph_ce, &
                              ph_b_fact
   USE ph_freq_thermodynamics, ONLY : phf_free_ener, phf_ener, phf_entropy, &
@@ -67,6 +67,7 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (ibrav_geo) )       DEALLOCATE(ibrav_geo) 
   IF ( ALLOCATED (no_ph) )           DEALLOCATE(no_ph) 
   IF ( ALLOCATED (in_degree) )       DEALLOCATE(in_degree) 
+  IF ( ALLOCATED (phgeo_on_file) )   DEALLOCATE(phgeo_on_file) 
   IF ( ALLOCATED (vmin_t) )          DEALLOCATE(vmin_t) 
   IF ( ALLOCATED (ke) )              DEALLOCATE(ke) 
   IF ( ALLOCATED (keden) )           DEALLOCATE(keden) 

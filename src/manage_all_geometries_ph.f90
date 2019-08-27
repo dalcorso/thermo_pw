@@ -37,7 +37,7 @@ IMPLICIT NONE
 
 INTEGER  :: part, nwork, igeom, iaux
 CHARACTER(LEN=6) :: int_to_char
-LOGICAL :: std, ldcs, after_disp_save, check_dyn_file_exists, something_todo
+LOGICAL :: std, ldcs, after_disp_save, something_todo
 
 CHARACTER (LEN=256) :: auxdyn=' '
 

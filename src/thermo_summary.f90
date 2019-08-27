@@ -120,7 +120,7 @@ SUBROUTINE thermo_summary()
                                                                    &volume")')
           WRITE(stdout,'(5x,"Use what=''plot_bz'' to visualize the BZ path")')
      CASE ('mur_lc_dos')
-          WRITE(stdout,'(5x,"Calculating the electronic dos at minimum &
+          WRITE(stdout,'(5x,"Calculating the electronic dos at the minimum &
                                                                    &volume")')
      CASE ('mur_lc_ph') 
           WRITE(stdout,'(5x,"Doing a phonon calculation at the minimum &
@@ -129,25 +129,23 @@ SUBROUTINE thermo_summary()
           WRITE(stdout,'(5x,"Doing a phonon dispersion calculation at the &
                                            & minimum volume")')
           WRITE(stdout,'(5x,"Use what=''plot_bz'' to visualize the BZ path")')
-          WRITE(stdout,'(5x,"Computing the harmonic thermodynamic properties")')
+          WRITE(stdout,'(5x,"Computing the harmonic thermodynamic &
+                                                               &properties")')
      CASE ('mur_lc_t') 
           WRITE(stdout,'(5x,"Computing the lattice constant and the bulk" )')
           WRITE(stdout,'(5x,"modulus as a function of temperature ")')
      CASE ('scf_elastic_constants') 
           IF (frozen_ions) THEN
-             WRITE(stdout,'(5x,"Computing the frozen ions elastic constants ")')
+             WRITE(stdout,'(5x,"Computing the frozen ions elastic &
+                                                               &constants ")')
           ELSE
              WRITE(stdout,'(5x,"Computing the elastic constants ")')
           ENDIF
           lelc = .TRUE.
      CASE ('mur_lc_elastic_constants') 
-          IF (frozen_ions) THEN
-             WRITE(stdout,'(5x,"Computing the frozen ions elastic constants &
-                         &at the minimum volume")')
-          ELSE
-             WRITE(stdout,'(5x,"Computing the elastic constants at the &
+          WRITE(stdout,'(5x,"Computing the elastic constants at the &
                                   &minimum volume ")')
-          ENDIF
+          IF (frozen_ions) WRITE(stdout,'(5x,"The ions are frozen" )')
           lelc = .TRUE.
      CASE ('elastic_constants_t')
           WRITE(stdout,'(5x,"Computing the temperature dependent elastic" )')
@@ -156,21 +154,13 @@ SUBROUTINE thermo_summary()
           IF (frozen_ions) WRITE(stdout,'(5x,"The ions are frozen" )')
           lelc = .TRUE.
      CASE ('scf_piezoelectric_tensor') 
-          IF (frozen_ions) THEN
-             WRITE(stdout,'(5x,"Computing the frozen ions piezoelectric &
-                                                                   &tensor")')
-          ELSE
-             WRITE(stdout,'(5x,"Computing the piezoelectric tensor")')
-          ENDIF
+          WRITE(stdout,'(5x,"Computing the piezoelectric tensor")')
+          IF (frozen_ions) WRITE(stdout,'(5x,"The ions are frozen" )')
           lpiezo = .TRUE.
      CASE ('mur_lc_piezoelectric_tensor') 
-          IF (frozen_ions) THEN
-             WRITE(stdout,'(5x,"Computing the frozen ions piezoelectric tensor &
-                           &at the minimum volume")')
-          ELSE
-             WRITE(stdout,'(5x,"Computing the piezoelectric tensor at the &
+          WRITE(stdout,'(5x,"Computing the piezoelectric tensor at the &
                                   &minimum volume")')
-          ENDIF
+          IF (frozen_ions) WRITE(stdout,'(5x,"The ions are frozen" )')
           lpiezo=.TRUE.
      CASE ('scf_polarization') 
           WRITE(stdout,'(5x,"Computing the spontaneous polarization")')
@@ -187,7 +177,8 @@ SUBROUTINE thermo_summary()
                          &kinetic energy cutoff ")')
      CASE ('scf_2d_bands') 
           WRITE(stdout,'(5x,"Plotting the surface band structure")')
-          IF (lprojpbs) WRITE(stdout,'(5x,"Plotting projected band structure")')
+          IF (lprojpbs) WRITE(stdout,'(5x,"Plotting the projected band &
+                                                              &structure")')
      CASE DEFAULT
         CALL errore('thermo_summary','what not programmed',1)
   END SELECT
@@ -300,9 +291,8 @@ SUBROUTINE thermo_summary()
 !
 !  first rank tensors
 !
-     IF ( lpolar .OR. what=='plot_bz') THEN
-        CALL print_vectors_shape(code_group,ibrav)
-     ENDIF
+     IF ( lpolar .OR. what=='plot_bz') CALL print_vectors_shape(code_group,&
+                                                                        ibrav)
 !
 !   second rank tensors
 !
@@ -402,7 +392,7 @@ SUBROUTINE thermo_summary()
              6*ngeo_strain 
        ENDIF
     ENDIF
-ENDIF
+ ENDIF
 
 !
 !  B factor matrix
@@ -520,7 +510,7 @@ END SUBROUTINE thermo_summary
 FUNCTION check_group_ibrav(code_group, ibrav)
 !
 !  This routine checks if the ibrav is compatible with the point group,
-!  and if it is not if write a brief message saying which lattices are
+!  and if it is not it writes a brief message saying which lattices are
 !  compatible
 !
 USE kinds, ONLY : DP
