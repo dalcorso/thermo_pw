@@ -28,7 +28,7 @@ SUBROUTINE manage_all_geometries_ph()
   USE mp_world,         ONLY : world_comm
   USE output,           ONLY : fildyn
   USE control_thermo,   ONLY : outdir_thermo, after_disp, set_internal_path, &
-                               lq2r, lectqha
+                               lq2r
   USE io_global,        ONLY : stdout
 
 IMPLICIT NONE
@@ -117,23 +117,14 @@ DO igeom=start_geometry, last_geometry
    WRITE(stdout,'(5x,"Computing thermodynamic properties", i5)') igeom
    WRITE(stdout,'(5x,40("%"),/)') 
    outdir=TRIM(outdir_thermo)//'/g'//TRIM(int_to_char(igeom))//'/'
+   !  
+   !  The geometry must be reset here
    !
-   ! ... reads the phonon input
-   !
-   IF (after_disp.AND.(what=='mur_lc_t'.OR.&
-                                what=='elastic_constants_t')) THEN
-!
-!  The geometry is read by thermo_ph_readin from the output files of pw.x,
-!  except in the case where after_disp=.TRUE.. In this case we have to
-!  set it here.
-!
-      ibrav=ibrav_geo(igeom)
-      celldm(:)=celldm_geo(:,igeom)
-      IF (set_internal_path) CALL set_bz_path()
-      IF (igeom==start_geometry) CALL initialize_file_names()
-   ELSE
-      IF (lectqha.AND.set_internal_path) CALL set_bz_path()
-   ENDIF
+   ibrav=ibrav_geo(igeom)
+   celldm(:)=celldm_geo(:,igeom)
+   IF (set_internal_path) CALL set_bz_path()
+   IF (after_disp.AND.igeom==start_geometry) CALL initialize_file_names()
+
    CALL set_files_names(igeom)
    auxdyn=fildyn
 !
