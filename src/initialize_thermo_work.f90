@@ -28,7 +28,8 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
                              lstress, lelastic_const, lpiezoelectric_tensor,&
                              lberry, lpolarization, lpart2_pw, do_scf_relax, &
                              ldos_syn_1, ltherm_dos, ltherm_freq, after_disp, &
-                             lectqha
+                             lectqha, all_geometries_together, geometry, iqw, &
+                             irrw, comp_f_work
   USE control_pwrun,  ONLY : do_punch
   USE control_conv,   ONLY : nke, ke, deltake, nkeden, deltakeden, keden, &
                              nnk, nk_test, deltank, nsigma, sigma_test, &  
@@ -47,6 +48,11 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
   USE lattices,       ONLY : crystal_parameters
   USE start_k,        ONLY : nk1, nk2, nk3
   USE klist,          ONLY : degauss
+  USE control_ph,     ONLY : epsil, trans
+  USE freq_ph,        ONLY : fpol, nfs
+  USE optical,        ONLY : start_freq, last_freq
+  USE images_omega,   ONLY : omega_group
+  USE mp_images,      ONLY : nimage
   USE wrappers,       ONLY : f_mkdir_safe
   USE io_global,      ONLY : meta_ionode
   !
@@ -55,8 +61,9 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
   INTEGER, INTENT(IN) :: part
 
   INTEGER :: igeom, igeom_qha, ike, iden, icount, ink, isigma, iwork, ios
-  INTEGER :: count_energies
+  INTEGER :: count_energies, iq, irr, start_omega, i, j
   REAL(DP) :: compute_omega_geo, dual, kev, kedenv
+  LOGICAL :: something_to_do_all
 !
 !   the restart directory is used in all cases
 !
@@ -490,6 +497,34 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
               'elastic_constants_t')
 
            lphonon(1:nwork)=.TRUE.
+           IF (trans) THEN
+              IF (all_geometries_together) THEN
+                 DO iwork=1,nwork
+                    igeom=geometry(iwork)
+                    iq=iqw(iwork)
+                    irr=irrw(iwork)
+                    lphonon(iwork)=something_to_do_all(iwork,igeom,iq,irr)
+                 ENDDO
+              ENDIF
+           ELSEIF (fpol) THEN
+              ALLOCATE (comp_f_work(1:nfs,nwork))
+              IF (nimage>1) THEN
+                 comp_f_work=.FALSE.
+                 DO iwork=1,nwork
+                    start_omega=(iwork-1)*omega_group
+                    DO i=1, omega_group
+                       j=MIN(start_omega+i, nfs)
+                       comp_f_work(j,iwork)=.TRUE.
+                    ENDDO
+                    lphonon(iwork)=.FALSE.
+                    DO i=start_freq,last_freq
+                       lphonon(iwork)=lphonon(iwork).OR.comp_f_work(i,iwork)
+                    ENDDO
+                 ENDDO
+              ELSE
+                 comp_f_work(:,1)=.TRUE.
+              ENDIF
+           ENDIF
 !
 !  Here the cases in which there are pwscf calculation in the second part
 !
@@ -716,65 +751,109 @@ END SUBROUTINE initialize_mur_qha
 
 SUBROUTINE initialize_ph_work(nwork)
 !
-!  This routine counts how many tasks there are in a phonon calculation.
+!  This routine counts the number of tasks of a phonon calculation.
+!  For each phonon task it sets the geometry, the q point and the irr.
+!  When use_ph_images=.TRUE. the q point and irr are not used 
+!  and set to zero.
 !
-USE control_thermo, ONLY : all_geometries_together
-USE thermo_mod,  ONLY : tot_ngeo, start_geometry, last_geometry
-USE ions_base,   ONLY : nat
+USE control_thermo, ONLY : all_geometries_together, geometry, iqw, irrw
+USE thermo_mod,  ONLY : start_geometry, last_geometry
 USE grid_irr_iq, ONLY : irr_iq
 USE disp,        ONLY : nqs
 USE freq_ph,     ONLY : nfs, fpol
 USE images_omega,ONLY : omega_group
-USE initial_conf, ONLY : geometry, collect_info_save
+USE initial_conf, ONLY : collect_info_save
 USE control_ph,  ONLY : epsil, trans
 USE control_qe,  ONLY : use_ph_images
 USE mp_images,   ONLY : nimage
-USE mp_asyn,     ONLY : with_asyn_images
 
 IMPLICIT NONE
 INTEGER, INTENT(OUT) :: nwork
 
-INTEGER :: iq, irr, igeom, iwork, nqs_max, ngeometries
+INTEGER :: iq, irr, igeom, iwork, nqs_max, ngeom, stge, lage, nqsx
+INTEGER, ALLOCATABLE :: nqs_loc(:), irr_iq_loc(:,:)
 
 nwork=0
 IF (trans) THEN
-   IF (use_ph_images) THEN
-      IF (all_geometries_together) THEN
-         nwork=nimage*(last_geometry - start_geometry + 1)
-         ALLOCATE(geometry(nwork))
-         DO iwork=1, nwork
-            geometry(iwork)= (iwork-1) / nimage + start_geometry
-         ENDDO
-      ELSE
-         nwork=nimage
-      ENDIF
+!
+!  find the number of geometries and the maximum number of q points
+!  among geometries
+!
+   IF (all_geometries_together) THEN
+      stge = start_geometry
+      lage = last_geometry
+      ngeom = lage - stge + 1
+      nqsx = MAXVAL(collect_info_save(stge:lage)%nqs)
    ELSE
-      IF (all_geometries_together) THEN
-         nqs_max=0
-         DO igeom=start_geometry, last_geometry
-            nqs_max=MAX(collect_info_save(igeom)%nqs, nqs_max)
-         ENDDO
-         ngeometries=last_geometry - start_geometry + 1
-         ALLOCATE(geometry((3*nat+1)*nqs_max*ngeometries))
-         nwork=0
-         DO igeom=start_geometry, last_geometry
-            DO iq=1, collect_info_save(igeom)%nqs
-               DO irr=0, collect_info_save(igeom)%irr_iq(iq)
-                  nwork=nwork+1
-                  geometry(nwork)=igeom
-               ENDDO
-            ENDDO
-         ENDDO
-      ELSE
-         DO iq=1,nqs
-            DO irr=0, irr_iq(iq)
-               nwork=nwork+1
-            ENDDO
-         ENDDO
-      ENDIF
+      stge = 1
+      lage = 1
+      ngeom = 1
+      nqsx = nqs
    ENDIF
+!
+!   uniformize the case of many geometries and one geometry
+!
+   ALLOCATE(nqs_loc( stge : lage ))
+   ALLOCATE(irr_iq_loc(nqsx, stge : lage))
+   IF (all_geometries_together) THEN
+      DO igeom = stge, lage
+         nqs_loc(igeom)=collect_info_save(igeom)%nqs
+         DO iq=1,nqs_loc(igeom)
+            irr_iq_loc(iq,igeom)=collect_info_save(igeom)%irr_iq(iq)
+         ENDDO
+      ENDDO
+   ELSE
+      nqs_loc(1)=nqs
+      DO iq=1,nqs
+         irr_iq_loc(iq,1)=irr_iq(iq)
+      ENDDO
+   ENDIF
+!
+!  now count the number of works. 
+!
+   IF (use_ph_images) THEN
+      nwork=nimage * ngeom
+   ELSE
+      nwork=0
+      DO igeom = stge, lage
+         DO iq = 1, nqs_loc(igeom)
+            DO irr = 0, irr_iq_loc(iq,igeom)
+               nwork = nwork + 1
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
+!
+!   then for each work set the geometry, iq, and irr.
+!
+   ALLOCATE(geometry(nwork))
+   ALLOCATE(iqw(nwork))
+   ALLOCATE(irrw(nwork))
+   iqw=0
+   irrw=0
+   geometry=1
+   IF (use_ph_images) THEN
+      DO iwork=1, nwork
+         geometry(iwork)= (iwork-1) / nimage + stge
+      ENDDO
+   ELSE
+      nwork=0
+      DO igeom = stge, lage
+         DO iq=1, nqs_loc(igeom)
+            DO irr=0, irr_iq_loc(iq,igeom)
+               nwork = nwork + 1
+               geometry(nwork) = igeom
+               iqw(nwork) = iq
+               irrw(nwork) = irr
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
+
+   DEALLOCATE(nqs_loc)
+   DEALLOCATE(irr_iq_loc)
 ELSEIF (fpol) THEN
-   IF (with_asyn_images) THEN
+   IF (nimage>1) THEN
       nwork=nfs/omega_group
       IF (nwork*omega_group /= nfs ) nwork=nwork+1
    ELSE

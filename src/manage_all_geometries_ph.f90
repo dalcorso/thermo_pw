@@ -74,8 +74,7 @@ ENDIF
 !  otherwise some partial dynamical matrix could be missing.
 !
 CALL mp_barrier(world_comm)
-IF (.NOT.(after_disp.AND.(what=='mur_lc_t'.OR. &
-                               what=='elastic_constants_t'))) THEN
+IF (.NOT.(after_disp)) THEN
    DO igeom=start_geometry, last_geometry
       IF (no_ph(igeom)) CYCLE
       IF (phgeo_on_file(igeom)) CYCLE
@@ -123,7 +122,6 @@ DO igeom=start_geometry, last_geometry
    ibrav=ibrav_geo(igeom)
    celldm(:)=celldm_geo(:,igeom)
    IF (set_internal_path) CALL set_bz_path()
-
    CALL set_files_names(igeom)
    auxdyn=fildyn
 !

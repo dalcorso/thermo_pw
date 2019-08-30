@@ -39,7 +39,7 @@ SUBROUTINE deallocate_thermo()
                                rap_plot_in, nrap_plot, rap_plot, high_sym_path
   USE control_2d_bands, ONLY : averag, vacuum, aux_ind_sur
   USE initial_conf,     ONLY : ityp_save, amass_save, tau_save, tau_save_crys, &
-                               collect_info_save, geometry
+                               collect_info_save
   USE equilibrium_conf, ONLY : tau0, tau0_crys
   USE control_thermo,   ONLY : all_geometries_together
   USE control_grun,     ONLY : vgrun_t, b0_grun_t, celldm_grun_t
@@ -183,8 +183,6 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (tau_save_crys) )   DEALLOCATE(tau_save_crys)
   IF ( ALLOCATED (ityp_save) )       DEALLOCATE(ityp_save)
   IF ( ALLOCATED (amass_save) )      DEALLOCATE(amass_save)
-
-  IF ( ALLOCATED (geometry) )        DEALLOCATE(geometry)
 
   IF ( ALLOCATED (tau0) )            DEALLOCATE(tau0)
   IF ( ALLOCATED (tau0_crys) )       DEALLOCATE(tau0_crys)

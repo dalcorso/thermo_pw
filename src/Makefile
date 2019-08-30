@@ -120,6 +120,7 @@ set_thermo_work_todo.o \
 set_work_for_elastic_const.o \
 simple_nonanal.o \
 simple_plot.o \
+something_to_do_all.o \
 surface.o     \
 sym_band_sub.o \
 thermo_mod.o \

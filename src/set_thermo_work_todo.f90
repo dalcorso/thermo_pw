@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2013-2017 Andrea Dal Corso
+! Copyright (C) 2013-2019 Andrea Dal Corso
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -16,17 +16,18 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, auxdyn_loc)
 !  this correspond to a phonon calculation.
 !
   USE kinds,            ONLY : DP
-  USE thermo_mod,       ONLY : what, celldm_geo, tot_ngeo, start_geometry, &
+  USE thermo_mod,       ONLY : what, celldm_geo, start_geometry, &
                                last_geometry
   USE control_thermo,   ONLY : outdir_thermo, lstress, lphonon, &
-                               all_geometries_together
+                               all_geometries_together, geometry, irrw, &
+                               iqw, comp_f_work
   USE control_elastic_constants, ONLY : frozen_ions
   USE control_conv,     ONLY : ke, keden, nk_test, sigma_test
-  USE initial_conf,     ONLY : ibrav_save, tau_save_crys, collect_info_save, &
-                               geometry
+  USE initial_conf,     ONLY : ibrav_save, tau_save_crys, collect_info_save
   USE equilibrium_conf, ONLY : at0, tau0
   USE images_omega,     ONLY : omega_group
   USE control_qe,       ONLY : use_ph_images
+  USE collect_info,     ONLY : copy_collect_info
 !
 !  the library modules
 !
@@ -49,14 +50,13 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, auxdyn_loc)
   USE start_k,     ONLY : init_start_k
   USE klist,       ONLY : degauss
   USE freq_ph,     ONLY : fpol, nfs
-  USE optical,     ONLY : start_freq, last_freq
   USE io_files,    ONLY : tmp_dir, wfc_dir, check_tempdir
 !
 !   the phonon variables set here or used to set the input
 !
   USE grid_irr_iq, ONLY : irr_iq, comp_irr_iq, done_irr_iq
   USE disp,        ONLY : nqs, comp_iq, done_iq
-  USE control_ph,       ONLY : recover
+  USE control_ph,       ONLY : epsil, trans, recover
   USE images_omega, ONLY : comp_f
   USE mp_images,    ONLY : nimage
 
@@ -73,7 +73,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, auxdyn_loc)
   CHARACTER(LEN=10) :: cell_units
   CHARACTER(LEN=6) :: int_to_char
   CHARACTER(LEN=256) :: outdir
-  LOGICAL :: exst, parallelfs, trd_ht, something_to_do_all, std
+  LOGICAL :: exst, parallelfs, trd_ht
   !
   iq_point=0
   irr_value=0
@@ -197,98 +197,37 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, auxdyn_loc)
               'mur_lc_disp',    &
               'mur_lc_t',       &
               'elastic_constants_t')
+           IF (.NOT.lphonon(iwork)) RETURN
+           igeom=1
+           iq_point=1
+           irr_value=0
            IF (all_geometries_together) THEN
-              igeom=geometry(iwork)
-              std=something_to_do_all(iwork, igeom, iq_point, irr_value)
-              IF (std) THEN
-                 CALL initialize_ph_geometry(igeom, auxdyn_loc)
-              ELSE
-                 lphonon(iwork)=.FALSE.
-                 RETURN
-              ENDIF
-           ELSE
-              igeom=1
+               igeom=geometry(iwork)
+               CALL initialize_ph_geometry(igeom, auxdyn_loc)
            ENDIF
            comp_irr_iq=.FALSE.
            comp_iq=.FALSE.
            comp_f=.FALSE.
-           jwork=0
-           IF (fpol) THEN
-              comp_iq(1)=.TRUE.
-              comp_irr_iq(0,1)=.TRUE.
-              IF (with_asyn_images) THEN
-                 start_omega=(iwork-1)*omega_group
-                 DO i=1, omega_group
-                    j=MIN(start_omega+i, nfs)
-                    comp_f(j)=.TRUE.
-                 ENDDO
-              ELSE
-                 comp_f=.TRUE.
-              ENDIF
-              lphonon(iwork)=.FALSE.
-              DO i=start_freq,last_freq
-                 lphonon(iwork)=lphonon(iwork).OR.comp_f(i)
-              ENDDO
-           ELSE
+           IF (trans) THEN
               IF (use_ph_images) THEN
                  image=MOD(iwork-1,nimage)+1
-                 DO iq=1,collect_info_save(igeom)%nqs
-                    DO irr=0, collect_info_save(igeom)%irr_iq(iq)
-                       IF (collect_info_save(igeom)%&
-                                          comp_irr_iq(irr,iq,image)==1) &
-                          comp_irr_iq(irr,iq)=.TRUE.
-                       IF (collect_info_save(igeom)%&
-                                           done_irr_iq(irr,iq,image)==1) &
-                          comp_irr_iq(irr,iq)=.FALSE.
-                    ENDDO
-                    IF (collect_info_save(igeom)%comp_iq(iq,image)==1) &
-                          comp_iq(iq)=.TRUE.
-                    IF (collect_info_save(igeom)%done_iq(iq,image)==1) &
-                          comp_iq(iq)=.FALSE.
-                 ENDDO
-                 iq_point=iwork
-                 irr_value=0
+                 CALL copy_collect_info(collect_info_save(igeom), nqs, &
+                            nat, nimage, image, comp_irr_iq, done_irr_iq, &
+                            comp_iq, done_iq, irr_iq)
+                 iq_point=image
               ELSE
-                 IF (all_geometries_together) THEN
-                    startge=start_geometry
-                    lastge=last_geometry
-                 ELSE
-                    startge=1
-                    lastge=1
-                    target_nqs=nqs
-                 ENDIF
-                 DO igeom=startge,lastge
-                    IF (all_geometries_together) &
-                       target_nqs=collect_info_save(igeom)%nqs
-                    DO iq=1, target_nqs
-                       IF (all_geometries_together) THEN
-                          target_irr_iq=collect_info_save(igeom)%irr_iq(iq)
-                       ELSE
-                          target_irr_iq=irr_iq(iq)
-                       ENDIF
-                       DO irr=0, target_irr_iq
-                          jwork=jwork+1
-                          IF (jwork==iwork) THEN
-                             comp_irr_iq(irr,iq)=.TRUE.
-                             comp_iq(iq)=.TRUE.
-                             IF (all_geometries_together) THEN
-                                IF (collect_info_save(igeom)%&
-                                            done_irr_iq(irr,iq,1)==1) &
-                                    comp_irr_iq(irr,iq)=.FALSE.
-                                IF (collect_info_save(igeom)%done_iq(iq,1)==1)&
-                                   comp_iq(iq)=.FALSE.
-                             ELSE
-                                IF (done_irr_iq(irr,iq)) &
-                                   comp_irr_iq(irr,iq)=.FALSE.
-                                IF (done_iq(iq)) comp_iq(iq)=.FALSE.
-                             ENDIF
-                             iq_point=iq
-                             irr_value=irr
-                          ENDIF
-                       ENDDO
-                    ENDDO
-                 ENDDO
+                 comp_irr_iq(irrw(iwork),iqw(iwork))=.TRUE.
+                 comp_iq(iqw(iwork))=.TRUE.
+                 iq_point=iqw(iwork)
+                 irr_value=irrw(iwork)
               ENDIF
+           ELSEIF (fpol) THEN
+              comp_iq(1)=.TRUE.
+              comp_irr_iq(0,1)=.TRUE.
+              comp_f(:)=comp_f_work(:,iwork)
+           ELSEIF (epsil) THEN
+              comp_iq(1)=.TRUE.
+              comp_irr_iq(0,1)=.TRUE.
            ENDIF
 !
 !    Here the elastic constant calculation
@@ -352,48 +291,3 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, auxdyn_loc)
   RETURN
   !
 END SUBROUTINE set_thermo_work_todo
-!
-LOGICAL FUNCTION something_to_do_all(iwork, igeom, iq_point, irr_point)
-
-USE thermo_mod,   ONLY : tot_ngeo, start_geometry, last_geometry
-USE initial_conf, ONLY : collect_info_save
-USE control_qe,   ONLY : use_ph_images
-USE mp_images,    ONLY : nimage
-
-IMPLICIT NONE
-INTEGER, INTENT(IN) :: iwork, igeom
-INTEGER, INTENT(OUT) :: iq_point, irr_point
-
-LOGICAL :: std
-INTEGER :: iq, irr, jgeom, jwork, image
-
-std=.FALSE.
-IF (use_ph_images) THEN
-   image=MOD(iwork-1, nimage) + 1 
-   DO iq=1, collect_info_save(igeom)%nqs
-      DO irr=0, collect_info_save(igeom)%irr_iq(iq)
-         IF ((collect_info_save(igeom)%comp_irr_iq(irr,iq,image)==1).AND.&
-             (collect_info_save(igeom)%done_irr_iq(irr,iq,image)==0)) std=.TRUE.
-      ENDDO
-   ENDDO
-   irr_point=0
-   iq_point=0
-ELSE
-   jwork=0
-   DO jgeom=start_geometry, last_geometry
-      DO iq=1, collect_info_save(jgeom)%nqs
-         DO irr=0, collect_info_save(jgeom)%irr_iq(iq)
-            jwork=jwork+1
-            IF (jwork==iwork) THEN
-               IF (collect_info_save(jgeom)%done_irr_iq(irr,iq,1)==0) std=.TRUE.
-               irr_point=irr
-               iq_point=iq
-            ENDIF    
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF
-something_to_do_all=std
-
-RETURN
-END FUNCTION something_to_do_all

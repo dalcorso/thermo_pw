@@ -378,6 +378,14 @@ MODULE control_thermo
                           lstress(:), & ! if .true. this work computes stress
                           lphonon(:)    ! if .true. this work requires a phonon
 
+  INTEGER, ALLOCATABLE :: geometry(:), & ! the geometry of a given phonon
+                                         ! calculation for each work
+                          iqw(:),      & ! the q vector of a given phonon
+                                         ! calculation for each work
+                          irrw(:)        ! the irrep of a given phonon 
+                                         ! calculation for each work
+  LOGICAL, ALLOCATABLE :: comp_f_work(:,:) ! for each work the list of
+                                         ! frequencies to compute
   LOGICAL :: read_paths      ! the paths for dispersion are read from input
   LOGICAL :: lev_syn_1=.FALSE. ! if .true. must calculate the murnaghan
                                ! at T=0
@@ -746,7 +754,6 @@ MODULE initial_conf
   LOGICAL :: nosym_save        ! save the input nosym
 
   TYPE(collect_info_type), ALLOCATABLE :: collect_info_save(:)
-  INTEGER, ALLOCATABLE :: geometry(:)
 
   LOGICAL :: epsil_save   ! save input epsil, changed in a dispersion run
   LOGICAL :: zeu_save     ! save input_zeu, changed in dispersion run

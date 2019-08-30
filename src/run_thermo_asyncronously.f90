@@ -18,8 +18,8 @@ SUBROUTINE run_thermo_asynchronously(nwork, part, igeom, auxdyn)
                               asyn_stop, stop_signal_activated
   USE thermo_mod,      ONLY : energy_geo
   USE control_thermo,  ONLY : lpwscf, lstress, lphonon, lberry, &
-                              all_geometries_together, max_seconds_tpw
-  USE initial_conf,    ONLY : geometry
+                              all_geometries_together, max_seconds_tpw, &
+                              geometry
   USE control_qe,      ONLY : use_ph_images
   USE elastic_constants, ONLY : sigma_geo
   USE piezoelectric_tensor, ONLY : polar_geo, nppl
