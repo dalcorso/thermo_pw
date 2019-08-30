@@ -26,7 +26,9 @@ check_el_cons.o \
 check_el_cons_qha.o \
 check_geo_initial_status.o \
 check_phgeo_on_file.o \
+clean_bfgs_history.o \
 clean_dfft.o \
+clean_ngeo.o \
 clean_path.o \
 collect_everything.o \
 collect_info.o \
@@ -52,6 +54,7 @@ find_mode_sym_proj.o \
 fit_frequencies.o \
 generate_k_along_lines_kz.o \
 generalized_phdos.o \
+initialize_geometry_and_ph.o \
 initialize_thermo_work.o \
 interpolate_bfact.o \
 interpolate_cv.o \
@@ -101,6 +104,7 @@ read_elastic_qha.o \
 readmodes.o \
 read_state_densities.o \
 run_thermo_asyncronously.o \
+save_ph_variables.o \
 set_2d_bz_path.o \
 set_bz_path.o \
 set_dos_kpoints.o \
@@ -113,6 +117,7 @@ set_paths_disp.o \
 set_piezo_tensor_work.o \
 set_temperature.o \
 set_thermo_work_todo.o \
+set_work_for_elastic_const.o \
 simple_nonanal.o \
 simple_plot.o \
 surface.o     \
