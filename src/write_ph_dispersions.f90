@@ -62,6 +62,11 @@ SUBROUTINE write_ph_dispersions()
   LOGICAL, ALLOCATABLE :: high_sym(:), same_next(:)
   LOGICAL :: check_file_exists
   !
+!
+!  Set the BZ path for the present geometry
+!
+  CALL set_paths_disp()
+
   filefrq="phdisp_files/"//TRIM(flfrq)
   IF (check_file_exists(filefrq)) THEN
      WRITE(stdout,'(/,2x,76("-"))')
@@ -70,10 +75,6 @@ SUBROUTINE write_ph_dispersions()
      WRITE(stdout,'(2x,76("-"),/)')
      RETURN
   ENDIF
-!
-!  Set the BZ path for the present geometry
-!
-  CALL set_paths_disp()
 
   IF (disp_nqs==0) RETURN
 
