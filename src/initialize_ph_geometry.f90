@@ -6,7 +6,13 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 SUBROUTINE initialize_ph_geometry(igeom, auxdyn)
-
+!
+!   This routine initializes the phonon calculation by calling 
+!   initialize_geometry_and_ph which is a substitute of phq_readin.
+!   This routine reads the xml file produced by pw.x and allocates the  
+!   variables usually allocated by phq_readin.
+!   Then it calls check_initial_status to initialize the phonon.
+!
 USE input_parameters, ONLY : outdir
 USE control_thermo,   ONLY : outdir_thermo
 USE io_global,        ONLY : stdout

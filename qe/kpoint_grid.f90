@@ -7,7 +7,8 @@
 !
 !-----------------------------------------------------------------------
 SUBROUTINE kpoint_grid_tpw ( nrot, time_reversal, skip_equivalence, s, t_rev, &
-              bg, npk, k1,k2,k3, nk1,nk2,nk3, nks, xk, wk, comm, me_proc, nproc)
+              bg, npk, k1,k2,k3, nk1,nk2,nk3, nks, xk, wk, &
+              comm, me_proc, nproc)
 !-----------------------------------------------------------------------
 !
 !  Automatic generation of a uniform grid of k-points

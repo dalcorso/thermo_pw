@@ -9,58 +9,12 @@
 SUBROUTINE check_initial_geometry(auxdyn)
   !-----------------------------------------------------------------------
   !
-  ! This routine checks the initial status of the phonon run and sets
-  ! the variables that control the run, dealing with the image
-  ! and GRID parallelization features of the phonon code.
-  ! 
-  ! The size of the grid is determined by the following variables:
-  ! nqs : the number of q points
-  ! x_q : the coordinates of the q points
-  !
-  ! nfs : the number of imaginary frequencies
-  ! fiu : which frequencies 
-  !
-  ! The flags that control which tensors to calculate
-  !
-  ! In a recover calculation the q grid variables are already known, 
-  ! read from file in phq_readin. In a calculation starting from
-  ! scratch this routine sets them. The frequencies variables and the
-  ! tensors flags are read from input. 
-  ! The amount of work to do for each representation of each q
-  ! point depends on the size of the representation and the 
-  ! order of the small group of q. In a recover calculation
-  ! these information are on file, when recover=.false. this
-  ! routine writes the modes and their degeneration on files 
-  ! and calculates the order of the small group of q. The following
-  ! variables are set
-  !
-  ! irr_iq : for each q point how many irreducible representations
-  ! npert_irr_iq : how many perturbation per representation and per q
-  ! nsymq_iq : the order of the small group of q for each q
-  !
-  ! The following variables are set by this routine on the basis of
-  ! start_irr, last_irr, start_iq, last_iq, OR of modenum, OR of ifat and 
-  ! atomo:
-  !
-  ! comp_iq : =.TRUE. if the q point is calculated in this run
-  ! comp_irr_iq : =.TRUE. if the representation is calculated in this run
-  ! comp_iu : =.TRUE. if this frequency is calculated in this run
-  !                   NB: start_iu, last_iu is not yet programmed
-  ! 
-  ! After knowing this info the routine divides the total work among
-  ! the images (when nimage > 1) INDEPENDENTLY of what has been already
-  ! calculated and is available on file.
-  !
-  ! Then, when recover=.true., the routine looks on files for pieces
-  ! already calculated and sets the array
-  !
-  ! done_irr_iq : =.TRUE. if the representation has been already calculated
-  ! done_iq : =.TRUE. if the q point has been already calculated
-  ! done_iu : =.TRUE. if already calculated
-  ! done_bands_iq : .TRUE. if the bands for the q point are on file.
-  !
-  ! If recover=.false. all these array are initialized to .false.
-  !
+  !  This routine is equivalent to check_initial_status, but it is
+  !  a simplification of it that does not check the existence of the
+  !  bands files, does not write the dynmat0 file and does not 
+  !  create phonon directories in outdir.
+  !  It is used to make the phonon calculations of several geometries
+  !  and setup the relevant variables.
   !
   USE io_global,       ONLY : stdout
   USE ions_base,       ONLY : nat
