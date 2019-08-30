@@ -41,8 +41,8 @@ TYPE :: collect_info_type
     !
 END TYPE collect_info_type
 
-PUBLIC collect_info_type, init_collect_info, comm_collect_info, &
-       destroy_collect_info_type
+PUBLIC collect_info_type, init_collect_info, copy_collect_info, &
+       comm_collect_info, destroy_collect_info_type
 
 CONTAINS
 
@@ -50,7 +50,10 @@ CONTAINS
    SUBROUTINE init_collect_info(info, nqs, nat, nima, pos, comp_irr_iq, &
                                 done_irr_iq, comp_iq, done_iq, irr_iq)
 !----------------------------------------------------------------------------
-
+!
+!  This routine copy the variables of the phonon into the info
+!  structure allocating the necessary variables of the structure.
+!
    IMPLICIT NONE
 
    INTEGER, INTENT(IN) :: nqs, nat, nima, pos, irr_iq(nqs)
@@ -89,9 +92,49 @@ CONTAINS
    END SUBROUTINE init_collect_info
 
 !----------------------------------------------------------------------------
-   SUBROUTINE comm_collect_info(info, comm)
+   SUBROUTINE copy_collect_info(info, nqs, nat, nima, pos, comp_irr_iq, &
+                                done_irr_iq, comp_iq, done_iq, irr_iq)
 !----------------------------------------------------------------------------
 
+   IMPLICIT NONE
+
+   INTEGER, INTENT(IN) :: nqs, nat, nima, pos, irr_iq(nqs)
+   LOGICAL, INTENT(INOUT) :: comp_irr_iq(0:3*nat,nqs), &
+                    done_irr_iq(0:3*nat, nqs), comp_iq(nqs), done_iq(nqs)
+   TYPE(collect_info_type), INTENT(IN) :: info
+
+   INTEGER :: iq, irr
+
+   comp_irr_iq=.FALSE.
+   comp_iq=.FALSE.
+   done_irr_iq=.FALSE.
+   done_iq=.FALSE.
+
+   DO iq=1,nqs
+      DO irr=0, irr_iq(iq)
+         IF (info%comp_irr_iq(irr,iq,pos)==1) comp_irr_iq(irr,iq)=.TRUE.
+         IF (info%done_irr_iq(irr,iq,pos)==1) done_irr_iq(irr,iq)=.TRUE.
+      ENDDO
+      IF (info%comp_iq(iq,pos)==1) comp_iq(iq)=.TRUE.
+      IF (info%done_iq(iq,pos)==1) done_iq(iq)=.TRUE.
+   ENDDO
+   DO iq=1,nqs
+      DO irr=0, irr_iq(iq)
+         IF (done_irr_iq(irr,iq)) comp_irr_iq(irr,iq)=.FALSE.
+      ENDDO
+      IF (done_iq(iq)) comp_iq(iq)=.FALSE.
+   ENDDO
+
+   RETURN
+   END SUBROUTINE copy_collect_info
+
+!----------------------------------------------------------------------------
+   SUBROUTINE comm_collect_info(info, comm)
+!----------------------------------------------------------------------------
+!
+!  This routine comunicate the variables of the info structure to all 
+!  processors of a communicator group.
+!
    USE mp, ONLY : mp_sum
 
    IMPLICIT NONE
