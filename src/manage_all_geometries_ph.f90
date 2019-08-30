@@ -19,9 +19,7 @@ SUBROUTINE manage_all_geometries_ph()
 
   USE thermo_mod,       ONLY : what, ibrav_geo, celldm_geo, no_ph,      &
                                start_geometry, last_geometry, phgeo_on_file
-  USE control_ph,       ONLY : always_run, ldisp, trans, low_directory_check
-  USE freq_ph,          ONLY : fpol
-  USE control_lr,       ONLY : lgamma
+  USE control_ph,       ONLY : always_run, ldisp, low_directory_check
   USE cell_base,        ONLY : ibrav, celldm
 
   USE mp_asyn,          ONLY : with_asyn_images, stop_signal_activated
@@ -95,17 +93,9 @@ IF (.NOT.(after_disp.AND.(what=='mur_lc_t'.OR. &
       low_directory_check=.TRUE.
       CALL check_initial_geometry(auxdyn)
       low_directory_check=ldcs
-      IF (trans) THEN
-         IF (with_asyn_images) CALL collect_everything(auxdyn, igeom)
-      ELSEIF (fpol) THEN
-         IF (lgamma) THEN
-            CALL collect_all_epsilon()
-            CALL plot_epsilon_omega_opt()
-         ELSE
-            CALL collect_all_chi()
-            CALL plot_epsilon_omega_q()
-         ENDIF
-      ENDIF
+
+      CALL manage_collection(auxdyn, igeom)
+
       CALL close_ph_geometry(.TRUE.)
    ENDDO
    CALL restore_files_names()

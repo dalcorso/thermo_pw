@@ -5,6 +5,32 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+SUBROUTINE manage_collection(auxdyn,igeom)
+
+USE control_ph, ONLY : trans
+USE control_lr, ONLY : lgamma
+USE freq_ph,    ONLY : fpol
+USE mp_asyn,    ONLY : with_asyn_images
+
+IMPLICIT NONE
+CHARACTER (LEN=256), INTENT(IN) :: auxdyn
+INTEGER :: igeom
+
+IF (trans) THEN
+   IF (with_asyn_images) CALL collect_everything(auxdyn, igeom)
+ELSEIF (fpol) THEN
+   IF (lgamma) THEN
+      IF (with_asyn_images) CALL collect_all_epsilon()
+      CALL plot_epsilon_omega_opt()
+   ELSE
+      IF (with_asyn_images) CALL collect_all_chi()
+      CALL plot_epsilon_omega_q()
+   ENDIF
+ENDIF
+
+RETURN
+END SUBROUTINE manage_collection
+
 SUBROUTINE collect_everything(auxdyn, igeom)
 !
 !  This routine calls ph.x another time in order to collect the results 

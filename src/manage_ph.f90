@@ -24,9 +24,7 @@ SUBROUTINE manage_ph()
   USE disp,             ONLY : nqs, comp_iq, done_iq
   USE grid_irr_iq,      ONLY : comp_irr_iq, done_irr_iq, irr_iq
   USE ph_restart,       ONLY : destroy_status_run
-  USE freq_ph,          ONLY : fpol
   USE save_ph,          ONLY : clean_input_variables
-  USE control_lr,       ONLY : lgamma
   USE cell_base,        ONLY : ibrav, celldm
 
 
@@ -141,17 +139,8 @@ DO igeom=start_geometry,last_geometry
       !   writes the dynamical matrix
       !
       CALL mp_barrier(world_comm)
-      IF (trans) THEN
-         IF (with_asyn_images) CALL collect_everything(auxdyn, igeom)
-      ELSEIF (fpol) THEN
-         IF (lgamma) THEN
-            IF (nimage>1) CALL collect_all_epsilon()
-            CALL plot_epsilon_omega_opt()
-         ELSE
-            IF (nimage>1) CALL collect_all_chi()
-            CALL plot_epsilon_omega_q()
-         ENDIF
-      ENDIF
+
+      CALL manage_collection(auxdyn, igeom)
       !
    END IF
 
