@@ -27,7 +27,6 @@ SUBROUTINE manage_ph()
   USE save_ph,          ONLY : clean_input_variables
   USE cell_base,        ONLY : ibrav, celldm
 
-
   USE mp_asyn,          ONLY : with_asyn_images, stop_signal_activated
 
   USE io_global,        ONLY : meta_ionode, stdout, meta_ionode_id
@@ -44,7 +43,7 @@ SUBROUTINE manage_ph()
 IMPLICIT NONE
 
 INTEGER  :: part, nwork, igeom, exit_status, ph_geometries, iaux
-LOGICAL  :: check_dyn_file_exists, do_ph, has_xml, fninit, after_disp_save
+LOGICAL  :: check_dyn_file_exists, do_ph, has_xml, after_disp_save
 CHARACTER(LEN=6) :: int_to_char
 
 CHARACTER (LEN=256) :: auxdyn
@@ -55,7 +54,6 @@ always_run=.TRUE.
 CALL start_clock( 'PHONON' )
 IF (use_ph_images) ALLOCATE(collect_info_save(1))
 CALL check_phgeo_on_file()
-fninit=.FALSE.
 after_disp_save=after_disp
 DO igeom=start_geometry,last_geometry
    IF (no_ph(igeom).OR.stop_signal_activated) CYCLE
@@ -74,10 +72,6 @@ DO igeom=start_geometry,last_geometry
    ELSE
       CALL thermo_ph_readin()
       CALL save_ph_variables()
-   ENDIF
-   IF (.NOT.fninit) THEN
-      CALL initialize_file_names()
-      fninit=.TRUE.
    ENDIF
    CALL set_files_names(igeom)
 
@@ -160,10 +154,6 @@ DO igeom=start_geometry,last_geometry
    ENDIF
 ENDDO
 after_disp=after_disp_save
-IF (.NOT.fninit) THEN
-   CALL initialize_file_names()
-   fninit=.TRUE.
-ENDIF
 CALL restore_files_names()
 1000 CONTINUE
 

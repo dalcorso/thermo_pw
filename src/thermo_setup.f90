@@ -295,6 +295,11 @@ SUBROUTINE thermo_setup()
         sur_layers=MIN(2, nat/2)
      ENDIF
   ENDIF
+!
+!  Initialize here the internal names of the files for dealing with many
+!  geometries
+!
+   CALL initialize_file_names()
 
   RETURN
   !

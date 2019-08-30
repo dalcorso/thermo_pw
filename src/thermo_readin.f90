@@ -828,6 +828,8 @@ SUBROUTINE thermo_ph_readin()
   USE io_files,   ONLY : outdir_in_ph => tmp_dir
   USE mp,         ONLY : mp_bcast
   USE control_ph, ONLY : ldisp
+  USE internal_files_names, ONLY : fildyn_thermo
+  USE output,     ONLY : fildyn
   USE input_parameters, ONLY : outdir
   !
   IMPLICIT NONE
@@ -858,6 +860,7 @@ SUBROUTINE thermo_ph_readin()
   IF (meta_ionode) CLOSE(5,STATUS='KEEP')
   IF (.NOT.ldisp.AND. what /= 'scf_ph' .AND. what /= 'mur_lc_ph' ) &
         CALL errore('thermo_ph_readin','ldisp should be .TRUE.',1)
+  fildyn_thermo="dynamical_matrices/"//TRIM(fildyn)
   !
   RETURN
   !

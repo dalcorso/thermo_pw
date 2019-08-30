@@ -84,7 +84,6 @@ DO igeom=start_geometry,last_geometry
    IF (.NOT.fninit) THEN
       CALL thermo_ph_readin()
       CALL save_ph_variables()
-      CALL initialize_file_names()
       CALL set_files_names(igeom)
 
       auxdyn=fildyn
@@ -110,7 +109,6 @@ DO igeom=start_geometry,last_geometry
    CALL close_ph_geometry(.FALSE.)
    CALL restore_files_names()
 ENDDO
-IF (.NOT.fninit) CALL initialize_file_names()
 !
 !  If the phonon images are used, all images must have the same information 
 !  on what must be calculated by each image, so the collect_info structure 

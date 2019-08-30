@@ -22,7 +22,7 @@ SUBROUTINE manage_all_geometries_ph()
   USE control_ph,       ONLY : always_run, ldisp, low_directory_check
   USE cell_base,        ONLY : ibrav, celldm
 
-  USE mp_asyn,          ONLY : with_asyn_images, stop_signal_activated
+  USE mp_asyn,          ONLY : stop_signal_activated
   USE mp_images,        ONLY : nimage, my_image_id
   USE mp,               ONLY : mp_barrier
   USE mp_world,         ONLY : world_comm
@@ -123,7 +123,6 @@ DO igeom=start_geometry, last_geometry
    ibrav=ibrav_geo(igeom)
    celldm(:)=celldm_geo(:,igeom)
    IF (set_internal_path) CALL set_bz_path()
-   IF (after_disp.AND.igeom==start_geometry) CALL initialize_file_names()
 
    CALL set_files_names(igeom)
    auxdyn=fildyn
