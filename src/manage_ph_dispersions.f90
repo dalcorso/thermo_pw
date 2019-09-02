@@ -9,7 +9,8 @@ SUBROUTINE manage_ph_dispersions(auxdyn, igeom)
 
 USE ions_base,        ONLY : nsp, amass
 USE initial_conf,     ONLY : amass_save
-USE control_thermo,   ONLY : ltherm, ltherm_dos, ltherm_freq
+USE control_thermo,   ONLY : ltherm, ltherm_dos, ltherm_freq, &
+                             set_internal_path
 USE control_paths,    ONLY :  disp_nqs
 
 IMPLICIT NONE
@@ -23,6 +24,7 @@ CHARACTER(LEN=256) :: filedata, filerap, fileout, gnu_filename, filenameps
 !
 CALL q2r_sub(auxdyn) 
 amass_save(1:nsp)=amass(1:nsp)
+IF (set_internal_path) CALL set_bz_path()
 !
 !    compute interpolated dispersions
 !

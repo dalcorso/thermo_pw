@@ -358,7 +358,8 @@ SUBROUTINE q2r_sub(fildyn)
   !
 
   CALL interface_with_tpw(phid, nr1, nr2, nr3, nat, ntyp, lrigid, zeu, &
-                     epsil, atm, nspin_mag, m_loc, tau, ityp, at, bg, omega)
+                     epsil, atm, nspin_mag, m_loc, tau, ityp, at, bg,  &
+                     omega, ibrav, celldm)
   !
   DEALLOCATE(nc)
   DEALLOCATE(phid) 
@@ -598,7 +599,7 @@ subroutine set_zasr ( zasr, nr1,nr2,nr3, nat, ibrav, tau, zeu)
 
 SUBROUTINE interface_with_tpw(frc_, nr1, nr2, nr3, nat_, ntyp_, has_zstar_, &
                 zeu_, epsil_, atm_, nspin_mag_, m_loc_, tau_, ityp_, at_, &
-                bg_, omega_ )
+                bg_, omega_, ibrav_, celldm_ )
 !
 !  This routine is used to copy the variables produced by q2r in the variables
 !  of the thermo_pw code, avoiding to read the file on disk.
@@ -606,15 +607,17 @@ SUBROUTINE interface_with_tpw(frc_, nr1, nr2, nr3, nat_, ntyp_, has_zstar_, &
 USE kinds,  ONLY : DP
 USE ifc,    ONLY : frc, atm, zeu, m_loc, epsil_ifc, has_zstar
 USE ions_base, ONLY : nat, ntyp=>nsp, tau, ityp
-USE cell_base, ONLY : at, bg, omega
+USE cell_base, ONLY : ibrav, at, bg, celldm, omega
 USE disp,   ONLY : nq1, nq2, nq3
 USE noncollin_module, ONLY : nspin_mag
 
 IMPLICIT NONE
-INTEGER,     INTENT(IN) :: nr1, nr2, nr3, nat_, ntyp_, ityp_(nat_), nspin_mag_
+INTEGER,     INTENT(IN) :: nr1, nr2, nr3, nat_, ntyp_, ityp_(nat_), &
+                           nspin_mag_, ibrav_
 COMPLEX(DP),    INTENT(IN) :: frc_(nr1*nr2*nr3,3,3,nat_,nat_)
 REAL(DP),    INTENT(IN) :: zeu_(3,3,nat_), m_loc_(3,nat_), epsil_(3,3), &
-                           at_(3,3), bg_(3,3), omega_, tau_(3,nat_) 
+                           at_(3,3), bg_(3,3), omega_, tau_(3,nat_),    &
+                           celldm_(6)
 LOGICAL,     INTENT(IN) :: has_zstar_
 CHARACTER(LEN=3), INTENT(IN) :: atm_(ntyp_)
 INTEGER :: i,j,k,ijk
@@ -651,6 +654,8 @@ has_zstar=has_zstar_
 !  initialize atomic positions and the cell. This is necessary when using 
 !  after_disp=.TRUE.
 !
+ibrav=ibrav_
+celldm=celldm_
 at=at_
 bg=bg_
 nat=nat_

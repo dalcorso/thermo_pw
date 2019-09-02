@@ -35,11 +35,8 @@ LOGICAL FUNCTION check_dyn_file_exists(filename)
 !   It has to be called by all processors when they are synchronized.
 !   Only the meta_ionode checks that the file exists and sends the information
 !   to all processors.
-!   If after_disp is true but the dynamical matrix files are not found, 
-!   this routine stops with an error.
 !
 USE mp,             ONLY : mp_bcast
-USE control_thermo, ONLY : after_disp
 USE control_ph,     ONLY : xmldyn
 USE mp_world,       ONLY : world_comm
 USE io_global,      ONLY : meta_ionode_id, meta_ionode
@@ -76,10 +73,6 @@ IF (meta_ionode) THEN
    END DO
 ENDIF
 CALL mp_bcast(exst_all, meta_ionode_id, world_comm)
-
-IF (.NOT. exst_all .AND. after_disp) &
-      CALL errore('check_dyn_file_exists','after_disp but dynamical matrix &
-                      &files not found', 1)
 
 check_dyn_file_exists=exst_all
 

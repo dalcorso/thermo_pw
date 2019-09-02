@@ -15,7 +15,8 @@ SUBROUTINE check_phgeo_on_file()
 !
 
 USE thermo_mod,       ONLY : start_geometry, last_geometry, phgeo_on_file, &
-                             tot_ngeo
+                             tot_ngeo, no_ph
+USE control_thermo,   ONLY : after_disp
 USE output,           ONLY : fildyn
 
 IMPLICIT NONE
@@ -31,10 +32,14 @@ phgeo_on_file=.FALSE.
 !  loop on all the geometries calculated in this run
 !
 DO igeom=start_geometry,last_geometry
+   IF (no_ph(igeom)) CYCLE
    auxdyn=TRIM(fildyn)//'.g'//TRIM(int_to_char(igeom))//'.'
    IF (auxdyn(1:18)/='dynamical_matrices') &
           auxdyn='dynamical_matrices/'//TRIM(auxdyn)
    IF (check_dyn_file_exists(auxdyn)) phgeo_on_file(igeom)=.TRUE.
+   IF (after_disp.AND..NOT.phgeo_on_file(igeom)) &
+      CALL errore('check_phgeo_on_file','after_disp but dynamical matrix &
+                      &files not found', 1)
 ENDDO
 
 RETURN
