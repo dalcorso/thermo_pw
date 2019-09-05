@@ -10,7 +10,7 @@ SUBROUTINE deallocate_q2r()
   !-----------------------------------------------------------------------
   !
   !  This routine deallocates the variables allocated in 
-  !  manage_ph_dispersions
+  !  manage_ph_postproc
   !
   USE thermo_mod,     ONLY : tot_ngeo
   USE phdos_module,   ONLY : destroy_phdos

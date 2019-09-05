@@ -115,7 +115,7 @@ DO igeom=start_geometry, last_geometry
 !
 !  Compute the dispersions and the thermodynamic properties
 !
-   IF (lq2r) CALL manage_ph_dispersions(auxdyn, igeom)
+   IF (lq2r) CALL manage_ph_postproc(auxdyn, igeom)
 
    CALL restore_files_names()
 ENDDO

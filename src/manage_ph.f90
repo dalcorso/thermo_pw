@@ -119,7 +119,7 @@ DO igeom=start_geometry,last_geometry
       auxdyn=fildyn
    ENDIF
 
-   IF (lq2r) CALL manage_ph_dispersions(auxdyn, igeom)
+   IF (lq2r) CALL manage_ph_postproc(auxdyn, igeom)
 
 100 CALL deallocate_asyn()
    IF (do_ph) THEN

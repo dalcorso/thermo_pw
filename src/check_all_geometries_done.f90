@@ -49,7 +49,6 @@ USE thermo_mod,            ONLY : tot_ngeo, ibrav_geo, celldm_geo, no_ph, &
 USE control_elastic_constants, ONLY : start_geometry_qha, last_geometry_qha, &
                                   ngeom
 USE cell_base,             ONLY : ibrav, celldm
-USE control_ph,            ONLY : ldisp
 USE control_thermo,        ONLY : set_internal_path, lq2r
 USE output,                ONLY : fildyn
 USE io_global,             ONLY : stdout
@@ -68,13 +67,12 @@ DO igeom_qha=start_geometry_qha, last_geometry_qha
          WRITE(stdout,'(/,5x,40("%"))')
          WRITE(stdout,'(5x,"Recomputing geometry ", i5)') igeom
          WRITE(stdout,'(5x,40("%"),/)')
-         ldisp=.TRUE.
          ibrav=ibrav_geo(igeom)
          celldm(:)=celldm_geo(:,igeom)
          IF (set_internal_path) CALL set_bz_path()
          CALL set_files_names(igeom)
          auxdyn=fildyn
-         CALL manage_ph_dispersions(auxdyn, igeom)
+         CALL manage_ph_postproc(auxdyn, igeom)
       ENDIF
    ENDDO   
 ENDDO

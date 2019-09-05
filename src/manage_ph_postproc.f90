@@ -5,7 +5,7 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-SUBROUTINE manage_ph_dispersions(auxdyn, igeom)
+SUBROUTINE manage_ph_postproc(auxdyn, igeom)
 
 USE ions_base,        ONLY : nsp, amass
 USE initial_conf,     ONLY : amass_save
@@ -51,5 +51,5 @@ ENDIF
 CALL clean_ifc_variables()
 
 RETURN
-END SUBROUTINE manage_ph_dispersions
+END SUBROUTINE manage_ph_postproc
 

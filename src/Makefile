@@ -71,7 +71,7 @@ manage_energy_minimum.o \
 manage_piezo_tensor.o \
 manage_ph.o \
 manage_all_geometries_ph.o \
-manage_ph_dispersions.o \
+manage_ph_postproc.o \
 manage_ph_symmetry.o \
 manage_surface_states.o \
 manage_xrdp.o \
