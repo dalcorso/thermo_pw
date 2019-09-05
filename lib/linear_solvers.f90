@@ -16,7 +16,7 @@ MODULE linear_solvers
   PRIVATE
 
   PUBLIC  ccg_many_vectors, cg_many_vectors, linsolvx, linsolvx_sym, &
-          linsolvms, linsolvsvd
+          linsolvms, linsolvsvd, min_sqr_solve
 
 
 CONTAINS
@@ -683,5 +683,74 @@ CALL errore('linsolvx_sym','error in factorization',abs(info))
  
 RETURN
 END SUBROUTINE linsolvx_sym
+
+SUBROUTINE min_sqr_solve(ndata, ncoeff, amat, f, coeff, lsolve)
+!
+!   This routine receives a linear system where in general the number of
+!   rows ndata is larger than the number column ncoeff and finds the
+!   solution of the system that minimize the norm ||AX-f||^2.
+!   It can do it with three different algorithms according to the
+!   value of lsolve.
+!   A X = f      where A is a matrix of dimension ndata x ncoeff
+!                Using 1 a matrix ncoeff x ncoeff is calculated as
+!   A^T A X = A^T f   and the linear system provides X, the ncoeff 
+!                coefficients of the polynomial.
+!                Using 2 the overdetemined linear system AX=f is solved
+!                using QR or LQ factorization.
+!                Using 3 the overdetermined linear system AX=f is solved
+!                using SVD decomposition.
+!   If lsolve is not one of these values method 2 is used.
+!
+USE kinds, ONLY : DP
+IMPLICIT NONE
+
+INTEGER, INTENT(IN) :: ndata, ncoeff, lsolve
+REAL(DP), INTENT(IN) :: amat(ndata,ncoeff), f(ndata) 
+REAL(DP), INTENT(INOUT) :: coeff(ncoeff)
+
+REAL(DP), ALLOCATABLE :: aa(:,:), b(:)
+INTEGER :: idata, ivar, jvar, lsolve_
+
+ALLOCATE(aa(ncoeff,ncoeff))
+ALLOCATE(b(ncoeff))
+
+aa=0.0_DP
+b =0.0_DP
+DO ivar=1,ncoeff
+   DO jvar=1,ncoeff
+      DO idata=1,ndata
+         aa(ivar,jvar)= aa(ivar,jvar) + amat(idata,ivar) * amat(idata,jvar)
+      END DO
+   END DO
+   DO idata=1,ndata
+      b(ivar) = b(ivar) + amat(idata,ivar) * f(idata)
+   END DO
+END DO
+!
+!   solve the linear system and find the coefficients
+!
+coeff=0.0_DP
+lsolve_=lsolve
+IF (lsolve_<1.OR.lsolve_>3) lsolve_=2
+IF (lsolve_==1) THEN
+   WRITE(stdout,'(5x,"Finding the quartic polynomial using &
+                                              &ncoeff x ncoeff matrix")')  
+   CALL linsolvx(aa,ncoeff,b,coeff)
+!   CALL linsolvx_sym(aa,ncoeff,b,coeff)
+
+ELSEIF(lsolve_==2) THEN
+   WRITE(stdout,'(5x,"Finding the quartic polynomial using &
+                                                   &QR factorization")')  
+   CALL linsolvms(amat,ndata,ncoeff,f,coeff)
+ELSEIF(lsolve_==3) THEN
+   WRITE(stdout,'(5x,"Finding the quartic polynomial using SVD")')  
+   CALL linsolvsvd(amat,ndata,ncoeff,f,coeff)
+ENDIF
+
+DEALLOCATE(aa)
+DEALLOCATE(b)
+
+RETURN
+END SUBROUTINE min_sqr_solve
 
 END MODULE linear_solvers
