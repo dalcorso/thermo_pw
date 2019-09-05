@@ -147,36 +147,23 @@ SUBROUTINE fit_multi_quartic(ndata,nvar,lsolve,x,f,p4)
 !  a number of points equal or larger than the number of coefficients. 
 !  The routine makes a least square fit of the data.
 !
-!  lsolve can be 1, 2 or 3. It chooses the method to compute the
-!  polynomial coefficients. 
-!  The problem can be written, in matrix form:
-!  A X = B      where A is a matrix of dimension ndata x ncoeff
-!               Using 1 a matrix ncoeff x ncoeff is calculated as
-!  A^T A X = A^T B   and the linear system provides X, the ncoeff 
-!               coefficients of the polynomial.
-!               Using 2 the overdetemined linear system AX=B is solved
-!               using QR or LQ factorization.
-!               Using 3 the overdetermined linear system AX=B is solved
-!               using SVD decomposition
-!  If lsolve is not one of these values method 2 is used.
+!  lsolve can be 1, 2 or 3. See the routine min_sqr_solve for an
+!  explanation of its meaning. 
 !
-USE linear_solvers,     ONLY : linsolvx, linsolvx_sym, linsolvms, linsolvsvd
+USE linear_solvers,     ONLY : min_sqr_solve
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: nvar, ndata
 INTEGER, INTENT(INOUT) :: lsolve
 REAL(DP), INTENT(IN) :: x(nvar,ndata), f(ndata)
 TYPE(poly4), INTENT(INOUT) :: p4
-REAL(DP), ALLOCATABLE :: amat(:,:), aa(:,:), b(:), coeff(:), work(:)
-INTEGER, ALLOCATABLE :: ipiv(:)
+REAL(DP), ALLOCATABLE :: amat(:,:), coeff(:)
 
-INTEGER :: i, j, k, l, m, n, o, ivar, jvar, idata, ncoeff, info
+INTEGER :: i, j, k, l, m, n, o, idata, ncoeff
 
 ncoeff=1+nvar+p4%ncoeff2+p4%ncoeff3+p4%ncoeff4
 
 ALLOCATE(amat(ndata,ncoeff))
 ALLOCATE(coeff(ncoeff))
-ALLOCATE(aa(ncoeff,ncoeff))
-ALLOCATE(b(ncoeff))
 
 IF (nvar<1) CALL errore('fit_multi_quartic','nvar must be larger than 0',1)
 IF (ndata < ncoeff) &
@@ -207,39 +194,9 @@ DO idata=1,ndata
    ENDDO
 ENDDO
 
-aa=0.0_DP
-b =0.0_DP
-DO ivar=1,ncoeff
-   DO jvar=1,ncoeff
-      DO idata=1,ndata
-         aa(ivar,jvar)= aa(ivar,jvar) + amat(idata,ivar) * amat(idata,jvar)
-      END DO
-   END DO
-   DO idata=1,ndata
-      b(ivar) = b(ivar) + amat(idata,ivar) * f(idata)
-   END DO
-END DO
+CALL min_sqr_solve(ndata, ncoeff, amat, f, coeff, lsolve)
 !
-!   solve the linear system and find the coefficients
-!
-coeff=0.0_DP
-IF (lsolve<1.OR.lsolve>3) lsolve=2
-IF (lsolve==1) THEN
-   WRITE(stdout,'(5x,"Finding the quartic polynomial using &
-                                              &ncoeff x ncoeff matrix")')  
-   CALL linsolvx(aa,ncoeff,b,coeff)
-!   CALL linsolvx_sym(aa,ncoeff,b,coeff)
-
-ELSEIF(lsolve==2) THEN
-   WRITE(stdout,'(5x,"Finding the quartic polynomial using &
-                                                   &QR factorization")')  
-   CALL linsolvms(amat,ndata,ncoeff,f,coeff)
-ELSEIF(lsolve==3) THEN
-   WRITE(stdout,'(5x,"Finding the quartic polynomial using SVD")')  
-   CALL linsolvsvd(amat,ndata,ncoeff,f,coeff)
-ENDIF
-!
-!  assign the coefficients to the polynomial variables
+!  assign the coefficients to the polynomial 
 !
 p4%a0=coeff(1)
 n=0
@@ -263,8 +220,6 @@ ENDDO
 
 DEALLOCATE(amat)
 DEALLOCATE(coeff)
-DEALLOCATE(aa)
-DEALLOCATE(b)
 
 RETURN
 END SUBROUTINE fit_multi_quartic
