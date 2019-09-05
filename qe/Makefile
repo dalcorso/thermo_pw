@@ -57,6 +57,7 @@ dvqpsi_us.o \
 dvqpsi_us_only.o \
 dv_of_drho_clf.o \
 dv_of_drho_tran.o \
+dyndiag.o \
 dynmat0.o \
 electrons.o \
 ev_xml.o \
