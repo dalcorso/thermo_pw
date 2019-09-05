@@ -69,7 +69,7 @@ MODULE quadratic_surfaces
 
 CONTAINS
 
-SUBROUTINE fit_multi_quadratic(ndata,nvar,x,f,p2)
+SUBROUTINE fit_multi_quadratic(ndata,nvar,lsolve,x,f,p2)
 !
 !  This routine receives as input a set of vectors x(nvar,ndata) and
 !  function values f(ndata) and gives as output the coefficients of
@@ -104,24 +104,25 @@ SUBROUTINE fit_multi_quadratic(ndata,nvar,x,f,p2)
 !
 !   To interpolate the function it is better to give to fit_multi_quadratic 
 !   at least as many data points as the number of coefficients or more. The 
-!   routines makes a least square fit of the data.
+!   routine makes a least square fit of the data.
 !
-USE linear_solvers, ONLY : linsolvx_sym
+!   lsolve can be 1, 2 or 3. See the routine min_sqr_solve for an
+!   explanation of its meaning. 
+!
+USE linear_solvers,     ONLY : min_sqr_solve
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: nvar, ndata
+INTEGER, INTENT(IN) :: nvar, ndata, lsolve
 REAL(DP), INTENT(IN) :: x(nvar,ndata), f(ndata)
 TYPE(poly2), INTENT(INOUT) :: p2
 
-REAL(DP), ALLOCATABLE :: amat(:,:), coeff(:), aa(:,:), b(:)
+REAL(DP), ALLOCATABLE :: amat(:,:), coeff(:)
 
-INTEGER :: ivar, jvar, idata, ncoeff, i, j, n
+INTEGER :: i, j, n, idata, ncoeff
 
 ncoeff=1+nvar+p2%ncoeff2
 
 ALLOCATE(amat(ndata,ncoeff))
 ALLOCATE(coeff(ncoeff)) 
-ALLOCATE(aa(ncoeff,ncoeff)) 
-ALLOCATE(b(ncoeff)) 
 
 IF (nvar<1) CALL errore('fit_multi_quadratic','nvar must be larger than 1',1)
 IF (ndata < ncoeff) &
@@ -143,24 +144,7 @@ DO idata=1,ndata
    ENDDO
 ENDDO
 !
-!   Now set the linear system
-!
-aa=0.0_DP
-b =0.0_DP
-DO ivar=1,ncoeff
-   DO jvar=1,ncoeff
-      DO idata=1,ndata
-         aa(ivar,jvar)= aa(ivar,jvar) + amat(idata,ivar) * amat(idata,jvar)
-      END DO
-   END DO
-   DO idata=1,ndata
-      b(ivar) = b(ivar) + amat(idata,ivar) * f(idata)
-   END DO
-END DO
-!
-!   solve the linear system and find the coefficients
-!
-CALL linsolvx_sym(aa,ncoeff,b,coeff)
+CALL min_sqr_solve(ndata, ncoeff, amat, f, coeff, lsolve)
 !
 !   assign the coefficients to the polynomial
 !
@@ -176,8 +160,6 @@ ENDDO
 
 DEALLOCATE(amat)
 DEALLOCATE(coeff) 
-DEALLOCATE(aa) 
-DEALLOCATE(b) 
 
 RETURN
 END SUBROUTINE fit_multi_quadratic

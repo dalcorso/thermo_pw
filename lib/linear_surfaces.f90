@@ -46,7 +46,7 @@ MODULE linear_surfaces
 
 CONTAINS
 
-SUBROUTINE fit_multi_linear(ndata,nvar,x,f,p_in)
+SUBROUTINE fit_multi_linear(ndata,nvar,lsolve,x,f,p_in)
 !
 !  This routine receives as input a set of vectors x(nvar,ndata) and
 !  function values f(ndata) and gives as output the coefficients of
@@ -60,18 +60,20 @@ SUBROUTINE fit_multi_linear(ndata,nvar,x,f,p_in)
 !  nvar is the number of variables of the polynomial.
 !  To interpolate the function it is better to give to fit_multi_linear
 !  at least as many data points as the number of coefficients or more. The 
-!  routines makes a least square fit of the data.
-!   
+!  routine makes a least square fit of the data.
 !
-USE linear_solvers, ONLY : linsolvx
+!  lsolve can be 1, 2 or 3. See the routine min_sqr_solve for an
+!  explanation of its meaning. 
+!
+USE linear_solvers,     ONLY : min_sqr_solve
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: nvar, ndata
+INTEGER, INTENT(IN) :: nvar, ndata, lsolve
 REAL(DP), INTENT(IN) :: x(nvar,ndata), f(ndata)
 TYPE(poly1), INTENT(INOUT) :: p_in
 
-REAL(DP), ALLOCATABLE :: amat(:,:), aa(:,:), b(:), coeff(:) 
+REAL(DP), ALLOCATABLE :: amat(:,:), coeff(:) 
 
-INTEGER :: ivar, jvar, idata, i, ncoeff
+INTEGER :: i, idata, ncoeff
 
 IF (nvar<1) CALL errore('fit_multi_linear','nvar must be larger than 1',1)
 IF (ndata < nvar+1) &
@@ -80,8 +82,6 @@ IF (ndata < nvar+1) &
 ncoeff=nvar+1
 ALLOCATE(amat(ndata,ncoeff))
 ALLOCATE(coeff(ncoeff))
-ALLOCATE(aa(ncoeff,ncoeff))
-ALLOCATE(b(ncoeff))
 !
 !  prepare the auxiliary matrix
 !
@@ -94,26 +94,9 @@ DO idata=1,ndata
    ENDDO
 ENDDO
 !
-!   Now set the linear system
+CALL min_sqr_solve(ndata, ncoeff, amat, f, coeff, lsolve)
 !
-aa=0.0_DP
-b =0.0_DP
-DO ivar=1,ncoeff
-   DO jvar=1,ncoeff
-      DO idata=1,ndata
-         aa(ivar,jvar)= aa(ivar,jvar) + amat(idata,ivar) * amat(idata,jvar)
-      END DO
-   END DO
-   DO idata=1,ndata
-      b(ivar) = b(ivar) + amat(idata,ivar) * f(idata)
-   END DO
-END DO
-!
-!   solve the linear system and find the coefficients
-!
-CALL linsolvx(aa,ncoeff,b,coeff)
-!
-!   assign the coefficients to the polynomial variables
+!   assign the coefficients to the polynomial 
 !
 p_in%a0=coeff(1)
 DO i=1,nvar
@@ -122,8 +105,6 @@ ENDDO
 
 DEALLOCATE(amat)
 DEALLOCATE(coeff)
-DEALLOCATE(aa)
-DEALLOCATE(b)
 
 RETURN
 END SUBROUTINE fit_multi_linear

@@ -29,7 +29,7 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
   USE control_bands, ONLY : emin_input, emax_input 
   USE control_grun,  ONLY : grunmin_input, grunmax_input
   USE control_dosq,  ONLY : freqmin_input, freqmax_input
-  USE control_paths, ONLY : label_disp_q, nqaux, high_sym_path, disp_nqs, &
+  USE control_paths, ONLY : label_disp_q, nqaux, high_sym_path,  &
                             nrap_plot, rap_plot, long_path
   USE control_2d_bands, ONLY : nkz, identify_sur, lprojpbs, &
                                sym_divide, lsurface_state, lsurface_state_rap, &

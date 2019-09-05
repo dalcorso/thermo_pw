@@ -82,9 +82,9 @@ DO i=1,6
          ELSEIF (poly_degree_elc==3) THEN
             CALL fit_multi_cubic(ndata,nvar,lsolve,x,f,ec_p3(i,j)) 
          ELSEIF (poly_degree_elc==2) THEN
-            CALL fit_multi_quadratic(ndata,nvar,x,f,ec_p2(i,j))      
+            CALL fit_multi_quadratic(ndata,nvar,lsolve,x,f,ec_p2(i,j))      
          ELSEIF (poly_degree_elc==1) THEN
-            CALL fit_multi_linear(ndata,nvar,x,f,ec_p1(i,j))
+            CALL fit_multi_linear(ndata,nvar,lsolve,x,f,ec_p1(i,j))
          ELSE
             CALL errore('write_elastic_t','wrong poly_degree_elc',1)
          ENDIF

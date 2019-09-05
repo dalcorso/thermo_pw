@@ -182,28 +182,28 @@ RETURN
 END SUBROUTINE interp_freq_rap
 
 !-------------------------------------------------------------------------
-SUBROUTINE interp_freq_anis(ngeo,freq,x,nvar,p_grun_p2)
+SUBROUTINE interp_freq_anis(ngeo,freq,lsolve,x,nvar,p_grun_p2)
 !-------------------------------------------------------------------------
 
 USE polynomial, ONLY : poly2
 USE quadratic_surfaces, ONLY : fit_multi_quadratic
 
 IMPLICIT NONE
-INTEGER,  INTENT(IN) :: ngeo, nvar
+INTEGER,  INTENT(IN) :: ngeo, nvar, lsolve
 REAL(DP), INTENT(IN) :: freq(3*nat,ngeo), x(nvar,ngeo)
 TYPE(poly2), INTENT(INOUT) :: p_grun_p2(3*nat)
 
 INTEGER :: imode
 
 DO imode=1,3*nat
-   CALL fit_multi_quadratic(ngeo, nvar, x, freq(imode,:), p_grun_p2(imode))
+   CALL fit_multi_quadratic(ngeo, nvar, lsolve, x, freq(imode,:), p_grun_p2(imode))
 ENDDO
 
 RETURN
 END SUBROUTINE interp_freq_anis
 
 !--------------------------------------------------------------------------
-SUBROUTINE interp_freq_anis_eigen(ngeo,freq,x,central_geo,displa,nvar, &
+SUBROUTINE interp_freq_anis_eigen(ngeo,freq,lsolve,x,central_geo,displa,nvar, &
                                                                p_grun_p2)
 !--------------------------------------------------------------------------
 !
@@ -211,7 +211,7 @@ USE polynomial, ONLY : poly2
 USE quadratic_surfaces, ONLY : fit_multi_quadratic
 
 IMPLICIT NONE
-INTEGER,  INTENT(IN) :: ngeo, nvar,  central_geo
+INTEGER,  INTENT(IN) :: ngeo, nvar, central_geo, lsolve
 REAL(DP), INTENT(IN) :: freq(3*nat,ngeo), x(nvar,ngeo)
 COMPLEX(DP), INTENT(IN) :: displa(3*nat,3*nat,ngeo)
 TYPE(poly2), INTENT(INOUT) :: p_grun_p2(3*nat) 
@@ -236,7 +236,7 @@ DO imode=1, 3*nat
          f(igeo)=freq(imode,igeo)
       ENDIF
    ENDDO
-   CALL fit_multi_quadratic(ngeo, nvar, x, f, p_grun_p2(imode)) 
+   CALL fit_multi_quadratic(ngeo, nvar, lsolve, x, f, p_grun_p2(imode)) 
 ENDDO
 
 DEALLOCATE(f)

@@ -80,7 +80,7 @@ DO ipress=1, npress
    DO idata=1, ndata
      f(idata)=energy_geo(idata) + p(ipress) * omega_geo(idata)
    END DO
-   CALL fit_multi_quadratic(ndata,nvar,x,f,p2)
+   CALL fit_multi_quadratic(ndata,nvar,lsolve,x,f,p2)
    CALL print_chisq_quadratic(ndata, nvar, x, f, p2)
    CALL find_quadratic_extremum(nvar,x_pos_min,ymin,p2)
    IF (lquartic) THEN

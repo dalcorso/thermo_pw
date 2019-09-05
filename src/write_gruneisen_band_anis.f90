@@ -16,7 +16,7 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
   ! that corresponds to the temperature given in input.
   ! 
   USE kinds,          ONLY : DP
-  USE ions_base,      ONLY : nat, ntyp => nsp
+  USE ions_base,      ONLY : nat, ntyp => nsp, amass
   USE cell_base,      ONLY : celldm
   USE data_files,     ONLY : flgrun
   USE control_paths,  ONLY : nqaux, disp_q, disp_nqs
@@ -26,8 +26,9 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
   USE ph_freq_anharmonic,  ONLY : celldmf_t
   USE grun_anharmonic, ONLY : poly_order
   USE control_grun,   ONLY : temp_ph, celldm_ph
-  USE initial_conf,   ONLY : ibrav_save, amass_save, ityp_save
+  USE initial_conf,   ONLY : ibrav_save, ityp_save
   USE control_thermo, ONLY : ltherm_dos, ltherm_freq, set_internal_path
+  USE control_quartic_energy, ONLY : lsolve
   USE freq_interpolate, ONLY : interp_freq_anis_eigen, interp_freq_eigen
   USE polyfit_mod,    ONLY : compute_poly, compute_poly_deriv
   USE temperature,    ONLY : temp, ntemp
@@ -101,7 +102,7 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
 !  the normalized eigenvectors of the dynamical matrix
 !
         CALL readmodes(nat,nks,k,displa_geo,nwork,igeo,ntyp,ityp_save, &
-                                       amass_save, iumode)
+                                       amass, iumode)
         CLOSE(UNIT=iumode, STATUS='KEEP')
      ENDIF
   ENDDO
@@ -230,7 +231,7 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
               ENDDO
               IF (cgeo_eff==0) cgeo_eff=ndata/2
               CALL interp_freq_eigen(ndata, frequency_geo, xd, cgeo_eff, &
-                                  displa, poly_order, poly_grun)
+                                               displa, poly_order, poly_grun)
               DO imode=1,nmodes
                  CALL compute_poly(x(icrys), poly_order, poly_grun(:,imode),f)
 !
@@ -258,8 +259,8 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
               frequency_geo(1:nmodes,ndata)=freq_geo(1:nmodes,n,idata)
               displa(1:nmodes,1:nmodes,ndata)=displa_geo(1:nmodes,1:nmodes,idata,n)
            ENDDO
-           CALL interp_freq_anis_eigen(ndata, frequency_geo, x_data,       &
-                     cgeo_eff, displa, nvar, p_grun_p2 )
+           CALL interp_freq_anis_eigen(ndata, frequency_geo, lsolve, &
+                     x_data, cgeo_eff, displa, nvar, p_grun_p2 )
 !
 !  frequencies and gruneisen parameters are calculated at the chosen volume
 !

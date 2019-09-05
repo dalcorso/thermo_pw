@@ -85,7 +85,7 @@ SUBROUTINE quadratic_fit()
   !
 !  CALL summarize_fitting_data(nvar, ndata, x, f)
 
-  CALL fit_multi_quadratic(ndata,nvar,x,f,p2)
+  CALL fit_multi_quadratic(ndata,nvar,lsolve,x,f,p2)
  
   CALL print_quadratic_polynomial(nvar, p2)
 
@@ -214,7 +214,7 @@ SUBROUTINE quadratic_fit_t(itemp, celldm_t, free_e_min_t, ph_free_ener, &
   !
   !CALL summarize_fitting_data(nvar, ndata, x, f)
   !
-  CALL fit_multi_quadratic(ndata, nvar, x, f, pt2)
+  CALL fit_multi_quadratic(ndata, nvar, lsolve, x, f, pt2)
 
   CALL print_quadratic_polynomial(nvar, pt2)
 
@@ -246,7 +246,7 @@ SUBROUTINE quadratic_fit_t(itemp, celldm_t, free_e_min_t, ph_free_ener, &
      ELSEIF (poly_degree_ph==1) THEN
         WRITE(stdout,'(/,5x, "Fit with a fist order polynomial")') 
         CALL init_poly(nvar,pt1)
-        CALL fit_multi_linear(ndata, nvar, x, f, pt1)
+        CALL fit_multi_linear(ndata, nvar, lsolve, x, f, pt1)
         CALL print_chisq_linear(ndata, nvar, x, f, pt1)
         CALL find_quartic_linear_extremum(nvar, x_pos_min, ymin, p4, pt1)
         CALL clean_poly(pt1)

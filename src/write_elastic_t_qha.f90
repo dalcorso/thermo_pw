@@ -96,13 +96,13 @@ DO itemp=startt,lastt
                   CALL clean_poly(ec_p3)
                ELSEIF (poly_degree_elc==2) THEN
                   CALL init_poly(nvar,ec_p2)
-                  CALL fit_multi_quadratic(ndata,nvar,x,f, ec_p2)
+                  CALL fit_multi_quadratic(ndata,nvar,lsolve,x,f, ec_p2)
                   CALL evaluate_fit_quadratic(nvar,xfit,el_cons_t(i,j,itemp), &
                                       ec_p2)
                   CALL clean_poly(ec_p2)
                ELSEIF (poly_degree_elc==1) THEN
                   CALL init_poly(nvar,ec_p1)
-                  CALL fit_multi_linear(ndata,nvar,x,f,ec_p1)
+                  CALL fit_multi_linear(ndata,nvar,lsolve,x,f,ec_p1)
                   CALL evaluate_fit_linear(nvar, xfit, el_cons_t(i,j,itemp), &
                                                        ec_p1)
                   CALL clean_poly(ec_p1)
@@ -142,13 +142,13 @@ DO itemp=startt,lastt
                   CALL clean_poly(ec_p3)
                ELSEIF (poly_degree_elc==2) THEN
                   CALL init_poly(nvar,ec_p2)
-                  CALL fit_multi_quadratic(ndata, nvar, x, f, ec_p2)
+                  CALL fit_multi_quadratic(ndata, nvar, lsolve, x, f, ec_p2)
                   CALL evaluate_fit_quadratic(nvar,xfit, &
                                    el_consf_t(i,j,itemp), ec_p2)
                   CALL clean_poly(ec_p2)
                ELSEIF (poly_degree_elc==1) THEN
                   CALL init_poly(nvar,ec_p1)
-                  CALL fit_multi_linear(ndata,nvar,x,f,ec_p1)
+                  CALL fit_multi_linear(ndata,nvar,lsolve,x,f,ec_p1)
                   CALL evaluate_fit_linear(nvar,xfit,el_consf_t(i,j,itemp), &
                                  ec_p1)
                   CALL clean_poly(ec_p1)

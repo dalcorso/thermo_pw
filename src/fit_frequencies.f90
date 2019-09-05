@@ -19,6 +19,7 @@ SUBROUTINE fit_frequencies()
   USE grun_anharmonic,        ONLY : poly_grun, poly_order
   USE control_thermo,         ONLY : with_eigen
   USE freq_interpolate,       ONLY : interp_freq_eigen, interp_freq
+  USE control_quartic_energy, ONLY : lsolve
 
   IMPLICIT NONE
 
@@ -114,6 +115,7 @@ SUBROUTINE fit_frequencies_anis()
   USE grun_anharmonic,        ONLY : p_grun_p2
   USE polynomial,             ONLY : init_poly
   USE control_thermo,         ONLY : with_eigen
+  USE control_quartic_energy, ONLY : lsolve
   USE freq_interpolate,       ONLY : interp_freq_anis, interp_freq_anis_eigen
   USE lattices,               ONLY : compress_celldm, crystal_parameters
 
@@ -185,10 +187,10 @@ SUBROUTINE fit_frequencies_anis()
 !   and interpolates the data
 !
      IF (with_eigen) THEN
-        CALL interp_freq_anis_eigen(ndata,freq_geo,x,cgeo_eff,displa_geo, &
-                                                       nvar,p_grun_p2(:,n))
+        CALL interp_freq_anis_eigen(ndata,freq_geo,lsolve, x,cgeo_eff,&
+                           displa_geo, nvar,p_grun_p2(:,n))
      ELSE
-        CALL interp_freq_anis(ndata,freq_geo,x,nvar,p_grun_p2(:,n))
+        CALL interp_freq_anis(ndata,freq_geo,lsolve,x,nvar,p_grun_p2(:,n))
      ENDIF
   ENDDO
 !

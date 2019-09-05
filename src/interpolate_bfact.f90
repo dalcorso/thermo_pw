@@ -107,14 +107,14 @@ DO itemp=startt,lastt
                ncoeff=1+nvar+p2%ncoeff2
                IF (itemp==startt) CALL introduce_quadratic_fit(nvar, ncoeff, &
                                                               ndata)
-               CALL fit_multi_quadratic(ndata, nvar, x, b, p2)
+               CALL fit_multi_quadratic(ndata, nvar, lsolve, x, b, p2)
                CALL evaluate_fit_quadratic(nvar, vmin_t(itemp),     &
                                      bfact_t(ijpol,na,itemp), p2)
                CALL clean_poly(p2)
             ELSEIF(poly_degree_bfact==1) THEN
                CALL init_poly(nvar,p1)
                IF (itemp==startt) CALL introduce_linear_fit(nvar, ndata)
-               CALL fit_multi_linear(ndata, nvar, x, b, p1)
+               CALL fit_multi_linear(ndata, nvar, lsolve, x, b, p1)
                CALL evaluate_fit_linear(nvar, vmin_t(itemp), &
                                        bfact_t(ijpol,na,itemp), p1)
                CALL clean_poly(p1)
@@ -237,14 +237,14 @@ DO itemp=startt,lastt
                ncoeff=1+nvar+p2%ncoeff2
                IF (itemp==startt) CALL introduce_quadratic_fit(nvar, ncoeff,&
                                                                      ndata)
-               CALL fit_multi_quadratic(ndata, nvar, x, b, p2)
+               CALL fit_multi_quadratic(ndata, nvar, lsolve, x, b, p2)
                CALL evaluate_fit_quadratic(nvar, y, bfact_t(ijpol,na,itemp), &
                                                    p2)
                CALL clean_poly(p2)
             ELSEIF (poly_degree_bfact==1) THEN
                CALL init_poly(nvar,p1)
                IF (itemp==startt) CALL introduce_linear_fit(nvar, ndata)
-               CALL fit_multi_linear(ndata, nvar, x, b, p1)
+               CALL fit_multi_linear(ndata, nvar, lsolve, x, b, p1)
                CALL evaluate_fit_linear(nvar, y, bfact_t(ijpol,na,itemp), &
                                                                 p1)
                CALL clean_poly(p1)

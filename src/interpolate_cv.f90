@@ -116,7 +116,7 @@ DO itemp=startt,lastt
 !   compute the coefficients of the quadratic polynomial
 !
       CALL init_poly(nvar,p2)
-      CALL fit_multi_quadratic(ndata, nvar, x, f, p2)
+      CALL fit_multi_quadratic(ndata, nvar, lsolve, x, f, p2)
 !
 !  and evaluate the polynomial
 !
@@ -127,7 +127,7 @@ DO itemp=startt,lastt
 !   compute the coefficients of the linear polynomial
 !
       CALL init_poly(nvar,p1)
-      CALL fit_multi_linear(ndata, nvar, x, f, p1)
+      CALL fit_multi_linear(ndata, nvar, lsolve, x, f, p1)
 !
 !  and evaluate the polynomial
 !
