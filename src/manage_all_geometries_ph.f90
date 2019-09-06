@@ -19,8 +19,9 @@ SUBROUTINE manage_all_geometries_ph()
 
   USE thermo_mod,       ONLY : no_ph, start_geometry, last_geometry, &
                                phgeo_on_file
-  USE control_ph,       ONLY : always_run, ldisp, low_directory_check
+  USE control_ph,       ONLY : always_run, low_directory_check, trans
 
+  USE distribute_collection, ONLY : me_igeom
   USE mp_asyn,          ONLY : stop_signal_activated
   USE mp_images,        ONLY : nimage, my_image_id
   USE mp,               ONLY : mp_barrier
@@ -33,7 +34,7 @@ IMPLICIT NONE
 
 INTEGER  :: part, nwork, igeom, iaux
 CHARACTER(LEN=6) :: int_to_char
-LOGICAL :: std, ldcs, something_todo
+LOGICAL :: ldcs, something_todo
 
 CHARACTER (LEN=256) :: auxdyn=' '
 
@@ -69,11 +70,9 @@ IF (.NOT.after_disp) THEN
 !  otherwise some partial dynamical matrix could be missing.
 !
    CALL mp_barrier(world_comm)
+   IF (trans) CALL divide_all_collection_work()
    DO igeom=start_geometry, last_geometry
-      IF (no_ph(igeom)) CYCLE
-      IF (phgeo_on_file(igeom)) CYCLE
-      CALL check_stc_g(igeom, nimage, my_image_id, std)
-      IF (.NOT.std) CYCLE
+      IF (.NOT.me_igeom(igeom)) CYCLE
       WRITE(stdout,'(/,5x,40("%"))') 
       WRITE(stdout,'(5x,"Collecting geometry ", i5)') igeom
       WRITE(stdout,'(5x,40("%"),/)') 
@@ -91,7 +90,7 @@ IF (.NOT.after_disp) THEN
 
       CALL close_ph_geometry(.TRUE.)
    ENDDO
-   CALL restore_files_names()
+   CALL clean_collection_work()
 ENDIF
 !
 !  resynchronize all processors, otherwise some dynamical matrix could be
@@ -106,10 +105,7 @@ DO igeom=start_geometry, last_geometry
    WRITE(stdout,'(/,5x,40("%"))') 
    WRITE(stdout,'(5x,"Computing thermodynamic properties", i5)') igeom
    WRITE(stdout,'(5x,40("%"),/)') 
-   outdir=TRIM(outdir_thermo)//'/g'//TRIM(int_to_char(igeom))//'/'
-   !  
-   !  The geometry must be reset here
-   !
+
    CALL set_files_names(igeom)
    auxdyn=fildyn
 !
@@ -117,7 +113,6 @@ DO igeom=start_geometry, last_geometry
 !
    IF (lq2r) CALL manage_ph_postproc(auxdyn, igeom)
 
-   CALL restore_files_names()
 ENDDO
 100 CONTINUE
 CALL restore_files_names()

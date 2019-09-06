@@ -223,7 +223,7 @@ subroutine dynmatrix_tpw(iq_)
   !
   IF (ldiag_loc) THEN
      call dyndia (xq, nmodes, nat, ntyp, ityp, amass, iudyn, dyn, w2)
-     CALL manage_ph_symmetry(dyn, w2, num_rap_mode, xq, search_sym)
+     CALL manage_ph_symmetry(dyn, w2, num_rap_mode, xq, search_sym, 1)
      IF (qplot) omega_disp(:,current_iq)=w2(:)
   END IF
 !

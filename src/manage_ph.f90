@@ -17,26 +17,22 @@ SUBROUTINE manage_ph()
   USE ions_base,        ONLY : nat
   USE thermo_mod,       ONLY : no_ph, max_geometries, start_geometry, &
                                last_geometry, phgeo_on_file
-  USE control_ph,       ONLY : with_ext_images, always_run, ldisp, trans, &
-                               rec_code_read, xmldyn
+  USE control_ph,       ONLY : always_run, rec_code_read, trans
   USE initial_conf,     ONLY : collect_info_save
   USE disp,             ONLY : nqs, comp_iq, done_iq
   USE grid_irr_iq,      ONLY : comp_irr_iq, done_irr_iq, irr_iq
-  USE ph_restart,       ONLY : destroy_status_run
-  USE save_ph,          ONLY : clean_input_variables
 
   USE mp_asyn,          ONLY : with_asyn_images, stop_signal_activated
 
-  USE io_global,        ONLY : meta_ionode, stdout, meta_ionode_id
+  USE io_global,        ONLY : stdout
   USE output,           ONLY : fildyn
-  USE control_thermo,   ONLY : outdir_thermo, after_disp, set_internal_path, &
-                               lq2r
+  USE control_thermo,   ONLY : outdir_thermo, after_disp, lq2r
   USE control_qe,       ONLY : use_ph_images
   USE collect_info,     ONLY : comm_collect_info, init_collect_info, &
                                destroy_collect_info_type
   USE mp_images,        ONLY : nimage, my_image_id, inter_image_comm
   USE mp_world,         ONLY : world_comm
-  USE mp,               ONLY : mp_sum, mp_barrier
+  USE mp,               ONLY : mp_barrier
 
 IMPLICIT NONE
 
@@ -46,7 +42,6 @@ CHARACTER(LEN=6) :: int_to_char
 
 CHARACTER (LEN=256) :: auxdyn
 
-with_ext_images=with_asyn_images
 always_run=.TRUE.
 CALL start_clock( 'PHONON' )
 IF (use_ph_images) ALLOCATE(collect_info_save(1))
@@ -55,7 +50,6 @@ ph_geometries=0
 DO igeom=start_geometry,last_geometry
    IF (no_ph(igeom).OR.stop_signal_activated) CYCLE
    do_ph=.NOT.phgeo_on_file(igeom)
-   auxdyn=' '
    WRITE(stdout,'(/,5x,40("%"))') 
    WRITE(stdout,'(5x,"Computing geometry ", i5)') igeom
    WRITE(stdout,'(5x,40("%"),/)') 
@@ -107,14 +101,15 @@ DO igeom=start_geometry,last_geometry
       !
       CALL mp_barrier(world_comm)
       !
+      IF (trans) CALL divide_collection_work(igeom)
       CALL manage_collection(auxdyn, igeom)
+      CALL clean_collection_work()
    ELSE
 !
 !  When the dynamical matrices for this geometry are on file, the geometry 
 !  is set here when there are multiple geometries, otherwise this
 !  should have been set already. This is used only for setting the 
 !
-      ldisp=.TRUE.
       CALL set_files_names(igeom)
       auxdyn=fildyn
    ENDIF

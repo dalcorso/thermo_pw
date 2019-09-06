@@ -39,16 +39,14 @@ SUBROUTINE collect_everything(auxdyn, igeom)
 !  check_stc when all_geometries_together is .TRUE.. Otherwise
 !  the q points are distributed sequentially to each image.
 !
-USE mp_images,   ONLY : my_image_id, nimage
-USE mp_world,    ONLY : world_comm
-USE mp,          ONLY : mp_barrier
 USE io_global,   ONLY : stdout
 USE control_ph,  ONLY : recover
 USE control_qe,  ONLY : tcollect_all
-USE control_thermo, ONLY : all_geometries_together
 USE ions_base,   ONLY : nat
 USE disp,        ONLY : comp_iq, nqs
 USE grid_irr_iq, ONLY : comp_irr_iq, irr_iq
+
+USE distribute_collection, ONLY : me_igeom_iq
 
 IMPLICIT NONE
 CHARACTER (LEN=256), INTENT(IN) :: auxdyn
@@ -66,25 +64,24 @@ WRITE(stdout,'(2x,76("+"),/)')
 save_recover=recover
 recover=.TRUE.
 tcollect_all=.TRUE.
-
-IF (all_geometries_together) THEN
-   CALL check_stc(nqs, igeom, nat, nimage, my_image_id, comp_iq, &
-                                                        comp_irr_iq, std)
-ELSE
-   comp_irr_iq=.TRUE.
-   comp_iq=.FALSE.
-   std=.FALSE.
-   DO iq=1,nqs
-      IF (MOD(iq-1,nimage)==my_image_id) THEN
-         comp_iq(iq)=.TRUE.
-         DO irr=0, irr_iq(iq)
-            comp_irr_iq(:,iq)=.TRUE.
-         ENDDO
-         std=.TRUE.
-      ENDIF
-   ENDDO
-ENDIF
-
+!
+!   set the work that has to be done by the present image
+!
+comp_irr_iq=.FALSE.
+comp_iq=.FALSE.
+std=.FALSE.
+DO iq=1,nqs
+   IF (me_igeom_iq(igeom,iq)) THEN
+      comp_iq(iq)=.TRUE.
+      DO irr=0, irr_iq(iq)
+         comp_irr_iq(irr,iq)=.TRUE.
+      ENDDO
+      std=.TRUE.
+   ENDIF
+ENDDO
+!
+!  and do the collection work
+!
 IF (std) CALL do_phonon_tpw(auxdyn)
 
 tcollect_all=.FALSE.
@@ -92,75 +89,6 @@ recover=save_recover
 
 RETURN
 END SUBROUTINE collect_everything
-
-SUBROUTINE check_stc(nqs, igeom, nat, nimage, my_image_id, comp_iq, &
-                                                     comp_irr_iq, std)
-!
-!  This subroutine checks if this image has something to collect
-!  in the current geometry and sets the appropriate comp_iq and comp_irr_iq
-!
-USE thermo_mod,   ONLY : tot_ngeo, start_geometry, last_geometry
-USE initial_conf, ONLY : collect_info_save
-IMPLICIT NONE
-INTEGER, INTENT(IN) :: nqs, nat, igeom, nimage, my_image_id
-LOGICAL, INTENT(INOUT) :: comp_iq(nqs), comp_irr_iq(0:3*nat,nqs)
-LOGICAL, INTENT(OUT) :: std
-
-INTEGER :: irr, iq, jgeom, task
-INTEGER :: start_task(nimage), last_task(nimage)
-
-CALL compute_total_task_and_divide(start_task, last_task, nimage)
-
-comp_irr_iq=.TRUE.
-comp_iq=.FALSE.
-std=.FALSE.
-task=0
-DO jgeom=start_geometry, last_geometry
-   DO iq=1,collect_info_save(jgeom)%nqs
-      task = task+1
-      IF (task >=start_task(my_image_id+1).AND.task<=last_task(my_image_id+1)&
-                                                     .AND.igeom==jgeom) THEN
-         comp_iq(iq)=.TRUE.
-         DO irr=0, collect_info_save(igeom)%irr_iq(iq)
-            comp_irr_iq(irr,iq)=.TRUE.
-         ENDDO
-         std=.TRUE.
-      ENDIF
-   ENDDO
-ENDDO
-
-RETURN
-END SUBROUTINE check_stc 
-
-SUBROUTINE check_stc_g(igeom, nimage, my_image_id, std)
-!
-!  This subroutine checks if this image has something to collect
-!  in the current geometry, but does not set the comp_irr_iq and comp_iq 
-!  flags
-!
-USE thermo_mod,   ONLY : tot_ngeo, start_geometry, last_geometry
-USE initial_conf, ONLY : collect_info_save
-IMPLICIT NONE
-INTEGER, INTENT(IN) :: igeom, nimage, my_image_id
-LOGICAL, INTENT(OUT) :: std
-
-INTEGER :: iq, jgeom, task
-INTEGER :: start_task(nimage), last_task(nimage)
-
-CALL compute_total_task_and_divide(start_task, last_task, nimage)
-
-std=.FALSE.
-task=0
-DO jgeom=start_geometry, last_geometry
-   DO iq=1,collect_info_save(jgeom)%nqs
-      task = task+1
-      IF (task >=start_task(my_image_id+1).AND.task<=last_task(my_image_id+1)&
-                                             .AND.igeom==jgeom) std=.TRUE.
-   ENDDO
-ENDDO
-
-RETURN
-END SUBROUTINE check_stc_g
 
 SUBROUTINE compute_total_task_and_divide(start_task, last_task, nimage)
 !
@@ -170,18 +98,19 @@ SUBROUTINE compute_total_task_and_divide(start_task, last_task, nimage)
 !  in order to minimize the number of geometries that are initialized 
 !  again by each image. 
 !
-USE thermo_mod,   ONLY : tot_ngeo, start_geometry, last_geometry
+USE thermo_mod,   ONLY : no_ph, start_geometry, last_geometry, phgeo_on_file
 USE initial_conf, ONLY : collect_info_save
 IMPLICIT NONE
 
 INTEGER, INTENT(IN) :: nimage
 INTEGER, INTENT(INOUT) :: start_task(nimage), last_task(nimage)
 
-INTEGER :: iq, jgeom, image, total_task, task_per_image, resto, task
+INTEGER :: iq, igeom, image, total_task, task_per_image, resto
 
 total_task=0
-DO jgeom=start_geometry, last_geometry
-   DO iq=1,collect_info_save(jgeom)%nqs
+DO igeom=start_geometry, last_geometry
+   IF (no_ph(igeom).OR.phgeo_on_file(igeom)) CYCLE
+   DO iq=1,collect_info_save(igeom)%nqs
       total_task = total_task+1
    ENDDO
 ENDDO
@@ -191,12 +120,91 @@ resto=total_task - task_per_image * nimage
 
 start_task(1)=1
 last_task(1)=task_per_image
-IF (resto >=1) last_task(1)=task_per_image+1
+IF (resto > 0) last_task(1)=task_per_image+1
 DO image=2, nimage
    start_task(image)=last_task(image-1)+1
    last_task(image)=start_task(image)+task_per_image-1
-   IF (resto >=1) last_task(image)=last_task(image)+1
+   IF (resto >= image) last_task(image)=last_task(image)+1
 ENDDO
 
 RETURN
 END SUBROUTINE compute_total_task_and_divide
+
+SUBROUTINE divide_all_collection_work()
+!
+!   This routine, that is called only when all_geometry_together=.TRUE.
+!   sets two arrays (different for each image). 
+!   me_igeom : for each geometry is .true. if the present image must
+!              do some collection work in this geometry
+!   me_igeom_iq : is .true. if the present image must collect this
+!                 q point of this geometry
+!   
+!
+USE thermo_mod,     ONLY : no_ph, phgeo_on_file, start_geometry, last_geometry
+USE distribute_collection, ONLY : me_igeom, me_igeom_iq
+USE initial_conf,   ONLY : collect_info_save
+USE mp_images,      ONLY : nimage, my_image_id
+
+IMPLICIT NONE
+
+INTEGER :: nqsx, start_task(nimage), last_task(nimage), task, igeom, iq
+
+nqsx=MAXVAL(collect_info_save(:)%nqs)
+ALLOCATE(me_igeom(start_geometry:last_geometry))
+ALLOCATE(me_igeom_iq(start_geometry:last_geometry,nqsx))
+
+me_igeom=.FALSE.
+me_igeom_iq=.FALSE.
+
+CALL compute_total_task_and_divide(start_task, last_task, nimage)
+
+task=0
+DO igeom = start_geometry, last_geometry
+   IF (no_ph(igeom).OR.phgeo_on_file(igeom)) CYCLE
+   DO iq = 1, collect_info_save(igeom)%nqs
+      task = task+1
+      IF (task >=start_task(my_image_id+1).AND. &
+                           task<=last_task(my_image_id+1)) THEN
+         me_igeom(igeom)=.TRUE.
+         me_igeom_iq(igeom,iq)=.TRUE.                                    
+      ENDIF
+   ENDDO
+ENDDO
+
+RETURN
+END SUBROUTINE divide_all_collection_work
+
+SUBROUTINE divide_collection_work(igeom)
+!
+!  This routine, similar to the previous one, works for the
+!  case all_geometry_together=.FALSE.. It sets only
+!  me_igeom_iq
+!  
+!
+USE distribute_collection, ONLY : me_igeom_iq
+USE mp_images,    ONLY : nimage, my_image_id
+
+USE disp,         ONLY : nqs
+IMPLICIT NONE
+
+INTEGER :: igeom
+INTEGER :: iq
+
+ALLOCATE(me_igeom_iq(igeom:igeom,nqs))
+DO iq=1,nqs
+   me_igeom_iq(igeom,iq)=(MOD(iq-1,nimage)==my_image_id)
+ENDDO
+
+RETURN
+END SUBROUTINE divide_collection_work
+
+SUBROUTINE clean_collection_work()
+
+USE distribute_collection, ONLY : me_igeom, me_igeom_iq
+IMPLICIT NONE
+
+IF (ALLOCATED(me_igeom)) DEALLOCATE(me_igeom)
+IF (ALLOCATED(me_igeom_iq)) DEALLOCATE(me_igeom_iq)
+
+RETURN
+END SUBROUTINE clean_collection_work

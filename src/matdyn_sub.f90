@@ -5,9 +5,18 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+MODULE matdyn_mod
+
+IMPLICIT NONE
+PRIVATE
+SAVE
+
+PUBLIC matdyn_interp
+
+CONTAINS
 !
 !---------------------------------------------------------------------
-SUBROUTINE matdyn_interp(nq, disp_q, startq, lastq, with_eigen)
+SUBROUTINE matdyn_interp(nq, disp_q, freq_save, startq, lastq, z_save)
   !-----------------------------------------------------------------------
   !  this program calculates the phonon frequencies for a list of generic
   !  q vectors starting from the interatomic force constants generated
@@ -43,8 +52,6 @@ SUBROUTINE matdyn_interp(nq, disp_q, startq, lastq, with_eigen)
   !  disp_q(3,nq) ! the cartesian coordinates in units of 2 pi / a 
   !               of the q vectors for which the dynamical matrix needs
   !               to be computed
-  !  with_eigen   .TRUE. if the routine has to compute also the eigen
-  !               vectors.
   !  If q = 0, the direction qhat (q=>0) for the non-analytic part
   !  is extracted from the sequence of q-points as follows:
   !     qhat = q(n) - q(n-1)  or   qhat = q(n) - q(n+1)
@@ -57,9 +64,8 @@ SUBROUTINE matdyn_interp(nq, disp_q, startq, lastq, with_eigen)
   !              number for the imaginary frequencies)
   !
   !  z_save(3*nat, 3*nat, nq) ! this quantity must be allocated and
-  !              is given in output only if with_eigen is .true. 
-  !              NB: these are the displacements as in the output of the
-  !              dyndia routine, not the eigenvalues of the dynamical matrix.
+  !              is given in output only if eigenvectors are required
+  !              NB: these are the eigenvectors, not the displacements.
   !  NB: the nq vectors are set on the correct positions, but they
   !      are not collected and only those belonging to this processors are
   !      actually calculated. If the calling routine declared freq_save and
@@ -75,15 +81,15 @@ SUBROUTINE matdyn_interp(nq, disp_q, startq, lastq, with_eigen)
                              zasr, wscache
   USE control_ph,     ONLY : xmldyn
   USE disp,           ONLY : nq1, nq2, nq3
-  USE phonon_save,    ONLY : freq_save, z_save
   USE data_files,     ONLY : flfrc
   USE rigid,          ONLY : dyndiag
   !
   IMPLICIT NONE
   !
-  LOGICAL, INTENT(IN) :: with_eigen
   INTEGER, INTENT(IN) :: nq, startq, lastq
   REAL(DP), INTENT(IN) :: disp_q(3,nq)
+  REAL(DP), INTENT(INOUT) :: freq_save(3*nat,startq:lastq)
+  COMPLEX(DP), OPTIONAL, INTENT(INOUT) :: z_save(3*nat,3*nat,startq:lastq)
 
   INTEGER, PARAMETER:: nrwsx=200
   REAL(DP), PARAMETER :: eps=1.0d-6
@@ -139,7 +145,7 @@ SUBROUTINE matdyn_interp(nq, disp_q, startq, lastq, with_eigen)
   q(:,1:nqtot)=disp_q(:,1:nqtot)
 
   do_init=.TRUE.
-  IF (with_eigen) z_save=(0.0_DP,0.0_DP)
+  IF (PRESENT(z_save)) z_save=(0.0_DP,0.0_DP)
   freq_save=0.0_DP
   DO n=startq, lastq
      IF ( MOD(n-nstart+1,20000) == 0 ) WRITE(stdout, '(5x,"Computing q ",&
@@ -196,9 +202,11 @@ SUBROUTINE matdyn_interp(nq, disp_q, startq, lastq, with_eigen)
         !
      END IF
 
-     CALL dyndiag(nat,ntyp,amass,ityp,dyn,w2(1,n),z)
+     CALL dyndiag_tpw(nat,ntyp,amass,ityp,dyn,w2(1,n),z,-1)
      !
-     IF (with_eigen) z_save(:,:,n) = z(:,:) 
+     !  The eigenvectors of the dynamical matrix are given in z_save
+     !
+     IF (PRESENT(z_save)) z_save(:,:,n) = z(:,:) 
 
   END DO  !nq
   !
@@ -854,3 +862,4 @@ SUBROUTINE setupmat_simple (q,dyn,nat,at,bg,tau,omega,alat, &
   RETURN
 END SUBROUTINE setupmat_simple
 
+END MODULE matdyn_mod

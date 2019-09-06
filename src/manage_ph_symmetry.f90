@@ -26,7 +26,7 @@ MODULE ph_symmetry
 
 CONTAINS
 
-SUBROUTINE manage_ph_symmetry(dyn, w2, num_rap_mode, xq, search_sym)
+SUBROUTINE manage_ph_symmetry(dyn, w2, num_rap_mode, xq, search_sym, flag)
 !
 !  This routine is a driver that takes all the modes at a given point q
 !  and writes on output the irreducible representations of each mode.
@@ -55,7 +55,7 @@ IMPLICIT NONE
 
 COMPLEX(DP) :: dyn(3*nat, 3*nat)
 REAL(DP)    :: w2(3*nat), xq(3)
-INTEGER     :: num_rap_mode(3*nat)
+INTEGER     :: num_rap_mode(3*nat), flag
 LOGICAL     :: search_sym
 
 REAL(DP)    :: ft(3,48), wrk(3,48)
@@ -78,7 +78,7 @@ IF (search_sym) THEN
          CALL write_group_info_ph(.TRUE.)
       ENDIF
       CALL find_mode_sym_tpw (dyn, w2, tau, nat, nsym_ph, s_ph, sr_ph, irt_ph, &
-            xq, rtau_ph, amass, ntyp, ityp, 1, lgamma_gamma, .FALSE., &
+            xq, rtau_ph, amass, ntyp, ityp, flag, lgamma_gamma, .FALSE., &
             num_rap_mode, ierr)
       CALL print_mode_sym(w2, num_rap_mode, lgamma)
    ELSE
@@ -98,7 +98,7 @@ IF (search_sym) THEN
                                                                     ptype,-1)
       CALL find_mode_sym_proj (dyn, w2, tau, nat, nsym_ph, s_ph, sr_ph, ft, &
                             gii, invs_ph, irt_ph, xq, rtau_ph, amass, ntyp, &
-                            ityp, 1, .FALSE., .FALSE., num_rap_mode, ierr)
+                            ityp, flag, .FALSE., .FALSE., num_rap_mode, ierr)
 
       CALL print_mode_sym_proj(w2, num_rap_mode, ptype)
    ENDIF

@@ -48,7 +48,7 @@ SUBROUTINE thermo_setup()
 !  variables modified by this routine
 !
   USE initial_conf,         ONLY : celldm_save, ibrav_save, ityp_save,       &
-                                   amass_save, nr1_save, nr2_save, nr3_save, &
+                                   nr1_save, nr2_save, nr3_save, &
                                    nosym_save, tau_save, tau_save_crys, &
                                    omega_save, at_save
   USE initial_param,        ONLY : ecutwfc0, ecutrho0, ethr0
@@ -205,7 +205,6 @@ SUBROUTINE thermo_setup()
 ! Save the initial configurantion in the initial variables
 !
   ALLOCATE(ityp_save(nat))
-  ALLOCATE(amass_save(ntyp))
   ALLOCATE(tau_save(3,nat))
   ALLOCATE(tau_save_crys(3,nat))
 

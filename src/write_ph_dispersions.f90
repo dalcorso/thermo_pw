@@ -31,7 +31,6 @@ SUBROUTINE write_ph_dispersions()
   USE symm_base,  ONLY : set_sym, nsym, s, allfrac, remove_sym, ftau
   USE fft_base,   ONLY : dfftp
   USE cell_base,  ONLY : at
-  USE phonon_save, ONLY : freq_save, z_save
   USE thermo_sym, ONLY : code_group_save
   USE rap_point_group,  ONLY : code_group
   USE initial_conf, ONLY : nr1_save, nr2_save, nr3_save
@@ -39,6 +38,7 @@ SUBROUTINE write_ph_dispersions()
                             rap_plot, dkmod_save
   USE control_ph,    ONLY : xmldyn, search_sym
   USE control_lr,    ONLY : lgamma
+  USE matdyn_mod,    ONLY : matdyn_interp
   USE lr_symm_base,  ONLY : rtau
   USE ifc,           ONLY : m_loc, has_zstar
   USE io_bands,      ONLY : write_bands, write_representations
@@ -56,7 +56,8 @@ SUBROUTINE write_ph_dispersions()
   REAL(DP), ALLOCATABLE :: w2(:,:)
   INTEGER, ALLOCATABLE :: num_rap_mode(:,:), qcode_group(:), aux_ind(:), &
                           qcode_group_ext(:), ptypeq(:,:), lprojq(:)
-  REAL(DP), ALLOCATABLE :: gaugeq(:,:)
+  REAL(DP), ALLOCATABLE :: gaugeq(:,:), freq_save(:,:)
+  COMPLEX(DP), ALLOCATABLE :: z_save(:,:,:)
 
   INTEGER :: qcode_old, isym
   LOGICAL, ALLOCATABLE :: high_sym(:), same_next(:)
@@ -90,7 +91,7 @@ SUBROUTINE write_ph_dispersions()
 !
 !  we always need the eigenvectors to make the symmetry analysis
 !
-  CALL matdyn_interp(disp_nqs, disp_q, 1, disp_nqs, .TRUE.)
+  CALL matdyn_interp(disp_nqs, disp_q, freq_save, 1, disp_nqs, z_save)
 
   IF ( my_image_id /= root_image ) THEN
      DEALLOCATE (freq_save) 
@@ -295,6 +296,10 @@ SUBROUTINE find_representations_mode_q ( nat, ntyp, xq, w2, u, tau, ityp, &
   LOGICAL :: minus_q, sym(48), magnetic_sym
   LOGICAL :: symmorphic_or_nzb
 !
+!  This routine assumes that u contains the eigenvectors of the dynamical
+!  matrix
+!
+!
 !  find the small group of q and set the quantities needed to
 !  symmetrize a phonon mode
 !
@@ -314,7 +319,7 @@ SUBROUTINE find_representations_mode_q ( nat, ntyp, xq, w2, u, tau, ityp, &
 !  if the small group of q is non symmorphic,
 !  search the symmetries only if there are no G such that Sq -> q+G
 !
-  CALL manage_ph_symmetry(u, w2, num_rap_mode, xq, .TRUE.)
+  CALL manage_ph_symmetry(u, w2, num_rap_mode, xq, .TRUE., -1)
 
   RETURN
 END SUBROUTINE find_representations_mode_q

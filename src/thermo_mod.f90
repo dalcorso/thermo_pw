@@ -346,12 +346,9 @@ MODULE control_dosq
   SAVE
 
   INTEGER :: nq1_d, nq2_d, nq3_d    ! grid for phonon dos
-  INTEGER :: dos_nqs                ! total number of points for the phonon dos
 
   REAL(DP), ALLOCATABLE :: dos_q(:,:)  ! the cartesian coordinate of the q
                                        ! points for dos
-  REAL(DP), ALLOCATABLE :: dos_wq(:)   ! the weights for the phonon dos
-
   INTEGER :: ntetra
   REAL(DP), ALLOCATABLE ::  tetra(:,:,:)
   !
@@ -448,6 +445,18 @@ MODULE control_thermo
                               ! images
   !
 END MODULE control_thermo
+
+MODULE distribute_collection
+
+SAVE
+
+LOGICAL, ALLOCATABLE :: me_igeom(:) ! if .TRUE. this image must collect
+                                    ! some work in this geometry
+
+LOGICAL, ALLOCATABLE :: me_igeom_iq(:,:) ! if .TRUE. this image must collect
+                                    ! some q point in this geometry
+
+END MODULE distribute_collection
 
 MODULE control_elastic_constants
   USE kinds,  ONLY : DP
@@ -743,7 +752,6 @@ MODULE initial_conf
   REAL(DP) :: omega_save       ! the volume of the initial configuration
   INTEGER, ALLOCATABLE :: ityp_save(:)  ! save the type of atoms. To be
                                         ! used after completely cleaning pw
-  REAL(DP), ALLOCATABLE :: amass_save(:) ! save the mass of atoms. 
   REAL(DP) :: at_save(3,3)     ! save the at of the configuration read by pw.x 
   REAL(DP) :: bg_save(3,3)     ! save the bg of the configuration read by pw.x 
   REAL(DP), ALLOCATABLE :: tau_save(:,:) ! save the atomic coordinates read
@@ -1076,19 +1084,6 @@ MODULE thermo_sym
   INTEGER :: aux_sg          ! the orientation of the space group
 
 END MODULE thermo_sym
-
-MODULE phonon_save
-  USE kinds,  ONLY : DP
-  !
-  ! ... The variables needed to pass frequencies and eigenvectors from
-  !     matdyn_interp to the other routines
-  !
-  SAVE
-  !
-  REAL(DP), ALLOCATABLE :: freq_save(:,:)
-  COMPLEX(DP), ALLOCATABLE :: z_save(:,:,:)
-
-END MODULE phonon_save
 
 MODULE efermi_plot
   USE kinds,  ONLY : DP

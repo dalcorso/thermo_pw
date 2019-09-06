@@ -16,14 +16,14 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
   ! used when lmurn=.TRUE..
   ! 
   USE kinds,          ONLY : DP
-  USE ions_base,      ONLY : nat, ntyp => nsp
+  USE ions_base,      ONLY : nat, ntyp => nsp, amass
   USE data_files,     ONLY : flgrun
   USE thermo_mod,     ONLY : ngeo, omega_geo, no_ph
   USE anharmonic,     ONLY : vmin_t
   USE ph_freq_anharmonic, ONLY : vminf_t
   USE grun_anharmonic, ONLY : poly_order
   USE control_grun,   ONLY : temp_ph, volume_ph
-  USE initial_conf,   ONLY : amass_save, ityp_save, ibrav_save
+  USE initial_conf,   ONLY : ityp_save, ibrav_save
   USE control_mur,    ONLY : vmin
   USE control_thermo, ONLY : ltherm_dos, ltherm_freq
   USE temperature,    ONLY : temp, ntemp
@@ -83,7 +83,7 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
      CALL errore('write_gruneisen_band','modes are needed',ABS(ios))
      IF (ionode) THEN
         CALL readmodes(nat,nks,k,displa_geo,ngeo(1),igeo,ntyp,ityp_save,  &
-                                                         amass_save,iumode)
+                                                         amass,iumode)
         CLOSE(UNIT=iumode, STATUS='KEEP')
      ENDIF
   ENDDO

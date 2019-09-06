@@ -11,7 +11,7 @@ SUBROUTINE write_phdos(igeom)
   !
   !  This routine computes the phonon density of states. 
   !  It assumes that the frequencies are already known and are in the
-  !  variable freq_save. It needs also the weight of each q point.
+  !  variable ph_freq_save. It needs also the weight of each q point.
   !  After the call to this routine the variable phdos_save(igeom) 
   !  will contain the phonon dos.
   !  The dos are also written on file fldos. If the file is found in
@@ -27,12 +27,10 @@ SUBROUTINE write_phdos(igeom)
   USE ions_base,      ONLY : nat, amass
   USE control_dosq,   ONLY : phdos_sigma, deltafreq, freqmin, freqmax, &
                              ndos_input, freqmin_input, freqmax_input
-  USE phonon_save,    ONLY : freq_save, z_save
   USE thermo_mod,     ONLY : tot_ngeo
   USE control_thermo, ONLY : with_eigen
   USE thermodynamics, ONLY : phdos_save, gen_phdos_save
   USE ph_freq_thermodynamics, ONLY : ph_freq_save
-  USE control_dosq,   ONLY : dos_wq, dos_nqs
   USE data_files,     ONLY : fldos
   USE phdos_module,   ONLY : set_phdos, read_phdos_data, find_minimum_maximum,&
                              set_gen_phdos, read_genphdos_data
@@ -44,7 +42,7 @@ SUBROUTINE write_phdos(igeom)
   CHARACTER(LEN=256) :: filedos, filename
   REAL(DP) :: e, emin, emax, dosofe(2)
   REAL(DP), ALLOCATABLE :: gen_dos(:,:)
-  INTEGER :: n, i, ndos, nq, startq, lastq, nq_eff, na, ijpol, iundos
+  INTEGER :: n, i, ndos, nq, startq, lastq, nq_eff, na, ijpol, n_eff, iundos
   INTEGER :: find_free_unit
   LOGICAL :: check_file_exists
   CHARACTER(LEN=6) :: int_to_char
@@ -98,17 +96,19 @@ SUBROUTINE write_phdos(igeom)
   WRITE(stdout,'(5x,"Writing phdos on file ",a)') 
   WRITE(stdout,'(5x,a)') TRIM(filedos)
   WRITE(stdout,'(2x,76("+"),/)')
-  nq=dos_nqs
+  nq=ph_freq_save(igeom)%nq
 !
 ! compute the dos
 !
   CALL divide(world_comm, nq, startq, lastq)
   emin = 0.0d0
   emax = 0.0d0
+  n_eff=0
   DO n=startq, lastq
+     n_eff=n_eff+1
      DO i=1, 3*nat
-        emin = MIN (emin, freq_save(i,n))
-        emax = MAX (emax, freq_save(i,n))
+        emin = MIN (emin, ph_freq_save(igeom)%nu(i,n_eff))
+        emax = MAX (emax, ph_freq_save(igeom)%nu(i,n_eff))
      END DO
   END DO
   emax=emax*1.02_DP
@@ -143,8 +143,8 @@ SUBROUTINE write_phdos(igeom)
   DO n= 1, ndos
      e = emin + (n - 1) * deltafreq
      !
-     CALL dos_g(freq_save(1,startq), 1, 3*nat, nq_eff, dos_wq(startq), &
-                                         phdos_sigma, 0, e, dosofe)
+     CALL dos_g(ph_freq_save(igeom)%nu, 1, 3*nat, nq_eff, &
+                ph_freq_save(igeom)%wg, phdos_sigma, 0, e, dosofe)
      !
      phdos_save(igeom)%nu(n) = e
      phdos_save(igeom)%phdos(n) = dosofe(1)
@@ -159,9 +159,9 @@ SUBROUTINE write_phdos(igeom)
      CALL set_gen_phdos(gen_phdos_save,ndos,nat,deltafreq)
      DO n= 1, ndos
         e = emin + (n - 1) * deltafreq
-        CALL generalized_phdos(freq_save(1,startq), 3*nat, nq_eff, &
-                              dos_wq(startq), phdos_sigma, 0, e, &
-                              z_save(1,1,startq), nat, gen_dos)
+        CALL generalized_phdos(ph_freq_save(igeom)%nu, 3*nat, nq_eff, &
+                    ph_freq_save(igeom)%wg, phdos_sigma, 0, e, &
+                    ph_freq_save(igeom)%displa, nat, gen_dos)
         gen_phdos_save%nu(n) = e
         gen_phdos_save%phdos(:,:,n) = gen_dos(:,:)
      ENDDO

@@ -10,22 +10,18 @@ SUBROUTINE deallocate_q2r()
   !-----------------------------------------------------------------------
   !
   !  This routine deallocates the variables allocated in 
-  !  manage_ph_postproc
+  !  manage_ph_dispersions
   !
   USE thermo_mod,     ONLY : tot_ngeo
   USE phdos_module,   ONLY : destroy_phdos
   USE ph_freq_module, ONLY : destroy_ph_freq
   USE ph_freq_thermodynamics, ONLY : ph_freq_save
   USE thermodynamics, ONLY : phdos_save
-  USE control_dosq,   ONLY : dos_q, dos_wq
   USE control_thermo, ONLY : lph, ltherm, ltherm_dos
 
   IMPLICIT NONE
   INTEGER :: igeom
   !
-
-  IF ( ALLOCATED (dos_q) )           DEALLOCATE(dos_q)
-  IF ( ALLOCATED (dos_wq) )          DEALLOCATE(dos_wq)
 
   IF (lph) THEN
      IF (ltherm.AND.ltherm_dos) THEN

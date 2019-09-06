@@ -57,7 +57,7 @@ SUBROUTINE q2r_sub(fildyn)
                          read_dyn_mat, read_dyn_mat_tail, &
                          write_dyn_mat_header, write_ifc
   USE data_files, ONLY : flfrc
-  USE control_ph, ONLY : ldisp, xmldyn
+  USE control_ph, ONLY : xmldyn
   USE rigid,      ONLY : rgd_blk
   !
   IMPLICIT NONE
@@ -90,7 +90,7 @@ SUBROUTINE q2r_sub(fildyn)
   ! Only one image run this routine, but the results are broadcasted 
   ! to all images
   !
-  IF (flfrc == ' '.OR. .NOT. ldisp) RETURN
+  IF (flfrc == ' ') RETURN
   !
   filefrc="phdisp_files/"//TRIM(flfrc)
   WRITE(stdout,'(/,2x,76("+"))')
@@ -359,7 +359,7 @@ SUBROUTINE q2r_sub(fildyn)
 
   CALL interface_with_tpw(phid, nr1, nr2, nr3, nat, ntyp, lrigid, zeu, &
                      epsil, atm, nspin_mag, m_loc, tau, ityp, at, bg,  &
-                     omega, ibrav, celldm)
+                     omega, ibrav, celldm, amass)
   !
   DEALLOCATE(nc)
   DEALLOCATE(phid) 
@@ -599,14 +599,14 @@ subroutine set_zasr ( zasr, nr1,nr2,nr3, nat, ibrav, tau, zeu)
 
 SUBROUTINE interface_with_tpw(frc_, nr1, nr2, nr3, nat_, ntyp_, has_zstar_, &
                 zeu_, epsil_, atm_, nspin_mag_, m_loc_, tau_, ityp_, at_, &
-                bg_, omega_, ibrav_, celldm_ )
+                bg_, omega_, ibrav_, celldm_, amass_)
 !
 !  This routine is used to copy the variables produced by q2r in the variables
 !  of the thermo_pw code, avoiding to read the file on disk.
 !
 USE kinds,  ONLY : DP
 USE ifc,    ONLY : frc, atm, zeu, m_loc, epsil_ifc, has_zstar
-USE ions_base, ONLY : nat, ntyp=>nsp, tau, ityp
+USE ions_base, ONLY : nat, ntyp=>nsp, tau, ityp, amass
 USE cell_base, ONLY : ibrav, at, bg, celldm, omega
 USE disp,   ONLY : nq1, nq2, nq3
 USE noncollin_module, ONLY : nspin_mag
@@ -617,7 +617,7 @@ INTEGER,     INTENT(IN) :: nr1, nr2, nr3, nat_, ntyp_, ityp_(nat_), &
 COMPLEX(DP),    INTENT(IN) :: frc_(nr1*nr2*nr3,3,3,nat_,nat_)
 REAL(DP),    INTENT(IN) :: zeu_(3,3,nat_), m_loc_(3,nat_), epsil_(3,3), &
                            at_(3,3), bg_(3,3), omega_, tau_(3,nat_),    &
-                           celldm_(6)
+                           celldm_(6), amass_(ntyp_)
 LOGICAL,     INTENT(IN) :: has_zstar_
 CHARACTER(LEN=3), INTENT(IN) :: atm_(ntyp_)
 INTEGER :: i,j,k,ijk
@@ -663,6 +663,7 @@ ntyp=ntyp_
 omega=omega_
 tau=tau_
 ityp=ityp_
+amass(1:ntyp)=amass_(1:ntyp_)
 
 RETURN
 END SUBROUTINE interface_with_tpw
@@ -671,7 +672,6 @@ SUBROUTINE clean_ifc_variables()
 
 USE kinds,          ONLY : DP
 USE ifc,            ONLY : frc, atm, zeu, m_loc
-USE phonon_save,    ONLY : freq_save, z_save
 USE thermodynamics, ONLY : gen_phdos_save
 USE control_thermo, ONLY : with_eigen
 USE phdos_module,   ONLY : destroy_gen_phdos
@@ -681,8 +681,6 @@ IF (ALLOCATED(frc)) DEALLOCATE(frc)
 IF (ALLOCATED(atm)) DEALLOCATE(atm)
 IF (ALLOCATED(zeu)) DEALLOCATE(zeu)
 IF (ALLOCATED(m_loc)) DEALLOCATE(m_loc)
-IF (ALLOCATED(freq_save)) DEALLOCATE (freq_save)
-IF (ALLOCATED(z_save)) DEALLOCATE (z_save)
 IF (with_eigen) CALL destroy_gen_phdos(gen_phdos_save)
 
 RETURN
