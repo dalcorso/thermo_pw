@@ -361,7 +361,7 @@ USE mp,             ONLY : mp_sum
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
 INTEGER :: itemp, iu_therm, i, nq, imode, iq, nvar, nwork
-INTEGER :: itens, jtens, startq, lastq, nq_eff, iq_eff
+INTEGER :: itens, jtens, startq, lastq, iq_eff
 TYPE(ph_freq_type) :: ph_freq    ! the frequencies at the volumes at
                                  ! which the gruneisen parameters are 
                                  ! calculated
@@ -405,8 +405,7 @@ CALL find_central_geo(ngeo, no_ph, central_geo)
 nq=ph_freq_save(central_geo)%nq
 startq=ph_freq_save(central_geo)%startq
 lastq=ph_freq_save(central_geo)%lastq
-nq_eff=ph_freq_save(central_geo)%nq_eff
-CALL init_ph_freq(ph_freq, nat, nq1_d, nq2_d, nq3_d, nq_eff, startq, lastq,  &
+CALL init_ph_freq(ph_freq, nat, nq1_d, nq2_d, nq3_d, startq, lastq,  &
                                                                nq, .FALSE.)
 ph_freq%wg=ph_freq_save(central_geo)%wg
 !
@@ -418,7 +417,7 @@ ALLOCATE(ph_grun(nvar))
 ALLOCATE(grad(nvar))
 ALLOCATE(x(nvar))
 DO i=1, nvar
-   CALL init_ph_freq(ph_grun(i), nat, nq1_d, nq2_d, nq3_d, nq_eff, startq, &
+   CALL init_ph_freq(ph_grun(i), nat, nq1_d, nq2_d, nq3_d, startq, &
                                                     lastq, nq, .FALSE.)
 END DO
 !

@@ -66,21 +66,20 @@ PUBLIC :: ph_freq_type, zero_point_energy_ph, free_energy_ph, vib_energy_ph, &
 
 CONTAINS
 
-SUBROUTINE init_ph_freq(ph_freq, nat, nq1, nq2, nq3, nq_eff, startq, lastq, &
-                                 nq, flag)
+SUBROUTINE init_ph_freq(ph_freq, nat, nq1, nq2, nq3, startq, lastq, nq, flag)
 !
 !  If flag is true save also the eigenvectors
 !
 IMPLICIT NONE
 
 TYPE(ph_freq_type), INTENT(INOUT) :: ph_freq
-INTEGER, INTENT(IN) :: nq1, nq2, nq3, nat, nq_eff, startq, lastq, nq
+INTEGER, INTENT(IN) :: nq1, nq2, nq3, nat, startq, lastq, nq
 LOGICAL, INTENT(IN) :: flag
-INTEGER :: ndiv, nqtot
+INTEGER :: ndiv, nqtot, nq_eff
 
 nqtot = nq1 * nq2 * nq3
 ph_freq%nqtot=nqtot
-ph_freq%nq_eff=nq_eff
+ph_freq%nq_eff=lastq-startq+1
 ph_freq%startq=startq
 ph_freq%lastq=lastq
 ph_freq%nq=nq
@@ -91,6 +90,7 @@ ph_freq%nq3 = nq3
 ph_freq%nat = nat
 ph_freq%with_eigen=flag
 ndiv = ph_freq%number_of_points 
+nq_eff=ph_freq%nq_eff
 ALLOCATE(ph_freq%nu(3*nat, nq_eff))
 IF (flag) ALLOCATE(ph_freq%displa(3*nat, 3*nat, nq_eff))
 ALLOCATE(ph_freq%wg(nq_eff))

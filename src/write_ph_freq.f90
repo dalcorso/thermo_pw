@@ -46,7 +46,7 @@ SUBROUTINE write_ph_freq(igeom)
   CHARACTER(LEN=256) :: filename
 
   INTEGER :: iq, na, nta, ipol, jmode, nq, nqx, iq_eff, ntetra, &
-             startq, lastq, nq_eff, iproc, imode
+             startq, lastq, iproc, imode
   INTEGER, ALLOCATABLE :: nq_all(:)
   INTEGER, ALLOCATABLE :: start_proc(:)
   INTEGER, ALLOCATABLE :: last_proc(:)
@@ -88,8 +88,7 @@ SUBROUTINE write_ph_freq(igeom)
      CALL mp_bcast(buffer%wg, meta_ionode_id, world_comm)
      CALL mp_bcast(buffer%nu, meta_ionode_id, world_comm)
      CALL divide(world_comm, buffer%nq, startq, lastq)
-     nq_eff=lastq-startq+1
-     CALL init_ph_freq(ph_freq_save(igeom), nat, nq1_d, nq2_d, nq3_d, nq_eff, &
+     CALL init_ph_freq(ph_freq_save(igeom), nat, nq1_d, nq2_d, nq3_d, &
                                          startq, lastq, nq, with_eigen)
 
      ALLOCATE ( freq_save(3*nat, startq:lastq ))
@@ -131,8 +130,7 @@ SUBROUTINE write_ph_freq(igeom)
 !
 !   initialize space to save the frequencies
 !
-  nq_eff=lastq-startq+1
-  CALL init_ph_freq(ph_freq_save(igeom), nat, nq1_d, nq2_d, nq3_d, nq_eff, &
+  CALL init_ph_freq(ph_freq_save(igeom), nat, nq1_d, nq2_d, nq3_d, &
                                          startq, lastq, nq, with_eigen)
 !
 !   save the frequencies
@@ -183,7 +181,7 @@ SUBROUTINE write_ph_freq(igeom)
         last_proc(iproc)=nq
      ENDDO
      
-     CALL init_ph_freq(buffer, nat, nq1_d, nq2_d, nq3_d, nq, 1, nq, &
+     CALL init_ph_freq(buffer, nat, nq1_d, nq2_d, nq3_d, 1, nq, &
                                                          nq, with_eigen) 
      
      buffer%nu=0.0_DP
