@@ -54,6 +54,7 @@ find_mode_sym_proj.o \
 fit_frequencies.o \
 generate_k_along_lines_kz.o \
 generalized_phdos.o \
+gen_qpoints.o \
 initialize_geometry_and_ph.o \
 initialize_thermo_work.o \
 interpolate_bfact.o \
