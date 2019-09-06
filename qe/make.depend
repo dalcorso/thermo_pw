@@ -524,6 +524,8 @@ dvqpsi_us_only.o : ../../Modules/recvec.o
 dvqpsi_us_only.o : ../../Modules/uspp.o
 dvqpsi_us_only.o : ../../PHonon/PH/phcom.o
 dvqpsi_us_only.o : ../../PW/src/pwcom.o
+dyndiag.o : ../../Modules/constants.o
+dyndiag.o : ../../Modules/kind.o
 dynmat0.o : ../../LR_Modules/lrcom.o
 dynmat0.o : ../../Modules/cell_base.o
 dynmat0.o : ../../Modules/control_flags.o
