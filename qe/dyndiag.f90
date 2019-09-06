@@ -83,7 +83,7 @@ subroutine dyndiag_tpw (nat,ntyp,amass,ityp,dyn,w2,z,flag)
  !
  !  diagonalisation
  !
- call cdiagh(nat3,dyn2,nat3,w2,z)
+ call cdiagh2_tpw(nat3,dyn2,nat3,w2,z)
  !
  deallocate(dyn2)
  !
@@ -105,3 +105,57 @@ subroutine dyndiag_tpw (nat,ntyp,amass,ityp,dyn,w2,z,flag)
  return
 end subroutine dyndiag_tpw
 !
+!-----------------------------------------------------------------------
+subroutine cdiagh2_tpw (n,h,ldh,e,v)
+  !-----------------------------------------------------------------------
+  !
+  !   calculates all the eigenvalues and eigenvectors of a complex
+  !   hermitean matrix H . On output, the matrix is unchanged
+  !
+  use kinds, only: dp
+  implicit none
+  !
+  ! on INPUT
+  integer          n,       &! dimension of the matrix to be diagonalized
+       &           ldh       ! leading dimension of h, as declared
+  ! in the calling pgm unit
+  complex(DP)  h(ldh,n)  ! matrix to be diagonalized
+  !
+  ! on OUTPUT
+  real(DP)     e(n)      ! eigenvalues
+  complex(DP)  v(ldh,n)  ! eigenvectors (column-wise)
+  !
+  ! LOCAL variables (LAPACK version)
+  !
+  integer          lwork,   &! aux. var.
+       &           ILAENV,  &! function which gives block size
+       &           nb,      &! block size
+       &           info      ! flag saying if the exec. of libr. routines was ok
+  !
+  real(DP), allocatable::   rwork(:)
+  complex(DP), allocatable:: work(:)
+  !
+  !     check for the block size
+  !
+  nb = ILAENV( 1, 'ZHETRD', 'U', n, -1, -1, -1 )
+  if (nb.lt.1) nb=max(1,n)
+  if (nb.eq.1.or.nb.ge.n) then
+     lwork=2*n-1
+  else
+     lwork = (nb+1)*n
+  endif
+  !
+  ! allocate workspace
+  !
+  call zcopy(n*ldh,h,1,v,1)
+  allocate(work (lwork))
+  allocate(rwork (3*n-2))
+  call ZHEEV('V','U',n,v,ldh,e,work,lwork,rwork,info)
+  call errore ('cdiagh2_tpw','info =/= 0',abs(info))
+  ! deallocate workspace
+  deallocate(rwork)
+  deallocate(work)
+  !
+  return
+end subroutine cdiagh2_tpw
+
