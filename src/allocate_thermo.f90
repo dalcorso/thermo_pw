@@ -17,7 +17,7 @@ SUBROUTINE allocate_thermodynamics()
   USE temperature,    ONLY : ntemp
   USE thermodynamics, ONLY : ph_free_ener, ph_ener, ph_entropy, ph_ce, ph_b_fact
   USE ph_freq_thermodynamics, ONLY : phf_free_ener, phf_ener, phf_entropy, &
-                                     phf_ce, phf_b_fact
+                                     phf_ce, phf_b_fact, ph_freq_save
 
   IMPLICIT NONE
 
@@ -32,7 +32,10 @@ SUBROUTINE allocate_thermodynamics()
   IF (.NOT.ALLOCATED(phf_entropy))   ALLOCATE(phf_entropy(ntemp,tot_ngeo))
   IF (.NOT.ALLOCATED(phf_ce))        ALLOCATE(phf_ce(ntemp,tot_ngeo))
   IF (.NOT.ALLOCATED(phf_b_fact))    ALLOCATE(phf_b_fact(3,3,nat,ntemp,tot_ngeo))
-
+!
+!   allocate the structures needed to save the frequencies
+!
+  IF (.NOT.ALLOCATED(ph_freq_save))   ALLOCATE(ph_freq_save(tot_ngeo))
   RETURN
   !
 END SUBROUTINE allocate_thermodynamics

@@ -59,7 +59,6 @@ SUBROUTINE write_ph_freq(igeom)
   !
   filename='phdisp_files/'//TRIM(fldosfrq)
   file_exist=check_file_exists(filename)
-  IF (.NOT.ALLOCATED(ph_freq_save)) ALLOCATE(ph_freq_save(tot_ngeo))
   !
   ! Allocate space for the q points and the frequencies
   !
