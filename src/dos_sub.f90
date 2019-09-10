@@ -13,7 +13,7 @@ SUBROUTINE dos_sub()
   ! Calculates the Density of States (DOS),
   ! separated into up and down components for LSDA
   !
-  USE io_global,  ONLY : stdout, ionode, ionode_id
+  USE io_global,  ONLY : stdout, ionode
   USE io_files,   ONLY : prefix, tmp_dir
   USE constants,  ONLY : rytoev
   USE kinds,      ONLY : DP

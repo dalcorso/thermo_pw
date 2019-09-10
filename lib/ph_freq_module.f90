@@ -114,7 +114,6 @@ SUBROUTINE read_ph_freq_data(ph_freq, filename)
 !  This subroutine reads the ph_freq data from a file. It allocates space
 !  for the frequencies and their representation
 !
-USE io_global, ONLY : ionode, ionode_id
 IMPLICIT NONE
 TYPE(ph_freq_type), INTENT(INOUT) :: ph_freq
 CHARACTER(LEN=256), INTENT(IN) :: filename
@@ -170,7 +169,6 @@ SUBROUTINE write_ph_freq_data(ph_freq, filename)
 !  This subroutine writes the ph_freq data from a file. It allocates space
 !  for the frequencies
 !
-USE io_global, ONLY : ionode, ionode_id
 IMPLICIT NONE
 TYPE(ph_freq_type), INTENT(INOUT) :: ph_freq
 CHARACTER(LEN=256), INTENT(IN) :: filename

@@ -33,7 +33,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   !! @endnote
   !!
   !
-  USE io_global,        ONLY : stdout, ionode, ionode_id
+  USE io_global,        ONLY : stdout, ionode
   USE parameters,       ONLY : ntypx, npk, lmaxx
   USE initial_param,    ONLY : ethr0
   USE cell_base,        ONLY : fix_volume, fix_area

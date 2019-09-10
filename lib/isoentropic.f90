@@ -22,7 +22,7 @@ MODULE isoentropic
 !   the difference between isoentropic and isothermal quantities. 
 !
   USE kinds,     ONLY : DP
-  USE io_global, ONLY : stdout, ionode, ionode_id
+  USE io_global, ONLY : stdout
   USE mp_images, ONLY : intra_image_comm
   USE mp,        ONLY : mp_bcast 
   IMPLICIT NONE

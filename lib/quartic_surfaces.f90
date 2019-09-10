@@ -73,7 +73,7 @@ MODULE quartic_surfaces
 !
   USE kinds, ONLY : DP
   USE polynomial, ONLY : poly4
-  USE io_global, ONLY : stdout, meta_ionode
+  USE io_global, ONLY : stdout
   IMPLICIT NONE
   PRIVATE
   SAVE

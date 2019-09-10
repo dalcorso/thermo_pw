@@ -14,7 +14,6 @@ MODULE gnuplot_color
 !  on the screen and on a printer
 !
     USE kinds, ONLY : DP
-    USE io_global, ONLY : ionode
     USE gnuplot, ONLY : gnuplot_write_command
 
     SAVE

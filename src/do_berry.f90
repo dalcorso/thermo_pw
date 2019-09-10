@@ -27,7 +27,7 @@ SUBROUTINE do_berry ( exit_status, polar, nppl )
   ! ... Will be eventually merged with NEB
   !
   USE kinds,            ONLY : DP
-  USE io_global,        ONLY : stdout, ionode, ionode_id
+  USE io_global,        ONLY : stdout, ionode
   USE parameters,       ONLY : ntypx, npk, lmaxx
   USE cell_base,        ONLY : at
   USE basis,            ONLY : starting_pot, startingconfig
