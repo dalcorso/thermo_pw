@@ -16,7 +16,7 @@ SUBROUTINE fit_frequencies()
   USE thermo_mod,             ONLY : ngeo, omega_geo, no_ph
   USE ions_base,              ONLY : nat
   USE ph_freq_thermodynamics, ONLY : ph_freq_save
-  USE grun_anharmonic,        ONLY : poly_grun, poly_order
+  USE grun_anharmonic,        ONLY : poly_grun, poly_degree_grun
   USE control_thermo,         ONLY : with_eigen
   USE freq_interpolate,       ONLY : interp_freq_eigen, interp_freq
   USE control_quartic_energy, ONLY : lsolve
@@ -58,7 +58,7 @@ SUBROUTINE fit_frequencies()
 !  volume. Note that poly_grun is not deallocated and is the output of 
 !  this routine, used in the following ones.
 !
-  ALLOCATE(poly_grun(poly_order,3*nat,startq:lastq))
+  ALLOCATE(poly_grun(poly_degree_grun+1,3*nat,startq:lastq))
   ALLOCATE(freq_geo(3*nat,ndata))
   IF (with_eigen) ALLOCATE(displa_geo(3*nat,3*nat,ndata))
  
@@ -83,10 +83,10 @@ SUBROUTINE fit_frequencies()
 !
      IF (with_eigen) THEN
         CALL interp_freq_eigen(ndata,freq_geo,omega_data,cgeo_eff, &
-                               displa_geo,poly_order,poly_grun(1,1,n))
+                               displa_geo,poly_degree_grun,poly_grun(1,1,n))
      ELSE
         CALL interp_freq(ndata,freq_geo,omega_data, &
-                                             poly_order,poly_grun(1,1,n))
+                                        poly_degree_grun,poly_grun(1,1,n))
      END IF
   ENDDO
 !
@@ -187,7 +187,7 @@ SUBROUTINE fit_frequencies_anis()
 !   and interpolates the data
 !
      IF (with_eigen) THEN
-        CALL interp_freq_anis_eigen(ndata,freq_geo,lsolve, x,cgeo_eff,&
+        CALL interp_freq_anis_eigen(ndata,freq_geo,lsolve,x,cgeo_eff,&
                            displa_geo, nvar,p_grun_p2(:,n))
      ELSE
         CALL interp_freq_anis(ndata,freq_geo,lsolve,x,nvar,p_grun_p2(:,n))
@@ -217,7 +217,7 @@ SUBROUTINE fit_frequencies_anis_reduced()
   USE ions_base,              ONLY : nat
   USE cell_base,              ONLY : ibrav
   USE ph_freq_thermodynamics, ONLY : ph_freq_save
-  USE grun_anharmonic,        ONLY : poly_grun_red, poly_order
+  USE grun_anharmonic,        ONLY : poly_grun_red, poly_degree_grun
   USE control_thermo,         ONLY : with_eigen
   USE freq_interpolate,       ONLY : interp_freq, interp_freq_eigen
   USE lattices,               ONLY : compress_celldm, crystal_parameters
@@ -259,7 +259,7 @@ SUBROUTINE fit_frequencies_anis_reduced()
 !  crystal parameters. Note that poly_grun is not deallocated and 
 !  is the output of this routine, used in the following ones.
 !
-  ALLOCATE(poly_grun_red(poly_order,3*nat,nvar,startq:lastq))
+  ALLOCATE(poly_grun_red(poly_degree_grun+1,3*nat,nvar,startq:lastq))
   ALLOCATE(xd(ndata))
   ALLOCATE(freq_geo(3*nat,ndata))
   IF (with_eigen) ALLOCATE(displa_geo(3*nat,3*nat,ndata))
@@ -291,9 +291,9 @@ SUBROUTINE fit_frequencies_anis_reduced()
 !
         IF (with_eigen) THEN
            CALL interp_freq_eigen(ndata,freq_geo,xd,cgeo_eff,displa_geo, &
-                           poly_order,poly_grun_red(1,1,i,n))
+                           poly_degree_grun,poly_grun_red(1,1,i,n))
         ELSE
-           CALL interp_freq(ndata,freq_geo,xd,poly_order,&
+           CALL interp_freq(ndata,freq_geo,xd,poly_degree_grun,&
                                       poly_grun_red(1,1,i,n))
         ENDIF
      ENDDO

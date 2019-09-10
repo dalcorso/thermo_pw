@@ -413,7 +413,7 @@ DO igeo=1,ngeo
    y(igeo)=polar_geo(ialpha,igeo)
    WRITE(stdout,'(2f15.10)') x(igeo), y(igeo)
 ENDDO
-CALL polyfit( x, y, ngeo, alpha, m1 )
+CALL polyfit( x, y, ngeo, alpha, m1-1 )
 g_piezo_tensor(ialpha, mn) = alpha(2)
 WRITE(stdout,'(/,20x,40("-"),/)')
 !

@@ -84,7 +84,7 @@ SUBROUTINE thermo_readin()
                                    poly_degree_elc, poly_degree_cv, &
                                    poly_degree_bfact, lsolve
   USE piezoelectric_tensor, ONLY : nppl
-  USE grun_anharmonic,      ONLY : poly_order
+  USE grun_anharmonic,      ONLY : poly_degree_grun
   USE images_omega, ONLY : omega_group
   USE control_qe,   ONLY : force_band_calculation, use_ph_images
   USE band_computation, ONLY : sym_for_diago
@@ -256,7 +256,7 @@ SUBROUTINE thermo_readin()
                             poly_degree_bfact,              &
                             poly_degree_elc,                &
                             lv0_t, lb0_t,                   &
-                            poly_order,                     &
+                            poly_degree_grun,               &
                             flpgrun, flgrun, flpsgrun,      &
                             flanhar, flpsanhar,             &
                             fact_ngeo, ngeo_ph,             &
@@ -433,7 +433,7 @@ SUBROUTINE thermo_readin()
   poly_degree=0
   fl_el_cons='output_el_cons.dat'
 
-  poly_order=5
+  poly_degree_grun=4
 
   nppl=51
 

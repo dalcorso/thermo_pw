@@ -161,7 +161,7 @@ USE temperature,    ONLY : ntemp, temp
 USE thermo_mod,     ONLY : ngeo, no_ph
 USE ph_freq_thermodynamics, ONLY : ph_freq_save
 USE grun_anharmonic, ONLY : betab, cp_grun_t, b0_grun_s, &
-                           grun_gamma_t, poly_grun, poly_order, &
+                           grun_gamma_t, poly_grun, poly_degree_grun, &
                            ce_grun_t, cv_grun_t
 USE ph_freq_module, ONLY : thermal_expansion_ph, ph_freq_type,  &
                            destroy_ph_freq, init_ph_freq
@@ -216,8 +216,8 @@ DO itemp = 1, ntemp
    DO iq=startq, lastq
       iq_eff=iq_eff+1
       DO imode=1,3*nat
-         CALL compute_poly(vm, poly_order, poly_grun(:,imode,iq),f)
-         CALL compute_poly_deriv(vm, poly_order, poly_grun(:,imode,iq),g)
+         CALL compute_poly(vm, poly_degree_grun, poly_grun(:,imode,iq),f)
+         CALL compute_poly_deriv(vm, poly_degree_grun, poly_grun(:,imode,iq),g)
 !
 !     g here is d w / d V 
 !     ph_grun%nu will contain the gruneisen parameter divided by the volume

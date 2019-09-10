@@ -50,15 +50,15 @@ MODULE freq_interpolate
 CONTAINS
 
 !-------------------------------------------------------------------------
-SUBROUTINE interp_freq(ngeo,freq,omega,poly_order,poly_grun)
+SUBROUTINE interp_freq(ngeo,freq,omega,poly_degree_grun,poly_grun)
 !-------------------------------------------------------------------------
 
 USE polyfit_mod, ONLY : polyfit
 
 IMPLICIT NONE
-INTEGER,  INTENT(IN) :: ngeo, poly_order
+INTEGER,  INTENT(IN) :: ngeo, poly_degree_grun
 REAL(DP), INTENT(IN) :: freq(3*nat,ngeo), omega(ngeo)
-REAL(DP), INTENT(INOUT) :: poly_grun(poly_order,3*nat)
+REAL(DP), INTENT(INOUT) :: poly_grun(poly_degree_grun+1,3*nat)
 
 INTEGER :: imode
 
@@ -66,7 +66,8 @@ DO imode=1, 3*nat
 !
 !    Fits the frequencies as a function of the volume
 !
-   CALL polyfit( omega, freq(imode,:), ngeo, poly_grun(:,imode), poly_order )
+   CALL polyfit( omega, freq(imode,:), ngeo, poly_grun(:,imode), &
+                                                        poly_degree_grun )
 ENDDO
 
 RETURN
@@ -74,14 +75,14 @@ END SUBROUTINE interp_freq
 !
 !-------------------------------------------------------------------------
 SUBROUTINE interp_freq_eigen(ngeo, freq, omega, central_geo, &
-                                           displa, poly_order, poly_grun)
+                                      displa, poly_degree_grun, poly_grun)
 !-------------------------------------------------------------------------
 USE polyfit_mod, ONLY : polyfit
 IMPLICIT NONE
-INTEGER,  INTENT(IN) :: ngeo, central_geo, poly_order
+INTEGER,  INTENT(IN) :: ngeo, central_geo, poly_degree_grun
 REAL(DP), INTENT(IN) :: freq(3*nat,ngeo), omega(ngeo)
 COMPLEX(DP), INTENT(IN) :: displa(3*nat,3*nat,ngeo)
-REAL(DP), INTENT(INOUT) :: poly_grun(poly_order,3*nat)
+REAL(DP), INTENT(INOUT) :: poly_grun(poly_degree_grun+1,3*nat)
 
 REAL(DP), ALLOCATABLE :: frequences(:)
 REAL(DP) :: overlap
@@ -119,7 +120,7 @@ DO imode=1, 3*nat
 !
 !    Fits the frequencies as a function of the volume
 !
-   CALL polyfit( omega, frequences, ngeo, poly_grun(:,imode), poly_order )
+   CALL polyfit( omega, frequences, ngeo, poly_grun(:,imode), poly_degree_grun)
 ENDDO
 
 DEALLOCATE(frequences)
@@ -129,15 +130,15 @@ END SUBROUTINE interp_freq_eigen
 
 !-------------------------------------------------------------------------
 SUBROUTINE interp_freq_rap(ngeo, freq, omega, central_geo, &
-                                         rap, poly_order, poly_grun)
+                                         rap, poly_degree_grun, poly_grun)
 !-------------------------------------------------------------------------
 USE polyfit_mod, ONLY : polyfit
 
 IMPLICIT NONE
-INTEGER,  INTENT(IN) :: ngeo, poly_order, central_geo
+INTEGER,  INTENT(IN) :: ngeo, poly_degree_grun, central_geo
 INTEGER,  INTENT(IN) :: rap(3*nat,ngeo)
 REAL(DP), INTENT(IN) :: freq(3*nat,ngeo), omega(ngeo)
-REAL(DP), INTENT(INOUT) :: poly_grun(poly_order,3*nat)
+REAL(DP), INTENT(INOUT) :: poly_grun(poly_degree_grun+1,3*nat)
 
 REAL(DP), ALLOCATABLE :: frequences(:)
 INTEGER,  ALLOCATABLE :: level(:,:)
@@ -173,7 +174,7 @@ DO imode=1, 3*nat
 !
 !    Fits the frequencies as a function of the volume
 !
-   CALL polyfit(omega, frequences, ngeo, poly_grun(:,imode), poly_order)
+   CALL polyfit(omega, frequences, ngeo, poly_grun(:,imode), poly_degree_grun)
 ENDDO
 
 DEALLOCATE( level )

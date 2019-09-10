@@ -21,7 +21,7 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
   USE thermo_mod,     ONLY : ngeo, omega_geo, no_ph
   USE anharmonic,     ONLY : vmin_t
   USE ph_freq_anharmonic, ONLY : vminf_t
-  USE grun_anharmonic, ONLY : poly_order
+  USE grun_anharmonic, ONLY : poly_degree_grun
   USE control_grun,   ONLY : temp_ph, volume_ph
   USE initial_conf,   ONLY : ityp_save, ibrav_save
   USE control_mur,    ONLY : vmin
@@ -139,7 +139,7 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
 !
   ALLOCATE(frequency_geo(nmodes,ndata))
   ALLOCATE(displa(nmodes,nmodes,ndata))
-  ALLOCATE(poly_grun(poly_order,nmodes))
+  ALLOCATE(poly_grun(poly_degree_grun+1,nmodes))
   ALLOCATE(frequency(nmodes,nks))
   ALLOCATE(gruneisen(nmodes,nks))
 
@@ -182,14 +182,14 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
            displa(1:nmodes,1:nmodes,ndata) = displa_geo(1:nmodes,1:nmodes,igeo,n)
         ENDDO
         CALL interp_freq_eigen(ndata, frequency_geo, omega_data, &
-                          cgeo_eff, displa, poly_order, poly_grun)
+                          cgeo_eff, displa, poly_degree_grun, poly_grun)
 !
 !  frequencies and gruneisen parameters are calculated at the chosen
 !  volume using the intepolating polynomial
 !
         DO imode=1,nmodes
-           CALL compute_poly(vm, poly_order, poly_grun(:,imode),f)
-           CALL compute_poly_deriv(vm, poly_order, poly_grun(:,imode),g)
+           CALL compute_poly(vm, poly_degree_grun, poly_grun(:,imode),f)
+           CALL compute_poly_deriv(vm, poly_degree_grun, poly_grun(:,imode),g)
            frequency(imode,n)=f
 !
 !     g here is V d w / d V. We change sign and divide by the frequency w 

@@ -24,7 +24,7 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
   USE thermo_mod,     ONLY : celldm_geo, no_ph, in_degree, reduced_grid, red_central_geo
   USE anharmonic,     ONLY : celldm_t
   USE ph_freq_anharmonic,  ONLY : celldmf_t
-  USE grun_anharmonic, ONLY : poly_order
+  USE grun_anharmonic, ONLY : poly_degree_grun
   USE control_grun,   ONLY : temp_ph, celldm_ph
   USE initial_conf,   ONLY : ibrav_save, ityp_save
   USE control_thermo, ONLY : ltherm_dos, ltherm_freq, set_internal_path
@@ -231,13 +231,14 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
               ENDDO
               IF (cgeo_eff==0) cgeo_eff=ndata/2
               CALL interp_freq_eigen(ndata, frequency_geo, xd, cgeo_eff, &
-                                               displa, poly_order, poly_grun)
+                                          displa, poly_degree_grun, poly_grun)
               DO imode=1,nmodes
-                 CALL compute_poly(x(icrys), poly_order, poly_grun(:,imode),f)
+                 CALL compute_poly(x(icrys), poly_degree_grun, &
+                                                         poly_grun(:,imode),f)
 !
 !  this function gives the derivative with respect to x(i) multiplied by x(i)
 !
-                 CALL compute_poly_deriv(x(icrys), poly_order, &
+                 CALL compute_poly_deriv(x(icrys), poly_degree_grun, &
                                                    poly_grun(:,imode),g)
                  frequency(imode,n) = f
                  gruneisen(imode,n,icrys) = - x(icrys) * g

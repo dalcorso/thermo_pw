@@ -300,8 +300,8 @@ MODULE grun_anharmonic
                                         ! polynomial which fit the frequency
                                         ! as a function of crystal parameter
                                         ! this is for the reduced_grid case
-  INTEGER :: poly_order                 ! order of the polynomial + 1 
-
+  INTEGER :: poly_degree_grun           ! degree of the polynomial used to
+                                        ! intepolate the frequencies
   LOGICAL :: done_grun=.FALSE.          ! the anharmonic quantities with
                                         ! Gruneisen parameters have been 
                                         ! calculated

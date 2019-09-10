@@ -16,7 +16,12 @@ MODULE polyfit_mod
 !
 !  polyfit : interpolate a set of data with a polynomial of 
 !            arbitrary degree
-!  
+!
+!  compute_poly : computes the value of the polynomial in one point  
+!
+!  compute_poly_deriv : computes the value of the first derivative of the
+!                 polynomial in one point
+!
 !  write_poly : writes on output the coefficients of the polynomial.
 !
   USE kinds, ONLY : DP
@@ -30,23 +35,24 @@ MODULE polyfit_mod
 CONTAINS
 
 !--------------------------------------------------------------------------
-SUBROUTINE polyfit(x,y,ndati,a,ncoeff)
+SUBROUTINE polyfit(x,y,ndati,a,degree)
 !--------------------------------------------------------------------------
 !
 !  This routine fits a set of data with a polynomial of one variable and
-!  arbitrary degree. ncoeff is the number of coefficients equal 
-!  to the degree+1
+!  arbitrary degree. 
 !
 USE linear_solvers, ONLY : linsolvx
 IMPLICIT NONE
 INTEGER, INTENT(IN)   ::   ndati, &  ! number of data points
-                           ncoeff    ! number polynomial coefficients 
+                           degree    ! degree of the polynomial
 
 REAL(DP), INTENT(IN)  :: x(ndati), y(ndati)
-REAL(DP), INTENT(OUT) :: a(ncoeff)
+REAL(DP), INTENT(OUT) :: a(degree+1)
 
-REAL(DP) :: amat(ncoeff,ncoeff), bvec(ncoeff)
-INTEGER  ::  i, j, k       ! counters
+REAL(DP) :: amat(degree+1,degree+1), bvec(degree+1)
+INTEGER  ::  i, j, k, ncoeff 
+
+ncoeff=degree+1
 
 DO k=1,ncoeff
    DO j=1,ncoeff
@@ -67,17 +73,18 @@ RETURN
 END SUBROUTINE polyfit
 !
 !--------------------------------------------------------------------------
-SUBROUTINE compute_poly(x, ncoeff, poly, f)
+SUBROUTINE compute_poly(x, degree, poly, f)
 !--------------------------------------------------------------------------
 !
 USE kinds, ONLY : DP
 IMPLICIT NONE
-INTEGER :: ncoeff
-REAL(DP), INTENT(IN) :: poly(ncoeff), x
+INTEGER :: degree
+REAL(DP), INTENT(IN) :: poly(degree+1), x
 REAL(DP), INTENT(OUT) :: f
 
-INTEGER :: i
+INTEGER :: i, ncoeff
 
+ncoeff=degree+1
 f=poly(ncoeff)
 DO i=ncoeff-1,1,-1
    f = poly(i) + f*x
@@ -87,19 +94,21 @@ RETURN
 END SUBROUTINE compute_poly
 
 !--------------------------------------------------------------------------
-SUBROUTINE compute_poly_deriv(x, ncoeff, poly, g)
+SUBROUTINE compute_poly_deriv(x, degree, poly, g)
 !--------------------------------------------------------------------------
 !
 ! gives as output the derivative of the polynomial with respect to x
 ! 
 USE kinds, ONLY : DP
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: ncoeff
-REAL(DP), INTENT(IN) :: poly(ncoeff), x
+INTEGER, INTENT(IN) :: degree
+REAL(DP), INTENT(IN) :: poly(degree+1), x
 
 REAL(DP), INTENT(OUT) :: g
 
-INTEGER :: i
+INTEGER :: i, ncoeff
+
+ncoeff=degree+1
 
 g=poly(ncoeff)*(ncoeff-1.0_DP)
 DO i=ncoeff-1,2,-1
@@ -110,19 +119,20 @@ RETURN
 END SUBROUTINE compute_poly_deriv
 
 !--------------------------------------------------------------------------
-SUBROUTINE write_poly(a,ncoeff)
+SUBROUTINE write_poly(a,degree)
 !--------------------------------------------------------------------------
 !
 !   This routine writes on output the coefficients of a polynomial of
 !   one variable
 !
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: ncoeff
-REAL(DP), INTENT(IN) :: a(ncoeff)
+INTEGER, INTENT(IN) :: degree
+REAL(DP), INTENT(IN) :: a(degree+1)
 
-INTEGER :: i
+INTEGER :: i, ncoeff
 CHARACTER(LEN=6) :: int_to_char
 
+ncoeff=1+degree
 WRITE(stdout,'(/,5x,"Polynomial coefficients")')
 DO i=1,ncoeff
    WRITE(stdout,'(5x,a,e20.12)') "a"//TRIM(INT_TO_CHAR(i))//"=", a(i)

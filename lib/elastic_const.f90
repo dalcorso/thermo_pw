@@ -1898,8 +1898,8 @@ DO igeo=1,ngeo
    y(igeo)=sigma_geo(p,q,igeo)
    WRITE(stdout,'(2f18.10)') x(igeo), y(igeo)*ry_kbar
 ENDDO
-CALL polyfit( x, y, ngeo, alpha, m1 )
-CALL write_poly(alpha,m1)
+CALL polyfit( x, y, ngeo, alpha, m1-1 )
+CALL write_poly(alpha,m1-1)
 el_con(pq, mn) = -alpha(2)
 !
 !  The elastic constant tensor relates the stress to the strain in voigt
@@ -1931,8 +1931,8 @@ DO igeo=1,ngeo
    y(igeo)=energy_geo(igeo)
    WRITE(stdout,'(2f18.10)') x(igeo), y(igeo)
 ENDDO
-CALL polyfit( x, y, ngeo, alpha, m1 )
-CALL write_poly(alpha,m1)
+CALL polyfit( x, y, ngeo, alpha, m1-1 )
+CALL write_poly(alpha,m1-1)
 
 RETURN
 END SUBROUTINE el_cons_ij_ene

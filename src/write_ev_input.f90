@@ -148,7 +148,7 @@ REAL(DP) :: compute_mur_fun
      y(ndata)=ph_free_ener(itemp,idata)
 !    WRITE(stdout,'(2f25.14)') x(ndata), y(ndata)
   ENDDO
-  CALL polyfit(x, y, ndata, a, m1)
+  CALL polyfit(x, y, ndata, a, poly_degree_ph)
 
   CALL find_min_mur_pol(vmin, b0 / ry_kbar, b01, a, m1, vm)
   aux = (vmin / vm)**b01 * b0
@@ -232,7 +232,7 @@ REAL(DP) :: compute_mur_fun
      y(ndata)=phf_free_ener(itemp,idata) 
 !    WRITE(stdout,'(2f25.14)') x(ndata), y(ndata)
   ENDDO
-  CALL polyfit(x, y, ndata, a, m1)
+  CALL polyfit(x, y, ndata, a, poly_degree_ph)
 
   CALL find_min_mur_pol(vmin, b0 / ry_kbar, b01, a, m1, vm)
   aux = (vmin / vm)**b01 * b0
