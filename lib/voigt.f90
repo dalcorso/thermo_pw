@@ -13,7 +13,6 @@ MODULE voigt
 
 
   USE kinds,     ONLY : DP
-  USE io_global, ONLY : stdout
   IMPLICIT NONE
   PRIVATE
   SAVE

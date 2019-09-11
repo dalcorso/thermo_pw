@@ -195,7 +195,6 @@ SUBROUTINE q2r_sub(fildyn)
         CALL mp_bcast(nat, meta_ionode_id, world_comm)
         CALL mp_bcast(ntyp, meta_ionode_id, world_comm)
         CALL mp_bcast(nqs, meta_ionode_id, world_comm)
-        WRITE(6,*) nat
         IF (my_image_id/=0.AND.ifile==1) THEN
            ALLOCATE (tau(3,nat))
            ALLOCATE (ityp(nat))
