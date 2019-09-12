@@ -768,6 +768,9 @@ SUBROUTINE thermo_readin()
   CALL iosys()
   max_seconds_=save_max_seconds
 
+
+  IF ((set_internal_path.OR.set_2d_path).AND.calculation=='vc-relax') &
+     CALL errore('thermo_readin','path not available after vc-relax',1)
 !
 !   Now delete the temporary input files
 !
