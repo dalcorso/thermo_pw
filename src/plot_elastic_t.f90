@@ -462,7 +462,7 @@ IF (lelastic) THEN
       DO igeom=1, ngeom
          filename=TRIM(filelastic)//".g"//TRIM(int_to_char(igeom))
          ic=MOD(igeom-1,8)+1
-         CALL gnuplot_write_file_mul_data(filelastic,i,j,color(ic),&
+         CALL gnuplot_write_file_mul_data(filename,i,j,color(ic),&
                    (igeom==1), (igeom==ngeom).AND..NOT.lelasticf,.FALSE.)
       END DO
    ENDIF
