@@ -166,6 +166,7 @@ END DO
 !  In ph_freq_save the frequencies are distributed among all processors
 !  so the resulting thermodynamical quantities must be collected
 !
+CALL mp_sum(e0,world_comm)
 CALL mp_sum(phf_free_ener(1:ntemp,igeom),world_comm)
 CALL mp_sum(phf_ener(1:ntemp,igeom),world_comm)
 CALL mp_sum(phf_ce(1:ntemp,igeom),world_comm)
