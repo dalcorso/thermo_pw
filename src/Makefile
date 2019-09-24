@@ -58,9 +58,9 @@ gen_qpoints.o \
 initialize_geometry_and_ph.o \
 initialize_thermo_work.o \
 interpolate_bfact.o \
-interpolate_cv.o \
 interpolate_el_cons.o \
 interpolate_freq.o \
+interpolate_thermo.o \
 io_bands.o \
 initialize_ph_geometry.o \
 local_dos1d_so.o \

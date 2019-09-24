@@ -81,7 +81,7 @@ SUBROUTINE thermo_readin()
   USE control_energy_plot,  ONLY : ncontours, color_levels, ene_levels 
   USE control_quadratic_energy, ONLY : show_fit
   USE control_quartic_energy, ONLY : lquartic, poly_degree_ph,     &
-                                   poly_degree_elc, poly_degree_cv, &
+                                   poly_degree_elc, poly_degree_thermo, &
                                    poly_degree_bfact, lsolve
   USE piezoelectric_tensor, ONLY : nppl
   USE grun_anharmonic,      ONLY : poly_degree_grun
@@ -252,7 +252,7 @@ SUBROUTINE thermo_readin()
                             volume_ph, celldm_ph, temp_ph,  &
                             with_eigen,                     &
                             poly_degree_ph,                 &
-                            poly_degree_cv,                 &
+                            poly_degree_thermo,             &
                             poly_degree_bfact,              &
                             poly_degree_elc,                &
                             lv0_t, lb0_t,                   &
@@ -468,7 +468,7 @@ SUBROUTINE thermo_readin()
   temp_ph=0.0_DP
   with_eigen=.FALSE.
   poly_degree_ph=4
-  poly_degree_cv=4
+  poly_degree_thermo=4
   poly_degree_bfact=4
   poly_degree_elc=4
   lv0_t=.TRUE.
@@ -527,11 +527,11 @@ SUBROUTINE thermo_readin()
   IF (poly_degree_ph<1 .OR. poly_degree_ph>4) &
             CALL errore('thermo_readin','poly_degree_ph must be between &
                                                               & 1 and 4',1)
-  IF (poly_degree_cv<1 .OR. poly_degree_cv>4) &
-            CALL errore('thermo_readin','poly_degree_cv must be between & 
+  IF (poly_degree_thermo<1 .OR. poly_degree_thermo>4) &
+            CALL errore('thermo_readin','poly_degree_thermo must be between & 
                                                                &1 and 4',1)
   IF (poly_degree_bfact<1 .OR. poly_degree_bfact>4) &
-            CALL errore('thermo_readin','poly_degree_bcast must be between &
+            CALL errore('thermo_readin','poly_degree_bfact must be between &
                                                                &1 and 4',1)
   IF (poly_degree_elc<1 .OR. poly_degree_elc>4) &
             CALL errore('thermo_readin','poly_degree_elc must be between &
@@ -767,7 +767,6 @@ SUBROUTINE thermo_readin()
   outdir_thermo=outdir
   CALL iosys()
   max_seconds_=save_max_seconds
-
 
   IF ((set_internal_path.OR.set_2d_path).AND.calculation=='vc-relax') &
      CALL errore('thermo_readin','path not available after vc-relax',1)

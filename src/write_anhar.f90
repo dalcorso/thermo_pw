@@ -12,21 +12,23 @@ SUBROUTINE write_anharmonic()
 !
 USE kinds,          ONLY : DP
 USE temperature,    ONLY : ntemp, temp
-USE thermodynamics, ONLY : ph_ce, ph_b_fact
-USE anharmonic,     ONLY : alpha_t, beta_t, gamma_t, cp_t, cv_t, ce_t, b0_s, &
-                           vmin_t, free_e_min_t, b0_t, b01_t, bfact_t, &
-                           celldm_t
+USE thermodynamics, ONLY : ph_e0, ph_ce, ph_b_fact, ph_ener, ph_entropy
+USE anharmonic,     ONLY : alpha_t, beta_t, gamma_t, cp_t, cv_t, ce_t, ener_t, &
+                           entropy_t, b0_s, vmin_t, free_e_min_t, b0_t, b01_t, & 
+                           bfact_t, celldm_t
 USE data_files,     ONLY : flanhar
 USE control_thermo, ONLY : with_eigen
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
 
+REAL(DP) :: e0
+
 CALL compute_beta(vmin_t, beta_t, temp, ntemp)
 
 alpha_t = beta_t / 3.0_DP
 
-CALL interpolate_cv(vmin_t, celldm_t, ph_ce, ce_t) 
+CALL interpolate_thermo(vmin_t, celldm_t, ph_ce, ce_t) 
 cv_t=ce_t
 CALL compute_cp_bs_g(beta_t, vmin_t, b0_t, cv_t, cp_t, b0_s, gamma_t)
 !
@@ -64,6 +66,21 @@ filename="anhar_files/"//TRIM(flanhar)//'.gamma'
 CALL add_pressure(filename)
 
 CALL write_gamma_anharm(temp, gamma_t, cv_t, beta_t, b0_t, ntemp, filename)
+
+!
+!   here the vibrational energy, entropy, zero point energy 
+!
+
+CALL interpolate_thermo(vmin_t, celldm_t, ph_ener, ener_t)
+
+CALL interpolate_thermo(vmin_t, celldm_t, ph_entropy, entropy_t)
+
+CALL interpolate_e0(vmin_t, celldm_t, ph_e0, e0) 
+
+filename="anhar_files/"//TRIM(flanhar)//'.therm'
+CALL add_pressure(filename)
+CALL write_thermo_anharm(temp, ntemp, e0, ener_t, free_e_min_t, &
+                                                 entropy_t, cv_t, filename)
 !
 !   here the b factors
 !
@@ -82,20 +99,23 @@ SUBROUTINE write_ph_freq_anharmonic()
 USE kinds,          ONLY : DP
 USE temperature,    ONLY : ntemp, temp
 USE control_thermo, ONLY : with_eigen
-USE ph_freq_thermodynamics, ONLY : phf_ce, phf_b_fact
-USE ph_freq_anharmonic, ONLY : alphaf_t, betaf_t, gammaf_t, cpf_t, cvf_t,    &
-                        cef_t, b0f_s, free_e_minf_t, vminf_t, b0f_t, b01f_t, &
-                        bfactf_t, celldmf_t
+USE ph_freq_thermodynamics, ONLY : phf_e0, phf_ce, phf_b_fact, phf_ener, &
+                               phf_entropy
+USE ph_freq_anharmonic, ONLY : alphaf_t, betaf_t, gammaf_t, cpf_t, cvf_t, &
+                        cef_t, enerf_t, entropyf_t, b0f_s, free_e_minf_t, vminf_t, &
+                        b0f_t, b01f_t, bfactf_t, celldmf_t
 USE data_files,     ONLY : flanhar
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
 
+REAL(DP) :: e0
+
 CALL compute_beta(vminf_t, betaf_t, temp, ntemp)
 
 alphaf_t = betaf_t / 3.0_DP
 
-CALL interpolate_cv(vminf_t, celldmf_t, phf_ce, cef_t) 
+CALL interpolate_thermo(vminf_t, celldmf_t, phf_ce, cef_t) 
 cvf_t=cef_t
 CALL compute_cp_bs_g(betaf_t, vminf_t, b0f_t, cvf_t, cpf_t, b0f_s, gammaf_t)
 !
@@ -133,6 +153,21 @@ filename="anhar_files/"//TRIM(flanhar)//'.gamma_ph'
 CALL add_pressure(filename)
 
 CALL write_gamma_anharm(temp, gammaf_t, cvf_t, betaf_t, b0f_t, ntemp, filename)
+
+!
+!   here the vibrational energy, entropy, zero point energy 
+!
+
+CALL interpolate_thermo(vminf_t, celldmf_t, phf_ener, enerf_t) 
+
+CALL interpolate_thermo(vminf_t, celldmf_t, phf_entropy, entropyf_t)
+
+CALL interpolate_e0(vminf_t, celldmf_t, phf_e0, e0)
+
+filename="anhar_files/"//TRIM(flanhar)//'.therm_ph'
+CALL add_pressure(filename)
+CALL write_thermo_anharm(temp, ntemp, e0, enerf_t, free_e_minf_t, & 
+                                                   entropyf_t, cvf_t, filename)
 !
 !   here the b factors
 !
@@ -142,7 +177,6 @@ IF (with_eigen) THEN
    CALL add_pressure(filename)
    CALL write_anharm_bfact(temp, bfactf_t, ntemp, filename)
 END IF
-
 
 RETURN
 END SUBROUTINE write_ph_freq_anharmonic
@@ -559,3 +593,46 @@ ENDIF
 RETURN
 END SUBROUTINE write_anharm_bfact
 
+SUBROUTINE write_thermo_anharm(temp, ntemp, e0, ener_t, free_e_min_t, entropy_t, cv_t, filename)
+USE kinds,     ONLY : DP
+USE io_global, ONLY : meta_ionode
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ntemp
+REAL(DP), INTENT(IN) :: temp(ntemp), ener_t(ntemp), free_e_min_t(ntemp), &
+                        cv_t(ntemp), entropy_t(ntemp), e0
+CHARACTER(LEN=*) :: filename
+
+INTEGER :: itemp, iu_therm
+INTEGER :: find_free_unit
+
+IF (meta_ionode) THEN
+   iu_therm=find_free_unit()
+   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
+   WRITE(iu_therm,'("# Zero point energy:", f8.5, " Ry/cell,", f9.5, &
+                 &" kJ/(N mol),", f9.5, " kcal/(N mol)")') e0, &
+                    e0 * 1313.313_DP, e0 * 313.7545_DP
+   WRITE(iu_therm,'("# Temperature T in K, ")')
+   WRITE(iu_therm,'("# Energy and free energy in Ry/cell,")')
+   WRITE(iu_therm,'("# Entropy in Ry/cell/K,")')
+   WRITE(iu_therm,'("# Heat capacity Cv in Ry/cell/K.")')
+   WRITE(iu_therm,'("# Multiply by 13.6058 to have energies in &
+                          &eV/cell etc..")')
+   WRITE(iu_therm,'("# Multiply by 13.6058 x 23060.35 = 313 754.5 to have &
+                     &energies in cal/(N mol).")')
+   WRITE(iu_therm,'("# Multiply by 13.6058 x 96526.0 = 1 313 313 to &
+                     &have energies in J/(N mol).")')
+   WRITE(iu_therm,'("# N is the number of formula units per cell.")')
+   WRITE(iu_therm,'("# For instance in silicon N=2. Divide by N to have &
+                &energies in cal/mol etc. ")')
+   WRITE(iu_therm,'("#",5x,"   T  ", 10x, " energy ", 10x, "  free energy ",&
+               & 12x, " entropy ", 17x, " Cv ")')
+
+   DO itemp = 2, ntemp-1
+      WRITE(iu_therm, '(e12.5,e23.13,e23.13,e23.13,e23.13)') temp(itemp), ener_t(itemp), &
+                                    free_e_min_t(itemp), entropy_t(itemp), cv_t(itemp)
+   END DO
+
+   CLOSE(iu_therm)
+ENDIF
+RETURN
+END SUBROUTINE write_thermo_anharm

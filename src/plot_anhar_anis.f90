@@ -418,6 +418,9 @@ IF (lgnuplot.AND.ionode) &
 !IF (lgnuplot.AND.ionode) &
 !  CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
 !                                       //TRIM(gnu_filename), WAIT=.FALSE.)
+
+CALL plot_thermo_anhar()
+
 IF (with_eigen) CALL plot_dw_anhar_anis()
 
 IF (isoent_avail) THEN

@@ -78,6 +78,7 @@ filename_heat="anhar_files/"//TRIM(flanhar)//'.heat'
 CALL add_pressure(filename_heat)
 filename_heat_ph="anhar_files/"//TRIM(flanhar)//'.heat_ph'
 CALL add_pressure(filename_heat_ph)
+
 filename_gamma="anhar_files/"//TRIM(flanhar)//'.gamma'
 CALL add_pressure(filename_gamma)
 filename_gamma_ph="anhar_files/"//TRIM(flanhar)//'.gamma_ph'
@@ -242,12 +243,107 @@ IF (lgnuplot.AND.ionode) &
 !IF (lgnuplot.AND.ionode) &
 !   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
 !                                       //TRIM(gnu_filename), WAIT=.FALSE.)
+
+CALL plot_thermo_anhar()
+
 IF (with_eigen) CALL plot_dw_anhar()
 
 RETURN
 END SUBROUTINE plot_anhar
 
 ! Copyright (C) 2018 Cristiano Malica
+
+SUBROUTINE plot_thermo_anhar()
+!
+!  This is a driver to plot the quantities written inside fltherm
+!  
+USE kinds,            ONLY : DP
+USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
+USE control_thermo,   ONLY : ltherm_dos, ltherm_freq, with_eigen
+USE postscript_files, ONLY : flpsanhar
+USE gnuplot,          ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
+                             gnuplot_ylabel, &
+                             gnuplot_xlabel, &
+                             gnuplot_write_file_mul_data, &
+                             gnuplot_set_fact
+USE data_files,      ONLY : flanhar 
+USE temperature,     ONLY : tmin, tmax
+USE mp_images,       ONLY : root_image, my_image_id
+USE io_global,       ONLY : ionode
+
+IMPLICIT NONE
+INTEGER :: ierr, system
+CHARACTER(LEN=256) :: gnu_filename, filename, filetherm, filepstherm
+
+IF ( my_image_id /= root_image ) RETURN
+
+IF (.NOT.(ltherm_freq.OR.ltherm_dos)) RETURN
+
+filetherm="anhar_files/"//TRIM(flanhar)//'.therm'
+CALL add_pressure(filetherm)
+filename="anhar_files/"//TRIM(flanhar)//'.therm_ph'
+CALL add_pressure(filename)
+
+gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//'_therm_anhar'
+CALL gnuplot_start(gnu_filename)
+
+filepstherm=TRIM(flpsanhar)//'.thermo'//TRIM(flext)
+
+IF (tmin ==1._DP) THEN
+   CALL gnuplot_write_header(filepstherm, 0.0_DP, tmax, 0.0_DP, 0.0_DP, &
+                                                        1.0_DP, flext )
+ELSE
+   CALL gnuplot_write_header(filepstherm, tmin, tmax, 0.0_DP, 0.0_DP, &
+                                                        1.0_DP, flext )
+ENDIF
+
+CALL gnuplot_xlabel('T (K)', .FALSE.)
+CALL gnuplot_ylabel('Vibrational energy (kJ / (N mol))',.FALSE.)
+CALL gnuplot_set_fact(1313.3130_DP, .FALSE.)
+
+IF (ltherm_dos) &
+   CALL gnuplot_write_file_mul_data(filetherm,1,2,'color_red',.TRUE.,&
+                                                     .NOT.ltherm_freq,.FALSE.)
+IF (ltherm_freq) &
+   CALL gnuplot_write_file_mul_data(filename,1,2,'color_blue', &
+                                                .NOT.ltherm_dos,.TRUE.,.FALSE.)
+
+CALL gnuplot_ylabel('Vibrational free energy (kJ / (N mol))', .FALSE.)
+IF (ltherm_dos) &
+   CALL gnuplot_write_file_mul_data(filetherm,1,3,'color_red',.TRUE.,&
+                                                     .NOT.ltherm_freq, .FALSE.)
+IF (ltherm_freq) &
+   CALL gnuplot_write_file_mul_data(filename,1,3,'color_blue',&
+                                                .NOT.ltherm_dos,.TRUE.,.FALSE.)
+
+CALL gnuplot_set_fact(1313313.0_DP, .FALSE.)
+CALL gnuplot_ylabel('Entropy (J / K / (N mol))',.FALSE.)
+IF (ltherm_dos) &
+   CALL gnuplot_write_file_mul_data(filetherm,1,4,'color_red',.TRUE., &
+                                                   .NOT.ltherm_freq,.FALSE.)
+IF (ltherm_freq) &
+   CALL gnuplot_write_file_mul_data(filename,1,4,'color_blue',.NOT.ltherm_dos,&
+                                                             .TRUE.,.FALSE.)
+
+CALL gnuplot_ylabel('Heat capacity C_v (J / K / (N mol))',.FALSE.)
+IF (ltherm_dos) &
+   CALL gnuplot_write_file_mul_data(filetherm,1,5,'color_red',.TRUE.,&
+                 .NOT.ltherm_freq,.FALSE.)
+
+IF (ltherm_freq) &
+   CALL gnuplot_write_file_mul_data(filename,1,5,'color_blue',.NOT.ltherm_dos,&
+                                                           .TRUE.,.FALSE.)
+CALL gnuplot_end()
+
+IF (lgnuplot.AND.ionode) &
+   ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+
+!IF (lgnuplot.AND.ionode) &
+!   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
+!                                       //TRIM(gnu_filename), WAIT=.FALSE.)
+
+RETURN
+END SUBROUTINE plot_thermo_anhar
 
 SUBROUTINE plot_dw_anhar()
 !

@@ -17,7 +17,7 @@ USE phdos_module,   ONLY : zero_point_energy, fecv, integrated_dos, &
 USE thermo_mod,     ONLY : tot_ngeo
 USE temperature,    ONLY : ntemp, temp
 USE thermodynamics, ONLY : ph_ener, ph_free_ener, ph_entropy, ph_ce, &
-                           ph_b_fact, phdos_save, gen_phdos_save
+                           ph_e0, ph_b_fact, phdos_save, gen_phdos_save
 USE control_thermo, ONLY : with_eigen
 USE data_files,     ONLY : fltherm
 USE mp_world,       ONLY : world_comm
@@ -48,6 +48,7 @@ WRITE(stdout,'(5x,"Writing on file ",a)') TRIM(filetherm)
 WRITE(stdout,'(2x,76("+"),/)')
 
 CALL zero_point_energy(phdos_save(igeom), e0)
+ph_e0(igeom)=e0
 CALL integrated_dos(phdos_save(igeom), tot_states)
 !
 !  Divide the temperatures among processors
@@ -104,7 +105,7 @@ USE ph_freq_module,   ONLY : ph_freq_type, zero_point_energy_ph, fecv_ph, &
                              specific_heat_cv_ph, debye_waller_factor
 USE temperature,      ONLY : ntemp, temp
 USE ph_freq_thermodynamics, ONLY : phf_ener, phf_free_ener, phf_entropy, &
-                             phf_ce, phf_b_fact, ph_freq_save
+                             phf_e0, phf_ce, phf_b_fact, ph_freq_save
 USE thermo_mod,       ONLY : tot_ngeo
 USE control_thermo,   ONLY : with_eigen
 USE data_files,       ONLY : fltherm
@@ -137,6 +138,7 @@ WRITE(stdout,'(2x,76("+"),/)')
 !  Compute the zero point energy
 !
 CALL zero_point_energy_ph(ph_freq_save(igeom), e0)
+phf_e0(igeom)=e0
 !
 !  Now compute the other thermodynamic quantities. Note that the each
 !  processor adds its own q points so the thermodynamic quantities need
@@ -166,7 +168,7 @@ END DO
 !  In ph_freq_save the frequencies are distributed among all processors
 !  so the resulting thermodynamical quantities must be collected
 !
-CALL mp_sum(e0,world_comm)
+CALL mp_sum(phf_e0(igeom),world_comm)
 CALL mp_sum(phf_free_ener(1:ntemp,igeom),world_comm)
 CALL mp_sum(phf_ener(1:ntemp,igeom),world_comm)
 CALL mp_sum(phf_ce(1:ntemp,igeom),world_comm)
@@ -174,7 +176,8 @@ CALL mp_sum(phf_entropy(1:ntemp,igeom),world_comm)
 IF (with_eigen) CALL mp_sum(phf_b_fact(1:3,1:3,1:nat,1:ntemp,igeom),world_comm)
 
 IF (meta_ionode) &
-   CALL write_thermo_info(e0, 0.0_DP, ntemp, temp, phf_ener(1,igeom), &
+   CALL write_thermo_info(phf_e0(igeom), 0.0_DP, ntemp, temp, &
+              phf_ener(1,igeom), &
               phf_free_ener(1,igeom), phf_entropy(1,igeom), phf_ce(1,igeom),& 
                                                             2,filename)
 IF (meta_ionode.AND.with_eigen) &

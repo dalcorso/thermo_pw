@@ -130,6 +130,7 @@ MODULE thermodynamics
   REAL(DP), ALLOCATABLE :: ph_ener(:,:)      ! phonon total energy, T, geometry
   REAL(DP), ALLOCATABLE :: ph_free_ener(:,:) ! phonon free_energy, T, geometry
   REAL(DP), ALLOCATABLE :: ph_entropy(:,:)   ! phonon entropy, T, geometry
+  REAL(DP), ALLOCATABLE :: ph_e0(:)          ! zero point energy, geometry
   REAL(DP), ALLOCATABLE :: ph_ce(:,:)        ! phonon specific heat, T, geometry
   REAL(DP), ALLOCATABLE :: ph_b_fact(:,:,:,:,:)! atomic B factor
 
@@ -152,6 +153,7 @@ MODULE ph_freq_thermodynamics
   REAL(DP), ALLOCATABLE :: phf_ener(:,:)      ! phonon total energy, T, geometry
   REAL(DP), ALLOCATABLE :: phf_free_ener(:,:) ! phonon free_energy, T, geometry
   REAL(DP), ALLOCATABLE :: phf_entropy(:,:)   ! phonon entropy, T, geometry
+  REAL(DP), ALLOCATABLE :: phf_e0(:)          ! zero point energy, geometry
   REAL(DP), ALLOCATABLE :: phf_ce(:,:)        ! phonon specific heat, T, geometry
   REAL(DP), ALLOCATABLE :: phf_b_fact(:,:,:,:,:) ! atomic B factor
 
@@ -174,6 +176,8 @@ MODULE anharmonic
 !
   REAL(DP), ALLOCATABLE :: cp_t(:)     ! isobaric heat capacity (T)
   REAL(DP), ALLOCATABLE :: cv_t(:)     ! isocoric heat capacity (T)
+  REAL(DP), ALLOCATABLE :: ener_t(:)   ! vibrational energy (T)
+  REAL(DP), ALLOCATABLE :: entropy_t(:)! entropy (T)
   REAL(DP), ALLOCATABLE :: ce_t(:)     ! constant strain heat capacity (T)
   REAL(DP), ALLOCATABLE :: b0_s(:)     ! constant entropy bulk modulus
   REAL(DP), ALLOCATABLE :: alpha_t(:)  ! linear thermal expansion coefficient
@@ -224,6 +228,8 @@ MODULE ph_freq_anharmonic
 !
   REAL(DP), ALLOCATABLE :: cpf_t(:)     ! isobaric heat capacity (T)
   REAL(DP), ALLOCATABLE :: cvf_t(:)     ! isocoric heat capacity (T)
+  REAL(DP), ALLOCATABLE :: enerf_t(:)   ! vibrational energy (T)
+  REAL(DP), ALLOCATABLE :: entropyf_t(:)! entropy (T)
   REAL(DP), ALLOCATABLE :: cef_t(:)     ! constant strain heat capacity (T)
   REAL(DP), ALLOCATABLE :: b0f_s(:)     ! constant entropy bulk modulus
   REAL(DP), ALLOCATABLE :: alphaf_t(:)  ! linear thermal expansion coefficient
@@ -877,8 +883,10 @@ MODULE control_quartic_energy
                                              ! with a quartic polynomial
   INTEGER :: poly_degree_ph                  ! degree of the polynomial that 
                                              ! fits the free energy.
-  INTEGER :: poly_degree_cv                  ! degree of the polynomial that 
-                                             ! fits the heat capacity
+  INTEGER :: poly_degree_thermo              ! degree of the polynomial that 
+                                             ! fits the heat capacity, 
+                                             ! vibrational energy and entropy
+                                             ! and zero point energy
   INTEGER :: poly_degree_bfact               ! degree of the polynomial that 
                                              ! fits the b factor
   INTEGER :: poly_degree_elc                 ! degree of the polynomial that 
