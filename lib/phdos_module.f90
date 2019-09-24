@@ -270,7 +270,6 @@ SUBROUTINE zero_point_energy(phdos, ener)
 !  This subroutine receives as input a phdos and computes the zero point 
 !  energy that corresponds to that phdos. The output energy is in Ry.
 !
-!USE constants, ONLY : RY_TO_CMM1
 TYPE(phdos_type), INTENT(IN) :: phdos
 REAL(DP), INTENT(OUT) :: ener
 INTEGER :: ndiv
