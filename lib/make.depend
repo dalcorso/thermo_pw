@@ -37,7 +37,6 @@ eldos_module.o : ../../Modules/mp_images.o
 eldos_module.o : ../../UtilXlib/mp.o
 gnuplot.o : ../../Modules/io_global.o
 gnuplot.o : ../../Modules/kind.o
-gnuplot_color.o : ../../Modules/io_global.o
 gnuplot_color.o : ../../Modules/kind.o
 gnuplot_color.o : gnuplot.o
 isoentropic.o : ../../Modules/constants.o
@@ -106,7 +105,6 @@ strain.o : ../../Modules/kind.o
 strain.o : rotate.o
 vector.o : ../../Modules/io_global.o
 vector.o : ../../Modules/kind.o
-voigt.o : ../../Modules/io_global.o
 voigt.o : ../../Modules/kind.o
 xrdp.o : ../../Modules/constants.o
 xrdp.o : ../../Modules/io_global.o
