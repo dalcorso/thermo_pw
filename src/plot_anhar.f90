@@ -287,7 +287,7 @@ CALL add_pressure(filename)
 gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//'_therm_anhar'
 CALL gnuplot_start(gnu_filename)
 
-filepstherm=TRIM(flpsanhar)//'.thermo'//TRIM(flext)
+filepstherm=TRIM(flpsanhar)//'.therm'//TRIM(flext)
 
 IF (tmin ==1._DP) THEN
    CALL gnuplot_write_header(filepstherm, 0.0_DP, tmax, 0.0_DP, 0.0_DP, &

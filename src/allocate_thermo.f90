@@ -53,14 +53,15 @@ SUBROUTINE allocate_anharmonic()
                                   cp_t, b0_s, &
                                   celldm_t, alpha_anis_t, cpmce_anis,        &
                                   el_cons_t, el_comp_t, macro_el_t,          &
-                                  el_cons_s, el_comp_s, ener_t, entropy_t,   &
+                                  el_cons_s, el_comp_s, free_ener_t,         &
+                                  ener_t, entropy_t,   &
                                   bths_t, ggamma_t, bfact_t, el_con_geo_t
   USE ph_freq_anharmonic,  ONLY : vminf_t, b0f_t, b01f_t, free_e_minf_t,     &
                                   alphaf_t, betaf_t, gammaf_t, cvf_t, cef_t, &
                                   cpf_t, b0f_s, celldmf_t, alphaf_anis_t,    & 
                                   cpmcef_anis, el_consf_t, el_compf_t,       &
                                   el_consf_s, el_compf_s, enerf_t,           &
-                                  entropyf_t,                                &
+                                  free_enerf_t, entropyf_t,                  &
                                   macro_elf_t, bthsf_t, ggammaf_t, bfactf_t, &
                                   el_conf_geo_t
   USE grun_anharmonic,     ONLY : betab, alpha_an_g, cp_grun_t, cv_grun_t,   &
@@ -77,7 +78,8 @@ SUBROUTINE allocate_anharmonic()
   IF (.NOT. ALLOCATED (free_e_min_t) )  ALLOCATE(free_e_min_t(ntemp)) 
   IF (.NOT. ALLOCATED (b0_s) )          ALLOCATE(b0_s(ntemp)) 
   IF (.NOT. ALLOCATED (cv_t) )          ALLOCATE(cv_t(ntemp)) 
-  IF (.NOT. ALLOCATED (ener_t) )        ALLOCATE(ener_t(ntemp)) 
+  IF (.NOT. ALLOCATED (ener_t) )        ALLOCATE(ener_t(ntemp))
+  IF (.NOT. ALLOCATED (free_ener_t) )   ALLOCATE(free_ener_t(ntemp)) 
   IF (.NOT. ALLOCATED (entropy_t) )     ALLOCATE(entropy_t(ntemp)) 
   IF (.NOT. ALLOCATED (ce_t) )          ALLOCATE(ce_t(ntemp)) 
   IF (.NOT. ALLOCATED (cp_t) )          ALLOCATE(cp_t(ntemp)) 
@@ -105,6 +107,7 @@ SUBROUTINE allocate_anharmonic()
   IF (.NOT. ALLOCATED (b0f_s) )         ALLOCATE(b0f_s(ntemp)) 
   IF (.NOT. ALLOCATED (cvf_t) )         ALLOCATE(cvf_t(ntemp)) 
   IF (.NOT. ALLOCATED (enerf_t) )       ALLOCATE(enerf_t(ntemp)) 
+  IF (.NOT. ALLOCATED (free_enerf_t) )  ALLOCATE(free_enerf_t(ntemp))
   IF (.NOT. ALLOCATED (entropyf_t) )    ALLOCATE(entropyf_t(ntemp)) 
   IF (.NOT. ALLOCATED (cef_t) )         ALLOCATE(cef_t(ntemp)) 
   IF (.NOT. ALLOCATED (cpf_t) )         ALLOCATE(cpf_t(ntemp)) 

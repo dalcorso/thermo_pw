@@ -12,10 +12,10 @@ SUBROUTINE write_anharmonic()
 !
 USE kinds,          ONLY : DP
 USE temperature,    ONLY : ntemp, temp
-USE thermodynamics, ONLY : ph_e0, ph_ce, ph_b_fact, ph_ener, ph_entropy
+USE thermodynamics, ONLY : ph_e0, ph_ce, ph_b_fact, ph_ener, ph_free_ener, ph_entropy
 USE anharmonic,     ONLY : alpha_t, beta_t, gamma_t, cp_t, cv_t, ce_t, ener_t, &
-                           entropy_t, b0_s, vmin_t, free_e_min_t, b0_t, b01_t, & 
-                           bfact_t, celldm_t
+                           free_ener_t, entropy_t, b0_s, vmin_t, free_e_min_t, b0_t, & 
+                           b01_t, bfact_t, celldm_t
 USE data_files,     ONLY : flanhar
 USE control_thermo, ONLY : with_eigen
 
@@ -73,13 +73,15 @@ CALL write_gamma_anharm(temp, gamma_t, cv_t, beta_t, b0_t, ntemp, filename)
 
 CALL interpolate_thermo(vmin_t, celldm_t, ph_ener, ener_t)
 
+CALL interpolate_thermo(vmin_t, celldm_t, ph_free_ener, free_ener_t)
+
 CALL interpolate_thermo(vmin_t, celldm_t, ph_entropy, entropy_t)
 
 CALL interpolate_e0(vmin_t, celldm_t, ph_e0, e0) 
 
 filename="anhar_files/"//TRIM(flanhar)//'.therm'
 CALL add_pressure(filename)
-CALL write_thermo_anharm(temp, ntemp, e0, ener_t, free_e_min_t, &
+CALL write_thermo_anharm(temp, ntemp, e0, ener_t, free_ener_t, &
                                                  entropy_t, cv_t, filename)
 !
 !   here the b factors
@@ -100,10 +102,10 @@ USE kinds,          ONLY : DP
 USE temperature,    ONLY : ntemp, temp
 USE control_thermo, ONLY : with_eigen
 USE ph_freq_thermodynamics, ONLY : phf_e0, phf_ce, phf_b_fact, phf_ener, &
-                               phf_entropy
+                                   phf_free_ener, phf_entropy
 USE ph_freq_anharmonic, ONLY : alphaf_t, betaf_t, gammaf_t, cpf_t, cvf_t, &
-                        cef_t, enerf_t, entropyf_t, b0f_s, free_e_minf_t, vminf_t, &
-                        b0f_t, b01f_t, bfactf_t, celldmf_t
+                        cef_t, enerf_t, free_enerf_t, entropyf_t, b0f_s, free_e_minf_t, & 
+                        vminf_t, b0f_t, b01f_t, bfactf_t, celldmf_t
 USE data_files,     ONLY : flanhar
 
 IMPLICIT NONE
@@ -160,14 +162,16 @@ CALL write_gamma_anharm(temp, gammaf_t, cvf_t, betaf_t, b0f_t, ntemp, filename)
 
 CALL interpolate_thermo(vminf_t, celldmf_t, phf_ener, enerf_t) 
 
+CALL interpolate_thermo(vminf_t, celldmf_t, phf_free_ener, free_enerf_t)
+
 CALL interpolate_thermo(vminf_t, celldmf_t, phf_entropy, entropyf_t)
 
 CALL interpolate_e0(vminf_t, celldmf_t, phf_e0, e0)
 
 filename="anhar_files/"//TRIM(flanhar)//'.therm_ph'
 CALL add_pressure(filename)
-CALL write_thermo_anharm(temp, ntemp, e0, enerf_t, free_e_minf_t, & 
-                                                   entropyf_t, cvf_t, filename)
+CALL write_thermo_anharm(temp, ntemp, e0, enerf_t, free_enerf_t, & 
+                                            entropyf_t, cvf_t, filename)
 !
 !   here the b factors
 !

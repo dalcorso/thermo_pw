@@ -177,6 +177,7 @@ MODULE anharmonic
   REAL(DP), ALLOCATABLE :: cp_t(:)     ! isobaric heat capacity (T)
   REAL(DP), ALLOCATABLE :: cv_t(:)     ! isocoric heat capacity (T)
   REAL(DP), ALLOCATABLE :: ener_t(:)   ! vibrational energy (T)
+  REAL(DP), ALLOCATABLE :: free_ener_t(:)   ! vibrational free energy (T)
   REAL(DP), ALLOCATABLE :: entropy_t(:)! entropy (T)
   REAL(DP), ALLOCATABLE :: ce_t(:)     ! constant strain heat capacity (T)
   REAL(DP), ALLOCATABLE :: b0_s(:)     ! constant entropy bulk modulus
@@ -229,6 +230,7 @@ MODULE ph_freq_anharmonic
   REAL(DP), ALLOCATABLE :: cpf_t(:)     ! isobaric heat capacity (T)
   REAL(DP), ALLOCATABLE :: cvf_t(:)     ! isocoric heat capacity (T)
   REAL(DP), ALLOCATABLE :: enerf_t(:)   ! vibrational energy (T)
+  REAL(DP), ALLOCATABLE :: free_enerf_t(:) ! vibrational free energy (T)
   REAL(DP), ALLOCATABLE :: entropyf_t(:)! entropy (T)
   REAL(DP), ALLOCATABLE :: cef_t(:)     ! constant strain heat capacity (T)
   REAL(DP), ALLOCATABLE :: b0f_s(:)     ! constant entropy bulk modulus

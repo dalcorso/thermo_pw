@@ -20,13 +20,13 @@ SUBROUTINE deallocate_thermo()
                              phf_b_fact, phf_e0, phf_ce
   USE anharmonic,     ONLY : vmin_t, b0_t, free_e_min_t, &
                              alpha_t, beta_t, gamma_t, cv_t, ce_t, cp_t, &
-                             b0_s, ener_t, entropy_t, &
+                             b0_s, ener_t, free_ener_t, entropy_t, &
                              celldm_t, alpha_anis_t, cpmce_anis, el_cons_t, &
                              el_comp_t, macro_el_t, bths_t, ggamma_t, &
                              el_cons_s, el_comp_s, bfact_t, el_con_geo_t
   USE ph_freq_anharmonic, ONLY : vminf_t, b0f_t, free_e_minf_t, &
                              alphaf_t, betaf_t, gammaf_t, cvf_t, cef_t, &
-                             cpf_t, b0f_s, enerf_t, entropyf_t, &
+                             cpf_t, b0f_s, enerf_t, free_enerf_t, entropyf_t, &
                              celldmf_t, alphaf_anis_t, cpmcef_anis, &
                              el_consf_t, el_compf_t, macro_elf_t, bthsf_t, &
                              ggammaf_t, el_consf_s, el_compf_s, bfactf_t,  &
@@ -93,6 +93,7 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (cv_t) )            DEALLOCATE(cv_t) 
   IF ( ALLOCATED (ce_t) )            DEALLOCATE(ce_t) 
   IF ( ALLOCATED (ener_t) )          DEALLOCATE(ener_t) 
+  IF ( ALLOCATED (free_ener_t) )     DEALLOCATE(free_ener_t)
   IF ( ALLOCATED (entropy_t) )       DEALLOCATE(entropy_t) 
   IF ( ALLOCATED (cp_t) )            DEALLOCATE(cp_t) 
   IF ( ALLOCATED (alpha_t) )         DEALLOCATE(alpha_t) 
@@ -115,7 +116,8 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (b0f_t) )           DEALLOCATE(b0f_t) 
   IF ( ALLOCATED (b0f_s) )           DEALLOCATE(b0f_s) 
   IF ( ALLOCATED (cvf_t) )           DEALLOCATE(cvf_t) 
-  IF ( ALLOCATED (enerf_t) )         DEALLOCATE(enerf_t) 
+  IF ( ALLOCATED (enerf_t) )         DEALLOCATE(enerf_t)
+  IF ( ALLOCATED (free_enerf_t) )    DEALLOCATE(free_enerf_t) 
   IF ( ALLOCATED (entropyf_t) )      DEALLOCATE(entropyf_t) 
   IF ( ALLOCATED (cef_t) )           DEALLOCATE(cef_t) 
   IF ( ALLOCATED (cpf_t) )           DEALLOCATE(cpf_t) 

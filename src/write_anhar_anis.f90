@@ -14,9 +14,9 @@ USE kinds,          ONLY : DP
 USE temperature,    ONLY : ntemp, temp
 USE thermo_mod,     ONLY : ibrav_geo
 USE thermo_sym,     ONLY : laue
-USE thermodynamics, ONLY : ph_e0, ph_ce, ph_b_fact, ph_ener, ph_entropy
+USE thermodynamics, ONLY : ph_e0, ph_ce, ph_b_fact, ph_ener, ph_free_ener, ph_entropy
 USE anharmonic,     ONLY : alpha_anis_t, vmin_t, b0_t, celldm_t, beta_t, &
-                           gamma_t, cv_t, ce_t, cp_t, ener_t, entropy_t, b0_s, & 
+                           gamma_t, cv_t, ce_t, cp_t, ener_t, free_ener_t, entropy_t, b0_s, & 
                            cpmce_anis, el_cons_t, free_e_min_t, bths_t, ggamma_t, &
                            bfact_t, lelastic, el_cons_s, el_comp_s
 USE initial_conf,   ONLY : ibrav_save
@@ -57,9 +57,10 @@ CALL interpolate_thermo(vmin_t, celldm_t, ph_ce, ce_t)
 
 CALL interpolate_thermo(vmin_t, celldm_t, ph_ener, ener_t)
 
+CALL interpolate_thermo(vmin_t, celldm_t, ph_free_ener, free_ener_t)
+
 CALL interpolate_thermo(vmin_t, celldm_t, ph_entropy, entropy_t)
                                                        
-
 CALL interpolate_e0(vmin_t, celldm_t, ph_e0, e0)
 
 IF (lelastic) THEN
@@ -101,7 +102,7 @@ IF (meta_ionode) THEN
 
    filename="anhar_files/"//TRIM(flanhar)//'.therm'
    CALL add_pressure(filename)
-   CALL write_thermo_anharm(temp, ntemp, e0, ener_t, free_e_min_t, & 
+   CALL write_thermo_anharm(temp, ntemp, e0, ener_t, free_ener_t, & 
                                                   entropy_t, ce_t, filename )
 !
 !   here auxiliary quantities calculated from the phonon dos
@@ -196,10 +197,10 @@ USE temperature,    ONLY : ntemp, temp
 USE thermo_mod,     ONLY : ibrav_geo
 USE thermo_sym,     ONLY : laue
 USE ph_freq_thermodynamics, ONLY : phf_e0, phf_ce, phf_b_fact, phf_ener, &
-                               phf_entropy
+                                   phf_free_ener, phf_entropy
 USE ph_freq_anharmonic, ONLY : alphaf_anis_t, vminf_t, b0f_t, celldmf_t, &
-                               betaf_t, gammaf_t, cvf_t, cef_t, cpf_t, &
-                               enerf_t, entropyf_t, b0f_s, &
+                               betaf_t, gammaf_t, cvf_t, cef_t, cpf_t,   &
+                               enerf_t, free_enerf_t, entropyf_t, b0f_s, &
                                cpmcef_anis, el_consf_t, lelasticf,       &
                                free_e_minf_t, bthsf_t, ggammaf_t, bfactf_t, &
                                el_consf_s, el_compf_s
@@ -240,6 +241,8 @@ CALL compute_beta(vminf_t, betaf_t, temp, ntemp)
 CALL interpolate_thermo(vminf_t, celldmf_t, phf_ce, cef_t)
 
 CALL interpolate_thermo(vminf_t, celldmf_t, phf_ener, enerf_t)
+
+CALL interpolate_thermo(vminf_t, celldmf_t, phf_free_ener, free_enerf_t)
 
 CALL interpolate_thermo(vminf_t, celldmf_t, phf_entropy, entropyf_t)
 
@@ -284,7 +287,7 @@ IF (meta_ionode) THEN
 
    filename="anhar_files/"//TRIM(flanhar)//'.therm_ph'
    CALL add_pressure(filename)
-   CALL write_thermo_anharm(temp, ntemp, e0, enerf_t, free_e_minf_t, & 
+   CALL write_thermo_anharm(temp, ntemp, e0, enerf_t, free_enerf_t, & 
                                                entropyf_t, cef_t, filename)
 
 !
