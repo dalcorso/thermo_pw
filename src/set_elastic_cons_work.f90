@@ -24,7 +24,7 @@ USE thermo_mod,        ONLY : ibrav_geo, celldm_geo
 USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, rot_mat, &
                                elastic_algorithm, epsilon_0,               &
                                el_con_ibrav_geo, el_con_celldm_geo,        &
-                               work_base, elalgen
+                               work_base, elalgen, epsil_geo
 USE initial_conf,      ONLY : ibrav_save
 USE equilibrium_conf,  ONLY : celldm0
 USE thermo_sym,        ONLY : laue
@@ -285,6 +285,7 @@ work_base = nstep * ngeo_strain
 
 ALLOCATE( epsilon_voigt(6, nwork) )
 ALLOCATE( epsilon_geo(3, 3, nwork) )
+ALLOCATE( epsil_geo(nwork) )
 ALLOCATE( sigma_geo(3, 3, nwork) )
 ALLOCATE( ibrav_geo(nwork) )
 ALLOCATE( celldm_geo(6,nwork) )
@@ -298,10 +299,13 @@ IF (ngeom==1) THEN
 ENDIF
 base_ind=0
 epsilon_min= - delta_epsilon * (ngeo_strain - 1 ) / 2.0_DP - epsilon_0
+iwork=0
 DO igeom=1, ngeom
    DO istep=1,nstep
       DO igeo=1,ngeo_strain
-         epsil=epsilon_min + delta_epsilon * ( igeo - 1 )
+         iwork=iwork+1
+         epsil = epsilon_min + delta_epsilon * ( igeo - 1 )
+         epsil_geo(iwork) = epsil 
          IF (igeo > ngeo_strain/2) epsil=epsil + 2.0_DP*epsilon_0
          IF (MOD(ngeo_strain,2)==1 .AND. igeo==(ngeo_strain/2 + 1)) &
                                                 epsil=epsil-epsilon_0

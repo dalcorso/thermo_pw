@@ -50,7 +50,8 @@ SUBROUTINE deallocate_thermo()
   USE elastic_constants, ONLY : epsilon_geo, sigma_geo, epsilon_voigt
   USE control_elastic_constants, ONLY : rot_mat, el_con_geo, &
                              el_con_ibrav_geo, el_con_celldm_geo, &
-                             el_con_tau_crys_geo, el_con_omega_geo
+                             el_con_tau_crys_geo, el_con_omega_geo, &
+                             epsil_geo
   USE control_debye,    ONLY : deb_energy, deb_free_energy, deb_entropy, &
                                deb_cv, deb_b_fact, deb_bfact
   USE control_quadratic_energy, ONLY : p2, hessian_v, hessian_e, x_pos_min
@@ -184,6 +185,7 @@ SUBROUTINE deallocate_thermo()
 
   IF ( ALLOCATED (epsilon_voigt) )   DEALLOCATE(epsilon_voigt)
   IF ( ALLOCATED (epsilon_geo) )     DEALLOCATE(epsilon_geo)
+  IF ( ALLOCATED (epsil_geo) )       DEALLOCATE(epsil_geo)
   IF ( ALLOCATED (sigma_geo) )       DEALLOCATE(sigma_geo)
   IF ( ALLOCATED (rot_mat) )         DEALLOCATE(rot_mat)
   IF ( ALLOCATED (el_con_geo) )      DEALLOCATE(el_con_geo)

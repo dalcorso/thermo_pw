@@ -32,12 +32,19 @@ IMPLICIT NONE
 
 REAL(DP), ALLOCATABLE :: free_energy_geo(:), epsilon_geo_loc(:,:,:)
 INTEGER :: itemp, startt, lastt, igeom, base_ind
-CHARACTER(LEN=256)  :: filelastic
+CHARACTER(LEN=256)  :: filelastic, filename
 CHARACTER(LEN=6) :: int_to_char
-LOGICAL :: all_geometry_done
+LOGICAL :: all_geometry_done, exst, check_file_exists
 
 CALL check_all_geometry_done(all_geometry_done)
 IF (.NOT.all_geometry_done) RETURN
+
+filename='anhar_files/'//TRIM(flanhar)//'.celldm'
+exst=check_file_exists(filename)
+
+IF (exst) THEN
+   CALL manage_elastic_cons_qha_2()
+ELSE
 !
 !  the elastic constants are calculated here
 !  for each temperature
@@ -60,7 +67,7 @@ DO igeom=start_geometry_qha, last_geometry_qha
                           +ph_free_ener(itemp,base_ind+1:base_ind+work_base)
          epsilon_geo_loc(:,:,:)=epsilon_geo(:,:,base_ind+1:base_ind+work_base)
          CALL compute_elastic_constants_ene(free_energy_geo, epsilon_geo_loc, &
-                            tot_ngeo, ngeo_strain, ibrav_save, laue,          &
+                            work_base, ngeo_strain, ibrav_save, laue,         &
                             el_con_omega_geo(igeom), elcpvar)
          el_cons_t(:,:,itemp) = el_con(:,:)
       ENDIF
@@ -70,7 +77,7 @@ DO igeom=start_geometry_qha, last_geometry_qha
                           +phf_free_ener(itemp,base_ind+1:base_ind+work_base)
          epsilon_geo_loc(:,:,:)=epsilon_geo(:,:,base_ind+1:base_ind+work_base)
          CALL compute_elastic_constants_ene(free_energy_geo, epsilon_geo_loc, &
-                         tot_ngeo, ngeo_strain, ibrav_save, laue,       &
+                         work_base, ngeo_strain, ibrav_save, laue,       &
                          el_con_omega_geo(igeom), elcpvar)
          el_consf_t(:,:,itemp) = el_con(:,:)
       ENDIF 
@@ -113,6 +120,8 @@ DEALLOCATE(epsilon_geo_loc)
 
 CALL plot_elastic_t(0,.FALSE.)
 CALL plot_elastic_t(1,.FALSE.)
+
+ENDIF
 
 RETURN
 END SUBROUTINE manage_elastic_cons_qha

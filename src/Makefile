@@ -60,6 +60,7 @@ initialize_thermo_work.o \
 interpolate_bfact.o \
 interpolate_el_cons.o \
 interpolate_freq.o \
+interpolate_free_ener_strain.o \
 interpolate_thermo.o \
 io_bands.o \
 initialize_ph_geometry.o \
@@ -68,6 +69,7 @@ manage_anhar.o   \
 manage_bands.o   \
 manage_elastic_cons.o \
 manage_elastic_cons_qha.o \
+manage_elastic_cons_qha_2.o \
 manage_energy_minimum.o \
 manage_piezo_tensor.o \
 manage_ph.o \

@@ -540,6 +540,8 @@ MODULE control_elastic_constants
   REAL(DP), ALLOCATABLE :: el_con_tau_crys_geo(:,:,:) ! the atomic positions of each
   REAL(DP), ALLOCATABLE :: el_con_omega_geo(:) ! the volume of each 
                                 ! unperturbed cell.
+  REAL(DP), ALLOCATABLE :: epsil_geo(:) ! strain amplitude for each geometry
+                                !
   INTEGER :: ngeom=1            ! the number of geometries
 
   INTEGER :: work_base          ! number of works for one set of
