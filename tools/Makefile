@@ -22,7 +22,7 @@ LIBOBJS	= ../lib/thermo_lib.a ../qe/thermo_qe.a ../../PHonon/PH/libph.a \
 all : crystal_point_group.x mag_point_group.x gener_2d_slab.x gener_3d_slab.x \
       gener_nanowire.x supercell.x plot_sur_states.x translate.x elastic.x \
       test_colors.x epsilon_tpw.x kovalev.x hex_trig.x bravais_lattices.x \
-      space_groups.x debye.x
+      space_groups.x debye.x units.x
 
 space_groups.x : space_groups.o $(PWOBJS) $(LIBOBJS)
 	$(LD) $(LDFLAGS) -o $@ space_groups.o \
@@ -38,6 +38,11 @@ mag_point_group.x : mag_point_group.o $(PWOBJS) $(LIBOBJS)
 	$(LD) $(LDFLAGS) -o $@ mag_point_group.o \
 	    $(LIBOBJS) $(PWOBJS) $(QEMODS) $(LIBOBJS) $(PWOBJS) $(LIBS) $(QELIBS)
 	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/mag_point_group.x . )
+
+units.x : units.o $(PWOBJS) $(LIBOBJS)
+	$(LD) $(LDFLAGS) -o $@ units.o \
+	 $(LIBOBJS) $(PWOBJS) $(QEMODS) $(LIBOBJS) $(PWOBJS) $(LIBS) $(QELIBS)
+	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/units.x . )
 
 hex_trig.x : hex_trig.o
 	$(LD) $(LDFLAGS) -o $@ hex_trig.o 

@@ -1,0 +1,2698 @@
+%!
+%! Copyright (C) 2015 - Present Andrea Dal Corso 
+%! This file is distributed under the terms of the
+%! GNU General Public License. See the file `License'
+%! in the root directory of the present distribution,
+%! or http://www.gnu.org/copyleft/gpl.txt .
+%!
+\documentclass[12pt,a4paper]{article}
+\def\version{1.2.0}
+\def\qe{{\sc Quantum ESPRESSO}}
+\def\tpw{{\sc THERMO\_PW}}
+
+\usepackage{amsmath}
+\usepackage{html}
+\usepackage{color}
+
+\usepackage{graphicx}
+
+\definecolor{web-blue}{rgb}{0,0.5,1.0}
+\definecolor{coral}{rgb}{1.0,0.5,0.3}
+\definecolor{red}{rgb}{1.0,0,0.0}
+\definecolor{green}{rgb}{0.,0.5,0.0}
+\definecolor{limegreen}{rgb}{0.19,0.8,0.19}
+\definecolor{orange}{rgb}{1.0,0.44,0.0}
+\definecolor{violet}{rgb}{0.75,0.35,0.75}
+
+
+\textwidth = 17cm
+\textheight = 24cm
+\topmargin =-1 cm
+\oddsidemargin = 0 cm
+
+\def\pwx{\texttt{pw.x}}
+\def\phx{\texttt{ph.x}}
+\def\configure{\texttt{configure}}
+\def\PWscf{\texttt{PWscf}}
+\def\PHonon{\texttt{PHonon}}
+\def\thermo{\texttt{thermo\_pw}}
+\def\make{\texttt{make}}
+
+\def\hplanck{6.62607015\times 10^{-34}}
+\def\hbarf{1.0545718176462\times 10^{-34}}
+\def\cspeed{2.99792458\times 10^{8}}
+\def\e{1.602176634\times 10^{-19}}
+\def\rydberg{1.0973731568160\times 10^{7}}
+\def\alphaf{7.2973525693\times 10^{-3}}
+\def\amu{1.66053906660\times 10^{-27}}
+
+\def\me{9.1093837015\times 10^{-31}}
+\def\abohr{5.29177210903\times 10^{-11}}
+\def\muzero{1.25663706212\times 10^{-6}}
+\def\epsilonzero{8.8541878128\times 10^{-12}}
+\def\ehartree{4.3597447222072\times 10^{-18}}
+\def\bohrmag{9.2740100783\times 10^{-24}}
+
+\def\barl{5.29177210903\times 10^{-11}}
+\def\barm{9.1093837015\times 10^{-31}}
+\def\bart{2.4188843265857\times 10^{-17}}
+\def\barnu{4.1341373335182\times 10^{16}}
+\def\barv{2.18769126364\times 10^{6}}
+\def\bara{9.0442161272\times 10^{22}}
+\def\barp{1.99285191410\times 10^{-24}}
+\def\baram{1.0545718176462\times 10^{-34}}
+\def\barf{8.2387234982\times 10^{-8}}
+\def\baru{4.3597447222072\times 10^{-18}}
+\def\barw{1.8023783420686\times 10^{-1}}
+\def\barpr{2.9421015696\times 10^{13}}
+\def\bari{6.623618237510\times 10^{-3}}
+\def\barc{1.602176634\times 10^{-19}}
+\def\barrho{1.08120238456\times 10^{12}}
+\def\barcur{2.36533701094\times 10^{18}}
+\def\bare{5.14220674763\times 10^{11}}
+\def\barphi{2.7211386245988\times 10^{1}}
+\def\barcap{5.887890530517\times 10^{-21}}
+\def\bardip{8.4783536255\times 10^{-30}}
+\def\barpolar{5.7214766229\times 10^{1}}
+\def\bard{4.5530064316}
+\def\barohm{4.1082359022277\times 10^{3}}
+\def\barb{2.35051756758\times 10^{5}}
+\def\barav{1.24384033059\times 10^{-5}}
+\def\barwb{6.5821195695091\times 10^{-16}}
+\def\bary{9.937347433815\times 10^{-14}}
+\def\barmu{1.85480201567\times 10^{-23}}
+\def\barmag{1.25168244230\times 10^{8}}
+\def\barh{9.9605723936\times 10^{6}}
+
+\def\cmtom{1.0\times 10^{-2}}
+\def\gtokg{1.0\times 10^{-3}}
+\def\ptop{1.0\times 10^{-5}}
+\def\ltol{1.0\times 10^{-7}}
+\def\ftof{1.0\times 10^{-5}}
+\def\utou{1.0\times 10^{-7}}
+\def\prtopr{1.0\times 10^{-1}}
+\def\chtoch{3.33564095107\times 10^{-10}}
+\def\kappaa{1.000000000274\times 10^{-1}}
+\def\kappa{2.99792458082\times 10^{9}}
+\def\kappadiecic{1.00000000027}
+\def\itoi{3.33564095107\times 10^{-10}}
+\def\rhotorho{3.33564095107\times 10^{-4}}
+\def\curtocur{3.33564095107\times 10^{-6}}
+\def\etoe{2.99792458082\times 10^{4}}
+\def\phitophi{2.99792458082\times 10^{2}}
+\def\captocap{1.11265005544\times 10^{-12}}
+\def\diptodip{3.33564095107\times 10^{-12}}
+\def\polartopolar{3.33564095107\times 10^{-6}}
+\def\dtod{2.65441872871\times 10^{-7}}
+\def\ohmtoohm{8.9875517923\times 10^{11}}
+\def\btob{1.000000000274\times 10^{-4}}
+\def\avtoav{1.000000000274\times 10^{-6}}
+\def\wbtowb{1.000000000274\times 10^{-8}}
+\def\ytoy{8.9875517923\times 10^{11}}
+\def\mutomu{9.99999999726\times 10^{-4}}
+\def\magtomag{9.99999999726\times 10^{2}}
+\def\htoh{7.95774715242\times 10^{1}}
+\def\toverg{9.99999999726\times 10^{3}}
+
+\def\barlcgs{5.29177210903\times 10^{-9}}
+\def\barmcgs{9.1093837015\times 10^{-28}}
+\def\barvcgs{2.18769126364\times 10^{8}}
+\def\baracgs{9.0442161272\times 10^{24}}
+\def\barpcgs{1.99285191410\times 10^{-19}}
+\def\baramcgs{1.0545718176462\times 10^{-27}}
+\def\barfcgs{8.2387234982\times 10^{-3}}
+\def\barucgs{4.3597447222072\times 10^{-11}}
+\def\barwcgs{1.8023783420686\times 10^{6}}
+\def\barprcgs{2.9421015696\times 10^{14}}
+\def\baricgs{1.98571079282\times 10^{7}}
+\def\barccgs{4.80320471388\times 10^{-10}}
+\def\barrhocgs{3.2413632055\times 10^{15}}
+\def\barcurcgs{7.0911019670\times 10^{23}}
+\def\barecgs{1.71525554062\times 10^{7}}
+\def\barphicgs{9.07674142975\times 10^{-2}}
+\def\barcapcgs{5.29177210903\times 10^{-9}}
+\def\bardipcgs{2.54174647389\times 10^{-18}}
+\def\barpolarcgs{1.71525554062\times 10^{7}}
+\def\bardcgs{1.71525554062\times 10^{7}}
+\def\barohmcgs{4.57102890439\times 10^{-9}}
+\def\barbcgs{2.35051756693\times 10^{9}}
+\def\baravcgs{1.24384033025\times 10^{1}}
+\def\barwbcgs{6.58211956771\times 10^{-8}}
+\def\barycgs{1.10567901732\times 10^{-25}}
+\def\barmucgs{1.85480201618\times 10^{-20}}
+\def\barmagcgs{1.25168244264\times 10^{5}}
+\def\barhcgs{1.25168244264\times 10^{5}}
+
+\def\barmry{1.82187674030\times 10^{-30}}
+\def\bartry{4.8377686531714\times 10^{-17}}
+\def\barnury{2.0670686667591\times 10^{16}}
+\def\barvry{1.09384563182\times 10^{6}}
+\def\barary{4.52210806362\times 10^{22}}
+\def\barfry{4.11936174912\times 10^{-8}}
+\def\barury{2.1798723611036\times 10^{-18}}
+\def\barwry{4.505945855171\times 10^{-2}}
+\def\barprry{1.47105078482\times 10^{13}}
+\def\bariry{2.3418026858671\times 10^{-3}}
+\def\barcry{1.1329099625600\times 10^{-19}}
+\def\barrhory{7.6452553796\times 10^{11}}
+\def\barcurry{8.36272920114\times 10^{17}}
+\def\barery{3.63608926151\times 10^{11}}
+\def\barphiry{1.9241355740025\times 10^{1}}
+\def\bardipry{5.99510134192\times 10^{-30}}
+\def\barpolarry{4.0456949184\times 10^{1}}
+\def\bardry{3.21946172254}
+\def\barohmry{8.2164718044553\times 10^{3}}
+\def\barbry{3.3241338227\times 10^{5}}
+\def\baravry{1.75905586495\times 10^{-5}}
+\def\barwbry{9.3085227643611\times 10^{-16}}
+\def\baryry{3.9749389735260\times 10^{-13}}
+\def\barmury{6.5577154152\times 10^{-24}}
+\def\barmagry{4.42536571420\times 10^{7}}
+\def\barhry{3.52159414202\times 10^{6}}
+
+\def\cspeedau{1.37035999084\times 10^{2}}
+\def\amuau{1.8228884862\times 10^{3}}
+\def\ryev{1.3605693122994\times 10^{1}}
+
+\begin{document} 
+\author{Andrea Dal Corso (SISSA - Trieste)}
+\date{}
+
+%\def\SissaImage{./sissa_on_white.png}
+
+\title{
+%  \includegraphics[width=6cm]{\SissaImage}\\
+  \vskip 1cm
+  {\color{red} \Huge Thermo\_pw: Units} \\
+  \Large (version \version)
+}
+
+\maketitle
+
+\newpage
+
+\tableofcontents
+
+\newpage
+
+\section{{\color{coral}Introduction}}
+These notes discuss the atomic units (a.u.) used in 
+electronic structure codes. The notes are updated with the recent 
+(year 2019) changes to the international system (SI), but these  
+values are not those implemented neither in \tpw\ nor in \qe. The 
+last few digits of the conversion factors could be different from 
+those actually used in these codes. In the long term however the 
+conversion factors written here should be implemented also in the code. 
+
+\newpage
+\section{\color{coral}People}
+These notes have been written by Andrea Dal Corso (SISSA - Trieste). \\
+Disclaimer: I am not an expert of units. 
+These notes reflect what I think about units.
+If you think that some formula is wrong, that I misunderstood something, or 
+that something can be calculated more simply, please let me know, I would 
+like to learn more. 
+You can contact me directly: \texttt{dalcorso@sissa.it}. 
+
+\newpage
+\section{\color{coral}Overview}
+Electronic structure codes use atomic units (a.u.). 
+In these notes we explain how to obtain the conversion factors 
+from a.u. to the international system (SI) units and viceversa. 
+The most relevant physical formulas are written both in SI units 
+and in a.u.. Moreover, since several books and old literature still 
+use the c.g.s. (centimeter-gram-second) system we discuss also how 
+to convert from a.u. to c.g.s.-Gaussian units and viceversa.
+%and the modified c.g.s.-Gaussian system.
+
+These notes are organized in Sections, one for each physical quantity. 
+For each quantity we give its definition in the SI system and then we derive 
+the conversion factor from the a.u. to the SI unit, the conversion 
+factor from the c.g.s-Gaussian unit to the SI unit, and the conversion 
+factor from the a.u. to the c.g.s-Gaussian unit. The text in each Section 
+depends on the definitions given in previous Sections. Only in a few cases 
+it depends on definitions given in following Sections and in these cases 
+we mention explicitly where to find the required definition. Important 
+physical formulas are introduced when we have given sufficient information to
+convert the formula in different systems. Microscopic and macroscopic 
+Maxwell equations are also summarized in separate Sections. \\
+Each system has a different color. In black the SI, in blue the a.u., in 
+orange the c.g.s.-Gaussian system, 
+%in violet the modified c.g.s.-Gaussian system (when different from the
+%c.g.s.-Gaussian system) 
+and in green the conversion factors from a.u. to the c.g.s.-Gaussian units. 
+Comments of interest not belonging to any system in particular are given 
+in red. We indicate the numerical value of a given quantity in the SI 
+with a tilde. The units in a.u. are indicated with a bar, while the units 
+in the c.g.s.-Gaussian system are indicated with a bar and the subscript 
+$cgs$. When the c.g.s.-Gaussian unit has an accepted name we use it 
+interchangeably with the generic name. Only Hartree a.u. are described 
+in the main text since these are the most common microscopic units. 
+\qe\ uses Rydberg a.u. that can be easily derived from the Hartree
+a.u.. We describe Rydberg a.u. in Appendix A.
+
+It is useful to recall a few preliminary facts needed in the rest of 
+these notes. \\
+Three experimental quantities have fixed values in the SI: 
+\\
+The Planck constant 
+\begin{equation}
+h=\hplanck\ J\cdot s, 
+\label{hplanck}
+\end{equation}
+the speed of light 
+\begin{equation}
+c=\cspeed\ m/s,
+\label{cspeed}
+\end{equation}
+ and the electron charge
+\begin{equation}
+e=\e\ C. 
+\label{echarge}
+\end{equation}
+Two experimental quantities are known with high accuracy:
+\\
+The Rydberg constant, measured spectroscopically from the frequencies of
+Hydrogen and Deuterium absorption and emission lines:
+\begin{equation}
+R_\infty=
+\rydberg\ 1/m
+\label{rydberg}
+\end{equation}
+is known with a relative error of $1.9\times 10^{-12}$ \\
+and the fine structure constant, measured from the anomaly of the
+electron magnetic moment,
+\begin{equation}
+\alpha=
+\alphaf,
+\label{alpha}
+\end{equation}
+is known with a relative error of $1.6\times 10^{-10}$.
+
+The Rydberg constant can be written in terms of the fine structure
+constant $\alpha$ and the electron mass $m_e$ or in terms of $\alpha$ and
+of the Bohr radius $a_B$:
+\begin{equation}
+R_\infty={\alpha^2 m_e c \over 2 h}={\alpha \over 4 \pi a_B}.
+\end{equation}
+Using these equations we can calculate the electron mass as
+\begin{equation}
+m_e={2 h R_\infty\over \alpha^2 c}=
+\me\ kg
+\end{equation} 
+and $a_B$ as
+\begin{equation}
+a_B={\alpha\over 4\pi R_\infty}=
+\abohr\ m.
+\end{equation}
+\\
+$\alpha$ is a pure number equal to:
+\begin{equation}
+\alpha={e^2 \over 4 \pi \epsilon_0 \hbar c}= {\mu_0 c e^2 \over 2 h}, 
+\label{alphadef}
+\end{equation}
+where $\hbar=h/2\pi$, $\epsilon_0$ the vacuum electric
+permittivity and $\mu_0$ is the vacuum magnetic permeability. Hence
+the Bohr radius can be rewritten as:
+\begin{equation}
+a_B={\hbar \over \alpha m_e c}=
+{\hbar^2 4 \pi \epsilon_0 \over m_e e^2}.
+\end{equation}
+Eq.~\ref{alphadef} allows the calculation of $\mu_0$ as:
+\begin{equation}
+\mu_0={2 h \alpha \over e^2 c}=\muzero\ {N\over A^2}.
+\label{mu0}
+\end{equation}
+$\epsilon_0$ is obtained from the relation:
+\begin{equation}
+\epsilon_0={1 \over \mu_0 c^2}=\epsilonzero\ 
+{C^2\over N\cdot m^2}.
+\label{epsilon0}
+\end{equation}
+It is also useful to define the Hartree energy:
+\begin{equation}
+E_h= {e^2\over 4\pi\epsilon_0 a_B}=2 h c R_\infty = \baru\ J,
+\label{eh}
+\end{equation}
+and the Bohr magneton:
+\begin{equation}
+\mu_B = {\hbar e \over 2 m_e} = \bohrmag\ J/T.
+\label{bohrm}
+\end{equation}
+
+\newpage
+\section{\color{coral}Time}
+In the SI, the unit of time is the second 
+(symbol $s$), defined requiring that the frequency of a particular 
+line of the $^{133}$Cs atom is exactly $9192631770\ s^{-1}$.
+\\
+
+{\color{web-blue} In a.u. the unit of time (symbol $\bar t$) is 
+defined requiring that the numerical value of $\hbar$ is $1$.
+The conversion factor with the SI unit is obtained recalling that in the 
+SI the Planck constant 
+is $\hbar= \tilde \hbar\ J\cdot s=\tilde \hbar\ kg\cdot m^2 / s$. 
+Therefore in a.u. we have: 
+\begin{equation}
+\hbar = {\bar m \cdot \bar l^2 \over \bar t},
+\end{equation}
+where $\bar l$ is the unit of length and $\bar m$ the unit of mass.
+As we discuss below $\bar l=a_B$ and $\bar m=m_e$, therefore
+\begin{equation}
+\bar t = {m_e a_B^2 \over \hbar} = 
+{\hbar 4 \pi \epsilon_0 a_B \over e^2}
+={\hbar \over E_h}= {\hbarf\ J\cdot s \over \baru\ J}=
+\bart\ s
+\end{equation}
+\\
+}
+
+{\color{orange} In the c.g.s. system the unit of time 
+is the second (symbol $s$), defined as in the SI. We have $\bar t_{cgs}=s$.
+\\
+}
+
+{\color{green} The conversion factor between the a.u. and the c.g.s. unit is:
+${\bar t}=\bart\ s$.
+}
+
+\newpage
+
+\section{\color{coral}Length}
+In the SI, the unit of length is the metre (symbol $m$) defined
+as the length of the path traveled by light during the time interval
+of $1/299792458\ s$.
+\\
+
+{\color{web-blue} In a.u. the unit of the length (symbol $\bar l$) is defined
+requiring that the Bohr radius $a_B= \bar l$. The conversion factor with the
+SI unit is $\bar l = \barl\ m$.}
+\\
+
+{\color{orange} In the c.g.s. system the unit of length is the centimetre 
+(symbol $cm$) defined as $cm =\cmtom\ m$. We have $\bar l_{cgs}=10^{-2}\ m$.
+\\
+}
+
+{\color{green} The conversion factor between the a.u. and the c.g.s. unit is:
+${\bar l}=\barlcgs\ cm$.
+\\
+}
+
+{\color{red} A common unit of length is the angstrom (symbol \AA).
+We have \AA$=10^{-10}\ m$.
+}
+
+\newpage
+
+\section{\color{coral}Mass}
+In the SI the unit of mass is the kilogram (symbol $kg$) defined
+requiring that the Planck constant $h$ has the value
+$\hplanck$ $kg \cdot m^2 / s$. 
+\\
+
+{\color{web-blue} In a.u. the unit of mass (symbol $\bar m$) is defined
+requiring that the mass of the electron $m_e= \bar m$. The conversion
+factor with the SI unit is $\bar m = \me\ kg$.
+}
+\\
+
+{\color{orange} In the c.g.s. system the unit of mass is the gram 
+(symbol $g$) defined as $g =\gtokg\ kg$. 
+\\
+}
+
+{\color{green} The conversion factor between the a.u. and the c.g.s. unit is
+$\bar m=\barmcgs\ g$.
+\\
+}
+
+{\color{red} Atomic weights are usually expressed in atomic mass units
+($a.m.u.=\amu\ kg$). This quantity can be converted in a.u. as:
+\begin{equation}
+a.m.u. = {\amu\ kg \over \barm\ kg }\ \bar m=\amuau\ \bar m
+\end{equation}
+}
+
+
+\newpage
+\section{\color{coral}Frequency}
+
+In the SI the unit of frequency (symbol $Hz$) is the inverse
+of the unit of time: $Hz=1/s$. This unit is called Hertz.
+\\
+
+{\color{web-blue} In a.u. the unit of frequency (symbol $\bar \nu$) is defined
+in a similar way $\bar \nu= 1/\bar t$. The conversion factor with the 
+SI unit is:
+\begin{equation}
+\bar \nu = {1 \over \bart\ s}=\barnu\ Hz.
+\end{equation}
+}
+\\
+
+{\color{orange} In the c.g.s. system the unit of frequency is the Hertz 
+defined as in the SI.
+\\
+}
+
+{\color{green} The conversion factor between the a.u. and the c.g.s. unit is
+$\bar \nu=\barnu\ Hz$.
+\\
+}
+
+\newpage
+\section{\color{coral}Speed}
+In the SI the unit of speed is derived from its definition.
+For instance, the speed (${\bf v}$) of a particle 
+whose position as a function of time is ${\bf r}(t)$, is
+\begin{equation}
+{\bf v}={d{\bf r} \over dt},
+\end{equation} 
+so the unit of speed is $m/s$.
+\\
+
+{\color{web-blue} In a.u. the unit of speed ($\bar v$) is derived 
+from its definition $\bar v = \bar l / \bar t$. The conversion factor
+with the SI unit is:
+\begin{eqnarray}
+\bar v ={a_B \hbar \over m_e a_B^2}={\hbar \over m_e a_B}=\alpha c&=&
+ {\alphaf\  \cspeed\ m/s}\nonumber \\ 
+&=&\barv\ m/s.
+\end{eqnarray}
+Using the definitions of $\bar l$ and $\bar t$ we can also write:
+\begin{equation}
+\bar v={a_B E_h \over \hbar}.
+\end{equation}
+\\
+Note that since $\bar v= \alpha c$ we can also write 
+$c={1\over \alpha} \bar v$ meaning that the speed of light in a.u. 
+$c_{a.u.}={1\over\alpha}=\cspeedau\ m/s$.
+}
+\\
+
+{\color{orange} In the c.g.s. system the unit of speed is the 
+$\bar v_{cgs}=cm/s = \cmtom\ m/s$.
+\\
+}
+
+{\color{green} The conversion factor between the a.u. and the c.g.s. unit is:
+$\bar v=\barvcgs\ cm/s$.
+\\
+}
+
+\newpage
+\section{\color{coral}Acceleration}
+In the SI the unit of acceleration is derived its  
+definition. For instance, the acceleration (${\bf a}$) of a particle whose
+position as a function of time is ${\bf r}(t)$, is: 
+\begin{equation}
+{\bf a}={d^2{\bf r} \over dt^2},
+\end{equation} 
+so the unit of acceleration is $m/s^2$.
+\\
+
+{\color{web-blue} In a.u. the unit of acceleration ($\bar a$) is derived 
+from its definition $\bar a = \bar l / \bar t^2$. The conversion factor
+with the SI unit is:
+\begin{eqnarray}
+\bar a = {\bar v \over \bar t}={E_h \alpha c \over \hbar}&=& 
+{\baru\ J\ \alphaf\ \cspeed\ m/s \over \hbarf\ J\cdot s}\nonumber \\
+&=&\bara\ m/s^2.
+\end{eqnarray}
+\\
+}
+
+{\color{orange} In the c.g.s. system the unit of acceleration is the $\bar a_{cgs}=cm/s^2 = \cmtom\ m/s^2$.
+\\
+}
+
+{\color{green} The conversion factor between the a.u. and the c.g.s. unit is:
+$\bar a=\baracgs\ cm/s^2$.
+\\
+}
+
+\newpage
+\section{\color{coral}Momentum}
+In the SI the unit of momentum is derived from its definition.
+For instance, the momentum (${\bf p}$) of a particle of mass $m$ whose
+position as a function of time is ${\bf r}(t)$, is:
+\begin{equation}
+{\bf p}=m {d{\bf r} \over dt},
+\end{equation} 
+so the unit of momentum is $kg\cdot m/s$.
+\\
+
+{\color{web-blue} In a.u. the unit of momentum ($\bar p$) is derived 
+from its definition $\bar p = \bar m \cdot \bar v$. 
+The conversion factor with the SI unit is:
+\begin{equation}
+\bar p = {m_e a_B \over \bar t}= {\hbar \over a_B} =
+{\hbarf\ kg\cdot m^2/s \over \barl m}=\barp\ kg\cdot m/s.
+\end{equation}
+\\ }
+
+{\color{orange} In the c.g.s. system the unit of momentum is 
+$\bar p_{cgs}=g\cdot cm/s = \ptop\ kg\cdot m/s$.
+\\
+}
+
+{\color{green} The conversion factor between the a.u. and the c.g.s. unit is:
+$\bar p=\barpcgs\ g\cdot cm/s$.
+\\
+}
+
+\newpage
+\section{\color{coral}Angular momentum}
+In the SI the unit of angular momentum is derived from its
+definition. For instance, the angular momentum (${\bf L}$) 
+of a particle at position ${\bf r}$ and with momentum ${\bf p}$ is:
+\begin{equation}
+{\bf L}= {{\bf r} \times {\bf p}},
+\end{equation} 
+so the unit of angular momentum is $kg\cdot m^2/s$.
+\\
+
+{\color{web-blue} In a.u. the unit of angular momentum ($\bar L$) is derived 
+from its definition
+$\bar L = {\bar m \cdot \bar l^2 \over \bar t}$. 
+The conversion factor
+with the SI unit is:
+\begin{equation}
+\bar L={m_e a_B^2 \hbar \over m_e a_B^2}=\hbar=
+\hbarf\ kg\cdot m^2/s.
+\end{equation}
+\\
+}
+
+{\color{orange} In the c.g.s. system the unit of angular momentum is 
+$\bar L_{cgs}=g\cdot cm^2/s = \ltol\ kg\cdot m^2/s$.
+\\
+}
+
+{\color{green} The conversion factor between the a.u. and the c.g.s. unit is:
+$\bar L=\baramcgs\ g\cdot cm^2/s$.
+\\
+}
+
+\newpage
+\section{\color{coral}Force}
+In the SI the unit of force (symbol $N$) is derived from  
+the Newton equation:
+\begin{equation}
+{\bf F}= m {\bf a},
+\end{equation} 
+so the unit of force is $N=kg\cdot m/s^2$. This unit is called Newton.
+\\
+
+{\color{web-blue} In a.u. the unit of force ($\bar f$) is derived 
+from the same equation so we have $\bar f =\bar m \cdot \bar a$. The
+conversion factor with the SI unit is: 
+\begin{eqnarray}
+\bar f &=& {m_e a_B \hbar E_h \over m_e a_B^2 \hbar }= 
+{E_h\over a_B}\nonumber={\baru J \over \barl m}\nonumber \\
+&=&\barf\ N. 
+\end{eqnarray}
+So in a.u. the unit of force is Hartree/Bohr.
+}
+\\
+
+{\color{orange} In the c.g.s. system the unit of force is the 
+$\bar f_{cgs}=g\cdot cm/s^2 = \ftof\ kg\cdot m/s^2$. This unit is 
+called dyne.
+\\
+}
+
+{\color{green} The conversion factor between the a.u. and the c.g.s. unit is:
+$\bar f=\barfcgs\ dyne$.
+\\
+}
+\newpage
+
+\section{\color{coral}Energy}
+In the SI the unit of energy (symbol $J$) is derived from the 
+definition of work: 
+\begin{equation}
+U= \int {\bf F} \cdot d{\bf r}
+\end{equation} 
+so the unit of energy is $J=kg\cdot m^2/s^2=N\cdot m$. This unit is 
+called Joule.
+\\
+
+{\color{web-blue} In a.u. the unit of energy ($\bar U$) is derived 
+from the definition of work so $\bar U =\bar f \cdot \bar l$. The 
+conversion factor with the SI unit is: 
+\begin{equation}
+\bar U = {E_h\over a_B} a_B=E_h=\baru\ J, 
+\end{equation}
+so in a.u. the unit of the energy is the Hartree.
+}
+\\
+
+{\color{orange} In the c.g.s. system the unit of energy (symbol $erg$)
+is $\bar U_{cgs}=erg=dyne\cdot cm = \utou\ N\cdot m$. This unit is 
+called erg.
+\\
+}
+
+{\color{green} The conversion factor between the a.u. and the c.g.s. unit is:
+$\bar U=\barucgs\ erg$.
+\\
+}
+
+\newpage
+\section{\color{coral}Power}
+In the SI the unit of power (symbol $W$) is derived from its
+definition as the work per unit time: 
+\begin{equation}
+P= {d U \over d t},
+\end{equation} 
+so the unit of power is $W=J/s$. This unit is called Watt.
+\\
+
+{\color{web-blue} In a.u. the unit of power ($\bar W$) is derived 
+from its definition $\bar W ={\bar U \over \bar t}$. The
+conversion factor with the SI unit is: 
+\begin{equation}
+\bar W = {\baru\ J\over \bart\ s}=\barw\ W. 
+\end{equation}
+Using the definition of $\bar t$ and $\bar U$ we can also write:
+\begin{equation}
+\bar W = {E_h^2 \over \hbar}.
+\end{equation}
+}
+\\
+
+{\color{orange} In the c.g.s. system the unit of power is 
+$\bar W_{cgs} = erg/s = \utou\ W$. 
+\\
+}
+
+{\color{green} The conversion factor between the a.u. and the c.g.s. unit is:
+$\bar W=\barwcgs\ erg/s$.
+}
+
+\newpage
+\section{\color{coral}Pressure}
+In the SI the unit of pressure (or stress) (symbol $Pa$) is derived 
+from its definition as a force per unit area, so 
+the unit of pressure is $N/m^2=Pa$. This unit is called Pascal.
+\\
+
+{\color{web-blue} In a.u. the unit of pressure ($\bar \sigma$) is derived from 
+its definition so $\bar \sigma= {\bar f \over \bar l^2}$. The conversion
+factor with the SI unit is:
+\begin{equation}
+\bar \sigma= {\barf\ N \over (\barl\ m )^2}=\barpr Pa
+\end{equation}
+}
+
+{\color{orange} In the c.g.s. system the unit of pressure (symbol $Ba$)
+is the $\bar \sigma_{cgs}=Ba=dyne/cm^2 = \prtopr\ Pa$. This unit is 
+called barye. 
+\\
+}
+
+{\color{green} The conversion factor between the a.u. and the c.g.s. unit is:
+$\bar \sigma=\barprcgs\ Ba$.
+}
+
+
+\newpage
+\section{\color{coral}Temperature}
+In the SI the unit of temperature is the kelvin (symbol $K$) defined
+so that the Boltzmann constant is $1.380649\times 10^{23}$ $J / K$.
+\\
+
+{\color{web-blue} In a.u. the unit of temperature (symbol $K$) is the 
+kelvin as in the SI.}
+\\
+
+{\color{orange} In the c.g.s. system the unit of temperature (symbol $K$) 
+is the kelvin as in the SI.}
+
+\newpage
+\section{\color{coral}Current}
+In the SI the unit of current is the ampere (symbol $A$) defined
+requiring that the charge of the electron is $e=\e$ $A\cdot s$.
+The quantity $A\cdot s$ is called coulomb (symbol $C$).
+\\
+
+{\color{web-blue} In a.u. the unit of the current (symbol $\bar I$) is  
+derived from its definition:
+\begin{equation}
+I={dq \over dt}, 
+\end{equation}
+where $dq$ is the charge that passes through a cross section of the conductor
+in the time $dt$, so $\bar I = \bar C / \bar t$ where $\bar C$ is the 
+unit of charge (see below). The conversion factor with the SI unit is:
+\begin{equation}
+\bar I = {e E_h \over \hbar}={\barc\ C\ \baru J \over 
+\hbarf\  J\cdot s} = \bari A.
+\end{equation}
+}
+\\
+
+{\color{orange} In the c.g.s.-Gaussian system the unit of current 
+(symbol $statA$) is defined from Amp\`ere law. The force per unit length 
+between two parallel wires that carry a current $I$ and $I'$ is:
+\begin{equation}
+{F\over l} = {2\over c^2} {I I'\over r},
+\label{force_wire}
+\end{equation}
+therefore $\bar I_{cgs}=statA=\sqrt{dyne}\ cm/s$. This unit is called 
+statamp\`ere or 
+electrostatic unit ($esu$) of current.
+
+In order to convert between $statA$ and $A$, we can write $A= K\ statA$. 
+When the currents in the two wires are $I\ statA={I\over K} A$ and 
+$I'\ statA={I'\over K} A$ and their distance
+is $r\ cm=r\ 10^{-2}\ m$ the force per metre is in $N/m=
+{10^5\over 10^2} dyne/cm$
+\begin{equation}
+F=2{\tilde \mu_0\over 4\pi} {10^3\over 10^{-2} K^2}\ {I\ I' \over r} dyne/cm,
+\end{equation}
+where $\tilde \mu_0$ is the numerical value of $\mu_0$ in SI units
+(see Eq.~\ref{mu0}). Comparing this equation with Eq.~\ref{force_wire} we
+obtain:
+\begin{equation}
+{\tilde \mu_0 \over 4 \pi} {10^5\over K^2} = 
+{1\over \tilde c_{cgs}^2}, 
+\end{equation}
+where $\tilde c_{cgs}$ is the numerical value of the speed of light in
+c.g.s. units. We have $\tilde c_{cgs}=10^2 \tilde c$ where $\tilde c$ is
+the numerical value of the speed of light in SI units. From this
+equation we obtain:
+\begin{equation}
+K = \tilde c_{cgs} \sqrt {10^5 \tilde \mu_0 \over 4 \pi} =
+{\tilde c_{cgs}\over \tilde c} 
+\sqrt {10^5 \over 4 \pi \tilde \epsilon_0}=\sqrt {10^9 \over 4 \pi 
+\tilde \epsilon_0}=\kappa,
+\label{force_wire}
+\end{equation}
+where $\tilde \epsilon_0$ is the numerical value of the vacuum permittivity
+in SI units (Eq.~\ref{epsilon0}).
+
+In the old SI units ${\tilde \mu_0 \over 4 \pi} = 10^{-7}$, so 
+$K=10^{-1} \tilde c_{cgs}= 10\ \tilde c$.
+In the new SI we have:
+\begin{equation}
+{K\over 10 \tilde c}= \kappadiecic...
+\end{equation}
+\\
+}
+
+%{\color{violet} There exists also a modified c.g.s. Gaussian system, 
+%where the unit of the current (symbol $abA$) is defined 
+%from:
+%\begin{equation}
+%{F\over l} = 2 {I I'\over r}.
+%\end{equation}
+%Therefore $abA=\sqrt{dyne}$. This unit is called abampere or 
+%electromagnetic unit ($emu$) of current or biot.
+%
+%In order to compare $abA$ and $A$ we can write $abA= {1\over K_A}\ A$ 
+%and reasoning
+%as before we have:
+%\begin{equation}
+%{\tilde \mu_0 \over 2 \pi}\ {10^5\over K_A^2} = 1
+%\end{equation}
+%or
+%\begin{equation}
+%K_A = \sqrt {10^5 \tilde \mu_0 \over 4 \pi} ={1\over \tilde c} 
+%\sqrt {10^5 \over 4 \pi \tilde \epsilon_0}={K\over \tilde c_{cgs}} 
+%=\kappaa.
+%\end{equation}
+%\\
+%In the old SI units ${\tilde \mu_0 \over 4 \pi} = 10^{-7}$, so $K_A=10^{-1}$.
+%}
+%\\
+
+{\color{green} The conversion factor between the a.u. and the c.g.s.-Gaussian 
+unit is: $\bar I=\bari\ K statA=\baricgs\ statA$. \\
+%The conversion factor between a.u. and modified c.g.s.-Gaussian units is:
+%$\bar I=\bari\ K_A abA=\baricgsm\ abA$.
+}
+\\
+
+\newpage
+\section{\color{coral}Charge}
+In the SI the unit of the charge (symbol $C$), derived from the definition 
+of the current:
+\begin{equation}
+I={dq \over dt},
+\label{current}
+\end{equation}
+is the charge that passes in one second through the section of a conductor
+in which the current is $1 A$. This unit is called coulomb.
+
+In the SI the Coulomb force between two charges $q$ and $q'$ at
+distance ${\bf r}$ is
+\begin{equation}
+{\bf F} = {1\over 4 \pi \epsilon_0} {q\ q' \over r^3}\ {\bf r},
+\label{coulomb}
+\end{equation}
+where $r=|{\bf r}|$.
+\\
+
+{\color{web-blue} In a.u. the unit of the charge (symbol $\bar C$) is
+defined requiring that the electron has charge $e=\bar C$. The conversion 
+factor between a.u. and the SI unit is: 
+\begin{equation}
+\bar C=\barc\ C.
+\end{equation}
+
+With this information we can derive the form of the Coulomb law in a.u..
+A charge $q\ \bar C$ at a distance $r\ \bar l$ from a
+charge $q'\ \bar C$ will fill a force $F \bar f$ that can be 
+calculated using Eq.~\ref{coulomb}:
+\begin{equation}
+{\bf F} = {1\over 4 \pi \epsilon_0}\ {\bar C^2 \over \bar l^2 \bar f} 
+{q\ q' \over r^3}\ {\bf r},
+\end{equation}
+but since
+\begin{equation}
+{1\over 4 \pi \epsilon_0}\ {\bar C^2 \over \bar l^2\bar f} = 
+{E_h \over a_B \bar f}=1
+\end{equation}
+the Coulomb law in a.u. is:
+\begin{equation}
+{\bf F} = {q\ q' \over r^3}\ {\bf r}. 
+\end{equation}
+}
+\\
+
+{\color{orange} In the c.g.s. system the unit of charge (symbol $statC$)
+is defined from the Coulomb law:
+\begin{equation}
+{\bf F} = {q\ q'\over r^3}\ {\bf r},
+\label{coulombcgs}
+\end{equation}
+Therefore the charge unit is $\bar C_{cgs}=statC=\sqrt{dyne}\cdot cm=
+statA\cdot s$. This unit is called statcoulomb 
+or electrostatic unit ($esu$) of charge or franklin.
+
+The conversion factor between $statC$ and $C$ can be found by writing
+$statC={1\over K} C$ and considering two charges of $q\ statC$ and 
+$q'\ statC$ respectively, at a distance of $r\ cm$. Since the two charges are
+of ${q\over K}\ C$ and ${q'\over K}\ C$ at the distance of $r\ 10^{-2}\ m$,
+we can use the Coulomb law in SI units to find the 
+the force (in $N=10^5 dyne$) acting between them: 
+\begin{equation}
+{\bf F}={1\over 4 \pi \tilde \epsilon_0} {10^5\over 10^{-4} K^2} 
+{q\ q'\over r^3}\ {\bf r}\ dyne
+\end{equation}
+and comparing this equation with Eq.~\ref{coulombcgs} we find:
+\begin{equation}
+K= \sqrt{10^9 \over 4 \pi \tilde \epsilon_0}= \kappa. 
+\end{equation}
+\\
+Using this conversion factor we can write the equation that defines 
+the current.  When a charge $dq\ statC$, or ${dq\over K}\ C$ passes in $dt\ s$
+through a section of a conductor, the current is (due to Eq.~\ref{current})
+is $I={1\over K}\ {dq\over dt}\ A= {dq\over dt}\ statA$, so in the 
+c.g.s.-Gaussian system Eq.~\ref{current} still holds.   
+}
+\\
+
+%{\color{violet} In the modified c.g.s.-Gaussian system the unit of the
+%charge is the $statC$. Using the conversion factor between $statC$ and $C$
+%we can find the equation that defines the current in this system.
+%When a charge of $dq\ statC={dq\over K}\ C$ 
+%passes in a time $dt\ s$ through a section of a conductor,
+%the current is (due to Eq.~\ref{current}) 
+%$I={1\over K}\ {dq\over dt}\ A={K_A \over K}\ {dq\over dt}\ abA= 
+%{1\over c_{cgs}}\ {dq\over dt}\ abA$. So in these units the relationship
+%between current and charge is:
+%\begin{equation}
+%I={1\over c} {dq\over dt}.
+%\end{equation}
+%}
+%\\
+
+{\color{green} The conversion factor between the a.u. and the 
+c.g.s.-Gaussian unit is: $\bar C=\barc\ K statC=\barccgs\ statC$. \\
+}
+
+\newpage
+\section{\color{coral}Charge density}
+In the SI the unit of the charge density is derived from its
+definition:
+\begin{equation}
+\rho={dq \over dV},
+\end{equation}
+so the unit of the charge density is $C/m^3$.
+\\
+
+{\color{web-blue} In a.u. the unit of charge density (symbol $\bar \rho$) 
+is derived its definition $\bar \rho ={\bar C \over \bar l^3}$. The
+conversion factor with the SI unit is: 
+\begin{equation}
+\bar \rho = {e\over a_B^3} =
+{\barc\ C\over (\barl\ m)^3}=\barrho\ C/m^3. 
+\end{equation}
+\\
+}
+
+{\color{orange} In the c.g.s. system the unit of charge density  
+is derived from its definition and it is
+$\bar \rho_{cgs}=statC/cm^3 = {1 \over K\ 10^{-6}}\ C/m^3=\rhotorho\ C/m^3$.
+\\
+}
+
+{\color{green} The conversion factor between the a.u. and the 
+c.g.s.-Gaussian unit is: $\bar \rho = \barrhocgs\ statC/cm^3$. 
+\\
+}
+
+\newpage
+\section{\color{coral}Current density}
+In the SI the unit of the current density is derived from 
+its definition:
+\begin{equation}
+I=\int {\bf J}\cdot \hat {\bf n}\ dS,
+\end{equation}
+so the unit of the current density is $A/m^2$.
+\\
+In SI units the continuity equation is:
+\begin{equation}
+{\partial \rho \over \partial t}=-{\rm div} {\bf J}.
+\label{continuitysi}
+\end{equation}
+\\
+
+{\color{web-blue} In a.u. the unit of the current density (symbol $\bar J$) 
+is derived 
+from the same equation so we have $\bar J ={\bar I \over \bar l^2}$. The
+conversion factor to SI units is: 
+\begin{equation}
+\bar J = {\bari\ A\over (\barl\ m)^2}=\barcur\ A/m^2. 
+\end{equation}
+\\
+Inserting the expressions of $\bar I$ and $\bar l$ we can also write:
+\begin{equation}
+\bar J = {e E_h \over \hbar a_B^2}. 
+\end{equation}
+\\
+The continuity equation can be written as:
+\begin{equation}
+{\partial \rho \over \partial t}=-{\bar t \bar J \over \bar \rho \bar l} {\rm div} {\bf J}.
+\label{continuitygen}
+\end{equation}
+Since ${\bar t \bar J \over \bar \rho \bar l}=1$ the continuity equation 
+is Eq.~\ref{continuitysi}.
+}
+\\
+
+{\color{orange} In the c.g.s.-Gaussian system the unit of current density  
+(symbol $\bar J_{cgs}$) is derived from its definition 
+$\bar J_{cgs}=statA/cm^2 = {1 \over K 10^{-4}} A/m^2=\curtocur\ A/m^2$.
+\\
+Since in Eq.~\ref{continuitygen} ${\bar t_{cgs} \bar J_{cgs} \over 
+\bar \rho_{cgs} \bar l_{cgs}}=1$ the continuity equation is 
+Eq.~\ref{continuitysi}.
+}
+\\
+
+%{\color{violet} In the modified c.g.s.-Gaussian system the unit of current 
+%density  is derived from its definition and it is:
+%$abA/cm^2 = {1 \over K_A 10^{-4}} A/m^2=\curtocurm\ A/m^2$.
+%\\
+%The continuity equation can be derived by considering
+%a charge density $\rho\ statC/cm^3= {1\over 10^{-6} K}\ \rho\ C/m^3$ and
+%a current density ${\bf J}\ abA/cm^2= {1 \over K_A 10^{-4}} {\bf J}\ A/m^2.$
+%Accounting also for the different length units and 
+%using Eq.~\ref{continuitysi} we find:
+%\begin{equation}
+%{1\over 10^{-6} K} {\partial \rho \over \partial t}=-{1\over 10^{-6} K_A} {\rm div} {\bf J},
+%\label{continuitycgsm0}
+%\end{equation}
+%or in modified c.g.s.-Gaussian units:
+%\begin{equation}
+%{1\over c} {\partial \rho \over \partial t}=-{\rm div} {\bf J}.
+%\label{continuitycgsm1}
+%\end{equation}
+%\\
+%}
+
+{\color{green} 
+The conversion factor between the a.u. and the c.g.s.-Gaussian unit
+is: $\bar J = \barcurcgs\ statA/cm^2 $
+\\
+
+%The conversion factor between a.u. and modified c.g.s.-Gaussian units
+%is $\bar J = \barcurcgsm\ abA/cm^2. \label{cgsmcur}$
+}
+
+\newpage
+\section{\color{coral}Electric field}
+In the SI the unit of the electric field is derived from 
+its definition:
+\begin{equation}
+{\bf E}={{\bf F} \over q},
+\end{equation}
+so the unit of the electric field is $N/C= {kg\cdot m \over s^2 \cdot C}
+=V/m$.
+\\
+
+{\color{web-blue} In a.u. the unit of the electric field (symbol $\bar E$) 
+is derived from its definition $\bar E={\bar f \over \bar C}$. The 
+conversion factor to the SI unit is:
+\begin{equation}
+\bar E= {E_h\over a_B e}= {\barf\ N \over \barc\ C}= \bare\ N/C. 
+\end{equation}
+}
+\\
+
+{\color{orange} In the c.g.s.-Gaussian system the unit of electric field
+(symbol $statV/cm$) is derived from its definition:
+$\bar E_{cgs}=statV/cm=dyne / statC = {10^{-5}\ K } N/C=\etoe\ N/C$. 
+\\
+}
+
+{\color{green} 
+The conversion factor between the a.u. and the c.g.s.-Gaussian unit
+is: $\bar E = \barecgs \ statV/cm$.
+}
+
+\newpage
+\section{\color{coral}Electric potential}
+In the SI the unit of the electric potential (symbol $V$)
+is derived from its definition. The electric 
+potential is a function $\phi({\bf r})$ such that
+\begin{equation}
+{\bf E}=- \nabla \phi({\bf r}),
+\end{equation}
+so the unit of the electric potential is $V={N \cdot m \over C}={J\over C}$. 
+This unit is called Volt.
+\\
+
+{\color{web-blue} In a.u. the unit of the electric potential 
+(symbol $\bar V$) 
+is derived from its definition so $\bar V={\bar E \cdot \bar l}$. 
+The conversion factor to the SI unit is:
+\begin{equation}
+\bar V= {E_h\over e}=
+{\baru\ N\cdot m\over \barc\ C} =\barphi\ V.
+\end{equation}
+}
+\\
+
+{\color{orange} In the c.g.s.-Gaussian system the unit of electric potential
+(symbol $statV$) is derived from its definition: 
+$\bar V_{cgs}=statV=dyne\cdot cm / statC = {10^{-7}\ K} 
+N\cdot m/C=\phitophi\ V$. This unit
+is called statvolt. Note that 
+$statV=\sqrt{dyne}$.
+\\
+}
+
+{\color{green} 
+The conversion factor between the a.u. and the c.g.s.-Gaussian unit
+is:
+$\bar V = \barphicgs \ statV$.
+}
+\\
+
+{\color{red} A commonly used unit of energy is the electron volt (symbol $eV$)
+defined as the energy acquired by an electron accelerated through a
+potential difference of $1 V$. Therefore $eV=\e\ C\cdot V$ (or $J$).
+The Hartree energy espressed in $eV$ is: 
+\begin{equation}
+E_h=\barphi\ eV,
+\end{equation}
+while the Rydberg energy expressed in eV is
+\begin{equation}
+{E_h \over 2}=\ryev\ eV.
+\end{equation}
+}
+
+\newpage
+\section{\color{coral}Capacitance}
+In the SI the unit of the capacitance (symbol $F$) is derived from its 
+definition. The capacitance of a capacitor is the ratio between the charge
+on its surfaces and the voltage applied between them:
+\begin{equation}
+C=q/V,
+\end{equation}
+so the unit of the capacitance is $F={C \over V}={A \cdot s \over V}=
+{C^2 \over N \cdot m}
+={C^2 \over J}$. This unit is called Farad.
+\\
+
+{\color{web-blue} In a.u. the unit of the capacitance (symbol $\bar F$) 
+is derived from its definition: $\bar F={\bar C \over \bar V}$. The 
+conversion factor with the SI unit is:
+\begin{equation}
+\bar F = {e^2 \over E_h} = {(\barc\ C)^2\over \baru\ J}=\barcap\ F.
+\end{equation}
+}
+\\
+
+{\color{orange} In the c.g.s.-Gaussian system the unit of capacitance
+is derived from its definition: $\bar C_{cgs}=statC/statV=cm$. The 
+conversion factor with the SI unit is:
+$cm={1\over 10^{-7}\ K^2}\ C/V=\captocap\ F$.
+}
+\\
+
+{\color{green} 
+The conversion factor between the a.u. and the c.g.s.-Gaussian unit is: 
+$\bar F = \barcapcgs \ cm$.
+}
+
+
+\newpage
+\section{\color{coral}Vacuum electric permittivity}
+In the SI the unit of the vacuum electric permittivity $\epsilon_0$
+can be derived from the Coulomb law:
+\begin{equation}
+{\bf F} = {1\over 4 \pi \epsilon_0} {qq'\over r^3} {\bf r},
+\end{equation}
+so the unit of $\epsilon_0$ is $C^2 \over N\cdot m^2$. Its numerical
+value in these units is given in Eq.~\ref{epsilon0}.
+\\
+
+{\color{web-blue} In a.u. $\epsilon_0$ is not used.} 
+\\
+
+{\color{orange} In the c.g.s.-Gaussian system $\epsilon_0$ is not used.
+}
+\\
+
+{\color{green} In a.u. $\epsilon_0$ is not used. 
+\\
+}
+
+\newpage
+\section{\color{coral}Electric dipole moment}
+In the SI the unit of the electric dipole moment of a localized
+charge density is derived from its definition:
+\begin{equation}
+{\bf \wp}=\int_V {\bf r} \rho({\bf r}) d^3r,
+\end{equation}
+so the units of the electric dipole moment are $C\cdot m$.
+\\
+
+{\color{web-blue} In a.u. the unit of electric dipole moment is derived
+from its definition $\bar \wp=\bar C \bar l$. The conversion factor to the
+SI unit is:
+\begin{equation}
+\bar \wp = e\ a_B = \e\ C\ \abohr m = \bardip\ C\cdot m.
+\end{equation}
+} 
+\\
+
+{\color{orange} In the c.g.s.-Gaussian system the unit of electric 
+dipole is derived from its definition $\bar \wp_{cgs}=statC\cdot cm$.
+The conversion factor to the SI unit is $\bar \wp_{cgs}={10^{-2} \over K}
+\ C\cdot m=\diptodip\ C\cdot m$.
+}
+\\
+
+{\color{green} 
+The conversion factor between the a.u. and the c.g.s.-Gaussian unit is: 
+$\bar \wp = \bardipcgs \ statC\cdot cm$.
+}
+
+\newpage
+\section{\color{coral}Polarization}
+In the SI the unit of the polarization is derived from its definition as
+the electric dipole per unit volume ${C \over m^2}$. 
+\\
+
+{\color{web-blue} In a.u. the unit of the polarization (symbol $\bar P$) 
+is derived from its definition $\bar P={\bar C \over \bar l^2}$. The 
+conversion factor with the SI unit is:
+\begin{equation}
+\bar P = {e \over a_B^2} =
+{\barc\ C \over (\barl\ m)^2} = \barpolar\ C/m^2.
+\end{equation}
+}
+\\
+
+{\color{orange} In the c.g.s.-Gaussian system the unit of polarization
+is derived from its definition:
+$\bar P_{cgs}=statC/cm^2 = {1\over K\ 10^{-4}} C/m^2=\polartopolar\ C/m^2$. 
+\\
+}
+
+{\color{green} 
+The conversion factor between the a.u. and the c.g.s.-Gaussian unit is: 
+$\bar P = \barpolarcgs \ statC/cm^2$.
+}
+
+\newpage
+\section{\color{coral}Electric displacement}
+In the SI the electric displacement is given in term of the
+electric field and of the polarization by:
+\begin{equation}
+{\bf D}=\epsilon_0 {\bf E} + {\bf P},
+\label{eldisp}
+\end{equation}
+so the polarization and the electric displacement have the same
+unit ${C \over m^2}$. \\
+This equation is usually justified starting from
+the Maxwell equation:
+\begin{equation}
+\nabla \cdot {\bf E} = {\rho \over \epsilon_0},
+\end{equation}
+and separating $\rho$ into $\rho=\rho_f + \rho_b$ where
+$\rho_f$ are the free charges and $\rho_b$ are the 
+bound charges such that
+\begin{equation}
+\rho_b=-\nabla \cdot {\bf P}.
+\end{equation}
+Therefore one obtains:
+\begin{equation}
+\nabla \cdot (\epsilon_0 {\bf E}+ {\bf P})=\rho_f. 
+\end{equation}
+\\
+
+{\color{web-blue} In a.u. the unit of the electric displacement 
+(symbol $\bar D$) is derived from the 
+relationship between electric displacement, electric field, and polarization
+that can be found writing the above equations in a.u.. The Maxwell
+equation becomes:
+\begin{equation}
+{\bar E \over \bar l} \nabla \cdot {\bf E} = {\bar \rho \over \epsilon_0}
+\rho
+\label{maxwell1gen}
+\end{equation}
+and since ${\bar \rho \bar l \over \epsilon_0 \bar E}=4\pi$, in a.u. we have:
+\begin{equation}
+\nabla \cdot {\bf E} = 4 \pi \rho.
+\end{equation}
+The link between bound charges and polarization does not change:
+\begin{equation}
+\rho_b = -{\bar P \over \bar l \bar \rho} \nabla \cdot {\bf P}=
+-\nabla \cdot {\bf P},
+\end{equation}
+where we used the fact that ${\bar P \over \bar l \bar \rho}=1$.
+Inserting this expression in the Maxwell equation we obtain:
+\begin{equation}
+\nabla \cdot ({\bf E}+ 4 \pi {\bf P})=4 \pi \rho_f, 
+\label{aldispau}
+\end{equation}
+that suggests the following definition of the electric displacement:
+\begin{equation}
+{\bf D}={\bf E} + 4\pi {\bf P}.
+\label{eldispau}
+\end{equation}
+
+Finally we can find $\bar D$ by using Eq.~\ref{eldisp} for an electric
+field ${\bf E} \bar E$, a polarization ${\bf P} \bar P$ and a
+displacement ${\bf D} \bar D$:
+\begin{equation}
+{\bf D} = \left[{\bf E}\ {\epsilon_0 \bar E\over \bar D} + 
+{\bf P} {\bar P\over \bar D}\right].
+\label{eldispgen}
+\end{equation}
+Comparing this equation with Eq.~\ref{eldispau} we obtain:
+\begin{equation}
+\bar D= {\epsilon_0 \bar E}= {\bar P \over 4 \pi}
+\end{equation}
+or $\bar D= {\bar P\over 4 \pi}=\bard\ C/m^2$.
+\\
+}
+
+{\color{orange} In the c.g.s.-Gaussian system the relationship
+between electric displacement, electric field, and polarization can 
+be found noticing that in Eq.~\ref{maxwell1gen}
+${\bar \rho_{cgs} \bar l_{cgs} \over \epsilon_0 \bar E_{cgs}}=4\pi$
+so that the Maxwell equation becomes:
+\begin{equation}
+\nabla \cdot {\bf E} = 4 \pi \rho.
+\end{equation}
+Moreover since ${\bar P_{cgs} \over \bar l_{cgs} \bar \rho_{cgs}}=1$,
+the link between bound charge and polarization is as in the SI units and
+we obtain:
+\begin{equation}
+\nabla \cdot ({\bf E}+ 4 \pi {\bf P})=4 \pi \rho_f, 
+\label{aldispau}
+\end{equation}
+that suggests the following relationship between electric displacement,
+electric field and polarization:
+\begin{equation}
+{\bf D} =  {\bf E} + 4 \pi {\bf P}.
+\label{eldispcgs}
+\end{equation}
+\\
+The conversion factor with the SI unit $\bar D_{cgs}$ can be found
+from Eq.~\ref{eldispgen} that compared with Eq.~\ref{eldispcgs} gives
+\begin{equation}
+\bar D_{cgs}= {\epsilon_0 \bar E_{cgs}}= {\bar P_{cgs} \over 4 \pi}.
+\end{equation}
+The electric displacement and the polarization 
+have the same dimensions $statC/cm^2$ but while the unit of polarization
+is $\bar P_{cgs}=1\ statC/cm^2$ the unit of electric displacement 
+is $\bar D_{cgs}={1\over 4 \pi} statC/cm^2$.
+The conversion factor to SI units is:
+\begin{equation}
+\bar D_{cgs}= {1\over 4 \pi\ K\ 10^{-4}} C/m^2=\dtod\ C/m^2. 
+\end{equation}
+}
+\\
+
+{\color{green} 
+The conversion factor between the a.u. and the c.g.s.-Gaussian unit is: 
+$\bar D = \bardcgs \ statC/(cm^2 \cdot 4 \cdot \pi)$.
+%=\bardcgsoverfpi \ statC/cm^2$.
+}
+
+\newpage
+\section{\color{coral}Resistance}
+In the SI the unit of the resistance (symbol $\Omega$)
+is derived from its definition. The resistance is the ratio between 
+the applied voltage and the current that passes through a system:
+\begin{equation}
+R=V/I,
+\end{equation}
+so the unit of the resistance is $\Omega={V \over A}=
+{N\cdot m \cdot s \over C^2}={J\cdot s \over C^2}$. This
+unit is called Ohm.
+\\
+
+{\color{web-blue} In a.u. the unit of the resistance (symbol $\bar \Omega$) 
+is derived from its definition: $\bar \Omega={\bar V \over \bar I}$. The
+conversion factor with the SI unit is:
+\begin{equation}
+\bar \Omega = {E_h \hbar \over e^2 E_h}=  
+{\hbar \over e^2}=
+{\hbarf\ J\cdot s\over (\barc\ C)^2}=\barohm\ \Omega.
+\end{equation}
+\\
+}
+
+{\color{orange} In the c.g.s.-Gaussian system the unit of resistance
+is derived from its definition:
+$\bar \Omega_{cgs}=statV/statA=s/cm$. The conversion factor with the SI 
+unit is:
+$\bar \Omega_{cgs}=10^{-7}\ K^2\ V/A=\ohmtoohm\ Ohm$.
+}
+\\
+
+{\color{green}
+The conversion factor between the a.u. and the c.g.s.-Gaussian unit
+is: $\bar \Omega = \barohmcgs \ s/cm$.
+}
+
+
+\newpage
+\section{\color{coral}Magnetic flux density}
+In the SI the unit of the magnetic flux density 
+(symbol $T$) can be derived from the Lorentz force equation:
+\begin{equation}
+{\bf F}=q ({\bf v} \times {\bf B}),
+\label{lforce}
+\end{equation}
+so the unit of the magnetic flux density is $T={N\cdot s\over C\cdot m} = 
+{V \cdot s \over m^2}={N \over A\cdot m}={kg \over s \cdot C}$. 
+This unit is called Tesla. \\
+In the SI the second Maxwell equation reads:
+\begin{equation}
+\nabla \times {\bf E}=-{\partial {\bf B} \over \partial t}.
+\end{equation}
+\\
+
+{\color{web-blue} In a.u. the unit of the magnetic flux density 
+(symbol $\bar B$) is derived from the Lorentz force: 
+$\bar B= {\bar f \over \bar v \cdot
+\bar C}$. The conversion factor with the SI unit is:
+\begin{eqnarray}
+\bar B = {E_h \hbar \over a_B^2 E_h e}={\hbar \over a_B^2 e}&=&
+{\hbarf\ J\cdot s \over (\barl\ m)^2\ \barc\ C}\nonumber
+\\&=&\barb\ T.
+\end{eqnarray}
+\\
+
+Using the expression of $a_B$ we can also write:
+\begin{equation}
+\bar B= {m_e e \over a_B \hbar 4 \pi \epsilon_0}=
+{E_h \over 2 \mu_B},
+\end{equation}
+where $E_h$ is the Hartree energy (Eq.\ref{eh}) and $\mu_B$ is the Bohr 
+magneton (Eq.~\ref{bohrm}).
+\\
+In these units the second Maxwell equation is:
+\begin{equation}
+\nabla \times {\bf E}=-{\bar l \bar B \over \bar t \bar E} 
+{\partial {\bf B} \over \partial t}.
+\label{maxwell2gen}
+\end{equation}
+Since ${\bar l \bar B \over \bar t \bar E}=1$, the second Maxwell
+equation has the same form as in the SI.
+}
+\\
+
+{\color{orange} In the c.g.s.-Gaussian system the unit of magnetic
+flux density (symbol $G$) is derived from the Amp\`ere law by writing 
+the force per unit length between two parallel wires traversed by 
+a current $I$ as:
+\begin{equation}
+{F \over l} = {1\over c} B \cdot I,
+\end{equation}
+where $B={2\over c} {I \over r}$ is the magnetic flux density produced by 
+one wire at the distance of the other. 
+This relationship shows that ${\bf B}$ has the dimensions of a
+charge per unit area $statC/cm^2$. This unit is called Gauss.
+
+The conversion factor with the SI unit can be found using the expression of 
+the magnetic flux density $B$ produced by a wire crossed by 
+a currenit I in SI units: $B={\mu_0\over 2 \pi} {I \over r}$. 
+Writing $G={1\over K_T} T$, a current of $I\ statA= {I\over K} 
+A$ produces at a distance of $r\ {10^{-2}} m$ a magnetic field 
+(in $T=K_T G$): 
+\begin{equation}
+B={\tilde \mu_0\over 2 \pi}\ {K_T \over
+10^{-2} K}\ {I\over r}\  G.
+\end{equation}
+Comparing with the c.g.s.-Gaussian expression we obtain
+\begin{equation}
+K_T= {4 \pi \over \tilde \mu_0} {10^{-2}\ K \over \tilde c_{cgs}}= 
+{10^3 \over K_A}=\toverg,
+\end{equation}
+where $K_A=K/\tilde c_{cgs}=\kappaa$. 
+With the old SI units $K_T$ was exactly $10^4$.
+\\
+Using the conversion factor between $T$ and $G$ we can write the 
+Lorentz force in the c.g.s-Gaussian system. A particle with charge
+$q\ statC={q\over K}\ C$ that moves with a speed of ${\bf v}\ cm/s=
+{\bf v}\ 10^{-2}\ m/s$ in a field of ${\bf B}\ G = {{\bf B} \over K_T}\ T$ 
+will fill a force (in $N=10^5\ dyne$) (using Eq.~\ref{lforce}):
+\begin{equation}
+{\bf F}={10^{-2} \over K\ K_T} q\ ({\bf v}\times {\bf B})\ 10^5\ dyne. 
+\end{equation}
+Since ${10^{3} \over K K_T}=
+{1\over \tilde c_{cgs}}$ we obtain the Lorentz force in the 
+c.g.s.-Gaussian system
+\begin{equation}
+{\bf F}={q\over c}\ ({\bf v}\times {\bf B}).
+\end{equation}
+The second Maxwell equation can be found noticing that in Eq.~\ref{maxwell2gen}
+${\bar l_{cgs} \bar B_{cgs} \over \bar t_{cgs} \bar E_{cgs}}=
+{10^{-2} \over K_T 10^{-5} K}={10^3 K_A \over 10^3 K}={1\over 
+\tilde c_{cgs}}$ so 
+we have
+\begin{equation}
+\nabla \times {\bf E}=-{1\over c}
+{\partial {\bf B} \over \partial t}.
+\label{maxwell2cgs}
+\end{equation}
+}
+\\
+
+%{\color{violet} In the modified c.g.s.-Gaussian system the unit of 
+%magnetic flux density is derived from the Amp\`ere law by writing the force per
+%unit length between two parallel wires as:
+%\begin{equation}
+%{F \over l} = B \cdot I
+%\end{equation}
+%where $B=2 {I \over r}$ is the magnetic flux density. 
+%In this units ${\bf B}$ has dimension $abA/cm=\sqrt{dyne}/cm=statC/cm^2$,
+%so also in this system of units ${\bf B}$ is measured in $G$.
+%With the same reasoning as before and using $A=K_A\ abA$ we find:
+%\begin{equation}
+%{\tilde \mu_0\over 2 \pi} K_T G= {2 \over 10^2} K_A statC/cm^2
+%\end{equation}
+%that gives again
+%\begin{equation}
+% K_T = {10^3 \over K_A}=\toverg.
+%\end{equation}
+%\\
+%}
+
+{\color{green} 
+The conversion factor between the a.u. and the c.g.s.-Gaussian unit is: 
+$\bar B = \barbcgs\ G$.
+}
+
+\newpage
+\section{\color{coral}Vector potential}
+
+In the SI the unit of the vector potential (symbol $T \cdot m$)
+is derived from its definition. The vector potential (${\bf A}$)
+is a vector field such that:
+\begin{equation}
+{\bf B}=\nabla \times {\bf A},
+\label{defav}
+\end{equation}
+so the unit of the vector potential is $T\cdot m={N \over A}=
+{V\cdot s \over m}$. \\
+When the vector potential depends on time the electric field is:
+\begin{equation}
+{\bf E}=-\nabla \phi -{\partial {\bf A} \over \partial t}.
+\label{ephia}
+\end{equation}
+\\
+
+{\color{web-blue} In a.u. the unit of the vector potential
+(symbol $\bar A$) is derived from its definition $\bar A = \bar B \bar l$.
+We have:
+\begin{eqnarray}
+\bar A = {\hbar \over a_B e}&=&{\hbarf\ J\cdot s \over \abohr\ m\ \e C}
+\nonumber \\ 
+&=& \barav\ T\cdot m.
+\end{eqnarray}
+When the vector potential depends on time the electric field is:
+\begin{equation}
+{\bf E}=-{\bar V \over \bar E \bar l} \nabla \phi -
+{\bar A \over \bar E \bar t} {\partial {\bf A} \over \partial t}.
+\label{ephiagen}
+\end{equation}
+Since ${\bar V \over \bar E \bar l}=1$ and 
+${\bar A \over \bar E \bar t}=1$ Eq.~\ref{ephia} holds also in a.u..
+}
+\\
+
+{\color{orange} In the c.g.s.-Gaussian system the unit of the vector 
+potential (symbol $\bar A_{cgs}$) is derived from its definition 
+Eq.~\ref{defav}.
+The conversion factor with the SI unit is 
+$\bar A_{cgs} = G \cdot cm = {10^{-2}\over K_T} T\cdot m=
+{K_A \over 10^5} T\cdot m=\avtoav\ T\cdot m$. \\
+
+When the vector potential depends on time we can calculate the electric
+field as in Eq.~\ref{ephiagen} and since 
+${\bar V_{cgs} \over \bar E_{cgs} \bar l_{cgs}}=1$
+and ${\bar A_{cgs} \over \bar E_{cgs} \bar t_{cgs}}={1\over 
+\tilde c_{cgs}}$, in the 
+c.g.s.-Gaussian system the electric field is given by
+\begin{equation}
+{\bf E}=-\nabla \phi -
+{1 \over c} {\partial {\bf A} \over \partial t}.
+\end{equation}
+}
+\\
+
+{\color{green}
+The conversion factor between the a.u. and the c.g.s.-Gaussian unit is:
+$\bar A = \baravcgs\ G\cdot cm$.
+}
+
+\newpage
+\section{\color{coral}Magnetic field flux}
+In the SI the unit of the magnetic field flux (symbol $Wb$)
+is derived from its definition. The  
+magnetic field flux through a surface perpendicular to 
+$\hat {\bf n}$ is:
+\begin{equation}
+\Phi=\int {\bf B}\cdot \hat {\bf n}\ dS,
+\end{equation}
+so the unit of the magnetic field flux is $Wb= T \cdot m^2={N \cdot s\cdot m
+\over C}=V\cdot s={N\cdot m\over A}={kg\cdot m^2 \over s C}=
+{J\cdot s\over C}={J\over A}$. This
+unit is called Weber.
+\\
+
+{\color{web-blue} In a.u. the unit of the magnetic field flux
+(symbol $\bar {Wb}$) can be derived from its definition
+$\bar {Wb}=\bar B \cdot \bar l^2$. The conversion
+factor with the SI unit is:
+\begin{equation}
+\bar {Wb} = {\hbar \over e}=
+{\hbarf\ J\cdot s\over \e\ C}=\barwb\ Wb.
+\end{equation}
+\\
+}
+
+{\color{orange} In the c.g.s.-Gaussian system the unit of magnetic field
+flux (symbol $Mx$) is derived from its definition: $Mx=G\cdot cm^2$.
+This unit is called Maxwell.
+The conversion factor with the SI unit is:
+\begin{equation}
+Mx = {10^{-4}\over K_T}\ T\cdot m^2 = 10^{-7}\ K_A\ Wb =\wbtowb\ Wb
+\end{equation}
+In the old SI units this factor was $10^{-8}$.
+}
+\\
+
+{\color{green} 
+The conversion factor between the a.u. and the c.g.s.-Gaussian unit is: 
+$\bar Wb = \barwbcgs\ Mx$.
+}
+
+
+
+\newpage
+\section{\color{coral}Inductance}
+In the SI the unit of the inductance (symbol $H$)
+is derived from its definition as the ratio of the magnetic
+field flux and the current in a circuit:
+\begin{equation}
+L={\Phi \over I},
+\end{equation}
+so the unit of inductance is $H={Wb \over A}={T \cdot m^2 \over A}=
+{V\cdot s \over A} = \Omega \cdot s= {N \cdot m \over A^2}={J\over A^2}=
+{kg\cdot m^2 \over C^2}$. This unit is called Henry. 
+\\
+
+{\color{web-blue} In a.u. the unit of the inductance (symbol $\bar Y$) 
+can be derived from its definition as:
+$\bar Y={\bar {Wb} \over \bar I}$. The conversion factor with the SI unit is:
+\begin{eqnarray}
+\bar Y = {\hbar \bar t\over e^2}={m_e a_B^2 \over e^2}={\hbar^2\over E_h e^2}
+&=&{(\hbarf\ J\cdot s)^2 \over \baru\ J\ (\e\ C)^2}\nonumber \\
+&=&\bary\ H.
+\end{eqnarray}
+\\
+}
+
+{\color{orange} In the c.g.s.-Gaussian system the unit of inductance
+(symbol $statH$) is derived from its definition: 
+\begin{equation}
+L={1\over c} {\Phi \over I}.
+\label{inductancecgs}
+\end{equation}
+This relationship shows that inductance has the dimensions of 
+$s^2/cm$. This unit is called stathenry.
+The conversion factor with the SI unit can be found by writing
+$\bar Y_{cgs}=statH$ and 
+\begin{equation}
+L = {\bar \Phi_{cgs} \over \bar Y_{cgs} \bar I_{cgs}} {\Phi \over I}.
+\end{equation}
+Comparing with Eq.~\ref{inductancecgs} we obtain:
+\begin{equation}
+\bar Y_{cgs}= {\tilde c_{cgs} \bar \Phi_{cgs} \over \bar I_{cgs}},
+\end{equation}
+therefore:
+\begin{equation}
+statH=\tilde c_{cgs} {10^{-4} K \over K_T} H =
+{\tilde c_{cgs}} {10^{-7} K_A K} H=
+10^{-7} K^2\ H = \ytoy\ H.
+\end{equation}
+\\
+}
+
+{\color{green} 
+The conversion factor between the a.u. and the c.g.s.-Gaussian unit is: 
+$\bar H = \barycgs\ statH$.
+}
+
+\newpage
+\section{\color{coral}Magnetic dipole moment}
+In the SI the unit of the magnetic dipole moment
+can be derived from its definition. For instance the magnetic dipole 
+moment ${\boldsymbol \mu}$ of a coil traversed by a current $I$ is:
+\begin{equation}
+{\boldsymbol \mu}=IA \hat {\bf n},
+\label{magdip}
+\end{equation}
+where $A$ is the area of the coil and $\hat {\bf n}$ is a versor 
+normal to the area. Therefore the unit of the magnetic dipole moment is 
+$A\cdot m^2={N \cdot m \cdot  A \cdot m \over N}=J/T$.  
+\\
+
+{\color{web-blue} In a.u. the unit of the magnetic dipole moment 
+(symbol $\bar \mu$) is derived from its definition as 
+$\bar \mu= \bar I \cdot \bar l^2$. The conversion factor with the SI unit
+is: 
+\begin{eqnarray}
+\bar \mu = {\bar C \cdot \bar l^2 \over \bar t}= 
+{e a_B^2 \hbar \over m_e a_B^2}
+= {\hbar e \over m_e}=2 \mu_B &=&
+{\hbarf\ J\cdot s\ \e\ C \over \me\ kg}\nonumber \\ 
+&=& \barmu J/T.
+\end{eqnarray}
+\\
+}
+
+{\color{orange} In the c.g.s.-Gaussian system the unit of magnetic dipole
+moment (symbol $\bar \mu_{cgs}$) is derived from its definition:
+\begin{equation}
+{\boldsymbol \mu}={1\over c} I A \hat {\bf n},
+\label{magdipcgs}
+\end{equation}
+hence its dimensions are 
+$statC\cdot cm$. To find the conversion factor with the SI unit we use
+Eq.~\ref{magdip} for a current $I \bar I_{cgs}$ and area $A \bar l_{cgs}^2$
+that gives a dipole moment $\bar \mu_{cgs} {\boldsymbol \mu}$. We have
+therefore:
+\begin{equation}
+{\boldsymbol \mu} = {\bar I_{cgs} \bar l_{cgs}^2 \over \bar \mu_{cgs} }
+I A \hat {\bf n}.
+\end{equation} 
+Comparing with Eq.~\ref{magdipcgs} we obtain
+\begin{equation}
+\bar \mu_{cgs}= \tilde c_{cgs} \bar I_{cgs} \bar l_{cgs}^2= 
+{\tilde c_{cgs} 10^{-4} \over K}\ A\cdot m^2 = 
+{1\over 10^4 K_A}\ A\cdot m^2 = \mutomu\ A\cdot m^2.
+\end{equation}
+}
+\\
+
+%{\color{violet} In the modified c.g.s.-Gaussian system the unit of magnetic 
+%dipole moment must be modified as:
+%\begin{equation}
+%{\boldsymbol \mu}={1 \over c}IA \hat {\bf n}
+%\end{equation}
+%and the unit derived from the definition is 
+%$\bar \mu_{cgs}={1\over c} abA\cdot cm^2$.
+%Using the conversion factors found above we have:
+%\begin{equation}
+%\bar \mu_{cgs} = {10^{-4}\over \tilde c_{cgs} K_A}\ A\cdot m^2 
+%={10^{-4}\over K}\ A\cdot m^2 
+%= \mutomu\ A\cdot m^2
+%\end{equation}
+%so in this modified system the units of the magnetic dipole moment 
+%does not change.
+%}
+%\\
+
+{\color{green} 
+The conversion factor between the a.u. and the c.g.s.-Gaussian unit is: 
+$\bar \mu = \barmucgs\ statC\cdot cm$.
+}
+
+\newpage
+\section{\color{coral}Magnetization}
+In the SI the unit of the magnetization can be derived from its definition
+as the magnetic dipole moment per unit volume:
+\begin{equation}
+{\bf M} = {{\boldsymbol \mu}\over V},
+\end{equation}
+where $V$ is the volume of the sample.
+Therefore the unit of the magnetization is $A\over m$.  
+
+{\color{web-blue} In a.u. the unit of the magnetization 
+(symbol $\bar M$) is derived from its definition
+as $\bar M= {\bar I \over \bar l}$. The conversion factor with
+the SI unit is:
+\begin{equation}
+\bar M = {\bari\ A \over \barl\ m} = \barmag A/m.
+\end{equation}
+\\
+Using the expression of $\bar \mu$ and $\bar l$ we can write also:
+\begin{equation}
+\bar M = {2 \mu_B \over a_B^3}.
+\end{equation}
+}
+
+{\color{orange} In the c.g.s.-Gaussian system the unit of magnetization
+(symbol $\bar M_{cgs}$) is derived from its definition: 
+$\bar M_{cgs}={statC \over cm^2}$.
+The conversion with the SI unit is:
+\begin{equation}
+\bar M_{cgs} = {\bar \mu_{cgs} \over cm^3}={1\over 10^{-2}\ K_A}\ A/m =
+\magtomag\ A/m.
+\end{equation}
+}
+\\
+
+{\color{green} The conversion factor between the a.u. and the 
+c.g.s.-Gaussian unit is:
+$\bar M = \barmagcgs\ statA/cm$.
+}
+
+
+\newpage
+\section{\color{coral}Vacuum magnetic permeability}
+In the SI the unit of the vacuum magnetic permeability $\mu_0$
+be derived from the equation: 
+\begin{equation}
+\mu_0={1\over c^2 \epsilon_0},
+\end{equation}
+where $c$ is the speed of light. Therefore the unit of $\mu_0$ is 
+${N\cdot s^2 \over C^2}={N \over A^2}={m\cdot T \over A}$. Its numerical
+value is given in Eq.~\ref{mu0} and it is approximately $4\pi\times 10^{-7}$.
+\\
+
+{\color{web-blue} In a.u. the vacuum magnetic permeability $\mu_0$ is not 
+used.}
+\\
+
+{\color{orange} In the c.g.s.-Gaussian system $\mu_0$ is not used.
+}
+\\
+
+%{\color{violet} In the generalized c.g.s.-Gaussian system $\mu_0$ is not used.
+%}
+%\\
+
+\newpage
+\section{\color{coral}Magnetic field strength}
+In the SI the magnetic field strength is given in term of the
+magnetic flux density and of the magnetization by:
+\begin{equation}
+{\bf H}={{\bf B} \over \mu_0} - {\bf M},
+\label{magintensity}
+\end{equation}
+so the magnetic field and the magnetization have the same
+unit ${A \over m}$.\\
+Eq.~\ref{magintensity} can be derived from the Maxwell equation:
+\begin{equation}
+\nabla \times {\bf B}= \mu_0 {\bf J} + {1\over c^2} {\partial {\bf E} \over
+\partial t}.
+\label{maxwell4}
+\end{equation}
+Separating ${\bf J}={\bf J}_f + {\bf J}_m + {\bf J}_d$ where
+${\bf J}_f$ is the current of the free charges, 
+\begin{equation}
+{\bf J}_m=\nabla \times {\bf M}
+\end{equation}
+is the magnetization current, and
+\begin{equation}
+{\bf J}_d={\partial {\bf P} \over \partial t}
+\end{equation}
+is the displacement current and inserting these expressions in 
+Eq.~\ref{maxwell4} one obtains, after dividing by $\mu_0$:
+\begin{equation}
+\nabla \times ({{\bf B}\over \mu_0}-{\bf M})= {\bf J}_f + 
+{\partial ({\bf P} + \epsilon_0 {\bf E} )\over
+\partial t}.
+\end{equation}
+Using Eq.~\ref{magintensity} and the definition of ${\bf D}$ the
+macroscopic Maxwell equation becomes:
+\begin{equation}
+\nabla \times {\bf H}= {\bf J}_f + 
+{\partial {\bf D}\over
+\partial t}.
+\end{equation}
+\\
+
+{\color{web-blue} In a.u. the unit of magnetic field strength ($\bar H$) 
+can be derived from the relationship between magnetic field strength,
+magnetic flux density, and magnetization. This relationship can
+be derived writing Eq.~\ref{maxwell4} in a.u..
+We have:
+\begin{equation}
+\nabla \times {\bf B}= {\mu_0 \bar J \bar l \over \bar B} {\bf J} + 
+{\bar E \bar l \over c^2 \bar t \bar B} {\partial {\bf E} \over
+\partial t}.
+\label{maxwell4gen}
+\end{equation}
+Since ${\mu_0 \bar J \bar l \over \bar B}=4 \pi \alpha^2$ and 
+${\bar E \bar l \over c^2 \bar t \bar B}=\alpha^2$, where $\alpha$ 
+is the fine structure constant, this equation becomes:
+\begin{equation}
+\nabla \times {\bf B}= {4 \pi \alpha^2} {\bf J} + {\alpha^2} 
+{\partial {\bf E} \over \partial t}.
+\label{maxwell4au}
+\end{equation}
+Moreover we have:
+\begin{equation}
+{\bf J}_m={\bar M \over \bar l \bar J} \nabla \times {\bf M}
+\end{equation}
+and 
+\begin{equation}
+{\bf J}_d={\bar P \over \bar t \bar J} {\partial {\bf P} \over \partial t}.
+\end{equation}
+Since ${\bar M \over \bar l \bar J}=1$ and 
+${\bar P \over \bar t \bar J}=1$ we have:
+\begin{equation}
+{\bf J}_m= \nabla \times {\bf M}
+\end{equation}
+and 
+\begin{equation}
+{\bf J}_d={\partial {\bf P} \over \partial t},
+\end{equation}
+as in the SI. Therefore after division by $\alpha^2$ 
+Eq.~\ref{maxwell4au} becomes:
+\begin{equation}
+\nabla \times ({{\bf B}\over \alpha^2} -4\pi {\bf M})= 
+{4 \pi} {\bf J}_f +  {\partial ({\bf E}+4\pi {\bf P}) \over \partial t}.
+\label{maxwell4au1}
+\end{equation}
+This equation suggests the definition of the magnetic field strength as:
+\begin{equation}
+{\bf H}={{\bf B}\over \alpha^2} -4\pi {\bf M},
+\label{HBMau}
+\end{equation}
+that gives the macroscopic Maxwell equation:
+\begin{equation}
+\nabla \times {\bf H}= 
+{4 \pi} {\bf J}_f +  {\partial {\bf D} \over \partial t}.
+\end{equation}
+Finally, we can find $\bar H$ by writing:
+\begin{equation}
+{\bf H} = {\mu_0 \bar B \over \bar H} {\bf B} - {\bar M \over \bar H} {\bf M}.
+\label{HBMgen}
+\end{equation}
+Comparing with Eq.~\ref{HBMau} we obtain:
+\begin{equation}
+\bar H={\mu_0 \bar B \alpha^2} = {\bar M \over 4 \pi}.
+\end{equation}
+Therefore the conversion factor with the SI unit is:
+\begin{equation}
+\bar H = \barh\ A/m.
+\end{equation}
+}
+\\
+
+{\color{orange} In the c.g.s.-Gaussian system the unit of the magnetic field
+strength (symbol $Oe$) is derived from the relationship between 
+magnetic field strength,
+magnetic flux density, and magnetization. This relationship can be derived
+as discussed for the a.u. case. In Eq.~\ref{maxwell4gen} we have
+${\mu_0 \bar J_{cgs} \bar l_{cgs} \over \bar B_{cgs}}={4 \pi \over c_{cgs}}$
+and ${\bar E_{cgs} \bar l_{cgs} \over c^2 \bar t_{cgs} \bar B_{cgs}}=
+{1\over c_{cgs}}$ so the Maxwell equation becomes:
+\begin{equation}
+\nabla \times {\bf B}= {4 \pi \over c} {\bf J} + {1\over c} 
+{\partial {\bf E} \over \partial t}.
+\label{maxwell4cgs}
+\end{equation}
+Moreover we have:
+${\bar M_{cgs} \over \bar l_{cgs} \bar J_{cgs}}={K\over K_A}=c_{cgs}$ and
+${\bar P_{cgs} \over \bar t_{cgs} \bar J_{cgs}}=1$ so in c.g.s. units:
+\begin{equation}
+{\bf J}_m= c \nabla \times {\bf M}
+\end{equation}
+and
+\begin{equation}
+{\bf J}_d={\partial {\bf P} \over \partial t}.
+\end{equation}
+Inserting these expressions in the Maxwell equation we have:
+\begin{equation}
+\nabla \times ({\bf B} -4\pi {\bf M})= 
+{4 \pi\over c} {\bf J}_f +  {1\over c} {\partial ({\bf E}+4\pi {\bf P}) \over \partial t}.
+\label{maxwell4cgs1}
+\end{equation}
+This equation suggests the definition of the magnetic field strength as:
+\begin{equation}
+{\bf H}={\bf B} -4\pi {\bf M},
+\label{magintensitycgs}
+\end{equation}
+that gives the macroscopic Maxwell equation:
+\begin{equation}
+\nabla \times {\bf H}= 
+{4 \pi \over c} {\bf J}_f +  {1\over c}{\partial {\bf D} \over \partial t}.
+\end{equation}
+
+Comparing Eq.~\ref{magintensitycgs} and Eq.~\ref{HBMgen}, we can find the 
+conversion factor with the SI unit.
+We have $Oe=\mu_0 \bar B_{cgs}={\bar M_{cgs} \over 4 \pi}$ or
+\begin{equation}
+Oe= {1\over 4 \pi\ 10^{-2} K_A} A/m=\htoh\ A/m. 
+\end{equation}
+This unit is called Oersted.
+}
+\\
+
+%{\color{violet} In the generalized c.g.s.-Gaussian system the unit 
+%of magnetization
+%and of magnetic field intensity do not coincide. The two quantities
+%have the same dimensions $abA/cm$ but while the unit of magnetization is
+%of $\bar M_{cgs}=1\ abA/cm$ the unit of the magnetic field intensity 
+%is $\bar H_{cgs}={1\over 4 \pi} abA/cm$ 
+%and in SI units it is therefore
+%\begin{equation}
+%\bar H_{cgs}= {1\over 4 \pi\ K_A\ 10^{-2}} A/m=\htoh\ A/m
+%\end{equation}
+%\\
+%Due to this definition we can write Eq.~\ref{magintensity} as:
+%\begin{equation}
+%{{\bf H}\over \bar H_{cgs}}\ \bar H_{cgs} = {\bar \mu_{0,cgs} \over 
+% \mu_0} {{\bf B}\over \bar B_{cgs}}\
+%{\bar B_{cgs} \over \bar \mu_{0,cgs} }- {{\bf M}\over \bar M_{cgs}} 
+%\bar M_{cgs}
+%\end{equation}
+%and since $\bar H_{cgs} ={1\over 4\pi} \bar M_{cgs}$, ${\bar B_{cgs}
+%\over \bar \mu_{0,cgs}}= \bar M_{cgs}$ and ${\bar \mu_{0,cgs} \over 
+%\bar \mu_{0}}={1\over 4 \pi}$ in c.g.s.-Gaussian units we have
+%\begin{equation}
+%{\bf H} =  {\bf B} - 4 \pi {\bf M}
+%\label{ldispcgs}
+%\end{equation}
+%}
+%\\
+
+
+{\color{green} The conversion factor between the a.u. and the c.g.s.-Gaussian 
+unit is:
+$\bar H = \barhcgs\ statC/cm^2$.
+}
+
+\newpage
+\section{\color{coral}Microscopic Maxwell equations}
+In the SI the microscopic Maxwell equations are:
+\begin{eqnarray}
+{\rm div}\ {\bf E} &=& {\rho\over {\epsilon_0}}, \\
+\nabla \times {\bf E} &=& -{\partial {\bf B} \over \partial t}, \\
+{\rm div}\  {\bf B} &=& 0, \\
+\nabla \times {\bf B} &=& \mu_0{\bf J}+ {1\over c^2}
+{\partial {\bf E} \over \partial t}. 
+\end{eqnarray}
+
+{\color{web-blue} The form of the microscopic Maxwell equations
+in a.u. has been obtained in the previous text:
+\begin{eqnarray}
+{\rm div}\ {\bf E} &=& 4 \pi \rho, \\
+\nabla \times {\bf E} &=& -{\partial {\bf B} \over \partial t}, \\
+{\rm div}\  {\bf B} &=& 0, \\
+\nabla \times {\bf B} &=& {4 \pi \over c^2} {\bf J}+ {1\over c^2}
+{\partial {\bf E} \over \partial t}, 
+\end{eqnarray}
+where in these equations $c$ is actually $c_{a.u.}={1\over \alpha}$ and all 
+other quantities are measured in a.u..
+}
+\\
+
+{\color{orange} The form of the microscopic Maxwell equations
+in the c.g.s-Gaussian system has been discussed in the previous text:
+\begin{eqnarray}
+{\rm div}\ {\bf E} &=& 4 \pi \rho, \\
+\nabla \times {\bf E} &=& -{1\over c} {\partial {\bf B} \over \partial t}, \\
+{\rm div}\  {\bf B} &=& 0, \\
+\nabla \times {\bf B} &=& {4 \pi \over c} {\bf J}+ {1\over c}
+{\partial {\bf E} \over \partial t}, 
+\end{eqnarray}
+where in these equations $c$ is actually $c_{cgs}$ and all 
+other quantities are measured in c.g.s.-Gaussian units.
+}
+
+\newpage
+\section{\color{coral}Macroscopic Maxwell equations}
+In the SI the macroscopic Maxwell equations can be formally
+obtained by dividing the charge density into a free part and a
+bound part $\rho=\rho_f+\rho_b$ with $\rho_b=-{\rm div} {\bf P}$
+where ${\bf P}$ is the polarization.
+Similarly the current density can be divided into a free part, a 
+magnetization part 
+and a displacement part with ${\bf J}={\bf J}_f + {\bf J}_m + {\bf J}_d$ where
+${\bf J}_m=\nabla \times {\bf M}$ and ${\bf J}_d={\partial {\bf P}\over 
+\partial t}$.
+Inserting these expressions we have:
+\begin{eqnarray}
+{\rm div}\ {\bf D} &=& \rho_f, \\
+\nabla \times {\bf E} &=& -{\partial {\bf B} \over \partial t}, \\
+{\rm div}\  {\bf B} &=& 0, \\
+\nabla \times {\bf H} &=& {\bf J}_f+ {\partial {\bf D} \over \partial t}. 
+\end{eqnarray}
+where ${\bf D}=\epsilon_0 {\bf E}+{\bf P}$ and ${\bf H}={{\bf B}\over \mu_0}-
+{\bf M}$.
+\\
+
+{\color{web-blue} The form of the macroscopic Maxwell equations
+in a.u. has been discussed in the previous text. Also in these
+units we can write $\rho=\rho_f+\rho_b$ with $\rho_b=-{\rm div} {\bf P}$
+where ${\bf P}$ is the polarization.
+Similarly the current density can be divided into a free part, a magnetization
+part
+and a displacement part with ${\bf J}={\bf J}_f + {\bf J}_m + {\bf J}_d$ where
+${\bf J}_m=\nabla \times {\bf M}$ and ${\bf J}_d={\partial {\bf P}\over 
+\partial t}$
+We have:
+\begin{eqnarray}
+{\rm div}\ {\bf D} &=& 4 \pi \rho_f, \\
+\nabla \times {\bf E} &=& -{\partial {\bf B} \over \partial t}, \\
+{\rm div}\  {\bf B} &=& 0, \\
+\nabla \times {\bf H} &=& 4 \pi {\bf J}_f+ {\partial {\bf D} \over 
+\partial t}. 
+\end{eqnarray}
+where ${\bf D}={\bf E} + 4 \pi {\bf P}$ and ${\bf H}={c^2
+{\bf B}}- 4 \pi {\bf M}$.
+Here $c$ is $c_{a.u.}={1\over \alpha}$ and all other quantities are 
+measured in a.u..
+}
+\\
+
+{\color{orange} The form of the macroscopic Maxwell equations
+in the c.g.s-Gaussian system has been discussed in the previous text.
+In these units $\rho=\rho_f+\rho_b$ with $\rho_b=-{\rm div} {\bf P}$
+where ${\bf P}$ is the polarization.
+Similarly the current density can be divided into a free part, a 
+magnetization part
+and a displacement part with ${\bf J}={\bf J}_f + {\bf J}_m + {\bf J}_d$ where
+${\bf J}_m=c \nabla \times {\bf M}$ and ${\bf J}_d={\partial {\bf P}\over 
+\partial t}$
+\begin{eqnarray}
+{\rm div}\ {\bf D} &=& 4 \pi \rho_f, \\
+\nabla \times {\bf E} &=& -{1\over c} {\partial {\bf B} \over \partial t}, \\
+{\rm div}\  {\bf B} &=& 0, \\
+\nabla \times {\bf H} &=& {4 \pi \over c} {\bf J}_f+ {1\over c}
+{\partial {\bf D} \over \partial t}, 
+\end{eqnarray}
+where ${\bf D}={\bf E} + 4 \pi {\bf P}$ and ${\bf H}={\bf B}- 4 \pi {\bf M}$.
+In these equations $c$ is actually $c_{cgs}$ and all 
+other quantities are measured in c.g.s.-Gaussian units.
+}
+
+\newpage
+
+\section{\color{coral} Appendix A}
+{\color{violet}
+In this Appendix we discuss the Rydberg a.u. using the same 
+symbols used for Hartree a.u. with the subscript $R$.
+Rydberg a.u. are defined requiring that
+$a_B=\bar l_R$, $m_e={1\over 2}\ \bar m_R$, $e=\sqrt{2}\ \bar C_R$ and 
+$\hbar= {\bar m_R \bar l_R^2 \over \bar t_R}$.
+We have therefore 
+\begin{equation}
+\bar l_R=a_B=\bar l,
+\end{equation}
+\begin{equation}
+\bar m_R=2 m_e=2 \bar m=\barmry\ kg,
+\end{equation}
+\begin{equation}
+\bar C_R={e \over \sqrt{2}}= {\bar C \over \sqrt{2}}=\barcry\ C,
+\end{equation}
+\begin{equation}
+\bar t_R={\bar m_R \bar l_R^2 \over \hbar}= {2 m_e a_B^2 \over \hbar}=
+2 \bar t=\bartry\ s.
+\end{equation}
+Using these relationships we can derive the conversion factors for
+the other units discussed in the text. \\
+{\bf Frequency:}
+\begin{equation}
+\bar \nu_R={1\over \bar t_R}= {1\over 2 \bar t}= {1\over 2}\bar \nu=
+\barnury\ Hz.
+\end{equation}
+{\bf Speed:}
+\begin{equation}
+\bar v_R={\bar l_R\over \bar t_R}= {\bar l\over 2 \bar t}= {1\over 2}\bar v=
+\barvry\ m/s.
+\end{equation}
+{\bf Acceleration:}
+\begin{equation}
+\bar a_R={\bar l_R\over \bar t_R^2}= {\bar l\over 4 \bar t^2}=
+{1\over 4}\bar a=\barary\ m/s^2.
+\end{equation}
+{\bf Momentum:}
+\begin{equation}
+\bar p_R={\bar m_R \bar l_R\over \bar t_R}= {2 \bar m \bar l\over 2 \bar t}= 
+\bar p.
+\end{equation}
+{\bf Angular momentum:}
+\begin{equation}
+\bar L_R={\bar m_R \bar l_R^2\over \bar t_R}= {2 \bar m \bar l^2\over 2 
+\bar t}= \bar L.
+\end{equation}
+{\bf Force:}
+\begin{equation}
+\bar f_R={\bar m_R \bar l_R\over \bar t_R^2}= {2 \bar m \bar l\over 4 
+\bar t^2}= {1\over 2} \bar f=\barfry\ N.
+\end{equation}
+{\bf Energy:}
+\begin{equation}
+\bar U_R={\bar f_R \bar l_R}= {1\over 2} \bar f \bar l
+= {1\over 2} \bar U=\barury\ J.
+\end{equation}
+{\bf Power:}
+\begin{equation}
+\bar W_R={\bar U_R \over \bar t_R}= {\bar U \over 4 \bar t}
+= {1\over 4} \bar W=\barwry\ W.
+\end{equation}
+{\bf Pressure:}
+\begin{equation}
+\bar \sigma_R={\bar f_R \over \bar l_R^2}= {\bar U \over 2 \bar l^2}
+= {1\over 2} \bar \sigma=\barprry\ Pa.
+\end{equation}
+{\bf Current:}
+\begin{equation}
+\bar I_R={\bar C_R \over \bar t_R}= {\bar C \over 2 \sqrt{2} \bar t}
+= {1\over 2 \sqrt{2}} \bar I=\bariry\ A.
+\end{equation}
+{\bf Charge density:}
+\begin{equation}
+\bar \rho_R={\bar C_R \over \bar l_R^3}= {\bar C \over \sqrt{2} \bar l^3}
+= {1\over \sqrt{2}} \bar \rho=\barrhory\ C/m^3.
+\end{equation}
+{\bf Current density:}
+\begin{equation}
+\bar J_R={\bar I_R \over \bar l_R^2}= {\bar I \over 2 \sqrt{2} \bar l^2}
+= {1\over 2 \sqrt{2}} \bar J=\barcurry\ A/m^2.
+\end{equation}
+{\bf Electric field:}
+\begin{equation}
+\bar E_R={\bar f_R \over \bar C_R}= {\sqrt{2}\bar f \over 2 \bar C}
+= {1\over \sqrt{2}} \bar E=\barery\ N/C.
+\end{equation}
+{\bf Electric potential:}
+\begin{equation}
+\bar V_R={\bar E_R \bar l_R}= {\bar E \over \sqrt{2} \bar l}
+= {1\over \sqrt{2}} \bar V=\barphiry\ V.
+\end{equation}
+{\bf Capacitance:}
+\begin{equation}
+\bar F_R={\bar C_R \over \bar V_R}= {\sqrt{2} \bar C \over \sqrt{2} \bar V}
+= \bar F.
+\end{equation}
+{\bf Electric dipole moment:}
+\begin{equation}
+\bar \wp_R={\bar C_R \bar l_R}= {1\over \sqrt{2}} \bar C \bar l 
+= {1\over \sqrt{2}} \bar \wp=\bardipry\ C\cdot m.
+\end{equation}
+{\bf Polarization:}
+\begin{equation}
+\bar P_R={\bar C_R \over \bar l_R^2}= {\bar C \over \sqrt{2} \bar l^2}
+= {1\over \sqrt{2}} \bar P=\barpolarry\ C/m^2.
+\end{equation}
+{\bf Resistence:}
+\begin{equation}
+\bar \Omega_R={\bar V_R \over \bar I_R}= {2 \sqrt{2} \bar V \over \sqrt{2} 
+\bar I}
+= 2 \bar \Omega=\barohmry\ \Omega.
+\end{equation}
+{\bf Magnetic flux density:}
+\begin{equation}
+\bar B_R={\bar f_R \over \bar C_R \bar v_R}= {2 \sqrt{2} \bar f \over 2 
+\bar C \bar v}
+= \sqrt{2} \bar B=\barbry\ T.
+\end{equation}
+{\bf Vector potential:}
+\begin{equation}
+\bar A_R={\bar B_R \bar l_R }= \sqrt{2} \bar B \bar l 
+= \sqrt{2} \bar A=\baravry\ T\cdot m.
+\end{equation}
+{\bf Magnetic field flux:}
+\begin{equation}
+\bar Wb_R={\bar B_R \bar l_R^2 }= \sqrt{2} \bar B \bar l^2
+= \sqrt{2} \bar Wb=\barwbry\ Wb.
+\end{equation}
+{\bf Inductance:}
+\begin{equation}
+\bar Y_R={\bar Wb_R \over \bar I_R }= 2 (\sqrt{2})^2 {\bar Wb \over \bar I}
+= 4 \bar Y=\baryry\ H.
+\end{equation}
+{\bf Magnetic dipole moment:}
+\begin{equation}
+\bar \mu_R={\bar I_R \bar l_R^2}= {1\over 2\sqrt{2}} {\bar I \bar l^2}
+= {1\over 2\sqrt{2}} \bar \mu=\barmury\ A\cdot m^2.
+\end{equation}
+{\bf Magnetization:}
+\begin{equation}
+\bar M_R={\bar I_R \over \bar l_R}= {1\over 2\sqrt{2}} {\bar I \bar l}
+= {1\over 2\sqrt{2}} \bar M=\barmagry\ A/m.
+\end{equation}
+
+In order to discuss the units of the electric displacement and of
+the magnetic field strength, we need to discuss the Maxwell equations.
+The first Maxwell equation is
+\begin{equation}
+\nabla\cdot {\bf E} = 4 \pi \rho,
+\end{equation}
+since ${\bar \rho_R \bar l_R \over \epsilon_0 \bar E_R}=
+{\bar \rho \bar l \over \epsilon_0 \bar E}=4\pi$. Moreover since
+${\bar P_R \over \bar l_R \bar \rho_R}={\bar P \over \bar l \bar \rho}=1$
+in these units 
+\begin{equation}
+\rho_b=-\nabla \cdot {\bf P},
+\end{equation} 
+and the macroscopic Maxwell equation becomes:
+\begin{equation}
+\nabla\cdot ({\bf E}+4\pi {\bf P}) = 4 \pi \rho_f,
+\end{equation}
+suggesting the definition
+\begin{equation}
+{\bf D}={\bf E}+4\pi {\bf P}.
+\end{equation}
+Therefore:
+\begin{equation}
+\bar D_R={\bar P_R \over 4 \pi} = {1\over \sqrt{2}} \bar D=\bardry\ C/m^2.
+\end{equation}
+The fourth Maxwell equation can be written using
+${\mu_0 \bar J_R \bar l_R \over \bar B_R}={1\over 4} 
+{\mu_0 \bar J \bar l \over \bar B}= \pi \alpha^2$ and
+${\bar E_R \bar l_R \over c^2 \bar t_R \bar B_R}={1\over 4}
+{\bar E \bar l \over c^2 \bar t \bar B}={\alpha^2 \over 4}$ so we have
+\begin{equation}
+\nabla \times {\bf B}= \pi \alpha^2 {\bf J} + {\alpha^2 \over 4}
+{\partial {\bf E} \over \partial t}.
+\end{equation}
+Since ${\bar M_R \over \bar l_R \bar J_R}={\bar M \over \bar l \bar J}=1$
+and ${\bar P_R \over \bar t_R \bar J_R}={\bar P \over \bar t \bar J}=1$
+we can write
+\begin{equation}
+{\bf J}_m=\nabla \times {\bf M}
+\end{equation}
+and
+\begin{equation}
+{\bf J}_d={\partial {\bf P} \over \partial t},
+\end{equation}
+obtaining the equation
+\begin{equation}
+\nabla \times ({4{\bf B} \over \alpha^2}-4 \pi {\bf M})= 4 \pi 
+{\bf J}_f + {\partial ({\bf E}+4\pi {\bf P}) \over \partial t}.
+\end{equation}
+Defining the magnetic field strengh as:
+\begin{equation}
+{\bf H}={4{\bf B} \over \alpha^2}-4 \pi {\bf M},
+\end{equation}
+we can write the fourth macroscopic Maxwell equation as:
+\begin{equation}
+\nabla \times {\bf H}= 4 \pi 
+{\bf J}_f + {\partial {\bf D} \over \partial t}.
+\end{equation}
+Therefore we have:
+\begin{equation}
+\bar H_R ={\bar M_R \over 4 \pi}={1\over \sqrt{2}} {\bar M \over 4 \pi}=
+{1\over \sqrt{2}} \bar H=\barhry\ A/m.
+\end{equation}
+We note also that ${\bar l_R \bar B_R \over \bar E_R \bar t_R}=
+{\bar l \bar B \over \bar E \bar t}=1$ so the second Maxwell equation
+remains:
+\begin{equation}
+\nabla \times {\bf E}=-{\partial {\bf B} \over \partial t}.
+\end{equation}
+Finally we consider the continuity equation. Since
+${\bar t_R \bar J_R \over \bar \rho_R \bar l_R}={\bar t \bar J 
+\over \bar \rho \bar l}=1$ this equation remains:
+\begin{equation}
+{\partial \rho \over \partial t}=-\nabla \cdot {\bf J}.
+\end{equation}
+}
+
+\newpage
+
+\section{\color{coral} Appendix B}
+
+This Appendix collects the conversion factors discussed in the text
+and gives their absolute and relative errors. 
+The data reported here have been obtained with the tool 
+\texttt{tools/units.f90} using as input the values of the first seven
+quantities of this list taken from the NIST web-site 
+(\texttt{https://www.nist.gov/}). 
+Errors are calculated from the errors of the Rydberg constant and of
+the fine structure constant available in the same site. \\
+These values are updated to October 2019.
+
+\begin{verbatim}
+
+     Experimental quantities exact in the SI:
+     Planck constant:                        6.62607015E-34      J.s
+     Planck constant / 2 pi:                 1.0545718176462E-34 J.s
+     Speed of light:                         2.99792458E+08      m/s
+     Electron charge:                        1.602176634E-19     C
+
+     Approximate quantities determined by experiment:
+     Rydberg constant:                       1.0973731568160E+07 1/m
+     Fine structure constant:                7.2973525693E-03
+     Atomic mass unit:                       1.66053906660E-27   kg
+
+     Derived Physical quantities:
+     Electron mass:                          9.1093837015E-31    kg
+     mu0:                                    1.25663706212E-06   N/A^2
+     epsilon0:                               8.8541878128E-12    C^2/N m^2
+     E_hatree:                               4.3597447222072E-18 J
+     Bohr radius:                            5.29177210903E-11   m
+     Bohr magneton:                          9.2740100783E-24    J/T
+
+     Conversion factors (Atomic units - SI):
+     Length: \l=                             5.29177210903E-11   m
+     Mass: \m=                               9.1093837015E-31    kg
+     Time: \t=                               2.4188843265857E-17 s
+     Frequency: \nu=                         4.1341373335182E+16 Hz
+     Speed: \v=                              2.18769126364E+06   m/s
+     Acceleration: \a=                       9.0442161272E+22    m/s^2
+     Momentum: \p=                           1.99285191410E-24   kg m/s
+     Angular momentum: \L=                   1.0545718176462E-34 kg m^2/s
+     Force: \f=                              8.2387234982E-08    N
+     Energy: \U=                             4.3597447222072E-18 J
+     Power: \W=                              1.8023783420686E-01 W
+     Pressure: \pr=                          2.9421015696E+13    Pa
+     Current: \I=                            6.623618237510E-03  A
+     Charge: \C=                             1.602176634E-19     C
+     Charge density: \rho=                   1.08120238456E+12   C/m^3
+     Current density: \J=                    2.36533701094E+18   A/m^2
+     Electric field: \E=                     5.14220674763E+11   N/C
+     Electric potential: \V=                 2.7211386245988E+01 V
+     Capacitance: \F=                        5.887890530517E-21  F
+     Dipole moment: \dip=                    8.4783536255E-30    C m
+     Polarization: \P=                       5.7214766229E+01    C/m^2
+     Electric displacement: \D=              4.5530064316E+00    C/m^2
+     Resistance: \R=                         4.1082359022277E+03 Ohm
+     Magnetic induction: \B=                 2.35051756758E+05   T
+     Vector potential: \A=                   1.24384033059E-05   T m
+     Magnetic field flux: \Phi=              6.5821195695091E-16 Wb
+     Inductance: \Y=                         9.937347433815E-14  H
+     Magnetic dipole: \mu=                   1.85480201567E-23   A m^2 (J/T)
+     Magnetization: \M=                      1.25168244230E+08   A/m
+     Magnetic strength: \H=                  9.9605723936E+06    A/m
+
+     Conversion factors (c.g.s.-Gaussian - SI):
+     Length: cm=                             1.0E-02             m
+     Mass: g=                                1.0E-03             kg
+     Time: s=                                1.0E+00             s
+     Frequency: Hz=                          1.0E+00             Hz
+     Speed: cm/s=                            1.0E-02             m/s
+     Acceleration: cm/s^2=                   1.0E-02             m/s^2
+     Momentum: g cm/s=                       1.0E-05             kg m/s
+     Angular momentum: g cm^2/s=             1.0E-07             kg m^2/s
+     Force: dyne=                            1.0E-05             N
+     Energy: erg=                            1.0E-07             J
+     Power: erg/s=                           1.0E-07             W
+     Pressure: Ba=                           1.0E-01             Pa
+     Current: statA=                         3.33564095107E-10   A
+     Charge: statC=                          3.33564095107E-10   C
+     Charge density: statC/cm^3=             3.33564095107E-04   C/m^3
+     Current density: statA/cm^2=            3.33564095107E-06   A/m^2
+     Electric field: dyne/statC=             2.99792458082E+04   N/C
+     Electric potential: statV=              2.99792458082E+02   V
+     Capacitance: cm=                        1.11265005544E-12   F
+     Dipole moment: statC cm=                3.33564095107E-12   C m
+     Electric polarization: statC/cm^2=      3.33564095107E-06   C/m^2
+     Electric displacement: statC/cm^2 4 pi= 2.65441872871E-07   C/m^2
+     Resistance: s/cm=                       8.987551792288E+11  Ohm
+     Magnetic induction: G=                  1.000000000274E-04  T
+     Vector potential: G cm=                 1.000000000274E-06  T m
+     Magnetic field flux: Mx=                1.000000000274E-08  Wb
+     Inductance: statH=                      8.98755179229E+11   H
+     Magnetic dipole: statC cm=              9.99999999726E-04   A m^2
+     Magnetization: statC/cm^2=              9.99999999726E+02   A/m
+     Magnetic strength: statC/cm^2 4 pi=     7.95774715242E+01   A/m
+
+     C/statC=      2.99792458082E+09  (C/statC)/10c=   1.00000000027E+00
+
+     Conversion factors (SI - c.g.s.-Gaussian):
+     Length: m=                              1.0E+02             cm
+     Mass: kg=                               1.0E+03             g
+     Time: s=                                1.0E+00             s
+     Frequency: Hz=                          1.0E+00             Hz
+     Speed: m/s=                             1.0E+02             cm/s
+     Acceleration: m/s^2=                    1.0E+02             cm/s^2
+     Momentum: kg m/s=                       1.0E+05             g cm/s
+     Angular momentum: kg m^2/s=             1.0E+07             g cm^2/s
+     Force: N=                               1.0E+05             dyne
+     Energy: J=                              1.0E+07             erg
+     Power: W=                               1.0E+07             erg/s
+     Pressure: Pa=                           1.0E+01             Ba
+     Current: A=                             2.99792458082E+09   statA
+     Charge: C=                              2.99792458082E+09   statC
+     Charge density: C/m^3=                  2.99792458082E+03   statC/cm^3
+     Current density: A/m^2=                 2.99792458082E+05   statA/cm^2
+     Electric field: N/C=                    3.33564095107E-05   dyne/statC
+     Electric potential: V=                  3.33564095107E-03   statV
+     Capacitance: F=                         8.98755179229E+11   cm
+     Dipole moment: C m=                     2.99792458082E+11   statC cm
+     Electric polarization: C/m^2=           2.99792458082E+05   statC/cm^2
+     Electric displacement: C/m^2=           3.76730313565E+06   statC/cm^2 4pi
+     Resistance: Ohm=                        1.112650055445E-12  s/cm
+     Magnetic induction: T=                  9.999999997263E+03  G
+     Vector potential: T m=                  9.999999997263E+05  G cm
+     Magnetic field flux: Wb=                9.999999997263E+07  Mx
+     Inductance: H=                          1.11265005544E-12   statH
+     Magnetic dipole: A m^2=                 1.00000000027E+03   statC cm
+     Magnetization: A/m=                     1.00000000027E-03   statC/cm^2
+     Magnetic strength: A/m=                 1.25663706178E-02   statC/cm^2 4pi
+
+     Conversion factors (Atomic units - c.g.s.-Gaussian):
+     Length:                                 5.29177210903E-09   cm
+     Mass:                                   9.1093837015E-28    g
+     Time:                                   2.4188843265857E-17 s
+     Frequency:                              4.1341373335182E+16 Hz
+     Speed:                                  2.18769126364E+08   cm/s
+     Acceleration:                           9.0442161272E+24    cm/s^2
+     Momentum:                               1.99285191410E-19   g cm/s
+     Angular momentum:                       1.0545718176462E-27 g cm^2/s
+     Force:                                  8.2387234982E-03    dyne
+     Energy:                                 4.3597447222072E-11 erg
+     Power:                                  1.8023783420686E+06 erg/s
+     Pressure:                               2.9421015696E+14    Ba
+     Current:                                1.98571079282E+07   statA
+     Charge:                                 4.80320471388E-10   statC
+     Charge density:                         3.2413632055E+15    statC/cm^3
+     Current density:                        7.0911019670E+23    statA/cm^2
+     Electric field:                         1.71525554062E+07   dyne/statC
+     Electric potential:                     9.07674142975E-02   statV
+     Capacitance:                            5.29177210903E-09   cm
+     Dipole moment:                          2.54174647389E-18   statC cm
+     Polarization:                           1.71525554062E+07   statC/cm^2
+     Electric displacement:                  1.71525554062E+07   statC/cm^2 4pi
+     Resistance:                             4.57102890439E-09   s/cm
+     Magnetic induction:                     2.35051756693E+09   G
+     Vector potential:                       1.24384033025E+01   G cm
+     Magnetic field flux:                    6.58211956771E-08   Mx
+     Inductance:                             1.10567901732E-25   statH
+     Magnetic dipole:                        1.85480201618E-20   statC cm
+     Magnetization:                          1.25168244264E+05   statC/cm^2
+     Magnetic strength:                      1.25168244264E+05   statC/cm^2 4pi 
+
+     Conversion factors (Rydberg atomic units - SI):
+     Length: \l_R=                           5.29177210903E-11   m
+     Mass: \m_R=                             1.82187674030E-30   kg
+     Time: \t_R=                             4.8377686531714E-17 s
+     Frequency: \nu_R=                       2.0670686667591E+16 Hz
+     Speed: \v_R=                            1.09384563182E+06   m/s
+     Acceleration: \a_R=                     4.52210806362E+22   m/s^2
+     Momentum: \p_R=                         1.99285191410E-24   kg m/s
+     Angular momentum: \L_R=                 1.0545718176462E-34 kg m^2/s
+     Force: \f_R=                            4.11936174912E-08   N
+     Energy: \U_R=                           2.1798723611036E-18 J
+     Power: \W_R=                            4.505945855171E-02  W
+     Pressure: \pr_R=                        1.47105078482E+13   Pa
+     Current: \I_R=                          2.3418026858671E-03 A
+     Charge: \C_R=                           1.1329099625600E-19 C
+     Charge density: \rho_R=                 7.6452553796E+11    C/m^3
+     Current density: \J_R=                  8.36272920114E+17   A/m^2
+     Electric field: \E_R=                   3.63608926151E+11   N/C
+     Electric potential: \V_R=               1.9241355740025E+01 V
+     Capacitance: \F_R=                      5.887890530517E-21  F
+     Dipole moment: \dip_R=                  5.99510134192E-30   C m
+     Polarization: \P_R=                     4.0456949184E+01    C/m^2
+     Electric displacement: \D_R=            3.21946172254E+00   C/m^2
+     Resistance: \R_R=                       8.2164718044553E+03 Ohm
+     Magnetic induction: \B_R=               3.3241338227E+05    T
+     Vector potential: \A_R=                 1.75905586495E-05   T m
+     Magnetic field flux: \Phi_R=            9.3085227643611E-16 Wb
+     Inductance: \Y_R=                       3.9749389735260E-13 H
+     Magnetic dipole: \mu_R=                 6.5577154152E-24    A m^2 (J/T)
+     Magnetization: \M_R=                    4.42536571420E+07   A/m
+     Magnetic field: \H_R=                   3.52159414202E+06   A/m
+
+     Physical constants in atomic units:
+     Speed of light:                         1.37035999084E+02
+     atomic mass unit:                       1.8228884862E+03
+
+     Physical constants in eV:
+     Hartree in eV:                          2.7211386246E+01
+     Rydberg in eV:                          1.3605693123E+01
+
+     ----------------------------------------------------------------------
+     Errors:                     Absolute                  Relative
+
+     rydberg =                    2.10E-05 1/m              1.91E-12
+     alpha =                      1.10E-12                  1.51E-10
+     amu =                        5.00E-37                  3.01E-10
+
+     me =                         2.76E-40 kg               3.03E-10
+     abohr =                      8.08E-21 m                1.53E-10
+     mu0 =                        1.89E-16 N/A^2            1.51E-10
+     epsilon0 =                   1.33E-21 C^2/Nm^2         1.51E-10
+     hartree =                    8.34E-30 J                1.91E-12
+     bohr mag =                   2.81E-33 J/T              3.03E-10
+
+     Errors of conversion factors (atomic units - SI):
+     \l =                         8.08E-21 m                1.53E-10
+     \m =                         2.76E-40 kg               3.03E-10
+     \t =                         4.63E-29 s                1.91E-12
+     \nu =                        7.91E+04 s                1.91E-12
+     \v =                         3.30E-04 m/s              1.51E-10
+     \a =                         1.38E+13 m/s^2            1.53E-10
+     \p =                         3.04E-34 kg m/s           1.53E-10
+     \L =                         0.00E+00 kg m^2/s         0.00E+00
+     \f =                         1.27E-17 N                1.55E-10
+     \U =                         8.34E-30 J                1.91E-12
+     \W =                         6.90E-13 W                3.83E-12
+     \pr =                        1.35E+04 Pa               4.60E-10
+     \I =                         1.27E-14 A                1.91E-12
+     \C =                         0.00E+00 C                0.00E+00
+     \rho =                       4.95E+02 C/m^3            4.58E-10
+     \J =                         7.27E+08 A/m^2            3.07E-10
+     \E =                         7.95E+01 V/m              1.55E-10
+     \V =                         5.21E-11 V                1.91E-12
+     \F =                         1.13E-32 F                1.91E-12
+     \dip =                       1.29E-39 C m              1.53E-10
+     \P =                         1.75E-08 C/m^2            3.05E-10
+     \D =                         1.39E-09 C/m^2            3.05E-10
+     \R =                         0.00E+00 Ohm              0.00E+00
+     \B =                         7.18E-05 T                3.05E-10
+     \A =                         1.90E-15 T m              1.53E-10
+     \phi =                       0.00E+00 Wb               0.00E+00
+     \Y =                         1.90E-25 H                1.91E-12
+     \mu =                        5.63E-33 J/T              3.03E-10
+     \M =                         1.93E-02 A/m              1.55E-10
+     \H =                         1.54E-03 A/m              1.55E-10
+
+     cspeed =                     2.07E-08 \v               1.51E-10
+     amu =                        1.10E-06 \m               6.04E-10
+
+
+     Errors of conversion factors (c.g.s.-Gaussian - SI):
+     Current =                    2.51E-20 A                7.54E-11
+     Charge =                     2.51E-20 C                7.54E-11
+     Charge density =             2.51E-14 C/m^3            7.54E-11
+     Current density =            2.51E-16 A/m^2            7.54E-11
+     Electric field =             2.26E-06 V/m              7.54E-11
+     Electric potential =         2.26E-08 V                7.54E-11
+     Capacitance =                1.68E-22 F                1.51E-10
+     Dipole moment =              2.51E-22 C m              7.54E-11
+     Electric Polarization =      2.51E-16 C/m^2            7.54E-11
+     Electric Displacement =      2.00E-17 C/m^2            7.54E-11
+     Resistance =                 1.35E+02 Ohm              1.51E-10
+     Magnetic induction =         7.54E-15 T                7.54E-11
+     Vector potential =           7.54E-17 T m              7.54E-11
+     Magnetic field flux =        7.54E-19 Wb               7.54E-11
+     Inductance =                 1.35E+02 H                1.51E-10
+     Magnetic dipole =            7.54E-14 J/T              7.54E-11
+     Magnetization =              7.54E-08 A/m              7.54E-11
+     Magnetic strength =          6.00E-09 A/m              7.54E-11
+
+
+     Errors of conversion factors (atomic units - c.g.s.-Gaussian):
+     Current =                    1.53E-03 statA            7.73E-11
+     Charge =                     3.62E-20 statC            7.54E-11
+     Charge density =             1.73E+06 statC/cm^3       5.33E-10
+     Current density =            2.71E+14 statA/cm^2       3.83E-10
+     Electric field =             3.94E-03 statV/cm         2.30E-10
+     Electric potential =         7.01E-12 statV            7.73E-11
+     Capacitance =                8.08E-19 cm               1.53E-10
+     Dipole moment =              5.80E-28 statC cm         2.28E-10
+     Electric Polarization =      6.53E-03 statC/cm^2       3.81E-10
+     Electric displacement =      6.53E-03 statC/cm^2 4pi   3.81E-10
+     Resistance =                 6.89E-19 s/cm             1.51E-10
+     Magnetic induction =         8.95E-01 G                3.81E-10
+     Vector potential =           2.84E-09 G cm             2.28E-10
+     Magnetic field flux =        4.96E-18 Mx               7.54E-11
+     Inductance =                 1.69E-35 statH            1.53E-10
+     Magnetic dipole =            7.03E-30 statC cm         3.79E-10
+     Magnetization =              2.88E-05 statC/cm^2       2.30E-10
+     Magnetic strength =          2.88E-05 statC/cm^2 4pi   2.30E-10
+
+     Errors of conversion factors (Rydberg atomic units - SI):
+     \l_R =                       8.08E-21 m                1.53E-10
+     \m_R =                       5.53E-40 kg               3.03E-10
+     \t_R =                       9.26E-29 s                3.83E-12
+     \nu_R =                      3.96E+04 s                1.91E-12
+     \v_R =                       1.65E-04 m/s              1.51E-10
+     \a_R =                       6.90E+12 m/s^2            1.53E-10
+     \p_R =                       3.04E-34 kg m/s           1.53E-10
+     \L_R =                       0.00E+00 kg m^2/s         0.00E+00
+     \f_R =                       6.37E-18 N                1.55E-10
+     \U_R =                       4.17E-30 J                1.91E-12
+     \W_R =                       1.72E-13 W                3.83E-12
+     \pr_R =                      6.76E+03 Pa               4.60E-10
+     \I_R =                       4.48E-15 A                1.91E-12
+     \C_R =                       0.00E+00 C                0.00E+00
+     \rho_R =                     3.50E+02 C/m^3            4.58E-10
+     \J_R =                       2.57E+08 A/m^2            3.07E-10
+     \E_R =                       5.62E+01 V/m              1.55E-10
+     \V_R =                       5.21E-11 V                2.71E-12
+     \F_R =                       1.13E-32 F                1.91E-12
+     \dip_R =                     9.15E-40 C m              1.53E-10
+     \P_R =                       1.24E-08 C/m^2            3.05E-10
+     \D_R =                       9.83E-10 C/m^2            3.05E-10
+     \R_R =                       0.00E+00 Ohm              0.00E+00
+     \B_R =                       1.01E-04 T                3.05E-10
+     \A_R =                       2.69E-15 T m              1.53E-10
+     \phi_R =                     0.00E+00 Wb               0.00E+00
+     \Y_R =                       7.61E-25 H                1.91E-12
+     \mu_R =                      1.99E-33 J/T              3.03E-10
+     \M_R =                       6.84E-03 A/m              1.55E-10
+     \H_R =                       5.44E-04 A/m              1.55E-10
+
+\end{verbatim}
+
+\newpage
+
+
+\section{\color{coral}Bibliography}
+\begin{enumerate}
+
+\item
+[1.] J.D. Jackson, Classical electrodynamics, Third edition,
+J. Wiley and Sons (1999).
+
+\end{enumerate}
+
+\end{document}
