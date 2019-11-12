@@ -1,5 +1,5 @@
 %!
-%! Copyright (C) 2015 - Present Andrea Dal Corso 
+%! Copyright (C) 2019 - Present Andrea Dal Corso 
 %! This file is distributed under the terms of the
 %! GNU General Public License. See the file `License'
 %! in the root directory of the present distribution,
@@ -17,6 +17,7 @@
 \usepackage{graphicx}
 
 \definecolor{web-blue}{rgb}{0,0.5,1.0}
+\definecolor{steelblue}{rgb}{0.27,0.5,0.7}
 \definecolor{coral}{rgb}{1.0,0.5,0.3}
 \definecolor{red}{rgb}{1.0,0,0.0}
 \definecolor{green}{rgb}{0.,0.5,0.0}
@@ -170,6 +171,13 @@
 \def\barmagry{4.42536571420\times 10^{7}}
 \def\barhry{3.52159414202\times 10^{6}}
 
+\def\barbg{1.71525554109\times 10^{3}}
+\def\baravg{9.0767414322\times 10^{-8}}
+\def\barwbg{4.80320471520\times 10^{-18}}
+\def\barmug{2.5417464732\times 10^{-21}}
+\def\barmagg{1.71525554016\times 10^{10}}
+\def\barhg{1.36495698941\times 10^{9}}
+
 \def\cspeedau{1.37035999084\times 10^{2}}
 \def\amuau{1.8228884862\times 10^{3}}
 \def\ryev{1.3605693122994\times 10^{1}}
@@ -235,7 +243,7 @@ it depends on definitions given in following Sections and in these cases
 we mention explicitly where to find the required definition. Important 
 physical formulas are introduced when we have given sufficient information to
 convert the formula in different systems. Microscopic and macroscopic 
-Maxwell equations are also summarized in separate Sections. \\
+Maxwell's equations are also summarized in separate Sections. \\
 Each system has a different color. In black the SI, in blue the a.u., in 
 orange the c.g.s.-Gaussian system, 
 %in violet the modified c.g.s.-Gaussian system (when different from the
@@ -249,7 +257,11 @@ $cgs$. When the c.g.s.-Gaussian unit has an accepted name we use it
 interchangeably with the generic name. Only Hartree a.u. are described 
 in the main text since these are the most common microscopic units. 
 \qe\ uses Rydberg a.u. that can be easily derived from the Hartree
-a.u.. We describe Rydberg a.u. in Appendix A.
+a.u.. We describe Rydberg a.u. in Appendix A (in violet). In the $ab-initio$
+literature modified a.u. have been introduced in which the 
+electromagnetic equations look like those of the c.g.s-Gaussian system. 
+This requires some modifications to the definitions given in the main 
+text and we discuss these units in Appendix B (in steelblue).
 
 It is useful to recall a few preliminary facts needed in the rest of 
 these notes. \\
@@ -295,12 +307,12 @@ of the Bohr radius $a_B$:
 \begin{equation}
 R_\infty={\alpha^2 m_e c \over 2 h}={\alpha \over 4 \pi a_B}.
 \end{equation}
-Using these equations we can calculate the electron mass as
+Using these equations we can calculate the electron mass as:
 \begin{equation}
 m_e={2 h R_\infty\over \alpha^2 c}=
 \me\ kg
 \end{equation} 
-and $a_B$ as
+and $a_B$ as:
 \begin{equation}
 a_B={\alpha\over 4\pi R_\infty}=
 \abohr\ m.
@@ -465,7 +477,7 @@ $\bar \nu=\barnu\ Hz$.
 \section{\color{coral}Speed}
 In the SI the unit of speed is derived from its definition.
 For instance, the speed (${\bf v}$) of a particle 
-whose position as a function of time is ${\bf r}(t)$, is
+whose position as a function of time is ${\bf r}(t)$, is:
 \begin{equation}
 {\bf v}={d{\bf r} \over dt},
 \end{equation} 
@@ -847,7 +859,7 @@ is the charge that passes in one second through the section of a conductor
 in which the current is $1 A$. This unit is called coulomb.
 
 In the SI the Coulomb force between two charges $q$ and $q'$ at
-distance ${\bf r}$ is
+distance ${\bf r}$ is:
 \begin{equation}
 {\bf F} = {1\over 4 \pi \epsilon_0} {q\ q' \over r^3}\ {\bf r},
 \label{coulomb}
@@ -1079,7 +1091,7 @@ is: $\bar E = \barecgs \ statV/cm$.
 \section{\color{coral}Electric potential}
 In the SI the unit of the electric potential (symbol $V$)
 is derived from its definition. The electric 
-potential is a function $\phi({\bf r})$ such that
+potential is a function $\phi({\bf r})$ such that:
 \begin{equation}
 {\bf E}=- \nabla \phi({\bf r}),
 \end{equation}
@@ -1121,7 +1133,7 @@ The Hartree energy espressed in $eV$ is:
 \begin{equation}
 E_h=\barphi\ eV,
 \end{equation}
-while the Rydberg energy expressed in eV is
+while the Rydberg energy expressed in eV is:
 \begin{equation}
 {E_h \over 2}=\ryev\ eV.
 \end{equation}
@@ -1253,13 +1265,13 @@ electric field and of the polarization by:
 so the polarization and the electric displacement have the same
 unit ${C \over m^2}$. \\
 This equation is usually justified starting from
-the Maxwell equation:
+the Maxwell's equation:
 \begin{equation}
 \nabla \cdot {\bf E} = {\rho \over \epsilon_0},
 \end{equation}
 and separating $\rho$ into $\rho=\rho_f + \rho_b$ where
 $\rho_f$ are the free charges and $\rho_b$ are the 
-bound charges such that
+bound charges such that:
 \begin{equation}
 \rho_b=-\nabla \cdot {\bf P}.
 \end{equation}
@@ -1272,7 +1284,7 @@ Therefore one obtains:
 {\color{web-blue} In a.u. the unit of the electric displacement 
 (symbol $\bar D$) is derived from the 
 relationship between electric displacement, electric field, and polarization
-that can be found writing the above equations in a.u.. The Maxwell
+that can be found writing the above equations in a.u.. The Maxwell's
 equation becomes:
 \begin{equation}
 {\bar E \over \bar l} \nabla \cdot {\bf E} = {\bar \rho \over \epsilon_0}
@@ -1289,7 +1301,7 @@ The link between bound charges and polarization does not change:
 -\nabla \cdot {\bf P},
 \end{equation}
 where we used the fact that ${\bar P \over \bar l \bar \rho}=1$.
-Inserting this expression in the Maxwell equation we obtain:
+Inserting this expression in the Maxwell's equation we obtain:
 \begin{equation}
 \nabla \cdot ({\bf E}+ 4 \pi {\bf P})=4 \pi \rho_f, 
 \label{aldispau}
@@ -1320,7 +1332,7 @@ or $\bar D= {\bar P\over 4 \pi}=\bard\ C/m^2$.
 between electric displacement, electric field, and polarization can 
 be found noticing that in Eq.~\ref{maxwell1gen}
 ${\bar \rho_{cgs} \bar l_{cgs} \over \epsilon_0 \bar E_{cgs}}=4\pi$
-so that the Maxwell equation becomes:
+so that the Maxwell's equation becomes:
 \begin{equation}
 \nabla \cdot {\bf E} = 4 \pi \rho.
 \end{equation}
@@ -1339,7 +1351,7 @@ electric field and polarization:
 \end{equation}
 \\
 The conversion factor with the SI unit $\bar D_{cgs}$ can be found
-from Eq.~\ref{eldispgen} that compared with Eq.~\ref{eldispcgs} gives
+from Eq.~\ref{eldispgen} that compared with Eq.~\ref{eldispcgs} gives:
 \begin{equation}
 \bar D_{cgs}= {\epsilon_0 \bar E_{cgs}}= {\bar P_{cgs} \over 4 \pi}.
 \end{equation}
@@ -1409,7 +1421,7 @@ In the SI the unit of the magnetic flux density
 so the unit of the magnetic flux density is $T={N\cdot s\over C\cdot m} = 
 {V \cdot s \over m^2}={N \over A\cdot m}={kg \over s \cdot C}$. 
 This unit is called Tesla. \\
-In the SI the second Maxwell equation reads:
+In the SI the second Maxwell's equation reads:
 \begin{equation}
 \nabla \times {\bf E}=-{\partial {\bf B} \over \partial t}.
 \end{equation}
@@ -1434,13 +1446,13 @@ Using the expression of $a_B$ we can also write:
 where $E_h$ is the Hartree energy (Eq.\ref{eh}) and $\mu_B$ is the Bohr 
 magneton (Eq.~\ref{bohrm}).
 \\
-In these units the second Maxwell equation is:
+In these units the second Maxwell's equation is:
 \begin{equation}
 \nabla \times {\bf E}=-{\bar l \bar B \over \bar t \bar E} 
 {\partial {\bf B} \over \partial t}.
 \label{maxwell2gen}
 \end{equation}
-Since ${\bar l \bar B \over \bar t \bar E}=1$, the second Maxwell
+Since ${\bar l \bar B \over \bar t \bar E}=1$, the second Maxwell's
 equation has the same form as in the SI.
 }
 \\
@@ -1467,7 +1479,7 @@ A$ produces at a distance of $r\ {10^{-2}} m$ a magnetic field
 B={\tilde \mu_0\over 2 \pi}\ {K_T \over
 10^{-2} K}\ {I\over r}\  G.
 \end{equation}
-Comparing with the c.g.s.-Gaussian expression we obtain
+Comparing with the c.g.s.-Gaussian expression we obtain:
 \begin{equation}
 K_T= {4 \pi \over \tilde \mu_0} {10^{-2}\ K \over \tilde c_{cgs}}= 
 {10^3 \over K_A}=\toverg,
@@ -1485,15 +1497,15 @@ will fill a force (in $N=10^5\ dyne$) (using Eq.~\ref{lforce}):
 \end{equation}
 Since ${10^{3} \over K K_T}=
 {1\over \tilde c_{cgs}}$ we obtain the Lorentz force in the 
-c.g.s.-Gaussian system
+c.g.s.-Gaussian system:
 \begin{equation}
 {\bf F}={q\over c}\ ({\bf v}\times {\bf B}).
 \end{equation}
-The second Maxwell equation can be found noticing that in Eq.~\ref{maxwell2gen}
+The second Maxwell's equation can be found noticing that 
+in Eq.~\ref{maxwell2gen}
 ${\bar l_{cgs} \bar B_{cgs} \over \bar t_{cgs} \bar E_{cgs}}=
 {10^{-2} \over K_T 10^{-5} K}={10^3 K_A \over 10^3 K}={1\over 
-\tilde c_{cgs}}$ so 
-we have
+\tilde c_{cgs}}$ so we have:
 \begin{equation}
 \nabla \times {\bf E}=-{1\over c}
 {\partial {\bf B} \over \partial t}.
@@ -1577,7 +1589,7 @@ field as in Eq.~\ref{ephiagen} and since
 ${\bar V_{cgs} \over \bar E_{cgs} \bar l_{cgs}}=1$
 and ${\bar A_{cgs} \over \bar E_{cgs} \bar t_{cgs}}={1\over 
 \tilde c_{cgs}}$, in the 
-c.g.s.-Gaussian system the electric field is given by
+c.g.s.-Gaussian system the electric field is given by:
 \begin{equation}
 {\bf E}=-\nabla \phi -
 {1 \over c} {\partial {\bf A} \over \partial t}.
@@ -1732,7 +1744,7 @@ therefore:
 {\boldsymbol \mu} = {\bar I_{cgs} \bar l_{cgs}^2 \over \bar \mu_{cgs} }
 I A \hat {\bf n}.
 \end{equation} 
-Comparing with Eq.~\ref{magdipcgs} we obtain
+Comparing with Eq.~\ref{magdipcgs} we obtain:
 \begin{equation}
 \bar \mu_{cgs}= \tilde c_{cgs} \bar I_{cgs} \bar l_{cgs}^2= 
 {\tilde c_{cgs} 10^{-4} \over K}\ A\cdot m^2 = 
@@ -1839,7 +1851,7 @@ magnetic flux density and of the magnetization by:
 \end{equation}
 so the magnetic field and the magnetization have the same
 unit ${A \over m}$.\\
-Eq.~\ref{magintensity} can be derived from the Maxwell equation:
+Eq.~\ref{magintensity} can be derived from the fourth Maxwell's equation:
 \begin{equation}
 \nabla \times {\bf B}= \mu_0 {\bf J} + {1\over c^2} {\partial {\bf E} \over
 \partial t}.
@@ -1862,7 +1874,7 @@ Eq.~\ref{maxwell4} one obtains, after dividing by $\mu_0$:
 \partial t}.
 \end{equation}
 Using Eq.~\ref{magintensity} and the definition of ${\bf D}$ the
-macroscopic Maxwell equation becomes:
+fourth macroscopic Maxwell's equation becomes:
 \begin{equation}
 \nabla \times {\bf H}= {\bf J}_f + 
 {\partial {\bf D}\over
@@ -1918,7 +1930,7 @@ This equation suggests the definition of the magnetic field strength as:
 {\bf H}={{\bf B}\over \alpha^2} -4\pi {\bf M},
 \label{HBMau}
 \end{equation}
-that gives the macroscopic Maxwell equation:
+that gives the macroscopic Maxwell's equation:
 \begin{equation}
 \nabla \times {\bf H}= 
 {4 \pi} {\bf J}_f +  {\partial {\bf D} \over \partial t}.
@@ -1946,7 +1958,7 @@ magnetic flux density, and magnetization. This relationship can be derived
 as discussed for the a.u. case. In Eq.~\ref{maxwell4gen} we have
 ${\mu_0 \bar J_{cgs} \bar l_{cgs} \over \bar B_{cgs}}={4 \pi \over c_{cgs}}$
 and ${\bar E_{cgs} \bar l_{cgs} \over c^2 \bar t_{cgs} \bar B_{cgs}}=
-{1\over c_{cgs}}$ so the Maxwell equation becomes:
+{1\over c_{cgs}}$ so the Maxwell's equation becomes:
 \begin{equation}
 \nabla \times {\bf B}= {4 \pi \over c} {\bf J} + {1\over c} 
 {\partial {\bf E} \over \partial t}.
@@ -1962,7 +1974,7 @@ and
 \begin{equation}
 {\bf J}_d={\partial {\bf P} \over \partial t}.
 \end{equation}
-Inserting these expressions in the Maxwell equation we have:
+Inserting these expressions in the Maxwell's equation we have:
 \begin{equation}
 \nabla \times ({\bf B} -4\pi {\bf M})= 
 {4 \pi\over c} {\bf J}_f +  {1\over c} {\partial ({\bf E}+4\pi {\bf P}) \over \partial t}.
@@ -1973,7 +1985,7 @@ This equation suggests the definition of the magnetic field strength as:
 {\bf H}={\bf B} -4\pi {\bf M},
 \label{magintensitycgs}
 \end{equation}
-that gives the macroscopic Maxwell equation:
+that gives the macroscopic Maxwell's equation:
 \begin{equation}
 \nabla \times {\bf H}= 
 {4 \pi \over c} {\bf J}_f +  {1\over c}{\partial {\bf D} \over \partial t}.
@@ -2024,8 +2036,8 @@ $\bar H = \barhcgs\ statC/cm^2$.
 }
 
 \newpage
-\section{\color{coral}Microscopic Maxwell equations}
-In the SI the microscopic Maxwell equations are:
+\section{\color{coral}Microscopic Maxwell's equations}
+In the SI the microscopic Maxwell's equations are:
 \begin{eqnarray}
 {\rm div}\ {\bf E} &=& {\rho\over {\epsilon_0}}, \\
 \nabla \times {\bf E} &=& -{\partial {\bf B} \over \partial t}, \\
@@ -2034,7 +2046,7 @@ In the SI the microscopic Maxwell equations are:
 {\partial {\bf E} \over \partial t}. 
 \end{eqnarray}
 
-{\color{web-blue} The form of the microscopic Maxwell equations
+{\color{web-blue} The form of the microscopic Maxwell's equations
 in a.u. has been obtained in the previous text:
 \begin{eqnarray}
 {\rm div}\ {\bf E} &=& 4 \pi \rho, \\
@@ -2048,7 +2060,7 @@ other quantities are measured in a.u..
 }
 \\
 
-{\color{orange} The form of the microscopic Maxwell equations
+{\color{orange} The form of the microscopic Maxwell's equations
 in the c.g.s-Gaussian system has been discussed in the previous text:
 \begin{eqnarray}
 {\rm div}\ {\bf E} &=& 4 \pi \rho, \\
@@ -2062,8 +2074,8 @@ other quantities are measured in c.g.s.-Gaussian units.
 }
 
 \newpage
-\section{\color{coral}Macroscopic Maxwell equations}
-In the SI the macroscopic Maxwell equations can be formally
+\section{\color{coral}Macroscopic Maxwell's equations}
+In the SI the macroscopic Maxwell's equations can be formally
 obtained by dividing the charge density into a free part and a
 bound part $\rho=\rho_f+\rho_b$ with $\rho_b=-{\rm div} {\bf P}$
 where ${\bf P}$ is the polarization.
@@ -2083,7 +2095,7 @@ where ${\bf D}=\epsilon_0 {\bf E}+{\bf P}$ and ${\bf H}={{\bf B}\over \mu_0}-
 {\bf M}$.
 \\
 
-{\color{web-blue} The form of the macroscopic Maxwell equations
+{\color{web-blue} The form of the macroscopic Maxwell's equations
 in a.u. has been discussed in the previous text. Also in these
 units we can write $\rho=\rho_f+\rho_b$ with $\rho_b=-{\rm div} {\bf P}$
 where ${\bf P}$ is the polarization.
@@ -2107,7 +2119,7 @@ measured in a.u..
 }
 \\
 
-{\color{orange} The form of the macroscopic Maxwell equations
+{\color{orange} The form of the macroscopic Maxwell's equations
 in the c.g.s-Gaussian system has been discussed in the previous text.
 In these units $\rho=\rho_f+\rho_b$ with $\rho_b=-{\rm div} {\bf P}$
 where ${\bf P}$ is the polarization.
@@ -2129,8 +2141,95 @@ other quantities are measured in c.g.s.-Gaussian units.
 }
 
 \newpage
+\section{\color{coral}The Schr\"odinger equation}
+In the SI the time independent Schr\"odinger equation for a particle 
+with charge $q$, mass $m$ and spin $1/2$ in an electromagnetic field 
+described by the scalar potential $\phi({\bf r})$ and the vector
+potential ${\bf A}({\bf r})$ is:
+\begin{equation}
+\left[{1\over 2m} ({\bf p}-q {\bf A})^2 + q \phi - 
+{q \hbar \over 2 m} {\boldsymbol \sigma} \cdot {\bf B} \right]
+\Psi({\bf r})=E \Psi({\bf r})
+\end{equation}
+where ${\bf B}=\nabla\times {\bf A}$, ${\boldsymbol \sigma}$ are the Pauli
+matrices and $\Psi({\bf r})$ is a two component spinor.
+\\
 
-\section{\color{coral} Appendix A}
+{\color{web-blue} In a.u. the time independent Schr\"odinger equation
+becomes:
+\begin{equation}
+\left[{1\over 2m \bar m} (\bar p {\bf p}-\bar C \bar A q {\bf A})^2 + 
+\bar C \bar V q \phi - 
+{\bar C \hbar \bar B \over \bar m} {q \over 2 m} 
+{\boldsymbol \sigma} \cdot {\bf B} \right]
+\Psi({\bf r})=\bar E E \Psi({\bf r})
+\label{segen}
+\end{equation}
+Using $\bar p={\hbar \over a_B}$, $\bar A={\hbar \over e a_B}$, 
+$\bar C=e$, $\bar V= {E_h \over e}$, $\bar B={\hbar \over e a_B^2}$ and
+$\bar E=E_h$
+we get
+\begin{equation}
+\left[{\hbar^2 \over m_e a_B^2} {1\over 2m} ({\bf p}-q {\bf A})^2 + 
+E_h q \phi - {\hbar^2 \over m_e a_B^2} {q \over 2 m} 
+{\boldsymbol \sigma} \cdot {\bf B} \right]
+\Psi({\bf r})=E_h E \Psi({\bf r})
+\end{equation}
+but since $E_h= {\hbar^2 \over m_e a_B^2}$ the equation can be simplified into
+\begin{equation}
+\left[{1\over 2m} ({\bf p}-q {\bf A})^2 + 
+q \phi - {q \over 2 m} 
+{\boldsymbol \sigma} \cdot {\bf B} \right]
+\Psi({\bf r})= E \Psi({\bf r})
+\end{equation}
+where all quantities are in a.u..\\
+
+For an electron 
+$m=1$ and $q=-1$ and one should write:
+\begin{equation}
+\left[{1\over 2} ({\bf p}+ {\bf A})^2  
+- \phi + {1 \over 2} 
+{\boldsymbol \sigma} \cdot {\bf B} \right]
+\Psi({\bf r})= E \Psi({\bf r}).
+\end{equation}
+However this form is rarely used. One prefers to introduce the potential
+energy of the electron $V=q\phi$ and keep the symbol $\mu_B=-{1\over 2}$ 
+so that the equation is written:
+\begin{equation}
+\left[{1\over 2} ({\bf p}+ {\bf A})^2  
++ V - \mu_B {\boldsymbol \sigma} \cdot {\bf B} \right]
+\Psi({\bf r})= E \Psi({\bf r}).
+\end{equation}
+When ${\bf A}=0$ we can write explicitly ${\bf p}=-i \nabla$, and
+the Schr\"odinger equation becomes:
+\begin{equation}
+\left[-{1\over 2} \nabla^2  
++ V - \mu_B {\boldsymbol \sigma} \cdot {\bf B} \right]
+\Psi({\bf r})= E \Psi({\bf r}).
+\end{equation}
+}
+\\
+{\color{orange} The form of the Schr\"odinger equation in the c.g.s.-Gaussian
+system can be found starting from Eq.~\ref{segen} and using:
+$\bar p_{cgs}=10^{-5} {kg\cdot m \over s}$, $\bar C_{cgs} \bar A_{cgs}=
+{1\over K} {10^{-2}\over K_T} C\cdot T\cdot m = {10^{-5} \over \tilde c_{cgs}}
+{kg\cdot m \over s}$, $\bar C_{cgs} \bar V_{cgs}= {1\over K} 10^{-7} K 
+C\cdot V= 10^{-7} J$, ${\bar C_{cgs} \hbar \bar B_{cgs} \over \bar m_{cgs}}
+= \tilde \hbar {1\over K} {1\over K_T 10^{-3}} J={10^{-7} \tilde \hbar_{cgs}
+\over \tilde c_{cgs}} J$, and $\bar E_{cgs}=10^{-7} J$ leading to:
+\begin{equation}
+\left[{1\over 2m} ({\bf p}- {q \over c} {\bf A})^2 + 
+q \phi - 
+{\hbar q \over 2 m c} 
+{\boldsymbol \sigma} \cdot {\bf B} \right]
+\Psi({\bf r})= E \Psi({\bf r})
+\end{equation}
+where all quantities are expressed in c.g.s.-Gaussian units.
+}
+
+\newpage
+
+\section{\color{coral} Appendix A: Rydberg atomic units}
 {\color{violet}
 In this Appendix we discuss the Rydberg a.u. using the same 
 symbols used for Hartree a.u. with the subscript $R$.
@@ -2260,6 +2359,14 @@ the other units discussed in the text. \\
 \bar Wb_R={\bar B_R \bar l_R^2 }= \sqrt{2} \bar B \bar l^2
 = \sqrt{2} \bar Wb=\barwbry\ Wb.
 \end{equation}
+With this definition the Lorentz force remains:
+\begin{equation}
+{\bf F}=q {\bf E} + q \left({\bf v}\times {\bf B}\right),
+\end{equation}
+and since ${\bar l_R \bar B_R \over \bar E_R \bar t_R}={\bar l_R \bar B_R \over \bar E_R \bar t_R}=1$ the second Maxwell's equation remains:
+\begin{equation}
+\nabla\times {\bf E}=-{\partial {\bf B}\over \partial t},
+\end{equation}
 {\bf Inductance:}
 \begin{equation}
 \bar Y_R={\bar Wb_R \over \bar I_R }= 2 (\sqrt{2})^2 {\bar Wb \over \bar I}
@@ -2277,8 +2384,8 @@ the other units discussed in the text. \\
 \end{equation}
 
 In order to discuss the units of the electric displacement and of
-the magnetic field strength, we need to discuss the Maxwell equations.
-The first Maxwell equation is
+the magnetic field strength, we need to discuss the Maxwell's equations.
+The first Maxwell's equation is
 \begin{equation}
 \nabla\cdot {\bf E} = 4 \pi \rho,
 \end{equation}
@@ -2289,11 +2396,11 @@ in these units
 \begin{equation}
 \rho_b=-\nabla \cdot {\bf P},
 \end{equation} 
-and the macroscopic Maxwell equation becomes:
+and the macroscopic Maxwell's equation becomes:
 \begin{equation}
 \nabla\cdot ({\bf E}+4\pi {\bf P}) = 4 \pi \rho_f,
 \end{equation}
-suggesting the definition
+suggesting the definition:
 \begin{equation}
 {\bf D}={\bf E}+4\pi {\bf P}.
 \end{equation}
@@ -2301,11 +2408,11 @@ Therefore:
 \begin{equation}
 \bar D_R={\bar P_R \over 4 \pi} = {1\over \sqrt{2}} \bar D=\bardry\ C/m^2.
 \end{equation}
-The fourth Maxwell equation can be written using
+The fourth Maxwell's equation can be written using
 ${\mu_0 \bar J_R \bar l_R \over \bar B_R}={1\over 4} 
 {\mu_0 \bar J \bar l \over \bar B}= \pi \alpha^2$ and
 ${\bar E_R \bar l_R \over c^2 \bar t_R \bar B_R}={1\over 4}
-{\bar E \bar l \over c^2 \bar t \bar B}={\alpha^2 \over 4}$ so we have
+{\bar E \bar l \over c^2 \bar t \bar B}={\alpha^2 \over 4}$ so we have:
 \begin{equation}
 \nabla \times {\bf B}= \pi \alpha^2 {\bf J} + {\alpha^2 \over 4}
 {\partial {\bf E} \over \partial t}.
@@ -2329,7 +2436,7 @@ Defining the magnetic field strengh as:
 \begin{equation}
 {\bf H}={4{\bf B} \over \alpha^2}-4 \pi {\bf M},
 \end{equation}
-we can write the fourth macroscopic Maxwell equation as:
+we can write the fourth macroscopic Maxwell's equation as:
 \begin{equation}
 \nabla \times {\bf H}= 4 \pi 
 {\bf J}_f + {\partial {\bf D} \over \partial t}.
@@ -2340,7 +2447,7 @@ Therefore we have:
 {1\over \sqrt{2}} \bar H=\barhry\ A/m.
 \end{equation}
 We note also that ${\bar l_R \bar B_R \over \bar E_R \bar t_R}=
-{\bar l \bar B \over \bar E \bar t}=1$ so the second Maxwell equation
+{\bar l \bar B \over \bar E \bar t}=1$ so the second Maxwell's equation
 remains:
 \begin{equation}
 \nabla \times {\bf E}=-{\partial {\bf B} \over \partial t}.
@@ -2351,11 +2458,175 @@ ${\bar t_R \bar J_R \over \bar \rho_R \bar l_R}={\bar t \bar J
 \begin{equation}
 {\partial \rho \over \partial t}=-\nabla \cdot {\bf J}.
 \end{equation}
+
+The form of the Schr\"odinger equation in Rydberg a.u.
+can be found starting from Eq.~\ref{segen} and using:
+$\bar p_{R}=\bar p$, $\bar C_R \bar A_R= \bar C \bar A$,
+$\bar C_R \bar V_R= {1\over 2} \bar C \bar V$,  
+${\bar C_R \hbar \bar B_R \over \bar m_R}
+= {1\over 2} {\bar C \hbar \bar B \over \bar m}$,
+and $\bar E_R={1\over 2} \bar E$ leading to:
+\begin{equation}
+\left[{1\over 2m} ({\bf p}- q {\bf A})^2 + 
+q \phi - 
+{q \over 2 m} 
+{\boldsymbol \sigma} \cdot {\bf B} \right]
+\Psi({\bf r})= E \Psi({\bf r})
+\end{equation}
+where all quantities are expressed in Rydberg a.u.. \\
+
+For an electron 
+$m={1\over 2}$ and $q=-\sqrt{2}$ and one should write:
+\begin{equation}
+\left[({\bf p}+ \sqrt{2} {\bf A})^2  
+- \sqrt{2} \phi + \sqrt{2}
+{\boldsymbol \sigma} \cdot {\bf B} \right]
+\Psi({\bf r})= E \Psi({\bf r}).
+\end{equation}
+However this form is rarely used. One prefers to introduce the potential
+energy of the electron $V=q\phi$ and keep the symbol $\mu_B={q \over 2 m}
+=-\sqrt{2}$ 
+so that the equation is written:
+\begin{equation}
+\left[({\bf p}+ \sqrt{2} {\bf A})^2  
++ V - \mu_B {\boldsymbol \sigma} \cdot {\bf B} \right]
+\Psi({\bf r})= E \Psi({\bf r}).
+\end{equation}
+When ${\bf A}=0$ we can write explicitly ${\bf p}=-i \nabla$, and
+the Schr\"odinger equation becomes:
+\begin{equation}
+\left[-\nabla^2  
++ V - \mu_B {\boldsymbol \sigma} \cdot {\bf B} \right]
+\Psi({\bf r})= E \Psi({\bf r}).
+\end{equation}
+}
+\newpage
+
+\section{\color{coral} Appendix B: Gaussian atomic units}
+
+{\color{steelblue}
+It is possible to make the electromagnetic equations in a.u. look like 
+those of the c.g.s.-Gaussian system. This requires the modification of 
+the units of the magnetic flux density, vector potential, magnetic field 
+flux, magnetic dipole moment, magnetization, and magnetic field strength, 
+while the other units remain unchanged. 
+We discuss these quantities here using a subscript $G$ to identify the
+modified units. Although the unit of inductance is not modified 
+we discuss it since it depends on the definition of the magnetic field flux.
+In order to avoid confusion we use $\alpha$ which is the same in all
+systems, but these equations are sometimes written using the speed of light
+$c={1\over \alpha}$ instead of $\alpha$.
+\\
+
+\noindent {\bf Magnetic flux density:\\}
+The definition of the Lorentz force in these units should be:
+\begin{equation}
+{\bf F}=\alpha q ({\bf v}\times {\bf B}).
+\end{equation}
+Therefore we must have
+${\bar C_G \bar v_G \bar B_G \over \bar f_G} = \alpha$. Since one
+takes $\bar C_G=\bar C$, $\bar v_G=\bar v$ and $\bar f_G=\bar f$, we have 
+\begin{equation}
+\bar B_G=\alpha {\hbar \over e a_B^2}=\alpha \bar B=\barbg\ T.
+\end{equation}
+With this conversion factor we have ${\bar l_G \bar B_G \over \bar E_G
+\bar t_G}=\alpha {\bar l \bar B \over \bar E
+\bar t}=\alpha$ and the second Maxwell's equation becomes:
+\begin{equation}
+\nabla \times {\bf E}=-\alpha {\partial {\bf B} \over \partial t}.
+\end{equation}\\
+{\bf Vector potential:\\}
+We still have ${\bf B}=\nabla \times {\bf A}$, therefore:
+\begin{equation}
+\bar A_G=\bar B_G \bar l_G=\alpha \bar A= \baravg\ T.m
+\end{equation}
+When the vector potential is time dependent it gives rise to an electric field
+given by:
+\begin{equation}
+{\bf E}=-\nabla \Phi - \alpha {\partial {\bf A} \over \partial t}
+\end{equation}
+since ${\bar A_G \over \bar t_G \bar E_G}=\alpha
+{\bar A \over \bar t \bar E}=\alpha$.\\
+
+\noindent {\bf Magnetic field flux:\\}
+We still have:
+\begin{equation}
+\bar \Phi_G=\bar B_G \bar l_G^2=\alpha \bar \Phi=\barwbg\ Wb.
+\end{equation}\\
+{\bf Inductance:\\}
+To have the same equation as in the c.g.s.-Gaussian system:
+\begin{equation}
+L=\alpha {\Phi \over I},
+\end{equation} 
+we must have ${\bar \Phi_G \over \bar I_G \bar Y_G} = \alpha$ or: 
+\begin{equation}
+\bar Y_G={\bar \Phi_G \over \alpha \bar I_G}=\bar Y.
+\end{equation}\\
+{\bf Magnetic dipole moment:\\}
+To have the same equation as in the c.g.s.-Gaussian system:
+\begin{equation}
+{\boldsymbol \mu}=\alpha I A \hat {\bf n},
+\label{magdipcgs}
+\end{equation}
+we must have ${\bar I_G \bar l_G^2 \over \bar \mu_G}=\alpha$ or
+\begin{equation}
+\bar \mu_G={\bar I_G \bar l_G^2 \over \alpha} ={1 \over \alpha} \bar \mu= 
+\barmug\ A\cdot m^2.
+\end{equation}\\
+{\bf Magnetization:\\}
+We still have:
+\begin{equation}
+\bar M_G={\bar \mu_G \over \bar l_G^3}={1\over \alpha} \bar M=
+\barmagg\ A/m.
+\end{equation}\\
+{\bf Magnetic field strength:\\}
+The unit of the magnetic field strength is derived from the relationship
+between magnetic field flux, magnetization, and magnetic field strength.
+Since ${\mu_0 \bar J_G \bar l_G \over \bar B_G}=
+{\mu_0 \bar J \bar l \over \alpha \bar B}=4\pi \alpha$ and
+${\bar E_G \bar l_G \over c^2 \bar t_G \bar B_G}=
+{\bar E \bar l \over c^2 \bar t \alpha \bar B}=\alpha$, 
+the fourth Maxwell's equation becomes
+\begin{equation}
+\nabla \times {\bf B}= 4 \pi \alpha {\bf J} + \alpha
+{\partial {\bf E} \over \partial t}.
+\end{equation}
+Since ${\bar M_G \over \bar l_G \bar J_G}=
+{\bar M \over \alpha \bar l \bar J}={1\over \alpha}$ and 
+${\bar P_G \over \bar t_G \bar J_G}={\bar P \over \bar t \bar J}=1$ we
+can write:
+\begin{equation}
+{\bf J}_m={1\over \alpha} \nabla \times {\bf M}
+\end{equation}
+and 
+\begin{equation}
+{\bf J}_d={\partial {\bf P} \over \partial t}.
+\end{equation}
+So the fourth macroscopic Maxwell's equation becomes
+\begin{equation}
+\nabla \times ({\bf B}-4\pi {\bf M})= 4 \pi \alpha {\bf J}_f + \alpha
+{\partial ({\bf E}+4\pi {\bf P}) \over \partial t}.
+\end{equation}
+This suggests the definition of the magnetic field strength as
+${\bf H}={\bf B}-4 \pi {\bf M}$ in addition to the usual equation 
+for the electric induction ${\bf D} = {\bf E}+4\pi {\bf P}$. 
+This gives:
+\begin{equation}
+\nabla \times {\bf H}= 4 \pi \alpha {\bf J}_f + \alpha
+{\partial {\bf D} \over \partial t}.
+\end{equation}
+The unit of magnetic field strength is therefore derived from
+${\mu_0 \bar B_G \over \bar H_G}=1$ or ${\bar M_G \over \bar H_G}=4 \pi$ that
+gives
+\begin{equation}
+\bar H_G = \mu_0 \bar B_G=\alpha \mu_0 \bar B={\bar M_G \over 4 \pi}= 
+{1\over \alpha} \bar H=\barhg\ A/m.
+\end{equation}
 }
 
 \newpage
 
-\section{\color{coral} Appendix B}
+\section{\color{coral} Appendix C: Conversion factors tables}
 
 This Appendix collects the conversion factors discussed in the text
 and gives their absolute and relative errors. 
@@ -2550,7 +2821,15 @@ These values are updated to October 2019.
      Magnetization: \M_R=                    4.42536571420E+07   A/m
      Magnetic field: \H_R=                   3.52159414202E+06   A/m
 
-     Physical constants in atomic units:
+     Conversion factors (Gaussian atomic units - SI):
+     Magnetic induction: \B_G=               1.71525554109E+03   T
+     Vector potential: \A_G=                 9.0767414322E-08    T m
+     Magnetic field flux: \Phi_G=            4.80320471520E-18   Wb
+     Magnetic dipole: \mu_G=                 2.5417464732E-21    A m^2 (J/T)
+     Magnetization: \M_G=                    1.71525554016E+10   A/m
+     Magnetic field: \H_G=                   1.36495698941E+09   A/m
+
+     Physical constants in Hartree atomic units:
      Speed of light:                         1.37035999084E+02
      atomic mass unit:                       1.8228884862E+03
 
@@ -2681,6 +2960,14 @@ These values are updated to October 2019.
      \M_R =                       6.84E-03 A/m              1.55E-10
      \H_R =                       5.44E-04 A/m              1.55E-10
 
+
+     Errors of conversion factors (Gaussian atomic units - SI):
+     \B_G =                       7.82E-07 T                4.56E-10
+     \A_G =                       2.75E-17 T m              3.03E-10
+     \phi_G =                     7.24E-28 Wb               1.51E-10
+     \mu_G =                      1.15E-30 J/T              4.54E-10
+     \M_G =                       5.24E+00 A/m              3.05E-10
+     \H_G =                       4.17E-01 A/m              3.05E-10
 \end{verbatim}
 
 \newpage
@@ -2696,3 +2983,4 @@ J. Wiley and Sons (1999).
 \end{enumerate}
 
 \end{document}
+

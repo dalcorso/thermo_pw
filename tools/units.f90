@@ -46,25 +46,27 @@ REAL(DP) :: barmry, bartry, barcry, barnury, barvry, barary, barfry,   &
             barphiry, bardipry, barpolarry, bardry, barohmry, barbry,  &
             baravry, barwbry, baryry, barmury, barmagry, barhry
 
-REAL(DP) :: rydbergerr, alphaerr, amuerr, meerr, mu0err, epsilon0err,      &
-            abohrerr, hartreeerr, bohrmagerr, barterr, barnuerr, barverr,  &
-            baraerr, barperr, barferr, barwerr, barprerr, barierr,         &
-            barrhoerr, barcurerr, bareerr, barphierr, barcaperr, bardiperr,&
-            barpolarerr, barderr, barberr, baraverr, baryerr, barmagerr,   &
-            barherr, itoierr, rhotorhoerr, curtocurerr, etoeerr,           &
-            phitophierr, captocaperr, diptodiperr, polartopolarerr, dtoderr, & 
-            ohmtoohmerr, kappaerr, btoberr, avtoaverr, wbtowberr, ytoyerr, &
-            mutomuerr, magtomagerr, htoherr, baricgserr, barccgserr,       &
-            barrhocgserr, barcurcgserr, barecgserr, barphicgserr,          &
-            barcapcgserr, bardipcgserr, barpolarcgserr, bardcgserr,        &
-            barohmcgserr, barbcgserr, baravcgserr, barwbcgserr, barmuerr,  &
-            barycgserr, barmucgserr, barmagcgserr, barhcgserr, cspeedauerr, &
-            amuauerr, kappaaerr, barmryerr, bartryerr, barnuryerr, barvryerr,&
-            bararyerr, barfryerr, baruryerr, barwryerr, barprryerr, &
-            bariryerr, barrhoryerr, barcurryerr, bareryerr, barphiryerr, &
-            bardipryerr, barpolarryerr, bardryerr, barbryerr, &
-            baravryerr, baryryerr, barmuryerr, barmagryerr, barhryerr
+REAL(DP) :: barbg, baravg, barwbg, barmug, barmagg, barhg
 
+REAL(DP) :: rydbergerr, alphaerr, amuerr, meerr, mu0err, epsilon0err,        &
+            abohrerr, hartreeerr, bohrmagerr, barterr, barnuerr, barverr,    &
+            baraerr, barperr, barferr, barwerr, barprerr, barierr,           &
+            barrhoerr, barcurerr, bareerr, barphierr, barcaperr, bardiperr,  &
+            barpolarerr, barderr, barberr, baraverr, baryerr, barmagerr,     &
+            barherr, itoierr, rhotorhoerr, curtocurerr, etoeerr,             &
+            phitophierr, captocaperr, diptodiperr, polartopolarerr, dtoderr, & 
+            ohmtoohmerr, kappaerr, btoberr, avtoaverr, wbtowberr, ytoyerr,   &
+            mutomuerr, magtomagerr, htoherr, baricgserr, barccgserr,         &
+            barrhocgserr, barcurcgserr, barecgserr, barphicgserr,            &
+            barcapcgserr, bardipcgserr, barpolarcgserr, bardcgserr,          &
+            barohmcgserr, barbcgserr, baravcgserr, barwbcgserr, barmuerr,    &
+            barycgserr, barmucgserr, barmagcgserr, barhcgserr, cspeedauerr,  &
+            amuauerr, kappaaerr, barmryerr, bartryerr, barnuryerr, barvryerr,&
+            bararyerr, barfryerr, baruryerr, barwryerr, barprryerr,          &
+            bariryerr, barrhoryerr, barcurryerr, bareryerr, barphiryerr,     &
+            bardipryerr, barpolarryerr, bardryerr, barbryerr,                &
+            baravryerr, baryryerr, barmuryerr, barmagryerr, barhryerr,       &
+            barbgerr, baravgerr, barwbgerr, barmugerr, barmaggerr, barhgerr
 
 CHARACTER(LEN=80) :: float_to_latex
 
@@ -593,11 +595,38 @@ IF (ionode) THEN
    WRITE(iunout,*)
 ENDIF
 
+barbg = barb * alphaf
+baravg = barav * alphaf
+barwbg = barwb * alphaf
+barmug = barmu / alphaf
+barmagg = barmag / alphaf
+barhg = barh / alphaf
+
+WRITE(stdout,'(/,5x,"Conversion factors (Gaussian atomic units - SI):")') 
+WRITE(stdout,'(5x,"Magnetic induction: \B_G=",12x,es20.11,"   T")') barbg
+WRITE(stdout,'(5x,"Vector potential: \A_G=",13x,es20.10,"    T m")') baravg
+WRITE(stdout,'(5x,"Magnetic field flux: \Phi_G=",9x,es20.11,"   Wb")') barwbg
+WRITE(stdout,'(5x,"Magnetic dipole: \mu_G=",13x,es20.10,"    A m^2 (J/T)")') &
+                                                                    barmug
+WRITE(stdout,'(5x,"Magnetization: \M_G=",17x,es20.11,"   A/m")') barmagg
+WRITE(stdout,'(5x,"Magnetic field: \H_G=",16x,es20.11,"   A/m")') barhg
+
+
+IF (ionode) THEN
+   WRITE(iunout,'("\def\barbg{",a,"}")') TRIM(float_to_latex(barbg,11))
+   WRITE(iunout,'("\def\baravg{",a,"}")') TRIM(float_to_latex(baravg,10))
+   WRITE(iunout,'("\def\barwbg{",a,"}")') TRIM(float_to_latex(barwbg,11))
+   WRITE(iunout,'("\def\barmug{",a,"}")') TRIM(float_to_latex(barmug,10))
+   WRITE(iunout,'("\def\barmagg{",a,"}")') TRIM(float_to_latex(barmagg,11))
+   WRITE(iunout,'("\def\barhg{",a,"}")') TRIM(float_to_latex(barhg,11))
+   WRITE(iunout,*)
+ENDIF
+
 cspeedau=cspeed/barv
 amuau=amu/barm
 ryev=barphi*0.5_DP
 
-WRITE(stdout,'(/,5x,"Physical constants in atomic units:")') 
+WRITE(stdout,'(/,5x,"Physical constants in Hartree atomic units:")') 
 WRITE(stdout,'(5x,"Speed of light:",22x,es20.11)') cspeedau
 WRITE(stdout,'(5x,"atomic mass unit:",19x,es20.10)') amuau
 
@@ -844,9 +873,6 @@ WRITE(stdout,'(5x,"Magnetization = ",1x,es20.2," statC/cm^2",es15.2)') &
 WRITE(stdout,'(5x,"Magnetic strength = ",es17.2," statC/cm^2 4pi",es11.2)') &
                                  barhcgserr, barhcgserr/barhcgs
 
-
-
-
 barmryerr= meerr / me * barmry
 bartryerr= barterr / bart * bartry
 barnuryerr=barnuerr / barnu * barnury
@@ -930,6 +956,33 @@ WRITE(stdout,'(5x,"\M_R = ",10x,es20.2," A/m", 4x,es18.2)') barmagryerr, &
 WRITE(stdout,'(5x,"\H_R = ",10x,es20.2," A/m", 4x,es18.2)') barhryerr, &
                                                         barhryerr/barhry
 WRITE(stdout,*)
+
+barbgerr=(barberr/barb+alphaerr/alphaf)*barbg
+baravgerr=(baraverr/barav+alphaerr/alphaf)*baravg
+barwbgerr=alphaerr/alphaf * barwbg
+barmugerr=(barmuerr/barmu+alphaerr/alphaf)*barmug
+barmaggerr=(barmagerr/barmag+alphaerr/alphaf)*barmagg
+barhgerr=(barherr/barh+alphaerr/alphaf)*barhg
+
+
+WRITE(stdout,'(/,5x,"Errors of conversion factors &
+                                          &(Gaussian atomic units - SI):")') 
+WRITE(stdout,'(5x,"\B_G = ",10x,es20.2," T", 4x,es20.2)') barbgerr, &
+                                                        barbgerr/barbg
+WRITE(stdout,'(5x,"\A_G = ",10x,es20.2," T m", 2x,es20.2)') baravgerr, &
+                                                          baravgerr/baravg
+WRITE(stdout,'(5x,"\phi_G = ",8x,es20.2," Wb", 3x,es20.2)') barwbgerr, &
+                                                          barwbgerr/barwbg
+WRITE(stdout,'(5x,"\mu_G = ",9x,es20.2," J/T", 4x,es18.2)') barmugerr, &
+                                                        barmugerr/barmug
+WRITE(stdout,'(5x,"\M_G = ",10x,es20.2," A/m", 4x,es18.2)') barmaggerr, &
+                                                        barmaggerr/barmagg
+WRITE(stdout,'(5x,"\H_G = ",10x,es20.2," A/m", 4x,es18.2)') barhgerr, &
+                                                        barhgerr/barhg
+WRITE(stdout,*)
+
+
+
 
 IF (ionode) CLOSE(UNIT=iunout, status='KEEP')
 
