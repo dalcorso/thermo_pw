@@ -182,6 +182,7 @@
 \def\amuau{1.8228884862\times 10^{3}}
 \def\ryev{1.3605693122994\times 10^{1}}
 
+
 \begin{document} 
 \author{Andrea Dal Corso (SISSA - Trieste)}
 \date{}
@@ -988,7 +989,7 @@ so the unit of the current density is $A/m^2$.
 \\
 In SI units the continuity equation is:
 \begin{equation}
-{\partial \rho \over \partial t}=-{\rm div} {\bf J}.
+{\partial \rho \over \partial t}=-\nabla \cdot {\bf J}.
 \label{continuitysi}
 \end{equation}
 \\
@@ -1008,7 +1009,8 @@ Inserting the expressions of $\bar I$ and $\bar l$ we can also write:
 \\
 The continuity equation can be written as:
 \begin{equation}
-{\partial \rho \over \partial t}=-{\bar t \bar J \over \bar \rho \bar l} {\rm div} {\bf J}.
+{\partial \rho \over \partial t}=-{\bar t \bar J \over \bar \rho \bar l} 
+\nabla \cdot {\bf J}.
 \label{continuitygen}
 \end{equation}
 Since ${\bar t \bar J \over \bar \rho \bar l}=1$ the continuity equation 
@@ -1036,12 +1038,12 @@ Eq.~\ref{continuitysi}.
 %Accounting also for the different length units and 
 %using Eq.~\ref{continuitysi} we find:
 %\begin{equation}
-%{1\over 10^{-6} K} {\partial \rho \over \partial t}=-{1\over 10^{-6} K_A} {\rm div} {\bf J},
+%{1\over 10^{-6} K} {\partial \rho \over \partial t}=-{1\over 10^{-6} K_A} \nabla \cdot {\bf J},
 %\label{continuitycgsm0}
 %\end{equation}
 %or in modified c.g.s.-Gaussian units:
 %\begin{equation}
-%{1\over c} {\partial \rho \over \partial t}=-{\rm div} {\bf J}.
+%{1\over c} {\partial \rho \over \partial t}=-\nabla \cdot {\bf J}.
 %\label{continuitycgsm1}
 %\end{equation}
 %\\
@@ -1181,7 +1183,8 @@ can be derived from the Coulomb law:
 \begin{equation}
 {\bf F} = {1\over 4 \pi \epsilon_0} {qq'\over r^3} {\bf r},
 \end{equation}
-so the unit of $\epsilon_0$ is $C^2 \over N\cdot m^2$. Its numerical
+so the unit of $\epsilon_0$ is ${C^2 \over N\cdot m^2}={F\over m}$. 
+Its numerical
 value in these units is given in Eq.~\ref{epsilon0}.
 \\
 
@@ -1825,7 +1828,8 @@ be derived from the equation:
 \mu_0={1\over c^2 \epsilon_0},
 \end{equation}
 where $c$ is the speed of light. Therefore the unit of $\mu_0$ is 
-${N\cdot s^2 \over C^2}={N \over A^2}={m\cdot T \over A}$. Its numerical
+${N\cdot s^2 \over C^2}={N \over A^2}={V\cdot s \over A \cdot m}=
+{H\over m}={m\cdot T \over A}$. Its numerical
 value is given in Eq.~\ref{mu0} and it is approximately $4\pi\times 10^{-7}$.
 \\
 
@@ -2039,9 +2043,9 @@ $\bar H = \barhcgs\ statC/cm^2$.
 \section{\color{coral}Microscopic Maxwell's equations}
 In the SI the microscopic Maxwell's equations are:
 \begin{eqnarray}
-{\rm div}\ {\bf E} &=& {\rho\over {\epsilon_0}}, \\
+\nabla \cdot {\bf E} &=& {\rho\over {\epsilon_0}}, \\
 \nabla \times {\bf E} &=& -{\partial {\bf B} \over \partial t}, \\
-{\rm div}\  {\bf B} &=& 0, \\
+\nabla \cdot {\bf B} &=& 0, \\
 \nabla \times {\bf B} &=& \mu_0{\bf J}+ {1\over c^2}
 {\partial {\bf E} \over \partial t}. 
 \end{eqnarray}
@@ -2049,9 +2053,9 @@ In the SI the microscopic Maxwell's equations are:
 {\color{web-blue} The form of the microscopic Maxwell's equations
 in a.u. has been obtained in the previous text:
 \begin{eqnarray}
-{\rm div}\ {\bf E} &=& 4 \pi \rho, \\
+\nabla \cdot {\bf E} &=& 4 \pi \rho, \\
 \nabla \times {\bf E} &=& -{\partial {\bf B} \over \partial t}, \\
-{\rm div}\  {\bf B} &=& 0, \\
+\nabla \cdot {\bf B} &=& 0, \\
 \nabla \times {\bf B} &=& {4 \pi \over c^2} {\bf J}+ {1\over c^2}
 {\partial {\bf E} \over \partial t}, 
 \end{eqnarray}
@@ -2063,9 +2067,9 @@ other quantities are measured in a.u..
 {\color{orange} The form of the microscopic Maxwell's equations
 in the c.g.s-Gaussian system has been discussed in the previous text:
 \begin{eqnarray}
-{\rm div}\ {\bf E} &=& 4 \pi \rho, \\
+\nabla \cdot {\bf E} &=& 4 \pi \rho, \\
 \nabla \times {\bf E} &=& -{1\over c} {\partial {\bf B} \over \partial t}, \\
-{\rm div}\  {\bf B} &=& 0, \\
+\nabla \cdot {\bf B} &=& 0, \\
 \nabla \times {\bf B} &=& {4 \pi \over c} {\bf J}+ {1\over c}
 {\partial {\bf E} \over \partial t}, 
 \end{eqnarray}
@@ -2075,20 +2079,21 @@ other quantities are measured in c.g.s.-Gaussian units.
 
 \newpage
 \section{\color{coral}Macroscopic Maxwell's equations}
-In the SI the macroscopic Maxwell's equations can be formally
-obtained by dividing the charge density into a free part and a
-bound part $\rho=\rho_f+\rho_b$ with $\rho_b=-{\rm div} {\bf P}$
+In the SI the macroscopic Maxwell's equations can be formally obtained 
+first by averaging the microscopic equations and then dividing the 
+macroscopic charge density into a free part and a
+bound part $\rho=\rho_f+\rho_b$ with $\rho_b=-\nabla \cdot {\bf P}$
 where ${\bf P}$ is the polarization.
-Similarly the current density can be divided into a free part, a 
-magnetization part 
+Similarly the macroscopic current density is divided into a free part, a 
+magnetization part, 
 and a displacement part with ${\bf J}={\bf J}_f + {\bf J}_m + {\bf J}_d$ where
 ${\bf J}_m=\nabla \times {\bf M}$ and ${\bf J}_d={\partial {\bf P}\over 
 \partial t}$.
 Inserting these expressions we have:
 \begin{eqnarray}
-{\rm div}\ {\bf D} &=& \rho_f, \\
+\nabla \cdot {\bf D} &=& \rho_f, \\
 \nabla \times {\bf E} &=& -{\partial {\bf B} \over \partial t}, \\
-{\rm div}\  {\bf B} &=& 0, \\
+\nabla \cdot {\bf B} &=& 0, \\
 \nabla \times {\bf H} &=& {\bf J}_f+ {\partial {\bf D} \over \partial t}. 
 \end{eqnarray}
 where ${\bf D}=\epsilon_0 {\bf E}+{\bf P}$ and ${\bf H}={{\bf B}\over \mu_0}-
@@ -2096,19 +2101,19 @@ where ${\bf D}=\epsilon_0 {\bf E}+{\bf P}$ and ${\bf H}={{\bf B}\over \mu_0}-
 \\
 
 {\color{web-blue} The form of the macroscopic Maxwell's equations
-in a.u. has been discussed in the previous text. Also in these
-units we can write $\rho=\rho_f+\rho_b$ with $\rho_b=-{\rm div} {\bf P}$
+in a.u. has been discussed in the previous text.
+We can write $\rho=\rho_f+\rho_b$ with $\rho_b=-\nabla \cdot {\bf P}$
 where ${\bf P}$ is the polarization.
 Similarly the current density can be divided into a free part, a magnetization
-part
+part,
 and a displacement part with ${\bf J}={\bf J}_f + {\bf J}_m + {\bf J}_d$ where
 ${\bf J}_m=\nabla \times {\bf M}$ and ${\bf J}_d={\partial {\bf P}\over 
 \partial t}$
 We have:
 \begin{eqnarray}
-{\rm div}\ {\bf D} &=& 4 \pi \rho_f, \\
+\nabla \cdot {\bf D} &=& 4 \pi \rho_f, \\
 \nabla \times {\bf E} &=& -{\partial {\bf B} \over \partial t}, \\
-{\rm div}\  {\bf B} &=& 0, \\
+\nabla \cdot {\bf B} &=& 0, \\
 \nabla \times {\bf H} &=& 4 \pi {\bf J}_f+ {\partial {\bf D} \over 
 \partial t}. 
 \end{eqnarray}
@@ -2121,17 +2126,17 @@ measured in a.u..
 
 {\color{orange} The form of the macroscopic Maxwell's equations
 in the c.g.s-Gaussian system has been discussed in the previous text.
-In these units $\rho=\rho_f+\rho_b$ with $\rho_b=-{\rm div} {\bf P}$
+In these units $\rho=\rho_f+\rho_b$ with $\rho_b=-\nabla \cdot {\bf P}$
 where ${\bf P}$ is the polarization.
 Similarly the current density can be divided into a free part, a 
-magnetization part
+magnetization part,
 and a displacement part with ${\bf J}={\bf J}_f + {\bf J}_m + {\bf J}_d$ where
 ${\bf J}_m=c \nabla \times {\bf M}$ and ${\bf J}_d={\partial {\bf P}\over 
 \partial t}$
 \begin{eqnarray}
-{\rm div}\ {\bf D} &=& 4 \pi \rho_f, \\
+\nabla \cdot {\bf D} &=& 4 \pi \rho_f, \\
 \nabla \times {\bf E} &=& -{1\over c} {\partial {\bf B} \over \partial t}, \\
-{\rm div}\  {\bf B} &=& 0, \\
+\nabla \cdot {\bf B} &=& 0, \\
 \nabla \times {\bf H} &=& {4 \pi \over c} {\bf J}_f+ {1\over c}
 {\partial {\bf D} \over \partial t}, 
 \end{eqnarray}
