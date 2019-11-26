@@ -14,6 +14,8 @@ SUBROUTINE gen_qpoints_tpw (ibrav, at_, bg_, nat, tau, ityp, nk1, nk2, nk3, &
   USE symm_base,  ONLY : set_sym_bl, find_sym, s, irt, nsym, &
                          nrot, t_rev, time_reversal,  sname, &
                          allfrac, remove_sym
+  USE ifc,        ONLY : m_loc
+  USE noncollin_module, ONLY : nspin_mag
   USE initial_conf, ONLY : nr1_save, nr2_save, nr3_save
   USE mp_world,     ONLY : world_comm, mpime, nproc
   !
@@ -25,23 +27,39 @@ SUBROUTINE gen_qpoints_tpw (ibrav, at_, bg_, nat, tau, ityp, nk1, nk2, nk3, &
   INTEGER :: nqx, nq
   REAL(DP) :: q(3,nqx), wq(nqx)
   ! local
-  REAL(DP) :: xqq(3), mdum(3,nat)
-  LOGICAL :: magnetic_sym=.FALSE., skip_equivalence=.FALSE.
+  REAL(DP) :: xqq(3)
+  LOGICAL :: skip_equivalence=.FALSE., magnetic_sym, minus_q
   !
   time_reversal = .true.
+  magnetic_sym=(nspin_mag==4)
+  minus_q=.TRUE.
   t_rev(:) = 0
   xqq (:) =0.d0
   at = at_
   bg = bg_
   CALL set_sym_bl ( )
   !
-  CALL kpoint_grid_tpw ( nrot, time_reversal, skip_equivalence, s, &
-        t_rev, bg, nqx, 0,0,0, nk1,nk2,nk3, nq, q, wq, world_comm, mpime, nproc)
+  !   Here the q points are reduced with the symmetry of the Bravais 
+  !   lattice that has time_reversal=.TRUE. also in magnetic systems.
   !
-  CALL find_sym ( nat, tau, ityp, .NOT.time_reversal, mdum )
+  CALL kpoint_grid_tpw ( nrot, time_reversal, skip_equivalence, s, &
+        t_rev, bg, nqx, 0,0,0, nk1,nk2,nk3, nq, q, wq, &
+                                       world_comm, mpime, nproc)
+  !
+  !   The q points are then reopened with the point group of the
+  !   crystal that accounts for magnetism if present in the
+  !   dynamical matrices files
+  !
+  CALL find_sym ( nat, tau, ityp, magnetic_sym, m_loc )
   IF ( .NOT. allfrac ) CALL remove_sym ( nr1_save, nr2_save, nr3_save )
   !
-  CALL irreducible_BZ (nrot, s, nsym, time_reversal, magnetic_sym, &
+  !   
+  !  The points at q and -q have the same phonon frequencies also
+  !  in the magnetic case and minus_q is always .TRUE.
+  !  magnetic_sym has to be considered .FALSE. because .TRUE. should
+  !  be used only for the electronic bands.
+  !
+  CALL irreducible_BZ (nrot, s, nsym, minus_q, .FALSE., &
                        at, bg, nqx, nq, q, wq, t_rev)
   !
   RETURN
