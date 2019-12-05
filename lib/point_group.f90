@@ -8664,7 +8664,7 @@ CONTAINS
         ENDDO 
 
         SELECT CASE (group_b)
-           CASE(2)
+           CASE(4)
       !
       !    C_2
       !
