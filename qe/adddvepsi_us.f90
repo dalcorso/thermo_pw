@@ -5,7 +5,7 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-SUBROUTINE adddvepsi_us_tpw(nbnd_occ,becp1,becp2,ipol,kpoint,dvpsi)
+SUBROUTINE adddvepsi_us_tpw(nbnd_occ,becp1,becp2,ipol,dvpsi)
   ! This subdoutine adds to dvpsi the terms which depend on the augmentation
   ! charge. It assumes that the variable dpqq, has been set and it is in
   ! the crystal basis.
@@ -26,7 +26,7 @@ SUBROUTINE adddvepsi_us_tpw(nbnd_occ,becp1,becp2,ipol,kpoint,dvpsi)
 
   implicit none
 
-  integer, intent(in) :: ipol, kpoint, nbnd_occ
+  integer, intent(in) :: ipol, nbnd_occ
   TYPE(bec_type), intent(in) :: becp1
   TYPE(bec_type), intent(in) :: becp2
   COMPLEX(KIND=DP), INTENT(INOUT) :: dvpsi(npwx*npol,nbnd)

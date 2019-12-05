@@ -207,7 +207,7 @@ SUBROUTINE phescf_tpw()
            ! ... calculate the dielectric tensor epsilon
            !
            IF (.NOT. done_epsil) THEN
-              CALL dielec()
+              CALL dielec_tpw()
            ELSE
               CALL summarize_epsilon()
            ENDIF

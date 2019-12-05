@@ -42,6 +42,7 @@ compute_int3_coeff.o \
 control_qe.o \
 ccg_psi.o \
 deallocate_ph_tpw.o \
+dielec.o \
 do_cg_e.o \
 do_cg_ph.o \
 do_lanczos.o \
@@ -51,12 +52,14 @@ drhodv.o \
 drhodvnl.o \
 drhodvus.o \
 dvanqq.o \
+dvpsi_e.o \
 dveqpsi_us.o \
 dveqpsi_us_only.o \
 dvqpsi_us.o \
 dvqpsi_us_only.o \
 dv_of_drho_clf.o \
 dv_of_drho_tran.o \
+dvkb3.o \
 dyndiag.o \
 dynmat0.o \
 electrons.o \

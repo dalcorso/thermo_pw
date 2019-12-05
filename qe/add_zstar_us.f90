@@ -27,7 +27,7 @@ subroutine add_zstar_us_tpw()
   USE noncollin_module, ONLY : noncolin, npol
   USE wavefunctions, ONLY : evc
   USE uspp,      ONLY : vkb, nkb, okvan
-  USE qpoint,    ONLY : nksq, npwq
+  USE qpoint,    ONLY : nksq, npwq, ikks
   USE efield_mod, ONLY : zstarue0, zstareu0, zstarue0_rec
   USE control_ph, ONLY : zue, zeu, done_start_zstar, rec_code_read
   USE ph_restart, ONLY : ph_writefile
@@ -45,7 +45,7 @@ subroutine add_zstar_us_tpw()
   IMPLICIT NONE
 
   INTEGER :: ik, ig, ipol, jpol, nrec, mode, ipert, imode0, npe, irr
-  INTEGER :: na, ierr
+  INTEGER :: na, ierr, ikk
 
   REAL(DP) :: weight
   COMPLEX(DP) :: tpibai, tpibac
@@ -83,15 +83,16 @@ subroutine add_zstar_us_tpw()
 
   ALLOCATE (dvkb(npwx,nkb,3))
   DO ik = 1, nksq
-     npwq = ngk(ik)
-     npw=ngk(ik)
-     weight = wk (ik)
-     IF (nksq>1) call get_buffer (evc, lrwfc, iuwfc, ik)
-     call init_us_2 (npw, igk_k(1,ik), xk (1, ik), vkb)
+     ikk=ikks(ik)
+     npwq = ngk(ikk)
+     npw=ngk(ikk)
+     weight = wk (ikk)
+     IF (nksq>1) call get_buffer (evc, lrwfc, iuwfc, ikk)
+     call init_us_2 (npw, igk_k(1,ikk), xk (1, ikk), vkb)
      !
      ! Calculates  | d/dk beta >
      !
-     call dvkb3(ik,dvkb)
+     call dvkb3_tpw(ik,dvkb)
      !
      !   alphadk = <-i d/dk d/du beta|psi>
      !   becp2 = < -i d/dk beta | psi>
@@ -103,12 +104,12 @@ subroutine add_zstar_us_tpw()
         DO ipol = 1, 3
            DO ig = 1, npw
               aux1 (ig, :) = evc(ig,:) *  & 
-                ( xk(ipol,ik) + g(ipol,igk_k(ig,ik)) )
+                ( xk(ipol,ikk) + g(ipol,igk_k(ig,ikk)) )
            ENDDO
            IF (noncolin) THEN
               DO ig = 1, npw
                  aux1 (ig+npwx, :) = evc(ig+npwx,:) * & 
-                ( xk(ipol,ik) + g(ipol,igk_k(ig,ik)) )
+                ( xk(ipol,ikk) + g(ipol,igk_k(ig,ikk)) )
               ENDDO
            ENDIF
            CALL calbec(npw, dvkb(:,:,jpol), aux1, alphadk(ipol))
@@ -128,12 +129,12 @@ subroutine add_zstar_us_tpw()
            aux1=(0.d0,0.d0)
            DO ig = 1, npw
               aux1 (ig, :) = dpsi(ig,:) *           &
-                   ( xk(ipol,ik) + g(ipol,igk_k(ig,ik)) )
+                   ( xk(ipol,ikk) + g(ipol,igk_k(ig,ikk)) )
            ENDDO
            IF (noncolin) THEN
               DO ig = 1, npw
                  aux1 (ig+npwx, :) = dpsi(ig+npwx,:) *           &
-                      ( xk(ipol,ik) + g(ipol,igk_k(ig,ik)) )
+                      ( xk(ipol,ikk) + g(ipol,igk_k(ig,ikk)) )
               ENDDO
            ENDIF
            CALL calbec ( npw, vkb, aux1, alphapp(ipol) )

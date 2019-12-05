@@ -134,7 +134,7 @@ subroutine compute_drhous_tpw (drhous, dbecsum, wgg, becq, alpq)
            dpsi_save=dpsi
            DO jpol=1,3
               dvpsi=(0.0,0.0)
-              call dvpsi_e(ik, jpol)
+              call dvpsi_e_tpw(ik, jpol)
 !
 ! NB: The minus sign is due to the fact that dpsi_save contains
 !     -|psi_j><psi_j| dS/du |psi_i>

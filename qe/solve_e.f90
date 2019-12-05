@@ -59,7 +59,7 @@ subroutine solve_e_tpw(drhoscf)
   USE fft_helper_subroutines, ONLY : fftx_ntgrp
 
   USE lrus,                  ONLY : int3_paw
-  USE qpoint,                ONLY : nksq
+  USE qpoint,                ONLY : nksq, ikks, ikqs
   USE eqv,                   ONLY : dpsi, dvpsi
   USE control_lr,            ONLY : nbnd_occ, lgamma
   USE dv_of_drho_lr
@@ -101,6 +101,7 @@ subroutine solve_e_tpw(drhoscf)
   integer :: kter, iter0, ipol, ibnd, iter, lter, ik, ig, is, nrec, ndim, ios
   ! counters
   integer :: ltaver, lintercall, incr, jpol, v_siz
+  integer :: ikk, ikq
 
   real(DP) :: tcpu, get_clock
   ! timing variables
@@ -197,19 +198,21 @@ subroutine solve_e_tpw(drhoscf)
         CALL dnsq_scf (3, .false., 0, 1, .false.)
      !
      do ik = 1, nksq
-        npw = ngk(ik)
+        ikk=ikks(ik)
+        ikq=ikqs(ik)
+        npw = ngk(ikk)
         npwq= npw     ! q=0 always in this routine
-        if (lsda) current_spin = isk (ik)
+        if (lsda) current_spin = isk (ikk)
         !
         ! reads unperturbed wavefunctions psi_k in G_space, for all bands
         !
-        if (nksq.gt.1) call get_buffer (evc, lrwfc, iuwfc, ik)
+        if (nksq.gt.1) call get_buffer (evc, lrwfc, iuwfc, ikk)
         !
         ! compute beta functions and kinetic energy for k-point ik
         ! needed by h_psi, called by ch_psi_all, called by cgsolve_all
         !
-        CALL init_us_2 (npw, igk_k(1,ik), xk (1, ik), vkb)
-        CALL g2_kin(ik)
+        CALL init_us_2 (npw, igk_k(1,ikk), xk (1, ikk), vkb)
+        CALL g2_kin(ikk)
         !
         ! compute preconditioning matrix h_diag used by cgsolve_all
         !
@@ -219,7 +222,7 @@ subroutine solve_e_tpw(drhoscf)
            !
            ! computes/reads P_c^+ x psi_kpoint into dvpsi array
            !
-           call dvpsi_e (ik, ipol)
+           call dvpsi_e_tpw (ik, ipol)
            !
            if (iter > 1) then
               !
@@ -242,13 +245,13 @@ subroutine solve_e_tpw(drhoscf)
                  ENDIF
               ENDIF
               aux2=(0.0_DP,0.0_DP)
-              do ibnd = 1, nbnd_occ (ik), incr
+              do ibnd = 1, nbnd_occ (ikk), incr
                  IF ( dffts%has_task_groups ) THEN
                     call cft_wave_tg (ik, evc, tg_psic, 1, v_siz, ibnd, &
-                                      nbnd_occ (ik) )
+                                      nbnd_occ (ikk) )
                     call apply_dpot(v_siz, tg_psic, tg_dv, 1)
                     call cft_wave_tg (ik, aux2, tg_psic, -1, v_siz, ibnd, &
-                                      nbnd_occ (ik))
+                                      nbnd_occ (ikk))
                  ELSE
                     call cft_wave (ik, evc (1, ibnd), aux1, +1)
                     call apply_dpot(dffts%nnr, aux1, dvscfins(1,1,ipol), current_spin)
@@ -268,7 +271,7 @@ subroutine solve_e_tpw(drhoscf)
            !
            ! Orthogonalize dvpsi to valence states: ps = <evc|dvpsi>
            !
-           CALL orthogonalize(dvpsi, evc, ik, ik, dpsi, npwq, .false.)
+           CALL orthogonalize(dvpsi, evc, ikk, ikk, dpsi, npwq, .false.)
            !
            if (iter == 1) then
               !
@@ -299,8 +302,9 @@ subroutine solve_e_tpw(drhoscf)
 
            conv_root = .true.
 
-           call cgsolve_all (ch_psi_all,cg_psi,et(1,ik),dvpsi,dpsi, &
-              h_diag,npwx,npw,thresh,ik,lter,conv_root,anorm,nbnd_occ(ik),npol)
+           call cgsolve_all (ch_psi_all,cg_psi,et(1,ikk),dvpsi,dpsi, &
+              h_diag,npwx,npw,thresh,ik,lter,conv_root,anorm,&
+              nbnd_occ(ikk),npol)
 
            ltaver = ltaver + lter
            lintercall = lintercall + 1
@@ -316,10 +320,10 @@ subroutine solve_e_tpw(drhoscf)
            ! calculates dvscf, sum over k => dvscf_q_ipert
            !
            IF (noncolin) THEN
-              call incdrhoscf_nc(drhoscf(1,1,ipol),wk(ik),ik, &
+              call incdrhoscf_nc(drhoscf(1,1,ipol),wk(ikk),ik, &
                                  dbecsum_nc(1,1,1,1,ipol), dpsi)
            ELSE
-              call incdrhoscf (drhoscf(1,current_spin,ipol), wk(ik), &
+              call incdrhoscf (drhoscf(1,current_spin,ipol), wk(ikk), &
                             ik, dbecsum(1,1,current_spin,ipol), dpsi)
            ENDIF
         enddo   ! on polarizations

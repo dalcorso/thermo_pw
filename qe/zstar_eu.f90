@@ -28,7 +28,7 @@ subroutine zstar_eu_tpw(drhoscf)
   USE wavefunctions,  ONLY: evc
 
   USE modes,     ONLY : u, nirr, npert
-  USE qpoint,    ONLY : npwq, nksq
+  USE qpoint,    ONLY : npwq, nksq, ikks
   USE eqv,       ONLY : dvpsi, dpsi
   USE efield_mod,   ONLY : zstareu0, zstareu
   USE zstar_add, ONLY : zstareu0_rec
@@ -51,7 +51,7 @@ subroutine zstar_eu_tpw(drhoscf)
   ! output: the change of the scf charge (smooth part only)
 
   integer :: ipol, jpol, icart, na, nu, mu, imode0, irr, &
-       ipert, nrec, mode, ik, ibnd, ierr
+       ipert, nrec, mode, ik, ibnd, ikk, ierr
   ! counters
   real(DP) :: weight
   !  auxiliary space
@@ -66,11 +66,12 @@ subroutine zstar_eu_tpw(drhoscf)
   zstareu0_wrk(:,:)=(0.0_DP, 0.0_DP)
 
   do ik = 1, nksq
-     npw=ngk(ik)
+     ikk=ikks(ik)
+     npw=ngk(ikk)
      npwq = npw
-     weight = wk (ik)
-     if (nksq > 1) call get_buffer(evc, lrwfc, iuwfc, ik)
-     call init_us_2 (npw, igk_k(1,ik), xk (1, ik), vkb)
+     weight = wk (ikk)
+     if (nksq > 1) call get_buffer(evc, lrwfc, iuwfc, ikk)
+     call init_us_2 (npw, igk_k(1,ikk), xk (1, ikk), vkb)
      imode0 = 0
      do irr = 1, nirr
         do ipert = 1, npert (irr)
@@ -91,7 +92,7 @@ subroutine zstar_eu_tpw(drhoscf)
               ! read dpsi(scf)/dE for electric field in jpol direction
               !
               call get_buffer(dpsi, lrdwf, iudwf, nrec)
-              DO ibnd=1,nbnd_occ(ik)
+              DO ibnd=1,nbnd_occ(ikk)
                  zstareu0_wrk(jpol,mode)=zstareu0_wrk(jpol,mode)-weight*&
                      ( zdotc(npw,dpsi(1,ibnd),1,dvpsi(1,ibnd),1) + &
                       zdotc(npw,dvpsi(1,ibnd),1,dpsi(1,ibnd),1) )

@@ -26,6 +26,7 @@ subroutine add_dkmds_tpw(ik,uact,jpol,becp2,alphadk,bedp,alphapp,weight,zstar)
   USE uspp_param, ONLY: nh
   USE phus,       ONLY: alphap
   USE lrus,   ONLY : becp1, dpqq, dpqq_so
+  USE qpoint, ONLY : ikks
   USE control_lr, ONLY : nbnd_occ
   USE becmod,  ONLY : bec_type
 
@@ -42,7 +43,7 @@ subroutine add_dkmds_tpw(ik,uact,jpol,becp2,alphadk,bedp,alphapp,weight,zstar)
   TYPE(bec_type), intent(in) :: alphadk(3), becp2, bedp, alphapp(3)
 
   INTEGER :: ipol, ijkb0, nt, na, ih, jh, ikb, jkb, ibnd, mu, is, &
-             js, ijs, startb, lastb, nbnd_eff
+             js, ijs, startb, lastb, nbnd_eff, ikk
 
   complex(DP), allocatable :: ps1(:,:,:), ps2(:,:),  ps3(:,:,:), ps4(:,:) 
   complex(DP), allocatable :: ps1_nc(:,:,:,:), ps2_nc(:,:,:),  &
@@ -51,7 +52,8 @@ subroutine add_dkmds_tpw(ik,uact,jpol,becp2,alphadk,bedp,alphapp,weight,zstar)
   complex(DP), external :: zdotc
 
   call start_clock('add_dkmds')
-  nbnd_eff=nbnd_occ(ik)
+  ikk=ikks(ik)
+  nbnd_eff=nbnd_occ(ikk)
   if (nkb.gt.0) then 
      if (noncolin) then
         allocate (ps1_nc(nkb,npol,nbnd_eff,3))
