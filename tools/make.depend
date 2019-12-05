@@ -110,3 +110,7 @@ test_colors.o : ../../thermo_pw/lib/gnuplot.o
 test_colors.o : ../../thermo_pw/lib/gnuplot_color.o
 translate.o : ../../Modules/kind.o
 translate.o : ../../thermo_pw/lib/rotate.o
+units.o : ../../Modules/environment.o
+units.o : ../../Modules/io_global.o
+units.o : ../../Modules/kind.o
+units.o : ../../Modules/mp_global.o
