@@ -1,5 +1,7 @@
 New in version 1.2.0
 
+Added documentation on the units used in the code.
+
 Major revision on the multivariate polynomial interpolations. 
 Now the routine can deal with an arbitrary number of variables.
 
