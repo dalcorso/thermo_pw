@@ -171,7 +171,7 @@ MODULE point_group
          hex_op, cub_op, point_group_bravais, find_group_tags,  &
          group_name_schoenflies, group_name_international, &
          group_intersection, find_irreducible, set_rotations_character, &
-         set_irr_times_d
+         set_irr_times_d, angle_rot_tpw, angle_rot_s_tpw
 
 CONTAINS
 
@@ -16845,6 +16845,29 @@ angle_rot_tpw = angle * 180.0_DP / pi
 
 RETURN
 END FUNCTION angle_rot_tpw
+
+!-----------------------------------------------------------------------------
+FUNCTION angle_rot_s_tpw(smat)
+!-----------------------------------------------------------------------------
+!
+!  This subroutine receives an improper rotation matrix and determines the 
+!  rotation angle. 
+!
+USE kinds, ONLY : DP
+IMPLICIT NONE
+
+REAL(DP) :: smat(3,3)
+
+REAL(DP) :: aux_mat(3,3)
+REAL(DP) :: angle_rot_s_tpw
+
+aux_mat=-smat
+angle_rot_s_tpw=mod(angle_rot_tpw(aux_mat)+180.0_DP,360.0_DP)
+
+RETURN
+
+END FUNCTION angle_rot_s_tpw
+
 
 SUBROUTINE group_intersection(code_group_ext_a, code_group_ext_b,   &
                              code_group_ext_c )
