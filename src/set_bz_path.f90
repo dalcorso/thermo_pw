@@ -18,12 +18,18 @@ USE thermo_mod,       ONLY : what
 IMPLICIT NONE
 
 INTEGER :: bzt, i
+LOGICAL :: double_gamma
 !
 !  skip unsupported ibrav
 !
 nqaux=0
 IF (ibrav==91 .OR. ibrav==-13 .OR. ibrav==13 .OR. ibrav==14 .OR. ibrav==0) &
                                                RETURN
+!
+!  cases in which we need to double gamma
+!
+double_gamma=(what=='mur_lc_t'.OR.what=='elastic_constants_t'.OR.&
+              what=='scf_disp'.OR.what=='mur_lc_disp')
 !
 !  first select the Brillouin zone type
 !
@@ -36,69 +42,69 @@ SELECT CASE (bzt)
 CASE (1) 
      IF (long_path) THEN
         npk_label=8
-        IF (what=='mur_lc_t') npk_label=9
+        IF (double_gamma) npk_label=9
      ELSE
         npk_label=4
      ENDIF
 CASE (2)
      IF (long_path) THEN
         npk_label=11
-        IF (what=='mur_lc_t') npk_label=12
+        IF (double_gamma) npk_label=12
      ELSE
         npk_label=6
-        IF (what=='mur_lc_t') npk_label=7
+        IF (double_gamma) npk_label=7
      ENDIF
 CASE(3)
      npk_label=8
-     IF (what=='mur_lc_t') npk_label=9
+     IF (double_gamma) npk_label=9
 CASE(4)
      IF (long_path) THEN
         npk_label=12
-        IF (what=='mur_lc_t') npk_label=13
+        IF (double_gamma) npk_label=13
      ELSE
         npk_label=4
      ENDIF
 CASE(5) 
     IF (long_path) THEN
        npk_label=11
-       IF (what=='mur_lc_t') npk_label=12
+       IF (double_gamma) npk_label=12
     ELSE
        npk_label=5
-       IF (what=='mur_lc_t') npk_label=6
+       IF (double_gamma) npk_label=6
     ENDIF
 CASE(7)
      IF (long_path) THEN
         npk_label=16
-        IF (what=='mur_lc_t') npk_label=17
+        IF (double_gamma) npk_label=17
      ELSE
         npk_label=5
      ENDIF
 CASE (6) 
      npk_label=13
-     IF (what=='mur_lc_t') npk_label=14
+     IF (double_gamma) npk_label=15
 CASE (8) 
      npk_label=12
-     IF (what=='mur_lc_t') npk_label=13
+     IF (double_gamma) npk_label=13
 CASE (9) 
      npk_label=14
-     IF (what=='mur_lc_t') npk_label=15
+     IF (double_gamma) npk_label=15
 CASE (10)
      npk_label=10
-     IF (what=='mur_lc_t') npk_label=11
+     IF (double_gamma) npk_label=11
 CASE (11) 
      npk_label=15
-     IF (what=='mur_lc_t') npk_label=16
+     IF (double_gamma) npk_label=16
 CASE (12) 
      IF (long_path) THEN
         npk_label=12
-        IF (what=='mur_lc_t') npk_label=13
+        IF (double_gamma) npk_label=13
      ELSE
         npk_label=6
      ENDIF
 CASE (13) 
      IF (long_path.OR.old_path) THEN
         npk_label=12
-        IF (what=='mur_lc_t') npk_label=13
+        IF (double_gamma) npk_label=13
      ELSE
         npk_label=4
      ENDIF
@@ -141,7 +147,7 @@ CASE (1)
 !  Simple cubic bz
 !
    IF (long_path) THEN
-      IF (what=='mur_lc_t') THEN
+      IF (double_gamma) THEN
          letter(1:npk_label)= (/ 'gG', 'X ', 'M ', 'gG', 'gG', 'R ', 'X ', &
                                  'R ', 'M ' /)
          wqaux(1:npk_label) = (/  30,   30,   45,    0,   50,   45,     0, & 
@@ -166,7 +172,7 @@ CASE (2)
 !  fcc bz
 !
    IF (long_path) THEN
-      IF (what=='mur_lc_t') THEN
+      IF (double_gamma) THEN
          letter(1:npk_label)= (/ 'gG', 'X ', 'M ', 'K ', 'gG', &
                                  'gG', 'L ', 'W ', 'X ', 'L ', 'K ', 'W ' /)
          wqaux(1:npk_label) = (/ 40,  0,  15,  40,  0,   40,  40, &
@@ -192,7 +198,7 @@ CASE (3)
 !
 !   bcc bz
 !
-   IF (what=='mur_lc_t') THEN
+   IF (double_gamma) THEN
       letter(1:npk_label)= (/ 'gG', 'H ', 'N ', 'gG', 'gG', 'P ', 'H ', &
                               'P ', 'N ' /)  
       wqaux(1:npk_label)=  (/  40,  30,    30,    0,    30,   30,    0, &
@@ -212,7 +218,7 @@ CASE (4)
 ! simple tetragonal lattice
 !
    IF (long_path) THEN
-      IF (what=='mur_lc_t') THEN
+      IF (double_gamma) THEN
          letter(1:npk_label)= (/ 'gG', 'X ', 'M ', 'gG', 'gG', 'Z ', 'R ',  &
                                  'A ', 'Z ', 'X ', 'R ', 'M ', 'A '  /)  
          wqaux(1:npk_label) =  (/  30,   30,   45,  0,  40,   30,  30, &
@@ -237,7 +243,7 @@ CASE (5)
 !   bct c < a
 !
    IF (long_path) THEN
-      IF (what=='mur_lc_t') THEN
+      IF (double_gamma) THEN
          letter(1:npk_label)= (/ 'gG', 'X ', 'M ', 'gG', 'gG', 'Z ', 'Z1', &
                                  'M ', 'X ', 'P ', 'N ', 'gG' /)  
          wqaux(1:npk_label) =  (/  30,   30,   30,  0,  30,   0,   &
@@ -255,7 +261,7 @@ CASE (5)
          letter_path(6)='Z '
       ENDIF
    ELSE
-      IF (what=='mur_lc_t') THEN
+      IF (double_gamma) THEN
          letter(1:npk_label)= (/ 'gG', 'X ', 'M ', 'gG', 'gG', 'Z ' /)
          wqaux(1:npk_label) =  (/  30,   30,   30,  0,  30,   1 /)
          label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
@@ -271,13 +277,13 @@ CASE (6)
 !
 !   bct c > a
 !
-   IF (what=='mur_lc_t') THEN
+   IF (double_gamma) THEN
       letter(1:npk_label)= (/ 'gG ', 'X  ', 'P  ', 'N  ', 'gG ', 'gG ', &
                               'M  ', 'S  ', 'S0 ', 'gG ', 'X  ', 'R  ', &
-                              'gG ', 'M  ' /)  
+                              'gG ', 'gG ', 'M  ' /)  
       wqaux(1:npk_label) =  (/   30,    30,    30,    30,     0,    30,  &  
                                  30,     0,    30,     0,    30,     0,  &  
-                                 30,     1  /)
+                                 0,     30,     1  /)
 
       label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
    ELSE
@@ -295,7 +301,7 @@ CASE (7)
 !  Simple orthorhombic lattice
 !
    IF (long_path) THEN
-      IF (what=='mur_lc_t') THEN
+      IF (double_gamma) THEN
          letter(1:npk_label)= (/ 'gG', 'X ', 'S ', 'Y ', 'gG', 'gG', 'Z ', &
                                  'U ', 'R ', 'T ', 'Z ', 'X ', 'U ', 'Y ', &
                                  'T ', 'S ', 'R '  /)  
@@ -324,7 +330,7 @@ CASE (8)
 !
 !  Face centered Orthorombic case 1
 !
-   IF (what=='mur_lc_t') THEN
+   IF (double_gamma) THEN
       letter(1:npk_label)= (/ 'gG', 'X ', 'A1', 'Y ', 'T ', 'Z ', 'gG',  &
                        'gG', 'Y ', 'X1', 'L ', 'A ', 'Z ' /)  
       wqaux(1:npk_label) =  (/  30,   30,   30,   30,   30,   30,    0, &
@@ -343,7 +349,7 @@ CASE (9)
 !
 !  Face centered orthorhombic case 2
 !
-   IF (what=='mur_lc_t') THEN
+   IF (double_gamma) THEN
       letter(1:npk_label)= (/ 'gG', 'Y ', 'C ', 'D ', 'X ', 'gG', 'gG',  &
                        'Z ', 'D1', 'C1', 'H1', 'D ', 'D1', 'Z ', 'gG' /)  
       wqaux(1:npk_label) =  (/  30,   30,   30,   30,   30,    0,   30,  &
@@ -362,7 +368,7 @@ CASE (10)
 !
 !  Face centered orthorhombic case 3
 !
-   IF (what=='mur_lc_t') THEN
+   IF (double_gamma) THEN
       letter(1:npk_label)= (/ 'gG', 'Y ', 'T ', 'Z ', 'gG', 'gG',  &
                        'X ', 'A1', 'L ', 'A ', 'Z ' /)  
       wqaux(1:npk_label) =  (/  30,   30,   30,   30,   0,   30,  &
@@ -381,7 +387,7 @@ CASE (11)
 !
 !  Body centered orthorhombic
 !
-   IF (what=='mur_lc_t') THEN
+   IF (double_gamma) THEN
       IF (celldm(2) < 1.0_DP .AND. celldm(3) < 1.0_DP ) THEN
          letter(1:npk_label)= (/ 'gG', 'Y ', 'T ', 'W ', 'S ', 'L2', 'Z ', &
                            'gG', 'gG', 'X ', 'Y1', 'L ', 'Z1', 'R ', 'W ', 'L '/) 
@@ -425,7 +431,7 @@ CASE (12)
 !  Base centered orthorhombic
 !
    IF (long_path) THEN
-      IF (what=='mur_lc_t') THEN
+      IF (double_gamma) THEN
          IF (celldm(2) >= 1.0_DP) THEN
             letter(1:npk_label)= (/ 'gG', 'X ', 'S ', 'R ', 'A ', 'Z ', 'gG', &
                                     'gG', 'Y ', 'X1', 'A1', 'T ', 'Y ' /)  
@@ -464,7 +470,7 @@ CASE (13)
 !  simple hexagonal bz
 !
    IF (old_path) THEN
-      IF (what=='mur_lc_t') THEN
+      IF (double_gamma) THEN
          letter(1:npk_label) = (/ 'gG', 'K ', 'M ', 'gG', 'gG', 'A ', 'H ', &
                                   'L ', 'A ', 'M ', 'L ', 'K ', 'H ' /)
          wqaux(1:npk_label) =  (/  30,   30,   30,   0,    30,   30,  30, &
@@ -478,7 +484,7 @@ CASE (13)
          label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
       ENDIF
    ELSEIF (long_path) THEN
-      IF (what=='mur_lc_t') THEN
+      IF (double_gamma) THEN
          letter(1:npk_label) = (/ 'gG', 'M ', 'K ', 'gG', 'gG', 'A ', 'L ', &
                                   'H ', 'A ', 'L ', 'M ', 'H ', 'K ' /)
          wqaux(1:npk_label) =  (/  30,   30,   30,   0,    30,   30,  30, &
