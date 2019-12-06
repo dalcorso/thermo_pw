@@ -8680,22 +8680,22 @@ CONTAINS
 !   See point group manual for the different possibilities.
 !
                       CASE (1)
-                         aux_ind=1
-                      CASE (2)
                          IF (id2==1) THEN
-                           aux_ind=2
+                            aux_ind=2
                          ELSE
-                           aux_ind=1
+                            aux_ind=1
                          ENDIF
-                      CASE (3)
+                      CASE (2)
                          IF (id2==1) THEN
                            aux_ind=3
                          ELSE
                            aux_ind=1
                          ENDIF
-                      CASE (4,6,8,10,11) 
+                      CASE (3)
+                         aux_ind=1
+                      CASE (4,7,9,13,11) 
                          aux_ind=2
-                      CASE (5,7,9,12,13) 
+                      CASE (5,6,8,10,12) 
                          aux_ind=3
                    END SELECT
                 ENDIF
