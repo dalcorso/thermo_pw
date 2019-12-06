@@ -85,7 +85,7 @@ SUBROUTINE q2r_sub(fildyn)
   !
   REAL(DP) :: celldm(6), at(3,3), bg(3,3)
   REAL(DP) :: q(3,48), omega, xq, amass(ntypx), resi
-  REAL(DP) :: epsil(3,3), smat(3,3), angle_rot
+  REAL(DP) :: epsil(3,3), smat(3,3)
   !
   ! Only one image run this routine, but the results are broadcasted 
   ! to all images
