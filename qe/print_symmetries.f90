@@ -205,7 +205,7 @@ SUBROUTINE print_symmetries_tpw ( iverbosity, noncolin, domag )
         ELSE
            CALL set_irr_rap(code_group,nclass_ref,char_mat,name_rap, &
                 name_class,ir_ram)
-           CALL divide_class(code_group,nsym,sr,nclass,nelem,elem,which_irr)
+           CALL divide_class_tpw(code_group,nsym,sr,nclass,nelem,elem,which_irr)
            IF (nclass.ne.nclass_ref) CALL errore('summary','point group ?',1)
            CALL set_class_el_name(nsym,sname,nclass,nelem,elem,elem_name)
         ENDIF

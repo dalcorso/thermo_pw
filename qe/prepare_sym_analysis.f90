@@ -22,7 +22,7 @@
   LOGICAL, INTENT(IN) :: magnetic_sym
   CHARACTER(len=45), INTENT(IN) :: sname(48)
 
-  INTEGER :: nsym_is, isym
+  INTEGER :: nsym_is, isym, ipol, jpol
   REAL(DP) :: sr_is(3,3,48)
   CHARACTER(len=45) :: sname_is(48)
 !
@@ -46,11 +46,12 @@
      ENDDO
      CALL find_group(nsym_is,sr_is,gname_is,code_group_is)
      CALL set_irr_rap(code_group_is,nclass,char_mat,name_rap,name_class,ir_ram)
-     CALL divide_class(code_group_is,nsym_is,sr_is,nclass,nelem,elem,which_irr)
+     CALL divide_class_tpw(code_group_is,nsym_is,sr_is,nclass,nelem,elem,&
+                                                                which_irr)
      CALL set_class_el_name(nsym_is,sname_is,nclass,nelem,elem,elem_name)
   ELSE
      CALL set_irr_rap(code_group,nclass,char_mat,name_rap,name_class,ir_ram)
-     CALL divide_class(code_group,nsym,sr,nclass,nelem,elem,which_irr)
+     CALL divide_class_tpw(code_group,nsym,sr,nclass,nelem,elem,which_irr)
      CALL set_class_el_name(nsym,sname,nclass,nelem,elem,elem_name)
   ENDIF
 

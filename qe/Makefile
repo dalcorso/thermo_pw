@@ -43,6 +43,7 @@ control_qe.o \
 ccg_psi.o \
 deallocate_ph_tpw.o \
 dielec.o \
+divide_class.o \
 do_cg_e.o \
 do_cg_ph.o \
 do_lanczos.o \
