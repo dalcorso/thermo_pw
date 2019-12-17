@@ -56,6 +56,7 @@
 
 \def\barl{5.29177210903\times 10^{-11}}
 \def\barm{9.1093837015\times 10^{-31}}
+\def\barrhom{6.1473168257}
 \def\bart{2.4188843265857\times 10^{-17}}
 \def\barnu{4.1341373335182\times 10^{16}}
 \def\barv{2.18769126364\times 10^{6}}
@@ -128,6 +129,7 @@
 \def\baricgs{1.98571079282\times 10^{7}}
 \def\barccgs{4.80320471388\times 10^{-10}}
 \def\barrhocgs{3.2413632055\times 10^{15}}
+\def\barrhomcgs{6.1473168257\times 10^{-3}}
 \def\barcurcgs{7.0911019670\times 10^{23}}
 \def\barecgs{1.71525554062\times 10^{7}}
 \def\barphicgs{9.07674142975\times 10^{-2}}
@@ -447,6 +449,35 @@ a.m.u. = {\amu\ kg \over \barm\ kg }\ \bar m=\amuau\ \bar m
 \end{equation}
 }
 
+\newpage
+\section{\color{coral}Mass density}
+In the SI the unit of mass density is derived from its definition:
+\begin{equation}
+\rho_m= {d m \over d V},
+\end{equation}
+and it is $kg/m^3$.
+\\
+
+{\color{web-blue} In a.u. the unit of mass density 
+(symbol $\bar \rho_m$) is derived from
+its definition: $\bar \rho_m= {\bar m \over \bar l^3}$.
+The conversion factor with the SI unit is:
+\begin{equation}
+\bar \rho_m = {m_e \over a_B^3}= {\me\ kg \over (\abohr\ m)^3}=
+\barrhom\ kg/m^3.
+\end{equation}
+}
+\\
+
+{\color{orange} In the c.g.s. system the unit of mass density is derived from
+its definition: ${g/cm^3}$. The conversion factor with
+the SI unit is ${g/cm^3}=10^3\ kg/m^3$.
+}
+\\
+
+{\color{green} The conversion factor between the a.u. and the c.g.s. unit is
+$\bar \rho_m=\barrhomcgs\ g/cm^3$.
+
 
 \newpage
 \section{\color{coral}Frequency}
@@ -473,6 +504,7 @@ defined as in the SI.
 $\bar \nu=\barnu\ Hz$.
 \\
 }
+
 
 \newpage
 \section{\color{coral}Speed}
@@ -801,7 +833,6 @@ K = \tilde c_{cgs} \sqrt {10^5 \tilde \mu_0 \over 4 \pi} =
 {\tilde c_{cgs}\over \tilde c} 
 \sqrt {10^5 \over 4 \pi \tilde \epsilon_0}=\sqrt {10^9 \over 4 \pi 
 \tilde \epsilon_0}=\kappa,
-\label{force_wire}
 \end{equation}
 where $\tilde \epsilon_0$ is the numerical value of the vacuum permittivity
 in SI units (Eq.~\ref{epsilon0}).
@@ -1307,7 +1338,6 @@ where we used the fact that ${\bar P \over \bar l \bar \rho}=1$.
 Inserting this expression in the Maxwell's equation we obtain:
 \begin{equation}
 \nabla \cdot ({\bf E}+ 4 \pi {\bf P})=4 \pi \rho_f, 
-\label{aldispau}
 \end{equation}
 that suggests the following definition of the electric displacement:
 \begin{equation}
@@ -1344,7 +1374,6 @@ the link between bound charge and polarization is as in the SI units and
 we obtain:
 \begin{equation}
 \nabla \cdot ({\bf E}+ 4 \pi {\bf P})=4 \pi \rho_f, 
-\label{aldispau}
 \end{equation}
 that suggests the following relationship between electric displacement,
 electric field and polarization:
@@ -2571,7 +2600,7 @@ we must have ${\bar \Phi_G \over \bar I_G \bar Y_G} = \alpha$ or:
 To have the same equation as in the c.g.s.-Gaussian system:
 \begin{equation}
 {\boldsymbol \mu}=\alpha I A \hat {\bf n},
-\label{magdipcgs}
+\label{magdipaucgs}
 \end{equation}
 we must have ${\bar I_G \bar l_G^2 \over \bar \mu_G}=\alpha$ or
 \begin{equation}
@@ -2628,10 +2657,23 @@ gives
 {1\over \alpha} \bar H=\barhg\ A/m.
 \end{equation}
 }
-
 \newpage
 
-\section{\color{coral} Appendix C: Conversion factors tables}
+\section{\color{coral} Appendix C: Magnetization Intensity}
+
+Several authors use the magnetization intensity instead of the
+magnetization. This quantity is defined as:
+\begin{equation}
+{\bf I}=\mu_0 {\bf M},
+\end{equation}
+and has the same unit of the magnetic field (Tesla $T$). 
+The relationship between magnetic field strength, magnetic flux
+density, and magnetization intensity is written as:
+\begin{equation}
+{\bf B}= \mu_0 {\bf H} + {\bf I}.
+\end{equation} 
+
+\section{\color{coral} Appendix D: Conversion factors tables}
 
 This Appendix collects the conversion factors discussed in the text
 and gives their absolute and relative errors. 

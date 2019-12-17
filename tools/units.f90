@@ -26,20 +26,20 @@ REAL(DP) :: hplanck, hbarf, cspeed, e, rydberg, alphaf, amu, me, mu0,      &
 REAL(DP) :: barl, barm, bart, barnu, barv, bara, barp, baram, barf, baru,  &
             barw, barpr, bari, barc, barrho, barcur, bare, barphi, barcap, &
             bardip, barpolar, bard, barohm, barb, barav, barwb, bary,      &
-            barmu, barmag, barh
+            barmu, barmag, barh, barrhom
 
 REAL(DP) :: cspeedau, amuau, kappa, kappaa, kappadiecic, toverg
 
 REAL(DP) :: cmtom, gtokg, ptop, ltol, ftof, utou, prtopr, chtoch, itoi,     &
             rhotorho, curtocur, etoe, phitophi, captocap, diptodip,         &
             polartopolar, dtod, ohmtoohm, btob, avtoav, wbtowb, ytoy,       &
-            mutomu, magtomag, htoh
+            mutomu, magtomag, htoh, rhomtorhom
 
 REAL(DP) :: barlcgs, barmcgs, barvcgs, baracgs, barpcgs, baramcgs, barfcgs, &
             barucgs, barwcgs, barprcgs, baricgs, barccgs, barrhocgs,        &
             barcurcgs, barecgs, barphicgs, barcapcgs, bardipcgs,            &
             barpolarcgs, bardcgs, barohmcgs, barbcgs, baravcgs, barwbcgs,   &
-            barycgs, barmucgs, barmagcgs, barhcgs
+            barycgs, barmucgs, barmagcgs, barhcgs, barrhomcgs
 
 REAL(DP) :: barmry, bartry, barcry, barnury, barvry, barary, barfry,   &
             barury, barwry, barprry, bariry, barrhory, barcurry, barery, &
@@ -66,7 +66,8 @@ REAL(DP) :: rydbergerr, alphaerr, amuerr, meerr, mu0err, epsilon0err,        &
             bariryerr, barrhoryerr, barcurryerr, bareryerr, barphiryerr,     &
             bardipryerr, barpolarryerr, bardryerr, barbryerr,                &
             baravryerr, baryryerr, barmuryerr, barmagryerr, barhryerr,       &
-            barbgerr, baravgerr, barwbgerr, barmugerr, barmaggerr, barhgerr
+            barbgerr, baravgerr, barwbgerr, barmugerr, barmaggerr, barhgerr, &
+            barrhomerr
 
 CHARACTER(LEN=80) :: float_to_latex
 
@@ -151,6 +152,7 @@ ENDIF
 barl=abohr
 barm=me
 bart=hbarf/baru
+barrhom=me/abohr**3
 barnu=1.0_DP/bart
 barv=alphaf * cspeed
 bara=baru * alphaf * cspeed / hbarf
@@ -181,6 +183,7 @@ barh=barmag/4.0_DP/pi
 WRITE(stdout,'(/,5x,"Conversion factors (Atomic units - SI):")') 
 WRITE(stdout,'(5x,"Length: \l=",26x,es20.11,"   m")') barl
 WRITE(stdout,'(5x,"Mass: \m=",27x,es20.10,"    kg")') barm
+WRITE(stdout,'(5x,"Mass density: \rhom=",16x,es20.10,"    kg/m^3")') barrhom
 WRITE(stdout,'(5x,"Time: \t=",30x,es20.13," s")') bart
 WRITE(stdout,'(5x,"Frequency: \nu=",24x,es20.13," Hz")') barnu
 WRITE(stdout,'(5x,"Speed: \v=",27x,es20.11,"   m/s")') barv
@@ -213,6 +216,7 @@ WRITE(stdout,'(5x,"Magnetic strength: \H=",14x,es20.10,"    A/m")') barh
 IF (ionode) THEN
    WRITE(iunout,'("\def\barl{",a,"}")') TRIM(float_to_latex(barl,11))
    WRITE(iunout,'("\def\barm{",a,"}")') TRIM(float_to_latex(barm,10))
+   WRITE(iunout,'("\def\barrhom{",a,"}")') TRIM(float_to_latex(barrhom,10))
    WRITE(iunout,'("\def\bart{",a,"}")') TRIM(float_to_latex(bart,13))
    WRITE(iunout,'("\def\barnu{",a,"}")') TRIM(float_to_latex(barnu,13))
    WRITE(iunout,'("\def\barv{",a,"}")') TRIM(float_to_latex(barv,11))
@@ -247,6 +251,7 @@ ENDIF
 
 cmtom=1.D-2
 gtokg=1.D-3
+rhomtorhom=gtokg/cmtom**3
 kappa=SQRT(1.D9/4.0_DP/pi/epsilon0)
 kappaa=kappa/1.D2/cspeed
 
@@ -280,6 +285,7 @@ htoh=magtomag/4.0_DP/pi
 WRITE(stdout,'(/,5x,"Conversion factors (c.g.s.-Gaussian - SI):")') 
 WRITE(stdout,'(5x,"Length: cm=",16x,es20.1,10x,"   m")') cmtom
 WRITE(stdout,'(5x,"Mass: g=",19x,es20.1,10x,"   kg")') gtokg
+WRITE(stdout,'(5x,"Mass density: g/cm^3=",6x,es20.1,12x," kg/m^3")') rhomtorhom
 WRITE(stdout,'(5x,"Time: s=",32x,"1.0E+00",11x,"  s")') 
 WRITE(stdout,'(5x,"Frequency: Hz=",26x,"1.0E+00",11x,"  Hz")') 
 
@@ -323,6 +329,7 @@ WRITE(stdout,'(5x,"Magnetic strength: statC/cm^2 4 pi=",2x,&
 
 WRITE(stdout,'(/,5x,"C/statC=",3x,es20.11,"  (C/statC)/10c=",es20.11)') kappa,&
                                                    kappadiecic
+WRITE(stdout,'(/,5x,"mu_0/4 pi 10^-7=",3x,es20.11)') mu0/4.0_DP/pi/1.D-7
 
 WRITE(stdout,'(/,5x,"Conversion factors (SI - c.g.s.-Gaussian):")') 
 WRITE(stdout,'(5x,"Length: m=",17x,es20.1,10x,"   cm")') 1.0_DP/cmtom
@@ -410,6 +417,7 @@ ENDIF
 
 barlcgs=barl/cmtom
 barmcgs=me/gtokg
+barrhomcgs=barrhom/rhomtorhom
 barvcgs=barv / cmtom
 baracgs=bara / cmtom
 barpcgs=barp / ptop
@@ -440,6 +448,7 @@ barycgs=bary/ytoy
 WRITE(stdout,'(/,5x,"Conversion factors (Atomic units - c.g.s.-Gaussian):")') 
 WRITE(stdout,'(5x,"Length:",30x,es20.11,"   cm")') barlcgs
 WRITE(stdout,'(5x,"Mass:",31x,es20.10,"    g")') barmcgs
+WRITE(stdout,'(5x,"Mass density:",23x,es20.10,"    g/cm^3")') barrhomcgs
 WRITE(stdout,'(5x,"Time:",34x,es20.13," s")') bart
 WRITE(stdout,'(5x,"Frequency:",29x,es20.13," Hz")') barnu
 WRITE(stdout,'(5x,"Speed:",31x,es20.11,"   cm/s")') barvcgs
@@ -475,6 +484,8 @@ WRITE(stdout,'(5x,"Magnetic strength:",19x,es20.11,"   statC/cm^2 4pi ")') &
 IF (ionode) THEN
    WRITE(iunout,'("\def\barlcgs{",a,"}")') TRIM(float_to_latex(barlcgs,11))
    WRITE(iunout,'("\def\barmcgs{",a,"}")') TRIM(float_to_latex(barmcgs,10))
+   WRITE(iunout,'("\def\barrhomcgs{",a,"}")') &
+                                           TRIM(float_to_latex(barrhomcgs,10))
    WRITE(iunout,'("\def\barvcgs{",a,"}")') TRIM(float_to_latex(barvcgs,11))
    WRITE(iunout,'("\def\baracgs{",a,"}")') TRIM(float_to_latex(baracgs,10))
    WRITE(iunout,'("\def\barpcgs{",a,"}")') TRIM(float_to_latex(barpcgs,11))
@@ -673,6 +684,7 @@ WRITE(stdout,'(5x,"bohr mag = ",6x,es20.2," J/T", 4x,es18.2)') bohrmagerr, &
                                                     bohrmagerr/bohrmag
 WRITE(stdout,*)
 
+barrhomerr=(meerr/me + 3.0_DP * abohrerr/abohr)*barrhom
 barterr=hartreeerr/baru * bart
 barnuerr=barterr/bart * barnu
 barverr=(alphaerr/alphaf)*barv
@@ -700,6 +712,8 @@ barherr=barmagerr/barmag * barh
 WRITE(stdout,'(5x,"Errors of conversion factors (atomic units - SI):")') 
 WRITE(stdout,'(5x,"\l = ",12x,es20.2," m", 4x,es20.2)') abohrerr, abohrerr/barl
 WRITE(stdout,'(5x,"\m = ",12x,es20.2," kg", 3x,es20.2)') meerr, meerr/me
+WRITE(stdout,'(5x,"\rhom = ",9x,es20.2," kg/m^3", es19.2)') barrhomerr, &
+                                                           barrhomerr/barrhom
 WRITE(stdout,'(5x,"\t = ",12x,es20.2," s", 4x,es20.2)') barterr, barterr/bart
 WRITE(stdout,'(5x,"\nu = ",11x,es20.2," s", 4x,es20.2)') barnuerr, &
                                                         barnuerr/barnu
