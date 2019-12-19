@@ -201,10 +201,13 @@ SUBROUTINE matdyn_interp(nq, disp_q, freq_save, startq, lastq, z_save)
         CALL simple_nonanal (nat, epsil_ifc, qhat, zeu, omega, dyn)
         !
      END IF
-
+     !
+     !  The -1 flag is used to get the eigenvectors of the dynamical matrix
+     !  in z
+     !
      CALL dyndiag_tpw(nat,ntyp,amass,ityp,dyn,w2(1,n),z,-1)
      !
-     !  The eigenvectors of the dynamical matrix are given in z_save
+     !  The eigenvectors of the dynamical matrix are saved in z_save
      !
      IF (PRESENT(z_save)) z_save(:,:,n) = z(:,:) 
 

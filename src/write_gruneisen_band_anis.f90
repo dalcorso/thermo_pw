@@ -102,7 +102,7 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
 !  the normalized eigenvectors of the dynamical matrix
 !
         CALL readmodes(nat,nks,k,displa_geo,nwork,igeo,ntyp,ityp_save, &
-                                       amass, iumode)
+                                       amass, -1, iumode)
         CLOSE(UNIT=iumode, STATUS='KEEP')
      ENDIF
   ENDDO

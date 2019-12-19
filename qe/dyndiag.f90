@@ -88,7 +88,7 @@ subroutine dyndiag_tpw (nat,ntyp,amass,ityp,dyn,w2,z,flag)
  deallocate(dyn2)
  !
  !  displacements are eigenvectors divided by sqrt(amass)
- !  if flag=.TRUE. they are given as output of the routine, otherwise
+ !  if flag=1 they are given as output of the routine, otherwise
  !  the output are the eigenvectors of the dynamical matrix
  !
  IF (flag==1) THEN

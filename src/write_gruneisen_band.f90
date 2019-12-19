@@ -83,7 +83,7 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
      CALL errore('write_gruneisen_band','modes are needed',ABS(ios))
      IF (ionode) THEN
         CALL readmodes(nat,nks,k,displa_geo,ngeo(1),igeo,ntyp,ityp_save,  &
-                                                         amass,iumode)
+                                                         amass,-1,iumode)
         CLOSE(UNIT=iumode, STATUS='KEEP')
      ENDIF
   ENDDO
@@ -114,6 +114,7 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
      IF (central_geo==igeo) cgeo_eff=ndata
      omega_data(ndata)=omega_geo(igeo)
   ENDDO
+
 !
 !  Compute the volume at which the Gruneisen parameters and the frequencies
 !  are interpolated

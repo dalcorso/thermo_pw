@@ -6,17 +6,18 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !-----------------------------------------------------------------------
-SUBROUTINE readmodes (nat,nks,q,displa,ngeo,igeo,ntyp,ityp,amass,inunit)
+SUBROUTINE readmodes (nat,nks,q,displa,ngeo,igeo,ntyp,ityp,amass,iflag,inunit)
   !-----------------------------------------------------------------------
   !
   !   read modes from a file and transform them into eigenvectors
-  !   of the dynamical matrix
+  !   of the dynamical matrix if iflag==1, otherwise assumes to
+  !   read the eigenvectors and copy them in displa
   !
   USE kinds, ONLY: dp
   USE constants, ONLY : amu_ry
   IMPLICIT NONE
   ! input
-  INTEGER, INTENT(IN) :: nat, nks, igeo, ngeo, ntyp, inunit
+  INTEGER, INTENT(IN) :: nat, nks, igeo, ngeo, ntyp, iflag, inunit
   INTEGER, INTENT(IN) :: ityp(nat)
   REAL(DP), INTENT(IN) :: q(3,nks), amass(ntyp)
   COMPLEX(DP), INTENT(INOUT) :: displa(3*nat,3*nat,ngeo,nks)
@@ -44,17 +45,21 @@ SUBROUTINE readmodes (nat,nks,q,displa,ngeo,igeo,ntyp,ityp,amass,inunit)
            nta = ityp(na)
            sna=(na-1)*3
            READ (inunit,9020) (displa(sna+ipol,i,igeo,iq),ipol=1,3)
-           DO ipol=1,3
-              displa(sna+ipol,i,igeo,iq)=displa(sna+ipol,i,igeo,iq)* &
-                                      SQRT(amu_ry*amass(nta))
+           IF (iflag==1) THEN
+              DO ipol=1,3
+                 displa(sna+ipol,i,igeo,iq)=displa(sna+ipol,i,igeo,iq)* &
+                                         SQRT(amu_ry*amass(nta))
+              END DO
+           END IF
+        END DO
+        IF (iflag==1) THEN
+           znorm = 0.0d0
+           DO j=1,nat3
+              znorm=znorm+ABS(displa(j,i,igeo,iq))**2
            END DO
-        END DO
-        znorm = 0.0d0
-        DO j=1,nat3
-           znorm=znorm+ABS(displa(j,i,igeo,iq))**2
-        END DO
-        znorm = SQRT(znorm)
-        displa(:,i,igeo,iq)=displa(:,i,igeo,iq)/znorm
+           znorm = SQRT(znorm)
+           displa(:,i,igeo,iq)=displa(:,i,igeo,iq)/znorm
+        END IF
      END DO   
      READ(inunit,*)
   END DO
