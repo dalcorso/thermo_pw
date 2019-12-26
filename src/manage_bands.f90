@@ -23,8 +23,7 @@ USE io_global,        ONLY : stdout
 
 IMPLICIT NONE
 
-LOGICAL :: exit_status
-INTEGER :: nspin0, ierr
+INTEGER :: nspin0, exit_status, ierr
 CHARACTER(LEN=256) :: filedata, filerap, fileout, gnu_filename, filenameps
  
 ierr=0
@@ -51,6 +50,7 @@ IF (.NOT.only_bands_plot) THEN
    WRITE(stdout,'(2x,76("+"),/)')
    CALL set_fft_mesh()
    CALL do_pwscf(exit_status, .FALSE.)
+   IF (exit_status /=0) RETURN
 ENDIF
 
 IF (ldos_syn_1) THEN

@@ -38,11 +38,12 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   USE initial_param,    ONLY : ethr0
   USE cell_base,        ONLY : fix_volume, fix_area
   USE control_flags,    ONLY : conv_elec, gamma_only, ethr, lscf
-  USE control_flags,    ONLY : conv_ions, istep, nstep, restart, lmd, lbfgs
+  USE control_flags,    ONLY : conv_ions, istep, nstep, restart, lmd, lbfgs, &
+                               io_level
   USE command_line_options, ONLY : command_line
   USE force_mod,        ONLY : lforce, lstres, sigma, force
   USE check_stop,       ONLY : check_stop_init, check_stop_now
-  USE basis,            ONLY : starting_pot, startingconfig
+  USE basis,            ONLY : starting_pot, starting_wfc, startingconfig
   USE mp_images,        ONLY : intra_image_comm
   USE extrapolation,    ONLY : update_file, update_pot
   USE scf,              ONLY : rho
@@ -81,10 +82,15 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   ELSE
      starting_pot ='file'
      startingconfig='file'
+     starting_wfc = 'atomic+random'
      lscf=.FALSE.
      lbfgs=.FALSE.
      lforce=.FALSE.
      lstres=.FALSE.
+!
+!   in the nscf case we save the wavefunctions to allow restart
+!
+     IF (io_level<1) io_level=1
   ENDIF
   ethr=ethr0
   istep=0

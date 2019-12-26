@@ -765,6 +765,7 @@ SUBROUTINE thermo_readin()
   !
   CALL read_input_file('PW',TRIM(input(my_image_id+1)))
   outdir_thermo=outdir
+  outdir=TRIM(outdir)//'/g1/'
   CALL iosys()
   max_seconds_=save_max_seconds
 
