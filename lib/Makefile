@@ -43,7 +43,7 @@ xrdp.o
 
 all : thermo_lib.a
 
-thermo_lib.a: 	$(MODULES)
+thermo_lib.a: $(MODULES)
 	$(AR) $(ARFLAGS) $@ $?       
 	$(RANLIB) $@    
 

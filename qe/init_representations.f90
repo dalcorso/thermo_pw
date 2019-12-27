@@ -19,7 +19,7 @@ subroutine init_representations_tpw()
   USE ions_base,     ONLY : tau, nat
   USE cell_base,     ONLY : at, bg
   USE io_global,     ONLY : stdout
-  USE symm_base,     ONLY : nsym, sr, ftau, irt, time_reversal, t_rev, s, sname
+  USE symm_base,     ONLY : nsym, sr, irt, time_reversal, t_rev, s, sname
   USE control_ph,    ONLY : search_sym, current_iq, u_from_file, &
                             search_sym_save
   USE modes,         ONLY : u, npert, nirr, nmodes, name_rap_mode, &

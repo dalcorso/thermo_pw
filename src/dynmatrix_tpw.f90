@@ -24,7 +24,7 @@ subroutine dynmatrix_tpw(iq_)
   USE io_global,     ONLY : stdout
   USE control_flags, ONLY : modenum
   USE cell_base,     ONLY : at, bg, celldm, ibrav, omega
-  USE symm_base,     ONLY : s, sr, irt, ftau, nsym, invs, sname, t_rev
+  USE symm_base,     ONLY : s, sr, irt, nsym, invs, sname, t_rev
   USE fft_base,      ONLY : dfftp
   USE dynmat,        ONLY : dyn, w2
   USE noncollin_module, ONLY : nspin_mag

@@ -1,3 +1,4 @@
+27/12/2019 Version 1.2.0 is now frozen.
 New in version 1.2.0
 
 Added documentation on the units used in the code.
@@ -12,6 +13,9 @@ Added the computation of the temperature dependent elastic constants
 from the derivatives of the free energy with respect to strain within
 the quasi-harmonic approximation (experimental version, in 
 collaboration with C. Malica).
+
+Computation of the phonon frequencies in the noncollinear magnetic
+case (limited to metals) (in collaboration with A. Urru).
 
 16/04/2019 Version 1.1.1 is now frozen.
 

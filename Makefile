@@ -1,9 +1,8 @@
-# Makefile for PH
+# Makefile for thermo_pw
 sinclude ../make.sys
 
 default: all
 
-#all: phonon phgamma_only third_order third_order_q
 all: thermo_pw thermo_tools 
 
 thermo_tools: thermo_lib

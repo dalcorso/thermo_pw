@@ -28,6 +28,7 @@ SUBROUTINE dos_sub()
   USE noncollin_module, ONLY: noncolin
   USE control_bands, ONLY : emax_input
   USE data_files, ONLY : fleldos
+  USE pw_restart_new, ONLY : read_xml_file
   USE mp,         ONLY : mp_min, mp_max, mp_sum
   USE mp_pools,   ONLY : inter_pool_comm
   USE mp_images,  ONLY : my_image_id, root_image
