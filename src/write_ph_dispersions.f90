@@ -28,7 +28,7 @@ SUBROUTINE write_ph_dispersions()
   USE point_group,ONLY : nsym_group
   USE constants,  ONLY : ry_to_cmm1
   USE ions_base,  ONLY : nat, tau, ityp, nsp, amass
-  USE symm_base,  ONLY : set_sym, nsym, s, allfrac, remove_sym, ftau
+  USE symm_base,  ONLY : set_sym, nsym, s, allfrac, remove_sym
   USE fft_base,   ONLY : dfftp
   USE cell_base,  ONLY : at
   USE thermo_sym, ONLY : code_group_save
@@ -277,7 +277,7 @@ SUBROUTINE find_representations_mode_q ( nat, ntyp, xq, w2, u, tau, ityp, &
 
   USE kinds,        ONLY : DP
   USE cell_base,    ONLY : at, bg
-  USE symm_base,    ONLY : s, ftau, irt, nsym, time_reversal, copy_sym, &
+  USE symm_base,    ONLY : s, irt, nsym, time_reversal, copy_sym, &
                            s_axis_to_cart, inverse_s
   USE lr_symm_base, ONLY : gi, nsymq, rtau
   USE control_ph,   ONLY : search_sym
@@ -309,7 +309,7 @@ SUBROUTINE find_representations_mode_q ( nat, ntyp, xq, w2, u, tau, ityp, &
   IF (nspin_mag/=4) minus_q=.FALSE.
 
   sym(1:nsym)=.true.
-  call smallg_q_tpw (xq, 0, at, bg, nsym, s, ftau, sym, minus_q)
+  call smallg_q_tpw (xq, 0, at, bg, nsym, s, sym, minus_q)
   nsymq=copy_sym(nsym,sym)
   CALL s_axis_to_cart ()
   CALL set_giq_tpw (xq,s,nsymq,nsym,irotmq,minus_q,gi,gimq)

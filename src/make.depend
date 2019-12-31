@@ -161,6 +161,7 @@ dos_sub.o : ../../Modules/kind.o
 dos_sub.o : ../../Modules/mp_images.o
 dos_sub.o : ../../Modules/mp_pools.o
 dos_sub.o : ../../Modules/noncol.o
+dos_sub.o : ../../PW/src/pw_restart_new.o
 dos_sub.o : ../../PW/src/pwcom.o
 dos_sub.o : ../../PW/src/tetra.o
 dos_sub.o : ../../UtilXlib/mp.o
