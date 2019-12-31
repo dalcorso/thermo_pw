@@ -149,7 +149,7 @@ change <code>1D-8</code> with <code>1D-5</code>.
 * Compilation problem of <code>tools/test_colors.f90</code>: remove the RETURN command at the end of the file.
 * Error from <code>find_aux_ind_two_groups</code> in a phonon plot. Please 
 check commit
-<a href="https:/people.sissa.it/~dalcorso/matdyn_sub.f90">122688</a>
+<a href="https://people.sissa.it/~dalcorso/matdyn_sub.f90">122688</a>
 and make the same changes to <code>src/matdyn_sub.f90</code>.
 <br>
 
