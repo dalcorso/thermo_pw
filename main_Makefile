@@ -96,7 +96,7 @@ neb : pwlibs
 	( cd NEB; $(MAKE) TLDEPS= all || exit 1) ; fi
 
 
-tddfpt : phlibs
+tddfpt : lrmods
 	if test -d TDDFPT; then \
 	( cd TDDFPT; $(MAKE) TLDEPS= all || exit 1) ; fi
 
@@ -312,7 +312,7 @@ install :
 #########################################################
 # Run test-suite for numerical regression testing
 # NB: it is assumed that reference outputs have been 
-#     already computed once (usualy during release)
+#     already computed once (usually during release)
 #########################################################
 
 test-suite: pw cp 
@@ -399,10 +399,10 @@ tar-qe-modes :
 # "latex2html" and "convert" (from Image-Magick) are needed.
 doc : 
 	if test -d Doc ; then \
-	( cd Doc ; $(MAKE) VERSION=6.4 TLDEPS= all ) ; fi
+	( cd Doc ; $(MAKE) VERSION=6.5 TLDEPS= all ) ; fi
 	for dir in */Doc; do \
 	( if test -f $$dir/Makefile ; then \
-	( cd $$dir; $(MAKE) VERSION=6.4 TLDEPS= all ) ; fi ) ;  done
+	( cd $$dir; $(MAKE) VERSION=6.5 TLDEPS= all ) ; fi ) ;  done
 
 doc_clean :
 	if test -d Doc ; then \

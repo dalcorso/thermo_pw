@@ -22,12 +22,17 @@ CONTAINS
 SUBROUTINE rotate_mesh(my_nrxx, nsym, rir)
 !---------------------------------------------------------------------
 
-USE symm_base, ONLY : s, ftau
+USE fft_base,  ONLY : dfftp
+USE symm_base, ONLY : s, ft
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: my_nrxx, nsym
 INTEGER, INTENT(INOUT) :: rir(my_nrxx, nsym)
-INTEGER :: isym
+INTEGER :: isym, ftau(3,48)
+
+ftau(1,1:nsym) = NINT ( ft(1,1:nsym)*dfftp%nr1 ) 
+ftau(2,1:nsym) = NINT ( ft(2,1:nsym)*dfftp%nr2 ) 
+ftau(3,1:nsym) = NINT ( ft(3,1:nsym)*dfftp%nr3 )
 
 DO isym=1, nsym
    CALL rotate_mesh_1s(my_nrxx, s(1,1,isym), ftau(1,isym), rir(1,isym))
@@ -520,7 +525,7 @@ SUBROUTINE psymdvscf_tpw (npe, irr, dvsym)
 USE kinds,     ONLY : DP
 USE cell_base, ONLY : at, bg
 USE fft_base,  ONLY : dfftp
-USE symm_base, ONLY : nsym, s, ftau, invs, sname, t_rev
+USE symm_base, ONLY : nsym, s, ft, invs, sname, t_rev
 USE noncollin_module, ONLY : noncolin, nspin_lsda, nspin_mag
 USE spin_orb,  ONLY : domag
 USE modes,     ONLY : t, tmq
@@ -554,8 +559,9 @@ INTEGER, ALLOCATABLE :: iir(:), jir(:), kir(:), rir(:,:)
   ! the indices of the mesh and the rotated points
 COMPLEX(DP) :: dmags(3,npe), mag(3,npe), phase
   ! the magnetization component and the phase
-INTEGER :: stilde(3,3,nsym)
+INTEGER :: stilde(3,3,nsym), ftau(3,48)
   ! the symmetry matrices that rotate the magnetization
+  ! the fractional translations in the FFT mesh
 
 IF (nsymq == 1) RETURN
 
@@ -564,6 +570,10 @@ nr2=dfftp%nr2
 nr3=dfftp%nr3
 nr1x=dfftp%nr1x
 my_nrxx=nr1x*dfftp%my_nr2p*dfftp%my_nr3p
+
+ftau(1,1:nsym) = NINT ( ft(1,1:nsym)*dfftp%nr1 ) 
+ftau(2,1:nsym) = NINT ( ft(2,1:nsym)*dfftp%nr2 ) 
+ftau(3,1:nsym) = NINT ( ft(3,1:nsym)*dfftp%nr3 )
 
 ALLOCATE(iir(my_nrxx))
 ALLOCATE(jir(my_nrxx))

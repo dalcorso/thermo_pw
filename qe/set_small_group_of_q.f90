@@ -18,7 +18,7 @@
   USE kinds, ONLY : DP
   USE cell_base, ONLY : at, bg
   USE ions_base, ONLY : nat, tau
-  USE symm_base, ONLY : s, nsym, ftau, irt, t_rev, time_reversal
+  USE symm_base, ONLY : s, nsym, irt, t_rev, time_reversal
   USE control_flags, ONLY : modenum
   USE qpoint, ONLY : xq
   USE symm_base, ONLY : copy_sym, d1, d2, d3, inverse_s, s_axis_to_cart
@@ -34,7 +34,7 @@
   LOGICAL :: sym(48)
 
   sym(1:nsym)=.true.
-  call smallg_q_tpw (xq, modenum, at, bg, nsym, s, ftau, sym, minus_q)
+  call smallg_q_tpw (xq, modenum, at, bg, nsym, s, sym, minus_q)
   IF ( .not. time_reversal ) minus_q = .false.
   IF (modenum /= 0) THEN
 !
@@ -66,7 +66,7 @@
   END SUBROUTINE set_small_group_of_q_tpw
 !
 !-----------------------------------------------------------------------
-subroutine smallg_q_tpw (xq, modenum, at, bg, nrot, s, ftau, sym, minus_q)
+subroutine smallg_q_tpw (xq, modenum, at, bg, nrot, s, sym, minus_q)
   !-----------------------------------------------------------------------
   !
   ! This routine selects, among the symmetry matrices of the point group
@@ -87,10 +87,9 @@ subroutine smallg_q_tpw (xq, modenum, at, bg, nrot, s, ftau, sym, minus_q)
   ! input: the direct lattice vectors
   ! input: the q point of the crystal
 
-  integer, intent(in) :: s (3, 3, 48), nrot, ftau (3, 48), modenum
+  integer, intent(in) :: s (3, 3, 48), nrot, modenum
   ! input: the symmetry matrices
   ! input: number of symmetry operations
-  ! input: fft grid dimension (units for ftau)
   ! input: fractionary translation of each symmetr
   ! input: main switch of the program, used for
   !        q<>0 to restrict the small group of q

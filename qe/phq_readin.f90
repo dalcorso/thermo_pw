@@ -27,7 +27,7 @@ SUBROUTINE phq_readin_tpw()
   USE klist,         ONLY : xk, nks, nkstot, lgauss, two_fermi_energies, &
                             ltetra
   USE control_flags, ONLY : gamma_only, tqr, restart, io_level, &
-                            ts_vdw, ldftd3, lxdm  
+                            ts_vdw, ldftd3, lxdm, isolve
   USE funct,         ONLY : dft_is_meta, dft_is_hybrid
   USE uspp,          ONLY : okvan
   USE fixed_occ,     ONLY : tfixed_occ
@@ -85,6 +85,11 @@ SUBROUTINE phq_readin_tpw()
   USE dfile_star,    ONLY : drho_star, dvscf_star
   USE ldaU,          ONLY : lda_plus_u, U_projection, lda_plus_u_kind
   USE ldaU_ph,       ONLY : read_dns_bare, d2ns_type
+  USE qpoint,        ONLY : nksq, xq
+  USE control_lr,    ONLY : lgamma, lrpa
+  ! YAMBO >
+  USE YAMBO,         ONLY : elph_yambo,dvscf_yambo
+  ! YAMBO <
   !
   IMPLICIT NONE
   !
@@ -116,6 +121,7 @@ SUBROUTINE phq_readin_tpw()
   REAL(DP) :: deltaf, max_seconds
   COMPLEX(DP) :: delta_freq
   INTEGER :: nqaux, iq
+  CHARACTER(len=80) :: diagonalization='david'
   !
   NAMELIST / INPUTPH / tr2_ph, amass, alpha_mix, niter_ph, nmix_ph,  &
                        nat_todo, verbosity, iverbosity, outdir, epsil,  &
@@ -135,8 +141,9 @@ SUBROUTINE phq_readin_tpw()
                        extrapolation, only_spectrum, pseudo_hermitian, lcg, &
                        delta_freq, start_freq, last_freq,     &
                        lmagnon, lcharge, lall_tensor, lchimag, &
+                       el_ph_nsigma, el_ph_sigma,  electron_phonon, &
                        q_in_band_form, q2d, qplot, low_directory_check, &
-                       lshift_q
+                       lshift_q, read_dns_bare, d2ns_type, diagonalization
 
   ! tr2_ph       : convergence threshold
   ! amass        : atomic masses
@@ -176,9 +183,9 @@ SUBROUTINE phq_readin_tpw()
   ! ldiag        : if .true. force diagonalization of the dyn mat
   ! lqdir        : if .true. each q writes in its own directory
   ! search_sym   : if .true. analyze symmetry if possible
-  ! nk1,nk2,nk3,
-  ! ik1, ik2, ik3: when specified in input it uses for the phonon run
-  !                a different mesh than that used for the charge density.
+  ! nk1,nk2,nk3, k1,k2,k3 : 
+  !              when specified in input, the phonon run uses a different
+  !              k-point mesh from that used for the charge density.
   !
   ! dvscf_star%open : if .true. write in dvscf_star%dir the dvscf_q
   !                   'for all q' in the star of q with suffix dvscf_star%ext. 
@@ -276,17 +283,15 @@ SUBROUTINE phq_readin_tpw()
   electron_phonon=' '
   elph_nbnd_min = 1
   elph_nbnd_max = 0
-  el_ph_sigma = 0.02
-  el_ph_nsigma = 30
+  el_ph_sigma  = 0.02
+  el_ph_nsigma = 10
   el_ph_ngauss = 1
   lraman       = .FALSE.
   elop         = .FALSE.
   max_seconds  =  1.E+7_DP
   reduce_io    = .FALSE.
-  IF ( TRIM(outdir) == './') THEN
-     CALL get_environment_variable( 'ESPRESSO_TMPDIR', outdir )
-     IF ( TRIM( outdir ) == ' ' ) outdir = './'
-  ENDIF
+  CALL get_environment_variable( 'ESPRESSO_TMPDIR', outdir )
+  IF ( TRIM( outdir ) == ' ' ) outdir = './'
   prefix       = 'pwscf'
   fildyn       = 'matdyn'
   fildrho      = ' '
@@ -385,6 +390,17 @@ SUBROUTINE phq_readin_tpw()
   ELSE IF ( ABS(ios) /= 0 ) THEN
      CALL errore( 'phq_readin', 'reading inputph namelist', ABS( ios ) )
   END IF
+
+  ! diagonalization option
+  SELECT CASE(TRIM(diagonalization))
+  CASE ('david','davidson')
+     isolve = 0
+  CASE ('cg')
+     isolve = 1
+  CASE DEFAULT
+     CALL errore('phq_readin','diagonalization '//trim(diagonalization)//' not implemented',1)
+  END SELECT
+
   !
   ! ...  broadcast all input variables
   !
@@ -448,27 +464,84 @@ SUBROUTINE phq_readin_tpw()
   IF (dek <= 0.d0) CALL errore ( 'phq_readin', ' Wrong dek ', 1)
   !
   elph_tetra = 0
+
   SELECT CASE( trim( electron_phonon ) )
-  CASE( 'simple'  )
+ CASE( 'simple'  )
      elph=.true.
      elph_mat=.false.
-     elph_simple=.true. 
+     elph_simple=.true.
+     elph_epa=.false.
+  CASE( 'epa' )
+     elph=.true.
+     elph_mat=.false.
+     elph_simple=.false.
+     elph_epa=.true.
   CASE( 'Wannier' )
      elph=.true.
      elph_mat=.true.
      elph_simple=.false.
+     elph_epa=.false.
      auxdvscf=trim(fildvscf)
   CASE( 'interpolated' )
      elph=.true.
      elph_mat=.false.
      elph_simple=.false.
-  CASE DEFAULT
+     elph_epa=.false.
+ ! YAMBO >
+  CASE( 'yambo' )
+     elph=.true.
+     elph_mat=.false.
+     elph_simple=.false.
+     elph_epa=.false.
+     elph_yambo=.true.
+     nogg=.true.
+     auxdvscf=trim(fildvscf)
+  CASE( 'dvscf' )
      elph=.false.
      elph_mat=.false.
      elph_simple=.false.
+     elph_epa=.false.
+     elph_yambo=.false.
+     dvscf_yambo=.true.
+     nogg=.true.
+     auxdvscf=trim(fildvscf)
+  ! YAMBO <
+  CASE( 'lambda_tetra'  )
+     elph=.true.
+     elph_mat=.false.
+     elph_simple=.false.
+     trans = .false.
+     elph_tetra = 1
+  CASE( 'gamma_tetra'  )
+     elph=.true.
+     elph_mat=.false.
+     elph_simple=.false.
+     trans = .false.
+     elph_tetra = 2
+  CASE( 'scdft_input'  )
+     elph=.true.
+     elph_mat=.false.
+     elph_simple=.false.
+     trans = .false.
+     elph_tetra = 3
+ CASE DEFAULT
+     elph=.false.
+     elph_mat=.false.
+     elph_simple=.false.
+     elph_epa=.false.
   END SELECT
-  IF (elph.AND.qplot) &
-     CALL errore('phq_readin', 'qplot and elph not implemented',1)
+  IF (.not.elph_yambo) then
+    ! YAMBO <
+    IF (elph.AND.qplot) &
+       CALL errore('phq_readin', 'qplot and elph not implemented',1)
+  ENDIF
+  ! YAMBO >
+  IF (.not.elph_yambo.and..not.dvscf_yambo) then
+    ! YAMBO <
+    IF (qplot.AND..NOT.ldisp) CALL errore('phq_readin','qplot requires ldisp=.true.',1)
+    !
+  ENDIF
+
 
   IF (ldisp.AND.only_init.AND.(.NOT.lqdir)) &
      CALL errore('phq_readin', &
@@ -615,14 +688,14 @@ SUBROUTINE phq_readin_tpw()
   !   Here we finished the reading of the input file.
   !   Now allocate space for pwscf variables, read and check them.
   !
-  !   amass will also be read from file:
+  !   amass will be read again from file:
   !   save its content in auxiliary variables
   !
   ALLOCATE ( amass_input( SIZE(amass) ) )
   amass_input(:)= amass(:)
   !
   tmp_dir_save=tmp_dir
-  tmp_dir_ph= TRIM (tmp_dir) // '_ph' // TRIM(int_to_char(my_image_id)) //'/'
+  tmp_dir_ph= trimcheck(TRIM(tmp_dir)//'_ph' // int_to_char(my_image_id))//'/'
   CALL check_tempdir ( tmp_dir_ph, exst, parallelfs )
   tmp_dir_phq=tmp_dir_ph
 
@@ -648,11 +721,11 @@ SUBROUTINE phq_readin_tpw()
 !
 !   We check if the bands and the information on the pw run are in the directory
 !   written by the phonon code for the current q point. If the file exists
-!   we read from there, otherwise use the information in outdir.
+!   we read from there, otherwise use the information in tmp_dir.
 !
      IF (lqdir) THEN
-        tmp_dir_phq= TRIM (tmp_dir_ph) //TRIM(prefix)//&
-                          & '.q_' // TRIM(int_to_char(current_iq))//'/'
+        tmp_dir_phq= trimcheck ( TRIM(tmp_dir_ph) // TRIM(prefix) // &
+                                & '.q_' // int_to_char(current_iq) )//'/'
         CALL check_restart_recover(ext_recover, ext_restart)
         IF (.NOT.ext_recover.AND..NOT.ext_restart) tmp_dir_phq=tmp_dir_ph
      ENDIF
@@ -708,14 +781,16 @@ SUBROUTINE phq_readin_tpw()
         WRITE(stdout, '(5x,i3, 3f14.9)') iq, x_q(1,iq), x_q(2,iq), x_q(3,iq)
      END DO
   ENDIF
-
+  !
+  ! DFPT+U: the occupation matrix ns is read via read_file
+  !
   CALL read_file ( )
 
   magnetic_sym=noncolin .AND. domag
   !
   ! init_start_grid returns .true. if a new k-point grid is set from values
-  ! read from input (this happens if nk1*nk2*nk3, else it returns .false.,
-  ! leaves the current values, as read in read_file, unchanged)
+  ! read from input (this happens if nk1*nk2*nk3 > 0; otherwise reset_grid
+  ! returns .false., leaves the current values, read in read_file, unchanged)
   !
   newgrid = reset_grid (nk1, nk2, nk3, k1, k2, k3) 
   !
@@ -746,11 +821,20 @@ SUBROUTINE phq_readin_tpw()
   IF (ts_vdw) CALL errore('phq_readin',&
      'The phonon code with TS-VdW is not yet available',1)
 
+  IF (ldftd3) CALL errore('phq_readin',&
+     'The phonon code with Grimme''s DFT-D3 is not yet available',1)
+
+  IF ( dft_is_meta() ) CALL errore('phq_readin',&
+     'The phonon code with meta-GGA functionals is not yet available',1)
+
   IF ( dft_is_hybrid() ) CALL errore('phq_readin',&
      'The phonon code with hybrid functionals is not yet available',1)
 
   IF (okpaw.and.(lraman.or.elop)) CALL errore('phq_readin',&
      'The phonon code with paw and raman or elop is not yet available',1)
+
+  IF (okpaw.and.noncolin.and.domag) CALL errore('phq_readin',&
+     'The phonon code with paw and domag is not available yet',1)
 
   IF (okvan.and.(lraman.or.elop)) CALL errore('phq_readin',&
      'The phonon code with US-PP and raman or elop not yet available',1)
@@ -761,7 +845,7 @@ SUBROUTINE phq_readin_tpw()
   IF (lmovecell) CALL errore('phq_readin', &
       'The phonon code is not working after vc-relax',1)
 
-  IF (reduce_io) io_level=0
+  IF (reduce_io) io_level=1
 
   if(elph_mat.and.fildvscf.eq.' ') call errore('phq_readin',&
        'el-ph with wannier requires fildvscf',1)
@@ -771,6 +855,9 @@ SUBROUTINE phq_readin_tpw()
 
   IF(elph.and.nimage>1) call errore('phq_readin',&
        'el-ph with images not implemented',1)
+
+  IF( fildvscf /= ' ' .and. nimage > 1 ) call errore('phq_readin',&
+       'saving dvscf to file images not implemented',1)
   
   IF (elph.OR.fildvscf /= ' ') lqdir=.TRUE.
 
@@ -791,6 +878,8 @@ SUBROUTINE phq_readin_tpw()
 
   IF (tqr) CALL errore('phq_readin',&
      'The phonon code with Q in real space not available',1)
+
+  IF (lda_plus_u .AND. read_dns_bare .AND. ldisp) lqdir=.TRUE.
 
   IF (start_irr < 0 ) CALL errore('phq_readin', 'wrong start_irr',1)
   !
@@ -838,12 +927,15 @@ SUBROUTINE phq_readin_tpw()
      ENDIF
   ENDIF
   IF (lgamma_gamma.AND.ldiag) CALL errore('phq_readin','incompatible flags',1)
+  IF (lgamma_gamma.AND.elph ) CALL errore('phq_readin','lgamma_gamma and electron-phonon are incompatible',1)
   !
   IF (tfixed_occ) &
      CALL errore('phq_readin','phonon with arbitrary occupations not tested',1)
   !
-  IF (elph.AND..NOT.lgauss) CALL errore ('phq_readin', 'Electron-&
-       &phonon only for metals', 1)
+  !YAMBO >
+  IF (elph.AND..NOT.(lgauss .or. ltetra).and..NOT.elph_yambo) &
+          CALL errore ('phq_readin', 'Electron-phonon only for metals', 1)
+  !YAMBO <
   IF (elph.AND.fildvscf.EQ.' ') CALL errore ('phq_readin', 'El-ph needs &
        &a DeltaVscf file', 1)
   !   There might be other variables in the input file which describe

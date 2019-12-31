@@ -9,9 +9,9 @@
 SUBROUTINE do_pwscf ( exit_status, lscf_ ) 
   !----------------------------------------------------------------------------
   !
-  !! author: Paolo Giannozzi
-  !! license: GNU 
-  !! summary: Run an instance of the Plane Wave Self-Consistent Field code
+  !! Author: Paolo Giannozzi
+  !! License: GNU 
+  !! Summary: Run an instance of the Plane Wave Self-Consistent Field code
   !!
   !! Run an instance of the Plane Wave Self-Consistent Field code 
   !! MPI initialization and input data reading is performed in the 
@@ -20,10 +20,10 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   !! * 0: completed successfully
   !! * 1: an error has occurred (value returned by the errore() routine)
   !! * 2-127: convergence error
-  !!   * 2: scf convergence error
-  !!   * 3: ion convergence error
+  !!    * 2: scf convergence error
+  !!    * 3: ion convergence error
   !! * 128-255: code exited due to specific trigger
-  !!   * 255: exit due to user request, or signal trapped,
+  !!    * 255: exit due to user request, or signal trapped,
   !!          or time > max_seconds
   !!     (note: in the future, check_stop_now could also return a value
   !!     to specify the reason of exiting, and the value could be used
@@ -33,44 +33,45 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   !! @endnote
   !!
   !
-  USE io_global,        ONLY : stdout, ionode
-  USE parameters,       ONLY : ntypx, npk, lmaxx
-  USE initial_param,    ONLY : ethr0
-  USE cell_base,        ONLY : fix_volume, fix_area
-  USE control_flags,    ONLY : conv_elec, gamma_only, ethr, lscf
-  USE control_flags,    ONLY : conv_ions, istep, nstep, restart, lmd, lbfgs, &
-                               io_level
+  USE io_global,            ONLY : stdout, ionode, ionode_id
+  USE parameters,           ONLY : ntypx, npk, lmaxx
+  USE initial_param,        ONLY : ethr0
+  USE cell_base,            ONLY : fix_volume, fix_area
+  USE control_flags,        ONLY : conv_elec, gamma_only, ethr, lscf, treinit_gvecs
+  USE control_flags,        ONLY : conv_ions, istep, nstep, restart, lmd, &
+                                   lbfgs, io_level
+  USE cellmd,               ONLY : lmovecell
   USE command_line_options, ONLY : command_line
-  USE force_mod,        ONLY : lforce, lstres, sigma, force
-  USE check_stop,       ONLY : check_stop_init, check_stop_now
-  USE basis,            ONLY : starting_pot, starting_wfc, startingconfig
-  USE mp_images,        ONLY : intra_image_comm
-  USE extrapolation,    ONLY : update_file, update_pot
-  USE scf,              ONLY : rho
-  USE lsda_mod,         ONLY : nspin
-  USE fft_base,         ONLY : dfftp
-  USE qmmm,             ONLY : qmmm_initialization, qmmm_shutdown, &
+  USE force_mod,            ONLY : lforce, lstres, sigma, force
+  USE check_stop,           ONLY : check_stop_init, check_stop_now
+  USE basis,                ONLY : starting_pot, starting_wfc, startingconfig
+  USE mp_images,            ONLY : intra_image_comm
+  USE extrapolation,        ONLY : update_file, update_pot
+  USE scf,                  ONLY : rho
+  USE lsda_mod,             ONLY : nspin
+  USE fft_base,             ONLY : dfftp
+  USE qmmm,                 ONLY : qmmm_initialization, qmmm_shutdown, &
                                qmmm_update_positions, qmmm_update_forces
-  USE qexsd_module,     ONLY : qexsd_set_status
-  USE funct,            ONLY : dft_is_hybrid, stop_exx
+  USE qexsd_module,         ONLY : qexsd_set_status
+  USE funct,                ONLY : dft_is_hybrid, stop_exx
   !
   IMPLICIT NONE
   INTEGER, INTENT(OUT) :: exit_status
   !! Gives the exit status at the end
   LOGICAL :: lscf_
-  LOGICAL, external :: matches
-  !! checks if first string is contained in the second
+  LOGICAL, EXTERNAL :: matches
+  ! checks if first string is contained in the second
   INTEGER :: idone 
-  !! counter of electronic + ionic steps done in this run
+  ! counter of electronic + ionic steps done in this run
   INTEGER :: ions_status 
-  !!    ions_status =  3  not yet converged
-  !!    ions_status =  2  converged, restart with nonzero magnetization
-  !!    ions_status =  1  converged, final step with current cell needed
-  !!    ions_status =  0  converged, exiting
+  ! ions_status =  3  not yet converged
+  ! ions_status =  2  converged, restart with nonzero magnetization
+  ! ions_status =  1  converged, final step with current cell needed
+  ! ions_status =  0  converged, exiting
   !
   exit_status = 0
   ions_status = 3
-  IF ( ionode ) WRITE( unit = stdout, FMT = 9010 ) ntypx, npk, lmaxx
+  IF ( ionode ) WRITE( UNIT = stdout, FMT = 9010 ) ntypx, npk, lmaxx
   !
   IF ( gamma_only ) WRITE( UNIT = stdout, &
      & FMT = '(/,5X,"gamma-point specific algorithms are used")' )
@@ -107,13 +108,13 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   ! ... dry run: code will stop here if called with exit file present
   ! ... useful for a quick and automated way to check input data
   !
-  IF ( check_stop_now() ) THEN
+  IF ( nstep == 0 .OR. check_stop_now() ) THEN
      CALL pre_init()
      CALL data_structure( gamma_only )
      CALL summary()
      CALL memory_report()
      CALL qexsd_set_status(255)
-     CALL punch( 'init-config' )
+     CALL punch( 'config-init' )
      exit_status = 255
      RETURN
   ENDIF
@@ -121,7 +122,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   CALL init_run()
   !
   IF ( check_stop_now() ) THEN
-     CALL qexsd_set_status(255)
+     CALL qexsd_set_status( 255 )
      CALL punch( 'config' )
      exit_status = 255
      RETURN
@@ -132,7 +133,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
      ! ... electronic self-consistency or band structure calculation
      !
      IF ( .NOT. lscf) THEN
-        CALL non_scf ()
+        CALL non_scf()
      ELSE
         CALL electrons_tpw()
      END IF
@@ -143,7 +144,6 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
         IF ( check_stop_now() ) exit_status = 255
         IF ( .NOT. conv_elec )  exit_status =  2
         CALL qexsd_set_status(exit_status)
-        ! workaround for the case of a single k-point
         CALL punch( 'config' )
         RETURN
      ENDIF
@@ -173,27 +173,26 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
      !
      IF ( lstres ) CALL stress_tpw ( sigma )
      !
-     ! ... send out forces to MM code in QM/MM run
-     !
      IF ( lmd .OR. lbfgs ) THEN
         !
-        if (fix_volume) CALL impose_deviatoric_stress(sigma)
-        if (fix_area)  CALL  impose_deviatoric_stress_2d(sigma)
+        IF (fix_volume) CALL impose_deviatoric_stress( sigma )
+        IF (fix_area)   CALL impose_deviatoric_stress_2d( sigma )
         !
         ! ... save data needed for potential and wavefunction extrapolation
         !
-        CALL update_file ( )
+        CALL update_file()
         !
         ! ... ionic step (for molecular dynamics or optimization)
         !
         CALL move_ions ( idone, ions_status )
-        conv_ions = ( ions_status == 0 )
+        conv_ions = ( ions_status == 0 ) .OR. &
+                    ( ions_status == 1 .AND. treinit_gvecs )
         !
         ! ... then we save restart information for the new configuration
         !
         IF ( idone <= nstep .AND. .NOT. conv_ions ) THEN 
-            CALL qexsd_set_status(255)
-            CALL punch( 'config' )
+            CALL qexsd_set_status( 255 )
+            CALL punch( 'config-nowf' )
         END IF
         !
         IF (dft_is_hybrid() )  CALL stop_exx()
@@ -203,11 +202,11 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
      !
      ! ... send out forces to MM code in QM/MM run
      !
-     CALL qmmm_update_forces( force, rho%of_r, nspin, dfftp)
+     CALL qmmm_update_forces( force, rho%of_r, nspin, dfftp )
      !
      ! ... exit condition (ionic convergence) is checked here
      !
-     IF ( lmd .OR. lbfgs ) CALL add_qexsd_step(idone)
+     IF ( lmd .OR. lbfgs ) CALL add_qexsd_step( idone )
      IF ( conv_ions ) EXIT main_loop
      !
      ! ... receive new positions from MM code in QM/MM run
@@ -223,40 +222,53 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
            !
            ! ... final scf calculation with G-vectors for final cell
            !
-           CALL reset_gvectors ( )
+           lbfgs=.FALSE.; lmd=.FALSE.
+           WRITE( UNIT = stdout, FMT=9020 ) 
+           CALL reset_gvectors( )
            !
         ELSE IF ( ions_status == 2 ) THEN
            !
            ! ... check whether nonzero magnetization is real
            !
-           CALL reset_magn ( )
+           CALL reset_magn()
            !
         ELSE
            !
-           ! ... update the wavefunctions, charge density, potential
-           ! ... update_pot initializes structure factor array as well
-           !
-           CALL update_pot()
-           !
-           ! ... re-initialize atomic position-dependent quantities
-           !
-           CALL hinit1()
+           IF ( treinit_gvecs ) THEN
+              !
+              ! ... prepare for next step with freshly computed G vectors
+              !
+              IF ( lmovecell) CALL scale_h()
+              CALL reset_gvectors ( )
+              !
+           ELSE
+              !
+              ! ... update the wavefunctions, charge density, potential
+              ! ... update_pot initializes structure factor array as well
+              !
+              CALL update_pot()
+              !
+              ! ... re-initialize atomic position-dependent quantities
+              !
+              CALL hinit1()
+              !
+           END IF
            !
         END IF
         !
         !
-     END IF
+     ENDIF
      ! ... Reset convergence threshold of iterative diagonalization for
      ! ... the first scf iteration of each ionic step (after the first)
      !
      ethr = 1.0D-6
      !
-  END DO main_loop
+  ENDDO main_loop
   !
   ! ... save final data file
   !
-  CALL qexsd_set_status(exit_status)
-  CALL punch('all')
+  CALL qexsd_set_status( exit_status )
+  CALL punch( 'all' )
   !
   IF ( .NOT. conv_ions )  exit_status =  3
   !
@@ -270,8 +282,12 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   !
 9010 FORMAT( /,5X,'Current dimensions of program PWSCF are:', &
            & /,5X,'Max number of different atomic species (ntypx) = ',I2,&
-           & /,5X,'Max number of k-points (npk) = ',I6,&
+           & /,5X,'Max number of k-points (npk) = ',I6,       &
            & /,5X,'Max angular momentum in pseudopotentials (lmaxx) = ',i2)
+9020 FORMAT( /,5X,'Final scf calculation at the relaxed structure.', &
+          &  /,5X,'The G-vectors are recalculated for the final unit cell', &
+          &  /,5X,'Results may differ from those at the preceding step.' )
+
   !
 END SUBROUTINE do_pwscf
 

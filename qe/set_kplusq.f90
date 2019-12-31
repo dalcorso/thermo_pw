@@ -7,20 +7,19 @@
 !
 !
 !-----------------------------------------------------------------------
-subroutine set_kplusq_tpw (xk, wk, xq, nks, npk, diago_bands, &
+SUBROUTINE set_kplusq_tpw (xk, wk, xq, nks, npk, diago_bands, &
                                                     isym_bands, ik_origin)
   !-----------------------------------------------------------------------
-  !     This routine sets the k and k+q points (with zero weight) used in
-  !     the preparatory run for a linear response calculation.
+  !! This routine sets the k and k+q points (with zero weight) used in
+  !! the preparatory run for a linear response calculation.
   !
-  !     on input: xk and wk contain k-points and corresponding weights
-  !               xq the q point
+  !! * on input: xk and wk contain k-points and corresponding weights;
+  !! * on output: the number of points is doubled and xk and wk in the
+  !!              odd  positions are the original ones; those in the
+  !!              even positions are the corresponding k+q values.
   !
-  !     on output: the number of points is doubled and xk and wk in the
-  !                odd  positions are the original ones; those in the
-  !                even positions are the corresponding k+q values.
-  !     the gamma point is treated in a special way. No change is done
-  !     to the k-points
+  !! The gamma point is treated in a special way. No change is done
+  !! to the k-points.
   !     This routine generalizes the one of Quantum espresso in two ways
   !     First because for each k+q it searches if among the k points there
   !     is one that can be used with a symmetry rotation of the point group
@@ -33,53 +32,52 @@ subroutine set_kplusq_tpw (xk, wk, xq, nks, npk, diago_bands, &
   !     the diagonalization for those k+q for which the symmetry related
   !     k point is in another pool. 
   !
-  USE kinds, only : DP
+  USE kinds,   ONLY: DP
   USE cell_base, ONLY : at
   USE symm_base, ONLY : nsym, s, sr, t_rev
   USE start_k,   ONLY : nk1, nk2, nk3
   USE band_computation, ONLY : nks0
   USE mp_pools, ONLY : npool
-  implicit none
   !
-  !    First the dummy variables
+  IMPLICIT NONE
   !
+  INTEGER :: npk
+  !! inout: maximum allowed number of k
+  INTEGER :: nks
+  !! inout: starting and ending number of
+  REAL(DP) :: xk(3,npk)
+  !! inout: coordinates of k points
+  REAL(DP) :: wk(npk)
+  !! inout: weights of k points
+  REAL(DP) :: xq(3)
+  !! input: coordinates of a q-point
 
-  integer :: npk, nks
-  ! input-output: maximum allowed number of k
-  ! input-output: starting and ending number of
   INTEGER :: isym_bands(npk), ik_origin(npk)
   LOGICAL :: diago_bands(npk)
-  real(DP) :: xk (3, npk), wk (npk), eps, xq (3)
-  ! input-output: coordinates of k points
-  ! input-output: weights of k points
-  ! the smallest xq
-  ! input: coordinates of a q-point
+  ! 
+  ! ... local variables
   !
-  !    And then the local variables
-  !
-  logical :: lgamma, samev
+  LOGICAL :: lgamma, samev
   ! true if xq is the gamma point
-  integer :: ik, jk, kpol, isym, jsym, j, nk
+  INTEGER :: ik, jk, kpol, isym, jsym, j, nk
   ! counter on k
   ! counter
   REAL(DP), ALLOCATABLE :: xk_save(:,:), wk_new(:)
-  REAL(DP) :: xkq(3), xks(3)
+  REAL(DP) :: xkq(3), xks(3), eps
   INTEGER :: invs(3,3,48), table(48,48)
   LOGICAL :: diago_bands_save(nks)
   !
   eps = 1.d-12
   !
-  ! shift the k points in the odd positions and fill the even ones with k+
+  ! ... shift the k points in the odd positions and fill the even ones with k+
   !
   diago_bands_save(1:nks)=diago_bands(1:nks)
 
-  lgamma = abs (xq (1) ) .lt.eps.and.abs (xq (2) ) .lt.eps.and.abs ( &
-       xq (3) ) .lt.eps
+  lgamma = ABS(xq(1))<eps .AND. ABS(xq(2))<eps .AND. ABS(xq(3))<eps
 
-  if (.not.lgamma) then
+  IF (.NOT.lgamma) THEN
 
-     if (2 * nks.gt.npk) call errore ('set_kplusq', 'too many k points', &
-          & nks)
+     IF (2 * nks > npk) CALL errore( 'set_kplusq', 'too many k points', nks )
 
      ALLOCATE(xk_save(3,nks))
      xk_save(:,1:nks)=xk(:,1:nks)
@@ -95,13 +93,13 @@ subroutine set_kplusq_tpw (xk, wk, xq, nks, npk, diago_bands, &
         ENDDO
      ENDDO
 
-     do ik = nks, 1, - 1
-        do j = 1, 3
-           xk (j, 2 * ik - 1) = xk (j, ik)
-           xk (j, 2 * ik) = xk (j, ik) + xq (j)
-        enddo
-        wk (2 * ik - 1) = wk (ik)
-        wk (2 * ik) = 0.d0
+     DO ik = nks, 1, - 1
+        DO j = 1, 3
+           xk(j,2*ik-1) = xk(j,ik)
+           xk(j,2*ik) = xk(j,ik) + xq(j)
+        ENDDO
+        wk(2*ik-1) = wk(ik)
+        wk(2*ik) = 0.d0
         diago_bands( 2 * ik - 1 ) = diago_bands( ik )
         isym_bands( 2 * ik - 1 ) = isym_bands( ik )
         ik_origin( 2 * ik - 1) = 2 * ik_origin( ik )- 1
@@ -120,12 +118,12 @@ subroutine set_kplusq_tpw (xk, wk, xq, nks, npk, diago_bands, &
                               invs(kpol, 3, isym)*xk_save (3,jk)
               ENDDO
               IF (t_rev(isym)==1)  xks (:)=-xks(:)
-              samev = abs (xks (1) - xkq(1) - &
-                     nint (xks (1) - xkq(1) ) ) < 1.0d-5 .AND. &
-                      abs (xks (2) - xkq(2) - &
-                     nint (xks (2) - xkq(2) ) ) < 1.0d-5 .AND. &
-                      abs (xks (3) - xkq(3) - &
-                     nint (xks (3) - xkq(3) ) ) < 1.0d-5
+              samev = ABS( xks(1) - xkq(1) - &
+                     NINT( xks(1) - xkq(1) ) ) < 1.0d-5 .AND. &
+                      ABS( xks(2) - xkq(2) - &
+                     NINT( xks(2) - xkq(2) ) ) < 1.0d-5 .AND. &
+                      ABS( xks(3) - xkq(3) - &
+                     NINT( xks(3) - xkq(3) ) ) < 1.0d-5
               IF (samev) THEN
                  diago_bands( 2 * ik ) = .FALSE.
                  isym_bands( 2 * ik ) = isym
@@ -148,6 +146,6 @@ subroutine set_kplusq_tpw (xk, wk, xq, nks, npk, diago_bands, &
 !
 !     diago_bands=.TRUE.
 
-  endif
-  return
-end subroutine set_kplusq_tpw
+  ENDIF
+  RETURN
+END SUBROUTINE set_kplusq_tpw

@@ -12,6 +12,7 @@ MODFLAGS= $(BASEMOD_FLAGS) \
           $(MOD_FLAG)../qe \
           $(MOD_FLAG).
 
+#objects of libthermo_pw.a
 THERMOOBJS = \
 adjust_tau.o \
 addusdens1d_so.o \
@@ -129,7 +130,6 @@ sym_band_sub.o \
 thermo_mod.o \
 thermo_readin.o \
 thermo_setup.o \
-thermo_pw.o \
 thermo_summary.o \
 write_anhar.o \
 write_anhar_anis.o \
@@ -151,8 +151,13 @@ write_ph_dispersions.o \
 write_quadratic.o \
 write_thermo.o 
 
-LRMODS = ../../LR_Modules/liblrmod.a
-PWOBJS = ../../PHonon/PH/libph.a ../../PP/src/libpp.a ../../PW/src/libpw.a 
+#libraries of QE
+PWOBJS = ../../PHonon/PH/libph.a \
+         ../../PP/src/libpp.a \
+         ../../LR_Modules/liblrmod.a \
+         ../../PW/src/libpw.a 
+
+#library modules of QE
 QEMODS = ../../Modules/libqemod.a \
          ../../KS_Solvers/libks_solvers.a \
          ../../FFTXlib/libqefft.a \
@@ -160,16 +165,18 @@ QEMODS = ../../Modules/libqemod.a \
          ../../UtilXlib/libutil.a \
          ../../dft-d3/libdftd3qe.a
 
-LIBOBJS	=../qe/thermo_qe.a ../lib/thermo_lib.a ../../PHonon/PH/libph.a ../../clib/clib.a ../../iotk/src/libiotk.a
+#libraries of thermo_pw
+LIBTHERMO = ../qe/thermo_qe.a \
+            ../lib/thermo_lib.a 
 
-all : libthermo_pw.a thermo_pw.x 
+MODULES = $(LIBTHERMO) $(PWOBJS) $(QEMODS) $(LIBOBJS)
 
-thermo_pw.x : thermo_pw.o libthermo_pw.a $(QEMODS) $(LRMODS) $(PWOBJS) \
-              $(LIBOBJS) 
-	$(LD) $(LDFLAGS) -o $@ thermo_pw.o ../../PHonon/PH/rigid.o \
-              ../../PHonon/PH/write_eigenvectors.o libthermo_pw.a \
-        $(PWOBJS) $(QEMODS) $(LIBOBJS) $(LRMODS) $(PWOBJS) $(QEMODS) \
-        $(LIBS) $(QELIBS) ../../clib/clib.a
+all : thermo_pw.x 
+
+thermo_pw.x : thermo_pw.o libthermo_pw.a $(MODULES)
+	$(LD) $(LDFLAGS) -o $@ ./thermo_pw.o ./libthermo_pw.a \
+              ../../PHonon/PH/rigid.o ../../PHonon/PH/write_eigenvectors.o \
+        $(MODULES) $(QELIBS)
 	- ( cd ../../bin ; ln -fs ../thermo_pw/src/thermo_pw.x . )
 
 libthermo_pw.a : $(THERMOOBJS) 

@@ -19,11 +19,11 @@ LOGICAL FUNCTION check_bands( outdir, xq, iq )
   USE io_files,   ONLY : tmp_dir, prefix
   USE control_ph, ONLY : lqdir, newgrid
   USE io_global,  ONLY : ionode, ionode_id
-  USE pw_restart_new,   ONLY : pw_readschema_file
   USE qes_types_module, ONLY : output_type
   USE qes_libs_module,      ONLY :  qes_reset
   USE io_files,   ONLY : xmlpun_schema
   USE iotk_module, ONLY : iotk_free_unit
+  USE qexsd_module, ONLY : qexsd_readschema
   USE mp,         ONLY : mp_bcast
   USE mp_images,  ONLY : intra_image_comm
   USE qes_bcast_module, ONLY : qes_bcast
@@ -34,6 +34,7 @@ LOGICAL FUNCTION check_bands( outdir, xq, iq )
   REAL(DP), INTENT(IN) :: xq(3)
   CHARACTER(LEN=*) :: outdir
   CHARACTER(LEN=256)  :: dirname, filename, dir_phq, tmp_dir_save
+  CHARACTER(LEN=320)  :: filename1
   CHARACTER(LEN=6), EXTERNAL :: int_to_char
   LOGICAL :: exst, exst_restart, exst_recover
   INTEGER :: ik, iunaux, nks, ierr
@@ -74,10 +75,11 @@ LOGICAL FUNCTION check_bands( outdir, xq, iq )
   
   !
   IF (exst .AND. .NOT. exst_restart) THEN
-     IF (ionode) &
-        CALL pw_readschema_file(ierr, output_obj)
-     CALL mp_bcast( ierr, ionode_id, intra_image_comm )
-     CALL errore('check_bands','xmlfile not readable',ABS(ierr))
+     !
+     IF (ionode) CALL qexsd_readschema ( filename, ierr, output_obj)
+     CALL mp_bcast(ierr, ionode_id, intra_image_comm)
+     IF ( ierr > 0 ) CALL errore ( 'check_bands', &
+                                   'fatal error reading xml file', ierr )
      CALL qes_bcast(output_obj, ionode_id, intra_image_comm)
 
      nks = output_obj%band_structure%nks 

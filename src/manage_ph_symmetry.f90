@@ -118,18 +118,22 @@ SUBROUTINE set_symmetry_ph()
 !  magnetic case.
 !
 USE ions_base,        ONLY : nat
-USE symm_base,        ONLY : s, sr, irt, ftau, nsym, invs, t_rev, sname
+USE symm_base,        ONLY : s, sr, irt, ft, nsym, invs, t_rev, sname
 USE lr_symm_base,     ONLY : gi, nsymq, rtau
+USE fft_base,         ONLY : dfftp
 USE noncollin_module, ONLY : nspin_mag
 
 IMPLICIT NONE
 
 LOGICAL :: sym(48)
-INTEGER :: isym, jsym, ss(3,3)
+INTEGER :: isym, jsym, ss(3,3), ftau(3,48)
 LOGICAL :: found
 
 ALLOCATE (irt_ph(48, nat))
 ALLOCATE (rtau_ph(3, 48, nat))
+ftau(1,1:nsym) = NINT ( ft(1,1:nsym)*dfftp%nr1 )
+ftau(2,1:nsym) = NINT ( ft(2,1:nsym)*dfftp%nr2 )
+ftau(3,1:nsym) = NINT ( ft(3,1:nsym)*dfftp%nr3 )
 IF (nspin_mag==4) THEN
 !
 !  In the noncollinear magnetic case use only the symmetries that do

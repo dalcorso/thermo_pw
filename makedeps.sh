@@ -119,11 +119,12 @@ for dir in $dirs; do
 	$TOPDIR/moduledep.sh $DEPENDS > make.depend
 	$TOPDIR/includedep.sh $DEPENDS >> make.depend
 
-        # handle special cases: modules for C-fortran binding, hdf5, MPI
+        # handle special cases: modules for C-fortran binding,
+        #                     hdf5, MPI, FoX, libxc
         sed '/@iso_c_binding@/d' make.depend > make.depend.tmp
         sed '/@hdf5@/d;/@mpi@/d' make.depend.tmp > make.depend
         sed '/@fox_dom@/d;/@fox_wxml@/d'  make.depend > make.depend.tmp
-        sed '/@m_common_io@/d'   make.depend.tmp > make.depend
+        sed '/@m_common_io@/d;/@xc_f03_lib_m@/d'   make.depend.tmp > make.depend
 
         if test "$DIR" = "FFTXlib"
         then
@@ -141,40 +142,6 @@ for dir in $dirs; do
         then
             sed '/@ifcore@/d' make.depend > make.depend.tmp
             sed '/@cudafor@/d' make.depend.tmp > make.depend
-        fi
-
-        if test "$DIR" = "KS_Solvers/Davidson"
-        then
-
-            sed '/@elpa1@/d' make.depend > make.depend.tmp
-            sed '/@ifcore@/d' make.depend.tmp > make.depend
-        fi
-
-        if test "$DIR" = "KS_Solvers/Davidson_RCI"
-        then
-            sed '/@elpa1@/d' make.depend > make.depend.tmp
-            sed '/@ifcore@/d' make.depend.tmp > make.depend
-        fi
-
-        if test "$DIR" = "KS_Solvers/CG"
-        then
-
-            sed '/@elpa1@/d' make.depend > make.depend.tmp
-            sed '/@ifcore@/d' make.depend.tmp > make.depend
-        fi
-
-        if test "$DIR" = "KS_Solvers/PPCG"
-        then
-
-            sed '/@elpa1@/d' make.depend > make.depend.tmp
-            sed '/@ifcore@/d' make.depend.tmp > make.depend
-        fi
-
-        if test "$DIR" = "Modules"
-        then
-
-            sed '/@elpa1@/d' make.depend > make.depend.tmp
-            sed '/@ifcore@/d' make.depend.tmp > make.depend
         fi
 
         if test "$DIR" = "PW/src" || test "$DIR" = "TDDFPT/src"

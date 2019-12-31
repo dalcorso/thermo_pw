@@ -82,9 +82,10 @@ PROGRAM thermo_pw
   !
   CALL mp_startup ( start_images=.TRUE. )
   CALL mp_start_diag ( ndiag_, world_comm, intra_bgrp_comm, &
-       do_distr_diag_inside_bgrp_ = .true. )
+          do_distr_diag_inside_bgrp_ = .true. )
   CALL set_mpi_comm_4_solvers( intra_pool_comm, intra_bgrp_comm, &
        inter_bgrp_comm )
+
   CALL environment_start ( code )
   CALL start_clock( 'PWSCF' )
   with_asyn_images=(nimage > 1)
@@ -270,8 +271,8 @@ PROGRAM thermo_pw
   !
 1000  CALL deallocate_thermo()
   !
+  CALL laxlib_free_ortho_group()
   CALL environment_end( code )
-  CALL unset_mpi_comm_4_solvers()
   !
   CALL mp_global_end ()
   !

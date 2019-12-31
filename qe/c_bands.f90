@@ -1,6 +1,7 @@
 !
 ! Copyright (C) 2001-2013 Quantum ESPRESSO group
 ! Copyright (C) 2017 Dal Corso Andrea
+! Copyright (C) 2018-2019 Dal Corso Andrea and Andrea Urru
 !
 !  This version of the routine should be called only by the phonon code.  
 !  It allows the computation of the bands in the k points outside 
@@ -82,7 +83,7 @@ SUBROUTINE c_bands_nscf_tpw( )
   !
   DO ik = 1, ik_
      CALL get_buffer ( evc, nwordwfc, iunwfc, ik )
-  END DO
+  ENDDO
   !
   IF ( isolve == 0 ) THEN
      WRITE( stdout, '(5X,"Davidson diagonalization with overlap")' )
@@ -90,7 +91,7 @@ SUBROUTINE c_bands_nscf_tpw( )
      WRITE( stdout, '(5X,"CG style diagonalization")')
   ELSE
      CALL errore ( 'c_bands', 'invalid type of diagonalization', isolve)
-  END IF
+  ENDIF
   IF (tmp_dir /= tmp_dir_save) THEN
      iuawfc = 20
      lrawfc = nbnd * npwx * npol
@@ -98,7 +99,7 @@ SUBROUTINE c_bands_nscf_tpw( )
                                                          tmp_dir_save)
      IF (.NOT.exst.AND..NOT.exst_mem) THEN
         CALL errore ('c_bands_tpw', 'file '//trim(prefix)//'.wfc not found', 1)
-     END IF
+     ENDIF
   ENDIF
 !
 !  find the minimum number of k points diagonalized in all pools
@@ -138,7 +139,11 @@ SUBROUTINE c_bands_nscf_tpw( )
         !
         ! ... calculate starting  wavefunctions
         !
-        IF ( iverbosity > 0 ) WRITE( stdout, 9001 ) ik
+        IF ( iverbosity > 0 .AND. npool == 1 ) THEN
+           WRITE( stdout, 9001 ) ik, nks
+        ELSEIF ( iverbosity > 0 .AND. npool > 1 ) THEN
+           WRITE( stdout, 9002 ) ik, nks
+        ENDIF
         !
         IF ( TRIM(starting_wfc) == 'file' ) THEN
            !
@@ -148,7 +153,7 @@ SUBROUTINE c_bands_nscf_tpw( )
            !
            CALL init_wfc ( ik )
            !
-        END IF
+        ENDIF
         !
         ! ... diagonalization of bands for k-point ik
         !
@@ -183,7 +188,7 @@ SUBROUTINE c_bands_nscf_tpw( )
            IF (check_stop_now()) THEN
               CALL save_in_cbands(ik, ethr, avg_iter, et )
               RETURN
-           END IF
+           ENDIF
         ENDIF
         !
         ! report about timing
@@ -255,7 +260,7 @@ SUBROUTINE c_bands_nscf_tpw( )
 
         DO ikdiag=1, nkdiag
            ticket(ikdiag)=INT(dfloat((ikdiag-1))/nkdiag*divide+1)
-        END DO
+        ENDDO
 
         DO queue=1, divide
            nkdiag=0
@@ -269,7 +274,7 @@ SUBROUTINE c_bands_nscf_tpw( )
                        nkdiag_loc(queue)=nkdiag_loc(queue)+1
                        index_send(nkdiag,queue)=nkdiag_loc(queue)
                        working_pool(nkdiag)=my_pool_id+1
-                    END IF
+                    ENDIF
                  ELSE
                     nks_loop: DO ikk=1,nks
                        IF (ticket(nkdiag)==queue) THEN
@@ -280,14 +285,14 @@ SUBROUTINE c_bands_nscf_tpw( )
                              index_recv(nkdiag,queue)=nkrecv_loc(queue)
                              EXIT nks_loop
                           ENDIF
-                       END IF
+                       ENDIF
                     ENDDO nks_loop
                  ENDIF
               ENDIF
            ENDDO
            mem(queue)=dfftp%nnr*npol*nbnd*&
                       (nkdiag_loc(queue)+nkrecv_loc(queue))*16.0_DP/1.D9
-        END DO
+        ENDDO
 
         mem_to_alloc=maxval(mem)
 
@@ -298,10 +303,10 @@ SUBROUTINE c_bands_nscf_tpw( )
            DEALLOCATE(index_send)     
            DEALLOCATE(nkdiag_loc)     
            DEALLOCATE(nkrecv_loc)     
-        END IF
+        ENDIF
 
         DEALLOCATE(mem)
-     END DO
+     ENDDO
 
      CALL mp_sum(need, intra_orthopool_comm)
      CALL mp_sum(working_pool, intra_orthopool_comm)
@@ -427,7 +432,7 @@ SUBROUTINE c_bands_nscf_tpw( )
            DEALLOCATE(evcbuffer)
            DEALLOCATE(evcrecv)
         ENDIF
-     END DO
+     ENDDO
 
      CALL mp_stop_orthopools()
      !
@@ -467,7 +472,8 @@ SUBROUTINE c_bands_nscf_tpw( )
   !
   ! formats
   !
-9001 FORMAT(/'     Computing kpt #: ',I5 )
+9002 FORMAT(/'     Computing kpt #: ',I5, '  of ',I5,' on this pool' )
+9001 FORMAT(/'     Computing kpt #: ',I5, '  of ',I5 )
 9000 FORMAT( '     total cpu time spent up to now is ',F10.1,' secs' )
   !
 END SUBROUTINE c_bands_nscf_tpw
@@ -491,7 +497,7 @@ CALL cryst_to_cart(1,xko,at,-1)
 
 DO kpol=1,3
    xks(kpol)=s(kpol,1)*xko(1)+s(kpol,2)*xko(2)+s(kpol,3)*xko(3)
-END DO
+ENDDO
 IF (t_rev==1) xks = - xks
 
 gk = NINT(xks - xkc)
@@ -517,7 +523,7 @@ SUBROUTINE rotate_and_save_psic(psic, evcr, aux_xk, ik, ikk, iko)
 !  ikk local index of the current k point
 
 USE kinds,      ONLY : DP
-USE symm_base,  ONLY : s, sr, ftau, invs, t_rev
+USE symm_base,  ONLY : s, sr, ft, invs, t_rev, nsym
 USE fft_base,   ONLY : dfftp
 USE klist,      ONLY : xk, nkstot, ngk, igk_k
 USE wvfct,      ONLY : nbnd, npwx
@@ -536,7 +542,7 @@ INTEGER :: ik, iko, ikk
 REAL(DP) :: aux_xk(3,nkstot)
 COMPLEX(DP) :: psic(dfftp%nnr, npol, nbnd), evcr(dfftp%nnr, npol, nbnd)
 COMPLEX(DP) :: d_spin(2,2)
-INTEGER :: has_e, ibnd, ipol, ig, iks, npw, gk(3)
+INTEGER :: has_e, ibnd, ipol, ig, iks, npw, gk(3), ftau(3,48)
 
 CALL compute_gk(xk(1,ikk), aux_xk(1,iko), &
           s(1,1,invs(isym_bands(ik))), t_rev(invs(isym_bands(ik))), gk)
@@ -545,6 +551,10 @@ IF (noncolin) THEN
    has_e=1
    CALL find_u(sr(1,1,isym_bands(ik)),d_spin) 
 ENDIF
+
+ftau(1,1:nsym) = NINT ( ft(1,1:nsym)*dfftp%nr1 ) 
+ftau(2,1:nsym) = NINT ( ft(2,1:nsym)*dfftp%nr2 ) 
+ftau(3,1:nsym) = NINT ( ft(3,1:nsym)*dfftp%nr3 )
 
 iks=0
 IF (noncolin.AND.domag) THEN

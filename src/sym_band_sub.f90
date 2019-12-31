@@ -24,12 +24,12 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   USE klist,                ONLY : xk, nks, nkstot
   USE io_files,             ONLY : nwordwfc, iunwfc
   USE buffers,              ONLY : get_buffer
-  USE symm_base,            ONLY : s, ftau, nsym, t_rev, sname
+  USE symm_base,            ONLY : s, ft, nsym, t_rev, sname
   USE rap_point_group,      ONLY : code_group, nclass, nelem, elem,  &
        name_rap, name_class, gname, elem_name
   USE rap_point_group_so,   ONLY : nrap, nelem_so, elem_so, has_e, &
        name_rap_so, d_spin, elem_name_so
-  USE rap_point_group_is,   ONLY : nsym_is, sr_is, ftau_is, gname_is, &
+  USE rap_point_group_is,   ONLY : nsym_is, sr_is, ft_is, gname_is, &
        sname_is, code_group_is
   USE proj_rap_point_group, ONLY : which_elem, char_mat_proj, nrap_proj, &
                                    name_rap_proj, group_desc, nsym_proj
@@ -61,7 +61,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   INTEGER :: nks1tot, nks2tot
   INTEGER :: igroup, irap, dim_rap, ik2, ike, ikz, nks_, ios
   INTEGER :: sk(3,3,48), ftauk(3,48), gk(3,48), invsk(48), t_revk(48), &
-             nsymk, isym
+             nsymk, isym, ftau(3,48)
   INTEGER :: sk_is(3,3,48), gk_is(3,48), invs_is(48)
   INTEGER :: sk_in(3,3,48), ftau_in(3,48), gk_in(3,48), invs_in(48)
   LOGICAL :: is_symmorphic, search_sym, type1
@@ -71,7 +71,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   COMPLEX(DP) :: d_spink(2,2,48), d_spin_is(2,2,48), d_spin_in(2,2,48)
   COMPLEX(DP), ALLOCATABLE :: times(:,:,:)
   REAL(DP) :: dxk(3), dkmod, k1(3), k2(3), ps, &
-              gauge(48), argument(48,48), srk(3,3,48)
+              gauge(48), argument(48,48), srk(3,3,48), ftk(3,48)
   INTEGER, ALLOCATABLE :: rap_et(:,:), code_group_k(:), aux_ind(:), &
                           code_group_ext_k(:), lprojk(:), nrapk(:), &
                           ptypek(:,:), ngroup(:), istart(:,:)
@@ -115,6 +115,10 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   nr1=dfftp%nr1
   nr2=dfftp%nr2
   nr3=dfftp%nr3
+  ftau(1,1:nsym) = NINT ( ft(1,1:nsym)*nr1 )
+  ftau(2,1:nsym) = NINT ( ft(2,1:nsym)*nr2 )
+  ftau(3,1:nsym) = NINT ( ft(3,1:nsym)*nr3 )
+
   code_group_k=0
   code_group_ext_k=0
   gaugek=0.0_DP
@@ -142,12 +146,16 @@ SUBROUTINE sym_band_sub(filband, spin_component)
      !
      ! Find the small group of k
      !
-     CALL smallgk (xk(1,ik), at, bg, s, ftau, t_rev, sname, nsym, &
-          sk, ftauk, gk, t_revk, invsk, snamek, nsymk)
+     CALL smallgk (xk(1,ik), at, bg, s, ft, t_rev, sname, nsym, &
+          sk, ftk, gk, t_revk, invsk, snamek, nsymk)
+
+     ftauk(1,1:nsymk) = NINT ( ftk(1,1:nsymk)*dfftp%nr1 )
+     ftauk(2,1:nsymk) = NINT ( ftk(2,1:nsymk)*dfftp%nr2 )
+     ftauk(3,1:nsymk) = NINT ( ftk(3,1:nsymk)*dfftp%nr3 )
      !
      !  character of the irreducible representations
      !
-     CALL find_info_group(nsymk,sk,t_revk,ftauk,d_spink,gk,snamek,&
+     CALL find_info_group_tpw(nsymk,sk,t_revk,ftk,d_spink,gk,snamek,&
           sk_is,d_spin_is,gk_is,invs_is,is_symmorphic,search_sym)
 !
 !    select the symmetries to use and set the fractional translations
@@ -159,12 +167,9 @@ SUBROUTINE sym_band_sub(filband, spin_component)
         DO isym=1, nsym_in
            sk_in(:,:,isym)=sk_is(:,:,isym)
            d_spin_in(:,:,isym)=d_spin_is(:,:,isym)
-           ftau_in(:,isym)=ftau_is(:,isym)
+           ft_in(:,isym)=ft_is(:,isym)
            gk_in(:,isym)=gk_is(:,isym)
            invs_in(isym)=invs_is(isym)
-           ft_in(1,isym) = DBLE( ftau_is(1,isym) ) / DBLE(nr1)
-           ft_in(2,isym) = DBLE( ftau_is(2,isym) ) / DBLE(nr2)
-           ft_in(3,isym) = DBLE( ftau_is(3,isym) ) / DBLE(nr3)
         END DO
         code_group_k(ik)=code_group_is
         nrapk(ik)=nrap
@@ -177,9 +182,7 @@ SUBROUTINE sym_band_sub(filband, spin_component)
            ftau_in(:,isym)=ftauk(:,isym)
            gk_in(:,isym)=gk(:,isym)
            invs_in(isym)=invsk(isym)
-           ft_in(1,isym) = DBLE( ftauk(1,isym) ) / DBLE(nr1)
-           ft_in(2,isym) = DBLE( ftauk(2,isym) ) / DBLE(nr2)
-           ft_in(3,isym) = DBLE( ftauk(3,isym) ) / DBLE(nr3)
+           ft_in(:,isym) = ftk(:,isym)
         END DO
         code_group_k(ik)=code_group
         nrapk(ik)=nclass
@@ -300,9 +303,10 @@ SUBROUTINE sym_band_sub(filband, spin_component)
 !
      DO ik=nks1tot, nks2tot
 
-        CALL smallgk (xk(1,ik), at, bg, s, ftau, t_rev, sname, &
-             nsym, sk, ftauk, gk, t_revk, invsk, snamek, nsymk)
-        CALL find_info_group(nsymk,sk,t_revk,ftauk,d_spink,gk,snamek,&
+        CALL smallgk (xk(1,ik), at, bg, s, ft, t_rev, sname, &
+             nsym, sk, ftk, gk, t_revk, invsk, snamek, nsymk)
+
+        CALL find_info_group_tpw(nsymk,sk,t_revk,ftk,d_spink,gk,snamek,&
              sk_is,d_spin_is,gk_is,invs_is,is_symmorphic,search_sym)
 
         IF (noncolin.AND.domag) THEN
@@ -310,22 +314,16 @@ SUBROUTINE sym_band_sub(filband, spin_component)
            code_group_in=code_group_is
            DO isym=1, nsym_is
               sk_in(:,:,isym)=sk_is(:,:,isym)
-              ftau_in(:,isym)=ftau_is(:,isym)
+              ft_in(:,isym)=ft_is(:,isym)
               gk_in(:,isym)=gk_is(:,isym)
-              ft_in(1,isym) = DBLE( ftau_is(1,isym) ) / DBLE(nr1)
-              ft_in(2,isym) = DBLE( ftau_is(2,isym) ) / DBLE(nr2)
-              ft_in(3,isym) = DBLE( ftau_is(3,isym) ) / DBLE(nr3)
            END DO
         ELSE
            nsym_in=nsymk
            code_group_in=code_group
            DO isym=1, nsymk
               sk_in(:,:,isym)=sk(:,:,isym)
-              ftau_in(:,isym)=ftauk(:,isym)
               gk_in(:,isym)=gk(:,isym)
-              ft_in(1,isym) = DBLE( ftauk(1,isym) ) / DBLE(nr1)
-              ft_in(2,isym) = DBLE( ftauk(2,isym) ) / DBLE(nr2)
-              ft_in(3,isym) = DBLE( ftauk(3,isym) ) / DBLE(nr3)
+              ft_in(:,isym) = ftk(:,isym) 
            END DO
         ENDIF
 
@@ -587,8 +585,9 @@ END SUBROUTINE sym_band_sub
 SUBROUTINE find_aux_ind_xk(xk1, xk2, aux_ind)
 USE kinds, ONLY : DP
 USE cell_base, ONLY : at, bg
-USE symm_base, ONLY : s, ftau, t_rev, sname, nsym
+USE symm_base, ONLY : s, t_rev, ft, sname, nsym
 USE noncollin_module, ONLY : noncolin
+USE fft_base,        ONLY : dfftp
 USE spin_orb,        ONLY : domag
 USE rap_point_group, ONLY : code_group
 USE rap_point_group_so, ONLY : d_spin
@@ -600,15 +599,19 @@ INTEGER, INTENT(OUT) :: aux_ind
 INTEGER :: sk(3,3,48), ftauk(3,48), gk(3,48), sk_is(3,3,48), &
            gk_is(3,48), t_revk(48), invsk(48), invs_is(48), nsymk
 INTEGER :: sk1(3,3,48), ftauk1(3,48), gk1(3,48), sk1_is(3,3,48), &
-           t_revk1(48), invsk1(48), nsymk1
+           t_revk1(48), invsk1(48), nsymk1, ftau(3,48)
 INTEGER :: group_a, group_b, nsym_isa, nsym_isb
 LOGICAL :: is_symmorphic, search_sym
 CHARACTER(len=45) :: snamek(48), snamek1(48)
 COMPLEX(DP) :: d_spink(2,2,48), d_spink1(2,2,48), d_spin_is(2,2,48)
 
+ftau(1,1:nsym) = NINT ( ft(1,1:nsym)*dfftp%nr1 )
+ftau(2,1:nsym) = NINT ( ft(2,1:nsym)*dfftp%nr2 )
+ftau(3,1:nsym) = NINT ( ft(3,1:nsym)*dfftp%nr3 )
+
 CALL smallgk (xk1, at, bg, s, ftau, t_rev, sname, &
               nsym, sk, ftauk, gk, t_revk, invsk, snamek, nsymk)
-CALL find_info_group(nsymk, sk, t_revk, ftauk, d_spink, gk, snamek,&
+CALL find_info_group_tpw(nsymk, sk, t_revk, ftauk, d_spink, gk, snamek,&
              sk_is, d_spin_is, gk_is, invs_is, is_symmorphic, search_sym)
 group_a=code_group
 IF (noncolin.AND.domag) THEN
@@ -617,7 +620,7 @@ IF (noncolin.AND.domag) THEN
 ENDIF
 CALL smallgk (xk2, at, bg, s, ftau, t_rev, sname, &
             nsym, sk1, ftauk1, gk1, t_revk1, invsk1, snamek1, nsymk1)
-CALL find_info_group(nsymk1, sk1, t_revk1, ftauk1, d_spink1, gk1, &
+CALL find_info_group_tpw(nsymk1, sk1, t_revk1, ftauk1, d_spink1, gk1, &
             snamek1, sk1_is, d_spin_is, gk_is, invs_is, &
             is_symmorphic,search_sym)
 group_b=code_group

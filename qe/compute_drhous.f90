@@ -7,7 +7,7 @@
 !
 !
 !-----------------------------------------------------------------------
-subroutine compute_drhous_tpw (drhous, dbecsum, wgg, becq, alpq)
+SUBROUTINE compute_drhous_tpw (drhous, dbecsum, wgg, becq, alpq)
   !-----------------------------------------------------------------------
   !
   !    This routine computes the part of the change of the charge density
@@ -41,24 +41,24 @@ subroutine compute_drhous_tpw (drhous, dbecsum, wgg, becq, alpq)
   USE mp_bands,   ONLY : intra_bgrp_comm
   USE mp,         ONLY : mp_sum
 
-  implicit none
+  IMPLICIT NONE
   !
   !     the dummy variables
   !
 
-  complex(DP) :: dbecsum (nhm * (nhm + 1) / 2, nat, nspin, 3 * nat) &
+  COMPLEX(DP) :: dbecsum (nhm * (nhm + 1) / 2, nat, nspin, 3 * nat) &
        , drhous (dfftp%nnr, nspin, 3 * nat)
   !output:the derivative of becsum
   ! output: add the orthogonality term
-  type (bec_type) :: becq(nksq), & ! (nkb, nbnd)
+  TYPE (bec_type) :: becq(nksq), & ! (nkb, nbnd)
                      alpq (3, nksq)
   ! input: the becp with psi_{k+q}
   ! input: the alphap with psi_{k+q}
 
-  real(DP) :: wgg (nbnd, nbnd, nksq)
+  REAL(DP) :: wgg (nbnd, nbnd, nksq)
   ! input: the weights
 
-  integer :: npw, npwq, ik, ikq, ikk, ig, nu_i, ibnd, ios, jpol, ipol, na
+  INTEGER :: npw, npwq, ik, ikq, ikk, ig, nu_i, ibnd, ios, jpol, ipol, na
   ! counter on k points
   ! the point k+q
   ! record for wfcs at k point
@@ -68,58 +68,58 @@ subroutine compute_drhous_tpw (drhous, dbecsum, wgg, becq, alpq)
   ! counter on the bands
   ! integer variable for I/O control
 
-  real(DP) :: weight
+  REAL(DP) :: weight
   ! the weight of the k point
 
-  complex(DP), allocatable :: evcr (:,:), dpsi_save(:,:)
+  COMPLEX(DP), ALLOCATABLE :: evcr (:,:), dpsi_save(:,:)
   ! the wavefunctions in real space
   COMPLEX(DP) :: zdotc
   LOGICAL :: add_zstar
 
-  if (.not.okvan) return
+  IF (.NOT.okvan) RETURN
   add_zstar= (zeu.OR.zue.AND.(.NOT.done_start_zstar)).AND.comp_irr(0).AND. &
              (.NOT. done_irr(0))
 
-  call start_clock ('com_drhous')
-  allocate (evcr( dffts%nnr, nbnd))
-  IF (add_zstar) allocate ( dpsi_save ( npwx*npol , nbnd))
+  CALL start_clock ('com_drhous')
+  ALLOCATE (evcr( dffts%nnr, nbnd))
+  IF (add_zstar) ALLOCATE ( dpsi_save ( npwx*npol , nbnd))
   !
   IF (zeu.or.zue) zstarue0  = (0.d0, 0.d0)
   drhous(:,:,:) = (0.d0, 0.d0)
   dbecsum (:,:,:,:) = (0.d0, 0.d0)
 
-  do ik = 1, nksq
+  DO ik = 1, nksq
      ikk = ikks(ik)
      ikq = ikqs(ik)
      npw = ngk(ikk)
      npwq= ngk(ikq)
      weight = wk (ikk)
-     if (lsda) current_spin = isk (ikk)
+     IF (lsda) current_spin = isk (ikk)
      !
      !   For each k point we construct the beta functions
      !
-     call init_us_2 (npwq, igk_k(1,ikq), xk (1, ikq), vkb)
+     CALL init_us_2 (npwq, igk_k(1,ikq), xk (1, ikq), vkb)
      !
      !   Read the wavefunctions at k and transform to real space
      !
-     call get_buffer (evc, lrwfc, iuwfc, ikk)
+     CALL get_buffer (evc, lrwfc, iuwfc, ikk)
      evcr(:,:) = (0.d0, 0.d0)
-     do ibnd = 1, nbnd
-        do ig = 1, npw
+     DO ibnd = 1, nbnd
+        DO ig = 1, npw
            evcr (dffts%nl (igk_k(ig,ikk) ), ibnd) = evc (ig, ibnd)
-        enddo
+        ENDDO
         CALL invfft ('Wave', evcr (:, ibnd), dffts)
-     enddo
+     ENDDO
      !
      !   Read the wavefunctions at k+q
      !
-     if (.not.lgamma.and.nksq.gt.1) call get_buffer (evq, lrwfc, iuwfc, ikq)
+     IF (.NOT.lgamma.AND.nksq>1) call get_buffer (evq, lrwfc, iuwfc, ikq)
      !
      !   And compute the contribution of this k point to the change of
      !   the charge density
      !
-     do nu_i = 1, 3 * nat
-        call incdrhous (drhous (1, current_spin, nu_i), weight, ik, &
+     DO nu_i = 1, 3 * nat
+        CALL incdrhous (drhous (1, current_spin, nu_i), weight, ik, &
              dbecsum (1, 1, current_spin, nu_i), evcr, wgg, becq, alpq, nu_i)
 !
 !   After this call dpsi contains the change of the wavefunctions due
@@ -134,7 +134,7 @@ subroutine compute_drhous_tpw (drhous, dbecsum, wgg, becq, alpq)
            dpsi_save=dpsi
            DO jpol=1,3
               dvpsi=(0.0,0.0)
-              call dvpsi_e_tpw(ik, jpol)
+              CALL dvpsi_e_tpw(ik, jpol)
 !
 ! NB: The minus sign is due to the fact that dpsi_save contains
 !     -|psi_j><psi_j| dS/du |psi_i>
@@ -145,16 +145,16 @@ subroutine compute_drhous_tpw (drhous, dbecsum, wgg, becq, alpq)
               ENDDO
            ENDDO
         ENDIF
-     enddo
-  enddo
+     ENDDO
+  ENDDO
 
   IF (add_zstar) &
          CALL mp_sum ( zstarue0, intra_bgrp_comm )
 
-  deallocate(evcr)
+  DEALLOCATE(evcr)
   IF (add_zstar) DEALLOCATE(dpsi_save)
 
-  call stop_clock ('com_drhous')
-  return
+  CALL stop_clock ('com_drhous')
+  RETURN
 
-end subroutine compute_drhous_tpw
+END SUBROUTINE compute_drhous_tpw

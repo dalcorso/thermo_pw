@@ -17,7 +17,7 @@ can be found <a href="https://people.sissa.it/dalcorso/thermo_pw/user_guide/inde
 9. A. Urru and A. Dal Corso,
 Density functional perturbation theory for lattice dynamics with fully
 relativistic ultrasoft pseudopotentials: The magnetic case,
-<a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.100.045115">Phys. Rev. B <B>100</B>, 045115 (2019).
+<a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.100.045115">Phys. Rev. B <B>100</B>, 045115 (2019).</a>
 
 
 8. C. Malica and A. Dal Corso,
@@ -95,6 +95,10 @@ If you are new to QE, please ask to the
 in the examples directories.</p>
 
 **Thermo_pw downloads**:
+<br>
+<br>
+- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.2.0.tar.gz">
+thermo_pw.1.2.0.tar.gz</a>  (released 28-12-2019) compatible with QE-6.4.1.
 <br>
 <br>
 - <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.1.1.tar.gz">

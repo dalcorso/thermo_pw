@@ -66,14 +66,14 @@ SUBROUTINE thermo_summary()
   USE spin_orb,             ONLY : domag
   USE cell_base,            ONLY : ibrav, at, bg, celldm, omega
   USE ions_base,            ONLY : tau, nat, ityp, nsp, atm
-  USE symm_base,            ONLY : nsym, sr, ftau
+  USE symm_base,            ONLY : nsym, sr, ft
 
   USE mp_images,            ONLY : my_image_id, root_image
   USE io_global,            ONLY : ionode, stdout
   USE io_files,             ONLY : prefix
   !
   IMPLICIT NONE
-  REAL(DP) :: ft(3,48)
+  REAL(DP) :: ft_(3,48)
   REAL(DP) :: s01(3), s02(3)
   REAL(DP), ALLOCATABLE :: xau(:,:)
   INTEGER :: it, ia, na, ipol, jpol, iuout, &
@@ -249,6 +249,7 @@ SUBROUTINE thermo_summary()
 ! quantities is not written on output
 !
   IF (what=='scf_2d_band') GOTO 1000
+
 !
 ! check the compatibility of point group and Bravais lattice. If 
 ! they are compatibile, we use symmetry to reduce the number 
@@ -274,13 +275,9 @@ SUBROUTINE thermo_summary()
 !  are the fft factors that pw.x will use. It should coincide with the
 !  previously identified one.
 !
-     DO isym=1,nsym
-        ft(1,isym)= -DBLE(ftau(1,isym)) / dfftp%nr1
-        ft(2,isym)= -DBLE(ftau(2,isym)) / dfftp%nr2
-        ft(3,isym)= -DBLE(ftau(3,isym)) / dfftp%nr3
-     ENDDO
+     ft_(:,1:nsym)=-ft(:,1:nsym)
 
-     CALL find_space_group(ibrav, nsym, sr, ft, at, bg, sg_number, aux_sg, &
+     CALL find_space_group(ibrav, nsym, sr, ft_, at, bg, sg_number, aux_sg, &
                                                         s01,  s02, .TRUE.)
 
      CALL sg_name(sg_number, 1, spaceg_name)
@@ -584,13 +581,13 @@ USE cell_base,        ONLY : ibrav, at, bg
 USE thermo_sym,       ONLY : fft_fact, ibrav_group_consistent
 USE rap_point_group,  ONLY : code_group
 USE space_groups,     ONLY : find_space_group, set_fft_fact
-USE symm_base,        ONLY : nsym, sr, ftau
+USE symm_base,        ONLY : nsym, sr, ft
 
 IMPLICIT NONE
 INTEGER :: sg_number
 INTEGER :: unique, trig, isym, aux_sg
 LOGICAL :: check_group_ibrav
-REAL(DP) :: s01(3), s02(3), ft(3,48)
+REAL(DP) :: s01(3), s02(3), ft_(3,48)
 CHARACTER(LEN=12) :: spaceg_name
 CHARACTER(LEN=11) :: gname
 
@@ -603,12 +600,8 @@ CALL find_group(nsym,sr,gname,code_group)
 ibrav_group_consistent=check_group_ibrav(code_group, ibrav)
 
 IF ( ibrav_group_consistent ) THEN
-   DO isym=1,nsym
-      ft(1,isym)= -DBLE(ftau(1,isym)) / dfftp%nr1
-      ft(2,isym)= -DBLE(ftau(2,isym)) / dfftp%nr2
-      ft(3,isym)= -DBLE(ftau(3,isym)) / dfftp%nr3
-   ENDDO
-   CALL find_space_group(ibrav, nsym, sr, ft, at, bg, sg_number, aux_sg,&
+   ft_(:,1:nsym)=-ft(:,1:nsym)
+   CALL find_space_group(ibrav, nsym, sr, ft_, at, bg, sg_number, aux_sg,&
                                   s01, s02, .FALSE.)
 
    IF (sg_number > 0) THEN

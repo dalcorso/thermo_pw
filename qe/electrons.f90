@@ -14,8 +14,8 @@
 SUBROUTINE electrons_tpw()
   !----------------------------------------------------------------------------
   !
-  ! ... General self-consistency loop, also for hybrid functionals
-  ! ... For non-hybrid functionals it just calls "electron_scf"
+  !! General self-consistency loop, also for hybrid functionals
+  !! For non-hybrid functionals it just calls "electron_scf"
   !
   USE kinds,                ONLY : DP
   USE check_stop,           ONLY : check_stop_now, stopped_by_user
@@ -32,8 +32,7 @@ SUBROUTINE electrons_tpw()
                                    kedtau, vnew
   USE control_flags,        ONLY : tr2, niter, conv_elec, restart, lmd, &
                                    do_makov_payne
-  USE io_files,             ONLY : iunmix, output_drho, &
-                                   iunres, iunefield, seqopn
+  USE io_files,             ONLY : iunres, seqopn
   USE ldaU,                 ONLY : eth
   USE extfield,             ONLY : tefield, etotefield
   USE wvfct,                ONLY : nbnd, wg, et
@@ -42,7 +41,7 @@ SUBROUTINE electrons_tpw()
                                    lambda, report
   USE uspp,                 ONLY : okvan
   USE exx,                  ONLY : aceinit,exxinit, exxenergy2, exxenergy, exxbuff, &
-                                   fock0, fock1, fock2, fock3, dexx, use_ace, local_thr
+                                   fock0, fock1, fock2, fock3, dexx, use_ace, local_thr 
   USE funct,                ONLY : dft_is_hybrid, exx_is_active
   USE control_flags,        ONLY : adapt_thr, tr2_init, tr2_multi, gamma_only
   !
@@ -60,20 +59,24 @@ SUBROUTINE electrons_tpw()
   !
   ! ... a few local variables
   !
-  REAL(DP) :: &
-      charge,       &! the total charge
-      exxen          ! used to compute exchange energy
-  REAL(dp), EXTERNAL :: exxenergyace
-  INTEGER :: &
-      idum,         &! dummy counter on iterations
-      iter,         &! counter on iterations
-      printout,     &
-      ik, ios
-  REAL(DP) :: &
-      tr2_min,     &! estimated error on energy coming from diagonalization
-      tr2_final     ! final threshold for exx minimization 
-                    ! when using adaptive thresholds.
-  LOGICAL :: first, exst, all_done_asyn
+  REAL(DP) :: charge
+  !! the total charge
+  REAL(DP) :: exxen
+  !! used to compute exchange energy
+  REAL(DP), EXTERNAL :: exxenergyace
+  INTEGER :: idum
+  !! dummy counter on iterations
+  INTEGER :: iter
+  !! counter on iterations
+  INTEGER :: printout, ik, ios
+  !
+  REAL(DP) :: tr2_min
+  !! estimated error on energy coming from diagonalization
+  REAL(DP) :: tr2_final
+  !! final threshold for exx minimization 
+  !! when using adaptive thresholds.
+  LOGICAL :: first, exst
+  LOGICAL :: all_done_asyn
   REAL(DP) :: etot_cmp_paw(nat,2,2)
   LOGICAL :: DoLoc
   !
@@ -90,12 +93,12 @@ SUBROUTINE electrons_tpw()
      printout = 1  ! print etot, not energy components at each scf step
   ELSE
      printout = 2  ! print etot and energy components at each scf step
-  END IF
+  ENDIF
   IF (dft_is_hybrid() .AND. adapt_thr ) tr2= tr2_init
   fock0 = 0.D0
   fock1 = 0.D0
-  IF (.NOT. exx_is_active () ) fock2 = 0.D0
   fock3 = 0.D0
+  IF (.NOT. exx_is_active () ) fock2 = 0.D0
   !
   !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   !%%%%%%%%%%%%%%%%%%%%  Iterate hybrid functional  %%%%%%%%%%%%%%%%%%%%%
@@ -124,7 +127,7 @@ SUBROUTINE electrons_tpw()
              CALL localize_orbitals( )
            ELSE IF (DoLoc) THEN
              CALL localize_orbitals_k( )
-           END IF 
+           ENDIF 
            ! FIXME: ugly hack, overwrites exxbuffer from exxinit
            CALL seqopn (iunres, 'restart_exx', 'unformatted', exst)
            IF (exst) READ (iunres, iostat=ios) exxbuff
@@ -139,10 +142,10 @@ SUBROUTINE electrons_tpw()
            !
            WRITE(stdout,'(5x,"Calculation (EXX) restarted from iteration #", &
                         & i6)') iter 
-        END IF
-     END IF
+        ENDIF
+     ENDIF
      CLOSE ( unit=iunres, status='delete')
-  END IF
+  ENDIF
   !
   DO idum=1,niter
      !
@@ -173,9 +176,9 @@ SUBROUTINE electrons_tpw()
            CALL seqopn (iunres, 'restart_exx', 'unformatted', exst)
            WRITE (iunres) exxbuff
            CLOSE (unit=iunres, status='keep')
-        END IF
+        ENDIF
         RETURN
-     END IF
+     ENDIF
      !
      first =  first .AND. .NOT. exx_is_active ( )
      !
@@ -193,9 +196,9 @@ SUBROUTINE electrons_tpw()
           CALL localize_orbitals( )
         ELSE IF (DoLoc) THEN
           CALL localize_orbitals_k( )
-        END IF 
+        ENDIF 
         IF (use_ace) THEN
-           CALL aceinit ( DoLoc )
+           CALL aceinit ( DoLoc ) 
            fock2 = exxenergyace()
         ELSE
            fock2 = exxenergy2()
@@ -232,7 +235,7 @@ SUBROUTINE electrons_tpw()
           CALL localize_orbitals( )
         ELSE IF (DoLoc) THEN
           CALL localize_orbitals_k( )
-        END IF 
+        ENDIF 
         IF (use_ace) CALL aceinit ( DoLoc, fock3 )
         !
         ! fock2 is the exchange energy calculated for orbitals at step n,
@@ -249,7 +252,6 @@ SUBROUTINE electrons_tpw()
         ! check for convergence. dexx is positive definite: if it isn't,
         ! there is some numerical problem. One such cause could be that
         ! the treatment of the divergence in exact exchange has failed. 
-        !
         ! FIXME: to be properly implemented for all cases
         !
 !civn 
@@ -258,7 +260,7 @@ SUBROUTINE electrons_tpw()
           dexx =  0.5D0 * ((fock1-fock0)+(fock3-fock2)) 
         ELSE
           dexx = fock1 - 0.5D0*(fock0+fock2)
-        END IF 
+        ENDIF 
         !
         IF ( dexx < 0.0_dp ) THEN
            IF( Doloc ) THEN
@@ -281,13 +283,12 @@ SUBROUTINE electrons_tpw()
            WRITE( stdout, 9066 ) '!!', etot, hwf_energy
         ELSE
            WRITE( stdout, 9066 ) '  ', etot, hwf_energy
-        END IF
+        ENDIF
         IF ( dexx>1.d-8 ) THEN
           WRITE( stdout, 9067 ) dexx
         ELSE
           WRITE( stdout, 9068 ) dexx
         ENDIF
-
         WRITE( stdout, 9062 ) - fock1
         IF (use_ace) THEN
            WRITE( stdout, 9063 ) 0.5D0*fock2
@@ -299,7 +300,7 @@ SUBROUTINE electrons_tpw()
            IF ( do_makov_payne ) CALL makov_payne( etot )
            WRITE( stdout, 9101 )
            RETURN
-        END IF
+        ENDIF
         !
         IF ( adapt_thr ) THEN
            tr2 = MAX(tr2_multi * dexx, tr2_final)
@@ -321,9 +322,9 @@ SUBROUTINE electrons_tpw()
         WRITE (iunres, *) (et(1:nbnd,ik),ik=1,nks)
         CLOSE (unit=iunres, status='keep')
         RETURN
-     END IF
+     ENDIF
      !
-  END DO
+  ENDDO
   !
   WRITE( stdout, 9120 ) iter
   FLUSH( stdout )
@@ -348,14 +349,11 @@ END SUBROUTINE electrons_tpw
 !----------------------------------------------------------------------------
 SUBROUTINE electrons_scf_tpw ( printout, exxen )
   !----------------------------------------------------------------------------
-  !
-  ! ... This routine is a driver of the self-consistent cycle.
-  ! ... It uses the routine c_bands for computing the bands at fixed
-  ! ... Hamiltonian, the routine sum_band to compute the charge density,
-  ! ... the routine v_of_rho to compute the new potential and the routine
-  ! ... mix_rho to mix input and output charge densities.
-  ! ... If printout > 0, prints on output the total energy;
-  ! ... if printout > 1, also prints decomposition into energy contributions
+  !! This routine is a driver of the self-consistent cycle.
+  !! It uses the routine c_bands for computing the bands at fixed
+  !! Hamiltonian, the routine sum_band to compute the charge density,
+  !! the routine v_of_rho to compute the new potential and the routine
+  !! mix_rho to mix input and output charge densities.
   !
   USE kinds,                ONLY : DP
   USE check_stop,           ONLY : check_stop_now, stopped_by_user
@@ -388,8 +386,7 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
                                    llondon, ldftd3, scf_must_converge, lxdm, ts_vdw
   USE control_flags,        ONLY : n_scf_steps, scf_error
 
-  USE io_files,             ONLY : iunmix, output_drho, &
-                                   iunres, iunefield, seqopn
+  USE io_files,             ONLY : iunmix, output_drho
   USE ldaU,                 ONLY : eth, Hubbard_U, Hubbard_lmax, &
                                    niter_with_fixed_ns, lda_plus_u
   USE extfield,             ONLY : tefield, etotefield, gate, etotgatefield !TB
@@ -399,7 +396,8 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
   USE io_rho_xml,           ONLY : write_scf
   USE uspp,                 ONLY : okvan
   USE mp_bands,             ONLY : intra_bgrp_comm
-  USE mp_pools,             ONLY : root_pool, my_pool_id, inter_pool_comm
+  USE mp_pools,             ONLY : root_pool, me_pool, my_pool_id, &
+                                   inter_pool_comm, intra_pool_comm
   USE mp,                   ONLY : mp_sum, mp_bcast
   !
   USE london_module,        ONLY : energy_london
@@ -424,46 +422,57 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
   IMPLICIT NONE
   !
   INTEGER, INTENT (IN) :: printout
-  REAL(DP),INTENT (IN) :: exxen    ! current estimate of the exchange energy
+  !! * If printout>0, prints on output the total energy;
+  !! * if printout>1, also prints decomposition into energy contributions.
+  REAL(DP),INTENT (IN) :: exxen
+  !! current estimate of the exchange energy
   !
-  ! ... a few local variables
+  ! ... local variables
   !
-  REAL(DP) :: &
-      dr2,          &! the norm of the diffence between potential
-      charge,       &! the total charge
-      deband_hwf,   &! deband for the Harris-Weinert-Foulkes functional
-      mag           ! local magnetization
-  INTEGER :: &
-      i,            &! counter on polarization
-      idum,         &! dummy counter on iterations
-      iter,         &! counter on iterations
-      ios, kilobytes
-  REAL(DP) :: &
-      tr2_min,     &! estimated error on energy coming from diagonalization
-      descf,       &! correction for variational energy
-      en_el=0.0_DP,&! electric field contribution to the total energy
-      eext=0.0_DP   ! external forces contribution to the total energy
-  LOGICAL :: &
-      first, exst
+  REAL(DP) :: dr2
+  !! the norm of the diffence between potential
+  REAL(DP) :: charge
+  !! the total charge
+  REAL(DP) :: deband_hwf
+  !! deband for the Harris-Weinert-Foulkes functional
+  REAL(DP) :: mag
+  !! local magnetization
+  INTEGER :: i
+  !! counter on polarization
+  INTEGER :: idum
+  !! dummy counter on iterations
+  INTEGER :: iter
+  !! counter on iterations
+  INTEGER :: ios, kilobytes
   !
-  ! ... auxiliary variables for calculating and storing temporary copies of
-  ! ... the charge density and of the HXC-potential
+  REAL(DP) :: tr2_min
+  !! estimated error on energy coming from diagonalization
+  REAL(DP) :: descf
+  !! correction for variational energy
+  REAL(DP) :: en_el=0.0_DP
+  !! electric field contribution to the total energy
+  REAL(DP) :: eext=0.0_DP
+  !! external forces contribution to the total energy
+  LOGICAL :: first, exst
+  !! auxiliary variables for calculating and storing temporary copies of
+  !! the charge density and of the HXC-potential
   !
-  type (scf_type) :: rhoin ! used to store rho_in of current/next iteration
+  TYPE(scf_type) :: rhoin
+  !! used to store rho_in of current/next iteration
   !
   ! ... external functions
   !
   REAL(DP), EXTERNAL :: ewald, get_clock
+  !
   REAL(DP) :: etot_cmp_paw(nat,2,2)
-  !
-  ! auxiliary variables for grimme-d3
-  !
   REAL(DP) :: latvecs(3,3)
+  !! auxiliary variables for grimme-d3
   INTEGER:: atnum(1:nat), na
+  !! auxiliary variables for grimme-d3
   !
   iter = 0
   dr2  = 0.0_dp
-  IF ( restart ) CALL restart_in_electrons (iter, dr2, ethr, et )
+  IF ( restart ) CALL restart_in_electrons( iter, dr2, ethr, et )
   !
   WRITE( stdout, 9000 ) get_clock( 'PWSCF' )
   !
@@ -481,30 +490,30 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
   ELSE
      ewld = ewald( alat, nat, nsp, ityp, zv, at, bg, tau, &
                 omega, g, gg, ngm, gcutm, gstart, gamma_only, strf )
-  END IF
+  ENDIF
   !
   IF ( llondon ) THEN
-     elondon = energy_london ( alat , nat , ityp , at ,bg , tau )
+     elondon = energy_london( alat , nat , ityp , at ,bg , tau )
   ELSE
      elondon = 0.d0
-  END IF
+  ENDIF
   !
   ! Grimme-D3 correction to the energy
   !
-  IF(ldftd3) THEN
+  IF (ldftd3) THEN
      latvecs(:,:)=at(:,:)*alat
      tau(:,:)=tau(:,:)*alat
-     do na=1, nat
-        atnum(na) = get_atomic_number(trim(atm(ityp(na))))
-     end do
+     DO na = 1, nat
+        atnum(na) = get_atomic_number(TRIM(atm(ityp(na))))
+     ENDDO
      call dftd3_pbc_dispersion(dftd3,tau,atnum,latvecs,energy_dftd3)
      edftd3=energy_dftd3*2.d0
      tau(:,:)=tau(:,:)/alat
   ELSE
      edftd3= 0.0
-  END IF
+  ENDIF
   !
-  call create_scf_type ( rhoin )
+  CALL create_scf_type( rhoin )
   !
   WRITE( stdout, 9002 )
   FLUSH( stdout )
@@ -521,7 +530,7 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
         conv_elec=.FALSE.
         CALL save_in_electrons (iter, dr2, ethr, et )
         GO TO 10
-     END IF
+     ENDIF
      iter = iter + 1
      !
      WRITE( stdout, 9010 ) iter, ecutwfc, mixing_beta
@@ -539,7 +548,7 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
         ! ... iterative diagonalization may become unstable
         ethr = MAX( ethr, 1.D-13 )
         !
-     END IF
+     ENDIF
      !
      first = ( iter == 1 )
      !
@@ -565,21 +574,21 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
         ! ... diagonalization of the KS hamiltonian
         !
         IF ( lelfield ) THEN
-           CALL c_bands_efield ( iter )
+           CALL c_bands_efield( iter )
         ELSE
            CALL c_bands( iter )
-        END IF
+        ENDIF
         !
         IF ( stopped_by_user ) THEN
            conv_elec=.FALSE.
-           CALL save_in_electrons (iter-1, dr2, ethr, et )
+           CALL save_in_electrons( iter-1, dr2, ethr, et )
            GO TO 10
-        END IF
+        ENDIF
         !
         ! ... xk, wk, isk, et, wg are distributed across pools;
         ! ... the first node has a complete copy of xk, wk, isk,
         ! ... while eigenvalues et and weights wg must be
-        ! ... explicitely collected to the first node
+        ! ... explicitly collected to the first node
         ! ... this is done here for et, in sum_band for wg
         !
         CALL poolrecover( et, nbnd, nkstot, nks )
@@ -614,7 +623,7 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
               ELSE
                  rhoin%ns = rho%ns
               ENDIF
-           END IF
+           ENDIF
            IF ( iter <= niter_with_fixed_ns ) THEN
               WRITE( stdout, '(/,5X,"RESET ns to initial values (iter <= mixing_fixed_ns)",/)')
               IF (noncolin) THEN
@@ -622,9 +631,9 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
               ELSE
                  rho%ns = rhoin%ns
               ENDIF
-           END IF
+           ENDIF
            !
-        END IF
+        ENDIF
         !
         ! ... calculate total and absolute magnetization
         !
@@ -638,27 +647,38 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
         !
         ! ... mix_rho mixes several quantities: rho in g-space, tauk (for
         ! ... meta-gga), ns and ns_nc (for lda+u) and becsum (for paw)
-        ! ... Results are broadcast from pool 0 to others to prevent trouble
-        ! ... on machines unable to yield the same results from the same 
-        ! ... calculation on same data, performed on different procs
-        ! ... The mixing should be done on pool 0 only as well, but inside
-        ! ... mix_rho there is a call to rho_ddot that in the PAW case 
-        ! ... contains a hidden parallelization level on the entire image
+        ! ... The mixing could in principle be done on pool 0 only, but
+        ! ... mix_rho contains a call to rho_ddot that in the PAW case
+        ! ... is parallelized on the entire image
         !
         ! IF ( my_pool_id == root_pool ) 
-        CALL mix_rho ( rho, rhoin, mixing_beta, dr2, tr2_min, iter, nmix, &
-                       iunmix, conv_elec )
-        CALL bcast_scf_type ( rhoin, root_pool, inter_pool_comm )
-        CALL mp_bcast ( dr2, root_pool, inter_pool_comm )
-        CALL mp_bcast ( conv_elec, root_pool, inter_pool_comm )
+        CALL mix_rho( rho, rhoin, mixing_beta, dr2, tr2_min, iter, nmix, &
+                      iunmix, conv_elec )
+        ! ... Results are broadcast from pool 0 to others to prevent trouble
+        ! ... on machines unable to yield the same results for the same 
+        ! ... calculations on the same data, performed on different procs
         !
-        if (.not. scf_must_converge .and. idum == niter) conv_elec = .true.
+        IF ( lda_plus_u )  THEN
+           ! ... For LDA+U, ns and ns_nc are also broadcast inside each pool
+           ! ... to ensure consistency on all processors of all pools
+           IF (noncolin) THEN
+              CALL mp_bcast( rhoin%ns_nc, root_pool, intra_pool_comm )
+           ELSE
+              CALL mp_bcast( rhoin%ns, root_pool, intra_pool_comm )
+           ENDIF
+        ENDIF
+        !
+        CALL bcast_scf_type( rhoin, root_pool, inter_pool_comm )
+        CALL mp_bcast( dr2, root_pool, inter_pool_comm )
+        CALL mp_bcast( conv_elec, root_pool, inter_pool_comm )
+        !
+        IF (.NOT. scf_must_converge .AND. idum == niter) conv_elec = .TRUE.
         !
         ! ... if convergence is achieved or if the self-consistency error
         ! ... (dr2) is smaller than the estimated error due to diagonalization
         ! ... (tr2_min), rhoin and rho are unchanged: rhoin contains the input
-        ! ...  density and rho contains the output density
-        ! ... In the other cases rhoin contains the mixed charge density 
+        ! ... density and rho contains the output density.
+        ! ... In all other cases, rhoin contains the mixed charge density 
         ! ... (the new input density) while rho is unchanged
         !
         IF ( first .and. nat > 0) THEN
@@ -684,9 +704,9 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
               !
               CYCLE scf_step
               !
-           END IF
+           ENDIF
            !
-        END IF
+        ENDIF
         !
         IF ( .NOT. conv_elec ) THEN
            !
@@ -694,10 +714,11 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
            ! ... charge density (i.e. the new estimate)
            !
            CALL v_of_rho( rhoin, rho_core, rhog_core, &
-                          ehart, etxc, vtxc, eth, etotefield, charge, v)
+                          ehart, etxc, vtxc, eth, etotefield, charge, v )
+           !
            IF (okpaw) THEN
-              CALL PAW_potential(rhoin%bec, ddd_paw, epaw,etot_cmp_paw)
-              CALL PAW_symmetrize_ddd(ddd_paw)
+              CALL PAW_potential( rhoin%bec, ddd_paw, epaw,etot_cmp_paw )
+              CALL PAW_symmetrize_ddd( ddd_paw )
            ENDIF
            !
            ! ... estimate correction needed to have variational energy:
@@ -721,12 +742,12 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
            !
            vnew%of_r(:,:) = v%of_r(:,:)
            CALL v_of_rho( rho,rho_core,rhog_core, &
-                          ehart, etxc, vtxc, eth, etotefield, charge, v)
+                          ehart, etxc, vtxc, eth, etotefield, charge, v )
            vnew%of_r(:,:) = v%of_r(:,:) - vnew%of_r(:,:)
            !
            IF (okpaw) THEN
-              CALL PAW_potential(rho%bec, ddd_paw, epaw,etot_cmp_paw)
-              CALL PAW_symmetrize_ddd(ddd_paw)
+              CALL PAW_potential( rho%bec, ddd_paw, epaw, etot_cmp_paw )
+              CALL PAW_symmetrize_ddd( ddd_paw )
            ENDIF
            !
            ! ... note that rho is here the output, not mixed, charge density
@@ -734,13 +755,13 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
            !
            descf = 0._dp
            !
-        END IF 
+        ENDIF 
         !
         ! ... if we didn't cycle before we can exit the do-loop
         !
         EXIT scf_step
         !
-     END DO scf_step
+     ENDDO scf_step
      !
      plugin_etot = 0.0_dp
      !
@@ -768,17 +789,16 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
         !
         IF ( (noncolin .AND. domag) .OR. i_cons==1 .OR. nspin==2) CALL report_mag()
         !
-     END IF
+     ENDIF
      !
      WRITE( stdout, 9000 ) get_clock( 'PWSCF' )
      !
      IF ( conv_elec ) WRITE( stdout, 9101 )
-!  these values are assigned to global variables  because these information are needed for XML  printout 
-!  P.D. 
+
      IF ( conv_elec ) THEN 
            scf_error = dr2
            n_scf_steps = iter
-     END IF  
+     ENDIF  
 
      !
      IF ( conv_elec .OR. MOD( iter, iprint ) == 0 ) THEN
@@ -792,7 +812,7 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
         ENDIF
         CALL print_ks_energies()
         !
-     END IF
+     ENDIF
      !
      IF ( ABS( charge - nelec ) / charge > 1.D-7 ) THEN
         WRITE( stdout, 9050 ) charge, nelec
@@ -801,9 +821,9 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
               CALL errore( 'electrons', 'charge is wrong: smearing is needed', 1 )
            ELSE
               CALL errore( 'electrons', 'charge is wrong', 1 )
-           END IF
-        END IF
-     END IF
+           ENDIF
+        ENDIF
+     ENDIF
      !
      etot = eband + ( etxc - etxcc ) + ewld + ehart + deband + demet + descf
      ! for hybrid calculations, add the current estimate of exchange energy
@@ -820,38 +840,39 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
         eext = alat*compute_eextfor()
         etot = etot + eext
         hwf_energy = hwf_energy + eext
-     END IF
+     ENDIF
      IF (llondon) THEN
         etot = etot + elondon
         hwf_energy = hwf_energy + elondon
-     END IF
+     ENDIF
      !
      ! grimme-d3 dispersion energy
      IF (ldftd3) THEN
         etot = etot + edftd3
         hwf_energy = hwf_energy + edftd3
-     END IF
+     ENDIF
+     !
      ! calculate the xdm energy contribution with converged density
      IF (lxdm .and. conv_elec) THEN
-        exdm = energy_xdm()
+        exdm = energy_xdm()  
         etot = etot + exdm
         hwf_energy = hwf_energy + exdm
-     END IF
+     ENDIF
      IF (ts_vdw) THEN
         ! factor 2 converts from Ha to Ry units
         etot = etot + 2.0d0*EtsvdW
         hwf_energy = hwf_energy + 2.0d0*EtsvdW
-     END IF
+     ENDIF
      !
      IF ( tefield ) THEN
         etot = etot + etotefield
         hwf_energy = hwf_energy + etotefield
-     END IF
+     ENDIF
      ! TB gate energy
      IF ( gate) THEN
         etot = etot + etotgatefield
         hwf_energy = hwf_energy + etotgatefield
-     END IF
+     ENDIF
      !
      IF ( lfcpopt .or. lfcpdyn ) THEN
         etot = etot + ef * tot_charge
@@ -881,7 +902,7 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
         !
         GO TO 10
         !
-     END IF
+     ENDIF
      !
      ! ... uncomment the following line if you wish to monitor the evolution
      ! ... of the force calculation during self-consistency
@@ -894,7 +915,9 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
      CALL print_clock_pw()
 #endif
      !
-  END DO
+  ENDDO
+  n_scf_steps = iter
+  scf_error = dr2
   !
   WRITE( stdout, 9101 )
   WRITE( stdout, 9120 ) iter
@@ -912,7 +935,7 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
      CALL close_mix_file( iunmix, 'delete' )
   ELSE
      CALL close_mix_file( iunmix, 'keep' )
-  END IF
+  ENDIF
   !
   IF ( output_drho /= ' ' ) CALL remove_atomic_rho()
   call destroy_scf_type ( rhoin )
@@ -949,12 +972,12 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
           !
           DO ir = 1, dfftp%nnr
              !
-             mag = rho%of_r(ir,2) 
+             mag = rho%of_r(ir,2)
              !
              magtot = magtot + mag
              absmag = absmag + ABS( mag )
              !
-          END DO
+          ENDDO
           !
           magtot = magtot * omega / ( dfftp%nr1*dfftp%nr2*dfftp%nr3 )
           absmag = absmag * omega / ( dfftp%nr1*dfftp%nr2*dfftp%nr3 )
@@ -964,7 +987,7 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
           !
           IF (two_fermi_energies.and.lgauss) bfield(3)=0.5D0*(ef_up-ef_dw)
           !
-       ELSE IF ( noncolin ) THEN
+       ELSEIF ( noncolin ) THEN
           !
           magtot_nc = 0.D0
           absmag    = 0.D0
@@ -979,11 +1002,11 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
                 !
                 magtot_nc(i) = magtot_nc(i) + rho%of_r(ir,i+1)
                 !
-             END DO
+             ENDDO
              !
              absmag = absmag + ABS( mag )
              !
-          END DO
+          ENDDO
           !
           CALL mp_sum( magtot_nc, intra_bgrp_comm )
           CALL mp_sum( absmag, intra_bgrp_comm )
@@ -992,11 +1015,11 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
              !
              magtot_nc(i) = magtot_nc(i) * omega / ( dfftp%nr1*dfftp%nr2*dfftp%nr3 )
              !
-          END DO
+          ENDDO
           !
           absmag = absmag * omega / ( dfftp%nr1*dfftp%nr2*dfftp%nr3 )
           !
-       END IF
+       ENDIF
        !
        RETURN
        !
@@ -1005,23 +1028,38 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
      !-----------------------------------------------------------------------
      FUNCTION delta_e()
        !-----------------------------------------------------------------------
-       ! ... delta_e = - \int rho%of_r(r)  v%of_r(r)
-       !               - \int rho%kin_r(r) v%kin_r(r) [for Meta-GGA]
-       !               - \sum rho%ns       v%ns       [for LDA+U]
-       !               - \sum becsum       D1_Hxc     [for PAW]
+       !! This function computes \(\textrm{delta_e}\), where:
+       !
+       !! $$\begin{alignat*}{2} \text{delta}\_\text{e} &= - \int\text{rho}\%\text{of}\_\text{r(r)}\cdot 
+       !!                                                           \text{v}\%\text{of}\_\text{r(r)} && \\
+       !!                          &= - \int \text{rho}\%\text{kin}\_\text{r(r)}\cdot \text{v}\%\text{kin}\_
+       !!                                                           \text{r(r)} && \text{[for Meta-GGA]} \\
+       !!                          &= - \sum \text{rho}\%\text{ns}\cdot \text{v}\%\text{ns} && 
+       !!                                                                               \text{[for LDA+U]}\\
+       !!                          &= - \sum \text{becsum}\cdot \text{D1}\_\text{Hxc} && \text{[for PAW]}
+       !!                                                                                  \end{alignat*} $$
+       !
+       ! ... delta_e =  - \int rho%of_r(r)  v%of_r(r)
+       !                - \int rho%kin_r(r) v%kin_r(r) [for Meta-GGA]
+       !                - \sum rho%ns       v%ns       [for LDA+U]
+       !                - \sum becsum       D1_Hxc     [for PAW]
+       !
        USE funct,  ONLY : dft_is_meta
+       !
        IMPLICIT NONE
-       REAL(DP) :: delta_e, delta_e_hub
+       !
+       REAL(DP) :: delta_e
+       REAL(DP) :: delta_e_hub
        INTEGER  :: ir
        !
-       delta_e = 0._dp
+       delta_e = 0._DP
        IF ( nspin==2 ) THEN
           !
           DO ir = 1,dfftp%nnr
             delta_e = delta_e - ( rho%of_r(ir,1) + rho%of_r(ir,2) ) * v%of_r(ir,1) &  ! up
                               - ( rho%of_r(ir,1) - rho%of_r(ir,2) ) * v%of_r(ir,2)    ! dw
-          ENDDO
-          delta_e = 0.5_dp*delta_e
+          ENDDO 
+          delta_e = 0.5_DP*delta_e
           !
        ELSE
           delta_e = - SUM( rho%of_r(:,:)*v%of_r(:,:) )
@@ -1034,18 +1072,18 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
        !
        CALL mp_sum( delta_e, intra_bgrp_comm )
        !
-       if (lda_plus_u) then
-         if (noncolin) then
-           delta_e_hub = - SUM (rho%ns_nc(:,:,:,:)*v%ns_nc(:,:,:,:))
+       IF (lda_plus_u) THEN
+         IF (noncolin) THEN
+           delta_e_hub = - SUM( rho%ns_nc(:,:,:,:)*v%ns_nc(:,:,:,:) )
            delta_e = delta_e + delta_e_hub
-         else
-           delta_e_hub = - SUM (rho%ns(:,:,:,:)*v%ns(:,:,:,:))
-           if (nspin==1) delta_e_hub = 2.d0 * delta_e_hub
+         ELSE
+           delta_e_hub = - SUM( rho%ns(:,:,:,:)*v%ns(:,:,:,:) )
+           IF (nspin==1) delta_e_hub = 2.d0 * delta_e_hub
            delta_e = delta_e + delta_e_hub
-         endif
-       end if
+         ENDIF
+       ENDIF
        !
-       IF (okpaw) delta_e = delta_e - SUM(ddd_paw(:,:,:)*rho%bec(:,:,:))
+       IF (okpaw) delta_e = delta_e - SUM( ddd_paw(:,:,:)*rho%bec(:,:,:) )
        !
        RETURN
        !
@@ -1054,13 +1092,21 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
      !-----------------------------------------------------------------------
      FUNCTION delta_escf()
        !-----------------------------------------------------------------------
+       !! This function calculates the difference between the Hartree and XC energy
+       !! at first order in the charge density difference \(\textrm{delta_rho(r)}\):
+       !
+       !! $$\begin{alignat*}{2} \text{delta}\_\text{escf} &= - \int\text{rho}\%\text{of}\_\text{r(r)}\cdot
+       !!                                                              \text{v}\%\text{of}\_\text{r(r)} && \\
+       !!                          &= - \int \text{rho}\%\text{kin}\_\text{r(r)}\cdot \text{v}\%\text{kin}\_
+       !!                                                              \text{r(r)} && \text{[for Meta-GGA]} \\
+       !!                          &= - \sum \text{rho}\%\text{ns}\cdot \text{v}\%\text{ns} && 
+       !!                                                                                \text{[for LDA+U]} \\
+       !!                          &= - \sum \text{becsum}\cdot \text{D1} && \text{[for PAW]} \end{alignat*} $$
        !
        ! ... delta_escf = - \int \delta rho%of_r(r)  v%of_r(r)
        !                  - \int \delta rho%kin_r(r) v%kin_r(r) [for Meta-GGA]
        !                  - \sum \delta rho%ns       v%ns       [for LDA+U]
-       !                  - \sum \delta becsum       D1         [for PAW]
-       ! ... calculates the difference between the Hartree and XC energy
-       ! ... at first order in the charge density difference \delta rho(r)
+       !                  - \sum \delta becsum       D1         [for PAW] 
        !
        USE funct,  ONLY : dft_is_meta
        IMPLICIT NONE
@@ -1110,7 +1156,7 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
      END FUNCTION delta_escf
      !
      !-----------------------------------------------------------------------
-     FUNCTION calc_pol ( ) RESULT ( en_el )
+     FUNCTION calc_pol( ) RESULT ( en_el )
        !-----------------------------------------------------------------------
        !
        USE kinds,     ONLY : DP
@@ -1123,77 +1169,78 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
        REAL (DP) :: en_el
        !
        INTEGER :: i, j 
+       !
        REAL(DP):: sca, el_pol_cart(3),  el_pol_acc_cart(3)
        !
-       IF (.not.l3dstring) THEN
-          CALL c_phase_field(el_pol(gdir),ion_pol(gdir),fc_pol(gdir),gdir)
-          if (.not.l_el_pol_old) then
-             l_el_pol_old=.true.
-             el_pol_old(gdir)=el_pol(gdir)
-             en_el=-efield*(el_pol(gdir)+ion_pol(gdir))
-             el_pol_acc(gdir)=0.d0
-          else
-             sca=(el_pol(gdir)-el_pol_old(gdir))/fc_pol(gdir)
-             if(sca < - pi) then
-                el_pol_acc(gdir)=el_pol_acc(gdir)+2.d0*pi*fc_pol(gdir)
-             else if(sca > pi) then
-                el_pol_acc(gdir)=el_pol_acc(gdir)-2.d0*pi*fc_pol(gdir)
-             endif
-             en_el=-efield*(el_pol(gdir)+ion_pol(gdir)+el_pol_acc(gdir))
-             el_pol_old=el_pol
-          endif
+       IF (.NOT.l3dstring) THEN
+          CALL c_phase_field( el_pol(gdir), ion_pol(gdir), fc_pol(gdir), gdir )
+          IF (.NOT.l_el_pol_old) THEN
+             l_el_pol_old = .TRUE.
+             el_pol_old(gdir) = el_pol(gdir)
+             en_el = -efield*(el_pol(gdir)+ion_pol(gdir))
+             el_pol_acc(gdir) = 0.d0
+          ELSE
+             sca = (el_pol(gdir)-el_pol_old(gdir))/fc_pol(gdir)
+             IF (sca < - pi) THEN
+                el_pol_acc(gdir) = el_pol_acc(gdir)+2.d0*pi*fc_pol(gdir)
+             ELSEIF (sca > pi) THEN
+                el_pol_acc(gdir) = el_pol_acc(gdir)-2.d0*pi*fc_pol(gdir)
+             ENDIF
+             en_el = -efield*(el_pol(gdir)+ion_pol(gdir)+el_pol_acc(gdir))
+             el_pol_old = el_pol
+          ENDIF
        ELSE
-          do i=1,3
-            CALL c_phase_field(el_pol(i),ion_pol(i),fc_pol(i),i)
-          enddo
-          el_pol_cart(:)=0.d0
-          do i=1,3
-             do j=1,3
+          DO i = 1, 3
+            CALL c_phase_field( el_pol(i), ion_pol(i), fc_pol(i), i )
+          ENDDO
+          el_pol_cart(:) = 0.d0
+          DO i = 1, 3
+             DO j = 1, 3
                 !el_pol_cart(i)=el_pol_cart(i)+transform_el(j,i)*el_pol(j)
-                el_pol_cart(i)=el_pol_cart(i)+at(i,j)*el_pol(j) / &
-                               (sqrt(at(1,j)**2.d0+at(2,j)**2.d0+at(3,j)**2.d0))
-             enddo
-          enddo
+                el_pol_cart(i) = el_pol_cart(i)+at(i,j)*el_pol(j) / &
+                                 (SQRT(at(1,j)**2.d0+at(2,j)**2.d0+at(3,j)**2.d0))
+             ENDDO
+          ENDDO
 
-          write(stdout,'( "Electronic Dipole on Cartesian axes" )')
-          do i=1,3
-             write(stdout,*) i, el_pol_cart(i)
-          enddo
+          WRITE( stdout,'( "Electronic Dipole on Cartesian axes" )' )
+          DO i = 1, 3
+             WRITE(stdout,*) i, el_pol_cart(i)
+          ENDDO
 
-          write(stdout,'( "Ionic Dipole on Cartesian axes" )')
-          do i=1,3
-             write(stdout,*) i, ion_pol(i)
-          enddo
+          WRITE( stdout,'( "Ionic Dipole on Cartesian axes" )' )
+          DO i = 1, 3
+             WRITE(stdout,*) i, ion_pol(i)
+          ENDDO
 
-          if(.not.l_el_pol_old) then
-             l_el_pol_old=.true.
-             el_pol_old(:)=el_pol(:)
-             en_el=0.d0
-             do i=1,3
-                en_el=en_el-efield_cart(i)*(el_pol_cart(i)+ion_pol(i))
-             enddo
-             el_pol_acc(:)=0.d0
-          else
-             do i=1,3
-                sca=(el_pol(i)-el_pol_old(i))/fc_pol(i)
-                if(sca < - pi) then
-                   el_pol_acc(i)=el_pol_acc(i)+2.d0*pi*fc_pol(i)
-                else if(sca > pi) then
-                   el_pol_acc(i)=el_pol_acc(i)-2.d0*pi*fc_pol(i)
-                endif
-             enddo
-             el_pol_acc_cart(:)=0.d0
-             do i=1,3
-                do j=1,3
-                   el_pol_acc_cart(i)=el_pol_acc_cart(i)+transform_el(j,i)*el_pol_acc(j)
-                enddo
-             enddo
-             en_el=0.d0
-             do i=1,3
-                en_el=en_el-efield_cart(i)*(el_pol_cart(i)+ion_pol(i)+el_pol_acc_cart(i))
-             enddo
-             el_pol_old(:)=el_pol(:)
-          endif
+          IF (.NOT.l_el_pol_old) THEN
+             l_el_pol_old = .TRUE.
+             el_pol_old(:) = el_pol(:)
+             en_el = 0.d0
+             DO i = 1, 3
+                en_el = en_el-efield_cart(i)*(el_pol_cart(i)+ion_pol(i))
+             ENDDO
+             el_pol_acc(:) = 0.d0
+          ELSE
+             DO i = 1, 3
+                sca = (el_pol(i)-el_pol_old(i))/fc_pol(i)
+                IF (sca < - pi) THEN
+                   el_pol_acc(i) = el_pol_acc(i)+2.d0*pi*fc_pol(i)
+                ELSEIF (sca > pi) THEN
+                   el_pol_acc(i) = el_pol_acc(i)-2.d0*pi*fc_pol(i)
+                ENDIF
+             ENDDO
+             el_pol_acc_cart(:) = 0.d0
+             DO i = 1, 3
+                DO j = 1, 3
+                   el_pol_acc_cart(i) = el_pol_acc_cart(i)+transform_el(j,i)*el_pol_acc(j)
+                ENDDO
+             ENDDO
+             en_el = 0.d0
+             DO i = 1, 3
+                en_el = en_el-efield_cart(i)*(el_pol_cart(i)+ion_pol(i)+el_pol_acc_cart(i))
+             ENDDO
+             el_pol_old(:) = el_pol(:)
+          ENDIF
        ENDIF
        !
      END FUNCTION calc_pol
@@ -1213,7 +1260,7 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
              WRITE( stdout, 9081 ) etot, hwf_energy, dr2
           ELSE
              WRITE( stdout, 9083 ) etot, hwf_energy, dr2
-          END IF
+          ENDIF
           IF ( only_paw ) WRITE( stdout, 9085 ) etot+total_core_energy
           !
           WRITE( stdout, 9060 ) &
@@ -1250,7 +1297,7 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
           ! ... potential energy Omega = E - muN, -muN is the potentiostat
           ! ... contribution.
           !
-          IF ( lfcpopt .or. lfcpdyn ) WRITE( stdout, 9072 ) ef*tot_charge
+          IF ( lfcpopt .OR. lfcpdyn ) WRITE( stdout, 9072 ) ef*tot_charge
           !
        ELSE IF ( conv_elec ) THEN
           !
@@ -1258,7 +1305,7 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
              WRITE( stdout, 9081 ) etot, hwf_energy, dr2
           ELSE
              WRITE( stdout, 9083 ) etot, hwf_energy, dr2
-          END IF
+          ENDIF
           !
        ELSE
           !
@@ -1266,8 +1313,8 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
              WRITE( stdout, 9080 ) etot, hwf_energy, dr2
           ELSE
              WRITE( stdout, 9082 ) etot, hwf_energy, dr2
-          END IF
-       END IF
+          ENDIF
+       ENDIF
        !
        CALL plugin_print_energies()
        !

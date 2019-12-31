@@ -26,7 +26,7 @@ subroutine phq_summary_tpw
   USE gvect,         ONLY : gcutm, ngm
   USE gvecs,         ONLY : doublegrid, dual, gcutms, ngms
   USE fft_base,      ONLY : dffts
-  USE symm_base,     ONLY : s, sr, ftau, sname, t_rev
+  USE symm_base,     ONLY : s, sr, ft, sname, t_rev
   USE noncollin_module, ONLY : noncolin
   USE spin_orb,      ONLY : lspinorb, domag
   USE funct,         ONLY : write_dft_name
@@ -66,6 +66,7 @@ subroutine phq_summary_tpw
   ! counter on beta functions
   ! counter on irreducible representation
   ! the first mode
+  INTEGER :: ftau(3,48)
 
   real(DP) :: ft1, ft2, ft3, xkg (3)
   ! fractionary translations
@@ -175,6 +176,9 @@ subroutine phq_summary_tpw
      else
         nsymtot = nsymq
      endif
+     ftau(1,1:nsymtot) = NINT ( ft(1,1:nsymtot)*dfftp%nr1 )
+     ftau(2,1:nsymtot) = NINT ( ft(2,1:nsymtot)*dfftp%nr2 )
+     ftau(3,1:nsymtot) = NINT ( ft(3,1:nsymtot)*dfftp%nr3 )
      do isymq = 1, nsymtot
         if (isymq.gt.nsymq) then
            isym = irotmq

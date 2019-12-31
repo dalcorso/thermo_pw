@@ -1,4 +1,3 @@
-HELPDOC=../../dev-tools/helpdoc
 
 LATEX   = pdflatex
 LATEX2HTML = latex2html

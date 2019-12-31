@@ -44,6 +44,7 @@ ccg_psi.o \
 deallocate_ph_tpw.o \
 dielec.o \
 divide_class.o \
+divide_class_so.o \
 do_cg_e.o \
 do_cg_ph.o \
 do_lanczos.o \
@@ -68,6 +69,7 @@ ev_xml.o \
 find_band_sym.o \
 find_irrep.o \
 find_inverse_s.o \
+find_info_group.o \
 find_mode_sym.o \
 h_pcg_step.o \
 initialize_ph.o \
@@ -133,8 +135,8 @@ solve_eq_tran.o \
 solve_linter.o  \
 solve_linear_system.o \
 star_q.o \
-stress.o \
 stres_gradcorr.o \
+stress.o \
 symdyn_munu.o \
 symdynph_gq.o \
 symmetrize_drho.o \
@@ -150,7 +152,7 @@ zstar_eu_us.o
 
 all : thermo_qe.a
 
-thermo_qe.a: 	$(MODULES)
+thermo_qe.a: $(MODULES)
 	$(AR) $(ARFLAGS) $@ $?       
 	$(RANLIB) $@    
 
