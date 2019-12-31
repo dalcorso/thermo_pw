@@ -167,16 +167,11 @@ Please change line 571 of <code>src/thermo_readin.f90</code> from
 
 **Patches for thermo_pw.0.2.0**:
 <br>
-* Problem in anharmonic properties: use <code>thermo_pw.0.3.0</code> or higher, 
-or make the same changes as in commit 
-<a href="http://www.qe-forge.org/gf/project/thermo_pw/scmcvs/?action=ScmCommitDetail&scm_commit_id=19508">
-19508.</a>
+* Problem in anharmonic properties: update to a newer version.
 * Modules/clocks.f90 : line 91 set <code>maxclock=200</code> otherwise 
 <code>thermo_pw</code> might run out of clocks.
 * Bug fix: In anharmonic calculations some vertical lines in phonon dispersion 
-plots are double. Change as in commit 
-<a href="http://www.qe-forge.org/gf/project/thermo_pw/scmcvs/?action=ScmCommitDetail&scm_commit_id=19386">
-19386</a>. 
+plots are double. Update to a newer version. 
 <br>
 
 **Patches for thermo_pw.0.1.0**:
@@ -257,9 +252,8 @@ Only <code>thermo_pw.0.5.0</code> or later versions can be compiled in serial. A
 <br><br>
 11. An ionic relaxation converges with <code>pw.x</code> but not with <code>thermo_pw.x</code> (version <code>0.4.0</code>).
 <br>
-This is a bug of version <code>0.4.0</code>. Please apply the same changes 
-as in the
-commit <a href="http://www.qe-forge.org/gf/project/thermo_pw/scmcvs/?action=ScmCommitDetail&scm_commit_id=197343">197343</a> or update to a newer version.
+This is a bug of version <code>0.4.0</code>. Please  
+update to a newer version.
 <br><br>
 12. The plot of the phonon dispersions is very strange with several disjoint
 parts. Moreover the modes are not classified using symmetry. Why?
