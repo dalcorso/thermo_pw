@@ -69,7 +69,7 @@ Clean Ir(111) and Pt(111) electronic surface states: a first-principle fully rel
 <br>
 <br>
 
-<p align="justify">The following papers contain some calculations made by using the <code>thermo_pw</code>:</p>
+<p align="justify">The following papers contain some calculations made by using <code>thermo_pw</code>:</p>
 
 1. S. Poncé, D. Jena, and F. Giustino,
 Hole mobility of strained GaN from first principles,
