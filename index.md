@@ -11,15 +11,16 @@ a brief tutorial is available <a href="https://people.sissa.it/dalcorso/thermo_p
 while the user's guide of <code>thermo_pw</code> version <code>1.1.1</code> 
 can be found <a href="https://people.sissa.it/dalcorso/thermo_pw/user_guide/index.html">here</a>.</p>
 <p align="justify"> Presently there is no reference work for citing <code>thermo_pw</code>. If you want to mention it in your work, you can put a reference to this web page.</p>
-<p align="justify">The following papers have been written using 
-<code>thermo_pw</code>:</p>
+<p align="justify">The following papers describe new
+features implemented in the <code>thermo_pw</code>:</p>
+
 
 9. A. Urru and A. Dal Corso,
 Density functional perturbation theory for lattice dynamics with fully
 relativistic ultrasoft pseudopotentials: The magnetic case,
 <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.100.045115">Phys. Rev. B <B>100</B>, 045115 (2019).</a>
-
-
+<br>
+<br>
 8. C. Malica and A. Dal Corso,
 Temperature dependent atomic B-factor: an ab-initio calculation,
 <a href="https://doi.org/10.1107/S205327331900514X">Acta Cryst. A <B>75</B>, 624 (2019).</a>
@@ -67,6 +68,13 @@ Clean Ir(111) and Pt(111) electronic surface states: a first-principle fully rel
 <a href="http://www.sciencedirect.com/science/article/pii/S0039602815000734"> Surf. Sci. <B>637-638</B>, 106 (2015)</a>.
 <br>
 <br>
+
+<p align="justify">The following papers contain some calculations made by using the <code>thermo_pw</code>:</p>
+
+1. S. Poncé, D. Jena, and F. Giustino,
+Hole mobility of strained GaN from first principles,
+<a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.100.085204">
+Phys. Rev. B <B>100</B>, 085204 (2019)</a>.
 
 See also the presentation given at the Quantum-ESPRESSO developers meeting 2017:
 <br>
