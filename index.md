@@ -12,7 +12,7 @@ while the user's guide of <code>thermo_pw</code> version <code>1.1.1</code>
 can be found <a href="https://people.sissa.it/dalcorso/thermo_pw/user_guide/index.html">here</a>.</p>
 <p align="justify"> Presently there is no reference work for citing <code>thermo_pw</code>. If you want to mention it in your work, you can put a reference to this web page.</p>
 <p align="justify">The following papers describe new
-features implemented in the <code>thermo_pw</code>:</p>
+features implemented in <code>thermo_pw</code>:</p>
 
 
 9. A. Urru and A. Dal Corso,
