@@ -28,12 +28,16 @@ REAL(DP) :: barl, barm, bart, barnu, barv, bara, barp, baram, barf, baru,  &
             bardip, barpolar, bard, barohm, barb, barav, barwb, bary,      &
             barmu, barmag, barh, barrhom
 
+REAL(DP) :: barifc, bardmc, baralpha, baralphap
+
 REAL(DP) :: cspeedau, amuau, kappa, kappaa, kappadiecic, toverg
 
 REAL(DP) :: cmtom, gtokg, ptop, ltol, ftof, utou, prtopr, chtoch, itoi,     &
             rhotorho, curtocur, etoe, phitophi, captocap, diptodip,         &
             polartopolar, dtod, ohmtoohm, btob, avtoav, wbtowb, ytoy,       &
             mutomu, magtomag, htoh, rhomtorhom
+
+REAL(DP) :: alphatoalpha, alphaptoalphap, zmtozm
 
 REAL(DP) :: barlcgs, barmcgs, barvcgs, baracgs, barpcgs, baramcgs, barfcgs, &
             barucgs, barwcgs, barprcgs, baricgs, barccgs, barrhocgs,        &
@@ -652,6 +656,44 @@ IF (ionode) THEN
    WRITE(iunout,*)
 ENDIF
 
+barifc=baru/barl**2
+bardmc=e*baru*abohr/hbarf
+baralpha=1.0_DP/barv
+baralphap=4.0_DP * pi * alphaf**2 * baralpha
+WRITE(stdout,'(/,5x,"Material properties (a.u. - SI):")') 
+WRITE(stdout,'(5x,"Int. force const.: \ifc=",13x,es20.11,"   J/m^2")') barifc
+WRITE(stdout,'(5x,"Dyn. mag. charge: \dmc=",14x,es20.11,"   A m")') bardmc
+WRITE(stdout,'(5x,"ME tensor (I): \alpha=",15x,es20.11,"   s/m")') baralpha
+WRITE(stdout,'(5x,"ME tensor (II): \alpha''=",13x,es20.11,"   s/m")') baralphap
+
+IF (ionode) THEN
+   WRITE(iunout,'("\def\barifc{",a,"}")') TRIM(float_to_latex(barifc,11))
+   WRITE(iunout,'("\def\bardmc{",a,"}")') TRIM(float_to_latex(bardmc,11))
+   WRITE(iunout,'("\def\baralpha{",a,"}")') TRIM(float_to_latex(baralpha,11))
+   WRITE(iunout,'("\def\baralphap{",a,"}")') TRIM(float_to_latex(baralphap,11))
+ENDIF
+
+!ifctoifc=baru/barl**2
+!dmctodmc=e*baru*abohr/hbarf
+zmtozm=1.D-2/kappaa
+alphatoalpha=mu0 * magtomag / etoe / 4.0_DP / pi
+alphaptoalphap=mu0 * magtomag / etoe 
+WRITE(stdout,'(/,5x,"Material properties (c.g.s. - SI):")') 
+!WRITE(stdout,'(5x,"Int. force const.: \ifc=",13x,es20.11,"   J/m^2")') barifc
+WRITE(stdout,'(5x,"Dyn. mag. charge: \dmc=",14x,es20.11,"   A m")') zmtozm 
+WRITE(stdout,'(5x,"ME tensor (I): \alpha=",15x,es20.11,"   s/m")') alphatoalpha
+WRITE(stdout,'(5x,"ME tensor (II): \alpha''=",13x,es20.11,"   s/m")') &
+                                                                 alphaptoalphap
+
+IF (ionode) THEN
+!   WRITE(iunout,'("\def\barifc{",a,"}")') TRIM(float_to_latex(barifc,11))
+!   WRITE(iunout,'("\def\bardmc{",a,"}")') TRIM(float_to_latex(bardmc,11))
+   WRITE(iunout,'("\def\zmtozm{",a,"}")') TRIM(float_to_latex(zmtozm,11))
+   WRITE(iunout,'("\def\alphatoalpha{",a,"}")') &
+                                 TRIM(float_to_latex(alphatoalpha,11))
+   WRITE(iunout,'("\def\alphaptoalphap{",a,"}")') &
+                                 TRIM(float_to_latex(alphaptoalphap,11))
+ENDIF
 
 WRITE(stdout,'(/,5x,70("-"))') 
 WRITE(stdout,'(5x,"Errors:                     Absolute                  Relative",/)') 

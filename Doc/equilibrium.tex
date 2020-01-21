@@ -1,0 +1,3341 @@
+%!
+%! Copyright (C) 2019 - Present Andrea Dal Corso 
+%! This file is distributed under the terms of the
+%! GNU General Public License. See the file `License'
+%! in the root directory of the present distribution,
+%! or http://www.gnu.org/copyleft/gpl.txt .
+%!
+\documentclass[12pt,a4paper]{article}
+\def\version{1.2.0}
+\def\qe{{\sc Quantum ESPRESSO}}
+\def\tpw{{\sc THERMO\_PW}}
+
+\usepackage{amsmath}
+\usepackage{html}
+\usepackage{color}
+
+\usepackage{graphicx}
+
+\definecolor{web-blue}{rgb}{0,0.5,1.0}
+\definecolor{steelblue}{rgb}{0.27,0.5,0.7}
+\definecolor{coral}{rgb}{1.0,0.5,0.3}
+\definecolor{red}{rgb}{1.0,0,0.0}
+\definecolor{green}{rgb}{0.,0.5,0.0}
+\definecolor{limegreen}{rgb}{0.19,0.8,0.19}
+\definecolor{orange}{rgb}{1.0,0.44,0.0}
+\definecolor{violet}{rgb}{0.75,0.35,0.75}
+
+
+\textwidth = 17cm
+\textheight = 24cm
+\topmargin =-1 cm
+\oddsidemargin = 0 cm
+
+\def\pwx{\texttt{pw.x}}
+\def\phx{\texttt{ph.x}}
+\def\configure{\texttt{configure}}
+\def\PWscf{\texttt{PWscf}}
+\def\PHonon{\texttt{PHonon}}
+\def\thermo{\texttt{thermo\_pw}}
+\def\make{\texttt{make}}
+
+\def\hplanck{6.62607015\times 10^{-34}}
+\def\hbarf{1.0545718176462\times 10^{-34}}
+\def\cspeed{2.99792458\times 10^{8}}
+\def\e{1.602176634\times 10^{-19}}
+\def\rydberg{1.0973731568160\times 10^{7}}
+\def\alphaf{7.2973525693\times 10^{-3}}
+\def\amu{1.66053906660\times 10^{-27}}
+
+\def\me{9.1093837015\times 10^{-31}}
+\def\abohr{5.29177210903\times 10^{-11}}
+\def\muzero{1.25663706212\times 10^{-6}}
+\def\epsilonzero{8.8541878128\times 10^{-12}}
+\def\ehartree{4.3597447222072\times 10^{-18}}
+\def\bohrmag{9.2740100783\times 10^{-24}}
+
+\def\barl{5.29177210903\times 10^{-11}}
+\def\barm{9.1093837015\times 10^{-31}}
+\def\bart{2.4188843265857\times 10^{-17}}
+\def\barnu{4.1341373335182\times 10^{16}}
+\def\barv{2.18769126364\times 10^{6}}
+\def\bara{9.0442161272\times 10^{22}}
+\def\barp{1.99285191410\times 10^{-24}}
+\def\baram{1.0545718176462\times 10^{-34}}
+\def\barf{8.2387234982\times 10^{-8}}
+\def\baru{4.3597447222072\times 10^{-18}}
+\def\barw{1.8023783420686\times 10^{-1}}
+\def\barpr{2.9421015696\times 10^{13}}
+\def\bari{6.623618237510\times 10^{-3}}
+\def\barc{1.602176634\times 10^{-19}}
+\def\barrho{1.08120238456\times 10^{12}}
+\def\barcur{2.36533701094\times 10^{18}}
+\def\bare{5.14220674763\times 10^{11}}
+\def\barphi{2.7211386245988\times 10^{1}}
+\def\barcap{5.887890530517\times 10^{-21}}
+\def\bardip{8.4783536255\times 10^{-30}}
+\def\barpolar{5.7214766229\times 10^{1}}
+\def\bard{4.5530064316}
+\def\barohm{4.1082359022277\times 10^{3}}
+\def\barb{2.35051756758\times 10^{5}}
+\def\barav{1.24384033059\times 10^{-5}}
+\def\barwb{6.5821195695091\times 10^{-16}}
+\def\bary{9.937347433815\times 10^{-14}}
+\def\barmu{1.85480201567\times 10^{-23}}
+\def\barmag{1.25168244230\times 10^{8}}
+\def\barh{9.9605723936\times 10^{6}}
+
+\def\cmtom{1.0\times 10^{-2}}
+\def\gtokg{1.0\times 10^{-3}}
+\def\ptop{1.0\times 10^{-5}}
+\def\ltol{1.0\times 10^{-7}}
+\def\ftof{1.0\times 10^{-5}}
+\def\utou{1.0\times 10^{-7}}
+\def\prtopr{1.0\times 10^{-1}}
+\def\chtoch{3.33564095107\times 10^{-10}}
+\def\kappaa{1.000000000274\times 10^{-1}}
+\def\kappa{2.99792458082\times 10^{9}}
+\def\kappadiecic{1.00000000027}
+\def\itoi{3.33564095107\times 10^{-10}}
+\def\rhotorho{3.33564095107\times 10^{-4}}
+\def\curtocur{3.33564095107\times 10^{-6}}
+\def\etoe{2.99792458082\times 10^{4}}
+\def\phitophi{2.99792458082\times 10^{2}}
+\def\captocap{1.11265005544\times 10^{-12}}
+\def\diptodip{3.33564095107\times 10^{-12}}
+\def\polartopolar{3.33564095107\times 10^{-6}}
+\def\dtod{2.65441872871\times 10^{-7}}
+\def\ohmtoohm{8.9875517923\times 10^{11}}
+\def\btob{1.000000000274\times 10^{-4}}
+\def\avtoav{1.000000000274\times 10^{-6}}
+\def\wbtowb{1.000000000274\times 10^{-8}}
+\def\ytoy{8.9875517923\times 10^{11}}
+\def\mutomu{9.99999999726\times 10^{-4}}
+\def\magtomag{9.99999999726\times 10^{2}}
+\def\htoh{7.95774715242\times 10^{1}}
+\def\toverg{9.99999999726\times 10^{3}}
+
+\def\barlcgs{5.29177210903\times 10^{-9}}
+\def\barmcgs{9.1093837015\times 10^{-28}}
+\def\barvcgs{2.18769126364\times 10^{8}}
+\def\baracgs{9.0442161272\times 10^{24}}
+\def\barpcgs{1.99285191410\times 10^{-19}}
+\def\baramcgs{1.0545718176462\times 10^{-27}}
+\def\barfcgs{8.2387234982\times 10^{-3}}
+\def\barucgs{4.3597447222072\times 10^{-11}}
+\def\barwcgs{1.8023783420686\times 10^{6}}
+\def\barprcgs{2.9421015696\times 10^{14}}
+\def\baricgs{1.98571079282\times 10^{7}}
+\def\barccgs{4.80320471388\times 10^{-10}}
+\def\barrhocgs{3.2413632055\times 10^{15}}
+\def\barcurcgs{7.0911019670\times 10^{23}}
+\def\barecgs{1.71525554062\times 10^{7}}
+\def\barphicgs{9.07674142975\times 10^{-2}}
+\def\barcapcgs{5.29177210903\times 10^{-9}}
+\def\bardipcgs{2.54174647389\times 10^{-18}}
+\def\barpolarcgs{1.71525554062\times 10^{7}}
+\def\bardcgs{1.71525554062\times 10^{7}}
+\def\barohmcgs{4.57102890439\times 10^{-9}}
+\def\barbcgs{2.35051756693\times 10^{9}}
+\def\baravcgs{1.24384033025\times 10^{1}}
+\def\barwbcgs{6.58211956771\times 10^{-8}}
+\def\barycgs{1.10567901732\times 10^{-25}}
+\def\barmucgs{1.85480201618\times 10^{-20}}
+\def\barmagcgs{1.25168244264\times 10^{5}}
+\def\barhcgs{1.25168244264\times 10^{5}}
+
+\def\barmry{1.82187674030\times 10^{-30}}
+\def\bartry{4.8377686531714\times 10^{-17}}
+\def\barnury{2.0670686667591\times 10^{16}}
+\def\barvry{1.09384563182\times 10^{6}}
+\def\barary{4.52210806362\times 10^{22}}
+\def\barfry{4.11936174912\times 10^{-8}}
+\def\barury{2.1798723611036\times 10^{-18}}
+\def\barwry{4.505945855171\times 10^{-2}}
+\def\barprry{1.47105078482\times 10^{13}}
+\def\bariry{2.3418026858671\times 10^{-3}}
+\def\barcry{1.1329099625600\times 10^{-19}}
+\def\barrhory{7.6452553796\times 10^{11}}
+\def\barcurry{8.36272920114\times 10^{17}}
+\def\barery{3.63608926151\times 10^{11}}
+\def\barphiry{1.9241355740025\times 10^{1}}
+\def\bardipry{5.99510134192\times 10^{-30}}
+\def\barpolarry{4.0456949184\times 10^{1}}
+\def\bardry{3.21946172254}
+\def\barohmry{8.2164718044553\times 10^{3}}
+\def\barbry{3.3241338227\times 10^{5}}
+\def\baravry{1.75905586495\times 10^{-5}}
+\def\barwbry{9.3085227643611\times 10^{-16}}
+\def\baryry{3.9749389735260\times 10^{-13}}
+\def\barmury{6.5577154152\times 10^{-24}}
+\def\barmagry{4.42536571420\times 10^{7}}
+\def\barhry{3.52159414202\times 10^{6}}
+
+\def\barbg{1.71525554109\times 10^{3}}
+\def\baravg{9.0767414322\times 10^{-8}}
+\def\barwbg{4.80320471520\times 10^{-18}}
+\def\barmug{2.5417464732\times 10^{-21}}
+\def\barmagg{1.71525554016\times 10^{10}}
+\def\barhg{1.36495698941\times 10^{9}}
+
+\def\cspeedau{1.37035999084\times 10^{2}}
+\def\amuau{1.8228884862\times 10^{3}}
+\def\ryev{1.3605693122994\times 10^{1}}
+
+\def\barifc{1.55689310282\times 10^{3}}
+\def\bardmc{3.50506782501\times 10^{-13}}
+\def\baralpha{4.57102890439\times 10^{-7}}
+\def\baralphap{3.05882401116\times 10^{-10}}
+
+\def\zmtozm{9.99999999726\times 10^{-2}}
+\def\alphatoalpha{3.33564095198\times 10^{-9}}
+\def\alphaptoalphap{4.19169004390\times 10^{-8}}
+
+
+\begin{document} 
+\author{Andrea Dal Corso (SISSA - Trieste)}
+\date{}
+
+%\def\SissaImage{./sissa_on_white.png}
+
+\title{
+%  \includegraphics[width=6cm]{\SissaImage}\\
+  \vskip 1cm
+  {\color{red} \Huge Thermo\_pw: Equilibrium material properties} \\
+  \Large (version \version)
+}
+
+\maketitle
+
+\newpage
+
+\tableofcontents
+
+\newpage
+
+\section{\color{coral}Introduction}
+These notes discuss the units of the equilibrium material properties
+using the same color conventions of the file \texttt{units.pdf}.\\
+The notes are part of the \tpw\ package. The complete package is
+available at \texttt{https://github.com/dalcorso/thermo\_pw}.
+
+
+\newpage
+\section{\color{coral}People}
+These notes have been written by Andrea Dal Corso (SISSA - Trieste). \\
+Disclaimer: I am not an expert of units. 
+These notes reflect what I think about units.
+If you think that some formula is wrong, that I misunderstood something, or 
+that something can be calculated more simply, please let me know, I would 
+like to learn more. 
+You can contact me directly: \texttt{dalcorso@sissa.it}. 
+
+\newpage
+\section{\color{coral}Overview}
+The units used in electronic structure codes have been
+discussed in a separate file called \texttt{units.pdf}. In this guide
+we extend the previous discussion to equilibrium material properties.
+
+As the previous manual these notes are organized in Sections, one for 
+each physical quantity and we use the same conventions for the text color.
+
+We start from the expression of the magneto-electric enthalpy 
+written as a function of the atomic displacement 
+${\bf u}_{I,\alpha}$, the strain $\epsilon_{\alpha,\beta}$, the electric
+field ${\bf E}_\alpha$, and the magnetic field strength ${\bf H}_\alpha$
+(here $I$ indicates the atom and $\alpha$ and $\beta$ are cartesian
+coordinates indices).
+The Taylor expansion of this function up to second order gives
+\begin{eqnarray}
+\mathcal{F}(\{{\bf u}_{I,\alpha}\}, \{\epsilon_{\alpha,\beta}\},
+\{ {\bf E}_\alpha\}, \{{\bf H}_\alpha\})=\mathcal{F}_0 &+&
+\sum_{I,\alpha} {\partial \mathcal{F} \over \partial 
+{\bf u}_{I,\alpha}} {\bf u}_{I,\alpha}+ \sum_{\alpha,\beta}
+{\partial \mathcal{F} \over \partial 
+\epsilon_{\alpha,\beta}} \epsilon_{\alpha,\beta} \nonumber \\ 
+&+&\sum_{\alpha}
+{\partial \mathcal{F} \over \partial 
+{\bf E}_\alpha} {\bf E}_\alpha + 
+\sum_{\alpha}
+{\partial \mathcal{F} \over \partial 
+{\bf H}_\alpha} {\bf H}_\alpha \nonumber \\
+&+&{1\over 2}
+\sum_{I,\alpha,J,\beta} {\partial^2 \mathcal{F} \over \partial 
+{\bf u}_{I,\alpha} \partial {\bf u}_{J,\beta}} {\bf u}_{I,\alpha}
+{\bf u}_{J,\beta}\nonumber \\
+&+& {1\over 2}\sum_{\alpha,\beta,\gamma,\delta} 
+{\partial^2 \mathcal{F} \over \partial 
+\epsilon_{\alpha,\beta} \partial \epsilon_{\gamma,\delta}} 
+\epsilon_{\alpha,\beta}
+\epsilon_{\gamma,\delta} \nonumber \\
+&+& {1\over 2} \sum_{\alpha,\beta} 
+{\partial^2 \mathcal{F} \over \partial 
+{\bf E}_{\alpha} \partial {\bf E}_{\beta}} 
+{\bf E}_{\alpha}
+{\bf E}_{\beta} \nonumber \\
+&+& {1\over 2} \sum_{\alpha,\beta} 
+{\partial^2 \mathcal{F} \over \partial 
+{\bf H}_{\alpha} \partial {\bf H}_{\beta}} 
+{\bf H}_{\alpha}
+{\bf H}_{\beta} \nonumber \\
+&+& \sum_{I,\alpha,\beta,\gamma} {\partial^2 \mathcal{F} \over \partial 
+{\bf u}_{I,\alpha} \partial \epsilon_{\beta,\gamma}} {\bf u}_{I,\alpha}
+\epsilon_{\beta,\gamma}\nonumber \\
+&+& \sum_{I,\alpha,\beta} {\partial^2 \mathcal{F} \over \partial 
+{\bf u}_{I,\alpha} \partial {\bf E}_{\beta}} {\bf u}_{I,\alpha}
+{\bf E}_{\beta} \nonumber \\
+&+& \sum_{I,\alpha,\beta} {\partial^2 \mathcal{F} \over \partial 
+{\bf u}_{I,\alpha} \partial {\bf H}_{\beta}} {\bf u}_{I,\alpha}
+{\bf H}_{\beta} \nonumber \\
+&+& \sum_{\alpha,\beta,\gamma} {\partial^2 \mathcal{F} \over \partial 
+\epsilon_{\alpha,\beta} \partial {\bf E}_{\gamma}} \epsilon_{\alpha,\beta}
+{\bf E}_{\gamma} \nonumber \\
+&+& \sum_{\alpha,\beta,\gamma} {\partial^2 \mathcal{F} \over \partial 
+\epsilon_{\alpha,\beta} \partial {\bf H}_{\gamma}} \epsilon_{\alpha,\beta}
+{\bf H}_{\gamma} \nonumber \\
+&+& \sum_{\alpha,\beta} {\partial^2 \mathcal{F} \over \partial 
+{\bf E}_{\alpha} \partial {\bf H}_{\beta}} {\bf E}_{\alpha}
+{\bf H}_{\beta},
+\end{eqnarray}
+where all the derivatives are computed for ${\bf u}_{I,\alpha}=0$,
+$\epsilon_{\alpha,\beta}=0$, ${\bf E}_\alpha=0$, and ${\bf H}_\alpha=0$.
+\newpage
+This is the microscopic magneto-electric enthalpy of the solid. This 
+expression is valid in all systems of units. It can be compared with 
+the expression of the 
+phenomenological magneto-electric enthalpy. The form of this phenomenological
+expansion depends on the conventions adopted in each system. We give here the
+form of the expansion and discuss in the following each term separately.
+In the SI units we have:
+\begin{eqnarray}
+\mathcal{F}(\{{\bf u}_{I,\alpha}\}, \{\epsilon_{\alpha,\beta}\},
+\{ {\bf E}_\alpha\}, \{{\bf H}_\alpha\})=\mathcal{F}_0 &-&
+\sum_{I,\alpha} {\bf f}^{(0)}_{I,\alpha} {\bf u}_{I,\alpha}+ 
+V \sum_{\alpha,\beta}
+\sigma^{(0)}_{\alpha,\beta} \epsilon_{\alpha,\beta} \nonumber \\ 
+&-&V \sum_{\alpha} {\bf P}^{(0)}_\alpha {\bf E}_\alpha - 
+\mu_0 V \sum_{\alpha}
+{\bf M}^{(0)}_\alpha {\bf H}_\alpha \nonumber \\
+&+&{1\over 2}
+\sum_{I,\alpha,J,\beta} C_{I,\alpha,J,\beta} {\bf u}_{I,\alpha}
+{\bf u}_{J,\beta}\nonumber \\
+&+& {V\over 2}\sum_{\alpha,\beta,\gamma,\delta} 
+C_{\alpha,\beta,\gamma,\delta}  
+\epsilon_{\alpha,\beta}
+\epsilon_{\gamma,\delta} \nonumber \\
+&-& {1\over 2} \epsilon_0 V \sum_{\alpha,\beta} 
+\chi^e_{\alpha,\beta}
+{\bf E}_{\alpha}
+{\bf E}_{\beta} \nonumber \\
+&-& {1\over 2} \mu_0 V \sum_{\alpha,\beta} 
+\chi^m_{\alpha,\beta}
+{\bf H}_{\alpha}
+{\bf H}_{\beta} \nonumber \\
+&-& \sum_{I,\alpha,\beta,\gamma}
+\Gamma_{I,\alpha,\beta,\gamma} {\bf u}_{I,\alpha}
+\epsilon_{\beta,\gamma}\nonumber \\
+&-& e \sum_{I,\alpha,\beta} Z^*_{I,\alpha,\beta} 
+{\bf u}_{I,\alpha} {\bf E}_{\beta} \nonumber \\
+&-& \mu_0 \sum_{I,\alpha,\beta} 
+Z^m_{I,\alpha,\beta} {\bf u}_{I,\alpha}{\bf H}_{\beta} \nonumber \\
+&-& V \sum_{\alpha,\beta,\gamma} e_{\alpha,\beta,\gamma} 
+\epsilon_{\alpha,\beta} {\bf E}_{\gamma} \nonumber \\
+&-& \mu_0 V \sum_{\alpha,\beta,\gamma}  h_{\alpha,\beta,\gamma} 
+\epsilon_{\alpha,\beta} {\bf H}_{\gamma} \nonumber \\
+&-& V \sum_{\alpha,\beta} \alpha_{\alpha,\beta} {\bf E}_{\alpha}
+{\bf H}_{\beta}.
+\end{eqnarray}
+
+\newpage
+{\color{web-blue} In a.u. the microscopic magneto-electric enthalpy
+is written as (see below for the derivation):
+\begin{eqnarray}
+\mathcal{F}(\{{\bf u}_{I,\alpha}\}, \{\epsilon_{\alpha,\beta}\},
+\{ {\bf E}_\alpha\}, \{{\bf H}_\alpha\})=\mathcal{F}_0 &-&
+\sum_{I,\alpha} {\bf f}^{(0)}_{I,\alpha} {\bf u}_{I,\alpha}
++ V \sum_{\alpha,\beta}
+\sigma_{\alpha,\beta}^{(0)} \epsilon_{\alpha,\beta} \nonumber \\ 
+&-&V \sum_{\alpha} {\bf P}^{(0)}_\alpha {\bf E}_\alpha - 
+\alpha^2 V \sum_{\alpha}
+{\bf M}^{(0)}_\alpha {\bf H}_\alpha \nonumber \\
+&+&{1\over 2}
+\sum_{I,\alpha,J,\beta} C_{I,\alpha,J,\beta} {\bf u}_{I,\alpha}
+{\bf u}_{J,\beta}\nonumber \\
+&+& {V\over 2}\sum_{\alpha,\beta,\gamma,\delta} 
+C_{\alpha,\beta,\gamma,\delta}  
+\epsilon_{\alpha,\beta}
+\epsilon_{\gamma,\delta} \nonumber \\
+&-& {V\over 2} \sum_{\alpha,\beta} 
+\chi^e_{\alpha,\beta}
+{\bf E}_{\alpha}
+{\bf E}_{\beta} \nonumber \\
+&-& {\alpha^2 V \over 2}  \sum_{\alpha,\beta} 
+\chi^m_{\alpha,\beta}
+{\bf H}_{\alpha}
+{\bf H}_{\beta} \nonumber \\
+&-& \sum_{I,\alpha,\beta,\gamma}
+\Gamma_{I,\alpha,\beta,\gamma} {\bf u}_{I,\alpha}
+\epsilon_{\beta,\gamma}\nonumber \\
+&-& \sum_{I,\alpha,\beta} Z^*_{I,\alpha,\beta} 
+{\bf u}_{I,\alpha} {\bf E}_{\beta} \nonumber \\
+&-& \alpha^2 \sum_{I,\alpha,\beta} 
+Z^m_{I,\alpha,\beta} {\bf u}_{I,\alpha}{\bf H}_{\beta} \nonumber \\
+&-& V \sum_{\alpha,\beta,\gamma} e_{\alpha,\beta,\gamma} 
+\epsilon_{\alpha,\beta} {\bf E}_{\gamma} \nonumber \\
+&-& \alpha^2 V \sum_{\alpha,\beta,\gamma}  h_{\alpha,\beta,\gamma} 
+\epsilon_{\alpha,\beta} {\bf H}_{\gamma} \nonumber \\
+&-& {V \over 4 \pi} \sum_{\alpha,\beta} 
+\alpha_{\alpha,\beta} {\bf E}_{\alpha}
+{\bf H}_{\beta}.
+\end{eqnarray}
+}
+
+\newpage
+{\color{orange} In c.g.s.-Gaussian units the microscopic
+magneto-electric enthalpy is written as (see below for the derivation):
+\begin{eqnarray}
+\mathcal{F}(\{{\bf u}_{I,\alpha}\}, \{\epsilon_{\alpha,\beta}\},
+\{ {\bf E}_\alpha\}, \{{\bf H}_\alpha\})=\mathcal{F}_0 &-&
+\sum_{I,\alpha} {\bf f}^{(0)}_{I,\alpha} {\bf u}_{I,\alpha}+ 
+V \sum_{\alpha,\beta}
+\sigma^{(0)}_{\alpha,\beta} \epsilon_{\alpha,\beta} \nonumber \\ 
+&-&V \sum_{\alpha} {\bf P}^{(0)}_\alpha {\bf E}_\alpha - 
+V \sum_{\alpha}
+{\bf M}^{(0)}_\alpha {\bf H}_\alpha \nonumber \\
+&+&{1\over 2}
+\sum_{I,\alpha,J,\beta} C_{I,\alpha,J,\beta} {\bf u}_{I,\alpha}
+{\bf u}_{J,\beta}\nonumber \\
+&+& {V\over 2}\sum_{\alpha,\beta,\gamma,\delta} 
+C_{\alpha,\beta,\gamma,\delta}  
+\epsilon_{\alpha,\beta}
+\epsilon_{\gamma,\delta} \nonumber \\
+&-& {V\over 2} \sum_{\alpha,\beta} 
+\chi^e_{\alpha,\beta}
+{\bf E}_{\alpha}
+{\bf E}_{\beta} \nonumber \\
+&-& {V \over 2}  \sum_{\alpha,\beta} 
+\chi^m_{\alpha,\beta}
+{\bf H}_{\alpha}
+{\bf H}_{\beta} \nonumber \\
+&-& \sum_{I,\alpha,\beta,\gamma}
+\Gamma_{I,\alpha,\beta,\gamma} {\bf u}_{I,\alpha}
+\epsilon_{\beta,\gamma}\nonumber \\
+&-& e\sum_{I,\alpha,\beta} Z^*_{I,\alpha,\beta} 
+{\bf u}_{I,\alpha} {\bf E}_{\beta} \nonumber \\
+&-& \sum_{I,\alpha,\beta} 
+Z^m_{I,\alpha,\beta} {\bf u}_{I,\alpha}{\bf H}_{\beta} \nonumber \\
+&-& V \sum_{\alpha,\beta,\gamma} e_{\alpha,\beta,\gamma} 
+\epsilon_{\alpha,\beta} {\bf E}_{\gamma} \nonumber \\
+&-&V \sum_{\alpha,\beta,\gamma}  h_{\alpha,\beta,\gamma} 
+\epsilon_{\alpha,\beta} {\bf H}_{\gamma} \nonumber \\
+&-& {V \over 4 \pi} \sum_{\alpha,\beta} 
+\alpha_{\alpha,\beta} {\bf E}_{\alpha}
+{\bf H}_{\beta}.
+\end{eqnarray}
+}
+
+\newpage
+From this microscopic magneto-electric enthalpy one can compute the forces
+acting on the atoms for a given atomic configuration. Minimizing this
+enthalpy one obtains the equilibrium atomic positions that can be used
+to obtain the macroscopic magneto-electric enthalpy. This procedure
+links the microscopic (frozen-ions) material properties to the
+macroscopic ones (relaxed-ions) as we discuss in the following. 
+
+Temperature can be included in this scheme using the appropriate
+thermodynamic potential at each temperature instead of the macroscopic
+magneto-electric enthalpy calculated at $T=0$. 
+
+The magneto-electric enthalpy that we have discussed is not unique. One could 
+choose different independent 
+variables and define the respective expansion coefficients. In particular 
+we can use $\sigma_{\alpha,\beta}$ instead of $\epsilon_{\alpha,\beta}$, 
+${\bf D}_\alpha$ instead of ${\bf E}_\alpha$, and ${\bf B}_\alpha$ instead of
+${\bf H}_\alpha$. 
+We discuss the material properties deriving from the magneto-electric
+enthalpy discussed in this introduction in the
+main text and then discuss in the Appendices A and B the consequences 
+of other choices for the independent variables.
+In particular, while theoretically it is easy to study a strained solid,
+experimentally it is simpler to control the applied stress. In Appendix A 
+we discuss the consequences of this choice. 
+While experimentally one controls the magnetic field intensity
+${\bf H}$, the magnetic flux density ${\bf B}$ enters in the quantum
+mechanical equations used in electronic structure calculations. 
+We discuss in Appendix B the relationship between quantities 
+calculated at fixed ${\bf H}$ or at fixed ${\bf B}$. 
+
+Finally we note that the enthalpy used here does not include the contribution 
+of the electric and magnetic fields that would exist in absence of the 
+material and a different enthalpy is obtained by including them. 
+We discuss this point in Appendix C and use an enthalpy that includes
+the contributions of these fields in the thermodynamic equations.
+
+\newpage
+\section{\color{coral}Forces}
+The forces acting on the atoms are given by:
+\begin{equation}
+{\bf f}^{(0)}_{I,\alpha}=-{\partial \mathcal{F} \over \partial {\bf u}_{I,\alpha}}
+\label{force}
+\end{equation}
+We have already discussed the unit of forces. It is $N=J/m$ in agreement
+with the fact that ${\bf u}_{I,\alpha}$ is in $m$ and $\mathcal{F}$ in $J$.
+\\
+
+{\color{web-blue} In a.u. the unit of force is 
+$\bar f= {E_h \over a_B}$ so ${\bar U \over \bar l \bar f}=1$ and
+Eq.~\ref{force} is unchanged.
+}
+\\
+
+{\color{orange} In the c.g.s. system the unit of force 
+is $\bar f_{cgs}=dyne=10^{-5} N$ and since ${\bar U_{cgs} \over 
+\bar l_{cgs} \bar f_{cgs}}=1$ Eq.~\ref{force} is unchanged.
+\\
+}
+
+
+\newpage
+\section{\color{coral}Stress}
+The stress present in a crystal is given by:
+\begin{equation}
+{\sigma}^{(0)}_{\alpha,\beta}={1\over V} 
+{\partial \mathcal{F} \over \partial \epsilon_{\alpha,\beta}},
+\label{stress}
+\end{equation}
+where $V$ is the volume of the crystal.
+We have already discussed the unit of stress in the SI system. It is
+in $Pa=N/m^2=J/m^3$ in agreement with the fact that 
+$\epsilon_{\alpha,\beta}$ is dimensionless.
+\\
+
+{\color{web-blue} In a.u. the unit of stress is 
+$\bar \sigma= {E_h \over a_B^3}$ so ${\bar U \over \bar l^3 \bar \sigma}=1$ and
+Eq.~\ref{stress} is unchanged.
+}
+\\
+
+{\color{orange} In the c.g.s. system the unit of stress
+is $\bar \sigma_{cgs}=Ba=10^{-1} Pa$ and since ${\bar U_{cgs} \over 
+\bar l_{cgs}^3 \bar \sigma_{cgs}}=1$ Eq.~\ref{stress} is unchanged.
+\\
+}
+
+\newpage
+\section{\color{coral}Polarization}
+The polarization present in a crystal is given by:
+\begin{equation}
+{\bf P}^{(0)}_{\alpha}=-{1\over V} 
+{\partial \mathcal{F} \over \partial {\bf E}_{\alpha}},
+\label{polarization}
+\end{equation}
+where $V$ is the volume of the crystal.
+We have already discussed the unit of polarization in the SI system. It is
+in $C/m^2={J\cdot C \over N\cdot m^3}$ in agreement with the fact that the
+electric field is in $N/C$ and $\mathcal{F}$ is in $J$.
+\\
+
+{\color{web-blue} In a.u. the unit of polarization is 
+$\bar P= {e \over a_B^2}$ so ${\bar U \over \bar l^3 \bar E \bar P}=1$ and
+Eq.~\ref{polarization} is unchanged.
+}
+\\
+
+{\color{orange} In c.g.s.-Gaussian system the unit of polarization is 
+$\bar P_{cgs}= statC/cm^2$ so ${\bar U_{cgs} \over \bar l_{cgs}^3 
+\bar E_{cgs} \bar P_{cgs}}=1$ and
+Eq.~\ref{polarization} is unchanged.
+}
+
+\newpage
+\section{\color{coral}Magnetization}
+The magnetization present in a crystal is given by:
+\begin{equation}
+{\bf M}^{(0)}_{\alpha}=-{1\over \mu_0 V} 
+{\partial \mathcal{F} \over \partial {\bf H}_{\alpha}},
+\label{magnetization}
+\end{equation}
+where $V$ is the volume of the crystal.
+We have already discussed the unit of magnetization in the SI system. It is
+in $A/m={J\cdot A \cdot m \over N\cdot m^3}$ in agreement with the fact 
+that the magnetic field strength is in $A/m$, $\mu_0$ is in $N/A^2$, $V$ is
+in $m^3$, and $\mathcal{F}$ is in $J$.
+\\
+
+{\color{web-blue} In a.u. the unit of magnetization is 
+$\bar M= {\bar I \over \bar l}$ and $\bar H ={\bar M \over 4 \pi}$ so 
+${\bar U \over \mu_0 \bar l^3 \bar H \bar M}={1\over \alpha^2}$ and
+the definition of the magnetization is:
+\begin{equation}
+{\bf M}^{(0)}_{\alpha}=-{1\over \alpha^2 V} 
+{\partial \mathcal{F} \over \partial {\bf H}_{\alpha}}.
+\label{magnetizationau}
+\end{equation}
+}
+\\
+
+{\color{orange} In the c.g.s-Gaussian system the unit of magnetization is 
+$\bar M_{cgs}= {1\over 10^{-2} K_A} A/m$ so 
+${\bar U_{cgs} \over \mu_0 \bar l_{cgs}^3 
+\bar H_{cgs} \bar M_{cgs}}=1$ and the definition of the magnetization
+is:
+\begin{equation}
+{\bf M}^{(0)}_{\alpha}=-{1\over V} 
+{\partial \mathcal{F} \over \partial {\bf H}_{\alpha}}.
+\label{magnetization}
+\end{equation}
+}
+
+
+\newpage
+\section{\color{coral}Interatomic force constants}
+The interatomic force constants are defined as:
+\begin{equation}
+C_{I,\alpha,J,\beta}={\partial^2 \mathcal{F} \over \partial 
+{\bf u}_{I,\alpha} \partial {\bf u}_{J,\beta}}.
+\label{ifc}
+\end{equation}
+Their unit is $J/m^2$.
+\\
+
+{\color{web-blue} In a.u. the unit of the interatomic force constants is 
+${\bar U \over \bar l^2}={E_h\over a_B^2}$ and Eq.~\ref{ifc} is 
+unchanged.
+The conversion factor with the SI unit is:
+\begin{equation}
+{\bar U \over \bar l^2}={\baru\ J \over (\abohr\ m)^2}=\barifc\ J/m^2.
+\end{equation}
+}
+\\
+
+{\color{orange} In c.g.s. units the unit of the interatomic 
+force constants is 
+${\bar U_{cgs} \over \bar l_{cgs}^2}=erg/cm^2$ and Eq.~\ref{ifc} is 
+unchanged.
+The conversion factor with the SI unit is:
+\begin{equation}
+erg/cm^2= 10^{-3} J/m^2.
+\end{equation}
+}
+
+\newpage
+\section{\color{coral}Elastic constants}
+The frozen-ions elastic constants are defined as:
+\begin{equation}
+C_{\alpha,\beta,\gamma,\delta}= {1\over V} 
+{\partial^2 \mathcal{F} \over \partial 
+\epsilon_{\alpha,\beta} \partial \epsilon_{\gamma,\delta}}={\partial
+\sigma_{\alpha,\beta}\over \partial \epsilon_{\gamma,\delta}}.
+\label{elastcons}
+\end{equation}
+Their unit is $Pa=J/m^3$. Here $V$ is the volume of the unperturbed crystal.
+\\
+
+{\color{web-blue} In a.u. the unit of the elastic constants is 
+${\bar U \over \bar l^3}={E_h\over a_B^3}$ and Eq.~\ref{elastcons} is 
+unchanged. This is the same unit of the pressure or stress.
+}
+\\
+
+{\color{orange} In the c.g.s. system the unit of the elastic constants
+is $\bar \sigma_{cgs}=Ba=10^{-1} Pa$ and since ${\bar U_{cgs} \over 
+\bar l_{cgs}^3 \bar \sigma_{cgs}}=1$ Eq.~\ref{elastcons} is unchanged.
+\\
+}
+
+\newpage
+\section{\color{coral}Electric susceptibility}
+The electric susceptibility of the crystal is defined as:
+\begin{equation}
+\chi^e_{\alpha,\beta}=-{1\over \epsilon_0 V} 
+{\partial^2 \mathcal{F} \over \partial 
+{\bf E}_{\alpha} \partial {\bf E}_{\beta}}= {1\over \epsilon_0}
+{\partial {\bf P}_\alpha \over \partial {\bf E}_{\beta}},
+\end{equation}
+and is a dimensionless quantity since ${1\over V} 
+{\partial \mathcal{F} \over \partial 
+{\bf E}_{\alpha}}$ and $\epsilon_0 {\bf E}$ have both the unit of
+the polarization.\\
+The relative dielectric constant is $\epsilon_{r,\alpha,\beta}=
+{1\over \epsilon_0} {\partial {\bf D}_{\alpha} \over \partial {\bf E}_{\beta}}=
+\delta_{\alpha,\beta} 
++{1\over \epsilon_0} {\partial {\bf P}_\alpha \over \partial {\bf E}_\beta} = 
+\delta_{\alpha,\beta} + 
+\chi^e_{\alpha,\beta}$.
+\\
+
+{\color{web-blue} The electric susceptibility is dimensionless but
+in a.u. we have
+${\bar U \over \epsilon_0 \bar l^3 \bar E^2}=4\pi$. 
+The susceptibility is usually defined as:
+\begin{equation}
+\chi^{e,a.u.}_{\alpha,\beta}=-{1\over V} 
+{\partial^2 \mathcal{F} \over \partial 
+{\bf E}_{\alpha} \partial {\bf E}_{\beta}}= 
+{\partial {\bf P}_\alpha \over \partial {\bf E}_\beta}, 
+\end{equation}
+so, even if $\chi^e_{\alpha,\beta}$ is dimensionless,  
+the numerical value of $\chi^{e,a.u.}_{\alpha,\beta}$ differs from the
+SI value and we have
+$\chi^{e,a.u.}_{\alpha,\beta} = {\chi^e_{\alpha,\beta} \over 4 \pi}$. \\
+The relative dielectric constant is $\epsilon_{r,\alpha,\beta}=
+{\partial {\bf D}_{\alpha} \over \partial {\bf E}_{\beta}}=
+\delta_{\alpha,\beta} 
++4 \pi {\partial {\bf P}_\alpha \over \partial {\bf E}_\beta} = 
+\delta_{\alpha,\beta} + 
+4\pi \chi^{e,a.u.}_{\alpha,\beta}$.
+}
+\\
+
+{\color{orange} The electric susceptibility is dimensionless but
+in c.g.s.-Gaussian units we have
+${\bar U_{cgs} \over \epsilon_0 \bar l_{cgs}^3 \bar E_{cgs}^2}=4\pi$. 
+The electric susceptibility is usually defined as:
+\begin{equation}
+\chi^{e,cgs}_{\alpha,\beta}=-{1\over V} 
+{\partial^2 \mathcal{F} \over \partial 
+{\bf E}_{\alpha} \partial {\bf E}_{\beta}}=
+{\partial {\bf P}_\alpha \over \partial {\bf E}_\beta}, 
+\end{equation}
+so, even if $\chi^e_{\alpha,\beta}$ is dimensionless,  
+the numerical value of $\chi^{e,cgs}_{\alpha,\beta}$ differs from the
+SI value and we have
+$\chi^{e,cgs}_{\alpha,\beta} = {\chi^e_{\alpha,\beta} \over 4 \pi}$. \\
+The relative dielectric constant is $\epsilon_{r,\alpha,\beta}=
+{\partial {\bf D}_{\alpha} \over \partial {\bf E}_{\beta}}=
+\delta_{\alpha,\beta} 
++4 \pi {\partial {\bf P}_\alpha \over \partial {\bf E}_\beta} = 
+\delta_{\alpha,\beta} + 
+4\pi \chi^{e,cgs}_{\alpha,\beta}$.
+}
+
+\newpage
+\section{\color{coral}Magnetic susceptibility}
+The magnetic susceptibility of the crystal is defined as
+\begin{equation}
+\chi^m_{\alpha,\beta}=-{1\over \mu_0 V} 
+{\partial^2 \mathcal{F} \over \partial 
+{\bf H}_{\alpha} \partial {\bf H}_{\beta}}=
+{\partial {\bf M}_{\alpha} \over \partial {\bf H}_{\beta}},
+\end{equation}
+and is a dimensionless quantity since ${1\over \mu_0 V}
+{\partial \mathcal{F} \over \partial 
+{\bf H}_{\alpha}}$ and the magnetic field strength have
+both the unit of a magnetization.\\
+The relative permeability is $\mu_{r,\alpha,\beta}=
+{1\over \mu_0} {\partial {\bf B}_{\alpha} \over \partial {\bf H}_\beta}=
+\delta_{\alpha,\beta} 
++{\partial {\bf M}_\alpha \over \partial {\bf H}_\beta} = 
+\delta_{\alpha,\beta} + 
+\chi^m_{\alpha,\beta}$.
+\\
+
+{\color{web-blue} The magnetic susceptibility is dimensionless but
+in a.u. we have
+${\bar U \over \mu_0 \bar l^3 \bar H^2}={4\pi \over \alpha^2}$.
+Since the magnetic susceptibility is defined as:
+\begin{equation}
+\chi^{m,a.u.}_{\alpha,\beta}=-{1 \over \alpha^2 V} 
+{\partial^2 \mathcal{F} \over \partial 
+{\bf H}_{\alpha} \partial {\bf H}_{\beta}}
+={\partial {\bf M}_{\alpha} \over \partial {\bf H}_{\beta}},
+\end{equation}
+even if $\chi^m_{\alpha,\beta}$ is dimensionless,
+the numerical value of $\chi^{m,a.u.}_{\alpha,\beta}$ differs from the
+SI value and we have
+$\chi^{m,a.u.}_{\alpha,\beta} = {\chi^m_{\alpha,\beta} \over 4 \pi}$. \\
+The relative permeability is $\mu_{r,\alpha,\beta}=
+{1\over \alpha^2}{\partial {\bf B}_{\alpha} \over \partial {\bf H}_\beta}=
+\delta_{\alpha,\beta} 
++4 \pi {\partial {\bf M}_\alpha \over \partial {\bf H}_\beta} = 
+\delta_{\alpha,\beta} + 
+4 \pi \chi^{m,a.u.}_{\alpha,\beta}$.
+}
+\\
+
+{\color{orange} The magnetic susceptibility is dimensionless but
+in c.g.s.-Gaussian units we have
+${\bar U_{cgs} \over \mu_0 \bar l_{cgs}^3 \bar H_{cgs}^2}=
+{4\pi}$. Since the magnetic susceptibility is defined as:
+\begin{equation}
+\chi^{m,cgs}_{\alpha,\beta}=-{1 \over V} 
+{\partial^2 \mathcal{F} \over \partial 
+{\bf H}_{\alpha} \partial {\bf H}_{\beta}}=
+{\partial {\bf M}_{\alpha} \over \partial {\bf H}_{\beta}},
+\end{equation}
+even if $\chi^m_{\alpha,\beta}$ is dimensionless,
+the numerical value of $\chi^{m,cgs}_{\alpha,\beta}$ differs from the
+SI value and we have:
+$\chi^{m,cgs}_{\alpha,\beta} = {\chi^m_{\alpha,\beta} \over 4 \pi}$. \\
+The relative permeability is $\mu_{r,\alpha,\beta}=
+{\partial {\bf B}_{\alpha} \over \partial {\bf H}_\beta}=
+\delta_{\alpha,\beta} 
++4 \pi {\partial {\bf M}_\alpha \over \partial {\bf H}_\beta} = 
+\delta_{\alpha,\beta} + 
+4 \pi \chi^{m,cgs}_{\alpha,\beta}$.
+}
+
+\newpage
+\section{\color{coral}Internal strain parameters}
+The internal strain parameters are defined as:
+\begin{equation}
+\Gamma_{I,\alpha,\beta,\gamma}=-{\partial^2 \mathcal{F} \over \partial 
+{\bf u}_{I,\alpha} \partial \epsilon_{\beta,\gamma}}
+={\partial {\bf f}_{I,\alpha} \over \partial \epsilon_{\beta,\gamma}}
+=-V {\partial \sigma_{\beta,\gamma}\over \partial {\bf u}_{I,\alpha}}.
+\label{isp}
+\end{equation}
+Its unit is $J/m=N$.
+\\
+
+{\color{web-blue} In a.u. the unit of the internal strain parameter is
+${\bar U \over \bar l}={E_h \over a_B}$, so it has the same unit as the force
+and Eq.~\ref{isp} is unchanged.
+}
+\\
+
+{\color{orange} In c.g.s. units the unit of the internal strain parameter is
+${\bar U_{cgs} \over \bar l_{cgs}}=erg/cm=dyne$, so it has the same unit 
+as the force and Eq.~\ref{isp} is unchanged.
+}
+
+\newpage
+\section{\color{coral}Born effective charges}
+The Born effective charges are defined as:
+\begin{equation}
+Z^*_{I,\alpha,\beta}=-{1\over e} {\partial^2 \mathcal{F} \over \partial 
+{\bf u}_{I,\alpha} \partial {\bf E}_{\beta}}={V\over e} {
+\partial {\bf P}_{\beta} \over \partial 
+{\bf u}_{I,\alpha}}={1\over e} {\partial {\bf f}_{I,\alpha} 
+\over \partial {\bf E}_{\beta}}.
+\end{equation}
+They are dimensionless quantities since the unit of 
+${\partial^2 \mathcal{F} \over \partial 
+{\bf u}_{I,\alpha} \partial {\bf E}_{\beta}}$ is ${J \cdot C \over m\cdot N}=
+C$.
+\\
+
+{\color{web-blue} The Born effective charges are dimensionless 
+and since 
+${\bar U \over e \bar l \bar E}=1$ we can write:
+\begin{equation}
+Z^*_{I,\alpha,\beta}=-{\partial^2 \mathcal{F} \over \partial 
+{\bf u}_{I,\alpha} \partial {\bf E}_{\beta}} 
+=V {
+\partial {\bf P}_{\beta} \over \partial 
+{\bf u}_{I,\alpha}}={\partial {\bf f}_{I,\alpha} 
+\over \partial {\bf E}_{\beta}}.
+\end{equation}
+}
+\\
+
+{\color{orange} The Born effective charges are dimensionless
+and since 
+${\bar U_{cgs} \over \bar C_{cgs} \bar l_{cgs} \bar E_{cgs}}=1$ we can write:
+\begin{equation}
+Z^*_{I,\alpha,\beta}=-{1\over e}{\partial^2 \mathcal{F} \over \partial 
+{\bf u}_{I,\alpha} \partial {\bf E}_{\beta}}={V\over e} {
+\partial {\bf P}_{\beta} \over \partial 
+{\bf u}_{I,\alpha}}={1\over e} {\partial {\bf f}_{I,\alpha} 
+\over \partial {\bf E}_{\beta}}.
+\end{equation}
+}
+
+\newpage
+\section{\color{coral}Dynamical magnetic charges}
+The dynamical magnetic charges are defined as:
+\begin{equation}
+Z^m_{I,\alpha,\beta}= -{1\over \mu_0} {\partial^2 \mathcal{F} \over \partial 
+{\bf u}_{I,\alpha} \partial {\bf H}_{\beta}}=V {\partial {\bf M}_{\beta}
+\over \partial {\bf u}_{I,\alpha}}= {1\over \mu_0}{\partial {\bf f}_{I,\alpha} 
+\over \partial {\bf H}_{\beta}}. 
+\end{equation}
+They have unit of $A\cdot m$ since the unit of 
+${\partial^2 \mathcal{F} \over \partial 
+{\bf u}_{I,\alpha} \partial {\bf H}_{\beta}}$ is ${J \cdot m \over m\cdot A}=
+{N\cdot m \over A}$ and the unit of $\mu_0$ is $N/A^2$.
+\\
+
+{\color{web-blue} In a.u. the unit of the dynamical magnetic charges is
+$\bar Z^m = \bar I \bar l = \bar M \bar l^2$ and since 
+${\bar U \over \mu_0 \bar l^2 \bar H \bar I}={1\over \alpha^2}$ we can write:
+\begin{equation}
+Z^m_{I,\alpha,\beta}=-{1\over \alpha^2} {\partial^2 \mathcal{F} \over \partial 
+{\bf u}_{I,\alpha} \partial {\bf H}_{\beta}}=
+V {\partial {\bf M}_{\beta} \over \partial {\bf u}_{I,\alpha}}=
+{1\over \alpha^2}{\partial {\bf f}_{I,\alpha} \over \partial {\bf H}_{\beta}}.
+\end{equation}
+The conversion factor with the SI unit is:
+\begin{equation}
+\bar Z^m = {\bar C \bar l \over \bar t} = {e \hbar \over m_e a_B}={2 \mu_B \over a_B} = {e \over \hbar} E_h a_B=\bardmc A\cdot m.
+\end{equation}
+}
+\\
+
+{\color{orange} In c.g.s.-Gaussian units the unit of the dynamical magnetic 
+charges depend on the equation used for its definition.
+Requiring that
+\begin{equation}
+Z^m_{I,\alpha,\beta}= V 
+{\partial {\bf M}_{\beta} \over \partial {\bf u}_{I,\alpha}},
+\end{equation}
+then $\bar Z^m_{cgs} = \bar M_{cgs} \bar l_{cgs}^2$ 
+and since 
+${\bar U_{cgs} \over \mu_0 \bar l_{cgs}^3 \bar H_{cgs} \bar M_{cgs}}=1
+$ we can write:
+\begin{equation}
+Z^m_{I,\alpha,\beta}=-{\partial^2 \mathcal{F} \over \partial 
+{\bf u}_{I,\alpha} \partial {\bf H}_{\beta}}= V 
+{\partial {\bf M}_{\beta} \over \partial {\bf u}_{I,\alpha}}=
+{\partial {\bf f}_{I,\alpha} \over \partial {\bf H}_{\beta}}.
+\end{equation}
+The conversion factor with the SI unit is:
+\begin{equation}
+\bar Z^m_{cgs} = \bar l^2_{cgs} \bar M_{cgs}={10^{-4} \over 10^{-2} K_A}
+A\cdot m=\zmtozm\ A\cdot m.
+\end{equation}
+}
+
+
+\newpage
+\section{\color{coral}Piezoelectric tensor}
+The frozen-ions piezoelectric tensor is defined as:
+\begin{equation}
+e_{\alpha,\beta,\gamma}=-{1\over V} {\partial^2 \mathcal{F} \over \partial 
+\epsilon_{\alpha,\beta} \partial {\bf E}_{\gamma}}={\partial 
+{\bf P}_{\gamma} \over \partial \epsilon_{\alpha,\beta}}=
+-{\partial \sigma_{\alpha,\beta} \over
+\partial {\bf E}_{\gamma}}.
+\label{piezo}
+\end{equation}
+Its unit is ${J\cdot C \over N \cdot m^3}= {C\over m^2}$.
+\\
+
+{\color{web-blue} In a.u. the unit of the piezoelectric tensor is
+${\bar C \over \bar l^2}={e\over a_B^2}$ so it has the same unit of the
+polarization. Since  
+${\bar U \over \bar l \bar E \bar C}=1$ the piezoelectric tensor is
+defined by Eq.~\ref{piezo} also in a.u..
+}
+\\
+
+{\color{orange} In c.g.s.-Gaussian units the unit of the piezoelectric
+tensor is
+${\bar C_{cgs} \over \bar l_{cgs}^2}$ and since 
+${\bar U_{cgs} \over \bar l_{cgs} \bar E_{cgs} \bar C_{cgs}}=1$ 
+the piezoelectric tensor is
+defined by Eq.~\ref{piezo} also in c.g.s.-Gaussian units.
+}
+
+\newpage
+\section{\color{coral}Piezomagnetic tensor}
+The frozen-ions piezomagnetic tensor is defined as:
+\begin{equation}
+h_{\alpha,\beta,\gamma}=-{1\over \mu_0 V} 
+{\partial^2 \mathcal{F} \over \partial 
+\epsilon_{\alpha,\beta} \partial {\bf H}_{\gamma}}=
+{\partial {\bf M}_{\gamma} \over \partial 
+\epsilon_{\alpha,\beta}}=-{1\over \mu_0} 
+{\partial \sigma_{\alpha,\beta} \over \partial {\bf H}_{\gamma}}.
+\end{equation}
+Its unit is ${J \cdot A^2 \cdot m\over N \cdot m^3 \cdot A}= {A\over m}$.
+\\
+
+{\color{web-blue} In a.u. the unit of the piezomagnetic tensor is
+$\bar h={\bar I \over \bar l}$ and since 
+${\bar U \over \mu_0 \bar l^2 \bar H \bar I}={1\over \alpha^2}$ we can write:
+\begin{equation}
+h_{\alpha,\beta,\gamma}=-{1\over \alpha^2 V} 
+{\partial^2 \mathcal{F} \over \partial 
+\epsilon_{\alpha,\beta} \partial {\bf H}_{\gamma}}=
+{\partial {\bf M}_{\gamma} \over \partial 
+\epsilon_{\alpha,\beta}}=-{1\over \alpha^2} 
+{\partial \sigma_{\alpha,\beta} \over \partial {\bf H}_{\gamma}}.
+\end{equation}
+It has the same unit of the magnetization.
+}
+\\
+
+{\color{orange} In c.g.s.-Gaussian units the unit of the piezomagnetic 
+tensor depends on the equation used for its definition.
+Requiring that
+\begin{equation}
+h_{\alpha,\beta,\gamma}={\partial {\bf M}_{\gamma} \over \partial 
+\epsilon_{\alpha,\beta}},
+\end{equation}
+we obtain
+$\bar h_{cgs}=\bar M_{cgs}$ and since 
+${\bar U_{cgs} \over \mu_0 \bar l_{cgs}^3 \bar H_{cgs} \bar M_{cgs}}=
+1$ we can write:
+\begin{equation}
+h_{\alpha,\beta,\gamma}=-{1\over V} 
+{\partial^2 \mathcal{F} \over \partial 
+\epsilon_{\alpha,\beta} \partial {\bf H}_{\gamma}}=
+{\partial {\bf M}_{\gamma} \over \partial 
+\epsilon_{\alpha,\beta}}=-
+{\partial \sigma_{\alpha,\beta} \over \partial {\bf H}_{\gamma}}.
+\end{equation}
+It has the same unit of the magnetization.
+}
+\\
+
+\newpage
+\section{\color{coral}Magnetoelectric tensor}
+The frozen-ions magneto-electric tensor is defined as
+\begin{equation}
+\alpha_{\alpha,\beta}=-{1\over V} {\partial^2 \mathcal{F} \over \partial 
+{\bf E}_{\alpha} \partial {\bf H}_{\beta}}=
+\mu_0 {\partial {\bf M}_{\beta} \over \partial {\bf E}_{\alpha}}
+={\partial {\bf P}_{\alpha} \over \partial {\bf H}_{\beta}}. 
+\end{equation}
+Its unit is ${J \cdot C \cdot m \over m^3 \cdot N \cdot A}={s \over m}=
+{V \cdot s \over V\cdot m}= {Wb \over V\cdot m} = {T \cdot m \over V}$.
+\\
+
+{\color{web-blue} 
+
+In a.u. we can choose to define the magneto-electric tensor as (convention I):
+\begin{equation}
+\alpha_{\alpha,\beta}=-{4 \pi\over V} {\partial^2 \mathcal{F} \over \partial 
+{\bf E}_{\alpha} \partial {\bf H}_{\beta}}= 4 \pi \alpha^2 {\partial {\bf M}_{\beta} \over \partial {\bf E}_{\alpha}}= 4 \pi
+{\partial {\bf P}_{\alpha} \over \partial {\bf H}_{\beta}}, 
+\end{equation}
+then we have: $\bar \alpha=
+{\bar U \over 4 \pi \bar l^3 \bar E \bar H}={\mu_0 \bar M \over 4 \pi \bar E}$.
+Since
+${\bar U \over \bar l^3 \bar E \bar H}=4 \pi {\bar t \over \bar l }$, 
+the conversion factor with the SI unit is:
+\begin{equation}
+\bar \alpha = {\bar t \over \bar l} = {1\over \bar v}=\baralpha\ {s \over m}.
+\end{equation}
+\\
+Alternatively we can define $\bar \alpha'=4 \pi \alpha^2 {\bar t \over \bar l}$ 
+(convention II) and we have:
+\begin{equation}
+\alpha'_{\alpha,\beta}=-{1 \over \alpha^2 V} 
+{\partial^2 \mathcal{F} \over \partial {\bf E}_{\alpha} 
+\partial {\bf H}_{\beta}}= {\partial {\bf M}_{\beta} \over 
+\partial {\bf E}_{\alpha}}= {1\over \alpha^2}
+{\partial {\bf P}_{\alpha} \over \partial {\bf H}_{\beta}}. 
+\end{equation}
+The conversion factor to the SI unit is: 
+\begin{equation}
+\bar \alpha'= 4 \pi \alpha^2 \bar \alpha = {4 \pi \alpha^2\over \bar v}
+=\baralphap\ {s \over m}.
+\end{equation}
+}
+\\
+
+{\color{orange} 
+In c.g.s.-Gaussian unit we can choose to define the magneto-electric 
+tensor as (convention I): 
+\begin{equation}
+\alpha_{\alpha,\beta}=-{4 \pi\over V} {\partial^2 \mathcal{F} \over \partial 
+{\bf E}_{\alpha} \partial {\bf H}_{\beta}}= 4 \pi {\partial {\bf M}_{\beta} 
+\over \partial {\bf E}_{\alpha}}= 4 \pi
+{\partial {\bf P}_{\alpha} \over \partial {\bf H}_{\beta}},
+\end{equation}
+then we have: $\bar \alpha_{cgs}=
+{\bar U_{cgs} \over 4 \pi \bar l_{cgs}^3 \bar E_{cgs} 
+\bar H_{cgs}}={\mu_0 \bar M_{cgs} \over 4 \pi \bar E_{cgs}}$ 
+and since ${\bar U_{cgs} \over \bar l_{cgs}^3 \bar E_{cgs} 
+\bar H_{cgs}} ={4 \pi \over c}$ we have:
+\begin{equation}
+\bar \alpha_{cgs}={1 \over c} = \alphatoalpha\ {s \over m}.
+\end{equation}
+\\
+Alternatively we can define (convention II):
+\begin{equation}
+\alpha'_{\alpha,\beta}=-{1\over V} {\partial^2 \mathcal{F} \over \partial 
+{\bf E}_{\alpha} \partial {\bf H}_{\beta}}={\partial {\bf M}_{\beta} \over \partial 
+{\bf E}_{\alpha}}={\partial {\bf P}_{\alpha} \over \partial 
+{\bf H}_{\beta}}. 
+\end{equation}
+The conversion factor to the SI unit in this case is 
+$\bar \alpha'_{cgs}={\bar U_{cgs} \over \bar l_{cgs}^3 \bar E_{cgs} 
+\bar H_{cgs}}={\mu_0 \bar M_{cgs} \over \bar E_{cgs}}$ or:
+\begin{equation}
+\bar \alpha'_{cgs}={4 \pi \over c}=\alphaptoalphap\ {s\over m}.
+\end{equation}
+}
+
+\newpage
+\section{\color{coral}Equations of motion}
+The first derivatives of the free-energy give the following equations:
+\begin{eqnarray}
+{\bf f}_{I,\alpha}&=&{\bf f}^{(0)}_{I,\alpha}
+-\sum_{J,\beta} C_{I,\alpha,J,\beta} {\bf u}_{J,\beta}
++\sum_{\gamma,\delta}
+\Gamma_{I,\alpha,\gamma,\delta} 
+\epsilon_{\gamma,\delta} +
+e \sum_{\gamma} Z^*_{I,\alpha,\gamma} {\bf E}_{\gamma}
++\mu_0 \sum_{\gamma} 
+Z^m_{I,\alpha,\gamma} {\bf H}_{\gamma}, \\
+\sigma_{\lambda,\mu}&=& \sigma_{\lambda,\mu}^{(0)}
+-{1\over V} \sum_{I,\alpha}
+\Gamma_{I,\alpha,\lambda,\mu} {\bf u}_{I,\alpha}
++\sum_{\gamma,\delta} C_{\lambda,\mu,\gamma,\delta}  
+\epsilon_{\gamma,\delta} -
+\sum_{\gamma} e_{\lambda,\mu,\gamma} 
+ {\bf E}_{\gamma}
+-\mu_0 \sum_{\gamma}  h_{\lambda,\mu,\gamma} 
+{\bf H}_{\gamma}, \\
+{\bf P}_{\lambda}&=& {\bf P}^{(0)}_{\lambda}
++{e\over V} \sum_{I,\alpha} Z^*_{I,\alpha,\lambda} 
+{\bf u}_{I,\alpha} +
+\sum_{\gamma,\delta} e_{\gamma,\delta,\lambda} 
+\epsilon_{\gamma,\delta} +
+\epsilon_0 \sum_{\gamma} 
+\chi^e_{\lambda,\gamma}
+{\bf E}_{\gamma} +
+\sum_{\gamma} \alpha_{\lambda,\gamma} 
+{\bf H}_{\gamma}, \\
+{\bf M}_{\lambda}&=& {\bf M}^{(0)}_{\lambda}
++{1\over V}\sum_{I,\alpha} 
+Z^m_{I,\alpha,\lambda} {\bf u}_{I,\alpha} +
+\sum_{\gamma,\delta}  h_{\gamma,\delta,\lambda} 
+\epsilon_{\gamma,\delta} 
++{1\over \mu_0} \sum_{\gamma} \alpha_{\gamma,\lambda} {\bf E}_{\gamma}
++\sum_{\gamma} 
+\chi^m_{\lambda,\gamma}
+{\bf H}_{\gamma}.
+\end{eqnarray}
+It is quite common to derive ${\bf u}_{I,\alpha}$ from the first equation
+by requiring that the forces acting on atoms vanish.
+We have:
+\begin{equation}
+{\bf u}_{I,\alpha}=\sum_{J,\beta} C^{-1}_{I,\alpha,J,\beta}
+{\bf f}^{(0)}_{J,\beta} + \sum_{J,\beta,\gamma,\delta} 
+C^{-1}_{I,\alpha,J,\beta}
+\Gamma_{J,\beta,\gamma,\delta} \epsilon_{\gamma,\delta}
++ e \sum_{J,\beta,\gamma} C^{-1}_{I,\alpha,J,\beta}
+Z^*_{J,\beta,\gamma} {\bf E}_{\gamma} 
++ \mu_0 \sum_{J,\beta,\gamma} C^{-1}_{I,\alpha,J,\beta} Z^m_{J,\beta,\gamma} 
+{\bf H}_{\gamma},
+\end{equation}
+and inserting this expression in the other equations we can write:
+\begin{eqnarray}
+\sigma_{\lambda,\mu}&=& \tilde \sigma_{\lambda,\mu}^{(0)}
++\sum_{\gamma,\delta} \tilde C_{\lambda,\mu,\gamma,\delta}  
+\epsilon_{\gamma,\delta} -
+\sum_{\gamma} \tilde e_{\lambda,\mu,\gamma} 
+ {\bf E}_{\gamma}
+-\mu_0 \sum_{\gamma}  \tilde h_{\lambda,\mu,\gamma} 
+{\bf H}_{\gamma}, \\
+{\bf P}_{\lambda}&=& \tilde {\bf P}^{(0)}_{\lambda}
++\sum_{\gamma,\delta} \tilde e_{\gamma,\delta,\lambda} 
+\epsilon_{\gamma,\delta} +
+\epsilon_0 \sum_{\gamma} 
+\tilde \chi^e_{\lambda,\gamma}
+{\bf E}_{\gamma} +
+\sum_{\gamma} \tilde \alpha_{\lambda,\gamma} 
+{\bf H}_{\gamma}, \\
+{\bf M}_{\lambda}&=& \tilde {\bf M}^{(0)}_{\lambda}
++\sum_{\gamma,\delta}  \tilde h_{\gamma,\delta,\lambda} 
+\epsilon_{\gamma,\delta} 
++{1\over \mu_0} \sum_{\gamma} \tilde \alpha_{\gamma,\lambda} {\bf E}_{\gamma}
++\sum_{\gamma} 
+\tilde \chi^m_{\lambda,\gamma}
+{\bf H}_{\gamma},
+\end{eqnarray}
+where 
+\begin{eqnarray}
+\tilde \sigma^{(0)}_{\lambda,\mu}&=&\sigma^{(0)}_{\lambda,\mu}
+-{1\over V} \sum_{I,\alpha,J,\beta} \Gamma_{I,\alpha,\lambda,\mu}
+C^{-1}_{I,\alpha,J,\beta} {\bf f}^{(0)}_{J,\beta}, \\
+\tilde {\bf P}^{(0)}_\lambda&=& {\bf P}^{(0)}_\lambda +{e\over V}
+\sum_{I,\alpha,J,\beta} Z^*_{I,\alpha,\lambda} C^{-1}_{I,\alpha,J,\beta}
+{\bf f}^{(0)}_{J,\beta}, \\
+\tilde {\bf M}^{(0)}_\lambda&=& {\bf M}^{(0)}_\lambda +{1\over V}
+\sum_{I,\alpha,J,\beta} Z^m_{I,\alpha,\lambda} C^{-1}_{I,\alpha,J,\beta}
+{\bf f}^{(0)}_{J,\beta},
+\end{eqnarray}
+are the stress, polarization, and magnetization at the equilibrium position,
+while
+\begin{eqnarray}
+\tilde C_{\lambda,\mu,\gamma,\delta}&=&C_{\lambda,\mu,\gamma,\delta}
+-{1\over V}\sum_{I,\alpha,J,\beta} \Gamma_{I,\alpha,\lambda,\mu}
+C^{-1}_{I,\alpha,J,\beta}  \Gamma_{J,\beta,\gamma,\delta},\\
+\tilde \chi^e_{\lambda,\gamma}&=&\chi^e_{\lambda,\gamma} 
++{e^2 \over \epsilon_0 V} \sum_{I,\alpha,J,\beta} Z^*_{I,\alpha,\lambda}
+C^{-1}_{I,\alpha,J,\beta}  Z^*_{J,\beta,\gamma},\\
+\tilde \chi^m_{\lambda,\gamma}&=&\chi^m_{\lambda,\gamma} 
++{\mu_0 \over V} \sum_{I,\alpha,J,\beta} Z^m_{I,\alpha,\lambda}
+C^{-1}_{I,\alpha,J,\beta}  Z^m_{J,\beta,\gamma}, \\
+\tilde e_{\lambda,\mu,\gamma}&=&e_{\lambda,\mu,\gamma}
++{e\over V}\sum_{I,\alpha,J,\beta} \Gamma_{I,\alpha,\lambda,\mu}
+C^{-1}_{I,\alpha,J,\beta} Z^*_{J,\beta,\gamma}
+,\\
+\tilde h_{\lambda,\mu,\gamma}&=&h_{\lambda,\mu,\gamma}
++{1\over V}\sum_{I,\alpha,J,\beta} \Gamma_{I,\alpha,\lambda,\mu}
+C^{-1}_{I,\alpha,J,\beta} Z^m_{J,\beta,\gamma},\\
+\tilde \alpha_{\lambda,\gamma}&=&\alpha_{\lambda,\gamma}
++{\mu_0 e \over V}\sum_{I,\alpha,J,\beta} Z^*_{I,\alpha,\lambda}
+C^{-1}_{I,\alpha,J,\beta}  Z^m_{J,\beta,\gamma}
+\end{eqnarray}
+are the macroscopic tensors.
+\\
+
+{\color{web-blue}
+The first derivatives of the free-energy give the following equations:
+\begin{eqnarray}
+{\bf f}_{I,\alpha}&=&{\bf f}^{(0)}_{I,\alpha}
+-\sum_{J,\beta} C_{I,\alpha,J,\beta} {\bf u}_{J,\beta}
++\sum_{\gamma,\delta}
+\Gamma_{I,\alpha,\gamma,\delta} 
+\epsilon_{\gamma,\delta} +
+\sum_{\gamma} Z^*_{I,\alpha,\gamma} {\bf E}_{\gamma}
++\alpha^2 \sum_{\gamma} 
+Z^m_{I,\alpha,\gamma} {\bf H}_{\gamma}, \\
+\sigma_{\lambda,\mu}&=& \sigma_{\lambda,\mu}^{(0)}
+-{1\over V} \sum_{I,\alpha}
+\Gamma_{I,\alpha,\lambda,\mu} {\bf u}_{I,\alpha}
++\sum_{\gamma,\delta} C_{\lambda,\mu,\gamma,\delta}  
+\epsilon_{\gamma,\delta} -
+\sum_{\gamma} e_{\lambda,\mu,\gamma} 
+ {\bf E}_{\gamma}
+-\alpha^2 \sum_{\gamma}  h_{\lambda,\mu,\gamma} 
+{\bf H}_{\gamma}, \\
+{\bf P}_{\lambda}&=& {\bf P}^{(0)}_{\lambda}
++{1\over V} \sum_{I,\alpha} Z^*_{I,\alpha,\lambda} 
+{\bf u}_{I,\alpha} +
+\sum_{\gamma,\delta} e_{\gamma,\delta,\lambda} 
+\epsilon_{\gamma,\delta} +
+\sum_{\gamma} 
+\chi^e_{\lambda,\gamma}
+{\bf E}_{\gamma} +
+{1\over 4 \pi}\sum_{\gamma} \alpha_{\lambda,\gamma} 
+{\bf H}_{\gamma}, \\
+{\bf M}_{\lambda}&=& {\bf M}^{(0)}_{\lambda}
++{1\over V}\sum_{I,\alpha} 
+Z^m_{I,\alpha,\lambda} {\bf u}_{I,\alpha} +
+\sum_{\gamma,\delta}  h_{\gamma,\delta,\lambda} 
+\epsilon_{\gamma,\delta} 
++{1\over 4 \pi \alpha^2} \sum_{\gamma} \alpha_{\gamma,\lambda} {\bf E}_{\gamma}
++\sum_{\gamma} 
+\chi^m_{\lambda,\gamma}
+{\bf H}_{\gamma}.
+\end{eqnarray}
+It is quite common to derive ${\bf u}_{I,\alpha}$ from the first equation
+by requiring that the forces acting on atoms vanish.
+We have:
+\begin{equation}
+{\bf u}_{I,\alpha}=\sum_{J,\beta} C^{-1}_{I,\alpha,J,\beta}
+{\bf f}^{(0)}_{J,\beta} + \sum_{J,\beta,\gamma,\delta} 
+C^{-1}_{I,\alpha,J,\beta}
+\Gamma_{J,\beta,\gamma,\delta} \epsilon_{\gamma,\delta}
++ \sum_{J,\beta,\gamma} C^{-1}_{I,\alpha,J,\beta}
+Z^*_{J,\beta,\gamma} {\bf E}_{\gamma} 
++ \alpha^2 \sum_{J,\beta,\gamma} C^{-1}_{I,\alpha,J,\beta} 
+Z^m_{J,\beta,\gamma} 
+{\bf H}_{\gamma},
+\end{equation}
+and inserting this expression in the other equations we can write:
+\begin{eqnarray}
+\sigma_{\lambda,\mu}&=& \tilde \sigma_{\lambda,\mu}^{(0)}
++\sum_{\gamma,\delta} \tilde C_{\lambda,\mu,\gamma,\delta}  
+\epsilon_{\gamma,\delta} -
+\sum_{\gamma} \tilde e_{\lambda,\mu,\gamma} 
+ {\bf E}_{\gamma}
+-\alpha^2 \sum_{\gamma}  \tilde h_{\lambda,\mu,\gamma} 
+{\bf H}_{\gamma}, \\
+{\bf P}_{\lambda}&=& \tilde {\bf P}^{(0)}_{\lambda}
++\sum_{\gamma,\delta} \tilde e_{\gamma,\delta,\lambda} 
+\epsilon_{\gamma,\delta} +
+\sum_{\gamma} 
+\tilde \chi^e_{\lambda,\gamma}
+{\bf E}_{\gamma} +
+{1\over 4 \pi}\sum_{\gamma} \tilde \alpha_{\lambda,\gamma} 
+{\bf H}_{\gamma}, \\
+{\bf M}_{\lambda}&=& \tilde {\bf M}^{(0)}_{\lambda}
++\sum_{\gamma,\delta}  \tilde h_{\gamma,\delta,\lambda} 
+\epsilon_{\gamma,\delta} 
++{1\over 4 \pi \alpha^2} \sum_{\gamma} \tilde \alpha_{\gamma,\lambda} 
+{\bf E}_{\gamma}
++\sum_{\gamma} 
+\tilde \chi^m_{\lambda,\gamma}
+{\bf H}_{\gamma},
+\end{eqnarray}
+where 
+\begin{eqnarray}
+\tilde \sigma^{(0)}_{\lambda,\mu}&=&\sigma^{(0)}_{\lambda,\mu}
+-{1\over V} \sum_{I,\alpha,J,\beta} \Gamma_{I,\alpha,\lambda,\mu}
+C^{-1}_{I,\alpha,J,\beta} {\bf f}^{(0)}_{J,\beta}, \\
+\tilde {\bf P}^{(0)}_\lambda&=& {\bf P}^{(0)}_\lambda +{1\over V}
+\sum_{I,\alpha,J,\beta} Z^*_{I,\alpha,\lambda} C^{-1}_{I,\alpha,J,\beta}
+{\bf f}^{(0)}_{J,\beta}, \\
+\tilde {\bf M}^{(0)}_\lambda&=& {\bf M}^{(0)}_\lambda +{1\over V}
+\sum_{I,\alpha,J,\beta} Z^m_{I,\alpha,\lambda} C^{-1}_{I,\alpha,J,\beta}
+{\bf f}^{(0)}_{J,\beta},
+\end{eqnarray}
+are the stress, polarization, and magnetization at the equilibrium position,
+while
+\begin{eqnarray}
+\tilde C_{\lambda,\mu,\gamma,\delta}&=&C_{\lambda,\mu,\gamma,\delta}
+-{1\over V}\sum_{I,\alpha,J,\beta} \Gamma_{I,\alpha,\lambda,\mu}
+C^{-1}_{I,\alpha,J,\beta}  \Gamma_{J,\beta,\gamma,\delta},\\
+\tilde \chi^e_{\lambda,\gamma}&=&\chi^e_{\lambda,\gamma} 
++{1 \over V} \sum_{I,\alpha,J,\beta} Z^*_{I,\alpha,\lambda}
+C^{-1}_{I,\alpha,J,\beta}  Z^*_{J,\beta,\gamma},\\
+\tilde \chi^m_{\lambda,\gamma}&=&\chi^m_{\lambda,\gamma} 
++{\alpha^2 \over V} \sum_{I,\alpha,J,\beta} Z^m_{I,\alpha,\lambda}
+C^{-1}_{I,\alpha,J,\beta}  Z^m_{J,\beta,\gamma}, \\
+\tilde e_{\lambda,\mu,\gamma}&=&e_{\lambda,\mu,\gamma}
++{1\over V}\sum_{I,\alpha,J,\beta} \Gamma_{I,\alpha,\lambda,\mu}
+C^{-1}_{I,\alpha,J,\beta} Z^*_{J,\beta,\gamma},\\
+\tilde h_{\lambda,\mu,\gamma}&=&h_{\lambda,\mu,\gamma}
++{1\over V}\sum_{I,\alpha,J,\beta} \Gamma_{I,\alpha,\lambda,\mu}
+C^{-1}_{I,\alpha,J,\beta}  Z^m_{J,\beta,\gamma},\\
+\tilde \alpha_{\lambda,\gamma}&=&\alpha_{\lambda,\gamma}
++{4 \pi \alpha^2 \over V}\sum_{I,\alpha,J,\beta} Z^*_{I,\alpha,\lambda}
+C^{-1}_{I,\alpha,J,\beta}  Z^m_{J,\beta,\gamma}
+\end{eqnarray}
+are the macroscopic tensors.
+}
+\\
+
+{\color{orange}
+The first derivatives of the free-energy give the following equations:
+\begin{eqnarray}
+{\bf f}_{I,\alpha}&=&{\bf f}^{(0)}_{I,\alpha}
+-\sum_{J,\beta} C_{I,\alpha,J,\beta} {\bf u}_{J,\beta}
++\sum_{\gamma,\delta}
+\Gamma_{I,\alpha,\gamma,\delta} 
+\epsilon_{\gamma,\delta} +
+e \sum_{\gamma} Z^*_{I,\alpha,\gamma} {\bf E}_{\gamma}
++\sum_{\gamma} 
+Z^m_{I,\alpha,\gamma} {\bf H}_{\gamma}, \\
+\sigma_{\lambda,\mu}&=& \sigma_{\lambda,\mu}^{(0)}
+-{1\over V} \sum_{I,\alpha}
+\Gamma_{I,\alpha,\lambda,\mu} {\bf u}_{I,\alpha}
++\sum_{\gamma,\delta} C_{\lambda,\mu,\gamma,\delta}  
+\epsilon_{\gamma,\delta} -
+\sum_{\gamma} e_{\lambda,\mu,\gamma} 
+ {\bf E}_{\gamma}
+-\sum_{\gamma}  h_{\lambda,\mu,\gamma} 
+{\bf H}_{\gamma}, \\
+{\bf P}_{\lambda}&=& {\bf P}^{(0)}_{\lambda}
++{e\over V} \sum_{I,\alpha} Z^*_{I,\alpha,\lambda} 
+{\bf u}_{I,\alpha} +
+\sum_{\gamma,\delta} e_{\gamma,\delta,\lambda} 
+\epsilon_{\gamma,\delta} +
+\sum_{\gamma} 
+\chi^e_{\lambda,\gamma}
+{\bf E}_{\gamma} +
+{1\over 4 \pi} \sum_{\gamma} \alpha_{\lambda,\gamma} 
+{\bf H}_{\gamma}, \\
+{\bf M}_{\lambda}&=& {\bf M}^{(0)}_{\lambda}
++{1\over V}\sum_{I,\alpha} 
+Z^m_{I,\alpha,\lambda} {\bf u}_{I,\alpha} +
+\sum_{\gamma,\delta}  h_{\gamma,\delta,\lambda} 
+\epsilon_{\gamma,\delta} 
++{1\over 4 \pi} \sum_{\gamma} \alpha_{\gamma,\lambda} {\bf E}_{\gamma}
++\sum_{\gamma} 
+\chi^m_{\lambda,\gamma}
+{\bf H}_{\gamma}.
+\end{eqnarray}
+It is quite common to derive ${\bf u}_{I,\alpha}$ from the first equation
+by requiring that the forces acting on atoms vanish.
+We have:
+\begin{equation}
+{\bf u}_{I,\alpha}=\sum_{J,\beta} C^{-1}_{I,\alpha,J,\beta}
+{\bf f}^{(0)}_{J,\beta} + \sum_{J,\beta,\gamma,\delta} 
+C^{-1}_{I,\alpha,J,\beta}
+\Gamma_{J,\beta,\gamma,\delta} \epsilon_{\gamma,\delta}
++ e \sum_{J,\beta,\gamma} C^{-1}_{I,\alpha,J,\beta}
+Z^*_{J,\beta,\gamma} {\bf E}_{\gamma} 
++ \sum_{J,\beta,\gamma} C^{-1}_{I,\alpha,J,\beta} Z^m_{J,\beta,\gamma} 
+{\bf H}_{\gamma},
+\end{equation}
+and inserting this expression in the other equations we can write:
+\begin{eqnarray}
+\sigma_{\lambda,\mu}&=& \tilde \sigma_{\lambda,\mu}^{(0)}
++\sum_{\gamma,\delta} \tilde C_{\lambda,\mu,\gamma,\delta}  
+\epsilon_{\gamma,\delta} -
+\sum_{\gamma} \tilde e_{\lambda,\mu,\gamma} 
+ {\bf E}_{\gamma}
+-\sum_{\gamma}  \tilde h_{\lambda,\mu,\gamma} 
+{\bf H}_{\gamma}, \\
+{\bf P}_{\lambda}&=& \tilde {\bf P}^{(0)}_{\lambda}
++\sum_{\gamma,\delta} \tilde e_{\gamma,\delta,\lambda} 
+\epsilon_{\gamma,\delta} +
+\sum_{\gamma} 
+\tilde \chi^e_{\lambda,\gamma}
+{\bf E}_{\gamma} +
+{1\over 4 \pi}\sum_{\gamma} \tilde \alpha_{\lambda,\gamma} 
+{\bf H}_{\gamma}, \\
+{\bf M}_{\lambda}&=& \tilde {\bf M}^{(0)}_{\lambda}
++\sum_{\gamma,\delta}  \tilde h_{\gamma,\delta,\lambda} 
+\epsilon_{\gamma,\delta} 
++{1\over 4 \pi} \sum_{\gamma} \tilde \alpha_{\gamma,\lambda} {\bf E}_{\gamma}
++\sum_{\gamma} 
+\tilde \chi^m_{\lambda,\gamma}
+{\bf H}_{\gamma},
+\end{eqnarray}
+where 
+\begin{eqnarray}
+\tilde \sigma^{(0)}_{\lambda,\mu}&=&\sigma^{(0)}_{\lambda,\mu}
+-{1\over V} \sum_{I,\alpha,J,\beta} \Gamma_{I,\alpha,\lambda,\mu}
+C^{-1}_{I,\alpha,J,\beta} {\bf f}^{(0)}_{J,\beta}, \\
+\tilde {\bf P}^{(0)}_\lambda&=& {\bf P}^{(0)}_\lambda +{e\over V}
+\sum_{I,\alpha,J,\beta} Z^*_{I,\alpha,\lambda} C^{-1}_{I,\alpha,J,\beta}
+{\bf f}^{(0)}_{J,\beta}, \\
+\tilde {\bf M}^{(0)}_\lambda&=& {\bf M}^{(0)}_\lambda +{1\over V}
+\sum_{I,\alpha,J,\beta} Z^m_{I,\alpha,\lambda} C^{-1}_{I,\alpha,J,\beta}
+{\bf f}^{(0)}_{J,\beta},
+\end{eqnarray}
+are the stress, polarization, and magnetization at the equilibrium position,
+while
+\begin{eqnarray}
+\tilde C_{\lambda,\mu,\gamma,\delta}&=&C_{\lambda,\mu,\gamma,\delta}
+-{1\over V}\sum_{I,\alpha,J,\beta} \Gamma_{I,\alpha,\lambda,\mu}
+C^{-1}_{I,\alpha,J,\beta}  \Gamma_{J,\beta,\gamma,\delta},\\
+\tilde \chi^e_{\lambda,\gamma}&=&\chi^e_{\lambda,\gamma} 
++{e^2 \over V} \sum_{I,\alpha,J,\beta} Z^*_{I,\alpha,\lambda}
+C^{-1}_{I,\alpha,J,\beta}  Z^*_{J,\beta,\gamma},\\
+\tilde \chi^m_{\lambda,\gamma}&=&\chi^m_{\lambda,\gamma} 
++{1 \over V} \sum_{I,\alpha,J,\beta} Z^m_{I,\alpha,\lambda}
+C^{-1}_{I,\alpha,J,\beta}  Z^m_{J,\beta,\gamma}, \\
+\tilde e_{\lambda,\mu,\gamma}&=&e_{\lambda,\mu,\gamma}
++{e\over V}\sum_{I,\alpha,J,\beta} 
+\Gamma_{I,\alpha,\lambda,\mu} C^{-1}_{I,\alpha,J,\beta} 
+Z^*_{J,\beta,\gamma},\\
+\tilde h_{\lambda,\mu,\gamma}&=&h_{\lambda,\mu,\gamma}
++{1\over V}\sum_{I,\alpha,J,\beta} \Gamma_{I,\alpha,\lambda,\mu}
+C^{-1}_{I,\alpha,J,\beta} Z^m_{J,\beta,\gamma},\\
+\tilde \alpha_{\lambda,\gamma}&=&\alpha_{\lambda,\gamma}
++{4 \pi e \over V}\sum_{I,\alpha,J,\beta} Z^*_{I,\alpha,\lambda}
+C^{-1}_{I,\alpha,J,\beta}  Z^m_{J,\beta,\gamma}
+\end{eqnarray}
+are the macroscopic tensors.
+}
+\\
+\newpage
+
+\section{\color{coral}Thermodynamics}
+The two principles of thermodynamics can be summarized by the equation:
+\begin{equation}
+dU = -dW + T dS,
+\end{equation}
+that gives the change of the internal energy of the system $dU$ when
+it does a work $dW$ and we give reversibly the heat $T dS$, where $T$ 
+is the temperature and $dS$ is the change of entropy.
+We can consider the work done by the system when the strain
+$\epsilon_{\alpha,\beta}$ change:
+\begin{equation}
+dW_1 =-V \sum_{\alpha,\beta} \sigma_{\alpha,\beta} d \epsilon_{\alpha,\beta}. 
+\end{equation}
+The work done by an insulating solid when the electric field is 
+${\bf E}_\alpha$, the magnetic field intensity is ${\bf H}_\alpha$, 
+and $d {\bf D}_\alpha$ are the electric displacement changes and 
+$d {\bf B}_\alpha$ are the magnetic flux density changes, can be derived
+from the Maxwell equations as: 
+\begin{equation}
+dW_2 = -V \sum_\alpha {\bf E}_\alpha d {\bf D}_\alpha 
+-V \sum_{\alpha,\beta} {\bf H}_{\alpha} d {\bf B}_\alpha.
+\end{equation}
+The minus sign comes from the fact that we are writing the work done by the
+solid. The change of internal energy is:
+\begin{equation}
+dU = V \sum_{\alpha,\beta} \sigma_{\alpha,\beta} d \epsilon_{\alpha,\beta}
++ V \sum_\alpha {\bf E}_\alpha d {\bf D}_\alpha + 
+V \sum_{\alpha,\beta} {\bf H}_{\alpha} d {\bf B}_\alpha + T dS,
+\end{equation}
+It is convenient to take the temperature $T$,
+the electric field ${\bf E}_\alpha$ and the magnetic field intensity
+${\bf H}_\alpha$ as independent variables.
+This can be done by introducing the generalized Helmholtz free energy 
+by writing
+$F=U- V \sum_{\alpha} {\bf E}_\alpha {\bf D}_\alpha -
+V \sum_{\alpha} {\bf H}_\alpha {\bf B}_\alpha - TS $, we have then
+\begin{equation}
+dF = V \sum_{\alpha,\beta} \sigma_{\alpha,\beta} d \epsilon_{\alpha,\beta}
+- V \sum_\alpha {\bf D}_\alpha d {\bf E}_\alpha - 
+V \sum_{\alpha,\beta} {\bf B}_{\alpha} d {\bf H}_\alpha - S dT.
+\end{equation}
+From the previous equations we obtain:
+\begin{eqnarray}
+S&=&-{\partial F \over \partial T}, \\
+\sigma_{\alpha,\beta}&=&{1\over V}
+{\partial F \over \partial \epsilon_{\alpha,\beta}}, \\
+{\bf D}_{\alpha}&=&-{1\over V}
+{\partial F \over \partial {\bf E}_{\alpha}}, \\
+{\bf B}_{\alpha}&=&-{1\over V}
+{\partial F \over \partial {\bf H}_{\alpha}}.
+\end{eqnarray}
+Assuming that these quantities are functions of the independent variables
+$T$, $\epsilon_{\alpha,\beta}$, ${\bf E}_\alpha$, and ${\bf H}_\alpha$ we
+obtain the temperature dependent macroscopic equations:
+\begin{eqnarray}
+dS&=&{\partial S \over \partial T} dT+\sum_{\alpha,\beta}
+{\partial S \over \partial \epsilon_{\alpha,\beta}}d\epsilon_{\alpha,\beta}
++\sum_\gamma{\partial S \over \partial {\bf E}_{\gamma}}d{\bf E}_{\gamma}+ 
+\sum_\delta{\partial S \over \partial {\bf H}_{\delta}}d{\bf H}_{\delta}, \\
+d\sigma_{\alpha,\beta}&=&
+{\partial \sigma_{\alpha,\beta} \over \partial T} dT+\sum_{\gamma,\delta}
+{\partial \sigma_{\alpha,\beta} \over \partial 
+\epsilon_{\gamma,\delta}}d\epsilon_{\gamma,\delta}
++\sum_\gamma{\partial \sigma_{\alpha,\beta} \over \partial 
+{\bf E}_{\gamma}}d{\bf E}_{\gamma}+ 
+\sum_\delta{\partial \sigma_{\alpha,\beta} \over \partial 
+{\bf H}_{\delta}}d{\bf H}_{\delta}, \\
+d{\bf D}_\gamma&=&
+{\partial  {\bf D}_\gamma \over \partial T} dT+\sum_{\alpha,\beta}
+{\partial {\bf D}_\gamma \over \partial \epsilon_{\alpha,\beta}}
+d\epsilon_{\alpha,\beta}
++\sum_\alpha{\partial {\bf D}_\gamma \over \partial {\bf E}_{\alpha}}d{\bf E}_{\alpha}+ 
+\sum_\delta{\partial {\bf D}_\gamma \over \partial {\bf H}_{\delta}}d{\bf H}_{\delta}, \\
+d{\bf B}_\delta&=&
+{\partial {\bf B}_\delta \over \partial T} dT+\sum_{\alpha,\beta}
+{\partial {\bf B}_\delta \over \partial \epsilon_{\alpha,\beta}}
+d\epsilon_{\alpha,\beta}
++\sum_\gamma{\partial {\bf B}_\delta \over \partial {\bf E}_{\gamma}}
+d{\bf E}_{\gamma}+ 
+\sum_\alpha{\partial {\bf B}_\delta \over \partial {\bf H}_{\alpha}}
+d{\bf H}_{\alpha}, 
+\end{eqnarray}
+These equations allow the definition of the isothermal material properties 
+at finite temperature. In addition to generalizing to finite temperatures
+the macroscopic quantities introduced so far, they provide other material 
+properties not yet analyzed:
+
+\subsection{Heat capacity at constant strain}
+The heat capacity at constant strain is defined as
+\begin{equation}
+C_\epsilon= - T {\partial^2 F \over \partial T^2} = 
+T {\partial S \over \partial T},
+\end{equation}
+and has the same unit as $S$: $J\over K$. Usually one considers the heat
+capacity of a mole of substance and gives $C_\epsilon$ in 
+${J\over K \cdot mol}$.
+
+\subsection{Thermal stresses}
+The thermal stress is defined as:
+\begin{equation}
+\tilde b_{\alpha,\beta} = 
+-{1\over V} {\partial^2 F \over \partial T
+\partial \epsilon_{\alpha,\beta}}=
+-{\partial \sigma_{\alpha,\beta} \over \partial T}=
+{1\over V} {\partial S \over \partial {\bf \epsilon}_{\alpha,\beta}},
+\end{equation}
+its unit is ${N \over m^2 \cdot K}$.
+
+\subsection{Pyroelectric and electro-caloric tensors}
+The pyroelectric and the electro-caloric tensors are defined as:
+\begin{equation}
+\tilde {\bf p}_\gamma =
+-{1\over V} {\partial^2 F \over \partial T
+\partial {\bf E}_\gamma}=
+{\partial {\bf D}_\gamma \over \partial T}=
+{1\over V} {\partial S \over \partial {\bf E}_{\gamma}},
+\end{equation}
+their unit is ${C \over m^2 \cdot K}$. Note that one has also
+${\partial {\bf D}_\gamma \over \partial T}=
+{\partial {\bf P}_\gamma \over \partial T}$. 
+
+\subsection{Pyromagnetic and magneto-caloric tensors}
+The pyromagnetic and the magneto-caloric tensors are defined as:
+\begin{equation}
+\tilde {\bf q}_\gamma = 
+-{1\over V} {\partial^2 F \over \partial T
+\partial {\bf H}_\gamma}=
+{\partial {\bf B}_\gamma \over \partial T}=
+{1\over V} {\partial S \over \partial {\bf H}_{\gamma}},
+\end{equation}
+their unit is ${T \over K}$. Note that one has also
+${\partial {\bf B}_\gamma \over \partial T}= \mu_0
+{\partial {\bf M}_\gamma \over \partial T}$.
+
+\subsection{Macroscopic equations at finite temperature}
+
+The other derivatives are just finite temperature generalizations of the
+previously discussed quantities. We can rewrite the macroscopic equations as:
+\begin{eqnarray}
+dS&=&{C_\epsilon\over T} dT+ V \sum_{\alpha,\beta} \tilde b_{\alpha,\beta} 
+d\epsilon_{\alpha,\beta}
++ V \sum_\gamma \tilde {\bf p}_\gamma d{\bf E}_{\gamma} +
+V \sum_\delta \tilde {\bf q}_\delta d{\bf H}_{\delta}, \\
+d\sigma_{\alpha,\beta}&=& -\tilde b_{\alpha,\beta} dT + 
+\sum_{\gamma,\delta} \tilde C^T_{\alpha,\beta,\gamma,\delta} 
+d \epsilon_{\gamma,\delta} - \sum_\gamma \tilde e^T_{\alpha,\beta,\gamma} 
+d{\bf E}_{\gamma} -\mu_0 
+\sum_\delta \tilde h^T_{\alpha,\beta,\delta} d{\bf H}_{\delta}, \\
+d{\bf D}_\gamma&=&
+\tilde {\bf p}_\gamma dT + \sum_{\alpha,\beta} \tilde 
+e^T_{\alpha,\beta,\gamma} d\epsilon_{\alpha,\beta}
++\epsilon_0 \sum_\alpha \tilde \epsilon^T_{r,\gamma,\alpha} 
+d{\bf E}_{\alpha} + 
+\sum_\delta \tilde \alpha^T_{\gamma,\delta} d{\bf H}_{\delta}, 
+\label{dsi} \\
+d{\bf B}_\delta&=&
+\tilde {\bf q}_\delta dT+\mu_0 \sum_{\alpha,\beta}
+\tilde h^T_{\alpha,\beta,\gamma}
+d\epsilon_{\alpha,\beta}
++\sum_\gamma \tilde \alpha^T_{\gamma,\delta}
+d{\bf E}_{\gamma}+ \mu_0
+\sum_\alpha \tilde \mu^{T}_{r,\delta,\alpha}
+d{\bf H}_{\alpha}, \label{bsi}
+\end{eqnarray}
+where the index $T$ indicates isothermal quantities and 
+the tilde $\tilde{ }$ indicates that the independent variables are
+$T$, $\epsilon_{\alpha,\beta}$, ${\bf E}_\alpha$, and ${\bf H}_\alpha$. 
+Moreover we used the fact
+that 
+${\partial {\bf D}_\gamma \over \partial T} =
+{\partial {\bf P}_\gamma \over \partial T}$,
+${\partial {\bf D}_\gamma \over \partial \epsilon_{\alpha,\beta}}=
+{\partial {\bf P}_\gamma \over \partial \epsilon_{\alpha,\beta}}$,
+${\partial {\bf D}_\gamma \over \partial {\bf E}_{\alpha}}= \epsilon_0 
+\delta_{\gamma,\alpha} +
+{\partial {\bf P}_\gamma \over \partial {\bf E}_{\alpha}}$, 
+${\partial {\bf D}_\gamma \over \partial {\bf H}_{\delta}}= 
+{\partial {\bf P}_\gamma \over \partial {\bf H}_{\delta}}$, 
+${\partial {\bf B}_\gamma \over \partial T} = \mu_0
+{\partial {\bf M}_\gamma \over \partial T}$,
+${\partial {\bf B}_\gamma \over \partial \epsilon_{\alpha,\beta}}= \mu_0
+{\partial {\bf M}_\gamma \over \partial \epsilon_{\alpha,\beta}}$,
+${\partial {\bf B}_\gamma \over \partial {\bf E}_{\alpha}}= \mu_0
+{\partial {\bf M}_\gamma \over \partial {\bf E}_{\alpha}}$, and
+${\partial {\bf B}_\gamma \over \partial {\bf H}_{\delta}}= \mu_0
+(\delta_{\gamma,\delta} +
+{\partial {\bf M}_\gamma \over \partial {\bf H}_{\delta}})$. 
+
+Using these Equations Eqs.~\ref{dsi} and \ref{bsi} can be written
+equivalently as:
+\begin{eqnarray}
+d{\bf P}_\gamma&=&
+\tilde {\bf p}_\gamma dT + \sum_{\alpha,\beta} \tilde 
+e^T_{\alpha,\beta,\gamma} d\epsilon_{\alpha,\beta}
++\epsilon_0 \sum_\alpha \tilde \chi^{e,T}_{\gamma,\alpha} 
+d{\bf E}_{\alpha} + 
+\sum_\delta \tilde \alpha^T_{\gamma,\delta} d{\bf H}_{\delta}, \\
+d{\bf M}_\delta&=&
+{1\over \mu_0}\tilde {\bf q}_\delta dT+ \sum_{\alpha,\beta}
+\tilde h^T_{\alpha,\beta,\gamma}
+d\epsilon_{\alpha,\beta}
++{1\over \mu_0}\sum_\gamma \tilde \alpha^T_{\gamma,\delta}
+d{\bf E}_{\gamma}+ 
+\sum_\alpha \tilde \chi^{m,T}_{\delta,\alpha}
+d{\bf H}_{\alpha}, 
+\end{eqnarray}
+
+
+\newpage
+{\color{web-blue}
+In a.u. the two principles of thermodynamics can be summarized by the equation:
+\begin{equation}
+dU = -dW + T dS,
+\end{equation}
+that gives the change of the internal energy of the system $dU$ when
+it does a work $dW$ and we give reversibly the heat $T dS$, where $T$ 
+is the temperature and $dS$ is the change of entropy.
+We can consider the work done by the system when the strain
+$\epsilon_{\alpha,\beta}$ change:
+\begin{equation}
+dW_1 =-V \sum_{\alpha,\beta} \sigma_{\alpha,\beta} d \epsilon_{\alpha,\beta}. 
+\end{equation}
+The work done by an insulating solid when the electric field is 
+${\bf E}_\alpha$, the magnetic field intensity is ${\bf H}_\alpha$, 
+and $d {\bf D}_\alpha$ are the electric displacement changes and 
+$d {\bf B}_\alpha$ are the magnetic flux density changes, can be derived
+from the Maxwell equations as: 
+\begin{equation}
+dW_2 = -{V \over 4 \pi} \sum_\alpha {\bf E}_\alpha d {\bf D}_\alpha 
+-{V \over 4 \pi} \sum_{\alpha,\beta} {\bf H}_{\alpha} d {\bf B}_\alpha.
+\end{equation}
+The minus sign comes from the fact that we are writing the work done by the
+solid. The change of internal energy is:
+\begin{equation}
+dU = V \sum_{\alpha,\beta} \sigma_{\alpha,\beta} d \epsilon_{\alpha,\beta}
++ {V\over 4 \pi} \sum_\alpha {\bf E}_\alpha d {\bf D}_\alpha + 
+{V \over 4 \pi} \sum_{\alpha,\beta} {\bf H}_{\alpha} d {\bf B}_\alpha + T dS,
+\end{equation}
+It is convenient to take the temperature $T$,
+the electric field ${\bf E}_\alpha$ and the magnetic field intensity
+${\bf H}_\alpha$ as independent variables.
+This can be done by introducing the generalized Helmholtz free energy 
+by writing
+$F=U-{V \over 4 \pi}\sum_{\alpha} {\bf E}_\alpha {\bf D}_\alpha -
+{V\over 4 \pi} \sum_{\alpha} {\bf H}_\alpha {\bf B}_\alpha - TS $, 
+we have then
+\begin{equation}
+dF = V \sum_{\alpha,\beta} \sigma_{\alpha,\beta} d \epsilon_{\alpha,\beta}
+- {V\over 4 \pi} \sum_\alpha {\bf D}_\alpha d {\bf E}_\alpha - 
+{V \over 4 \pi} \sum_{\alpha,\beta} {\bf B}_{\alpha} d {\bf H}_\alpha - S dT.
+\end{equation}
+From the previous equations we obtain:
+\begin{eqnarray}
+S&=&-{\partial F \over \partial T}, \\
+\sigma_{\alpha,\beta}&=&{1\over V}
+{\partial F \over \partial \epsilon_{\alpha,\beta}}, \\
+{\bf D}_{\alpha}&=&-{4 \pi \over V}
+{\partial F \over \partial {\bf E}_{\alpha}}, \\
+{\bf B}_{\alpha}&=&-{4 \pi \over V}
+{\partial F \over \partial {\bf H}_{\alpha}}.
+\end{eqnarray}
+Assuming that these quantities are functions of the independent variables
+$T$, $\epsilon_{\alpha,\beta}$, ${\bf E}_\alpha$, and ${\bf H}_\alpha$ we
+obtain the temperature dependent macroscopic equations:
+\begin{eqnarray}
+dS&=&{\partial S \over \partial T} dT+\sum_{\alpha,\beta}
+{\partial S \over \partial \epsilon_{\alpha,\beta}}d\epsilon_{\alpha,\beta}
++\sum_\gamma{\partial S \over \partial {\bf E}_{\gamma}}d{\bf E}_{\gamma}+ 
+\sum_\delta{\partial S \over \partial {\bf H}_{\delta}}d{\bf H}_{\delta}, \\
+d\sigma_{\alpha,\beta}&=&
+{\partial \sigma_{\alpha,\beta} \over \partial T} dT+\sum_{\gamma,\delta}
+{\partial \sigma_{\alpha,\beta} \over \partial 
+\epsilon_{\gamma,\delta}}d\epsilon_{\gamma,\delta}
++\sum_\gamma{\partial \sigma_{\alpha,\beta} \over \partial 
+{\bf E}_{\gamma}}d{\bf E}_{\gamma}+ 
+\sum_\delta{\partial \sigma_{\alpha,\beta} \over \partial 
+{\bf H}_{\delta}}d{\bf H}_{\delta}, \\
+d{\bf D}_\gamma&=&
+{\partial  {\bf D}_\gamma \over \partial T} dT+\sum_{\alpha,\beta}
+{\partial {\bf D}_\gamma \over \partial \epsilon_{\alpha,\beta}}
+d\epsilon_{\alpha,\beta}
++\sum_\alpha{\partial {\bf D}_\gamma \over \partial {\bf E}_{\alpha}}d{\bf E}_{\alpha}+ 
+\sum_\delta{\partial {\bf D}_\gamma \over \partial {\bf H}_{\delta}}d{\bf H}_{\delta}, \\
+d{\bf B}_\delta&=&
+{\partial {\bf B}_\delta \over \partial T} dT+\sum_{\alpha,\beta}
+{\partial {\bf B}_\delta \over \partial \epsilon_{\alpha,\beta}}
+d\epsilon_{\alpha,\beta}
++\sum_\gamma{\partial {\bf B}_\delta \over \partial {\bf E}_{\gamma}}
+d{\bf E}_{\gamma}+ 
+\sum_\alpha{\partial {\bf B}_\delta \over \partial {\bf H}_{\alpha}}
+d{\bf H}_{\alpha}, 
+\end{eqnarray}
+These equations allow the definition of the isothermal material properties 
+at finite temperature. In addition to generalizing to finite temperatures
+the macroscopic quantities introduced so far, they provide other material 
+properties not yet analyzed:
+
+\subsection{\color{web-blue}Heat capacity at constant strain}
+The heat capacity at constant strain is defined as
+\begin{equation}
+C_\epsilon= - T {\partial^2 F \over \partial T^2} = 
+T {\partial S \over \partial T},
+\end{equation}
+and has the same unit as $S$: $E_h\over K$. Usually one considers the heat
+capacity of a mole of substance and gives $C_\epsilon$ in 
+${E_h\over K \cdot mol}$.
+
+\subsection{\color{web-blue}Thermal stresses}
+The thermal stress is defined as:
+\begin{equation}
+\tilde b_{\alpha,\beta} = 
+-{1\over V} {\partial^2 F \over \partial T
+\partial \epsilon_{\alpha,\beta}}=
+-{\partial \sigma_{\alpha,\beta} \over \partial T}=
+{1\over V} {\partial S \over \partial {\bf \epsilon}_{\alpha,\beta}},
+\end{equation}
+its unit is ${E_h \over a_B^3 \cdot K}$.
+
+\subsection{\color{web-blue}Pyroelectric and electro-caloric tensors}
+The pyroelectric and the electro-caloric tensors are defined as:
+\begin{equation}
+\tilde {\bf p}_\gamma =
+-{1\over V} {\partial^2 F \over \partial T
+\partial {\bf E}_\gamma}=
+{1\over 4 \pi} {\partial {\bf D}_\gamma \over \partial T}=
+{1\over V} {\partial S \over \partial {\bf E}_{\gamma}},
+\end{equation}
+their unit is ${e \over a_B^2 \cdot K}$. Note that one has also
+${\partial {\bf D}_\gamma \over \partial T}=
+4 \pi {\partial {\bf P}_\gamma \over \partial T}$. 
+
+\subsection{\color{web-blue}Pyromagnetic and magneto-caloric tensors}
+The pyromagnetic and the magneto-caloric tensors are defined as:
+\begin{equation}
+\tilde {\bf q}_\gamma = 
+-{1\over V} {\partial^2 F \over \partial T
+\partial {\bf H}_\gamma}=
+{1\over 4 \pi} {\partial {\bf B}_\gamma \over \partial T}=
+{1\over V} {\partial S \over \partial {\bf H}_{\gamma}},
+\end{equation}
+their unit is ${4 \pi \hbar \over a_B^2 \cdot e \cdot K}$. 
+Note that one has also
+${\partial {\bf B}_\gamma \over \partial T}= 4 \pi \alpha^2
+{\partial {\bf M}_\gamma \over \partial T}$.
+
+\subsection{\color{web-blue}Macroscopic equations at finite temperature}
+The other derivatives are just finite temperature generalizations of the
+previously discussed quantities. We can rewrite the macroscopic equations as:
+\begin{eqnarray}
+dS&=&{C_\epsilon\over T} dT+ V \sum_{\alpha,\beta} \tilde b_{\alpha,\beta} 
+d\epsilon_{\alpha,\beta}
++ V \sum_\gamma \tilde {\bf p}_\gamma d{\bf E}_{\gamma} + 
+V \sum_\delta \tilde {\bf q}_\delta d{\bf H}_{\delta}, \\
+d\sigma_{\alpha,\beta}&=& -\tilde b_{\alpha,\beta} dT + 
+\sum_{\gamma,\delta} \tilde C^T_{\alpha,\beta,\gamma,\delta} 
+d \epsilon_{\gamma,\delta} - \sum_\gamma \tilde e^T_{\alpha,\beta,\gamma} 
+d{\bf E}_{\gamma} -\alpha^2
+\sum_\delta \tilde h^T_{\alpha,\beta,\delta} d{\bf H}_{\delta}, \\
+d{\bf D}_\gamma&=&
+4 \pi \tilde {\bf p}_\gamma dT + 4 \pi \sum_{\alpha,\beta} \tilde 
+e^T_{\alpha,\beta,\gamma} d\epsilon_{\alpha,\beta}
++\sum_\alpha \tilde \epsilon^T_{r,\gamma,\alpha} 
+d{\bf E}_{\alpha} + 
+\sum_\delta \tilde \alpha^T_{\gamma,\delta} d{\bf H}_{\delta}, 
+\label{dau} \\
+d{\bf B}_\delta&=&
+4 \pi \tilde {\bf q}_\delta dT+ 4 \pi \alpha^2 \sum_{\alpha,\beta}
+\tilde h^T_{\alpha,\beta,\gamma}
+d\epsilon_{\alpha,\beta}
++\sum_\gamma \tilde \alpha^T_{\delta,\gamma}
+d{\bf E}_{\gamma}+ \alpha^2
+\sum_\alpha \tilde \mu^{T}_{r,\delta,\alpha}
+d{\bf H}_{\alpha}, \label{bau} 
+\end{eqnarray}
+where the index $T$ indicates isothermal quantities and 
+the tilde $\tilde{ }$ indicates that the independent variables are
+$T$, $\epsilon_{\alpha,\beta}$, ${\bf E}_\alpha$, and ${\bf H}_\alpha$. 
+Moreover we used the fact
+that 
+${\partial {\bf D}_\gamma \over \partial T} =
+4 \pi {\partial {\bf P}_\gamma \over \partial T}$,
+${\partial {\bf D}_\gamma \over \partial \epsilon_{\alpha,\beta}}=
+4 \pi {\partial {\bf P}_\gamma \over \partial \epsilon_{\alpha,\beta}}$,
+${\partial {\bf D}_\gamma \over \partial {\bf E}_{\alpha}}=  
+\delta_{\gamma,\alpha} + 4 \pi 
+{\partial {\bf P}_\gamma \over \partial {\bf E}_{\alpha}}$, 
+${\partial {\bf D}_\gamma \over \partial {\bf H}_{\delta}}= 
+4 \pi {\partial {\bf P}_\gamma \over \partial {\bf H}_{\delta}}$, 
+${\partial {\bf B}_\gamma \over \partial T} = 4 \pi \alpha^2
+{\partial {\bf M}_\gamma \over \partial T}$,
+${\partial {\bf B}_\gamma \over \partial \epsilon_{\alpha,\beta}}= 4 \pi 
+\alpha^2 {\partial {\bf M}_\gamma \over \partial \epsilon_{\alpha,\beta}}$,
+${\partial {\bf B}_\gamma \over \partial {\bf E}_{\alpha}}= 4 \pi \alpha^2
+{\partial {\bf M}_\gamma \over \partial {\bf E}_{\alpha}}$, and
+${\partial {\bf B}_\gamma \over \partial {\bf H}_{\delta}}= \alpha^2
+(\delta_{\gamma,\delta} + 4 \pi
+{\partial {\bf M}_\gamma \over \partial {\bf H}_{\delta}})$. 
+
+Using these Equations Eqs.~\ref{dau} and \ref{bau} can be written
+equivalently as:
+\begin{eqnarray}
+d{\bf P}_\gamma&=&
+\tilde {\bf p}_\gamma dT + \sum_{\alpha,\beta} \tilde 
+e^T_{\alpha,\beta,\gamma} d\epsilon_{\alpha,\beta}
++ \sum_\alpha \tilde \chi^{e,T}_{\gamma,\alpha} 
+d{\bf E}_{\alpha} + {1\over 4 \pi}
+\sum_\delta \tilde \alpha^T_{\gamma,\delta} d{\bf H}_{\delta}, \\
+d{\bf M}_\delta&=&
+{1\over \alpha^2}\tilde {\bf q}_\delta dT+ \sum_{\alpha,\beta}
+\tilde h^T_{\alpha,\beta,\gamma}
+d\epsilon_{\alpha,\beta}
++{1\over 4 \pi \alpha^2} \sum_\gamma \tilde \alpha^T_{\gamma,\delta}
+d{\bf E}_{\gamma}+ 
+\sum_\alpha \tilde \chi^{m,T}_{\delta,\alpha}
+d{\bf H}_{\alpha}, 
+\end{eqnarray}
+}
+
+\newpage
+{\color{orange}
+The two principles of thermodynamics can be summarized by the equation:
+\begin{equation}
+dU = -dW + T dS,
+\end{equation}
+that gives the change of the internal energy of the system $dU$ when
+it does a work $dW$ and we give reversibly the heat $T dS$, where $T$ 
+is the temperature and $dS$ is the change of entropy.
+We can consider the work done by the system when the strain
+$\epsilon_{\alpha,\beta}$ change:
+\begin{equation}
+dW_1 =-V \sum_{\alpha,\beta} \sigma_{\alpha,\beta} d \epsilon_{\alpha,\beta}. 
+\end{equation}
+The work done by an insulating solid when the electric field is 
+${\bf E}_\alpha$, the magnetic field intensity is ${\bf H}_\alpha$, 
+and $d {\bf D}_\alpha$ are the electric displacement changes and 
+$d {\bf B}_\alpha$ are the magnetic flux density changes, can be derived
+from the Maxwell equations as: 
+\begin{equation}
+dW_2 = -{V \over 4 \pi} \sum_\alpha {\bf E}_\alpha d {\bf D}_\alpha 
+-{V \over 4 \pi} \sum_{\alpha,\beta} {\bf H}_{\alpha} d {\bf B}_\alpha.
+\end{equation}
+The minus sign comes from the fact that we are writing the work done by the
+solid. The change of internal energy is:
+\begin{equation}
+dU = V \sum_{\alpha,\beta} \sigma_{\alpha,\beta} d \epsilon_{\alpha,\beta}
++ {V \over 4 \pi} \sum_\alpha {\bf E}_\alpha d {\bf D}_\alpha + 
+{V \over 4 \pi} \sum_{\alpha,\beta} {\bf H}_{\alpha} d {\bf B}_\alpha + T dS,
+\end{equation}
+It is convenient to take the temperature $T$,
+the electric field ${\bf E}_\alpha$ and the magnetic field intensity
+${\bf H}_\alpha$ as independent variables.
+This can be done by introducing the generalized Helmholtz free energy 
+by writing
+$F=U- {V \over 4 \pi} \sum_{\alpha} {\bf E}_\alpha {\bf D}_\alpha -
+{V \over 4 \pi} \sum_{\alpha} {\bf H}_\alpha {\bf B}_\alpha - TS $, we 
+have then
+\begin{equation}
+dF = V \sum_{\alpha,\beta} \sigma_{\alpha,\beta} d \epsilon_{\alpha,\beta}
+- {V \over 4 \pi} \sum_\alpha {\bf D}_\alpha d {\bf E}_\alpha - 
+{V \over 4 \pi} \sum_{\alpha,\beta} {\bf B}_{\alpha} d {\bf H}_\alpha - S dT.
+\end{equation}
+From the previous equations we obtain:
+\begin{eqnarray}
+S&=&-{\partial F \over \partial T}, \\
+\sigma_{\alpha,\beta}&=&{1\over V}
+{\partial F \over \partial \epsilon_{\alpha,\beta}}, \\
+{\bf D}_{\alpha}&=&-{4 \pi \over V}
+{\partial F \over \partial {\bf E}_{\alpha}}, \\
+{\bf B}_{\alpha}&=&-{4 \pi \over V}
+{\partial F \over \partial {\bf H}_{\alpha}}.
+\end{eqnarray}
+Assuming that these quantities are functions of the independent variables
+$T$, $\epsilon_{\alpha,\beta}$, ${\bf E}_\alpha$, and ${\bf H}_\alpha$ we
+obtain the temperature dependent macroscopic equations:
+\begin{eqnarray}
+dS&=&{\partial S \over \partial T} dT+\sum_{\alpha,\beta}
+{\partial S \over \partial \epsilon_{\alpha,\beta}}d\epsilon_{\alpha,\beta}
++\sum_\gamma{\partial S \over \partial {\bf E}_{\gamma}}d{\bf E}_{\gamma}+ 
+\sum_\delta{\partial S \over \partial {\bf H}_{\delta}}d{\bf H}_{\delta}, \\
+d\sigma_{\alpha,\beta}&=&
+{\partial \sigma_{\alpha,\beta} \over \partial T} dT+\sum_{\gamma,\delta}
+{\partial \sigma_{\alpha,\beta} \over \partial 
+\epsilon_{\gamma,\delta}}d\epsilon_{\gamma,\delta}
++\sum_\gamma{\partial \sigma_{\alpha,\beta} \over \partial 
+{\bf E}_{\gamma}}d{\bf E}_{\gamma}+ 
+\sum_\delta{\partial \sigma_{\alpha,\beta} \over \partial 
+{\bf H}_{\delta}}d{\bf H}_{\delta}, \\
+d{\bf D}_\gamma&=&
+{\partial  {\bf D}_\gamma \over \partial T} dT+\sum_{\alpha,\beta}
+{\partial {\bf D}_\gamma \over \partial \epsilon_{\alpha,\beta}}
+d\epsilon_{\alpha,\beta}
++\sum_\alpha{\partial {\bf D}_\gamma \over \partial {\bf E}_{\alpha}}d{\bf E}_{\alpha}+ 
+\sum_\delta{\partial {\bf D}_\gamma \over \partial {\bf H}_{\delta}}d{\bf H}_{\delta}, \\
+d{\bf B}_\delta&=&
+{\partial {\bf B}_\delta \over \partial T} dT+\sum_{\alpha,\beta}
+{\partial {\bf B}_\delta \over \partial \epsilon_{\alpha,\beta}}
+d\epsilon_{\alpha,\beta}
++\sum_\gamma{\partial {\bf B}_\delta \over \partial {\bf E}_{\gamma}}
+d{\bf E}_{\gamma}+ 
+\sum_\alpha{\partial {\bf B}_\delta \over \partial {\bf H}_{\alpha}}
+d{\bf H}_{\alpha}, 
+\end{eqnarray}
+These equations allow the definition of the isothermal material properties 
+at finite temperature. In addition to generalizing to finite temperatures
+the macroscopic quantities introduced so far, they provide other material 
+properties not yet analyzed:
+
+\subsection{\color{orange}Heat capacity at constant strain}
+The heat capacity at constant strain is defined as
+\begin{equation}
+C_\epsilon= - T {\partial^2 F \over \partial T^2} = 
+T {\partial S \over \partial T},
+\end{equation}
+and has the same unit as $S$: $erg\over K$. Usually one considers the heat
+capacity of a mole of substance and gives $C_\epsilon$ in 
+${erg\over K \cdot mol}$.
+
+\subsection{\color{orange}Thermal stresses}
+The thermal stress is defined as:
+\begin{equation}
+\tilde b_{\alpha,\beta} = 
+-{1\over V} {\partial^2 F \over \partial T
+\partial \epsilon_{\alpha,\beta}}=
+-{\partial \sigma_{\alpha,\beta} \over \partial T}=
+{1\over V} {\partial S \over \partial {\bf \epsilon}_{\alpha,\beta}},
+\end{equation}
+its unit is ${dyne \over cm^2 \cdot K}$.
+
+\subsection{\color{orange}Pyroelectric and electro-caloric tensors}
+The pyroelectric and the electro-caloric tensors are defined as:
+\begin{equation}
+\tilde {\bf p}_\gamma =
+-{1\over V} {\partial^2 F \over \partial T
+\partial {\bf E}_\gamma}=
+{1\over 4 \pi} {\partial {\bf D}_\gamma \over \partial T}=
+{1\over V} {\partial S \over \partial {\bf E}_{\gamma}},
+\end{equation}
+their unit is ${statC \over cm^2 \cdot K}$. Note that one has also
+${\partial {\bf D}_\gamma \over \partial T}=4 \pi
+{\partial {\bf P}_\gamma \over \partial T}$. 
+
+\subsection{\color{orange}Pyromagnetic and magneto-caloric tensors}
+The pyromagnetic and the magneto-caloric tensors are defined as:
+\begin{equation}
+\tilde {\bf q}_\gamma = 
+-{1\over V} {\partial^2 F \over \partial T
+\partial {\bf H}_\gamma}=
+{1 \over 4 \pi} {\partial {\bf B}_\gamma \over \partial T}=
+{1\over V} {\partial S \over \partial {\bf H}_{\gamma}},
+\end{equation}
+their unit is ${4 \pi G \over K}$. Note that one has also
+${\partial {\bf B}_\gamma \over \partial T}= 4 \pi
+{\partial {\bf M}_\gamma \over \partial T}$.
+
+\subsection{\color{orange}Macroscopic equations at finite temperature}
+The other derivatives are just finite temperature generalizations of the
+previously discussed quantities. We can rewrite the macroscopic equations as:
+\begin{eqnarray}
+dS&=&{C_\epsilon\over T} dT+ V \sum_{\alpha,\beta} \tilde b_{\alpha,\beta} 
+d\epsilon_{\alpha,\beta}
++ V \sum_\gamma \tilde {\bf p}_\gamma d{\bf E}_{\gamma} +
+V \sum_\delta \tilde {\bf q}_\delta d{\bf H}_{\delta}, \\
+d\sigma_{\alpha,\beta}&=& -\tilde b_{\alpha,\beta} dT + 
+\sum_{\gamma,\delta} \tilde C^T_{\alpha,\beta,\gamma,\delta} 
+d \epsilon_{\gamma,\delta} - \sum_\gamma \tilde e^T_{\alpha,\beta,\gamma} 
+d{\bf E}_{\gamma} -
+\sum_\delta \tilde h^T_{\alpha,\beta,\delta} d{\bf H}_{\delta}, \\
+d{\bf D}_\gamma&=&
+4 \pi \tilde {\bf p}_\gamma dT + 4 \pi \sum_{\alpha,\beta} \tilde 
+e^T_{\alpha,\beta,\gamma} d\epsilon_{\alpha,\beta}
++ \sum_\alpha \tilde \epsilon^T_{r,\gamma,\alpha} 
+d{\bf E}_{\alpha} + 
+\sum_\delta \tilde \alpha^T_{\gamma,\delta} d{\bf H}_{\delta}, 
+\label{dcgs} \\
+d{\bf B}_\delta&=&
+4 \pi \tilde {\bf q}_\delta dT+ 4 \pi \sum_{\alpha,\beta}
+\tilde h^T_{\alpha,\beta,\gamma}
+d\epsilon_{\alpha,\beta}
++ \sum_\gamma \tilde \alpha^T_{\gamma,\delta}
+d{\bf E}_{\gamma}+ 
+\sum_\alpha \tilde \mu^{T}_{r,\delta,\alpha}
+d{\bf H}_{\alpha}, \label{bcgs}
+\end{eqnarray}
+where the index $T$ indicates isothermal quantities and 
+the tilde $\tilde{ }$ indicates that the independent variables are
+$T$, $\epsilon_{\alpha,\beta}$, ${\bf E}_\alpha$, and ${\bf H}_\alpha$. 
+Moreover we used the fact that 
+${\partial {\bf D}_\gamma \over \partial T} =
+4 \pi {\partial {\bf P}_\gamma \over \partial T}$,
+${\partial {\bf D}_\gamma \over \partial \epsilon_{\alpha,\beta}}=
+4 \pi {\partial {\bf P}_\gamma \over \partial \epsilon_{\alpha,\beta}}$,
+${\partial {\bf D}_\gamma \over \partial {\bf E}_{\alpha}}=  
+\delta_{\gamma,\alpha} + 4 \pi 
+{\partial {\bf P}_\gamma \over \partial {\bf E}_{\alpha}}$, 
+${\partial {\bf D}_\gamma \over \partial {\bf H}_{\delta}}= 
+4 \pi {\partial {\bf P}_\gamma \over \partial {\bf H}_{\delta}}$, 
+${\partial {\bf B}_\gamma \over \partial T} = 4 \pi
+{\partial {\bf M}_\gamma \over \partial T}$,
+${\partial {\bf B}_\gamma \over \partial \epsilon_{\alpha,\beta}}= 4 \pi
+{\partial {\bf M}_\gamma \over \partial \epsilon_{\alpha,\beta}}$,
+${\partial {\bf B}_\gamma \over \partial {\bf E}_{\alpha}}= 4 \pi
+{\partial {\bf M}_\gamma \over \partial {\bf E}_{\alpha}}$, and
+${\partial {\bf B}_\gamma \over \partial {\bf H}_{\delta}}= 
+\delta_{\gamma,\delta} + 4 \pi
+{\partial {\bf M}_\gamma \over \partial {\bf H}_{\delta}}$. 
+
+Using these Equations Eqs.~\ref{dcgs} and \ref{bcgs} can be written
+equivalently as:
+\begin{eqnarray}
+d{\bf P}_\gamma&=&
+\tilde {\bf p}_\gamma dT + \sum_{\alpha,\beta} \tilde 
+e^T_{\alpha,\beta,\gamma} d\epsilon_{\alpha,\beta}
++ \sum_\alpha \tilde \chi^{e,T}_{\gamma,\alpha} 
+d{\bf E}_{\alpha} + {1\over 4 \pi}
+\sum_\delta \tilde \alpha^T_{\gamma,\delta} d{\bf H}_{\delta}, \\
+d{\bf M}_\delta&=& \tilde {\bf q}_\delta dT+ \sum_{\alpha,\beta}
+\tilde h^T_{\alpha,\beta,\gamma}
+d\epsilon_{\alpha,\beta}
++{1\over 4 \pi} \sum_\gamma \tilde \alpha^T_{\gamma,\delta}
+d{\bf E}_{\gamma}+ 
+\sum_\alpha \tilde \chi^{m,T}_{\delta,\alpha}
+d{\bf H}_{\alpha}, 
+\end{eqnarray}
+}
+
+\newpage
+
+\section{\color{coral} Appendix A: Stress as an independent variable}
+
+While in calculations it is easy to control the strain applied to
+a given crystal, experimentally it is simpler to apply a given stress
+on a solid. It is therefore common for instance to define the 
+piezoelectric (piezomagnetic) tensor from the polarization 
+(magnetization) induced by a stress. In order to define it one 
+can introduce a free-energy depending on $\sigma_{\alpha,\beta}$,
+${\bf E}_\alpha$, and ${\bf H}_\alpha$. Alternatively one can use the
+equations of motion to write the strain as a function of stress and
+to insert its espression in the equation for the polarization
+(magnetization). We obtain:
+\begin{eqnarray}
+\epsilon_{\gamma,\delta} &=& 
+- \sum_{\alpha,\beta} 
+C^{-1}_{\gamma,\delta,\alpha,\beta} \sigma^{(0)}_{\alpha,\beta} 
++ \sum_{\alpha,\beta} 
+C^{-1}_{\gamma,\delta,\alpha,\beta} \sigma_{\alpha,\beta} 
++ \sum_{\alpha,\beta,\mu} 
+C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde e_{\alpha,\beta,\mu} {\bf E}_\mu 
+\nonumber \\
+&+& \mu_0 \sum_{\alpha,\beta,\mu} 
+C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde h_{\alpha,\beta,\mu} {\bf H}_\mu 
+\\
+{\bf P}_{\lambda}&=& \hat {\bf P}^{(0)}_{\lambda}
++\sum_{\alpha,\beta} \hat d_{\alpha,\beta,\lambda} 
+\sigma_{\alpha,\beta} +
+\epsilon_0 \sum_{\mu} 
+\hat \chi^e_{\lambda,\mu}
+{\bf E}_{\mu} +
+\sum_{\mu} \hat \alpha_{\lambda,\mu} 
+{\bf H}_{\mu}, \\
+{\bf M}_{\lambda}&=& \hat {\bf M}^{(0)}_{\lambda}
++\sum_{\alpha,\beta} \hat h_{\alpha,\beta,\lambda} 
+\sigma_{\alpha,\beta} +
+{1\over \mu_0} \sum_{\mu} \hat \alpha_{\lambda,\mu} 
+{\bf E}_{\mu}+
+\sum_{\mu} 
+\hat \chi^m_{\lambda,\mu}
+{\bf H}_{\mu}
+\end{eqnarray} 
+where
+\begin{eqnarray}
+\hat {\bf P}^{(0)}_{\lambda}&=&\tilde {\bf P}^{(0)}_{\lambda}
+-\sum_{\alpha,\beta,\gamma,\delta} \tilde e_{\alpha,\beta,\lambda}
+\tilde C^{-1}_{\alpha,\beta,\gamma,\delta} 
+\tilde \sigma^{(0)}_{\gamma,\delta}, \\
+\hat {\bf M}^{(0)}_{\lambda}&=&\tilde {\bf M}^{(0)}_{\lambda}
+-\sum_{\alpha,\beta,\gamma,\delta} \tilde h_{\alpha,\beta,\lambda}
+\tilde C^{-1}_{\alpha,\beta,\gamma,\delta} 
+\tilde \sigma^{(0)}_{\gamma,\delta}, \\
+\hat d_{\alpha,\beta,\lambda}&=&\sum_{\gamma,\delta} 
+\tilde e_{\gamma,\delta,\lambda} 
+\tilde C^{-1}_{\gamma,\delta,\alpha,\beta}, \\
+\hat h_{\alpha,\beta,\lambda}&=&\sum_{\gamma,\delta} 
+\tilde h_{\gamma,\delta,\lambda} 
+\tilde C^{-1}_{\gamma,\delta,\alpha,\beta}, \\
+\hat \chi^e_{\lambda,\mu}&=&\tilde \chi^e_{\lambda,\mu}
++{1\over \epsilon_0} 
+\sum_{\alpha,\beta,\gamma,\delta}\tilde e_{\gamma,\delta,\lambda}
+\tilde C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde e_{\alpha,\beta,\mu}, \\
+\hat \chi^m_{\lambda,\mu}&=&\tilde \chi^m_{\lambda,\mu}
++{\mu_0}\sum_{\alpha,\beta,\gamma,\delta}\tilde h_{\gamma,\delta,\lambda}
+\tilde C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde h_{\alpha,\beta,\mu}, \\
+\hat \alpha_{\lambda,\mu}&=&\tilde \alpha_{\lambda,\mu}
++\mu_0 \sum_{\alpha,\beta,\gamma,\delta}\tilde e_{\gamma,\delta,\lambda}
+\tilde C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde h_{\alpha,\beta,\mu},
+\end{eqnarray}
+where $\hat \chi^e_{\lambda,\mu}$, $\hat \chi^m_{\lambda,\mu}$ and
+$\hat \alpha_{\lambda,\mu}$ are the dielectric susceptibility, the magnetic
+susceptibility, 
+and the magneto-electric tensor at constant stress, while 
+$\hat d_{\alpha,\beta,\lambda}$ ($\hat h_{\alpha,\beta,\lambda}$)
+is the piezoelectric (piezomagnetic) tensor that
+gives the polarization (magnetization) induced by a stress. 
+
+\subsection{Thermodynamic equations}
+Similarly for the thermodynamic equations we can introduce the Gibbs
+free energy as:
+\begin{equation}
+G=F - V \sum_{\alpha,\beta} \sigma_{\alpha,\beta} \epsilon_{\alpha,\beta},
+\end{equation}
+and to write:
+\begin{equation}
+dG=SdT - V \sum_{\alpha,\beta} \epsilon_{\alpha,\beta} d \sigma_{\alpha,\beta}
+-V \sum_{\alpha} {\bf D}_\alpha d {\bf E}_\alpha
+-V \sum_{\alpha} {\bf B}_\alpha d {\bf H}_\alpha
+\end{equation}
+We have therefore:
+\begin{eqnarray}
+S&=&-{\partial G \over \partial T}, \\
+\epsilon_{\alpha,\beta}&=&-{1\over V}
+{\partial G \over \partial \sigma_{\alpha,\beta}}, \\
+{\bf D}_{\alpha}&=&-{1\over V}
+{\partial G \over \partial {\bf E}_{\alpha}}, \\
+{\bf B}_{\alpha}&=&-{1\over V}
+{\partial G \over \partial {\bf H}_{\alpha}}.
+\end{eqnarray}
+Assuming that these quantities are functions of the independent variables
+$T$, $\sigma_{\alpha,\beta}$, ${\bf E}_\alpha$, and ${\bf H}_\alpha$ we
+obtain the temperature dependent macroscopic equations:
+\begin{eqnarray}
+dS&=&{\partial S \over \partial T} dT+\sum_{\alpha,\beta}
+{\partial S \over \partial \sigma_{\alpha,\beta}}d\sigma_{\alpha,\beta}
++\sum_\gamma{\partial S \over \partial {\bf E}_{\gamma}}d{\bf E}_{\gamma}+ 
+\sum_\delta{\partial S \over \partial {\bf H}_{\delta}}d{\bf H}_{\delta}, \\
+d\epsilon_{\alpha,\beta}&=&
+{\partial \epsilon_{\alpha,\beta} \over \partial T} dT+\sum_{\gamma,\delta}
+{\partial \epsilon_{\alpha,\beta} \over \partial 
+\sigma_{\gamma,\delta}}d\sigma_{\gamma,\delta}
++\sum_\gamma{\partial \epsilon_{\alpha,\beta} \over \partial 
+{\bf E}_{\gamma}}d{\bf E}_{\gamma}+ 
+\sum_\delta{\partial \epsilon_{\alpha,\beta} \over \partial 
+{\bf H}_{\delta}}d{\bf H}_{\delta}, \\
+d{\bf D}_\gamma&=&
+{\partial  {\bf D}_\gamma \over \partial T} dT+\sum_{\alpha,\beta}
+{\partial {\bf D}_\gamma \over \partial \sigma_{\alpha,\beta}}
+d\sigma_{\alpha,\beta}
++\sum_\alpha{\partial {\bf D}_\gamma \over \partial {\bf E}_{\alpha}}d{\bf E}_{\alpha}+ 
+\sum_\delta{\partial {\bf D}_\gamma \over \partial {\bf H}_{\delta}}d{\bf H}_{\delta}, \\
+d{\bf B}_\delta&=&
+{\partial {\bf B}_\delta \over \partial T} dT+\sum_{\alpha,\beta}
+{\partial {\bf B}_\delta \over \partial \sigma_{\alpha,\beta}}
+d\sigma_{\alpha,\beta}
++\sum_\gamma{\partial {\bf B}_\delta \over \partial {\bf E}_{\gamma}}
+d{\bf E}_{\gamma}+ 
+\sum_\alpha{\partial {\bf B}_\delta \over \partial {\bf H}_{\alpha}}
+d{\bf H}_{\alpha}. 
+\end{eqnarray}
+
+This expansion introduces other material properties not yet defined:
+\subsection{Heat capacity at constant stress}
+The heat capacity at constant stress is defined as
+\begin{equation}
+C_\sigma= - T {\partial^2 G \over \partial T^2} = 
+T {\partial S \over \partial T},
+\end{equation}
+and has the same unit as $S$: $J\over K$. Usually one considers the heat
+capacity of a mole of substance and gives $C_\sigma$ in 
+${J \over K \cdot mol}$.
+
+\subsection{Thermal expansion and piezocaloric effect}
+The thermal expansion coefficient or the piezocaloric effects are
+described by the tensor:
+\begin{equation}
+\gamma_{\alpha,\beta}=-{1\over V} {\partial^2 G \over \partial T 
+\partial \sigma_{\alpha,\beta}}={\partial \epsilon_{\alpha,\beta} \over 
+\partial T}= {1\over V}
+{\partial S \over \partial \sigma_{\alpha,\beta}},
+\end{equation}
+its unit is $1/K$.
+
+\subsection{Direct and converse piezo-electric effects}
+The direct and converse piezo-electric effects are described by the 
+tensor:
+\begin{equation}
+d_{\alpha,\beta,\gamma}=-{1\over V} {\partial^2 G \over
+\partial \sigma_{\alpha,\beta} \partial {\bf E}_\gamma}=
+{\partial \epsilon_{\alpha,\beta} \over \partial {\bf E}_\gamma}= 
+{\partial {\bf D}_\gamma \over \partial \sigma_{\alpha,\beta}},
+\end{equation}
+its unit is $C/N$. Note also that 
+${\partial {\bf D}_\gamma \over \partial \sigma_{\alpha,\beta}}
+={\partial {\bf P}_\gamma \over \partial \sigma_{\alpha,\beta}}$.
+
+\subsection{Direct and converse piezo-magnetic effects}
+The direct and converse piezo-magnetic effects are described by the 
+tensor:
+\begin{equation}
+\hat h_{\alpha,\beta,\gamma}=-{1\over \mu_0 V} {\partial^2 G \over
+\partial \sigma_{\alpha,\beta} \partial {\bf H}_\gamma}= {1\over \mu_0}
+{\partial \epsilon_{\alpha,\beta} \over \partial {\bf H}_\gamma}= 
+{1 \over \mu_0}{\partial {\bf B}_\gamma \over \partial \sigma_{\alpha,\beta}},
+\end{equation}
+its unit is ${A\cdot m \over N} = {1\over T}$. Note also that 
+${\partial {\bf B}_\gamma \over \partial \sigma_{\alpha,\beta}}
+=\mu_0 {\partial {\bf M}_\gamma \over \partial \sigma_{\alpha,\beta}}$.
+The piezomagnetic tensor 
+($q_{\alpha,\beta,\gamma}$) is sometimes defined
+from the relationship between magnetization intensity ${\bf I}$
+and stress. Since ${\bf I}=\mu_0 {\bf M}$ we have
+$q_{\alpha,\beta,\gamma}=\mu_0 \hat h_{\alpha,\beta,\gamma}$. The
+unit of $q_{\alpha,\beta,\gamma}$ is ${N\over A^2}{A \cdot m\over N}
+={m\over A}={Wb\over N}$. 
+
+
+\subsection{Macroscopic equations at finite temperature}
+The other derivatives are just finite temperature generalization of the
+previously discussed quantities. We can rewrite the macroscopic equations as:
+\begin{eqnarray}
+dS&=&{C_\sigma\over T} dT+ V \sum_{\alpha,\beta} \hat \gamma_{\alpha,\beta} 
+d\sigma_{\alpha,\beta}
++ V \sum_\gamma \hat {\bf p}_\gamma d{\bf E}_{\gamma} + 
+V \sum_\delta \hat {\bf q}_\delta d{\bf H}_{\delta}, \\
+d\epsilon_{\alpha,\beta}&=& \hat \gamma_{\alpha,\beta} dT + 
+\sum_{\gamma,\delta} \hat C^{-1 T}_{\alpha,\beta,\gamma,\delta} 
+d \sigma_{\gamma,\delta} + \sum_\gamma \hat d^T_{\alpha,\beta,\gamma} 
+d{\bf E}_{\gamma} +\mu_0 
+\sum_\delta \hat h^T_{\alpha,\beta,\delta} d{\bf H}_{\delta}, \\
+d{\bf D}_\gamma&=&
+\hat {\bf p}_\gamma dT + \sum_{\alpha,\beta} \hat 
+d^T_{\alpha,\beta,\gamma} d\sigma_{\alpha,\beta}
++\epsilon_0 \sum_\alpha \hat \epsilon^T_{r,\gamma,\alpha} d{\bf E}_{\alpha} + 
+\sum_\delta \hat \alpha^T_{\gamma,\delta} d{\bf H}_{\delta}, \\
+d{\bf B}_\delta&=&
+\hat {\bf q}_\delta dT+ \mu_0 \sum_{\alpha,\beta}
+\hat h^T_{\alpha,\beta,\gamma}
+d\sigma_{\alpha,\beta}
++\sum_\gamma \hat \alpha^T_{\gamma,\delta}
+d{\bf E}_{\gamma}+ \mu_0
+\sum_\alpha \hat \mu^T_{r,\delta,\alpha}
+d{\bf H}_{\alpha}, 
+\end{eqnarray}
+where the index $T$ indicates isothermal quantities and the hat $\hat{}$
+indicates that the independent variables are $T$, $\sigma_{\alpha,\beta}$, 
+${\bf E}_\alpha$, and ${\bf H}_\alpha$. 
+
+\newpage
+{\color{web-blue}
+While in calculations it is easy to control the strain applied to
+a given crystal, experimentally it is simpler to apply a given stress
+on a solid. It is therefore common for instance to define the 
+piezoelectric (piezomagnetic) tensor from the polarization 
+(magnetization) induced by a stress. In order to define it one 
+can introduce a free-energy depending on $\sigma_{\alpha,\beta}$,
+${\bf E}_\alpha$, and ${\bf H}_\alpha$. Alternatively one can use the
+equations of motion to write the strain as a function of stress and
+to insert its espression in the equation for the polarization
+(magnetization). We obtain:
+\begin{eqnarray}
+\epsilon_{\gamma,\delta} &=& 
+- \sum_{\alpha,\beta} 
+C^{-1}_{\gamma,\delta,\alpha,\beta} \sigma^{(0)}_{\alpha,\beta} 
++ \sum_{\alpha,\beta} 
+C^{-1}_{\gamma,\delta,\alpha,\beta} \sigma_{\alpha,\beta} 
++ \sum_{\alpha,\beta,\mu} 
+C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde e_{\alpha,\beta,\mu} {\bf E}_\mu 
+\nonumber \\
+&+& \alpha^2 \sum_{\alpha,\beta,\mu} 
+C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde h_{\alpha,\beta,\mu} {\bf H}_\mu 
+\\
+{\bf P}_{\lambda}&=& \hat {\bf P}^{(0)}_{\lambda}
++\sum_{\alpha,\beta} \hat d_{\alpha,\beta,\lambda} 
+\sigma_{\alpha,\beta} +
+\sum_{\mu} 
+\hat \chi^e_{\lambda,\mu}
+{\bf E}_{\mu} +
+{1\over 4 \pi} \sum_{\mu} \hat \alpha_{\lambda,\mu} 
+{\bf H}_{\mu}, \\
+{\bf M}_{\lambda}&=& \hat {\bf M}^{(0)}_{\lambda}
++\sum_{\alpha,\beta} \hat h_{\alpha,\beta,\lambda} 
+\sigma_{\alpha,\beta} +
+{1\over 4 \pi \alpha^2} \sum_{\mu} \hat \alpha_{\lambda,\mu} 
+{\bf E}_{\mu}+
+\sum_{\mu} 
+\hat \chi^m_{\lambda,\mu}
+{\bf H}_{\mu}
+\end{eqnarray} 
+where
+\begin{eqnarray}
+\hat {\bf P}^{(0)}_{\lambda}&=&\tilde {\bf P}^{(0)}_{\lambda}
+-\sum_{\alpha,\beta,\gamma,\delta} \tilde e_{\alpha,\beta,\lambda}
+\tilde C^{-1}_{\alpha,\beta,\gamma,\delta} 
+\tilde \sigma^{(0)}_{\gamma,\delta}, \\
+\hat {\bf M}^{(0)}_{\lambda}&=&\tilde {\bf M}^{(0)}_{\lambda}
+-\sum_{\alpha,\beta,\gamma,\delta} \tilde h_{\alpha,\beta,\lambda}
+\tilde C^{-1}_{\alpha,\beta,\gamma,\delta} 
+\tilde \sigma^{(0)}_{\gamma,\delta}, \\
+\hat d_{\alpha,\beta,\lambda}&=&\sum_{\gamma,\delta} 
+\tilde e_{\gamma,\delta,\lambda} 
+\tilde C^{-1}_{\gamma,\delta,\alpha,\beta}, \\
+\hat h_{\alpha,\beta,\lambda}&=&\sum_{\gamma,\delta} 
+\tilde h_{\gamma,\delta,\lambda} 
+\tilde C^{-1}_{\gamma,\delta,\alpha,\beta}, \\
+\hat \chi^e_{\lambda,\mu}&=&\tilde \chi^e_{\lambda,\mu}
++ 
+\sum_{\alpha,\beta,\gamma,\delta}\tilde e_{\gamma,\delta,\lambda}
+\tilde C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde e_{\alpha,\beta,\mu}, \\
+\hat \chi^m_{\lambda,\mu}&=&\tilde \chi^m_{\lambda,\mu}
++\alpha^2 \sum_{\alpha,\beta,\gamma,\delta}\tilde h_{\gamma,\delta,\lambda}
+\tilde C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde h_{\alpha,\beta,\mu}, \\
+\hat \alpha_{\lambda,\mu}&=&\tilde \alpha_{\lambda,\mu}
++4 \pi \alpha^2 
+\sum_{\alpha,\beta,\gamma,\delta}\tilde e_{\gamma,\delta,\lambda}
+\tilde C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde h_{\alpha,\beta,\mu},
+\end{eqnarray}
+where $\hat \chi^e_{\lambda,\mu}$, $\hat \chi^m_{\lambda,\mu}$ and
+$\hat \alpha_{\lambda,\mu}$ are the dielectric susceptibility, the magnetic
+susceptibility, 
+and the magneto-electric tensor at constant stress, while 
+$\hat d_{\alpha,\beta,\lambda}$ ($\hat h_{\alpha,\beta,\lambda}$)
+is the piezoelectric (piezomagnetic) tensor that
+gives the polarization (magnetization) induced by a stress. 
+
+\subsection{\color{web-blue}Thermodynamic equations}
+Similarly for the thermodynamic equations we can introduce the Gibbs
+free energy as:
+\begin{equation}
+G=F - V \sum_{\alpha,\beta} \sigma_{\alpha,\beta} \epsilon_{\alpha,\beta},
+\end{equation}
+and to write:
+\begin{equation}
+dG=SdT - V \sum_{\alpha,\beta} \epsilon_{\alpha,\beta} d \sigma_{\alpha,\beta}
+-{V \over 4 \pi} \sum_{\alpha} {\bf D}_\alpha d {\bf E}_\alpha
+-{V \over 4 \pi} \sum_{\alpha} {\bf B}_\alpha d {\bf H}_\alpha
+\end{equation}
+We have therefore:
+\begin{eqnarray}
+S&=&-{\partial G \over \partial T}, \\
+\epsilon_{\alpha,\beta}&=&-{1\over V}
+{\partial G \over \partial \sigma_{\alpha,\beta}}, \\
+{\bf D}_{\alpha}&=&-{4 \pi \over V}
+{\partial G \over \partial {\bf E}_{\alpha}}, \\
+{\bf B}_{\alpha}&=&-{4 \pi \over V}
+{\partial G \over \partial {\bf H}_{\alpha}}.
+\end{eqnarray}
+Assuming that these quantities are functions of the independent variables
+$T$, $\sigma_{\alpha,\beta}$, ${\bf E}_\alpha$, and ${\bf H}_\alpha$ we
+obtain the temperature dependent macroscopic equations:
+\begin{eqnarray}
+dS&=&{\partial S \over \partial T} dT+\sum_{\alpha,\beta}
+{\partial S \over \partial \sigma_{\alpha,\beta}}d\sigma_{\alpha,\beta}
++\sum_\gamma{\partial S \over \partial {\bf E}_{\gamma}}d{\bf E}_{\gamma}+ 
+\sum_\delta{\partial S \over \partial {\bf H}_{\delta}}d{\bf H}_{\delta}, \\
+d\epsilon_{\alpha,\beta}&=&
+{\partial \epsilon_{\alpha,\beta} \over \partial T} dT+\sum_{\gamma,\delta}
+{\partial \epsilon_{\alpha,\beta} \over \partial 
+\sigma_{\gamma,\delta}}d\sigma_{\gamma,\delta}
++\sum_\gamma{\partial \epsilon_{\alpha,\beta} \over \partial 
+{\bf E}_{\gamma}}d{\bf E}_{\gamma}+ 
+\sum_\delta{\partial \epsilon_{\alpha,\beta} \over \partial 
+{\bf H}_{\delta}}d{\bf H}_{\delta}, \\
+d{\bf D}_\gamma&=&
+{\partial  {\bf D}_\gamma \over \partial T} dT+\sum_{\alpha,\beta}
+{\partial {\bf D}_\gamma \over \partial \sigma_{\alpha,\beta}}
+d\sigma_{\alpha,\beta}
++\sum_\alpha{\partial {\bf D}_\gamma \over \partial {\bf E}_{\alpha}}d{\bf E}_{\alpha}+ 
+\sum_\delta{\partial {\bf D}_\gamma \over \partial {\bf H}_{\delta}}d{\bf H}_{\delta}, \\
+d{\bf B}_\delta&=&
+{\partial {\bf B}_\delta \over \partial T} dT+\sum_{\alpha,\beta}
+{\partial {\bf B}_\delta \over \partial \sigma_{\alpha,\beta}}
+d\sigma_{\alpha,\beta}
++\sum_\gamma{\partial {\bf B}_\delta \over \partial {\bf E}_{\gamma}}
+d{\bf E}_{\gamma}+ 
+\sum_\alpha{\partial {\bf B}_\delta \over \partial {\bf H}_{\alpha}}
+d{\bf H}_{\alpha}. 
+\end{eqnarray}
+
+This expansion introduces other material properties not yet defined:
+\subsection{\color{web-blue}Heat capacity at constant stress}
+The heat capacity at constant stress is defined as
+\begin{equation}
+C_\sigma= - T {\partial^2 G \over \partial T^2} = 
+T {\partial S \over \partial T},
+\end{equation}
+and has the same unit as $S$: $E_h\over K$. Usually one considers the heat
+capacity of a mole of substance and gives $C_\sigma$ in 
+${E_h \over K \cdot mol}$.
+
+\subsection{\color{web-blue}Thermal expansion and piezocaloric effect}
+The thermal expansion coefficient or the piezocaloric effects are
+described by the tensor:
+\begin{equation}
+\gamma_{\alpha,\beta}=-{1\over V} {\partial^2 G \over \partial T 
+\partial \sigma_{\alpha,\beta}}={\partial \epsilon_{\alpha,\beta} \over 
+\partial T}= {1\over V}
+{\partial S \over \partial \sigma_{\alpha,\beta}},
+\end{equation}
+its unit is $1/K$.
+
+\subsection{\color{web-blue}Direct and converse piezo-electric effects}
+The direct and converse piezo-electric effects are described by the 
+tensor:
+\begin{equation}
+d_{\alpha,\beta,\gamma}=-{1\over V} {\partial^2 G \over
+\partial \sigma_{\alpha,\beta} \partial {\bf E}_\gamma}=
+{\partial \epsilon_{\alpha,\beta} \over \partial {\bf E}_\gamma}= 
+{1\over 4 \pi} {\partial {\bf D}_\gamma \over \partial \sigma_{\alpha,\beta}},
+\end{equation}
+its unit is $e a_B/E_h$. Note also that 
+${\partial {\bf D}_\gamma \over \partial \sigma_{\alpha,\beta}}
+=4 \pi {\partial {\bf P}_\gamma \over \partial \sigma_{\alpha,\beta}}$.
+
+\subsection{\color{web-blue}Direct and converse piezo-magnetic effects}
+The direct and converse piezo-magnetic effects are described by the 
+tensor:
+\begin{equation}
+\hat h_{\alpha,\beta,\gamma}=-{1\over V} {\partial^2 G \over
+\partial \sigma_{\alpha,\beta} \partial {\bf H}_\gamma}= 
+{\partial \epsilon_{\alpha,\beta} \over \partial {\bf H}_\gamma}= 
+{1 \over 4 \pi}{\partial {\bf B}_\gamma \over \partial \sigma_{\alpha,\beta}},
+\end{equation}
+its unit is ${1 \over \alpha^2 \bar B}$. Note also that 
+${\partial {\bf B}_\gamma \over \partial \sigma_{\alpha,\beta}}
+=4\pi \alpha^2 {\partial {\bf M}_\gamma \over \partial \sigma_{\alpha,\beta}}$.
+
+\subsection{\color{web-blue}Macroscopic equations at finite temperature}
+
+The other derivatives are just finite temperature generalization of the
+previously discussed quantities. We can rewrite the macroscopic equations as:
+\begin{eqnarray}
+dS&=&{C_\sigma\over T} dT+ V \sum_{\alpha,\beta} \hat \gamma_{\alpha,\beta} 
+d\sigma_{\alpha,\beta}
++ V \sum_\gamma \hat {\bf p}_\gamma d{\bf E}_{\gamma} + 
+V \sum_\delta \hat {\bf q}_\delta d{\bf H}_{\delta}, \\
+d\epsilon_{\alpha,\beta}&=& \hat \gamma_{\alpha,\beta} dT + 
+\sum_{\gamma,\delta} \hat C^{-1 T}_{\alpha,\beta,\gamma,\delta} 
+d \sigma_{\gamma,\delta} + \sum_\gamma \hat d^T_{\alpha,\beta,\gamma} 
+d{\bf E}_{\gamma} +
+\sum_\delta \hat h^T_{\alpha,\beta,\delta} d{\bf H}_{\delta}, \\
+d{\bf D}_\gamma&=&
+4 \pi \hat {\bf p}_\gamma dT + 4 \pi \sum_{\alpha,\beta} \hat 
+d^T_{\alpha,\beta,\gamma} d\sigma_{\alpha,\beta}
++ \sum_\alpha \hat \epsilon^T_{r,\gamma,\alpha} d{\bf E}_{\alpha} + 
+\sum_\delta \hat \alpha^T_{\gamma,\delta} d{\bf H}_{\delta}, \\
+d{\bf B}_\delta&=&
+4 \pi \hat {\bf q}_\delta dT+ 4 \pi \sum_{\alpha,\beta}
+\hat h^T_{\alpha,\beta,\gamma}
+d\sigma_{\alpha,\beta}
++\sum_\gamma \hat \alpha^T_{\gamma,\delta}
+d{\bf E}_{\gamma}+ \alpha^2
+\sum_\alpha \hat \mu^T_{r,\delta,\alpha}
+d{\bf H}_{\alpha}, 
+\end{eqnarray}
+where the index $T$ indicates isothermal quantities and the hat $\hat{}$
+indicates that the independent variables are $T$, $\sigma_{\alpha,\beta}$, 
+${\bf E}_\alpha$, and ${\bf H}_\alpha$.  
+}
+
+\newpage
+{\color{orange}
+While in calculations it is easy to control the strain applied to
+a given crystal, experimentally it is simpler to apply a given stress
+on a solid. It is therefore common for instance to define the 
+piezoelectric (piezomagnetic) tensor from the polarization 
+(magnetization) induced by a stress. In order to define it one 
+can introduce a free-energy depending on $\sigma_{\alpha,\beta}$,
+${\bf E}_\alpha$, and ${\bf H}_\alpha$. Alternatively one can use the
+equations of motion to write the strain as a function of stress and
+to insert its espression in the equation for the polarization
+(magnetization). We obtain:
+\begin{eqnarray}
+\epsilon_{\gamma,\delta} &=& 
+- \sum_{\alpha,\beta} 
+C^{-1}_{\gamma,\delta,\alpha,\beta} \sigma^{(0)}_{\alpha,\beta} 
++ \sum_{\alpha,\beta} 
+C^{-1}_{\gamma,\delta,\alpha,\beta} \sigma_{\alpha,\beta} 
++ \sum_{\alpha,\beta,\mu} 
+C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde e_{\alpha,\beta,\mu} {\bf E}_\mu 
+\nonumber \\
+&+& \sum_{\alpha,\beta,\mu} 
+C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde h_{\alpha,\beta,\mu} {\bf H}_\mu 
+\\
+{\bf P}_{\lambda}&=& \hat {\bf P}^{(0)}_{\lambda}
++\sum_{\alpha,\beta} \hat d_{\alpha,\beta,\lambda} 
+\sigma_{\alpha,\beta} +
+\sum_{\mu} 
+\hat \chi^e_{\lambda,\mu}
+{\bf E}_{\mu} +
+{1\over 4 \pi}\sum_{\mu} \hat \alpha_{\lambda,\mu} 
+{\bf H}_{\mu}, \\
+{\bf M}_{\lambda}&=& \hat {\bf M}^{(0)}_{\lambda}
++\sum_{\alpha,\beta} \hat h_{\alpha,\beta,\lambda} 
+\sigma_{\alpha,\beta} +
+{1\over 4 \pi} \sum_{\mu} \hat \alpha_{\lambda,\mu} 
+{\bf E}_{\mu}+
+\sum_{\mu} 
+\hat \chi^m_{\lambda,\mu}
+{\bf H}_{\mu}
+\end{eqnarray} 
+where
+\begin{eqnarray}
+\hat {\bf P}^{(0)}_{\lambda}&=&\tilde {\bf P}^{(0)}_{\lambda}
+-\sum_{\alpha,\beta,\gamma,\delta} \tilde e_{\alpha,\beta,\lambda}
+\tilde C^{-1}_{\alpha,\beta,\gamma,\delta} 
+\tilde \sigma^{(0)}_{\gamma,\delta}, \\
+\hat {\bf M}^{(0)}_{\lambda}&=&\tilde {\bf M}^{(0)}_{\lambda}
+-\sum_{\alpha,\beta,\gamma,\delta} \tilde h_{\alpha,\beta,\lambda}
+\tilde C^{-1}_{\alpha,\beta,\gamma,\delta} 
+\tilde \sigma^{(0)}_{\gamma,\delta}, \\
+\hat d_{\alpha,\beta,\lambda}&=&\sum_{\gamma,\delta} 
+\tilde e_{\gamma,\delta,\lambda} 
+\tilde C^{-1}_{\gamma,\delta,\alpha,\beta}, \\
+\hat h_{\alpha,\beta,\lambda}&=&\sum_{\gamma,\delta} 
+\tilde h_{\gamma,\delta,\lambda} 
+\tilde C^{-1}_{\gamma,\delta,\alpha,\beta}, \\
+\hat \chi^e_{\lambda,\mu}&=&\tilde \chi^e_{\lambda,\mu}
++
+\sum_{\alpha,\beta,\gamma,\delta}\tilde e_{\gamma,\delta,\lambda}
+\tilde C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde e_{\alpha,\beta,\mu}, \\
+\hat \chi^m_{\lambda,\mu}&=&\tilde \chi^m_{\lambda,\mu}
++\sum_{\alpha,\beta,\gamma,\delta}\tilde h_{\gamma,\delta,\lambda}
+\tilde C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde h_{\alpha,\beta,\mu}, \\
+\hat \alpha_{\lambda,\mu}&=&\tilde \alpha_{\lambda,\mu}
++4 \pi \sum_{\alpha,\beta,\gamma,\delta}\tilde e_{\gamma,\delta,\lambda}
+\tilde C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde h_{\alpha,\beta,\mu},
+\end{eqnarray}
+where $\hat \chi^e_{\lambda,\mu}$, $\hat \chi^m_{\lambda,\mu}$ and
+$\hat \alpha_{\lambda,\mu}$ are the dielectric susceptibility, the magnetic
+susceptibility, 
+and the magneto-electric tensor at constant stress, while 
+$\hat d_{\alpha,\beta,\lambda}$ ($\hat h_{\alpha,\beta,\lambda}$)
+is the piezoelectric (piezomagnetic) tensor that
+gives the polarization (magnetization) induced by a stress. 
+
+\subsection{\color{orange}Thermodynamic equations}
+Similarly for the thermodynamic equations we can introduce the Gibbs
+free energy as:
+\begin{equation}
+G=F - V \sum_{\alpha,\beta} \sigma_{\alpha,\beta} \epsilon_{\alpha,\beta},
+\end{equation}
+and to write:
+\begin{equation}
+dG=SdT - V \sum_{\alpha,\beta} \epsilon_{\alpha,\beta} d \sigma_{\alpha,\beta}
+-{V \over 4 \pi} \sum_{\alpha} {\bf D}_\alpha d {\bf E}_\alpha
+-{V \over 4 \pi} \sum_{\alpha} {\bf B}_\alpha d {\bf H}_\alpha
+\end{equation}
+We have therefore:
+\begin{eqnarray}
+S&=&-{\partial G \over \partial T}, \\
+\epsilon_{\alpha,\beta}&=&-{1\over V}
+{\partial G \over \partial \sigma_{\alpha,\beta}}, \\
+{\bf D}_{\alpha}&=&-{4 \pi \over V}
+{\partial G \over \partial {\bf E}_{\alpha}}, \\
+{\bf B}_{\alpha}&=&-{4 \pi \over V}
+{\partial G \over \partial {\bf H}_{\alpha}}.
+\end{eqnarray}
+Assuming that these quantities are functions of the independent variables
+$T$, $\sigma_{\alpha,\beta}$, ${\bf E}_\alpha$, and ${\bf H}_\alpha$ we
+obtain the temperature dependent macroscopic equations:
+\begin{eqnarray}
+dS&=&{\partial S \over \partial T} dT+\sum_{\alpha,\beta}
+{\partial S \over \partial \sigma_{\alpha,\beta}}d\sigma_{\alpha,\beta}
++\sum_\gamma{\partial S \over \partial {\bf E}_{\gamma}}d{\bf E}_{\gamma}+ 
+\sum_\delta{\partial S \over \partial {\bf H}_{\delta}}d{\bf H}_{\delta}, \\
+d\epsilon_{\alpha,\beta}&=&
+{\partial \epsilon_{\alpha,\beta} \over \partial T} dT+\sum_{\gamma,\delta}
+{\partial \epsilon_{\alpha,\beta} \over \partial 
+\sigma_{\gamma,\delta}}d\sigma_{\gamma,\delta}
++\sum_\gamma{\partial \epsilon_{\alpha,\beta} \over \partial 
+{\bf E}_{\gamma}}d{\bf E}_{\gamma}+ 
+\sum_\delta{\partial \epsilon_{\alpha,\beta} \over \partial 
+{\bf H}_{\delta}}d{\bf H}_{\delta}, \\
+d{\bf D}_\gamma&=&
+{\partial  {\bf D}_\gamma \over \partial T} dT+\sum_{\alpha,\beta}
+{\partial {\bf D}_\gamma \over \partial \sigma_{\alpha,\beta}}
+d\sigma_{\alpha,\beta}
++\sum_\alpha{\partial {\bf D}_\gamma \over \partial {\bf E}_{\alpha}}d{\bf E}_{\alpha}+ 
+\sum_\delta{\partial {\bf D}_\gamma \over \partial {\bf H}_{\delta}}d{\bf H}_{\delta}, \\
+d{\bf B}_\delta&=&
+{\partial {\bf B}_\delta \over \partial T} dT+\sum_{\alpha,\beta}
+{\partial {\bf B}_\delta \over \partial \sigma_{\alpha,\beta}}
+d\sigma_{\alpha,\beta}
++\sum_\gamma{\partial {\bf B}_\delta \over \partial {\bf E}_{\gamma}}
+d{\bf E}_{\gamma}+ 
+\sum_\alpha{\partial {\bf B}_\delta \over \partial {\bf H}_{\alpha}}
+d{\bf H}_{\alpha}. 
+\end{eqnarray}
+
+This expansion introduces other material properties not yet defined:
+\subsection{\color{orange}Heat capacity at constant stress}
+The heat capacity at constant stress is defined as
+\begin{equation}
+C_\sigma= - T {\partial^2 G \over \partial T^2} = 
+T {\partial S \over \partial T},
+\end{equation}
+and has the same unit as $S$: $erg\over K$. Usually one considers the heat
+capacity of a mole of substance and gives $C_\sigma$ in 
+${erg \over K \cdot mol}$.
+
+\subsection{\color{orange}Thermal expansion and piezocaloric effect}
+The thermal expansion coefficient or the piezocaloric effects are
+described by the tensor:
+\begin{equation}
+\gamma_{\alpha,\beta}=-{1\over V} {\partial^2 G \over \partial T 
+\partial \sigma_{\alpha,\beta}}={\partial \epsilon_{\alpha,\beta} \over 
+\partial T}= {1\over V}
+{\partial S \over \partial \sigma_{\alpha,\beta}},
+\end{equation}
+its unit is $1/K$.
+
+\subsection{\color{orange}Direct and converse piezo-electric effects}
+The direct and converse piezo-electric effects are described by the 
+tensor:
+\begin{equation}
+d_{\alpha,\beta,\gamma}=-{1\over V} {\partial^2 G \over
+\partial \sigma_{\alpha,\beta} \partial {\bf E}_\gamma}=
+{\partial \epsilon_{\alpha,\beta} \over \partial {\bf E}_\gamma}= 
+{1\over 4\pi}{\partial {\bf D}_\gamma \over \partial \sigma_{\alpha,\beta}},
+\end{equation}
+its unit is $statC/dyne$. Note also that 
+${\partial {\bf D}_\gamma \over \partial \sigma_{\alpha,\beta}}
+=4\pi {\partial {\bf P}_\gamma \over \partial \sigma_{\alpha,\beta}}$.
+
+\subsection{\color{orange}Direct and converse piezo-magnetic effects}
+The direct and converse piezo-magnetic effects are described by the 
+tensor:
+\begin{equation}
+\hat h_{\alpha,\beta,\gamma}=-{1\over V} {\partial^2 G \over
+\partial \sigma_{\alpha,\beta} \partial {\bf H}_\gamma}= 
+{\partial \epsilon_{\alpha,\beta} \over \partial {\bf H}_\gamma}= 
+{1 \over 4 \pi}{\partial {\bf B}_\gamma \over \partial \sigma_{\alpha,\beta}},
+\end{equation}
+its unit is ${1\over G}$. Note also that 
+${\partial {\bf B}_\gamma \over \partial \sigma_{\alpha,\beta}}
+=4 \pi {\partial {\bf M}_\gamma \over \partial \sigma_{\alpha,\beta}}$.
+
+\subsection{\color{orange}Macroscopic equations at finite temperature}
+The other derivatives are just finite temperature generalization of the
+previously discussed quantities. We can rewrite the macroscopic equations as:
+\begin{eqnarray}
+dS&=&{C_\sigma\over T} dT+ V \sum_{\alpha,\beta} \hat \gamma_{\alpha,\beta} 
+d\sigma_{\alpha,\beta}
++ V \sum_\gamma \hat {\bf p}_\gamma d{\bf E}_{\gamma} + 
+V \sum_\delta \hat {\bf q}_\delta d{\bf H}_{\delta}, \\
+d\epsilon_{\alpha,\beta}&=& \hat \gamma_{\alpha,\beta} dT + 
+\sum_{\gamma,\delta} \hat C^{-1 T}_{\alpha,\beta,\gamma,\delta} 
+d \sigma_{\gamma,\delta} + \sum_\gamma \hat d^T_{\alpha,\beta,\gamma} 
+d{\bf E}_{\gamma} +
+\sum_\delta \hat h^T_{\alpha,\beta,\delta} d{\bf H}_{\delta}, \\
+d{\bf D}_\gamma&=&
+4 \pi \hat {\bf p}_\gamma dT + 4 \pi \sum_{\alpha,\beta} \hat 
+d^T_{\alpha,\beta,\gamma} d\sigma_{\alpha,\beta} +
+\sum_\alpha \hat \epsilon^T_{r,\gamma,\alpha} d{\bf E}_{\alpha} + 
+\sum_\delta \hat \alpha^T_{\gamma,\delta} d{\bf H}_{\delta}, \\
+d{\bf B}_\delta&=&
+4 \pi \hat {\bf q}_\delta dT + 4 \pi \sum_{\alpha,\beta}
+\hat h^T_{\alpha,\beta,\gamma}
+d\sigma_{\alpha,\beta}
++\sum_\gamma \hat \alpha^T_{\delta,\gamma}
+d{\bf E}_{\gamma}+ 
+\sum_\alpha \hat \mu^T_{r,\delta,\alpha}
+d{\bf H}_{\alpha}, 
+\end{eqnarray}
+where the index $T$ indicates isothermal quantities and the hat $\hat{}$
+indicates that the independent variables are $T$, $\sigma_{\alpha,\beta}$, 
+${\bf E}_\alpha$, and ${\bf H}_\alpha$.  
+}
+
+\newpage
+\section{\color{coral}Appendix B: {\bf B} as an independent variable}
+In density functional theory the electric field ${\bf E}$ and the
+magnetic field ${\bf B}$ are the two quantities that enter in the Kohn
+and Sham equations. In this case the total energy functional is 
+actually the free enthalpy that depends on $\epsilon$, ${\bf E}$, and 
+${\bf B}$. 
+Since in the equations of motion we have ${\bf M}$ and not ${\bf B}$ 
+to proceed as in the previous case we use the general equation
+\begin{equation}
+{\bf B}_\alpha= \mu_0({\bf M}_\alpha+{\bf H}_\alpha)
+\end{equation}
+and obtain ${\bf H}_\alpha$ as a function of ${\bf B}$.
+We have:
+\begin{equation}
+{\bf H}_\delta = - \sum_\nu \tilde \mu^{-1}_{r,\delta,\nu} {\bf M}^{(0)}_\nu
+- \sum_{\alpha,\beta,\nu} \tilde \mu^{-1}_{r,\delta,\nu} \tilde h_{\alpha,\beta,\nu}
+\epsilon_{\alpha,\beta} - {1\over \mu_0} \sum_{\alpha,\nu}
+\tilde \mu^{-1}_{r,\delta,\nu} \tilde \alpha_{\alpha,\nu} {\bf E}_\alpha
++ {1\over \mu_0} \sum_\nu \tilde \mu^{-1}_{r,\delta,\nu} {\bf B}_\nu, 
+\end{equation}
+where $\tilde \mu_{r,\delta,\nu}$ is the relative magnetic
+permeability.
+Inserting this expression in the equations of motion we obtain:
+\begin{eqnarray}
+\sigma_{\lambda,\mu}&=& \check \sigma_{\lambda,\mu}^{(0)}
++\sum_{\gamma,\delta} \check C_{\lambda,\mu,\gamma,\delta}  
+\epsilon_{\gamma,\delta} -
+\sum_{\gamma} \check e_{\lambda,\mu,\gamma} 
+ {\bf E}_{\gamma}
+-\sum_{\gamma,\nu}  \tilde h_{\lambda,\mu,\gamma} 
+\tilde \mu^{-1}_{r,\gamma,\nu} {\bf B}_{\nu}, \\
+{\bf P}_{\lambda}&=& \check {\bf P}^{(0)}_{\lambda}
++\sum_{\alpha,\beta} \check e_{\alpha,\beta,\lambda} 
+\epsilon_{\alpha,\beta} +
+\sum_{\beta} 
+\check \chi^e_{\lambda,\beta}
+{\bf E}_{\beta} +
+{1\over 4 \pi \mu_0}\sum_{\delta,\nu} \tilde \alpha_{\lambda,\delta} 
+\tilde \mu^{-1}_{r,\delta,\nu}  
+{\bf B}_{\nu}, 
+\end{eqnarray}
+one finds the relationship between quantities calculated at constant 
+${\bf B}$ and those calculated at constant ${\bf H}$. We have:
+\begin{eqnarray}
+\check C_{\lambda,\mu,\gamma,\delta} &=&
+\tilde C_{\lambda,\mu,\gamma,\delta} + \mu_0 \sum_{\alpha,\beta,\nu}
+\tilde h_{\lambda,\mu,\alpha} \tilde \mu^{-1}_{r,\alpha,\nu} 
+\tilde h_{\gamma,\delta,\nu}, \\
+\check e_{\lambda,\mu,\gamma}&=&\tilde e_{\lambda,\mu,\gamma}
+-\sum_{\alpha,\beta} \tilde h_{\lambda,\mu,\alpha} 
+\tilde \mu^{-1}_{r,\alpha,\nu}
+\tilde \alpha_{\gamma,\nu}, \\
+\check \chi^e_{\lambda,\mu}&=&\tilde \chi^e_{\lambda,\mu}
+-{1\over \epsilon_0 \mu_0} \sum_{\delta,\nu} \tilde \alpha_{\lambda,\delta} 
+\tilde \mu^{-1}_{r,\delta,\nu} \tilde \alpha_{\mu,\nu}. 
+\end{eqnarray}
+In addition we have the relationships:
+\begin{eqnarray}
+\check \sigma^{(0)}_{\lambda,\mu} &=& \tilde \sigma^{(0)}_{\lambda,\mu}
++ \mu_0 \sum_{\gamma,\nu} \tilde h_{\lambda,\mu,\gamma} 
+\tilde \mu^{-1}_{r,\gamma,\nu} {\bf M}^{(0)}_\nu,  \\
+\check {\bf P}^{(0)}_{\lambda} &=& \tilde {\bf P}^{(0)}_{\lambda}
+- \sum_{\beta,\nu} \tilde \alpha_{\lambda,\beta} 
+\tilde \mu^{-1}_{r,\beta,\nu} {\bf M}^{(0)}_\nu. 
+\end{eqnarray}
+We can derive similar equations from the microscopic equations of motion.
+The dependence of ${\bf H}_\delta$ on ${\bf B}$ is:
+\begin{eqnarray}
+{\bf H}_\delta = 
+&-& \sum_\nu \mu^{-1}_{r,\delta,\nu} {\bf M}^{(0)}_\nu 
+-{1\over V} \sum_{I,\alpha,\nu} \mu^{-1}_{r,\delta,\nu} Z^m_{I,\alpha,\nu}
+{\bf u}_{I,\alpha} \nonumber\\
+&-& \sum_{\alpha,\beta,\nu} \mu^{-1}_{r,\delta,\nu} h_{\alpha,\beta,\nu}
+\epsilon_{\alpha,\beta} - {1\over \mu_0} \sum_{\alpha,\nu}
+\mu^{-1}_{r,\delta,\nu} \alpha_{\alpha,\nu} {\bf E}_\alpha
++ {1\over \mu_0} \sum_\nu \mu^{-1}_{r,\delta,\nu} {\bf B}_\nu, 
+\end{eqnarray}
+where $\tilde \mu_{r,\delta,\nu}$ is the frozen-ions relative magnetic
+permeability.
+Inserting this equation in the other equations of motion gives:
+\begin{eqnarray}
+{\bf f}_{I,\alpha}&=&\breve{\bf f}^{(0)}_{I,\alpha}
+-\sum_{J,\beta} \breve C_{I,\alpha,J,\beta} {\bf u}_{J,\beta}
++\sum_{\beta,\gamma}
+\breve \Gamma_{I,\alpha,\beta,\gamma} 
+\epsilon_{\beta,\gamma} +
+e \sum_{\beta} \breve Z^*_{I,\alpha,\beta} {\bf E}_{\beta}
++\sum_{\beta} 
+\breve Z^m_{I,\alpha,\beta} {\bf B}_{\beta}, \\
+\sigma_{\lambda,\mu}&=&\breve  \sigma_{\lambda,\mu}^{(0)}
+-{1\over V} \sum_{I,\alpha}
+\breve \Gamma_{I,\alpha,\lambda,\mu} {\bf u}_{I,\alpha}
++\sum_{\gamma,\delta} \breve C_{\lambda,\mu,\gamma,\delta}  
+\epsilon_{\gamma,\delta} -
+\sum_{\gamma} \breve e_{\lambda,\mu,\gamma} 
+ {\bf E}_{\gamma}
+-\sum_{\gamma}  \breve h_{\lambda,\mu,\gamma} 
+{\bf B}_{\gamma}, \\
+{\bf P}_{\lambda}&=& \breve {\bf P}^{(0)}_{\lambda}
++{e\over V} \sum_{I,\alpha} \breve Z^*_{I,\alpha,\lambda} 
+{\bf u}_{I,\alpha} +
+\sum_{\alpha,\beta} \breve e_{\alpha,\beta,\lambda} 
+\epsilon_{\alpha,\beta} +
+\epsilon_0 \sum_{\beta} 
+\breve \chi^e_{\lambda,\beta}
+{\bf E}_{\beta} +
+\sum_{\beta} \breve \alpha_{\lambda,\beta} 
+{\bf B}_{\beta}, 
+\end{eqnarray}
+where
+\begin{eqnarray}
+\breve {\bf f}^{(0)}_{I,\alpha}&=&{\bf f}^{(0)}_{I,\alpha} - \mu_0 
+\sum_{\gamma,\nu}
+Z^m_{I,\alpha,\gamma} \mu^{-1}_{r,\gamma,\nu} {\bf M}^{(0)}_\nu, \\
+\breve \sigma^{(0)}_{\lambda,\mu}&=&\sigma^{(0)}_{\lambda,\mu}
++\mu_0 \sum_{\gamma,\nu} h_{\lambda,\mu,\gamma} \mu^{-1}_{r,\gamma,\nu} 
+{\bf M}^{(0)}_\nu, \\
+\breve {\bf P}^{(0)}_\lambda&=& {\bf P}^{(0)}_\lambda -
+\sum_{\gamma,\nu} \alpha_{\lambda,\gamma} \mu^{-1}_{r,\gamma,\nu} 
+{\bf M}^{(0)}_\nu, \\
+\end{eqnarray}
+and
+\begin{eqnarray}
+\breve C_{I,\alpha,J,\beta} &=& C_{I,\alpha,J,\beta}+
+{\mu_0\over V}  \sum_{\delta,\lambda} Z^m_{I,\alpha,\delta}
+\mu^{-1}_{r,\delta,\lambda}Z^m_{J,\beta,\lambda},\\
+\breve \Gamma_{I,\alpha,\beta,\gamma} &=& \Gamma_{I,\alpha,\beta,\gamma}
+- \mu_0 \sum_{\delta,\lambda} Z^m_{I,\alpha,\delta}
+\mu^{-1}_{r,\delta,\lambda} h_{\beta,\gamma,\lambda}, \\
+\breve Z^*_{I,\alpha,\beta} &=& Z^*_{I,\alpha,\beta}
+-{1\over e} \sum_{\delta,\lambda} Z^m_{I,\alpha,\delta} 
+\mu^{-1}_{r,\delta,\lambda} \alpha_{\beta,\lambda}, \\
+\breve Z^m_{I,\alpha,\beta} &=& \sum_{\delta} Z^m_{I,\alpha,\delta} 
+\mu^{-1}_{r,\delta,\beta}, 
+\end{eqnarray}
+are the microscopic tensors, while
+\begin{eqnarray}
+\breve C_{\lambda,\mu,\gamma,\delta} &=&
+C_{\lambda,\mu,\gamma,\delta} + \mu_0 \sum_{\alpha,\beta,\nu}
+h_{\lambda,\mu,\alpha} \mu^{-1}_{r,\alpha,\nu} 
+h_{\gamma,\delta,\nu}, \\
+\breve e_{\lambda,\mu,\gamma}&=& e_{\lambda,\mu,\gamma}
+-\sum_{\alpha,\beta} h_{\lambda,\mu,\alpha} \mu^{-1}_{r,\alpha,\nu}
+\alpha_{\gamma,\nu}, \\
+\breve h_{\lambda,\mu,\gamma}&=& \sum_\delta h_{\lambda,\mu,\delta}
+\mu^{-1}_{r,\delta,\gamma} \\
+\breve \chi^e_{\lambda,\mu}&=& \chi^e_{\lambda,\mu}
+-{1\over \epsilon_0 \mu_0} \sum_{\delta,\nu} \alpha_{\lambda,\delta} 
+\mu^{-1}_{r,\delta,\nu} \alpha_{\mu,\nu}, \\
+\breve \alpha_{\lambda,\rho} &=&\sum_\beta \alpha_{\lambda,\beta}
+\mu^{-1}_{r,\beta,\rho}
+\end{eqnarray}
+are the frozen-ions macroscopic tensors.
+\\
+\newpage
+
+{\color{web-blue}
+In a.u. the relationship between ${\bf M}$ and ${\bf B}$ is:
+\begin{equation}
+{\bf B}_\alpha= \alpha^2 ({\bf H}_\alpha+4 \pi {\bf M}_\alpha)
+\end{equation}
+and we have:
+\begin{equation}
+{\bf H}_\delta = - 4 \pi \sum_\nu \tilde \mu^{-1}_{r,\delta,\nu} 
+{\bf M}^{(0)}_\nu
+- 4 \pi \sum_{\alpha,\beta,\nu} \tilde \mu^{-1}_{r,\delta,\nu} 
+\tilde h_{\alpha,\beta,\nu}
+\epsilon_{\alpha,\beta} - {1\over \alpha^2} \sum_{\alpha,\nu}
+\tilde \mu^{-1}_{r,\delta,\nu} \tilde \alpha_{\alpha,\nu} {\bf E}_\alpha
++ {1\over \alpha^2} \sum_\nu \tilde \mu^{-1}_{r,\delta,\nu} {\bf B}_\nu, 
+\end{equation}
+where $\tilde \mu_{r,\delta,\nu}$ is the relative magnetic
+permeability.
+Inserting this expression in the equations of motion we obtain:
+\begin{eqnarray}
+\sigma_{\lambda,\mu}&=& \check \sigma_{\lambda,\mu}^{(0)}
++\sum_{\gamma,\delta} \check C_{\lambda,\mu,\gamma,\delta}  
+\epsilon_{\gamma,\delta} -
+\sum_{\gamma} \check e_{\lambda,\mu,\gamma} 
+ {\bf E}_{\gamma}
+-\sum_{\gamma,\nu}  \tilde h_{\lambda,\mu,\gamma} 
+\tilde \mu^{-1}_{r,\gamma,\nu} {\bf B}_{\nu}, \\
+{\bf P}_{\lambda}&=& \check {\bf P}^{(0)}_{\lambda}
++\sum_{\alpha,\beta} \check e_{\alpha,\beta,\lambda} 
+\epsilon_{\alpha,\beta} +
+\sum_{\beta} 
+\check \chi^e_{\lambda,\beta}
+{\bf E}_{\beta} +
+{1\over 4 \pi \mu_0}\sum_{\delta,\nu} \tilde \alpha_{\lambda,\delta} 
+\tilde \mu^{-1}_{r,\delta,\nu}  
+{\bf B}_{\nu}, 
+\end{eqnarray}
+one finds the relationship between quantities calculated at constant 
+${\bf B}$ and those calculated at constant ${\bf H}$. We have:
+\begin{eqnarray}
+\check C_{\lambda,\mu,\gamma,\delta} &=&
+\tilde C_{\lambda,\mu,\gamma,\delta} + 4 \pi \alpha^2 \sum_{\alpha,\beta,\nu}
+\tilde h_{\lambda,\mu,\alpha} \tilde \mu^{-1}_{r,\alpha,\nu} 
+\tilde h_{\gamma,\delta,\nu}, \\
+\check e_{\lambda,\mu,\gamma}&=&\tilde e_{\lambda,\mu,\gamma}
+- \sum_{\alpha,\beta} \tilde h_{\lambda,\mu,\alpha} 
+\tilde \mu^{-1}_{r,\alpha,\nu}
+\tilde \alpha_{\gamma,\nu}, \\
+\check \chi^e_{\lambda,\mu}&=&\tilde \chi^e_{\lambda,\mu}
+-{1\over 4 \pi \alpha^2} \sum_{\delta,\nu} \tilde \alpha_{\lambda,\delta} 
+\tilde \mu^{-1}_{r,\delta,\nu} \tilde \alpha_{\mu,\nu}. 
+\end{eqnarray}
+In addition we have the relationships:
+\begin{eqnarray}
+\check \sigma^{(0)}_{\lambda,\mu} &=& \tilde \sigma^{(0)}_{\lambda,\mu}
++ 4 \pi \alpha^2 \sum_{\gamma,\nu} \tilde h_{\lambda,\mu,\gamma} 
+\tilde \mu^{-1}_{r,\gamma,\nu} {\bf M}^{(0)}_\nu,  \\
+\check {\bf P}^{(0)}_{\lambda} &=& \tilde {\bf P}^{(0)}_{\lambda}
+- \sum_{\beta,\nu} \tilde \alpha_{\lambda,\beta} 
+\tilde \mu^{-1}_{r,\beta,\nu} {\bf M}^{(0)}_\nu. 
+\end{eqnarray}
+We can derive similar equations from the microscopic equations of motion.
+The dependence of ${\bf H}_\delta$ on ${\bf B}$ is:
+\begin{eqnarray}
+{\bf H}_\delta = 
+&-& 4 \pi \sum_\nu \mu^{-1}_{r,\delta,\nu} {\bf M}^{(0)}_\nu 
+-{4 \pi \over V} \sum_{I,\alpha,\nu} \mu^{-1}_{r,\delta,\nu} Z^m_{I,\alpha,\nu}
+{\bf u}_{I,\alpha} \nonumber\\
+&-& 4 \pi \sum_{\alpha,\beta,\nu} \mu^{-1}_{r,\delta,\nu} h_{\alpha,\beta,\nu}
+\epsilon_{\alpha,\beta} - {1\over \alpha^2} \sum_{\alpha,\nu}
+\mu^{-1}_{r,\delta,\nu} \alpha_{\alpha,\nu} {\bf E}_\alpha
++ {1\over \alpha^2} \sum_\nu \mu^{-1}_{r,\delta,\nu} {\bf B}_\nu, 
+\end{eqnarray}
+where $\mu^{-1}_{r,\delta,\nu}$ is the frozen-ions relative magnetic
+permeability.
+Inserting this equation in the other equations of motion gives:
+\begin{eqnarray}
+{\bf f}_{I,\alpha}&=&\breve{\bf f}^{(0)}_{I,\alpha}
+-\sum_{J,\beta} \breve C_{I,\alpha,J,\beta} {\bf u}_{J,\beta}
++\sum_{\beta,\gamma}
+\breve \Gamma_{I,\alpha,\beta,\gamma} 
+\epsilon_{\beta,\gamma} +
+\sum_{\beta} \breve Z^*_{I,\alpha,\beta} {\bf E}_{\beta}
++\sum_{\beta} 
+\breve Z^m_{I,\alpha,\beta} {\bf B}_{\beta}, \\
+\sigma_{\lambda,\mu}&=&\breve  \sigma_{\lambda,\mu}^{(0)}
+-{1\over V} \sum_{I,\alpha}
+\breve \Gamma_{I,\alpha,\lambda,\mu} {\bf u}_{I,\alpha}
++\sum_{\gamma,\delta} \breve C_{\lambda,\mu,\gamma,\delta}  
+\epsilon_{\gamma,\delta} -
+\sum_{\gamma} \breve e_{\lambda,\mu,\gamma} 
+ {\bf E}_{\gamma}
+-\sum_{\gamma}  \breve h_{\lambda,\mu,\gamma} 
+{\bf B}_{\gamma}, \\
+{\bf P}_{\lambda}&=& \breve {\bf P}^{(0)}_{\lambda}
++{1\over V} \sum_{I,\alpha} \breve Z^*_{I,\alpha,\lambda} 
+{\bf u}_{I,\alpha} +
+\sum_{\alpha,\beta} \breve e_{\alpha,\beta,\lambda} 
+\epsilon_{\alpha,\beta} +
+\epsilon_0 \sum_{\beta} 
+\breve \chi^e_{\lambda,\beta}
+{\bf E}_{\beta} +
+\sum_{\beta} \breve \alpha_{\lambda,\beta} 
+{\bf B}_{\beta}, 
+\end{eqnarray}
+where
+\begin{eqnarray}
+\breve {\bf f}^{(0)}_{I,\alpha}&=&{\bf f}^{(0)}_{I,\alpha} - 4 \pi
+\alpha^2
+\sum_{\gamma,\nu}
+Z^m_{I,\alpha,\gamma} \mu^{-1}_{r,\gamma,\nu} {\bf M}^{(0)}_\nu, \\
+\breve \sigma^{(0)}_{\lambda,\mu}&=&\sigma^{(0)}_{\lambda,\mu}
++4 \pi \alpha^2 \sum_{\gamma,\nu} h_{\lambda,\mu,\gamma} \mu^{-1}_{r,\gamma,\nu} 
+{\bf M}^{(0)}_\nu, \\
+\breve {\bf P}^{(0)}_\lambda&=& {\bf P}^{(0)}_\lambda -
+\sum_{\gamma,\nu} \alpha_{\lambda,\gamma} \mu^{-1}_{r,\gamma,\nu} 
+{\bf M}^{(0)}_\nu, \\
+\end{eqnarray}
+and
+\begin{eqnarray}
+\breve C_{I,\alpha,J,\beta} &=& C_{I,\alpha,J,\beta}+
+{4 \pi \alpha^2 \over V}  \sum_{\delta,\lambda} Z^m_{I,\alpha,\delta}
+\mu^{-1}_{r,\delta,\lambda}Z^m_{J,\beta,\lambda},\\
+\breve \Gamma_{I,\alpha,\beta,\gamma} &=& \Gamma_{I,\alpha,\beta,\gamma}
+- 4 \pi \alpha^2 \sum_{\delta,\lambda} Z^m_{I,\alpha,\delta}
+\mu^{-1}_{r,\delta,\lambda} h_{\beta,\gamma,\lambda}, \\
+\breve Z^*_{I,\alpha,\beta} &=& Z^*_{I,\alpha,\beta}
+-\sum_{\delta,\lambda} Z^m_{I,\alpha,\delta} 
+\mu^{-1}_{r,\delta,\lambda} \alpha_{\beta,\lambda}, \\
+\breve Z^m_{I,\alpha,\beta} &=& \sum_{\delta} Z^m_{I,\alpha,\delta} 
+\mu^{-1}_{r,\delta,\beta}, 
+\end{eqnarray}
+are the microscopic tensors, while
+\begin{eqnarray}
+\breve C_{\lambda,\mu,\gamma,\delta} &=&
+C_{\lambda,\mu,\gamma,\delta} + 4 \pi \alpha^2 \sum_{\alpha,\beta,\nu}
+h_{\lambda,\mu,\alpha} \mu^{-1}_{r,\alpha,\nu} 
+h_{\gamma,\delta,\nu}, \\
+\breve e_{\lambda,\mu,\gamma}&=& e_{\lambda,\mu,\gamma}
+-\sum_{\alpha,\beta} h_{\lambda,\mu,\alpha} \mu^{-1}_{r,\alpha,\nu}
+\alpha_{\gamma,\nu}, \\
+\breve h_{\lambda,\mu,\gamma}&=& \sum_\delta h_{\lambda,\mu,\delta}
+\mu^{-1}_{r,\delta,\gamma} \\
+\breve \chi^e_{\lambda,\mu}&=& \chi^e_{\lambda,\mu}
+-{1\over 4 \pi \alpha^2} \sum_{\delta,\nu} \alpha_{\lambda,\delta} 
+\mu^{-1}_{r,\delta,\nu} \alpha_{\mu,\nu}, \\
+\breve \alpha_{\lambda,\rho} &=&{1\over 4 \pi \alpha^2}
+\sum_\beta \alpha_{\lambda,\beta}
+\mu^{-1}_{r,\beta,\rho}
+\end{eqnarray}
+are the frozen-ions macroscopic tensors.
+}
+\\
+\newpage
+{\color{orange}
+In c.g.s.-Gaussian units the relationship between 
+${\bf M}$ and ${\bf B}$ is:
+\begin{equation}
+{\bf B}_\alpha= {\bf H}_\alpha+ 4 \pi {\bf M}_\alpha
+\end{equation}
+and we have:
+\begin{equation}
+{\bf H}_\delta = - 4 \pi \sum_\nu \tilde \mu^{-1}_{r,\delta,\nu} 
+{\bf M}^{(0)}_\nu
+- 4 \pi \sum_{\alpha,\beta,\nu} \tilde \mu^{-1}_{r,\delta,\nu} 
+\tilde h_{\alpha,\beta,\nu}
+\epsilon_{\alpha,\beta} - \sum_{\alpha,\nu}
+\tilde \mu^{-1}_{r,\delta,\nu} \tilde \alpha_{\alpha,\nu} {\bf E}_\alpha
++ \sum_\nu \tilde \mu^{-1}_{r,\delta,\nu} {\bf B}_\nu, 
+\end{equation}
+where $\tilde \mu^{-1}_{r,\delta,\nu}$ is the relative magnetic
+permeability.
+Inserting this expression in the equations of motion we obtain:
+\begin{eqnarray}
+\sigma_{\lambda,\mu}&=& \check \sigma_{\lambda,\mu}^{(0)}
++\sum_{\gamma,\delta} \check C_{\lambda,\mu,\gamma,\delta}  
+\epsilon_{\gamma,\delta} -
+\sum_{\gamma} \check e_{\lambda,\mu,\gamma} 
+ {\bf E}_{\gamma}
+-\sum_{\gamma,\nu}  \tilde h_{\lambda,\mu,\gamma} 
+\tilde \mu^{-1}_{r,\gamma,\nu} {\bf B}_{\nu}, \\
+{\bf P}_{\lambda}&=& \check {\bf P}^{(0)}_{\lambda}
++\sum_{\alpha,\beta} \check e_{\alpha,\beta,\lambda} 
+\epsilon_{\alpha,\beta} +
+\sum_{\beta} 
+\check \chi^e_{\lambda,\beta}
+{\bf E}_{\beta} +
+{1\over 4 \pi} \sum_{\delta,\nu} \tilde \alpha_{\lambda,\delta} 
+\tilde \mu^{-1}_{r,\delta,\nu}  
+{\bf B}_{\nu}, 
+\end{eqnarray}
+one finds the relationship between quantities calculated at constant 
+${\bf B}$ and those calculated at constant ${\bf H}$. We have:
+\begin{eqnarray}
+\check C_{\lambda,\mu,\gamma,\delta} &=&
+\tilde C_{\lambda,\mu,\gamma,\delta} + 4 \pi \sum_{\alpha,\beta,\nu}
+\tilde h_{\lambda,\mu,\alpha} \tilde \mu^{-1}_{r,\alpha,\nu} 
+\tilde h_{\gamma,\delta,\nu}, \\
+\check e_{\lambda,\mu,\gamma}&=&\tilde e_{\lambda,\mu,\gamma}
+-\sum_{\alpha,\beta} \tilde h_{\lambda,\mu,\alpha} 
+\tilde \mu^{-1}_{r,\alpha,\nu}
+\tilde \alpha_{\gamma,\nu}, \\
+\check \chi^e_{\lambda,\mu}&=&\tilde \chi^e_{\lambda,\mu}
+-{1\over 4 \pi} \sum_{\delta,\nu} \tilde \alpha_{\lambda,\delta} 
+\tilde \mu^{-1}_{r,\delta,\nu} \tilde \alpha_{\mu,\nu}. 
+\end{eqnarray}
+In addition we have the relationships:
+\begin{eqnarray}
+\check \sigma^{(0)}_{\lambda,\mu} &=& \tilde \sigma^{(0)}_{\lambda,\mu}
++ 4 \pi \sum_{\gamma,\nu} \tilde h_{\lambda,\mu,\gamma} 
+\tilde \mu^{-1}_{r,\gamma,\nu} {\bf M}^{(0)}_\nu,  \\
+\check {\bf P}^{(0)}_{\lambda} &=& \tilde {\bf P}^{(0)}_{\lambda}
+- \sum_{\beta,\nu} \tilde \alpha_{\lambda,\beta} 
+\tilde \mu^{-1}_{r,\beta,\nu} {\bf M}^{(0)}_\nu. 
+\end{eqnarray}
+We can derive similar equations from the microscopic equations of motion.
+The dependence of ${\bf H}_\delta$ on ${\bf B}$ is:
+\begin{eqnarray}
+{\bf H}_\delta = 
+&-& 4 \pi \sum_\nu \mu^{-1}_{r,\delta,\nu} {\bf M}^{(0)}_\nu 
+-{4 \pi \over V} \sum_{I,\alpha,\nu} \mu^{-1}_{r,\delta,\nu} Z^m_{I,\alpha,\nu}
+{\bf u}_{I,\alpha} \nonumber\\
+&-& 4 \pi \sum_{\alpha,\beta,\nu} \mu^{-1}_{r,\delta,\nu} h_{\alpha,\beta,\nu}
+\epsilon_{\alpha,\beta} - \sum_{\alpha,\nu}
+\mu^{-1}_{r,\delta,\nu} \alpha_{\alpha,\nu} {\bf E}_\alpha
++ \sum_\nu \mu^{-1}_{r,\delta,\nu} {\bf B}_\nu, 
+\end{eqnarray}
+where $\mu^{-1}_{r,\delta,\nu}$ is the frozen-ions relative magnetic
+permeability.
+Inserting this equation in the other equations of motion gives:
+\begin{eqnarray}
+{\bf f}_{I,\alpha}&=&\breve{\bf f}^{(0)}_{I,\alpha}
+-\sum_{J,\beta} \breve C_{I,\alpha,J,\beta} {\bf u}_{J,\beta}
++\sum_{\beta,\gamma}
+\breve \Gamma_{I,\alpha,\beta,\gamma} 
+\epsilon_{\beta,\gamma} +
+e \sum_{\beta} \breve Z^*_{I,\alpha,\beta} {\bf E}_{\beta}
++\sum_{\beta} 
+\breve Z^m_{I,\alpha,\beta} {\bf B}_{\beta}, \\
+\sigma_{\lambda,\mu}&=&\breve  \sigma_{\lambda,\mu}^{(0)}
+-{1\over V} \sum_{I,\alpha}
+\breve \Gamma_{I,\alpha,\lambda,\mu} {\bf u}_{I,\alpha}
++\sum_{\gamma,\delta} \breve C_{\lambda,\mu,\gamma,\delta}  
+\epsilon_{\gamma,\delta} -
+\sum_{\gamma} \breve e_{\lambda,\mu,\gamma} 
+ {\bf E}_{\gamma}
+-\sum_{\gamma}  \breve h_{\lambda,\mu,\gamma} 
+{\bf B}_{\gamma}, \\
+{\bf P}_{\lambda}&=& \breve {\bf P}^{(0)}_{\lambda}
++{e\over V} \sum_{I,\alpha} \breve Z^*_{I,\alpha,\lambda} 
+{\bf u}_{I,\alpha} +
+\sum_{\alpha,\beta} \breve e_{\alpha,\beta,\lambda} 
+\epsilon_{\alpha,\beta} +
+\sum_{\beta} 
+\breve \chi^e_{\lambda,\beta}
+{\bf E}_{\beta} +
+{1\over 4 \pi} \sum_{\beta} \breve \alpha_{\lambda,\beta} 
+{\bf B}_{\beta}, 
+\end{eqnarray}
+where
+\begin{eqnarray}
+\breve {\bf f}^{(0)}_{I,\alpha}&=&{\bf f}^{(0)}_{I,\alpha} - 4 \pi
+\sum_{\gamma,\nu}
+Z^m_{I,\alpha,\gamma} \mu^{-1}_{r,\gamma,\nu} {\bf M}^{(0)}_\nu, \\
+\breve \sigma^{(0)}_{\lambda,\mu}&=&\sigma^{(0)}_{\lambda,\mu}
++ 4 \pi \sum_{\gamma,\nu} h_{\lambda,\mu,\gamma} \mu^{-1}_{r,\gamma,\nu} 
+{\bf M}^{(0)}_\nu, \\
+\breve {\bf P}^{(0)}_\lambda&=& {\bf P}^{(0)}_\lambda -
+\sum_{\gamma,\nu} \alpha_{\lambda,\gamma} \mu^{-1}_{r,\gamma,\nu} 
+{\bf M}^{(0)}_\nu, \\
+\end{eqnarray}
+and
+\begin{eqnarray}
+\breve C_{I,\alpha,J,\beta} &=& C_{I,\alpha,J,\beta}+
+{4 \pi \over V}  \sum_{\delta,\lambda} Z^m_{I,\alpha,\delta}
+\mu^{-1}_{r,\delta,\lambda}Z^m_{J,\beta,\lambda},\\
+\breve \Gamma_{I,\alpha,\beta,\gamma} &=& \Gamma_{I,\alpha,\beta,\gamma}
+- 4 \pi \sum_{\delta,\lambda} Z^m_{I,\alpha,\delta}
+\mu^{-1}_{r,\delta,\lambda} h_{\beta,\gamma,\lambda}, \\
+\breve Z^*_{I,\alpha,\beta} &=& Z^*_{I,\alpha,\beta}
+-{1\over e} \sum_{\delta,\lambda} Z^m_{I,\alpha,\delta} 
+\mu^{-1}_{r,\delta,\lambda} \alpha_{\beta,\lambda}, \\
+\breve Z^m_{I,\alpha,\beta} &=& \sum_{\delta} Z^m_{I,\alpha,\delta} 
+\mu^{-1}_{r,\delta,\beta}, 
+\end{eqnarray}
+are the microscopic tensors, while
+\begin{eqnarray}
+\breve C_{\lambda,\mu,\gamma,\delta} &=&
+C_{\lambda,\mu,\gamma,\delta} + 4 \pi \sum_{\alpha,\beta,\nu}
+h_{\lambda,\mu,\alpha} \mu^{-1}_{r,\alpha,\nu} 
+h_{\gamma,\delta,\nu}, \\
+\breve e_{\lambda,\mu,\gamma}&=& e_{\lambda,\mu,\gamma}
+-\sum_{\alpha,\beta} h_{\lambda,\mu,\alpha} \mu^{-1}_{r,\alpha,\nu}
+\alpha_{\gamma,\nu}, \\
+\breve h_{\lambda,\mu,\gamma}&=& \sum_\delta h_{\lambda,\mu,\delta}
+\mu^{-1}_{r,\delta,\gamma} \\
+\breve \chi^e_{\lambda,\mu}&=& \chi^e_{\lambda,\mu}
+-{1\over 4 \pi} \sum_{\delta,\nu} \alpha_{\lambda,\delta} 
+\mu^{-1}_{r,\delta,\nu} \alpha_{\mu,\nu}, \\
+\breve \alpha_{\lambda,\rho} &=&\sum_\beta \alpha_{\lambda,\beta}
+\mu^{-1}_{r,\beta,\rho}
+\end{eqnarray}
+are the frozen-ions macroscopic tensors.
+}
+
+\newpage
+\section{\color{coral} Appendix C: Free-energy of free-fields }
+
+The free energy of the free fields is written as
+\begin{equation}
+\mathcal{F}_{free}=-{\epsilon_0 V \over 2} \sum_{\alpha,\beta} 
+\delta_{\alpha,\beta} {\bf E}_\alpha {\bf E}_\beta-
+{\mu_0 V \over 2} \sum_{\alpha,\beta} 
+\delta_{\alpha,\beta} {\bf H}_\alpha {\bf H}_\beta.
+\end{equation}
+Therefore expanding $\mathcal{\tilde F} = \mathcal{F} + \mathcal{F}_{free}$
+instead of $\mathcal{F}$ we would obtain four different terms:
+\begin{eqnarray}
+\mathcal{\tilde F}(\{{\bf u}_{I,\alpha}\}, \{\epsilon_{\alpha,\beta}\},
+\{ {\bf E}_\alpha\}, \{{\bf H}_\alpha\})&=& \cdots -
+V \sum_{\alpha} {\bf D}^{(0)}_\alpha {\bf E}_\alpha - 
+V \sum_{\alpha} {\bf B}^{(0)}_\alpha {\bf H}_\alpha \nonumber \\
+&-&  
+ {1\over 2} \epsilon_0 V \sum_{\alpha,\beta} 
+\epsilon_{r,\alpha,\beta}
+{\bf E}_{\alpha}
+{\bf E}_{\beta} \nonumber \\
+&-& {1\over 2} \mu_0 V \sum_{\alpha,\beta} 
+\mu_{r,\alpha,\beta}
+{\bf H}_{\alpha}
+{\bf H}_{\beta} \nonumber \\
+&+& \cdots,
+\end{eqnarray}
+where the dots indicate the same terms written above.
+Moreover we have:
+\begin{equation}
+{\bf D}_\alpha = -{1\over V} {\partial \mathcal{\tilde F} \over 
+\partial {\bf E}_\alpha},
+\end{equation}
+and
+\begin{equation}
+{\bf B}_\alpha = -{1\over V} {\partial \mathcal{\tilde F} \over 
+\partial {\bf H}_\alpha}.
+\end{equation}
+\\
+
+{\color{web-blue} In a.u. the free energy of the 
+free fields is written as
+\begin{equation}
+\mathcal{F}_{free}=-{V \over 8 \pi} \sum_{\alpha,\beta} 
+\delta_{\alpha,\beta} {\bf E}_\alpha {\bf E}_\beta-
+{\alpha^2 V \over 8 \pi} \sum_{\alpha,\beta} 
+\delta_{\alpha,\beta} {\bf H}_\alpha {\bf H}_\beta.
+\end{equation}
+Therefore expanding $\mathcal{\tilde F} = \mathcal{F} + \mathcal{F}_{free}$
+instead of $\mathcal{F}$ we would obtain four different terms:
+\begin{eqnarray}
+\mathcal{\tilde F}(\{{\bf u}_{I,\alpha}\}, \{\epsilon_{\alpha,\beta}\},
+\{ {\bf E}_\alpha\}, \{{\bf H}_\alpha\})&=& \cdots -
+{V \over 4 \pi} \sum_{\alpha} {\bf D}^{(0)}_\alpha {\bf E}_\alpha - 
+{V \over 4 \pi} \sum_{\alpha} {\bf B}^{(0)}_\alpha {\bf H}_\alpha \nonumber \\
+&-&  
+ {V\over 8 \pi} \sum_{\alpha,\beta} 
+\epsilon_{r,\alpha,\beta}
+{\bf E}_{\alpha}
+{\bf E}_{\beta} \nonumber \\
+&-& {\alpha^2 V\over 8 \pi} \sum_{\alpha,\beta} 
+\mu_{r,\alpha,\beta}
+{\bf H}_{\alpha}
+{\bf H}_{\beta} \nonumber \\
+&+& \cdots,
+\end{eqnarray}
+where the dots indicate the same terms written above.
+Moreover we have:
+\begin{equation}
+{\bf D}_\alpha = -{4\pi\over V} {\partial \mathcal{\tilde F} \over 
+\partial {\bf E}_\alpha},
+\end{equation}
+and
+\begin{equation}
+{\bf B}_\alpha = -{4\pi\over V} {\partial \mathcal{\tilde F} \over 
+\partial {\bf H}_\alpha}.
+\end{equation}
+}
+\\
+
+{\color{orange} In c.g.s.-Gaussian units the free energy of the 
+free fields is written as
+\begin{equation}
+\mathcal{F}_{free}=-{V \over 8 \pi} \sum_{\alpha,\beta} 
+\delta_{\alpha,\beta} {\bf E}_\alpha {\bf E}_\beta-
+{V \over 8 \pi} \sum_{\alpha,\beta} 
+\delta_{\alpha,\beta} {\bf H}_\alpha {\bf H}_\beta.
+\end{equation}
+Therefore expanding $\mathcal{\tilde F} = \mathcal{F} + \mathcal{F}_{free}$
+instead of $\mathcal{F}$ we would obtain four different terms:
+\begin{eqnarray}
+\mathcal{\tilde F}(\{{\bf u}_{I,\alpha}\}, \{\epsilon_{\alpha,\beta}\},
+\{ {\bf E}_\alpha\}, \{{\bf H}_\alpha\})&=& \cdots -
+{V\over 4 \pi} \sum_{\alpha} {\bf D}^{(0)}_\alpha {\bf E}_\alpha - 
+{V \over 4 \pi} \sum_{\alpha} {\bf B}^{(0)}_\alpha {\bf H}_\alpha \nonumber \\
+&-&  
+ {V\over 8 \pi} \sum_{\alpha,\beta} 
+\epsilon_{r,\alpha,\beta}
+{\bf E}_{\alpha}
+{\bf E}_{\beta} \nonumber \\
+&-& {V\over 8 \pi} \sum_{\alpha,\beta} 
+\mu_{r,\alpha,\beta}
+{\bf H}_{\alpha}
+{\bf H}_{\beta} \nonumber \\
+&+& \cdots,
+\end{eqnarray}
+where the dots indicate the same terms written above.
+Moreover we have:
+\begin{equation}
+{\bf D}_\alpha = -{4 \pi \over V} {\partial \mathcal{\tilde F} \over 
+\partial {\bf E}_\alpha},
+\end{equation}
+and
+\begin{equation}
+{\bf B}_\alpha = -{4 \pi \over V} {\partial \mathcal{\tilde F} \over 
+\partial {\bf H}_\alpha}.
+\end{equation}
+}
+
+%\newpage
+%\section{\color{coral} Appendix D: Gaussian atomic units}
+%
+%{\color{steelblue}
+%Written in Gaussian a.u. the phenomenological expression
+%of the magneto-electric enthalpy coincides with the one written in 
+%c.g.s.-Gaussian units.
+%This expression can be found by notincing that with respect to the
+%a.u. discussed in the text, Gaussian a.u. change the definition of the 
+%following quantities:
+%\\
+%
+%\noindent {\bf Magnetization:\\}
+%Since ${\bar U_G \over \bar l_G^3 \mu_0 \bar H_G \bar M_G}=1$ we have:
+%\begin{equation}
+%{\bf M}^{(0)}_{\alpha}=-{1\over V} 
+%{\partial \mathcal{F} \over \partial {\bf H}_{\alpha}}.
+%\label{magnetization}
+%\end{equation}
+%\\
+%
+%\noindent {\bf Magnetic susceptibility:\\}
+%Since ${\bar U_G \over \mu_0 \bar l_G^3 \bar H_G^2}=4\pi$ we have:
+%\begin{equation}
+%\chi^{m,a.u.}_{\alpha,\beta}=-{1\over V} 
+%{\partial^2 \mathcal{F} \over \partial 
+%{\bf H}_{\alpha} \partial {\bf H}_{\beta}}. 
+%\end{equation}
+%and $\chi^{m,a.u.}_{\alpha,\beta}= {\chi^{m}_{\alpha,\beta}\over 4 \pi}$.
+%\\
+%
+%\noindent {\bf Dynamical magnetic charges:\\}
+%In this case $\bar Z^m_G={\bar Z^m\over \alpha}$ and since
+%${\alpha \bar U_G \over \mu_0 \bar l_G^2 \bar H_G \bar I_G}=1$ we have:
+%\begin{equation}
+%Z^m_{I,\alpha,\beta}=-{\partial^2 \mathcal{F} \over \partial 
+%{\bf u}_{I,\alpha} \partial {\bf H}_{\beta}}.
+%\end{equation}
+%\\
+%
+%\noindent {\bf Piezomagnetic tensor:\\}
+%In this case $\bar h_G={\bar h \over \alpha}$ because the piezomagnetic
+%tensor and the magnetization have the same unit. Since 
+%${\alpha \bar U_G \over \mu_0 \bar l_G^2 \bar H_G \bar I_G}=1$ 
+%we have:
+%\begin{equation}
+%h_{\alpha,\beta,\gamma}=-{1\over V} 
+%{\partial^2 \mathcal{F} \over \partial 
+%\epsilon_{\alpha,\beta} \partial {\bf H}_{\gamma}}.
+%\end{equation}
+%\\
+%
+%\noindent {\bf Magnetoelectric tensor:\\}
+%It is convenient to choose $\bar \alpha_G={\bar \alpha \over \alpha}$ so
+%that ${\bar U_G \over \bar l_G^2 \bar E_G \bar H_G \bar t}={4 \pi}$ 
+%and we can write:
+%\begin{equation}
+%\alpha_{\alpha,\beta}=-{4 \pi \over V} 
+%{\partial^2 \mathcal{F} \over \partial 
+%{\bf E}_{\alpha} \partial {\bf H}_{\beta}}. 
+%\end{equation}
+%}
+%
+\newpage
+\section{\color{coral}Bibliography}
+\begin{enumerate}
+
+\item
+[1.] J.D. Jackson, Classical electrodynamics, Third edition,
+J. Wiley and Sons (1999).
+
+\item
+[2.] M. Ye and D. Vanderbilt, Phys. Rev. B {\bf 89}, 064301 (2014).
+
+\item[3.] J.F. Nye, Physical properties of crystals, Oxford university 
+press (1985).
+\end{enumerate}
+
+\end{document}
+
