@@ -11,6 +11,7 @@
 \def\tpw{{\sc THERMO\_PW}}
 
 \usepackage{amsmath}
+\usepackage{mathtools}
 \usepackage{html}
 \usepackage{color}
 
@@ -522,11 +523,11 @@ so the unit of speed is $m/s$.
 {\color{web-blue} In a.u. the unit of speed ($\bar v$) is derived 
 from its definition $\bar v = \bar l / \bar t$. The conversion factor
 with the SI unit is:
-\begin{eqnarray}
-\bar v ={a_B \hbar \over m_e a_B^2}={\hbar \over m_e a_B}=\alpha c&=&
+\begin{align}
+\bar v ={a_B \hbar \over m_e a_B^2}={\hbar \over m_e a_B}=\alpha c&=
  {\alphaf\  \cspeed\ m/s}\nonumber \\ 
-&=&\barv\ m/s.
-\end{eqnarray}
+&=\barv\ m/s.
+\end{align}
 Using the definitions of $\bar l$ and $\bar t$ we can also write:
 \begin{equation}
 \bar v={a_B E_h \over \hbar}.
@@ -534,7 +535,7 @@ Using the definitions of $\bar l$ and $\bar t$ we can also write:
 \\
 Note that since $\bar v= \alpha c$ we can also write 
 $c={1\over \alpha} \bar v$ meaning that the speed of light in a.u. 
-$c_{a.u.}={1\over\alpha}=\cspeedau\ m/s$.
+$c_{a.u.}={1\over\alpha}=\cspeedau$.
 }
 \\
 
@@ -562,11 +563,11 @@ so the unit of acceleration is $m/s^2$.
 {\color{web-blue} In a.u. the unit of acceleration ($\bar a$) is derived 
 from its definition $\bar a = \bar l / \bar t^2$. The conversion factor
 with the SI unit is:
-\begin{eqnarray}
-\bar a = {\bar v \over \bar t}={E_h \alpha c \over \hbar}&=& 
+\begin{align}
+\bar a = {\bar v \over \bar t}={E_h \alpha c \over \hbar}&= 
 {\baru\ J\ \alphaf\ \cspeed\ m/s \over \hbarf\ J\cdot s}\nonumber \\
-&=&\bara\ m/s^2.
-\end{eqnarray}
+&= \bara\ m/s^2.
+\end{align}
 \\
 }
 
@@ -655,11 +656,11 @@ so the unit of force is $N=kg\cdot m/s^2$. This unit is called Newton.
 {\color{web-blue} In a.u. the unit of force ($\bar f$) is derived 
 from the same equation so we have $\bar f =\bar m \cdot \bar a$. The
 conversion factor with the SI unit is: 
-\begin{eqnarray}
-\bar f &=& {m_e a_B \hbar E_h \over m_e a_B^2 \hbar }= 
+\begin{align}
+\bar f &= {m_e a_B \hbar E_h \over m_e a_B^2 \hbar }= 
 {E_h\over a_B}\nonumber={\baru J \over \barl m}\nonumber \\
-&=&\barf\ N. 
-\end{eqnarray}
+&=\barf\ N. 
+\end{align}
 So in a.u. the unit of force is Hartree/Bohr.
 }
 \\
@@ -811,19 +812,20 @@ therefore $\bar I_{cgs}=statA=\sqrt{dyne}\ cm/s$. This unit is called
 statamp\`ere or 
 electrostatic unit ($esu$) of current.
 
-In order to convert between $statA$ and $A$, we can write $A= K\ statA$. 
-When the currents in the two wires are $I\ statA={I\over K} A$ and 
-$I'\ statA={I'\over K} A$ and their distance
+In order to convert between $statA$ and $A$, we can write 
+$A= \mathcal{K}\ statA$. 
+When the currents in the two wires are $I\ statA={I\over \mathcal{K}} A$ and 
+$I'\ statA={I'\over \mathcal{K}} A$ and their distance
 is $r\ cm=r\ 10^{-2}\ m$ the force per metre is in $N/m=
 {10^5\over 10^2} dyne/cm$
 \begin{equation}
-F=2{\tilde \mu_0\over 4\pi} {10^3\over 10^{-2} K^2}\ {I\ I' \over r} dyne/cm,
+F=2{\tilde \mu_0\over 4\pi} {10^3\over 10^{-2} \mathcal{K}^2}\ {I\ I' \over r} dyne/cm,
 \end{equation}
 where $\tilde \mu_0$ is the numerical value of $\mu_0$ in SI units
 (see Eq.~\ref{mu0}). Comparing this equation with Eq.~\ref{force_wire} we
 obtain:
 \begin{equation}
-{\tilde \mu_0 \over 4 \pi} {10^5\over K^2} = 
+{\tilde \mu_0 \over 4 \pi} {10^5\over \mathcal{K}^2} = 
 {1\over \tilde c_{cgs}^2}, 
 \end{equation}
 where $\tilde c_{cgs}$ is the numerical value of the speed of light in
@@ -831,7 +833,7 @@ c.g.s. units. We have $\tilde c_{cgs}=10^2 \tilde c$ where $\tilde c$ is
 the numerical value of the speed of light in SI units. From this
 equation we obtain:
 \begin{equation}
-K = \tilde c_{cgs} \sqrt {10^5 \tilde \mu_0 \over 4 \pi} =
+\mathcal{K} = \tilde c_{cgs} \sqrt {10^5 \tilde \mu_0 \over 4 \pi} =
 {\tilde c_{cgs}\over \tilde c} 
 \sqrt {10^5 \over 4 \pi \tilde \epsilon_0}=\sqrt {10^9 \over 4 \pi 
 \tilde \epsilon_0}=\kappa,
@@ -840,10 +842,10 @@ where $\tilde \epsilon_0$ is the numerical value of the vacuum permittivity
 in SI units (Eq.~\ref{epsilon0}).
 
 In the old SI units ${\tilde \mu_0 \over 4 \pi} = 10^{-7}$, so 
-$K=10^{-1} \tilde c_{cgs}= 10\ \tilde c$.
+$\mathcal{K}=10^{-1} \tilde c_{cgs}= 10\ \tilde c$.
 In the new SI we have:
 \begin{equation}
-{K\over 10 \tilde c}= \kappadiecic...
+{\mathcal{K}\over 10 \tilde c}= \kappadiecic...
 \end{equation}
 \\
 }
@@ -857,27 +859,28 @@ In the new SI we have:
 %Therefore $abA=\sqrt{dyne}$. This unit is called abampere or 
 %electromagnetic unit ($emu$) of current or biot.
 %
-%In order to compare $abA$ and $A$ we can write $abA= {1\over K_A}\ A$ 
+%In order to compare $abA$ and $A$ we can write $abA= {1\over \mathcal{K}_A}\ A$ 
 %and reasoning
 %as before we have:
 %\begin{equation}
-%{\tilde \mu_0 \over 2 \pi}\ {10^5\over K_A^2} = 1
+%{\tilde \mu_0 \over 2 \pi}\ {10^5\over \mathcal{K}_A^2} = 1
 %\end{equation}
 %or
 %\begin{equation}
-%K_A = \sqrt {10^5 \tilde \mu_0 \over 4 \pi} ={1\over \tilde c} 
-%\sqrt {10^5 \over 4 \pi \tilde \epsilon_0}={K\over \tilde c_{cgs}} 
+%\mathcal{K}_A = \sqrt {10^5 \tilde \mu_0 \over 4 \pi} ={1\over \tilde c} 
+%\sqrt {10^5 \over 4 \pi \tilde \epsilon_0}={\mathcal{K}\over \tilde c_{cgs}} 
 %=\kappaa.
 %\end{equation}
 %\\
-%In the old SI units ${\tilde \mu_0 \over 4 \pi} = 10^{-7}$, so $K_A=10^{-1}$.
+%In the old SI units ${\tilde \mu_0 \over 4 \pi} = 10^{-7}$, so 
+%$\mathcal{K}_A=10^{-1}$.
 %}
 %\\
 
 {\color{green} The conversion factor between the a.u. and the c.g.s.-Gaussian 
-unit is: $\bar I=\bari\ K statA=\baricgs\ statA$. \\
+unit is: $\bar I=\bari\ \mathcal{K} statA=\baricgs\ statA$. \\
 %The conversion factor between a.u. and modified c.g.s.-Gaussian units is:
-%$\bar I=\bari\ K_A abA=\baricgsm\ abA$.
+%$\bar I=\bari\ \mathcal{K}_A abA=\baricgsm\ abA$.
 }
 \\
 
@@ -939,24 +942,24 @@ statA\cdot s$. This unit is called statcoulomb
 or electrostatic unit ($esu$) of charge or franklin.
 
 The conversion factor between $statC$ and $C$ can be found by writing
-$statC={1\over K} C$ and considering two charges of $q\ statC$ and 
+$statC={1\over \mathcal{K}} C$ and considering two charges of $q\ statC$ and 
 $q'\ statC$ respectively, at a distance of $r\ cm$. Since the two charges are
-of ${q\over K}\ C$ and ${q'\over K}\ C$ at the distance of $r\ 10^{-2}\ m$,
+of ${q\over \mathcal{K}}\ C$ and ${q'\over \mathcal{K}}\ C$ at the distance of $r\ 10^{-2}\ m$,
 we can use the Coulomb law in SI units to find the 
 the force (in $N=10^5 dyne$) acting between them: 
 \begin{equation}
-{\bf F}={1\over 4 \pi \tilde \epsilon_0} {10^5\over 10^{-4} K^2} 
+{\bf F}={1\over 4 \pi \tilde \epsilon_0} {10^5\over 10^{-4} \mathcal{K}^2} 
 {q\ q'\over r^3}\ {\bf r}\ dyne
 \end{equation}
 and comparing this equation with Eq.~\ref{coulombcgs} we find:
 \begin{equation}
-K= \sqrt{10^9 \over 4 \pi \tilde \epsilon_0}= \kappa. 
+\mathcal{K}= \sqrt{10^9 \over 4 \pi \tilde \epsilon_0}= \kappa. 
 \end{equation}
 \\
 Using this conversion factor we can write the equation that defines 
-the current.  When a charge $dq\ statC$, or ${dq\over K}\ C$ passes in $dt\ s$
+the current.  When a charge $dq\ statC$, or ${dq\over \mathcal{K}}\ C$ passes in $dt\ s$
 through a section of a conductor, the current is (due to Eq.~\ref{current})
-is $I={1\over K}\ {dq\over dt}\ A= {dq\over dt}\ statA$, so in the 
+is $I={1\over \mathcal{K}}\ {dq\over dt}\ A= {dq\over dt}\ statA$, so in the 
 c.g.s.-Gaussian system Eq.~\ref{current} still holds.   
 }
 \\
@@ -964,10 +967,10 @@ c.g.s.-Gaussian system Eq.~\ref{current} still holds.
 %{\color{violet} In the modified c.g.s.-Gaussian system the unit of the
 %charge is the $statC$. Using the conversion factor between $statC$ and $C$
 %we can find the equation that defines the current in this system.
-%When a charge of $dq\ statC={dq\over K}\ C$ 
+%When a charge of $dq\ statC={dq\over \mathcal{K}}\ C$ 
 %passes in a time $dt\ s$ through a section of a conductor,
 %the current is (due to Eq.~\ref{current}) 
-%$I={1\over K}\ {dq\over dt}\ A={K_A \over K}\ {dq\over dt}\ abA= 
+%$I={1\over \mathcal{K}}\ {dq\over dt}\ A={\mathcal{K}_A \over \mathcal{K}}\ {dq\over dt}\ abA= 
 %{1\over c_{cgs}}\ {dq\over dt}\ abA$. So in these units the relationship
 %between current and charge is:
 %\begin{equation}
@@ -977,7 +980,7 @@ c.g.s.-Gaussian system Eq.~\ref{current} still holds.
 %\\
 
 {\color{green} The conversion factor between the a.u. and the 
-c.g.s.-Gaussian unit is: $\bar C=\barc\ K statC=\barccgs\ statC$. \\
+c.g.s.-Gaussian unit is: $\bar C=\barc\ \mathcal{K} statC=\barccgs\ statC$. \\
 }
 
 \newpage
@@ -1002,7 +1005,7 @@ conversion factor with the SI unit is:
 
 {\color{orange} In the c.g.s. system the unit of charge density  
 is derived from its definition and it is
-$\bar \rho_{cgs}=statC/cm^3 = {1 \over K\ 10^{-6}}\ C/m^3=\rhotorho\ C/m^3$.
+$\bar \rho_{cgs}=statC/cm^3 = {1 \over \mathcal{K}\ 10^{-6}}\ C/m^3=\rhotorho\ C/m^3$.
 \\
 }
 
@@ -1053,7 +1056,7 @@ is Eq.~\ref{continuitysi}.
 
 {\color{orange} In the c.g.s.-Gaussian system the unit of current density  
 (symbol $\bar J_{cgs}$) is derived from its definition 
-$\bar J_{cgs}=statA/cm^2 = {1 \over K 10^{-4}} A/m^2=\curtocur\ A/m^2$.
+$\bar J_{cgs}=statA/cm^2 = {1 \over \mathcal{K} 10^{-4}} A/m^2=\curtocur\ A/m^2$.
 \\
 Since in Eq.~\ref{continuitygen} ${\bar t_{cgs} \bar J_{cgs} \over 
 \bar \rho_{cgs} \bar l_{cgs}}=1$ the continuity equation is 
@@ -1063,15 +1066,15 @@ Eq.~\ref{continuitysi}.
 
 %{\color{violet} In the modified c.g.s.-Gaussian system the unit of current 
 %density  is derived from its definition and it is:
-%$abA/cm^2 = {1 \over K_A 10^{-4}} A/m^2=\curtocurm\ A/m^2$.
+%$abA/cm^2 = {1 \over \mathcal{K}_A 10^{-4}} A/m^2=\curtocurm\ A/m^2$.
 %\\
 %The continuity equation can be derived by considering
-%a charge density $\rho\ statC/cm^3= {1\over 10^{-6} K}\ \rho\ C/m^3$ and
-%a current density ${\bf J}\ abA/cm^2= {1 \over K_A 10^{-4}} {\bf J}\ A/m^2.$
+%a charge density $\rho\ statC/cm^3= {1\over 10^{-6} \mathcal{K}}\ \rho\ C/m^3$ and
+%a current density ${\bf J}\ abA/cm^2= {1 \over \mathcal{K}_A 10^{-4}} {\bf J}\ A/m^2.$
 %Accounting also for the different length units and 
 %using Eq.~\ref{continuitysi} we find:
 %\begin{equation}
-%{1\over 10^{-6} K} {\partial \rho \over \partial t}=-{1\over 10^{-6} K_A} \nabla \cdot {\bf J},
+%{1\over 10^{-6} \mathcal{K}} {\partial \rho \over \partial t}=-{1\over 10^{-6} \mathcal{K}_A} \nabla \cdot {\bf J},
 %\label{continuitycgsm0}
 %\end{equation}
 %or in modified c.g.s.-Gaussian units:
@@ -1113,7 +1116,7 @@ conversion factor to the SI unit is:
 
 {\color{orange} In the c.g.s.-Gaussian system the unit of electric field
 (symbol $statV/cm$) is derived from its definition:
-$\bar E_{cgs}=statV/cm=dyne / statC = {10^{-5}\ K } N/C=\etoe\ N/C$. 
+$\bar E_{cgs}=statV/cm=dyne / statC = {10^{-5}\ \mathcal{K} } N/C=\etoe\ N/C$. 
 \\
 }
 
@@ -1147,7 +1150,7 @@ The conversion factor to the SI unit is:
 
 {\color{orange} In the c.g.s.-Gaussian system the unit of electric potential
 (symbol $statV$) is derived from its definition: 
-$\bar V_{cgs}=statV=dyne\cdot cm / statC = {10^{-7}\ K} 
+$\bar V_{cgs}=statV=dyne\cdot cm / statC = {10^{-7}\ \mathcal{K}} 
 N\cdot m/C=\phitophi\ V$. This unit
 is called statvolt. Note that 
 $statV=\sqrt{dyne}$.
@@ -1199,7 +1202,7 @@ conversion factor with the SI unit is:
 {\color{orange} In the c.g.s.-Gaussian system the unit of capacitance
 is derived from its definition: $\bar C_{cgs}=statC/statV=cm$. The 
 conversion factor with the SI unit is:
-$cm={1\over 10^{-7}\ K^2}\ C/V=\captocap\ F$.
+$cm={1\over 10^{-7}\ \mathcal{K}^2}\ C/V=\captocap\ F$.
 }
 \\
 
@@ -1253,7 +1256,8 @@ SI unit is:
 
 {\color{orange} In the c.g.s.-Gaussian system the unit of electric 
 dipole is derived from its definition $\bar \wp_{cgs}=statC\cdot cm$.
-The conversion factor to the SI unit is $\bar \wp_{cgs}={10^{-2} \over K}
+The conversion factor to the SI unit is $\bar \wp_{cgs}={10^{-2} \over 
+\mathcal{K}}
 \ C\cdot m=\diptodip\ C\cdot m$.
 }
 \\
@@ -1281,7 +1285,7 @@ conversion factor with the SI unit is:
 
 {\color{orange} In the c.g.s.-Gaussian system the unit of polarization
 is derived from its definition:
-$\bar P_{cgs}=statC/cm^2 = {1\over K\ 10^{-4}} C/m^2=\polartopolar\ C/m^2$. 
+$\bar P_{cgs}=statC/cm^2 = {1\over \mathcal{K}\ 10^{-4}} C/m^2=\polartopolar\ C/m^2$. 
 \\
 }
 
@@ -1395,7 +1399,7 @@ is $\bar P_{cgs}=1\ statC/cm^2$ the unit of electric displacement
 is $\bar D_{cgs}={1\over 4 \pi} statC/cm^2$.
 The conversion factor to SI units is:
 \begin{equation}
-\bar D_{cgs}= {1\over 4 \pi\ K\ 10^{-4}} C/m^2=\dtod\ C/m^2. 
+\bar D_{cgs}= {1\over 4 \pi\ \mathcal{K}\ 10^{-4}} C/m^2=\dtod\ C/m^2. 
 \end{equation}
 }
 \\
@@ -1434,7 +1438,7 @@ conversion factor with the SI unit is:
 is derived from its definition:
 $\bar \Omega_{cgs}=statV/statA=s/cm$. The conversion factor with the SI 
 unit is:
-$\bar \Omega_{cgs}=10^{-7}\ K^2\ V/A=\ohmtoohm\ Ohm$.
+$\bar \Omega_{cgs}=10^{-7}\ \mathcal{K}^2\ V/A=\ohmtoohm\ Ohm$.
 }
 \\
 
@@ -1465,11 +1469,11 @@ In the SI the second Maxwell's equation reads:
 (symbol $\bar B$) is derived from the Lorentz force: 
 $\bar B= {\bar f \over \bar v \cdot
 \bar C}$. The conversion factor with the SI unit is:
-\begin{eqnarray}
-\bar B = {E_h \hbar \over a_B^2 E_h e}={\hbar \over a_B^2 e}&=&
+\begin{align}
+\bar B = {E_h \hbar \over a_B^2 E_h e}={\hbar \over a_B^2 e}&=
 {\hbarf\ J\cdot s \over (\barl\ m)^2\ \barc\ C}\nonumber
-\\&=&\barb\ T.
-\end{eqnarray}
+\\&= \barb\ T.
+\end{align}
 \\
 
 Using the expression of $a_B$ we can also write:
@@ -1506,30 +1510,30 @@ charge per unit area $statC/cm^2$. This unit is called Gauss.
 The conversion factor with the SI unit can be found using the expression of 
 the magnetic flux density $B$ produced by a wire crossed by 
 a currenit I in SI units: $B={\mu_0\over 2 \pi} {I \over r}$. 
-Writing $G={1\over K_T} T$, a current of $I\ statA= {I\over K} 
+Writing $G={1\over \mathcal{K}_T} T$, a current of $I\ statA= {I\over \mathcal{K}} 
 A$ produces at a distance of $r\ {10^{-2}} m$ a magnetic field 
-(in $T=K_T G$): 
+(in $T=\mathcal{K}_T G$): 
 \begin{equation}
-B={\tilde \mu_0\over 2 \pi}\ {K_T \over
-10^{-2} K}\ {I\over r}\  G.
+B={\tilde \mu_0\over 2 \pi}\ {\mathcal{K}_T \over
+10^{-2} \mathcal{K}}\ {I\over r}\  G.
 \end{equation}
 Comparing with the c.g.s.-Gaussian expression we obtain:
 \begin{equation}
-K_T= {4 \pi \over \tilde \mu_0} {10^{-2}\ K \over \tilde c_{cgs}}= 
-{10^3 \over K_A}=\toverg,
+\mathcal{K}_T= {4 \pi \over \tilde \mu_0} {10^{-2}\ \mathcal{K} \over \tilde c_{cgs}}= 
+{10^3 \over \mathcal{K}_A}=\toverg,
 \end{equation}
-where $K_A=K/\tilde c_{cgs}=\kappaa$. 
-With the old SI units $K_T$ was exactly $10^4$.
+where $\mathcal{K}_A=\mathcal{K}/\tilde c_{cgs}=\kappaa$. 
+With the old SI units $\mathcal{K}_T$ was exactly $10^4$.
 \\
 Using the conversion factor between $T$ and $G$ we can write the 
 Lorentz force in the c.g.s-Gaussian system. A particle with charge
-$q\ statC={q\over K}\ C$ that moves with a speed of ${\bf v}\ cm/s=
-{\bf v}\ 10^{-2}\ m/s$ in a field of ${\bf B}\ G = {{\bf B} \over K_T}\ T$ 
+$q\ statC={q\over \mathcal{K}}\ C$ that moves with a speed of ${\bf v}\ cm/s=
+{\bf v}\ 10^{-2}\ m/s$ in a field of ${\bf B}\ G = {{\bf B} \over \mathcal{K}_T}\ T$ 
 will fill a force (in $N=10^5\ dyne$) (using Eq.~\ref{lforce}):
 \begin{equation}
-{\bf F}={10^{-2} \over K\ K_T} q\ ({\bf v}\times {\bf B})\ 10^5\ dyne. 
+{\bf F}={10^{-2} \over \mathcal{K}\ \mathcal{K}_T} q\ ({\bf v}\times {\bf B})\ 10^5\ dyne. 
 \end{equation}
-Since ${10^{3} \over K K_T}=
+Since ${10^{3} \over \mathcal{K} \mathcal{K}_T}=
 {1\over \tilde c_{cgs}}$ we obtain the Lorentz force in the 
 c.g.s.-Gaussian system:
 \begin{equation}
@@ -1538,7 +1542,7 @@ c.g.s.-Gaussian system:
 The second Maxwell's equation can be found noticing that 
 in Eq.~\ref{maxwell2gen}
 ${\bar l_{cgs} \bar B_{cgs} \over \bar t_{cgs} \bar E_{cgs}}=
-{10^{-2} \over K_T 10^{-5} K}={10^3 K_A \over 10^3 K}={1\over 
+{10^{-2} \over \mathcal{K}_T 10^{-5} \mathcal{K}}={10^3 \mathcal{K}_A \over 10^3 \mathcal{K}}={1\over 
 \tilde c_{cgs}}$ so we have:
 \begin{equation}
 \nabla \times {\bf E}=-{1\over c}
@@ -1557,13 +1561,13 @@ ${\bar l_{cgs} \bar B_{cgs} \over \bar t_{cgs} \bar E_{cgs}}=
 %where $B=2 {I \over r}$ is the magnetic flux density. 
 %In this units ${\bf B}$ has dimension $abA/cm=\sqrt{dyne}/cm=statC/cm^2$,
 %so also in this system of units ${\bf B}$ is measured in $G$.
-%With the same reasoning as before and using $A=K_A\ abA$ we find:
+%With the same reasoning as before and using $A=\mathcal{K}_A\ abA$ we find:
 %\begin{equation}
-%{\tilde \mu_0\over 2 \pi} K_T G= {2 \over 10^2} K_A statC/cm^2
+%{\tilde \mu_0\over 2 \pi} \mathcal{K}_T G= {2 \over 10^2} \mathcal{K}_A statC/cm^2
 %\end{equation}
 %that gives again
 %\begin{equation}
-% K_T = {10^3 \over K_A}=\toverg.
+% \mathcal{K}_T = {10^3 \over \mathcal{K}_A}=\toverg.
 %\end{equation}
 %\\
 %}
@@ -1595,11 +1599,11 @@ When the vector potential depends on time the electric field is:
 {\color{web-blue} In a.u. the unit of the vector potential
 (symbol $\bar A$) is derived from its definition $\bar A = \bar B \bar l$.
 We have:
-\begin{eqnarray}
-\bar A = {\hbar \over a_B e}&=&{\hbarf\ J\cdot s \over \abohr\ m\ \e C}
+\begin{align}
+\bar A = {\hbar \over a_B e}&= {\hbarf\ J\cdot s \over \abohr\ m\ \e C}
 \nonumber \\ 
-&=& \barav\ T\cdot m.
-\end{eqnarray}
+&= \barav\ T\cdot m.
+\end{align}
 When the vector potential depends on time the electric field is:
 \begin{equation}
 {\bf E}=-{\bar V \over \bar E \bar l} \nabla \phi -
@@ -1615,8 +1619,8 @@ ${\bar A \over \bar E \bar t}=1$ Eq.~\ref{ephia} holds also in a.u..
 potential (symbol $\bar A_{cgs}$) is derived from its definition 
 Eq.~\ref{defav}.
 The conversion factor with the SI unit is 
-$\bar A_{cgs} = G \cdot cm = {10^{-2}\over K_T} T\cdot m=
-{K_A \over 10^5} T\cdot m=\avtoav\ T\cdot m$. \\
+$\bar A_{cgs} = G \cdot cm = {10^{-2}\over \mathcal{K}_T} T\cdot m=
+{\mathcal{K}_A \over 10^5} T\cdot m=\avtoav\ T\cdot m$. \\
 
 When the vector potential depends on time we can calculate the electric
 field as in Eq.~\ref{ephiagen} and since 
@@ -1667,7 +1671,7 @@ flux (symbol $Mx$) is derived from its definition: $Mx=G\cdot cm^2$.
 This unit is called Maxwell.
 The conversion factor with the SI unit is:
 \begin{equation}
-Mx = {10^{-4}\over K_T}\ T\cdot m^2 = 10^{-7}\ K_A\ Wb =\wbtowb\ Wb
+Mx = {10^{-4}\over \mathcal{K}_T}\ T\cdot m^2 = 10^{-7}\ \mathcal{K}_A\ Wb =\wbtowb\ Wb
 \end{equation}
 In the old SI units this factor was $10^{-8}$.
 }
@@ -1696,11 +1700,11 @@ so the unit of inductance is $H={Wb \over A}={T \cdot m^2 \over A}=
 {\color{web-blue} In a.u. the unit of the inductance (symbol $\bar Y$) 
 can be derived from its definition as:
 $\bar Y={\bar {Wb} \over \bar I}$. The conversion factor with the SI unit is:
-\begin{eqnarray}
+\begin{align}
 \bar Y = {\hbar \bar t\over e^2}={m_e a_B^2 \over e^2}={\hbar^2\over E_h e^2}
-&=&{(\hbarf\ J\cdot s)^2 \over \baru\ J\ (\e\ C)^2}\nonumber \\
-&=&\bary\ H.
-\end{eqnarray}
+&= {(\hbarf\ J\cdot s)^2 \over \baru\ J\ (\e\ C)^2}\nonumber \\
+&= \bary\ H.
+\end{align}
 \\
 }
 
@@ -1723,9 +1727,9 @@ Comparing with Eq.~\ref{inductancecgs} we obtain:
 \end{equation}
 therefore:
 \begin{equation}
-statH=\tilde c_{cgs} {10^{-4} K \over K_T} H =
-{\tilde c_{cgs}} {10^{-7} K_A K} H=
-10^{-7} K^2\ H = \ytoy\ H.
+statH=\tilde c_{cgs} {10^{-4} \mathcal{K} \over \mathcal{K}_T} H =
+{\tilde c_{cgs}} {10^{-7} \mathcal{K}_A \mathcal{K}} H=
+10^{-7} \mathcal{K}^2\ H = \ytoy\ H.
 \end{equation}
 \\
 }
@@ -1753,13 +1757,13 @@ $A\cdot m^2={N \cdot m \cdot  A \cdot m \over N}=J/T$.
 (symbol $\bar \mu$) is derived from its definition as 
 $\bar \mu= \bar I \cdot \bar l^2$. The conversion factor with the SI unit
 is: 
-\begin{eqnarray}
+\begin{align}
 \bar \mu = {\bar C \cdot \bar l^2 \over \bar t}= 
 {e a_B^2 \hbar \over m_e a_B^2}
-= {\hbar e \over m_e}=2 \mu_B &=&
+= {\hbar e \over m_e}=2 \mu_B &=
 {\hbarf\ J\cdot s\ \e\ C \over \me\ kg}\nonumber \\ 
-&=& \barmu J/T.
-\end{eqnarray}
+&= \barmu J/T.
+\end{align}
 \\
 }
 
@@ -1781,8 +1785,8 @@ I A \hat {\bf n}.
 Comparing with Eq.~\ref{magdipcgs} we obtain:
 \begin{equation}
 \bar \mu_{cgs}= \tilde c_{cgs} \bar I_{cgs} \bar l_{cgs}^2= 
-{\tilde c_{cgs} 10^{-4} \over K}\ A\cdot m^2 = 
-{1\over 10^4 K_A}\ A\cdot m^2 = \mutomu\ A\cdot m^2.
+{\tilde c_{cgs} 10^{-4} \over \mathcal{K}}\ A\cdot m^2 = 
+{1\over 10^4 \mathcal{K}_A}\ A\cdot m^2 = \mutomu\ A\cdot m^2.
 \end{equation}
 }
 \\
@@ -1796,8 +1800,8 @@ Comparing with Eq.~\ref{magdipcgs} we obtain:
 %$\bar \mu_{cgs}={1\over c} abA\cdot cm^2$.
 %Using the conversion factors found above we have:
 %\begin{equation}
-%\bar \mu_{cgs} = {10^{-4}\over \tilde c_{cgs} K_A}\ A\cdot m^2 
-%={10^{-4}\over K}\ A\cdot m^2 
+%\bar \mu_{cgs} = {10^{-4}\over \tilde c_{cgs} \mathcal{K}_A}\ A\cdot m^2 
+%={10^{-4}\over \mathcal{K}}\ A\cdot m^2 
 %= \mutomu\ A\cdot m^2
 %\end{equation}
 %so in this modified system the units of the magnetic dipole moment 
@@ -1839,7 +1843,7 @@ Using the expression of $\bar \mu$ and $\bar l$ we can write also:
 $\bar M_{cgs}={statC \over cm^2}$.
 The conversion with the SI unit is:
 \begin{equation}
-\bar M_{cgs} = {\bar \mu_{cgs} \over cm^3}={1\over 10^{-2}\ K_A}\ A/m =
+\bar M_{cgs} = {\bar \mu_{cgs} \over cm^3}={1\over 10^{-2}\ \mathcal{K}_A}\ A/m =
 \magtomag\ A/m.
 \end{equation}
 }
@@ -2000,7 +2004,7 @@ and ${\bar E_{cgs} \bar l_{cgs} \over c^2 \bar t_{cgs} \bar B_{cgs}}=
 \label{maxwell4cgs}
 \end{equation}
 Moreover we have:
-${\bar M_{cgs} \over \bar l_{cgs} \bar J_{cgs}}={K\over K_A}=c_{cgs}$ and
+${\bar M_{cgs} \over \bar l_{cgs} \bar J_{cgs}}={\mathcal{K}\over \mathcal{K}_A}=c_{cgs}$ and
 ${\bar P_{cgs} \over \bar t_{cgs} \bar J_{cgs}}=1$ so in c.g.s. units:
 \begin{equation}
 {\bf J}_m= c \nabla \times {\bf M}
@@ -2030,7 +2034,7 @@ Comparing Eq.~\ref{magintensitycgs} and Eq.~\ref{HBMgen}, we can find the
 conversion factor with the SI unit.
 We have $Oe=\mu_0 \bar B_{cgs}={\bar M_{cgs} \over 4 \pi}$ or
 \begin{equation}
-Oe= {1\over 4 \pi\ 10^{-2} K_A} A/m=\htoh\ A/m. 
+Oe= {1\over 4 \pi\ 10^{-2} \mathcal{K}_A} A/m=\htoh\ A/m. 
 \end{equation}
 This unit is called Oersted.
 }
@@ -2044,7 +2048,7 @@ This unit is called Oersted.
 %is $\bar H_{cgs}={1\over 4 \pi} abA/cm$ 
 %and in SI units it is therefore
 %\begin{equation}
-%\bar H_{cgs}= {1\over 4 \pi\ K_A\ 10^{-2}} A/m=\htoh\ A/m
+%\bar H_{cgs}= {1\over 4 \pi\ \mathcal{K}_A\ 10^{-2}} A/m=\htoh\ A/m
 %\end{equation}
 %\\
 %Due to this definition we can write Eq.~\ref{magintensity} as:
@@ -2073,23 +2077,23 @@ $\bar H = \barhcgs\ statC/cm^2$.
 \newpage
 \section{\color{coral}Microscopic Maxwell's equations}
 In the SI the microscopic Maxwell's equations are:
-\begin{eqnarray}
-\nabla \cdot {\bf E} &=& {\rho\over {\epsilon_0}}, \\
-\nabla \times {\bf E} &=& -{\partial {\bf B} \over \partial t}, \\
-\nabla \cdot {\bf B} &=& 0, \\
-\nabla \times {\bf B} &=& \mu_0{\bf J}+ {1\over c^2}
+\begin{align}
+\nabla \cdot {\bf E} &= {\rho\over {\epsilon_0}}, \\
+\nabla \times {\bf E} &= -{\partial {\bf B} \over \partial t}, \\
+\nabla \cdot {\bf B} &= 0, \\
+\nabla \times {\bf B} &= \mu_0{\bf J}+ {1\over c^2}
 {\partial {\bf E} \over \partial t}. 
-\end{eqnarray}
+\end{align}
 
 {\color{web-blue} The form of the microscopic Maxwell's equations
 in a.u. has been obtained in the previous text:
-\begin{eqnarray}
-\nabla \cdot {\bf E} &=& 4 \pi \rho, \\
-\nabla \times {\bf E} &=& -{\partial {\bf B} \over \partial t}, \\
-\nabla \cdot {\bf B} &=& 0, \\
-\nabla \times {\bf B} &=& {4 \pi \over c^2} {\bf J}+ {1\over c^2}
+\begin{align}
+\nabla \cdot {\bf E} &= 4 \pi \rho, \\
+\nabla \times {\bf E} &= -{\partial {\bf B} \over \partial t}, \\
+\nabla \cdot {\bf B} &= 0, \\
+\nabla \times {\bf B} &= {4 \pi \over c^2} {\bf J}+ {1\over c^2}
 {\partial {\bf E} \over \partial t}, 
-\end{eqnarray}
+\end{align}
 where in these equations $c$ is actually $c_{a.u.}={1\over \alpha}$ and all 
 other quantities are measured in a.u..
 }
@@ -2097,13 +2101,13 @@ other quantities are measured in a.u..
 
 {\color{orange} The form of the microscopic Maxwell's equations
 in the c.g.s-Gaussian system has been discussed in the previous text:
-\begin{eqnarray}
-\nabla \cdot {\bf E} &=& 4 \pi \rho, \\
-\nabla \times {\bf E} &=& -{1\over c} {\partial {\bf B} \over \partial t}, \\
-\nabla \cdot {\bf B} &=& 0, \\
-\nabla \times {\bf B} &=& {4 \pi \over c} {\bf J}+ {1\over c}
+\begin{align}
+\nabla \cdot {\bf E} &= 4 \pi \rho, \\
+\nabla \times {\bf E} &= -{1\over c} {\partial {\bf B} \over \partial t}, \\
+\nabla \cdot {\bf B} &= 0, \\
+\nabla \times {\bf B} &= {4 \pi \over c} {\bf J}+ {1\over c}
 {\partial {\bf E} \over \partial t}, 
-\end{eqnarray}
+\end{align}
 where in these equations $c$ is actually $c_{cgs}$ and all 
 other quantities are measured in c.g.s.-Gaussian units.
 }
@@ -2121,12 +2125,12 @@ and a displacement part with ${\bf J}={\bf J}_f + {\bf J}_m + {\bf J}_d$ where
 ${\bf J}_m=\nabla \times {\bf M}$ and ${\bf J}_d={\partial {\bf P}\over 
 \partial t}$.
 Inserting these expressions we have:
-\begin{eqnarray}
-\nabla \cdot {\bf D} &=& \rho_f, \\
-\nabla \times {\bf E} &=& -{\partial {\bf B} \over \partial t}, \\
-\nabla \cdot {\bf B} &=& 0, \\
-\nabla \times {\bf H} &=& {\bf J}_f+ {\partial {\bf D} \over \partial t}. 
-\end{eqnarray}
+\begin{align}
+\nabla \cdot {\bf D} &= \rho_f, \\
+\nabla \times {\bf E} &= -{\partial {\bf B} \over \partial t}, \\
+\nabla \cdot {\bf B} &= 0, \\
+\nabla \times {\bf H} &= {\bf J}_f+ {\partial {\bf D} \over \partial t}. 
+\end{align}
 where ${\bf D}=\epsilon_0 {\bf E}+{\bf P}$ and ${\bf H}={{\bf B}\over \mu_0}-
 {\bf M}$.
 \\
@@ -2141,13 +2145,13 @@ and a displacement part with ${\bf J}={\bf J}_f + {\bf J}_m + {\bf J}_d$ where
 ${\bf J}_m=\nabla \times {\bf M}$ and ${\bf J}_d={\partial {\bf P}\over 
 \partial t}$
 We have:
-\begin{eqnarray}
-\nabla \cdot {\bf D} &=& 4 \pi \rho_f, \\
-\nabla \times {\bf E} &=& -{\partial {\bf B} \over \partial t}, \\
-\nabla \cdot {\bf B} &=& 0, \\
-\nabla \times {\bf H} &=& 4 \pi {\bf J}_f+ {\partial {\bf D} \over 
+\begin{align}
+\nabla \cdot {\bf D} &= 4 \pi \rho_f, \\
+\nabla \times {\bf E} &= -{\partial {\bf B} \over \partial t}, \\
+\nabla \cdot {\bf B} &= 0, \\
+\nabla \times {\bf H} &= 4 \pi {\bf J}_f+ {\partial {\bf D} \over 
 \partial t}. 
-\end{eqnarray}
+\end{align}
 where ${\bf D}={\bf E} + 4 \pi {\bf P}$ and ${\bf H}={c^2
 {\bf B}}- 4 \pi {\bf M}$.
 Here $c$ is $c_{a.u.}={1\over \alpha}$ and all other quantities are 
@@ -2164,13 +2168,13 @@ magnetization part,
 and a displacement part with ${\bf J}={\bf J}_f + {\bf J}_m + {\bf J}_d$ where
 ${\bf J}_m=c \nabla \times {\bf M}$ and ${\bf J}_d={\partial {\bf P}\over 
 \partial t}$
-\begin{eqnarray}
-\nabla \cdot {\bf D} &=& 4 \pi \rho_f, \\
-\nabla \times {\bf E} &=& -{1\over c} {\partial {\bf B} \over \partial t}, \\
-\nabla \cdot {\bf B} &=& 0, \\
-\nabla \times {\bf H} &=& {4 \pi \over c} {\bf J}_f+ {1\over c}
+\begin{align}
+\nabla \cdot {\bf D} &= 4 \pi \rho_f, \\
+\nabla \times {\bf E} &= -{1\over c} {\partial {\bf B} \over \partial t}, \\
+\nabla \cdot {\bf B} &= 0, \\
+\nabla \times {\bf H} &= {4 \pi \over c} {\bf J}_f+ {1\over c}
 {\partial {\bf D} \over \partial t}, 
-\end{eqnarray}
+\end{align}
 where ${\bf D}={\bf E} + 4 \pi {\bf P}$ and ${\bf H}={\bf B}- 4 \pi {\bf M}$.
 In these equations $c$ is actually $c_{cgs}$ and all 
 other quantities are measured in c.g.s.-Gaussian units.
@@ -2248,10 +2252,10 @@ the Schr\"odinger equation becomes:
 {\color{orange} The form of the Schr\"odinger equation in the c.g.s.-Gaussian
 system can be found starting from Eq.~\ref{segen} and using:
 $\bar p_{cgs}=10^{-5} {kg\cdot m \over s}$, $\bar C_{cgs} \bar A_{cgs}=
-{1\over K} {10^{-2}\over K_T} C\cdot T\cdot m = {10^{-5} \over \tilde c_{cgs}}
-{kg\cdot m \over s}$, $\bar C_{cgs} \bar V_{cgs}= {1\over K} 10^{-7} K 
+{1\over \mathcal{K}} {10^{-2}\over \mathcal{K}_T} C\cdot T\cdot m = {10^{-5} \over \tilde c_{cgs}}
+{kg\cdot m \over s}$, $\bar C_{cgs} \bar V_{cgs}= {1\over \mathcal{K}} 10^{-7} \mathcal{K} 
 C\cdot V= 10^{-7} J$, ${\bar C_{cgs} \hbar \bar B_{cgs} \over \bar m_{cgs}}
-= \tilde \hbar {1\over K} {1\over K_T 10^{-3}} J={10^{-7} \tilde \hbar_{cgs}
+= \tilde \hbar {1\over \mathcal{K}} {1\over \mathcal{K}_T 10^{-3}} J={10^{-7} \tilde \hbar_{cgs}
 \over \tilde c_{cgs}} J$, and $\bar E_{cgs}=10^{-7} J$ leading to:
 \begin{equation}
 \left[{1\over 2m} ({\bf p}- {q \over c} {\bf A})^2 + 

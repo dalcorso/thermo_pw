@@ -11,6 +11,7 @@
 \def\tpw{{\sc THERMO\_PW}}
 
 \usepackage{amsmath}
+\usepackage{mathtools}
 \usepackage{html}
 \usepackage{color}
 
@@ -246,57 +247,57 @@ field ${\bf E}_\alpha$, and the magnetic field strength ${\bf H}_\alpha$
 (here $I$ indicates the atom and $\alpha$ and $\beta$ are cartesian
 coordinates indices).
 The Taylor expansion of this function up to second order gives
-\begin{eqnarray}
+\begin{align}
 \mathcal{F}(\{{\bf u}_{I,\alpha}\}, \{\epsilon_{\alpha,\beta}\},
-\{ {\bf E}_\alpha\}, \{{\bf H}_\alpha\})=\mathcal{F}_0 &+&
+\{ {\bf E}_\alpha\}, \{{\bf H}_\alpha\})=\mathcal{F}_0 &+
 \sum_{I,\alpha} {\partial \mathcal{F} \over \partial 
 {\bf u}_{I,\alpha}} {\bf u}_{I,\alpha}+ \sum_{\alpha,\beta}
 {\partial \mathcal{F} \over \partial 
 \epsilon_{\alpha,\beta}} \epsilon_{\alpha,\beta} \nonumber \\ 
-&+&\sum_{\alpha}
+&+\sum_{\alpha}
 {\partial \mathcal{F} \over \partial 
 {\bf E}_\alpha} {\bf E}_\alpha + 
 \sum_{\alpha}
 {\partial \mathcal{F} \over \partial 
 {\bf H}_\alpha} {\bf H}_\alpha \nonumber \\
-&+&{1\over 2}
+&+{1\over 2}
 \sum_{I,\alpha,J,\beta} {\partial^2 \mathcal{F} \over \partial 
 {\bf u}_{I,\alpha} \partial {\bf u}_{J,\beta}} {\bf u}_{I,\alpha}
 {\bf u}_{J,\beta}\nonumber \\
-&+& {1\over 2}\sum_{\alpha,\beta,\gamma,\delta} 
+&+ {1\over 2}\sum_{\alpha,\beta,\gamma,\delta} 
 {\partial^2 \mathcal{F} \over \partial 
 \epsilon_{\alpha,\beta} \partial \epsilon_{\gamma,\delta}} 
 \epsilon_{\alpha,\beta}
 \epsilon_{\gamma,\delta} \nonumber \\
-&+& {1\over 2} \sum_{\alpha,\beta} 
+&+ {1\over 2} \sum_{\alpha,\beta} 
 {\partial^2 \mathcal{F} \over \partial 
 {\bf E}_{\alpha} \partial {\bf E}_{\beta}} 
 {\bf E}_{\alpha}
 {\bf E}_{\beta} \nonumber \\
-&+& {1\over 2} \sum_{\alpha,\beta} 
+&+ {1\over 2} \sum_{\alpha,\beta} 
 {\partial^2 \mathcal{F} \over \partial 
 {\bf H}_{\alpha} \partial {\bf H}_{\beta}} 
 {\bf H}_{\alpha}
 {\bf H}_{\beta} \nonumber \\
-&+& \sum_{I,\alpha,\beta,\gamma} {\partial^2 \mathcal{F} \over \partial 
+&+ \sum_{I,\alpha,\beta,\gamma} {\partial^2 \mathcal{F} \over \partial 
 {\bf u}_{I,\alpha} \partial \epsilon_{\beta,\gamma}} {\bf u}_{I,\alpha}
 \epsilon_{\beta,\gamma}\nonumber \\
-&+& \sum_{I,\alpha,\beta} {\partial^2 \mathcal{F} \over \partial 
+&+ \sum_{I,\alpha,\beta} {\partial^2 \mathcal{F} \over \partial 
 {\bf u}_{I,\alpha} \partial {\bf E}_{\beta}} {\bf u}_{I,\alpha}
 {\bf E}_{\beta} \nonumber \\
-&+& \sum_{I,\alpha,\beta} {\partial^2 \mathcal{F} \over \partial 
+&+ \sum_{I,\alpha,\beta} {\partial^2 \mathcal{F} \over \partial 
 {\bf u}_{I,\alpha} \partial {\bf H}_{\beta}} {\bf u}_{I,\alpha}
 {\bf H}_{\beta} \nonumber \\
-&+& \sum_{\alpha,\beta,\gamma} {\partial^2 \mathcal{F} \over \partial 
+&+ \sum_{\alpha,\beta,\gamma} {\partial^2 \mathcal{F} \over \partial 
 \epsilon_{\alpha,\beta} \partial {\bf E}_{\gamma}} \epsilon_{\alpha,\beta}
 {\bf E}_{\gamma} \nonumber \\
-&+& \sum_{\alpha,\beta,\gamma} {\partial^2 \mathcal{F} \over \partial 
+&+ \sum_{\alpha,\beta,\gamma} {\partial^2 \mathcal{F} \over \partial 
 \epsilon_{\alpha,\beta} \partial {\bf H}_{\gamma}} \epsilon_{\alpha,\beta}
 {\bf H}_{\gamma} \nonumber \\
-&+& \sum_{\alpha,\beta} {\partial^2 \mathcal{F} \over \partial 
+&+ \sum_{\alpha,\beta} {\partial^2 \mathcal{F} \over \partial 
 {\bf E}_{\alpha} \partial {\bf H}_{\beta}} {\bf E}_{\alpha}
 {\bf H}_{\beta},
-\end{eqnarray}
+\end{align}
 where all the derivatives are computed for ${\bf u}_{I,\alpha}=0$,
 $\epsilon_{\alpha,\beta}=0$, ${\bf E}_\alpha=0$, and ${\bf H}_\alpha=0$.
 \newpage
@@ -307,131 +308,131 @@ phenomenological magneto-electric enthalpy. The form of this phenomenological
 expansion depends on the conventions adopted in each system. We give here the
 form of the expansion and discuss in the following each term separately.
 In the SI units we have:
-\begin{eqnarray}
+\begin{align}
 \mathcal{F}(\{{\bf u}_{I,\alpha}\}, \{\epsilon_{\alpha,\beta}\},
-\{ {\bf E}_\alpha\}, \{{\bf H}_\alpha\})=\mathcal{F}_0 &-&
+\{ {\bf E}_\alpha\}, \{{\bf H}_\alpha\})=\mathcal{F}_0 &-
 \sum_{I,\alpha} {\bf f}^{(0)}_{I,\alpha} {\bf u}_{I,\alpha}+ 
 V \sum_{\alpha,\beta}
 \sigma^{(0)}_{\alpha,\beta} \epsilon_{\alpha,\beta} \nonumber \\ 
-&-&V \sum_{\alpha} {\bf P}^{(0)}_\alpha {\bf E}_\alpha - 
+&- V \sum_{\alpha} {\bf P}^{(0)}_\alpha {\bf E}_\alpha - 
 \mu_0 V \sum_{\alpha}
 {\bf M}^{(0)}_\alpha {\bf H}_\alpha \nonumber \\
-&+&{1\over 2}
+&+ {1\over 2}
 \sum_{I,\alpha,J,\beta} C_{I,\alpha,J,\beta} {\bf u}_{I,\alpha}
 {\bf u}_{J,\beta}\nonumber \\
-&+& {V\over 2}\sum_{\alpha,\beta,\gamma,\delta} 
+&+ {V\over 2}\sum_{\alpha,\beta,\gamma,\delta} 
 C_{\alpha,\beta,\gamma,\delta}  
 \epsilon_{\alpha,\beta}
 \epsilon_{\gamma,\delta} \nonumber \\
-&-& {1\over 2} \epsilon_0 V \sum_{\alpha,\beta} 
+&- {1\over 2} \epsilon_0 V \sum_{\alpha,\beta} 
 \chi^e_{\alpha,\beta}
 {\bf E}_{\alpha}
 {\bf E}_{\beta} \nonumber \\
-&-& {1\over 2} \mu_0 V \sum_{\alpha,\beta} 
+&- {1\over 2} \mu_0 V \sum_{\alpha,\beta} 
 \chi^m_{\alpha,\beta}
 {\bf H}_{\alpha}
 {\bf H}_{\beta} \nonumber \\
-&-& \sum_{I,\alpha,\beta,\gamma}
+&- \sum_{I,\alpha,\beta,\gamma}
 \Gamma_{I,\alpha,\beta,\gamma} {\bf u}_{I,\alpha}
 \epsilon_{\beta,\gamma}\nonumber \\
-&-& e \sum_{I,\alpha,\beta} Z^*_{I,\alpha,\beta} 
+&- e \sum_{I,\alpha,\beta} Z^*_{I,\alpha,\beta} 
 {\bf u}_{I,\alpha} {\bf E}_{\beta} \nonumber \\
-&-& \mu_0 \sum_{I,\alpha,\beta} 
+&- \mu_0 \sum_{I,\alpha,\beta} 
 Z^m_{I,\alpha,\beta} {\bf u}_{I,\alpha}{\bf H}_{\beta} \nonumber \\
-&-& V \sum_{\alpha,\beta,\gamma} e_{\alpha,\beta,\gamma} 
+&- V \sum_{\alpha,\beta,\gamma} e_{\alpha,\beta,\gamma} 
 \epsilon_{\alpha,\beta} {\bf E}_{\gamma} \nonumber \\
-&-& \mu_0 V \sum_{\alpha,\beta,\gamma}  h_{\alpha,\beta,\gamma} 
+&- \mu_0 V \sum_{\alpha,\beta,\gamma}  h_{\alpha,\beta,\gamma} 
 \epsilon_{\alpha,\beta} {\bf H}_{\gamma} \nonumber \\
-&-& V \sum_{\alpha,\beta} \alpha_{\alpha,\beta} {\bf E}_{\alpha}
+&- V \sum_{\alpha,\beta} \alpha_{\alpha,\beta} {\bf E}_{\alpha}
 {\bf H}_{\beta}.
-\end{eqnarray}
+\end{align}
 
 \newpage
 {\color{web-blue} In a.u. the microscopic magneto-electric enthalpy
 is written as (see below for the derivation):
-\begin{eqnarray}
+\begin{align}
 \mathcal{F}(\{{\bf u}_{I,\alpha}\}, \{\epsilon_{\alpha,\beta}\},
-\{ {\bf E}_\alpha\}, \{{\bf H}_\alpha\})=\mathcal{F}_0 &-&
+\{ {\bf E}_\alpha\}, \{{\bf H}_\alpha\})=\mathcal{F}_0 &-
 \sum_{I,\alpha} {\bf f}^{(0)}_{I,\alpha} {\bf u}_{I,\alpha}
 + V \sum_{\alpha,\beta}
 \sigma_{\alpha,\beta}^{(0)} \epsilon_{\alpha,\beta} \nonumber \\ 
-&-&V \sum_{\alpha} {\bf P}^{(0)}_\alpha {\bf E}_\alpha - 
+&- V \sum_{\alpha} {\bf P}^{(0)}_\alpha {\bf E}_\alpha - 
 \alpha^2 V \sum_{\alpha}
 {\bf M}^{(0)}_\alpha {\bf H}_\alpha \nonumber \\
-&+&{1\over 2}
+&+ {1\over 2}
 \sum_{I,\alpha,J,\beta} C_{I,\alpha,J,\beta} {\bf u}_{I,\alpha}
 {\bf u}_{J,\beta}\nonumber \\
-&+& {V\over 2}\sum_{\alpha,\beta,\gamma,\delta} 
+&+ {V\over 2}\sum_{\alpha,\beta,\gamma,\delta} 
 C_{\alpha,\beta,\gamma,\delta}  
 \epsilon_{\alpha,\beta}
 \epsilon_{\gamma,\delta} \nonumber \\
-&-& {V\over 2} \sum_{\alpha,\beta} 
+&- {V\over 2} \sum_{\alpha,\beta} 
 \chi^e_{\alpha,\beta}
 {\bf E}_{\alpha}
 {\bf E}_{\beta} \nonumber \\
-&-& {\alpha^2 V \over 2}  \sum_{\alpha,\beta} 
+&- {\alpha^2 V \over 2}  \sum_{\alpha,\beta} 
 \chi^m_{\alpha,\beta}
 {\bf H}_{\alpha}
 {\bf H}_{\beta} \nonumber \\
-&-& \sum_{I,\alpha,\beta,\gamma}
+&- \sum_{I,\alpha,\beta,\gamma}
 \Gamma_{I,\alpha,\beta,\gamma} {\bf u}_{I,\alpha}
 \epsilon_{\beta,\gamma}\nonumber \\
-&-& \sum_{I,\alpha,\beta} Z^*_{I,\alpha,\beta} 
+&- \sum_{I,\alpha,\beta} Z^*_{I,\alpha,\beta} 
 {\bf u}_{I,\alpha} {\bf E}_{\beta} \nonumber \\
-&-& \alpha^2 \sum_{I,\alpha,\beta} 
+&- \alpha^2 \sum_{I,\alpha,\beta} 
 Z^m_{I,\alpha,\beta} {\bf u}_{I,\alpha}{\bf H}_{\beta} \nonumber \\
-&-& V \sum_{\alpha,\beta,\gamma} e_{\alpha,\beta,\gamma} 
+&- V \sum_{\alpha,\beta,\gamma} e_{\alpha,\beta,\gamma} 
 \epsilon_{\alpha,\beta} {\bf E}_{\gamma} \nonumber \\
-&-& \alpha^2 V \sum_{\alpha,\beta,\gamma}  h_{\alpha,\beta,\gamma} 
+&- \alpha^2 V \sum_{\alpha,\beta,\gamma}  h_{\alpha,\beta,\gamma} 
 \epsilon_{\alpha,\beta} {\bf H}_{\gamma} \nonumber \\
-&-& {V \over 4 \pi} \sum_{\alpha,\beta} 
+&- {V \over 4 \pi} \sum_{\alpha,\beta} 
 \alpha_{\alpha,\beta} {\bf E}_{\alpha}
 {\bf H}_{\beta}.
-\end{eqnarray}
+\end{align}
 }
 
 \newpage
 {\color{orange} In c.g.s.-Gaussian units the microscopic
 magneto-electric enthalpy is written as (see below for the derivation):
-\begin{eqnarray}
+\begin{align}
 \mathcal{F}(\{{\bf u}_{I,\alpha}\}, \{\epsilon_{\alpha,\beta}\},
-\{ {\bf E}_\alpha\}, \{{\bf H}_\alpha\})=\mathcal{F}_0 &-&
+\{ {\bf E}_\alpha\}, \{{\bf H}_\alpha\})=\mathcal{F}_0 &-
 \sum_{I,\alpha} {\bf f}^{(0)}_{I,\alpha} {\bf u}_{I,\alpha}+ 
 V \sum_{\alpha,\beta}
 \sigma^{(0)}_{\alpha,\beta} \epsilon_{\alpha,\beta} \nonumber \\ 
-&-&V \sum_{\alpha} {\bf P}^{(0)}_\alpha {\bf E}_\alpha - 
+&- V \sum_{\alpha} {\bf P}^{(0)}_\alpha {\bf E}_\alpha - 
 V \sum_{\alpha}
 {\bf M}^{(0)}_\alpha {\bf H}_\alpha \nonumber \\
-&+&{1\over 2}
+&+ {1\over 2}
 \sum_{I,\alpha,J,\beta} C_{I,\alpha,J,\beta} {\bf u}_{I,\alpha}
 {\bf u}_{J,\beta}\nonumber \\
-&+& {V\over 2}\sum_{\alpha,\beta,\gamma,\delta} 
+&+ {V\over 2}\sum_{\alpha,\beta,\gamma,\delta} 
 C_{\alpha,\beta,\gamma,\delta}  
 \epsilon_{\alpha,\beta}
 \epsilon_{\gamma,\delta} \nonumber \\
-&-& {V\over 2} \sum_{\alpha,\beta} 
+&- {V\over 2} \sum_{\alpha,\beta} 
 \chi^e_{\alpha,\beta}
 {\bf E}_{\alpha}
 {\bf E}_{\beta} \nonumber \\
-&-& {V \over 2}  \sum_{\alpha,\beta} 
+&- {V \over 2}  \sum_{\alpha,\beta} 
 \chi^m_{\alpha,\beta}
 {\bf H}_{\alpha}
 {\bf H}_{\beta} \nonumber \\
-&-& \sum_{I,\alpha,\beta,\gamma}
+&- \sum_{I,\alpha,\beta,\gamma}
 \Gamma_{I,\alpha,\beta,\gamma} {\bf u}_{I,\alpha}
 \epsilon_{\beta,\gamma}\nonumber \\
-&-& e\sum_{I,\alpha,\beta} Z^*_{I,\alpha,\beta} 
+&- e\sum_{I,\alpha,\beta} Z^*_{I,\alpha,\beta} 
 {\bf u}_{I,\alpha} {\bf E}_{\beta} \nonumber \\
-&-& \sum_{I,\alpha,\beta} 
+&- \sum_{I,\alpha,\beta} 
 Z^m_{I,\alpha,\beta} {\bf u}_{I,\alpha}{\bf H}_{\beta} \nonumber \\
-&-& V \sum_{\alpha,\beta,\gamma} e_{\alpha,\beta,\gamma} 
+&- V \sum_{\alpha,\beta,\gamma} e_{\alpha,\beta,\gamma} 
 \epsilon_{\alpha,\beta} {\bf E}_{\gamma} \nonumber \\
-&-&V \sum_{\alpha,\beta,\gamma}  h_{\alpha,\beta,\gamma} 
+&- V \sum_{\alpha,\beta,\gamma}  h_{\alpha,\beta,\gamma} 
 \epsilon_{\alpha,\beta} {\bf H}_{\gamma} \nonumber \\
-&-& {V \over 4 \pi} \sum_{\alpha,\beta} 
+&- {V \over 4 \pi} \sum_{\alpha,\beta} 
 \alpha_{\alpha,\beta} {\bf E}_{\alpha}
 {\bf H}_{\beta}.
-\end{eqnarray}
+\end{align}
 }
 
 \newpage
@@ -575,7 +576,7 @@ the definition of the magnetization is:
 \\
 
 {\color{orange} In the c.g.s-Gaussian system the unit of magnetization is 
-$\bar M_{cgs}= {1\over 10^{-2} K_A} A/m$ so 
+$\bar M_{cgs}= {1\over 10^{-2} \mathcal{K}_A} A/m$ so 
 ${\bar U_{cgs} \over \mu_0 \bar l_{cgs}^3 
 \bar H_{cgs} \bar M_{cgs}}=1$ and the definition of the magnetization
 is:
@@ -891,7 +892,8 @@ Z^m_{I,\alpha,\beta}=-{\partial^2 \mathcal{F} \over \partial
 \end{equation}
 The conversion factor with the SI unit is:
 \begin{equation}
-\bar Z^m_{cgs} = \bar l^2_{cgs} \bar M_{cgs}={10^{-4} \over 10^{-2} K_A}
+\bar Z^m_{cgs} = \bar l^2_{cgs} \bar M_{cgs}={10^{-4} \over 10^{-2} 
+\mathcal{K}_A}
 A\cdot m=\zmtozm\ A\cdot m.
 \end{equation}
 }
@@ -1062,8 +1064,8 @@ $\bar \alpha'_{cgs}={\bar U_{cgs} \over \bar l_{cgs}^3 \bar E_{cgs}
 \newpage
 \section{\color{coral}Equations of motion}
 The first derivatives of the free-energy give the following equations:
-\begin{eqnarray}
-{\bf f}_{I,\alpha}&=&{\bf f}^{(0)}_{I,\alpha}
+\begin{align}
+{\bf f}_{I,\alpha}&= {\bf f}^{(0)}_{I,\alpha}
 -\sum_{J,\beta} C_{I,\alpha,J,\beta} {\bf u}_{J,\beta}
 +\sum_{\gamma,\delta}
 \Gamma_{I,\alpha,\gamma,\delta} 
@@ -1071,7 +1073,7 @@ The first derivatives of the free-energy give the following equations:
 e \sum_{\gamma} Z^*_{I,\alpha,\gamma} {\bf E}_{\gamma}
 +\mu_0 \sum_{\gamma} 
 Z^m_{I,\alpha,\gamma} {\bf H}_{\gamma}, \\
-\sigma_{\lambda,\mu}&=& \sigma_{\lambda,\mu}^{(0)}
+\sigma_{\lambda,\mu}&= \sigma_{\lambda,\mu}^{(0)}
 -{1\over V} \sum_{I,\alpha}
 \Gamma_{I,\alpha,\lambda,\mu} {\bf u}_{I,\alpha}
 +\sum_{\gamma,\delta} C_{\lambda,\mu,\gamma,\delta}  
@@ -1080,7 +1082,7 @@ Z^m_{I,\alpha,\gamma} {\bf H}_{\gamma}, \\
  {\bf E}_{\gamma}
 -\mu_0 \sum_{\gamma}  h_{\lambda,\mu,\gamma} 
 {\bf H}_{\gamma}, \\
-{\bf P}_{\lambda}&=& {\bf P}^{(0)}_{\lambda}
+{\bf P}_{\lambda}&= {\bf P}^{(0)}_{\lambda}
 +{e\over V} \sum_{I,\alpha} Z^*_{I,\alpha,\lambda} 
 {\bf u}_{I,\alpha} +
 \sum_{\gamma,\delta} e_{\gamma,\delta,\lambda} 
@@ -1090,7 +1092,7 @@ Z^m_{I,\alpha,\gamma} {\bf H}_{\gamma}, \\
 {\bf E}_{\gamma} +
 \sum_{\gamma} \alpha_{\lambda,\gamma} 
 {\bf H}_{\gamma}, \\
-{\bf M}_{\lambda}&=& {\bf M}^{(0)}_{\lambda}
+{\bf M}_{\lambda}&= {\bf M}^{(0)}_{\lambda}
 +{1\over V}\sum_{I,\alpha} 
 Z^m_{I,\alpha,\lambda} {\bf u}_{I,\alpha} +
 \sum_{\gamma,\delta}  h_{\gamma,\delta,\lambda} 
@@ -1099,7 +1101,7 @@ Z^m_{I,\alpha,\lambda} {\bf u}_{I,\alpha} +
 +\sum_{\gamma} 
 \chi^m_{\lambda,\gamma}
 {\bf H}_{\gamma}.
-\end{eqnarray}
+\end{align}
 It is quite common to derive ${\bf u}_{I,\alpha}$ from the first equation
 by requiring that the forces acting on atoms vanish.
 We have:
@@ -1114,15 +1116,15 @@ Z^*_{J,\beta,\gamma} {\bf E}_{\gamma}
 {\bf H}_{\gamma},
 \end{equation}
 and inserting this expression in the other equations we can write:
-\begin{eqnarray}
-\sigma_{\lambda,\mu}&=& \tilde \sigma_{\lambda,\mu}^{(0)}
+\begin{align}
+\sigma_{\lambda,\mu}&= \tilde \sigma_{\lambda,\mu}^{(0)}
 +\sum_{\gamma,\delta} \tilde C_{\lambda,\mu,\gamma,\delta}  
 \epsilon_{\gamma,\delta} -
 \sum_{\gamma} \tilde e_{\lambda,\mu,\gamma} 
  {\bf E}_{\gamma}
 -\mu_0 \sum_{\gamma}  \tilde h_{\lambda,\mu,\gamma} 
 {\bf H}_{\gamma}, \\
-{\bf P}_{\lambda}&=& \tilde {\bf P}^{(0)}_{\lambda}
+{\bf P}_{\lambda}&= \tilde {\bf P}^{(0)}_{\lambda}
 +\sum_{\gamma,\delta} \tilde e_{\gamma,\delta,\lambda} 
 \epsilon_{\gamma,\delta} +
 \epsilon_0 \sum_{\gamma} 
@@ -1130,56 +1132,56 @@ and inserting this expression in the other equations we can write:
 {\bf E}_{\gamma} +
 \sum_{\gamma} \tilde \alpha_{\lambda,\gamma} 
 {\bf H}_{\gamma}, \\
-{\bf M}_{\lambda}&=& \tilde {\bf M}^{(0)}_{\lambda}
+{\bf M}_{\lambda}&= \tilde {\bf M}^{(0)}_{\lambda}
 +\sum_{\gamma,\delta}  \tilde h_{\gamma,\delta,\lambda} 
 \epsilon_{\gamma,\delta} 
 +{1\over \mu_0} \sum_{\gamma} \tilde \alpha_{\gamma,\lambda} {\bf E}_{\gamma}
 +\sum_{\gamma} 
 \tilde \chi^m_{\lambda,\gamma}
 {\bf H}_{\gamma},
-\end{eqnarray}
+\end{align}
 where 
-\begin{eqnarray}
-\tilde \sigma^{(0)}_{\lambda,\mu}&=&\sigma^{(0)}_{\lambda,\mu}
+\begin{align}
+\tilde \sigma^{(0)}_{\lambda,\mu}&= \sigma^{(0)}_{\lambda,\mu}
 -{1\over V} \sum_{I,\alpha,J,\beta} \Gamma_{I,\alpha,\lambda,\mu}
 C^{-1}_{I,\alpha,J,\beta} {\bf f}^{(0)}_{J,\beta}, \\
-\tilde {\bf P}^{(0)}_\lambda&=& {\bf P}^{(0)}_\lambda +{e\over V}
+\tilde {\bf P}^{(0)}_\lambda&= {\bf P}^{(0)}_\lambda +{e\over V}
 \sum_{I,\alpha,J,\beta} Z^*_{I,\alpha,\lambda} C^{-1}_{I,\alpha,J,\beta}
 {\bf f}^{(0)}_{J,\beta}, \\
-\tilde {\bf M}^{(0)}_\lambda&=& {\bf M}^{(0)}_\lambda +{1\over V}
+\tilde {\bf M}^{(0)}_\lambda&= {\bf M}^{(0)}_\lambda +{1\over V}
 \sum_{I,\alpha,J,\beta} Z^m_{I,\alpha,\lambda} C^{-1}_{I,\alpha,J,\beta}
 {\bf f}^{(0)}_{J,\beta},
-\end{eqnarray}
+\end{align}
 are the stress, polarization, and magnetization at the equilibrium position,
 while
-\begin{eqnarray}
-\tilde C_{\lambda,\mu,\gamma,\delta}&=&C_{\lambda,\mu,\gamma,\delta}
+\begin{align}
+\tilde C_{\lambda,\mu,\gamma,\delta}&= C_{\lambda,\mu,\gamma,\delta}
 -{1\over V}\sum_{I,\alpha,J,\beta} \Gamma_{I,\alpha,\lambda,\mu}
 C^{-1}_{I,\alpha,J,\beta}  \Gamma_{J,\beta,\gamma,\delta},\\
-\tilde \chi^e_{\lambda,\gamma}&=&\chi^e_{\lambda,\gamma} 
+\tilde \chi^e_{\lambda,\gamma}&= \chi^e_{\lambda,\gamma} 
 +{e^2 \over \epsilon_0 V} \sum_{I,\alpha,J,\beta} Z^*_{I,\alpha,\lambda}
 C^{-1}_{I,\alpha,J,\beta}  Z^*_{J,\beta,\gamma},\\
-\tilde \chi^m_{\lambda,\gamma}&=&\chi^m_{\lambda,\gamma} 
+\tilde \chi^m_{\lambda,\gamma}&= \chi^m_{\lambda,\gamma} 
 +{\mu_0 \over V} \sum_{I,\alpha,J,\beta} Z^m_{I,\alpha,\lambda}
 C^{-1}_{I,\alpha,J,\beta}  Z^m_{J,\beta,\gamma}, \\
-\tilde e_{\lambda,\mu,\gamma}&=&e_{\lambda,\mu,\gamma}
+\tilde e_{\lambda,\mu,\gamma}&= e_{\lambda,\mu,\gamma}
 +{e\over V}\sum_{I,\alpha,J,\beta} \Gamma_{I,\alpha,\lambda,\mu}
 C^{-1}_{I,\alpha,J,\beta} Z^*_{J,\beta,\gamma}
 ,\\
-\tilde h_{\lambda,\mu,\gamma}&=&h_{\lambda,\mu,\gamma}
+\tilde h_{\lambda,\mu,\gamma}&= h_{\lambda,\mu,\gamma}
 +{1\over V}\sum_{I,\alpha,J,\beta} \Gamma_{I,\alpha,\lambda,\mu}
 C^{-1}_{I,\alpha,J,\beta} Z^m_{J,\beta,\gamma},\\
-\tilde \alpha_{\lambda,\gamma}&=&\alpha_{\lambda,\gamma}
+\tilde \alpha_{\lambda,\gamma}&= \alpha_{\lambda,\gamma}
 +{\mu_0 e \over V}\sum_{I,\alpha,J,\beta} Z^*_{I,\alpha,\lambda}
 C^{-1}_{I,\alpha,J,\beta}  Z^m_{J,\beta,\gamma}
-\end{eqnarray}
+\end{align}
 are the macroscopic tensors.
 \\
 
 {\color{web-blue}
 The first derivatives of the free-energy give the following equations:
-\begin{eqnarray}
-{\bf f}_{I,\alpha}&=&{\bf f}^{(0)}_{I,\alpha}
+\begin{align}
+{\bf f}_{I,\alpha}&= {\bf f}^{(0)}_{I,\alpha}
 -\sum_{J,\beta} C_{I,\alpha,J,\beta} {\bf u}_{J,\beta}
 +\sum_{\gamma,\delta}
 \Gamma_{I,\alpha,\gamma,\delta} 
@@ -1187,7 +1189,7 @@ The first derivatives of the free-energy give the following equations:
 \sum_{\gamma} Z^*_{I,\alpha,\gamma} {\bf E}_{\gamma}
 +\alpha^2 \sum_{\gamma} 
 Z^m_{I,\alpha,\gamma} {\bf H}_{\gamma}, \\
-\sigma_{\lambda,\mu}&=& \sigma_{\lambda,\mu}^{(0)}
+\sigma_{\lambda,\mu}&= \sigma_{\lambda,\mu}^{(0)}
 -{1\over V} \sum_{I,\alpha}
 \Gamma_{I,\alpha,\lambda,\mu} {\bf u}_{I,\alpha}
 +\sum_{\gamma,\delta} C_{\lambda,\mu,\gamma,\delta}  
@@ -1196,7 +1198,7 @@ Z^m_{I,\alpha,\gamma} {\bf H}_{\gamma}, \\
  {\bf E}_{\gamma}
 -\alpha^2 \sum_{\gamma}  h_{\lambda,\mu,\gamma} 
 {\bf H}_{\gamma}, \\
-{\bf P}_{\lambda}&=& {\bf P}^{(0)}_{\lambda}
+{\bf P}_{\lambda}&= {\bf P}^{(0)}_{\lambda}
 +{1\over V} \sum_{I,\alpha} Z^*_{I,\alpha,\lambda} 
 {\bf u}_{I,\alpha} +
 \sum_{\gamma,\delta} e_{\gamma,\delta,\lambda} 
@@ -1206,16 +1208,17 @@ Z^m_{I,\alpha,\gamma} {\bf H}_{\gamma}, \\
 {\bf E}_{\gamma} +
 {1\over 4 \pi}\sum_{\gamma} \alpha_{\lambda,\gamma} 
 {\bf H}_{\gamma}, \\
-{\bf M}_{\lambda}&=& {\bf M}^{(0)}_{\lambda}
+{\bf M}_{\lambda}&= {\bf M}^{(0)}_{\lambda}
 +{1\over V}\sum_{I,\alpha} 
 Z^m_{I,\alpha,\lambda} {\bf u}_{I,\alpha} +
 \sum_{\gamma,\delta}  h_{\gamma,\delta,\lambda} 
 \epsilon_{\gamma,\delta} 
-+{1\over 4 \pi \alpha^2} \sum_{\gamma} \alpha_{\gamma,\lambda} {\bf E}_{\gamma}
++{1\over 4 \pi \alpha^2} 
+\sum_{\gamma} \alpha_{\gamma,\lambda} {\bf E}_{\gamma}
 +\sum_{\gamma} 
 \chi^m_{\lambda,\gamma}
 {\bf H}_{\gamma}.
-\end{eqnarray}
+\end{align}
 It is quite common to derive ${\bf u}_{I,\alpha}$ from the first equation
 by requiring that the forces acting on atoms vanish.
 We have:
@@ -1231,15 +1234,15 @@ Z^m_{J,\beta,\gamma}
 {\bf H}_{\gamma},
 \end{equation}
 and inserting this expression in the other equations we can write:
-\begin{eqnarray}
-\sigma_{\lambda,\mu}&=& \tilde \sigma_{\lambda,\mu}^{(0)}
+\begin{align}
+\sigma_{\lambda,\mu}&= \tilde \sigma_{\lambda,\mu}^{(0)}
 +\sum_{\gamma,\delta} \tilde C_{\lambda,\mu,\gamma,\delta}  
 \epsilon_{\gamma,\delta} -
 \sum_{\gamma} \tilde e_{\lambda,\mu,\gamma} 
  {\bf E}_{\gamma}
 -\alpha^2 \sum_{\gamma}  \tilde h_{\lambda,\mu,\gamma} 
 {\bf H}_{\gamma}, \\
-{\bf P}_{\lambda}&=& \tilde {\bf P}^{(0)}_{\lambda}
+{\bf P}_{\lambda}&= \tilde {\bf P}^{(0)}_{\lambda}
 +\sum_{\gamma,\delta} \tilde e_{\gamma,\delta,\lambda} 
 \epsilon_{\gamma,\delta} +
 \sum_{\gamma} 
@@ -1247,7 +1250,7 @@ and inserting this expression in the other equations we can write:
 {\bf E}_{\gamma} +
 {1\over 4 \pi}\sum_{\gamma} \tilde \alpha_{\lambda,\gamma} 
 {\bf H}_{\gamma}, \\
-{\bf M}_{\lambda}&=& \tilde {\bf M}^{(0)}_{\lambda}
+{\bf M}_{\lambda}&= \tilde {\bf M}^{(0)}_{\lambda}
 +\sum_{\gamma,\delta}  \tilde h_{\gamma,\delta,\lambda} 
 \epsilon_{\gamma,\delta} 
 +{1\over 4 \pi \alpha^2} \sum_{\gamma} \tilde \alpha_{\gamma,\lambda} 
@@ -1255,49 +1258,49 @@ and inserting this expression in the other equations we can write:
 +\sum_{\gamma} 
 \tilde \chi^m_{\lambda,\gamma}
 {\bf H}_{\gamma},
-\end{eqnarray}
+\end{align}
 where 
-\begin{eqnarray}
-\tilde \sigma^{(0)}_{\lambda,\mu}&=&\sigma^{(0)}_{\lambda,\mu}
+\begin{align}
+\tilde \sigma^{(0)}_{\lambda,\mu}&= \sigma^{(0)}_{\lambda,\mu}
 -{1\over V} \sum_{I,\alpha,J,\beta} \Gamma_{I,\alpha,\lambda,\mu}
 C^{-1}_{I,\alpha,J,\beta} {\bf f}^{(0)}_{J,\beta}, \\
-\tilde {\bf P}^{(0)}_\lambda&=& {\bf P}^{(0)}_\lambda +{1\over V}
+\tilde {\bf P}^{(0)}_\lambda&= {\bf P}^{(0)}_\lambda +{1\over V}
 \sum_{I,\alpha,J,\beta} Z^*_{I,\alpha,\lambda} C^{-1}_{I,\alpha,J,\beta}
 {\bf f}^{(0)}_{J,\beta}, \\
-\tilde {\bf M}^{(0)}_\lambda&=& {\bf M}^{(0)}_\lambda +{1\over V}
+\tilde {\bf M}^{(0)}_\lambda&= {\bf M}^{(0)}_\lambda +{1\over V}
 \sum_{I,\alpha,J,\beta} Z^m_{I,\alpha,\lambda} C^{-1}_{I,\alpha,J,\beta}
 {\bf f}^{(0)}_{J,\beta},
-\end{eqnarray}
+\end{align}
 are the stress, polarization, and magnetization at the equilibrium position,
 while
-\begin{eqnarray}
-\tilde C_{\lambda,\mu,\gamma,\delta}&=&C_{\lambda,\mu,\gamma,\delta}
+\begin{align}
+\tilde C_{\lambda,\mu,\gamma,\delta}&= C_{\lambda,\mu,\gamma,\delta}
 -{1\over V}\sum_{I,\alpha,J,\beta} \Gamma_{I,\alpha,\lambda,\mu}
 C^{-1}_{I,\alpha,J,\beta}  \Gamma_{J,\beta,\gamma,\delta},\\
-\tilde \chi^e_{\lambda,\gamma}&=&\chi^e_{\lambda,\gamma} 
+\tilde \chi^e_{\lambda,\gamma}&= \chi^e_{\lambda,\gamma} 
 +{1 \over V} \sum_{I,\alpha,J,\beta} Z^*_{I,\alpha,\lambda}
 C^{-1}_{I,\alpha,J,\beta}  Z^*_{J,\beta,\gamma},\\
-\tilde \chi^m_{\lambda,\gamma}&=&\chi^m_{\lambda,\gamma} 
+\tilde \chi^m_{\lambda,\gamma}&= \chi^m_{\lambda,\gamma} 
 +{\alpha^2 \over V} \sum_{I,\alpha,J,\beta} Z^m_{I,\alpha,\lambda}
 C^{-1}_{I,\alpha,J,\beta}  Z^m_{J,\beta,\gamma}, \\
-\tilde e_{\lambda,\mu,\gamma}&=&e_{\lambda,\mu,\gamma}
+\tilde e_{\lambda,\mu,\gamma}&= e_{\lambda,\mu,\gamma}
 +{1\over V}\sum_{I,\alpha,J,\beta} \Gamma_{I,\alpha,\lambda,\mu}
 C^{-1}_{I,\alpha,J,\beta} Z^*_{J,\beta,\gamma},\\
-\tilde h_{\lambda,\mu,\gamma}&=&h_{\lambda,\mu,\gamma}
+\tilde h_{\lambda,\mu,\gamma}&= h_{\lambda,\mu,\gamma}
 +{1\over V}\sum_{I,\alpha,J,\beta} \Gamma_{I,\alpha,\lambda,\mu}
 C^{-1}_{I,\alpha,J,\beta}  Z^m_{J,\beta,\gamma},\\
-\tilde \alpha_{\lambda,\gamma}&=&\alpha_{\lambda,\gamma}
+\tilde \alpha_{\lambda,\gamma}&= \alpha_{\lambda,\gamma}
 +{4 \pi \alpha^2 \over V}\sum_{I,\alpha,J,\beta} Z^*_{I,\alpha,\lambda}
 C^{-1}_{I,\alpha,J,\beta}  Z^m_{J,\beta,\gamma}
-\end{eqnarray}
+\end{align}
 are the macroscopic tensors.
 }
 \\
 
 {\color{orange}
 The first derivatives of the free-energy give the following equations:
-\begin{eqnarray}
-{\bf f}_{I,\alpha}&=&{\bf f}^{(0)}_{I,\alpha}
+\begin{align}
+{\bf f}_{I,\alpha}&= {\bf f}^{(0)}_{I,\alpha}
 -\sum_{J,\beta} C_{I,\alpha,J,\beta} {\bf u}_{J,\beta}
 +\sum_{\gamma,\delta}
 \Gamma_{I,\alpha,\gamma,\delta} 
@@ -1305,7 +1308,7 @@ The first derivatives of the free-energy give the following equations:
 e \sum_{\gamma} Z^*_{I,\alpha,\gamma} {\bf E}_{\gamma}
 +\sum_{\gamma} 
 Z^m_{I,\alpha,\gamma} {\bf H}_{\gamma}, \\
-\sigma_{\lambda,\mu}&=& \sigma_{\lambda,\mu}^{(0)}
+\sigma_{\lambda,\mu}&=  \sigma_{\lambda,\mu}^{(0)}
 -{1\over V} \sum_{I,\alpha}
 \Gamma_{I,\alpha,\lambda,\mu} {\bf u}_{I,\alpha}
 +\sum_{\gamma,\delta} C_{\lambda,\mu,\gamma,\delta}  
@@ -1314,7 +1317,7 @@ Z^m_{I,\alpha,\gamma} {\bf H}_{\gamma}, \\
  {\bf E}_{\gamma}
 -\sum_{\gamma}  h_{\lambda,\mu,\gamma} 
 {\bf H}_{\gamma}, \\
-{\bf P}_{\lambda}&=& {\bf P}^{(0)}_{\lambda}
+{\bf P}_{\lambda}&= {\bf P}^{(0)}_{\lambda}
 +{e\over V} \sum_{I,\alpha} Z^*_{I,\alpha,\lambda} 
 {\bf u}_{I,\alpha} +
 \sum_{\gamma,\delta} e_{\gamma,\delta,\lambda} 
@@ -1324,7 +1327,7 @@ Z^m_{I,\alpha,\gamma} {\bf H}_{\gamma}, \\
 {\bf E}_{\gamma} +
 {1\over 4 \pi} \sum_{\gamma} \alpha_{\lambda,\gamma} 
 {\bf H}_{\gamma}, \\
-{\bf M}_{\lambda}&=& {\bf M}^{(0)}_{\lambda}
+{\bf M}_{\lambda}&= {\bf M}^{(0)}_{\lambda}
 +{1\over V}\sum_{I,\alpha} 
 Z^m_{I,\alpha,\lambda} {\bf u}_{I,\alpha} +
 \sum_{\gamma,\delta}  h_{\gamma,\delta,\lambda} 
@@ -1333,7 +1336,7 @@ Z^m_{I,\alpha,\lambda} {\bf u}_{I,\alpha} +
 +\sum_{\gamma} 
 \chi^m_{\lambda,\gamma}
 {\bf H}_{\gamma}.
-\end{eqnarray}
+\end{align}
 It is quite common to derive ${\bf u}_{I,\alpha}$ from the first equation
 by requiring that the forces acting on atoms vanish.
 We have:
@@ -1348,15 +1351,15 @@ Z^*_{J,\beta,\gamma} {\bf E}_{\gamma}
 {\bf H}_{\gamma},
 \end{equation}
 and inserting this expression in the other equations we can write:
-\begin{eqnarray}
-\sigma_{\lambda,\mu}&=& \tilde \sigma_{\lambda,\mu}^{(0)}
+\begin{align}
+\sigma_{\lambda,\mu}&= \tilde \sigma_{\lambda,\mu}^{(0)}
 +\sum_{\gamma,\delta} \tilde C_{\lambda,\mu,\gamma,\delta}  
 \epsilon_{\gamma,\delta} -
 \sum_{\gamma} \tilde e_{\lambda,\mu,\gamma} 
  {\bf E}_{\gamma}
 -\sum_{\gamma}  \tilde h_{\lambda,\mu,\gamma} 
 {\bf H}_{\gamma}, \\
-{\bf P}_{\lambda}&=& \tilde {\bf P}^{(0)}_{\lambda}
+{\bf P}_{\lambda}&= \tilde {\bf P}^{(0)}_{\lambda}
 +\sum_{\gamma,\delta} \tilde e_{\gamma,\delta,\lambda} 
 \epsilon_{\gamma,\delta} +
 \sum_{\gamma} 
@@ -1364,49 +1367,49 @@ and inserting this expression in the other equations we can write:
 {\bf E}_{\gamma} +
 {1\over 4 \pi}\sum_{\gamma} \tilde \alpha_{\lambda,\gamma} 
 {\bf H}_{\gamma}, \\
-{\bf M}_{\lambda}&=& \tilde {\bf M}^{(0)}_{\lambda}
+{\bf M}_{\lambda}&= \tilde {\bf M}^{(0)}_{\lambda}
 +\sum_{\gamma,\delta}  \tilde h_{\gamma,\delta,\lambda} 
 \epsilon_{\gamma,\delta} 
 +{1\over 4 \pi} \sum_{\gamma} \tilde \alpha_{\gamma,\lambda} {\bf E}_{\gamma}
 +\sum_{\gamma} 
 \tilde \chi^m_{\lambda,\gamma}
 {\bf H}_{\gamma},
-\end{eqnarray}
+\end{align}
 where 
-\begin{eqnarray}
-\tilde \sigma^{(0)}_{\lambda,\mu}&=&\sigma^{(0)}_{\lambda,\mu}
+\begin{align}
+\tilde \sigma^{(0)}_{\lambda,\mu}&= \sigma^{(0)}_{\lambda,\mu}
 -{1\over V} \sum_{I,\alpha,J,\beta} \Gamma_{I,\alpha,\lambda,\mu}
 C^{-1}_{I,\alpha,J,\beta} {\bf f}^{(0)}_{J,\beta}, \\
-\tilde {\bf P}^{(0)}_\lambda&=& {\bf P}^{(0)}_\lambda +{e\over V}
+\tilde {\bf P}^{(0)}_\lambda&= {\bf P}^{(0)}_\lambda +{e\over V}
 \sum_{I,\alpha,J,\beta} Z^*_{I,\alpha,\lambda} C^{-1}_{I,\alpha,J,\beta}
 {\bf f}^{(0)}_{J,\beta}, \\
-\tilde {\bf M}^{(0)}_\lambda&=& {\bf M}^{(0)}_\lambda +{1\over V}
+\tilde {\bf M}^{(0)}_\lambda&= {\bf M}^{(0)}_\lambda +{1\over V}
 \sum_{I,\alpha,J,\beta} Z^m_{I,\alpha,\lambda} C^{-1}_{I,\alpha,J,\beta}
 {\bf f}^{(0)}_{J,\beta},
-\end{eqnarray}
+\end{align}
 are the stress, polarization, and magnetization at the equilibrium position,
 while
-\begin{eqnarray}
-\tilde C_{\lambda,\mu,\gamma,\delta}&=&C_{\lambda,\mu,\gamma,\delta}
+\begin{align}
+\tilde C_{\lambda,\mu,\gamma,\delta}&= C_{\lambda,\mu,\gamma,\delta}
 -{1\over V}\sum_{I,\alpha,J,\beta} \Gamma_{I,\alpha,\lambda,\mu}
 C^{-1}_{I,\alpha,J,\beta}  \Gamma_{J,\beta,\gamma,\delta},\\
-\tilde \chi^e_{\lambda,\gamma}&=&\chi^e_{\lambda,\gamma} 
+\tilde \chi^e_{\lambda,\gamma}&= \chi^e_{\lambda,\gamma} 
 +{e^2 \over V} \sum_{I,\alpha,J,\beta} Z^*_{I,\alpha,\lambda}
 C^{-1}_{I,\alpha,J,\beta}  Z^*_{J,\beta,\gamma},\\
-\tilde \chi^m_{\lambda,\gamma}&=&\chi^m_{\lambda,\gamma} 
+\tilde \chi^m_{\lambda,\gamma}&= \chi^m_{\lambda,\gamma} 
 +{1 \over V} \sum_{I,\alpha,J,\beta} Z^m_{I,\alpha,\lambda}
 C^{-1}_{I,\alpha,J,\beta}  Z^m_{J,\beta,\gamma}, \\
-\tilde e_{\lambda,\mu,\gamma}&=&e_{\lambda,\mu,\gamma}
+\tilde e_{\lambda,\mu,\gamma}&= e_{\lambda,\mu,\gamma}
 +{e\over V}\sum_{I,\alpha,J,\beta} 
 \Gamma_{I,\alpha,\lambda,\mu} C^{-1}_{I,\alpha,J,\beta} 
 Z^*_{J,\beta,\gamma},\\
-\tilde h_{\lambda,\mu,\gamma}&=&h_{\lambda,\mu,\gamma}
+\tilde h_{\lambda,\mu,\gamma}&= h_{\lambda,\mu,\gamma}
 +{1\over V}\sum_{I,\alpha,J,\beta} \Gamma_{I,\alpha,\lambda,\mu}
 C^{-1}_{I,\alpha,J,\beta} Z^m_{J,\beta,\gamma},\\
-\tilde \alpha_{\lambda,\gamma}&=&\alpha_{\lambda,\gamma}
+\tilde \alpha_{\lambda,\gamma}&= \alpha_{\lambda,\gamma}
 +{4 \pi e \over V}\sum_{I,\alpha,J,\beta} Z^*_{I,\alpha,\lambda}
 C^{-1}_{I,\alpha,J,\beta}  Z^m_{J,\beta,\gamma}
-\end{eqnarray}
+\end{align}
 are the macroscopic tensors.
 }
 \\
@@ -1454,24 +1457,24 @@ dF = V \sum_{\alpha,\beta} \sigma_{\alpha,\beta} d \epsilon_{\alpha,\beta}
 V \sum_{\alpha,\beta} {\bf B}_{\alpha} d {\bf H}_\alpha - S dT.
 \end{equation}
 From the previous equations we obtain:
-\begin{eqnarray}
-S&=&-{\partial F \over \partial T}, \\
-\sigma_{\alpha,\beta}&=&{1\over V}
+\begin{align}
+S&=-{\partial F \over \partial T}, \\
+\sigma_{\alpha,\beta}&= {1\over V}
 {\partial F \over \partial \epsilon_{\alpha,\beta}}, \\
-{\bf D}_{\alpha}&=&-{1\over V}
+{\bf D}_{\alpha}&= -{1\over V}
 {\partial F \over \partial {\bf E}_{\alpha}}, \\
-{\bf B}_{\alpha}&=&-{1\over V}
+{\bf B}_{\alpha}&= -{1\over V}
 {\partial F \over \partial {\bf H}_{\alpha}}.
-\end{eqnarray}
+\end{align}
 Assuming that these quantities are functions of the independent variables
 $T$, $\epsilon_{\alpha,\beta}$, ${\bf E}_\alpha$, and ${\bf H}_\alpha$ we
 obtain the temperature dependent macroscopic equations:
-\begin{eqnarray}
-dS&=&{\partial S \over \partial T} dT+\sum_{\alpha,\beta}
+\begin{align}
+dS&= {\partial S \over \partial T} dT+\sum_{\alpha,\beta}
 {\partial S \over \partial \epsilon_{\alpha,\beta}}d\epsilon_{\alpha,\beta}
 +\sum_\gamma{\partial S \over \partial {\bf E}_{\gamma}}d{\bf E}_{\gamma}+ 
 \sum_\delta{\partial S \over \partial {\bf H}_{\delta}}d{\bf H}_{\delta}, \\
-d\sigma_{\alpha,\beta}&=&
+d\sigma_{\alpha,\beta}&=
 {\partial \sigma_{\alpha,\beta} \over \partial T} dT+\sum_{\gamma,\delta}
 {\partial \sigma_{\alpha,\beta} \over \partial 
 \epsilon_{\gamma,\delta}}d\epsilon_{\gamma,\delta}
@@ -1479,13 +1482,13 @@ d\sigma_{\alpha,\beta}&=&
 {\bf E}_{\gamma}}d{\bf E}_{\gamma}+ 
 \sum_\delta{\partial \sigma_{\alpha,\beta} \over \partial 
 {\bf H}_{\delta}}d{\bf H}_{\delta}, \\
-d{\bf D}_\gamma&=&
+d{\bf D}_\gamma&=
 {\partial  {\bf D}_\gamma \over \partial T} dT+\sum_{\alpha,\beta}
 {\partial {\bf D}_\gamma \over \partial \epsilon_{\alpha,\beta}}
 d\epsilon_{\alpha,\beta}
 +\sum_\alpha{\partial {\bf D}_\gamma \over \partial {\bf E}_{\alpha}}d{\bf E}_{\alpha}+ 
 \sum_\delta{\partial {\bf D}_\gamma \over \partial {\bf H}_{\delta}}d{\bf H}_{\delta}, \\
-d{\bf B}_\delta&=&
+d{\bf B}_\delta&=
 {\partial {\bf B}_\delta \over \partial T} dT+\sum_{\alpha,\beta}
 {\partial {\bf B}_\delta \over \partial \epsilon_{\alpha,\beta}}
 d\epsilon_{\alpha,\beta}
@@ -1493,7 +1496,7 @@ d\epsilon_{\alpha,\beta}
 d{\bf E}_{\gamma}+ 
 \sum_\alpha{\partial {\bf B}_\delta \over \partial {\bf H}_{\alpha}}
 d{\bf H}_{\alpha}, 
-\end{eqnarray}
+\end{align}
 These equations allow the definition of the isothermal material properties 
 at finite temperature. In addition to generalizing to finite temperatures
 the macroscopic quantities introduced so far, they provide other material 
@@ -1550,24 +1553,24 @@ ${\partial {\bf B}_\gamma \over \partial T}= \mu_0
 
 The other derivatives are just finite temperature generalizations of the
 previously discussed quantities. We can rewrite the macroscopic equations as:
-\begin{eqnarray}
-dS&=&{C_\epsilon\over T} dT+ V \sum_{\alpha,\beta} \tilde b_{\alpha,\beta} 
+\begin{align}
+dS&= {C_\epsilon\over T} dT+ V \sum_{\alpha,\beta} \tilde b_{\alpha,\beta} 
 d\epsilon_{\alpha,\beta}
 + V \sum_\gamma \tilde {\bf p}_\gamma d{\bf E}_{\gamma} +
 V \sum_\delta \tilde {\bf q}_\delta d{\bf H}_{\delta}, \\
-d\sigma_{\alpha,\beta}&=& -\tilde b_{\alpha,\beta} dT + 
+d\sigma_{\alpha,\beta}&= -\tilde b_{\alpha,\beta} dT + 
 \sum_{\gamma,\delta} \tilde C^T_{\alpha,\beta,\gamma,\delta} 
 d \epsilon_{\gamma,\delta} - \sum_\gamma \tilde e^T_{\alpha,\beta,\gamma} 
 d{\bf E}_{\gamma} -\mu_0 
 \sum_\delta \tilde h^T_{\alpha,\beta,\delta} d{\bf H}_{\delta}, \\
-d{\bf D}_\gamma&=&
+d{\bf D}_\gamma&=
 \tilde {\bf p}_\gamma dT + \sum_{\alpha,\beta} \tilde 
 e^T_{\alpha,\beta,\gamma} d\epsilon_{\alpha,\beta}
 +\epsilon_0 \sum_\alpha \tilde \epsilon^T_{r,\gamma,\alpha} 
 d{\bf E}_{\alpha} + 
 \sum_\delta \tilde \alpha^T_{\gamma,\delta} d{\bf H}_{\delta}, 
 \label{dsi} \\
-d{\bf B}_\delta&=&
+d{\bf B}_\delta&=
 \tilde {\bf q}_\delta dT+\mu_0 \sum_{\alpha,\beta}
 \tilde h^T_{\alpha,\beta,\gamma}
 d\epsilon_{\alpha,\beta}
@@ -1575,7 +1578,7 @@ d\epsilon_{\alpha,\beta}
 d{\bf E}_{\gamma}+ \mu_0
 \sum_\alpha \tilde \mu^{T}_{r,\delta,\alpha}
 d{\bf H}_{\alpha}, \label{bsi}
-\end{eqnarray}
+\end{align}
 where the index $T$ indicates isothermal quantities and 
 the tilde $\tilde{ }$ indicates that the independent variables are
 $T$, $\epsilon_{\alpha,\beta}$, ${\bf E}_\alpha$, and ${\bf H}_\alpha$. 
@@ -1602,14 +1605,14 @@ ${\partial {\bf B}_\gamma \over \partial {\bf H}_{\delta}}= \mu_0
 
 Using these Equations Eqs.~\ref{dsi} and \ref{bsi} can be written
 equivalently as:
-\begin{eqnarray}
-d{\bf P}_\gamma&=&
+\begin{align}
+d{\bf P}_\gamma&=
 \tilde {\bf p}_\gamma dT + \sum_{\alpha,\beta} \tilde 
 e^T_{\alpha,\beta,\gamma} d\epsilon_{\alpha,\beta}
 +\epsilon_0 \sum_\alpha \tilde \chi^{e,T}_{\gamma,\alpha} 
 d{\bf E}_{\alpha} + 
 \sum_\delta \tilde \alpha^T_{\gamma,\delta} d{\bf H}_{\delta}, \\
-d{\bf M}_\delta&=&
+d{\bf M}_\delta&=
 {1\over \mu_0}\tilde {\bf q}_\delta dT+ \sum_{\alpha,\beta}
 \tilde h^T_{\alpha,\beta,\gamma}
 d\epsilon_{\alpha,\beta}
@@ -1617,8 +1620,7 @@ d\epsilon_{\alpha,\beta}
 d{\bf E}_{\gamma}+ 
 \sum_\alpha \tilde \chi^{m,T}_{\delta,\alpha}
 d{\bf H}_{\alpha}, 
-\end{eqnarray}
-
+\end{align}
 
 \newpage
 {\color{web-blue}
@@ -1664,24 +1666,24 @@ dF = V \sum_{\alpha,\beta} \sigma_{\alpha,\beta} d \epsilon_{\alpha,\beta}
 {V \over 4 \pi} \sum_{\alpha,\beta} {\bf B}_{\alpha} d {\bf H}_\alpha - S dT.
 \end{equation}
 From the previous equations we obtain:
-\begin{eqnarray}
-S&=&-{\partial F \over \partial T}, \\
-\sigma_{\alpha,\beta}&=&{1\over V}
+\begin{align}
+S&= -{\partial F \over \partial T}, \\
+\sigma_{\alpha,\beta}&= {1\over V}
 {\partial F \over \partial \epsilon_{\alpha,\beta}}, \\
-{\bf D}_{\alpha}&=&-{4 \pi \over V}
+{\bf D}_{\alpha}&= -{4 \pi \over V}
 {\partial F \over \partial {\bf E}_{\alpha}}, \\
-{\bf B}_{\alpha}&=&-{4 \pi \over V}
+{\bf B}_{\alpha}&= -{4 \pi \over V}
 {\partial F \over \partial {\bf H}_{\alpha}}.
-\end{eqnarray}
+\end{align}
 Assuming that these quantities are functions of the independent variables
 $T$, $\epsilon_{\alpha,\beta}$, ${\bf E}_\alpha$, and ${\bf H}_\alpha$ we
 obtain the temperature dependent macroscopic equations:
-\begin{eqnarray}
-dS&=&{\partial S \over \partial T} dT+\sum_{\alpha,\beta}
+\begin{align}
+dS&= {\partial S \over \partial T} dT+\sum_{\alpha,\beta}
 {\partial S \over \partial \epsilon_{\alpha,\beta}}d\epsilon_{\alpha,\beta}
 +\sum_\gamma{\partial S \over \partial {\bf E}_{\gamma}}d{\bf E}_{\gamma}+ 
 \sum_\delta{\partial S \over \partial {\bf H}_{\delta}}d{\bf H}_{\delta}, \\
-d\sigma_{\alpha,\beta}&=&
+d\sigma_{\alpha,\beta}&=
 {\partial \sigma_{\alpha,\beta} \over \partial T} dT+\sum_{\gamma,\delta}
 {\partial \sigma_{\alpha,\beta} \over \partial 
 \epsilon_{\gamma,\delta}}d\epsilon_{\gamma,\delta}
@@ -1689,13 +1691,13 @@ d\sigma_{\alpha,\beta}&=&
 {\bf E}_{\gamma}}d{\bf E}_{\gamma}+ 
 \sum_\delta{\partial \sigma_{\alpha,\beta} \over \partial 
 {\bf H}_{\delta}}d{\bf H}_{\delta}, \\
-d{\bf D}_\gamma&=&
+d{\bf D}_\gamma&=
 {\partial  {\bf D}_\gamma \over \partial T} dT+\sum_{\alpha,\beta}
 {\partial {\bf D}_\gamma \over \partial \epsilon_{\alpha,\beta}}
 d\epsilon_{\alpha,\beta}
 +\sum_\alpha{\partial {\bf D}_\gamma \over \partial {\bf E}_{\alpha}}d{\bf E}_{\alpha}+ 
 \sum_\delta{\partial {\bf D}_\gamma \over \partial {\bf H}_{\delta}}d{\bf H}_{\delta}, \\
-d{\bf B}_\delta&=&
+d{\bf B}_\delta&=
 {\partial {\bf B}_\delta \over \partial T} dT+\sum_{\alpha,\beta}
 {\partial {\bf B}_\delta \over \partial \epsilon_{\alpha,\beta}}
 d\epsilon_{\alpha,\beta}
@@ -1703,7 +1705,7 @@ d\epsilon_{\alpha,\beta}
 d{\bf E}_{\gamma}+ 
 \sum_\alpha{\partial {\bf B}_\delta \over \partial {\bf H}_{\alpha}}
 d{\bf H}_{\alpha}, 
-\end{eqnarray}
+\end{align}
 These equations allow the definition of the isothermal material properties 
 at finite temperature. In addition to generalizing to finite temperatures
 the macroscopic quantities introduced so far, they provide other material 
@@ -1760,24 +1762,24 @@ ${\partial {\bf B}_\gamma \over \partial T}= 4 \pi \alpha^2
 \subsection{\color{web-blue}Macroscopic equations at finite temperature}
 The other derivatives are just finite temperature generalizations of the
 previously discussed quantities. We can rewrite the macroscopic equations as:
-\begin{eqnarray}
-dS&=&{C_\epsilon\over T} dT+ V \sum_{\alpha,\beta} \tilde b_{\alpha,\beta} 
+\begin{align}
+dS&= {C_\epsilon\over T} dT+ V \sum_{\alpha,\beta} \tilde b_{\alpha,\beta} 
 d\epsilon_{\alpha,\beta}
 + V \sum_\gamma \tilde {\bf p}_\gamma d{\bf E}_{\gamma} + 
 V \sum_\delta \tilde {\bf q}_\delta d{\bf H}_{\delta}, \\
-d\sigma_{\alpha,\beta}&=& -\tilde b_{\alpha,\beta} dT + 
+d\sigma_{\alpha,\beta}&= -\tilde b_{\alpha,\beta} dT + 
 \sum_{\gamma,\delta} \tilde C^T_{\alpha,\beta,\gamma,\delta} 
 d \epsilon_{\gamma,\delta} - \sum_\gamma \tilde e^T_{\alpha,\beta,\gamma} 
 d{\bf E}_{\gamma} -\alpha^2
 \sum_\delta \tilde h^T_{\alpha,\beta,\delta} d{\bf H}_{\delta}, \\
-d{\bf D}_\gamma&=&
+d{\bf D}_\gamma&=
 4 \pi \tilde {\bf p}_\gamma dT + 4 \pi \sum_{\alpha,\beta} \tilde 
 e^T_{\alpha,\beta,\gamma} d\epsilon_{\alpha,\beta}
 +\sum_\alpha \tilde \epsilon^T_{r,\gamma,\alpha} 
 d{\bf E}_{\alpha} + 
 \sum_\delta \tilde \alpha^T_{\gamma,\delta} d{\bf H}_{\delta}, 
 \label{dau} \\
-d{\bf B}_\delta&=&
+d{\bf B}_\delta&=
 4 \pi \tilde {\bf q}_\delta dT+ 4 \pi \alpha^2 \sum_{\alpha,\beta}
 \tilde h^T_{\alpha,\beta,\gamma}
 d\epsilon_{\alpha,\beta}
@@ -1785,7 +1787,7 @@ d\epsilon_{\alpha,\beta}
 d{\bf E}_{\gamma}+ \alpha^2
 \sum_\alpha \tilde \mu^{T}_{r,\delta,\alpha}
 d{\bf H}_{\alpha}, \label{bau} 
-\end{eqnarray}
+\end{align}
 where the index $T$ indicates isothermal quantities and 
 the tilde $\tilde{ }$ indicates that the independent variables are
 $T$, $\epsilon_{\alpha,\beta}$, ${\bf E}_\alpha$, and ${\bf H}_\alpha$. 
@@ -1812,14 +1814,14 @@ ${\partial {\bf B}_\gamma \over \partial {\bf H}_{\delta}}= \alpha^2
 
 Using these Equations Eqs.~\ref{dau} and \ref{bau} can be written
 equivalently as:
-\begin{eqnarray}
-d{\bf P}_\gamma&=&
+\begin{align}
+d{\bf P}_\gamma&=
 \tilde {\bf p}_\gamma dT + \sum_{\alpha,\beta} \tilde 
 e^T_{\alpha,\beta,\gamma} d\epsilon_{\alpha,\beta}
 + \sum_\alpha \tilde \chi^{e,T}_{\gamma,\alpha} 
 d{\bf E}_{\alpha} + {1\over 4 \pi}
 \sum_\delta \tilde \alpha^T_{\gamma,\delta} d{\bf H}_{\delta}, \\
-d{\bf M}_\delta&=&
+d{\bf M}_\delta&=
 {1\over \alpha^2}\tilde {\bf q}_\delta dT+ \sum_{\alpha,\beta}
 \tilde h^T_{\alpha,\beta,\gamma}
 d\epsilon_{\alpha,\beta}
@@ -1827,7 +1829,7 @@ d\epsilon_{\alpha,\beta}
 d{\bf E}_{\gamma}+ 
 \sum_\alpha \tilde \chi^{m,T}_{\delta,\alpha}
 d{\bf H}_{\alpha}, 
-\end{eqnarray}
+\end{align}
 }
 
 \newpage
@@ -1874,24 +1876,24 @@ dF = V \sum_{\alpha,\beta} \sigma_{\alpha,\beta} d \epsilon_{\alpha,\beta}
 {V \over 4 \pi} \sum_{\alpha,\beta} {\bf B}_{\alpha} d {\bf H}_\alpha - S dT.
 \end{equation}
 From the previous equations we obtain:
-\begin{eqnarray}
-S&=&-{\partial F \over \partial T}, \\
-\sigma_{\alpha,\beta}&=&{1\over V}
+\begin{align}
+S&=-{\partial F \over \partial T}, \\
+\sigma_{\alpha,\beta}&= {1\over V}
 {\partial F \over \partial \epsilon_{\alpha,\beta}}, \\
-{\bf D}_{\alpha}&=&-{4 \pi \over V}
+{\bf D}_{\alpha}&= -{4 \pi \over V}
 {\partial F \over \partial {\bf E}_{\alpha}}, \\
-{\bf B}_{\alpha}&=&-{4 \pi \over V}
+{\bf B}_{\alpha}&= -{4 \pi \over V}
 {\partial F \over \partial {\bf H}_{\alpha}}.
-\end{eqnarray}
+\end{align}
 Assuming that these quantities are functions of the independent variables
 $T$, $\epsilon_{\alpha,\beta}$, ${\bf E}_\alpha$, and ${\bf H}_\alpha$ we
 obtain the temperature dependent macroscopic equations:
-\begin{eqnarray}
-dS&=&{\partial S \over \partial T} dT+\sum_{\alpha,\beta}
+\begin{align}
+dS&= {\partial S \over \partial T} dT+\sum_{\alpha,\beta}
 {\partial S \over \partial \epsilon_{\alpha,\beta}}d\epsilon_{\alpha,\beta}
 +\sum_\gamma{\partial S \over \partial {\bf E}_{\gamma}}d{\bf E}_{\gamma}+ 
 \sum_\delta{\partial S \over \partial {\bf H}_{\delta}}d{\bf H}_{\delta}, \\
-d\sigma_{\alpha,\beta}&=&
+d\sigma_{\alpha,\beta}&=
 {\partial \sigma_{\alpha,\beta} \over \partial T} dT+\sum_{\gamma,\delta}
 {\partial \sigma_{\alpha,\beta} \over \partial 
 \epsilon_{\gamma,\delta}}d\epsilon_{\gamma,\delta}
@@ -1899,13 +1901,13 @@ d\sigma_{\alpha,\beta}&=&
 {\bf E}_{\gamma}}d{\bf E}_{\gamma}+ 
 \sum_\delta{\partial \sigma_{\alpha,\beta} \over \partial 
 {\bf H}_{\delta}}d{\bf H}_{\delta}, \\
-d{\bf D}_\gamma&=&
+d{\bf D}_\gamma&=
 {\partial  {\bf D}_\gamma \over \partial T} dT+\sum_{\alpha,\beta}
 {\partial {\bf D}_\gamma \over \partial \epsilon_{\alpha,\beta}}
 d\epsilon_{\alpha,\beta}
 +\sum_\alpha{\partial {\bf D}_\gamma \over \partial {\bf E}_{\alpha}}d{\bf E}_{\alpha}+ 
 \sum_\delta{\partial {\bf D}_\gamma \over \partial {\bf H}_{\delta}}d{\bf H}_{\delta}, \\
-d{\bf B}_\delta&=&
+d{\bf B}_\delta&=
 {\partial {\bf B}_\delta \over \partial T} dT+\sum_{\alpha,\beta}
 {\partial {\bf B}_\delta \over \partial \epsilon_{\alpha,\beta}}
 d\epsilon_{\alpha,\beta}
@@ -1913,7 +1915,7 @@ d\epsilon_{\alpha,\beta}
 d{\bf E}_{\gamma}+ 
 \sum_\alpha{\partial {\bf B}_\delta \over \partial {\bf H}_{\alpha}}
 d{\bf H}_{\alpha}, 
-\end{eqnarray}
+\end{align}
 These equations allow the definition of the isothermal material properties 
 at finite temperature. In addition to generalizing to finite temperatures
 the macroscopic quantities introduced so far, they provide other material 
@@ -1969,24 +1971,24 @@ ${\partial {\bf B}_\gamma \over \partial T}= 4 \pi
 \subsection{\color{orange}Macroscopic equations at finite temperature}
 The other derivatives are just finite temperature generalizations of the
 previously discussed quantities. We can rewrite the macroscopic equations as:
-\begin{eqnarray}
-dS&=&{C_\epsilon\over T} dT+ V \sum_{\alpha,\beta} \tilde b_{\alpha,\beta} 
+\begin{align}
+dS&= {C_\epsilon\over T} dT+ V \sum_{\alpha,\beta} \tilde b_{\alpha,\beta} 
 d\epsilon_{\alpha,\beta}
 + V \sum_\gamma \tilde {\bf p}_\gamma d{\bf E}_{\gamma} +
 V \sum_\delta \tilde {\bf q}_\delta d{\bf H}_{\delta}, \\
-d\sigma_{\alpha,\beta}&=& -\tilde b_{\alpha,\beta} dT + 
+d\sigma_{\alpha,\beta}&= -\tilde b_{\alpha,\beta} dT + 
 \sum_{\gamma,\delta} \tilde C^T_{\alpha,\beta,\gamma,\delta} 
 d \epsilon_{\gamma,\delta} - \sum_\gamma \tilde e^T_{\alpha,\beta,\gamma} 
 d{\bf E}_{\gamma} -
 \sum_\delta \tilde h^T_{\alpha,\beta,\delta} d{\bf H}_{\delta}, \\
-d{\bf D}_\gamma&=&
+d{\bf D}_\gamma&=
 4 \pi \tilde {\bf p}_\gamma dT + 4 \pi \sum_{\alpha,\beta} \tilde 
 e^T_{\alpha,\beta,\gamma} d\epsilon_{\alpha,\beta}
 + \sum_\alpha \tilde \epsilon^T_{r,\gamma,\alpha} 
 d{\bf E}_{\alpha} + 
 \sum_\delta \tilde \alpha^T_{\gamma,\delta} d{\bf H}_{\delta}, 
 \label{dcgs} \\
-d{\bf B}_\delta&=&
+d{\bf B}_\delta&=
 4 \pi \tilde {\bf q}_\delta dT+ 4 \pi \sum_{\alpha,\beta}
 \tilde h^T_{\alpha,\beta,\gamma}
 d\epsilon_{\alpha,\beta}
@@ -1994,7 +1996,7 @@ d\epsilon_{\alpha,\beta}
 d{\bf E}_{\gamma}+ 
 \sum_\alpha \tilde \mu^{T}_{r,\delta,\alpha}
 d{\bf H}_{\alpha}, \label{bcgs}
-\end{eqnarray}
+\end{align}
 where the index $T$ indicates isothermal quantities and 
 the tilde $\tilde{ }$ indicates that the independent variables are
 $T$, $\epsilon_{\alpha,\beta}$, ${\bf E}_\alpha$, and ${\bf H}_\alpha$. 
@@ -2020,21 +2022,21 @@ ${\partial {\bf B}_\gamma \over \partial {\bf H}_{\delta}}=
 
 Using these Equations Eqs.~\ref{dcgs} and \ref{bcgs} can be written
 equivalently as:
-\begin{eqnarray}
-d{\bf P}_\gamma&=&
+\begin{align}
+d{\bf P}_\gamma&=
 \tilde {\bf p}_\gamma dT + \sum_{\alpha,\beta} \tilde 
 e^T_{\alpha,\beta,\gamma} d\epsilon_{\alpha,\beta}
 + \sum_\alpha \tilde \chi^{e,T}_{\gamma,\alpha} 
 d{\bf E}_{\alpha} + {1\over 4 \pi}
 \sum_\delta \tilde \alpha^T_{\gamma,\delta} d{\bf H}_{\delta}, \\
-d{\bf M}_\delta&=& \tilde {\bf q}_\delta dT+ \sum_{\alpha,\beta}
+d{\bf M}_\delta&= \tilde {\bf q}_\delta dT+ \sum_{\alpha,\beta}
 \tilde h^T_{\alpha,\beta,\gamma}
 d\epsilon_{\alpha,\beta}
 +{1\over 4 \pi} \sum_\gamma \tilde \alpha^T_{\gamma,\delta}
 d{\bf E}_{\gamma}+ 
 \sum_\alpha \tilde \chi^{m,T}_{\delta,\alpha}
 d{\bf H}_{\alpha}, 
-\end{eqnarray}
+\end{align}
 }
 
 \newpage
@@ -2051,8 +2053,8 @@ ${\bf E}_\alpha$, and ${\bf H}_\alpha$. Alternatively one can use the
 equations of motion to write the strain as a function of stress and
 to insert its espression in the equation for the polarization
 (magnetization). We obtain:
-\begin{eqnarray}
-\epsilon_{\gamma,\delta} &=& 
+\begin{align}
+\epsilon_{\gamma,\delta} &= 
 - \sum_{\alpha,\beta} 
 C^{-1}_{\gamma,\delta,\alpha,\beta} \sigma^{(0)}_{\alpha,\beta} 
 + \sum_{\alpha,\beta} 
@@ -2060,10 +2062,10 @@ C^{-1}_{\gamma,\delta,\alpha,\beta} \sigma_{\alpha,\beta}
 + \sum_{\alpha,\beta,\mu} 
 C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde e_{\alpha,\beta,\mu} {\bf E}_\mu 
 \nonumber \\
-&+& \mu_0 \sum_{\alpha,\beta,\mu} 
+&+ \mu_0 \sum_{\alpha,\beta,\mu} 
 C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde h_{\alpha,\beta,\mu} {\bf H}_\mu 
 \\
-{\bf P}_{\lambda}&=& \hat {\bf P}^{(0)}_{\lambda}
+{\bf P}_{\lambda}&= \hat {\bf P}^{(0)}_{\lambda}
 +\sum_{\alpha,\beta} \hat d_{\alpha,\beta,\lambda} 
 \sigma_{\alpha,\beta} +
 \epsilon_0 \sum_{\mu} 
@@ -2071,7 +2073,7 @@ C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde h_{\alpha,\beta,\mu} {\bf H}_\mu
 {\bf E}_{\mu} +
 \sum_{\mu} \hat \alpha_{\lambda,\mu} 
 {\bf H}_{\mu}, \\
-{\bf M}_{\lambda}&=& \hat {\bf M}^{(0)}_{\lambda}
+{\bf M}_{\lambda}&= \hat {\bf M}^{(0)}_{\lambda}
 +\sum_{\alpha,\beta} \hat h_{\alpha,\beta,\lambda} 
 \sigma_{\alpha,\beta} +
 {1\over \mu_0} \sum_{\mu} \hat \alpha_{\lambda,\mu} 
@@ -2079,34 +2081,34 @@ C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde h_{\alpha,\beta,\mu} {\bf H}_\mu
 \sum_{\mu} 
 \hat \chi^m_{\lambda,\mu}
 {\bf H}_{\mu}
-\end{eqnarray} 
+\end{align} 
 where
-\begin{eqnarray}
-\hat {\bf P}^{(0)}_{\lambda}&=&\tilde {\bf P}^{(0)}_{\lambda}
+\begin{align}
+\hat {\bf P}^{(0)}_{\lambda}&= \tilde {\bf P}^{(0)}_{\lambda}
 -\sum_{\alpha,\beta,\gamma,\delta} \tilde e_{\alpha,\beta,\lambda}
 \tilde C^{-1}_{\alpha,\beta,\gamma,\delta} 
 \tilde \sigma^{(0)}_{\gamma,\delta}, \\
-\hat {\bf M}^{(0)}_{\lambda}&=&\tilde {\bf M}^{(0)}_{\lambda}
+\hat {\bf M}^{(0)}_{\lambda}&= \tilde {\bf M}^{(0)}_{\lambda}
 -\sum_{\alpha,\beta,\gamma,\delta} \tilde h_{\alpha,\beta,\lambda}
 \tilde C^{-1}_{\alpha,\beta,\gamma,\delta} 
 \tilde \sigma^{(0)}_{\gamma,\delta}, \\
-\hat d_{\alpha,\beta,\lambda}&=&\sum_{\gamma,\delta} 
+\hat d_{\alpha,\beta,\lambda}&= \sum_{\gamma,\delta} 
 \tilde e_{\gamma,\delta,\lambda} 
 \tilde C^{-1}_{\gamma,\delta,\alpha,\beta}, \\
-\hat h_{\alpha,\beta,\lambda}&=&\sum_{\gamma,\delta} 
+\hat h_{\alpha,\beta,\lambda}&= \sum_{\gamma,\delta} 
 \tilde h_{\gamma,\delta,\lambda} 
 \tilde C^{-1}_{\gamma,\delta,\alpha,\beta}, \\
-\hat \chi^e_{\lambda,\mu}&=&\tilde \chi^e_{\lambda,\mu}
+\hat \chi^e_{\lambda,\mu}&= \tilde \chi^e_{\lambda,\mu}
 +{1\over \epsilon_0} 
 \sum_{\alpha,\beta,\gamma,\delta}\tilde e_{\gamma,\delta,\lambda}
 \tilde C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde e_{\alpha,\beta,\mu}, \\
-\hat \chi^m_{\lambda,\mu}&=&\tilde \chi^m_{\lambda,\mu}
+\hat \chi^m_{\lambda,\mu}&= \tilde \chi^m_{\lambda,\mu}
 +{\mu_0}\sum_{\alpha,\beta,\gamma,\delta}\tilde h_{\gamma,\delta,\lambda}
 \tilde C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde h_{\alpha,\beta,\mu}, \\
-\hat \alpha_{\lambda,\mu}&=&\tilde \alpha_{\lambda,\mu}
+\hat \alpha_{\lambda,\mu}&= \tilde \alpha_{\lambda,\mu}
 +\mu_0 \sum_{\alpha,\beta,\gamma,\delta}\tilde e_{\gamma,\delta,\lambda}
 \tilde C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde h_{\alpha,\beta,\mu},
-\end{eqnarray}
+\end{align}
 where $\hat \chi^e_{\lambda,\mu}$, $\hat \chi^m_{\lambda,\mu}$ and
 $\hat \alpha_{\lambda,\mu}$ are the dielectric susceptibility, the magnetic
 susceptibility, 
@@ -2128,24 +2130,24 @@ dG=SdT - V \sum_{\alpha,\beta} \epsilon_{\alpha,\beta} d \sigma_{\alpha,\beta}
 -V \sum_{\alpha} {\bf B}_\alpha d {\bf H}_\alpha
 \end{equation}
 We have therefore:
-\begin{eqnarray}
-S&=&-{\partial G \over \partial T}, \\
-\epsilon_{\alpha,\beta}&=&-{1\over V}
+\begin{align}
+S&= -{\partial G \over \partial T}, \\
+\epsilon_{\alpha,\beta}&= -{1\over V}
 {\partial G \over \partial \sigma_{\alpha,\beta}}, \\
-{\bf D}_{\alpha}&=&-{1\over V}
+{\bf D}_{\alpha}&= -{1\over V}
 {\partial G \over \partial {\bf E}_{\alpha}}, \\
-{\bf B}_{\alpha}&=&-{1\over V}
+{\bf B}_{\alpha}&= -{1\over V}
 {\partial G \over \partial {\bf H}_{\alpha}}.
-\end{eqnarray}
+\end{align}
 Assuming that these quantities are functions of the independent variables
 $T$, $\sigma_{\alpha,\beta}$, ${\bf E}_\alpha$, and ${\bf H}_\alpha$ we
 obtain the temperature dependent macroscopic equations:
-\begin{eqnarray}
-dS&=&{\partial S \over \partial T} dT+\sum_{\alpha,\beta}
+\begin{align}
+dS&= {\partial S \over \partial T} dT+\sum_{\alpha,\beta}
 {\partial S \over \partial \sigma_{\alpha,\beta}}d\sigma_{\alpha,\beta}
 +\sum_\gamma{\partial S \over \partial {\bf E}_{\gamma}}d{\bf E}_{\gamma}+ 
 \sum_\delta{\partial S \over \partial {\bf H}_{\delta}}d{\bf H}_{\delta}, \\
-d\epsilon_{\alpha,\beta}&=&
+d\epsilon_{\alpha,\beta}&=
 {\partial \epsilon_{\alpha,\beta} \over \partial T} dT+\sum_{\gamma,\delta}
 {\partial \epsilon_{\alpha,\beta} \over \partial 
 \sigma_{\gamma,\delta}}d\sigma_{\gamma,\delta}
@@ -2153,13 +2155,13 @@ d\epsilon_{\alpha,\beta}&=&
 {\bf E}_{\gamma}}d{\bf E}_{\gamma}+ 
 \sum_\delta{\partial \epsilon_{\alpha,\beta} \over \partial 
 {\bf H}_{\delta}}d{\bf H}_{\delta}, \\
-d{\bf D}_\gamma&=&
+d{\bf D}_\gamma&=
 {\partial  {\bf D}_\gamma \over \partial T} dT+\sum_{\alpha,\beta}
 {\partial {\bf D}_\gamma \over \partial \sigma_{\alpha,\beta}}
 d\sigma_{\alpha,\beta}
 +\sum_\alpha{\partial {\bf D}_\gamma \over \partial {\bf E}_{\alpha}}d{\bf E}_{\alpha}+ 
 \sum_\delta{\partial {\bf D}_\gamma \over \partial {\bf H}_{\delta}}d{\bf H}_{\delta}, \\
-d{\bf B}_\delta&=&
+d{\bf B}_\delta&=
 {\partial {\bf B}_\delta \over \partial T} dT+\sum_{\alpha,\beta}
 {\partial {\bf B}_\delta \over \partial \sigma_{\alpha,\beta}}
 d\sigma_{\alpha,\beta}
@@ -2167,7 +2169,7 @@ d\sigma_{\alpha,\beta}
 d{\bf E}_{\gamma}+ 
 \sum_\alpha{\partial {\bf B}_\delta \over \partial {\bf H}_{\alpha}}
 d{\bf H}_{\alpha}. 
-\end{eqnarray}
+\end{align}
 
 This expansion introduces other material properties not yet defined:
 \subsection{Heat capacity at constant stress}
@@ -2228,22 +2230,22 @@ unit of $q_{\alpha,\beta,\gamma}$ is ${N\over A^2}{A \cdot m\over N}
 \subsection{Macroscopic equations at finite temperature}
 The other derivatives are just finite temperature generalization of the
 previously discussed quantities. We can rewrite the macroscopic equations as:
-\begin{eqnarray}
-dS&=&{C_\sigma\over T} dT+ V \sum_{\alpha,\beta} \hat \gamma_{\alpha,\beta} 
+\begin{align}
+dS&= {C_\sigma\over T} dT+ V \sum_{\alpha,\beta} \hat \gamma_{\alpha,\beta} 
 d\sigma_{\alpha,\beta}
 + V \sum_\gamma \hat {\bf p}_\gamma d{\bf E}_{\gamma} + 
 V \sum_\delta \hat {\bf q}_\delta d{\bf H}_{\delta}, \\
-d\epsilon_{\alpha,\beta}&=& \hat \gamma_{\alpha,\beta} dT + 
+d\epsilon_{\alpha,\beta}&= \hat \gamma_{\alpha,\beta} dT + 
 \sum_{\gamma,\delta} \hat C^{-1 T}_{\alpha,\beta,\gamma,\delta} 
 d \sigma_{\gamma,\delta} + \sum_\gamma \hat d^T_{\alpha,\beta,\gamma} 
 d{\bf E}_{\gamma} +\mu_0 
 \sum_\delta \hat h^T_{\alpha,\beta,\delta} d{\bf H}_{\delta}, \\
-d{\bf D}_\gamma&=&
+d{\bf D}_\gamma&=
 \hat {\bf p}_\gamma dT + \sum_{\alpha,\beta} \hat 
 d^T_{\alpha,\beta,\gamma} d\sigma_{\alpha,\beta}
 +\epsilon_0 \sum_\alpha \hat \epsilon^T_{r,\gamma,\alpha} d{\bf E}_{\alpha} + 
 \sum_\delta \hat \alpha^T_{\gamma,\delta} d{\bf H}_{\delta}, \\
-d{\bf B}_\delta&=&
+d{\bf B}_\delta&=
 \hat {\bf q}_\delta dT+ \mu_0 \sum_{\alpha,\beta}
 \hat h^T_{\alpha,\beta,\gamma}
 d\sigma_{\alpha,\beta}
@@ -2251,7 +2253,7 @@ d\sigma_{\alpha,\beta}
 d{\bf E}_{\gamma}+ \mu_0
 \sum_\alpha \hat \mu^T_{r,\delta,\alpha}
 d{\bf H}_{\alpha}, 
-\end{eqnarray}
+\end{align}
 where the index $T$ indicates isothermal quantities and the hat $\hat{}$
 indicates that the independent variables are $T$, $\sigma_{\alpha,\beta}$, 
 ${\bf E}_\alpha$, and ${\bf H}_\alpha$. 
@@ -2268,8 +2270,8 @@ ${\bf E}_\alpha$, and ${\bf H}_\alpha$. Alternatively one can use the
 equations of motion to write the strain as a function of stress and
 to insert its espression in the equation for the polarization
 (magnetization). We obtain:
-\begin{eqnarray}
-\epsilon_{\gamma,\delta} &=& 
+\begin{align}
+\epsilon_{\gamma,\delta} &=
 - \sum_{\alpha,\beta} 
 C^{-1}_{\gamma,\delta,\alpha,\beta} \sigma^{(0)}_{\alpha,\beta} 
 + \sum_{\alpha,\beta} 
@@ -2277,10 +2279,10 @@ C^{-1}_{\gamma,\delta,\alpha,\beta} \sigma_{\alpha,\beta}
 + \sum_{\alpha,\beta,\mu} 
 C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde e_{\alpha,\beta,\mu} {\bf E}_\mu 
 \nonumber \\
-&+& \alpha^2 \sum_{\alpha,\beta,\mu} 
+&+ \alpha^2 \sum_{\alpha,\beta,\mu} 
 C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde h_{\alpha,\beta,\mu} {\bf H}_\mu 
 \\
-{\bf P}_{\lambda}&=& \hat {\bf P}^{(0)}_{\lambda}
+{\bf P}_{\lambda}&= \hat {\bf P}^{(0)}_{\lambda}
 +\sum_{\alpha,\beta} \hat d_{\alpha,\beta,\lambda} 
 \sigma_{\alpha,\beta} +
 \sum_{\mu} 
@@ -2288,7 +2290,7 @@ C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde h_{\alpha,\beta,\mu} {\bf H}_\mu
 {\bf E}_{\mu} +
 {1\over 4 \pi} \sum_{\mu} \hat \alpha_{\lambda,\mu} 
 {\bf H}_{\mu}, \\
-{\bf M}_{\lambda}&=& \hat {\bf M}^{(0)}_{\lambda}
+{\bf M}_{\lambda}&= \hat {\bf M}^{(0)}_{\lambda}
 +\sum_{\alpha,\beta} \hat h_{\alpha,\beta,\lambda} 
 \sigma_{\alpha,\beta} +
 {1\over 4 \pi \alpha^2} \sum_{\mu} \hat \alpha_{\lambda,\mu} 
@@ -2296,35 +2298,35 @@ C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde h_{\alpha,\beta,\mu} {\bf H}_\mu
 \sum_{\mu} 
 \hat \chi^m_{\lambda,\mu}
 {\bf H}_{\mu}
-\end{eqnarray} 
+\end{align} 
 where
-\begin{eqnarray}
-\hat {\bf P}^{(0)}_{\lambda}&=&\tilde {\bf P}^{(0)}_{\lambda}
+\begin{align}
+\hat {\bf P}^{(0)}_{\lambda}&= \tilde {\bf P}^{(0)}_{\lambda}
 -\sum_{\alpha,\beta,\gamma,\delta} \tilde e_{\alpha,\beta,\lambda}
 \tilde C^{-1}_{\alpha,\beta,\gamma,\delta} 
 \tilde \sigma^{(0)}_{\gamma,\delta}, \\
-\hat {\bf M}^{(0)}_{\lambda}&=&\tilde {\bf M}^{(0)}_{\lambda}
+\hat {\bf M}^{(0)}_{\lambda}&= \tilde {\bf M}^{(0)}_{\lambda}
 -\sum_{\alpha,\beta,\gamma,\delta} \tilde h_{\alpha,\beta,\lambda}
 \tilde C^{-1}_{\alpha,\beta,\gamma,\delta} 
 \tilde \sigma^{(0)}_{\gamma,\delta}, \\
-\hat d_{\alpha,\beta,\lambda}&=&\sum_{\gamma,\delta} 
+\hat d_{\alpha,\beta,\lambda}&= \sum_{\gamma,\delta} 
 \tilde e_{\gamma,\delta,\lambda} 
 \tilde C^{-1}_{\gamma,\delta,\alpha,\beta}, \\
-\hat h_{\alpha,\beta,\lambda}&=&\sum_{\gamma,\delta} 
+\hat h_{\alpha,\beta,\lambda}&= \sum_{\gamma,\delta} 
 \tilde h_{\gamma,\delta,\lambda} 
 \tilde C^{-1}_{\gamma,\delta,\alpha,\beta}, \\
-\hat \chi^e_{\lambda,\mu}&=&\tilde \chi^e_{\lambda,\mu}
+\hat \chi^e_{\lambda,\mu}&= \tilde \chi^e_{\lambda,\mu}
 + 
 \sum_{\alpha,\beta,\gamma,\delta}\tilde e_{\gamma,\delta,\lambda}
 \tilde C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde e_{\alpha,\beta,\mu}, \\
-\hat \chi^m_{\lambda,\mu}&=&\tilde \chi^m_{\lambda,\mu}
+\hat \chi^m_{\lambda,\mu}&= \tilde \chi^m_{\lambda,\mu}
 +\alpha^2 \sum_{\alpha,\beta,\gamma,\delta}\tilde h_{\gamma,\delta,\lambda}
 \tilde C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde h_{\alpha,\beta,\mu}, \\
-\hat \alpha_{\lambda,\mu}&=&\tilde \alpha_{\lambda,\mu}
+\hat \alpha_{\lambda,\mu}&= \tilde \alpha_{\lambda,\mu}
 +4 \pi \alpha^2 
 \sum_{\alpha,\beta,\gamma,\delta}\tilde e_{\gamma,\delta,\lambda}
 \tilde C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde h_{\alpha,\beta,\mu},
-\end{eqnarray}
+\end{align}
 where $\hat \chi^e_{\lambda,\mu}$, $\hat \chi^m_{\lambda,\mu}$ and
 $\hat \alpha_{\lambda,\mu}$ are the dielectric susceptibility, the magnetic
 susceptibility, 
@@ -2346,24 +2348,24 @@ dG=SdT - V \sum_{\alpha,\beta} \epsilon_{\alpha,\beta} d \sigma_{\alpha,\beta}
 -{V \over 4 \pi} \sum_{\alpha} {\bf B}_\alpha d {\bf H}_\alpha
 \end{equation}
 We have therefore:
-\begin{eqnarray}
-S&=&-{\partial G \over \partial T}, \\
-\epsilon_{\alpha,\beta}&=&-{1\over V}
+\begin{align}
+S&=-{\partial G \over \partial T}, \\
+\epsilon_{\alpha,\beta}&= -{1\over V}
 {\partial G \over \partial \sigma_{\alpha,\beta}}, \\
-{\bf D}_{\alpha}&=&-{4 \pi \over V}
+{\bf D}_{\alpha}&= -{4 \pi \over V}
 {\partial G \over \partial {\bf E}_{\alpha}}, \\
-{\bf B}_{\alpha}&=&-{4 \pi \over V}
+{\bf B}_{\alpha}&= -{4 \pi \over V}
 {\partial G \over \partial {\bf H}_{\alpha}}.
-\end{eqnarray}
+\end{align}
 Assuming that these quantities are functions of the independent variables
 $T$, $\sigma_{\alpha,\beta}$, ${\bf E}_\alpha$, and ${\bf H}_\alpha$ we
 obtain the temperature dependent macroscopic equations:
-\begin{eqnarray}
-dS&=&{\partial S \over \partial T} dT+\sum_{\alpha,\beta}
+\begin{align}
+dS&= {\partial S \over \partial T} dT+\sum_{\alpha,\beta}
 {\partial S \over \partial \sigma_{\alpha,\beta}}d\sigma_{\alpha,\beta}
 +\sum_\gamma{\partial S \over \partial {\bf E}_{\gamma}}d{\bf E}_{\gamma}+ 
 \sum_\delta{\partial S \over \partial {\bf H}_{\delta}}d{\bf H}_{\delta}, \\
-d\epsilon_{\alpha,\beta}&=&
+d\epsilon_{\alpha,\beta}&= 
 {\partial \epsilon_{\alpha,\beta} \over \partial T} dT+\sum_{\gamma,\delta}
 {\partial \epsilon_{\alpha,\beta} \over \partial 
 \sigma_{\gamma,\delta}}d\sigma_{\gamma,\delta}
@@ -2371,13 +2373,13 @@ d\epsilon_{\alpha,\beta}&=&
 {\bf E}_{\gamma}}d{\bf E}_{\gamma}+ 
 \sum_\delta{\partial \epsilon_{\alpha,\beta} \over \partial 
 {\bf H}_{\delta}}d{\bf H}_{\delta}, \\
-d{\bf D}_\gamma&=&
+d{\bf D}_\gamma&= 
 {\partial  {\bf D}_\gamma \over \partial T} dT+\sum_{\alpha,\beta}
 {\partial {\bf D}_\gamma \over \partial \sigma_{\alpha,\beta}}
 d\sigma_{\alpha,\beta}
 +\sum_\alpha{\partial {\bf D}_\gamma \over \partial {\bf E}_{\alpha}}d{\bf E}_{\alpha}+ 
 \sum_\delta{\partial {\bf D}_\gamma \over \partial {\bf H}_{\delta}}d{\bf H}_{\delta}, \\
-d{\bf B}_\delta&=&
+d{\bf B}_\delta&= 
 {\partial {\bf B}_\delta \over \partial T} dT+\sum_{\alpha,\beta}
 {\partial {\bf B}_\delta \over \partial \sigma_{\alpha,\beta}}
 d\sigma_{\alpha,\beta}
@@ -2385,7 +2387,7 @@ d\sigma_{\alpha,\beta}
 d{\bf E}_{\gamma}+ 
 \sum_\alpha{\partial {\bf B}_\delta \over \partial {\bf H}_{\alpha}}
 d{\bf H}_{\alpha}. 
-\end{eqnarray}
+\end{align}
 
 This expansion introduces other material properties not yet defined:
 \subsection{\color{web-blue}Heat capacity at constant stress}
@@ -2439,22 +2441,22 @@ ${\partial {\bf B}_\gamma \over \partial \sigma_{\alpha,\beta}}
 
 The other derivatives are just finite temperature generalization of the
 previously discussed quantities. We can rewrite the macroscopic equations as:
-\begin{eqnarray}
-dS&=&{C_\sigma\over T} dT+ V \sum_{\alpha,\beta} \hat \gamma_{\alpha,\beta} 
+\begin{align}
+dS&= {C_\sigma\over T} dT+ V \sum_{\alpha,\beta} \hat \gamma_{\alpha,\beta} 
 d\sigma_{\alpha,\beta}
 + V \sum_\gamma \hat {\bf p}_\gamma d{\bf E}_{\gamma} + 
 V \sum_\delta \hat {\bf q}_\delta d{\bf H}_{\delta}, \\
-d\epsilon_{\alpha,\beta}&=& \hat \gamma_{\alpha,\beta} dT + 
+d\epsilon_{\alpha,\beta}&= \hat \gamma_{\alpha,\beta} dT + 
 \sum_{\gamma,\delta} \hat C^{-1 T}_{\alpha,\beta,\gamma,\delta} 
 d \sigma_{\gamma,\delta} + \sum_\gamma \hat d^T_{\alpha,\beta,\gamma} 
 d{\bf E}_{\gamma} +
 \sum_\delta \hat h^T_{\alpha,\beta,\delta} d{\bf H}_{\delta}, \\
-d{\bf D}_\gamma&=&
+d{\bf D}_\gamma&= 
 4 \pi \hat {\bf p}_\gamma dT + 4 \pi \sum_{\alpha,\beta} \hat 
 d^T_{\alpha,\beta,\gamma} d\sigma_{\alpha,\beta}
 + \sum_\alpha \hat \epsilon^T_{r,\gamma,\alpha} d{\bf E}_{\alpha} + 
 \sum_\delta \hat \alpha^T_{\gamma,\delta} d{\bf H}_{\delta}, \\
-d{\bf B}_\delta&=&
+d{\bf B}_\delta&= 
 4 \pi \hat {\bf q}_\delta dT+ 4 \pi \sum_{\alpha,\beta}
 \hat h^T_{\alpha,\beta,\gamma}
 d\sigma_{\alpha,\beta}
@@ -2462,7 +2464,7 @@ d\sigma_{\alpha,\beta}
 d{\bf E}_{\gamma}+ \alpha^2
 \sum_\alpha \hat \mu^T_{r,\delta,\alpha}
 d{\bf H}_{\alpha}, 
-\end{eqnarray}
+\end{align}
 where the index $T$ indicates isothermal quantities and the hat $\hat{}$
 indicates that the independent variables are $T$, $\sigma_{\alpha,\beta}$, 
 ${\bf E}_\alpha$, and ${\bf H}_\alpha$.  
@@ -2480,8 +2482,8 @@ ${\bf E}_\alpha$, and ${\bf H}_\alpha$. Alternatively one can use the
 equations of motion to write the strain as a function of stress and
 to insert its espression in the equation for the polarization
 (magnetization). We obtain:
-\begin{eqnarray}
-\epsilon_{\gamma,\delta} &=& 
+\begin{align}
+\epsilon_{\gamma,\delta} &=
 - \sum_{\alpha,\beta} 
 C^{-1}_{\gamma,\delta,\alpha,\beta} \sigma^{(0)}_{\alpha,\beta} 
 + \sum_{\alpha,\beta} 
@@ -2489,10 +2491,10 @@ C^{-1}_{\gamma,\delta,\alpha,\beta} \sigma_{\alpha,\beta}
 + \sum_{\alpha,\beta,\mu} 
 C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde e_{\alpha,\beta,\mu} {\bf E}_\mu 
 \nonumber \\
-&+& \sum_{\alpha,\beta,\mu} 
+&+ \sum_{\alpha,\beta,\mu} 
 C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde h_{\alpha,\beta,\mu} {\bf H}_\mu 
 \\
-{\bf P}_{\lambda}&=& \hat {\bf P}^{(0)}_{\lambda}
+{\bf P}_{\lambda}&= \hat {\bf P}^{(0)}_{\lambda}
 +\sum_{\alpha,\beta} \hat d_{\alpha,\beta,\lambda} 
 \sigma_{\alpha,\beta} +
 \sum_{\mu} 
@@ -2500,7 +2502,7 @@ C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde h_{\alpha,\beta,\mu} {\bf H}_\mu
 {\bf E}_{\mu} +
 {1\over 4 \pi}\sum_{\mu} \hat \alpha_{\lambda,\mu} 
 {\bf H}_{\mu}, \\
-{\bf M}_{\lambda}&=& \hat {\bf M}^{(0)}_{\lambda}
+{\bf M}_{\lambda}&= \hat {\bf M}^{(0)}_{\lambda}
 +\sum_{\alpha,\beta} \hat h_{\alpha,\beta,\lambda} 
 \sigma_{\alpha,\beta} +
 {1\over 4 \pi} \sum_{\mu} \hat \alpha_{\lambda,\mu} 
@@ -2508,34 +2510,34 @@ C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde h_{\alpha,\beta,\mu} {\bf H}_\mu
 \sum_{\mu} 
 \hat \chi^m_{\lambda,\mu}
 {\bf H}_{\mu}
-\end{eqnarray} 
+\end{align} 
 where
-\begin{eqnarray}
-\hat {\bf P}^{(0)}_{\lambda}&=&\tilde {\bf P}^{(0)}_{\lambda}
+\begin{align}
+\hat {\bf P}^{(0)}_{\lambda}&= \tilde {\bf P}^{(0)}_{\lambda}
 -\sum_{\alpha,\beta,\gamma,\delta} \tilde e_{\alpha,\beta,\lambda}
 \tilde C^{-1}_{\alpha,\beta,\gamma,\delta} 
 \tilde \sigma^{(0)}_{\gamma,\delta}, \\
-\hat {\bf M}^{(0)}_{\lambda}&=&\tilde {\bf M}^{(0)}_{\lambda}
+\hat {\bf M}^{(0)}_{\lambda}&= \tilde {\bf M}^{(0)}_{\lambda}
 -\sum_{\alpha,\beta,\gamma,\delta} \tilde h_{\alpha,\beta,\lambda}
 \tilde C^{-1}_{\alpha,\beta,\gamma,\delta} 
 \tilde \sigma^{(0)}_{\gamma,\delta}, \\
-\hat d_{\alpha,\beta,\lambda}&=&\sum_{\gamma,\delta} 
+\hat d_{\alpha,\beta,\lambda}&= \sum_{\gamma,\delta} 
 \tilde e_{\gamma,\delta,\lambda} 
 \tilde C^{-1}_{\gamma,\delta,\alpha,\beta}, \\
-\hat h_{\alpha,\beta,\lambda}&=&\sum_{\gamma,\delta} 
+\hat h_{\alpha,\beta,\lambda}&= \sum_{\gamma,\delta} 
 \tilde h_{\gamma,\delta,\lambda} 
 \tilde C^{-1}_{\gamma,\delta,\alpha,\beta}, \\
-\hat \chi^e_{\lambda,\mu}&=&\tilde \chi^e_{\lambda,\mu}
+\hat \chi^e_{\lambda,\mu}&= \tilde \chi^e_{\lambda,\mu}
 +
 \sum_{\alpha,\beta,\gamma,\delta}\tilde e_{\gamma,\delta,\lambda}
 \tilde C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde e_{\alpha,\beta,\mu}, \\
-\hat \chi^m_{\lambda,\mu}&=&\tilde \chi^m_{\lambda,\mu}
+\hat \chi^m_{\lambda,\mu}&= \tilde \chi^m_{\lambda,\mu}
 +\sum_{\alpha,\beta,\gamma,\delta}\tilde h_{\gamma,\delta,\lambda}
 \tilde C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde h_{\alpha,\beta,\mu}, \\
-\hat \alpha_{\lambda,\mu}&=&\tilde \alpha_{\lambda,\mu}
+\hat \alpha_{\lambda,\mu}&= \tilde \alpha_{\lambda,\mu}
 +4 \pi \sum_{\alpha,\beta,\gamma,\delta}\tilde e_{\gamma,\delta,\lambda}
 \tilde C^{-1}_{\gamma,\delta,\alpha,\beta} \tilde h_{\alpha,\beta,\mu},
-\end{eqnarray}
+\end{align}
 where $\hat \chi^e_{\lambda,\mu}$, $\hat \chi^m_{\lambda,\mu}$ and
 $\hat \alpha_{\lambda,\mu}$ are the dielectric susceptibility, the magnetic
 susceptibility, 
@@ -2557,24 +2559,24 @@ dG=SdT - V \sum_{\alpha,\beta} \epsilon_{\alpha,\beta} d \sigma_{\alpha,\beta}
 -{V \over 4 \pi} \sum_{\alpha} {\bf B}_\alpha d {\bf H}_\alpha
 \end{equation}
 We have therefore:
-\begin{eqnarray}
-S&=&-{\partial G \over \partial T}, \\
-\epsilon_{\alpha,\beta}&=&-{1\over V}
+\begin{align}
+S&= -{\partial G \over \partial T}, \\
+\epsilon_{\alpha,\beta}&= -{1\over V}
 {\partial G \over \partial \sigma_{\alpha,\beta}}, \\
-{\bf D}_{\alpha}&=&-{4 \pi \over V}
+{\bf D}_{\alpha}&= -{4 \pi \over V}
 {\partial G \over \partial {\bf E}_{\alpha}}, \\
-{\bf B}_{\alpha}&=&-{4 \pi \over V}
+{\bf B}_{\alpha}&= -{4 \pi \over V}
 {\partial G \over \partial {\bf H}_{\alpha}}.
-\end{eqnarray}
+\end{align}
 Assuming that these quantities are functions of the independent variables
 $T$, $\sigma_{\alpha,\beta}$, ${\bf E}_\alpha$, and ${\bf H}_\alpha$ we
 obtain the temperature dependent macroscopic equations:
-\begin{eqnarray}
-dS&=&{\partial S \over \partial T} dT+\sum_{\alpha,\beta}
+\begin{align}
+dS&= {\partial S \over \partial T} dT+\sum_{\alpha,\beta}
 {\partial S \over \partial \sigma_{\alpha,\beta}}d\sigma_{\alpha,\beta}
 +\sum_\gamma{\partial S \over \partial {\bf E}_{\gamma}}d{\bf E}_{\gamma}+ 
 \sum_\delta{\partial S \over \partial {\bf H}_{\delta}}d{\bf H}_{\delta}, \\
-d\epsilon_{\alpha,\beta}&=&
+d\epsilon_{\alpha,\beta}&=
 {\partial \epsilon_{\alpha,\beta} \over \partial T} dT+\sum_{\gamma,\delta}
 {\partial \epsilon_{\alpha,\beta} \over \partial 
 \sigma_{\gamma,\delta}}d\sigma_{\gamma,\delta}
@@ -2582,13 +2584,13 @@ d\epsilon_{\alpha,\beta}&=&
 {\bf E}_{\gamma}}d{\bf E}_{\gamma}+ 
 \sum_\delta{\partial \epsilon_{\alpha,\beta} \over \partial 
 {\bf H}_{\delta}}d{\bf H}_{\delta}, \\
-d{\bf D}_\gamma&=&
+d{\bf D}_\gamma&= 
 {\partial  {\bf D}_\gamma \over \partial T} dT+\sum_{\alpha,\beta}
 {\partial {\bf D}_\gamma \over \partial \sigma_{\alpha,\beta}}
 d\sigma_{\alpha,\beta}
 +\sum_\alpha{\partial {\bf D}_\gamma \over \partial {\bf E}_{\alpha}}d{\bf E}_{\alpha}+ 
 \sum_\delta{\partial {\bf D}_\gamma \over \partial {\bf H}_{\delta}}d{\bf H}_{\delta}, \\
-d{\bf B}_\delta&=&
+d{\bf B}_\delta&= 
 {\partial {\bf B}_\delta \over \partial T} dT+\sum_{\alpha,\beta}
 {\partial {\bf B}_\delta \over \partial \sigma_{\alpha,\beta}}
 d\sigma_{\alpha,\beta}
@@ -2596,7 +2598,7 @@ d\sigma_{\alpha,\beta}
 d{\bf E}_{\gamma}+ 
 \sum_\alpha{\partial {\bf B}_\delta \over \partial {\bf H}_{\alpha}}
 d{\bf H}_{\alpha}. 
-\end{eqnarray}
+\end{align}
 
 This expansion introduces other material properties not yet defined:
 \subsection{\color{orange}Heat capacity at constant stress}
@@ -2649,22 +2651,22 @@ ${\partial {\bf B}_\gamma \over \partial \sigma_{\alpha,\beta}}
 \subsection{\color{orange}Macroscopic equations at finite temperature}
 The other derivatives are just finite temperature generalization of the
 previously discussed quantities. We can rewrite the macroscopic equations as:
-\begin{eqnarray}
-dS&=&{C_\sigma\over T} dT+ V \sum_{\alpha,\beta} \hat \gamma_{\alpha,\beta} 
+\begin{align}
+dS&= {C_\sigma\over T} dT+ V \sum_{\alpha,\beta} \hat \gamma_{\alpha,\beta} 
 d\sigma_{\alpha,\beta}
 + V \sum_\gamma \hat {\bf p}_\gamma d{\bf E}_{\gamma} + 
 V \sum_\delta \hat {\bf q}_\delta d{\bf H}_{\delta}, \\
-d\epsilon_{\alpha,\beta}&=& \hat \gamma_{\alpha,\beta} dT + 
+d\epsilon_{\alpha,\beta}&=  \hat \gamma_{\alpha,\beta} dT + 
 \sum_{\gamma,\delta} \hat C^{-1 T}_{\alpha,\beta,\gamma,\delta} 
 d \sigma_{\gamma,\delta} + \sum_\gamma \hat d^T_{\alpha,\beta,\gamma} 
 d{\bf E}_{\gamma} +
 \sum_\delta \hat h^T_{\alpha,\beta,\delta} d{\bf H}_{\delta}, \\
-d{\bf D}_\gamma&=&
+d{\bf D}_\gamma&= 
 4 \pi \hat {\bf p}_\gamma dT + 4 \pi \sum_{\alpha,\beta} \hat 
 d^T_{\alpha,\beta,\gamma} d\sigma_{\alpha,\beta} +
 \sum_\alpha \hat \epsilon^T_{r,\gamma,\alpha} d{\bf E}_{\alpha} + 
 \sum_\delta \hat \alpha^T_{\gamma,\delta} d{\bf H}_{\delta}, \\
-d{\bf B}_\delta&=&
+d{\bf B}_\delta&= 
 4 \pi \hat {\bf q}_\delta dT + 4 \pi \sum_{\alpha,\beta}
 \hat h^T_{\alpha,\beta,\gamma}
 d\sigma_{\alpha,\beta}
@@ -2672,7 +2674,7 @@ d\sigma_{\alpha,\beta}
 d{\bf E}_{\gamma}+ 
 \sum_\alpha \hat \mu^T_{r,\delta,\alpha}
 d{\bf H}_{\alpha}, 
-\end{eqnarray}
+\end{align}
 where the index $T$ indicates isothermal quantities and the hat $\hat{}$
 indicates that the independent variables are $T$, $\sigma_{\alpha,\beta}$, 
 ${\bf E}_\alpha$, and ${\bf H}_\alpha$.  
@@ -2702,15 +2704,15 @@ We have:
 where $\tilde \mu_{r,\delta,\nu}$ is the relative magnetic
 permeability.
 Inserting this expression in the equations of motion we obtain:
-\begin{eqnarray}
-\sigma_{\lambda,\mu}&=& \check \sigma_{\lambda,\mu}^{(0)}
+\begin{align}
+\sigma_{\lambda,\mu}&=  \check \sigma_{\lambda,\mu}^{(0)}
 +\sum_{\gamma,\delta} \check C_{\lambda,\mu,\gamma,\delta}  
 \epsilon_{\gamma,\delta} -
 \sum_{\gamma} \check e_{\lambda,\mu,\gamma} 
  {\bf E}_{\gamma}
 -\sum_{\gamma,\nu}  \tilde h_{\lambda,\mu,\gamma} 
 \tilde \mu^{-1}_{r,\gamma,\nu} {\bf B}_{\nu}, \\
-{\bf P}_{\lambda}&=& \check {\bf P}^{(0)}_{\lambda}
+{\bf P}_{\lambda}&= \check {\bf P}^{(0)}_{\lambda}
 +\sum_{\alpha,\beta} \check e_{\alpha,\beta,\lambda} 
 \epsilon_{\alpha,\beta} +
 \sum_{\beta} 
@@ -2719,48 +2721,48 @@ Inserting this expression in the equations of motion we obtain:
 {1\over 4 \pi \mu_0}\sum_{\delta,\nu} \tilde \alpha_{\lambda,\delta} 
 \tilde \mu^{-1}_{r,\delta,\nu}  
 {\bf B}_{\nu}, 
-\end{eqnarray}
+\end{align}
 one finds the relationship between quantities calculated at constant 
 ${\bf B}$ and those calculated at constant ${\bf H}$. We have:
-\begin{eqnarray}
-\check C_{\lambda,\mu,\gamma,\delta} &=&
+\begin{align}
+\check C_{\lambda,\mu,\gamma,\delta} &=
 \tilde C_{\lambda,\mu,\gamma,\delta} + \mu_0 \sum_{\alpha,\beta,\nu}
 \tilde h_{\lambda,\mu,\alpha} \tilde \mu^{-1}_{r,\alpha,\nu} 
 \tilde h_{\gamma,\delta,\nu}, \\
-\check e_{\lambda,\mu,\gamma}&=&\tilde e_{\lambda,\mu,\gamma}
+\check e_{\lambda,\mu,\gamma}&= \tilde e_{\lambda,\mu,\gamma}
 -\sum_{\alpha,\beta} \tilde h_{\lambda,\mu,\alpha} 
 \tilde \mu^{-1}_{r,\alpha,\nu}
 \tilde \alpha_{\gamma,\nu}, \\
-\check \chi^e_{\lambda,\mu}&=&\tilde \chi^e_{\lambda,\mu}
+\check \chi^e_{\lambda,\mu}&= \tilde \chi^e_{\lambda,\mu}
 -{1\over \epsilon_0 \mu_0} \sum_{\delta,\nu} \tilde \alpha_{\lambda,\delta} 
 \tilde \mu^{-1}_{r,\delta,\nu} \tilde \alpha_{\mu,\nu}. 
-\end{eqnarray}
+\end{align}
 In addition we have the relationships:
-\begin{eqnarray}
-\check \sigma^{(0)}_{\lambda,\mu} &=& \tilde \sigma^{(0)}_{\lambda,\mu}
+\begin{align}
+\check \sigma^{(0)}_{\lambda,\mu} &= \tilde \sigma^{(0)}_{\lambda,\mu}
 + \mu_0 \sum_{\gamma,\nu} \tilde h_{\lambda,\mu,\gamma} 
 \tilde \mu^{-1}_{r,\gamma,\nu} {\bf M}^{(0)}_\nu,  \\
-\check {\bf P}^{(0)}_{\lambda} &=& \tilde {\bf P}^{(0)}_{\lambda}
+\check {\bf P}^{(0)}_{\lambda} &= \tilde {\bf P}^{(0)}_{\lambda}
 - \sum_{\beta,\nu} \tilde \alpha_{\lambda,\beta} 
 \tilde \mu^{-1}_{r,\beta,\nu} {\bf M}^{(0)}_\nu. 
-\end{eqnarray}
+\end{align}
 We can derive similar equations from the microscopic equations of motion.
 The dependence of ${\bf H}_\delta$ on ${\bf B}$ is:
-\begin{eqnarray}
+\begin{align}
 {\bf H}_\delta = 
-&-& \sum_\nu \mu^{-1}_{r,\delta,\nu} {\bf M}^{(0)}_\nu 
+&- \sum_\nu \mu^{-1}_{r,\delta,\nu} {\bf M}^{(0)}_\nu 
 -{1\over V} \sum_{I,\alpha,\nu} \mu^{-1}_{r,\delta,\nu} Z^m_{I,\alpha,\nu}
 {\bf u}_{I,\alpha} \nonumber\\
-&-& \sum_{\alpha,\beta,\nu} \mu^{-1}_{r,\delta,\nu} h_{\alpha,\beta,\nu}
+&- \sum_{\alpha,\beta,\nu} \mu^{-1}_{r,\delta,\nu} h_{\alpha,\beta,\nu}
 \epsilon_{\alpha,\beta} - {1\over \mu_0} \sum_{\alpha,\nu}
 \mu^{-1}_{r,\delta,\nu} \alpha_{\alpha,\nu} {\bf E}_\alpha
 + {1\over \mu_0} \sum_\nu \mu^{-1}_{r,\delta,\nu} {\bf B}_\nu, 
-\end{eqnarray}
+\end{align}
 where $\tilde \mu_{r,\delta,\nu}$ is the frozen-ions relative magnetic
 permeability.
 Inserting this equation in the other equations of motion gives:
-\begin{eqnarray}
-{\bf f}_{I,\alpha}&=&\breve{\bf f}^{(0)}_{I,\alpha}
+\begin{align}
+{\bf f}_{I,\alpha}&= \breve{\bf f}^{(0)}_{I,\alpha}
 -\sum_{J,\beta} \breve C_{I,\alpha,J,\beta} {\bf u}_{J,\beta}
 +\sum_{\beta,\gamma}
 \breve \Gamma_{I,\alpha,\beta,\gamma} 
@@ -2768,7 +2770,7 @@ Inserting this equation in the other equations of motion gives:
 e \sum_{\beta} \breve Z^*_{I,\alpha,\beta} {\bf E}_{\beta}
 +\sum_{\beta} 
 \breve Z^m_{I,\alpha,\beta} {\bf B}_{\beta}, \\
-\sigma_{\lambda,\mu}&=&\breve  \sigma_{\lambda,\mu}^{(0)}
+\sigma_{\lambda,\mu}&= \breve  \sigma_{\lambda,\mu}^{(0)}
 -{1\over V} \sum_{I,\alpha}
 \breve \Gamma_{I,\alpha,\lambda,\mu} {\bf u}_{I,\alpha}
 +\sum_{\gamma,\delta} \breve C_{\lambda,\mu,\gamma,\delta}  
@@ -2777,7 +2779,7 @@ e \sum_{\beta} \breve Z^*_{I,\alpha,\beta} {\bf E}_{\beta}
  {\bf E}_{\gamma}
 -\sum_{\gamma}  \breve h_{\lambda,\mu,\gamma} 
 {\bf B}_{\gamma}, \\
-{\bf P}_{\lambda}&=& \breve {\bf P}^{(0)}_{\lambda}
+{\bf P}_{\lambda}&=  \breve {\bf P}^{(0)}_{\lambda}
 +{e\over V} \sum_{I,\alpha} \breve Z^*_{I,\alpha,\lambda} 
 {\bf u}_{I,\alpha} +
 \sum_{\alpha,\beta} \breve e_{\alpha,\beta,\lambda} 
@@ -2787,50 +2789,50 @@ e \sum_{\beta} \breve Z^*_{I,\alpha,\beta} {\bf E}_{\beta}
 {\bf E}_{\beta} +
 \sum_{\beta} \breve \alpha_{\lambda,\beta} 
 {\bf B}_{\beta}, 
-\end{eqnarray}
+\end{align}
 where
-\begin{eqnarray}
-\breve {\bf f}^{(0)}_{I,\alpha}&=&{\bf f}^{(0)}_{I,\alpha} - \mu_0 
+\begin{align}
+\breve {\bf f}^{(0)}_{I,\alpha}&= {\bf f}^{(0)}_{I,\alpha} - \mu_0 
 \sum_{\gamma,\nu}
 Z^m_{I,\alpha,\gamma} \mu^{-1}_{r,\gamma,\nu} {\bf M}^{(0)}_\nu, \\
-\breve \sigma^{(0)}_{\lambda,\mu}&=&\sigma^{(0)}_{\lambda,\mu}
+\breve \sigma^{(0)}_{\lambda,\mu}&= \sigma^{(0)}_{\lambda,\mu}
 +\mu_0 \sum_{\gamma,\nu} h_{\lambda,\mu,\gamma} \mu^{-1}_{r,\gamma,\nu} 
 {\bf M}^{(0)}_\nu, \\
-\breve {\bf P}^{(0)}_\lambda&=& {\bf P}^{(0)}_\lambda -
+\breve {\bf P}^{(0)}_\lambda&= {\bf P}^{(0)}_\lambda -
 \sum_{\gamma,\nu} \alpha_{\lambda,\gamma} \mu^{-1}_{r,\gamma,\nu} 
 {\bf M}^{(0)}_\nu, \\
-\end{eqnarray}
+\end{align}
 and
-\begin{eqnarray}
-\breve C_{I,\alpha,J,\beta} &=& C_{I,\alpha,J,\beta}+
+\begin{align}
+\breve C_{I,\alpha,J,\beta} &= C_{I,\alpha,J,\beta}+
 {\mu_0\over V}  \sum_{\delta,\lambda} Z^m_{I,\alpha,\delta}
 \mu^{-1}_{r,\delta,\lambda}Z^m_{J,\beta,\lambda},\\
-\breve \Gamma_{I,\alpha,\beta,\gamma} &=& \Gamma_{I,\alpha,\beta,\gamma}
+\breve \Gamma_{I,\alpha,\beta,\gamma} &= \Gamma_{I,\alpha,\beta,\gamma}
 - \mu_0 \sum_{\delta,\lambda} Z^m_{I,\alpha,\delta}
 \mu^{-1}_{r,\delta,\lambda} h_{\beta,\gamma,\lambda}, \\
-\breve Z^*_{I,\alpha,\beta} &=& Z^*_{I,\alpha,\beta}
+\breve Z^*_{I,\alpha,\beta} &= Z^*_{I,\alpha,\beta}
 -{1\over e} \sum_{\delta,\lambda} Z^m_{I,\alpha,\delta} 
 \mu^{-1}_{r,\delta,\lambda} \alpha_{\beta,\lambda}, \\
-\breve Z^m_{I,\alpha,\beta} &=& \sum_{\delta} Z^m_{I,\alpha,\delta} 
+\breve Z^m_{I,\alpha,\beta} &= \sum_{\delta} Z^m_{I,\alpha,\delta} 
 \mu^{-1}_{r,\delta,\beta}, 
-\end{eqnarray}
+\end{align}
 are the microscopic tensors, while
-\begin{eqnarray}
-\breve C_{\lambda,\mu,\gamma,\delta} &=&
+\begin{align}
+\breve C_{\lambda,\mu,\gamma,\delta} &=
 C_{\lambda,\mu,\gamma,\delta} + \mu_0 \sum_{\alpha,\beta,\nu}
 h_{\lambda,\mu,\alpha} \mu^{-1}_{r,\alpha,\nu} 
 h_{\gamma,\delta,\nu}, \\
-\breve e_{\lambda,\mu,\gamma}&=& e_{\lambda,\mu,\gamma}
+\breve e_{\lambda,\mu,\gamma}&= e_{\lambda,\mu,\gamma}
 -\sum_{\alpha,\beta} h_{\lambda,\mu,\alpha} \mu^{-1}_{r,\alpha,\nu}
 \alpha_{\gamma,\nu}, \\
-\breve h_{\lambda,\mu,\gamma}&=& \sum_\delta h_{\lambda,\mu,\delta}
+\breve h_{\lambda,\mu,\gamma}&= \sum_\delta h_{\lambda,\mu,\delta}
 \mu^{-1}_{r,\delta,\gamma} \\
-\breve \chi^e_{\lambda,\mu}&=& \chi^e_{\lambda,\mu}
+\breve \chi^e_{\lambda,\mu}&= \chi^e_{\lambda,\mu}
 -{1\over \epsilon_0 \mu_0} \sum_{\delta,\nu} \alpha_{\lambda,\delta} 
 \mu^{-1}_{r,\delta,\nu} \alpha_{\mu,\nu}, \\
-\breve \alpha_{\lambda,\rho} &=&\sum_\beta \alpha_{\lambda,\beta}
+\breve \alpha_{\lambda,\rho} &= \sum_\beta \alpha_{\lambda,\beta}
 \mu^{-1}_{r,\beta,\rho}
-\end{eqnarray}
+\end{align}
 are the frozen-ions macroscopic tensors.
 \\
 \newpage
@@ -2853,15 +2855,15 @@ and we have:
 where $\tilde \mu_{r,\delta,\nu}$ is the relative magnetic
 permeability.
 Inserting this expression in the equations of motion we obtain:
-\begin{eqnarray}
-\sigma_{\lambda,\mu}&=& \check \sigma_{\lambda,\mu}^{(0)}
+\begin{align}
+\sigma_{\lambda,\mu}&= \check \sigma_{\lambda,\mu}^{(0)}
 +\sum_{\gamma,\delta} \check C_{\lambda,\mu,\gamma,\delta}  
 \epsilon_{\gamma,\delta} -
 \sum_{\gamma} \check e_{\lambda,\mu,\gamma} 
  {\bf E}_{\gamma}
 -\sum_{\gamma,\nu}  \tilde h_{\lambda,\mu,\gamma} 
 \tilde \mu^{-1}_{r,\gamma,\nu} {\bf B}_{\nu}, \\
-{\bf P}_{\lambda}&=& \check {\bf P}^{(0)}_{\lambda}
+{\bf P}_{\lambda}&= \check {\bf P}^{(0)}_{\lambda}
 +\sum_{\alpha,\beta} \check e_{\alpha,\beta,\lambda} 
 \epsilon_{\alpha,\beta} +
 \sum_{\beta} 
@@ -2870,48 +2872,48 @@ Inserting this expression in the equations of motion we obtain:
 {1\over 4 \pi \mu_0}\sum_{\delta,\nu} \tilde \alpha_{\lambda,\delta} 
 \tilde \mu^{-1}_{r,\delta,\nu}  
 {\bf B}_{\nu}, 
-\end{eqnarray}
+\end{align}
 one finds the relationship between quantities calculated at constant 
 ${\bf B}$ and those calculated at constant ${\bf H}$. We have:
-\begin{eqnarray}
-\check C_{\lambda,\mu,\gamma,\delta} &=&
+\begin{align}
+\check C_{\lambda,\mu,\gamma,\delta} &=
 \tilde C_{\lambda,\mu,\gamma,\delta} + 4 \pi \alpha^2 \sum_{\alpha,\beta,\nu}
 \tilde h_{\lambda,\mu,\alpha} \tilde \mu^{-1}_{r,\alpha,\nu} 
 \tilde h_{\gamma,\delta,\nu}, \\
-\check e_{\lambda,\mu,\gamma}&=&\tilde e_{\lambda,\mu,\gamma}
+\check e_{\lambda,\mu,\gamma}&= \tilde e_{\lambda,\mu,\gamma}
 - \sum_{\alpha,\beta} \tilde h_{\lambda,\mu,\alpha} 
 \tilde \mu^{-1}_{r,\alpha,\nu}
 \tilde \alpha_{\gamma,\nu}, \\
-\check \chi^e_{\lambda,\mu}&=&\tilde \chi^e_{\lambda,\mu}
+\check \chi^e_{\lambda,\mu}&= \tilde \chi^e_{\lambda,\mu}
 -{1\over 4 \pi \alpha^2} \sum_{\delta,\nu} \tilde \alpha_{\lambda,\delta} 
 \tilde \mu^{-1}_{r,\delta,\nu} \tilde \alpha_{\mu,\nu}. 
-\end{eqnarray}
+\end{align}
 In addition we have the relationships:
-\begin{eqnarray}
-\check \sigma^{(0)}_{\lambda,\mu} &=& \tilde \sigma^{(0)}_{\lambda,\mu}
+\begin{align}
+\check \sigma^{(0)}_{\lambda,\mu} &= \tilde \sigma^{(0)}_{\lambda,\mu}
 + 4 \pi \alpha^2 \sum_{\gamma,\nu} \tilde h_{\lambda,\mu,\gamma} 
 \tilde \mu^{-1}_{r,\gamma,\nu} {\bf M}^{(0)}_\nu,  \\
-\check {\bf P}^{(0)}_{\lambda} &=& \tilde {\bf P}^{(0)}_{\lambda}
+\check {\bf P}^{(0)}_{\lambda} &= \tilde {\bf P}^{(0)}_{\lambda}
 - \sum_{\beta,\nu} \tilde \alpha_{\lambda,\beta} 
 \tilde \mu^{-1}_{r,\beta,\nu} {\bf M}^{(0)}_\nu. 
-\end{eqnarray}
+\end{align}
 We can derive similar equations from the microscopic equations of motion.
 The dependence of ${\bf H}_\delta$ on ${\bf B}$ is:
-\begin{eqnarray}
+\begin{align}
 {\bf H}_\delta = 
-&-& 4 \pi \sum_\nu \mu^{-1}_{r,\delta,\nu} {\bf M}^{(0)}_\nu 
+&- 4 \pi \sum_\nu \mu^{-1}_{r,\delta,\nu} {\bf M}^{(0)}_\nu 
 -{4 \pi \over V} \sum_{I,\alpha,\nu} \mu^{-1}_{r,\delta,\nu} Z^m_{I,\alpha,\nu}
 {\bf u}_{I,\alpha} \nonumber\\
-&-& 4 \pi \sum_{\alpha,\beta,\nu} \mu^{-1}_{r,\delta,\nu} h_{\alpha,\beta,\nu}
+&- 4 \pi \sum_{\alpha,\beta,\nu} \mu^{-1}_{r,\delta,\nu} h_{\alpha,\beta,\nu}
 \epsilon_{\alpha,\beta} - {1\over \alpha^2} \sum_{\alpha,\nu}
 \mu^{-1}_{r,\delta,\nu} \alpha_{\alpha,\nu} {\bf E}_\alpha
 + {1\over \alpha^2} \sum_\nu \mu^{-1}_{r,\delta,\nu} {\bf B}_\nu, 
-\end{eqnarray}
+\end{align}
 where $\mu^{-1}_{r,\delta,\nu}$ is the frozen-ions relative magnetic
 permeability.
 Inserting this equation in the other equations of motion gives:
-\begin{eqnarray}
-{\bf f}_{I,\alpha}&=&\breve{\bf f}^{(0)}_{I,\alpha}
+\begin{align}
+{\bf f}_{I,\alpha}&= \breve{\bf f}^{(0)}_{I,\alpha}
 -\sum_{J,\beta} \breve C_{I,\alpha,J,\beta} {\bf u}_{J,\beta}
 +\sum_{\beta,\gamma}
 \breve \Gamma_{I,\alpha,\beta,\gamma} 
@@ -2919,7 +2921,7 @@ Inserting this equation in the other equations of motion gives:
 \sum_{\beta} \breve Z^*_{I,\alpha,\beta} {\bf E}_{\beta}
 +\sum_{\beta} 
 \breve Z^m_{I,\alpha,\beta} {\bf B}_{\beta}, \\
-\sigma_{\lambda,\mu}&=&\breve  \sigma_{\lambda,\mu}^{(0)}
+\sigma_{\lambda,\mu}&= \breve  \sigma_{\lambda,\mu}^{(0)}
 -{1\over V} \sum_{I,\alpha}
 \breve \Gamma_{I,\alpha,\lambda,\mu} {\bf u}_{I,\alpha}
 +\sum_{\gamma,\delta} \breve C_{\lambda,\mu,\gamma,\delta}  
@@ -2928,7 +2930,7 @@ Inserting this equation in the other equations of motion gives:
  {\bf E}_{\gamma}
 -\sum_{\gamma}  \breve h_{\lambda,\mu,\gamma} 
 {\bf B}_{\gamma}, \\
-{\bf P}_{\lambda}&=& \breve {\bf P}^{(0)}_{\lambda}
+{\bf P}_{\lambda}&= \breve {\bf P}^{(0)}_{\lambda}
 +{1\over V} \sum_{I,\alpha} \breve Z^*_{I,\alpha,\lambda} 
 {\bf u}_{I,\alpha} +
 \sum_{\alpha,\beta} \breve e_{\alpha,\beta,\lambda} 
@@ -2938,52 +2940,52 @@ Inserting this equation in the other equations of motion gives:
 {\bf E}_{\beta} +
 \sum_{\beta} \breve \alpha_{\lambda,\beta} 
 {\bf B}_{\beta}, 
-\end{eqnarray}
+\end{align}
 where
-\begin{eqnarray}
-\breve {\bf f}^{(0)}_{I,\alpha}&=&{\bf f}^{(0)}_{I,\alpha} - 4 \pi
+\begin{align}
+\breve {\bf f}^{(0)}_{I,\alpha}&= {\bf f}^{(0)}_{I,\alpha} - 4 \pi
 \alpha^2
 \sum_{\gamma,\nu}
 Z^m_{I,\alpha,\gamma} \mu^{-1}_{r,\gamma,\nu} {\bf M}^{(0)}_\nu, \\
-\breve \sigma^{(0)}_{\lambda,\mu}&=&\sigma^{(0)}_{\lambda,\mu}
+\breve \sigma^{(0)}_{\lambda,\mu}&= \sigma^{(0)}_{\lambda,\mu}
 +4 \pi \alpha^2 \sum_{\gamma,\nu} h_{\lambda,\mu,\gamma} \mu^{-1}_{r,\gamma,\nu} 
 {\bf M}^{(0)}_\nu, \\
-\breve {\bf P}^{(0)}_\lambda&=& {\bf P}^{(0)}_\lambda -
+\breve {\bf P}^{(0)}_\lambda&= {\bf P}^{(0)}_\lambda -
 \sum_{\gamma,\nu} \alpha_{\lambda,\gamma} \mu^{-1}_{r,\gamma,\nu} 
-{\bf M}^{(0)}_\nu, \\
-\end{eqnarray}
+{\bf M}^{(0)}_\nu, 
+\end{align}
 and
-\begin{eqnarray}
-\breve C_{I,\alpha,J,\beta} &=& C_{I,\alpha,J,\beta}+
+\begin{align}
+\breve C_{I,\alpha,J,\beta} &= C_{I,\alpha,J,\beta}+
 {4 \pi \alpha^2 \over V}  \sum_{\delta,\lambda} Z^m_{I,\alpha,\delta}
 \mu^{-1}_{r,\delta,\lambda}Z^m_{J,\beta,\lambda},\\
-\breve \Gamma_{I,\alpha,\beta,\gamma} &=& \Gamma_{I,\alpha,\beta,\gamma}
+\breve \Gamma_{I,\alpha,\beta,\gamma} &= \Gamma_{I,\alpha,\beta,\gamma}
 - 4 \pi \alpha^2 \sum_{\delta,\lambda} Z^m_{I,\alpha,\delta}
 \mu^{-1}_{r,\delta,\lambda} h_{\beta,\gamma,\lambda}, \\
-\breve Z^*_{I,\alpha,\beta} &=& Z^*_{I,\alpha,\beta}
+\breve Z^*_{I,\alpha,\beta} &= Z^*_{I,\alpha,\beta}
 -\sum_{\delta,\lambda} Z^m_{I,\alpha,\delta} 
 \mu^{-1}_{r,\delta,\lambda} \alpha_{\beta,\lambda}, \\
-\breve Z^m_{I,\alpha,\beta} &=& \sum_{\delta} Z^m_{I,\alpha,\delta} 
+\breve Z^m_{I,\alpha,\beta} &= \sum_{\delta} Z^m_{I,\alpha,\delta} 
 \mu^{-1}_{r,\delta,\beta}, 
-\end{eqnarray}
+\end{align}
 are the microscopic tensors, while
-\begin{eqnarray}
-\breve C_{\lambda,\mu,\gamma,\delta} &=&
+\begin{align}
+\breve C_{\lambda,\mu,\gamma,\delta} &=
 C_{\lambda,\mu,\gamma,\delta} + 4 \pi \alpha^2 \sum_{\alpha,\beta,\nu}
 h_{\lambda,\mu,\alpha} \mu^{-1}_{r,\alpha,\nu} 
 h_{\gamma,\delta,\nu}, \\
-\breve e_{\lambda,\mu,\gamma}&=& e_{\lambda,\mu,\gamma}
+\breve e_{\lambda,\mu,\gamma}&= e_{\lambda,\mu,\gamma}
 -\sum_{\alpha,\beta} h_{\lambda,\mu,\alpha} \mu^{-1}_{r,\alpha,\nu}
 \alpha_{\gamma,\nu}, \\
-\breve h_{\lambda,\mu,\gamma}&=& \sum_\delta h_{\lambda,\mu,\delta}
+\breve h_{\lambda,\mu,\gamma}&= \sum_\delta h_{\lambda,\mu,\delta}
 \mu^{-1}_{r,\delta,\gamma} \\
-\breve \chi^e_{\lambda,\mu}&=& \chi^e_{\lambda,\mu}
+\breve \chi^e_{\lambda,\mu}&= \chi^e_{\lambda,\mu}
 -{1\over 4 \pi \alpha^2} \sum_{\delta,\nu} \alpha_{\lambda,\delta} 
 \mu^{-1}_{r,\delta,\nu} \alpha_{\mu,\nu}, \\
-\breve \alpha_{\lambda,\rho} &=&{1\over 4 \pi \alpha^2}
+\breve \alpha_{\lambda,\rho} &= {1\over 4 \pi \alpha^2}
 \sum_\beta \alpha_{\lambda,\beta}
 \mu^{-1}_{r,\beta,\rho}
-\end{eqnarray}
+\end{align}
 are the frozen-ions macroscopic tensors.
 }
 \\
@@ -3007,15 +3009,15 @@ and we have:
 where $\tilde \mu^{-1}_{r,\delta,\nu}$ is the relative magnetic
 permeability.
 Inserting this expression in the equations of motion we obtain:
-\begin{eqnarray}
-\sigma_{\lambda,\mu}&=& \check \sigma_{\lambda,\mu}^{(0)}
+\begin{align}
+\sigma_{\lambda,\mu}&= \check \sigma_{\lambda,\mu}^{(0)}
 +\sum_{\gamma,\delta} \check C_{\lambda,\mu,\gamma,\delta}  
 \epsilon_{\gamma,\delta} -
 \sum_{\gamma} \check e_{\lambda,\mu,\gamma} 
  {\bf E}_{\gamma}
 -\sum_{\gamma,\nu}  \tilde h_{\lambda,\mu,\gamma} 
 \tilde \mu^{-1}_{r,\gamma,\nu} {\bf B}_{\nu}, \\
-{\bf P}_{\lambda}&=& \check {\bf P}^{(0)}_{\lambda}
+{\bf P}_{\lambda}&= \check {\bf P}^{(0)}_{\lambda}
 +\sum_{\alpha,\beta} \check e_{\alpha,\beta,\lambda} 
 \epsilon_{\alpha,\beta} +
 \sum_{\beta} 
@@ -3024,48 +3026,48 @@ Inserting this expression in the equations of motion we obtain:
 {1\over 4 \pi} \sum_{\delta,\nu} \tilde \alpha_{\lambda,\delta} 
 \tilde \mu^{-1}_{r,\delta,\nu}  
 {\bf B}_{\nu}, 
-\end{eqnarray}
+\end{align}
 one finds the relationship between quantities calculated at constant 
 ${\bf B}$ and those calculated at constant ${\bf H}$. We have:
-\begin{eqnarray}
-\check C_{\lambda,\mu,\gamma,\delta} &=&
+\begin{align}
+\check C_{\lambda,\mu,\gamma,\delta} &=
 \tilde C_{\lambda,\mu,\gamma,\delta} + 4 \pi \sum_{\alpha,\beta,\nu}
 \tilde h_{\lambda,\mu,\alpha} \tilde \mu^{-1}_{r,\alpha,\nu} 
 \tilde h_{\gamma,\delta,\nu}, \\
-\check e_{\lambda,\mu,\gamma}&=&\tilde e_{\lambda,\mu,\gamma}
+\check e_{\lambda,\mu,\gamma}&= \tilde e_{\lambda,\mu,\gamma}
 -\sum_{\alpha,\beta} \tilde h_{\lambda,\mu,\alpha} 
 \tilde \mu^{-1}_{r,\alpha,\nu}
 \tilde \alpha_{\gamma,\nu}, \\
-\check \chi^e_{\lambda,\mu}&=&\tilde \chi^e_{\lambda,\mu}
+\check \chi^e_{\lambda,\mu}&= \tilde \chi^e_{\lambda,\mu}
 -{1\over 4 \pi} \sum_{\delta,\nu} \tilde \alpha_{\lambda,\delta} 
 \tilde \mu^{-1}_{r,\delta,\nu} \tilde \alpha_{\mu,\nu}. 
-\end{eqnarray}
+\end{align}
 In addition we have the relationships:
-\begin{eqnarray}
-\check \sigma^{(0)}_{\lambda,\mu} &=& \tilde \sigma^{(0)}_{\lambda,\mu}
+\begin{align}
+\check \sigma^{(0)}_{\lambda,\mu} &= \tilde \sigma^{(0)}_{\lambda,\mu}
 + 4 \pi \sum_{\gamma,\nu} \tilde h_{\lambda,\mu,\gamma} 
 \tilde \mu^{-1}_{r,\gamma,\nu} {\bf M}^{(0)}_\nu,  \\
-\check {\bf P}^{(0)}_{\lambda} &=& \tilde {\bf P}^{(0)}_{\lambda}
+\check {\bf P}^{(0)}_{\lambda} &= \tilde {\bf P}^{(0)}_{\lambda}
 - \sum_{\beta,\nu} \tilde \alpha_{\lambda,\beta} 
 \tilde \mu^{-1}_{r,\beta,\nu} {\bf M}^{(0)}_\nu. 
-\end{eqnarray}
+\end{align}
 We can derive similar equations from the microscopic equations of motion.
 The dependence of ${\bf H}_\delta$ on ${\bf B}$ is:
-\begin{eqnarray}
+\begin{align}
 {\bf H}_\delta = 
-&-& 4 \pi \sum_\nu \mu^{-1}_{r,\delta,\nu} {\bf M}^{(0)}_\nu 
+&- 4 \pi \sum_\nu \mu^{-1}_{r,\delta,\nu} {\bf M}^{(0)}_\nu 
 -{4 \pi \over V} \sum_{I,\alpha,\nu} \mu^{-1}_{r,\delta,\nu} Z^m_{I,\alpha,\nu}
 {\bf u}_{I,\alpha} \nonumber\\
-&-& 4 \pi \sum_{\alpha,\beta,\nu} \mu^{-1}_{r,\delta,\nu} h_{\alpha,\beta,\nu}
+&- 4 \pi \sum_{\alpha,\beta,\nu} \mu^{-1}_{r,\delta,\nu} h_{\alpha,\beta,\nu}
 \epsilon_{\alpha,\beta} - \sum_{\alpha,\nu}
 \mu^{-1}_{r,\delta,\nu} \alpha_{\alpha,\nu} {\bf E}_\alpha
 + \sum_\nu \mu^{-1}_{r,\delta,\nu} {\bf B}_\nu, 
-\end{eqnarray}
+\end{align}
 where $\mu^{-1}_{r,\delta,\nu}$ is the frozen-ions relative magnetic
 permeability.
 Inserting this equation in the other equations of motion gives:
-\begin{eqnarray}
-{\bf f}_{I,\alpha}&=&\breve{\bf f}^{(0)}_{I,\alpha}
+\begin{align}
+{\bf f}_{I,\alpha}&= \breve{\bf f}^{(0)}_{I,\alpha}
 -\sum_{J,\beta} \breve C_{I,\alpha,J,\beta} {\bf u}_{J,\beta}
 +\sum_{\beta,\gamma}
 \breve \Gamma_{I,\alpha,\beta,\gamma} 
@@ -3073,7 +3075,7 @@ Inserting this equation in the other equations of motion gives:
 e \sum_{\beta} \breve Z^*_{I,\alpha,\beta} {\bf E}_{\beta}
 +\sum_{\beta} 
 \breve Z^m_{I,\alpha,\beta} {\bf B}_{\beta}, \\
-\sigma_{\lambda,\mu}&=&\breve  \sigma_{\lambda,\mu}^{(0)}
+\sigma_{\lambda,\mu}&= \breve  \sigma_{\lambda,\mu}^{(0)}
 -{1\over V} \sum_{I,\alpha}
 \breve \Gamma_{I,\alpha,\lambda,\mu} {\bf u}_{I,\alpha}
 +\sum_{\gamma,\delta} \breve C_{\lambda,\mu,\gamma,\delta}  
@@ -3082,7 +3084,7 @@ e \sum_{\beta} \breve Z^*_{I,\alpha,\beta} {\bf E}_{\beta}
  {\bf E}_{\gamma}
 -\sum_{\gamma}  \breve h_{\lambda,\mu,\gamma} 
 {\bf B}_{\gamma}, \\
-{\bf P}_{\lambda}&=& \breve {\bf P}^{(0)}_{\lambda}
+{\bf P}_{\lambda}&= \breve {\bf P}^{(0)}_{\lambda}
 +{e\over V} \sum_{I,\alpha} \breve Z^*_{I,\alpha,\lambda} 
 {\bf u}_{I,\alpha} +
 \sum_{\alpha,\beta} \breve e_{\alpha,\beta,\lambda} 
@@ -3092,50 +3094,50 @@ e \sum_{\beta} \breve Z^*_{I,\alpha,\beta} {\bf E}_{\beta}
 {\bf E}_{\beta} +
 {1\over 4 \pi} \sum_{\beta} \breve \alpha_{\lambda,\beta} 
 {\bf B}_{\beta}, 
-\end{eqnarray}
+\end{align}
 where
-\begin{eqnarray}
-\breve {\bf f}^{(0)}_{I,\alpha}&=&{\bf f}^{(0)}_{I,\alpha} - 4 \pi
+\begin{align}
+\breve {\bf f}^{(0)}_{I,\alpha}&= {\bf f}^{(0)}_{I,\alpha} - 4 \pi
 \sum_{\gamma,\nu}
 Z^m_{I,\alpha,\gamma} \mu^{-1}_{r,\gamma,\nu} {\bf M}^{(0)}_\nu, \\
-\breve \sigma^{(0)}_{\lambda,\mu}&=&\sigma^{(0)}_{\lambda,\mu}
+\breve \sigma^{(0)}_{\lambda,\mu}&= \sigma^{(0)}_{\lambda,\mu}
 + 4 \pi \sum_{\gamma,\nu} h_{\lambda,\mu,\gamma} \mu^{-1}_{r,\gamma,\nu} 
 {\bf M}^{(0)}_\nu, \\
-\breve {\bf P}^{(0)}_\lambda&=& {\bf P}^{(0)}_\lambda -
+\breve {\bf P}^{(0)}_\lambda&= {\bf P}^{(0)}_\lambda -
 \sum_{\gamma,\nu} \alpha_{\lambda,\gamma} \mu^{-1}_{r,\gamma,\nu} 
 {\bf M}^{(0)}_\nu, \\
-\end{eqnarray}
+\end{align}
 and
-\begin{eqnarray}
-\breve C_{I,\alpha,J,\beta} &=& C_{I,\alpha,J,\beta}+
+\begin{align}
+\breve C_{I,\alpha,J,\beta} &= C_{I,\alpha,J,\beta}+
 {4 \pi \over V}  \sum_{\delta,\lambda} Z^m_{I,\alpha,\delta}
 \mu^{-1}_{r,\delta,\lambda}Z^m_{J,\beta,\lambda},\\
-\breve \Gamma_{I,\alpha,\beta,\gamma} &=& \Gamma_{I,\alpha,\beta,\gamma}
+\breve \Gamma_{I,\alpha,\beta,\gamma} &= \Gamma_{I,\alpha,\beta,\gamma}
 - 4 \pi \sum_{\delta,\lambda} Z^m_{I,\alpha,\delta}
 \mu^{-1}_{r,\delta,\lambda} h_{\beta,\gamma,\lambda}, \\
-\breve Z^*_{I,\alpha,\beta} &=& Z^*_{I,\alpha,\beta}
+\breve Z^*_{I,\alpha,\beta} &= Z^*_{I,\alpha,\beta}
 -{1\over e} \sum_{\delta,\lambda} Z^m_{I,\alpha,\delta} 
 \mu^{-1}_{r,\delta,\lambda} \alpha_{\beta,\lambda}, \\
-\breve Z^m_{I,\alpha,\beta} &=& \sum_{\delta} Z^m_{I,\alpha,\delta} 
+\breve Z^m_{I,\alpha,\beta} &= \sum_{\delta} Z^m_{I,\alpha,\delta} 
 \mu^{-1}_{r,\delta,\beta}, 
-\end{eqnarray}
+\end{align}
 are the microscopic tensors, while
-\begin{eqnarray}
-\breve C_{\lambda,\mu,\gamma,\delta} &=&
+\begin{align}
+\breve C_{\lambda,\mu,\gamma,\delta} &=
 C_{\lambda,\mu,\gamma,\delta} + 4 \pi \sum_{\alpha,\beta,\nu}
 h_{\lambda,\mu,\alpha} \mu^{-1}_{r,\alpha,\nu} 
 h_{\gamma,\delta,\nu}, \\
-\breve e_{\lambda,\mu,\gamma}&=& e_{\lambda,\mu,\gamma}
+\breve e_{\lambda,\mu,\gamma}&= e_{\lambda,\mu,\gamma}
 -\sum_{\alpha,\beta} h_{\lambda,\mu,\alpha} \mu^{-1}_{r,\alpha,\nu}
 \alpha_{\gamma,\nu}, \\
-\breve h_{\lambda,\mu,\gamma}&=& \sum_\delta h_{\lambda,\mu,\delta}
+\breve h_{\lambda,\mu,\gamma}&= \sum_\delta h_{\lambda,\mu,\delta}
 \mu^{-1}_{r,\delta,\gamma} \\
-\breve \chi^e_{\lambda,\mu}&=& \chi^e_{\lambda,\mu}
+\breve \chi^e_{\lambda,\mu}&= \chi^e_{\lambda,\mu}
 -{1\over 4 \pi} \sum_{\delta,\nu} \alpha_{\lambda,\delta} 
 \mu^{-1}_{r,\delta,\nu} \alpha_{\mu,\nu}, \\
-\breve \alpha_{\lambda,\rho} &=&\sum_\beta \alpha_{\lambda,\beta}
+\breve \alpha_{\lambda,\rho} &= \sum_\beta \alpha_{\lambda,\beta}
 \mu^{-1}_{r,\beta,\rho}
-\end{eqnarray}
+\end{align}
 are the frozen-ions macroscopic tensors.
 }
 
@@ -3151,22 +3153,21 @@ The free energy of the free fields is written as
 \end{equation}
 Therefore expanding $\mathcal{\tilde F} = \mathcal{F} + \mathcal{F}_{free}$
 instead of $\mathcal{F}$ we would obtain four different terms:
-\begin{eqnarray}
+\begin{align}
 \mathcal{\tilde F}(\{{\bf u}_{I,\alpha}\}, \{\epsilon_{\alpha,\beta}\},
-\{ {\bf E}_\alpha\}, \{{\bf H}_\alpha\})&=& \cdots -
+\{ {\bf E}_\alpha\}, \{{\bf H}_\alpha\})&= \cdots -
 V \sum_{\alpha} {\bf D}^{(0)}_\alpha {\bf E}_\alpha - 
 V \sum_{\alpha} {\bf B}^{(0)}_\alpha {\bf H}_\alpha \nonumber \\
-&-&  
- {1\over 2} \epsilon_0 V \sum_{\alpha,\beta} 
+&- {1\over 2} \epsilon_0 V \sum_{\alpha,\beta} 
 \epsilon_{r,\alpha,\beta}
 {\bf E}_{\alpha}
 {\bf E}_{\beta} \nonumber \\
-&-& {1\over 2} \mu_0 V \sum_{\alpha,\beta} 
+&- {1\over 2} \mu_0 V \sum_{\alpha,\beta} 
 \mu_{r,\alpha,\beta}
 {\bf H}_{\alpha}
 {\bf H}_{\beta} \nonumber \\
-&+& \cdots,
-\end{eqnarray}
+&+ \cdots,
+\end{align}
 where the dots indicate the same terms written above.
 Moreover we have:
 \begin{equation}
@@ -3190,22 +3191,21 @@ free fields is written as
 \end{equation}
 Therefore expanding $\mathcal{\tilde F} = \mathcal{F} + \mathcal{F}_{free}$
 instead of $\mathcal{F}$ we would obtain four different terms:
-\begin{eqnarray}
+\begin{align}
 \mathcal{\tilde F}(\{{\bf u}_{I,\alpha}\}, \{\epsilon_{\alpha,\beta}\},
-\{ {\bf E}_\alpha\}, \{{\bf H}_\alpha\})&=& \cdots -
+\{ {\bf E}_\alpha\}, \{{\bf H}_\alpha\})&= \cdots -
 {V \over 4 \pi} \sum_{\alpha} {\bf D}^{(0)}_\alpha {\bf E}_\alpha - 
 {V \over 4 \pi} \sum_{\alpha} {\bf B}^{(0)}_\alpha {\bf H}_\alpha \nonumber \\
-&-&  
- {V\over 8 \pi} \sum_{\alpha,\beta} 
+&- {V\over 8 \pi} \sum_{\alpha,\beta} 
 \epsilon_{r,\alpha,\beta}
 {\bf E}_{\alpha}
 {\bf E}_{\beta} \nonumber \\
-&-& {\alpha^2 V\over 8 \pi} \sum_{\alpha,\beta} 
+&- {\alpha^2 V\over 8 \pi} \sum_{\alpha,\beta} 
 \mu_{r,\alpha,\beta}
 {\bf H}_{\alpha}
 {\bf H}_{\beta} \nonumber \\
-&+& \cdots,
-\end{eqnarray}
+&+ \cdots,
+\end{align}
 where the dots indicate the same terms written above.
 Moreover we have:
 \begin{equation}
@@ -3230,22 +3230,21 @@ free fields is written as
 \end{equation}
 Therefore expanding $\mathcal{\tilde F} = \mathcal{F} + \mathcal{F}_{free}$
 instead of $\mathcal{F}$ we would obtain four different terms:
-\begin{eqnarray}
+\begin{align}
 \mathcal{\tilde F}(\{{\bf u}_{I,\alpha}\}, \{\epsilon_{\alpha,\beta}\},
-\{ {\bf E}_\alpha\}, \{{\bf H}_\alpha\})&=& \cdots -
+\{ {\bf E}_\alpha\}, \{{\bf H}_\alpha\})&= \cdots -
 {V\over 4 \pi} \sum_{\alpha} {\bf D}^{(0)}_\alpha {\bf E}_\alpha - 
 {V \over 4 \pi} \sum_{\alpha} {\bf B}^{(0)}_\alpha {\bf H}_\alpha \nonumber \\
-&-&  
- {V\over 8 \pi} \sum_{\alpha,\beta} 
+&- {V\over 8 \pi} \sum_{\alpha,\beta} 
 \epsilon_{r,\alpha,\beta}
 {\bf E}_{\alpha}
 {\bf E}_{\beta} \nonumber \\
-&-& {V\over 8 \pi} \sum_{\alpha,\beta} 
+&- {V\over 8 \pi} \sum_{\alpha,\beta} 
 \mu_{r,\alpha,\beta}
 {\bf H}_{\alpha}
 {\bf H}_{\beta} \nonumber \\
-&+& \cdots,
-\end{eqnarray}
+&+ \cdots,
+\end{align}
 where the dots indicate the same terms written above.
 Moreover we have:
 \begin{equation}
