@@ -290,8 +290,10 @@ SUBROUTINE phq_readin_tpw()
   elop         = .FALSE.
   max_seconds  =  1.E+7_DP
   reduce_io    = .FALSE.
-  CALL get_environment_variable( 'ESPRESSO_TMPDIR', outdir )
-  IF ( TRIM( outdir ) == ' ' ) outdir = './'
+  IF ( TRIM(outdir) == './') THEN
+     CALL get_environment_variable( 'ESPRESSO_TMPDIR', outdir )
+     IF ( TRIM( outdir ) == ' ' ) outdir = './'
+  ENDIF
   prefix       = 'pwscf'
   fildyn       = 'matdyn'
   fildrho      = ' '
