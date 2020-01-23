@@ -167,9 +167,12 @@ SUBROUTINE sym_band_sub(filband, spin_component)
         DO isym=1, nsym_in
            sk_in(:,:,isym)=sk_is(:,:,isym)
            d_spin_in(:,:,isym)=d_spin_is(:,:,isym)
-           ft_in(:,isym)=ft_is(:,isym)
+           ftau_in(1,isym) = NINT ( ft_is(1,isym)*dfftp%nr1 )
+           ftau_in(2,isym) = NINT ( ft_is(2,isym)*dfftp%nr2 )
+           ftau_in(3,isym) = NINT ( ft_is(3,isym)*dfftp%nr3 )
            gk_in(:,isym)=gk_is(:,isym)
            invs_in(isym)=invs_is(isym)
+           ft_in(:,isym)=ft_is(:,isym)
         END DO
         code_group_k(ik)=code_group_is
         nrapk(ik)=nrap
