@@ -210,8 +210,14 @@ MODULE anharmonic
                                          ! of temperature (constant entropy)
   REAL(DP), ALLOCATABLE :: el_comp_s(:,:,:) ! elastic compliances as a function
                                          ! of temperature (constant entropy)
+  REAL(DP), ALLOCATABLE :: macro_el_s(:,:) ! macroscopic elasticity as a 
+                                           ! function of t (from el_cons_s)
   REAL(DP), ALLOCATABLE :: macro_el_t(:,:) ! macroscopic elasticity as a 
-                                         ! function of t
+                                           ! function of t (from el_cons_t)
+  REAL(DP), ALLOCATABLE :: v_s(:,:)        ! the sound velocities from
+                                           ! macro_el_s: vp, vb, vg
+  REAL(DP), ALLOCATABLE :: v_t(:,:)        ! the sound velocities from
+                                           ! macro_el_t: vp, vb, vg
   REAL(DP), ALLOCATABLE :: el_con_geo_t(:,:,:,:)
 
 END MODULE anharmonic
@@ -263,8 +269,14 @@ MODULE ph_freq_anharmonic
                                          ! of temperature (constant entropy)
   REAL(DP), ALLOCATABLE :: el_compf_s(:,:,:) ! elastic compliances as a function
                                          ! of temperature (constant entropy)
+  REAL(DP), ALLOCATABLE :: macro_elf_s(:,:) ! macroscopic elasticity as a 
+                                            ! function of t (from el_consf_s)
   REAL(DP), ALLOCATABLE :: macro_elf_t(:,:) ! macroscopic elasticity as a 
-                                         ! function of t
+                                            ! function of t (from el_consf_t)
+  REAL(DP), ALLOCATABLE :: vf_s(:,:)        ! the sound velocities from
+                                            ! macro_elf_s: vp, vb, vg
+  REAL(DP), ALLOCATABLE :: vf_t(:,:)        ! the sound velocities from
+                                            ! macro_elf_t: vp, vb, vg
   REAL(DP), ALLOCATABLE :: el_conf_geo_t(:,:,:,:)
 
 END MODULE ph_freq_anharmonic

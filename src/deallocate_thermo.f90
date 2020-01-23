@@ -23,14 +23,15 @@ SUBROUTINE deallocate_thermo()
                              b0_s, ener_t, free_ener_t, entropy_t, &
                              celldm_t, alpha_anis_t, cpmce_anis, el_cons_t, &
                              el_comp_t, macro_el_t, bths_t, ggamma_t, &
-                             el_cons_s, el_comp_s, bfact_t, el_con_geo_t
+                             el_cons_s, el_comp_s, macro_el_s, v_t, v_s, bfact_t, & 
+                             el_con_geo_t
   USE ph_freq_anharmonic, ONLY : vminf_t, b0f_t, free_e_minf_t, &
                              alphaf_t, betaf_t, gammaf_t, cvf_t, cef_t, &
                              cpf_t, b0f_s, enerf_t, free_enerf_t, entropyf_t, &
                              celldmf_t, alphaf_anis_t, cpmcef_anis, &
                              el_consf_t, el_compf_t, macro_elf_t, bthsf_t, &
-                             ggammaf_t, el_consf_s, el_compf_s, bfactf_t,  &
-                             el_conf_geo_t
+                             ggammaf_t, el_consf_s, el_compf_s, macro_elf_s, &
+                             vf_t, vf_s, bfactf_t, el_conf_geo_t
   USE grun_anharmonic,  ONLY : betab, alpha_an_g, cp_grun_t, cv_grun_t, &
                              ce_grun_t, b0_grun_s, &
                              grun_gamma_t, poly_grun, poly_grun_red, &
@@ -112,6 +113,9 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (el_cons_s) )       DEALLOCATE(el_cons_s)
   IF ( ALLOCATED (el_comp_s) )       DEALLOCATE(el_comp_s)
   IF ( ALLOCATED (macro_el_t) )      DEALLOCATE(macro_el_t)
+  IF ( ALLOCATED (macro_el_s) )      DEALLOCATE(macro_el_s)
+  IF ( ALLOCATED (v_t) )             DEALLOCATE(v_t)
+  IF ( ALLOCATED (v_s) )             DEALLOCATE(v_s)
   IF ( ALLOCATED (el_con_geo_t) )    DEALLOCATE(el_con_geo_t) 
 
   IF ( ALLOCATED (b0f_t) )           DEALLOCATE(b0f_t) 
@@ -136,7 +140,10 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (el_compf_t) )      DEALLOCATE(el_compf_t)
   IF ( ALLOCATED (el_consf_s) )      DEALLOCATE(el_consf_s)
   IF ( ALLOCATED (el_compf_s) )      DEALLOCATE(el_compf_s)
+  IF ( ALLOCATED (macro_elf_s) )     DEALLOCATE(macro_elf_s)
   IF ( ALLOCATED (macro_elf_t) )     DEALLOCATE(macro_elf_t)
+  IF ( ALLOCATED (vf_t) )            DEALLOCATE(vf_t)
+  IF ( ALLOCATED (vf_s) )            DEALLOCATE(vf_s)
   IF ( ALLOCATED (el_conf_geo_t) )   DEALLOCATE(el_conf_geo_t) 
 
   IF ( ALLOCATED (betab) )           DEALLOCATE(betab) 

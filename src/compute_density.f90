@@ -13,7 +13,8 @@ SUBROUTINE compute_density(omega,density)
 !
 USE kinds, ONLY : DP
 USE constants, ONLY : amu_si, bohr_radius_si
-USE ions_base, ONLY : nat, ityp, atm, amass
+USE ions_base, ONLY : nat, atm, amass
+USE initial_conf, ONLY : ityp_save
 USE io_global, ONLY : stdout
 
 IMPLICIT NONE
@@ -29,7 +30,7 @@ INTEGER :: ia, it
 total_mass=0.0_DP
 total_expected_mass=0.0_DP
 DO ia=1,nat
-   it=ityp(ia)
+   it=ityp_save(ia)
    expected_mass=atom_weight(atomic_number(TRIM(atm(it))))
    IF (amass(it)==0.0_DP) THEN
       current_mass=expected_mass

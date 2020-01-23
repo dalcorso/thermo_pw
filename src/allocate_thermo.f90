@@ -52,16 +52,16 @@ SUBROUTINE allocate_anharmonic()
                                   alpha_t, beta_t, gamma_t, cv_t, ce_t,      &
                                   cp_t, b0_s, &
                                   celldm_t, alpha_anis_t, cpmce_anis,        &
-                                  el_cons_t, el_comp_t, macro_el_t,          &
-                                  el_cons_s, el_comp_s, free_ener_t,         &
-                                  ener_t, entropy_t,   &
+                                  el_cons_t, el_comp_t, macro_el_s,          &
+                                  macro_el_t, el_cons_s, el_comp_s,          &
+                                  v_t, v_s, free_ener_t, ener_t, entropy_t,  &
                                   bths_t, ggamma_t, bfact_t, el_con_geo_t
   USE ph_freq_anharmonic,  ONLY : vminf_t, b0f_t, b01f_t, free_e_minf_t,     &
                                   alphaf_t, betaf_t, gammaf_t, cvf_t, cef_t, &
                                   cpf_t, b0f_s, celldmf_t, alphaf_anis_t,    & 
                                   cpmcef_anis, el_consf_t, el_compf_t,       &
-                                  el_consf_s, el_compf_s, enerf_t,           &
-                                  free_enerf_t, entropyf_t,                  &
+                                  el_consf_s, el_compf_s, vf_t, vf_s, enerf_t, &
+                                  free_enerf_t, entropyf_t, macro_elf_s,     &
                                   macro_elf_t, bthsf_t, ggammaf_t, bfactf_t, &
                                   el_conf_geo_t
   USE grun_anharmonic,     ONLY : betab, alpha_an_g, cp_grun_t, cv_grun_t,   &
@@ -95,8 +95,11 @@ SUBROUTINE allocate_anharmonic()
   IF (.NOT. ALLOCATED (el_cons_t) )     ALLOCATE(el_cons_t(6,6,ntemp)) 
   IF (.NOT. ALLOCATED (el_comp_t) )     ALLOCATE(el_comp_t(6,6,ntemp)) 
   IF (.NOT. ALLOCATED (el_cons_s) )     ALLOCATE(el_cons_s(6,6,ntemp)) 
-  IF (.NOT. ALLOCATED (el_comp_s) )     ALLOCATE(el_comp_s(6,6,ntemp)) 
+  IF (.NOT. ALLOCATED (el_comp_s) )     ALLOCATE(el_comp_s(6,6,ntemp))
+  IF (.NOT. ALLOCATED (macro_el_s) )    ALLOCATE(macro_el_s(8,ntemp))
   IF (.NOT. ALLOCATED (macro_el_t) )    ALLOCATE(macro_el_t(8,ntemp)) 
+  IF (.NOT. ALLOCATED (v_s) )           ALLOCATE(v_s(3,ntemp))
+  IF (.NOT. ALLOCATED (v_t) )           ALLOCATE(v_t(3,ntemp))
   IF (.NOT. ALLOCATED (el_con_geo_t) )  ALLOCATE(el_con_geo_t(6,6,ntemp,&
                                                                    tot_ngeo)) 
 
@@ -123,11 +126,13 @@ SUBROUTINE allocate_anharmonic()
   IF (.NOT. ALLOCATED (el_consf_t) )    ALLOCATE(el_consf_t(6,6,ntemp)) 
   IF (.NOT. ALLOCATED (el_compf_t) )    ALLOCATE(el_compf_t(6,6,ntemp)) 
   IF (.NOT. ALLOCATED (el_consf_s) )    ALLOCATE(el_consf_s(6,6,ntemp)) 
-  IF (.NOT. ALLOCATED (el_compf_s) )    ALLOCATE(el_compf_s(6,6,ntemp)) 
-  IF (.NOT. ALLOCATED (macro_elf_t) )   ALLOCATE(macro_elf_t(8,ntemp)) 
+  IF (.NOT. ALLOCATED (el_compf_s) )    ALLOCATE(el_compf_s(6,6,ntemp))
+  IF (.NOT. ALLOCATED (macro_elf_s) )   ALLOCATE(macro_elf_s(8,ntemp)) 
+  IF (.NOT. ALLOCATED (macro_elf_t) )   ALLOCATE(macro_elf_t(8,ntemp))
+  IF (.NOT. ALLOCATED (vf_s) )          ALLOCATE(vf_s(3,ntemp))
+  IF (.NOT. ALLOCATED (vf_t) )          ALLOCATE(vf_t(3,ntemp))
   IF (.NOT. ALLOCATED (el_conf_geo_t) ) ALLOCATE(el_conf_geo_t(6,6,&
                                                            ntemp,tot_ngeo)) 
-
   IF (.NOT. ALLOCATED (vgrun_t) )       ALLOCATE(vgrun_t(ntemp)) 
   IF (.NOT. ALLOCATED (b0_grun_t) )     ALLOCATE(b0_grun_t(ntemp)) 
   IF (.NOT. ALLOCATED (celldm_grun_t) ) ALLOCATE(celldm_grun_t(6,ntemp)) 

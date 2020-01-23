@@ -189,6 +189,8 @@ IF (ltherm_freq) CALL write_ph_freq_anhar_anis()
 IF (what=='mur_lc_t') THEN
    CALL plot_elastic_t(0,.TRUE.)
    CALL plot_elastic_t(1,.TRUE.)
+
+   CALL plot_macro_el_t()
 ENDIF
 !
 !    calculate and plot the Gruneisen parameters along the given path.

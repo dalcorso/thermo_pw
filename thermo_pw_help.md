@@ -6,7 +6,7 @@ ESPRESSO (QE)</a> package. <code>Thermo_pw</code> can be downloaded from its
 <a href="http://dalcorso.github.io/thermo_pw/">main page</a> as 
 a <code>.tar.gz</code> file. The current production version is 
 <code>1.2.1</code> compatible with 
-<code>QE-6.4.1</code>. The <code>thermo_pw</code> file should be copied
+<code>QE-6.5</code>. The <code>thermo_pw</code> file should be copied
 in the main (QE) directory and unpacked with the command:</p>
 <p align="center">
 <code>tar -xzvf thermo_pw.1.2.1.tar.gz</code>

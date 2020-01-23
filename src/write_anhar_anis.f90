@@ -17,12 +17,15 @@ USE thermo_sym,     ONLY : laue
 USE thermodynamics, ONLY : ph_e0, ph_ce, ph_b_fact, ph_ener, ph_free_ener, ph_entropy
 USE anharmonic,     ONLY : alpha_anis_t, vmin_t, b0_t, celldm_t, beta_t, &
                            gamma_t, cv_t, ce_t, cp_t, ener_t, free_ener_t, entropy_t, b0_s, & 
-                           cpmce_anis, el_cons_t, free_e_min_t, bths_t, ggamma_t, &
-                           bfact_t, lelastic, el_cons_s, el_comp_s
+                           cpmce_anis, el_cons_t, el_comp_t, free_e_min_t, bths_t, ggamma_t, &
+                           bfact_t, lelastic, el_cons_s, el_comp_s, macro_el_t, macro_el_s, &
+                           v_t, v_s
 USE initial_conf,   ONLY : ibrav_save
 USE control_thermo, ONLY : with_eigen
 USE elastic_constants, ONLY : compute_elastic_compliances, &
-                              write_el_cons_on_file
+                              write_el_cons_on_file, print_macro_elasticity,  &                 
+                              write_macro_el_on_file, print_sound_velocities, & 
+                              write_sound_on_file
 USE isoentropic,    ONLY : isostress_heat_capacity, thermal_stress,      &
                            gen_average_gruneisen, isoentropic_elastic_constants
 USE data_files,     ONLY : flanhar
@@ -32,7 +35,7 @@ IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
 INTEGER :: itemp, iu_therm, ibrav
 INTEGER :: find_free_unit
-REAL(DP) :: compute_omega_geo, csmct(6,6,ntemp)
+REAL(DP) :: compute_omega_geo, csmct(6,6,ntemp), density(ntemp)
 
 REAL(DP) :: e0
 
@@ -42,6 +45,7 @@ CALL compute_alpha_anis(celldm_t, alpha_anis_t, temp, ntemp, ibrav_save)
 !
 DO itemp=1,ntemp
    vmin_t(itemp)=compute_omega_geo(ibrav_save, celldm_t(1,itemp))
+   CALL compute_density(vmin_t(itemp),density(itemp))
 ENDDO
 !
 !  compute the volume thermal expansion as the derivative of the volume
@@ -77,6 +81,28 @@ IF (lelastic) THEN
    DO itemp=2, ntemp-1
       CALL compute_elastic_compliances(el_cons_s(:,:,itemp), &
                                                    el_comp_s(:,:,itemp))
+     !
+     ! Compute macro-elasticity variables and sound velocities using adiabatic 
+     ! elastic constants end elastic compliances just computed vs. temperature 
+     !
+      CALL print_macro_elasticity(ibrav_save, el_cons_s(:,:,itemp), &
+                       el_comp_s(:,:,itemp), macro_el_s(:,itemp), .FALSE.)
+
+      CALL print_sound_velocities(ibrav_save, el_cons_s(:,:,itemp), &
+           el_comp_s(:,:,itemp), density(itemp), v_s(1,itemp), v_s(2,itemp), &
+                                                               v_s(3,itemp))
+      !
+      ! Compute macro-elasticity variables and sound velocities using 
+      ! isothermal 
+      ! elastic constants and elastic compliances vs. temperature computed in 
+      ! previous routines (set_elastic_constant_t and write_elastic_t_qha).
+      !
+      CALL print_macro_elasticity(ibrav_save, el_cons_t(:,:,itemp), &
+                       el_comp_t(:,:,itemp), macro_el_t(:,itemp), .FALSE.)
+
+      CALL print_sound_velocities(ibrav_save, el_cons_t(:,:,itemp), &
+           el_comp_t(:,:,itemp), density(itemp), v_t(1,itemp), v_t(2,itemp), &
+                                                               v_t(3,itemp))
    ENDDO
 ENDIF
 
@@ -174,6 +200,30 @@ IF (lelastic) THEN
    CALL add_pressure(filename)
    CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, el_comp_s, &
                                                      b0_s, filename, 1)
+!
+!   Isothermal macro-elasticity variables
+!
+   filename='anhar_files/'//TRIM(flanhar)//'.macro_el'
+   CALL add_pressure(filename)
+   CALL write_macro_el_on_file(temp, ntemp, macro_el_t, filename)
+!
+!   Adiabatic macro-elasticity variables
+!
+   filename='anhar_files/'//TRIM(flanhar)//'.macro_el_s'
+   CALL add_pressure(filename)
+   CALL write_macro_el_on_file(temp, ntemp, macro_el_s, filename)
+!
+!   Isothermal sound velocities
+!
+   filename='anhar_files/'//TRIM(flanhar)//'.sound_vel'
+   CALL add_pressure(filename)
+   CALL write_sound_on_file(temp, ntemp, v_t, filename)
+!
+!   Adiabatic sound velocities
+!
+   filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_s'
+   CALL add_pressure(filename)
+   CALL write_sound_on_file(temp, ntemp, v_s, filename)
 ENDIF
 
 IF (with_eigen) THEN
@@ -201,11 +251,14 @@ USE ph_freq_thermodynamics, ONLY : phf_e0, phf_ce, phf_b_fact, phf_ener, &
 USE ph_freq_anharmonic, ONLY : alphaf_anis_t, vminf_t, b0f_t, celldmf_t, &
                                betaf_t, gammaf_t, cvf_t, cef_t, cpf_t,   &
                                enerf_t, free_enerf_t, entropyf_t, b0f_s, &
-                               cpmcef_anis, el_consf_t, lelasticf,       &
+                               cpmcef_anis, el_consf_t, el_compf_t, lelasticf, &
                                free_e_minf_t, bthsf_t, ggammaf_t, bfactf_t, &
-                               el_consf_s, el_compf_s
+                               el_consf_s, el_compf_s, macro_elf_t, macro_elf_s,&
+                               vf_s, vf_t
 USE elastic_constants, ONLY : compute_elastic_compliances, &
-                              write_el_cons_on_file
+                              write_el_cons_on_file, print_macro_elasticity, &
+                              write_macro_el_on_file, print_sound_velocities, &  
+                              write_sound_on_file
 USE initial_conf,   ONLY : ibrav_save
 USE control_thermo, ONLY : with_eigen
 USE isoentropic,    ONLY : isostress_heat_capacity, thermal_stress,      &
@@ -218,6 +271,7 @@ CHARACTER(LEN=256) :: filename
 INTEGER :: itemp, iu_therm
 INTEGER :: find_free_unit, ibrav
 REAL(DP) :: compute_omega_geo, el_con_t(6,6,ntemp), csmct(6,6,ntemp)
+REAL(DP) :: densityf(ntemp)
 
 REAL(DP) :: e0
 
@@ -227,6 +281,7 @@ CALL compute_alpha_anis(celldmf_t, alphaf_anis_t, temp, ntemp, ibrav_save)
 !
 DO itemp=1,ntemp
    vminf_t(itemp)=compute_omega_geo(ibrav_save, celldmf_t(1,itemp))
+   CALL compute_density(vminf_t(itemp),densityf(itemp))
 ENDDO
 !
 !  compute the volume thermal expansion as the derivative of the volume
@@ -261,6 +316,25 @@ IF (lelasticf) THEN
    DO itemp=2, ntemp-1
       CALL compute_elastic_compliances(el_consf_s(:,:,itemp), &
                                                         el_compf_s(:,:,itemp))
+
+      ! Compute macro-elasticity variables and sound velocities using adiabatic 
+      ! elastic constants end elastic compliances just computed vs. temperature 
+      CALL print_macro_elasticity(ibrav_save, el_consf_s(:,:,itemp), &
+                         el_compf_s(:,:,itemp), macro_elf_s(:,itemp), .FALSE.)
+
+      CALL print_sound_velocities(ibrav_save, el_consf_s(:,:,itemp), &
+           el_compf_s(:,:,itemp), densityf(itemp), vf_s(1,itemp), vf_s(2,itemp), vf_s(3,itemp))
+
+
+      ! Compute macro-elasticity variables and sound velocities using isothermal 
+      ! elastic constants and elastic compliances vs. temperature computed in previous 
+      ! routines (set_elastic_constant_t and write_elastic_t_qha).
+      CALL print_macro_elasticity(ibrav_save, el_consf_t(:,:,itemp), &
+                          el_compf_t(:,:,itemp), macro_elf_t(:,itemp), .FALSE.)
+
+      CALL print_sound_velocities(ibrav_save, el_consf_t(:,:,itemp), &
+           el_compf_t(:,:,itemp), densityf(itemp), vf_t(1,itemp), vf_t(2,itemp), vf_t(3,itemp))
+
    ENDDO
 ENDIF
 
@@ -361,6 +435,30 @@ IF (lelasticf) THEN
    CALL add_pressure(filename)
    CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, el_compf_s, b0f_s, &
                                                               filename, 1)
+!
+!   Isothermal macro-elasticity variables
+!
+   filename='anhar_files/'//TRIM(flanhar)//'.macro_el_ph'
+   CALL add_pressure(filename)
+   CALL write_macro_el_on_file(temp, ntemp, macro_elf_t, filename)
+!
+!   Adiabatic macro-elasticity variables
+!
+   filename='anhar_files/'//TRIM(flanhar)//'.macro_el_s_ph'
+   CALL add_pressure(filename)
+   CALL write_macro_el_on_file(temp, ntemp, macro_elf_s, filename)
+!
+!   Isothermal sound velocities
+!
+   filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_ph'
+   CALL add_pressure(filename)
+   CALL write_sound_on_file(temp, ntemp, vf_t, filename)
+!
+!   Adiabatic sound velocities
+!
+   filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_s_ph'
+   CALL add_pressure(filename)
+   CALL write_sound_on_file(temp, ntemp, vf_s, filename)
 ENDIF
 
 IF (with_eigen) THEN
