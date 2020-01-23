@@ -5,11 +5,11 @@ working version of the <a href="http://www.quantum-espresso.org/">Quantum
 ESPRESSO (QE)</a> package. <code>Thermo_pw</code> can be downloaded from its 
 <a href="http://dalcorso.github.io/thermo_pw/">main page</a> as 
 a <code>.tar.gz</code> file. The current production version is 
-<code>1.2.0</code> compatible with 
+<code>1.2.1</code> compatible with 
 <code>QE-6.4.1</code>. The <code>thermo_pw</code> file should be copied
 in the main (QE) directory and unpacked with the command:</p>
 <p align="center">
-<code>tar -xzvf thermo_pw.1.2.0.tar.gz</code>
+<code>tar -xzvf thermo_pw.1.2.1.tar.gz</code>
 </p>
 <p align="justify">This command produces a directory called 
 <code>thermo_pw</code>. To compile the code you need a Fortran compiler, for 
@@ -54,7 +54,7 @@ patches given below.</p>
 
 **Patches for the git version:
 
-**Patches for thermo_pw.1.2.0**:
+**Patches for thermo_pw.1.2.0 and thermo_pw.1.2.1**:
 
 When what='elastic_costants_t' a bug in QE prevents the use of 
 use_free_energy=.TRUE. and elastic_algorithm='energy_std'.
