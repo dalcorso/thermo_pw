@@ -41,6 +41,9 @@ SUBROUTINE phqscf_tpw
   USE units_ph,         ONLY : iundnsscf
   USE control_flags,    ONLY : iverbosity
   USE write_hub
+  USE magnetic_charges, ONLY : mag_charge_mode, mag_charge
+  USE spin_orb,         ONLY : domag
+  USE control_lr,       ONLY : lgamma
 
 
   IMPLICIT NONE
@@ -68,9 +71,16 @@ SUBROUTINE phqscf_tpw
      dyn_hub_scf      = (0.d0, 0.d0)
   ENDIF
   !
+  ! Initialize mag_charge_mode in the SO-MAG case
+  !
   ! For each irreducible representation we compute the change
   ! of the wavefunctions
   !
+  IF (noncolin.AND.domag.AND.lgamma) THEN
+     mag_charge_mode(:,:) = (0.0_DP, 0.0_DP)
+     mag_charge(:,:,:) = (0.0_DP, 0.0_DP)
+  ENDIF
+
   DO irr = 1, nirr
      IF ( (comp_irr (irr)) .AND. (.NOT.done_irr (irr)) ) THEN
         npe=npert(irr)

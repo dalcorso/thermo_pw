@@ -27,7 +27,7 @@ subroutine dynmatrix_tpw(iq_)
   USE symm_base,     ONLY : s, sr, irt, nsym, invs, sname, t_rev
   USE fft_base,      ONLY : dfftp
   USE dynmat,        ONLY : dyn, w2
-  USE noncollin_module, ONLY : nspin_mag
+  USE noncollin_module, ONLY : nspin_mag, noncolin
   USE modes,         ONLY : u, nmodes, npert, nirr, num_rap_mode
   USE gamma_gamma,   ONLY : nasr, asr, equiv_atoms, has_equivalent, &
                             n_diff_sites
@@ -51,6 +51,8 @@ subroutine dynmatrix_tpw(iq_)
   USE ph_symmetry,   ONLY : manage_ph_symmetry
   USE qpoint,        ONLY : xq
   USE control_lr,    ONLY : lgamma
+  USE spin_orb,      ONLY : domag
+  USE magnetic_charges, ONLY : mag_charge
 
   implicit none
   INTEGER, INTENT(IN) :: iq_
@@ -65,6 +67,7 @@ subroutine dynmatrix_tpw(iq_)
   real(DP) :: sxq (3, 48), work(3), ft(3,48), wrk(3,48)
   ! list of vectors in the star of q
   real(DP), allocatable :: zstar(:,:,:)
+  COMPLEX(DP), ALLOCATABLE :: zeta(:,:,:)
   integer :: icart, jcart, ierr, gii(3,48), ptype(3), isym
   logical :: ldiag_loc
   !
@@ -216,6 +219,11 @@ subroutine dynmatrix_tpw(iq_)
   ELSEIF (lgamma) THEN
      IF (done_zue) CALL summarize_zue()
   ENDIF
+  !
+  !   In the noncollinear magnetic case computes the dynamical 
+  !   magnetic charges
+  ! 
+  IF (noncolin.AND.domag.and.lgamma) CALL sym_and_write_magnetic_charges()
 
   if (lraman) call write_ramtns (iudyn, ramtns)
   !
@@ -226,6 +234,34 @@ subroutine dynmatrix_tpw(iq_)
      CALL manage_ph_symmetry(dyn, w2, num_rap_mode, xq, search_sym, 1)
      IF (qplot) omega_disp(:,current_iq)=w2(:)
   END IF
+  !
+  ! Here we write on output the Born effective charges and the 
+  ! dynamical magnetic charges (if any) along the eigenvectors 
+  ! of the dynamical matrix calculated inside the routine from 
+  ! the eigendisplacements contained in dyn. The charges are not
+  ! modified.
+  !
+  IF (noncolin.AND.domag.AND.lgamma) THEN 
+     WRITE(stdout,'(/,"The dynamical magnetic charges associated &
+                      &to eigenvectors",/)')
+     CALL rotate_and_write_charges (dyn, mag_charge)
+  END IF
+
+  IF (done_zue) THEN 
+     ALLOCATE (zeta(3, nat, 3))
+     DO icart = 1, 3
+        DO na = 1, nat 
+           DO jcart = 1, 3
+              zeta (icart, na, jcart) = CMPLX(zstarue(jcart, na, icart), &
+                                                                   0.0_DP) 
+           ENDDO
+        ENDDO
+     ENDDO
+     WRITE(stdout,'(/,"The Born effective charges &
+                                    &associated to eigenvectors",/)')
+     CALL rotate_and_write_charges (dyn, zeta)
+     DEALLOCATE (zeta)
+  ENDIF
 !
 ! Here we save the dynamical matrix and the effective charges dP/du on
 ! the recover file. If a recover file with this very high recover code

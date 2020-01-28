@@ -63,8 +63,11 @@ subroutine solve_e_tpw(drhoscf)
   USE eqv,                   ONLY : dpsi, dvpsi
   USE control_lr,            ONLY : nbnd_occ, lgamma
   USE dv_of_drho_lr
-  USE fft_interfaces,        ONLY : fft_interpolate
+  USE fft_interfaces,        ONLY : fft_interpolate, fwfft
   USE ldaU,                  ONLY : lda_plus_u
+  USE magnetic_charges,      ONLY : alpha_me
+  USE cell_base,             ONLY : bg
+  USE gvect,                 ONLY : gg
 
   implicit none
 
@@ -81,6 +84,7 @@ subroutine solve_e_tpw(drhoscf)
   complex(DP) , pointer ::      &
                    dvscfins (:,:,:)    ! change of the scf potential (smooth)
   complex(DP) :: drhoscf (dffts%nnr, nspin_mag, 3)
+  complex(DP), allocatable:: drhoscf_aux(:,:,:), alpha_work(:,:)
   complex(DP), pointer ::  drhoscfh (:,:,:) ! change of the scf potential (output)
   complex(DP), allocatable, target :: &
                    dvscfout (:,:,:) ! change of the scf potential (output)
@@ -102,6 +106,7 @@ subroutine solve_e_tpw(drhoscf)
   ! counters
   integer :: ltaver, lintercall, incr, jpol, v_siz
   integer :: ikk, ikq
+  integer :: icart, jcart
 
   real(DP) :: tcpu, get_clock
   ! timing variables
@@ -112,6 +117,12 @@ subroutine solve_e_tpw(drhoscf)
   !
   !  This routine is task group aware
   !
+  IF (noncolin.AND.domag) then 
+     allocate (drhoscf_aux(dfftp%nnr, nspin_mag, 3))
+     allocate (alpha_work(3,3))
+     drhoscf_aux = (0.0_DP, 0.0_DP)
+     alpha_work = (0.0_DP, 0.0_DP)
+  END IF
   allocate (dvscfin( dfftp%nnr, nspin_mag, 3))
   if (doublegrid) then
      allocate (dvscfins(dffts%nnr, nspin_mag, 3))
@@ -458,6 +469,35 @@ IF (convt) THEN
       CALL zstar_eu_us_tpw (dvscfin)
    ENDIF
 ENDIF
+!
+!   In the noncolinear magnetic case, we compute the integral of the response 
+!   of the magnetization to the electric field, which allows 
+!   to compute the frozen-ion spin component of the magnetoelectric tensor.
+!
+IF (noncolin.AND.domag) then 
+   alpha_me(:,:) = (0.0_DP, 0.0_DP)
+   DO ipol = 1, 3
+      drhoscf_aux(:,:,:) = drhoscfh(:,:,:)
+      DO is=2,nspin_mag
+         CALL fwfft ('Rho', drhoscf_aux(:,is,ipol), dfftp)
+         IF (ABS(gg(1)).LT.1.d-8) THEN 
+            alpha_me(ipol,is-1)= drhoscf_aux(dfftp%nl(1),is,ipol)
+         ENDIF
+      ENDDO
+   ENDDO
+   CALL mp_sum(alpha_me,intra_bgrp_comm)
+ENDIF
+!
+!   and we bring to cartesian coordinates the components 
+!   of the magnetoelectric tensor.
+!
+DO icart=1,3
+   alpha_work(:,icart) = alpha_me(1,icart) * bg(:,1) + &
+                         alpha_me(2,icart) * bg(:,2) + &
+                         alpha_me(3,icart) * bg(:,3)
+ENDDO
+
+alpha_me = alpha_work
 
   deallocate (h_diag)
   deallocate (aux1)
@@ -478,6 +518,8 @@ ENDIF
      DEALLOCATE( tg_psic)
      !
   ENDIF
+  IF (allocated(drhoscf_aux)) deallocate(drhoscf_aux)
+  IF (allocated(alpha_work)) deallocate(alpha_work)
 
   call stop_clock ('solve_e')
   return

@@ -47,6 +47,9 @@ SUBROUTINE phescf_tpw()
   USE ldaU,            ONLY : lda_plus_u, Hubbard_lmax
   USE ldaU_ph,         ONLY : dnsscf, dnsscf_all_modes
   USE control_flags,   ONLY : iverbosity
+  USE magnetic_charges, ONLY : alpha_me
+  USE spin_orb,         ONLY : domag
+  USE control_lr,       ONLY : lgamma
   USE write_hub
 
   !
@@ -219,6 +222,10 @@ SUBROUTINE phescf_tpw()
            ELSEIF (done_zeu) THEN
               CALL summarize_zeu()
            ENDIF
+           ! 
+           ! ... write magnetoelectric tensor 
+           !
+           IF (noncolin.AND.domag.AND.lgamma) CALL summarize_alpha()
            !
            IF ( fildrho /= ' ' ) CALL punch_plot_e()
            !

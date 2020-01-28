@@ -107,6 +107,7 @@ psh_lanczos_step.o \
 q_points.o \
 q2qstar_ph.o \
 rotate_and_add_dyn.o \
+rotate_charges.o \
 run_nscf.o \
 read_dyn_from_file.o \
 read_lanczos_chain.o \
@@ -137,6 +138,8 @@ solve_linear_system.o \
 star_q.o \
 stres_gradcorr.o \
 stress.o \
+summarize_alpha.o \
+sym_and_write_magnetic_charges.o \
 symdyn_munu.o \
 symdynph_gq.o \
 symmetrize_drho.o \

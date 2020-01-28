@@ -97,6 +97,17 @@ MODULE zstar_add
 
 END MODULE zstar_add
 
+MODULE magnetic_charges
+  USE kinds,  ONLY : DP
+
+  SAVE
+  COMPLEX (DP), ALLOCATABLE ::          &
+                mag_charge_mode(:,:),   &     ! (3*nat, 3)
+                mag_charge(:,:,:),      &     ! (3, nat, 3)
+                alpha_me(:,:)                 ! (3, 3)
+
+END MODULE magnetic_charges
+
 MODULE band_computation
   USE kinds,      ONLY : DP
   USE parameters, ONLY : npk

@@ -27,7 +27,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   USE io_files,             ONLY : prefix, diropn
   USE check_stop,           ONLY : check_stop_now
   USE wavefunctions,        ONLY : evc
-  USE cell_base,            ONLY : at
+  USE cell_base,            ONLY : at, omega
   USE klist,                ONLY : ltetra, lgauss, xk, wk, ngk, igk_k
   USE gvecs,                ONLY : doublegrid
   USE fft_base,             ONLY : dfftp, dffts
@@ -72,8 +72,10 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   USE control_lr,   ONLY : lgamma
   USE nc_mag_aux,   ONLY : int1_nc_save, deeq_nc_save, int3_save
   USE dv_of_drho_lr, ONLY : dv_of_drho
-  USE fft_interfaces, ONLY : fft_interpolate
+  USE fft_interfaces, ONLY : fft_interpolate, fwfft
   USE ldaU,         ONLY : lda_plus_u
+  USE magnetic_charges,     ONLY : mag_charge_mode
+  USE gvect,                ONLY : gg
 
   implicit none
 
@@ -100,7 +102,8 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   ! change of the scf potential
   complex(DP), pointer :: dvscfins (:,:,:)
   ! change of the scf potential (smooth part only)
-  complex(DP), allocatable :: drhoscfh (:,:,:), dvscfout (:,:,:)
+  complex(DP), allocatable :: drhoscfh (:,:,:), dvscfout (:,:,:), & 
+       drhoscf_aux(:,:,:)
   ! change of rho / scf potential (output)
   ! change of scf potential (output)
   complex(DP), allocatable :: ldos (:,:), ldoss (:,:), mixin(:),  &
@@ -150,8 +153,10 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
 !  This routine is task group aware
 !
   nsolv=1
-  IF (noncolin.AND.domag) nsolv=2
-
+  IF (noncolin.AND.domag) THEN 
+     nsolv=2
+     ALLOCATE (drhoscf_aux(dfftp%nnr, nspin_mag, npe))
+  ENDIF
 
   allocate (dvscfin ( dfftp%nnr , nspin_mag , npe))
   if (doublegrid) then
@@ -541,6 +546,23 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   enddo
 155 iter0=0
   !
+  !    Here we compute the magnetic charge associated with the
+  !    modes of the irreducible representation.
+  !
+  IF (noncolin.AND.domag.AND.lgamma) THEN 
+     DO ipert = 1, npe
+        drhoscf_aux(:,:,:) = drhoscfh(:,:,:)
+        DO is=2,nspin_mag
+           CALL fwfft ('Rho', drhoscf_aux(:,is,ipert), dfftp)
+           IF (ABS(gg(1)).LT.1.d-8) THEN 
+              mag_charge_mode(imode0+ipert,is-1)= &
+                              omega*drhoscf_aux(dfftp%nl(1),is,ipert)
+           END IF
+        END DO
+        CALL mp_sum(mag_charge_mode(imode0+ipert,1:3),intra_bgrp_comm)
+     ENDDO
+  END IF
+  !
   !    A part of the dynamical matrix requires the integral of
   !    the self consistent change of the potential and the variation of
   !    the charge due to the displacement of the atoms.
@@ -580,6 +602,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
      DEALLOCATE (int3_save)
      DEALLOCATE (dbecsum_aux)
   ENDIF
+  IF (allocated(drhoscf_aux)) deallocate(drhoscf_aux)
 
   CALL stop_clock ('solve_linter')
 END SUBROUTINE solve_linter_tpw
