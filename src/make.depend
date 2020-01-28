@@ -180,7 +180,9 @@ dynmatrix_tpw.o : ../../PHonon/PH/io_dyn_mat.o
 dynmatrix_tpw.o : ../../PHonon/PH/ph_restart.o
 dynmatrix_tpw.o : ../../PHonon/PH/phcom.o
 dynmatrix_tpw.o : ../../PHonon/PH/ramanm.o
+dynmatrix_tpw.o : ../../PW/src/pwcom.o
 dynmatrix_tpw.o : ../../PW/src/symm_base.o
+dynmatrix_tpw.o : ../../thermo_pw/qe/control_qe.o
 dynmatrix_tpw.o : manage_ph_symmetry.o
 dynmatrix_tpw.o : thermo_mod.o
 elastic_constants_t.o : ../../Modules/cell_base.o

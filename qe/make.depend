@@ -114,6 +114,7 @@ allocate_phq.o : ../../Modules/ions_base.o
 allocate_phq.o : ../../Modules/kind.o
 allocate_phq.o : ../../Modules/noncol.o
 allocate_phq.o : ../../Modules/uspp.o
+allocate_phq.o : ../../PHonon/PH/phcom.o
 allocate_phq.o : ../../PW/src/pwcom.o
 allocate_phq.o : control_qe.o
 apply_ac.o : ../../LR_Modules/lrcom.o
@@ -1084,6 +1085,9 @@ rotate_all_psi_r.o : ../../PW/src/pwcom.o
 rotate_and_add_dyn.o : ../../Modules/constants.o
 rotate_and_add_dyn.o : ../../Modules/kind.o
 rotate_and_add_dyn.o : ../../PW/src/symm_base.o
+rotate_charges.o : ../../Modules/io_global.o
+rotate_charges.o : ../../Modules/ions_base.o
+rotate_charges.o : ../../Modules/kind.o
 run_nscf.o : ../../FFTXlib/fft_types.o
 run_nscf.o : ../../LR_Modules/lrcom.o
 run_nscf.o : ../../Modules/cell_base.o
@@ -1244,6 +1248,7 @@ solve_e.o : ../../FFTXlib/fft_helper_subroutines.o
 solve_e.o : ../../FFTXlib/fft_interfaces.o
 solve_e.o : ../../LR_Modules/dv_of_drho.o
 solve_e.o : ../../LR_Modules/lrcom.o
+solve_e.o : ../../Modules/cell_base.o
 solve_e.o : ../../Modules/check_stop.o
 solve_e.o : ../../Modules/fft_base.o
 solve_e.o : ../../Modules/io_files.o
@@ -1266,6 +1271,7 @@ solve_e.o : ../../PW/src/paw_symmetry.o
 solve_e.o : ../../PW/src/pwcom.o
 solve_e.o : ../../PW/src/scf_mod.o
 solve_e.o : ../../UtilXlib/mp.o
+solve_e.o : control_qe.o
 solve_e_fpolc.o : ../../FFTXlib/fft_helper_subroutines.o
 solve_e_fpolc.o : ../../FFTXlib/fft_interfaces.o
 solve_e_fpolc.o : ../../LR_Modules/dv_of_drho.o
@@ -1434,6 +1440,16 @@ stress.o : ../../PW/src/symme.o
 stress.o : ../../PW/src/xdm_dispersion.o
 stress.o : ../../dft-d3/api.o
 stress.o : ../../dft-d3/dftd3_qe.o
+summarize_alpha.o : ../../Modules/constants.o
+summarize_alpha.o : ../../Modules/io_global.o
+summarize_alpha.o : ../../Modules/kind.o
+summarize_alpha.o : control_qe.o
+sym_and_write_magnetic_charges.o : ../../Modules/constants.o
+sym_and_write_magnetic_charges.o : ../../Modules/io_global.o
+sym_and_write_magnetic_charges.o : ../../Modules/ions_base.o
+sym_and_write_magnetic_charges.o : ../../Modules/kind.o
+sym_and_write_magnetic_charges.o : ../../PHonon/PH/phcom.o
+sym_and_write_magnetic_charges.o : control_qe.o
 symdyn_munu.o : ../../Modules/kind.o
 symdynph_gq.o : ../../Modules/constants.o
 symdynph_gq.o : ../../Modules/kind.o
