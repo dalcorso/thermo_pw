@@ -54,7 +54,7 @@ patches given below.</p>
 
 **Patches for the git version:
 
-**Patches for thermo_pw.1.2.0 and thermo_pw.1.2.1**:
+**Patches for thermo_pw.1.2.0**:
 
 When what='elastic_costants_t' a bug in QE prevents the use of 
 use_free_energy=.TRUE. and elastic_algorithm='energy_std'.
@@ -237,7 +237,13 @@ I am using <code>thermo_pw.0.3.0</code>.
 Most probably you have not applied the patch described above. Update to a
 newer version.
 <br><br>
-9. I cannot run the examples. I have problems using images. What 
+9. After unpacking the tar file there is no <code>thermo_pw</code> directory.
+<br>
+The directory obtained unpacking the source files obtained from the github 
+releases web page is called <code>thermo_pw-#version number</code>. Just 
+change the name of this directory to <code>thermo_pw</code>.
+<br><br>
+10. I cannot run the examples. I have problems using images. What 
 should I do?
 <br>
 If you want to run the examples without images 
@@ -245,17 +251,17 @@ edit the file <code>environment_variables</code> in the main <code>QE</code>
 directory. Search the two variables <code>PARA_IMAGE_PREFIX</code> and
 <code>PARA_IMAGE_POSTFIX</code> and set <code>-ni 1</code>. 
 <br><br>
-10. I have not a parallel computer. I do not know what <code>mpi</code> is. 
+11. I have not a parallel computer. I do not know what <code>mpi</code> is. 
 Can I run <code>thermo_pw</code>?
 <br>
 Only <code>thermo_pw.0.5.0</code> or later versions can be compiled in serial. All previous versions must be compiled together with <code>mpi</code>.
 <br><br>
-11. An ionic relaxation converges with <code>pw.x</code> but not with <code>thermo_pw.x</code> (version <code>0.4.0</code>).
+12. An ionic relaxation converges with <code>pw.x</code> but not with <code>thermo_pw.x</code> (version <code>0.4.0</code>).
 <br>
 This is a bug of version <code>0.4.0</code>. Please  
 update to a newer version.
 <br><br>
-12. The plot of the phonon dispersions is very strange with several disjoint
+13. The plot of the phonon dispersions is very strange with several disjoint
 parts. Moreover the modes are not classified using symmetry. Why?
 <br>
 The mode symmetry analysis requires dynamical matrices in <code>.xml</code> 
@@ -264,7 +270,7 @@ variable in the <code>ph.x</code> input.
 Symmetry matrices are needed also to recognize symmetry equivalent point
 on the Brillouin zone.
 <br><br>
-13. The plot of the Gruneisen parameters has strange crossings in some points.
+14. The plot of the Gruneisen parameters has strange crossings in some points.
 Why?
 <br>
 In some cases the plot of the Gruneisen parameters needs more accuracy 
@@ -274,7 +280,7 @@ parameter <code>5.D-2</code> at line 148 of
 <code>PHonon/PH/find_mode_sym.f90</code> to <code>1.D-2</code> or 
 less and recompile <code>thermo_pw</code>.
 <br><br>
-14. Thermo_pw documentation does not compile and stops with an error 
+15. Thermo_pw documentation does not compile and stops with an error 
 saying that
 <code>html.sty</code> is missing or <code>latex2html</code> is missing.
 <br>
@@ -286,12 +292,12 @@ can install <code>latex2html</code>. Even if you do not solve this problem,
 <code>thermo_pw.x</code> will be available in the <code>bin</code> directory 
 of QE. Only the documentation will be missing. 
 <br><br>
-15. The plot of the projected band structure has some problems. Some gaps
+16. The plot of the projected band structure has some problems. Some gaps
 have the same color of the projected band structure. 
 <br>
 This is a problem of old versions of gnuplot. Update to gnuplot 5.0 or higher.
 <br><br>
-16. The phonon dispersion plot seems strange, some branches are missing.
+17. The phonon dispersion plot seems strange, some branches are missing.
 <br>
 Please check that you used enough digits for the atomic positions. A typical
 problem appears when you write 1/3 and 2/3 in single precision. The 
@@ -300,7 +306,7 @@ actually present in the final modes and the routine that identifies the
 mode symmetry gets 
 confused.
 <br><br>
-17. The code fails to identify the space group and stops with an error
+18. The code fails to identify the space group and stops with an error
 ''point group orientation uncorrect''.
 <br>
 Most probably you are simulating a noncollinear magnetic system. Magnetic
@@ -309,7 +315,7 @@ up to 0.9.0. Please make the same changes as commit a68e6cb of 18 January 2018.
 If you find this error, you are using ibrav/=0, and your system is collinear,
 please send me your input.
 <br><br>
-18. <code>what='scf_disp'</code> and partial phonon computations with
+19. <code>what='scf_disp'</code> and partial phonon computations with
 <code>start_q</code>, <code>last_q</code> or <code>start_irr</code> 
 <code>last_irr</code> gives strange error messages.
 <br>
@@ -318,14 +324,14 @@ files in the <code>dynamical_matrices</code> directory. Use
 <code>what='scf_ph'</code> until you collect all the dynamical matrices
 and do a final run with <code>what='scf_disp'</code>.
 <br><br>
-19. I am computing a phonon dispersion but some <B>q</B> points are not 
+20. I am computing a phonon dispersion but some <B>q</B> points are not 
 computed.
 <br>
 Most probably you have not cleaned the outdir directory. Note that the 
 <code>thermo_pw</code> always tries to use the content of the 
 <code>outdir</code> directory if present.
 <br><br>
-20. Is it possible to increase the temperature range? 
+21. Is it possible to increase the temperature range? 
 <br>
 Yes, you have to remove the <code>therm_files</code> directory
 while keeping the <code>dynamical_matrices</code> and the 
@@ -333,7 +339,7 @@ while keeping the <code>dynamical_matrices</code> and the
 directory, use <code>after_disp=.TRUE.</code> and set <code>fildyn</code> 
 with the name of the dynamical matrices.
 <br><br>
-21. Is it possible to increase the number of points used to compute the
+22. Is it possible to increase the number of points used to compute the
 phonon dos?
 <br>
 Yes, you have to remove both the <code>phdisp_files</code> and the
@@ -341,7 +347,7 @@ Yes, you have to remove both the <code>phdisp_files</code> and the
 while keeping the <code>dynamical_matrices</code> and the 
 <code>restart</code> directories. 
 <br><br>
-22. I made a calculation with <code>with_eigen=.FALSE.</code>. Is it possible
+23. I made a calculation with <code>with_eigen=.FALSE.</code>. Is it possible
 to restart with <code>with_eigen=.TRUE.</code>?
 <br>
 Yes, but you have to remove both the <code>phdisp_files</code> and the 

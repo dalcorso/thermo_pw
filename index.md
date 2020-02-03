@@ -14,7 +14,6 @@ can be found <a href="https://people.sissa.it/dalcorso/thermo_pw/user_guide/inde
 <p align="justify">The following papers describe new
 features implemented in <code>thermo_pw</code>:</p>
 
-
 9. A. Urru and A. Dal Corso,
 Density functional perturbation theory for lattice dynamics with fully
 relativistic ultrasoft pseudopotentials: The magnetic case,
@@ -103,6 +102,10 @@ If you are new to QE, please ask to the
 in the examples directories.</p>
 
 **Thermo_pw downloads**:
+<br>
+<br>
+- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.2.1.tar.gz">
+thermo_pw.1.2.1.tar.gz</a>  (released 23-1-2020) compatible with QE-6.5.
 <br>
 <br>
 - <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.2.0.tar.gz">
