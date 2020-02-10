@@ -486,18 +486,18 @@ IF (noncolin.AND.domag) then
       ENDDO
    ENDDO
    CALL mp_sum(alpha_me,intra_bgrp_comm)
-ENDIF
 !
 !   and we bring to cartesian coordinates the components 
 !   of the magnetoelectric tensor.
 !
-DO icart=1,3
-   alpha_work(:,icart) = alpha_me(1,icart) * bg(:,1) + &
-                         alpha_me(2,icart) * bg(:,2) + &
-                         alpha_me(3,icart) * bg(:,3)
-ENDDO
+   DO icart=1,3
+      alpha_work(:,icart) = alpha_me(1,icart) * bg(:,1) + &
+                            alpha_me(2,icart) * bg(:,2) + &
+                            alpha_me(3,icart) * bg(:,3)
+   ENDDO
 
-alpha_me = alpha_work
+   alpha_me = alpha_work
+ENDIF
 
   deallocate (h_diag)
   deallocate (aux1)
