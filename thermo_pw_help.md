@@ -56,6 +56,9 @@ patches given below.</p>
 
 **Patches for thermo_pw.1.2.0**:
 
+The phonon dispersions have a wrong scale when the dynamical matrices 
+are written in the old format. Change as described in: 
+<a href="https://github.com/dalcorso/thermo_pw/commit/3bbabc9b903a1255012f6cc0927cac705645f05b">commit 3bbabc9</a>.
 When what='elastic_costants_t' a bug in QE prevents the use of 
 use_free_energy=.TRUE. and elastic_algorithm='energy_std'.
 Add the instruction:
