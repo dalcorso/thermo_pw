@@ -11,6 +11,7 @@ SUBROUTINE read_dyn_from_file_tpw( nqs, xq, epsil, lrigid, &
   !----------------------------------------------------------------------------
   !
   USE kinds, ONLY : DP
+  USE constants, ONLY : amu_ry
   USE dynamicalq, ONLY: phiq, tau, ityp, zeu
   USE io_global, ONLY : ionode, ionode_id, stdout
   USE mp,        ONLY : mp_bcast
@@ -112,7 +113,7 @@ SUBROUTINE read_dyn_from_file_tpw( nqs, xq, epsil, lrigid, &
         CALL mp_bcast(amass1, ionode_id, intra_image_comm)
         IF (i.NE.nt) CALL errore('read_dyn_from_file','wrong data read',nt)
         IF (atm1.NE.atm(nt)) CALL errore('read_dyn_from_file','wrong atm',nt)
-        IF (abs(amass1-amass(nt)) > eps8 ) &
+        IF (abs(amass1/amu_ry-amass(nt)) > eps8 ) &
              CALL errore('read_dyn_from_file','wrong amass',nt)
      END DO
      DO na=1,nat

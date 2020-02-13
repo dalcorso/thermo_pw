@@ -49,6 +49,7 @@ SUBROUTINE q2r_sub(fildyn)
   USE mp,         ONLY : mp_bcast
   USE dynamicalq, ONLY : phiq, tau, ityp, zeu
   USE ifc,        ONLY : zasr
+  USE constants,  ONLY : amu_ry
   USE fft_scalar, ONLY : cfft3d
   USE io_global,  ONLY : stdout, meta_ionode, meta_ionode_id
   USE mp_images,  ONLY : my_image_id
@@ -229,6 +230,7 @@ SUBROUTINE q2r_sub(fildyn)
         CALL recips(at(1,1),at(1,2),at(1,3),bg(1,1),bg(1,2),bg(1,3))
         IF (lrigid .AND. (zasr.NE.'no')) &
            CALL set_zasr ( zasr, nr1,nr2,nr3, nat, ibrav, tau, zeu)
+        amass=amass/amu_ry    ! the mass in this code is in amu
      END IF
      IF (lrigid.AND..NOT.lrigid1) CALL errore('q2r_sub', &
            & 'file with dyn.mat. at q=0 should be first of the list',ifile)
@@ -310,7 +312,7 @@ SUBROUTINE q2r_sub(fildyn)
         WRITE(iunfrc,'(i3,i5,i3,6f11.7)') ntyp,nat,ibrav,celldm
         IF (ibrav==0) WRITE (2,'(2x,3f15.9)') ((at(i,j),i=1,3),j=1,3)
         DO nt = 1,ntyp
-           WRITE(iunfrc,*) nt," '",atm(nt),"' ",amass(nt)
+           WRITE(iunfrc,*) nt," '",atm(nt),"' ",amass(nt)*amu_ry
         END DO
         DO na=1,nat
            WRITE(iunfrc,'(2i5,3f18.10)') na,ityp(na),(tau(j,na),j=1,3)
