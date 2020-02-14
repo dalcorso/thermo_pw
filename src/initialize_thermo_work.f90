@@ -387,14 +387,9 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            CALL set_elastic_cons_work(1,nwork)
 
            ALLOCATE(energy_geo(nwork))
-           ALLOCATE(omega_geo(nwork))
            ALLOCATE(el_con_omega_geo(1))
            energy_geo=0.0_DP
            IF (elalgen) THEN
-              DO igeom = 1, nwork
-                 omega_geo(igeom)=compute_omega_geo(ibrav_geo(igeom),&
-                                                    celldm_geo(1,igeom))
-              ENDDO
               omega0= compute_omega_geo(ibrav_save, celldm0)
               el_con_omega_geo(1)=omega0
            ENDIF

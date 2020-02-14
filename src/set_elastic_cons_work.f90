@@ -40,6 +40,7 @@ INTEGER, INTENT(OUT) :: nwork
 REAL(DP) :: epsilon_min, epsil
 INTEGER  :: igeo, iwork, igeom, base_ind, istep, nstep
 CHARACTER(LEN=2) :: strain_list(21)
+LOGICAL :: flag
 
 nstep=0
 SELECT CASE (laue) 
@@ -297,6 +298,7 @@ IF (ngeom==1) THEN
    el_con_ibrav_geo(1)=ibrav_save
    el_con_celldm_geo(:,1)=celldm0(:)
 ENDIF
+flag=(elastic_algorithm=='standard'.OR.elastic_algorithm=='energy_std')
 base_ind=0
 epsilon_min= - delta_epsilon * (ngeo_strain - 1 ) / 2.0_DP - epsilon_0
 iwork=0
@@ -313,7 +315,7 @@ DO igeom=1, ngeom
          CALL set_strain_adv(strain_list(istep), el_con_ibrav_geo(igeom),  &
               el_con_celldm_geo(1,igeom), epsil, &
               epsilon_voigt(1,base_ind+igeo), ibrav_geo(base_ind+igeo), &
-              celldm_geo(1,base_ind+igeo), rot_mat(1,1,base_ind+igeo) )
+              celldm_geo(1,base_ind+igeo), rot_mat(1,1,base_ind+igeo), flag )
       ENDDO
       base_ind = base_ind + ngeo_strain
    ENDDO

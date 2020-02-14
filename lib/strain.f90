@@ -207,7 +207,7 @@ RETURN
 END SUBROUTINE set_strain
 
 SUBROUTINE set_strain_adv(strain_code, ibrav, celldm, epsil, epsilon_voigt, &
-                     ibrav_strain, celldm_strain, rot )
+                     ibrav_strain, celldm_strain, rot, flag )
 !
 !  This routine sets for every Bravais lattice the strain and
 !  the new Bravais lattice and celldm of the strained system.
@@ -223,6 +223,7 @@ SUBROUTINE set_strain_adv(strain_code, ibrav, celldm, epsil, epsilon_voigt, &
 !                           H I  CG CH CI DG DH DI
 !                           EG EH EI GH IH IG
 !
+!  If flag is .TRUE. sets only epsilon_voigt
 
 USE constants,        ONLY : pi
 USE rotate,           ONLY : set_rot_xyz
@@ -230,6 +231,7 @@ IMPLICIT NONE
 INTEGER, INTENT(IN)  :: ibrav
 REAL(DP), INTENT(IN) :: celldm(6), epsil
 CHARACTER(LEN=2),INTENT(IN) :: strain_code
+LOGICAL, INTENT(IN) :: flag
 
 INTEGER, INTENT(OUT) :: ibrav_strain
 REAL(DP), INTENT(INOUT) :: celldm_strain(6), epsilon_voigt(6), rot(3,3)
@@ -260,7 +262,7 @@ rotcr(3,3)=1.0_DP/sqrt3
 !  set the epsilon_voigt
 !
 CALL set_strain(strain_code,epsil,epsilon_voigt)
-IF (ibrav==14) RETURN
+IF (ibrav==14 .OR. flag) RETURN
 
 IF (ibrav==1) THEN
 !

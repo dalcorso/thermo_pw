@@ -11,8 +11,7 @@ USE initial_conf,      ONLY : ibrav_save
 USE lattices,       ONLY : compress_celldm, crystal_parameters
 USE thermo_mod,        ONLY : energy_geo, tot_ngeo
 USE control_elastic_constants, ONLY : ngeo_strain, elcpvar, ngeom, &
-                              work_base, el_con_omega_geo, el_con_celldm_geo, &
-                              epsil_geo
+                              work_base, el_con_celldm_geo, epsil_geo
 USE thermodynamics,    ONLY : ph_free_ener
 USE temperature,       ONLY : ntemp
 USE control_quartic_energy, ONLY : lsolve, poly_degree_elc
