@@ -45,7 +45,7 @@ SUBROUTINE plot_multi_energy()
   CHARACTER(LEN=12) :: color(8)
   CHARACTER(LEN=50) :: xlabel, ylabel
   REAL(DP) :: emax, emin, deltae, ene_levels_int(ncontours)
-  REAL(DP) :: xmin, xmax, ymin, ymax
+  REAL(DP) :: xmin, xmax, ymin, ymax, x2
   INTEGER :: nx, ny, icont, ifile, tot_n, iwork
   INTEGER :: compute_nwork
   INTEGER :: ierr, system
@@ -186,10 +186,12 @@ SUBROUTINE plot_multi_energy()
                                                   ylabel, tablefile, flext)
 
         IF (nvar==2) THEN
+           x2=x_pos_min(2)
+           IF (ibrav_save==5) x2=COS(x_pos_min(2))
            CALL gnuplot_line_v(hessian_v(1,1), hessian_v(2,1), x_pos_min(1),  &
-                                       x_pos_min(2),.FALSE.,'color_blue')
+                                       x2,.FALSE.,'color_blue')
            CALL gnuplot_line_v(hessian_v(1,2), hessian_v(2,2), x_pos_min(1),  &
-                                       x_pos_min(2),.FALSE.,'color_blue')
+                                       x2,.FALSE.,'color_blue')
         ENDIF
      CASE (8,9,91,10,11) 
         IF (ncontours==0) RETURN
