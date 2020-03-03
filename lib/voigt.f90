@@ -19,7 +19,10 @@ MODULE voigt
 
   PUBLIC            &
        voigt_index, & ! given two indeces of a symmetric tensor gives the voigt
-                      ! index and viceversa
+                      ! index 
+       voigt_extract_indices, & ! given the voigt index gives the two
+                      ! indices of a symmetric tensor. Only one couple 
+                      ! is given.
        to_voigt2,   & ! transform a tensor of rank 2 to the voigt form
                       ! and viceversa
        to_voigt3,   & ! transform a tensor of rank 3 to the voigt form
@@ -29,33 +32,43 @@ MODULE voigt
 
 CONTAINS
 
-SUBROUTINE voigt_index(m, n, mn, flag)
+SUBROUTINE voigt_index(m, n, mn)
 !
-!  If flag is .true., this routine receives two indeces 1<= m, n <=3 and
-!  gives the voigt index 1<=mn<=6 corresponding to these two indices,
-!  If flag is .false. it receive mn and gives m and n, m<=n
+!  This routine receives two indeces 1<= m, n <=3 and
+!  gives the voigt index 1<=mn<=6 corresponding to these two indices.
 !
 IMPLICIT NONE
-INTEGER, INTENT(INOUT) :: m, n, mn
-LOGICAL, INTENT(IN) :: flag 
-INTEGER :: voigt(3,3), mind(6), nind(6)
+INTEGER, INTENT(IN) :: m, n
+INTEGER, INTENT(OUT) :: mn
+INTEGER :: voigt(3,3)
 DATA voigt / 1, 6, 5, 6, 2, 4, 5, 4, 3 / 
-DATA mind  / 1, 2, 3, 2, 1, 1 /
-DATA nind  / 1, 2, 3, 3, 3, 2 /
 
-IF (flag) THEN
-   IF (m<1.OR.m>3.OR.n<1.OR.n>3) &
-      CALL errore('voigt_index','m or n out or range',1)
-   mn=voigt(m,n) 
-ELSE
-   IF (mn<1.OR.mn>6) &
-      CALL errore('voigt_index','mn out of range',1)
-   m=mind(mn)
-   n=nind(mn)
-ENDIF
+IF (m<1.OR.m>3.OR.n<1.OR.n>3) &
+   CALL errore('voigt_index','m or n out or range',1)
+mn=voigt(m,n) 
 
 RETURN
 END SUBROUTINE voigt_index
+
+SUBROUTINE voigt_extract_indices(m, n, mn)
+!
+!  This routine receives the voigt index 1<=mn<=6 and gives
+!  the two indices m, n, that correspond to it. It provide the couple
+!  with n>=m.
+!
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: mn
+INTEGER, INTENT(OUT) :: m, n
+INTEGER :: mind(6), nind(6)
+DATA mind  / 1, 2, 3, 2, 1, 1 /
+DATA nind  / 1, 2, 3, 3, 3, 2 /
+
+IF (mn<1.OR.mn>6) CALL errore('oigt_extract_indeces','mn out of range',1)
+m=mind(mn)
+n=nind(mn)
+
+RETURN
+END SUBROUTINE voigt_extract_indices
 
 SUBROUTINE to_voigt2 (av, a, flag)
 !
@@ -74,14 +87,14 @@ INTEGER :: ij, i, j
 IF (flag) THEN
    av=0.0_DP
    DO ij=1,6
-      CALL voigt_index(i,j,ij,.FALSE.)
+      CALL voigt_extract_indices(i,j,ij)
       av(ij) = a(i,j) 
    ENDDO
 ELSE
    a=0.0_DP
    DO i=1,3
       DO j=1,3
-         CALL voigt_index(i,j,ij,.TRUE.)
+         CALL voigt_index(i,j,ij)
          a(i,j) = av(ij)
       ENDDO
    ENDDO
@@ -107,14 +120,14 @@ INTEGER :: ij, i, j
 IF (flag) THEN
    av=0.0_DP
    DO ij=1,6
-      CALL voigt_index(i,j,ij,.FALSE.)
+      CALL voigt_extract_indices(i,j,ij)
       av(:,ij) = a(:,i,j) 
    ENDDO
 ELSE
    a=0.0_DP
    DO i=1,3
       DO j=1,3
-         CALL voigt_index(i,j,ij,.TRUE.)
+         CALL voigt_index(i,j,ij)
          a(:,i,j) = av(:,ij)
       ENDDO
    ENDDO
@@ -140,9 +153,9 @@ INTEGER :: ij, mn, i, j, m, n
 IF (flag) THEN
    av=0.0_DP
    DO ij=1,6
-      CALL voigt_index(i,j,ij,.FALSE.)
+      CALL voigt_extract_indices(i,j,ij)
       DO mn=1,6
-         CALL voigt_index(m,n,mn,.FALSE.)
+         CALL voigt_extract_indices(m,n,mn)
          av(ij,mn) = a(i,j,m,n) 
       ENDDO
    ENDDO
@@ -150,10 +163,10 @@ ELSE
    a=0.0_DP
    DO i=1,3
       DO j=1,3
-         CALL voigt_index(i,j,ij,.TRUE.)
+         CALL voigt_index(i,j,ij)
          DO m=1,3
             DO n=1,3
-               CALL voigt_index(m,n,mn,.TRUE.)
+               CALL voigt_index(m,n,mn)
                a(i,j,m,n) = av(ij,mn)
             ENDDO
          ENDDO

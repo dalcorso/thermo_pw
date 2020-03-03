@@ -1879,7 +1879,7 @@ END SUBROUTINE elastic_constants_from_compliances
 SUBROUTINE el_cons_ij(pq, mn, ngeo, epsil_geo, sigma_geo, m1)
 USE kinds, ONLY : DP
 USE polyfit_mod, ONLY : polyfit, write_poly
-USE voigt, ONLY : voigt_index
+USE voigt, ONLY : voigt_extract_indices
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: mn, pq, ngeo
@@ -1891,9 +1891,9 @@ REAL(DP) :: x(ngeo), y(ngeo)
 
 WRITE(stdout,'(/,20x,40("-"),/)')
 mnin=mn
-CALL voigt_index(m,n,mnin,.FALSE.)
+CALL voigt_extract_indices(m,n,mnin)
 pqin=pq
-CALL voigt_index(p,q,pqin,.FALSE.)
+CALL voigt_extract_indices(p,q,pqin)
 WRITE(stdout,'(/,5x,"Elastic constant ",2i5)') pq, mn
 WRITE(stdout,'(/,10x,"strain",7x,"stress (kbar)")') 
 DO igeo=1,ngeo
@@ -2178,7 +2178,7 @@ SUBROUTINE correct_for_stress(bmat, el_cons_, stres)
 !  bmat(6,6). It receives also the stress of the unperturbed system
 !  in stres(3,3)
 !
-USE voigt, ONLY : voigt_index
+USE voigt, ONLY : voigt_extract_indices
 IMPLICIT NONE
 
 REAL(DP), INTENT(IN) :: el_cons_(6,6)
@@ -2189,10 +2189,10 @@ INTEGER :: ij, kl, ijm, klm, i, j, k, l
 
 DO ij=1,6
    ijm=ij
-   CALL voigt_index(i,j,ijm,.FALSE.)
+   CALL voigt_extract_indices(i,j,ijm)
    DO kl=1,6
       klm=kl
-      CALL voigt_index(k,l,klm,.FALSE.)
+      CALL voigt_extract_indices(k,l,klm)
       bmat(ij,kl)= el_cons_(ij,kl) - 0.5_DP * (2.0_DP*stres(i,j)*delta(k,l) &
                     -0.5_DP*(stres(j,l)*delta(i,k) +      &
                              stres(j,k)*delta(i,l) +      &

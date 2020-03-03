@@ -394,7 +394,7 @@ END SUBROUTINE compute_piezo_tensor
 SUBROUTINE piezo_ij(ialpha, mn, ngeo, epsil_geo, polar_geo)
 USE kinds, ONLY : DP
 USE polyfit_mod, ONLY : polyfit
-USE voigt, ONLY : voigt_index
+USE voigt, ONLY : voigt_extract_indices
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: mn, ialpha, ngeo
@@ -406,7 +406,7 @@ REAL(DP) :: x(ngeo), y(ngeo)
 
 WRITE(stdout,'(/,20x,40("-"),/)')
 mnin=mn
-CALL voigt_index(m,n,mnin,.FALSE.)
+CALL voigt_extract_indices(m,n,mnin)
 WRITE(stdout,'("Piezo ",2i5)') ialpha, mn
 DO igeo=1,ngeo
    x(igeo)=epsil_geo(m,n,igeo)
