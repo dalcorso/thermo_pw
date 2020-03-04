@@ -2912,6 +2912,7 @@ INTEGER, INTENT(IN) :: ntemp
 REAL(DP), INTENT(IN) :: temp(ntemp), macro_el_t(8,ntemp)
 CHARACTER(LEN=*), INTENT(IN) :: filename
 
+REAL(DP) :: macro_el_t_aver(4,ntemp) !Reuss-Voigt-Hill variables
 INTEGER :: itemp, iu_macro_el, ios
 INTEGER :: find_free_unit
 
@@ -2930,6 +2931,13 @@ IF (meta_ionode) THEN
    WRITE(iu_macro_el,'("#",2x,"T  ", 20x, "b0v ", 13x, "e0v ", 13x, "g0v ",  &
                & 13x, "  nuv", 13x, "   b0r", 13x, "e0r ", 13x, "g0r ", 13x, "nur ")')
    DO itemp=2,ntemp-1
+      
+      macro_el_t_aver(1,itemp) = (macro_el_t(1,itemp)+macro_el_t(5,itemp))*0.5_DP
+      macro_el_t_aver(2,itemp) = (macro_el_t(2,itemp)+macro_el_t(6,itemp))*0.5_DP
+      macro_el_t_aver(3,itemp) = (macro_el_t(3,itemp)+macro_el_t(7,itemp))*0.5_DP
+      macro_el_t_aver(4,itemp) = (macro_el_t(2,itemp)+macro_el_t(6,itemp))/ &
+                          (2.d0*(macro_el_t(3,itemp)+macro_el_t(7,itemp)))-1.0_DP
+
       WRITE(iu_macro_el,'(e16.8, 8e18.10)') temp(itemp), macro_el_t(1,itemp), &
               macro_el_t(2,itemp), macro_el_t(3,itemp), macro_el_t(4,itemp), &
               macro_el_t(5,itemp), macro_el_t(6,itemp), macro_el_t(7,itemp), &
@@ -2937,6 +2945,33 @@ IF (meta_ionode) THEN
    ENDDO
 
    CLOSE(iu_macro_el)
+
+END IF
+
+iu_macro_el=find_free_unit()
+IF (meta_ionode) &
+   OPEN(UNIT=iu_macro_el, FILE=TRIM(filename)//'_aver', FORM='formatted', &
+                                       STATUS='UNKNOWN', ERR=40, IOSTAT=ios)
+40 CALL mp_bcast(ios, meta_ionode_id, world_comm)
+   CALL errore('write_macro_el_on_file','opening macro elasticity file',&
+                                                             ABS(ios))
+
+IF (meta_ionode) THEN
+   WRITE(iu_macro_el,'("#",2x,"Macro-elasticity variable within the Voigt-Reuss-Hill &
+                                                            approximation")')
+   WRITE(iu_macro_el,'("#",2x,"b0: bulk modulus (kbar), e0: Young modulus (kbar), g0: & 
+                                  shear modulus (kbar), nu: Poisson ratio")')
+   WRITE(iu_macro_el,'("#",2x,"v: Voigt average, r: Reuss average")')
+   WRITE(iu_macro_el,'("#",2x,"T  ", 20x, "b0 ", 13x, "e0 ", 13x, "g0 ",  &
+                                                             & 13x, "  nu")')
+   DO itemp=2,ntemp-1
+
+      WRITE(iu_macro_el,'(e16.8, 8e18.10)') temp(itemp), macro_el_t_aver(1,itemp), &
+              macro_el_t_aver(2,itemp), macro_el_t_aver(3,itemp), macro_el_t_aver(4,itemp)
+   ENDDO
+
+   CLOSE(iu_macro_el)
+
 ENDIF
 
 RETURN

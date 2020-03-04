@@ -10,7 +10,8 @@ SUBROUTINE plot_macro_el_t
 !  This is a driver to plot the macro-elasticity variables (MEVs) as a function of
 !  temperature. It plots both the MEVs computed from isothermal elastic constants (ECs)
 !  and from adiabatic ECs in two separated files. It compares the results obtained
-!  from Voigt average (color red) and Reuss average (color blue). 
+!  from Voigt average (color red), Reuss average (color blue) and
+!  Voigt-Reuss-Hill average (color green).
 !  It also plots the three sound velocities (V_P, V_B, V_G) by comparing the isothermal 
 !  (red) with the adiabatic (blue) result in the single plot. 
 !  It is used by both quasi-static or quasi-harmonic temperature dependent ECs. 
@@ -64,9 +65,13 @@ USE io_global,        ONLY : ionode
 IMPLICIT NONE
 
 CHARACTER(LEN=256), INTENT(INOUT) :: filelastic, gnu_filename, filenameps
+CHARACTER(LEN=256) :: filelastic_aver
 INTEGER :: ierr, system
 
+filelastic_aver=TRIM(filelastic)//"_aver"
+
 filelastic=TRIM(filelastic)
+filelastic_aver=TRIM(filelastic_aver)
 gnu_filename=TRIM(gnu_filename)
 filenameps=TRIM(filenameps)
 
@@ -88,29 +93,43 @@ CALL gnuplot_write_file_mul_data(filelastic,1,2,'color_red',.TRUE.,  &
                                                              .FALSE.,.FALSE.)
 
 CALL gnuplot_write_file_mul_data(filelastic,1,6,'color_blue',.FALSE., &
+                                                             .FALSE.,.FALSE.)
+
+CALL gnuplot_write_file_mul_data(filelastic_aver,1,2,'color_green',.FALSE., &
                                                               .TRUE.,.FALSE.)
+
 CALL gnuplot_ylabel('Young modulus (kbar)',.FALSE.)
 
 CALL gnuplot_write_file_mul_data(filelastic,1,3,'color_red',.TRUE.,  &
                                                              .FALSE.,.FALSE.)
 
 CALL gnuplot_write_file_mul_data(filelastic,1,7,'color_blue',.FALSE., &
+                                                             .FALSE.,.FALSE.)
+
+CALL gnuplot_write_file_mul_data(filelastic_aver,1,3,'color_green',.FALSE., &
                                                               .TRUE.,.FALSE.)
+
 CALL gnuplot_ylabel('Shear modulus (kbar)',.FALSE.)
         
 CALL gnuplot_write_file_mul_data(filelastic,1,4,'color_red',.TRUE., &
                                                              .FALSE.,.FALSE.)
 
 CALL gnuplot_write_file_mul_data(filelastic,1,8,'color_blue',.FALSE., &
+                                                             .FALSE.,.FALSE.)
+
+CALL gnuplot_write_file_mul_data(filelastic_aver,1,4,'color_green',.FALSE., &
                                                               .TRUE.,.FALSE.)
+
 CALL gnuplot_ylabel('Poisson ratio',.FALSE.)
 
 CALL gnuplot_write_file_mul_data(filelastic,1,5,'color_red',.TRUE., &
                                                              .FALSE.,.FALSE.)
 
 CALL gnuplot_write_file_mul_data(filelastic,1,9,'color_blue',.FALSE., &
-                                                              .TRUE.,.FALSE.)
+                                                              .FALSE.,.FALSE.)
 
+CALL gnuplot_write_file_mul_data(filelastic_aver,1,5,'color_green',.FALSE., &
+                                                              .TRUE.,.FALSE.)
 CALL gnuplot_end()
 
 IF (lgnuplot.AND.ionode) &
