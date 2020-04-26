@@ -32,7 +32,8 @@ MODULES = $(LIBTHERMO) $(PWOBJS) $(QEMODS) $(LIBOBJS)
 all : space_groups.x crystal_point_group.x mag_point_group.x units.x \
       hex_trig.x bravais_lattices.x kovalev.x supercell.x translate.x \
       elastic.x plot_sur_states.x gener_2d_slab.x gener_3d_slab.x \
-      gener_nanowire.x debye.x rotate_tensors.x test_colors.x epsilon_tpw.x 
+      gener_nanowire.x debye.x rotate_tensors.x test_colors.x epsilon_tpw.x \
+      pdec.x
       
 
 space_groups.x : space_groups.o $(MODULES)
@@ -107,6 +108,10 @@ epsilon_tpw.x : epsilon_tpw.o $(MODULES)
 	$(LD) $(LDFLAGS) -o $@ epsilon_tpw.o $(MODULES) $(QELIBS)
 	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/epsilon_tpw.x . )
 
+pdec.x : pdec.o $(MODULES)
+	$(LD) $(LDFLAGS) -o $@ pdec.o $(MODULES) $(QELIBS)
+	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/pdec.x . )
+
 clean :
 	- /bin/rm -f *.x *.o *.a *~ *_tmp.f90 *.d *.mod *.i *.L
 	- /bin/rm -rf ../../bin/space_groups.x 
@@ -127,6 +132,7 @@ clean :
 	- /bin/rm -rf ../../bin/rotate_tensors.x 
 	- /bin/rm -rf ../../bin/test_colors.x 
 	- /bin/rm -rf ../../bin/epsilon_tpw.x 
+	- /bin/rm -rf ../../bin/pdec.x 
 
 include make.depend
 # DO NOT DELETE
