@@ -14,6 +14,13 @@ can be found <a href="https://people.sissa.it/dalcorso/thermo_pw/user_guide/inde
 <p align="justify">The following papers describe new
 features implemented in <code>thermo_pw</code>:</p>
 
+10. C. Malica and A. Dal Corso,
+Quasi-harmonic temperature dependent elastic constants: Applications 
+to Silicon, Aluminum, and Silver,
+<a href="https://iopscience.iop.org/article/10.1088/1361-648X/ab8426/meta">
+J. of Phys.: Condens. Matter <B>32</B>, 315902 (2020).</a>
+<br>
+<br>
 9. A. Urru and A. Dal Corso,
 Density functional perturbation theory for lattice dynamics with fully
 relativistic ultrasoft pseudopotentials: The magnetic case,
