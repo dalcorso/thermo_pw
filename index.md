@@ -77,6 +77,14 @@ Clean Ir(111) and Pt(111) electronic surface states: a first-principle fully rel
 
 <p align="justify">The following papers contain some calculations made by using <code>thermo_pw</code>:</p>
 
+2. C. Malica and A. Dal Corso,
+Temperature dependent elastic constants and thermodynamic properties 
+of BAs: an ab-initio investigation, 
+<a href="https://aip.scitation.org/doi/10.1063/5.0011111">
+Jour. of Applied Phys. <B>127</B>, 245103 (2020).</a>
+<br>
+<br>
+
 1. S. Poncé, D. Jena, and F. Giustino,
 Hole mobility of strained GaN from first principles,
 <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.100.085204">
