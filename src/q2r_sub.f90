@@ -204,7 +204,10 @@ SUBROUTINE q2r_sub(fildyn)
         ENDIF
         CALL mp_bcast(phiq, meta_ionode_id, world_comm)
         CALL mp_bcast(q, meta_ionode_id, world_comm)
-        IF (ifile==1) ALLOCATE (m_loc(3,nat))
+        IF (ifile==1) THEN
+           ALLOCATE (m_loc(3,nat))
+           amass=amass/amu_ry   
+        ENDIF
         IF (meta_ionode) CLOSE(unit=iundyn)
      ENDIF
      IF (ifile==1) THEN
@@ -230,7 +233,6 @@ SUBROUTINE q2r_sub(fildyn)
         CALL recips(at(1,1),at(1,2),at(1,3),bg(1,1),bg(1,2),bg(1,3))
         IF (lrigid .AND. (zasr.NE.'no')) &
            CALL set_zasr ( zasr, nr1,nr2,nr3, nat, ibrav, tau, zeu)
-        amass=amass/amu_ry    ! the mass in this code is in amu
      END IF
      IF (lrigid.AND..NOT.lrigid1) CALL errore('q2r_sub', &
            & 'file with dyn.mat. at q=0 should be first of the list',ifile)
