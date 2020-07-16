@@ -203,6 +203,7 @@ SUBROUTINE q2r_sub(fildyn)
            ALLOCATE (phiq(3,3,nat,nat,48))
         ENDIF
         CALL mp_bcast(phiq, meta_ionode_id, world_comm)
+        CALL mp_bcast(zeu, meta_ionode_id, world_comm)
         CALL mp_bcast(q, meta_ionode_id, world_comm)
         IF (ifile==1) THEN
            ALLOCATE (m_loc(3,nat))
