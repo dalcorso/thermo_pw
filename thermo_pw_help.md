@@ -57,10 +57,10 @@ patches given below.</p>
 **Patches for thermo_pw.1.2.1**:
 * The phonon dispersions have a wrong scale when the dynamical matrices 
 are written in the old format. Change as described in: 
-<a href="https://github.com/dalcorso/thermo_pw/commit/3bbabc9b903a1255012f6cc0927cac705645f05b">commit 3bbabc9</a> 
-and in 
-<a href="https://github.com/dalcorso/thermo_pw/commit/35f6defc268508f8ff6dc422581ab3caa65f6e25">commit 35fedef</a>
-(Present also in version 1.2.0).
+<a href="https://github.com/dalcorso/thermo_pw/commit/3bbabc9b903a1255012f6cc0927cac705645f05b">commit 3bbabc9</a>, 
+in 
+<a href="https://github.com/dalcorso/thermo_pw/commit/35f6defc268508f8ff6dc422581ab3caa65f6e25"> commit 35f6def</a> and in
+<a href="https://github.com/dalcorso/thermo_pw/commit/35f6defc268508f8ff6dc422581ab3caa65f6e25">commit 35fedef</a> (Present also in version 1.2.0).
 
 **Patches for thermo_pw.1.2.0**:
 
