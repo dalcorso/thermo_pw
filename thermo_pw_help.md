@@ -59,7 +59,7 @@ patches given below.</p>
 are written in the old format. Change as described in: 
 <a href="https://github.com/dalcorso/thermo_pw/commit/3bbabc9b903a1255012f6cc0927cac705645f05b">commit 3bbabc9</a>, 
 in 
-<a href="https://github.com/dalcorso/thermo_pw/commit/35f6defc268508f8ff6dc422581ab3caa65f6e25"> commit 35f6def</a> and in
+<a href="https://github.com/dalcorso/thermo_pw/commit/42d4b2d4c0247a4a332f12f9d3abbaf2e77b7f38"> commit 42d4b2d</a> and in
 <a href="https://github.com/dalcorso/thermo_pw/commit/35f6defc268508f8ff6dc422581ab3caa65f6e25">commit 35fedef</a> (Present also in version 1.2.0).
 
 **Patches for thermo_pw.1.2.0**:
