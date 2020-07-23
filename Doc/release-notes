@@ -1,5 +1,16 @@
 New in version 1.3.0
 
+Added a routine to plot the pressure dependent
+elastic constants at several temperatures 
+(in collaboration with C. Malica).
+
+Added a plot of the sound velocities as a function
+of temperature (in collaboration with C. Malica).
+
+Added a calculation of the spin component of the
+dynamical magnetic charges and magnetoelectic
+tensor (in collaboration with A. Urru).
+
 23/01/2020 Version 1.2.1 is now frozen.
 
 This version is compatible with QE 6.5.

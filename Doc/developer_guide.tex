@@ -441,7 +441,7 @@ elastic_constants_t
 
 # is an integer from 1 to the number of crystal parameters
 #na is an integer from 1 to the number of atoms in the unit cell
-#g is an interger from 1 to the number of geometries
+#g is an integer from 1 to the number of geometries
 \end{verbatim} 
 
 \newpage
@@ -1229,18 +1229,9 @@ following modules:
 
 \begin{itemize}
 
-\item \texttt{lattices.f90} contains routines to deal with Bravais lattices.
-Presently there is a routine to calculate the primitive cell of
-a given centered cell. There are routines to find the ibrav code and the
-celldm parameters given the primitive lattice vectors. There is a routine
-that finds if two sets of primitive lattice vectors define the same 
-Bravais lattice. A routine finds the point group of the Bravais lattice
-given the primitive vectors.
-
 \item
-\texttt{latgen\_2d.f90} contains routines to deal with two dimensional
-Bravais lattices. Presently it contains the routines to generate the
-primitive vectors of these lattices and their reciprocal lattice vectors.
+\texttt{asy.f90} contains the routines to write a script for the
+\texttt{asymptote} code.
 
 \item
 \texttt{atomic\_pos.f90} contains routines to deal with the atomic positions.
@@ -1252,21 +1243,105 @@ how many types of atoms there are and which ones.
 plot of the two-dimensional Brillouin zones.
 
 \item
-\texttt{rotate.f90} contains routines to deal with rotations. Presently it
-applies a given rotation to a vector or to a tensor.
-It finds the rotation that transform three vectors in other three vectors,
-assuming that one sets is the rotated of the other set.
+\texttt{bz\_asy.f90} contains the information needed to make the plot       
+of the Brillouin zone using the \texttt{asymptote} code.      
 
 \item
-\texttt{space\_groups.f90} contains routines to detect the space group,
-to set the FFT indices compatible with a given space group, to find the
-space group number given the name, or the name given the number etc.
+\texttt{cubic\_surfaces.f90} contains routines to fit a set of data
+with a cubic polynomial, to find the gradient or the Hessian in 
+a given point and to find the local extremum of the cubic polynomial
+closest to a given input point. 
+
+\item
+\texttt{debye\_module.f90} contains routines to calculate the debye 
+temperature, the vibrational energy, free-energy, and entropy according
+to the Debye's model.
+
+\item
+\texttt{diagonalize.f90} contains routines that diagonalize a matrix.
+Presently it contains a driver that calls LAPACK routines
+for real symmetric matrices.
+
+\item
+\texttt{elastic\_const.f90} contains routines to calculate the elastic
+constants given the strain and the induced stress or the strain and
+the energy or the Helmholtz free energy. It can also compute
+quantities dependent on the elastic constants, such as the elastic 
+compliances, the bulk moduli, the sound speeds or the Voigt-Reuss-Hill 
+averages. It has also routines to transform from the Voigt to the 
+tensorial notation and viceversa.
+
+\item
+\texttt{eldos\_module.f90} contains routines to calculate the electronic
+excitation energy, free energy, entropy, and constant strain heat capacity
+from the electronic density of states, assuming a gas of independent 
+electrons.   
+
+\item
+\texttt{gnuplot.f90} contains the routines to write a \texttt{gnuplot} script.
+
+\item
+\texttt{gnuplot\_color.f90} contains routines to insert the color names
+inside the \texttt{gnuplot} scripts.
+
+\item
+\texttt{isoentropic.f90} contains routines to calculate the isoentropic
+quantities or the constant stress heat capacity.
+
+\item
+\texttt{latgen\_2d.f90} contains routines to deal with two dimensional
+Bravais lattices. Presently it contains the routines to generate the
+primitive vectors of these lattices and their reciprocal lattice vectors.
+
+\item \texttt{lattices.f90} contains routines to deal with Bravais lattices.
+Presently there is a routine to calculate the primitive cell of
+a given centered cell. There are routines to find the ibrav code and the
+celldm parameters given the primitive lattice vectors. There is a routine
+that finds if two sets of primitive lattice vectors define the same 
+Bravais lattice. A routine finds the point group of the Bravais lattice
+given the primitive vectors.
+
+\item
+\texttt{linear\_solvers.f90} contains routines that solve iteratively
+a linear system. It contains also a few drivers that calls LAPACK routines
+and do not require workspace information. 
+
+\item
+\texttt{linear\_surfaces.f90} contains routines to fit a set of data
+with a linear polynomial, to compute it, and to set its gradient.  
+
+\item
+\texttt{magnetic\_point\_group.f90} contains routines to deal with 
+crystallographic
+magnetic point groups. Presently it contains only the list of magnetic
+point groups and some routines to assign a code or an extended code to each
+magnetic point group.
+
+\item
+\texttt{mp\_asyn.f90} contains the routines needed to run many 
+independent calculations in a asynchronous way. It supports a master-slave
+approach in which a processor acts as a master and sends to the slaves
+the information on the work to do when they are ready to do it.
 
 \item
 \texttt{nye.f90} contains routines to print the form of tensors of
 rank ranging from one to four, according to the point group and the
 Bravais lattice.
 
+\item
+\texttt{phdos\_module.f90} contains routines to calculate the vibrational
+energy, free energy, entropy, and constant strain heat capacity from the
+phonon density of states. It computes also the atomic B factors from the
+generalized phonon density of states.
+
+\item
+\texttt{ph\_freq\_module.f90} contains routines to calculate the vibrational
+energy, free energy, entropy, and constant strain heat capacity from the
+phonon frequencies. It computes also the atomic B factors.
+
+\item
+\texttt{piezoelectric\_tensor.f90} contains routines to calculate the
+piezoelectric tensor given the strain and the induced polarization.
 
 \item
 \texttt{point\_group.f90} contains routines to deal with crystallographic
@@ -1283,61 +1358,11 @@ It has routines that finds all the subgroups or supergroups of a given given
 point group.
 
 \item
-\texttt{magnetic\_point\_group.f90} contains routines to deal with crystallographic
-magnetic point groups. Presently it contains only the list of magnetic
-point groups and some routines to assign a code or an extended code to each
-magnetic point group.
-
-\item
-\texttt{eldos\_module.f90} contains routines to calculate the electronic
-excitation energy, free energy, entropy, and constant strain heat capacity
-from the electronic density of states, assuming a gas of independent 
-electrons.   
-
-\item
-\texttt{ph\_freq\_module.f90} contains routines to calculate the vibrational
-energy, free energy, entropy, and constant strain heat capacity from the
-phonon frequencies. It computes also the atomic B factors.
-
-\item
-\texttt{phdos\_module.f90} contains routines to calculate the vibrational
-energy, free energy, entropy, and constant strain heat capacity from the
-phonon density of states. It computes also the atomic B factors from the
-generalized phonon density of states.
-
-\item
-\texttt{strain.f90} contains routines to apply a given strain to a given
-Bravais lattice.
-
-\item
-\texttt{isoentropic.f90} contains routines to calculate the isoentropic
-quantities or the constant stress heat capacity.
-
-\item
-\texttt{voigt.f90} contains routines to pass from the usual form of tensors
-to the voigt notation or from tensors in voigt form to the usual form.
-
-\item
-\texttt{piezoelectric\_tensor.f90} contains routines to calculate the
-piezoelectric tensor given the strain and the induced polarization.
-
-\item
-\texttt{elastic\_const.f90} contains routines to calculate the elastic
-constants given the strain and the induced stress or the strain and
-the energy or the Helmholtz free energy. It can also compute
-quantities dependent on the elastic constants, such as the elastic 
-compliances, the bulk moduli, the sound speeds or the Voigt-Reuss-Hill 
-averages. It has also routines to transform from the Voigt to the 
-tensorial notation and viceversa.
-
-\item
-\texttt{xrdp.f90} contains routines to calculate the atomic form factors 
-and the X-rays powder diffraction spectra.
-
-\item
-\texttt{debye\_module.f90} contains routines to calculate the debye 
-temperature, the vibrational energy, free-energy, and entropy according
-to the Debye's model.
+\texttt{polyfit.f90} contains routines to deal with polynomial
+interpolation of arbitrary degree for a single variable. Presently
+it contains a routine that finds the polynomial interpolation a set of data,
+a routine to evaluate the polynomial in an input point and a routine
+that evaluates its first derivative in an input point.
 
 \item
 \texttt{polynomial.f90} contains routines to define a multivariate 
@@ -1346,20 +1371,10 @@ space. It contains also functions that count the number of coefficients
 of the polynomials.
 
 \item
-\texttt{linear\_surfaces.f90} contains routines to fit a set of data
-with a linear polynomial, to compute it, and to set its gradient.  
-
-\item
 \texttt{quadratic\_surfaces.f90} contains routines to fit a set of data
 with a quadratic polynomial, to compute it, to find its gradient 
 in a given point, to print the Hessian and to find the extremum of the 
 quadratic polynomial. 
-
-\item
-\texttt{cubic\_surfaces.f90} contains routines to fit a set of data
-with a cubic polynomial, to find the gradient or the Hessian in 
-a given point and to find the local extremum of the cubic polynomial
-closest to a given input point. 
 
 \item
 \texttt{quartic\_surfaces.f90} contains routines to fit a set of data
@@ -1368,21 +1383,19 @@ a given point and to find the local extremum of the quartic polynomial
 closest to a given input point. 
 
 \item
-\texttt{polyfit.f90} contains routines to deal with polynomial
-interpolation of arbitrary degree for a single variable. Presently
-it contains a routine that finds the polynomial interpoling a set of data,
-a routine to evaluate the polynomial in an input point and a routine
-that evaluates its first derivative in an input point.
+\texttt{rotate.f90} contains routines to deal with rotations. Presently it
+applies a given rotation to a vector or to a tensor.
+It finds the rotation that transform three vectors in other three vectors,
+assuming that one sets is the rotated of the other set.
 
 \item
-\texttt{linear\_solvers.f90} contains routines that solve iteratively
-a linear system. It contains also a few drivers that calls LAPACK routines
-and do not require workspace information. 
+\texttt{space\_groups.f90} contains routines to detect the space group,
+to set the FFT indexes compatible with a given space group, to find the
+space group number given the name, or the name given the number etc.
 
 \item
-\texttt{diagonalize.f90} contains routines that diagonalize a matrix.
-Presently it contains a driver that calls LAPACK routines
-for real symmetric matrices.
+\texttt{strain.f90} contains routines to apply a given strain to a given
+Bravais lattice.
 
 \item
 \texttt{vector.f90} contains routines to deal with vectors.
@@ -1390,25 +1403,12 @@ Presently it has only a routine to write on output the components of
 a vector.
 
 \item
-\texttt{mp\_asyn.f90} contains the routines needed to run many 
-independent calculations in a asynchronous way. It supports a master-slave
-approach in which a processor acts as a master and sends to the slaves
-the information on the work to do when they are ready to do it.
+\texttt{voigt.f90} contains routines to pass from the usual form of tensors
+to the voigt notation or from tensors in voigt form to the usual form.
 
 \item
-\texttt{asy.f90} contains the routines to write a script for the
-\texttt{asymptote} code.
-
-\item
-\texttt{bz\_asy.f90} contains the information needed to make the plot       
-of the Brillouin zone using the \texttt{asymptote} code.      
-
-\item
-\texttt{gnuplot.f90} contains the routines to write a \texttt{gnuplot} script.
-
-\item
-\texttt{gnuplot\_color.f90} contains routines to insert the color names
-inside the \texttt{gnuplot} scripts.
+\texttt{xrdp.f90} contains routines to calculate the atomic form factors 
+and the X-rays powder diffraction spectra.
 
 \end{itemize}
 
