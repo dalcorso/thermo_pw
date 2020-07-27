@@ -334,7 +334,7 @@ C_{\alpha,\beta,\gamma,\delta}
 {\bf H}_{\alpha}
 {\bf H}_{\beta} \nonumber \\
 &- \sum_{s,\alpha,\beta,\gamma}
-\Gamma_{s,\alpha,\beta,\gamma} {\bf u}_{s,\alpha}
+\Lambda_{s,\alpha,\beta,\gamma} {\bf u}_{s,\alpha}
 \epsilon_{\beta,\gamma}\nonumber \\
 &- e \sum_{s,\alpha,\beta} Z^*_{s,\alpha,\beta} 
 {\bf u}_{s,\alpha} {\bf E}_{\beta} \nonumber \\
@@ -376,7 +376,7 @@ C_{\alpha,\beta,\gamma,\delta}
 {\bf H}_{\alpha}
 {\bf H}_{\beta} \nonumber \\
 &- \sum_{s,\alpha,\beta,\gamma}
-\Gamma_{s,\alpha,\beta,\gamma} {\bf u}_{s,\alpha}
+\Lambda_{s,\alpha,\beta,\gamma} {\bf u}_{s,\alpha}
 \epsilon_{\beta,\gamma}\nonumber \\
 &- \sum_{s,\alpha,\beta} Z^*_{s,\alpha,\beta} 
 {\bf u}_{s,\alpha} {\bf E}_{\beta} \nonumber \\
@@ -420,7 +420,7 @@ C_{\alpha,\beta,\gamma,\delta}
 {\bf H}_{\alpha}
 {\bf H}_{\beta} \nonumber \\
 &- \sum_{s,\alpha,\beta,\gamma}
-\Gamma_{s,\alpha,\beta,\gamma} {\bf u}_{s,\alpha}
+\Lambda_{s,\alpha,\beta,\gamma} {\bf u}_{s,\alpha}
 \epsilon_{\beta,\gamma}\nonumber \\
 &- e\sum_{s,\alpha,\beta} Z^*_{s,\alpha,\beta} 
 {\bf u}_{s,\alpha} {\bf E}_{\beta} \nonumber \\
@@ -781,7 +781,7 @@ The relative permeability is $\mu_{r,\alpha,\beta}=
 \section{\color{coral}Internal strain parameters}
 The internal strain parameters are defined as:
 \begin{equation}
-\Gamma_{s,\alpha,\beta,\gamma}=-{\partial^2 \mathcal{F} \over \partial 
+\Lambda_{s,\alpha,\beta,\gamma}=-{\partial^2 \mathcal{F} \over \partial 
 {\bf u}_{s,\alpha} \partial \epsilon_{\beta,\gamma}}
 ={\partial {\bf f}_{s,\alpha} \over \partial \epsilon_{\beta,\gamma}}
 =-V {\partial \sigma_{\beta,\gamma}\over \partial {\bf u}_{s,\alpha}}.
@@ -1070,14 +1070,14 @@ The first derivatives of the magneto-electric enthalpy give the following equati
 {\bf f}_{s,\alpha}&= {\bf f}^{(0)}_{s,\alpha}
 -\sum_{s',\beta} C_{s,\alpha,s',\beta} {\bf u}_{s',\beta}
 +\sum_{\gamma,\delta}
-\Gamma_{s,\alpha,\gamma,\delta} 
+\Lambda_{s,\alpha,\gamma,\delta} 
 \epsilon_{\gamma,\delta} +
 e \sum_{\gamma} Z^*_{s,\alpha,\gamma} {\bf E}_{\gamma}
 +\mu_0 \sum_{\gamma} 
 Z^m_{s,\alpha,\gamma} {\bf H}_{\gamma}, \\
 \sigma_{\lambda,\mu}&= \sigma_{\lambda,\mu}^{(0)}
 -{1\over V} \sum_{s,\alpha}
-\Gamma_{s,\alpha,\lambda,\mu} {\bf u}_{s,\alpha}
+\Lambda_{s,\alpha,\lambda,\mu} {\bf u}_{s,\alpha}
 +\sum_{\gamma,\delta} C_{\lambda,\mu,\gamma,\delta}  
 \epsilon_{\gamma,\delta} -
 \sum_{\gamma} e_{\lambda,\mu,\gamma} 
@@ -1114,7 +1114,7 @@ and searching the solution in the form ${\bf u}_{s,\alpha}(t)=
 \sum_{s',\beta} \left(C_{s,\alpha,s',\beta} - 
 M_s \omega^2 \delta_{ss'}\delta_{\alpha\beta}\right)
 {\bf u}_{s',\beta}= {\bf f}^{(0)}_{s,\alpha} + \sum_{\gamma,\delta} 
-\Gamma_{s,\alpha,\gamma,\delta} \epsilon_{\gamma,\delta}
+\Lambda_{s,\alpha,\gamma,\delta} \epsilon_{\gamma,\delta}
 + e \sum_{\gamma} Z^*_{s,\alpha,\gamma} {\bf E}_{\gamma} 
 + \mu_0 \sum_{\gamma} Z^m_{s,\alpha,\gamma} 
 {\bf H}_{\gamma},
@@ -1145,7 +1145,7 @@ so we can write the displacement as:
 {\bf u}_{s,\alpha}=\sum_{s',\beta} C^{-1}_{s,\alpha,s',\beta}
 {\bf f}^{(0)}_{s',\beta} + \sum_{s',\beta,\gamma,\delta} 
 C^{-1}_{s,\alpha,s',\beta}
-\Gamma_{s',\beta,\gamma,\delta} \epsilon_{\gamma,\delta}
+\Lambda_{s',\beta,\gamma,\delta} \epsilon_{\gamma,\delta}
 + e \sum_{s',\beta,\gamma} C^{-1}_{s,\alpha,s',\beta}
 Z^*_{s',\beta,\gamma} {\bf E}_{\gamma} 
 + \mu_0 \sum_{s',\beta,\gamma} C^{-1}_{s,\alpha,s',\beta} 
@@ -1180,7 +1180,7 @@ and inserting this expression in the other equations we can write:
 where 
 \begin{align}
 \tilde \sigma^{(0)}_{\lambda,\mu}&= \sigma^{(0)}_{\lambda,\mu}
--{1\over V} \sum_{s,\alpha,s',\beta} \Gamma_{s,\alpha,\lambda,\mu}
+-{1\over V} \sum_{s,\alpha,s',\beta} \Lambda_{s,\alpha,\lambda,\mu}
 C^{-1}_{s,\alpha,s',\beta} {\bf f}^{(0)}_{s',\beta}, \\
 \tilde {\bf P}^{(0)}_\lambda&= {\bf P}^{(0)}_\lambda +{e\over V}
 \sum_{s,\alpha,s',\beta} Z^*_{s,\alpha,\lambda} C^{-1}_{s,\alpha,s',\beta}
@@ -1193,8 +1193,8 @@ are the stress, polarization, and magnetization at the equilibrium position,
 while
 \begin{align}
 \tilde C_{\lambda,\mu,\gamma,\delta}&= C_{\lambda,\mu,\gamma,\delta}
--{1\over V}\sum_{s,\alpha,s',\beta} \Gamma_{s,\alpha,\lambda,\mu}
-C^{-1}_{s,\alpha,s',\beta}  \Gamma_{s',\beta,\gamma,\delta},\\
+-{1\over V}\sum_{s,\alpha,s',\beta} \Lambda_{s,\alpha,\lambda,\mu}
+C^{-1}_{s,\alpha,s',\beta}  \Lambda_{s',\beta,\gamma,\delta},\\
 \tilde \chi^e_{\lambda,\gamma}&= \chi^e_{\lambda,\gamma} 
 +{e^2 \over \epsilon_0 V} \sum_{s,\alpha,s',\beta} Z^*_{s,\alpha,\lambda}
 C^{-1}_{s,\alpha,s',\beta}  Z^*_{s',\beta,\gamma},\\
@@ -1202,11 +1202,11 @@ C^{-1}_{s,\alpha,s',\beta}  Z^*_{s',\beta,\gamma},\\
 +{\mu_0 \over V} \sum_{s,\alpha,s',\beta} Z^m_{s,\alpha,\lambda}
 C^{-1}_{s,\alpha,s',\beta}  Z^m_{s',\beta,\gamma}, \\
 \tilde e_{\lambda,\mu,\gamma}&= e_{\lambda,\mu,\gamma}
-+{e\over V}\sum_{s,\alpha,s',\beta} \Gamma_{s,\alpha,\lambda,\mu}
++{e\over V}\sum_{s,\alpha,s',\beta} \Lambda_{s,\alpha,\lambda,\mu}
 C^{-1}_{s,\alpha,s',\beta} Z^*_{s',\beta,\gamma}
 ,\\
 \tilde h_{\lambda,\mu,\gamma}&= h_{\lambda,\mu,\gamma}
-+{1\over V}\sum_{s,\alpha,s',\beta} \Gamma_{s,\alpha,\lambda,\mu}
++{1\over V}\sum_{s,\alpha,s',\beta} \Lambda_{s,\alpha,\lambda,\mu}
 C^{-1}_{s,\alpha,s',\beta} Z^m_{s',\beta,\gamma},\\
 \tilde \alpha_{\lambda,\gamma}&= \alpha_{\lambda,\gamma}
 +{\mu_0 e \over V}\sum_{s,\alpha,s',\beta} Z^*_{s,\alpha,\lambda}
@@ -1221,14 +1221,14 @@ The first derivatives of the magneto-electric enthalpy give the following equati
 {\bf f}_{s,\alpha}&= {\bf f}^{(0)}_{s,\alpha}
 -\sum_{s',\beta} C_{s,\alpha,s',\beta} {\bf u}_{s',\beta}
 +\sum_{\gamma,\delta}
-\Gamma_{s,\alpha,\gamma,\delta} 
+\Lambda_{s,\alpha,\gamma,\delta} 
 \epsilon_{\gamma,\delta} +
 \sum_{\gamma} Z^*_{s,\alpha,\gamma} {\bf E}_{\gamma}
 +\alpha^2 \sum_{\gamma} 
 Z^m_{s,\alpha,\gamma} {\bf H}_{\gamma}, \\
 \sigma_{\lambda,\mu}&= \sigma_{\lambda,\mu}^{(0)}
 -{1\over V} \sum_{s,\alpha}
-\Gamma_{s,\alpha,\lambda,\mu} {\bf u}_{s,\alpha}
+\Lambda_{s,\alpha,\lambda,\mu} {\bf u}_{s,\alpha}
 +\sum_{\gamma,\delta} C_{\lambda,\mu,\gamma,\delta}  
 \epsilon_{\gamma,\delta} -
 \sum_{\gamma} e_{\lambda,\mu,\gamma} 
@@ -1266,7 +1266,7 @@ and searching the solution in the form ${\bf u}_{s,\alpha}(t)=
 \sum_{s',\beta} \left(C_{s,\alpha,s',\beta} - 
 M_s \omega^2 \delta_{ss'}\delta_{\alpha\beta}\right)
 {\bf u}_{s',\beta}= {\bf f}^{(0)}_{s,\alpha} + \sum_{\gamma,\delta} 
-\Gamma_{s,\alpha,\gamma,\delta} \epsilon_{\gamma,\delta}
+\Lambda_{s,\alpha,\gamma,\delta} \epsilon_{\gamma,\delta}
 + \sum_{\gamma} Z^*_{s,\alpha,\gamma} {\bf E}_{\gamma} 
 + \alpha^2 \sum_{\gamma} Z^m_{s,\alpha,\gamma} 
 {\bf H}_{\gamma},
@@ -1296,7 +1296,7 @@ so we have the displacement:
 {\bf u}_{s,\alpha}=\sum_{s',\beta} C^{-1}_{s,\alpha,s',\beta}
 {\bf f}^{(0)}_{s',\beta} + \sum_{s',\beta,\gamma,\delta} 
 C^{-1}_{s,\alpha,s',\beta}
-\Gamma_{s',\beta,\gamma,\delta} \epsilon_{\gamma,\delta}
+\Lambda_{s',\beta,\gamma,\delta} \epsilon_{\gamma,\delta}
 + \sum_{s',\beta,\gamma} C^{-1}_{s,\alpha,s',\beta}
 Z^*_{s',\beta,\gamma} {\bf E}_{\gamma} 
 + \alpha^2 \sum_{s',\beta,\gamma} C^{-1}_{s,\alpha,s',\beta} 
@@ -1332,7 +1332,7 @@ and inserting this expression in the other equations we can write:
 where 
 \begin{align}
 \tilde \sigma^{(0)}_{\lambda,\mu}&= \sigma^{(0)}_{\lambda,\mu}
--{1\over V} \sum_{s,\alpha,s',\beta} \Gamma_{s,\alpha,\lambda,\mu}
+-{1\over V} \sum_{s,\alpha,s',\beta} \Lambda_{s,\alpha,\lambda,\mu}
 C^{-1}_{s,\alpha,s',\beta} {\bf f}^{(0)}_{s',\beta}, \\
 \tilde {\bf P}^{(0)}_\lambda&= {\bf P}^{(0)}_\lambda +{1\over V}
 \sum_{s,\alpha,s',\beta} Z^*_{s,\alpha,\lambda} C^{-1}_{s,\alpha,s',\beta}
@@ -1345,8 +1345,8 @@ are the stress, polarization, and magnetization at the equilibrium position,
 while
 \begin{align}
 \tilde C_{\lambda,\mu,\gamma,\delta}&= C_{\lambda,\mu,\gamma,\delta}
--{1\over V}\sum_{s,\alpha,s',\beta} \Gamma_{s,\alpha,\lambda,\mu}
-C^{-1}_{s,\alpha,s',\beta}  \Gamma_{s',\beta,\gamma,\delta},\\
+-{1\over V}\sum_{s,\alpha,s',\beta} \Lambda_{s,\alpha,\lambda,\mu}
+C^{-1}_{s,\alpha,s',\beta}  \Lambda_{s',\beta,\gamma,\delta},\\
 \tilde \chi^e_{\lambda,\gamma}&= \chi^e_{\lambda,\gamma} 
 +{1 \over V} \sum_{s,\alpha,s',\beta} Z^*_{s,\alpha,\lambda}
 C^{-1}_{s,\alpha,s',\beta}  Z^*_{s',\beta,\gamma},\\
@@ -1354,10 +1354,10 @@ C^{-1}_{s,\alpha,s',\beta}  Z^*_{s',\beta,\gamma},\\
 +{\alpha^2 \over V} \sum_{s,\alpha,s',\beta} Z^m_{s,\alpha,\lambda}
 C^{-1}_{s,\alpha,s',\beta}  Z^m_{s',\beta,\gamma}, \\
 \tilde e_{\lambda,\mu,\gamma}&= e_{\lambda,\mu,\gamma}
-+{1\over V}\sum_{s,\alpha,s',\beta} \Gamma_{s,\alpha,\lambda,\mu}
++{1\over V}\sum_{s,\alpha,s',\beta} \Lambda_{s,\alpha,\lambda,\mu}
 C^{-1}_{s,\alpha,s',\beta} Z^*_{s',\beta,\gamma},\\
 \tilde h_{\lambda,\mu,\gamma}&= h_{\lambda,\mu,\gamma}
-+{1\over V}\sum_{s,\alpha,s',\beta} \Gamma_{s,\alpha,\lambda,\mu}
++{1\over V}\sum_{s,\alpha,s',\beta} \Lambda_{s,\alpha,\lambda,\mu}
 C^{-1}_{s,\alpha,s',\beta}  Z^m_{s',\beta,\gamma},\\
 \tilde \alpha_{\lambda,\gamma}&= \alpha_{\lambda,\gamma}
 +{4 \pi \alpha^2 \over V}\sum_{s,\alpha,s',\beta} Z^*_{s,\alpha,\lambda}
@@ -1373,14 +1373,14 @@ The first derivatives of the magneto-electric enthalpy give the following equati
 {\bf f}_{s,\alpha}&= {\bf f}^{(0)}_{s,\alpha}
 -\sum_{s',\beta} C_{s,\alpha,s',\beta} {\bf u}_{s',\beta}
 +\sum_{\gamma,\delta}
-\Gamma_{s,\alpha,\gamma,\delta} 
+\Lambda_{s,\alpha,\gamma,\delta} 
 \epsilon_{\gamma,\delta} +
 e \sum_{\gamma} Z^*_{s,\alpha,\gamma} {\bf E}_{\gamma}
 +\sum_{\gamma} 
 Z^m_{s,\alpha,\gamma} {\bf H}_{\gamma}, \\
 \sigma_{\lambda,\mu}&=  \sigma_{\lambda,\mu}^{(0)}
 -{1\over V} \sum_{s,\alpha}
-\Gamma_{s,\alpha,\lambda,\mu} {\bf u}_{s,\alpha}
+\Lambda_{s,\alpha,\lambda,\mu} {\bf u}_{s,\alpha}
 +\sum_{\gamma,\delta} C_{\lambda,\mu,\gamma,\delta}  
 \epsilon_{\gamma,\delta} -
 \sum_{\gamma} e_{\lambda,\mu,\gamma} 
@@ -1417,7 +1417,7 @@ and searching the solution in the form ${\bf u}_{s,\alpha}(t)=
 \sum_{s',\beta} \left(C_{s,\alpha,s',\beta} - 
 M_s \omega^2 \delta_{ss'}\delta_{\alpha\beta}\right)
 {\bf u}_{s',\beta}= {\bf f}^{(0)}_{s,\alpha} + \sum_{\gamma,\delta} 
-\Gamma_{s,\alpha,\gamma,\delta} \epsilon_{\gamma,\delta}
+\Lambda_{s,\alpha,\gamma,\delta} \epsilon_{\gamma,\delta}
 + e \sum_{\gamma} Z^*_{s,\alpha,\gamma} {\bf E}_{\gamma} 
 + \sum_{\gamma} Z^m_{s,\alpha,\gamma} 
 {\bf H}_{\gamma},
@@ -1447,7 +1447,7 @@ so we have the displacement:
 {\bf u}_{s,\alpha}=\sum_{s',\beta} C^{-1}_{s,\alpha,s',\beta}
 {\bf f}^{(0)}_{s',\beta} + \sum_{s',\beta,\gamma,\delta} 
 C^{-1}_{s,\alpha,s',\beta}
-\Gamma_{s',\beta,\gamma,\delta} \epsilon_{\gamma,\delta}
+\Lambda_{s',\beta,\gamma,\delta} \epsilon_{\gamma,\delta}
 + e \sum_{s',\beta,\gamma} C^{-1}_{s,\alpha,s',\beta}
 Z^*_{s',\beta,\gamma} {\bf E}_{\gamma} 
 + \sum_{s',\beta,\gamma} C^{-1}_{s,\alpha,s',\beta} Z^m_{s',\beta,\gamma} 
@@ -1481,7 +1481,7 @@ and inserting this expression in the other equations we can write:
 where 
 \begin{align}
 \tilde \sigma^{(0)}_{\lambda,\mu}&= \sigma^{(0)}_{\lambda,\mu}
--{1\over V} \sum_{s,\alpha,s',\beta} \Gamma_{s,\alpha,\lambda,\mu}
+-{1\over V} \sum_{s,\alpha,s',\beta} \Lambda_{s,\alpha,\lambda,\mu}
 C^{-1}_{s,\alpha,s',\beta} {\bf f}^{(0)}_{s',\beta}, \\
 \tilde {\bf P}^{(0)}_\lambda&= {\bf P}^{(0)}_\lambda +{e\over V}
 \sum_{s,\alpha,s',\beta} Z^*_{s,\alpha,\lambda} C^{-1}_{s,\alpha,s',\beta}
@@ -1494,8 +1494,8 @@ are the stress, polarization, and magnetization at the equilibrium position,
 while
 \begin{align}
 \tilde C_{\lambda,\mu,\gamma,\delta}&= C_{\lambda,\mu,\gamma,\delta}
--{1\over V}\sum_{s,\alpha,s',\beta} \Gamma_{s,\alpha,\lambda,\mu}
-C^{-1}_{s,\alpha,s',\beta}  \Gamma_{s',\beta,\gamma,\delta},\\
+-{1\over V}\sum_{s,\alpha,s',\beta} \Lambda_{s,\alpha,\lambda,\mu}
+C^{-1}_{s,\alpha,s',\beta}  \Lambda_{s',\beta,\gamma,\delta},\\
 \tilde \chi^e_{\lambda,\gamma}&= \chi^e_{\lambda,\gamma} 
 +{e^2 \over V} \sum_{s,\alpha,s',\beta} Z^*_{s,\alpha,\lambda}
 C^{-1}_{s,\alpha,s',\beta}  Z^*_{s',\beta,\gamma},\\
@@ -1504,10 +1504,10 @@ C^{-1}_{s,\alpha,s',\beta}  Z^*_{s',\beta,\gamma},\\
 C^{-1}_{s,\alpha,s',\beta}  Z^m_{s',\beta,\gamma}, \\
 \tilde e_{\lambda,\mu,\gamma}&= e_{\lambda,\mu,\gamma}
 +{e\over V}\sum_{s,\alpha,s',\beta} 
-\Gamma_{s,\alpha,\lambda,\mu} C^{-1}_{s,\alpha,s',\beta} 
+\Lambda_{s,\alpha,\lambda,\mu} C^{-1}_{s,\alpha,s',\beta} 
 Z^*_{s',\beta,\gamma},\\
 \tilde h_{\lambda,\mu,\gamma}&= h_{\lambda,\mu,\gamma}
-+{1\over V}\sum_{s,\alpha,s',\beta} \Gamma_{s,\alpha,\lambda,\mu}
++{1\over V}\sum_{s,\alpha,s',\beta} \Lambda_{s,\alpha,\lambda,\mu}
 C^{-1}_{s,\alpha,s',\beta} Z^m_{s',\beta,\gamma},\\
 \tilde \alpha_{\lambda,\gamma}&= \alpha_{\lambda,\gamma}
 +{4 \pi e \over V}\sum_{s,\alpha,s',\beta} Z^*_{s,\alpha,\lambda}
@@ -2868,14 +2868,14 @@ Inserting this equation in the other equations of motion gives:
 {\bf f}_{s,\alpha}&= \breve{\bf f}^{(0)}_{s,\alpha}
 -\sum_{s',\beta} \breve C_{s,\alpha,s',\beta} {\bf u}_{s',\beta}
 +\sum_{\beta,\gamma}
-\breve \Gamma_{s,\alpha,\beta,\gamma} 
+\breve \Lambda_{s,\alpha,\beta,\gamma} 
 \epsilon_{\beta,\gamma} +
 e \sum_{\beta} \breve Z^*_{s,\alpha,\beta} {\bf E}_{\beta}
 +\sum_{\beta} 
 \breve Z^m_{s,\alpha,\beta} {\bf B}_{\beta}, \\
 \sigma_{\lambda,\mu}&= \breve  \sigma_{\lambda,\mu}^{(0)}
 -{1\over V} \sum_{s,\alpha}
-\breve \Gamma_{s,\alpha,\lambda,\mu} {\bf u}_{s,\alpha}
+\breve \Lambda_{s,\alpha,\lambda,\mu} {\bf u}_{s,\alpha}
 +\sum_{\gamma,\delta} \breve C_{\lambda,\mu,\gamma,\delta}  
 \epsilon_{\gamma,\delta} -
 \sum_{\gamma} \breve e_{\lambda,\mu,\gamma} 
@@ -2910,7 +2910,7 @@ and
 \breve C_{s,\alpha,s',\beta} &= C_{s,\alpha,s',\beta}+
 {\mu_0\over V}  \sum_{\delta,\lambda} Z^m_{s,\alpha,\delta}
 \mu^{-1}_{r,\delta,\lambda}Z^m_{s',\beta,\lambda},\\
-\breve \Gamma_{s,\alpha,\beta,\gamma} &= \Gamma_{s,\alpha,\beta,\gamma}
+\breve \Lambda_{s,\alpha,\beta,\gamma} &= \Lambda_{s,\alpha,\beta,\gamma}
 - \mu_0 \sum_{\delta,\lambda} Z^m_{s,\alpha,\delta}
 \mu^{-1}_{r,\delta,\lambda} h_{\beta,\gamma,\lambda}, \\
 \breve Z^*_{s,\alpha,\beta} &= Z^*_{s,\alpha,\beta}
@@ -3019,14 +3019,14 @@ Inserting this equation in the other equations of motion gives:
 {\bf f}_{s,\alpha}&= \breve{\bf f}^{(0)}_{s,\alpha}
 -\sum_{s',\beta} \breve C_{s,\alpha,s',\beta} {\bf u}_{s',\beta}
 +\sum_{\beta,\gamma}
-\breve \Gamma_{s,\alpha,\beta,\gamma} 
+\breve \Lambda_{s,\alpha,\beta,\gamma} 
 \epsilon_{\beta,\gamma} +
 \sum_{\beta} \breve Z^*_{s,\alpha,\beta} {\bf E}_{\beta}
 +\sum_{\beta} 
 \breve Z^m_{s,\alpha,\beta} {\bf B}_{\beta}, \\
 \sigma_{\lambda,\mu}&= \breve  \sigma_{\lambda,\mu}^{(0)}
 -{1\over V} \sum_{s,\alpha}
-\breve \Gamma_{s,\alpha,\lambda,\mu} {\bf u}_{s,\alpha}
+\breve \Lambda_{s,\alpha,\lambda,\mu} {\bf u}_{s,\alpha}
 +\sum_{\gamma,\delta} \breve C_{\lambda,\mu,\gamma,\delta}  
 \epsilon_{\gamma,\delta} -
 \sum_{\gamma} \breve e_{\lambda,\mu,\gamma} 
@@ -3062,7 +3062,7 @@ and
 \breve C_{s,\alpha,s',\beta} &= C_{s,\alpha,s',\beta}+
 {4 \pi \alpha^2 \over V}  \sum_{\delta,\lambda} Z^m_{s,\alpha,\delta}
 \mu^{-1}_{r,\delta,\lambda}Z^m_{s',\beta,\lambda},\\
-\breve \Gamma_{s,\alpha,\beta,\gamma} &= \Gamma_{s,\alpha,\beta,\gamma}
+\breve \Lambda_{s,\alpha,\beta,\gamma} &= \Lambda_{s,\alpha,\beta,\gamma}
 - 4 \pi \alpha^2 \sum_{\delta,\lambda} Z^m_{s,\alpha,\delta}
 \mu^{-1}_{r,\delta,\lambda} h_{\beta,\gamma,\lambda}, \\
 \breve Z^*_{s,\alpha,\beta} &= Z^*_{s,\alpha,\beta}
@@ -3173,14 +3173,14 @@ Inserting this equation in the other equations of motion gives:
 {\bf f}_{s,\alpha}&= \breve{\bf f}^{(0)}_{s,\alpha}
 -\sum_{s',\beta} \breve C_{s,\alpha,s',\beta} {\bf u}_{s',\beta}
 +\sum_{\beta,\gamma}
-\breve \Gamma_{s,\alpha,\beta,\gamma} 
+\breve \Lambda_{s,\alpha,\beta,\gamma} 
 \epsilon_{\beta,\gamma} +
 e \sum_{\beta} \breve Z^*_{s,\alpha,\beta} {\bf E}_{\beta}
 +\sum_{\beta} 
 \breve Z^m_{s,\alpha,\beta} {\bf B}_{\beta}, \\
 \sigma_{\lambda,\mu}&= \breve  \sigma_{\lambda,\mu}^{(0)}
 -{1\over V} \sum_{s,\alpha}
-\breve \Gamma_{s,\alpha,\lambda,\mu} {\bf u}_{s,\alpha}
+\breve \Lambda_{s,\alpha,\lambda,\mu} {\bf u}_{s,\alpha}
 +\sum_{\gamma,\delta} \breve C_{\lambda,\mu,\gamma,\delta}  
 \epsilon_{\gamma,\delta} -
 \sum_{\gamma} \breve e_{\lambda,\mu,\gamma} 
@@ -3215,7 +3215,7 @@ and
 \breve C_{s,\alpha,s',\beta} &= C_{s,\alpha,s',\beta}+
 {4 \pi \over V}  \sum_{\delta,\lambda} Z^m_{s,\alpha,\delta}
 \mu^{-1}_{r,\delta,\lambda}Z^m_{s',\beta,\lambda},\\
-\breve \Gamma_{s,\alpha,\beta,\gamma} &= \Gamma_{s,\alpha,\beta,\gamma}
+\breve \Lambda_{s,\alpha,\beta,\gamma} &= \Lambda_{s,\alpha,\beta,\gamma}
 - 4 \pi \sum_{\delta,\lambda} Z^m_{s,\alpha,\delta}
 \mu^{-1}_{r,\delta,\lambda} h_{\beta,\gamma,\lambda}, \\
 \breve Z^*_{s,\alpha,\beta} &= Z^*_{s,\alpha,\beta}
