@@ -14,6 +14,11 @@ can be found <a href="https://people.sissa.it/dalcorso/thermo_pw/user_guide/inde
 <p align="justify">The following papers describe new
 features implemented in <code>thermo_pw</code>:</p>
 
+11. O. Motornyi, N. Vast, I. Timrov, O. Baseggio, S. Baroni, and A. Dal Corso,
+Electron energy loss spectroscopy of bulk gold with ultrasoft pseudopotentials and the Liouville-Lanczos method,
+<a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.102.035156">
+Phys. Rev. B <B>102</B>, 035156 (2020).</a>
+
 10. C. Malica and A. Dal Corso,
 Quasi-harmonic temperature dependent elastic constants: Applications 
 to Silicon, Aluminum, and Silver,
