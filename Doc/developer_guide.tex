@@ -184,6 +184,12 @@ Instead if \texttt{lectqha=.TRUE.} the code will do:
 \item
 Q) Calculation of the temperature dependent elastic constants within the
 `fixed-geometry quasi-harmonic' approximation.
+
+\item
+R) Calculation of the temperature dependent elastic constants within the
+`quasi-harmonic' approximation.
+
+
 \end{itemize}
 There are also two initial routines (\texttt{thermo\_setup} and 
 \texttt{thermo\_summary}) that can carry out preprocessing tasks, such as 
@@ -198,7 +204,7 @@ on output.
 The different \texttt{what} activates the following parts of the code:
 
 \begin{verbatim}
-what         A   B   C   D   E    F  H0  G1    H    I   L   G2   M  N  O  P  Q
+what         A   B   C   D   E    F  H0  G1    H    I   L   G2   M  N  O  P  Q  R
 
 plot_bz
 scf                          *
@@ -225,7 +231,7 @@ mur_lc_polarization
              *           *               *               +
 mur_lc_t     *           *                                  *   *  *  *  *
 elastic_constants_t
-             *                       *                      *               * 
+             *                       *                      *               *   *
 + not yet active or working.
 \end{verbatim}
 
@@ -522,7 +528,7 @@ directories, one for the wavefunctions and one for the other quantities.
 directory coincident with the \texttt{outdir} directory.
 
 \newpage
-\section{\color{coral}The managers}
+\section{\color{coral}The drivers}
 
 The \texttt{thermo\_pw} main program is in the file \texttt{src/thermo\_pw.f90}.
 This routine is responsible for the main flow of the program discussed
@@ -545,10 +551,19 @@ manage_xrdp.f90,
 \end{verbatim}
 coordinates the calculation of the X-ray power diffraction spectra,
 \begin{verbatim}
-manage_ph.f90, manage_all_geometries_ph.f90, manage_ph_dispersions.f90      
+manage_ph.f90, manage_all_geometries_ph.f90, manage_ph_postproc.f90      
 \end{verbatim}
 coordinate the calculation of the optical properties, the phonon dispersion
 and the harmonic thermodynamic quantities at one or more geometries,
+\begin{verbatim}
+manage_collection.f90
+\end{verbatim}
+coordinates the collection of all the phonon calculations made by the 
+different images
+\begin{verbatim}
+manage_ph_symmetry.f90
+\end{verbatim}
+coordinates the symmetry analysis of the phonon modes,
 \begin{verbatim}
 manage_elastic_cons.f90        
 \end{verbatim}
@@ -558,7 +573,11 @@ Debye approximation,
 \begin{verbatim}
 manage_anhar.f90               
 \end{verbatim}
-coordinates the calculation of the anharmonic thermodynamic quantities.
+coordinates the calculation of the anharmonic thermodynamic quantities,
+\begin{verbatim}
+manage_elastic_cons_qha.f90, manage_elastic_cons_qha_2.f90        
+\end{verbatim}
+coordinates the calculation of the temperature dependent elastic constants.
 
 \newpage
 \section{\color{coral}How to insert a new flow-chart}

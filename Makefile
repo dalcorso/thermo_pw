@@ -34,7 +34,7 @@ leave_qe:
 	if test -f makedeps.sh_qe ; then mv ../install/makedeps.sh . ; \
            mv makedeps.sh_qe ../install/makedeps.sh ; fi
 
-clean: thermo_tools_clean thermo_pw_clean thermo_lib_clean thermo_qe_clean examples_clean doc_clean
+clean: thermo_tools_clean thermo_pw_clean thermo_lib_clean thermo_qe_clean examples_clean examples_qe_clean doc_clean
 
 thermo_pw_clean:
 	( cd src ; $(MAKE) clean )
@@ -51,6 +51,10 @@ thermo_qe_clean:
 examples_clean:
 	if test -d examples ; then \
 	( cd examples ; ./clean_all ) ; fi
+
+examples_qe_clean:
+	if test -d examples_qe ; then \
+	( cd examples_qe ; ./clean_all ) ; fi
 
 doc_clean:
 	if test -d Doc ; then \
