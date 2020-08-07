@@ -20,6 +20,8 @@ ph_example02 : phonon dispersions of AlAs with norm-conserving PPs
 
 ph_example06 : phonon dispersions of Pt with fully relativistic US-PPs
 
+ph_example07 : phonon dispersions of Ni with fully relativistic US-PPs
+
 ph_example08 : phonon dispersions of carbon with PAW-PP, Ni with PAW-PP and pbe
 
 ph_example11 : phonon dispersions of Pt with fully relativistic PAW-PPs.
