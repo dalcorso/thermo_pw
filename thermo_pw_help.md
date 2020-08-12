@@ -54,6 +54,13 @@ patches given below.</p>
 
 **Patches for the git version**:
 
+**Patches for thermo_pw.1.3.0**:
+<br>
+To reproduce ph_example07 it is necessary to change line 999 of 
+file PW/src/pw_restart_new.f90 of QE6.5. Substitute angle1, angle2,
+starting_magnetization with starting_magnetization, angle1, angle2.
+
+
 **Patches for thermo_pw.1.2.1**:
 * The phonon dispersions have a wrong scale when the dynamical matrices 
 are written in the old format. Change as described in: 
@@ -63,7 +70,7 @@ in
 <a href="https://github.com/dalcorso/thermo_pw/commit/35f6defc268508f8ff6dc422581ab3caa65f6e25">commit 35fedef</a> (Present also in version 1.2.0).
 
 **Patches for thermo_pw.1.2.0**:
-
+<br>
 * When what='elastic_costants_t' a bug in QE prevents the use of 
 use_free_energy=.TRUE. and elastic_algorithm='energy_std'.
 Add the instruction:
