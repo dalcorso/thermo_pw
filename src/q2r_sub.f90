@@ -207,7 +207,7 @@ SUBROUTINE q2r_sub(fildyn)
         CALL mp_bcast(q, meta_ionode_id, world_comm)
         IF (ifile==1) THEN
            ALLOCATE (m_loc(3,nat))
-           amass=amass/amu_ry   
+           amass=amass/amu_ry
         ENDIF
         IF (meta_ionode) CLOSE(unit=iundyn)
      ENDIF
@@ -224,6 +224,7 @@ SUBROUTINE q2r_sub(fildyn)
         CALL mp_bcast(epsil, meta_ionode_id, world_comm)
         ! it must be allocated here because nat is read from file
         ALLOCATE (phid(nr1*nr2*nr3,3,3,nat,nat) )
+        phid=(0.0_DP,0.0_DP)
         !
         lrigid1=lrigid
 
@@ -360,7 +361,6 @@ SUBROUTINE q2r_sub(fildyn)
                                                           &10^-12)')")
   END IF
   !
-
   CALL interface_with_tpw(phid, nr1, nr2, nr3, nat, ntyp, lrigid, zeu, &
                      epsil, atm, nspin_mag, m_loc, tau, ityp, at, bg,  &
                      omega, ibrav, celldm, amass)

@@ -194,10 +194,10 @@ subroutine incdrhoscf_nc_tpw (drhoscf, weight, ik, rsign, dbecsum, dpsi)
   ! Ultrasoft contribution
   ! Calculate dbecsum_nc = <evc|vkb><vkb|dpsi>
   !
-  IF (rsign==1) THEN
-     CALL addusdbec_nc_tpw (ik, weight, dpsi, dbecsum, becp1)
+  IF (ABS(rsign-1.0_DP)<1.D-10) THEN
+     CALL addusdbec_nc (ik, weight, dpsi, dbecsum, becp1)
   ELSE
-     CALL addusdbec_nc_tpw (ik, weight, dpsi, dbecsum, becpt)
+     CALL addusdbec_nc (ik, weight, dpsi, dbecsum, becpt)
   ENDIF
   !
   DEALLOCATE(psi)

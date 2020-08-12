@@ -5,21 +5,30 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-!
+!------------------------------------------------------
 SUBROUTINE manage_energy_minimum(nwork)
+!------------------------------------------------------
+!
+!  This routine coordinates the work to find the minimum
+!  of the total energy as a function of the crystal
+!  parameters.
+!
 
 USE kinds,            ONLY : DP
-USE thermo_mod,       ONLY : celldm_geo, omega_geo, central_geo
+USE thermo_mod,       ONLY : celldm_geo, omega_geo, central_geo, density, &
+                             energy_geo
 USE control_mur,      ONLY : vmin, b0, b01, emin, lmurn
 USE equilibrium_conf, ONLY : celldm0, omega0, tau0, at0, tau0_crys
 USE initial_conf,     ONLY : ibrav_save, tau_save_crys
+USE control_xrdp,     ONLY : lxrdp
 
 USE ions_base,        ONLY : nat, tau
 USE cell_base,        ONLY : at, bg, omega, cell_base_init
 
 USE io_global,        ONLY : meta_ionode_id
+USE mp_images,        ONLY : nproc_image
 USE mp_world,         ONLY : world_comm
-USE mp,               ONLY : mp_bcast
+USE mp,               ONLY : mp_sum, mp_bcast
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: nwork
@@ -27,6 +36,11 @@ INTEGER, INTENT(IN) :: nwork
 REAL(DP)            :: rd_ht(3,3), zero
 LOGICAL             :: trd_ht
 CHARACTER(LEN=10)   :: cell_units
+!
+!  First collect the total energies
+!
+CALL mp_sum(energy_geo, world_comm)
+energy_geo=energy_geo / nproc_image
 
 IF (lmurn) THEN
    CALL do_ev()
@@ -65,6 +79,14 @@ tau0=tau
 !
 tau0_crys=tau
 CALL cryst_to_cart(nat, tau0_crys, bg, -1)
+!
+!  recompute the density at the minimum volume
+!
+     CALL compute_density(omega,density)
+!
+!  compute the xrdp at the minimum volume if required by the user
+!
+     IF (lxrdp) CALL manage_xrdp(' ')
 
 RETURN
 END SUBROUTINE manage_energy_minimum

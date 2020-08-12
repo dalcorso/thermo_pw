@@ -402,6 +402,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            CALL set_piezo_tensor_work(nwork) 
            ALLOCATE(energy_geo(nwork))
            ALLOCATE(omega_geo(nwork))
+           energy_geo=0.0_DP
            iaux=10
            lpiezoelectric_tensor=.TRUE.
            do_punch=.TRUE.

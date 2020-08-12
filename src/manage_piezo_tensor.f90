@@ -18,13 +18,19 @@ USE elastic_constants,    ONLY : epsilon_geo, el_con, el_compliances, &
 USE data_files,           ONLY : fl_el_cons
 
 USE mp_world,             ONLY : world_comm
-USE mp_images,            ONLY : my_image_id, root_image
-USE mp,                   ONLY : mp_bcast
+USE mp_images,            ONLY : my_image_id, root_image, nproc_image
+USE mp,                   ONLY : mp_bcast, mp_sum
 USE io_global,            ONLY : meta_ionode_id 
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: nwork
 LOGICAL :: exst
+
+!
+!  First collect the polarization among all images
+!
+CALL mp_sum(polar_geo, world_comm)
+polar_geo=polar_geo / nproc_image
 !
 !  the piezoelectric tensor is calculated here
 !

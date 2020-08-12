@@ -5,16 +5,29 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-SUBROUTINE print_polarization(polar, flag)
+SUBROUTINE print_polarization(polar_, flag)
 USE kinds,     ONLY : DP
 USE constants, ONLY : electron_si, bohr_radius_si
 USE cell_base, ONLY : alat, omega
 USE io_global, ONLY : stdout
+USE piezoelectric_tensor,  ONLY : polar_geo
+
+USE mp,        ONLY : mp_sum
+USE mp_world,  ONLY : world_comm
+USE mp_images, ONLY : nproc_image
 
 IMPLICIT NONE
-REAL(DP), INTENT(IN) :: polar(3)
+REAL(DP), INTENT(IN) :: polar_(3)
 LOGICAL, INTENT(IN) :: flag
-REAL(DP) :: fact
+REAL(DP) :: fact, polar(3)
+
+IF (flag) THEN
+   CALL mp_sum(polar_geo, world_comm)
+   polar_geo=polar_geo / nproc_image
+   polar=polar_geo(:,1)
+ELSE
+   polar=polar_
+ENDIF
 
 WRITE(stdout,'(/,5x,"The Berry phase polarization of this solid in &
                      cartesian coordinates is:")')

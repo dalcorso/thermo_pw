@@ -31,7 +31,7 @@ END FUNCTION check_file_exists
 LOGICAL FUNCTION check_dyn_file_exists(filename)
 !
 !   This function checks if all the dynamical matrix files at a given geometry
-!   exist. In this case the phonon calculation at that geometry is not redone.
+!   exist. 
 !   It has to be called by all processors when they are synchronized.
 !   Only the meta_ionode checks that the file exists and sends the information
 !   to all processors.

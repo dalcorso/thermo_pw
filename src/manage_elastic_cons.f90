@@ -5,7 +5,20 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!----------------------------------------------------------
 SUBROUTINE manage_elastic_cons(nwork,ngeom)
+!----------------------------------------------------------
+!
+!   This routine coodinates the work to compute the T=0 K
+!   elastic constant after the scf calculations of the total
+!   energy or stress of all the strained geometries has been
+!   done. ngeom is the number of unperturbed geometries for which
+!   we calculate the elastic constants. 
+!
+!   It coordinates also the calculation of material quantities
+!   such as the sound velocity which depend on the elastic
+!   constant.
+!
 
 USE kinds,             ONLY : DP
 USE thermo_mod,        ONLY : energy_geo, density
@@ -45,6 +58,11 @@ CHARACTER(LEN=6)    :: int_to_char
 CHARACTER(LEN=256)  :: filelastic
 !
 !  the elastic constants are calculated here
+!
+!  First collect the total energies
+!
+CALL mp_sum(energy_geo, world_comm)
+energy_geo=energy_geo / nproc_image
 !
 !  First collect the stress if it has been calculated
 !

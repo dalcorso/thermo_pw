@@ -5,8 +5,13 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!----------------------------------------------------------
 SUBROUTINE manage_elastic_cons_qha()
-
+!----------------------------------------------------------
+!
+!  This routine is similar to manage_elastic_cons, but it
+!  works for the finite temperature case.
+!
 USE kinds,             ONLY : DP
 USE thermo_mod,        ONLY : energy_geo, tot_ngeo 
 USE control_elastic_constants, ONLY : ngeo_strain, elcpvar, ngeom, &
@@ -36,7 +41,7 @@ CHARACTER(LEN=256)  :: filelastic, filename
 CHARACTER(LEN=6) :: int_to_char
 LOGICAL :: all_geometry_done, exst, check_file_exists
 
-CALL check_all_geometry_done(all_geometry_done)
+CALL check_all_geometries_done(all_geometry_done)
 IF (.NOT.all_geometry_done) RETURN
 
 filename='anhar_files/'//TRIM(flanhar)//'.celldm'

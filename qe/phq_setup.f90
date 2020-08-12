@@ -233,7 +233,7 @@ subroutine phq_setup_tpw
   !   not been calculated by set_nscf because this is a recover run. 
   !   We recalculate here the small group of q.
   !
-  IF (nsymq==0) CALL set_small_group_of_q_tpw(nsymq, invsymq, minus_q)
+  IF (nsymq==0) CALL set_small_group_of_q(nsymq, invsymq, minus_q)
   IF ( .NOT. time_reversal ) minus_q = .FALSE.
   !
   !
@@ -250,7 +250,7 @@ subroutine phq_setup_tpw
   !    and calculate the vectors G associated to the symmetry Sq = q + G
   !    if minus_q is true calculate also irotmq and the G associated to Sq=-g+G
   !
-  CALL set_giq_tpw (xq,s,nsymq,nsym,irotmq,minus_q,gi,gimq)
+  CALL set_giq (xq,s,nsymq,nsym,irotmq,minus_q,gi,gimq)
 
   num_rap_mode=-1
   IF (search_sym.AND.symmorphic_or_nzb()) CALL prepare_sym_analysis_tpw(nsymq,&

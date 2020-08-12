@@ -7,7 +7,7 @@
 !
 !
 !----------------------------------------------------------------------
-subroutine addusddenseq (drhoscf, dbecsum)
+SUBROUTINE addusddenseq (drhoscf, dbecsum)
   !----------------------------------------------------------------------
   !
   !  This routine adds to the change of the charge and magnetization
@@ -19,17 +19,18 @@ subroutine addusddenseq (drhoscf, dbecsum)
   !  (2001) with b=c=0.
   !
 
-  USE kinds, only : DP
+  USE kinds,     ONLY : DP
   USE ions_base, ONLY : nat, ityp, ntyp => nsp
-  use fft_base,  only: dfftp
-  use fft_interfaces, only: invfft
-  USE gvect, ONLY : g, gg, ngm, eigts1, eigts2, eigts3, mill
-  USE uspp, ONLY: okvan
+  USE cell_base, ONLY : tpiba
+  USE fft_base,  ONLY: dfftp
+  USE fft_interfaces, ONLY: invfft
+  USE gvect,     ONLY : g, gg, ngm, eigts1, eigts2, eigts3, mill
+  USE uspp,      ONLY: okvan
   USE uspp_param, ONLY: upf, lmaxq, nh, nhm
   USE noncollin_module, ONLY : nspin_mag
 
   USE qpoint, ONLY : xq, eigqts
-  implicit none
+  IMPLICIT NONE
   !
   !   the dummy variables
   !
@@ -37,7 +38,7 @@ subroutine addusddenseq (drhoscf, dbecsum)
   ! input: if zero does not compute drho
   ! input: the number of perturbations
 
-  complex(DP) :: drhoscf(dfftp%nnr,nspin_mag,1), &
+  COMPLEX(DP) :: drhoscf(dfftp%nnr,nspin_mag,1), &
                  dbecsum(nhm*(nhm+1)/2,nat,nspin_mag,1)
 
   ! inp/out: change of the charge density
@@ -46,85 +47,85 @@ subroutine addusddenseq (drhoscf, dbecsum)
   !     here the local variables
   !
 
-  integer :: ig, na, nt, ih, jh, ijh, is
+  INTEGER :: ig, na, nt, ih, jh, ijh, is
 
   ! counters
 
-  real(DP), allocatable  :: qmod(:), qpg(:,:), ylmk0(:,:)
+  REAL(DP), ALLOCATABLE  :: qmod(:), qpg(:,:), ylmk0(:,:)
   ! the modulus of q+G
   ! the spherical harmonics
 
-  complex(DP) :: zsum
-  complex(DP), allocatable ::  sk (:), qg (:), qgm (:), aux (:,:)
+  COMPLEX(DP) :: zsum
+  COMPLEX(DP), ALLOCATABLE ::  sk (:), qg (:), qgm (:), aux (:,:)
   ! the structure factor
   ! work space
 
-  if (.not.okvan) return
-  call start_clock ('addusddenseq')
-  allocate (aux(  ngm, nspin_mag))
-  allocate (sk (  ngm))
-  allocate (qg (  dfftp%nnr))
-  allocate (ylmk0(ngm , lmaxq * lmaxq))
-  allocate (qgm  (ngm))
-  allocate (qmod (ngm))
-  allocate (qpg(3, ngm))
+  IF (.NOT.okvan) RETURN
+  CALL start_clock ('addusddenseq')
+  ALLOCATE (aux(  ngm, nspin_mag))
+  ALLOCATE (sk (  ngm))
+  ALLOCATE (qg (  dfftp%nnr))
+  ALLOCATE (ylmk0(ngm , lmaxq * lmaxq))
+  ALLOCATE (qgm  (ngm))
+  ALLOCATE (qmod (ngm))
+  ALLOCATE (qpg(3, ngm))
   !
   !  And then we compute the additional charge in reciprocal space
   !
-  call setqmod (ngm, xq, g, qmod, qpg)
-  call ylmr2 (lmaxq * lmaxq, ngm, qpg, qmod, ylmk0)
-  do ig = 1, ngm
-     qmod (ig) = sqrt (qmod (ig) )
-  enddo
+  CALL setqmod (ngm, xq, g, qmod, qpg)
+  CALL ylmr2 (lmaxq * lmaxq, ngm, qpg, qmod, ylmk0)
+  DO ig = 1, ngm
+     qmod (ig) = sqrt (qmod (ig) ) * tpiba
+  ENDDO
 
   aux (:,:) = (0.d0, 0.d0)
-  do nt = 1, ntyp
-     if (upf(nt)%tvanp ) then
+  DO nt = 1, ntyp
+     IF (upf(nt)%tvanp ) THEN
         ijh = 0
-        do ih = 1, nh (nt)
-           do jh = ih, nh (nt)
-              call qvan2 (ngm, ih, jh, nt, qmod, qgm, ylmk0)
+        DO ih = 1, nh (nt)
+           DO jh = ih, nh (nt)
+              CALL qvan2 (ngm, ih, jh, nt, qmod, qgm, ylmk0)
               ijh = ijh + 1
-              do na = 1, nat
-                 if (ityp (na) == nt) then
+              DO na = 1, nat
+                 IF (ityp (na) == nt) then
                     !
                     ! calculate the structure factor
                     !
-                    do ig = 1, ngm
+                    DO ig = 1, ngm
                        sk(ig)=eigts1(mill(1,ig),na)*eigts2(mill(2,ig),na) &
                              *eigts3(mill(3,ig),na)*eigqts(na)*qgm(ig)
-                    enddo
+                    ENDDO
                     !
                     !  And qgmq and becp and dbecq
                     !
-                    do is=1,nspin_mag
+                    DO is=1,nspin_mag
                        zsum = dbecsum (ijh, na, is, 1)
-                       call zaxpy(ngm,zsum,sk,1,aux(1,is),1)
-                    enddo
-                 endif
-              enddo
-           enddo
-        enddo
-     endif
-  enddo
+                       CALL zaxpy(ngm,zsum,sk,1,aux(1,is),1)
+                    ENDDO
+                 ENDIF
+              ENDDO
+           ENDDO
+        ENDDO
+     ENDIF
+  ENDDO
   !
   !     convert aux to real space
   !
-  do is=1,nspin_mag
+  DO is=1,nspin_mag
      qg (:) = (0.d0, 0.d0)
      qg (dfftp%nl (:) ) = aux (:, is)
      CALL invfft ('Rho', qg, dfftp)
      drhoscf(:,is,1) = drhoscf(:,is,1) + 2.d0*qg(:)
-  enddo
+  ENDDO
 
-  deallocate (qpg)
-  deallocate (qmod)
-  deallocate (qgm)
-  deallocate (ylmk0)
-  deallocate (qg)
-  deallocate (sk)
-  deallocate (aux)
+  DEALLOCATE (qpg)
+  DEALLOCATE (qmod)
+  DEALLOCATE (qgm)
+  DEALLOCATE (ylmk0)
+  DEALLOCATE (qg)
+  DEALLOCATE (sk)
+  DEALLOCATE (aux)
 
-  call stop_clock ('addusddenseq')
-  return
-end subroutine addusddenseq
+  CALL stop_clock ('addusddenseq')
+  RETURN
+END SUBROUTINE addusddenseq

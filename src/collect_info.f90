@@ -132,7 +132,7 @@ CONTAINS
    SUBROUTINE comm_collect_info(info, comm)
 !----------------------------------------------------------------------------
 !
-!  This routine comunicate the variables of the info structure to all 
+!  This routine comunicates the variables of the info structure to all 
 !  processors of a communicator group.
 !
    USE mp, ONLY : mp_sum

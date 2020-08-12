@@ -40,7 +40,6 @@ USE qpoint,         ONLY : ikks
 USE eqv,            ONLY : dvpsi
 USE ldaU,           ONLY : lda_plus_u
 
-
 IMPLICIT NONE
 
 INTEGER :: isolv, ipert, ik, npe
@@ -118,14 +117,14 @@ CALL stop_clock ('vpsifft')
 !  V_{eff} on the bare change of the potential
 !
 IF (isolv==1) THEN
-   CALL adddvscf_tpw (ipert, ik, becp1)
+   CALL adddvscf_ph_mag (ipert, ik, becp1)
    !
    ! DFPT+U: add to dvpsi the scf part of the response
    ! Hubbard potential dV_hub
    !
    IF (lda_plus_u) call adddvhubscf (ipert, ik)
 ELSE
-   CALL adddvscf_tpw (ipert, ik, becpt)
+   CALL adddvscf_ph_mag (ipert, ik, becpt)
 ENDIF
 !
 !  reset the original magnetic field if it was changed

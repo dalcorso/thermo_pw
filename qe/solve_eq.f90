@@ -548,7 +548,7 @@ subroutine solve_eq(iu, flag)
         ENDIF
      ENDIF
 
-     call newdq_tpw(dvscfin,1)
+     call newdq(dvscfin,1)
 
 1001 CONTINUE
 

@@ -131,7 +131,7 @@ MODULE thermodynamics
   REAL(DP), ALLOCATABLE :: ph_free_ener(:,:) ! phonon free_energy, T, geometry
   REAL(DP), ALLOCATABLE :: ph_entropy(:,:)   ! phonon entropy, T, geometry
   REAL(DP), ALLOCATABLE :: ph_e0(:)          ! zero point energy, geometry
-  REAL(DP), ALLOCATABLE :: ph_ce(:,:)        ! phonon specific heat, T, geometry
+  REAL(DP), ALLOCATABLE :: ph_ce(:,:)        ! phonon heat capacity, T, geometry
   REAL(DP), ALLOCATABLE :: ph_b_fact(:,:,:,:,:)! atomic B factor
 
 END MODULE thermodynamics
@@ -341,7 +341,6 @@ MODULE ifc
   REAL(DP) :: epsil_ifc(3,3)
   LOGICAL :: has_zstar
   ! frc : interatomic force constants in real space
-  ! tau : atomic positions for the original cell
   ! zeu : effective charges for the original cell
   ! m_loc: the magnetic moments of each atom
   ! wscache: the weight of each q point 

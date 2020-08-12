@@ -133,8 +133,8 @@ loop_k:  DO j=start_k+2, nkstot
   n1=nks_eff/n2
   IF (n1*n2 /= nks_eff) CALL errore('punch_band_2d',&
                                     'Problems with k points',1)
-  mdkx = sqrt( dkx(1)**2 + dkx(2)**2 + dkx(3)**2 )
-  mdky = sqrt( dky(1)**2 + dky(2)**2 + dky(3)**2 )
+  mdkx = SQRT( dkx(1)**2 + dkx(2)**2 + dkx(3)**2 )
+  mdky = SQRT( dky(1)**2 + dky(2)**2 + dky(3)**2 )
 !
 !  find which bands cross ef
 !

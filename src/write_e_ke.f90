@@ -13,7 +13,9 @@ USE thermo_mod,     ONLY : energy_geo
 USE data_files,     ONLY : flkeconv
 USE io_files,       ONLY : check_tempdir
 USE io_global,      ONLY : ionode
-USE mp_images,      ONLY : my_image_id, root_image
+USE mp_world,       ONLY : world_comm
+USE mp_images,      ONLY : my_image_id, root_image, nproc_image
+USE mp,             ONLY : mp_sum
 
 IMPLICIT NONE
 INTEGER            :: ike, iden, icount, iu_eke
@@ -22,6 +24,11 @@ CHARACTER(LEN=6)   :: int_to_char
 CHARACTER(LEN=256) :: filename
 REAL(DP) :: kev, kedenv
 LOGICAL  :: exst, parallelfs
+!
+!  First collect the total energies
+!
+CALL mp_sum(energy_geo, world_comm)
+energy_geo=energy_geo / nproc_image
 
 IF (my_image_id /= root_image) RETURN
 

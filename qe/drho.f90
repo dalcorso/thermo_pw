@@ -7,7 +7,7 @@
 !
 !-----------------------------------------------------------------------
 
-subroutine drho_tpw
+SUBROUTINE drho_tpw
   !-----------------------------------------------------------------------
   !
   !    Here we compute, for each mode the change of the charge density
@@ -18,7 +18,7 @@ subroutine drho_tpw
   !
   !
   USE kinds,      ONLY : DP
-  USE gvecs,         ONLY : doublegrid
+  USE gvecs,      ONLY : doublegrid
   USE fft_base,   ONLY : dfftp, dffts
   USE lsda_mod,   ONLY : nspin
   USE cell_base,  ONLY : omega
@@ -46,10 +46,9 @@ subroutine drho_tpw
   USE becmod,     ONLY : bec_type, allocate_bec_type, deallocate_bec_type
   USE fft_interfaces, ONLY : fft_interpolate
 
+  IMPLICIT NONE
 
-  implicit none
-
-  integer :: mode, is, ir, irr, iper, npe, nrstot, nu_i, nu_j, ik, &
+  INTEGER :: mode, is, ir, irr, iper, npe, nrstot, nu_i, nu_j, ik, &
              ipol
   ! counter on modes
   ! counter on atoms and polarizations
@@ -61,13 +60,12 @@ subroutine drho_tpw
   ! counter on k-point
   ! counter on coordinates
 
-  real(DP), allocatable :: wgg (:,:,:)
+  REAL(DP), ALLOCATABLE :: wgg (:,:,:)
   ! the weight of each point
 
-
-  complex(DP) :: zdotc, wdyn (3 * nat, 3 * nat)
-  type (bec_type), pointer :: becq(:), alpq(:,:)
-  complex(DP), allocatable :: dvlocin (:), drhous (:,:,:),&
+  COMPLEX(DP) :: zdotc, wdyn (3 * nat, 3 * nat)
+  TYPE (bec_type), POINTER :: becq(:), alpq(:,:)
+  COMPLEX(DP), ALLOCATABLE :: dvlocin (:), drhous (:,:,:),&
        drhoust (:,:,:), dbecsum(:,:,:,:), dbecsum_nc(:,:,:,:,:)
   ! auxiliary to store bec at k+q
   ! auxiliary to store alphap at
@@ -80,161 +78,160 @@ subroutine drho_tpw
 !  The PAW case requires dbecsumort so we recalculate this starting part
 !  This will be changed soon
 !
-  if (all_done) return
-  if ((rec_code_read >=-20 .and..not.okpaw)) return
+  IF (all_done) RETURN
+  IF ((rec_code_read >=-20 .AND..NOT.okpaw)) RETURN
 
   dyn00(:,:) = (0.d0,0.d0)
-  if (.not.okvan) return
-  call start_clock ('drho')
+  IF (.NOT.okvan) RETURN
+  CALL start_clock ('drho')
   !
   !    first compute the terms needed for the change of the charge density
   !    due to the displacement of the augmentation charge
   !
-  call compute_becsum_ph()
+  CALL compute_becsum_ph()
   !
-  call compute_alphasum()
+  CALL compute_alphasum()
   !
   !    then compute the weights
   !
-  allocate (wgg (nbnd ,nbnd , nksq))
-  if (lgamma) then
+  ALLOCATE (wgg (nbnd ,nbnd , nksq))
+  IF (lgamma) THEN
      becq => becp1
      alpq => alphap
-  else
-     allocate (becq ( nksq))
-     allocate (alpq ( 3, nksq))
-     do ik =1,nksq
-        call allocate_bec_type (  nkb, nbnd, becq(ik))
+  ELSE
+     ALLOCATE (becq ( nksq))
+     ALLOCATE (alpq ( 3, nksq))
+     DO ik =1,nksq
+        CALL allocate_bec_type (  nkb, nbnd, becq(ik))
         DO ipol=1,3
            CALL allocate_bec_type (  nkb, nbnd, alpq(ipol,ik))
         ENDDO
-     end do
-  endif
-  call compute_weight (wgg)
+     ENDDO
+  ENDIF
+  CALL compute_weight (wgg)
   !
   !    becq and alpq are sufficient to compute the part of C^3 (See Eq. 37
   !    which does not contain the local potential
   !
-  IF (.not.lgamma) call compute_becalp (becq, alpq)
-  call compute_nldyn (dyn00, wgg, becq, alpq)
+  IF (.NOT.lgamma) CALL compute_becalp (becq, alpq)
+  CALL compute_nldyn (dyn00, wgg, becq, alpq)
   !
   !   now we compute the change of the charge density due to the change of
   !   the orthogonality constraint
   !
-  allocate (drhous ( dfftp%nnr, nspin_mag , 3 * nat))
-  allocate (dbecsum( nhm * (nhm + 1) /2, nat, nspin_mag, 3 * nat))
+  ALLOCATE (drhous ( dfftp%nnr, nspin_mag , 3 * nat))
+  ALLOCATE (dbecsum( nhm * (nhm + 1) /2, nat, nspin_mag, 3 * nat))
   dbecsum=(0.d0,0.d0)
   IF (noncolin) THEN
-     allocate (dbecsum_nc( nhm, nhm, nat, nspin, 3 * nat))
+     ALLOCATE (dbecsum_nc( nhm, nhm, nat, nspin, 3 * nat))
      dbecsum_nc=(0.d0,0.d0)
-     call compute_drhous_nc_tpw (drhous, dbecsum_nc, wgg, becq, alpq)
+     CALL compute_drhous_nc_tpw (drhous, dbecsum_nc, wgg, becq, alpq)
   ELSE
-     call compute_drhous_tpw (drhous, dbecsum, wgg, becq, alpq)
+     CALL compute_drhous_tpw (drhous, dbecsum, wgg, becq, alpq)
   ENDIF
 
-  if (.not.lgamma) then
-     do ik=1,nksq
-        call deallocate_bec_type(becq(ik))
+  IF (.NOT.lgamma) THEN
+     DO ik=1,nksq
+        CALL deallocate_bec_type(becq(ik))
         DO ipol=1,3
-           call deallocate_bec_type(alpq(ipol,ik))
+           CALL deallocate_bec_type(alpq(ipol,ik))
         ENDDO
-     end do
-     deallocate (becq)
-     deallocate (alpq)
-  endif
-  deallocate (wgg)
+     END DO
+     DEALLOCATE (becq)
+     DEALLOCATE (alpq)
+  ENDIF
+  DEALLOCATE (wgg)
   !
   !  The part of C^3 (Eq. 37) which contain the local potential can be
   !  evaluated with an integral of this change of potential and drhous
   !
-  allocate (dvlocin(dffts%nnr))
+  ALLOCATE (dvlocin(dffts%nnr))
 
   wdyn (:,:) = (0.d0, 0.d0)
   nrstot = dffts%nr1 * dffts%nr2 * dffts%nr3
-  do nu_i = 1, 3 * nat
-     call compute_dvloc (nu_i, dvlocin)
-     do nu_j = 1, 3 * nat
-        do is = 1, nspin_lsda
+  DO nu_i = 1, 3 * nat
+     CALL compute_dvloc (nu_i, dvlocin)
+     DO nu_j = 1, 3 * nat
+        DO is = 1, nspin_lsda
            wdyn (nu_j, nu_i) = wdyn (nu_j, nu_i) + &
                 zdotc (dffts%nnr, drhous(1,is,nu_j), 1, dvlocin, 1) * &
                 omega / DBLE (nrstot)
-        enddo
-     enddo
-
-  enddo
+        ENDDO
+     ENDDO
+  ENDDO
   !
   ! collect contributions from all pools (sum over k-points)
   !
-  call mp_sum ( dyn00, inter_pool_comm )
-  call mp_sum ( wdyn, inter_pool_comm )
+  CALL mp_sum ( dyn00, inter_pool_comm )
+  CALL mp_sum ( wdyn, inter_pool_comm )
   !
   ! collect contributions from nodes of a pool (sum over G & R space)
   !
-  call mp_sum ( wdyn, intra_bgrp_comm )
+  CALL mp_sum ( wdyn, intra_bgrp_comm )
 
-  call zaxpy (3 * nat * 3 * nat, (1.d0, 0.d0), wdyn, 1, dyn00, 1)
+  CALL zaxpy (3 * nat * 3 * nat, (1.d0, 0.d0), wdyn, 1, dyn00, 1)
   !
   !     force this term to be hermitean
   !
-  do nu_i = 1, 3 * nat
-     do nu_j = 1, nu_i
+  DO nu_i = 1, 3 * nat
+     DO nu_j = 1, nu_i
         dyn00(nu_i,nu_j) = 0.5d0*( dyn00(nu_i,nu_j) + CONJG(dyn00(nu_j,nu_i)))
         dyn00(nu_j,nu_i) = CONJG(dyn00(nu_i,nu_j))
-     enddo
-  enddo
+     ENDDO
+  ENDDO
   !      call tra_write_matrix('drho dyn00',dyn00,u,nat)
   !
   !    add the augmentation term to the charge density and save it
   !
-  allocate (drhoust(dfftp%nnr, nspin_mag , npertx))
+  ALLOCATE (drhoust(dfftp%nnr, nspin_mag , npertx))
   drhoust=(0.d0,0.d0)
   !
   !  The calculation of dbecsum is distributed across processors (see addusdbec)
   !  Sum over processors the contributions coming from each slice of bands
   !
   IF (noncolin) THEN
-     call mp_sum ( dbecsum_nc, intra_bgrp_comm )
+     CALL mp_sum ( dbecsum_nc, intra_bgrp_comm )
   ELSE
-     call mp_sum ( dbecsum, intra_bgrp_comm )
-  END IF
+     CALL mp_sum ( dbecsum, intra_bgrp_comm )
+  ENDIF
 
-  IF (noncolin.and.okvan) CALL set_dbecsum_nc(dbecsum_nc, dbecsum, 3*nat)
+  IF (noncolin.AND.okvan) CALL set_dbecsum_nc(dbecsum_nc, dbecsum, 3*nat)
 
   mode = 0
-  if (okpaw) becsumort=(0.0_DP,0.0_DP)
-  do irr = 1, nirr
+  IF (okpaw) becsumort=(0.0_DP,0.0_DP)
+  DO irr = 1, nirr
      npe = npert (irr)
-     if (doublegrid) then
-        do is = 1, nspin_mag
-           do iper = 1, npe
-              call fft_interpolate (dffts, drhous(:,is,mode+iper), dfftp, &
+     IF (doublegrid) THEN
+        DO is = 1, nspin_mag
+           DO iper = 1, npe
+              CALL fft_interpolate (dffts, drhous(:,is,mode+iper), dfftp, &
                                                   drhoust(:,is,iper))
-           enddo
-        enddo
-     else
-        call zcopy (dfftp%nnr*nspin_mag*npe, drhous(1,1,mode+1), 1, drhoust, 1)
-     endif
+           ENDDO
+        ENDDO
+     ELSE
+        CALL zcopy (dfftp%nnr*nspin_mag*npe, drhous(1,1,mode+1), 1, drhoust, 1)
+     ENDIF
 
-     call dscal (2*dfftp%nnr*nspin_mag*npe, 0.5d0, drhoust, 1)
+     CALL dscal (2*dfftp%nnr*nspin_mag*npe, 0.5d0, drhoust, 1)
 
-     call addusddens (drhoust, dbecsum(1,1,1,mode+1), mode, npe, 1)
-     do iper = 1, npe
+     CALL addusddens (drhoust, dbecsum(1,1,1,mode+1), mode, npe, 1)
+     DO iper = 1, npe
         nu_i = mode+iper
-        call save_buffer (drhoust (1, 1, iper), lrdrhous, iudrhous, nu_i)
-     enddo
+        CALL save_buffer (drhoust (1, 1, iper), lrdrhous, iudrhous, nu_i)
+     ENDDO
      mode = mode+npe
-  enddo
-   !
-   !  Collect the sum over k points in different pools.
-   !
-   IF (okpaw) call mp_sum ( becsumort, inter_pool_comm )
+  ENDDO
+  !
+  !  Collect the sum over k points in different pools.
+  !
+  IF (okpaw) CALL mp_sum ( becsumort, inter_pool_comm )
 
-  deallocate (drhoust)
-  deallocate (dvlocin)
-  deallocate (dbecsum)
-  if (noncolin) deallocate(dbecsum_nc)
-  deallocate (drhous)
+  DEALLOCATE (drhoust)
+  DEALLOCATE (dvlocin)
+  DEALLOCATE (dbecsum)
+  IF (noncolin) DEALLOCATE (dbecsum_nc)
+  DEALLOCATE (drhous)
 
-  call stop_clock ('drho')
-  return
-end subroutine drho_tpw
+  CALL stop_clock ('drho')
+  RETURN
+END SUBROUTINE drho_tpw

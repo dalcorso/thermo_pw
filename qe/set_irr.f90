@@ -92,8 +92,8 @@ subroutine set_irr_tpw (xq, u, npert, nirr, eigen)
 !
 ! symmetrize the random matrix with the little group of q
 !
-     call symdynph_gq_tpw (xq,wdyn,s,invs,rtau,irt,nsymq,nat,irotmq,minus_q)
-!call write_matrix_tpw('symmetrized matrix',wdyn,nat)
+     call symdynph_gq_new (xq,wdyn,s,invs,rtau,irt,nsymq,nat,irotmq,minus_q)
+!call write_matrix('symmetrized matrix',wdyn,nat)
 !
 !  Diagonalize the symmetrized random matrix.
 !  Transform the symmetrized matrix, currently in crystal coordinates,

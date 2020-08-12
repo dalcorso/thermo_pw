@@ -109,7 +109,7 @@ SUBROUTINE set_int3q(irr, imode0, rpert, drhoscf, int3_paw0, dvscfin)
 !   In the US and PAW case computes the integral of dV_Hxc and the 
 !   augmentation function. This quantity is needed in adddvscf.
 !
-  CALL newdq_tpw(dvscfin,rpert)
+  CALL newdq(dvscfin,rpert)
 
   IF (okpaw) DEALLOCATE(dbecsum)
   DEALLOCATE(drhoc)

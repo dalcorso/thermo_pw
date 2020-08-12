@@ -90,7 +90,7 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
   ! ... smallg_q flags in symmetry operations of the crystal
   ! ... that are not symmetry operations of the small group of q
   !
-  CALL set_small_group_of_q_tpw(nsymq,invsymq,minus_q)
+  CALL set_small_group_of_q(nsymq,invsymq,minus_q)
   !
   ! ... Input k-points are assumed to be  given in the IBZ of the Bravais
   ! ... lattice, with the full point symmetry of the lattice.

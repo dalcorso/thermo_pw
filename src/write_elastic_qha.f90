@@ -37,7 +37,7 @@ INTEGER :: itemp, startt, lastt
 CHARACTER(LEN=256)  :: filelastic
 LOGICAL :: all_geometry_done
 
-CALL check_all_geometry_done(all_geometry_done)
+CALL check_all_geometries_done(all_geometry_done)
 IF (.NOT.all_geometry_done) RETURN
 !
 !  the elastic constants are calculated here

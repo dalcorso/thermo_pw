@@ -5,7 +5,15 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!--------------------------------------------------------
 SUBROUTINE check_existence(iwork, part, iaux, run)
+!--------------------------------------------------------
+!
+!   This routine checks if on file there are the information of
+!   the self-consitent run corresponding to iwork, part, iaux.
+!   If it finds them, it reads the energy and the stress if necessary
+!   and sets run to .FALSE.. If it does not find them it sets
+!   run to .TRUE. so that pw.x is called.
 !
 !   This routine can be called separately by each image
 !
@@ -83,8 +91,13 @@ SUBROUTINE check_existence(iwork, part, iaux, run)
   RETURN
 END SUBROUTINE check_existence
 
+!--------------------------------------------------------
 SUBROUTINE save_existence(iwork, part, iaux)
-
+!--------------------------------------------------------
+!
+!  This routine saves on file the total energy, and
+!  possibly the stress of a self-consistent run. 
+!
   USE control_thermo,  ONLY : lstress
 
   USE thermo_mod,      ONLY : energy_geo

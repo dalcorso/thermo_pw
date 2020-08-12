@@ -271,22 +271,6 @@ SUBROUTINE quadratic_fit_t(itemp, celldm_t, free_e_min_t, ph_free_ener, &
   !
 END SUBROUTINE quadratic_fit_t
 
-INTEGER FUNCTION compute_nwork_ph(no_ph,ndatatot)
-IMPLICIT NONE
-INTEGER, INTENT(IN) :: ndatatot
-LOGICAL, INTENT(IN) :: no_ph(ndatatot)
-
-INTEGER :: idata, counter_ndata
-
-counter_ndata=0
-DO idata=1,ndatatot
-   IF (.NOT. no_ph(idata)) counter_ndata=counter_ndata+1
-ENDDO
-compute_nwork_ph=counter_ndata
-
-RETURN
-END FUNCTION compute_nwork_ph
-
 SUBROUTINE set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
 !
 !  this rouotine receives and array of values of celldm celldm_geo(6,ndata)

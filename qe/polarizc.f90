@@ -7,7 +7,7 @@
 !
 !
 !-----------------------------------------------------------------------
-subroutine polarizc ( iu )
+SUBROUTINE polarizc ( iu )
   !-----------------------------------------------------------------------
   !
   !      calculates the frequency dependent polarizability
@@ -42,18 +42,18 @@ subroutine polarizc ( iu )
   !
   ! local variables
   !
-  integer :: ibnd, ipol, jpol, nrec, ik, ierr, npw
+  INTEGER :: ibnd, ipol, jpol, nrec, ik, ierr, npw
   ! counter on polarizations
   ! counter on records
   ! counter on k points
-  real(kind=DP) :: w, weight, repsilon(3,3), iepsilon(3,3)
-  COMPLEX(kind=DP) :: cepsilon(3,3), alpha(3,3)
+  REAL(KIND=DP) :: w, weight, repsilon(3,3), iepsilon(3,3)
+  COMPLEX(KIND=DP) :: cepsilon(3,3), alpha(3,3)
 
-  complex(kind=DP), EXTERNAL :: zdotc
+  COMPLEX(KIND=DP), EXTERNAL :: zdotc
 
-  call start_clock ('polariz')
+  CALL start_clock ('polariz')
   cepsilon(:,:) = (0.0_DP, 0.0_DP)
-  do ik = 1, nksq
+  DO ik = 1, nksq
      npw = ngk(ik)
      IF (ABS(CMPLX(fru(iu),fiu(iu)))> 1.D-7) THEN
 !
@@ -67,13 +67,13 @@ subroutine polarizc ( iu )
         weight = wk(ik) * 2.0_DP
      END IF
      w = fpi * weight / omega
-     do ipol = 1, 3
+     DO ipol = 1, 3
         nrec = (ipol - 1) * nksq + ik
-        call get_buffer (dvpsi, lrebar, iuebar, nrec)
-        do jpol = 1, 3
+        CALL get_buffer (dvpsi, lrebar, iuebar, nrec)
+        DO jpol = 1, 3
            nrec = (jpol - 1) * nksq + ik
-           call get_buffer(dpsi, lrdwf, iudwf, nrec)
-           do ibnd = 1, nbnd_occ (ik)
+           CALL get_buffer(dpsi, lrdwf, iudwf, nrec)
+           DO ibnd = 1, nbnd_occ (ik)
               !
               !  this is  <DeltaV*psi(E)|DeltaPsi(E, w)>
               !
@@ -82,13 +82,13 @@ subroutine polarizc ( iu )
               IF (noncolin) &
                  cepsilon(ipol,jpol)=cepsilon(ipol,jpol)-2.d0*w* &
                    zdotc (npw, dvpsi (1+npwx, ibnd), 1, dpsi (1+npwx, ibnd), 1) 
-           enddo
+           ENDDO
            IF (ABS(CMPLX(fru(iu),fiu(iu))) >= 1.D-7) THEN
 !
 !   Add the term at -w
 !
-              call get_buffer(dpsi, lr1dwf, iu1dwf, nrec)
-              do ibnd = 1, nbnd_occ (ik)
+              CALL get_buffer(dpsi, lr1dwf, iu1dwf, nrec)
+              DO ibnd = 1, nbnd_occ (ik)
                  !
                  !  this is  <DeltaV*psi(E)|DeltaPsi(E,-w)>
                  !
@@ -97,13 +97,13 @@ subroutine polarizc ( iu )
                  IF (noncolin) &
                  cepsilon(ipol,jpol)=cepsilon(ipol,jpol)-2.d0*w* &
                      zdotc (npw,dvpsi(1+npwx, ibnd),1,dpsi(1+npwx, ibnd),1) 
-              enddo
-           END IF
-        enddo
-     enddo
-  enddo
-  call mp_sum ( cepsilon, intra_bgrp_comm )
-  call mp_sum ( cepsilon, inter_pool_comm )
+              ENDDO
+           ENDIF
+        ENDDO
+     ENDDO
+  ENDDO
+  CALL mp_sum ( cepsilon, intra_bgrp_comm )
+  CALL mp_sum ( cepsilon, inter_pool_comm )
   !
   !      symmetrize
   !
@@ -112,10 +112,10 @@ subroutine polarizc ( iu )
   !     +                                ipol=1,3),jpol=1,3)
   repsilon=DREAL(cepsilon)
   iepsilon=DIMAG(cepsilon)
-  call crys_to_cart ( repsilon )
-  call symmatrix ( repsilon )
-  call crys_to_cart ( iepsilon )
-  call symmatrix ( iepsilon )
+  CALL crys_to_cart ( repsilon )
+  CALL symmatrix ( repsilon )
+  CALL crys_to_cart ( iepsilon )
+  CALL symmatrix ( iepsilon )
   !
   !    pass to cartesian axis
   !
@@ -127,9 +127,9 @@ subroutine polarizc ( iu )
   !
   ! add the diagonal part
   !
-  do ipol = 1, 3
+  DO ipol = 1, 3
      repsilon (ipol, ipol) = repsilon (ipol, ipol) + 1.0_DP
-  enddo
+  ENDDO
   cepsilon=CMPLX(repsilon, iepsilon)
   epsilonc(:,:,iu)=cepsilon(:,:)
   !
@@ -139,18 +139,20 @@ subroutine polarizc ( iu )
                      &frequency",f9.4," +",f9.4," i Ry")') current_w 
   WRITE( stdout, '(42x,f9.4," +",f9.4," i eV")') current_w * rytoev
   WRITE( stdout, '(/,10x,"Real part ",f5.2,/)') 
-  WRITE( stdout, '(10x,"(",3f18.9," )")') ((repsilon(ipol,jpol), ipol=1,3), jpol=1,3)
+  WRITE( stdout, '(10x,"(",3f18.9," )")') ((repsilon(ipol,jpol), ipol=1,3), &
+                                                                      jpol=1,3)
   WRITE( stdout, '(/,10x,"Imaginary part ",f5.2,/)') 
-  WRITE( stdout, '(10x,"(",3f18.9," )")') ((iepsilon(ipol,jpol), ipol=1,3), jpol=1,3)
+  WRITE( stdout, '(10x,"(",3f18.9," )")') ((iepsilon(ipol,jpol), ipol=1,3), &
+                                                                      jpol=1,3)
 
   IF (nkstot==1 .OR. (nkstot==2.AND.lsda)) CALL write_polarizc(cepsilon, iu)
 !  done_iu(iu)=.TRUE.
-!  call ph_writefile('polarization',0,iu,ierr)
+!  CALL ph_writefile('polarization',0,iu,ierr)
   !
-  call stop_clock ('polariz')
+  CALL stop_clock ('polariz')
 
-  return
-end subroutine polarizc
+  RETURN
+END SUBROUTINE polarizc
 
   SUBROUTINE write_polarizc(cepsilon, iu)
 !
@@ -170,13 +172,13 @@ end subroutine polarizc
   ! compute the polarization
   !
   alpha=(0.0_DP, 0.0_DP)
-  do ipol = 1, 3
-     do jpol = 1, 3
+  DO ipol = 1, 3
+     DO jpol = 1, 3
         IF (ABS(cepsilon(ipol,jpol)) > 1.D-4) &
         alpha (ipol, jpol)=(3.d0*omega/fpi)*(cepsilon (ipol, jpol) - 1.0_DP )/ &
                                             (cepsilon (ipol, jpol) + 2.0_DP )
-     enddo
-  enddo
+     ENDDO
+  ENDDO
   polarc(:,:,iu)=alpha(:,:)
 
   WRITE(stdout,'(/,5x,"Polarizability (a.u.)^3",20x,"Polarizability (A^3)")')
@@ -189,4 +191,3 @@ end subroutine polarizc
          (DIMAG(polarc(ipol,jpol,iu))*BOHR_RADIUS_ANGS**3, jpol=1,3), ipol=1,3)
   RETURN
   END SUBROUTINE write_polarizc
-

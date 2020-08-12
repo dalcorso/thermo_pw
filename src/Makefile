@@ -31,12 +31,13 @@ clean_bfgs_history.o \
 clean_dfft.o \
 clean_ngeo.o \
 clean_path.o \
-collect_everything.o \
+collect_all_geometries.o \
 collect_info.o \
 compute_cp.o \
 compute_density.o \
 compute_el_comp_t.o \
 compute_eref_band.o \
+compute_nwork_ph.o \
 compute_omega_geo.o \
 deallocate_asyn.o \
 deallocate_thermo.o \
@@ -48,10 +49,13 @@ dos_sub.o \
 dynmatrix_tpw.o \
 elastic_constants_t.o \
 ev_sub.o \
+evaluate_celldm.o \
+evaluate_vm.o \
 float_to_char.o \
 find_symmetry.o \
 find_band_sym_proj.o \
 find_mode_sym_proj.o \
+find_representations_mode_q.o \
 fit_frequencies.o \
 generate_k_along_lines_kz.o \
 generalized_phdos.o \
@@ -67,7 +71,9 @@ io_bands.o \
 initialize_ph_geometry.o \
 local_dos1d_so.o \
 manage_anhar.o   \
+manage_anhar_routines.o   \
 manage_bands.o   \
+manage_collection.o \
 manage_elastic_cons.o \
 manage_elastic_cons_qha.o \
 manage_elastic_cons_qha_2.o \
@@ -76,8 +82,10 @@ manage_piezo_tensor.o \
 manage_ph.o \
 manage_all_geometries_ph.o \
 manage_ph_postproc.o \
+manage_ph_run.o \
 manage_ph_symmetry.o \
 manage_surface_states.o \
+manage_sync_pw.o \
 manage_xrdp.o \
 matdyn_sub.o \
 plan_avg_sub.o \
@@ -106,6 +114,7 @@ proj_band_structure.o \
 q2r_sub.o \
 quadratic_fit.o \
 read_elastic_qha.o \
+read_minimal_info.o \
 readmodes.o \
 read_state_densities.o \
 run_thermo_asyncronously.o \
@@ -131,6 +140,7 @@ sym_band_sub.o \
 thermo_mod.o \
 thermo_readin.o \
 thermo_setup.o \
+thermo_startup.o \
 thermo_summary.o \
 write_anhar.o \
 write_anhar_anis.o \
@@ -161,6 +171,7 @@ PWOBJS = ../../PHonon/PH/libph.a \
 #library modules of QE
 QEMODS = ../../Modules/libqemod.a \
          ../../KS_Solvers/libks_solvers.a \
+         ../../upflib/libupf.a    \
          ../../FFTXlib/libqefft.a \
          ../../LAXlib/libqela.a   \
          ../../UtilXlib/libutil.a \

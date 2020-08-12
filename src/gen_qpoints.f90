@@ -9,11 +9,15 @@ SUBROUTINE gen_qpoints_tpw (ibrav, at_, bg_, nat, tau, ityp, nk1, nk2, nk3, &
      nqx, nq, q, wq)
   !-----------------------------------------------------------------------
   !
+  !  This routine generates a q point mesh for doing integrals over
+  !  the Brillouin zone or to compute the phonon density of states.
+  !  The q points are symmetrized and only inequivalent q points
+  !  with appropriate weights are given in output.
+  !
   USE kinds,      ONLY : DP
   USE cell_base,  ONLY : at, bg
   USE symm_base,  ONLY : set_sym_bl, find_sym, s, irt, nsym, &
-                         nrot, t_rev, time_reversal,  sname, &
-                         allfrac, remove_sym
+                         nrot, t_rev, time_reversal, allfrac, remove_sym
   USE ifc,        ONLY : m_loc
   USE noncollin_module, ONLY : nspin_mag
   USE initial_conf, ONLY : nr1_save, nr2_save, nr3_save
@@ -30,7 +34,7 @@ SUBROUTINE gen_qpoints_tpw (ibrav, at_, bg_, nat, tau, ityp, nk1, nk2, nk3, &
   REAL(DP) :: xqq(3)
   LOGICAL :: skip_equivalence=.FALSE., magnetic_sym, minus_q
   !
-  time_reversal = .true.
+  time_reversal = .TRUE.
   magnetic_sym=(nspin_mag==4)
   minus_q=.TRUE.
   t_rev(:) = 0

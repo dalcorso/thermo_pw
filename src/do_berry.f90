@@ -28,7 +28,8 @@ SUBROUTINE do_berry ( exit_status, polar, nppl )
   !
   USE kinds,            ONLY : DP
   USE io_global,        ONLY : stdout, ionode
-  USE parameters,       ONLY : ntypx, npk, lmaxx
+  USE parameters,       ONLY : ntypx, npk
+  USE upf_params,       ONLY : lmaxx
   USE cell_base,        ONLY : at
   USE basis,            ONLY : starting_pot, startingconfig
   USE control_flags,    ONLY : gamma_only, lscf, lbands, ethr, &

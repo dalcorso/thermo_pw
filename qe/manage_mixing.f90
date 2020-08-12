@@ -8,7 +8,11 @@
 !
 SUBROUTINE manage_mixing(dvscfout, dvscfin, dbecsum, mixin, npe, iter, kter, &
                                                             dr2, convt )
-
+!
+!   This routines is called by all the solve_xx routines to mix the
+!   induced potential and possibly the derivatives of the partial
+!   occupations in the PAW case.
+!
 USE kinds,             ONLY : DP
 USE ions_base,         ONLY : nat
 USE paw_variables,     ONLY : okpaw
@@ -16,7 +20,6 @@ USE fft_base,          ONLY : dfftp
 USE noncollin_module,  ONLY : noncolin, npol, nspin_mag
 USE uspp_param,        ONLY : nhm
 USE control_ph,        ONLY : nmix_ph, tr2_ph, alpha_mix, flmixdpot
-
 
 IMPLICIT NONE
 INTEGER :: npe, iter, kter

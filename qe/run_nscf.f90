@@ -69,7 +69,7 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
      ENDIF
      qnorm = SQRT(xq(1)**2+xq(2)**2+xq(3)**2)
      CALL read_file()
-     CALL set_small_group_of_q_tpw(nsymq,invsymq,minus_q)
+     CALL set_small_group_of_q(nsymq,invsymq,minus_q)
      RETURN
   ENDIF
   !

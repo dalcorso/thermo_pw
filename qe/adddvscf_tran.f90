@@ -7,7 +7,7 @@
 !
 !
 !----------------------------------------------------------------------
-subroutine adddvscf_tran (spin_psi0, ik)
+SUBROUTINE adddvscf_tran (spin_psi0, ik)
   !----------------------------------------------------------------------
   !
   !     This routine computes the contribution of the selfconsistent
@@ -28,17 +28,17 @@ subroutine adddvscf_tran (spin_psi0, ik)
   USE qpoint,     ONLY : npwq
   USE lrus,       ONLY : int3, int3_nc, becp1
   USE eqv,        ONLY : dvpsi
-  implicit none
+  IMPLICIT NONE
   !
   !   The dummy variables
   !
-  integer :: ik, spin_psi0
+  INTEGER :: ik, spin_psi0
   ! input: the k point
   ! input: the spin of the unpertubed wavefunctions psi0
   !
   !   And the local variables
   !
-  integer :: na, nt, ibnd, ih, jh, ijkb0, ikb, jkb, is, js, ijs
+  INTEGER :: na, nt, ibnd, ih, jh, ijkb0, ikb, jkb, is, js, ijs
   ! counter on atoms
   ! counter on atomic types
   ! counter on bands
@@ -48,41 +48,41 @@ subroutine adddvscf_tran (spin_psi0, ik)
   ! counter on the k points
   ! counter on vkb
   ! counter on vkb
-  complex(DP) :: sump
+  COMPLEX(DP) :: sump
   ! auxiliary variable
 
-  if (.not.okvan) return
-  call start_clock ('adddvscf')
+  IF (.not.okvan) RETURN
+  CALL start_clock ('adddvscf')
   ijkb0 = 0
-  do nt = 1, ntyp
-     if (upf(nt)%tvanp  ) then
-        do na = 1, nat
-           if (ityp (na) .eq.nt) then
+  DO nt = 1, ntyp
+     IF (upf(nt)%tvanp  ) then
+        DO na = 1, nat
+           IF (ityp (na) .eq.nt) then
               !
               !   we multiply the integral for the becp term and the beta_n
               !
-              do ibnd = 1, nbnd
-                 do ih = 1, nh (nt)
+              DO ibnd = 1, nbnd
+                 DO ih = 1, nh (nt)
                     ikb = ijkb0 + ih
                     sump = (0.d0, 0.d0)
-                    do jh = 1, nh (nt)
+                    DO jh = 1, nh (nt)
                        jkb = ijkb0 + jh
                        sump = sump + int3 (ih, jh, 1, na, 1)*&
                                    becp1(ik)%k(jkb, ibnd)
-                    enddo
-                    call zaxpy(npwq,sump,vkb(1,ikb),1,dvpsi(1,ibnd),1)
-                 enddo
-              enddo
+                    ENDDO
+                    CALL zaxpy(npwq,sump,vkb(1,ikb),1,dvpsi(1,ibnd),1)
+                 ENDDO
+              ENDDO
               ijkb0 = ijkb0 + nh (nt)
-           endif
-        enddo
-     else
-        do na = 1, nat
-           if (ityp (na) .eq.nt) ijkb0 = ijkb0 + nh (nt)
-        enddo
-     endif
-  enddo
+           ENDIF
+        ENDDO
+     ELSE
+        DO na = 1, nat
+           IF (ityp (na) .EQ.nt) ijkb0 = ijkb0 + nh (nt)
+        ENDDO
+     ENDIF
+  ENDDO
 
-  call stop_clock ('adddvscf')
-  return
-end subroutine adddvscf_tran
+  CALL stop_clock ('adddvscf')
+  RETURN
+END SUBROUTINE adddvscf_tran

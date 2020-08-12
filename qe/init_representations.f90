@@ -65,7 +65,7 @@ subroutine init_representations_tpw()
 !
 !    search for the small group of q
 !
-     CALL set_small_group_of_q_tpw(nsymq,invsymq,minus_q)
+     CALL set_small_group_of_q(nsymq,invsymq,minus_q)
 !
 !    calculate rtau with the new symmetry order
 !
@@ -74,7 +74,7 @@ subroutine init_representations_tpw()
 !    and calculate the vectors G associated to the symmetry Sq = q + G
 !    if minus_q is true calculate also irotmq and the G associated to Sq=-g+G
 !
-     CALL set_giq_tpw (xq,s,nsymq,nsym,irotmq,minus_q,gi,gimq)
+     CALL set_giq (xq,s,nsymq,nsym,irotmq,minus_q,gi,gimq)
 !
 !    Check if we can search symmetry for this q point
 !

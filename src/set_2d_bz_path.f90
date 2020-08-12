@@ -6,6 +6,10 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 SUBROUTINE set_2d_bz_path()
+!
+!  This routine sets a default path for each of the 2d Brillouin zones
+!  Its sets also the number of points for each line of the path.
+!
 USE kinds,            ONLY : DP
 USE input_parameters, ONLY : ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
                              trd_ht, rd_ht, cell_units

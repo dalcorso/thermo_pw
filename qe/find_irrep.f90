@@ -60,7 +60,7 @@ SUBROUTINE find_irrep_sym_tpw()
 
   npertx = 0
   DO irr = 1, nirr
-     npertx = max (npertx, npert (irr) )
+     npertx = MAX (npertx, npert (irr) )
   ENDDO
   CALL allocate_pert()
   CALL set_irr_sym_tpw (t, tmq, npertx )

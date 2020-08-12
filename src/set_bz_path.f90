@@ -6,6 +6,10 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 SUBROUTINE set_bz_path()
+!
+!   This routine sets a default path for each three dimensional Brillouin
+!   zone.
+!
 USE kinds,            ONLY : DP
 USE cell_base,        ONLY : ibrav, celldm
 USE control_paths,    ONLY : xqaux, wqaux, npk_label, letter,     &

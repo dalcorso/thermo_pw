@@ -20,7 +20,7 @@ SUBROUTINE addusdens1d_so (plan, prho)
   !  densities
   !
   USE kinds,      ONLY: DP
-  USE cell_base,  ONLY: alat, omega, celldm
+  USE cell_base,  ONLY: alat, omega, celldm, tpiba
   USE ions_base,  ONLY: nat, ntyp => nsp, ityp
   USE fft_base,   ONLY: dfftp
   USE fft_scalar, ONLY: cft_1z
@@ -73,7 +73,7 @@ SUBROUTINE addusdens1d_so (plan, prho)
   ALLOCATE (qgm(ngm1d)) 
   ALLOCATE (aux(ngm1d,nspin))
   DO ig = 1, ngm1d
-     qmod (ig) = sqrt (gg1d (ig) )
+     qmod (ig) = sqrt (gg1d (ig) ) * tpiba
   ENDDO
   aux(:,:) = (0.d0, 0.d0)
 

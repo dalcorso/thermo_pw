@@ -6,7 +6,12 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 SUBROUTINE manage_ph_postproc(auxdyn, igeom)
-
+!
+!  This driver computes the interatomic force constants and
+!  interpolates the phonon frequencies to make a phonon dispersion
+!  and then computes them on a thick mesh to compute the harmonic
+!  thermodynamic quantities.
+!
 USE control_thermo,   ONLY : ltherm, ltherm_dos, ltherm_freq, set_internal_path
 USE control_paths,    ONLY : disp_nqs
 

@@ -17,7 +17,7 @@ PROGRAM bravais_lattices
 !  it applies an arbitrary rotation and again checks that 
 !  the routine find_ibrav identify correctly the lattice.
 !
-USE kinds, ONLY : DP
+USE kinds,            ONLY : DP
 USE mp_global,        ONLY : mp_startup, mp_global_end
 USE environment,      ONLY : environment_start, environment_end
 USE rotate,           ONLY : find_rotation

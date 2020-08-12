@@ -13,7 +13,7 @@ SUBROUTINE readmodes (nat,nks,q,displa,ngeo,igeo,ntyp,ityp,amass,iflag,inunit)
   !   of the dynamical matrix if iflag==1, otherwise assumes to
   !   read the eigenvectors and copy them in displa
   !
-  USE kinds, ONLY: dp
+  USE kinds, ONLY: DP
   USE constants, ONLY : amu_ry
   IMPLICIT NONE
   ! input

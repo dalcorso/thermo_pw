@@ -9,8 +9,7 @@
 SUBROUTINE apply_trev_r(psic)
 !
 !  This routine applies the time reversal operator to the wavefunctions
-!  evc at the k point ikk_evc and puts the output in evc with the order
-!  of G vectors of ikk_tevc
+!  psic in real space.
 !
 USE kinds,     ONLY : DP
 USE wvfct,     ONLY : nbnd

@@ -19,7 +19,7 @@ SUBROUTINE thermo_readin()
   !  xqaux,  wqaux, wqauxr, letter, letter_path
   !  label_list, label_disp_q, nrap_plot_in, rap_plot_in
   !
-  !  Moreover it create the restart directory
+  !  Moreover it creates the restart directory
   !
   USE kinds,                ONLY : DP
 !
@@ -41,7 +41,7 @@ SUBROUTINE thermo_readin()
                                    flepsilon, fleldos, fleltherm, fldosfrq
   USE temperature,          ONLY : tmin, tmax, deltat, ntemp
   USE control_pressure,     ONLY : pressure
-  USE control_dosq,         ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq, &
+  USE control_dosq,         ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq,&
                                    freqmin_input, freqmax_input, phdos_sigma
   USE control_paths,        ONLY : xqaux, wqaux, wqauxr, npk_label, letter, &
                                    label_list, nqaux, q_in_band_form, &
@@ -85,9 +85,9 @@ SUBROUTINE thermo_readin()
                                    poly_degree_bfact, lsolve
   USE piezoelectric_tensor, ONLY : nppl
   USE grun_anharmonic,      ONLY : poly_degree_grun
-  USE images_omega, ONLY : omega_group
-  USE control_qe,   ONLY : force_band_calculation, use_ph_images
-  USE band_computation, ONLY : sym_for_diago
+  USE images_omega,         ONLY : omega_group
+  USE control_qe,           ONLY : force_band_calculation, use_ph_images
+  USE band_computation,     ONLY : sym_for_diago
 !
 !  the QE variables needed here. max_seconds, zasr, xmldyn and fildyn
 !  could be set by this routine 

@@ -10,10 +10,11 @@ SUBROUTINE symmetrize_drho(drhoscf, dbecsum, irr, npe, code)
 !  This subroutine symmetrizes drhoscf and, in the PAW case dbecsum, 
 !  calling the appropriate routines according to code
 !  
-!  code 1 : phonon perturbation
-!  code 2 : electric field perturbation q=0
-!  code 3 : electric field perturbation q/=0
-!  code 4 : electric field perturbation q=0 (complex quantity for optical)
+!  code
+!   1   : phonon perturbation
+!   2   : electric field perturbation q=0
+!   3   : electric field perturbation q/=0 (for eels) 
+!   4   : electric field perturbation q=0 (complex quantity for optical)
 !
 USE kinds,            ONLY : DP
 USE ions_base,        ONLY : nat

@@ -281,7 +281,7 @@ SUBROUTINE phq_init_tpw()
   IF (noncolin.AND.domag) DEALLOCATE(tevc)
   DEALLOCATE( aux1 )
   !
-  IF (trans.OR.zeu) CALL dvanqq_tpw()
+  IF (trans.OR.zeu) CALL dvanqq()
   !
   IF ( ( epsil .OR. zue .OR. l_head) .AND. okvan ) THEN
      CALL compute_qdipol(dpqq)
@@ -322,7 +322,7 @@ SUBROUTINE phq_init_tpw()
   !
   CALL add_zstar_us_tpw()
 
-  IF ( trans ) CALL dynmat0_tpw()
+  IF ( trans ) CALL dynmat0()
   !
   CALL stop_clock( 'phq_init' )
   !

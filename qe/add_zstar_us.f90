@@ -6,8 +6,8 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !--------------------------------------------------------
-subroutine add_zstar_us_tpw()
-!----------===============-------------------------------
+SUBROUTINE add_zstar_us_tpw()
+!--------------------------------------------------------
   ! add the contribution of all modes to the effective charges. 
   ! This term is common to both Born effective charges: those calculated 
   ! as dF/dE and those calculated as dP/du.
@@ -55,11 +55,11 @@ subroutine add_zstar_us_tpw()
   COMPLEX(DP), ALLOCATABLE :: aux1(:,:)
 
 
-  IF ( .NOT. comp_irr(0) .OR. done_irr(0) ) RETURN
+  IF (.NOT. comp_irr(0) .OR. done_irr(0) ) RETURN
   IF (.NOT. (zeu.OR.zue).OR. done_start_zstar ) RETURN
   IF (rec_code_read > -30 ) RETURN
 
-  call start_clock('add_zstar_us')
+  CALL start_clock('add_zstar_us')
   IF (.NOT. okvan) THEN
      zstarue0=(0.0_DP,0.0_DP)
      zstareu0=(0.0_DP,0.0_DP)
@@ -77,8 +77,8 @@ subroutine add_zstar_us_tpw()
    CALL allocate_bec_type (nkb,nbnd,becp2)
    CALL allocate_bec_type (nkb,nbnd,bedp)
    DO ipol=1,3
-      call allocate_bec_type (nkb,nbnd,alphadk(ipol))
-      call allocate_bec_type (nkb,nbnd,alphapp(ipol))
+      CALL allocate_bec_type (nkb,nbnd,alphadk(ipol))
+      CALL allocate_bec_type (nkb,nbnd,alphapp(ipol))
    ENDDO
 
   ALLOCATE (dvkb(npwx,nkb,3))
@@ -87,12 +87,12 @@ subroutine add_zstar_us_tpw()
      npwq = ngk(ikk)
      npw=ngk(ikk)
      weight = wk (ikk)
-     IF (nksq>1) call get_buffer (evc, lrwfc, iuwfc, ikk)
-     call init_us_2 (npw, igk_k(1,ikk), xk (1, ikk), vkb)
+     IF (nksq>1) CALL get_buffer (evc, lrwfc, iuwfc, ikk)
+     CALL init_us_2 (npw, igk_k(1,ikk), xk (1, ikk), vkb)
      !
      ! Calculates  | d/dk beta >
      !
-     call dvkb3_tpw(ik,dvkb)
+     CALL dvkb3_tpw(ik,dvkb)
      !
      !   alphadk = <-i d/dk d/du beta|psi>
      !   becp2 = < -i d/dk beta | psi>
@@ -156,7 +156,7 @@ subroutine add_zstar_us_tpw()
            npe=npert(irr)
            DO ipert = 1, npe
               mode = imode0 + ipert
-              call add_dkmds_tpw(ik,u(1,mode),jpol,becp2,alphadk,bedp,alphapp, &
+              CALL add_dkmds_tpw(ik,u(1,mode),jpol,becp2,alphadk,bedp,alphapp, &
                              weight, zstarue0(mode,jpol) )
            ENDDO
            imode0 = imode0 + npe
@@ -178,7 +178,7 @@ subroutine add_zstar_us_tpw()
 !  effective charges collected among processors
 !
    CALL mp_sum ( zstarue0, inter_pool_comm )
-!  write(6,*) ' term Z^{(2a}'
+!  WRITE(6,*) ' term Z^{(2a}'
 !  DO na = 1, nat
 !     WRITE( stdout, '(10x," atom ",i6, a6)') na, atm(ityp(na))
 !     WRITE( stdout, '(6x,"Ex  (",6f10.5," )")')  (zstarue0 (3*(na-1)+jpol,1), &

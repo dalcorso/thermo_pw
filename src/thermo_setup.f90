@@ -29,6 +29,8 @@ SUBROUTINE thermo_setup()
   !   It changes the variables of QE only if ibrav=0 and allowed by the 
   !   user. In this case it changes ibrav, celldm, tau, at, and bg.
   !
+  !   It sets the variable with_asyn_images if nimage>1
+  !
   USE kinds,                ONLY : DP
   USE constants,            ONLY : k_boltzmann_ry
   USE thermo_mod,           ONLY : what, ngeo, fact_ngeo, ngeo_ph    
@@ -76,6 +78,8 @@ SUBROUTINE thermo_setup()
   USE klist,                ONLY : degauss, ltetra
   USE control_flags,        ONLY : ethr
   USE io_global,            ONLY : stdout
+  USE mp_images,            ONLY : nimage
+  USE mp_asyn,              ONLY : with_asyn_images
 
   !
   IMPLICIT NONE
@@ -84,6 +88,9 @@ SUBROUTINE thermo_setup()
   REAL(DP), PARAMETER :: eps1=1D-8
   REAL(DP) :: ur(3,3), global_s(3,3), rd_ht(3,3), celldm_(6), alat_save, zero
   REAL(DP), ALLOCATABLE :: tau_aux(:,:)
+  !
+  !
+  with_asyn_images=(nimage>1)
   !
   CALL set_temperature()
   !

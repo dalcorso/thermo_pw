@@ -113,7 +113,7 @@ SUBROUTINE compute_drhous_tpw (drhous, dbecsum, wgg, becq, alpq)
      !
      !   Read the wavefunctions at k+q
      !
-     IF (.NOT.lgamma.AND.nksq>1) call get_buffer (evq, lrwfc, iuwfc, ikq)
+     IF (.NOT.lgamma.AND.nksq>1) CALL get_buffer (evq, lrwfc, iuwfc, ikq)
      !
      !   And compute the contribution of this k point to the change of
      !   the charge density

@@ -22,7 +22,7 @@ INTEGER :: itemp
 CHARACTER(LEN=256) :: filedata, filerap, fileout, gnu_filename, filenameps
 LOGICAL :: all_geometry_done
 
-CALL check_all_geometry_done(all_geometry_done)
+CALL check_all_geometries_done(all_geometry_done)
 IF (.NOT.all_geometry_done) RETURN
 
 IF (ltherm_dos) THEN
@@ -108,7 +108,7 @@ REAL(DP), ALLOCATABLE :: phf(:)
 LOGICAL :: all_geometry_done
 INTEGER :: compute_nwork
 
-CALL check_all_geometry_done(all_geometry_done)
+CALL check_all_geometries_done(all_geometry_done)
 IF (.NOT.all_geometry_done) RETURN
 !
 !    Anisotropic solid. Compute the crystal parameters, the thermal expansion 

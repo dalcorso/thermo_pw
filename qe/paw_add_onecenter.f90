@@ -357,7 +357,7 @@ MODULE paw_add_onecenter
     REAL(DP),ALLOCATABLE :: egcxc_of_tid(:)
 
 
-    if(TIMING) CALL start_clock ('PAW_gcxc_v')
+    IF (TIMING) CALL start_clock ('PAW_gcxc_v')
   
     e_gcxc = 0._dp
 

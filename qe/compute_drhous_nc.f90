@@ -13,8 +13,6 @@ SUBROUTINE compute_drhous_nc_tpw (drhous, dbecsum, wgg, becq, alpq)
   !    This routine computes the part of the change of the charge density
   !    which is due to the orthogonalization constraint on wavefunctions
   !
-  !
-  !
   USE kinds,      ONLY : DP
   USE ions_base,  ONLY : nat
   USE lsda_mod,   ONLY : lsda, nspin, current_spin, isk
@@ -117,7 +115,7 @@ SUBROUTINE compute_drhous_nc_tpw (drhous, dbecsum, wgg, becq, alpq)
      !
      !   Read the wavefunctions at k+q
      !
-     IF (.NOT.lgamma.AND.nksq>1) call get_buffer(evq, lrwfc, iuwfc, ikq)
+     IF (.NOT.lgamma.AND.nksq>1) CALL get_buffer(evq, lrwfc, iuwfc, ikq)
      !
      !   And compute the contribution of this k point to the change of
      !   the charge density

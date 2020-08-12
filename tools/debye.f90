@@ -177,7 +177,8 @@ CHARACTER(LEN=6) :: int_to_char
 
 iu_therm=find_free_unit()
 
-OPEN (UNIT=iu_therm, FILE=TRIM(filename)//'.dw', STATUS='unknown', FORM='formatted')
+OPEN (UNIT=iu_therm, FILE=TRIM(filename)//'.dw', STATUS='unknown', &
+                                                 FORM='formatted')
 WRITE(iu_therm,'("#",6x,"T",14x,"B_33")')
 
 DO itemp = 1, ntemp

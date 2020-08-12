@@ -22,83 +22,60 @@ PROGRAM thermo_pw
   ! ... carried out in parallel. This driver can carry out a scf 
   ! ... calculation, a non scf calculation to determine the band structure,
   ! ... or a linear response calculation at a given q and for a given
-  ! ... representation. Finally the root image can carry out several
-  ! ... post processing tasks. The type of calculations currently implemented 
+  ! ... representation. Finally several post processing tasks are carried
+  ! ... out in parallel or by the root image. 
+  ! ... The type of calculations currently implemented 
   ! ... are described in the user's guide and in the developer's guide.
   ! ...
 
   USE kinds,            ONLY : DP
 
-  USE thermo_mod,       ONLY : what, ngeo, energy_geo, tot_ngeo, density,  &
-                               start_geometry, last_geometry
+  USE thermo_mod,       ONLY : what, ngeo
   USE control_thermo,   ONLY : lev_syn_1, lev_syn_2, lpwscf_syn_1,         &
-                               lbands_syn_1, lph, outdir_thermo, lq2r,     &
-                               lconv_ke_test, lconv_nk_test,               &
+                               lph, lconv_ke_test, lconv_nk_test,    &
                                lelastic_const, lectqha,            &
                                lpiezoelectric_tensor, lpolarization,       &
-                               lpart2_pw, all_geometries_together
-  USE control_pwrun,    ONLY : do_punch
-  USE control_elastic_constants, ONLY : elalgen, ngeom
-  USE control_2d_bands, ONLY : only_bands_plot
-  USE control_mur,      ONLY : lmurn
-  USE control_xrdp,     ONLY : lxrdp
-!
-!  library helper routines and variables
-!
-  USE piezoelectric_tensor, ONLY : polar_geo 
+                               lpart2_pw
+
+  USE control_elastic_constants, ONLY : ngeom
 !
 !  variables of pw or phonon used here
 !
-  USE input_parameters, ONLY : outdir
-  USE ions_base,        ONLY : tau
-  USE cell_base,        ONLY : at, omega, celldm
-
-  USE io_files,         ONLY : tmp_dir, wfc_dir, check_tempdir
-  USE check_stop,       ONLY : max_seconds
+  USE check_stop,       ONLY : max_seconds, check_stop_init
 !
 !  parallelization control 
 !
-  USE check_stop,       ONLY : check_stop_init
-  USE mp_global,        ONLY : mp_startup, mp_global_end
-  USE environment,      ONLY : environment_start, environment_end
-  USE mp_images,        ONLY : nimage, nproc_image, my_image_id, root_image
-  USE io_global,        ONLY : stdout, meta_ionode_id
-  USE mp_world,         ONLY : world_comm
-  USE mp_pools,         ONLY : intra_pool_comm
-  USE mp_bands,         ONLY : intra_bgrp_comm, inter_bgrp_comm
-  USE mp_diag,          ONLY : mp_start_diag
-  USE mp_asyn,          ONLY : with_asyn_images, stop_signal_activated
-  USE mp,               ONLY : mp_sum, mp_bcast, mp_barrier
-  USE command_line_options,  ONLY : ndiag_
+  USE mp_asyn,          ONLY : stop_signal_activated
   !
   IMPLICIT NONE
   !
-  INTEGER  :: part, nwork, exit_status, iaux
-  LOGICAL  :: exst, parallelfs, run
+  INTEGER  :: part, nwork, iaux
+  REAL(DP) :: polar(3)
   CHARACTER (LEN=9)   :: code = 'THERMO_PW'
   CHARACTER (LEN=256) :: auxdyn=' '
   !
-  ! Initialize MPI, clocks, print initial messages
+  !  Initialize mpi, the clocks and all the parallelism of QE
   !
-  CALL mp_startup ( start_images=.TRUE. )
-  CALL mp_start_diag ( ndiag_, world_comm, intra_bgrp_comm, &
-          do_distr_diag_inside_bgrp_ = .true. )
-  CALL set_mpi_comm_4_solvers( intra_pool_comm, intra_bgrp_comm, &
-       inter_bgrp_comm )
-
-  CALL environment_start ( code )
-  CALL start_clock( 'PWSCF' )
-  with_asyn_images=(nimage > 1)
+  CALL thermo_startup(code)
   !
   ! ... and begin with the initialization part
+  ! ... readin input
   !
   CALL thermo_readin()
   !
+  ! ... setup common variables needed for many tasks
+  !
   CALL thermo_setup()
+  !
+  ! ... make a summary of what will be computed
   !
   CALL thermo_summary()
   !
+  ! ... initialize the timer that stops the calculation after max_seconds
+  !
   CALL check_stop_init(max_seconds)
+  !
+  !... setup the work to do for the given task
   !
   part = 1
   !
@@ -110,12 +87,7 @@ PROGRAM thermo_pw
   CALL run_thermo_asynchronously(nwork, part, iaux, auxdyn)
   !
   !  In this part all images are synchronized and can communicate 
-  !  their results thought the world_comm communicator
-  !
-  IF (nwork>0) THEN
-     CALL mp_sum(energy_geo, world_comm)
-     energy_geo=energy_geo / nproc_image
-  ENDIF
+  !  their results thought the world_comm communicator.
 !
 !  In the kinetic energy test write the results
 !
@@ -135,144 +107,88 @@ PROGRAM thermo_pw
 !  bulk modulus and its pressure derivative and write the results.
 !  Otherwise interpolate the energy with a quadratic or quartic polynomial.
 !
-  IF (lev_syn_1) THEN
+  IF (lev_syn_1) CALL manage_energy_minimum(nwork)
 !
-!   minimize the energy and find the equilibrium geometry
+!  When computing the elastic constants as a function of temperature
+!  here we have the energy for each strained geometry and can compute
+!  the T=0 K elastic constants for all the reference geometries.
 !
-     CALL manage_energy_minimum(nwork)
-!
-!  recompute the density at the minimum volume
-!
-     CALL compute_density(omega,density)
-!
-!  compute the xrdp at the minimum volume if required by the user
-!
-     IF (lxrdp) CALL manage_xrdp(' ')
-
-  ENDIF
-
   IF (lectqha) CALL manage_elastic_cons(nwork,ngeom)
 
   CALL deallocate_asyn()
-
-  IF (lpwscf_syn_1) THEN
-     with_asyn_images=.FALSE.
-     outdir=TRIM(outdir_thermo)//'/g1/'
-     tmp_dir = TRIM ( outdir )
-     wfc_dir = tmp_dir
-     CALL check_tempdir ( tmp_dir, exst, parallelfs )
-
-     IF (my_image_id==root_image) THEN
 !
-!   do the self consistent calculation at the new lattice constant
+!  This part makes a self consistent pw.x calculation followed by
+!  a nonselfconsisten one if required. Only one image does the calculation.
+!  This part is used also for surface band structure and to identify 
+!  surface states.
 !
-        do_punch=.TRUE.
-        IF (.NOT.only_bands_plot) THEN
-           WRITE(stdout,'(/,2x,76("+"))')
-           WRITE(stdout,'(5x,"Doing a self-consistent calculation", i5)') 
-           WRITE(stdout,'(2x,76("+"),/)')
-           CALL check_existence(0,1,0,run)
-           IF (run) THEN
-              CALL do_pwscf(exit_status, .TRUE.)
-              CALL save_existence(0,1,0)
-           END IF
-
-           IF (lxrdp) CALL manage_xrdp('.scf')
-
-        ENDIF
-     ENDIF
-     IF (lbands_syn_1) CALL manage_bands()
-     CALL mp_bcast(tau, meta_ionode_id, world_comm)
-     CALL mp_bcast(celldm, meta_ionode_id, world_comm)
-     CALL mp_bcast(at, meta_ionode_id, world_comm)
-     CALL mp_bcast(omega, meta_ionode_id, world_comm)
-     CALL set_equilibrium_conf(celldm, tau, at, omega)
-     with_asyn_images=(nimage>1)
-  END IF
-     !
+  IF (lpwscf_syn_1) CALL manage_sync_pw()
+!
+!   here we make another asynchronous calculation with many runs
+!   of pw.x. It can be used for instance to compute the T=0 K elastic
+!   elastic constants at the minimum of the murnaghan computed in the
+!   first part. 
+!
   IF (lpart2_pw) THEN
-!
-!   here the second part does not use the phonon code. This is for the
-!   calculation of elastic constants. 
-!
-    part=2
-    CALL initialize_thermo_work(nwork, part, iaux)
-    !
-    !  Asynchronous work starts again. No communication is
-    !  allowed except though the master workers mechanism
-    !
-    CALL run_thermo_asynchronously(nwork, part, 1, auxdyn)
-    !
-    ! here we return synchronized and calculate the elastic constants 
-    ! from energy or stress 
-    !
-    IF (lelastic_const) THEN
-       IF (elalgen) THEN
-    !
-    !   recover the energy calculated by all images
-    !
-          CALL mp_sum(energy_geo, world_comm)
-          energy_geo=energy_geo / nproc_image
-       ENDIF
-       CALL manage_elastic_cons(nwork, 1)
-    ENDIF
+     !
+     part=2
+     !
+     CALL initialize_thermo_work(nwork, part, iaux)
+     !
+     !  Asynchronous work starts again. No communication is
+     !  allowed except though the master workers mechanism
+     !
+     CALL run_thermo_asynchronously(nwork, part, 1, auxdyn)
+     !
+     ! here we return synchronized and calculate the elastic constants 
+     ! from energy or stress 
+     !
+     IF (lelastic_const) CALL manage_elastic_cons(nwork, 1)
+     !
+     IF (lpiezoelectric_tensor) CALL manage_piezo_tensor(nwork)
+     !
+     IF (lpolarization) CALL print_polarization(polar, .TRUE. )
 
-    IF (lpiezoelectric_tensor) THEN
-       CALL mp_sum(polar_geo, world_comm)
-       polar_geo=polar_geo / nproc_image
-
-       CALL manage_piezo_tensor(nwork)
-    END IF
-
-    IF (lpolarization) THEN
-       CALL mp_sum(polar_geo, world_comm)
-       polar_geo=polar_geo / nproc_image
-       CALL print_polarization(polar_geo(:,1), .TRUE. )
-    ENDIF
-
-    CALL deallocate_asyn()
+     CALL deallocate_asyn()
   ENDIF
 
   IF (what(1:8) /= 'mur_lc_t') ngeo=1
 !
-!   This part makes one or several phonon calculations, using the
-!   image feature of this code and running asynchronously.
+!   This part makes one or several phonon calculations, using 
+!   images and running asynchronously.
+!   After each calculation one can plot the phonon dispersions,
+!   compute the density of phonon states and the harmonic thermodynamic
+!   quantities. A single phonon dispersion made here can also provide
+!   the dielectric constant, the eels spectrum, or the Born effective
+!   charges.
 !
   IF (lph) THEN
 
-     IF (all_geometries_together) THEN
-        CALL manage_all_geometries_ph()
-     ELSE
-        CALL manage_ph()
-     ENDIF
+     CALL manage_ph_run()
+
      IF (stop_signal_activated) GOTO 1000
 !
 !     Here the Helmholtz free energy at each geometry is available.
 !     We can write on file the free energy as a function of the volume at
 !     any temperature. For each temperature we can fit the free energy
-!     or the Gibbs energy if we have a finite pressure with a 
+!     (or the Gibbs energy if we have a finite pressure) with a 
 !     Murnaghan equation or with a quadratic or quartic polynomial. 
-!     We save the minimum volume or crystal parameters. With the Murnaghan fit
-!     we save also the bulk modulus and its pressure derivative for each 
-!     temperature.
+!     We save the minimum volume or the crystal parameters. 
+!     With the Murnaghan fit we save also the bulk modulus and 
+!     its pressure derivative for each temperature.
+!     One can also compute here the Gruneisen parameters.
 !
-     IF (lev_syn_2) THEN
-        CALL mp_barrier(world_comm)
-        IF (lmurn) THEN
-           CALL manage_anhar()
-        ELSE
-           CALL manage_anhar_anis()
-        ENDIF
-     ENDIF
+     IF (lev_syn_2) CALL manage_anhar_routines()
+!
+!   When lectqha=.TRUE. here we have computed the Helmholtz free energy for
+!   all the strained geometries (for a single unpertubed geometry or
+!   for a mesh of unperturbed geometries) and compute here the
+!   temperature dependent elastic constants
+!
      IF (lectqha) CALL manage_elastic_cons_qha()
   ENDIF
   !
-1000  CALL deallocate_thermo()
-  !
-  CALL laxlib_free_ortho_group()
-  CALL environment_end( code )
-  !
-  CALL mp_global_end ()
+1000  CALL thermo_end(code) 
   !
   STOP
   !

@@ -54,7 +54,7 @@ arg=randy(0)
 DO na=1, nat
    DO ipol=1, 3
       DO jpol=ipol, 3
-!         call random_number(rnumb)
+!         CALL random_number(rnumb)
          rnumb=2.0_DP*randy()-1.0_DP
          random_bmatrix(ipol,jpol,na)=rnumb
          IF (ipol/=jpol) random_bmatrix(jpol,ipol,na)=random_bmatrix(ipol,jpol,na)

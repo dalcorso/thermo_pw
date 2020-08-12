@@ -67,7 +67,7 @@ CONTAINS
        READ (iunrec) int1, int2, int3
        IF (noncolin) THEN
           IF (domag) THEN
-             CALL set_int12_nc_tpw(0)
+             CALL set_int12_nc(0)
              CALL compute_int3_coeff(dvscfin, dbecsum, npe)
           ELSE
              CALL set_int12_nc(0)

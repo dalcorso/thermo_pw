@@ -9,7 +9,7 @@
 SUBROUTINE transform_intq_so(intq,na)
 !----------------------------------------------------------------------------
 !
-! This routine multiply intq by the identity and the Pauli
+! This routine multiplies intq by the identity and the Pauli
 ! matrices, rotate it as appropriate for the spin-orbit case
 ! and saves it in intq_nc.
 !

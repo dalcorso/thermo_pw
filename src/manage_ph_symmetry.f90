@@ -32,7 +32,7 @@ SUBROUTINE manage_ph_symmetry(dyn, w2, num_rap_mode, xq, search_sym, flag)
 !  and writes on output the irreducible representations of each mode.
 !  It works also for nonsymmorphic points group. The point group and the
 !  symmetry information should be calculated before calling this 
-!  routine and must be in the standard variables, s, sr, ftau, etc.
+!  routine and must be in the standard variables, s, sr, ft, etc.
 !  In the noncollinear magnetic system the routine removes the symmetries
 !  that require time reversal and use the smaller group to identify the
 !  symmetry of the mode.

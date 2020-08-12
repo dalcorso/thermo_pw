@@ -34,7 +34,8 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   !!
   !
   USE io_global,            ONLY : stdout, ionode, ionode_id
-  USE parameters,           ONLY : ntypx, npk, lmaxx
+  USE parameters,           ONLY : ntypx, npk
+  USE upf_params,           ONLY : lmaxx
   USE initial_param,        ONLY : ethr0
   USE cell_base,            ONLY : fix_volume, fix_area
   USE control_flags,        ONLY : conv_elec, gamma_only, ethr, lscf, treinit_gvecs
@@ -290,4 +291,5 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
 
   !
 END SUBROUTINE do_pwscf
+
 

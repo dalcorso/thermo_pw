@@ -23,7 +23,7 @@ subroutine set_irr_sym_tpw ( t, tmq, npertx )
   USE control_flags, ONLY : modenum
   USE mp,        ONLY : mp_bcast
   USE mp_images, ONLY : intra_image_comm
-  USE io_global, ONLY : ionode_id
+  USE io_global, ONLY : ionode_id, stdout
 
   USE qpoint,       ONLY : xq
   USE lr_symm_base, ONLY : nsymq, irotmq, rtau, minus_q
@@ -160,13 +160,13 @@ subroutine set_irr_sym_tpw ( t, tmq, npertx )
                  wrk = wrk + t (ipert,kpert,irot,irr) * conjg( t(jpert,kpert,irot,irr))
               enddo
               if (jpert.ne.ipert .and. abs(wrk)> 1.d-6 ) THEN
-                 WRITE(6,*) wrk
-                 call errore('set_irr_sym_new','wrong representation zero',&
+                 WRITE(stdout,*) wrk, irot, isymq, t_rev(irot)
+                 call errore('set_irr_sym_tpw','wrong representation zero',&
                                                     100*irr+10*jpert+ipert)
               ENDIF
               if (jpert.eq.ipert .and. abs(wrk-1.d0)> 1.d-6 ) THEN
-                 WRITE(6,*) wrk
-                 call errore('set_irr_sym_new','wrong representation one',&
+                 WRITE(stdout,*) wrk, irot, isymq, t_rev(irot)
+                 call errore('set_irr_sym_tpw','wrong representation one',&
                                                      100*irr+10*jpert+ipert)
               ENDIF
            enddo

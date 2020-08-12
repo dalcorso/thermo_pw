@@ -627,7 +627,7 @@ SUBROUTINE setup_tpw()
   !
   ! ... Set up Hubbard parameters for LDA+U calculation
   !
-  CALL init_lda_plus_u ( upf(1:ntyp)%psd, noncolin )
+  CALL init_lda_plus_u ( upf(1:ntyp)%psd, nspin, noncolin )
   !
   ! ... initialize d1 and d2 to rotate the spherical harmonics
   !

@@ -127,14 +127,14 @@ subroutine drhodv_tpw (nu_i0, nper, drhoscf)
         ENDDO
      ENDDO
      IF (isolv==1) THEN
-        call drhodvnl_tpw (ik, ikk, nper, nu_i0, dynwrk, becp1, alphap, &
+        call drhodvnl (ik, ikk, nper, nu_i0, dynwrk, becp1, alphap, &
                                                         dbecq, dalpq)
      ELSE
         IF (okvan) THEN
            deeq_nc(:,:,:,:)=deeq_nc_save(:,:,:,:,2)
            int1_nc(:,:,:,:,:)=int1_nc_save(:,:,:,:,:,2)
         ENDIF
-        call drhodvnl_tpw (ik, ikk, nper, nu_i0, dynwrk, becpt, alphapt, &
+        call drhodvnl (ik, ikk, nper, nu_i0, dynwrk, becpt, alphapt, &
                                                          dbecq, dalpq)
         IF (okvan) THEN
            deeq_nc(:,:,:,:)=deeq_nc_save(:,:,:,:,1)
@@ -169,8 +169,8 @@ subroutine drhodv_tpw (nu_i0, nper, drhoscf)
   ! add to the rest of the dynamical matrix
   !
 !        WRITE( stdout,*) 'drhodv dyn, wdyn'
-!        call tra_write_matrix_tpw('drhodv dyn',dyn,u,nat)
-!        call tra_write_matrix_tpw('drhodv wdyn',wdyn,u,nat)
+!        call tra_write_matrix('drhodv dyn',dyn,u,nat)
+!        call tra_write_matrix('drhodv wdyn',wdyn,u,nat)
 
   dyn (:,:) = dyn (:,:) + wdyn (:,:)
   dyn_rec(:,:) = dyn_rec(:,:) + wdyn(:,:)

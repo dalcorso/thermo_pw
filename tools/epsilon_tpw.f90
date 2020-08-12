@@ -577,7 +577,7 @@ SUBROUTINE dipole_calc( ik, dipole_aux, nbndmin, nbndmax, shift )
      CALL commutator_Hx_psi (ik, nbnd_occ, becp1, becp2, ipol, dpsi )
      IF (okvan) THEN
         dvpsi=(0.0_DP,0.0_DP)
-        CALL adddvepsi_us_tpw( nbnd_occ, becp1, becp2, ipol, ik, dvpsi)
+        CALL adddvepsi_us( nbnd_occ, becp1, becp2, ipol, ik, dvpsi)
      ENDIF
      !
      DO iband2 = nbndmin, nbndmax
@@ -653,7 +653,7 @@ CHARACTER(LEN=256) :: gnu_filename, gnuplot_command, filename, ylabel, xlabel
 IF ( my_image_id /= root_image ) RETURN
 
 gnuplot_command='gnuplot'
-gnu_filename='gnuplot_tmp_epsilon'
+gnu_filename='gnuplot_files/gnuplot_tmp_epsilon'
 CALL gnuplot_start(gnu_filename)
 
 ymin=1.D10

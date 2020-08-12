@@ -35,7 +35,7 @@ IF (okpaw) CALL PAW_dpotential(dbecsum,rho%bec,int3_paw,npe)
 !   with the new change of the potential we compute the integrals
 !   of the change of potential and Q
 !
-CALL newdq_tpw (dvscfin, npe)
+CALL newdq (dvscfin, npe)
 !
 !  In the noncollinear magnetic case computes the int3 coefficients with
 !  the opposite sign of the magnetic field. They are saved in int3_save,
@@ -56,7 +56,7 @@ IF (noncolin.AND.domag) THEN
 !
 !   here compute the int3 integrals
 !
-   CALL newdq_tpw (dvscfin, npe)
+   CALL newdq (dvscfin, npe)
    int3_save(:,:,:,:,:,2)=int3_nc(:,:,:,:,:)
 !
 !  restore the correct sign of the magnetic field.
