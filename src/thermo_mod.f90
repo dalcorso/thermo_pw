@@ -157,10 +157,6 @@ MODULE ph_freq_thermodynamics
   REAL(DP), ALLOCATABLE :: phf_ce(:,:)        ! phonon specific heat, T, geometry
   REAL(DP), ALLOCATABLE :: phf_b_fact(:,:,:,:,:) ! atomic B factor
 
-  REAL(DP), ALLOCATABLE :: vminf_t(:), b0f_t(:), b01f_t(:), free_e_minf_t(:) 
-                           ! the parameters of the minimum of the  
-                           ! free energy at each temperature
-
 END MODULE ph_freq_thermodynamics
 
 MODULE anharmonic
