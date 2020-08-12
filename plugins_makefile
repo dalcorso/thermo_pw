@@ -40,7 +40,7 @@ d3q_clean:
 #d3q_veryclean: d3q_clean
 d3q_veryclean: d3q_clean
 	# delete unpacked directory and its links, keep the archive
-	test -a ../D3Q/protect || \
+	test -e ../D3Q/protect || \
 	(cd ..; \
 		i=D3Q; \
 		while j=$$(readlink $$i);do rm -rf $$i; i=$$j;done;\
@@ -61,7 +61,7 @@ test-suite: uncompress-test-suite
 	if test -d ../test-suite ; then \
 	( cd ../test-suite ; $(MAKE) TLDEPS= run-tests || exit 1) ; fi
 
-uncompress-test-suite: 
+uncompress-test-suite:
 	$(call download_and_unpack,$(TESTSUITE),$(TESTSUITE_URL),test-suite,test-suite)
 	touch uncompress-test-suite
 
@@ -75,7 +75,7 @@ gipaw:  uncompress-gipaw configure-gipaw
 	cd ../GIPAW; $(MAKE) all || exit 1; cd ../bin; ln -fs ../GIPAW/src/gipaw.x . ; fi
 	touch make-gipaw
 
-uncompress-gipaw: 
+uncompress-gipaw:
 	$(call download_and_unpack,$(GIPAW),$(GIPAW_URL),GIPAW,qe-gipaw)	
 	touch uncompress-gipaw
 
@@ -103,7 +103,7 @@ w90: uncompress-w90 configure-w90
 	-(cd ../bin; ln -fs ../W90/wannier90.x .)
 	touch make-w90
 
-uncompress-w90: 
+uncompress-w90:
 	$(call download_and_unpack,$(W90),$(W90_URL),W90,wannier90)
 	touch uncompress-w90
 
@@ -127,7 +127,7 @@ uncompress-want:
 	$(call download_and_unpack,$(WANT),$(WANT_URL),WANT,want)
 	touch uncompress-want
 
-configure-want: 
+configure-want:
 	cd ../WANT ; \
 	./configure \
 	--with-external-iotk \
@@ -216,16 +216,16 @@ plumed: test-plumed uncompress-plumed patch-plumed
 	cd ../; $(MAKE) pw; $(MAKE) cp; fi
 	touch make-plumed
 
-test-plumed: 
+test-plumed:
 	@(if test ! -s ../archive/$(PLUMED).tar.gz && test ! -d ../PLUMED; then \
 	echo "The release contains no PLUMED package. Trying to download it from qe-forge."; fi) 
 	touch ./test-plumed
 
-uncompress-plumed: 
+uncompress-plumed:
 	$(call download_and_unpack,$(PLUMED),$(PLUMED_URL),PLUMED,plumed)
 	touch uncompress-plumed
 
-patch-plumed: 
+patch-plumed:
 	if test -d ../PLUMED; then \
 	(cd ../PLUMED ; export plumedir="`pwd`" ; \
 	cp  patches/plumedpatch_qespresso_5.2.sh ../ ; \
@@ -466,7 +466,7 @@ clean: w90_clean want_clean yambo_clean yambo-devel_clean plumed_clean \
 
 veryclean: w90_veryclean want_veryclean yambo_veryclean yambo-devel_veryclean \
 	plumed_veryclean gipaw_veryclean thermo_pw_veryclean west_veryclean SternheimerGW_veryclean \
-	test-suite_veryclean sax_veryclean d3q_veryclean 
+	test-suite_veryclean sax_veryclean d3q_veryclean #examples_veryclean
 
 #distclean : veryclean
 distclean: w90_distclean want_distclean yambo_distclean yambo-devel_distclean \

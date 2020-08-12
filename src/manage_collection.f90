@@ -5,7 +5,14 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!---------------------------------------------------
 SUBROUTINE manage_collection(auxdyn,igeom)
+!---------------------------------------------------
+!
+!  This routine manages the collection of the partial
+!  quantities computed by the different images using
+!  the phonon code.
+!
 
 USE control_ph, ONLY : trans
 USE control_lr, ONLY : lgamma
