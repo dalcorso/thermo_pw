@@ -56,7 +56,7 @@ patches given below.</p>
 
 **Patches for thermo_pw.1.3.0**:
 <br>
-*To reproduce ph_example07 it is necessary to change line 999 of 
+* To reproduce ph_example07 it is necessary to change line 999 of 
 file PW/src/pw_restart_new.f90 of QE6.5. Substitute angle1, angle2,
 starting_magnetization with starting_magnetization, angle1, angle2.
 
