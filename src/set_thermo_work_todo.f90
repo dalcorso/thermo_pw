@@ -33,7 +33,6 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, auxdyn_loc)
 !
   USE elastic_constants, ONLY : epsilon_geo
   USE strain_mod,        ONLY : apply_strain, print_strain
-  USE mp_asyn,           ONLY : with_asyn_images
 !
 !  the pw variables that are set here or used to set the input
 !

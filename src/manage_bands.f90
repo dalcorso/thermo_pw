@@ -20,6 +20,7 @@ USE lsda_mod,         ONLY : nspin
 USE control_flags,    ONLY : lbands
 
 USE io_global,        ONLY : stdout
+USE mp_images,        ONLY : my_image_id, root_image
 
 IMPLICIT NONE
 
@@ -44,7 +45,7 @@ ENDIF
 IF (nbnd_bands == 0) nbnd_bands = 2*nbnd
 IF (nbnd_bands > nbnd) nbnd = nbnd_bands
 
-IF (.NOT.only_bands_plot) THEN
+IF (.NOT.only_bands_plot .AND. (my_image_id==root_image) ) THEN
    WRITE(stdout,'(/,2x,76("+"))')
    WRITE(stdout,'(5x,"Doing a non self-consistent calculation", i5)') 
    WRITE(stdout,'(2x,76("+"),/)')
@@ -56,12 +57,12 @@ ENDIF
 IF (ldos_syn_1) THEN
    IF (.NOT.only_bands_plot.OR.ierr/=0) THEN
       CALL dos_sub()
-      CALL read_minimal_info(.FALSE.,ierr)
+      IF (my_image_id==root_image) CALL read_minimal_info(.FALSE.,ierr)
    ENDIF
    CALL plot_dos()
    CALL write_el_thermo()
    CALL plot_el_thermo()
-ELSE
+ELSEIF (my_image_id==root_image) THEN
    nspin0=nspin
    IF (nspin==4) nspin0=1
 !

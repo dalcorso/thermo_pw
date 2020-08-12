@@ -180,10 +180,8 @@ PROGRAM thermo_pw
            IF (lxrdp) CALL manage_xrdp('.scf')
 
         ENDIF
-
-        IF (lbands_syn_1) CALL manage_bands()
-
      ENDIF
+     IF (lbands_syn_1) CALL manage_bands()
      CALL mp_bcast(tau, meta_ionode_id, world_comm)
      CALL mp_bcast(celldm, meta_ionode_id, world_comm)
      CALL mp_bcast(at, meta_ionode_id, world_comm)

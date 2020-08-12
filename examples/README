@@ -178,7 +178,8 @@ what=mur_lc_t: this example computes the elastic constants on the
               The files with elastic constants are then used in another run
               to modify the behavior of what='mur_lc_t' and to calculate
               the temperature dependent elastic constants within the
-              "quasi-static approximation".
+              "quasi-static approximation". Run run_example first and 
+              run_example_mur_lc_t second.
 example23:
 what=elastic_constants_t:
 what=mur_lc_t: this example computes the elastic constants as a function
@@ -188,3 +189,4 @@ what=mur_lc_t: this example computes the elastic constants as a function
               then used in another run to modify the behavior of
               what='mur_lc_t' and to calculate the temperature dependent
               elastic constants within the "quasi-harmonic approximation".
+              Run run_example first and run_example_mur_lc_t second.

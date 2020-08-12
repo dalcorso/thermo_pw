@@ -43,18 +43,18 @@ INTEGER :: n1, n2, n, ndos, idum
 INTEGER :: find_free_unit
 LOGICAL :: check_file_exists, do_read
 !
+!  check if the data are already on file
+!
+do_read=.FALSE.
+fileeltherm="therm_files/"//TRIM(fleltherm)
+IF (check_file_exists(fileeltherm)) do_read=.TRUE.
+!
 IF (my_image_id /= root_image) RETURN
 !
 !  Electrons contribute to the thermodynamical properties of metals only.
 !  For insulators return.
 !
 IF (degauss==0.0_DP.AND..NOT.ltetra) RETURN
-!
-!  check if the data are already on file
-!
-do_read=.FALSE.
-fileeltherm="therm_files/"//TRIM(fleltherm)
-IF (check_file_exists(fileeltherm)) do_read=.TRUE.
 
 ALLOCATE(el_mu(ntemp))
 ALLOCATE(el_free_ener(ntemp))

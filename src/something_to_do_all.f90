@@ -6,6 +6,10 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 LOGICAL FUNCTION something_to_do_all(iwork, igeom, iqw, irrw)
+!
+!  This function checks if there is some irreducible representation to
+!  calculate among all the geometries.
+!
 
 USE initial_conf, ONLY : collect_info_save
 USE control_qe,   ONLY : use_ph_images
