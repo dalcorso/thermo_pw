@@ -366,6 +366,7 @@ manage_anhar.o : ../../UtilXlib/mp.o
 manage_anhar.o : thermo_mod.o
 manage_bands.o : ../../Modules/control_flags.o
 manage_bands.o : ../../Modules/io_global.o
+manage_bands.o : ../../Modules/mp_images.o
 manage_bands.o : ../../PW/src/pwcom.o
 manage_bands.o : thermo_mod.o
 manage_elastic_cons.o : ../../Modules/cell_base.o
@@ -615,6 +616,7 @@ proj_band_structure.o : ../../thermo_pw/lib/point_group.o
 proj_band_structure.o : thermo_mod.o
 q2r_sub.o : ../../FFTXlib/fft_scalar.o
 q2r_sub.o : ../../Modules/cell_base.o
+q2r_sub.o : ../../Modules/constants.o
 q2r_sub.o : ../../Modules/io_global.o
 q2r_sub.o : ../../Modules/ions_base.o
 q2r_sub.o : ../../Modules/kind.o
@@ -726,7 +728,6 @@ set_thermo_work_todo.o : ../../PHonon/PH/phcom.o
 set_thermo_work_todo.o : ../../PW/src/pwcom.o
 set_thermo_work_todo.o : ../../PW/src/start_k.o
 set_thermo_work_todo.o : ../../thermo_pw/lib/elastic_const.o
-set_thermo_work_todo.o : ../../thermo_pw/lib/mp_asyn.o
 set_thermo_work_todo.o : ../../thermo_pw/lib/strain.o
 set_thermo_work_todo.o : ../../thermo_pw/qe/control_qe.o
 set_thermo_work_todo.o : collect_info.o

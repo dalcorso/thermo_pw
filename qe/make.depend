@@ -1054,6 +1054,7 @@ q_points.o : ../../PHonon/PH/elph_tetra_mod.o
 q_points.o : ../../PHonon/PH/phcom.o
 q_points.o : ../../PW/src/symm_base.o
 q_points.o : ../../UtilXlib/mp.o
+read_dyn_from_file.o : ../../Modules/constants.o
 read_dyn_from_file.o : ../../Modules/io_global.o
 read_dyn_from_file.o : ../../Modules/kind.o
 read_dyn_from_file.o : ../../Modules/mp_images.o

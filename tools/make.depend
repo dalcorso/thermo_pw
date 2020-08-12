@@ -74,6 +74,17 @@ mag_point_group.o : ../../Modules/kind.o
 mag_point_group.o : ../../Modules/mp_global.o
 mag_point_group.o : ../../thermo_pw/lib/magnetic_point_group.o
 mag_point_group.o : ../../thermo_pw/lib/point_group.o
+pdec.o : ../../Modules/environment.o
+pdec.o : ../../Modules/io_global.o
+pdec.o : ../../Modules/kind.o
+pdec.o : ../../Modules/mp_global.o
+pdec.o : ../../Modules/mp_world.o
+pdec.o : ../../Modules/wrappers.o
+pdec.o : ../../UtilXlib/mp.o
+pdec.o : ../../thermo_pw/lib/elastic_const.o
+pdec.o : ../../thermo_pw/lib/gnuplot.o
+pdec.o : ../../thermo_pw/lib/nye.o
+pdec.o : ../../thermo_pw/lib/polyfit.o
 plot_sur_states.o : ../../Modules/environment.o
 plot_sur_states.o : ../../Modules/io_global.o
 plot_sur_states.o : ../../Modules/kind.o
