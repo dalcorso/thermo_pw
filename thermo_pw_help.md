@@ -5,11 +5,11 @@ working version of the <a href="http://www.quantum-espresso.org/">Quantum
 ESPRESSO (QE)</a> package. <code>Thermo_pw</code> can be downloaded from its 
 <a href="http://dalcorso.github.io/thermo_pw/">main page</a> as 
 a <code>.tar.gz</code> file. The current production version is 
-<code>1.2.1</code> compatible with 
+<code>1.3.0</code> compatible with 
 <code>QE-6.5</code>. The <code>thermo_pw</code> file should be copied
 in the main (QE) directory and unpacked with the command:</p>
 <p align="center">
-<code>tar -xzvf thermo_pw.1.2.1.tar.gz</code>
+<code>tar -xzvf thermo_pw.1.3.0.tar.gz</code>
 </p>
 <p align="justify">This command produces a directory called 
 <code>thermo_pw</code>. To compile the code you need a Fortran compiler, for 
@@ -44,7 +44,7 @@ The <code>git</code> version can be used only together with the version of <code
 <p align="justify"> Although <code>thermo_pw</code> has been 
 used for several years and can be considered reasonably stable, it remains an 
 experimental code given as it is.
-If you are running a version of <code>QE</code> older than <code>6.4.1</code>
+If you are running a version of <code>QE</code> older than <code>6.5</code>
 you can still use <code>thermo_pw</code> but you should carefully match the
 versions of <code>thermo_pw</code> and of <code>QE</code> as explained in the
 main <code>thermo_pw</code> page.</p>
