@@ -132,6 +132,10 @@ thermo_pw.1.3.1.tar.gz</a>  (released 13-8-2020) compatible with QE-6.6.
 thermo_pw.1.3.0.tar.gz</a>  (released 12-8-2020) compatible with QE-6.5.
 <br>
 <br>
+- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.2.1.tar.gz">
+thermo_pw.1.2.1.tar.gz</a>  (released 23-1-2020) compatible with QE-6.5.
+<br>
+<br>
 - <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.2.0.tar.gz">
 thermo_pw.1.2.0.tar.gz</a>  (released 28-12-2019) compatible with QE-6.4.1.
 <br>
