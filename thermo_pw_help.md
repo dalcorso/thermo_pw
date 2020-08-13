@@ -44,7 +44,7 @@ The <code>git</code> version can be used only together with the version of <code
 <p align="justify"> Although <code>thermo_pw</code> has been 
 used for several years and can be considered reasonably stable, it remains an 
 experimental code given as it is.
-If you are running a version of <code>QE</code> older than <code>6.5</code>
+If you are running a version of <code>QE</code> older than <code>6.6</code>
 you can still use <code>thermo_pw</code> but you should carefully match the
 versions of <code>thermo_pw</code> and of <code>QE</code> as explained in the
 main <code>thermo_pw</code> page.</p>
