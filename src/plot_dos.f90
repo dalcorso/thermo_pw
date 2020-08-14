@@ -11,6 +11,7 @@ USE kinds, ONLY : DP
 USE constants, ONLY : rytoev
 USE gnuplot,   ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
                       gnuplot_xlabel, gnuplot_ylabel, gnuplot_write_command, &
+                      gnuplot_write_horizontal_line, &
                       gnuplot_write_file_mul_data, &
                       gnuplot_write_file_mul_data_minus
 USE control_gnuplot, ONLY : gnuplot_command, lgnuplot, flgnuplot, flext
@@ -19,7 +20,7 @@ USE control_bands,   ONLY : emin_input
 USE data_files, ONLY : fleldos
 USE postscript_files, ONLY : flpseldos
 USE ener,             ONLY : ef
-USE klist,     ONLY : degauss, ltetra
+USE klist,     ONLY : degauss, ltetra, nelec
 USE lsda_mod,  ONLY : nspin
 USE io_global, ONLY : ionode
 USE mp_images, ONLY : my_image_id, root_image
@@ -130,6 +131,8 @@ IF (nspin==2) THEN
    CALL gnuplot_write_command(TRIM(ylabel),.FALSE.)
    CALL gnuplot_write_command('unset arrow',.FALSE.)
    CALL gnuplot_write_command('unset label',.FALSE.)
+   CALL gnuplot_write_horizontal_line(nelec, 3, 'front', 'color_black', &
+                                                                   .FALSE.)
    CALL gnuplot_write_file_mul_data(fileeldos,1,4,'color_blue',.TRUE.,.TRUE.,&
                                                                       .FALSE.)
 ELSE
@@ -141,6 +144,8 @@ ELSE
    CALL gnuplot_write_command(TRIM(ylabel),.FALSE.)
    CALL gnuplot_write_command('unset arrow',.FALSE.)
    CALL gnuplot_write_command('unset label',.FALSE.)
+   CALL gnuplot_write_horizontal_line(nelec, 3, 'front', 'color_black', &
+                                                                   .FALSE.)
    CALL gnuplot_write_file_mul_data(fileeldos,1,3,'color_blue',.TRUE.,.TRUE.,&
                                                                       .FALSE.)
 ENDIF
