@@ -20,7 +20,7 @@ USE klist,          ONLY : degauss, nelec, ltetra
 USE lsda_mod,       ONLY : lsda
 USE temperature,    ONLY : ntemp, temp
 USE mp_images,      ONLY : root_image, my_image_id, intra_image_comm
-USE mp,             ONLY : mp_bcast
+USE mp,             ONLY : mp_bcast, mp_sum
 USE io_global,      ONLY : ionode, ionode_id, stdout
 USE data_files,     ONLY : fleltherm, fleldos
 
@@ -39,7 +39,7 @@ REAL(DP), ALLOCATABLE :: el_cv(:)
 REAL(DP) :: ene0, mu0
 REAL(DP) ::  dos1, dos2, dosef, udosef, ddosef, ddos1, ddos2, &
              uddosde, dddosde, ddosde
-INTEGER :: n1, n2, n, ndos, idum
+INTEGER :: n1, n2, n, ndos, idum, nstart, nlast
 INTEGER :: find_free_unit
 LOGICAL :: check_file_exists, do_read
 !
@@ -99,8 +99,8 @@ CALL read_eldos_data(eldos, lsda, fileeldos)
 !  The default low temperature is 4. K or the lowest temperature
 !  required in input.
 !
-CALL el_chem_pot(eldos, min(4.0_DP,temp(1)), nelec, mu0)
-CALL el_energy(eldos, min(4.0_DP,temp(1)), mu0, ene0)
+CALL el_chem_pot(eldos, MIN(4.0_DP,temp(1)), nelec, mu0)
+CALL el_energy(eldos, MIN(4.0_DP,temp(1)), mu0, ene0)
 WRITE(stdout,'(/,5x, "Chemical potential (mu) at T=", f13.5," K  =", &
                    &f13.8, "  eV")') min(4.0_DP,temp(1)),  mu0 * rytoev
 
@@ -146,16 +146,30 @@ WRITE(stdout,'(/,5x,"g''/g at mu =", 21x, f15.8,&
                            &"  eV^(-1)")')  ddosde / dosef /rytoev
 
 WRITE(stdout,'(/,5x,"Computing the electronic thermodynamic properties",/)')
-DO itemp = 1, ntemp
-   IF (MOD(itemp,100)==0.OR.itemp==ntemp) &
+
+el_mu=0.0_DP
+el_free_ener=0.0_DP
+el_ener=0.0_DP
+el_entr=0.0_DP
+el_cv=0.0_DP
+
+CALL divide (intra_image_comm, ntemp, nstart, nlast)
+DO itemp = nstart, nlast
+   IF (MOD(itemp,50)==0.OR.itemp==ntemp) &
                   WRITE(stdout,'(5x, "Computing temperature ", i8,&
-                                                   &" /",i8)') itemp, ntemp
+                       &" /",i8, " Total" i8)') itemp, nlast-nstart+1, ntemp
    CALL el_chem_pot(eldos, temp(itemp), nelec, el_mu(itemp))
    CALL el_free_energy(eldos, temp(itemp), el_mu(itemp), el_free_ener(itemp))
    CALL el_energy(eldos, temp(itemp), el_mu(itemp), el_ener(itemp))
    CALL el_entropy(eldos, temp(itemp), el_mu(itemp), el_entr(itemp))
    CALL el_specific_heat_cv(eldos, temp(itemp), el_mu(itemp), el_cv(itemp))
 END DO
+
+CALL mp_sum(el_mu, intra_image_comm)
+CALL mp_sum(el_free_ener, intra_image_comm)
+CALL mp_sum(el_ener, intra_image_comm)
+CALL mp_sum(el_entr, intra_image_comm)
+CALL mp_sum(el_cv, intra_image_comm)
 
 IF (ionode) THEN
    iu_therm=find_free_unit()
