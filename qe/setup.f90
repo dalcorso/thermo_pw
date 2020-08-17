@@ -609,6 +609,7 @@ SUBROUTINE setup_tpw()
   !
   kunit = 1
   CALL divide_et_impera ( nkstot, xk, wk, isk, nks )
+  IF (nks==0) CALL errore('setup_tpw','some pools have no k point',1)
   !
   IF ( dft_is_hybrid() ) THEN
      CALL exx_grid_init()

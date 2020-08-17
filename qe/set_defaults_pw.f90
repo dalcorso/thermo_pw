@@ -241,6 +241,7 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
   ! ... distribute k-points (and their weights and spin indices)
   !
   CALL divide_et_impera( nkstot, xk, wk, isk, nks )
+  IF (nks==0) CALL errore('setup_nscf_tpw','some pools have no k point',1)
   !
 #else
   !

@@ -5,11 +5,11 @@ working version of the <a href="http://www.quantum-espresso.org/">Quantum
 ESPRESSO (QE)</a> package. <code>Thermo_pw</code> can be downloaded from its 
 <a href="http://dalcorso.github.io/thermo_pw/">main page</a> as 
 a <code>.tar.gz</code> file. The current production version is 
-<code>1.3.1</code> compatible with 
+<code>1.3.2</code> compatible with 
 <code>QE-6.6</code>. The <code>thermo_pw</code> file should be copied
 in the main (QE) directory and unpacked with the command:</p>
 <p align="center">
-<code>tar -xzvf thermo_pw.1.3.1.tar.gz</code>
+<code>tar -xzvf thermo_pw.1.3.2.tar.gz</code>
 </p>
 <p align="justify">This command produces a directory called 
 <code>thermo_pw</code>. To compile the code you need a Fortran compiler, for 
@@ -54,10 +54,13 @@ patches given below.</p>
 
 **Patches for the git version**:
 
-**Patches for thermo_pw.1.3.1**:
+
+**Patches for thermo_pw.1.3.1 and thermo_pw.1.3.2**:
 <br>
 * To reproduce ph_example07 it is necessary to change line 1049 of 
 file PW/src/pw_restart_new.f90 of QE6.6 as explained for version 1.3.0.
+* QE6.6 does not stop any longer if some pools have no k point. thermo_pw
+is not working in this case. See in the FAQ 24 to solve this problem.
 
 **Patches for thermo_pw.1.3.0**:
 <br>
@@ -374,3 +377,14 @@ to restart with <code>with_eigen=.TRUE.</code>?
 Yes, but you have to remove both the <code>phdisp_files</code> and the 
 <code>therm_files</code> directories, while keeping the 
 <code>dynamical_matrices</code> and the <code>restart</code> directories.
+24. I am using <code>thermo_pw 1.3.1</code> with<code>QE6.6</code> but 
+the code hangs or stops in random places when computing phonon dispersions. 
+<br>
+Be careful with the use of pools. Since version <code>6.6 QE</code> 
+does not stop any longer if some pools have no k points, but 
+<code>thermo_pw</code> cannot deal with 
+this case. In order to check if you are in this situation search the
+string 'suboptimal parallelization: some nodes have no k-points' in your
+output. The solution is to decrease the number of pools until the
+message disappear.
+If you want a permanent check of this problem use <code>thermo_pw.1.3.2</code>.
