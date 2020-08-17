@@ -61,6 +61,7 @@ TYPE(eldos_type), INTENT(INOUT) :: eldos
 
 IF (ALLOCATED(eldos%e)) DEALLOCATE(eldos%e)
 IF (ALLOCATED(eldos%dos)) DEALLOCATE(eldos%dos)
+IF (ALLOCATED(eldos%ddos)) DEALLOCATE(eldos%ddos)
 IF (ALLOCATED(eldos%intdos)) DEALLOCATE(eldos%intdos)
 
 RETURN
