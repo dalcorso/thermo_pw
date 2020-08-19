@@ -12,13 +12,16 @@ MODULE collect_info
 !  grid of q points and irreducible representations for a single geometry.
 !  It saves also the status of the disk with the information on the
 !  representations that have been already calculated.
-!  Presently it has three routines:
-!  init_collect_info that copy in the structure the variables read by the
-!                     phonon
-!  comm_collect_info that sends to all images the available information
-!  destroy_collect_info that deallocate the memory allocated by 
-!                       init_collect_info. It has to be called to free the
-!                       memory.
+!  Presently it has four routines:
+!
+!  init_collect_info copies in the structure the variables of the phonon
+!  copy_collect_info copies in the phonon variables the information
+!                    of the structure
+!  comm_collect_info sends to all images the available information
+!                    so that any image can do the task that has been
+!                    calculated by the phonon for another image.
+!  destroy_collect_info deallocates the memory allocated by init_collect_info. 
+!
 !
 USE kinds, ONLY : DP
 
@@ -27,18 +30,18 @@ PRIVATE
 
 TYPE :: collect_info_type
     !
-    INTEGER :: nqs
+    INTEGER :: nqs                   ! number of q points
     !
-    INTEGER, ALLOCATABLE :: irr_iq(:)
+    INTEGER, ALLOCATABLE :: irr_iq(:)   ! number of irrep for each q
     !
-    INTEGER, ALLOCATABLE :: comp_irr_iq(:,:,:)
-    !
-    INTEGER, ALLOCATABLE :: done_irr_iq(:,:,:)
-    !
-    INTEGER, ALLOCATABLE :: comp_iq(:,:)
-    
-    INTEGER, ALLOCATABLE :: done_iq(:,:)
-    !
+    INTEGER, ALLOCATABLE :: comp_irr_iq(:,:,:) ! irrep, iq, image
+    !                                      equal one if must be computed
+    INTEGER, ALLOCATABLE :: done_irr_iq(:,:,:) ! irrep, iq, image
+    !                                      equal one if already computed
+    INTEGER, ALLOCATABLE :: comp_iq(:,:)     ! iq, image
+    !                                      equal one if must be computed 
+    INTEGER, ALLOCATABLE :: done_iq(:,:)     ! iq, image
+    !                                      equal one if already computed
 END TYPE collect_info_type
 
 PUBLIC collect_info_type, init_collect_info, copy_collect_info, &
@@ -51,32 +54,45 @@ CONTAINS
                                 done_irr_iq, comp_iq, done_iq, irr_iq)
 !----------------------------------------------------------------------------
 !
-!  This routine copy the variables of the phonon into the info
+!  This routine copies the variables of the phonon into the info
 !  structure allocating the necessary variables of the structure.
+!
+!  Every image writes in a different position (given by pos) in the
+!  array, so that they can comunicate to each other who does what.
+!  nima is the number of images used to set the dimension of the array.
 !
    IMPLICIT NONE
 
    INTEGER, INTENT(IN) :: nqs, nat, nima, pos, irr_iq(nqs)
-   LOGICAL, INTENT(IN) :: comp_irr_iq(0:3*nat,nqs), done_irr_iq(0:3*nat, nqs), &
+   LOGICAL, INTENT(IN) :: comp_irr_iq(0:3*nat,nqs), done_irr_iq(0:3*nat,nqs),&
                           comp_iq(nqs), done_iq(nqs)
    TYPE(collect_info_type), INTENT(INOUT) :: info
 
    INTEGER :: iq, irr
-
+!
+!  these variables are the same for all images
+!
    info%nqs=nqs
    ALLOCATE(info%irr_iq(nqs))
    info%irr_iq(1:nqs)= irr_iq(1:nqs)
-
+!
+!  these instead differ and are set in different positions (pos)
+!  first allocate space to contain the info of each image
+!
    ALLOCATE(info%comp_irr_iq(0:3*nat,nqs,nima))
    ALLOCATE(info%done_irr_iq(0:3*nat,nqs,nima))
    ALLOCATE(info%comp_iq(nqs,nima))
    ALLOCATE(info%done_iq(nqs,nima))
-
+!
+!  sets all to zero, so the variables can be broadcasted with an mp_sum
+!
    info%comp_irr_iq=0
    info%done_irr_iq=0
    info%comp_iq=0
    info%done_iq=0
-
+!
+!  set to 1 the iq and irrep of this image.
+!
    DO iq=1,nqs
       DO irr=0, irr_iq(iq)
          IF (comp_irr_iq(irr,iq)) &
@@ -95,7 +111,10 @@ CONTAINS
    SUBROUTINE copy_collect_info(info, nqs, nat, nima, pos, comp_irr_iq, &
                                 done_irr_iq, comp_iq, done_iq, irr_iq)
 !----------------------------------------------------------------------------
-
+!
+!  This routine is the inverse of init_collect_info. It uses the information
+!  saved in the info structure to set the phonon variables.
+!
    IMPLICIT NONE
 
    INTEGER, INTENT(IN) :: nqs, nat, nima, pos, irr_iq(nqs)
@@ -109,7 +128,10 @@ CONTAINS
    comp_iq=.FALSE.
    done_irr_iq=.FALSE.
    done_iq=.FALSE.
-
+!
+!  Note that the structure uses 0 or 1, while the phonon variables are logicals
+!  This is because there is no mp_sum routines for logicals.
+!
    DO iq=1,nqs
       DO irr=0, irr_iq(iq)
          IF (info%comp_irr_iq(irr,iq,pos)==1) comp_irr_iq(irr,iq)=.TRUE.
@@ -133,7 +155,7 @@ CONTAINS
 !----------------------------------------------------------------------------
 !
 !  This routine comunicates the variables of the info structure to all 
-!  processors of a communicator group.
+!  processors of a communicator group. 
 !
    USE mp, ONLY : mp_sum
 
@@ -152,15 +174,17 @@ CONTAINS
 !----------------------------------------------------------------------------
    SUBROUTINE destroy_collect_info_type(info)
 !----------------------------------------------------------------------------
-
+!
+!  This routine deallocate the space allocated by init_collect_info
+!
    IMPLICIT NONE
    TYPE(collect_info_type) :: info
 
-   IF (ALLOCATED(info%irr_iq)) DEALLOCATE(info%irr_iq)
+   IF (ALLOCATED(info%irr_iq))      DEALLOCATE(info%irr_iq)
    IF (ALLOCATED(info%comp_irr_iq)) DEALLOCATE(info%comp_irr_iq)
    IF (ALLOCATED(info%done_irr_iq)) DEALLOCATE(info%done_irr_iq)
-   IF (ALLOCATED(info%comp_iq)) DEALLOCATE(info%comp_iq)
-   IF (ALLOCATED(info%done_iq)) DEALLOCATE(info%done_iq)
+   IF (ALLOCATED(info%comp_iq))     DEALLOCATE(info%comp_iq)
+   IF (ALLOCATED(info%done_iq))     DEALLOCATE(info%done_iq)
 
    RETURN
    END SUBROUTINE destroy_collect_info_type

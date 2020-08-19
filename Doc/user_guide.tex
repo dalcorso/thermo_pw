@@ -1360,7 +1360,14 @@ configuration its associated error can be large, larger for the
 quadratic than for the Murnaghan interpolation. For this
 reason the present option should be used starting from the minimum found by
 \texttt{pw.x} using the \texttt{vc-relax} option and the pressure 
-should not be too different from the pressure used for \texttt{vc-relax}.\\
+should not be too different from the pressure used for \texttt{vc-relax}.
+Note that with this option the atomic coordinates are relaxed at each
+geometry even if you specified \texttt{calculation='scf'} in the 
+\texttt{pw.x} input. Use \texttt{frozen\_ion=.TRUE.} if you want to keep
+them fixed. To increase the maximum number of ionic iterations use
+\texttt{calculation='relax'} and give \texttt{nstep} (otherwise the default 
+is $20$). Only the \texttt{bfgs} relaxation is supported by this
+option.\\
 This option can be controlled by the following variables:
 \begin{verbatim}
 ngeo(1),...,ngeo(6) : the number of geometries to use for each celldm parameter.
@@ -1392,6 +1399,12 @@ lmurn       : if .TRUE. the Murnaghan fit is done. Only ngeo(1) values of
              Default: .TRUE. 
 show_fit   : if .TRUE. show the contour plot of the fitted energy instead
              of the energy. Used by default when reduced_grid is .TRUE.
+             Default: logical .FALSE.
+frozen_ions: if .TRUE. the atomic coordinates are obtained by straining 
+             the coordinates given in the pw.x input to the new cell 
+             parameters (equivalent to keep the crystal coordinates fixed) 
+             and kept fixed. If .FALSE. the atomic coordinates are relaxed
+             at each geometry.
              Default: logical .FALSE.
 vmin_input : minimum volume for the plot of the energy as a function of volume.
              Default: real 0.98 times the volume of the first geometry.
