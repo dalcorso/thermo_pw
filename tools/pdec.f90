@@ -151,7 +151,7 @@ READ(5,*) ntemp_press
 
 IF (ntemp_press<1 .OR. ntemp_press>10) THEN
    WRITE(stdout,'(5x,"Incorrect number of temperatures.")')
-   RETURN
+   STOP 1
 ENDIF
 
 ALLOCATE(temp_press(ntemp_press))
@@ -161,7 +161,7 @@ DO itemp=1, ntemp_press
    READ(5,*) temp_press(itemp)
    IF (temp_press(itemp)<tmin.OR.temp_press(itemp)>tmax) THEN
       WRITE(stdout,'(5x,"Invalid temperature")')
-      RETURN
+      STOP 1
    END IF
 END DO
 
@@ -230,7 +230,6 @@ ENDDO
 CALL environment_end(code)
 CALL mp_global_end ()
 
-RETURN
 END PROGRAM pdec
 
 SUBROUTINE lines_number(filename, lines)
@@ -390,9 +389,9 @@ IF (meta_ionode) THEN
             !  b unique
             !
             WRITE(iu_el_cons,'("#",2x,"P  ", 10x, " B ", 13x, " C_11", &
-             13x, " C_12 ", 13x, " C_13 ", 13x, " C_22 ", 13x, " C_23", &
-             13x, " C_33 ", 13x, " C_44 ", 13x, " C_55 ", 13x, " C_66", &
-             13x, " C_15 ", 13x, " C_25 ", 13x, " C_35 ", 13x, " C_46")')
+              &13x, " C_12 ", 13x, " C_13 ", 13x, " C_22 ", 13x, " C_23", &
+              &13x, " C_33 ", 13x, " C_44 ", 13x, " C_55 ", 13x, " C_66", &
+              &13x, " C_15 ", 13x, " C_25 ", 13x, " C_35 ", 13x, " C_46")')
             DO ipress=1,npress
                WRITE(iu_el_cons,'(e16.8,14e20.12)') p(ipress),b0_p(ipress),&
                      el_cons_p(1,1,ipress), el_cons_p(1,2,ipress), &
@@ -408,9 +407,9 @@ IF (meta_ionode) THEN
             !  c unique
             !
             WRITE(iu_el_cons,'("#",2x,"P  ", 10x, " B ",13x," C_11 ",  &
-             13x, " C_12 ", 13x, " C_13 ", 13x, " C_22 ", 13x, " C_23", &
-             13x, " C_33 ", 13x, " C_44 ", 13x, " C_55 ", 13x, " C_66", &
-             13x, " C_16 ", 13x, " C_26 ", 13x, " C_36 ", 13x, " C_45")')
+             &13x, " C_12 ", 13x, " C_13 ", 13x, " C_22 ", 13x, " C_23", &
+             &13x, " C_33 ", 13x, " C_44 ", 13x, " C_55 ", 13x, " C_66", &
+             &13x, " C_16 ", 13x, " C_26 ", 13x, " C_36 ", 13x, " C_45")')
             DO ipress=1,npress
                WRITE(iu_el_cons,'(e16.8,14e20.12)') p(ipress), b0_p(ipress),&
                      el_cons_p(1,1,ipress), el_cons_p(1,2,ipress), &
@@ -425,11 +424,11 @@ IF (meta_ionode) THEN
 
      CASE(2)
         WRITE(iu_el_cons,'("#",2x,"P  ", 10x, " B ", 13x, " C_11 ", &
-                13x, " C_12 ", 13x, " C_13 ", 13x, " C_22 ", 13x, "C_23 ", &
-                13x, " C_33 ", 13x, " C_44 ", 13x, " C_55 ", 13x, "C_66 ", &
-                13x, " C_14 ", 13x, " C_15 ", 13x, " C_16 ", 13x, "C_24 ", &
-                13x, " C_25 ", 13x, " C_26 ", 13x, " C_34 ", 13x, "C_35 ", &
-                13x, " C_36 ", 13x, " C_45 ", 13x, " C_46 ", 13x, "C_56 ")')
+               &13x, " C_12 ", 13x, " C_13 ", 13x, " C_22 ", 13x, "C_23 ", &
+               &13x, " C_33 ", 13x, " C_44 ", 13x, " C_55 ", 13x, "C_66 ", &
+               &13x, " C_14 ", 13x, " C_15 ", 13x, " C_16 ", 13x, "C_24 ", &
+               &13x, " C_25 ", 13x, " C_26 ", 13x, " C_34 ", 13x, "C_35 ", &
+               &13x, " C_36 ", 13x, " C_45 ", 13x, " C_46 ", 13x, "C_56 ")')
         DO ipress=1,npress
             WRITE(iu_el_cons,'(e16.8,24e20.12)') p(ipress),b0_p(ipress), &
                   el_cons_p(1,1,ipress), el_cons_p(1,2,ipress), &
@@ -469,7 +468,7 @@ IMPLICIT NONE
 INTEGER, INTENT(IN) :: ibrav, laue
 CHARACTER (LEN=256), INTENT(IN) :: filename
 CHARACTER(LEN=256) :: gnuplot_command, gnu_filename, filenameps, filelastic
-INTEGER :: ierr
+INTEGER :: ierr, system
 
 gnuplot_command='gnuplot'
 
