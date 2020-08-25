@@ -379,6 +379,7 @@ to restart with <code>with_eigen=.TRUE.</code>?
 Yes, but you have to remove both the <code>phdisp_files</code> and the 
 <code>therm_files</code> directories, while keeping the 
 <code>dynamical_matrices</code> and the <code>restart</code> directories.
+<br><br>
 24. I am using <code>thermo_pw 1.3.1</code> with<code>QE6.6</code> but 
 the code hangs or stops in random places when computing phonon dispersions. 
 <br>
