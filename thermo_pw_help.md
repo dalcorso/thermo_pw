@@ -61,6 +61,8 @@ patches given below.</p>
 file PW/src/pw_restart_new.f90 of QE6.6 as explained for version 1.3.0.
 * QE6.6 does not stop any longer if some pools have no k point. thermo_pw
 is not working in this case. See in the FAQ 24 to solve this problem.
+* tools/pdec.f90 does not compile with some compilers. Take the git version
+of this file and recompile.
 
 **Patches for thermo_pw.1.3.0**:
 <br>
