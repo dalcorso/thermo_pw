@@ -32,8 +32,7 @@ DO igeom_qha=start_geometry_qha, last_geometry_qha
    DO iwork=1,work_base
       igeom=(igeom_qha-1)*work_base+iwork
       IF (no_ph(igeom)) CYCLE
-      IF ((igeom<start_geometry.OR.igeom>last_geometry.OR.&
-                                 max_geometries<tot_ngeo).AND.lq2r) THEN
+      IF ((igeom<start_geometry.OR.igeom>last_geometry).AND.lq2r) THEN
          WRITE(stdout,'(/,5x,40("%"))')
          WRITE(stdout,'(5x,"Recomputing geometry ", i5)') igeom
          WRITE(stdout,'(5x,40("%"),/)')

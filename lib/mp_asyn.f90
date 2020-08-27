@@ -19,7 +19,7 @@ MODULE mp_asyn
 !  pieces and carry it out asynchronously. The images should not 
 !  communicate with each other: only intra-image communications are allowed
 !  because in general images run asynchronously. They can however 
-!  syncronize the work using this module, that tells to the representative 
+!  synchronize the work using this module, that tells to the representative 
 !  of each image which is the task that the image has to carry out. 
 !
 !  The master calls once asyn_init, and as often as possible asyn_master.

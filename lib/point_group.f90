@@ -494,7 +494,7 @@ CONTAINS
 !  the representations of group_in, and for all the possible aux_ind,
 !  and the final instructions copy in ndeg and rap_list only the
 !  information for the required representation.
-!  The representations numbers are syncronized with those defined in
+!  The representations numbers are synchronized with those defined in
 !  the routine set_irr (in PW/src/divide_class.f90).
 !
 !  This routine can be used in the scalar relativistic case. For the
@@ -5598,7 +5598,7 @@ CONTAINS
 !  the representations of group_in,
 !  and the final instructions copy in ndeg and rap_list only the
 !  information for the required representation.
-!  The representations numbers are syncronized with those defined in
+!  The representations numbers are synchronized with those defined in
 !  the routine set_irr_so (in PW/src/divide_class_so.f90).
 !
 !  This routine must be used in the fully relativistic case with spin-orbit,
