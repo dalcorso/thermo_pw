@@ -4,24 +4,24 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!----------------------------------------------------------------
 SUBROUTINE set_files_names(igeom)
+!----------------------------------------------------------------
 
 USE postscript_files,  ONLY : flpstherm, flpsdisp, flpsdos
 USE data_files,        ONLY : fltherm, flfrc, flfrq, fldos, flpband, flvec, &
                               fldosfrq
 USE control_gnuplot,   ONLY : flgnuplot
-USE internal_files_names, ONLY : fildyn_thermo, flfrc_thermo, flfrq_thermo, &
+USE internal_files_names, ONLY : flfrc_thermo, flfrq_thermo, &
                        fldos_thermo, fltherm_thermo, flpband_thermo,       &
                        flpsdos_thermo, flpstherm_thermo, flgnuplot_thermo, &
                        flpsdisp_thermo, flvec_thermo, fldosfrq_thermo
-USE output,            ONLY : fildyn
   !
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: igeom
 CHARACTER(LEN=6) :: int_to_char
 
-
-fildyn=TRIM(fildyn_thermo)//'.g'//TRIM(int_to_char(igeom))//'.'
+CALL set_fildyn_name(igeom)
 flfrc=TRIM(flfrc_thermo)//'.g'//TRIM(int_to_char(igeom))
 flfrq=TRIM(flfrq_thermo)//'.g'//TRIM(int_to_char(igeom))
 flvec=TRIM(flvec_thermo)//'.g'//TRIM(int_to_char(igeom))
@@ -39,8 +39,9 @@ flpsdisp=TRIM(flpsdisp_thermo)//'.g'//TRIM(int_to_char(igeom))
 RETURN
 END SUBROUTINE set_files_names
 
-
+!----------------------------------------------------------------
 SUBROUTINE initialize_file_names()
+!----------------------------------------------------------------
 
 USE postscript_files,  ONLY : flpstherm, flpsdisp, flpsdos
 USE data_files,        ONLY : fltherm, flfrc, flfrq, fldos, flpband, flvec, &
@@ -108,8 +109,10 @@ flpsdisp = TRIM(flpsdisp_thermo)
 RETURN
 END SUBROUTINE restore_files_names
 
+!----------------------------------------------------------------
 SUBROUTINE set_files_for_plot(icode, file_disp, filedata, filerap, fileout, &
                                      gnu_filename, filenameps)
+!----------------------------------------------------------------
 !
 !   This routine receives as input a code of what we want to plot
 !   icode  1  band structure
@@ -246,4 +249,36 @@ CHARACTER(LEN=6) :: int_to_char
 
 RETURN
 END SUBROUTINE set_files_for_plot
+
+!----------------------------------------------------------------
+SUBROUTINE set_fildyn_name(igeom)
+!----------------------------------------------------------------
+
+USE internal_files_names, ONLY : fildyn_thermo
+USE output,               ONLY : fildyn
+  !
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: igeom
+CHARACTER(LEN=6) :: int_to_char
+
+fildyn=TRIM(fildyn_thermo)//'.g'//TRIM(int_to_char(igeom))//'.'
+
+RETURN
+END SUBROUTINE set_fildyn_name
+
+!----------------------------------------------------------------
+SUBROUTINE set_outdir_name(igeom)
+!----------------------------------------------------------------
+
+USE control_thermo,       ONLY : outdir_thermo
+USE input_parameters,     ONLY : outdir
+  !
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: igeom
+CHARACTER(LEN=6) :: int_to_char
+
+outdir=TRIM(outdir_thermo)//'/g'//TRIM(int_to_char(igeom))//'/'
+
+RETURN
+END SUBROUTINE set_outdir_name
 

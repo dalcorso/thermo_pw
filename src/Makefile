@@ -5,7 +5,7 @@ include ../../make.inc
 # location of needed modules and included files (if any)
 MODFLAGS= $(BASEMOD_FLAGS) \
           $(MOD_FLAG)../../PW/src  \
-          $(MOD_FLAG)../../dft-d3/ \
+          $(MOD_FLAG)../../dft-d3  \
           $(MOD_FLAG)../../LR_Modules \
           $(MOD_FLAG)../../PHonon/PH \
           $(MOD_FLAG)../lib \
@@ -33,15 +33,16 @@ clean_ngeo.o \
 clean_path.o \
 collect_all_geometries.o \
 collect_info.o \
+collect_the_info.o \
 compute_cp.o \
 compute_density.o \
 compute_el_comp_t.o \
 compute_eref_band.o \
-compute_nwork_ph.o \
 compute_omega_geo.o \
 deallocate_asyn.o \
 deallocate_thermo.o \
 deallocate_q2r.o \
+decorated_write.o \
 do_pwscf.o \
 do_berry.o \
 do_phonon.o \
@@ -51,16 +52,16 @@ elastic_constants_t.o \
 ev_sub.o \
 evaluate_celldm.o \
 evaluate_vm.o \
-float_to_char.o \
+fast_phq_readin.o \
 find_symmetry.o \
 find_band_sym_proj.o \
 find_mode_sym_proj.o \
 find_representations_mode_q.o \
 fit_frequencies.o \
+float_to_char.o \
 generate_k_along_lines_kz.o \
 generalized_phdos.o \
 gen_qpoints.o \
-initialize_geometry_and_ph.o \
 initialize_thermo_work.o \
 interpolate_bfact.o \
 interpolate_el_cons.o \
@@ -80,11 +81,13 @@ manage_elastic_cons_qha_2.o \
 manage_energy_minimum.o \
 manage_piezo_tensor.o \
 manage_ph.o \
-manage_all_geometries_ph.o \
+manage_ph_all_geometries.o \
 manage_ph_postproc.o \
 manage_ph_run.o \
 manage_ph_symmetry.o \
 manage_surface_states.o \
+manage_syn_1.o \
+manage_syn_2.o \
 manage_sync_pw.o \
 manage_xrdp.o \
 matdyn_sub.o \
@@ -117,6 +120,7 @@ read_elastic_qha.o \
 read_minimal_info.o \
 readmodes.o \
 read_state_densities.o \
+run_iwork.o \
 run_thermo_asyncronously.o \
 save_ph_variables.o \
 set_2d_bz_path.o \

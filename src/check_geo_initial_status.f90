@@ -31,37 +31,23 @@ SUBROUTINE check_geo_initial_status(something_todo)
 !
 !  collect_info_save
 !
-!
-USE input_parameters, ONLY : outdir
-
 USE thermo_mod,       ONLY : no_ph, start_geometry, last_geometry, &
                              tot_ngeo, phgeo_on_file
-USE ions_base,        ONLY : nat
-USE disp,             ONLY : nqs, comp_iq, done_iq
-USE grid_irr_iq,      ONLY : comp_irr_iq, done_irr_iq, irr_iq
+USE initial_conf,     ONLY : collect_info_save
 
-USE output,           ONLY : fildyn
-USE control_thermo,   ONLY : outdir_thermo
 USE control_qe,       ONLY : use_ph_images
 USE control_ph,       ONLY : recover
 
-USE initial_conf,     ONLY : collect_info_save
-USE collect_info,     ONLY : comm_collect_info, init_collect_info
-
-USE mp_images,        ONLY : inter_image_comm, nimage, my_image_id
 USE mp,               ONLY : mp_barrier
 USE mp_world,         ONLY : world_comm
 
-
 IMPLICIT NONE
 
-LOGICAL  :: something_todo
+LOGICAL, INTENT(OUT)  :: something_todo
 
-INTEGER  :: igeom
-INTEGER  :: nima, pos
-CHARACTER(LEN=6) :: int_to_char
+INTEGER             :: igeom
 CHARACTER (LEN=256) :: auxdyn=' '
-LOGICAL :: fninit
+LOGICAL             :: fninit
 
 ALLOCATE(collect_info_save(tot_ngeo))
 !
@@ -72,59 +58,40 @@ something_todo=.FALSE.
 DO igeom=1, tot_ngeo
    collect_info_save(igeom)%nqs=0
 ENDDO
+!
+!  loop on the geometries
+!
 DO igeom=start_geometry,last_geometry
    IF (no_ph(igeom)) CYCLE
    IF (phgeo_on_file(igeom)) CYCLE
    something_todo=.TRUE.
-   auxdyn=' '
-   outdir=TRIM(outdir_thermo)//'/g'//TRIM(int_to_char(igeom))//'/'
+   CALL set_outdir_name(igeom)
    !
-   ! ... reads the phonon input and generate q grid and modes
+   !    reads the pw.x output, the phonon input and generate 
+   !    the grid of q points and modes. 
+   !    For the fist geometry we read also ph_control for the info 
+   !    on the q point mesh
    !
    IF (.NOT.fninit) THEN
       CALL thermo_ph_readin()
       CALL save_ph_variables()
-      CALL set_files_names(igeom)
-
-      auxdyn=fildyn
-      CALL check_initial_geometry(auxdyn)
       fninit=.TRUE.
    ELSE
-      CALL initialize_geometry_and_ph(recover, igeom, auxdyn)
-      CALL check_initial_geometry(auxdyn)
+      CALL fast_phq_readin(recover, igeom)
    ENDIF
+   CALL set_fildyn_name(igeom)
+   CALL check_initial_geometry(auxdyn,0)
    !
    ! collect the info on what has to be calculated and what already exists.
    !
-   IF (use_ph_images) THEN
-      pos=my_image_id+1
-      nima=nimage
-   ELSE
-      pos=1
-      nima=1
-   ENDIF
-   CALL init_collect_info(collect_info_save(igeom), nqs, nat, nima, pos, &
-                         comp_irr_iq, done_irr_iq, comp_iq, done_iq, irr_iq)
-
+   CALL collect_the_info(collect_info_save(igeom))
+   !
    CALL close_ph_geometry(.FALSE.)
-   CALL restore_files_names()
 ENDDO
 !
-!  If the phonon images are used, all images must have the same information 
-!  on what must be calculated by each image, so the collect_info structure 
-!  is shared between all images for each geometry. 
-!  Otherwise here there is a syncronization of all processors.
+!  here there is a syncronization of all processors.
 !
-IF (use_ph_images) THEN 
-   DO igeom=start_geometry, last_geometry
-      IF (phgeo_on_file(igeom)) CYCLE
-      CALL comm_collect_info(collect_info_save(igeom), inter_image_comm)
-      CALL restore_files_names()
-   ENDDO
-ELSE
-   CALL mp_barrier(world_comm)
-ENDIF
-
+CALL mp_barrier(world_comm)
 CALL restore_files_names()
 
 RETURN

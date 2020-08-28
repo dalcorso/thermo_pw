@@ -28,7 +28,6 @@ USE rotate,           ONLY : rotate_vect
 !
 USE cell_base,        ONLY : cell_base_init, at
 USE ions_base,        ONLY : tau, nat
-USE io_files,         ONLY : tmp_dir, wfc_dir, check_tempdir
 USE io_global,        ONLY : stdout
 
 IMPLICIT NONE
@@ -37,7 +36,7 @@ INTEGER, INTENT(IN) :: iwork
 INTEGER  :: ivec, na, ipol, jpol, ibrav
 REAL(DP), ALLOCATABLE :: tau_ocoord(:,:)
 REAL(DP) :: rd_ht(3,3), zero, celldm_(6)
-LOGICAL  :: exst, parallelfs, trd_ht
+LOGICAL  :: trd_ht
 CHARACTER(LEN=256) :: outdir
 CHARACTER(LEN=10)  :: cell_units
 CHARACTER(LEN=6)   :: int_to_char
@@ -107,11 +106,11 @@ ELSEIF (elastic_algorithm=='advanced' .OR. &
    CALL find_fft_fact()
 ENDIF
 CALL set_fft_mesh()
-
+!
+!  Set the tmp_dir directory for this geometry
+!
 outdir=TRIM(outdir_thermo)//'/g'//TRIM(int_to_char(iwork))//'/'
-tmp_dir = TRIM ( outdir )
-wfc_dir = tmp_dir
-CALL check_tempdir ( tmp_dir, exst, parallelfs )
+CALL set_tmp_dir( outdir )
 IF (.NOT.frozen_ions) CALL clean_bfgs_history()
 
 RETURN

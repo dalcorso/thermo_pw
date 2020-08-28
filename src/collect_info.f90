@@ -8,20 +8,22 @@
 MODULE collect_info
 !
 !  This is an auxiliary module with a structure, the collect_info_type, that
-!  has sufficient variables to keep in memory the information on the 
-!  grid of q points and irreducible representations for a single geometry.
+!  keeps in memory the information on the grid of q points and irreducible 
+!  representations, together with the tasks that every image has to do
+!  for a single geometry. 
 !  It saves also the status of the disk with the information on the
 !  representations that have been already calculated.
 !  Presently it has four routines:
 !
-!  init_collect_info copies in the structure the variables of the phonon
-!  copy_collect_info copies in the phonon variables the information
+!  init_collect_info initialize the collect_info structure 
+!  save_collect_info copies the variable of the phonon in the collect_info
+!                    structure. Each images writes in its own position
+!  read_collect_info copies in the phonon variables the information
 !                    of the structure
 !  comm_collect_info sends to all images the available information
 !                    so that any image can do the task that has been
 !                    calculated by the phonon for another image.
 !  destroy_collect_info deallocates the memory allocated by init_collect_info. 
-!
 !
 USE kinds, ONLY : DP
 
@@ -44,31 +46,25 @@ TYPE :: collect_info_type
     !                                      equal one if already computed
 END TYPE collect_info_type
 
-PUBLIC collect_info_type, init_collect_info, copy_collect_info, &
-       comm_collect_info, destroy_collect_info_type
+PUBLIC collect_info_type, init_collect_info, save_collect_info, &
+       read_collect_info, comm_collect_info, destroy_collect_info_type
 
 CONTAINS
 
 !----------------------------------------------------------------------------
-   SUBROUTINE init_collect_info(info, nqs, nat, nima, pos, comp_irr_iq, &
-                                done_irr_iq, comp_iq, done_iq, irr_iq)
+   SUBROUTINE init_collect_info(info, nqs, nat, nima, irr_iq)
 !----------------------------------------------------------------------------
 !
-!  This routine copies the variables of the phonon into the info
-!  structure allocating the necessary variables of the structure.
-!
-!  Every image writes in a different position (given by pos) in the
-!  array, so that they can comunicate to each other who does what.
-!  nima is the number of images used to set the dimension of the array.
+!  This routine initializes a collect_info structure allocating
+!  sufficient space to save the info on the status of the phonon.
+!  The arrays have size nima number of images since each image
+!  writes in a different position and the information can be sent
+!  to all the images
 !
    IMPLICIT NONE
 
-   INTEGER, INTENT(IN) :: nqs, nat, nima, pos, irr_iq(nqs)
-   LOGICAL, INTENT(IN) :: comp_irr_iq(0:3*nat,nqs), done_irr_iq(0:3*nat,nqs),&
-                          comp_iq(nqs), done_iq(nqs)
+   INTEGER, INTENT(IN) :: nqs, nat, nima, irr_iq(nqs)
    TYPE(collect_info_type), INTENT(INOUT) :: info
-
-   INTEGER :: iq, irr
 !
 !  these variables are the same for all images
 !
@@ -83,6 +79,29 @@ CONTAINS
    ALLOCATE(info%done_irr_iq(0:3*nat,nqs,nima))
    ALLOCATE(info%comp_iq(nqs,nima))
    ALLOCATE(info%done_iq(nqs,nima))
+
+   RETURN
+   END SUBROUTINE init_collect_info
+!
+!----------------------------------------------------------------------------
+   SUBROUTINE save_collect_info(info, nqs, nat, pos, comp_irr_iq, &
+                                done_irr_iq, comp_iq, done_iq)
+!----------------------------------------------------------------------------
+!
+!  This routine copies the variables of the phonon into the info
+!  structure. It assumes that the variables are already allocated.
+!
+!  Every image writes in a different position (given by pos) in the
+!  array, so that they can comunicate to each other who does what.
+!
+   IMPLICIT NONE
+
+   INTEGER, INTENT(IN) :: nqs, nat, pos
+   LOGICAL, INTENT(IN) :: comp_irr_iq(0:3*nat,nqs), done_irr_iq(0:3*nat,nqs),&
+                          comp_iq(nqs), done_iq(nqs)
+   TYPE(collect_info_type), INTENT(INOUT) :: info
+
+   INTEGER :: iq, irr
 !
 !  sets all to zero, so the variables can be broadcasted with an mp_sum
 !
@@ -94,61 +113,49 @@ CONTAINS
 !  set to 1 the iq and irrep of this image.
 !
    DO iq=1,nqs
-      DO irr=0, irr_iq(iq)
-         IF (comp_irr_iq(irr,iq)) &
-            info%comp_irr_iq(irr,iq,pos)=1
-         IF (done_irr_iq(irr,iq)) &
-            info%done_irr_iq(irr,iq,pos)=1
+      DO irr=0, info%irr_iq(iq)
+         IF (comp_irr_iq(irr,iq)) info%comp_irr_iq(irr,iq,pos)=1
+         IF (done_irr_iq(irr,iq)) info%done_irr_iq(irr,iq,pos)=1
       ENDDO
       IF (comp_iq(iq)) info%comp_iq(iq,pos)=1
       IF (done_iq(iq)) info%done_iq(iq,pos)=1
    ENDDO
 
    RETURN
-   END SUBROUTINE init_collect_info
+   END SUBROUTINE save_collect_info
 
 !----------------------------------------------------------------------------
-   SUBROUTINE copy_collect_info(info, nqs, nat, nima, pos, comp_irr_iq, &
-                                done_irr_iq, comp_iq, done_iq, irr_iq)
+   SUBROUTINE read_collect_info(info, nqs, nat, pos, comp_irr_iq, comp_iq)
 !----------------------------------------------------------------------------
 !
-!  This routine is the inverse of init_collect_info. It uses the information
+!  This routine is the inverse of save_collect_info. It uses the information
 !  saved in the info structure to set the phonon variables.
 !
    IMPLICIT NONE
 
-   INTEGER, INTENT(IN) :: nqs, nat, nima, pos, irr_iq(nqs)
-   LOGICAL, INTENT(INOUT) :: comp_irr_iq(0:3*nat,nqs), &
-                    done_irr_iq(0:3*nat, nqs), comp_iq(nqs), done_iq(nqs)
+   INTEGER, INTENT(IN) :: nqs, nat, pos
+   LOGICAL, INTENT(INOUT) :: comp_irr_iq(0:3*nat,nqs), comp_iq(nqs)
    TYPE(collect_info_type), INTENT(IN) :: info
 
    INTEGER :: iq, irr
 
    comp_irr_iq=.FALSE.
    comp_iq=.FALSE.
-   done_irr_iq=.FALSE.
-   done_iq=.FALSE.
 !
 !  Note that the structure uses 0 or 1, while the phonon variables are logicals
 !  This is because there is no mp_sum routines for logicals.
 !
    DO iq=1,nqs
-      DO irr=0, irr_iq(iq)
+      DO irr=0, info%irr_iq(iq)
          IF (info%comp_irr_iq(irr,iq,pos)==1) comp_irr_iq(irr,iq)=.TRUE.
-         IF (info%done_irr_iq(irr,iq,pos)==1) done_irr_iq(irr,iq)=.TRUE.
+         IF (info%done_irr_iq(irr,iq,pos)==1) comp_irr_iq(irr,iq)=.FALSE.
       ENDDO
       IF (info%comp_iq(iq,pos)==1) comp_iq(iq)=.TRUE.
-      IF (info%done_iq(iq,pos)==1) done_iq(iq)=.TRUE.
-   ENDDO
-   DO iq=1,nqs
-      DO irr=0, irr_iq(iq)
-         IF (done_irr_iq(irr,iq)) comp_irr_iq(irr,iq)=.FALSE.
-      ENDDO
-      IF (done_iq(iq)) comp_iq(iq)=.FALSE.
+      IF (info%done_iq(iq,pos)==1) comp_iq(iq)=.FALSE.
    ENDDO
 
    RETURN
-   END SUBROUTINE copy_collect_info
+   END SUBROUTINE read_collect_info
 
 !----------------------------------------------------------------------------
    SUBROUTINE comm_collect_info(info, comm)

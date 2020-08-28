@@ -6,7 +6,7 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !-----------------------------------------------------------------------
-SUBROUTINE initialize_thermo_work(nwork, part, iaux)
+SUBROUTINE initialize_thermo_work(nwork, part)
   !-----------------------------------------------------------------------
   !
   !  This routine is called by all images and initializes the global 
@@ -29,7 +29,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
                              lberry, lpolarization, lpart2_pw, do_scf_relax, &
                              ldos_syn_1, ltherm_dos, ltherm_freq, after_disp, &
                              lectqha, all_geometries_together, geometry, iqw, &
-                             irrw, comp_f_work
+                             irrw, comp_f_iw
   USE control_pwrun,  ONLY : do_punch
   USE control_conv,   ONLY : nke, ke, deltake, nkeden, deltakeden, keden, &
                              nnk, nk_test, deltank, nsigma, sigma_test, &  
@@ -57,49 +57,46 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
   USE io_global,      ONLY : meta_ionode
   !
   IMPLICIT NONE
-  INTEGER, INTENT(OUT) :: nwork, iaux
+  INTEGER, INTENT(OUT) :: nwork
   INTEGER, INTENT(IN) :: part
 
-  INTEGER :: igeom, igeom_qha, ike, iden, icount, ink, isigma, iwork, ios
+  INTEGER :: igeom, igeom_qha, ike, iden, icount, ink, isigma, iwork, &
+             iwork_tot, ios
   INTEGER :: count_energies, iq, irr, start_omega, i, j
   REAL(DP) :: compute_omega_geo, dual, kev, kedenv
   LOGICAL :: something_to_do_all
-!
-!   the restart directory is used in all cases
-!
-  ios=0
-  IF (meta_ionode) ios = f_mkdir_safe( 'restart' )
 !
 !  here initialize the work to do and sets to true the flags that activate
 !  the different parts of thermo_pw. Sets also the number of tasks for each
 !  what.
 !
   nwork=0
-  iaux=0
   IF (part == 1) THEN
+!
+!   the restart directory is used in all cases
+!
+     ios=0
+     IF (meta_ionode) ios = f_mkdir_safe( 'restart' )
      ngeom=1
+     tot_ngeo=1
      SELECT CASE (TRIM(what))
 !
 !   In these cases we do not do any asynchronous work in the first part
 !
         CASE ( 'plot_bz', ' ') 
         CASE ( 'scf') 
-           ALLOCATE(energy_geo(1))
            lpwscf_syn_1=.TRUE.
         CASE ('scf_bands') 
-           ALLOCATE(energy_geo(1))
            lpwscf_syn_1=.TRUE.
            lbands_syn_1=.TRUE.
            IF (meta_ionode) ios = f_mkdir_safe( 'band_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
         CASE ('scf_2d_bands')
-           ALLOCATE(energy_geo(1))
            lpwscf_syn_1=.TRUE.
            lbands_syn_1=.TRUE.
            IF (meta_ionode) ios = f_mkdir_safe( 'band_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
         CASE ('scf_dos') 
-           ALLOCATE(energy_geo(1))
            lpwscf_syn_1=.TRUE.
            lbands_syn_1=.TRUE.
            ldos_syn_1=.TRUE.
@@ -107,7 +104,6 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
         CASE ('scf_ph') 
-           ALLOCATE(energy_geo(1))
            lpwscf_syn_1=.NOT.after_disp
            lph=.TRUE.
            tot_ngeo=1
@@ -116,7 +112,6 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            IF (meta_ionode) ios = f_mkdir_safe( 'dynamical_matrices' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
         CASE ('scf_disp')
-           ALLOCATE(energy_geo(1))
            lpwscf_syn_1=.NOT.after_disp
            lph=.TRUE.
            tot_ngeo=1
@@ -125,13 +120,13 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            lq2r = .TRUE.
            ltherm = ltherm_dos .OR. ltherm_freq
            CALL allocate_thermodynamics()
-!
-!   In these cases we make asynchronous work in the first part
-!
            IF (meta_ionode) ios = f_mkdir_safe( 'dynamical_matrices' )
            IF (meta_ionode) ios = f_mkdir_safe( 'phdisp_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
+!
+!   In these cases we make asynchronous work in the first part
+!
         CASE ( 'scf_ke') 
            nwork= count_energies(ecutwfc, ecutrho, deltake, deltakeden, nke,&
                                                                       nkeden)
@@ -198,9 +193,9 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
 !   of the energy to find the equilibrium crystal parameters
 !
         CASE ('mur_lc')
+           do_punch=.FALSE.
            lev_syn_1=.TRUE.
            lpwscf_syn_1=do_scf_relax
-           do_punch=.FALSE.
            CALL initialize_mur(nwork)
            IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
@@ -225,10 +220,10 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
         CASE ('mur_lc_ph') 
            do_punch=.FALSE.
-           lpwscf_syn_1=.NOT.after_disp
            lev_syn_1=.TRUE.
-           lph=.TRUE.
+           lpwscf_syn_1=.NOT.after_disp
            CALL initialize_mur(nwork)
+           lph=.TRUE.
            tot_ngeo=1
            ALLOCATE(no_ph(tot_ngeo))
            no_ph(1)=.FALSE.
@@ -239,8 +234,8 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            do_punch=.FALSE.
            lev_syn_1=.TRUE.
            lpwscf_syn_1=.NOT.after_disp
-           lph=.TRUE.
            CALL initialize_mur(nwork)
+           lph=.TRUE.
            tot_ngeo=1
            ALLOCATE(no_ph(tot_ngeo))
            no_ph(1)=.FALSE.
@@ -253,31 +248,31 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
         CASE ('mur_lc_elastic_constants') 
+           do_punch=.FALSE.
            lev_syn_1=.TRUE.
            lpwscf_syn_1=do_scf_relax
-           lpart2_pw=.TRUE.
-           do_punch=.FALSE.
            CALL initialize_mur(nwork)
+           lpart2_pw=.TRUE.
            tot_ngeo=1
            IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
         CASE ('mur_lc_piezoelectric_tensor') 
+           do_punch=.FALSE.
            lev_syn_1=.TRUE.
            lpwscf_syn_1=do_scf_relax
-           lpart2_pw=.TRUE.
-           do_punch=.FALSE.
            CALL initialize_mur(nwork)
+           lpart2_pw=.TRUE.
            tot_ngeo=1
            IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
         CASE ('mur_lc_polarization')
+           do_punch=.FALSE.
            lev_syn_1=.TRUE.
            lpwscf_syn_1=do_scf_relax
-           lpart2_pw=.TRUE.
-           do_punch=.FALSE.
            CALL initialize_mur(nwork)
+           lpart2_pw=.TRUE.
            tot_ngeo=1
            IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
@@ -286,11 +281,11 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
 !
         CASE ('mur_lc_t')
            lev_syn_1=.NOT.reduced_grid
+           CALL initialize_mur(nwork)
            lph = .TRUE.
            lq2r = .TRUE.
            ltherm = .TRUE.
            lev_syn_2=.TRUE.
-           CALL initialize_mur(nwork)
            tot_ngeo=nwork
            ALLOCATE(no_ph(tot_ngeo))
            IF (reduced_grid) ALLOCATE(in_degree(tot_ngeo))
@@ -355,22 +350,14 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
 !  In this part we do the phonon calculations
 !
      SELECT CASE (TRIM(what))
-        CASE ('scf_ph')
-           CALL initialize_ph_work(nwork)
-        CASE ('scf_disp') 
-           CALL initialize_ph_work(nwork)
-        CASE ('mur_lc_ph') 
-           CALL initialize_ph_work(nwork)
-        CASE ('mur_lc_disp') 
-           CALL initialize_ph_work(nwork)
-        CASE ('mur_lc_t')
+        CASE ('scf_ph',        &
+              'scf_disp',      &
+              'mur_lc_ph',     &
+              'mur_lc_disp',   &
+              'mur_lc_t')
            CALL initialize_ph_work(nwork)
         CASE ('elastic_constants_t')
-           IF (use_free_energy) THEN
-              CALL initialize_ph_work(nwork)
-           ELSE
-              nwork=0
-           ENDIF
+           IF (use_free_energy) CALL initialize_ph_work(nwork)
         CASE ('scf_elastic_constants', 'mur_lc_elastic_constants')
 
            IF (ALLOCATED(ibrav_geo))  DEALLOCATE(ibrav_geo)
@@ -403,13 +390,11 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
            ALLOCATE(energy_geo(nwork))
            ALLOCATE(omega_geo(nwork))
            energy_geo=0.0_DP
-           iaux=10
            lpiezoelectric_tensor=.TRUE.
            do_punch=.TRUE.
         CASE ('scf_polarization', 'mur_lc_polarization')
            IF (ALLOCATED(energy_geo)) DEALLOCATE(energy_geo)
            IF (ALLOCATED(omega_geo)) DEALLOCATE(omega_geo)
-           iaux=20 
            nwork=1
            lpolarization=.TRUE.
            ALLOCATE(polar_geo(3,nwork))
@@ -436,19 +421,7 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
   IF (part == 1) THEN
      SELECT CASE (TRIM(what))
 !
-!  First the cases in which there is no asynchronous work in the first part
-!
-        CASE ( 'scf',                        &
-               'scf_bands',                  &
-               'scf_dos',                    &
-               'scf_2d_bands',               &
-               'scf_ph',                     & 
-               'scf_disp',                   &
-               'scf_elastic_constants',      &
-               'scf_piezoelectric_tensor',   &
-               'scf_polarization' )
-!
-!  Then the cases in which there is pwscf asynchronous work in the first part
+!  The cases in which there is pwscf asynchronous work in the first part
 !
         CASE ('scf_ke',                      &
               'scf_nk',                      &
@@ -470,8 +443,8 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
         CASE ('elastic_constants_t')  
            DO igeom_qha=start_geometry_qha, last_geometry_qha
               DO iwork=1,work_base
-                 igeom= (igeom_qha-1)*work_base + iwork
-                 lpwscf(igeom)=.TRUE.
+                 iwork_tot= (igeom_qha-1)*work_base + iwork
+                 lpwscf(iwork_tot)=.TRUE.
               ENDDO
            ENDDO
            lstress(1:nwork)=.NOT.elalgen
@@ -503,22 +476,22 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
                  ENDDO
               ENDIF
            ELSEIF (fpol) THEN
-              ALLOCATE (comp_f_work(1:nfs,nwork))
+              ALLOCATE (comp_f_iw(1:nfs,nwork))
               IF (nimage>1) THEN
-                 comp_f_work=.FALSE.
+                 comp_f_iw=.FALSE.
                  DO iwork=1,nwork
                     start_omega=(iwork-1)*omega_group
                     DO i=1, omega_group
                        j=MIN(start_omega+i, nfs)
-                       comp_f_work(j,iwork)=.TRUE.
+                       comp_f_iw(j,iwork)=.TRUE.
                     ENDDO
                     lphonon(iwork)=.FALSE.
                     DO i=start_freq,last_freq
-                       lphonon(iwork)=lphonon(iwork).OR.comp_f_work(i,iwork)
+                       lphonon(iwork)=lphonon(iwork).OR.comp_f_iw(i,iwork)
                     ENDDO
                  ENDDO
               ELSE
-                 comp_f_work(:,1)=.TRUE.
+                 comp_f_iw(:,1)=.TRUE.
               ENDIF
            ENDIF
 !
@@ -542,7 +515,9 @@ SUBROUTINE initialize_thermo_work(nwork, part, iaux)
   RETURN
 END SUBROUTINE initialize_thermo_work
 
+!-----------------------------------------------------------------------
 SUBROUTINE set_celldm_geo(celldm_geo, nwork)
+!-----------------------------------------------------------------------
 !
 !   This routine sets the grid of values on celldm_geo.
 !
@@ -615,7 +590,9 @@ ENDDO
 RETURN
 END SUBROUTINE set_celldm_geo
 
+!-----------------------------------------------------------------------
 SUBROUTINE summarize_geometries(nwork)
+!-----------------------------------------------------------------------
 USE thermo_mod,    ONLY : ibrav_geo, celldm_geo, no_ph
 USE initial_conf,  ONLY : celldm_save, ibrav_save
 USE io_global,     ONLY : stdout
@@ -644,7 +621,9 @@ WRITE(stdout,'(/,5x,70("-"))')
 RETURN
 END SUBROUTINE summarize_geometries
 
+!-----------------------------------------------------------------------
 INTEGER FUNCTION compute_nwork()
+!-----------------------------------------------------------------------
 !
 !  This function computes the number of tasks needed for energy minimization
 !
@@ -664,8 +643,32 @@ compute_nwork=auxgeo
 
 RETURN
 END FUNCTION compute_nwork
+!
+!-----------------------------------------------------
+INTEGER FUNCTION compute_nwork_ph(no_ph,ndatatot)
+!-----------------------------------------------------
+!
+!  This routines computes the number of geometries in which
+!  phonon modes have to be calculated.
+!
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ndatatot
+LOGICAL, INTENT(IN) :: no_ph(ndatatot)
 
+INTEGER :: idata, counter_ndata
+
+counter_ndata=0
+DO idata=1,ndatatot
+   IF (.NOT. no_ph(idata)) counter_ndata=counter_ndata+1
+ENDDO
+compute_nwork_ph=counter_ndata
+
+RETURN
+END FUNCTION compute_nwork_ph
+
+!-----------------------------------------------------------------------
 SUBROUTINE initialize_mur(nwork)
+!-----------------------------------------------------------------------
 !
 !   this routine sets the number of tasks needed to make an energy
 !   minimization. It allocates the variables ibrav_geo, celldm_geo, 
@@ -699,7 +702,9 @@ ibrav_geo=ibrav_save
 RETURN
 END SUBROUTINE initialize_mur
 
+!-----------------------------------------------------------------------
 SUBROUTINE initialize_mur_qha(nwork)
+!-----------------------------------------------------------------------
 !
 !   this routine sets the unperturbed geometries for the computation
 !   of the elastic constants within the quasiharmonic approximation.
@@ -745,19 +750,33 @@ WRITE(stdout,'(/,5x,70("-"))')
 RETURN
 END SUBROUTINE initialize_mur_qha
 
+!-----------------------------------------------------------------------
 SUBROUTINE initialize_ph_work(nwork)
+!-----------------------------------------------------------------------
 !
-!  This routine counts the number of tasks of a phonon calculation.
+!  This routine receives as input:
+!  start_geometry
+!  last_geometry
+!  the first and last geometry computed in this run.
+!  For each geometry it receives a structure collect_info_save(igeom).
+!  This structure has the following information:
+!  nqs    the number of q points to compute
+!  irr_iq(iq) for each q point how many irreducible representations.  
+!
+!  This routine counts the number of tasks for one or many phonon 
 !  For each phonon task it sets the geometry, the q point and the irr.
 !  When use_ph_images=.TRUE. the q point and irr are not used 
 !  and set to zero.
 !
-USE control_thermo, ONLY : all_geometries_together, geometry, iqw, irrw
+USE control_thermo, ONLY : all_geometries_together, geometry, iqw, irrw, &
+                        comp_irr_iq_iw, comp_iq_iw
 USE thermo_mod,  ONLY : start_geometry, last_geometry
 USE grid_irr_iq, ONLY : irr_iq
+USE ions_base,   ONLY : nat
 USE disp,        ONLY : nqs
 USE freq_ph,     ONLY : nfs, fpol
 USE images_omega,ONLY : omega_group
+USE collect_info, ONLY : read_collect_info
 USE initial_conf, ONLY : collect_info_save
 USE control_ph,  ONLY : epsil, trans
 USE control_qe,  ONLY : use_ph_images
@@ -766,7 +785,7 @@ USE mp_images,   ONLY : nimage
 IMPLICIT NONE
 INTEGER, INTENT(OUT) :: nwork
 
-INTEGER :: iq, irr, igeom, iwork, nqs_max, ngeom, stge, lage, nqsx
+INTEGER :: iq, irr, igeom, iwork, nqs_max, ngeom, image, stge, lage, nqsx
 INTEGER, ALLOCATABLE :: nqs_loc(:), irr_iq_loc(:,:)
 
 nwork=0
@@ -825,12 +844,23 @@ IF (trans) THEN
    ALLOCATE(geometry(nwork))
    ALLOCATE(iqw(nwork))
    ALLOCATE(irrw(nwork))
+   ALLOCATE(comp_irr_iq_iw(0:3*nat,nqsx,nwork))
+   ALLOCATE(comp_iq_iw(nqsx,nwork))
+
    iqw=0
    irrw=0
+   comp_irr_iq_iw=.FALSE.
+   comp_iq_iw=.FALSE.
    geometry=1
    IF (use_ph_images) THEN
       DO iwork=1, nwork
          geometry(iwork)= (iwork-1) / nimage + stge
+         image=MOD(iwork-1,nimage)+1
+         igeom=geometry(iwork)
+         CALL read_collect_info(collect_info_save(igeom), nqs, &
+              nat, image, comp_irr_iq_iw(0,1,iwork), comp_iq_iw(1,iwork))
+         iqw(iwork) = image
+         irrw(iwork) = 0
       ENDDO
    ELSE
       nwork=0
@@ -841,6 +871,12 @@ IF (trans) THEN
                geometry(nwork) = igeom
                iqw(nwork) = iq
                irrw(nwork) = irr
+               comp_irr_iq_iw(irr,iq,nwork)=.TRUE.
+               comp_iq_iw(iq,nwork)=.TRUE.
+               IF (collect_info_save(igeom)%done_iq(iq,1)==1) &
+                                       comp_iq_iw(iq,nwork)=.FALSE.
+               IF (collect_info_save(igeom)%done_irr_iq(irr,iq,1)==1) &
+                                       comp_irr_iq_iw(irr,iq,nwork)=.FALSE.
             ENDDO
          ENDDO
       ENDDO
@@ -864,15 +900,16 @@ ENDIF
 RETURN
 END SUBROUTINE initialize_ph_work
 
+!-----------------------------------------------------------------------
 SUBROUTINE initialize_no_ph(no_ph, tot_ngeo, ibrav)
-USE thermo_mod, ONLY : ngeo, fact_ngeo, ngeo_ph, reduced_grid, &
-                       red_central_geo, in_degree
-USE lattices, ONLY : compress_int_vect
-
+!-----------------------------------------------------------------------
 !
 !   This routine is used to skip phonon calculations in those geometries
 !   that are not on the grid used to compute the vibrational energy.
 !
+USE thermo_mod, ONLY : ngeo, fact_ngeo, ngeo_ph, reduced_grid, &
+                       red_central_geo, in_degree
+USE lattices, ONLY : compress_int_vect
 IMPLICIT NONE
 
 INTEGER, INTENT(IN)    :: tot_ngeo, ibrav
@@ -969,7 +1006,9 @@ END DO
 RETURN
 END SUBROUTINE initialize_no_ph
 
+!-----------------------------------------------------------------------
 SUBROUTINE set_equilibrium_conf( celldm, tau, at, omega )
+!-----------------------------------------------------------------------
 !
 !  This routine sets the equilibrium variables to those given
 !  in input. The tau are in cartesian coordinates and this routine
@@ -1001,8 +1040,16 @@ CALL cryst_to_cart( nat, tau0_crys, bg0, -1 )
 RETURN
 END SUBROUTINE set_equilibrium_conf
 
+!-----------------------------------------------------------------------
 INTEGER FUNCTION count_energies(ecutwfc, ecutrho, deltake, deltakeden, &
                                                              nke, nkeden)
+!-----------------------------------------------------------------------
+!
+!   Given a set of cut-offs for the wavefunctions and the charge
+!   densities, this functions counts how many possible calculations
+!   can be done removing all those for which the cut-off for the
+!   charge is smaller than 4 times the one for the wavefunctions
+!
 USE kinds, ONLY : DP
 IMPLICIT NONE
 INTEGER :: nke, nkeden
@@ -1024,7 +1071,9 @@ count_energies=icount
 RETURN
 END FUNCTION count_energies
 
+!-----------------------------------------------------------------------
 SUBROUTINE find_central_geo(ngeo, no_ph, central_geo)
+!-----------------------------------------------------------------------
 !
 USE thermo_mod, ONLY : reduced_grid, red_central_geo
 !
@@ -1055,7 +1104,9 @@ ENDIF
 RETURN
 END SUBROUTINE find_central_geo
 
+!-----------------------------------------------------------------------
 FUNCTION in_grid(igeo1, igeo2, igeo3, igeo4, igeo5, igeo6)
+!-----------------------------------------------------------------------
 !
 !  This logical function returns .TRUE. if only one of the six igeo 
 !  is different from zero. These are the geometries at which the phonon

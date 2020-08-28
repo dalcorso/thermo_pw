@@ -5,65 +5,54 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-SUBROUTINE initialize_ph_geometry(igeom, auxdyn)
+SUBROUTINE initialize_ph_geometry(igeom)
 !
 !   This routine initializes the phonon calculation by calling 
-!   initialize_geometry_and_ph which is a substitute of phq_readin.
+!   fast_phq_readin which is a substitute of phq_readin.
 !   This routine reads the xml file produced by pw.x and allocates the  
 !   variables usually allocated by phq_readin.
 !   Then it calls check_initial_status to initialize the phonon.
 !
-USE input_parameters, ONLY : outdir
-USE control_thermo,   ONLY : outdir_thermo
 USE io_global,        ONLY : stdout
 
-USE control_ph,       ONLY : rec_code_read, low_directory_check
+USE control_phrun,    ONLY : auxdyn
 USE grid_irr_iq,      ONLY : done_irr_iq
 USE disp,             ONLY : done_iq
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: igeom
-CHARACTER (LEN=256), INTENT(INOUT) :: auxdyn
-CHARACTER(LEN=6) :: int_to_char
+CHARACTER(LEN=80) :: message
 LOGICAL :: ldcs
 
-WRITE(stdout,'(/,5x,40("%"))')
-WRITE(stdout,'(5x,"Computing geometry ", i5)') igeom
-WRITE(stdout,'(5x,40("%"),/)')
-outdir=TRIM(outdir_thermo)//'/g'//TRIM(int_to_char(igeom))//'/'
+WRITE(message,'(5x,"Computing geometry ", i5)') igeom
+CALL decorated_write(message)
+CALL set_outdir_name(igeom)
 !
 ! ... reads the xml file produced by pw.x for this geometry
 !
-CALL initialize_geometry_and_ph(.TRUE., igeom, auxdyn)
+CALL fast_phq_readin(.TRUE., igeom)
 !
-!  no need to recheck the phsave directory here
+CALL set_fildyn_name(igeom)
 !
-ldcs=low_directory_check
-low_directory_check=.TRUE.
-CALL check_initial_status_tpw(auxdyn)
-low_directory_check=ldcs
+!  no need to recheck the phsave directory here. Call check_initial_status_tpw
+!  with iflag=1
+!
+CALL check_initial_status_tpw(auxdyn, 1)
 !
 !  The recover is managed after this routine
 !
 done_irr_iq=.FALSE.
 done_iq=.FALSE.
 !
-!  When there are many geometries the possible recover file is not used.
-!  Actually the rec_code_read read from file is the one written in the
-!  previous task of this image. We do all the tasks of a given image if
-!  the dynamical matrix is not already on file. In this case thermo_pw
-!  do not call the phonon and rec_code_read is not relevant.
-!
-rec_code_read=-40
-!
 RETURN
 END SUBROUTINE initialize_ph_geometry
 
 SUBROUTINE close_ph_geometry(close_ph)
 !
-!  This routine frees the variables allocated by the phq_readin, closes
+!  This routine frees the variables allocated by phq_readin, closes
 !  all the files, and reset the control variables of the phonon to their
-!  default values.
+!  input values. Note that it frees also the pw.x variables allocated
+!  by read_file.
 !
 USE ph_restart,       ONLY : destroy_status_run
 USE save_ph,          ONLY : clean_input_variables

@@ -1,33 +1,30 @@
 !
-! Copyright (C) 2013-2019 Andrea Dal Corso
+! Copyright (C) 2013-2020 Andrea Dal Corso
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !-----------------------------------------------------------------------
-SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, auxdyn_loc)
-  !-----------------------------------------------------------------------
+SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
+!-----------------------------------------------------------------------
 !
-!  This routine receives from the asynchronous driver the work to do in
-!  the integer iwork and sets the input variables of pwscf or of the
-!  phonon according to iwork before performing the actual calculation.
-!  On output it gives the q point and the irreducible representation, if
-!  this correspond to a phonon calculation.
+!  This routine receives from the asynchronous driver the number of the
+!  work to do, iwork, and sets the input variables of pwscf or of the phonon 
+!  according to iwork.
+!  When this iwork and part correspond to a phonon calculation it gives 
+!  the q point iq_point and the irreducible representation irr_value
+!  on output if not using ph.x images. Otherwise the iq_point
+!  gives the number of the image that would have done that work in ph.x 
+!  and irr_value is not used.
 !
   USE kinds,            ONLY : DP
-  USE thermo_mod,       ONLY : what, celldm_geo, start_geometry, &
-                               last_geometry
-  USE control_thermo,   ONLY : outdir_thermo, lstress, lphonon, &
-                               all_geometries_together, geometry, irrw, &
-                               iqw, comp_f_work
+  USE thermo_mod,       ONLY : what, celldm_geo
+  USE control_thermo,   ONLY : outdir_thermo
   USE control_elastic_constants, ONLY : frozen_ions
   USE control_conv,     ONLY : ke, keden, nk_test, sigma_test
-  USE initial_conf,     ONLY : ibrav_save, tau_save_crys, collect_info_save
+  USE initial_conf,     ONLY : ibrav_save, tau_save_crys
   USE equilibrium_conf, ONLY : at0, tau0
-  USE images_omega,     ONLY : omega_group
-  USE control_qe,       ONLY : use_ph_images
-  USE collect_info,     ONLY : copy_collect_info
 !
 !  the library modules
 !
@@ -37,42 +34,29 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, auxdyn_loc)
 !  the pw variables that are set here or used to set the input
 !
   USE input_parameters, ONLY : electron_maxstep, k_points, xk, wk, k1, k2, &
-                               k3, nkstot, etot_conv_thr, forc_conv_thr
-  USE control_flags,    ONLY : lbfgs, nstep, niter 
-  USE cell_base,   ONLY : cell_base_init, at
-  USE ions_base,   ONLY : tau, nat
-  USE gvecw,       ONLY : ecutwfc
-  USE gvect,       ONLY : ecutrho
-  USE gvecs,       ONLY : dual
-  USE force_mod,   ONLY : lforce, lstres
-  USE relax,       ONLY : epse, epsf
-  USE start_k,     ONLY : init_start_k
-  USE klist,       ONLY : degauss
-  USE freq_ph,     ONLY : fpol, nfs
-  USE io_files,    ONLY : tmp_dir, wfc_dir, check_tempdir
-!
-!   the phonon variables set here or used to set the input
-!
-  USE grid_irr_iq, ONLY : irr_iq, comp_irr_iq, done_irr_iq
-  USE disp,        ONLY : nqs, comp_iq, done_iq
-  USE control_ph,       ONLY : epsil, trans, recover
-  USE images_omega, ONLY : comp_f
-  USE mp_images,    ONLY : nimage
+                               k3, nkstot
+  USE control_flags,    ONLY : niter
+  USE cell_base,        ONLY : cell_base_init, at
+  USE ions_base,        ONLY : tau, nat
+  USE gvecw,            ONLY : ecutwfc
+  USE gvect,            ONLY : ecutrho
+  USE gvecs,            ONLY : dual
+  USE force_mod,        ONLY : lstres
+  USE start_k,          ONLY : init_start_k
+  USE klist,            ONLY : degauss
 
-  USE io_global,   ONLY : stdout
+  USE io_global,        ONLY : stdout
   !
   IMPLICIT NONE
   INTEGER, INTENT(IN) :: iwork, part
   INTEGER, INTENT(OUT) :: iq_point, irr_value
-  CHARACTER(LEN=256), INTENT(INOUT) :: auxdyn_loc
 
-  INTEGER :: jwork, irr, iq, i, j, ia, nk1, nk2, nk3, ibrav, start_omega, &
-             igeom, startge, lastge, target_nqs, target_irr_iq, image
+  INTEGER :: i, ia, nk1, nk2, nk3, ibrav, igeom, image
   REAL(DP) :: rd_ht(3,3), zero, celldm(6)
   CHARACTER(LEN=10) :: cell_units
   CHARACTER(LEN=6) :: int_to_char
   CHARACTER(LEN=256) :: outdir
-  LOGICAL :: exst, parallelfs, trd_ht
+  LOGICAL :: trd_ht
   !
   iq_point=0
   irr_value=0
@@ -81,43 +65,47 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, auxdyn_loc)
   IF (part == 1) THEN
      SELECT CASE (TRIM(what))
 !
-!  first the cases where there is nothing to do
-!
-        CASE ('scf',              &
-              'scf_bands',        &
-              'scf_dos',          &
-              'scf_ph',           &
-              'scf_disp') 
-!
-!  then the cases in which we set the kinetic energy and the k points
+!  Here we set the kinetic energy 
 !
         CASE ('scf_ke')
            ecutwfc = ke(iwork)
            ecutrho = keden(iwork)
            dual = ecutrho / ecutwfc
+!
+!  recompute the FFT dimension
+!
            CALL set_fft_mesh()
+!
+!  set the tmp_dir for this work
+!
            outdir=TRIM(outdir_thermo)//'/ke'//TRIM(int_to_char(iwork))//'/'
-           tmp_dir = TRIM ( outdir )
-           wfc_dir = tmp_dir
-           CALL check_tempdir ( tmp_dir, exst, parallelfs )
+           CALL set_tmp_dir( outdir)
+
         CASE ('scf_nk')
+!
+!  Here we set the number of k points and the degauss in metals
+!
+           IF (TRIM(k_points) /='automatic') &
+              CALL errore('set_thermo_work_todo', &
+                               'kpoint test requires automatic k point',1)
            degauss = sigma_test(iwork)
            nk1=nk_test(1,iwork)
            nk2=nk_test(2,iwork)
            nk3=nk_test(3,iwork)
-           IF (TRIM(k_points) /='automatic') &
-              CALL errore('set_thermo_work_todo', &
-                               'kpoint test requires automatic k point',1)
 !
 !   for the shift we use the same parameters read in input
 !
            CALL init_start_k ( nk1, nk2, nk3, k1, k2, k3, k_points, &
                                nkstot, xk, wk )
+!
+!  recompute the FFT dimension
+!
            CALL set_fft_mesh()
+!
+!  set the tmp_dir for this work
+!
            outdir=TRIM(outdir_thermo)//'/nk'//TRIM(int_to_char(iwork))//'/'
-           tmp_dir = TRIM ( outdir )
-           wfc_dir = tmp_dir
-           CALL check_tempdir ( tmp_dir, exst, parallelfs )
+           CALL set_tmp_dir( outdir)
 !
 !   then all the cases that require many energies calculations at
 !   different geometries. The geometry is set here in the pwscf variables
@@ -131,56 +119,45 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, auxdyn_loc)
               'mur_lc_elastic_constants',    &
               'mur_lc_piezoelectric_tensor', &
               'mur_lc_polarization')
-
-           IF (frozen_ions) THEN
-              lbfgs=.FALSE.
-           ELSE
-              lforce=.TRUE.
-              lstres=.TRUE.
-              lbfgs = .TRUE.
-              nstep = 20
-              epse = etot_conv_thr
-              epsf = forc_conv_thr
-           ENDIF
 !
-!   now set the celldm. 
+!  Initialize the QE variables for the ionic relaxation. 
+!
+           CALL initialize_relaxation(iwork)
+!
+!    In the relaxed ion case we compute the stress but do use it
+!    so lstress(iwork) is .FALSE. but here we set lstres=.TRUE.
+!    To save time or if stress is not available comment this command.
+!
+           lstres=.NOT.frozen_ions
+!
+!   now set the celldm
 !
            celldm(:)=celldm_geo(:,iwork)
            rd_ht=0.0_DP
            CALL cell_base_init ( ibrav_save, celldm, zero, zero, zero, zero, &
                                      zero, zero, .FALSE., rd_ht, ' ' )
+!
+!   recompute the fft mesh 
+!
            CALL set_fft_mesh()
 !
 ! strain uniformly the coordinates to the new celldm
 !
            tau=tau_save_crys
            CALL cryst_to_cart( nat, tau, at, 1 )
-
+!
+! set the tmp_dir for this geometry
+!
            outdir=TRIM(outdir_thermo)//'/g'//TRIM(int_to_char(iwork))//'/'
-           tmp_dir = TRIM ( outdir )
-           wfc_dir = tmp_dir
-           CALL check_tempdir ( tmp_dir, exst, parallelfs )
-
+           CALL set_tmp_dir( outdir)
            IF (.NOT.frozen_ions) CALL clean_bfgs_history()
 !
 !    the case of quasi-harmonic elastic constants
 !
         CASE ('elastic_constants_t')
-           WRITE(stdout,'(/,2x,76("-"))')
-           niter = electron_maxstep
-           IF (frozen_ions) THEN
-              lstres=lstress(iwork)
-              lbfgs=.FALSE.
-           ELSE
-              lforce=.TRUE.
-              lstres=lstress(iwork)
-              lbfgs = .TRUE.
-              nstep = 20
-              epse = etot_conv_thr
-              epsf = forc_conv_thr
-           ENDIF
+           niter=electron_maxstep
+           CALL initialize_relaxation(iwork)
            CALL set_work_for_elastic_const(iwork)
-     
         CASE DEFAULT
            CALL errore('set_thermo_work_todo','unknown what',1)
      END SELECT
@@ -196,89 +173,36 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, auxdyn_loc)
               'mur_lc_disp',    &
               'mur_lc_t',       &
               'elastic_constants_t')
-           IF (.NOT.lphonon(iwork)) RETURN
-           igeom=1
-           iq_point=1
-           irr_value=0
-           IF (all_geometries_together) THEN
-               igeom=geometry(iwork)
-               CALL initialize_ph_geometry(igeom, auxdyn_loc)
-           ENDIF
-           comp_irr_iq=.FALSE.
-           comp_iq=.FALSE.
-           comp_f=.FALSE.
-           IF (trans) THEN
-              IF (use_ph_images) THEN
-                 image=MOD(iwork-1,nimage)+1
-                 CALL copy_collect_info(collect_info_save(igeom), nqs, &
-                            nat, nimage, image, comp_irr_iq, done_irr_iq, &
-                            comp_iq, done_iq, irr_iq)
-                 iq_point=image
-              ELSE
-                 comp_irr_iq(irrw(iwork),iqw(iwork))=.TRUE.
-                 comp_iq(iqw(iwork))=.TRUE.
-                 iq_point=iqw(iwork)
-                 irr_value=irrw(iwork)
-              ENDIF
-           ELSEIF (fpol) THEN
-              comp_iq(1)=.TRUE.
-              comp_irr_iq(0,1)=.TRUE.
-              comp_f(:)=comp_f_work(:,iwork)
-           ELSEIF (epsil) THEN
-              comp_iq(1)=.TRUE.
-              comp_irr_iq(0,1)=.TRUE.
-           ENDIF
+
+           CALL set_ph_work(iwork, igeom, iq_point, irr_value)
 !
 !    Here the elastic constant calculation
 !
         CASE ('scf_elastic_constants', 'mur_lc_elastic_constants')
-           niter = electron_maxstep
-           IF (frozen_ions) THEN
-              lstres=lstress(iwork)
-              lbfgs=.FALSE.
-           ELSE
-              lforce=.TRUE.
-              lstres=lstress(iwork)
-              lbfgs = .TRUE.
-              nstep = 20
-              epse = etot_conv_thr
-              epsf = forc_conv_thr
-           ENDIF
+           niter=electron_maxstep
+           CALL initialize_relaxation(iwork)
            CALL set_work_for_elastic_const(iwork)
         CASE ('scf_piezoelectric_tensor', 'mur_lc_piezoelectric_tensor')
+           niter=electron_maxstep
            ibrav=0
-           niter = electron_maxstep
            DO i=1, 3
               CALL apply_strain(at0(1,i), at(1,i), epsilon_geo(1,1,iwork))
            ENDDO
            DO ia=1,nat
               CALL apply_strain(tau0(1,ia), tau(1,ia), epsilon_geo(1,1,iwork))
            ENDDO
-           WRITE(stdout,'(/,2x,76("-"))')
            CALL print_strain(epsilon_geo(:,:,iwork))
-           IF (frozen_ions) THEN
-              lstres=.TRUE.
-              lbfgs=.FALSE.
-           ELSE
-              lforce=.TRUE.
-              lstres=.TRUE.
-              lbfgs = .TRUE.
-              nstep = 20
-              epse = etot_conv_thr
-              epsf = forc_conv_thr
-           ENDIF
+
+           CALL initialize_relaxation(iwork)
+
            rd_ht = TRANSPOSE( at ) 
            trd_ht=.TRUE.
            cell_units='alat'
            CALL cell_base_init ( ibrav, celldm, zero, zero, zero, zero, &
                          zero, zero, trd_ht, rd_ht, cell_units )
            CALL set_fft_mesh()
-
            outdir=TRIM(outdir_thermo)//'/g'//TRIM(int_to_char(iwork))//'/'
-           tmp_dir = TRIM ( outdir )
-           wfc_dir = tmp_dir
-           CALL check_tempdir ( tmp_dir, exst, parallelfs )
-
+           CALL set_tmp_dir( outdir )
            IF (.NOT.frozen_ions) CALL clean_bfgs_history()
 
         CASE ('scf_polarization','mur_lc_polarization')
@@ -290,3 +214,139 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value, auxdyn_loc)
   RETURN
   !
 END SUBROUTINE set_thermo_work_todo
+
+!-----------------------------------------------------------------------
+SUBROUTINE set_tmp_dir (outdir)
+!-----------------------------------------------------------------------
+!
+!  This subroutine sets the tmp_dir and wfc_dir to the input outdir
+!  and creates the directory if it does not exist. It stops
+!  if the directory cannot be created or if some processor within
+!  the same image cannot read or write on it.
+!
+USE io_files,    ONLY : tmp_dir, wfc_dir, check_tempdir
+
+IMPLICIT NONE
+CHARACTER(LEN=256), INTENT(IN) :: outdir
+LOGICAL :: exst, parallelfs
+
+tmp_dir = TRIM ( outdir )
+wfc_dir = tmp_dir
+CALL check_tempdir ( tmp_dir, exst, parallelfs )
+IF (.NOT. parallelfs) &
+         CALL errore('set_tmp_dir','some node cannot read or write',1)
+RETURN
+END SUBROUTINE set_tmp_dir
+
+!-----------------------------------------------------------------------
+SUBROUTINE initialize_relaxation(iwork)
+!-----------------------------------------------------------------------
+!
+!  This routine initializes the variables that usually are initialized
+!  in iosys with calculation='relax'. This is needed because there is 
+!  also the possibility that we relax the ions when in the pw.x input
+!  calculation='scf'. Here we do a minimal initialization of the
+!  pw.x variables. Only lbfgs relaxation is possible.
+!  With frozen_ion=.TRUE. relaxation is disabled even if it was
+!  requested in the input of pw.x.
+!
+USE control_thermo,   ONLY : lstress
+USE control_elastic_constants, ONLY : frozen_ions 
+USE input_parameters, ONLY : etot_conv_thr, forc_conv_thr
+USE control_flags,    ONLY : lbfgs, nstep
+USE force_mod,        ONLY : lforce, lstres
+USE relax,            ONLY : epse, epsf
+
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: iwork
+
+lstres=lstress(iwork)
+IF (frozen_ions) THEN
+   lbfgs=.FALSE.
+ELSE
+   lforce=.TRUE.
+   lbfgs = .TRUE.
+   IF (nstep==1) nstep = 20
+   epse = etot_conv_thr
+   epsf = forc_conv_thr
+ENDIF
+RETURN
+END SUBROUTINE initialize_relaxation
+
+!-----------------------------------------------------------------------
+SUBROUTINE set_ph_work(iwork, igeom, iq_point, irr_value)
+!-----------------------------------------------------------------------
+!
+!    This subroutine sets the comp_iq, comp_irr_iq, comp_f, that
+!    corresponds to iwork. For doing this it uses the arrays
+!    comp_iq_iw, comp_irr_iq_iw, comp_f_iw, prepared in
+!    initialize_thermo_work. If we are doing all the geometries
+!    together this routine initialize also the current geometry
+!    reading the output of pw.x for the current geometry. 
+!
+USE control_thermo,   ONLY : all_geometries_together, geometry, irrw, &
+                             iqw, comp_irr_iq_iw, comp_iq_iw, comp_f_iw
+USE ions_base,        ONLY : nat
+USE grid_irr_iq,      ONLY : irr_iq, comp_irr_iq
+USE disp,             ONLY : nqs, comp_iq
+USE control_ph,       ONLY : epsil, trans
+USE control_thermo,   ONLY : lphonon
+USE freq_ph,          ONLY : fpol
+USE images_omega,     ONLY : comp_f
+USE mp_images,        ONLY : nimage
+!
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: iwork
+INTEGER, INTENT(OUT) :: igeom, iq_point, irr_value
+
+INTEGER :: image
+!
+!  With recover this iwork could be already done and we return.
+!
+IF (.NOT.lphonon(iwork)) RETURN
+!
+igeom=1
+iq_point=1
+irr_value=0
+!
+!  If we are doing all geometries together at each task we must
+!  read the output of pw.x. Get here the information.
+!
+IF (all_geometries_together) THEN
+   igeom=geometry(iwork)
+   CALL initialize_ph_geometry(igeom)
+ENDIF
+!
+!  set the default. Nothing is calculated if not explicitely set below
+!
+comp_irr_iq=.FALSE.
+comp_iq=.FALSE.
+comp_f=.FALSE.
+!
+!  here sets the variables that controls the phonon run
+!
+IF (trans) THEN
+   comp_irr_iq(:,:)=comp_irr_iq_iw(:,1:nqs,iwork)
+   comp_iq(:)=comp_iq_iw(1:nqs,iwork)
+   iq_point=iqw(iwork)
+   irr_value=irrw(iwork)
+ELSEIF (fpol) THEN
+!
+!   This is the frequency dependent case. There is only one q point 
+!   and the 0 irrep to be done. We do all the frequencies set
+!   into comp_f_iw for iwork
+!
+   comp_iq(1)=.TRUE.
+   comp_irr_iq(0,1)=.TRUE.
+   comp_f(:)=comp_f_iw(:,iwork)
+ELSEIF (epsil) THEN
+!
+!  In this case we make only the electric field perturbation. There
+!  is only one q point and the 0 irrep.
+!
+   comp_iq(1)=.TRUE.
+   comp_irr_iq(0,1)=.TRUE.
+ENDIF
+
+RETURN
+END SUBROUTINE set_ph_work

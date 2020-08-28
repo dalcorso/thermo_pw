@@ -6,7 +6,7 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !-----------------------------------------------------------------------
-SUBROUTINE check_initial_geometry(auxdyn)
+SUBROUTINE check_initial_geometry(auxdyn, iflag)
   !-----------------------------------------------------------------------
   !
   !  This routine is equivalent to check_initial_status, but it is
@@ -15,6 +15,10 @@ SUBROUTINE check_initial_geometry(auxdyn)
   !  create phonon directories in outdir.
   !  It is used to make the phonon calculations of several geometries
   !  and setup the relevant variables.
+  !  iflag is used to set the phonon flag low_directory_check
+  !   0    no change to the flag
+  !   1    set the flag to .TRUE.
+  !   2    set the flag to .FALSE.
   !
   USE io_global,       ONLY : stdout
   USE ions_base,       ONLY : nat
@@ -27,7 +31,7 @@ SUBROUTINE check_initial_geometry(auxdyn)
                               start_q, last_q, current_iq, tmp_dir_ph, &
                               ext_recover, ext_restart, qplot, &
                               done_zeu, done_start_zstar, done_epsil, &
-                              done_zue, always_run
+                              done_zue, always_run, low_directory_check
   USE control_qe,      ONLY : use_ph_images, tcollect_all
   USE ph_restart,      ONLY : check_directory_phsave, check_available_bands,&
                               allocate_grid_variables, ph_writefile
@@ -43,10 +47,15 @@ SUBROUTINE check_initial_geometry(auxdyn)
   !
   IMPLICIT NONE
   !
+  INTEGER :: iflag
   CHARACTER (LEN=256) :: auxdyn, filename
   CHARACTER (LEN=6), EXTERNAL :: int_to_char
-  LOGICAL :: exst
+  LOGICAL :: exst, ldcs
   INTEGER :: iq, iq_start, ierr
+  !
+  ldcs=low_directory_check
+  IF (iflag==1) low_directory_check=.TRUE.
+  IF (iflag==2) low_directory_check=.FALSE.
   !
   tmp_dir=tmp_dir_ph
   !
@@ -129,5 +138,7 @@ SUBROUTINE check_initial_geometry(auxdyn)
   ENDIF
   !
   auxdyn = fildyn
+  low_directory_check=ldcs
+
   RETURN
   END SUBROUTINE check_initial_geometry

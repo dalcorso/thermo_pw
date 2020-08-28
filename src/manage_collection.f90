@@ -38,7 +38,9 @@ ENDIF
 RETURN
 END SUBROUTINE manage_collection
 
+!---------------------------------------------------
 SUBROUTINE collect_everything(auxdyn, igeom)
+!---------------------------------------------------
 !
 !  This routine calls ph.x another time in order to collect the results 
 !  calculated by all images. The work is divided among images. Each image 
@@ -46,23 +48,23 @@ SUBROUTINE collect_everything(auxdyn, igeom)
 !  check_stc when all_geometries_together is .TRUE.. Otherwise
 !  the q points are distributed sequentially to each image.
 !
-USE io_global,   ONLY : stdout
 USE control_ph,  ONLY : recover
 USE control_qe,  ONLY : tcollect_all
-USE ions_base,   ONLY : nat
 USE disp,        ONLY : comp_iq, nqs
 USE grid_irr_iq, ONLY : comp_irr_iq, irr_iq
 
 USE distribute_collection, ONLY : me_igeom_iq
 
 IMPLICIT NONE
+INTEGER, INTENT(IN)             :: igeom
 CHARACTER (LEN=256), INTENT(IN) :: auxdyn
-INTEGER :: irr, iq, igeom
-LOGICAL :: save_recover, std
+
+INTEGER            :: irr, iq
+LOGICAL            :: save_recover, std
+CHARACTER (LEN=80) :: message
 !
-WRITE(stdout,'(/,2x,76("+"))')
-WRITE(stdout,'(5x,"Collecting the results and writing fildyn files")') 
-WRITE(stdout,'(2x,76("+"),/)')
+WRITE(message,'(5x,"Collecting the results and writing fildyn files")') 
+CALL decorated1_write(message)
 !
 !  All quantities should be already in phsave
 !  Each image receives a subset of q points and collects the results
@@ -96,8 +98,10 @@ recover=save_recover
 
 RETURN
 END SUBROUTINE collect_everything
-
+!
+!----------------------------------------------------------------------
 SUBROUTINE compute_total_task_and_divide(start_task, last_task, nimage)
+!----------------------------------------------------------------------
 !
 !  This routine distributes all the collection tasks to the available images. 
 !  When there are more tasks than images, it gives the q points belonging
@@ -109,7 +113,7 @@ USE thermo_mod,   ONLY : no_ph, start_geometry, last_geometry, phgeo_on_file
 USE initial_conf, ONLY : collect_info_save
 IMPLICIT NONE
 
-INTEGER, INTENT(IN) :: nimage
+INTEGER, INTENT(IN)    :: nimage
 INTEGER, INTENT(INOUT) :: start_task(nimage), last_task(nimage)
 
 INTEGER :: iq, igeom, image, total_task, task_per_image, resto
@@ -137,11 +141,13 @@ ENDDO
 RETURN
 END SUBROUTINE compute_total_task_and_divide
 
+!----------------------------------------------------------------------
 SUBROUTINE divide_all_collection_work()
+!----------------------------------------------------------------------
 !
-!   This routine, that is called only when all_geometry_together=.TRUE.
+!   This routine, called only when all_geometry_together=.TRUE.,
 !   sets two arrays (different for each image). 
-!   me_igeom : for each geometry is .true. if the present image must
+!   me_igeom : for each geometry it is .TRUE. if the present image must
 !              do some collection work in this geometry
 !   me_igeom_iq : is .true. if the present image must collect this
 !                 q point of this geometry
@@ -151,11 +157,13 @@ USE thermo_mod,     ONLY : no_ph, phgeo_on_file, start_geometry, last_geometry
 USE distribute_collection, ONLY : me_igeom, me_igeom_iq
 USE initial_conf,   ONLY : collect_info_save
 USE mp_images,      ONLY : nimage, my_image_id
+USE control_ph,     ONLY : trans
 
 IMPLICIT NONE
 
 INTEGER :: nqsx, start_task(nimage), last_task(nimage), task, igeom, iq
 
+IF (.NOT.trans) RETURN
 nqsx=MAXVAL(collect_info_save(:)%nqs)
 ALLOCATE(me_igeom(start_geometry:last_geometry))
 ALLOCATE(me_igeom_iq(start_geometry:last_geometry,nqsx))
@@ -181,7 +189,9 @@ ENDDO
 RETURN
 END SUBROUTINE divide_all_collection_work
 
+!----------------------------------------------------------------------
 SUBROUTINE divide_collection_work(igeom)
+!----------------------------------------------------------------------
 !
 !  This routine, similar to the previous one, works for the
 !  case all_geometry_together=.FALSE.. It sets only
@@ -189,14 +199,16 @@ SUBROUTINE divide_collection_work(igeom)
 !  
 !
 USE distribute_collection, ONLY : me_igeom_iq
-USE mp_images,    ONLY : nimage, my_image_id
+USE mp_images,             ONLY : nimage, my_image_id
 
-USE disp,         ONLY : nqs
+USE disp,                  ONLY : nqs
+USE control_ph,            ONLY : trans
 IMPLICIT NONE
 
 INTEGER :: igeom
 INTEGER :: iq
 
+IF (.NOT. trans) RETURN
 ALLOCATE(me_igeom_iq(igeom:igeom,nqs))
 DO iq=1,nqs
    me_igeom_iq(igeom,iq)=(MOD(iq-1,nimage)==my_image_id)
@@ -205,8 +217,13 @@ ENDDO
 RETURN
 END SUBROUTINE divide_collection_work
 
+!----------------------------------------------------------------------
 SUBROUTINE clean_collection_work()
-
+!----------------------------------------------------------------------
+!
+!   This routine deallocates the variables used to divide the collection
+!   work
+!
 USE distribute_collection, ONLY : me_igeom, me_igeom_iq
 IMPLICIT NONE
 

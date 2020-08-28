@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2013-2016 Andrea Dal Corso
+! Copyright (C) 2013-2020 Andrea Dal Corso
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -10,7 +10,7 @@ PROGRAM thermo_pw
   !-----------------------------------------------------------------------
   !
   ! ... This is a driver for the calculation of thermodynamic quantities,
-  ! ... using the harmonic and/or quasiharmonic approximation and the
+  ! ... using the harmonic and/or quasi-harmonic approximation and the
   ! ... plane waves pseudopotential method.
   ! ... It reads the input of pw.x and an input that specifies
   ! ... the calculations to do and the parameters for these calculations.
@@ -28,38 +28,28 @@ PROGRAM thermo_pw
   ! ... are described in the user's guide and in the developer's guide.
   ! ...
 
-  USE kinds,            ONLY : DP
-
-  USE thermo_mod,       ONLY : what, ngeo
-  USE control_thermo,   ONLY : lev_syn_1, lev_syn_2, lpwscf_syn_1,         &
-                               lph, lconv_ke_test, lconv_nk_test,    &
-                               lelastic_const, lectqha,            &
-                               lpiezoelectric_tensor, lpolarization,       &
+  USE control_thermo,   ONLY : lev_syn_2, lph, lpwscf_syn_1, lectqha, &
                                lpart2_pw
-
-  USE control_elastic_constants, ONLY : ngeom
-!
-!  variables of pw or phonon used here
-!
+  !
+  !  variables of pw or phonon used here
+  !
   USE check_stop,       ONLY : max_seconds, check_stop_init
-!
-!  parallelization control 
-!
+  !
+  !  parallelization control 
+  !
   USE mp_asyn,          ONLY : stop_signal_activated
   !
   IMPLICIT NONE
   !
-  INTEGER  :: part, nwork, iaux
-  REAL(DP) :: polar(3)
+  INTEGER  :: part, nwork
   CHARACTER (LEN=9)   :: code = 'THERMO_PW'
-  CHARACTER (LEN=256) :: auxdyn=' '
   !
-  !  Initialize mpi, the clocks and all the parallelism of QE
+  ! ... Initialize mpi, the clocks, and all the parallelism of QE
   !
   CALL thermo_startup(code)
   !
   ! ... and begin with the initialization part
-  ! ... readin input
+  ! ... reading input
   !
   CALL thermo_readin()
   !
@@ -75,116 +65,90 @@ PROGRAM thermo_pw
   !
   CALL check_stop_init(max_seconds)
   !
-  !... setup the work to do for the given task
+  !... setup the work to do in part 1 for the given task
   !
   part = 1
   !
-  CALL initialize_thermo_work(nwork, part, iaux)
+  CALL initialize_thermo_work(nwork, part)
   !
   !  In this part the images work asynchronously. No communication is
-  !  allowed except though the master-workers mechanism
+  !  allowed except through the master-slave mechanism
   !
-  CALL run_thermo_asynchronously(nwork, part, iaux, auxdyn)
+  CALL run_thermo_asynchronously(nwork, part, 1)
   !
-  !  In this part all images are synchronized and can communicate 
-  !  their results thought the world_comm communicator.
-!
-!  In the kinetic energy test write the results
-!
-  IF (lconv_ke_test) THEN
-     CALL write_e_ke()
-     CALL plot_e_ke()
-  ENDIF
-!
-! In the k-point test write the results
-!
-  IF (lconv_nk_test) THEN
-     CALL write_e_nk()
-     CALL plot_e_nk()
-  ENDIF
-!
-!  In a Murnaghan equation calculation determine the lattice constant,
-!  bulk modulus and its pressure derivative and write the results.
-!  Otherwise interpolate the energy with a quadratic or quartic polynomial.
-!
-  IF (lev_syn_1) CALL manage_energy_minimum(nwork)
-!
-!  When computing the elastic constants as a function of temperature
-!  here we have the energy for each strained geometry and can compute
-!  the T=0 K elastic constants for all the reference geometries.
-!
-  IF (lectqha) CALL manage_elastic_cons(nwork,ngeom)
-
-  CALL deallocate_asyn()
-!
-!  This part makes a self consistent pw.x calculation followed by
-!  a nonselfconsisten one if required. Only one image does the calculation.
-!  This part is used also for surface band structure and to identify 
-!  surface states.
-!
+  !  In this part all images are re-synchronized again and can communicate 
+  !  through the world_comm communicator.
+  !  Compute here the physical quantities that can be obtained
+  !  from the first set of calculations.
+  !
+  CALL manage_syn_1(nwork)
+  !
+  !  This part makes a self consistent pw.x calculation followed by
+  !  a non self-consistent one if required. Only one image does the 
+  !  calculation. This part is used also for surface band structure 
+  !  and to identify surface states.
+  !
   IF (lpwscf_syn_1) CALL manage_sync_pw()
-!
-!   here we make another asynchronous calculation with many runs
-!   of pw.x. It can be used for instance to compute the T=0 K elastic
-!   elastic constants at the minimum of the murnaghan computed in the
-!   first part. 
-!
+  !
   IF (lpart2_pw) THEN
+     !
+     !   here we make another asynchronous set of calculations with many runs
+     !   of pw.x. 
+     !
+     !... setup the work to do in part 2 for the given task
      !
      part=2
      !
-     CALL initialize_thermo_work(nwork, part, iaux)
+     CALL initialize_thermo_work(nwork, part)
      !
      !  Asynchronous work starts again. No communication is
-     !  allowed except though the master workers mechanism
+     !  allowed except through the master-slave mechanism
      !
-     CALL run_thermo_asynchronously(nwork, part, 1, auxdyn)
+     CALL run_thermo_asynchronously(nwork, part, 1)
      !
-     ! here we return synchronized and calculate the elastic constants 
-     ! from energy or stress 
+     !  In this part all images are re-synchronized again and can communicate 
+     !  through the world_comm communicator.
+     !  Compute here the physical quantities that can be obtained
+     !  from the second set of calculations.
      !
-     IF (lelastic_const) CALL manage_elastic_cons(nwork, 1)
+     CALL manage_syn_2(nwork)
      !
-     IF (lpiezoelectric_tensor) CALL manage_piezo_tensor(nwork)
+  ELSEIF (lph) THEN
      !
-     IF (lpolarization) CALL print_polarization(polar, .TRUE. )
-
-     CALL deallocate_asyn()
-  ENDIF
-
-  IF (what(1:8) /= 'mur_lc_t') ngeo=1
-!
-!   This part makes one or several phonon calculations, using 
-!   images and running asynchronously.
-!   After each calculation one can plot the phonon dispersions,
-!   compute the density of phonon states and the harmonic thermodynamic
-!   quantities. A single phonon dispersion made here can also provide
-!   the dielectric constant, the eels spectrum, or the Born effective
-!   charges.
-!
-  IF (lph) THEN
-
+     !   Here we make one or several phonon calculations, using 
+     !   images and running asynchronously.
+     !   After each calculation one can plot the phonon dispersions,
+     !   the density of phonon states and the harmonic thermodynamic
+     !   quantities. A single phonon dispersion made here can also provide
+     !   the dielectric constant, the eels spectrum, or the Born effective
+     !   charges. The management of the phonon asynchronous work is made
+     !   inside the manager.
+     !
      CALL manage_ph_run()
-
+     ! 
+     !   The stop_signal stops all the calculation after each image has
+     !   terminated its task even if there are still tasks to do.
+     !   It is triggered by max_seconds.
+     !
      IF (stop_signal_activated) GOTO 1000
-!
-!     Here the Helmholtz free energy at each geometry is available.
-!     We can write on file the free energy as a function of the volume at
-!     any temperature. For each temperature we can fit the free energy
-!     (or the Gibbs energy if we have a finite pressure) with a 
-!     Murnaghan equation or with a quadratic or quartic polynomial. 
-!     We save the minimum volume or the crystal parameters. 
-!     With the Murnaghan fit we save also the bulk modulus and 
-!     its pressure derivative for each temperature.
-!     One can also compute here the Gruneisen parameters.
-!
+     !
+     !   Here the Helmholtz free energy at each geometry is available.
+     !   We can write on file the free energy as a function of the volume at
+     !   any temperature. For each temperature we can fit the free energy
+     !   (or the Gibbs energy if we have a finite pressure) with a 
+     !   Murnaghan equation or with a quadratic or quartic polynomial. 
+     !   We save the minimum volume or the crystal parameters. 
+     !   With the Murnaghan fit we save also the bulk modulus and 
+     !   its pressure derivative for each temperature.
+     !   One can also compute here the Gruneisen parameters.
+     !
      IF (lev_syn_2) CALL manage_anhar_routines()
-!
-!   When lectqha=.TRUE. here we have computed the Helmholtz free energy for
-!   all the strained geometries (for a single unpertubed geometry or
-!   for a mesh of unperturbed geometries) and compute here the
-!   temperature dependent elastic constants
-!
+     !
+     !   When lectqha=.TRUE. here we have computed the Helmholtz free energy 
+     !   for all the strained geometries (for a single unperturbed geometry or
+     !   for a mesh of unperturbed geometries) and compute here the
+     !   temperature dependent elastic constants
+     !
      IF (lectqha) CALL manage_elastic_cons_qha()
   ENDIF
   !

@@ -6,11 +6,11 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !--------------------------------------------------------
-SUBROUTINE check_existence(iwork, part, iaux, run)
+SUBROUTINE check_existence(iwork, part, run)
 !--------------------------------------------------------
 !
 !   This routine checks if on file there are the information of
-!   the self-consitent run corresponding to iwork, part, iaux.
+!   the self-consitent run corresponding to iwork, part.
 !   If it finds them, it reads the energy and the stress if necessary
 !   and sets run to .FALSE.. If it does not find them it sets
 !   run to .TRUE. so that pw.x is called.
@@ -31,7 +31,7 @@ SUBROUTINE check_existence(iwork, part, iaux, run)
   !
   IMPLICIT NONE
   !
-  INTEGER, INTENT(IN) :: iwork, part, iaux
+  INTEGER, INTENT(IN) :: iwork, part
   LOGICAL, INTENT(OUT) :: run
 
   INTEGER  :: iu_ene, ios, ipol, jpol
@@ -45,7 +45,7 @@ SUBROUTINE check_existence(iwork, part, iaux, run)
   IF (ionode) THEN
      iu_ene=find_free_unit()
      filename='restart/e_work_part.'//TRIM(int_to_char(iwork))//'.'//&
-                              TRIM(int_to_char(part+iaux))
+                              TRIM(int_to_char(part))
      INQUIRE(FILE=TRIM(filename),EXIST=exst)
      IF (exst) THEN
         WRITE(stdout,'(5x,"Data found on file")')
@@ -92,7 +92,7 @@ SUBROUTINE check_existence(iwork, part, iaux, run)
 END SUBROUTINE check_existence
 
 !--------------------------------------------------------
-SUBROUTINE save_existence(iwork, part, iaux)
+SUBROUTINE save_existence(iwork, part)
 !--------------------------------------------------------
 !
 !  This routine saves on file the total energy, and
@@ -110,7 +110,7 @@ SUBROUTINE save_existence(iwork, part, iaux)
   !
   IMPLICIT NONE
   !
-  INTEGER, INTENT(IN) :: iwork, part, iaux
+  INTEGER, INTENT(IN) :: iwork, part
   INTEGER :: find_free_unit
   CHARACTER(LEN=6) :: int_to_char
   CHARACTER(LEN=256) :: filename
@@ -119,7 +119,7 @@ SUBROUTINE save_existence(iwork, part, iaux)
   IF (ionode) THEN
      iu_ene=find_free_unit()
      filename='restart/e_work_part.'//TRIM(int_to_char(iwork))//'.'//&
-                              TRIM(int_to_char(part+iaux))
+                              TRIM(int_to_char(part))
      OPEN(UNIT=iu_ene, FILE=TRIM(filename), STATUS='UNKNOWN', &
                        FORM='FORMATTED', ERR=20, IOSTAT=ios)
 

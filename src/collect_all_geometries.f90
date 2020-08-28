@@ -20,12 +20,13 @@ USE control_elastic_constants, ONLY : start_geometry_qha, last_geometry_qha, &
                                   ngeom
 USE cell_base,             ONLY : ibrav, celldm
 USE control_thermo,        ONLY : set_internal_path, lq2r
+USE control_phrun,         ONLY : auxdyn
 USE output,                ONLY : fildyn
 USE io_global,             ONLY : stdout
 
 IMPLICIT NONE
 INTEGER :: igeom, igeom_qha, iwork, work_base
-CHARACTER(LEN=256) :: auxdyn
+CHARACTER(LEN=80)  :: message
 
 work_base=tot_ngeo/ngeom
 DO igeom_qha=start_geometry_qha, last_geometry_qha
@@ -33,15 +34,15 @@ DO igeom_qha=start_geometry_qha, last_geometry_qha
       igeom=(igeom_qha-1)*work_base+iwork
       IF (no_ph(igeom)) CYCLE
       IF ((igeom<start_geometry.OR.igeom>last_geometry).AND.lq2r) THEN
-         WRITE(stdout,'(/,5x,40("%"))')
-         WRITE(stdout,'(5x,"Recomputing geometry ", i5)') igeom
-         WRITE(stdout,'(5x,40("%"),/)')
+         WRITE(message,'(5x,"Recomputing geometry ", i5)') igeom
+         CALL decorated_write(message)
+
          ibrav=ibrav_geo(igeom)
          celldm(:)=celldm_geo(:,igeom)
          IF (set_internal_path) CALL set_bz_path()
          CALL set_files_names(igeom)
          auxdyn=fildyn
-         CALL manage_ph_postproc(auxdyn, igeom)
+         CALL manage_ph_postproc(igeom)
       ENDIF
    ENDDO   
 ENDDO

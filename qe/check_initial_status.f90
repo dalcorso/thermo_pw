@@ -6,7 +6,7 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !-----------------------------------------------------------------------
-SUBROUTINE check_initial_status_tpw(auxdyn)
+SUBROUTINE check_initial_status_tpw(auxdyn, iflag)
   !-----------------------------------------------------------------------
   !
   ! This routine checks the initial status of the phonon run and sets
@@ -66,6 +66,11 @@ SUBROUTINE check_initial_status_tpw(auxdyn)
   ! It also creates a directory for each q inside outdir/_ph# 
   ! if this directory does not exist and lqdir=.true.
   !
+  ! iflag decides if the phsave directory is read and analyzed
+  !  0    no change to low_directory_check
+  !  1    low_directory_check set to .TRUE.
+  !  2    low_directiry_check set to .FALSE.
+  !
   USE io_global,       ONLY : stdout
   USE control_flags,   ONLY : modenum
   USE ions_base,       ONLY : nat
@@ -82,7 +87,8 @@ SUBROUTINE check_initial_status_tpw(auxdyn)
                               ext_recover, ext_restart, tmp_dir_phq, lqdir, &
                               start_irr, last_irr, newgrid, qplot, &
                               done_zeu, done_start_zstar, done_epsil, &
-                              done_zue, always_run
+                              done_zue, always_run, low_directory_check, &
+                              rec_code_read
   USE control_qe,      ONLY : use_ph_images
   USE save_ph,         ONLY : tmp_dir_save
   USE units_ph,        ONLY : iudyn
@@ -104,11 +110,17 @@ SUBROUTINE check_initial_status_tpw(auxdyn)
   !
   IMPLICIT NONE
   !
+  INTEGER :: iflag
   CHARACTER (LEN=256) :: auxdyn, filename
   CHARACTER (LEN=256), EXTERNAL :: trimcheck
-  CHARACTER (LEN=6), EXTERNAL :: int_to_char
-  LOGICAL :: exst
+  CHARACTER (LEN=6),   EXTERNAL :: int_to_char
+  LOGICAL :: exst, ldcs
   INTEGER :: iq, iq_start, ierr
+  !
+  !
+  ldcs=low_directory_check
+  IF (iflag==1) low_directory_check=.TRUE.
+  IF (iflag==2) low_directory_check=.FALSE.
   !
   tmp_dir=tmp_dir_ph
   !
@@ -327,7 +339,14 @@ SUBROUTINE check_initial_status_tpw(auxdyn)
      ENDIF
   ENDDO
   !
+  low_directory_check=ldcs
   auxdyn = fildyn
+!
+!  When there are many images the possible recover file is not used.
+!  Actually the rec_code_read read from file is the one written in the
+!  previous task of this image. 
+!
+  IF (nimage>1) rec_code_read=-40
   RETURN
   END SUBROUTINE check_initial_status_tpw
 

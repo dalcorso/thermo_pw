@@ -5,7 +5,7 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-SUBROUTINE manage_ph_postproc(auxdyn, igeom)
+SUBROUTINE manage_ph_postproc(igeom)
 !
 !  This driver computes the interatomic force constants and
 !  interpolates the phonon frequencies to make a phonon dispersion
@@ -14,9 +14,9 @@ SUBROUTINE manage_ph_postproc(auxdyn, igeom)
 !
 USE control_thermo,   ONLY : ltherm, ltherm_dos, ltherm_freq, set_internal_path
 USE control_paths,    ONLY : disp_nqs
+USE control_phrun,    ONLY : auxdyn
 
 IMPLICIT NONE
-CHARACTER(LEN=256), INTENT(IN) :: auxdyn
 INTEGER, INTENT(IN) :: igeom
 
 CHARACTER(LEN=256) :: filedata, filerap, fileout, gnu_filename, filenameps

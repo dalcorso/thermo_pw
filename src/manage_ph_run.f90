@@ -16,7 +16,7 @@ USE control_thermo, ONLY : all_geometries_together
 IMPLICIT NONE
 
    IF (all_geometries_together) THEN
-      CALL manage_all_geometries_ph()
+      CALL manage_ph_all_geometries()
    ELSE
       CALL manage_ph()
    ENDIF

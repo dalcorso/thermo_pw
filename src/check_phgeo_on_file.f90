@@ -13,19 +13,21 @@ SUBROUTINE check_phgeo_on_file()
 !   phgeo_on_file(igeom) to .TRUE. if all the dynamical matrices for
 !   this geometry are on file. 
 !
+!   NB: this routine works only if after_disp=.TRUE. and/or fildyn has been
+!       given in input to thermo_pw. 
+!
 
 USE thermo_mod,       ONLY : start_geometry, last_geometry, phgeo_on_file, &
                              tot_ngeo, no_ph
 USE control_thermo,   ONLY : after_disp
-USE output,           ONLY : fildyn
 
 IMPLICIT NONE
 
 INTEGER  :: igeom
-CHARACTER(LEN=6) :: int_to_char
-CHARACTER (LEN=256) :: auxdyn=' '
-LOGICAL :: check_dyn_file_exists
-
+!
+!  Allocate the phgeo_on_file variable. This routine can be called only
+!  once
+!
 ALLOCATE(phgeo_on_file(tot_ngeo))
 phgeo_on_file=.FALSE.
 !
@@ -33,14 +35,30 @@ phgeo_on_file=.FALSE.
 !
 DO igeom=start_geometry,last_geometry
    IF (no_ph(igeom)) CYCLE
-   auxdyn=TRIM(fildyn)//'.g'//TRIM(int_to_char(igeom))//'.'
-   IF (auxdyn(1:18)/='dynamical_matrices') &
-          auxdyn='dynamical_matrices/'//TRIM(auxdyn)
-   IF (check_dyn_file_exists(auxdyn)) phgeo_on_file(igeom)=.TRUE.
-   IF (after_disp.AND..NOT.phgeo_on_file(igeom)) &
-      CALL errore('check_phgeo_on_file','after_disp but dynamical matrix &
-                      &files not found', 1)
+   CALL set_fildyn_name(igeom)
+   CALL check_phgeo_on_file_1g(igeom)
 ENDDO
 
 RETURN
 END SUBROUTINE check_phgeo_on_file
+!
+ 
+!--------------------------------------------------------------
+SUBROUTINE check_phgeo_on_file_1g(igeom)
+!--------------------------------------------------------------
+
+USE thermo_mod,     ONLY : phgeo_on_file
+USE control_thermo, ONLY : after_disp
+USE output,         ONLY : fildyn
+
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: igeom
+CHARACTER(LEN=6)    :: int_to_char
+LOGICAL             :: check_dyn_file_exists
+
+IF (check_dyn_file_exists(fildyn)) phgeo_on_file(igeom)=.TRUE.
+IF (after_disp.AND..NOT.phgeo_on_file(igeom)) &
+   CALL errore('check_phgeo_on_file','after_disp but dynamical matrix &
+                      &files not found', 1)
+RETURN
+END SUBROUTINE check_phgeo_on_file_1g

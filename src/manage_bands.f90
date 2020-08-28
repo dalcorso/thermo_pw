@@ -26,6 +26,7 @@ IMPLICIT NONE
 
 INTEGER :: nspin0, exit_status, ierr
 CHARACTER(LEN=256) :: filedata, filerap, fileout, gnu_filename, filenameps
+CHARACTER(LEN=80)  :: message
  
 ierr=0
 IF (only_bands_plot) CALL read_minimal_info(.TRUE., ierr)
@@ -46,9 +47,8 @@ IF (nbnd_bands == 0) nbnd_bands = 2*nbnd
 IF (nbnd_bands > nbnd) nbnd = nbnd_bands
 
 IF (.NOT.only_bands_plot .AND. (my_image_id==root_image) ) THEN
-   WRITE(stdout,'(/,2x,76("+"))')
-   WRITE(stdout,'(5x,"Doing a non self-consistent calculation", i5)') 
-   WRITE(stdout,'(2x,76("+"),/)')
+   WRITE(message,'(5x,"Doing a non self-consistent calculation", i5)') 
+   CALL decorated1_write(message)
    CALL set_fft_mesh()
    CALL do_pwscf(exit_status, .FALSE.)
    IF (exit_status /=0) RETURN

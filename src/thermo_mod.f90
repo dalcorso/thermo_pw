@@ -396,18 +396,22 @@ MODULE control_thermo
                                          ! calculation for each work
                           irrw(:)        ! the irrep of a given phonon 
                                          ! calculation for each work
-  LOGICAL, ALLOCATABLE :: comp_f_work(:,:) ! for each work the list of
+  LOGICAL, ALLOCATABLE :: comp_f_iw(:,:), & ! for each work the list of
                                          ! frequencies to compute
+                          comp_irr_iq_iw(:,:,:), & ! for each work the 
+                                         ! comp_irr_iq of that work
+                          comp_iq_iw(:,:) ! for each work the list
+                                         ! of comp_iq of that work.
   LOGICAL :: read_paths      ! the paths for dispersion are read from input
   LOGICAL :: lev_syn_1=.FALSE. ! if .true. must calculate the murnaghan
                                ! at T=0
   LOGICAL :: lev_syn_2=.FALSE. ! if .true. must calculate the murnaghan
                                ! at all T
-  LOGICAL :: lpwscf_syn_1=.FALSE. ! if .true. must calculate the syncronous pw
+  LOGICAL :: lpwscf_syn_1=.FALSE. ! if .true. must calculate the synchronous pw
                                   ! for scf calculation
-  LOGICAL :: lbands_syn_1=.FALSE. ! if .true. must calculate the syncronous pw
+  LOGICAL :: lbands_syn_1=.FALSE. ! if .true. must calculate the synchronous pw
                                   ! for nscf calculation
-  LOGICAL :: ldos_syn_1=.FALSE.   ! if .true. must calculate the syncronous pw
+  LOGICAL :: ldos_syn_1=.FALSE.   ! if .true. must calculate the synchronous pw
                                   ! for nscf calculation for dos
   LOGICAL :: lpart2_pw=.FALSE.    ! if .true. in the second part makes
                                   ! also pw calculations           
@@ -826,6 +830,14 @@ MODULE control_pwrun
   LOGICAL  :: do_punch=.TRUE.  ! set this variable to .FALSE. if pw has
                                ! not to save the punch files.
 END MODULE control_pwrun
+
+MODULE control_phrun
+
+  SAVE
+
+  CHARACTER(LEN=256)  :: auxdyn=""  ! the name of the dynamical matrix file
+
+END MODULE control_phrun
 
 MODULE control_energy_plot
 

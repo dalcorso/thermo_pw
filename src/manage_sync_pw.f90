@@ -15,10 +15,10 @@ SUBROUTINE manage_sync_pw()
 !  relaxed coordinates are sent to all the other images.
 !
   USE kinds,            ONLY : DP
-  USE control_thermo,   ONLY : lbands_syn_1, outdir_thermo
-  USE input_parameters, ONLY : outdir
+  USE control_thermo,   ONLY : lbands_syn_1
   USE ions_base,        ONLY : tau
   USE cell_base,        ONLY : at, omega, celldm
+  USE input_parameters, ONLY : outdir
 
   USE io_files,         ONLY : tmp_dir, wfc_dir, check_tempdir
   USE control_pwrun,    ONLY : do_punch
@@ -33,13 +33,12 @@ SUBROUTINE manage_sync_pw()
 IMPLICIT NONE
 
 INTEGER  :: exit_status
-LOGICAL  :: exst, parallelfs, run
+LOGICAL  :: run
+CHARACTER (LEN=80) :: message
 
    with_asyn_images=.FALSE.
-   outdir=TRIM(outdir_thermo)//'/g1/'
-   tmp_dir = TRIM ( outdir )
-   wfc_dir = tmp_dir
-   CALL check_tempdir ( tmp_dir, exst, parallelfs )
+   CALL set_outdir_name(1)
+   CALL set_tmp_dir(outdir)
 
    IF (my_image_id==root_image) THEN
 !
@@ -47,13 +46,12 @@ LOGICAL  :: exst, parallelfs, run
 !
       do_punch=.TRUE.
       IF (.NOT.only_bands_plot) THEN
-         WRITE(stdout,'(/,2x,76("+"))')
-         WRITE(stdout,'(5x,"Doing a self-consistent calculation", i5)') 
-         WRITE(stdout,'(2x,76("+"),/)')
-         CALL check_existence(0,1,0,run)
+         WRITE(message,'(5x,"Doing a self-consistent calculation", i5)') 
+         CALL decorated1_write(message)
+         CALL check_existence(0,1,run)
          IF (run) THEN
             CALL do_pwscf(exit_status, .TRUE.)
-            CALL save_existence(0,1,0)
+            CALL save_existence(0,1)
          END IF
 
          IF (lxrdp) CALL manage_xrdp('.scf')
