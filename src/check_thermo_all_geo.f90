@@ -6,7 +6,7 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !--------------------------------------------------------
-SUBROUTINE collect_all_geometries()
+SUBROUTINE check_thermo_all_geo()
 !--------------------------------------------------------
 !
 !  This routine should be called only when the dynamical matrices
@@ -15,7 +15,7 @@ SUBROUTINE collect_all_geometries()
 !  it does not find them it recomputes the missing quantities.
 !
 USE thermo_mod,            ONLY : tot_ngeo, ibrav_geo, celldm_geo, no_ph, &
-                                  max_geometries, start_geometry, last_geometry
+                                  start_geometry, last_geometry
 USE control_elastic_constants, ONLY : start_geometry_qha, last_geometry_qha, &
                                   ngeom
 USE cell_base,             ONLY : ibrav, celldm
@@ -48,5 +48,5 @@ DO igeom_qha=start_geometry_qha, last_geometry_qha
 ENDDO
 
 RETURN
-END SUBROUTINE collect_all_geometries
+END SUBROUTINE check_thermo_all_geo
 

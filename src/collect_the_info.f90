@@ -12,7 +12,7 @@ SUBROUTINE collect_the_info(info)
 !  This routine must be called after the call to check_initial_status
 !  to save on the info structure the status information on the phonon
 !  grid calculation. It acts as an interface between the phonon
-!  and the infor structure
+!  and the info structure.
 !
 USE collect_info,     ONLY : collect_info_type, init_collect_info, &
                              save_collect_info, comm_collect_info

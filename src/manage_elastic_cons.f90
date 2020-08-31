@@ -10,8 +10,8 @@ SUBROUTINE manage_elastic_cons(nwork,ngeom)
 !----------------------------------------------------------
 !
 !   This routine coodinates the work to compute the T=0 K
-!   elastic constant after the scf calculations of the total
-!   energy or stress of all the strained geometries has been
+!   elastic constants after the scf calculations of the total
+!   energy or stress of all the strained geometries have been
 !   done. ngeom is the number of unperturbed geometries for which
 !   we calculate the elastic constants. 
 !
@@ -64,12 +64,12 @@ CHARACTER(LEN=256)  :: filelastic
 CALL mp_sum(energy_geo, world_comm)
 energy_geo=energy_geo / nproc_image
 !
-!  First collect the stress if it has been calculated
+!  Then collect the stress if it has been calculated
 !
-   IF (.NOT.elalgen) THEN
-      CALL mp_sum(sigma_geo, world_comm)
-      sigma_geo=sigma_geo / nproc_image
-   ENDIF
+IF (.NOT.elalgen) THEN
+   CALL mp_sum(sigma_geo, world_comm)
+   sigma_geo=sigma_geo / nproc_image
+ENDIF
 !
 !  work_base is the nwork to compute the elastic constants of one geometry
 !

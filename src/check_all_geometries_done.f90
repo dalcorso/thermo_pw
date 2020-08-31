@@ -48,7 +48,7 @@ ENDDO
 !  dynamical matrices for the missing geometries are on file and
 !  we read the thermal properties of the geometries not computed in this run
 !
-CALL collect_all_geometries()
+CALL check_thermo_all_geo()
 
 RETURN
 END SUBROUTINE check_all_geometries_done

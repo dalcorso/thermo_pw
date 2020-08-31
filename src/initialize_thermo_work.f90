@@ -18,37 +18,37 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   !  lpwscf, lstress, lberry, lphonon
   !
   USE kinds,          ONLY : DP
-  USE thermo_mod,     ONLY : what, step_ngeo, energy_geo, ngeo, &
-                             celldm_geo, omega_geo, ibrav_geo, tot_ngeo, no_ph,&
-                             start_geometry, last_geometry, reduced_grid, &
-                             in_degree
-  USE control_thermo, ONLY : lpwscf, lphonon, lev_syn_1, lev_syn_2, &
+  USE thermo_mod,     ONLY : what, energy_geo, celldm_geo, ibrav_geo,       &
+                             omega_geo, tot_ngeo, no_ph, start_geometry,    &
+                             last_geometry, reduced_grid, in_degree
+  USE control_thermo, ONLY : lpwscf, lphonon, lev_syn_1, lev_syn_2,   &
                              lph, lpwscf_syn_1, lbands_syn_1, lq2r,   &
-                             ltherm, lconv_ke_test, lconv_nk_test, &
-                             lstress, lelastic_const, lpiezoelectric_tensor,&
+                             ltherm, lconv_ke_test, lconv_nk_test,    &
+                             lstress, lelastic_const, lpiezoelectric_tensor, &
                              lberry, lpolarization, lpart2_pw, do_scf_relax, &
                              ldos_syn_1, ltherm_dos, ltherm_freq, after_disp, &
                              lectqha, all_geometries_together, geometry, iqw, &
                              irrw, comp_f_iw
   USE control_pwrun,  ONLY : do_punch
   USE control_conv,   ONLY : nke, ke, deltake, nkeden, deltakeden, keden, &
-                             nnk, nk_test, deltank, nsigma, sigma_test, &  
+                             nnk, nk_test, deltank, nsigma, sigma_test,   &  
                              deltasigma, ncutoffene
   USE equilibrium_conf, ONLY : celldm0, omega0
-  USE initial_conf,   ONLY : celldm_save, ibrav_save
+  USE initial_conf,   ONLY : ibrav_save
   USE piezoelectric_tensor, ONLY : polar_geo
-  USE control_elastic_constants, ONLY : rot_mat, ngeom, use_free_energy, &
+  USE control_elastic_constants, ONLY : rot_mat, ngeom, use_free_energy,   &
                                    elalgen, work_base, start_geometry_qha, &
-                                   last_geometry_qha, elastic_algorithm, &
+                                   last_geometry_qha, elastic_algorithm,   &
                                    el_con_omega_geo
-  USE elastic_constants, ONLY : epsilon_voigt, sigma_geo, epsilon_geo
+  USE collect_info, ONLY : something_to_do_all
+  USE initial_conf, ONLY : collect_info_save
   USE gvecw,          ONLY : ecutwfc
   USE gvect,          ONLY : ecutrho
   USE control_quadratic_energy, ONLY : nvar
   USE lattices,       ONLY : crystal_parameters
   USE start_k,        ONLY : nk1, nk2, nk3
   USE klist,          ONLY : degauss
-  USE control_ph,     ONLY : epsil, trans
+  USE control_ph,     ONLY : trans
   USE freq_ph,        ONLY : fpol, nfs
   USE optical,        ONLY : start_freq, last_freq
   USE images_omega,   ONLY : omega_group
@@ -58,13 +58,12 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   !
   IMPLICIT NONE
   INTEGER, INTENT(OUT) :: nwork
-  INTEGER, INTENT(IN) :: part
+  INTEGER, INTENT(IN)  :: part
 
-  INTEGER :: igeom, igeom_qha, ike, iden, icount, ink, isigma, iwork, &
-             iwork_tot, ios
-  INTEGER :: count_energies, iq, irr, start_omega, i, j
+  INTEGER  :: igeom, igeom_qha, ike, iden, icount, ink, isigma, iwork, &
+              iwork_tot, ios
+  INTEGER  :: count_energies, iq, irr, start_omega, i, j
   REAL(DP) :: compute_omega_geo, dual, kev, kedenv
-  LOGICAL :: something_to_do_all
 !
 !  here initialize the work to do and sets to true the flags that activate
 !  the different parts of thermo_pw. Sets also the number of tasks for each
@@ -309,7 +308,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            CALL initialize_mur_qha(ngeom)
            IF (start_geometry_qha<1) start_geometry_qha=1
            IF (last_geometry_qha>ngeom) last_geometry_qha=ngeom
-           CALL set_elastic_cons_work(ngeom, nwork)
+           CALL initialize_elastic_cons(ngeom, nwork)
            start_geometry=MAX((start_geometry_qha-1)*work_base+1, &
                                                        start_geometry)
            last_geometry=MIN(last_geometry_qha*work_base, last_geometry)
@@ -364,14 +363,10 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            IF (ALLOCATED(celldm_geo)) DEALLOCATE(celldm_geo)
            IF (ALLOCATED(energy_geo)) DEALLOCATE(energy_geo)
            IF (ALLOCATED(omega_geo))  DEALLOCATE(omega_geo)
-           IF (ALLOCATED(epsilon_voigt)) DEALLOCATE(epsilon_voigt)
-           IF (ALLOCATED(epsilon_geo)) DEALLOCATE(epsilon_geo)
-           IF (ALLOCATED(sigma_geo))  DEALLOCATE(sigma_geo)
-           IF (ALLOCATED(rot_mat))    DEALLOCATE(rot_mat)
 !
-!     set_elastic_constant_work allocates ibrav_geo and celldm_geo
+!     initialise_elastic_cons allocates ibrav_geo and celldm_geo
 !
-           CALL set_elastic_cons_work(1,nwork)
+           CALL initialize_elastic_cons(1,nwork)
 
            ALLOCATE(energy_geo(nwork))
            ALLOCATE(el_con_omega_geo(1))
@@ -472,7 +467,8 @@ SUBROUTINE initialize_thermo_work(nwork, part)
                     igeom=geometry(iwork)
                     iq=iqw(iwork)
                     irr=irrw(iwork)
-                    lphonon(iwork)=something_to_do_all(iwork,igeom,iq,irr)
+                    lphonon(iwork)=something_to_do_all(&
+                               collect_info_save(igeom),iwork,iq,irr)
                  ENDDO
               ENDIF
            ELSEIF (fpol) THEN

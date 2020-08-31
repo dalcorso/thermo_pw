@@ -122,7 +122,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
 !
 !  Initialize the QE variables for the ionic relaxation. 
 !
-           CALL initialize_relaxation(iwork)
+           CALL set_work_for_relaxation(iwork)
 !
 !    In the relaxed ion case we compute the stress but do use it
 !    so lstress(iwork) is .FALSE. but here we set lstres=.TRUE.
@@ -156,7 +156,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
 !
         CASE ('elastic_constants_t')
            niter=electron_maxstep
-           CALL initialize_relaxation(iwork)
+           CALL set_work_for_relaxation(iwork)
            CALL set_work_for_elastic_const(iwork)
         CASE DEFAULT
            CALL errore('set_thermo_work_todo','unknown what',1)
@@ -174,13 +174,13 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
               'mur_lc_t',       &
               'elastic_constants_t')
 
-           CALL set_ph_work(iwork, igeom, iq_point, irr_value)
+           CALL set_work_for_ph(iwork, igeom, iq_point, irr_value)
 !
 !    Here the elastic constant calculation
 !
         CASE ('scf_elastic_constants', 'mur_lc_elastic_constants')
            niter=electron_maxstep
-           CALL initialize_relaxation(iwork)
+           CALL set_work_for_relaxation(iwork)
            CALL set_work_for_elastic_const(iwork)
         CASE ('scf_piezoelectric_tensor', 'mur_lc_piezoelectric_tensor')
            niter=electron_maxstep
@@ -193,7 +193,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
            ENDDO
            CALL print_strain(epsilon_geo(:,:,iwork))
 
-           CALL initialize_relaxation(iwork)
+           CALL set_work_for_relaxation(iwork)
 
            rd_ht = TRANSPOSE( at ) 
            trd_ht=.TRUE.
@@ -239,7 +239,7 @@ RETURN
 END SUBROUTINE set_tmp_dir
 
 !-----------------------------------------------------------------------
-SUBROUTINE initialize_relaxation(iwork)
+SUBROUTINE set_work_for_relaxation(iwork)
 !-----------------------------------------------------------------------
 !
 !  This routine initializes the variables that usually are initialized
@@ -271,10 +271,10 @@ ELSE
    epsf = forc_conv_thr
 ENDIF
 RETURN
-END SUBROUTINE initialize_relaxation
+END SUBROUTINE set_work_for_relaxation
 
 !-----------------------------------------------------------------------
-SUBROUTINE set_ph_work(iwork, igeom, iq_point, irr_value)
+SUBROUTINE set_work_for_ph(iwork, igeom, iq_point, irr_value)
 !-----------------------------------------------------------------------
 !
 !    This subroutine sets the comp_iq, comp_irr_iq, comp_f, that
@@ -314,7 +314,7 @@ irr_value=0
 !
 IF (all_geometries_together) THEN
    igeom=geometry(iwork)
-   CALL initialize_ph_geometry(igeom)
+   CALL prepare_do_phonon(igeom)
 ENDIF
 !
 !  set the default. Nothing is calculated if not explicitely set below
@@ -349,4 +349,4 @@ ELSEIF (epsil) THEN
 ENDIF
 
 RETURN
-END SUBROUTINE set_ph_work
+END SUBROUTINE set_work_for_ph

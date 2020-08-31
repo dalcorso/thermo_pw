@@ -16,7 +16,7 @@ SUBROUTINE manage_ph()
 ! thermo_pw variables
 !
   USE thermo_mod,       ONLY : no_ph, max_geometries, start_geometry, &
-                               last_geometry, phgeo_on_file
+                               last_geometry, dynmat_on_file
   USE control_thermo,   ONLY : lq2r
   USE control_phrun,    ONLY : auxdyn
   USE initial_conf,     ONLY : collect_info_save
@@ -48,7 +48,7 @@ ALLOCATE(collect_info_save(1))
 !  so it works only with after_disp or if one sets fildyn in the
 !  thermo_control file.
 !
-CALL check_phgeo_on_file()
+CALL check_dynmat_all_geo_on_file()
 !
 !  main loop on the geometries, one after the other
 !
@@ -58,7 +58,7 @@ DO igeom=start_geometry,last_geometry
 !  first check all the possibilities of not computing this geometry
 !
    IF (no_ph(igeom).OR.stop_signal_activated) CYCLE  ! skip this geometry
-   IF (phgeo_on_file(igeom)) GOTO 50  ! skip but compute the thermodynamic
+   IF (dynmat_on_file(igeom)) GOTO 50  ! skip but compute the thermodynamic
    IF (ph_geometries+1 > max_geometries) THEN
       WRITE(stdout,'(5x,"The code stops because max_geometries is",&
                             &i4)') max_geometries

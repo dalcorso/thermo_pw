@@ -45,7 +45,7 @@ CALL start_clock( 'PHONON' )
 !   available. This check works only if fildyn has been set in the input
 !   thermo_control.
 !
-CALL check_phgeo_on_file()
+CALL check_dynmat_all_geo_on_file()
 !
 IF (after_disp) GOTO 50   ! Skip all the phonon calculation if after_disp 
                           ! is true.
@@ -53,7 +53,7 @@ IF (after_disp) GOTO 50   ! Skip all the phonon calculation if after_disp
 !  Initialize the work of all the geometries and analyze what is on disk
 !  This routine must be called by all processors
 !
-CALL check_geo_initial_status(something_todo)
+CALL check_initial_status_all_geo(something_todo)
 !
 IF (something_todo) THEN
 !
@@ -86,8 +86,9 @@ DO igeom=start_geometry, last_geometry
    CALL decorated_write(message)
    CALL set_outdir_name(igeom)
    !
-   ! reads the pw.x output and the phonon input and check what is on 
-   ! file
+   ! reads the pw.x output and the phonon input. With the flag 1 check
+   ! initial geometry does not recheck what is on disk. Here all parts 
+   ! of the dynamical matrices must have been computed by some image.
    !
    CALL fast_phq_readin(.TRUE., igeom)
    CALL set_fildyn_name(igeom)
@@ -101,6 +102,9 @@ DO igeom=start_geometry, last_geometry
    !
    CALL close_ph_geometry(.TRUE.)
 ENDDO
+!
+!  deallocate the variables needed to divide the collection work among
+!  images.
 !
 CALL clean_collection_work()
 50 CONTINUE
@@ -123,7 +127,7 @@ DO igeom=start_geometry, last_geometry
    CALL set_files_names(igeom)
    auxdyn=fildyn
 !
-!  Compute the dispersions and the thermodynamic properties
+!  Compute the phonon dispersions and the thermodynamic properties
 !
    IF (lq2r) CALL manage_ph_postproc(igeom)
 ENDDO

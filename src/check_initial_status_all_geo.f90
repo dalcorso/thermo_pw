@@ -6,7 +6,7 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !--------------------------------------------------------------------------
-SUBROUTINE check_geo_initial_status(something_todo)
+SUBROUTINE check_initial_status_all_geo(something_todo)
 !--------------------------------------------------------------------------
 !
 !  This routine analyses in sequence all the xml files written by
@@ -32,7 +32,7 @@ SUBROUTINE check_geo_initial_status(something_todo)
 !  collect_info_save
 !
 USE thermo_mod,       ONLY : no_ph, start_geometry, last_geometry, &
-                             tot_ngeo, phgeo_on_file
+                             tot_ngeo, dynmat_on_file
 USE initial_conf,     ONLY : collect_info_save
 
 USE control_qe,       ONLY : use_ph_images
@@ -63,7 +63,7 @@ ENDDO
 !
 DO igeom=start_geometry,last_geometry
    IF (no_ph(igeom)) CYCLE
-   IF (phgeo_on_file(igeom)) CYCLE
+   IF (dynmat_on_file(igeom)) CYCLE
    something_todo=.TRUE.
    CALL set_outdir_name(igeom)
    !
@@ -95,4 +95,4 @@ CALL mp_barrier(world_comm)
 CALL restore_files_names()
 
 RETURN
-END SUBROUTINE check_geo_initial_status
+END SUBROUTINE check_initial_status_all_geo

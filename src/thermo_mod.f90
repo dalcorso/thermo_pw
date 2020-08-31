@@ -32,7 +32,7 @@ MODULE thermo_mod
                                         !
   LOGICAL, ALLOCATABLE :: no_ph(:)      ! decide in which geometries
                                         ! the phonons are calculated
-  LOGICAL, ALLOCATABLE :: phgeo_on_file(:) ! set to .TRUE. if the phonons
+  LOGICAL, ALLOCATABLE :: dynmat_on_file(:) ! set to .TRUE. if the dynmat
                                         ! of this geometry are on file
 
   INTEGER :: tot_ngeo                   ! total number of geometries for

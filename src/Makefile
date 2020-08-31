@@ -25,13 +25,13 @@ check_file_exists.o \
 check_all_geometries_done.o \
 check_el_cons.o \
 check_el_cons_qha.o \
-check_geo_initial_status.o \
-check_phgeo_on_file.o \
+check_dynmat_all_geo_on_file.o \
+check_thermo_all_geo.o \
 clean_bfgs_history.o \
 clean_dfft.o \
+check_initial_status_all_geo.o \
 clean_ngeo.o \
 clean_path.o \
-collect_all_geometries.o \
 collect_info.o \
 collect_the_info.o \
 compute_cp.o \
@@ -63,13 +63,13 @@ generate_k_along_lines_kz.o \
 generalized_phdos.o \
 gen_qpoints.o \
 initialize_thermo_work.o \
+initialize_elastic_cons.o \
 interpolate_bfact.o \
 interpolate_el_cons.o \
 interpolate_freq.o \
 interpolate_free_ener_strain.o \
 interpolate_thermo.o \
 io_bands.o \
-initialize_ph_geometry.o \
 local_dos1d_so.o \
 manage_anhar.o   \
 manage_anhar_routines.o   \
@@ -112,6 +112,7 @@ plot_mur.o \
 plot_phdos.o \
 plot_thermo.o \
 plot_xrdp.o \
+prepare_do_phonon.o \
 print_polarization.o \
 proj_band_structure.o \
 q2r_sub.o \
@@ -127,7 +128,6 @@ set_2d_bz_path.o \
 set_bz_path.o \
 set_dos_kpoints.o \
 set_elastic_constants_t.o \
-set_elastic_cons_work.o \
 set_files_names.o \
 set_fft_mesh.o \
 set_k_points.o \
@@ -138,7 +138,6 @@ set_thermo_work_todo.o \
 set_work_for_elastic_const.o \
 simple_nonanal.o \
 simple_plot.o \
-something_to_do_all.o \
 surface.o     \
 sym_band_sub.o \
 thermo_mod.o \

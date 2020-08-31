@@ -47,7 +47,8 @@ TYPE :: collect_info_type
 END TYPE collect_info_type
 
 PUBLIC collect_info_type, init_collect_info, save_collect_info, &
-       read_collect_info, comm_collect_info, destroy_collect_info_type
+       read_collect_info, comm_collect_info, destroy_collect_info_type, &
+       something_to_do_all
 
 CONTAINS
 
@@ -195,5 +196,40 @@ CONTAINS
 
    RETURN
    END SUBROUTINE destroy_collect_info_type
+
+!
+!--------------------------------------------------------------------------
+   LOGICAL FUNCTION something_to_do_all(info, iwork, iqw, irrw)
+!--------------------------------------------------------------------------
+!
+!  This function checks if there is some irreducible representation to
+!  calculate among all the geometries.
+!
+   USE control_qe,   ONLY : use_ph_images
+   USE mp_images,    ONLY : nimage
+
+   IMPLICIT NONE
+   TYPE(collect_info_type), INTENT(IN) :: info
+   INTEGER, INTENT(IN) :: iwork, iqw, irrw
+
+   LOGICAL :: std
+   INTEGER :: iq, irr, image
+
+   std=.FALSE.
+   IF (use_ph_images) THEN
+      image=MOD(iwork-1, nimage) + 1 
+      DO iq=1, info%nqs
+         DO irr=0, info%irr_iq(iq)
+            IF ((info%comp_irr_iq(irr,iq,image)==1).AND.&
+                (info%done_irr_iq(irr,iq,image)==0)) std=.TRUE.
+         ENDDO
+      ENDDO
+   ELSE
+      IF (info%done_irr_iq(irrw,iqw,1)==0) std=.TRUE.
+   ENDIF
+   something_to_do_all=std
+
+   RETURN
+   END FUNCTION something_to_do_all
 
 END MODULE collect_info

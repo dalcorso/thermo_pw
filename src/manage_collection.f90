@@ -109,7 +109,7 @@ SUBROUTINE compute_total_task_and_divide(start_task, last_task, nimage)
 !  in order to minimize the number of geometries that are initialized 
 !  again by each image. 
 !
-USE thermo_mod,   ONLY : no_ph, start_geometry, last_geometry, phgeo_on_file
+USE thermo_mod,   ONLY : no_ph, start_geometry, last_geometry, dynmat_on_file
 USE initial_conf, ONLY : collect_info_save
 IMPLICIT NONE
 
@@ -120,7 +120,7 @@ INTEGER :: iq, igeom, image, total_task, task_per_image, resto
 
 total_task=0
 DO igeom=start_geometry, last_geometry
-   IF (no_ph(igeom).OR.phgeo_on_file(igeom)) CYCLE
+   IF (no_ph(igeom).OR.dynmat_on_file(igeom)) CYCLE
    DO iq=1,collect_info_save(igeom)%nqs
       total_task = total_task+1
    ENDDO
@@ -153,7 +153,7 @@ SUBROUTINE divide_all_collection_work()
 !                 q point of this geometry
 !   
 !
-USE thermo_mod,     ONLY : no_ph, phgeo_on_file, start_geometry, last_geometry
+USE thermo_mod,     ONLY : no_ph, dynmat_on_file, start_geometry, last_geometry
 USE distribute_collection, ONLY : me_igeom, me_igeom_iq
 USE initial_conf,   ONLY : collect_info_save
 USE mp_images,      ONLY : nimage, my_image_id
@@ -175,7 +175,7 @@ CALL compute_total_task_and_divide(start_task, last_task, nimage)
 
 task=0
 DO igeom = start_geometry, last_geometry
-   IF (no_ph(igeom).OR.phgeo_on_file(igeom)) CYCLE
+   IF (no_ph(igeom).OR.dynmat_on_file(igeom)) CYCLE
    DO iq = 1, collect_info_save(igeom)%nqs
       task = task+1
       IF (task >=start_task(my_image_id+1).AND. &

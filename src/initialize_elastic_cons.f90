@@ -5,7 +5,7 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-SUBROUTINE set_elastic_cons_work( ngeom, nwork )
+SUBROUTINE initialize_elastic_cons( ngeom, nwork )
 !
 !  This routine sets the work to do for computing the elastic constants for
 !  each Laue class. 
@@ -62,7 +62,7 @@ SELECT CASE (laue)
             IF (ibrav_save==1) strain_list(3) = 'F '
          ENDIF
       ELSE
-         CALL errore('set_elastic_cons_work',&
+         CALL errore('initialize_elastic_cons',&
                               'Incorrect lattice for cubic system',1)
       ENDIF
    CASE (19,23)
@@ -84,7 +84,7 @@ SELECT CASE (laue)
             strain_list(5) = 'H '
          ENDIF
       ELSE
-         CALL errore('set_elastic_cons_work',&
+         CALL errore('initialise_elastic_cons',&
                        'Incorrect lattice for hexagonal system',ibrav_save)
       ENDIF
    CASE (18,22)
@@ -113,7 +113,7 @@ SELECT CASE (laue)
             ENDIF
          ENDIF
       ELSE
-         CALL errore('set_elastic_cons_work',&
+         CALL errore('initialize_elastic_cons',&
                        'Incorrect lattice for tetragonal system',ibrav_save)
       ENDIF
    CASE (20)
@@ -143,7 +143,7 @@ SELECT CASE (laue)
             strain_list(9) = 'I '
          ENDIF
       ELSE
-         CALL errore('set_elastic_cons_work',&
+         CALL errore('initialize_elastic_cons',&
                     'Incorrect lattice for orthorombic system',ibrav_save)
       ENDIF
    CASE (25,27)
@@ -175,7 +175,7 @@ SELECT CASE (laue)
             END IF
          END IF
       ELSE
-         CALL errore('set_elastic_cons_work',&
+         CALL errore('initialize_elastic_cons',&
                     'Incorrect lattice for trigonal system',ibrav_save)
       END IF
    CASE (16)
@@ -224,7 +224,7 @@ SELECT CASE (laue)
             ENDIF
          END IF
       ELSE
-         CALL errore('set_elastic_cons_work',&
+         CALL errore('initialize_elastic_cons',&
                     'Incorrect lattice for monoclinic system',ibrav_save)
       END IF
 
@@ -266,20 +266,20 @@ SELECT CASE (laue)
             strain_list(21) = 'IG'
          END IF
       ELSE
-         CALL errore('set_elastic_cons_work',&
+         CALL errore('initialize_elastic_cons',&
                     'Incorrect lattice for triclinic system',ibrav_save)
       END IF
    CASE DEFAULT
-      CALL errore('set_elastic_cons_work','Laue class not available',1)
+      CALL errore('initialize_elastic_cons','Laue class not available',1)
 END SELECT
 IF (nstep<1.AND.elastic_algorithm=='advanced') &
-   CALL errore('set_elastic_cons_work', 'Incorrect nstep, &
+   CALL errore('initialize_elastic_cons', 'Incorrect nstep, &
                                              &use standard algorithm',1)
 IF (nstep<1.AND.elastic_algorithm=='energy') &
-   CALL errore('set_elastic_cons_work', 'Incorrect nstep, &
+   CALL errore('initialize_elastic_cons', 'Incorrect nstep, &
                                              &use energy_std algorithm',1)
 IF (nstep<1) &
-   CALL errore('set_elastic_cons_work', 'Incorrect nstep, &
+   CALL errore('initialize_elastic_cons', 'Incorrect nstep, &
                                              &check elastic_algorithm',1)
 nwork = nstep * ngeo_strain * ngeom
 work_base = nstep * ngeo_strain
@@ -333,4 +333,4 @@ IF (elastic_algorithm=='standard'.OR.elastic_algorithm=='energy_std') THEN
 ENDIF
 
 RETURN
-END SUBROUTINE set_elastic_cons_work
+END SUBROUTINE initialize_elastic_cons

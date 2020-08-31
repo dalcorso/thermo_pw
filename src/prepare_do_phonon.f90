@@ -5,19 +5,16 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-SUBROUTINE initialize_ph_geometry(igeom)
+SUBROUTINE prepare_do_phonon(igeom)
 !
 !   This routine initializes the phonon calculation by calling 
-!   fast_phq_readin which is a substitute of phq_readin.
-!   This routine reads the xml file produced by pw.x and allocates the  
-!   variables usually allocated by phq_readin.
+!   fast_phq_readin that reads the xml file produced by pw.x and 
+!   allocates the variables usually allocated by phq_readin.
 !   Then it calls check_initial_status to initialize the phonon.
 !
 USE io_global,        ONLY : stdout
 
 USE control_phrun,    ONLY : auxdyn
-USE grid_irr_iq,      ONLY : done_irr_iq
-USE disp,             ONLY : done_iq
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: igeom
@@ -35,17 +32,12 @@ CALL fast_phq_readin(.TRUE., igeom)
 CALL set_fildyn_name(igeom)
 !
 !  no need to recheck the phsave directory here. Call check_initial_status_tpw
-!  with iflag=1
+!  with iflag=1 to skip the recheck.
 !
 CALL check_initial_status_tpw(auxdyn, 1)
 !
-!  The recover is managed after this routine
-!
-done_irr_iq=.FALSE.
-done_iq=.FALSE.
-!
 RETURN
-END SUBROUTINE initialize_ph_geometry
+END SUBROUTINE prepare_do_phonon
 
 SUBROUTINE close_ph_geometry(close_ph)
 !
