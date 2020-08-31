@@ -28,7 +28,7 @@ TYPE eldos_type
    REAL(DP) :: de                     ! interval of the mesh of  (ev)
    REAL(DP), ALLOCATABLE :: e(:)      ! the energies (ev)
    REAL(DP), ALLOCATABLE :: dos(:)    ! the electron dos (states/ ev)
-   REAL(DP), ALLOCATABLE :: ddos(:)    ! the electron dos (states/ ev)
+   REAL(DP), ALLOCATABLE :: ddos(:)   ! the electron dos (states/ ev) for lsda
    REAL(DP), ALLOCATABLE :: intdos(:) ! the integrated electron dos (states/ ev)
 END TYPE eldos_type
 
@@ -84,7 +84,7 @@ LOGICAL, INTENT(IN) :: lsda
 INTEGER :: iunit, ios
 INTEGER, PARAMETER :: ndivx=10000000
 REAL(DP), ALLOCATABLE :: e(:), dos(:,:), intdos(:)
-REAL(DP) :: de, de_
+REAL(DP) :: de, de_, deltae
 INTEGER :: i, ndiv
 INTEGER :: find_free_unit
 
@@ -132,17 +132,12 @@ CALL mp_bcast(e,ionode_id,intra_image_comm)
 CALL mp_bcast(dos,ionode_id,intra_image_comm)
 CALL mp_bcast(intdos,ionode_id,intra_image_comm)
 
-ALLOCATE(eldos%e(ndiv))
-ALLOCATE(eldos%dos(ndiv))
-IF (lsda) ALLOCATE(eldos%ddos(ndiv))
-ALLOCATE(eldos%intdos(ndiv))
+deltae=de / rytoev   ! internally energies are in Ry
+CALL set_eldos(eldos,ndiv,lsda,deltae)
 
-eldos%number_of_points=ndiv
-eldos%lsda=lsda
-eldos%de=de / rytoev                       ! internally energies are in Ry
 eldos%e(:) = e(1:ndiv) / rytoev            ! internally energies are in Ry
-eldos%dos(:) = dos(1:ndiv,1) * rytoev        ! internally dos in states / Ry
-IF (lsda) eldos%ddos(:) = dos(1:ndiv,2) * rytoev ! internally dos in states / Ry
+eldos%dos(:) = dos(1:ndiv,1) * rytoev        ! internally dos in states/Ry
+IF (lsda) eldos%ddos(:) = dos(1:ndiv,2) * rytoev ! internally dos in states/Ry
 eldos%intdos(:) = intdos(1:ndiv)
 
 DEALLOCATE(e)
