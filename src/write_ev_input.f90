@@ -14,7 +14,6 @@ SUBROUTINE write_ev_input(file_dat)
   !  for the ev_sub subroutine.
   !
   !
-  USE kinds,            ONLY : DP
   USE mp_images,        ONLY : my_image_id, root_image
   USE thermo_mod,       ONLY : omega_geo, energy_geo, ngeo
   USE control_pressure, ONLY : pressure
@@ -47,9 +46,10 @@ SUBROUTINE write_ev_input(file_dat)
   !
 END SUBROUTINE write_ev_input
 
+!-----------------------------------------------------------------------
 SUBROUTINE write_ev_driver(file_dat)
+!-----------------------------------------------------------------------
 
-USE kinds,            ONLY : DP
 USE io_global,        ONLY : ionode
 USE control_pressure, ONLY : pressure_kb
 
@@ -76,11 +76,12 @@ ENDIF
 RETURN
 END SUBROUTINE write_ev_driver
 
+!-----------------------------------------------------------------------
 SUBROUTINE do_ev()
+!-----------------------------------------------------------------------
 !
 !  This subroutine computes the equilibrium volume and bulk modulus
 !
-USE kinds,       ONLY : DP
 USE control_mur, ONLY : vmin, b0, b01, emin
 USE control_pressure, ONLY : pressure_kb
 USE data_files,  ONLY : flevdat
@@ -107,9 +108,12 @@ CHARACTER(LEN=256) :: file_dat, filename
   RETURN
 END SUBROUTINE do_ev
 
+!-----------------------------------------------------------------------
 SUBROUTINE do_ev_t(itemp)
+!-----------------------------------------------------------------------
 !
-!  This subroutine compute the equilibrium volume and bulk modulus
+!  This subroutine computes the equilibrium volume and bulk modulus
+!  at a given temperature. It uses the free energy computed by phonon dos
 !
 USE kinds,          ONLY : DP
 USE constants,      ONLY : ry_kbar
@@ -190,9 +194,13 @@ REAL(DP) :: compute_mur_fun
   RETURN
 END SUBROUTINE do_ev_t
 
+!-----------------------------------------------------------------------
 SUBROUTINE do_ev_t_ph(itemp) 
+!-----------------------------------------------------------------------
 !
-!  This subroutine compute the equilibrium volume and bulk modulus
+!  This subroutine computes the equilibrium volume and bulk modulus
+!  at a given temperature. It uses the free energy computed by the
+!  sum over the phonon frequencies
 !
 USE kinds,          ONLY : DP
 USE thermo_mod,     ONLY : ngeo, omega_geo, energy_geo, celldm_geo, &
@@ -212,7 +220,6 @@ USE mp_images,      ONLY : my_image_id, root_image
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: itemp
 INTEGER :: igeom, iu_ev
-CHARACTER(LEN=6) :: int_to_char
 REAL(DP) :: free_e, vm, celldm_(6)
 INTEGER :: m1
 INTEGER :: idata, ndata, i1
@@ -275,7 +282,9 @@ REAL(DP) :: compute_mur_fun
   RETURN
 END SUBROUTINE do_ev_t_ph
 
+!-----------------------------------------------------------------------
 SUBROUTINE find_min_mur_pol(v0, b0, b01, a, m1, vm)
+!-----------------------------------------------------------------------
 !
 !  This routine minimizes a function equal to the Murnaghan equation
 !  with parameters v0, b0, and b01 and a polynomial of degree m1-1 of
@@ -315,7 +324,9 @@ vm=v1
 RETURN
 END SUBROUTINE find_min_mur_pol
 
+!-----------------------------------------------------------------------
 FUNCTION compute_fun(v, v0, b0, b01, a, m1)
+!-----------------------------------------------------------------------
 !
 !  This function computes the first derivative of the Murnaghan equation
 !  plus a polynomial of degree m1-1 with respect to the volume
@@ -337,8 +348,10 @@ ENDDO
 compute_fun=aux
 RETURN
 END FUNCTION compute_fun
-
+!
+!-----------------------------------------------------------------------
 FUNCTION compute_fun_deriv(v, v0, b0, b01, a, m1)
+!-----------------------------------------------------------------------
 !
 !  This function computes the second derivative of the Murnaghan equation
 !  plus a polynomial of degree m1-1 with respect to the volume
@@ -360,7 +373,9 @@ compute_fun_deriv=aux
 RETURN
 END FUNCTION compute_fun_deriv
 
+!-----------------------------------------------------------------------
 FUNCTION compute_mur_fun(v, v0, b0, b01, a, m1)
+!-----------------------------------------------------------------------
 !
 !   This function computes the sum of a Murnaghan equation and
 !   a polynomial. Compute fun computes the derivative with respect

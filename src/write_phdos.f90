@@ -22,9 +22,8 @@ SUBROUTINE write_phdos(igeom)
   USE mp,             ONLY : mp_sum, mp_bcast, mp_max, mp_min
   USE mp_world,       ONLY : world_comm
   USE mp_images,      ONLY : my_image_id, root_image 
-  USE constants,      ONLY : amu_ry
   USE io_global,      ONLY : meta_ionode, meta_ionode_id, stdout
-  USE ions_base,      ONLY : nat, amass
+  USE ions_base,      ONLY : nat
   USE control_dosq,   ONLY : phdos_sigma, deltafreq, freqmin, freqmax, &
                              ndos_input, freqmin_input, freqmax_input
   USE thermo_mod,     ONLY : tot_ngeo
@@ -54,7 +53,7 @@ SUBROUTINE write_phdos(igeom)
   IF ( check_file_exists(filedos) ) THEN
      IF ( my_image_id == root_image ) THEN
         WRITE(stdout,'(/,2x,76("-"))')
-        WRITE(stdout,'(5x,"Readin phdos from file ")') 
+        WRITE(stdout,'(5x,"Reading phdos from file ")') 
         WRITE(stdout,'(5x,a)') TRIM(filedos)
         WRITE(stdout,'(2x,76("-"),/)')
         CALL read_phdos_data(phdos_save(igeom),filedos)
@@ -197,7 +196,10 @@ SUBROUTINE write_phdos(igeom)
   RETURN
 END SUBROUTINE write_phdos
 !
+!---------------------------------------------------------------------
 SUBROUTINE symmetrize_gen_phdos(phdos, nat)
+!---------------------------------------------------------------------
+!
 USE kinds, ONLY : DP
 USE symme, ONLY : symtensor
 

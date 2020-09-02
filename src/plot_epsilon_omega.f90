@@ -51,7 +51,6 @@ USE io_global,        ONLY : ionode
 IMPLICIT NONE
 
 CHARACTER(LEN=256) :: gnu_filename, filename, string
-CHARACTER(LEN=6), EXTERNAL :: int_to_char
 INTEGER :: im
 INTEGER :: ierr, system
 
@@ -170,7 +169,6 @@ USE io_global,        ONLY : ionode
 IMPLICIT NONE
 
 CHARACTER(LEN=256) :: gnu_filename, filename, string
-CHARACTER(LEN=6), EXTERNAL :: int_to_char
 INTEGER :: im
 INTEGER :: ierr, system
 

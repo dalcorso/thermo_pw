@@ -7,7 +7,11 @@
 !
 SUBROUTINE write_mur(omega0, b0in, b01, emin)
 !
-! in input emin in Ry, omega0 in (a.u.)**3, b0in in kbar
+!  This routine writes on file the Murnaghan energy versus volume
+!  curve, together with the pressure versus volume curve. 
+!  It receives the parameters of the Murnaghan equation:
+!
+! in input emin in Ry, omega0 in (a.u.)**3, b0in in kbar, b01 adimensional
 ! in output omega in (a.u.)**3, p in kbar, e in Ry
 !
 USE kinds,            ONLY : DP

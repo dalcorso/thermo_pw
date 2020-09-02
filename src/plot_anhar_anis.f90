@@ -454,7 +454,6 @@ USE io_global,        ONLY : ionode
 IMPLICIT NONE
 CHARACTER(LEN=256) :: gnu_filename, filename, psfilename, filenameph
 INTEGER :: ierr, system, na
-CHARACTER(LEN=6) :: int_to_char
 
 IF ( my_image_id /= root_image ) RETURN
 
@@ -560,7 +559,6 @@ USE io_global,        ONLY : ionode
 IMPLICIT NONE
 CHARACTER(LEN=256) :: gnu_filename, filename, psfilename, filenameph
 INTEGER :: ierr, system, na
-CHARACTER(LEN=6) :: int_to_char
 
 IF ( my_image_id /= root_image ) RETURN
 IF (.NOT.(ltherm_freq.OR.ltherm_dos)) RETURN

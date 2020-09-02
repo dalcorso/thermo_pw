@@ -5,10 +5,12 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!-----------------------------------------------------------------------
 SUBROUTINE write_thermo(igeom)
+!-----------------------------------------------------------------------
 !
-!  This routine writes on file the harmonic thermodynamic quantities
-!  calculated using the phonon dos
+!  This routine computes and writes on file the harmonic thermodynamic 
+!  quantities calculated using the phonon dos
 !
 USE kinds,          ONLY : DP
 USE ions_base,      ONLY : nat, nsp, ityp, amass
@@ -94,9 +96,13 @@ IF (meta_ionode.AND.with_eigen) &
 
 RETURN
 END SUBROUTINE write_thermo
-
+!
+!-----------------------------------------------------------------------
 SUBROUTINE write_thermo_ph(igeom)
-
+!-----------------------------------------------------------------------
+!  This routine computes and writes on file the harmonic thermodynamic 
+!  quantities calculated using the direct sum over the phonon frequencies
+!
 USE kinds,            ONLY : DP
 USE ions_base,        ONLY : nat, nsp, ityp, amass
 USE symme,            ONLY : symtensor
@@ -186,8 +192,14 @@ IF (meta_ionode.AND.with_eigen) &
 RETURN
 END SUBROUTINE write_thermo_ph
 
+!-----------------------------------------------------------------------
 SUBROUTINE write_thermo_debye(igeom)
-
+!-----------------------------------------------------------------------
+! 
+!  This routine computes and writes on file the harmonic thermodynamic 
+!  quantities calculated using the Debye model. It receives as input only
+!  the debye temperature
+!
 USE kinds,            ONLY : DP
 USE ions_base,        ONLY : nat, nsp, amass, ityp
 USE debye_module,     ONLY : debye_e0, debye_vib_energy, debye_free_energy, &
@@ -236,7 +248,7 @@ DO itemp=1,ntemp
    deb_free_energy(itemp) = deb_free_energy(itemp) + deb_e0
 END DO
 !
-!  Write on file
+!  Write on file the information
 !
 IF (ionode) THEN
    CALL write_thermo_info(deb_e0, debye_t, ntemp, temp, deb_energy, &
@@ -246,9 +258,16 @@ END IF
 
 RETURN
 END SUBROUTINE write_thermo_debye
-
+!
+!-----------------------------------------------------------------------
 SUBROUTINE write_thermo_info(e0, tot_states, ntemp, temp, energy, &
                                  free_energy, entropy, cv, iflag, filename)
+!-----------------------------------------------------------------------
+!
+! This routine writes on file the text inside the files with the 
+! thermodynamic quantities that explain the units and the quantities
+! contained in the file
+!
 USE kinds, ONLY : DP
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ntemp, iflag
@@ -300,7 +319,13 @@ CLOSE(UNIT=iu_therm, STATUS='KEEP')
 RETURN
 END SUBROUTINE write_thermo_info
 
+!-----------------------------------------------------------------------
 SUBROUTINE write_dw_info(ntemp, temp, b_fact, nat, filename)
+!-----------------------------------------------------------------------
+!
+!  This routine writes on files the debye-waller factor as a function of
+!  temperature
+!
 USE kinds, ONLY : DP
 
 IMPLICIT NONE
@@ -329,10 +354,17 @@ END DO
 
 RETURN
 END SUBROUTINE write_dw_info
-
+!
+!-----------------------------------------------------------------------
 SUBROUTINE read_thermo(ntemp, temp, ph_ener, ph_free_ener, ph_entropy, &
                        ph_ce, b_fact, do_read, filetherm)
-
+!-----------------------------------------------------------------------
+!
+!  This routine reads a file that contains the harmonic thermodynamic
+!  quantities. It must be called by all processors, only the meta_ionode
+!  reads and broadcast the thermodynamic quantities.
+!  When with_eigen is true it reads also the atomic b factor.
+!
 USE kinds,            ONLY : DP
 USE ions_base,        ONLY : nat
 USE io_global,        ONLY : meta_ionode, meta_ionode_id
@@ -350,7 +382,7 @@ LOGICAL, INTENT(OUT) :: do_read
 CHARACTER(LEN=*) :: filetherm
 CHARACTER(LEN=256) :: filename_loc
 INTEGER :: iu_therm, idum, itemp, na, ipol, jpol, find_free_unit
-LOGICAL  :: check_file_exists
+LOGICAL :: check_file_exists
 CHARACTER(LEN=6) :: int_to_char
 
 do_read=.FALSE.
@@ -400,7 +432,13 @@ END SUBROUTINE read_thermo
 !
 !  Copyright (C) 2018 Cristiano Malica
 !
+!-----------------------------------------------------------------------
 SUBROUTINE write_dw_debye(ntemp, temp, deb_bfact, filename)
+!-----------------------------------------------------------------------
+!
+! This routine writes on file the atomic b factor computed using the
+! debye model.
+!
 USE kinds, ONLY : DP
 
 IMPLICIT NONE
@@ -408,9 +446,8 @@ INTEGER, INTENT(IN) :: ntemp
 REAL(DP), INTENT(IN) :: temp(ntemp), deb_bfact(ntemp)
 CHARACTER(LEN=*) :: filename
 
-INTEGER :: iu_therm, itemp, na, ipol, jpol
+INTEGER :: iu_therm, itemp
 INTEGER :: find_free_unit
-CHARACTER(LEN=6) :: int_to_char
 
 iu_therm=find_free_unit()
 
