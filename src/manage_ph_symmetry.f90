@@ -26,7 +26,9 @@ MODULE ph_symmetry
 
 CONTAINS
 
+!-------------------------------------------------------------------------
 SUBROUTINE manage_ph_symmetry(dyn, w2, num_rap_mode, xq, search_sym, flag)
+!-------------------------------------------------------------------------
 !
 !  This routine is a driver that takes all the modes at a given point q
 !  and writes on output the irreducible representations of each mode.
@@ -109,7 +111,9 @@ ENDIF
 RETURN
 END SUBROUTINE manage_ph_symmetry
 
+!-------------------------------------------------------------------------
 SUBROUTINE set_symmetry_ph()
+!-------------------------------------------------------------------------
 !
 !  This routine sets the symmetry elements that must be used to
 !  analyze the phonon modes. They are the small point group of q in the
@@ -171,7 +175,9 @@ ENDIF
 RETURN
 END SUBROUTINE set_symmetry_ph
 
+!-------------------------------------------------------------------------
 SUBROUTINE unset_symmetry_ph
+!-------------------------------------------------------------------------
 
 IMPLICIT NONE
 
@@ -180,7 +186,9 @@ DEALLOCATE(rtau_ph)
 RETURN
 END SUBROUTINE unset_symmetry_ph
 
+!-------------------------------------------------------------------------
 SUBROUTINE initialize_gcode_old(code)
+!-------------------------------------------------------------------------
 IMPLICIT NONE
 INTEGER :: code
 

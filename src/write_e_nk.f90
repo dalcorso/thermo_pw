@@ -29,7 +29,9 @@ CALL mp_sum(energy_geo, world_comm)
 energy_geo=energy_geo / nproc_image
 
 IF (my_image_id /= root_image) RETURN
-
+!
+!  then open the file and write inside
+!
 iu_enk=find_free_unit()
 DO isigma=1, nsigma
    IF (nsigma > 1) THEN

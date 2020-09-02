@@ -166,8 +166,6 @@ USE ph_freq_module, ONLY : zero_point_energy_ph
 USE thermo_mod,     ONLY : celldm_geo, omega_geo, no_ph, tot_ngeo
 USE control_mur,    ONLY : lmurn
 USE temperature,    ONLY : ntemp
-USE thermodynamics, ONLY : phdos_save
-USE ph_freq_thermodynamics, ONLY : ph_freq_save
 USE linear_surfaces, ONLY : fit_multi_linear, evaluate_fit_linear
 USE quadratic_surfaces, ONLY : fit_multi_quadratic, evaluate_fit_quadratic
 USE cubic_surfaces, ONLY : fit_multi_cubic, evaluate_fit_cubic

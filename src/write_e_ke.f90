@@ -31,7 +31,9 @@ CALL mp_sum(energy_geo, world_comm)
 energy_geo=energy_geo / nproc_image
 
 IF (my_image_id /= root_image) RETURN
-
+!
+!  and then open the files with output and write inside
+!
 IF (ionode) iu_eke=find_free_unit()
 icount = 0
 DO iden=1, nkeden
