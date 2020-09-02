@@ -130,7 +130,7 @@ SUBROUTINE set_files_for_plot(icode, file_disp, filedata, filerap, fileout, &
 !   contained in the thermo_pw modules and are provided on the dummy veriables
 !
 
-USE thermo_mod,       ONLY : tot_ngeo, central_geo
+USE thermo_mod,       ONLY : central_geo
 USE control_thermo,   ONLY : spin_component
 USE lsda_mod,         ONLY : nspin
 
@@ -282,3 +282,19 @@ outdir=TRIM(outdir_thermo)//'/g'//TRIM(int_to_char(igeom))//'/'
 RETURN
 END SUBROUTINE set_outdir_name
 
+!----------------------------------------------------------------
+SUBROUTINE add_geometry_number(dir,filein,fileout,igeom)
+!----------------------------------------------------------------
+
+USE internal_files_names, ONLY : fildyn_thermo
+USE output,               ONLY : fildyn
+  !
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: igeom
+CHARACTER(LEN=256) :: dir, filein, fileout
+CHARACTER(LEN=6) :: int_to_char
+
+fileout=TRIM(dir)//TRIM(filein)//'.g'//TRIM(int_to_char(igeom))
+
+RETURN
+END SUBROUTINE add_geometry_number

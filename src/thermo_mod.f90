@@ -214,7 +214,9 @@ MODULE anharmonic
                                            ! macro_el_s: vp, vb, vg
   REAL(DP), ALLOCATABLE :: v_t(:,:)        ! the sound velocities from
                                            ! macro_el_t: vp, vb, vg
-  REAL(DP), ALLOCATABLE :: el_con_geo_t(:,:,:,:)
+  REAL(DP), ALLOCATABLE :: el_con_geo_t(:,:,:,:) ! the temperature dependent
+                                           ! elastic constants at all 
+                                           ! geometries
 
 END MODULE anharmonic
 
@@ -273,8 +275,9 @@ MODULE ph_freq_anharmonic
                                             ! macro_elf_s: vp, vb, vg
   REAL(DP), ALLOCATABLE :: vf_t(:,:)        ! the sound velocities from
                                             ! macro_elf_t: vp, vb, vg
-  REAL(DP), ALLOCATABLE :: el_conf_geo_t(:,:,:,:)
-
+  REAL(DP), ALLOCATABLE :: el_conf_geo_t(:,:,:,:) ! the temperature dependent
+                                            ! elastic constants at all 
+                                            ! geometries
 END MODULE ph_freq_anharmonic
 
 MODULE grun_anharmonic

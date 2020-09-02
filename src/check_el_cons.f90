@@ -26,16 +26,14 @@ SUBROUTINE check_el_cons()
                                 print_elastic_compliances
   USE control_elastic_constants, ONLY : el_cons_available, frozen_ions, &
                                         el_cons_t_available, el_con_geo
-  USE control_macro_elasticity, ONLY : macro_el
-  USE thermo_mod,       ONLY : tot_ngeo, no_ph
-  USE data_files,       ONLY : fl_el_cons
+  USE control_macro_elasticity,  ONLY : macro_el
+  USE thermo_mod,        ONLY : tot_ngeo, no_ph
+  USE data_files,        ONLY : fl_el_cons
   !
   IMPLICIT NONE
   CHARACTER(LEN=256) :: filelastic
-  CHARACTER(LEN=6) :: int_to_char
-  INTEGER :: igeo, central_geo
-  !
-  LOGICAL  :: exst, found(tot_ngeo)
+  INTEGER            :: igeo, central_geo
+  LOGICAL            :: exst, found(tot_ngeo)
   !
   ALLOCATE( el_con_geo(6,6,tot_ngeo) )
   el_con_geo=0.0_DP
@@ -43,8 +41,8 @@ SUBROUTINE check_el_cons()
   el_cons_available=.FALSE.
   el_cons_t_available=.FALSE.
   DO igeo = 1, tot_ngeo
-     filelastic='elastic_constants/'//TRIM(fl_el_cons)//'.g'//&
-                                              TRIM(int_to_char(igeo))
+     CALL add_geometry_number('elastic_constants/', fl_el_cons, &
+                                filelastic, igeo)
      CALL read_elastic(filelastic, exst)
      IF (.NOT.exst) CYCLE
      found(igeo)=.TRUE.

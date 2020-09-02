@@ -39,7 +39,6 @@ SUBROUTINE check_el_cons_qha()
   !
   IMPLICIT NONE
   CHARACTER(LEN=256) :: filelastic, filelastic_ph 
-  CHARACTER(LEN=6) :: int_to_char
   INTEGER :: igeo, central_geo
   !
   LOGICAL  :: check_file_exists
@@ -53,8 +52,8 @@ SUBROUTINE check_el_cons_qha()
   IF (ltherm_dos) THEN
      el_con_geo_t=0.0_DP
      DO igeo = 1, tot_ngeo
-        filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons.g'//&
-                                                 TRIM(int_to_char(igeo))
+        CALL add_geometry_number('anhar_files/', flanhar//'.el_cons', &
+                                filelastic, igeo)
         exst=check_file_exists(filelastic)
         IF (.NOT.exst) CYCLE
         !
@@ -76,8 +75,9 @@ SUBROUTINE check_el_cons_qha()
   IF (ltherm_freq) THEN
      el_conf_geo_t=0.0_DP
      DO igeo=1, tot_ngeo
-        filelastic_ph='anhar_files/'//TRIM(flanhar)//'.el_cons.g'//&
-                                            TRIM(int_to_char(igeo))//'_ph'
+        CALL add_geometry_number('anhar_files/', flanhar//'.el_cons', &
+                                filelastic_ph, igeo)
+        filelastic_ph=TRIM(filelastic_ph)//'_ph'
         exst=check_file_exists(filelastic_ph)
         IF (.NOT.exst) CYCLE
         !
