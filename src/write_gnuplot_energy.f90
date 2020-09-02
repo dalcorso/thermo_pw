@@ -20,7 +20,7 @@ SUBROUTINE write_gnuplot_energy(nwork)
   USE thermo_mod, ONLY : energy_geo, ngeo, celldm_geo, omega_geo
   USE cell_base,  ONLY : ibrav
   USE data_files, ONLY : flenergy
-  USE control_pressure, ONLY : pressure, pressure_kb
+  USE control_pressure, ONLY : pressure
   USE io_global,  ONLY : stdout, ionode, ionode_id
   USE mp_images,  ONLY : my_image_id, root_image, intra_image_comm
   USE mp,         ONLY : mp_bcast
@@ -31,7 +31,6 @@ SUBROUTINE write_gnuplot_energy(nwork)
   INTEGER :: iu_ev, iwork, ifiles, nfiles, ios
   INTEGER :: find_free_unit
   CHARACTER(LEN=6) :: int_to_char
-  CHARACTER(LEN=8) :: float_to_char
   !
   IF (my_image_id /= root_image) RETURN
 
@@ -50,8 +49,7 @@ SUBROUTINE write_gnuplot_energy(nwork)
      iu_ev=find_free_unit()
      DO ifiles = 1, nfiles
         fileout='energy_files/'//TRIM(flenergy)//int_to_char(ifiles)
-        IF (pressure /= 0.0_DP) fileout = TRIM(fileout)//'.'// &
-                                          TRIM(float_to_char(pressure_kb,1))
+        CALL add_pressure(fileout)
         OPEN(UNIT=iu_ev, FILE=TRIM(fileout), STATUS='UNKNOWN', &
                          FORM='FORMATTED', ERR=20, IOSTAT=ios)
 

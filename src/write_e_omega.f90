@@ -36,7 +36,6 @@ USE io_global,        ONLY : ionode
 IMPLICIT NONE
 
 CHARACTER(LEN=256) :: filename, filename1
-CHARACTER(LEN=8)   :: float_to_char
 INTEGER  :: i, iu_mur, npress, ipress, idata, nvar, ndata
 INTEGER  :: find_free_unit, compute_nwork
 REAL(DP) :: press_min, press_max, deltap, ymin, ymin4

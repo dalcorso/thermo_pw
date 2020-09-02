@@ -14,7 +14,7 @@ SUBROUTINE write_elastic_t_qha()
 !
 USE kinds,      ONLY : DP
 USE io_global,  ONLY : stdout
-USE thermo_mod, ONLY : ngeo, ibrav_geo, celldm_geo
+USE thermo_mod, ONLY : ibrav_geo, celldm_geo
 USE thermo_sym, ONLY : laue
 USE control_quartic_energy, ONLY : lsolve, poly_degree_elc
 USE linear_surfaces,    ONLY : fit_multi_linear, evaluate_fit_linear

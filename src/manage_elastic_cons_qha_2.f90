@@ -8,9 +8,7 @@
 SUBROUTINE manage_elastic_cons_qha_2()
 
 USE kinds,             ONLY : DP
-USE cell_base,      ONLY : ibrav
 USE initial_conf,      ONLY : ibrav_save
-USE thermo_mod,     ONLY : energy_geo, tot_ngeo
 USE thermo_sym,        ONLY : laue
 USE elastic_constants, ONLY : epsilon_geo, el_con,           &
                               compute_elastic_constants_ene, &

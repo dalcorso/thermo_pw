@@ -24,7 +24,6 @@ USE io_global,        ONLY : stdout
 
 IMPLICIT NONE
 
-CHARACTER(LEN=6) :: int_to_char
 CHARACTER(LEN=11) :: group_name
 CHARACTER(LEN=9) :: code='CPG', label(48)
 INTEGER :: work_choice, igroup, group_index_ext, group_index_in_ext, &

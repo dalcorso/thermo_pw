@@ -39,7 +39,6 @@ CHARACTER(LEN=256) :: gnu_filename, filename, filename0, filename_aux_grun,  &
                       filename_dbulk, filename_dbulk_ph,             &
                       filename_heat, filename_heat_ph,               &
                       filename_gamma, filename_gamma_ph, filename_gamma_grun 
-CHARACTER(LEN=8) :: float_to_char
 INTEGER :: ierr, system
 
 IF ( my_image_id /= root_image ) RETURN

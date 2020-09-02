@@ -380,7 +380,6 @@ SUBROUTINE check_initial_status_tpw(auxdyn, iflag)
 
    INTEGER, ALLOCATABLE :: image_iq(:,:), work(:)
    INTEGER :: iq, irr, image, work_so_far, actual_diff, diff_for_next
-   CHARACTER(LEN=6), EXTERNAL :: int_to_char
 
    ALLOCATE (image_iq(0:3*nat,nqs))
    ALLOCATE (work(0:nimage-1))

@@ -173,7 +173,6 @@ CHARACTER(LEN=*) :: filename
 
 INTEGER :: iu_therm, itemp, na, ipol, jpol
 INTEGER :: find_free_unit
-CHARACTER(LEN=6) :: int_to_char
 
 iu_therm=find_free_unit()
 

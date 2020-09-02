@@ -16220,7 +16220,6 @@ INTEGER :: group_in, group_out, nsym_in, nsym_out, nrap_in, nrap_out
 INTEGER :: n, i, ndeg, isym, jsym, irap, jrap
 
 CHARACTER(LEN=256) :: rap_name
-CHARACTER(LEN=6) :: int_to_char
 
 IF (.NOT.(is_subgroup(cge_in,cge_out))) RETURN
 
@@ -16348,7 +16347,6 @@ INTEGER :: group_in, group_out, nsym_in, nsym_out, nrap1_in, nrap2_in,nrap_out
 INTEGER :: n, i, l, m,  ndeg, isym, jsym, irap, jrap, krap
 
 CHARACTER(LEN=256) :: rap_name
-CHARACTER(LEN=6) :: int_to_char
 
 IF (.NOT.(is_subgroup(cge_in,cge_out))) RETURN
 

@@ -49,7 +49,6 @@ SUBROUTINE check_initial_geometry(auxdyn, iflag)
   !
   INTEGER :: iflag
   CHARACTER (LEN=256) :: auxdyn, filename
-  CHARACTER (LEN=6), EXTERNAL :: int_to_char
   LOGICAL :: exst, ldcs
   INTEGER :: iq, iq_start, ierr
   !

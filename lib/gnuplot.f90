@@ -437,7 +437,6 @@ CHARACTER(LEN=*), INTENT(IN) :: lw, color
 LOGICAL, INTENT(IN) :: start, last
 
 CHARACTER(LEN=256) :: string
-CHARACTER(LEN=6) :: int_to_char
 LOGICAL :: comment
 
 string=" """//TRIM(data_file)//""" u ($1*xscale-xshift):($2" &

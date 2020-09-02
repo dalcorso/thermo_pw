@@ -51,7 +51,6 @@ SUBROUTINE write_ev_driver(file_dat)
 !-----------------------------------------------------------------------
 
 USE io_global,        ONLY : ionode
-USE control_pressure, ONLY : pressure_kb
 
 IMPLICIT NONE
 CHARACTER(LEN=256), INTENT(IN) :: file_dat
@@ -83,7 +82,6 @@ SUBROUTINE do_ev()
 !  This subroutine computes the equilibrium volume and bulk modulus
 !
 USE control_mur, ONLY : vmin, b0, b01, emin
-USE control_pressure, ONLY : pressure_kb
 USE data_files,  ONLY : flevdat
 USE io_global,   ONLY : meta_ionode_id, stdout
 USE mp_world,    ONLY : world_comm
