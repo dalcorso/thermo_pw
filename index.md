@@ -124,9 +124,7 @@ Errors such as
 <br>
 2. error in namelist 
 <br>
-3. missing symmetry 
-<br>
-4. point group incompatible with the Bravais lattice
+3. point group incompatible with the Bravais lattice
 <br>
 are exactly what the error message says. Do not ask what they mean
 but search in the archived answers. These errors are
