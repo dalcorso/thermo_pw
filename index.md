@@ -119,6 +119,7 @@ click <a href="https://lists.quantum-espresso.org/mailman/listinfo/thermo_pw-for
 Please do not send me questions about the input of <code>pw.x</code>.
 <br>
 Errors such as 
+<br>
 1. tmp_dir cannot be opened
 <br>
 2. error in namelist 
