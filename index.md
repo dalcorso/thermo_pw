@@ -3,7 +3,8 @@ computation of materials properties using Quantum ESPRESSO (QE) routines
 as the underlying engine. It provides an alternative organization of the 
 QE work-flow for the most common tasks exploiting, when possible, 
 an asynchronous image parallelization. Moreover, the code has a set of 
-pre-processing tools to reduce the user input information and a set of 
+pre-processing tools to reduce the input information given by the user 
+and a set of 
 post-processing tools to produce plots directly comparable with experiment.</p>
 <p align="justify"> A quick introduction to the <code>thermo_pw</code> code can be found 
 <a href="https://dalcorso.github.io/thermo_pw/thermo_pw_help.html">here</a>,
@@ -89,7 +90,6 @@ of BAs: an ab-initio investigation,
 Jour. of Applied Phys. <B>127</B>, 245103 (2020).</a>
 <br>
 <br>
-
 1. S. Poncé, D. Jena, and F. Giustino,
 Hole mobility of strained GaN from first principles,
 <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.100.085204">
@@ -117,6 +117,19 @@ apply all the patches and if your problem is not solved, post it to the
 click <a href="https://lists.quantum-espresso.org/mailman/listinfo/thermo_pw-forum">here</a>.
 <br>
 Please do not send me questions about the input of <code>pw.x</code>.
+<br>
+Errors such as 
+1. tmp_dir cannot be opened
+<br>
+2. error in namelist 
+<br>
+3. missing symmetry 
+<br>
+4. point group incompatible with the Bravais lattice
+<br>
+are exactly what the error message says. Do not ask what they mean
+but search in the archived answers. These errors are
+extensively discussed also in the archived QE mailing lists and manuals.
 If you are new to QE, please ask to the
 <code>users@lists.quantum-espresso.org</code> mailing list or search
 in the examples directories.</p>

@@ -3,7 +3,7 @@
 > This is the distribution of the thermo\_pw package 
 > (see https://dalcorso.github.io/thermo_pw). This program is
 > a driver to compute the physical properties of materials, using
-> Quantum ESPRESSO (QE) (see http://www.quantum-espresso.org) routines
+> Quantum ESPRESSO (QE) (see http://www.quantum-espresso.org)
 > as the underlying engine.
 
 Thermo\_pw reads the same input as the pw.x code of QE and produces postscript
