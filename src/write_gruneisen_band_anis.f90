@@ -162,7 +162,7 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
   WRITE(stdout,'(/,5x,"Plotting Gruneisen parameters at celldm:")') 
   WRITE(stdout,'(5x,6f12.7)') cm 
   IF (celldm_ph(1)==0.0_DP.AND.(ltherm_freq.OR.ltherm_dos)) &
-            WRITE(stdout,'(5x,"Corresponding to T=",f17.8)') temp_ph
+            WRITE(stdout,'(5x,"Corresponding to T=",f17.4," K")') temp_ph
 !
 ! Now allocate space to save the frequencies to interpolate and the
 ! coeffieints of the polynomial. Allocate also space to save the

@@ -134,7 +134,7 @@ SUBROUTINE write_gruneisen_band(file_disp, file_vec)
   WRITE(stdout,'(/,5x,"Plotting Gruneisen parameters at volume",f17.8,&
                                                     &" (a.u.)^3")') vm
   IF (volume_ph==0.0_DP.AND.(ltherm_freq.OR.ltherm_dos)) &
-            WRITE(stdout,'(5x,"Corresponding to T=",f17.8)') temp_ph
+            WRITE(stdout,'(5x,"Corresponding to T=",f17.4," K")') temp_ph
 !
 !  Allocate space for interpolating the frequencies
 !

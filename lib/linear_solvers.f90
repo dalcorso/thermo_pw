@@ -733,17 +733,17 @@ coeff=0.0_DP
 lsolve_=lsolve
 IF (lsolve_<1.OR.lsolve_>3) lsolve_=2
 IF (lsolve_==1) THEN
-   WRITE(stdout,'(5x,"Finding the quartic polynomial using &
-                                              &ncoeff x ncoeff matrix")')  
+!   WRITE(stdout,'(5x,"Finding the quartic polynomial using &
+!                                              &ncoeff x ncoeff matrix")')  
    CALL linsolvx(aa,ncoeff,b,coeff)
 !   CALL linsolvx_sym(aa,ncoeff,b,coeff)
 
 ELSEIF(lsolve_==2) THEN
-   WRITE(stdout,'(5x,"Finding the quartic polynomial using &
-                                                   &QR factorization")')  
+!   WRITE(stdout,'(5x,"Finding the quartic polynomial using &
+!                                                   &QR factorization")')  
    CALL linsolvms(amat,ndata,ncoeff,f,coeff)
 ELSEIF(lsolve_==3) THEN
-   WRITE(stdout,'(5x,"Finding the quartic polynomial using SVD")')  
+!   WRITE(stdout,'(5x,"Finding the quartic polynomial using SVD")')  
    CALL linsolvsvd(amat,ndata,ncoeff,f,coeff)
 ENDIF
 

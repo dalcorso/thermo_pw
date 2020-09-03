@@ -28,8 +28,6 @@ LOGICAL, INTENT(OUT) :: all_geometry_done
 
 INTEGER :: igeom, igeom_qha, iwork, work_base
 LOGICAL  :: check_dyn_file_exists
-CHARACTER(LEN=6) :: int_to_char
-CHARACTER(LEN=256) :: auxdyn
 
 all_geometry_done=.TRUE.
 work_base=tot_ngeo/ngeom
@@ -37,9 +35,9 @@ DO igeom_qha=start_geometry_qha, last_geometry_qha
    DO iwork=1,work_base
       igeom=(igeom_qha-1)*work_base+iwork
       IF (no_ph(igeom)) CYCLE
-      auxdyn=TRIM(fildyn)//'.g'//TRIM(int_to_char(igeom))//'.'
+      CALL set_fildyn_name(igeom)
       IF (all_geometry_done) all_geometry_done=all_geometry_done.AND. &
-           check_dyn_file_exists(auxdyn)
+           check_dyn_file_exists(fildyn)
       IF (.NOT.all_geometry_done) RETURN
    ENDDO
 ENDDO

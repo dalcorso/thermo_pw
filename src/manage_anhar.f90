@@ -11,8 +11,10 @@ USE kinds,                 ONLY : DP
 USE temperature,           ONLY : ntemp
 USE control_thermo,        ONLY : ltherm_dos, ltherm_freq
 USE internal_files_names,  ONLY : flfrq_thermo, flvec_thermo
+USE data_files,            ONLY : flanhar
 USE anharmonic,            ONLY : vmin_t, b0_t, b01_t, free_e_min_t
 USE ph_freq_anharmonic,    ONLY : vminf_t, b0f_t, b01f_t, free_e_minf_t
+USE io_global,             ONLY : stdout
 USE mp_images,             ONLY : inter_image_comm
 USE mp,                    ONLY : mp_sum
 
@@ -26,6 +28,14 @@ CALL check_all_geometries_done(all_geometry_done)
 IF (.NOT.all_geometry_done) RETURN
 
 IF (ltherm_dos) THEN
+   WRITE(stdout,'(/,2x,76("-"))')
+   WRITE(stdout,'(5x,"Computing the anharmonic properties within ")')
+   WRITE(stdout,'(5x,"the QHA approximation using phonon dos.")') 
+   WRITE(stdout,'(5x,"Writing on file ",a)') TRIM(flanhar)
+   WRITE(stdout,'(2x,76("-"),/)')
+   !
+   !  first the crystal parameters as a function of temperature
+   !
    vmin_t=0.0_DP
    b0_t=0.0_DP
    b01_t=0.0_DP
@@ -37,9 +47,21 @@ IF (ltherm_dos) THEN
    CALL mp_sum(b0_t, inter_image_comm)
    CALL mp_sum(b01_t, inter_image_comm)
    CALL mp_sum(free_e_min_t, inter_image_comm)
+!
+!    calculate several anharmonic quantities 
+!
+   CALL write_anharmonic()
 ENDIF
 
 IF (ltherm_freq) THEN
+   WRITE(stdout,'(/,2x,76("+"))')
+   WRITE(stdout,'(5x,"Computing the anharmonic properties within ")')
+   WRITE(stdout,'(5x,"the QHA approximation using phonon frequencies.")') 
+   WRITE(stdout,'(5x,"Writing on file ",a)') TRIM(flanhar)//'_ph'
+   WRITE(stdout,'(2x,76("+"),/)')
+   !
+   !  first the crystal parameters as a function of temperature
+   !
    vminf_t=0.0_DP
    b0f_t=0.0_DP
    b01f_t=0.0_DP
@@ -51,12 +73,17 @@ IF (ltherm_freq) THEN
    CALL mp_sum(b0f_t, inter_image_comm)
    CALL mp_sum(b01f_t, inter_image_comm)
    CALL mp_sum(free_e_minf_t, inter_image_comm)
-ENDIF
 !
 !    calculate several anharmonic quantities 
 !
-IF (ltherm_dos) CALL write_anharmonic()
-IF (ltherm_freq) CALL write_ph_freq_anharmonic()
+   CALL write_ph_freq_anharmonic()
+ENDIF
+
+WRITE(stdout,'(/,2x,76("-"))')
+WRITE(stdout,'(5x,"Computing the anharmonic properties within ")')
+WRITE(stdout,'(5x,"the QHA approximation using Gruneisen parameters.")') 
+WRITE(stdout,'(2x,76("-"),/)')
+   !
 !
 !    calculate and plot the Gruneisen parameters along the given path
 !
@@ -195,6 +222,11 @@ ENDIF
 !
 !    calculate and plot the Gruneisen parameters along the given path.
 !
+WRITE(stdout,'(/,2x,76("-"))')
+WRITE(stdout,'(5x,"Computing the anharmonic properties within ")')
+WRITE(stdout,'(5x,"the QHA approximation using Gruneisen parameters.")')
+WRITE(stdout,'(2x,76("-"),/)')
+
 CALL write_gruneisen_band_anis(flfrq_thermo,flvec_thermo)
 CALL set_files_for_plot(4, flfrq_thermo, filedata, filerap, &
                                           fileout, gnu_filename, filenameps)

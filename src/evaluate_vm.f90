@@ -29,14 +29,15 @@ DO itemp=1,ntemp
 ENDDO
 
 IF (itemp0 == ntemp) THEN
-   WRITE(stdout,'(5x,"temp_ph too large setting to",f15.8 )') temp(ntemp-1)
+   WRITE(stdout,'(/,5x,"temp_ph too large setting to",f15.4," K")') &
+                                                               temp(ntemp-1)
    temp_ph=temp(ntemp-1)
    vm=vminf_t(ntemp-1)
    RETURN
 ENDIF
 
 IF (itemp0 == 1) THEN
-   WRITE(stdout,'(5x,"temp_ph too small setting to",f15.8 )') temp(2)
+   WRITE(stdout,'(/,5x,"temp_ph too small setting to",f15.4," K")') temp(2)
    temp_ph=temp(2)
    vm=vminf_t(2)
    RETURN

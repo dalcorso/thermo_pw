@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!---------------------------------------------------------------------
 LOGICAL FUNCTION check_file_exists(filename)
+!---------------------------------------------------------------------
 !
 !   This function checks if a file exists and returns true or false.
 !   It has to be called by all processors when they are synchronized.
@@ -28,7 +30,9 @@ check_file_exists=exst
 RETURN
 END FUNCTION check_file_exists
 
+!---------------------------------------------------------------------
 LOGICAL FUNCTION check_dyn_file_exists(filename)
+!---------------------------------------------------------------------
 !
 !   This function checks if all the dynamical matrix files at a given geometry
 !   exist. 
