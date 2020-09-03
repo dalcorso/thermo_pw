@@ -391,3 +391,31 @@ string 'suboptimal parallelization: some nodes have no k-points' in your
 output. The solution is to decrease the number of pools until the
 message disappear.
 If you want a permanent check of this problem use <code>thermo_pw.1.3.2</code>.
+<br><br>
+25. <code>tmp_dir</code> cannot be opened.
+Check your <code>outdir</code> directory in the <code>pw.x</code> input.
+Usually this error indicates a missing parent directory. You might have
+an error in the path indicated in outdir or
+you are not allowed to write or execute the parent directory.
+<br><br>
+26. Error in namelist.
+<br>
+Most probably there is a mistake in a variable of the namelist. Please
+check accurately the user guide. The other possibility is that your
+editor added some hidden characters in the input file. Please check
+for it for instance with the command <code>cat -A input_file</code>.
+Another possibility is that you are reading the user guide of a version
+of <code>thermo_pw</code> different from the one you are using and the
+variable is not yet available. Please match the versions of the user guide
+and of <code>thermo_pw</code>.
+<br><br>
+27. Point group incompatible with the Bravais lattice.
+This means that your point group is different from the point groups compatible
+with a given Bravais lattice. The calculation is still possible but
+<code>thermo_pw</code> will not be able to find the space group and 
+will not use the symmetries to simplify the calculation of the physical 
+properties. Please check if you can find why some symmetries are missing,
+or why you have too much symmetries. Try to use one of the Bravais
+lattices suggested by the code.
+<br><br>
+

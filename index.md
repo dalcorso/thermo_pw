@@ -118,7 +118,7 @@ click <a href="https://lists.quantum-espresso.org/mailman/listinfo/thermo_pw-for
 <br>
 Please do not send me questions about the input of <code>pw.x</code>.
 <br>
-Errors such as 
+Errors such as: 
 <br>
 1. tmp_dir cannot be opened
 <br>
@@ -126,10 +126,11 @@ Errors such as
 <br>
 3. point group incompatible with the Bravais lattice
 <br>
-are exactly what the error message says. Do not ask what they mean
-but search in the archived answers. These errors are
-extensively discussed also in the archived QE mailing lists and manuals.
-If you are new to QE, please ask to the
+are exactly what the error message says. Some possible solutions
+are indicated in the FAQ (25, 26, 27) 
+<a href="https://dalcorso.github.io/thermo_pw/thermo_pw_help.html">here.</a>
+If these do not solve your problem I have no better answer. 
+You can also find help in the QE user guide, at the
 <code>users@lists.quantum-espresso.org</code> mailing list or search
 in the examples directories.</p>
 
