@@ -333,7 +333,7 @@ mode symmetry gets
 confused.
 <br><br>
 18. The code fails to identify the space group and stops with an error
-''point group orientation uncorrect''.
+''point group orientation incorrect''.
 <br>
 Most probably you are simulating a noncollinear magnetic system. Magnetic
 space group identification is not implemented but no check is done in versions
@@ -353,7 +353,7 @@ and do a final run with <code>what='scf_disp'</code>.
 20. I am computing a phonon dispersion but some <B>q</B> points are not 
 computed.
 <br>
-Most probably you have not cleaned the outdir directory. Note that the 
+Most probably you have not cleaned the <code>outdir</code> directory. Note that the 
 <code>thermo_pw</code> always tries to use the content of the 
 <code>outdir</code> directory if present.
 <br><br>
@@ -393,9 +393,10 @@ message disappear.
 If you want a permanent check of this problem use <code>thermo_pw.1.3.2</code>.
 <br><br>
 25. <code>tmp_dir</code> cannot be opened.
+<br>
 Check your <code>outdir</code> directory in the <code>pw.x</code> input.
 Usually this error indicates a missing parent directory. You might have
-an error in the path indicated in outdir or
+an error in the path indicated in <code>outdir</code> or
 you are not allowed to write or execute the parent directory.
 <br><br>
 26. Error in namelist.
@@ -410,12 +411,15 @@ variable is not yet available. Please match the versions of the user guide
 and of <code>thermo_pw</code>.
 <br><br>
 27. Point group incompatible with the Bravais lattice.
+<br>
 This means that your point group is different from the point groups compatible
 with a given Bravais lattice. The calculation is still possible but
 <code>thermo_pw</code> will not be able to find the space group and 
 will not use the symmetries to simplify the calculation of the physical 
 properties. Please check if you can find why some symmetries are missing,
 or why you have too much symmetries. Try to use one of the Bravais
-lattices suggested by the code.
+lattices suggested by the code. The message might also indicate that
+you have a supercell. If this is what you want, just ignore the message and
+continue the calculation, otherwise simplify your cell.
 <br><br>
 
