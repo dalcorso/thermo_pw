@@ -124,10 +124,8 @@ Errors such as:
 <br>
 2. error in namelist 
 <br>
-3. point group incompatible with the Bravais lattice
-<br>
 are exactly what the error message says. Some possible solutions
-are indicated in the FAQ (25, 26, 27) 
+are indicated in the FAQ (25, 26) 
 <a href="https://dalcorso.github.io/thermo_pw/thermo_pw_help.html">here.</a>
 If these do not solve your problem I have no better answer. 
 You can also find help in the QE user guide, at the
