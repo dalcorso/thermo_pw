@@ -6,7 +6,8 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 SUBROUTINE manage_elastic_cons_qha_2()
-
+!
+!
 USE kinds,             ONLY : DP
 USE initial_conf,      ONLY : ibrav_save
 USE thermo_sym,        ONLY : laue
@@ -17,16 +18,16 @@ USE control_elastic_constants, ONLY : ngeo_strain, elcpvar, ngeom, &
                            work_base, el_con_omega_geo, epsil_geo
 USE anharmonic,        ONLY : el_cons_t, el_comp_t, b0_t, lelastic
 USE control_quartic_energy, ONLY : poly_degree_elc
-USE linear_surfaces, ONLY : evaluate_fit_linear
+USE linear_surfaces,   ONLY : evaluate_fit_linear
 USE quadratic_surfaces, ONLY : evaluate_fit_quadratic
-USE cubic_surfaces,   ONLY : evaluate_fit_cubic
-USE quartic_surfaces, ONLY : evaluate_fit_quartic
-USE temperature,    ONLY : ntemp, temp
-USE lattices,       ONLY : expand_celldm, crystal_parameters
-USE polynomial,     ONLY : poly1, poly2, poly3, poly4, init_poly, clean_poly
-USE data_files,     ONLY : flanhar
-USE mp_world,       ONLY : world_comm
-USE mp,             ONLY : mp_sum
+USE cubic_surfaces,    ONLY : evaluate_fit_cubic
+USE quartic_surfaces,  ONLY : evaluate_fit_quartic
+USE temperature,       ONLY : ntemp, temp
+USE lattices,          ONLY : expand_celldm, crystal_parameters
+USE polynomial,        ONLY : poly1, poly2, poly3, poly4, init_poly, clean_poly
+USE data_files,        ONLY : flanhar
+USE mp_world,          ONLY : world_comm
+USE mp,                ONLY : mp_sum
 
 IMPLICIT NONE
 
@@ -58,7 +59,6 @@ ALLOCATE(p4(startt:lastt,ngroup))
 ALLOCATE(y(nvar+1))
 ALLOCATE(free_ener(work_base))
 ALLOCATE(epsilon_geo_loc(3,3,work_base))
-
 
 CALL interpolate_free_ener_strain(p1,p2,p3,p4,startt,lastt,ngroup)
 
@@ -170,7 +170,7 @@ IF (meta_ionode) THEN
       DO itemp = 1, ntemp-1
          READ(iu_therm, '(e12.5,2e20.9)') rdum_temp, x_t(1,itemp), rdum
          IF (ABS(rdum_temp-temp(itemp))>1D-5) &
-            CALL errore('read_alpha_anis','uncorrect temperature', 1)
+            CALL errore('read_alpha_anis','incorrect temperature', 1)
    END DO
 
    ELSEIF (ibrav==4 .OR. ibrav==6 .OR. ibrav==7 ) THEN
@@ -179,7 +179,7 @@ IF (meta_ionode) THEN
                                                      x_t(2,itemp), &
                                                      rdum, rdum
          IF (ABS(rdum_temp-temp(itemp))>1D-5) &
-            CALL errore('read_alpha_anis','uncorrect temperature', 1)
+            CALL errore('read_alpha_anis','incorrect temperature', 1)
       END DO
 
    ELSEIF ( ibrav==5 ) THEN
@@ -188,7 +188,7 @@ IF (meta_ionode) THEN
                                                      x_t(2,itemp), &
                                                      rdum, rdum
          IF (ABS(rdum_temp-temp(itemp))>1D-5) &
-            CALL errore('read_alpha_anis','uncorrect temperature', 1)
+            CALL errore('read_alpha_anis','incorrect temperature', 1)
       END DO
 
    ELSEIF (ibrav==8 .OR. ibrav==9 .OR. ibrav==10 .OR. ibrav==11) THEN
@@ -198,7 +198,7 @@ IF (meta_ionode) THEN
                                                      x_t(3,itemp), &
                                                      rdum, rdum, rdum
          IF (ABS(rdum_temp-temp(itemp))>1D-5) &
-            CALL errore('read_alpha_anis','uncorrect temperature', 1)
+            CALL errore('read_alpha_anis','incorrect temperature', 1)
       END DO
 
    ELSEIF (ibrav==12 .OR. ibrav==13) THEN
@@ -208,7 +208,7 @@ IF (meta_ionode) THEN
                                                      x_t(3,itemp), &
                                                      x_t(4,itemp)
          IF (ABS(rdum_temp-temp(itemp))>1D-5) &
-            CALL errore('read_alpha_anis','uncorrect temperature', 1)
+            CALL errore('read_alpha_anis','incorrect temperature', 1)
       END DO
    ELSEIF (ibrav==-12 .OR. ibrav==-13) THEN
       DO itemp = 1, ntemp-1
@@ -217,7 +217,7 @@ IF (meta_ionode) THEN
                                                      x_t(3,itemp), &
                                                      x_t(4,itemp)
          IF (ABS(rdum_temp-temp(itemp))>1D-5) &
-             CALL errore('read_alpha_anis','uncorrect temperature', 1)
+             CALL errore('read_alpha_anis','incorrect temperature', 1)
       END DO
    ELSEIF (ibrav==14) THEN
       DO itemp = 1, ntemp-1
@@ -228,7 +228,7 @@ IF (meta_ionode) THEN
                                                      x_t(5,itemp), &
                                                      x_t(6,itemp)
          IF (ABS(rdum_temp-temp(itemp))>1D-5) &
-              CALL errore('read_alpha_anis','uncorrect temperature', 1)
+              CALL errore('read_alpha_anis','incorrect temperature', 1)
       END DO
    ELSE IF (ibrav==0) THEN
 !
