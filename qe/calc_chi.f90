@@ -128,7 +128,7 @@ SUBROUTINE calc_chi(freq,broad,chi)
   ! This subroutine Calculates the susceptibility.
   !
   USE kinds,      ONLY : DP
-  USE constants,  ONLY : fpi
+  USE constants,  ONLY : fpi, e2
   USE lr_lanczos, ONLY : beta_store, beta_store_ext, gamma_store_ext, &
                          zeta_store, lanczos_steps, lanczos_steps_ext
   USE lr_global,  ONLY : rpert
@@ -187,7 +187,7 @@ SUBROUTINE calc_chi(freq,broad,chi)
          !
          ! Multiplication with a norm
          !
-         chi(ip,ip2) = chi(ip,ip2) * cmplx(beta_store(1),0.0d0,dp)
+         chi(ip,ip2) = chi(ip,ip2) * CMPLX(beta_store(1),0.0d0,DP)
          !
          ! The response charge density is defined as 2*evc0*q, see Eq. (43) in
          ! JCP 128, 154105 (2008). 
@@ -198,9 +198,9 @@ SUBROUTINE calc_chi(freq,broad,chi)
          !
          ! 
          IF (lgamma) THEN
-            chi(ip,ip2) = chi(ip,ip2) * cmplx(-2.d0*degspin, 0.d0, dp)
+            chi(ip,ip2) = chi(ip,ip2) * CMPLX(-2.d0*degspin, 0.d0, DP)
          ELSE
-            chi(ip,ip2) = chi(ip,ip2) * cmplx( 2.d0*degspin, 0.d0, dp)
+            chi(ip,ip2) = chi(ip,ip2) * CMPLX( 2.d0*degspin, 0.d0, DP)
          ENDIF
          !
      ENDDO
@@ -208,7 +208,7 @@ SUBROUTINE calc_chi(freq,broad,chi)
   ENDDO
   !
   IF (rpert==3) THEN
-     fact=fpi/omega
+     fact=fpi*e2/omega
      epsil(:,:) = DBLE(chi(:,:)) 
      CALL crys_to_cart(epsil)
      CALL symmatrix(epsil)

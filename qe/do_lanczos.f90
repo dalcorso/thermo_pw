@@ -210,8 +210,6 @@ SUBROUTINE do_lanczos()
               !
               IF (lgamma) THEN
                  CALL dvpsi_e(ik,ipol)
-                 anorm = DSQRT(at(1,ipol)**2 + at(2,ipol)**2 + at(3,ipol)**2)
-                 dvpsi(:,:) = dvpsi(:,:) / anorm
               ELSE
                  CALL dveqpsi_us(ik)
                  d0psi2(:,:,ik)=dvpsi(:,:)

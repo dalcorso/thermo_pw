@@ -15,10 +15,10 @@ SUBROUTINE plot_epsilon_omega_opt()
 !  imaginary part of epsilon. Depending on the Bravais lattice it
 !  plots one or more curves (up to three) on the same plot: 
 !  ibrav = 1,2,3  it plots only epsilon_xx 
-!  ibrav = 4,6,7  it plots only epsilon_xx (red) and epsilon_zz (green)
+!  ibrav = 4,5,6,7  it plots only epsilon_xx (red) and epsilon_zz (green)
 !  ibrav = 8,9,10,11 it plots epsilon_xx (red), epsilon_yy (green), 
 !                   epsilon_zz (blue).
-!  ibrav = 5, 12, 13, 14 at each frequency it diagonalizes the dielectric
+!  ibrav = 12, 13, 14 at each frequency it diagonalizes the dielectric
 !                    tensor and plots the three eigenvalues as a function
 !                    of the frequency. Note that the real and the imaginary
 !                    part can have different principal directions and
@@ -112,7 +112,7 @@ DO im=1,2
       IF (ibrav==1.OR.ibrav==2.OR.ibrav==3) THEN
          CALL gnuplot_write_file_mul_data(filename,1,3,'color_red',.TRUE.,&
                                                 .TRUE.,.FALSE.)
-      ELSE IF (ibrav==4.OR.ibrav==6.OR.ibrav==7) THEN
+      ELSE IF (ibrav==4.OR.ibrav==5.OR.ibrav==6.OR.ibrav==7) THEN
          CALL gnuplot_write_file_mul_data(filename,1,3,'color_red',.TRUE.,&
                                                 .FALSE.,.FALSE.)
          CALL gnuplot_write_file_mul_data(filename,1,5,'color_green',.FALSE.,&
