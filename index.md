@@ -82,7 +82,14 @@ Clean Ir(111) and Pt(111) electronic surface states: a first-principle fully rel
 <br>
 
 <p align="justify">The following papers contain some calculations made by using <code>thermo_pw</code>:</p>
-
+<br>
+3. A. Urru and A. Dal Corso,
+Lattice dynamics effects on the magnetocrystalline anisotropy
+energy: application to MnBi,
+<a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.102.115126">
+Phys. Rev. B <B>102</B>, 115126 (2020).</a>
+<br>
+<br>
 2. C. Malica and A. Dal Corso,
 Temperature dependent elastic constants and thermodynamic properties 
 of BAs: an ab-initio investigation, 
