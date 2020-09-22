@@ -34,7 +34,7 @@ all : space_groups.x crystal_point_group.x mag_point_group.x units.x \
       hex_trig.x bravais_lattices.x kovalev.x supercell.x translate.x \
       elastic.x plot_sur_states.x gener_2d_slab.x gener_3d_slab.x \
       gener_nanowire.x debye.x rotate_tensors.x test_colors.x epsilon_tpw.x \
-      pdec.x
+      pdec.x optical.x
       
 
 space_groups.x : space_groups.o $(MODULES)
@@ -76,6 +76,10 @@ translate.x : translate.o $(MODULES)
 elastic.x : elastic.o $(MODULES)
 	$(LD) $(LDFLAGS) -o $@ elastic.o $(MODULES) $(QELIBS)
 	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/elastic.x . )
+
+optical.x : optical.o $(MODULES)
+	$(LD) $(LDFLAGS) -o $@ optical.o $(MODULES) $(QELIBS)
+	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/optical.x . )
 
 plot_sur_states.x : plot_sur_states.o $(MODULES)
 	$(LD) $(LDFLAGS) -o $@ plot_sur_states.o $(MODULES) $(QELIBS)

@@ -51,7 +51,7 @@ SUBROUTINE extrapolate()
         !
         IF (mod(i,2)==1) THEN
            !
-           IF ( i/=151 .and. abs( beta_store_ext(i)-average/counter ) &
+           IF ( i/=151 .AND. ABS( beta_store_ext(i)-average/counter ) &
                                                                   > 2.d0 ) THEN
               !
               !if ( i.ne.151 .and. counter == 0) counter = 1
@@ -68,7 +68,7 @@ SUBROUTINE extrapolate()
            !
         ELSE
            !
-           IF ( i/=151 .and. abs( beta_store_ext(i)-average/counter ) &
+           IF ( i/=151 .AND. abs( beta_store_ext(i)-average/counter ) &
                                                                   > 2.d0 ) THEN
               !
               !if ( i.ne.151 .and. counter == 0) counter = 1
@@ -102,7 +102,7 @@ SUBROUTINE extrapolate()
      !
      DO i=lanczos_steps,lanczos_steps_ext
         !
-        IF (mod(i,2)==1) THEN
+        IF (MOD(i,2)==1) THEN
            !
            beta_store_ext(i)=average+av_amplitude
            gamma_store_ext(i)=average+av_amplitude
@@ -123,9 +123,10 @@ SUBROUTINE extrapolate()
 END SUBROUTINE extrapolate
 
 SUBROUTINE calc_chi(freq,broad,chi)
-  !-----------------------------------------------------------------------------
+  !----------------------------------------------------------------------------
   !
-  ! This subroutine Calculates the susceptibility.
+  ! This subroutine calculates the susceptibility and the dielectric
+  ! constant in the optical case.
   !
   USE kinds,      ONLY : DP
   USE constants,  ONLY : fpi, e2
@@ -145,7 +146,7 @@ SUBROUTINE calc_chi(freq,broad,chi)
   COMPLEX(DP) :: omeg_c, a(lanczos_steps_ext), b(lanczos_steps_ext), &
                  c(lanczos_steps_ext), r(lanczos_steps_ext)
   COMPLEX(DP) :: ZDOTC
-  INTEGER     :: ip, ip2, ipe, i, info, ipert
+  INTEGER     :: ip, ip2, i, info, ipert
   REAL(DP)    :: degspin, epsil(3,3), epsili(3,3), fact
 
   degspin=2.0_DP
@@ -206,6 +207,9 @@ SUBROUTINE calc_chi(freq,broad,chi)
      ENDDO
      !
   ENDDO
+  !
+  !   In the optical case symmetrize the tensor. Real and imaginary parts
+  !   are symmetrized independently. Finally add one on the diagonal.
   !
   IF (rpert==3) THEN
      fact=fpi*e2/omega
