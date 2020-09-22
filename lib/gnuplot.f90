@@ -31,6 +31,7 @@ MODULE gnuplot
            gnuplot_write_file_mul_data_minus, &
            gnuplot_write_file_mul_data_times, &
            gnuplot_write_file_mul_data, gnuplot_write_file_mul_point, &
+           gnuplot_write_file_mul_data_log10, &
            gnuplot_write_file_mul_data_sum, gnuplot_write_command, &
            gnuplot_end, gnuplot_do_2dplot, gnuplot_start_2dplot, &
            gnuplot_set_contour, gnuplot_rectangle, gnuplot_polygon, &
@@ -40,7 +41,10 @@ MODULE gnuplot
 
 CONTAINS
 
-SUBROUTINE gnuplot_write_header(filename, xmin, xmax, ymin, ymax, xscale, flext)
+!--------------------------------------------------------------------------
+SUBROUTINE gnuplot_write_header(filename, xmin, xmax, ymin, ymax, xscale, &
+                                                                     flext)
+!--------------------------------------------------------------------------
 !
 !  This routine sets the dimensions of the plot. It recives:
 !  filename : the name of the postscript file where the gnuplot script writes
@@ -106,7 +110,12 @@ ENDIF
 RETURN
 END SUBROUTINE gnuplot_write_header
 
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_write_vertical_line(xcoord, linewidth, pos, color, comment)
+!--------------------------------------------------------------------------
+!
+!  This subroutine plots a vertical line
+!
 IMPLICIT NONE
 REAL(DP) :: xcoord, ycoord
 INTEGER  :: linewidth
@@ -124,7 +133,13 @@ WRITE( iun_gnuplot, frt ) xcoord, xcoord, TRIM(pos), linewidth, TRIM(color)
 RETURN
 END SUBROUTINE gnuplot_write_vertical_line
 
-SUBROUTINE gnuplot_write_horizontal_line(ycoord, linewidth, pos, color, comment)
+!--------------------------------------------------------------------------
+SUBROUTINE gnuplot_write_horizontal_line(ycoord, linewidth, pos, color, &
+                                                               comment)
+!--------------------------------------------------------------------------
+!  
+!  This subroutine plots a horizontal line
+!
 IMPLICIT NONE
 REAL(DP) :: ycoord
 INTEGER  :: linewidth
@@ -141,9 +156,12 @@ WRITE(iun_gnuplot, frt) ycoord, ycoord, TRIM(pos), linewidth, TRIM(color)
 RETURN
 END SUBROUTINE gnuplot_write_horizontal_line
 
-SUBROUTINE gnuplot_write_horizontal_segment(x, ycoord, linewidth, pos, color, comment)
+!--------------------------------------------------------------------------
+SUBROUTINE gnuplot_write_horizontal_segment(x, ycoord, linewidth, pos, &
+                                                            color, comment)
+!--------------------------------------------------------------------------
 !
-!   this routine is like gnuplot_write_horizontal_line but writes the
+!   This routine is like gnuplot_write_horizontal_line but writes the
 !   segment between x(1) and x(2)
 !
 IMPLICIT NONE
@@ -163,7 +181,12 @@ WRITE(iun_gnuplot, frt) x(1), x(2), TRIM(pos), linewidth, TRIM(color)
 RETURN
 END SUBROUTINE gnuplot_write_horizontal_segment
  
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_write_label(xcoord, ycoord, label, comment)
+!--------------------------------------------------------------------------
+!
+!  This subroutine writes a label at the point (xcoord, ycoord)
+!
 IMPLICIT NONE
 REAL(DP) :: xcoord, ycoord
 CHARACTER(LEN=3) :: label
@@ -181,7 +204,9 @@ IF (ionode) WRITE(iun_gnuplot, frt)  TRIM(ws), xcoord, ycoord
 RETURN
 END SUBROUTINE gnuplot_write_label
 
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_put_label(xcoord, ycoord, tag, label, comment, where_lab)
+!--------------------------------------------------------------------------
 !
 !  this routine writes only the label, without any transformation
 !
@@ -208,12 +233,14 @@ IF (ionode) WRITE(iun_gnuplot, frt)  tag, TRIM(label),  xcoord, ycoord, TRIM(whe
 RETURN
 END SUBROUTINE gnuplot_put_label
 
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_put_label_yl(xcoord, wherey, tag, label, color, &
-                                                    comment, where_lab)
+                                                        comment, where_lab)
+!--------------------------------------------------------------------------
 !
 !  this routine writes only the label, without any transformation.
 !  The y coordinate is calculated from the gnuplot script and here
-!  the command to calculate this coordinate much be provided
+!  the command to calculate this coordinate must be provided
 !
 IMPLICIT NONE
 REAL(DP) :: xcoord
@@ -240,7 +267,9 @@ IF (ionode) WRITE(iun_gnuplot, frt)  tag, TRIM(label),  xcoord, TRIM(wherey), &
 RETURN
 END SUBROUTINE gnuplot_put_label_yl
 
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_write_label_yl(xcoord, ylabel, label, comment)
+!--------------------------------------------------------------------------
 !
 !   This subroutine puts a label in a y position calculated by the
 !   gnuplot script
@@ -263,7 +292,9 @@ IF (ionode) WRITE(iun_gnuplot, frt)  TRIM(ws), xcoord, TRIM(ylabel)
 RETURN
 END SUBROUTINE gnuplot_write_label_yl
 
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_write_label_yl_bar(xcoord, ylabel, label, comment)
+!--------------------------------------------------------------------------
 !
 !   This subroutine puts a label in a y position calculated by the
 !   gnuplot script
@@ -288,7 +319,12 @@ IF (ionode) WRITE(iun_gnuplot, frt)  TRIM(ws), xcoord, TRIM(ylabel)
 RETURN
 END SUBROUTINE gnuplot_write_label_yl_bar
 
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_ylabel(label, comment)
+!--------------------------------------------------------------------------
+!
+!   This subroutine sets the y label
+!
 IMPLICIT NONE
 CHARACTER(LEN=*), INTENT(IN) :: label
 CHARACTER(LEN=256) :: frt
@@ -302,8 +338,12 @@ IF (ionode.AND. label /=' ') WRITE(iun_gnuplot, frt) TRIM(label)
 RETURN
 END SUBROUTINE gnuplot_ylabel
 
-
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_xlabel(label, comment)
+!--------------------------------------------------------------------------
+!
+!   This subroutine sets the x label
+!
 IMPLICIT NONE
 CHARACTER(LEN=*), INTENT(IN) :: label
 CHARACTER(LEN=256) :: frt
@@ -321,7 +361,12 @@ IF (ionode.AND. label /=' ') WRITE(iun_gnuplot, frt) TRIM(label)
 RETURN
 END SUBROUTINE gnuplot_xlabel
 
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_unset_xticks(comment)
+!--------------------------------------------------------------------------
+!
+!   This subroutine hides the xticks on the x axis
+!
 IMPLICIT NONE
 CHARACTER(LEN=256) :: frt
 LOGICAL :: comment
@@ -334,7 +379,12 @@ IF (ionode) WRITE(iun_gnuplot, frt)
 RETURN
 END SUBROUTINE gnuplot_unset_xticks
 
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_unset_border(comment)
+!--------------------------------------------------------------------------
+!
+!   This subroutine removes the border
+!
 IMPLICIT NONE
 CHARACTER(LEN=256) :: frt
 LOGICAL :: comment
@@ -347,7 +397,12 @@ IF (ionode) WRITE(iun_gnuplot, frt)
 RETURN
 END SUBROUTINE gnuplot_unset_border
 
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_set_xticks(xstart,delta,xend,comment)
+!--------------------------------------------------------------------------
+!
+!   This routines sets the ticks on the x axis
+!
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: xstart, delta, xend
 LOGICAL, INTENT(IN) :: comment
@@ -360,7 +415,12 @@ IF (ionode) WRITE(iun_gnuplot, '(a)') TRIM(frt)
 RETURN
 END SUBROUTINE gnuplot_set_xticks
 
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_set_yticks(ystart,delta,yend,comment)
+!--------------------------------------------------------------------------
+!
+!   This routines sets the ticks on the y axis
+!
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: ystart, delta, yend
 LOGICAL, INTENT(IN) :: comment
@@ -374,7 +434,12 @@ IF (ionode) WRITE(iun_gnuplot, '(a)') TRIM(frt)
 RETURN
 END SUBROUTINE gnuplot_set_yticks
 
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_unset_yticks(comment)
+!--------------------------------------------------------------------------
+!
+!   This routines hides the ticks on the y axis
+!
 IMPLICIT NONE
 CHARACTER(LEN=256) :: frt
 LOGICAL :: comment
@@ -387,7 +452,13 @@ IF (ionode) WRITE(iun_gnuplot, frt)
 RETURN
 END SUBROUTINE gnuplot_unset_yticks
 
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_set_eref(eref, comment)
+!--------------------------------------------------------------------------
+!
+!    This subroutine sets eref with a value which is subtracted to all
+!    y values
+!
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: eref
 CHARACTER(LEN=256) :: frt
@@ -401,7 +472,13 @@ IF (ionode) WRITE(iun_gnuplot, frt) eref
 RETURN
 END SUBROUTINE gnuplot_set_eref
 
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_set_gfact(gfact, comment)
+!--------------------------------------------------------------------------
+!
+!    This subroutine sets gfact with a value which is multiplied to all
+!    y values after subtraction of eref
+!
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: gfact
 CHARACTER(LEN=256) :: frt
@@ -415,7 +492,13 @@ IF (ionode) WRITE(iun_gnuplot, frt) gfact
 RETURN
 END SUBROUTINE gnuplot_set_gfact
 
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_set_fact(fact, comment)
+!--------------------------------------------------------------------------
+!
+!    This subroutine sets fact with a value which is multiplied to all
+!    y values before subtraction of eref
+!
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: fact
 CHARACTER(LEN=256) :: frt
@@ -429,7 +512,16 @@ IF (ionode) WRITE(iun_gnuplot, frt) fact
 RETURN
 END SUBROUTINE gnuplot_set_fact
 
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_write_file_data(data_file,lw,color,start,last, comment)
+!--------------------------------------------------------------------------
+!
+!   This subroutine plots the data contained in a file
+!   lw   line width
+!   color color
+!   start, last are logical variables set to .TRUE. if this is the first
+!               line of a plot or the last line of a plot
+!
 IMPLICIT NONE
 
 CHARACTER(LEN=*), INTENT(IN) :: data_file
@@ -452,8 +544,14 @@ IF (ionode) &
 RETURN
 END SUBROUTINE gnuplot_write_file_data
 
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_write_file_mul_data_sum(data_file, col1, col2, col3,&
                      color, start, last, comment)
+!--------------------------------------------------------------------------
+!
+!   This subroutine plots the data contained in a file. The plot is
+!   col2+col3  versus col1
+!
 IMPLICIT NONE
 
 CHARACTER(LEN=*), INTENT(IN) :: data_file
@@ -479,8 +577,14 @@ IF (ionode) &
 RETURN
 END SUBROUTINE gnuplot_write_file_mul_data_sum
 
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_write_file_mul_data_times(data_file, col1, col2, col3,&
                      color, start, last, comment)
+!--------------------------------------------------------------------------
+!
+!   This subroutine plots the data contained in a file. The plot is
+!   col2*col3  versus col1
+!
 IMPLICIT NONE
 
 CHARACTER(LEN=*), INTENT(IN) :: data_file
@@ -506,8 +610,14 @@ IF (ionode) &
 RETURN
 END SUBROUTINE gnuplot_write_file_mul_data_times
 
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_write_file_mul_data(data_file, col1, col2, color, start, &
                                        last, comment)
+!--------------------------------------------------------------------------
+!
+!   This subroutine plots the data contained in a file. The plot is
+!   col2 versus col1
+!
 IMPLICIT NONE
 
 CHARACTER(LEN=*), INTENT(IN) :: data_file
@@ -533,8 +643,47 @@ IF (ionode) &
 RETURN
 END SUBROUTINE gnuplot_write_file_mul_data
 
+!--------------------------------------------------------------------------
+SUBROUTINE gnuplot_write_file_mul_data_log10(data_file, col1, col2, color, &
+                                                       start, last, comment)
+!--------------------------------------------------------------------------
+!
+!   This subroutine plots the logarithm with basis 10 of the data contained 
+!   in a file. The plot is log10 (col2) versus col1
+!
+IMPLICIT NONE
+
+CHARACTER(LEN=*), INTENT(IN) :: data_file
+INTEGER, INTENT(IN) :: col1, col2
+CHARACTER(LEN=*), INTENT(IN) :: color
+LOGICAL, INTENT(IN) :: start, last
+
+CHARACTER(LEN=256) :: string
+CHARACTER(LEN=6) :: int_to_char
+LOGICAL :: comment
+
+string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//&
+                     "*xscale-xshift):(log10($"//TRIM(int_to_char(col2)) &
+            //"*fact-eref)*gfact) w l lw 3 lc rgb "//TRIM(color)
+
+IF (start) string="plot "//TRIM(string)
+IF (.NOT.last) string=TRIM(string)//", \"
+IF (comment) string = '# ' // TRIM(string)
+
+IF (ionode) &
+   WRITE(iun_gnuplot,'(a)') TRIM(string)
+
+RETURN
+END SUBROUTINE gnuplot_write_file_mul_data_log10
+
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_write_file_mul_data_minus(data_file, col1, col2, &
                                       color, start, last, comment)
+!--------------------------------------------------------------------------
+!
+!   This subroutine plots the data contained in a file. The plot is
+!   -col2 versus col1
+!
 IMPLICIT NONE
 
 CHARACTER(LEN=*), INTENT(IN) :: data_file
@@ -560,8 +709,14 @@ IF (ionode) &
 RETURN
 END SUBROUTINE gnuplot_write_file_mul_data_minus
 
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_write_file_mul_point(data_file, col1, col2, color, start, &
                                         last, comment)
+!--------------------------------------------------------------------------
+!
+!   This subroutine plots the data contained in a file with points. The plot is
+!   col2 versus col1
+!
 IMPLICIT NONE
 
 CHARACTER(LEN=*), INTENT(IN) :: data_file
@@ -587,7 +742,9 @@ IF (ionode) &
 RETURN
 END SUBROUTINE gnuplot_write_file_mul_point
 
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_write_command(command, comment)
+!--------------------------------------------------------------------------
 !
 !   this subroutine writes a command in a gnuplot script
 !
@@ -604,8 +761,12 @@ IF (ionode.AND. command /=' ') WRITE(iun_gnuplot, '(a)') TRIM(frt)
 RETURN
 END SUBROUTINE gnuplot_write_command
 
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_initialize_contour_counter(max_contours)
-
+!--------------------------------------------------------------------------
+!
+!   This routine initializes the contour counter
+!
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: max_contours
 
@@ -616,11 +777,13 @@ ALLOCATE(contour_color(contour_max))
 RETURN
 END SUBROUTINE gnuplot_initialize_contour_counter
 
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_set_contour(file2d_dat,levr,color,tablefile)
+!--------------------------------------------------------------------------
 !
-!  This routine gives the commands to search a contour levr in a file with a 2d
-!  function and write it in a table file. It assumes that gnuplot_start_2dplot
-!  has been already called
+!  This routine gives the commands to search a contour level in a file 
+!  with a 2d function and write it in a table file. It assumes that 
+!  gnuplot_start_2dplot has been already called
 !
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: levr
@@ -641,7 +804,9 @@ ENDIF
 
 END SUBROUTINE gnuplot_set_contour
 
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_start_2dplot(max_contours, nx, ny)
+!--------------------------------------------------------------------------
 !
 !  this soubroutine initialize a 2d plot on a file with nx, ny grid of points
 !
@@ -667,7 +832,12 @@ CALL gnuplot_initialize_contour_counter(max_contours)
 RETURN
 END SUBROUTINE gnuplot_start_2dplot
 
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_line_v( v_x, v_y, x_0, y_0, start, color)
+!--------------------------------------------------------------------------
+!
+!
+!
 USE kinds, ONLY : DP
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: v_x, v_y, x_0, y_0
@@ -699,17 +869,21 @@ ENDIF
 RETURN
 END SUBROUTINE gnuplot_line_v
 
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_close_2dplot_prep
-
+!--------------------------------------------------------------------------
+!
 IMPLICIT NONE
 IF (ionode) WRITE(iun_gnuplot,'("unset table")')
 
 RETURN
 END SUBROUTINE gnuplot_close_2dplot_prep
 
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_do_2dplot(filename, xmin, xmax, ymin, ymax, xlabel, &
                                        ylabel, tablefile, flext)
-
+!--------------------------------------------------------------------------
+!
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: xmin, xmax, ymin, ymax
 CHARACTER(LEN=*), INTENT(IN) :: filename, flext, xlabel, ylabel
@@ -750,7 +924,9 @@ CALL gnuplot_stop_2dplot()
 RETURN
 END SUBROUTINE gnuplot_do_2dplot
 
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_line(x, y, lw, front, color)
+!--------------------------------------------------------------------------
 !
 !  write a line from (x(1), y(1)) to (x(2),y(2))
 !
@@ -774,7 +950,10 @@ ENDIF
 RETURN
 END SUBROUTINE gnuplot_line
 
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_rectangle(x, y, opacity, color)
+!--------------------------------------------------------------------------
+!
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: x(4), y(4)
 CHARACTER(LEN=*), INTENT(IN) :: opacity, color
@@ -787,7 +966,10 @@ IF (ionode) &
 RETURN
 END SUBROUTINE gnuplot_rectangle
 
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_rectangle_yl(x, opacity, color)
+!--------------------------------------------------------------------------
+!
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: x(2)
 CHARACTER(LEN=*), INTENT(IN) :: opacity, color
@@ -800,7 +982,10 @@ IF (ionode) &
 RETURN
 END SUBROUTINE gnuplot_rectangle_yl
 
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_circle(x, y, radius, opacity, color)
+!--------------------------------------------------------------------------
+!
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: x, y
 CHARACTER(LEN=*), INTENT(IN) :: radius, opacity, color
@@ -813,8 +998,10 @@ IF (ionode) &
 RETURN
 END SUBROUTINE gnuplot_circle
 
-
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_polygon(n, x, y, opacity, color)
+!--------------------------------------------------------------------------
+!
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: n
 REAL(DP), INTENT(IN) :: x(n), y(n)
@@ -835,8 +1022,10 @@ IF (ionode)  WRITE(iun_gnuplot, '(a)') TRIM(fmt_str)
 RETURN
 END SUBROUTINE gnuplot_polygon
 
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_print_objects()
-
+!--------------------------------------------------------------------------
+!
 IMPLICIT NONE
 
 IF (ionode)  WRITE(iun_gnuplot, '("plot x+1e6" )') 
@@ -844,7 +1033,9 @@ IF (ionode)  WRITE(iun_gnuplot, '("plot x+1e6" )')
 RETURN
 END SUBROUTINE gnuplot_print_objects
 
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_stop_2dplot()
+!--------------------------------------------------------------------------
 
 IMPLICIT NONE
 
@@ -853,8 +1044,9 @@ DEALLOCATE(contour_color)
 RETURN
 END SUBROUTINE gnuplot_stop_2dplot
 
-
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_start(filename_gnu)
+!--------------------------------------------------------------------------
 !
 !  This routine opens the gnuplot script file
 !
@@ -871,7 +1063,9 @@ ENDIF
 RETURN
 END SUBROUTINE gnuplot_start
 
+!--------------------------------------------------------------------------
 SUBROUTINE gnuplot_end
+!--------------------------------------------------------------------------
 !
 !  This routine closes the gnuplot script file
 !
@@ -882,7 +1076,10 @@ IF (ionode) CLOSE(UNIT=iun_gnuplot, STATUS='KEEP')
 RETURN
 END SUBROUTINE gnuplot_end
 
+!--------------------------------------------------------------------------
 SUBROUTINE set_ws_from_label(label, ws)
+!--------------------------------------------------------------------------
+!
 IMPLICIT NONE
 CHARACTER(LEN=3), INTENT(IN) :: label
 CHARACTER(LEN=20), INTENT(OUT) :: ws
