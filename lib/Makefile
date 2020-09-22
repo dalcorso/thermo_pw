@@ -26,6 +26,7 @@ linear_surfaces.o \
 magnetic_point_group.o \
 mp_asyn.o \
 nye.o \
+optical.o \
 ph_freq_module.o \
 phdos_module.o \
 piezoelectric_tensor.o \
