@@ -10,7 +10,7 @@ USE kinds,          ONLY : DP
 USE constants,      ONLY : rytoev
 USE optical_module, ONLY : compute_refractive_index, compute_alpha, &
                            compute_energy, compute_frequency, compute_lambda, &
-                           compute_complex_epsilon
+                           compute_complex_epsilon, compute_reflectivity
 USE mp_global,      ONLY : mp_startup, mp_global_end
 USE environment,    ONLY : environment_start, environment_end
 USE io_global,      ONLY : stdout
@@ -39,20 +39,23 @@ READ(5,*) work_choice
 IF (work_choice == 1) THEN
    WRITE(stdout,'(/,5x,"Enter e1 and e2")')
    READ(5,*) epsilon1, epsilon2
-   CALL compute_refractive_index(epsilon1, epsilon2, enne, kappa, ref)
+   CALL compute_refractive_index(epsilon1, epsilon2, enne, kappa)
+   CALL compute_reflectivity(enne,kappa,ref)
    CALL write_output(epsilon1, epsilon2, enne, kappa, ref)
 ELSEIF (work_choice == 2) THEN
    WRITE(stdout,'(/,5x,"Enter n and k")')
    READ(5,*) enne, kappa
    CALL compute_complex_epsilon(epsilon1, epsilon2, enne, kappa)
-   CALL compute_refractive_index(epsilon1, epsilon2, enne, kappa, ref)
+   CALL compute_refractive_index(epsilon1, epsilon2, enne, kappa)
+   CALL compute_reflectivity(enne,kappa,ref)
    CALL write_output(epsilon1, epsilon2, enne, kappa, ref)
 ELSEIF (work_choice == 3) THEN
    WRITE(stdout,'(/,5x,"Enter n and k")')
    READ(5,*) enne, kappa
    CALL read_energy(omega)
    CALL compute_complex_epsilon(epsilon1, epsilon2, enne, kappa)
-   CALL compute_refractive_index(epsilon1, epsilon2, enne, kappa, ref)
+   CALL compute_refractive_index(epsilon1, epsilon2, enne, kappa)
+   CALL compute_reflectivity(enne,kappa,ref)
    CALL compute_alpha(omega, kappa, alpha)
    CALL write_output(epsilon1, epsilon2, enne, kappa, ref)
    WRITE(stdout,'(/,5x,"alpha     =",e15.6, " cm^(-1)")') alpha
@@ -60,7 +63,8 @@ ELSEIF (work_choice == 4) THEN
    WRITE(stdout,'(/,5x,"Enter e1 and e2")')
    READ(5,*) epsilon1, epsilon2
    CALL read_energy(omega)
-   CALL compute_refractive_index(epsilon1, epsilon2, enne, kappa, ref)
+   CALL compute_refractive_index(epsilon1, epsilon2, enne, kappa)
+   CALL compute_reflectivity(enne,kappa,ref)
    CALL compute_alpha(omega, kappa, alpha)
    CALL write_output(epsilon1, epsilon2, enne, kappa, ref)
    WRITE(stdout,'(/,5x,"alpha     =",e15.6, " cm^(-1)")') alpha

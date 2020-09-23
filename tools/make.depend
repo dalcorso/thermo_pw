@@ -74,6 +74,12 @@ mag_point_group.o : ../../Modules/kind.o
 mag_point_group.o : ../../Modules/mp_global.o
 mag_point_group.o : ../../thermo_pw/lib/magnetic_point_group.o
 mag_point_group.o : ../../thermo_pw/lib/point_group.o
+optical.o : ../../Modules/constants.o
+optical.o : ../../Modules/environment.o
+optical.o : ../../Modules/io_global.o
+optical.o : ../../Modules/kind.o
+optical.o : ../../Modules/mp_global.o
+optical.o : ../../thermo_pw/lib/optical.o
 pdec.o : ../../Modules/environment.o
 pdec.o : ../../Modules/io_global.o
 pdec.o : ../../Modules/kind.o

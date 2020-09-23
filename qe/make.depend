@@ -788,6 +788,7 @@ phescf.o : ../../PW/src/buffers.o
 phescf.o : ../../PW/src/ldaU.o
 phescf.o : ../../PW/src/pwcom.o
 phescf.o : ../../UtilXlib/mp.o
+phescf.o : ../../thermo_pw/lib/optical.o
 phescf.o : ../../upflib/uspp.o
 phescf.o : control_qe.o
 phq_init.o : ../../LR_Modules/Coul_cut_2D_ph.o

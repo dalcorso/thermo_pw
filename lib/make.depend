@@ -62,6 +62,9 @@ magnetic_point_group.o : ../../Modules/kind.o
 magnetic_point_group.o : point_group.o
 nye.o : ../../Modules/io_global.o
 nye.o : ../../Modules/kind.o
+optical.o : ../../Modules/constants.o
+optical.o : ../../Modules/io_global.o
+optical.o : ../../Modules/kind.o
 ph_freq_module.o : ../../Modules/constants.o
 ph_freq_module.o : ../../Modules/io_global.o
 ph_freq_module.o : ../../Modules/kind.o
