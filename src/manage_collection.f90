@@ -13,7 +13,6 @@ SUBROUTINE manage_collection(auxdyn,igeom)
 !  quantities computed by the different images using
 !  the phonon code.
 !
-
 USE control_ph, ONLY : trans
 USE control_lr, ONLY : lgamma
 USE freq_ph,    ONLY : fpol
@@ -28,7 +27,7 @@ IF (trans) THEN
 ELSEIF (fpol) THEN
    IF (lgamma) THEN
       IF (with_asyn_images) CALL collect_all_epsilon()
-      CALL plot_epsilon_omega_opt()
+      CALL plot_optical_constants()
    ELSE
       IF (with_asyn_images) CALL collect_all_chi()
       CALL plot_epsilon_omega_q()

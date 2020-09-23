@@ -103,7 +103,9 @@ input of \thermo\ by the \texttt{XCrySDen} program).
 \item Electronic heat capacity as a function of temperature (for metals only).
 
 \item Complex dielectric constant as a function of the complex
-frequency $\omega$ at fixed geometry.
+frequency $\omega$ at fixed geometry. Complex index of refraction for
+all systems except monoclinic and triclinic. Reflectivity at normal
+incidence and adsorption coefficient for cubic solids. 
 
 \item Inverse dielectric constant at a given wavevector {\bf q} as a function 
 of the complex frequency $\omega$ at fixed geometry.
@@ -129,7 +131,9 @@ parameters. Murnaghan fit.
 \item Electronic density of states at the minimum of the total energy.
 
 \item Complex dielectric constant as a function of the complex
-frequency $\omega$ at the minimum of the total energy.
+frequency $\omega$ at the minimum of the total energy. Complex index 
+of refraction for all systems except monoclinic and triclinic. Reflectivity 
+at normal incidence and adsorption coefficient for cubic solids.
 
 \item Inverse dielectric constant at a given wavevector {\bf q} as a function 
 of the complex frequency $\omega$ at the minimum of the total energy.
@@ -970,6 +974,10 @@ calculation are the dynamical matrices files. \\
 compute the complex dielectric constant tensor of insulators as a function 
 of a complex frequency for the study of optical properties within 
 time-dependent density functional perturbation theory (TD-DFPT). 
+The code produces also the complex index of refraction for all
+systems except monoclinic and triclinic. For cubic solids it makes
+also a plot of the reflectivity for normal incidence and of the
+adsorption coefficient.
 As a default the TD-DFPT algorithm uses the Sternheimer equation and 
 a self-consistent loop, but it is also possible to use a Lanczos chain.
 The option is activated in the \texttt{ph.x} input by setting 
@@ -1048,12 +1056,22 @@ where the frequency dependent dielectric constant is written and plotted
 and how the images divide the work:
 \begin{verbatim}
 flepsilon : beginning of the name of the file where the frequency dependent 
-          dielectric constant is written (the code adds the extensions _re
-          and _im)
+          dielectric constant is written at finite q (the code adds the 
+          extensions _re and _im)
           Default: character(len=*) 'epsilon'
 flpsepsilon : name of the postscript file where the frequency dependent 
-          dielectric constant is plotted.
+          dielectric constant is plotted at finite q.
           Default: character(len=*) 'output_epsilon'
+floptical : beginning of the name of the file where the frequency dependent 
+          dielectric constant and the complex index of refraction are written 
+          (the code adds the extensions _xx, _yy, and _zz for the solids that
+          need to distinguish the different directions.
+          Default: character(len=*) 'optical'
+flpsoptical : name of the postscript file where the frequency dependent 
+          dielectric constant, the complex index of refraction and for
+          cubic solid also the reflectivity and the absorption coefficient
+          are plotted.
+          Default: character(len=*) 'output_optical'
 omega_group : number of frequencies calculated together by each image.
           This variables is used only with images.
           Default: integer 1.
@@ -2287,18 +2305,22 @@ quantity. There is a single \texttt{blue} curve per plot.
 
 \item
 Dielectric constant as a function of frequency (${\bf q}={\bf 0}$). There are 
-two plots, one for the real part and one for the imaginary part. For cubic 
-systems both curves are in red. For hexagonal, trigonal, and tetragonal 
+two plots, one for the real part and one for the imaginary part. 
+Other two plots contain the real and imaginary part of the complex index
+of refraction. For cubic solids other two plots show the reflectivity
+for normal incidence and the absorption coefficient.
+All curves are in red. For hexagonal, trigonal, and tetragonal 
 systems the $xx$ component is in red, while the $zz$ component is in green. 
 For orthorombic systems the $xx$ component is in red, the $yy$ component in 
 green and the $zz$ component in blue. For monoclinic and triclinic
 systems the plot is not done. 
 
 \item
-Dielectric constant as a function of frequency (${\bf q}\neq {\bf 0}$). 
-There are four plots: the real and imaginary part of 
+Inverse of the dielectric constant as a function of frequency 
+(${\bf q}\neq {\bf 0}$). There are four plots: the real and imaginary part of 
 $\varepsilon({\bf q},\omega)$ and the real and imaginary part of 
-$1/\varepsilon({\bf q},\omega)$. They are all in red.
+$1/\varepsilon({\bf q},\omega)$. They are all in red. Note that the latter
+is really calculated, while the first is just its inverse. 
 
 \item
 Phonon dispersions. In this figure the phonon dispersions have the color 

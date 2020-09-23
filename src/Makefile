@@ -108,6 +108,7 @@ plot_gruneisen_band_anis.o \
 plot_macro_el_t.o \
 plot_multi_energy.o \
 plot_mur.o \
+plot_optical_const.o \
 plot_phdos.o \
 plot_thermo.o \
 plot_xrdp.o \

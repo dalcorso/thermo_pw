@@ -417,7 +417,7 @@ with a given Bravais lattice. The calculation is still possible but
 <code>thermo_pw</code> will not be able to find the space group and 
 will not use the symmetries to simplify the calculation of the physical 
 properties. Please check if you can find why some symmetries are missing,
-or why you have too much symmetries. Try to use one of the Bravais
+or why you have too many symmetries. Try to use one of the Bravais
 lattices suggested by the code. The message might also indicate that
 you have a supercell. If this is what you want, just ignore the message and
 continue the calculation, otherwise simplify your cell.

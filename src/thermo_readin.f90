@@ -38,7 +38,8 @@ SUBROUTINE thermo_readin()
                                    flanhar, filband, flkeconv, flenergy,   &
                                    flpbs, flprojlayer, flnkconv, flgrun,   &
                                    flpgrun, fl_el_cons, flpband, flvec,    &
-                                   flepsilon, fleldos, fleltherm, fldosfrq
+                                   flepsilon, floptical, fleldos, fleltherm, &
+                                   fldosfrq
   USE temperature,          ONLY : tmin, tmax, deltat, ntemp
   USE control_pressure,     ONLY : pressure
   USE control_dosq,         ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq,&
@@ -54,7 +55,8 @@ SUBROUTINE thermo_readin()
   USE postscript_files,     ONLY : flpsband, flpsdisp, flpsmur, flpsdos, &
                                    flpstherm, flpsanhar, flpskeconv, &
                                    flpsnkconv, flpsgrun,  flpsenergy, &
-                                   flpsepsilon, flpseldos, flpseltherm
+                                   flpsepsilon, flpsoptical, flpseldos, &
+                                   flpseltherm
   USE control_2d_bands,     ONLY : lprojpbs, nkz, gap_thr, sym_divide, &
                                    identify_sur, sur_layers, sur_thr, sp_min, &
                                    force_bands, only_bands_plot, dump_states, &
@@ -198,6 +200,8 @@ SUBROUTINE thermo_readin()
 !
                             flepsilon,                      &
                             flpsepsilon,                    &
+                            floptical,                      &
+                            flpsoptical,                    &
                             force_band_calculation,         &
                             use_ph_images,                  &
                             sym_for_diago,                  &
@@ -393,7 +397,9 @@ SUBROUTINE thermo_readin()
   flpsformf='output_formf'
 
   flepsilon='epsilon'
+  floptical='optical'
   flpsepsilon='output_epsilon'
+  flpsoptical='output_optical'
   force_band_calculation=.FALSE.
   IF (nimage>1) THEN
      use_ph_images=.FALSE.

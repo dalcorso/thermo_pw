@@ -1012,6 +1012,8 @@ MODULE data_files
                                   ! suited for gnuplot contour plots
   CHARACTER(LEN=256) :: flepsilon ! the name of the file with the dielectric
                                   ! constant
+  CHARACTER(LEN=256) :: floptical ! the name of the file with the optical
+                                  ! constant
   CHARACTER(LEN=256) :: filband ! file with the bands, readable by plotband 
   CHARACTER(LEN=256) :: flpband ! the name of the file with the bands in 
                                 ! a format readable by gnuplot
@@ -1057,6 +1059,8 @@ MODULE postscript_files
   CHARACTER(LEN=256) :: flpsenergy  ! the name of the postscript file with 
                                   ! the energy contours
   CHARACTER(LEN=256) :: flpsepsilon ! the name of the file with the dielectric
+                                  ! constant
+  CHARACTER(LEN=256) :: flpsoptical ! the name of the file with the optical
                                   ! constant
 END MODULE postscript_files
 

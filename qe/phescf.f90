@@ -59,6 +59,8 @@ SUBROUTINE phescf_tpw()
   !
   INTEGER :: find_free_unit
   !
+  INTEGER, ALLOCATABLE :: computed(:)
+  !
   LOGICAL :: exst_mem, exst
   !
   IF ( .NOT. comp_irr(0)  ) RETURN
@@ -102,6 +104,7 @@ SUBROUTINE phescf_tpw()
      ALLOCATE(epsilonc(3,3,nfs))
      ALLOCATE(epsilonm1c(3,3,nfs))
      ALLOCATE(polarc(3,3,nfs))
+     ALLOCATE(computed(nfs))
      IF (lcfreq) THEN
         iu1dwf = 42
         lr1dwf =  nbnd * npwx * npol
@@ -109,6 +112,7 @@ SUBROUTINE phescf_tpw()
                                                            exst, tmp_dir)
      ENDIF
      !
+     computed=0
      IF (llanczos) THEN
         CALL allocate_lanczos()
         IF (ionode) THEN
@@ -132,6 +136,7 @@ SUBROUTINE phescf_tpw()
         CALL extrapolate()
         IF (ionode) THEN
            DO iu=start_freq, last_freq
+              computed(iu)=1
               CALL calc_chi(fru(iu),fiu(iu),epsilonc(1,1,iu))
               DO ipol=1,3
                  DO jpol=1,3
@@ -147,43 +152,46 @@ SUBROUTINE phescf_tpw()
         ENDIF
         CALL deallocate_lanczos()
      ELSE
-     epsilonm1c = (0.0_DP,0.0_DP)
-     DO iu = start_freq, last_freq
-        !
-        IF (.NOT.comp_f(iu)) CYCLE
-        !
-        current_w=CMPLX(fru(iu), fiu(iu))
-        WRITE( stdout, '(/,5x,70("-"))') 
-        WRITE( stdout, '(6x,"Dielectric constant at &
+        epsilonm1c = (0.0_DP,0.0_DP)
+        DO iu = start_freq, last_freq
+           !
+           IF (.NOT.comp_f(iu)) CYCLE
+           computed(iu)=1
+           !
+           current_w=CMPLX(fru(iu), fiu(iu))
+           WRITE( stdout, '(/,5x,70("-"))') 
+           WRITE( stdout, '(6x,"Dielectric constant at &
                 &frequency",f9.4," +",f9.4," i Ry", i6," /",i6)') current_w, &
                 iu, nfs
-        !
-        CALL solve_e_fpolc( iu )
+           !
+           CALL solve_e_fpolc( iu )
 
-        IF ( convt ) CALL polarizc (iu)
-        !
-        !  Save also the inverse of the macroscopic dielectric constant
-        !  and its square root, the refractive_index
-        !
-        DO ipol=1,3
-           DO jpol=1,3
-              IF (ABS(epsilonc(ipol,jpol,iu))>1.D-8) THEN
-                 epsilonm1c(ipol,jpol,iu)=CMPLX(1.0_DP,0.0_DP) / &
+           IF ( convt ) CALL polarizc (iu)
+           !
+           !  Save also the inverse of the macroscopic dielectric constant
+           !  and its square root, the refractive_index
+           !
+           DO ipol=1,3
+              DO jpol=1,3
+                 IF (ABS(epsilonc(ipol,jpol,iu))>1.D-8) THEN
+                    epsilonm1c(ipol,jpol,iu)=CMPLX(1.0_DP,0.0_DP) / &
                         epsilonc(ipol,jpol,iu)
-              END IF
-           END DO
-        END DO
+                 ENDIF
+              ENDDO
+           ENDDO
 
-        CALL write_epsilon_on_disk(iu)
+           CALL write_epsilon_on_disk(iu)
 
-     END DO 
+        ENDDO 
      ENDIF
+     CALL write_optical_on_disk(epsilonc, fru, fiu, computed, nfs)
 
      IF (lcfreq) CALL close_buffer(iu1dwf, 'delete')
 
      DEALLOCATE(polarc)
      DEALLOCATE(epsilonc)
      DEALLOCATE(epsilonm1c)
+     DEALLOCATE(computed)
      !
      WRITE( stdout, '(/,5X,"End of Frequency Dependent Polarizability Calculation")' )
      !
@@ -275,8 +283,9 @@ SUBROUTINE phescf_tpw()
   !
 END SUBROUTINE phescf_tpw
 
-
+!-----------------------------------------------------------------
 SUBROUTINE write_epsilon_on_disk(iu)
+!-----------------------------------------------------------------
 USE kinds,    ONLY : DP
 USE io_global, ONLY : ionode
 USE klist,    ONLY : nkstot
@@ -427,7 +436,9 @@ END IF
 RETURN
 END SUBROUTINE write_epsilon_on_disk
 
+!-----------------------------------------------------------
 SUBROUTINE collect_all_epsilon()
+!-----------------------------------------------------------
 !
 !   This subroutine reads from disk all the dielectric constants written
 !   by the different images and writes them on a single file
@@ -445,8 +456,8 @@ USE mp_images, ONLY : my_image_id, intra_image_comm, inter_image_comm, nimage
 USE mp,        ONLY : mp_bcast, mp_sum
 
 IMPLICIT NONE
-INTEGER :: iu_epsil, ipol, jpol, iuf, iu
-LOGICAL :: exst
+INTEGER  :: iu_epsil, ipol, jpol, iuf, iu
+LOGICAL  :: exst
 REAL(DP) :: buffer(3,3), alpha(3,3), epsilonr(3,3,nfs), epsiloni(3,3,nfs),&
             ro, ri
 INTEGER, ALLOCATABLE :: computed(:)
@@ -615,6 +626,7 @@ IF (meta_ionode) THEN
    DO iu=1,nfs
       IF (computed(iu)>0) CALL write_epsilon_on_disk(iu)
    END DO
+   CALL write_optical_on_disk(epsilonc, fru, fiu, computed, nfs)
 ENDIF
 
 DEALLOCATE(polarc)
@@ -624,3 +636,104 @@ DEALLOCATE(computed)
 
 RETURN
 END SUBROUTINE collect_all_epsilon
+!
+!-------------------------------------------------------------------
+SUBROUTINE write_optical_on_disk(epsilonc, fru, fiu, computed, nfs)
+!-------------------------------------------------------------------
+!
+!  This routine writes on disk the optical quantities:
+!  epsilon1, epsilon2  real and imaginary part of the dielectric constant
+!  n, k                real and imaginary part of the refractive index
+!  For cubic solids it writes also
+!  R, alpha            the reflectivity for normal incidence and the &
+!                      absorption coefficient
+!
+USE kinds,          ONLY : DP
+USE cell_base,      ONLY : ibrav
+USE optical_module, ONLY : compute_refractive_index, compute_lambda, &
+                           compute_reflectivity, compute_alpha
+IMPLICIT NONE
+INTEGER, INTENT(IN)     :: nfs
+COMPLEX(DP), INTENT(IN) :: epsilonc(3,3,nfs)
+REAL(DP), INTENT(IN)    :: fru(nfs), fiu(nfs)
+INTEGER(DP), INTENT(IN) :: computed(nfs)
+
+CHARACTER(LEN=256) :: filename
+INTEGER  :: find_free_unit
+INTEGER  :: iu_optic, iu
+REAL(DP) :: epsilon1, epsilon2, enne, kappa, ref, lambda, alpha
+LOGICAL  :: cubic
+
+iu_optic=find_free_unit()
+filename='dynamical_matrices/optical_xx'
+OPEN (UNIT=iu_optic, FILE=TRIM(filename), STATUS='unknown', FORM='formatted')
+WRITE(iu_optic,'("# Im(w)=",e15.7," Ry")') fiu(1)
+cubic=(ABS(ibrav)>0.AND.ibrav<4)
+IF (cubic) THEN
+   WRITE(iu_optic,'("# Re(w) (Ry)      lambda         e1             e2&
+         &          n              k              R         alpha (cm^-1)")')
+ELSE
+   WRITE(iu_optic,'("# Re(w) (Ry)      lambda         e1             e2&
+         &          n              k")')
+ENDIF
+DO iu=1, nfs
+   IF (computed(iu)>0) THEN
+      epsilon1=DBLE(epsilonc(1,1,iu))
+      epsilon2=AIMAG(epsilonc(1,1,iu))
+      CALL compute_refractive_index(epsilon1, epsilon2, enne, kappa)
+      CALL compute_lambda(fru(iu), lambda)
+      IF (ABS(ibrav)>0.AND.ibrav<4) THEN
+         CALL compute_alpha(fru(iu), kappa, alpha)
+         CALL compute_reflectivity(enne, kappa, ref)
+         WRITE(iu_optic,'(8e15.7)') fru(iu), lambda, epsilon1, epsilon2, &
+                                             enne, kappa, ref, alpha
+      ELSE
+         WRITE(iu_optic,'(6e15.7)') fru(iu), lambda, epsilon1, epsilon2, &
+                                             enne, kappa
+      ENDIF
+   ENDIF
+ENDDO
+CLOSE(iu_optic)
+
+IF (ibrav>3.AND.ABS(ibrav)<12) THEN 
+   filename='dynamical_matrices/optical_zz'
+   OPEN (UNIT=iu_optic, FILE=TRIM(filename), STATUS='unknown', &
+                                                     FORM='formatted')
+   WRITE(iu_optic,'("# Im(w)=",e15.7," Ry")') fiu(1)
+   WRITE(iu_optic,'("# Re(w) (Ry)      lambda         e1             e2&
+         &          n              k   ")')
+   DO iu=1, nfs
+      IF (computed(iu)>0) THEN
+         epsilon1=DBLE(epsilonc(3,3,iu))
+         epsilon2=AIMAG(epsilonc(3,3,iu))
+         CALL compute_refractive_index(epsilon1, epsilon2, enne, kappa)
+         CALL compute_lambda(fru(iu), lambda)
+         WRITE(iu_optic,'(6e15.7)') fru(iu), lambda, epsilon1, epsilon2, &
+                                             enne, kappa
+      ENDIF
+   ENDDO
+   CLOSE(iu_optic)
+ENDIF
+
+IF (ibrav>7.AND.ABS(ibrav)<12) THEN 
+   filename='dynamical_matrices/optical_yy'
+   OPEN (UNIT=iu_optic, FILE=TRIM(filename), STATUS='unknown', &
+                                                     FORM='formatted')
+   WRITE(iu_optic,'("# Im(w)=",e15.7," Ry")') fiu(1)
+   WRITE(iu_optic,'("# Re(w) (Ry)      lambda         e1             e2&
+         &          n              k          ")')
+   DO iu=1, nfs
+      IF (computed(iu)>0) THEN
+         epsilon1=DBLE(epsilonc(2,2,iu))
+         epsilon2=AIMAG(epsilonc(2,2,iu))
+         CALL compute_refractive_index(epsilon1, epsilon2, enne, kappa)
+         CALL compute_lambda(fru(iu), lambda)
+         WRITE(iu_optic,'(8e15.7)') fru(iu), lambda, epsilon1, epsilon2, &
+                                             enne, kappa
+      ENDIF
+   ENDDO
+   CLOSE(iu_optic)
+ENDIF
+
+RETURN
+END SUBROUTINE write_optical_on_disk
