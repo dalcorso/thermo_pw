@@ -5,8 +5,10 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-SUBROUTINE convert_rap_surface(nbnd, nks, nkz, high_symmetry, gcodek, aux_ind, &
-                       gcodek_ext, ptypek, rap, gaugek, lprojk)
+!-----------------------------------------------------------------------
+SUBROUTINE convert_rap_surface(nbnd, nks, nkz, high_symmetry, gcodek, &
+                       aux_ind, gcodek_ext, ptypek, rap, gaugek, lprojk)
+!-----------------------------------------------------------------------
 !
 !   In a projected band structure calculation, we change the representations
 !   of the points groups of higher symmetry that might occur for particular 
@@ -69,8 +71,10 @@ SUBROUTINE convert_rap_surface(nbnd, nks, nkz, high_symmetry, gcodek, aux_ind, &
   RETURN
   END SUBROUTINE convert_rap_surface
 
+!-----------------------------------------------------------------------
 SUBROUTINE convert_proj_surface(nlines, tot_points, point_group_path, &
                                projective, lprojk_eff)
+!-----------------------------------------------------------------------
 
 USE control_2d_bands, ONLY : nkz
 USE point_group,      ONLY : has_sigma_h
@@ -116,7 +120,9 @@ ENDDO
 RETURN
 END SUBROUTINE convert_proj_surface
 
+!-----------------------------------------------------------------------
 SUBROUTINE identify_surface_states(nat, nbnd, nkstot, e, rap)
+!-----------------------------------------------------------------------
 !
 !  This routine searches, among the bands the surface states using the
 !  information given in input:
@@ -239,9 +245,11 @@ DEALLOCATE(sumna)
 RETURN
 END SUBROUTINE identify_surface_states
 
-SUBROUTINE plot_surface_states(nbnd, nks, nlines, kx, e_rap, emin, emax, eref, &
-                  nrap, nbnd_rapk, start_rapk, start_point, last_point, &
-                  nrap_plot, rap_plot )
+!-----------------------------------------------------------------------
+SUBROUTINE plot_surface_states(nbnd, nks, nlines, kx, e_rap, emin, emax, &
+                  eref, nrap, nbnd_rapk, start_rapk, start_point,        &
+                  last_point, nrap_plot, rap_plot )
+!-----------------------------------------------------------------------
 !
 !  This routine writes on the gnuplot scripts the command to
 !  plot the surface states. The surface states must have been already

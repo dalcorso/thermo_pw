@@ -66,7 +66,9 @@ PUBLIC :: ph_freq_type, zero_point_energy_ph, free_energy_ph, vib_energy_ph, &
 
 CONTAINS
 
+!--------------------------------------------------------------------
 SUBROUTINE init_ph_freq(ph_freq, nat, nq1, nq2, nq3, startq, lastq, nq, flag)
+!--------------------------------------------------------------------
 !
 !  If flag is true save also the eigenvectors
 !
@@ -98,7 +100,9 @@ ALLOCATE(ph_freq%wg(nq_eff))
 RETURN
 END SUBROUTINE init_ph_freq
 
+!--------------------------------------------------------------------
 SUBROUTINE destroy_ph_freq(ph_freq)
+!--------------------------------------------------------------------
 IMPLICIT NONE
 TYPE(ph_freq_type), INTENT(INOUT) :: ph_freq
 
@@ -109,7 +113,9 @@ IF (ALLOCATED(ph_freq%displa)) DEALLOCATE(ph_freq%displa)
 RETURN
 END SUBROUTINE destroy_ph_freq
 
+!--------------------------------------------------------------------
 SUBROUTINE read_ph_freq_data(ph_freq, filename)
+!--------------------------------------------------------------------
 !
 !  This subroutine reads the ph_freq data from a file. It allocates space
 !  for the frequencies and their representation
@@ -164,7 +170,9 @@ CLOSE(iunit)
 RETURN
 END SUBROUTINE read_ph_freq_data
 
+!--------------------------------------------------------------------
 SUBROUTINE write_ph_freq_data(ph_freq, filename)
+!--------------------------------------------------------------------
 !
 !  This subroutine writes the ph_freq data from a file. It allocates space
 !  for the frequencies
@@ -199,7 +207,9 @@ CLOSE(iunit)
 RETURN
 END SUBROUTINE write_ph_freq_data
 
+!--------------------------------------------------------------------
 SUBROUTINE zero_point_energy_ph(ph_freq, ener)
+!--------------------------------------------------------------------
 !
 !  This subroutine receives as input a set of phonon frequencies and computes 
 !  the zero point energy that corresponds to that frequencies. The output 
@@ -227,7 +237,9 @@ ener = ener / ry_to_cmm1
 RETURN
 END SUBROUTINE zero_point_energy_ph
 
+!--------------------------------------------------------------------
 SUBROUTINE free_energy_ph(ph_freq, temp, free_ener)
+!--------------------------------------------------------------------
 !
 !  This routine receives as input a phdos and a temperature and gives as 
 !  output the vibrational free energy at that temperature. ener contains
@@ -269,7 +281,9 @@ IF (counter > 3) WRITE(stdout,'(5x,"WARNING: Too many acoustic modes")')
 RETURN
 END SUBROUTINE free_energy_ph
 
+!--------------------------------------------------------------------
 SUBROUTINE vib_energy_ph(ph_freq, temp, ener)
+!--------------------------------------------------------------------
 !
 !  This routine receives as input a set of phonon frequencies and a 
 !  temperature and gives as 
@@ -310,7 +324,9 @@ ener = ener / ry_to_cmm1
 RETURN
 END SUBROUTINE vib_energy_ph
 
+!--------------------------------------------------------------------
 SUBROUTINE vib_entropy_ph(ph_freq, temp, entr)
+!--------------------------------------------------------------------
 !
 !  This routine receives as input a phdos and a temperature and gives as 
 !  output the vibrational entropy at that temperature. 
@@ -333,7 +349,9 @@ ENDIF
 RETURN
 END SUBROUTINE vib_entropy_ph
 
+!--------------------------------------------------------------------
 SUBROUTINE specific_heat_cv_ph(ph_freq, temp, cv)
+!--------------------------------------------------------------------
 !
 !  This routine receives as input a set of phonon frequencies and a 
 !  temperature and gives as output the constant volume specific heat at 
@@ -374,7 +392,9 @@ cv = cv * kb
 RETURN
 END SUBROUTINE specific_heat_cv_ph
 
+!--------------------------------------------------------------------
 SUBROUTINE thermal_expansion_ph(ph_freq, ph_grun, temp, betab, cv)
+!--------------------------------------------------------------------
 !
 !  This routine receives as input a set of phonon frequencies
 !  on a uniform q mesh, the gruneisen parameters divided by the cell volume
@@ -424,7 +444,9 @@ betab = betab * kb
 RETURN
 END SUBROUTINE thermal_expansion_ph
 
+!--------------------------------------------------------------------
 SUBROUTINE fecv_ph(ph_freq, temp, free_ener, ener, cv)
+!--------------------------------------------------------------------
 !
 !  This routine receives as input a set of frequencies 
 !  and a temperature and gives as output the vibrational free energy,
@@ -481,7 +503,9 @@ cv = cv * kb
 RETURN
 END SUBROUTINE fecv_ph
 
+!--------------------------------------------------------------------
 SUBROUTINE debye_waller_factor(ph_freq, temp, b_fact, nat, amass, ntyp, ityp)
+!--------------------------------------------------------------------
 !
 ! This subroutine receives as input a set of phonon frequencies and
 ! respective displacements (eigenvalues and eigenvectors of dynamical
@@ -564,4 +588,5 @@ ENDDO
 
 RETURN
 END SUBROUTINE debye_waller_factor
+
 END MODULE ph_freq_module

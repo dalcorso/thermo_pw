@@ -45,8 +45,9 @@ MODULE io_bands
           write_representations
 
 CONTAINS
-
+!---------------------------------------------------------------------
   SUBROUTINE write_bands(nks, nbnd, xk, et, fact, filedata)
+!---------------------------------------------------------------------
 
   IMPLICIT NONE
   INTEGER, INTENT(IN) :: nks, nbnd
@@ -81,9 +82,11 @@ CONTAINS
   RETURN
   END SUBROUTINE write_bands
 
+!---------------------------------------------------------------------
   SUBROUTINE write_representations(nks, nbnd, xk, rap, high_symmetry,      &
                           gcodek, aux_ind, gcodek_ext, ptypek, lprojk, & 
                           same_next, gaugek, filedata, ik0, nks_eff) 
+!---------------------------------------------------------------------
 
   USE kinds, ONLY : DP
   USE constants, ONLY : pi
@@ -128,7 +131,9 @@ CONTAINS
   RETURN
   END SUBROUTINE write_representations
 
+!---------------------------------------------------------------------
   SUBROUTINE read_parameters(nks, nbnd, filedata)
+!---------------------------------------------------------------------
   IMPLICIT NONE
   INTEGER, INTENT(OUT) :: nks, nbnd
   CHARACTER(LEN=256) :: filedata
@@ -159,7 +164,9 @@ CONTAINS
   RETURN
   END SUBROUTINE read_parameters
 
+!---------------------------------------------------------------------
   SUBROUTINE read_bands(nks, nbnd, xk, et, filedata)
+!---------------------------------------------------------------------
 
   USE kinds, ONLY : DP
   IMPLICIT NONE
@@ -213,9 +220,11 @@ CONTAINS
   RETURN
   END SUBROUTINE read_bands
 
+!---------------------------------------------------------------------
   SUBROUTINE read_representations(nks, nbnd, xk, rap, high_symmetry,      &
                           gcodek, aux_ind, gcodek_ext, ptypek, lprojk, & 
                           same_next, gaugek, exist_rap, filedata) 
+!---------------------------------------------------------------------
 
   USE kinds, ONLY : DP
   USE constants, ONLY : pi
@@ -305,7 +314,9 @@ CONTAINS
   RETURN
   END SUBROUTINE read_representations
 
+!---------------------------------------------------------------------
   SUBROUTINE clean_band_reader()
+!---------------------------------------------------------------------
 
   IMPLICIT NONE
 

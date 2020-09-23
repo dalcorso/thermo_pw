@@ -66,7 +66,9 @@ PUBLIC :: phdos_type, read_phdos_data, zero_point_energy, free_energy, &
           
 CONTAINS
 
+!--------------------------------------------------------------------
 SUBROUTINE set_phdos(phdos,ndiv,deltanu)
+!--------------------------------------------------------------------
 IMPLICIT NONE
 TYPE(phdos_type), INTENT(INOUT) :: phdos
 INTEGER, INTENT(IN) :: ndiv
@@ -80,7 +82,9 @@ ALLOCATE(phdos%phdos(ndiv))
 RETURN
 END SUBROUTINE set_phdos
 
+!--------------------------------------------------------------------
 SUBROUTINE set_gen_phdos(phdos,ndiv,nat,deltanu)
+!--------------------------------------------------------------------
 IMPLICIT NONE
 TYPE(gen_phdos_type), INTENT(INOUT) :: phdos
 INTEGER, INTENT(IN) :: ndiv, nat
@@ -95,7 +99,9 @@ ALLOCATE(phdos%phdos(6,nat,ndiv))
 RETURN
 END SUBROUTINE set_gen_phdos
 
+!--------------------------------------------------------------------
 SUBROUTINE destroy_phdos(phdos)
+!--------------------------------------------------------------------
 IMPLICIT NONE
 TYPE(phdos_type), INTENT(INOUT) :: phdos
 
@@ -105,7 +111,9 @@ IF (ALLOCATED(phdos%phdos)) DEALLOCATE(phdos%phdos)
 RETURN
 END SUBROUTINE destroy_phdos
 
+!--------------------------------------------------------------------
 SUBROUTINE destroy_gen_phdos(phdos)
+!--------------------------------------------------------------------
 IMPLICIT NONE
 TYPE(gen_phdos_type), INTENT(INOUT) :: phdos
 
@@ -115,7 +123,9 @@ IF (ALLOCATED(phdos%phdos)) DEALLOCATE(phdos%phdos)
 RETURN
 END SUBROUTINE destroy_gen_phdos
 
+!--------------------------------------------------------------------
 SUBROUTINE read_phdos_data(phdos, filename)
+!--------------------------------------------------------------------
 !
 !  This subroutine reads the phdos from a file. It allocates space,
 !  opens and closes the phdos file.
@@ -185,7 +195,9 @@ IF (ionode) CLOSE(iunit)
 RETURN
 END SUBROUTINE read_phdos_data
 
+!--------------------------------------------------------------------
 SUBROUTINE read_genphdos_data(phdos, nat, filename)
+!--------------------------------------------------------------------
 !
 !  This subroutine reads the phdos from a file. It allocates space,
 !  opens and closes the phdos file.
@@ -265,7 +277,9 @@ DEALLOCATE(dos)
 RETURN
 END SUBROUTINE read_genphdos_data
 
+!--------------------------------------------------------------------
 SUBROUTINE zero_point_energy(phdos, ener)
+!--------------------------------------------------------------------
 !
 !  This subroutine receives as input a phdos and computes the zero point 
 !  energy that corresponds to that phdos. The output energy is in Ry.
@@ -282,7 +296,9 @@ ener = ener / ry_to_cmm1
 RETURN
 END SUBROUTINE zero_point_energy
 
+!--------------------------------------------------------------------
 SUBROUTINE free_energy(phdos, temp, ener)
+!--------------------------------------------------------------------
 !
 !  This routine receives as input a phdos and a temperature and gives as 
 !  output the vibrational free energy at that temperature. ener contains
@@ -312,7 +328,9 @@ ener = ener*phdos%de
 RETURN
 END SUBROUTINE free_energy
 
+!--------------------------------------------------------------------
 SUBROUTINE vib_energy(phdos, temp, ener)
+!--------------------------------------------------------------------
 !
 !  This routine receives as input a phdos and a temperature and gives as 
 !  output the vibrational energy at that temperature. ener contains
@@ -342,7 +360,9 @@ ener = ener * phdos%de / ry_to_cmm1
 RETURN
 END SUBROUTINE vib_energy
 
+!--------------------------------------------------------------------
 SUBROUTINE vib_entropy(phdos, temp, entr)
+!--------------------------------------------------------------------
 !
 !  This routine receives as input a phdos and a temperature and gives as 
 !  output the vibrational entropy at that temperature. 
@@ -365,7 +385,9 @@ ENDIF
 RETURN
 END SUBROUTINE vib_entropy
 
+!--------------------------------------------------------------------
 SUBROUTINE specific_heat_cv(phdos, temp, cv)
+!--------------------------------------------------------------------
 !
 !  This routine receives as input a phdos and a temperature and gives as 
 !  output the constant volume specific heat at that temperature. 
@@ -394,7 +416,9 @@ cv = cv * phdos%de * kb
 RETURN
 END SUBROUTINE specific_heat_cv
 
+!--------------------------------------------------------------------
 SUBROUTINE fecv(phdos, temp, free_ener, ener, cv)
+!--------------------------------------------------------------------
 !
 !  This routine receives as input a phdos and a temperature and gives as 
 !  output the vibrational free energy at that temperature. ener contains
@@ -432,8 +456,10 @@ cv = cv * phdos%de * kb
 RETURN
 END SUBROUTINE fecv
 
+!--------------------------------------------------------------------
 SUBROUTINE phdos_debye_factor(phdos, temp, b_fact,  &
                                               nat, amass, nsp, ityp)
+!--------------------------------------------------------------------
 !
 USE constants, ONLY : h_planck_si, c_si, amu_si
 
@@ -480,8 +506,9 @@ ENDDO
 RETURN
 END SUBROUTINE phdos_debye_factor
 
-
+!--------------------------------------------------------------------
 SUBROUTINE integrated_dos(phdos, tot_dos)
+!--------------------------------------------------------------------
 !
 !  This routine receives as input a phdos and a temperature and gives as 
 !  output the vibrational energy at that temperature. ener contains
@@ -504,7 +531,9 @@ tot_dos = tot_dos * phdos%de
 RETURN
 END SUBROUTINE integrated_dos
 
+!--------------------------------------------------------------------
 SUBROUTINE find_minimum_maximum(phdos, freqmin, freqmax)
+!--------------------------------------------------------------------
 !
 !  find the range of the phdos frequencies
 !

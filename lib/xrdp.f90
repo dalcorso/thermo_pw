@@ -32,7 +32,9 @@ PUBLIC compute_form_factor, write_form_factor, compute_xrdp, select_lambda
 
 CONTAINS
 
+!-----------------------------------------------------------------------
 SUBROUTINE write_form_factor(element,smin,smax,npoint,lcm,filename)
+!-----------------------------------------------------------------------
 
 USE kinds, ONLY : DP
 USE io_global, ONLY : ionode
@@ -79,8 +81,10 @@ DEALLOCATE(ff)
 RETURN
 END SUBROUTINE write_form_factor
 
+!-----------------------------------------------------------------------
 SUBROUTINE compute_xrdp(at,bg,alat,nat,tau,ntyp,ityp,atm,&
                                            lambda,ibrav,lcm,in_filename)
+!-----------------------------------------------------------------------
 !
 ! This routine generates all the reciprocal lattice vectors contained in
 ! a sphere of radius 
@@ -318,7 +322,9 @@ DEALLOCATE( multiplicity )
 RETURN
 END SUBROUTINE compute_xrdp
 
+!-----------------------------------------------------------------------
 SUBROUTINE select_lambda(elem_name,lambda)
+!-----------------------------------------------------------------------
 !
 !  This routine sets the X-ray wavelengh from the anode element. The output values
 !  are taken from J.A. Bearden "X-Ray Wavelengths". Rev. of Mod. Phys. 39, 78–124, (1967) and are in Angstrom.
@@ -351,7 +357,9 @@ END SUBROUTINE select_lambda
 
 
 
+!-----------------------------------------------------------------------
 SUBROUTINE cromermann_form_factor(element, s, ff)
+!-----------------------------------------------------------------------
 USE kinds, ONLY : DP
 
 IMPLICIT NONE
@@ -375,7 +383,9 @@ ff=ff+par_c_cm
 RETURN
 END SUBROUTINE cromermann_form_factor 
 
+!-----------------------------------------------------------------------
 SUBROUTINE set_cromermann_coefficients(element,par_a_cm,par_b_cm,par_c_cm)
+!-----------------------------------------------------------------------
 !
 !  This routine set the parameters of Cromer and Mann that can be
 !  found in the Intenational Tables of Crystallography Vol. C.
@@ -1399,7 +1409,9 @@ ff=ff+par_ff_z
 RETURN
 END SUBROUTINE compute_form_factor
 
+!-----------------------------------------------------------------------
 SUBROUTINE compute_param_ff(element, par_ff_z, par_ff_a, par_ff_b)
+!-----------------------------------------------------------------------
 !
 !  This routine sets the form factor parameters. The parameters are
 !  taken from Table 12.1 of

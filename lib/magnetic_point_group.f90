@@ -23,7 +23,9 @@ MODULE magnetic_point_group
 
 CONTAINS
 
+!--------------------------------------------------------------------
 SUBROUTINE find_mag_group_code(group_code,subgroup_code,mag_code)
+!--------------------------------------------------------------------
 !
 ! This routine receives the codes of a group and of a subgroup and
 ! gives the code of the magnetic group that corresponds to them.
@@ -131,9 +133,10 @@ ENDIF
 RETURN
 END SUBROUTINE find_mag_group_code
 
-
+!--------------------------------------------------------------------
 FUNCTION mag_group_name(code)
-
+!--------------------------------------------------------------------
+!
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: code
 CHARACTER(LEN=21) :: mag_group_name
@@ -207,8 +210,10 @@ mag_group_name=gname(code)
 RETURN
 END FUNCTION mag_group_name
 
+!--------------------------------------------------------------------
 FUNCTION magnetic_type(code)
-
+!--------------------------------------------------------------------
+!
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: code
 CHARACTER(LEN=2) :: magnetic_type
@@ -234,7 +239,9 @@ magnetic_type=mtype(code)
 RETURN
 END FUNCTION magnetic_type
 
+!--------------------------------------------------------------------
 SUBROUTINE set_mag_group_subgroup(group,subgroup)
+!--------------------------------------------------------------------
 
 IMPLICIT NONE
 INTEGER, INTENT(OUT) :: group(58), subgroup(58)
@@ -255,7 +262,9 @@ subgroup=subgroup_
 RETURN
 END SUBROUTINE set_mag_group_subgroup
 
+!--------------------------------------------------------------------
 LOGICAL FUNCTION is_mag_group(code_group, code_subgroup)
+!--------------------------------------------------------------------
 !
 !  This function receives the codes of group and of a subgroup and
 !  returns .TRUE. if the subgroup is invariant and of index=2
@@ -277,7 +286,9 @@ ENDDO
 RETURN
 END FUNCTION is_mag_group
 
+!--------------------------------------------------------------------
 SUBROUTINE find_group_subgroup(group_code,subgroup_code, mag_code)
+!--------------------------------------------------------------------
 !
 !  This routine recieves the code of a magnetic group (between 1 and 122)
 !  and sets the code of the group and of the invariant subgroup that
@@ -309,7 +320,9 @@ ENDIF
 RETURN
 END SUBROUTINE find_group_subgroup
 
+!--------------------------------------------------------------------
 SUBROUTINE set_mag_group_subgroup_ext(group_ext,subgroup_ext)
+!--------------------------------------------------------------------
 !
 !  This routine sets the codes of all the possible combinations of
 !  extended group - subgroups codes that define a magnetic point group.
@@ -391,8 +404,10 @@ subgroup_ext=subgroup_ext_
 RETURN
 END SUBROUTINE set_mag_group_subgroup_ext
 
+!--------------------------------------------------------------------
 SUBROUTINE find_mag_group_code_ext(group_code_ext,subgroup_code_ext, &
                                     mag_code_ext)
+!--------------------------------------------------------------------
 !
 !   This routine receives the extended codes of a group and of its invariant
 !   subgroup and gives the code of the magnetic point group
@@ -768,8 +783,10 @@ ENDIF
 RETURN
 END SUBROUTINE find_mag_group_code_ext
 
+!--------------------------------------------------------------------
 SUBROUTINE find_group_subgroup_ext(group_code_ext,subgroup_code_ext, &
                                     mag_code_ext)
+!--------------------------------------------------------------------
 !
 !  This routine recieve the extended code of a magnetic group 
 !  (between 1 and 589) and sets the extended code of the group and of the 
@@ -803,8 +820,9 @@ ENDIF
 RETURN
 END SUBROUTINE find_group_subgroup_ext
 
-
+!--------------------------------------------------------------------
 FUNCTION mag_group_index_from_ext(mag_code_group_ext)
+!--------------------------------------------------------------------
 !
 !  This routine receives the extended magnetic group code of a magnetic
 !  point group and gives the magnetic_group_code

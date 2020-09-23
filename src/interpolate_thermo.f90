@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!-----------------------------------------------------------------------
 SUBROUTINE interpolate_thermo(vmin_t, celldm_t, ph_thermo, thermo_t)
+!-----------------------------------------------------------------------
 !
 !  This subroutine receives the desired thermodynamical quantity at 
 !  several geometries (specific heat, entropy or vibrational energy), 
@@ -151,7 +153,9 @@ END SUBROUTINE interpolate_thermo
 
 ! Copyright (C) 2019 Cristiano Malica
 
+!-----------------------------------------------------------------------
 SUBROUTINE interpolate_e0(vmin_t, celldm_t, ph_e0, e0)
+!-----------------------------------------------------------------------
 !
 !  This subroutine receives the zero point energy (ZPE) computed  
 !  at several geometries in ph_e0.

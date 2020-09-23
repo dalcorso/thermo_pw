@@ -105,7 +105,9 @@ CONTAINS
 !   The following four routines allocate the variables of a polynomial of
 !   degree 1, 2, 3, or 4.
 !
+!--------------------------------------------------------------------
    SUBROUTINE init_poly1(nvar,poly_in)
+!--------------------------------------------------------------------
    IMPLICIT NONE
    INTEGER, INTENT(IN) :: nvar
    TYPE(poly1), INTENT(INOUT) :: poly_in
@@ -119,6 +121,7 @@ CONTAINS
 ! --------------------------------------------------------------------------
 !
    SUBROUTINE init_poly2(nvar,poly_in)
+!--------------------------------------------------------------------
    IMPLICIT NONE
    INTEGER, INTENT(IN) :: nvar
    TYPE(poly2), INTENT(INOUT) :: poly_in
@@ -134,6 +137,7 @@ CONTAINS
 ! --------------------------------------------------------------------------
 !
    SUBROUTINE init_poly3(nvar,poly_in)
+!--------------------------------------------------------------------
    IMPLICIT NONE
    INTEGER, INTENT(IN) :: nvar
    TYPE(poly3), INTENT(INOUT) :: poly_in
@@ -151,6 +155,7 @@ CONTAINS
 ! --------------------------------------------------------------------------
 !
    SUBROUTINE init_poly4(nvar,poly_in)
+!--------------------------------------------------------------------
    IMPLICIT NONE
    INTEGER, INTENT(IN) :: nvar
    TYPE(poly4), INTENT(INOUT) :: poly_in
@@ -173,6 +178,7 @@ CONTAINS
 !   degree 1, 2, 3, or 4.
 !
    SUBROUTINE clean_poly1(poly_in)
+!--------------------------------------------------------------------
    IMPLICIT NONE
    TYPE(poly1), INTENT(INOUT) :: poly_in
 
@@ -184,6 +190,7 @@ CONTAINS
 ! --------------------------------------------------------------------------
 !
    SUBROUTINE clean_poly2(poly_in)
+!--------------------------------------------------------------------
    IMPLICIT NONE
    TYPE(poly2), INTENT(INOUT) :: poly_in
 
@@ -196,6 +203,7 @@ CONTAINS
 ! --------------------------------------------------------------------------
 !
    SUBROUTINE clean_poly3(poly_in)
+!--------------------------------------------------------------------
    IMPLICIT NONE
    TYPE(poly3), INTENT(INOUT) :: poly_in
 
@@ -209,6 +217,7 @@ CONTAINS
 ! --------------------------------------------------------------------------
 !
    SUBROUTINE clean_poly4(poly_in)
+!--------------------------------------------------------------------
    IMPLICIT NONE
    TYPE(poly4), INTENT(INOUT) :: poly_in
 
@@ -223,6 +232,7 @@ CONTAINS
 ! --------------------------------------------------------------------------
 !
    SUBROUTINE poly_ncoeff_sep(n,d,ncoeff)
+!--------------------------------------------------------------------
 !
 !  This routine gives the number of coefficients of a polynomial of n
 !  variables of degree d (only the terms of degree d are accounted for).
@@ -255,6 +265,7 @@ CONTAINS
 ! --------------------------------------------------------------------------
 !
    SUBROUTINE poly_ncoeff(n,d,ncoeff)
+!--------------------------------------------------------------------
 !
 !  This routine gives the total number of coefficients of a polynomial of
 !  n variables of degree d (all terms of degree up to d are accounted for).

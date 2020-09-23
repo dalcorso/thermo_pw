@@ -5,7 +5,10 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!----------------------------------------------------------------------
 SUBROUTINE latgen_2d(ibrav_2d, celldm_2d, a1, a2)
+!----------------------------------------------------------------------
+!
 USE kinds, ONLY : DP
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ibrav_2d
@@ -56,7 +59,9 @@ END SELECT
 RETURN
 END SUBROUTINE latgen_2d
 
+!----------------------------------------------------------------------
 SUBROUTINE recips_2d(a1,a2,b1,b2)
+!----------------------------------------------------------------------
 !
 !  This routine receives as input the direct lattice vectors of a 2d 
 !  Bravais lattice and finds the reciprocal lattice vectors b1 and b2

@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!---------------------------------------------------------------------
 SUBROUTINE manage_elastic_cons_qha_2()
+!---------------------------------------------------------------------
 !
 !
 USE kinds,             ONLY : DP
@@ -139,7 +141,9 @@ CALL plot_elastic_t(1,.FALSE.)
 RETURN
 END SUBROUTINE manage_elastic_cons_qha_2
 
+!---------------------------------------------------------------------
 SUBROUTINE read_alpha_anis(ibrav, nvar, x_t, temp, ntemp, filename)
+!---------------------------------------------------------------------
 USE kinds, ONLY : DP
 USE io_global,  ONLY : meta_ionode, meta_ionode_id, stdout
 USE mp_world,   ONLY : world_comm

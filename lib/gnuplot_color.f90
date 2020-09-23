@@ -63,7 +63,9 @@ MODULE gnuplot_color
 
 CONTAINS
 
+!--------------------------------------------------------------------
    SUBROUTINE gnuplot_set_base_colors()
+!--------------------------------------------------------------------
 
    IMPLICIT NONE
 
@@ -100,7 +102,9 @@ CONTAINS
    RETURN
    END SUBROUTINE gnuplot_set_base_colors
 
+!--------------------------------------------------------------------
    SUBROUTINE gnuplot_set_dark_light_colors()
+!--------------------------------------------------------------------
 
    IMPLICIT NONE
 
@@ -135,7 +139,9 @@ CONTAINS
    RETURN
    END SUBROUTINE gnuplot_set_dark_light_colors
 
+!--------------------------------------------------------------------
    SUBROUTINE gnuplot_set_reds()
+!--------------------------------------------------------------------
 
    IMPLICIT NONE
 
@@ -162,7 +168,9 @@ CONTAINS
    RETURN
    END SUBROUTINE gnuplot_set_reds
 
+!--------------------------------------------------------------------
    SUBROUTINE gnuplot_set_oranges()
+!--------------------------------------------------------------------
 
    IMPLICIT NONE
 
@@ -195,7 +203,9 @@ CONTAINS
    RETURN
    END SUBROUTINE gnuplot_set_oranges
 
+!--------------------------------------------------------------------
    SUBROUTINE gnuplot_set_yellows()
+!--------------------------------------------------------------------
 
    IMPLICIT NONE
 
@@ -214,7 +224,9 @@ CONTAINS
    RETURN
    END SUBROUTINE gnuplot_set_yellows
 
+!--------------------------------------------------------------------
    SUBROUTINE gnuplot_set_greens()
+!--------------------------------------------------------------------
 
    IMPLICIT NONE
 
@@ -246,7 +258,9 @@ CONTAINS
    RETURN
    END SUBROUTINE gnuplot_set_greens
 
+!--------------------------------------------------------------------
    SUBROUTINE gnuplot_set_blues()
+!--------------------------------------------------------------------
 
    IMPLICIT NONE
 
@@ -281,7 +295,9 @@ CONTAINS
    RETURN
    END SUBROUTINE gnuplot_set_blues
 
+!--------------------------------------------------------------------
    SUBROUTINE gnuplot_set_violets()
+!--------------------------------------------------------------------
 
    IMPLICIT NONE
 
@@ -300,7 +316,9 @@ CONTAINS
    RETURN
    END SUBROUTINE gnuplot_set_violets
 
+!--------------------------------------------------------------------
    SUBROUTINE gnuplot_set_grays()
+!--------------------------------------------------------------------
 
    IMPLICIT NONE
 
@@ -365,7 +383,9 @@ CONTAINS
    RETURN
    END SUBROUTINE gnuplot_set_grays
 
+!--------------------------------------------------------------------
    SUBROUTINE gnuplot_set_all_colors()
+!--------------------------------------------------------------------
 
    IMPLICIT NONE
    INTEGER :: counter
@@ -398,7 +418,9 @@ CONTAINS
    RETURN
    END SUBROUTINE gnuplot_set_all_colors
 
+!--------------------------------------------------------------------
    SUBROUTINE convert_color_name(inname, outname)
+!--------------------------------------------------------------------
 !
 !   this routine substitutes the _ with a - in the color name, in order
 !   to print it.
@@ -421,7 +443,5 @@ CONTAINS
 
    RETURN
    END SUBROUTINE convert_color_name
-
-
 
 END MODULE gnuplot_color

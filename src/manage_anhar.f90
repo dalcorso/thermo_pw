@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!-------------------------------------------------------------------
 SUBROUTINE manage_anhar()
+!-------------------------------------------------------------------
 
 USE kinds,                 ONLY : DP
 USE temperature,           ONLY : ntemp
@@ -109,9 +111,9 @@ RETURN
 END SUBROUTINE manage_anhar
 
 !-------------------------------------------------------------------------
-!
 SUBROUTINE manage_anhar_anis()
-
+!-------------------------------------------------------------------
+!
 USE kinds,                 ONLY : DP
 USE thermo_mod,            ONLY : reduced_grid, what
 USE temperature,           ONLY : ntemp, temp

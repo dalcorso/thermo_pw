@@ -21,7 +21,9 @@ MODULE nye
 
 CONTAINS
 
+!--------------------------------------------------------------------
 SUBROUTINE print_vectors_shape(code_group, ibrav)
+!--------------------------------------------------------------------
 
 USE io_global, ONLY : stdout
 
@@ -132,7 +134,9 @@ END SELECT
 RETURN
 END SUBROUTINE print_vectors_shape
 
+!--------------------------------------------------------------------
 SUBROUTINE print_tensor2_shape(ibrav)
+!--------------------------------------------------------------------
 
 USE io_global, ONLY : stdout
 
@@ -189,7 +193,9 @@ END SELECT
 RETURN
 END SUBROUTINE print_tensor2_shape
 
+!--------------------------------------------------------------------
 SUBROUTINE print_piezo_shape(code_group, ibrav)
+!--------------------------------------------------------------------
 
 USE io_global, ONLY : stdout
 IMPLICIT NONE
@@ -346,7 +352,9 @@ END SELECT
 RETURN
 END SUBROUTINE print_piezo_shape
 
+!--------------------------------------------------------------------
 SUBROUTINE print_el_cons_shape(laue, ibrav)
+!--------------------------------------------------------------------
 !
 !  This routine prints on output the chape of the elastic constants
 !  tensor
@@ -477,7 +485,9 @@ END SELECT
 RETURN
 END SUBROUTINE print_el_cons_shape
 
+!--------------------------------------------------------------------
 SUBROUTINE print_b_fact_shape(b_rest)
+!--------------------------------------------------------------------
 !
 !  This routine prints on output the shape of the B factor tensor. 
 !
@@ -590,6 +600,5 @@ SELECT CASE (b_rest_)
 END SELECT
    
 END SUBROUTINE print_b_fact_shape
-
 
 END MODULE nye

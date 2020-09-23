@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!-----------------------------------------------------------------
 SUBROUTINE plot_anhar_anis()
+!-----------------------------------------------------------------
 !
 !  This is a driver to plot the quantities written inside flanhar,
 !  flanhar//'_ph', flanhar//'.celldm', flanhar//'.celldm_ph', 
@@ -431,7 +433,9 @@ ENDIF
 RETURN
 END SUBROUTINE plot_anhar_anis
 
+!-----------------------------------------------------------------
 SUBROUTINE plot_thermal_stress()
+!-----------------------------------------------------------------
 !
 !  This routine plot the thermal stress tensor
 !
@@ -536,7 +540,9 @@ IF (lgnuplot.AND.ionode) &
 RETURN
 END SUBROUTINE plot_thermal_stress
 
+!-----------------------------------------------------------------
 SUBROUTINE plot_generalized_gruneisen()
+!-----------------------------------------------------------------
 !
 !  This routine plot the thermal stress tensor
 !
@@ -641,7 +647,9 @@ END SUBROUTINE plot_generalized_gruneisen
 
 ! Copyright (C) 2018 Cristiano Malica
 
+!-----------------------------------------------------------------
 SUBROUTINE plot_dw_anhar_anis()
+!-----------------------------------------------------------------
 !
 !  This is a driver to plot the quantities written inside 
 !

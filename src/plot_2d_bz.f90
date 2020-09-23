@@ -4,9 +4,10 @@
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
-
+!--------------------------------------------------------------------------
 SUBROUTINE plot_2d_bz(ibrav, celldm, at, bg, xk, wk, npkt, letter, &
                       letter_path, npk_label, label_list, asy_filename)
+!--------------------------------------------------------------------------
 !
 !  This subroutine plots the BZ of a given solid. It
 !  receives as input:
@@ -63,9 +64,11 @@ CALL generate_2d_asy_figure(xk, wk, npkt, letter, letter_path, npk_label, &
 RETURN
 END SUBROUTINE plot_2d_bz
 
+!--------------------------------------------------------------------------
 SUBROUTINE generate_2d_asy_figure(xk, wk, npkt, letter, letter_path, &
                       npk_label, label_list, bz_2d_struc, bz_asy_struc, &
                       asy_filename)
+!--------------------------------------------------------------------------
 !
 !  This subroutine generates an input script for asymptote that
 !  plots the BZ

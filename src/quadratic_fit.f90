@@ -271,7 +271,9 @@ SUBROUTINE quadratic_fit_t(itemp, celldm_t, free_e_min_t, ph_free_ener, &
   !
 END SUBROUTINE quadratic_fit_t
 
+!-------------------------------------------------------------------
 SUBROUTINE set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
+!-------------------------------------------------------------------
 !
 !  this rouotine receives and array of values of celldm celldm_geo(6,ndata)
 !  and transform it in a compact array x(nvar,ndata), where nvar depends
@@ -294,7 +296,9 @@ ENDDO
 RETURN
 END SUBROUTINE set_x_from_celldm
 
+!-------------------------------------------------------------------
 SUBROUTINE print_genergy(ymin)
+!-------------------------------------------------------------------
 USE kinds, ONLY : DP
 USE control_pressure, ONLY : pressure
 USE io_global, ONLY : stdout
@@ -311,7 +315,9 @@ ENDIF
 RETURN
 END SUBROUTINE print_genergy
 
+!-------------------------------------------------------------------
 SUBROUTINE print_energy(ymin)
+!-------------------------------------------------------------------
 
 USE kinds, ONLY : DP
 USE control_pressure, ONLY : pressure

@@ -2182,7 +2182,9 @@ MODULE space_groups
 
   CONTAINS
 
+!-----------------------------------------------------------------------
   SUBROUTINE set_add_info()
+!-----------------------------------------------------------------------
   IMPLICIT NONE
 
 !
@@ -2599,7 +2601,9 @@ MODULE space_groups
   RETURN
   END SUBROUTINE set_add_info
 
+!-----------------------------------------------------------------------
   SUBROUTINE set_fft_fact(code, unique, trig, fft_fact)
+!-----------------------------------------------------------------------
 !
 ! This routine recives as input the code of a space group and gives as
 ! output the factor that should be contained in the dimensions of the
@@ -2714,8 +2718,10 @@ MODULE space_groups
   RETURN
   END SUBROUTINE set_fft_fact
 
+!-----------------------------------------------------------------------
   SUBROUTINE find_space_group(ibrav, nsym, sr_in, ft_in, at, bg, &
                                      sg_number, aux_sg, s01, s02, verbosity)
+!-----------------------------------------------------------------------
   !
   !  This routine receives as input: 
   !  the bravais lattice, the number of symmetries, the rotation matrices 
@@ -4884,7 +4890,9 @@ MODULE space_groups
   RETURN
   END SUBROUTINE find_space_group
 
+!-----------------------------------------------------------------------
   SUBROUTINE transform_fcc_axis(tau_aux,naux)
+!-----------------------------------------------------------------------
   INTEGER, INTENT(IN) :: naux
   REAL(DP), INTENT(INOUT) :: tau_aux(3,naux)
 
@@ -4910,7 +4918,9 @@ MODULE space_groups
   RETURN
   END SUBROUTINE transform_fcc_axis
 
+!-----------------------------------------------------------------------
   SUBROUTINE transform_bcc_axis(tau_aux,naux)
+!-----------------------------------------------------------------------
   INTEGER, INTENT(IN) :: naux
   REAL(DP), INTENT(INOUT) :: tau_aux(3,naux)
 
@@ -4927,7 +4937,9 @@ MODULE space_groups
   RETURN
   END SUBROUTINE transform_bcc_axis
 
+!-----------------------------------------------------------------------
   SUBROUTINE transform_fco_axis(tau_aux,naux)
+!-----------------------------------------------------------------------
   INTEGER, INTENT(IN) :: naux
   REAL(DP), INTENT(INOUT) :: tau_aux(3,naux)
 
@@ -4944,7 +4956,9 @@ MODULE space_groups
   RETURN
   END SUBROUTINE transform_fco_axis
 
+!-----------------------------------------------------------------------
   SUBROUTINE transform_ct_axis(tau_aux,naux)
+!-----------------------------------------------------------------------
   INTEGER, INTENT(IN) :: naux
   REAL(DP), INTENT(INOUT) :: tau_aux(3,naux)
 
@@ -4961,7 +4975,9 @@ MODULE space_groups
   RETURN
   END SUBROUTINE transform_ct_axis
 
+!-----------------------------------------------------------------------
   SUBROUTINE transform_obco_c_axis(tau_aux,naux)
+!-----------------------------------------------------------------------
   INTEGER, INTENT(IN) :: naux
   REAL(DP), INTENT(INOUT) :: tau_aux(3,naux)
 
@@ -4977,7 +4993,9 @@ MODULE space_groups
   RETURN
   END SUBROUTINE transform_obco_c_axis
 
+!-----------------------------------------------------------------------
   SUBROUTINE transform_monoclinic_center_c(tau_aux,naux)
+!-----------------------------------------------------------------------
   INTEGER, INTENT(IN) :: naux
   REAL(DP), INTENT(INOUT) :: tau_aux(3,naux)
 
@@ -4993,7 +5011,9 @@ MODULE space_groups
   RETURN
   END SUBROUTINE transform_monoclinic_center_c
 
+!-----------------------------------------------------------------------
   SUBROUTINE transform_monoclinic_center_b(tau_aux,naux)
+!-----------------------------------------------------------------------
   INTEGER, INTENT(IN) :: naux
   REAL(DP), INTENT(INOUT) :: tau_aux(3,naux)
 
@@ -5009,7 +5029,9 @@ MODULE space_groups
   RETURN
   END SUBROUTINE transform_monoclinic_center_b
 
+!-----------------------------------------------------------------------
   SUBROUTINE transform_obco_a_axis(tau_aux,naux)
+!-----------------------------------------------------------------------
   INTEGER, INTENT(IN) :: naux
   REAL(DP), INTENT(INOUT) :: tau_aux(3,naux)
 
@@ -5025,7 +5047,9 @@ MODULE space_groups
   RETURN
   END SUBROUTINE transform_obco_a_axis
 
+!-----------------------------------------------------------------------
   SUBROUTINE transform_bco_axis(tau_aux,naux)
+!-----------------------------------------------------------------------
   INTEGER, INTENT(IN) :: naux
   REAL(DP), INTENT(INOUT) :: tau_aux(3,naux)
 
@@ -5042,7 +5066,9 @@ MODULE space_groups
   RETURN
   END SUBROUTINE transform_bco_axis
 
+!-----------------------------------------------------------------------
   SUBROUTINE transform_trigonal_axis(tau_aux,naux)
+!-----------------------------------------------------------------------
   INTEGER, INTENT(IN) :: naux
   REAL(DP), INTENT(INOUT) :: tau_aux(3,naux)
 
@@ -5059,7 +5085,9 @@ MODULE space_groups
   RETURN
   END SUBROUTINE transform_trigonal_axis
 
+!-----------------------------------------------------------------------
   SUBROUTINE find_space_group_number(sgroup_name, group_code)
+!-----------------------------------------------------------------------
 !
 !  This routine returns the space group number of a given group_name if
 !  the name is recognized or zero if it is not.
@@ -5082,7 +5110,9 @@ MODULE space_groups
   RETURN
   END SUBROUTINE find_space_group_number
 
+!-----------------------------------------------------------------------
   SUBROUTINE find_space_group_names(group_code)
+!-----------------------------------------------------------------------
 !
 !  This routine writes on output all the names that correspond to a given
 !  space group.
@@ -5102,7 +5132,9 @@ MODULE space_groups
   RETURN
   END SUBROUTINE find_space_group_names
 
+!-----------------------------------------------------------------------
   SUBROUTINE sg_name(group_code, aux_sg, output_name)
+!-----------------------------------------------------------------------
 !
 !  This routine receives a space group code and gives as output the 
 !  space group name
@@ -5120,7 +5152,9 @@ MODULE space_groups
   RETURN
   END SUBROUTINE sg_name
 
+!-----------------------------------------------------------------------
   SUBROUTINE project_frac_tran(sr,ft,at,bg,ftperp,ftpar)
+!-----------------------------------------------------------------------
 !
 !  This subroutine receives as input a space group operation in the
 !  form of a rotation matrix sr (in cartesian coordinates) and a 
@@ -5182,7 +5216,9 @@ MODULE space_groups
   RETURN
   END SUBROUTINE project_frac_tran
 
+!-----------------------------------------------------------------------
   SUBROUTINE shift_frac_tran(sr,ft,at,bg,s0,ftnew)
+!-----------------------------------------------------------------------
 !
 !  This subroutine receives as input a space group operation in the
 !  form of a rotation matrix sr (in cartesian coordinates) and a 
@@ -5216,7 +5252,9 @@ MODULE space_groups
   RETURN
   END SUBROUTINE shift_frac_tran
 
+!-----------------------------------------------------------------------
   SUBROUTINE roto_shift_sg(sr,ft,at,bg,rot,s0,srnew,ftnew)
+!-----------------------------------------------------------------------
 !
 !  This subroutine receives as input a space group operation in the
 !  form of a rotation matrix sr (in cartesian coordinates) and a 
@@ -5263,7 +5301,9 @@ MODULE space_groups
   END SUBROUTINE roto_shift_sg
 
 
+!-----------------------------------------------------------------------
   SUBROUTINE find_sg_tags(sr,ft,ibrav,at,bg,ftperp,ftpar,sym_in,s0,sg_sym_out)
+!-----------------------------------------------------------------------
 !
 !   This routine receives as input a space group operation in the form
 !   of a 3x3 matrix sr (in cartesian coordinates), 
@@ -6166,7 +6206,9 @@ MODULE space_groups
   RETURN
   END SUBROUTINE find_sg_tags
 
+!-----------------------------------------------------------------------
 SUBROUTINE find_mirror_type(ifrac,imirror)
+!-----------------------------------------------------------------------
 !
 !  imirror codes
 !  1  a
@@ -6192,7 +6234,9 @@ IF (ifrac(1)/=0.AND.ifrac(2)/=0.AND.ifrac(3)/=0) imirror=4
 RETURN
 END SUBROUTINE find_mirror_type
 
+!-----------------------------------------------------------------------
 SUBROUTINE find_ifact(axis_order,ifrac,ifact)
+!-----------------------------------------------------------------------
 !
 !   This routine receives a vector of three integers ifrac.
 !   It removes the zeros and for the remaining integers it checks
@@ -6250,7 +6294,9 @@ END DO
 RETURN
 END SUBROUTINE find_ifact
 
+!-----------------------------------------------------------------------
 SUBROUTINE find_origin_xyz_rot(sr,ftperp,sym_in,at,bg,s0,ipol)
+!-----------------------------------------------------------------------
 !
 ! This routine finds the origin shift needed to bring the fractional
 ! translation associated to a rotation whose axis is parallel to x, y, or
@@ -6345,7 +6391,9 @@ CALL cryst_to_cart(1,s0,bg,-1)
 RETURN
 END SUBROUTINE find_origin_xyz_rot
 
+!-----------------------------------------------------------------------
 SUBROUTINE find_origin_3_rot(sr,ftperp,sym_in,at,bg,s0)
+!-----------------------------------------------------------------------
 !
 ! This routine finds the origin shift needed to bring the fractional
 ! translation associated to a rotation of +-120 about a diagonal of the cube
@@ -6418,7 +6466,9 @@ CALL cryst_to_cart(1,s0,bg,-1)
 RETURN
 END SUBROUTINE find_origin_3_rot
 
+!-----------------------------------------------------------------------
 SUBROUTINE set_sg_ibrav(sgc, ibrav)
+!-----------------------------------------------------------------------
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: sgc
@@ -6455,7 +6505,9 @@ ibrav=sg_ibrav(sgc)
 RETURN
 END SUBROUTINE set_sg_ibrav
 
+!-----------------------------------------------------------------------
 SUBROUTINE set_point_group_code(sgc, group_code, group_code_ext)
+!-----------------------------------------------------------------------
 !
 !   This routine receives the group code of a space group (1-230)
 !   and gives the code of the point group, both in condensed and
@@ -6524,7 +6576,9 @@ group_code_ext=group_code_list_ext(sgc)
 RETURN
 END SUBROUTINE set_point_group_code
 
+!-----------------------------------------------------------------------
 SUBROUTINE set_ft_generators(sgc,ft)
+!-----------------------------------------------------------------------
 !
 ! This routine receives in input the space group code and sets the
 ! fractionary translations on the generators. The elements of ft are
@@ -6967,7 +7021,9 @@ END SELECT
 RETURN
 END SUBROUTINE set_ft_generators
 
+!-----------------------------------------------------------------------
 LOGICAL FUNCTION check_space_group_ft(ft1,ftref,nsym)
+!-----------------------------------------------------------------------
 !
 !  This routine checks if all the fractional translations differ
 !  only by integer numbers with respect to those of the standard space group.
@@ -6994,7 +7050,9 @@ END DO
 RETURN
 END FUNCTION check_space_group_ft
 
+!-----------------------------------------------------------------------
 SUBROUTINE set_standard_sg(sgc,ibrav,celldm,nsym,sr,ft)
+!-----------------------------------------------------------------------
 !
 !   This routine receives as input the sgc (1-230), the bravais lattice index
 !   and the dimension of the unit cell and sets the symmetry 
@@ -7369,7 +7427,9 @@ ENDDO
 RETURN
 END SUBROUTINE set_standard_sg
 
+!-----------------------------------------------------------------------
 SUBROUTINE space_group_multiply(sr1, ft1, sr2, ft2, sr3, ft3)
+!-----------------------------------------------------------------------
 !
 !   This routine multiplies two space group operations
 !   sr1, sr2 are two 3x3 rotation matrices in cartesian coordinates
@@ -7395,7 +7455,9 @@ ft3 = ft1 + ftaux
 RETURN
 END SUBROUTINE space_group_multiply
 
+!-----------------------------------------------------------------------
 SUBROUTINE find_reference_pg(code_group_ext, ref_code_group_ext)
+!-----------------------------------------------------------------------
 !
 !  For each point group (in extended form), gives the point group of
 !  the reference space group for that point group
@@ -7427,7 +7489,9 @@ ref_code_group_ext=rfc(code_group_ext)
 RETURN
 END SUBROUTINE find_reference_pg
 
+!-----------------------------------------------------------------------
 LOGICAL FUNCTION check_code_group_ext(cge)
+!-----------------------------------------------------------------------
 !
 !  this function gives .TRUE. if the point group is one of those compatible
 !  with the ITA tables
@@ -7450,7 +7514,9 @@ check_code_group_ext=(cge==1.OR.cge==2.OR.cge==3.OR.cge==15.OR.cge==16      &
 RETURN
 END FUNCTION check_code_group_ext
 
+!-----------------------------------------------------------------------
 LOGICAL FUNCTION symmorphic_sg(sgc,ssgc)
+!-----------------------------------------------------------------------
 !
 !   This function receives a space group number (1-230) and returns .TRUE.
 !   if the space group is symmorphic. It returns also the group number
@@ -7493,7 +7559,9 @@ symmorphic_sg=(sgc==ssgc)
 RETURN
 END FUNCTION symmorphic_sg
 
+!-----------------------------------------------------------------------
 LOGICAL FUNCTION check_intersection(ft1,ft2,ft3)
+!-----------------------------------------------------------------------
 
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: ft1(3), ft2(3), ft3(3)
@@ -7534,7 +7602,9 @@ check_intersection=type1.AND.type2.AND.type3
 RETURN
 END FUNCTION check_intersection
 
+!-----------------------------------------------------------------------
 SUBROUTINE sg_origin(sg_number, spaceg_name, at, s01, s02)
+!-----------------------------------------------------------------------
 
 USE kinds, ONLY : DP
 USE io_global, ONLY : stdout

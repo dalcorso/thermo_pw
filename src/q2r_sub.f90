@@ -601,9 +601,11 @@ subroutine set_zasr ( zasr, nr1,nr2,nr3, nat, ibrav, tau, zeu)
    return
  end subroutine set_zasr
 
+!----------------------------------------------------------------------------
 SUBROUTINE interface_with_tpw(frc_, nr1, nr2, nr3, nat_, ntyp_, has_zstar_, &
                 zeu_, epsil_, atm_, nspin_mag_, m_loc_, tau_, ityp_, at_, &
                 bg_, omega_, ibrav_, celldm_, amass_)
+!----------------------------------------------------------------------------
 !
 !  This routine is used to copy the variables produced by q2r in the variables
 !  of the thermo_pw code, avoiding to read the file on disk.
@@ -672,7 +674,9 @@ amass(1:ntyp)=amass_(1:ntyp_)
 RETURN
 END SUBROUTINE interface_with_tpw
 
+!----------------------------------------------------------------------------
 SUBROUTINE clean_ifc_variables()
+!----------------------------------------------------------------------------
 
 USE kinds,          ONLY : DP
 USE ifc,            ONLY : frc, atm, zeu, m_loc

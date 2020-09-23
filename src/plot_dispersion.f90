@@ -5,9 +5,11 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!---------------------------------------------------------------------------
 SUBROUTINE initialize_plot_dispersion(kx, nks, xscale, ymin, ymax, eref,    &
      print_eref, nlines, start_point, last_point, label_disp_q,             &
      point_group_path, projective, lprojk, ylabel, gnu_filename, filenameps)
+!---------------------------------------------------------------------------
 !
 !   This routine initializes the gnuplot script and write in the script
 !   the commands to plot the frame where the bands are plotted. It
@@ -262,7 +264,10 @@ END DO
 RETURN
 END SUBROUTINE initialize_plot_dispersion
 
-SUBROUTINE plot_dispersion(nlines, nrap, has_points, dorap, with_lines, fileout)
+!---------------------------------------------------------------------------
+SUBROUTINE plot_dispersion(nlines, nrap, has_points, dorap, with_lines, &
+                                                                    fileout)
+!---------------------------------------------------------------------------
 !
 !   This routine writes a part of the gnuplot script with the commands
 !   to plot the band structure in a series of panels. It is supposed

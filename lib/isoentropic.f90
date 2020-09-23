@@ -35,7 +35,9 @@ MODULE isoentropic
 
 CONTAINS
 !
+!----------------------------------------------------------------------
 SUBROUTINE isobaric_heat_capacity(volume,b0_t,beta_t,temp,cpmcv,ntemp)
+!----------------------------------------------------------------------
 !
 !  This routine receives the volume, the bulk modulus, the volume thermal
 !  expansion at ntemp temperatures and provides the difference between
@@ -61,7 +63,9 @@ END DO
 RETURN
 END SUBROUTINE isobaric_heat_capacity
 
+!----------------------------------------------------------------------
 SUBROUTINE isoentropic_bulk_modulus(volume,b0_t,beta_t,cp_t,temp,bsmbt,ntemp)
+!----------------------------------------------------------------------
 !
 !  This routine receives the volume, the bulk modulus, the volume thermal
 !  expansion and the isobaric heat capacity at ntemp temperatures and 
@@ -89,7 +93,9 @@ END DO
 RETURN
 END SUBROUTINE isoentropic_bulk_modulus
 
+!----------------------------------------------------------------------
 SUBROUTINE average_gruneisen(volume,b0_t,beta_t,cv_t,temp,gamma_t,ntemp)
+!----------------------------------------------------------------------
 !
 !  This routine receives the volume, the bulk modulus, the volume thermal
 !  expansion and the isochoric heat capacity at ntemp temperatures and 
@@ -114,7 +120,9 @@ END DO
 RETURN
 END SUBROUTINE average_gruneisen
 
+!----------------------------------------------------------------------
 SUBROUTINE thermal_stress(el_con_t,alpha_t,bths,ntemp)
+!----------------------------------------------------------------------
 !
 !  This routine receives the isothermal elastic constants and
 !  the thermal expansion tensor and gives as output the thermal stress as a
@@ -156,7 +164,9 @@ END DO
 RETURN
 END SUBROUTINE thermal_stress
 
+!----------------------------------------------------------------------
 SUBROUTINE isostress_heat_capacity(volume,el_con_t,alpha_t,temp,cpmcv,ntemp)
+!----------------------------------------------------------------------
 !
 !  This routine receives the isothermal elastic constants and
 !  the thermal expansion tensor and gives as output the difference
@@ -196,7 +206,9 @@ END DO
 RETURN
 END SUBROUTINE isostress_heat_capacity
 
+!----------------------------------------------------------------------
 SUBROUTINE isoentropic_elastic_constants(volume,bths,cv_t,temp,csmct,ntemp)
+!----------------------------------------------------------------------
 !
 !  This routine receives the thermal stress, in kbar, the specific heat
 !  in Ry/cell and gives as output the correction to the elastic constants
@@ -235,7 +247,9 @@ END DO
 RETURN
 END SUBROUTINE isoentropic_elastic_constants
 
+!----------------------------------------------------------------------
 SUBROUTINE gen_average_gruneisen(volume,bths,ce_t,temp,ggamma_t,ntemp)
+!----------------------------------------------------------------------
 !
 !  This routine receives the thermal stress, the constant strain specific
 !  heat and gives the generalized average Gruneisen parameters.

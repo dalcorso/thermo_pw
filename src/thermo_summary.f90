@@ -504,7 +504,9 @@ WRITE(stdout,'(5x,70("-"))')
   RETURN
 END SUBROUTINE thermo_summary
 
+!-----------------------------------------------------------------------
 FUNCTION check_group_ibrav(code_group, ibrav)
+!-----------------------------------------------------------------------
 !
 !  This routine checks if the ibrav is compatible with the point group,
 !  and if it is not it writes a brief message saying which lattices are
@@ -569,7 +571,9 @@ IF (noncolin.AND.domag) check_group_ibrav=.FALSE.
 RETURN
 END FUNCTION check_group_ibrav
 
+!-----------------------------------------------------------------------
 SUBROUTINE find_fft_fact()
+!-----------------------------------------------------------------------
 !
 !  This routine finds the fft_fact that corresponds to the space group
 !  of the solid. It assumes that the tau and celldm are already known
@@ -622,7 +626,9 @@ ENDIF
 RETURN
 END SUBROUTINE find_fft_fact
 
+!-----------------------------------------------------------------------
 SUBROUTINE summarize_kpt(xqaux, wqaux, nqaux, letter_path )
+!-----------------------------------------------------------------------
 USE kinds, ONLY : DP
 USE io_global, ONLY : stdout
 IMPLICIT NONE
@@ -654,7 +660,9 @@ WRITE(stdout,*)
 RETURN
 END SUBROUTINE summarize_kpt
 
+!-----------------------------------------------------------------------
 SUBROUTINE add_origin_fact(s0,fft_fact)
+!-----------------------------------------------------------------------
 !
 !   This routine receives the origin shift in crystal coordinates
 !   and checks if the fft_factors contains the factors needed to represent

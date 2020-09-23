@@ -5,9 +5,11 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!---------------------------------------------------------------------------
 SUBROUTINE find_mode_sym_proj (u, w2, tau, nat, nsym, s, sr, ft, gk, invs, &
                     irt, xq, rtau, amass, ntyp, ityp, flag, lmolecule, &
                     lstop, num_rap_mode, ierr)
+!---------------------------------------------------------------------------
   !
   !   This subroutine finds the irreducible representations which give
   !   the transformation properties of eigenvectors of the dynamical
@@ -242,7 +244,9 @@ SUBROUTINE find_mode_sym_proj (u, w2, tau, nat, nsym, s, sr, ft, gk, invs, &
   RETURN
 END SUBROUTINE find_mode_sym_proj
 
+!---------------------------------------------------------------------------
 SUBROUTINE print_mode_sym_proj(w2, num_rap_mode, ptype)
+!---------------------------------------------------------------------------
 !
 !  This routine prints the vibrational frequencies and the 
 !  symmetry of the eigenvectors of the dynamical matrix. It is used 
@@ -301,7 +305,9 @@ ENDDO
 RETURN
 END SUBROUTINE print_mode_sym_proj
 
+!---------------------------------------------------------------------------
 SUBROUTINE prepare_sym_analysis_proj(nsymq,s,sr,ft,gii,t_rev,ptype,gcode_old)
+!---------------------------------------------------------------------------
 !
 !  set gcode_old to -1 to avoid any output writing from this routine
 !

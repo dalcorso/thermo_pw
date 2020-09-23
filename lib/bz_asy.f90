@@ -27,7 +27,10 @@ END TYPE
 
 CONTAINS
 
+!----------------------------------------------------------------------
 SUBROUTINE allocate_bz_asy( bz_struc, bz_asy_struc )
+!----------------------------------------------------------------------
+!
 IMPLICIT NONE
 TYPE(bz), INTENT(INOUT) :: bz_struc
 TYPE(bz_asy), INTENT(INOUT) :: bz_asy_struc
@@ -49,7 +52,10 @@ ALLOCATE(bz_asy_struc%letter_position(bz_2d_struc%nlett))
 RETURN
 END SUBROUTINE allocate_2d_bz_asy
 
+!----------------------------------------------------------------------
 SUBROUTINE init_bz_asy(bz_struc, bz_asy_struc)
+!----------------------------------------------------------------------
+!
 USE asy, ONLY : asy_proj
 USE bz_form, ONLY : adjust_orthorombic_vect
 IMPLICIT NONE
@@ -690,7 +696,10 @@ ENDIF
 RETURN
 END SUBROUTINE init_bz_asy
 
+!----------------------------------------------------------------------
 SUBROUTINE init_2d_bz_asy(bz_2d_struc, bz_asy_struc, ibrav_2d, celldm_2d)
+!----------------------------------------------------------------------
+!
 IMPLICIT NONE
 TYPE(bz_2d), INTENT(IN) :: bz_2d_struc
 TYPE(bz_asy), INTENT(INOUT) :: bz_asy_struc
@@ -760,7 +769,9 @@ ENDIF
 RETURN
 END SUBROUTINE init_2d_bz_asy
 
+!----------------------------------------------------------------------
 SUBROUTINE find_letter_position(bz_struc, bz_asy_struc, letter, let_pos)
+!----------------------------------------------------------------------
 !
 !  This routine checks if among the labels of special points defined
 !  for each BZ there is the label letter and in that case it 
@@ -789,7 +800,9 @@ CALL errore('find_letter_position','Letter not recognized '//TRIM(letter),1)
 RETURN
 END SUBROUTINE find_letter_position
 
+!----------------------------------------------------------------------
 SUBROUTINE find_2d_letter_position(bz_2d_struc, bz_asy_struc, letter, let_pos)
+!----------------------------------------------------------------------
 !
 !  This routine checks if among the labels of special points defined
 !  for each BZ there is the label letter and in that case it 
@@ -817,6 +830,5 @@ CALL errore('find_2d_letter_position','Letter not recognized '//TRIM(letter),1)
 
 RETURN
 END SUBROUTINE find_2d_letter_position
-
 
 END MODULE bz_asy_mod

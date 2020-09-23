@@ -42,8 +42,10 @@ SUBROUTINE allocate_thermodynamics()
   RETURN
   !
 END SUBROUTINE allocate_thermodynamics
-
+!
+!-------------------------------------------------------------------------
 SUBROUTINE allocate_anharmonic()
+!-------------------------------------------------------------------------
 
   USE thermo_mod,          ONLY : tot_ngeo
   USE temperature,         ONLY : ntemp
@@ -151,7 +153,9 @@ SUBROUTINE allocate_anharmonic()
   !
 END SUBROUTINE allocate_anharmonic
 
+!-------------------------------------------------------------------------
 SUBROUTINE allocate_debye()
+!-------------------------------------------------------------------------
 
 USE ions_base,     ONLY : nat
 USE temperature,   ONLY : ntemp

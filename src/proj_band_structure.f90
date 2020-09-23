@@ -542,7 +542,9 @@ DEALLOCATE(y)
 RETURN
 END SUBROUTINE proj_band_structure
 
+!---------------------------------------------------------------------
 SUBROUTINE adjust_beyond_limits(x,y,emax,emin,plot)
+!---------------------------------------------------------------------
 
 USE kinds, ONLY : DP
 IMPLICIT NONE

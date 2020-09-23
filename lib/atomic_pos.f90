@@ -20,7 +20,9 @@ SAVE
 PUBLIC find_ityp
 
 CONTAINS
+!------------------------------------------------------------------
    SUBROUTINE find_ityp(nat, label, ntyp, ityp, atm, ntypx)
+!------------------------------------------------------------------
 
    IMPLICIT NONE 
 

@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!-----------------------------------------------------------------------
 SUBROUTINE plot_anhar()
+!-----------------------------------------------------------------------
 !
 !  This is a driver to plot the quantities written inside flanhar,
 !  flanhar//'_ph', flanhar//'.bulk_mod', flanhar//'.bulk_mod_ph', 
@@ -252,7 +254,9 @@ END SUBROUTINE plot_anhar
 
 ! Copyright (C) 2018 Cristiano Malica
 
+!-----------------------------------------------------------------------
 SUBROUTINE plot_thermo_anhar()
+!-----------------------------------------------------------------------
 !
 !  This is a driver to plot the quantities written inside fltherm
 !  
@@ -344,7 +348,9 @@ IF (lgnuplot.AND.ionode) &
 RETURN
 END SUBROUTINE plot_thermo_anhar
 
+!-----------------------------------------------------------------------
 SUBROUTINE plot_dw_anhar()
+!-----------------------------------------------------------------------
 !
 !  This is a driver to plot the quantities written inside 
 !

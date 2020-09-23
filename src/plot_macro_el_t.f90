@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!-------------------------------------------------------------------------
 SUBROUTINE plot_macro_el_t
+!-------------------------------------------------------------------------
 !
 !  This is a driver to plot the macro-elasticity variables (MEVs) as a function of
 !  temperature. It plots both the MEVs computed from isothermal elastic constants (ECs)
@@ -52,7 +54,9 @@ CALL plot_sound()
 RETURN
 END SUBROUTINE plot_macro_el_t
 
+!-------------------------------------------------------------------------
 SUBROUTINE plot_one_macro_el(filelastic, gnu_filename, filenameps)
+!-------------------------------------------------------------------------
 
 USE kinds,            ONLY : DP
 USE temperature,      ONLY : tmin, tmax
@@ -139,7 +143,9 @@ RETURN
 
 END SUBROUTINE plot_one_macro_el
 
+!-------------------------------------------------------------------------
 SUBROUTINE plot_sound()
+!-------------------------------------------------------------------------
 
 USE kinds,               ONLY : DP
 USE temperature,         ONLY : tmin, tmax

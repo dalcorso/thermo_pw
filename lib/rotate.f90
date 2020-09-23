@@ -48,7 +48,9 @@ MODULE rotate
          euler_to_su2, find_rotation, is_rotation, rotate_rot, set_rot_xyz
 
 CONTAINS
+!--------------------------------------------------------------------
    SUBROUTINE rotate_vect(rot, n, a, ra, flag)
+!--------------------------------------------------------------------
 !
 !  if flag is 1 rotate the n vectors according to rot
 !  if flag is -1 rotate the n vectors according to rot^-1
@@ -83,7 +85,9 @@ CONTAINS
    END SUBROUTINE rotate_vect
 
 
+!--------------------------------------------------------------------
    SUBROUTINE rotate_tensors2(rot, n, a, ra, flag)
+!--------------------------------------------------------------------
 !
 !  this routine apply a rotation to n tensors of rank 2
 !  if flag is 1 rotate the n tensors according to rot
@@ -128,7 +132,9 @@ CONTAINS
    RETURN
    END SUBROUTINE rotate_tensors2
 
+!--------------------------------------------------------------------
    SUBROUTINE rotate_tensors3(rot, n, a, ra, flag)
+!--------------------------------------------------------------------
 !
 !  this routine applies a rotation to n tensors of rank 4
 !  if flag is 1 rotate the n tensors according to rot
@@ -186,7 +192,9 @@ CONTAINS
    RETURN
    END SUBROUTINE rotate_tensors3
 
+!--------------------------------------------------------------------
    SUBROUTINE rotate_tensors4(rot, n, a, ra, flag)
+!--------------------------------------------------------------------
 !
 !  this routine applies a rotation to n tensors of rank 4
 !  if flag is 1 rotate the n tensors according to rot
@@ -254,7 +262,9 @@ CONTAINS
    RETURN
    END SUBROUTINE rotate_tensors4
 
+!--------------------------------------------------------------------
    SUBROUTINE rotate_rot(rot, rot_in, rot_out)
+!--------------------------------------------------------------------
 
    USE kinds, ONLY : DP
    IMPLICIT NONE
@@ -266,7 +276,9 @@ CONTAINS
    END SUBROUTINE rotate_rot
 
 
+!--------------------------------------------------------------------
 SUBROUTINE euler_to_su2(psi,theta,phi,a,b)
+!--------------------------------------------------------------------
 
 USE kinds, ONLY : DP
 IMPLICIT NONE
@@ -284,7 +296,9 @@ b=SIN(theta/2.0_DP) * CMPLX( COS(arg), SIN(arg), KIND=DP ) * (0.0_DP, -1.0_DP)
 RETURN
 END SUBROUTINE euler_to_su2
 
+!--------------------------------------------------------------------
 SUBROUTINE find_rotation(at,at1,sr)
+!--------------------------------------------------------------------
 !
 !   This routine receives six vectors at and at1. The three vectors
 !   at are obtained by applying a matrix sr to the vectors at1. 
@@ -314,7 +328,9 @@ END DO
 RETURN
 END SUBROUTINE find_rotation
 
+!--------------------------------------------------------------------
 LOGICAL FUNCTION is_rotation(rmat)
+!--------------------------------------------------------------------
 !
 !  This function receives a 3x3 real matrix  becomes .TRUE. if
 !  it is a rotation.
@@ -342,7 +358,9 @@ END DO
 RETURN
 END FUNCTION is_rotation
 
+!--------------------------------------------------------------------
 SUBROUTINE set_rot_xyz(rot, axis, angle)
+!--------------------------------------------------------------------
 !
 !  Set a rotation matrix about the axis x, y, or z according to axis (1,2,3).
 !  Angle is the rotation angle and it is supposed to be in radiants

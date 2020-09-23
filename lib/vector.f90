@@ -21,7 +21,9 @@ MODULE vector_mod
 
 CONTAINS
 
+!-----------------------------------------------------------------------
 SUBROUTINE write_vector(nvar, x)
+!-----------------------------------------------------------------------
 !
 !   This routine writes on output a vector of dimension nvar
 !

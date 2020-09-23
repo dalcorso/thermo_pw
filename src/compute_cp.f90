@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!---------------------------------------------------------------------------
 SUBROUTINE compute_cp_bs_g(beta_t, vmin_t, b0_t, cv_t, cp_t, b0_s, gamma_t)
+!---------------------------------------------------------------------------
 !
 !  This subroutine receives the thermal expansion, the equilibrium volume,
 !  the bulk modulus and the constant volume heat capacity all as a function
@@ -43,7 +45,9 @@ CALL average_gruneisen(vmin_t,b0_t,beta_t,cv_t,temp,gamma_t,ntemp)
 RETURN
 END SUBROUTINE compute_cp_bs_g
 
+!---------------------------------------------------------------------------
 SUBROUTINE compute_cv_bs_g(beta_t, vmin_t, b0_t, cv_t, cp_t, b0_s, gamma_t)
+!---------------------------------------------------------------------------
 !
 !  This subroutine receives the thermal expansion, the equilibrium volume,
 !  the bulk modulus and the isobaric heat capacity all as a function

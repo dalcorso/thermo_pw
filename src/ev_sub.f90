@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!-----------------------------------------------------------------------
 SUBROUTINE ev_sub(vmin,b0,b01,emin_out,inputfile)
+!-----------------------------------------------------------------------
 !
 !      fit of E(v) or H(V) at finite pressure to an equation of state (EOS)
 !

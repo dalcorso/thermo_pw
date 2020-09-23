@@ -5,9 +5,11 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!------------------------------------------------------------------------
 SUBROUTINE plot_bz(ibrav, celldm, at, bg, point_type, &
                    xk, wk, npkt, letter, letter_path, npk_label, &
                    label_list, asy_filename)
+!------------------------------------------------------------------------
 !
 !  This subroutine plots the BZ of a given solid. It
 !  receives as input:
@@ -69,9 +71,11 @@ CALL generate_asy_figure(xk, wk, npkt, letter, letter_path, npk_label, &
 RETURN
 END SUBROUTINE plot_bz
 
-SUBROUTINE generate_asy_figure(xk, wk, npkt, letter, letter_path, &
+!--------------------------------------------------------------------------
+SUBROUTINE generate_asy_figure(xk, wk, npkt, letter, letter_path,    &
                       npk_label, label_list, bz_struc, bz_asy_struc, &
                       asy_filename)
+!--------------------------------------------------------------------------
 !
 !  This subroutine generates an input script for asymptote that
 !  plots the BZ

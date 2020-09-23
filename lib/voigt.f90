@@ -32,7 +32,9 @@ MODULE voigt
 
 CONTAINS
 
+!-----------------------------------------------------------------------
 SUBROUTINE voigt_index(m, n, mn)
+!-----------------------------------------------------------------------
 !
 !  This routine receives two indeces 1<= m, n <=3 and
 !  gives the voigt index 1<=mn<=6 corresponding to these two indices.
@@ -50,7 +52,9 @@ mn=voigt(m,n)
 RETURN
 END SUBROUTINE voigt_index
 
+!-----------------------------------------------------------------------
 SUBROUTINE voigt_extract_indices(m, n, mn)
+!-----------------------------------------------------------------------
 !
 !  This routine receives the voigt index 1<=mn<=6 and gives
 !  the two indices m, n, that correspond to it. It provide the couple
@@ -70,7 +74,9 @@ n=nind(mn)
 RETURN
 END SUBROUTINE voigt_extract_indices
 
+!-----------------------------------------------------------------------
 SUBROUTINE to_voigt2 (av, a, flag)
+!-----------------------------------------------------------------------
 !
 !  This routine transforms a rank 2 3x3 tensor in a 6 component Voigt array
 !  (flag=.true.) or viceversa (flag=.false.)
@@ -103,7 +109,9 @@ ENDIF
 RETURN
 END SUBROUTINE to_voigt2
 
+!-----------------------------------------------------------------------
 SUBROUTINE to_voigt3(av, a, flag)
+!-----------------------------------------------------------------------
 !
 !  This routine transforms a rank 3 3x3x3 tensor in a 3x6 component Voigt array
 !  (flag=.true.) or viceversa (flag=.false.)
@@ -136,7 +144,9 @@ ENDIF
 RETURN
 END SUBROUTINE to_voigt3
 
+!-----------------------------------------------------------------------
 SUBROUTINE to_voigt4(av, a, flag)
+!-----------------------------------------------------------------------
 !
 !  This routine transforms a rank 4 3x3x3x3 tensor in a 6x6 component Voigt 
 !  array (flag=.true.) or viceversa (flag=.false.)

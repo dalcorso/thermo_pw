@@ -51,7 +51,9 @@ MODULE cubic_surfaces
 
 CONTAINS
 
+!--------------------------------------------------------------
 SUBROUTINE fit_multi_cubic(ndata,nvar,lsolve,x,f,p3)
+!--------------------------------------------------------------
 !
 !  This routine receives as input a set of vectors x(nvar,ndata) and
 !  function values f(ndata) and gives as output the coefficients of
@@ -166,7 +168,9 @@ DEALLOCATE(coeff)
 RETURN
 END SUBROUTINE fit_multi_cubic
 
+!--------------------------------------------------------------
 SUBROUTINE evaluate_fit_cubic(nvar,x,f,p3)
+!--------------------------------------------------------------
 !
 !  This routine evaluates the cubic polynomial at the point x
 !
@@ -196,7 +200,9 @@ ENDDO
 RETURN
 END SUBROUTINE evaluate_fit_cubic
 
+!--------------------------------------------------------------
 SUBROUTINE evaluate_cubic_grad(nvar,x,f,p3)
+!--------------------------------------------------------------
 !
 !  computes the gradient of the cubic polynomial at the point x.
 !
@@ -228,7 +234,9 @@ ENDDO
 RETURN
 END SUBROUTINE evaluate_cubic_grad
 
+!--------------------------------------------------------------
 SUBROUTINE evaluate_cubic_hessian(nvar,x,f,p3)
+!--------------------------------------------------------------
 !
 !  computes the Hessian of the cubic polynomial at the point x. 
 !
@@ -263,7 +271,9 @@ ENDDO
 RETURN
 END SUBROUTINE evaluate_cubic_hessian
 
+!--------------------------------------------------------------
 SUBROUTINE find_cubic_extremum(nvar,x,f,p3)
+!--------------------------------------------------------------
 !
 !  This routine starts from the point x and finds the extremum closest
 !  to x. In output x are the coordinates of the extremum and f 
@@ -314,7 +324,9 @@ CALL evaluate_fit_cubic(nvar,x,f,p3)
 RETURN
 END SUBROUTINE find_cubic_extremum
 
+!--------------------------------------------------------------
 SUBROUTINE print_cubic_polynomial(nvar, p3)
+!--------------------------------------------------------------
 !
 !  This subroutine prints the coefficients of a cubic polynomial.
 !
@@ -359,7 +371,9 @@ ENDDO
 RETURN
 END SUBROUTINE print_cubic_polynomial
 
+!--------------------------------------------------------------
 SUBROUTINE introduce_cubic_fit(nvar, ncoeff, ndata)
+!--------------------------------------------------------------
 !
 !  This subroutine prints a few information on the cubic polynomial
 !
@@ -375,7 +389,9 @@ WRITE(stdout,'(5x,"Number of fitting data:",5x,i5,/)')  ndata
 RETURN
 END SUBROUTINE introduce_cubic_fit
 
+!--------------------------------------------------------------
 SUBROUTINE print_chisq_cubic(ndata, nvar, x, f, p3)
+!--------------------------------------------------------------
 !
 !   This routine receives as input the values of a function f for ndata
 !   values of the independent variables x, a set of coefficients

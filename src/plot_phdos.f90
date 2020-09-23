@@ -6,8 +6,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-
+!----------------------------------------------------------------
 SUBROUTINE plot_phdos()
+!----------------------------------------------------------------
 
 USE kinds,            ONLY : DP
 USE control_dosq,     ONLY : freqmin, freqmax
@@ -29,7 +30,9 @@ IF (with_eigen) CALL plot_gen_phdos()
 RETURN
 END SUBROUTINE plot_phdos
 !
+!----------------------------------------------------------------
 SUBROUTINE plot_gen_phdos()
+!----------------------------------------------------------------
 !
 !  This is a driver to plot the generalized phdos
 !

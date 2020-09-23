@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!------------------------------------------------------------------
 SUBROUTINE set_temperature()
+!------------------------------------------------------------------
 
 USE kinds,          ONLY : DP
 USE temperature,    ONLY : tmin, tmax, deltat, ntemp, temp
@@ -30,7 +32,9 @@ END DO
 RETURN
 END SUBROUTINE set_temperature
 
+!------------------------------------------------------------------
 SUBROUTINE set_pressure()
+!------------------------------------------------------------------
 !
 !  Set the pressure in Ry/(a.u.)^2 units. Input pressure is given in kbar.
 !  This routine allocates also celldm0 and initialize it to the input geometry
@@ -52,8 +56,10 @@ pressure=pressure_kb/ry_kbar
 RETURN
 END SUBROUTINE set_pressure
 
+!------------------------------------------------------------------
 SUBROUTINE add_pressure(filename)
-
+!------------------------------------------------------------------
+!
 USE kinds, ONLY : DP
 USE control_pressure, ONLY : pressure_kb
 

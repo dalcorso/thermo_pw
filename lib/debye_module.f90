@@ -37,7 +37,9 @@ PUBLIC  compute_debye_temperature, compute_average_sound, debye_vib_energy, &
 
 CONTAINS
 
+!--------------------------------------------------------------
 SUBROUTINE compute_average_sound(elconv, density, average_sound_speed)
+!--------------------------------------------------------------
 !
 !  This routine receives as input the elastic constants in Voigt notation 
 !  C_{ij} and the density of the solid. It gives as output the average 
@@ -102,7 +104,9 @@ RETURN
 END SUBROUTINE compute_average_sound
 
 
+!-------------------------------------------------------------------------
 SUBROUTINE compute_debye_temperature(el_con, density, nat, omega, debye_t)
+!-------------------------------------------------------------------------
 !
 !  This routine receives as input: the elastic constants in Voigt form
 !  and in kbar units, the density in kg/m^3, omega in (a.u.)^2, the
@@ -133,7 +137,9 @@ WRITE(stdout,'(/,5x,"Debye temperature = ", f12.3, " K")') debye_t
 RETURN
 END SUBROUTINE compute_debye_temperature
 
+!-------------------------------------------------------------------------
 SUBROUTINE debye_vib_energy(debye_t, temp, ntemp, nat, deb_energy)
+!-------------------------------------------------------------------------
 !
 ! This routine receives in input the Debye temperature and a set of
 ! temperatures and computes the Debye vibrational energy in this set
@@ -162,7 +168,9 @@ END DO
 RETURN
 END SUBROUTINE debye_vib_energy
 
+!-------------------------------------------------------------------------
 SUBROUTINE debye_free_energy(debye_t, temp, ntemp, nat, deb_free_energy)
+!-------------------------------------------------------------------------
 !
 ! This routine receives in input the Debye temperature and a set of
 ! temperatures and computes the Debye vibrational free energy in this set
@@ -200,8 +208,10 @@ END DO
 RETURN
 END SUBROUTINE debye_free_energy
 
+!-------------------------------------------------------------------------
 SUBROUTINE debye_entropy(debye_t, temp, ntemp, nat, deb_entropy)
-
+!-------------------------------------------------------------------------
+!
 IMPLICIT NONE
 INTEGER :: ntemp, nat
 REAL(DP), INTENT(IN) :: debye_t
@@ -242,7 +252,9 @@ END DO
 RETURN
 END SUBROUTINE debye_entropy
 
+!-------------------------------------------------------------------------
 SUBROUTINE debye_cv (debye_t, temp, ntemp, nat, deb_cv)
+!-------------------------------------------------------------------------
 !
 !  The Debye temperature is in K, the temperature is in K, deb_cv is
 !  the heat capacity in Ry / K / cell 
@@ -275,8 +287,10 @@ END DO
 RETURN
 END SUBROUTINE debye_cv
 
-
+!-------------------------------------------------------------------------
 SUBROUTINE debye_e0(debye_t, nat, deb_e0)
+!-------------------------------------------------------------------------
+!
 
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: debye_t
@@ -288,10 +302,10 @@ deb_e0 = 9.0_DP * nat * k_boltzmann_ry * debye_t / 8.0_DP
 RETURN
 END SUBROUTINE debye_e0
 
-
-
+!-------------------------------------------------------------------------
 FUNCTION deb_int_cv(y)
-
+!-------------------------------------------------------------------------
+!
 IMPLICIT NONE
 REAL(DP) :: y, deb_int_cv
 
@@ -311,8 +325,11 @@ deb_int_cv = integral * deltax / y**3
 RETURN 
 END FUNCTION deb_int_cv
 
-FUNCTION deb_int_ene(y)
 
+!-------------------------------------------------------------------------
+FUNCTION deb_int_ene(y)
+!-------------------------------------------------------------------------
+!
 IMPLICIT NONE
 REAL(DP) :: y, deb_int_ene
 
@@ -333,7 +350,9 @@ deb_int_ene = integral * deltax / y**3
 RETURN 
 END FUNCTION deb_int_ene
 
+!-------------------------------------------------------------------------
 FUNCTION deb_int_free_ene(y)
+!-------------------------------------------------------------------------
 IMPLICIT NONE
 REAL(DP) :: y, deb_int_free_ene
 
@@ -353,8 +372,10 @@ deb_int_free_ene = integral * deltax / y**3
 RETURN 
 END FUNCTION deb_int_free_ene
 
-SUBROUTINE compute_debye_temperature_poisson(in_poisson, bulk_modulus, density,&
-                                             nat, omega, debye_t)
+!-------------------------------------------------------------------------
+SUBROUTINE compute_debye_temperature_poisson(in_poisson, bulk_modulus, &
+                                          density, nat, omega, debye_t)
+!-------------------------------------------------------------------------
 !
 !  This routine receives as input the poisson ratio, the bulk modulus
 !  in kbar, the density in kg/m^3, the number of atoms per cell 
@@ -411,7 +432,9 @@ END SUBROUTINE compute_debye_temperature_poisson
 !
 ! Copyright (C) 2018 Cristiano Malica
 !
+!-------------------------------------------------------------------------
 SUBROUTINE debye_b_factor(debye_t, temp, ntemp, amass, deb_bfact)
+!-------------------------------------------------------------------------
 !
 !  The Debye temperature is in K, the temperature is in K, deb_bfact is
 !  the B-factor in Angstrom^2 
@@ -440,7 +463,9 @@ END DO
 RETURN
 END SUBROUTINE debye_b_factor
 
+!-------------------------------------------------------------------------
 FUNCTION deb_int_bfact(y)
+!-------------------------------------------------------------------------
 
 IMPLICIT NONE
 REAL(DP) :: y, deb_int_bfact

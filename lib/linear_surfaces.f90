@@ -46,7 +46,9 @@ MODULE linear_surfaces
 
 CONTAINS
 
+!--------------------------------------------------------------------
 SUBROUTINE fit_multi_linear(ndata,nvar,lsolve,x,f,p_in)
+!--------------------------------------------------------------------
 !
 !  This routine receives as input a set of vectors x(nvar,ndata) and
 !  function values f(ndata) and gives as output the coefficients of
@@ -109,7 +111,9 @@ DEALLOCATE(coeff)
 RETURN
 END SUBROUTINE fit_multi_linear
 !
+!--------------------------------------------------------------------
 SUBROUTINE evaluate_fit_linear(nvar,x,f,p_in)
+!--------------------------------------------------------------------
 !
 !  This routine evaluates the linear polynomial at the point x
 !
@@ -129,7 +133,9 @@ ENDDO
 RETURN
 END SUBROUTINE evaluate_fit_linear
 
+!--------------------------------------------------------------------
 SUBROUTINE set_linear_grad(nvar,f,p_in)
+!--------------------------------------------------------------------
 !
 !   This routine gives the gradient of the linear polynomial.
 !
@@ -143,7 +149,9 @@ f=p_in%phi1
 RETURN
 END SUBROUTINE set_linear_grad
 !
+!--------------------------------------------------------------------
 SUBROUTINE print_linear_polynomial(nvar, p_in)
+!--------------------------------------------------------------------
 !
 !  This routine writes on output the coefficients of the linear polynomial. 
 !
@@ -170,7 +178,9 @@ ENDDO
 RETURN
 END SUBROUTINE print_linear_polynomial
 
+!--------------------------------------------------------------------
 SUBROUTINE introduce_linear_fit(nvar, ndata)
+!--------------------------------------------------------------------
 !
 !   This routine writes a small message with the information on 
 !   the fit with a linear polynomial.
@@ -187,7 +197,9 @@ INTEGER, INTENT(IN) :: nvar, ndata
 RETURN
 END SUBROUTINE introduce_linear_fit
 
+!--------------------------------------------------------------------
 SUBROUTINE print_chisq_linear(ndata, nvar, x, f, p_in)
+!--------------------------------------------------------------------
 !
 !   This routine receives as input the values of a function f for ndata
 !   values of the independent variables x, a set of coefficients

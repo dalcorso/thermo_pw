@@ -52,7 +52,9 @@ SUBROUTINE bands_sub()
   RETURN
 END SUBROUTINE bands_sub
 
+!--------------------------------------------------------------------
 SUBROUTINE punch_band_2d_tpw(filband,spin_component)
+!--------------------------------------------------------------------
 !
 !  This routine opens a file for each band and writes on output 
 !  kx, ky, energy, 

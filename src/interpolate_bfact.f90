@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!---------------------------------------------------------------------
 SUBROUTINE interpolate_b_fact(vmin_t, ph_b_fact, bfact_t)
+!---------------------------------------------------------------------
 !
 !  This subroutine receives the 6 independent components of
 !  B factor (BF) matrix for each atom in the unit cell
@@ -134,7 +136,9 @@ DEALLOCATE(b)
 RETURN
 END SUBROUTINE interpolate_b_fact
 
+!---------------------------------------------------------------------
 SUBROUTINE interpolate_b_fact_anis(celldm_t, ph_b_fact, bfact_t)
+!---------------------------------------------------------------------
 !
 !  This subroutine receives the 6 independent components of
 !  B factor (BF) matrix for each atom in the unit cell

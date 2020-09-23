@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!-----------------------------------------------------------------------
 SUBROUTINE write_anhar_anis()
+!-----------------------------------------------------------------------
 !
 !   This routine computes the thermal expansion tensor for anisotropic
 !   solids.
@@ -236,7 +238,9 @@ END IF
 RETURN
 END SUBROUTINE write_anhar_anis
 !
+!-----------------------------------------------------------------------
 SUBROUTINE write_ph_freq_anhar_anis()
+!-----------------------------------------------------------------------
 !
 !   This routine computes the thermal expansion tensor for anisotropic
 !   solids using the free energy calculated from direct integration of
@@ -471,7 +475,9 @@ END IF
 RETURN
 END SUBROUTINE write_ph_freq_anhar_anis
 
+!-----------------------------------------------------------------------
 SUBROUTINE write_grun_anhar_anis()
+!-----------------------------------------------------------------------
 USE kinds,          ONLY : DP
 USE constants,      ONLY : ry_kbar
 USE ions_base,      ONLY : nat
@@ -724,7 +730,9 @@ DEALLOCATE(x)
 RETURN
 END SUBROUTINE write_grun_anhar_anis
 
+!-----------------------------------------------------------------------
 SUBROUTINE write_alpha_anis(ibrav, celldmf_t, alpha_t, temp, ntemp, filename)
+!-----------------------------------------------------------------------
 USE kinds, ONLY : DP
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ibrav, ntemp
@@ -810,7 +818,9 @@ CLOSE(iu_therm)
 RETURN
 END SUBROUTINE write_alpha_anis
 
+!-----------------------------------------------------------------------
 SUBROUTINE compute_alpha_anis(celldm_t, alpha_anis_t, temp, ntemp, ibrav)
+!-----------------------------------------------------------------------
 
 USE kinds, ONLY : DP
 
@@ -875,7 +885,9 @@ END SELECT
 RETURN
 END SUBROUTINE compute_alpha_anis
 
+!-----------------------------------------------------------------------
 SUBROUTINE convert_ac_alpha(alpha_aux, alpha, cm, ibrav)
+!-----------------------------------------------------------------------
 !
 !  this subroutine receives the thermal expansion calculated with the
 !  gruneisen parameters which are derivatives of the frequencies with 
@@ -927,7 +939,9 @@ END SELECT
 RETURN
 END SUBROUTINE convert_ac_alpha
 
+!-----------------------------------------------------------------------
 SUBROUTINE write_heat_anharm_anis(temp, cet, cvt, cpt, ntemp, filename)
+!-----------------------------------------------------------------------
 USE kinds,     ONLY : DP
 USE io_global, ONLY : meta_ionode
 IMPLICIT NONE
@@ -956,7 +970,9 @@ ENDIF
 RETURN
 END SUBROUTINE write_heat_anharm_anis
 
+!-----------------------------------------------------------------------
 SUBROUTINE write_heat_anharm_small(temp, cet, ntemp, filename)
+!-----------------------------------------------------------------------
 USE kinds,     ONLY : DP
 USE io_global, ONLY : meta_ionode
 IMPLICIT NONE
@@ -983,7 +999,9 @@ ENDIF
 RETURN
 END SUBROUTINE write_heat_anharm_small
 
+!-----------------------------------------------------------------------
 SUBROUTINE write_thermal_stress(temp, bths_t, ntemp, filename)
+!-----------------------------------------------------------------------
 USE kinds,     ONLY : DP
 USE io_global, ONLY : meta_ionode
 IMPLICIT NONE
@@ -1013,7 +1031,9 @@ ENDIF
 RETURN
 END SUBROUTINE write_thermal_stress
 
+!-----------------------------------------------------------------------
 SUBROUTINE write_generalized_gamma(temp, ggamma_t, ntemp, filename)
+!-----------------------------------------------------------------------
 USE kinds,     ONLY : DP
 USE io_global, ONLY : meta_ionode
 
@@ -1044,7 +1064,9 @@ ENDIF
 RETURN
 END SUBROUTINE write_generalized_gamma
 
+!-----------------------------------------------------------------------
 SUBROUTINE set_elastic_grun()
+!-----------------------------------------------------------------------
 
 USE anharmonic,         ONLY : lelastic
 USE ph_freq_anharmonic, ONLY : lelasticf

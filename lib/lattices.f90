@@ -107,7 +107,9 @@ MODULE lattices
 
 CONTAINS
 
+!----------------------------------------------------------------------
   SUBROUTINE compute_conventional(at, atp, ibrav)
+!----------------------------------------------------------------------
 !
 !   This routine write the conventional vectors of a given centered
 !   bravais lattice. It assumes that the primitive vectors are defined
@@ -168,7 +170,9 @@ CONTAINS
   RETURN
   END SUBROUTINE compute_conventional
 
+!----------------------------------------------------------------------
   SUBROUTINE conventional_ibrav(ibrav, cibrav)
+!----------------------------------------------------------------------
 !
 ! Given the ibrav of a given Bravais lattice gives the ibrav of the
 ! conventional lattice.
@@ -191,7 +195,9 @@ CONTAINS
   RETURN
   END SUBROUTINE conventional_ibrav
 
+!----------------------------------------------------------------------
   LOGICAL FUNCTION is_centered(ibrav)
+!----------------------------------------------------------------------
 !
 !  Gives true if the input bravais lattice is centered
 !
@@ -206,8 +212,10 @@ CONTAINS
   END FUNCTION is_centered
 
 
+!----------------------------------------------------------------------
   SUBROUTINE find_ibrav_code(a1, a2, a3, ibrav, celldm, code_group_ext, ur, &
                              global_s, verbosity)
+!----------------------------------------------------------------------
 !
 !   This routine is closely related to the routine latgen.f90 of the
 !   QE distribution. Given ibrav and celldm the routine latgen
@@ -719,7 +727,9 @@ CONTAINS
   RETURN
   END SUBROUTINE find_ibrav_code
 
+!----------------------------------------------------------------------
   SUBROUTINE toint(b)
+!----------------------------------------------------------------------
 !
 !  This routine receives a vector with three components. It divides
 !  all the components for the one with smallest nonzero modulus.
@@ -742,7 +752,9 @@ CONTAINS
   RETURN
   END SUBROUTINE toint
 
+!----------------------------------------------------------------------
 SUBROUTINE find_combination(at, at1, ur, is_combination)
+!----------------------------------------------------------------------
 !
 !   This routine receives six vectors at and at1. The three vectors
 !   at are obtained as a linear combination with integer coefficients
@@ -779,7 +791,9 @@ END DO
 RETURN
 END SUBROUTINE find_combination
 
+!----------------------------------------------------------------------
 LOGICAL FUNCTION is_bravais_lattice(at, erre, setn)
+!----------------------------------------------------------------------
 !
 !   This routine receives three primitive vectors at and a 
 !   vector erre. It becomes .TRUE. if erre is a Bravais lattice vector
@@ -810,7 +824,9 @@ END DO
 RETURN
 END FUNCTION is_bravais_lattice
 
+!----------------------------------------------------------------------
 LOGICAL FUNCTION same_lattice(at, at2, ur, at1, sr)
+!----------------------------------------------------------------------
 !
 !   This routine receives six vectors at and at2. Three vectors
 !   at1 are obtained as a linear combination with integer coefficients
@@ -954,7 +970,9 @@ ENDDO
 RETURN
 END FUNCTION same_lattice
 
+!----------------------------------------------------------------------
 SUBROUTINE lattice_point_group(at,gname,code_group,nsym,sr)
+!----------------------------------------------------------------------
 !
 !   This routine receives three primitive vectors, at, of a Bravais lattice
 !   and finds the number of symmetries, the rotation matrices, and the point 
@@ -1043,7 +1061,9 @@ CALL find_group(nsym, sr, gname, code_group)
 RETURN
 END SUBROUTINE lattice_point_group
 
+!----------------------------------------------------------------------
 LOGICAL FUNCTION bravais_dir(at, ax, enne, rvec_out, rvecmod_out )
+!----------------------------------------------------------------------
 !
 !   This routine receives three primitive lattices at and a direction ax
 !   and finds the shorter Bravais lattice vector in the direction of 
@@ -1109,7 +1129,9 @@ ENDDO
 RETURN
 END FUNCTION bravais_dir
 
+!----------------------------------------------------------------------
 SUBROUTINE compute_omega(at, omega)
+!----------------------------------------------------------------------
 !
 !  Compute the volume of the unit cell given by the at
 !
@@ -1127,7 +1149,9 @@ omega=ABS(omega)
 RETURN
 END SUBROUTINE compute_omega
 
+!----------------------------------------------------------------------
 SUBROUTINE lattice_name(ibrav, latt_name)
+!----------------------------------------------------------------------
 !
 !  this subroutine receives as input the Bravais lattice vector index
 !  and gives as output the lattice name
@@ -1180,7 +1204,9 @@ END SELECT
 RETURN
 END SUBROUTINE lattice_name
 
+!----------------------------------------------------------------------
 LOGICAL FUNCTION zone_border(vect,at,bg,iflag)
+!----------------------------------------------------------------------
 !
 !   This function receives a vector vect, the direct and reciprocal lattice
 !   vectors at and bg and a iflag=+-1.
@@ -1240,7 +1266,9 @@ zone_border = nc>1
 RETURN
 END FUNCTION zone_border
 
+!----------------------------------------------------------------------
 LOGICAL FUNCTION same_star(nsym, s, xk1, xk2, at)
+!----------------------------------------------------------------------
 !
 !  This routine receives a point group of order nsym and its rotations
 !  matrices s in the crystal basis. It uses these symmetries to see if
@@ -1282,7 +1310,9 @@ ENDDO
 RETURN
 END FUNCTION same_star
 
+!----------------------------------------------------------------------
 FUNCTION is_compatible_group_ibrav(code_group, ibrav, is_compatible, ncomp)
+!----------------------------------------------------------------------
 !
 !  This function returns .TRUE. is the Bravais lattice and the
 !  point group are compatible.
@@ -1512,8 +1542,10 @@ ENDDO
 RETURN
 END FUNCTION is_compatible_group_ibrav
 
+!----------------------------------------------------------------------
 SUBROUTINE print_bravais_description(ibrav,celldm)
-
+!----------------------------------------------------------------------
+!
 USE kinds, ONLY : DP
 USE constants, ONLY : pi
 USE io_global, ONLY : stdout
@@ -1578,7 +1610,9 @@ SELECT CASE (ibrav)
 RETURN
 END SUBROUTINE print_bravais_description
 
+!----------------------------------------------------------------------
 INTEGER FUNCTION crystal_parameters(ibrav)
+!----------------------------------------------------------------------
 !
 !   This function returs the number of independent crystal parameters
 !   for each Bravais lattice index
@@ -1606,7 +1640,9 @@ crystal_parameters=nvar
 RETURN
 END FUNCTION crystal_parameters
 
+!----------------------------------------------------------------------
 SUBROUTINE find_closest_at( gvec, at, enne, m, rmu )
+!----------------------------------------------------------------------
 !
 !  This subroutine finds the m vectors of the Bravais lattice defined
 !  by the primitive vectors at, closest to the origin and belonging to 
@@ -1699,7 +1735,9 @@ DEALLOCATE (ind)
 RETURN
 END SUBROUTINE find_closest_at
 
+!----------------------------------------------------------------------
 SUBROUTINE remove_common_factors(m,n,o,fact)
+!----------------------------------------------------------------------
 
 IMPLICIT NONE
 INTEGER, INTENT(INOUT) :: m, n, o
@@ -1720,8 +1758,10 @@ ENDDO
 RETURN
 END SUBROUTINE remove_common_factors
 
+!----------------------------------------------------------------------
 SUBROUTINE compress_celldm(cm,x,nvar,ibrav)
-
+!----------------------------------------------------------------------
+!
 USE kinds, ONLY : DP
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: nvar, ibrav
@@ -1766,7 +1806,9 @@ END SELECT
 RETURN
 END SUBROUTINE compress_celldm
 
+!----------------------------------------------------------------------
 SUBROUTINE compress_int_vect(inv,x,n,ibrav)
+!----------------------------------------------------------------------
 
 USE kinds, ONLY : DP
 IMPLICIT NONE
@@ -1793,7 +1835,9 @@ END SELECT
 RETURN
 END SUBROUTINE compress_int_vect
 
+!----------------------------------------------------------------------
 SUBROUTINE expand_celldm(cm, x, nvar, ibrav)
+!----------------------------------------------------------------------
 !
 !  This routine receives a set of compressed crystallographic parameters 
 !  in the array x(nvar) and transforms them in the celldm array

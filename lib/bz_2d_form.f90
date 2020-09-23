@@ -42,9 +42,11 @@ END TYPE
 
 CONTAINS
 
+!----------------------------------------------------------------------
 SUBROUTINE allocate_2d_bz(ibz, bz_struc, celldm, at, bg, celldm_2d)
+!----------------------------------------------------------------------
 !
-!  This routine identify the 2d Brillouin zone (ibz) starting from the at
+!  This routine identifies the 2d Brillouin zone (ibz) starting from the at
 !  and celldm and sets celldm_2d and the bz_struc data for the following
 !  routines
 !
@@ -108,7 +110,10 @@ ALLOCATE(bz_struc%letter_coord(3,bz_struc%nlett))
 RETURN
 END SUBROUTINE allocate_2d_bz
 
+!----------------------------------------------------------------------
 SUBROUTINE deallocate_2d_bz(bz_struc)
+!----------------------------------------------------------------------
+!
 IMPLICIT NONE
 TYPE(bz_2d), INTENT(INOUT) :: bz_struc
 
@@ -316,7 +321,9 @@ ENDIF
 RETURN
 END SUBROUTINE init_2d_bz
 
+!----------------------------------------------------------------------
 SUBROUTINE compute_vertices(bz_struc)
+!----------------------------------------------------------------------
 !
 !  This routine finds the coordinates of the vertex of the BZ, given
 !  the index of the three planes that define each vertex.
@@ -362,7 +369,9 @@ CALL errore('find_letter_coordinate','Letter not recognized '//TRIM(letter),1)
 RETURN
 END SUBROUTINE find_2d_letter_coordinate
 
+!----------------------------------------------------------------------
 SUBROUTINE find_2d_intersection( ivertex, normal, nfaces, outputk) 
+!----------------------------------------------------------------------
 !
 ! This routine receives as input the number of the two lines that define
 ! a vertex of the BZ, the reciprocal vectors perpendicular to all the 
@@ -402,7 +411,9 @@ END IF
 RETURN
 END SUBROUTINE find_2d_intersection
 
+!----------------------------------------------------------------------
 SUBROUTINE find_2d_bz_type(ibrav, ibz)
+!----------------------------------------------------------------------
 !
 !  This routine identifies the bz type that corresponds to the given
 !  bravais lattice and structural parameters. 
@@ -422,7 +433,9 @@ ENDIF
 RETURN
 END SUBROUTINE find_2d_bz_type
 
+!----------------------------------------------------------------------
 SUBROUTINE find_2d_vertices(bz_struc) 
+!----------------------------------------------------------------------
 !
 !  This routine uses the definition of the vertices of each edge to 
 !  identify, for each vertex, the two edges that define it.
@@ -451,7 +464,9 @@ ENDDO
 RETURN
 END SUBROUTINE find_2d_vertices
 
+!----------------------------------------------------------------------
 SUBROUTINE find_ibrav_2d(at, ibrav, celldm, celldm_2d)
+!----------------------------------------------------------------------
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: at(3,3), celldm(6)
 REAL(DP) :: eps=1.d-12, prod1, prod2, moda1, moda2
@@ -511,8 +526,10 @@ END IF
 RETURN
 END SUBROUTINE find_ibrav_2d
 
+!----------------------------------------------------------------------
 SUBROUTINE transform_2d_label_coord(ibrav, celldm, xk, letter, label_list, &
                                  npk_label, nks, k_points )
+!----------------------------------------------------------------------
 !
 !  This routine transforms the labels in the array letter into k points
 !  coordinates that are put in the array xk in the position indicated

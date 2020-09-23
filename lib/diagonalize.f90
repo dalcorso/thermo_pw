@@ -21,7 +21,9 @@ MODULE diagonalize
 
 CONTAINS
 
+!-------------------------------------------------------------------------
 SUBROUTINE diagonalize_r (npw,nbnd,h,e,v)
+!-------------------------------------------------------------------------
 !
 ! f90 interface to LAPACK routine ZHEEVX which calculates
 ! nbnd eigenvalues and eigenvectors of a complex hermitean matrix h. 

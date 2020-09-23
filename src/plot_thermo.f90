@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!-------------------------------------------------------------------
 SUBROUTINE plot_thermo()
+!-------------------------------------------------------------------
 !
 !  This is a driver to plot the quantities written inside fltherm
 !  
@@ -95,7 +97,9 @@ IF (with_eigen) CALL plot_dw()
 RETURN
 END SUBROUTINE plot_thermo
 
+!-------------------------------------------------------------------
 SUBROUTINE plot_thermo_debye(igeom)
+!-------------------------------------------------------------------
 !
 !  This is a driver to plot the quantities written inside fltherm_debye
 !
@@ -164,7 +168,9 @@ IF (nsp==1) CALL plot_debye_dw(igeom)
 RETURN
 END SUBROUTINE plot_thermo_debye
 
+!-------------------------------------------------------------------
 SUBROUTINE plot_el_thermo()
+!-------------------------------------------------------------------
 !
 !  This is a driver to plot the quantities written inside fltherm_el_thermo
 !
@@ -236,7 +242,9 @@ END SUBROUTINE plot_el_thermo
 !
 ! Copyright (C) 2018 Cristiano Malica
 !
+!-------------------------------------------------------------------
 SUBROUTINE plot_dw()
+!-------------------------------------------------------------------
 !
 !  This is a driver to plot the quantities written inside fltherm_el_thermo
 !
@@ -350,7 +358,9 @@ IF (lgnuplot.AND.ionode) &
 RETURN
 END SUBROUTINE plot_dw
 
+!-------------------------------------------------------------------
 SUBROUTINE plot_debye_dw(igeom)
+!-------------------------------------------------------------------
 
 USE kinds,            ONLY : DP
 USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext

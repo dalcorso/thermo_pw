@@ -21,8 +21,11 @@ PUBLIC asy_writepoint, asy_putlabel, asy_writesurface, asy_openplot, &
        asy_write_2d_point, asy_put2dlabel, asy_2d_join, asy_write_2d_surface
 
 CONTAINS
-
+!
+!------------------------------------------------------------------
 SUBROUTINE asy_writepoint(point,label)
+!------------------------------------------------------------------
+!
 IMPLICIT NONE
 
 CHARACTER(LEN=5) :: label
@@ -35,7 +38,10 @@ IF (ionode) &
 RETURN
 END SUBROUTINE asy_writepoint
 
+!------------------------------------------------------------------
 SUBROUTINE asy_write_2d_point(point,label)
+!------------------------------------------------------------------
+!
 IMPLICIT NONE
 
 CHARACTER(LEN=5) :: label
@@ -48,7 +54,10 @@ IF (ionode) &
 RETURN
 END SUBROUTINE asy_write_2d_point
 
+!------------------------------------------------------------------
 SUBROUTINE asy_putlabel(label, a, pos)
+!------------------------------------------------------------------
+!
 IMPLICIT NONE
 INTEGER, SAVE :: counter=0
 CHARACTER(LEN=3), INTENT(IN) :: label, pos
@@ -95,7 +104,10 @@ ENDIF
 RETURN
 END SUBROUTINE asy_putlabel
 
+!------------------------------------------------------------------
 SUBROUTINE asy_put2dlabel(label, a, pos)
+!------------------------------------------------------------------
+!
 IMPLICIT NONE
 INTEGER, SAVE :: counter=0
 CHARACTER(LEN=3), INTENT(IN) :: label, pos
@@ -127,7 +139,10 @@ ENDIF
 RETURN
 END SUBROUTINE asy_put2dlabel
 
+!------------------------------------------------------------------
 SUBROUTINE asy_writesurface(indeces)
+!------------------------------------------------------------------
+!
 IMPLICIT NONE
 INTEGER :: indeces(9)
 CHARACTER(LEN=100) :: linesur
@@ -152,7 +167,10 @@ ENDIF
 RETURN
 END SUBROUTINE asy_writesurface
 
+!------------------------------------------------------------------
 SUBROUTINE asy_write_2d_surface(nvertices)
+!------------------------------------------------------------------
+!
 IMPLICIT NONE
 INTEGER :: nvertices
 CHARACTER(LEN=100) :: linesur
@@ -175,7 +193,10 @@ ENDIF
 RETURN
 END SUBROUTINE asy_write_2d_surface
 
+!------------------------------------------------------------------
 SUBROUTINE asy_openplot(filename_asy)
+!------------------------------------------------------------------
+!
 USE mp, ONLY : mp_bcast
 IMPLICIT NONE
 CHARACTER(LEN=*) :: filename_asy
@@ -205,7 +226,10 @@ ENDIF
 RETURN
 END SUBROUTINE asy_openplot
 
+!------------------------------------------------------------------
 SUBROUTINE asy_open2dplot(filename_asy)
+!------------------------------------------------------------------
+!
 USE mp, ONLY : mp_bcast
 IMPLICIT NONE
 CHARACTER(LEN=*) :: filename_asy
@@ -231,7 +255,10 @@ ENDIF
 RETURN
 END SUBROUTINE asy_open2dplot
 
+!------------------------------------------------------------------
 SUBROUTINE asy_closeplot()
+!------------------------------------------------------------------
+!
 IMPLICIT NONE
 IF (ionode) &
    CLOSE(UNIT=asyu, STATUS='KEEP')
@@ -239,7 +266,10 @@ IF (ionode) &
 RETURN
 END SUBROUTINE asy_closeplot
 
+!------------------------------------------------------------------
 SUBROUTINE asy_plotaxis(xk)
+!------------------------------------------------------------------
+!
 IMPLICIT NONE
 INTEGER, PARAMETER :: DP=8
 REAL(DP), INTENT(IN) :: xk(3)
@@ -274,7 +304,10 @@ ENDIF
 RETURN
 END SUBROUTINE asy_plotaxis
 
+!------------------------------------------------------------------
 SUBROUTINE asy_join(a,b,pen)
+!------------------------------------------------------------------
+!
 IMPLICIT NONE
 INTEGER, SAVE :: counter=0
 CHARACTER(LEN=*) :: pen
@@ -300,7 +333,10 @@ WRITE(asyu,'(a)') TRIM(string)
 RETURN
 END SUBROUTINE asy_join
 
+!------------------------------------------------------------------
 SUBROUTINE asy_2d_join(a,b,pen)
+!------------------------------------------------------------------
+!
 IMPLICIT NONE
 INTEGER, SAVE :: counter=0
 CHARACTER(LEN=*) :: pen

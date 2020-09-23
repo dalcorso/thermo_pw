@@ -37,7 +37,9 @@ PUBLIC :: eldos_type, read_eldos_data, el_free_energy, el_energy, el_entropy, &
           
 CONTAINS
 
+!--------------------------------------------------------------------
 SUBROUTINE set_eldos(eldos,ndiv,lsda,deltae)
+!--------------------------------------------------------------------
 IMPLICIT NONE
 TYPE(eldos_type), INTENT(INOUT) :: eldos
 INTEGER, INTENT(IN) :: ndiv
@@ -55,7 +57,10 @@ ALLOCATE(eldos%intdos(ndiv))
 RETURN
 END SUBROUTINE set_eldos
 
+!--------------------------------------------------------------------
 SUBROUTINE destroy_eldos(eldos)
+!--------------------------------------------------------------------
+!
 IMPLICIT NONE
 TYPE(eldos_type), INTENT(INOUT) :: eldos
 
@@ -67,7 +72,9 @@ IF (ALLOCATED(eldos%intdos)) DEALLOCATE(eldos%intdos)
 RETURN
 END SUBROUTINE destroy_eldos
 
+!--------------------------------------------------------------------
 SUBROUTINE read_eldos_data(eldos, lsda, filename)
+!--------------------------------------------------------------------
 !
 !  This subroutine reads the eldos from a file. It allocates space,
 !  opens and closes the eldos file.
@@ -148,7 +155,9 @@ IF (ionode) CLOSE(iunit)
 RETURN
 END SUBROUTINE read_eldos_data
 
+!--------------------------------------------------------------------
 SUBROUTINE el_entropy(eldos, temp, mu, entropy)
+!--------------------------------------------------------------------
 !
 !  This routine receives as input an eldos, a temperature and a chemical
 !  potential and gives as output the electron entropy at that temperature. 
@@ -184,7 +193,9 @@ entropy = entropy * eldos%de * kb
 RETURN
 END SUBROUTINE el_entropy
 
+!--------------------------------------------------------------------
 SUBROUTINE el_energy(eldos, temp, mu, ener)
+!--------------------------------------------------------------------
 !
 !  This routine receives as input an eldos and a temperature and gives as 
 !  output the indipendent electron energy at that temperature. 
@@ -215,7 +226,9 @@ ener = ener * eldos%de
 RETURN
 END SUBROUTINE el_energy
 
+!--------------------------------------------------------------------
 SUBROUTINE el_free_energy(eldos, temp, mu, free_energy)
+!--------------------------------------------------------------------
 !
 !  This routine receives as input an eldos, a temperature and a
 !  chemical potential and gives as output the electron free_energy 
@@ -239,7 +252,9 @@ ENDIF
 RETURN
 END SUBROUTINE el_free_energy
 
+!--------------------------------------------------------------------
 SUBROUTINE el_specific_heat_cv(eldos, temp, mu, cv)
+!--------------------------------------------------------------------
 !
 !  This routine receives as input an electron dos, a temperature and
 !  a chemical potential and gives as output the constant volume specific 
@@ -271,7 +286,9 @@ cv = cv * eldos%de * temp1 ** 2 / kb
 RETURN
 END SUBROUTINE el_specific_heat_cv
 
+!--------------------------------------------------------------------
 SUBROUTINE el_chem_pot(eldos, temp, nelec, mu)
+!--------------------------------------------------------------------
 !
 !  This routine receives as input an electron dos, a temperature, and 
 !  the number of electrons and gives as output the chemical potential 
@@ -319,7 +336,9 @@ IF (iter==maxter) CALL errore('el_chem_pot','Difficulty with bisection',1)
 RETURN
 END SUBROUTINE el_chem_pot
 
+!--------------------------------------------------------------------
 FUNCTION integrated_dos (eldos, temp, mu)
+!--------------------------------------------------------------------
 !
 !  This routine receives as input an electron dos, a temperature and
 !  a chemical potential and gives as output the number of electrons 

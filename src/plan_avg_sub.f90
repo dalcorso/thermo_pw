@@ -139,7 +139,10 @@ SUBROUTINE plan_avg_sub(averag, vacuum, nat_, nbnd_, nks_, ninter, &
 
 CONTAINS
 !
-SUBROUTINE prepare_plan_avg (ninter, zdim, i1, vacuum1, vacuum2, surface1, surface2)
+!--------------------------------------------------------------------------
+SUBROUTINE prepare_plan_avg (ninter, zdim, i1, vacuum1, vacuum2, surface1, &
+                                                                 surface2)
+!--------------------------------------------------------------------------
   !
   !  This routine prepare the calculation of the planar average by computing
   !  1) ninter   the number of layers of the surface
@@ -298,8 +301,10 @@ SUBROUTINE prepare_plan_avg (ninter, zdim, i1, vacuum1, vacuum2, surface1, surfa
   RETURN
 END SUBROUTINE prepare_plan_avg
 
+!-------------------------------------------------------------------------
 SUBROUTINE do_plan_avg (ik, averag, vacuum, plan, zdim, ninter, i1, &
                                     vacuum1, vacuum2, surface1, surface2)
+!-------------------------------------------------------------------------
   !
   !    This routine computes the planar average on the xy plane
   !    for the charge density of all state of the system at ik.
@@ -423,7 +428,9 @@ SUBROUTINE do_plan_avg (ik, averag, vacuum, plan, zdim, ninter, i1, &
 END SUBROUTINE do_plan_avg
 
 
+!-------------------------------------------------------------------------
 INTEGER FUNCTION find_global_ik(ik)
+!-------------------------------------------------------------------------
   USE klist,  ONLY : nkstot
   USE mp_pools, ONLY : my_pool_id, npool, kunit
   IMPLICIT NONE

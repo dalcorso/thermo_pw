@@ -105,7 +105,9 @@ MODULE strain_mod
 CONTAINS
 !
 
+!-----------------------------------------------------------------------
 SUBROUTINE set_strain(strain_code, epsil, epsilon_voigt)
+!-----------------------------------------------------------------------
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: epsil
 REAL(DP), INTENT(OUT) :: epsilon_voigt(6)
@@ -206,8 +208,10 @@ ENDIF
 RETURN
 END SUBROUTINE set_strain
 
+!-----------------------------------------------------------------------
 SUBROUTINE set_strain_adv(strain_code, ibrav, celldm, epsil, epsilon_voigt, &
                      ibrav_strain, celldm_strain, rot, flag )
+!-----------------------------------------------------------------------
 !
 !  This routine sets for every Bravais lattice the strain and
 !  the new Bravais lattice and celldm of the strained system.
@@ -884,7 +888,9 @@ ENDIF
 RETURN
 END SUBROUTINE set_strain_adv
 !
+!-----------------------------------------------------------------------
 SUBROUTINE trans_epsilon(eps_voigt, eps_tensor, flag)
+!-----------------------------------------------------------------------
 !
 !  This routine transforms the strain tensor from a one dimensional
 !  vector with 6 components, to a 3 x 3 symmetric tensor and viceversa
@@ -925,7 +931,9 @@ ENDIF
 RETURN
 END SUBROUTINE trans_epsilon
 
+!-----------------------------------------------------------------------
 SUBROUTINE apply_strain(a, b, epsiln)
+!-----------------------------------------------------------------------
 !
 !  This routine receives as input a vector a and a strain tensor \epsil and
 !  gives as output a vector b = a + \epsil a 
@@ -943,7 +951,9 @@ ENDDO
 RETURN
 END SUBROUTINE apply_strain
 
+!-----------------------------------------------------------------------
 SUBROUTINE print_strain(strain)
+!-----------------------------------------------------------------------
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: strain(3,3)
 INTEGER :: i, j
@@ -956,7 +966,10 @@ WRITE(stdout,'(/)')
 
 RETURN
 END SUBROUTINE print_strain
+
+!-----------------------------------------------------------------------
 SUBROUTINE set_rot_f(rot, phi)
+!-----------------------------------------------------------------------
 
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: phi
@@ -972,7 +985,9 @@ rot(2,3)= COS(phi)
 RETURN
 END SUBROUTINE set_rot_f
 
+!-----------------------------------------------------------------------
 SUBROUTINE set_rot_h(rot, sint, cost)
+!-----------------------------------------------------------------------
 
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: sint, cost
@@ -992,7 +1007,9 @@ rot(3,3)= sint / den
 RETURN
 END SUBROUTINE set_rot_h
 
+!-----------------------------------------------------------------------
 SUBROUTINE set_rot_i(rot, epsil, sint, cost)
+!-----------------------------------------------------------------------
 
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: epsil, sint, cost

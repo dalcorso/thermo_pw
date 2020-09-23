@@ -60,7 +60,9 @@ MODULE elastic_constants
 
 CONTAINS
 
+!-------------------------------------------------------------------------
 SUBROUTINE print_elastic_constants(elc, frozen_ions)
+!-------------------------------------------------------------------------
 !
 !  This routine writes on output the elastic constants
 !
@@ -96,7 +98,9 @@ WRITE(stdout,'(5x,"1 torr = 1 mm Hg = 1/760 bar = 7.5006 x 10^-3 Pa",/)')
 RETURN
 END SUBROUTINE print_elastic_constants
 
+!-------------------------------------------------------------------------
 SUBROUTINE print_elastic_compliances(els, frozen_ions)
+!-------------------------------------------------------------------------
 !
 !  This routine writes on output the elastic compliances
 !
@@ -122,7 +126,9 @@ WRITE(stdout,'(/,5x,"1/Mbar = 1/10^{11} Pa; 1 Pa = 1 N/m^2")')
 RETURN
 END SUBROUTINE print_elastic_compliances 
 
+!-------------------------------------------------------------------------
 SUBROUTINE write_elastic(filename)
+!-------------------------------------------------------------------------
 !
 !  This routine writes the elastic constants and compliances on file.
 !  It must be called after computing the elastic constant
@@ -157,7 +163,9 @@ ENDIF
 RETURN
 END SUBROUTINE write_elastic
 
+!-------------------------------------------------------------------------
 SUBROUTINE read_elastic(filename, exists)
+!-------------------------------------------------------------------------
 !
 !  This routine reads the elastic constants and compliances from file.
 !
@@ -198,8 +206,10 @@ exists=.TRUE.
 RETURN
 END SUBROUTINE read_elastic
 
-SUBROUTINE compute_elastic_constants(sigma_geo, epsil_geo, nwork, ngeo_strain,&
-                                     ibrav, laue, m1)
+!-------------------------------------------------------------------------
+SUBROUTINE compute_elastic_constants(sigma_geo, epsil_geo, nwork, &
+                                     ngeo_strain, ibrav, laue, m1)
+!-------------------------------------------------------------------------
 !
 !  This routine computes the elastic constants by fitting the stress-strain
 !  relationship with a polynomial of degree m1-1. The nonvanishing
@@ -854,8 +864,10 @@ el_con = el_con * ry_kbar
 RETURN
 END SUBROUTINE compute_elastic_constants
 
+!-------------------------------------------------------------------------
 SUBROUTINE compute_elastic_constants_ene(energy_geo, epsil_geo, nwork, &
                                         ngeo_strain, ibrav, laue, omega, m1)
+!-------------------------------------------------------------------------
 !
 !  This routine computes the elastic constants by fitting the total
 !  energy-strain relation with a polynomial of order m1-1. 
@@ -1842,7 +1854,9 @@ el_con = el_con * ry_kbar
 RETURN
 END SUBROUTINE compute_elastic_constants_ene
 
+!-------------------------------------------------------------------------
 SUBROUTINE compute_elastic_compliances(cmn,smn)
+!-------------------------------------------------------------------------
 !
 ! This routine receives as input the elastic constants matrix and computes 
 ! its inverse, the elastic compliance matrix
@@ -1859,7 +1873,9 @@ CALL invmat(6, cmn, smn)
 RETURN
 END SUBROUTINE compute_elastic_compliances
 
+!-------------------------------------------------------------------------
 SUBROUTINE elastic_constants_from_compliances(cmn,smn)
+!-------------------------------------------------------------------------
 !
 ! This routine receives as input the elastic compliances matrix smn
 ! and computes its inverse, the elastic constants matrix
@@ -1917,7 +1933,10 @@ IF (m /= n) el_con(pq, mn) = el_con(pq, mn) * 0.5_DP
 RETURN
 END SUBROUTINE el_cons_ij
 
+!-------------------------------------------------------------------------
 SUBROUTINE el_cons_ij_ene(m, n, label, ngeo, epsil_geo, energy_geo, alpha, m1)
+!-------------------------------------------------------------------------
+!
 USE kinds, ONLY : DP
 USE polyfit_mod, ONLY : polyfit, write_poly
 
@@ -1942,8 +1961,10 @@ CALL write_poly(alpha,m1-1)
 RETURN
 END SUBROUTINE el_cons_ij_ene
 
-SUBROUTINE macro_elasticity( ibrav, cmn, smn, b0v,  &
-                             e0v, g0v, nuv, b0r, e0r, g0r, nur )
+!-------------------------------------------------------------------------
+SUBROUTINE macro_elasticity( ibrav, cmn, smn, b0v, e0v, g0v, nuv, b0r, &
+                                                       e0r, g0r, nur )
+!-------------------------------------------------------------------------
 !
 !  This routine collects some relationships that link the elastic constants 
 !  to the parameters of the macroscopic elasticity and to
@@ -1993,7 +2014,9 @@ nur = e0r/ (2.0_DP * g0r) - 1.0_DP
 RETURN
 END SUBROUTINE macro_elasticity
 
+!-------------------------------------------------------------------------
 SUBROUTINE print_macro_elasticity(ibrav, cmn, smn, macro_el, flag)
+!-------------------------------------------------------------------------
 !
 ! If flag is .true. print the macroscopic elastic properties. If it
 ! is false it only computes them
@@ -2046,7 +2069,9 @@ macro_el(8)=nur
 RETURN
 END SUBROUTINE print_macro_elasticity
 
+!-------------------------------------------------------------------------
 SUBROUTINE print_sound_velocities(ibrav, cmn, smn, density, vp, vb, vg)
+!-------------------------------------------------------------------------
 !
 !  In input the elastic constants are in kbar, the elastic compliances 
 !  in kbar^-1 and the density in Kg/m^3. The sound velocity is printed
@@ -2094,7 +2119,9 @@ ENDIF
 RETURN
 END SUBROUTINE print_sound_velocities
 
+!-------------------------------------------------------------------------
 SUBROUTINE set_sound_mat(elcon, qvec, soundmat)
+!-------------------------------------------------------------------------
 !
 !  This routine receives the elastic constants in the format C_{ijkl}
 !  a direction for the propagation of the sound waves and gives as
@@ -2124,7 +2151,9 @@ END DO
 RETURN
 END SUBROUTINE set_sound_mat
 
+!-------------------------------------------------------------------------
 SUBROUTINE compute_sound(elcon, qvec, density, sound_speed, sound_disp)
+!-------------------------------------------------------------------------
 !
 !  This routine receives as input the elastic constants in Voigt notation 
 !  C_{ij}, the direction of propagation of the sound, and the
@@ -2172,7 +2201,9 @@ ENDDO
 RETURN
 END SUBROUTINE compute_sound
 
+!-------------------------------------------------------------------------
 SUBROUTINE correct_for_stress(bmat, el_cons_, stres)
+!-------------------------------------------------------------------------
 !
 !  This routine receives as input the second derivatives of the 
 !  energy with respect to strain in el_cons(6,6) and gives as output
@@ -2206,7 +2237,9 @@ ENDDO
 RETURN
 END SUBROUTINE correct_for_stress
 
+!-------------------------------------------------------------------------
 SUBROUTINE correct_for_pressure(bmat, el_cons_, pressure)
+!-------------------------------------------------------------------------
 !
 !  This routine receives as input the second derivatives of the 
 !  energy with respect to strain in el_cons(6,6) and gives as output
@@ -2233,7 +2266,9 @@ CALL correct_for_stress(bmat, el_cons_, stres)
 RETURN
 END SUBROUTINE correct_for_pressure
 
+!-------------------------------------------------------------------------
 INTEGER FUNCTION delta(i,j)
+!-------------------------------------------------------------------------
 !
 !   delta function between two integers
 !
@@ -2245,8 +2280,10 @@ IF (i==j) delta=1
 RETURN
 END FUNCTION delta
 
+!-------------------------------------------------------------------------
 SUBROUTINE print_el_cons_info(elastic_algorithm, laue, ibrav, ngeo_strain)
-
+!-------------------------------------------------------------------------
+!
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: laue, ibrav, ngeo_strain
 CHARACTER(LEN=*), INTENT(IN) :: elastic_algorithm
@@ -2356,8 +2393,10 @@ WRITE(stdout,'(5x,"for a total of",i3," scf calculations")') &
 RETURN
 END SUBROUTINE print_el_cons_info
 
+!-------------------------------------------------------------------------
 SUBROUTINE write_el_cons_on_file(temp, ntemp, ibrav, laue, el_cons_t, b0, &
-                                                             filename, iflag)
+                                                         filename, iflag)
+!-------------------------------------------------------------------------
 !
 !  iflag=0 writes the elastic constants
 !  iflag=1 writes the elastic compliances
@@ -2604,8 +2643,10 @@ END SUBROUTINE write_el_cons_on_file
 !
 ! Copyright (C) 2019 Cristiano Malica
 !
+!-------------------------------------------------------------------------
 SUBROUTINE read_el_cons_from_file(temp, ntemp, ibrav, laue, el_cons_t, b0_t, &
                                                              filename)
+!-------------------------------------------------------------------------
 !
 USE kinds,      ONLY : DP
 USE io_global,  ONLY : meta_ionode, meta_ionode_id, stdout
@@ -2779,7 +2820,9 @@ CALL mp_bcast(el_cons_t, meta_ionode_id, world_comm)
 RETURN
 END SUBROUTINE read_el_cons_from_file
 
+!-------------------------------------------------------------------------
 SUBROUTINE expand_el_cons(el_cons_t, laue, ibrav, ntemp, temp)
+!-------------------------------------------------------------------------
 
 USE kinds,      ONLY : DP
 
@@ -2899,7 +2942,9 @@ END DO
 RETURN
 END SUBROUTINE expand_el_cons
 
+!-------------------------------------------------------------------------
 SUBROUTINE write_macro_el_on_file(temp, ntemp, macro_el_t, filename)
+!-------------------------------------------------------------------------
 !
 ! This routine creates a file with macro-elasticity variables as a function 
 ! of temperature.
@@ -2979,7 +3024,9 @@ ENDIF
 RETURN
 END SUBROUTINE write_macro_el_on_file
 
+!-------------------------------------------------------------------------
 SUBROUTINE write_sound_on_file(temp, ntemp, v_t, filename)
+!-------------------------------------------------------------------------
 !
 ! This routine creates a file with sound velocities as a function 
 ! of temperature.

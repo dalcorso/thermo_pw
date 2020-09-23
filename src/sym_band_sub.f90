@@ -585,7 +585,9 @@ SUBROUTINE sym_band_sub(filband, spin_component)
   RETURN
 END SUBROUTINE sym_band_sub
 !
+!-----------------------------------------------------------------------
 SUBROUTINE find_aux_ind_xk(xk1, xk2, aux_ind)
+!-----------------------------------------------------------------------
 USE kinds, ONLY : DP
 USE cell_base, ONLY : at, bg
 USE symm_base, ONLY : s, t_rev, ft, sname, nsym
@@ -647,8 +649,10 @@ ENDIF
 RETURN
 END SUBROUTINE find_aux_ind_xk
 
+!-----------------------------------------------------------------------
 SUBROUTINE set_factor_system(argument, s, ft_in, gk, nsym, which_elem, &
                              verbose, lso, cge)
+!-----------------------------------------------------------------------
 !
 !  This routine sets the factor system of a given projective representation
 !  of the small point group of a k vector that depends on the fractional

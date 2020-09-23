@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!---------------------------------------------------------------------
 SUBROUTINE plot_elastic_t(iflag, with_s)
+!---------------------------------------------------------------------
 !
 !  This is a driver to plot the elastic constants as a function of
 !  temperature
@@ -420,8 +422,10 @@ IF (lgnuplot.AND.ionode) &
 RETURN
 END SUBROUTINE plot_elastic_t
 
+!---------------------------------------------------------------------
 SUBROUTINE plot_one_elastic_constant(i, j, label, lelastic, lelasticf, &
                                            filelastic, filelastic_s, with_s)
+!---------------------------------------------------------------------
 USE gnuplot, ONLY : gnuplot_ylabel, &
                     gnuplot_write_file_mul_data
 

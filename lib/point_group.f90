@@ -175,8 +175,10 @@ MODULE point_group
 
 CONTAINS
 
+!--------------------------------------------------------------------
   SUBROUTINE convert_rap(n, list_in, list_out, group_in, group_out, aux_ind, &
                          lspinorb)
+!--------------------------------------------------------------------
 
   IMPLICIT NONE
   INTEGER, INTENT(IN) :: group_in, group_out, n, aux_ind
@@ -213,9 +215,11 @@ CONTAINS
   RETURN
   END SUBROUTINE convert_rap
  
+!--------------------------------------------------------------------
   SUBROUTINE convert_rap_new(n, list_in, list_out, group_ext_in,  &
                     group_ext_out, aux_ind, ptype_in, ptype_out,  &
                     gauge_in, gauge_out)
+!--------------------------------------------------------------------
 
   USE kinds, ONLY : DP
   IMPLICIT NONE
@@ -269,9 +273,11 @@ CONTAINS
   RETURN
   END SUBROUTINE convert_rap_new
 
+!--------------------------------------------------------------------
   SUBROUTINE convert_rap_proj(n, list_in, list_out, group_ext_in,    &
                                  group_ext_out, ptype_in, ptype_out, &
                                  gauge_in, gauge_out)
+!--------------------------------------------------------------------
 !
 !   This routine converts a list of irreducible representations of 
 !   group_ext_in into a list of irreducible representations of group_ext_out.
@@ -480,7 +486,9 @@ CONTAINS
   END SUBROUTINE convert_rap_proj
  
 
+!--------------------------------------------------------------------
   SUBROUTINE convert_one_rap(rap, ndeg, rap_list, group_in, group_out, aux_ind)
+!--------------------------------------------------------------------
 !
 !  This routine sets the subduction table for the group subgroup relationship.
 !  This subduction table is organized like this. It is set for each group_in,
@@ -5583,7 +5591,9 @@ CONTAINS
 
   END SUBROUTINE convert_one_rap
 !  
+!--------------------------------------------------------------------
   SUBROUTINE convert_one_rap_so(rap, ndeg, rap_list, group_in, group_out)
+!--------------------------------------------------------------------
 !
 !  This routine sets the subduction table for the group subgroup relationship.
 !  This subduction table is organized like this. It is set for each group_in,
@@ -8451,8 +8461,10 @@ CONTAINS
   END SUBROUTINE convert_one_rap_so
 
 
+!--------------------------------------------------------------------
   SUBROUTINE find_aux_ind_two_groups(nsym_a, nsym_b, sk_a, sk_b, at, bg, &
                                      group_a, group_b, aux_ind)
+!--------------------------------------------------------------------
 !
 !  This routine assumes that the point group_b is a subgroup of point
 !  group_a and finds the auxiliary index that tells which type of 
@@ -9999,8 +10011,10 @@ CONTAINS
   END SUBROUTINE find_aux_ind_two_groups
 
 
+!--------------------------------------------------------------------
   SUBROUTINE find_group_info_ext(nsym, smat, code_group, code_group_ext, &
                                                   which_elem, group_desc)
+!--------------------------------------------------------------------
 !
 !  This subroutine extends the find_group_info routine of QE.
 !  In addition to the code of the group 1-32, it provides an extended code
@@ -10238,7 +10252,9 @@ CONTAINS
   RETURN
   END SUBROUTINE find_group_info_ext
 
+!--------------------------------------------------------------------
   SUBROUTINE find_group_ext(group_tags, nsym, code_group_ext)
+!--------------------------------------------------------------------
 
   IMPLICIT NONE
 
@@ -10286,7 +10302,9 @@ CONTAINS
   RETURN
   END SUBROUTINE find_group_ext
 
+!--------------------------------------------------------------------
   FUNCTION group_index_from_ext(code_group_ext)
+!--------------------------------------------------------------------
 !
 !   This function converts the extended group code (1-136) into the standard
 !   group code (1-32)
@@ -10316,7 +10334,9 @@ CONTAINS
   END FUNCTION group_index_from_ext
 
 
+!--------------------------------------------------------------------
   SUBROUTINE set_group_desc(group_desc, nsym, code_group_ext)
+!--------------------------------------------------------------------
 !
 !   This routine contains the list of symmetry operations for each
 !   extended group code (1-136) and sets them into group_desc
@@ -11249,7 +11269,9 @@ CONTAINS
   RETURN
   END SUBROUTINE set_group_desc
 
+!--------------------------------------------------------------------
 SUBROUTINE find_group_tags(nsym, smat, group_tags)
+!--------------------------------------------------------------------
 !
 !  This routine finds for all the symmetries of a point group the
 !  number of the symmetry operation in the list of symmetries
@@ -11395,7 +11417,9 @@ SUBROUTINE find_group_tags(nsym, smat, group_tags)
 RETURN
 END SUBROUTINE find_group_tags
 
+!--------------------------------------------------------------------
 SUBROUTINE group_generators(code_group, row, column, n, linv, columni)
+!--------------------------------------------------------------------
 !
 !  Since each point group has two generators A and B and is defined by
 !  A^n1=E' and B^n2=E' and (AB)^2=E',
@@ -11858,8 +11882,10 @@ END SELECT
 RETURN
 END SUBROUTINE group_generators
 
+!--------------------------------------------------------------------
 SUBROUTINE set_stand_irr_proj(cge, ptype, char_mat_proj, name_rap, nrap_proj, &
                                                                    nsym_proj)
+!--------------------------------------------------------------------
 !
 !  This subroutine receives in input the extended group code and
 !  sets the standard projective irreducible representations for that group.
@@ -14637,6 +14663,7 @@ END SELECT
 RETURN
 END SUBROUTINE set_stand_irr_proj
 
+!--------------------------------------------------------------------
 SUBROUTINE  transform_s_to_cart( sk, sr, nsym, at, bg )
   !----------------------------------------------------------------------
   !
@@ -14664,7 +14691,9 @@ SUBROUTINE  transform_s_to_cart( sk, sr, nsym, at, bg )
 
   END SUBROUTINE transform_s_to_cart
 
+!--------------------------------------------------------------------
   LOGICAL FUNCTION has_sigma_h(code_group)
+!--------------------------------------------------------------------
 
   INTEGER, INTENT(IN) :: code_group
 
@@ -14677,7 +14706,9 @@ SUBROUTINE  transform_s_to_cart( sk, sr, nsym, at, bg )
   RETURN
   END FUNCTION has_sigma_h
 
+!--------------------------------------------------------------------
   FUNCTION is_right_oriented (a,b,c)
+!--------------------------------------------------------------------
   !
   !  This functions receives 3 vectors a,b,c and gives as output true
   !  if they are oriented as x,y,z, .false. if they have the opposite
@@ -14704,8 +14735,10 @@ SUBROUTINE  transform_s_to_cart( sk, sr, nsym, at, bg )
   RETURN
   END FUNCTION is_right_oriented
 
+!--------------------------------------------------------------------
 SUBROUTINE find_projection_type(code_group, code_group_ext, argument,  &
                                      ptype, gauge, verbose)
+!--------------------------------------------------------------------
 !
 !  The inputs of the routine are the codes of the point group, standard and
 !  extended, and a set of arguments for the phases of the factor system.
@@ -15303,8 +15336,10 @@ END IF
 RETURN
 END SUBROUTINE find_projection_type
 
+!--------------------------------------------------------------------
 SUBROUTINE find_irr_proj(code_group_ext,char_mat_proj,name_rap,nrap_proj,&
                                               nsym,ptype,gauge,verbosity)
+!--------------------------------------------------------------------
 !
 !  This routine receives the arguments of the phases (gauge) of a given 
 !  gauge. It sets the character tables that correspond to the standard factor
@@ -15369,7 +15404,9 @@ ENDIF
 RETURN
 END SUBROUTINE find_irr_proj
 
+!--------------------------------------------------------------------
 SUBROUTINE print_element_list(code_group_ext)
+!--------------------------------------------------------------------
 !
 !  This routine print the list of elements of a point group, given its
 !  extended code
@@ -15387,8 +15424,9 @@ WRITE(stdout,'((5x,4(i2," - ",i2,1x,a8)))') (i, group_desc(i), &
 RETURN
 END SUBROUTINE print_element_list
 
-
+!--------------------------------------------------------------------
 SUBROUTINE compute_classes(cge, nclasses, nelem, elem)
+!--------------------------------------------------------------------
 !
 !  This subroutine finds the classes of a point group
 !
@@ -15432,7 +15470,9 @@ ENDDO
 RETURN
 END SUBROUTINE compute_classes
 
+!--------------------------------------------------------------------
 SUBROUTINE compute_classes_double(cge, nclasses, nelem, elem, has_e)
+!--------------------------------------------------------------------
 !
 !  This subroutine finds the classes of a double point group
 !
@@ -15590,7 +15630,9 @@ ENDDO
 RETURN
 END SUBROUTINE compute_classes_double
 
+!--------------------------------------------------------------------
 FUNCTION is_subgroup(group_in_ext, group_out_ext)
+!--------------------------------------------------------------------
 !
 !  The function returns .TRUE. if group_out is a subgroup of group_in
 !  The two extended codes of the groups are given in input
@@ -15626,7 +15668,9 @@ ENDDO
 RETURN
 END FUNCTION is_subgroup
 
+!--------------------------------------------------------------------
 SUBROUTINE set_sym_su2(sym_num, smat, sinv)
+!--------------------------------------------------------------------
 !
 !  This routine uses the Cayley-Klein parameters to set the su2 rotation
 !  matrices for the 32 proper rotations defined in the module. 
@@ -15718,7 +15762,9 @@ SUBROUTINE set_sym_su2(sym_num, smat, sinv)
   RETURN
   END SUBROUTINE set_sym_su2
 
+!--------------------------------------------------------------------
   SUBROUTINE find_product_table(prd, code_group_ext)
+!--------------------------------------------------------------------
 
   USE kinds, ONLY : DP
   IMPLICIT NONE
@@ -15758,7 +15804,9 @@ SUBROUTINE set_sym_su2(sym_num, smat, sinv)
   RETURN
   END SUBROUTINE find_product_table
 
+!--------------------------------------------------------------------
   SUBROUTINE set_sym_o3(mat,isym)
+!--------------------------------------------------------------------
 !
 !  Set the symmetry matrix isym as a 3x3 orthogonal matrix in cartesian i
 !  coordinates
@@ -15813,7 +15861,9 @@ SUBROUTINE set_sym_su2(sym_num, smat, sinv)
  
   END SUBROUTINE set_sym_o3
 
+!--------------------------------------------------------------------
  SUBROUTINE find_double_product_table(prd, epos, code_group_ext)
+!--------------------------------------------------------------------
 
  IMPLICIT NONE
  INTEGER, INTENT(IN)  :: code_group_ext
@@ -15828,7 +15878,9 @@ SUBROUTINE set_sym_su2(sym_num, smat, sinv)
  RETURN
  END SUBROUTINE find_double_product_table
 
+!--------------------------------------------------------------------
  SUBROUTINE find_double_product_table_from_sym(prd, epos, group_desc, nsym)
+!--------------------------------------------------------------------
 !
 !  This routine provides the product table prd of a given double group.
 !  Each entry prd(i,j) is the index of the operation that results from
@@ -15862,7 +15914,9 @@ SUBROUTINE set_sym_su2(sym_num, smat, sinv)
  RETURN
  END SUBROUTINE find_double_product_table_from_sym
 
+!--------------------------------------------------------------------
  SUBROUTINE product_sym_su2(isym, jsym, prd, epos)
+!--------------------------------------------------------------------
  !
  !  This routine recives the indeces of two symmetry operations, the
  !  list of symmetry operations in su2 form and gives the index of the
@@ -15920,7 +15974,9 @@ SUBROUTINE set_sym_su2(sym_num, smat, sinv)
  RETURN
  END SUBROUTINE product_sym_su2
 !
+!--------------------------------------------------------------------
  SUBROUTINE  set_factors(group_code, ptype, argument)
+!--------------------------------------------------------------------
 !
 !  This routine set the standard factor system of a point group that
 !  correspond to a given projection type. Note that only the factors
@@ -15997,7 +16053,9 @@ SUBROUTINE set_sym_su2(sym_num, smat, sinv)
  RETURN
  END SUBROUTINE set_factors
 
+!--------------------------------------------------------------------
  FUNCTION nsym_group(code_group)
+!--------------------------------------------------------------------
 !
 !  this function receives the code of the group and gives as output
 !  the number of symmetry operations of the group
@@ -16026,7 +16084,9 @@ nsym_group= nelem(code_group)
 RETURN
 END FUNCTION nsym_group
 
+!--------------------------------------------------------------------
 SUBROUTINE zero_tpi(arg)
+!--------------------------------------------------------------------
 !
 !  This subroutine receives the argument of a phase and brings it in the
 !  [0,tpi] range.
@@ -16043,7 +16103,9 @@ IF (arg < 0.0_DP) arg=arg+tpi
 RETURN
 END SUBROUTINE zero_tpi
 
+!--------------------------------------------------------------------
 SUBROUTINE write_group_table(group_desc, nsym, factor)
+!--------------------------------------------------------------------
 
 USE kinds, ONLY : DP
 USE io_global, ONLY : stdout
@@ -16081,7 +16143,9 @@ END DO
 RETURN
 END SUBROUTINE write_group_table
 
+!--------------------------------------------------------------------
 SUBROUTINE write_group_table_integer(group_desc, nsym, factor)
+!--------------------------------------------------------------------
 
 USE kinds, ONLY : DP
 USE io_global, ONLY : stdout
@@ -16107,7 +16171,9 @@ ENDDO
 RETURN
 END SUBROUTINE write_group_table_integer
 
+!--------------------------------------------------------------------
 SUBROUTINE write_group_char_mat(group_desc, nsym, char_mat, name_rap, nrap)
+!--------------------------------------------------------------------
 USE kinds, ONLY : DP
 USE io_global, ONLY : stdout
 IMPLICIT NONE
@@ -16146,7 +16212,9 @@ WRITE(stdout,*)
 RETURN
 END SUBROUTINE write_group_char_mat
 
+!--------------------------------------------------------------------
 SUBROUTINE print_character_table(cge,ptype)
+!--------------------------------------------------------------------
   
 USE kinds, ONLY : DP
 USE io_global, ONLY : stdout
@@ -16193,7 +16261,9 @@ ENDDO
 RETURN
 END SUBROUTINE print_character_table
 
+!--------------------------------------------------------------------
 SUBROUTINE print_compatibility_table(cge_in,ptype_in,cge_out)
+!--------------------------------------------------------------------
 !
 !  This routine writes the compatibility table between the irreducible 
 !  representations of the group cge_in with the projection type ptype_in, 
@@ -16312,7 +16382,9 @@ ENDDO
 RETURN
 END SUBROUTINE print_compatibility_table
 
+!--------------------------------------------------------------------
 SUBROUTINE print_kronecker_table(cge_in,ptype1_in,ptype2_in,cge_out,lcomp)
+!--------------------------------------------------------------------
 !
 !  This routine writes the compatibility table between the product of
 !  two irreducible representations of the group cge_in with the projection 
@@ -16487,7 +16559,9 @@ ENDDO
 RETURN
 END SUBROUTINE print_kronecker_table
 
+!--------------------------------------------------------------------
 SUBROUTINE add_rap_name(rap_name, ndeg, add_name)
+!--------------------------------------------------------------------
 !
 ! This routines adds the string add_name to rap_name. When rap_name
 ! is not empty its adds a + sign. Moreover if nged > 1 it puts it 
@@ -16515,7 +16589,9 @@ ENDIF
 RETURN
 END SUBROUTINE add_rap_name
 
+!--------------------------------------------------------------------
 SUBROUTINE write_gauge(gauge, group_desc, nsym)
+!--------------------------------------------------------------------
 !
 !  This routine prints the gauge factors. In input gauge are the
 !  arguments of the phases.
@@ -16544,7 +16620,9 @@ WRITE(stdout,*)
 RETURN
 END SUBROUTINE write_gauge
 
+!--------------------------------------------------------------------
 SUBROUTINE print_ptype_info(ptype, cge)
+!--------------------------------------------------------------------
 !
 !  This routine can be used to print information on ptype on output.
 !
@@ -16595,7 +16673,9 @@ ENDIF
 RETURN
 END SUBROUTINE print_ptype_info
 
+!--------------------------------------------------------------------
 SUBROUTINE find_factor_system(sym_mat, dim_rap, nsym, cge, phase, verbosity)
+!--------------------------------------------------------------------
 !
 !  This routine receives a set of nsym matrices of dimensions dim_rap that
 !  are supposed to be a representation (possibly projective) of the point 
@@ -16666,7 +16746,9 @@ IF (verbosity) CALL write_group_table(group_desc, nsym, phase)
 RETURN
 END SUBROUTINE find_factor_system
 
+!--------------------------------------------------------------------
 SUBROUTINE point_group_bravais(code_group, bl_code_group)
+!--------------------------------------------------------------------
 !
 !   This routine receives the code of a point group and gives the
 !   code_group of the Bravais lattice compatible with the input point group
@@ -16701,7 +16783,9 @@ bl_code_group = bl_cg(code_group)
 RETURN
 END SUBROUTINE point_group_bravais
 
+!--------------------------------------------------------------------
 SUBROUTINE transform_group(code_group_ext_in, op_code, code_group_ext_out)
+!--------------------------------------------------------------------
 !
 !  This routine finds the group conjugate of the input group according to
 !  the operation op_code
@@ -16730,7 +16814,9 @@ CALL find_group_info_ext(nsym_in, sr_out, code_group, code_group_ext_out, &
 RETURN
 END SUBROUTINE transform_group
 
+!--------------------------------------------------------------------
 SUBROUTINE group_name_schoenflies(code, group_name)
+!--------------------------------------------------------------------
 !
 !   This routine receives the code of a point group and writes its
 !   Schoenflies name in a form that can be used to write a gnuplot
@@ -16757,7 +16843,9 @@ group_name=gname(code)
 RETURN
 END SUBROUTINE group_name_schoenflies
 
+!--------------------------------------------------------------------
 SUBROUTINE group_name_international(code, group_name)
+!--------------------------------------------------------------------
 !
 !   This routine receives the code of a point group and writes its
 !   international name in a form that can be used to write a gnuplot
@@ -16784,7 +16872,9 @@ group_name=gname(code)
 RETURN
 END SUBROUTINE group_name_international
 
+!--------------------------------------------------------------------
 FUNCTION angle_rot_tpw(smat)
+!--------------------------------------------------------------------
 !
 !   This routine receives a rotation matrix and computes the rotation
 !   angle. It is slightly different from the one contained in QE.
@@ -16867,8 +16957,10 @@ RETURN
 END FUNCTION angle_rot_s_tpw
 
 
+!--------------------------------------------------------------------
 SUBROUTINE group_intersection(code_group_ext_a, code_group_ext_b,   &
                              code_group_ext_c )
+!--------------------------------------------------------------------
 !
 !   This routine receives the extended codes of two point group and
 !   gives as output the extended code of the intersection of the two
@@ -16899,7 +16991,9 @@ CALL find_group_ext(group_tags_c, nsym_c, code_group_ext_c)
 RETURN
 END SUBROUTINE group_intersection
 
+!--------------------------------------------------------------------
 SUBROUTINE set_rotations_character(code_group_ext, character_rot, j, do_parity)
+!--------------------------------------------------------------------
 !
 !  This routine sets the characters of the rotations in the representation of
 !  angular momentum j and with parity - (if do_parity is .true.) or 
@@ -16938,7 +17032,9 @@ RETURN
 END SUBROUTINE set_rotations_character
 
 
+!--------------------------------------------------------------------
 REAL(DP) FUNCTION angle_op(sym_code, flag)
+!--------------------------------------------------------------------
 !
 !   This routine gives as output the rotation angle of each of the 64 symmetry
 !   operations defined in QE. When flag=1 the rotation angle is in radiants,
@@ -16959,8 +17055,10 @@ IF (flag==1) angle_op=angle_op * pi / 180.0_DP
 RETURN 
 END FUNCTION angle_op
 
+!--------------------------------------------------------------------
 SUBROUTINE set_irr_times_d(code_group_ext, ptype, char_mat_proj, name_rap, &
-                                                    nrap, nsym, jang, do_parity)
+                                               nrap, nsym, jang, do_parity)
+!--------------------------------------------------------------------
 !
 !  This routine sets a character table for a given point group multiplying
 !  the characters in each representation for the characters of the
@@ -16993,8 +17091,10 @@ ENDDO
 RETURN
 END SUBROUTINE set_irr_times_d
 
+!--------------------------------------------------------------------
 SUBROUTINE find_irreducible(code_group_ext, ptype, characters, rap_list, &
                                             name_rap_list, nrap, nrapx)
+!--------------------------------------------------------------------
 !
 !  This routine receives the extended code of a point group and an
 !  array of characters and decomposes the representation that corresponds

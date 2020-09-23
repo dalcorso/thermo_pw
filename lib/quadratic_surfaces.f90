@@ -69,7 +69,9 @@ MODULE quadratic_surfaces
 
 CONTAINS
 
+!--------------------------------------------------------------------
 SUBROUTINE fit_multi_quadratic(ndata,nvar,lsolve,x,f,p2)
+!--------------------------------------------------------------------
 !
 !  This routine receives as input a set of vectors x(nvar,ndata) and
 !  function values f(ndata) and gives as output the coefficients of
@@ -164,7 +166,9 @@ DEALLOCATE(coeff)
 RETURN
 END SUBROUTINE fit_multi_quadratic
 !
+!--------------------------------------------------------------------
 SUBROUTINE evaluate_fit_quadratic(nvar,x,f,p2)
+!--------------------------------------------------------------------
 !
 !  This routine evaluates the quadratic polynomial at the point x
 !
@@ -189,7 +193,9 @@ ENDDO
 RETURN
 END SUBROUTINE evaluate_fit_quadratic
 
+!--------------------------------------------------------------------
 SUBROUTINE evaluate_quadratic_grad(nvar,x,f,p2)
+!--------------------------------------------------------------------
 !
 !   This routine evaluates the gradient of the quadratic polynomial
 !   at the point x.
@@ -215,7 +221,9 @@ ENDDO
 RETURN
 END SUBROUTINE evaluate_quadratic_grad
 
+!--------------------------------------------------------------------
 SUBROUTINE write_quadratic_hessian(nvar, p2, v, e)
+!--------------------------------------------------------------------
 !
 !  This routine writes the Hessian of the quadratic polynomial and
 !  its eigenvalues and eigenvectors.
@@ -258,7 +266,9 @@ WRITE(stdout,*)
 RETURN
 END SUBROUTINE write_quadratic_hessian
 !
+!--------------------------------------------------------------------
 SUBROUTINE find_quadratic_extremum(nvar,x,f,p2)
+!--------------------------------------------------------------------
 !
 !   This routine finds the extremum x of a quadratic polynomial. 
 !   On output f contains the value of the polynomial at the extremum. 
@@ -293,7 +303,9 @@ CALL evaluate_fit_quadratic(nvar,x,f,p2)
 RETURN
 END SUBROUTINE find_quadratic_extremum
 
+!--------------------------------------------------------------------
 SUBROUTINE find_quadratic_linear_extremum(nvar,x,f,p2,p1)
+!--------------------------------------------------------------------
 !
 ! This routine finds the extremum of the sum of a quadratic and a linear 
 ! polynomials.
@@ -320,7 +332,9 @@ CALL clean_poly(ps)
 RETURN
 END SUBROUTINE find_quadratic_linear_extremum
 !
+!--------------------------------------------------------------------
 SUBROUTINE find_two_quadratic_extremum(nvar,x,f,p2,p21)
+!--------------------------------------------------------------------
 !
 ! This routine finds the extremum of the sum of two quadratic polynomials
 ! p2 and p21. 
@@ -346,7 +360,9 @@ CALL clean_poly(ps)
 RETURN
 END SUBROUTINE find_two_quadratic_extremum
 !
+!--------------------------------------------------------------------
 SUBROUTINE print_quadratic_polynomial(nvar, p2)
+!--------------------------------------------------------------------
 !
 !  This routine writes on output the coefficients of the quadratic polynomial. 
 !
@@ -384,7 +400,9 @@ ENDDO
 RETURN
 END SUBROUTINE print_quadratic_polynomial
 
+!--------------------------------------------------------------------
 SUBROUTINE introduce_quadratic_fit(nvar, ncoeff, ndata)
+!--------------------------------------------------------------------
 !
 !   This routine writes a small message with the information on 
 !   the quadratic polynomial
@@ -401,7 +419,9 @@ INTEGER, INTENT(IN) :: nvar, ncoeff, ndata
 RETURN
 END SUBROUTINE introduce_quadratic_fit
 
+!--------------------------------------------------------------------
 SUBROUTINE print_chisq_quadratic(ndata, nvar, x, f, p2)
+!--------------------------------------------------------------------
 !
 !   This routine receives as input the values of a function f for ndata
 !   values of the independent variables x, a set of ncoeff coefficients
@@ -431,7 +451,9 @@ WRITE(stdout,'(5x,"chi square quadratic=",e18.5," relative error",e18.5,&
 RETURN
 END SUBROUTINE print_chisq_quadratic
 
+!--------------------------------------------------------------------
 SUBROUTINE compare_quadratic_fit(ndata, nvar, x, f, p2)
+!--------------------------------------------------------------------
 !
 !   This routine receives as input the values of a function f for ndata
 !   values of the independent variables x, a set of ncoeff coefficients
@@ -455,7 +477,9 @@ ENDDO
 RETURN
 END SUBROUTINE compare_quadratic_fit
 
+!--------------------------------------------------------------------
 SUBROUTINE summarize_fitting_data(nvar, ndata, x, f)
+!--------------------------------------------------------------------
 !
 !   This routine writes in output the values of the function f in
 !   the set of points x. nvar is the number of variables of the vector x.

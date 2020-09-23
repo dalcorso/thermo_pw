@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!----------------------------------------------------------------------
 SUBROUTINE prepare_do_phonon(igeom)
+!----------------------------------------------------------------------
 !
 !   This routine initializes the phonon calculation by calling 
 !   fast_phq_readin that reads the xml file produced by pw.x and 
@@ -39,7 +41,9 @@ CALL check_initial_status_tpw(auxdyn, 1)
 RETURN
 END SUBROUTINE prepare_do_phonon
 
+!----------------------------------------------------------------------
 SUBROUTINE close_ph_geometry(close_ph)
+!----------------------------------------------------------------------
 !
 !  This routine frees the variables allocated by phq_readin, closes
 !  all the files, and reset the control variables of the phonon to their

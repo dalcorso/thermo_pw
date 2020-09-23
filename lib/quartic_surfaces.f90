@@ -97,7 +97,9 @@ MODULE quartic_surfaces
 
 CONTAINS
 
+!--------------------------------------------------------------------
 SUBROUTINE fit_multi_quartic(ndata,nvar,lsolve,x,f,p4)
+!--------------------------------------------------------------------
 !
 !  This routine receives as input a set of vectors x(nvar,ndata) and
 !  function values f(ndata) and gives as output the coefficients of
@@ -224,7 +226,9 @@ DEALLOCATE(coeff)
 RETURN
 END SUBROUTINE fit_multi_quartic
 
+!--------------------------------------------------------------------
 SUBROUTINE evaluate_fit_quartic(nvar,x,f,p4)
+!--------------------------------------------------------------------
 !
 !  This routine evaluates the quartic polynomial at the point x.
 !
@@ -259,7 +263,9 @@ ENDDO
 RETURN
 END SUBROUTINE evaluate_fit_quartic
 
+!--------------------------------------------------------------------
 SUBROUTINE evaluate_quartic_grad(nvar,x,f,p4)
+!--------------------------------------------------------------------
 !
 !   This routine evaluates the gradient of the quartic polynomial at the 
 !   point x.
@@ -300,7 +306,9 @@ ENDDO
 RETURN
 END SUBROUTINE evaluate_quartic_grad
 
+!--------------------------------------------------------------------
 SUBROUTINE evaluate_quartic_hessian(nvar,x,f,p4)
+!--------------------------------------------------------------------
 !
 !   This routine evaluates the hessian of the quartic polynomial at the 
 !   point x.
@@ -352,7 +360,9 @@ ENDDO
 RETURN
 END SUBROUTINE evaluate_quartic_hessian
 
+!--------------------------------------------------------------------
 SUBROUTINE find_quartic_extremum(nvar,x,f,p4)
+!--------------------------------------------------------------------
 !
 !  This routine finds the extremum of the quartic polynomial p4 closest
 !  to the input point x. The mimumum is written in x and the value of the
@@ -404,7 +414,9 @@ CALL evaluate_fit_quartic(nvar,x,f,p4)
 RETURN
 END SUBROUTINE find_quartic_extremum
 !
+!--------------------------------------------------------------------
 SUBROUTINE print_quartic_polynomial(nvar, p4)
+!--------------------------------------------------------------------
 !
 !  This subroutine writes on output the coefficients of a quartic
 !  polynomial p4. 
@@ -473,7 +485,9 @@ ENDDO
 RETURN
 END SUBROUTINE print_quartic_polynomial
 
+!--------------------------------------------------------------------
 SUBROUTINE introduce_quartic_fit(nvar, ncoeff, ndata)
+!--------------------------------------------------------------------
 !
 !   This routine writes a small message with the information on the 
 !   quartic polynomial fit.
@@ -490,7 +504,9 @@ WRITE(stdout,'(5x,"Number of fitting data:",7x,i5,/)') ndata
 RETURN
 END SUBROUTINE introduce_quartic_fit
 !
+!--------------------------------------------------------------------
 SUBROUTINE print_chisq_quartic(ndata, nvar, x, f, p4)
+!--------------------------------------------------------------------
 !
 !   This routine receives as input the values of a function f for ndata
 !   values of the independent variables x, a set of ncoeff coefficients
@@ -522,7 +538,9 @@ WRITE(stdout,'(5x,"chi square quartic=",e18.5," relative error",e18.5,&
 RETURN
 END SUBROUTINE print_chisq_quartic
 !
+!--------------------------------------------------------------------
 SUBROUTINE evaluate_two_quartic(nvar,x,f,p4,p41)
+!--------------------------------------------------------------------
 !
 !  This routine evaluates the sum of two quartic polynomials at the point x
 !
@@ -549,7 +567,9 @@ CALL clean_poly(p4s)
 RETURN
 END SUBROUTINE evaluate_two_quartic
 !
+!--------------------------------------------------------------------
 SUBROUTINE find_two_quartic_extremum(nvar,x,f,p4,p41)
+!--------------------------------------------------------------------
 !
 !  This routine finds the extremum of the sum of two quartic polynomials 
 !  p4 and p41 closest to the input point x. The extremum is written in x 
@@ -578,7 +598,9 @@ CALL clean_poly(p4s)
 RETURN
 END SUBROUTINE find_two_quartic_extremum
 !
+!--------------------------------------------------------------------
 SUBROUTINE print_chisq_two_quartic(ndata,nvar,x,f,p4,p41)
+!--------------------------------------------------------------------
 !
 !  This routine writes on output the chi squared of the sum of two 
 !  quartic polynomials that interpolate the function f in the ndata
@@ -605,7 +627,9 @@ WRITE(stdout,'(5x,"chi square quartic=",e18.5," relative error",e18.5,&
 RETURN
 END SUBROUTINE print_chisq_two_quartic
 !
+!--------------------------------------------------------------------
 SUBROUTINE evaluate_quartic_linear(nvar,x,f,p4,p1) 
+!--------------------------------------------------------------------
 !
 !  This routine evaluates the sum of a quartic and a linear polynomials 
 !  at the point x.
@@ -634,7 +658,9 @@ CALL clean_poly(p4s)
 RETURN
 END SUBROUTINE evaluate_quartic_linear
 
+!--------------------------------------------------------------------
 SUBROUTINE find_quartic_linear_extremum(nvar,x,f,p4,p1) 
+!--------------------------------------------------------------------
 !
 !  This routine finds the extremum of the sum of a quartic and a linear
 !  polynomials p4 and p1 closest to the input point x. The extremum is 
@@ -665,7 +691,9 @@ CALL clean_poly(p4s)
 RETURN
 END SUBROUTINE find_quartic_linear_extremum
 !
+!--------------------------------------------------------------------
 SUBROUTINE evaluate_quartic_quadratic(nvar,x,f,p4,p2)
+!--------------------------------------------------------------------
 !
 !  This routine evaluates the sum of a quartic and a quadratic polynomials 
 !  at the point x.
@@ -695,7 +723,9 @@ CALL clean_poly(p4s)
 RETURN
 END SUBROUTINE evaluate_quartic_quadratic
 !
+!--------------------------------------------------------------------
 SUBROUTINE find_quartic_quadratic_extremum(nvar,x,f,p4,p2)
+!--------------------------------------------------------------------
 !
 !  This routine finds the extremum of the sum of a quartic and a quadratic
 !  polynomials p4 and p2 closest to the input point x. The extremum is 
@@ -726,7 +756,9 @@ CALL clean_poly(p4s)
 RETURN
 END SUBROUTINE find_quartic_quadratic_extremum
 !
+!--------------------------------------------------------------------
 SUBROUTINE print_chisq_quartic_quadratic(ndata, nvar,x,f,p4,p2)
+!--------------------------------------------------------------------
 !
 !  This routine writes on output the chi square of the sum of a
 !  quadratic and a quartic polynomials that interpolate the function f in 
@@ -755,7 +787,9 @@ WRITE(stdout,'(5x,"chi square quartic=",e18.5," relative error",e18.5,&
 RETURN
 END SUBROUTINE print_chisq_quartic_quadratic
 !
+!--------------------------------------------------------------------
 SUBROUTINE evaluate_quartic_cubic(nvar,x,f,p4,p3) 
+!--------------------------------------------------------------------
 !
 !  This routine evaluates the sum of a quartic and a cubic polynomials 
 !  at the point x.
@@ -785,7 +819,9 @@ CALL clean_poly(p4s)
 RETURN
 END SUBROUTINE evaluate_quartic_cubic
 !
+!--------------------------------------------------------------------
 SUBROUTINE find_quartic_cubic_extremum(nvar,x,f,p4,p3)
+!--------------------------------------------------------------------
 !
 !  This routine finds the extremum of the sum of a quartic and a cubic
 !  polynomials p4 and p3 closest to the input point x. The extremum is 
@@ -816,7 +852,9 @@ CALL clean_poly(p4s)
 RETURN
 END SUBROUTINE find_quartic_cubic_extremum
 !
+!--------------------------------------------------------------------
 SUBROUTINE print_chisq_quartic_cubic(ndata,nvar,x,f,p4,p3)
+!--------------------------------------------------------------------
 !
 !  This routine writes on output the chi square of the sum of a
 !  cubic and a quartic polynomials that interpolate the function f in 

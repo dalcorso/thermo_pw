@@ -71,7 +71,10 @@ PUBLIC asyn_master_init, asyn_worker_init, asyn_close, asyn_master, &
 
 CONTAINS
 
+!--------------------------------------------------------------------
 SUBROUTINE initialize_master(nproc_, nwork_, proc_num_, comm)
+!--------------------------------------------------------------------
+!
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: nproc_, nwork_, comm
 INTEGER, INTENT(IN) :: proc_num_(0:nproc_-1)
@@ -103,7 +106,10 @@ proc_num=proc_num_(1:nworkers)
 RETURN
 END SUBROUTINE initialize_master
 
+!--------------------------------------------------------------------
 SUBROUTINE asyn_master_init(nproc_, nwork_, proc_num_, comm)
+!--------------------------------------------------------------------
+!
 !
 !  This routine initializes the asynchronous work. It is called by the master
 !  when it knows:
@@ -137,7 +143,9 @@ ENDDO
 RETURN
 END SUBROUTINE asyn_master_init
 
+!--------------------------------------------------------------------
 SUBROUTINE asyn_worker_init(master_, comm)
+!--------------------------------------------------------------------
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: master_ ! the master node
 INTEGER, INTENT(IN) :: comm ! the comunicator
@@ -149,7 +157,9 @@ tag=1
 RETURN
 END SUBROUTINE asyn_worker_init
 
+!--------------------------------------------------------------------
 SUBROUTINE asyn_master(all_done) 
+!--------------------------------------------------------------------
 !
 !  This routine is called by the master. It checks if some worker is
 !  available to do work and possibly send the work to do to the worker
@@ -230,7 +240,9 @@ ENDDO
 RETURN
 END SUBROUTINE asyn_master
 
+!--------------------------------------------------------------------
 SUBROUTINE asyn_master_work(master_work) 
+!--------------------------------------------------------------------
 !
 !  This subroutine is called by the master if it is ready to do some
 !  work. In this case the routine gives it some job or -1 if there
@@ -271,7 +283,9 @@ ENDIF
 RETURN
 END SUBROUTINE asyn_master_work
 
+!--------------------------------------------------------------------
 SUBROUTINE asyn_worker(worker_work) 
+!--------------------------------------------------------------------
 !
 !  This subroutine is called by the worker if it is ready to do some
 !  work. In this case the routine gives it some work or -1 if there
@@ -298,7 +312,9 @@ worker_work=iwork
 RETURN
 END SUBROUTINE asyn_worker
 
+!--------------------------------------------------------------------
 LOGICAL FUNCTION choose_next(iwork, work_finished)
+!--------------------------------------------------------------------
 !
 !  This function chooses the next work to do.
 !  There are two possible outputs:
@@ -332,7 +348,9 @@ choose_next = (iwork>0)
 RETURN
 END FUNCTION choose_next
 
+!--------------------------------------------------------------------
 SUBROUTINE asyn_close()
+!--------------------------------------------------------------------
 !
 ! deallocate everything and close
 !
@@ -351,7 +369,9 @@ DEALLOCATE(doing)
 RETURN
 END SUBROUTINE asyn_close
 
+!--------------------------------------------------------------------
 SUBROUTINE asyn_stop()
+!--------------------------------------------------------------------
 !
 ! This routines activates the stop signal. When this signal is activated the
 ! master sends the NO_WORK signal to all the slaves and exit smoothly together

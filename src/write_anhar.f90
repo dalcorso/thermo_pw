@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!-----------------------------------------------------------------------
 SUBROUTINE write_anharmonic()
+!-----------------------------------------------------------------------
 !
 !   This routine writes on output the anharmonic quantities calculated
 !   at the volume that minimize the free energy (computed from phonon dos)
@@ -97,7 +99,9 @@ END IF
 RETURN
 END SUBROUTINE write_anharmonic
 
+!-----------------------------------------------------------------------
 SUBROUTINE write_ph_freq_anharmonic()
+!-----------------------------------------------------------------------
 USE kinds,          ONLY : DP
 USE temperature,    ONLY : ntemp, temp
 USE control_thermo, ONLY : with_eigen
@@ -185,7 +189,9 @@ END IF
 RETURN
 END SUBROUTINE write_ph_freq_anharmonic
 
+!-----------------------------------------------------------------------
 SUBROUTINE write_grun_anharmonic()
+!-----------------------------------------------------------------------
 !
 !  This routine computes the anharmonic properties from the Gruneisen
 !  parameters. Used when lmurn=.TRUE.. (Assumes to have the volume and
@@ -312,7 +318,9 @@ CALL destroy_ph_freq(ph_grun)
 RETURN
 END SUBROUTINE write_grun_anharmonic
 
+!-----------------------------------------------------------------------
 SUBROUTINE compute_beta(vmin_t, beta_t, temp, ntemp)
+!-----------------------------------------------------------------------
 !
 !  This routine receives as input the volume for ntemp temperatures
 !  and computes the volume thermal expansion for ntemp-2 temperatures.
@@ -343,7 +351,9 @@ CALL mp_sum(beta_t, world_comm)
 RETURN
 END SUBROUTINE compute_beta
 
+!-----------------------------------------------------------------------
 SUBROUTINE write_ener_beta(temp, vmin, emin, beta, ntemp, filename)
+!-----------------------------------------------------------------------
 USE kinds,     ONLY : DP
 USE io_global, ONLY : meta_ionode
 IMPLICIT NONE
@@ -372,7 +382,9 @@ ENDIF
 RETURN
 END SUBROUTINE write_ener_beta
 
+!-----------------------------------------------------------------------
 SUBROUTINE write_bulk_anharm(temp, b0t, b0s, ntemp, filename)
+!-----------------------------------------------------------------------
 USE kinds,     ONLY : DP
 USE io_global, ONLY : meta_ionode
 IMPLICIT NONE
@@ -401,7 +413,9 @@ ENDIF
 RETURN
 END SUBROUTINE write_bulk_anharm
 
+!-----------------------------------------------------------------------
 SUBROUTINE write_dbulk_anharm(temp, b01t, ntemp, filename)
+!-----------------------------------------------------------------------
 USE kinds,     ONLY : DP
 USE io_global, ONLY : meta_ionode
 IMPLICIT NONE
@@ -428,7 +442,9 @@ ENDIF
 RETURN
 END SUBROUTINE write_dbulk_anharm
 
+!-----------------------------------------------------------------------
 SUBROUTINE write_gamma_anharm(temp, gammat, cvt, beta, b0t, ntemp, filename)
+!-----------------------------------------------------------------------
 USE kinds,     ONLY : DP
 USE io_global, ONLY : meta_ionode
 IMPLICIT NONE
@@ -458,7 +474,9 @@ ENDIF
 RETURN
 END SUBROUTINE write_gamma_anharm
 
+!-----------------------------------------------------------------------
 SUBROUTINE write_heat_anharm(temp, cet, cvt, cpt, ntemp, filename)
+!-----------------------------------------------------------------------
 USE kinds,     ONLY : DP
 USE io_global, ONLY : meta_ionode
 IMPLICIT NONE
@@ -488,8 +506,10 @@ ENDIF
 RETURN
 END SUBROUTINE write_heat_anharm
 
+!-----------------------------------------------------------------------
 SUBROUTINE write_aux_grun(temp, betab, cp_grun_t, cv_grun_t, b0_grun_s, b0_t, &
                                                            ntemp, filename) 
+!-----------------------------------------------------------------------
 USE kinds,     ONLY : DP
 USE io_global, ONLY : meta_ionode
 IMPLICIT NONE
@@ -520,7 +540,9 @@ END IF
 RETURN
 END SUBROUTINE write_aux_grun
 
+!-----------------------------------------------------------------------
 SUBROUTINE set_volume_b0_grun()
+!-----------------------------------------------------------------------
 
 USE control_grun,       ONLY : lv0_t, lb0_t, vgrun_t, celldm_grun_t, &
                                b0_grun_t
@@ -561,7 +583,9 @@ END SUBROUTINE set_volume_b0_grun
 !
 ! Copyright (C) 2018 Cristiano Malica
 !
+!-----------------------------------------------------------------------
 SUBROUTINE write_anharm_bfact(temp, bfact_t, ntemp, filename)
+!-----------------------------------------------------------------------
 
 USE ions_base, ONLY : nat
 USE kinds,     ONLY : DP
@@ -597,7 +621,9 @@ ENDIF
 RETURN
 END SUBROUTINE write_anharm_bfact
 
+!-----------------------------------------------------------------------
 SUBROUTINE write_thermo_anharm(temp, ntemp, e0, ener_t, free_e_min_t, entropy_t, cv_t, filename)
+!-----------------------------------------------------------------------
 USE kinds,     ONLY : DP
 USE io_global, ONLY : meta_ionode
 IMPLICIT NONE
