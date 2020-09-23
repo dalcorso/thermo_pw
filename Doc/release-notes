@@ -1,5 +1,8 @@
 New in Version 1.4.0
 
+Added the computation of the complex index of refraction
+and, for cubic solids, of the reflectivity and of
+the absorption coefficient.
 
 13/08/2020 Version 1.3.1 is now frozen
 New in version 1.3.1
