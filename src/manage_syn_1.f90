@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!-------------------------------------------------------------------------
 SUBROUTINE manage_syn_1(nwork)
+!-------------------------------------------------------------------------
 !
 !  This subroutine manages the synchronous work after the first set of
 !  possibly asynchronous pw.x calculations.

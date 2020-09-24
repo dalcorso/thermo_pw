@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!--------------------------------------------------------------------
 SUBROUTINE set_2d_bz_path()
+!--------------------------------------------------------------------
 !
 !  This routine sets a default path for each of the 2d Brillouin zones
 !  Its sets also the number of points for each line of the path.

@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!---------------------------------------------------------------
 SUBROUTINE plot_optical_constants()
+!---------------------------------------------------------------
 !
 !  This is a driver to plot the quantities inside the optical constant 
 !  file. For the general crystal it produces four plots.

@@ -528,7 +528,9 @@ WRITE(stdout,'(/,5x,"Group number",i5,3x,a11)') group_index_ext, &
 RETURN
 END SUBROUTINE read_group_index
 
+!-----------------------------------------------------------------------
 SUBROUTINE print_rap(nrap, name_rap_list)
+!-----------------------------------------------------------------------
 
 USE io_global, ONLY : stdout
 IMPLICIT NONE

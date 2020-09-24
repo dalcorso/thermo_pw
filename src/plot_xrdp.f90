@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!------------------------------------------------------------------
 SUBROUTINE plot_xrdp(exten)
+!------------------------------------------------------------------
 !
 !  This is a driver to plot the X-ray diffraction intensities as a 
 !  function of the scattering angle 2 theta

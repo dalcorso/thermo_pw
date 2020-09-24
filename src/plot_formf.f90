@@ -5,8 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-
+!-------------------------------------------------------------------
 SUBROUTINE plot_form_factors()
+!-------------------------------------------------------------------
 
 USE kinds,        ONLY : DP
 USE ions_base,    ONLY : nsp, atm

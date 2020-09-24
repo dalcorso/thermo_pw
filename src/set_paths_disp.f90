@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!---------------------------------------------------------------------
 SUBROUTINE set_paths_disp()
+!---------------------------------------------------------------------
 !
 !  This subroutine computes the paths for (band or phonon) dispersions 
 !  from the label letters or the auxiliary (k or q) points given in

@@ -5,8 +5,10 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!---------------------------------------------------------------------------
 SUBROUTINE simple_plot(ext, data_filename, psfilename, xlabel, ylabel, &
                        colore, xmin, xmax, ymin, ymax)
+!---------------------------------------------------------------------------
 !
 !  This is a simple routine which write a gnuplot script in flgnuplot,
 !  The script creates a graph of the data contained in data_filename,

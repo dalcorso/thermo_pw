@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!----------------------------------------------------------------------
 SUBROUTINE initialize_elastic_cons( ngeom, nwork )
+!----------------------------------------------------------------------
 !
 !  This routine sets the work to do for computing the elastic constants for
 !  each Laue class. 

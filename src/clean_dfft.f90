@@ -5,8 +5,10 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!----------------------------------------------------------------------
 SUBROUTINE clean_dfft()
-
+!----------------------------------------------------------------------
+!
 USE fft_base, ONLY : dfftp, dffts
 USE input_parameters, ONLY : nr1, nr2, nr3, nr1s, nr2s, nr3s
 

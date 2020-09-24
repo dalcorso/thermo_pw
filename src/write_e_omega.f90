@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!-------------------------------------------------------------------------
 SUBROUTINE write_e_omega()
+!-------------------------------------------------------------------------
 !
 ! This routine receives as input the coefficients of the quadratic
 ! or quartic polynomial that fit the energy as a function of the volume

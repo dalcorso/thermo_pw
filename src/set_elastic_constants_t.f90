@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!----------------------------------------------------------------------
 SUBROUTINE set_elastic_constants_t()
+!----------------------------------------------------------------------
 !
 !  This routine sets the temperature dependent elastic constants
 !  depending on what has been found in the files and the user requests.

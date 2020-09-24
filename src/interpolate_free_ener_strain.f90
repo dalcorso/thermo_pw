@@ -4,7 +4,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!------------------------------------------------------------------------
 SUBROUTINE interpolate_free_ener_strain(p1,p2,p3,p4,startt,lastt,ngroup)
+!------------------------------------------------------------------------
 
 USE kinds,             ONLY : DP
 USE initial_conf,      ONLY : ibrav_save

@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!--------------------------------------------------------------------------
 SUBROUTINE manage_bands()
+!--------------------------------------------------------------------------
 !
 !   this is a driver that controls the band structure / electronic dos
 !   calculation. It manage also the recovering of the bands from file.

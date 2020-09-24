@@ -4,7 +4,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!-----------------------------------------------------------------------
 SUBROUTINE compute_el_comp_t(el_cons_t, el_comp_t, b0_t)
+!-----------------------------------------------------------------------
 !
 !   This routine computes the elastic compliances and the bulk modulus
 !   at all temperatures given the elastic constants at all temperatures

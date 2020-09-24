@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!----------------------------------------------------------------------
 SUBROUTINE write_mur(omega0, b0in, b01, emin)
+!----------------------------------------------------------------------
 !
 !  This routine writes on file the Murnaghan energy versus volume
 !  curve, together with the pressure versus volume curve. 

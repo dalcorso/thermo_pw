@@ -7,8 +7,10 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!----------------------------------------------------------------------
 SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
                                       gnu_filename, filenameps )
+!----------------------------------------------------------------------
   !
   ! reads data files produced by "bands_sub", produces
   ! * data file ready for plotting with gnuplot, xmgr or the like
@@ -928,8 +930,10 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
   RETURN
 END SUBROUTINE plotband_sub
 
+!--------------------------------------------------------------------------
 SUBROUTINE find_total_plot_length(tot_points, k_eff, kx, same_next_eff, &
                                        nkz, dxmod_save, factor_dx, dgap)
+!--------------------------------------------------------------------------
 !
 !  now compute the x coordinate on the plot, but use the effective k
 !  points

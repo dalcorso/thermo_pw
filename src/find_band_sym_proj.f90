@@ -19,9 +19,11 @@ MODULE band_symmetry
   PUBLIC find_band_sym_proj
 
 CONTAINS
-
+!
+!-------------------------------------------------------------------------
 SUBROUTINE find_band_sym_proj (ik,evc,et,nsym,s,ftau,d_spin,gk,invs, &
      rap_et,times,ngroup,istart,accuracy,cge)
+!-------------------------------------------------------------------------
   !
   !   This subroutine finds the irreducible representations 
   !   (vector or projective) which give the transformation 

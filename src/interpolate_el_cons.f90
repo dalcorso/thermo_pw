@@ -5,8 +5,10 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!----------------------------------------------------------------------------
 SUBROUTINE interpolate_el_cons(celldm_t, nvar, ibrav, ec_p1, ec_p2, &
                     ec_p3, ec_p4, poly_degree_elc, el_cons_t, el_comp_t, b0_t)
+!----------------------------------------------------------------------------
 !
 ! This routine receives as input the coeffients of polynomials which 
 ! interpolate the elastic constants on a grid of geometries,  

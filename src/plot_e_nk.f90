@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!---------------------------------------------------------------------
 SUBROUTINE plot_e_nk()
+!---------------------------------------------------------------------
 !
 !  This is a driver to plot the quantities written inside flnkconv
 !

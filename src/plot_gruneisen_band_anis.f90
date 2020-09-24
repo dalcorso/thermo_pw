@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!------------------------------------------------------------------------
 SUBROUTINE plot_gruneisen_band_anis(flinput)
+!------------------------------------------------------------------------
 !
 !  This is a driver to plot the Gruneisen parameters of anisotropic
 !  solid. This routine knows only how many Gruneisen parameter files 

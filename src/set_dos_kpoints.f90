@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!---------------------------------------------------------------------------
 SUBROUTINE set_dos_kpoints()
+!---------------------------------------------------------------------------
 !
 !  This subroutine computes the mesh of k point for electronic dos
 !  calculation. 

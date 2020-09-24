@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!-----------------------------------------------------------------------
 SUBROUTINE set_k_points()
+!-----------------------------------------------------------------------
 !
 !  This subroutine copies the k points path in the input k points of
 !  the pw.x code.

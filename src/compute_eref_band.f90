@@ -5,12 +5,14 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!--------------------------------------------------------------------
 SUBROUTINE compute_eref_band(e, nbnd, eref, print_eref)
-  USE kinds, ONLY : DP
-  USE constants,  ONLY : rytoev
-  USE ener,          ONLY : ef
-  USE klist,         ONLY : degauss, nelec
-  USE noncollin_module, ONLY : noncolin
+!--------------------------------------------------------------------
+USE kinds,            ONLY : DP
+USE constants,        ONLY : rytoev
+USE ener,             ONLY : ef
+USE klist,            ONLY : degauss, nelec
+USE noncollin_module, ONLY : noncolin
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: nbnd
 REAL(DP), INTENT(IN)  :: e(nbnd)

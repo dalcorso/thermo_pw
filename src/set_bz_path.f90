@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!-------------------------------------------------------------------
 SUBROUTINE set_bz_path()
+!-------------------------------------------------------------------
 !
 !   This routine sets a default path for each three dimensional Brillouin
 !   zone.

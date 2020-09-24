@@ -5,7 +5,10 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!-----------------------------------------------------------------------
 SUBROUTINE write_e_nk()
+!-----------------------------------------------------------------------
+!
 USE kinds,          ONLY : DP
 USE control_conv,   ONLY : nnk, nk_test, nsigma
 USE thermo_mod,     ONLY : energy_geo

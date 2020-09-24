@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!---------------------------------------------------------------------------
 SUBROUTINE generate_k_along_lines_kz(nkaux, xkaux, wkaux, xk, wk, nkstot, nkz)
+!---------------------------------------------------------------------------
 !
 !  This routine recieves as input a set of k point (xkaux) and integer weights
 !  (wkaux) and generates a set of k points along the lines 

@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!----------------------------------------------------------------------
 SUBROUTINE manage_anhar_routines()
+!----------------------------------------------------------------------
 !
 !   This subroutine manages the calculation of the anharmonic properties
 !   and selects the routines that make the isotropic (where volume is a 

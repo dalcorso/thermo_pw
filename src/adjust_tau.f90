@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!-----------------------------------------------------------------------
 SUBROUTINE adjust_tau(tau_save, tau, at)
+!-----------------------------------------------------------------------
 !
 !  This routine receives as input the crystal coordinates of the atoms in the
 !  original cell and transforms them in cartesian coordinates with the new

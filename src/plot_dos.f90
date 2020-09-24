@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!----------------------------------------------------------------------------
 SUBROUTINE plot_dos( )
+!----------------------------------------------------------------------------
 !
 USE kinds, ONLY : DP
 USE constants, ONLY : rytoev
@@ -72,7 +74,6 @@ DO n=1,save_ndos
 END DO
 ymax=ymax*1.1_DP
 
-gnu_filename = 'gnuplot_files/'//TRIM(flgnuplot)//'_dos'
 ymin1=1.D10
 ymax1=0.0_DP
 DO n=1,save_ndos

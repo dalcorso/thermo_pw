@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!-------------------------------------------------------------------------
 SUBROUTINE plot_epsilon_omega_q()
+!-------------------------------------------------------------------------
 !
 !  This is a driver to plot the quantities inside the epsilon files. It makes 
 !  four plots. The first two contain the real and the imaginary part of the 

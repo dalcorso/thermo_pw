@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!----------------------------------------------------------------------
 SUBROUTINE write_e_ke()
+!----------------------------------------------------------------------
 USE kinds,          ONLY : DP
 USE control_conv,   ONLY : nke, ke, nkeden, deltakeden, deltake
 USE initial_param,  ONLY : ecutrho0, ecutwfc0

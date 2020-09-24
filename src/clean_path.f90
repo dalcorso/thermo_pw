@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!---------------------------------------------------------------------
 SUBROUTINE clean_path(nqaux, xqaux, wqaux)
+!---------------------------------------------------------------------
 !
 ! This routine receives a sets of reciprocal lattice points that
 ! determines a path. It removes from the paths the lines that are too

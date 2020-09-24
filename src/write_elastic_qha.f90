@@ -5,8 +5,10 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!------------------------------------------------------------------------
 SUBROUTINE write_elastic_qha()
-
+!------------------------------------------------------------------------
+!
 USE kinds,             ONLY : DP
 USE thermo_mod,        ONLY : energy_geo, tot_ngeo
 USE control_elastic_constants, ONLY : ngeo_strain, frozen_ions, elcpvar

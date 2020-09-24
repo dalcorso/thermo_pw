@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!-------------------------------------------------------------------
 SUBROUTINE compute_density(omega,density)
+!-------------------------------------------------------------------
 !
 !  This routine receives the volume of a unit cell in (a.u.)^3,
 !  the number of atoms inside the unit cell and the mass (in a.m.u.) of

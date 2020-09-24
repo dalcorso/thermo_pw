@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!----------------------------------------------------------------------
 SUBROUTINE set_geometry_el_cons(iwork)
+!----------------------------------------------------------------------
 !
 !  This routine receives as input the current unperturbed geometry
 !  and set the variables of pw with this unperturbed geometry.

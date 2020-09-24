@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!-------------------------------------------------------------------------
 SUBROUTINE write_gruneisen_band(file_disp, file_vec)
+!-------------------------------------------------------------------------
   !
   ! reads data files produced by write_ph_dispersions for ngeo geometries, 
   ! interpolates them with a polynomial and computes and writes a file with 

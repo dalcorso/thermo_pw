@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!--------------------------------------------------------------
 SUBROUTINE print_polarization(polar_, flag)
+!--------------------------------------------------------------
 USE kinds,     ONLY : DP
 USE constants, ONLY : electron_si, bohr_radius_si
 USE cell_base, ONLY : alat, omega

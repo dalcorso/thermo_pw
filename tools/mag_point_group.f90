@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!-------------------------------------------------------------------
 PROGRAM mag_point_group
+!-------------------------------------------------------------------
 !
 !
 USE kinds, ONLY : DP
@@ -94,8 +96,10 @@ CALL mp_global_end ()
 
 END PROGRAM mag_point_group
 
+!--------------------------------------------------------------------------
 SUBROUTINE read_group_code_mag(group_desc, subgroup_desc, nsym, &
                                                          mag_group_code_ext)
+!--------------------------------------------------------------------------
 USE magnetic_point_group, ONLY : find_group_subgroup_ext, mag_group_name, &
                                  mag_group_index_from_ext
 USE io_global,   ONLY : stdout

@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!---------------------------------------------------------------------
 SUBROUTINE write_quadratic()
+!---------------------------------------------------------------------
 !
 ! This routine writes the energy as a function of the celldm(1) for
 ! the polynomial fit of cubic systems.

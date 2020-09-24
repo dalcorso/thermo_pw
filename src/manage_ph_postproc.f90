@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!-----------------------------------------------------------------------
 SUBROUTINE manage_ph_postproc(igeom)
+!-----------------------------------------------------------------------
 !
 !  This driver computes the interatomic force constants and
 !  interpolates the phonon frequencies to make a phonon dispersion
