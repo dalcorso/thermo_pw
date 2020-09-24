@@ -64,7 +64,9 @@ FUNCTION lr_dot(x,y)
   !
 CONTAINS
   !
+  !-------------------------------------------------------------------
   SUBROUTINE lr_dot_gamma()
+  !-------------------------------------------------------------------
     USE gvect,                ONLY : gstart
 
     IMPLICIT NONE
@@ -92,7 +94,9 @@ CONTAINS
     !
   END SUBROUTINE lr_dot_gamma
   !
+  !-------------------------------------------------------------------
   SUBROUTINE lr_dot_k
+  !-------------------------------------------------------------------
     !
     USE qpoint, ONLY : ikks, ikqs
     IMPLICIT NONE
@@ -180,7 +184,9 @@ FUNCTION lr_dot0(x,y)
   !
 CONTAINS
   !
+  !-------------------------------------------------------------------
   SUBROUTINE lr_dot_k
+  !-------------------------------------------------------------------
     !
     USE qpoint, ONLY : ikks, ikqs
     IMPLICIT NONE
@@ -216,7 +222,9 @@ CONTAINS
 
 END FUNCTION lr_dot0
 
+!-------------------------------------------------------------------
 SUBROUTINE lr_prec(res, pres)
+!-------------------------------------------------------------------
 
 USE kinds,       ONLY : DP
 USE lr_cg,       ONLY : prec_vec

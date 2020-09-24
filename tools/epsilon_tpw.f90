@@ -630,7 +630,9 @@ SUBROUTINE dipole_calc( ik, dipole_aux, nbndmin, nbndmax, shift )
   !
 END SUBROUTINE dipole_calc
 
+!---------------------------------------------------------------------
 SUBROUTINE plot_jdos(fileps, nw, wgrid, jdos )
+!---------------------------------------------------------------------
 !
 USE kinds, ONLY : DP
 USE constants, ONLY : rytoev
@@ -693,7 +695,9 @@ IF (ionode) &
 RETURN
 END SUBROUTINE plot_jdos
 
+!---------------------------------------------------------------------
 SUBROUTINE plot_epsilon(fileps, nw, wgrid, epsr, epsi, eels )
+!---------------------------------------------------------------------
 !
 USE kinds, ONLY : DP
 USE constants, ONLY : rytoev

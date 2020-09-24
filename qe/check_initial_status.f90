@@ -349,8 +349,9 @@ SUBROUTINE check_initial_status_tpw(auxdyn, iflag)
   IF (nimage>1) rec_code_read=-40
   RETURN
   END SUBROUTINE check_initial_status_tpw
-
+!-------------------------------------------------------------------------
   SUBROUTINE image_q_irr_tpw()
+!-------------------------------------------------------------------------
 !
 !  This routine is an example of the load balancing among images.
 !  It decides which image makes which q and which irreducible representation
@@ -487,8 +488,9 @@ SUBROUTINE check_initial_status_tpw(auxdyn, iflag)
    DEALLOCATE(work)
    RETURN
    END SUBROUTINE image_q_irr_tpw
-
+!-------------------------------------------------------------------------
    SUBROUTINE print_image_work()
+!-------------------------------------------------------------------------
 
    USE disp, ONLY : comp_iq, nqs
    USE grid_irr_iq, ONLY : irr_iq, comp_irr_iq

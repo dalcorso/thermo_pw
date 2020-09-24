@@ -5,8 +5,10 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!------------------------------------------------------------------------
 SUBROUTINE find_band_sym_tpw (ik,evc,nsym,s,ftau,gk,invs,rap_et,times,&
                               ngroup,istart,accuracy)
+!------------------------------------------------------------------------
   !
   !   This subroutine finds the irreducible representations which give
   !   the transformation properties of the wavefunctions.
@@ -198,8 +200,10 @@ SUBROUTINE find_band_sym_tpw (ik,evc,nsym,s,ftau,gk,invs,rap_et,times,&
   RETURN
 END SUBROUTINE find_band_sym_tpw
 
+!------------------------------------------------------------------------
 SUBROUTINE find_band_sym_so_tpw (ik,evc,nsym,s,ftau,d_spin,gk, &
                                  invs,rap_et,times,ngroup,istart,accuracy)
+!------------------------------------------------------------------------
   !
   !   This subroutine finds the irreducible representations of the
   !   double group which give the transformation properties of the

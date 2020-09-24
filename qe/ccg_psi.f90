@@ -7,7 +7,7 @@
 !
 !
 !-----------------------------------------------------------------
-subroutine ccg_psi_tpw (lda, n, m, psi, h_diag, flag)
+SUBROUTINE ccg_psi_tpw (lda, n, m, psi, h_diag, flag)
   !-----------------------------------------------------------------
   !
   !    This routine gives a preconditioning to the linear system solver.
@@ -57,4 +57,4 @@ subroutine ccg_psi_tpw (lda, n, m, psi, h_diag, flag)
      END IF
   enddo
   return
-end subroutine ccg_psi_tpw
+END SUBROUTINE ccg_psi_tpw

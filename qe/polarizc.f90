@@ -154,7 +154,9 @@ SUBROUTINE polarizc ( iu )
   RETURN
 END SUBROUTINE polarizc
 
+!---------------------------------------------------------------------------
   SUBROUTINE write_polarizc(cepsilon, iu)
+!---------------------------------------------------------------------------
 !
 !  This routine write on output the
 !

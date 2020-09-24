@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!----------------------------------------------------------------------
 PROGRAM debye
+!----------------------------------------------------------------------
 
 USE kinds,        ONLY : DP
 USE debye_module, ONLY : debye_e0, debye_vib_energy, debye_free_energy, &
@@ -108,8 +110,11 @@ CALL mp_global_end ()
 
 END PROGRAM debye
 
+!----------------------------------------------------------------------
 SUBROUTINE write_thermo_info(e0, tot_states, ntemp, temp, energy, &
                                  free_energy, entropy, cv, iflag, filename)
+!----------------------------------------------------------------------
+!
 USE kinds, ONLY : DP
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ntemp, iflag

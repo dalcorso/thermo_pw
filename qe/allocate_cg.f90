@@ -5,8 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-
+!------------------------------------------------------------------------
   SUBROUTINE allocate_cg(npe, nc)
+!------------------------------------------------------------------------
 
   USE klist,                ONLY : nks
   USE uspp,                 ONLY : okvan, nkb
@@ -67,7 +68,9 @@
   RETURN
   END SUBROUTINE allocate_cg
 
+!------------------------------------------------------------------------
   SUBROUTINE deallocate_cg()
+!------------------------------------------------------------------------
 
   USE lr_global,  ONLY : evc0, evq0, sevq0, d0psi, d0psi2
   USE lr_cg,      ONLY : evc1, dir, res, pres, prec_vec, dir_new

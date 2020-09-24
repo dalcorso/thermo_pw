@@ -1,4 +1,13 @@
+!
+! Copyright (C) 2018 Andrea Dal Corso
+! This file is distributed under the terms of the
+! GNU General Public License. See the file `License'
+! in the root directory of the present distribution,
+! or http://www.gnu.org/copyleft/gpl.txt .
+!
+!-------------------------------------------------------------------
   SUBROUTINE allocate_lanczos()
+!-------------------------------------------------------------------
 
   USE klist,                ONLY : nks
   USE uspp,                 ONLY : okvan, nkb
@@ -85,7 +94,9 @@
   RETURN
   END SUBROUTINE allocate_lanczos
 
+!-----------------------------------------------------------------------
   SUBROUTINE deallocate_lanczos()
+!-----------------------------------------------------------------------
 
   USE lr_global,  ONLY : evc0, sevq0, evq0, d0psi, d0psi2, size_evc1, rpert
   USE lr_lanczos, ONLY : evc1, evc1_new, evc1_old, sevc1, beta_store, &

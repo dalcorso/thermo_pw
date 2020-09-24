@@ -221,7 +221,9 @@ SUBROUTINE pheqscf()
   !
 END SUBROUTINE pheqscf
 
+!-----------------------------------------------------------------------
 SUBROUTINE write_chi_on_disk(iu)
+!-----------------------------------------------------------------------
 USE kinds, ONLY : DP
 USE optical,          ONLY : current_w, fru, lcharge, &
                              intq, intq_nc, dmuxc_tran, chirr, chirz, chizz, &
@@ -348,7 +350,9 @@ END IF
 RETURN
 END SUBROUTINE write_chi_on_disk
 
+!-----------------------------------------------------------------------
 SUBROUTINE collect_all_chi()
+!-----------------------------------------------------------------------
 
 USE kinds, ONLY : DP
 USE noncollin_module,  ONLY : nspin_mag

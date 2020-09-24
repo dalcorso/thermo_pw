@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!--------------------------------------------------------------------
 PROGRAM crystal_point_group
+!--------------------------------------------------------------------
 !
 !
 USE kinds, ONLY : DP
@@ -502,7 +504,10 @@ CALL mp_global_end ()
 
 END PROGRAM crystal_point_group
 
+!--------------------------------------------------------------------
 SUBROUTINE read_group_index(group_desc, nsym, group_index_ext)
+!--------------------------------------------------------------------
+!
 USE point_group, ONLY : group_index_from_ext
 USE io_global, ONLY : stdout
 USE point_group, ONLY : find_group_ext, set_group_desc

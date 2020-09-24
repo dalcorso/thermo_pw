@@ -94,7 +94,9 @@ ENDDO
 RETURN
 END SUBROUTINE rotate_mesh_1s
 
+!--------------------------------------------------------------------
 SUBROUTINE find_mesh_ijk(my_nrxx, iir, jir, kir)
+!--------------------------------------------------------------------
 
 USE fft_base, ONLY : dfftp
 

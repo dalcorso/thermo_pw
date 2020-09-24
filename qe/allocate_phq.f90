@@ -7,7 +7,7 @@
 !
 !
 !-----------------------------------------------------------------------
-subroutine allocate_phq_tpw
+SUBROUTINE allocate_phq_tpw
   !-----------------------------------------------------------------------
   !
   ! dynamical allocation of arrays: quantities needed for the linear

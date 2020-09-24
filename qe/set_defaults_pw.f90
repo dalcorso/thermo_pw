@@ -253,7 +253,9 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
   !
 END SUBROUTINE setup_nscf_tpw
 
+!-------------------------------------------------------------------------
 SUBROUTINE distribute_diago()
+!-------------------------------------------------------------------------
 !
 !   This routine distributes the k points that must be diagonalized as
 !   uniformely as possible among the k points, so that if the k points

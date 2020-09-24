@@ -1040,7 +1040,9 @@ CALL mp_global_end ()
 
 END PROGRAM gener_3d_slab
 
+!--------------------------------------------------------------------
 SUBROUTINE remove_common_factors(m,n,o,fact)
+!--------------------------------------------------------------------
 
 IMPLICIT NONE
 INTEGER, INTENT(INOUT) :: m, n, o
@@ -1061,7 +1063,9 @@ ENDDO
 RETURN
 END SUBROUTINE remove_common_factors
 
+!--------------------------------------------------------------------
 SUBROUTINE vector_prod(a,b,c)
+!--------------------------------------------------------------------
 
 USE kinds, ONLY : DP
 
@@ -1076,7 +1080,9 @@ c(3) = a(1) * b(2) - a(2) * b(1)
 RETURN
 END SUBROUTINE vector_prod
 
+!--------------------------------------------------------------------
 SUBROUTINE search_vicinals(g, bg)
+!--------------------------------------------------------------------
 !
 !  This routine receives the G vector perpendicular to a surface and
 !  the primitive vectors of the reciprocal lattice (of the conventional

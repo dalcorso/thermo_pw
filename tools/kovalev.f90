@@ -1,3 +1,10 @@
+!
+! Copyright (C) 2018 Andrea Dal Corso 
+! This file is distributed under the terms of the
+! GNU General Public License. See the file `License'
+! in the root directory of the present distribution,
+! or http://www.gnu.org/copyleft/gpl.txt .
+!
 PROGRAM kovalev
 !
 !  This program contains a few useful tools to help the reading of the
@@ -159,7 +166,9 @@ ENDIF
 
 CONTAINS
 
+!-------------------------------------------------------------------------
 SUBROUTINE set_sym_su2_kov(sym_num, smat, sinv)
+!-------------------------------------------------------------------------
 !
 !  This routine uses the Cayley-Klein parameters to set the su2 rotation
 !  matrices for the 32 proper rotations defined in the module. 
@@ -271,7 +280,9 @@ SUBROUTINE set_sym_su2_kov(sym_num, smat, sinv)
   RETURN
   END SUBROUTINE set_sym_su2_kov
 
+!-------------------------------------------------------------------------
  SUBROUTINE find_double_product_table_from_sym_kov(prd, epos, group_desc, nsym)
+!-------------------------------------------------------------------------
 !
 !  This routine provides the product table prd of a given double group.
 !  Each entry prd(i,j) is the index of the operation that results from
@@ -305,7 +316,9 @@ SUBROUTINE set_sym_su2_kov(sym_num, smat, sinv)
  RETURN
  END SUBROUTINE find_double_product_table_from_sym_kov
 
+!-------------------------------------------------------------------------
  SUBROUTINE product_sym_su2_kov(isym, jsym, prd, epos)
+!-------------------------------------------------------------------------
  !
  !  This routine recives the indeces of two symmetry operations, the
  !  list of symmetry operations in su2 form and gives the index of the

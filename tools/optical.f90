@@ -5,7 +5,10 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!-----------------------------------------------------------------------
 PROGRAM optical
+!-----------------------------------------------------------------------
+!
 USE kinds,          ONLY : DP
 USE constants,      ONLY : rytoev
 USE optical_module, ONLY : compute_refractive_index, compute_alpha, &

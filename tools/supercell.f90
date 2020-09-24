@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!------------------------------------------------------------------------
 PROGRAM supercell_pos
+!------------------------------------------------------------------------
 !
 !  This program reads a space group number and a set of inequivalent
 !  positions and finds all the positions inside a unit cell.
@@ -844,7 +846,10 @@ CALL mp_global_end ()
 
 END PROGRAM supercell_pos
 
+!------------------------------------------------------------------------
 SUBROUTINE transform_fcc_cubic(tau,nat) 
+!------------------------------------------------------------------------
+!
 USE kinds, ONLY : DP
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: nat
@@ -862,7 +867,10 @@ END DO
 RETURN
 END SUBROUTINE transform_fcc_cubic
 
+!------------------------------------------------------------------------
 SUBROUTINE transform_bcc_cubic(tau,nat) 
+!------------------------------------------------------------------------
+!
 USE kinds, ONLY : DP
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: nat
@@ -880,7 +888,10 @@ END DO
 RETURN
 END SUBROUTINE transform_bcc_cubic
 
+!------------------------------------------------------------------------
 SUBROUTINE transform_trig_hex(tau,nat) 
+!------------------------------------------------------------------------
+!
 USE kinds, ONLY : DP
 IMPLICIT NONE
 REAL(DP), PARAMETER :: onet = 1.0_DP / 3.0_DP
@@ -899,7 +910,10 @@ END DO
 RETURN
 END SUBROUTINE transform_trig_hex
 
+!------------------------------------------------------------------------
 SUBROUTINE transform_ct_tet(tau,nat) 
+!------------------------------------------------------------------------
+!
 USE kinds, ONLY : DP
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: nat
@@ -917,7 +931,10 @@ END DO
 RETURN
 END SUBROUTINE transform_ct_tet
 
+!------------------------------------------------------------------------
 SUBROUTINE transform_ofco_orth_c(tau,nat) 
+!------------------------------------------------------------------------
+!
 USE kinds, ONLY : DP
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: nat
@@ -935,7 +952,10 @@ END DO
 RETURN
 END SUBROUTINE transform_ofco_orth_c
 
+!------------------------------------------------------------------------
 SUBROUTINE transform_ofco_orth_a(tau,nat) 
+!------------------------------------------------------------------------
+!
 USE kinds, ONLY : DP
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: nat
@@ -953,7 +973,10 @@ END DO
 RETURN
 END SUBROUTINE transform_ofco_orth_a
 
+!------------------------------------------------------------------------
 SUBROUTINE transform_fco_orth(tau,nat) 
+!------------------------------------------------------------------------
+!
 USE kinds, ONLY : DP
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: nat
@@ -971,7 +994,10 @@ END DO
 RETURN
 END SUBROUTINE transform_fco_orth
 
+!------------------------------------------------------------------------
 SUBROUTINE transform_bco_orth(tau,nat) 
+!------------------------------------------------------------------------
+!
 USE kinds, ONLY : DP
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: nat
@@ -989,7 +1015,10 @@ END DO
 RETURN
 END SUBROUTINE transform_bco_orth
 
+!------------------------------------------------------------------------
 SUBROUTINE transform_ofc_mon_uniq_c(tau,nat) 
+!------------------------------------------------------------------------
+!
 USE kinds, ONLY : DP
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: nat
@@ -1007,7 +1036,10 @@ END DO
 RETURN
 END SUBROUTINE transform_ofc_mon_uniq_c
 
+!------------------------------------------------------------------------
 SUBROUTINE transform_ofc_mon_uniq_b(tau,nat) 
+!------------------------------------------------------------------------
+!
 USE kinds, ONLY : DP
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: nat
@@ -1025,7 +1057,9 @@ END DO
 RETURN
 END SUBROUTINE transform_ofc_mon_uniq_b
 
+!------------------------------------------------------------------------
 SUBROUTINE write_cell_info ( iunout, ibrav, units, celldm)
+!------------------------------------------------------------------------
 USE kinds, ONLY : DP
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: iunout, ibrav

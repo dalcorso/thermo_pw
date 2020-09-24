@@ -13,7 +13,9 @@
 ! is necessary. This memory does not decrease by increasing the number of
 ! processors and is allocated by each processor.
 !
+!-------------------------------------------------------------------------
 SUBROUTINE rotate_all_psi_tpw(ik,psic_nc,evcr,s,ftau,d_spin,has_e,gk)
+!-------------------------------------------------------------------------
   !
   !  This subroutine rotates one-component or two-component
   !  wavefunctions according to the operator {S,f} (Actually O_{S,f} \psi(r)=

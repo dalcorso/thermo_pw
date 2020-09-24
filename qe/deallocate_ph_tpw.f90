@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!------------------------------------------------------------------------
 SUBROUTINE allocate_ph_tpw
+!------------------------------------------------------------------------
 !
 !  This allocation is done by phq_readin_tpw. To avoid crash when only
 !  the xml file is read we allocate these variables here
@@ -24,7 +26,9 @@ IMPLICIT NONE
 RETURN
 END SUBROUTINE allocate_ph_tpw
 
+!------------------------------------------------------------------------
 SUBROUTINE deallocate_ph_tpw
+!------------------------------------------------------------------------
 
 USE optical, ONLY : fru
 USE images_omega, ONLY : comp_f

@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 
+!----------------------------------------------------------------------
 SUBROUTINE realspace_grid_init_tpw( dfft, at, bg, gcutm, fft_fact )
+!----------------------------------------------------------------------
     !
     ! ... Sets optimal values for dfft%nr[123] and dfft%nr[123]x
     ! ... If fft_fact is present, force nr[123] to be multiple of fft_fac([123])
@@ -52,7 +54,9 @@ SUBROUTINE realspace_grid_init_tpw( dfft, at, bg, gcutm, fft_fact )
 
 END SUBROUTINE realspace_grid_init_tpw
 
+!-------------------------------------------------------------------------
    SUBROUTINE grid_set_tpw( dfft, bg, gcut, nr1, nr2, nr3 )
+!-------------------------------------------------------------------------
 
 !  this routine returns in nr1, nr2, nr3 the minimal 3D real-space FFT 
 !  grid required to fit the G-vector sphere with G^2 <= gcut

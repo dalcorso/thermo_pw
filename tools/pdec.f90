@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!------------------------------------------------------------------------
 PROGRAM pdec
+!------------------------------------------------------------------------
 
 ! This program reads the temperature dependent elastic constants (ECs)
 ! files for each pressure in the anhar_files directory and writes in 
@@ -232,7 +234,9 @@ CALL mp_global_end ()
 
 END PROGRAM pdec
 
+!------------------------------------------------------------------------
 SUBROUTINE lines_number(filename, lines)
+!------------------------------------------------------------------------
 
 !Count the number of lines written in a file
 
@@ -261,7 +265,9 @@ CLOSE(UNIT=iupress)
 RETURN
 END SUBROUTINE lines_number
 
+!------------------------------------------------------------------------
 FUNCTION real_to_char(y)
+!------------------------------------------------------------------------
 
 USE kinds, ONLY : DP
 
@@ -276,8 +282,10 @@ real_to_char = ADJUSTL(real_to_char)
 RETURN
 END FUNCTION real_to_char
 
+!------------------------------------------------------------------------
 SUBROUTINE write_el_cons_p(p, npress, ibrav, laue, el_cons_p, b0_p, filename)
-
+!------------------------------------------------------------------------
+!
 USE kinds,      ONLY : DP
 USE io_global,  ONLY : meta_ionode, meta_ionode_id, stdout
 USE mp_world,   ONLY : world_comm
@@ -451,7 +459,9 @@ ENDIF
 RETURN
 END SUBROUTINE write_el_cons_p
 
+!------------------------------------------------------------------------
 SUBROUTINE plot_elastic_p(ibrav, laue, filename)
+!------------------------------------------------------------------------
 !
 !  This is a driver to plot the elastic constants as a function of
 !  temperature
@@ -462,7 +472,6 @@ USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,           &
                              gnuplot_ylabel, gnuplot_set_fact, &
                              gnuplot_write_file_mul_point
 USE io_global, ONLY : ionode
-
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ibrav, laue
@@ -527,8 +536,8 @@ IF (laue==25.OR.laue==27) THEN
 !
 !  trigonal D_3d or S_6
 !
-CALL gnuplot_ylabel('C_{14} (kbar)',.FALSE.)
-CALL gnuplot_write_file_mul_point(filelastic,1,8,'color_red',.TRUE.,&
+   CALL gnuplot_ylabel('C_{14} (kbar)',.FALSE.)
+   CALL gnuplot_write_file_mul_point(filelastic,1,8,'color_red',.TRUE.,&
                                                     .TRUE.,.FALSE.)
 ENDIF
 
@@ -536,8 +545,8 @@ IF (laue==27) THEN
 !
 !  trigonal S_6
 !
-CALL gnuplot_ylabel('C_{25} (kbar)',.FALSE.)
-CALL gnuplot_write_file_mul_point(filelastic,1,9,'color_red',.TRUE.,&
+   CALL gnuplot_ylabel('C_{25} (kbar)',.FALSE.)
+   CALL gnuplot_write_file_mul_point(filelastic,1,9,'color_red',.TRUE.,&
                                                     .TRUE.,.FALSE.)
 ENDIF
 
@@ -545,8 +554,8 @@ IF (laue==18.OR.laue==22) THEN
 !
 !  tetragonal C_4h or D_4h
 !
-CALL gnuplot_ylabel('C_{66} (kbar)',.FALSE.)
-CALL gnuplot_write_file_mul_point(filelastic,1,9,'color_red',.TRUE.,&
+   CALL gnuplot_ylabel('C_{66} (kbar)',.FALSE.)
+   CALL gnuplot_write_file_mul_point(filelastic,1,9,'color_red',.TRUE.,&
                                                     .TRUE.,.FALSE.)
 ENDIF
 
@@ -554,8 +563,8 @@ IF (laue==18) THEN
 !
 !  tetragonal C_4h
 !
-CALL gnuplot_ylabel('C_{16} (kbar)',.FALSE.)
-CALL gnuplot_write_file_mul_point(filelastic,1,9,'color_red',.TRUE.,&
+   CALL gnuplot_ylabel('C_{16} (kbar)',.FALSE.)
+   CALL gnuplot_write_file_mul_point(filelastic,1,9,'color_red',.TRUE.,&
                                                     .TRUE.,.FALSE.)
 ENDIF
 
@@ -564,28 +573,28 @@ IF (laue==2.OR.laue==16.OR.laue==20) THEN
 !  triclinic C_i, monoclinic C_2h, or orthorhombic D_2h
 !
 
-CALL gnuplot_ylabel('C_{22} (kbar)',.FALSE.)
-CALL gnuplot_write_file_mul_point(filelastic,1,6,'color_red',.TRUE.,&
+   CALL gnuplot_ylabel('C_{22} (kbar)',.FALSE.)
+   CALL gnuplot_write_file_mul_point(filelastic,1,6,'color_red',.TRUE.,&
                                                     .TRUE.,.FALSE.)
 
-CALL gnuplot_ylabel('C_{23} (kbar)',.FALSE.)
-CALL gnuplot_write_file_mul_point(filelastic,1,7,'color_red',.TRUE.,&
+   CALL gnuplot_ylabel('C_{23} (kbar)',.FALSE.)
+   CALL gnuplot_write_file_mul_point(filelastic,1,7,'color_red',.TRUE.,&
                                                     .TRUE.,.FALSE.)
 
-CALL gnuplot_ylabel('C_{33} (kbar)',.FALSE.)
-CALL gnuplot_write_file_mul_point(filelastic,1,8,'color_red',.TRUE.,&
+   CALL gnuplot_ylabel('C_{33} (kbar)',.FALSE.)
+   CALL gnuplot_write_file_mul_point(filelastic,1,8,'color_red',.TRUE.,&
                                                     .TRUE.,.FALSE.)
 
-CALL gnuplot_ylabel('C_{44} (kbar)',.FALSE.)
-CALL gnuplot_write_file_mul_point(filelastic,1,9,'color_red',.TRUE.,&
+   CALL gnuplot_ylabel('C_{44} (kbar)',.FALSE.)
+   CALL gnuplot_write_file_mul_point(filelastic,1,9,'color_red',.TRUE.,&
                                                     .TRUE.,.FALSE.)
 
-CALL gnuplot_ylabel('C_{55} (kbar)',.FALSE.)
-CALL gnuplot_write_file_mul_point(filelastic,1,10,'color_red',.TRUE.,&
+   CALL gnuplot_ylabel('C_{55} (kbar)',.FALSE.)
+   CALL gnuplot_write_file_mul_point(filelastic,1,10,'color_red',.TRUE.,&
                                                     .TRUE.,.FALSE.)
 
-CALL gnuplot_ylabel('C_{66} (kbar)',.FALSE.)
-CALL gnuplot_write_file_mul_point(filelastic,1,11,'color_red',.TRUE.,&
+   CALL gnuplot_ylabel('C_{66} (kbar)',.FALSE.)
+   CALL gnuplot_write_file_mul_point(filelastic,1,11,'color_red',.TRUE.,&
                                                     .TRUE.,.FALSE.)
 END IF
 

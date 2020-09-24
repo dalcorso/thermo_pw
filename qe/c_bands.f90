@@ -14,6 +14,7 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !
+  !----------------------------------------------------------------------------
 SUBROUTINE c_bands_nscf_tpw( )
   !----------------------------------------------------------------------------
   !
@@ -478,7 +479,9 @@ SUBROUTINE c_bands_nscf_tpw( )
   !
 END SUBROUTINE c_bands_nscf_tpw
 
+!----------------------------------------------------------------------------
 SUBROUTINE compute_gk(xk, xk_orig, s, t_rev, gk)
+!----------------------------------------------------------------------------
 
 USE kinds, ONLY : DP
 USE cell_base, ONLY : at, bg

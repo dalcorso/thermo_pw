@@ -8,7 +8,7 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-!
+!-------------------------------------------------------------------------
 SUBROUTINE extrapolate()
   !-----------------------------------------------------------------------
   !
@@ -122,6 +122,7 @@ SUBROUTINE extrapolate()
   !
 END SUBROUTINE extrapolate
 
+!----------------------------------------------------------------------------
 SUBROUTINE calc_chi(freq,broad,chi)
   !----------------------------------------------------------------------------
   !
