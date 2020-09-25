@@ -132,7 +132,8 @@ FREQUENCIES
 EOF
 
 $ECHO "  running the thermo_pw scf_ph calculation for Si..."
-$ECHO "  dielectric constant is in output_epsilon.ps.\c"
+$ECHO "  The dielectric constant and the refractive index are  "
+$ECHO "  in output_optical.ps and output_optical_lambda.ps.\c"
 $THERMO_PW_COMMAND < si.scf_ph.in > si.scf_ph.out
 check_failure $?
 $ECHO " done"
