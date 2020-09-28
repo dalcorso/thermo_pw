@@ -135,6 +135,7 @@ SUBROUTINE phescf_tpw()
         ENDIF
         CALL extrapolate()
         IF (ionode) THEN
+           epsilonm1c = (0.0_DP,0.0_DP)
            DO iu=start_freq, last_freq
               computed(iu)=1
               CALL calc_chi(fru(iu),fiu(iu),epsilonc(1,1,iu))
