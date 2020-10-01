@@ -622,7 +622,8 @@ RETURN
 END SUBROUTINE write_anharm_bfact
 
 !-----------------------------------------------------------------------
-SUBROUTINE write_thermo_anharm(temp, ntemp, e0, ener_t, free_e_min_t, entropy_t, cv_t, filename)
+SUBROUTINE write_thermo_anharm(temp, ntemp, e0, ener_t, free_e_min_t, &
+                                                entropy_t, cv_t, filename)
 !-----------------------------------------------------------------------
 USE kinds,     ONLY : DP
 USE io_global, ONLY : meta_ionode
@@ -658,8 +659,9 @@ IF (meta_ionode) THEN
                & 12x, " entropy ", 17x, " Cv ")')
 
    DO itemp = 2, ntemp-1
-      WRITE(iu_therm, '(e12.5,e23.13,e23.13,e23.13,e23.13)') temp(itemp), ener_t(itemp), &
-                                    free_e_min_t(itemp), entropy_t(itemp), cv_t(itemp)
+      WRITE(iu_therm, '(e12.5,e23.13,e23.13,e23.13,e23.13)') temp(itemp),    &
+                       ener_t(itemp), free_e_min_t(itemp), entropy_t(itemp), &
+                       cv_t(itemp)
    END DO
 
    CLOSE(iu_therm)

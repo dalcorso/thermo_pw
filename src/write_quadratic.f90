@@ -11,7 +11,7 @@ SUBROUTINE write_quadratic()
 !
 ! This routine writes the energy as a function of the celldm(1) for
 ! the polynomial fit of cubic systems.
-! in input emin in Ry, omega0 in (a.u.)**3, b0in in kbar
+! In input emin in Ry, omega0 in (a.u.)**3, b0in in kbar,
 ! in output omega in (a.u.)**3, p in kbar, e in Ry
 !
 USE kinds,          ONLY : DP

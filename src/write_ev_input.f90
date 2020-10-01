@@ -6,7 +6,7 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !-----------------------------------------------------------------------
-SUBROUTINE write_ev_input(file_dat)
+SUBROUTINE write_ev_input(filedata)
   !-----------------------------------------------------------------------
   !
   !  This routine receives the summary of the cell volumes and of
@@ -20,14 +20,12 @@ SUBROUTINE write_ev_input(file_dat)
   USE io_global,        ONLY : ionode
 
   IMPLICIT NONE
-  CHARACTER(LEN=256) :: file_dat
   CHARACTER(LEN=256) :: filedata
   INTEGER :: iu_ev, igeom
   INTEGER :: find_free_unit
   !
   IF (my_image_id /= root_image) RETURN
   !
-  filedata=TRIM(file_dat)
   CALL write_ev_driver(filedata) 
   !
   IF (ionode) THEN
@@ -83,7 +81,7 @@ SUBROUTINE do_ev()
 !
 USE control_mur, ONLY : vmin, b0, b01, emin
 USE data_files,  ONLY : flevdat
-USE io_global,   ONLY : meta_ionode_id, stdout
+USE io_global,   ONLY : meta_ionode_id
 USE mp_world,    ONLY : world_comm
 USE mp,          ONLY : mp_bcast
 
@@ -122,7 +120,6 @@ USE control_quartic_energy, ONLY : poly_degree_ph
 USE thermodynamics, ONLY : ph_free_ener
 USE anharmonic,     ONLY : vmin_t, b0_t, b01_t, free_e_min_t
 USE temperature,    ONLY : ntemp, temp
-USE control_pressure, ONLY : pressure_kb
 USE data_files,     ONLY : flevdat
 USE polyfit_mod,    ONLY : polyfit
 USE io_global,      ONLY : stdout
@@ -171,21 +168,10 @@ REAL(DP) :: compute_mur_fun
   CALL compute_celldm_geo(vmin_t(itemp), celldm_, celldm_geo(1,central_geo), &
                                          omega_geo(central_geo))
   WRITE(stdout,'(/,2x,76("-"))')
-  WRITE(stdout,'(5x, "free energy from phonon dos, at T= ", f12.6)') temp(itemp)
-  IF (pressure_kb /= 0.0_DP) &
-     WRITE(stdout, '(5x,"pressure = ",f15.6," kbar")') pressure_kb
-  WRITE(stdout,'(5x, "The equilibrium lattice constant is ",9x,f12.4,&
-                                 &" a.u.")') celldm_(1)
-  WRITE(stdout,'(5x, "The bulk modulus is ",24x,f12.3,"  kbar")')  b0_t(itemp)
-  WRITE(stdout,'(5x, "The pressure derivative of the bulk modulus is ",&
-                               &f9.3)')  b01_t(itemp)
-  IF (pressure_kb /= 0.0_DP) THEN
-     WRITE(stdout,'(5x,"The Gibbs energy at the minimum is    ",&
-                                    6x,f20.9," Ry")') free_e_min_t(itemp)
-  ELSE
-     WRITE(stdout,'(5x,"The free energy at the minimum is",6x,f20.9," Ry")') &
-                                                 free_e_min_t(itemp)
-  END IF
+  WRITE(stdout,'(5x, "free energy from phonon dos, at T= ", f12.6)') &
+                                                                 temp(itemp)
+  CALL summarize_mur(celldm_(1), b0_t(itemp), b01_t(itemp), &
+                                                     free_e_min_t(itemp))
 
   WRITE(stdout,'(2x,76("-"),/)')
 
@@ -209,7 +195,6 @@ USE ph_freq_anharmonic,     ONLY : vminf_t, b0f_t, b01f_t, free_e_minf_t
 USE control_mur,    ONLY : emin, vmin, b0, b01
 USE control_quartic_energy, ONLY : poly_degree_ph
 USE temperature,    ONLY : ntemp, temp
-USE control_pressure, ONLY : pressure_kb
 USE polyfit_mod,    ONLY : polyfit
 USE data_files,     ONLY : flevdat
 USE io_global,      ONLY : stdout
@@ -260,20 +245,8 @@ REAL(DP) :: compute_mur_fun
   WRITE(stdout,'(/,2x,76("+"))')
   WRITE(stdout,'(5x, "free energy from phonon frequencies at T=",f12.4)') &
                                                                temp(itemp)
-  IF (pressure_kb /= 0.0_DP) &
-     WRITE(stdout, '(5x,"pressure = ",f15.6," kbar")') pressure_kb
-  WRITE(stdout,'(5x, "The equilibrium lattice constant is ",16x,f12.4,&
-                                 &" a.u.")') celldm_(1)
-  WRITE(stdout,'(5x, "The bulk modulus is ",31x,f12.3,"  kbar")')  b0f_t(itemp)
-  WRITE(stdout,'(5x, "The pressure derivative of the bulk modulus is ",5x,&
-                               &f11.3)')  b01f_t(itemp)
-  IF (pressure_kb /= 0.0_DP) THEN
-     WRITE(stdout,'(5x,"The Gibbs energy at the minimum is    ",&
-                                    6x,f20.9," Ry")') free_e_minf_t(itemp)
-  ELSE
-     WRITE(stdout,'(5x,"The free energy at the minimum is",6x,f20.9," Ry")') &
-                                                 free_e_minf_t(itemp)
-  END IF
+  CALL summarize_mur(celldm_(1), b0f_t(itemp), b01f_t(itemp), &
+                                                      free_e_minf_t(itemp))
 
   WRITE(stdout,'(2x,76("+"),/)')
 
@@ -396,3 +369,32 @@ compute_mur_fun=aux
 
 RETURN
 END FUNCTION compute_mur_fun
+
+!-------------------------------------------------------------------------
+SUBROUTINE summarize_mur(celldm, b0, b01, free_e_min)
+!-------------------------------------------------------------------------
+!
+USE kinds,     ONLY : DP
+USE control_pressure, ONLY : pressure_kb
+USE io_global, ONLY : stdout
+
+IMPLICIT NONE
+REAL(DP) ::  celldm, b0, b01, free_e_min
+
+IF (pressure_kb /= 0.0_DP) &
+   WRITE(stdout, '(5x,"pressure = ",f15.6," kbar")') pressure_kb
+WRITE(stdout,'(5x, "The equilibrium lattice constant is ",9x,f12.4,&
+                                 &" a.u.")') celldm
+WRITE(stdout,'(5x, "The bulk modulus is ",24x,f12.3,"  kbar")')  b0
+WRITE(stdout,'(5x, "The pressure derivative of the bulk modulus is ",&
+                               &f9.3)')  b01
+IF (pressure_kb /= 0.0_DP) THEN
+   WRITE(stdout,'(5x,"The Gibbs energy at the minimum is    ",&
+                                    6x,f20.9," Ry")') free_e_min
+ELSE
+   WRITE(stdout,'(5x,"The free energy at the minimum is",6x,f20.9," Ry")') &
+                                                 free_e_min
+END IF
+
+RETURN
+END SUBROUTINE summarize_mur

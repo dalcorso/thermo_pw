@@ -23,7 +23,8 @@ SUBROUTINE write_gruneisen_band_anis(file_disp, file_vec)
   USE data_files,     ONLY : flgrun
   USE control_paths,  ONLY : nqaux, disp_q, disp_nqs
   USE equilibrium_conf, ONLY : celldm0
-  USE thermo_mod,     ONLY : celldm_geo, no_ph, in_degree, reduced_grid, red_central_geo
+  USE thermo_mod,     ONLY : celldm_geo, no_ph, in_degree, reduced_grid, &
+                             red_central_geo
   USE anharmonic,     ONLY : celldm_t
   USE ph_freq_anharmonic,  ONLY : celldmf_t
   USE grun_anharmonic, ONLY : poly_degree_grun

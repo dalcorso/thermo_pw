@@ -30,7 +30,8 @@ REAL(DP) :: barl, barm, bart, barnu, barv, bara, barp, baram, barf, baru,  &
 
 REAL(DP) :: barifc, bardmc, baralpha, baralphap
 
-REAL(DP) :: cspeedau, amuau, kappa, kappaa, kappadiecic, toverg
+REAL(DP) :: cspeedau, amuau, kappa, kappaa, kappadiecic, toverg, cmm1hz,    &
+            hzcmm1
 
 REAL(DP) :: cmtom, gtokg, ptop, ltol, ftof, utou, prtopr, chtoch, itoi,     &
             rhotorho, curtocur, etoe, phitophi, captocap, diptodip,         &
@@ -640,6 +641,8 @@ ENDIF
 cspeedau=cspeed/barv
 amuau=amu/barm
 ryev=barphi*0.5_DP
+hzcmm1=1.D-2 / cspeed
+cmm1hz=1.D2 * cspeed
 
 WRITE(stdout,'(/,5x,"Physical constants in Hartree atomic units:")') 
 WRITE(stdout,'(5x,"Speed of light:",22x,es20.11)') cspeedau
@@ -649,10 +652,16 @@ WRITE(stdout,'(/,5x,"Physical constants in eV:")')
 WRITE(stdout,'(5x,"Hartree in eV:",22x,es20.10)') barphi
 WRITE(stdout,'(5x,"Rydberg in eV:",22x,es20.10)') ryev
 
+WRITE(stdout,'(/,5x,"Frequency conversion:")') 
+WRITE(stdout,'(5x,"Hz in cm^-1:",22x,es20.14)') hzcmm1
+WRITE(stdout,'(5x,"cm^-1 in Hz:",22x,es20.8)') cmm1hz
+
 IF (ionode) THEN
    WRITE(iunout,'("\def\cspeedau{",a,"}")') TRIM(float_to_latex(cspeedau,11))
    WRITE(iunout,'("\def\amuau{",a,"}")') TRIM(float_to_latex(amuau,10))
    WRITE(iunout,'("\def\ryev{",a,"}")') TRIM(float_to_latex(ryev,13))
+   WRITE(iunout,'("\def\hzcmm1{",a,"}")') TRIM(float_to_latex(hzcmm1,14))
+   WRITE(iunout,'("\def\cmm1hz{",a,"}")') TRIM(float_to_latex(cmm1hz,8))
    WRITE(iunout,*)
 ENDIF
 
