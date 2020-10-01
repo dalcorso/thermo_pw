@@ -184,6 +184,8 @@
 \def\cspeedau{1.37035999084\times 10^{2}}
 \def\amuau{1.8228884862\times 10^{3}}
 \def\ryev{1.3605693122994\times 10^{1}}
+\def\hzcmm1{3.33564095198152\times 10^{-11}}
+\def\cmm1hz{2.99792458\times 10^{10}}
 
 
 \begin{document} 
@@ -487,6 +489,8 @@ $\bar \rho_m=\barrhomcgs\ g/cm^3$.
 
 In the SI the unit of frequency (symbol $Hz$) is the inverse
 of the unit of time: $Hz=1/s$. This unit is called Hertz.
+The angular frequency is defined as $\omega = 2 \pi \nu$ where 
+$\nu$ is the frequency. Its units are $radiant/s$.
 \\
 
 {\color{web-blue} In a.u. the unit of frequency (symbol $\bar \nu$) is defined
@@ -508,6 +512,20 @@ $\bar \nu=\barnu\ Hz$.
 \\
 }
 
+{\color{red}
+A commonly used unit of frequency is the wavenumber, that is the number of 
+light waves with frequency $\nu$ per $cm$. If the wavelength $\lambda$ is
+given in $cm$, the wavenumber is $\bar \nu={1\over \lambda}$ and its units
+are $cm^{-1}$. Since $\lambda={c\over \nu}$ the conversion factor
+from $Hz$ to $cm^{-1}$ is:
+\begin{equation}
+{1\over 10^2 c}=\hzcmm1\ cm^{-1}/Hz,
+\end{equation}
+while the conversion factor from $cm^{-1}$ to $Hz$ is:
+\begin{equation}
+10^2 c=\cmm1hz\ Hz/cm^{-1}
+\end{equation}
+}
 
 \newpage
 \section{\color{coral}Speed}
@@ -1179,6 +1197,8 @@ while the Rydberg energy expressed in eV is:
 \begin{equation}
 {E_h \over 2}=\ryev\ eV.
 \end{equation}
+These units are used also to measure the frequency giving the energy
+of a photon of frequency $\nu$, that is $h \nu$ instead of $\nu$.
 }
 
 \newpage
@@ -1592,7 +1612,7 @@ is a vector field such that:
 \label{defav}
 \end{equation}
 so the unit of the vector potential is $T\cdot m={N \over A}=
-{V\cdot s \over m}$. \\
+{V\cdot s \over m}={N\cdot s \over C}$. \\
 When the vector potential depends on time the electric field is:
 \begin{equation}
 {\bf E}=-\nabla \phi -{\partial {\bf A} \over \partial t}.
