@@ -291,7 +291,8 @@ USE output,               ONLY : fildyn
   !
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: igeom
-CHARACTER(LEN=256) :: dir, filein, fileout
+CHARACTER(LEN=*) :: dir, filein
+CHARACTER(LEN=256) :: fileout
 CHARACTER(LEN=6) :: int_to_char
 
 fileout=TRIM(dir)//TRIM(filein)//'.g'//TRIM(int_to_char(igeom))
