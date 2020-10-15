@@ -93,11 +93,11 @@ DO igeom=start_geometry_qha, last_geometry_qha
    IF (ltherm_dos) THEN
       CALL mp_sum(el_cons_t, world_comm)
       CALL compute_el_comp_t(el_cons_t,el_comp_t,b0_t)
-      CALL add_geometry_number('anhar_files/', flanhar//'.el_cons', &
+      CALL add_geometry_number('anhar_files/', TRIM(flanhar)//'.el_cons', &
                                               filelastic, igeom)
       CALL write_el_cons_on_file(temp, ntemp, ibrav_save, laue, el_cons_t, &
                                               b0_t, filelastic, 0)
-      CALL add_geometry_number('anhar_files/', flanhar//'.el_comp', &
+      CALL add_geometry_number('anhar_files/', TRIM(flanhar)//'.el_comp', &
                                               filelastic, igeom)
       CALL write_el_cons_on_file(temp, ntemp, ibrav_save, laue, el_comp_t, &
                                               b0_t, filelastic, 1)
@@ -107,13 +107,13 @@ DO igeom=start_geometry_qha, last_geometry_qha
    IF (ltherm_freq) THEN
       CALL mp_sum(el_consf_t, world_comm)
       CALL compute_el_comp_t(el_consf_t,el_compf_t,b0f_t)
-      CALL add_geometry_number('anhar_files/', flanhar//'.el_cons', &
+      CALL add_geometry_number('anhar_files/', TRIM(flanhar)//'.el_cons', &
                                 filelastic, igeom)
       filelastic=TRIM(filelastic)//'_ph'
       CALL write_el_cons_on_file(temp, ntemp, ibrav_save, laue, el_consf_t, &
                                                     b0f_t, filelastic, 0)
 
-      CALL add_geometry_number('anhar_files/', flanhar//'.el_comp', &
+      CALL add_geometry_number('anhar_files/', TRIM(flanhar)//'.el_comp', &
                                 filelastic, igeom)
       filelastic=TRIM(filelastic)//'_ph'
       CALL write_el_cons_on_file(temp, ntemp, ibrav_save, laue, el_compf_t, &
