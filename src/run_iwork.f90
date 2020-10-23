@@ -13,14 +13,14 @@ SUBROUTINE run_iwork(iwork, part, iq, irr, igeom)
 ! It also checks if the pw.x calculation has already been done
 ! and copy the output of pw.x in the variables of thermo_pw.
 !
-USE control_thermo,       ONLY : lpwscf, lstress, lphonon, lberry, &
-                                 geometry, all_geometries_together
+USE control_thermo,       ONLY : lpwscf, lpwband, lstress, lphonon, lberry, &
+                                 lef, geometry, all_geometries_together
 USE control_qe,           ONLY : use_ph_images
 USE control_phrun,        ONLY : auxdyn
-USE thermo_mod,           ONLY : energy_geo
+USE thermo_mod,           ONLY : energy_geo, ef_geo
 USE elastic_constants,    ONLY : sigma_geo
 USE piezoelectric_tensor, ONLY : polar_geo, nppl
-USE ener,                 ONLY : etot
+USE ener,                 ONLY : etot, ef
 USE force_mod,            ONLY : sigma
 USE freq_ph,              ONLY : fpol
 USE io_global,            ONLY : stdout
@@ -50,13 +50,14 @@ WRITE(stdout,'(2x,76("+"),/)')
 !  must be true and the input has been already set by set_thermo_work_todo.
 !  First pw.x
 !
-IF (lpwscf(iwork)) THEN
-   CALL check_existence(iwork,part,run)
+IF (lpwscf(iwork).OR.lpwband(iwork)) THEN
+   IF (lpwscf(iwork)) CALL check_existence(iwork,part,run)
    IF (run) THEN
-      CALL do_pwscf(exit_status, .TRUE.)
-      energy_geo(iwork)=etot
+      CALL do_pwscf(exit_status, lpwscf(iwork))
+      IF (lpwscf(iwork)) energy_geo(iwork)=etot
+      IF (lef(iwork)) ef_geo(iwork)=ef
       IF (lstress(iwork)) sigma_geo(:,:,iwork)=sigma(:,:)
-      CALL save_existence(iwork,part)
+      IF (lpwscf(iwork)) CALL save_existence(iwork,part)
    ENDIF
 ENDIF
 !

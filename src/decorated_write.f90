@@ -36,3 +36,20 @@ WRITE(stdout,'(2x,76("+"),/)')
 
 RETURN
 END SUBROUTINE decorated1_write
+
+!--------------------------------------------------------------------------
+SUBROUTINE decorated1_write2(message1, message2)
+!--------------------------------------------------------------------------
+
+USE io_global, ONLY : stdout
+
+IMPLICIT NONE
+CHARACTER(LEN=*), INTENT(IN) :: message1, message2
+
+WRITE(stdout,'(/,2x,76("+"))') 
+WRITE(stdout,'(a)') TRIM(message1)
+WRITE(stdout,'(a)') TRIM(message2)
+WRITE(stdout,'(2x,76("+"),/)') 
+
+RETURN
+END SUBROUTINE decorated1_write2

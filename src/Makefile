@@ -75,6 +75,7 @@ manage_anhar.o \
 manage_anhar_routines.o \
 manage_bands.o \
 manage_collection.o \
+manage_el_free_energy.o \
 manage_elastic_cons.o \
 manage_elastic_cons_qha.o \
 manage_elastic_cons_qha_2.o \

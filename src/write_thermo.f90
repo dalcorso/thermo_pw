@@ -40,8 +40,9 @@ IF ( igeom < 1 .OR. igeom > tot_ngeo ) CALL errore('write_thermo', &
 
 filetherm='therm_files/'//TRIM(fltherm)
 CALL read_thermo(ntemp, temp, ph_ener(1,igeom), ph_free_ener(1,igeom), &
-                 ph_entropy(1,igeom), ph_ce(1,igeom), &
-                 ph_b_fact(1,1,1,1,igeom), do_read, filetherm)
+                 ph_entropy(1,igeom), ph_ce(1,igeom), do_read, filetherm)
+IF (with_eigen.AND.do_read) &
+   CALL read_b_factor(ntemp, ph_b_fact(1,1,1,1,igeom),filetherm) 
 IF (do_read) RETURN
 
 WRITE(stdout,'(/,2x,76("+"))')
@@ -132,8 +133,9 @@ IF ( igeom < 1 .OR. igeom > tot_ngeo ) CALL errore('write_thermo', &
                                                'Too many geometries',1)
 filename='therm_files/'//TRIM(fltherm)//'_ph'
 CALL read_thermo(ntemp, temp, phf_ener(1,igeom), phf_free_ener(1,igeom), &
-                 phf_entropy(1,igeom), phf_ce(1,igeom), &
-                 phf_b_fact(1,1,1,1,igeom), do_read, filename)
+                 phf_entropy(1,igeom), phf_ce(1,igeom), do_read, filename)
+IF (with_eigen.AND.do_read) &
+   CALL read_b_factor(ntemp, phf_b_fact(1,1,1,1,igeom),filename)
 IF (do_read) RETURN
 
 WRITE(stdout,'(/,2x,76("+"))')
@@ -222,7 +224,7 @@ LOGICAL  :: do_read
 filename='therm_files/'//TRIM(fltherm)//'_debye.g'//TRIM(int_to_char(igeom))
 
 CALL read_thermo(ntemp, temp, deb_energy, deb_free_energy, deb_entropy, &
-                        deb_cv, deb_b_fact, do_read, filename)
+                        deb_cv, do_read, filename)
 IF (do_read) RETURN
 
 IF (my_image_id /= root_image) RETURN
@@ -357,7 +359,7 @@ END SUBROUTINE write_dw_info
 !
 !-----------------------------------------------------------------------
 SUBROUTINE read_thermo(ntemp, temp, ph_ener, ph_free_ener, ph_entropy, &
-                       ph_ce, b_fact, do_read, filetherm)
+                       ph_ce, do_read, filetherm)
 !-----------------------------------------------------------------------
 !
 !  This routine reads a file that contains the harmonic thermodynamic
@@ -375,13 +377,12 @@ USE mp,               ONLY : mp_bcast
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ntemp
 REAL(DP), INTENT(INOUT) :: temp(ntemp), ph_ener(ntemp), ph_free_ener(ntemp),&
-                           ph_entropy(ntemp), ph_ce(ntemp), &
-                           b_fact(3,3,nat,ntemp)
+                           ph_entropy(ntemp), ph_ce(ntemp)
 LOGICAL, INTENT(OUT) :: do_read
 
 CHARACTER(LEN=*) :: filetherm
 CHARACTER(LEN=256) :: filename_loc
-INTEGER :: iu_therm, idum, itemp, na, ipol, jpol, find_free_unit
+INTEGER :: iu_therm, idum, itemp, na, find_free_unit
 LOGICAL :: check_file_exists
 CHARACTER(LEN=6) :: int_to_char
 
@@ -407,28 +408,52 @@ IF (do_read) THEN
    CALL mp_bcast(ph_entropy, meta_ionode_id, world_comm)
    CALL mp_bcast(ph_ce, meta_ionode_id, world_comm)
 
-   IF (with_eigen) THEN
-      DO na=1,nat
-         filename_loc=TRIM(filetherm)//'.'//TRIM(int_to_char(na))//'.dw'
-         IF (meta_ionode) THEN
-            OPEN (UNIT=iu_therm, FILE=TRIM(filename_loc), STATUS='unknown',&
-                                             FORM='formatted')
-            READ(iu_therm, *)
-            DO itemp = 1, ntemp
-               READ(iu_therm, '(e16.8,6e18.8)') temp(itemp), &
-                     ((b_fact(ipol,jpol,na,itemp), jpol=ipol,3), ipol=1,3)
-            END DO
-            CLOSE(UNIT=iu_therm, STATUS='KEEP')
-         ENDIF
-      ENDDO
-      CALL mp_bcast(b_fact, meta_ionode_id, world_comm)
-   ELSE
-      b_fact=0.0_DP
-   ENDIF
 END IF
 
 RETURN
 END SUBROUTINE read_thermo
+
+!---------------------------------------------------------------------------
+SUBROUTINE read_b_factor(ntemp, b_fact, filetherm)
+!---------------------------------------------------------------------------
+!
+!   Reads the b factor and broacast to all processors
+!
+USE kinds,      ONLY : DP
+USE ions_base,  ONLY : nat
+USE io_global,  ONLY : meta_ionode, meta_ionode_id
+USE mp_world,   ONLY : world_comm
+USE mp,         ONLY : mp_bcast
+
+IMPLICIT NONE
+INTEGER, INTENT(IN)     :: ntemp
+REAL(DP), INTENT(INOUT) :: b_fact(3,3,nat,ntemp)
+CHARACTER(LEN=*)        :: filetherm
+
+INTEGER :: na, itemp, ipol, jpol, iu_therm, find_free_unit
+CHARACTER(LEN=256) :: filename_loc
+CHARACTER(LEN=6) :: int_to_char
+REAL(DP) :: rdum
+
+DO na=1,nat
+   filename_loc=TRIM(filetherm)//'.'//TRIM(int_to_char(na))//'.dw'
+   IF (meta_ionode) THEN
+      iu_therm=find_free_unit()
+      OPEN (UNIT=iu_therm, FILE=TRIM(filename_loc), STATUS='unknown',&
+                                             FORM='formatted')
+      READ(iu_therm, *)
+      DO itemp = 1, ntemp
+         READ(iu_therm, '(e16.8,6e18.8)') rdum, &
+                     ((b_fact(ipol,jpol,na,itemp), jpol=ipol,3), ipol=1,3)
+      END DO
+      CLOSE(UNIT=iu_therm, STATUS='KEEP')
+   ENDIF
+ENDDO
+CALL mp_bcast(b_fact, meta_ionode_id, world_comm)
+
+RETURN
+END SUBROUTINE read_b_factor
+
 !
 !  Copyright (C) 2018 Cristiano Malica
 !

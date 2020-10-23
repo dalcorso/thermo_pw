@@ -40,6 +40,32 @@ RETURN
 END SUBROUTINE set_files_names
 
 !----------------------------------------------------------------
+SUBROUTINE set_el_files_names(igeom)
+!----------------------------------------------------------------
+
+USE internal_files_names, ONLY : fleldos_thermo, flgnuplot_thermo,   &
+                                 flpseldos_thermo, fleltherm_thermo, &
+                                 flpseltherm_thermo
+USE data_files,           ONLY : fleldos, fleltherm
+USE postscript_files,     ONLY : flpseldos, flpseltherm
+USE control_gnuplot,      ONLY : flgnuplot
+
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: igeom
+
+CHARACTER(LEN=6) :: int_to_char
+
+flgnuplot=TRIM(flgnuplot_thermo)//'.g'//TRIM(int_to_char(igeom))
+
+fleldos=TRIM(fleldos_thermo)//'.g'//TRIM(int_to_char(igeom))
+flpseldos=TRIM(flpseldos_thermo)//'.g'//TRIM(int_to_char(igeom))
+fleltherm=TRIM(fleltherm_thermo)//'.g'//TRIM(int_to_char(igeom))
+flpseltherm=TRIM(flpseltherm_thermo)//'.g'//TRIM(int_to_char(igeom))
+
+RETURN
+END SUBROUTINE set_el_files_names
+
+!----------------------------------------------------------------
 SUBROUTINE initialize_file_names()
 !----------------------------------------------------------------
 
@@ -108,6 +134,48 @@ flpsdisp = TRIM(flpsdisp_thermo)
 
 RETURN
 END SUBROUTINE restore_files_names
+!
+!----------------------------------------------------------------
+SUBROUTINE restore_el_file_names()
+!----------------------------------------------------------------
+
+USE internal_files_names, ONLY : fleldos_thermo, flpseldos_thermo, &
+                                 fleltherm_thermo, flpseltherm_thermo, &
+                                 flgnuplot_thermo
+USE postscript_files,     ONLY : flpseldos, flpseltherm
+USE data_files,           ONLY : fleldos, fleltherm
+USE control_gnuplot,      ONLY : flgnuplot
+
+IMPLICIT NONE
+
+flgnuplot =TRIM(flgnuplot_thermo)
+
+fleldos=TRIM(fleldos_thermo)
+flpseldos=TRIM(flpseldos_thermo)
+fleltherm=TRIM(fleltherm_thermo)
+flpseltherm=TRIM(flpseltherm_thermo)
+
+RETURN
+END SUBROUTINE restore_el_file_names
+
+!----------------------------------------------------------------
+SUBROUTINE initialize_el_file_names()
+!----------------------------------------------------------------
+
+USE internal_files_names, ONLY : fleldos_thermo, flpseldos_thermo, &
+                                 fleltherm_thermo, flpseltherm_thermo
+USE postscript_files,     ONLY : flpseldos, flpseltherm
+USE data_files,           ONLY : fleldos, fleltherm
+
+IMPLICIT NONE
+
+fleldos_thermo=TRIM(fleldos)
+flpseldos_thermo=TRIM(flpseldos)
+fleltherm_thermo=TRIM(fleltherm)
+flpseltherm_thermo=TRIM(flpseltherm)
+
+RETURN
+END SUBROUTINE initialize_el_file_names
 
 !----------------------------------------------------------------
 SUBROUTINE set_files_for_plot(icode, file_disp, filedata, filerap, fileout, &

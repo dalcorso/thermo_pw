@@ -39,7 +39,7 @@ SUBROUTINE thermo_readin()
                                    flpbs, flprojlayer, flnkconv, flgrun,   &
                                    flpgrun, fl_el_cons, flpband, flvec,    &
                                    flepsilon, floptical, fleldos, fleltherm, &
-                                   fldosfrq
+                                   fldosfrq, flelanhar
   USE temperature,          ONLY : tmin, tmax, deltat, ntemp
   USE control_pressure,     ONLY : pressure
   USE control_dosq,         ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq,&
@@ -65,7 +65,8 @@ SUBROUTINE thermo_readin()
   USE control_bands,        ONLY : emin_input, emax_input, nbnd_bands, lsym, &
                                    enhance_plot
   USE control_eldos,        ONLY : deltae, ndose, nk1_d, nk2_d, nk3_d, &
-                                   k1_d, k2_d, k3_d, sigmae, legauss
+                                   k1_d, k2_d, k3_d, sigmae, legauss,  &
+                                   lel_free_energy
   USE control_grun,         ONLY : grunmin_input, grunmax_input, &
                                    temp_ph, volume_ph, celldm_ph, lv0_t, &
                                    lb0_t
@@ -245,6 +246,7 @@ SUBROUTINE thermo_readin()
                             flpsmur,                        &
                             ncontours,                      &
                             flenergy, flpsenergy,           &
+                            lel_free_energy,                 &
 !
 !   mur_lc_elastic_constants
 !
@@ -262,7 +264,7 @@ SUBROUTINE thermo_readin()
                             lv0_t, lb0_t,                   &
                             poly_degree_grun,               &
                             flpgrun, flgrun, flpsgrun,      &
-                            flanhar, flpsanhar,             &
+                            flanhar, flelanhar, flpsanhar,  &
                             fact_ngeo, ngeo_ph,             &
                             all_geometries_together,        &
 !
@@ -397,9 +399,10 @@ SUBROUTINE thermo_readin()
   flpsformf='output_formf'
 
   flepsilon='epsilon'
-  floptical='optical'
   flpsepsilon='output_epsilon'
+  floptical='optical'
   flpsoptical='output_optical'
+
   force_band_calculation=.FALSE.
   IF (nimage>1) THEN
      use_ph_images=.FALSE.
@@ -462,6 +465,7 @@ SUBROUTINE thermo_readin()
   flevdat='output_ev.dat'
   flpsmur='output_mur'
   ncontours=0
+  lel_free_energy=.FALSE.
   flenergy='output_energy'
   flpsenergy='output_energy'
 
@@ -483,6 +487,7 @@ SUBROUTINE thermo_readin()
   flgrun='output_grun.dat'
   flpsgrun='output_grun'
   flanhar='output_anhar.dat'
+  flelanhar='output_elanhar.dat'
   flpsanhar='output_anhar'
   fact_ngeo=1
   ngeo_ph=0

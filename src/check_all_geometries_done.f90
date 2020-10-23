@@ -51,3 +51,41 @@ CALL check_thermo_all_geo()
 RETURN
 END SUBROUTINE check_all_geometries_done
 
+!----------------------------------------------------------
+SUBROUTINE check_all_el_free_ener_done(all_el_free)
+!----------------------------------------------------------
+!
+!  This routine checks that the files with the electronic
+!  thermodynamic properties are on file. In this case all_el_free
+!  is set to .TRUE. otherwise to false
+!
+
+USE thermo_mod, ONLY : tot_ngeo, no_ph
+USE data_files, ONLY : fleltherm
+USE control_elastic_constants, ONLY : start_geometry_qha, last_geometry_qha, &
+                       ngeom
+
+IMPLICIT NONE
+
+LOGICAL, INTENT(OUT) :: all_el_free
+
+INTEGER :: igeom, igeom_qha, iwork, work_base
+LOGICAL  :: check_file_exists
+CHARACTER(LEN=256) :: filename
+
+all_el_free=.TRUE.
+work_base=tot_ngeo/ngeom
+DO igeom_qha=start_geometry_qha, last_geometry_qha
+   DO iwork=1,work_base
+      igeom=(igeom_qha-1)*work_base+iwork
+      IF (no_ph(igeom)) CYCLE
+      CALL set_el_files_names(igeom)
+      filename="therm_files/"//TRIM(fleltherm)
+      IF (all_el_free) all_el_free=all_el_free.AND. &
+           check_file_exists(filename)
+      IF (.NOT.all_el_free) RETURN
+   ENDDO
+ENDDO
+
+RETURN
+END SUBROUTINE check_all_el_free_ener_done

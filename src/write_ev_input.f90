@@ -6,7 +6,7 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !-----------------------------------------------------------------------
-SUBROUTINE write_ev_input(filedata)
+SUBROUTINE write_ev_input(file_dat)
   !-----------------------------------------------------------------------
   !
   !  This routine receives the summary of the cell volumes and of
@@ -20,12 +20,14 @@ SUBROUTINE write_ev_input(filedata)
   USE io_global,        ONLY : ionode
 
   IMPLICIT NONE
+  CHARACTER(LEN=256) :: file_dat
   CHARACTER(LEN=256) :: filedata
   INTEGER :: iu_ev, igeom
   INTEGER :: find_free_unit
   !
   IF (my_image_id /= root_image) RETURN
   !
+  filedata=TRIM(file_dat)
   CALL write_ev_driver(filedata) 
   !
   IF (ionode) THEN
@@ -81,7 +83,7 @@ SUBROUTINE do_ev()
 !
 USE control_mur, ONLY : vmin, b0, b01, emin
 USE data_files,  ONLY : flevdat
-USE io_global,   ONLY : meta_ionode_id
+USE io_global,   ONLY : meta_ionode_id, stdout
 USE mp_world,    ONLY : world_comm
 USE mp,          ONLY : mp_bcast
 
@@ -117,9 +119,12 @@ USE thermo_mod,     ONLY : ngeo, omega_geo, energy_geo, celldm_geo, &
                            central_geo, no_ph
 USE control_mur,    ONLY : vmin, b0, b01, emin
 USE control_quartic_energy, ONLY : poly_degree_ph
+USE control_eldos,  ONLY : lel_free_energy
 USE thermodynamics, ONLY : ph_free_ener
+USE el_thermodynamics, ONLY : el_free_ener
 USE anharmonic,     ONLY : vmin_t, b0_t, b01_t, free_e_min_t
 USE temperature,    ONLY : ntemp, temp
+USE control_pressure, ONLY : pressure_kb
 USE data_files,     ONLY : flevdat
 USE polyfit_mod,    ONLY : polyfit
 USE io_global,      ONLY : stdout
@@ -145,6 +150,7 @@ REAL(DP) :: compute_mur_fun
      ndata=ndata+1
      x(ndata)=omega_geo(idata)
      y(ndata)=ph_free_ener(itemp,idata)
+     IF (lel_free_energy) y(ndata)=y(ndata)+el_free_ener(itemp,idata)
 !    WRITE(stdout,'(2f25.14)') x(ndata), y(ndata)
   ENDDO
   CALL polyfit(x, y, ndata, a, poly_degree_ph)
@@ -169,7 +175,7 @@ REAL(DP) :: compute_mur_fun
                                          omega_geo(central_geo))
   WRITE(stdout,'(/,2x,76("-"))')
   WRITE(stdout,'(5x, "free energy from phonon dos, at T= ", f12.6)') &
-                                                                 temp(itemp)
+                                                                temp(itemp)
   CALL summarize_mur(celldm_(1), b0_t(itemp), b01_t(itemp), &
                                                      free_e_min_t(itemp))
 
@@ -191,10 +197,13 @@ USE thermo_mod,     ONLY : ngeo, omega_geo, energy_geo, celldm_geo, &
                            central_geo, no_ph
 USE constants,      ONLY : ry_kbar
 USE ph_freq_thermodynamics, ONLY : phf_free_ener
+USE el_thermodynamics,      ONLY : el_free_ener
 USE ph_freq_anharmonic,     ONLY : vminf_t, b0f_t, b01f_t, free_e_minf_t
 USE control_mur,    ONLY : emin, vmin, b0, b01
 USE control_quartic_energy, ONLY : poly_degree_ph
+USE control_eldos,  ONLY : lel_free_energy
 USE temperature,    ONLY : ntemp, temp
+USE control_pressure, ONLY : pressure_kb
 USE polyfit_mod,    ONLY : polyfit
 USE data_files,     ONLY : flevdat
 USE io_global,      ONLY : stdout
@@ -220,6 +229,7 @@ REAL(DP) :: compute_mur_fun
      ndata=ndata+1
      x(ndata)=omega_geo(idata)
      y(ndata)=phf_free_ener(itemp,idata) 
+     IF (lel_free_energy) y(ndata)=y(ndata)+el_free_ener(itemp,idata)
 !    WRITE(stdout,'(2f25.14)') x(ndata), y(ndata)
   ENDDO
   CALL polyfit(x, y, ndata, a, poly_degree_ph)
@@ -252,6 +262,92 @@ REAL(DP) :: compute_mur_fun
 
   RETURN
 END SUBROUTINE do_ev_t_ph
+
+!-----------------------------------------------------------------------
+SUBROUTINE do_ev_t_el(itemp)
+!-----------------------------------------------------------------------
+!
+!  This subroutine computes the equilibrium volume and bulk modulus
+!  at a given temperature. It uses the free energy computed by phonon dos
+!
+USE kinds,          ONLY : DP
+USE constants,      ONLY : ry_kbar
+USE thermo_mod,     ONLY : ngeo, omega_geo, energy_geo, celldm_geo, &
+                           central_geo
+USE control_mur,    ONLY : vmin, b0, b01, emin
+USE control_quartic_energy, ONLY : poly_degree_ph
+USE el_thermodynamics, ONLY : el_free_ener
+USE el_anharmonic,  ONLY : vmine_t, b0e_t, b01e_t, free_e_mine_t
+USE temperature,    ONLY : ntemp, temp
+USE control_pressure, ONLY : pressure_kb
+USE data_files,     ONLY : flevdat
+USE polyfit_mod,    ONLY : polyfit
+USE io_global,      ONLY : stdout
+USE mp_images,      ONLY : my_image_id, root_image
+
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: itemp
+INTEGER :: igeom, iu_ev
+REAL(DP) :: free_e, vm, celldm_(6)
+INTEGER  :: m1
+INTEGER :: idata, ndata, i1
+REAL(DP) :: a(poly_degree_ph+1), x(ngeo(1)), y(ngeo(1)), aux, aux1
+REAL(DP) :: compute_mur_fun
+
+  IF (my_image_id /= root_image) RETURN
+
+  m1=poly_degree_ph+1
+  WRITE(stdout,*) ngeo(1), central_geo
+  ndata=0
+  DO idata=1,ngeo(1)
+     ndata=ndata+1
+     x(ndata)=omega_geo(idata)
+     y(ndata)=el_free_ener(itemp,idata)
+     WRITE(stdout,'(2f25.14)') x(ndata), y(ndata)
+  ENDDO
+  WRITE(stdout,*)
+  CALL polyfit(x, y, ndata, a, poly_degree_ph)
+
+  CALL find_min_mur_pol(vmin, b0 / ry_kbar, b01, a, m1, vm)
+  aux = (vmin / vm)**b01 * b0
+  DO i1=3,m1
+     aux=aux+ (i1-2.0_DP) * (i1 - 1.0_DP) * a(i1) * vm ** (i1-2) * ry_kbar
+  ENDDO
+  aux1= b0 * b01 / aux * ( vmin / vm )** b01
+  DO i1=3,m1
+     aux1=aux1- (i1-2.0_DP)**2*(i1 - 1.0_DP) * a(i1) * vm ** (i1-2) * ry_kbar &
+                                 / aux
+  ENDDO
+
+  vmine_t(itemp)=vm
+  b0e_t(itemp)=aux
+  b01e_t(itemp)=aux1
+  free_e_mine_t(itemp)=emin + compute_mur_fun(vm, vmin, b0/ry_kbar, b01, a, m1)
+  !
+  CALL compute_celldm_geo(vmine_t(itemp), celldm_, celldm_geo(1,central_geo), &
+                                         omega_geo(central_geo))
+  WRITE(stdout,'(/,2x,76("-"))')
+  WRITE(stdout,'(5x, "free energy from electron dos, at T= ", f12.6)') &
+                                                                temp(itemp)
+  IF (pressure_kb /= 0.0_DP) &
+     WRITE(stdout, '(5x,"pressure = ",f15.6," kbar")') pressure_kb
+  WRITE(stdout,'(5x, "The equilibrium lattice constant is ",9x,f12.4,&
+                                 &" a.u.")') celldm_(1)
+  WRITE(stdout,'(5x, "The bulk modulus is ",24x,f12.3,"  kbar")')  b0e_t(itemp)
+  WRITE(stdout,'(5x, "The pressure derivative of the bulk modulus is ",&
+                               &f9.3)')  b01e_t(itemp)
+  IF (pressure_kb /= 0.0_DP) THEN
+     WRITE(stdout,'(5x,"The Gibbs energy at the minimum is    ",&
+                                    6x,f20.9," Ry")') free_e_mine_t(itemp)
+  ELSE
+     WRITE(stdout,'(5x,"The free energy at the minimum is",6x,f20.9," Ry")') &
+                                                 free_e_mine_t(itemp)
+  END IF
+
+  WRITE(stdout,'(2x,76("-"),/)')
+
+  RETURN
+END SUBROUTINE do_ev_t_el
 
 !-----------------------------------------------------------------------
 SUBROUTINE find_min_mur_pol(v0, b0, b01, a, m1, vm)

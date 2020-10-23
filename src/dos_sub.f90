@@ -31,7 +31,7 @@ SUBROUTINE dos_sub()
   !
   IMPLICIT NONE
   !
-  CHARACTER(len=256) :: filedos
+  CHARACTER(len=256) :: filedos, message1, message2
   REAL(DP) :: emin, emax
   REAL(DP), ALLOCATABLE :: e(:), dosofe(:,:), dosint(:)
   REAL(DP) :: save_degauss, ef1
@@ -44,6 +44,10 @@ SUBROUTINE dos_sub()
   !
   CALL clean_pw(.TRUE.)
   CALL read_xml_file( wfc_is_collected )
+  !
+  message1="     Computing the electron dos"
+  WRITE(message2,'(5x,"Writing on file therm_files/",a)') TRIM(fleldos)
+  CALL decorated1_write2(message1, message2)
   !
   save_degauss=degauss
   save_ngauss=ngauss

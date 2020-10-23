@@ -19,10 +19,12 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
 !  and irr_value is not used.
 !
   USE kinds,            ONLY : DP
-  USE thermo_mod,       ONLY : what, celldm_geo
+  USE thermo_mod,       ONLY : what, ibrav_geo, celldm_geo, ef_geo
   USE control_thermo,   ONLY : outdir_thermo
-  USE control_elastic_constants, ONLY : frozen_ions
+  USE control_elastic_constants, ONLY : frozen_ions, use_free_energy
+  USE control_bands,    ONLY : nbnd_bands
   USE control_conv,     ONLY : ke, keden, nk_test, sigma_test
+  USE control_eldos,    ONLY : lel_free_energy
   USE initial_conf,     ONLY : ibrav_save, tau_save_crys
   USE equilibrium_conf, ONLY : at0, tau0
 !
@@ -35,12 +37,14 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
 !
   USE input_parameters, ONLY : electron_maxstep, k_points, xk, wk, k1, k2, &
                                k3, nkstot
-  USE control_flags,    ONLY : niter
+  USE control_flags,    ONLY : niter, lbands
   USE cell_base,        ONLY : cell_base_init, at
   USE ions_base,        ONLY : tau, nat
   USE gvecw,            ONLY : ecutwfc
   USE gvect,            ONLY : ecutrho
   USE gvecs,            ONLY : dual
+  USE wvfct,            ONLY : nbnd
+  USE ener,             ONLY : ef
   USE force_mod,        ONLY : lstres
   USE start_k,          ONLY : init_start_k
   USE klist,            ONLY : degauss
@@ -171,10 +175,17 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
               'scf_disp',       &
               'mur_lc_ph',      &
               'mur_lc_disp',    &
-              'mur_lc_t',       &
-              'elastic_constants_t')
-
+              'mur_lc_t')       
            CALL set_work_for_ph(iwork, igeom, iq_point, irr_value)
+        CASE('elastic_constants_t')
+           IF (use_free_energy) THEN
+              CALL set_work_for_ph(iwork, igeom, iq_point, irr_value)
+           ELSEIF (lel_free_energy) THEN
+              CALL set_work_for_bands(iwork)
+           ENDIF
+        CASE ('mur_lc')
+
+              CALL set_work_for_bands(iwork)
 !
 !    Here the elastic constant calculation
 !
@@ -350,3 +361,55 @@ ENDIF
 
 RETURN
 END SUBROUTINE set_work_for_ph
+
+!-----------------------------------------------------------------------
+SUBROUTINE set_work_for_bands(iwork)
+!-----------------------------------------------------------------------
+USE kinds,          ONLY : DP
+USE ions_base,      ONLY : tau, nat
+USE cell_base,      ONLY : cell_base_init, at
+USE control_flags,  ONLY : lbands
+USE control_bands,  ONLY : nbnd_bands
+USE wvfct,          ONLY : nbnd
+USE thermo_mod,     ONLY : what, ibrav_geo, celldm_geo, ef_geo
+USE control_thermo, ONLY : outdir_thermo
+USE klist,          ONLY : lgauss, ltetra
+USE ener,           ONLY : ef
+USE initial_conf,   ONLY : tau_save_crys
+
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: iwork
+REAL(DP) :: rd_ht(3,3), zero, celldm(6)
+CHARACTER(LEN=256) :: outdir
+CHARACTER(LEN=6) :: int_to_char
+!
+!   now set the celldm
+!
+celldm(:)=celldm_geo(:,iwork)
+rd_ht=0.0_DP
+CALL cell_base_init ( ibrav_geo(iwork), celldm, zero, zero, &
+                      zero, zero, zero, zero, .FALSE., rd_ht, ' ' )
+CALL set_dos_kpoints()
+lbands=.FALSE.
+IF (lgauss.OR.ltetra) ef=ef_geo(iwork)
+!
+!    use nbnd_bands to control how many bands to compute. If it is zero
+!    we use the number of bands of the self-consistent calculation
+!
+IF (nbnd_bands > nbnd) nbnd = nbnd_bands
+!
+!   recompute the fft mesh 
+!
+CALL set_fft_mesh()
+!
+! strain uniformly the coordinates to the new celldm
+!
+tau=tau_save_crys
+CALL cryst_to_cart( nat, tau, at, 1 )
+!
+! set the tmp_dir for this geometry
+!
+outdir=TRIM(outdir_thermo)//'/g'//TRIM(int_to_char(iwork))//'/'
+CALL set_tmp_dir(outdir)
+RETURN
+END SUBROUTINE set_work_for_bands

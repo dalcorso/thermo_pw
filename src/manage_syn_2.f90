@@ -5,9 +5,7 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-!-------------------------------------------------------------------------
 SUBROUTINE manage_syn_2(nwork)
-!-------------------------------------------------------------------------
 !
 !   This subroutine manages the synchronous calculations made in
 !   part2 after the run of many pw.x calculations.
@@ -15,12 +13,16 @@ SUBROUTINE manage_syn_2(nwork)
 USE kinds, ONLY : DP
 USE control_thermo,   ONLY : lelastic_const, lpiezoelectric_tensor, &
                              lpolarization
+USE control_eldos,    ONLY : lel_free_energy
+
 IMPLICIT NONE
 REAL(DP) :: polar(3)
 INTEGER :: nwork
 !
 ! here we return synchronized and calculate the elastic constants 
 ! from energy or stress 
+!
+IF (lel_free_energy) CALL manage_el_free_energy(nwork)
 !
 IF (lelastic_const) CALL manage_elastic_cons(nwork, 1)
 !

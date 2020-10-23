@@ -1,5 +1,9 @@
 New in Version 1.4.0
 
+Added the automatic computation of the electronic contribution to
+the thermodynamic properties and to the elastic constants
+(in collaboration with C. Malica).
+
 Added the computation of the complex index of refraction
 and, for cubic solids, of the reflectivity and of
 the absorption coefficient.

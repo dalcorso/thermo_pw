@@ -5,15 +5,20 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-!-------------------------------------------------------------------
+!---------------------------------------------------------------------
 SUBROUTINE manage_anhar()
-!-------------------------------------------------------------------
+!---------------------------------------------------------------------
 
 USE kinds,                 ONLY : DP
 USE temperature,           ONLY : ntemp
+USE thermo_mod,            ONLY : tot_ngeo
 USE control_thermo,        ONLY : ltherm_dos, ltherm_freq
+USE control_eldos,         ONLY : lel_free_energy
+USE temperature,           ONLY : temp, ntemp
 USE internal_files_names,  ONLY : flfrq_thermo, flvec_thermo
-USE data_files,            ONLY : flanhar
+USE el_thermodynamics,     ONLY : el_ener, el_free_ener, el_entr, &
+                                  el_ce
+USE data_files,            ONLY : flanhar, fleltherm
 USE anharmonic,            ONLY : vmin_t, b0_t, b01_t, free_e_min_t
 USE ph_freq_anharmonic,    ONLY : vminf_t, b0f_t, b01f_t, free_e_minf_t
 USE io_global,             ONLY : stdout
@@ -22,12 +27,26 @@ USE mp,                    ONLY : mp_sum
 
 IMPLICIT NONE
 
-INTEGER :: itemp
+INTEGER :: itemp, igeom
 CHARACTER(LEN=256) :: filedata, filerap, fileout, gnu_filename, filenameps
-LOGICAL :: all_geometry_done
+LOGICAL :: all_geometry_done, all_el_free, ldummy
 
 CALL check_all_geometries_done(all_geometry_done)
 IF (.NOT.all_geometry_done) RETURN
+
+IF (lel_free_energy) THEN
+   CALL check_all_el_free_ener_done(all_el_free)
+   IF (.NOT.all_el_free) CALL errore('manage_anhar',&
+                        'missing electron thermodynamics',1)
+   DO igeom=1, tot_ngeo
+      CALL set_el_files_names(igeom)
+      filedata="therm_files/"//TRIM(fleltherm)
+      CALL read_thermo(ntemp, temp, el_ener(:,igeom),           &
+                       el_free_ener(:,igeom), el_entr(:,igeom), &
+                       el_ce(:,igeom), ldummy, filedata)
+   ENDDO
+   CALL restore_el_file_names()
+ENDIF
 
 IF (ltherm_dos) THEN
    WRITE(stdout,'(/,2x,76("-"))')
@@ -112,17 +131,21 @@ END SUBROUTINE manage_anhar
 
 !-------------------------------------------------------------------------
 SUBROUTINE manage_anhar_anis()
-!-------------------------------------------------------------------
-!
+!-------------------------------------------------------------------------
+
 USE kinds,                 ONLY : DP
-USE thermo_mod,            ONLY : reduced_grid, what
+USE thermo_mod,            ONLY : reduced_grid, what, tot_ngeo
 USE temperature,           ONLY : ntemp, temp
 USE control_pressure,      ONLY : pressure_kb
 USE control_thermo,        ONLY : ltherm_dos, ltherm_freq
 USE control_elastic_constants, ONLY : el_cons_qha_available, &
                                   el_consf_qha_available
+USE control_eldos,         ONLY : lel_free_energy
 USE thermodynamics,        ONLY : ph_free_ener
 USE ph_freq_thermodynamics, ONLY : phf_free_ener
+USE el_thermodynamics,     ONLY : el_ener, el_free_ener, el_entr, &
+                                  el_ce
+USE data_files,            ONLY : fleltherm
 USE internal_files_names,  ONLY : flfrq_thermo, flvec_thermo
 USE anharmonic,            ONLY : celldm_t, free_e_min_t
 USE ph_freq_anharmonic,    ONLY : celldmf_t, free_e_minf_t
@@ -131,14 +154,28 @@ USE mp,                    ONLY : mp_sum
 USE mp_world,              ONLY : world_comm
 
 IMPLICIT NONE
-INTEGER :: itemp, startt, lastt, idata, ndata
+INTEGER :: itemp, igeom, startt, lastt, idata, ndata
 CHARACTER(LEN=256) :: filedata, filerap, fileout, gnu_filename, filenameps
 REAL(DP), ALLOCATABLE :: phf(:)
-LOGICAL :: all_geometry_done
+LOGICAL :: all_geometry_done, all_el_free, ldummy
 INTEGER :: compute_nwork
 
 CALL check_all_geometries_done(all_geometry_done)
 IF (.NOT.all_geometry_done) RETURN
+
+IF (lel_free_energy) THEN
+   CALL check_all_el_free_ener_done(all_el_free)
+   IF (.NOT.all_el_free) CALL errore('manage_anhar_anis',&
+                        'missing electron thermodynamics',1)
+   DO igeom=1, tot_ngeo
+      CALL set_el_files_names(igeom)
+      filedata="therm_files/"//TRIM(fleltherm)
+      CALL read_thermo(ntemp, temp, el_ener(:,igeom),           &
+                       el_free_ener(:,igeom), el_entr(:,igeom), &
+                       el_ce(:,igeom), ldummy, filedata)
+   ENDDO
+   CALL restore_el_file_names()
+ENDIF
 !
 !    Anisotropic solid. Compute the crystal parameters, the thermal expansion 
 !    tensor and the Helmholtz (or Gibbs) free energy as a function 
@@ -162,6 +199,7 @@ IF (ltherm_dos) THEN
       ENDIF
       DO idata=1,ndata
          phf(idata)=ph_free_ener(itemp,idata)
+         IF (lel_free_energy) phf(idata)=phf(idata)+el_free_ener(itemp, idata)
       ENDDO
       CALL quadratic_fit_t(itemp, celldm_t(:,itemp), free_e_min_t(itemp), phf,&
                                                                         ndata)
@@ -185,6 +223,7 @@ IF (ltherm_freq) THEN
       ENDIF
       DO idata=1,ndata
          phf(idata)=phf_free_ener(itemp,idata)
+         IF (lel_free_energy) phf(idata)=phf(idata)+el_free_ener(itemp, idata)
       ENDDO
       CALL quadratic_fit_t(itemp, celldmf_t(:,itemp), free_e_minf_t(itemp), &
                                                       phf, ndata)
@@ -253,3 +292,48 @@ CALL plot_anhar_anis()
 
 RETURN
 END SUBROUTINE manage_anhar_anis
+!
+!-------------------------------------------------------------------
+SUBROUTINE manage_el_anhar()
+!-------------------------------------------------------------------
+!
+USE kinds,                 ONLY : DP
+USE temperature,           ONLY : ntemp
+USE data_files,            ONLY : flelanhar
+USE el_anharmonic,         ONLY : vmine_t, b0e_t, b01e_t, free_e_mine_t
+USE io_global,             ONLY : stdout
+USE mp_images,             ONLY : inter_image_comm
+USE mp,                    ONLY : mp_sum
+
+IMPLICIT NONE
+
+INTEGER :: itemp
+
+WRITE(stdout,'(/,2x,76("-"))')
+WRITE(stdout,'(5x,"Computing the crystal parameters adding ")')
+WRITE(stdout,'(5x,"the electronic energy.")') 
+WRITE(stdout,'(5x,"Writing on file ",a)') TRIM(flelanhar)
+WRITE(stdout,'(2x,76("-"),/)')
+!
+!  first the crystal parameters as a function of temperature
+!
+vmine_t=0.0_DP
+b0e_t=0.0_DP
+b01e_t=0.0_DP
+free_e_mine_t=0.0_DP
+DO itemp=1, ntemp
+   CALL do_ev_t_el(itemp)
+ENDDO
+CALL mp_sum(vmine_t, inter_image_comm)
+CALL mp_sum(b0e_t, inter_image_comm)
+CALL mp_sum(b01e_t, inter_image_comm)
+CALL mp_sum(free_e_mine_t, inter_image_comm)
+!
+!    calculate several anharmonic quantities 
+!
+CALL write_el_anharmonic()
+
+!CALL plot_el_anhar() 
+
+RETURN
+END SUBROUTINE manage_el_anhar

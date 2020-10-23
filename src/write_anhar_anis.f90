@@ -17,6 +17,7 @@ USE temperature,    ONLY : ntemp, temp
 USE thermo_mod,     ONLY : ibrav_geo
 USE thermo_sym,     ONLY : laue
 USE thermodynamics, ONLY : ph_e0, ph_ce, ph_b_fact, ph_ener, ph_free_ener, ph_entropy
+USE el_thermodynamics, ONLY : el_ener, el_free_ener, el_entr, el_ce
 USE anharmonic,     ONLY : alpha_anis_t, vmin_t, b0_t, celldm_t, beta_t, &
                            gamma_t, cv_t, ce_t, cp_t, ener_t, free_ener_t, entropy_t, b0_s, & 
                            cpmce_anis, el_cons_t, el_comp_t, free_e_min_t, bths_t, ggamma_t, &
@@ -24,12 +25,15 @@ USE anharmonic,     ONLY : alpha_anis_t, vmin_t, b0_t, celldm_t, beta_t, &
                            v_t, v_s
 USE initial_conf,   ONLY : ibrav_save
 USE control_thermo, ONLY : with_eigen
+USE control_eldos,  ONLY : lel_free_energy
 USE elastic_constants, ONLY : compute_elastic_compliances, &
                               write_el_cons_on_file, print_macro_elasticity,  &                 
                               write_macro_el_on_file, print_sound_velocities, & 
                               write_sound_on_file
 USE isoentropic,    ONLY : isostress_heat_capacity, thermal_stress,      &
                            gen_average_gruneisen, isoentropic_elastic_constants
+USE el_anharmonic,  ONLY : el_energy_t, el_free_energy_t, el_entropy_t, &
+                           el_ce_t
 USE data_files,     ONLY : flanhar
 USE io_global,      ONLY : meta_ionode
 
@@ -68,6 +72,18 @@ CALL interpolate_thermo(vmin_t, celldm_t, ph_free_ener, free_ener_t)
 CALL interpolate_thermo(vmin_t, celldm_t, ph_entropy, entropy_t)
                                                        
 CALL interpolate_e0(vmin_t, celldm_t, ph_e0, e0)
+
+IF (lel_free_energy) THEN
+   CALL interpolate_thermo(vmin_t, celldm_t, el_ce, el_ce_t)
+   ce_t = ce_t + el_ce_t
+   CALL interpolate_thermo(vmin_t, celldm_t, el_ener, el_energy_t)
+   ener_t = ener_t + el_energy_t
+   CALL interpolate_thermo(vmin_t, celldm_t, el_free_ener, el_free_energy_t)
+   free_ener_t = free_ener_t + el_free_energy_t
+   CALL interpolate_thermo(vmin_t, celldm_t, el_entr, el_entropy_t)
+   entropy_t = entropy_t + el_entropy_t
+ENDIF
+
 
 IF (lelastic) THEN
    CALL isostress_heat_capacity(vmin_t,el_cons_t,alpha_anis_t,temp, &
@@ -252,6 +268,7 @@ USE thermo_mod,     ONLY : ibrav_geo
 USE thermo_sym,     ONLY : laue
 USE ph_freq_thermodynamics, ONLY : phf_e0, phf_ce, phf_b_fact, phf_ener, &
                                    phf_free_ener, phf_entropy
+USE el_thermodynamics,  ONLY : el_ener, el_free_ener, el_entr, el_ce
 USE ph_freq_anharmonic, ONLY : alphaf_anis_t, vminf_t, b0f_t, celldmf_t, &
                                betaf_t, gammaf_t, cvf_t, cef_t, cpf_t,   &
                                enerf_t, free_enerf_t, entropyf_t, b0f_s, &
@@ -263,8 +280,11 @@ USE elastic_constants, ONLY : compute_elastic_compliances, &
                               write_el_cons_on_file, print_macro_elasticity, &
                               write_macro_el_on_file, print_sound_velocities, &  
                               write_sound_on_file
+USE el_anharmonic,  ONLY : el_energyf_t, el_free_energyf_t, el_entropyf_t, &
+                           el_cef_t
 USE initial_conf,   ONLY : ibrav_save
 USE control_thermo, ONLY : with_eigen
+USE control_eldos,  ONLY : lel_free_energy
 USE isoentropic,    ONLY : isostress_heat_capacity, thermal_stress,      &
                            gen_average_gruneisen, isoentropic_elastic_constants
 USE data_files,     ONLY : flanhar
@@ -306,6 +326,18 @@ CALL interpolate_thermo(vminf_t, celldmf_t, phf_free_ener, free_enerf_t)
 CALL interpolate_thermo(vminf_t, celldmf_t, phf_entropy, entropyf_t)
 
 CALL interpolate_e0(vminf_t, celldmf_t, phf_e0, e0)
+
+IF (lel_free_energy) THEN
+   CALL interpolate_thermo(vminf_t, celldmf_t, el_ce, el_cef_t)
+   cef_t = cef_t + el_cef_t
+   CALL interpolate_thermo(vminf_t, celldmf_t, el_ener, el_energyf_t)
+   enerf_t = enerf_t + el_energyf_t
+   CALL interpolate_thermo(vminf_t, celldmf_t, el_free_ener, el_free_energyf_t)
+   free_enerf_t = free_enerf_t + el_free_energyf_t
+   CALL interpolate_thermo(vminf_t, celldmf_t, el_entr, el_entropyf_t)
+   entropyf_t = entropyf_t + el_entropyf_t
+ENDIF
+
 
 IF (lelasticf) THEN
    CALL isostress_heat_capacity(vminf_t,el_consf_t,alphaf_anis_t,temp,&
@@ -474,7 +506,6 @@ END IF
 
 RETURN
 END SUBROUTINE write_ph_freq_anhar_anis
-
 !-----------------------------------------------------------------------
 SUBROUTINE write_grun_anhar_anis()
 !-----------------------------------------------------------------------

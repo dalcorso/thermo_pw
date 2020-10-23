@@ -19,7 +19,6 @@ SUBROUTINE allocate_thermodynamics()
                              ph_ce, ph_b_fact
   USE ph_freq_thermodynamics, ONLY : phf_free_ener, phf_ener, phf_entropy, &
                                      phf_e0, phf_ce, phf_b_fact, ph_freq_save
-
   IMPLICIT NONE
 
   IF (.NOT.ALLOCATED(ph_free_ener))  ALLOCATE(ph_free_ener(ntemp,tot_ngeo))
@@ -42,7 +41,42 @@ SUBROUTINE allocate_thermodynamics()
   RETURN
   !
 END SUBROUTINE allocate_thermodynamics
+
+!-------------------------------------------------------------------------
+SUBROUTINE allocate_el_thermodynamics(tot_ngeo)
+  !-----------------------------------------------------------------------
+  !
+  !  This routine deallocates the variables that control the thermo calculation
+  !
+  USE kinds,          ONLY : DP
+  USE temperature,    ONLY : ntemp
+  USE el_thermodynamics, ONLY : el_ener, el_free_ener, el_entr, el_mu, &
+                           el_ce
+  USE el_anharmonic,  ONLY : vmine_t, b0e_t, b01e_t, free_e_mine_t
+  IMPLICIT NONE
+
+INTEGER, INTENT(IN) :: tot_ngeo
 !
+!   allocate the variables for the electronic thermodynamic
+!
+  IF (.NOT.ALLOCATED(el_free_ener))      ALLOCATE(el_free_ener(ntemp,tot_ngeo))
+  IF (.NOT.ALLOCATED(el_ener))           ALLOCATE(el_ener(ntemp,tot_ngeo))
+  IF (.NOT.ALLOCATED(el_entr))           ALLOCATE(el_entr(ntemp,tot_ngeo))
+  IF (.NOT.ALLOCATED(el_mu))             ALLOCATE(el_mu(ntemp,tot_ngeo))
+  IF (.NOT.ALLOCATED(el_ce))             ALLOCATE(el_ce(ntemp,tot_ngeo))
+!
+!  allocate the variables for the anharmonic properties calculated adding
+!  the electronic free energy
+!
+  IF (.NOT. ALLOCATED (vmine_t) )        ALLOCATE(vmine_t(ntemp))
+  IF (.NOT. ALLOCATED (b0e_t) )          ALLOCATE(b0e_t(ntemp))
+  IF (.NOT. ALLOCATED (b01e_t) )         ALLOCATE(b01e_t(ntemp))
+  IF (.NOT. ALLOCATED (free_e_mine_t) )  ALLOCATE(free_e_mine_t(ntemp))
+
+  RETURN
+  !
+END SUBROUTINE allocate_el_thermodynamics
+
 !-------------------------------------------------------------------------
 SUBROUTINE allocate_anharmonic()
 !-------------------------------------------------------------------------
@@ -70,6 +104,9 @@ SUBROUTINE allocate_anharmonic()
                                   ce_grun_t, b0_grun_s, grun_gamma_t,        &
                                   grun_cpmce_anis, el_cons_grun_t,           &
                                   el_comp_grun_t
+  USE el_anharmonic, ONLY : el_energy_t, el_free_energy_t, el_entropy_t, &
+                            el_ce_t, el_energyf_t, el_free_energyf_t,    &
+                            el_entropyf_t, el_cef_t
   USE control_grun,        ONLY : vgrun_t, celldm_grun_t, b0_grun_t
 
   IMPLICIT NONE
@@ -149,13 +186,23 @@ SUBROUTINE allocate_anharmonic()
   IF (.NOT. ALLOCATED (betab) )         ALLOCATE(betab(ntemp))
   IF (.NOT. ALLOCATED (grun_gamma_t) )  ALLOCATE(grun_gamma_t(ntemp)) 
 
+  IF (.NOT. ALLOCATED (el_energy_t) )   ALLOCATE(el_energy_t(ntemp))
+  IF (.NOT. ALLOCATED (el_free_energy_t) ) ALLOCATE(el_free_energy_t(ntemp))
+  IF (.NOT. ALLOCATED (el_entropy_t) )  ALLOCATE(el_entropy_t(ntemp))
+  IF (.NOT. ALLOCATED (el_ce_t) )       ALLOCATE(el_ce_t(ntemp))
+
+  IF (.NOT. ALLOCATED (el_energyf_t) )  ALLOCATE(el_energyf_t(ntemp))
+  IF (.NOT. ALLOCATED (el_free_energyf_t) ) ALLOCATE(el_free_energyf_t(ntemp))
+  IF (.NOT. ALLOCATED (el_entropyf_t) ) ALLOCATE(el_entropyf_t(ntemp))
+  IF (.NOT. ALLOCATED (el_cef_t) )      ALLOCATE(el_cef_t(ntemp))
+
   RETURN
   !
 END SUBROUTINE allocate_anharmonic
 
-!-------------------------------------------------------------------------
+!---------------------------------------------------------------------
 SUBROUTINE allocate_debye()
-!-------------------------------------------------------------------------
+!---------------------------------------------------------------------
 
 USE ions_base,     ONLY : nat
 USE temperature,   ONLY : ntemp

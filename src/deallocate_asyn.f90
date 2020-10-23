@@ -13,10 +13,13 @@ SUBROUTINE deallocate_asyn()
   !
   USE kinds, ONLY : DP
   USE control_thermo, ONLY : lpwscf, lphonon, lstress, lberry, geometry, &
-                             iqw, irrw, comp_irr_iq_iw, comp_iq_iw, comp_f_iw
+                             iqw, irrw, comp_irr_iq_iw, comp_iq_iw,      &
+                             comp_f_iw, lpwband, lef
   IMPLICIT NONE
   !
   IF (ALLOCATED(lpwscf))     DEALLOCATE(lpwscf) 
+  IF (ALLOCATED(lpwband))    DEALLOCATE(lpwband) 
+  IF (ALLOCATED(lef))        DEALLOCATE(lef) 
   IF (ALLOCATED(lberry))     DEALLOCATE(lberry) 
   IF (ALLOCATED(lphonon))    DEALLOCATE(lphonon) 
   IF (ALLOCATED(lstress))    DEALLOCATE(lstress) 

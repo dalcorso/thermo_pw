@@ -5,9 +5,7 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-!--------------------------------------------------------------------
-SUBROUTINE write_el_thermo()
-!--------------------------------------------------------------------
+SUBROUTINE write_el_thermo(igeom)
 !
 !  This routine writes on file the electronic thermodynamical quantities
 !
@@ -16,6 +14,8 @@ USE constants,      ONLY : rytoev
 USE eldos_module,   ONLY : eldos_type, el_free_energy, el_energy, el_entropy, &
                            el_specific_heat_cv, destroy_eldos, &
                            el_chem_pot, read_eldos_data
+USE el_thermodynamics, ONLY : el_ener, el_free_ener, el_entr, el_mu, &
+                           el_ce
 USE ener,           ONLY : ef
 USE lsda_mod,       ONLY : nspin
 USE klist,          ONLY : degauss, nelec, ltetra
@@ -27,17 +27,14 @@ USE io_global,      ONLY : ionode, ionode_id, stdout
 USE data_files,     ONLY : fleltherm, fleldos
 
 IMPLICIT NONE
+INTEGER, INTENT(IN) :: igeom
 
 INTEGER          :: itemp
 INTEGER          :: iu_therm
 TYPE(eldos_type) :: eldos
 
-CHARACTER(LEN=256) :: fileeltherm, fileeldos
-REAL(DP), ALLOCATABLE :: el_mu(:)
-REAL(DP), ALLOCATABLE :: el_free_ener(:)
-REAL(DP), ALLOCATABLE :: el_ener(:)
-REAL(DP), ALLOCATABLE :: el_entr(:)
-REAL(DP), ALLOCATABLE :: el_cv(:)
+CHARACTER(LEN=256) :: fileeltherm, fileeldos, message1, message2
+
 REAL(DP) :: ene0, mu0
 REAL(DP) ::  dos1, dos2, dosef, udosef, ddosef, ddos1, ddos2, &
              uddosde, dddosde, ddosde
@@ -58,12 +55,6 @@ IF (my_image_id /= root_image) RETURN
 !
 IF (degauss==0.0_DP.AND..NOT.ltetra) RETURN
 
-ALLOCATE(el_mu(ntemp))
-ALLOCATE(el_free_ener(ntemp))
-ALLOCATE(el_ener(ntemp))
-ALLOCATE(el_entr(ntemp))
-ALLOCATE(el_cv(ntemp))
-
 IF (do_read) THEN
    IF (ionode) THEN
       iu_therm=find_free_unit()
@@ -75,23 +66,23 @@ IF (do_read) THEN
       ENDDO
       DO itemp = 1, ntemp
          READ(iu_therm, '(e16.8,5e20.12)') temp(itemp), &
-                    el_ener(itemp), el_free_ener(itemp), &
-                    el_entr(itemp), el_cv(itemp), el_mu(itemp)
+                    el_ener(itemp,igeom), el_free_ener(itemp,igeom), &
+                    el_entr(itemp,igeom), el_ce(itemp,igeom),    &
+                    el_mu(itemp,igeom)
       END DO
       CLOSE(iu_therm)
    END IF
-   CALL mp_bcast(el_ener, ionode_id, intra_image_comm)
-   CALL mp_bcast(el_free_ener, ionode_id, intra_image_comm)
-   CALL mp_bcast(el_entr, ionode_id, intra_image_comm)
-   CALL mp_bcast(el_cv, ionode_id, intra_image_comm)
-   CALL mp_bcast(el_mu, ionode_id, intra_image_comm)
+   CALL mp_bcast(el_ener(:,igeom), ionode_id, intra_image_comm)
+   CALL mp_bcast(el_free_ener(:,igeom), ionode_id, intra_image_comm)
+   CALL mp_bcast(el_entr(:,igeom), ionode_id, intra_image_comm)
+   CALL mp_bcast(el_ce(:,igeom), ionode_id, intra_image_comm)
+   CALL mp_bcast(el_mu(:,igeom), ionode_id, intra_image_comm)
    RETURN
 ENDIF
 
-WRITE(stdout,'(/,2x,76("+"))')
-WRITE(stdout,'(5x,"Computing the thermodynamic properties from electron dos")')
-WRITE(stdout,'(5x,"Writing on file ",a)') TRIM(fleltherm)
-WRITE(stdout,'(2x,76("+"),/)')
+message1="     Computing the thermodynamic properties from electron dos"
+WRITE(message2,'(5x,"Writing on file ",a)') TRIM(fleltherm)
+CALL decorated1_write2(message1, message2)
 
 fileeldos='therm_files/'//TRIM(fleldos)
 CALL read_eldos_data(eldos, lsda, fileeldos)
@@ -149,29 +140,37 @@ WRITE(stdout,'(/,5x,"g''/g at mu =", 21x, f15.8,&
 
 WRITE(stdout,'(/,5x,"Computing the electronic thermodynamic properties",/)')
 
-el_mu=0.0_DP
-el_free_ener=0.0_DP
-el_ener=0.0_DP
-el_entr=0.0_DP
-el_cv=0.0_DP
+el_mu(:,igeom)=0.0_DP
+el_free_ener(:,igeom)=0.0_DP
+el_ener(:,igeom)=0.0_DP
+el_entr(:,igeom)=0.0_DP
+el_ce(:,igeom)=0.0_DP
 
 CALL divide (intra_image_comm, ntemp, nstart, nlast)
 DO itemp = nstart, nlast
    IF (MOD(itemp,50)==0.OR.itemp==ntemp) &
                   WRITE(stdout,'(5x, "Computing temperature ", i8,&
                        &" /",i8, " Total" i8)') itemp, nlast-nstart+1, ntemp
-   CALL el_chem_pot(eldos, temp(itemp), nelec, el_mu(itemp))
-   CALL el_free_energy(eldos, temp(itemp), el_mu(itemp), el_free_ener(itemp))
-   CALL el_energy(eldos, temp(itemp), el_mu(itemp), el_ener(itemp))
-   CALL el_entropy(eldos, temp(itemp), el_mu(itemp), el_entr(itemp))
-   CALL el_specific_heat_cv(eldos, temp(itemp), el_mu(itemp), el_cv(itemp))
+   CALL el_chem_pot(eldos, temp(itemp), nelec, el_mu(itemp,igeom))
+   CALL el_free_energy(eldos, temp(itemp), el_mu(itemp,igeom),  &
+                                                el_free_ener(itemp,igeom))
+   CALL el_energy(eldos, temp(itemp), el_mu(itemp,igeom), el_ener(itemp,igeom))
+   CALL el_entropy(eldos, temp(itemp), el_mu(itemp,igeom), &
+                                                     el_entr(itemp,igeom))
+   CALL el_specific_heat_cv(eldos, temp(itemp), el_mu(itemp,igeom), &
+                                                     el_ce(itemp,igeom))
 END DO
 
-CALL mp_sum(el_mu, intra_image_comm)
-CALL mp_sum(el_free_ener, intra_image_comm)
-CALL mp_sum(el_ener, intra_image_comm)
-CALL mp_sum(el_entr, intra_image_comm)
-CALL mp_sum(el_cv, intra_image_comm)
+CALL mp_sum(el_mu(:,igeom), intra_image_comm)
+CALL mp_sum(el_free_ener(:,igeom), intra_image_comm)
+CALL mp_sum(el_ener(:,igeom), intra_image_comm)
+CALL mp_sum(el_entr(:,igeom), intra_image_comm)
+CALL mp_sum(el_ce(:,igeom), intra_image_comm)
+!
+!   The zero of the energy is taken when all the valence bands are occupied
+!
+el_ener(:,igeom)=el_ener(:,igeom)-ene0
+el_free_ener(:,igeom)=el_free_ener(:,igeom)-ene0
 
 IF (ionode) THEN
    iu_therm=find_free_unit()
@@ -198,19 +197,14 @@ IF (ionode) THEN
 
    DO itemp = 1, ntemp
       WRITE(iu_therm, '(e16.8,5e20.12)') temp(itemp), &
-                    el_ener(itemp)-ene0, el_free_ener(itemp)-ene0, &
-                    el_entr(itemp), el_cv(itemp), el_mu(itemp)
+             el_ener(itemp,igeom), el_free_ener(itemp,igeom), &
+             el_entr(itemp,igeom), el_ce(itemp,igeom), el_mu(itemp,igeom)
    END DO
 
    CLOSE(iu_therm)
 END IF
 
 CALL destroy_eldos(eldos)
-DEALLOCATE( el_mu )
-DEALLOCATE( el_free_ener )
-DEALLOCATE( el_ener )
-DEALLOCATE( el_entr )
-DEALLOCATE( el_cv )
 
 RETURN
 END SUBROUTINE write_el_thermo

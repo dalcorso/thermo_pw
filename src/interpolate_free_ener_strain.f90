@@ -7,23 +7,29 @@
 !------------------------------------------------------------------------
 SUBROUTINE interpolate_free_ener_strain(p1,p2,p3,p4,startt,lastt,ngroup)
 !------------------------------------------------------------------------
-
+!
+!  This routine interpolates the free energy as a function of strain 
+!  with a polynomial of degree poly_degree_elc and gives as output
+!  the polynomial coefficients.
+!
 USE kinds,             ONLY : DP
 USE initial_conf,      ONLY : ibrav_save
-USE lattices,       ONLY : compress_celldm, crystal_parameters
+USE lattices,          ONLY : compress_celldm, crystal_parameters
 USE thermo_mod,        ONLY : energy_geo, tot_ngeo
 USE control_elastic_constants, ONLY : ngeo_strain, elcpvar, ngeom, &
                               work_base, el_con_celldm_geo, epsil_geo
+USE control_eldos,     ONLY : lel_free_energy
 USE thermodynamics,    ONLY : ph_free_ener
+USE el_thermodynamics, ONLY : el_free_ener
 USE temperature,       ONLY : ntemp
 USE control_quartic_energy, ONLY : lsolve, poly_degree_elc
-USE linear_surfaces, ONLY : fit_multi_linear
+USE linear_surfaces,   ONLY : fit_multi_linear
 USE quadratic_surfaces, ONLY : fit_multi_quadratic
-USE cubic_surfaces, ONLY : fit_multi_cubic
-USE quartic_surfaces, ONLY : fit_multi_quartic
-USE polynomial, ONLY : poly1, poly2, poly3, poly4, init_poly, clean_poly
-USE mp_world,       ONLY : world_comm
-USE mp,             ONLY : mp_sum
+USE cubic_surfaces,    ONLY : fit_multi_cubic
+USE quartic_surfaces,  ONLY : fit_multi_quartic
+USE polynomial,        ONLY : poly1, poly2, poly3, poly4, init_poly, clean_poly
+USE mp_world,          ONLY : world_comm
+USE mp,                ONLY : mp_sum
 
 IMPLICIT NONE
 INTEGER :: startt, lastt, ngroup
@@ -61,6 +67,7 @@ DO itemp = startt, lastt
             y(1:nvar,ndata) = x(1:nvar,igeom)
             y(nvar+1,ndata) = epsil_geo(ind)
             g(ndata) = energy_geo(ind) + ph_free_ener(itemp,ind)
+            IF (lel_free_energy) g(ndata)=g(ndata)+el_free_ener(itemp,ind)
          ENDDO
       ENDDO
       IF (poly_degree_elc==4) THEN

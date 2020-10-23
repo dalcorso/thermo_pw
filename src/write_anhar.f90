@@ -14,15 +14,21 @@ SUBROUTINE write_anharmonic()
 !
 USE kinds,          ONLY : DP
 USE temperature,    ONLY : ntemp, temp
-USE thermodynamics, ONLY : ph_e0, ph_ce, ph_b_fact, ph_ener, ph_free_ener, ph_entropy
+USE thermodynamics, ONLY : ph_e0, ph_ce, ph_b_fact, ph_ener, ph_free_ener, &
+                                                             ph_entropy
+USE el_thermodynamics, ONLY : el_ener, el_free_ener, el_entr, el_ce
 USE anharmonic,     ONLY : alpha_t, beta_t, gamma_t, cp_t, cv_t, ce_t, ener_t, &
                            free_ener_t, entropy_t, b0_s, vmin_t, free_e_min_t, b0_t, & 
                            b01_t, bfact_t, celldm_t
+USE el_anharmonic,  ONLY : el_energy_t, el_free_energy_t, el_entropy_t, &
+                           el_ce_t
 USE data_files,     ONLY : flanhar
 USE control_thermo, ONLY : with_eigen
+USE control_eldos,  ONLY : lel_free_energy
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
+INTEGER :: itemp
 
 REAL(DP) :: e0
 
@@ -32,6 +38,10 @@ alpha_t = beta_t / 3.0_DP
 
 CALL interpolate_thermo(vmin_t, celldm_t, ph_ce, ce_t) 
 cv_t=ce_t
+IF (lel_free_energy) THEN
+   CALL interpolate_thermo(vmin_t, celldm_t, el_ce, el_ce_t) 
+   cv_t = cv_t + el_ce_t
+ENDIF
 CALL compute_cp_bs_g(beta_t, vmin_t, b0_t, cv_t, cp_t, b0_s, gamma_t)
 !
 !   here we plot the quantities calculated from the phonon dos
@@ -81,6 +91,15 @@ CALL interpolate_thermo(vmin_t, celldm_t, ph_entropy, entropy_t)
 
 CALL interpolate_e0(vmin_t, celldm_t, ph_e0, e0) 
 
+IF (lel_free_energy) THEN
+   CALL interpolate_thermo(vmin_t, celldm_t, el_ener, el_energy_t)
+   ener_t = ener_t + el_energy_t 
+   CALL interpolate_thermo(vmin_t, celldm_t, el_free_ener, el_free_energy_t)
+   free_ener_t = free_ener_t + el_free_energy_t 
+   CALL interpolate_thermo(vmin_t, celldm_t, el_entr, el_entropy_t)
+   entropy_t = entropy_t + el_entropy_t
+ENDIF
+
 filename="anhar_files/"//TRIM(flanhar)//'.therm'
 CALL add_pressure(filename)
 CALL write_thermo_anharm(temp, ntemp, e0, ener_t, free_ener_t, &
@@ -98,10 +117,9 @@ END IF
 
 RETURN
 END SUBROUTINE write_anharmonic
-
-!-----------------------------------------------------------------------
+!-------------------------------------------------------------------------
 SUBROUTINE write_ph_freq_anharmonic()
-!-----------------------------------------------------------------------
+!-------------------------------------------------------------------------
 USE kinds,          ONLY : DP
 USE temperature,    ONLY : ntemp, temp
 USE control_thermo, ONLY : with_eigen
@@ -110,12 +128,17 @@ USE ph_freq_thermodynamics, ONLY : phf_e0, phf_ce, phf_b_fact, phf_ener, &
 USE ph_freq_anharmonic, ONLY : alphaf_t, betaf_t, gammaf_t, cpf_t, cvf_t, &
                         cef_t, enerf_t, free_enerf_t, entropyf_t, b0f_s, free_e_minf_t, & 
                         vminf_t, b0f_t, b01f_t, bfactf_t, celldmf_t
+USE control_eldos,  ONLY : lel_free_energy
+USE el_thermodynamics, ONLY : el_ener, el_free_ener, el_entr, el_ce
+USE el_anharmonic,  ONLY : el_energyf_t, el_free_energyf_t, el_entropyf_t, &
+                           el_cef_t
 USE data_files,     ONLY : flanhar
 
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
 
 REAL(DP) :: e0
+INTEGER  :: itemp
 
 CALL compute_beta(vminf_t, betaf_t, temp, ntemp)
 
@@ -123,6 +146,13 @@ alphaf_t = betaf_t / 3.0_DP
 
 CALL interpolate_thermo(vminf_t, celldmf_t, phf_ce, cef_t) 
 cvf_t=cef_t
+IF (lel_free_energy) THEN
+   CALL interpolate_thermo(vminf_t, celldmf_t, el_ce, el_cef_t)
+   DO itemp=1,ntemp
+      WRITE(6,*) temp(itemp), cvf_t(itemp), el_cef_t(itemp)
+   ENDDO
+   cvf_t = cvf_t + el_cef_t
+ENDIF
 CALL compute_cp_bs_g(betaf_t, vminf_t, b0f_t, cvf_t, cpf_t, b0f_s, gammaf_t)
 !
 !   here we plot the quantities calculated from the phonon dos
@@ -172,6 +202,16 @@ CALL interpolate_thermo(vminf_t, celldmf_t, phf_entropy, entropyf_t)
 
 CALL interpolate_e0(vminf_t, celldmf_t, phf_e0, e0)
 
+IF (lel_free_energy) THEN
+   CALL interpolate_thermo(vminf_t, celldmf_t, el_ener, el_energyf_t)
+   enerf_t = enerf_t + el_energyf_t
+   CALL interpolate_thermo(vminf_t, celldmf_t, el_free_ener, el_free_energyf_t)
+   free_enerf_t = free_enerf_t + el_free_energyf_t
+   CALL interpolate_thermo(vminf_t, celldmf_t, el_entr, el_entropyf_t)
+   entropyf_t = entropyf_t + el_entropyf_t
+ENDIF
+
+
 filename="anhar_files/"//TRIM(flanhar)//'.therm_ph'
 CALL add_pressure(filename)
 CALL write_thermo_anharm(temp, ntemp, e0, enerf_t, free_enerf_t, & 
@@ -188,10 +228,9 @@ END IF
 
 RETURN
 END SUBROUTINE write_ph_freq_anharmonic
-
-!-----------------------------------------------------------------------
+!-------------------------------------------------------------------------
 SUBROUTINE write_grun_anharmonic()
-!-----------------------------------------------------------------------
+!-------------------------------------------------------------------------
 !
 !  This routine computes the anharmonic properties from the Gruneisen
 !  parameters. Used when lmurn=.TRUE.. (Assumes to have the volume and
@@ -318,9 +357,45 @@ CALL destroy_ph_freq(ph_grun)
 RETURN
 END SUBROUTINE write_grun_anharmonic
 
-!-----------------------------------------------------------------------
+!-------------------------------------------------------------------------
+SUBROUTINE write_el_anharmonic()
+!-------------------------------------------------------------------------
+!
+USE data_files,     ONLY : flelanhar
+USE el_anharmonic,  ONLY : vmine_t, b0e_t, b01e_t, free_e_mine_t
+USE io_global,      ONLY : meta_ionode
+USE temperature,    ONLY : temp, ntemp
+
+IMPLICIT NONE
+INTEGER :: iu_therm
+INTEGER :: itemp
+INTEGER :: find_free_unit
+CHARACTER(LEN=256) :: filename
+
+filename='anhar_files/'//TRIM(flelanhar)
+IF (meta_ionode) THEN
+   iu_therm=find_free_unit()
+   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
+
+   WRITE(iu_therm,'("#  ")')
+   WRITE(iu_therm,'("#   T (K)        V_T(T) (a.u.)^3        B_0(T) (kbar) &
+                                 &    dB0/dp       free energy (Ry) ")')
+
+   DO itemp = 1, ntemp
+      WRITE(iu_therm, '(e12.5,4e22.13)') temp(itemp), &
+                 vmine_t(itemp), b0e_t(itemp), b01e_t(itemp), &
+                 free_e_mine_t(itemp)
+   ENDDO
+
+   CLOSE(iu_therm)
+ENDIF
+
+RETURN
+END SUBROUTINE write_el_anharmonic
+
+!-------------------------------------------------------------------------
 SUBROUTINE compute_beta(vmin_t, beta_t, temp, ntemp)
-!-----------------------------------------------------------------------
+!-------------------------------------------------------------------------
 !
 !  This routine receives as input the volume for ntemp temperatures
 !  and computes the volume thermal expansion for ntemp-2 temperatures.
@@ -351,9 +426,9 @@ CALL mp_sum(beta_t, world_comm)
 RETURN
 END SUBROUTINE compute_beta
 
-!-----------------------------------------------------------------------
+!------------------------------------------------------------------------
 SUBROUTINE write_ener_beta(temp, vmin, emin, beta, ntemp, filename)
-!-----------------------------------------------------------------------
+!------------------------------------------------------------------------
 USE kinds,     ONLY : DP
 USE io_global, ONLY : meta_ionode
 IMPLICIT NONE
@@ -382,9 +457,9 @@ ENDIF
 RETURN
 END SUBROUTINE write_ener_beta
 
-!-----------------------------------------------------------------------
+!------------------------------------------------------------------------
 SUBROUTINE write_bulk_anharm(temp, b0t, b0s, ntemp, filename)
-!-----------------------------------------------------------------------
+!------------------------------------------------------------------------
 USE kinds,     ONLY : DP
 USE io_global, ONLY : meta_ionode
 IMPLICIT NONE
@@ -413,9 +488,9 @@ ENDIF
 RETURN
 END SUBROUTINE write_bulk_anharm
 
-!-----------------------------------------------------------------------
+!------------------------------------------------------------------------
 SUBROUTINE write_dbulk_anharm(temp, b01t, ntemp, filename)
-!-----------------------------------------------------------------------
+!------------------------------------------------------------------------
 USE kinds,     ONLY : DP
 USE io_global, ONLY : meta_ionode
 IMPLICIT NONE
@@ -442,9 +517,9 @@ ENDIF
 RETURN
 END SUBROUTINE write_dbulk_anharm
 
-!-----------------------------------------------------------------------
+!------------------------------------------------------------------------
 SUBROUTINE write_gamma_anharm(temp, gammat, cvt, beta, b0t, ntemp, filename)
-!-----------------------------------------------------------------------
+!------------------------------------------------------------------------
 USE kinds,     ONLY : DP
 USE io_global, ONLY : meta_ionode
 IMPLICIT NONE
@@ -474,9 +549,9 @@ ENDIF
 RETURN
 END SUBROUTINE write_gamma_anharm
 
-!-----------------------------------------------------------------------
+!------------------------------------------------------------------------
 SUBROUTINE write_heat_anharm(temp, cet, cvt, cpt, ntemp, filename)
-!-----------------------------------------------------------------------
+!------------------------------------------------------------------------
 USE kinds,     ONLY : DP
 USE io_global, ONLY : meta_ionode
 IMPLICIT NONE
@@ -506,10 +581,10 @@ ENDIF
 RETURN
 END SUBROUTINE write_heat_anharm
 
-!-----------------------------------------------------------------------
+!------------------------------------------------------------------------
 SUBROUTINE write_aux_grun(temp, betab, cp_grun_t, cv_grun_t, b0_grun_s, b0_t, &
                                                            ntemp, filename) 
-!-----------------------------------------------------------------------
+!------------------------------------------------------------------------
 USE kinds,     ONLY : DP
 USE io_global, ONLY : meta_ionode
 IMPLICIT NONE
@@ -540,10 +615,9 @@ END IF
 RETURN
 END SUBROUTINE write_aux_grun
 
-!-----------------------------------------------------------------------
+!------------------------------------------------------------------------
 SUBROUTINE set_volume_b0_grun()
-!-----------------------------------------------------------------------
-
+!------------------------------------------------------------------------
 USE control_grun,       ONLY : lv0_t, lb0_t, vgrun_t, celldm_grun_t, &
                                b0_grun_t
 USE control_thermo,     ONLY : ltherm_dos, ltherm_freq
@@ -583,9 +657,9 @@ END SUBROUTINE set_volume_b0_grun
 !
 ! Copyright (C) 2018 Cristiano Malica
 !
-!-----------------------------------------------------------------------
+!------------------------------------------------------------------------
 SUBROUTINE write_anharm_bfact(temp, bfact_t, ntemp, filename)
-!-----------------------------------------------------------------------
+!------------------------------------------------------------------------
 
 USE ions_base, ONLY : nat
 USE kinds,     ONLY : DP
@@ -621,10 +695,10 @@ ENDIF
 RETURN
 END SUBROUTINE write_anharm_bfact
 
-!-----------------------------------------------------------------------
+!------------------------------------------------------------------------
 SUBROUTINE write_thermo_anharm(temp, ntemp, e0, ener_t, free_e_min_t, &
-                                                entropy_t, cv_t, filename)
-!-----------------------------------------------------------------------
+                                                 entropy_t, cv_t, filename)
+!------------------------------------------------------------------------
 USE kinds,     ONLY : DP
 USE io_global, ONLY : meta_ionode
 IMPLICIT NONE
@@ -659,9 +733,8 @@ IF (meta_ionode) THEN
                & 12x, " entropy ", 17x, " Cv ")')
 
    DO itemp = 2, ntemp-1
-      WRITE(iu_therm, '(e12.5,e23.13,e23.13,e23.13,e23.13)') temp(itemp),    &
-                       ener_t(itemp), free_e_min_t(itemp), entropy_t(itemp), &
-                       cv_t(itemp)
+      WRITE(iu_therm, '(e12.5,e23.13,e23.13,e23.13,e23.13)') temp(itemp), &
+             ener_t(itemp), free_e_min_t(itemp), entropy_t(itemp), cv_t(itemp)
    END DO
 
    CLOSE(iu_therm)

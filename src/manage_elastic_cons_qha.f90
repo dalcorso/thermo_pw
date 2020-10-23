@@ -24,11 +24,13 @@ USE elastic_constants, ONLY : epsilon_geo, el_con, el_compliances,         &
                               write_el_cons_on_file  
 USE thermodynamics,    ONLY : ph_free_ener
 USE ph_freq_thermodynamics, ONLY : phf_free_ener
+USE el_thermodynamics, ONLY : el_ener, el_free_ener, el_entr, el_ce
 USE anharmonic,        ONLY : el_cons_t, el_comp_t, b0_t, lelastic
 USE ph_freq_anharmonic,ONLY : el_consf_t, el_compf_t, b0f_t, lelasticf
 USE control_thermo,    ONLY : ltherm_dos, ltherm_freq
+USE control_eldos,     ONLY : lel_free_energy
 USE temperature,       ONLY : ntemp, temp
-USE data_files,        ONLY : flanhar
+USE data_files,        ONLY : flanhar, fleltherm
 USE io_global,         ONLY : stdout
 USE mp_world,          ONLY : world_comm
 USE mp,                ONLY : mp_sum
@@ -37,12 +39,26 @@ IMPLICIT NONE
 
 REAL(DP), ALLOCATABLE :: free_energy_geo(:), epsilon_geo_loc(:,:,:)
 INTEGER :: itemp, startt, lastt, igeom, base_ind
-CHARACTER(LEN=256)  :: filelastic, filename
+CHARACTER(LEN=256)  :: filelastic, filename, filedata
 CHARACTER(LEN=6) :: int_to_char
-LOGICAL :: all_geometry_done, exst, check_file_exists
+LOGICAL :: all_geometry_done, all_el_free, exst, ldummy, check_file_exists
 
 CALL check_all_geometries_done(all_geometry_done)
 IF (.NOT.all_geometry_done) RETURN
+IF (lel_free_energy) THEN
+   CALL check_all_el_free_ener_done(all_el_free)
+   IF (.NOT.all_el_free) CALL errore('manage_anhar',&
+                        'missing electron thermodynamics',1)
+   DO igeom=1, tot_ngeo
+      CALL set_el_files_names(igeom)
+      filedata="therm_files/"//TRIM(fleltherm)
+      CALL read_thermo(ntemp, temp, el_ener(:,igeom),           &
+                       el_free_ener(:,igeom), el_entr(:,igeom), &
+                       el_ce(:,igeom), ldummy, filedata)
+   ENDDO
+   CALL restore_el_file_names()
+ENDIF
+
 
 filename='anhar_files/'//TRIM(flanhar)//'.celldm'
 exst=check_file_exists(filename)
@@ -70,6 +86,8 @@ DO igeom=start_geometry_qha, last_geometry_qha
          WRITE(stdout,'(5x,"From vibrational density of states")')
          free_energy_geo(:)=energy_geo(base_ind+1:base_ind+work_base) &
                           +ph_free_ener(itemp,base_ind+1:base_ind+work_base)
+         IF (lel_free_energy) free_energy_geo(:)=free_energy_geo(:) + &
+                           el_free_ener(itemp,base_ind+1:base_ind+work_base)
          epsilon_geo_loc(:,:,:)=epsilon_geo(:,:,base_ind+1:base_ind+work_base)
          CALL compute_elastic_constants_ene(free_energy_geo, epsilon_geo_loc, &
                             work_base, ngeo_strain, ibrav_save, laue,         &
@@ -80,6 +98,8 @@ DO igeom=start_geometry_qha, last_geometry_qha
          WRITE(stdout, '(5x, "Using Brillouin zone integrals")')
          free_energy_geo(:)=energy_geo(base_ind+1:base_ind+work_base) &
                           +phf_free_ener(itemp,base_ind+1:base_ind+work_base)
+         IF (lel_free_energy) free_energy_geo(:)=free_energy_geo(:) + &
+                           el_free_ener(itemp,base_ind+1:base_ind+work_base)
          epsilon_geo_loc(:,:,:)=epsilon_geo(:,:,base_ind+1:base_ind+work_base)
          CALL compute_elastic_constants_ene(free_energy_geo, epsilon_geo_loc, &
                          work_base, ngeo_strain, ibrav_save, laue,       &

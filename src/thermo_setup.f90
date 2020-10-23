@@ -39,7 +39,7 @@ SUBROUTINE thermo_setup()
                                    set_internal_path, set_2d_path
   USE control_elastic_constants, ONLY : ngeo_strain, elastic_algorithm, &
                                   elcpvar, poly_degree, elalgen
-  USE control_eldos,        ONLY : deltae, ndose
+  USE control_eldos,        ONLY : deltae, ndose, lel_free_energy
   USE control_mur,          ONLY : lmurn
   USE equilibrium_conf,     ONLY : tau0, tau0_crys
   USE control_paths,        ONLY : npk_label, lbar_label
@@ -280,7 +280,8 @@ SUBROUTINE thermo_setup()
 !
 !  setup for the electronic dos
 !
-  IF (what(1:7)=='scf_dos'.OR.what(1:10)=='mur_lc_dos') THEN
+  IF (what(1:7)=='scf_dos'.OR.what(1:10)=='mur_lc_dos'.OR.lel_free_energy) &
+                                                                         THEN
      IF (deltae==0.0_DP.AND.ndose==0.AND.(degauss>0.0_DP.OR.ltetra)) THEN
         deltae=1.5_DP * k_boltzmann_ry*MIN(4.0_DP, tmin)
         WRITE(stdout,'(/,5x,"Deltae set to",f20.9," Ry")') deltae
@@ -306,6 +307,7 @@ SUBROUTINE thermo_setup()
 !  geometries
 !
    CALL initialize_file_names()
+   CALL initialize_el_file_names()
 
   RETURN
   !

@@ -19,7 +19,7 @@ SUBROUTINE bcast_thermo_input()
                               filband, flkeconv, flnkconv, flgrun, flpband,   &
                               flpgrun, flenergy, flprojlayer, flpbs, flvec,   &
                               flepsilon, fleldos, fleltherm, fldosfrq,        &
-                              fl_el_cons
+                              fl_el_cons, flelanhar
   USE postscript_files, ONLY : flpsband, flpsdisp, flpsdos,                   &
                               flpstherm,  flpsanhar, flpsmur, flpskeconv,     &
                               flpsnkconv, flpsgrun, flpsenergy, flpsepsilon,  &
@@ -39,7 +39,8 @@ SUBROUTINE bcast_thermo_input()
                                only_bands_plot, dump_states, subtract_vacuum, &
                                sp_min
   USE control_eldos,   ONLY : deltae, ndose, nk1_d, nk2_d, nk3_d, &
-                              k1_d, k2_d, k3_d, sigmae, legauss
+                              k1_d, k2_d, k3_d, sigmae, legauss,  &
+                              lel_free_energy
   USE control_asy,     ONLY : flasy, lasymptote, asymptote_command
   USE control_xrdp,    ONLY : lambda, flxrdp, flpsxrdp, lformf, smin, smax,   &
                               nspoint, flformf, flpsformf, lcm, lxrdp, &
@@ -168,6 +169,7 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( k3_d, meta_ionode_id, world_comm )
   CALL mp_bcast( sigmae, meta_ionode_id, world_comm )
   CALL mp_bcast( legauss, meta_ionode_id, world_comm )
+  CALL mp_bcast( lel_free_energy, meta_ionode_id, world_comm )
   CALL mp_bcast( fleldos, meta_ionode_id, world_comm )
   CALL mp_bcast( flpseldos, meta_ionode_id, world_comm )
   CALL mp_bcast( fleltherm, meta_ionode_id, world_comm )
@@ -287,6 +289,7 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( flgrun, meta_ionode_id, world_comm )
   CALL mp_bcast( flpsgrun, meta_ionode_id, world_comm )
   CALL mp_bcast( flanhar, meta_ionode_id, world_comm )
+  CALL mp_bcast( flelanhar, meta_ionode_id, world_comm )
   CALL mp_bcast( flpsanhar, meta_ionode_id, world_comm )
 !
 !  elastic_constants_t

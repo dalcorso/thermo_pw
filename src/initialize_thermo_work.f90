@@ -18,17 +18,16 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   !  lpwscf, lstress, lberry, lphonon
   !
   USE kinds,          ONLY : DP
-  USE thermo_mod,     ONLY : what, energy_geo, celldm_geo, ibrav_geo,       &
+  USE thermo_mod,     ONLY : what, energy_geo, ef_geo, celldm_geo, ibrav_geo, &
                              omega_geo, tot_ngeo, no_ph, start_geometry,    &
                              last_geometry, reduced_grid, in_degree
-  USE control_thermo, ONLY : lpwscf, lphonon, lev_syn_1, lev_syn_2,   &
-                             lph, lpwscf_syn_1, lbands_syn_1, lq2r,   &
+  USE control_thermo, ONLY : lpwscf, lpwband, lphonon, lev_syn_1, lev_syn_2, &
+                             lph, lef, lpwscf_syn_1, lbands_syn_1, lq2r,   &
                              ltherm, lconv_ke_test, lconv_nk_test,    &
                              lstress, lelastic_const, lpiezoelectric_tensor, &
                              lberry, lpolarization, lpart2_pw, do_scf_relax, &
                              ldos_syn_1, ltherm_dos, ltherm_freq, after_disp, &
-                             lectqha, all_geometries_together, geometry, iqw, &
-                             irrw, comp_f_iw
+                             lectqha
   USE control_pwrun,  ONLY : do_punch
   USE control_conv,   ONLY : nke, ke, deltake, nkeden, deltakeden, keden, &
                              nnk, nk_test, deltank, nsigma, sigma_test,   &  
@@ -40,19 +39,13 @@ SUBROUTINE initialize_thermo_work(nwork, part)
                                    elalgen, work_base, start_geometry_qha, &
                                    last_geometry_qha, elastic_algorithm,   &
                                    el_con_omega_geo
-  USE collect_info, ONLY : something_to_do_all
-  USE initial_conf, ONLY : collect_info_save
+  USE control_eldos, ONLY : lel_free_energy
   USE gvecw,          ONLY : ecutwfc
   USE gvect,          ONLY : ecutrho
   USE control_quadratic_energy, ONLY : nvar
   USE lattices,       ONLY : crystal_parameters
   USE start_k,        ONLY : nk1, nk2, nk3
-  USE klist,          ONLY : degauss
-  USE control_ph,     ONLY : trans
-  USE freq_ph,        ONLY : fpol, nfs
-  USE optical,        ONLY : start_freq, last_freq
-  USE images_omega,   ONLY : omega_group
-  USE mp_images,      ONLY : nimage
+  USE klist,          ONLY : degauss, lgauss, ltetra
   USE wrappers,       ONLY : f_mkdir_safe
   USE io_global,      ONLY : meta_ionode
   !
@@ -192,12 +185,19 @@ SUBROUTINE initialize_thermo_work(nwork, part)
 !   of the energy to find the equilibrium crystal parameters
 !
         CASE ('mur_lc')
+           lpart2_pw=lel_free_energy
            do_punch=.FALSE.
            lev_syn_1=.TRUE.
            lpwscf_syn_1=do_scf_relax
            CALL initialize_mur(nwork)
            IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
+           IF (lel_free_energy) THEN
+              IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
+              IF (meta_ionode) ios = f_mkdir_safe( 'anhar_files' )
+              tot_ngeo=nwork
+              CALL allocate_el_thermodynamics(tot_ngeo)
+           ENDIF
         CASE ('mur_lc_bands') 
            do_punch=.FALSE.
            lev_syn_1=.TRUE.
@@ -300,9 +300,11 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            IF (meta_ionode) ios = f_mkdir_safe( 'phdisp_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
+           IF (lel_free_energy) CALL allocate_el_thermodynamics(tot_ngeo)
         CASE ('elastic_constants_t')
            lectqha=.TRUE.
            lph=use_free_energy
+           IF (.NOT.lph) lpart2_pw=lel_free_energy
            lq2r = use_free_energy
            ltherm = use_free_energy
            CALL initialize_mur_qha(ngeom)
@@ -315,6 +317,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            tot_ngeo=nwork
            ALLOCATE(energy_geo(tot_ngeo))
            ALLOCATE(no_ph(tot_ngeo))
+           IF (lel_free_energy) ALLOCATE(ef_geo(tot_ngeo))
            energy_geo=0.0_DP
            no_ph=.FALSE.
            IF (elastic_algorithm=='advanced'.OR.elastic_algorithm=='energy') &
@@ -334,6 +337,8 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               IF (meta_ionode) ios = f_mkdir_safe( 'phdisp_files' )
               IF (meta_ionode) ios = f_mkdir_safe( 'anhar_files' )
            ENDIF
+           IF (lel_free_energy) CALL allocate_el_thermodynamics(tot_ngeo)
+
         CASE DEFAULT
            CALL errore('initialize_thermo_work','what not recognized',1)
      END SELECT
@@ -356,7 +361,13 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               'mur_lc_t')
            CALL initialize_ph_work(nwork)
         CASE ('elastic_constants_t')
-           IF (use_free_energy) CALL initialize_ph_work(nwork)
+           IF (use_free_energy) THEN
+              CALL initialize_ph_work(nwork)
+           ELSEIF (lel_free_energy) THEN
+              nwork=tot_ngeo
+           ENDIF
+        CASE ('mur_lc')
+             nwork=tot_ngeo
         CASE ('scf_elastic_constants', 'mur_lc_elastic_constants')
 
            IF (ALLOCATED(ibrav_geo))  DEALLOCATE(ibrav_geo)
@@ -405,10 +416,14 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   IF ( nwork == 0 ) RETURN
 
   ALLOCATE( lpwscf(nwork) )
+  ALLOCATE( lpwband(nwork) )
+  ALLOCATE( lef(nwork) )
   ALLOCATE( lstress(nwork) )
   ALLOCATE( lberry(nwork) )
   ALLOCATE( lphonon(nwork) )
   lpwscf  = .FALSE.
+  lpwband = .FALSE.
+  lef = .FALSE.
   lstress = .FALSE.
   lberry  = .FALSE.
   lphonon = .FALSE.
@@ -430,6 +445,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               'mur_lc_piezoelectric_tensor', &
               'mur_lc_polarization' )
            lpwscf(1:nwork)=.TRUE.
+           lef(1:nwork)=(lgauss.OR.ltetra)
            IF (reduced_grid) THEN
               DO iwork=1,nwork
                  IF (no_ph(iwork)) lpwscf(iwork)=.FALSE.
@@ -443,6 +459,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               ENDDO
            ENDDO
            lstress(1:nwork)=.NOT.elalgen
+           IF (lel_free_energy) lef(1:nwork)=(lgauss.OR.ltetra)
         CASE DEFAULT
           CALL errore('initialize_thermo_work','unknown what',1)
      END SELECT
@@ -457,38 +474,27 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               'scf_disp',         &
               'mur_lc_ph',        &
               'mur_lc_disp',      &
-              'mur_lc_t',         &
-              'elastic_constants_t')
+              'mur_lc_t')         
+             
+           CALL initialize_flags_for_ph(nwork)
 
-           lphonon(1:nwork)=.TRUE.
-           IF (trans) THEN
-              IF (all_geometries_together) THEN
-                 DO iwork=1,nwork
-                    igeom=geometry(iwork)
-                    iq=iqw(iwork)
-                    irr=irrw(iwork)
-                    lphonon(iwork)=something_to_do_all(&
-                               collect_info_save(igeom),iwork,iq,irr)
-                 ENDDO
-              ENDIF
-           ELSEIF (fpol) THEN
-              ALLOCATE (comp_f_iw(1:nfs,nwork))
-              IF (nimage>1) THEN
-                 comp_f_iw=.FALSE.
-                 DO iwork=1,nwork
-                    start_omega=(iwork-1)*omega_group
-                    DO i=1, omega_group
-                       j=MIN(start_omega+i, nfs)
-                       comp_f_iw(j,iwork)=.TRUE.
-                    ENDDO
-                    lphonon(iwork)=.FALSE.
-                    DO i=start_freq,last_freq
-                       lphonon(iwork)=lphonon(iwork).OR.comp_f_iw(i,iwork)
-                    ENDDO
-                 ENDDO
-              ELSE
-                 comp_f_iw(:,1)=.TRUE.
-              ENDIF
+!
+!  Here the case in which lel_free_energy is .true. In this case we must
+!  do a el_dos calculation
+!
+        CASE( 'mur_lc' )
+           lpwband(1:nwork)=.TRUE.
+!
+!  Here the case of elastic_constants_t. In this case we must
+!  do a el_dos calculation if use_free_energy is .FALSE. and
+!  lel_free_energy is .TRUE. or a phonon calculation is 
+!  use_free_energy is  .TRUE.
+!
+        CASE('elastic_constants_t')
+           IF (use_free_energy) THEN
+              CALL initialize_flags_for_ph(nwork)
+           ELSE
+              lpwband(1:nwork)=.TRUE.
            ENDIF
 !
 !  Here the cases in which there are pwscf calculation in the second part
@@ -672,7 +678,7 @@ SUBROUTINE initialize_mur(nwork)
 !   in each task.
 !
 USE kinds,         ONLY : DP
-USE thermo_mod,    ONLY : ibrav_geo, celldm_geo, energy_geo, omega_geo
+USE thermo_mod,    ONLY : ibrav_geo, celldm_geo, energy_geo, ef_geo, omega_geo
 USE initial_conf,  ONLY : ibrav_save
 
 IMPLICIT NONE
@@ -687,6 +693,7 @@ nwork=compute_nwork()
 ALLOCATE(ibrav_geo(nwork))
 ALLOCATE(celldm_geo(6,nwork))
 ALLOCATE(energy_geo(nwork))
+ALLOCATE(ef_geo(nwork))
 ALLOCATE(omega_geo(nwork))
 CALL set_celldm_geo(celldm_geo, nwork)
 DO igeom = 1, nwork
@@ -1124,3 +1131,55 @@ in_grid=(nzero==1)
 
 RETURN
 END FUNCTION in_grid
+
+!---------------------------------------------------------------------
+SUBROUTINE initialize_flags_for_ph(nwork)
+!---------------------------------------------------------------------
+!
+USE control_thermo, ONLY : lphonon, all_geometries_together, iqw,  &
+                           irrw, comp_f_iw, geometry
+USE initial_conf,   ONLY : collect_info_save
+USE collect_info,   ONLY : something_to_do_all
+USE freq_ph,        ONLY : fpol, nfs
+USE images_omega,   ONLY : omega_group
+USE mp_images,      ONLY : nimage
+USE optical,        ONLY : start_freq, last_freq
+USE control_ph,     ONLY : trans
+
+
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: nwork
+INTEGER :: i, j, iwork, igeom, iq, irr, start_omega
+
+lphonon(1:nwork)=.TRUE.
+IF (trans) THEN
+   IF (all_geometries_together) THEN
+      DO iwork=1,nwork
+         igeom=geometry(iwork)
+         iq=iqw(iwork)
+         irr=irrw(iwork)
+         lphonon(iwork)=something_to_do_all( &
+                               collect_info_save(igeom),iwork,iq,irr)
+      ENDDO
+   ENDIF
+ELSEIF (fpol) THEN
+   ALLOCATE (comp_f_iw(1:nfs,nwork))
+   IF (nimage>1) THEN
+      comp_f_iw=.FALSE.
+      DO iwork=1,nwork
+         start_omega=(iwork-1)*omega_group
+         DO i=1, omega_group
+            j=MIN(start_omega+i, nfs)
+            comp_f_iw(j,iwork)=.TRUE.
+         ENDDO
+         lphonon(iwork)=.FALSE.
+         DO i=start_freq,last_freq
+            lphonon(iwork)=lphonon(iwork).OR.comp_f_iw(i,iwork)
+         ENDDO
+      ENDDO
+   ELSE
+      comp_f_iw(:,1)=.TRUE.
+   ENDIF
+ENDIF
+RETURN
+END SUBROUTINE initialize_flags_for_ph

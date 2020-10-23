@@ -45,8 +45,10 @@ MODULE thermo_mod
                                                 ! geometry
                            forces_geo(:,:,:), & ! the forces on atoms at each
                                                 ! geometry
-                           stress_geo(:,:,:)    ! the stress at each 
+                           stress_geo(:,:,:), & ! the stress at each 
                                                 ! geometry
+                           ef_geo(:)            ! save the fermi energy in
+                                                ! metals
   REAL(DP) ::              step_ngeo(6)         ! the difference of 
                                                 ! parameters among
                                                 ! different geometries.
@@ -158,6 +160,26 @@ MODULE ph_freq_thermodynamics
   REAL(DP), ALLOCATABLE :: phf_b_fact(:,:,:,:,:) ! atomic B factor
 
 END MODULE ph_freq_thermodynamics
+
+MODULE el_thermodynamics
+  !
+  USE kinds, ONLY: DP
+  !
+  ! ... The variables needed to save the electronic thermodynamic quantities 
+  !     calculated from the electron dos at several geometries
+  !
+  SAVE
+
+  REAL(DP), ALLOCATABLE :: el_ener(:,:)      ! electronic total energy, &
+                                             ! T, geometry
+  REAL(DP), ALLOCATABLE :: el_free_ener(:,:) ! electronic free_energy, T, &
+                                             ! geometry
+  REAL(DP), ALLOCATABLE :: el_entr(:,:)      ! electronic entropy, T, geometry
+  REAL(DP), ALLOCATABLE :: el_mu(:,:)        ! electronic chemical potential, 
+                                             ! T, geometry
+  REAL(DP), ALLOCATABLE :: el_ce(:,:)        ! electronic heat capacity, &
+                                             ! T, geometry
+END MODULE el_thermodynamics
 
 MODULE anharmonic
 !
@@ -335,6 +357,42 @@ MODULE grun_anharmonic
 
 END MODULE grun_anharmonic
 
+MODULE el_anharmonic
+!
+!   The variables needed to describe the anharmonic quantities calculated
+!   from the minimum of the free energy fitted by the Murnaghan
+!
+  USE kinds, ONLY: DP
+  SAVE
+!
+!   here all the quantities obtained adding the free energy of the
+!   electrons
+!
+                                       ! parameter
+
+  REAL(DP), ALLOCATABLE :: vmine_t(:), b0e_t(:), b01e_t(:), free_e_mine_t(:) 
+                           ! the parameters of the minimum of the  
+                           ! free energy calculated from dos at each temperature
+  REAL(DP), ALLOCATABLE :: el_energy_t(:) ! interpolated electronic energy 
+                           ! at the temperature dependent geometry 
+  REAL(DP), ALLOCATABLE :: el_free_energy_t(:) ! interpolated electronic 
+                           ! free energy at the temperature dependent geometry 
+  REAL(DP), ALLOCATABLE :: el_entropy_t(:) ! interpolated electronic entropy
+                           ! at the temperature dependent geometry 
+  REAL(DP), ALLOCATABLE :: el_ce_t(:) ! interpolated electronic heat capacity
+                           ! at the temperature dependent geometry 
+
+  REAL(DP), ALLOCATABLE :: el_energyf_t(:) ! interpolated electronic energy 
+                           ! at the temperature dependent geometry 
+  REAL(DP), ALLOCATABLE :: el_free_energyf_t(:) ! interpolated electronic 
+                           ! free energy at the temperature dependent geometry 
+  REAL(DP), ALLOCATABLE :: el_entropyf_t(:) ! interpolated electronic entropy
+                           ! at the temperature dependent geometry 
+  REAL(DP), ALLOCATABLE :: el_cef_t(:) ! interpolated electronic heat capacity
+                           ! at the temperature dependent geometry 
+
+END MODULE el_anharmonic
+
 MODULE ifc
   !
   USE kinds, ONLY: DP
@@ -388,6 +446,9 @@ MODULE control_thermo
   SAVE
   !
   LOGICAL, ALLOCATABLE :: lpwscf(:),  & ! if .true. this work requires a scf calc.
+                          lpwband(:), & ! if .true. this work makes a band
+                                        ! calculation
+                          lef(:),     & ! if .true. save the fermi level 
                           lberry(:),  & ! if .true. this work requires 
                                         ! a berry_phase calculation
                           lstress(:), & ! if .true. this work computes stress
@@ -724,6 +785,9 @@ MODULE control_eldos
   INTEGER :: save_ndos      ! number of points in the file 
   REAL(DP), ALLOCATABLE :: dos_k(:,:)  
   REAL(DP), ALLOCATABLE :: dos_wk(:)
+
+  LOGICAL :: lel_free_energy ! if .TRUE. add the electron free energy to
+                            ! the total energy
   
 END MODULE control_eldos
 
@@ -1007,6 +1071,9 @@ MODULE data_files
   CHARACTER(LEN=256) :: fltherm ! file with the harmonic thermodynamic 
   CHARACTER(LEN=256) :: fleltherm ! file with the electronic thermodynamic 
   CHARACTER(LEN=256) :: flanhar ! file with the anharmonic quantities
+  CHARACTER(LEN=256) :: flelanhar ! file with the anharmonic quantities
+                                ! obtained adding only the electronic 
+                                ! free energy
   CHARACTER(LEN=256) :: flevdat ! file with data for ev.x 
   CHARACTER(LEN=256) :: flenergy  ! the name of the file with the energy
                                   ! suited for gnuplot contour plots
@@ -1058,9 +1125,9 @@ MODULE postscript_files
                                   ! the gruneisen parameters
   CHARACTER(LEN=256) :: flpsenergy  ! the name of the postscript file with 
                                   ! the energy contours
-  CHARACTER(LEN=256) :: flpsepsilon ! the name of the file with the dielectric
-                                  ! constant
   CHARACTER(LEN=256) :: flpsoptical ! the name of the file with the optical
+                                  ! constant
+  CHARACTER(LEN=256) :: flpsepsilon ! the name of the file with the dielectric
                                   ! constant
 END MODULE postscript_files
 
@@ -1086,6 +1153,16 @@ MODULE internal_files_names
   CHARACTER(LEN=256) :: flpstherm_thermo  ! postscript file with thermodynamic
                                           ! quantities
   CHARACTER(LEN=256) :: flvec_thermo      ! the name of the file with the eigenvectors
+
+  CHARACTER(LEN=256) :: fleldos_thermo    ! the name of the file with electron
+                                          ! dos
+  CHARACTER(LEN=256) :: flpseldos_thermo  ! the name of the postscript file 
+                                          ! with electron dos
+  CHARACTER(LEN=256) :: fleltherm_thermo  ! the name of the file with the 
+                                          ! electronic thermodynamic properties
+  CHARACTER(LEN=256) :: flpseltherm_thermo  ! the name of the postscript
+                                          ! file with the electronic 
+                                          !thermodynamic properties
 
 END MODULE internal_files_names
 

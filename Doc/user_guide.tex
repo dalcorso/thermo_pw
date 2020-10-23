@@ -1385,7 +1385,12 @@ geometry even if you specified \texttt{calculation='scf'} in the
 them fixed. To increase the maximum number of ionic iterations use
 \texttt{calculation='relax'} and give \texttt{nstep} (otherwise the default 
 is $20$). Only the \texttt{bfgs} relaxation is supported by this
-option.\\
+option.
+When \texttt{lel\_free\_energy=.TRUE.} the code makes also an electronic bands
+dos calculation at each geometry, computes the electronic thermodynamic
+quantities as a function of temperature and writes them in separate files.
+These files can be used to add the electronic contribution to the
+anharmonic properties with the option \texttt{mur\_lc\_t}.\\
 This option can be controlled by the following variables:
 \begin{verbatim}
 ngeo(1),...,ngeo(6) : the number of geometries to use for each celldm parameter.
@@ -1447,6 +1452,11 @@ flevdat    : file where the Murnaghan equation is written. The results of the
              Default: character(len=*) 'output_ev.dat'
 flpsmur    : postscript file of the Murnaghan plot
              Default: character(len=*) 'output_mur'
+lel_free_energy : if .TRUE. computes the electronic thermodynamic 
+             properties (energy, free energy, entropy, and constant strain
+             heat capacity) at each temperature and plots them. See the
+             scf_dos option for the parameters that control the calculation.
+             Default: .FALSE.
 ncontours  : the number of contours in the energy plot. These levels can
              be determined automatically by the code or defined by the user.
              The energy levels can be defined after the INPUT_THERMO namelist 
@@ -1840,6 +1850,18 @@ minimize the free energy.
 When both the $T=0$ and the temperature dependent elastic constants
 are on file in the directory \texttt{elastic\_constants} and 
 \texttt{anhar\_files} respectively, the latter are used.
+When both \texttt{use\_free\_energy=.TRUE.} and
+\texttt{lel\_free\_energy=.TRUE.} the electronic free energy is
+added to the free energy before computing the elastic constants. In this case 
+the code expects to find on file (in \texttt{therm\_files}) the electronic 
+thermodynamic propeties for each perturbed geometry. When 
+\texttt{use\_free\_energy=.FALSE.} and 
+\texttt{lel\_free\_energy=.TRUE.} the code computes the electronic
+thermodynamic properties at each perturbed geometry and writes them on 
+file. In this case the electronic free energy is not added to the free
+energy. Note that the user must be careful to use the same value for the
+\texttt{lel\_free\_energy} flag with this option and in the following
+\texttt{mur\_lc\_t} calculation that interpolates the elastic constants.
 The variables that control this run are:
 \begin{verbatim}
 use_free_energy : when .TRUE. computes the elastic constants as second 
