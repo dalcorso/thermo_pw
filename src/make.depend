@@ -374,6 +374,8 @@ manage_collection.o : ../../PHonon/PH/phcom.o
 manage_collection.o : ../../thermo_pw/lib/mp_asyn.o
 manage_collection.o : ../../thermo_pw/qe/control_qe.o
 manage_collection.o : thermo_mod.o
+manage_el_free_energy.o : ../../Modules/input_parameters.o
+manage_el_free_energy.o : thermo_mod.o
 manage_elastic_cons.o : ../../Modules/cell_base.o
 manage_elastic_cons.o : ../../Modules/ions_base.o
 manage_elastic_cons.o : ../../Modules/kind.o
@@ -560,12 +562,10 @@ plot_elastic_t.o : ../../Modules/kind.o
 plot_elastic_t.o : ../../Modules/mp_images.o
 plot_elastic_t.o : ../../thermo_pw/lib/gnuplot.o
 plot_elastic_t.o : thermo_mod.o
-plot_epsilon_omega.o : ../../Modules/cell_base.o
 plot_epsilon_omega.o : ../../Modules/constants.o
 plot_epsilon_omega.o : ../../Modules/io_global.o
 plot_epsilon_omega.o : ../../Modules/kind.o
 plot_epsilon_omega.o : ../../Modules/mp_images.o
-plot_epsilon_omega.o : ../../PW/src/pwcom.o
 plot_epsilon_omega.o : ../../thermo_pw/lib/gnuplot.o
 plot_epsilon_omega.o : thermo_mod.o
 plot_formf.o : ../../Modules/ions_base.o
