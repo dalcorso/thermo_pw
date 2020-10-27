@@ -185,7 +185,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
            ENDIF
         CASE ('mur_lc')
 
-              CALL set_work_for_bands(iwork)
+           CALL set_work_for_bands(iwork)
 !
 !    Here the elastic constant calculation
 !
@@ -387,6 +387,7 @@ CHARACTER(LEN=6) :: int_to_char
 !
 celldm(:)=celldm_geo(:,iwork)
 rd_ht=0.0_DP
+zero=0.0_DP
 CALL cell_base_init ( ibrav_geo(iwork), celldm, zero, zero, &
                       zero, zero, zero, zero, .FALSE., rd_ht, ' ' )
 CALL set_dos_kpoints()
