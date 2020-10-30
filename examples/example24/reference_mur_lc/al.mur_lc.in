@@ -1,0 +1,25 @@
+ &control
+   calculation = 'scf'
+   prefix='aluminum',
+   pseudo_dir = '/home/espresso/QE66_3/pseudo/',
+   outdir='/home/espresso/QE66_3/tempdir/'
+ /
+ &system
+    ibrav=  2, 
+    celldm(1) =7.50, 
+    nat=  1, 
+    ntyp= 1,
+    smearing='mp'
+    degauss=0.02,
+    occupations='smearing'
+    ecutwfc =16.0,
+ /
+ &electrons
+    conv_thr =  1.0d-8
+ /
+ATOMIC_SPECIES
+ Al  0.0  Al.pz-vbc.UPF
+ATOMIC_POSITIONS (alat)
+ Al 0.00 0.00 0.00
+K_POINTS AUTOMATIC
+8 8 8 1 1 1 

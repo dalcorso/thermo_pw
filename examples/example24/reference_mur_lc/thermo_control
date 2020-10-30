@@ -1,0 +1,9 @@
+ &INPUT_THERMO
+  what='mur_lc',
+  frozen_ions=.FALSE.
+  lel_free_energy=.TRUE.
+  nk1_d=16
+  nk2_d=16
+  nk3_d=16
+  nbnd_bands=12
+ /

@@ -190,3 +190,17 @@ what=mur_lc_t: this example computes the elastic constants as a function
               what='mur_lc_t' and to calculate the temperature dependent
               elastic constants within the "quasi-harmonic approximation".
               Run run_example first and run_example_mur_lc_t second.
+
+example24:
+what=mur_lc:  
+lel_free_energy=.TRUE. 
+what=mur_lc_t
+lel_free_energy=.TRUE. 
+              this example computes the lattice constant of Al as a function
+              of temperature keeping into account the contribution to the
+              free energy of the electronic excitations.
+              The first run computes the electronic thermodynamic properties
+              at all the geometries computed by mur_lc, while the second
+              reads the files with the electronic properties and adds
+              to the electron and phonon free energy the one of the electron
+              exitations before computing the anharmonic properties.
