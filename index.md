@@ -83,6 +83,12 @@ Clean Ir(111) and Pt(111) electronic surface states: a first-principle fully rel
 
 <p align="justify">The following papers contain some calculations made by using <code>thermo_pw</code>:</p>
 <br>
+4. A. Urru
+Lattice dynamics with Fully Relativistic Pseudopotentials for magnetic systems,
+with selected applications,
+<a href="https://iris.sissa.it/handle/20.500.11767/115671#.X8uStKYo-cM">PhD thesis.</a>
+<br>
+<br>
 3. A. Urru and A. Dal Corso,
 Lattice dynamics effects on the magnetocrystalline anisotropy
 energy: application to MnBi,
