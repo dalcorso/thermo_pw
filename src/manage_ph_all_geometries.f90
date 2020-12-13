@@ -36,7 +36,7 @@ IMPLICIT NONE
 
 INTEGER           :: part, nwork, igeom
 CHARACTER(LEN=80) :: message
-LOGICAL           :: something_todo
+LOGICAL           :: something_todo, check_dyn_file_exists
 
 always_run=.TRUE.
 CALL start_clock( 'PHONON' )
@@ -129,7 +129,7 @@ DO igeom=start_geometry, last_geometry
 !
 !  Compute the phonon dispersions and the thermodynamic properties
 !
-   IF (lq2r) CALL manage_ph_postproc(igeom)
+   IF (lq2r.AND.check_dyn_file_exists(fildyn)) CALL manage_ph_postproc(igeom)
 ENDDO
 
 100 CONTINUE

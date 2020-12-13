@@ -134,7 +134,12 @@ DO igeom=start_geometry,last_geometry
    IF (.NOT.stop_signal_activated) THEN
       CALL set_files_names(igeom)
       auxdyn=fildyn
-      IF (lq2r) CALL manage_ph_postproc(igeom)
+!
+!     must recheck if all dynamical matrix files exists because the phonon
+!     might have start_q last_q
+!
+      IF (lq2r.AND.check_dyn_file_exists(fildyn)) &
+                                CALL manage_ph_postproc(igeom)
    ENDIF
 ENDDO  ! loop on geometries
 CALL restore_files_names()
