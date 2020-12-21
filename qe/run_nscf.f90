@@ -22,7 +22,7 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   USE fft_base,        ONLY : dffts, dfftp
   !!!
   USE fft_types, ONLY: fft_type_allocate
-  USE cell_base, ONLY: at, bg
+  USE cell_base, ONLY: at, bg, tpiba
   USE gvect,     ONLY: gcutm
   USE gvecs,     ONLY: gcutms
   USE klist,     ONLY : qnorm
@@ -67,7 +67,7 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
         kunit=4
         IF (lgamma_iq(iq)) kunit=2
      ENDIF
-     qnorm = SQRT(xq(1)**2+xq(2)**2+xq(3)**2)
+     qnorm = SQRT(xq(1)**2+xq(2)**2+xq(3)**2) * tpiba
      CALL read_file()
      CALL set_small_group_of_q(nsymq,invsymq,minus_q)
      RETURN
