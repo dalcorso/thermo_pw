@@ -149,7 +149,7 @@ in the examples directories.</p>
 <br>
 <br>
 - <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.4.0.tar.gz">
-thermo_pw.1.4.0.tar.gz</a>  (released 17-12-2020) compatible with QE-6.6.
+thermo_pw.1.4.0.tar.gz</a>  (released 22-12-2020) compatible with QE-6.6.
 <br>
 <br>
 - <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.3.2.tar.gz">
