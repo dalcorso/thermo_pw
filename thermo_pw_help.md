@@ -57,6 +57,9 @@ patches given below.</p>
 
 **Patches for thermo_pw.1.3.1 and thermo_pw.1.3.2**:
 <br>
+* The phonon calculation with US-PP and PAW-PP is unstable. Correct as in
+commit: 
+<a href="https://github.com/dalcorso/thermo_pw/commit/51b600a25dd1d46c2ea004a509beb830d82a5811">commit_51b600a</a>.
 * To reproduce ph_example07 it is necessary to change line 1049 of 
 file PW/src/pw_restart_new.f90 of QE6.6 as explained for version 1.3.0.
 * QE6.6 does not stop any longer if some pools have no k point. thermo_pw
