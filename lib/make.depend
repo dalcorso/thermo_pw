@@ -35,6 +35,10 @@ eldos_module.o : ../../Modules/io_global.o
 eldos_module.o : ../../Modules/kind.o
 eldos_module.o : ../../Modules/mp_images.o
 eldos_module.o : ../../UtilXlib/mp.o
+freecad.o : ../../Modules/io_global.o
+freecad.o : ../../Modules/kind.o
+freecad.o : ../../Modules/mp_images.o
+freecad.o : ../../UtilXlib/mp.o
 gnuplot.o : ../../Modules/io_global.o
 gnuplot.o : ../../Modules/kind.o
 gnuplot_color.o : ../../Modules/kind.o
