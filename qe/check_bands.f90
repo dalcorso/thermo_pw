@@ -22,7 +22,6 @@ LOGICAL FUNCTION check_bands( outdir, xq, iq )
   USE qes_types_module, ONLY : output_type
   USE qes_libs_module,      ONLY :  qes_reset
   USE io_files,   ONLY : xmlpun_schema
-  USE iotk_module, ONLY : iotk_free_unit
   USE qexsd_module, ONLY : qexsd_readschema
   USE mp,         ONLY : mp_bcast
   USE mp_images,  ONLY : intra_image_comm

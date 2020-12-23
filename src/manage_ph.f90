@@ -119,6 +119,7 @@ DO igeom=start_geometry,last_geometry
    CALL divide_collection_work(igeom)
    CALL manage_collection(auxdyn, igeom)
    CALL clean_collection_work()
+   CALL mp_barrier(world_comm)
    !
 100 CONTINUE
    !

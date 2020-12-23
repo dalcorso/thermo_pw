@@ -657,7 +657,7 @@ IMPLICIT NONE
 INTEGER, INTENT(IN)     :: nfs
 COMPLEX(DP), INTENT(IN) :: epsilonc(3,3,nfs)
 REAL(DP), INTENT(IN)    :: fru(nfs), fiu(nfs)
-INTEGER(DP), INTENT(IN) :: computed(nfs)
+INTEGER, INTENT(IN)     :: computed(nfs)
 
 CHARACTER(LEN=256) :: filename
 INTEGER  :: find_free_unit
