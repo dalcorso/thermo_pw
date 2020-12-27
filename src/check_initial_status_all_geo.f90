@@ -35,7 +35,6 @@ USE thermo_mod,       ONLY : no_ph, start_geometry, last_geometry, &
                              tot_ngeo, dynmat_on_file
 USE initial_conf,     ONLY : collect_info_save
 
-USE control_qe,       ONLY : use_ph_images
 USE control_ph,       ONLY : recover
 
 USE mp,               ONLY : mp_barrier

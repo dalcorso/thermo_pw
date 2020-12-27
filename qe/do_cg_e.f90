@@ -334,7 +334,7 @@ SUBROUTINE do_cg_e(drhoscfs)
            weight=wk(ikk)
            IF (noncolin) THEN
               CALL incdrhoscf_nc(drhoscfs(1,1,ipol), weight, ik,         &
-                                 dbecsum_nc(1,1,1,1,ipol), dpsi)
+                                 dbecsum_nc(1,1,1,1,ipol), dpsi, 1.0_DP)
            ELSE
               CALL incdrhoscf(drhoscfs(1,current_spin,ipol), weight, ik, &
                                  dbecsum(1,1,current_spin,ipol), dpsi)

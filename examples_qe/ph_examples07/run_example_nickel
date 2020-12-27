@@ -132,7 +132,7 @@ cat > ph_control << EOF
 EOF
 
 $ECHO "  running the thermo_pw.x" 
-$ECHO "  to calculate the phonon of Ni with PAW-PPs."
+$ECHO "  to calculate the phonon of Ni with US-PPs."
 $THERMO_PW_COMMAND < ni.in > ni.out
 check_failure $?
 $ECHO " done"

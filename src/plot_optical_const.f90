@@ -88,7 +88,7 @@ DO col=1, 2
       CALL gnuplot_write_file_mul_data(filename,col,7,'color_red',.TRUE.,&
                                                 .TRUE.,.FALSE.)
 
-      CALL gnuplot_write_command('unset yrange',.FALSE.)
+      CALL gnuplot_write_command('set yrange [0<*:*<20]',.FALSE.)
       CALL gnuplot_ylabel('log_{10} ({/Symbol a} ({/Symbol w}) (cm^{-1}))', &
                                                                  .FALSE.) 
       filename='dynamical_matrices/'//TRIM(floptical)//'_xx'

@@ -211,6 +211,7 @@ SUBROUTINE eps_calc (intersmear, nw, wmax, wmin, nbndmin, nbndmax, shift, &
   USE lsda_mod,             ONLY : current_spin, isk
   !
   USE io_global,            ONLY : ionode, stdout, meta_ionode
+  USE wrappers,             ONLY : f_mkdir_safe
   USE mp_pools,             ONLY : inter_pool_comm
   USE mp,                   ONLY : mp_sum
   !
@@ -226,7 +227,7 @@ SUBROUTINE eps_calc (intersmear, nw, wmax, wmin, nbndmin, nbndmax, shift, &
   ! local variables
   !
   INTEGER       :: i, ik, iband1, iband2, ipol, jpol
-  INTEGER       :: iw, ierr, iu_epsil
+  INTEGER       :: iw, ierr, iu_epsil, ios
   INTEGER       :: find_free_unit
   REAL(DP)      :: etrans, const, w, sumweight
   !
@@ -336,6 +337,8 @@ SUBROUTINE eps_calc (intersmear, nw, wmax, wmin, nbndmin, nbndmax, shift, &
         END DO
      END DO
   END DO
+
+  IF (meta_ionode) ios = f_mkdir_safe( 'dynamical_matrices' )
   !
   ! recover over kpt parallelization (inter_pool)
   !
@@ -357,13 +360,13 @@ SUBROUTINE eps_calc (intersmear, nw, wmax, wmin, nbndmin, nbndmax, shift, &
         ! write results on data files
         !
         iu_epsil=find_free_unit()
-        INQUIRE(FILE="jdos", exist=exst)
+        INQUIRE(FILE="dynamical_matrices/jdos", exist=exst)
         IF (exst) THEN
-           OPEN (UNIT=iu_epsil, FILE='jdos', STATUS='old', &
+           OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/jdos', STATUS='old', &
                                  POSITION='append', FORM='formatted')
         ELSE
-           OPEN (UNIT=iu_epsil, FILE='jdos', STATUS='unknown', &
-                                                    FORM='formatted')
+           OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/jdos', &
+                          STATUS='unknown', FORM='formatted')
            WRITE(iu_epsil,'("#  Re(w)       Im(w)          jdos        ")') 
            WRITE(iu_epsil,'("# Frequency in Ry")')
         END IF
@@ -420,13 +423,13 @@ SUBROUTINE eps_calc (intersmear, nw, wmax, wmin, nbndmin, nbndmax, shift, &
         ! write results on data files
         !
         iu_epsil=find_free_unit()
-        INQUIRE(FILE="epsilon_re", exist=exst)
+        INQUIRE(FILE="dynamical_matrices/epsilon_re", exist=exst)
         IF (exst) THEN
-           OPEN (UNIT=iu_epsil, FILE='epsilon_re', STATUS='old', &
-                                 POSITION='append', FORM='formatted')
+           OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/epsilon_re', &
+                       STATUS='old', POSITION='append', FORM='formatted')
         ELSE
-           OPEN (UNIT=iu_epsil, FILE='epsilon_re', STATUS='unknown', &
-                                                    FORM='formatted')
+           OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/epsilon_re', &
+                       STATUS='unknown', FORM='formatted')
            WRITE(iu_epsil,'("#  Re(w)       Im(w)          e11            e22&
               &            e33            e12            e13            e23")')
            WRITE(iu_epsil,'("# Frequency in Ry")')
@@ -439,13 +442,13 @@ SUBROUTINE eps_calc (intersmear, nw, wmax, wmin, nbndmin, nbndmax, shift, &
         END DO
         CLOSE(iu_epsil)
  
-        INQUIRE(FILE="epsilon_im", exist=exst)
+        INQUIRE(FILE="dynamical_matrices/epsilon_im", exist=exst)
         IF (exst) THEN
-           OPEN (UNIT=iu_epsil, FILE='epsilon_im', STATUS='old', &
-                                 POSITION='append', FORM='formatted')
+           OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/epsilon_im', &
+                        STATUS='old', POSITION='append', FORM='formatted')
         ELSE
-           OPEN (UNIT=iu_epsil, FILE='epsilon_im', STATUS='unknown', &
-                                                    FORM='formatted')
+           OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/epsilon_im', &
+                      STATUS='unknown', FORM='formatted')
            WRITE(iu_epsil,'("#  Re(w)       Im(w)          e11            e22&
                 &            e33            e12            e13            e23")')
            WRITE(iu_epsil,'("# Frequency in Ry")')
@@ -458,13 +461,13 @@ SUBROUTINE eps_calc (intersmear, nw, wmax, wmin, nbndmin, nbndmax, shift, &
         END DO
         CLOSE(iu_epsil)
 
-        INQUIRE(FILE="epsilonm1_im", exist=exst)
+        INQUIRE(FILE="dynamical_matrices/epsilonm1_im", exist=exst)
         IF (exst) THEN
-           OPEN (UNIT=iu_epsil, FILE='epsilonm1_im', STATUS='old', &
-                                 POSITION='append', FORM='formatted')
+           OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/epsilonm1_im', &
+                         STATUS='old', POSITION='append', FORM='formatted')
         ELSE
-           OPEN (UNIT=iu_epsil, FILE='epsilonm1_im', STATUS='unknown', &
-                                                    FORM='formatted')
+           OPEN (UNIT=iu_epsil, FILE='dynamical_matrices/epsilonm1_im', &
+                          STATUS='unknown', FORM='formatted')
            WRITE(iu_epsil,'("#  Re(w)       Im(w)        em111          em122&
                 &          em133          em112          em113          em123")')
            WRITE(iu_epsil,'("# Frequency in Ry")')
@@ -720,7 +723,7 @@ CHARACTER(LEN=256) :: gnu_filename, gnuplot_command, filename, ylabel, xlabel
 IF ( my_image_id /= root_image ) RETURN
 
 gnuplot_command='gnuplot'
-gnu_filename='gnuplot_tmp_epsilon'
+gnu_filename='gnuplot_files/gnuplot_tmp_epsilon'
 CALL gnuplot_start(gnu_filename)
 
 filename=TRIM(fileps)
@@ -734,25 +737,28 @@ CALL gnuplot_ylabel(TRIM(ylabel), .FALSE.)
 CALL gnuplot_xlabel(TRIM(xlabel), .FALSE.)
 CALL gnuplot_write_command('plot_width=2',.FALSE.)
 
-CALL gnuplot_write_file_mul_data('epsilon_re',1,3,'color_blue',.TRUE.,.FALSE., .FALSE.)
-CALL gnuplot_write_file_mul_data('epsilon_re',1,4,'color_green',.FALSE.,.FALSE., .FALSE.)
-CALL gnuplot_write_file_mul_data('epsilon_re',1,5,'color_red',.FALSE.,.TRUE., .FALSE.)
+filename='dynamical_matrices/epsilon_re'
+CALL gnuplot_write_file_mul_data(filename,1,3,'color_blue',.TRUE.,.FALSE., .FALSE.)
+CALL gnuplot_write_file_mul_data(filename,1,4,'color_green',.FALSE.,.FALSE., .FALSE.)
+CALL gnuplot_write_file_mul_data(filename,1,5,'color_red',.FALSE.,.TRUE., .FALSE.)
 
 ylabel='{/Symbol e}_2 ({/Symbol w})'
 CALL gnuplot_ylabel(TRIM(ylabel), .FALSE.)
 CALL gnuplot_write_command('plot_width=2',.FALSE.)
 
-CALL gnuplot_write_file_mul_data('epsilon_im',1,3,'color_blue',.TRUE.,.FALSE., .FALSE.)
-CALL gnuplot_write_file_mul_data('epsilon_im',1,4,'color_green',.FALSE.,.FALSE., .FALSE.)
-CALL gnuplot_write_file_mul_data('epsilon_im',1,5,'color_red',.FALSE.,.TRUE., .FALSE.)
+filename='dynamical_matrices/epsilon_im'
+CALL gnuplot_write_file_mul_data(filename,1,3,'color_blue',.TRUE.,.FALSE., .FALSE.)
+CALL gnuplot_write_file_mul_data(filename,1,4,'color_green',.FALSE.,.FALSE., .FALSE.)
+CALL gnuplot_write_file_mul_data(filename,1,5,'color_red',.FALSE.,.TRUE., .FALSE.)
 
 ylabel='Im 1/{/Symbol e} ({/Symbol w})'
 CALL gnuplot_ylabel(TRIM(ylabel), .FALSE.)
 CALL gnuplot_write_command('plot_width=2',.FALSE.)
 
-CALL gnuplot_write_file_mul_data('epsilonm1_im',1,3,'color_blue',.TRUE.,.FALSE., .FALSE.)
-CALL gnuplot_write_file_mul_data('epsilonm1_im',1,4,'color_green',.FALSE.,.FALSE., .FALSE.)
-CALL gnuplot_write_file_mul_data('epsilonm1_im',1,5,'color_red',.FALSE.,.TRUE., .FALSE.)
+filename='dynamical_matrices/epsilonm1_im'
+CALL gnuplot_write_file_mul_data(filename,1,3,'color_blue',.TRUE.,.FALSE., .FALSE.)
+CALL gnuplot_write_file_mul_data(filename,1,4,'color_green',.FALSE.,.FALSE., .FALSE.)
+CALL gnuplot_write_file_mul_data(filename,1,5,'color_red',.FALSE.,.TRUE., .FALSE.)
 
 CALL gnuplot_end()
 
