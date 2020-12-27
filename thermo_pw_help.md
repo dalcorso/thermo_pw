@@ -54,6 +54,11 @@ patches given below.</p>
 
 **Patches for the git version**:
 
+**Patches for thermo_pw.1.4.0**:
+<br>
+* Problems with examples 10,11, and 18. Problems with electric fields and
+FR-PP. Please apply the changes as in commit:
+<a href="https://github.com/dalcorso/thermo_pw/commit/743148245d3ee9ce524afe3edc323d5ff3b31a92">commit_7431482</a>.
 
 **Patches for thermo_pw.1.3.1 and thermo_pw.1.3.2**:
 <br>
