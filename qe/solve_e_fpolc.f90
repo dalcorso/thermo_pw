@@ -413,7 +413,7 @@ SUBROUTINE solve_e_fpolc(iu)
            !
            IF (noncolin) THEN
               call incdrhoscf_nc(dvscfout(1,1,ipol), weight, ik, &
-                                 dbecsum_nc(1,1,1,1,ipol), dpsi)
+                                 dbecsum_nc(1,1,1,1,ipol), dpsi, 1.0_DP)
            ELSE
               call incdrhoscf (dvscfout(1,current_spin,ipol), weight, &
                          ik, dbecsum(1,1,current_spin,ipol), dpsi)

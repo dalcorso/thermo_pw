@@ -332,7 +332,7 @@ subroutine solve_e_tpw(drhoscf)
            !
            IF (noncolin) THEN
               call incdrhoscf_nc(drhoscf(1,1,ipol),wk(ikk),ik, &
-                                 dbecsum_nc(1,1,1,1,ipol), dpsi)
+                                 dbecsum_nc(1,1,1,1,ipol), dpsi, 1.0_DP)
            ELSE
               call incdrhoscf (drhoscf(1,current_spin,ipol), wk(ikk), &
                             ik, dbecsum(1,1,current_spin,ipol), dpsi)

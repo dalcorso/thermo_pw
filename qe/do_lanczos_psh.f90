@@ -368,7 +368,7 @@ SUBROUTINE do_lanczos_psh()
            weight=wk(ikk)
            IF (noncolin) THEN
               CALL incdrhoscf_nc(dvscfin(1,1,ipol), weight, ik,         &
-                                 dbecsum_nc(1,1,1,1,ipol), dpsi)
+                                 dbecsum_nc(1,1,1,1,ipol), dpsi, 1.0_DP)
            ELSE
               CALL incdrhoscf(dvscfin(1,current_spin,ipol), weight, ik, &
                                  dbecsum(1,1,current_spin,ipol), dpsi)

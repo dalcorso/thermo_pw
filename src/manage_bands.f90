@@ -62,7 +62,7 @@ IF (ldos_syn_1) THEN
       IF (my_image_id==root_image) CALL read_minimal_info(.FALSE.,ierr)
    ENDIF
    CALL plot_dos()
-   CALL write_el_thermo()
+   CALL write_el_thermo(1)
    CALL plot_el_thermo()
 ELSEIF (my_image_id==root_image) THEN
    nspin0=nspin

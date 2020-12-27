@@ -95,6 +95,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            IF (meta_ionode) ios = f_mkdir_safe( 'band_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
+           CALL allocate_el_thermodynamics(1)
         CASE ('scf_ph') 
            lpwscf_syn_1=.NOT.after_disp
            lph=.TRUE.
@@ -126,6 +127,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            ALLOCATE(ke(nwork))
            ALLOCATE(keden(nwork))
            ALLOCATE(energy_geo(nwork))
+           ALLOCATE(ef_geo(nwork))
            icount=0
            DO iden=1, nkeden
               kedenv = ecutrho + (iden-1) * deltakeden
@@ -149,6 +151,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            ALLOCATE(nk_test(3,nwork))
            ALLOCATE(sigma_test(nwork))
            ALLOCATE(energy_geo(nwork))
+           ALLOCATE(ef_geo(nwork))
            tot_ngeo=0
            icount=0
            DO isigma=1, nsigma
