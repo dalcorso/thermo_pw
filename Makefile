@@ -24,6 +24,8 @@ join_qe:
            plugins_makefile_qe ; mv plugins_makefile ../install ; fi
 	if test -f makedeps.sh ; then mv ../install/makedeps.sh \
            makedeps.sh_qe ; mv makedeps.sh ../install/ ; fi
+	if test -f ph_restart.f90 ; then mv ../PHonon/PH/ph_restart.f90 \
+           ph_restart.f90_qe ; mv ph_restart.f90 ../PHonon/PH ; fi
 
 leave_qe:
 	if test -f Makefile_qe ; then mv ../Makefile main_Makefile ; \
@@ -33,6 +35,8 @@ leave_qe:
            mv plugins_makefile_qe ../install/plugins_makefile ; fi
 	if test -f makedeps.sh_qe ; then mv ../install/makedeps.sh . ; \
            mv makedeps.sh_qe ../install/makedeps.sh ; fi
+	if test -f ph_restart.f90_qe ; then mv ../PHonon/PH/ph_restart.f90 \
+           ph_restart.f90 ; mv ph_restart.f90_qe ../PHonon/PH/ph_restart.f90 ; fi
 
 clean: thermo_tools_clean thermo_pw_clean thermo_lib_clean thermo_qe_clean examples_clean examples_qe_clean doc_clean
 
