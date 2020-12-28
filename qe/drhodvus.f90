@@ -126,9 +126,9 @@ subroutine drhodvus_tpw (irr, imode0, dvscfin, npe)
         mode0 = mode0 + npert (irr1)
       enddo
    endif
-!         WRITE( stdout,*) 'drhodvus dyn1, dyn'
-!         call tra_write_matrix('drhodvus dyn1',dyn1,u,nat)
-!         call tra_write_matrix('drhodvus dyn',dyn,u,nat)
+  !       WRITE( stdout,*) 'drhodvus dyn1, dyn'
+  !       call tra_write_matrix('drhodvus dyn1',dyn1,u,nat)
+  !       call tra_write_matrix('drhodvus dyn',dyn,u,nat)
   !       call stop_ph(.true.)
   dyn (:,:) = dyn (:,:) + dyn1 (:,:)
   dyn_rec(:,:) = dyn1(:,:)

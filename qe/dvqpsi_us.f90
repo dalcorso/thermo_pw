@@ -49,25 +49,42 @@ subroutine dvqpsi_us_tpw (ik, uact, addnlcc, becp1, alphap)
   !
   !   The dummy variables
   !
-  integer, intent(in) :: ik
-  ! input: the k point
-  complex(DP) :: uact (3 * nat)
-  ! input: the pattern of displacements
-  logical :: addnlcc
+  INTEGER, INTENT(in) :: ik
+  !! input: the k point
+  COMPLEX(DP) :: uact (3 * nat)
+  !! input: the pattern of displacements
+  LOGICAL :: addnlcc
+  !!
   !
   TYPE(bec_type) :: becp1(nksq), alphap(3,nksq)
   !
   !   And the local variables
   !
-
-  integer :: npw, npwq, na, mu, ikq, ikk, iks, ig, nt, ibnd, ir, is, ip
-  ! counter on atoms
-  ! counter on modes
-  ! the point k
-  ! counter on G vectors
-  ! the type of atom
-  ! counter on bands
-  ! counter on real mesh
+  INTEGER ::  na  
+  !! counter on atoms
+  INTEGER :: mu
+  !! counter on modes
+  INTEGER :: npw
+  !! Number of pw
+  INTEGER :: ikk
+  !! the point k
+  INTEGER :: npwq
+  !! Number of q
+  INTEGER :: ikq
+  !! k-q index
+  INTEGER :: iks
+  !!
+  INTEGER :: ig
+  !! counter on G vectors
+  INTEGER :: nt
+  !! the type of atom
+  INTEGER :: ibnd
+  !! counter on bands
+  INTEGER :: ir 
+  !! counter on real mesh
+  INTEGER :: is
+  !! 
+  INTEGER :: ip
 
   complex(DP) :: gtau, gu, fact, u1, u2, u3, gu0
   complex(DP) , allocatable, target :: aux (:)
@@ -168,8 +185,8 @@ subroutine dvqpsi_us_tpw (ik, uact, addnlcc, becp1, alphap)
 
       CALL fwfft ('Rho', aux, dfftp)
 ! 
-!   This is needed also when the smooth and the thick grids coincide to
-!   cut the potential at the cut-off
+!  This is needed also when the smooth and the thick grids coincide to
+!  cut the potential at the cut-off
 !
       auxs(:) = (0.d0, 0.d0)
       do ig=1,ngms

@@ -9,27 +9,24 @@
 !-----------------------------------------------------------------------------
 SUBROUTINE divide_class_tpw( code_group, nrot, smat, nclass, nelem, elem, which_irr )
 !-----------------------------------------------------------------------------
-!! This subroutine receives as input a set of nrot 3x3 matrices smat, which
-!! are assumed to be the operations of the point group given by code_group.
-!! smat are in cartesian coordinates. This routine divides the group in 
-!! classes and find:
-
-!! * nclass:         the number of classes of the group
-!! * nelem(iclass):  for each class, the number of elements of the class
-!! * elem(i,iclass): 1 < i < nelem(iclass) for each class tells which matrices 
-!!                   smat belong to that class
-!! * which_irr(iclass): for each class gives the position of that class in the
-!!                      character table associated with the group and provided
-!!                      by the routine set_irr_rap.
-
-!! NB: changing the order of 
-!! the elements in the character table must be reflected in 
-!! a change to which_irr. Presently the character tables 
-!! are those given by P.W. Atkins, M.S. Child, and 
-!! C.S.G. Phillips, "Tables for group theory". 
-!! Several equivalent names for the irreducible representation
-!! are given. D, G, L, S are used for Delta, Gamma, Lambda 
-!! and Sigma.
+!! This subroutine receives as input a set of \(\text{nrot}\) 3x3 matrices 
+!! \(\text{smat}\), which are assumed to be the operations of the point group given
+!! by \(\texttt{code_group}\). The matrices \(\text{smat}\) are in cartesian 
+!! coordinates.  
+!! This routine divides the group in classes and finds:
+!
+!! * \(\text{nclass}\): the number of classes of the group;
+!! * \(\text{nelem(iclass)}\): for each class, the number of elements of the class
+!! * \(\text{elem(i,iclass)}\): \(1<i<\text{nelem}(\text{iclass})\) for each class tells
+!!                              which matrices \(\text{smat}\) belong to that class;
+!! * \(\text{which_irr(iclass)}\): for each class gives the position of that class in the
+!!                                 character table associated with the group and provided
+!!                                 by the routine \(\texttt{set_irr_rap}\).
+!! NB: changing the order of the elements in the character table must be reflected in 
+!! a change to \(\text{which_irr}\). Presently the character tables are those given 
+!! by P.W. Atkins, M.S. Child, and C.S.G. Phillips, "Tables for group theory".  
+!! Several equivalent names for the irreducible representation are given. D, G, L, S 
+!! are used for Delta, Gamma, Lambda and Sigma.
 !
 USE kinds, ONLY : DP
 USE point_group, ONLY : angle_rot_s_tpw

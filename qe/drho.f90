@@ -63,7 +63,7 @@ SUBROUTINE drho_tpw
   REAL(DP), ALLOCATABLE :: wgg (:,:,:)
   ! the weight of each point
 
-  COMPLEX(DP) :: zdotc, wdyn (3 * nat, 3 * nat)
+  COMPLEX(DP) :: wdyn (3 * nat, 3 * nat)
   TYPE (bec_type), POINTER :: becq(:), alpq(:,:)
   COMPLEX(DP), ALLOCATABLE :: dvlocin (:), drhous (:,:,:),&
        drhoust (:,:,:), dbecsum(:,:,:,:), dbecsum_nc(:,:,:,:,:)
@@ -153,8 +153,9 @@ SUBROUTINE drho_tpw
      CALL compute_dvloc (nu_i, dvlocin)
      DO nu_j = 1, 3 * nat
         DO is = 1, nspin_lsda
+        ! FIXME: use zgemm instead of dot_product
            wdyn (nu_j, nu_i) = wdyn (nu_j, nu_i) + &
-                zdotc (dffts%nnr, drhous(1,is,nu_j), 1, dvlocin, 1) * &
+                dot_product (drhous(1:dffts%nnr,is,nu_j), dvlocin) * &
                 omega / DBLE (nrstot)
         ENDDO
      ENDDO

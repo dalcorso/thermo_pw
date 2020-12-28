@@ -39,10 +39,10 @@ subroutine phq_summary_tpw
   USE modes,         ONLY : u, npert, nirr, name_rap_mode
   USE optical,       ONLY : fru
   USE rap_point_group, ONLY : gname
-  USE qpoint,        ONLY : xq
   USE ramanm,        ONLY : lraman, elop
   USE control_flags, ONLY : iverbosity
   USE gvecw,         ONLY : ecutwfc
+  USE qpoint,        ONLY : xq
   USE lr_symm_base,  ONLY : irotmq, minus_q, nsymq
   USE constants,     ONLY : rytoev
   USE ldaU_ph,       ONLY : effU
@@ -52,7 +52,7 @@ subroutine phq_summary_tpw
   implicit none
 
   integer :: i, mu, nu, ipol, apol, na, nt, isymq, isym, nsymtot, &
-       ik, irr, imode0, iu
+             ik, irr, imode0, iu
   ! generic counter
   ! counter on modes
   ! counter on modes

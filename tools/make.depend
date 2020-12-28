@@ -38,6 +38,7 @@ epsilon_tpw.o : ../../Modules/mp_world.o
 epsilon_tpw.o : ../../Modules/noncol.o
 epsilon_tpw.o : ../../Modules/recvec.o
 epsilon_tpw.o : ../../Modules/wavefunctions.o
+epsilon_tpw.o : ../../Modules/wrappers.o
 epsilon_tpw.o : ../../PW/src/pwcom.o
 epsilon_tpw.o : ../../PW/src/symme.o
 epsilon_tpw.o : ../../UtilXlib/mp.o

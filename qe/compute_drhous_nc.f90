@@ -22,9 +22,9 @@ SUBROUTINE compute_drhous_nc_tpw (drhous, dbecsum, wgg, becq, alpq)
   USE fft_interfaces, ONLY : invfft
   USE wvfct,      ONLY : npwx, nbnd
   USE noncollin_module, ONLY : npol, nspin_mag
-  USE wavefunctions, ONLY : evc
-  USE uspp,       ONLY : okvan, nkb, vkb
-  USE uspp_param, ONLY : nhm
+  USE wavefunctions,  ONLY: evc
+  USE uspp,       ONLY: okvan, nkb, vkb
+  USE uspp_param, ONLY: nhm
 
   USE qpoint,     ONLY : nksq, ikks, ikqs
   USE eqv,        ONLY : evq, dvpsi, dpsi

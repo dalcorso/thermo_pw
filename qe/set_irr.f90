@@ -63,9 +63,9 @@ subroutine set_irr_tpw (xq, u, npert, nirr, eigen)
   ! counters and auxiliary variables
 
   integer :: info, mode_per_rap(0:12), count_rap(0:12), rap, init, pos, irap, &
-             num_rap_aux( 3 * nat ), ierr, kmode, current_mode
+             num_rap_aux( 3 * nat ), ierr
 
-  real(DP) :: modul, arg, eig(3*nat), scal
+  real(DP) :: modul, arg, eig(3*nat)
 ! the eigenvalues of dynamical matrix
 ! the modulus of the mode
 ! the argument of the phase
@@ -78,7 +78,6 @@ subroutine set_irr_tpw (xq, u, npert, nirr, eigen)
 ! rotated pattern
 ! the phase factor
 
-  logical :: done_mode(3*nat)
   logical :: magnetic_sym
   logical :: is_degenerate_mode
 

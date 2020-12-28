@@ -18,21 +18,50 @@ SUBROUTINE kpoint_grid_tpw ( nrot, time_reversal, skip_equivalence, s, t_rev, &
   USE mp,    ONLY : mp_sum
   IMPLICIT NONE
   !
-  INTEGER, INTENT(in):: nrot, npk, k1, k2, k3, nk1, nk2, nk3, &
-                        t_rev(48), s(3,3,48), comm, nproc, me_proc
-  LOGICAL, INTENT(in):: time_reversal, skip_equivalence
-  real(DP), INTENT(in):: bg(3,3)
+  INTEGER, INTENT(in):: comm, nproc, me_proc
+  INTEGER, INTENT(IN) :: nrot
+  !! number of bravais lattice symmetries
+  INTEGER, INTENT(IN) :: npk
+  !! max number of k-points
+  INTEGER, INTENT(IN) :: k1
+  !! the offset from the origin, direction 1
+  INTEGER, INTENT(IN) :: k2
+  !! the offset from the origin, direction 2
+  INTEGER, INTENT(IN) :: k3
+  !! the offset from the origin, direction 3
+  INTEGER, INTENT(IN) :: nk1
+  !! the special-point grid, direction 1
+  INTEGER, INTENT(IN) :: nk2
+  !! the special-point grid, direction 2
+  INTEGER, INTENT(IN) :: nk3
+  !! the special-point grid, direction 3
+  INTEGER, INTENT(IN) :: t_rev(48)
+  !! time reversal flag, for noncolinear magnetism
+  INTEGER, INTENT(IN) :: s(3,3,48)
+  !! symmetry matrices, in crystal axis
+  LOGICAL, INTENT(IN) :: time_reversal
+  !! if .TRUE. the system has time reversal symmetry
+  LOGICAL, INTENT(IN) :: skip_equivalence
+  !! if .TRUE. skip check of k-points equivalence
+  REAL(DP), INTENT(IN) :: bg(3,3)
+  !! bg(:,i) are the reciprocal lattice vectors, b_i,
+  !! in tpiba=2pi/alat units: b_i(:) = bg(:,i)/tpiba
+  INTEGER,  INTENT(out) :: nks
+  !! number of k points
+  REAL(DP), INTENT(out) :: xk(3,npk)
+  !! coordinates of k points
+  REAL(DP), INTENT(out) :: wk(npk)
+  !! weight of k points
   !
-  INTEGER, INTENT(out) :: nks
-  real(DP), INTENT(out):: xk(3,npk)
-  real(DP), INTENT(out):: wk(npk)
-  ! LOCAL:
-  real(DP), PARAMETER :: eps=1.0d-5
-  real(DP) :: xkr(3), fact, xx, yy, zz
+  ! ... local variables
+  !
+  REAL(DP) :: xkr(3), fact, xx, yy, zz
   real(DP), ALLOCATABLE:: xkg(:,:), wkk(:), xk_(:,:), wk_(:)
-  INTEGER :: nkr, i,j,k, ns, n, nk, startk, lastk, pos, iproc
+  INTEGER :: nkr, i, j, k, ns, n, nk
+  INTEGER :: startk, lastk, pos, iproc
   INTEGER, ALLOCATABLE :: equiv(:), npos(:), nks_save(:)
   LOGICAL :: in_the_list
+  REAL(DP), PARAMETER :: eps=1.0d-5
   !
   nkr=nk1*nk2*nk3
 
