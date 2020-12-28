@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2009 Quantum ESPRESSO group
+! Copyright (C) 2001-2018 Quantum ESPRESSO group
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -25,26 +25,28 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   USE cell_base, ONLY: at, bg, tpiba
   USE gvect,     ONLY: gcutm
   USE gvecs,     ONLY: gcutms
-  USE klist,     ONLY : qnorm
+  USE klist,     ONLY : qnorm, nelec
   !!!
   USE disp,            ONLY : lgamma_iq
   USE control_ph,      ONLY : reduce_io, recover, tmp_dir_phq, &
                               ext_restart, bands_computed, newgrid, qplot, &
                               only_wfc
   USE io_global,       ONLY : stdout
-  !!!
   USE grid_irr_iq,     ONLY : done_bands
   USE acfdtest,        ONLY : acfdt_is_active, acfdt_num_der, ir_point, delta_vrs
   USE scf,             ONLY : vrs
+  USE mp_bands,        ONLY : intra_bgrp_comm, nyfft
+  USE mp_pools,        ONLY : kunit
   USE force_mod,       ONLY : lforce, lstres
 
   USE lr_symm_base,    ONLY : minus_q, nsymq, invsymq
+  USE control_lr,      ONLY : ethr_nscf
   USE qpoint,          ONLY : xq
   USE noncollin_module,ONLY : noncolin
   USE spin_orb,        ONLY : domag
-  USE mp_bands,        ONLY : intra_bgrp_comm, nyfft
-  USE mp_pools,        ONLY : kunit
   USE el_phon,         ONLY : elph_mat
+  USE ahc,             ONLY : elph_ahc
+  !
  !
   IMPLICIT NONE
   !
@@ -91,12 +93,14 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   lstres            = .FALSE.
   restart = ext_restart
   conv_ions=.true.
+  ethr_nscf      = 1.0D-9 / nelec 
+  ! threshold for diagonalization ethr_nscf - should be good for all cases
   !
-  !!!
-  CALL fft_type_allocate ( dfftp, at, bg, gcutm, intra_bgrp_comm, nyfft=nyfft )
+  CALL fft_type_allocate ( dfftp, at, bg, gcutm,  intra_bgrp_comm, nyfft=nyfft )
   CALL fft_type_allocate ( dffts, at, bg, gcutms, intra_bgrp_comm, nyfft=nyfft)
-  !!!
-  CALL setup_nscf_tpw ( newgrid, xq, elph_mat )
+  !
+  CALL setup_nscf_tpw ( newgrid, xq, elph_mat .OR. elph_ahc )
+  !
   CALL init_run()
 !!!!!!!!!!!!!!!!!!!!!!!! ACFDT TEST !!!!!!!!!!!!!!!!
   IF (acfdt_is_active) THEN

@@ -42,9 +42,12 @@ SUBROUTINE prepare_q_tpw(auxdyn, do_band, do_iq, setup_pw, iq)
 
   USE qpoint,          ONLY : xq
   USE control_lr,      ONLY : lgamma
+  USE spin_orb,        ONLY : domag
+  USE noncollin_module, ONLY : noncolin
   ! YAMBO >
   USE YAMBO,           ONLY : elph_yambo,yambo_elph_file_name,dvscf_yambo
   ! YAMBO <
+  USE ahc,             ONLY : elph_ahc
   !
   IMPLICIT NONE
   !
@@ -180,6 +183,14 @@ SUBROUTINE prepare_q_tpw(auxdyn, do_band, do_iq, setup_pw, iq)
      lgamma=lgamma_iq(iq)
   ENDIF
   !
+  ! If elph_ahc, disable epsil calculation
+  !
+  IF (elph_ahc) THEN
+     epsil = .FALSE.
+     zeu = .FALSE.
+     zue = .FALSE.
+  ENDIF
+  !
   !  Save the current status of the run: all the flags, the list of q,
   !  and the current q, the fact that we are before the bands
   !
@@ -195,14 +206,22 @@ SUBROUTINE prepare_q_tpw(auxdyn, do_band, do_iq, setup_pw, iq)
   !     of q \= 0   we do make first a nscf run
   !
   setup_pw = (.NOT.lgamma .OR. modenum /= 0 .OR. newgrid) 
+  ! YAMBO >
+  if (qplot.and.elph_yambo) setup_pw=.true.
+  ! YAMBO <
   !
   ! with qplot we redo the bands at gamma if it is not the first point
   ! of the list.
   !
   IF ((qplot.AND.iq /= 1).OR.always_run) setup_pw=.true.
-  ! YAMBO >
-  if (qplot.and.elph_yambo) setup_pw=.true.
-  ! YAMBO <
+  !
+  ! Note (A. Urru): in the noncollinear magnetic case we need setup_pw = 
+  ! .true. because we have to recompute the bands. Moreover we need to avoid 
+  ! to call dfpt_tetra, because that routine has not been generalized properly 
+  ! to the SO-MAG case yet. This is only a temporary workaround, but please 
+  ! don't change it until the dfpt_tetra_mod has been properly updated. 
+  !
+  IF (noncolin.AND.domag) setup_pw=.true.
 
   do_band=.FALSE.
   DO irr=start_irr, MIN(ABS(last_irr),irr_iq(iq))
@@ -215,7 +234,6 @@ SUBROUTINE prepare_q_tpw(auxdyn, do_band, do_iq, setup_pw, iq)
   !  If this q has been already calculated we only diagonalize the dynamical 
   !  matrix
   !
-
   IF ( done_iq(iq) ) do_band=.FALSE.
   IF (tcollect_all) THEN
      do_band=.FALSE.
@@ -229,7 +247,7 @@ SUBROUTINE prepare_q_tpw(auxdyn, do_band, do_iq, setup_pw, iq)
   ENDIF
   !
   dfpt_tetra_linit = .FALSE.
-  IF(.NOT. setup_pw .AND. ltetra) dfpt_tetra_linit = .TRUE.
+  IF((.NOT. setup_pw .OR. done_bands(iq)) .AND. ltetra) dfpt_tetra_linit = .TRUE. 
   !
   RETURN
   !

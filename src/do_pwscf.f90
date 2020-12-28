@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2013-2017 Quantum ESPRESSO group
+! Copyright (C) 2013-2020 Quantum ESPRESSO group
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -33,6 +33,8 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   !! @endnote
   !!
   !
+  USE kinds,                ONLY : DP
+  USE mp,                   ONLY : mp_bcast, mp_sum
   USE io_global,            ONLY : stdout, ionode, ionode_id
   USE parameters,           ONLY : ntypx, npk
   USE upf_params,           ONLY : lmaxx
@@ -40,7 +42,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   USE cell_base,            ONLY : fix_volume, fix_area
   USE control_flags,        ONLY : conv_elec, gamma_only, ethr, lscf, treinit_gvecs
   USE control_flags,        ONLY : conv_ions, istep, nstep, restart, lmd, &
-                                   lbfgs, io_level
+                                   lbfgs, io_level, lensemb
   USE cellmd,               ONLY : lmovecell
   USE command_line_options, ONLY : command_line
   USE force_mod,            ONLY : lforce, lstres, sigma, force
@@ -52,9 +54,11 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   USE lsda_mod,             ONLY : nspin
   USE fft_base,             ONLY : dfftp
   USE qmmm,                 ONLY : qmmm_initialization, qmmm_shutdown, &
-                               qmmm_update_positions, qmmm_update_forces
+                                   qmmm_update_positions, qmmm_update_forces
   USE qexsd_module,         ONLY : qexsd_set_status
   USE funct,                ONLY : dft_is_hybrid, stop_exx
+  USE beef,                 ONLY : beef_energies
+  USE ldaU,                 ONLY : lda_plus_u
   !
   IMPLICIT NONE
   INTEGER, INTENT(OUT) :: exit_status
@@ -62,9 +66,12 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   LOGICAL :: lscf_
   LOGICAL, EXTERNAL :: matches
   ! checks if first string is contained in the second
+  !
+  ! ... local variables
+  !
   INTEGER :: idone 
   ! counter of electronic + ionic steps done in this run
-  INTEGER :: ions_status 
+  INTEGER :: ions_status
   ! ions_status =  3  not yet converged
   ! ions_status =  2  converged, restart with nonzero magnetization
   ! ions_status =  1  converged, final step with current cell needed
@@ -149,15 +156,6 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
         RETURN
      ENDIF
      !
-     ! ... ionic section starts here
-     !
-     CALL start_clock( 'ions' ); !write(*,*)' start ions' ; FLUSH(6)
-     conv_ions = .TRUE.
-     !
-     ! ... recover from a previous run, if appropriate
-     !
-     !IF ( restart .AND. lscf ) CALL restart_in_ions()
-     !
      ! ... file in CASINO format written here if required
      !
      IF ( lmd ) THEN
@@ -165,6 +163,11 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
      ELSE
         CALL pw2casino( 0 )
      END IF
+     !
+     ! ... ionic section starts here
+     !
+     CALL start_clock( 'ions' ); !write(*,*)' start ions' ; FLUSH(6)
+     conv_ions = .TRUE.
      !
      ! ... force calculation
      !
@@ -175,6 +178,10 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
      IF ( lstres ) CALL stress_tpw ( sigma )
      !
      IF ( lmd .OR. lbfgs ) THEN
+        !
+        ! ... add information on this ionic step to xml file
+        !
+        CALL add_qexsd_step( idone )
         !
         IF (fix_volume) CALL impose_deviatoric_stress( sigma )
         IF (fix_area)   CALL impose_deviatoric_stress_2d( sigma )
@@ -189,14 +196,15 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
         conv_ions = ( ions_status == 0 ) .OR. &
                     ( ions_status == 1 .AND. treinit_gvecs )
         !
-        ! ... then we save restart information for the new configuration
+        IF (dft_is_hybrid() )  CALL stop_exx()
         !
-        IF ( idone <= nstep .AND. .NOT. conv_ions ) THEN 
+        ! ... save restart information for the new configuration
+        !
+        IF ( idone <= nstep .AND. .NOT. conv_ions ) THEN
             CALL qexsd_set_status( 255 )
-            CALL punch( 'config-nowf' )
+            CALL punch( 'config-only' )
         END IF
         !
-        IF (dft_is_hybrid() )  CALL stop_exx()
      END IF
      !
      CALL stop_clock( 'ions' ); !write(*,*)' stop ions' ; FLUSH(6)
@@ -207,7 +215,6 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
      !
      ! ... exit condition (ionic convergence) is checked here
      !
-     IF ( lmd .OR. lbfgs ) CALL add_qexsd_step( idone )
      IF ( conv_ions ) EXIT main_loop
      !
      ! ... receive new positions from MM code in QM/MM run
@@ -225,7 +232,12 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
            !
            lbfgs=.FALSE.; lmd=.FALSE.
            WRITE( UNIT = stdout, FMT=9020 ) 
+           !
            CALL reset_gvectors( )
+           !
+           ! ... read atomic occupations for DFT+U(+V)
+           !
+           IF ( lda_plus_u ) CALL read_ns()
            !
         ELSE IF ( ions_status == 2 ) THEN
            !
@@ -269,11 +281,12 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   ! ... save final data file
   !
   CALL qexsd_set_status( exit_status )
-  CALL punch( 'all' )
-  !
-  IF ( .NOT. conv_ions )  exit_status =  3
+  IF ( lensemb ) CALL beef_energies( )
+  IF ( io_level > -1 ) CALL punch( 'all' )
   !
   CALL qmmm_shutdown()
+  !
+  IF ( .NOT. conv_ions )  exit_status =  3
   !
   CALL close_files(.TRUE.)
   !

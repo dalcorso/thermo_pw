@@ -14,7 +14,8 @@ SUBROUTINE deallocate_asyn()
   USE kinds, ONLY : DP
   USE control_thermo, ONLY : lpwscf, lphonon, lstress, lberry, geometry, &
                              iqw, irrw, comp_irr_iq_iw, comp_iq_iw,      &
-                             comp_f_iw, lpwband, lef
+                             done_irr_iq_iw, done_iq_iw, comp_f_iw, lpwband, &
+                             lef
   IMPLICIT NONE
   !
   IF (ALLOCATED(lpwscf))     DEALLOCATE(lpwscf) 
@@ -28,6 +29,8 @@ SUBROUTINE deallocate_asyn()
   IF (ALLOCATED(irrw))       DEALLOCATE(irrw) 
   IF (ALLOCATED(comp_irr_iq_iw)) DEALLOCATE(comp_irr_iq_iw) 
   IF (ALLOCATED(comp_iq_iw))  DEALLOCATE(comp_iq_iw) 
+  IF (ALLOCATED(done_irr_iq_iw)) DEALLOCATE(done_irr_iq_iw) 
+  IF (ALLOCATED(done_iq_iw))  DEALLOCATE(done_iq_iw) 
   IF (ALLOCATED(comp_f_iw)) DEALLOCATE(comp_f_iw) 
   ! 
   RETURN

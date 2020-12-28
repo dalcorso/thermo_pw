@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2001-2016 Quantum ESPRESSO group
+! Copyright (C) 2001-2018 Quantum ESPRESSO group
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -52,17 +52,17 @@ subroutine phq_setup_tpw
   USE kinds,         ONLY : DP
   USE ions_base,     ONLY : tau, nat, ntyp => nsp, ityp
   USE cell_base,     ONLY : at, bg
-  USE io_global,     ONLY : ionode
+  USE io_global,     ONLY : ionode, stdout
   USE io_files,      ONLY : tmp_dir
   USE klist,         ONLY : xk, nks, nkstot
   USE lsda_mod,      ONLY : nspin, starting_magnetization
-  USE scf,           ONLY : v, vrs, vltot, kedtau
+  USE scf,           ONLY : v, vrs, vltot, kedtau, rho
   USE dfunct,        ONLY : newd
   USE fft_base,      ONLY : dfftp
   USE gvect,         ONLY : ngm
   USE gvecs,         ONLY : doublegrid
   USE symm_base,     ONLY : nrot, nsym, s, irt, t_rev, time_reversal, &
-                            sr, invs, inverse_s, sname, d1, d2, d3
+                            sr, invs, inverse_s, sname, d1, d2, d3, check_grid_sym
   USE uspp_param,    ONLY : upf
   USE uspp,          ONLY : nlcc_any, deeq_nc, okvan
   USE spin_orb,      ONLY : domag
@@ -104,7 +104,8 @@ subroutine phq_setup_tpw
   USE ldaU,          ONLY : lda_plus_u, Hubbard_U, Hubbard_J0
   USE ldaU_ph,       ONLY : effU
   USE constants,     ONLY : rytoev
-
+  USE dvscf_interpolate, ONLY : ldvscf_interpolate, dvscf_interpol_setup
+  USE ahc,           ONLY : elph_ahc, elph_ahc_setup
 
   implicit none
 
@@ -141,6 +142,7 @@ subroutine phq_setup_tpw
   ! 1) Computes the total local potential (external+scf) on the smooth grid
   !
 !!!!!!!!!!!!!!!!!!!!!!!! ACFDT TEST !!!!!!!!!!!!!!!!
+!  write(*,*) " acfdt_is_active ",acfdt_is_active, " acfdt_num_der ", acfdt_num_der
   IF (acfdt_is_active) THEN
      ! discard set_vrs for numerical derivatives
      if (.not.acfdt_num_der) then 
@@ -194,20 +196,19 @@ subroutine phq_setup_tpw
   !
   call setup_dgc()
   !
-  ! 4) Computes the inverse of each matrix of the crystal symmetry group
-  !
-  call inverse_s()
-  !
-  ! 5) Computes the number of occupied bands for each k point
+  ! 4) Computes the number of occupied bands for each k point
   !
   call setup_nbnd_occ()
   !
-  ! 6) Computes alpha_pv
+  ! 5) Computes alpha_pv
   !
   call setup_alpha_pv()
   !
-  ! 7) set all the variables needed to use the pattern representation
+  ! 6) Set all symmetries and variables needed to use the pattern representation
   !
+  call inverse_s()
+  IF ( .NOT. check_grid_sym (dfftp%nr1,dfftp%nr2,dfftp%nr3) ) &
+          CALL errore('phq_setup','FFT grid incompatible with symmetry',1)
   magnetic_sym = noncolin .AND. domag
   time_reversal = .NOT. noinv .AND. .NOT. magnetic_sym
 
@@ -425,6 +426,9 @@ subroutine phq_setup_tpw
      call mp_max(elph_nbnd_max, inter_pool_comm)
      !
   END IF
+  !
+  ! DFPT+U 
+  !
   IF (lda_plus_u) THEN
      !
      ! Define effU     
@@ -448,6 +452,16 @@ subroutine phq_setup_tpw
      CALL setup_offset_beta()
      !
   ENDIF
+  !
+  ! dVscf Fourier interpolation
+  !
+  IF (ldvscf_interpolate) THEN
+    CALL dvscf_interpol_setup()
+  ENDIF
+  !
+  ! AHC e-ph coupling
+  !
+  IF (elph_ahc) CALL elph_ahc_setup()
   !
   CALL stop_clock ('phq_setup')
   RETURN

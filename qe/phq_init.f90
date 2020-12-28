@@ -64,9 +64,8 @@ SUBROUTINE phq_init_tpw()
   USE el_phon,              ONLY : elph_mat, iunwfcwann, npwq_refolded, &
                                    kpq,g_kpq,igqg,xk_gamma, lrwfcr
   USE wannier_gw,           ONLY : l_head
-  USE Coul_cut_2D,          ONLY : do_cutoff_2D
-  USE Coul_cut_2D_ph,       ONLY : cutoff_lr_Vlocq, cutoff_fact_qg
-
+  USE Coul_cut_2D,          ONLY : do_cutoff_2D     
+  USE Coul_cut_2D_ph,       ONLY : cutoff_lr_Vlocq , cutoff_fact_qg 
   USE lrus,                 ONLY : becp1, dpqq, dpqq_so
   USE qpoint,               ONLY : xq, nksq, eigqts, ikks, ikqs
   USE qpoint_aux,           ONLY : becpt, alphapt, ikmks
@@ -133,14 +132,14 @@ SUBROUTINE phq_init_tpw()
   END DO
   ! for 2d calculations, we need to initialize the fact for the q+G 
   ! component of the cutoff of the COulomb interaction
-  IF (do_cutoff_2D) call cutoff_fact_qg()
+  IF (do_cutoff_2D) call cutoff_fact_qg() 
   !  in 2D calculations the long range part of vlocq(g) (erf/r part)
   ! was not re-added in g-space because everything is caclulated in
   ! radial coordinates, which is not compatible with 2D cutoff. 
   ! It will be re-added each time vlocq(g) is used in the code. 
   ! Here, this cutoff long-range part of vlocq(g) is computed only once
   ! by the routine below and stored
-  IF (do_cutoff_2D) call cutoff_lr_Vlocq()
+  IF (do_cutoff_2D) call cutoff_lr_Vlocq() 
   !
   ! only for electron-phonon coupling with wannier functions
   ! 
@@ -194,16 +193,16 @@ SUBROUTINE phq_init_tpw()
      !
      ! ... read the wavefunctions at k
      !
-    if(elph_mat) then
+     if(elph_mat) then
         call read_wfc_rspace_and_fwfft( evc, ik, lrwfcr, iunwfcwann, npw, igk_k(1,ikk) )
-!       CALL davcio (evc, lrwfc, iunwfcwann, ik, - 1)
-    else
-       CALL get_buffer( evc, lrwfc, iuwfc, ikk )
-       IF (noncolin.AND.domag) THEN
-          CALL get_buffer( tevc, lrwfc, iuwfc, ikmks(ik) )
-          CALL calbec (npw, vkb, tevc, becpt(ik) )
-       ENDIF
-    endif
+        !       CALL davcio (evc, lrwfc, iunwfcwann, ik, - 1)
+     else
+        CALL get_buffer( evc, lrwfc, iuwfc, ikk )
+        IF (noncolin.AND.domag) THEN
+           CALL get_buffer( tevc, lrwfc, iuwfc, ikmks(ik) )
+           CALL calbec (npw, vkb, tevc, becpt(ik) )
+        ENDIF
+     endif
      !
      ! ... e) we compute the becp terms which are used in the rest of
      ! ...    the code
@@ -218,12 +217,12 @@ SUBROUTINE phq_init_tpw()
         DO ibnd = 1, nbnd
            DO ig = 1, npw
               aux1(ig,ibnd) = evc(ig,ibnd) * tpiba * ( 0.D0, 1.D0 ) * &
-                              ( xk(ipol,ikk) + g(ipol,igk_k(ig,ikk)) )
+                   ( xk(ipol,ikk) + g(ipol,igk_k(ig,ikk)) )
            END DO
            IF (noncolin) THEN
               DO ig = 1, npw
                  aux1(ig+npwx,ibnd)=evc(ig+npwx,ibnd)*tpiba*(0.D0,1.D0)*&
-                           ( xk(ipol,ikk) + g(ipol,igk_k(ig,ikk)) )
+                      ( xk(ipol,ikk) + g(ipol,igk_k(ig,ikk)) )
               END DO
            END IF
         END DO
@@ -236,12 +235,12 @@ SUBROUTINE phq_init_tpw()
            DO ibnd = 1, nbnd
               DO ig = 1, npw
                  aux1(ig,ibnd) = tevc(ig,ibnd) * tpiba * ( 0.D0, 1.D0 ) * &
-                              ( xk(ipol,ikk) + g(ipol,igk_k(ig,ikk)) )
+                      ( xk(ipol,ikk) + g(ipol,igk_k(ig,ikk)) )
               END DO
               IF (noncolin) THEN
                  DO ig = 1, npw
                     aux1(ig+npwx,ibnd)=tevc(ig+npwx,ibnd)*tpiba*(0.D0,1.D0)*&
-                           ( xk(ipol,ikk) + g(ipol,igk_k(ig,ikk)) )
+                         ( xk(ipol,ikk) + g(ipol,igk_k(ig,ikk)) )
                  END DO
               END IF
            END DO
@@ -250,30 +249,30 @@ SUBROUTINE phq_init_tpw()
      ENDIF
      !
 !!!!!!!!!!!!!!!!!!!!!!!! ACFDT TEST !!!!!!!!!!!!!!!!
-  IF (acfdt_is_active) THEN
-     ! ACFDT -test always read calculated wcf from non_scf calculation
-     IF(acfdt_num_der) then 
-       CALL get_buffer( evq, lrwfc, iuwfc, ikq )
+     IF (acfdt_is_active) THEN
+        ! ACFDT -test always read calculated wcf from non_scf calculation
+        IF(acfdt_num_der) then 
+           CALL get_buffer( evq, lrwfc, iuwfc, ikq )
+        ELSE
+           IF ( .NOT. lgamma ) &
+                CALL get_buffer( evq, lrwfc, iuwfc, ikq )
+        ENDIF
      ELSE
-       IF ( .NOT. lgamma ) &
-          CALL get_buffer( evq, lrwfc, iuwfc, ikq )
+        ! this is the standard treatment
+        IF ( .NOT. lgamma .and..not. elph_mat )then 
+           CALL get_buffer( evq, lrwfc, iuwfc, ikq )
+        ELSEIF(.NOT. lgamma .and. elph_mat) then
+           !
+           ! I read the wavefunction in real space and fwfft it
+           !
+           ikqg = kpq(ik)
+           call read_wfc_rspace_and_fwfft( evq, ikqg, lrwfcr, iunwfcwann, npwq, &
+                igk_k(1,ikq) )
+           !        CALL davcio (evq, lrwfc, iunwfcwann, ikqg, - 1)
+           call calculate_and_apply_phase(ik, ikqg, igqg, &
+                npwq_refolded, g_kpq, xk_gamma, evq, .false.)
+        ENDIF
      ENDIF
-  ELSE
-     ! this is the standard treatment
-     IF ( .NOT. lgamma .and..not. elph_mat )then 
-        CALL get_buffer( evq, lrwfc, iuwfc, ikq )
-     ELSEIF(.NOT. lgamma .and. elph_mat) then
-        !
-        ! I read the wavefunction in real space and fwfft it
-        !
-        ikqg = kpq(ik)
-        call read_wfc_rspace_and_fwfft( evq, ikqg, lrwfcr, iunwfcwann, npwq, &
-                                        igk_k(1,ikq) )
-!        CALL davcio (evq, lrwfc, iunwfcwann, ikqg, - 1)
-        call calculate_and_apply_phase(ik, ikqg, igqg, &
-           npwq_refolded, g_kpq, xk_gamma, evq, .false.)
-     ENDIF
-  ENDIF
 !!!!!!!!!!!!!!!!!!!!!!!! END OF ACFDT TEST !!!!!!!!!!!!!!!!
      !
   END DO
@@ -291,7 +290,7 @@ SUBROUTINE phq_init_tpw()
   !
   ! DFPT+U
   ! 
-  IF (lda_plus_u)  THEN
+  IF (lda_plus_u)  THEN 
      !
      ! Calculate and write to file the atomic orbitals 
      ! \phi and S\phi at k and k+q

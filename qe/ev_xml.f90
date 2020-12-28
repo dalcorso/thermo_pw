@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2010 Quantum ESPRESSO group
+! Copyright (C) 2020 Quantum ESPRESSO group
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -9,8 +9,6 @@ MODULE ev_xml
 !
 !   This module contains routines to write the information obtained by the
 !   ev.x program in an xml file.
-!
-USE iotk_module
 !
 USE kinds,     ONLY : DP
 
@@ -28,20 +26,22 @@ IMPLICIT NONE
   CONTAINS
 !-----------------------------------------------------------------------
     SUBROUTINE write_evdata_xml &
-        (npt,fac,v0,etot,efit,istat,par,npar,emin,pressure_kb,chisq,filout,ierr)
+        (npt,fac,v0,etot,efit,istat,par,npar,emin,pressure_kb,&
+                                                     chisq,filout, ierr)
 !-----------------------------------------------------------------------
 !
+  USE kinds,     ONLY : dp
   USE constants, ONLY : ry_kbar, bohr_radius_angs
   IMPLICIT NONE
-  INTEGER, INTENT(in) :: npt, istat, npar
-  REAL(DP), INTENT(in):: v0(npt), etot(npt), efit(npt), emin, chisq, fac, &
-                         pressure_kb
-  REAL(DP), INTENT(in):: par(npar)
-  CHARACTER(len=256), INTENT(IN) :: filout
-  INTEGER, INTENT(out) :: ierr
+  INTEGER, INTENT(IN) :: npt, istat, npar
+  REAL(DP), INTENT(IN):: v0(npt), etot(npt), efit(npt), emin, chisq, fac
+  REAL(DP), INTENT(In):: par(npar), pressure_kb
+  CHARACTER(LEN=256), INTENT(IN) :: filout
+  INTEGER, INTENT(OUT) :: ierr
   !
+  INTEGER :: iunout = 11
   REAL(DP) :: p(npt), volume(2), a0(2), alldata(6,npt)
-  INTEGER :: i
+  INTEGER :: i, iun
   CHARACTER(len=256) :: filename
   REAL(DP), EXTERNAL :: birch, keane
 
@@ -50,35 +50,32 @@ IMPLICIT NONE
   ELSE
      filename = 'ev.xml'
   ENDIF
-
-  ierr=0
-  CALL iotk_free_unit( iunout, ierr )
-  IF ( ierr /= 0 ) THEN
-     ierr = 11 
-     RETURN
-  END IF
   !
   ! ... open XML descriptor
   !
-  CALL iotk_open_write( iunout, FILE = TRIM( filename ), &
-                          BINARY = .FALSE., IERR = ierr )
+  OPEN ( UNIT=iunout, FILE = TRIM( filename ), FORM='formatted', IOSTAT = ierr )
   IF ( ierr /= 0 ) THEN
-     ierr = 12 
+     WRITE (6,*) 'Failed opening file ' // TRIM(filename)
      RETURN
   END IF
 
-  CALL iotk_write_begin(iunout, "EQUATIONS_OF_STATE" )
+  WRITE (iunout,'("<xml>")')
+  WRITE (iunout,'("<EQUATIONS_OF_STATE>")')
+  WRITE (iunout,'("<EQUATION_TYPE>")')
   IF (istat==1) THEN
-     CALL iotk_write_dat(iunout, "EQUATION_TYPE", "Birch 1st order")
+     WRITE (iunout,'("Birch 1st order")')
   ELSEIF (istat==2) THEN
-     CALL iotk_write_dat(iunout, "EQUATION_TYPE", "Birch 2nd order")
+     WRITE (iunout,'("Birch 2nd order")')
   ELSEIF (istat==3) THEN
-     CALL iotk_write_dat(iunout, "EQUATION_TYPE", "Keane")
+     WRITE (iunout,'("Keane")')
   ELSEIF (istat==4) THEN
-     CALL iotk_write_dat(iunout, "EQUATION_TYPE", "Murnaghan")
+     WRITE (iunout,'("Murnaghan")')
   ENDIF
-  CALL iotk_write_dat(iunout, "CHI_SQUARE", chisq)
-  CALL iotk_write_end(iunout, "EQUATIONS_OF_STATE" )
+  WRITE (iunout,'("</EQUATION_TYPE>")')
+  WRITE (iunout,'("<CHI_SQUARE>")')
+  WRITE (iunout,'(1pe25.12)') chisq
+  WRITE (iunout,'("</CHI_SQUARE>")')
+  WRITE (iunout,'("</EQUATIONS_OF_STATE>")')
 
   IF (istat==1 .or. istat==2) THEN
      DO i=1,npt
@@ -95,38 +92,55 @@ IMPLICIT NONE
      alldata (2,i) = etot(i) 
      alldata (3,i) = efit(i)
      alldata (4,i) = etot(i) - efit(i)
-     alldata (5,i) = p(i) + pressure_kb
+     alldata (5,i) = p(i) 
      alldata (6,i) = etot(i) + p(i) * v0(i) / ry_kbar
   ENDDO
 
-  CALL iotk_write_begin(iunout, "EQUATIONS_PARAMETERS" )
+  WRITE (iunout,'("<EQUATIONS_PARAMETERS>")')
 
   volume(1)=par(1)
   volume(2)=par(1)*bohr_radius_angs**3
-  CALL iotk_write_dat(iunout, "EQUILIBRIUM_VOLUME_AU_A", volume(:), COLUMNS=2 )
-  CALL iotk_write_dat(iunout, "BULK_MODULUS_KBAR", par(2))
-  CALL iotk_write_dat(iunout, "DERIVATIVE_BULK_MODULUS", par(3))
-  CALL iotk_write_dat(iunout, "SECOND_DERIVATIVE_BULK_MODULUS", par(4))
-  CALL iotk_write_dat(iunout, "MINIMUM_ENERGY_RY", emin)
-  CALL iotk_write_dat(iunout, "PRESSURE_KB", pressure_kb)
-  CALL iotk_write_dat(iunout, "CELL_FACTOR", fac)
+  WRITE (iunout, '("<EQUILIBRIUM_VOLUME_AU_A>")')
+  WRITE (iunout, '(2(1pe25.15))') volume(:)
+  WRITE (iunout, '("</EQUILIBRIUM_VOLUME_AU_A>")')
+  WRITE (iunout, '("<BULK_MODULUS_KBAR>")')
+  WRITE (iunout, '(1pe25.15)') par(2)
+  WRITE (iunout, '("</BULK_MODULUS_KBAR>")')
+  WRITE (iunout, '("<DERIVATIVE_BULK_MODULUS>")')
+  WRITE (iunout, '(1pe25.15)') par(3)
+  WRITE (iunout, '("</DERIVATIVE_BULK_MODULUS>")')
+  WRITE (iunout, '("<SECOND_DERIVATIVE_BULK_MODULUS>")')
+  WRITE (iunout, '(1pe25.15)') par(4)
+  WRITE (iunout, '("</SECOND_DERIVATIVE_BULK_MODULUS>")')
+  WRITE (iunout, '("<MINIMUM_ENERGY_RY>")')
+  WRITE (iunout, '(1pe25.15)') emin
+  WRITE (iunout, '("</MINIMUM_ENERGY_RY>")')
+  WRITE (iunout, '("<CELL_FACTOR>")')
+  WRITE (iunout, '(1pe25.15)') fac
+  WRITE (iunout, '("</CELL_FACTOR>")')
   IF (fac /= 0.0_DP) THEN
      a0(1) = (par(1)/fac)**(1d0/3d0)
      a0(2) = (par(1)/fac)**(1d0/3d0) * bohr_radius_angs
-     CALL iotk_write_dat(iunout, "CELL_PARAMETER_AU_A", a0, COLUMNS=2 )
+     WRITE (iunout, '("<CELL_PARAMETER_AU_A>")')
+     WRITE (iunout, '(2(1pe25.15))') a0
+     WRITE (iunout, '("</CELL_PARAMETER_AU_A>")')
   ENDIF
-  CALL iotk_write_end(iunout, "EQUATIONS_PARAMETERS" )
+  WRITE (iunout,'("</EQUATIONS_PARAMETERS>")')
 
-  CALL iotk_write_begin(iunout, "FIT_CHECK" )
-  CALL iotk_write_dat(iunout, "NUMBER_OF_DATA", npt )
-  CALL iotk_write_dat(iunout, "VOL_ENE_EFIT_DELTA_P_GIBBS", &
-                alldata(:,:), COLUMNS=6 )
+  WRITE (iunout,'("<FIT_CHECK>")')
+  WRITE (iunout,'("<NUMBER_OF_DATA>")')
+  WRITE (iunout,'(i8)') npt
+  WRITE (iunout,'("</NUMBER_OF_DATA>")')
+  WRITE (iunout,'("<VOL_ENE_EFIT_DELTA_P_GIBBS>")')
+  WRITE (iunout,'(6(1pe25.15))') alldata(:,:)
+  WRITE (iunout,'("</VOL_ENE_EFIT_DELTA_P_GIBBS>")')
 
-  CALL iotk_write_end(iunout, "FIT_CHECK" )
-  CALL iotk_close_write( iunout )
-
+  WRITE (iunout,'("</FIT_CHECK>")')
+  CLOSE (unit=iunout, status='keep')
+  
   RETURN
 END SUBROUTINE write_evdata_xml
+
 !
 END MODULE ev_xml
 

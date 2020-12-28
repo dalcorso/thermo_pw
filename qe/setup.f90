@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2001-2016 Quantum ESPRESSO group
+! Copyright (C) 2001-2020 Quantum ESPRESSO group
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -9,31 +9,36 @@
 !----------------------------------------------------------------------------
 SUBROUTINE setup_tpw()
   !----------------------------------------------------------------------------
+  !! This routine is called at the beginning of the calculation and:
   !
-  ! ... This routine is called at the beginning of the calculation and
-  ! ... 1) determines various parameters of the calculation:
-  ! ...    zv        charge of each atomic type
-  ! ...    nelec     total number of electrons (if not given in input)
-  ! ...    nbnd      total number of bands (if not given in input)
-  ! ...    nbndx     max number of bands used in iterative diagonalization
-  ! ...    tpiba     2 pi / a (a = lattice parameter)
-  ! ...    tpiba2    square of tpiba
-  ! ...    gcutm     cut-off in g space for charge/potentials
-  ! ...    gcutms    cut-off in g space for smooth charge
-  ! ...    ethr      convergence threshold for iterative diagonalization
-  ! ... 2) finds actual crystal symmetry:
-  ! ...    s         symmetry matrices in the direct lattice vectors basis
-  ! ...    nsym      number of crystal symmetry operations
-  ! ...    nrot      number of lattice symmetry operations
-  ! ...    ft        fractionary translations
-  ! ...    irt       for each atom gives the corresponding symmetric
-  ! ...    invsym    if true the system has inversion symmetry
-  ! ... 3) generates k-points corresponding to the actual crystal symmetry
-  ! ... 4) calculates various quantities used in magnetic, spin-orbit, PAW
-  ! ...    electric-field, LDA+U calculations, and for parallelism
+  !! 1) determines various parameters of the calculation:
+  !
+  !!  * zv:        charge of each atomic type;
+  !!  * nelec:     total number of electrons (if not given in input);
+  !!  * nbnd:      total number of bands (if not given in input);
+  !!  * nbndx:     max number of bands used in iterative diagonalization;
+  !!  * tpiba:     2 pi / a (a = lattice parameter);
+  !!  * tpiba2:    square of tpiba;
+  !!  * gcutm:     cut-off in g space for charge/potentials;
+  !!  * gcutms:    cut-off in g space for smooth charge;
+  !!  * ethr:      convergence threshold for iterative diagonalization;
+  !
+  !! 2) finds actual crystal symmetry:
+  !
+  !!  * s:         symmetry matrices in the direct lattice vectors basis;
+  !!  * nsym:      number of crystal symmetry operations;
+  !!  * nrot:      number of lattice symmetry operations;
+  !!  * ft:        fractionary translations;
+  !!  * irt:       for each atom gives the corresponding symmetric;
+  !!  * invsym:    if true the system has inversion symmetry;
+  !
+  !! 3) generates k-points corresponding to the actual crystal symmetry;
+  !
+  !! 4) calculates various quantities used in magnetic, spin-orbit, PAW
+  !!    electric-field, DFT+U(+V) calculations, and for parallelism.
   !
   USE kinds,              ONLY : DP
-  USE constants,          ONLY : eps8, rytoev, fpi, pi, degspin, e2
+  USE constants,          ONLY : eps8, e2, fpi, pi, degspin
   USE parameters,         ONLY : npk
   USE io_global,          ONLY : stdout, ionode, ionode_id
   USE io_files,           ONLY : xmlfile
@@ -75,19 +80,20 @@ SUBROUTINE setup_tpw()
   USE lsda_mod,           ONLY : lsda, nspin, current_spin, isk, &
                                  starting_magnetization
   USE spin_orb,           ONLY : lspinorb, domag
-  USE noncollin_module,   ONLY : noncolin, npol, m_loc, i_cons, &
+  USE noncollin_module,   ONLY : noncolin, npol, i_cons, m_loc, &
                                  angle1, angle2, bfield, ux, nspin_lsda, &
                                  nspin_gga, nspin_mag
   USE qexsd_module,       ONLY : qexsd_readschema
   USE qexsd_copy,         ONLY : qexsd_copy_efermi
   USE qes_libs_module,    ONLY : qes_reset
   USE qes_types_module,   ONLY : output_type
-  USE exx,                ONLY : ecutfock, nbndproj
+  USE exx,                ONLY : ecutfock
   USE exx_base,           ONLY : exx_grid_init, exx_mp_init, exx_div_check
   USE funct,              ONLY : dft_is_meta, dft_is_hybrid, dft_is_gradient
   USE paw_variables,      ONLY : okpaw
   USE fcp_variables,      ONLY : lfcpopt, lfcpdyn
   USE extfield,           ONLY : gate
+  USE additional_kpoints, ONLY : add_additional_kpoints
   !
   IMPLICIT NONE
   !
@@ -127,6 +133,8 @@ SUBROUTINE setup_tpw()
   IF ( dft_is_hybrid() ) THEN
      IF ( lberry ) CALL errore( 'setup ', &
                          'hybrid XC not allowed in Berry-phase calculations',1 )
+     IF ( lelfield ) CALL errore( 'setup ', &
+                         'hybrid XC and electric fields untested',1 )
      IF ( allfrac ) CALL errore( 'setup ', &
                          'option use_all_frac incompatible with hybrid XC', 1 )
      IF (.NOT. lscf) CALL errore( 'setup ', &
@@ -147,6 +155,9 @@ SUBROUTINE setup_tpw()
      IF ( noncolin ) no_t_rev=.true.
   END IF
   !
+  IF ( dft_is_meta() .AND. noncolin )  CALL errore( 'setup', &
+                               'Non-collinear Meta-GGA not implemented', 1 )
+  !
   ! ... Compute the ionic charge for each atom type and the total ionic charge
   !
   zv(1:ntyp) = upf(1:ntyp)%zp
@@ -164,9 +175,9 @@ SUBROUTINE setup_tpw()
   !
   nelec = ionic_charge - tot_charge
   !
-  IF ( lbands .OR. ( (lfcpopt .OR. lfcpdyn ) .AND. restart )) THEN 
+  IF ( .NOT. lscf .OR. ( (lfcpopt .OR. lfcpdyn ) .AND. restart )) THEN 
      !
-     ! ... in these cases, we need to read the Fermi energy
+     ! ... in these cases, we need (or it is useful) to read the Fermi energy
      !
      IF (ionode) CALL qexsd_readschema ( xmlfile(), ierr, output_obj )
      CALL mp_bcast(ierr, ionode_id, intra_image_comm)
@@ -174,21 +185,16 @@ SUBROUTINE setup_tpw()
           & TRIM(xmlfile()), ierr )
      IF (ionode) CALL qexsd_copy_efermi ( output_obj%band_structure, &
           nelec, ef, two_fermi_energies, ef_up, ef_dw )
+     ! convert to Ry a.u. 
+     ef = ef*e2
+     ef_up = ef_up*e2
+     ef_dw = ef_dw*e2
      CALL mp_bcast(nelec, ionode_id, intra_image_comm)
      CALL mp_bcast(ef, ionode_id, intra_image_comm)
      CALL mp_bcast(two_fermi_energies, ionode_id, intra_image_comm)
      CALL mp_bcast(ef_up, ionode_id, intra_image_comm)
      CALL mp_bcast(ef_dw, ionode_id, intra_image_comm)
      CALL qes_reset  ( output_obj )
-!
-!   This new implementation of QE xml file gives ef in Ha, should convert to Ry
-!   NB: I think this is a bug of QE setup.f90
-!
-     ef=ef*e2
-     IF (two_fermi_energies) THEN
-        ef_up=ef_up*e2
-        ef_dw=ef_dw*e2
-     ENDIF
      !
   END IF 
   IF ( (lfcpopt .OR. lfcpdyn) .AND. restart ) THEN  
@@ -200,10 +206,10 @@ SUBROUTINE setup_tpw()
   ! ... Set the domag variable to make a spin-orbit calculation with zero
   ! ... magnetization
   !
-  IF ( lspinorb ) THEN
+  IF ( noncolin  ) THEN
      domag = ANY ( ABS( starting_magnetization(1:ntyp) ) > 1.D-6 )
   ELSE
-     domag = .TRUE.
+     domag = .false.
   END IF
   !
   !  Set the different spin indices
@@ -359,8 +365,9 @@ SUBROUTINE setup_tpw()
      !
   ELSE IF ( .NOT. lscf ) THEN
      !
-     IF ( ethr == 0.D0 ) ethr = 0.1D0 * MIN( 1.D-2, tr2 / nelec )
-     ethr = MAX( ethr, 1.D-13 )
+     ! ... do not allow convergence threshold of scf and nscf to become too small 
+     ! 
+     IF ( ethr == 0.D0 ) ethr = MAX(1.D-13, 0.1D0 * MIN( 1.D-2, tr2 / nelec ))
      !
   ELSE
      !
@@ -508,6 +515,8 @@ SUBROUTINE setup_tpw()
      END IF
   END IF
   !
+  CALL add_additional_kpoints(nkstot, xk, wk)
+  !
   IF ( nat==0 ) THEN
      !
      nsym=nrot
@@ -626,7 +635,7 @@ SUBROUTINE setup_tpw()
      ENDDO
   ENDIF
   !
-  ! ... Set up Hubbard parameters for LDA+U calculation
+  ! ... Set up Hubbard parameters for DFT+U(+V) calculation
   !
   CALL init_lda_plus_u ( upf(1:ntyp)%psd, nspin, noncolin )
   !

@@ -46,7 +46,6 @@ do_cg_ph.o \
 do_lanczos.o \
 do_lanczos_psh.o \
 drho.o \
-drhodv.o \
 drhodvus.o \
 dv_of_drho_clf.o \
 dv_of_drho_tran.o \
@@ -65,7 +64,6 @@ find_inverse_s.o \
 find_mode_sym.o \
 h_pcg_step.o \
 initialize_ph.o \
-incdrhoscf_nc.o \
 init_representations.o \
 irrek.o \
 kpoint_grid.o \
@@ -105,7 +103,6 @@ rotate_all_psi_r.o \
 rotate_and_add_dyn.o \
 rotate_charges.o \
 run_nscf.o \
-ruotaijk.o \
 scal_prod.o \
 set_defaults_pw.o \
 set_fxc_tran.o \

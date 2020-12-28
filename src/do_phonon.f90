@@ -34,7 +34,8 @@ SUBROUTINE do_phonon_tpw(auxdyn)
   USE control_ph,      ONLY : epsil, trans, qplot, only_init, &
                               only_wfc, rec_code, where_rec
   USE control_lr,      ONLY : lgamma
-  USE el_phon,         ONLY : elph, elph_mat, elph_simple
+  USE ahc,            ONLY : elph_ahc, elph_do_ahc
+  USE el_phon,         ONLY : elph, elph_mat, elph_simple, elph_epa
   !
   ! YAMBO >
   USE YAMBO,           ONLY : elph_yambo
@@ -123,6 +124,8 @@ SUBROUTINE do_phonon_tpw(auxdyn)
            CALL elphsum_wannier(iq)
         ELSEIF( elph_simple ) THEN
            CALL elphsum_simple()
+       ELSEIF( elph_epa ) THEN
+           CALL elphfil_epa(iq)
         ELSEIF( elph_yambo ) THEN
            CALL elph_yambo_eval_and_IO()
         ELSEIF(elph_tetra == 1) THEN
@@ -131,6 +134,8 @@ SUBROUTINE do_phonon_tpw(auxdyn)
            CALL elph_tetra_gamma()
         ELSEIF(elph_tetra == 3) THEN
            CALL elph_scdft()
+        ELSEIF( elph_ahc ) THEN
+           CALL elph_do_ahc()
         ELSE
            CALL elphsum()
         END IF

@@ -120,7 +120,7 @@ SUBROUTINE check_initial_geometry(auxdyn, iflag)
 ! If there are more than one image, divide the work among the images
 !
   IF (nimage > 1 .AND. use_ph_images .AND. .NOT. tcollect_all ) &
-                                           CALL image_q_irr_tpw()
+                                           CALL image_q_irr_tpw(.TRUE.)
 !
   IF (recover) THEN
 !

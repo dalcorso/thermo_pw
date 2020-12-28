@@ -775,7 +775,7 @@ SUBROUTINE initialize_ph_work(nwork)
 !  and set to zero.
 !
 USE control_thermo, ONLY : all_geometries_together, geometry, iqw, irrw, &
-                        comp_irr_iq_iw, comp_iq_iw
+                        comp_irr_iq_iw, comp_iq_iw, done_irr_iq_iw, done_iq_iw
 USE thermo_mod,  ONLY : start_geometry, last_geometry
 USE grid_irr_iq, ONLY : irr_iq
 USE ions_base,   ONLY : nat
@@ -852,11 +852,15 @@ IF (trans) THEN
    ALLOCATE(irrw(nwork))
    ALLOCATE(comp_irr_iq_iw(0:3*nat,nqsx,nwork))
    ALLOCATE(comp_iq_iw(nqsx,nwork))
+   ALLOCATE(done_irr_iq_iw(0:3*nat,nqsx,nwork))
+   ALLOCATE(done_iq_iw(nqsx,nwork))
 
    iqw=0
    irrw=0
    comp_irr_iq_iw=.FALSE.
    comp_iq_iw=.FALSE.
+   done_irr_iq_iw=.FALSE.
+   done_iq_iw=.FALSE.
    geometry=1
    IF (use_ph_images) THEN
       DO iwork=1, nwork
@@ -864,7 +868,8 @@ IF (trans) THEN
          image=MOD(iwork-1,nimage)+1
          igeom=geometry(iwork)
          CALL read_collect_info(collect_info_save(igeom), nqs, &
-              nat, image, comp_irr_iq_iw(0,1,iwork), comp_iq_iw(1,iwork))
+              nat, image, comp_irr_iq_iw(0,1,iwork), comp_iq_iw(1,iwork), &
+                          done_irr_iq_iw(0,1,iwork), done_iq_iw(1,iwork))
          iqw(iwork) = image
          irrw(iwork) = 0
       ENDDO
@@ -879,10 +884,10 @@ IF (trans) THEN
                irrw(nwork) = irr
                comp_irr_iq_iw(irr,iq,nwork)=.TRUE.
                comp_iq_iw(iq,nwork)=.TRUE.
-               IF (collect_info_save(igeom)%done_iq(iq,1)==1) &
-                                       comp_iq_iw(iq,nwork)=.FALSE.
                IF (collect_info_save(igeom)%done_irr_iq(irr,iq,1)==1) &
-                                       comp_irr_iq_iw(irr,iq,nwork)=.FALSE.
+                                       done_irr_iq_iw(irr,iq,nwork)=.TRUE.
+               IF (collect_info_save(igeom)%done_iq(iq,1)==1) &
+                                       done_iq_iw(iq,nwork)=.TRUE.
             ENDDO
          ENDDO
       ENDDO

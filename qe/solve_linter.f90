@@ -382,8 +382,8 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
               weight = wk (ikk)
               IF (nsolv==2) weight=weight/2.0_DP
               IF (noncolin) THEN
-                 CALL incdrhoscf_nc_tpw(drhoscf(1,1,ipert),weight,ik, rsign, &
-                                 dbecsum_nc(1,1,1,1,ipert,isolv), dpsi)
+                 CALL incdrhoscf_nc(drhoscf(1,1,ipert),weight,ik, &
+                                 dbecsum_nc(1,1,1,1,ipert,isolv), dpsi, rsign)
               ELSE
                  CALL incdrhoscf (drhoscf(1,current_spin,ipert), weight, ik, &
                             dbecsum(1,1,current_spin,ipert), dpsi)

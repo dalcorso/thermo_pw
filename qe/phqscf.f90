@@ -128,7 +128,7 @@ SUBROUTINE phqscf_tpw
         !   Add the contribution of this mode to the dynamical matrix
         !
         IF (convt) THEN
-           CALL drhodv_tpw (imode0, npe, drhoscfs)
+           CALL drhodv (imode0, npe, drhoscfs)
            !
            !   add the contribution of the modes imode0+1 -> imode+npe
            !   to the effective charges Z(Us,E) (Us=scf,E=bare)

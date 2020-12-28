@@ -98,7 +98,7 @@ SUBROUTINE rotate_all_psi_r_tpw(psic_nc,evcr,s,ftau,d_spin,has_e,gk)
      jir(ir)=j
      kir(ir)=k
      IF (i > nr1 .OR. j > nr2 .OR. k > nr3) CYCLE
-     CALL ruotaijk_tpw (ss, ftau, i, j, k, nr1, nr2, nr3, ri, rj, rk ) 
+     CALL rotate_grid_point (ss, ftau, i, j, k, nr1, nr2, nr3, ri, rj, rk ) 
      rir(ir)=ri+(rj-1)*nr1x+(rk-1)*nr1x*nr2x
   ENDDO
 !

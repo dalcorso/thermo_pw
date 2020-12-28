@@ -126,7 +126,8 @@ CONTAINS
    END SUBROUTINE save_collect_info
 
 !----------------------------------------------------------------------------
-   SUBROUTINE read_collect_info(info, nqs, nat, pos, comp_irr_iq, comp_iq)
+   SUBROUTINE read_collect_info(info, nqs, nat, pos, comp_irr_iq, comp_iq, &
+                                                     done_irr_iq, done_iq)
 !----------------------------------------------------------------------------
 !
 !  This routine is the inverse of save_collect_info. It uses the information
@@ -136,12 +137,15 @@ CONTAINS
 
    INTEGER, INTENT(IN) :: nqs, nat, pos
    LOGICAL, INTENT(INOUT) :: comp_irr_iq(0:3*nat,nqs), comp_iq(nqs)
+   LOGICAL, INTENT(INOUT) :: done_irr_iq(0:3*nat,nqs), done_iq(nqs)
    TYPE(collect_info_type), INTENT(IN) :: info
 
    INTEGER :: iq, irr
 
    comp_irr_iq=.FALSE.
    comp_iq=.FALSE.
+   done_irr_iq=.FALSE.
+   done_iq=.FALSE.
 !
 !  Note that the structure uses 0 or 1, while the phonon variables are logicals
 !  This is because there is no mp_sum routines for logicals.
@@ -149,10 +153,10 @@ CONTAINS
    DO iq=1,nqs
       DO irr=0, info%irr_iq(iq)
          IF (info%comp_irr_iq(irr,iq,pos)==1) comp_irr_iq(irr,iq)=.TRUE.
-         IF (info%done_irr_iq(irr,iq,pos)==1) comp_irr_iq(irr,iq)=.FALSE.
+         IF (info%done_irr_iq(irr,iq,pos)==1) done_irr_iq(irr,iq)=.TRUE.
       ENDDO
       IF (info%comp_iq(iq,pos)==1) comp_iq(iq)=.TRUE.
-      IF (info%done_iq(iq,pos)==1) comp_iq(iq)=.FALSE.
+      IF (info%done_iq(iq,pos)==1) done_iq(iq)=.TRUE.
    ENDDO
 
    RETURN

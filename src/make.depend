@@ -70,7 +70,6 @@ check_file_exists.o : ../../UtilXlib/mp.o
 check_initial_status_all_geo.o : ../../Modules/mp_world.o
 check_initial_status_all_geo.o : ../../PHonon/PH/phcom.o
 check_initial_status_all_geo.o : ../../UtilXlib/mp.o
-check_initial_status_all_geo.o : ../../thermo_pw/qe/control_qe.o
 check_initial_status_all_geo.o : thermo_mod.o
 check_thermo_all_geo.o : ../../Modules/cell_base.o
 check_thermo_all_geo.o : ../../Modules/io_global.o
@@ -133,6 +132,7 @@ do_berry.o : ../../PW/src/symm_base.o
 do_berry.o : ../../upflib/upf_params.o
 do_berry.o : thermo_mod.o
 do_phonon.o : ../../LR_Modules/lrcom.o
+do_phonon.o : ../../PHonon/PH/ahc.o
 do_phonon.o : ../../PHonon/PH/elph.o
 do_phonon.o : ../../PHonon/PH/elph_scdft_mod.o
 do_phonon.o : ../../PHonon/PH/elph_tetra_mod.o
@@ -145,14 +145,18 @@ do_pwscf.o : ../../Modules/control_flags.o
 do_pwscf.o : ../../Modules/fft_base.o
 do_pwscf.o : ../../Modules/funct.o
 do_pwscf.o : ../../Modules/io_global.o
+do_pwscf.o : ../../Modules/kind.o
 do_pwscf.o : ../../Modules/mp_images.o
 do_pwscf.o : ../../Modules/parameters.o
 do_pwscf.o : ../../Modules/qexsd.o
 do_pwscf.o : ../../Modules/qmmm.o
 do_pwscf.o : ../../PW/src/atomic_wfc_mod.o
+do_pwscf.o : ../../PW/src/beef.o
+do_pwscf.o : ../../PW/src/ldaU.o
 do_pwscf.o : ../../PW/src/pwcom.o
 do_pwscf.o : ../../PW/src/scf_mod.o
 do_pwscf.o : ../../PW/src/update_pot.o
+do_pwscf.o : ../../UtilXlib/mp.o
 do_pwscf.o : ../../upflib/upf_params.o
 do_pwscf.o : thermo_mod.o
 dos_sub.o : ../../Modules/constants.o

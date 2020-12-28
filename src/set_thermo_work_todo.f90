@@ -296,10 +296,11 @@ SUBROUTINE set_work_for_ph(iwork, igeom, iq_point, irr_value)
 !    reading the output of pw.x for the current geometry. 
 !
 USE control_thermo,   ONLY : all_geometries_together, geometry, irrw, &
-                             iqw, comp_irr_iq_iw, comp_iq_iw, comp_f_iw
+                             iqw, comp_irr_iq_iw, comp_iq_iw, comp_f_iw, &
+                             done_irr_iq_iw, done_iq_iw
 USE ions_base,        ONLY : nat
-USE grid_irr_iq,      ONLY : irr_iq, comp_irr_iq
-USE disp,             ONLY : nqs, comp_iq
+USE grid_irr_iq,      ONLY : irr_iq, comp_irr_iq, done_irr_iq
+USE disp,             ONLY : nqs, comp_iq, done_iq
 USE control_ph,       ONLY : epsil, trans
 USE control_thermo,   ONLY : lphonon
 USE freq_ph,          ONLY : fpol
@@ -332,6 +333,8 @@ ENDIF
 !
 comp_irr_iq=.FALSE.
 comp_iq=.FALSE.
+done_irr_iq=.FALSE.
+done_iq=.FALSE.
 comp_f=.FALSE.
 !
 !  here sets the variables that controls the phonon run
@@ -339,6 +342,8 @@ comp_f=.FALSE.
 IF (trans) THEN
    comp_irr_iq(:,:)=comp_irr_iq_iw(:,1:nqs,iwork)
    comp_iq(:)=comp_iq_iw(1:nqs,iwork)
+   done_irr_iq(:,:)=done_irr_iq_iw(:,1:nqs,iwork)
+   done_iq(:)=done_iq_iw(1:nqs,iwork)
    iq_point=iqw(iwork)
    irr_value=irrw(iwork)
 ELSEIF (fpol) THEN

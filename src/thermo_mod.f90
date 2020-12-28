@@ -464,8 +464,12 @@ MODULE control_thermo
                                          ! frequencies to compute
                           comp_irr_iq_iw(:,:,:), & ! for each work the 
                                          ! comp_irr_iq of that work
-                          comp_iq_iw(:,:) ! for each work the list
+                          comp_iq_iw(:,:), & ! for each work the list
                                          ! of comp_iq of that work.
+                          done_irr_iq_iw(:,:,:), & ! for each work the 
+                                         ! done_irr_iq of that work
+                          done_iq_iw(:,:) ! for each work the list
+                                         ! of done_iq of that work.
   LOGICAL :: read_paths      ! the paths for dispersion are read from input
   LOGICAL :: lev_syn_1=.FALSE. ! if .true. must calculate the murnaghan
                                ! at T=0

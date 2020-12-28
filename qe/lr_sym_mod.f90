@@ -87,7 +87,7 @@ DO ir = 1, my_nrxx
    j=j + 1
    k=k + 1
    IF (i > nr1 .OR. j > nr2 .OR. k > nr3) CYCLE
-   CALL ruotaijk_tpw (ss, ftau, i, j, k, nr1, nr2, nr3, ri, rj, rk ) 
+   CALL rotate_grid_point (ss, ftau, i, j, k, nr1, nr2, nr3, ri, rj, rk ) 
    rir(ir)=ri+(rj-1)*nr1x+(rk-1)*nr12x
 ENDDO
 

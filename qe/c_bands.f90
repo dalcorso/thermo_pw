@@ -18,8 +18,8 @@
 SUBROUTINE c_bands_nscf_tpw( )
   !----------------------------------------------------------------------------
   !
-  ! ... Driver routine for Hamiltonian diagonalization routines
-  ! ... specialized to non-self-consistent calculations (no electric field)
+  !! Driver routine for Hamiltonian diagonalization routines
+  !! specialized to non-self-consistent calculations (no electric field).
   !
   USE kinds,                ONLY : DP
   USE io_global,            ONLY : stdout
@@ -36,7 +36,8 @@ SUBROUTINE c_bands_nscf_tpw( )
   USE control_flags,        ONLY : ethr, restart, isolve, io_level, iverbosity
   USE save_ph,              ONLY : tmp_dir_save
   USE io_files,             ONLY : tmp_dir, prefix
-  USE ldaU,                 ONLY : lda_plus_u, U_projection, wfcU
+  USE ldaU,                 ONLY : lda_plus_u, lda_plus_u_kind, U_projection, &
+                                   wfcU
   USE lsda_mod,             ONLY : current_spin, lsda, isk
   USE wavefunctions,        ONLY : evc
   USE control_lr,           ONLY : lgamma
@@ -78,20 +79,24 @@ SUBROUTINE c_bands_nscf_tpw( )
   !
   ik_ = 0
   avg_iter = 0.D0
-  IF ( restart ) CALL restart_in_cbands(ik_, ethr, avg_iter, et )
+  IF ( restart ) CALL restart_in_cbands( ik_, ethr, avg_iter, et )
   !
   ! ... If restarting, calculated wavefunctions have to be read from file
   !
   DO ik = 1, ik_
-     CALL get_buffer ( evc, nwordwfc, iunwfc, ik )
+     CALL get_buffer( evc, nwordwfc, iunwfc, ik )
   ENDDO
   !
   IF ( isolve == 0 ) THEN
      WRITE( stdout, '(5X,"Davidson diagonalization with overlap")' )
-  ELSE IF ( isolve == 1 ) THEN
-     WRITE( stdout, '(5X,"CG style diagonalization")')
+  ELSEIF ( isolve == 1 ) THEN
+     WRITE( stdout, '(5X,"CG style diagonalization")' )
+  ELSEIF ( isolve == 2 ) THEN
+     WRITE( stdout, '(5X,"PPCG style diagonalization")' )
+  ELSEIF ( isolve == 3 ) THEN
+     WRITE( stdout, '(5X,"ParO style diagonalization")')
   ELSE
-     CALL errore ( 'c_bands', 'invalid type of diagonalization', isolve)
+     CALL errore ( 'c_bands', 'invalid type of diagonalization', isolve )
   ENDIF
   IF (tmp_dir /= tmp_dir_save) THEN
      iuawfc = 20
@@ -126,7 +131,11 @@ SUBROUTINE c_bands_nscf_tpw( )
      IF (diago_bands(ikk)) THEN
         ik_diago=ik_diago+1
         current_k = ik
+        !
+        IF (lda_plus_u .AND. lda_plus_u_kind.EQ.2) CALL phase_factor(ik)
+        !
         IF ( lsda ) current_spin = isk(ik)
+        !
         call g2_kin( ik )
         ! 
         ! ... More stuff needed by the hamiltonian: nonlocal projectors

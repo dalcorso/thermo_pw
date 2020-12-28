@@ -16,7 +16,7 @@
   USE bp,                   ONLY : lelfield, lberry, lorbm
   USE check_stop,           ONLY : stopped_by_user
   USE control_flags,        ONLY : io_level, conv_elec, lbands
-  USE ener,                 ONLY : ef
+  USE ener,                 ONLY : ef, ef_up, ef_dw
   USE io_global,            ONLY : stdout, ionode
   USE io_files,             ONLY : iunwfc, nwordwfc
   USE buffers,              ONLY : save_buffer
@@ -30,6 +30,7 @@
   ! ... local variables
   !
   INTEGER :: iter, i
+  REAL(dp):: ef_scf, ef_scf_up, ef_scf_dw
   REAL(DP), EXTERNAL :: get_clock
   !
   !
@@ -68,6 +69,10 @@
   ! ... for a "bands" calculation where Ef is read from data file)
   ! ... may be needed in further calculations such as phonon
   !
+  ! save Fermi energy read from scf calculation
+  ef_scf = ef
+  ef_scf_up = ef_up
+  ef_scf_dw = ef_dw
   IF ( lbands ) THEN
      CALL weights_only( )
   ELSE
@@ -84,9 +89,10 @@
   WRITE( stdout, 9102 )
   !
   ! ... write band eigenvalues (conv_elec is used in print_ks_energies)
+  ! ... if Ef is re-computed: print original Ef as well
   !
   conv_elec = .TRUE.
-  CALL print_ks_energies() 
+  CALL print_ks_energies_nonscf ( ef_scf, ef_scf_up, ef_scf_dw )
   !
   ! ... save converged wfc if they have not been written previously
   ! ... FIXME: it shouldn't be necessary to do this here
