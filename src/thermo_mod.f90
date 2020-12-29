@@ -1173,7 +1173,7 @@ END MODULE internal_files_names
 MODULE control_asy
   USE kinds,  ONLY : DP
   !
-  ! ... The variables needed to control the brillouin zone plot
+  ! ... The variables needed to control the brillouin zone plot with asymptote
   !
   SAVE
   !
@@ -1185,6 +1185,17 @@ MODULE control_asy
                         ! code
 
 END MODULE control_asy
+
+MODULE control_freecad
+  USE kinds,  ONLY : DP
+  !
+  ! ... The variables needed to control the brillouin zone plot with freecad
+  !
+  SAVE
+
+CHARACTER(LEN=256) :: freecadfile
+
+END MODULE control_freecad
 
 MODULE thermo_sym
   USE kinds,  ONLY : DP

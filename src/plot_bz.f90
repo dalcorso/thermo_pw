@@ -8,7 +8,7 @@
 !------------------------------------------------------------------------
 SUBROUTINE plot_bz(ibrav, celldm, at, bg, point_type, &
                    xk, wk, npkt, letter, letter_path, npk_label, &
-                   label_list, asy_filename)
+                   label_list, asy_filename, freecadfile)
 !------------------------------------------------------------------------
 !
 !  This subroutine plots the BZ of a given solid. It
@@ -24,6 +24,8 @@ SUBROUTINE plot_bz(ibrav, celldm, at, bg, point_type, &
 !  label_list : an array that says which k point is given as a letter
 !  asy_filename : the name of a file where an asymptote script that allows
 !                 to show the BZ is written
+!  freecadfile : the name of a file where a freecad script that allows to
+!                show the BZ is written
 !  It produces as output an asymptote script that can be used to generate
 !  a pdf file of the BZ and a plot of the path in the BZ.
 !
@@ -41,7 +43,7 @@ REAL(DP), INTENT(INOUT) :: xk(3,npkt)
 INTEGER, INTENT(IN) :: label_list(npk_label), wk(npkt) 
 CHARACTER(LEN=3),INTENT(IN) :: letter(npk_label), letter_path(npk_label)
 INTEGER, INTENT(IN) :: ibrav
-CHARACTER(LEN=*), INTENT(IN) :: asy_filename
+CHARACTER(LEN=*), INTENT(IN) :: asy_filename, freecadfile
 CHARACTER(LEN=10), INTENT(IN) :: point_type 
 INTEGER :: ik
 TYPE(bz) :: bz_struc
@@ -67,6 +69,8 @@ CALL allocate_bz_asy(bz_struc, bz_asy_struc )
 CALL init_bz_asy(bz_struc, bz_asy_struc)
 CALL generate_asy_figure(xk, wk, npkt, letter, letter_path, npk_label, &
                         label_list, bz_struc, bz_asy_struc, asy_filename)
+CALL generate_freecad_figure(xk, wk, npkt, letter, letter_path, npk_label, &
+                        label_list, bz_struc, bz_asy_struc, freecadfile)
 
 RETURN
 END SUBROUTINE plot_bz
@@ -153,3 +157,93 @@ CALL asy_closeplot()
 
 RETURN
 END SUBROUTINE generate_asy_figure
+
+!--------------------------------------------------------------------------
+SUBROUTINE generate_freecad_figure(xk, wk, npkt, letter, letter_path,    &
+                  npk_label, label_list, bz_struc, bz_asy_struc, asy_filename)
+!--------------------------------------------------------------------------
+!
+!  This subroutine generates an input script for asymptote that
+!  plots the BZ
+!
+USE kinds, ONLY : DP
+USE freecad, ONLY : freecad_writepoint, freecad_openplot, freecad_closeplot,  &
+                    freecad_writesurface, freecad_createsolid, freecad_clean, &
+                    freecad_centerview, freecad_setcolor, freecad_plotaxis,   &
+                    freecad_createpdf, freecad_join, freecad_putlabel
+USE bz_form, ONLY : bz, find_letter_coordinate
+USE bz_asy_mod, ONLY : bz_asy, find_letter_position
+USE control_paths, ONLY : q_in_band_form 
+
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: npkt, npk_label
+CHARACTER(LEN=3), INTENT(IN) :: letter(npk_label), letter_path(npk_label)
+INTEGER, INTENT(IN) :: label_list(npk_label), wk(npkt)
+REAL(DP), INTENT(INOUT) :: xk(3,npkt)
+TYPE(bz), INTENT(IN) :: bz_struc
+TYPE(bz_asy) :: bz_asy_struc
+CHARACTER(LEN=*), INTENT(IN) :: asy_filename
+
+INTEGER :: i, ik
+CHARACTER(LEN=6) :: int_to_char
+CHARACTER(LEN=7) :: label
+CHARACTER(LEN=3) :: let_pos
+REAL(DP) :: x0(3), vect(3), ak(3), xk1(3), xmod, xmod1
+REAL(DP) :: letter_coordinates(3)
+
+CALL freecad_openplot(asy_filename)
+
+DO i=1,bz_struc%nvertices
+!   label="Point"//TRIM(int_to_char(i))
+   CALL freecad_writepoint(bz_struc%vertex_coord(:,i))
+ENDDO
+
+DO i=1,bz_struc%nfaces
+!   IF (bz_asy_struc%visible(i)) CALL asy_writesurface(bz_struc%indsur(:,i))
+   CALL freecad_writesurface(bz_struc%indsur(:,i))
+ENDDO
+CALL freecad_createsolid(bz_struc%nfaces)
+
+CALL freecad_clean(bz_struc%nvertices, bz_struc%nfaces)
+!
+!  find where the coordinate axis intercept the BZ
+!
+ak(1)=bz_struc%xi(1)
+ak(2)=bz_struc%yi(2)
+ak(3)=bz_struc%zi(3)
+!
+!  Create the axis and put them in a group
+!
+CALL freecad_plotaxis(ak)
+DO i = 1, npk_label
+   CALL find_letter_coordinate(bz_struc, letter(i), &
+                                          letter_coordinates )
+   xk(:,label_list(i))=letter_coordinates
+   CALL find_letter_position(bz_struc, bz_asy_struc, letter(i), let_pos)
+   CALL freecad_putlabel(letter_path(label_list(i)), letter_coordinates, &
+                                                     let_pos)
+END DO
+
+DO ik=2, npkt
+   CALL freecad_join(xk(:,ik), xk(:,ik-1))
+ENDDO
+!
+!IF (.NOT.q_in_band_form) THEN
+!   DO ik=1, npkt
+!      IF (letter_path(ik) /= '') THEN
+!         CALL find_letter_position(bz_struc, bz_asy_struc, letter_path(ik), &
+!                                   let_pos)
+!         CALL asy_putlabel(letter_path(ik), xk(:,ik), let_pos)
+!      END IF
+!   END DO
+!END IF
+!
+!   The BZ will be yellow
+!
+CALL freecad_setcolor(1.0_DP, 1.0_DP, 0.0_DP)
+CALL freecad_centerview()
+CALL freecad_createpdf('Brillouin.pdf')
+CALL freecad_closeplot()
+
+RETURN
+END SUBROUTINE generate_freecad_figure

@@ -33,6 +33,7 @@ SUBROUTINE thermo_summary()
   USE control_paths,        ONLY : nqaux, xqaux, wqaux, npk_label, letter, &
                                    letter_path, label_list, point_label_type
   USE control_asy,          ONLY : flasy, lasymptote, asymptote_command
+  USE control_freecad,      ONLY : freecadfile
   USE control_elastic_constants, ONLY : frozen_ions, ngeo_strain, &
                                    elastic_algorithm, elalgen
   USE control_xrdp,         ONLY : lambda, flxrdp, lformf, &
@@ -437,7 +438,7 @@ WRITE(stdout,'(5x,70("-"))')
                         ibrav /=14 .AND. ibrav /=0) THEN 
            CALL plot_bz(ibrav, celldm, at, bg, point_label_type, &
                 xqaux, wqaux, nqaux, letter, letter_path, npk_label, &
-                label_list, asy_filename)
+                label_list, asy_filename, freecadfile)
 
            IF (lasymptote.AND.ionode) &
               ierr=system(TRIM(asymptote_command)//' '//TRIM(asy_filename))
