@@ -5,11 +5,11 @@ working version of the <a href="http://www.quantum-espresso.org/">Quantum
 ESPRESSO (QE)</a> package. <code>Thermo_pw</code> can be downloaded from its 
 <a href="http://dalcorso.github.io/thermo_pw/">main page</a> as 
 a <code>.tar.gz</code> file. The current production version is 
-<code>1.4.0</code> compatible with 
-<code>QE-6.6</code>. The <code>thermo_pw</code> file should be copied
+<code>1.4.1</code> compatible with 
+<code>QE-6.7</code>. The <code>thermo_pw</code> file should be copied
 in the main (QE) directory and unpacked with the command:</p>
 <p align="center">
-<code>tar -xzvf thermo_pw.1.4.0.tar.gz</code>
+<code>tar -xzvf thermo_pw.1.4.1.tar.gz</code>
 </p>
 <p align="justify">This command produces a directory called 
 <code>thermo_pw</code>. To compile the code you need a Fortran compiler, for 
@@ -39,13 +39,13 @@ package. Then you can give the command:</p>
 <code>git clone https://github.com/dalcorso/thermo_pw</code>
 </p>
 <p align="justify"> and you should get a directory called <code>thermo_pw</code> that contains the source code.
-The <code>git</code> version can be used only together with the version of <code>QE</code> reported here: <code>6.6</code>. Please note that sometimes the <code>git</code> version is not working properly and in any case its use is not recommended.</p> 
+The <code>git</code> version can be used only together with the version of <code>QE</code> reported here: <code>6.7</code>. Please note that sometimes the <code>git</code> version is not working properly and in any case its use is not recommended.</p> 
 
 <p align="justify"> Although <code>thermo_pw</code> has been 
 used for several years and can be considered reasonably stable, it remains an 
 experimental code given as it is.
-If you are running a version of <code>QE</code> older than <code>6.6</code>
-you can still use <code>thermo_pw</code> but you should carefully match the
+A version of <code>QE</code> older than <code>6.7</code>
+can still be used with <code>thermo_pw</code> matching carefully the
 versions of <code>thermo_pw</code> and of <code>QE</code> as explained in the
 main <code>thermo_pw</code> page.</p>
 
