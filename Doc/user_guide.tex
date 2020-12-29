@@ -6,7 +6,7 @@
 %! or http://www.gnu.org/copyleft/gpl.txt .
 %!
 \documentclass[12pt,a4paper]{article}
-\def\version{1.4.1}
+\def\version{1.5.0}
 \def\qe{{\sc Quantum ESPRESSO}}
 \def\tpw{{\sc THERMO\_PW}}
 
@@ -213,6 +213,7 @@ like to mention M. Palumbo, O. Motornyi, A. Urru, and C. Malica.
 \hline
 \texttt{thermo\_pw} & \qe  \\
 \hline
+1.5.0 & 6.7 \\
 1.4.1 & 6.7 \\
 1.4.0 & 6.6 \\
 1.3.2 & 6.6 \\
@@ -356,7 +357,8 @@ the improvement of the figures when needed.
 The plot of the Brillouin zone (BZ) is made with the help of the 
 \texttt{asymptote} code. \texttt{Thermo\_pw} produces a script 
 for the \texttt{asymptote} code and can also run it to produce the \texttt{pdf}
-file of the BZ. 
+file of the BZ. Starting from version 1.5.0 \thermo\ writes also a 
+script to plot the BZ using the \texttt{freeCAD} software.
 
 \newpage
 
@@ -870,7 +872,7 @@ Number of tasks for this option: 1.
 
 \subsection{\color{web-blue}\texttt{what='plot\_bz'}}
 With this option the code writes a script to make a plot
-of the Brillouin zone and of the path (the default one or the one given in 
+of the Brillouin zone (BZ) and of the path (the default one or the one given in 
 input). 
 The script must be read by the \texttt{asymptote} code, available at 
 \texttt{http://asymptote.sourceforge.net/}. In many Linux distributions
@@ -894,6 +896,24 @@ npx         : used only in the monoclinic cell, this parameter is needed
               code stops with an error asking to increase npx, double 
               it until the error disappears.
               Default: integer 8
+\end{verbatim}
+
+Starting from version \texttt{1.5.0} \thermo\ produces also a script to
+plot the BZ using the \texttt{freeCAD} software. In order to plot
+the BZ you need to download the code (from the site
+\texttt{https://www.freecadweb.org/}, version \texttt{0.18} or higher)
+and, after opening it, choose 
+\texttt{Macro/Macros} to execute the \texttt{freeCAD} macro with extension
+\texttt{.FCMacro} that you find in the working directory. 
+There is a file called \texttt{brillouin.cam} in the
+\texttt{Doc} directory that can be used with the option 
+\texttt{View/Freeze Display} to obtain the standard view of the Brillouin zone.
+This feature is still experimental.\\
+The following variables control the plot:
+\begin{verbatim}
+freecadfile : name of the file that contains the freecad script to plot 
+              the Brillouin zone.
+              Default: character(len=*) 'tpw_freecad'
 \end{verbatim}
 The structure of the solid can be seen using the \texttt{XCrySDen} code
 that can read the input file of \texttt{pw.x}. You can find the code at
