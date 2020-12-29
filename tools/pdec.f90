@@ -43,6 +43,7 @@ REAL(DP), ALLOCATABLE :: el_cons_tinput_p(:,:,:,:), b0_tinput_p(:,:)
 INTEGER(DP), ALLOCATABLE :: ind(:)
 REAL(DP) :: tmin, tmax, deltat
 REAL(DP) :: a(2)
+INTEGER  :: system, ierr
 CHARACTER (LEN=256) :: input_filename, filename_path, partial_filename, str_tmp, rdum_str
 CHARACTER (LEN=256) :: file_press, filepressure, filelastic, filefirstpressure
 CHARACTER(LEN=8) :: real_to_char
@@ -71,7 +72,7 @@ filename_path = './anhar_files/'//TRIM(input_filename)
 
 INQUIRE(FILE=TRIM(filename_path),EXIST=exst)
 
-CALL system('ls '//TRIM(filename_path)//'.* > ec_files_pressure.txt')
+ierr=system('ls '//TRIM(filename_path)//'.* > ec_files_pressure.txt')
 
 file_press = 'ec_files_pressure.txt'
 
