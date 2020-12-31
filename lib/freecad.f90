@@ -25,7 +25,7 @@ REAL(DP) :: fcfact=100     ! This factor converts the units of the BZ into
 !  10 cm in freecad units. This default can be changed from input.
 
 PUBLIC freecad_writepoint, freecad_openplot, freecad_closeplot,  &
-       freecad_writesurface, freecad_createsolid, freecad_clean, &
+       freecad_writesurface, freecad_createsolid,  &
        freecad_centerview, freecad_setcolor, freecad_plotaxis,   &
        freecad_join, freecad_putlabel, freecad_setfcfact, freecad_createpdf
 
@@ -57,7 +57,7 @@ IF (ionode) THEN
    WRITE(fcu,'("import Draft")')
    WRITE(fcu,'("import Part")')
    WRITE(fcu,'("import TechDraw")')
-   WRITE(fcu,'("App.newDocument(""Brillouin"")")')
+   WRITE(fcu,'("doc=App.newDocument(""Brillouin"")")')
 ENDIF
 
 RETURN
@@ -242,24 +242,26 @@ END SUBROUTINE freecad_plotaxis
 
 
 !----------------------------------------------------------------------
-SUBROUTINE freecad_writepoint(xk)
+SUBROUTINE freecad_writepoint(xk,npoint)
 !----------------------------------------------------------------------
 !
-!  This routine receives the coordinates of a point and generates a 
-!  point object on the freecad tree.
+!  This routine receives the coordinates of a point and write them
+!  as a FreeCAD vector on the script. The name of the vector is point#npoint
 !
 IMPLICIT NONE
 REAL(DP) :: xk(3)
+INTEGER  :: npoint
 
 CHARACTER(LEN=256) :: strin
+CHARACTER(LEN=3)   :: al
 INTEGER :: ipol
 !
 !
 IF (ionode) THEN
-   WRITE(strin,'("point = Draft.makePoint(",f13.8,",",f13.8,",",f13.8,")")') &
-                                             (xk(ipol)*fcfact,ipol=1,3)
+   CALL create_index(npoint, al)
+   WRITE(strin,'("point",a,"=FreeCAD.Vector(",f13.8,",",f13.8,",&
+                           ",f13.8,")")') TRIM(al), (xk(ipol)*fcfact,ipol=1,3)
    WRITE(fcu,'(a)') TRIM(strin)
-   WRITE(fcu,'("Draft.autogroup(point)")')
 ENDIF
 
 RETURN
@@ -278,23 +280,21 @@ REAL(DP) :: dx(3), distance
 CHARACTER(LEN=3) :: al
 
 counter=counter+1
-CALL freecad_writepoint(x1)
-CALL freecad_writepoint(x2)
+CALL freecad_writepoint(x1,999)
+CALL freecad_writepoint(x2,998)
 CALL create_index(counter, al)
 IF (ionode) THEN
-   WRITE(fcu,'("_=Part.makeLine(App.ActiveDocument.Point.Shape.Vertex1.Point, &
-           &App.ActiveDocument.Point001.Shape.Vertex1.Point)")')
-   WRITE(fcu,'("if _.isNull(): raise RuntimeError(''Failed to create edge'')")')
+   WRITE(fcu,'("_=Part.Edge(Part.LineSegment(point999, point998))")')
    WRITE(fcu,'("App.ActiveDocument.addObject(''Part::Feature'',''Edge'').&
                                                                  &Shape=_")')
    WRITE(fcu,'("del _")')
-   WRITE(fcu,'("App.getDocument(""Brillouin"").removeObject(''Point'')")')
-   WRITE(fcu,'("App.getDocument(""Brillouin"").removeObject(''Point001'')")')
    WRITE(fcu,'("App.getDocument(""Brillouin"").getObject(""Group"").&
      &addObject(App.getDocument(""Brillouin"").getObject(""Edge",a,"""))")') &
              TRIM(al)
    WRITE(fcu,'("FreeCADGui.getDocument(""Brillouin"").getObject(""Edge",a,""").&
                        &LineColor = (1.00,0.00,0.00)")') TRIM(al)
+   WRITE(fcu,'("FreeCADGui.getDocument(""Brillouin"").getObject(""Edge",a,""").&
+                       &LineWidth = 3")') TRIM(al)
    WRITE(fcu,'("App.activeDocument().recompute()")')
 ENDIF
 
@@ -311,21 +311,23 @@ CHARACTER(LEN=3), INTENT(IN) :: label, pos
 REAL(DP) :: a(3)
 INTEGER :: lens
 CHARACTER(LEN=3) :: al
+CHARACTER(LEN=7) :: labelo
 REAL(DP) :: r(3), da(3)
 
 CALL convert_pos(da,pos)
+CALL convert_label(label,labelo)
 r=a+da
 counter=counter+1
 CALL create_index(counter, al)
 
 IF (ionode) THEN
    WRITE(fcu,'("text = Draft.makeText([""",a,"""],point=FreeCAD.Vector(",f7.2,&
-                     &",",f7.2,",",f7.2,"))")') TRIM(label), r*fcfact
+                     &",",f7.2,",",f7.2,"))")') TRIM(labelo), r*fcfact
    WRITE(fcu,'("Draft.autogroup(text)")')
    WRITE(fcu,'("FreeCADGui.getDocument(""Brillouin"").getObject(""Text",a,""").&
                           &DisplayMode = u""2D text""")') TRIM(al)
    WRITE(fcu,'("FreeCADGui.getDocument(""Brillouin"").getObject(""Text",a,""").&
-                          &FontSize = ''40 mm''")') TRIM(al)
+                          &FontSize = ''35 mm''")') TRIM(al)
    WRITE(fcu,'("FreeCADGui.getDocument(""Brillouin"").getObject(""Text",a,""").&
                           &TextColor = (1.00,0.00,0.00)")') TRIM(al)
 ENDIF
@@ -343,6 +345,38 @@ ENDIF
 RETURN
 END SUBROUTINE freecad_putlabel
 
+!------------------------------------------------------------------
+SUBROUTINE convert_label(label, labelo)
+!------------------------------------------------------------------
+!
+!  This subroutine converts the labels in the form gLetter in the
+!  corresponding unicode code to print the greek letter in freecad
+!
+IMPLICIT NONE
+CHARACTER(LEN=3), INTENT(IN) :: label
+CHARACTER(LEN=7), INTENT(OUT) :: labelo
+
+IF (ionode) THEN
+   IF (label=='gG ') THEN
+      labelo='\u0393'
+   ELSEIF (label=='gS ') THEN
+      labelo='\u03a3'
+   ELSEIF (label=='gS0') THEN
+      labelo='\u03a30'
+   ELSEIF (label=='gS1') THEN
+      labelo='\u03a31'
+   ELSEIF (label=='gD0') THEN
+      labelo='\u03940'
+   ELSEIF (label=='gL0') THEN
+      labelo='\u039b0'
+   ELSE
+      labelo=label
+   ENDIF
+ENDIF
+
+RETURN
+END SUBROUTINE convert_label
+
 SUBROUTINE convert_pos(dx,pos)
 
 IMPLICIT NONE
@@ -353,63 +387,80 @@ dx=0.0_DP
 
 SELECT CASE (TRIM(pos))
    CASE('E')
-       dx(1)=0.1_DP
+       dx(1)=0.06_DP
+       dx(2)=0.06_DP
    CASE('W')
-       dx(1)=-0.1_DP
+       dx(1)=-0.06_DP
+       dx(2)=-0.06_DP
    CASE('N')
-       dx(3)=0.1_DP
+       dx(3)=0.08_DP
    CASE('S')
-       dx(3)=-0.1_DP
+       dx(3)=-0.12_DP
    CASE('NE')
-       dx(1)=0.1_DP
-       dx(3)=0.1_DP
+       dx(1)=0.06_DP
+       dx(2)=0.06_DP
+       dx(3)=0.08_DP
    CASE('NW')
-       dx(1)=-0.1_DP
-       dx(3)=0.1_DP
+       dx(1)=-0.06_DP
+       dx(2)=-0.06_DP
+       dx(3)=0.08_DP
    CASE('SE')
-       dx(1)=0.1_DP
-       dx(3)=-0.1_DP
+       dx(2)=0.06_DP
+       dx(2)=0.06_DP
+       dx(3)=-0.12_DP
    CASE('SW')
-       dx(1)=-0.1_DP
-       dx(3)=-0.1_DP
+       dx(1)=-0.06_DP
+       dx(2)=-0.06_DP
+       dx(3)=-0.12_DP
    CASE DEFAULT
       CALL errore('convert_pos','unknown pos',1)
 END SELECT  
 
 RETURN
 END SUBROUTINE convert_pos
-
 !
 !----------------------------------------------------------------------
-SUBROUTINE freecad_writesurface(indeces)
+SUBROUTINE freecad_writesurface(indeces, nface)
 !----------------------------------------------------------------------
 !
 !  This routine assumes that the coordinates of all the vertices of the
-!  BZ have been given. It receives the indices of a given surface and
-!  plot the surface.
+!  BZ have been given. It receives the indices of the vertices of a
+!  face of the BZ and write on the script the commands to define the surface.
 !
 IMPLICIT NONE
 REAL(DP) :: xk(3)
 
-INTEGER :: indeces(9)
+INTEGER :: indeces(9), nface
 CHARACTER(LEN=1000) :: linesur
-CHARACTER(LEN=3)    :: al
-INTEGER :: i
+CHARACTER(LEN=3)    :: al, al1, al2
+INTEGER :: i, counter
 
 IF (ionode) THEN
-   linesur="_=Part.Face(Part.makePolygon(["
-   DO i=1,indeces(1)
-      CALL create_index(indeces(i+1)-1, al)
-      linesur=TRIM(linesur)//"App.ActiveDocument.Point"//&
-                                         &TRIM(al)//".Shape.Vertex1.Point,"
+   counter=0
+   DO i=1,indeces(1)-1
+      counter=counter+1
+      CALL create_index(indeces(i+1), al)
+      CALL create_index(indeces(i+2), al1)
+      CALL create_index(counter, al2)
+      WRITE(fcu,'("L",a,"=Part.LineSegment(point",a,",point",a,")")') al2,al,al1
    ENDDO
-   linesur=TRIM(linesur)//" ], True))"
+   counter=counter+1
+   CALL create_index(indeces(indeces(1)+1), al)
+   CALL create_index(indeces(2), al1)
+   CALL create_index(counter, al2)
+   WRITE(fcu,'("L",a,"=Part.LineSegment(point",a,",point",a,")")') al2,al,al1
 
-   WRITE(fcu,'(a)') TRIM(linesur)
-   WRITE(fcu,'("if _.isNull(): raise RuntimeError(''Failed to create face'')")')
-   WRITE(fcu,'("App.ActiveDocument.addObject(''Part::Feature'',&
-                                                       &''Face'').Shape=_")')
-   WRITE(fcu,'("del _")')
+   linesur="W=Part.Wire(["
+   DO i=1,counter
+      CALL create_index(i, al2)
+      WRITE(fcu,'("E",a,"=Part.Edge(L",a,")")') al2, al2
+      linesur=TRIM(linesur)//"E"//TRIM(al2)//","
+   ENDDO
+   linesur=TRIM(linesur)//"])"
+   WRITE(fcu,'(a)') TRIM(linesur) 
+
+   CALL create_index(nface, al)
+   WRITE(fcu,'("F",a,"=Part.Face(W)")') al
 ENDIF
 
 RETURN
@@ -421,7 +472,7 @@ SUBROUTINE freecad_createsolid(nfaces)
 !
 !  This routine assumes that all the faces of the solid have been created
 !  and uses them to build a shell and then to transform the shell in 
-!  a solid.
+!  a solid. Only the solid is added to the FreeCAD Application.
 !
 IMPLICIT NONE
 INTEGER :: nfaces
@@ -431,28 +482,21 @@ CHARACTER(LEN=3)    :: al
 INTEGER :: i
 
 IF (ionode) THEN
-   linesur="_=Part.Shell(["
+   linesur="S=Part.Shell(["
    DO i=1,nfaces
-      CALL create_index(i-1, al)
-      linesur=TRIM(linesur)//"App.ActiveDocument.Face"//&
-                                            &TRIM(al)//".Shape.Face1,"
+      CALL create_index(i, al)
+      linesur=TRIM(linesur)//"F"//TRIM(al)//","
    ENDDO
-   linesur=TRIM(linesur)//"  ])"
-
+   linesur=TRIM(linesur)//" ])"
    WRITE(fcu,'(a)') TRIM(linesur)
-   WRITE(fcu,'("if _.isNull(): raise RuntimeError(''Failed to create &
-                                                                 &shell'')")')
-   WRITE(fcu,'("App.ActiveDocument.addObject(''Part::Feature'',&
-                                                       &''Shell'').Shape=_")')
-   WRITE(fcu,'("del _")')
 
-   WRITE(fcu,'("shell=App.ActiveDocument.Shell.Shape")')
-   WRITE(fcu,'("_=Part.Solid(shell)")')
-   WRITE(fcu,'("if _.isNull(): raise RuntimeError(''Failed to create &
-                                                                &solid'')")')
+   WRITE(fcu,'("P=Part.Solid(S)")')
    WRITE(fcu,'("App.ActiveDocument.addObject(''Part::Feature'',&
-                                                      &''Solid'').Shape=_")')
-   WRITE(fcu,'("del _")')
+                                                      &''Solid'').Shape=P")')
+   WRITE(fcu,'("FreeCADGui.ActiveDocument.getObject(""Solid"").&
+                                                      &Transparency=15")')
+   WRITE(fcu,'("FreeCADGui.ActiveDocument.getObject(""Solid"").&
+                                                      &LineWidth = 3.00")')
 ENDIF
 
 RETURN
@@ -484,47 +528,6 @@ ENDIF
 
 RETURN
 END SUBROUTINE create_index
-
-!----------------------------------------------------------------
-SUBROUTINE freecad_clean(npoints, nfaces)
-!----------------------------------------------------------------
-!
-!  This routine, to be called before closing the script gives
-!  a series of command to clean all the objects defined to build
-!  the BZ and leaves only the BZ solid in the freecad tree.
-!
-IMPLICIT NONE
-INTEGER, INTENT(IN) :: npoints, nfaces
-
-CHARACTER(LEN=1000) :: linesur
-CHARACTER(LEN=3)    :: al
-INTEGER :: i
-
-IF (ionode) THEN
-   WRITE(fcu,'("App.getDocument(""Brillouin"").removeObject(""Shell"")")')
-!   WRITE(fcu,'("App.getDocument(""Brillouin"").recompute()")')
-
-   DO i=1,npoints
-      linesur='App.getDocument("Brillouin").removeObject("Point'
-      CALL create_index(i-1, al)
-      linesur=TRIM(linesur)//TRIM(al)//'")'
-      WRITE(fcu,'(a)') TRIM(linesur)
-!      WRITE(fcu,'("App.getDocument(""Brillouin"").recompute()")')
-   ENDDO
-
-   DO i=1,nfaces
-      linesur='App.getDocument("Brillouin").removeObject("Face'
-      CALL create_index(i-1, al)
-      linesur=TRIM(linesur)//TRIM(al)//'")'
-      WRITE(fcu,'(a)') TRIM(linesur)
-!      WRITE(fcu,'("App.getDocument(""Brillouin"").recompute()")')
-   ENDDO
-
-   WRITE(fcu,'("App.getDocument(""Brillouin"").recompute()")')
-ENDIF
-
-RETURN
-END SUBROUTINE freecad_clean
 
 !--------------------------------------------------------------------
 SUBROUTINE freecad_setfcfact(fact)

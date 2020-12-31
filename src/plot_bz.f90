@@ -160,7 +160,7 @@ END SUBROUTINE generate_asy_figure
 
 !--------------------------------------------------------------------------
 SUBROUTINE generate_freecad_figure(xk, wk, npkt, letter, letter_path,    &
-                  npk_label, label_list, bz_struc, bz_asy_struc, asy_filename)
+                  npk_label, label_list, bz_struc, bz_asy_struc, freecadfile)
 !--------------------------------------------------------------------------
 !
 !  This subroutine generates an input script for asymptote that
@@ -168,7 +168,7 @@ SUBROUTINE generate_freecad_figure(xk, wk, npkt, letter, letter_path,    &
 !
 USE kinds, ONLY : DP
 USE freecad, ONLY : freecad_writepoint, freecad_openplot, freecad_closeplot,  &
-                    freecad_writesurface, freecad_createsolid, freecad_clean, &
+                    freecad_writesurface, freecad_createsolid, &
                     freecad_centerview, freecad_setcolor, freecad_plotaxis,   &
                     freecad_createpdf, freecad_join, freecad_putlabel
 USE bz_form, ONLY : bz, find_letter_coordinate
@@ -182,7 +182,7 @@ INTEGER, INTENT(IN) :: label_list(npk_label), wk(npkt)
 REAL(DP), INTENT(INOUT) :: xk(3,npkt)
 TYPE(bz), INTENT(IN) :: bz_struc
 TYPE(bz_asy) :: bz_asy_struc
-CHARACTER(LEN=*), INTENT(IN) :: asy_filename
+CHARACTER(LEN=*), INTENT(IN) :: freecadfile
 
 INTEGER :: i, ik
 CHARACTER(LEN=6) :: int_to_char
@@ -191,20 +191,18 @@ CHARACTER(LEN=3) :: let_pos
 REAL(DP) :: x0(3), vect(3), ak(3), xk1(3), xmod, xmod1
 REAL(DP) :: letter_coordinates(3)
 
-CALL freecad_openplot(asy_filename)
+CALL freecad_openplot(freecadfile)
 
 DO i=1,bz_struc%nvertices
 !   label="Point"//TRIM(int_to_char(i))
-   CALL freecad_writepoint(bz_struc%vertex_coord(:,i))
+   CALL freecad_writepoint(bz_struc%vertex_coord(:,i),i)
 ENDDO
 
 DO i=1,bz_struc%nfaces
 !   IF (bz_asy_struc%visible(i)) CALL asy_writesurface(bz_struc%indsur(:,i))
-   CALL freecad_writesurface(bz_struc%indsur(:,i))
+   CALL freecad_writesurface(bz_struc%indsur(:,i),i)
 ENDDO
 CALL freecad_createsolid(bz_struc%nfaces)
-
-CALL freecad_clean(bz_struc%nvertices, bz_struc%nfaces)
 !
 !  find where the coordinate axis intercept the BZ
 !
