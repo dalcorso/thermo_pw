@@ -898,15 +898,20 @@ npx         : used only in the monoclinic cell, this parameter is needed
               Default: integer 8
 \end{verbatim}
 
-Starting from version \texttt{1.5.0} \thermo\ produces also a script to
+Starting from version \texttt{1.5.0} \thermo\ writes also a script to
 plot the BZ using the \texttt{freeCAD} software. In order to plot
 the BZ you need to download the code (from the site
 \texttt{https://www.freecadweb.org/}, version \texttt{0.18} or higher)
 and, after opening it, choose 
-\texttt{Macro/Macros} to execute the \texttt{freeCAD} macro with extension
-\texttt{.FCMacro} that you find in the working directory. 
-There is a file called \texttt{brillouin.cam} in the
-\texttt{Doc} directory that can be used with the option 
+\texttt{Macro/Macros} to execute the \texttt{freeCAD} macro
+that you find in the working directory (the default name is 
+\texttt{tpw\_freecad.FCMacro}). 
+In the \texttt{Doc} directory there is a file called \texttt{tpw\_bz.svg} 
+that contains the template for the PDF file with the BZ plot. This file
+should be copied in the directory where you run the \texttt{freeCAD} 
+executable before running the script.
+In the same directory there is a file called \texttt{brillouin\_view.cam} 
+in the \texttt{Doc} directory that can be used with the option 
 \texttt{View/Freeze Display} to obtain the standard view of the Brillouin zone.
 This feature is still experimental.\\
 The following variables control the plot:
