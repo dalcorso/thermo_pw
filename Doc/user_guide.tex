@@ -911,6 +911,18 @@ There is a file called \texttt{brillouin.cam} in the
 This feature is still experimental.\\
 The following variables control the plot:
 \begin{verbatim}
+fcfact      : factor used to convert from the 2\pi/a units used 
+              for the Brillouin zone plot to the millimiters units needed to
+              make a plot in freecad. 
+              Default: real 100.0
+fc_red,     
+fc_green,
+fc_blue     : color of the BZ in the rgb format (between 0.0 and 1.0).
+              By default the BZ will be yellow.
+              Default: real 1.0, 1.0, 0.0
+fc_transparency : transparency of the BZ between 0 (opaque) and 100 
+              (transparent).
+              Default: integer 15.
 freecadfile : name of the file that contains the freecad script to plot 
               the Brillouin zone.
               Default: character(len=*) 'tpw_freecad'

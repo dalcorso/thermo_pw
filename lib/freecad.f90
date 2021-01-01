@@ -81,18 +81,25 @@ RETURN
 END SUBROUTINE freecad_centerview
 
 !-----------------------------------------------------------------------
-SUBROUTINE freecad_setcolor(r,g,b)
+SUBROUTINE freecad_setcolor(r,g,b,transparency)
 !----------------------------------------------------------------------
 !
-!  The color is given in r,g,b form (from 0 to 1). The routine must
-!  be called after the BZ solid has been created.
+!  The color is given in r,g,b form (from 0.0 to 1.0). The routine sets
+!  also the transparency of the solid and the width of the lines.
+!  The routine must be called after the BZ solid has been created.
 !
 IMPLICIT NONE
 REAL(DP) :: r, g, b
+INTEGER  :: transparency
 
-IF (ionode) &
+IF (ionode) THEN
    WRITE(fcu,'("FreeCADGui.getDocument(""Brillouin"").&
     &getObject(""Solid"").ShapeColor = (",f4.2,",",f4.2,",",f4.2,")")') r, g, b
+   WRITE(fcu,'("FreeCADGui.ActiveDocument.getObject(""Solid"").&
+                                           &Transparency=",i3)') transparency
+   WRITE(fcu,'("FreeCADGui.ActiveDocument.getObject(""Solid"").&
+                                                      &LineWidth = 3.00")')
+ENDIF
 
 RETURN
 END SUBROUTINE freecad_setcolor
@@ -332,16 +339,6 @@ IF (ionode) THEN
                           &TextColor = (1.00,0.00,0.00)")') TRIM(al)
 ENDIF
 
-!WRITE(fcu,'("ss=Draft.makeShapeString(String=""",a,""",&
-!            &FontFile=""/usr/share/fonts/opentype/cantarell/&
-!            &Cantarell-Regular.otf"",Size=5.0,Tracking=0.0)")') TRIM(label)
-!WRITE(fcu,'("plm=FreeCAD.Placement()")')
-!WRITE(fcu,'("plm.Base=FreeCAD.Vector(",f7.2,",",f7.2,",",f7.2,")")') r*fcfact
-!WRITE(fcu,'("plm.Rotation.Q=(0.,0.,0.,0.)")')
-!WRITE(fcu,'("ss.Placement=plm")')
-!WRITE(fcu,'("ss.Support=None")')
-!WRITE(fcu,'("Draft.autogroup(ss)")')
-
 RETURN
 END SUBROUTINE freecad_putlabel
 
@@ -378,7 +375,12 @@ RETURN
 END SUBROUTINE convert_label
 
 SUBROUTINE convert_pos(dx,pos)
-
+!
+!   The BZ letters have some standard position (N,S,E,W,NE,NW,SE,SW)
+!   This routine converts this position in a shift of the position of 
+!   the letter.
+!   
+!
 IMPLICIT NONE
 CHARACTER(LEN=3) :: pos
 REAL(DP) :: dx(3)
@@ -386,29 +388,29 @@ REAL(DP) :: dx(3)
 dx=0.0_DP
 
 SELECT CASE (TRIM(pos))
-   CASE('E')
+   CASE('E')          ! East
        dx(1)=0.06_DP
        dx(2)=0.06_DP
-   CASE('W')
+   CASE('W')          ! West
        dx(1)=-0.06_DP
        dx(2)=-0.06_DP
-   CASE('N')
+   CASE('N')          ! North
        dx(3)=0.08_DP
-   CASE('S')
+   CASE('S')          ! South
        dx(3)=-0.12_DP
-   CASE('NE')
+   CASE('NE')         ! North-East
        dx(1)=0.06_DP
        dx(2)=0.06_DP
        dx(3)=0.08_DP
-   CASE('NW')
+   CASE('NW')         ! North-West
        dx(1)=-0.06_DP
        dx(2)=-0.06_DP
        dx(3)=0.08_DP
-   CASE('SE')
+   CASE('SE')         ! South-East
        dx(2)=0.06_DP
        dx(2)=0.06_DP
        dx(3)=-0.12_DP
-   CASE('SW')
+   CASE('SW')         ! South-West
        dx(1)=-0.06_DP
        dx(2)=-0.06_DP
        dx(3)=-0.12_DP
@@ -493,10 +495,6 @@ IF (ionode) THEN
    WRITE(fcu,'("P=Part.Solid(S)")')
    WRITE(fcu,'("App.ActiveDocument.addObject(''Part::Feature'',&
                                                       &''Solid'').Shape=P")')
-   WRITE(fcu,'("FreeCADGui.ActiveDocument.getObject(""Solid"").&
-                                                      &Transparency=15")')
-   WRITE(fcu,'("FreeCADGui.ActiveDocument.getObject(""Solid"").&
-                                                      &LineWidth = 3.00")')
 ENDIF
 
 RETURN

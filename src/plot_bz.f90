@@ -170,10 +170,12 @@ USE kinds, ONLY : DP
 USE freecad, ONLY : freecad_writepoint, freecad_openplot, freecad_closeplot,  &
                     freecad_writesurface, freecad_createsolid, &
                     freecad_centerview, freecad_setcolor, freecad_plotaxis,   &
-                    freecad_createpdf, freecad_join, freecad_putlabel
+                    freecad_createpdf, freecad_join, freecad_putlabel,        &
+                    freecad_setfcfact
 USE bz_form, ONLY : bz, find_letter_coordinate
 USE bz_asy_mod, ONLY : bz_asy, find_letter_position
 USE control_paths, ONLY : q_in_band_form 
+USE control_freecad, ONLY : fcfact, fc_red, fc_green, fc_blue, fc_transparency
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: npkt, npk_label
@@ -192,6 +194,7 @@ REAL(DP) :: x0(3), vect(3), ak(3), xk1(3), xmod, xmod1
 REAL(DP) :: letter_coordinates(3)
 
 CALL freecad_openplot(freecadfile)
+CALL freecad_setfcfact(fcfact)
 
 DO i=1,bz_struc%nvertices
 !   label="Point"//TRIM(int_to_char(i))
@@ -236,9 +239,9 @@ ENDDO
 !   END DO
 !END IF
 !
-!   The BZ will be yellow
+!   The default BZ color will be yellow  (1.0, 1.0, 0.0)
 !
-CALL freecad_setcolor(1.0_DP, 1.0_DP, 0.0_DP)
+CALL freecad_setcolor(fc_red, fc_green, fc_blue, fc_transparency)
 CALL freecad_centerview()
 CALL freecad_createpdf('Brillouin.pdf')
 CALL freecad_closeplot()
