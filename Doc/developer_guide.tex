@@ -68,7 +68,7 @@ This guide has been written by Andrea Dal Corso (SISSA - Trieste).
 \section{\color{coral}Overview}
 \tpw\ is logically divided into parts. In some parts the different
 images run asynchronously doing different tasks and in some parts the
-run is synchronous. Usually in this synchronous parts results are 
+run is synchronous. Usually in these synchronous parts results are 
 collected, the image division of the processors is not used, and when possible
 the work is parallelized among all available processors. In some cases
 only the processors of the root image make the work while the others remain
@@ -139,6 +139,11 @@ Following G1 or G2 there is another synchronous part.
 After G1 the synchronous part will do one of the following:
 
 \begin{itemize}
+
+\item
+H1) \texttt{lel\_free\_energy=.TRUE.} computes the electronic dos and
+the electronic thermodynamic properties. In this case G1 must have
+computed the electronic bands for each geometry calculated in the first part.
 
 \item
 H) \texttt{lelastic\_const=.TRUE.} elastic constants calculations.
@@ -218,7 +223,7 @@ scf_disp                     *                              *
 scf_elastic_constants                    *    *
 scf_piezoelectric_tensor                 *          +
 scf_polarization                         *              +
-mur_lc       *           *
+mur_lc       *           *              (*)
 mur_lc_bands *           *   *    *
 mur_lc_dos   *           *   *    *
 mur_lc_ph    *           *   *                              *
@@ -231,10 +236,10 @@ mur_lc_polarization
              *           *               *               +
 mur_lc_t     *           *                                  *   *  *  *  *
 elastic_constants_t
-             *                       *                      *               *   *
+             *                       *  (*)                 *               *   *
 + not yet active or working.
+(*) when lel_free_energy=.TRUE. and use_free_energy=.FALSE.. 
 \end{verbatim}
-
 
 \newpage
 \section{\color{coral}Plots and physical quantities}
@@ -256,6 +261,8 @@ Electronic density of states                   scf_dos, mur_lc_dos
 Electronic energy, free energy, entropy,      
 isochoric heat capacity (metals only)          scf_dos, mur_lc_dos
 Frequency dependent dielectric constant (q=0)  scf_ph, mur_lc_ph
+(insulators only)
+Frequency dependent index of refraction        scf_ph, mur_lc_ph
 (insulators only)
 Frequency dependent dielectric constant (q/=0) scf_ph, mur_lc_ph
 Phonon dispersions                             scf_disp, mur_lc_disp
@@ -290,6 +297,8 @@ Difference isoentropic-isothermal bulk modulus mur_lc_t
 Thermal stresses as a function of T            mur_lc_t
 Average Gruneisen parameter                    mur_lc_t
 Generalized Average Gruneisen parameters       mur_lc_t     
+Frequency dependent reflectivity               scf_ph, mur_lc_ph
+(insulators only)
 \end{verbatim}
 
 This is the list of the quantities that can be obtained in output
@@ -537,6 +546,12 @@ software that it contains, separate drivers, called
 \texttt{manage\_...},  coordinate more limited tasks.
 Presently, the following drivers are available:
 \begin{verbatim}
+manage_sync_pw.f90 manage_syn_1.f90 manage_syn_2.f90
+\end{verbatim}
+coordinate the calculation of a synchronous \texttt{pw.x} run possibly 
+followed by a non self consistent calculation, manage the calculation of 
+the first and second synchronous parts,
+\begin{verbatim}
 manage_bands.f90, manage_surface_states.f90,      
 \end{verbatim}
 coordinate the calculation of the band structure, the electronic density
@@ -551,7 +566,8 @@ manage_xrdp.f90,
 \end{verbatim}
 coordinates the calculation of the X-ray power diffraction spectra,
 \begin{verbatim}
-manage_ph.f90, manage_all_geometries_ph.f90, manage_ph_postproc.f90      
+manage_ph.f90, manage_ph_all_geometries.f90, manage_ph_postproc.f90,
+manage_ph_run.f90      
 \end{verbatim}
 coordinate the calculation of the optical properties, the phonon dispersion
 and the harmonic thermodynamic quantities at one or more geometries,
@@ -571,13 +587,18 @@ coordinates the calculation of the elastic constants, the sound velocities,
 the Debye temperature and the harmonic thermodynamic properties within the 
 Debye approximation,
 \begin{verbatim}
-manage_anhar.f90               
+manage_anhar_routines.f90 manage_anhar.f90               
 \end{verbatim}
 coordinates the calculation of the anharmonic thermodynamic quantities,
 \begin{verbatim}
 manage_elastic_cons_qha.f90, manage_elastic_cons_qha_2.f90        
 \end{verbatim}
-coordinates the calculation of the temperature dependent elastic constants.
+coordinates the calculation of the temperature dependent elastic constants,
+\begin{verbatim}
+../src/manage_el_free_energy.f90      
+\end{verbatim}
+coordinates the calculation of the electronic thermodynamic properties for
+many geometries.
 
 \newpage
 \section{\color{coral}How to insert a new flow-chart}
@@ -605,7 +626,7 @@ postprocessing of the data computed for the new option and writes them on
 file and a routine that plots these data. The former should be called 
 \texttt{write\_...} while the latter will be \texttt{plot\_...}.
 These can be called from a manager routine which is called where needed
-in the \texttt{thermo\_pw.f90} main driver. \\
+in \texttt{thermo\_pw.f90}. \\
 \texttt{thermo\_setup.f90} and \texttt{thermo\_summary.f90} are two routines 
 that are called at the beginning of the run. The first
 can save input variables or call preprocessing routines that work on 
@@ -1249,8 +1270,8 @@ following modules:
 \begin{itemize}
 
 \item
-\texttt{asy.f90} contains the routines to write a script for the
-\texttt{asymptote} code.
+\texttt{asy.f90} contains the routines to write a script to plot the
+Brillouin zone using the \texttt{asymptote} code.
 
 \item
 \texttt{atomic\_pos.f90} contains routines to deal with the atomic positions.
@@ -1297,11 +1318,15 @@ from the electronic density of states, assuming a gas of independent
 electrons.   
 
 \item
-\texttt{gnuplot.f90} contains the routines to write a \texttt{gnuplot} script.
+\texttt{freecad.f90} contains the routines to write a script to plot the
+Brillouin zone using the \texttt{FreeCAD} code.
 
 \item
 \texttt{gnuplot\_color.f90} contains routines to insert the color names
 inside the \texttt{gnuplot} scripts.
+
+\item
+\texttt{gnuplot.f90} contains the routines to write a \texttt{gnuplot} script.
 
 \item
 \texttt{isoentropic.f90} contains routines to calculate the isoentropic
@@ -1346,6 +1371,13 @@ the information on the work to do when they are ready to do it.
 \texttt{nye.f90} contains routines to print the form of tensors of
 rank ranging from one to four, according to the point group and the
 Bravais lattice.
+
+\item
+\texttt{optical.f90} contains routines to work with the optical properties
+of solids ranging from routines that compute the complex index of refraction
+from the complex dielectric constant, to routines that compute the
+reflectivity from the dielectric constant, to routines that make
+the conversion of photon energy to frequency or wavelength.
 
 \item
 \texttt{phdos\_module.f90} contains routines to calculate the vibrational
@@ -1460,7 +1492,7 @@ does not link the \texttt{thermo\_pw} variables and cannot use them, while
 \texttt{thermo\_pw} links the library produced in this directory and can
 call these routines instead of those of \qe. The routines in this directory
 can call all the routines or use the variables of all the libraries
-of \qe: \texttt{pwlib},
+of \qe: \texttt{pwlib}, \texttt{librlmodule},
 \texttt{phlib}, \texttt{pplib} and all lower level libraries.
 As a rule the routines here should have the same names of those in \qe\ with
 the extension \texttt{\_tpw}. This directory contains also many routines
@@ -1468,5 +1500,19 @@ of \qe\ that have no modification except the call to the \texttt{\_tpw}
 routines. The additional global variables needed by these routines are
 contained in the file \texttt{control\_qe.f90} and should be added there.
 
-\end{document}
+\newpage
+\section{\color{coral}Make join\_qe and make leave\_qe}
+The command \texttt{make join\_qe} substitutes three files of the QE
+distribution: \texttt{Makefile} in the main QE directory, 
+\texttt{install/makedeps.sh} and \texttt{install/plugins\_makefile}.
+These files need to be modified to insert the commands needed to
+compile \tpw. The original files of the QE distribution are copied
+in the main \texttt{thermo\_pw} directory with the name extension
+\texttt{\_qe}. The command \texttt{make leave\_qe} restores the original
+files in the QE distribution.
+Occasionally this technique is also used to substitute a few QE files
+to correct bugs identified between the release of the QE package 
+and the release of the \tpw\ package. In these cases it is important
+to give the comman \texttt{make join\_qe} before compiling QE.
 
+\end{document}
