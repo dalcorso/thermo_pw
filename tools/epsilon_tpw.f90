@@ -109,7 +109,7 @@ PROGRAM epsilon_tpw
   !
   ! local variables
   !
-  INTEGER :: ios
+  INTEGER :: ios, stdin
   !
   ! initialise environment
   !
@@ -134,8 +134,9 @@ PROGRAM epsilon_tpw
   !
   IF (ionode) WRITE( stdout, "( 2/, 5x, 'Reading input file...' ) " )
   ios = 0
+  stdin=5
   !
-  IF (meta_ionode) READ( 5, input_epsilon, IOSTAT = ios )
+  IF (meta_ionode) READ( stdin, input_epsilon, IOSTAT = ios )
   CALL mp_bcast(ios, meta_ionode_id, world_comm )
   CALL errore( 'epsilon', 'reading input_epsilon namelist', ABS( ios ) )
   !

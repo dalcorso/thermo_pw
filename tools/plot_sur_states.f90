@@ -74,14 +74,15 @@ CHARACTER(LEN=256) :: str, filename1
 CHARACTER(LEN=30) :: xlabel, ylabel
 CHARACTER(LEN=6) :: int_to_char
 CHARACTER(LEN=9) :: code='plot_surf'
-INTEGER :: system
+INTEGER :: system, stdin
 
 CALL mp_startup ( start_images=.true. )
 CALL environment_start ( code )
 
+stdin=5
 gnuplot_command='gnuplot'
 WRITE(stdout,'(5x,"Number of states to plot and maximum number of states per group")') 
-READ(5,*) nstates, nmax
+READ(stdin,*) nstates, nmax
 WRITE(stdout,'(5x,i5)') nstates, nmax
 ALLOCATE(nk_plot(nstates))
 ALLOCATE(ik_plot(nmax,nstates))
@@ -90,25 +91,25 @@ ALLOCATE(label_plot(nstates))
 WRITE(stdout,'(5x,"Input all the states...")') 
 DO istate=1,nstates
    write(stdout,*) 'istate', istate
-   READ(5,*) nk_plot(istate)
+   READ(stdin,*) nk_plot(istate)
    IF (nk_plot(istate)> nmax) CALL errore('plot_sur_states','increase nmax',1)
    WRITE(stdout,'(5x,i6)') nk_plot(istate)
    DO ik=1,nk_plot(istate)
-      READ(5,*) ik_plot(ik,istate), ibnd_plot(ik,istate), label_plot(istate)
+      READ(stdin,*) ik_plot(ik,istate), ibnd_plot(ik,istate), label_plot(istate)
       WRITE(stdout,'(5x,2i7,3x,a)') ik_plot(ik,istate), ibnd_plot(ik,istate), &
                                              TRIM(label_plot(istate))
    ENDDO
 ENDDO
 WRITE(stdout,'(5x,"Name of the file with the planar averages")') 
-READ(5,'(a)')  dump_file
+READ(stdin,'(a)')  dump_file
 WRITE(stdout,'(5x,"Name of the file with the bands")') 
-READ(5,'(a)')  energy_band_file
+READ(stdin,'(a)')  energy_band_file
 WRITE(stdout,'(5x,a)')  TRIM(dump_file)
 WRITE(stdout,'(5x,"Starting and ending points of the plot")') 
-READ(5,*) startz, endz
+READ(stdin,*) startz, endz
 WRITE(stdout,'(5x,2f15.5)') startz, endz
 WRITE(stdout,'(5x,"Do you want to plot the atoms (.TRUE.=yes)")') 
-READ(5,*) latoms
+READ(stdin,*) latoms
 WRITE(stdout,'(5x,l5)') latoms
 !
 !  Open dump_file and read the states and the atomic positions

@@ -73,6 +73,7 @@ REAL(DP) :: alat_box, celldm_2d(3), celldm(6), omega, at(3,3)
 INTEGER  :: direction, jbulk
 INTEGER, ALLOCATABLE :: ityp(:), ps(:), qs(:)
 INTEGER :: find_free_unit
+INTEGER :: stdin
 REAL(DP), ALLOCATABLE :: tau_2d(:,:), tau_ribbon(:,:), y(:,:)
 CHARACTER ( LEN=3 ), ALLOCATABLE :: atm_2d(:)
 CHARACTER ( LEN=3 ), ALLOCATABLE :: atm(:)
@@ -84,6 +85,7 @@ CHARACTER(LEN=9) :: code='2D_SLAB'
 CALL mp_startup ( start_images=.true. )
 CALL environment_start ( code )
 
+stdin=5
 WRITE(stdout,'("ibrav_2d ")')
 WRITE(stdout,'("1 -- oblique, give a, b, cos(gamma) ")')
 WRITE(stdout,'("2 -- rectangular, give a and b ")')
@@ -92,51 +94,51 @@ WRITE(stdout,'("4 -- square, give a ")')
 WRITE(stdout,'("5 -- hexagonal, give a ")')
 WRITE(stdout,'("ibrav_2d?")')
 
-READ(5,*) ibrav_2d
+READ(stdin,*) ibrav_2d
 WRITE(stdout,'(i5)') ibrav_2d
 WRITE(stdout,'("a, b/a, COS(gamma)? ")')
 
-READ(5,*) celldm_2d(1), celldm_2d(2), celldm_2d(3)
+READ(stdin,*) celldm_2d(1), celldm_2d(2), celldm_2d(3)
 WRITE(stdout,'(3f15.6)') celldm_2d
 alat=celldm_2d(1)
 WRITE(stdout,'("Number of atoms in the 2d unit cell?")') 
 
-READ(5,*) nat_2d
+READ(stdin,*) nat_2d
 WRITE(stdout,'(i5)') nat_2d
 ALLOCATE(tau_2d(3,nat_2d))
 ALLOCATE(atm_2d(nat_2d))
 DO ia=1,nat_2d
-   READ(5,*) atm_2d(ia), tau_2d(1,ia), tau_2d(2,ia), tau_2d(3,ia)
+   READ(stdin,*) atm_2d(ia), tau_2d(1,ia), tau_2d(2,ia), tau_2d(3,ia)
    WRITE(stdout,'(a3, 3f18.10)') atm_2d(ia), tau_2d(1,ia), tau_2d(2,ia), &
                                              tau_2d(3,ia)
 ENDDO
 
 WRITE(stdout,'("Dimension of the box?")')
-READ(5,*) alat_box
+READ(stdin,*) alat_box
 WRITE(stdout,'(f15.6)') alat_box
 
 WRITE(stdout,'("Crystal coordinates of the G vector m b1 + n b2 (m,n)?")')
-READ(5,*) m, n
+READ(stdin,*) m, n
 WRITE(stdout,'(2i5)') m,n
 
 WRITE(stdout,'("Number of rows ?")')
-READ(5,*) nrows
+READ(stdin,*) nrows
 WRITE(stdout,'(i5)') nrows
 
 WRITE(stdout,'("Number of atoms per row ?")')
-READ(5,*) nat_row
+READ(stdin,*) nat_row
 WRITE(stdout,'(i5)') nat_row
 
 WRITE(stdout,'("Exact vacuum (.TRUE.) or row distance multiples (.FALSE.)?")')
-READ(5,*) ldist_vacuum
+READ(stdin,*) ldist_vacuum
 WRITE(stdout,*) ldist_vacuum
 
 WRITE(stdout,'("Vacuum space in a.u. ?")')
-READ(5,*) vacuum
+READ(stdin,*) vacuum
 WRITE(stdout,'(f15.6)') vacuum 
 
 WRITE(stdout,'("Output file name?")')
-READ(5,*) filename
+READ(stdin,*) filename
 WRITE(stdout,'(a)') TRIM(filename)
 
 pi=4.0_DP * atan(1.0_DP)

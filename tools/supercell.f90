@@ -168,7 +168,7 @@ INTEGER :: which_input, iconv, icenter, units
 INTEGER :: na, iat, ia, natoms, nt, nb, i1, i2, i3, iuout, nfield, idx, k, &
            ivec, jvec, ipol, jpol, ierr, code_group_ext, copies, idet, iv, &
            n1, n2, n3, iformat
-INTEGER :: find_free_unit
+INTEGER :: find_free_unit, stdin
 REAL(DP) :: a, cg, inp(3), prod1, prod2, prod3, rmu(3), radius, rmod, v(3,7), &
             rmm(3,3), check
 LOGICAL :: found
@@ -180,18 +180,19 @@ CHARACTER(LEN=9) :: code='SUPERCELL'
 CALL mp_startup ( start_images=.true. )
 CALL environment_start ( code )
 
+stdin=5
 WRITE(stdout,'(5x," Space group (1) or standard coordinates (2)? ")')
-READ(5,*) which_input
+READ(stdin,*) which_input
 WRITE(stdout,'(i5)') which_input
 
 IF (which_input==1) THEN
    units=2
    WRITE(stdout,'(5x," Space group number? ")')
-   READ(5,*) space_group_code
+   READ(stdin,*) space_group_code
    WRITE(stdout,'(i5)') space_group_code
 
    WRITE(stdout,'(5x," Origin, unique axis b, trigonal or hexagonal? (default 1 1 1) ")')
-   READ(5,*) or, unb, trig
+   READ(stdin,*) or, unb, trig
 
    WRITE(stdout,'(3i5)') or, unb, trig
    uniqueb=.FALSE.
@@ -203,29 +204,31 @@ IF (which_input==1) THEN
    ENDIF
    origin_choice=or
    WRITE(stdout,'(5x,"celldm ? (For instance 1.0 0.0 0.0 0.0 0.0 0.0)  ")')
-   READ(5,*) celldm(1), celldm(2), celldm(3), celldm(4), celldm(5), celldm(6)
+   READ(stdin,*) celldm(1), celldm(2), celldm(3), celldm(4), celldm(5), &
+                 celldm(6)
    WRITE(stdout,'(6f12.6)') celldm(1), celldm(2), celldm(3), celldm(4), &
                             celldm(5), celldm(6)
 ELSE
    WRITE(stdout,'(5x," Bravais lattice code ibrav (as in QE)? ")')
-   READ(5,*) ibrav
+   READ(stdin,*) ibrav
    WRITE(stdout, '(i5)') ibrav
    WRITE(stdout,'(5x," Units (alat (1) or crystal coordinates (2)) ? ")')
-   READ(5,*) units
+   READ(stdin,*) units
    WRITE(stdout, '(i5)') units
    IF (ibrav/=0) THEN
       WRITE(stdout,'(5x,"celldm ? (For instance 1.0 0.0 0.0 0.0 0.0 0.0)  ")')
-      READ(5,*) celldm(1), celldm(2), celldm(3), celldm(4), celldm(5), celldm(6)
+      READ(stdin,*) celldm(1), celldm(2), celldm(3), celldm(4), celldm(5), &
+                    celldm(6)
       WRITE(stdout,'(6f12.6)') celldm(1), celldm(2), celldm(3), celldm(4), &
                                celldm(5), celldm(6)
    ELSE
       celldm=0.0_DP
       WRITE(stdout,'(5x,"Units of at (at are multiplied by this number)? ")')
-      READ(5,*) celldm(1)
+      READ(stdin,*) celldm(1)
       WRITE(stdout,'(f12.6)') celldm(1)
       WRITE(stdout,'(5x,"at ? ")')
       DO ivec=1,3
-         READ(5,*) at(:,ivec)
+         READ(stdin,*) at(:,ivec)
          WRITE(stdout,'(3f12.6)') at(:,ivec)
       ENDDO 
       at=at*celldm(1)
@@ -233,39 +236,39 @@ ELSE
 ENDIF
 
 WRITE(stdout,'(5x,"Transform to conventional cell? (1=Yes, 0=No) ")') 
-READ(5,*) iconv
+READ(stdin,*) iconv
 WRITE(stdout,'(i5)') iconv
 WRITE(stdout,'(5x,"Format of the input supercell? (1, 2, or 3) ")') 
-READ(5,*) iformat
+READ(stdin,*) iformat
 WRITE(stdout,'(i5)') iformat
 IF (iformat==1) THEN
    WRITE(stdout,'(5x,"n1, n2, n3? (for instance 1 1 1)")')
-   READ(5,*) n1, n2, n3
+   READ(stdin,*) n1, n2, n3
    WRITE(stdout,'(3i5)') n1, n2, n3
 ELSEIF(iformat==2) THEN
    WRITE(stdout,'(5x,"m11, m12, m13? (for instance 1 0 0)")') 
-   READ(5,*) (mm(1, ipol), ipol=1,3)
+   READ(stdin,*) (mm(1, ipol), ipol=1,3)
    WRITE(stdout,'(3i6)') (mm(1, ipol), ipol=1,3)
    WRITE(stdout,'(5x,"m21, m22, m23? (for instance 0 1 0)")') 
-   READ(5,*) (mm(2, ipol), ipol=1,3)
+   READ(stdin,*) (mm(2, ipol), ipol=1,3)
    WRITE(stdout,'(3i6)') (mm(2, ipol), ipol=1,3)
    WRITE(stdout,'(5x,"m31, m32, m33? (for instance 0 0 1)")') 
-   READ(5,*) (mm(3, ipol), ipol=1,3)
+   READ(stdin,*) (mm(3, ipol), ipol=1,3)
    WRITE(stdout,'(3i6)') (mm(3, ipol), ipol=1,3)
 ELSEIF(iformat==3) THEN
    WRITE(stdout,'(5x,"R_1x, R_1y, R_1z ? (for instance 1.0 0.0 0.0)")') 
-   READ(5,*) (ats(1, ipol), ipol=1,3)
+   READ(stdin,*) (ats(1, ipol), ipol=1,3)
    WRITE(stdout,'(3f15.7)') (ats(1, ipol), ipol=1,3)
    WRITE(stdout,'(5x,"R_2x, R_2y, R_2z ? (for instance 0.0 1.0 0.0)")') 
-   READ(5,*) (ats(2, ipol), ipol=1,3)
+   READ(stdin,*) (ats(2, ipol), ipol=1,3)
    WRITE(stdout,'(3f15.7)') (ats(2, ipol), ipol=1,3)
    WRITE(stdout,'(5x,"R_3x, R_3y, R_3z ? (for instance 0.0 0.0 1.0)")') 
-   READ(5,*) (ats(3, ipol), ipol=1,3)
+   READ(stdin,*) (ats(3, ipol), ipol=1,3)
    WRITE(stdout,'(3f15.7)') (ats(3, ipol), ipol=1,3)
 ENDIF
 WRITE(stdout,'(5x,"Centered output crystal coordinates? &
                  &(0=No, 1=Yes -0.5,0.5, 2=Yes 0,1) ")') 
-READ(5,*) icenter
+READ(stdin,*) icenter
 WRITE(stdout,'(i5)') icenter
 !
 !  now read atomic positions and compute all atoms in the primitive unit cell 
@@ -279,7 +282,7 @@ WRITE(stdout,'(i5)') icenter
 !
 WRITE(stdout,'(5x," Number of atoms and atomic coordinates? ")')
 IF (which_input==1) THEN
-   READ(5,*) ineq_nat
+   READ(stdin,*) ineq_nat
 
    ALLOCATE(ineq_tau(3,ineq_nat))
    ALLOCATE(label(ineq_nat))
@@ -371,13 +374,13 @@ IF (which_input==1) THEN
 ELSE
    uniqueb=.FALSE.
    rhombohedral = (ibrav==5)
-   READ(5,*) nat
+   READ(stdin,*) nat
    ALLOCATE(tau(3,nat))
    ALLOCATE(stau(3,nat))
    ALLOCATE(ityp(nat))
    ALLOCATE(label(nat))
    DO na=1, nat
-      READ(5,*) label(na), tau(1,na), tau(2,na), tau(3,na)
+      READ(stdin,*) label(na), tau(1,na), tau(2,na), tau(3,na)
    ENDDO
 
 

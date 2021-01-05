@@ -26,21 +26,23 @@ PROGRAM translate
 !
 USE kinds, ONLY : DP
 USE rotate, ONLY : is_rotation, rotate_vect
+USE io_global, ONLY : stdout
 
 IMPLICIT NONE
 INTEGER :: nat
 REAL(DP), ALLOCATABLE :: tau(:,:), tau0(:,:)
 REAL(DP) :: a(3), rot(3,3), original_units, final_units, fact
-INTEGER :: na, ipol, jpol, input_rot
+INTEGER :: na, ipol, jpol, input_rot, stdin
 CHARACTER(LEN=3), ALLOCATABLE :: label(:)
 
-WRITE(6,'(5x," Translation vector? ")')
-READ(5,*) a(1), a(2), a(3)
-WRITE(6,'(3f15.8)') a(1), a(2), a(3)
+stdin=5
+WRITE(stdout,'(5x," Translation vector? ")')
+READ(stdin,*) a(1), a(2), a(3)
+WRITE(stdout,'(3f15.8)') a(1), a(2), a(3)
 
-WRITE(6,'(5x," Rotation matrix? (0 to skip) ")')
-READ(5,*) input_rot
-WRITE(6,'(i5)') input_rot
+WRITE(stdout,'(5x," Rotation matrix? (0 to skip) ")')
+READ(stdin,*) input_rot
+WRITE(stdout,'(i5)') input_rot
 
 IF (input_rot == 0) THEN
    rot=0.0_DP
@@ -49,44 +51,44 @@ IF (input_rot == 0) THEN
    rot(3,3)=1.0_DP
 ELSE
    DO ipol=1,3
-      READ(5,*) (rot(ipol,jpol), jpol=1,3)
-      WRITE(6,'(3f15.8)') (rot(ipol,jpol), jpol=1,3)
+      READ(stdin,*) (rot(ipol,jpol), jpol=1,3)
+      WRITE(stdout,'(3f15.8)') (rot(ipol,jpol), jpol=1,3)
    ENDDO
 
    IF (.NOT.is_rotation(rot)) THEN
-      WRITE(6,'(/,5x,"WARNING: input matrix not a rotation")')
+      WRITE(stdout,'(/,5x,"WARNING: input matrix not a rotation")')
    END IF
 END IF
 
-WRITE(6,'(5x," Number of atoms and atomic coordinates")')
-READ(5,*) nat
-WRITE(6,'(i5)') nat 
+WRITE(stdout,'(5x," Number of atoms and atomic coordinates")')
+READ(stdin,*) nat
+WRITE(stdout,'(i5)') nat 
 
 ALLOCATE(tau0(3,nat))
 ALLOCATE(tau(3,nat))
 ALLOCATE(label(nat))
 DO na=1, nat
-   READ(5,*) label(na), tau0(1,na), tau0(2,na), tau0(3,na)
-   WRITE(6,'(a3,3f20.12)') label(na), tau0(1,na), tau0(2,na), tau0(3,na)
+   READ(stdin,*) label(na), tau0(1,na), tau0(2,na), tau0(3,na)
+   WRITE(stdout,'(a3,3f20.12)') label(na), tau0(1,na), tau0(2,na), tau0(3,na)
 ENDDO
 
-WRITE(6,'(/,5x,"(Roto-)translated coordinates")') 
-WRITE(6,*) nat
+WRITE(stdout,'(/,5x,"(Roto-)translated coordinates")') 
+WRITE(stdout,*) nat
 CALL rotate_vect(rot,nat, tau0, tau,1) 
 DO na=1, nat
-   WRITE(6,'(a3,3f20.12)') label(na), tau(1,na) + a(1), tau(2,na) + a(2), &
+   WRITE(stdout,'(a3,3f20.12)') label(na), tau(1,na) + a(1), tau(2,na) + a(2), &
                                      tau(3,na) + a(3)
 ENDDO
 
-WRITE(6,'(5x," change of units? (original units - final units, &
+WRITE(stdout,'(5x," change of units? (original units - final units, &
                                 & 0.0, 0.0 to skip)")')
-READ(5,*) original_units, final_units
-WRITE(6,'(2f16.7)') original_units, final_units
+READ(stdin,*) original_units, final_units
+WRITE(stdout,'(2f16.7)') original_units, final_units
 
 IF (original_units>0.0_DP .AND. final_units>0.0_DP) THEN
    fact=original_units/final_units
    DO na=1, nat
-      WRITE(6,'(a3,3f20.12)') label(na), (tau(1,na) + a(1))*fact, &
+      WRITE(stdout,'(a3,3f20.12)') label(na), (tau(1,na) + a(1))*fact, &
                                          (tau(2,na) + a(2))*fact, &
                                          (tau(3,na) + a(3))*fact
    ENDDO

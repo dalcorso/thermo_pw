@@ -216,6 +216,7 @@ INTEGER  :: p, q, s,       & ! the indices of the R
 
 INTEGER, ALLOCATABLE :: ityp(:),        & ! type of atoms 
                         if_pos(:,:)       ! if to be kept fixed (in pw.x input)
+INTEGER :: stdin
 REAL(DP), ALLOCATABLE :: tau_sur(:,:)     ! crystal coordinates of the atoms of
                                           ! the slab in the basis of the slab at
 
@@ -231,42 +232,43 @@ CALL environment_start ( code )
 !
 !  Reading input
 !
+stdin=5
 WRITE(stdout,'("ibrav_3d? ")')
-READ(5,*) ibrav_3d
+READ(stdin,*) ibrav_3d
 WRITE(stdout,'(i5)') ibrav_3d
 WRITE(stdout,'("celldm ")')
-READ(5,*) celldm_3d(1), celldm_3d(2), celldm_3d(3), &
+READ(stdin,*) celldm_3d(1), celldm_3d(2), celldm_3d(3), &
           celldm_3d(4), celldm_3d(5), celldm_3d(6)
 WRITE(stdout,'(6f12.6)') celldm_3d
 alat=celldm_3d(1)
 WRITE(stdout,'("Crystal coordinates? (1 yes all, 2 yes only irreducible, 3 no)")')
-READ(5,*) lcryst
+READ(stdin,*) lcryst
 WRITE(stdout,'(i5)') lcryst
 
 IF (lcryst==2) THEN
    WRITE(stdout,'("Space group number?")')
-   READ(5,*) space_group_number
+   READ(stdin,*) space_group_number
    WRITE(stdout,'(i5)') space_group_number
    WRITE(stdout,'("Unique axis b? (.TRUE. or .FALSE.")') 
-   READ(5,*) uniqueb
+   READ(stdin,*) uniqueb
    WRITE(stdout,'(l5)') uniqueb
    WRITE(stdout,'("Rombohedral? (.TRUE. or .FALSE.")') 
-   READ(5,*) rhombohedral
+   READ(stdin,*) rhombohedral
    WRITE(stdout,'(l5)') rhombohedral
    WRITE(stdout,'("Origin choice? (1 or 2)")') 
-   READ(5,*) origin_choice
+   READ(stdin,*) origin_choice
    WRITE(stdout,'(i5)') origin_choice
 END IF
 
 WRITE(stdout,'("Number of atoms in the bulk unit cell?")') 
-READ(5,*) nat_3d
+READ(stdin,*) nat_3d
 WRITE(stdout,'(i5)') nat_3d
 
 ALLOCATE(tau_3d(3,nat_3d))
 ALLOCATE(ityp(nat_3d))
 ALLOCATE(atm_3d(nat_3d))
 DO na=1,nat_3d
-   READ(5,*) atm_3d(na), tau_3d(1,na), tau_3d(2,na), tau_3d(3,na)
+   READ(stdin,*) atm_3d(na), tau_3d(1,na), tau_3d(2,na), tau_3d(3,na)
    WRITE(stdout,'(a3, 3f18.10)') atm_3d(na), tau_3d(1,na), tau_3d(2,na), tau_3d(3,na)
 ENDDO
 !
@@ -305,55 +307,55 @@ ENDIF
 !
 IF (ibrav_3d == 4) THEN
    WRITE(stdout,'("Three (.TRUE.) or four (.FALSE.) indices  ?")') 
-   READ(5,*) three_indices
+   READ(stdin,*) three_indices
    WRITE(stdout,'(l5)') three_indices
    IF (three_indices) THEN
        WRITE(stdout,'("Crystal coordinates of the &
                              &G vector m b1 + n b2 + o b3 (m,n,o)?")')
-       READ(5,*) m, n, o
+       READ(stdin,*) m, n, o
        WRITE(stdout,'(3i5)') m,n,o
    ELSE
        WRITE(stdout,'("Crystal coordinates of the &
                              &G vector m b1 + n b2 + o b3 (m,n,h,o) h=-m-n?")')
-       READ(5,*) m, n, h, o
+       READ(stdin,*) m, n, h, o
        WRITE(stdout,'(4i5)') m,n,h,o
        IF (h /= -m-n) CALL errore('gener_3d_slab','h must be equal to -m-n', 1)
    ENDIF
 ELSE
    WRITE(stdout,'("Crystal coordinates of the &
                              &G vector m b1 + n b2 + o b3 (m,n,o)?")')
-   READ(5,*) m, n, o
+   READ(stdin,*) m, n, o
    WRITE(stdout,'(3i5)') m,n,o
 ENDIF
 
 WRITE(stdout,'("Number of layers ?")')
-READ(5,*) nlayers
+READ(stdin,*) nlayers
 WRITE(stdout,'(i5)') nlayers
 IF (nlayers>nmax) CALL errore('gener_3d_slab','nlayer too large',nmax)
 
 WRITE(stdout,'("Transformation matrix ? (t11, t12, t21, t22) ")')
-READ(5,*) t11, t12, t21, t22
+READ(stdin,*) t11, t12, t21, t22
 WRITE(stdout,'(2i5)') t11, t12
 WRITE(stdout,'(2i5)') t21, t22
 
 WRITE(stdout,'("Exact vacuum (.TRUE.) or row distance multiples (.FALSE.)?")')
-READ(5,*) ldist_vacuum
+READ(stdin,*) ldist_vacuum
 WRITE(stdout,*) ldist_vacuum
 
 WRITE(stdout,'("Vacuum space in a.u. ?")')
-READ(5,*) vacuum
+READ(stdin,*) vacuum
 WRITE(stdout,'(f15.6)') vacuum 
 
 WRITE(stdout,'("In which layer do you want to put the origin?")')
-READ(5,*) origin_shift
+READ(stdin,*) origin_shift
 WRITE(stdout,'(i5)') origin_shift
 
 WRITE(stdout,'("Do you want to put the origin within two slabs?")')
-READ(5,*) do_shift
+READ(stdin,*) do_shift
 WRITE(stdout,'(l5)') do_shift
 
 WRITE(stdout,'("Output file name?")')
-READ(5,*) filename
+READ(stdin,*) filename
 WRITE(stdout,'(a)') TRIM(filename)
 !
 !  generate the 3D bulk primitive direct and reciprocal lattice vectors.

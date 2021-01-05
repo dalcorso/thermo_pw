@@ -27,16 +27,18 @@ CHARACTER(LEN=11) :: group_name
 INTEGER :: work_choice, igroup, code_group, code_subgroup, mag_group_count, &
            group_code_ext, subgroup_code_ext, mag_group_code, &
            group_desc(48), subgroup_desc(48), mag_group_code_ext, nsym
+INTEGER :: stdin
 
 CALL mp_startup ( start_images=.true. )
 CALL environment_start ( code )
 
+stdin=5
 WRITE(stdout,'(/,5x,"Choose what to write")')
 WRITE(stdout,'(5x,"1) List the magnetic point groups (short)")')
 WRITE(stdout,'(5x,"2) List the magnetic point groups (long)")')
 WRITE(stdout,'(5x,"3) List the elements of a magnetic point group ")')
 
-READ(5,*) work_choice
+READ(stdin,*) work_choice
 
 IF (work_choice == 1) THEN
    WRITE(stdout,*)
@@ -109,11 +111,13 @@ IMPLICIT NONE
 INTEGER :: mag_group_code_ext, nsym
 INTEGER :: group_desc(48), subgroup_desc(48)
 INTEGER :: isym, subnsym, group_code_ext, subgroup_code_ext
+INTEGER :: stdin
 CHARACTER(LEN=11) :: group_name
 
 WRITE(stdout,'(/,5x,"Extended magnetic point group code &
                                               &(see the list using 2)?")')
-READ(5,*) mag_group_code_ext
+stdin=5
+READ(stdin,*) mag_group_code_ext
 
 IF (mag_group_code_ext>589) &
    CALL errore('read_group_code_mag','input magnetic code out of range',1)

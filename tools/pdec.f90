@@ -43,7 +43,7 @@ REAL(DP), ALLOCATABLE :: el_cons_tinput_p(:,:,:,:), b0_tinput_p(:,:)
 INTEGER(DP), ALLOCATABLE :: ind(:)
 REAL(DP) :: tmin, tmax, deltat
 REAL(DP) :: a(2)
-INTEGER  :: system, ierr
+INTEGER  :: system, ierr, stdin
 CHARACTER (LEN=256) :: input_filename, filename_path, partial_filename, str_tmp, rdum_str
 CHARACTER (LEN=256) :: file_press, filepressure, filelastic, filefirstpressure
 CHARACTER(LEN=8) :: real_to_char
@@ -54,16 +54,16 @@ CALL mp_startup ( start_images=.true. )
 CALL environment_start ( code )
 
 ios = f_mkdir_safe( 'pressure_files' )
-
+stdin=5
 WRITE(stdout,*)
 WRITE(stdout,'(5x,"Insert the part of the elastic constants file name before the pressure:")')
-READ(5,*) input_filename
+READ(stdin,*) input_filename
 
 WRITE(stdout,'(5x,"Bravais index of your solid ? ")')
-READ(5,*) ibrav
+READ(stdin,*) ibrav
 
 WRITE(stdout,'(5x,"Laue class of your solid ? ")')
-READ(5,*) laue
+READ(stdin,*) laue
 
 WRITE(stdout,'(5x,"The shape of elastic constant tensor of your system is:")')
 CALL print_el_cons_shape(laue,ibrav)
@@ -150,7 +150,7 @@ ENDDO
 WRITE(stdout,*)
 WRITE(stdout,'(5x,"Number of temperatures for the elastic constants vs pressure")')
 WRITE(stdout,'(5x,"plots (select a value from 1 to 10):")')
-READ(5,*) ntemp_press
+READ(stdin,*) ntemp_press
 
 IF (ntemp_press<1 .OR. ntemp_press>10) THEN
    WRITE(stdout,'(5x,"Incorrect number of temperatures.")')
@@ -161,7 +161,7 @@ ALLOCATE(temp_press(ntemp_press))
 
 DO itemp=1, ntemp_press
    WRITE(stdout,'(5x,"Temperature",I2," (K):")') itemp
-   READ(5,*) temp_press(itemp)
+   READ(stdin,*) temp_press(itemp)
    IF (temp_press(itemp)<tmin.OR.temp_press(itemp)>tmax) THEN
       WRITE(stdout,'(5x,"Invalid temperature")')
       STOP 1

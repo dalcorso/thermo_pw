@@ -22,6 +22,7 @@ CHARACTER(LEN=256) :: filename
 
 INTEGER  :: itemp, nat, nsp
 INTEGER  :: ntemp
+INTEGER  :: stdin
 
 REAL(DP), ALLOCATABLE :: temp(:), deb_cv(:), deb_entropy(:), &
                          deb_energy(:), deb_free_energy(:), deb_bfact(:)
@@ -31,29 +32,30 @@ REAL(DP) :: debye_t, deb_e0, amass(1), tmin, tmax, deltat
 CALL mp_startup (start_images=.TRUE.)
 CALL environment_start(code)
 
+stdin=5
 WRITE(stdout,'(5x,"Debye temperature (K)? ")')
-READ(5,*) debye_t
+READ(stdin,*) debye_t
 
 WRITE(stdout,'(5x,"Number of atoms? ")')
-READ(5,*) nat
+READ(stdin,*) nat
 
 WRITE(stdout,'(5x,"Number of atom types? ")')
-READ(5,*) nsp
+READ(stdin,*) nsp
 
 WRITE(stdout,'(5x,"Atomic mass (a.m.u.)? ")')
-READ(5,*) amass(1)
+READ(stdin,*) amass(1)
 
 WRITE(stdout,'(5x,"Minimum temperature (K)? ")')
-READ(5,*) tmin
+READ(stdin,*) tmin
 
 WRITE(stdout,'(5x,"Maximum temperature (K)? ")')
-READ(5,*) tmax
+READ(stdin,*) tmax
 
 WRITE(stdout,'(5x,"Delta T (K)? ")')
-READ(5,*) deltat
+READ(stdin,*) deltat
 
 WRITE(stdout,'(5x,"Output file? ")')
-READ(5,*) filename
+READ(stdin,*) filename
 
 WRITE(stdout,'(/,2x,76("+"))')
 WRITE(stdout,'(5x,"Computing the thermodynamic properties from elastic &

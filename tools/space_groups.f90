@@ -34,6 +34,7 @@ CHARACTER(LEN=11) :: gname
 REAL(DP), PARAMETER :: eps1=1.D-8, eps2=1.D-5
 INTEGER :: group_desc(48), group_code, group_code_ext, work_choice, ibrav, &
            sgc, sgc_, ssgc, nsym, isym, ivec, counter, aux_sg, ftau(3,48)
+INTEGER :: stdin
 REAL(DP) :: celldm(6), sr(3,3,48), ft(3,48), s01(3), s02(3), at(3,3), bg(3,3), &
             omega
 CHARACTER(LEN=11) :: group_name, sg_name
@@ -42,13 +43,14 @@ CHARACTER(LEN=12) :: sg_name1
 CALL mp_startup (start_images=.TRUE.)
 CALL environment_start(code)
 
+stdin=5
 WRITE(stdout,'(/,5x,"Choose what to do")')
 WRITE(stdout,'(5x,"1) Write the space group names")')
 WRITE(stdout,'(5x,"2) Write the space group number")')
 WRITE(stdout,'(5x,"3) Write the symmetry elements of a space group")')
 WRITE(stdout,'(5x,"4) Write symmorphic space groups")')
 
-READ(5,*) work_choice
+READ(stdin,*) work_choice
 
 celldm(1)=1.0_DP
 celldm(2)=1.2_DP
@@ -60,7 +62,7 @@ celldm(6)=-0.2_DP
 
 IF (work_choice==1) THEN
    WRITE(stdout,'(5x,"Space group number?")')
-   READ(5,*) sgc
+   READ(stdin,*) sgc
 
    CALL set_add_info()
 
@@ -84,7 +86,7 @@ IF (work_choice==1) THEN
    ENDIF
 ELSEIF (work_choice==2) THEN
    WRITE(stdout,'(5x,"Space group name?")')
-   READ(5,'(a)') sg_name
+   READ(stdin,'(a)') sg_name
 
    CALL set_add_info()
    CALL find_space_group_number(sg_name,sgc)
@@ -110,7 +112,7 @@ ELSEIF (work_choice==2) THEN
 
 ELSEIF (work_choice==3) THEN
    WRITE(stdout,'(5x,"Input space_group_number? ")')
-   READ(5,*) sgc
+   READ(stdin,*) sgc
 
    CALL set_add_info()
 

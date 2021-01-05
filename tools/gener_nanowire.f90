@@ -79,7 +79,7 @@ REAL(DP), ALLOCATABLE :: tau_2d(:,:), tau_nano(:,:)
 CHARACTER(LEN=3), ALLOCATABLE :: atm_2d(:), atm_typ(:)
 CHARACTER(LEN=3) :: atm(nmax)
 LOGICAL :: lwire, lrect, lcrys
-INTEGER :: iuout
+INTEGER :: iuout, stdin
 INTEGER :: find_free_unit
 CHARACTER(LEN=256) :: filename
 CHARACTER(LEN=9) :: code='NANOWIRE'
@@ -87,7 +87,7 @@ CHARACTER(LEN=9) :: code='NANOWIRE'
 CALL mp_startup ( start_images=.true. )
 CALL environment_start ( code )
 
-
+stdin=5
 WRITE(stdout,'("ibrav_2d ")')
 WRITE(stdout,'("1 -- oblique, give a, b, cos(gamma) ")')
 WRITE(stdout,'("2 -- rectangular, give a and b ")')
@@ -95,30 +95,30 @@ WRITE(stdout,'("3 -- centered rectangular, give a and b ")')
 WRITE(stdout,'("4 -- square, give a ")')
 WRITE(stdout,'("5 -- hexagonal, give a ")')
 WRITE(stdout,'("ibrav_2d?")')
-READ(5,*) ibrav_2d
+READ(stdin,*) ibrav_2d
 WRITE(stdout,'(i5)') ibrav_2d
 WRITE(stdout,'("a, b/a, COS(gamma)? ")')
-READ(5,*) celldm_2d(1), celldm_2d(2), celldm_2d(3)
+READ(stdin,*) celldm_2d(1), celldm_2d(2), celldm_2d(3)
 WRITE(stdout,'(3f15.6)') celldm_2d
 alat=celldm_2d(1)
 WRITE(stdout,'("Number of atoms in the 2d unit cell?")') 
-READ(5,*) nat_2d
+READ(stdin,*) nat_2d
 WRITE(stdout,'(i5)') nat_2d
 
 ALLOCATE(tau_2d(3,nat_2d))
 ALLOCATE(atm_2d(nat_2d))
 DO ia=1,nat_2d
-   READ(5,*) atm_2d(ia), tau_2d(1,ia), tau_2d(2,ia), tau_2d(3,ia)
+   READ(stdin,*) atm_2d(ia), tau_2d(1,ia), tau_2d(2,ia), tau_2d(3,ia)
    WRITE(stdout,'(a3, 3f18.10)') atm_2d(ia), tau_2d(1,ia), tau_2d(2,ia), &
                                                             tau_2d(3,ia)
 ENDDO
 
 WRITE(stdout,'("Dimension of the box?")')
-READ(5,*) alat_box
+READ(stdin,*) alat_box
 WRITE(stdout,'(f15.6)') alat_box
 
 WRITE(stdout,'("Two dimensional sheet (.FALSE.) or wire (.TRUE.)?")')
-READ(5,*) lwire
+READ(stdin,*) lwire
 WRITE(stdout,*) lwire
 
 SELECT CASE (ibrav_2d) 
@@ -127,7 +127,7 @@ SELECT CASE (ibrav_2d)
 !  rhombus
 !
       WRITE(stdout,'("General lattice, give m,n,p,q")')
-      READ(5,*) m, n, p, q
+      READ(stdin,*) m, n, p, q
    CASE(2)
 !
 !  rectangular
@@ -135,10 +135,10 @@ SELECT CASE (ibrav_2d)
       WRITE(stdout,'("Only nanowires of type (m,0) or (0,n) have rectangular cell")')
       WRITE(stdout,'("Rectangular? If .TRUE. then give m and n otherwise &
                  &give m n p q")')
-      READ(5,*) lrect
+      READ(stdin,*) lrect
       WRITE(stdout,*) lrect
       IF (lrect) THEN
-         READ(5,*) m, n
+         READ(stdin,*) m, n
          IF (m > 0) THEN
             p=0
             q=1
@@ -147,7 +147,7 @@ SELECT CASE (ibrav_2d)
             q=0
          ENDIF
       ELSE
-         READ(5,*) m, n, p, q
+         READ(stdin,*) m, n, p, q
       ENDIF
    CASE(3)
 !
@@ -156,15 +156,15 @@ SELECT CASE (ibrav_2d)
       WRITE(stdout,'("Only nanowires of type (m,m) are rectangular.")')
       WRITE(stdout,'("Rectangular? If .TRUE. then give m otherwise &
                  &give m n p q")')
-      READ(5,*) lrect
+      READ(stdin,*) lrect
       WRITE(stdout,*) lrect
       IF (lrect) THEN
-         READ(5,*) m
+         READ(stdin,*) m
          n=m
          p=1
          q=-p
       ELSE
-         READ(5,*) m, n, p, q
+         READ(stdin,*) m, n, p, q
       ENDIF
    CASE(4)
 !
@@ -173,10 +173,10 @@ SELECT CASE (ibrav_2d)
       WRITE(stdout,'("Nanowires of all types (m,n) are rectangular.")')
       WRITE(stdout,'("Rectangular? If .TRUE. then give m and n otherwise &
                  &give m n p q")')
-      READ(5,*) lrect
+      READ(stdin,*) lrect
       WRITE(stdout,*) lrect
       IF (lrect) THEN
-         READ(5,*) m,n
+         READ(stdin,*) m,n
          IF (n>0) THEN
             fact=DBLE(m) / DBLE(n)
             DO ip=1, ABS(n)
@@ -192,7 +192,7 @@ SELECT CASE (ibrav_2d)
            p=0
          END IF
       ELSE
-         READ(5,*) m, n, p, q
+         READ(stdin,*) m, n, p, q
       ENDIF
    CASE(5)
 !
@@ -201,17 +201,17 @@ SELECT CASE (ibrav_2d)
       WRITE(stdout,'("Nanowires of all types (m,n) are rectangular.")')
       WRITE(stdout,'("Rectangular? If .TRUE. then give m and n otherwise &
                  &give m n p q")')
-      READ(5,*) lrect
+      READ(stdin,*) lrect
       WRITE(stdout,*) lrect
       IF (lrect) THEN
-         READ(5,*) m,n
+         READ(stdin,*) m,n
          IF (2*n-m /= 0) THEN
             fact= DBLE( 2 * m - n ) / DBLE( 2 * n - m )
             p=0
             q=0
             DO ip=1, ABS(2*n-m)
                xq = - ip * fact
-               WRITE(6,*) ip, ABS(xq - NINT(xq)), NINT(xq)
+               WRITE(stdout,*) ip, ABS(xq - NINT(xq)), NINT(xq)
                IF (ABS(xq - NINT(xq)) < 1.d-10 ) THEN
                   p=ip
                   q=NINT(xq)
@@ -223,7 +223,7 @@ SELECT CASE (ibrav_2d)
            p=0
          END IF
       ELSE
-         READ(5,*) m, n, p, q
+         READ(stdin,*) m, n, p, q
       ENDIF
 END SELECT
 
@@ -233,7 +233,7 @@ IF (p==0.AND.q==0) THEN
 ENDIF
 
 WRITE(stdout,'("repeated units along z?")')
-READ(5,*) nz
+READ(stdin,*) nz
 
 IF (nz > 1) THEN
    p=p*nz
@@ -241,7 +241,7 @@ IF (nz > 1) THEN
 ENDIF
 
 WRITE(stdout,'("Output file name?")')
-READ(5,*) filename
+READ(stdin,*) filename
 
 pi=4.0_DP * atan(1.0_DP)
 CALL latgen_2d(ibrav_2d, celldm_2d, a1, a2)

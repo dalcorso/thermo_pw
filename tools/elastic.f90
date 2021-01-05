@@ -60,7 +60,7 @@ REAL(DP) :: el_compliances(6,6)  ! the elastic constants
 REAL(DP) :: density, omega, debye_t, approx_debye_t, poisson, bulkm, deltat
 REAL(DP) :: macro_el(8), vp, vb, vg, deb_e0
 INTEGER :: i, ntemp, iundeb, ios
-INTEGER :: find_free_unit
+INTEGER :: find_free_unit, stdin
 REAL(DP), ALLOCATABLE :: temp(:), deb_cv(:), deb_energy(:), &
                          deb_free_energy(:), deb_entropy(:)
 CHARACTER(LEN=9) :: code='elastic'
@@ -68,8 +68,9 @@ CHARACTER(LEN=9) :: code='elastic'
 CALL mp_startup ( start_images=.true. )
 CALL environment_start ( code )
 
+stdin=5
 WRITE(stdout,'(5x,"Bravais lattice index")') 
-READ(5,*) ibrav
+READ(stdin,*) ibrav
 
 el_con=0.0_DP
 IF (ibrav==1.OR.ibrav==2.OR.ibrav==3) THEN
@@ -77,11 +78,11 @@ IF (ibrav==1.OR.ibrav==2.OR.ibrav==3) THEN
 !  cubic
 !
    WRITE(stdout,'(5x,"C11?")')
-   READ(5,*) el_con(1,1)
+   READ(stdin,*) el_con(1,1)
    WRITE(stdout,'(5x,"C12?")')
-   READ(5,*) el_con(1,2)
+   READ(stdin,*) el_con(1,2)
    WRITE(stdout,'(5x,"C44?")')
-   READ(5,*) el_con(4,4)
+   READ(stdin,*) el_con(4,4)
    el_con(2,2)=el_con(1,1)
    el_con(3,3)=el_con(1,1)
    el_con(5,5)=el_con(4,4)
@@ -100,15 +101,15 @@ ELSEIF (ibrav==4) THEN
    laue=23
 
    WRITE(stdout,'(5x,"C11?")')
-   READ(5,*) el_con(1,1)
+   READ(stdin,*) el_con(1,1)
    WRITE(stdout,'(5x,"C12?")')
-   READ(5,*) el_con(1,2)
+   READ(stdin,*) el_con(1,2)
    WRITE(stdout,'(5x,"C13?")')
-   READ(5,*) el_con(1,3)
+   READ(stdin,*) el_con(1,3)
    WRITE(stdout,'(5x,"C33?")')
-   READ(5,*) el_con(3,3)
+   READ(stdin,*) el_con(3,3)
    WRITE(stdout,'(5x,"C44?")')
-   READ(5,*) el_con(4,4)
+   READ(stdin,*) el_con(4,4)
    
    el_con(2,2)=el_con(1,1)
    el_con(5,5)=el_con(4,4)
@@ -122,20 +123,20 @@ ELSEIF (ibrav==5) THEN
 !  trigonal
 !
    WRITE(stdout,'(5x,"laue class? (25 (D_3d) or 27 (S_6)) ")')
-   READ(5,*) laue
+   READ(stdin,*) laue
    IF (laue /= 25 .AND. laue /= 27) CALL errore('elastic','Wrong Laue class',1)
    WRITE(stdout,'(5x,"C11?")')
-   READ(5,*) el_con(1,1)
+   READ(stdin,*) el_con(1,1)
    WRITE(stdout,'(5x,"C12?")')
-   READ(5,*) el_con(1,2)
+   READ(stdin,*) el_con(1,2)
    WRITE(stdout,'(5x,"C13?")')
-   READ(5,*) el_con(1,3)
+   READ(stdin,*) el_con(1,3)
    WRITE(stdout,'(5x,"C14?")')
-   READ(5,*) el_con(1,4)
+   READ(stdin,*) el_con(1,4)
    WRITE(stdout,'(5x,"C33?")')
-   READ(5,*) el_con(3,3)
+   READ(stdin,*) el_con(3,3)
    WRITE(stdout,'(5x,"C44?")')
-   READ(5,*) el_con(4,4)
+   READ(stdin,*) el_con(4,4)
 
    el_con(2,2)=el_con(1,1)
    el_con(5,5)=el_con(4,4)
@@ -153,7 +154,7 @@ ELSEIF (ibrav==5) THEN
 
    IF (laue==27) THEN
       WRITE(stdout,'(5x,"C15?")')
-      READ(5,*) el_con(1,5)
+      READ(stdin,*) el_con(1,5)
       el_con(2,5)=-el_con(1,5)
       el_con(4,6)=-el_con(1,5)
       el_con(5,1)=el_con(1,5)
@@ -165,20 +166,20 @@ ELSEIF (ibrav==6 .OR. ibrav==7) THEN
 ! tetragonal
 !
    WRITE(stdout,'(5x,"laue class? (18 (C_4h) or 22 (D_2d)) ")')
-   READ(5,*) laue
+   READ(stdin,*) laue
    IF (laue /= 18 .AND. laue /= 22) CALL errore('elastic','Wrong Laue class',1)
    WRITE(stdout,'(5x,"C11?")')
-   READ(5,*) el_con(1,1)
+   READ(stdin,*) el_con(1,1)
    WRITE(stdout,'(5x,"C12?")')
-   READ(5,*) el_con(1,2)
+   READ(stdin,*) el_con(1,2)
    WRITE(stdout,'(5x,"C13?")')
-   READ(5,*) el_con(1,3)
+   READ(stdin,*) el_con(1,3)
    WRITE(stdout,'(5x,"C33?")')
-   READ(5,*) el_con(3,3)
+   READ(stdin,*) el_con(3,3)
    WRITE(stdout,'(5x,"C44?")')
-   READ(5,*) el_con(4,4)
+   READ(stdin,*) el_con(4,4)
    WRITE(stdout,'(5x,"C66?")')
-   READ(5,*) el_con(6,6)
+   READ(stdin,*) el_con(6,6)
 
    el_con(2,2)=el_con(1,1)
    el_con(5,5)=el_con(4,4)
@@ -189,7 +190,7 @@ ELSEIF (ibrav==6 .OR. ibrav==7) THEN
 
    IF (laue==22) THEN
       WRITE(stdout,'(5x,"C16?")')
-      READ(5,*) el_con(1,6)
+      READ(stdin,*) el_con(1,6)
       el_con(2,6)=-el_con(1,6)
       el_con(6,1)=el_con(1,6) 
       el_con(6,2)=el_con(2,6) 
@@ -201,23 +202,23 @@ ELSEIF (ibrav==8 .OR. ibrav==9 .OR. ibrav==10 .OR. ibrav==11) THEN
 !
    laue=20
    WRITE(stdout,'(5x,"C11?")')
-   READ(5,*) el_con(1,1)
+   READ(stdin,*) el_con(1,1)
    WRITE(stdout,'(5x,"C12?")')
-   READ(5,*) el_con(1,2)
+   READ(stdin,*) el_con(1,2)
    WRITE(stdout,'(5x,"C13?")')
-   READ(5,*) el_con(1,3)
+   READ(stdin,*) el_con(1,3)
    WRITE(stdout,'(5x,"C22?")')
-   READ(5,*) el_con(2,2)
+   READ(stdin,*) el_con(2,2)
    WRITE(stdout,'(5x,"C23?")')
-   READ(5,*) el_con(2,3)
+   READ(stdin,*) el_con(2,3)
    WRITE(stdout,'(5x,"C33?")')
-   READ(5,*) el_con(3,3)
+   READ(stdin,*) el_con(3,3)
    WRITE(stdout,'(5x,"C44?")')
-   READ(5,*) el_con(4,4)
+   READ(stdin,*) el_con(4,4)
    WRITE(stdout,'(5x,"C55?")')
-   READ(5,*) el_con(5,5)
+   READ(stdin,*) el_con(5,5)
    WRITE(stdout,'(5x,"C66?")')
-   READ(5,*) el_con(6,6)
+   READ(stdin,*) el_con(6,6)
 
    el_con(2,1)=el_con(1,2)
    el_con(3,1)=el_con(1,3)
@@ -228,31 +229,31 @@ ELSEIF (ibrav==12 .OR. ibrav==13) THEN
 !
    laue=16
    WRITE(stdout,'(5x,"C11?")')
-   READ(5,*) el_con(1,1)
+   READ(stdin,*) el_con(1,1)
    WRITE(stdout,'(5x,"C12?")')
-   READ(5,*) el_con(1,2)
+   READ(stdin,*) el_con(1,2)
    WRITE(stdout,'(5x,"C13?")')
-   READ(5,*) el_con(1,3)
+   READ(stdin,*) el_con(1,3)
    WRITE(stdout,'(5x,"C22?")')
-   READ(5,*) el_con(2,2)
+   READ(stdin,*) el_con(2,2)
    WRITE(stdout,'(5x,"C23?")')
-   READ(5,*) el_con(2,3)
+   READ(stdin,*) el_con(2,3)
    WRITE(stdout,'(5x,"C33?")')
-   READ(5,*) el_con(3,3)
+   READ(stdin,*) el_con(3,3)
    WRITE(stdout,'(5x,"C44?")')
-   READ(5,*) el_con(4,4)
+   READ(stdin,*) el_con(4,4)
    WRITE(stdout,'(5x,"C55?")')
-   READ(5,*) el_con(5,5)
+   READ(stdin,*) el_con(5,5)
    WRITE(stdout,'(5x,"C66?")')
-   READ(5,*) el_con(6,6)
+   READ(stdin,*) el_con(6,6)
    WRITE(stdout,'(5x,"C16?")')
-   READ(5,*) el_con(1,6)
+   READ(stdin,*) el_con(1,6)
    WRITE(stdout,'(5x,"C26?")')
-   READ(5,*) el_con(2,6)
+   READ(stdin,*) el_con(2,6)
    WRITE(stdout,'(5x,"C36?")')
-   READ(5,*) el_con(3,6)
+   READ(stdin,*) el_con(3,6)
    WRITE(stdout,'(5x,"C45?")')
-   READ(5,*) el_con(4,5)
+   READ(stdin,*) el_con(4,5)
 
    el_con(2,1)=el_con(1,2)
    el_con(3,1)=el_con(1,3)
@@ -270,31 +271,31 @@ ELSEIF (ibrav==-12 .OR. ibrav==-13) THEN
 !
    laue=16
    WRITE(stdout,'(5x,"C11?")')
-   READ(5,*) el_con(1,1)
+   READ(stdin,*) el_con(1,1)
    WRITE(stdout,'(5x,"C12?")')
-   READ(5,*) el_con(1,2)
+   READ(stdin,*) el_con(1,2)
    WRITE(stdout,'(5x,"C13?")')
-   READ(5,*) el_con(1,3)
+   READ(stdin,*) el_con(1,3)
    WRITE(stdout,'(5x,"C22?")')
-   READ(5,*) el_con(2,2)
+   READ(stdin,*) el_con(2,2)
    WRITE(stdout,'(5x,"C23?")')
-   READ(5,*) el_con(2,3)
+   READ(stdin,*) el_con(2,3)
    WRITE(stdout,'(5x,"C33?")')
-   READ(5,*) el_con(3,3)
+   READ(stdin,*) el_con(3,3)
    WRITE(stdout,'(5x,"C44?")')
-   READ(5,*) el_con(4,4)
+   READ(stdin,*) el_con(4,4)
    WRITE(stdout,'(5x,"C55?")')
-   READ(5,*) el_con(5,5)
+   READ(stdin,*) el_con(5,5)
    WRITE(stdout,'(5x,"C66?")')
-   READ(5,*) el_con(6,6)
+   READ(stdin,*) el_con(6,6)
    WRITE(stdout,'(5x,"C15?")')
-   READ(5,*) el_con(1,5)
+   READ(stdin,*) el_con(1,5)
    WRITE(stdout,'(5x,"C25?")')
-   READ(5,*) el_con(2,5)
+   READ(stdin,*) el_con(2,5)
    WRITE(stdout,'(5x,"C35?")')
-   READ(5,*) el_con(3,5)
+   READ(stdin,*) el_con(3,5)
    WRITE(stdout,'(5x,"C46?")')
-   READ(5,*) el_con(4,6)
+   READ(stdin,*) el_con(4,6)
 
    el_con(2,1)=el_con(1,2)
    el_con(3,1)=el_con(1,3)
@@ -311,47 +312,47 @@ ELSEIF (ibrav==14) THEN
 !
    laue=2
    WRITE(stdout,'(5x,"C11?")')
-   READ(5,*) el_con(1,1)
+   READ(stdin,*) el_con(1,1)
    WRITE(stdout,'(5x,"C12?")')
-   READ(5,*) el_con(1,2)
+   READ(stdin,*) el_con(1,2)
    WRITE(stdout,'(5x,"C13?")')
-   READ(5,*) el_con(1,3)
+   READ(stdin,*) el_con(1,3)
    WRITE(stdout,'(5x,"C22?")')
-   READ(5,*) el_con(2,2)
+   READ(stdin,*) el_con(2,2)
    WRITE(stdout,'(5x,"C23?")')
-   READ(5,*) el_con(2,3)
+   READ(stdin,*) el_con(2,3)
    WRITE(stdout,'(5x,"C33?")')
-   READ(5,*) el_con(3,3)
+   READ(stdin,*) el_con(3,3)
    WRITE(stdout,'(5x,"C44?")')
-   READ(5,*) el_con(4,4)
+   READ(stdin,*) el_con(4,4)
    WRITE(stdout,'(5x,"C55?")')
-   READ(5,*) el_con(5,5)
+   READ(stdin,*) el_con(5,5)
    WRITE(stdout,'(5x,"C66?")')
-   READ(5,*) el_con(6,6)
+   READ(stdin,*) el_con(6,6)
    WRITE(stdout,'(5x,"C14?")')
-   READ(5,*) el_con(1,4)
+   READ(stdin,*) el_con(1,4)
    WRITE(stdout,'(5x,"C15?")')
-   READ(5,*) el_con(1,5)
+   READ(stdin,*) el_con(1,5)
    WRITE(stdout,'(5x,"C16?")')
-   READ(5,*) el_con(1,6)
+   READ(stdin,*) el_con(1,6)
    WRITE(stdout,'(5x,"C24?")')
-   READ(5,*) el_con(2,4)
+   READ(stdin,*) el_con(2,4)
    WRITE(stdout,'(5x,"C25?")')
-   READ(5,*) el_con(2,5)
+   READ(stdin,*) el_con(2,5)
    WRITE(stdout,'(5x,"C26?")')
-   READ(5,*) el_con(2,6)
+   READ(stdin,*) el_con(2,6)
    WRITE(stdout,'(5x,"C34?")')
-   READ(5,*) el_con(3,4)
+   READ(stdin,*) el_con(3,4)
    WRITE(stdout,'(5x,"C35?")')
-   READ(5,*) el_con(3,5)
+   READ(stdin,*) el_con(3,5)
    WRITE(stdout,'(5x,"C36?")')
-   READ(5,*) el_con(3,6)
+   READ(stdin,*) el_con(3,6)
    WRITE(stdout,'(5x,"C45?")')
-   READ(5,*) el_con(4,5)
+   READ(stdin,*) el_con(4,5)
    WRITE(stdout,'(5x,"C46?")')
-   READ(5,*) el_con(4,6)
+   READ(stdin,*) el_con(4,6)
    WRITE(stdout,'(5x,"C56?")')
-   READ(5,*) el_con(5,6)
+   READ(stdin,*) el_con(5,6)
 
    el_con(2,1)=el_con(1,2)
    el_con(3,1)=el_con(1,3)
@@ -378,13 +379,13 @@ ELSE
 ENDIF
 
 WRITE(stdout,'(5x,"Density (kg/m^3)?")')
-READ(5,*) density
+READ(stdin,*) density
 IF (density > 0.0_DP) THEN
    WRITE(stdout,'(5x,"Number of atoms per cell?")')
-   READ(5,*) nat
+   READ(stdin,*) nat
    IF (nat>0) THEN
       WRITE(stdout,'(5x,"Volume per cell?")')
-      READ(5,*) omega
+      READ(stdin,*) omega
    END IF
 END IF
 

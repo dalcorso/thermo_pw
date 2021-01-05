@@ -54,16 +54,17 @@ INTEGER :: nat
 REAL(DP) :: a(3), rot(3,3), tensor1(3), tensor2(3,3), tensor3(3,3,3),  &
             tensor4(3,3,3,3), rtensor1(3), rtensor2(3,3), rtensor3(3,3,3), &
             rtensor4(3,3,3,3), tensor3v(3,6), tensor4v(6,6)
-INTEGER :: na, ipol, jpol, rank
+INTEGER :: na, ipol, jpol, rank, stdin
 
 CHARACTER(LEN=9) :: code='r_tensor' 
 
 CALL mp_startup ( start_images=.true. )
 CALL environment_start ( code )
 
+stdin=5
 WRITE(stdout,'(5x,"Rotation matrix?")') 
 DO ipol=1,3
-   READ(5,*) (rot(ipol,jpol), jpol=1,3)
+   READ(stdin,*) (rot(ipol,jpol), jpol=1,3)
    WRITE(stdout,'(3f15.8)') (rot(ipol,jpol), jpol=1,3)
 ENDDO
 
@@ -72,29 +73,29 @@ IF (.NOT.is_rotation(rot)) THEN
 END IF
 
 WRITE(stdout,'(5x,"Rank of the tensor")')
-READ(5,*) rank
+READ(stdin,*) rank
 WRITE(stdout,'(i5)') rank
 
 IF (rank==1) THEN
    WRITE(stdout,'(5x,"Enter the tensor components")')
-   READ(5,*) (tensor1(ipol), ipol=1,3)
+   READ(stdin,*) (tensor1(ipol), ipol=1,3)
    WRITE(stdout,'(3f15.8)') (tensor1(ipol), ipol=1,3)
 ELSEIF (rank==2) THEN
    WRITE(stdout,'(5x,"Enter the tensor components")')
    DO ipol=1,3
-      READ(5,*) (tensor2(ipol, jpol), jpol=1,3)
+      READ(stdin,*) (tensor2(ipol, jpol), jpol=1,3)
       WRITE(stdout,'(3f15.8)') (tensor2(ipol,jpol), jpol=1,3)
    ENDDO
 ELSEIF (rank==3) THEN
    WRITE(stdout,'(5x,"Enter the tensor components")')
    DO ipol=1,3
-      READ(5,*) (tensor3v(ipol, jpol), jpol=1,6)
+      READ(stdin,*) (tensor3v(ipol, jpol), jpol=1,6)
       WRITE(stdout,'(6f12.8)') (tensor3v(ipol,jpol), jpol=1,6)
    ENDDO
 ELSEIF (rank==4) THEN
    WRITE(stdout,'(5x,"Enter the tensor components")')
    DO ipol=1,6
-      READ(5,*) (tensor4v(ipol, jpol), jpol=1,6)
+      READ(stdin,*) (tensor4v(ipol, jpol), jpol=1,6)
       WRITE(stdout,'(6f12.5)') (tensor4v(ipol,jpol), jpol=1,6)
    ENDDO
 ENDIF

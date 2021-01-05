@@ -82,6 +82,7 @@ COMPLEX(DP) :: a, b
 REAL(DP) :: psi, theta, phi, arg
 INTEGER :: work_choice, isym, jsym, start, last, nsym, ntables, itables, &
            group_index_ext
+INTEGER :: stdin
 INTEGER :: prd(48,48), epos(48,48), group_desc(48)
 
 
@@ -93,7 +94,8 @@ WRITE(stdout,'(5x,"1) Write Kovalev symmetry operations list")')
 !WRITE(stdout,'(5x,"3) Write Kovalev hexagonal product table")')
 !WRITE(stdout,'(5x,"4) Write Kovalev su2 matrices")')
 
-READ(5,*) work_choice
+stdin=5
+READ(stdin,*) work_choice
 
 
 IF (work_choice == 1 ) THEN
@@ -336,7 +338,7 @@ SUBROUTINE set_sym_su2_kov(sym_num, smat, sinv)
 
  DO ksym=1,64
     CALL set_sym_su2_kov(ksym, group_mat(1,1,ksym), sinv(ksym))
-!    WRITE(6,*) 'ksym', ksym, group_desc(ksym)
+!    WRITE(stdout,*) 'ksym', ksym, group_desc(ksym)
  ENDDO
 
  a_mat(:,:)=group_mat(:,:,isym)

@@ -53,7 +53,7 @@ CHARACTER(LEN=256) :: flgnuplot, gnuplot_command
 LOGICAL :: lgnuplot
 CHARACTER(LEN=20) :: color
 REAL(DP) :: x(4), y(4), xmin, xmax, ymin, ymax, deltax, xm
-INTEGER  :: icolor, system
+INTEGER  :: icolor, system, stdin
 CHARACTER(LEN=9) :: code='test_colors'
 
 CALL mp_startup ( start_images=.true. )
@@ -64,6 +64,7 @@ IF ( my_image_id /= root_image ) GOTO 100
 lgnuplot=.TRUE.
 gnuplot_command='gnuplot'
 flgnuplot='color.gnu'
+stdin=5
 
 IF (ionode) THEN
    WRITE(stdout,'(/,5x,"1) Base colors ")')
@@ -77,7 +78,7 @@ IF (ionode) THEN
    WRITE(stdout,'(5x,"9) Grays ")')
    WRITE(stdout,'(5x,"10) All colors ")')
    WRITE(stdout,'(/,5x,"Your choice? ")')
-   READ(5,*) icolor
+   READ(stdin,*) icolor
 ENDIF
 gnu_filename=TRIM(flgnuplot)
 CALL gnuplot_start(gnu_filename)

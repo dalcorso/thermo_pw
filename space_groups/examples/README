@@ -63,6 +63,8 @@ it in the thermo_pw-forum mailing list. Cut-off energies, k-points, and
 smearing are completely untested and should be tested before using these 
 input for realistic calculations.
 
-NB: These examples requires the pseudopotentials of pslibrary.1.0.0. 
+NB: These examples requires the LDA pseudopotentials of pslibrary.1.0.0
+(see https://github.com/dalcorso/pslibrary).
 You need to install the library and to change the PSEUDO_DIR variable in
-the environment_variables file.
+the environment_variables file of QE to point to 
+pslibrary.1.0.0/pz/PSEUDOPOTENTIALS.

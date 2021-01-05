@@ -18,10 +18,12 @@ MODULE optical_module
 !                           real and imaginary part of the dielectric constant
 !  compute_lambda     that receives the energy of the photon in Ry and
 !                     gives the wavelength in nanometers
-!  compute_omega      that receives the wavelength of the photon in nanometers
+!  compute_energy     that receives the wavelength of the photon in nanometers
 !                     and gives the energy in Ry
-!  compute_frequency  that receives the energy of the photon in eV and
+!  compute_frequency  that receives the energy of the photon in Ry and
 !                     computes its frequency in Hz
+!  compute_energy_hz  that receives the frequency of the photon in Hz and
+!                     computes its energy in Ry
 !  compute_alpha      receives the real part of the frequency in Ry, the 
 !                     imaginary part of the refractive index and gives the
 !                     absorption coefficient in cm^-1
@@ -36,7 +38,8 @@ MODULE optical_module
   SAVE
 
   PUBLIC compute_refractive_index, compute_complex_epsilon, compute_lambda, &
-         compute_frequency, compute_energy, compute_reflectivity, compute_alpha
+         compute_frequency, compute_energy, compute_energy_hz, &
+         compute_reflectivity, compute_alpha
 
 CONTAINS
 !
@@ -186,5 +189,25 @@ freq_out = freq_in * rydberg_si / h_planck_si
 
 RETURN
 END SUBROUTINE compute_frequency
+
+!--------------------------------------------------------------------
+SUBROUTINE compute_energy_hz(freq_in, energy_out)
+!--------------------------------------------------------------------
+!
+!  Receives the frequency in Hz and, as output, gives the energy of the
+!  phonon in Ry.
+!  freq_in multiplied h_planck_si is energy_out in Joule. 
+!  Dividing by rydberg_si we obtain the energy_out in Ry.
+!
+USE constants, ONLY : h_planck_si, rydberg_si
+IMPLICIT NONE
+
+REAL(DP), INTENT(IN)  :: freq_in
+REAL(DP), INTENT(OUT) :: energy_out
+
+energy_out = freq_in * h_planck_si / rydberg_si 
+
+RETURN
+END SUBROUTINE compute_energy_hz
 
 END MODULE optical_module

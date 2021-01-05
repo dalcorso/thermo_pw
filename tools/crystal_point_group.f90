@@ -37,6 +37,7 @@ INTEGER :: i, j, k, l, m, n, iepos, ksym, iclass, ielem, giin_ext, giout_ext
 INTEGER :: nclasses, nelem(24), elem(18,24), has_e(18,24)
 INTEGER :: group_index_a_ext, group_index_b_ext, group_index_c_ext, nrap, &
            nrap_gp, irap, ndim, ncount, subwork_choice
+INTEGER :: stdin
 INTEGER, ALLOCATABLE :: rap_list(:)
 CHARACTER(LEN=45) :: name_rap(48)
 CHARACTER(LEN=45), ALLOCATABLE :: name_rap_list(:)
@@ -48,6 +49,7 @@ COMPLEX(DP) :: cmat(2,2), character_rap(48), char_mat_proj(48,48)
 CALL mp_startup ( start_images=.true. )
 CALL environment_start ( code )
 
+stdin=5
 WRITE(stdout,'(/,5x,"Choose what to write")')
 WRITE(stdout,'(5x,"1) List the point groups (short)")')
 WRITE(stdout,'(5x,"2) List the symmetry operations")')
@@ -69,7 +71,7 @@ WRITE(stdout,'(5x,"17) List conjugate groups")')
 WRITE(stdout,'(5x,"18) Find intersection between two groups")')
 
 
-READ(5,*) work_choice
+READ(stdin,*) work_choice
 
 IF (work_choice == 1) THEN
    WRITE(stdout,*)
@@ -91,7 +93,7 @@ ELSEIF (work_choice == 2) THEN
 ELSEIF (work_choice == 3) THEN
    WRITE(stdout,'(5x,"Give the number of the two rotations &
                                      &(point 2 gives the list)")')
-   READ(5,*) isym, jsym
+   READ(stdin,*) isym, jsym
    CALL product_sym_su2(isym,jsym,ksym,iepos)
    CALL set_sym_o3(mat, ksym)
    CALL set_sym_su2(ksym,cmat,linvs)
@@ -281,7 +283,7 @@ ELSEIF (work_choice == 16) THEN
                                                &chi and D(1/2)(+)")')
    WRITE(stdout,'(5x,"7) Decompose the product of the group representations &
                                                &chi and D(j)(+-)")')
-   READ(5,*) subwork_choice 
+   READ(stdin,*) subwork_choice 
    IF (subwork_choice ==1 .OR. subwork_choice==2) THEN
       CALL read_group_index(group_desc,nsym,group_index_in_ext)
       CALL read_group_index(group_desc,nsym,group_index_out_ext)
@@ -366,10 +368,10 @@ ELSEIF (work_choice == 16) THEN
 
       WRITE(stdout,'(5x,"Angular momentum j (0, 1, 2, 3, ... for s,p,d,f... &
              or 0.5, 1.5, 2.5, ...) ?")')
-      READ(5,*) jang
+      READ(stdin,*) jang
 
       WRITE(stdout,'(/,5x,"Parity of D(j): + or - ?")') 
-      READ(5,*) chparity
+      READ(stdin,*) chparity
       do_parity=.FALSE.
       IF (chparity=='-') do_parity=.TRUE.
 
@@ -411,15 +413,15 @@ ELSEIF (work_choice == 16) THEN
       IF (subwork_choice==7) THEN
          WRITE(stdout,'(/,5x,"Point group (1) or double point group (-1) &
                                                       &representations?")')
-         READ(5,*) ptype1(1)
+         READ(stdin,*) ptype1(1)
          IF (ptype1(1)/=1.AND.ptype1(1)/=-1) ptype1(1)=1
 
          WRITE(stdout,'(5x,"Angular momentum j (0, 1, 2, 3, ... for s,p,d,f... &
              or 0.5, 1.5, 2.5, ...) ?")')
-         READ(5,*) jang
+         READ(stdin,*) jang
 
          WRITE(stdout,'(5x,"Parity of D(j): + or - ?")')
-         READ(5,*) chparity
+         READ(stdin,*) chparity
          do_parity=.FALSE.
          IF (chparity=='-') do_parity=.TRUE.
       ELSE
@@ -516,10 +518,13 @@ IMPLICIT NONE
 INTEGER :: group_index_ext, nsym
 INTEGER :: group_desc(48)
 INTEGER :: isym 
+INTEGER :: stdin
 CHARACTER(LEN=11) :: group_name
+
+stdin=5
 WRITE(stdout,'(/,5x,"Extended point group code (1-136) (see the list using 4)?")')
 
-READ(5,*) group_index_ext
+READ(stdin,*) group_index_ext
 CALL set_group_desc(group_desc,nsym,group_index_ext)
 
 WRITE(stdout,'(/,5x,"Group number",i5,3x,a11)') group_index_ext, &

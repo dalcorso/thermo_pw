@@ -38,21 +38,22 @@ REAL(DP) :: celldm(6), celldm2(6), at(3,3), at1(3,3), at2(3,3), at3(3,3),   &
             maxdiff
 LOGICAL :: equivalent, lsame
 INTEGER :: ibrav, ibrav_output, ibrav_output2, ipol, ivec, jvec, jpol,      &
-           group_code, nsym, work_choice, code_group_ext
+           group_code, nsym, work_choice, code_group_ext, stdin
 
 CALL mp_startup (start_images=.TRUE.)
 CALL environment_start(code)
 
+stdin=5
 WRITE(stdout,'(/,5x,"Choose what to do")')
 WRITE(stdout,'(5x,"1) Identify the Bravais lattice")')
 WRITE(stdout,'(5x,"2) Compare two Bravais lattices")')
 
-READ(5,*) work_choice
+READ(stdin,*) work_choice
 
 IF (work_choice==1) THEN
    WRITE(stdout,'(5x,"Input at? ")')
    DO ivec=1,3
-      READ(5,*) (at(ipol,ivec),ipol=1,3)
+      READ(stdin,*) (at(ipol,ivec),ipol=1,3)
    END DO
 
    code_group_ext=0
@@ -88,18 +89,18 @@ IF (work_choice==1) THEN
 
 ELSEIF (work_choice==2) THEN
    WRITE(stdout,'(5x,"celldm(1) (set to 1.0 to use the at1)")')
-   READ(5,*) celldm(1)
+   READ(stdin,*) celldm(1)
    WRITE(stdout,'(5x,"Input at? ")')
    DO ivec=1,3
-      READ(5,*) (at(ipol,ivec),ipol=1,3)
+      READ(stdin,*) (at(ipol,ivec),ipol=1,3)
    END DO
    at=at * celldm(1)
 
    WRITE(stdout,'(5x,"celldm(1) (set to 1.0 to use the at2)")')
-   READ(5,*) celldm2(1)
+   READ(stdin,*) celldm2(1)
    WRITE(stdout,'(5x,"Input at2? ")')
    DO ivec=1,3
-      READ(5,*) (at2(ipol,ivec),ipol=1,3)
+      READ(stdin,*) (at2(ipol,ivec),ipol=1,3)
    END DO
    at2 = at2 * celldm2(1)
 
