@@ -88,7 +88,7 @@ requires mainly five information:
 
 \item The cut-off energies.
 
-\item The {\bf k}-point mesh used to make integrations over
+\item The {\bf k}-point mesh used to make integration over
 the Brillouin zone. The smearing parameter for metals. 
 \end{itemize}
 
@@ -448,6 +448,42 @@ Please keep the default value of \texttt{deltae} or the electronic
 thermodynamic properties could be wrong at low temperatures.
 
 \newpage
+\section{\color{coral}How do I calculate the thermal expansion of a metal
+accounting for the free energy due to the electronic excitations?}
+This is a two step calculations. First use \texttt{what='mur\_lc'} and
+the flag \texttt{lel\_free\_energy=.TRUE.} to write on files the
+electronic thermodynamic properties for each geometry used by
+\texttt{what='mur\_lc'}. Then copy the files with
+the electronic thermodynamic properties in the  
+\texttt{therm\_files} directory and run \tpw\ with \texttt{what='mur\_lc\_t'}
+and the flag \texttt{lel\_free\_energy=.TRUE.}. The electronic free energy
+is read from files and added to the vibrational free energy before computing
+the equilibrium crystal structure.
+See \texttt{example24} for this case. 
+
+\newpage
+\section{\color{coral}How do I calculate the elastic constants of a metal
+accounting for the free energy due to the electronic excitations?}
+This is a four step procedure. First use \texttt{what='mur\_lc'} and
+the flag \texttt{lel\_free\_energy=.TRUE.} as in the previous point
+in order to get the electronic thermodynamic properties for all the 
+unperturbed geometries. Then use \texttt{what='elastic\_constant\_t'}
+with the flag \texttt{lel\_free\_energy=.TRUE.} and the flag
+\texttt{use\_free\_energy=.FALSE.} to write on file the electronic
+thermodynamic properties for all strained geometries. Then use
+\texttt{what='elastic\_constant\_t'} with \texttt{lel\_free\_energy=.TRUE.}
+and \texttt{use\_free\_energy=.TRUE.} after copying the electronic
+thermodynamic properties obtained at previous point in the 
+\texttt{therm\_files} directory, so the 
+free energy derived in this step to obtain the elastic constants 
+has also the electronic contribution. 
+Finally use \texttt{what='mur\_lc\_t'} with \texttt{lel\_free\_energy=.TRUE.}
+and \texttt{use\_free\_energy=.TRUE.} after copying the elastic
+constants obtained at previous step in the \texttt{anhar\_files} directory
+and the electronic thermodynamic properties obtained in the first 
+step in the \texttt{therm\_files} directory.
+
+\newpage
 \section{\color{coral}How do I calculate the frequency dependent dielectric
 constant of a material?}
 Use \texttt{what='scf\_ph'}. See \texttt{example16} and \texttt{example20}. 
@@ -458,6 +494,16 @@ The dielectric constant is in the file \texttt{output\_epsilon.ps}.
 Note that for metals you need to specify a finite wave-vector {\bf q} and you 
 cannot plot the dielectric constant when {\bf q} is the $\Gamma$ point.  
 See \texttt{example17} and \texttt{example21} for this case. 
+
+\newpage
+\section{\color{coral}How do I calculate the frequency dependent 
+reflectivity of a material?}
+The calculation of this quantity is implemented only for isotropic 
+(cubic) solids. It is plotted together with the frequency dependent 
+dielectric constant in insulating cubic solids when {\bf q} is 
+the $\Gamma$ point. In this case the code plots also the 
+absorption coefficient. Both quantities can be plotted as a function of
+the frequency or of the wavelength.
 
 \newpage
 \section{\color{coral} Which is the meaning of the colors in

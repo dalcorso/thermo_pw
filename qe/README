@@ -1,5 +1,5 @@
-This directory contains routines of Quantum ESPRESSO that need to be modified 
-to be used in thermo_pw and new routines that add new capabilities to
+This directory contains routines of Quantum ESPRESSO that are modified 
+in thermo_pw and new routines that add new capabilities to
 QE. The name of the files with the QE routines remain unchanged but the 
 actual routine inside the file has the _tpw extension.
 
@@ -29,7 +29,6 @@ solve_linter_tpw: contains a call to asyn_master to have the master check for
 
 phqscf_tpw : call solve_linter_tpw instead of solve_linter. Uses the new
             logic of the effective charges. Call do_cg_ph if lcg is .TRUE..
-            call drhodv_tpw.
 
 prepare_q_tpw: use the variable tcollect_all to avoid the calculation of
             the bands in the final run that collects all the dynamical 
@@ -136,8 +135,6 @@ rotate_and_add_dyn.f90 : generalized to deal with t_rev symmetry
 q2qstar_ph.f90 : call rotate_and_add_dyn_tpw
 
 set_kplusq_nc.f90 : generalized to deal with t_rev symmetry
-
-drhodv.f90 : generalized to the noncollinear magnetic case.
 
 drhodvnl.f90 : generalized to the noncollinear magnetic case.
 
