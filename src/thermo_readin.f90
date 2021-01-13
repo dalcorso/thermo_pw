@@ -394,7 +394,7 @@ SUBROUTINE thermo_readin()
   fcfact=100.0_DP
   fc_red=1.0_DP
   fc_green=1.0_DP
-  fc_blue=0.0_DP
+  fc_blue=0.5_DP
   fc_transparency=15
 
   lambda=0.0_DP

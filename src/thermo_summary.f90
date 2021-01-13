@@ -490,7 +490,8 @@ WRITE(stdout,'(5x,70("-"))')
      IF ( my_image_id==root_image ) THEN
 
         CALL plot_2d_bz(ibrav, celldm, at, bg, xqaux, wqaux, nqaux, &
-             letter, letter_path, npk_label, label_list, asy_filename)
+             letter, letter_path, npk_label, label_list, asy_filename,&
+                                                         freecadfile)
 
         IF (lasymptote.AND.ionode) &
            ierr=system(TRIM(asymptote_command)//' '//TRIM(asy_filename))

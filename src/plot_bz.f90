@@ -32,8 +32,8 @@ SUBROUTINE plot_bz(ibrav, celldm, at, bg, point_type, &
 !
 USE kinds, ONLY : DP
 USE bz_form, ONLY : bz, init_bz, allocate_bz, find_letter_coordinate, &
-                    find_bz_type, set_label_type
-USE bz_asy_mod, ONLY : bz_asy, allocate_bz_asy, init_bz_asy
+                    find_bz_type, set_label_type, deallocate_bz
+USE bz_asy_mod, ONLY : bz_asy, allocate_bz_asy, init_bz_asy, deallocate_bz_asy
 USE control_paths, ONLY : npx
 USE io_global, ONLY : stdout
 IMPLICIT NONE
@@ -71,7 +71,11 @@ CALL generate_asy_figure(xk, wk, npkt, letter, letter_path, npk_label, &
                         label_list, bz_struc, bz_asy_struc, asy_filename)
 CALL generate_freecad_figure(xk, wk, npkt, letter, letter_path, npk_label, &
                         label_list, bz_struc, bz_asy_struc, freecadfile)
-
+!
+!  deallocate the variables that define the bz and its asy script
+!
+CALL deallocate_bz_asy(bz_asy_struc)
+CALL deallocate_bz(bz_struc)
 RETURN
 END SUBROUTINE plot_bz
 
@@ -171,7 +175,7 @@ USE freecad, ONLY : freecad_writepoint, freecad_openplot, freecad_closeplot,  &
                     freecad_writesurface, freecad_createsolid, &
                     freecad_centerview, freecad_setcolor, freecad_plotaxis,   &
                     freecad_createpdf, freecad_join, freecad_putlabel,        &
-                    freecad_setfcfact
+                    freecad_setfcfact, freecad_isoview, freecad_setfontsize
 USE bz_form, ONLY : bz, find_letter_coordinate
 USE bz_asy_mod, ONLY : bz_asy, find_letter_position
 USE control_paths, ONLY : q_in_band_form 
@@ -184,25 +188,27 @@ INTEGER, INTENT(IN) :: label_list(npk_label), wk(npkt)
 REAL(DP), INTENT(INOUT) :: xk(3,npkt)
 TYPE(bz), INTENT(IN) :: bz_struc
 TYPE(bz_asy) :: bz_asy_struc
+CHARACTER(LEN=3) :: al
 CHARACTER(LEN=*), INTENT(IN) :: freecadfile
 
 INTEGER :: i, ik
 CHARACTER(LEN=6) :: int_to_char
-CHARACTER(LEN=7) :: label
 CHARACTER(LEN=3) :: let_pos
-REAL(DP) :: x0(3), vect(3), ak(3), xk1(3), xmod, xmod1
+REAL(DP) :: x0(3), vect(3), ak(3), xk1(3), rgb(3), xmod, xmod1, maxdx
 REAL(DP) :: letter_coordinates(3)
 
 CALL freecad_openplot(freecadfile)
 CALL freecad_setfcfact(fcfact)
+maxdx=MAX(bz_struc%xi(1), bz_struc%xi(2))
+maxdx=MAX(maxdx, bz_struc%xi(3))
+CALL freecad_setfontsize(0.50_DP*maxdx)
 
 DO i=1,bz_struc%nvertices
-!   label="Point"//TRIM(int_to_char(i))
    CALL freecad_writepoint(bz_struc%vertex_coord(:,i),i)
 ENDDO
 
 DO i=1,bz_struc%nfaces
-!   IF (bz_asy_struc%visible(i)) CALL asy_writesurface(bz_struc%indsur(:,i))
+!   IF (bz_asy_struc%visible(i)) CALL freecad_writesurface(bz_struc%indsur(:,i),i)
    CALL freecad_writesurface(bz_struc%indsur(:,i),i)
 ENDDO
 CALL freecad_createsolid(bz_struc%nfaces)
@@ -222,28 +228,34 @@ DO i = 1, npk_label
    xk(:,label_list(i))=letter_coordinates
    CALL find_letter_position(bz_struc, bz_asy_struc, letter(i), let_pos)
    CALL freecad_putlabel(letter_path(label_list(i)), letter_coordinates, &
-                                                     let_pos)
+                                                     let_pos, .FALSE.)
 END DO
 
+rgb=0.0_DP
+rgb(1)=1.0_DP
 DO ik=2, npkt
-   CALL freecad_join(xk(:,ik), xk(:,ik-1))
+   CALL freecad_join(xk(:,ik), xk(:,ik-1), rgb, al)
 ENDDO
 !
-!IF (.NOT.q_in_band_form) THEN
-!   DO ik=1, npkt
-!      IF (letter_path(ik) /= '') THEN
-!         CALL find_letter_position(bz_struc, bz_asy_struc, letter_path(ik), &
-!                                   let_pos)
-!         CALL asy_putlabel(letter_path(ik), xk(:,ik), let_pos)
-!      END IF
-!   END DO
-!END IF
+IF (.NOT.q_in_band_form) THEN
+   DO ik=1, npkt
+      IF (letter_path(ik) /= '') THEN
+         CALL find_letter_position(bz_struc, bz_asy_struc, letter_path(ik), &
+                                   let_pos)
+         CALL freecad_putlabel(letter_path(ik), xk(:,ik), let_pos, .FALSE.)
+      END IF
+   END DO
+END IF
 !
 !   The default BZ color will be yellow  (1.0, 1.0, 0.0)
 !
-CALL freecad_setcolor(fc_red, fc_green, fc_blue, fc_transparency)
+rgb(1)=fc_red
+rgb(2)=fc_green
+rgb(3)=fc_blue
+CALL freecad_setcolor('Solid', rgb, fc_transparency)
 CALL freecad_centerview()
-CALL freecad_createpdf('Brillouin.pdf')
+CALL freecad_isoview()
+!CALL freecad_createpdf('Brillouin.pdf')
 CALL freecad_closeplot()
 
 RETURN

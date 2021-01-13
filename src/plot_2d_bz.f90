@@ -6,7 +6,7 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !--------------------------------------------------------------------------
 SUBROUTINE plot_2d_bz(ibrav, celldm, at, bg, xk, wk, npkt, letter, &
-                      letter_path, npk_label, label_list, asy_filename)
+           letter_path, npk_label, label_list, asy_filename,freecadfile)
 !--------------------------------------------------------------------------
 !
 !  This subroutine plots the BZ of a given solid. It
@@ -27,9 +27,10 @@ SUBROUTINE plot_2d_bz(ibrav, celldm, at, bg, xk, wk, npkt, letter, &
 !
 !
 USE kinds, ONLY : DP
-USE bz_2d_form, ONLY : bz_2d, init_2d_bz, allocate_2d_bz, find_2d_bz_type
-!USE bz, ONLY : find_letter_coordinate
-USE bz_asy_mod, ONLY : bz_asy, allocate_2d_bz_asy, init_2d_bz_asy
+USE bz_2d_form, ONLY : bz_2d, init_2d_bz, allocate_2d_bz, find_2d_bz_type, &
+                       deallocate_2d_bz
+USE bz_asy_mod, ONLY : bz_asy, allocate_2d_bz_asy, init_2d_bz_asy, &
+                       deallocate_bz_asy
 USE control_paths, ONLY : npx
 USE io_global, ONLY : stdout
 IMPLICIT NONE
@@ -39,7 +40,7 @@ REAL(DP), INTENT(INOUT) :: xk(3,npkt)
 INTEGER, INTENT(IN) :: label_list(npk_label), wk(npkt) 
 CHARACTER(LEN=3),INTENT(IN) :: letter(npk_label), letter_path(npk_label)
 INTEGER, INTENT(IN) :: ibrav
-CHARACTER(LEN=*), INTENT(IN) :: asy_filename
+CHARACTER(LEN=*), INTENT(IN) :: asy_filename, freecadfile
 INTEGER :: ik
 REAL(DP) :: celldm_2d(3)
 TYPE(bz_2d) :: bz_2d_struc
@@ -60,7 +61,11 @@ CALL allocate_2d_bz_asy(bz_2d_struc, bz_asy_struc )
 CALL init_2d_bz_asy(bz_2d_struc, bz_asy_struc, ibz, celldm_2d)
 CALL generate_2d_asy_figure(xk, wk, npkt, letter, letter_path, npk_label, &
                         label_list, bz_2d_struc, bz_asy_struc, asy_filename)
+CALL generate_2d_freecad_figure(xk, wk, npkt, letter, letter_path, npk_label, &
+                        label_list, bz_2d_struc, bz_asy_struc, freecadfile)
 
+CALL deallocate_bz_asy(bz_asy_struc)
+CALL deallocate_2d_bz(bz_2d_struc)
 RETURN
 END SUBROUTINE plot_2d_bz
 
@@ -76,7 +81,7 @@ SUBROUTINE generate_2d_asy_figure(xk, wk, npkt, letter, letter_path, &
 USE kinds, ONLY : DP
 USE asy, ONLY : asy_open2dplot, asy_closeplot, asy_write_2d_point, &
                 asy_writesurface, asy_2d_join, asy_put2dlabel, &
-                asy_write_2d_surface
+                asy_write_2d_surface, asy_2d_plotaxis
 USE bz_2d_form, ONLY : bz_2d, find_2d_letter_coordinate
 USE bz_asy_mod, ONLY : bz_asy, find_2d_letter_position
 USE control_paths, ONLY : q_in_band_form 
@@ -94,7 +99,7 @@ INTEGER :: i, ik
 CHARACTER(LEN=6) :: int_to_char
 CHARACTER(LEN=7) :: label
 CHARACTER(LEN=3) :: let_pos
-REAL(DP) :: x0(3), vect(3), ak(3), xk1(3), xmod, xmod1
+REAL(DP) :: ak(3)
 REAL(DP) :: letter_coordinates(3)
 
 CALL asy_open2dplot(asy_filename)
@@ -126,8 +131,109 @@ IF (.NOT.q_in_band_form) THEN
       END IF
    END DO
 END IF
+!
+!  find where the coordinate axis intercept the BZ
+!
+ak(1)=bz_2d_struc%xi(1)
+ak(2)=bz_2d_struc%yi(2)
+ak(3)=0.0_DP
 
+CALL asy_2d_plotaxis(ak)
+ 
 CALL asy_closeplot()
 
 RETURN
 END SUBROUTINE generate_2d_asy_figure
+
+!--------------------------------------------------------------------------
+SUBROUTINE generate_2d_freecad_figure(xk, wk, npkt, letter, letter_path, &
+                      npk_label, label_list, bz_2d_struc, bz_asy_struc, &
+                      freecadfile)
+!--------------------------------------------------------------------------
+!
+!  This subroutine generates an input script for FreeCAD that
+!  plots the two dimensional BZ
+!
+USE kinds, ONLY : DP
+USE freecad, ONLY : freecad_openplot, freecad_closeplot, freecad_writepoint, &
+                    freecad_writesurface, freecad_createshell, freecad_join, &
+                    freecad_putlabel, freecad_2d_plotaxis, freecad_setcolor, &
+                    freecad_centerview, freecad_setfontsize
+USE bz_2d_form, ONLY : bz_2d, find_2d_letter_coordinate
+USE bz_asy_mod, ONLY : bz_asy, find_2d_letter_position
+USE control_paths, ONLY : q_in_band_form 
+USE control_freecad, ONLY : fc_red, fc_green, fc_blue, fc_transparency
+
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: npkt, npk_label
+CHARACTER(LEN=3), INTENT(IN) :: letter(npk_label), letter_path(npk_label)
+INTEGER, INTENT(IN) :: label_list(npk_label), wk(npkt)
+REAL(DP), INTENT(INOUT) :: xk(3,npkt)
+REAL(DP) :: rgb(3)
+TYPE(bz_2d), INTENT(IN) :: bz_2d_struc
+TYPE(bz_asy), INTENT(IN) :: bz_asy_struc
+CHARACTER(LEN=*), INTENT(IN) :: freecadfile
+
+INTEGER :: i, ik
+CHARACTER(LEN=3) :: let_pos
+REAL(DP) :: ak(3), maxdx
+REAL(DP) :: letter_coordinates(3)
+INTEGER  :: indices(9)
+CHARACTER(LEN=3) :: al
+
+CALL freecad_openplot(freecadfile)
+maxdx=MAX(bz_2d_struc%xi(1), bz_2d_struc%xi(2))
+CALL freecad_setfontsize(0.64_DP*maxdx)
+indices(1)=bz_2d_struc%nvertices
+
+DO i=1,bz_2d_struc%nvertices
+   CALL freecad_writepoint(bz_2d_struc%vertex_coord(:,i), i)
+   indices(i+1)=i
+ENDDO
+
+CALL freecad_writesurface(indices, 1)
+
+CALL freecad_createshell()
+DO i = 1, npk_label
+   CALL find_2d_letter_coordinate(bz_2d_struc, letter(i), letter_coordinates )
+   xk(:,label_list(i))=letter_coordinates
+   CALL find_2d_letter_position(bz_2d_struc, bz_asy_struc, letter(i), let_pos)
+   CALL freecad_putlabel(letter_path(label_list(i)), letter_coordinates, &
+                                                     let_pos, .TRUE.)
+END DO
+
+rgb=0.0_DP
+rgb(1)=1.0_DP
+DO ik=2, npkt
+   IF (wk(ik-1)/=0) CALL freecad_join(xk(:,ik), xk(:,ik-1), rgb, al)
+ENDDO
+!
+IF (.NOT.q_in_band_form) THEN
+   DO ik=1, npkt
+      IF (letter_path(ik) /= '') THEN
+         CALL find_2d_letter_position(bz_2d_struc, bz_asy_struc, &
+                                                   letter_path(ik), let_pos)
+         CALL freecad_putlabel(letter_path(ik), xk(:,ik), let_pos, .TRUE.)
+      END IF
+   END DO
+END IF
+!
+!   The default BZ color will be yellow  (1.0, 1.0, 0.0)
+!
+rgb(1)=fc_red
+rgb(2)=fc_green
+rgb(3)=fc_blue
+CALL freecad_setcolor('Shell', rgb, fc_transparency)
+!
+!  find where the coordinate axis intercept the BZ
+!
+ak(1)=bz_2d_struc%xi(1)
+ak(2)=bz_2d_struc%yi(2)
+ak(3)=0.0_DP
+
+CALL freecad_2d_plotaxis(ak)
+CALL freecad_centerview() 
+CALL freecad_closeplot()
+
+RETURN
+END SUBROUTINE generate_2d_freecad_figure
