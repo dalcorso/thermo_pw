@@ -7,6 +7,33 @@
 !
 MODULE bz_asy_mod
     !
+    !   This module contains the additional variables needed to make
+    !   the plot of the Brillouin zone. It defines the type bz_asy
+    !   that contains an array of logical variables, one for each face,
+    !   .TRUE. if the face is visible and .FALSE. if the face is not
+    !   visible. Then for each possible label it contains its standard
+    !   position close to the point where it is put.
+    !   It offers the following subroutines:
+    !
+    !   allocate_bz_asy     allocate memory for a bz_asy type, taking
+    !                       info from a bz_struc 
+    !  
+    !   deallocate_bz_asy   deallocate the memory of a bz_asy type 
+    !
+    !   allocate_2d_bz_asy  allocate the memory of a bz_asy type, taking 
+    !                       info from a bz_2d_struc 
+    !   init_bz_asy         initializes the variables of a bz_asy type using
+    !                       an input bz structure
+    !
+    !   init_2d_bz_asy      initialize the variables of a bz_asy type using
+    !                       an input bz_2d structure
+    !
+    !   find_letter_position receives a label and gives the position of this
+    !                       label with respect to the 3d point
+    !
+    !   find_2d_letter_position receives a label and gives the position of this
+    !                       label with respect to the 2d point
+    !
     USE kinds, ONLY : DP
     USE bz_form, ONLY : bz
     USE bz_2d_form, ONLY : bz_2d
@@ -23,7 +50,8 @@ TYPE bz_asy
 END TYPE
    
     PUBLIC bz_asy, allocate_bz_asy, init_bz_asy, find_letter_position, &
-           allocate_2d_bz_asy, init_2d_bz_asy, find_2d_letter_position
+           deallocate_bz_asy, allocate_2d_bz_asy, init_2d_bz_asy,      &
+           find_2d_letter_position
 
 CONTAINS
 
@@ -40,8 +68,24 @@ ALLOCATE(bz_asy_struc%letter_position(bz_struc%nlett))
 !
 RETURN
 END SUBROUTINE allocate_bz_asy
+!
+!----------------------------------------------------------------------
+SUBROUTINE deallocate_bz_asy( bz_asy_struc )
+!----------------------------------------------------------------------
+!
+IMPLICIT NONE
+TYPE(bz_asy), INTENT(INOUT) :: bz_asy_struc
+!
+IF (ALLOCATED(bz_asy_struc%visible)) DEALLOCATE(bz_asy_struc%visible)
+IF (ALLOCATED(bz_asy_struc%letter_position)) DEALLOCATE(bz_asy_struc%&
+                                                         letter_position)
+!
+RETURN
+END SUBROUTINE deallocate_bz_asy
 
+!------------------------------------------------------------------------
 SUBROUTINE allocate_2d_bz_asy( bz_2d_struc, bz_asy_struc )
+!------------------------------------------------------------------------
 IMPLICIT NONE
 TYPE(bz_2d), INTENT(INOUT) :: bz_2d_struc
 TYPE(bz_asy), INTENT(INOUT) :: bz_asy_struc
@@ -715,9 +759,8 @@ IF (ibrav_2d==1) THEN
 !  oblique lattice
 !
    bz_asy_struc%letter_position(1)='S '
-   bz_asy_struc%letter_position(2)='S '
-   bz_asy_struc%letter_position(3)='S '
-   bz_asy_struc%letter_position(4)='N '
+   bz_asy_struc%letter_position(2)='  '
+   bz_asy_struc%letter_position(3)='  '
 !
 ELSEIF (ibrav_2d==2) THEN
 !

@@ -7,6 +7,64 @@
 !
 MODULE asy
 !
+!  This module provides subroutines to write a script for the asymptote
+!  code to plot the Brillouin zone.
+!  It offers the following subroutines:
+!
+!  asy_writepoint   writes the 3d coordinates of a point and gives a
+!                   label to the point.
+!
+!  asy_write2dpoint writes the 2d coordinates of a point and gives a
+!                   label to the point.
+!
+!  asy_putlabel     writes a label in a 3d position and gives it a small
+!                   shift with respect to the 3d point. This routine
+!                   can also receive a label gG to write the
+!                   greek letter gamma. Only the labels of the different
+!                   Brillouin zone are supported.
+!
+!  asy_put2dlabel   writes a label in a 2d position and gives it a small
+!                   shift. Also this routine supports the gG label.
+!  
+!  asy_writesurface writes the commands to plot a 3d surface defined by 
+!                   points given before in the script. The input is the
+!                   number of points and their numbers in the list.
+!
+!  asy_write2dsurface writes the commands to plot a 2d surface defined by 
+!                   points given before in the script. The input is the
+!                   number of points and their numbers in the list.
+!
+!  asy_openplot     writes the commands to start an asymptote script and
+!                   make a 3d plot.
+!                   It also opens the file for the script.
+!   
+!  asy_open2dplot   writes the commands to start an asymptote script and
+!                   make a 2d plot.
+!                   It also opens the file for the script.
+! 
+!  asy_closeplot    closes the file with the script.
+!
+!  asy_plotaxis     plots the k_x, k_y, and k_z axis. It receives the length
+!                   of each axis inside the Brillouin zone and plots an
+!                   asis that goes outside the BZ of 0.55, 0.45, and 0.55 times
+!                   the length inside. The part inside the BZ is dashed.
+!                   It puts also the labels k_x, k_y, and k_z.
+!
+!  asy_2d_plotaxis  plots the k_x and k_y axis. It receives the length
+!                   of each axis inside the Brillouin zone and plots an
+!                   asis that goes outside the BZ of 0.55, 0.45 times
+!                   the length inside. The part inside the BZ is dashed.
+!                   It puts also the labels k_x, and k_y.
+!
+!  asy_join         writes the commands to draw a line between two 3d 
+!                   points. The style and color of the line can be specified
+!                   in input.      
+! 
+!  asy_2d_join      writes the commands to draw a line between two 2d 
+!                   points. The style and color of the line can be specified
+!                   in input.
+!
+!
 USE kinds, ONLY : DP
 USE io_global, ONLY : ionode, ionode_id
 USE mp_images, ONLY : intra_image_comm
@@ -18,7 +76,8 @@ INTEGER :: asyu = 56
 REAL(DP) :: asy_proj(3) = (/ 5.0_DP, 2.0_DP, 1.0_DP /)
 PUBLIC asy_writepoint, asy_putlabel, asy_writesurface, asy_openplot, &
        asy_closeplot, asy_join, asy_plotaxis, asy_proj, asy_open2dplot, &
-       asy_write_2d_point, asy_put2dlabel, asy_2d_join, asy_write_2d_surface
+       asy_write_2d_point, asy_put2dlabel, asy_2d_join, asy_write_2d_surface, &
+       asy_2d_plotaxis
 
 CONTAINS
 !
@@ -271,7 +330,6 @@ SUBROUTINE asy_plotaxis(xk)
 !------------------------------------------------------------------
 !
 IMPLICIT NONE
-INTEGER, PARAMETER :: DP=8
 REAL(DP), INTENT(IN) :: xk(3)
 REAL(DP) :: maxdx
 
@@ -303,6 +361,37 @@ ENDIF
 
 RETURN
 END SUBROUTINE asy_plotaxis
+
+!------------------------------------------------------------------
+SUBROUTINE asy_2d_plotaxis(xk)
+!------------------------------------------------------------------
+!
+IMPLICIT NONE
+REAL(DP), INTENT(IN) :: xk(3)
+REAL(DP) :: maxdx
+
+IF (ionode) THEN
+   WRITE(asyu,'("triple G=(0.0,0.0,0.0);")')
+   WRITE(asyu,'("triple M1=(",f10.6,",0.0,0.0);")') xk(1)
+   WRITE(asyu,'("triple M2=(0.0,",f10.6,",0.0);")') xk(2)
+
+   maxdx=max(xk(1),xk(2))
+   WRITE(asyu,'("draw(G--M1,dotted);")')
+   WRITE(asyu,'("draw(M1--M1+(",f10.6,",0.0,0.0),Arrow3);")') 0.55_DP*maxdx
+
+   WRITE(asyu,'("draw(G--M2,dotted);")')
+   WRITE(asyu,'("draw(M2--M2+(0.0,",f10.6,",0.0),Arrow3);")') 0.45_DP*maxdx
+
+   WRITE(asyu,*)
+   WRITE(asyu,'("label(scale(1.9)*""$k_x$"",M1+(",f10.6,",0.0,0.0),N);")') &
+                                                         0.55_DP*maxdx
+   WRITE(asyu,'("label(scale(1.9)*""$k_y$"",M2+(0.0,",f10.6,",0.0),NW);")') &
+                                                         0.45_DP*maxdx
+   WRITE(asyu,*)
+ENDIF
+
+RETURN
+END SUBROUTINE asy_2d_plotaxis
 
 !------------------------------------------------------------------
 SUBROUTINE asy_join(a,b,pen)
