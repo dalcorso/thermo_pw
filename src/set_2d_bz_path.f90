@@ -32,6 +32,7 @@ CALL cell_base_init ( ibrav, celldm, a, b, c, cosab, cosac, cosbc, &
                       trd_ht, rd_ht, cell_units )
 
 CALL find_ibrav_2d(at, ibrav_2d, celldm_cb, celldm_2d)
+
 !
 !  Then set the number of path in the bz
 !
@@ -71,8 +72,8 @@ SELECT CASE (ibrav_2d)
 !
 !  Oblique bz
 !
-      letter(1:npk_label)= (/ 'gG', 'X ', 'M ', 'gG' /)
-      wqaux(1:npk_label) = (/  30,   30,   30,   1   /)
+      letter(1:npk_label)= (/ 'gG', 'X ', 'gG', 'Y ' /)
+      wqaux(1:npk_label) = (/  30,   0,   30,   1   /)
       label_list(1:npk_label)=(/ ( i, i=1,npk_label) /)
       letter_path=letter
    CASE (2) 
