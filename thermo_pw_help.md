@@ -430,4 +430,10 @@ lattices suggested by the code. The message might also indicate that
 you have a supercell. If this is what you want, just ignore the message and
 continue the calculation, otherwise simplify your cell.
 <br><br>
-
+28. Is <code>thermo_pw</code> compatible with the GPU version of QE?
+<br>
+Presently there is no support for GPU in <code>thermo\_pw</code> routines,
+but starting from QE6.7 and with the git version of <code>thermo\_pw</code> 
+you can give the command <code>make tpw_gpu</code>
+to obtain a version of the code that can be compiled with 
+<code>q-e-gpu.6.7</code>.  
