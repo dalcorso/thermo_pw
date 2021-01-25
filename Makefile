@@ -38,6 +38,41 @@ leave_qe:
 	if test -f ph_restart.f90_qe ; then mv ../PHonon/PH/ph_restart.f90 \
            ph_restart.f90 ; mv ph_restart.f90_qe ../PHonon/PH/ph_restart.f90 ; fi
 
+tpw_gpu:
+	if test -f cpu_gpu/gpu_setup.f90 ; then mv qe/setup.f90 \
+           cpu_gpu/cpu_setup.f90 ; \
+           mv cpu_gpu/gpu_setup.f90 qe/setup.f90 ; fi
+	if test -f cpu_gpu/gpu_electrons.f90 ; then mv qe/electrons.f90 \
+           cpu_gpu/cpu_electrons.f90 ; \
+           mv cpu_gpu/gpu_electrons.f90 qe/electrons.f90 ; fi
+	if test -f cpu_gpu/gpu_non_scf.f90 ; then mv qe/non_scf.f90 \
+           cpu_gpu/cpu_non_scf.f90 ; \
+           mv cpu_gpu/gpu_non_scf.f90 qe/non_scf.f90 ; fi
+	if test -f cpu_gpu/gpu_c_bands.f90 ; then mv qe/c_bands.f90 \
+           cpu_gpu/cpu_c_bands.f90 ; \
+           mv cpu_gpu/gpu_c_bands.f90 qe/c_bands.f90 ; fi
+	if test -f cpu_gpu/gpu_stress.f90 ; then mv qe/stress.f90 \
+           cpu_gpu/cpu_stress.f90 ; \
+           mv cpu_gpu/gpu_stress.f90 qe/stress.f90 ; fi
+
+tpw_cpu:
+	if test -f cpu_gpu/cpu_setup.f90 ; then mv qe/setup.f90 \
+           cpu_gpu/gpu_setup.f90 ; \
+           mv cpu_gpu/cpu_setup.f90 qe/setup.f90 ; fi
+	if test -f cpu_gpu/cpu_electrons.f90 ; then mv qe/electrons.f90 \
+           cpu_gpu/gpu_electrons.f90 ; \
+           mv cpu_gpu/cpu_electrons.f90 qe/electrons.f90 ; fi
+	if test -f cpu_gpu/cpu_non_scf.f90 ; then mv qe/non_scf.f90 \
+           cpu_gpu/gpu_non_scf.f90 ; \
+           mv cpu_gpu/cpu_non_scf.f90 qe/non_scf.f90 ; fi
+	if test -f cpu_gpu/cpu_c_bands.f90 ; then mv qe/c_bands.f90 \
+           cpu_gpu/gpu_c_bands.f90 ; \
+           mv cpu_gpu/cpu_c_bands.f90 qe/c_bands.f90 ; fi
+	if test -f cpu_gpu/cpu_stress.f90 ; then mv qe/stress.f90 \
+           cpu_gpu/gpu_stress.f90 ; \
+           mv cpu_gpu/cpu_stress.f90 qe/stress.f90 ; fi
+
+
 clean: thermo_tools_clean thermo_pw_clean thermo_lib_clean thermo_qe_clean examples_clean examples_qe_clean doc_clean
 
 thermo_pw_clean:
