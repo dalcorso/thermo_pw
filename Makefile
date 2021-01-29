@@ -54,6 +54,20 @@ tpw_gpu:
 	if test -f cpu_gpu/gpu_stress.f90 ; then mv qe/stress.f90 \
            cpu_gpu/cpu_stress.f90 ; \
            mv cpu_gpu/gpu_stress.f90 qe/stress.f90 ; fi
+	if test -f cpu_gpu/gpu_solve_linter.f90 ; then mv qe/solve_linter.f90 \
+           cpu_gpu/cpu_solve_linter.f90 ; \
+           mv cpu_gpu/gpu_solve_linter.f90 qe/solve_linter.f90 ; fi
+	if test -f cpu_gpu/gpu_ch_psi_all.f90 ; then mv qe/ch_psi_all.f90 \
+           cpu_gpu/cpu_ch_psi_all.f90 ; \
+           mv cpu_gpu/gpu_ch_psi_all.f90 qe/ch_psi_all.f90 ; fi
+	if test -f cpu_gpu/gpu_solve_linear_system.f90 ; then  \
+           mv qe/solve_linear_system.f90 \
+           cpu_gpu/cpu_solve_linear_system.f90 ; \
+           mv cpu_gpu/gpu_solve_linear_system.f90 \
+                  qe/solve_linear_system.f90 ; fi
+	if test -f cpu_gpu/gpu_Makefile ; then mv qe/Makefile \
+           cpu_gpu/cpu_Makefile ; \
+           mv cpu_gpu/gpu_Makefile qe/Makefile ; fi
 
 tpw_cpu:
 	if test -f cpu_gpu/cpu_setup.f90 ; then mv qe/setup.f90 \
@@ -71,6 +85,20 @@ tpw_cpu:
 	if test -f cpu_gpu/cpu_stress.f90 ; then mv qe/stress.f90 \
            cpu_gpu/gpu_stress.f90 ; \
            mv cpu_gpu/cpu_stress.f90 qe/stress.f90 ; fi
+	if test -f cpu_gpu/cpu_solve_linter.f90 ; then mv qe/solve_linter.f90 \
+           cpu_gpu/gpu_solve_linter.f90 ; \
+           mv cpu_gpu/cpu_solve_linter.f90 qe/solve_linter.f90 ; fi
+	if test -f cpu_gpu/cpu_ch_psi_all.f90 ; then mv qe/ch_psi_all.f90 \
+           cpu_gpu/gpu_ch_psi_all.f90 ; \
+           mv cpu_gpu/cpu_ch_psi_all.f90 qe/ch_psi_all.f90 ; fi
+	if test -f cpu_gpu/cpu_solve_linear_system.f90 ; then  \
+           mv qe/solve_linear_system.f90 \
+           cpu_gpu/gpu_solve_linear_system.f90 ; \
+           mv cpu_gpu/cpu_solve_linear_system.f90 \
+                  qe/solve_linear_system.f90 ; fi
+	if test -f cpu_gpu/cpu_Makefile ; then mv qe/Makefile \
+           cpu_gpu/gpu_Makefile ; \
+           mv cpu_gpu/cpu_Makefile qe/Makefile ; fi
 
 
 clean: thermo_tools_clean thermo_pw_clean thermo_lib_clean thermo_qe_clean examples_clean examples_qe_clean doc_clean
