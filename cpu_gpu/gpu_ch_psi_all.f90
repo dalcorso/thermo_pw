@@ -201,6 +201,7 @@ CONTAINS
        call divide (inter_bgrp_comm, m, m_start, m_end)
        if (m_end >= m_start) CALL calbec (n, vkb, hpsi(:,m_start:m_end), becp, m_end- m_start + 1)
     else
+       CALL using_becp_auto(2)
        CALL calbec (n, vkb, hpsi, becp, m)
     end if
     CALL s_psi (npwx, n, m, hpsi, spsi)
