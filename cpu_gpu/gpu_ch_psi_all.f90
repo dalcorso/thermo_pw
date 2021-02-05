@@ -164,6 +164,7 @@ CONTAINS
     ! K-point part
     !
     USE becmod, ONLY : becp, calbec
+    USE becmod_subs_gpum, ONLY : using_becp_auto
     
     IMPLICIT NONE
     INTEGER :: m_start, m_end
