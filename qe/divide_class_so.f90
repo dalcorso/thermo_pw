@@ -63,7 +63,7 @@ COMPLEX(DP) :: d_spin(2,2,48), d_spine(2,2,96), c_spin(2,2)
 !
 INTEGER :: done(96), irot, jrot, krot, iclass, i, other, other1
 INTEGER :: tipo_sym, set_e, ipol, axis, axis1, axis2, ts, nused, iaxis(4), &
-           iax, ibx, icx, aclass, bclass, cclass,  &
+           iax, ibx, icx, aclass, bclass, cclass, sumi, &
            imax, imbx, imcx, amclass, bmclass, cmclass, ind2(3)  
 REAL(DP), PARAMETER :: eps = 1.d-7
 REAL(DP) :: angle_rot, angle_rot_s, ars, ax_save(3,3:5), angle_vectors
@@ -249,7 +249,12 @@ ELSEIF (code_group==9) THEN
       IF (ts==1) THEN
          which_irr(iclass)=2
       ELSE IF (ts==4) THEN
-         which_irr(iclass)=set_e(has_e(1,iclass),5)
+         sumi=has_e(1,iclass)+has_e(2,iclass)+has_e(3,iclass)
+         IF (sumi>0) THEN
+            which_irr(iclass)=5
+         ELSE
+            which_irr(iclass)=6
+         ENDIF
       ELSEIF (ts==3) THEN
          which_irr(iclass)=set_e(has_e(1,iclass),3)
       ELSE
@@ -377,7 +382,12 @@ ELSEIF (code_group==13) THEN
       ELSEIF (ts==3) THEN
          which_irr(iclass)=set_e(has_e(1,iclass),3)
       ELSEIF (ts==5) THEN
-         which_irr(iclass)=set_e(has_e(1,iclass),5)
+         sumi=has_e(1,iclass)+has_e(2,iclass)+has_e(3,iclass)
+         IF (sumi>0) THEN
+            which_irr(iclass)=5
+         ELSE
+            which_irr(iclass)=6
+         ENDIF
       ELSE
          CALL errore('divide_class_so','wrong operation',1)
       ENDIF
@@ -797,13 +807,23 @@ ELSEIF (code_group==25) THEN
       ELSEIF (ts==3) THEN
          which_irr(iclass)=set_e(has_e(1,iclass),3)
       ELSE IF (ts==4) THEN
-         which_irr(iclass)=set_e(has_e(1,iclass),5)
+         sumi=has_e(1,iclass)+has_e(2,iclass)+has_e(3,iclass)
+         IF (sumi>0) THEN
+            which_irr(iclass)=5
+         ELSE
+            which_irr(iclass)=6
+         ENDIF
       ELSE IF (ts==2) THEN
          which_irr(iclass)=set_e(has_e(1,iclass),7)
       ELSE IF (ts==6) THEN
          which_irr(iclass)=set_e(has_e(1,iclass),9)
       ELSE IF (ts==5) THEN
-         which_irr(iclass)=set_e(has_e(1,iclass),11)
+         sumi=has_e(1,iclass)+has_e(2,iclass)+has_e(3,iclass)
+         IF (sumi>0) THEN
+            which_irr(iclass)=11
+         ELSE
+            which_irr(iclass)=12
+         ENDIF
       ELSE
          CALL errore('divide_class_so','wrong operation',1)
       END IF
