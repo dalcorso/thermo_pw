@@ -439,20 +439,20 @@ to obtain a version of the code that can be compiled with
 <code>q-e-gpu.6.7</code>.  
 <br><br>
 29. The band or phonon symmetry is not indicated. There are many
-question marks instead of the names of the irreducible representation?
+question marks instead of the names of the irreducible representations?
 <br>
-The question marks indicate that the algorithm that find the symmetry is
+The question marks indicate that the algorithm that finds the symmetry is
 confused and is unable to find a well defined symmetry. There are several 
 possible reasons: 
-*1) You might have a too small cut-off, or
+* 1) You might have a too small cut-off, or
 a too small threshold for the self consistence and the symmetry is not
 accurate enough. Please modify these parameters.
-*2) Your atomic positions are quite close to a symmetry but
+* 2) Your atomic positions are quite close to a symmetry but
 not exactly there. The typical problem appears when you use single precision
 atomic coordinates. Please correct the atomic coordinates. 
-*3) There might be some problem with the pseudopotential and
+* 3) There might be some problem with the pseudopotential and
 there is some ghost state. Please check other pseudopotentials to
 see if the problem disappears. 
-*4) If none of the above applies, there might be a problem in the algorithm 
+* 4) If none of the above applies, there might be a problem in the algorithm 
 that finds the symmetry. Please send me your input or post it to one of
 the forum mailing lists.
