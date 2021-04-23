@@ -161,7 +161,7 @@ in the patch
 <br>
 * There is a problem with anharmonic properties calculated recovering the run
 with <code>after_disp=.TRUE.</code> introduced in this version. Take the file
-<a href="./q2r_sub.f90">thermo_pw/src/q2r_sub.f90</a>, substitute the one 
+<a href="https://people.sissa.it/~dalcorso/q2r_sub.f90">thermo_pw/src/q2r_sub.f90</a>, substitute the one 
 of <code>thermo_pw.0.6.0</code> and recompile.<br>
 Moreover, at lines 11307 and 11336 of <code>lib/point_group.f90</code>,
 change <code>1D-8</code> with <code>1D-5</code>.
@@ -202,7 +202,7 @@ Please change line 571 of <code>src/thermo_readin.f90</code> from
 **Patches for thermo_pw.0.2.0**:
 <br>
 * Problem in anharmonic properties: update to a newer version.
-* Modules/clocks.f90 : line 91 set <code>maxclock=200</code> otherwise 
+* Modules/clocks.f90 : line 41 set <code>maxclock=200</code> otherwise 
 <code>thermo_pw</code> might run out of clocks.
 * Bug fix: In anharmonic calculations some vertical lines in phonon dispersion 
 plots are double. Update to a newer version. 
