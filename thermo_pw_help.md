@@ -59,6 +59,8 @@ patches given below.</p>
 * Problems with examples 10,11, and 18. Problems with electric fields and
 FR-PP. Please apply the changes as in commit:
 <a href="https://github.com/dalcorso/thermo_pw/commit/743148245d3ee9ce524afe3edc323d5ff3b31a92">commit_7431482</a>.
+* To reproduce ph_example07 it is necessary to change line 1049 of 
+file PW/src/pw_restart_new.f90 of QE6.6 as explained for version 1.3.0.
 
 **Patches for thermo_pw.1.3.1 and thermo_pw.1.3.2**:
 <br>
