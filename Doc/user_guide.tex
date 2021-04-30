@@ -67,12 +67,12 @@ post-processing tools to convert the output of \qe\ into plots of material
 properties directly comparable with experiment. 
 
 \thermo\ has the following directory structure, contained in a subdirectory 
-\texttt{thermo\_pw/} that should be put in the main directory of the \qe\ tree:
+\texttt{thermo\_pw/} that should be put in the root directory of the \qe\ tree:
 
 \begin{tabular}{ll}
 \texttt{Doc/}      & : contains this user's guide and other documentation\\
-\texttt{examples/} & : some running examples \\
-\texttt{examples\_qe/} & : some examples of \qe\ run using 
+\texttt{examples/} & : some examples \\
+\texttt{examples\_qe/} & : \qe\ examples run using 
 \texttt{thermo\_pw} \\
 \texttt{inputs/}   & : a collection of useful inputs \\
 \texttt{pseudo\_test/} & : a collection of inputs to test a pseudopotential library\\
@@ -208,35 +208,35 @@ like to mention M. Palumbo, O. Motornyi, A. Urru, and C. Malica.
 \subsection{\color{web-blue}Installing}
 \begin{table}
 \begin{center}
-\begin{tabular}{ll}
+\begin{tabular}{lll}
 \hline
 \hline
-\texttt{thermo\_pw} & \qe  \\
+\texttt{thermo\_pw} & \qe & release date \\
 \hline
-1.5.0 & 6.7 \\
-1.4.1 & 6.7 \\
-1.4.0 & 6.6 \\
-1.3.2 & 6.6 \\
-1.3.1 & 6.6 \\
-1.3.0 & 6.5 \\
-1.2.1 & 6.5 \\
-1.2.0 & 6.4.1 \\
-1.1.1 & 6.4.1 \\
-1.1.0 & 6.4 \\
-1.0.9 & 6.3 \\
-1.0.0 & 6.3 \\
-0.9.9 & 6.2.1 \\
-0.9.0 & 6.2.1 \\
-0.8.0 & 6.2 \\
-0.8.0-beta & 6.2-beta \\
-0.7.9 & 6.1 \\
-0.7.0 & 6.1 \\
-0.6.0 & 6.0.0 \\
-0.5.0 & 5.4.0 \\
-0.4.0 & 5.3.0 \\
-0.3.0 & 5.2.1, 5.2.0 \\
-0.2.0 & 5.1.2 \\
-0.1.0 & 5.1.1 \\
+1.5.0 & 6.7 &  \\
+1.4.1 & 6.7 & 29/12/2020 \\
+1.4.0 & 6.6 & 22/12/2020 \\
+1.3.2 & 6.6 & 17/8/2020 \\
+1.3.1 & 6.6 & 13/8/2020 \\
+1.3.0 & 6.5 & 12/8/2020 \\
+1.2.1 & 6.5 & 23/1/2020 \\
+1.2.0 & 6.4.1 & 28/12/2019 \\
+1.1.1 & 6.4.1 & 16/04/2019 \\
+1.1.0 & 6.4 & 16/04/2019 \\
+1.0.9 & 6.3 & 6/3/2019 \\
+1.0.0 & 6.3 & 17/7/2018 \\
+0.9.9 & 6.2.1 & 5/7/2018 \\
+0.9.0 & 6.2.1 & 20/12/2017 \\
+0.8.0 & 6.2 & 24/10/2017 \\
+0.8.0-beta & 6.2-beta & 31/8/2017\\
+0.7.9 & 6.1 & 06/7/2017 \\
+0.7.0 & 6.1 & 18/3/2017 \\
+0.6.0 & 6.0.0 & 5/10/2016 \\
+0.5.0 & 5.4.0 & 26/4/2016 \\
+0.4.0 & 5.3.0 & 23/1/2016 \\
+0.3.0 & 5.2.1, 5.2.0 & 23/6/2015 \\
+0.2.0 & 5.1.2 & 13/3/2015 \\
+0.1.0 & 5.1.1 & 28/11/2014 \\
 \hline
 \hline
 \end{tabular}
@@ -245,53 +245,54 @@ like to mention M. Palumbo, O. Motornyi, A. Urru, and C. Malica.
 \end{center}
 \end{table}
 
-\thermo\ is a package tightly bound to \qe. It cannot be compiled without
-it. For instruction on how to download and compile \qe, please 
+The \thermo\ package is tightly bound to \qe. It cannot be compiled without
+it. To download and compile \qe, please 
 refer to the general User's Guide, available in the file \texttt{Doc/user\_guide.pdf}
-in the main \qe\ directory, or in the web site 
+in the root \qe\ directory, or on the web site 
 \texttt{http://www.quantum-espresso.org}.
 
-\texttt{Thermo\_pw} can be downloaded from its main distribution page
-\texttt{https://dalcorso.github.} \texttt{io/thermo\_pw/}
-by downloading one of the \texttt{.tar.gz} files.
-The versions of \texttt{thermo\_pw} and of \qe\ must be carefully matched
+The main distribution page of \texttt{Thermo\_pw} is
+\texttt{https://dalcorso.github.io/thermo\_pw/}
+where you can download one of the \texttt{.tar.gz} files.
+Please match carefully \texttt{thermo\_pw} and \qe\ versions
 as illustrated in Table 1. 
-There is no \texttt{thermo\_pw} package for the versions of \qe\ not listed 
-there. Unpacking the \texttt{.tar.gz} file in the main \qe\ directory, for
-instance with the command \texttt{tar -xzvf thermo\_pw.1.2.1.tar.gz}, you
-obtain a directory \texttt{thermo\_pw} with the source files. \\
-It is also possible to download the \texttt{git} version of 
+For the versions of \qe\ not listed here, there is no \texttt{thermo\_pw} 
+package. The source files of \texttt{thermo\_pw} can be obtained by
+unpacking the \texttt{.tar.gz} file in the root \qe\ directory, for
+instance with the command \texttt{tar -xzvf thermo\_pw.1.4.1.tar.gz}.\\
+You can also download the \texttt{git} version of 
 \texttt{thermo\_pw} as described at
 the web page: 
-\texttt{https://dalcorso.github.io/thermo\_pw/thermo\_pw\_help.html}.
+\texttt{https://dal} \texttt{corso.github.io/thermo\_pw/thermo\_pw\_help.html}.
 The \texttt{git} version of \texttt{thermo\_pw} contains the most recent
 features and bug fixes but it might work only with the \texttt{git} 
-version of \qe\ and its use for production runs is not advised. \\
+version of \qe\ and its use for production is not recommended. \\
 Please read the web page: 
-\texttt{http://dalcorso.github.io/thermo\_pw/} 
-to have updated information about the compatibility between the \texttt{git} 
-version of \texttt{thermo\_pw} and \qe. \\
-The web page \texttt{https://dalcorso.github.io/thermo\_pw/thermo\_pw\_help.html}
-contains also information on critical bugs found in the 
+\texttt{http://dalcorso.github.io/thermo\_pw/thermo\_pw\_help.html} 
+for updated information about the compatibility between the \texttt{git} 
+version of \texttt{thermo\_pw} and \qe. 
+This web page contains also information on critical bugs found in the 
 \texttt{thermo\_pw} package and should be consulted before using 
 \texttt{thermo\_pw}.
 
 \subsection{\color{web-blue}Compiling}
 
-In order to compile \thermo\ the main \texttt{Makefile} and the files
+In order to compile \thermo, the main \texttt{Makefile} and the files
 \texttt{install/makedeps.sh} and \texttt{install/plugins\_makefile}
-of \qe\ need to be changed. In the \texttt{thermo\_pw}
-directory give the command \texttt{make join\_qe}. This command exchanges
-the files contained in \texttt{thermo\_pw} with those of the \qe\ package.
+of \qe\ must be changed. This is done by giving the command 
+\texttt{make join\_qe} inside the \texttt{thermo\_pw} directory. 
+This command exchanges
+the \texttt{thermo\_pw} files with those of the \qe\ package.
 
-Typing \texttt{make thermo\_pw} from the main \qe\ directory, or \texttt{make} 
-from the \texttt{thermo\_pw}\ directory, produces the executable
-\texttt{thermo\_pw/src/thermo\_pw.x} that can be found in the 
+Typing \texttt{make thermo\_pw} inside the main \qe\ directory, 
+or \texttt{make} 
+inside the \texttt{thermo\_pw}\ directory, produces the executable
+\texttt{thermo\_pw/src/thermo\_pw.x} that appears in the 
 \qe\ \texttt{bin/} directory. A few other tool codes are produced as well
-and linked in the \texttt{bin/} directory of \qe.
+and linked in the \qe\ \texttt{bin/} directory.
 
-\thermo\ has been written on a PC with Linux operating system using the
-\texttt{gfortran} compiler with \texttt{openMPI} parallelization. It has
+\thermo\ has been written on a PC with the Linux operating system using a
+\texttt{gfortran} compiler and \texttt{openMPI} parallelization. It has
 been run in parallel on a Linux cluster with several hundreds processors.
 It has not been tested with other combinations of computer/operating system, 
 but it is supposed to run on the same systems where \qe\ runs. If
@@ -306,8 +307,8 @@ mailing list
 \texttt{thermo\_pw-forum}). 
 Requests of new features are also welcome. If you think you have
 found a bug 
-in \texttt{thermo\_pw} you can report it to the mailing list or 
-write directly to me: \\\texttt{dalcorso.at.sissa.it}.
+in \texttt{thermo\_pw}, you can report it to the mailing list or 
+write me: \texttt{dalcorso.at.sissa.it}.
 
 \subsection{\color{web-blue}Uninstalling}
 
@@ -317,11 +318,11 @@ the command \texttt{make leave\_qe} is needed to restore the original \qe\ files
 
 \subsection{\color{web-blue}Running \thermo}
 
-In order to run \thermo\ you need in the working directory
-an input for \texttt{pw.x}, an input 
-for \texttt{ph.x} that must be called \texttt{ph\_control} (if required
-by the task), and a 
-file called \texttt{thermo\_control}. 
+In order to run \thermo, you need an input for \texttt{pw.x},  
+a file called \texttt{thermo\_control}, and an input for \texttt{ph.x}
+(which must be called \texttt{ph\_control}) if required by the task.
+ These files must be in your working
+directory.
 The input of \texttt{pw.x} can have any name and is given as input to
 the \thermo\ code. It is better not to specify an \texttt{outdir} 
 directory in the \texttt{ph.x} input. Specifying an \texttt{outdir}
@@ -334,17 +335,17 @@ A typical command for running \thermo\ is:
 mpirun -n np thermo_pw.x -ni ni ... < input_pw > output_thermo_pw
 \end{verbatim}
 where \texttt{np} is the number of processors and \texttt{ni} is the number 
-of images. The dots indicate the other parallelization options that
-you can find in the \qe\ manual.
+of images. The dots indicate the other \qe\ parallelization options that
+you can find in its manual.
 
-Note that it is very easy to waste resources if the number of 
-images is too large. Unused images wait for the working images to complete
+Note that it is very easy to waste resources using too many 
+images. Unused images wait for the working images to complete
 their tasks wasting cpu-time in an endless loop. 
 Some options 
 do not use the image feature, so you have to know how the calculation 
 is divided and the number of images must not
-be larger than the number of tasks (see below an indication of this number
-for each option). If you have doubts on this point use one image 
+be larger than the number of tasks (below I give this number for each option).
+If you have doubts on this point use one image 
 (\texttt{ni=1}).
 
 The outputs of the \thermo\ code are one or more \texttt{postscript} or
@@ -404,10 +405,10 @@ flext       : extension of the output files. Presently .ps and .pdf are
               available only if gnuplot supports the pdfcairo terminal.
               Default: character(len=*) '.ps'
 \end{verbatim}
-If you are running \thermo\ on a system that has not \texttt{gnuplot}
+If your system has not \texttt{gnuplot}
 you can disable the production of the \texttt{postscript} or 
 \texttt{pdf} files and use other
-graphical tools to produce the plots from the output data. 
+graphical tools to do plots from the output data. 
 
 \subsection{\color{web-blue}Temperature and pressure}
 Several quantities in \thermo\ can be calculated as a function of temperature.
@@ -917,7 +918,7 @@ This feature is still experimental.\\
 The following variables control the plot:
 \begin{verbatim}
 fcfact      : factor used to convert from the 2\pi/a units used 
-              for the Brillouin zone plot to the millimiters units needed to
+              for the Brillouin zone plot to the millimeters units needed to
               make a plot in freecad. 
               Default: real 100.0
 fc_red,     
@@ -1059,11 +1060,11 @@ llanczos: When this flag is .TRUE. at finite frequencies a Lanczos
           Default : .FALSE.
 lanczos_steps: steps of the Lanczos chain.
           Default : interger 2000
-lanczos_steps_ext:  steps of the extrapolated lanczos chain
+lanczos_steps_ext:  steps of the extrapolated Lanczos chain
           Default: integer 10000
 lanczos_restart_steps: number of steps between saving of the Lanczos status.
           If 0 the status is saved only at the end of the run. Use 
-          recover=.TRUE. to resume an interrupted lanczos chain or to
+          recover=.TRUE. to resume an interrupted Lanczos chain or to
           increase the number of steps.
           Default: integer 0
 extrapolation : extrapolation type. Presently only 'no' or 'average' are
@@ -1757,7 +1758,7 @@ lb0_t         : if .TRUE. the calculation of the thermal expansion with
                 file all the quantities that depend on elastic properties 
                 are not computed.
                 Default: logical .TRUE.
-poly_degree_grun : degree of the polynomial used to intepolate the frequencies
+poly_degree_grun : degree of the polynomial used to interpolate the frequencies
                 (Used only when lmurn=.TRUE. otherwise it is 2).
                 Default: 4
 flgrun        : file where the Gruneisen parameters are written. 
@@ -1892,7 +1893,7 @@ When both \texttt{use\_free\_energy=.TRUE.} and
 \texttt{lel\_free\_energy=.TRUE.} the electronic free energy is
 added to the free energy before computing the elastic constants. In this case 
 the code expects to find on file (in \texttt{therm\_files}) the electronic 
-thermodynamic propeties for each perturbed geometry. When 
+thermodynamic properties for each perturbed geometry. When 
 \texttt{use\_free\_energy=.FALSE.} and 
 \texttt{lel\_free\_energy=.TRUE.} the code computes the electronic
 thermodynamic properties at each perturbed geometry and writes them on 
