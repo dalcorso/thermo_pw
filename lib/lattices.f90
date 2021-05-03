@@ -221,17 +221,17 @@ CONTAINS
 !   QE distribution. Given ibrav and celldm the routine latgen
 !   provides three primitive vectors at2 of the Bravais lattice. 
 !   The present routine receives three primitive vectors of a Bravais lattice
-!   a1, a2, a3 and finds the Bravais lattice type (ibrav) and the dimensions of 
-!   the lattice celldm that gives the same Bravais lattice when given
+!   a1, a2, a3 and finds the Bravais lattice type (ibrav) and 
+!   the dimensions of 
+!   the lattice celldm that give the same Bravais lattice when given
 !   as input to latgen. In general the orientation of the a1, a2, a3 can
 !   be different from that given by latgen and also it might happen that
 !   the a1, a2, a3 are linear combinations of the vectors given by latgen.
 !   This routine gives as output two matrices, ur and global_s. These
-!   two matrices are not uniquely defined but their combined use
-!   allows to transform the at2 given by latgen into the a1, a2, a3 
-!   given in input.
-!   Note also that in some cases the set at1, at2, at3 and the ur and
-!   global_s matrices are not uniquely defined. In particular 
+!   two matrices allows to transform the at2 given by latgen into the 
+!   a1, a2, a3 given in input.
+!   Note also that in some cases the set at1, at2, at3 and the matrices
+!   ur and global_s are not uniquely defined. In particular 
 !   for the ortorhombic systems any exchange of at1, at2, at3 can be
 !   recovered with an appropriate rotation. In this case we make the following
 !   choice. If the input conventional cell is parallel to x, y, and z we 
@@ -828,16 +828,21 @@ END FUNCTION is_bravais_lattice
 LOGICAL FUNCTION same_lattice(at, at2, ur, at1, sr)
 !----------------------------------------------------------------------
 !
-!   This routine receives six vectors at and at2. Three vectors
-!   at1 are obtained as a linear combination with integer coefficients
-!   of the at2 and the at are obtained as a rotation of the at1.
+!   This routine receives six vectors at and at2 and returns .TRUE.
+!   when these two sets of primitive vectors generate the same Bravais
+!   lattice. Three vectors at1 are obtained as a linear combination 
+!   with integer coefficients of the at2 and the at are obtained 
+!   rotating the at1.
 !   This function espresses at in terms of at2 using ur the integer
 !   coefficients that links at1 and at2 and the rotation matrix sr that
-!   links at to at1.
+!   links at to at1:
 !
-!   at1_i = \sum_j ur_ij at2_j
-!   at_i  = sr at1_i
+!   at1_{\alpha,i} = \sum_j ur_ij at2_{\alpha,j}
+!   at_{\alpha,i}  = \sum_\beta sr_{\alpha,\beta} at1_{\beta,i}
 !   at, at1, at2 and sr are in cartesian coordinates.
+!
+!   ur_ij and sr_{\alpha,\beta} as well as the at1 are output of this
+!   function when it returns .TRUE..
 !
 USE kinds, ONLY : DP
 USE rotate, ONLY : find_rotation, is_rotation
