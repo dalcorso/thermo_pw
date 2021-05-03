@@ -1,0 +1,10 @@
+
+ &inputph
+  tr2_ph=1.0d-14,
+  prefix='pt',
+  fildyn='pt.dyn.xml',
+  ldisp=.TRUE.
+  nq1=4,
+  nq2=4,
+  nq3=4,
+/

@@ -11,7 +11,7 @@ $ECHO
 $ECHO "$EXAMPLE_DIR : starting"
 $ECHO
 $ECHO "This example shows how to use thermo_pw.x to calculate"
-$ECHO "the phonons of Pt with spin orbit and PAW-PPs."
+$ECHO "the phonons of Pt with FR PAW-PPs and spin orbit."
 
 # set the needed environment variables
 . ../../../environment_variables
@@ -19,6 +19,7 @@ $ECHO "the phonons of Pt with spin orbit and PAW-PPs."
 # required executables and pseudopotentials
 BIN_LIST="thermo_pw.x"
 PSEUDO_LIST="Pt.rel-pz-n-kjpaw_psl.1.0.0.UPF"
+TPW_PSEUDO='https://people.sissa.it/~dalcorso/upload/'
 
 $ECHO
 $ECHO "  executables directory: $BIN_DIR"
@@ -57,7 +58,7 @@ for FILE in $PSEUDO_LIST ; do
     if test ! -r $PSEUDO_DIR/$FILE ; then
        $ECHO
        $ECHO "Downloading $FILE to $PSEUDO_DIR...\c"
-            $WGET $PSEUDO_DIR/$FILE $NETWORK_PSEUDO/$FILE 2> /dev/null
+            $WGET $PSEUDO_DIR/$FILE $TPW_PSEUDO/$FILE 2> /dev/null
     fi
     if test $? != 0; then
         $ECHO
