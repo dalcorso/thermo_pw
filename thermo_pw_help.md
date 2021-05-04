@@ -56,7 +56,7 @@ patches given below.</p>
 
 **Patches for thermo_pw.1.4.1**:
 <br>
-* At line 576 of uflib/read_upf_new.f90 of QE6.7 change PP_AEWFC_rel with
+* At line 576 of upflib/read_upf_new.f90 of QE6.7 change PP_AEWFC_rel with
 PP_AEWFC_REL.
 
 **Patches for thermo_pw.1.4.0**:
@@ -66,7 +66,7 @@ FR-PP. Please apply the changes as in commit:
 <a href="https://github.com/dalcorso/thermo_pw/commit/743148245d3ee9ce524afe3edc323d5ff3b31a92">commit_7431482</a>.
 * To reproduce ph_example07 it is necessary to change line 1049 of 
 file PW/src/pw_restart_new.f90 of QE6.6 as explained for version 1.3.0.
-* At line 557 of uflib/read_upf_new.f90 of QE6.6 change PP_AEWFC_rel with
+* At line 557 of upflib/read_upf_new.f90 of QE6.6 change PP_AEWFC_rel with
 PP_AEWFC_REL.
 
 **Patches for thermo_pw.1.3.1 and thermo_pw.1.3.2**:
