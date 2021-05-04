@@ -58,6 +58,8 @@ patches given below.</p>
 <br>
 * At line 576 of upflib/read_upf_new.f90 of QE6.7 change PP_AEWFC_rel with
 PP_AEWFC_REL.
+* I usually change line 400 of Modules/read_namelists.f90 of QE6.7
+restoring the old default diago_david_ndim=4.
 
 **Patches for thermo_pw.1.4.0**:
 <br>
@@ -68,6 +70,8 @@ FR-PP. Please apply the changes as in commit:
 file PW/src/pw_restart_new.f90 of QE6.6 as explained for version 1.3.0.
 * At line 557 of upflib/read_upf_new.f90 of QE6.6 change PP_AEWFC_rel with
 PP_AEWFC_REL.
+* I usually change line 400 of Modules/read_namelists.f90 of QE6.6 
+restoring the old default diago_david_ndim=4.
 
 **Patches for thermo_pw.1.3.1 and thermo_pw.1.3.2**:
 <br>
@@ -80,6 +84,8 @@ file PW/src/pw_restart_new.f90 of QE6.6 as explained for version 1.3.0.
 is not working in this case. See in the FAQ 24 to solve this problem.
 * tools/pdec.f90 does not compile with some compilers. Take the git version
 of this file and recompile.
+* I usually change line 400 of Modules/read_namelists.f90 of QE6.6 restoring 
+the old default diago_david_ndim=4.
 
 **Patches for thermo_pw.1.3.0**:
 <br>
