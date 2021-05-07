@@ -63,6 +63,8 @@ restoring the old default diago_david_ndim=4.
 
 **Patches for thermo_pw.1.4.0**:
 <br>
+* Still a missing transformation of ftau into ft. Please change
+as in commit <a href="https://github.com/dalcorso/thermo_pw/commit/3e3953152e2c81d301eb6a596de97eba07f6841d">commit_3e39531</a> of 7/5/2021.
 * Problems with examples 10,11, and 18. Problems with electric fields and
 FR-PP. Please apply the changes as in commit:
 <a href="https://github.com/dalcorso/thermo_pw/commit/743148245d3ee9ce524afe3edc323d5ff3b31a92">commit_7431482</a>.
