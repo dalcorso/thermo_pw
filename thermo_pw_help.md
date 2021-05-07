@@ -56,6 +56,8 @@ patches given below.</p>
 
 **Patches for thermo_pw.1.4.1**:
 <br>
+* Still a missing transformation of ftau into ft. Please change
+as in commit <a href="https://github.com/dalcorso/thermo_pw/commit/3e3953152e2c81d301eb6a596de97eba07f6841d">commit_3e39531</a> of 7/5/2021.
 * At line 576 of upflib/read_upf_new.f90 of QE6.7 change PP_AEWFC_rel with
 PP_AEWFC_REL.
 * I usually change line 400 of Modules/read_namelists.f90 of QE6.7
@@ -77,6 +79,8 @@ restoring the old default diago_david_ndim=4.
 
 **Patches for thermo_pw.1.3.1 and thermo_pw.1.3.2**:
 <br>
+* Still a missing transformation of ftau into ft. Please change
+as in commit <a href="https://github.com/dalcorso/thermo_pw/commit/3e3953152e2c81d301eb6a596de97eba07f6841d">commit_3e39531</a> of 7/5/2021.
 * The phonon calculation with US-PP and PAW-PP is unstable. Correct as in
 commit: 
 <a href="https://github.com/dalcorso/thermo_pw/commit/51b600a25dd1d46c2ea004a509beb830d82a5811">commit_51b600a</a>.
@@ -91,6 +95,8 @@ the old default diago_david_ndim=4.
 
 **Patches for thermo_pw.1.3.0**:
 <br>
+* Still a missing transformation of ftau into ft. Please change
+as in commit <a href="https://github.com/dalcorso/thermo_pw/commit/3e3953152e2c81d301eb6a596de97eba07f6841d">commit_3e39531</a> of 7/5/2021.
 * To reproduce ph_example07 it is necessary to change line 999 of 
 file PW/src/pw_restart_new.f90 of QE6.5. Substitute angle1, angle2,
 starting_magnetization with starting_magnetization, angle1, angle2.
