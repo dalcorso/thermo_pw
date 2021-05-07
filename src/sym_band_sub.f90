@@ -601,31 +601,29 @@ USE point_group,        ONLY : find_aux_ind_two_groups
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: xk1(3), xk2(3)
 INTEGER, INTENT(OUT) :: aux_ind
-INTEGER :: sk(3,3,48), ftauk(3,48), gk(3,48), sk_is(3,3,48), &
+INTEGER :: sk(3,3,48), gk(3,48), sk_is(3,3,48), &
            gk_is(3,48), t_revk(48), invsk(48), invs_is(48), nsymk
-INTEGER :: sk1(3,3,48), ftauk1(3,48), gk1(3,48), sk1_is(3,3,48), &
+INTEGER :: sk1(3,3,48), gk1(3,48), sk1_is(3,3,48), &
            t_revk1(48), invsk1(48), nsymk1, ftau(3,48)
 INTEGER :: group_a, group_b, nsym_isa, nsym_isb
+REAL(DP) :: ftk(3,48), ftk1(3,48)
 LOGICAL :: is_symmorphic, search_sym
 CHARACTER(len=45) :: snamek(48), snamek1(48)
 COMPLEX(DP) :: d_spink(2,2,48), d_spink1(2,2,48), d_spin_is(2,2,48)
 
-ftau(1,1:nsym) = NINT ( ft(1,1:nsym)*dfftp%nr1 )
-ftau(2,1:nsym) = NINT ( ft(2,1:nsym)*dfftp%nr2 )
-ftau(3,1:nsym) = NINT ( ft(3,1:nsym)*dfftp%nr3 )
 
-CALL smallgk (xk1, at, bg, s, ftau, t_rev, sname, &
-              nsym, sk, ftauk, gk, t_revk, invsk, snamek, nsymk)
-CALL find_info_group_tpw(nsymk, sk, t_revk, ftauk, d_spink, gk, snamek,&
+CALL smallgk (xk1, at, bg, s, ft, t_rev, sname, &
+              nsym, sk, ftk, gk, t_revk, invsk, snamek, nsymk)
+CALL find_info_group_tpw(nsymk, sk, t_revk, ftk, d_spink, gk, snamek,&
              sk_is, d_spin_is, gk_is, invs_is, is_symmorphic, search_sym)
 group_a=code_group
 IF (noncolin.AND.domag) THEN
    group_a=code_group_is
    nsym_isa=nsym_is
 ENDIF
-CALL smallgk (xk2, at, bg, s, ftau, t_rev, sname, &
-            nsym, sk1, ftauk1, gk1, t_revk1, invsk1, snamek1, nsymk1)
-CALL find_info_group_tpw(nsymk1, sk1, t_revk1, ftauk1, d_spink1, gk1, &
+CALL smallgk (xk2, at, bg, s, ft, t_rev, sname, &
+            nsym, sk1, ftk1, gk1, t_revk1, invsk1, snamek1, nsymk1)
+CALL find_info_group_tpw(nsymk1, sk1, t_revk1, ftk1, d_spink1, gk1, &
             snamek1, sk1_is, d_spin_is, gk_is, invs_is, &
             is_symmorphic,search_sym)
 group_b=code_group
