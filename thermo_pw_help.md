@@ -113,7 +113,7 @@ in
 
 **Patches for thermo_pw.1.2.0**:
 <br>
-* When what='elastic_costants_t' a bug in QE prevents the use of 
+* When what='elastic_constants_t' a bug in QE prevents the use of 
 use_free_energy=.TRUE. and elastic_algorithm='energy_std'.
 Add the instruction:
 ibrav_ => NULL()
@@ -479,3 +479,15 @@ see if the problem disappears.
 * If none of the above applies, there might be a problem in the algorithm 
 that finds the symmetry. Please send me your input or post it to one of
 the forum mailing lists.
+<br><br>
+30. Can I compute the temperature dependent elastic constants with 
+<code>thermo\_pw</code>?
+* Quasi-static elastic constants are available from version <code>0.6.0</code>.Quasi-harmonic elastic constants require version <code>1.2.0</code> or
+later. The electronic contribution is implemented only starting for
+version <code>1.4.0</code>. 
+* Note that this feature is still work in progress and there are still 
+some limitations. For instance, atomic coordinates are relaxed only at 
+zero temperature.
+* Note also that the quasi-harmonic calculation is very time consuming.
+As an order of magnitude it requires hundreds of phonon dispersion 
+calculations.
