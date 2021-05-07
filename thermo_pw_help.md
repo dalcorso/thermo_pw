@@ -481,7 +481,7 @@ that finds the symmetry. Please send me your input or post it to one of
 the forum mailing lists.
 <br><br>
 30. Can I compute the temperature dependent elastic constants with 
-<code>thermo\_pw</code>?
+<code>thermo_pw</code>?
 * Quasi-static elastic constants are available from version <code>0.6.0</code>.Quasi-harmonic elastic constants require version <code>1.2.0</code> or
 later. The electronic contribution is implemented only starting for
 version <code>1.4.0</code>. 
