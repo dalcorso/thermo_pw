@@ -604,7 +604,7 @@ INTEGER, INTENT(OUT) :: aux_ind
 INTEGER :: sk(3,3,48), gk(3,48), sk_is(3,3,48), &
            gk_is(3,48), t_revk(48), invsk(48), invs_is(48), nsymk
 INTEGER :: sk1(3,3,48), gk1(3,48), sk1_is(3,3,48), &
-           t_revk1(48), invsk1(48), nsymk1, ftau(3,48)
+           t_revk1(48), invsk1(48), nsymk1
 INTEGER :: group_a, group_b, nsym_isa, nsym_isb
 REAL(DP) :: ftk(3,48), ftk1(3,48)
 LOGICAL :: is_symmorphic, search_sym
