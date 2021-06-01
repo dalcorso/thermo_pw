@@ -1129,12 +1129,15 @@ It is useful to solve first the eivenvalue problem:
 \sum_{s',\beta} \left(C_{s,\alpha,s',\beta} - 
 M_s \omega_j^2 \delta_{ss'}\delta_{\alpha\beta}\right){\bf e}^j_{s',\beta}=0
 \end{equation}
-and to define the operator
+and to define the matrix 
 \begin{equation}
-C^{-1}_{s,\alpha,s',\beta}(\omega) = \sum_j {{\bf e}^j_{s,\alpha} 
+C^{-1}_{s,\alpha,s',\beta}(\omega) = \sideset{}{'}\sum_j {{\bf e}^j_{s,\alpha} 
 {\bf e}^j_{s',\beta}
 \over \sqrt{M_s M_{s'}}(\omega^2_j - \omega^2)}.
 \end{equation}
+The apostrophe on the sum means that we remove the three acoustic modes 
+from the sum in order to avoid the divergence in the
+$\lim_{\omega\rightarrow 0}$. 
 It is simple to show that
 \begin{equation}
 \lim_{\omega\rightarrow 0} \sum_{s,\alpha} C_{s'',\gamma,s,\alpha} C^{-1}_{s,\alpha,s',\beta}(\omega)
@@ -1281,11 +1284,14 @@ It is useful to solve first the eivenvalue problem:
 \sum_{s',\beta} \left(C_{s,\alpha,s',\beta} - 
 M_s \omega_j^2 \delta_{ss'}\delta_{\alpha\beta}\right){\bf e}^j_{s',\beta}=0
 \end{equation}
-and to define the operator
+and to define the matrix
 \begin{equation}
-C^{-1}_{s,\alpha,s',\beta}(\omega) = \sum_j {{\bf e}^j_{s,\alpha} {\bf e}^j_{s',\beta}
+C^{-1}_{s,\alpha,s',\beta}(\omega) = \sideset{}{'}\sum_j {{\bf e}^j_{s,\alpha} {\bf e}^j_{s',\beta}
 \over \sqrt{M_s M_{s'}}(\omega^2_j - \omega^2)}.
 \end{equation}
+The apostrophe on the sum means that we remove the three acoustic modes
+from the sum in order to avoid the divergence in the
+$\lim_{\omega\rightarrow 0}$.
 It is simple to show that
 \begin{equation}
 \lim_{\omega\rightarrow 0} \sum_{s,\alpha} C_{s'',\gamma,s,\alpha} C^{-1}_{s,\alpha,s',\beta}(\omega)
@@ -1432,11 +1438,14 @@ It is useful to solve first the eivenvalue problem:
 \sum_{s',\beta} \left(C_{s,\alpha,s',\beta} - 
 M_s \omega_j^2 \delta_{ss'}\delta_{\alpha\beta}\right){\bf e}^j_{s',\beta}=0
 \end{equation}
-and to define the operator
+and to define the matrix
 \begin{equation}
-C^{-1}_{s,\alpha,s',\beta}(\omega) = \sum_j {{\bf e}^j_{s,\alpha} {\bf e}^j_{s',\beta}
+C^{-1}_{s,\alpha,s',\beta}(\omega) = \sideset{}{'}\sum_j {{\bf e}^j_{s,\alpha} {\bf e}^j_{s',\beta}
 \over \sqrt{M_s M_{s'}}(\omega^2_j - \omega^2)}.
 \end{equation}
+The apostrophe on the sum means that we remove the three acoustic modes
+from the sum in order to avoid the divergence in the
+$\lim_{\omega\rightarrow 0}$.
 It is simple to show that
 \begin{equation}
 \lim_{\omega\rightarrow 0} \sum_{s,\alpha} C_{s'',\gamma,s,\alpha} C^{-1}_{s,\alpha,s',\beta}(\omega)
