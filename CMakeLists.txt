@@ -179,7 +179,6 @@ target_link_libraries(qe_tpw_qe
         qe_fftx
         qe_dftd3
         qe_devxlib
-        qe_upflib
         qe_xclib)
 
 set(src_tpw
@@ -370,10 +369,7 @@ target_link_libraries(qe_tpw_exe
         qe_phonon_ph
         qe_pw
         qe_pp
-        qe_lax
-        qe_upflib
-        qe_modules
-        qe_xclib)
+        qe_modules)
 
 ###########################################################
 # space_groups.x
@@ -386,17 +382,8 @@ set_target_properties(qe_tpw_space_groups_exe
         OUTPUT_NAME space_groups.x)
 target_link_libraries(qe_tpw_space_groups_exe
     PRIVATE
-        qe_tpw
-        qe_tpw_qe
         qe_tpw_lib
-        qe_lr_modules
-        qe_phonon_ph
-        qe_pw
-        qe_pp
-        qe_lax
-        qe_upflib
-        qe_modules
-        qe_xclib)
+        qe_modules)
 
 ###########################################################
 # crystal_point_groups.x
@@ -409,17 +396,8 @@ set_target_properties(qe_tpw_crystal_point_group_exe
         OUTPUT_NAME crystal_point_group.x)
 target_link_libraries(qe_tpw_crystal_point_group_exe
     PRIVATE
-        qe_tpw
-        qe_tpw_qe
         qe_tpw_lib
-        qe_lr_modules
-        qe_phonon_ph
-        qe_pw
-        qe_pp
-        qe_lax
-        qe_upflib
-        qe_modules
-        qe_xclib)
+        qe_modules)
 
 ###########################################################
 # mag_point_groups.x
@@ -432,17 +410,8 @@ set_target_properties(qe_tpw_mag_point_group_exe
         OUTPUT_NAME mag_point_group.x)
 target_link_libraries(qe_tpw_mag_point_group_exe
     PRIVATE
-        qe_tpw
-        qe_tpw_qe
         qe_tpw_lib
-        qe_lr_modules
-        qe_phonon_ph
-        qe_pw
-        qe_pp
-        qe_lax
-        qe_upflib
-        qe_modules
-        qe_xclib)
+        qe_modules)
 
 ###########################################################
 # units.x
@@ -455,17 +424,8 @@ set_target_properties(qe_tpw_units_exe
         OUTPUT_NAME units.x)
 target_link_libraries(qe_tpw_units_exe
     PRIVATE
-        qe_tpw
-        qe_tpw_qe
         qe_tpw_lib
-        qe_lr_modules
-        qe_phonon_ph
-        qe_pw
-        qe_pp
-        qe_lax
-        qe_upflib
-        qe_modules
-        qe_xclib)
+        qe_modules)
 
 ###########################################################
 # hex_trig.x
@@ -491,17 +451,8 @@ set_target_properties(qe_tpw_bravais_lattices_exe
         OUTPUT_NAME bravais_lattices.x)
 target_link_libraries(qe_tpw_bravais_lattices_exe
     PRIVATE
-        qe_tpw
-        qe_tpw_qe
         qe_tpw_lib
-        qe_lr_modules
-        qe_phonon_ph
-        qe_pw
-        qe_pp
-        qe_lax
-        qe_upflib
-        qe_modules
-        qe_xclib)
+        qe_modules)
 
 ###########################################################
 # kovalev.x
@@ -514,17 +465,8 @@ set_target_properties(qe_tpw_kovalev_exe
         OUTPUT_NAME kovalev.x)
 target_link_libraries(qe_tpw_kovalev_exe
     PRIVATE
-        qe_tpw
-        qe_tpw_qe
         qe_tpw_lib
-        qe_lr_modules
-        qe_phonon_ph
-        qe_pw
-        qe_pp
-        qe_lax
-        qe_upflib
-        qe_modules
-        qe_xclib)
+        qe_modules)
 
 ###########################################################
 # supercell.x
@@ -538,17 +480,8 @@ set_target_properties(qe_tpw_supercell_exe
         OUTPUT_NAME supercell.x)
 target_link_libraries(qe_tpw_supercell_exe
     PRIVATE
-        qe_tpw
-        qe_tpw_qe
         qe_tpw_lib
-        qe_lr_modules
-        qe_phonon_ph
-        qe_pw
-        qe_pp
-        qe_lax
-        qe_upflib
-        qe_modules
-        qe_xclib)
+        qe_modules)
 
 ###########################################################
 # translate.x
@@ -562,17 +495,8 @@ set_target_properties(qe_tpw_translate_exe
         OUTPUT_NAME translate.x)
 target_link_libraries(qe_tpw_translate_exe
     PRIVATE
-        qe_tpw
-        qe_tpw_qe
         qe_tpw_lib
-        qe_lr_modules
-        qe_phonon_ph
-        qe_pw
-        qe_pp
-        qe_lax
-        qe_upflib
-        qe_modules
-        qe_xclib)
+        qe_modules)
 
 ###########################################################
 # elastic.x
@@ -586,17 +510,8 @@ set_target_properties(qe_tpw_elastic_exe
         OUTPUT_NAME elastic.x)
 target_link_libraries(qe_tpw_elastic_exe
     PRIVATE
-        qe_tpw
-        qe_tpw_qe
         qe_tpw_lib
-        qe_lr_modules
-        qe_phonon_ph
-        qe_pw
-        qe_pp
-        qe_lax
-        qe_upflib
-        qe_modules
-        qe_xclib)
+        qe_modules)
 
 ###########################################################
 # optical.x
@@ -610,17 +525,8 @@ set_target_properties(qe_tpw_optical_exe
         OUTPUT_NAME optical.x)
 target_link_libraries(qe_tpw_optical_exe
     PRIVATE
-        qe_tpw
-        qe_tpw_qe
         qe_tpw_lib
-        qe_lr_modules
-        qe_phonon_ph
-        qe_pw
-        qe_pp
-        qe_lax
-        qe_upflib
-        qe_modules
-        qe_xclib)
+        qe_modules)
 
 ###########################################################
 # plot_surf_states.x
@@ -634,17 +540,8 @@ set_target_properties(qe_tpw_plot_sur_states_exe
         OUTPUT_NAME plot_sur_states.x)
 target_link_libraries(qe_tpw_plot_sur_states_exe
     PRIVATE
-        qe_tpw
-        qe_tpw_qe
         qe_tpw_lib
-        qe_lr_modules
-        qe_phonon_ph
-        qe_pw
-        qe_pp
-        qe_lax
-        qe_upflib
-        qe_modules
-        qe_xclib)
+        qe_modules)
 
 ###########################################################
 # gener_2d_slab.x
@@ -658,17 +555,8 @@ set_target_properties(qe_tpw_gener_2d_slab_exe
         OUTPUT_NAME gener_2d_slab.x)
 target_link_libraries(qe_tpw_gener_2d_slab_exe
     PRIVATE
-        qe_tpw
-        qe_tpw_qe
         qe_tpw_lib
-        qe_lr_modules
-        qe_phonon_ph
-        qe_pw
-        qe_pp
-        qe_lax
-        qe_upflib
-        qe_modules
-        qe_xclib)
+        qe_modules)
 
 ###########################################################
 # gener_3d_slab.x
@@ -682,17 +570,8 @@ set_target_properties(qe_tpw_gener_3d_slab_exe
         OUTPUT_NAME gener_3d_slab.x)
 target_link_libraries(qe_tpw_gener_3d_slab_exe
     PRIVATE
-        qe_tpw
-        qe_tpw_qe
         qe_tpw_lib
-        qe_lr_modules
-        qe_phonon_ph
-        qe_pw
-        qe_pp
-        qe_lax
-        qe_upflib
-        qe_modules
-        qe_xclib)
+        qe_modules)
 
 ###########################################################
 # gener_nanowire.x
@@ -706,17 +585,8 @@ set_target_properties(qe_tpw_gener_nanowire_exe
         OUTPUT_NAME gener_nanowire.x)
 target_link_libraries(qe_tpw_gener_nanowire_exe
     PRIVATE
-        qe_tpw
-        qe_tpw_qe
         qe_tpw_lib
-        qe_lr_modules
-        qe_phonon_ph
-        qe_pw
-        qe_pp
-        qe_lax
-        qe_upflib
-        qe_modules
-        qe_xclib)
+        qe_modules)
 
 ###########################################################
 # debye.x
@@ -730,17 +600,8 @@ set_target_properties(qe_tpw_debye_exe
         OUTPUT_NAME debye.x)
 target_link_libraries(qe_tpw_debye_exe
     PRIVATE
-        qe_tpw
-        qe_tpw_qe
         qe_tpw_lib
-        qe_lr_modules
-        qe_phonon_ph
-        qe_pw
-        qe_pp
-        qe_lax
-        qe_upflib
-        qe_modules
-        qe_xclib)
+        qe_modules)
 
 ###########################################################
 # rotate_tensor.x
@@ -754,17 +615,8 @@ set_target_properties(qe_tpw_rotate_tensor_exe
         OUTPUT_NAME rotate_tensor.x)
 target_link_libraries(qe_tpw_rotate_tensor_exe
     PRIVATE
-        qe_tpw
-        qe_tpw_qe
         qe_tpw_lib
-        qe_lr_modules
-        qe_phonon_ph
-        qe_pw
-        qe_pp
-        qe_lax
-        qe_upflib
-        qe_modules
-        qe_xclib)
+        qe_modules)
 
 ###########################################################
 # test_colors.x
@@ -778,15 +630,8 @@ set_target_properties(qe_tpw_test_colors_exe
         OUTPUT_NAME test_colors.x)
 target_link_libraries(qe_tpw_test_colors_exe
     PRIVATE
-        qe_tpw
-        qe_tpw_qe
         qe_tpw_lib
-        qe_pw
-        qe_pp
-        qe_lax
-        qe_upflib
-        qe_modules
-        qe_xclib)
+        qe_modules)
 
 ###########################################################
 # epsilon_tpw.x
@@ -800,17 +645,11 @@ set_target_properties(qe_tpw_epsilon_tpw_exe
         OUTPUT_NAME epsilon_tpw.x)
 target_link_libraries(qe_tpw_epsilon_tpw_exe
     PRIVATE
-        qe_tpw
-        qe_tpw_qe
         qe_tpw_lib
-        qe_lr_modules
-        qe_phonon_ph
         qe_pw
         qe_pp
-        qe_lax
-        qe_upflib
-        qe_modules
-        qe_xclib)
+        qe_lr_modules
+        qe_modules)
 
 ###########################################################
 # pdec.x
@@ -824,17 +663,8 @@ set_target_properties(qe_tpw_pdec_exe
         OUTPUT_NAME pdec.x)
 target_link_libraries(qe_tpw_pdec_exe
     PRIVATE
-        qe_tpw
-        qe_tpw_qe
         qe_tpw_lib
-        qe_lr_modules
-        qe_phonon_ph
-        qe_pw
-        qe_pp
-        qe_lax
-        qe_upflib
-        qe_modules
-        qe_xclib)
+        qe_modules)
 
 ###########################################################
 
