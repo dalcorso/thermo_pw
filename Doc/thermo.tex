@@ -1,5 +1,5 @@
 %!
-%! Copyright (C) 2015 - Present Andrea Dal Corso 
+%! Copyright (C) 2014-2021 Andrea Dal Corso 
 %! This file is distributed under the terms of the
 %! GNU General Public License. See the file `License'
 %! in the root directory of the present distribution,
@@ -8,43 +8,45 @@
 \documentclass[12pt,a4paper]{article}
 \def\version{1.5.0}
 \def\qe{{\sc Quantum ESPRESSO}}
-\def\tpw{{\sc THERMO\_PW}}
 
+\usepackage[T1]{fontenc}
+\usepackage{bookman}
 \usepackage{html}
+
+% BEWARE: don't revert from graphicx for epsfig, because latex2html
+% doesn't handle epsfig commands !!!
+\usepackage{graphicx}
 \usepackage{color}
 
-\usepackage{graphicx}
+\textwidth = 16cm
+\textheight = 24cm
+\topmargin =0 cm
+\oddsidemargin = 0. cm
+
 
 \definecolor{web-blue}{rgb}{0,0.5,1.0}
 \definecolor{coral}{rgb}{1.0,0.5,0.3}
 \definecolor{red}{rgb}{1.0,0,0.0}
 \definecolor{green}{rgb}{0.,1.0,0.0}
 
-
-\textwidth = 17cm
-\textheight = 24cm
-\topmargin =-1 cm
-\oddsidemargin = 0 cm
-
 \def\pwx{\texttt{pw.x}}
 \def\phx{\texttt{ph.x}}
 \def\configure{\texttt{configure}}
 \def\PWscf{\texttt{PWscf}}
 \def\PHonon{\texttt{PHonon}}
-\def\thermo{\texttt{thermo\_pw}}
+\def\tpw{\texttt{thermo\_pw}}
 \def\make{\texttt{make}}
 
 \begin{document} 
+
 \author{Andrea Dal Corso (SISSA - Trieste)}
 \date{}
 
-%\def\SissaImage{./sissa_on_white.png}
-
 \title{
-%  \includegraphics[width=6cm]{\SissaImage}\\
-  \vskip 1cm
-  {\color{red} \Huge Thermo\_pw: Thermodynamics of crystals} \\
-  \Large (version \version)
+  \includegraphics[width=5cm]{thermo_pw.jpg} \\
+  \vspace{3truecm}
+  % title
+  \Huge \color{blue} Thermo\_pw: Thermodynamics of crystals \\(v.\version)
 }
 
 \maketitle

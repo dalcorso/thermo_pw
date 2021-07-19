@@ -1,5 +1,5 @@
 %!
-%! Copyright (C) 2019 - Present Andrea Dal Corso 
+%! Copyright (C) 2014-2021 Andrea Dal Corso 
 %! This file is distributed under the terms of the
 %! GNU General Public License. See the file `License'
 %! in the root directory of the present distribution,
@@ -8,14 +8,24 @@
 \documentclass[12pt,a4paper]{article}
 \def\version{1.5.0}
 \def\qe{{\sc Quantum ESPRESSO}}
-\def\tpw{{\sc THERMO\_PW}}
 
+\usepackage[T1]{fontenc}
+\usepackage{bookman}
+\usepackage{html}
+
+% BEWARE: don't revert from graphicx for epsfig, because latex2html
+% doesn't handle epsfig commands !!!
+\usepackage{graphicx}
+\usepackage{color}
 \usepackage{amsmath}
 \usepackage{mathtools}
-\usepackage{html}
-\usepackage{color}
 
-\usepackage{graphicx}
+
+\textwidth = 16cm
+\textheight = 24cm
+\topmargin =0 cm
+\oddsidemargin = 0. cm
+
 
 \definecolor{web-blue}{rgb}{0,0.5,1.0}
 \definecolor{steelblue}{rgb}{0.27,0.5,0.7}
@@ -27,10 +37,6 @@
 \definecolor{violet}{rgb}{0.75,0.35,0.75}
 
 
-\textwidth = 17cm
-\textheight = 24cm
-\topmargin =-1 cm
-\oddsidemargin = 0 cm
 
 \def\pwx{\texttt{pw.x}}
 \def\phx{\texttt{ph.x}}
@@ -38,7 +44,9 @@
 \def\PWscf{\texttt{PWscf}}
 \def\PHonon{\texttt{PHonon}}
 \def\thermo{\texttt{thermo\_pw}}
+\def\tpw{\texttt{thermo\_pw}}
 \def\make{\texttt{make}}
+
 
 \def\hplanck{6.62607015\times 10^{-34}}
 \def\hbarf{1.0545718176462\times 10^{-34}}
@@ -194,16 +202,15 @@
 
 
 \begin{document} 
+
 \author{Andrea Dal Corso (SISSA - Trieste)}
 \date{}
 
-%\def\SissaImage{./sissa_on_white.png}
-
 \title{
-%  \includegraphics[width=6cm]{\SissaImage}\\
-  \vskip 1cm
-  {\color{red} \Huge Thermo\_pw: Equilibrium material properties} \\
-  \Large (version \version)
+  \includegraphics[width=5cm]{thermo_pw.jpg} \\
+  \vspace{3truecm}
+  % title
+  \Huge \color{blue} Thermo\_pw: Equilibrium material properties \\ (v.\version)
 }
 
 \maketitle
@@ -1143,18 +1150,18 @@ It is simple to show that
 \lim_{\omega\rightarrow 0} \sum_{s,\alpha} C_{s'',\gamma,s,\alpha} C^{-1}_{s,\alpha,s',\beta}(\omega)
 =\delta_{s'',s'} \delta_{\gamma,\beta}
 \end{equation}
-so we can write the displacement as:
-\begin{equation}
-{\bf u}_{s,\alpha}=\sum_{s',\beta} C^{-1}_{s,\alpha,s',\beta}
+so we have the displacement:
+\begin{eqnarray}
+{\bf u}_{s,\alpha}&=&\sum_{s',\beta} C^{-1}_{s,\alpha,s',\beta}
 {\bf f}^{(0)}_{s',\beta} + \sum_{s',\beta,\gamma,\delta} 
 C^{-1}_{s,\alpha,s',\beta}
 \Lambda_{s',\beta,\gamma,\delta} \epsilon_{\gamma,\delta}
 + e \sum_{s',\beta,\gamma} C^{-1}_{s,\alpha,s',\beta}
-Z^*_{s',\beta,\gamma} {\bf E}_{\gamma} 
-+ \mu_0 \sum_{s',\beta,\gamma} C^{-1}_{s,\alpha,s',\beta} 
+Z^*_{s',\beta,\gamma} {\bf E}_{\gamma} \nonumber \\
+&+& \mu_0 \sum_{s',\beta,\gamma} C^{-1}_{s,\alpha,s',\beta} 
 Z^m_{s',\beta,\gamma} 
 {\bf H}_{\gamma},
-\end{equation}
+\end{eqnarray}
 and inserting this expression in the other equations we can write:
 \begin{align}
 \sigma_{\lambda,\mu}&= \tilde \sigma_{\lambda,\mu}^{(0)}
@@ -1298,17 +1305,17 @@ It is simple to show that
 =\delta_{s'',s'} \delta_{\gamma,\beta}
 \end{equation}
 so we have the displacement:
-\begin{equation}
-{\bf u}_{s,\alpha}=\sum_{s',\beta} C^{-1}_{s,\alpha,s',\beta}
+\begin{eqnarray}
+{\bf u}_{s,\alpha}&=&\sum_{s',\beta} C^{-1}_{s,\alpha,s',\beta}
 {\bf f}^{(0)}_{s',\beta} + \sum_{s',\beta,\gamma,\delta} 
 C^{-1}_{s,\alpha,s',\beta}
 \Lambda_{s',\beta,\gamma,\delta} \epsilon_{\gamma,\delta}
 + \sum_{s',\beta,\gamma} C^{-1}_{s,\alpha,s',\beta}
-Z^*_{s',\beta,\gamma} {\bf E}_{\gamma} 
-+ \alpha^2 \sum_{s',\beta,\gamma} C^{-1}_{s,\alpha,s',\beta} 
+Z^*_{s',\beta,\gamma} {\bf E}_{\gamma} \nonumber \\
+&+& \alpha^2 \sum_{s',\beta,\gamma} C^{-1}_{s,\alpha,s',\beta} 
 Z^m_{s',\beta,\gamma} 
 {\bf H}_{\gamma},
-\end{equation}
+\end{eqnarray}
 and inserting this expression in the other equations we can write:
 \begin{align}
 \sigma_{\lambda,\mu}&= \tilde \sigma_{\lambda,\mu}^{(0)}
@@ -1452,16 +1459,16 @@ It is simple to show that
 =\delta_{s'',s'} \delta_{\gamma,\beta}
 \end{equation}
 so we have the displacement:
-\begin{equation}
-{\bf u}_{s,\alpha}=\sum_{s',\beta} C^{-1}_{s,\alpha,s',\beta}
+\begin{eqnarray}
+{\bf u}_{s,\alpha}&=&\sum_{s',\beta} C^{-1}_{s,\alpha,s',\beta}
 {\bf f}^{(0)}_{s',\beta} + \sum_{s',\beta,\gamma,\delta} 
 C^{-1}_{s,\alpha,s',\beta}
 \Lambda_{s',\beta,\gamma,\delta} \epsilon_{\gamma,\delta}
 + e \sum_{s',\beta,\gamma} C^{-1}_{s,\alpha,s',\beta}
-Z^*_{s',\beta,\gamma} {\bf E}_{\gamma} 
-+ \sum_{s',\beta,\gamma} C^{-1}_{s,\alpha,s',\beta} Z^m_{s',\beta,\gamma} 
+Z^*_{s',\beta,\gamma} {\bf E}_{\gamma} \nonumber \\
+&+& \sum_{s',\beta,\gamma} C^{-1}_{s,\alpha,s',\beta} Z^m_{s',\beta,\gamma} 
 {\bf H}_{\gamma},
-\end{equation}
+\end{eqnarray}
 and inserting this expression in the other equations we can write:
 \begin{align}
 \sigma_{\lambda,\mu}&= \tilde \sigma_{\lambda,\mu}^{(0)}
@@ -1614,7 +1621,7 @@ at finite temperature. In addition to generalizing to finite temperatures
 the macroscopic quantities introduced so far, they provide other material 
 properties not yet analyzed:
 
-\subsection{Heat capacity at constant strain}
+\subsection{\ \ Heat capacity at constant strain}
 The heat capacity at constant strain is defined as
 \begin{equation}
 C_\epsilon= - T {\partial^2 F \over \partial T^2} = 
@@ -1624,7 +1631,7 @@ and has the same unit as $S$: $J\over K$. Usually one considers the heat
 capacity of a mole of substance and gives $C_\epsilon$ in 
 ${J\over K \cdot mol}$.
 
-\subsection{Thermal stresses}
+\subsection{\ \ Thermal stresses}
 The thermal stress is defined as:
 \begin{equation}
 \tilde b_{\alpha,\beta} = 
@@ -1635,7 +1642,7 @@ The thermal stress is defined as:
 \end{equation}
 its unit is ${N \over m^2 \cdot K}$.
 
-\subsection{Pyroelectric and electro-caloric tensors}
+\subsection{\ \ Pyroelectric and electro-caloric tensors}
 The pyroelectric and the electro-caloric tensors are defined as:
 \begin{equation}
 \tilde {\bf p}_\gamma =
@@ -1648,7 +1655,7 @@ their unit is ${C \over m^2 \cdot K}$. Note that one has also
 ${\partial {\bf D}_\gamma \over \partial T}=
 {\partial {\bf P}_\gamma \over \partial T}$. 
 
-\subsection{Pyromagnetic and magneto-caloric tensors}
+\subsection{\ \ Pyromagnetic and magneto-caloric tensors}
 The pyromagnetic and the magneto-caloric tensors are defined as:
 \begin{equation}
 \tilde {\bf q}_\gamma = 
@@ -1661,7 +1668,7 @@ their unit is ${T \over K}$. Note that one has also
 ${\partial {\bf B}_\gamma \over \partial T}= \mu_0
 {\partial {\bf M}_\gamma \over \partial T}$.
 
-\subsection{Macroscopic equations at finite temperature}
+\subsection{\ \ Macroscopic equations at finite temperature}
 
 The other derivatives are just finite temperature generalizations of the
 previously discussed quantities. We can rewrite the macroscopic equations as:
@@ -1823,7 +1830,7 @@ at finite temperature. In addition to generalizing to finite temperatures
 the macroscopic quantities introduced so far, they provide other material 
 properties not yet analyzed:
 
-\subsection{\color{web-blue}Heat capacity at constant strain}
+\subsection{\color{web-blue}\ \ Heat capacity at constant strain}
 The heat capacity at constant strain is defined as
 \begin{equation}
 C_\epsilon= - T {\partial^2 F \over \partial T^2} = 
@@ -1833,7 +1840,7 @@ and has the same unit as $S$: $E_h\over K$. Usually one considers the heat
 capacity of a mole of substance and gives $C_\epsilon$ in 
 ${E_h\over K \cdot mol}$.
 
-\subsection{\color{web-blue}Thermal stresses}
+\subsection{\color{web-blue}\ \ Thermal stresses}
 The thermal stress is defined as:
 \begin{equation}
 \tilde b_{\alpha,\beta} = 
@@ -1844,7 +1851,7 @@ The thermal stress is defined as:
 \end{equation}
 its unit is ${E_h \over a_B^3 \cdot K}$.
 
-\subsection{\color{web-blue}Pyroelectric and electro-caloric tensors}
+\subsection{\color{web-blue}\ \ Pyroelectric and electro-caloric tensors}
 The pyroelectric and the electro-caloric tensors are defined as:
 \begin{equation}
 \tilde {\bf p}_\gamma =
@@ -1857,7 +1864,7 @@ their unit is ${e \over a_B^2 \cdot K}$. Note that one has also
 ${\partial {\bf D}_\gamma \over \partial T}=
 4 \pi {\partial {\bf P}_\gamma \over \partial T}$. 
 
-\subsection{\color{web-blue}Pyromagnetic and magneto-caloric tensors}
+\subsection{\color{web-blue}\ \ Pyromagnetic and magneto-caloric tensors}
 The pyromagnetic and the magneto-caloric tensors are defined as:
 \begin{equation}
 \tilde {\bf q}_\gamma = 
@@ -1871,7 +1878,7 @@ Note that one has also
 ${\partial {\bf B}_\gamma \over \partial T}= 4 \pi \alpha^2
 {\partial {\bf M}_\gamma \over \partial T}$.
 
-\subsection{\color{web-blue}Macroscopic equations at finite temperature}
+\subsection{\color{web-blue}\ \ Macroscopic equations at finite temperature}
 The other derivatives are just finite temperature generalizations of the
 previously discussed quantities. We can rewrite the macroscopic equations as:
 \begin{align}
@@ -2033,7 +2040,7 @@ at finite temperature. In addition to generalizing to finite temperatures
 the macroscopic quantities introduced so far, they provide other material 
 properties not yet analyzed:
 
-\subsection{\color{orange}Heat capacity at constant strain}
+\subsection{\color{orange}\ \ Heat capacity at constant strain}
 The heat capacity at constant strain is defined as
 \begin{equation}
 C_\epsilon= - T {\partial^2 F \over \partial T^2} = 
@@ -2043,7 +2050,7 @@ and has the same unit as $S$: $erg\over K$. Usually one considers the heat
 capacity of a mole of substance and gives $C_\epsilon$ in 
 ${erg\over K \cdot mol}$.
 
-\subsection{\color{orange}Thermal stresses}
+\subsection{\color{orange}\ \ Thermal stresses}
 The thermal stress is defined as:
 \begin{equation}
 \tilde b_{\alpha,\beta} = 
@@ -2054,7 +2061,7 @@ The thermal stress is defined as:
 \end{equation}
 its unit is ${dyne \over cm^2 \cdot K}$.
 
-\subsection{\color{orange}Pyroelectric and electro-caloric tensors}
+\subsection{\color{orange}\ \ Pyroelectric and electro-caloric tensors}
 The pyroelectric and the electro-caloric tensors are defined as:
 \begin{equation}
 \tilde {\bf p}_\gamma =
@@ -2067,7 +2074,7 @@ their unit is ${statC \over cm^2 \cdot K}$. Note that one has also
 ${\partial {\bf D}_\gamma \over \partial T}=4 \pi
 {\partial {\bf P}_\gamma \over \partial T}$. 
 
-\subsection{\color{orange}Pyromagnetic and magneto-caloric tensors}
+\subsection{\color{orange}\ \ Pyromagnetic and magneto-caloric tensors}
 The pyromagnetic and the magneto-caloric tensors are defined as:
 \begin{equation}
 \tilde {\bf q}_\gamma = 
@@ -2080,7 +2087,7 @@ their unit is ${4 \pi G \over K}$. Note that one has also
 ${\partial {\bf B}_\gamma \over \partial T}= 4 \pi
 {\partial {\bf M}_\gamma \over \partial T}$.
 
-\subsection{\color{orange}Macroscopic equations at finite temperature}
+\subsection{\color{orange}\ \ Macroscopic equations at finite temperature}
 The other derivatives are just finite temperature generalizations of the
 previously discussed quantities. We can rewrite the macroscopic equations as:
 \begin{align}
@@ -2229,7 +2236,7 @@ $\hat d_{\alpha,\beta,\lambda}$ ($\hat h_{\alpha,\beta,\lambda}$)
 is the piezoelectric (piezomagnetic) tensor that
 gives the polarization (magnetization) induced by a stress. 
 
-\subsection{Thermodynamic equations}
+\subsection{\ \ Thermodynamic equations}
 Similarly for the thermodynamic equations we can introduce the Gibbs
 free energy as:
 \begin{equation}
@@ -2284,7 +2291,7 @@ d{\bf H}_{\alpha}.
 \end{align}
 
 This expansion introduces other material properties not yet defined:
-\subsection{Heat capacity at constant stress}
+\subsection{\ \ Heat capacity at constant stress}
 The heat capacity at constant stress is defined as
 \begin{equation}
 C_\sigma= - T {\partial^2 G \over \partial T^2} = 
@@ -2294,7 +2301,7 @@ and has the same unit as $S$: $J\over K$. Usually one considers the heat
 capacity of a mole of substance and gives $C_\sigma$ in 
 ${J \over K \cdot mol}$.
 
-\subsection{Thermal expansion and piezocaloric effect}
+\subsection{\ \ Thermal expansion and piezocaloric effect}
 The thermal expansion coefficient or the piezocaloric effects are
 described by the tensor:
 \begin{equation}
@@ -2305,7 +2312,7 @@ described by the tensor:
 \end{equation}
 its unit is $1/K$.
 
-\subsection{Direct and converse piezo-electric effects}
+\subsection{\ \ Direct and converse piezo-electric effects}
 The direct and converse piezo-electric effects are described by the 
 tensor:
 \begin{equation}
@@ -2318,7 +2325,7 @@ its unit is $C/N$. Note also that
 ${\partial {\bf D}_\gamma \over \partial \sigma_{\alpha,\beta}}
 ={\partial {\bf P}_\gamma \over \partial \sigma_{\alpha,\beta}}$.
 
-\subsection{Direct and converse piezo-magnetic effects}
+\subsection{\ \ Direct and converse piezo-magnetic effects}
 The direct and converse piezo-magnetic effects are described by the 
 tensor:
 \begin{equation}
@@ -2339,7 +2346,7 @@ unit of $q_{\alpha,\beta,\gamma}$ is ${N\over A^2}{A \cdot m\over N}
 ={m\over A}={Wb\over N}$. 
 
 
-\subsection{Macroscopic equations at finite temperature}
+\subsection{\ \ Macroscopic equations at finite temperature}
 The other derivatives are just finite temperature generalization of the
 previously discussed quantities. We can rewrite the macroscopic equations as:
 \begin{align}
@@ -2447,7 +2454,7 @@ $\hat d_{\alpha,\beta,\lambda}$ ($\hat h_{\alpha,\beta,\lambda}$)
 is the piezoelectric (piezomagnetic) tensor that
 gives the polarization (magnetization) induced by a stress. 
 
-\subsection{\color{web-blue}Thermodynamic equations}
+\subsection{\color{web-blue}\ \ Thermodynamic equations}
 Similarly for the thermodynamic equations we can introduce the Gibbs
 free energy as:
 \begin{equation}
@@ -2502,7 +2509,7 @@ d{\bf H}_{\alpha}.
 \end{align}
 
 This expansion introduces other material properties not yet defined:
-\subsection{\color{web-blue}Heat capacity at constant stress}
+\subsection{\color{web-blue}\ \ Heat capacity at constant stress}
 The heat capacity at constant stress is defined as
 \begin{equation}
 C_\sigma= - T {\partial^2 G \over \partial T^2} = 
@@ -2512,7 +2519,7 @@ and has the same unit as $S$: $E_h\over K$. Usually one considers the heat
 capacity of a mole of substance and gives $C_\sigma$ in 
 ${E_h \over K \cdot mol}$.
 
-\subsection{\color{web-blue}Thermal expansion and piezocaloric effect}
+\subsection{\color{web-blue}\ \ Thermal expansion and piezocaloric effect}
 The thermal expansion coefficient or the piezocaloric effects are
 described by the tensor:
 \begin{equation}
@@ -2523,7 +2530,7 @@ described by the tensor:
 \end{equation}
 its unit is $1/K$.
 
-\subsection{\color{web-blue}Direct and converse piezo-electric effects}
+\subsection{\color{web-blue}\ \ Direct and converse piezo-electric effects}
 The direct and converse piezo-electric effects are described by the 
 tensor:
 \begin{equation}
@@ -2536,7 +2543,7 @@ its unit is $e a_B/E_h$. Note also that
 ${\partial {\bf D}_\gamma \over \partial \sigma_{\alpha,\beta}}
 =4 \pi {\partial {\bf P}_\gamma \over \partial \sigma_{\alpha,\beta}}$.
 
-\subsection{\color{web-blue}Direct and converse piezo-magnetic effects}
+\subsection{\color{web-blue}\ \ Direct and converse piezo-magnetic effects}
 The direct and converse piezo-magnetic effects are described by the 
 tensor:
 \begin{equation}
@@ -2549,7 +2556,7 @@ its unit is ${1 \over \alpha^2 \bar B}$. Note also that
 ${\partial {\bf B}_\gamma \over \partial \sigma_{\alpha,\beta}}
 =4\pi \alpha^2 {\partial {\bf M}_\gamma \over \partial \sigma_{\alpha,\beta}}$.
 
-\subsection{\color{web-blue}Macroscopic equations at finite temperature}
+\subsection{\color{web-blue}\ \ Macroscopic equations at finite temperature}
 
 The other derivatives are just finite temperature generalization of the
 previously discussed quantities. We can rewrite the macroscopic equations as:
@@ -2658,7 +2665,7 @@ $\hat d_{\alpha,\beta,\lambda}$ ($\hat h_{\alpha,\beta,\lambda}$)
 is the piezoelectric (piezomagnetic) tensor that
 gives the polarization (magnetization) induced by a stress. 
 
-\subsection{\color{orange}Thermodynamic equations}
+\subsection{\color{orange}\ \ Thermodynamic equations}
 Similarly for the thermodynamic equations we can introduce the Gibbs
 free energy as:
 \begin{equation}
@@ -2713,7 +2720,7 @@ d{\bf H}_{\alpha}.
 \end{align}
 
 This expansion introduces other material properties not yet defined:
-\subsection{\color{orange}Heat capacity at constant stress}
+\subsection{\color{orange}\ \ Heat capacity at constant stress}
 The heat capacity at constant stress is defined as
 \begin{equation}
 C_\sigma= - T {\partial^2 G \over \partial T^2} = 
@@ -2723,7 +2730,7 @@ and has the same unit as $S$: $erg\over K$. Usually one considers the heat
 capacity of a mole of substance and gives $C_\sigma$ in 
 ${erg \over K \cdot mol}$.
 
-\subsection{\color{orange}Thermal expansion and piezocaloric effect}
+\subsection{\color{orange}\ \ Thermal expansion and piezocaloric effect}
 The thermal expansion coefficient or the piezocaloric effects are
 described by the tensor:
 \begin{equation}
@@ -2734,7 +2741,7 @@ described by the tensor:
 \end{equation}
 its unit is $1/K$.
 
-\subsection{\color{orange}Direct and converse piezo-electric effects}
+\subsection{\color{orange}\ \ Direct and converse piezo-electric effects}
 The direct and converse piezo-electric effects are described by the 
 tensor:
 \begin{equation}
@@ -2747,7 +2754,7 @@ its unit is $statC/dyne$. Note also that
 ${\partial {\bf D}_\gamma \over \partial \sigma_{\alpha,\beta}}
 =4\pi {\partial {\bf P}_\gamma \over \partial \sigma_{\alpha,\beta}}$.
 
-\subsection{\color{orange}Direct and converse piezo-magnetic effects}
+\subsection{\color{orange}\ \ Direct and converse piezo-magnetic effects}
 The direct and converse piezo-magnetic effects are described by the 
 tensor:
 \begin{equation}
@@ -2760,7 +2767,7 @@ its unit is ${1\over G}$. Note also that
 ${\partial {\bf B}_\gamma \over \partial \sigma_{\alpha,\beta}}
 =4 \pi {\partial {\bf M}_\gamma \over \partial \sigma_{\alpha,\beta}}$.
 
-\subsection{\color{orange}Macroscopic equations at finite temperature}
+\subsection{\color{orange}\ \ Macroscopic equations at finite temperature}
 The other derivatives are just finite temperature generalization of the
 previously discussed quantities. We can rewrite the macroscopic equations as:
 \begin{align}

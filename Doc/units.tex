@@ -1,5 +1,5 @@
 %!
-%! Copyright (C) 2019 - Present Andrea Dal Corso 
+%! Copyright (C) 2019-2021 Andrea Dal Corso 
 %! This file is distributed under the terms of the
 %! GNU General Public License. See the file `License'
 %! in the root directory of the present distribution,
@@ -8,14 +8,24 @@
 \documentclass[12pt,a4paper]{article}
 \def\version{1.5.0}
 \def\qe{{\sc Quantum ESPRESSO}}
-\def\tpw{{\sc THERMO\_PW}}
 
+\usepackage[T1]{fontenc}
+\usepackage{bookman}
+\usepackage{html}
+
+% BEWARE: don't revert from graphicx for epsfig, because latex2html
+% doesn't handle epsfig commands !!!
+\usepackage{graphicx}
+\usepackage{color}
 \usepackage{amsmath}
 \usepackage{mathtools}
-\usepackage{html}
-\usepackage{color}
 
-\usepackage{graphicx}
+
+\textwidth = 16cm
+\textheight = 24cm
+\topmargin =0 cm
+\oddsidemargin = 0. cm
+
 
 \definecolor{web-blue}{rgb}{0,0.5,1.0}
 \definecolor{steelblue}{rgb}{0.27,0.5,0.7}
@@ -27,18 +37,14 @@
 \definecolor{violet}{rgb}{0.75,0.35,0.75}
 
 
-\textwidth = 17cm
-\textheight = 24cm
-\topmargin =-1 cm
-\oddsidemargin = 0 cm
-
 \def\pwx{\texttt{pw.x}}
 \def\phx{\texttt{ph.x}}
 \def\configure{\texttt{configure}}
 \def\PWscf{\texttt{PWscf}}
 \def\PHonon{\texttt{PHonon}}
-\def\thermo{\texttt{thermo\_pw}}
+\def\tpw{\texttt{thermo\_pw}}
 \def\make{\texttt{make}}
+
 
 \def\hplanck{6.62607015\times 10^{-34}}
 \def\hbarf{1.0545718176462\times 10^{-34}}
@@ -187,18 +193,16 @@
 \def\hzcmm1{3.33564095198152\times 10^{-11}}
 \def\cmm1hz{2.99792458\times 10^{10}}
 
-
 \begin{document} 
+
 \author{Andrea Dal Corso (SISSA - Trieste)}
 \date{}
 
-%\def\SissaImage{./sissa_on_white.png}
-
 \title{
-%  \includegraphics[width=6cm]{\SissaImage}\\
-  \vskip 1cm
-  {\color{red} \Huge Thermo\_pw: Units} \\
-  \Large (version \version)
+  \includegraphics[width=5cm]{thermo_pw.jpg} \\
+  \vspace{3truecm}
+  % title
+  \Huge \color{blue} Units \\ (v.\version)
 }
 
 \maketitle
@@ -448,7 +452,7 @@ $\bar m=\barmcgs\ g$.
 }
 
 {\color{red} Atomic weights are usually expressed in atomic mass units
-($a.m.u.=\amu\ kg$). This quantity can be converted in a.u. as:
+($a.m.u.=$ \\ $\amu\ kg$). This quantity can be converted in a.u. as:
 \begin{equation}
 a.m.u. = {\amu\ kg \over \barm\ kg }\ \bar m=\amuau\ \bar m
 \end{equation}
@@ -771,6 +775,8 @@ factor with the SI unit is:
 \begin{equation}
 \bar \sigma= {\barf\ N \over (\barl\ m )^2}=\barpr Pa
 \end{equation}
+Note also that $\bar f = {E_h \over a_B}$ so 
+$\bar \sigma = {E_h \over a_B^3}$.
 }
 
 {\color{orange} In the c.g.s. system the unit of pressure (symbol $Ba$)
@@ -2718,201 +2724,201 @@ These values are updated to October 2019.
 \begin{verbatim}
 
      Experimental quantities exact in the SI:
-     Planck constant:                        6.62607015E-34      J.s
-     Planck constant / 2 pi:                 1.0545718176462E-34 J.s
-     Speed of light:                         2.99792458E+08      m/s
-     Electron charge:                        1.602176634E-19     C
+     Planck constant:           6.62607015E-34      J.s
+     Planck constant / 2 pi:    1.0545718176462E-34 J.s
+     Speed of light:            2.99792458E+08      m/s
+     Electron charge:           1.602176634E-19     C
 
      Approximate quantities determined by experiment:
-     Rydberg constant:                       1.0973731568160E+07 1/m
-     Fine structure constant:                7.2973525693E-03
-     Atomic mass unit:                       1.66053906660E-27   kg
+     Rydberg constant:          1.0973731568160E+07 1/m
+     Fine structure constant:   7.2973525693E-03
+     Atomic mass unit:          1.66053906660E-27   kg
 
      Derived Physical quantities:
-     Electron mass:                          9.1093837015E-31    kg
-     mu0:                                    1.25663706212E-06   N/A^2
-     epsilon0:                               8.8541878128E-12    C^2/N m^2
-     E_hatree:                               4.3597447222072E-18 J
-     Bohr radius:                            5.29177210903E-11   m
-     Bohr magneton:                          9.2740100783E-24    J/T
+     Electron mass:             9.1093837015E-31    kg
+     mu0:                       1.25663706212E-06   N/A^2
+     epsilon0:                  8.8541878128E-12    C^2/N m^2
+     E_hatree:                  4.3597447222072E-18 J
+     Bohr radius:               5.29177210903E-11   m
+     Bohr magneton:             9.2740100783E-24    J/T
 
      Conversion factors (Atomic units - SI):
-     Length: \l=                             5.29177210903E-11   m
-     Mass: \m=                               9.1093837015E-31    kg
-     Time: \t=                               2.4188843265857E-17 s
-     Frequency: \nu=                         4.1341373335182E+16 Hz
-     Speed: \v=                              2.18769126364E+06   m/s
-     Acceleration: \a=                       9.0442161272E+22    m/s^2
-     Momentum: \p=                           1.99285191410E-24   kg m/s
-     Angular momentum: \L=                   1.0545718176462E-34 kg m^2/s
-     Force: \f=                              8.2387234982E-08    N
-     Energy: \U=                             4.3597447222072E-18 J
-     Power: \W=                              1.8023783420686E-01 W
-     Pressure: \pr=                          2.9421015696E+13    Pa
-     Current: \I=                            6.623618237510E-03  A
-     Charge: \C=                             1.602176634E-19     C
-     Charge density: \rho=                   1.08120238456E+12   C/m^3
-     Current density: \J=                    2.36533701094E+18   A/m^2
-     Electric field: \E=                     5.14220674763E+11   N/C
-     Electric potential: \V=                 2.7211386245988E+01 V
-     Capacitance: \F=                        5.887890530517E-21  F
-     Dipole moment: \dip=                    8.4783536255E-30    C m
-     Polarization: \P=                       5.7214766229E+01    C/m^2
-     Electric displacement: \D=              4.5530064316E+00    C/m^2
-     Resistance: \R=                         4.1082359022277E+03 Ohm
-     Magnetic induction: \B=                 2.35051756758E+05   T
-     Vector potential: \A=                   1.24384033059E-05   T m
-     Magnetic field flux: \Phi=              6.5821195695091E-16 Wb
-     Inductance: \Y=                         9.937347433815E-14  H
-     Magnetic dipole: \mu=                   1.85480201567E-23   A m^2 (J/T)
-     Magnetization: \M=                      1.25168244230E+08   A/m
-     Magnetic strength: \H=                  9.9605723936E+06    A/m
+     Length: \l=                5.29177210903E-11   m
+     Mass: \m=                  9.1093837015E-31    kg
+     Time: \t=                  2.4188843265857E-17 s
+     Frequency: \nu=            4.1341373335182E+16 Hz
+     Speed: \v=                 2.18769126364E+06   m/s
+     Acceleration: \a=          9.0442161272E+22    m/s^2
+     Momentum: \p=              1.99285191410E-24   kg m/s
+     Angular momentum: \L=      1.0545718176462E-34 kg m^2/s
+     Force: \f=                 8.2387234982E-08    N
+     Energy: \U=                4.3597447222072E-18 J
+     Power: \W=                 1.8023783420686E-01 W
+     Pressure: \pr=             2.9421015696E+13    Pa
+     Current: \I=               6.623618237510E-03  A
+     Charge: \C=                1.602176634E-19     C
+     Charge density: \rho=      1.08120238456E+12   C/m^3
+     Current density: \J=       2.36533701094E+18   A/m^2
+     Electric field: \E=        5.14220674763E+11   N/C
+     Electric potential: \V=    2.7211386245988E+01 V
+     Capacitance: \F=           5.887890530517E-21  F
+     Dipole moment: \dip=       8.4783536255E-30    C m
+     Polarization: \P=          5.7214766229E+01    C/m^2
+     Electric displacement: \D= 4.5530064316E+00    C/m^2
+     Resistance: \R=            4.1082359022277E+03 Ohm
+     Magnetic induction: \B=    2.35051756758E+05   T
+     Vector potential: \A=      1.24384033059E-05   T m
+     Magnetic field flux: \Phi= 6.5821195695091E-16 Wb
+     Inductance: \Y=            9.937347433815E-14  H
+     Magnetic dipole: \mu=      1.85480201567E-23   A m^2 (J/T)
+     Magnetization: \M=         1.25168244230E+08   A/m
+     Magnetic strength: \H=     9.9605723936E+06    A/m
 
      Conversion factors (c.g.s.-Gaussian - SI):
-     Length: cm=                             1.0E-02             m
-     Mass: g=                                1.0E-03             kg
-     Time: s=                                1.0E+00             s
-     Frequency: Hz=                          1.0E+00             Hz
-     Speed: cm/s=                            1.0E-02             m/s
-     Acceleration: cm/s^2=                   1.0E-02             m/s^2
-     Momentum: g cm/s=                       1.0E-05             kg m/s
-     Angular momentum: g cm^2/s=             1.0E-07             kg m^2/s
-     Force: dyne=                            1.0E-05             N
-     Energy: erg=                            1.0E-07             J
-     Power: erg/s=                           1.0E-07             W
-     Pressure: Ba=                           1.0E-01             Pa
-     Current: statA=                         3.33564095107E-10   A
-     Charge: statC=                          3.33564095107E-10   C
-     Charge density: statC/cm^3=             3.33564095107E-04   C/m^3
-     Current density: statA/cm^2=            3.33564095107E-06   A/m^2
-     Electric field: dyne/statC=             2.99792458082E+04   N/C
-     Electric potential: statV=              2.99792458082E+02   V
-     Capacitance: cm=                        1.11265005544E-12   F
-     Dipole moment: statC cm=                3.33564095107E-12   C m
-     Electric polarization: statC/cm^2=      3.33564095107E-06   C/m^2
+     Length: cm=                1.0E-02             m
+     Mass: g=                   1.0E-03             kg
+     Time: s=                   1.0E+00             s
+     Frequency: Hz=             1.0E+00             Hz
+     Speed: cm/s=               1.0E-02             m/s
+     Acceleration: cm/s^2=      1.0E-02             m/s^2
+     Momentum: g cm/s=          1.0E-05             kg m/s
+     Angular momentum: g cm^2/s= 1.0E-07             kg m^2/s
+     Force: dyne=               1.0E-05             N
+     Energy: erg=               1.0E-07             J
+     Power: erg/s=              1.0E-07             W
+     Pressure: Ba=              1.0E-01             Pa
+     Current: statA=            3.33564095107E-10   A
+     Charge: statC=             3.33564095107E-10   C
+     Charge density: statC/cm^3= 3.33564095107E-04   C/m^3
+     Current density: statA/cm^2=3.33564095107E-06   A/m^2
+     Electric field: dyne/statC= 2.99792458082E+04   N/C
+     Electric potential: statV=  2.99792458082E+02   V
+     Capacitance: cm=           1.11265005544E-12   F
+     Dipole moment: statC cm=   3.33564095107E-12   C m
+     Electric polarization: statC/cm^2= 3.33564095107E-06   C/m^2
      Electric displacement: statC/cm^2 4 pi= 2.65441872871E-07   C/m^2
-     Resistance: s/cm=                       8.987551792288E+11  Ohm
-     Magnetic induction: G=                  1.000000000274E-04  T
-     Vector potential: G cm=                 1.000000000274E-06  T m
-     Magnetic field flux: Mx=                1.000000000274E-08  Wb
-     Inductance: statH=                      8.98755179229E+11   H
-     Magnetic dipole: statC cm=              9.99999999726E-04   A m^2
-     Magnetization: statC/cm^2=              9.99999999726E+02   A/m
-     Magnetic strength: statC/cm^2 4 pi=     7.95774715242E+01   A/m
+     Resistance: s/cm=          8.987551792288E+11  Ohm
+     Magnetic induction: G=     1.000000000274E-04  T
+     Vector potential: G cm=    1.000000000274E-06  T m
+     Magnetic field flux: Mx=   1.000000000274E-08  Wb
+     Inductance: statH=         8.98755179229E+11   H
+     Magnetic dipole: statC cm= 9.99999999726E-04   A m^2
+     Magnetization: statC/cm^2= 9.99999999726E+02   A/m
+     Magnetic strength: statC/cm^2 4 pi= 7.95774715242E+01   A/m
 
-     C/statC=      2.99792458082E+09  (C/statC)/10c=   1.00000000027E+00
+     C/statC=  2.99792458082E+09  (C/statC)/10c= 1.00000000027E+00
 
      Conversion factors (SI - c.g.s.-Gaussian):
-     Length: m=                              1.0E+02             cm
-     Mass: kg=                               1.0E+03             g
-     Time: s=                                1.0E+00             s
-     Frequency: Hz=                          1.0E+00             Hz
-     Speed: m/s=                             1.0E+02             cm/s
-     Acceleration: m/s^2=                    1.0E+02             cm/s^2
-     Momentum: kg m/s=                       1.0E+05             g cm/s
-     Angular momentum: kg m^2/s=             1.0E+07             g cm^2/s
-     Force: N=                               1.0E+05             dyne
-     Energy: J=                              1.0E+07             erg
-     Power: W=                               1.0E+07             erg/s
-     Pressure: Pa=                           1.0E+01             Ba
-     Current: A=                             2.99792458082E+09   statA
-     Charge: C=                              2.99792458082E+09   statC
-     Charge density: C/m^3=                  2.99792458082E+03   statC/cm^3
-     Current density: A/m^2=                 2.99792458082E+05   statA/cm^2
-     Electric field: N/C=                    3.33564095107E-05   dyne/statC
-     Electric potential: V=                  3.33564095107E-03   statV
-     Capacitance: F=                         8.98755179229E+11   cm
-     Dipole moment: C m=                     2.99792458082E+11   statC cm
-     Electric polarization: C/m^2=           2.99792458082E+05   statC/cm^2
-     Electric displacement: C/m^2=           3.76730313565E+06   statC/cm^2 4pi
-     Resistance: Ohm=                        1.112650055445E-12  s/cm
-     Magnetic induction: T=                  9.999999997263E+03  G
-     Vector potential: T m=                  9.999999997263E+05  G cm
-     Magnetic field flux: Wb=                9.999999997263E+07  Mx
-     Inductance: H=                          1.11265005544E-12   statH
-     Magnetic dipole: A m^2=                 1.00000000027E+03   statC cm
-     Magnetization: A/m=                     1.00000000027E-03   statC/cm^2
-     Magnetic strength: A/m=                 1.25663706178E-02   statC/cm^2 4pi
+     Length: m=                 1.0E+02             cm
+     Mass: kg=                  1.0E+03             g
+     Time: s=                   1.0E+00             s
+     Frequency: Hz=             1.0E+00             Hz
+     Speed: m/s=                1.0E+02             cm/s
+     Acceleration: m/s^2=       1.0E+02             cm/s^2
+     Momentum: kg m/s=          1.0E+05             g cm/s
+     Angular momentum: kg m^2/s=  1.0E+07             g cm^2/s
+     Force: N=                  1.0E+05             dyne
+     Energy: J=                 1.0E+07             erg
+     Power: W=                  1.0E+07             erg/s
+     Pressure: Pa=              1.0E+01             Ba
+     Current: A=                2.99792458082E+09   statA
+     Charge: C=                 2.99792458082E+09   statC
+     Charge density: C/m^3=     2.99792458082E+03   statC/cm^3
+     Current density: A/m^2=    2.99792458082E+05   statA/cm^2
+     Electric field: N/C=       3.33564095107E-05   dyne/statC
+     Electric potential: V=     3.33564095107E-03   statV
+     Capacitance: F=            8.98755179229E+11   cm
+     Dipole moment: C m=        2.99792458082E+11   statC cm
+     Electric polarization: C/m^2= 2.99792458082E+05   statC/cm^2
+     Electric displacement: C/m^2= 3.76730313565E+06   statC/cm^2 4pi
+     Resistance: Ohm=           1.112650055445E-12  s/cm
+     Magnetic induction: T=     9.999999997263E+03  G
+     Vector potential: T m=     9.999999997263E+05  G cm
+     Magnetic field flux: Wb=   9.999999997263E+07  Mx
+     Inductance: H=             1.11265005544E-12   statH
+     Magnetic dipole: A m^2=    1.00000000027E+03   statC cm
+     Magnetization: A/m=        1.00000000027E-03   statC/cm^2
+     Magnetic strength: A/m=    1.25663706178E-02   statC/cm^2 4pi
 
      Conversion factors (Atomic units - c.g.s.-Gaussian):
-     Length:                                 5.29177210903E-09   cm
-     Mass:                                   9.1093837015E-28    g
-     Time:                                   2.4188843265857E-17 s
-     Frequency:                              4.1341373335182E+16 Hz
-     Speed:                                  2.18769126364E+08   cm/s
-     Acceleration:                           9.0442161272E+24    cm/s^2
-     Momentum:                               1.99285191410E-19   g cm/s
-     Angular momentum:                       1.0545718176462E-27 g cm^2/s
-     Force:                                  8.2387234982E-03    dyne
-     Energy:                                 4.3597447222072E-11 erg
-     Power:                                  1.8023783420686E+06 erg/s
-     Pressure:                               2.9421015696E+14    Ba
-     Current:                                1.98571079282E+07   statA
-     Charge:                                 4.80320471388E-10   statC
-     Charge density:                         3.2413632055E+15    statC/cm^3
-     Current density:                        7.0911019670E+23    statA/cm^2
-     Electric field:                         1.71525554062E+07   dyne/statC
-     Electric potential:                     9.07674142975E-02   statV
-     Capacitance:                            5.29177210903E-09   cm
-     Dipole moment:                          2.54174647389E-18   statC cm
-     Polarization:                           1.71525554062E+07   statC/cm^2
-     Electric displacement:                  1.71525554062E+07   statC/cm^2 4pi
-     Resistance:                             4.57102890439E-09   s/cm
-     Magnetic induction:                     2.35051756693E+09   G
-     Vector potential:                       1.24384033025E+01   G cm
-     Magnetic field flux:                    6.58211956771E-08   Mx
-     Inductance:                             1.10567901732E-25   statH
-     Magnetic dipole:                        1.85480201618E-20   statC cm
-     Magnetization:                          1.25168244264E+05   statC/cm^2
-     Magnetic strength:                      1.25168244264E+05   statC/cm^2 4pi 
+     Length:                    5.29177210903E-09   cm
+     Mass:                      9.1093837015E-28    g
+     Time:                      2.4188843265857E-17 s
+     Frequency:                 4.1341373335182E+16 Hz
+     Speed:                     2.18769126364E+08   cm/s
+     Acceleration:              9.0442161272E+24    cm/s^2
+     Momentum:                  1.99285191410E-19   g cm/s
+     Angular momentum:          1.0545718176462E-27 g cm^2/s
+     Force:                     8.2387234982E-03    dyne
+     Energy:                    4.3597447222072E-11 erg
+     Power:                     1.8023783420686E+06 erg/s
+     Pressure:                  2.9421015696E+14    Ba
+     Current:                   1.98571079282E+07   statA
+     Charge:                    4.80320471388E-10   statC
+     Charge density:            3.2413632055E+15    statC/cm^3
+     Current density:           7.0911019670E+23    statA/cm^2
+     Electric field:            1.71525554062E+07   dyne/statC
+     Electric potential:        9.07674142975E-02   statV
+     Capacitance:               5.29177210903E-09   cm
+     Dipole moment:             2.54174647389E-18   statC cm
+     Polarization:              1.71525554062E+07   statC/cm^2
+     Electric displacement:     1.71525554062E+07   statC/cm^2 4pi
+     Resistance:                4.57102890439E-09   s/cm
+     Magnetic induction:        2.35051756693E+09   G
+     Vector potential:          1.24384033025E+01   G cm
+     Magnetic field flux:       6.58211956771E-08   Mx
+     Inductance:                1.10567901732E-25   statH
+     Magnetic dipole:           1.85480201618E-20   statC cm
+     Magnetization:             1.25168244264E+05   statC/cm^2
+     Magnetic strength:         1.25168244264E+05   statC/cm^2 4pi 
 
      Conversion factors (Rydberg atomic units - SI):
-     Length: \l_R=                           5.29177210903E-11   m
-     Mass: \m_R=                             1.82187674030E-30   kg
-     Time: \t_R=                             4.8377686531714E-17 s
-     Frequency: \nu_R=                       2.0670686667591E+16 Hz
-     Speed: \v_R=                            1.09384563182E+06   m/s
-     Acceleration: \a_R=                     4.52210806362E+22   m/s^2
-     Momentum: \p_R=                         1.99285191410E-24   kg m/s
-     Angular momentum: \L_R=                 1.0545718176462E-34 kg m^2/s
-     Force: \f_R=                            4.11936174912E-08   N
-     Energy: \U_R=                           2.1798723611036E-18 J
-     Power: \W_R=                            4.505945855171E-02  W
-     Pressure: \pr_R=                        1.47105078482E+13   Pa
-     Current: \I_R=                          2.3418026858671E-03 A
-     Charge: \C_R=                           1.1329099625600E-19 C
-     Charge density: \rho_R=                 7.6452553796E+11    C/m^3
-     Current density: \J_R=                  8.36272920114E+17   A/m^2
-     Electric field: \E_R=                   3.63608926151E+11   N/C
-     Electric potential: \V_R=               1.9241355740025E+01 V
-     Capacitance: \F_R=                      5.887890530517E-21  F
-     Dipole moment: \dip_R=                  5.99510134192E-30   C m
-     Polarization: \P_R=                     4.0456949184E+01    C/m^2
-     Electric displacement: \D_R=            3.21946172254E+00   C/m^2
-     Resistance: \R_R=                       8.2164718044553E+03 Ohm
-     Magnetic induction: \B_R=               3.3241338227E+05    T
-     Vector potential: \A_R=                 1.75905586495E-05   T m
-     Magnetic field flux: \Phi_R=            9.3085227643611E-16 Wb
-     Inductance: \Y_R=                       3.9749389735260E-13 H
-     Magnetic dipole: \mu_R=                 6.5577154152E-24    A m^2 (J/T)
-     Magnetization: \M_R=                    4.42536571420E+07   A/m
-     Magnetic field: \H_R=                   3.52159414202E+06   A/m
+     Length: \l_R=              5.29177210903E-11   m
+     Mass: \m_R=                1.82187674030E-30   kg
+     Time: \t_R=                4.8377686531714E-17 s
+     Frequency: \nu_R=          2.0670686667591E+16 Hz
+     Speed: \v_R=               1.09384563182E+06   m/s
+     Acceleration: \a_R=        4.52210806362E+22   m/s^2
+     Momentum: \p_R=            1.99285191410E-24   kg m/s
+     Angular momentum: \L_R=    1.0545718176462E-34 kg m^2/s
+     Force: \f_R=               4.11936174912E-08   N
+     Energy: \U_R=              2.1798723611036E-18 J
+     Power: \W_R=               4.505945855171E-02  W
+     Pressure: \pr_R=           1.47105078482E+13   Pa
+     Current: \I_R=             2.3418026858671E-03 A
+     Charge: \C_R=              1.1329099625600E-19 C
+     Charge density: \rho_R=    7.6452553796E+11    C/m^3
+     Current density: \J_R=     8.36272920114E+17   A/m^2
+     Electric field: \E_R=      3.63608926151E+11   N/C
+     Electric potential: \V_R=  1.9241355740025E+01 V
+     Capacitance: \F_R=         5.887890530517E-21  F
+     Dipole moment: \dip_R=     5.99510134192E-30   C m
+     Polarization: \P_R=        4.0456949184E+01    C/m^2
+     Electric displacement: \D_R= 3.21946172254E+00   C/m^2
+     Resistance: \R_R=          8.2164718044553E+03 Ohm
+     Magnetic induction: \B_R=  3.3241338227E+05    T
+     Vector potential: \A_R=    1.75905586495E-05   T m
+     Magnetic field flux: \Phi_R= 9.3085227643611E-16 Wb
+     Inductance: \Y_R=          3.9749389735260E-13 H
+     Magnetic dipole: \mu_R=    6.5577154152E-24    A m^2 (J/T)
+     Magnetization: \M_R=       4.42536571420E+07   A/m
+     Magnetic field: \H_R=      3.52159414202E+06   A/m
 
      Conversion factors (Gaussian atomic units - SI):
-     Magnetic induction: \B_G=               1.71525554109E+03   T
-     Vector potential: \A_G=                 9.0767414322E-08    T m
-     Magnetic field flux: \Phi_G=            4.80320471520E-18   Wb
-     Magnetic dipole: \mu_G=                 2.5417464732E-21    A m^2 (J/T)
-     Magnetization: \M_G=                    1.71525554016E+10   A/m
-     Magnetic field: \H_G=                   1.36495698941E+09   A/m
+     Magnetic induction: \B_G=  1.71525554109E+03   T
+     Vector potential: \A_G=    9.0767414322E-08    T m
+     Magnetic field flux: \Phi_G= 4.80320471520E-18   Wb
+     Magnetic dipole: \mu_G=    2.5417464732E-21    A m^2 (J/T)
+     Magnetization: \M_G=       1.71525554016E+10   A/m
+     Magnetic field: \H_G=      1.36495698941E+09   A/m
 
      Physical constants in Hartree atomic units:
-     Speed of light:                         1.37035999084E+02
-     atomic mass unit:                       1.8228884862E+03
+     Speed of light:            1.37035999084E+02
+     atomic mass unit:          1.8228884862E+03
 
      Physical constants in eV:
-     Hartree in eV:                          2.7211386246E+01
-     Rydberg in eV:                          1.3605693123E+01
+     Hartree in eV:             2.7211386246E+01
+     Rydberg in eV:             1.3605693123E+01
 
      ----------------------------------------------------------------------
      Errors:                     Absolute                  Relative

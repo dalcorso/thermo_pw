@@ -1,5 +1,5 @@
 %!
-%! Copyright (C) 2016 Andrea Dal Corso 
+%! Copyright (C) 2014-2021 Andrea Dal Corso 
 %! This file is distributed under the terms of the
 %! GNU General Public License. See the file `License'
 %! in the root directory of the present distribution,
@@ -8,21 +8,26 @@
 \documentclass[12pt,a4paper]{article}
 \def\version{1.5.0}
 \def\qe{{\sc Quantum ESPRESSO}}
-\def\tpw{{\sc THERMO\_PW}}
 
+\usepackage[T1]{fontenc}
+\usepackage{bookman}
 \usepackage{html}
-\usepackage{color}
+
+% BEWARE: don't revert from graphicx for epsfig, because latex2html
+% doesn't handle epsfig commands !!!
 \usepackage{graphicx}
+\usepackage{color}
+
+\textwidth = 16cm
+\textheight = 24cm
+\topmargin =0 cm
+\oddsidemargin = 0. cm
+
 
 \definecolor{web-blue}{rgb}{0,0.5,1.0}
 \definecolor{coral}{rgb}{1.0,0.5,0.3}
 \definecolor{red}{rgb}{1.0,0,0.0}
 \definecolor{green}{rgb}{0.,1.0,0.0}
-
-\textwidth = 17cm
-\textheight = 24cm
-\topmargin =-1 cm
-\oddsidemargin = 0 cm
 
 \def\pwx{\texttt{pw.x}}
 \def\phx{\texttt{ph.x}}
@@ -33,21 +38,21 @@
 \def\make{\texttt{make}}
 
 \begin{document} 
+
 \author{Andrea Dal Corso (SISSA - Trieste)}
 \date{}
 
-%\def\SissaImage{./sissa_on_white.png}
-
 \title{
-%  \includegraphics[width=6cm]{\SissaImage}\\
-  \vskip 1cm
-  {\color{red} \Huge \tpw\ Tutorial} \\
-  \Large (version \version)
+  \includegraphics[width=5cm]{thermo_pw.jpg} \\
+  \vspace{3truecm}
+  % title
+  \Huge \color{blue} {\sc Thermo\_pw} Tutorial \\ (v.\version)
 }
 
 \maketitle
 
 \newpage
+
 \tableofcontents
 
 \newpage
@@ -140,7 +145,11 @@ pseudopotential file. Pseudopotential files depend on the exchange and
 correlation functional and can be found in many 
 different places. There is a pseudopotential page in the \qe\ website, or 
 you can consider generating your pseudopotentials with the \texttt{pslibrary} 
-inputs. You can consult the web page \texttt{https://dalcorso.github.io/pslibrary/} for more information. \\
+inputs. You can consult the web page 
+\begin{center}
+\texttt{https://dalcorso.github.io/pslibrary/} 
+\end{center}
+for more information. \\
 
 The kinetic energies cut-offs depend on the pseudopotentials
 and on the accuracy of your calculation. You can 
@@ -408,12 +417,12 @@ working directory the directory \texttt{elastic\_constants} obtained
 in the previous step. Elastic constants are read only when
 \texttt{lmurn=.FALSE.}.
 The ``quasi-static'' approximation means that the code interpolates
-the elastic constants at $T=0$ found in the first step at the geometry that
+the elastic constants at $T=0$ K found in the first step at the geometry that
 minimizes the Helmholtz (or Gibbs at finite pressure) free energy at
 temperature $T$. \\
 The second method uses the ``quasi-harmonic'' approximation and
 requires many phonon calculations at many geometries.
-First use \texttt{what='elastic\_constants\_t'} and set
+First use \texttt{what='elastic\_} \texttt{constants\_t'} and set
 \texttt{use\_free\_energy=} \texttt{.TRUE.}. This option computes the 
 temperature dependent elastic constants taking as unperturbed geometries 
 those used by \texttt{what='mur\_lc\_t'} and saves them in the directory 
@@ -451,11 +460,11 @@ thermodynamic properties could be wrong at low temperatures.
 \section{\color{coral}How do I calculate the thermal expansion of a metal
 accounting for the free energy due to the electronic excitations?}
 This is a two step calculations. First use \texttt{what='mur\_lc'} and
-the flag \texttt{lel\_free\_energy=.TRUE.} to write on files the
+the flag \texttt{lel\_} \texttt{free\_energy=.TRUE.} to write on files the
 electronic thermodynamic properties for each geometry used by
 \texttt{what='mur\_lc'}. Then copy the files with
 the electronic thermodynamic properties in the  
-\texttt{therm\_files} directory and run \tpw\ with \texttt{what='mur\_lc\_t'}
+\texttt{therm\_files} directory and run \thermo\ with \texttt{what='mur\_lc\_t'}
 and the flag \texttt{lel\_free\_energy=.TRUE.}. The electronic free energy
 is read from files and added to the vibrational free energy before computing
 the equilibrium crystal structure.
@@ -465,9 +474,9 @@ See \texttt{example24} for this case.
 \section{\color{coral}How do I calculate the elastic constants of a metal
 accounting for the free energy due to the electronic excitations?}
 This is a four step procedure. First use \texttt{what='mur\_lc'} and
-the flag \texttt{lel\_free\_energy=.TRUE.} as in the previous point
+the flag \texttt{lel\_} \texttt{free\_energy=.TRUE.} as in the previous point
 in order to get the electronic thermodynamic properties for all the 
-unperturbed geometries. Then use \texttt{what='elastic\_constant\_t'}
+unperturbed geometries. Then use \texttt{what=} \texttt{'elastic\_constant\_t'}
 with the flag \texttt{lel\_free\_energy=.TRUE.} and the flag
 \texttt{use\_free\_energy=.FALSE.} to write on file the electronic
 thermodynamic properties for all strained geometries. Then use
@@ -478,7 +487,7 @@ thermodynamic properties obtained at previous point in the
 free energy derived in this step to obtain the elastic constants 
 has also the electronic contribution. 
 Finally use \texttt{what='mur\_lc\_t'} with \texttt{lel\_free\_energy=.TRUE.}
-and \texttt{use\_free\_energy=.TRUE.} after copying the elastic
+and \texttt{use\_free\_energy=} \texttt{.TRUE.} after copying the elastic
 constants obtained at previous step in the \texttt{anhar\_files} directory
 and the electronic thermodynamic properties obtained in the first 
 step in the \texttt{therm\_files} directory.

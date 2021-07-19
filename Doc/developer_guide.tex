@@ -1,5 +1,5 @@
 %!
-%! Copyright (C) 2015 - Present Andrea Dal Corso 
+%! Copyright (C) 2015-2021 Andrea Dal Corso 
 %! This file is distributed under the terms of the
 %! GNU General Public License. See the file `License'
 %! in the root directory of the present distribution,
@@ -8,43 +8,49 @@
 \documentclass[12pt,a4paper]{article}
 \def\version{1.5.0}
 \def\qe{{\sc Quantum ESPRESSO}}
-\def\tpw{{\sc THERMO\_PW}}
-\def\thermo{{\texttt{thermo\_pw}}}
 
+\usepackage[T1]{fontenc}
+\usepackage{bookman}
 \usepackage{html}
+
+% BEWARE: don't revert from graphicx for epsfig, because latex2html
+% doesn't handle epsfig commands !!!
+\usepackage{graphicx}
 \usepackage{color}
 
-\usepackage{graphicx}
+\textwidth = 16cm
+\textheight = 24cm
+\topmargin =0 cm
+\oddsidemargin = 0. cm
+
 
 \definecolor{web-blue}{rgb}{0,0.5,1.0}
 \definecolor{coral}{rgb}{1.0,0.5,0.3}
 \definecolor{red}{rgb}{1.0,0,0.0}
 \definecolor{green}{rgb}{0.,1.0,0.0}
 
-\textwidth = 17cm
-\textheight = 24cm
-\topmargin =-1 cm
-\oddsidemargin = 0 cm
-
 \def\pwx{\texttt{pw.x}}
 \def\phx{\texttt{ph.x}}
 \def\configure{\texttt{configure}}
 \def\PWscf{\texttt{PWscf}}
 \def\PHonon{\texttt{PHonon}}
+\def\thermo{\texttt{thermo\_pw}}
+\def\tpw{\texttt{thermo\_pw}}
 \def\make{\texttt{make}}
 
-\begin{document}
+\begin{document} 
+
 \author{Andrea Dal Corso (SISSA - Trieste)}
 \date{}
 
-%\def\SissaImage{./sissa_on_white.png}
-
 \title{
-%  \includegraphics[width=6cm]{\SissaImage}\\
-  \vskip 1cm
-  {\color{red}\Huge \tpw\ Developer's Guide} \\
-  \Large (version \version)
+  \includegraphics[width=5cm]{thermo_pw.jpg} \\
+  \vspace{3truecm}
+  % title
+  \Huge \color{blue} {\sc Thermo\_pw} Developer's Guide \\
+  (v.\version)
 }
+
 \maketitle
 
 \newpage
@@ -129,7 +135,7 @@ files produced by the \texttt{pw.x} calculation. The final collection
 of the dynamical matrices, calculations of the phonon dispersions, phonon 
 dos and harmonic thermodynamic quantities are done in a synchronous way 
 within the loop over the geometries.
-When \texttt{all\_geometries\_together=.TRUE.} a single asynchronous run
+When \texttt{all\_geometries\_} \texttt{together=.TRUE.} a single asynchronous run
 calculates all the irreducible representations of all geometries. After
 the phonon run, the phonon dispersions, phonon dos and harmonic 
 thermodynamic quantities are calculated synchronously in a loop over 
@@ -208,6 +214,7 @@ on output.
 
 The different \texttt{what} activates the following parts of the code:
 
+\begin{footnotesize}
 \begin{verbatim}
 what         A   B   C   D   E    F  H0  G1    H    I   L   G2   M  N  O  P  Q  R
 
@@ -240,12 +247,14 @@ elastic_constants_t
 + not yet active or working.
 (*) when lel_free_energy=.TRUE. and use_free_energy=.FALSE.. 
 \end{verbatim}
+\end{footnotesize}
 
 \newpage
 \section{\color{coral}Plots and physical quantities}
 This is the list of the plots that can be obtained and 
 the \texttt{what} to use:
 
+\begin{footnotesize}
 \begin{verbatim}
 Brillouin zone                                 plot_bz
 X-ray powder diffraction pattern               plot_bz
@@ -300,10 +309,12 @@ Generalized Average Gruneisen parameters       mur_lc_t
 Frequency dependent reflectivity               scf_ph, mur_lc_ph
 (insulators only)
 \end{verbatim}
+\end{footnotesize}
 
 This is the list of the quantities that can be obtained in output
 and the \texttt{what} to use:
 
+\begin{footnotesize}
 \begin{verbatim}
 Space group number                             plot_bz, all others
 Equilibrium geometry                           mur_lc
@@ -316,6 +327,7 @@ Elastic constant tensor                        scf_elastic_constants,
                                                mur_lc_elastic_constants
                                                elastic_constants_t
 \end{verbatim}
+\end{footnotesize}
 
 \newpage
 \section{\color{coral}Scripts and Files}
@@ -331,6 +343,7 @@ the data is called \texttt{plot\_}. The following is a list of the routines
 that write and plot the data and the name of the associated files
 containing the data, the scripts and the postscript files.
 
+\begin{footnotesize}
 \begin{verbatim}
 
 what             routines         data           scripts            postscript
@@ -458,6 +471,7 @@ elastic_constants_t
 #na is an integer from 1 to the number of atoms in the unit cell
 #g is an integer from 1 to the number of geometries
 \end{verbatim} 
+\end{footnotesize}
 
 \newpage
 \section{\color{coral}Directory structure}
@@ -472,6 +486,7 @@ some subdirectories within the \texttt{outdir} directory. This is done to
 have different images working in different scratch directories and running
 independently. \\
 The following directories are created within the \texttt{working} directory:
+\begin{footnotesize}
 \begin{verbatim}
 restart         : a directory where each task creates a file with the total
                   energy and possibly the stress that it has calculated.
@@ -509,6 +524,7 @@ anhar_files     : a directory that contains the files with the anharmonic
 elastic_constants : a directory that contains the elastic constants files
                     at T=0.
 \end{verbatim}
+\end{footnotesize}
 The postscript files with the physical quantities are all written in
 the \texttt{working} directory. \\
 In the \texttt{outdir} directory defined in the input of \texttt{pw.x},
@@ -606,7 +622,8 @@ In order to insert a new flow-chart in the \texttt{thermo\_pw} code it
 is necessary to set a new option for the variable \texttt{what}. The
 new option will control what happens in the following routines:
 \begin{verbatim}
-thermo_setup.f90, thermo_summary.f90, initialize_thermo_work.f90, set_thermo_work_todo.f90
+thermo_setup.f90, thermo_summary.f90, initialize_thermo_work.f90, 
+set_thermo_work_todo.f90
 \end{verbatim}
 and the software that controls the option must be added to these routines.
 In addition new variables needed to control the option can be added
@@ -744,7 +761,8 @@ value of \texttt{celldm(3)} and they contain:
 \end{verbatim}
 For all other systems a file is produced with the format:
 \begin{verbatim}
-#   celldm(1)    celldm(2)   celldm(3) celldm(4)  celldm(5) celldm(6) energy
+#  celldm(1) celldm(2) celldm(3) celldm(4) celldm(5) 
+   celldm(6) energy
 \end{verbatim}
 
 \item 
@@ -766,7 +784,7 @@ density of states refers to the sum of spin up and spin down states.
 This file contains the electron thermodynamic properties as a function of
 temperature. It has the format:
 \begin{verbatim}
-#   T     energy     free energy     entropy    C_v        chemical pot
+#   T     energy   free energy   entropy    C_v     chemical pot
 \end{verbatim}
 and contains the electron excitation energy, free energy, entropy, 
 isochoric specific heat and chemical potential.
@@ -794,7 +812,7 @@ the QE distribution.
 
 \item 
 \texttt{phdisp\_files/flpband.g\#(.\#)(.\#)} 
-(default name \texttt{output\_pband.dat.g\#(.\#)(.\#)})
+(default name \texttt{output\_pband.dat.} \texttt{g\#(.\#)(.\#)})
 For each geometry for which a phonon dispersion is calculated these files
 contain the frequencies along the path. They are in a format readable by
 \texttt{gnuplot} as produced by the \texttt{plotband.f90} code of \qe.
@@ -813,7 +831,7 @@ The file is readable only by \texttt{thermo\_pw}.
 \item 
 \texttt{phdisp\_files/fldos.g\#} (default name 
 \texttt{output\_dos.dat.g\#}). For each geometry for which a phonon density of 
-states is calculated (when \texttt{ltherm\_dos=.TRUE.}) this file contains:
+states is calculated (when \texttt{ltherm\_} \texttt{dos=.TRUE.}) this file contains:
 \begin{verbatim}
 #   Frequency       dos
 \end{verbatim}
@@ -825,14 +843,14 @@ The frequency and the phonon density of states.
 density of states is calculated (when \texttt{ltherm\_dos=.TRUE.} and
 \texttt{with\_eigen=.TRUE.}) and for each atom (\#na) this file contains: 
 \begin{verbatim}
-#   Frequency       g_xx    g_xy    g_xz    g_yy    g_yz     g_zz
+#   Frequency  g_xx   g_xy   g_xz   g_yy   g_yz    g_zz
 \end{verbatim}
 The frequency and the six components of the generalized phonon density of 
 states for atom \#na. 
 
 \item 
 \texttt{therm\_files/fltherm.g\#(\_ph)} (default name 
-\texttt{output\_therm.dat.g\#(\_ph)}). For each geometry for which 
+\texttt{output\_therm.dat.g\#} \texttt{(\_ph)}). For each geometry for which 
 a complete phonon dispersion is calculated (and whose number is given
 by \texttt{g\#}) the code produces one of these files that contains 
 the harmonic 
@@ -848,7 +866,7 @@ of states.
 
 \item 
 \texttt{therm\_files/fltherm.debye\_g\#} (default name 
-\texttt{output\_therm.dat.debye\_g\#}). For each geometry for which 
+\texttt{output\_therm.dat.}\\ \texttt{debye\_g\#}). For each geometry for which 
 the elastic constants are calculated (and whose number is given
 by \texttt{g\#}) the code produces a file that contains 
 the harmonic thermodynamic quantities as a function of temperature computed
@@ -861,14 +879,14 @@ isochoric heat capacity.
 
 \item 
 \texttt{therm\_files/fltherm.g\#(\_ph).\#na.dw} (default name 
-\texttt{output\_therm.dat.g\#(\_ph).\#na.dw}). 
+\texttt{output\_therm.} \texttt{dat.g\#(\_ph).\#na.dw}). 
 If \texttt{with\_eigen=.TRUE.}, for each geometry for which 
 a complete phonon dispersion is calculated (and whose number is given
 by \texttt{g\#}) the code produces for each atom \texttt{.\#na} one of these 
 files that contains the atomic $B$ factor tensor as a function of 
 temperature. It contains:
 \begin{verbatim}
-#   T      B_{11}     B_{12}     B_{13}     B_{22}     B_{23}     B_{33}
+#   T    B_{11}   B_{12}   B_{13}  B_{22}  B_{23}  B_{33}
 \end{verbatim}
 The extension \texttt{(\_ph)} indicates 
 quantities calculated from the direct integration over the Brillouin zone,
@@ -877,7 +895,7 @@ density of states.
 
 \item 
 \texttt{therm\_files/fltherm.debye\_g\#.dw} (default name 
-\texttt{output\_therm.dat.debye\_g\#.dw}). This file is produced
+\texttt{output\_therm.dat.} \texttt{debye\_g\#.dw}). This file is produced
 only if the solid has one atomic type. For each geometry for which 
 the elastic constants are calculated (and whose number is given
 by \texttt{g\#}) the code produces a file that contains 
@@ -902,7 +920,7 @@ direct integration over the Brilluoin zone (computing the phonon density
 of states). 
 
 \item \texttt{anharm\_files/flanhar(.bulk\_mod)(\_ph)} 
-(default name \texttt{output\_anharm.dat.aux})
+(default name \texttt{output\_anharm.} \texttt{dat.aux})
 This file is present when \texttt{lmurn=.TRUE.} or when the elastic
 constants are on file and \texttt{lb0\_t=.FALSE.}. It contains:
 \begin{verbatim}
@@ -916,7 +934,7 @@ direct integration over the Brilluoin zone (computing the phonon density
 of states). 
 
 \item \texttt{anharm\_files/flanhar(.dbulk\_mod)(\_ph)} 
-(default name \texttt{output\_anharm.dat.aux})
+(default name \texttt{output\_}\\ \texttt{anharm.dat.aux})
 This file is present when \texttt{lmurn=.TRUE.}. It contains:
 \begin{verbatim}
    T          dB / dp  (T)  
@@ -929,10 +947,10 @@ integration over the Brilluoin zone (computing the phonon density of states).
 
 \item 
 \texttt{anhar\_files/flanhar(.heat)(\_ph)}
-(default name \texttt{output\_anhar.heat(\_ph)}). 
+(default name \texttt{output\_anhar.}\\ \texttt{heat(\_ph)}). 
 This file contains the following quantities:
 \begin{verbatim}
-#   T       C_e(T)     (C_P-C_V)(T)       (C_e + C_P - C_V)(T)    
+#   T       C_e(T)     (C_P-C_V)(T)    (C_e + C_P - C_V)(T)    
 \end{verbatim}
 the temperature, the constant strain heat capacity calculated 
 by interpolating the heat capacity calculated at several geometries 
@@ -950,7 +968,7 @@ are on file.
 
 \item 
 \texttt{anhar\_files/flanhar(.aux\_grun)} 
-(default name \texttt{output\_anhar.dat.aux\_grun}). This file is printed
+(default name \texttt{output\_anhar.dat.} \texttt{aux\_grun}). This file is printed
 when \texttt{lmurn=.TRUE.} or when the elastic
 constants are on file and \texttt{lb0\_t=.FALSE.}. It contains
 \begin{verbatim}
@@ -966,11 +984,11 @@ from the free energy derivatives.
 \item 
 \texttt{anhar\_files/flanhar(.heat\_anis)(\_ph)(\_grun)} 
 (default name \\ \texttt{output\_anhar.heat\_anis(\_ph)(\_grun)}). 
-This file is printed when \texttt{lmurn=.FALSE.} and  the elastic
+This file is printed when \texttt{lmurn=} \texttt{.FALSE.} and  the elastic
 constants of one or more configurations are on file.
 This file contains the following quantities:
 \begin{verbatim}
-#   T       (C_s-C_e)(T)        C_p(T)        (C_V - C_e)(T)    
+#   T       (C_s-C_e)(T)        C_p(T)      (C_V - C_e)(T)    
 \end{verbatim}
 the temperature, the difference between the constant stress and constant
 strain heat capacities, the isobaric heat capacity, and the difference
@@ -984,14 +1002,14 @@ contained in the file.
 
 \item
 \texttt{anhar\_files/flanhar.anis(\_ph).\#na.dw} (default name
-\texttt{output\_therm.dat.anis(\_ph).\#na.dw}).
+\texttt{output\_therm.} \texttt{dat.anis(\_ph).\#na.dw}).
 If \texttt{with\_eigen=.TRUE.}, the code produces for each atom 
 \texttt{.\#na} one of these
 files that contains the atomic $B$ factor tensor as a function of
 temperature. The atomic $B$ factor is interpolated at the equilibrium
 geometry at that temperature. The file contains:
 \begin{verbatim}
-#   T      B_{11}     B_{12}     B_{13}     B_{22}     B_{23}     B_{33}
+#   T   B_{11}   B_{12}   B_{13}   B_{22}   B_{23}   B_{33}
 \end{verbatim}
 The extension \texttt{(\_ph)} indicates interpolation of
 quantities calculated from the direct integration over the Brillouin zone,
@@ -1001,14 +1019,14 @@ from the generalized phonon density of states.
 
 \item
 \texttt{anhar\_files/flanhar.tstress(\_ph)} (default name 
-\texttt{output\_therm.dat.tstress(\_ph)}).
-This file is printed when \texttt{lmurn=.FALSE.} and the elastic constants 
+\texttt{output\_therm.dat.} \texttt{tstress(\_ph)}).
+This file is printed when \texttt{lmurn=} \texttt{.FALSE.} and the elastic constants 
 of one or more configurations are on file.
 The thermal stresses are computed as a function of temperature from the
 elastic constants and the thermal expansion.
 The file contains:
 \begin{verbatim}
-#   T      b_{11}     b_{12}     b_{13}     b_{22}     b_{23}     b_{33}
+#   T   b_{11}  b_{12}  b_{13}  b_{22}  b_{23}  b_{33}
 \end{verbatim}
 The extension \texttt{(\_ph)} indicates interpolation of
 the elastic constants at the equilibrium geometry calculated from the 
@@ -1022,7 +1040,7 @@ calculated from the phonon density of states.
 \texttt{anhar\_files/flanhar(.gamma)(\_ph)(\_grun)} 
 (default name \\ \texttt{output\_anhar.gamma(\_ph)(\_grun)}). 
 This file is printed
-when \texttt{lmurn=.TRUE.} or when the elastic
+when \texttt{lmurn=} \texttt{.TRUE.} or when the elastic
 constants of one or more configurations are on file.
 This file contains the following quantities:
 \begin{verbatim}
@@ -1040,7 +1058,7 @@ contained in the file.
 
 \item
 \texttt{anhar\_files/flanhar.ggamma(\_ph)} (default name
-\texttt{output\_therm.dat.ggamma(\_ph)}).
+\texttt{output\_therm.dat.} \texttt{ggamma(\_ph)}).
 This file is printed when \texttt{lmurn=.FALSE.} and the elastic constants 
 of one or more configurations are on file.
 The generalized Gr\"uneisen parameters are computed as a function of 
@@ -1048,7 +1066,7 @@ temperature from the thermal stresses the volume and the
 constant strain heat capacity.
 The file contains:
 \begin{verbatim}
-#   T      g_{11}     g_{12}     g_{13}     g_{22}     g_{23}     g_{33}
+#   T   g_{11}  g_{12}  g_{13}  g_{22}  g_{23}  g_{33}
 \end{verbatim}
 The extension \texttt{(\_ph)} indicates the use of quantities 
 calculated by direct integration over the Brillouin zone,
@@ -1075,7 +1093,8 @@ For trigonal solids it contains:
 \end{verbatim}
 For orthorhombic solids it contains:
 \begin{verbatim}
-#   T  celldm(1)  celldm(2)  celldm(3)  alpha_xx  alpha_yy  alpha_zz
+#   T  celldm(1) celldm(2) celldm(3) alpha_xx alpha_yy 
+    alpha_zz
 \end{verbatim}
 For monoclinic solids b-unique:
 \begin{verbatim}
@@ -1087,7 +1106,8 @@ For monoclinic solids c-unique:
 \end{verbatim}
 For triclinic solids:
 \begin{verbatim}
-#   T  celldm(1)  celldm(2)  celldm(3)  celldm(4)  celldm(5)  celldm(6)
+#   T  celldm(1) celldm(2) celldm(3) celldm(4) celldm(5) 
+       celldm(6)
 \end{verbatim}
 No extension or the extension \texttt{(\_ph)} 
 indicate that the quantities have been calculated from the minimization of
@@ -1125,7 +1145,7 @@ along the path and the number of the irreducible representation.
 
 \item
 \texttt{anhar\_files/flanhar.el\_cons(.g\#g)(\_s)(\_ph)}
-(default name \texttt{output\_anhar.dat.el\_cons(\_s)(\_ph)}). This file
+(default name \texttt{output\_} \texttt{anhar.dat.el\_cons(\_s)(\_ph)}). This file
 contains the elastic constants as a functions of temperature. The number
 of columns depends on the Laue class. The first column is the 
 temperature and the second is the bulk modulus. The others are the
@@ -1156,7 +1176,8 @@ For the Laue class $D_{4h}$, it contains:
 \end{verbatim}
 For the Laue class $D_{2h}$, it contains:
 \begin{verbatim}
-# T  B  C_{11} C_{12} C_{13} C_{22} C_{23} C_{33} C_{44} C_{55} C_{66}
+# T  B  C_{11} C_{12} C_{13} C_{22} C_{23} C_{33} C_{44} 
+        C_{55} C_{66}
 \end{verbatim}
 For the Laue class $C_{4h}$, it contains:
 \begin{verbatim}
@@ -1165,19 +1186,19 @@ For the Laue class $C_{4h}$, it contains:
 For the Laue class $C_{2h}$, the content depends on the Bravais lattice. 
 If the lattice is $b$-unique the file contains:
 \begin{verbatim}
-# T  B  C_{11} C_{12} C_{13} C_{22} C_{23} C_{33} C_{44} C_{55} C_{66} 
-        C_{15} C_{25} C_{35} C_{46} 
+# T  B  C_{11} C_{12} C_{13} C_{22} C_{23} C_{33} C_{44} 
+        C_{55} C_{66} C_{15} C_{25} C_{35} C_{46} 
 \end{verbatim}
 If the lattice is $c$-unique the file contains:
 \begin{verbatim}
-# T  B  C_{11} C_{12} C_{13} C_{22} C_{23} C_{33} C_{44} C_{55} C_{66} 
-        C_{16} C_{26} C_{36} C_{45} 
+# T  B  C_{11} C_{12} C_{13} C_{22} C_{23} C_{33} C_{44} 
+        C_{55} C_{66} C_{16} C_{26} C_{36} C_{45} 
 \end{verbatim}
 For the Laue class $C_i$, it contains:
 \begin{verbatim}
-# T  B  C_{11} C_{12} C_{13} C_{22} C_{23} C_{33} C_{44} C_{55} C_{66} 
-        C_{14} C_{15} C_{16} C_{24} C_{25} C_{26} C_{34} C_{35} C_{36}
-        C_{45} C_{46} C_{56} 
+# T  B  C_{11} C_{12} C_{13} C_{22} C_{23} C_{33} C_{44} 
+        C_{55} C_{66} C_{14} C_{15} C_{16} C_{24} C_{25} 
+        C_{26} C_{34} C_{35} C_{36} C_{45} C_{46} C_{56} 
 \end{verbatim}
 No extension or the \texttt{(\_ph)} extension means that the elastic
 constants have been interpolated at the geometry that minimizes the
@@ -1191,7 +1212,7 @@ and \texttt{\#g} is the number of the geometry.
 
 \item
 \texttt{anhar\_files/flanhar.el\_comp(.g\#g)(\_s)(\_ph)}
-(default name \texttt{output\_anhar.dat.el\_comp(\_s)(\_ph)}). This file
+(default name \texttt{output\_} \texttt{anhar.dat.el\_comp(\_s)(\_ph)}). This file
 contains the elastic compliances as a functions of temperature. 
 The number of columns depends on the Laue class. The first column is the 
 temperature and the second is the compressibility. The others are the
@@ -1222,7 +1243,8 @@ For the Laue class $D_{4h}$, it contains:
 \end{verbatim}
 For the Laue class $D_{2h}$, it contains:
 \begin{verbatim}
-# T  K  S_{11} S_{12} S_{13} S_{22} S_{23} S_{33} S_{44} S_{55} S_{66}
+# T  K  S_{11} S_{12} S_{13} S_{22} S_{23} S_{33} S_{44} 
+        S_{55} S_{66}
 \end{verbatim}
 For the Laue class $C_{4h}$, it contains:
 \begin{verbatim}
@@ -1231,19 +1253,19 @@ For the Laue class $C_{4h}$, it contains:
 For the Laue class $C_{2h}$, the content depends on the Bravais lattice. 
 If the lattice is $b$-unique the file contains:
 \begin{verbatim}
-# T  K  S_{11} S_{12} S_{13} S_{22} S_{23} S_{33} S_{44} S_{55} S_{66} 
-        S_{15} S_{25} S_{35} S_{46} 
+# T  K  S_{11} S_{12} S_{13} S_{22} S_{23} S_{33} S_{44} 
+        S_{55} S_{66} S_{15} S_{25} S_{35} S_{46} 
 \end{verbatim}
 If the lattice is $c$-unique the file contains:
 \begin{verbatim}
-# T  K  S_{11} S_{12} S_{13} S_{22} S_{23} S_{33} S_{44} S_{55} S_{66} 
-        S_{16} S_{26} S_{36} S_{45} 
+# T  K  S_{11} S_{12} S_{13} S_{22} S_{23} S_{33} S_{44} 
+        S_{55} S_{66} S_{16} S_{26} S_{36} S_{45} 
 \end{verbatim}
 For the Laue class $C_i$, it contains:
 \begin{verbatim}
-# T  K  S_{11} S_{12} S_{13} S_{22} S_{23} S_{33} S_{44} S_{55} S_{66} 
-        S_{14} S_{15} S_{16} S_{24} S_{25} S_{26} S_{34} S_{35} S_{36}
-        S_{45} S_{46} S_{56}
+# T  K  S_{11} S_{12} S_{13} S_{22} S_{23} S_{33} S_{44} 
+        S_{55} S_{66} S_{14} S_{15} S_{16} S_{24} S_{25} 
+        S_{26} S_{34} S_{35} S_{36} S_{45} S_{46} S_{56}
 \end{verbatim}
 
 \end{itemize}
@@ -1504,7 +1526,8 @@ contained in the file \texttt{control\_qe.f90} and should be added there.
 \section{\color{coral}Make join\_qe and make leave\_qe}
 The command \texttt{make join\_qe} substitutes three files of the QE
 distribution: \texttt{Makefile} in the main QE directory, 
-\texttt{install/makedeps.sh} and \texttt{install/plugins\_makefile}.
+\texttt{install/makedeps.sh} and \texttt{install/}
+\texttt{plugins\_makefile}.
 These files need to be modified to insert the commands needed to
 compile \tpw. The original files of the QE distribution are copied
 in the main \texttt{thermo\_pw} directory with the name extension
