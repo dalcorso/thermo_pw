@@ -2,6 +2,7 @@ asy.o : ../../Modules/io_global.o
 asy.o : ../../Modules/kind.o
 asy.o : ../../Modules/mp_images.o
 asy.o : ../../UtilXlib/mp.o
+bz_2d_form.o : ../../Modules/constants.o
 bz_2d_form.o : ../../Modules/io_global.o
 bz_2d_form.o : ../../Modules/kind.o
 bz_asy.o : ../../Modules/bz_form.o
