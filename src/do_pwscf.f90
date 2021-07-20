@@ -40,6 +40,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   USE upf_params,           ONLY : lmaxx
   USE initial_param,        ONLY : ethr0
   USE cell_base,            ONLY : fix_volume, fix_area
+  USE ions_base,            ONLY : if_pos
   USE control_flags,        ONLY : conv_elec, gamma_only, ethr, lscf, treinit_gvecs
   USE control_flags,        ONLY : conv_ions, istep, nstep, restart, lmd, &
                                    lbfgs, io_level, lensemb
@@ -56,9 +57,11 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   USE qmmm,                 ONLY : qmmm_initialization, qmmm_shutdown, &
                                    qmmm_update_positions, qmmm_update_forces
   USE qexsd_module,         ONLY : qexsd_set_status
-  USE funct,                ONLY : dft_is_hybrid, stop_exx
+  USE xc_lib,               ONLY : xclib_dft_is, stop_exx
   USE beef,                 ONLY : beef_energies
   USE ldaU,                 ONLY : lda_plus_u
+
+  USE device_fbuff_m,             ONLY : dev_buf
   !
   IMPLICIT NONE
   INTEGER, INTENT(OUT) :: exit_status
@@ -76,6 +79,9 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   ! ions_status =  2  converged, restart with nonzero magnetization
   ! ions_status =  1  converged, final step with current cell needed
   ! ions_status =  0  converged, exiting
+  INTEGER :: ierr
+  !
+  LOGICAL :: optimizer_failed = .FALSE.
   !
   exit_status = 0
   ions_status = 3
@@ -171,11 +177,11 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
      !
      ! ... force calculation
      !
-     IF ( lforce ) CALL forces()
+     IF ( lforce .AND. ANY( if_pos(:,:) == 1 )) CALL forces()
      !
      ! ... stress calculation
      !
-     IF ( lstres ) CALL stress_tpw ( sigma )
+     IF ( lstres ) CALL stress( sigma )
      !
      IF ( lmd .OR. lbfgs ) THEN
         !
@@ -192,11 +198,11 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
         !
         ! ... ionic step (for molecular dynamics or optimization)
         !
-        CALL move_ions ( idone, ions_status )
+        CALL move_ions ( idone, ions_status, optimizer_failed )
         conv_ions = ( ions_status == 0 ) .OR. &
                     ( ions_status == 1 .AND. treinit_gvecs )
         !
-        IF (dft_is_hybrid() )  CALL stop_exx()
+        IF ( xclib_dft_is('hybrid') )  CALL stop_exx()
         !
         ! ... save restart information for the new configuration
         !
@@ -215,7 +221,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
      !
      ! ... exit condition (ionic convergence) is checked here
      !
-     IF ( conv_ions ) EXIT main_loop
+     IF ( conv_ions .OR. optimizer_failed ) EXIT main_loop
      !
      ! ... receive new positions from MM code in QM/MM run
      !
@@ -276,6 +282,10 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
      !
      ethr = 1.0D-6
      !
+     CALL dev_buf%reinit( ierr )
+     IF ( ierr .ne. 0 ) CALL errore( 'run_pwscf', 'Cannot reset GPU buffers!  Buffers still locked: ', abs(ierr) )
+     !
+     !
   ENDDO main_loop
   !
   ! ... save final data file
@@ -286,7 +296,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   !
   CALL qmmm_shutdown()
   !
-  IF ( .NOT. conv_ions )  exit_status =  3
+  IF ( .NOT. conv_ions .OR. optimizer_failed )  exit_status =  3
   !
   CALL close_files(.TRUE.)
   !

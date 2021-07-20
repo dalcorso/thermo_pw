@@ -143,8 +143,8 @@ do_pwscf.o : ../../Modules/check_stop.o
 do_pwscf.o : ../../Modules/command_line_options.o
 do_pwscf.o : ../../Modules/control_flags.o
 do_pwscf.o : ../../Modules/fft_base.o
-do_pwscf.o : ../../Modules/funct.o
 do_pwscf.o : ../../Modules/io_global.o
+do_pwscf.o : ../../Modules/ions_base.o
 do_pwscf.o : ../../Modules/kind.o
 do_pwscf.o : ../../Modules/mp_images.o
 do_pwscf.o : ../../Modules/parameters.o
@@ -157,6 +157,7 @@ do_pwscf.o : ../../PW/src/pwcom.o
 do_pwscf.o : ../../PW/src/scf_mod.o
 do_pwscf.o : ../../PW/src/update_pot.o
 do_pwscf.o : ../../UtilXlib/mp.o
+do_pwscf.o : ../../XClib/xc_lib.o
 do_pwscf.o : ../../upflib/upf_params.o
 do_pwscf.o : thermo_mod.o
 dos_sub.o : ../../Modules/constants.o
@@ -280,10 +281,10 @@ initialize_thermo_work.o : ../../Modules/ions_base.o
 initialize_thermo_work.o : ../../Modules/kind.o
 initialize_thermo_work.o : ../../Modules/mp_images.o
 initialize_thermo_work.o : ../../Modules/recvec.o
-initialize_thermo_work.o : ../../Modules/wrappers.o
 initialize_thermo_work.o : ../../PHonon/PH/phcom.o
 initialize_thermo_work.o : ../../PW/src/pwcom.o
 initialize_thermo_work.o : ../../PW/src/start_k.o
+initialize_thermo_work.o : ../../UtilXlib/clib_wrappers.o
 initialize_thermo_work.o : ../../thermo_pw/lib/lattices.o
 initialize_thermo_work.o : ../../thermo_pw/lib/piezoelectric_tensor.o
 initialize_thermo_work.o : ../../thermo_pw/qe/control_qe.o
@@ -500,8 +501,8 @@ plan_avg_sub.o : ../../Modules/mp_pools.o
 plan_avg_sub.o : ../../Modules/noncol.o
 plan_avg_sub.o : ../../Modules/recvec.o
 plan_avg_sub.o : ../../Modules/wavefunctions.o
-plan_avg_sub.o : ../../Modules/wrappers.o
 plan_avg_sub.o : ../../PW/src/pwcom.o
+plan_avg_sub.o : ../../UtilXlib/clib_wrappers.o
 plan_avg_sub.o : ../../UtilXlib/mp.o
 plan_avg_sub.o : ../../upflib/uspp.o
 plan_avg_sub.o : thermo_mod.o
@@ -510,6 +511,7 @@ plot_2d_bz.o : ../../Modules/kind.o
 plot_2d_bz.o : ../../thermo_pw/lib/asy.o
 plot_2d_bz.o : ../../thermo_pw/lib/bz_2d_form.o
 plot_2d_bz.o : ../../thermo_pw/lib/bz_asy.o
+plot_2d_bz.o : ../../thermo_pw/lib/freecad.o
 plot_2d_bz.o : thermo_mod.o
 plot_anhar.o : ../../Modules/cell_base.o
 plot_anhar.o : ../../Modules/io_global.o
@@ -532,6 +534,7 @@ plot_bz.o : ../../Modules/io_global.o
 plot_bz.o : ../../Modules/kind.o
 plot_bz.o : ../../thermo_pw/lib/asy.o
 plot_bz.o : ../../thermo_pw/lib/bz_asy.o
+plot_bz.o : ../../thermo_pw/lib/freecad.o
 plot_bz.o : thermo_mod.o
 plot_dispersion.o : ../../Modules/io_global.o
 plot_dispersion.o : ../../Modules/kind.o
@@ -859,12 +862,8 @@ thermo_setup.o : ../../thermo_pw/lib/lattices.o
 thermo_setup.o : ../../thermo_pw/lib/mp_asyn.o
 thermo_setup.o : ../../thermo_pw/lib/xrdp.o
 thermo_setup.o : thermo_mod.o
-thermo_startup.o : ../../Modules/command_line_options.o
 thermo_startup.o : ../../Modules/environment.o
-thermo_startup.o : ../../Modules/mp_bands.o
 thermo_startup.o : ../../Modules/mp_global.o
-thermo_startup.o : ../../Modules/mp_pools.o
-thermo_startup.o : ../../Modules/mp_world.o
 thermo_summary.o : ../../Modules/cell_base.o
 thermo_summary.o : ../../Modules/fft_base.o
 thermo_summary.o : ../../Modules/io_files.o

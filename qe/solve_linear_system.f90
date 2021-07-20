@@ -34,7 +34,7 @@ REAL(DP) :: thresh
 INTEGER :: ikk, ikq, ikmk, npwq
 REAL(DP) ::  anorm
 LOGICAL :: conv_root
-EXTERNAL ch_psi_all, cg_psi
+EXTERNAL ch_psi_all_tpw, cg_psi
 
 ikk=ikks(ik)
 ikq=ikqs(ik)
@@ -47,7 +47,7 @@ IF (isolv==2) THEN
 ENDIF
 
 conv_root=.TRUE.
-CALL cgsolve_all (ch_psi_all, cg_psi, et(1,ikmk), dvpsi, dpsi, &
+CALL cgsolve_all (ch_psi_all_tpw, cg_psi, et(1,ikmk), dvpsi, dpsi, &
                   h_diag, npwx, npwq, thresh, ik, lter, conv_root, &
                   anorm, nbnd_occ(ikk), npol )
 

@@ -9,7 +9,7 @@ a <code>.tar.gz</code> file. The current production version is
 <code>QE-6.7</code>. The <code>thermo_pw</code> file should be copied
 in the main (QE) directory and unpacked with the command:</p>
 <p align="center">
-<code>tar -xzvf thermo_pw.1.5.0.tar.gz</code>
+<code>tar -xzvf thermo_pw.1.5.1.tar.gz</code>
 </p>
 <p align="justify">This command produces a directory called 
 <code>thermo_pw</code>. To compile the code you need a Fortran compiler, for 
@@ -23,6 +23,8 @@ directory and compile <code>thermo_pw</code> with the command:</p>
 <p align="center"><code>
 make thermo_pw
 </code></p>
+<p align="justify"> If you use <code>cmake</code>, the command 
+<code>make</code> produces also the <code>thermo_pw.x</code> executable.
 <p align="justify"> To run <code>thermo_pw</code> it is useful to have the 
 <a href="http://www.gnuplot.info/">gnuplot</a> package, and to plot 
 the Brillouin zone
@@ -39,12 +41,12 @@ package. Then you can give the command:</p>
 <code>git clone https://github.com/dalcorso/thermo_pw</code>
 </p>
 <p align="justify"> and you should get a directory called <code>thermo_pw</code> that contains the source code.
-The <code>git</code> version can be used only together with the version of <code>QE</code> reported here: <code>6.7</code>. Please note that sometimes the <code>git</code> version is not working properly and in any case its use is not recommended.</p> 
+The <code>git</code> version can be used only together with the version of <code>QE</code> reported here: <code>6.8</code>. Please note that sometimes the <code>git</code> version is not working properly and in any case its use is not recommended.</p> 
 
 <p align="justify"> Although <code>thermo_pw</code> has been 
 used for several years and can be considered reasonably stable, it remains an 
 experimental code given as it is.
-A version of <code>QE</code> older than <code>6.7</code>
+A version of <code>QE</code> older than <code>6.8</code>
 can still be used with <code>thermo_pw</code> matching carefully the
 versions of <code>thermo_pw</code> and of <code>QE</code> as explained in the
 main <code>thermo_pw</code> page.</p>
@@ -456,10 +458,11 @@ continue the calculation, otherwise simplify your cell.
 28. Is <code>thermo_pw</code> compatible with the GPU version of QE?
 <br>
 Presently there is no support for GPU in <code>thermo\_pw</code> routines,
-but starting from QE6.7 and with the git version of <code>thermo\_pw</code> 
+but with QE6.7 and with version 1.5.0 
 you can give the command <code>make tpw_gpu</code>
 to obtain a version of the code that can be compiled with 
-<code>q-e-gpu.6.7</code>.  
+<code>q-e-gpu.6.7</code>. Version 1.5.1 and QE6.8 or later versions
+can be compiled with CUDA enabled. 
 <br><br>
 29. The band or phonon symmetry is not indicated. There are many
 question marks instead of the names of the irreducible representations.
@@ -468,11 +471,11 @@ The question marks indicate that the algorithm that finds the symmetry is
 confused and is unable to find a well defined symmetry. There are several 
 possible reasons: 
 * You might have a too small cut-off, or
-a too small threshold for the self consistence and the symmetry is not
+a too large threshold for the self consistence and the symmetry is not
 accurate enough. Please modify these parameters.
-* Your atomic positions are quite close to a symmetry but
-not exactly there. The typical problem appears when you use single precision
-atomic coordinates. Please correct the atomic coordinates. 
+* Your atomic positions are quite close to a symmetry position but
+not exactly there. This is a common problem when using single precision
+atomic coordinates. Please correct the atomic coordinates adding more digits. 
 * There might be some problem with the pseudopotential and
 there is some ghost state. Please check other pseudopotentials to
 see if the problem disappears. 

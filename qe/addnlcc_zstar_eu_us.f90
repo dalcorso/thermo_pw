@@ -12,7 +12,8 @@ SUBROUTINE addnlcc_zstar_eu_us_tpw( drhoscf )
 
   USE kinds,     ONLY : DP
   USE ions_base, ONLY : nat
-  USE funct,     ONLY : dft_is_gradient, dft_is_nonlocc
+  USE funct,     ONLY : dft_is_nonlocc
+  USE xc_lib,    ONLY : xclib_dft_is
   USE scf,       ONLY : rho, rho_core
   USE gvect,     ONLY : g
   USE cell_base, ONLY : omega, alat
@@ -79,7 +80,7 @@ SUBROUTINE addnlcc_zstar_eu_us_tpw( drhoscf )
            ! its contribution. grho contains already the core charge
            !
 
-           IF ( dft_is_gradient() ) &
+           IF ( xclib_dft_is('gradient')) &
               CALL dgradcorr (dfftp, rho%of_r, grho, dvxc_rr, dvxc_sr, &
               dvxc_ss, dvxc_s, xq, drhoscf (1, 1, ipol),  &
               nspin_mag, nspin_gga, g, dvaux)

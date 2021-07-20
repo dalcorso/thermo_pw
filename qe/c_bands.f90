@@ -29,7 +29,7 @@ SUBROUTINE c_bands_nscf_tpw( )
   USE basis,                ONLY : starting_wfc
   USE fft_base,             ONLY : dfftp
   USE klist,                ONLY : nkstot, nks, xk, ngk, igk_k
-  USE uspp,                 ONLY : vkb, nkb
+  USE uspp,                 ONLY : vkb, nkb, using_vkb
   USE gvect,                ONLY : g, gg, ngm
   USE fft_interfaces,       ONLY : invfft
   USE wvfct,                ONLY : et, nbnd, npwx, current_k
@@ -52,6 +52,10 @@ SUBROUTINE c_bands_nscf_tpw( )
   USE band_computation,     ONLY : diago_bands, ik_origin, sym_for_diago
   USE noncollin_module,     ONLY : noncolin, npol
   USE spin_orb,             ONLY : domag
+
+  USE wavefunctions_gpum, ONLY : using_evc
+  USE wvfct_gpum,                ONLY : using_et
+
   !
   IMPLICIT NONE
   !
@@ -79,10 +83,12 @@ SUBROUTINE c_bands_nscf_tpw( )
   !
   ik_ = 0
   avg_iter = 0.D0
+  IF ( restart ) CALL using_et(1)
   IF ( restart ) CALL restart_in_cbands( ik_, ethr, avg_iter, et )
   !
   ! ... If restarting, calculated wavefunctions have to be read from file
   !
+  CALL using_evc(1)
   DO ik = 1, ik_
      CALL get_buffer( evc, nwordwfc, iunwfc, ik )
   ENDDO
@@ -140,6 +146,7 @@ SUBROUTINE c_bands_nscf_tpw( )
         ! 
         ! ... More stuff needed by the hamiltonian: nonlocal projectors
         !
+        IF ( nkb > 0 ) CALL using_vkb(1)
         IF ( nkb > 0 ) CALL init_us_2( ngk(ik), igk_k(1,ik), xk(1,ik), vkb )
         !
         ! ... Needed for LDA+U
@@ -157,6 +164,7 @@ SUBROUTINE c_bands_nscf_tpw( )
         !
         IF ( TRIM(starting_wfc) == 'file' ) THEN
            !
+           CALL using_evc(1)
            CALL get_buffer ( evc, nwordwfc, iunwfc, ik )
            !
         ELSE
@@ -187,6 +195,7 @@ SUBROUTINE c_bands_nscf_tpw( )
         !
         ! ... save wave-functions (unless disabled in input)
         !
+        IF ( io_level > -1 ) CALL using_evc(0)
         IF ( io_level > -1 ) CALL save_buffer ( evc, nwordwfc, iunwfc, ik )
         !
         !
@@ -196,6 +205,7 @@ SUBROUTINE c_bands_nscf_tpw( )
            ! ... save wavefunctions to file
            !
            IF (check_stop_now()) THEN
+              CALL using_et(0)
               CALL save_in_cbands(ik, ethr, avg_iter, et )
               RETURN
            ENDIF

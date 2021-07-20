@@ -69,8 +69,7 @@ MODULE paw_add_onecenter
     USE uspp_param,             ONLY : upf
     USE lsda_mod,               ONLY : nspin
     USE atom,                   ONLY : g => rgrid
-    USE funct,                  ONLY : dft_is_gradient
-    USE xc_lda_lsda,            ONLY : xc
+    USE xc_lib,                 ONLY : xclib_dft_is
     USE constants,              ONLY : fpi ! REMOVE
     !
     TYPE(paw_info), INTENT(IN) :: i
@@ -273,7 +272,7 @@ MODULE paw_add_onecenter
     ENDIF
     !
     ! Add gradient correction, if necessary
-    IF ( dft_is_gradient() ) &
+    IF ( xclib_dft_is('Gradient') ) &
         CALL PAW_gcxc_potential( i, rho_lm, rho_core, v_lm, energy )
         !
     IF (TIMING) CALL stop_clock( 'PAW_xc_pot' )
@@ -298,8 +297,7 @@ MODULE paw_add_onecenter
     USE noncollin_module,       ONLY : noncolin, nspin_mag, nspin_gga
     USE atom,                   ONLY : g => rgrid
     USE constants,              ONLY : sqrtpi, fpi,pi,e2
-    USE funct,                  ONLY : igcc_is_lyp
-    USE xc_gga,                 ONLY : xc_gcx
+    USE xc_lib,                 ONLY : igcc_is_lyp, xc_gcx
     USE mp,                     ONLY : mp_sum
     !
     TYPE(paw_info), INTENT(IN) :: i

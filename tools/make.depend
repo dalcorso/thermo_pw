@@ -38,9 +38,9 @@ epsilon_tpw.o : ../../Modules/mp_world.o
 epsilon_tpw.o : ../../Modules/noncol.o
 epsilon_tpw.o : ../../Modules/recvec.o
 epsilon_tpw.o : ../../Modules/wavefunctions.o
-epsilon_tpw.o : ../../Modules/wrappers.o
 epsilon_tpw.o : ../../PW/src/pwcom.o
 epsilon_tpw.o : ../../PW/src/symme.o
+epsilon_tpw.o : ../../UtilXlib/clib_wrappers.o
 epsilon_tpw.o : ../../UtilXlib/mp.o
 epsilon_tpw.o : ../../thermo_pw/lib/gnuplot.o
 epsilon_tpw.o : ../../upflib/uspp.o
@@ -86,7 +86,7 @@ pdec.o : ../../Modules/io_global.o
 pdec.o : ../../Modules/kind.o
 pdec.o : ../../Modules/mp_global.o
 pdec.o : ../../Modules/mp_world.o
-pdec.o : ../../Modules/wrappers.o
+pdec.o : ../../UtilXlib/clib_wrappers.o
 pdec.o : ../../UtilXlib/mp.o
 pdec.o : ../../thermo_pw/lib/elastic_const.o
 pdec.o : ../../thermo_pw/lib/gnuplot.o
@@ -114,9 +114,9 @@ supercell.o : ../../Modules/io_global.o
 supercell.o : ../../Modules/kind.o
 supercell.o : ../../Modules/mp_global.o
 supercell.o : ../../Modules/parser.o
-supercell.o : ../../Modules/wrappers.o
 supercell.o : ../../Modules/wyckoff.o
 supercell.o : ../../Modules/wypos.o
+supercell.o : ../../UtilXlib/clib_wrappers.o
 supercell.o : ../../thermo_pw/lib/atomic_pos.o
 supercell.o : ../../thermo_pw/lib/lattices.o
 test_colors.o : ../../Modules/environment.o
@@ -126,6 +126,7 @@ test_colors.o : ../../Modules/mp_global.o
 test_colors.o : ../../Modules/mp_images.o
 test_colors.o : ../../thermo_pw/lib/gnuplot.o
 test_colors.o : ../../thermo_pw/lib/gnuplot_color.o
+translate.o : ../../Modules/io_global.o
 translate.o : ../../Modules/kind.o
 translate.o : ../../thermo_pw/lib/rotate.o
 units.o : ../../Modules/environment.o

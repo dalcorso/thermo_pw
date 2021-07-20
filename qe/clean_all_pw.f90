@@ -30,11 +30,12 @@ SUBROUTINE clean_all_pw( )
   USE radial_grids,         ONLY : deallocate_radial_grid
   USE pseudo_types,         ONLY : deallocate_pseudo_upf
   USE ions_base,            ONLY : deallocate_ions_base
-
+  USE ktetra,               ONLY : deallocate_tetra
   !
   USE london_module,        ONLY : dealloca_london
   USE xdm_module,           ONLY : cleanup_xdm
   USE constraints_module,   ONLY : deallocate_constraint
+  USE dftd3_qe,             ONLY : dftd3_clean
   !
   !
   IMPLICIT NONE
@@ -61,7 +62,9 @@ SUBROUTINE clean_all_pw( )
   !
   CALL dealloca_london()
   CALL cleanup_xdm()
+  CALL dftd3_clean()
   CALL deallocate_constraint()
+  CALL deallocate_tetra()
   !
   RETURN
   !

@@ -212,7 +212,7 @@ SUBROUTINE eps_calc (intersmear, nw, wmax, wmin, nbndmin, nbndmax, shift, &
   USE lsda_mod,             ONLY : current_spin, isk
   !
   USE io_global,            ONLY : ionode, stdout, meta_ionode
-  USE wrappers,             ONLY : f_mkdir_safe
+  USE clib_wrappers,             ONLY : f_mkdir_safe
   USE mp_pools,             ONLY : inter_pool_comm
   USE mp,                   ONLY : mp_sum
   !

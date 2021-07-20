@@ -48,7 +48,7 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
   USE optical,            ONLY : lmagnon
   USE paw_variables,      ONLY : okpaw
   USE lr_symm_base,       ONLY : nsymq, invsymq, minus_q
-  USE uspp_param,         ONLY : n_atom_wfc
+  USE upf_ions,           ONLY : n_atom_wfc
   USE band_computation,   ONLY : diago_bands, isym_bands, ik_origin, &
                                  sym_for_diago, nks0
  
@@ -79,7 +79,7 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
   max_cg_iter=20
   natomwfc = n_atom_wfc( nat, ityp, noncolin )
   !
-  use_para_diag = check_para_diag( nbnd )
+  CALL set_para_diag( nbnd, use_para_diag )
   !
   ! ... Symmetry and k-point section
   !

@@ -30,7 +30,7 @@ SUBROUTINE plan_avg_sub(averag, vacuum, nat_, nbnd_, nks_, ninter, &
   USE becmod,    ONLY : becp, allocate_bec_type, deallocate_bec_type
   USE uspp,      ONLY : nkb
   USE klist,     ONLY : nks, xk, nkstot
-  USE wrappers,  ONLY : f_mkdir_safe
+  USE clib_wrappers,  ONLY : f_mkdir_safe
   USE io_global, ONLY : ionode, ionode_id
   USE mp_images, ONLY : intra_image_comm
   USE mp_bands,  ONLY : nbgrp, me_bgrp, root_bgrp, intra_bgrp_comm

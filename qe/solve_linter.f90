@@ -34,7 +34,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   USE spin_orb,             ONLY : domag
   USE wvfct,                ONLY : nbnd, npwx
   USE scf,                  ONLY : rho, vrs
-  USE uspp,                 ONLY : okvan, vkb, deeq_nc
+  USE uspp,                 ONLY : okvan, nkb, vkb, deeq_nc, using_vkb
   USE uspp_param,           ONLY : nhm
   USE noncollin_module,     ONLY : noncolin, npol, nspin_mag
   USE paw_variables,        ONLY : okpaw
@@ -75,6 +75,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   USE ldaU,         ONLY : lda_plus_u
   USE magnetic_charges,     ONLY : mag_charge_mode
   USE gvect,                ONLY : gg
+
 
   IMPLICIT NONE
 
@@ -259,7 +260,10 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
         ! compute beta functions and kinetic energy for k-point ikq
         ! needed by h_psi, called by ch_psi_all, called by cgsolve_all
         !
-        CALL init_us_2 (npwq, igk_k(1,ikq), xk (1, ikq), vkb)
+        IF ( nkb > 0 ) THEN
+           CALL using_vkb(2)
+           CALL init_us_2( npwq, igk_k(1,ikq), xk(1,ikq), vkb )
+        ENDIF
         CALL g2_kin (ikq) 
         !
         ! Start the loop on the two linear systems, one at B and one at
@@ -574,7 +578,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   !    We compute it here.
   !
   IF (convt) THEN
-     CALL drhodvus_tpw (irr, imode0, dvscfin, npe)
+     CALL drhodvus (irr, imode0, dvscfin, npe)
      IF (fildvscf.NE.' ') THEN
         DO ipert = 1, npe
            IF (lmetq0) then

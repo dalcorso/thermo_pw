@@ -13,22 +13,11 @@ SUBROUTINE thermo_startup(code)
 !
 USE mp_global,        ONLY : mp_startup
 USE environment,      ONLY : environment_start
-USE mp_world,         ONLY : world_comm
-USE mp_pools,         ONLY : intra_pool_comm
-USE mp_bands,         ONLY : intra_bgrp_comm, inter_bgrp_comm
-USE command_line_options,  ONLY : ndiag_
 
 IMPLICIT NONE
-INCLUDE 'laxlib.fh'
 CHARACTER(LEN=*) :: code
   !
   CALL mp_startup( start_images=.TRUE. )
-  !
-  CALL laxlib_start ( ndiag_, world_comm, intra_bgrp_comm, &
-                         do_distr_diag_inside_bgrp_ = .TRUE. )
-  !
-  CALL set_mpi_comm_4_solvers( intra_pool_comm, intra_bgrp_comm, &
-       inter_bgrp_comm )
   !
   CALL environment_start ( code )
   !

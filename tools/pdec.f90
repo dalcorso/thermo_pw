@@ -24,7 +24,7 @@ PROGRAM pdec
 USE kinds,   ONLY : DP
 USE mp_global,    ONLY : mp_startup, mp_global_end
 USE environment,  ONLY : environment_start, environment_end
-USE wrappers,          ONLY : f_mkdir_safe
+USE clib_wrappers,  ONLY : f_mkdir_safe
 USE elastic_constants, ONLY : read_el_cons_from_file
 USE nye,     ONLY : print_el_cons_shape
 USE polyfit_mod, ONLY : polyfit, compute_poly

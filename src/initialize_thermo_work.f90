@@ -46,7 +46,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   USE lattices,       ONLY : crystal_parameters
   USE start_k,        ONLY : nk1, nk2, nk3
   USE klist,          ONLY : degauss, lgauss, ltetra
-  USE wrappers,       ONLY : f_mkdir_safe
+  USE clib_wrappers,       ONLY : f_mkdir_safe
   USE io_global,      ONLY : meta_ionode
   !
   IMPLICIT NONE

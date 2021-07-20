@@ -101,7 +101,7 @@ USE wy_pos,      ONLY : wypos
 USE parser,      ONLY : read_line, get_field, field_count
 USE atomic_pos,  ONLY : find_ityp
 USE lattices,    ONLY : find_ibrav_code
-USE wrappers,    ONLY : feval_infix
+USE clib_wrappers, ONLY : feval_infix
 USE io_global,   ONLY : ionode, stdout
 USE mp_global,   ONLY : mp_startup, mp_global_end
 USE environment, ONLY : environment_start, environment_end
