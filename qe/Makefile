@@ -29,6 +29,7 @@ calc_chi.o \
 check_bands.o \
 check_initial_geometry.o \
 check_initial_status.o \
+ch_psi_all.o \
 clean_all_pw.o \
 collect_grid_files.o \
 compute_intq.o \
@@ -46,7 +47,6 @@ do_cg_ph.o \
 do_lanczos.o \
 do_lanczos_psh.o \
 drho.o \
-drhodvus.o \
 dv_of_drho_clf.o \
 dv_of_drho_tran.o \
 dveqpsi_us.o \

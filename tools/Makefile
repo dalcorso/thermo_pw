@@ -20,6 +20,7 @@ PWOBJS = ../../PHonon/PH/libph.a \
 QEMODS = ../../Modules/libqemod.a \
          ../../KS_Solvers/libks_solvers.a \
          ../../upflib/libupf.a    \
+         ../../XClib/xc_lib.a     \
          ../../FFTXlib/libqefft.a \
          ../../LAXlib/libqela.a \
          ../../UtilXlib/libutil.a

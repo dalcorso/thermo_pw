@@ -273,6 +273,17 @@ if(QE_ENABLE_OPENMP)
 endif(QE_ENABLE_OPENMP)
 
 ###########################################################
+# OpenACC
+# The following targets will be defined:
+add_library(qe_openacc_fortran INTERFACE)
+qe_install_targets(qe_openacc_fortran)
+###########################################################
+if(QE_ENABLE_OPENACC)
+    target_link_libraries(qe_openacc_fortran
+        INTERFACE OpenACC::OpenACC_Fortran)
+endif(QE_ENABLE_OPENACC)
+
+###########################################################
 # MPI
 # The following targets will be defined:
 add_library(qe_mpi_fortran INTERFACE)
@@ -649,6 +660,7 @@ add_custom_target(ph
         qe_phonon_fd_exe
         qe_phonon_fdef_exe
         qe_phonon_fdifc_exe
+        qe_phonon_postahc_exe
     COMMENT
         "phonon code, Gamma-only and third-order derivatives")
 
@@ -703,7 +715,7 @@ add_custom_target(pp
     COMMENT
         "postprocessing programs")
 
-add_custom_target(tpw
+add_custom_target(thermo_pw
     DEPENDS
         qe_tpw_lib
         qe_tpw_qe
@@ -746,7 +758,8 @@ add_custom_target(pwall
         pp
         pwcond
         neb
-        tpw
+        thermo_pw
+        tpw_tools
     COMMENT
         "same as \"make pw ph pp pwcond neb\"")
 
