@@ -121,8 +121,6 @@ solve_eq_tran.o \
 solve_linter.o \
 solve_linear_system.o \
 star_q.o \
-stres_gradcorr.o \
-stress.o \
 summarize_alpha.o \
 sym_and_write_magnetic_charges.o \
 symmetrize_drho.o \

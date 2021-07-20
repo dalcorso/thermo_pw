@@ -24,8 +24,8 @@ join_qe:
            plugins_makefile_qe ; mv plugins_makefile ../install ; fi
 	if test -f makedeps.sh ; then mv ../install/makedeps.sh \
            makedeps.sh_qe ; mv makedeps.sh ../install/ ; fi
-	if test -f ph_restart.f90 ; then mv ../PHonon/PH/ph_restart.f90 \
-           ph_restart.f90_qe ; mv ph_restart.f90 ../PHonon/PH ; fi
+	if test -f main_CMakeLists.txt ; then mv ../CMakeLists.txt \
+           CMakeLists.txt_qe ; mv main_CMakeLists.txt ../CMakeLists.txt ; fi
 
 leave_qe:
 	if test -f Makefile_qe ; then mv ../Makefile main_Makefile ; \
@@ -35,71 +35,9 @@ leave_qe:
            mv plugins_makefile_qe ../install/plugins_makefile ; fi
 	if test -f makedeps.sh_qe ; then mv ../install/makedeps.sh . ; \
            mv makedeps.sh_qe ../install/makedeps.sh ; fi
-	if test -f ph_restart.f90_qe ; then mv ../PHonon/PH/ph_restart.f90 \
-           ph_restart.f90 ; mv ph_restart.f90_qe ../PHonon/PH/ph_restart.f90 ; fi
-
-tpw_gpu:
-	if test -f cpu_gpu/gpu_setup.f90 ; then mv qe/setup.f90 \
-           cpu_gpu/cpu_setup.f90 ; \
-           mv cpu_gpu/gpu_setup.f90 qe/setup.f90 ; fi
-	if test -f cpu_gpu/gpu_electrons.f90 ; then mv qe/electrons.f90 \
-           cpu_gpu/cpu_electrons.f90 ; \
-           mv cpu_gpu/gpu_electrons.f90 qe/electrons.f90 ; fi
-	if test -f cpu_gpu/gpu_non_scf.f90 ; then mv qe/non_scf.f90 \
-           cpu_gpu/cpu_non_scf.f90 ; \
-           mv cpu_gpu/gpu_non_scf.f90 qe/non_scf.f90 ; fi
-	if test -f cpu_gpu/gpu_c_bands.f90 ; then mv qe/c_bands.f90 \
-           cpu_gpu/cpu_c_bands.f90 ; \
-           mv cpu_gpu/gpu_c_bands.f90 qe/c_bands.f90 ; fi
-	if test -f cpu_gpu/gpu_stress.f90 ; then mv qe/stress.f90 \
-           cpu_gpu/cpu_stress.f90 ; \
-           mv cpu_gpu/gpu_stress.f90 qe/stress.f90 ; fi
-	if test -f cpu_gpu/gpu_solve_linter.f90 ; then mv qe/solve_linter.f90 \
-           cpu_gpu/cpu_solve_linter.f90 ; \
-           mv cpu_gpu/gpu_solve_linter.f90 qe/solve_linter.f90 ; fi
-	if test -f cpu_gpu/gpu_ch_psi_all.f90 ; then mv qe/ch_psi_all.f90 \
-           cpu_gpu/cpu_ch_psi_all.f90 ; \
-           mv cpu_gpu/gpu_ch_psi_all.f90 qe/ch_psi_all.f90 ; fi
-	if test -f cpu_gpu/gpu_solve_linear_system.f90 ; then  \
-           mv qe/solve_linear_system.f90 \
-           cpu_gpu/cpu_solve_linear_system.f90 ; \
-           mv cpu_gpu/gpu_solve_linear_system.f90 \
-                  qe/solve_linear_system.f90 ; fi
-	if test -f cpu_gpu/gpu_Makefile ; then mv qe/Makefile \
-           cpu_gpu/cpu_Makefile ; \
-           mv cpu_gpu/gpu_Makefile qe/Makefile ; fi
-
-tpw_cpu:
-	if test -f cpu_gpu/cpu_setup.f90 ; then mv qe/setup.f90 \
-           cpu_gpu/gpu_setup.f90 ; \
-           mv cpu_gpu/cpu_setup.f90 qe/setup.f90 ; fi
-	if test -f cpu_gpu/cpu_electrons.f90 ; then mv qe/electrons.f90 \
-           cpu_gpu/gpu_electrons.f90 ; \
-           mv cpu_gpu/cpu_electrons.f90 qe/electrons.f90 ; fi
-	if test -f cpu_gpu/cpu_non_scf.f90 ; then mv qe/non_scf.f90 \
-           cpu_gpu/gpu_non_scf.f90 ; \
-           mv cpu_gpu/cpu_non_scf.f90 qe/non_scf.f90 ; fi
-	if test -f cpu_gpu/cpu_c_bands.f90 ; then mv qe/c_bands.f90 \
-           cpu_gpu/gpu_c_bands.f90 ; \
-           mv cpu_gpu/cpu_c_bands.f90 qe/c_bands.f90 ; fi
-	if test -f cpu_gpu/cpu_stress.f90 ; then mv qe/stress.f90 \
-           cpu_gpu/gpu_stress.f90 ; \
-           mv cpu_gpu/cpu_stress.f90 qe/stress.f90 ; fi
-	if test -f cpu_gpu/cpu_solve_linter.f90 ; then mv qe/solve_linter.f90 \
-           cpu_gpu/gpu_solve_linter.f90 ; \
-           mv cpu_gpu/cpu_solve_linter.f90 qe/solve_linter.f90 ; fi
-	if test -f cpu_gpu/cpu_ch_psi_all.f90 ; then mv qe/ch_psi_all.f90 \
-           cpu_gpu/gpu_ch_psi_all.f90 ; \
-           mv cpu_gpu/cpu_ch_psi_all.f90 qe/ch_psi_all.f90 ; fi
-	if test -f cpu_gpu/cpu_solve_linear_system.f90 ; then  \
-           mv qe/solve_linear_system.f90 \
-           cpu_gpu/gpu_solve_linear_system.f90 ; \
-           mv cpu_gpu/cpu_solve_linear_system.f90 \
-                  qe/solve_linear_system.f90 ; fi
-	if test -f cpu_gpu/cpu_Makefile ; then mv qe/Makefile \
-           cpu_gpu/gpu_Makefile ; \
-           mv cpu_gpu/cpu_Makefile qe/Makefile ; fi
-
+	if test -f CMakeLists.txt_qe ; then mv ../CMakeLists.txt \
+           main_CMakeLists.txt ; \
+           mv CMakeLists.txt_qe ../CMakeLists.txt ; fi
 
 clean: thermo_tools_clean thermo_pw_clean thermo_lib_clean thermo_qe_clean examples_clean examples_qe_clean doc_clean
 

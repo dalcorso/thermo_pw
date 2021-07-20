@@ -649,10 +649,6 @@ add_custom_target(ph
         qe_phonon_fd_exe
         qe_phonon_fdef_exe
         qe_phonon_fdifc_exe
-        qe_phonon_postahc_exe
-        qe_plotphon_kforbands_exe
-        qe_plotphon_bandstognuplot_exe
-        qe_plotphon_eminmax_exe
     COMMENT
         "phonon code, Gamma-only and third-order derivatives")
 
