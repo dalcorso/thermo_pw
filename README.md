@@ -12,8 +12,8 @@ for properties such as the electronic band structures, the phonon
 dispersions, or the harmonic and anharmonic thermodynamic quantities,
 it is simpler to use and faster to learn. Moreover it can run in parallel
 creating several images of itself, carrying out asynchronous tasks.
-See Doc/tutorial.pdf (or [here](https://people.sissa.it/~dalcorso/thermo_pw/tutorial/tutorial.html)) for an overview of the code
-and the file Doc/user\_guide.pdf (or [here](https://people.sissa.it/~dalcorso/thermo_pw/user_guide/user_guide.html)) for a detailed description of its 
+See [Doc/tutorial.pdf](https://people.sissa.it/~dalcorso/thermo_pw/tutorial.pdf) (or [here](https://people.sissa.it/~dalcorso/thermo_pw/tutorial/tutorial.html)) for an overview of the code
+and the file [Doc/user\_guide.pdf](https://people.sissa.it/~dalcorso/thermo_pw/user_guide.pdf) (or [here](https://people.sissa.it/~dalcorso/thermo_pw/user_guide/user_guide.html)) for a detailed description of its 
 options.
 
 [![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
