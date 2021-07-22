@@ -24,7 +24,7 @@ directory and compile <code>thermo_pw</code> with the command:</p>
 make thermo_pw
 </code></p>
 <p align="justify"> If you use <code>cmake</code>, the command 
-<code>make</code> produces also the <code>thermo_pw.x</code> executable.
+<code>make</code> produces also the <code>thermo_pw.x</code> executable.</p>
 <p align="justify"> To run <code>thermo_pw</code> it is useful to have the 
 <a href="http://www.gnuplot.info/">gnuplot</a> package, and to plot 
 the Brillouin zone
