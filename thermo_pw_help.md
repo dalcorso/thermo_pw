@@ -30,7 +30,7 @@ make thermo_pw
 the Brillouin zone
 you need the <a href="http://asymptote.sourceforge.net/">asymptote</a> package. 
 Both are available as precompiled packages in many distributions.
-For further information, please refer to the user's guide
+For further information, please refer to the user''s guide
 available in the <code>thermo_pw/Doc</code> directory.
 Please report any problem to
 <a href="mailto:dalcorso .at. sissa.it"> dalcorso .at. sissa.it</a>.</p>
