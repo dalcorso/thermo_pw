@@ -62,7 +62,7 @@
 This guide gives a brief overview of the \thermo\ package. 
 It gives you the minimal information needed to accomplish a given task.
 It assumes that you have already downloaded and compiled \qe\ and \thermo\  
-and you want to calculate some material property but you do not known where 
+and you want to calculate some material property but you do not know where 
 to start. 
 The ultimate reference for the use of \thermo\ is its user's guide,
 however the capabilities of the code are rapidly expanding and the 
@@ -103,7 +103,7 @@ information on the \texttt{ibrav} code and on the required crystal parameters
 in the file \texttt{PW/Doc/INPUT\_PW} of the \qe\ distribution. 
 In \qe\ you can use \texttt{ibrav=0} and give the primitive
 lattice vectors of the Bravais lattice. Presently \thermo\ needs to
-known the Bravais lattice number so this form of input is not recommended. 
+know the Bravais lattice number so this form of input is not recommended. 
 If you use it, \thermo\ writes on output the \texttt{ibrav}, the 
 \texttt{celldm} and the atomic coordinates needed to simulate
 the same cell and stops.
@@ -238,7 +238,10 @@ Use \texttt{what='plot\_bz'}. See \texttt{example12}. With this option
 \thermo\ does not call \texttt{pw.x}, it just produces a script for
 the \texttt{asymptote} code with the instructions to plot the Brillouin
 zone and the standard path (or the path that you have given in the \thermo\ 
-input).
+input). Starting from version 1.5.0 \texttt{thermo\_pw} produces also a
+script to plot the Brillouin zone using the \texttt{freeCAD} software
+(version 0.18). See more details in the user's guide.
+
 
 \newpage
 
@@ -390,15 +393,21 @@ as a function of pressure).
 temperature?}
 Use \texttt{what='mur\_lc\_t'} and the option \texttt{lmurn=.TRUE.}.
 This approach is rigorously valid only for cubic solids, for anisotropic
-solid it is only an approximation in which only \texttt{celldm(1)} is
-changed while the other crystal parameters are kept constant.
+solid it is an approximation in which only \texttt{celldm(1)} is
+changed while the other crystal parameters are kept constant. 
+For this case, see below the calculation of the elastic constants 
+as a function of temperature. This calculation gives also the bulk 
+modulus as a function of temperature.
 
 \newpage
 \section{\color{coral}How do I calculate the constant pressure heat capacity?}
 Use \texttt{what='mur\_lc\_t'} and the option \texttt{lmurn=.TRUE.}.
 This approach is rigorously valid only for cubic solids, for anisotropic
-solid it is only an approximation in which only \texttt{celldm(1)} is
+solid it is an approximation in which only \texttt{celldm(1)} is
 changed while the other crystal parameters are kept constant.
+For this case, see below the calculation of the elastic constants
+as a function of temperature. This calculation gives also the 
+isobaric heat capacity as a function of temperature.
 
 \newpage
 \section{\color{coral}How do I calculate the elastic constants 
@@ -408,7 +417,7 @@ The fastest method uses the ``quasi-static'' approximation but it
 is less accurate.
 First use 
 \texttt{what='elastic\_constants\_t'}. This option computes the elastic
-constants at $T=0$ for all the geometries used by 
+constants at $T=0$ K for all the geometries used by 
 \texttt{what='mur\_lc\_t'} and
 saves them in the directory \texttt{elastic\_constants}.  
 In the second step use the same input for \texttt{pw.x} and run again 
@@ -440,8 +449,10 @@ minimizes the Helmholtz free energy. \\
 The plot of the elastic constants will be found in 
 \texttt{output\_anhar.el\_cons.ps}.
 Note that these approaches used with the option \texttt{lmurn=.FALSE.} can
-calculate the thermodynamic properties of non-cubic solids, but the
-second method is still experimental and should be limited to cubic solids.
+calculate the thermodynamic properties of non-cubic solids.
+Presently the main approximation is that the atomic coordinates are
+relaxed only at $T=0$ K minimizing the energy and the free energy is 
+not calculated as a function of the atomic positions.
 
 \newpage
 \section{\color{coral}How do I calculate the electronic heat capacity
