@@ -139,6 +139,7 @@ clean :
 	- /bin/rm -rf ../../bin/test_colors.x 
 	- /bin/rm -rf ../../bin/epsilon_tpw.x 
 	- /bin/rm -rf ../../bin/pdec.x 
+	- /bin/rm -rf ../../bin/optical.x 
 
 include make.depend
 # DO NOT DELETE

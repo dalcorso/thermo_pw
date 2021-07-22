@@ -1,5 +1,5 @@
 # Makefile for thermo_pw
-sinclude ../make.sys
+sinclude ../make.inc
 
 default: all
 
@@ -39,7 +39,7 @@ leave_qe:
            main_CMakeLists.txt ; \
            mv CMakeLists.txt_qe ../CMakeLists.txt ; fi
 
-clean: thermo_tools_clean thermo_pw_clean thermo_lib_clean thermo_qe_clean examples_clean examples_qe_clean doc_clean
+clean: thermo_tools_clean thermo_pw_clean thermo_lib_clean thermo_qe_clean examples_clean examples_qe_clean space_groups_clean doc_clean
 
 thermo_pw_clean:
 	( cd src ; $(MAKE) clean )
@@ -60,6 +60,10 @@ examples_clean:
 examples_qe_clean:
 	if test -d examples_qe ; then \
 	( cd examples_qe ; ./clean_all ) ; fi
+
+space_groups_clean:
+	if test -d space_groups ; then \
+	( cd space_groups ; ./clean_all ) ; fi
 
 doc_clean:
 	if test -d Doc ; then \
