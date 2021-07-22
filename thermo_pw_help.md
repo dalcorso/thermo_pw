@@ -55,7 +55,7 @@ main <code>thermo_pw</code> page.</p>
 patches given below.</p>
 
 **Patches for thermo_pw.1.5.0**:
-
+<br>
 **Patches for thermo_pw.1.4.1**:
 <br>
 * Still a missing transformation of ftau into ft. Please change
