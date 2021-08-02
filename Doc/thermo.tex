@@ -59,7 +59,7 @@
 
 \section{{\color{coral}Introduction}}
 These notes describe the thermodynamics of crystals implemented in \tpw. \\
-These notes are part of the \tpw\ package. The complete package is
+They are part of the \tpw\ package. The complete package is
 available at \texttt{https://github.com/dalcorso/thermo\_pw}.
 
 \newpage
@@ -87,36 +87,33 @@ reference configuration.
 Within the quasi-harmonic approximation the solid has an internal
 energy given by  
 \begin{equation}
-U=U_0 + U_{el} + U_{ph}
+U=U_0 + U_{el} + U_{ph},
 \end{equation}
 where $U_0$ is the ground state energy of the electrons in the field 
-of the nuclei fixed at the equilibrium positions at the given strain and
-temperature, $U_{el}$ is the additional electron energy due to the 
-finite electron temperature and $U_{ph}$ is the internal energy of the 
-phonons that accounts for the vibrational energy of the nuclei. 
+of the nuclei fixed at the equilibrium positions at the given strain, 
+$U_{el}$ is the additional electron energy due to the 
+finite electron temperature and $U_{ph}$ is the vibrational energy of the nuclei. 
 Given the phonon frequencies $\omega_{{\bf q},\nu}$ of the solid 
 (at wavevector ${\bf q}$) we can write:
 \begin{equation}
 U_{ph} = \sum_{{\bf q},\nu} {\hbar \omega_{{\bf q},\nu} \over 2}
 + \sum_{{\bf q},\nu} {\hbar \omega_{{\bf q},\nu} \over 
-e^{\beta \hbar \omega_{{\bf q},\nu}}-1}.
+e^{\beta \hbar \omega_{{\bf q},\nu}}-1},
 \label{uvib}
 \end{equation}
-where $\beta=1/ k_B T$ and $k_B$ is the Boltzmann constant and $\hbar$ is the
-Planck constant.
+where $\beta=1/ k_B T$, $k_B$ is the Boltzmann constant, and $\hbar$ is the
+Planck constant divided by $2\pi$.
 Presently $U_0$ is calculated within density functional theory (DFT) and
 $U_{ph}$ within density functional perturbation theory (DFPT). 
 For metals the electronic contribution to the heat capacity is not 
 completely negligible. \tpw\ allows its estimate for a gas of 
-independent electrons with the density of states given by the DFT bands,
-but it neglects $U_{el}$ in all other calculations.
-Similarly the Helmholtz free energy is $F=U_0+F_{ph}$ with:
+independent electrons with the density of states given by the DFT bands.
+Similarly the Helmholtz free energy is $F=U_0+F_{el}+F_{ph}$ with:
 \begin{equation}
 F_{ph} = k_B T \sum_{{\bf q},\nu} \ln \left[ 2 \sinh \left({\beta \hbar 
-\omega_{{\bf q},\nu} \over 2}\right) \right],
+\omega_{{\bf q},\nu} \over 2}\right) \right].
 \nonumber
 \end{equation}
-where we have neglected the finite electron temperature. \\
 Having the internal energy and the Helmholtz free energy, the entropy can 
 be calculated as $S=(U-F)/T$.
 
@@ -124,20 +121,22 @@ be calculated as $S=(U-F)/T$.
 entropy of a unit cell of the solid for a given choice of the primitive 
 Bravais lattice vectors ${\bf a}_1$, ${\bf a}_2$, and ${\bf a}_3$. These
 vectors depend on a few parameters $\zeta_k$ that determine the size 
-of the unit cell ($k$ is $1$ for cubic lattices and has a maximum
-value $k=6$ for the triclinic lattice).
+of the unit cell ($k$ is $1$ for cubic lattices, $2$ for tetragonal, hexagonal,
+and trigonal lattices, $3$ for othorhombic lattices, $4$ for monoclinic
+lattices and $6$ for the triclinic lattice).
 The unit cell contains $N_{at}$ atoms
 whose positions are indicated by ${\bf d}_s$ with $1\le s\le N_{at}$.
-These positions are assumed to be optimized so that the forces acting
-on atoms vanish.
+These positions are usually optimized so that the forces acting on atoms 
+vanish at $T=0$ K.
 The reference configuration of the solid is
 characterized by a set of parameters $\zeta_{k,0}$ and a set of parameters 
 $\zeta_k$ corresponds to a solid in a strained state.
-Therefore from a theoretical point of view it is easy to calculate the 
+Therefore, theoretically, we calculate the 
 internal energy, the Helmholtz free energy, and the entropy as a 
 function of strain and temperature.
 
-Experimentally it is simpler to control the stress imposed on the solid. 
+Experimentally it is simpler to control the stress imposed on the solid,
+usually a constant pressure.
 Moreover in some cases the thermodynamic quantities are measured without 
 heat exchange, that is at constant entropy instead of at constant temperature. 
 In the thermodynamic theory of the elastic solid it is natural to consider two
@@ -145,7 +144,7 @@ functions. The internal energy as a function of strain and entropy
 to describe adiabatic properties and the Helmholtz free energy as a function
 of strain and temperature to describe isothermal properties.
 Therefore we can calculate directly isothermal quantities (measured at constant
-temperature), but we need thermodynamics equations to calculate
+temperature), but we need thermodynamics relationships to calculate
 the adiabatic quantities (measured at constant entropy).
 
 First derivatives of the Helmholtz free energy with respect to strain
@@ -164,10 +163,9 @@ From the elastic constants we can calculate the isothermal bulk modulus
 of the solid at any temperature. 
 Thermal expansions and elastic constants allows the calculation of the thermal
 stresses and using these quantities we can obtain the heat capacity at
-constant stress, the adiabatic elastic constants and bulk moduli 
-from the corresponding isothermal ones. Finally from the constant strain 
-heat capacity and the thermal stresses we can calculate the anisotropic 
-average Gr\"uneisen parameters.
+constant stress, the adiabatic elastic constants and the bulk modulus.
+Finally from the constant strain heat capacity and the thermal stresses 
+we can calculate the anisotropic average Gr\"uneisen parameters.
 
 The strain for which the stress is a given pressure (or stress) at a given
 temperature minimizes the Gibbs free energy at that temperature and
@@ -178,7 +176,7 @@ From these information we can deduce the thermal expansion of the
 solid at fixed pressure (or stress). Second derivatives of the Gibbs free
 energy with respect to strain give the isothermal elastic constants at the 
 given temperature and pressure (or stress). From the elastic constants 
-we can calculate the isothermal bulk modulus of the solid at the
+we can calculate the isothermal bulk modulus at the
 given temperature and pressure (or stress).
 %Thermal expansions and elastic constants allow the calculation of the thermal
 %stresses at the given pressure (or stress) and using these quantities we 
@@ -195,12 +193,11 @@ parameters $\zeta_k$ to the thermodynamic functions.
 \newpage
 
 \section{\color{coral}Crystal lattices}
-We start with a short review of the fourteen Bravais lattices and give
-our definition of the primitive lattice vectors. For each lattice we 
-specify the number of parameters necessary to define the unit cell.
+We start with a short review of the fourteen Bravais lattices and 
+give their primitive lattice vectors chosen with the same definitions used
+in the \qe\ routines. 
 The volume of one unit cell is indicated with $\Omega$ and the total 
-volume of the solid is $V=N\Omega$ where $N$ is the number of unit cells
-of the solid. 
+volume of the solid is $V=N\Omega$ where $N$ is the number of unit cells.
 
 \subsection{\color{web-blue}Cubic system}
 The cubic system comprises three Bravais lattices. The cubic lattice
@@ -411,10 +408,13 @@ ${\bf x}_i = \sum_j\alpha_{i,j} {\bf X}_j$. $\epsilon_{j,k}$
 is the symmetrized tensor $\epsilon_{j,k}={1\over 2} ( u_{j,k} +
 u_{k,j})$. $\epsilon_{j,k}$ do not coincide with the Lagrangian strains
 $\eta_{j,k}={1\over 2} ( u_{j,k} + u_{k,j} + \sum_l u_{l,j}u_{l,k})$ but 
-differ only for terms quadratic in $u_{i,j}$. As the Lagrangian strains, 
-$\epsilon_{j,k}$ do not contain any rotation and to first order they can 
-be identified with $\eta_{j,k}$. At first order in $\epsilon_{j,k}$ we have
-also the following useful relations for the reciprocal lattice vectors:
+differ only for terms quadratic in $u_{i,j}$. 
+%As the Lagrangian strains, 
+
+%$\epsilon_{j,k}$ do not contain any rotation and to first order they can 
+%be identified with $\eta_{j,k}$. 
+At first order in $\epsilon_{j,k}$ we have
+the following useful relations for the reciprocal lattice vectors:
 \begin{equation}
 {\bf b}'_{j,i} = {\bf b}_{j,i} -  \sum_{k=1}^3 \epsilon_{j,k} {\bf b}_{k,i},
 \end{equation}
@@ -654,7 +654,7 @@ to the strains of interest for the following.
 The cell remains cubic only applying an isotropic strain $\epsilon_A$ that 
 changes the cubic lattice constant $a_c$ to $a=(1+\epsilon_{1,1})a_c$.
 
-Applying $\epsilon_B$, the simple (body-centered) cubic
+Applying $\epsilon_B$, the (body-centered) cubic
 unit cell becomes (centered) tetragonal with:
 \begin{eqnarray}
 a&=&a_c (1+\epsilon_{1,1}), \\
@@ -683,7 +683,7 @@ R^A=\left( \begin{array}{ccc}
 \right).
 \end{equation}
 
-Similarly, by applying $\epsilon_E$ the simple (body-centered) cubic
+Similarly, by applying $\epsilon_E$ the (body-centered) cubic
 cell becomes a (centered) tetragonal cell with
 \begin{eqnarray}
 a&=&a_c,   \\
@@ -700,7 +700,7 @@ cubic cell and the change of coordinates can be done with the same rotation
 matrix written above.
 
 Among the shear strain $\epsilon_F$
-transforms the simple cubic unit cell into a rhombohedral cell with
+transforms the cubic unit cell into a rhombohedral cell with
 parameters:
 \begin{eqnarray}
 a_r&=& a_c \sqrt{1+2\epsilon_{1,2}^2}, \\
@@ -763,7 +763,7 @@ $\epsilon_B$ changes $a_t$ into $a_t(1+\epsilon_{1,1})$
 while $c_t$ does not change and $\epsilon_E$ changes  
 $c_t$ into $c_t(1+\epsilon_{3,3})$ while $a_t$ does not change.
 
-Applying $\epsilon_{B'}$ to a simple tetragonal cell transforms it into an  
+Applying $\epsilon_{B'}$ to a tetragonal cell transforms it into an  
 orthorhombic cell with
 \begin{eqnarray}
 a&=& a_t (1+\epsilon_{1,1}), \\
@@ -774,7 +774,7 @@ Applying $\epsilon_{B'}$ to a centered tetragonal cell transforms it
 into a body-centered orthorhombic cell with the same
 parameters. 
 
-Similarly, applying $\epsilon_C$ to a simple tetragonal cell transforms 
+Similarly, applying $\epsilon_C$ to a tetragonal cell transforms 
 it into an  orthorhombic cell with
 \begin{eqnarray}
 a&=&a_t (1+\epsilon_{1,1}), \\
@@ -785,7 +785,7 @@ and applying $\epsilon_C$ to a centered tetragonal cell transforms it
 into a body-centered orthorhombic cell with the same
 parameters.\\
 
-$\epsilon_G$ applied to the simple tetragonal cell transforms it into a 
+$\epsilon_G$ applied to the tetragonal cell transforms it into a 
 base-centered orthorhombic cell, with parameters:
 \begin{eqnarray}
 a&=&\sqrt{2} a_t (1-\epsilon_{1,2}), \\
@@ -800,15 +800,15 @@ $\epsilon_G$ applied to the centered tetragonal cell transforms it into
 a face-centered orthorhombic cell with the same parameters written above
 and the same change of reference system.
 
-$\epsilon_H$ applied to the simple tetragonal cell transforms it into a 
-simple monoclinic (b-unique) cell with:
+$\epsilon_H$ applied to the tetragonal cell transforms it into a 
+monoclinic (b-unique) cell with:
 \begin{eqnarray}
 a&=&a_t \sqrt{1+\epsilon_{1,3}^2}, \\
 b&=&a_t, \\
 c&=&c_t \sqrt{1+\epsilon_{1,3}^2}, \\
 \cos\beta &=& {2 \epsilon_{1,3} \over 1 + \epsilon_{1,3}^2}.
 \end{eqnarray}
-The reference system of the simple monoclinic cell is rotated with respect to
+The reference system of the monoclinic cell is rotated with respect to
 the reference system of the tetragonal cell. 
 The change of coordinates can be written as above with the rotation matrix 
 \begin{equation}
@@ -858,15 +858,15 @@ $a_o$ and $c_o$ remain constant.
 $\epsilon_E$ changes $c_o$ into $c_o(1+\epsilon_{3,3})$ while $a_o$ and
 $b_o$ remain constant.
 
-Applying $\epsilon_G$ to an simple orthorhombic cell transforms it into a 
-simple monoclinic ($c$-unique) cell with
+Applying $\epsilon_G$ to an orthorhombic cell transforms it into a 
+monoclinic ($c$-unique) cell with
 \begin{eqnarray}
 a&=&a_o \sqrt{1+\epsilon_{1,2}^2}, \\
 b&=&b_o \sqrt{1+\epsilon_{1,2}^2}, \\
 c&=&c_o, \\
 \cos\gamma &=& {2 \epsilon_{1,2} \over 1 + \epsilon_{1,2}^2}.
 \end{eqnarray}
-The reference system of the simple monoclinic cell is rotated with respect to
+The reference system of the monoclinic cell is rotated with respect to
 the reference system of the orthorhombic cell. 
 The change of coordinates can be written as above with the rotation matrix 
 \begin{equation}
@@ -879,23 +879,23 @@ R^E=\left( \begin{array}{ccc}
 \end{equation}
 where $\tan \phi=-\epsilon_{1,2}$.
 
-Similarly, applying $\epsilon_H$ to a simple (base-centered) 
+Similarly, applying $\epsilon_H$ to a (base-centered) 
 orthorhombic lattice transforms
-it in a simple (base-centered) monoclinic lattice ($b$-unique) with 
+it in a (base-centered) monoclinic lattice ($b$-unique) with 
 \begin{eqnarray}
 a&=&a_o \sqrt{1+\epsilon_{1,3}^2}, \\
 b&=&b_o, \\
 c&=&c_o \sqrt{1+\epsilon_{1,3}^2}, \\
 \cos\beta &=& {2 \epsilon_{1,3} \over 1 + \epsilon_{1,3}^2}. 
 \end{eqnarray}
-The reference system of the simple (base-centered) monoclinic cell is 
-rotated with respect to the reference system of the simple (base-centered) 
+The reference system of the (base-centered) monoclinic cell is 
+rotated with respect to the reference system of the (base-centered) 
 orthorhombic cell. 
 The change of coordinates can be written as above with the rotation matrix 
 $R^D$ and $\tan \phi=-\epsilon_{1,3}$.
 
-$\epsilon_I$ transforms the simple (base-centered) orthorhombic lattice 
-in a simple (base-centered) monoclinic lattice that 
+$\epsilon_I$ transforms the (base-centered) orthorhombic lattice 
+in a (base-centered) monoclinic lattice that 
 however is $a$-unique and must be rotated to be simulated.
 For instance we can simulate the strained orthorhombic cell with a monoclinic
 $c$-unique lattice with
@@ -905,9 +905,9 @@ b&=&c_o \sqrt{1+\epsilon_{2,3}^2}, \\
 c&=&a_o, \\
 \cos\gamma &=& {2 \epsilon_{2,3} \over 1 + \epsilon_{2,3}^2}. 
 \end{eqnarray}
-The reference system of the simple (base-centered) monoclinic cell is 
+The reference system of the (base-centered) monoclinic cell is 
 rotated with respect to
-the reference system of the simple (base-centered) orthorhombic cell. 
+the reference system of the (base-centered) orthorhombic cell. 
 The change of coordinates can be written as above with the rotation matrix 
 \begin{equation}
 R^F=\left( \begin{array}{ccc}
@@ -922,7 +922,7 @@ R^F=\left( \begin{array}{ccc}
 and ${\rm tg} \phi =-\epsilon_{2,3}$. 
 
 The application of $\epsilon_G$ to a base-centered orthorhombic lattice
-transforms it into a $c$-unique simple monoclinic lattice with parameters:
+transforms it into a $c$-unique monoclinic lattice with parameters:
 \begin{eqnarray}
 a&=&a_o \sqrt{1+\epsilon_{1,2}^2}, \\
 b&=&{1\over 2} \sqrt{(a_o^2+b_o^2)(1+\epsilon_{1,2}^2)+4a_ob_o\epsilon_{1,2}}, \\
@@ -931,7 +931,7 @@ c&=&c_o,  \\
 \sqrt{1+\epsilon_{1,2}^2} \sqrt{(a_o^2+b_o^2)
 (1+\epsilon_{1,2}^2)+4a_ob_o\epsilon_{1,2}}}. 
 \end{eqnarray}
-The reference system of the simple monoclinic cell is rotated with respect to
+The reference system of the monoclinic cell is rotated with respect to
 the reference system of the orthorhombic cell. 
 The change of coordinates can be written as above with the rotation matrix 
 $R^E$ and ${\rm tg}\phi=-\epsilon_{1,2}$.
@@ -1048,16 +1048,16 @@ and
 
 \subsection{\color{web-blue} Monoclinic system}
 Applying $\epsilon_A$, $\epsilon_C$, $\epsilon_D$, $\epsilon_E$, or
-$\epsilon_G$ to a $c$-unique simple (base-centered) monoclinic cell does 
+$\epsilon_G$ to a $c$-unique (base-centered) monoclinic cell does 
 not change its shape.
 
-Applying $\epsilon_A$ to a $c$-unique simple (base-centered) monoclinic 
+Applying $\epsilon_A$ to a $c$-unique (base-centered) monoclinic 
 lattice changes
 $a_m$ to $a_m(1+\epsilon_{1,1})$, $b_m$ to $b_m(1+\epsilon_{1,1})$
 and $c_m$ to $c_m(1+\epsilon_{1,1})$ while $\cos \gamma_m$
 does not change.
 
-Applying $\epsilon_C$ to a $c$-unique simple (base-centered) monoclinic lattice 
+Applying $\epsilon_C$ to a $c$-unique (base-centered) monoclinic lattice 
 changes $a_m$, $b_m$, $c_m$, and $\cos \gamma_m$ to 
 \begin{eqnarray}
 a&=&a_m(1+\epsilon_{1,1}), \\
@@ -1069,7 +1069,7 @@ c&=&c_m \\
 +\epsilon_{1,1}^2 \cos^2\gamma_m}},
 \end{eqnarray}
 
-Applying $\epsilon_D$ to a $c$-unique simple (base-centered) monoclinic lattice 
+Applying $\epsilon_D$ to a $c$-unique (base-centered) monoclinic lattice 
 changes $a_m$, $b_m$, $c_m$, and $\cos \gamma_m$ to 
 \begin{eqnarray}
 a&=&a_m, \\
@@ -1081,12 +1081,12 @@ c&=&c_m \\
 +\epsilon_{2,2}^2 \sin^2\gamma_m}}.
 \end{eqnarray}
 
-Applying $\epsilon_E$ to a $c$-unique simple (base-centered) monoclinic 
+Applying $\epsilon_E$ to a $c$-unique (base-centered) monoclinic 
 lattice changes
 only $c_m$ to $c_m(1+\epsilon_{3,3})$ while all the other crystal
 parameter do not change.
 
-Applying $\epsilon_G$ to a $c$-unique simple (base-centered) monoclinic lattice 
+Applying $\epsilon_G$ to a $c$-unique (base-centered) monoclinic lattice 
 changes $a_m$, $b_m$, $c_m$, and $\cos \gamma_m$ to 
 \begin{eqnarray}
 a&=&a_m \sqrt{1+\epsilon_{1,2}^2}, \\
@@ -1097,14 +1097,14 @@ c&=&c_m, \\
 \sin \gamma_m \over \sqrt{1+\epsilon_{1,2}^2}
 \sqrt{1+\epsilon_{1,2}^2+4\epsilon_{1,2} \cos\gamma_m \sin\gamma_m}}.
 \end{eqnarray}
-The reference system of the strained simple (base-centered) monoclinic 
+The reference system of the strained (base-centered) monoclinic 
 lattice is rotated 
-with respect to the reference system of the unstrained simple 
+with respect to the reference system of the unstrained  
 (base-centered) monoclinic lattice. 
 The change of coordinates can be written as above with the rotation matrix 
 $R^E$ and ${\rm tg}\phi=-\epsilon_{1,2}$.
 
-Applying $\epsilon_H$ to a $c$-unique simple monoclinic lattice transforms
+Applying $\epsilon_H$ to a $c$-unique monoclinic lattice transforms
 it into a triclinic cell with parameters:
 \begin{eqnarray}
 a&=&a_m \sqrt{1+\epsilon_{1,3}^2}, \\
@@ -1117,12 +1117,12 @@ c&=&c_m \sqrt{1+\epsilon_{1,3}^2}, \\
 \sqrt{1+\epsilon_{1,3}^2 \cos^2\gamma_m}}.
 \end{eqnarray}
 The reference system of the triclinic lattice is rotated 
-with respect to the reference system of the simple 
+with respect to the reference system of the  
 monoclinic lattice. 
 The change of coordinates can be written as above with the rotation matrix 
 $R^D$ and ${\rm tg}\phi=-\epsilon_{1,3}$.
 
-Applying $\epsilon_I$ to a $c$-unique simple monoclinic lattice transforms
+Applying $\epsilon_I$ to a $c$-unique monoclinic lattice transforms
 it into a triclinic cell with parameters:
 \begin{eqnarray}
 a&=&a_m,  \\
@@ -1135,7 +1135,7 @@ c&=&c_m \sqrt{1+\epsilon_{2,3}^2}, \\
 \sqrt{1+\epsilon_{2,3}^2 \sin^2\gamma_m}}.
 \end{eqnarray}
 The reference system of the triclinic lattice is rotated 
-with respect to the reference system of the simple 
+with respect to the reference system of the  
 monoclinic lattice. 
 The change of coordinates can be written as above with the rotation matrix 
 \begin{equation}
@@ -1193,16 +1193,16 @@ The change of coordinates can be written as above with the rotation matrix
 $R^G$ and ${\rm tg}\phi=-\epsilon_{2,3}$.
 
 Applying $\epsilon_A$, $\epsilon_C$, $\epsilon_D$, $\epsilon_E$, and
-$\epsilon_H$ to a $b$-unique simple (base-centered) monoclinic lattice
+$\epsilon_H$ to a $b$-unique (base-centered) monoclinic lattice
 does not change its shape.
 
-Applying $\epsilon_A$ to a $b$-unique simple (base-centered) monoclinic 
+Applying $\epsilon_A$ to a $b$-unique (base-centered) monoclinic 
 lattice changes
 $a_m$ to $a_m(1+\epsilon_{1,1})$, $b_m$ to $b_m(1+\epsilon_{1,1})$
 and $c_m$ to $c_m(1+\epsilon_{1,1})$ while $\cos \beta_m$
 does not change.
 
-Applying $\epsilon_C$ to a $b$-unique simple (base-centered) monoclinic lattice 
+Applying $\epsilon_C$ to a $b$-unique (base-centered) monoclinic lattice 
 changes $a_m$, $b_m$, $c_m$, and $\cos \beta_m$ to 
 \begin{eqnarray}
 a&=&a_m(1+\epsilon_{1,1}), \\
@@ -1214,12 +1214,12 @@ c&=&c_m \sqrt{1+2 \epsilon_{1,1}\cos^2\beta_m
 +\epsilon_{1,1}^2 \cos^2\beta_m}},
 \end{eqnarray}
 
-Applying $\epsilon_D$ to a $b$-unique simple (base-centered) monoclinic 
+Applying $\epsilon_D$ to a $b$-unique (base-centered) monoclinic 
 lattice changes
 only $b_m$ to $b_m(1+\epsilon_{2,2})$ while all the other crystal
 parameter do not change.
 
-Applying $\epsilon_E$ to a $b$-unique simple (base-centered) monoclinic lattice 
+Applying $\epsilon_E$ to a $b$-unique (base-centered) monoclinic lattice 
 changes $a_m$, $b_m$, $c_m$, and $\cos \beta_m$ to 
 \begin{eqnarray}
 a&=&a_m, \\
@@ -1230,7 +1230,7 @@ c&=&c_m \sqrt{1+2 \epsilon_{3,3}\sin^2\beta_m
 +\epsilon_{3,3}^2 \sin^2\beta_m}}.
 \end{eqnarray}
 
-Applying $\epsilon_H$ to a $b$-unique simple (base-centered) monoclinic lattice 
+Applying $\epsilon_H$ to a $b$-unique (base-centered) monoclinic lattice 
 changes $a_m$, $b_m$, $c_m$, and $\cos \beta_m$ to 
 \begin{eqnarray}
 a&=&a_m \sqrt{1+\epsilon_{1,3}^2}, \\
@@ -1241,14 +1241,14 @@ c&=&c_m \sqrt{1+\epsilon_{1,3}^2
 \sin \beta_m \over \sqrt{1+\epsilon_{1,3}^2}
 \sqrt{1+\epsilon_{1,3}^2+4\epsilon_{1,3} \cos\beta_m \sin\beta_m}}.
 \end{eqnarray}
-The reference system of the strained simple (base-centered) monoclinic 
+The reference system of the strained (base-centered) monoclinic 
 lattice is rotated 
-with respect to the reference system of the unstrained simple 
+with respect to the reference system of the unstrained  
 (base-centered) monoclinic lattice. 
 The change of coordinates can be written as above with the rotation matrix 
 $R^D$ and ${\rm tg}\phi=-\epsilon_{1,3}$.
 
-Applying $\epsilon_G$ to a $b$-unique simple monoclinic lattice transforms
+Applying $\epsilon_G$ to a $b$-unique monoclinic lattice transforms
 it into a triclinic lattice with parameters:
 \begin{eqnarray}
 a&=&a_m \sqrt{1+\epsilon_{1,2}^2}, \\
@@ -1261,12 +1261,12 @@ c&=&c_m \sqrt{1+\epsilon_{1,2}^2 \cos^2\beta_m}, \\
 \cos\gamma &=& {2 \epsilon_{1,2}^2 \over 1+\epsilon_{1,2}^2}.
 \end{eqnarray}
 The reference system of the triclinic lattice is rotated 
-with respect to the reference system of the simple 
+with respect to the reference system of the  
 monoclinic lattice. 
 The change of coordinates can be written as above with the rotation matrix 
 $R^E$ and ${\rm tg}\phi=-\epsilon_{1,2}$.
 
-Applying $\epsilon_I$ to a $b$-unique simple monoclinic lattice transforms
+Applying $\epsilon_I$ to a $b$-unique monoclinic lattice transforms
 it into a triclinic lattice with parameters:
 \begin{eqnarray}
 a&=&a_m,  \\
@@ -1279,8 +1279,8 @@ c&=&c_m \sqrt{1+\epsilon_{2,3}^2 \sin^2\beta_m}, \\
 \cos\gamma &=& 0. 
 \end{eqnarray}
 The reference system of the triclinic lattice is rotated 
-with respect to the reference system of the simple 
-monoclinic lattice. 
+with respect to the reference system of the  
+monoclinic lattice.
 The change of coordinates can be written as above with the rotation matrix 
 $R^G$ and ${\rm tg}\phi=-\epsilon_{2,3}$.
 
@@ -1557,7 +1557,8 @@ is sufficient to minimize the internal energy with respect to strain:
 \begin{equation}
 {\partial U \over \partial \epsilon_i}=0.
 \end{equation}
-Neglecting the contribution of $U_{ph}$ (zero point motion) we can minimize 
+Neglecting the contribution of $U_{ph}$ (zero point motion) and
+of $U_{el}$ we can minimize 
 $U_0$.\\
 In practice this equation is difficult to use and one limits to consider
 only strains that do not modify the shape of the unit cell. The
@@ -1611,7 +1612,7 @@ Along the direction ${\bf l}$ we can write:
 \end{equation}
 where $d_{\bf l}$ is the interplanar distance for that set of lattice planes.
 In the most complex case, for a triclinic solid we need six directions
-to set up a linear system whose solution are the six independent components
+to set up a linear system whose solutions are the six independent components
 of the thermal expansion tensor, while for the other crystal systems 
 the thermal expansion can be determined in a simpler manner.
 We discuss this point separately for each crystal system.
@@ -1622,7 +1623,7 @@ The thermal expansion tensor is diagonal and the only nonzero components
 are all equal: $\alpha_1=\alpha_2=\alpha_3$. We can consider the 
 lattice planes perpendicular to ${\bf l}=(0,0,1)$ and the thermal expansion
 in the direction ${\bf l}$ is $\alpha_3$. The distance between planes
-$d_{\bf l}=a$ in the simple cubic and $d_{\bf l}=a/2$ in the face-centered
+$d_{\bf l}=a$ in the cubic and $d_{\bf l}=a/2$ in the face-centered
 and the body-centered cubic lattices so in all cases:  
 \begin{equation}
 \alpha_{i} =  {1\over a(T) } {d a(T) \over dT}.
@@ -1633,14 +1634,14 @@ In the tetragonal and hexagonal systems $k=2$, $\zeta_1=a$, $\zeta_2=c/a$.
 The only nonzero components of the thermal expansion are 
 $\alpha_{1}=\alpha_{2}$ and $\alpha_{3}$. We can consider the
 lattice planes perpendicular to ${\bf l}=(1,0,0)$ whose distance
-is $d_{\bf l}=a$ in the simple tetragonal lattice and $d_{\bf l}=a/2$ in 
+is $d_{\bf l}=a$ in the tetragonal lattice and $d_{\bf l}=a/2$ in 
 centered tetragonal and hexagonal case. 
 For this direction we have $\alpha_{\bf l}=\alpha_1$ and 
 \begin{equation}
 \alpha_1 = {1\over a(T)} {d a \over dT}.
 \end{equation}
 Then we can consider the planes perpendicular to ${\bf l}=(0,0,1)$.
-The distance between these planes is $d_{\bf l}=c$ for the simple
+The distance between these planes is $d_{\bf l}=c$ for the 
 tetragonal and hexagonal lattices and $d_{\bf l}=c/2$ for the 
 centered tetragonal lattice. Since $\alpha_{\bf l}=\alpha_3$ we have
 \begin{equation}
@@ -1708,7 +1709,7 @@ ${\bf l}=(1,0,0)$, ${\bf l}=(0,1,0)$ and ${\bf l}=(0,0,1)$ we find:
 \alpha_{2} &=&  {1\over b(T) } {d b \over dT}, \\
 \alpha_{3} &=&  {1\over c(T) } {d c \over dT}.
 \end{eqnarray}
-which is valid for the simple orthorhombic lattice as well as for the
+which is valid for the orthorhombic lattice as well as for the
 base-centered, the face-centered, and the body-centered orthorhombic lattices.
 Choosing $a$, $b/a$, and $c/a$ as parameters we find:
 \begin{eqnarray}
@@ -1735,21 +1736,22 @@ when a certain quantity of heat is given to it at constant strain:
 \begin{equation}
 C_\epsilon= T {d S \over dT}\Big|_\epsilon = { d U \over d T}\Big|_\epsilon.
 \end{equation}
-Since only the entropy of the ionic displacements is taken into consideration,
-the only term that is derived is $U_{ph}$. Once the phonon dispersions 
-have been calculated this quantity can be obtained by deriving Eq.~\ref{uvib}.
+The terms in $U$ that depend on temperature are $U_{el}$ and $U_{ph}$. 
+Once the phonon dispersions 
+have been calculated $U_{ph}$ can be obtained by deriving Eq.~\ref{uvib}.
 
-Note that for metals the electronic contribution, while not large, is important 
+For metals the electronic contribution coming from $U_{el}$, while not large, 
+is important 
 and must be accounted for before comparing with experiment. Presently,
 this term is calculated in \tpw\ for a model of independent electrons with
-the same density of states (DOS) of the DFT bands. This contribution is 
-calculated for a metal together with the DOS (see below).
+the same density of states (DOS) of the DFT bands. It is calculated together 
+with the DOS (see below).
 
 \newpage
 \section{\color{coral}The elastic constants}
 
 When a crystal is deformed with a given strain $\epsilon_i$ forces
-appear to bring it to the equilibrium configuration. These
+appear to bring it back to the equilibrium configuration. These
 forces can be described by the stress tensor. For small strain the 
 stress tensor is proportional to the strain and we have:
 \begin{equation}
@@ -2778,7 +2780,7 @@ applied to a solid produces a strain proportional to the stress:
 \epsilon_{i} =\sum_{il} S_{i,l} \sigma_l, 
 \end{equation}
 where the tensor $S_{i,l}$ is known as elastic compliances. It is the
-inverse of the elastic constant tensor: 
+inverse of the elastic constants tensor: 
 \begin{equation}
 S_{i,l} = C_{i,l}^{-1}.
 \end{equation}
@@ -2789,7 +2791,7 @@ S_{i,l} = C_{i,l}^{-1}.
 
 The isothermal compressibility is defined as the derivative of the 
 equilibrium volume with respect to pressure divided by the volume,
-calculated at constant temperature.
+calculated at constant temperature:
 \begin{equation}
 K_T = - {1 \over V} {d V \over d p}\Bigg|_T.
 \end{equation}
