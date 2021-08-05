@@ -270,8 +270,10 @@ SUBROUTINE write_thermo_info(e0, tot_states, ntemp, temp, energy, &
 ! thermodynamic quantities that explain the units and the quantities
 ! contained in the file
 !
-USE kinds, ONLY : DP
+USE kinds,        ONLY : DP
+USE constants,    ONLY : rytoev, electronvolt_si, rydberg_si, avogadro
 IMPLICIT NONE
+REAL(DP), PARAMETER :: caltoj=4.184_DP
 INTEGER, INTENT(IN) :: ntemp, iflag
 REAL(DP), INTENT(IN) :: e0, tot_states, temp(ntemp), energy(ntemp),  &
                         free_energy(ntemp), entropy(ntemp), cv(ntemp)
@@ -285,7 +287,7 @@ OPEN (UNIT=iu_therm, FILE=TRIM(filename), STATUS='unknown',&
                                                      FORM='formatted')
 WRITE(iu_therm,'("# Zero point energy:", f8.5, " Ry/cell,", f9.5, &
                  &" kJ/(N mol),", f9.5, " kcal/(N mol)")') e0, &
-                    e0 * 1313.313_DP, e0 * 313.7545_DP 
+             e0*rydberg_si*avogadro/1.D3, e0*rydberg_si*avogadro/caltoj/1.D3
 IF (iflag==3) THEN
    WRITE(iu_therm,'("# Temperature T in K, Debye temperature=",f12.3, &
                                           &" K,")') tot_states
@@ -300,12 +302,14 @@ ENDIF
 WRITE(iu_therm,'("# Energy and free energy in Ry/cell,")')
 WRITE(iu_therm,'("# Entropy in Ry/cell/K,")')
 WRITE(iu_therm,'("# Heat capacity Cv in Ry/cell/K.")')
-WRITE(iu_therm,'("# Multiply by 13.6058 to have energies in &
-                       &eV/cell etc..")')
-WRITE(iu_therm,'("# Multiply by 13.6058 x 23060.35 = 313 754.5 to have &
-                  &energies in cal/(N mol).")')
-WRITE(iu_therm,'("# Multiply by 13.6058 x 96526.0 = 1 313 313 to &
-                  &have energies in J/(N mol).")')
+WRITE(iu_therm,'("# Multiply by ",f7.4," to have energies in &
+                       &eV/cell etc..")') rytoev
+WRITE(iu_therm,'("# Multiply by ",f7.4," x ",f8.2," = ",f9.1," to have &
+                  &energies in cal/(N mol).")') rytoev, electronvolt_si &
+                         * avogadro / caltoj, rydberg_si*avogadro/caltoj
+WRITE(iu_therm,'("# Multiply by ",f7.4," x ",f8.2," = ",f9.1," to &
+                  &have energies in J/(N mol).")') rytoev, electronvolt_si&
+                         * avogadro, rydberg_si*avogadro
 WRITE(iu_therm,'("# N is the number of formula units per cell.")')
 WRITE(iu_therm,'("# For instance in silicon N=2. Divide by N to have &
                 &energies in cal/mol etc. ")')

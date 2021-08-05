@@ -17,6 +17,7 @@ SUBROUTINE plot_anhar_anis()
 !  flanhar//'.gamma', flanhar//'.gamma_ph', flanhar//'.gamma_grun'
 !
 USE kinds,           ONLY : DP
+USE constants,       ONLY : rydberg_si, avogadro
 USE control_gnuplot, ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
 USE postscript_files, ONLY : flpsanhar
 USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
@@ -49,6 +50,7 @@ CHARACTER(LEN=256) :: gnu_filename, filename, filename1, filename2, &
                       filename_gamma, filename_gamma_ph, filename_gamma_grun, &
                       filenameps
 INTEGER :: ierr, system
+REAL(DP) :: factor
 LOGICAL :: isoent_avail, noncubic
 
 IF ( my_image_id /= root_image ) RETURN
@@ -319,7 +321,8 @@ IF (done_grun) &
 !
 !  Part 6: C_e heat capacity
 !
-CALL gnuplot_set_fact(1313313.0_DP,.FALSE.)
+factor = rydberg_si*avogadro 
+CALL gnuplot_set_fact(factor,.FALSE.)
 CALL gnuplot_ylabel('Heat capacity C_{/Symbol e} (J / K / N / mol)',.FALSE.)
 IF (ltherm_dos) &
    CALL gnuplot_write_file_mul_data(filename_heat,1,2,'color_red',.TRUE.,&
@@ -331,7 +334,7 @@ IF (ltherm_freq) &
 !  Part 7: C_p Heat capacity
 !
 IF (isoent_avail) THEN
-   CALL gnuplot_set_fact(1313313.0_DP,.FALSE.)
+   CALL gnuplot_set_fact(factor,.FALSE.)
    CALL gnuplot_ylabel('Heat capacity C_p (J / K / N / mol)',.FALSE.)
    IF (ltherm_dos) &
       CALL gnuplot_write_file_mul_data(filename_heat_anis,1,3,'color_red',  &
@@ -347,7 +350,7 @@ ENDIF
 !  Part 8: C_p -C_e Heat capacity
 !
 IF (isoent_avail) THEN
-   CALL gnuplot_set_fact(1313313.0_DP,.FALSE.)
+   CALL gnuplot_set_fact(factor,.FALSE.)
    CALL gnuplot_ylabel('C_{/Symbol s} - C_{/Symbol e} (J / K / N / mol)',&
                                                                    .FALSE.)
    IF (ltherm_dos) &
@@ -365,7 +368,7 @@ ENDIF
 !
 noncubic=(ibrav_save/=1.AND.ibrav_save/=2.AND.ibrav_save/=3)
 IF (isoent_avail.AND.noncubic) THEN
-   CALL gnuplot_set_fact(1313313.0_DP,.FALSE.)
+   CALL gnuplot_set_fact(factor,.FALSE.)
    CALL gnuplot_ylabel('C_{V} - C_{/Symbol e} (J / K / N / mol)',.FALSE.)
    IF (ltherm_dos) &
       CALL gnuplot_write_file_mul_data(filename_heat_anis,1,4,'color_red',&

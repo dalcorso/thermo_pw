@@ -17,6 +17,7 @@ SUBROUTINE plot_anhar()
 !  
 !
 USE kinds,            ONLY : DP
+USE constants,        ONLY : rydberg_si, avogadro
 USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
 USE control_thermo,   ONLY : ltherm, ltherm_dos, ltherm_freq, with_eigen
 USE postscript_files, ONLY : flpsanhar
@@ -42,6 +43,7 @@ CHARACTER(LEN=256) :: gnu_filename, filename, filename0, filename_aux_grun,  &
                       filename_heat, filename_heat_ph,               &
                       filename_gamma, filename_gamma_ph, filename_gamma_grun 
 INTEGER :: ierr, system
+REAL(DP) :: factor
 
 IF ( my_image_id /= root_image ) RETURN
 
@@ -164,7 +166,8 @@ CALL gnuplot_write_file_mul_point('anhar.exp',1,2,'color_red',.FALSE.,&
 !
 !  Part 6: isochoric heat capacity
 !
-CALL gnuplot_set_fact(1313313.0_DP,.FALSE.)
+factor = rydberg_si*avogadro 
+CALL gnuplot_set_fact(factor,.FALSE.)
 CALL gnuplot_ylabel('Heat capacity C_v (J / K / N / mol)',.FALSE.) 
 IF (ltherm_dos) &
    CALL gnuplot_write_file_mul_data(filename_heat,1,2,'color_red',.TRUE.,&
@@ -175,7 +178,7 @@ IF (ltherm_freq) &
 !
 !  Part 7: isobaric heat capacity
 !
-CALL gnuplot_set_fact(1313313.0_DP,.FALSE.)
+CALL gnuplot_set_fact(factor,.FALSE.)
 CALL gnuplot_ylabel('Heat capacity C_p (J / K / N / mol)',.FALSE.) 
 IF (ltherm_dos) &
    CALL gnuplot_write_file_mul_data(filename_heat,1,4,'color_red',.TRUE.,&
@@ -193,7 +196,7 @@ IF (ltherm_freq) &
 !
 !  Part 8: isobaric -isochoric heat capacity
 !
-CALL gnuplot_set_fact(1313313.0_DP,.FALSE.)
+CALL gnuplot_set_fact(factor,.FALSE.)
 CALL gnuplot_ylabel('C_p - C_v (J / K / N / mol)',.FALSE.) 
 
 IF (ltherm_dos) &
@@ -261,6 +264,7 @@ SUBROUTINE plot_thermo_anhar()
 !  This is a driver to plot the quantities written inside fltherm
 !  
 USE kinds,            ONLY : DP
+USE constants,        ONLY : rydberg_si, avogadro
 USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
 USE control_thermo,   ONLY : ltherm_dos, ltherm_freq, with_eigen
 USE postscript_files, ONLY : flpsanhar
@@ -277,6 +281,7 @@ USE io_global,       ONLY : ionode
 IMPLICIT NONE
 INTEGER :: ierr, system
 CHARACTER(LEN=256) :: gnu_filename, filename, filetherm, filepstherm
+REAL(DP) :: factor
 
 IF ( my_image_id /= root_image ) RETURN
 
@@ -302,7 +307,8 @@ ENDIF
 
 CALL gnuplot_xlabel('T (K)', .FALSE.)
 CALL gnuplot_ylabel('Vibrational energy (kJ / (N mol))',.FALSE.)
-CALL gnuplot_set_fact(1313.3130_DP, .FALSE.)
+factor = rydberg_si*avogadro / 1.D3
+CALL gnuplot_set_fact(factor, .FALSE.)
 
 IF (ltherm_dos) &
    CALL gnuplot_write_file_mul_data(filetherm,1,2,'color_red',.TRUE.,&
@@ -319,7 +325,7 @@ IF (ltherm_freq) &
    CALL gnuplot_write_file_mul_data(filename,1,3,'color_blue',&
                                                 .NOT.ltherm_dos,.TRUE.,.FALSE.)
 
-CALL gnuplot_set_fact(1313313.0_DP, .FALSE.)
+CALL gnuplot_set_fact(factor*1.D3, .FALSE.)
 CALL gnuplot_ylabel('Entropy (J / K / (N mol))',.FALSE.)
 IF (ltherm_dos) &
    CALL gnuplot_write_file_mul_data(filetherm,1,4,'color_red',.TRUE., &

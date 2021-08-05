@@ -13,6 +13,7 @@ SUBROUTINE plot_thermo()
 !  
 !
 USE kinds,            ONLY : DP
+USE constants,        ONLY : rydberg_si, avogadro
 USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
 USE control_thermo,   ONLY : ltherm_dos, ltherm_freq, with_eigen
 USE postscript_files, ONLY : flpstherm
@@ -29,10 +30,12 @@ USE io_global,       ONLY : ionode
 IMPLICIT NONE
 INTEGER :: ierr, system
 CHARACTER(LEN=256) :: gnu_filename, filename, filetherm, filepstherm
+REAL(DP) :: factor
 
 IF ( my_image_id /= root_image ) RETURN
 
 IF (.NOT.(ltherm_freq.OR.ltherm_dos)) RETURN
+factor = rydberg_si*avogadro / 1.D3
 
 gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//'_therm'
 CALL gnuplot_start(gnu_filename)
@@ -49,7 +52,7 @@ filetherm="therm_files/"//TRIM(fltherm)
 filename=TRIM(filetherm)//'_ph'
 CALL gnuplot_xlabel('T (K)', .FALSE.) 
 CALL gnuplot_ylabel('Vibrational energy (kJ / (N mol))',.FALSE.) 
-CALL gnuplot_set_fact(1313.3130_DP, .FALSE.) 
+CALL gnuplot_set_fact(factor, .FALSE.) 
 
 IF (ltherm_dos) &
    CALL gnuplot_write_file_mul_data(filetherm,1,2,'color_red',.TRUE.,&
@@ -66,7 +69,7 @@ IF (ltherm_freq) &
    CALL gnuplot_write_file_mul_data(filename,1,3,'color_blue',&
                                                 .NOT.ltherm_dos,.TRUE.,.FALSE.)
 
-CALL gnuplot_set_fact(1313313.0_DP, .FALSE.) 
+CALL gnuplot_set_fact(factor*1.D3, .FALSE.) 
 CALL gnuplot_ylabel('Entropy (J / K / (N mol))',.FALSE.) 
 IF (ltherm_dos) &
    CALL gnuplot_write_file_mul_data(filetherm,1,4,'color_red',.TRUE., &
@@ -104,6 +107,7 @@ SUBROUTINE plot_thermo_debye(igeom)
 !  This is a driver to plot the quantities written inside fltherm_debye
 !
 USE kinds,            ONLY : DP
+USE constants,        ONLY : rydberg_si, avogadro
 USE ions_base,        ONLY : nsp
 USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
 USE postscript_files, ONLY : flpstherm
@@ -122,9 +126,11 @@ INTEGER, INTENT(IN) :: igeom
 CHARACTER(LEN=256) :: gnu_filename, filename, psfilename
 CHARACTER(LEN=6) :: int_to_char
 INTEGER :: ierr, system
+REAL(DP) :: factor
 
 IF ( my_image_id /= root_image ) RETURN
 
+factor = rydberg_si*avogadro / 1.D3
 gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_debye.g'//&
                                                    TRIM(int_to_char(igeom))
 
@@ -141,14 +147,14 @@ ENDIF
 filename='therm_files/'//TRIM(fltherm)//'_debye.g'//TRIM(int_to_char(igeom))
 CALL gnuplot_xlabel('T (K)', .FALSE.) 
 CALL gnuplot_ylabel('Debye vibrational energy (kJ / (N mol))',.FALSE.) 
-CALL gnuplot_set_fact(1313.3130_DP, .FALSE.) 
+CALL gnuplot_set_fact(factor, .FALSE.) 
 
 CALL gnuplot_write_file_mul_data(filename,1,2,'color_blue',.TRUE.,.TRUE.,.FALSE.)
 
 CALL gnuplot_ylabel('Debye vibrational free energy (kJ / (N mol))', .FALSE.) 
 CALL gnuplot_write_file_mul_data(filename,1,3,'color_blue',.TRUE.,.TRUE., .FALSE.)
 
-CALL gnuplot_set_fact(1313313.0_DP, .FALSE.) 
+CALL gnuplot_set_fact(factor * 1.D3, .FALSE.) 
 CALL gnuplot_ylabel('Debye entropy (J / K / (N mol))',.FALSE.) 
 CALL gnuplot_write_file_mul_data(filename,1,4,'color_blue',.TRUE.,.TRUE.,.FALSE.)
 
@@ -175,6 +181,7 @@ SUBROUTINE plot_el_thermo()
 !  This is a driver to plot the quantities written inside fltherm_el_thermo
 !
 USE kinds,            ONLY : DP
+USE constants,        ONLY : rydberg_si, avogadro
 USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
 USE postscript_files, ONLY : flpseltherm
 USE gnuplot,          ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
@@ -191,9 +198,11 @@ USE io_global,        ONLY : ionode
 IMPLICIT NONE
 CHARACTER(LEN=256) :: gnu_filename, filename, psfilename
 INTEGER :: ierr, system
+REAL(DP) :: factor
 
 IF ( my_image_id /= root_image ) RETURN
 
+factor = rydberg_si*avogadro / 1.D3
 IF (degauss==0.0_DP.AND..NOT.ltetra) RETURN
 gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_eltherm'
 CALL gnuplot_start(gnu_filename)
@@ -210,14 +219,14 @@ filename='therm_files/'//TRIM(fleltherm)
 
 CALL gnuplot_xlabel('T (K)', .FALSE.) 
 CALL gnuplot_ylabel('Electron energy (kJ / (N mol))',.FALSE.) 
-CALL gnuplot_set_fact(1313.3130_DP, .FALSE.) 
+CALL gnuplot_set_fact(factor, .FALSE.) 
 
 CALL gnuplot_write_file_mul_data(filename,1,2,'color_blue',.TRUE.,.TRUE.,.FALSE.)
 
 CALL gnuplot_ylabel('Electron free energy (kJ / (N mol))', .FALSE.) 
 CALL gnuplot_write_file_mul_data(filename,1,3,'color_blue',.TRUE.,.TRUE., .FALSE.)
 
-CALL gnuplot_set_fact(1313313.0_DP, .FALSE.) 
+CALL gnuplot_set_fact(factor*1.D3, .FALSE.) 
 CALL gnuplot_ylabel('Electron entropy (J / K / (N mol))',.FALSE.) 
 CALL gnuplot_write_file_mul_data(filename,1,4,'color_blue',.TRUE.,.TRUE.,.FALSE.)
 
