@@ -374,7 +374,7 @@ TYPE(poly2), INTENT(IN) :: p2
 CHARACTER(LEN=6) :: int_to_char
 INTEGER :: i, j, n
 
-WRITE(stdout,'(/,5x,"Quadratic polynomial:")') 
+WRITE(stdout,'(5x,"Quadratic polynomial:")') 
 !
 !   term of 0 degree
 !
@@ -397,6 +397,8 @@ DO i=1, nvar
    ENDDO
 ENDDO   
 
+WRITE(stdout,*)
+
 RETURN
 END SUBROUTINE print_quadratic_polynomial
 
@@ -410,11 +412,11 @@ SUBROUTINE introduce_quadratic_fit(nvar, ncoeff, ndata)
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: nvar, ncoeff, ndata
 
-  WRITE(stdout,'(/,5x,"Fitting the data with a quadratic polynomial:")')
+  WRITE(stdout,'(5x,"Interpolating the data with a quadratic polynomial:")')
 
   WRITE(stdout,'(/,5x,"Number of variables:",10x,i5)')  nvar
   WRITE(stdout,'(5x,"Coefficients of the quadratic polynomial:",i5)')  ncoeff
-  WRITE(stdout,'(5x,"Number of fitting data:",7x,i5,/)')  ndata
+  WRITE(stdout,'(5x,"Number of points to fit:",7x,i5,/)')  ndata
 
 RETURN
 END SUBROUTINE introduce_quadratic_fit
@@ -446,8 +448,8 @@ DO idata=1,ndata
    chisq = chisq + (aux - f(idata))**2
    IF (ABS(f(idata))>1.D-12) perc= perc + ABS((f(idata)-aux) / f(idata))
 ENDDO
-WRITE(stdout,'(5x,"chi square quadratic=",e18.5," relative error",e18.5,&
-                                  &" %",/)') chisq/ndata, perc * 100 / ndata
+WRITE(stdout,'(3x,"chi square quadratic:",e15.5,", relative error:",e15.5,&
+                                  &" %")') chisq/ndata, perc * 100 / ndata
 RETURN
 END SUBROUTINE print_chisq_quadratic
 
@@ -473,6 +475,7 @@ DO idata=1,ndata
    CALL evaluate_fit_quadratic(nvar,x(1,idata),aux,p2)
    WRITE(stdout,'(3f19.12)') f(idata), aux, f(idata)-aux
 ENDDO
+WRITE(stdout,*)
 
 RETURN
 END SUBROUTINE compare_quadratic_fit

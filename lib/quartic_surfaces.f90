@@ -429,7 +429,7 @@ TYPE(poly4), INTENT(IN) ::  p4
 INTEGER :: i, j, k, l, n, m, o
 CHARACTER(LEN=6) :: int_to_char
 
-WRITE(stdout,'(/,5x,"Quartic polynomial:")')
+WRITE(stdout,'(5x,"Quartic polynomial:")')
 !
 !  term of 0 degree
 !
@@ -482,6 +482,8 @@ DO i=1, nvar
    ENDDO
 ENDDO
 
+WRITE(stdout,*)
+
 RETURN
 END SUBROUTINE print_quartic_polynomial
 
@@ -495,11 +497,11 @@ SUBROUTINE introduce_quartic_fit(nvar, ncoeff, ndata)
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: nvar, ncoeff, ndata
 
-WRITE(stdout,'(/,5x,"Fitting the data with a quartic polynomial:")')
+WRITE(stdout,'(5x,"Interpolating the data with a quartic polynomial:")')
 
 WRITE(stdout,'(/,5x,"Number of variables:",10x,i5)') nvar
 WRITE(stdout,'(5x,"Coefficients of the quartic polynomial:",2x,i5)')  ncoeff
-WRITE(stdout,'(5x,"Number of fitting data:",7x,i5,/)') ndata
+WRITE(stdout,'(5x,"Number of points to fit:",7x,i5,/)') ndata
 
 RETURN
 END SUBROUTINE introduce_quartic_fit
@@ -533,8 +535,8 @@ DO idata=1,ndata
    IF (ABS(f(idata))>1.D-12) perc= perc + ABS((f(idata)-aux) / f(idata))
 ENDDO
 
-WRITE(stdout,'(5x,"chi square quartic=",e18.5," relative error",e18.5,&
-                                     &" %",/)') chisq/ndata, perc * 100 / ndata
+WRITE(stdout,'(3x,"chi square quartic:",e15.5,", relative error:",e15.5,&
+                                     &" %")') chisq/ndata, perc * 100 / ndata
 RETURN
 END SUBROUTINE print_chisq_quartic
 !

@@ -339,7 +339,7 @@ INTEGER :: i, j, k, n, m
 CHARACTER(LEN=6) :: int_to_char
 
 
-WRITE(stdout,'(/,5x,"Cubic polynomial:")')
+WRITE(stdout,'(5x,"Cubic polynomial:")')
 
 WRITE(stdout,'(5x,e15.7)') p3%a0
 
@@ -380,11 +380,11 @@ SUBROUTINE introduce_cubic_fit(nvar, ncoeff, ndata)
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: nvar, ncoeff, ndata
 
-WRITE(stdout,'(/,5x,"Fitting the data with a cubic polynomial:")')
+WRITE(stdout,'(5x,"Interpolating the data with a cubic polynomial:")')
 
 WRITE(stdout,'(/,5x,"Number of variables:",8x,i5)')  nvar
 WRITE(stdout,'(5x,"Coefficients of the cubic polynomial:",2x,i5)')  ncoeff
-WRITE(stdout,'(5x,"Number of fitting data:",5x,i5,/)')  ndata
+WRITE(stdout,'(5x,"Number of points to fit:",5x,i5,/)')  ndata
 
 RETURN
 END SUBROUTINE introduce_cubic_fit
@@ -418,8 +418,8 @@ DO idata=1,ndata
    IF (ABS(f(idata))>1.D-12) perc= perc + ABS((f(idata)-aux) / f(idata))
 ENDDO
 
-WRITE(stdout,'(5x,"chi square cubic=",e18.5," relative error",e18.5,&
-                                  &" %",/)') chisq / ndata, perc * 100 / ndata
+WRITE(stdout,'(3x,"chi square cubic:",e15.5,", relative error:",e15.5,&
+                                  &" %")') chisq / ndata, perc * 100 / ndata
 RETURN
 END SUBROUTINE print_chisq_cubic
 

@@ -34,7 +34,7 @@ REAL(DP) :: x(nvar)
 INTEGER :: i
 
 DO i=1, nvar
-   WRITE(stdout,'(23x,"x",i1,"=",f16.9)') i, x(i)
+   WRITE(stdout,'(23x,"x",i1,"=",f16.9,/)') i, x(i)
 END DO
 
 RETURN
