@@ -83,13 +83,15 @@ ENDIF
 IF (ionode) THEN
    iu_mur=find_free_unit()
    OPEN(UNIT=iu_mur, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
-   IF (pressure_kb /= 0.0_DP) THEN
-      WRITE(iu_mur,'( "# a (a.u.)       enthalpy (Ry)    pressure (kbar)" )')
-   ELSE
-      WRITE(iu_mur,'( "# a (a.u.)       energy (Ry)      pressure (kbar)" )')
-   END IF
-
    IF (ibrav==1.OR.ibrav==2.OR.ibrav==3) THEN
+      IF (pressure_kb /= 0.0_DP) THEN
+         WRITE(iu_mur,'( "# ",7x,"a (a.u.)",10x,"enthalpy (Ry)",6x,&
+                                                       &"pressure (kbar)" )')
+      ELSE
+         WRITE(iu_mur,'( "# ",7x,"a (a.u.)",12x,"energy (Ry)",6x,&
+                                                       &"pressure (kbar)" )')
+      END IF
+
       DO i=1,nvol
          a= xmin + deltaa * (i-1)
          IF (lquartic) THEN

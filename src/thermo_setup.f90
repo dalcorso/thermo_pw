@@ -32,6 +32,7 @@ SUBROUTINE thermo_setup()
   !   It sets the variable with_asyn_images if nimage>1
   !
   USE kinds,                ONLY : DP
+  USE constants,            ONLY : ry_kbar
   USE constants,            ONLY : k_boltzmann_ry
   USE thermo_mod,           ONLY : what, ngeo, fact_ngeo, ngeo_ph    
   USE temperature,          ONLY : tmin
@@ -40,7 +41,7 @@ SUBROUTINE thermo_setup()
   USE control_elastic_constants, ONLY : ngeo_strain, elastic_algorithm, &
                                   elcpvar, poly_degree, elalgen
   USE control_eldos,        ONLY : deltae, ndose, lel_free_energy
-  USE control_mur,          ONLY : lmurn
+  USE control_mur,          ONLY : lmurn, press_min, press_max
   USE equilibrium_conf,     ONLY : tau0, tau0_crys
   USE control_paths,        ONLY : npk_label, lbar_label
   USE control_grun,         ONLY : temp_ph, volume_ph, celldm_ph
@@ -126,6 +127,11 @@ SUBROUTINE thermo_setup()
                                                               temp_ph=tmin
 
   IF (lambda==0.0_DP) CALL select_lambda(lambda_elem,lambda)
+!
+!  the pressure must be in Ry/(a.u.)^3 but in input it was given in kbar
+!
+    press_max=press_max/ry_kbar
+    press_min=press_min/ry_kbar
 !
 !   here deal with ibrav=0. The code finds ibrav and celldm and
 !   writes them on output or change them and continue the calculation

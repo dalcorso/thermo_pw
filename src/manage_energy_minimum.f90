@@ -55,6 +55,7 @@ ELSE
    CALL plot_multi_energy()
    CALL write_e_omega()
    CALL plot_mur()
+   CALL plot_geo_p()
 ENDIF
 CALL mp_bcast(celldm0, meta_ionode_id, world_comm)
 CALL mp_bcast(emin, meta_ionode_id, world_comm)

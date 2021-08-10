@@ -39,7 +39,7 @@ SUBROUTINE write_minimum_energy_data()
      WRITE(stdout,'(5x,6f12.5)') celldm0(:)
   ENDIF
  
-  WRITE(stdout,'(5x,"The ",a," at the minimum is    ",6x,f20.9," Ry")') &
+  WRITE(stdout,'(5x,"The ",a," at the minimum is:   ",6x,f20.9," Ry")') &
                                                    TRIM(quantity), emin
   WRITE(stdout,'(2x,76("-"),/)')
   RETURN

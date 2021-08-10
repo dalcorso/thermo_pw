@@ -131,7 +131,8 @@ unperturbed geometry.
 
 \item Fit of the total energy as a function of the lattice parameters with
 a quadratic or quartic polynomial and determination of equilibrium lattice 
-parameters. Murnaghan fit.
+parameters. Murnaghan fit. Enthalpy as a function of pressure. Crystal
+parameters and volume as a function of pressure. 
 
 \item Electronic band structure at the minimum of the total energy.
 
@@ -1494,10 +1495,11 @@ at different geometries. The runs can be done in parallel when several images
 are available. This option has two working modes controlled by the 
 logical variable \texttt{lmurn}. When \texttt{lmurn=.TRUE.} the total energy as 
 a function of the volume is interpolated by a Murnaghan equation and 
-a plot of the energy as a function of the volume and of the pressure 
-as a function of the volume is produced. The volume is changed by 
+a plot of the energy as a function of the volume, of the pressure 
+as a function of the volume and of the enthalpy as a function of
+pressure are produced. The volume is changed by 
 changing only \texttt{celldm(1)}. \texttt{celldm(2)...celldm(6)} remain fixed
-at the values given as input of \texttt{pw.x}.
+at the values given as input of \texttt{pw.x}. 
 When \texttt{lmurn=.FALSE.} the energy is calculated in a uniform
 grid of parameters composed of \texttt{ngeo(1)} $\times$ \texttt{ngeo(2)...}
 $\times$ \texttt{ngeo(6)} points.
@@ -1511,7 +1513,10 @@ contour plots of the energy as a function of the two crystal parameters
 are plotted. For orthorhombic systems contour plots of the energy as a function
 of $a$ and $b/a$ are plotted for each value of $c/a$. 
 Presently no graphical tool is implemented to plot the energy
-for monoclinic and triclinic crystal systems. 
+for monoclinic and triclinic crystal systems. However in all cases
+the enthalpy as a function of pressure is shown. Moreover
+separate plots show the crystal parameters as well as the volume as 
+a function of pressure.
 When \texttt{lmurn=.FALSE.} the bulk modulus
 is not calculated. To obtain it, you can calculate the elastic constants at the
 minimum geometry (see the option \texttt{what='mur\_lc\_elastic\_constants'}). 
@@ -1594,6 +1599,14 @@ deltav     : distance between two volumes in the plot of the
              Default: real calculated from nvol.
 nvol       : number of volumes in Murnaghan plot.
              Default: integer 51
+press_min  : minimum pressure for the plot of the enthalpy as a function
+             of pressure. In kbar units.
+             Default: real -50 kbar
+press_max  : maximum pressure for the plot of the enthalpy as a function
+             of pressure. In kbar units.
+             Default: real 100 kbar
+npress     : number of pressures between press_min and press_max.
+             Default: integer 150
 lquartic   : if .TRUE. fit the energy with a quartic polynomial.
              Default: logical .TRUE.
 lsolve     : choose the algorithm used to fit the quartic 
@@ -2443,9 +2456,9 @@ points and lowest \texttt{degauss}) is subtracted from all energies.
 
 \item
 Total energy as a function of volume (\texttt{lmurn=.TRUE.}). 
-This plot is composed of two figures: the total energy as a function of the
-volume 
-and pressure as a function of the volume. Both curves are \texttt{red}.   
+This plot is composed of three figures: the total energy as a function of the
+volume, the pressure as a function of the volume and the enthalpy
+as a function of pressure. All curves are \texttt{red}.   
 The points on the first curve are the energies calculated by 
 \texttt{pw.x}, the continuous curve is the fit.
 
@@ -2470,6 +2483,12 @@ by the code the entire energy range (for all $c/a$) is divided into nine
 levels so each figure might have less that nine curves.
 For crystal systems with more crystallographic parameters, this figure is
 not available.
+
+\item
+The crystal parameters and the volume as a function of pressure.
+When (\texttt{lmurn=.FALSE.}) the code plots the lattice parameters 
+as a function of pressure, as well as the volume as a function of 
+pressure (so far tested only for cubic cases). All plots are \texttt{red}.
 
 \item
 Energy bands. In this figure the bands have the color of

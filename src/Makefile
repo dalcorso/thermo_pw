@@ -105,6 +105,7 @@ plot_ef.o \
 plot_elastic_t.o \
 plot_epsilon_omega.o \
 plot_formf.o \
+plot_geo_p.o \
 plot_gruneisen_band_anis.o \
 plot_macro_el_t.o \
 plot_multi_energy.o \

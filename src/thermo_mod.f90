@@ -111,6 +111,14 @@ MODULE control_mur
                                ! function of the celldm parameters, with a
                                ! quadratic or quartic polynomial of dimension 
                                ! up to 6
+  REAL(DP) :: press_min        ! minimal pressure in the pressure-volume plot
+                               ! (lmurn=.FALSE.)
+  REAL(DP) :: press_max        ! maximum pressure in the pressure-volume plot
+                               ! (lmurn=.FALSE.)
+  INTEGER :: npress            ! number of computed pressures
+
+  REAL(DP) :: omegap0          ! omega at p=0. Estimated in all cases also
+                               ! when enthalpy is minimized at finite pressure.
 
 END MODULE control_mur
 

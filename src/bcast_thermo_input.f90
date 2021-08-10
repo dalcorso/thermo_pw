@@ -64,7 +64,8 @@ SUBROUTINE bcast_thermo_input()
   USE control_quartic_energy, ONLY : lquartic, poly_degree_ph, &
                                      poly_degree_thermo, poly_degree_bfact, &
                                      poly_degree_elc, lsolve
-  USE control_mur,     ONLY : vmin_input, vmax_input, deltav, nvol, lmurn
+  USE control_mur,     ONLY : vmin_input, vmax_input, deltav, nvol, &
+                              press_min, press_max, npress, lmurn
   USE control_energy_plot, ONLY : ncontours
   USE control_grun,    ONLY : temp_ph, volume_ph, celldm_ph, lv0_t, lb0_t,    &
                               grunmin_input, grunmax_input
@@ -262,6 +263,9 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( show_fit, meta_ionode_id, world_comm )
   CALL mp_bcast( vmin_input, meta_ionode_id, world_comm )
   CALL mp_bcast( vmax_input, meta_ionode_id, world_comm )
+  CALL mp_bcast( press_min, meta_ionode_id, world_comm )
+  CALL mp_bcast( press_max, meta_ionode_id, world_comm )
+  CALL mp_bcast( npress, meta_ionode_id, world_comm )
   CALL mp_bcast( deltav, meta_ionode_id, world_comm )
   CALL mp_bcast( nvol, meta_ionode_id, world_comm )
   CALL mp_bcast( lquartic, meta_ionode_id, world_comm )

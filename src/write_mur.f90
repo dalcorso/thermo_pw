@@ -56,16 +56,19 @@ IF (ionode) THEN
    iu_mur=find_free_unit()
    OPEN(UNIT=iu_mur, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
    IF (pressure_kb /= 0.0_DP) THEN
-      WRITE(iu_mur,'( "# omega (a.u.)**3      enthalpy (Ry)   pressure (kbar)" )')
+      WRITE(iu_mur,'( "#",2x,"omega (a.u.)**3",6x,"enthalpy (Ry)",6x,  &
+                            & "enthalpy(p) (Ry)",5x,"pressure (kbar)")')
    ELSE
-      WRITE(iu_mur,'( "# omega (a.u.)**3       energy (Ry)      pressure (kbar)" )')
+      WRITE(iu_mur,'( "#",3x,"omega (a.u.)**3",7x,"energy (Ry)",8x,&
+                            &"enthalpy(p)(Ry)",4x,"pressure (kbar)")')
    END IF
    DO i=1,nvol
       omega= vmin_input + deltav * (i-1)
       e=emin+(omega0 * b0) / b01 *( (1.0_DP / (b01-1.0_DP))*((omega0 / omega)** &
                 (b01-1.0_DP)) + omega / omega0 ) - (omega0 *b0 / (b01-1.0_DP))
       p= b0in * ((omega0 / omega)**b01 - 1.0_DP) / b01
-      WRITE(iu_mur,'(3f20.10)') omega, e, p + pressure_kb
+      WRITE(iu_mur,'(f18.10,3f20.10)') omega, e, e+p*omega/ry_kbar, &
+                                                 p + pressure_kb
    ENDDO 
    CLOSE(UNIT=iu_mur, STATUS='KEEP')
 

@@ -12,17 +12,20 @@ SUBROUTINE plot_mur()
 !  This is a driver to plot the energy and pressure as a function of volume
 !
 USE kinds,            ONLY : DP
+USE constants,        ONLY : ry_kbar
 USE control_gnuplot,  ONLY : flgnuplot, lgnuplot, gnuplot_command, flext
 USE postscript_files, ONLY : flpsmur
 USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,  &
                              gnuplot_write_header,        &
                              gnuplot_ylabel,              &
                              gnuplot_xlabel,              &
+                             gnuplot_write_command,       &
                              gnuplot_write_horizontal_line, &
                              gnuplot_write_file_mul_data, &
                              gnuplot_write_file_mul_point
 USE data_files,       ONLY : flevdat
-USE control_mur,      ONLY : lmurn, vmin_input, vmax_input
+USE control_mur,      ONLY : lmurn, vmin_input, vmax_input, press_max, &
+                             press_min
 USE control_pressure, ONLY : pressure_kb
 USE mp_images,        ONLY : my_image_id, root_image
 USE io_global,        ONLY : ionode
@@ -47,7 +50,9 @@ CALL gnuplot_write_header(filename, vmin_input, vmax_input, 0.0_DP, 0.0_DP, &
                           1.0_DP, flext ) 
 
 CALL gnuplot_xlabel('Volume ((a.u.)^3)',.FALSE.) 
-
+!
+!  Energy or enthalpy as a function of the volume.
+!
 filename1="energy_files/"//TRIM(flevdat)//'_mur'
 filename2="energy_files/"//TRIM(flevdat)
 CALL add_pressure(filename1)
@@ -59,18 +64,30 @@ ELSE
    CALL gnuplot_ylabel('Energy (Ry)',.FALSE.) 
 END IF
 CALL gnuplot_write_file_mul_data(filename1,1,2,'color_red',.TRUE.,.NOT.lmurn, &
-                                                                        .FALSE.)
+                                                                      .FALSE.)
 IF (lmurn) &
    CALL gnuplot_write_file_mul_point(filename2,1,2,'color_red',.FALSE.,.TRUE.,&
-                                                                        .FALSE.)
-
+                                                                      .FALSE.)
+!
+!  Pressure as a function of the volume
+!
 CALL gnuplot_ylabel('Pressure (kbar)',.FALSE.) 
 IF (pressure_kb /= 0.0_DP) &
    CALL gnuplot_write_horizontal_line(pressure_kb, 2, 'front', 'color_green',&
                                                                      .FALSE.)
 CALL gnuplot_write_horizontal_line(0.0_DP, 2, 'front', 'color_black',.FALSE.)
-CALL gnuplot_write_file_mul_data(filename1,1,3,'color_red',.TRUE.,.TRUE.,&
-                                                                        .FALSE.)
+CALL gnuplot_write_file_mul_data(filename1,1,4,'color_red',.TRUE.,.TRUE.,&
+                                                                     .FALSE.)
+!
+!  Enthalpy as a function of pressure
+!
+CALL gnuplot_xlabel('pressure (kbar)',.FALSE.) 
+WRITE(label,'("set xrange [",f12.5,":",f12.5,"]")') press_min*ry_kbar, &
+                                                    press_max*ry_kbar
+CALL gnuplot_write_command(TRIM(label),.FALSE.)
+CALL gnuplot_ylabel('Enthalpy (Ry)',.FALSE.) 
+CALL gnuplot_write_file_mul_data(filename1,4,3,'color_red',.TRUE.,.TRUE.,&
+                                                                   .FALSE.)
 
 CALL gnuplot_end()
 

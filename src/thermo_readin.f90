@@ -75,7 +75,7 @@ SUBROUTINE thermo_readin()
   USE control_conv,         ONLY : nke, deltake, nkeden, deltakeden, &
                                    nnk, deltank, nsigma, deltasigma
   USE control_mur,          ONLY : vmin_input, vmax_input, deltav, nvol, &
-                                   lmurn
+                                   press_min, press_max, npress, lmurn
   USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, &
                                    frozen_ions, elastic_algorithm, &
                                    poly_degree, epsilon_0, use_free_energy, &
@@ -246,6 +246,7 @@ SUBROUTINE thermo_readin()
                             reduced_grid,                   &
                             show_fit,                       &
                             vmin_input, vmax_input, deltav, &
+                            press_min, press_max, npress,   &
                             nvol,                           &
                             lquartic, lsolve,               &
                             flevdat,                        &
@@ -470,6 +471,9 @@ SUBROUTINE thermo_readin()
   show_fit=.FALSE.
   vmin_input=0.0_DP
   vmax_input=0.0_DP
+  press_min=-50.0_DP 
+  press_max=100.0_DP 
+  npress=150
   deltav=0.0_DP
   nvol=1
   lquartic=.TRUE.

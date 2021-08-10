@@ -62,10 +62,12 @@ SUBROUTINE quadratic_fit()
   ndata = compute_nwork()
 
   IF (pressure>0.0_DP) THEN
-     WRITE(stdout,'(/,5x,"Enthalpy")') 
+     WRITE(stdout,'(/,5x,"Fitting the enthalpy with a function of the crystal &
+                                         &parameters.")') 
      WRITE(stdout,'(5x, "Pressure is :",f12.6)') pressure_kb
   ELSE
-     WRITE(stdout,'(/,5x,"Energy")') 
+     WRITE(stdout,'(/,5x,"Fitting the energy with a function of the crystal &
+                                         &parameters.")') 
   ENDIF
 
 
@@ -89,7 +91,13 @@ SUBROUTINE quadratic_fit()
  
   CALL print_quadratic_polynomial(nvar, p2)
 
-  WRITE(stdout,'(/,7x,"Energy (1)      Fitted energy (2)   DeltaE (1)-(2)")') 
+  IF (pressure>0.0_DP) THEN
+     WRITE(stdout,'(7x,"Enthalpy (1)      Fitted enthalpy (2)   &
+                                                    &DeltaE (1)-(2)")') 
+  ELSE
+     WRITE(stdout,'(7x,"Energy (1)      Fitted energy (2)   &
+                                                    &DeltaE (1)-(2)")') 
+  ENDIF
   CALL compare_quadratic_fit(ndata, nvar, x, f, p2)
   CALL print_chisq_quadratic(ndata, nvar, x, f, p2)
 
@@ -307,9 +315,9 @@ IMPLICIT NONE
 REAL(DP) :: ymin
 
 IF (pressure > 0.0_DP) THEN
-   WRITE(stdout,'(5x,"Gibbs energy at the extremum",f22.12)') ymin
+   WRITE(stdout,'(5x,"Gibbs energy at the extremum:",f22.12," Ry")') ymin
 ELSE
-   WRITE(stdout,'(5x,"Free energy at the extremum",f22.12)') ymin
+   WRITE(stdout,'(5x,"Free energy at the extremum:",f22.12," Ry")') ymin
 ENDIF
 
 RETURN
@@ -327,9 +335,9 @@ IMPLICIT NONE
 REAL(DP) :: ymin
 
 IF (pressure > 0.0_DP) THEN
-   WRITE(stdout,'(5x,"Enthalpy at the extremum",f21.12)') ymin
+   WRITE(stdout,'(5x,"Enthalpy at the extremum:",f21.12," Ry")') ymin
 ELSE
-   WRITE(stdout,'(5x,"Energy at the extremum",f21.12)') ymin
+   WRITE(stdout,'(5x,"Energy at the extremum:",f21.12," Ry")') ymin
 ENDIF
 
 RETURN
