@@ -1,0 +1,5 @@
+ &INPUT_THERMO
+  what='mur_lc',
+  lmurn=.TRUE.
+  pressure=0,
+ /
