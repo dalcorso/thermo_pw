@@ -1,22 +1,8 @@
- &INPUT_THERMO
-  what='scf_disp',
-  emax_input=600,
-  nq1_d=6, 
-  nq2_d=6, 
-  nq3_d=6,
- /
- 6
-  gG              40
-  X               20
-  W               20
-  1.0   1.0 0.0   40  'X'
-  gG              40
-  L                1
  &control
    calculation = 'scf'
    prefix='silicon',
-   pseudo_dir = '/scratch/dalcorso_sissa/espresso_jan_2014/pseudo/',
-   outdir='/scratch/dalcorso_sissa/espresso_jan_2014/tempdir/'
+   pseudo_dir = '/home/espresso/pslibrary.1.0.0/pz/PSEUDOPOTENTIALS/',
+   outdir='/scratch/RUNNING_QE/QE680_TPW151/tempdir/'
  /
  &system
    ibrav=  2, 
@@ -30,18 +16,8 @@
  /
 ATOMIC_SPECIES
  Si  28.086  Si.pz-vbc.UPF
-ATOMIC_POSITIONS
+ATOMIC_POSITIONS (alat)
  Si 0.00 0.00 0.00
  Si 0.25 0.25 0.25
 K_POINTS AUTOMATIC
 4 4 4 1 1 1 
----
-ciao
- &inputph
-  tr2_ph=1.0d-12,
-  prefix='silicon',
-  fildyn='si.dyn',
-  ldisp=.TRUE.
-  fildyn='si.dyn',
-  nq1=2, nq2=2, nq3=2,
-/
