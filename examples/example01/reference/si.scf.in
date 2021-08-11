@@ -4,8 +4,8 @@
     prefix='silicon',
     tstress = .true.
     tprnfor = .true.
-    pseudo_dir = '/scratch/dalcorso_sissa/espresso_jan_2014/pseudo/',
-    outdir='/scratch/dalcorso_sissa/espresso_jan_2014/tempdir/'
+    pseudo_dir = '/home/espresso/pslibrary.1.0.0/pz/PSEUDOPOTENTIALS/',
+    outdir='/scratch/RUNNING_QE/QE680_TPW151/tempdir/'
  /
  &system
     ibrav=  2, celldm(1) =10.20, nat=  2, ntyp= 1,
@@ -18,7 +18,7 @@
  /
 ATOMIC_SPECIES
  Si  28.086  Si.pz-vbc.UPF
-ATOMIC_POSITIONS
+ATOMIC_POSITIONS (alat)
  Si 0.00 0.00 0.00
  Si 0.25 0.25 0.25
 K_POINTS AUTOMATIC
