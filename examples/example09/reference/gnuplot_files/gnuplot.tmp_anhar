@@ -1,0 +1,79 @@
+set encoding iso_8859_15
+set terminal postscript enhanced solid color "AvantGarde-Book" 20
+set output "output_anhar.ps"
+
+set key off
+xscale=       1.000000
+xshift=0.0
+xmin=       0.000000
+xmax=     800.000000
+set xrange [xmin*xscale-xshift:xmax*xscale-xshift]
+set border lw 2
+eref=0.0
+fact=1.0
+gfact=1.0
+point_size=1.0
+color_red="red"
+color_green="green"
+color_blue="blue"
+color_cyan="cyan"
+color_magenta="magenta"
+color_gold="gold"
+color_pink="pink"
+color_black="black"
+color_olive="olive"
+color_brown="brown"
+color_gray="gray"
+color_light_blue="light-blue"
+color_orange="orange"
+color_yellow="yellow"
+ set xlabel "T (K)"
+fact=      0.10000000E+01
+set ylabel "Volume ((a.u.)^3)"
+plot  "anhar_files/output_anhar.dat" u ($1*xscale-xshift):($2*fact-eref)*gfact w l lw 3 lc rgb color_red, \
+ "anhar_files/output_anhar.dat_ph" u ($1*xscale-xshift):($2*fact-eref)*gfact w l lw 3 lc rgb color_blue
+fact=      0.10000000E+01
+set ylabel "Helmholtz Free Energy (Ry)"
+plot  "anhar_files/output_anhar.dat" u ($1*xscale-xshift):($3*fact-eref)*gfact w l lw 3 lc rgb color_red, \
+ "anhar_files/output_anhar.dat_ph" u ($1*xscale-xshift):($3*fact-eref)*gfact w l lw 3 lc rgb color_blue
+fact=      0.10000000E+01
+set ylabel "Bulk modulus (kbar)"
+plot  "anhar_files/output_anhar.dat.bulk_mod" u ($1*xscale-xshift):($2*fact-eref)*gfact w l lw 3 lc rgb color_red, \
+ "anhar_files/output_anhar.dat.bulk_mod_ph" u ($1*xscale-xshift):($2*fact-eref)*gfact w l lw 3 lc rgb color_blue
+fact=      0.10000000E+01
+set ylabel "d B / d p"
+plot  "anhar_files/output_anhar.dat.dbulk_mod" u ($1*xscale-xshift):($2*fact-eref)*gfact w l lw 3 lc rgb color_red, \
+ "anhar_files/output_anhar.dat.dbulk_mod_ph" u ($1*xscale-xshift):($2*fact-eref)*gfact w l lw 3 lc rgb color_blue
+fact=      0.10000000E+01
+set ylabel "Thermal expansion ({/Symbol b} x 10^{6}) (K^{-1})"
+plot  "anhar_files/output_anhar.dat" u ($1*xscale-xshift):($4*fact-eref)*gfact w l lw 3 lc rgb color_red, \
+ "anhar_files/output_anhar.dat_ph" u ($1*xscale-xshift):($4*fact-eref)*gfact w l lw 3 lc rgb color_blue, \
+ "anhar_files/output_anhar.dat.aux_grun" u ($1*xscale-xshift):($2*fact-eref)*gfact w l lw 3 lc rgb color_green
+#  "anhar_files/output_anhar.dat.aux_grun" u ($1*xscale-xshift):($2*fact-eref)*gfact w l lw 3 lc rgb color_green, \
+#  "anhar.exp" u ($1*xscale-xshift):($2*fact-eref)*gfact w p pt 82 ps point_size lc rgb color_red
+fact=      0.13127498E+07
+set ylabel "Heat capacity C_v (J / K / N / mol)"
+plot  "anhar_files/output_anhar.dat.heat" u ($1*xscale-xshift):($2*fact-eref)*gfact w l lw 3 lc rgb color_red, \
+ "anhar_files/output_anhar.dat.heat_ph" u ($1*xscale-xshift):($2*fact-eref)*gfact w l lw 3 lc rgb color_blue
+fact=      0.13127498E+07
+set ylabel "Heat capacity C_p (J / K / N / mol)"
+plot  "anhar_files/output_anhar.dat.heat" u ($1*xscale-xshift):($4*fact-eref)*gfact w l lw 3 lc rgb color_red, \
+ "anhar_files/output_anhar.dat.heat_ph" u ($1*xscale-xshift):($4*fact-eref)*gfact w l lw 3 lc rgb color_blue
+#  "anhar_files/output_anhar.dat.heat" u ($1*xscale-xshift):($4*fact-eref)*gfact w l lw 3 lc rgb color_blue, \
+#  "cv.exp" u ($1*xscale-xshift):($2*fact-eref)*gfact w p pt 82 ps point_size lc rgb color_red
+fact=      0.13127498E+07
+set ylabel "C_p - C_v (J / K / N / mol)"
+plot  "anhar_files/output_anhar.dat.heat" u ($1*xscale-xshift):($3*fact-eref)*gfact w l lw 3 lc rgb color_red, \
+ "anhar_files/output_anhar.dat.heat_ph" u ($1*xscale-xshift):($3*fact-eref)*gfact w l lw 3 lc rgb color_blue, \
+ "anhar_files/output_anhar.dat.aux_grun" u ($1*xscale-xshift):($3*fact-eref)*gfact w l lw 3 lc rgb color_green
+fact=      0.10000000E+01
+set ylabel "B_S - B_T (kbar)"
+plot  "anhar_files/output_anhar.dat.bulk_mod" u ($1*xscale-xshift):($4*fact-eref)*gfact w l lw 3 lc rgb color_red, \
+ "anhar_files/output_anhar.dat.bulk_mod_ph" u ($1*xscale-xshift):($4*fact-eref)*gfact w l lw 3 lc rgb color_blue, \
+ "anhar_files/output_anhar.dat.aux_grun" u ($1*xscale-xshift):($4*fact-eref)*gfact w l lw 3 lc rgb color_green
+fact=      0.10000000E+01
+set ylabel "Gr\374neisen parameter ({/Symbol g})"
+set arrow from xmin*xscale-xshift,      0.0000 to xmax*xscale-xshift,      0.0000 nohead front lw   2 lc rgb color_black
+plot  "anhar_files/output_anhar.dat.gamma" u ($1*xscale-xshift):($2*fact-eref)*gfact w l lw 3 lc rgb color_red, \
+ "anhar_files/output_anhar.dat.gamma_ph" u ($1*xscale-xshift):($2*fact-eref)*gfact w l lw 3 lc rgb color_blue, \
+ "anhar_files/output_anhar.dat.gamma_grun" u ($1*xscale-xshift):($2*fact-eref)*gfact w l lw 3 lc rgb color_green
