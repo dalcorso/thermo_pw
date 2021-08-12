@@ -1,3 +1,4 @@
  &INPUT_THERMO
   what='mur_lc_elastic_constants',
+  frozen_ions=.FALSE.
  /

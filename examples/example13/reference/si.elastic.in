@@ -2,12 +2,15 @@
     calculation = 'scf'
     restart_mode='from_scratch',
     prefix='silicon',
-    pseudo_dir = '/home/espresso/espresso_mag_2014/pseudo/',
-    outdir='/home/espresso/espresso_mag_2014/tempdir/'
+    pseudo_dir = '/home/espresso/pslibrary.1.0.0/pz/PSEUDOPOTENTIALS/',
+    outdir='/scratch/RUNNING_QE/QE680_TPW151/tempdir/'
  /
  &system
-    ibrav=  2, celldm(1) =10.20, nat=  2, ntyp= 1,
-    ecutwfc =24.0,
+    ibrav=  2, 
+    celldm(1) =10.20, 
+    nat= 2, 
+    ntyp= 1,
+    ecutwfc=24.0,
  /
  &electrons
     conv_thr =  1.0d-8
