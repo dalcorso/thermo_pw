@@ -1,0 +1,7 @@
+ &INPUT_THERMO
+  what='scf_ke',
+  deltake=10.0,
+  nke=8
+  nkeden=3
+  deltakeden=100.0,
+ /
