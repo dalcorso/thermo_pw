@@ -2,8 +2,8 @@
     calculation = 'scf'
     restart_mode='from_scratch',
     prefix='copper',
-    pseudo_dir = '/scratch/dalcorso_sissa/SVN/espresso/pseudo/',
-    outdir='/scratch/dalcorso_sissa/SVN/espresso/tempdir/'
+    pseudo_dir = '/home/espresso/pslibrary.1.0.0/pz/PSEUDOPOTENTIALS/',
+    outdir='/scratch/RUNNING_QE/QE680_TPW151/tempdir/'
  /
  &system
     ibrav=  2, 
@@ -21,7 +21,7 @@
  /
 ATOMIC_SPECIES
  Cu  0.0  Cu.pz-dn-kjpaw_psl.0.2.UPF
-ATOMIC_POSITIONS
+ATOMIC_POSITIONS (alat)
  Cu 0.00 0.00 0.00
 K_POINTS AUTOMATIC
 4 4 4 1 1 1 

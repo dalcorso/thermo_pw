@@ -1,0 +1,9 @@
+ &INPUT_THERMO
+  what='scf_nk',
+  deltank(1)=4,
+  deltank(2)=4,
+  deltank(3)=4,
+  nnk=3
+  deltasigma=0.02,
+  nsigma=3
+ /
