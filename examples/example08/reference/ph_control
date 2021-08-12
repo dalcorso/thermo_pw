@@ -1,0 +1,8 @@
+phonons of Silicon
+ &inputph
+  tr2_ph=1.0d-12,
+  prefix='silicon',
+  fildyn='si.dyn.xml',
+  ldisp=.TRUE.
+  nq1=2, nq2=2, nq3=2,
+/
