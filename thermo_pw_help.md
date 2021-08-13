@@ -54,6 +54,11 @@ main <code>thermo_pw</code> page.</p>
 <p align="justify"> Before using <code>thermo_pw</code>, please apply the 
 patches given below.</p>
 
+**Patches for thermo_pw.1.5.1**:
+<br>
+* tools/epsilon_tpw.f90 was not updated to the QE68 conventions.
+Please change as in commit <a href="https://github.com/dalcorso/thermo_pw/commit/cd4353f48263e6015b770ef7488337f75a3184c4">commit_cd4353f</a> of 13/08/2021.
+
 **Patches for thermo_pw.1.5.0**:
 <br>
 **Patches for thermo_pw.1.4.1**:
