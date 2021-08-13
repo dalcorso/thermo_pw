@@ -1,7 +1,7 @@
 %!PS-Adobe-2.0
 %%Title: output_epsilon.ps
-%%Creator: gnuplot 4.2 patchlevel 6 
-%%CreationDate: Thu Mar 31 18:20:30 2016
+%%Creator: gnuplot 5.2 patchlevel 4
+%%CreationDate: Fri Aug 13 11:47:06 2021
 %%DocumentFonts: (atend)
 %%BoundingBox: 50 50 554 770
 %%Orientation: Landscape
@@ -11,91 +11,48 @@
 /gnudict 256 dict def
 gnudict begin
 %
-% The following 6 true/false flags may be edited by hand if required
-% The unit line width may also be changed
+% The following true/false flags may be edited by hand if desired.
+% The unit line width and grayscale image gamma correction may also be changed.
 %
 /Color true def
 /Blacktext false def
-/Solid true def
+/Solid false def
 /Dashlength 1 def
 /Landscape true def
 /Level1 false def
+/Level3 false def
 /Rounded false def
+/ClipToBoundingBox false def
+/SuppressPDFMark false def
 /TransparentPatterns false def
 /gnulinewidth 5.000 def
 /userlinewidth gnulinewidth def
+/Gamma 1.0 def
+/BackgroundColor {-1.000 -1.000 -1.000} def
 %
 /vshift -66 def
 /dl1 {
-  10.0 Dashlength mul mul
+  10.0 Dashlength userlinewidth gnulinewidth div mul mul mul
   Rounded { currentlinewidth 0.75 mul sub dup 0 le { pop 0.01 } if } if
 } def
 /dl2 {
-  10.0 Dashlength mul mul
+  10.0 Dashlength userlinewidth gnulinewidth div mul mul mul
   Rounded { currentlinewidth 0.75 mul add } if
 } def
 /hpt_ 31.5 def
 /vpt_ 31.5 def
 /hpt hpt_ def
 /vpt vpt_ def
-Level1 {} {
-/SDict 10 dict def
-systemdict /pdfmark known not {
-  userdict /pdfmark systemdict /cleartomark get put
-} if
-SDict begin [
-  /Title (output_epsilon.ps)
-  /Subject (gnuplot plot)
-  /Creator (gnuplot 4.2 patchlevel 6 )
-  /Author (espresso)
-%  /Producer (gnuplot)
-%  /Keywords ()
-  /CreationDate (Thu Mar 31 18:20:30 2016)
-  /DOCINFO pdfmark
-end
-} ifelse
-/reencodeISO15 {
-dup dup findfont dup length dict begin
-{ 1 index /FID ne { def }{ pop pop } ifelse } forall
-currentdict /CharStrings known {
-	CharStrings /Idieresis known {
-		/Encoding ISOLatin15Encoding def } if
-} if
-currentdict end definefont
+/doclip {
+  ClipToBoundingBox {
+    newpath 50 50 moveto 554 50 lineto 554 770 lineto 50 770 lineto closepath
+    clip
+  } if
 } def
-/ISOLatin15Encoding [
-/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
-/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
-/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
-/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
-/space/exclam/quotedbl/numbersign/dollar/percent/ampersand/quoteright
-/parenleft/parenright/asterisk/plus/comma/minus/period/slash
-/zero/one/two/three/four/five/six/seven/eight/nine/colon/semicolon
-/less/equal/greater/question/at/A/B/C/D/E/F/G/H/I/J/K/L/M/N
-/O/P/Q/R/S/T/U/V/W/X/Y/Z/bracketleft/backslash/bracketright
-/asciicircum/underscore/quoteleft/a/b/c/d/e/f/g/h/i/j/k/l/m
-/n/o/p/q/r/s/t/u/v/w/x/y/z/braceleft/bar/braceright/asciitilde
-/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
-/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
-/.notdef/dotlessi/grave/acute/circumflex/tilde/macron/breve
-/dotaccent/dieresis/.notdef/ring/cedilla/.notdef/hungarumlaut
-/ogonek/caron/space/exclamdown/cent/sterling/Euro/yen/Scaron
-/section/scaron/copyright/ordfeminine/guillemotleft/logicalnot
-/hyphen/registered/macron/degree/plusminus/twosuperior/threesuperior
-/Zcaron/mu/paragraph/periodcentered/zcaron/onesuperior/ordmasculine
-/guillemotright/OE/oe/Ydieresis/questiondown
-/Agrave/Aacute/Acircumflex/Atilde/Adieresis/Aring/AE/Ccedilla
-/Egrave/Eacute/Ecircumflex/Edieresis/Igrave/Iacute/Icircumflex
-/Idieresis/Eth/Ntilde/Ograve/Oacute/Ocircumflex/Otilde/Odieresis
-/multiply/Oslash/Ugrave/Uacute/Ucircumflex/Udieresis/Yacute
-/Thorn/germandbls/agrave/aacute/acircumflex/atilde/adieresis
-/aring/ae/ccedilla/egrave/eacute/ecircumflex/edieresis/igrave
-/iacute/icircumflex/idieresis/eth/ntilde/ograve/oacute/ocircumflex
-/otilde/odieresis/divide/oslash/ugrave/uacute/ucircumflex/udieresis
-/yacute/thorn/ydieresis
-] def
 %
-% Gnuplot Prolog Version 4.2 (August 2006)
+% Gnuplot Prolog Version 5.2 (Dec 2017)
+%
+%/SuppressPDFMark true def
 %
 /M {moveto} bind def
 /L {lineto} bind def
@@ -105,14 +62,16 @@ currentdict end definefont
 /Z {closepath} bind def
 /C {setrgbcolor} bind def
 /f {rlineto fill} bind def
+/g {setgray} bind def
+/Gshow {show} def   % May be redefined later in the file to support UTF-8
 /vpt2 vpt 2 mul def
 /hpt2 hpt 2 mul def
 /Lshow {currentpoint stroke M 0 vshift R 
-	Blacktext {gsave 0 setgray show grestore} {show} ifelse} def
+	Blacktext {gsave 0 setgray textshow grestore} {textshow} ifelse} def
 /Rshow {currentpoint stroke M dup stringwidth pop neg vshift R
-	Blacktext {gsave 0 setgray show grestore} {show} ifelse} def
+	Blacktext {gsave 0 setgray textshow grestore} {textshow} ifelse} def
 /Cshow {currentpoint stroke M dup stringwidth pop -2 div vshift R 
-	Blacktext {gsave 0 setgray show grestore} {show} ifelse} def
+	Blacktext {gsave 0 setgray textshow grestore} {textshow} ifelse} def
 /UP {dup vpt_ mul /vpt exch def hpt_ mul /hpt exch def
   /hpt2 hpt 2 mul def /vpt2 vpt 2 mul def} def
 /DL {Color {setrgbcolor Solid {pop []} if 0 setdash}
@@ -125,7 +84,8 @@ currentdict end definefont
 	dup 1 lt {pop 1} if 10 mul /udl exch def} def
 /PL {stroke userlinewidth setlinewidth
 	Rounded {1 setlinejoin 1 setlinecap} if} def
-% Default Line colors
+3.8 setmiterlimit
+% Classic Line colors (version 5.0)
 /LCw {1 1 1} def
 /LCb {0 0 0} def
 /LCa {0 0 0} def
@@ -138,19 +98,21 @@ currentdict end definefont
 /LC6 {0 0 0} def
 /LC7 {1 0.3 0} def
 /LC8 {0.5 0.5 0.5} def
-% Default Line Types
+% Default dash patterns (version 5.0)
+/LTB {BL [] LCb DL} def
 /LTw {PL [] 1 setgray} def
-/LTb {BL [] LCb DL} def
+/LTb {PL [] LCb DL} def
 /LTa {AL [1 udl mul 2 udl mul] 0 setdash LCa setrgbcolor} def
 /LT0 {PL [] LC0 DL} def
-/LT1 {PL [4 dl1 2 dl2] LC1 DL} def
-/LT2 {PL [2 dl1 3 dl2] LC2 DL} def
-/LT3 {PL [1 dl1 1.5 dl2] LC3 DL} def
-/LT4 {PL [6 dl1 2 dl2 1 dl1 2 dl2] LC4 DL} def
-/LT5 {PL [3 dl1 3 dl2 1 dl1 3 dl2] LC5 DL} def
-/LT6 {PL [2 dl1 2 dl2 2 dl1 6 dl2] LC6 DL} def
-/LT7 {PL [1 dl1 2 dl2 6 dl1 2 dl2 1 dl1 2 dl2] LC7 DL} def
-/LT8 {PL [2 dl1 2 dl2 2 dl1 2 dl2 2 dl1 2 dl2 2 dl1 4 dl2] LC8 DL} def
+/LT1 {PL [2 dl1 3 dl2] LC1 DL} def
+/LT2 {PL [1 dl1 1.5 dl2] LC2 DL} def
+/LT3 {PL [6 dl1 2 dl2 1 dl1 2 dl2] LC3 DL} def
+/LT4 {PL [1 dl1 2 dl2 6 dl1 2 dl2 1 dl1 2 dl2] LC4 DL} def
+/LT5 {PL [4 dl1 2 dl2] LC5 DL} def
+/LT6 {PL [1.5 dl1 1.5 dl2 1.5 dl1 1.5 dl2 1.5 dl1 6 dl2] LC6 DL} def
+/LT7 {PL [3 dl1 3 dl2 1 dl1 3 dl2] LC7 DL} def
+/LT8 {PL [2 dl1 2 dl2 2 dl1 6 dl2] LC8 DL} def
+/SL {[] 0 setdash} def
 /Pnt {stroke [] 0 setdash gsave 1 setlinecap M 0 0 V stroke grestore} def
 /Dia {stroke [] 0 setdash 2 copy vpt add M
   hpt neg vpt neg V hpt vpt neg V
@@ -345,7 +307,7 @@ currentdict end definefont
   ColR ColG ColB setrgbcolor} def
 /BoxColFill {gsave Rec PolyFill} def
 /PolyFill {gsave Density fill grestore grestore} def
-/h {rlineto rlineto rlineto gsave closepath fill grestore} bind def
+/h {rlineto rlineto rlineto closepath gsave fill grestore stroke} bind def
 %
 % PostScript Level 1 Pattern Fill routine for rectangles
 % Usage: x y w h s a XX PatternFill
@@ -357,7 +319,8 @@ currentdict end definefont
 /PatternFill {gsave /PFa [ 9 2 roll ] def
   PFa 0 get PFa 2 get 2 div add PFa 1 get PFa 3 get 2 div add translate
   PFa 2 get -2 div PFa 3 get -2 div PFa 2 get PFa 3 get Rec
-  gsave 1 setgray fill grestore clip
+  TransparentPatterns {} {gsave 1 setgray fill grestore} ifelse
+  clip
   currentlinewidth 0.5 mul setlinewidth
   /PFs PFa 2 get dup mul PFa 3 get dup mul add sqrt def
   0 0 M PFa 5 get rotate PFs -2 div dup translate
@@ -371,9 +334,14 @@ currentdict end definefont
 %
 /languagelevel where
  {pop languagelevel} {1} ifelse
- 2 lt
-	{/InterpretLevel1 true def}
-	{/InterpretLevel1 Level1 def}
+dup 2 lt
+	{/InterpretLevel1 true def
+	 /InterpretLevel3 false def}
+	{/InterpretLevel1 Level1 def
+	 2 gt
+	    {/InterpretLevel3 Level3 def}
+	    {/InterpretLevel3 false def}
+	 ifelse }
  ifelse
 %
 % PostScript level 2 pattern fill definitions
@@ -462,22 +430,79 @@ Level1 {Level1PatternFill} {Level2PatternFill} ifelse
 /Symbol-Oblique /Symbol findfont [1 0 .167 1 0 0] makefont
 dup length dict begin {1 index /FID eq {pop pop} {def} ifelse} forall
 currentdict end definefont pop
+%
+%
+% Encoding for ISO-8859-15 (also called Latin9)
+%
+/reencodeISO15 {
+dup dup findfont dup length dict begin
+{ 1 index /FID ne { def }{ pop pop } ifelse } forall
+currentdict /CharStrings known {
+	CharStrings /Idieresis known {
+		/Encoding ISOLatin15Encoding def } if
+} if
+currentdict end definefont
+} def
+/ISOLatin15Encoding [
+/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
+/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
+/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
+/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
+/space/exclam/quotedbl/numbersign/dollar/percent/ampersand/quoteright
+/parenleft/parenright/asterisk/plus/comma/minus/period/slash
+/zero/one/two/three/four/five/six/seven/eight/nine/colon/semicolon
+/less/equal/greater/question/at/A/B/C/D/E/F/G/H/I/J/K/L/M/N
+/O/P/Q/R/S/T/U/V/W/X/Y/Z/bracketleft/backslash/bracketright
+/asciicircum/underscore/quoteleft/a/b/c/d/e/f/g/h/i/j/k/l/m
+/n/o/p/q/r/s/t/u/v/w/x/y/z/braceleft/bar/braceright/asciitilde
+/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
+/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef/.notdef
+/.notdef/dotlessi/grave/acute/circumflex/tilde/macron/breve
+/dotaccent/dieresis/.notdef/ring/cedilla/.notdef/hungarumlaut
+/ogonek/caron/space/exclamdown/cent/sterling/Euro/yen/Scaron
+/section/scaron/copyright/ordfeminine/guillemotleft/logicalnot
+/hyphen/registered/macron/degree/plusminus/twosuperior/threesuperior
+/Zcaron/mu/paragraph/periodcentered/zcaron/onesuperior/ordmasculine
+/guillemotright/OE/oe/Ydieresis/questiondown
+/Agrave/Aacute/Acircumflex/Atilde/Adieresis/Aring/AE/Ccedilla
+/Egrave/Eacute/Ecircumflex/Edieresis/Igrave/Iacute/Icircumflex
+/Idieresis/Eth/Ntilde/Ograve/Oacute/Ocircumflex/Otilde/Odieresis
+/multiply/Oslash/Ugrave/Uacute/Ucircumflex/Udieresis/Yacute
+/Thorn/germandbls/agrave/aacute/acircumflex/atilde/adieresis
+/aring/ae/ccedilla/egrave/eacute/ecircumflex/edieresis/igrave
+/iacute/icircumflex/idieresis/eth/ntilde/ograve/oacute/ocircumflex
+/otilde/odieresis/divide/oslash/ugrave/uacute/ucircumflex/udieresis
+/yacute/thorn/ydieresis
+] def
+/Metrics {ExtendTextBox Gswidth} def
+/Lwidth {currentpoint stroke M 0 vshift R Metrics} def
+/Rwidth {currentpoint stroke M dup stringwidth pop neg vshift R Metrics} def
+/Cwidth {currentpoint stroke M dup stringwidth pop -2 div vshift R Metrics} def
+/GLwidth {currentpoint stroke M 0 vshift R {ExtendTextBox} forall} def
+/GRwidth {currentpoint stroke M dup Gwidth vshift R {ExtendTextBox} forall} def
+/GCwidth {currentpoint stroke M dup Gwidth 2 div vshift R {ExtendTextBox} forall} def
+/GLwidth2 {0 Gwidth AddGlyphWidth} def
+/GRwidth2 {Gwidth -1 mul 0 AddGlyphWidth} def
+/GCwidth2 {Gwidth 2 div dup -1 mul AddGlyphWidth} def
+/AddGlyphWidth { dup TBx2 gt {userdict /TBx2 3 -1 roll put} {pop} ifelse
+                 dup TBx1 lt {userdict /TBx1 3 -1 roll put} {pop} ifelse } def
 /MFshow {
    { dup 5 get 3 ge
      { 5 get 3 eq {gsave} {grestore} ifelse }
      {dup dup 0 get findfont exch 1 get scalefont setfont
      [ currentpoint ] exch dup 2 get 0 exch R dup 5 get 2 ne {dup dup 6
-     get exch 4 get {show} {stringwidth pop 0 R} ifelse }if dup 5 get 0 eq
+     get exch 4 get {textshow} {Metrics pop 0 R} ifelse }if dup 5 get 0 eq
      {dup 3 get {2 get neg 0 exch R pop} {pop aload pop M} ifelse} {dup 5
-     get 1 eq {dup 2 get exch dup 3 get exch 6 get stringwidth pop -2 div
-     dup 0 R} {dup 6 get stringwidth pop -2 div 0 R 6 get
-     show 2 index {aload pop M neg 3 -1 roll neg R pop pop} {pop pop pop
+     get 1 eq {dup 2 get exch dup 3 get exch 6 get Gswidth pop -2 div
+     dup 0 R} {dup 6 get Gswidth pop -2 div 0 R 6 get
+     textshow 2 index {aload pop M neg 3 -1 roll neg R pop pop} {pop pop pop
      pop aload pop M} ifelse }ifelse }ifelse }
      ifelse }
-   forall} bind def
+   forall} def
+/Gswidth {dup type /stringtype eq {stringwidth} {pop (n) stringwidth} ifelse} def
 /MFwidth {0 exch { dup 5 get 3 ge { 5 get 3 eq { 0 } { pop } ifelse }
  {dup 3 get{dup dup 0 get findfont exch 1 get scalefont setfont
-     6 get stringwidth pop add} {pop} ifelse} ifelse} forall} bind def
+     6 get Gswidth pop add} {pop} ifelse} ifelse} forall} def
 /MLshow { currentpoint stroke M
   0 exch R
   Blacktext {gsave 0 setgray MFshow grestore} {MFshow} ifelse } bind def
@@ -490,11 +515,54 @@ currentdict end definefont pop
 /XYsave    { [( ) 1 2 true false 3 ()] } bind def
 /XYrestore { [( ) 1 2 true false 4 ()] } bind def
 /AvantGarde-Book reencodeISO15 def
+Level1 SuppressPDFMark or 
+{} {
+/SDict 10 dict def
+systemdict /pdfmark known not {
+  userdict /pdfmark systemdict /cleartomark get put
+} if
+SDict begin [
+  /Title (output_epsilon.ps)
+  /Subject (gnuplot plot)
+  /Creator (gnuplot 5.2 patchlevel 4)
+%  /Producer (gnuplot)
+%  /Keywords ()
+  /CreationDate (Fri Aug 13 11:47:06 2021)
+  /DOCINFO pdfmark
+end
+} ifelse
+%
+% Support for boxed text - Ethan A Merritt Sep 2016
+%
+/InitTextBox { userdict /TBy2 3 -1 roll put userdict /TBx2 3 -1 roll put
+           userdict /TBy1 3 -1 roll put userdict /TBx1 3 -1 roll put
+	   /Boxing true def } def
+/ExtendTextBox { dup type /stringtype eq
+    { Boxing { gsave dup false charpath pathbbox
+      dup TBy2 gt {userdict /TBy2 3 -1 roll put} {pop} ifelse
+      dup TBx2 gt {userdict /TBx2 3 -1 roll put} {pop} ifelse
+      dup TBy1 lt {userdict /TBy1 3 -1 roll put} {pop} ifelse
+      dup TBx1 lt {userdict /TBx1 3 -1 roll put} {pop} ifelse
+      grestore } if }
+    {} ifelse} def
+/PopTextBox { newpath TBx1 TBxmargin sub TBy1 TBymargin sub M
+               TBx1 TBxmargin sub TBy2 TBymargin add L
+	       TBx2 TBxmargin add TBy2 TBymargin add L
+	       TBx2 TBxmargin add TBy1 TBymargin sub L closepath } def
+/DrawTextBox { PopTextBox stroke /Boxing false def} def
+/FillTextBox { gsave PopTextBox fill grestore /Boxing false def} def
+0 0 0 0 InitTextBox
+/TBxmargin 20 def
+/TBymargin 20 def
+/Boxing false def
+/textshow { ExtendTextBox Gshow } def
+%
 end
 %%EndProlog
 %%Page: 1 1
 gnudict begin
 gsave
+doclip
 50 50 translate
 0.100 0.100 scale
 90 rotate
@@ -502,219 +570,267 @@ gsave
 0 setgray
 newpath
 (AvantGarde-Book) findfont 200 scalefont setfont
+BackgroundColor 0 lt 3 1 roll 0 lt exch 0 lt or or not {gsave BackgroundColor C clippath fill grestore} if
 2.000 UL
 LTb
-1220 640 M
+LCb setrgbcolor
+980 640 M
 63 0 V
-5617 0 R
+5796 0 R
 -63 0 V
 stroke
-1100 640 M
+860 640 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 (-1)]
 ] -66.7 MRshow
+/AvantGarde-Book findfont 200 scalefont setfont
+/vshift -66 def
 2.000 UL
 LTb
-1220 1160 M
+LCb setrgbcolor
+980 1165 M
 63 0 V
-5617 0 R
+5796 0 R
 -63 0 V
 stroke
-1100 1160 M
+860 1165 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 (-0.5)]
 ] -66.7 MRshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-1220 1680 M
+LCb setrgbcolor
+980 1690 M
 63 0 V
-5617 0 R
+5796 0 R
 -63 0 V
 stroke
-1100 1680 M
+860 1690 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0)]
 ] -66.7 MRshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-1220 2200 M
+LCb setrgbcolor
+980 2215 M
 63 0 V
-5617 0 R
+5796 0 R
 -63 0 V
 stroke
-1100 2200 M
+860 2215 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0.5)]
 ] -66.7 MRshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-1220 2720 M
+LCb setrgbcolor
+980 2740 M
 63 0 V
-5617 0 R
+5796 0 R
 -63 0 V
 stroke
-1100 2720 M
+860 2740 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 1)]
 ] -66.7 MRshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-1220 3240 M
+LCb setrgbcolor
+980 3264 M
 63 0 V
-5617 0 R
+5796 0 R
 -63 0 V
 stroke
-1100 3240 M
+860 3264 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 1.5)]
 ] -66.7 MRshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-1220 3760 M
+LCb setrgbcolor
+980 3789 M
 63 0 V
-5617 0 R
+5796 0 R
 -63 0 V
 stroke
-1100 3760 M
+860 3789 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 2)]
 ] -66.7 MRshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-1220 4280 M
+LCb setrgbcolor
+980 4314 M
 63 0 V
-5617 0 R
+5796 0 R
 -63 0 V
 stroke
-1100 4280 M
+860 4314 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 2.5)]
 ] -66.7 MRshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-1220 4800 M
+LCb setrgbcolor
+980 4839 M
 63 0 V
-5617 0 R
+5796 0 R
 -63 0 V
 stroke
-1100 4800 M
+860 4839 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 3)]
 ] -66.7 MRshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-1220 640 M
+LCb setrgbcolor
+980 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-1220 440 M
+980 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-1788 640 M
+LCb setrgbcolor
+1566 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-1788 440 M
+1566 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 5)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-2356 640 M
+LCb setrgbcolor
+2152 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-2356 440 M
+2152 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 10)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-2924 640 M
+LCb setrgbcolor
+2738 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-2924 440 M
+2738 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 15)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-3492 640 M
+LCb setrgbcolor
+3324 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-3492 440 M
+3324 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 20)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-4060 640 M
+LCb setrgbcolor
+3910 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-4060 440 M
+3910 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 25)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-4628 640 M
+LCb setrgbcolor
+4495 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-4628 440 M
+4495 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 30)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-5196 640 M
+LCb setrgbcolor
+5081 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-5196 440 M
+5081 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 35)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-5764 640 M
+LCb setrgbcolor
+5667 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-5764 440 M
+5667 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 40)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-6332 640 M
+LCb setrgbcolor
+6253 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-6332 440 M
+6253 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 45)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-6900 640 M
+LCb setrgbcolor
+6839 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-6900 440 M
+6839 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 50)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-2.000 UL
-LTb
-1220 4800 N
-0 -4160 V
-5680 0 V
-0 4160 V
--5680 0 V
-Z stroke
 LCb setrgbcolor
-400 2720 M
-currentpoint gsave translate 90 rotate 0 0 moveto
+2.000 UL
+LTB
+LCb setrgbcolor
+980 4839 N
+980 640 L
+5859 0 V
+0 4199 V
+-5859 0 V
+Z stroke
+1.000 UP
+2.000 UL
+LTb
+LCb setrgbcolor
+LCb setrgbcolor
+180 2739 M
+currentpoint gsave translate -270 rotate 0 0 moveto
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 (Re 1 / )]
 /Symbol reencodeISO15 def
 [(Symbol) 200.0 0.0 true true 0 (e)]
@@ -723,131 +839,136 @@ currentpoint gsave translate 90 rotate 0 0 moveto
 [(AvantGarde-Book) 200.0 0.0 true true 0 (\))]
 ] -66.7 MCshow
 grestore
+/AvantGarde-Book findfont 200 scalefont setfont
 LTb
 LCb setrgbcolor
-4060 140 M
+3909 140 M
 [ [(Symbol) 200.0 0.0 true true 0 (w)]
 [(AvantGarde-Book) 200.0 0.0 true true 0 (  \(eV\))]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 LTb
-1.000 UP
-2.000 UL
-LTb
+% Begin plot #1
 3.000 UL
-LT0
-1.00 0.00 0.00 C /AvantGarde-Book findfont 200 scalefont setfont
-1235 1911 M
-56 -1 V
-57 -3 V
-56 -4 V
-56 -5 V
-56 -9 V
-56 -11 V
-56 -13 V
-56 -14 V
-56 -9 V
-56 2 V
-56 12 V
-56 3 V
-56 -14 V
-56 -28 V
-56 -35 V
-56 -38 V
-56 -37 V
-56 -30 V
-56 -13 V
-56 5 V
-56 4 V
-57 -19 V
-56 -50 V
-56 -74 V
-56 -90 V
-56 -96 V
-56 -91 V
-56 -87 V
-56 -100 V
-56 -98 V
-56 -47 V
-56 24 V
-56 151 V
-56 521 V
-56 1016 V
-56 1039 V
-56 557 V
-56 121 V
-56 -77 V
-56 -122 V
-56 -114 V
-56 -101 V
-57 -91 V
-56 -86 V
-56 -84 V
-56 -79 V
-56 -71 V
-56 -62 V
-56 -53 V
-56 -45 V
-56 -41 V
-56 -36 V
-56 -33 V
-56 -30 V
-56 -27 V
-56 -26 V
-56 -25 V
-56 -24 V
-56 -21 V
-56 -20 V
-56 -18 V
-56 -15 V
-56 -14 V
+LTb
+1.00 0.00 0.00 C 996 1923 M
+58 -1 V
+58 -3 V
+57 -4 V
+58 -6 V
+58 -8 V
+58 -12 V
+58 -13 V
 57 -13 V
-56 -13 V
-56 -13 V
-56 -12 V
-56 -11 V
-56 -11 V
-56 -9 V
-56 -9 V
-56 -7 V
-56 -7 V
-56 -7 V
-56 -5 V
-56 -5 V
-56 -3 V
-56 -4 V
-56 -5 V
-56 -5 V
-56 -5 V
-56 -6 V
-56 -5 V
-56 -5 V
+58 -9 V
+58 2 V
+58 11 V
+58 4 V
+58 -15 V
+57 -28 V
+58 -35 V
+58 -39 V
+58 -37 V
+58 -31 V
+57 -13 V
+58 6 V
+58 4 V
+58 -19 V
+58 -51 V
+57 -75 V
+58 -91 V
+58 -97 V
+58 -91 V
+58 -88 V
+58 -101 V
+57 -99 V
+58 -48 V
+58 24 V
+58 153 V
+58 526 V
+57 1026 V
+58 1048 V
+58 563 V
+58 122 V
+58 -78 V
+58 -123 V
+57 -115 V
+58 -102 V
+58 -92 V
+58 -87 V
+58 -84 V
+57 -80 V
+58 -72 V
+58 -63 V
+58 -53 V
+58 -46 V
+57 -41 V
+58 -36 V
+58 -33 V
+58 -30 V
+58 -28 V
+58 -26 V
+57 -26 V
+58 -24 V
+58 -21 V
+58 -20 V
+58 -18 V
+57 -16 V
+58 -14 V
+58 -13 V
+58 -13 V
+58 -13 V
+57 -12 V
+58 -11 V
+58 -11 V
+58 -10 V
+58 -8 V
+58 -8 V
+57 -7 V
+58 -6 V
+58 -6 V
+58 -5 V
+58 -3 V
+57 -4 V
+58 -4 V
+58 -6 V
+58 -5 V
+58 -6 V
+58 -5 V
 57 -5 V
-56 -4 V
-56 -5 V
-56 -4 V
-56 -4 V
-56 -3 V
-56 -3 V
-56 -3 V
-56 -2 V
-56 -3 V
-56 -2 V
-56 -2 V
-56 -2 V
-56 -3 V
-56 -3 V
+58 -5 V
+58 -4 V
+58 -5 V
+58 -4 V
+57 -4 V
+58 -4 V
+58 -3 V
+58 -2 V
+58 -3 V
+57 -2 V
+58 -2 V
+58 -2 V
+58 -3 V
+58 -2 V
+58 -3 V
+% End plot #1
 stroke
 2.000 UL
 LTb
-1220 4800 N
-0 -4160 V
-5680 0 V
-0 4160 V
--5680 0 V
+LCb setrgbcolor
+2.000 UL
+LTB
+LCb setrgbcolor
+980 4839 N
+980 640 L
+5859 0 V
+0 4199 V
+-5859 0 V
 Z stroke
 1.000 UP
 2.000 UL
 LTb
+LCb setrgbcolor
 stroke
 grestore
 end
@@ -855,6 +976,7 @@ showpage
 %%Page: 2 2
 gnudict begin
 gsave
+doclip
 50 50 translate
 0.100 0.100 scale
 90 rotate
@@ -862,209 +984,255 @@ gsave
 0 setgray
 newpath
 (AvantGarde-Book) findfont 200 scalefont setfont
+BackgroundColor 0 lt 3 1 roll 0 lt exch 0 lt or or not {gsave BackgroundColor C clippath fill grestore} if
 2.000 UL
 LTb
-1220 640 M
+LCb setrgbcolor
+980 640 M
 63 0 V
-5617 0 R
+5796 0 R
 -63 0 V
 stroke
-1100 640 M
+860 640 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0)]
 ] -66.7 MRshow
+/AvantGarde-Book findfont 200 scalefont setfont
+/vshift -66 def
 2.000 UL
 LTb
-1220 1234 M
+LCb setrgbcolor
+980 1240 M
 63 0 V
-5617 0 R
+5796 0 R
 -63 0 V
 stroke
-1100 1234 M
+860 1240 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0.5)]
 ] -66.7 MRshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-1220 1829 M
+LCb setrgbcolor
+980 1840 M
 63 0 V
-5617 0 R
+5796 0 R
 -63 0 V
 stroke
-1100 1829 M
+860 1840 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 1)]
 ] -66.7 MRshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-1220 2423 M
+LCb setrgbcolor
+980 2440 M
 63 0 V
-5617 0 R
+5796 0 R
 -63 0 V
 stroke
-1100 2423 M
+860 2440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 1.5)]
 ] -66.7 MRshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-1220 3017 M
+LCb setrgbcolor
+980 3039 M
 63 0 V
-5617 0 R
+5796 0 R
 -63 0 V
 stroke
-1100 3017 M
+860 3039 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 2)]
 ] -66.7 MRshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-1220 3611 M
+LCb setrgbcolor
+980 3639 M
 63 0 V
-5617 0 R
+5796 0 R
 -63 0 V
 stroke
-1100 3611 M
+860 3639 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 2.5)]
 ] -66.7 MRshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-1220 4206 M
+LCb setrgbcolor
+980 4239 M
 63 0 V
-5617 0 R
+5796 0 R
 -63 0 V
 stroke
-1100 4206 M
+860 4239 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 3)]
 ] -66.7 MRshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-1220 4800 M
+LCb setrgbcolor
+980 4839 M
 63 0 V
-5617 0 R
+5796 0 R
 -63 0 V
 stroke
-1100 4800 M
+860 4839 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 3.5)]
 ] -66.7 MRshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-1220 640 M
+LCb setrgbcolor
+980 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-1220 440 M
+980 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-1788 640 M
+LCb setrgbcolor
+1566 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-1788 440 M
+1566 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 5)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-2356 640 M
+LCb setrgbcolor
+2152 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-2356 440 M
+2152 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 10)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-2924 640 M
+LCb setrgbcolor
+2738 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-2924 440 M
+2738 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 15)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-3492 640 M
+LCb setrgbcolor
+3324 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-3492 440 M
+3324 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 20)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-4060 640 M
+LCb setrgbcolor
+3910 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-4060 440 M
+3910 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 25)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-4628 640 M
+LCb setrgbcolor
+4495 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-4628 440 M
+4495 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 30)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-5196 640 M
+LCb setrgbcolor
+5081 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-5196 440 M
+5081 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 35)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-5764 640 M
+LCb setrgbcolor
+5667 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-5764 440 M
+5667 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 40)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-6332 640 M
+LCb setrgbcolor
+6253 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-6332 440 M
+6253 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 45)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-6900 640 M
+LCb setrgbcolor
+6839 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-6900 440 M
+6839 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 50)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-2.000 UL
-LTb
-1220 4800 N
-0 -4160 V
-5680 0 V
-0 4160 V
--5680 0 V
-Z stroke
 LCb setrgbcolor
-400 2720 M
-currentpoint gsave translate 90 rotate 0 0 moveto
+2.000 UL
+LTB
+LCb setrgbcolor
+980 4839 N
+980 640 L
+5859 0 V
+0 4199 V
+-5859 0 V
+Z stroke
+1.000 UP
+2.000 UL
+LTb
+LCb setrgbcolor
+LCb setrgbcolor
+180 2739 M
+currentpoint gsave translate -270 rotate 0 0 moveto
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 (- Im 1 / )]
 [(Symbol) 200.0 0.0 true true 0 (e)]
 [(AvantGarde-Book) 200.0 0.0 true true 0 ( \(q, )]
@@ -1072,131 +1240,136 @@ currentpoint gsave translate 90 rotate 0 0 moveto
 [(AvantGarde-Book) 200.0 0.0 true true 0 (\))]
 ] -66.7 MCshow
 grestore
+/AvantGarde-Book findfont 200 scalefont setfont
 LTb
 LCb setrgbcolor
-4060 140 M
+3909 140 M
 [ [(Symbol) 200.0 0.0 true true 0 (w)]
 [(AvantGarde-Book) 200.0 0.0 true true 0 (  \(eV\))]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 LTb
-1.000 UP
-2.000 UL
-LTb
+% Begin plot #1
 3.000 UL
-LT0
-1.00 0.00 0.00 C /AvantGarde-Book findfont 200 scalefont setfont
-1235 642 M
-56 9 V
-57 8 V
-56 9 V
-56 9 V
-56 10 V
-56 12 V
-56 16 V
-56 23 V
-56 30 V
-56 30 V
-56 17 V
-56 -3 V
-56 -7 V
-56 1 V
-56 14 V
-56 27 V
-56 41 V
-56 56 V
-56 64 V
-56 50 V
-56 21 V
+LTb
+1.00 0.00 0.00 C 996 642 M
+58 9 V
+58 9 V
+57 9 V
+58 8 V
+58 10 V
+58 12 V
+58 17 V
+57 23 V
+58 30 V
+58 31 V
+58 16 V
+58 -3 V
+58 -7 V
 57 2 V
-56 8 V
-56 30 V
-56 62 V
-56 101 V
-56 138 V
-56 164 V
-56 207 V
-56 296 V
-56 398 V
-56 490 V
-56 653 V
-56 768 V
-56 393 V
-56 -398 V
-56 -834 V
-56 -766 V
-56 -537 V
-56 -353 V
-56 -247 V
-56 -186 V
-57 -149 V
-56 -123 V
-56 -98 V
-56 -76 V
-56 -56 V
-56 -42 V
-56 -32 V
-56 -29 V
-56 -24 V
-56 -21 V
-56 -19 V
-56 -17 V
-56 -15 V
-56 -14 V
-56 -12 V
-56 -9 V
-56 -8 V
-56 -6 V
-56 -4 V
-56 -4 V
-56 -4 V
-57 -5 V
-56 -4 V
-56 -4 V
-56 -3 V
-56 -2 V
-56 -2 V
-56 -1 V
-56 0 V
-56 -1 V
-56 0 V
-56 -1 V
-56 0 V
-56 0 V
-56 -2 V
-56 -3 V
-56 -3 V
-56 -3 V
-56 -3 V
-56 -2 V
-56 -2 V
-56 -1 V
+58 13 V
+58 28 V
+58 41 V
+58 57 V
+57 64 V
+58 51 V
+58 21 V
+58 3 V
+58 7 V
+57 31 V
+58 62 V
+58 102 V
+58 139 V
+58 166 V
+58 209 V
+57 299 V
+58 401 V
+58 495 V
+58 659 V
+58 775 V
+57 397 V
+58 -402 V
+58 -842 V
+58 -772 V
+58 -543 V
+58 -356 V
+57 -250 V
+58 -188 V
+58 -150 V
+58 -124 V
+58 -99 V
+57 -76 V
+58 -57 V
+58 -42 V
+58 -33 V
+58 -29 V
+57 -25 V
+58 -21 V
+58 -19 V
+58 -17 V
+58 -15 V
+58 -14 V
+57 -12 V
+58 -9 V
+58 -8 V
+58 -6 V
+58 -5 V
+57 -4 V
+58 -4 V
+58 -5 V
+58 -4 V
+58 -4 V
+57 -3 V
+58 -2 V
+58 -1 V
+58 -1 V
+58 -1 V
+58 0 V
 57 -1 V
-56 -1 V
-56 0 V
-56 -1 V
-56 0 V
-56 0 V
-56 1 V
-56 0 V
-56 -1 V
-56 0 V
-56 -1 V
-56 -1 V
-56 -1 V
-56 -2 V
-56 0 V
+58 0 V
+58 0 V
+58 -1 V
+58 -1 V
+57 -3 V
+58 -4 V
+58 -3 V
+58 -3 V
+58 -2 V
+58 -2 V
+57 -1 V
+58 -1 V
+58 0 V
+58 -1 V
+58 -1 V
+57 0 V
+58 1 V
+58 0 V
+58 0 V
+58 -1 V
+57 0 V
+58 -1 V
+58 -1 V
+58 -1 V
+58 -2 V
+58 0 V
+% End plot #1
 stroke
 2.000 UL
 LTb
-1220 4800 N
-0 -4160 V
-5680 0 V
-0 4160 V
--5680 0 V
+LCb setrgbcolor
+2.000 UL
+LTB
+LCb setrgbcolor
+980 4839 N
+980 640 L
+5859 0 V
+0 4199 V
+-5859 0 V
 Z stroke
 1.000 UP
 2.000 UL
 LTb
+LCb setrgbcolor
 stroke
 grestore
 end
@@ -1204,6 +1377,7 @@ showpage
 %%Page: 3 3
 gnudict begin
 gsave
+doclip
 50 50 translate
 0.100 0.100 scale
 90 rotate
@@ -1211,199 +1385,243 @@ gsave
 0 setgray
 newpath
 (AvantGarde-Book) findfont 200 scalefont setfont
+BackgroundColor 0 lt 3 1 roll 0 lt exch 0 lt or or not {gsave BackgroundColor C clippath fill grestore} if
 2.000 UL
 LTb
-980 640 M
+LCb setrgbcolor
+740 640 M
 63 0 V
-5857 0 R
+6036 0 R
 -63 0 V
 stroke
-860 640 M
+620 640 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 (-1)]
 ] -66.7 MRshow
+/AvantGarde-Book findfont 200 scalefont setfont
+/vshift -66 def
 2.000 UL
 LTb
-980 1333 M
+LCb setrgbcolor
+740 1340 M
 63 0 V
-5857 0 R
+6036 0 R
 -63 0 V
 stroke
-860 1333 M
+620 1340 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0)]
 ] -66.7 MRshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-980 2027 M
+LCb setrgbcolor
+740 2040 M
 63 0 V
-5857 0 R
+6036 0 R
 -63 0 V
 stroke
-860 2027 M
+620 2040 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 1)]
 ] -66.7 MRshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-980 2720 M
+LCb setrgbcolor
+740 2740 M
 63 0 V
-5857 0 R
+6036 0 R
 -63 0 V
 stroke
-860 2720 M
+620 2740 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 2)]
 ] -66.7 MRshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-980 3413 M
+LCb setrgbcolor
+740 3439 M
 63 0 V
-5857 0 R
+6036 0 R
 -63 0 V
 stroke
-860 3413 M
+620 3439 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 3)]
 ] -66.7 MRshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-980 4107 M
+LCb setrgbcolor
+740 4139 M
 63 0 V
-5857 0 R
+6036 0 R
 -63 0 V
 stroke
-860 4107 M
+620 4139 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 4)]
 ] -66.7 MRshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-980 4800 M
+LCb setrgbcolor
+740 4839 M
 63 0 V
-5857 0 R
+6036 0 R
 -63 0 V
 stroke
-860 4800 M
+620 4839 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 5)]
 ] -66.7 MRshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-980 640 M
+LCb setrgbcolor
+740 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-980 440 M
+740 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-1572 640 M
+LCb setrgbcolor
+1350 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-1572 440 M
+1350 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 5)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-2164 640 M
+LCb setrgbcolor
+1960 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-2164 440 M
+1960 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 10)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-2756 640 M
+LCb setrgbcolor
+2570 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-2756 440 M
+2570 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 15)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-3348 640 M
+LCb setrgbcolor
+3180 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-3348 440 M
+3180 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 20)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-3940 640 M
+LCb setrgbcolor
+3790 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-3940 440 M
+3790 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 25)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-4532 640 M
+LCb setrgbcolor
+4399 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-4532 440 M
+4399 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 30)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-5124 640 M
+LCb setrgbcolor
+5009 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-5124 440 M
+5009 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 35)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-5716 640 M
+LCb setrgbcolor
+5619 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-5716 440 M
+5619 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 40)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-6308 640 M
+LCb setrgbcolor
+6229 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-6308 440 M
+6229 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 45)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-6900 640 M
+LCb setrgbcolor
+6839 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-6900 440 M
+6839 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 50)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-2.000 UL
-LTb
-980 4800 N
-980 640 L
-5920 0 V
-0 4160 V
--5920 0 V
-Z stroke
 LCb setrgbcolor
-400 2720 M
-currentpoint gsave translate 90 rotate 0 0 moveto
+2.000 UL
+LTB
+LCb setrgbcolor
+740 4839 N
+740 640 L
+6099 0 V
+0 4199 V
+-6099 0 V
+Z stroke
+1.000 UP
+2.000 UL
+LTb
+LCb setrgbcolor
+LCb setrgbcolor
+180 2739 M
+currentpoint gsave translate -270 rotate 0 0 moveto
 [ [(Symbol) 200.0 0.0 true true 0 (e)]
 [(AvantGarde-Book) 160.0 -60.0 true true 0 (1)]
 [(AvantGarde-Book) 200.0 0.0 true true 0 ( \(q, )]
@@ -1411,131 +1629,136 @@ currentpoint gsave translate 90 rotate 0 0 moveto
 [(AvantGarde-Book) 200.0 0.0 true true 0 (\))]
 ] -46.7 MCshow
 grestore
+/AvantGarde-Book findfont 200 scalefont setfont
 LTb
 LCb setrgbcolor
-3940 140 M
+3789 140 M
 [ [(Symbol) 200.0 0.0 true true 0 (w)]
 [(AvantGarde-Book) 200.0 0.0 true true 0 (  \(eV\))]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 LTb
-1.000 UP
-2.000 UL
-LTb
+% Begin plot #1
 3.000 UL
-LT0
-1.00 0.00 0.00 C /AvantGarde-Book findfont 200 scalefont setfont
-996 4451 M
-59 13 V
-58 24 V
-58 32 V
-59 54 V
-58 81 V
-59 91 V
-58 52 V
-58 -98 V
-59 -350 V
-58 -451 V
-59 -231 V
-58 26 V
-59 118 V
-58 -1 V
-58 -384 V
-59 -843 V
-58 -849 V
-59 -437 V
-58 -79 V
-58 54 V
-59 27 V
-58 -92 V
-59 -217 V
-58 -203 V
-59 -69 V
-58 49 V
-58 90 V
-59 84 V
-58 73 V
-59 75 V
-58 71 V
-58 60 V
-59 54 V
-58 54 V
-59 53 V
-58 49 V
-59 44 V
-58 39 V
-58 34 V
-59 29 V
-58 24 V
-59 22 V
-58 20 V
-58 19 V
-59 19 V
-58 17 V
-59 17 V
-58 15 V
-58 13 V
-59 13 V
-58 11 V
-59 11 V
-58 10 V
-59 9 V
-58 9 V
-58 9 V
-59 8 V
-58 8 V
-59 8 V
-58 7 V
-58 7 V
-59 6 V
-58 6 V
-59 5 V
-58 5 V
-59 6 V
-58 5 V
-58 4 V
-59 5 V
-58 4 V
-59 4 V
-58 4 V
-58 3 V
-59 3 V
-58 2 V
-59 3 V
-58 1 V
-59 2 V
-58 2 V
-58 3 V
-59 3 V
-58 2 V
-59 3 V
-58 3 V
-58 2 V
-59 2 V
-58 2 V
-59 3 V
-58 2 V
-59 2 V
-58 1 V
-58 2 V
-59 1 V
-58 1 V
-59 1 V
-58 1 V
-58 2 V
-59 1 V
-58 2 V
+LTb
+1.00 0.00 0.00 C 757 4487 M
+60 12 V
+60 24 V
+60 34 V
+60 54 V
+61 81 V
+60 93 V
+60 53 V
+60 -100 V
+60 -353 V
+60 -455 V
+61 -233 V
+60 26 V
+60 118 V
+60 -1 V
+60 -387 V
+61 -849 V
+60 -859 V
+60 -441 V
+60 -79 V
+60 54 V
+60 28 V
+61 -93 V
+60 -220 V
+60 -205 V
+60 -69 V
+60 49 V
+61 91 V
+60 84 V
+60 75 V
+60 75 V
+60 72 V
+60 60 V
+61 55 V
+60 55 V
+60 53 V
+60 49 V
+60 44 V
+61 40 V
+60 34 V
+60 29 V
+60 25 V
+60 22 V
+60 20 V
+61 20 V
+60 18 V
+60 18 V
+60 17 V
+60 15 V
+61 14 V
+60 12 V
+60 12 V
+60 10 V
+60 10 V
+60 10 V
+61 9 V
+60 9 V
+60 8 V
+60 9 V
+60 7 V
+61 8 V
+60 7 V
+60 6 V
+60 5 V
+60 6 V
+60 5 V
+61 5 V
+60 5 V
+60 5 V
+60 5 V
+60 4 V
+61 4 V
+60 3 V
+60 4 V
+60 3 V
+60 2 V
+60 3 V
+61 1 V
+60 2 V
+60 2 V
+60 3 V
+60 3 V
+61 2 V
+60 3 V
+60 3 V
+60 2 V
+60 3 V
+60 2 V
+61 2 V
+60 2 V
+60 2 V
+60 2 V
+60 1 V
+61 1 V
+60 1 V
+60 2 V
+60 1 V
+60 1 V
+60 2 V
+61 1 V
+% End plot #1
 stroke
 2.000 UL
 LTb
-980 4800 N
-980 640 L
-5920 0 V
-0 4160 V
--5920 0 V
+LCb setrgbcolor
+2.000 UL
+LTB
+LCb setrgbcolor
+740 4839 N
+740 640 L
+6099 0 V
+0 4199 V
+-6099 0 V
 Z stroke
 1.000 UP
 2.000 UL
 LTb
+LCb setrgbcolor
 stroke
 grestore
 end
@@ -1543,6 +1766,7 @@ showpage
 %%Page: 4 4
 gnudict begin
 gsave
+doclip
 50 50 translate
 0.100 0.100 scale
 90 rotate
@@ -1550,199 +1774,243 @@ gsave
 0 setgray
 newpath
 (AvantGarde-Book) findfont 200 scalefont setfont
+BackgroundColor 0 lt 3 1 roll 0 lt exch 0 lt or or not {gsave BackgroundColor C clippath fill grestore} if
 2.000 UL
 LTb
-980 640 M
+LCb setrgbcolor
+740 640 M
 63 0 V
-5857 0 R
+6036 0 R
 -63 0 V
 stroke
-860 640 M
+620 640 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0)]
 ] -66.7 MRshow
+/AvantGarde-Book findfont 200 scalefont setfont
+/vshift -66 def
 2.000 UL
 LTb
-980 1333 M
+LCb setrgbcolor
+740 1340 M
 63 0 V
-5857 0 R
+6036 0 R
 -63 0 V
 stroke
-860 1333 M
+620 1340 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 1)]
 ] -66.7 MRshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-980 2027 M
+LCb setrgbcolor
+740 2040 M
 63 0 V
-5857 0 R
+6036 0 R
 -63 0 V
 stroke
-860 2027 M
+620 2040 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 2)]
 ] -66.7 MRshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-980 2720 M
+LCb setrgbcolor
+740 2740 M
 63 0 V
-5857 0 R
+6036 0 R
 -63 0 V
 stroke
-860 2720 M
+620 2740 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 3)]
 ] -66.7 MRshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-980 3413 M
+LCb setrgbcolor
+740 3439 M
 63 0 V
-5857 0 R
+6036 0 R
 -63 0 V
 stroke
-860 3413 M
+620 3439 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 4)]
 ] -66.7 MRshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-980 4107 M
+LCb setrgbcolor
+740 4139 M
 63 0 V
-5857 0 R
+6036 0 R
 -63 0 V
 stroke
-860 4107 M
+620 4139 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 5)]
 ] -66.7 MRshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-980 4800 M
+LCb setrgbcolor
+740 4839 M
 63 0 V
-5857 0 R
+6036 0 R
 -63 0 V
 stroke
-860 4800 M
+620 4839 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 6)]
 ] -66.7 MRshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-980 640 M
+LCb setrgbcolor
+740 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-980 440 M
+740 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 0)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-1572 640 M
+LCb setrgbcolor
+1350 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-1572 440 M
+1350 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 5)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-2164 640 M
+LCb setrgbcolor
+1960 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-2164 440 M
+1960 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 10)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-2756 640 M
+LCb setrgbcolor
+2570 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-2756 440 M
+2570 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 15)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-3348 640 M
+LCb setrgbcolor
+3180 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-3348 440 M
+3180 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 20)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-3940 640 M
+LCb setrgbcolor
+3790 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-3940 440 M
+3790 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 25)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-4532 640 M
+LCb setrgbcolor
+4399 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-4532 440 M
+4399 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 30)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-5124 640 M
+LCb setrgbcolor
+5009 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-5124 440 M
+5009 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 35)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-5716 640 M
+LCb setrgbcolor
+5619 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-5716 440 M
+5619 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 40)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-6308 640 M
+LCb setrgbcolor
+6229 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-6308 440 M
+6229 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 45)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-6900 640 M
+LCb setrgbcolor
+6839 640 M
 0 63 V
-0 4097 R
+0 4136 R
 0 -63 V
 stroke
-6900 440 M
+6839 440 M
 [ [(AvantGarde-Book) 200.0 0.0 true true 0 ( 50)]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 2.000 UL
 LTb
-2.000 UL
-LTb
-980 4800 N
-980 640 L
-5920 0 V
-0 4160 V
--5920 0 V
-Z stroke
 LCb setrgbcolor
-400 2720 M
-currentpoint gsave translate 90 rotate 0 0 moveto
+2.000 UL
+LTB
+LCb setrgbcolor
+740 4839 N
+740 640 L
+6099 0 V
+0 4199 V
+-6099 0 V
+Z stroke
+1.000 UP
+2.000 UL
+LTb
+LCb setrgbcolor
+LCb setrgbcolor
+180 2739 M
+currentpoint gsave translate -270 rotate 0 0 moveto
 [ [(Symbol) 200.0 0.0 true true 0 (e)]
 [(AvantGarde-Book) 160.0 -60.0 true true 0 (2)]
 [(AvantGarde-Book) 200.0 0.0 true true 0 ( \(q, )]
@@ -1750,131 +2018,136 @@ currentpoint gsave translate 90 rotate 0 0 moveto
 [(AvantGarde-Book) 200.0 0.0 true true 0 (\))]
 ] -46.7 MCshow
 grestore
+/AvantGarde-Book findfont 200 scalefont setfont
 LTb
 LCb setrgbcolor
-3940 140 M
+3789 140 M
 [ [(Symbol) 200.0 0.0 true true 0 (w)]
 [(AvantGarde-Book) 200.0 0.0 true true 0 (  \(eV\))]
 ] -66.7 MCshow
+/AvantGarde-Book findfont 200 scalefont setfont
 LTb
-1.000 UP
-2.000 UL
-LTb
+% Begin plot #1
 3.000 UL
-LT0
-1.00 0.00 0.00 C /AvantGarde-Book findfont 200 scalefont setfont
-996 667 M
-59 99 V
-58 110 V
-58 118 V
-59 129 V
-58 167 V
-59 240 V
-58 348 V
-58 450 V
-59 386 V
-58 87 V
-59 -128 V
-58 -53 V
-59 186 V
-58 457 V
-58 604 V
-59 316 V
-58 -271 V
-59 -564 V
-58 -473 V
-58 -265 V
-59 -94 V
-58 -18 V
-59 -89 V
-58 -244 V
-59 -314 V
-58 -266 V
-58 -185 V
-59 -131 V
-58 -107 V
-59 -89 V
-58 -67 V
-58 -54 V
-59 -49 V
-58 -44 V
-59 -33 V
-58 -25 V
-59 -20 V
-58 -14 V
-58 -10 V
-59 -8 V
-58 -8 V
-59 -8 V
-58 -8 V
-58 -8 V
-59 -7 V
-58 -6 V
-59 -5 V
-58 -4 V
-58 -3 V
-59 -3 V
-58 -3 V
-59 -3 V
-58 -3 V
-59 -3 V
-58 -3 V
-58 -2 V
-59 -3 V
-58 -1 V
-59 -2 V
-58 -1 V
-58 -1 V
-59 -1 V
-58 0 V
-59 -2 V
-58 -1 V
-59 -1 V
-58 -1 V
-58 0 V
-59 0 V
-58 0 V
-59 0 V
-58 0 V
-58 0 V
-59 0 V
-58 0 V
-59 0 V
-58 -1 V
-59 -1 V
-58 -1 V
-58 -1 V
-59 -2 V
-58 0 V
-59 -1 V
-58 0 V
-58 -1 V
-59 0 V
-58 0 V
-59 0 V
-58 0 V
-59 0 V
-58 0 V
-58 0 V
-59 0 V
-58 0 V
-59 -1 V
-58 0 V
-58 -1 V
-59 0 V
-58 -1 V
+LTb
+1.00 0.00 0.00 C 757 667 M
+60 101 V
+60 110 V
+60 119 V
+60 132 V
+61 168 V
+60 241 V
+60 351 V
+60 455 V
+60 390 V
+60 89 V
+61 -131 V
+60 -52 V
+60 186 V
+60 462 V
+60 609 V
+61 320 V
+60 -274 V
+60 -569 V
+60 -479 V
+60 -266 V
+60 -95 V
+61 -18 V
+60 -91 V
+60 -246 V
+60 -316 V
+60 -269 V
+61 -187 V
+60 -132 V
+60 -108 V
+60 -90 V
+60 -68 V
+60 -54 V
+61 -50 V
+60 -44 V
+60 -33 V
+60 -26 V
+60 -19 V
+61 -15 V
+60 -10 V
+60 -8 V
+60 -8 V
+60 -8 V
+60 -8 V
+61 -8 V
+60 -8 V
+60 -6 V
+60 -4 V
+60 -4 V
+61 -3 V
+60 -4 V
+60 -3 V
+60 -3 V
+60 -3 V
+60 -2 V
+61 -3 V
+60 -3 V
+60 -2 V
+60 -2 V
+60 -2 V
+61 -1 V
+60 -1 V
+60 0 V
+60 -1 V
+60 -1 V
+60 -2 V
+61 -1 V
+60 0 V
+60 -1 V
+60 0 V
+60 0 V
+61 0 V
+60 0 V
+60 0 V
+60 0 V
+60 0 V
+60 0 V
+61 -1 V
+60 -1 V
+60 -1 V
+60 -1 V
+60 -1 V
+61 -1 V
+60 -1 V
+60 0 V
+60 -1 V
+60 0 V
+60 0 V
+61 0 V
+60 0 V
+60 0 V
+60 0 V
+60 0 V
+61 0 V
+60 0 V
+60 0 V
+60 -1 V
+60 -1 V
+60 0 V
+61 0 V
+% End plot #1
 stroke
 2.000 UL
 LTb
-980 4800 N
-980 640 L
-5920 0 V
-0 4160 V
--5920 0 V
+LCb setrgbcolor
+2.000 UL
+LTB
+LCb setrgbcolor
+740 4839 N
+740 640 L
+6099 0 V
+0 4199 V
+-6099 0 V
 Z stroke
 1.000 UP
 2.000 UL
 LTb
+LCb setrgbcolor
 stroke
 grestore
 end
