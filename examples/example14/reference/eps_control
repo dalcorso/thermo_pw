@@ -1,6 +1,6 @@
 &input_epsilon
   prefix='silicon'
-  outdir='/home/espresso/THERMO/tempdir//g1/'
+  outdir='/scratch/RUNNING_QE/QE680_TPW151/tempdir/g1/'
   calculation='eps'
   wmin=0.05
   wmax=1.6

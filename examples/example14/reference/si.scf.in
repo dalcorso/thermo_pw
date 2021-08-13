@@ -5,7 +5,7 @@
     tstress = .true.
     tprnfor = .true.
     pseudo_dir = '/home/espresso/pslibrary.1.0.0/pz/PSEUDOPOTENTIALS/',
-    outdir='/home/espresso/THERMO/tempdir//'
+    outdir='/scratch/RUNNING_QE/QE680_TPW151/tempdir/'
  /
  &system
     ibrav=  2, celldm(1) =10.26, nat=  2, ntyp= 1,
