@@ -509,7 +509,7 @@ SUBROUTINE dipole_calc( ik, dipole_aux, nbndmin, nbndmax, shift )
   USE klist,                ONLY : xk, wk, nelec, ngk, igk_k
   USE noncollin_module,     ONLY : noncolin, npol
   USE uspp,                 ONLY : vkb, nkb, okvan
-  USE cell_base,            ONLY : tpiba2
+  USE cell_base,            ONLY : tpiba2, at
   USE gvect,                ONLY : ngm, g
   USE io_files,             ONLY : nwordwfc, iunwfc
   USE becmod,               ONLY : bec_type, calbec, &
@@ -578,7 +578,7 @@ SUBROUTINE dipole_calc( ik, dipole_aux, nbndmin, nbndmax, shift )
 
   DO ipol=1,3 
      !
-     CALL commutator_Hx_psi (ik, nbnd_occ, becp1, becp2, ipol, dpsi )
+     CALL commutator_Hx_psi (ik, nbnd_occ, at(:, ipol), becp1, becp2, dpsi )
      IF (okvan) THEN
         dvpsi=(0.0_DP,0.0_DP)
         CALL adddvepsi_us( nbnd_occ, becp1, becp2, ipol, ik, dvpsi)
