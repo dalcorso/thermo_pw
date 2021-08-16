@@ -1,0 +1,62 @@
+
+     Program epsil_tpw v.6.8 starts on 12Aug2021 at 19:45: 4 
+
+     This program is part of the open-source Quantum ESPRESSO suite
+     for quantum simulation of materials; please cite
+         "P. Giannozzi et al., J. Phys.:Condens. Matter 21 395502 (2009);
+         "P. Giannozzi et al., J. Phys.:Condens. Matter 29 465901 (2017);
+         "P. Giannozzi et al., J. Chem. Phys. 152 154105 (2020);
+          URL http://www.quantum-espresso.org", 
+     in publications or presentations arising from this work. More details at
+     http://www.quantum-espresso.org/quote
+
+     Parallel version (MPI), running on    12 processors
+
+     MPI processes distributed on     1 nodes
+     K-points division:     npool     =       4
+     R & G space division:  proc/nbgrp/npool/nimage =       3
+     4399 MiB available memory on the printing compute node when the environment starts
+
+
+
+     Reading input file...
+     Reading PW restart file...
+
+     Reading xml data from directory:
+
+     /scratch/RUNNING_QE/QE680_TPW151/tempdir/g1/silicon.save/
+
+     IMPORTANT: XC functional enforced from input :
+     Exchange-correlation= PZ
+                           (   1   1   0   0   0   0   0)
+     Any further DFT definition will be discarded
+     Please, verify this is what you really want
+
+
+     Parallelization info
+     --------------------
+     sticks:   dense  smooth     PW     G-vecs:    dense   smooth      PW
+     Min         120     120     40                 1523     1523     312
+     Max         121     121     41                 1526     1526     316
+     Sum         361     361    121                 4573     4573     941
+
+     Using Slab Decomposition
+
+     Reading collected, re-writing distributed wavefunctions
+     The system is an insulator ...
+
+     Writing output on file...
+
+
+     eps_calc     :      1.86s CPU      1.99s WALL (       1 calls)
+     dipole_calc  :      1.00s CPU      1.00s WALL (     102 calls)
+
+
+     epsil_tpw    :      2.55s CPU      2.72s WALL
+
+
+   This run was terminated on:  19:45: 7  12Aug2021            
+
+=------------------------------------------------------------------------------=
+   JOB DONE.
+=------------------------------------------------------------------------------=

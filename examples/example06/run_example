@@ -86,7 +86,7 @@ cat > thermo_control << EOF
   nbnd_bands=12,
  /
 EOF
-cat > si.scf_bands.in << EOF
+cat > si.mur_lc_bands.in << EOF
  &control
    calculation = 'scf'
    prefix='silicon',
@@ -113,7 +113,7 @@ K_POINTS AUTOMATIC
 EOF
 $ECHO "  running the mur_lc_bands calculation for Si and "
 $ECHO "  creating the postscript file output_bands.ps...\c"
-$THERMO_PW_COMMAND < si.scf_bands.in > si.scf_bands.out
+$THERMO_PW_COMMAND < si.mur_lc_bands.in > si.mur_lc_bands.out
 check_failure $?
 $ECHO " done"
 
