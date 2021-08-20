@@ -222,6 +222,7 @@ like to mention M. Palumbo, O. Motornyi, A. Urru, and C. Malica.
 \hline
 \texttt{thermo\_pw} & \qe & release date \\
 \hline
+1.6.0 & 6.8 & \\
 1.5.1 & 6.8 & 22/07/2021 \\
 1.5.0 & 6.7 & 19/07/2021 \\
 1.4.1 & 6.7 & 29/12/2020 \\
@@ -1894,6 +1895,9 @@ poly_degree_grun : degree of the polynomial used to interpolate
                 the frequencies (Used only when lmurn=.TRUE. 
                 otherwise it is 2).
                 Default: 4
+temp_nstep    : every temp_nstep temperatures the murnaghan energy(omega)
+                and the pressure(omega) curves are written on file.
+                Default : integer 1000000 
 flgrun        : file where the Gruneisen parameters are written. 
                 Default: character(len=*) 'output_pgrun.dat'
 flpgrun       : file where the Gruneisen parameters in a plotable 

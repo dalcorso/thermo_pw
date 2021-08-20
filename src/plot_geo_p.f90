@@ -131,3 +131,212 @@ IF (lgnuplot.AND.ionode) &
 
 RETURN
 END SUBROUTINE plot_geo_p
+
+!-------------------------------------------------------------------
+SUBROUTINE plot_geo_p_t()
+!-------------------------------------------------------------------
+!
+!  This is a driver to plot the geometry as a function of pressure 
+!  It plots: 
+!     the celldm parameters as a function of p
+!     the volume as a function of p
+!     the ratio volume/volume0 as a function of p 
+! volume0 is the volume at zero pressure
+!
+USE kinds,            ONLY : DP
+USE constants,        ONLY : ry_kbar
+USE control_gnuplot,  ONLY : flgnuplot, lgnuplot, gnuplot_command, flext
+USE postscript_files, ONLY : flpsmur
+USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,  &
+                             gnuplot_write_header,        &
+                             gnuplot_ylabel,              &
+                             gnuplot_xlabel,              &
+                             gnuplot_set_gfact,           &
+                             gnuplot_write_command,       &
+                             gnuplot_write_file_mul_data
+USE data_files,       ONLY : flevdat
+USE control_mur,      ONLY : press_min, press_max, omegap0
+USE temperature,      ONLY : ntemp, temp_nstep
+USE initial_conf,     ONLY : ibrav_save
+USE mp_images,        ONLY : my_image_id, root_image
+USE io_global,        ONLY : ionode
+
+IMPLICIT NONE
+
+CHARACTER(LEN=256) :: filename, gnu_filename, label
+CHARACTER(LEN=6) :: int_to_char
+CHARACTER(LEN=12) :: color(8)
+INTEGER :: istep, itemp, ierr, system
+LOGICAL :: first_step, last_step
+
+IF ( my_image_id /= root_image ) RETURN
+
+color(1)='color_red'
+color(2)='color_green'
+color(3)='color_blue'
+color(4)='color_yellow'
+color(5)='color_pink'
+color(6)='color_cyan'
+color(7)='color_orange'
+color(8)='color_black'
+
+gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//'_mur_celldm_t'
+CALL add_pressure(gnu_filename)
+filename=TRIM(flpsmur)//"_celldm_t"
+CALL add_pressure(filename)
+filename=TRIM(filename)//TRIM(flext)
+
+CALL gnuplot_start(gnu_filename)
+
+CALL gnuplot_write_header(filename, press_min*ry_kbar, press_max*ry_kbar, &
+                     0.0_DP, 0.0_DP, 1.0_DP, flext ) 
+
+CALL gnuplot_xlabel('pressure (kbar)',.FALSE.) 
+
+!
+!  plot a
+!
+CALL gnuplot_ylabel('a (a.u.)',.FALSE.) 
+
+istep=0
+DO itemp=1,ntemp,temp_nstep
+   first_step=(itemp==1)
+   last_step=((itemp+temp_nstep)>ntemp)
+   istep=MOD(istep,8)+1
+   filename="therm_files/"//TRIM(flevdat)//'_mur_celldm'//&
+                                               TRIM(int_to_char(itemp))
+   CALL add_pressure(filename)
+   CALL gnuplot_write_file_mul_data(filename,1,2,color(istep),first_step, &
+                                 last_step, .FALSE.)
+ENDDO
+!
+!  plot b/a
+!
+IF (ABS(ibrav_save)>7) THEN
+   CALL gnuplot_ylabel('b/a',.FALSE.) 
+   istep=0
+   DO itemp=1,ntemp,temp_nstep
+      first_step=(itemp==1)
+      last_step=((itemp+temp_nstep)>ntemp)
+      istep=MOD(istep,8)+1
+      filename="therm_files/"//TRIM(flevdat)//'_mur_celldm'//&
+                                               TRIM(int_to_char(itemp))
+      CALL add_pressure(filename)
+      CALL gnuplot_write_file_mul_data(filename,1,3,color(istep),first_step,&
+                                    last_step,.FALSE.)
+   ENDDO
+ENDIF
+!
+!  plot c/a
+!
+IF (ibrav_save==4.OR.ABS(ibrav_save)>5) THEN
+   CALL gnuplot_ylabel('c/a',.FALSE.) 
+   istep=0
+   DO itemp=1,ntemp,temp_nstep
+      first_step=(itemp==1)
+      last_step=((itemp+temp_nstep)>ntemp)
+      istep=MOD(istep,8)+1
+      filename="therm_files/"//TRIM(flevdat)//'_mur_celldm'//&
+                                               TRIM(int_to_char(itemp))
+      CALL add_pressure(filename)
+      CALL gnuplot_write_file_mul_data(filename,1,4,color(istep), &
+                               first_step,last_step,.FALSE.)
+   ENDDO
+ENDIF
+!
+!  plot cos(alpha)
+!
+IF (ibrav_save==5.OR.ibrav_save==12.OR.ibrav_save==13.OR.ibrav_save==14) THEN
+   CALL gnuplot_ylabel('cos({\Symbol a})',.FALSE.) 
+   istep=0
+   DO itemp=1,ntemp,temp_nstep
+      first_step=(itemp==1)
+      last_step=((itemp+temp_nstep)>ntemp)
+      istep=MOD(istep,8)+1
+      filename="therm_files/"//TRIM(flevdat)//'_mur_celldm'//&
+                                               TRIM(int_to_char(itemp))
+      CALL add_pressure(filename)
+      CALL gnuplot_write_file_mul_data(filename,1,5,color(istep),&
+                              first_step,last_step,.FALSE.)
+   ENDDO
+ENDIF
+!
+!  plot cos(beta)
+!
+IF (ibrav_save==-12.OR.ibrav_save==-13.OR.ibrav_save==14) THEN
+   CALL gnuplot_ylabel('cos({\Symbol b})',.FALSE.) 
+   istep=0
+   DO itemp=1,ntemp,temp_nstep
+      first_step=(itemp==1)
+      last_step=((itemp+temp_nstep)>ntemp)
+      istep=MOD(istep,8)+1
+      filename="therm_files/"//TRIM(flevdat)//'_mur_celldm'//&
+                                               TRIM(int_to_char(itemp))
+      CALL add_pressure(filename)
+      CALL gnuplot_write_file_mul_data(filename,1,5,color(istep), &
+                          first_step,last_step,.FALSE.)
+   ENDDO
+ENDIF
+!
+!  plot cos(gamma)
+!
+IF (ibrav_save==14) THEN
+   CALL gnuplot_ylabel('cos({\Symbol c})',.FALSE.) 
+   istep=0
+   DO itemp=1,ntemp,temp_nstep
+      first_step=(itemp==1)
+      last_step=((itemp+temp_nstep)>ntemp)
+      istep=MOD(istep,8)+1
+      filename="therm_files/"//TRIM(flevdat)//'_mur_celldm'//&
+                                               TRIM(int_to_char(itemp))
+      CALL add_pressure(filename)
+      CALL gnuplot_write_file_mul_data(filename,1,5,color(istep),&
+                                       first_step,last_step,.FALSE.)
+   ENDDO
+ENDIF
+!
+!   plot the volume
+!
+CALL gnuplot_ylabel('Volume ((a.u.)^3)',.FALSE.) 
+istep=0
+DO itemp=1,ntemp,temp_nstep
+   first_step=(itemp==1)
+   last_step=((itemp+temp_nstep)>ntemp)
+   istep=MOD(istep,8)+1
+   filename="therm_files/"//TRIM(flevdat)//'_mur'//&
+                                               TRIM(int_to_char(itemp))
+   CALL add_pressure(filename)
+   CALL gnuplot_write_file_mul_data(filename,4,1,color(istep),&
+                                          first_step,last_step,.FALSE.)
+ENDDO
+!
+!  plot V/V_0 as a function of the
+!
+IF (omegap0>0.0_DP) THEN
+   WRITE(label,'("set xrange [0:",f12.5,"]")') press_max*ry_kbar
+   CALL gnuplot_write_command(TRIM(label),.FALSE.)
+   CALL gnuplot_set_gfact(1.0_DP/omegap0,.FALSE.)
+   CALL gnuplot_ylabel('V/V_0',.FALSE.) 
+   istep=0
+   DO itemp=1,ntemp,temp_nstep
+      first_step=(itemp==1)
+      last_step=((itemp+temp_nstep)>ntemp)
+      istep=MOD(istep,8)+1
+      filename="therm_files/"//TRIM(flevdat)//'_mur'//&
+                                               TRIM(int_to_char(itemp))
+      CALL add_pressure(filename)
+      CALL gnuplot_write_file_mul_data(filename,4,1,color(istep),&
+                        first_step, last_step, .FALSE.)
+   ENDDO
+ENDIF
+CALL gnuplot_end()
+
+IF (lgnuplot.AND.ionode) &
+   ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+
+!IF (lgnuplot.AND.ionode) &
+!   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
+!                                       //TRIM(gnu_filename), WAIT=.FALSE.)
+
+RETURN
+END SUBROUTINE plot_geo_p_t

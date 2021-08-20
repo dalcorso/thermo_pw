@@ -25,7 +25,7 @@ SUBROUTINE bcast_thermo_input()
                               flpsnkconv, flpsgrun, flpsenergy, flpsepsilon,  &
                               flpseldos, flpseltherm
   USE control_gnuplot, ONLY : flgnuplot, lgnuplot, gnuplot_command, flext
-  USE temperature,     ONLY : tmin, tmax, deltat, ntemp
+  USE temperature,     ONLY : tmin, tmax, deltat, ntemp, temp_nstep
   USE control_pressure, ONLY : pressure
   USE control_conv,    ONLY : nke, deltake, nkeden, deltakeden,               &
                               nnk, deltank, nsigma, deltasigma
@@ -296,6 +296,7 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( lb0_t, meta_ionode_id, world_comm )
   CALL mp_bcast( all_geometries_together, meta_ionode_id, world_comm )
   CALL mp_bcast( ngeo_ph, meta_ionode_id, world_comm )
+  CALL mp_bcast( temp_nstep, meta_ionode_id, world_comm )
   CALL mp_bcast( fact_ngeo, meta_ionode_id, world_comm )
   CALL mp_bcast( poly_degree_grun, meta_ionode_id, world_comm )
   CALL mp_bcast( flpgrun, meta_ionode_id, world_comm )

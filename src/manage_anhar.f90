@@ -14,7 +14,7 @@ USE temperature,           ONLY : ntemp
 USE thermo_mod,            ONLY : tot_ngeo
 USE control_thermo,        ONLY : ltherm_dos, ltherm_freq
 USE control_eldos,         ONLY : lel_free_energy
-USE temperature,           ONLY : temp, ntemp
+USE temperature,           ONLY : temp, ntemp, temp_nstep
 USE internal_files_names,  ONLY : flfrq_thermo, flvec_thermo
 USE el_thermodynamics,     ONLY : el_ener, el_free_ener, el_entr, &
                                   el_ce
@@ -68,6 +68,12 @@ IF (ltherm_dos) THEN
    CALL mp_sum(b0_t, inter_image_comm)
    CALL mp_sum(b01_t, inter_image_comm)
    CALL mp_sum(free_e_min_t, inter_image_comm)
+   IF (temp_nstep<=ntemp) THEN
+      DO itemp=1,ntemp,temp_nstep
+         CALL write_mur(vmin_t(itemp), b0_t(itemp), b01_t(itemp), &
+              free_e_min_t(itemp), itemp)
+      ENDDO
+   ENDIF
 !
 !    calculate several anharmonic quantities 
 !
@@ -125,6 +131,7 @@ CALL fit_frequencies()
 CALL set_volume_b0_grun()
 CALL write_grun_anharmonic()
 CALL plot_anhar() 
+CALL plot_mur_t()
 
 RETURN
 END SUBROUTINE manage_anhar
@@ -135,7 +142,7 @@ SUBROUTINE manage_anhar_anis()
 
 USE kinds,                 ONLY : DP
 USE thermo_mod,            ONLY : reduced_grid, what, tot_ngeo
-USE temperature,           ONLY : ntemp, temp
+USE temperature,           ONLY : ntemp, temp, temp_nstep
 USE control_pressure,      ONLY : pressure_kb
 USE control_thermo,        ONLY : ltherm_dos, ltherm_freq
 USE control_elastic_constants, ONLY : el_cons_qha_available, &
@@ -206,6 +213,14 @@ IF (ltherm_dos) THEN
    ENDDO
    CALL mp_sum(celldm_t, world_comm)
    CALL mp_sum(free_e_min_t, world_comm)
+
+   DO itemp=1,ntemp,temp_nstep
+      DO idata=1,ndata
+         phf(idata)=ph_free_ener(itemp,idata)
+         IF (lel_free_energy) phf(idata)=phf(idata)+el_free_ener(itemp, idata)
+      ENDDO
+      CALL write_e_omega_t(itemp, celldm_t(:,itemp), phf, ndata)
+   ENDDO
 ENDIF
 
 IF (ltherm_freq) THEN
@@ -289,6 +304,8 @@ ENDIF
 !
 CALL write_grun_anhar_anis()
 CALL plot_anhar_anis()
+CALL plot_mur_t()
+CALL plot_geo_p_t()
 
 RETURN
 END SUBROUTINE manage_anhar_anis

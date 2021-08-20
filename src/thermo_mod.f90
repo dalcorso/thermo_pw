@@ -88,6 +88,8 @@ MODULE temperature
   REAL(DP) :: tmin, tmax                ! maximum and minimum temperature (K)
   REAL(DP) :: deltat                    ! delta T
   INTEGER  :: ntemp                     ! number of temperatures
+  INTEGER  :: temp_nstep                ! every temp_nstep temperatures the
+                                        ! murnaghan equation is written on file
 
 END MODULE temperature
 

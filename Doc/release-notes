@@ -1,5 +1,12 @@
+New in version 1.6
+
+Added a plot of the enthalpy as a function of pressure. 
+Added a plot of the crystal parameters as a function of pressure.
+Added a plot of the Murnaghan fit and of the pressure as a function 
+of volume at several temperatures.
+
 New in version 1.5.1
-22/07/2021 Version 1.5 is now frozen
+22/07/2021 Version 1.5.1 is now frozen
 
 This version is identical to 1.5 but it is compatible with QE.6.8.
 In particular it can be compiled with the GPU version of the QE.

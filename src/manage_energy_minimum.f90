@@ -44,7 +44,7 @@ energy_geo=energy_geo / nproc_image
 
 IF (lmurn) THEN
    CALL do_ev()
-   CALL write_mur(vmin,b0,b01,emin)
+   CALL write_mur(vmin,b0,b01,emin,0)
    CALL plot_mur()
    CALL compute_celldm_geo(vmin, celldm0, &
                    celldm_geo(1,central_geo), omega_geo(central_geo))

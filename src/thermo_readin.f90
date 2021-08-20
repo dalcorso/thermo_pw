@@ -40,7 +40,7 @@ SUBROUTINE thermo_readin()
                                    flpgrun, fl_el_cons, flpband, flvec,    &
                                    flepsilon, floptical, fleldos, fleltherm, &
                                    fldosfrq, flelanhar
-  USE temperature,          ONLY : tmin, tmax, deltat, ntemp
+  USE temperature,          ONLY : tmin, tmax, deltat, ntemp, temp_nstep
   USE control_pressure,     ONLY : pressure
   USE control_dosq,         ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq,&
                                    freqmin_input, freqmax_input, phdos_sigma
@@ -135,6 +135,7 @@ SUBROUTINE thermo_readin()
 !  temperature and pressure
 !
                             tmin, tmax, deltat, ntemp,      &
+                            temp_nstep,                     &
                             pressure,                       &
 !
 !   structure
@@ -319,6 +320,7 @@ SUBROUTINE thermo_readin()
 
   tmin=1.0_DP
   tmax=800.0_DP
+  temp_nstep=1000000
   deltat=3.0_DP
   ntemp=1
   pressure=0.0_DP
