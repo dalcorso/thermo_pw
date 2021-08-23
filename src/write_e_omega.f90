@@ -181,7 +181,7 @@ RETURN
 END SUBROUTINE write_e_omega
 
 !-------------------------------------------------------------------------
-SUBROUTINE write_e_omega_t(itemp, celldm_t, phf, ndatatot)
+SUBROUTINE write_e_omega_t(itemp, phf, ndatatot)
 !-------------------------------------------------------------------------
 !
 ! This routine receives as input the energies at the computed geometries
@@ -223,7 +223,7 @@ IMPLICIT NONE
 
 INTEGER  :: itemp
 INTEGER  :: ndatatot
-REAL(DP) :: phf(ndatatot), celldm_t(6)
+REAL(DP) :: phf(ndatatot)
 
 CHARACTER(LEN=256) :: filename, filename1
 CHARACTER(LEN=6) :: int_to_char
@@ -237,18 +237,15 @@ TYPE(poly2) :: p2
 TYPE(poly4) :: p4
 
 IF (my_image_id /= root_image) RETURN
+IF (itemp<=0) RETURN
 !
 !  The name of the output files that will contain the volume, energy, pressure
 !
-IF (itemp > 0) THEN
-   filename="therm_files/"//TRIM(flevdat)//'_mur'//TRIM(int_to_char(itemp))
-   filename1="therm_files/"//TRIM(flevdat)//'_mur_celldm'//&
-                                        TRIM(int_to_char(itemp))
-ELSE
-   filename="energy_files/"//TRIM(flevdat)//'_mur'
-   filename1="energy_files/"//TRIM(flevdat)//'_mur_celldm'
-ENDIF
+filename="anhar_files/"//TRIM(flevdat)//'_mur'//TRIM(int_to_char(itemp))
 CALL add_pressure(filename)
+
+filename1="anhar_files/"//TRIM(flevdat)//'_mur_celldm'//&
+                                                TRIM(int_to_char(itemp))
 CALL add_pressure(filename1)
 
 ndata=compute_nwork()

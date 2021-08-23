@@ -124,13 +124,13 @@ USE control_mur,      ONLY : lmurn, vmin_input, vmax_input, press_max, &
                              press_min
 USE temperature,      ONLY : ntemp, temp_nstep
 USE control_pressure, ONLY : pressure_kb
+USE color_mod,        ONLY : color
 USE mp_images,        ONLY : my_image_id, root_image
 USE io_global,        ONLY : ionode
 
 IMPLICIT NONE
 
 CHARACTER(LEN=256) :: filename, filename1, filename2, gnu_filename, label
-CHARACTER(LEN=12) :: color(8)
 CHARACTER(LEN=8) :: float_to_char
 CHARACTER(LEN=6) :: int_to_char
 INTEGER :: itemp, istep
@@ -140,15 +140,6 @@ LOGICAL :: first_step, last_step
 IF ( my_image_id /= root_image ) RETURN
 
 IF (temp_nstep>ntemp) RETURN
-
-color(1)='color_red'
-color(2)='color_green'
-color(3)='color_blue'
-color(4)='color_yellow'
-color(5)='color_pink'
-color(6)='color_cyan'
-color(7)='color_orange'
-color(8)='color_black'
 
 gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//'_mur_t'
 CALL add_pressure(gnu_filename)
@@ -170,7 +161,7 @@ DO itemp=1,ntemp,temp_nstep
    first_step=(itemp==1)
    last_step=((itemp+temp_nstep)>ntemp)
    istep=MOD(istep,8)+1
-   filename1="therm_files/"//TRIM(flevdat)//'_mur'//TRIM(int_to_char(itemp))
+   filename1="anhar_files/"//TRIM(flevdat)//'_mur'//TRIM(int_to_char(itemp))
    CALL add_pressure(filename1)
    IF (first_step) THEN
       IF (pressure_kb /= 0.0_DP) THEN
@@ -193,7 +184,7 @@ DO itemp=1,ntemp,temp_nstep
    last_step=((itemp+temp_nstep)>ntemp)
    istep=MOD(istep,8)+1
 
-   filename1="therm_files/"//TRIM(flevdat)//'_mur'//TRIM(int_to_char(itemp))
+   filename1="anhar_files/"//TRIM(flevdat)//'_mur'//TRIM(int_to_char(itemp))
    CALL add_pressure(filename1)
    IF (first_step) THEN
       CALL gnuplot_ylabel('Pressure (kbar)',.FALSE.) 
@@ -211,7 +202,7 @@ DO itemp=1,ntemp,temp_nstep
    first_step=(itemp==1)
    last_step=((itemp+temp_nstep)>ntemp)
    istep=MOD(istep,8)+1
-   filename1="therm_files/"//TRIM(flevdat)//'_mur'//TRIM(int_to_char(itemp))
+   filename1="anhar_files/"//TRIM(flevdat)//'_mur'//TRIM(int_to_char(itemp))
    CALL add_pressure(filename1)
 
    IF (first_step) THEN

@@ -157,6 +157,7 @@ USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,  &
 USE data_files,       ONLY : flevdat
 USE control_mur,      ONLY : press_min, press_max, omegap0
 USE temperature,      ONLY : ntemp, temp_nstep
+USE color_mod,        ONLY : color
 USE initial_conf,     ONLY : ibrav_save
 USE mp_images,        ONLY : my_image_id, root_image
 USE io_global,        ONLY : ionode
@@ -165,20 +166,10 @@ IMPLICIT NONE
 
 CHARACTER(LEN=256) :: filename, gnu_filename, label
 CHARACTER(LEN=6) :: int_to_char
-CHARACTER(LEN=12) :: color(8)
 INTEGER :: istep, itemp, ierr, system
 LOGICAL :: first_step, last_step
 
 IF ( my_image_id /= root_image ) RETURN
-
-color(1)='color_red'
-color(2)='color_green'
-color(3)='color_blue'
-color(4)='color_yellow'
-color(5)='color_pink'
-color(6)='color_cyan'
-color(7)='color_orange'
-color(8)='color_black'
 
 gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//'_mur_celldm_t'
 CALL add_pressure(gnu_filename)
@@ -203,7 +194,7 @@ DO itemp=1,ntemp,temp_nstep
    first_step=(itemp==1)
    last_step=((itemp+temp_nstep)>ntemp)
    istep=MOD(istep,8)+1
-   filename="therm_files/"//TRIM(flevdat)//'_mur_celldm'//&
+   filename="anhar_files/"//TRIM(flevdat)//'_mur_celldm'//&
                                                TRIM(int_to_char(itemp))
    CALL add_pressure(filename)
    CALL gnuplot_write_file_mul_data(filename,1,2,color(istep),first_step, &
@@ -219,7 +210,7 @@ IF (ABS(ibrav_save)>7) THEN
       first_step=(itemp==1)
       last_step=((itemp+temp_nstep)>ntemp)
       istep=MOD(istep,8)+1
-      filename="therm_files/"//TRIM(flevdat)//'_mur_celldm'//&
+      filename="anhar_files/"//TRIM(flevdat)//'_mur_celldm'//&
                                                TRIM(int_to_char(itemp))
       CALL add_pressure(filename)
       CALL gnuplot_write_file_mul_data(filename,1,3,color(istep),first_step,&
@@ -236,7 +227,7 @@ IF (ibrav_save==4.OR.ABS(ibrav_save)>5) THEN
       first_step=(itemp==1)
       last_step=((itemp+temp_nstep)>ntemp)
       istep=MOD(istep,8)+1
-      filename="therm_files/"//TRIM(flevdat)//'_mur_celldm'//&
+      filename="anhar_files/"//TRIM(flevdat)//'_mur_celldm'//&
                                                TRIM(int_to_char(itemp))
       CALL add_pressure(filename)
       CALL gnuplot_write_file_mul_data(filename,1,4,color(istep), &
@@ -253,7 +244,7 @@ IF (ibrav_save==5.OR.ibrav_save==12.OR.ibrav_save==13.OR.ibrav_save==14) THEN
       first_step=(itemp==1)
       last_step=((itemp+temp_nstep)>ntemp)
       istep=MOD(istep,8)+1
-      filename="therm_files/"//TRIM(flevdat)//'_mur_celldm'//&
+      filename="anhar_files/"//TRIM(flevdat)//'_mur_celldm'//&
                                                TRIM(int_to_char(itemp))
       CALL add_pressure(filename)
       CALL gnuplot_write_file_mul_data(filename,1,5,color(istep),&
@@ -270,7 +261,7 @@ IF (ibrav_save==-12.OR.ibrav_save==-13.OR.ibrav_save==14) THEN
       first_step=(itemp==1)
       last_step=((itemp+temp_nstep)>ntemp)
       istep=MOD(istep,8)+1
-      filename="therm_files/"//TRIM(flevdat)//'_mur_celldm'//&
+      filename="anhar_files/"//TRIM(flevdat)//'_mur_celldm'//&
                                                TRIM(int_to_char(itemp))
       CALL add_pressure(filename)
       CALL gnuplot_write_file_mul_data(filename,1,5,color(istep), &
@@ -287,7 +278,7 @@ IF (ibrav_save==14) THEN
       first_step=(itemp==1)
       last_step=((itemp+temp_nstep)>ntemp)
       istep=MOD(istep,8)+1
-      filename="therm_files/"//TRIM(flevdat)//'_mur_celldm'//&
+      filename="anhar_files/"//TRIM(flevdat)//'_mur_celldm'//&
                                                TRIM(int_to_char(itemp))
       CALL add_pressure(filename)
       CALL gnuplot_write_file_mul_data(filename,1,5,color(istep),&
@@ -303,7 +294,7 @@ DO itemp=1,ntemp,temp_nstep
    first_step=(itemp==1)
    last_step=((itemp+temp_nstep)>ntemp)
    istep=MOD(istep,8)+1
-   filename="therm_files/"//TRIM(flevdat)//'_mur'//&
+   filename="anhar_files/"//TRIM(flevdat)//'_mur'//&
                                                TRIM(int_to_char(itemp))
    CALL add_pressure(filename)
    CALL gnuplot_write_file_mul_data(filename,4,1,color(istep),&
@@ -322,7 +313,7 @@ IF (omegap0>0.0_DP) THEN
       first_step=(itemp==1)
       last_step=((itemp+temp_nstep)>ntemp)
       istep=MOD(istep,8)+1
-      filename="therm_files/"//TRIM(flevdat)//'_mur'//&
+      filename="anhar_files/"//TRIM(flevdat)//'_mur'//&
                                                TRIM(int_to_char(itemp))
       CALL add_pressure(filename)
       CALL gnuplot_write_file_mul_data(filename,4,1,color(istep),&

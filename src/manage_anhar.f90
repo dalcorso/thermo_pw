@@ -219,7 +219,7 @@ IF (ltherm_dos) THEN
          phf(idata)=ph_free_ener(itemp,idata)
          IF (lel_free_energy) phf(idata)=phf(idata)+el_free_ener(itemp, idata)
       ENDDO
-      CALL write_e_omega_t(itemp, celldm_t(:,itemp), phf, ndata)
+      CALL write_e_omega_t(itemp, phf, ndata)
    ENDDO
 ENDIF
 

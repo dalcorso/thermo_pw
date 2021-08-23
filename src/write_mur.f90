@@ -38,7 +38,7 @@ INTEGER  :: find_free_unit
 IF (my_image_id /= root_image) RETURN
 
 IF (itemp > 0) THEN
-   filename="therm_files/"//TRIM(flevdat)//'_mur'//TRIM(int_to_char(itemp))
+   filename="anhar_files/"//TRIM(flevdat)//'_mur'//TRIM(int_to_char(itemp))
 ELSE
    filename="energy_files/"//TRIM(flevdat)//'_mur'
 ENDIF

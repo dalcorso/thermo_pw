@@ -430,6 +430,7 @@ USE gnuplot, ONLY : gnuplot_ylabel, &
                     gnuplot_write_file_mul_data
 
 USE control_elastic_constants, ONLY : ngeom
+USE color_mod,    ONLY : color
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: i, j
 LOGICAL, INTENT(IN) :: lelastic, lelasticf, with_s
@@ -440,17 +441,7 @@ INTEGER :: igeom
 CHARACTER(LEN=256) :: filename, filename_s
 CHARACTER(LEN=6) :: int_to_char
 
-CHARACTER(LEN=12) :: color(8)
 INTEGER :: ic
-
-color(1)='color_red'
-color(2)='color_green'
-color(3)='color_blue'
-color(4)='color_yellow'
-color(5)='color_pink'
-color(6)='color_cyan'
-color(7)='color_orange'
-color(8)='color_black'
 
 IF (with_s.AND.ngeom>1) CALL errore('plot_one_elastic_constant',&
                       &'with_s and ngeom>1 are incompatible',1)

@@ -62,6 +62,7 @@ SUBROUTINE thermo_setup()
 !
   USE lattices,             ONLY : find_ibrav_code
   USE xrdp_module,          ONLY : select_lambda
+  USE color_mod,            ONLY : set_colors
 !
 !  these are of QE that can be changed here:
 !  ibrav, celldm, tau, dfftp parameters.
@@ -283,6 +284,10 @@ SUBROUTINE thermo_setup()
      ENDIF
   END IF
   CALL clean_ngeo(ngeo,fact_ngeo,ngeo_ph,ibrav)
+!
+!  Initialize colors
+!
+  CALL set_colors()
 !
 !  setup for the electronic dos
 !

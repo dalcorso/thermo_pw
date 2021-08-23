@@ -26,6 +26,7 @@ SUBROUTINE plot_multi_energy()
   USE control_pressure,     ONLY : pressure, pressure_kb
   USE mp_images,            ONLY : my_image_id, root_image
   USE io_global,            ONLY : ionode, stdout
+  USE color_mod,            ONLY : color
   USE gnuplot,              ONLY : gnuplot_start, gnuplot_end,             &
                                    gnuplot_start_2dplot,                   &
                                    gnuplot_set_contour, gnuplot_do_2dplot, &
@@ -42,7 +43,6 @@ SUBROUTINE plot_multi_energy()
                         tablefile, fileout
   CHARACTER(LEN=6) :: int_to_char
   CHARACTER(LEN=8) :: float_to_char
-  CHARACTER(LEN=12) :: color(8)
   CHARACTER(LEN=50) :: xlabel, ylabel
   REAL(DP) :: emax, emin, deltae, ene_levels_int(ncontours)
   REAL(DP) :: xmin, xmax, ymin, ymax, x2
@@ -64,14 +64,6 @@ SUBROUTINE plot_multi_energy()
   CALL add_pressure(filenameps)
   filenameps=TRIM(filenameps)//TRIM(flext)
 
-  color(1)='color_red'
-  color(2)='color_green'
-  color(3)='color_blue'
-  color(4)='color_yellow'
-  color(5)='color_pink'
-  color(6)='color_cyan'
-  color(7)='color_orange'
-  color(8)='color_black'
   tablefile='gnuplot_files/table'
   CALL gnuplot_start(gnu_filename)
 

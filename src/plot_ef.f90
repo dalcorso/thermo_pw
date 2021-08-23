@@ -23,6 +23,7 @@ uSE gnuplot,   ONLY : gnuplot_start, gnuplot_end,             &
                       gnuplot_ylabel, gnuplot_close_2dplot_prep
 USE efermi_plot, ONLY : n1, n2, kxmin, kxmax, kymin, kymax, has_ef
 USE wvfct,       ONLY : nbnd
+USE color_mod,   ONLY : color
 USE mp_images, ONLY : my_image_id, root_image
 USE io_global, ONLY : ionode
 
@@ -34,7 +35,6 @@ INTEGER :: ncountours, band_with_ef, ibnd, ierr
 INTEGER :: system
 CHARACTER(LEN=256) :: tablefile, filename, gnu_filename, flnameps
 CHARACTER(LEN=6)   :: int_to_char
-CHARACTER(LEN=12)  :: color(8)
 CHARACTER(LEN=50)  :: xlabel, ylabel
 
 IF ( my_image_id /= root_image ) RETURN
@@ -44,14 +44,6 @@ IF ( my_image_id /= root_image ) RETURN
 IF (.NOT.(lgauss.OR.ltetra)) RETURN
 
 gnu_filename=TRIM(flgnuplot)//'_ef'
-color(1)='color_red'
-color(2)='color_green'
-color(3)='color_blue'
-color(4)='color_yellow'
-color(5)='color_pink'
-color(6)='color_cyan'
-color(7)='color_orange'
-color(8)='color_black'
 tablefile='gnuplot_files/table'
 CALL gnuplot_start(gnu_filename)
 
