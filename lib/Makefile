@@ -12,6 +12,7 @@ atomic_pos.o \
 bz_2d_form.o \
 bz_asy.o \
 cubic_surfaces.o \
+color.o \
 debye_module.o \
 diagonalize.o \
 elastic_const.o \
