@@ -9127,13 +9127,13 @@ CONTAINS
         CALL is_d2(iax, ibx, icx, ind2)
 
         IF (ind2(1)==1) ic2=iax
-        IF (ind2(1)==2) ic2=ibx
-        IF (ind2(1)==3) ic2=icx
-        IF (ind2(2)==1) ic21=iax
+        IF (ind2(1)==2) ic21=iax
+        IF (ind2(1)==3) ic211=iax
+        IF (ind2(2)==1) ic2=ibx
         IF (ind2(2)==2) ic21=ibx
-        IF (ind2(2)==3) ic21=icx
-        IF (ind2(3)==1) ic211=iax
-        IF (ind2(3)==2) ic211=ibx
+        IF (ind2(2)==3) ic211=ibx
+        IF (ind2(3)==1) ic2=icx
+        IF (ind2(3)==2) ic21=icx
         IF (ind2(3)==3) ic211=icx
 
        SELECT CASE (group_b)
@@ -9229,6 +9229,7 @@ CONTAINS
               ELSE
                  CALL errore('find_aux_ind_two_groups','problem of C_2 D_2h C_2v',5)
               ENDIF
+
          CASE(16)
 !
 !   find the C_2 axis and check with which axis it is parallel

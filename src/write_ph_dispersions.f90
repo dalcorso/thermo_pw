@@ -233,7 +233,8 @@ SUBROUTINE write_ph_dispersions()
      CALL find_aux_ind_xk(disp_q(1,1), disp_q(1,2), aux_ind(2))
      CALL find_aux_ind_xk(disp_q(1,nq), disp_q(1,nq-1), aux_ind(nq-1))
      DO n=2,nq-1
-!        write(6,'(3f15.5,3l5)') q(:,n), high_sym(n-1), high_sym(n), high_sym(n+1)
+!        write(6,'(3f15.5,3l5)') disp_q(:,n), high_sym(n-1), high_sym(n), &
+!                                                            high_sym(n+1)
         IF (high_sym(n).AND..NOT.high_sym(n+1)) &
            CALL find_aux_ind_xk(disp_q(1,n), disp_q(1,n+1), aux_ind(n+1))
         IF (high_sym(n).AND..NOT.high_sym(n-1)) &
