@@ -15,6 +15,13 @@ can be found <a href="https://people.sissa.it/dalcorso/thermo_pw/user_guide/inde
 <p align="justify">The following papers describe new
 features implemented in <code>thermo_pw</code>:</p>
 
+12. C. Malica and A. Dal Corso,
+Quasi-harmonic thermoelasticity of palladium, platinum, copper and gold
+from first principles,
+Journal of Physics: Condensed Matter, to appear.
+<a href="https://iopscience.iop.org/article/10.1088/1361-648X/ac2041">
+preprint.</a>
+
 11. O. Motornyi, N. Vast, I. Timrov, O. Baseggio, S. Baroni, and A. Dal Corso,
 Electron energy loss spectroscopy of bulk gold with ultrasoft pseudopotentials and the Liouville-Lanczos method,
 <a href="https://journals.aps.org/prb/abstract/10.1103/PhysRevB.102.035156">
@@ -146,10 +153,6 @@ You can also find help in the QE user guide, at the
 in the examples directories.</p>
 
 **Thermo_pw downloads**:
-<br>
-<br>
-- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.5.1.tar.gz">
-thermo_pw.1.5.1.tar.gz</a>  (released 22-07-2021) compatible with QE-6.8.
 <br>
 <br>
 - <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.5.0.tar.gz">
