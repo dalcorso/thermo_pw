@@ -35,7 +35,7 @@ all : space_groups.x crystal_point_group.x mag_point_group.x units.x \
       hex_trig.x bravais_lattices.x kovalev.x supercell.x translate.x \
       elastic.x plot_sur_states.x gener_2d_slab.x gener_3d_slab.x \
       gener_nanowire.x debye.x rotate_tensors.x test_colors.x epsilon_tpw.x \
-      pdec.x optical.x change_e_name.x change_dynmat_name.x
+      pdec.x optical.x change_e_name.x change_dynmat_name.x template.x
       
 
 space_groups.x : space_groups.o $(MODULES)
@@ -45,6 +45,10 @@ space_groups.x : space_groups.o $(MODULES)
 crystal_point_group.x : crystal_point_group.o $(MODULES)
 	$(LD) $(LDFLAGS) -o $@ crystal_point_group.o $(MODULES) $(QELIBS)
 	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/crystal_point_group.x . )
+
+template.x : template.o $(MODULES)
+	$(LD) $(LDFLAGS) -o $@ template.o $(MODULES) $(QELIBS)
+	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/template.x . )
 
 mag_point_group.x : mag_point_group.o $(MODULES)
 	$(LD) $(LDFLAGS) -o $@ mag_point_group.o $(MODULES) $(QELIBS)
@@ -150,6 +154,7 @@ clean :
 	- /bin/rm -rf ../../bin/optical.x 
 	- /bin/rm -rf ../../bin/change_dynmat_name.x 
 	- /bin/rm -rf ../../bin/change_e_name.x 
+	- /bin/rm -rf ../../bin/template.x 
 
 include make.depend
 # DO NOT DELETE
