@@ -84,7 +84,7 @@ SUBROUTINE allocate_anharmonic()
   USE thermo_mod,          ONLY : tot_ngeo
   USE temperature,         ONLY : ntemp
   USE ions_base,           ONLY : nat
-  USE anharmonic,          ONLY : vmin_t, b0_t, b01_t, free_e_min_t,         &
+  USE anharmonic,          ONLY : vmin_t, b0_t, b01_t, free_e_min_t, a_t,    &
                                   alpha_t, beta_t, gamma_t, cv_t, ce_t,      &
                                   cp_t, b0_s, &
                                   celldm_t, alpha_anis_t, cpmce_anis,        &
@@ -107,14 +107,18 @@ SUBROUTINE allocate_anharmonic()
   USE el_anharmonic, ONLY : el_energy_t, el_free_energy_t, el_entropy_t, &
                             el_ce_t, el_energyf_t, el_free_energyf_t,    &
                             el_entropyf_t, el_cef_t
+  USE control_quartic_energy, ONLY : poly_degree_ph
   USE control_grun,        ONLY : vgrun_t, celldm_grun_t, b0_grun_t
 
   IMPLICIT NONE
+  INTEGER :: m1
 
   IF (.NOT. ALLOCATED (vmin_t) )        ALLOCATE(vmin_t(ntemp)) 
   IF (.NOT. ALLOCATED (b0_t) )          ALLOCATE(b0_t(ntemp)) 
   IF (.NOT. ALLOCATED (b01_t) )         ALLOCATE(b01_t(ntemp)) 
   IF (.NOT. ALLOCATED (free_e_min_t) )  ALLOCATE(free_e_min_t(ntemp)) 
+  m1=poly_degree_ph+1
+  IF (.NOT. ALLOCATED (a_t) )           ALLOCATE(a_t(m1,ntemp)) 
   IF (.NOT. ALLOCATED (b0_s) )          ALLOCATE(b0_s(ntemp)) 
   IF (.NOT. ALLOCATED (cv_t) )          ALLOCATE(cv_t(ntemp)) 
   IF (.NOT. ALLOCATED (ener_t) )        ALLOCATE(ener_t(ntemp))

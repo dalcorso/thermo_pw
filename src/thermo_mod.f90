@@ -219,6 +219,9 @@ MODULE anharmonic
   REAL(DP), ALLOCATABLE :: vmin_t(:), b0_t(:), b01_t(:), free_e_min_t(:) 
                            ! the parameters of the minimum of the  
                            ! free energy calculated from dos at each temperature
+  REAL(DP), ALLOCATABLE :: a_t(:,:) ! the coefficients of the polynomial
+                           ! that interpolates the free energy at each
+                           ! temperature
   REAL(DP), ALLOCATABLE :: celldm_t(:,:) ! the lattice parameters as a 
                            ! function of temperature
   REAL(DP), ALLOCATABLE :: alpha_anis_t(:,:)  ! thermal expansion tensor

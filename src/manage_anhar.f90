@@ -14,12 +14,15 @@ USE temperature,           ONLY : ntemp
 USE thermo_mod,            ONLY : tot_ngeo
 USE control_thermo,        ONLY : ltherm_dos, ltherm_freq
 USE control_eldos,         ONLY : lel_free_energy
+USE control_quartic_energy, ONLY : poly_degree_ph
 USE temperature,           ONLY : temp, ntemp, temp_nstep
 USE internal_files_names,  ONLY : flfrq_thermo, flvec_thermo
 USE el_thermodynamics,     ONLY : el_ener, el_free_ener, el_entr, &
                                   el_ce
 USE data_files,            ONLY : flanhar, fleltherm
-USE anharmonic,            ONLY : vmin_t, b0_t, b01_t, free_e_min_t
+
+USE control_mur,           ONLY : vmin, b0, b01, emin
+USE anharmonic,            ONLY : vmin_t, b0_t, b01_t, free_e_min_t, a_t
 USE ph_freq_anharmonic,    ONLY : vminf_t, b0f_t, b01f_t, free_e_minf_t
 USE io_global,             ONLY : stdout
 USE mp_images,             ONLY : inter_image_comm
@@ -27,7 +30,7 @@ USE mp,                    ONLY : mp_sum
 
 IMPLICIT NONE
 
-INTEGER :: itemp, igeom
+INTEGER :: itemp, igeom, m1
 CHARACTER(LEN=256) :: filedata, filerap, fileout, gnu_filename, filenameps
 LOGICAL :: all_geometry_done, all_el_free, ldummy
 
@@ -69,9 +72,9 @@ IF (ltherm_dos) THEN
    CALL mp_sum(b01_t, inter_image_comm)
    CALL mp_sum(free_e_min_t, inter_image_comm)
    IF (temp_nstep<=ntemp) THEN
+      m1=poly_degree_ph+1
       DO itemp=1,ntemp,temp_nstep
-         CALL write_mur(vmin_t(itemp), b0_t(itemp), b01_t(itemp), &
-              free_e_min_t(itemp), itemp)
+         CALL write_mur_pol(vmin, b0, b01, emin, a_t(:,itemp), m1, itemp)
       ENDDO
    ENDIF
 !
