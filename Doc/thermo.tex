@@ -395,24 +395,38 @@ ${\bf a}'_1$, ${\bf a}'_2$, and ${\bf a}'_3$, where:
 \label{strain_def}
 \end{equation}
 Here $i=1,2,3$ is the index of the primitive vector, while $k$ and $j$ run
-on the three Cartesian coordinates. We consider only symmetric tensors
-$\epsilon_{j,k}=\epsilon_{k,j}$ removing any rotation. 
+on the three Cartesian coordinates. We consider only symmetric 
+tensors $\epsilon_{j,k}=\epsilon_{k,j}$ removing any rotation. Moreover
+we restrict ourselves to constant strain tensors so that the strained
+solid is still periodic and can be described by a Bravais lattice.
+
 In the classical elasticity theory, one
 calls ${\bf X}$ the coordinates of an unstrained solid and
 ${\bf x}({\bf X})$ the position of each point ${\bf X}$ in
-the strained solid. Calling ${\bf u}= {\bf x} -{\bf X}$ the displacements
-of each point, the theory of elasticity defines the $3\times3$ matrix
-$\alpha_{i,j}=\delta_{i,j}+u_{i,j}$ where $u_{i,j}= {\partial u_i \over 
-\partial X_j}$ are the displacement gradients and 
-${\bf x}_i = \sum_j\alpha_{i,j} {\bf X}_j$. $\epsilon_{j,k}$
+the strained solid. The derivatives with respect to $X_j$ of the
+displacements of each point ${\bf u}= {\bf x} -{\bf X}$ 
+$u_{i,j}= {\partial u_i \over \partial X_j}$ are called
+displacement gradients. When $u_{i,j}$ are constant the strain
+is called homogeneous and we have ${\bf x}_i({\bf X}) = 
+\sum_j\alpha_{i,j} {\bf X}_j$ where 
+$\alpha_{i,j}=\delta_{i,j}+u_{i,j}$ is a $3\times 3$ matrix. 
+$\epsilon_{j,k}$
 is the symmetrized tensor $\epsilon_{j,k}={1\over 2} ( u_{j,k} +
-u_{k,j})$. $\epsilon_{j,k}$ do not coincide with the Lagrangian strains
-$\eta_{j,k}={1\over 2} ( u_{j,k} + u_{k,j} + \sum_l u_{l,j}u_{l,k})$ but 
-differ only for terms quadratic in $u_{i,j}$. 
-%As the Lagrangian strains, 
+u_{k,j})$. Calling $\omega_{j,k}={1\over 2} ( u_{j,k} -
+u_{k,j})$ the corresponding antisymmetric tensor, which describes
+rotations, we can write $u_{i,j}=\epsilon_{i,j}+\omega_{i,j}$.
 
-%$\epsilon_{j,k}$ do not contain any rotation and to first order they can 
-%be identified with $\eta_{j,k}$. 
+The strain of a solid can be described also from the change of the
+distance:
+\begin{equation}
+{\bf x}^2=\sum_l {\bf x}_l {\bf x}_l = \sum_{j,k}(\delta_{j,k} +
+2 \eta_{j,k}) {\bf X}_j {\bf X}_k 
+\end{equation}
+where $\eta_{j,k}={1\over 2} ( u_{j,k} + u_{k,j} + \sum_l u_{l,j}u_{l,k})$ 
+are the so called Langrangian strains which are always symmetric.
+$\epsilon_{j,k}$ do not coincide with the Lagrangian strains but
+differ only for terms quadratic in $u_{i,j}$. 
+
 At first order in $\epsilon_{j,k}$ we have
 the following useful relations for the reciprocal lattice vectors:
 \begin{equation}
