@@ -108,20 +108,23 @@ SUBROUTINE plot_mur_t()
 !  This is a driver to plot the energy and pressure as a function of volume
 !
 USE kinds,            ONLY : DP
-USE constants,        ONLY : ry_kbar
+USE constants,        ONLY : ry_kbar, rytoev
 USE control_gnuplot,  ONLY : flgnuplot, lgnuplot, gnuplot_command, flext
 USE postscript_files, ONLY : flpsmur
 USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,  &
                              gnuplot_write_header,        &
                              gnuplot_ylabel,              &
                              gnuplot_xlabel,              &
+                             gnuplot_set_fact,            &
                              gnuplot_write_command,       &
                              gnuplot_write_horizontal_line, &
                              gnuplot_write_file_mul_data, &
+                             gnuplot_write_file_mul_line_point, &
                              gnuplot_write_file_mul_point
 USE data_files,       ONLY : flevdat
 USE control_mur,      ONLY : lmurn, vmin_input, vmax_input, press_max, &
                              press_min
+USE control_eldos,    ONLY : lel_free_energy
 USE temperature,      ONLY : ntemp, temp_nstep
 USE control_pressure, ONLY : pressure_kb
 USE color_mod,        ONLY : color
@@ -195,9 +198,49 @@ DO itemp=1,ntemp,temp_nstep
                                                         last_step, .FALSE.)
 ENDDO
 !
+!   Vibrational free energy as a function of the volume
+!
+istep=0
+CALL gnuplot_set_fact(rytoev, .FALSE.)
+DO itemp=1,ntemp,temp_nstep
+   first_step=(itemp==1)
+   last_step=((itemp+temp_nstep)>ntemp)
+   istep=MOD(istep,8)+1
+
+   filename1="anhar_files/"//TRIM(flevdat)//'_free.'//TRIM(int_to_char(itemp))
+   CALL add_pressure(filename1)
+   IF (first_step) THEN
+      CALL gnuplot_ylabel('Vibrational free energy (eV)',.FALSE.) 
+   ENDIF
+   CALL gnuplot_write_file_mul_line_point(filename1,1,2,color(istep), &
+                                        first_step, last_step, .FALSE.)
+ENDDO
+!
+!   Electronic free energy as a function of the volume if computed
+!
+IF (lel_free_energy) THEN
+   istep=0
+   CALL gnuplot_set_fact(rytoev, .FALSE.)
+   DO itemp=1,ntemp,temp_nstep
+      first_step=(itemp==1)
+      last_step=((itemp+temp_nstep)>ntemp)
+      istep=MOD(istep,8)+1
+
+      filename1="anhar_files/"//TRIM(flevdat)//'_free.'// &
+                                           TRIM(int_to_char(itemp))
+      CALL add_pressure(filename1)
+      IF (first_step) THEN
+         CALL gnuplot_ylabel('Electronic free energy (eV)',.FALSE.) 
+      ENDIF
+      CALL gnuplot_write_file_mul_line_point(filename1,1,3,color(istep), &
+                                        first_step, last_step, .FALSE.)
+   ENDDO
+ENDIF
+!
 !  Enthalpy as a function of pressure
 !
 istep=0
+CALL gnuplot_set_fact(1.0_DP, .FALSE.)
 DO itemp=1,ntemp,temp_nstep
    first_step=(itemp==1)
    last_step=((itemp+temp_nstep)>ntemp)
@@ -216,11 +259,10 @@ DO itemp=1,ntemp,temp_nstep
    CALL gnuplot_write_file_mul_data(filename1,4,3,color(istep),first_step, &
                                                   last_step, .FALSE.)
 ENDDO
+CALL gnuplot_end()
 !
 !   close the file and make the plot
 !
-CALL gnuplot_end()
-
 IF (lgnuplot.AND.ionode) &
    ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
 

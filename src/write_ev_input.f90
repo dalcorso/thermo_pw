@@ -122,7 +122,7 @@ USE control_quartic_energy, ONLY : poly_degree_ph
 USE control_eldos,  ONLY : lel_free_energy
 USE thermodynamics, ONLY : ph_free_ener
 USE el_thermodynamics, ONLY : el_free_ener
-USE anharmonic,     ONLY : vmin_t, b0_t, b01_t, free_e_min_t
+USE anharmonic,     ONLY : vmin_t, b0_t, b01_t, free_e_min_t, a_t
 USE temperature,    ONLY : ntemp, temp
 USE control_pressure, ONLY : pressure_kb
 USE data_files,     ONLY : flevdat
@@ -154,6 +154,7 @@ REAL(DP) :: compute_mur_fun
 !    WRITE(stdout,'(2f25.14)') x(ndata), y(ndata)
   ENDDO
   CALL polyfit(x, y, ndata, a, poly_degree_ph)
+  CALL save_free_energy_on_file(itemp) 
 
   CALL find_min_mur_pol(vmin, b0 / ry_kbar, b01, a, m1, vm)
   aux = (vmin / vm)**b01 * b0
@@ -170,6 +171,7 @@ REAL(DP) :: compute_mur_fun
   b0_t(itemp)=aux
   b01_t(itemp)=aux1
   free_e_min_t(itemp)=emin + compute_mur_fun(vm, vmin, b0/ry_kbar, b01, a, m1)
+  a_t(1:m1,itemp)=a(1:m1)
   !
   CALL compute_celldm_geo(vmin_t(itemp), celldm_, celldm_geo(1,central_geo), &
                                          omega_geo(central_geo))
@@ -494,3 +496,49 @@ END IF
 
 RETURN
 END SUBROUTINE summarize_mur
+
+SUBROUTINE save_free_energy_on_file(itemp)
+!
+!  This subroutines saves on file the vibrational free energy and
+!  (if calculated) the electronic free energy every temp_nstep temperatures.
+!
+USE kinds,             ONLY : DP
+USE thermo_mod,        ONLY : omega_geo, ngeo, no_ph
+USE temperature,       ONLY : ntemp, temp_nstep
+USE thermodynamics,    ONLY : ph_free_ener
+USE el_thermodynamics, ONLY : el_free_ener
+USE control_eldos,     ONLY : lel_free_energy
+USE data_files,        ONLY : flevdat
+USE io_global,         ONLY : ionode
+
+IMPLICIT NONE
+CHARACTER(LEN=256) :: filedata
+CHARACTER(LEN=6) :: int_to_char
+INTEGER, INTENT(IN) :: itemp
+INTEGER :: idata, iu_free
+INTEGER :: find_free_unit
+
+IF (temp_nstep>ntemp) RETURN
+IF (MOD(itemp-1,temp_nstep)>0) RETURN
+
+filedata="anhar_files/"//TRIM(flevdat)//"_free."//TRIM(int_to_char(itemp))
+CALL add_pressure(filedata)
+
+IF (ionode) THEN
+   iu_free=find_free_unit()
+   OPEN(UNIT=iu_free, FILE=TRIM(filedata), STATUS='UNKNOWN', FORM='FORMATTED')
+   DO idata=1,ngeo(1)
+      IF (no_ph(idata)) CYCLE
+      IF (lel_free_energy) THEN
+         WRITE(iu_free,'(3f25.14)') omega_geo(idata), &
+                        ph_free_ener(itemp,idata), el_free_ener(itemp,idata)
+      ELSE
+         WRITE(iu_free,'(2f25.14)') omega_geo(idata), &
+                                    ph_free_ener(itemp,idata)
+      ENDIF
+   ENDDO
+   CLOSE(UNIT=iu_free, STATUS='KEEP')
+ENDIF
+
+RETURN
+END SUBROUTINE save_free_energy_on_file
