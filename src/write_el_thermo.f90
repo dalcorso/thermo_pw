@@ -10,7 +10,7 @@ SUBROUTINE write_el_thermo(igeom)
 !  This routine writes on file the electronic thermodynamical quantities
 !
 USE kinds,          ONLY : DP
-USE constants,      ONLY : rytoev
+USE constants,      ONLY : rytoev, electronvolt_si, rydberg_si, avogadro
 USE eldos_module,   ONLY : eldos_type, el_free_energy, el_energy, el_entropy, &
                            el_specific_heat_cv, destroy_eldos, &
                            el_chem_pot, read_eldos_data
@@ -27,8 +27,9 @@ USE io_global,      ONLY : ionode, ionode_id, stdout
 USE data_files,     ONLY : fleltherm, fleldos
 
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: igeom
+REAL(DP), PARAMETER :: caltoj=4.184_DP
 
+INTEGER, INTENT(IN) :: igeom
 INTEGER          :: itemp
 INTEGER          :: iu_therm
 TYPE(eldos_type) :: eldos
@@ -183,12 +184,14 @@ IF (ionode) THEN
    WRITE(iu_therm,'("# Energy and free energy in Ry/cell,")')
    WRITE(iu_therm,'("# Entropy in Ry/cell/K,")')
    WRITE(iu_therm,'("# Heat capacity Cv in Ry/cell/K.")')
-   WRITE(iu_therm,'("# Multiply by 13.6058 to have energies in &
-                       &eV/cell etc..")')
-   WRITE(iu_therm,'("# Multiply by 13.6058 x 23060.35 = 313 754.5 to have &
-                  &energies in cal/(N mol).")')
-   WRITE(iu_therm,'("# Multiply by 13.6058 x 96526.0 = 1 313 313 to &
-                  &have energies in J/(N mol).")')
+   WRITE(iu_therm,'("# Multiply by ",f7.4," to have energies in &
+                       &eV/cell etc..")') rytoev
+   WRITE(iu_therm,'("# Multiply by ",f7.4," x ",f8.2," = ",f9.1," to have &
+                  &energies in cal/(N mol).")') rytoev, electronvolt_si &
+                         * avogadro / caltoj, rydberg_si*avogadro/caltoj
+   WRITE(iu_therm,'("# Multiply by ",f7.4," x ",f8.2," = ",f9.1," to &
+                  &have energies in J/(N mol).")') rytoev, electronvolt_si&
+                         * avogadro, rydberg_si*avogadro
    WRITE(iu_therm,'("# N is the number of formula units per cell.")')
    WRITE(iu_therm,'("# For instance in silicon N=2. Divide by N to have &
                    &energies in cal/mol etc. ")')
