@@ -504,14 +504,14 @@ find_ibrav : This variable is active only when continue_zero_
              Default: logical .FALSE.
 \end{verbatim}
 
-\subsection{\color{web-blue}{\sc what='scf'}}
+\subsection{\color{web-blue}{what='scf'}}
 With this option the code computes only the total energy. This is a single
 calculation as if running \texttt{pw.x} with the given input.
 No other input variable is necessary.
 An example for this option can be found in \texttt{example01}. \\
 Number of tasks for this option: \texttt{1}.
 
-\subsection{\color{web-blue}{\sc what='scf}\_{\sc ke'}}
+\subsection{\color{web-blue}{what='scf}\_{ke'}}
 With this option the code makes several self-consistent calculations, 
 in parallel on several images, varying the kinetic energy cut-off for 
 the wavefunctions and for the charge density. 
@@ -548,7 +548,7 @@ flpskeconv : name of the postscript file with the plot
 An example for this option can be found in \texttt{example10}. \\
 Number of tasks for this option: \texttt{nke * nkedens}.
 
-\subsection{\color{web-blue}{\sc what='scf}\_{\sc nk'}}
+\subsection{\color{web-blue}{what='scf}\_{nk'}}
 With this option the code makes several self-consistent calculations, 
 in parallel on several images, varying the size of the {\bf k}-point grid, 
 and optionally for metals the smearing parameter \texttt{degauss}. In the 
@@ -579,7 +579,7 @@ flpsnkconv : name of the postscript file with the k points
 An example for this option can be found in \texttt{example11}. \\
 Number of tasks for this option: \texttt{nnk * nsigma}.
 
-\subsection{\color{web-blue}{\sc what='scf}\_{\sc bands'}}
+\subsection{\color{web-blue}{what='scf}\_{bands'}}
 With this option the code makes a self-consistent calculation followed 
 by a band structure calculation. This option is not parallelized over
 images and should be used with one image. The output of the band structure 
@@ -691,7 +691,7 @@ You cannot however run twice \texttt{thermo\_pw.x} on the same
 directory using \texttt{what='scf\_bands'} and two different paths, you
 must use two different working directories.
 
-\subsection{\color{web-blue}{\sc what='scf}\_{\sc 2d}\_{\sc bands'}}
+\subsection{\color{web-blue}{what='scf}\_{2d}\_{bands'}}
 With this option the code makes a self-consistent calculation followed
 by a band structure calculation as with the option 
 \texttt{what='scf\_bands'}, but it assumes 
@@ -879,7 +879,7 @@ plot. To change the defaults you can modify directly the \texttt{gnuplot}
 script, it is written in such a way that a change of a few variables can
 control the entire plot.
 
-\subsection{\color{web-blue}{\sc what='scf}\_{\sc dos'}}
+\subsection{\color{web-blue}{what='scf}\_{dos'}}
 With this option the code makes a self-consistent calculation followed
 by a band structure calculation on a uniform mesh of {\bf k}-points and
 computes and plots the electronic density of states. \\
@@ -936,7 +936,7 @@ required in input when it is lower than $4$ K or $4$ K. \\
 
 Number of tasks for this option: 1.
 
-\subsection{\color{web-blue}{\sc what='plot}\_{\sc bz'}}
+\subsection{\color{web-blue}{what='plot}\_{bz'}}
 With this option the code writes a script to make a plot
 of the Brillouin zone (BZ) and of the path (the default one or the 
 one given in input). 
@@ -1079,7 +1079,7 @@ flpsformf   : name of the postscript file with the atomic
               Default: character 'output_formf'
 \end{verbatim}
 
-\subsection{\color{web-blue}{\sc what='scf}\_{\sc ph'}}
+\subsection{\color{web-blue}{what='scf}\_{ph'}}
 With this option the code makes a self-consistent calculation followed
 by a phonon calculation. The phonon calculation is controlled by the file
 \texttt{ph\_control} and can be at a single {\bf q} point or on a mesh of 
@@ -1250,7 +1250,7 @@ sym_for_diago : When .TRUE. use symmetry to calculate the
               Default: logical .FALSE.
 \end{verbatim}
 
-\subsection{\color{web-blue}{\sc what='scf}\_{\sc disp'}}
+\subsection{\color{web-blue}{what='scf}\_{disp'}}
 With this option the code makes a self-consistent calculation followed by
 a phonon dispersion calculation at a fixed geometry. The geometry is given in the 
 input of \texttt{pw.x}. The dynamical matrices are used to calculate 
@@ -1346,7 +1346,7 @@ Number of tasks for this option: number of parallelizable tasks of the
 phonon code (smaller but of the order of number of {\bf q} points times 
 $3 N_{at}$, where $N_{at}$ is the number of atoms in the unit cell).
 
-\subsection{\color{web-blue}{\sc what='scf}\_{\sc elastic}\_{\sc constants'}}
+\subsection{\color{web-blue}{what='scf}\_{elastic}\_{constants'}}
 With this option the code calculates the elastic constants of the solid
 at the geometry given in the \texttt{pw.x} input. 
 There are four different algorithms that at convergence should give the
@@ -1490,7 +1490,7 @@ of temperature.
 %independent strains. \\
 %This feature is still incomplete and experimental.
 %
-\subsection{\color{web-blue}{\sc what='mur}\_{\sc lc'}}
+\subsection{\color{web-blue}{what='mur}\_{lc'}}
 With this option the code runs several self-consistent calculations
 at different geometries. The runs can be done in parallel when several images 
 are available. This option has two working modes controlled by the 
@@ -1666,7 +1666,7 @@ Number of tasks for this option: \\
 \texttt{ngeo(1)}$\times$\texttt{ngeo(2)}$\times$\texttt{ngeo(3)}$\times$\texttt{ngeo(4)}$\times$\texttt{ngeo(5)}$\times$\texttt{ngeo(6)} when 
 \texttt{lmurn=.FALSE.}. 
 
-\subsection{\color{web-blue}{\sc what='mur}\_{\sc lc}\_{\sc bands'}}
+\subsection{\color{web-blue}{what='mur}\_{lc}\_{bands'}}
 With this option the code computes the band structure at the geometry 
 that minimizes the energy (or the enthalpy at finite pressure). See  
 \texttt{what='scf\_bands'} and \texttt{what='mur\_lc'} for a list of 
@@ -1675,7 +1675,7 @@ An example for this option can be found in \texttt{example06}. \\
 Number of tasks for this option: see \texttt{what='mur\_lc'} and
 \texttt{what='scf\_bands'}.
 
-\subsection{\color{web-blue}{\sc what='mur}\_{\sc lc}\_{\sc dos'}}
+\subsection{\color{web-blue}{what='mur}\_{lc}\_{dos'}}
 With this option the code computes the electronic dos at the geometry 
 that minimizes the energy (or the enthalpy at finite pressure). See  
 \texttt{what='scf\_dos'} and \texttt{what='mur\_lc'} for a list of 
@@ -1683,7 +1683,7 @@ the variables that control these two options.\\
 Number of tasks for this option: see \texttt{what='mur\_lc'} and 
 \texttt{what='scf\_dos'}.
 
-\subsection{\color{web-blue}{\sc what='mur}\_{\sc lc}\_{\sc ph'}}
+\subsection{\color{web-blue}{what='mur}\_{lc}\_{ph'}}
 This option is similar to \texttt{what='scf\_ph'} but the phonon calculation
 is made at the geometry that minimizes the energy (or the enthalpy
 at finite pressure).
@@ -1694,7 +1694,7 @@ Number of tasks for this option: Maximum between the number of tasks
 needed by the \texttt{what='mur\_lc'} option and the number
 of tasks of the phonon code (see above the option \texttt{what='scf\_ph'}).
 
-\subsection{\color{web-blue}{\sc what='mur}\_{\sc lc}\_{\sc disp'}}
+\subsection{\color{web-blue}{what='mur}\_{lc}\_{disp'}}
 This option is similar to \texttt{what='scf\_disp'} but the phonon calculation
 is made at the geometry that minimizes the energy (or the enthalpy
 at finite pressure).
@@ -1705,7 +1705,7 @@ Number of tasks for this option: Maximum between the number of tasks
 needed by the \texttt{what='mur\_lc'} option and the number
 of tasks of the phonon code (see above the option \texttt{what='scf\_ph'}).
 
-\subsection{\color{web-blue}{\sc what='mur}\_{\sc lc}\_{\sc elastic}\_{\sc constants'}}
+\subsection{\color{web-blue}{what='mur}\_{lc}\_{elastic}\_{constants'}}
 As \texttt{what='scf\_elastic\_constants'} but the calculation is made at the
 geometry that minimizes the energy (or the enthalpy at finite pressure). 
 See \texttt{what='scf\_elastic\_constants'} and \texttt{what='mur\_lc'} for 
@@ -1721,7 +1721,7 @@ needed for the \texttt{what='scf\_elastic\_constants'} option.
 %energy minimization is made as described for \texttt{what='mur\_lc'}. \\
 %This feature is still incomplete and experimental.
 
-\subsection{\color{web-blue}{\sc what='mur}\_{\sc lc}\_{\sc t'}}
+\subsection{\color{web-blue}{what='mur}\_{lc}\_{t'}}
 With this option the code calculates the anharmonic 
 properties within the quasi-harmonic approximation. 
 The outputs of the code are the values of crystal parameters 
@@ -1981,7 +1981,7 @@ of tasks of the phonon code (see above the option \texttt{what='scf\_ph'}). \\
 When \texttt{all\_geometries\_together=.TRUE.}: number of tasks of the
 phonon code times the number of geometries. \\
 
-\subsection{\color{web-blue}{\sc what='elastic}\_{\sc constants}\_{\sc t'}}
+\subsection{\color{web-blue}{what='elastic}\_{constants}\_{t'}}
 
 With this option the code can compute the elastic constants and elastic
 compliances as a function of temperature using the quasi-harmonic
@@ -2249,7 +2249,7 @@ to change the number of the geometry to a set of dynamical matrix files.
 For an example of its use see \texttt{tools\_input/change\_name.in}.
 
 \item \texttt{change\_e\_name.x} A simple tool to change the number of the 
-geometry to a set of energy files inside the restart directory. 
+geometry to a set of energy files inside the \texttt{restart} directory. 
 
 \item \texttt{crystal\_point\_group.x} is a crystal point group calculator.
 It can give several information about the crystallographic point groups,
@@ -2332,6 +2332,12 @@ symmetry operations defined in the Kovalev tables and those used by \qe.
 \item \texttt{mag\_point\_group.x} gives a few information on the magnetic point
 groups.
 
+\item \texttt{merge\_interp.x} This is a driver of the spline
+interpolation routines of \texttt{QE}. It can read the meshes and the
+functions to interpolate from two different files and provide the
+first function on the mesh of the second. In the data files
+lines that start with \texttt{\#} are considered comments.
+
 \item \texttt{optical.x} contains a few utilities for
 optical properties calculations. It transforms a complex dielectric 
 constant into a complex index of refraction and computes the reflectivity 
@@ -2384,6 +2390,11 @@ For an example of its use see \texttt{tools\_input/supercell.in}.
 
 \item \texttt{test\_colors.x} produces a postscript file with the 
 \texttt{gnuplot} colors that can be used in the plots.   
+
+\item \texttt{template.x} This is an example on how to write a tool
+code that can interface with the \texttt{QE} routines and all the
+library routines of \texttt{thermo\_pw}. The template activates 
+the parallelization options of \texttt{QE} and can use images.
 
 \item \texttt{translate.x} reads a set of atomic positions and a translation
 vector and translates the atomic positions. It can read also a rotation matrix 
@@ -2586,7 +2597,26 @@ Debye vibrational energy, free energy,
 entropy, and isochoric heat capacity. This plot is composed of four 
 figures, one for each quantity. The curves are in \texttt{blue}
 and the word Debye appears in the $y$ axis label.
-                                            
+
+\item
+Free (or Gibbs) energy as a function of volume at several temperatures,
+pressure as a function of volume at several temperatures, Gibbs
+energy as a function of pressure at several temperatures,
+vibrational free energy as a function of volume at several temperatures,
+for metals also electronic free energy as a function of volume at several
+temperatures (if requested in input). In all these plots the first
+temperature is red, the others follow in the order green, blue, yellow, 
+pink, cyan, orange, black. If there are more temperatures the sequence is 
+repeated.
+
+\item Crystal parameters as a function of pressure at several temperatures.
+Volume as a function of pressure at several temperatures.
+The number of plots depends on the crystal system.
+In these plots the first temperature is red, the others follow in the 
+order green, blue, yellow, pink, cyan, orange, black.
+If there are more temperatures the sequence is 
+repeated.
+
 \item
 Equilibrium volume, Helmholtz (or Gibbs at finite pressure) free energy, 
 bulk modulus, pressure derivative of the bulk
