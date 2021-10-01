@@ -566,6 +566,10 @@ SUBROUTINE thermo_readin()
             CALL errore('thermo_readin','poly_degree_elc must be between &
                                                                &1 and 4',1)
 
+  IF (elastic_algorithm/='standard'.AND.elastic_algorithm/='advanced'.AND. &
+      elastic_algorithm/='energy'.AND.elastic_algorithm/='energy_std') &
+      CALL errore('thermo_readin','Unrecognized elastic algorithm',1)
+
   IF (what=='elastic_constants_t'.AND.elastic_algorithm/='energy_std' &
       .AND.elastic_algorithm/='energy'.AND.use_free_energy) &
      CALL errore('thermo_readin','Only the energy algorithms are available &
