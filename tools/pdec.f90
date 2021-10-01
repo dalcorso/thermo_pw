@@ -44,6 +44,7 @@ INTEGER(DP), ALLOCATABLE :: ind(:)
 REAL(DP) :: tmin, tmax, deltat
 REAL(DP) :: a(2)
 INTEGER  :: system, ierr, stdin
+INTEGER :: find_free_unit
 CHARACTER (LEN=256) :: input_filename, filename_path, partial_filename, str_tmp, rdum_str
 CHARACTER (LEN=256) :: file_press, filepressure, filelastic, filefirstpressure
 CHARACTER(LEN=8) :: real_to_char
@@ -89,6 +90,7 @@ ALLOCATE(ind(npress))
 p=0.0_DP
 ind=0
 
+iupress=find_free_unit()
 OPEN (UNIT=iupress, FILE=TRIM(file_press), ERR=50, IOSTAT=ios)
 
 50 CALL errore('pdec','opening file', ABS(ios))
@@ -104,7 +106,7 @@ DO ipress=1,npress
    READ(str_tmp,*) p(ipress) 
 END DO
 
-CLOSE(UNIT=iupress)
+CLOSE(UNIT=iupress, STATUS='KEEP')
 
 !Sort the array of pressures (required in the case negative pressures
 !are present)
@@ -130,7 +132,7 @@ READ(iupress,*)
 READ(iupress, '(e16.8, A)', IOSTAT=ios) tmin, rdum_str
 READ(iupress, '(e16.8, A)', IOSTAT=ios) deltat, rdum_str 
 
-CLOSE(UNIT=iupress)
+CLOSE(UNIT=iupress, STATUS='KEEP')
 
 deltat=deltat-tmin
 tmin=tmin-deltat
