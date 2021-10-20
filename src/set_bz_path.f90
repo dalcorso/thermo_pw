@@ -294,7 +294,7 @@ CASE (6)
       label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
    ELSE
       letter(1:npk_label)= (/ 'gG ', 'X  ', 'P  ', 'N  ', 'gG ', 'M  ', 'S  ', &
-                              'S0 ', 'gG ', 'X  ', 'R  ', 'gG ', 'M  ' /)  
+                              'S0 ', 'gG ', 'X  ', 'R  ', 'G  ', 'M  ' /)
       wqaux(1:npk_label) =  (/   30,    30,    30,    30,    30,    30,    0, &
                                  30,     0,    30,     0,    30,      1  /)
       label_list(1:npk_label) =(/ (i, i=1, npk_label) /)
