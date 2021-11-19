@@ -371,7 +371,7 @@ SUBROUTINE setup_tpw()
      !
      ! ... do not allow convergence threshold of scf and nscf to become too small 
      ! 
-     IF ( ethr == 0.D0 ) ethr = MAX(1.D-13, 0.1D0 * MIN( 1.D-2, tr2 / nelec ))
+     IF ( ethr == 0.D0 ) ethr = MAX(5.D-13, 0.1D0 * MIN( 1.D-2, tr2 / nelec ))
      !
   ELSE
      !
