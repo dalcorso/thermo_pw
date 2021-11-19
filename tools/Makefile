@@ -35,8 +35,8 @@ all : space_groups.x crystal_point_group.x mag_point_group.x units.x \
       hex_trig.x bravais_lattices.x kovalev.x supercell.x translate.x \
       elastic.x plot_sur_states.x gener_2d_slab.x gener_3d_slab.x \
       gener_nanowire.x debye.x rotate_tensors.x test_colors.x epsilon_tpw.x \
-      pdec.x optical.x change_e_name.x change_dynmat_name.x merge_interp.x \
-      template.x
+      pdec.x optical.x change_e_name.x change_tel_name.x change_dynmat_name.x \
+      merge_interp.x template.x
       
 
 space_groups.x : space_groups.o $(MODULES)
@@ -128,6 +128,10 @@ change_e_name.x : change_e_name.o $(MODULES)
 	$(LD) $(LDFLAGS) -o $@ change_e_name.o $(MODULES) $(QELIBS)
 	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/change_e_name.x . )
 
+change_tel_name.x : change_tel_name.o $(MODULES)
+	$(LD) $(LDFLAGS) -o $@ change_tel_name.o $(MODULES) $(QELIBS)
+	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/change_tel_name.x . )
+
 merge_interp.x : merge_interp.o $(MODULES)
 	$(LD) $(LDFLAGS) -o $@ merge_interp.o $(MODULES) $(QELIBS)
 	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/merge_interp.x . )
@@ -160,6 +164,7 @@ clean :
 	- /bin/rm -rf ../../bin/optical.x 
 	- /bin/rm -rf ../../bin/change_dynmat_name.x 
 	- /bin/rm -rf ../../bin/change_e_name.x 
+	- /bin/rm -rf ../../bin/change_tel_name.x 
 	- /bin/rm -rf ../../bin/merge_interp.x 
 	- /bin/rm -rf ../../bin/template.x 
 
