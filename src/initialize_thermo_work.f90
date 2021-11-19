@@ -486,7 +486,9 @@ SUBROUTINE initialize_thermo_work(nwork, part)
 !  do a el_dos calculation
 !
         CASE( 'mur_lc' )
-           lpwband(1:nwork)=.TRUE.
+           DO iwork=start_geometry, last_geometry
+              lpwband(iwork)=.TRUE.
+           ENDDO
 !
 !  Here the case of elastic_constants_t. In this case we must
 !  do a el_dos calculation if use_free_energy is .FALSE. and

@@ -5,9 +5,11 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!---------------------------------------------------------------------
 SUBROUTINE manage_el_free_energy
-
-USE thermo_mod,           ONLY : tot_ngeo
+!---------------------------------------------------------------------
+!
+USE thermo_mod,           ONLY : tot_ngeo, start_geometry, last_geometry
 USE control_thermo,       ONLY : outdir_thermo, lectqha
 USE input_parameters,     ONLY : outdir
 
@@ -16,7 +18,7 @@ IMPLICIT NONE
 INTEGER :: igeom
 CHARACTER(LEN=6) :: int_to_char
 
-DO igeom=1, tot_ngeo
+DO igeom=start_geometry, last_geometry
    outdir=TRIM(outdir_thermo)//'/g'//TRIM(int_to_char(igeom))//'/'
    CALL set_tmp_dir(outdir)
    CALL set_el_files_names(igeom)
