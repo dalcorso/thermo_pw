@@ -5,38 +5,48 @@
 %! in the root directory of the present distribution,
 %! or http://www.gnu.org/copyleft/gpl.txt .
 %!
-\documentclass[12pt,a4paper]{article}
+\documentclass[12pt,a4paper,twoside]{report}
 \def\version{1.6.0}
-\def\qe{{\sc Quantum ESPRESSO}}
 
 \usepackage[T1]{fontenc}
+\usepackage{tcolorbox}
 \usepackage{bookman}
 \usepackage{html}
-
-% BEWARE: don't revert from graphicx for epsfig, because latex2html
-% doesn't handle epsfig commands !!!
 \usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage[Lenny]{fncychap}
 \usepackage{color}
+\usepackage{geometry}
 \usepackage{amsmath}
 \usepackage{mathtools}
 
+\tcbuselibrary{breakable}
+\pagestyle{fancy}
+\lhead{Units guide}
+\rhead{}
+\cfoot{\thepage}
 
-\textwidth = 16cm
-\textheight = 24cm
-\topmargin =0 cm
-\oddsidemargin = 0. cm
-
+\newgeometry{
+      top=3cm,
+      bottom=3cm,
+      outer=2.25cm,
+      inner=2.75cm,
+}
 
 \definecolor{web-blue}{rgb}{0,0.5,1.0}
 \definecolor{steelblue}{rgb}{0.27,0.5,0.7}
 \definecolor{coral}{rgb}{1.0,0.5,0.3}
 \definecolor{red}{rgb}{1.0,0,0.0}
 \definecolor{green}{rgb}{0.,0.5,0.0}
+\definecolor{dark-blue}{rgb}{0.,0.0,0.6}
 \definecolor{limegreen}{rgb}{0.19,0.8,0.19}
 \definecolor{orange}{rgb}{1.0,0.44,0.0}
-\definecolor{violet}{rgb}{0.75,0.35,0.75}
+\definecolor{violet}{rgb}{0.50,0.33,0.9}
+\definecolor{light-yellow}{rgb}{0.94,0.85,0.62}
 
+\tcbset{colback=light-yellow,colframe=dark-blue,breakable}
 
+\def\qe{{\sc Quantum ESPRESSO}}
 \def\pwx{\texttt{pw.x}}
 \def\phx{\texttt{ph.x}}
 \def\configure{\texttt{configure}}
@@ -205,25 +215,29 @@
 \def\alphaptoalphap{4.19169004390\times 10^{-8}}
 \begin{document} 
 
-\author{Andrea Dal Corso (SISSA - Trieste)}
+\author{Andrea Dal Corso \\ (SISSA - Trieste)}
 \date{}
 
 \title{
   \includegraphics[width=5cm]{thermo_pw.jpg} \\
   \vspace{3truecm}
   % title
-  \Huge \color{blue} Units \\ (v.\version)
+  \Huge \color{dark-blue} Units guide (v.\version)
 }
 
 \maketitle
 
 \newpage
 
+\color{dark-blue}
 \tableofcontents
+\color{black}
 
 \newpage
 
-\section{\color{coral}Introduction}
+{\color{dark-blue}\chapter{Introduction}}
+\color{black}
+
 These notes discuss the atomic units (a.u.) used in 
 electronic structure codes. They are updated with the recent 
 (year 2019) changes to the international system (SI).  
@@ -233,7 +247,8 @@ These notes are part of the \tpw\ package. The complete package is
 available at \texttt{https://github.com/dalcorso/thermo\_pw}.
 
 \newpage
-\section{\color{coral}People}
+{\color{coral}\section{People}}
+\color{black}
 These notes have been written by Andrea Dal Corso (SISSA - Trieste). \\
 Disclaimer: I am not an expert of units. 
 These notes reflect what I think about units.
@@ -243,7 +258,8 @@ like to learn more.
 You can contact me by e-mail: \texttt{dalcorso@sissa.it}. 
 
 \newpage
-\section{\color{coral}Overview}
+{\color{coral}\section{Overview}}
+\color{black}
 Electronic structure codes use atomic units (a.u.). 
 In these notes we explain how to obtain the conversion factors 
 from a.u. to the international system (SI) units and viceversa. 
@@ -277,7 +293,7 @@ ${\rm cgs}$. When the c.g.s.-Gaussian unit has an accepted name we use it
 interchangeably with the generic name. Only Hartree a.u. are described 
 in the main text since these are the most common microscopic units. 
 \qe\ uses Rydberg a.u. that can be easily derived from the Hartree
-a.u.. We describe Rydberg a.u. in Appendix A (in violet). In the $ab-initio$
+a.u.. We describe Rydberg a.u. in Appendix A (in purple). In the $ab-initio$
 literature modified a.u. have been introduced in which the 
 electromagnetic equations look like those of the c.g.s-Gaussian system. 
 This requires some modifications to the definitions given in the main 
@@ -373,7 +389,11 @@ and the Bohr magneton:
 \end{equation}
 
 \newpage
-\section{\color{coral}Time}
+
+{\color{dark-blue}\chapter{Mechanical quantities}}
+
+{\color{coral}\section{Time}}
+\color{black}
 In the SI, the unit of time is the second 
 (symbol ${\rm s}$), defined requiring that the frequency of a particular 
 line of the $^{133}$Cs atom is exactly $9192631770\ {\rm s}^{-1}$.
@@ -411,7 +431,8 @@ ${\rm \bar t}=\bart\ {\rm s}$.
 
 \newpage
 
-\section{\color{coral}Length}
+{\color{coral}\section{Length}}
+\color{black}
 In the SI, the unit of length is the metre (symbol ${\rm m}$) defined
 as the length of the path traveled by light during the time interval
 of $1/299792458\ {\rm s}$.
@@ -438,7 +459,8 @@ We have \AA$=10^{-10}\ {\rm m}$.
 
 \newpage
 
-\section{\color{coral}Mass}
+{\color{coral}\section{Mass}}
+\color{black}
 In the SI the unit of mass is the kilogram (symbol ${\rm kg}$) defined
 requiring that the Planck constant $h$ has the value
 $\hplanck$ ${\rm kg} \cdot {\rm m}^2 / {\rm s}$. 
@@ -468,11 +490,16 @@ ${\rm \bar m}=\barmcgs\ {\rm g}$.
 }
 
 \newpage
-\section{\color{coral}Mass density}
+{\color{coral}\section{Mass density}}
+\color{black}
 In the SI the unit of mass density is derived from its definition:
+
+\begin{tcolorbox}
 \begin{equation}
 \rho_m= {d m \over d V},
 \end{equation}
+\end{tcolorbox}
+
 and it is ${\rm kg}/{\rm m}^3$.
 \\
 
@@ -498,7 +525,8 @@ ${\rm \bar \rho_m}=\barrhomcgs\ {\rm g}/{\rm cm}^3$.
 }
 
 \newpage
-\section{\color{coral}Frequency}
+{\color{coral}\section{Frequency}}
+\color{black}
 
 In the SI the unit of frequency (symbol ${\rm Hz}$) is the inverse
 of the unit of time: ${\rm Hz}=1/{\rm s}$. This unit is called hertz.
@@ -541,13 +569,18 @@ while the conversion factor from ${\rm cm}^{-1}$ to ${\rm Hz}$ is:
 }
 
 \newpage
-\section{\color{coral}Speed}
+{\color{coral}\section{Speed}}
+\color{black}
 In the SI the unit of speed is derived from its definition.
 For instance, the speed (${\bf v}$) of a particle 
 whose position as a function of time is ${\bf r}(t)$, is:
+
+\begin{tcolorbox}
 \begin{equation}
 {\bf v}={d{\bf r} \over dt},
 \end{equation} 
+\end{tcolorbox}
+
 so the unit of speed is ${\rm m}/{\rm s}$.
 \\
 
@@ -581,13 +614,18 @@ ${\rm \bar v}=\barvcgs\ {\rm cm}/{\rm s}$.
 }
 
 \newpage
-\section{\color{coral}Acceleration}
+{\color{coral}\section{Acceleration}}
+\color{black}
 In the SI the unit of acceleration is derived from its  
 definition. For instance, the acceleration (${\bf a}$) of a particle whose
 position as a function of time is ${\bf r}(t)$, is: 
+
+\begin{tcolorbox}
 \begin{equation}
 {\bf a}={d^2{\bf r} \over dt^2},
 \end{equation} 
+\end{tcolorbox}
+
 so the unit of acceleration is ${\rm m}/{\rm s}^2$.
 \\
 
@@ -612,13 +650,18 @@ ${\rm \bar a}=\baracgs\ {\rm cm}/{\rm s}^2$.
 }
 
 \newpage
-\section{\color{coral}Momentum}
+{\color{coral}\section{Momentum}}
+\color{black}
 In the SI the unit of momentum is derived from its definition.
 For instance, the momentum (${\bf p}$) of a particle of mass ${\rm m}$ whose
 position as a function of time is ${\bf r}(t)$, is:
+
+\begin{tcolorbox}
 \begin{equation}
 {\bf p}=m {d{\bf r} \over dt},
 \end{equation} 
+\end{tcolorbox}
+
 so the unit of momentum is ${\rm kg}\cdot {\rm m}/{\rm s}$.
 \\
 
@@ -643,13 +686,18 @@ ${\rm \bar p}=\barpcgs\ {\rm g}\cdot {\rm cm}/{\rm s}$.
 }
 
 \newpage
-\section{\color{coral}Angular momentum}
+{\color{coral}\section{Angular momentum}}
+\color{black}
 In the SI the unit of angular momentum is derived from its
 definition. For instance, the angular momentum (${\bf L}$) 
 of a particle at position ${\bf r}$ and with momentum ${\bf p}$ is:
+
+\begin{tcolorbox}
 \begin{equation}
 {\bf L}= {{\bf r} \times {\bf p}},
 \end{equation} 
+\end{tcolorbox}
+
 so the unit of angular momentum is ${\rm kg}\cdot {\rm m}^2/{\rm s}$.
 \\
 
@@ -676,12 +724,17 @@ ${\rm \bar L}=\baramcgs\ {\rm g}\cdot {\rm cm}^2/{\rm s}$.
 }
 
 \newpage
-\section{\color{coral}Force}
+{\color{coral}\section{Force}}
+\color{black}
 In the SI the unit of force (symbol ${\rm N}$) is derived from  
 the Newton equation:
+
+\begin{tcolorbox}
 \begin{equation}
 {\bf F}= m {\bf a},
 \end{equation} 
+\end{tcolorbox}
+
 so the unit of force is ${\rm N}={\rm kg}\cdot {\rm m}/{\rm s}^2$. 
 This unit is called newton.
 \\
@@ -710,12 +763,17 @@ ${\rm \bar f}=\barfcgs\ {\rm dyne}$.
 }
 \newpage
 
-\section{\color{coral}Energy}
+{\color{coral}\section{Energy}}
+\color{black}
 In the SI the unit of energy (symbol ${\rm J}$) is derived from the 
 definition of work: 
+
+\begin{tcolorbox}
 \begin{equation}
 U= \int {\bf F} \cdot d{\bf r}
 \end{equation} 
+\end{tcolorbox}
+
 so the unit of energy is ${\rm J}={\rm kg}\cdot {\rm m}^2/{\rm s}^2={\rm N}\cdot {\rm m}$. This unit is 
 called joule.
 \\
@@ -742,12 +800,17 @@ ${\rm \bar U}=\barucgs\ {\rm erg}$.
 }
 
 \newpage
-\section{\color{coral}Power}
+{\color{coral}\section{Power}}
+\color{black}
 In the SI the unit of power (symbol ${\rm W}$) is derived from its
 definition as the work per unit time: 
+
+\begin{tcolorbox}
 \begin{equation}
 P= {d U \over d t},
 \end{equation} 
+\end{tcolorbox}
+
 so the unit of power is ${\rm W}={\rm J}/{\rm s}$. This unit is called watt.
 \\
 
@@ -774,7 +837,8 @@ ${\rm \bar W}=\barwcgs\ {\rm erg}/{\rm s}$.
 }
 
 \newpage
-\section{\color{coral}Pressure}
+{\color{coral}\section{Pressure}}
+\color{black}
 In the SI the unit of pressure (or stress) (symbol ${\rm Pa}$) is derived 
 from its definition as a force per unit area, so 
 the unit of pressure is ${\rm N}/{\rm m}^2={\rm Pa}$. This unit is called 
@@ -808,7 +872,8 @@ millimeters of mercury (${\rm mmHg}=1\ {\rm torr}$).
 }
 
 \newpage
-\section{\color{coral}Temperature}
+{\color{coral}\section{Temperature}}
+\color{black}
 In the SI the unit of temperature is the kelvin (symbol ${\rm K}$) defined
 so that the Boltzmann constant is $\kb {\rm J} / {\rm K}$.
 \\
@@ -843,7 +908,11 @@ equal to $4.1868\ {\rm J}$, but we do not use it.
 }
 
 \newpage
-\section{\color{coral}Current}
+
+{\color{dark-blue}\chapter{Electromagnetic quantities}
+
+{\color{coral}\section{Current}}
+\color{black}
 In the SI the unit of current is the ampere (symbol ${\rm A}$) defined
 requiring that the charge of the electron is $e=\e$ ${\rm A}\cdot {\rm s}$.
 The quantity ${\rm A}\cdot {\rm s}$ is called coulomb (symbol ${\rm C}$).
@@ -950,22 +1019,31 @@ unit is: ${\rm \bar I}=\bari\ \mathcal{K}\ {\rm statA}=\baricgs\ {\rm statA}$. \
 \\
 
 \newpage
-\section{\color{coral}Charge}
+{\color{coral}\section{Charge}}
+\color{black}
 In the SI the unit of the charge (symbol ${\rm C}$), derived from the 
 definition of the current:
+
+\begin{tcolorbox}
 \begin{equation}
 I={dq \over dt},
 \label{current}
 \end{equation}
+\end{tcolorbox}
+
 is the charge that passes in one second through the section of a conductor
 in which the current is $1 {\rm A}$. This unit is called coulomb.
 
 In the SI the Coulomb force between two charges $q$ and $q'$ at
 distance ${\bf r}$ is:
+
+\begin{tcolorbox}
 \begin{equation}
 {\bf F} = {1\over 4 \pi \epsilon_0} {q\ q' \over r^3}\ {\bf r},
 \label{coulomb}
 \end{equation}
+\end{tcolorbox}
+
 where $r=|{\bf r}|$.
 \\
 
@@ -1055,12 +1133,17 @@ c.g.s.-Gaussian unit is: ${\rm \bar C}=\barc\ \mathcal{K}\ {\rm statC}=
 }
 
 \newpage
-\section{\color{coral}Charge density}
+{\color{coral}\section{Charge density}}
+\color{black}
 In the SI the unit of the charge density is derived from its
 definition:
+
+\begin{tcolorbox}
 \begin{equation}
 \rho={dq \over dV},
 \end{equation}
+\end{tcolorbox}
+
 so the unit of the charge density is ${\rm C}/{\rm m}^3$.
 \\
 
@@ -1086,20 +1169,28 @@ c.g.s.-Gaussian unit is: ${\rm \bar \rho} = \barrhocgs\ {\rm statC}/{\rm cm}^3$.
 }
 
 \newpage
-\section{\color{coral}Current density}
+{\color{coral}\section{Current density}}
+\color{black}
+
 In the SI the unit of the current density is derived from 
 its definition:
+
+\begin{tcolorbox}
 \begin{equation}
 I=\int {\bf J}\cdot \hat {\bf n}\ dS,
 \end{equation}
+\end{tcolorbox}
+
 so the unit of the current density is ${\rm A}/{\rm m}^2$.
 \\
 In SI units the continuity equation is:
+
+\begin{tcolorbox}
 \begin{equation}
 {\partial \rho \over \partial t}=-\nabla \cdot {\bf J}.
 \label{continuitysi}
 \end{equation}
-\\
+\end{tcolorbox}
 
 {\color{web-blue} In a.u. the unit of the current density (symbol ${\rm \bar J}$) 
 is derived 
@@ -1166,12 +1257,17 @@ is: ${\rm \bar J} = \barcurcgs\ {\rm statA}/{\rm cm}^2 $
 }
 
 \newpage
-\section{\color{coral}Electric field}
+{\color{coral}\section{Electric field}}
+\color{black}
 In the SI the unit of the electric field is derived from 
 its definition:
+
+\begin{tcolorbox}
 \begin{equation}
 {\bf E}={{\bf F} \over q},
 \end{equation}
+\end{tcolorbox}
+
 so the unit of the electric field is ${\rm N}/{\rm C}= {{\rm kg}\cdot {\rm m} \over {\rm s}^2 \cdot {\rm C}}
 ={\rm V}/{\rm m}$.
 \\
@@ -1197,13 +1293,18 @@ is: ${\rm \bar E} = \barecgs \ {\rm statV}/{\rm cm}$.
 }
 
 \newpage
-\section{\color{coral}Electric potential}
+{\color{coral}\section{Electric potential}}
+\color{black}
 In the SI the unit of the electric potential (symbol ${\rm V}$)
 is derived from its definition. The electric 
 potential is a function $\phi({\bf r})$ such that:
+
+\begin{tcolorbox}
 \begin{equation}
 {\bf E}=- \nabla \phi({\bf r}),
 \end{equation}
+\end{tcolorbox}
+
 so the unit of the electric potential is ${\rm V}={{\rm N} \cdot {\rm m} \over {\rm C}}={{\rm J}\over {\rm C}}$. 
 This unit is called volt.
 \\
@@ -1250,13 +1351,18 @@ of a photon of frequency $\nu$, that is $h \nu$ instead of $\nu$.
 }
 
 \newpage
-\section{\color{coral}Capacitance}
+{\color{coral}\section{Capacitance}}
+\color{black}
 In the SI the unit of the capacitance (symbol ${\rm F}$) is derived from its 
 definition. The capacitance of a capacitor is the ratio between the charge
 on its surfaces and the voltage applied between them:
+
+\begin{tcolorbox}
 \begin{equation}
 C=q/V,
 \end{equation}
+\end{tcolorbox}
+
 so the unit of the capacitance is ${\rm F}={{\rm C} \over {\rm V}}={{\rm A} \cdot {\rm s} \over {\rm V}}=
 {{\rm C}^2 \over {\rm N} \cdot {\rm m}}
 ={{\rm C}^2 \over {\rm J}}$. This unit is called farad.
@@ -1286,12 +1392,17 @@ ${\rm \bar F} = \barcapcgs \ {\rm cm}$.
 
 
 \newpage
-\section{\color{coral}Vacuum electric permittivity}
+{\color{coral}\section{Vacuum electric permittivity}}
+\color{black}
 In the SI the unit of the vacuum electric permittivity $\epsilon_0$
 can be derived from the Coulomb law:
+
+\begin{tcolorbox}
 \begin{equation}
 {\bf F} = {1\over 4 \pi \epsilon_0} {qq'\over r^3} {\bf r},
 \end{equation}
+\end{tcolorbox}
+
 so the unit of $\epsilon_0$ is ${{\rm C}^2 \over {\rm N}\cdot {\rm m}^2}={{\rm F}\over {\rm m}}$. 
 Its numerical
 value in these units is given in Eq.~\ref{epsilon0}.
@@ -1309,12 +1420,17 @@ value in these units is given in Eq.~\ref{epsilon0}.
 }
 
 \newpage
-\section{\color{coral}Electric dipole moment}
+{\color{coral}\section{Electric dipole moment}}
+\color{black}
 In the SI the unit of the electric dipole moment of a localized
 charge density is derived from its definition:
+
+\begin{tcolorbox}
 \begin{equation}
 {\bf \wp}=\int_V {\bf r} \rho({\bf r}) d^3r,
 \end{equation}
+\end{tcolorbox}
+
 so the units of the electric dipole moment are ${\rm C}\cdot {\rm m}$.
 \\
 
@@ -1341,10 +1457,16 @@ ${\rm \bar \wp} = \bardipcgs \ {\rm statC}\cdot {\rm cm}$.
 }
 
 \newpage
-\section{\color{coral}Polarization}
+{\color{coral}\section{Polarization}}
+\color{black}
 In the SI the unit of the polarization is derived from its definition as
-the electric dipole per unit volume ${{\rm C} \over {\rm m}^2}$. 
-\\
+the electric dipole per unit volume ${{\rm C} \over {\rm m}^2}$: 
+
+\begin{tcolorbox}
+\begin{equation}
+{\bf P}= {\bf \wp} / V.
+\end{equation}
+\end{tcolorbox}
 
 {\color{web-blue} In a.u. the unit of the polarization (symbol ${\rm \bar P}$) 
 is derived from its definition ${\rm \bar P}={{\rm \bar C} \over {\rm \bar l}^2}$. The 
@@ -1368,31 +1490,46 @@ ${\rm \bar P} = \barpolarcgs \ {\rm statC}/{\rm cm}^2$.
 }
 
 \newpage
-\section{\color{coral}Electric displacement}
+{\color{coral}\section{Electric displacement}}
+\color{black}
 In the SI the electric displacement is given in term of the
 electric field and of the polarization by:
+
+\begin{tcolorbox}
 \begin{equation}
 {\bf D}=\epsilon_0 {\bf E} + {\bf P},
 \label{eldisp}
 \end{equation}
+\end{tcolorbox}
+
 so the polarization and the electric displacement have the same
 unit ${{\rm C} \over {\rm m}^2}$. \\
 This equation is usually justified starting from
 the Maxwell's equation:
+
+\begin{tcolorbox}
 \begin{equation}
 \nabla \cdot {\bf E} = {\rho \over \epsilon_0},
 \end{equation}
+\end{tcolorbox}
+
 and separating $\rho$ into $\rho=\rho_f + \rho_b$ where
 $\rho_f$ are the free charges and $\rho_b$ are the 
 bound charges such that:
+
+\begin{tcolorbox}
 \begin{equation}
 \rho_b=-\nabla \cdot {\bf P}.
 \end{equation}
+\end{tcolorbox}
+
 Therefore one obtains:
+
+\begin{tcolorbox}
 \begin{equation}
 \nabla \cdot (\epsilon_0 {\bf E}+ {\bf P})=\rho_f. 
 \end{equation}
-\\
+\end{tcolorbox}
 
 {\color{web-blue} In a.u. the unit of the electric displacement 
 (symbol ${\rm \bar D}$) is derived from the 
@@ -1484,13 +1621,18 @@ ${\rm \bar D} = \bardcgs \ {\rm statC}/({\rm cm}^2 \cdot 4 \pi)$.
 }
 
 \newpage
-\section{\color{coral}Resistance}
+{\color{coral}\section{Resistance}}
+\color{black}
 In the SI the unit of the resistance (symbol $\Omega$)
 is derived from its definition. The resistance is the ratio between 
 the applied voltage and the current that passes through a system:
+
+\begin{tcolorbox}
 \begin{equation}
 R=V/I,
 \end{equation}
+\end{tcolorbox}
+
 so the unit of the resistance is $\Omega={{\rm V} \over {\rm A}}=
 {{\rm N}\cdot {\rm m} \cdot {\rm s} \over {\rm C}^2}=
 {{\rm J}\cdot {\rm s} \over {\rm C}^2}$. This
@@ -1523,21 +1665,28 @@ is: $\bar \Omega = \barohmcgs \ {\rm s}/{\rm cm}$.
 
 
 \newpage
-\section{\color{coral}Magnetic flux density}
+{\color{coral}\section{Magnetic flux density}}
+\color{black}
 In the SI the unit of the magnetic flux density 
 (symbol ${\rm T}$) can be derived from the Lorentz force equation:
+
+\begin{tcolorbox}
 \begin{equation}
 {\bf F}=q ({\bf v} \times {\bf B}),
 \label{lforce}
 \end{equation}
+\end{tcolorbox}
+
 so the unit of the magnetic flux density is ${\rm T}={{\rm N}\cdot {\rm s}\over {\rm C}\cdot {\rm m}} = 
 {{\rm V} \cdot {\rm s} \over {\rm m}^2}={{\rm N} \over {\rm A}\cdot {\rm m}}={{\rm kg} \over {\rm s} \cdot {\rm C}}$. 
 This unit is called tesla. \\
 In the SI the second Maxwell's equation reads:
+
+\begin{tcolorbox}
 \begin{equation}
 \nabla \times {\bf E}=-{\partial {\bf B} \over \partial t}.
-\end{equation}
-\\
+\end{equation} 
+\end{tcolorbox}
 
 {\color{web-blue} In a.u. the unit of the magnetic flux density 
 (symbol ${\rm \bar B}$) is derived from the Lorentz force: 
@@ -1652,23 +1801,30 @@ ${\rm \bar B} = \barbcgs\ {\rm G}$.
 }
 
 \newpage
-\section{\color{coral}Vector potential}
+{\color{coral}\section{Vector potential}}
+\color{black}
 
 In the SI the unit of the vector potential (symbol ${\rm T} \cdot {\rm m}$)
 is derived from its definition. The vector potential (${\bf A}$)
 is a vector field such that:
+
+\begin{tcolorbox}
 \begin{equation}
 {\bf B}=\nabla \times {\bf A},
 \label{defav}
 \end{equation}
+\end{tcolorbox}
+
 so the unit of the vector potential is ${\rm T}\cdot {\rm m}={{\rm N} \over {\rm A}}=
 {{\rm V}\cdot {\rm s} \over {\rm m}}={{\rm N}\cdot {\rm s} \over {\rm C}}$. \\
 When the vector potential depends on time the electric field is:
+
+\begin{tcolorbox}
 \begin{equation}
 {\bf E}=-\nabla \phi -{\partial {\bf A} \over \partial t}.
 \label{ephia}
 \end{equation}
-\\
+\end{tcolorbox}
 
 {\color{web-blue} In a.u. the unit of the vector potential
 (symbol ${\rm \bar A}$) is derived from its definition ${\rm \bar A} = {\rm \bar B}\cdot {\rm \bar l}$.
@@ -1715,14 +1871,20 @@ ${\rm \bar A} = \baravcgs\ {\rm G}\cdot {\rm cm}$.
 }
 
 \newpage
-\section{\color{coral}Magnetic field flux}
+{\color{coral}\section{Magnetic field flux}}
+\color{black}
+
 In the SI the unit of the magnetic field flux (symbol ${\rm Wb}$)
 is derived from its definition. The  
 magnetic field flux through a surface perpendicular to 
 $\hat {\bf n}$ is:
+
+\begin{tcolorbox}
 \begin{equation}
 \Phi=\int {\bf B}\cdot \hat {\bf n}\ dS,
 \end{equation}
+\end{tcolorbox}
+
 so the unit of the magnetic field flux is ${\rm Wb}= {\rm T} \cdot {\rm m}^2={{\rm N} \cdot {\rm s}\cdot {\rm m}
 \over {\rm C}}={\rm V}\cdot {\rm s}={{\rm N}\cdot {\rm m}\over {\rm A}}={{\rm kg}\cdot {\rm m}^2 \over {\rm s} {\rm C}}=
 {{\rm J}\cdot {\rm s}\over {\rm C}}={{\rm J}\over {\rm A}}$. This
@@ -1757,13 +1919,19 @@ $\bar Wb = \barwbcgs\ {\rm Mx}$.
 }
 
 \newpage
-\section{\color{coral}Inductance}
+{\color{coral}\section{Inductance}}
+\color{black}
+
 In the SI the unit of the inductance (symbol ${\rm H}$)
 is derived from its definition as the ratio of the magnetic
 field flux and the current in a circuit:
+
+\begin{tcolorbox}
 \begin{equation}
 L={\Phi \over I},
 \end{equation}
+\end{tcolorbox}
+
 so the unit of inductance is ${\rm H}={{\rm Wb} \over {\rm A}}={{\rm T} \cdot {\rm m}^2 \over {\rm A}}=
 {{\rm V}\cdot {\rm s} \over {\rm A}} = \Omega \cdot {\rm s}= {{\rm N} \cdot {\rm m} \over {\rm A}^2}={{\rm J}\over {\rm A}^2}=
 {{\rm kg}\cdot {\rm m}^2 \over {\rm C}^2}$. This unit is called henry. 
@@ -1812,14 +1980,20 @@ ${\rm \bar H} = \barycgs\ {\rm statH}$.
 }
 
 \newpage
-\section{\color{coral}Magnetic dipole moment}
+{\color{coral}\section{Magnetic dipole moment}}
+\color{black}
+
 In the SI the unit of the magnetic dipole moment
 can be derived from its definition. For instance the magnetic dipole 
 moment ${\boldsymbol \mu}$ of a coil traversed by a current $I$ is:
+
+\begin{tcolorbox}
 \begin{equation}
 {\boldsymbol \mu}=IA \hat {\bf n},
 \label{magdip}
 \end{equation}
+\end{tcolorbox}
+
 where $A$ is the area of the coil and $\hat {\bf n}$ is a versor 
 normal to the area. Therefore the unit of the magnetic dipole moment is 
 ${\rm A}\cdot {\rm m}^2={{\rm N} \cdot {\rm m} \cdot  {\rm A} \cdot {\rm m} \over {\rm N}}={\rm J}/{\rm T}$.  
@@ -1887,12 +2061,18 @@ $\bar \mu = \barmucgs\ {\rm statC}\cdot {\rm cm}$.
 }
 
 \newpage
-\section{\color{coral}Magnetization}
+{\color{coral}\section{Magnetization}}
+\color{black}
+
 In the SI the unit of the magnetization can be derived from its definition
 as the magnetic dipole moment per unit volume:
+
+\begin{tcolorbox}
 \begin{equation}
 {\bf M} = {{\boldsymbol \mu}\over V},
 \end{equation}
+\end{tcolorbox}
+
 where $V$ is the volume of the sample.
 Therefore the unit of the magnetization is ${\rm A}\over {\rm m}$.  
 
@@ -1928,12 +2108,18 @@ ${\rm \bar M} = \barmagcgs\ {\rm statC}/{\rm cm}^2$.
 
 
 \newpage
-\section{\color{coral}Vacuum magnetic permeability}
+{\color{coral}\section{Vacuum magnetic permeability}}
+\color{black}
+
 In the SI the unit of the vacuum magnetic permeability $\mu_0$
 be derived from the equation: 
+
+\begin{tcolorbox}
 \begin{equation}
 \mu_0={1\over c^2 \epsilon_0},
 \end{equation}
+\end{tcolorbox}
+
 where $c$ is the speed of light. Therefore the unit of $\mu_0$ is 
 ${{\rm N}\cdot {\rm s}^2 \over {\rm C}^2}={{\rm N} \over {\rm A}^2}={{\rm V}\cdot {\rm s} \over {\rm A} \cdot {\rm m}}=
 {{\rm H}\over {\rm m}}={{\rm m}\cdot {\rm T} \over {\rm A}}$. Its numerical
@@ -1953,45 +2139,69 @@ used.}
 %\\
 
 \newpage
-\section{\color{coral}Magnetic field strength}
+{\color{coral}\section{Magnetic field strength}}
+\color{black}
+
 In the SI the magnetic field strength is given in term of the
 magnetic flux density and of the magnetization by:
+
+\begin{tcolorbox}
 \begin{equation}
 {\bf H}={{\bf B} \over \mu_0} - {\bf M},
 \label{magintensity}
 \end{equation}
+\end{tcolorbox}
+
 so the magnetic field and the magnetization have the same
 unit ${{\rm A} \over {\rm m}}$.\\
 Eq.~\ref{magintensity} can be derived from the fourth Maxwell's equation:
+
+\begin{tcolorbox}
 \begin{equation}
 \nabla \times {\bf B}= \mu_0 {\bf J} + {1\over c^2} {\partial {\bf E} \over
 \partial t}.
 \label{maxwell4}
 \end{equation}
+\end{tcolorbox}
+
 Separating ${\bf J}={\bf J}_f + {\bf J}_m + {\bf J}_d$ where
 ${\bf J}_f$ is the current of the free charges, 
+
+\begin{tcolorbox}
 \begin{equation}
 {\bf J}_m=\nabla \times {\bf M}
 \end{equation}
+\end{tcolorbox}
+
 is the magnetization current, and
+
+\begin{tcolorbox}
 \begin{equation}
 {\bf J}_d={\partial {\bf P} \over \partial t}
 \end{equation}
+\end{tcolorbox}
+
 is the displacement current and inserting these expressions in 
 Eq.~\ref{maxwell4} one obtains, after dividing by $\mu_0$:
+
+\begin{tcolorbox}
 \begin{equation}
 \nabla \times ({{\bf B}\over \mu_0}-{\bf M})= {\bf J}_f + 
 {\partial ({\bf P} + \epsilon_0 {\bf E} )\over
 \partial t}.
 \end{equation}
+\end{tcolorbox}
+
 Using Eq.~\ref{magintensity} and the definition of ${\bf D}$ the
 fourth macroscopic Maxwell's equation becomes:
+
+\begin{tcolorbox}
 \begin{equation}
 \nabla \times {\bf H}= {\bf J}_f + 
 {\partial {\bf D}\over
 \partial t}.
 \end{equation}
-\\
+\end{tcolorbox}
 
 {\color{web-blue} In a.u. the unit of magnetic field strength (${\rm \bar H}$) 
 can be derived from the relationship between magnetic field strength,
@@ -2148,8 +2358,12 @@ ${\rm \bar H} = \barhcgs\ {\rm statC}/{\rm cm}^2$.
 }
 
 \newpage
-\section{\color{coral}Microscopic Maxwell's equations}
+{\color{coral}\section{Microscopic Maxwell's equations}}
+\color{black}
+
 In the SI the microscopic Maxwell's equations are:
+
+\begin{tcolorbox}
 \begin{align}
 \nabla \cdot {\bf E} &= {\rho\over {\epsilon_0}}, \\
 \nabla \times {\bf E} &= -{\partial {\bf B} \over \partial t}, \\
@@ -2157,6 +2371,7 @@ In the SI the microscopic Maxwell's equations are:
 \nabla \times {\bf B} &= \mu_0{\bf J}+ {1\over c^2}
 {\partial {\bf E} \over \partial t}. 
 \end{align}
+\end{tcolorbox}
 
 {\color{web-blue} The form of the microscopic Maxwell's equations
 in a.u. has been obtained in the previous text:
@@ -2186,7 +2401,9 @@ other quantities are measured in c.g.s.-Gaussian units.
 }
 
 \newpage
-\section{\color{coral}Macroscopic Maxwell's equations}
+{\color{coral}\section{Macroscopic Maxwell's equations}}
+\color{black}
+
 In the SI the macroscopic Maxwell's equations can be formally obtained 
 first by averaging the microscopic equations and then dividing the 
 macroscopic charge density into a free part and a
@@ -2198,12 +2415,16 @@ and a displacement part with ${\bf J}={\bf J}_f + {\bf J}_m + {\bf J}_d$ where
 ${\bf J}_m=\nabla \times {\bf M}$ and ${\bf J}_d={\partial {\bf P}\over 
 \partial t}$.
 Inserting these expressions we have:
+
+\begin{tcolorbox}
 \begin{align}
 \nabla \cdot {\bf D} &= \rho_f, \\
 \nabla \times {\bf E} &= -{\partial {\bf B} \over \partial t}, \\
 \nabla \cdot {\bf B} &= 0, \\
 \nabla \times {\bf H} &= {\bf J}_f+ {\partial {\bf D} \over \partial t}. 
 \end{align}
+\end{tcolorbox}
+
 where ${\bf D}=\epsilon_0 {\bf E}+{\bf P}$ and ${\bf H}={{\bf B}\over \mu_0}-
 {\bf M}$.
 \\
@@ -2254,16 +2475,25 @@ other quantities are measured in c.g.s.-Gaussian units.
 }
 
 \newpage
-\section{\color{coral}The Schr\"odinger equation}
+
+{\color{dark-blue}\chapter{Quantum Mechanics}}
+
+{\color{coral}\section{The Schr\"odinger equation}}
+\color{black}
+
 In the SI the time independent Schr\"odinger equation for a particle 
 with charge $q$, mass $m$ and spin $1/2$ in an electromagnetic field 
 described by the scalar potential $\phi({\bf r})$ and the vector
 potential ${\bf A}({\bf r})$ is:
+
+\begin{tcolorbox}
 \begin{equation}
 \left[{1\over 2m} ({\bf p}-q {\bf A})^2 + q \phi - 
 {q \hbar \over 2 m} {\boldsymbol \sigma} \cdot {\bf B} \right]
 \Psi({\bf r})=E \Psi({\bf r})
 \end{equation}
+\end{tcolorbox}
+
 where ${\bf B}=\nabla\times {\bf A}$, ${\boldsymbol \sigma}$ are the Pauli
 matrices and $\Psi({\bf r})$ is a two component spinor.
 \\
@@ -2341,8 +2571,9 @@ where all quantities are expressed in c.g.s.-Gaussian units.
 }
 
 \newpage
+\appendix
 
-\section{\color{coral} Appendix A: Rydberg atomic units}
+{\color{dark-blue}\chapter{Rydberg atomic units}}
 {\color{violet}
 In this Appendix we discuss the Rydberg a.u. using the same 
 symbols used for Hartree a.u. with the subscript $R$.
@@ -2618,7 +2849,7 @@ the Schr\"odinger equation becomes:
 }
 \newpage
 
-\section{\color{coral} Appendix B: Gaussian atomic units}
+{\color{dark-blue}\chapter{Gaussian atomic units}}
 
 {\color{steelblue}
 It is possible to make the electromagnetic equations in a.u. look like 
@@ -2742,7 +2973,7 @@ gives
 }
 \newpage
 
-\section{\color{coral} Appendix C: Magnetization Intensity}
+{\color{dark-blue}\chapter{Magnetization Intensity}}
 
 Several authors use the magnetization intensity instead of the
 magnetization. This quantity is defined as:
@@ -2756,7 +2987,7 @@ density, and magnetization intensity is written as:
 {\bf B}= \mu_0 {\bf H} + {\bf I}.
 \end{equation} 
 
-\section{\color{coral} Appendix D: Conversion factors tables}
+{\color{dark-blue}\chapter{Conversion factors tables}}
 
 This Appendix collects the conversion factors discussed in the text
 and gives their absolute and relative errors. 
@@ -2768,364 +2999,354 @@ Errors are calculated from the errors of the Rydberg constant and of
 the fine structure constant available in the same site. \\
 These values are updated to October 2019.
 
+\begin{tcolorbox}
 \begin{verbatim}
-     Experimental quantities exact in the SI:
-     Planck constant:           6.62607015E-34      J.s
-     Planck constant / 2 pi:    1.0545718176462E-34 J.s
-     Speed of light:            2.99792458E+08      m/s
-     Electron charge:           1.602176634E-19     C
-     Avogadro number:           6.02214076E+23
-     Boltzmann constant:        1.380649E-23        J/K
+Experimental quantities exact in the SI:
+Planck constant:           6.62607015E-34      J.s
+Planck constant / 2 pi:    1.0545718176462E-34 J.s
+Speed of light:            2.99792458E+08      m/s
+Electron charge:           1.602176634E-19     C
+Avogadro number:           6.02214076E+23
+Boltzmann constant:        1.380649E-23        J/K
 
-     Approximate quantities determined by experiment:
-     Rydberg constant:          1.0973731568160E+07 1/m
-     Fine structure constant:   7.2973525693E-03
-     Atomic mass unit:          1.66053906660E-27   kg
+Approximate quantities determined by experiment:
+Rydberg constant:          1.0973731568160E+07 1/m
+Fine structure constant:   7.2973525693E-03
+Atomic mass unit:          1.66053906660E-27   kg
 
-     Derived Physical quantities:
-     Electron mass:             9.1093837015E-31    kg
-     mu0:                       1.25663706212E-06   N/A^2
-     epsilon0:                  8.8541878128E-12    C^2/N m^2
-     E_hatree:                  4.3597447222072E-18 J
-     Bohr radius:               5.29177210903E-11   m
-     Bohr magneton:             9.2740100783E-24    J/T
+Derived Physical quantities:
+Electron mass:             9.1093837015E-31    kg
+mu0:                       1.25663706212E-06   N/A^2
+epsilon0:                  8.8541878128E-12    C^2/N m^2
+E_hatree:                  4.3597447222072E-18 J
+Bohr radius:               5.29177210903E-11   m
+Bohr magneton:             9.2740100783E-24    J/T
 
-     Conversion factors (Atomic units - SI):
-     Length: \l=                5.29177210903E-11   m
-     Mass: \m=                  9.1093837015E-31    kg
-     Mass density: \rhom=       6.1473168257E+00    kg/m^3
-     Time: \t=                  2.4188843265857E-17 s
-     Frequency: \nu=            4.1341373335182E+16 Hz
-     Speed: \v=                 2.18769126364E+06   m/s
-     Acceleration: \a=          9.0442161272E+22    m/s^2
-     Momentum: \p=              1.99285191410E-24   kg m/s
-     Angular momentum: \L=      1.0545718176462E-34 kg m^2/s
-     Force: \f=                 8.2387234982E-08    N
-     Energy: \U=                4.3597447222072E-18 J
-     Power: \W=                 1.8023783420686E-01 W
-     Pressure: \pr=             2.9421015696E+13    Pa
-     Current: \I=               6.623618237510E-03  A
-     Charge: \C=                1.602176634E-19     C
-     Charge density: \rho=      1.08120238456E+12   C/m^3
-     Current density: \J=       2.36533701094E+18   A/m^2
-     Electric field: \E=        5.14220674763E+11   N/C
-     Electric potential: \V=    2.7211386245988E+01 V
-     Capacitance: \F=           5.887890530517E-21  F
-     Dipole moment: \dip=       8.4783536255E-30    C m
-     Polarization: \P=          5.7214766229E+01    C/m^2
-     Electric displacement: \D= 4.5530064316E+00    C/m^2
-     Resistance: \R=            4.1082359022277E+03 Ohm
-     Magnetic induction: \B=    2.35051756758E+05   T
-     Vector potential: \A=      1.24384033059E-05   T m
-     Magnetic field flux: \Phi= 6.5821195695091E-16 Wb
-     Inductance: \Y=            9.937347433815E-14  H
-     Magnetic dipole: \mu=      1.85480201567E-23   A m^2 (J/T)
-     Magnetization: \M=         1.25168244230E+08   A/m
-     Magnetic strength: \H=     9.9605723936E+06    A/m
+Conversion factors (Atomic units - SI):
+Length: \l=                5.29177210903E-11   m
+Mass: \m=                  9.1093837015E-31    kg
+Mass density: \rhom=       6.1473168257E+00    kg/m^3
+Time: \t=                  2.4188843265857E-17 s
+Frequency: \nu=            4.1341373335182E+16 Hz
+Speed: \v=                 2.18769126364E+06   m/s
+Acceleration: \a=          9.0442161272E+22    m/s^2
+Momentum: \p=              1.99285191410E-24   kg m/s
+Angular momentum: \L=      1.0545718176462E-34 kg m^2/s
+Force: \f=                 8.2387234982E-08    N
+Energy: \U=                4.3597447222072E-18 J
+Power: \W=                 1.8023783420686E-01 W
+Pressure: \pr=             2.9421015696E+13    Pa
+Current: \I=               6.623618237510E-03  A
+Charge: \C=                1.602176634E-19     C
+Charge density: \rho=      1.08120238456E+12   C/m^3
+Current density: \J=       2.36533701094E+18   A/m^2
+Electric field: \E=        5.14220674763E+11   N/C
+Electric potential: \V=    2.7211386245988E+01 V
+Capacitance: \F=           5.887890530517E-21  F
+Dipole moment: \dip=       8.4783536255E-30    C m
+Polarization: \P=          5.7214766229E+01    C/m^2
+Electric displacement: \D= 4.5530064316E+00    C/m^2
+Resistance: \R=            4.1082359022277E+03 Ohm
+Magnetic induction: \B=    2.35051756758E+05   T
+Vector potential: \A=      1.24384033059E-05   T m
+Magnetic field flux: \Phi= 6.5821195695091E-16 Wb
+Inductance: \Y=            9.937347433815E-14  H
+Magnetic dipole: \mu=      1.85480201567E-23   A m^2 (J/T)
+Magnetization: \M=         1.25168244230E+08   A/m
+Magnetic strength: \H=     9.9605723936E+06    A/m
 
-     Conversion factors (c.g.s.-Gaussian - SI):
-     Length: cm=                1.0E-02             m
-     Mass: g=                   1.0E-03             kg
-     Mass density: g/cm^3=      1.0E+03             kg/m^3
-     Time: s=                   1.0E+00             s
-     Frequency: Hz=             1.0E+00             Hz
-     Speed: cm/s=               1.0E-02             m/s
-     Acceleration: cm/s^2=      1.0E-02             m/s^2
-     Momentum: g cm/s=          1.0E-05             kg m/s
-     Angular momentum: g cm^2/s=1.0E-07             kg m^2/s
-     Force: dyne=               1.0E-05             N
-     Energy: erg=               1.0E-07             J
-     Power: erg/s=              1.0E-07             W
-     Pressure: Ba=              1.0E-01             Pa
-     Current: statA=            3.33564095107E-10   A
-     Charge: statC=             3.33564095107E-10   C
-     Charge density: statC/cm^3=3.33564095107E-04   C/m^3
-     Current density: statA/cm^2=3.33564095107E-06  A/m^2
-     Electric field: dyne/statC=2.99792458082E+04   N/C
-     Electric potential: statV= 2.99792458082E+02   V
-     Capacitance: cm=           1.11265005544E-12   F
-     Dipole moment: statC cm=   3.33564095107E-12   C m
-     Electric polarization: statC/cm^2= 3.33564095107E-06 C/m^2
-     Electric displacement: statC/cm^2 4 pi= 2.65441872871E-07 C/m^2
-     Resistance: s/cm=          8.987551792288E+11  Ohm
-     Magnetic induction: G=     1.000000000274E-04  T
-     Vector potential: G cm=    1.000000000274E-06  T m
-     Magnetic field flux: Mx=   1.000000000274E-08  Wb
-     Inductance: statH=         8.98755179229E+11   H
-     Magnetic dipole: statC cm= 9.99999999726E-04   A m^2
-     Magnetization: statC/cm^2= 9.99999999726E+02   A/m
-     Magnetic strength: statC/cm^2 4 pi= 7.95774715242E+01 A/m
+Conversion factors (c.g.s.-Gaussian - SI):
+Length: cm=                1.0E-02             m
+Mass: g=                   1.0E-03             kg
+Mass density: g/cm^3=      1.0E+03             kg/m^3
+Time: s=                   1.0E+00             s
+Frequency: Hz=             1.0E+00             Hz
+Speed: cm/s=               1.0E-02             m/s
+Acceleration: cm/s^2=      1.0E-02             m/s^2
+Momentum: g cm/s=          1.0E-05             kg m/s
+Angular momentum: g cm^2/s=1.0E-07             kg m^2/s
+Force: dyne=               1.0E-05             N
+Energy: erg=               1.0E-07             J
+Power: erg/s=              1.0E-07             W
+Pressure: Ba=              1.0E-01             Pa
+Current: statA=            3.33564095107E-10   A
+Charge: statC=             3.33564095107E-10   C
+Charge density: statC/cm^3=3.33564095107E-04   C/m^3
+Current density: statA/cm^2=3.33564095107E-06  A/m^2
+Electric field: dyne/statC=2.99792458082E+04   N/C
+Electric potential: statV= 2.99792458082E+02   V
+Capacitance: cm=           1.11265005544E-12   F
+Dipole moment: statC cm=   3.33564095107E-12   C m
+Electric polarization: statC/cm^2= 3.33564095107E-06 C/m^2
+Electric displ: statC/cm^2 4 pi = 2.65441872871E-07 C/m^2
+Resistance: s/cm=          8.987551792288E+11  Ohm
+Magnetic induction: G=     1.000000000274E-04  T
+Vector potential: G cm=    1.000000000274E-06  T m
+Magnetic field flux: Mx=   1.000000000274E-08  Wb
+Inductance: statH=         8.98755179229E+11   H
+Magnetic dipole: statC cm= 9.99999999726E-04   A m^2
+Magnetization: statC/cm^2= 9.99999999726E+02   A/m
+Magnetic strength: statC/cm^2 4 pi= 7.95774715242E+01 A/m
 
-     C/statC= 2.99792458082E+09 (C/statC)/10c= 1.00000000027E+00
+C/statC= 2.99792458082E+09 (C/statC)/10c= 1.00000000027E+00
 
-     mu_0/4 pi 10^-7=      1.00000000055E+00
+mu_0/4 pi 10^-7=      1.00000000055E+00
 
-     Conversion factors (SI - c.g.s.-Gaussian):
-     Length: m=                 1.0E+02             cm
-     Mass: kg=                  1.0E+03             g
-     Time: s=                   1.0E+00             s
-     Frequency: Hz=             1.0E+00             Hz
-     Speed: m/s=                1.0E+02             cm/s
-     Acceleration: m/s^2=       1.0E+02             cm/s^2
-     Momentum: kg m/s=          1.0E+05             g cm/s
-     Angular momentum: kg m^2/s=1.0E+07             g cm^2/s
-     Force: N=                  1.0E+05             dyne
-     Energy: J=                 1.0E+07             erg
-     Power: W=                  1.0E+07             erg/s
-     Pressure: Pa=              1.0E+01             Ba
-     Current: A=                2.99792458082E+09   statA
-     Charge: C=                 2.99792458082E+09   statC
-     Charge density: C/m^3=     2.99792458082E+03   statC/cm^3
-     Current density: A/m^2=    2.99792458082E+05   statA/cm^2
-     Electric field: N/C=       3.33564095107E-05   dyne/statC
-     Electric potential: V=     3.33564095107E-03   statV
-     Capacitance: F=            8.98755179229E+11   cm
-     Dipole moment: C m=        2.99792458082E+11   statC cm
-     Electric polarization: C/m^2= 2.99792458082E+05 statC/cm^2
-     Electric displacement: C/m^2= 3.76730313565E+06 statC/cm^2 4pi
-     Resistance: Ohm=           1.112650055445E-12  s/cm
-     Magnetic induction: T=     9.999999997263E+03  G
-     Vector potential: T m=     9.999999997263E+05  G cm
-     Magnetic field flux: Wb=   9.999999997263E+07  Mx
-     Inductance: H=             1.11265005544E-12   statH
-     Magnetic dipole: A m^2=    1.00000000027E+03   statC cm
-     Magnetization: A/m=        1.00000000027E-03   statC/cm^2
-     Magnetic strength: A/m=    1.25663706178E-02   statC/cm^2 4pi
+Conversion factors (SI - c.g.s.-Gaussian):
+Length: m=                 1.0E+02             cm
+Mass: kg=                  1.0E+03             g
+Time: s=                   1.0E+00             s
+Frequency: Hz=             1.0E+00             Hz
+Speed: m/s=                1.0E+02             cm/s
+Acceleration: m/s^2=       1.0E+02             cm/s^2
+Momentum: kg m/s=          1.0E+05             g cm/s
+Angular momentum: kg m^2/s=1.0E+07             g cm^2/s
+Force: N=                  1.0E+05             dyne
+Energy: J=                 1.0E+07             erg
+Power: W=                  1.0E+07             erg/s
+Pressure: Pa=              1.0E+01             Ba
+Current: A=                2.99792458082E+09   statA
+Charge: C=                 2.99792458082E+09   statC
+Charge density: C/m^3=     2.99792458082E+03   statC/cm^3
+Current density: A/m^2=    2.99792458082E+05   statA/cm^2
+Electric field: N/C=       3.33564095107E-05   dyne/statC
+Electric potential: V=     3.33564095107E-03   statV
+Capacitance: F=            8.98755179229E+11   cm
+Dipole moment: C m=        2.99792458082E+11   statC cm
+Electric polarization: C/m^2= 2.99792458082E+05 statC/cm^2
+Electric displ.: C/m^2= 3.76730313565E+06 statC/cm^2 4pi
+Resistance: Ohm=           1.112650055445E-12  s/cm
+Magnetic induction: T=     9.999999997263E+03  G
+Vector potential: T m=     9.999999997263E+05  G cm
+Magnetic field flux: Wb=   9.999999997263E+07  Mx
+Inductance: H=             1.11265005544E-12   statH
+Magnetic dipole: A m^2=    1.00000000027E+03   statC cm
+Magnetization: A/m=        1.00000000027E-03   statC/cm^2
+Magnetic strength: A/m=    1.25663706178E-02   statC/cm^2 4pi
 
-     Conversion factors (Atomic units - c.g.s.-Gaussian):
-     Length:                    5.29177210903E-09   cm
-     Mass:                      9.1093837015E-28    g
-     Mass density:              6.1473168257E-03    g/cm^3
-     Time:                      2.4188843265857E-17 s
-     Frequency:                 4.1341373335182E+16 Hz
-     Speed:                     2.18769126364E+08   cm/s
-     Acceleration:              9.0442161272E+24    cm/s^2
-     Momentum:                  1.99285191410E-19   g cm/s
-     Angular momentum:          1.0545718176462E-27 g cm^2/s
-     Force:                     8.2387234982E-03    dyne
-     Energy:                    4.3597447222072E-11 erg
-     Power:                     1.8023783420686E+06 erg/s
-     Pressure:                  2.9421015696E+14    Ba
-     Current:                   1.98571079282E+07   statA
-     Charge:                    4.80320471388E-10   statC
-     Charge density:            3.2413632055E+15    statC/cm^3
-     Current density:           7.0911019670E+23    statA/cm^2
-     Electric field:            1.71525554062E+07   dyne/statC
-     Electric potential:        9.07674142975E-02   statV
-     Capacitance:               5.29177210903E-09   cm
-     Dipole moment:             2.54174647389E-18   statC cm
-     Polarization:              1.71525554062E+07   statC/cm^2
-     Electric displacement:     1.71525554062E+07   statC/cm^2 4pi
-     Resistance:                4.57102890439E-09   s/cm
-     Magnetic induction:        2.35051756693E+09   G
-     Vector potential:          1.24384033025E+01   G cm
-     Magnetic field flux:       6.58211956771E-08   Mx
-     Inductance:                1.10567901732E-25   statH
-     Magnetic dipole:           1.85480201618E-20   statC cm
-     Magnetization:             1.25168244264E+05   statC/cm^2
-     Magnetic strength:         1.25168244264E+05   statC/cm^2 4pi 
+Conversion factors (Atomic units - c.g.s.-Gaussian):
+Length:                    5.29177210903E-09   cm
+Mass:                      9.1093837015E-28    g
+Mass density:              6.1473168257E-03    g/cm^3
+Time:                      2.4188843265857E-17 s
+Frequency:                 4.1341373335182E+16 Hz
+Speed:                     2.18769126364E+08   cm/s
+Acceleration:              9.0442161272E+24    cm/s^2
+Momentum:                  1.99285191410E-19   g cm/s
+Angular momentum:          1.0545718176462E-27 g cm^2/s
+Force:                     8.2387234982E-03    dyne
+Energy:                    4.3597447222072E-11 erg
+Power:                     1.8023783420686E+06 erg/s
+Pressure:                  2.9421015696E+14    Ba
+Current:                   1.98571079282E+07   statA
+Charge:                    4.80320471388E-10   statC
+Charge density:            3.2413632055E+15    statC/cm^3
+Current density:           7.0911019670E+23    statA/cm^2
+Electric field:            1.71525554062E+07   dyne/statC
+Electric potential:        9.07674142975E-02   statV
+Capacitance:               5.29177210903E-09   cm
+Dipole moment:             2.54174647389E-18   statC cm
+Polarization:              1.71525554062E+07   statC/cm^2
+Electric displacement:     1.71525554062E+07   statC/cm^2 4pi
+Resistance:                4.57102890439E-09   s/cm
+Magnetic induction:        2.35051756693E+09   G
+Vector potential:          1.24384033025E+01   G cm
+Magnetic field flux:       6.58211956771E-08   Mx
+Inductance:                1.10567901732E-25   statH
+Magnetic dipole:           1.85480201618E-20   statC cm
+Magnetization:             1.25168244264E+05   statC/cm^2
+Magnetic strength:         1.25168244264E+05   statC/cm^2 4pi 
 
-     Conversion factors (Rydberg atomic units - SI):
-     Length: \l_R=              5.29177210903E-11   m
-     Mass: \m_R=                1.82187674030E-30   kg
-     Time: \t_R=                4.8377686531714E-17 s
-     Frequency: \nu_R=          2.0670686667591E+16 Hz
-     Speed: \v_R=               1.09384563182E+06   m/s
-     Acceleration: \a_R=        4.52210806362E+22   m/s^2
-     Momentum: \p_R=            1.99285191410E-24   kg m/s
-     Angular momentum: \L_R=    1.0545718176462E-34 kg m^2/s
-     Force: \f_R=               4.11936174912E-08   N
-     Energy: \U_R=              2.1798723611036E-18 J
-     Power: \W_R=               4.505945855171E-02  W
-     Pressure: \pr_R=           1.47105078482E+13   Pa
-     Current: \I_R=             2.3418026858671E-03 A
-     Charge: \C_R=              1.1329099625600E-19 C
-     Charge density: \rho_R=    7.6452553796E+11    C/m^3
-     Current density: \J_R=     8.36272920114E+17   A/m^2
-     Electric field: \E_R=      3.63608926151E+11   N/C
-     Electric potential: \V_R=  1.9241355740025E+01 V
-     Capacitance: \F_R=         5.887890530517E-21  F
-     Dipole moment: \dip_R=     5.99510134192E-30   C m
-     Polarization: \P_R=        4.0456949184E+01    C/m^2
-     Electric displacement: \D_R=3.21946172254E+00   C/m^2
-     Resistance: \R_R=          8.2164718044553E+03 Ohm
-     Magnetic induction: \B_R=  3.3241338227E+05    T
-     Vector potential: \A_R=    1.75905586495E-05   T m
-     Magnetic field flux: \Phi_R=9.3085227643611E-16 Wb
-     Inductance: \Y_R=          3.9749389735260E-13 H
-     Magnetic dipole: \mu_R=    6.5577154152E-24    A m^2 (J/T)
-     Magnetization: \M_R=       4.42536571420E+07   A/m
-     Magnetic field: \H_R=      3.52159414202E+06   A/m
+Conversion factors (Rydberg atomic units - SI):
+Length: \l_R=              5.29177210903E-11   m
+Mass: \m_R=                1.82187674030E-30   kg
+Time: \t_R=                4.8377686531714E-17 s
+Frequency: \nu_R=          2.0670686667591E+16 Hz
+Speed: \v_R=               1.09384563182E+06   m/s
+Acceleration: \a_R=        4.52210806362E+22   m/s^2
+Momentum: \p_R=            1.99285191410E-24   kg m/s
+Angular momentum: \L_R=    1.0545718176462E-34 kg m^2/s
+Force: \f_R=               4.11936174912E-08   N
+Energy: \U_R=              2.1798723611036E-18 J
+Power: \W_R=               4.505945855171E-02  W
+Pressure: \pr_R=           1.47105078482E+13   Pa
+Current: \I_R=             2.3418026858671E-03 A
+Charge: \C_R=              1.1329099625600E-19 C
+Charge density: \rho_R=    7.6452553796E+11    C/m^3
+Current density: \J_R=     8.36272920114E+17   A/m^2
+Electric field: \E_R=      3.63608926151E+11   N/C
+Electric potential: \V_R=  1.9241355740025E+01 V
+Capacitance: \F_R=         5.887890530517E-21  F
+Dipole moment: \dip_R=     5.99510134192E-30   C m
+Polarization: \P_R=        4.0456949184E+01    C/m^2
+Electric displacement: \D_R=3.21946172254E+00   C/m^2
+Resistance: \R_R=          8.2164718044553E+03 Ohm
+Magnetic induction: \B_R=  3.3241338227E+05    T
+Vector potential: \A_R=    1.75905586495E-05   T m
+Magnetic field flux: \Phi_R=9.3085227643611E-16 Wb
+Inductance: \Y_R=          3.9749389735260E-13 H
+Magnetic dipole: \mu_R=    6.5577154152E-24    A m^2 (J/T)
+Magnetization: \M_R=       4.42536571420E+07   A/m
+Magnetic field: \H_R=      3.52159414202E+06   A/m
 
-     Conversion factors (Gaussian atomic units - SI):
-     Magnetic induction: \B_G=  1.71525554109E+03   T
-     Vector potential: \A_G=    9.0767414322E-08    T m
-     Magnetic field flux: \Phi_G=4.80320471520E-18  Wb
-     Magnetic dipole: \mu_G=    2.5417464732E-21    A m^2 (J/T)
-     Magnetization: \M_G=       1.71525554016E+10   A/m
-     Magnetic field: \H_G=      1.36495698941E+09   A/m
+Conversion factors (Gaussian atomic units - SI):
+Magnetic induction: \B_G=  1.71525554109E+03   T
+Vector potential: \A_G=    9.0767414322E-08    T m
+Magnetic field flux: \Phi_G=4.80320471520E-18  Wb
+Magnetic dipole: \mu_G=    2.5417464732E-21    A m^2 (J/T)
+Magnetization: \M_G=       1.71525554016E+10   A/m
+Magnetic field: \H_G=      1.36495698941E+09   A/m
 
-     Physical constants in Hartree atomic units:
-     Speed of light:            1.37035999084E+02
-     atomic mass unit:          1.8228884862E+03
+Physical constants in Hartree atomic units:
+Speed of light:            1.37035999084E+02
+atomic mass unit:          1.8228884862E+03
 
-     Physical constants in eV:
-     Hartree in eV:             2.7211386246E+01
-     Rydberg in eV:             1.3605693123E+01
+Physical constants in eV:
+Hartree in eV:             2.7211386246E+01
+Rydberg in eV:             1.3605693123E+01
 
-     Frequency conversion:
-     Hz in cm^-1:               3.33564095198152E-11
-     cm^-1 in Hz:               2.99792458E+10
+Frequency conversion:
+Hz in cm^-1:               3.33564095198152E-11
+cm^-1 in Hz:               2.99792458E+10
 
-     Material properties (a.u. - SI):
-     Int. force const.: \ifc=   1.55689310282E+03   J/m^2
-     Dyn. mag. charge: \dmc=    3.50506782501E-13   A m
-     ME tensor (I): \alpha=     4.57102890439E-07   s/m
-     ME tensor (II): \alpha'=   3.05882401116E-10   s/m
+------------------------------------------------------------
+Errors:                   Absolute                 Relative
 
-     Material properties (c.g.s. - SI):
-     Dyn. mag. charge: \dmc=    9.99999999726E-02   A m
-     ME tensor (I): \alpha=     3.33564095198E-09   s/m
-     ME tensor (II): \alpha'=   4.19169004390E-08   s/m
+rydberg =                  2.10E-05 1/m             1.91E-12
+alpha =                    1.10E-12                 1.51E-10
+amu =                      5.00E-37                 3.01E-10
 
-     ----------------------------------------------------------------------
-     Errors:                     Absolute                  Relative
+me =                       2.76E-40 kg              3.03E-10
+abohr =                    8.08E-21 m               1.53E-10
+mu0 =                      1.89E-16 N/A^2           1.51E-10
+epsilon0 =                 1.33E-21 C^2/Nm^2        1.51E-10
+hartree =                  8.34E-30 J               1.91E-12
+bohr mag =                 2.81E-33 J/T             3.03E-10
 
-     rydberg =                  2.10E-05 1/m              1.91E-12
-     alpha =                    1.10E-12                  1.51E-10
-     amu =                      5.00E-37                  3.01E-10
+Errors of conversion factors (atomic units - SI):
+\l =                       8.08E-21 m               1.53E-10
+\m =                       2.76E-40 kg              3.03E-10
+\rhom =                    4.68E-09 kg/m^3          7.61E-10
+\t =                       4.63E-29 s               1.91E-12
+\nu =                      7.91E+04 s               1.91E-12
+\v =                       3.30E-04 m/s             1.51E-10
+\a =                       1.38E+13 m/s^2           1.53E-10
+\p =                       3.04E-34 kg m/s          1.53E-10
+\L =                       0.00E+00 kg m^2/s        0.00E+00
+\f =                       1.27E-17 N               1.55E-10
+\U =                       8.34E-30 J               1.91E-12
+\W =                       6.90E-13 W               3.83E-12
+\pr =                      1.35E+04 Pa              4.60E-10
+\I =                       1.27E-14 A               1.91E-12
+\C =                       0.00E+00 C               0.00E+00
+\rho =                     4.95E+02 C/m^3           4.58E-10
+\J =                       7.27E+08 A/m^2           3.07E-10
+\E =                       7.95E+01 V/m             1.55E-10
+\V =                       5.21E-11 V               1.91E-12
+\F =                       1.13E-32 F               1.91E-12
+\dip =                     1.29E-39 C m             1.53E-10
+\P =                       1.75E-08 C/m^2           3.05E-10
+\D =                       1.39E-09 C/m^2           3.05E-10
+\R =                       0.00E+00 Ohm             0.00E+00
+\B =                       7.18E-05 T               3.05E-10
+\A =                       1.90E-15 T m             1.53E-10
+\phi =                     0.00E+00 Wb              0.00E+00
+\Y =                       1.90E-25 H               1.91E-12
+\mu =                      5.63E-33 J/T             3.03E-10
+\M =                       1.93E-02 A/m             1.55E-10
+\H =                       1.54E-03 A/m             1.55E-10
 
-     me =                       2.76E-40 kg               3.03E-10
-     abohr =                    8.08E-21 m                1.53E-10
-     mu0 =                      1.89E-16 N/A^2            1.51E-10
-     epsilon0 =                 1.33E-21 C^2/Nm^2         1.51E-10
-     hartree =                  8.34E-30 J                1.91E-12
-     bohr mag =                 2.81E-33 J/T              3.03E-10
-
-     Errors of conversion factors (atomic units - SI):
-     \l =                       8.08E-21 m                1.53E-10
-     \m =                       2.76E-40 kg               3.03E-10
-     \rhom =                    4.68E-09 kg/m^3           7.61E-10
-     \t =                       4.63E-29 s                1.91E-12
-     \nu =                      7.91E+04 s                1.91E-12
-     \v =                       3.30E-04 m/s              1.51E-10
-     \a =                       1.38E+13 m/s^2            1.53E-10
-     \p =                       3.04E-34 kg m/s           1.53E-10
-     \L =                       0.00E+00 kg m^2/s         0.00E+00
-     \f =                       1.27E-17 N                1.55E-10
-     \U =                       8.34E-30 J                1.91E-12
-     \W =                       6.90E-13 W                3.83E-12
-     \pr =                      1.35E+04 Pa               4.60E-10
-     \I =                       1.27E-14 A                1.91E-12
-     \C =                       0.00E+00 C                0.00E+00
-     \rho =                     4.95E+02 C/m^3            4.58E-10
-     \J =                       7.27E+08 A/m^2            3.07E-10
-     \E =                       7.95E+01 V/m              1.55E-10
-     \V =                       5.21E-11 V                1.91E-12
-     \F =                       1.13E-32 F                1.91E-12
-     \dip =                     1.29E-39 C m              1.53E-10
-     \P =                       1.75E-08 C/m^2            3.05E-10
-     \D =                       1.39E-09 C/m^2            3.05E-10
-     \R =                       0.00E+00 Ohm              0.00E+00
-     \B =                       7.18E-05 T                3.05E-10
-     \A =                       1.90E-15 T m              1.53E-10
-     \phi =                     0.00E+00 Wb               0.00E+00
-     \Y =                       1.90E-25 H                1.91E-12
-     \mu =                      5.63E-33 J/T              3.03E-10
-     \M =                       1.93E-02 A/m              1.55E-10
-     \H =                       1.54E-03 A/m              1.55E-10
-
-     cspeed =                   2.07E-08 \v               1.51E-10
-     amu =                      1.10E-06 \m               6.04E-10
+cspeed =                   2.07E-08 \v              1.51E-10
+amu =                      1.10E-06 \m              6.04E-10
 
 
-     Errors of conversion factors (c.g.s.-Gaussian - SI):
-     Current =                  2.51E-20 A                7.54E-11
-     Charge =                   2.51E-20 C                7.54E-11
-     Charge density =           2.51E-14 C/m^3            7.54E-11
-     Current density =          2.51E-16 A/m^2            7.54E-11
-     Electric field =           2.26E-06 V/m              7.54E-11
-     Electric potential =       2.26E-08 V                7.54E-11
-     Capacitance =              1.68E-22 F                1.51E-10
-     Dipole moment =            2.51E-22 C m              7.54E-11
-     Electric Polarization =    2.51E-16 C/m^2            7.54E-11
-     Electric Displacement =    2.00E-17 C/m^2            7.54E-11
-     Resistance =               1.35E+02 Ohm              1.51E-10
-     Magnetic induction =       7.54E-15 T                7.54E-11
-     Vector potential =         7.54E-17 T m              7.54E-11
-     Magnetic field flux =      7.54E-19 Wb               7.54E-11
-     Inductance =               1.35E+02 H                1.51E-10
-     Magnetic dipole =          7.54E-14 J/T              7.54E-11
-     Magnetization =            7.54E-08 A/m              7.54E-11
-     Magnetic strength =        6.00E-09 A/m              7.54E-11
+Errors of conversion factors (c.g.s.-Gaussian - SI):
+Current =                  2.51E-20 A               7.54E-11
+Charge =                   2.51E-20 C               7.54E-11
+Charge density =           2.51E-14 C/m^3           7.54E-11
+Current density =          2.51E-16 A/m^2           7.54E-11
+Electric field =           2.26E-06 V/m             7.54E-11
+Electric potential =       2.26E-08 V               7.54E-11
+Capacitance =              1.68E-22 F               1.51E-10
+Dipole moment =            2.51E-22 C m             7.54E-11
+Electric Polarization =    2.51E-16 C/m^2           7.54E-11
+Electric Displacement =    2.00E-17 C/m^2           7.54E-11
+Resistance =               1.35E+02 Ohm             1.51E-10
+Magnetic induction =       7.54E-15 T               7.54E-11
+Vector potential =         7.54E-17 T m             7.54E-11
+Magnetic field flux =      7.54E-19 Wb              7.54E-11
+Inductance =               1.35E+02 H               1.51E-10
+Magnetic dipole =          7.54E-14 J/T             7.54E-11
+Magnetization =            7.54E-08 A/m             7.54E-11
+Magnetic strength =        6.00E-09 A/m             7.54E-11
 
 
-     Errors of conversion factors (atomic units - c.g.s.-Gaussian):
-     Current =                  1.53E-03 statA            7.73E-11
-     Charge =                   3.62E-20 statC            7.54E-11
-     Charge density =           1.73E+06 statC/cm^3       5.33E-10
-     Current density =          2.71E+14 statA/cm^2       3.83E-10
-     Electric field =           3.94E-03 statV/cm         2.30E-10
-     Electric potential =       7.01E-12 statV            7.73E-11
-     Capacitance =              8.08E-19 cm               1.53E-10
-     Dipole moment =            5.80E-28 statC cm         2.28E-10
-     Electric Polarization =    6.53E-03 statC/cm^2       3.81E-10
-     Electric displacement =    6.53E-03 statC/cm^2 4pi   3.81E-10
-     Resistance =               6.89E-19 s/cm             1.51E-10
-     Magnetic induction =       8.95E-01 G                3.81E-10
-     Vector potential =         2.84E-09 G cm             2.28E-10
-     Magnetic field flux =      4.96E-18 Mx               7.54E-11
-     Inductance =               1.69E-35 statH            1.53E-10
-     Magnetic dipole =          7.03E-30 statC cm         3.79E-10
-     Magnetization =            2.88E-05 statC/cm^2       2.30E-10
-     Magnetic strength =        2.88E-05 statC/cm^2 4pi   2.30E-10
+Errors of conversion factors (atomic units-c.g.s.-Gaussian):
+Current =                  1.53E-03 statA           7.73E-11
+Charge =                   3.62E-20 statC           7.54E-11
+Charge density =           1.73E+06 statC/cm^3      5.33E-10
+Current density =          2.71E+14 statA/cm^2      3.83E-10
+Electric field =           3.94E-03 statV/cm        2.30E-10
+Electric potential =       7.01E-12 statV           7.73E-11
+Capacitance =              8.08E-19 cm              1.53E-10
+Dipole moment =            5.80E-28 statC cm        2.28E-10
+Electric Polarization =    6.53E-03 statC/cm^2      3.81E-10
+Electric displacement =    6.53E-03 statC/cm^2 4pi  3.81E-10
+Resistance =               6.89E-19 s/cm            1.51E-10
+Magnetic induction =       8.95E-01 G               3.81E-10
+Vector potential =         2.84E-09 G cm            2.28E-10
+Magnetic field flux =      4.96E-18 Mx              7.54E-11
+Inductance =               1.69E-35 statH           1.53E-10
+Magnetic dipole =          7.03E-30 statC cm        3.79E-10
+Magnetization =            2.88E-05 statC/cm^2      2.30E-10
+Magnetic strength =        2.88E-05 statC/cm^2 4pi  2.30E-10
 
-     Errors of conversion factors (Rydberg atomic units - SI):
-     \l_R =                     8.08E-21 m                1.53E-10
-     \m_R =                     5.53E-40 kg               3.03E-10
-     \t_R =                     9.26E-29 s                3.83E-12
-     \nu_R =                    3.96E+04 s                1.91E-12
-     \v_R =                     1.65E-04 m/s              1.51E-10
-     \a_R =                     6.90E+12 m/s^2            1.53E-10
-     \p_R =                     3.04E-34 kg m/s           1.53E-10
-     \L_R =                     0.00E+00 kg m^2/s         0.00E+00
-     \f_R =                     6.37E-18 N                1.55E-10
-     \U_R =                     4.17E-30 J                1.91E-12
-     \W_R =                     1.72E-13 W                3.83E-12
-     \pr_R =                    6.76E+03 Pa               4.60E-10
-     \I_R =                     4.48E-15 A                1.91E-12
-     \C_R =                     0.00E+00 C                0.00E+00
-     \rho_R =                   3.50E+02 C/m^3            4.58E-10
-     \J_R =                     2.57E+08 A/m^2            3.07E-10
-     \E_R =                     5.62E+01 V/m              1.55E-10
-     \V_R =                     5.21E-11 V                2.71E-12
-     \F_R =                     1.13E-32 F                1.91E-12
-     \dip_R =                   9.15E-40 C m              1.53E-10
-     \P_R =                     1.24E-08 C/m^2            3.05E-10
-     \D_R =                     9.83E-10 C/m^2            3.05E-10
-     \R_R =                     0.00E+00 Ohm              0.00E+00
-     \B_R =                     1.01E-04 T                3.05E-10
-     \A_R =                     2.69E-15 T m              1.53E-10
-     \phi_R =                   0.00E+00 Wb               0.00E+00
-     \Y_R =                     7.61E-25 H                1.91E-12
-     \mu_R =                    1.99E-33 J/T              3.03E-10
-     \M_R =                     6.84E-03 A/m              1.55E-10
-     \H_R =                     5.44E-04 A/m              1.55E-10
+Errors of conversion factors (Rydberg atomic units - SI):
+\l_R =                     8.08E-21 m               1.53E-10
+\m_R =                     5.53E-40 kg              3.03E-10
+\t_R =                     9.26E-29 s               3.83E-12
+\nu_R =                    3.96E+04 s               1.91E-12
+\v_R =                     1.65E-04 m/s             1.51E-10
+\a_R =                     6.90E+12 m/s^2           1.53E-10
+\p_R =                     3.04E-34 kg m/s          1.53E-10
+\L_R =                     0.00E+00 kg m^2/s        0.00E+00
+\f_R =                     6.37E-18 N               1.55E-10
+\U_R =                     4.17E-30 J               1.91E-12
+\W_R =                     1.72E-13 W               3.83E-12
+\pr_R =                    6.76E+03 Pa              4.60E-10
+\I_R =                     4.48E-15 A               1.91E-12
+\C_R =                     0.00E+00 C               0.00E+00
+\rho_R =                   3.50E+02 C/m^3           4.58E-10
+\J_R =                     2.57E+08 A/m^2           3.07E-10
+\E_R =                     5.62E+01 V/m             1.55E-10
+\V_R =                     5.21E-11 V               2.71E-12
+\F_R =                     1.13E-32 F               1.91E-12
+\dip_R =                   9.15E-40 C m             1.53E-10
+\P_R =                     1.24E-08 C/m^2           3.05E-10
+\D_R =                     9.83E-10 C/m^2           3.05E-10
+\R_R =                     0.00E+00 Ohm             0.00E+00
+\B_R =                     1.01E-04 T               3.05E-10
+\A_R =                     2.69E-15 T m             1.53E-10
+\phi_R =                   0.00E+00 Wb              0.00E+00
+\Y_R =                     7.61E-25 H               1.91E-12
+\mu_R =                    1.99E-33 J/T             3.03E-10
+\M_R =                     6.84E-03 A/m             1.55E-10
+\H_R =                     5.44E-04 A/m             1.55E-10
 
 
-     Errors of conversion factors (Gaussian atomic units - SI):
-     \B_G =                     7.82E-07 T                4.56E-10
-     \A_G =                     2.75E-17 T m              3.03E-10
-     \phi_G =                   7.24E-28 Wb               1.51E-10
-     \mu_G =                    1.15E-30 J/T              4.54E-10
-     \M_G =                     5.24E+00 A/m              3.05E-10
-     \H_G =                     4.17E-01 A/m              3.05E-10
+Errors of conversion factors (Gaussian atomic units - SI):
+\B_G =                     7.82E-07 T               4.56E-10
+\A_G =                     2.75E-17 T m             3.03E-10
+\phi_G =                   7.24E-28 Wb              1.51E-10
+\mu_G =                    1.15E-30 J/T             4.54E-10
+\M_G =                     5.24E+00 A/m             3.05E-10
+\H_G =                     4.17E-01 A/m             3.05E-10
 \end{verbatim}
-
+\end{tcolorbox}
 \newpage
 
 
-\section{\color{coral}Bibliography}
+{\color{dark-blue}\chapter{Bibliography}}
 \begin{enumerate}
 
 \item

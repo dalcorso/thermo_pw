@@ -5,30 +5,48 @@
 %! in the root directory of the present distribution,
 %! or http://www.gnu.org/copyleft/gpl.txt .
 %!
-\documentclass[12pt,a4paper]{article}
+\documentclass[12pt,a4paper,twoside]{report}
 \def\version{1.6.0}
-\def\qe{{\sc Quantum ESPRESSO}}
 
 \usepackage[T1]{fontenc}
+\usepackage{tcolorbox}
 \usepackage{bookman}
 \usepackage{html}
-
-% BEWARE: don't revert from graphicx for epsfig, because latex2html
-% doesn't handle epsfig commands !!!
 \usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage[Lenny]{fncychap}
 \usepackage{color}
+\usepackage{geometry}
+\usepackage{amsmath}
+\usepackage{mathtools}
 
-\textwidth = 16cm
-\textheight = 24cm
-\topmargin =0 cm
-\oddsidemargin = 0. cm
+\tcbuselibrary{breakable}
+\pagestyle{fancy}
+\lhead{Thermodynamics of crystals}
+\rhead{}
+\cfoot{\thepage}
 
+\newgeometry{
+      top=3cm,
+      bottom=3cm,
+      outer=2.25cm,
+      inner=2.75cm,
+}
 
 \definecolor{web-blue}{rgb}{0,0.5,1.0}
+\definecolor{steelblue}{rgb}{0.27,0.5,0.7}
 \definecolor{coral}{rgb}{1.0,0.5,0.3}
 \definecolor{red}{rgb}{1.0,0,0.0}
-\definecolor{green}{rgb}{0.,1.0,0.0}
+\definecolor{green}{rgb}{0.,0.5,0.0}
+\definecolor{dark-blue}{rgb}{0.,0.0,0.6}
+\definecolor{limegreen}{rgb}{0.19,0.8,0.19}
+\definecolor{orange}{rgb}{1.0,0.44,0.0}
+\definecolor{violet}{rgb}{0.50,0.33,0.9}
+\definecolor{light-yellow}{rgb}{0.94,0.85,0.62}
 
+\tcbset{colback=light-yellow,colframe=dark-blue,breakable}
+
+\def\qe{{\sc Quantum ESPRESSO}}
 \def\pwx{\texttt{pw.x}}
 \def\phx{\texttt{ph.x}}
 \def\configure{\texttt{configure}}
@@ -37,33 +55,39 @@
 \def\tpw{\texttt{thermo\_pw}}
 \def\make{\texttt{make}}
 
+
 \begin{document} 
 
-\author{Andrea Dal Corso (SISSA - Trieste)}
+\author{Andrea Dal Corso \\ (SISSA - Trieste)}
 \date{}
 
 \title{
-  \includegraphics[width=5cm]{thermo_pw.jpg} \\
+  \includegraphics[width=8cm]{thermo_pw.jpg} \\
   \vspace{3truecm}
   % title
-  \Huge \color{blue} Thermo\_pw: Thermodynamics of crystals \\(v.\version)
+  \Huge \color{dark-blue} {\sc Thermo\_pw}: Thermodynamics of crystals \\(v.\version)
 }
 
 \maketitle
 
 \newpage
 
-\tableofcontents
+{\color{dark-blue}\tableofcontents}
+\color{black}
 
 \newpage
 
-\section{{\color{coral}Introduction}}
+{\color{dark-blue}\chapter{Introduction}}
+\color{black}
+
 These notes describe the thermodynamics of crystals implemented in \tpw. \\
 They are part of the \tpw\ package. The complete package is
 available at \texttt{https://github.com/dalcorso/thermo\_pw}.
 
 \newpage
-\section{\color{coral}People}
+{\color{coral}\section{People}}
+\color{black}
+
 These notes have been written by Andrea Dal Corso (SISSA - Trieste). \\
 Disclaimer: I am not an expert of crystal thermodynamics. 
 These notes reflect what I have understood so far and implemented in 
@@ -74,7 +98,9 @@ You can contact me directly: \texttt{dalcorso@sissa.it} or send an
 e-mail to the \texttt{thermo\_pw-forum} mailing list.
 
 \newpage
-\section{\color{coral}Overview}
+{\color{coral}\section{Overview}}
+\color{black}
+
 The properties of a solid addressed by \tpw\ are described by the thermodynamic
 theory of the elastic solid.[1,2] In this theory a solid is characterized by an
 equilibrium configuration that depends on the temperature $T$ and on an
@@ -192,14 +218,18 @@ parameters $\zeta_k$ to the thermodynamic functions.
 
 \newpage
 
-\section{\color{coral}Crystal lattices}
+{\color{dark-blue}\chapter{Crystal lattices}}
+\color{black}
+
 We start with a short review of the fourteen Bravais lattices and 
 give their primitive lattice vectors chosen with the same definitions used
 in \qe. 
 The volume of one unit cell is indicated with $\Omega$ and the total 
 volume of the solid is $V=N\Omega$ where $N$ is the number of unit cells.
 
-\subsection{\color{web-blue}Cubic system}
+{\color{web-blue}\subsection{Cubic system}}
+\color{black}
+
 The cubic system comprises three Bravais lattices. The cubic lattice
 is:
 \begin{eqnarray}
@@ -227,7 +257,9 @@ The body-centered cubic lattice is:
 The volume of the unit cell is $\Omega = a^3/2$. \\
 All three lattices are characterized by one parameter $\zeta_1=a$.
 
-\subsection{\color{web-blue}Tetragonal system}
+{\color{web-blue}\subsection{Tetragonal system}}
+\color{black}
+
 The tetragonal system comprises two Bravais lattices: the tetragonal
 and the centered tetragonal lattices.\\
 The tetragonal lattice is:
@@ -249,7 +281,9 @@ The volume of the unit cell is $\Omega = a^2c/2$. \\
 Both lattices are characterized by two parameters $\zeta_1=a$ and 
 $\zeta_2=c/a$.
 
-\subsection{\color{web-blue}Orthorhombic system}
+{\color{web-blue}\subsection{Orthorhombic system}}
+\color{black}
+
 The orthorhombic system comprises four Bravais lattices.
 The orthorhombic lattice:
 \begin{eqnarray}
@@ -295,7 +329,9 @@ The volume of the unit cell is $\Omega = abc/2$. \\
 All four lattices are characterized by three parameters, 
 $\zeta_1=a$, $\zeta_2=b/a$ and $\zeta_3=c/a$.
 
-\subsection{\color{web-blue}Monoclinic system}
+{\color{web-blue}\subsection{Monoclinic system}}
+\color{black}
+
 The monoclinic system comprises two Bravais lattices:
 The monoclinic and the base-centered monoclinic lattices.
 Each one of these two lattices can be $c$-unique or $b$-unique depending on
@@ -334,7 +370,9 @@ All lattices are characterized by four parameters $\zeta_1=a$, $\zeta_2=b/a$,
 $\zeta_3=c/a$ and $\zeta_4=\cos\gamma$
 ($c$-unique) or $\cos\beta$ ($b$-unique).
 
-\subsection{\color{web-blue}Triclinic system}
+{\color{web-blue}\subsection{Triclinic system}}
+\color{black}
+
 The triclinic system comprises only the triclinic Bravais lattice:
 \begin{eqnarray}
 {\bf a}_1 &=& a (1, 0, 0), \nonumber \\
@@ -349,7 +387,9 @@ The lattice is characterized by six parameters $\zeta_1=a$,
 $\zeta_2=b$, $\zeta_3=c$, $\zeta_4=\cos\alpha$,
 $\zeta_5=\cos\beta$, $\zeta_6=\cos\gamma$.
 
-\subsection{\color{web-blue}Hexagonal system}
+{\color{web-blue}\subsection{Hexagonal system}}
+\color{black}
+
 The hexagonal system comprises only the hexagonal Bravais lattice:
 \begin{eqnarray}
 {\bf a}_1 &=& a (1, 0, 0), \nonumber \\
@@ -361,7 +401,9 @@ The volume of the unit cell is $\sqrt{3} a^2 c /2$. \\
 The lattice is characterized by two parameters $\zeta_1=a$ 
 and $\zeta_2=c/a$.
 
-\subsection{\color{web-blue}Trigonal system}
+{\color{web-blue}\subsection{Trigonal system}}
+\color{black}
+
 The trigonal system comprises two Bravais lattices: the hexagonal Bravais 
 lattice described above or the rhombohedral Bravais lattice:
 \begin{eqnarray}
@@ -384,7 +426,9 @@ $\zeta_2=\cos\alpha$.
 
 \newpage
 
-\section{\color{coral}The strain tensor}
+{\color{dark-blue}\chapter{The strain tensor}}
+\color{black}
+
 The strain is defined by a $3\times 3$ tensor
 $\epsilon$. Applying a strain $\epsilon$ to a solid, 
 the three primitive vectors ${\bf a}_1$, ${\bf a}_2$, and ${\bf a}_3$
@@ -664,7 +708,9 @@ For each system (with the exception of the monoclinic and triclinic)
 we discuss how the Bravais lattice changes for a given strain limiting
 to the strains of interest for the following.
 
-\subsection{\color{web-blue}Cubic system}
+{\color{web-blue}\subsection{Cubic system}}
+\color{black}
+
 The cell remains cubic only applying an isotropic strain $\epsilon_A$ that 
 changes the cubic lattice constant $a_c$ to $a=(1+\epsilon_{1,1})a_c$.
 
@@ -767,7 +813,9 @@ the reference system of the body-centered cubic cell.
 The change of coordinates can be written as above with the rotation matrix 
 $R^C$.
 
-\subsection{\color{web-blue}Tetragonal system}
+{\color{web-blue}\subsection{Tetragonal system}}
+\color{black}
+
 Applying $\epsilon_A$, or $\epsilon_B$, or $\epsilon_E$ to a 
 (centered) tetragonal cell
 does not change its shape. $\epsilon_A$ changes $a_t$ into 
@@ -853,7 +901,9 @@ $R^D$ and the angle $\phi$ equal to
 {\rm tg} \phi = -{\epsilon_{1,3} a_t - c_t \over a_t - \epsilon_{3,1} c_t}.
 \end{equation}
 
-\subsection{\color{web-blue}Orthorhombic system}
+{\color{web-blue}\subsection{Orthorhombic system}}
+\color{black}
+
 Applying $\epsilon_A$, $\epsilon_B$, $\epsilon_{B'}$, $\epsilon_{B''}$, 
 $\epsilon_C$, $\epsilon_D$, or $\epsilon_E$, to a (base-centered, 
 face-centered, or body-centered) orthorhombic cell does not change its shape. 
@@ -1060,7 +1110,9 @@ and
 {\rm tg} \phi = -{\epsilon_{2,3} b_o - c_o \over b_o - \epsilon_{3,2} c_o}.
 \end{equation}
 
-\subsection{\color{web-blue} Monoclinic system}
+{\color{web-blue}\subsection{Monoclinic system}}
+\color{black}
+
 Applying $\epsilon_A$, $\epsilon_C$, $\epsilon_D$, $\epsilon_E$, or
 $\epsilon_G$ to a $c$-unique (base-centered) monoclinic cell does 
 not change its shape.
@@ -1341,14 +1393,17 @@ monoclinic lattice.
 The change of coordinates can be written as above with the rotation matrix 
 $R^G$ and ${\rm tg}\phi=-\epsilon_{2,3}$.
 
-\subsection{\color{web-blue}Triclinic system}
+{\color{web-blue}\subsection{Triclinic system}}
+\color{black}
+
 Any strain applied to a triclinic system will keep the shape of the
 unit cell. Only the crystal parameters change, but there is no advantage
 to use a rotated triclinic cell with respect to the cell obtained
 simply applying the strain directly to the primitive vectors. Therefore
 we do not discuss this case any further.
 
-\subsection{\color{web-blue}Hexagonal system}
+{\color{web-blue}\subsection{Hexagonal system}}
+\color{black}
 
 Applying $\epsilon_A$, $\epsilon_B$, or $\epsilon_E$, to an hexagonal cell 
 does not change its shape.
@@ -1388,7 +1443,8 @@ with respect to the reference system of the hexagonal cell.
 The change of coordinates can be written as above with the rotation matrix 
 $R^D$ and ${\rm tg}\phi=-\epsilon_{1,3}$.
 
-\subsection{\color{web-blue}Trigonal system}
+{\color{web-blue}\subsection{Trigonal system}}
+\color{black}
 
 Applying $\epsilon_A$ or $\epsilon_E$ to a rhombohedral lattice does
 not change its shape. 
@@ -1466,7 +1522,8 @@ b&=& {2 \cos \theta_r - \epsilon_{2,3} \sin \theta_r \over
 \end{eqnarray}
 
 \newpage
-\section{\color{coral}The stress tensor}
+{\color{dark-blue}\chapter{The stress tensor}}
+\color{black}
 
 Consider a small volume $dV$ of the solid with the form of a prism with 
 edges parallel to $x_1$, $x_2$, and $x_3$. Let us call $S_i$ one of
@@ -1501,7 +1558,8 @@ The negative sign indicates that a positive pressure reduces the
 volume of the solid so it pushes on the surfaces.
 
 \newpage
-\section{\color{coral}Thermodynamic functions}
+{\color{dark-blue}\chapter{Thermodynamic functions}}
+\color{black}
 
 The thermodynamic functions can be introduced by using the first law
 of thermodynamics and the definition of the entropy ($S$). The heat 
@@ -1565,7 +1623,9 @@ We have:
 $G$ is called the Gibbs free energy of the solid.
 
 \newpage
-\section{\color{coral}Equilibrium geometry and thermal expansion}
+{\color{dark-blue}\chapter{Equilibrium geometry and thermal expansion}}
+\color{black}
+
 To calculate the equilibrium geometry at $T=0$ and $\sigma=0$ it
 is sufficient to minimize the internal energy with respect to strain:
 \begin{equation}
@@ -1631,7 +1691,8 @@ of the thermal expansion tensor, while for the other crystal systems
 the thermal expansion can be determined in a simpler manner.
 We discuss this point separately for each crystal system.
 
-\subsection{\color{web-blue}Cubic system}
+{\color{web-blue}\subsection{Cubic system}}
+\color{black}
 In the cubic system $k=1$ and $\zeta_1=a$. 
 The thermal expansion tensor is diagonal and the only nonzero components
 are all equal: $\alpha_1=\alpha_2=\alpha_3$. We can consider the 
@@ -1643,7 +1704,9 @@ and the body-centered cubic lattices so in all cases:
 \alpha_{i} =  {1\over a(T) } {d a(T) \over dT}.
 \end{equation}
 
-\subsection{\color{web-blue}Tetragonal and hexagonal systems}
+{\color{web-blue}\subsection{Tetragonal and hexagonal systems}}
+\color{black}
+
 In the tetragonal and hexagonal systems $k=2$, $\zeta_1=a$, $\zeta_2=c/a$.
 The only nonzero components of the thermal expansion are 
 $\alpha_{1}=\alpha_{2}$ and $\alpha_{3}$. We can consider the
@@ -1672,7 +1735,9 @@ and we have
 \alpha_3 = {1\over a(T)} {da \over d T}  + {1\over c/a(T)} {d c/a \over dT}.
 \end{equation}
 
-\subsection{\color{web-blue}Trigonal system}
+{\color{web-blue}\subsection{Trigonal system}}
+\color{black}
+
 In the trigonal system $k=2$, $\zeta_1=a$, $\zeta_2=\cos\alpha$. 
 The thermal expansion tensor has three diagonal components 
 $\alpha_1=\alpha_2$ and $\alpha_3$. We can consider the rhombohedral
@@ -1712,7 +1777,9 @@ to obtain
 {d \cos\alpha \over d T}.
 \end{eqnarray}
 
-\subsection{\color{web-blue}Orthorhombic systems}
+{\color{web-blue}\subsection{Orthorhombic systems}}
+\color{black}
+
 In the orthorhombic system $k=3$, $\zeta_1=a$, $\zeta_2=b/a$, 
 $\zeta_3=c/a$. The nonzero components of the thermal expansion are 
 $\alpha_{1}$, $\alpha_{2}$, and $\alpha_{3}$. 
@@ -1732,7 +1799,8 @@ Choosing $a$, $b/a$, and $c/a$ as parameters we find:
 \alpha_3 &=& {1\over a(T)} {da \over d T}  + {1\over c/a(T)} {d c/a \over dT}.
 \end{eqnarray}
 
-%\subsection{\color{web-blue}Monoclinic systems}
+%{\color{web-blue}\subsection{Monoclinic systems}}
+%\color{black}
 %In the monoclinic system $k=4$, $\zeta_1=a$, $\zeta_2=b$, $\zeta_3=c$, 
 %$\zeta_4=\cos\gamma$ (c-unique) of $\zeta_4=\cos\beta$ (b-unique). 
 %For the c-unique cell it is simple to define 
@@ -1741,10 +1809,13 @@ Choosing $a$, $b/a$, and $c/a$ as parameters we find:
 %\end{equation}
 %For the other two.
 
-%\subsection{\color{web-blue}Triclinic systems}
+%{\color{web-blue}\subsection{Triclinic systems}}
+%\color{black}
 
 \newpage
-\section{\color{coral}The heat capacity}
+{\color{dark-blue}\chapter{The heat capacity}}
+\color{black}
+
 The heat capacity measures the variation of the temperature of the solid
 when a certain quantity of heat is given to it at constant strain:
 \begin{equation}
@@ -1762,7 +1833,8 @@ the same density of states (DOS) of the DFT bands. It is calculated together
 with the DOS (see below).
 
 \newpage
-\section{\color{coral}The elastic constants}
+{\color{dark-blue}\chapter{The elastic constants}}
+\color{black}
 
 When a crystal is deformed with a given strain $\epsilon_i$ forces
 appear to bring it back to the equilibrium configuration. These
@@ -1796,7 +1868,8 @@ of elastic constants and fit linearly the stress as a function of strain. \\
 The procedure depends on the Laue class of the solid. We discuss separately
 the different Bravais lattices below.
 
-\subsection{\color{web-blue}Cubic system}
+{\color{web-blue}\subsection{Cubic system}}
+\color{black}
 
 The nonzero components of the elastic constants tensor for the cubic system
 are independent on the Laue class and are $C_{11}=C_{22}=C_{33}$,
@@ -1842,7 +1915,9 @@ C_{44}&=&{1 \over 3 V} {d^2 U_F \over d \epsilon_4^2}.
 but the use of the energy instead of stress requires three fits instead
 of two. 
 
-\subsection{\color{web-blue}Tetragonal system}
+{\color{web-blue}\subsection{Tetragonal system}}
+\color{black}
+
 In this case there are two possibilities depending on the Laue class.
 For the point groups $C_{4v} (4mm)$, $D_{2d} (\bar42m)$, $D_4 (422)$ and
 $D_{4h} (4/mmm)$ (Laue class $D_{4h} (4/mmm)$) the nonzero components of the 
@@ -1934,7 +2009,9 @@ from which we obtain:
 C_{16}={1 \over 2V} {d^2 U_{C+G} \over d \epsilon^2} - {(C_{11}+C_{66})\over 2}.
 \end{equation}
 
-\subsection{\color{web-blue}Orthorhombic system}
+{\color{web-blue}\subsection{Orthorhombic system}}
+\color{black}
+
 In this system all solids belong to the $D_{2h} (mmm)$ Laue class so
 the non zero elements of the elastic constant tensor are the same for all 
 point groups and are
@@ -2026,7 +2103,9 @@ C_{55}&=&{1 \over V} {d^2 U_H \over d \epsilon_5^2}, \\
 C_{66}&=&{1 \over V} {d^2 U_G \over d \epsilon_6^2}.
 \end{eqnarray}
 
-\subsection{\color{web-blue}Monoclinic system}
+{\color{web-blue}\subsection{Monoclinic system}}
+\color{black}
+
 The non zero components of the elastic constants tensor depend on the choice
 of the unit cell $b$-unique or $c$-unique. 
 $C_{11}$, $C_{12}$, $C_{13}$, $C_{22}$, $C_{23}$, $C_{33}$, $C_{44}$, 
@@ -2199,7 +2278,9 @@ C_{35}&=&{1 \over 2 V} {d^2 U_{E+H} \over d \epsilon^2} - {(C_{33} + C_{55})\ove
 C_{46}&=&{1 \over 2 V} {d^2 U_{G+I} \over d \epsilon^2} - {(C_{44} + C_{66})\over 2}. 
 \end{eqnarray}
 
-\subsection{\color{web-blue}Triclinic system}
+{\color{web-blue}\subsection{Triclinic system}}
+\color{black}
+
 In this case all the components of the elastic constant tensors are non zero.
 We can apply $\epsilon_C$ and obtain:
 \begin{eqnarray}
@@ -2378,7 +2459,9 @@ C_{46}&=&{1 \over 2 V} {d^2 U_{G+I} \over d \epsilon^2} - {(C_{44} + C_{66})\ove
 C_{56}&=&{1 \over 2 V} {d^2 U_{G+H} \over d \epsilon^2} - {(C_{55} + C_{66})\over 2}.
 \end{eqnarray}
 
-\subsection{\color{web-blue}Hexagonal system}
+{\color{web-blue}\subsection{Hexagonal system}}
+\color{black}
+
 In this case the form of the elastic constants tensor is independent of
 the Laue class. The nonzero components are $C_{11}=C_{22}$, $C_{12}$, 
 $C_{13}=C_{23}$, $C_{33}$, $C_{44}=C_{55}$, $C_{66}={1\over 2} 
@@ -2439,7 +2522,9 @@ C_{12}&=&{1 \over 2 V} {d^2 U_A \over d \epsilon_1^2} - C_{11} -
 C_{55}&=&{1 \over V} {d^2 U_I \over d \epsilon_5^2}. \\
 \end{eqnarray}
 
-\subsection{\color{web-blue}Trigonal system}
+{\color{web-blue}\subsection{Trigonal system}}
+\color{black}
+
 In this case there are two possibilities depending on the Laue class. For
 the point groups $D_3(32)$, $C_{3v}(3m)$ and $D_{3d}(\bar 3m)$ (Laue class
 $D_{3d}(\bar 3m)$) the nonzero components of the elastic constant tensor
@@ -2529,7 +2614,8 @@ C_{25} = {1 \over 2 V} {d^2 U_{C+G} \over d \epsilon_1^2} -
 \end{equation}
 
 \newpage
-\section{\color{coral}Stress or pressure dependent elastic constants}
+{\color{dark-blue}\chapter{Stress or pressure dependent elastic constants}}
+\color{black}
 
 The elastic constants of a solid on which we apply a stress 
 $\sigma^{(0)}_{ij}$ can still
@@ -2606,12 +2692,16 @@ ${1 \over V}{\partial^2 U \over \partial \epsilon_{ij}
 \partial \epsilon_{kl}}\Bigg|_{\epsilon=0}$. We consider each case
 separately and write only the components that need to be corrected.
 
-\subsection{\color{web-blue}Cubic system}
+{\color{web-blue}\subsection{Cubic system}}
+\color{black}
+
 When the unit cell remains cubic, we can change only the parameter 
 $a$ and the stress is always an isotropic pressure, so we can use the 
 relationships written above.
 
-\subsection{\color{web-blue}Tetragonal, Hexagonal, and Trigonal systems}
+{\color{web-blue}\subsection{Tetragonal, Hexagonal, and Trigonal systems}}
+\color{black}
+
 In the tetragonal, hexagonal, and trigonal systems the nonzero components 
 of the stress tensor present when $a$ and $c/a$ (or $a$ and $\alpha$ in
 the trigonal case) are not the equilibrium ones are
@@ -2636,7 +2726,9 @@ B_{13,13} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{13}^2}\Bigg|_{\e
 B_{23,23} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{23}^2 }\Bigg|_{\epsilon=0} + {1\over 4} (\sigma^{(0)}_{11}+\sigma^{(0)}_{33}).
 \end{eqnarray}
 
-\subsection{\color{web-blue}Orthorhombic system}
+{\color{web-blue}\subsection{Orthorhombic system}}
+\color{black}
+
 In the orthorhombic system the nonzero components of the stress tensor 
 present when $a$, $b/a$ and $c/a$ are not the equilibrium ones are
 $\sigma^{(0)}_{11}$, $\sigma^{(0)}_{22}$, and $\sigma^{(0)}_{33}$.
@@ -2659,7 +2751,9 @@ B_{13,13} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{13}^2}\Bigg|_{\e
 B_{23,23} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{23}^2 }\Bigg|_{\epsilon=0} + {1\over 4} (\sigma^{(0)}_{22}+\sigma^{(0)}_{33}).
 \end{eqnarray}
 
-\subsection{\color{web-blue}Monoclinic system}
+{\color{web-blue}\subsection{Monoclinic system}}
+\color{black}
+
 In this case the stress tensor differs for the $b$-unique or $c$-unique
 lattices. In both cases the non-zero components can be $\sigma^{(0)}_{11}$, 
 $\sigma^{(0)}_{22}$, and $\sigma^{(0)}_{33}$. In the $b$-unique case 
@@ -2702,7 +2796,9 @@ B_{32,31} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{32}
 \partial \epsilon_{31}}\Bigg|_{\epsilon=0} +{1\over 4}\sigma^{(0)}_{12}. 
 \end{eqnarray}
 
-\subsection{\color{web-blue}Triclinic system}
+{\color{web-blue}\subsection{Triclinic system}}
+\color{black}
+
 In this case the stress tensor can have any component. 
 Taking for $i$, $j$, and $k$ different values, the general formula can 
 be rewritten in the form:
@@ -2725,7 +2821,9 @@ B_{ij,kk} &=& {1 \over V}{\partial^2 U \over \partial \epsilon_{ij}
 \end{eqnarray}
 
 \newpage
-\section{\color{coral}Temperature dependent elastic constants}
+{\color{dark-blue}\chapter{Temperature dependent elastic constants}}
+\color{black}
+
 In principle to calculate the elastic constants at each temperature it
 is sufficient to substitute the Helmholtz free energy to the total energy
 in the equations of the previous section. 
@@ -2764,7 +2862,7 @@ each temperature at the geometry that minimizes the Helmholtz free energy.
 We call this ``quasi-harmonic'' approximation.
 
 %\newpage
-%\section{\color{coral}Pressure and temperature dependent elastic 
+%{\color{dark-blue}\chapter{Pressure and temperature dependent elastic 
 %constants}
 %
 %Under pressure instead of using the Helmholtz free energy we can minimize 
@@ -2787,7 +2885,9 @@ We call this ``quasi-harmonic'' approximation.
 %the size and thickness of the grid of equilibrium configurations.
 %
 \newpage
-\section{\color{coral}The elastic compliances}
+{\color{dark-blue}\chapter{The elastic compliances}}
+\color{black}
+
 The relationship between stress and strain can be inverted. A stress 
 applied to a solid produces a strain proportional to the stress:
 \begin{equation}
@@ -2801,7 +2901,8 @@ S_{i,l} = C_{i,l}^{-1}.
 
 
 \newpage
-\section{\color{coral}Bulk modulus and compressibility}
+{\color{dark-blue}\chapter{Bulk modulus and compressibility}}
+\color{black}
 
 The isothermal compressibility is defined as the derivative of the 
 equilibrium volume with respect to pressure divided by the volume,
@@ -2832,7 +2933,9 @@ B_T = {1 \over S_{1,1}+S_{2,2}+S_{3,3}+2 S_{1,2}+2 S_{1,3}+2 S_{2,3}}.
 %this in the following.
 
 \newpage
-\section{\color{coral}Thermal expansion from Gr\"uneisen parameters}
+{\color{dark-blue}\chapter{Thermal expansion from Gr\"uneisen parameters}}
+\color{black}
+
 Thermal expansion can be calculated from the numerical derivatives of the 
 phonon frequencies with respect to strain, doing analytically the
 derivative with respect to the temperature.
@@ -2892,7 +2995,9 @@ Eq.~\ref{strain_def}:
 \end{equation}
 We now apply this equation in some crystal systems.
 
-\subsection{\color{web-blue}Cubic system}
+{\color{web-blue}\subsection{Cubic system}}
+\color{black}
+
 By changing the cubic cell size $a$ to $a'=a+da$ and applying Eq.~\ref{strain}
 we find that
 \begin{equation}
@@ -2916,7 +3021,9 @@ are equal and we have:
  \omega_{{\bf q}\nu} \over \partial a}.
 \end{equation}
 %
-\subsection{\color{web-blue}Tetragonal and hexagonal systems}
+{\color{web-blue}\subsection{Tetragonal and hexagonal systems}}
+\color{black}
+
 In these systems we first change $a$ keeping $c/a$ constant, and then
 change $c/a$ by keeping $a$ constant. Using Eq.~\ref{strain} we find that
 the first change corresponds to
@@ -2943,7 +3050,9 @@ ${\partial \omega_{{\bf q}\nu} \over \partial \epsilon_{1,1}}=
 {c\over a} {\partial \omega_{{\bf q}\nu} \over \partial c/a}\right).
 \end{equation}
  
-\subsection{\color{web-blue}Trigonal system}
+{\color{web-blue}\subsection{Trigonal system}}
+\color{black}
+
 The rhombohedral lattice can be considered also an hexagonal lattice and 
 the relationships between the parameters of the hexagonal lattice
 $a_h$ and $x=c_h/a_h$ and the parameters $a$ and $\cos \alpha$ of the
@@ -2989,7 +3098,9 @@ and
 \epsilon_{3,3}} \right).
 \end{equation}
 
-\subsection{\color{web-blue}Orthorhombic system}
+{\color{web-blue}\subsection{Orthorhombic system}}
+\color{black}
+
 In this system we can consider the three strains. We first change $a$
 by keeping $b/a$ and $c/a$ constant, then we change $b/a$ by keeping $a$
 and $c/a$ constant and finally we change $c/a$ by keeping $a$ and $b/a$ 
@@ -3021,7 +3132,8 @@ Substituting these two equations in Eq.~\ref{cubic_strain} we obtain:
 \end{equation}
 %
 \newpage
-\section{\color{coral}Average Gr\"uneisen parameter}
+{\color{dark-blue}\chapter{Average Gr\"uneisen parameter}}
+\color{black}
 
 The product of the thermal expansion coefficient $\beta$, the bulk modulus
 $B_T$, and the volume of unit cell $V$, divided by the isochoric
@@ -3048,8 +3160,9 @@ parameters:
 \end{equation}
 
 \newpage
-\section{\color{coral}Constant stress, isobaric, and isochoric 
-heat capacities}
+{\color{dark-blue}\chapter{Constant stress, isobaric, and isochoric 
+heat capacities}}
+\color{black}
 
 The difference between the heat capacity calculated at constant stress
 and at constant strain is given by:
@@ -3076,7 +3189,8 @@ C_\epsilon - C_V =  T V \left( \sum_{ij} \alpha_{ij} b_{ij} + \beta^2 B_T
 which vanishes for cubic crystals.
 
 \newpage
-\section{\color{coral}Adiabatic quantities}
+{\color{dark-blue}\chapter{Adiabatic quantities}}
+\color{black}
 
 Similarly the difference between adiabatic and isothermal 
 elastic compliances is given by (Voigt notation):
@@ -3097,7 +3211,9 @@ K_T - K_S =  {T V \beta^2 \over C_P}.
 
 \newpage
 
-\section{\color{coral}Finite temperature electronic excitation energy}
+{\color{dark-blue}\chapter{Finite temperature electronic excitation energy}}
+\color{black}
+
 The electronic excitation energy due to the finite temperature $U_{el}$ is
 neglected in semiconductors and insulators. For metals it gives a finite
 contribution to the heat capacity that we estimate by a model of independent 
@@ -3147,7 +3263,31 @@ dependence of the chemical potential, and
 \end{equation}
 
 \newpage
-\section{\color{coral}Appendix}
+
+{\color{dark-blue}\chapter{Bibliography}}
+\color{black}
+
+\begin{enumerate}
+
+
+\item
+[1.] J.F. Nye, Physical properties of crystals, Oxford University press, 
+Oxford (1957).
+
+\item
+[2.] D.C. Wallace, Thermodynamics of crystals, J. Wiley and Sons (1972),
+Dover edition (1998).
+
+\item
+[3.] T.H.K. Barron and M.L. Klein, Proc. Phys. Soc. {\bf 85}, 523 (1965).
+\end{enumerate}
+
+\newpage
+
+\appendix
+{\color{dark-blue}\chapter{Centered lattices}}
+\color{black}
+
 It is often useful to express the primitive vectors of the centered
 lattices in term of the primitive vectors of the conventional lattices
 and viceversa. We report in this appendix the relationships that result
@@ -3262,23 +3402,5 @@ Rombohedral cell (in term of the hexagonal cell):
 {\bf a}_2&=& - {\bf a}_1' + {\bf a}_2', \\
 {\bf a}_3&=& {\bf a}_1' + {\bf a}_2' + {\bf a}_3'.
 \end{eqnarray}
-
-\newpage
-
-\section{\color{coral}Bibliography}
-\begin{enumerate}
-
-
-\item
-[1.] J.F. Nye, Physical properties of crystals, Oxford University press, 
-Oxford (1957).
-
-\item
-[2.] D.C. Wallace, Thermodynamics of crystals, J. Wiley and Sons (1972),
-Dover edition (1998).
-
-\item
-[3.] T.H.K. Barron and M.L. Klein, Proc. Phys. Soc. {\bf 85}, 523 (1965).
-\end{enumerate}
 
 \end{document}

@@ -5,30 +5,36 @@
 %! in the root directory of the present distribution,
 %! or http://www.gnu.org/copyleft/gpl.txt .
 %!
-\documentclass[12pt,a4paper]{article}
+\documentclass[12pt,a4paper,twoside]{report}
 \def\version{1.6.0}
-\def\qe{{\sc Quantum ESPRESSO}}
 
 \usepackage[T1]{fontenc}
 \usepackage{bookman}
 \usepackage{html}
-
-% BEWARE: don't revert from graphicx for epsfig, because latex2html
-% doesn't handle epsfig commands !!!
 \usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage[Lenny]{fncychap}
 \usepackage{color}
+\usepackage{geometry}
 
-\textwidth = 16cm
-\textheight = 24cm
-\topmargin =0 cm
-\oddsidemargin = 0. cm
+\pagestyle{fancy}
+\lhead{Tutorial}
+\rhead{}
+\cfoot{\thepage}
 
-
+\newgeometry{
+      top=3cm,
+      bottom=3cm,
+      outer=3cm,
+      inner=3.5cm,
+}
 \definecolor{web-blue}{rgb}{0,0.5,1.0}
 \definecolor{coral}{rgb}{1.0,0.5,0.3}
 \definecolor{red}{rgb}{1.0,0,0.0}
 \definecolor{green}{rgb}{0.,1.0,0.0}
+\definecolor{dark-blue}{rgb}{0.,0.0,0.6}
 
+\def\qe{{\sc Quantum ESPRESSO}}
 \def\pwx{\texttt{pw.x}}
 \def\phx{\texttt{ph.x}}
 \def\configure{\texttt{configure}}
@@ -46,7 +52,7 @@
   \includegraphics[width=5cm]{thermo_pw.jpg} \\
   \vspace{3truecm}
   % title
-  \Huge \color{blue} {\sc Thermo}\_{\sc pw} Tutorial \\ (v.\version)
+  \Huge \color{dark-blue} {\sc Thermo}\_{\sc pw} Tutorial \\ (v.\version)
 }
 
 \maketitle
@@ -57,7 +63,8 @@
 
 \newpage
 
-\section{\color{coral}Introduction}
+{\color{dark-blue}\chapter*{Introduction}}
+\color{black}
 
 This guide gives a brief overview of the \thermo\ package. 
 It gives you the minimum information needed to accomplish a given task.
@@ -74,12 +81,14 @@ Please refer to the \qe\ documentation for this.
 
 \newpage
 
-\section{\color{coral}People}
+{\color{coral}\section{People}}
+\color{black}
 This tutorial has been written by Andrea Dal Corso (SISSA - Trieste). 
 
 \newpage
 
-\section{\color{coral}Overview}
+{\color{coral}\section{Overview}}
+\color{black}
 
 In order to make a calculation with \thermo\ you need  
 an input file for the \texttt{pw.x} code of \qe. This input file
@@ -182,7 +191,10 @@ give a first estimate of a given quantity but that must be fine tuned
 to obtain publication quality results.
 
 \newpage
-\section{\color{coral}How do I make a self-consistent calculation?}
+{\color{dark-blue}\chapter{Howtos}}
+
+{\color{coral}\section{How do I make a self-consistent calculation?}}
+\color{black}
 Use \texttt{what='scf'}. See \texttt{example01}. The calculation is
 equivalent to a call to \texttt{pw.x} and is controlled by
 its input. In particular in the input of \texttt{pw.x} you can choose
@@ -197,7 +209,8 @@ calculation.
 
 \newpage
 
-\section{\color{coral}How do I plot the band structure?}
+{\color{coral}\section{How do I plot the band structure?}}
+\color{black}
 Use \texttt{what='scf\_bands'}. See \texttt{example02}.
 With this option \thermo\ calls 
 \texttt{pw.x} twice, making first a self-consistent calculation with 
@@ -215,7 +228,8 @@ Check also the option \texttt{what='scf\_2d\_bands'}
 to plot the surface band structure.
 \newpage
 
-\section{\color{coral}How do I plot the electronic density of states?}
+{\color{coral}\section{How do I plot the electronic density of states?}}
+\color{black}
 Use \texttt{what='scf\_dos'}. See \texttt{example18}. With this option
 \thermo\ calls \texttt{pw.x} twice, making first a self-consistent calculation
 followed by a non self-consistent calculation on a uniform {\bf k}-point mesh.
@@ -225,7 +239,8 @@ states is in a file called by default \texttt{output\_eldos.ps}, a name
 that can be changed in the \thermo\ input.
 \newpage
 
-\section{\color{coral}How can I see the crystal structure?}
+{\color{coral}\section{How can I see the crystal structure?}}
+\color{black}
 \thermo\ is not a crystal structure viewer, but you can use the
 \texttt{XCrySDen} code, which reads the \texttt{pw.x} input, to
 see the crystal structure. If you use \texttt{what='plot\_bz'}, 
@@ -240,7 +255,8 @@ of \texttt{pw.x}.
 
 \newpage
 
-\section{\color{coral}How can I see the Brillouin zone?}
+{\color{coral}\section{How can I see the Brillouin zone?}}
+\color{black}
 Use \texttt{what='plot\_bz'}. See \texttt{example12}. With this option
 \thermo\ does not call \texttt{pw.x}, it just produces a script for
 the \texttt{asymptote} code with the instructions to plot the Brillouin
@@ -252,7 +268,8 @@ script to plot the Brillouin zone using the \texttt{freeCAD} software
 
 \newpage
 
-\section{\color{coral}How can I plot the X-ray powder diffraction spectrum?}
+{\color{coral}\section{How can I plot the X-ray powder diffraction spectrum?}}
+\color{black}
 Use \texttt{what='plot\_bz'} to see the spectrum corresponding to
 the geometry given in the \texttt{pw.x} input. You can also see the
 spectrum corresponding to a relaxed structure using for instance
@@ -265,7 +282,8 @@ are also written in a file called by default \texttt{output\_xrdp.dat},
 which can also be changed in the \thermo\ input.
 
 \newpage
-\section{\color{coral}How can I find the space group of my crystal?}
+{\color{coral}\section{How can I find the space group of my crystal?}}
+\color{black}
 Use \texttt{what='plot\_bz'} and look at the output. The space group is
 identified. In the case you have a structure with \texttt{ibrav=0} and
 the primitive lattice vectors use the option \texttt{find\_ibrav=.TRUE.} 
@@ -276,7 +294,8 @@ It does not work for noncollinear magnetic system, or for supercells, or
 when the Bravais lattice and the point group are incompatible.
 
 \newpage
-\section{\color{coral}How do I plot the phonon dispersions?}
+{\color{coral}\section{How do I plot the phonon dispersions?}}
+\color{black}
 Use \texttt{what='scf\_disp'}. See \texttt{example04}. In this case you
 have to prepare an input for the \texttt{ph.x} code that must be
 called \texttt{ph\_control}. The required information in this input
@@ -290,8 +309,9 @@ The vibrational density of states is found in a file called by default
 \texttt{output\_dos.g1.ps}, which can also be changed in the \thermo\ input.
 
 \newpage
-\section{\color{coral}How do I calculate the vibrational energy, 
-free energy, entropy, and heat capacity?}
+{\color{coral}\section{How do I calculate the vibrational energy, 
+free energy, entropy, and heat capacity?}}
+\color{black}
 Use \texttt{what='scf\_disp'}. See \texttt{example04}. These quantities
 are calculated after the phonon dispersion for the default 
 temperature range ($1$ K - $800$ K) or for the range
@@ -301,7 +321,8 @@ Note that they are calculated at the geometry given in the input
 of \texttt{pw.x}.
 
 \newpage
-\section{\color{coral}How do I calculate the atomic B-factor of a solid?}
+{\color{coral}\section{How do I calculate the atomic B-factor of a solid?}}
+\color{black}
 Use \texttt{what='scf\_disp'} as in \texttt{example04} and add the
 flag \texttt{with\_eigen=.TRUE.}. These quantities
 are calculated after the phonon dispersions for the default 
@@ -312,7 +333,8 @@ Note that they are calculated at the geometry given in the input
 of \texttt{pw.x}.
 
 \newpage
-\section{\color{coral}How do I calculate the elastic constants?}
+{\color{coral}\section{How do I calculate the elastic constants?}}
+\color{black}
 Use \texttt{what='scf\_elastic\_constants'}. See \texttt{example13}. The
 elastic constants appear in the output of \thermo\ and also in a file
 called by default \texttt{output\_} \texttt{el\_cons.dat}, a name 
@@ -321,7 +343,8 @@ by \thermo\ for the options
 that require the knowledge of the elastic constants.
 
 \newpage
-\section{\color{coral}How do I calculate the Debye temperature?}
+{\color{coral}\section{How do I calculate the Debye temperature?}}
+\color{black}
 Use \texttt{what='scf\_elastic\_constants'}. See \texttt{example13}. The
 Debye temperature appears in the output of \thermo. A file called
 \texttt{output\_therm\_debye.g1.ps} contains plots of the vibrational
@@ -329,7 +352,8 @@ energy, free energy, entropy, and heat capacity computed within the
 Debye model.
 
 \newpage
-\section{\color{coral}How do I calculate the equilibrium structure?}
+{\color{coral}\section{How do I calculate the equilibrium structure?}}
+\color{black}
 Use \texttt{what='mur\_lc'}. See \texttt{example05} for the cubic case
 and refer to the user's
 guide for anisotropic solids. The crystal
@@ -354,21 +378,24 @@ the equilibrium geometry is the one at the given pressure (see below)
 and the calculations are carried out at this geometry.
 
 \newpage
-\section{\color{coral}How do I calculate the equilibrium structure 
-at a given pressure?}
+{\color{coral}\section{How do I calculate the equilibrium structure 
+at a given pressure?}}
+\color{black}
 Use \texttt{what='mur\_lc'} and specify \texttt{pressure=value} in kbar in the
 \thermo\ input. Note that in the input of \texttt{pw.x} you should 
 give a geometry which is as close as possible to the equilibrium value
 found at the given pressure (see above).
 
 \newpage
-\section{\color{coral}How do I specify the temperature range} 
+{\color{coral}\section{How do I specify the temperature range}} 
+\color{black}
 See the subsection {\it Temperature and Pressure} in the 
 \texttt{thermo\_pw} user's guide. 
 
 \newpage
-\section{\color{coral}How do I calculate the crystal parameters as a function
-of temperature?}
+{\color{coral}\section{How do I calculate the crystal parameters as a function
+of temperature?}}
+\color{black}
 Use \texttt{what='mur\_lc\_t'}. See \texttt{example09}. Note that
 for this option you need to give also the \texttt{ph.x} input.
 For anisotropic solids using \texttt{lmurn=.TRUE.} you calculate 
@@ -386,15 +413,17 @@ to solids in which equilibrium atomic positions are fixed by
 symmetry, while it is an approximation in the other cases.
 
 \newpage
-\section{\color{coral}How do I calculate the thermal expansion?}
+{\color{coral}\section{How do I calculate the thermal expansion?}}
+\color{black}
 Use \texttt{what='mur\_lc\_t'}. See \texttt{example09}. The components
 of the thermal expansion tensor are shown as a function of temperature 
 in the file \texttt{output\_anharm.ps}, a name that can be changed in 
 the \thermo\ input.
 
 \newpage
-\section{\color{coral}How do I calculate the Helmholtz (or Gibbs) free energy
-as a function of temperature keeping into account the thermal expansion?}
+{\color{coral}\section{How do I calculate the Helmholtz (or Gibbs) free energy
+as a function of temperature keeping into account the thermal expansion?}}
+\color{black}
 Use \texttt{what='mur\_lc\_t'}. The Helmholtz (or Gibbs at finite pressure) 
 free energy is shown as a function of temperature in the file 
 \texttt{output\_anharm.ps}. Note that the absolute value of this energy
@@ -404,8 +433,9 @@ and predict if a phase transition occurs and at which temperature (also
 as a function of pressure).
 
 \newpage
-\section{\color{coral}How do I calculate the bulk modulus as a function of 
-temperature?}
+{\color{coral}\section{How do I calculate the bulk modulus as a function of 
+temperature?}}
+\color{black}
 Use \texttt{what='mur\_lc\_t'} and the option \texttt{lmurn=.TRUE.}.
 This approach is rigorously valid only for cubic solids, for anisotropic
 solid it is an approximation in which only \texttt{celldm(1)} is
@@ -415,7 +445,8 @@ temperature. This calculation gives also the bulk modulus as a function
 of temperature.
 
 \newpage
-\section{\color{coral}How do I calculate the isobaric heat capacity?}
+{\color{coral}\section{How do I calculate the isobaric heat capacity?}}
+\color{black}
 Use \texttt{what='mur\_lc\_t'} and the option \texttt{lmurn=.TRUE.}.
 This approach is rigorously valid only for cubic solids, for anisotropic
 solid it is an approximation in which only \texttt{celldm(1)} is
@@ -425,8 +456,9 @@ as a function of temperature. This calculation gives also the
 isobaric heat capacity as a function of temperature.
 
 \newpage
-\section{\color{coral}How do I calculate the elastic constants 
-as a function of temperature?}
+{\color{coral}\section{How do I calculate the elastic constants 
+as a function of temperature?}}
+\color{black}
 There are two ways. Both of them are a two step calculation. 
 The fastest, but less accurate, method uses the ``quasi-static'' approximation.
 First use 
@@ -472,8 +504,9 @@ the free energy is
 not calculated as a function of the atomic positions.
 
 \newpage
-\section{\color{coral}How do I calculate the electronic heat capacity
-of a metal?}
+{\color{coral}\section{How do I calculate the electronic heat capacity
+of a metal?}}
+\color{black}
 Use \texttt{what='scf\_dos'}. See \texttt{example18}. In the metallic
 case in addition to a plot of the density of states this option produces
 also a plot of the electronic energy, free energy, entropy, heat capacity,
@@ -485,8 +518,9 @@ Please be careful with the value of \texttt{deltae} or the electronic
 thermodynamic properties could be wrong at low temperatures.
 
 \newpage
-\section{\color{coral}How do I calculate the thermal expansion of a metal
-accounting for the free energy due to the electronic excitations?}
+{\color{coral}\section{How do I calculate the thermal expansion of a metal
+accounting for the free energy due to the electronic excitations?}}
+\color{black}
 This is a two step calculation. First use \texttt{what='mur\_lc'} and
 the flag \texttt{lel\_} \texttt{free\_energy=.TRUE.} to write on files the
 electronic thermodynamic properties for each geometry used by
@@ -499,8 +533,9 @@ the equilibrium crystal structure.
 See \texttt{example24} for this case. 
 
 \newpage
-\section{\color{coral}How do I calculate the elastic constants of a metal
-accounting for the free energy due to the electronic excitations?}
+{\color{coral}\section{How do I calculate the elastic constants of a metal
+accounting for the free energy due to the electronic excitations?}}
+\color{black}
 This is a four step calculation. First use \texttt{what='mur\_lc'} and
 the flag \texttt{lel\_} \texttt{free\_energy=.TRUE.} as in the previous point
 in order to get the electronic thermodynamic properties for all the 
@@ -521,8 +556,9 @@ and the electronic thermodynamic properties obtained in the first
 step in the \texttt{therm\_files} directory.
 
 \newpage
-\section{\color{coral}How do I calculate the frequency dependent dielectric
-constant of a material?}
+{\color{coral}\section{How do I calculate the frequency dependent dielectric
+constant of a material?}}
+\color{black}
 Use \texttt{what='scf\_ph'}. See \texttt{example16} and \texttt{example20}. 
 Please note that this calculation is made by the extended version of the
 phonon code available in \thermo, so you have to provide specific flags
@@ -533,8 +569,9 @@ cannot plot the dielectric constant when {\bf q} is the $\Gamma$ point.
 See \texttt{example17} and \texttt{example21} for this case. 
 
 \newpage
-\section{\color{coral}How do I calculate the frequency dependent 
-reflectivity of a material?}
+{\color{coral}\section{How do I calculate the frequency dependent 
+reflectivity of a material?}}
+\color{black}
 The calculation of this quantity is implemented only for isotropic 
 (cubic) solids. It is plotted together with the frequency dependent 
 dielectric constant in insulating cubic solids when {\bf q} is 
@@ -543,8 +580,9 @@ absorption coefficient. Both quantities can be plotted as a function of
 the frequency or of the wavelength.
 
 \newpage
-\section{\color{coral} Which is the meaning of the colors in
-the electronic bands and phonon dispersions plots?}
+{\color{coral}\section{Which is the meaning of the colors in
+the electronic bands and phonon dispersions plots?}}
+\color{black}
 Different colors correspond to different irreducible representations of 
 the point co-group of the {\bf k} or {\bf q} wavevector. To see the
 correspondence color-representation see the \texttt{point\_groups.pdf} 

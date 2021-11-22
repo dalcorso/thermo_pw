@@ -5,47 +5,57 @@
 %! in the root directory of the present distribution,
 %! or http://www.gnu.org/copyleft/gpl.txt .
 %!
-\documentclass[12pt,a4paper]{article}
+\documentclass[12pt,a4paper,twoside]{report}
 \def\version{1.6.0}
-\def\qe{{\sc Quantum ESPRESSO}}
 
 \usepackage[T1]{fontenc}
+\usepackage{tcolorbox}
 \usepackage{bookman}
 \usepackage{html}
-
-% BEWARE: don't revert from graphicx for epsfig, because latex2html
-% doesn't handle epsfig commands !!!
 \usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage[Lenny]{fncychap}
 \usepackage{color}
+\usepackage{geometry}
 \usepackage{amsmath}
 \usepackage{mathtools}
 
+\tcbuselibrary{breakable}
+\pagestyle{fancy}
+\lhead{Equilibrium}
+\rhead{}
+\cfoot{\thepage}
 
-\textwidth = 16cm
-\textheight = 24cm
-\topmargin =0 cm
-\oddsidemargin = 0. cm
-
+\newgeometry{
+      top=3cm,
+      bottom=3cm,
+      outer=2.25cm,
+      inner=2.75cm,
+}
 
 \definecolor{web-blue}{rgb}{0,0.5,1.0}
 \definecolor{steelblue}{rgb}{0.27,0.5,0.7}
 \definecolor{coral}{rgb}{1.0,0.5,0.3}
 \definecolor{red}{rgb}{1.0,0,0.0}
 \definecolor{green}{rgb}{0.,0.5,0.0}
+\definecolor{dark-blue}{rgb}{0.,0.0,0.6}
 \definecolor{limegreen}{rgb}{0.19,0.8,0.19}
 \definecolor{orange}{rgb}{1.0,0.44,0.0}
-\definecolor{violet}{rgb}{0.75,0.35,0.75}
+\definecolor{violet}{rgb}{0.50,0.33,0.9}
+\definecolor{light-yellow}{rgb}{0.94,0.85,0.62}
 
+\tcbset{colback=light-yellow,colframe=dark-blue,breakable}
 
-
+\def\qe{{\sc Quantum ESPRESSO}}
 \def\pwx{\texttt{pw.x}}
 \def\phx{\texttt{ph.x}}
 \def\configure{\texttt{configure}}
 \def\PWscf{\texttt{PWscf}}
 \def\PHonon{\texttt{PHonon}}
-\def\thermo{\texttt{thermo\_pw}}
 \def\tpw{\texttt{thermo\_pw}}
 \def\make{\texttt{make}}
+
+
 
 
 \def\hplanck{6.62607015\times 10^{-34}}
@@ -203,14 +213,14 @@
 
 \begin{document} 
 
-\author{Andrea Dal Corso (SISSA - Trieste)}
+\author{Andrea Dal Corso \\ (SISSA - Trieste)}
 \date{}
 
 \title{
-  \includegraphics[width=5cm]{thermo_pw.jpg} \\
+  \includegraphics[width=8cm]{thermo_pw.jpg} \\
   \vspace{3truecm}
   % title
-  \Huge \color{blue} Thermo\_pw: Equilibrium material properties \\ (v.\version)
+  \Huge \color{dark-blue} {\sc Thermo\_pw}: Equilibrium material properties \\ (v.\version)
 }
 
 \maketitle
@@ -221,7 +231,9 @@
 
 \newpage
 
-\section{\color{coral}Introduction}
+{\color{dark-blue}\chapter{Introduction}}
+\color{black}
+
 These notes discuss the units of the equilibrium material properties
 using the same color conventions of the file \texttt{units.pdf}.\\
 The notes are part of the \tpw\ package. The complete package is
@@ -229,7 +241,9 @@ available at \texttt{https://github.com/dalcorso/thermo\_pw}.
 
 
 \newpage
-\section{\color{coral}People}
+{\color{coral}\section{People}}
+\color{black}
+
 These notes have been written by Andrea Dal Corso (SISSA - Trieste). \\
 Disclaimer: I am not an expert of units. 
 These notes reflect what I think about units.
@@ -239,7 +253,8 @@ like to learn more.
 You can contact me by e-mail: \texttt{dalcorso@sissa.it}. 
 
 \newpage
-\section{\color{coral}Overview}
+{\color{coral}\section{Overview}}
+\color{black}
 The units used in electronic structure codes have been
 discussed in a separate file called \texttt{units.pdf}. In this guide
 we extend the previous discussion to equilibrium material properties.
@@ -481,7 +496,13 @@ We discuss this point in Appendix C and use an enthalpy that includes
 the contributions of these fields in the thermodynamic equations.
 
 \newpage
-\section{\color{coral}Forces}
+
+{\color{dark-blue}\chapter{Physical quantities}}
+\color{black}
+
+{\color{coral}\section{Forces}}
+\color{black}
+
 The forces acting on the atoms are given by:
 \begin{equation}
 {\bf f}^{(0)}_{s,\alpha}=-{\partial \mathcal{F} \over \partial {\bf u}_{s,\alpha}}
@@ -504,7 +525,9 @@ is ${\rm \bar f_{cgs}}={\rm dyne}=10^{-5} {\rm N}$ and since ${{\rm \bar U_{cgs}
 }
 
 \newpage
-\section{\color{coral}Stress}
+{\color{coral}\section{Stress}}
+\color{black}
+
 The stress present in a crystal is given by:
 \begin{equation}
 {\sigma}^{(0)}_{\alpha,\beta}={1\over V} 
@@ -530,7 +553,9 @@ is ${\rm \bar \sigma_{cgs}}={\rm Ba}=10^{-1} {\rm Pa}$ and since ${{\rm \bar U_{
 }
 
 \newpage
-\section{\color{coral}Polarization}
+{\color{coral}\section{Polarization}}
+\color{black}
+
 The polarization present in a crystal is given by:
 \begin{equation}
 {\bf P}^{(0)}_{\alpha}=-{1\over V} 
@@ -558,7 +583,9 @@ Eq.~\ref{polarization} is unchanged.
 }
 
 \newpage
-\section{\color{coral}Magnetization}
+{\color{coral}\section{Magnetization}}
+\color{black}
+
 The magnetization present in a crystal is given by:
 \begin{equation}
 {\bf M}^{(0)}_{\alpha}=-{1\over \mu_0 V} 
@@ -592,13 +619,15 @@ magnetization is:
 \begin{equation}
 {\bf M}^{(0)}_{\alpha}=-{1\over V} 
 {\partial \mathcal{F} \over \partial {\bf H}_{\alpha}}.
-\label{magnetization}
+\label{magnetizationcgs}
 \end{equation}
 }
 
 
 \newpage
-\section{\color{coral}Interatomic force constants}
+{\color{coral}\section{Interatomic force constants}}
+\color{black}
+
 The interatomic force constants are defined as:
 \begin{equation}
 C_{s,\alpha,s',\beta}={\partial^2 \mathcal{F} \over \partial 
@@ -629,7 +658,9 @@ The conversion factor with the SI unit is:
 }
 
 \newpage
-\section{\color{coral}Elastic constants}
+{\color{coral}\section{Elastic constants}}
+\color{black}
+
 The frozen-ions elastic constants are defined as:
 \begin{equation}
 C_{\alpha,\beta,\gamma,\delta}= {1\over V} 
@@ -656,7 +687,9 @@ is ${\rm \bar \sigma_{cgs}}={\rm Ba}=10^{-1} {\rm Pa}$ and since ${{\rm \bar U_{
 }
 
 \newpage
-\section{\color{coral}Electric susceptibility}
+{\color{coral}\section{Electric susceptibility}}
+\color{black}
+
 The electric susceptibility of the crystal is defined as:
 \begin{equation}
 \chi^e_{\alpha,\beta}=-{1\over \epsilon_0 V} 
@@ -723,7 +756,9 @@ The relative dielectric constant is $\epsilon_{r,\alpha,\beta}=
 }
 
 \newpage
-\section{\color{coral}Magnetic susceptibility}
+{\color{coral}\section{Magnetic susceptibility}}
+\color{black}
+
 The magnetic susceptibility of the crystal is defined as
 \begin{equation}
 \chi^m_{\alpha,\beta}=-{1\over \mu_0 V} 
@@ -789,7 +824,9 @@ The relative permeability is $\mu_{r,\alpha,\beta}=
 }
 
 \newpage
-\section{\color{coral}Internal strain parameters}
+{\color{coral}\section{Internal strain parameters}}
+\color{black}
+
 The internal strain parameters are defined as:
 \begin{equation}
 \Lambda_{s,\alpha,\beta,\gamma}=-{\partial^2 \mathcal{F} \over \partial 
@@ -813,7 +850,9 @@ as the force and Eq.~\ref{isp} is unchanged.
 }
 
 \newpage
-\section{\color{coral}Born effective charges}
+{\color{coral}\section{Born effective charges}}
+\color{black}
+
 The Born effective charges are defined as:
 \begin{equation}
 Z^*_{s,\alpha,\beta}=-{1\over e} {\partial^2 \mathcal{F} \over \partial 
@@ -856,7 +895,9 @@ Z^*_{s,\alpha,\beta}=-{1\over e}{\partial^2 \mathcal{F} \over \partial
 }
 
 \newpage
-\section{\color{coral}Dynamical magnetic charges}
+{\color{coral}\section{Dynamical magnetic charges}}
+\color{black}
+
 The dynamical magnetic charges are defined as:
 \begin{equation}
 Z^m_{s,\alpha,\beta}= -{1\over \mu_0} {\partial^2 \mathcal{F} \over \partial 
@@ -914,7 +955,9 @@ The conversion factor with the SI unit is:
 
 
 \newpage
-\section{\color{coral}Piezoelectric tensor}
+{\color{coral}\section{Piezoelectric tensor}}
+\color{black}
+
 The frozen-ions piezoelectric tensor is defined as:
 \begin{equation}
 e_{\alpha,\beta,\gamma}=-{1\over V} {\partial^2 \mathcal{F} \over \partial 
@@ -945,7 +988,9 @@ defined by Eq.~\ref{piezo} also in c.g.s.-Gaussian units.
 }
 
 \newpage
-\section{\color{coral}Piezomagnetic tensor}
+{\color{coral}\section{Piezomagnetic tensor}}
+\color{black}
+
 The frozen-ions piezomagnetic tensor is defined as:
 \begin{equation}
 h_{\alpha,\beta,\gamma}=-{1\over \mu_0 V} 
@@ -998,7 +1043,9 @@ It has the same unit of the magnetization.
 \\
 
 \newpage
-\section{\color{coral}Magnetoelectric tensor}
+{\color{coral}\section{Magnetoelectric tensor}}
+\color{black}
+
 The frozen-ions magnetoelectric tensor is defined as
 \begin{equation}
 \alpha_{\alpha,\beta}=-{1\over V} {\partial^2 \mathcal{F} \over \partial 
@@ -1081,7 +1128,9 @@ ${\rm \bar \alpha'_{cgs}}={{\rm \bar U_{cgs}} \over {\rm \bar l_{cgs}}^3
 }
 
 \newpage
-\section{\color{coral}Equations of motion}
+{\color{dark-blue}\chapter{Equations of motion}}
+\color{black}
+
 The first derivatives of the magneto-electric enthalpy give the following equations:
 \begin{align}
 {\bf f}_{s,\alpha}&= {\bf f}^{(0)}_{s,\alpha}
@@ -1544,7 +1593,9 @@ are the macroscopic tensors.
 \\
 \newpage
 
-\section{\color{coral}Thermodynamics}
+{\color{dark-blue}\chapter{Thermodynamics}}
+\color{black}
+
 The two principles of thermodynamics can be summarized by the equation:
 \begin{equation}
 dU = -dW + T dS,
@@ -2171,8 +2222,26 @@ d{\bf H}_{\alpha},
 }
 
 \newpage
+{\color{dark-blue}\chapter{Bibliography}}
+\color{black}
 
-\section{\color{coral} Appendix A: Stress as an independent variable}
+\begin{enumerate}
+
+\item
+[1.] J.D. Jackson, Classical electrodynamics, Third edition,
+J. Wiley and Sons (1999).
+
+\item
+[2.] M. Ye and D. Vanderbilt, Phys. Rev. B {\bf 89}, 064301 (2014).
+
+\item[3.] J.F. Nye, Physical properties of crystals, Oxford university 
+press (1985).
+\end{enumerate}
+
+
+\appendix
+{\color{dark-blue}\chapter{Stress as an independent variable}}
+\color{black}
 
 While in calculations it is easy to control the strain applied to
 a given crystal, experimentally it is simpler to apply a given stress
@@ -2812,7 +2881,9 @@ ${\bf E}_\alpha$, and ${\bf H}_\alpha$.
 }
 
 \newpage
-\section{\color{coral}Appendix B: {\bf B} as an independent variable}
+{\color{dark-blue}\chapter{{\bf B} as an independent variable}}
+\color{black}
+
 In density functional theory the electric field ${\bf E}$ and the
 magnetic field ${\bf B}$ are the two quantities that enter in the Kohn
 and Sham equations. In this case the total energy functional is 
@@ -3273,7 +3344,8 @@ are the frozen-ions macroscopic tensors.
 }
 
 \newpage
-\section{\color{coral} Appendix C: Free-energy of free-fields }
+{\color{dark-blue}\chapter{Free-energy of free-fields}}
+\color{black}
 
 The free energy of the free fields is written as
 \begin{equation}
@@ -3390,7 +3462,7 @@ and
 }
 
 %\newpage
-%\section{\color{coral} Appendix D: Gaussian atomic units}
+%{\color{dark-blue}\chapter{Gaussian atomic units}}
 %
 %{\color{steelblue}
 %Written in Gaussian a.u. the phenomenological expression
@@ -3452,20 +3524,6 @@ and
 %\end{equation}
 %}
 %
-\newpage
-\section{\color{coral}Bibliography}
-\begin{enumerate}
-
-\item
-[1.] J.D. Jackson, Classical electrodynamics, Third edition,
-J. Wiley and Sons (1999).
-
-\item
-[2.] M. Ye and D. Vanderbilt, Phys. Rev. B {\bf 89}, 064301 (2014).
-
-\item[3.] J.F. Nye, Physical properties of crystals, Oxford university 
-press (1985).
-\end{enumerate}
 
 \end{document}
 

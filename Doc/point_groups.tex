@@ -5,48 +5,67 @@
 %! in the root directory of the present distribution,
 %! or http://www.gnu.org/copyleft/gpl.txt .
 %!
-\documentclass[12pt,a4paper]{article}
+\documentclass[12pt,a4paper,twoside]{report}
 \def\version{1.6.0}
-\def\qe{{\sc Quantum ESPRESSO}}
 
 \usepackage[T1]{fontenc}
+\usepackage{tcolorbox}
 \usepackage{bookman}
 \usepackage{html}
-
-% BEWARE: don't revert from graphicx for epsfig, because latex2html
-% doesn't handle epsfig commands !!!
 \usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage[Lenny]{fncychap}
 \usepackage{color}
+\usepackage{geometry}
+\usepackage{amsmath}
+\usepackage{mathtools}
 
-\textwidth = 16cm
-\textheight = 24cm
-\topmargin =0 cm
-\oddsidemargin = 0. cm
+\tcbuselibrary{breakable}
+\pagestyle{fancy}
+\lhead{Point groups guide}
+\rhead{}
+\cfoot{\thepage}
 
+\newgeometry{
+      top=3cm,
+      bottom=3cm,
+      outer=2.25cm,
+      inner=2.75cm,
+}
 
 \definecolor{web-blue}{rgb}{0,0.5,1.0}
+\definecolor{steelblue}{rgb}{0.27,0.5,0.7}
 \definecolor{coral}{rgb}{1.0,0.5,0.3}
 \definecolor{red}{rgb}{1.0,0,0.0}
-\definecolor{green}{rgb}{0.,1.0,0.0}
+\definecolor{green}{rgb}{0.,0.5,0.0}
+\definecolor{dark-blue}{rgb}{0.,0.0,0.6}
+\definecolor{limegreen}{rgb}{0.19,0.8,0.19}
+\definecolor{orange}{rgb}{1.0,0.44,0.0}
+\definecolor{violet}{rgb}{0.50,0.33,0.9}
+\definecolor{light-yellow}{rgb}{0.94,0.85,0.62}
 
+\tcbset{colback=light-yellow,colframe=dark-blue,breakable}
+
+\def\qe{{\sc Quantum ESPRESSO}}
 \def\pwx{\texttt{pw.x}}
 \def\phx{\texttt{ph.x}}
 \def\configure{\texttt{configure}}
 \def\PWscf{\texttt{PWscf}}
 \def\PHonon{\texttt{PHonon}}
-\def\thermo{\texttt{thermo\_pw}}
+\def\tpw{\texttt{thermo\_pw}}
 \def\make{\texttt{make}}
+
 
 \begin{document} 
 
-\author{Andrea Dal Corso (SISSA - Trieste)}
+\author{Andrea Dal Corso \\ (SISSA - Trieste)}
 \date{}
 
 \title{
-  \includegraphics[width=5cm]{thermo_pw.jpg} \\
+  \includegraphics[width=8cm]{thermo_pw.jpg} \\
   \vspace{3truecm}
   % title
-  \Huge \color{blue} Point groups in \qe\ and \thermo\ \\
+  \Huge \color{dark-blue} Point groups in \qe\ and {\sc Thermo\_pw}\ \\
    (v.\version)
 }
 
@@ -58,8 +77,10 @@
 
 \newpage
 \newpage
-\section{\color{coral}Introduction}
-\qe\ and \thermo\ can determine the point group of a
+{\color{dark-blue}\chapter{Introduction}}
+\color{black}
+
+\qe\ and \tpw\ can determine the point group of a
 solid, the symmetry of its physical properties, the symmetry
 of the electronic wavefunctions and of the phonon modes. The proper interpretation
 of these symmetry information requires the knowledge of the conventions on the 
@@ -143,20 +164,24 @@ manual that you can find in the \texttt{Doc} sub-directory of the
 and their orientation with respect to the Cartesian axes, as given by the
 \qe\ routines, are described there and here we assume that the reader has a
 basic understanding of these primitive vectors. \\
-These notes are part of the \thermo\ package. The complete package is
+These notes are part of the \tpw\ package. The complete package is
 available at \texttt{https://github.com/dalcorso/thermo\_pw}.
 
 \newpage
-\section{\color{coral}People}
+{\color{coral}\section{People}}
+\color{black}
 This guide has been written by Andrea Dal Corso (SISSA - Trieste).
 
 \newpage
-\section{\color{coral}Overview}
-In \qe\ and \thermo, the $32$ crystallographic point groups 
+{\color{coral}\section{Overview}}
+\color{black}
+In \qe\ and \tpw, the $32$ crystallographic point groups 
 (point groups in the following) are identified by an integer number 
 (the group code) and 
 by a string (the group name) according to the following table:
 
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 1  "C_1 (1)    ", 2  "C_i (-1)   ", 3  "C_s (m)    ", 4  "C_2  (2)   ", 
 5  "C_3 (3)    ", 6  "C_4 (4)    ", 7  "C_6 (6)    ", 8  "D_2  (222) ", 
@@ -167,8 +192,13 @@ by a string (the group name) according to the following table:
 25 "D_3d (-3m) ", 26 "S_4 (-4)   ", 27 "S_6 (-3)   ", 28 "T    (23)  ", 
 29 "T_h (m-3)  ", 30 "T_d (-43m) ", 31 "O   (432)  ", 32 "O_h (m-3m) "  
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 All symmetry operations are conventionally divided in $6$ 
 different types, with an integer number identifying the symmetry type:
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
    1 identity                          E
    2 inversion                         i
@@ -177,6 +207,8 @@ different types, with an integer number identifying the symmetry type:
    5 mirror                            s
    6 improper rotation /= 180 degrees  S3, S4, or S6
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 The point group is identified by counting the number of symmetry operations of 
 each type. \\
 An extended group code is also available for a more easy control of the
@@ -189,16 +221,21 @@ symmorphic space groups. Non-symmorphic space groups require the projective
 representations of the point groups. 
 The point groups have up to $12$ irreducible 
 representations distinguished in the electronic bands or phonon dispersions
-plots produced by \thermo\ by a different color. \\
+plots produced by \tpw\ by a different color. \\
 The color codes for each representation are the following:
 \begin{center}
 \includegraphics[width=16cm]{color.png} 
 \end{center}
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 1 -> red            2 -> green        3 -> blue           4 -> cyan
 5 -> magenta        6 -> gold         7 -> pink           8 -> black
 9 -> olive         10 -> brown       11 -> light-blue    12 -> orange
 \end{verbatim} 
+\end{footnotesize}
+\end{tcolorbox}
+
 The number of each irreducible representation corresponds to its position
 in the character table and is given below after the list of characters. 
 Group of bands degenerate by time reversal might belong to a reducible
@@ -262,66 +299,105 @@ indicates that the operation is multiplied by the $360^\circ$ rotation
 (called \texttt{-E} in the tables or $\bar E$ in the text).
 
 \newpage
-\section{\color{coral}Point groups}
+{\color{dark-blue}\chapter{Point groups}}
 
-\subsection{\color{web-blue}$C_1\ (1)$}
+{\color{coral}\section{$C_1\ (1)$}}
+\color{black}
 This group contains only the identity ($E$) \texttt{[1]}. 
 It is a group compatible with the triclinic Bravais lattice 
 (\texttt{ibrav=14}). \\
 Its Laue class is $C_i$. \\
 The character table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_1    E    
 A      1.00       1
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+ 
 There is only one irreducible representation, so all functions are 
 totally symmetric. \\
 The character table of the double group is ($\bar E$ indicates the
 $360^\circ$ rotation): 
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_1    E     -E   
 G_2    1.00 -1.00      1
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There is only one irreducible representation ($\Gamma_2$), 
 so all functions are totally symmetric. \\
 This group has no subgroup.
 
 \newpage
-\subsection{\color{web-blue}$C_i\ (\bar 1)$}
+{\color{coral}\section{$C_i\ (\bar 1)$}}
+\color{black}
 This group has two elements: The identity and inversion ($i$) \texttt{[28]}.
 It is a group compatible with the triclinic Bravais lattice 
 (\texttt{ibrav=14}). \\
 Its Laue class is $C_i$. \\
 The character table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_i    E     i    
 A_g    1.00  1.00      1
 A_u    1.00 -1.00      1
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are two representations distinguished by the parity
 with respect to inversion: $A_g$ is even and $A_u$ is odd. \\
 The character table of the double group is: 
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_i    E     -E    i     -i   
 G_2+   1.00 -1.00  1.00 -1.00     1
 G_2-   1.00 -1.00 -1.00  1.00     2
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are two representations distinguished by the parity
 with respect to inversion: $\Gamma_2^+$ is even and $\Gamma_2^-$ is odd.\\
 $C_1$ is the only subgroup of $C_i$. The compatibility table for the
 representations is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_i     A_u    A_g
 C_1      A      A
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 The compatibility table for the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_i    G_2+   G_2- 
 C_1    G_2    G_2
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 
 \newpage
-\subsection{\color{web-blue}$C_s\ (m)$}
+{\color{coral}\section{$C_s\ (m)$}}
+\color{black}
 This group has two elements: The identity and a mirror symmetry ($\sigma$).
 It is a group compatible with the monoclinic system and with the
 simple monoclinic (\texttt{ibrav=$\pm$12}) or the base-centered monoclinic 
@@ -341,14 +417,23 @@ the axis $(x=0, z=0)$, and $z$ is a shorthand notation for
 the axis $(x=0, y=0)$). There are therefore $13$ 
 realizations of interest for solids. \\
 The character table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_s    E     s
 A'     1.00  1.00      1
 A''    1.00 -1.00      2
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are two representations distinguished by the parity
 with respect to the mirror symmetry: $A'$ is even and $A''$ is odd.\\
 The character table of the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 C_s    E     -E    s     -s   
@@ -361,24 +446,39 @@ G_4    1.00 -1.00  0.00  0.00       2
 G_3    0.00  0.00  1.00 -1.00       1
 G_4    0.00  0.00 -1.00  1.00       2
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are two one-dimensional representations distinguished by the 
 behavior with respect to the mirror symmetry: the functions
 are multiplied by $i$ according to $\Gamma_3$ and by
 $-i$ according to $\Gamma_4$.\\
 $C_1$ is the only subgroup of $C_i$. The compatibility table for the
 representations is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_s     A'     A''
 C_1     A      A
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 The compatibility table for the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_s    G_3    G_4 
 C_1    G_2    G_2
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
 \newpage
-\subsection{\color{web-blue}$C_2\ (2)$}
+{\color{coral}\section{$C_2\ (2)$}}
+\color{black}
 This group has two elements: The identity and a rotation of $180^\circ$ 
 about an axis ($C_2$).
 It is a group compatible with the monoclinic system and with the
@@ -395,14 +495,23 @@ $(y=\sqrt{3}x, z=0)$ \texttt{[12]}, $(y=-\sqrt{3}x, z=0)$ \texttt{[11]},
 $(y=x/\sqrt{3}, z=0)$ \texttt{[14]}, $(y=-x/\sqrt{3}, z=0)$ \texttt{[13]}. 
 There are therefore $13$ realizations of interest for solids. \\
 The character table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_2    E     C2
 A      1.00  1.00    1
 B      1.00 -1.00    2
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are two representations distinguished by the parity
 with respect to the rotation: $A$ is even and $B$ is odd.\\
 The character table of the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 C_2    E     -E    C2    -C2
@@ -414,24 +523,40 @@ G_4    1.00 -1.00  0.00  0.00     2
 G_3    0.00  0.00  1.00 -1.00     1
 G_4    0.00  0.00 -1.00  1.00     2
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
+
 There are two one-dimensional representations distinguished by the 
 behavior with respect to the rotation: the functions
 are multiplied by $i$ according to $\Gamma_3$ and by $-i$ according to 
 $\Gamma_4$.\\
 $C_1$ is the only subgroup of $C_2$. \\
 The compatibility table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_2     A      B  
 C_1     A      A
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 The compatibility table for the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_2    G_3    G_4 
 C_1    G_2    G_2
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
 \newpage
-\subsection{\color{web-blue}$C_3\ (3)$}
+{\color{coral}\section{$C_3\ (3)$}}
+\color{black}
 This group has three elements: The identity and two rotations of $\pm120^\circ$ 
 about an axis ($C_3$ and $C_3^2$).
 It is a group compatible with the trigonal and hexagonal systems and with the
@@ -442,6 +567,9 @@ The $C_3$ axis can be: $z$ \texttt{[33]}, $x=y=z$ \texttt{[29]},
 $x=-y=z$ \texttt{[32]}, $x=-y=-z$ \texttt{[30]}, $x=y=-z$ \texttt{[31]}.
 There are therefore $5$ realizations of interest for solids. \\
 The character table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 C_3    E     C3    C3^2
@@ -454,10 +582,16 @@ A      0.00  0.00  0.00      1
 E      0.00  0.87 -0.87      2
 E*     0.00 -0.87  0.87      3 
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are three one-dimensional representations: $A$ is totally symmetric, while
 a $C_3$ rotation multiplies the functions by $e^{i\phi}$ according to $E$
 and by $e^{-i\phi}$ according to $E^*$ ($\phi=2 \pi / 3$). \\
 The character table of the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 C_3    E     -E    C3    -C3   C3^2  -C3^2
@@ -471,24 +605,39 @@ G_4    0.00  0.00  0.87 -0.87 -0.87  0.87     1
 G_5    0.00  0.00 -0.87  0.87  0.87 -0.87     2
 G_6    0.00  0.00  0.00  0.00  0.00  0.00     3
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are three irreducible representations that can be distinguished by the
 behavior in a $C_3$ rotation: the functions are multiplied by $e^{i\phi/2}$ according
 to $\Gamma_4$, by $e^{-i\phi/2}$ according to $\Gamma_5$ and by $e^{i\pi}=-1$ 
 according to $\Gamma_6$ ($\phi=2 \pi / 3$). \\
 $C_1$ is the only subgroup of $C_3$. \\
 The compatibility table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_3     A      E      E*  
 C_1     A      A      A
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 The compatibility table for the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_3    G_4    G_5    G_6 
 C_1    G_2    G_2    G_2
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
 \newpage
-\subsection{\color{web-blue}$C_4\ (4)$}
+{\color{coral}\section{$C_4\ (4)$}}
+\color{black}
 This group has four elements: The identity, two rotations of $\pm90^\circ$ 
 about an axis ($C_4$ and $C_4^3$), and a rotation of $180^\circ$ about the same
 axis ($C_2$).
@@ -499,6 +648,9 @@ Its Laue class is $C_{4h}$. \\
 The axes can be: $x$ \texttt{[36]}, $y$ \texttt{[35]}, or $z$ \texttt{[34]}.
 There are therefore $3$ realizations of interest for solids. \\
 The character table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 C_4    E     C4    C2    C4^3
@@ -514,12 +666,18 @@ B      0.00  0.00  0.00  0.00       2
 E      0.00  1.00  0.00 -1.00       3
 E*     0.00 -1.00  0.00  1.00       4
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are four irreducible representations that can be distinguished according
 to the behavior for a $C_4$ rotations. $A$ is totally symmetric, while for a
 $C_4$ rotation the functions are multiplied by $e^{i\pi}=-1$ according to 
 $B$, by $e^{i\pi/2}=i$ according to $E$ and by $e^{-i\pi/2}=-i$ according to
 $E^*$. \\
 The character table of the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 C_4    E     -E    C4    -C4   C2    -C2   C4^3  -C4^3
@@ -535,6 +693,9 @@ G_6    0.00  0.00 -0.71  0.71 -1.00  1.00  0.71 -0.71      2
 G_7    0.00  0.00 -0.71  0.71  1.00 -1.00  0.71 -0.71      3
 G_8    0.00  0.00  0.71 -0.71 -1.00  1.00 -0.71  0.71      4
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are four irreducible representations distinguished according
 to the behavior for a $C_4$ rotation. The functions are multiplied by 
 $e^{i\omega}$ according to $\Gamma_5$, by $-e^{i3\omega}$ according to 
@@ -544,20 +705,33 @@ differences both with Ref.~[2] and Ref.~[8].\\
 $C_4$ has two subgroups $C_1$ and $C_2$. The $C_2$ subgroup has the same axis
 as $C_4$. \\
 The compatibility table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_4     A      B      E      E*  
 C_1     A      A      A      A
 C_2     A      A      B      B
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 The compatibility table for the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_4     G_5    G_6    G_7    G_8 
 C_1     G_2    G_2    G_2    G_2
 C_2     G_3    G_4    G_3    G_4
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 
 \newpage
-\subsection{\color{web-blue}$C_6\ (6)$}
+{\color{coral}\section{$C_6\ (6)$}}
+\color{black}
 This group has six elements: The identity, two rotations of $\pm60^\circ$ 
 about an axis ($C_6$ and $C_6^5$), two rotations of $\pm120^\circ$
 about the same axis ($C_3$ and $C_3^2$) and a rotation of $180^\circ$ about 
@@ -568,6 +742,9 @@ Its Laue class is $C_{6h}$. \\
 The $C_6$ axis is $z$ \texttt{[37]}.
 There is therefore $1$ realization of interest for solids. \\
 The character table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 C_6    E     C6    C3    C2    C3^2  C6^5 
@@ -587,6 +764,9 @@ E_1*   0.00 -0.87 -0.87  0.00  0.87  0.87       4
 E_2    0.00  0.87 -0.87  0.00  0.87 -0.87       5
 E_2*   0.00 -0.87  0.87  0.00 -0.87  0.87       6
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are six irreducible representations distinguished for
 the behavior for a $C_6$ rotation. $A$ is totally symmetric, while
 the functions are multiplied by $e^{i\pi}=-1$ according
@@ -594,7 +774,9 @@ to $B$, by $e^{i\psi}$ according to $E_1$, by $e^{-i\psi}$
 according to $E_1^*$, by $e^{i2\psi}$ according to $E_2$, and by $e^{-i2\psi}$
 according to $E_2^*$ ($\psi=\pi/3$). \\
 The character table of the double group is:
-\begin{footnotesize}
+
+\begin{tcolorbox}
+\begin{scriptsize}
 \begin{verbatim}
      real part
 C_6  E     -E    C6    -C6   C3    -C3   C2    -C2   C3^2  -C3^2 C6^5  -C6^5
@@ -614,7 +796,9 @@ G_10 0.00  0.00  0.50 -0.50 -0.87  0.87  1.00 -1.00  0.87 -0.87 -0.50  0.50  4
 G_11 0.00  0.00  1.00 -1.00  0.00  0.00 -1.00  1.00  0.00  0.00 -1.00  1.00  5
 G_12 0.00  0.00 -1.00  1.00  0.00  0.00  1.00 -1.00  0.00  0.00  1.00 -1.00  6
 \end{verbatim}
-\end{footnotesize}
+\end{scriptsize}
+\end{tcolorbox}
+
 There are six irreducible representations distinguished for the
 behavior for a $C_6$ rotation. The functions are multiplied
 by $e^{i\psi/2}$ according to $\Gamma_7$, by $-e^{i5\psi/2}$ 
@@ -626,22 +810,35 @@ to $\Gamma_{12}$ ($\psi=\pi/3$). \\
 The subgroups of $C_6$ are $C_1$, $C_2$, and $C_3$. Both $C_2$ and $C_3$ have
 the rotation axis coinciding with the $C_6$ axis of $C_6$. \\
 The compatibility table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_6     A      B      E_1    E_1*   E_2   E_2* 
 C_1     A      A      A      A      A     A
 C_2     A      B      B      B      A     A
 C_3     A      A      E      E*     E*    E
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 The compatibility table for the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_6     G_7    G_8    G_9    G_10   G_11   G_12 
 C_1     G_2    G_2    G_2    G_2    G_2    G_2
 C_2     G_3    G_4    G_4    G_3    G_4    G_3
 C_3     G_4    G_5    G_4    G_5    G_6    G_6
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 
 \newpage
-\subsection{\color{web-blue}$D_2\ (222)$ or $V$} 
+{\color{coral}\section{$D_2\ (222)$ or $V$}} 
+\color{black}
 This group has four elements: The identity and three rotations of $180^\circ$ about 
 three perpendicular axes ($C_2$, $C_2'$, and $C_2''$). It is a group compatible with 
 the orthorhombic system and with the simple orthorhombic (\texttt{ibrav=8}), 
@@ -666,6 +863,9 @@ f) $z$ ($C_2$), ($y=-\sqrt{3}x$, $z=0$) ($C_2'$), ($y=x/\sqrt{3}$, $z=0$) ($C_2'
 \end{itemize}
 There are therefore $6$ realizations of interest in solids. \\
 The character table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_2    E     C2    C2'   C2''
 A      1.00  1.00  1.00  1.00    1
@@ -673,6 +873,9 @@ B_1    1.00  1.00 -1.00 -1.00    2
 B_2    1.00 -1.00  1.00 -1.00    3
 B_3    1.00 -1.00 -1.00  1.00    4
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are four one-dimensional irreducible representations.
 $A$ is totally symmetric, $B_1$ is even with respect to
 $C_2$ and odd with respect to $C_2'$ and $C_2''$, 
@@ -680,17 +883,26 @@ $B_2$ is even with respect to $C_2'$ and odd with respect to $C_2$ or $C_2''$,
 and $B_3$ is even with respect to $C_2''$ and odd with respect to
 $C_2$ or $C_2'$. \\
 The character table of the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_2    E     -E    C2    C2'   C2'' 
                    -C2   -C2'  -C2''
 G_5    2.00 -2.00  0.00  0.00  0.00     1
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There is only one irreducible representation. \\
 The subgroups of $D_2$ are $C_1$ and $C_2$. The axis of $C_2$ can be parallel to
 any of the three axes of $D_2$ and therefore there are three lines in the
 compatibility table for the cases in which the axis of $C_2$ is parallel to 
 $C_2$ (case 1), $C_2'$ (case 2) or $C_2''$ (case 3). 
 The compatibility table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_2     A      B_1    B_2    B_3  
 C_1     A      A      A      A   
@@ -698,16 +910,26 @@ C_2_1   A      A      B      B
 C_2_2   A      B      A      B   
 C_2_3   A      B      B      A
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 The compatibility table for the double group does not distinguish the different
 cases:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_2     G_5  
 C_1     2 G_2
 C_2     G_3 + G_4
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 
 \newpage
-\subsection{\color{web-blue}$D_3\ (32)$}
+{\color{coral}\section{$D_3\ (32)$}}
+\color{black}
 This group has six elements: The identity, two rotations of $\pm120^\circ$ about
 an axis ($C_3$ and $C_3^2$) and three rotations of $180^\circ$ 
 ($3C_2'$) about three axes perpendicular to the axis of $C_3$.
@@ -729,16 +951,25 @@ When the $C_3$ axis is $x=y=-z$ the three $C_2'$ axes are
 ($x=z$, $y=0$), ($y=z$, $x=0$), ($x=-y$, $z=0$) \texttt{[48]}. 
 There are therefore $6$ realizations of interest for solids. \\
 The character table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_3    E     2C3   3C2'
 A_1    1.00  1.00  1.00      1
 A_2    1.00  1.00 -1.00      2
 E      2.00 -1.00  0.00      3
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are three irreducible representations. $A_1$ is totally symmetric,
 $E$ is two-fold degenerate and $A_2$ is odd with respect to the
 $C_2'$ rotations.\\
 The character table of the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
     real part
 D_3    E     -E    2C3   -2C3   3C2' -3C2'
@@ -752,6 +983,9 @@ G_4    0.00  0.00  0.00  0.00  0.00  0.00      1
 G_5    0.00  0.00  0.00  0.00  1.00 -1.00      2
 G_6    0.00  0.00  0.00  0.00 -1.00  1.00      3
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are three irreducible representations. $\Gamma_4$ is two-dimensional,
 while $\Gamma_5$ and $\Gamma_6$ which are both one dimensional can be distinguished
 because for a $C_2'$ rotation the functions are multiplied by $i$ according to
@@ -760,22 +994,35 @@ The subgroups of $D_3$ are $C_1$, $C_2$, and $C_3$. The $C_2$ axis is
 parallel to one of the $C_2'$ axes of $D_3$, while the $C_3$ axis 
 of $C_3$ is parallel to the $C_3$ axis of $D_3$. \\
 The compatibility table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_3     A_1    A_2    E    
 C_1     A      A      2 A      
 C_2     A      B      A + B        
 C_3     A      A      E + E*      
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 The compatibility table for the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_3     G_4          G_5    G_6    
 C_1     2 G_2        G_2    G_2
 C_2     G_3 + G_4    G_3    G_4
 C_3     G_4 + G_5    G_6    G_6   
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 
 \newpage
-\subsection{\color{web-blue}$D_4\ (422)$} 
+{\color{coral}\section{$D_4\ (422)$}} 
+\color{black}
 This group has eight elements: The identity, two rotations of 
 $\pm90^\circ$ about
 an axis ($C_4$ and $C_4^3$), a rotation of $180^\circ$ about the same axis and
@@ -799,6 +1046,9 @@ c) $C_4$ coinciding with $z$: $x$, $y$ ($C_2'$), ($y=\pm x$, $z=0$) ($C_2''$)
 \end{itemize}
 There are therefore $3$ realizations of interest for solids. \\
 The character table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_4    E     2C4   C2    2C2'  2C2''
 A_1    1.00  1.00  1.00  1.00  1.00      1
@@ -807,6 +1057,9 @@ B_1    1.00 -1.00  1.00  1.00 -1.00      3
 B_2    1.00 -1.00  1.00 -1.00  1.00      4
 E      2.00  0.00 -2.00  0.00  0.00      5
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are five irreducible representations. $A_1$ is totally symmetric 
 and $E$ is two-fold degenerate. The other representations can be distinguished
 according to the behavior with respect to the $C_2'$ and $C_2''$ rotations.
@@ -814,12 +1067,18 @@ $A_2$ is odd with respect to both $C_2'$ and $C_2''$, $B_1$ is even with respect
 to $C_2'$ and odd with respect to $C_2''$, while $B_2$ is odd with respect to
 $C_2'$ and even with respect to $C_2''$. \\ 
 The character table of the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_4    E     -E    2C4   -2C4   C2   2C2'  2C2''
                                -C2   -2C2' -2C2''
 G_6    2.00 -2.00  1.41 -1.41  0.00  0.00  0.00      1
 G_7    2.00 -2.00 -1.41  1.41  0.00  0.00  0.00      2
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are two two-fold degenerate irreducible representations that can be 
 distinguished for the character with respect to a $C_4$ rotation, equal
 to $\sqrt{2}$ according to $\Gamma_6$ and to $-\sqrt{2}$ according to $\Gamma_7$. \\
@@ -841,6 +1100,9 @@ $C_2$ and $C_2'$ are parallel to the $C_2''$ axes of $D_4$ are
 excluded by the choice of axes of $D_2$. When only one axis of $D_2$
 is parallel to $x$, $y$, or $z$ that axis is always $C_2$. \\
 The compatibility table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_4      A_1    A_2    B_1     B_2      E
 C_1       A      A      A       A      2 A
@@ -853,7 +1115,13 @@ D_2_2     A      B_1    B_1     A     B_2 + B_3
 D_2_3     A      B_2    A       B_2   B_1 + B_3
 D_2_4     A      B_3    A       B_3   B_1 + B_2
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 The compatibility table for the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_4     G_6             G_7  
 C_1     G_2             G_2   
@@ -861,9 +1129,12 @@ C_2     G_3 + G_4       G_3 + G_4
 C_4     G_5 + G_6       G_7 + G_8
 D_2     G_5             G_5
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
 \newpage
-\subsection{\color{web-blue}$D_6\ (622)$} 
+{\color{coral}\section{$D_6\ (622)$}} 
+\color{black}
 This group has twelve elements: The identity, two rotations of 
 $\pm60^\circ$ about an axis ($C_6$ and $C_6^5$), two rotations of 
 $\pm120^\circ$ about the same axis
@@ -878,6 +1149,9 @@ $x$, ($y=\pm\sqrt{3}x$, $z=0$) ($C_2'$),
 $y$, ($y=\pm x/\sqrt{3}$, $z=0$) ($C_2''$). There is therefore
 $1$ realization of interest for solids. \\
 The character table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_6    E     2C6   2C3   C2    3C2'  3C2''
 A_1    1.00  1.00  1.00  1.00  1.00  1.00      1
@@ -887,6 +1161,9 @@ B_2    1.00 -1.00  1.00 -1.00 -1.00  1.00      4
 E_1    2.00  1.00 -1.00 -2.00  0.00  0.00      5
 E_2    2.00 -1.00 -1.00  2.00  0.00  0.00      6
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are six irreducible representations. $A_1$ is totally symmetric.
 $A_2$, $B_1$, and $B_2$ are one dimensional and can be distinguished for the
 behavior with respect to the $C_2'$ and $C_2''$ rotations. $A_2$ is odd 
@@ -896,6 +1173,9 @@ even with respect to $C_2''$. $E_1$ and $E_2$ are both two dimensional and
 can be distinguished for the character with respect to the $C_2$ 
 rotation. It is $-2$ for $E_1$ and $2$ for $E_2$. \\
 The character table for the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_6    E     -E     2C6  -2C6   2C3  -2C3   C2    3C2' 3C2''
                                            -C2   -3C2' -3C2''
@@ -903,6 +1183,9 @@ G_7    2.00 -2.00  1.73 -1.73  1.00 -1.00  0.00  0.00  0.00     1
 G_8    2.00 -2.00 -1.73  1.73  1.00 -1.00  0.00  0.00  0.00     2
 G_9    2.00 -2.00  0.00  0.00 -2.00  2.00  0.00  0.00  0.00     3
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are three irreducible representations, all two dimensional. 
 They can be distinguished for the character with respect to the $C_6$ rotation.
 It is $\sqrt{3}$ according to $\Gamma_7$, $-\sqrt{3}$ according to $\Gamma_8$ 
@@ -918,6 +1201,9 @@ The $C_3$ axis of $D_3$ coincides with the $C_6$ axis of $D_6$ and the $C_2'$ ax
 of $D_3$ can coincide with the $C_2'$ axes of $D_6$ (case 1) or with the
 $C_2''$ axes of $D_6$ (case 2).\\
 The compatibility table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_6     A_1    A_2    B_1     B_2      E_1        E_2
 C_1     A      A       A       A       2 A        2 A
@@ -930,7 +1216,13 @@ D_2     A      B_1     B_2     B_3   B_2+B_3     A + B_1
 D_3_1   A_1    A_2     A_1     A_2      E          E
 D_3_2   A_1    A_2     A_2     A_1      E          E
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 The compatibility table for the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_6      G_7          G_8           G_9 
 C_1    2 G_2        2 G_2         2 G_2
@@ -940,9 +1232,12 @@ C_6    G_7 + G_8    G_9 + G_10    G_11 + G_12
 D_2       G_5          G_5           G_5
 D_3       G_4          G_4        G_5 + G_6
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
 \newpage
-\subsection{\color{web-blue}$C_{2v}\ (mm2)$} 
+{\color{coral}\section{$C_{2v}\ (mm2)$}}
+\color{black}
 This group has four elements: The identity, a rotation of $180^\circ$ about
 an axis ($C_2$) and two mirror planes ($\sigma_v$ and $\sigma_v'$) that contain 
 the $C_2$ axis.
@@ -957,6 +1252,8 @@ $x$, $y$, $z$, $(x=y, z=0)$, $(x=-y, z=0)$, $(x=z, y=0)$, $(x=-z, y=0)$,
 $(y=z, x=0)$, $(y=-z, x=0)$, $(y=x/\sqrt{3}, z=0)$, $(y=-x/\sqrt{3}, z=0)$, 
 $(y=\sqrt{3}x, z=0)$, $(y=-\sqrt{3}x, z=0)$. For the mirror planes there are
 the following possibilities:
+
+\begin{tcolorbox}
 \begin{footnotesize}
 \begin{verbatim}
          C_2                perp. to s_v           perp. to s_v'
@@ -980,10 +1277,14 @@ s)   y= m x, z=0                 z                 y=-x/m,  z=0    [70]
 t)   y=-m x, z=0            y= x/m,  z=0                z          [71]
 \end{verbatim}
 \end{footnotesize}
+\end{tcolorbox}
+
 where $m=\sqrt{3}$.
 There are therefore $18$ realizations of interest for solids. \\
 The character table is (isomorphic to $D_2$ with $C_2 \rightarrow C_2$,
 $\sigma_v \rightarrow C_2'$, $\sigma_v' \rightarrow C_2''$):
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_2v   E     C2    s_v    s_v'
 A_1    1.00  1.00  1.00  1.00      1
@@ -991,6 +1292,9 @@ A_2    1.00  1.00 -1.00 -1.00      2
 B_1    1.00 -1.00  1.00 -1.00      3
 B_2    1.00 -1.00 -1.00  1.00      4
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are four irreducible representations. $A_1$ is totally symmetric while
 $A_2$ is odd with respect to both mirror symmetries.  
 $B_1$ is even with respect to the mirror $\sigma_v$ and odd with respect to
@@ -1000,16 +1304,25 @@ it is important to make a definite choice for the planes $\sigma_v$ and $\sigma_
 We use the definition in the previous table. Therefore even or odd is with respect
 to the mirror planes given in this table. \\
 The character table of the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_2v   E     -E     C2    s_v   s_v'
                    -C2   -s_v  -s_v'
 G_5    2.00 -2.00  0.00  0.00  0.00     1
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There is only one irreducible representation $\Gamma_5$. \\
 The subgroups of $C_{2v}$ are $C_1$, $C_s$, and $C_2$. The axis of $C_2$ is 
 parallel to the $C_2$ axis of $C_{2v}$, while the mirror of $C_s$ can coincide
 with $\sigma_v$ (case 1) or with $\sigma_v'$ (case 2). \\
 The compatibility table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_2v    A_1      A_2       B_1       B_2
 C_1      A        A         A         A
@@ -1017,16 +1330,25 @@ C_s_1    A'       A''       A'        A''
 C_s_2    A'       A''       A''       A'
 C_2      A        A         B         B
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 The compatibility table for the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_2v     G_5
 C_1     2 G_2
 C_s     G_3 + G_4
 C_2     G_3 + G_4
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
 \newpage
-\subsection{\color{web-blue}$C_{3v}\ (3m)$} 
+{\color{coral}\section{$C_{3v}\ (3m)$}} 
+\color{black}
 This group has six elements: The identity, two rotations of $\pm120^\circ$ about
 an axis ($C_3$ and $C_3^2$) and three mirror planes ($3\sigma_v$) 
 that contain the $C_3$ axis.
@@ -1035,6 +1357,8 @@ rhombohedral (\texttt{ibrav=5}) and hexagonal (\texttt{ibrav=4}) Bravais lattice
 Its Laue class is $D_{3d}$. \\
 The $C_3$ axis can be: $z$, $x=y=z$, $x=-y=z$, $x=-y=-z$, $x=y=-z$.
 For the mirror planes there are the following possibilities:
+
+\begin{tcolorbox}
 \begin{footnotesize}
 \begin{verbatim}
       C_3        perp. to s_v       perp to s_v'     perp to s_v''
@@ -1046,19 +1370,30 @@ e)    x=-y=-z    x=z,  y=0          x=y,   z=0       y=-z,   x=0     [76]
 f)    x=y=-z     x=z,  y=0          y=z,   x=0       x=-y,   z=0     [77]
 \end{verbatim}
 \end{footnotesize}
+\end{tcolorbox}
+
 There are therefore $6$ realizations of interest for solids. \\
 The character table is (isomorphic to $D_3$ with $\sigma_v \rightarrow C_2$):
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_3v   E     2C3   3s_v
 A_1    1.00  1.00  1.00      1
 A_2    1.00  1.00 -1.00      2
 E      2.00 -1.00  0.00      3
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are three irreducible representations and since the three mirror planes
 are in the same class the choice of $\sigma_v$, $\sigma_v'$, or $\sigma_v''$ is
 irrelevant to distinguish the representations. $A_1$ is totally symmetric,
 $A_2$ is odd with respect to the mirror symmetries and $E$ is two dimensional. \\
 The character table of the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 C_3v   E     -E    2C3   -2C3  3s_v  -3s_v
@@ -1072,6 +1407,9 @@ G_4    0.00  0.00  0.00  0.00  0.00  0.00      1
 G_5    0.00  0.00  0.00  0.00  1.00 -1.00      2
 G_6    0.00  0.00  0.00  0.00 -1.00  1.00      3
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are three irreducible representations. $\Gamma_4$ is two dimensional, while
 $\Gamma_5$ and $\Gamma_6$ can be distinguished because for a mirror symmetry the
 functions are multiplied by $i$ according to $\Gamma_5$ and by $-i$ according to
@@ -1080,22 +1418,35 @@ The subgroups of $C_{3v}$ are $C_1$, $C_s$, and $C_3$. The axis of $C_3$ coincid
 with the axis of $C_{3v}$, while the mirror plane of $C_s$ coincides with
 one of the three mirrors of $C_{3v}$. \\
 The compatibility table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_3v    A_1      A_2      E
 C_1      A        A       A
 C_s      A'       A''    A' + A''
 C_3      A        A      E  + E*
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 The compatibility table for the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_3v    G_4        G_5      G_6
 C_1     2 G_2      G_2      G_2
 C_s    G_3 + G_4   G_3      G_4
 C_3    G_4 + G_5   G_6      G_6
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 
 \newpage
-\subsection{\color{web-blue}$C_{4v}\ (4mm)$} 
+{\color{coral}\section{$C_{4v}\ (4mm)$}} 
+\color{black}
 This group has eight elements: The identity, two rotations of $\pm90^\circ$ 
 about an axis ($C_4$ and $C_4^3$), a rotation of $180^\circ$ about the same axis 
 ($C_2$) and four mirror symmetries ($2\sigma_v$ and $2 \sigma_d$) with respect
@@ -1114,6 +1465,9 @@ $C_4$ axis is $z$ the axes perpendicular to the mirror planes are $x$, $y$
 There are therefore $3$ realizations of interest for solids. \\
 The character table is (isomorphic to $D_4$ with $\sigma_v \rightarrow C_2'$
 and $\sigma_d \rightarrow C_2''$):
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_4v   E     2C4   C2    2s_v  2s_d 
 A_1    1.00  1.00  1.00  1.00  1.00       1
@@ -1122,6 +1476,9 @@ B_1    1.00 -1.00  1.00  1.00 -1.00       3
 B_2    1.00 -1.00  1.00 -1.00  1.00       4
 E      2.00  0.00 -2.00  0.00  0.00       5
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are 5 irreducible representations. $A_1$ is totally symmetric, $E$ is
 two dimensional and $A_2$ is odd with respect to all mirror symmetries.
 To distinguish $B_1$ and $B_2$ we have to fix the mirror planes
@@ -1130,12 +1487,18 @@ The representation $B_1$ is even with respect to the mirror symmetries
 $\sigma_v$ and odd with respect to $\sigma_d$, while $B_2$ is odd with respect to
 $\sigma_v$ and even with respect to $\sigma_d$. \\
 The character table of the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_4v   E     -E    2C4   -2C4   C2    2s_v  2s_d
                                -C2   -2s_v -2s_d
 G_6    2.00 -2.00  1.41 -1.41  0.00  0.00  0.00      1
 G_7    2.00 -2.00 -1.41  1.41  0.00  0.00  0.00      2
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are two irreducible representations, both two dimensional. They can be
 distinguished from the character for a $C_4$ rotation. It is
 $\sqrt{2}$ according to $\Gamma_6$ and $-\sqrt{2}$ with respect to 
@@ -1147,6 +1510,9 @@ while the mirror plane of $C_s$ coincides with a $\sigma_v$
 mirror planes of $C_{2v}$ can coincide with the two planes $\sigma_v$ 
 (case 1) or with the two planes $\sigma_d$ (case 2).\\
 The compatibility table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_4v    A_1      A_2      B_1       B_2       E
 C_1      A        A        A        A        2 A
@@ -1157,7 +1523,13 @@ C_4      A        A        B        B      E  + E*
 C_2v_1   A_1      A_2      A_1      A_2   B_1 + B_2
 C_2v_2   A_1      A_2      A_2      A_1   B_1 + B_2
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 The compatibility table of the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_4v    G_6          G_7  
 C_1    2 G_2        2 G_2
@@ -1166,9 +1538,13 @@ C_2    G_3 + G_4    G_3 + G_4
 C_4    G_5 + G_6    G_7 + G_8
 C_2v    G_5          G_5
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 
 \newpage
-\subsection{\color{web-blue}$C_{6v}\ (6mm)$} 
+{\color{coral}\section{$C_{6v}\ (6mm)$}} 
+\color{black}
 This group has twelve elements: The identity, two rotations of $\pm60^\circ$ 
 about an axis ($C_6$ and $C_6^5$), two rotations of $\pm120^\circ$
 about the same axis ($C_3$ and $C_3^2$), a rotation of $180^\circ$ about 
@@ -1183,6 +1559,9 @@ are perpendicular to $x$ and to $(y=\pm \sqrt{3} x, z=0)$.
 There is therefore $1$ realization of interest for solids. \\
 The character table is (isomorphic to $D_6$ with $\sigma_d \rightarrow C_2'$
 and $\sigma_v \rightarrow C_2''$):
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_6v   E     2C6   2C3   C2    3s_d  3s_v 
 A_1    1.00  1.00  1.00  1.00  1.00  1.00      1
@@ -1192,6 +1571,9 @@ B_2    1.00 -1.00  1.00 -1.00 -1.00  1.00      4
 E_1    2.00  1.00 -1.00 -2.00  0.00  0.00      5
 E_2    2.00 -1.00 -1.00  2.00  0.00  0.00      6
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are six irreducible representations. $A_1$ is totally symmetric, while
 $A_2$ is odd with respect to all mirror symmetries. $B_1$ and $B_2$ can be
 distinguished for the behavior for a $\sigma_v$ and a
@@ -1202,6 +1584,9 @@ $\sigma_v$. $E_1$ and $E_2$ are both two dimensional and can be
 distinguished by the character of a $C_6$ rotation. It is
 $1$ according to $E_1$ and $-1$ according to $E_2$.\\
 The character table of the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_6v   E     -E     2C6  -2C6   2C3  -2C3   C2    3s_d  3s_v
                                            -C2   -3s_d -3s_v
@@ -1209,6 +1594,9 @@ G_7    2.00 -2.00  1.73 -1.73  1.00 -1.00  0.00  0.00  0.00    1
 G_8    2.00 -2.00 -1.73  1.73  1.00 -1.00  0.00  0.00  0.00    2
 G_9    2.00 -2.00  0.00  0.00 -2.00  2.00  0.00  0.00  0.00    3
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are three two-dimensional irreducible representations that can be 
 distinguished for the character of the $C_6$ rotations, equal to $\sqrt{3}$
 according to $\Gamma_7$, to $-\sqrt{3}$ according to $\Gamma_8$ and to
@@ -1227,6 +1615,9 @@ or with one of the planes $\sigma_v$ (case 2).
 The three mirror planes of $C_{3v}$ can coincide with the three mirrors 
 $\sigma_d$ of $C_{6v}$ (case 1) or with the three mirrors $\sigma_v$ (case 2).\\
 The compatibility table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_6v    A_1      A_2      B_1       B_2      E_1           E_2
 C_1      A        A        A         A       2 A           2 A
@@ -1240,7 +1631,13 @@ C_2v_2   A_1      A_2      B_2       B_1   B_1 + B_2    A_1 + A_2
 C_3v_1   A_1      A_2      A_1       A_2       E            E  
 C_3v_2   A_1      A_2      A_2       A_1       E            E
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 The compatibility table for the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_6v    G_7          G_8             G_9
 C_1    2 G_2        2 G_2           2 G_2
@@ -1251,9 +1648,12 @@ C_6    G_7 + G_8    G_9 + G_10     G_11 + G_12
 C_2v    G_5          G_5             G_5
 C_3v    G_4          G_4           G_5 + G_6
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
 \newpage
-\subsection{\color{web-blue}$C_{2h}\ (2/m)$} 
+{\color{coral}\section{$C_{2h}\ (2/m)$}} 
+\color{black}
 This group has four elements: The identity, a rotation of $180^\circ$ 
 about an axis ($C_2$), inversion and a mirror symmetry with respect to 
 a plane perpendicular to the $C_2$ axis.
@@ -1273,6 +1673,9 @@ $(y=-x/\sqrt{3}, z=0)$ \texttt{[94]}. The mirror plane $\sigma_h$
 is perpendicular to the axis. There are therefore $13$ realizations 
 of interest for solids. \\
 The character table is (using $C_{2h}=C_2 \times C_i$):
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_2h   E     C2    i     s_h
 A_g    1.00  1.00  1.00  1.00       1
@@ -1280,11 +1683,17 @@ B_g    1.00 -1.00  1.00 -1.00       2
 A_u    1.00  1.00 -1.00 -1.00       3
 B_u    1.00 -1.00 -1.00  1.00       4
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are four irreducible representations, two even $A_g$ and $B_g$ and
 two odd $A_u$ and $B_u$ with respect to inversion. $A$ and $B$ representations
 are distinguished by the fact that $A$ are even with respect
 to the $C_2$ rotation and $B$ are odd. \\
 The character table of the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 C_2h   E     -E    C2    -C2   i     -i    s_h   -s_h 
@@ -1300,6 +1709,9 @@ G_4+   0.00  0.00 -1.00  1.00  0.00  0.00 -1.00  1.00     2
 G_3-   0.00  0.00  1.00 -1.00  0.00  0.00 -1.00  1.00     3
 G_4-   0.00  0.00 -1.00  1.00  0.00  0.00  1.00 -1.00     4
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are four one-dimensional irreducible representations. $\Gamma_3^+$
 and $\Gamma_4^+$ are even with respect to inversion, while
 $\Gamma_3^-$ and $\Gamma_4^-$ are odd. $\Gamma_3$ and $\Gamma_4$ 
@@ -1310,6 +1722,9 @@ The subgroups of $C_{2h}$ are $C_1$, $C_i$, $C_s$, and $C_2$. The
 axis of $C_2$ coincides with the axis of $C_{2h}$, while the 
 mirror of $C_s$ coincides with the mirror of $C_{2h}$.\\
 The compatibility table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_2h     A_g      B_g     A_u     B_u
 C_1       A        A       A       A
@@ -1317,7 +1732,13 @@ C_i      A_g      A_g     A_u     A_u
 C_s       A'       A''     A''     A'
 C_2       A        B       A       B
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 The compatibility table of the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_2h     G_3+      G_4+     G_3-     G_4- 
 C_1      G_2       G_2      G_2      G_2
@@ -1325,24 +1746,40 @@ C_i      G_2+      G_2+     G_2-     G_2-
 C_s      G_3       G_4      G_4      G_3
 C_2      G_3       G_4      G_3      G_4
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 This group has also projective representations corresponding to
 $IC_2 = \beta C_2 I$ and $\beta=-1$ ($I$ is the inversion).
 With the representations of the $C_2$ point group one can build [11]:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 C_2h      E     
 BA      2.00       1
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 With the representations of the $C_2$ double point group we have:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 C_2h      E     
 G_4G_3  2.00       1
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 All elements not explicitly indicated have zero character.
 
 \newpage
-\subsection{\color{web-blue}$C_{3h}\ (\bar 6)$}  
+{\color{coral}\section{$C_{3h}\ (\bar 6)$}}  
+\color{black}
 This group has six elements: The identity, two rotation of $\pm120^\circ$ 
 about an axis ($C_3$ and $C_3^2$), a mirror symmetry with respect to a 
 plane perpendicular to the $C_3$ axis and the product of these operations, 
@@ -1354,6 +1791,9 @@ Its Laue class is $C_{6h}$. \\
 The $C_3$ axis must be parallel to the $z$ axis. There is therefore
 $1$ realization of interest for solids. \\
 The character table is (using $C_{3h}=C_3 \times \sigma_h$):
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 C_3h   E     C3    C3^2  s_h   S3    S3^5 
@@ -1373,6 +1813,9 @@ A''    0.00  0.00  0.00  0.00  0.00  0.00      4
 E''    0.00  0.87 -0.87  0.00 -0.87  0.87      5
 E''*   0.00 -0.87  0.87  0.00  0.87 -0.87      6
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 The group has six irreducible representations. The representation 
 $A'$, $E'$, and $E'^*$ are even with respect to the mirror symmetry, while
 $A''$, $E''$, and $E''^*$ are odd. The representations $A$, $E$, and $E*$
@@ -1380,7 +1823,9 @@ can be distinguished for the behavior for a $C_3$ rotation.
 The functions are multiplied by $1$ according to $A$, by $e^{i\phi}$ according to 
 $E$ representations and by $e^{-i\phi}$ according to $E^*$ ($\phi=\pi /3$). \\
 The character table of the double group is:
-\begin{footnotesize}
+
+\begin{tcolorbox}
+\begin{scriptsize}
 \begin{verbatim}
      real part
 C_3h  E     -E    C3    -C3   C3^2  -C3^2  s_h  -s_h   S3   -S3   S3^5 -S3^5
@@ -1400,7 +1845,9 @@ G_10  0.00  0.00 -0.87  0.87  0.87 -0.87  1.00 -1.00 -0.50  0.50  0.50 -0.50 4
 G_11  0.00  0.00  0.00  0.00  0.00  0.00 -1.00  1.00 -1.00  1.00  1.00 -1.00 5
 G_12  0.00  0.00  0.00  0.00  0.00  0.00  1.00 -1.00  1.00 -1.00 -1.00  1.00 6
 \end{verbatim}
-\end{footnotesize}
+\end{scriptsize}
+\end{tcolorbox}
+
 There are six one-dimensional irreducible representations that can be
 distinguished for the behavior for a $S_3^5$ operation. The functions
 are multiplied by $e^{i\psi/2}$ according to $\Gamma_7$, by $-e^{i5\psi/2}$
@@ -1412,22 +1859,34 @@ The subgroups of $C_{3h}$ are $C_1$, $C_s$, and $C_3$. The axis of $C_3$
 coincides with the rotation axis of $C_{3h}$, while the mirror of $C_s$ coincides
 with the mirror $\sigma_h$ of $C_{3h}$. \\ 
 The compatibility table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_3h     A'        E'       E'*      A''        E''        E''* 
 C_1      A         A        A        A          A          A
 C_s      A'        A'       A'       A''        A''        A''
 C_3      A         E        E*       A          E          E*
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 The compatibility table of the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_3h     G_7      G_8      G_9      G_10      G_11      G_12
 C_1      G_2      G_2      G_2      G_2       G_2       G_2
 C_s      G_3      G_4      G_4      G_3       G_4       G_3
 C_3      G_4      G_5      G_4      G_5       G_6       G_6
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
 \newpage
-\subsection{\color{web-blue}$C_{4h}\ (4/m)$}  
+{\color{coral}\section{$C_{4h}\ (4/m)$}}  
+\color{black}
 This group has eight elements: The identity, two rotation of $\pm90^\circ$ 
 about an axis ($C_4$ and $C_4^3$), a rotation of $180^\circ$ about the
 same axis ($C_2$), inversion, and the product of inversion with previous
@@ -1442,6 +1901,9 @@ The $C_4$ axis can be parallel to $x$ \texttt{[98]}, $y$ \texttt{[97]},
 or $z$ \texttt{[96]}. There are therefore
 $3$ realizations of interest for solids. \\
 The character table is (using $C_{4h}=C_4 \times C_i$):
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 C_4h   E     C4    C2    C4^3  i     S4^3  s_h   S4   
@@ -1465,6 +1927,9 @@ B_u    0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00      6
 E_u    0.00  1.00  0.00 -1.00  0.00 -1.00  0.00  1.00      7
 E_u*   0.00 -1.00  0.00  1.00  0.00  1.00  0.00 -1.00      8
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are eight irreducible representations. $A_g$, $B_g$, $E_g$, and
 $E_g^*$ are even with respect to inversion while $A_u$, $B_u$, $E_u$,
 and $E_u^*$ are odd. $A$, $B$, $E$, and $E^*$ can be recognized for the
@@ -1472,7 +1937,9 @@ behavior for a $C_4$ rotation. The functions are multiplied by
 $1$ according to $A$ representations, by $-1$ according to $B$,
 by $i$ according to $E$ and by $-i$ according to $E^*$. \\
 The character table for the double group is:
-\begin{footnotesize}
+
+\begin{tcolorbox}
+\begin{scriptsize}
 \begin{verbatim}
      real part
 C_4h   E     -E    C4    -C4   C2    -C2   C4^3  -C4^3 i     -i    S4^3  -S4^3
@@ -1515,9 +1982,10 @@ G_5-  -1.00  1.00  0.71 -0.71     5
 G_6-   1.00 -1.00 -0.71  0.71     6
 G_7-  -1.00  1.00 -0.71  0.71     7
 G_8-   1.00 -1.00  0.71 -0.71     8
-
 \end{verbatim}
-\end{footnotesize}
+\end{scriptsize}
+\end{tcolorbox}
+
 There are eight irreducible representations. $\Gamma_5^+$, $\Gamma_6^+$,
 $\Gamma_7^+$, and $\Gamma_8^+$ are even with respect to inversion, while
 $\Gamma_5^-$, $\Gamma_6^-$, $\Gamma_7^-$, and $\Gamma_8^-$ are odd.
@@ -1531,6 +1999,9 @@ and $S_4$.  The axes of $C_2$, $C_4$, $C_{2h}$, and $S_4$
 coincide with the $C_4$ axis of $C_{4h}$.
 The mirror $\sigma$ of $C_s$ coincides with the mirror $\sigma_h$ of $C_{4h}$. \\
 The compatibility table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_4h     A_g    B_g    E_g    E_g^*    A_u    B_u    E_u     E_u^*
 C_1      A      A      A       A        A      A      A       A
@@ -1541,7 +2012,13 @@ C_4      A      B      E      E*        A      B      E       E*
 C_2h     A_g    A_g    B_g    B_g       A_u    A_u    B_u     B_u
 S_4      A      B      E      E*        B      A      E*      E 
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 The compatibility table for the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_4h     G_5+    G_6+   G_7+   G_8+    G_5-   G_6-    G_7-    G_8-
 C_1      G_2     G_2    G_2    G_2     G_2    G_2     G_2     G_2
@@ -1552,9 +2029,15 @@ C_4      G_5     G_6    G_7    G_8     G_5    G_6     G_7     G_8
 C_2h     G_3+    G_4+   G_3+   G_4+    G_3-   G_4-    G_3-    G_4-
 S_4      G_5     G_6    G_7    G_8     G_7    G_8     G_5     G_6
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 This group has also projective representations corresponding to
 $I 4z = \beta 4z I$ and $\beta=-1$ ($I$ is the inversion).
 With the representations of the $C_4$ point group one can obtain [11]:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 C_4h      E         2z
@@ -1565,7 +2048,13 @@ C_4h      E         2z
 E* E     0.00      0.00     1
 BA       0.00      0.00     2
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 With the representations of the $C_4$ double point group we have:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 C_4h      E         2z
@@ -1576,10 +2065,14 @@ C_4h      E         2z
 G_6G_8   0.00     -2.00     1
 G_7G_5   0.00      2.00     2
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 All elements not explicitly indicated have zero character.
 
 \newpage
-\subsection{\color{web-blue}$C_{6h}\ (6/m)$}  
+{\color{coral}\section{$C_{6h}\ (6/m)$}}  
+\color{black}
 This group has twelve elements: The identity, two rotations of $\pm60^\circ$ 
 about an axis ($C_6$ and $C_6^5$), two rotations of $\pm120^\circ$
 about the same axis ($C_3$ and $C_3^2$), a rotation of $180^\circ$ about the
@@ -1594,7 +2087,9 @@ Its Laue class is $C_{6h}$. \\
 The $C_6$ axis is parallel to the $z$ axis. There is therefore
 $1$ realization of interest for solids. \\
 The character table is (using $C_{6h}=C_6 \times C_i$):
-\begin{footnotesize}
+
+\begin{tcolorbox}
+\begin{scriptsize}
 \begin{verbatim}
     real part
 C_6h E     C6    C3    C2    C3^2  C6^5  i     S3^5  S6^5  s_h   S6    S3   
@@ -1626,7 +2121,9 @@ E1u* 0.00 -0.87 -0.87  0.00  0.87  0.87  0.00  0.87  0.87  0.00 -0.87 -0.87 10
 E_2u 0.00  0.87 -0.87  0.00  0.87 -0.87  0.00 -0.87  0.87  0.00 -0.87  0.87 11
 E2u* 0.00 -0.87  0.87  0.00 -0.87  0.87  0.00  0.87 -0.87  0.00  0.87 -0.87 12
 \end{verbatim}
-\end{footnotesize}
+\end{scriptsize}
+\end{tcolorbox}
+
 There are $12$ one-dimensional irreducible representations. $A_g$, 
 $B_g$, $E_{1g}$, $E_{1g}^*$, $E_{2g}$, and $E_{2g}^*$ are even with respect to
 inversion, while $A_u$, $B_u$, $E_{1u}$, $E_{1u}^*$, $E_{2u}$, and $E_{2u}^*$
@@ -1636,7 +2133,9 @@ according to $A$, by $-1$ according to $B$, by $e^{i\psi}$ according to
 $E_1$, by $e^{-i\psi}$ according to $E_1^*$, by $e^{i2 \psi}$ according to
 $E_2$ and $e^{-i2 \psi}$ according to $E_2^*$ ($\psi=\pi/3$). \\
 The character table for the double group is:
-\begin{footnotesize}
+
+\begin{tcolorbox}
+\begin{scriptsize}
 \begin{verbatim}
     real part
 C_6h  E     -E    C6    -C6   C3    -C3   C2    -C2   C3^2  -C3^2 C6^5  -C6^5
@@ -1696,7 +2195,9 @@ G_10- 0.00 0.00 -0.50  0.50  0.87 -0.87 -1.00  1.00 -0.87  0.87  0.50 -0.50 10
 G_11- 0.00 0.00 -1.00  1.00  0.00  0.00  1.00 -1.00  0.00  0.00  1.00 -1.00 11
 G_12- 0.00 0.00  1.00 -1.00  0.00  0.00 -1.00  1.00  0.00  0.00 -1.00  1.00 12
 \end{verbatim} 
-\end{footnotesize}
+\end{scriptsize}
+\end{tcolorbox}
+
 There are twelve one-dimensional irreducible representations. 
 $\Gamma_7^+$, $\Gamma_8^+$, $\Gamma_9^+$, $\Gamma_{10}^+$, $\Gamma_{11}^+$,
 and $\Gamma_{12}^+$ are even with respect to inversion, while 
@@ -1714,7 +2215,8 @@ $C_{2h}$, $C_{3h}$, and $S_6$. The axes of $C_2$, $C_3$, $C_6$, $C_{2h}$,
 $C_{3h}$, and of $S_6$ coincide with the $C_6$ axis of $C_{6h}$. The mirror 
 plane of $C_s$ coincides with the mirror plane of $C_{6h}$.\\
 The compatibility table is:
-\begin{footnotesize}
+\begin{tcolorbox}
+\begin{scriptsize}
 \begin{verbatim}
 C_6h  A_g  B_g  E_1g  E_1g*  E_2g  E_2g*  A_u  B_u  E_1u  E_1u*  E_2u  E_2u*
 C_1   A    A    A     A      A     A      A    A    A     A      A     A
@@ -1727,8 +2229,12 @@ C_2h  A_g  B_g  B_g   B_g    A_g   A_g    A_u  B_u  B_u   B_u    A_u   A_u
 C_3h  A'   A''  E''   E''*   E'*   E'     A''  A'   E'    E'*    E''*  E'' 
 S_6   A_g  A_g  E_g   E_g*   E_g*  E_g    A_u  A_u  E_u   E_u*   E_u*  E_u
 \end{verbatim}
-\end{footnotesize}
+\end{scriptsize}
+\end{tcolorbox}
+
 The compatibility table for the double group is:
+
+\begin{tcolorbox}
 \begin{footnotesize}
 \begin{verbatim}
 C_6h   G_7+ G_8+ G_9+ G_10+ G_11+ G_12+ G_7- G_8- G_9- G_10-  G_11- G_12-
@@ -1743,9 +2249,14 @@ C_3h   G_7  G_8  G_9   G_10  G_11 G_12  G_9  G_10 G_7   G_8   G_12  G_11
 S_6    G_4+ G_5+ G_4+  G_5+  G_6+ G_6+  G_4- G_5- G_4-  G_5-  G_6-  G_6-
 \end{verbatim}
 \end{footnotesize}
+\end{tcolorbox}
+
 This group has also projective representations corresponding to
 $IC_2 = \beta C_2 I$ and $\beta=-1$ ($I$ is the inversion).
 With the representations of the $C_6$ point group one can obtain [11]:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 C_6h      E        3z        3-z
@@ -1757,7 +2268,12 @@ E_1*E_2  0.00     -1.73      1.73    1
 E_2*E_1  0.00      1.73     -1.73    2
 BA       0.00      0.00      0.00    3
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 With the representations of the $C_6$ double point group we have:
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 C_6h      E        3z        3-z
@@ -1769,10 +2285,14 @@ G_8G_10  0.00     -1.73      1.73    1
 G_12G_11 0.00      0.00      0.00    2
 G_9G_7   0.00      1.73     -1.73    3
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 All elements not explicitly indicated have zero character.
 
 \newpage
-\subsection{\color{web-blue}$D_{2h}\ (mmm)$ or $V_h$}  
+{\color{coral}\section{$D_{2h}\ (mmm)$ or $V_h$}}  
+\color{black}
 This group has eight elements: The identity, three rotation of $180^\circ$
 about three perpendicular axes ($C_2$, $C_2'$, and $C_2''$),
 inversion and three mirror symmetries with respect to planes perpendicular to
@@ -1806,6 +2326,8 @@ The mirrors $\sigma_v$, $\sigma_v'$, and $\sigma_v''$  are perpendicular to
 the $C_2$, $C_2'$, and $C_2''$ axes, respectively.
 There are therefore $6$ realizations of interest in solids. \\
 The character table is (using $D_{2h}=D_2 \times C_i$):
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_2h   E     C2     C2'  C2''  i     s_v   s_v'  s_v''
 A_g    1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00     1 
@@ -1817,6 +2339,9 @@ B_1u   1.00  1.00 -1.00 -1.00 -1.00 -1.00  1.00  1.00     6
 B_2u   1.00 -1.00  1.00 -1.00 -1.00  1.00 -1.00  1.00     7
 B_3u   1.00 -1.00 -1.00  1.00 -1.00  1.00  1.00 -1.00     8
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are eight one-dimensional irreducible representations. $A_g$, $B_{1g}$,
 $B_{2g}$, and $B_{3g}$ are even with respect to inversion while $A_u$, $B_{1u}$,
 $B_{2u}$, and $B_{3u}$ are odd. $A$, $B_1$, $B_2$, and $B_3$ can be distinguished,
@@ -1828,12 +2353,18 @@ $B_2$ is even with respect to $C_2'$ and odd with respect to $C_2$ and $C_2''$,
 and $B_3$ is even with respect to $C_2''$ and odd with respect to
 $C_2$ and $C_2'$.\\
 The character table for the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_2h   E     -E     C2    C2'  C2''  i     -i     s_v   s_v' s_v''
                    -C2   -C2'  -C2''             -s_v  -s_v' -s_v''
 G_5+   2.00 -2.00  0.00  0.00  0.00  2.00 -2.00  0.00  0.00  0.00    1
 G_5-   2.00 -2.00  0.00  0.00  0.00 -2.00  2.00  0.00  0.00  0.00    2
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are two two-dimensional irreducible representations. $\Gamma_5^+$ is 
 even with respect to inversion and $\Gamma_5^-$ is odd. \\
 The subgroups of $D_{2h}$ are $C_1$, $C_i$, $C_s$, $C_2$, $D_2$, $C_{2v}$, and
@@ -1849,6 +2380,9 @@ in case 1,4, $\sigma_v$ and $\sigma_v''$ in case 2,5, and $\sigma_v$ and
 $\sigma_v'$ in case 3,6. The two mirrors must be assigned to $\sigma_v$ and
 $\sigma_v'$ of $C_{2v}$ with the same conventions used to define the character 
 table of $C_{2v}$. We have therefore $6$ cases summarized in the following table:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_2v            C_2            s_v        s_v'     case
 D_2h            C_2            s_v'       s_v''      1
@@ -1858,11 +2392,17 @@ D_2h            C_2'           s_v''      s_v        5
 D_2h            C_2''          s_v        s_v'       3
 D_2h            C_2''          s_v'       s_v        6
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 The axis of $C_{2h}$ is parallel to $C_2$ (case 1),
 to $C_2'$ (case 2) or to $C_2''$ (case 3) and the mirror is perpendicular
 to the axis, so it coincides with $\sigma_v$ in case 1, with $\sigma_v'$ in
 case 2 and with $\sigma_v''$ in case 3. \\
 The compatibility table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_2h     A_g    B_1g    B_2g    B_3g    A_u    B_1u    B_2u    B_3u     
 C_1      A      A       A       A       A      A       A       A
@@ -1884,8 +2424,14 @@ C_2h_1   A_g    A_g     B_g     B_g     A_u    A_u     B_u     B_u
 C_2h_2   A_g    B_g     A_g     B_g     A_u    B_u     A_u     B_u   
 C_2h_3   A_g    B_g     B_g     A_g     A_u    B_u     B_u     A_u   
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 The compatibility table for the double group does not distinguish the
 different cases: 
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_2h       G_5+          G_5-
 C_1        2 G_2         2 G_2
@@ -1896,10 +2442,16 @@ D_2        G_5           G_5
 C_2v       G_5           G_5
 C_2h       G_3+ + G_4+   G_3- + G_4-
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 $D_{2h}$ has also projective representations corresponding to
 $\beta=1$ and $\gamma=-1$ where $I 2z = \beta 2z I$, 
 $I 2x = \gamma 2x I$ ($I$ is the inversion). With the representations
 of the $D_2$ point group we have [11]:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 D_2h      E         2z       i2z
@@ -1909,7 +2461,12 @@ B_2B_3   2.00     -2.00      0.00     2
 AB_1     0.00      0.00      0.00     1
 B_2B_3   0.00      0.00      0.00     2
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 With the representations of the $D_2$ double point group we have:
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 D_2h      E         2z       i2z
@@ -1919,9 +2476,15 @@ G_5-y    2.00      0.00      0.00     2
 G_5y     0.00      0.00     -2.00     1
 G_5-y    0.00      0.00      2.00     2
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 All elements not explicitly indicated have zero character.
 There are also projective representations corresponding to $\beta=-1$ 
 and $\gamma=1$. With the representations of the $D_2$ point group we have:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 D_2h      E        2x        i2x
@@ -1931,7 +2494,13 @@ B_1B_3   2.00     -2.00      0.00     2
 AB_2     0.00      0.00      0.00     1
 B_1B_3   0.00      0.00      0.00     2
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 With the representations of the $D_2$ double point group we have:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 D_2h      E        2x        i2x
@@ -1941,9 +2510,15 @@ G_5-z    2.00      0.00      0.00     2
 G_5z     0.00      0.00     -2.00     1
 G_5-z    0.00      0.00      2.00     2
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 Finally there are projective representations corresponding to
 $\beta=-1$ and $\gamma=-1$. With the representations of the $D_2$ point
 group we have: 
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 D_2h      E         2y       i2y
@@ -1953,7 +2528,13 @@ B_1B_2   2.00     -2.00      0.00     2
 AB_3     0.00      0.00      0.00     1
 B_1B_2   0.00      0.00      0.00     2
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 With the representations of the $D_2$ double point group we have:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 D_2h      E         2y       i2y
@@ -1963,9 +2544,13 @@ G_5-x    2.00      0.00      0.00     2
 G_5x     0.00      0.00     -2.00     1
 G_5-x    0.00      0.00      2.00     2
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 
 \newpage
-\subsection{\color{web-blue}$D_{3h}\ (\bar 62m)$} 
+{\color{coral}\section{$D_{3h}\ (\bar 62m)$}} 
+\color{black}
 This group has twelve elements: The identity, two rotations of $\pm120^\circ$
 about an axis ($C_3$ and $C_3^2$), three rotations of $180^\circ$
 about three axes ($3C_2$) perpendicular to the $C_3$ axis,
@@ -1987,6 +2572,9 @@ $3\sigma_v$ are perpendicular to the $3C_2$ axes of case (b) and in case (b)
 they are perpendicular to the $3C_2$ axes of case (a).
 There are therefore $2$ realizations of interest for solids. \\
 The character table is (using $D_{3h}=D_3 \times \sigma_h$):
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_3h   E     2C3   3C2   s_h   2S3   3s_v 
 A'_1   1.00  1.00  1.00  1.00  1.00  1.00     1
@@ -1996,6 +2584,9 @@ A''1   1.00  1.00  1.00 -1.00 -1.00 -1.00     4
 A''2   1.00  1.00 -1.00 -1.00 -1.00  1.00     5
 E''    2.00 -1.00  0.00 -2.00  1.00  0.00     6
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are six irreducible representations. $A_1'$, $A_2'$, and $E'$ are
 even with respect to the mirror $\sigma_h$, while
 $A_1''$, $A_2''$, and $E''$ are odd. The representations $E$ are
@@ -2003,6 +2594,8 @@ two dimensional. The one-dimensional representations $A_1$ and $A_2$ can
 be distinguished because $A_1$ is even with respect to the $C_2$ rotations
 while $A_2$ is odd. \\
 The character table of the double group is:
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_3h   E     -E    2C3   -2C3   3C2'  s_h  2S3   -2S3   3s_v
                                -3C2' -s_h'             -3s_v
@@ -2010,6 +2603,9 @@ G_7    2.00 -2.00  1.00 -1.00  0.00  0.00  1.73 -1.73  0.00      1
 G_8    2.00 -2.00  1.00 -1.00  0.00  0.00 -1.73  1.73  0.00      2
 G_9    2.00 -2.00 -2.00  2.00  0.00  0.00  0.00  0.00  0.00      3
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are three two-dimensional representations. They can be distinguished
 for the character of the symmetry operations with respect to the $S_3$
 operations: $\sqrt{3}$ according to $\Gamma_7$, $-\sqrt{3}$ according
@@ -2032,6 +2628,9 @@ The three mirror planes of $C_{3v}$ coincide with the three mirror planes
 $\sigma_v$ of $D_{3h}$. $\sigma_h$ of $C_{3h}$ coincides
 with $\sigma_h$ of $D_{3h}$. \\
 The compatibility table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_3h      A_1'       A_2'       E'        A_1''      A_2''      E''
 C_1        A          A         2A         A          A        2 A
@@ -2045,7 +2644,13 @@ C_2v_2     A_1        B_1    A_1 + B_1     A_2        B_2    A_2 + B_2
 C_3v       A_1        A_2        E         A_2        A_1        E
 C_3h       A'         A'      E' + E'*     A''        A''    E'' + E''*
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 The compatibility table for the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_3h       G_7           G_8              G_9
 C_1        2 G_2         2 G_2          2 G_2
@@ -2057,9 +2662,13 @@ C_2v       G_5           G_5              G_5
 C_3v       G_4           G_4            G_5 + G_6
 C_3h       G_7 + G_8     G_9 + G_10     G_11 + G_12
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 
 \newpage
-\subsection{\color{web-blue}$D_{4h}\ (4/mmm)$} 
+{\color{coral}\section{$D_{4h}\ (4/mmm)$}} 
+\color{black}
 This group has sixteen elements: The identity, two rotations of $\pm90^\circ$
 about an axis ($C_4$ and $C_4^3$), a rotation of $180^\circ$ about the 
 same axis ($C_2$), four rotations of $180^\circ$ about four axes ($2C_2'$
@@ -2082,6 +2691,9 @@ When the $C_4$ axis is $z$ the four $C_2$ axes are : $x$, $y$ ($2C_2'$),
 ($y=\pm x$, $z=0$) ($2C_2''$).  
 There are therefore $3$ realizations of interest for solids. \\
 The character table is (using $D_{4h}=D_4 \times C_i$):
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_4h   E     2C4   C2    2C2'  2C2'' i     2S4   s_h   2s_v  2s_d 
 A_1g   1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00    1
@@ -2095,6 +2707,9 @@ B_1u   1.00 -1.00  1.00  1.00 -1.00 -1.00  1.00 -1.00 -1.00  1.00    8
 B_2u   1.00 -1.00  1.00 -1.00  1.00 -1.00  1.00 -1.00  1.00 -1.00    9
 E_u    2.00  0.00 -2.00  0.00  0.00 -2.00  0.00  2.00  0.00  0.00    10
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are ten irreducible representations. $A_{1g}$, $A_{2g}$, $B_{1g}$, 
 $B_{2g}$, and $E_g$ are even with respect to inversion, while 
 $A_{1u}$, $A_{2u}$, $B_{1u}$, $B_{2u}$, and $E_u$ are odd.
@@ -2104,7 +2719,9 @@ $A_1$ is even and $A_2$ is odd with respect to both rotations,
 $B_1$ is even with respect to $C_2'$ and odd with respect to $C_2''$,
 $B_2$ is odd with respect to $C_2'$ and even with respect to $C_2''$. \\
 The character table for the double group is:
-\begin{footnotesize}
+
+\begin{tcolorbox}
+\begin{scriptsize}
 \begin{verbatim}
 D_4h   E     -E    2C4   -2C4   C2    2C2' 2C2'' i     -i    2S4   -2S4   s_h 
                                -C2   -2C2' -2C2'                         -s_h 
@@ -2120,7 +2737,9 @@ G_7+   0.00  0.00      2
 G_6-   0.00  0.00      3
 G_7-   0.00  0.00      4
 \end{verbatim}
-\end{footnotesize}
+\end{scriptsize}
+\end{tcolorbox}
+
 There are four two dimensional representations. $\Gamma_6^+$ and $\Gamma_7^+$
 are even with respect to inversion while $\Gamma_6^-$ and $\Gamma_7^-$ are 
 odd. $\Gamma_6$ and $\Gamma_7$ can be distinguished for the character with
@@ -2182,7 +2801,9 @@ coincide with mirrors $\sigma_v$ of $D_{4h}$ (case 2).
 The four-fold rotoinversion axis of $S_4$ coincides with the $C_4$ axis of 
 $D_{4h}$. \\
 The compatibility table is:
-\begin{footnotesize}
+
+\begin{tcolorbox}
+\begin{scriptsize}
 \begin{verbatim}
 D_4h    A_1g   A_2g   B_1g   B_2g   E_g     A_1u  A_2u   B_1u  B_2u  E_u
 C_1      A      A      A      A     2 A      A     A     A     A     2 A
@@ -2213,8 +2834,13 @@ D_2d_1   A_1    A_2    B_1    B_2      E     B_1   B_2   A_1   A_2      E
 D_2d_2   A_1    A_2    B_2    B_1      E     B_1   B_2   A_2   A_1      E
 S_4      A      A      B      B    E + E*    B     B     A     A      E + E* 
 \end{verbatim}
-\end{footnotesize}
+\end{scriptsize}
+\end{tcolorbox}
+
 The compatibility table for the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_4h       G_6+          G_7+          G_6-         G_7-
 C_1       2 G_2         2 G_2         2 G_2        2 G_2
@@ -2232,10 +2858,16 @@ D_2h        G_5+         G_5+          G_5-         G_5-
 D_2d        G_6          G_7           G_7          G_6
 S_4       G_5 + G_6    G_7 + G_8    G_7 + G_8    G_5 + G_6
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 $D_{4h}$ has also projective representations corresponding to
 $\beta=1$ and $\gamma=-1$ where $IC_{4z} = \beta C_{4z} I$, 
 $IC_{2x} = \gamma C_{2x} I$ ($I$ is the inversion).
 With the representations of the $D_4$ point group one can obtain [11]:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 D_4h      E        4z        2z     4-z      i4z      i2z     i4-z
@@ -2249,7 +2881,13 @@ B_1B_2   0.00      0.00     0.00    0.00     0.00     0.00    0.00    2
 Ey       0.00      0.00     0.00    0.00     0.00     0.00    0.00    3
 E-y      0.00      0.00     0.00    0.00     0.00     0.00    0.00    4
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 With the representations of the double point group we have:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 D_4h      E        4z        2z     4-z      i4z      i2z     i4-z
@@ -2263,10 +2901,16 @@ G_6-y    0.00      0.00     0.00    0.00     1.41     2.00   -1.41    2
 G_7y     0.00      0.00     0.00    0.00    -1.41     2.00    1.41    3
 G_7-y    0.00      0.00     0.00    0.00     1.41    -2.00   -1.41    4
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 All elements not explicitly indicated have zero character.
 There are also projective representations corresponding to $\beta=-1$ 
 and $\gamma=1$. With the representations of the $D_4$ point group one
 can obtain:  
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 D_4h      E      2z        2x      2y      i2x     i2y
@@ -2275,14 +2919,26 @@ A_2B_2   2.00    2.00    -2.00   -2.00     0.00    0.00     2
 Ez       2.00   -2.00     0.00    0.00    -2.00   -2.00     3
 E-z      2.00   -2.00     0.00    0.00     2.00    2.00     4
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 With the representations of the $D_4$ double point group we have:  
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 D_4h      E      2z        2x      2y      i2x     i2y
 G_6G_7z  4.00    0.00     0.00    0.00     0.00    0.00     1
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are also projective representations corresponding to $\beta=-1$ 
 and $\gamma=-1$. With the representations of the $D_4$ point group we have:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 D_4h      E      2z      2xy     2x-y     i2xy    i2x-y
@@ -2291,15 +2947,25 @@ A_2B_1   2.00    2.00   -2.00   -2.00     0.00    0.00     2
 Ex       2.00   -2.00    0.00    0.00    -2.00    2.00     3
 E-x      2.00   -2.00    0.00    0.00     2.00   -2.00     4
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 With the representations of the $D_4$ double point group we have:  
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 D_4h      E      2z      2xy     2x-y     i2xy    i2x-y
 G_6G_7x  4.00    0.00    0.00    0.00     0.00    0.00     1
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 
 \newpage
-\subsection{\color{web-blue}$D_{6h}\ (6/mmm)$} 
+{\color{coral}\section{$D_{6h}\ (6/mmm)$}} 
+\color{black}
 This group has twenty-four elements: The identity, two rotations of 
 $\pm60^\circ$ about an axis ($C_6$ and $C_6^5$), two rotations of 
 $\pm120^\circ$ about the same axis ($C_3$ and $C_3^2$), a rotation of 
@@ -2322,7 +2988,9 @@ $\sigma_v$ are perpendicular to the $C_2''$ axes, while $\sigma_d$ are
 perpendicular to the $C_2'$ axes. There is therefore $1$ realization
 of interest for solids. \\
 The character table is (using $D_{6h}=D_6 \times C_i$):
-\begin{footnotesize}
+
+\begin{tcolorbox}
+\begin{scriptsize}
 \begin{verbatim}
 D_6h E     2C6   2C3   C2    3C2'  3C2'' i     2S3   2S6   s_h   3s_d  3s_v 
 A_1g 1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00 1
@@ -2338,7 +3006,10 @@ B_2u 1.00 -1.00  1.00 -1.00 -1.00  1.00 -1.00  1.00 -1.00  1.00  1.00 -1.00 10
 E_1u 2.00  1.00 -1.00 -2.00  0.00  0.00 -2.00 -1.00  1.00  2.00  0.00  0.00 11
 E_2u 2.00 -1.00 -1.00  2.00  0.00  0.00 -2.00  1.00  1.00 -2.00  0.00  0.00 12
 \end{verbatim}
-\end{footnotesize}
+\end{scriptsize}
+\end{tcolorbox}
+
+
 There are twelve irreducible representations. $A_{1g}$, $A_{2g}$, $B_{1g}$, 
 $B_{2g}$, $E_{1g}$, and $E_{2g}$ are even with respect to inversion, while
 $A_{1u}$, $A_{2u}$, $B_{1u}$, $B_{2u}$, $E_{1u}$, and $E_{2u}$ are odd.
@@ -2352,7 +3023,9 @@ respect to both rotations, $B_1$ is even with respect to $C_2'$ and odd with
 respect to $C_2''$, while $B_2$ is odd with respect to $C_2'$ and even with
 respect to $C_2''$. \\
 The character table of the double group is:
-\begin{footnotesize}
+
+\begin{tcolorbox}
+\begin{scriptsize}
 \begin{verbatim}
 D_6h   E     -E    2C6   -2C6  2C3   -2C3  C2     3C2' 3C2''  i    -i    2S3  
                                            -C2   -3C2' -3C2''                  
@@ -2372,7 +3045,9 @@ G_7-   1.73 -1.00  1.00  0.00  0.00  0.00    4
 G_8-  -1.73 -1.00  1.00  0.00  0.00  0.00    5
 G_9-   0.00  2.00 -2.00  0.00  0.00  0.00    6
 \end{verbatim}
-\end{footnotesize}
+\end{scriptsize}
+\end{tcolorbox}
+
 There are six two-dimensional irreducible representations $\Gamma_7^+$,
 $\Gamma_8^+$, and $\Gamma_9^+$ have positive character for inversion, while
 $\Gamma_7^-$, $\Gamma_8^-$, and $\Gamma_9^-$ have negative character. 
@@ -2457,7 +3132,9 @@ of $D_{3d}$ coincide with the three mirror planes $\sigma_v$ of $D_{6h}$.
 The six-fold rotoinversion axis of $S_6$ coincides with the $C_6$ axis of $D_{6h}$.
 \\
 The compatibility table is:
-\begin{footnotesize}
+
+\begin{tcolorbox}
+\begin{scriptsize}
 \begin{verbatim}
 D_6h  A_1g  A_2g B_1g  B_2g  E_1g  E_2g    A_1u A_2u  B_1u B_2u  E_1u  E_2u
 C_1    A     A    A     A     A     A      A    A     A    A     A     A
@@ -2496,9 +3173,13 @@ D_3d_2 A_1g A_2g A_2g A_1g    E_g     E_g  A_1u A_2u A_2u A_1u    E_u    E_u
 S_6    A_g  A_g  A_g  A_g     E_g     E_g  A_u A_u  A_u  A_u      E_u    E_u
                              +E_g*   +E_g*                       +E_u*  +E_u*
 \end{verbatim}
-\end{footnotesize}
+\end{scriptsize}
+\end{tcolorbox}
+
 The compatibility table for the double group is:
-\begin{footnotesize}
+
+\begin{tcolorbox}
+\begin{scriptsize}
 \begin{verbatim}
 D_6h    G_7+         G_8+       G_9+       G_7-       G_8-       G_9-
 C_1     2 G_2       2 G_2      2 G_2      2 G_2      2 G_2       2 G_2
@@ -2520,12 +3201,16 @@ D_3h     G_7         G_8        G_9        G_8        G_7        G_9
 D_3d     G_4+        G_4+    G_5++G_6+     G_4-       G_4-     G_5-+G_6-
 S_6   G_4++G_5+  G_4++G_5+    2 G_6+    G_4-+G_5-  G_4-+G_5-    2 G_6-
 \end{verbatim}
-\end{footnotesize}
+\end{scriptsize}
+\end{tcolorbox}
+
 $D_{6h}$ has also projective representations corresponding to
 $\beta=1$ and $\gamma=-1$ where $IC_{6z} = \beta C_{6z} I$, 
 $IC_{2x} = \gamma C_{2x} I$ ($I$ is the inversion). With the 
 representations of the $D_6$ point group one can obtain:
-\begin{footnotesize}
+
+\begin{tcolorbox}
+\begin{scriptsize}
 \begin{verbatim}
      real part
 D_6h    E     6z    3z    2z    3-z   6-z   i6z   i3z   i2z   i3-z   i6-z
@@ -2543,9 +3228,14 @@ E1-y    0.00  0.00  0.00  0.00  0.00  0.00  1.73  1.73  0.00 -1.73  -1.73  4
 E2y     0.00  0.00  0.00  0.00  0.00  0.00 -1.73  1.73  0.00  1.73  -1.73  5
 E2-y    0.00  0.00  0.00  0.00  0.00  0.00  1.73 -1.73  0.00 -1.73   1.73  6
 \end{verbatim}
-\end{footnotesize}
+\end{scriptsize}
+\end{tcolorbox}
+
+
 With the representations of the $D_6$ double point group we have:
-\begin{footnotesize}
+
+\begin{tcolorbox}
+\begin{scriptsize}
 \begin{verbatim}
      real part
 D_6h    E     6z    3z    2z    3-z   6-z   i6z   i3z   i2z   i3-z   i6-z
@@ -2563,10 +3253,14 @@ G_9-y   0.00  0.00  0.00  0.00  0.00  0.00  2.00  0.00 -2.00  0.00  -2.00  4
 G_8y    0.00  0.00  0.00  0.00  0.00  0.00 -1.00  1.73 -2.00 -1.73   1.00  5
 G_8-y   0.00  0.00  0.00  0.00  0.00  0.00  1.00 -1.73  2.00  1.73  -1.00  6
 \end{verbatim}
-\end{footnotesize}
+\end{scriptsize}
+\end{tcolorbox}
+
 All elements not explicitly indicated have zero character.
 There are also projective representations corresponding to $\beta=-1$ 
 and $\gamma=1$. With the representations of the $D_6$ point group we have:  
+
+\begin{tcolorbox}
 \begin{footnotesize}
 \begin{verbatim}
      real part
@@ -2580,7 +3274,11 @@ A_2B_2  0.00  0.00  0.00   0.00  0.00  0.00   0.00    0.00    0.00     2
 E_1E_2  0.00  0.00  0.00   0.00  0.00  0.00   0.00    0.00    0.00     3
 \end{verbatim}
 \end{footnotesize}
+\end{tcolorbox}
+
 With the representations of the $D_6$ double point group we have:
+
+\begin{tcolorbox}
 \begin{footnotesize}
 \begin{verbatim}
      real part
@@ -2594,8 +3292,12 @@ G_9-z   0.00  0.00  0.00   0.00  0.00  0.00   2.00   -2.00   -2.00     2
 G_9G_8  0.00  0.00  0.00   0.00  0.00  0.00   0.00    0.00    0.00     3
 \end{verbatim}
 \end{footnotesize}
+\end{tcolorbox}
+
 There are also projective representations corresponding to $\beta=-1$ 
 and $\gamma=-1$. With the representations of the $D_6$ point group we have:  
+
+\begin{tcolorbox}
 \begin{footnotesize}
 \begin{verbatim}
      real part
@@ -2609,7 +3311,11 @@ A_2B_1  0.00  0.00  0.00   0.00  0.00  0.00    0.00    0.00    0.00     2
 E_1E_2  0.00  0.00  0.00   0.00  0.00  0.00    0.00    0.00    0.00     3
 \end{verbatim}
 \end{footnotesize}
+\end{tcolorbox}
+
 With the representations of the $D_6$ double point group we have:
+
+\begin{tcolorbox}
 \begin{footnotesize}
 \begin{verbatim}
      real part
@@ -2623,9 +3329,12 @@ G_9-x   0.00  0.00  0.00   0.00  0.00  0.00    2.00   -2.00   -2.00     2
 G_7G_8  0.00  0.00  0.00   0.00  0.00  0.00    0.00    0.00    0.00     3
 \end{verbatim}
 \end{footnotesize}
+\end{tcolorbox}
+
 
 \newpage
-\subsection{\color{web-blue}$D_{2d}\ (\bar 42m)$} 
+{\color{coral}\section{$D_{2d}\ (\bar 42m)$}} 
+\color{black}
 This group has eight elements: The identity, two improper rotations 
 of $\pm90^\circ$ about an axis ($S_4^3$ and $S_4$), a rotation of 
 $180^\circ$ about the same axis ($C_2$), two rotations of $180^\circ$ about
@@ -2653,6 +3362,9 @@ perpendicular to $x$ and $y$ \texttt{[113]}.
 There are therefore $6$ realizations of interest for solids.\\
 The character table is (isomorphic to $D_4$ with $S_4 \rightarrow C_4$
 and $\sigma_d \rightarrow C_2''$):
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_2d   E     2S4   C2    2C2'  2s_d
 A_1    1.00  1.00  1.00  1.00  1.00     1
@@ -2661,6 +3373,9 @@ B_1    1.00 -1.00  1.00  1.00 -1.00     3
 B_2    1.00 -1.00  1.00 -1.00  1.00     4
 E      2.00  0.00 -2.00  0.00  0.00     5
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are five irreducible representations. $A_1$ is totally symmetric, $E$
 is two dimensional and $A_2$, $B_1$, and $B_2$ can be recognized according to
 the behavior with respect to the $C_2'$ rotations and the $\sigma_d$
@@ -2669,12 +3384,18 @@ even with respect to the $C_2'$ rotation and odd with respect to the
 $\sigma_d$ symmetry, $B_2$ is odd with respect to the $C_2'$ rotation and 
 even with respect to the $\sigma_d$ symmetry. \\
 The character table of the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_2d   E     -E    2S4   -2S4  C2    2C2'  2s_d 
                                -C2   -2C2' -2s_d
 G_6    2.00 -2.00  1.41 -1.41  0.00  0.00  0.00      1
 G_7    2.00 -2.00 -1.41  1.41  0.00  0.00  0.00      2
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are two two-dimensional representations that can be distinguished
 for the character for an $S_4$ rotation. The character is $\sqrt{2}$
 according to $\Gamma_6$ and $-\sqrt{2}$ according to $\Gamma_7$. \\
@@ -2692,6 +3413,9 @@ of $D_{2d}$ (case 2), the axis $C_2''$ of $D_2$ coincides with the axis
 $S_4$ of $D_{2d}$ and the other two axes of $D_2$ coincide with the $C_2'$ 
 axis of $D_{2d}$ (case 3). \\
 The compatibility table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_2d  A_1     A_2     B_1     B_2    E
 C_1    A      A        A       A     2 A 
@@ -2704,7 +3428,13 @@ D_2_3  A      B_3      A      B_3    B_1 + B_2
 C_2v   A_1    A_2      A_2    A_1    B_1 + B_2
 S_4    A      A        B       B     E + E*
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 The compatibility table for the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_2d    G_6          G_7  
 C_1     2 G_2       2 G_2 
@@ -2714,9 +3444,12 @@ D_2      G_5          G_5
 C_2v     G_5          G_5
 S_4   G_5 + G_6    G_7 + G_8
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
 \newpage
-\subsection{\color{web-blue}$D_{3d}\ (\bar 3m)$} 
+{\color{coral}\section{$D_{3d}\ (\bar 3m)$}} 
+\color{black}
 This group has twelve elements: The identity, two improper rotations 
 of $\pm120^\circ$ about an axis ($S_6^5$ and $S_6$), two rotation of 
 $\pm120^\circ$ about the same axis ($C_3$ and $C_3^2$), inversion,
@@ -2743,6 +3476,9 @@ $x=y=-z$ the $C_2'$ axes are $(y=z, x=0)$, $(x=z, y=0)$, and $(y=-x, z=0)$
 \texttt{[123]}. The mirror planes are perpendicular to the $C_2'$ axes.
 There are therefore $6$ realizations of interest for solids. \\
 The character table is (using $D_{3d}=D_3 \times C_i$):
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_3d   E     2C3   3C2'  i     2S6   3s_d 
 A_1g   1.00  1.00  1.00  1.00  1.00  1.00     1
@@ -2752,13 +3488,18 @@ A_1u   1.00  1.00  1.00 -1.00 -1.00 -1.00     4
 A_2u   1.00  1.00 -1.00 -1.00 -1.00  1.00     5
 E_u    2.00 -1.00  0.00 -2.00  1.00  0.00     6
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are six irreducible representations. $A_{1g}$, $A_{2g}$, and $E_g$
 are even with respect to inversion, while $A_{1u}$, $A_{2u}$, and $E_u$ are
 odd. The $E$ representations are two dimensional, while the $A_1$ and $A_2$
 representations can be distinguished because $A_1$ is even with
 respect to the $C_2'$ rotations while $A_2$ is odd. \\
 The character table of the double group is:
-\begin{footnotesize}
+
+\begin{tcolorbox}
+\begin{scriptsize}
 \begin{verbatim}
      real part
 D_3d  E     -E   2C3   -2C3  3C2'  -3C2' i     -i    2S6   -2S6  3s_v  -3s_v
@@ -2778,7 +3519,9 @@ G_4-  0.00 0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  4
 G_5-  0.00 0.00  0.00  0.00  1.00 -1.00  0.00  0.00  0.00  0.00 -1.00  1.00  5
 G_6-  0.00 0.00  0.00  0.00 -1.00  1.00  0.00  0.00  0.00  0.00  1.00 -1.00  6
 \end{verbatim}
-\end{footnotesize}
+\end{scriptsize}
+\end{tcolorbox}
+
 There are six irreducible representations, $\Gamma_4^+$, $\Gamma_5^+$,
 $\Gamma_6^+$ have positive character for inversion, while $\Gamma_4^-$, 
 $\Gamma_5^-$ and $\Gamma_6^-$ have negative character. $\Gamma_4$ is two 
@@ -2800,6 +3543,9 @@ plane $\sigma_h$ of $C_{2h}$ coincides with the $\sigma_d$ plane of $D_{3d}$
 perpendicular to the $C_2'$ axis. The $S_6$ axis of $S_6$ coincides with the
 $S_6$ axis of $D_{3d}$. \\
 The compatibility table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_3d  A_1g     A_2g     E_g      A_1u     A_2u     E_u
 C_1    A       A        2 A      A        A        2 A
@@ -2812,7 +3558,13 @@ C_3v   A_1     A_2      E        A_2      A_1      E
 C_2h   A_g     B_g    A_g+B_g    A_u      B_u      A_u+B_u   
 S_6    A_g     A_g    E_g+E_g*   A_u      A_u      E_u+E_u*
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 The compatibility table for the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_3d   G_4+       G_5+    G_6+     G_4-      G_5-     G_6-
 C_1    2 G_2      G_2     G_2     2 G_2      G_2      G_2      
@@ -2825,9 +3577,15 @@ C_3v   G_4        G_5     G_6     G_4        G_6      G_5
 C_2h   G_3++G_4+  G_3+    G_4+    G_3-+G_4-  G_3-     G_4-
 S_6    G_4++G_5+  G_6+    G_6+    G_4-+G_5-  G_6-     G_6-
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 This group has also projective representations corresponding to
 $I {3z} = \beta {3z} I$ and $\beta=-1$ ($I$ is the inversion).
 With the representations of the $D_3$ point group one can obtain [11]:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 D_3d      E         3z       3-z        i3z     i3-z
@@ -2839,7 +3597,13 @@ A_1A_2   0.00      0.00      0.00      0.00     0.00       1
 E1y      0.00      0.00      0.00     -1.73     1.73       2
 E1-y     0.00      0.00      0.00      1.73    -1.73       3
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 With the representations of the $D_3$ double point group we have:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 D_3d      E         3z       3-z        i3z     i3-z
@@ -2851,9 +3615,13 @@ G_6G_5   0.00      0.00      0.00      0.00     0.00       1
 G_4y     0.00      0.00      0.00     -1.73     1.73       2
 G_4-y    0.00      0.00      0.00      1.73    -1.73       3
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 
 \newpage
-\subsection{\color{web-blue}$S_4\ (\bar 4)$}  
+{\color{coral}\section{$S_4\ (\bar 4)$}}  
+\color{black}
 This group has four elements: The identity, two improper rotations 
 of $\pm90^\circ$ about an axis ($S_4$ and $S_4^3$),  
 a rotations of $180^\circ$ about the same axis. 
@@ -2866,6 +3634,8 @@ or $z$ \texttt{[124]}. There are therefore $3$ realizations
 of interest for solids. \\ 
 The character table is (isomorphic to $C_4$ with $S_4^3 \rightarrow C_4$ and
 $S_4 \rightarrow C_4^3$):
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 S_4    E     S4^3  C2    S4   
@@ -2879,11 +3649,17 @@ B      0.00  0.00  0.00  0.00    2
 E      0.00  1.00  0.00 -1.00    3
 E*     0.00 -1.00  0.00  1.00    4
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are four one-dimensional irreducible representations. $A$ is total
 symmetric, and the other three can be recognized according to the behavior
 for the $S_4$ rotation. The functions are multiplied by $-1$ according to
 $B$, by $-i$ according to $E$ and by $i$ according to $E^*$.\\
 The character table of the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 S_4    E     -E    S4^3 -S4^3  C2   -C2    S4   -S4  
@@ -2899,6 +3675,9 @@ G_6    0.00  0.00 -0.71  0.71 -1.00  1.00  0.71 -0.71    2
 G_7    0.00  0.00 -0.71  0.71  1.00 -1.00  0.71 -0.71    3
 G_8    0.00  0.00  0.71 -0.71 -1.00  1.00 -0.71  0.71    4
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are four one dimensional irreducible representations, that can
 be distinguished according to the behavior for an $S_4$ rotations.
 The functions are multiplied by $e^{-i\omega}$ according to $\Gamma_5$,
@@ -2906,20 +3685,32 @@ by $e^{i\omega}$ according to $\Gamma_6$, $-e^{-i\omega}$ according to
 $\Gamma_7$ and $-e^{i\omega}$ according to $\Gamma_8$ ($\omega=\pi/4$). \\
 The subgroups of $S_4$ are $C_1$ and $C_2$. \\
 The compatibility table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 S_4    A      B       E       E*  
 C_1    A      A       A       A
 C_2    A      A       B       B
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 The compatibility table for the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 S_4    G_5       G_6      G_7      G_8 
 C_1    G_2       G_2      G_2      G_2
 C_2    G_3       G_4      G_3      G_4
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
 \newpage
-\subsection{\color{web-blue}$S_6\ (\bar 3)$ or $C_{3i}$}  
+{\color{coral}\section{$S_6\ (\bar 3)$ or $C_{3i}$}}  
+\color{black}
 This group has six elements: The identity, two improper rotations 
 of $\pm120^\circ$ about an axis ($S_6^5$ and $S_6$), two rotations of 
 $\pm120^\circ$ about the same axis ($C_3$ and $C_3^2$) and inversion.
@@ -2930,6 +3721,9 @@ The $S_6$ axis can be: $z$ \texttt{[127]}, $x=y=z$ \texttt{[128]},
 $x=-y=z$ \texttt{[131]}, $x=-y=-z$ \texttt{[129]}, $x=y=-z$ \texttt{[130]}.
 There are therefore $5$ realizations of interest for solids. \\
 The character table is (using $S_6=C_3 \times C_i$):
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 S_6    E     C3    C3^2  i     S6^5  S6   
@@ -2949,6 +3743,9 @@ A_u    0.00  0.00  0.00  0.00  0.00  0.00     4
 E_u    0.00  0.87 -0.87  0.00 -0.87  0.87     5
 E_u*   0.00 -0.87  0.87  0.00  0.87 -0.87     6
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are six one dimensional irreducible representations. $A_g$, $E_g$,
 and $E_g^*$, are even with respect to inversion while $A_u$, $E_u$, and $E_u^*$
 are odd. The $A$, $E$, and $E^*$ representations can be distinguished 
@@ -2956,7 +3753,9 @@ for the $C_3$ rotation. The functions are multiplied by $1$ according to $A$,
 by $e^{i\psi}$ according to $E$ and $e^{-i\psi}$ according to $E^*$
 ($\psi=2\pi/3$). \\
 The character table of the double group is:
-\begin{footnotesize}
+
+\begin{tcolorbox}
+\begin{scriptsize}
 \begin{verbatim}
      real part
 S_6  E     -E    C3    -C3   C3^2  -C3^2  i    -i    S6^5  -S6^5 S6    -S6  
@@ -2976,7 +3775,9 @@ G_4- 0.00  0.00  0.87 -0.87 -0.87  0.87  0.00  0.00 -0.87  0.87  0.87 -0.87  4
 G_5- 0.00  0.00 -0.87  0.87  0.87 -0.87  0.00  0.00  0.87 -0.87 -0.87  0.87  5
 G_6- 0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  6
 \end{verbatim}
-\end{footnotesize}
+\end{scriptsize}
+\end{tcolorbox}
+
 There are six one-dimensional irreducible representations. $\Gamma_4^+$,
 $\Gamma_5^+$, and $\Gamma_6^+$ are even with respect to inversion, while
 $\Gamma_4^-$, $\Gamma_5^-$, and $\Gamma_6^-$ are odd. $\Gamma_4$, $\Gamma_5$,
@@ -2987,22 +3788,34 @@ to $\Gamma_6$ ($\psi=\pi/3$). \\
 The subgroups of $S_6$ are $C_1$, $C_i$, and $C_3$. The axis of $C_3$ coincides
 the the axis of $S_6$. \\
 The compatibility table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 S_6    A_g      E_g      E_g*      A_u      E_u       E_u*  
 C_1    A        A        A         A        A         A
 C_i    A_g      A_g      A_g       A_u      A_u       A_u
 C_3    A        E        E*        A        E         E*
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 The compatibility table for the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 S_6    G_4+     G_5+     G_6+     G_4-     G_5-     G_6-  
 C_1    G_2      G_2      G_2      G_2      G_2      G_2
 C_i    G_2+     G_2+     G_2+     G_2-     G_2-     G_2-
 C_3    G_4      G_5      G_6      G_4      G_5      G_6 
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
 \newpage
-\subsection{\color{web-blue}$T\ (23)$} 
+{\color{coral}\section{$T\ (23)$}} 
+\color{black}
 This group has twelve elements: The identity, eight rotations of $\pm120^\circ$ 
 about four axes ($4C_3$ and $4C_3^2$ (called $C_3'$ in the character
 table)), three rotations of $180^\circ$ about three different axes ($3C_2$)
@@ -3015,6 +3828,9 @@ The four axes $C_3$ are $x=y=z$, $x=-y=z$, $x=-y=-z$, $x=y=-z$, while
 the three axes $C_2$ are $x$, $y$, $z$. There is therefore $1$
 realization of interest for solids. \\
 The character table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 T      E     3C2   4C3   4C3' 
@@ -3028,11 +3844,17 @@ E      0.00  0.00  0.87 -0.87    2
 E*     0.00  0.00 -0.87  0.87    3
 T      0.00  0.00  0.00  0.00    4
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are four irreducible representations. $A$ is totally symmetric and
 $T$ is three dimensional. $E$ and $E^*$ are distinguished for the $C_3$ rotation
 about the $C_3$ axis. The functions are multiplied by $e^{i\phi}$ according
 to $E$ and by $e^{-i\phi}$ according to $E^*$ ($\phi=2\pi/3$). \\
 The character table of the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 T      E     -E    3C2    4C3  -4C3   4C3' -4C3'
@@ -3049,6 +3871,9 @@ G_5    0.00  0.00  0.00  0.00  0.00  0.00  0.00    1
 G_6    0.00  0.00  0.00  0.87 -0.87 -0.87  0.87    2
 G_7    0.00  0.00  0.00 -0.87  0.87  0.87 -0.87    3
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are three two-dimensional irreducible representations. They can be
 distinguished for the behavior for a $C_3$ rotation. The character of
 the matrix is $1$ according to $\Gamma_5$, $e^{i\psi}$ according to $\Gamma_6$
@@ -3058,6 +3883,9 @@ can be one of the three $C_2$ axes of $T$, the axis of $C_3$ one of the
 four $C_3$ axes of $T$. The three axes of $D_2$ are the three $C_2$ axes of
 $T$. \\
 The compatibility table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 T     A     E     E*          T
 C_1   A     A     A          3 A
@@ -3065,7 +3893,13 @@ C_2   A     A     A         A + 2B
 C_3   A     E     E*      A + E + E*
 D_2   A     A     A     B_1 + B_2 + B_3
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 The compatibility table for the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 T        G_5        G_6          G_7   
 C_1     2 G_2      2 G_2        2 G_2
@@ -3073,9 +3907,12 @@ C_2   G_3 + G_4  G_3 + G_4    G_3 + G_4
 C_3   G_4 + G_5  G_6 + G_4    G_6 + G_5
 D_2      G_5        G_5          G_5
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
 \newpage
-\subsection{\color{web-blue}$T_h\ (m\bar 3)$}
+{\color{coral}\section{$T_h\ (m\bar 3)$}}
+\color{black}
 This group has twenty-four elements: The identity, eight rotations 
 of $\pm120^\circ$ about four axes ($4C_3$ and $4C_3^2$ (called $4C3'$ in the 
 character table)), three rotations of $180^\circ$ about three different axes 
@@ -3091,6 +3928,9 @@ The four axes $C_3$ are $x=y=z$, $x=-y=z$, $x=-y=-z$, $x=y=-z$, while
 the three axes $C_2$ are $x$, $y$, $z$. There is therefore $1$
 realization of interest for solids. \\
 The character table is (using $T_h= T \times C_i$):
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 T_h    E     3C2   4C3   4C3'  i     3s_h  4S6^5 4S6  
@@ -3112,6 +3952,9 @@ E_u    0.00  0.00  0.87 -0.87  0.00  0.00 -0.87  0.87     6
 E_u*   0.00  0.00 -0.87  0.87  0.00  0.00  0.87 -0.87     7
 T_u    0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00     8
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are eight irreducible representations. $A_g$, $E_g$, $E_g^*$, and $T_g$
 are even with respect to inversion while $A_u$, $E_u$, $E_u^*$, and $T_u$
 are odd. $A$ representations are totally symmetric with respect to the proper 
@@ -3120,7 +3963,9 @@ behavior for a $C_3$ rotations. The functions are multiplied by
 $e^{i\phi}$ according to $E$ and $e^{-i\phi}$ according to $E^*$
 ($\phi=2\pi/3$). \\
 The character table of the double group is:
-\begin{footnotesize}
+
+\begin{tcolorbox}
+\begin{scriptsize}
 \begin{verbatim}
      real part
 T_h    E     -E     3C2   4C3  -4C3   4C3' -4C3' i     -i     3s_h 4S6'  -4S6'
@@ -3160,7 +4005,9 @@ G_5-   0.00  0.00    4
 G_6-   0.87 -0.87    5
 G_7-  -0.87  0.87    6
 \end{verbatim}  
-\end{footnotesize}
+\end{scriptsize}
+\end{tcolorbox}
+
 There are six two dimensional irreducible representations. $\Gamma_5^+$,
 $\Gamma_6^+$, and $\Gamma_7^+$ are even with respect to inversion while
 $\Gamma_5^-$, $\Gamma_6^-$, and $\Gamma_7^-$ are odd. $\Gamma_5$,
@@ -3182,7 +4029,9 @@ perpendicular to these axes are the three mirror $\sigma_h$ of $T_h$.
 The $S_6$ axis of $S_6$ is one of the four $C_3$ axis of $T_h$.
 The $C_3$ and $C_2$ axes of $T$ are the same as those of $T_h$. \\
 The compatibility table is:
-\begin{footnotesize}
+
+\begin{tcolorbox}
+\begin{scriptsize}
 \begin{verbatim}
 T_h   A_g    E_g     E_g*     T_g         A_u     E_u     E_u*     T_u
 C_1    A      A       A       3 A         A       A       A        3 A
@@ -3198,8 +4047,13 @@ D_2h  A_g     A_g    A_g    B_1g+B_2g  A_u     A_u     A_u         B_1u+B_2u
 S_6   A_g     E_g    E_g*   A_g+E_g+E_g*  A_u     E_u     E_u*   A_u+E_u+E_u*
 T     A       E      E*        T          A       E       E*         T
 \end{verbatim}
-\end{footnotesize}
+\end{scriptsize}
+\end{tcolorbox}
+
 The compatibility table for the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 T_h   G_5+       G_6+       G_7+      G_5-      G_6-      G_7-
 C_1   2 G_2      2 G_2      2 G_2     2 G_2     2 G_2     2 G_2
@@ -3213,9 +4067,12 @@ D_2h    G_5+       G_5+     G_5+      G_5-      G_5-      G_5-
 S_6   G_4++G_5+  G_5++G_6+  G_4++G_6+ G_4-+G_5- G_5-+G_6- G_4-+G_6-
 T       G_5        G_6      G_7       G_5       G_6       G_7
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
 \newpage
-\subsection{\color{web-blue}$T_d\ (\bar 43m)$}
+{\color{coral}\section{$T_d\ (\bar 43m)$}}
+\color{black}
 This group has twenty-four elements: The identity, eight rotations 
 of $\pm120^\circ$ about four axes ($8C_3$), three rotations of 
 $180^\circ$ about three different axes ($3C_2$), six
@@ -3232,6 +4089,9 @@ $(x=\pm z, y=0)$, $(y=\pm x, z=0)$.
 There is therefore $1$ realization of interest for solids. \\
 The character table is (isomorphic to $O$ with $S_4 \rightarrow C_4$ and
 $\sigma_d \rightarrow C_2'$):
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 T_d    E     8C3   3C2   6S4   6s_d
 A_1    1.00  1.00  1.00  1.00  1.00     1
@@ -3240,6 +4100,9 @@ E      2.00 -1.00  2.00  0.00  0.00     3
 T_1    3.00  0.00 -1.00  1.00 -1.00     4
 T_2    3.00  0.00 -1.00 -1.00  1.00     5
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are five irreducible representations. $A_1$ is totally symmetric,
 $E$ is two dimensional, and $T_1$ and $T_2$ are three dimensional.
 They can be distinguished for the character of a mirror $\sigma_d$ operation,
@@ -3247,6 +4110,9 @@ $T_1$ is has character $1$ and $T_2$ has character $-1$.
 Similarly for a $S_4$ rotation $T_1$ has character $-1$ 
 while $T_2$ has character $1$. \\
 The character table of the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 T_d    E     -E    8C3   -8C3   3C2  6S4   -6S4  6s_d 
                                -3C2              -6s_d
@@ -3254,6 +4120,9 @@ G_6    2.00 -2.00  1.00 -1.00  0.00  1.41 -1.41  0.00    1
 G_7    2.00 -2.00  1.00 -1.00  0.00 -1.41  1.41  0.00    2
 G_8    4.00 -4.00 -1.00  1.00  0.00  0.00  0.00  0.00    3
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There is a four dimensional representation $\Gamma_8$ and two two-dimensional 
 irreducible representations $\Gamma_6$ and $\Gamma_7$ that can be
 distinguished for the character for a $S_4$ rotation. It is $\sqrt{2}$
@@ -3274,6 +4143,9 @@ mirrors $\sigma_d$ that contain the $S_4$ axis. The $S_4$ axis of $S_4$
 coincides with a $S_4$ axis of $T_d$, and the $C_3$ and $C_2$ axes of $T$ 
 coincide with those of $T_d$. \\
 The compatibility table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 T_d    A_1     A_2     E      T_1        T_2
 C_1    A       A      2 A     3 A        3 A
@@ -3287,7 +4159,13 @@ D_2d   A_1     B_1  A_1+B_1  A_2 + E     B_2 + E
 S_4    A       B     A + B   A + E + E*   B + E + E*  
 T      A       A     E + E*     T            T
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 The compatibility table for the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 T_d        G_6          G_7             G_8
 C_1       2 G_2       2 G_2           4 G_2
@@ -3301,9 +4179,13 @@ D_2d       G_6          G_7           G_6 + G_7
 S_4     G_5 + G_6    G_7 + G_8  G_5 + G_6 + G_7 + G_8  
 T          G_5          G_5           G_6 + G_7
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 
 \newpage
-\subsection{\color{web-blue}$O\ (432)$} 
+{\color{coral}\section{$O\ (432)$}} 
+\color{black}
 This group has twenty-four elements: The identity, eight rotations 
 of $\pm120^\circ$ about four axes ($8C_3$), three rotations of 
 $180^\circ$ about three different axes ($3C_2$), six
@@ -3319,6 +4201,9 @@ the three axes $C_4$ are $x$, $y$, $z$.
 The six $C_2'$ axes are $(y=\pm z, x=0)$, $(x=\pm z, y=0)$, $(y=\pm x, z=0)$.
 There is therefore $1$ realization of interest for solids. \\
 The character table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 O      E     8C3   3C2   6C4   6C2' 
 A_1    1.00  1.00  1.00  1.00  1.00     1
@@ -3327,6 +4212,9 @@ E      2.00 -1.00  2.00  0.00  0.00     3
 T_1    3.00  0.00 -1.00  1.00 -1.00     4
 T_2    3.00  0.00 -1.00 -1.00  1.00     5
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are five irreducible representations. $A_1$ is totally symmetric,
 while $A_2$ is odd with respect to the $C_2'$ and the $C_4$ rotations.
 $E$ is two dimensional, while $T_1$ and $T_2$ are three dimensional. The
@@ -3335,6 +4223,9 @@ or for a $C_4$ rotation. $T_1$ has character $1$ for a $C_4$ rotation and
 $-1$ for a $C_2'$ rotation, while $T_2$ has character $-1$ for a $C_4$ rotation
 and $1$ for a $C_2'$ rotation. \\
 The character table of the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 O      E     -E    8C3   -8C3   3C2  6C4   -6C4   6C2'
                                -3C2              -6C2'
@@ -3342,6 +4233,9 @@ G_6    2.00 -2.00  1.00 -1.00  0.00  1.41 -1.41  0.00     1
 G_7    2.00 -2.00  1.00 -1.00  0.00 -1.41  1.41  0.00     2
 G_8    4.00 -4.00 -1.00  1.00  0.00  0.00  0.00  0.00     3
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 There are two two-dimensional irreducible representations, $\Gamma_6$ and
 $\Gamma_7$ and one four dimensional irreducible representation $\Gamma_8$.
 $\Gamma_6$ and $\Gamma_7$ can be distinguished for the character for a
@@ -3363,6 +4257,9 @@ axes of $O$ and $2C_2''$ coincide with the two $C_2'$ axes of $O$ perpendicular
 to the $C_4$ axis of $D_4$. The $C_3$ and $C_2$ axes of $T$ coincide with
 the $C_3$ and $C_4$ axis of $O$. \\
 The compatibility table is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 O       A_1      A_2      E        T_1            T_2
 C_1      A        A       2 A      3 A            3 A
@@ -3376,7 +4273,13 @@ D_3     A_1      A_2       E      A_2 + E       A_1 + E
 D_4     A_1      B_1    A_1+B_1   A_2 + E       B_2 + E
 T       A         A      E + E*       T             T
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 The compatibility table for the double group is:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 O           G_6          G_7         G_8
 C_1        2 G_2        2 G_2       2 G_2
@@ -3388,9 +4291,12 @@ D_3         G_4          G_4      G_4 + G_5 + G_6
 D_4         G_6          G_7      G_6 + G_7
 T           G_5          G_5      G_6 + G_7 
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
 \newpage
-\subsection{\color{web-blue}$O_h\ (m\bar3m)$}   
+{\color{coral}\section{$O_h\ (m\bar3m)$}}   
+\color{black}
 This group has forty-eight elements: 
 The identity, eight rotations of $\pm120^\circ$ about four axes ($8C_3$), 
 three rotations of $180^\circ$ about three different axes ($3C_2$), six
@@ -3412,6 +4318,7 @@ The six $C_2'$ axes are $(y=\pm z, x=0)$, $(x=\pm z, y=0)$, $(y=\pm x, z=0)$.
 The $\sigma_d$ planes are perpendicular to the $C_2'$ axes.
 There is therefore $1$ realization of interest for solids. \\
 The character table is (using $O_h=O \times C_i$):
+\begin{tcolorbox}
 \begin{footnotesize}
 \begin{verbatim}
 O_h    E     8C3   3C2   6C4   6C2'  i     8S6   3s_h  6S4   6s_d 
@@ -3427,6 +4334,8 @@ T_1u   3.00  0.00 -1.00  1.00 -1.00 -3.00  0.00  1.00 -1.00  1.00    9
 T_2u   3.00  0.00 -1.00 -1.00  1.00 -3.00  0.00  1.00  1.00 -1.00    10
 \end{verbatim}
 \end{footnotesize}
+\end{tcolorbox}
+
 There are ten irreducible representations. $A_{1g}$, $A_{2g}$, $E_g$,
 $T_{1g}$, and $T_{2g}$ are even with respect to inversion, $A_{1u}$, 
 $A_{2u}$, $E_u$, $T_{1u}$, and $T_{2u}$ are odd. $A_1$ representations are even
@@ -3437,7 +4346,9 @@ dimensional, while $T_1$ and $T_2$ are three dimensional. $T_1$ and $T_2$
 can be distinguished for the character of the rotations about the $C_2'$
 axes. $T_1$ has character $-1$ while $T_2$ has character $1$. \\
 The character table of the double group is:
-\begin{footnotesize}
+
+\begin{tcolorbox}
+\begin{scriptsize}
 \begin{verbatim}
 O_h    E     -E    8C3   -8C3   3C2  6C4   -6C4   6C2' i     -i    8S6   -8S6 
                                -3C2              -6C2'                        
@@ -3457,7 +4368,9 @@ G_6-   0.00 -1.41  1.41  0.00     4
 G_7-   0.00  1.41 -1.41  0.00     5
 G_8-   0.00  0.00  0.00  0.00     6
 \end{verbatim}
-\end{footnotesize}
+\end{scriptsize}
+\end{tcolorbox}
+
 There are six irreducible representations. $\Gamma_6^+$, $\Gamma_7^+$ and
 $\Gamma_8^+$ are have positive characters for inversion, while
 $\Gamma_6^-$, $\Gamma_7^-$ and $\Gamma_8^-$ have negative characters.
@@ -3538,7 +4451,9 @@ The $C_3$ and $C_2$ axes of $T$, $T_h$, $T_d$, and
 $O$ coincide with those of $O_h$, and the $S_4$ and $C_2'$ axes of $T_d$ and
 the $C_4$ and $C_2'$ axes of $O$ coincide with those of $O_h$. \\
 The compatibility table is:
-\begin{footnotesize}
+
+\begin{tcolorbox}
+\begin{scriptsize}
 \begin{verbatim}
 O_h   A_1g  A_2g   E_g    T_1g     T_2g   A_1u  A_2u  E_u    T_1u   T_2u
 C_1   A     A      2 A    3 A      3 A     A    A     2 A    3 A    3 A
@@ -3586,9 +4501,13 @@ T_h  A_g   A_g   E_g+E_g*   T_g      T_g    A_u  A_u E_u+E_u*   T_u      T_u
 T_d  A_1   A_2   E          T_1      T_2    A_2  A_1 E          T_2      T_1
 O    A_1   A_2   E          T_1      T_2    A_1  A_2 E          T_1      T_2
 \end{verbatim}
-\end{footnotesize}
+\end{scriptsize}
+\end{tcolorbox}
+
 The compatibility table for the double group is:
-\begin{footnotesize}
+
+\begin{tcolorbox}
+\begin{scriptsize}
 \begin{verbatim}
 O_h    G_6+       G_7+        G_8+         G_6-       G_7-       G_8-
 C_1    2 G_2     2 G_2       4 G_2        2 G_2       2 G_2      4 G_2
@@ -3619,10 +4538,15 @@ T_h    G_5+      G_5+      G_6++G_7+        G_5-       G_5-      G_6-+G_7-
 T_d    G_6       G_7       G_8              G_7        G_6       G_8
 O      G_6       G_7       G_8              G_6        G_7       G_8    
 \end{verbatim}
-\end{footnotesize}
+\end{scriptsize}
+\end{tcolorbox}
+
 This group has also projective representations corresponding to
 $I {4z} = \beta {4z} I$ and $\beta=-1$ ($I$ is the inversion). With
 the representation of the $O$ point group we have:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 O_h       E        3C2       8C3      4 iC3   4 iC3^-1  
@@ -3636,7 +4560,13 @@ Ey       0.00      0.00      0.00     -1.73     1.73   2
 E-y      0.00      0.00      0.00      1.73    -1.73   3 
 T_1T_2   0.00      0.00      0.00      0.00     0.00   4
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 With the representations of the $O$ double point group we have:
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      real part
 O_h       E        3C2       8C3      4 iC3    4iC3^-1 
@@ -3648,12 +4578,14 @@ G_6G_7   0.00      0.00      0.00      0.00     0.00    1
 G_8y     0.00      0.00      0.00      1.73    -1.73    2
 G_8-y    0.00      0.00      0.00     -1.73     1.73    3
 \end{verbatim}
-
+\end{footnotesize}
+\end{tcolorbox}
 
 \newpage
-\section{\color{coral}Symmetry matrices
+{\color{dark-blue}\chapter{Symmetry matrices}
 \label{section_sym}}
-\subsection{\color{web-blue}O(3)}
+{\color{coral}\section{O(3)}}
+\color{black}
 \qe\ uses internally the following symmetry matrices. Each one of these
 matrices is checked as a possible symmetry in the given order. The extended
 description of the symmetry operations is the one printed by \qe. Moreover
@@ -3668,7 +4600,8 @@ $z$ axis, \texttt{x-y} indicates the axis $y=-x, z=0$ and \texttt{xyz}
 indicates the axis $x=y=z$).
 A letter \texttt{i} in front of the symbol indicates multiplication 
 by inversion.
-\begin{footnotesize}
+\begin{tcolorbox}
+\begin{scriptsize}
 \begin{verbatim}
       isym =  1     identity    E      E
 
@@ -4059,7 +4992,9 @@ by inversion.
                   (  0.0000000  0.0000000  1.0000000 )
 
 \end{verbatim}
-\end{footnotesize}
+\end{scriptsize}
+\end{tcolorbox}
+
 The directions of the rotation axes or the perpendicular to the mirror
 planes in the hexagonal case are indicated in the following figure
 (axis with the same color are perpendicular to each other):
@@ -4072,7 +5007,8 @@ where ${\bf a}_1$ is along $x$, ${\bf a}_2$ is rotated
 of $120^\circ$ in the $xy$ plane and ${\bf a}_3$ is parallel to the $z$
 axis.
 
-\subsection{\color{web-blue}SU(2)}
+{\color{coral}\section{SU(2)}}
+\color{black}
 The application of the rotation operator to a two-component spinor 
 wavefunction requires the $2\times2$ matrices of the $SU(2)$ group.
 The operation of $SU(2)$ in spin space can be defined by the Cayley-Klein
@@ -4092,6 +5028,9 @@ the rotation angle is neglected. In order to define the
 matrices of the point group it is necessary to choose one $SU(2)$ matrix
 for each rotation. The choice is not obvious for $180^\circ$ rotations.
 Ref.[11] suggests the following choice of the Cayley-Klein parameters: 
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
      1   E       
              a=  1.00  0.00    b=  0.00  0.00   
@@ -4158,6 +5097,9 @@ Ref.[11] suggests the following choice of the Cayley-Klein parameters:
     32   2110    
              a=  0.00  0.00    b= -0.87 -0.50    
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 for almost all groups except $D_3$, $C_{3v}$, and $D_{3d}$ for which
 a different sign choice is necessary to keep in the same class the three
 $C_2$ or $\sigma_v$ operations. \qe\ uses 
@@ -4166,7 +5108,7 @@ $D_3$, $C_{3v}$, and $D_{3d}$ operations. For these groups we use the
 matrices written above changing the character table of the double point 
 groups accordingly. 
 
-\section{\color{coral}List of the $136$ point groups available in QE}
+{\color{dark-blue}\chapter{List of the $136$ point groups available in QE}}
 
 This is the list of the $136$ realizations of the $32$ crystallographic 
 point groups that have been described in this guide and that can be built 
@@ -4177,6 +5119,9 @@ of the tool \texttt{crystal\_point\_group.x} to specify a well
 defined point group. Name is the Sch\"onflies name of one of the $32$
 crystallographic point groups that corresponds to a given realization while
 the list of the symmetry operations is given after the name.
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
   #  name  symmetry operations
   1   C_1  E           
@@ -4328,13 +5273,19 @@ the list of the symmetry operations is given after the name.
            3x-yz 3xy-z 4-x 4x 4-y 4y 4-z 4z 2y-z 2yz 2x-z 2xz 2x-y 2xy
 136   O_h  E 2x 2y 2z 3xyz 3x-y-z 3-xy-z 3-x-yz 3-x-yz 3-x-y-z 3-xyz
            3x-yz 3xy-z 4-x 4x 4-y 4y 4-z 4z 2y-z 2yz 2x-z 2xz 2x-y 2xy
-           i i2x i2y i2z i3xyz i3x-y-z i3-xy-z i3-x-yz i3-x-yz i3-x-y-z i3-xyz
-           i3x-yz i3xy-z i4-x i4x i4-y i4y i4-z i4z i2y-z i2yz i2x-z 
-           i2xz i2x-y i2xy
+           i i2x i2y i2z i3xyz i3x-y-z i3-xy-z i3-x-yz i3-x-yz i3-x-y-z 
+           i3-xyz i3x-yz i3xy-z i4-x i4x i4-y i4y i4-z i4z i2y-z i2yz 
+           i2x-z i2xz i2x-y i2xy
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 \newpage
-\section{\color{coral}Alternative names for the irreducible representations}
-Comparison of the output of \thermo\ and of \texttt{pw.x} and \texttt{ph.x} 
+{\color{dark-blue}\chapter{Alternative names for the irreducible 
+representations}}
+\color{black}
+
+Comparison of the output of \tpw\ and of \texttt{pw.x} and \texttt{ph.x} 
 with previous literature is sometimes difficult due to the use of different 
 names for the irreducible representations. As a rule we have used the names
 reported in Ref.~[1] for the representations of the point group and those
@@ -4350,12 +5301,18 @@ We give a table for each point group. The first column gives the names
 used in this guide, followed by the names used by \qe\ and by 
 other references.
 
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_1         [QE]        [1,5]   [2]    [11]
 A           A           A       G_1             
 G_2         G_2                 G_2              
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_i         [QE]        [1,5]   [2]    [11] 
 A_g         A_g         A_g     G_1+   M_0g
@@ -4363,7 +5320,12 @@ A_u         A_u         A_u     G_1-   M_0u
 G_2+        G_2+                G_2+   M_1/2g
 G_2-        G_2-                G_2-   M_1/2u
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_s         [QE]        [1,5]   [2]    [11] 
 A'          A'          A'      G_1    M_0
@@ -4371,10 +5333,15 @@ A''         A''         A''     G_2    M_1
 G_3         G_3                 G_3    M_1/2*
 G_4         G_4                 G_4    M_1/2
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
 $C_s$ is the small group of ${\bf k}$ along the $\Sigma$ line of the 
 zinc-blend structure and in Ref.[15] its representations have been given
 particular names.
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_2         [QE]        [1,5]   [2]    [11]    [15]  
 A           A           A       G_1    M_0     S_1
@@ -4382,7 +5349,11 @@ B           B           B       G_2    M_1     S_2
 G_3         G_3                 G_3    M_1/2*  S_3
 G_4         G_4                 G_4    M_1/2   S_4
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_3         [QE]        [1,5]   [2]    [11]
 A           A           A       G_1    M_0
@@ -4392,11 +5363,16 @@ G_4         G_4                 G_4    M_1/2*
 G_5         G_5                 G_5    M_1/2
 G_6         G_6                 G_6    M_3/2
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 The representations of the $C_3$ group are sometimes labeled by an integer 
 $m$, such that the character of the $C_3$ operation is 
 $e^{i {2\pi \over 3} m}$. In this case, $A$ is indicated by $m=0$, $E$ and 
 $E^*$ by $m=1$ and $m=2$, respectively.
 
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_4         [QE]        [1,5]   [2]    [11]
 A           A           A       G_1    M_0
@@ -4408,12 +5384,16 @@ G_6         G_6                 G_6    M_1/2
 G_7         G_7                 G_7    M_3/2 
 G_8         G_8                 G_8    M_3/2*
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 The representations of $C_4$ are sometimes labeled by an integer $m$,
 such that the character of the $C_4$ operation is $e^{i {2\pi \over 4} m}$.
 In this case $A$ is indicated by $m=0$, $B$ by $m=2$, $E$ and $E^*$ 
 by $m=1$ and $m=3$, respectively.
 
-
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_6         [QE]        [1,5]   [2]    [11]    
 A           A           A       G_1    M_0
@@ -4429,6 +5409,9 @@ G_10        G_10                G_10   M_5/2*
 G_11        G_11                G_11   M_3/2
 G_12        G_12                G_12   M_3/2*
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 The representations of $C_6$ are sometimes labeled by an integer $m$,
 such that the character of the $C_6$ operation is $e^{i {2\pi \over 6} m}$.
 In this case $A$ is indicated by $m=0$, $B$ by $m=3$, $E_1$ and $E_1^*$ 
@@ -4438,6 +5421,9 @@ The names of the representations of $D_2$ depend on the choice of the
 three perpendicular axes $C_2$, $C_2'$ and $C_2''$. The following table 
 is purely indicative and corresponds to our choice $z$, $x$, and $y$ 
 for the three axes and the choice $z$, $y$, $x$ for Refs.[5,2,11].
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_2         [QE]        [1,5]   [2]    [11] 
 A           A           A       G_1    A
@@ -4446,7 +5432,11 @@ B_2         B_2         B_3     G_4    B_3
 B_3         B_3         B_2     G_2    B_2
 G_5         G_5                 G_5    E_1/2
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_3         [QE]        [1,5]   [2]    [11]  
 A_1         A_1         A_1     G_1    A_1
@@ -4456,7 +5446,11 @@ G_4         G_4                 G_4    E_1/2
 G_5         G_5                 G_5    B_2
 G_6         G_6                 G_6    B_1
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_4         [QE]        [1,5]   [2]    [11] 
 A_1         A_1         A_1     G_1    A_1
@@ -4467,7 +5461,11 @@ E           E           E       G_5    E
 G_6         G_6                 G_6    E_1/2
 G_7         G_7                 G_7    E_3/2
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_6         [QE]        [1,5]   [2]    [11]
 A_1         A_1         A_1     G_1    A_1
@@ -4480,6 +5478,8 @@ G_7         G_7                 G_7    E_1/2
 G_8         G_8                 G_8    E_5/2 
 G_9         G_9                 G_9    E_3/2  
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
 The representations of $C_{2v}$ are difficult to distinguish among different
 references. While $A_1$ and $A_2$ are distinguishable since the 
@@ -4495,6 +5495,9 @@ for the line $Z$ of the simple cubic, for the line $G$ and $D$ of the bcc,
 for the points $K$ and $U$ of the fcc [14]. $C_{2v}$ is the small group
 of ${\bf k}$ along the $\Delta$ line for a zinc-blend structure and
 its representations have been given special names in Ref.[15]. 
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_2v        [QE]        [1,5]   [2]    [11]    [14]      [15]
 A_1     A_1, D_1, S_1   A_1     G_1    A_1     S_1, Z_1  D_1
@@ -4503,12 +5506,17 @@ B_1     B_1, D_3, S_3   B_2     G_4    B_2     S_3, Z_3  D_3
 B_2     B_2, D_4, S_4   B_1     G_2    B_1     S_4, Z_4  D_4
 G_5     G_5, D_5                G_5    E_1/2             D_5
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
 The representations of $C_{3v}$ are used to classify the states along the 
 $\Lambda$ line of the simple cubic and fcc Brillouin zone and therefore have
 received special names in Ref.[14]. It is the small group of the $\Lambda$ 
 line also for the zinc-blende structure and special names for the 
 representations of the double group have been given in Ref.[15].
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_3v        [QE]        [1,5]   [2]    [11]    [14]   [15]
 A_1       A_1, L_1      A_1     G_1    A_1     L_1     L_1
@@ -4518,10 +5526,15 @@ G_4       G_4, L_6              G_4    E_1/2           L_6
 G_5       G_5, L_4              G_5    B_2             L_4
 G_6       G_6, L_5              G_6    B_1             L_5
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
 The group $C_{4v}$ is the small group of ${\bf k}$ along the $\Delta$ line of
 the simple cubic and fcc Brillouin zone so in Ref.[14] its representations have 
 been given special names.
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_4v        [QE]        [1,5]   [2]    [11]    [14]
 A_1     A_1, G_1, D_1   A_1     G_1    A_1     D_1
@@ -4532,7 +5545,11 @@ E       E, G_5, D_5     E       G_5    E       D_5
 G_6     G_6, D_6                G_6    E_1/2
 G_7     G_7, D_7                G_7    E_3/2
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_6v        [QE]        [1,5]   [2]    [11]
 A_1         A_1         A_1     G_1    A_1
@@ -4545,7 +5562,11 @@ G_7         G_7                 G_7    E_1/2
 G_8         G_8                 G_8    E_5/2
 G_9         G_9                 G_9    E_3/2
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_2h        [QE]        [1,5]   [2]    [11] 
 A_g         A_g         A_g     G_1+   M_0g
@@ -4557,7 +5578,11 @@ G_4+        G_4+                G_4+   M_1/2g
 G_3-        G_3-                G_3-   M_1/2u*
 G_4-        G_4-                G_4-   M_1/2u
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_3h        [QE]        [1,5]   [2]    [11] 
 A'          A'          A'      G_1    M_0
@@ -4573,7 +5598,11 @@ G_10        G_10                G_10   M_5/2*
 G_11        G_11                G_11   M_3/2
 G_12        G_12                G_12   M_3/2*
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_4h        [QE]        [1,5]   [2]    [11]
 A_g         A_g         A_g     G_1+   M_0g
@@ -4593,7 +5622,11 @@ G_6-        G_6-                G_6-   M_1/2u
 G_7-        G_7-                G_7-   M_3/2u
 G_8-        G_8-                G_8-   M_3/2u*
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 C_6h        [QE]        [1,5]   [2]    [11]
 A_g         A_g         A_g     G_1+   M_0g
@@ -4621,11 +5654,15 @@ G_10-       G_10-               G_10-  M_5/2u*
 G_11-       G_11-               G_11-  M_3/2u
 G_12-       G_12-               G_12-  M_3/2u*
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
 The representations of $D_{2h}$ are used to classify the states at the $N$
 point of bcc Brillouin zone and therefore have received special names 
 in Ref.[14].
 
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_2h        [QE]        [1,5]   [2]    [11]    [14]
 A_g         A_g         A_g     G_1+   A_g     N_1
@@ -4639,7 +5676,11 @@ B_3u        B_3u        B_2u    G_2-   B_2u    N_3'
 G_5+        G_5+                G_5+   E_1/2g
 G_5-        G_5-                G_5-   E_1/2u
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_3h        [QE]        [1,5]   [2]    [11]
 A'_1       A'_1         A'_1    G_1    A_1
@@ -4652,6 +5693,8 @@ G_7        G_7                  G_7    E_1/2
 G_8        G_8                  G_8    E_5/2
 G_9        G_9                  G_9    E_3/2
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
 The group $D_{4h}$ is the small group of ${\bf k}$ at the $X$ and $M$
 point of the simple cubic Brillouin zone so in Ref.[14] its representations 
@@ -4659,6 +5702,9 @@ have been given special names for the use with the $M$ point. The same names
 with the exchange of $M$ with $X$ are used for the $X$ point. Note however
 that for the space group $221$ at $M$ Ref.[13] uses different names that
 are also widely used.
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_4h        [QE]        [1,5]   [2]    [11]    [14]   [13]
 A_1g   A_1g, X_1, M_1   A_1g    G_1+   A_1g    M_1    M_1+
@@ -4676,7 +5722,11 @@ G_7+   G_7+, M_7+               G_7+   E_3/2g
 G_6-   G_6-, M_6-               G_6-   E_1/2u
 G_7-   G_7-, M_7-               G_7-   E_3/2u
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_6h        [QE]        [1,5]   [2]    [11]
 A_1g        A_1g        A_1g    G_1+   A_1g
@@ -4698,12 +5748,17 @@ G_7-        G_7-                G_7-   E_1/2u
 G_8-        G_8-                G_8-   E_5/2u
 G_9-        G_9-                G_9-   E_3/2u
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
 The representations of $D_{2d}$ are used to classify the states at the
 point $W$ of the fcc Brillouin zone and therefore have received special names 
 in Ref.[14]. The same group is also used to classify the states at the
 $X$ point of the Brillouin zone for a zincblend structure and the
 representations have names given in Ref.[15]
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_2d        [QE]        [1,5]   [2]    [11]    [14]   [15]
 A_1    A_1, X_1, W_1    A_1     G_1    A_1     W_1    X_1
@@ -4714,10 +5769,15 @@ E      E, X_5, W_3      E       G_5    E       W_3    X_5
 G_6    G_6, X_6, W_6            G_6    E_1/2          X_6
 G_7    G_7, X_7, W_7            G_7    E_3/2          X_7
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
 The representations of $D_{3d}$ are used to classify the states at the
 point $L$ of the fcc lattice and therefore have received special names 
 in Ref.[14].
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 D_3d        [QE]        [1,5]   [2]    [11]    [14]
 A_1g      A_1g, L_1     A_1g    G_1+   A_1g    L_1
@@ -4733,7 +5793,12 @@ G_4-      G_4-, L_6-            G_4-   E_1/2u
 G_5-      G_5-, L_4-            G_5-   B_2u
 G_6-      G_6-, L_5-            G_6-   B_1u
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 S_4         [QE]        [1,5]   [2]    [11]
 A           A           A       G_1    M_0
@@ -4745,7 +5810,12 @@ G_6         G_6                 G_6    M_1/2
 G_7         G_7                 G_7    M_3/2
 G_8         G_8                 G_8    M_3/2*
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 S_6         [QE]        [1,5]   [2]    [11]
 A_g         A_g         A_g     G_1+   M_0g
@@ -4761,7 +5831,11 @@ G_4-        G_4-                G_4-   M_1/2u*
 G_5-        G_5-                G_5-   M_1/2u
 G_6-        G_6-                G_6-   M_3/2u
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 T           [QE]        [1,5]   [2]    [11]
 A           A           A       G_1    A
@@ -4772,7 +5846,11 @@ G_5                             G_5    E_1/2
 G_6                             G_6    E_1/2''
 G_7                             G_7    E_1/2'
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 T_h         [QE]        [1,5]   [2]    [11]
 A_g         A_g         A_g     G_1+   A_g
@@ -4790,11 +5868,17 @@ G_5-        G_5-                G_5-   E_1/2u
 G_6-        G_6-                G_6-   E_1/2''u
 G_7-        G_7-                G_7-   E_1/2'u
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
+
 
 The group $T_d$ is the small group of ${\bf k}$ for the point $P$ of the
 bcc Brillouin zone and for the point $\Gamma$ for a zincblend structure
 so in Ref.[14] and Ref.[15] its representations have been given 
 special names. 
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 T_d         [QE]        [1,5]   [2]    [11]    [14]   [15]
 A_1    A_1, G_1, P_1    A_1     G_1    A_1     P_1    G_1
@@ -4806,7 +5890,11 @@ G_6       G_6, P_6              G_6    E_1/2
 G_7       G_7, P_7              G_7    E'_1/2
 G_8       G_8, P_8              G_8    Q
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 O           [QE]        [1,5]   [2]    [11]
 A_1         A_1          A_1    G_1    A_1
@@ -4818,11 +5906,16 @@ G_6         G_6                 G_6    E_1/2
 G_7         G_7                 G_7    E'_1/2
 G_8         G_8                 G_8    Q
 \end{verbatim}
+\end{footnotesize}
+\end{tcolorbox}
 
 The $O_h$ group is the small group of ${\bf k}$ for the $\Gamma$ point, 
 and the $R$ point of the simple cubic Brillouin zone and at
 the $H$ point of the body-centered cubic Brillouin zone and its irreducible
 representations have received special names in Ref.[14].
+
+\begin{tcolorbox}
+\begin{footnotesize}
 \begin{verbatim}
 O_h         [QE]        [1,5]   [2]    [11]    [14]
 A_1g  A_1g, G_1, G_1+   A_1g    G_1+   A_1g    G_1
@@ -4842,10 +5935,14 @@ G_6-        G_6-                G_6-   E_1/2u
 G_7-        G_7-                G_7-   E'_1/2u
 G_8-        G_8-                G_8-   Q_u
 \end{verbatim} 
+\end{footnotesize}
+\end{tcolorbox}
 
 
 \newpage
-\section{\color{coral}Bibliography}
+
+{\color{dark-blue}\chapter{Bibliography}}
+\color{black}
 \begin{enumerate}
 
 \item
@@ -4902,7 +5999,7 @@ crystal',
 Cambridge University Press, Cambridge (1999). 
 (A compact presentation of many concepts relevant to molecules and solids.
 Advanced. The classification of the bands and phonons of non-symmorphic space groups
-made in \thermo\ is based on the theory given in this book).
+made in \tpw\ is based on the theory given in this book).
 
 \item
 C.J. Bradley and A.P. Cracknell, {\it The mathematical

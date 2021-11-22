@@ -5,38 +5,50 @@
 %! in the root directory of the present distribution,
 %! or http://www.gnu.org/copyleft/gpl.txt .
 %!
-\documentclass[12pt,a4paper]{article}
+\documentclass[12pt,a4paper,twoside]{report}
 \def\version{1.6.0}
-\def\qe{{\sc Quantum ESPRESSO}}
 
 \usepackage[T1]{fontenc}
+\usepackage{tcolorbox}
 \usepackage{bookman}
 \usepackage{html}
-
-% BEWARE: don't revert from graphicx for epsfig, because latex2html
-% doesn't handle epsfig commands !!!
 \usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage[Lenny]{fncychap}
 \usepackage{color}
+\usepackage{geometry}
+\tcbuselibrary{breakable}
+\pagestyle{fancy}
+\lhead{Developer's guide}
+\rhead{}
+\cfoot{\thepage}
 
-\textwidth = 16cm
-\textheight = 24cm
-\topmargin =0 cm
-\oddsidemargin = 0. cm
-
+\newgeometry{
+      top=3cm,
+      bottom=3cm,
+      outer=2.25cm,
+      inner=2.75cm,
+}
 
 \definecolor{web-blue}{rgb}{0,0.5,1.0}
 \definecolor{coral}{rgb}{1.0,0.5,0.3}
 \definecolor{red}{rgb}{1.0,0,0.0}
 \definecolor{green}{rgb}{0.,1.0,0.0}
+\definecolor{dark-blue}{rgb}{0.,0.0,0.6}
+\definecolor{light-pink}{rgb}{1.0,1.0,0.8}
+%\tcbset{colback=light-pink,colframe=dark-blue,oversize=\linewidth/15,breakable}
+\tcbset{colback=light-pink,colframe=dark-blue,breakable}
 
+\def\qe{{\sc Quantum ESPRESSO}}
 \def\pwx{\texttt{pw.x}}
 \def\phx{\texttt{ph.x}}
 \def\configure{\texttt{configure}}
 \def\PWscf{\texttt{PWscf}}
 \def\PHonon{\texttt{PHonon}}
-\def\thermo{\texttt{thermo\_pw}}
 \def\tpw{\texttt{thermo\_pw}}
 \def\make{\texttt{make}}
+
+
 
 \begin{document} 
 
@@ -47,7 +59,7 @@
   \includegraphics[width=5cm]{thermo_pw.jpg} \\
   \vspace{3truecm}
   % title
-  \Huge \color{blue} {\sc Thermo}\_{\sc pw} Developer's Guide \\
+  \Huge \color{dark-blue} {\sc Thermo}\_{\sc pw} Developer's Guide \\
   (v.\version)
 }
 
@@ -59,7 +71,8 @@
 
 \newpage
 
-\section{\color{coral}Introduction}
+{\color{dark-blue}\chapter*{Introduction}}
+\color{black}
 This guide discusses the internal organization of \tpw. It is not necessary
 to read it to use \tpw. It contains some technical information not 
 appropriate for the user's guide that you might need to modify the code.
@@ -67,11 +80,12 @@ It assumes that you have read and understood the user's guide and that
 you have already some familiarity with the input variables and 
 the working modes of \tpw.
 
-\section{\color{coral}People}
+{\color{coral}\section{People}}
+\color{black}
 This guide has been written by Andrea Dal Corso (SISSA - Trieste). 
 
-\newpage
-\section{\color{coral}Overview}
+{\color{coral}\section{Overview}}
+\color{black}
 \tpw\ is logically divided into parts. In some parts the different
 images run asynchronously doing different tasks and in some parts the
 run is synchronous. Usually in these synchronous parts results are 
@@ -210,7 +224,9 @@ The first is used to initialize variables and the second to write messages
 on output.
 
 \newpage
-\section{\color{coral}Activated parts}
+
+{\color{dark-blue}\chapter{Activated parts}}
+\color{black}
 
 The different \texttt{what} activates the following parts of the code:
 
@@ -250,7 +266,8 @@ elastic_constants_t
 \end{footnotesize}
 
 \newpage
-\section{\color{coral}Plots and physical quantities}
+{\color{dark-blue}\chapter{Plots and physical quantities}}
+\color{black}
 This is the list of the plots that can be obtained and 
 the \texttt{what} to use:
 
@@ -330,7 +347,8 @@ Elastic constant tensor                        scf_elastic_constants,
 \end{footnotesize}
 
 \newpage
-\section{\color{coral}Scripts and Files}
+{\color{dark-blue}\chapter{Scripts and Files}}
+\color{black}
 
 In almost all tasks, \tpw\ produces some data files containing the quantity 
 to plot, some scripts to plot the data and, if the \texttt{gnuplot} code
@@ -474,14 +492,15 @@ elastic_constants_t
 \end{footnotesize}
 
 \newpage
-\section{\color{coral}Directory structure}
-\thermo\ creates several directories where it saves the data needed to
+{\color{dark-blue}\chapter{Directory structure}}
+\color{black}
+\tpw\ creates several directories where it saves the data needed to
 create the plots or the information needed to restart the calculation.  
 As \qe, it uses two main directories: the \texttt{working} 
-directory, which is the current directory when \thermo\ is started 
+directory, which is the current directory when \tpw\ is started 
 (the one written by the unix command \texttt{pwd}), and a scratch directory 
 called \texttt{outdir} directory and defined in the \texttt{pw.x} input. For its
-internal purposes \thermo\ might change the \texttt{outdir} directory creating
+internal purposes \tpw\ might change the \texttt{outdir} directory creating
 some subdirectories within the \texttt{outdir} directory. This is done to
 have different images working in different scratch directories and running
 independently. \\
@@ -528,7 +547,7 @@ elastic_constants : a directory that contains the elastic constants files
 The postscript files with the physical quantities are all written in
 the \texttt{working} directory. \\
 In the \texttt{outdir} directory defined in the input of \texttt{pw.x},
-\thermo\ creates a directory called \texttt{g\#} for each geometry, 
+\tpw\ creates a directory called \texttt{g\#} for each geometry, 
 where \texttt{\#} indicates the geometry number, and uses the directory 
 \texttt{outdir/g\#} as the outdir directory for each different geometry. 
 An image that receives the task, for instance a self-consistent calculation 
@@ -549,11 +568,12 @@ task number. Similarly, \texttt{what='scf\_nk'} uses outdir directories
 called \texttt{outdir/nk\#}.
 Recent versions of the \qe\ package allows also two different scratch
 directories, one for the wavefunctions and one for the other quantities.
-\thermo\ does not use this feature and sets always the wavefunction
+\tpw\ does not use this feature and sets always the wavefunction
 directory coincident with the \texttt{outdir} directory.
 
 \newpage
-\section{\color{coral}The drivers}
+{\color{dark-blue}\chapter{The drivers}}
+\color{black}
 
 The \texttt{thermo\_pw} main program is in the file \texttt{src/thermo\_pw.f90}.
 This routine is responsible for the main flow of the program discussed
@@ -617,7 +637,8 @@ coordinates the calculation of the electronic thermodynamic properties for
 many geometries.
 
 \newpage
-\section{\color{coral}How to insert a new flow-chart}
+{\color{dark-blue}\chapter{How to insert a new flow-chart}}
+\color{black}
 In order to insert a new flow-chart in the \texttt{thermo\_pw} code it
 is necessary to set a new option for the variable \texttt{what}. The
 new option will control what happens in the following routines:
@@ -667,7 +688,8 @@ which is called by \texttt{thermo\_pw} at the beginning of the run
 but not before each task.
 
 \newpage
-\section{\color{coral}Files contents}
+{\color{dark-blue}\chapter{Files contents}}
+\color{black}
 
 Many data files produced by \texttt{thermo\_pw} are in a form readable
 by the \texttt{gnuplot} program and are therefore arranged in columns.
@@ -1280,7 +1302,8 @@ quasi-harmonic' elastic compliances calculated on a grid of geometries
 and \texttt{\#g} is the number of the geometry.
 
 \newpage
-\section{\color{coral}Library}
+{\color{dark-blue}\chapter{Library}}
+\color{black}
 
 \tpw\ offers a library of modules to deal with the properties of solids. The 
 modules are independent from the \tpw\ variables, but might
@@ -1338,6 +1361,14 @@ tensorial notation and viceversa.
 excitation energy, free energy, entropy, and constant strain heat capacity
 from the electronic density of states, assuming a gas of independent 
 electrons.   
+
+\item
+\texttt{eos.f90} contains routines to calculate the equation of state and
+its derivatives: pressure, bulk modulus, pressure derivatives of the bulk
+modulus. Three equations are implemented: Birch-Murnaghan of third
+and fourth order and Murnaghan equation. It is also possible to compute
+the derivatives adding a polynomial of arbitrary degree to the equation
+of state.
 
 \item
 \texttt{freecad.f90} contains the routines to write a script to plot the
@@ -1434,8 +1465,10 @@ point group.
 \texttt{polyfit.f90} contains routines to deal with polynomial
 interpolation of arbitrary degree for a single variable. Presently
 it contains a routine that finds the polynomial interpolation a set of data,
-a routine to evaluate the polynomial in an input point and a routine
-that evaluates its first derivative in an input point.
+a routine to evaluate the polynomial in an input point and routines
+that evaluate its first, second, third, and fourth derivatives in an 
+input point. There is also a generic routine that evaluates the p-th
+derivative.
 
 \item
 \texttt{polynomial.f90} contains routines to define a multivariate 
@@ -1486,15 +1519,18 @@ and the X-rays powder diffraction spectra.
 \end{itemize}
 
 \newpage
-\section{\color{coral}Master-slave approach to the asynchronous parallelization}
+{\color{dark-blue}\chapter{Master-slave approach to the asynchronous 
+parallelization}}
+\color{black}
 
 The following scheme shows how a single loop composed of \texttt{nwork} tasks
 can be parallelized with a master-slave approach.
 
-\begin{figure*}[ht]
+\begin{center}
+\begin{figure}[h]
   \begin{tabular}[t]{ll}
-    \includegraphics[height=0.80\textwidth]{flowmaster.png}
-    &\includegraphics[height=0.80\textwidth]{flowslave.png}\\
+    \includegraphics[height=0.65\textwidth]{flowmaster.png}
+    &\includegraphics[height=0.65\textwidth]{flowslave.png}\\
   \end{tabular}
  \caption{Comparison between the work-flow of the master image (left)
  and of the slave images (right) in \texttt{thermo\_pw}. In the right
@@ -1502,10 +1538,12 @@ part of the figure we show also the equivalent serial code. The green lines
 indicate the points of communication between the master and the slave images.
 }
 \label{figflow}
-\end{figure*}
+\end{figure}
+\end{center}
 
 \newpage
-\section{\color{coral}The directory qe}
+{\color{dark-blue}\chapter{The directory qe}}
+\color{black}
 
 The directory \texttt{qe} contains several routines of \qe\ that need to
 be modified or improved to be used in \texttt{thermo\_pw}. This
@@ -1523,7 +1561,9 @@ routines. The additional global variables needed by these routines are
 contained in the file \texttt{control\_qe.f90} and should be added there.
 
 \newpage
-\section{\color{coral}Make join\_qe and make leave\_qe}
+{\color{dark-blue}\chapter{Make join\_qe and make leave\_qe}}
+\color{black}
+
 The command \texttt{make join\_qe} substitutes three files of the QE
 distribution: \texttt{Makefile} in the main QE directory, 
 \texttt{install/makedeps.sh} and \texttt{install/}
