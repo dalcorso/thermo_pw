@@ -17,6 +17,7 @@ debye_module.o \
 diagonalize.o \
 elastic_const.o \
 eldos_module.o \
+eos.o \
 freecad.o \
 gnuplot.o \
 gnuplot_color.o \

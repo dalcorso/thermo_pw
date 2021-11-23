@@ -36,7 +36,7 @@ all : space_groups.x crystal_point_group.x mag_point_group.x units.x \
       elastic.x plot_sur_states.x gener_2d_slab.x gener_3d_slab.x \
       gener_nanowire.x debye.x rotate_tensors.x test_colors.x epsilon_tpw.x \
       pdec.x optical.x change_e_name.x change_tel_name.x change_dynmat_name.x \
-      merge_interp.x template.x
+      merge_interp.x template.x eos_test.x
       
 
 space_groups.x : space_groups.o $(MODULES)
@@ -140,6 +140,10 @@ template.x : template.o $(MODULES)
 	$(LD) $(LDFLAGS) -o $@ template.o $(MODULES) $(QELIBS)
 	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/template.x . )
 
+eos_test.x : eos_test.o $(MODULES)
+	$(LD) $(LDFLAGS) -o $@ eos_test.o $(MODULES) $(QELIBS)
+	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/eos_test.x . )
+
 clean :
 	- /bin/rm -f *.x *.o *.a *~ *_tmp.f90 *.d *.mod *.i *.L
 	- /bin/rm -rf ../../bin/space_groups.x 
@@ -165,6 +169,7 @@ clean :
 	- /bin/rm -rf ../../bin/change_dynmat_name.x 
 	- /bin/rm -rf ../../bin/change_e_name.x 
 	- /bin/rm -rf ../../bin/change_tel_name.x 
+	- /bin/rm -rf ../../bin/eos_test.x 
 	- /bin/rm -rf ../../bin/merge_interp.x 
 	- /bin/rm -rf ../../bin/template.x 
 

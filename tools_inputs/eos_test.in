@@ -1,0 +1,15 @@
+4                        ! ieos
+109.17                   ! v0   
+2745.192                 ! b0 
+4.224                    ! dB/dp
+-0.00171                 ! d^2B/dP^2
+121.0                    ! Maximum volume              
+54.0                     ! Minimum volume
+1000                     ! number of points of volume grid
+Yes                      ! use polynomial?
+4                        ! degree of the polynomial
+-0.103609198739E-01      ! a(1)
+0.357921035421E-03       ! a(2)
+-0.733536276182E-05      ! a(3)
+0.481785248549E-07       ! a(4)
+-0.138678121061E-09      ! a(degree+1)
