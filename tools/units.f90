@@ -105,18 +105,18 @@ rydberg=1.0973731568160D7 ! rydberg
 alphaf=7.2973525693D-3  ! fine strcuture constants
 amu=1.66053906660D-27   ! kg
 
-WRITE(stdout,'(/,5x,"Experimental quantities exact in the SI:")') 
-WRITE(stdout,'(5x,"Planck constant: ",4x,es20.8,"      J.s")') hplanck
-WRITE(stdout,'(5x,"Planck constant / 2 pi:",3x,es20.13," J.s")') hbarf
-WRITE(stdout,'(5x,"Speed of light: ",5x,es20.8,"      m/s")') cspeed
-WRITE(stdout,'(5x,"Electron charge: ",5x,es20.9,"     C")') e
-WRITE(stdout,'(5x,"Avogadro number: ",4x,es20.8)') avonum
-WRITE(stdout,'(5x,"Boltzmann constant: ",es19.6,"        J/K")') boltz
+WRITE(stdout,'(/,"Experimental quantities exact in the SI:")') 
+WRITE(stdout,'("Planck constant: ",4x,es20.8,"      J.s")') hplanck
+WRITE(stdout,'("Planck constant / 2 pi:",3x,es20.13," J.s")') hbarf
+WRITE(stdout,'("Speed of light: ",5x,es20.8,"      m/s")') cspeed
+WRITE(stdout,'("Electron charge: ",5x,es20.9,"     C")') e
+WRITE(stdout,'("Avogadro number: ",4x,es20.8)') avonum
+WRITE(stdout,'("Boltzmann constant: ",es19.6,"        J/K")') boltz
 
-WRITE(stdout,'(/,5x,"Approximate quantities determined by experiment:")') 
-WRITE(stdout,'(5x,"Rydberg constant: ",8x,es20.13," 1/m")') rydberg
-WRITE(stdout,'(5x,"Fine structure constant: ",es18.10)') alphaf
-WRITE(stdout,'(5x,"Atomic mass unit: ",6x,es20.11,"   kg")') amu
+WRITE(stdout,'(/,"Approximate quantities determined by experiment:")') 
+WRITE(stdout,'("Rydberg constant: ",8x,es20.13," 1/m")') rydberg
+WRITE(stdout,'("Fine structure constant: ",es18.10)') alphaf
+WRITE(stdout,'("Atomic mass unit: ",6x,es20.11,"   kg")') amu
 
 IF (ionode) THEN
    WRITE(iunout,'("\def\hplanck{",a,"}")') TRIM(float_to_latex(hplanck,8))
@@ -141,13 +141,13 @@ epsilon0=1.0_DP/mu0/cspeed**2          ! N m^2/C^2
 baru=2.0_DP * hplanck * cspeed * rydberg
 bohrmag=hbarf*e/2.0_DP/me
 
-WRITE(stdout,'(/,5x,"Derived Physical quantities:")') 
-WRITE(stdout,'(5x,"Electron mass: ",8x,es20.10,"    kg")') me
-WRITE(stdout,'(5x,"mu0: ",19x,es20.11,"   N/A^2")') mu0
-WRITE(stdout,'(5x,"epsilon0: ",13x,es20.10,"    C^2/N m^2")') epsilon0
-WRITE(stdout,'(5x,"E_hatree: ",16x,es20.13," J")') baru
-WRITE(stdout,'(5x,"Bohr radius: ",11x,es20.11,"   m")') abohr
-WRITE(stdout,'(5x,"Bohr magneton: ",8x,es20.10,"    J/T")') bohrmag
+WRITE(stdout,'(/,"Derived Physical quantities:")') 
+WRITE(stdout,'("Electron mass: ",8x,es20.10,"    kg")') me
+WRITE(stdout,'("mu0: ",19x,es20.11,"   N/A^2")') mu0
+WRITE(stdout,'("epsilon0: ",13x,es20.10,"    C^2/N m^2")') epsilon0
+WRITE(stdout,'("E_hatree: ",16x,es20.13," J")') baru
+WRITE(stdout,'("Bohr radius: ",11x,es20.11,"   m")') abohr
+WRITE(stdout,'("Bohr magneton: ",8x,es20.10,"    J/T")') bohrmag
 
 IF (ionode) THEN
    WRITE(iunout,'("\def\me{",a,"}")') TRIM(float_to_latex(me,10))
@@ -193,38 +193,38 @@ barmu=hbarf * e / me
 barmag=bari/barl
 barh=barmag/4.0_DP/pi
 
-WRITE(stdout,'(/,5x,"Conversion factors (Atomic units - SI):")') 
-WRITE(stdout,'(5x,"Length: \l=",13x,es20.11,"   m")') barl
-WRITE(stdout,'(5x,"Mass: \m=",14x,es20.10,"    kg")') barm
-WRITE(stdout,'(5x,"Mass density: \rhom=",3x,es20.10,"    kg/m^3")') barrhom
-WRITE(stdout,'(5x,"Time: \t=",17x,es20.13," s")') bart
-WRITE(stdout,'(5x,"Frequency: \nu=",11x,es20.13," Hz")') barnu
-WRITE(stdout,'(5x,"Speed: \v=",14x,es20.11,"   m/s")') barv
-WRITE(stdout,'(5x,"Acceleration: \a=",6x,es20.10,"    m/s^2")') bara
-WRITE(stdout,'(5x,"Momentum: \p=",11x,es20.11,"   kg m/s")') barp
-WRITE(stdout,'(5x,"Angular momentum: \L=",5x,es20.13," kg m^2/s")') baram
-WRITE(stdout,'(5x,"Force: \f=",13x,es20.10,"    N")') barf
-WRITE(stdout,'(5x,"Energy: \U=",15x,es20.13," J")') baru
-WRITE(stdout,'(5x,"Power: \W=",16x,es20.13," W")') barw
-WRITE(stdout,'(5x,"Pressure: \pr=",9x,es20.10,"    Pa")') barpr
-WRITE(stdout,'(5x,"Current: \I=",13x,es20.12,"  A")') bari
-WRITE(stdout,'(5x,"Charge: \C=",11x,es20.9,"     C")') barc
-WRITE(stdout,'(5x,"Charge density: \rho=",3x,es20.11,"   C/m^3")') barrho
-WRITE(stdout,'(5x,"Current density: \J=",4x,es20.11,"   A/m^2")') barcur
-WRITE(stdout,'(5x,"Electric field: \E=",5x,es20.11,"   N/C")') bare
-WRITE(stdout,'(5x,"Electric potential: \V=",3x,es20.13," V")') barphi
-WRITE(stdout,'(5x,"Capacitance: \F=",9x,es20.12,"  F")') barcap
-WRITE(stdout,'(5x,"Dipole moment: \dip=",3x,es20.10,"    C m")') bardip
-WRITE(stdout,'(5x,"Polarization: \P=",6x,es20.10,"    C/m^2")') barpolar
-WRITE(stdout,'(5x,"Electric displacement: \D=",es17.10,"    C/m^2")') bard
-WRITE(stdout,'(5x,"Resistance: \R=",11x,es20.13," Ohm")') barohm
-WRITE(stdout,'(5x,"Magnetic induction: \B=",1x,es20.11,"   T")') barb
-WRITE(stdout,'(5x,"Vector potential: \A=",3x,es20.11,"   T m")') barav
-WRITE(stdout,'(5x,"Magnetic field flux: \Phi=",es20.13," Wb")') barwb
-WRITE(stdout,'(5x,"Inductance: \Y= ",9x,es20.12,"  H")') bary
-WRITE(stdout,'(5x,"Magnetic dipole: \mu=",3x,es20.11,"   A m^2 (J/T)")') barmu
-WRITE(stdout,'(5x,"Magnetization: \M=",6x,es20.11,"   A/m")') barmag
-WRITE(stdout,'(5x,"Magnetic strength: \H=",1x,es20.10,"    A/m")') barh
+WRITE(stdout,'(/,"Conversion factors (Atomic units - SI):")') 
+WRITE(stdout,'("Length: \l=",13x,es20.11,"   m")') barl
+WRITE(stdout,'("Mass: \m=",14x,es20.10,"    kg")') barm
+WRITE(stdout,'("Mass density: \rhom=",3x,es20.10,"    kg/m^3")') barrhom
+WRITE(stdout,'("Time: \t=",17x,es20.13," s")') bart
+WRITE(stdout,'("Frequency: \nu=",11x,es20.13," Hz")') barnu
+WRITE(stdout,'("Speed: \v=",14x,es20.11,"   m/s")') barv
+WRITE(stdout,'("Acceleration: \a=",6x,es20.10,"    m/s^2")') bara
+WRITE(stdout,'("Momentum: \p=",11x,es20.11,"   kg m/s")') barp
+WRITE(stdout,'("Angular momentum: \L=",5x,es20.13," kg m^2/s")') baram
+WRITE(stdout,'("Force: \f=",13x,es20.10,"    N")') barf
+WRITE(stdout,'("Energy: \U=",15x,es20.13," J")') baru
+WRITE(stdout,'("Power: \W=",16x,es20.13," W")') barw
+WRITE(stdout,'("Pressure: \pr=",9x,es20.10,"    Pa")') barpr
+WRITE(stdout,'("Current: \I=",13x,es20.12,"  A")') bari
+WRITE(stdout,'("Charge: \C=",11x,es20.9,"     C")') barc
+WRITE(stdout,'("Charge density: \rho=",3x,es20.11,"   C/m^3")') barrho
+WRITE(stdout,'("Current density: \J=",4x,es20.11,"   A/m^2")') barcur
+WRITE(stdout,'("Electric field: \E=",5x,es20.11,"   N/C")') bare
+WRITE(stdout,'("Electric potential: \V=",3x,es20.13," V")') barphi
+WRITE(stdout,'("Capacitance: \F=",9x,es20.12,"  F")') barcap
+WRITE(stdout,'("Dipole moment: \dip=",3x,es20.10,"    C m")') bardip
+WRITE(stdout,'("Polarization: \P=",6x,es20.10,"    C/m^2")') barpolar
+WRITE(stdout,'("Electric displacement: \D=",es17.10,"    C/m^2")') bard
+WRITE(stdout,'("Resistance: \R=",11x,es20.13," Ohm")') barohm
+WRITE(stdout,'("Magnetic induction: \B=",1x,es20.11,"   T")') barb
+WRITE(stdout,'("Vector potential: \A=",3x,es20.11,"   T m")') barav
+WRITE(stdout,'("Magnetic field flux: \Phi=",es20.13," Wb")') barwb
+WRITE(stdout,'("Inductance: \Y= ",9x,es20.12,"  H")') bary
+WRITE(stdout,'("Magnetic dipole: \mu=",3x,es20.11,"   A m^2 (J/T)")') barmu
+WRITE(stdout,'("Magnetization: \M=",6x,es20.11,"   A/m")') barmag
+WRITE(stdout,'("Magnetic strength: \H=",1x,es20.10,"    A/m")') barh
 
 IF (ionode) THEN
    WRITE(iunout,'("\def\barl{",a,"}")') TRIM(float_to_latex(barl,11))
@@ -295,101 +295,101 @@ mutomu=1.D-4 / kappaa
 magtomag=1.D2/kappaa
 htoh=magtomag/4.0_DP/pi
 
-WRITE(stdout,'(/,5x,"Conversion factors (c.g.s.-Gaussian - SI):")') 
-WRITE(stdout,'(5x,"Length: cm=",3x,es20.1,10x,"   m")') cmtom
-WRITE(stdout,'(5x,"Mass: g=",6x,es20.1,10x,"   kg")') gtokg
-WRITE(stdout,'(5x,"Mass density: g/cm^3=",es13.1,12x," kg/m^3")') rhomtorhom
-WRITE(stdout,'(5x,"Time: s=",19x,"1.0E+00",11x,"  s")') 
-WRITE(stdout,'(5x,"Frequency: Hz=",13x,"1.0E+00",11x,"  Hz")') 
+WRITE(stdout,'(/,"Conversion factors (c.g.s.-Gaussian - SI):")') 
+WRITE(stdout,'("Length: cm=",3x,es20.1,10x,"   m")') cmtom
+WRITE(stdout,'("Mass: g=",6x,es20.1,10x,"   kg")') gtokg
+WRITE(stdout,'("Mass density: g/cm^3=",es13.1,12x," kg/m^3")') rhomtorhom
+WRITE(stdout,'("Time: s=",19x,"1.0E+00",11x,"  s")') 
+WRITE(stdout,'("Frequency: Hz=",13x,"1.0E+00",11x,"  Hz")') 
 
-WRITE(stdout,'(5x,"Speed: cm/s=",2x,es20.1,10x,"   m/s")') cmtom
-WRITE(stdout,'(5x,"Acceleration: cm/s^2=",es13.1,10x,"   m/s^2")') cmtom
-WRITE(stdout,'(5x,"Momentum: g cm/s=",es17.1,10x,"   kg m/s")') ptop
-WRITE(stdout,'(5x,"Angular momentum: g cm^2/s=",es7.1,10x,"   kg m^2/s")')&
+WRITE(stdout,'("Speed: cm/s=",2x,es20.1,10x,"   m/s")') cmtom
+WRITE(stdout,'("Acceleration: cm/s^2=",es13.1,10x,"   m/s^2")') cmtom
+WRITE(stdout,'("Momentum: g cm/s=",es17.1,10x,"   kg m/s")') ptop
+WRITE(stdout,'("Angular momentum: g cm^2/s=",es7.1,10x,"   kg m^2/s")')&
                                                                 ltol
-WRITE(stdout,'(5x,"Force: dyne=",2x,es20.1,10x,"   N")') ftof
-WRITE(stdout,'(5x,"Energy: erg=",2x,es20.1,10x,"   J")') utou
-WRITE(stdout,'(5x,"Power: erg/s=",1x,es20.1,10x,"   W")') utou
-WRITE(stdout,'(5x,"Pressure: Ba=",1x,es20.1,10x,"   Pa")') prtopr
-WRITE(stdout,'(5x,"Current: statA=",9x,es20.11,"   A")') itoi
-WRITE(stdout,'(5x,"Charge: statC=",10x,es20.11,"   C")') chtoch
-WRITE(stdout,'(5x,"Charge density: statC/cm^3=",es17.11,1x,&
+WRITE(stdout,'("Force: dyne=",2x,es20.1,10x,"   N")') ftof
+WRITE(stdout,'("Energy: erg=",2x,es20.1,10x,"   J")') utou
+WRITE(stdout,'("Power: erg/s=",1x,es20.1,10x,"   W")') utou
+WRITE(stdout,'("Pressure: Ba=",1x,es20.1,10x,"   Pa")') prtopr
+WRITE(stdout,'("Current: statA=",9x,es20.11,"   A")') itoi
+WRITE(stdout,'("Charge: statC=",10x,es20.11,"   C")') chtoch
+WRITE(stdout,'("Charge density: statC/cm^3=",es17.11,1x,&
                                                         &"  C/m^3")') rhotorho
-WRITE(stdout,'(5x,"Current density: statA/cm^2=",es17.11,1x,&
+WRITE(stdout,'("Current density: statA/cm^2=",es17.11,1x,&
                                                         &" A/m^2")') curtocur
-WRITE(stdout,'(5x,"Electric field: dyne/statC=",es17.11,1x,"  N/C")') &
+WRITE(stdout,'("Electric field: dyne/statC=",es17.11,1x,"  N/C")') &
                                                                      etoe
-WRITE(stdout,'(5x,"Electric potential: statV=",es18.11,1x,"  V")') &
+WRITE(stdout,'("Electric potential: statV=",es18.11,1x,"  V")') &
                                                                      phitophi
-WRITE(stdout,'(5x,"Capacitance: cm=",8x,es20.11,1x,"  F")') captocap
-WRITE(stdout,'(5x,"Dipole moment: statC cm=",es20.11,&
+WRITE(stdout,'("Capacitance: cm=",8x,es20.11,1x,"  F")') captocap
+WRITE(stdout,'("Dipole moment: statC cm=",es20.11,&
                                             &1x,"  C m")') diptodip
-WRITE(stdout,'(5x,"Electric polarization: statC/cm^2=",es18.11,&
+WRITE(stdout,'("Electric polarization: statC/cm^2=",es18.11,&
                                             &" C/m^2")') polartopolar
-WRITE(stdout,'(5x,"Electric displacement: statC/cm^2 4 pi=",es18.11,&
+WRITE(stdout,'("Electric displ: statC/cm^2 4 pi =",es18.11,&
                                             &" C/m^2")') dtod
-WRITE(stdout,'(5x,"Resistance: s/cm=",8x,es20.12,"  Ohm")') ohmtoohm
-WRITE(stdout,'(5x,"Magnetic induction: G=",3x,es20.12,"  T")') btob
-WRITE(stdout,'(5x,"Vector potential: G cm=",2x,es20.12,"  T m")') avtoav
-WRITE(stdout,'(5x,"Magnetic field flux: Mx=",1x,es20.12,"  Wb")') wbtowb
-WRITE(stdout,'(5x,"Inductance: statH=",6x,es20.11,2x," H")') ytoy
-WRITE(stdout,'(5x,"Magnetic dipole: statC cm=",es18.11,2x,&
+WRITE(stdout,'("Resistance: s/cm=",8x,es20.12,"  Ohm")') ohmtoohm
+WRITE(stdout,'("Magnetic induction: G=",3x,es20.12,"  T")') btob
+WRITE(stdout,'("Vector potential: G cm=",2x,es20.12,"  T m")') avtoav
+WRITE(stdout,'("Magnetic field flux: Mx=",1x,es20.12,"  Wb")') wbtowb
+WRITE(stdout,'("Inductance: statH=",6x,es20.11,2x," H")') ytoy
+WRITE(stdout,'("Magnetic dipole: statC cm=",es18.11,2x,&
                                             &" A m^2")') mutomu
-WRITE(stdout,'(5x,"Magnetization: statC/cm^2=",es18.11,2x," A/m")') &
+WRITE(stdout,'("Magnetization: statC/cm^2=",es18.11,2x," A/m")') &
                                                          magtomag
-WRITE(stdout,'(5x,"Magnetic strength: statC/cm^2 4 pi=",&
+WRITE(stdout,'("Magnetic strength: statC/cm^2 4 pi=",&
                                      &es18.11," A/m")') htoh
 
-WRITE(stdout,'(/,5x,"C/statC=",es18.11," (C/statC)/10c=",es18.11)') kappa,&
+WRITE(stdout,'(/,"C/statC=",es18.11," (C/statC)/10c=",es18.11)') kappa,&
                                                    kappadiecic
-WRITE(stdout,'(/,5x,"mu_0/4 pi 10^-7=",3x,es20.11)') mu0/4.0_DP/pi/1.D-7
+WRITE(stdout,'(/,"mu_0/4 pi 10^-7=",3x,es20.11)') mu0/4.0_DP/pi/1.D-7
 
-WRITE(stdout,'(/,5x,"Conversion factors (SI - c.g.s.-Gaussian):")') 
-WRITE(stdout,'(5x,"Length: m=",4x,es20.1,10x,"   cm")') 1.0_DP/cmtom
-WRITE(stdout,'(5x,"Mass: kg=",5x,es20.1,10x,"   g")')   1.0_DP/gtokg
-WRITE(stdout,'(5x,"Time: s=",19x,"1.0E+00",11x,"  s")') 
-WRITE(stdout,'(5x,"Frequency: Hz=",13x,"1.0E+00",11x,"  Hz")') 
-WRITE(stdout,'(5x,"Speed: m/s=",3x,es20.1,10x,"   cm/s")') 1.0_DP/cmtom
-WRITE(stdout,'(5x,"Acceleration: m/s^2=",es14.1,10x,"   cm/s^2")') &
+WRITE(stdout,'(/,"Conversion factors (SI - c.g.s.-Gaussian):")') 
+WRITE(stdout,'("Length: m=",4x,es20.1,10x,"   cm")') 1.0_DP/cmtom
+WRITE(stdout,'("Mass: kg=",5x,es20.1,10x,"   g")')   1.0_DP/gtokg
+WRITE(stdout,'("Time: s=",19x,"1.0E+00",11x,"  s")') 
+WRITE(stdout,'("Frequency: Hz=",13x,"1.0E+00",11x,"  Hz")') 
+WRITE(stdout,'("Speed: m/s=",3x,es20.1,10x,"   cm/s")') 1.0_DP/cmtom
+WRITE(stdout,'("Acceleration: m/s^2=",es14.1,10x,"   cm/s^2")') &
                                                               1.0_DP/cmtom
-WRITE(stdout,'(5x,"Momentum: kg m/s=",es17.1,10x"   g cm/s")') 1.0_DP/ptop
-WRITE(stdout,'(5x,"Angular momentum: kg m^2/s=",es7.1,10x,"   g cm^2/s")')&
+WRITE(stdout,'("Momentum: kg m/s=",es17.1,10x"   g cm/s")') 1.0_DP/ptop
+WRITE(stdout,'("Angular momentum: kg m^2/s=",es7.1,10x,"   g cm^2/s")')&
                                                                 1.0_DP/ltol
-WRITE(stdout,'(5x,"Force: N=",5x,es20.1,10x,"   dyne")') 1.0_DP/ftof
-WRITE(stdout,'(5x,"Energy: J=",4x,es20.1,10x,"   erg")') 1.0_DP/utou
-WRITE(stdout,'(5x,"Power: W=",5x,es20.1,10x,"   erg/s")') 1.0_DP/utou
-WRITE(stdout,'(5x,"Pressure: Pa=",1x,es20.1,10x,"   Ba")') 1.0_DP/prtopr
+WRITE(stdout,'("Force: N=",5x,es20.1,10x,"   dyne")') 1.0_DP/ftof
+WRITE(stdout,'("Energy: J=",4x,es20.1,10x,"   erg")') 1.0_DP/utou
+WRITE(stdout,'("Power: W=",5x,es20.1,10x,"   erg/s")') 1.0_DP/utou
+WRITE(stdout,'("Pressure: Pa=",1x,es20.1,10x,"   Ba")') 1.0_DP/prtopr
 
-WRITE(stdout,'(5x,"Current: A=",13x,es20.11,"   statA")') 1.0_DP/itoi
-WRITE(stdout,'(5x,"Charge: C=",14x,es20.11,"   statC")') 1.0_DP/chtoch
-WRITE(stdout,'(5x,"Charge density: C/m^3=",2x,es20.11,1x,&
+WRITE(stdout,'("Current: A=",13x,es20.11,"   statA")') 1.0_DP/itoi
+WRITE(stdout,'("Charge: C=",14x,es20.11,"   statC")') 1.0_DP/chtoch
+WRITE(stdout,'("Charge density: C/m^3=",2x,es20.11,1x,&
                                            &"  statC/cm^3")') 1.0_DP/rhotorho
-WRITE(stdout,'(5x,"Current density: A/m^2=",1x,es20.11,1x,&
+WRITE(stdout,'("Current density: A/m^2=",1x,es20.11,1x,&
                                            &"  statA/cm^2")') 1.0_DP/curtocur
-WRITE(stdout,'(5x,"Electric field: N/C=",4x,es20.11,1x,"  dyne/statC")') &
+WRITE(stdout,'("Electric field: N/C=",4x,es20.11,1x,"  dyne/statC")') &
                                                              1.0_DP/etoe
-WRITE(stdout,'(5x,"Electric potential: V=",2x,es20.11,1x,"  statV")') &
+WRITE(stdout,'("Electric potential: V=",2x,es20.11,1x,"  statV")') &
                                                           1.0_DP/phitophi
-WRITE(stdout,'(5x,"Capacitance: F=",9x,es20.11,1x,"  cm")') 1.0_DP/captocap
-WRITE(stdout,'(5x,"Dipole moment: C m=",5x,es20.11,1x,"  statC cm")') 1.0_DP/diptodip
-WRITE(stdout,'(5x,"Electric polarization: C/m^2=",es18.11,&
+WRITE(stdout,'("Capacitance: F=",9x,es20.11,1x,"  cm")') 1.0_DP/captocap
+WRITE(stdout,'("Dipole moment: C m=",5x,es20.11,1x,"  statC cm")') 1.0_DP/diptodip
+WRITE(stdout,'("Electric polarization: C/m^2=",es18.11,&
                                       &" statC/cm^2")') 1.0_DP/polartopolar
-WRITE(stdout,'(5x,"Electric displacement: C/m^2=",es18.11,&
+WRITE(stdout,'("Electric displ.: C/m^2=",es18.11,&
                                             &" statC/cm^2 4pi")') 1.0_DP/dtod
-WRITE(stdout,'(5x,"Resistance: Ohm=",9x,es20.12,"  s/cm")') &
+WRITE(stdout,'("Resistance: Ohm=",9x,es20.12,"  s/cm")') &
                                                           1.0_DP/ohmtoohm
-WRITE(stdout,'(5x,"Magnetic induction: T=",3x,es20.12,&
+WRITE(stdout,'("Magnetic induction: T=",3x,es20.12,&
                                             &"  G")') 1.0_DP/btob
-WRITE(stdout,'(5x,"Vector potential: T m=",3x,es20.12,&
+WRITE(stdout,'("Vector potential: T m=",3x,es20.12,&
                                             &"  G cm")') 1.0_DP/avtoav
-WRITE(stdout,'(5x,"Magnetic field flux: Wb=",1x,es20.12,&
+WRITE(stdout,'("Magnetic field flux: Wb=",1x,es20.12,&
                                             &"  Mx")') 1.0_DP/wbtowb
-WRITE(stdout,'(5x,"Inductance: H=",10x,es20.11,1x,"  statH")') 1.0_DP/ytoy
-WRITE(stdout,'(5x,"Magnetic dipole: A m^2=",1x,es20.11,1x,&
+WRITE(stdout,'("Inductance: H=",10x,es20.11,1x,"  statH")') 1.0_DP/ytoy
+WRITE(stdout,'("Magnetic dipole: A m^2=",1x,es20.11,1x,&
                                             &"  statC cm")') 1.0_DP/mutomu
-WRITE(stdout,'(5x,"Magnetization: A/m=",5x,es20.11,1x,"  statC/cm^2")') &
+WRITE(stdout,'("Magnetization: A/m=",5x,es20.11,1x,"  statC/cm^2")') &
                                                          1.0_DP/magtomag
-WRITE(stdout,'(5x,"Magnetic strength: A/m=",&
+WRITE(stdout,'("Magnetic strength: A/m=",&
                                 &1x,es20.11,"   statC/cm^2 4pi")') 1.0_DP/htoh
 
 IF (ionode) THEN
@@ -458,40 +458,40 @@ barohmcgs=barohm/ohmtoohm
 barcapcgs=barcap/captocap
 barycgs=bary/ytoy
 
-WRITE(stdout,'(/,5x,"Conversion factors (Atomic units - c.g.s.-Gaussian):")') 
-WRITE(stdout,'(5x,"Length:",17x,es20.11,"   cm")') barlcgs
-WRITE(stdout,'(5x,"Mass:",18x,es20.10,"    g")') barmcgs
-WRITE(stdout,'(5x,"Mass density:",10x,es20.10,"    g/cm^3")') barrhomcgs
-WRITE(stdout,'(5x,"Time:",21x,es20.13," s")') bart
-WRITE(stdout,'(5x,"Frequency:",16x,es20.13," Hz")') barnu
-WRITE(stdout,'(5x,"Speed:",18x,es20.11,"   cm/s")') barvcgs
-WRITE(stdout,'(5x,"Acceleration:",10x,es20.10,"    cm/s^2")') baracgs
-WRITE(stdout,'(5x,"Momentum:",15x,es20.11,"   g cm/s")') barpcgs
-WRITE(stdout,'(5x,"Angular momentum:",9x,es20.13," g cm^2/s")') baramcgs
-WRITE(stdout,'(5x,"Force:",17x,es20.10,"    dyne")') barfcgs
-WRITE(stdout,'(5x,"Energy:",19x,es20.13," erg")') barucgs
-WRITE(stdout,'(5x,"Power:",20x,es20.13," erg/s")') barwcgs
-WRITE(stdout,'(5x,"Pressure:",14x,es20.10,"    Ba")') barprcgs
-WRITE(stdout,'(5x,"Current:",16x,es20.11,"   statA")') baricgs
-WRITE(stdout,'(5x,"Charge:",17x,es20.11,"   statC")') barccgs
-WRITE(stdout,'(5x,"Charge density:",8x,es20.10,3x," statC/cm^3")') barrhocgs
-WRITE(stdout,'(5x,"Current density:",7x,es20.10,3x," statA/cm^2")') barcurcgs
-WRITE(stdout,'(5x,"Electric field:",9x,es20.11,2x," dyne/statC")') barecgs
-WRITE(stdout,'(5x,"Electric potential:",5x,es20.11,2x," statV")') barphicgs
-WRITE(stdout,'(5x,"Capacitance:",12x,es20.11,2x," cm")') barcapcgs
-WRITE(stdout,'(5x,"Dipole moment:",10x,es20.11,2x," statC cm")') bardipcgs
-WRITE(stdout,'(5x,"Polarization:",11x,es20.11,2x," statC/cm^2")') barpolarcgs
-WRITE(stdout,'(5x,"Electric displacement:",2x,es20.11,&
+WRITE(stdout,'(/,"Conversion factors (Atomic units - c.g.s.-Gaussian):")') 
+WRITE(stdout,'("Length:",17x,es20.11,"   cm")') barlcgs
+WRITE(stdout,'("Mass:",18x,es20.10,"    g")') barmcgs
+WRITE(stdout,'("Mass density:",10x,es20.10,"    g/cm^3")') barrhomcgs
+WRITE(stdout,'("Time:",21x,es20.13," s")') bart
+WRITE(stdout,'("Frequency:",16x,es20.13," Hz")') barnu
+WRITE(stdout,'("Speed:",18x,es20.11,"   cm/s")') barvcgs
+WRITE(stdout,'("Acceleration:",10x,es20.10,"    cm/s^2")') baracgs
+WRITE(stdout,'("Momentum:",15x,es20.11,"   g cm/s")') barpcgs
+WRITE(stdout,'("Angular momentum:",9x,es20.13," g cm^2/s")') baramcgs
+WRITE(stdout,'("Force:",17x,es20.10,"    dyne")') barfcgs
+WRITE(stdout,'("Energy:",19x,es20.13," erg")') barucgs
+WRITE(stdout,'("Power:",20x,es20.13," erg/s")') barwcgs
+WRITE(stdout,'("Pressure:",14x,es20.10,"    Ba")') barprcgs
+WRITE(stdout,'("Current:",16x,es20.11,"   statA")') baricgs
+WRITE(stdout,'("Charge:",17x,es20.11,"   statC")') barccgs
+WRITE(stdout,'("Charge density:",8x,es20.10,3x," statC/cm^3")') barrhocgs
+WRITE(stdout,'("Current density:",7x,es20.10,3x," statA/cm^2")') barcurcgs
+WRITE(stdout,'("Electric field:",9x,es20.11,2x," dyne/statC")') barecgs
+WRITE(stdout,'("Electric potential:",5x,es20.11,2x," statV")') barphicgs
+WRITE(stdout,'("Capacitance:",12x,es20.11,2x," cm")') barcapcgs
+WRITE(stdout,'("Dipole moment:",10x,es20.11,2x," statC cm")') bardipcgs
+WRITE(stdout,'("Polarization:",11x,es20.11,2x," statC/cm^2")') barpolarcgs
+WRITE(stdout,'("Electric displacement:",2x,es20.11,&
                                            &"   statC/cm^2 4pi")') bardcgs
-WRITE(stdout,'(5x,"Resistance:",13x,es20.11,2x," s/cm")') barohmcgs
-WRITE(stdout,'(5x,"Magnetic induction:",5x,es20.11,2x," G")') barbcgs
-WRITE(stdout,'(5x,"Vector potential:",7x,es20.11,2x," G cm")') baravcgs
-WRITE(stdout,'(5x,"Magnetic field flux:",4x,es20.11,2x," Mx")') barwbcgs
-WRITE(stdout,'(5x,"Inductance:",13x,es20.11,"   statH")') barycgs
-WRITE(stdout,'(5x,"Magnetic dipole:",8x,es20.11,"   statC cm")') barmucgs
-WRITE(stdout,'(5x,"Magnetization:",10x,es20.11,&
+WRITE(stdout,'("Resistance:",13x,es20.11,2x," s/cm")') barohmcgs
+WRITE(stdout,'("Magnetic induction:",5x,es20.11,2x," G")') barbcgs
+WRITE(stdout,'("Vector potential:",7x,es20.11,2x," G cm")') baravcgs
+WRITE(stdout,'("Magnetic field flux:",4x,es20.11,2x," Mx")') barwbcgs
+WRITE(stdout,'("Inductance:",13x,es20.11,"   statH")') barycgs
+WRITE(stdout,'("Magnetic dipole:",8x,es20.11,"   statC cm")') barmucgs
+WRITE(stdout,'("Magnetization:",10x,es20.11,&
                                            &"   statC/cm^2")') barmagcgs
-WRITE(stdout,'(5x,"Magnetic strength:",6x,es20.11,"   statC/cm^2 4pi ")') &
+WRITE(stdout,'("Magnetic strength:",6x,es20.11,"   statC/cm^2 4pi ")') &
                                                                barhcgs
 
 IF (ionode) THEN
@@ -555,39 +555,39 @@ barmury=0.5_DP * barmu / sqrt2
 barmagry=0.5_DP * barmag / sqrt2
 barhry=0.5_DP * barh / sqrt2
 
-WRITE(stdout,'(/,5x,"Conversion factors (Rydberg atomic units - SI):")') 
-WRITE(stdout,'(5x,"Length: \l_R=",11x,es20.11,"   m")') barl
-WRITE(stdout,'(5x,"Mass: \m_R=",13x,es20.11,"   kg")') barmry
-WRITE(stdout,'(5x,"Time: \t_R=",15x,es20.13," s")') bartry
-WRITE(stdout,'(5x,"Frequency: \nu_R=",9x,es20.13," Hz")') barnury
-WRITE(stdout,'(5x,"Speed: \v_R=",12x,es20.11,"   m/s")') barvry
-WRITE(stdout,'(5x,"Acceleration: \a_R=",5x,es20.11,"   m/s^2")') barary
-WRITE(stdout,'(5x,"Momentum: \p_R=",9x,es20.11,"   kg m/s")') barp
-WRITE(stdout,'(5x,"Angular momentum: \L_R=",3x,es20.13," kg m^2/s")') baram
-WRITE(stdout,'(5x,"Force: \f_R=",12x,es20.11,"   N")') barfry
-WRITE(stdout,'(5x,"Energy: \U_R=",13x,es20.13," J")') barury
-WRITE(stdout,'(5x,"Power: \W_R=",13x,es20.12,"  W")') barwry
-WRITE(stdout,'(5x,"Pressure: \pr_R=",8x,es20.11,"   Pa")') barprry
-WRITE(stdout,'(5x,"Current: \I_R=",12x,es20.13," A")') bariry
-WRITE(stdout,'(5x,"Charge: \C_R=",13x,es20.13," C")') barcry
-WRITE(stdout,'(5x,"Charge density: \rho_R=",es20.10,"    C/m^3")') barrhory
-WRITE(stdout,'(5x,"Current density: \J_R=",2x,es20.11,"   A/m^2")') barcurry
-WRITE(stdout,'(5x,"Electric field: \E_R=",3x,es20.11,"   N/C")') barery
-WRITE(stdout,'(5x,"Electric potential: \V_R=",1x,es20.13," V")') barphiry
-WRITE(stdout,'(5x,"Capacitance: \F_R=",7x,es20.12,"  F")') barcap
-WRITE(stdout,'(5x,"Dipole moment: \dip_R=",2x,es20.11,"   C m")') bardipry
-WRITE(stdout,'(5x,"Polarization: \P_R=",4x,es20.10,"    C/m^2")') barpolarry
-WRITE(stdout,'(5x,"Electric displacement: \D_R=",es17.11,"   C/m^2")') &
+WRITE(stdout,'(/,"Conversion factors (Rydberg atomic units - SI):")') 
+WRITE(stdout,'("Length: \l_R=",11x,es20.11,"   m")') barl
+WRITE(stdout,'("Mass: \m_R=",13x,es20.11,"   kg")') barmry
+WRITE(stdout,'("Time: \t_R=",15x,es20.13," s")') bartry
+WRITE(stdout,'("Frequency: \nu_R=",9x,es20.13," Hz")') barnury
+WRITE(stdout,'("Speed: \v_R=",12x,es20.11,"   m/s")') barvry
+WRITE(stdout,'("Acceleration: \a_R=",5x,es20.11,"   m/s^2")') barary
+WRITE(stdout,'("Momentum: \p_R=",9x,es20.11,"   kg m/s")') barp
+WRITE(stdout,'("Angular momentum: \L_R=",3x,es20.13," kg m^2/s")') baram
+WRITE(stdout,'("Force: \f_R=",12x,es20.11,"   N")') barfry
+WRITE(stdout,'("Energy: \U_R=",13x,es20.13," J")') barury
+WRITE(stdout,'("Power: \W_R=",13x,es20.12,"  W")') barwry
+WRITE(stdout,'("Pressure: \pr_R=",8x,es20.11,"   Pa")') barprry
+WRITE(stdout,'("Current: \I_R=",12x,es20.13," A")') bariry
+WRITE(stdout,'("Charge: \C_R=",13x,es20.13," C")') barcry
+WRITE(stdout,'("Charge density: \rho_R=",es20.10,"    C/m^3")') barrhory
+WRITE(stdout,'("Current density: \J_R=",2x,es20.11,"   A/m^2")') barcurry
+WRITE(stdout,'("Electric field: \E_R=",3x,es20.11,"   N/C")') barery
+WRITE(stdout,'("Electric potential: \V_R=",1x,es20.13," V")') barphiry
+WRITE(stdout,'("Capacitance: \F_R=",7x,es20.12,"  F")') barcap
+WRITE(stdout,'("Dipole moment: \dip_R=",2x,es20.11,"   C m")') bardipry
+WRITE(stdout,'("Polarization: \P_R=",4x,es20.10,"    C/m^2")') barpolarry
+WRITE(stdout,'("Electric displacement: \D_R=",es17.11,"   C/m^2")') &
                                                                   bardry
-WRITE(stdout,'(5x,"Resistance: \R_R=",9x,es20.13," Ohm")') barohmry
-WRITE(stdout,'(5x,"Magnetic induction: \B_R=",es18.10,"    T")') barbry
-WRITE(stdout,'(5x,"Vector potential: \A_R=",1x,es20.11,"   T m")') baravry
-WRITE(stdout,'(5x,"Magnetic field flux: \Phi_R=",es19.13," Wb")') barwbry
-WRITE(stdout,'(5x,"Inductance: \Y_R= ",8x,es20.13," H")') baryry
-WRITE(stdout,'(5x,"Magnetic dipole: \mu_R=",es20.10,"    A m^2 (J/T)")') &
+WRITE(stdout,'("Resistance: \R_R=",9x,es20.13," Ohm")') barohmry
+WRITE(stdout,'("Magnetic induction: \B_R=",es18.10,"    T")') barbry
+WRITE(stdout,'("Vector potential: \A_R=",1x,es20.11,"   T m")') baravry
+WRITE(stdout,'("Magnetic field flux: \Phi_R=",es19.13," Wb")') barwbry
+WRITE(stdout,'("Inductance: \Y_R= ",8x,es20.13," H")') baryry
+WRITE(stdout,'("Magnetic dipole: \mu_R=",es20.10,"    A m^2 (J/T)")') &
                                                                     barmury
-WRITE(stdout,'(5x,"Magnetization: \M_R=",4x,es20.11,"   A/m")') barmagry
-WRITE(stdout,'(5x,"Magnetic field: \H_R=",3x,es20.11,"   A/m")') barhry
+WRITE(stdout,'("Magnetization: \M_R=",4x,es20.11,"   A/m")') barmagry
+WRITE(stdout,'("Magnetic field: \H_R=",3x,es20.11,"   A/m")') barhry
 
 IF (ionode) THEN
    WRITE(iunout,'("\def\barmry{",a,"}")') TRIM(float_to_latex(barmry,11))
@@ -626,14 +626,14 @@ barmug = barmu / alphaf
 barmagg = barmag / alphaf
 barhg = barh / alphaf
 
-WRITE(stdout,'(/,5x,"Conversion factors (Gaussian atomic units - SI):")') 
-WRITE(stdout,'(5x,"Magnetic induction: \B_G=",es19.11,"   T")') barbg
-WRITE(stdout,'(5x,"Vector potential: \A_G=",es20.10,"    T m")') baravg
-WRITE(stdout,'(5x,"Magnetic field flux: \Phi_G=",es17.11,"  Wb")') barwbg
-WRITE(stdout,'(5x,"Magnetic dipole: \mu_G=",es20.10,"    A m^2 (J/T)")') &
+WRITE(stdout,'(/,"Conversion factors (Gaussian atomic units - SI):")') 
+WRITE(stdout,'("Magnetic induction: \B_G=",es19.11,"   T")') barbg
+WRITE(stdout,'("Vector potential: \A_G=",es20.10,"    T m")') baravg
+WRITE(stdout,'("Magnetic field flux: \Phi_G=",es17.11,"  Wb")') barwbg
+WRITE(stdout,'("Magnetic dipole: \mu_G=",es20.10,"    A m^2 (J/T)")') &
                                                                     barmug
-WRITE(stdout,'(5x,"Magnetization: \M_G=",4x,es20.11,"   A/m")') barmagg
-WRITE(stdout,'(5x,"Magnetic field: \H_G=",3x,es20.11,"   A/m")') barhg
+WRITE(stdout,'("Magnetization: \M_G=",4x,es20.11,"   A/m")') barmagg
+WRITE(stdout,'("Magnetic field: \H_G=",3x,es20.11,"   A/m")') barhg
 
 
 IF (ionode) THEN
@@ -652,17 +652,17 @@ ryev=barphi*0.5_DP
 hzcmm1=1.D-2 / cspeed
 cmm1hz=1.D2 * cspeed
 
-WRITE(stdout,'(/,5x,"Physical constants in Hartree atomic units:")') 
-WRITE(stdout,'(5x,"Speed of light:",9x,es20.11)') cspeedau
-WRITE(stdout,'(5x,"atomic mass unit:",6x,es20.10)') amuau
+WRITE(stdout,'(/,"Physical constants in Hartree atomic units:")') 
+WRITE(stdout,'("Speed of light:",9x,es20.11)') cspeedau
+WRITE(stdout,'("atomic mass unit:",6x,es20.10)') amuau
 
-WRITE(stdout,'(/,5x,"Physical constants in eV:")') 
-WRITE(stdout,'(5x,"Hartree in eV:",9x,es20.10)') barphi
-WRITE(stdout,'(5x,"Rydberg in eV:",9x,es20.10)') ryev
+WRITE(stdout,'(/,"Physical constants in eV:")') 
+WRITE(stdout,'("Hartree in eV:",9x,es20.10)') barphi
+WRITE(stdout,'("Rydberg in eV:",9x,es20.10)') ryev
 
-WRITE(stdout,'(/,5x,"Frequency conversion:")') 
-WRITE(stdout,'(5x,"Hz in cm^-1:",15x,es20.14)') hzcmm1
-WRITE(stdout,'(5x,"cm^-1 in Hz:",9x,es20.8)') cmm1hz
+WRITE(stdout,'(/,"Frequency conversion:")') 
+WRITE(stdout,'("Hz in cm^-1:",15x,es20.14)') hzcmm1
+WRITE(stdout,'("cm^-1 in Hz:",9x,es20.8)') cmm1hz
 
 IF (ionode) THEN
    WRITE(iunout,'("\def\cspeedau{",a,"}")') TRIM(float_to_latex(cspeedau,11))
@@ -677,11 +677,11 @@ barifc=baru/barl**2
 bardmc=e*baru*abohr/hbarf
 baralpha=1.0_DP/barv
 baralphap=4.0_DP * pi * alphaf**2 * baralpha
-WRITE(stdout,'(/,5x,"Material properties (a.u. - SI):")') 
-WRITE(stdout,'(5x,"Int. force const.: \ifc=",es20.11,"   J/m^2")') barifc
-WRITE(stdout,'(5x,"Dyn. mag. charge: \dmc=",1x,es20.11,"   A m")') bardmc
-WRITE(stdout,'(5x,"ME tensor (I): \alpha=",2x,es20.11,"   s/m")') baralpha
-WRITE(stdout,'(5x,"ME tensor (II): \alpha''=",es20.11,"   s/m")') baralphap
+WRITE(stdout,'(/,"Material properties (a.u. - SI):")') 
+WRITE(stdout,'("Int. force const.: \ifc=",es20.11,"   J/m^2")') barifc
+WRITE(stdout,'("Dyn. mag. charge: \dmc=",1x,es20.11,"   A m")') bardmc
+WRITE(stdout,'("ME tensor (I): \alpha=",2x,es20.11,"   s/m")') baralpha
+WRITE(stdout,'("ME tensor (II): \alpha''=",es20.11,"   s/m")') baralphap
 
 IF (ionode) THEN
    WRITE(iunout,'("\def\barifc{",a,"}")') TRIM(float_to_latex(barifc,11))
@@ -695,11 +695,11 @@ ENDIF
 zmtozm=1.D-2/kappaa
 alphatoalpha=mu0 * magtomag / etoe / 4.0_DP / pi
 alphaptoalphap=mu0 * magtomag / etoe 
-WRITE(stdout,'(/,5x,"Material properties (c.g.s. - SI):")') 
+WRITE(stdout,'(/,"Material properties (c.g.s. - SI):")') 
 !WRITE(stdout,'(5x,"Int. force const.: \ifc=",13x,es20.11,"   J/m^2")') barifc
-WRITE(stdout,'(5x,"Dyn. mag. charge: \dmc=",1x,es20.11,"   A m")') zmtozm 
-WRITE(stdout,'(5x,"ME tensor (I): \alpha=",2x,es20.11,"   s/m")') alphatoalpha
-WRITE(stdout,'(5x,"ME tensor (II): \alpha''=",es20.11,"   s/m")') &
+WRITE(stdout,'("Dyn. mag. charge: \dmc=",1x,es20.11,"   A m")') zmtozm 
+WRITE(stdout,'("ME tensor (I): \alpha=",2x,es20.11,"   s/m")') alphatoalpha
+WRITE(stdout,'("ME tensor (II): \alpha''=",es20.11,"   s/m")') &
                                                                  alphaptoalphap
 
 IF (ionode) THEN
@@ -712,16 +712,16 @@ IF (ionode) THEN
                                  TRIM(float_to_latex(alphaptoalphap,11))
 ENDIF
 
-WRITE(stdout,'(/,5x,70("-"))') 
-WRITE(stdout,'(5x,"Errors:                     Absolute                  Relative",/)') 
+WRITE(stdout,'(/,60("-"))') 
+WRITE(stdout,'("Errors:                   Absolute                 Relative",/)') 
 
 rydbergerr=0.0000000000021D7
 alphaerr=0.0000000011D-3
 amuerr=0.00000000050D-27
 
-WRITE(stdout,'(5x,"rydberg = ",5x,es20.2," 1/m",4x,es18.2)') rydbergerr, rydbergerr/rydberg
-WRITE(stdout,'(5x,"alpha = ",7x,es20.2,2x,4x,es20.2)') alphaerr, alphaerr/alphaf
-WRITE(stdout,'(5x,"amu = ",9x,es20.2,2x,4x,es20.2)') amuerr, amuerr/amu
+WRITE(stdout,'("rydberg = ",5x,es20.2," 1/m",3x,es18.2)') rydbergerr, rydbergerr/rydberg
+WRITE(stdout,'("alpha = ",7x,es20.2,2x,3x,es20.2)') alphaerr, alphaerr/alphaf
+WRITE(stdout,'("amu = ",9x,es20.2,2x,3x,es20.2)') amuerr, amuerr/amu
 WRITE(stdout,*)
 
 meerr=( rydbergerr / rydberg + 2.0_DP * alphaerr/alphaf) * me
@@ -731,15 +731,15 @@ epsilon0err= mu0err * epsilon0 / mu0
 hartreeerr=(rydbergerr / rydberg ) * baru
 bohrmagerr=meerr/me * bohrmag
 
-WRITE(stdout,'(5x,"me = ",10x,es20.2," kg",4x,es19.2)') meerr, meerr/me
-WRITE(stdout,'(5x,"abohr = ",7x,es20.2," m",4x,es20.2)') &
+WRITE(stdout,'("me = ",10x,es20.2," kg",3x,es19.2)') meerr, meerr/me
+WRITE(stdout,'("abohr = ",7x,es20.2," m",3x,es20.2)') &
                                                     abohrerr, abohrerr/abohr
-WRITE(stdout,'(5x,"mu0 = ",9x,es20.2," N/A^2",4x,es16.2)') mu0err, mu0err/mu0
-WRITE(stdout,'(5x,"epsilon0 = ",4x,es20.2," C^2/Nm^2",4x,es13.2)') &
+WRITE(stdout,'("mu0 = ",9x,es20.2," N/A^2",3x,es16.2)') mu0err, mu0err/mu0
+WRITE(stdout,'("epsilon0 = ",4x,es20.2," C^2/Nm^2",3x,es13.2)') &
                                        epsilon0err, epsilon0err/epsilon0
-WRITE(stdout,'(5x,"hartree = ",5x,es20.2," J", 4x,es20.2)') hartreeerr, &
+WRITE(stdout,'("hartree = ",5x,es20.2," J", 3x,es20.2)') hartreeerr, &
                                                     hartreeerr/baru
-WRITE(stdout,'(5x,"bohr mag = ",4x,es20.2," J/T", 4x,es18.2)') bohrmagerr, &
+WRITE(stdout,'("bohr mag = ",4x,es20.2," J/T", 3x,es18.2)') bohrmagerr, &
                                                     bohrmagerr/bohrmag
 WRITE(stdout,*)
 
@@ -768,62 +768,62 @@ barmuerr=meerr/me * barmu
 barmagerr=(barierr/bari + abohrerr/abohr)*barmag 
 barherr=barmagerr/barmag * barh
 
-WRITE(stdout,'(5x,"Errors of conversion factors (atomic units - SI):")') 
-WRITE(stdout,'(5x,"\l = ",10x,es20.2," m", 4x,es20.2)') abohrerr, abohrerr/barl
-WRITE(stdout,'(5x,"\m = ",10x,es20.2," kg", 3x,es20.2)') meerr, meerr/me
-WRITE(stdout,'(5x,"\rhom = ",7x,es20.2," kg/m^3", es19.2)') barrhomerr, &
+WRITE(stdout,'("Errors of conversion factors (atomic units - SI):")') 
+WRITE(stdout,'("\l = ",10x,es20.2," m", 3x,es20.2)') abohrerr, abohrerr/barl
+WRITE(stdout,'("\m = ",10x,es20.2," kg", 2x,es20.2)') meerr, meerr/me
+WRITE(stdout,'("\rhom = ",7x,es20.2," kg/m^3", es18.2)') barrhomerr, &
                                                            barrhomerr/barrhom
-WRITE(stdout,'(5x,"\t = ",10x,es20.2," s", 4x,es20.2)') barterr, barterr/bart
-WRITE(stdout,'(5x,"\nu = ",9x,es20.2," s", 4x,es20.2)') barnuerr, &
+WRITE(stdout,'("\t = ",10x,es20.2," s", 3x,es20.2)') barterr, barterr/bart
+WRITE(stdout,'("\nu = ",9x,es20.2," s", 3x,es20.2)') barnuerr, &
                                                         barnuerr/barnu
-WRITE(stdout,'(5x,"\v = ",10x,es20.2," m/s", 4x,es18.2)') barverr, barverr/barv
-WRITE(stdout,'(5x,"\a = ",10x,es20.2," m/s^2", 4x,es16.2)') baraerr, &
+WRITE(stdout,'("\v = ",10x,es20.2," m/s", 3x,es18.2)') barverr, barverr/barv
+WRITE(stdout,'("\a = ",10x,es20.2," m/s^2", 3x,es16.2)') baraerr, &
                                                         baraerr/bara
-WRITE(stdout,'(5x,"\p = ",10x,es20.2," kg m/s", 4x,es15.2)') barperr, &
+WRITE(stdout,'("\p = ",10x,es20.2," kg m/s", 3x,es15.2)') barperr, &
                                                         barperr/barp
-WRITE(stdout,'(5x,"\L = ",10x,es20.2," kg m^2/s",es17.2)') zero, zero
-WRITE(stdout,'(5x,"\f = ",10x,es20.2," N", 4x,es20.2)') barferr, barferr/barf
-WRITE(stdout,'(5x,"\U = ",10x,es20.2," J", 4x,es20.2)') hartreeerr, &
+WRITE(stdout,'("\L = ",10x,es20.2," kg m^2/s",es16.2)') zero, zero
+WRITE(stdout,'("\f = ",10x,es20.2," N", 3x,es20.2)') barferr, barferr/barf
+WRITE(stdout,'("\U = ",10x,es20.2," J", 3x,es20.2)') hartreeerr, &
                                                         hartreeerr/baru
-WRITE(stdout,'(5x,"\W = ",10x,es20.2," W", 4x,es20.2)') barwerr, barwerr/barw
-WRITE(stdout,'(5x,"\pr = ",9x,es20.2," Pa", 4x,es19.2)') barprerr, &
+WRITE(stdout,'("\W = ",10x,es20.2," W", 3x,es20.2)') barwerr, barwerr/barw
+WRITE(stdout,'("\pr = ",9x,es20.2," Pa", 3x,es19.2)') barprerr, &
                                                         barprerr/barpr
-WRITE(stdout,'(5x,"\I = ",10x,es20.2," A", 4x,es20.2)') barierr, barierr/bari
-WRITE(stdout,'(5x,"\C = ",10x,es20.2," C", 4x,es20.2)') zero, zero
-WRITE(stdout,'(5x,"\rho = ",8x,es20.2," C/m^3", 4x,es16.2)') barrhoerr, &
+WRITE(stdout,'("\I = ",10x,es20.2," A", 3x,es20.2)') barierr, barierr/bari
+WRITE(stdout,'("\C = ",10x,es20.2," C", 3x,es20.2)') zero, zero
+WRITE(stdout,'("\rho = ",8x,es20.2," C/m^3", 3x,es16.2)') barrhoerr, &
                                                         barrhoerr/barrho
-WRITE(stdout,'(5x,"\J = ",11x,es19.2," A/m^2", 4x,es16.2)') barcurerr, &
+WRITE(stdout,'("\J = ",11x,es19.2," A/m^2", 3x,es16.2)') barcurerr, &
                                                         barcurerr/barcur
-WRITE(stdout,'(5x,"\E = ",10x,es20.2," V/m", 4x,es18.2)') bareerr, &
+WRITE(stdout,'("\E = ",10x,es20.2," V/m", 3x,es18.2)') bareerr, &
                                                         bareerr/bare
-WRITE(stdout,'(5x,"\V = ",10x,es20.2," V", 4x,es20.2)') barphierr, &
+WRITE(stdout,'("\V = ",10x,es20.2," V", 3x,es20.2)') barphierr, &
                                                         barphierr/barphi
-WRITE(stdout,'(5x,"\F = ",10x,es20.2," F", 4x,es20.2)') barcaperr, &
+WRITE(stdout,'("\F = ",10x,es20.2," F", 3x,es20.2)') barcaperr, &
                                                         barcaperr/barcap
-WRITE(stdout,'(5x,"\dip = ",6x,es22.2," C m", 4x,es18.2)') bardiperr, &
+WRITE(stdout,'("\dip = ",6x,es22.2," C m", 3x,es18.2)') bardiperr, &
                                                         bardiperr/bardip
-WRITE(stdout,'(5x,"\P = ",10x,es20.2," C/m^2", 4x,es16.2)') barpolarerr, &
+WRITE(stdout,'("\P = ",10x,es20.2," C/m^2", 3x,es16.2)') barpolarerr, &
                                                         barpolarerr/barpolar
-WRITE(stdout,'(5x,"\D = ",10x,es20.2," C/m^2",4x, es16.2)') barderr, &
+WRITE(stdout,'("\D = ",10x,es20.2," C/m^2",3x, es16.2)') barderr, &
                                                         barderr/bard
-WRITE(stdout,'(5x,"\R = ",10x,es20.2," Ohm", 2x,es20.2)') zero, zero
-WRITE(stdout,'(5x,"\B = ",10x,es20.2," T", 4x,es20.2)') barberr, barberr/barb
-WRITE(stdout,'(5x,"\A = ",10x,es20.2," T m", 2x,es20.2)') baraverr, &
+WRITE(stdout,'("\R = ",10x,es20.2," Ohm", 1x,es20.2)') zero, zero
+WRITE(stdout,'("\B = ",10x,es20.2," T", 3x,es20.2)') barberr, barberr/barb
+WRITE(stdout,'("\A = ",10x,es20.2," T m", 1x,es20.2)') baraverr, &
                                                           baraverr/barav
-WRITE(stdout,'(5x,"\phi = ",8x,es20.2," Wb", 3x,es20.2)') zero, zero
-WRITE(stdout,'(5x,"\Y = ",10x,es20.2," H", 4x,es20.2)') baryerr, baryerr/bary
-WRITE(stdout,'(5x,"\mu = ",9x,es20.2," J/T", 4x,es18.2)') barmuerr, &
+WRITE(stdout,'("\phi = ",8x,es20.2," Wb", 2x,es20.2)') zero, zero
+WRITE(stdout,'("\Y = ",10x,es20.2," H", 3x,es20.2)') baryerr, baryerr/bary
+WRITE(stdout,'("\mu = ",9x,es20.2," J/T", 3x,es18.2)') barmuerr, &
                                                         barmuerr/barmu
-WRITE(stdout,'(5x,"\M = ",10x,es20.2," A/m", 4x,es18.2)') barmagerr, &
+WRITE(stdout,'("\M = ",10x,es20.2," A/m", 3x,es18.2)') barmagerr, &
                                                         barmagerr/barmag
-WRITE(stdout,'(5x,"\H = ",10x,es20.2," A/m", 4x,es18.2)') barherr, &
+WRITE(stdout,'("\H = ",10x,es20.2," A/m", 3x,es18.2)') barherr, &
                                                         barherr/barh
 WRITE(stdout,*)
 cspeedauerr=barverr/barv * cspeedau
 amuauerr=(amuerr/amu+meerr/me) * amuau
-WRITE(stdout,'(5x,"cspeed = ",6x,es20.2," \v",5x,es18.2)') cspeedauerr, &
+WRITE(stdout,'("cspeed = ",6x,es20.2," \v",4x,es18.2)') cspeedauerr, &
                                               cspeedauerr/cspeedau 
-WRITE(stdout,'(5x,"amu = ",9x,es20.2," \m",5x,es18.2)') amuauerr, &
+WRITE(stdout,'("amu = ",9x,es20.2," \m",4x,es18.2)') amuauerr, &
                                               amuauerr/amuau 
 
 WRITE(stdout,*)
@@ -847,42 +847,42 @@ mutomuerr=kappaerr/kappa * mutomu
 magtomagerr=kappaerr/kappa * magtomag
 htoherr=magtomagerr/magtomag * htoh
 
-WRITE(stdout,'(/,5x,"Errors of conversion factors (c.g.s.-Gaussian - SI):")') 
-WRITE(stdout,'(5x,"Current = ",5x,es20.2," A", 4x,es20.2)') itoierr, &
+WRITE(stdout,'(/,"Errors of conversion factors (c.g.s.-Gaussian - SI):")') 
+WRITE(stdout,'("Current = ",5x,es20.2," A", 3x,es20.2)') itoierr, &
                                                            itoierr/itoi
-WRITE(stdout,'(5x,"Charge = ",6x,es20.2," C", 4x,es20.2)') itoierr, &
+WRITE(stdout,'("Charge = ",6x,es20.2," C", 3x,es20.2)') itoierr, &
                                                            itoierr/itoi
-WRITE(stdout,'(5x,"Charge density = ",es18.2," C/m^3", 4x,es16.2)') &
+WRITE(stdout,'("Charge density = ",es18.2," C/m^3", 3x,es16.2)') &
                                       rhotorhoerr, rhotorhoerr/rhotorho
-WRITE(stdout,'(5x,"Current density = ",es17.2," A/m^2", 4x,es16.2)') &
+WRITE(stdout,'("Current density = ",es17.2," A/m^2", 3x,es16.2)') &
                                       curtocurerr, curtocurerr/curtocur
-WRITE(stdout,'(5x,"Electric field = ",es18.2," V/m", 4x,es18.2)') etoeerr, &
+WRITE(stdout,'("Electric field = ",es18.2," V/m", 3x,es18.2)') etoeerr, &
                                       etoeerr/etoe
-WRITE(stdout,'(5x,"Electric potential = ",es14.2," V", 4x,es20.2)') &
+WRITE(stdout,'("Electric potential = ",es14.2," V", 3x,es20.2)') &
                                       phitophierr, phitophierr/phitophi
-WRITE(stdout,'(5x,"Capacitance = ",3x,es18.2," F", 4x,es20.2)') captocaperr, &
+WRITE(stdout,'("Capacitance = ",3x,es18.2," F", 3x,es20.2)') captocaperr, &
                                       captocaperr/captocap
-WRITE(stdout,'(5x,"Dipole moment = ",1x,es18.2," C m", 4x,es18.2)') &
+WRITE(stdout,'("Dipole moment = ",1x,es18.2," C m", 3x,es18.2)') &
                                       diptodiperr, diptodiperr/diptodip
-WRITE(stdout,'(5x,"Electric Polarization = ",es11.2," C/m^2", 4x,es16.2)') &
+WRITE(stdout,'("Electric Polarization = ",es11.2," C/m^2", 3x,es16.2)') &
                             polartopolarerr, polartopolarerr/polartopolar
-WRITE(stdout,'(5x,"Electric Displacement = ",es11.2," C/m^2",4x, es16.2)') &
+WRITE(stdout,'("Electric Displacement = ",es11.2," C/m^2",3x, es16.2)') &
                                                  dtoderr, dtoderr/dtod
-WRITE(stdout,'(5x,"Resistance = ",4x,es18.2," Ohm", 4x,es18.2)') ohmtoohmerr, &
+WRITE(stdout,'("Resistance = ",4x,es18.2," Ohm", 3x,es18.2)') ohmtoohmerr, &
                                               ohmtoohmerr/ohmtoohm
-WRITE(stdout,'(5x,"Magnetic induction = ",es14.2," T", 4x,es20.2)') &
+WRITE(stdout,'("Magnetic induction = ",es14.2," T", 3x,es20.2)') &
                                               btoberr, btoberr/btob
-WRITE(stdout,'(5x,"Vector potential = ",es16.2," T m",2x,es20.2)') &
+WRITE(stdout,'("Vector potential = ",es16.2," T m",1x,es20.2)') &
                                               avtoaverr, avtoaverr/avtoav
-WRITE(stdout,'(5x,"Magnetic field flux = ",es13.2," Wb", 4x,es19.2)') &
+WRITE(stdout,'("Magnetic field flux = ",es13.2," Wb", 3x,es19.2)') &
                                              wbtowberr, wbtowberr/wbtowb
-WRITE(stdout,'(5x,"Inductance = ",2x,es20.2," H", 4x,es20.2)') ytoyerr, &
+WRITE(stdout,'("Inductance = ",2x,es20.2," H", 3x,es20.2)') ytoyerr, &
                                                ytoyerr/ytoy
-WRITE(stdout,'(5x,"Magnetic dipole = ",es17.2," J/T", 4x,es18.2)') &
+WRITE(stdout,'("Magnetic dipole = ",es17.2," J/T", 3x,es18.2)') &
                                          mutomuerr, mutomuerr/mutomu
-WRITE(stdout,'(5x,"Magnetization = ",es19.2," A/m", 4x,es18.2)') &
+WRITE(stdout,'("Magnetization = ",es19.2," A/m", 3x,es18.2)') &
                                            magtomagerr, magtomagerr/magtomag
-WRITE(stdout,'(5x,"Magnetic strength = ",es15.2," A/m", 4x,es18.2)') &
+WRITE(stdout,'("Magnetic strength = ",es15.2," A/m", 3x,es18.2)') &
                                            htoherr, htoherr/htoh
 
 WRITE(stdout,*)
@@ -906,44 +906,44 @@ barmucgserr=(barmuerr/barmu + mutomuerr/mutomu)*barmucgs
 barmagcgserr=(barmagerr/barmag + magtomagerr/magtomag)*barmagcgs
 barhcgserr=(barherr/barh + htoherr/htoh)*barhcgs
 
-WRITE(stdout,'(/,5x,"Errors of conversion factors &
-                                      &(atomic units - c.g.s.-Gaussian):")') 
+WRITE(stdout,'(/,"Errors of conversion factors &
+                                      &(atomic units-c.g.s.-Gaussian):")') 
 
-WRITE(stdout,'(5x,"Current = ",5x,es20.2," statA", 4x,es16.2)')  &
+WRITE(stdout,'("Current = ",5x,es20.2," statA", 3x,es16.2)')  &
                                    baricgserr, baricgserr/baricgs
-WRITE(stdout,'(5x,"Charge = ",6x,es20.2," statC", 4x,es16.2)') &
+WRITE(stdout,'("Charge = ",6x,es20.2," statC", 3x,es16.2)') &
                                    barccgserr, barccgserr/barccgs
-WRITE(stdout,'(5x,"Charge density = ",es18.2," statC/cm^3", 4x,es11.2)') &
+WRITE(stdout,'("Charge density = ",es18.2," statC/cm^3", 3x,es11.2)') &
                                    barrhocgserr, barrhocgserr/barrhocgs
-WRITE(stdout,'(5x,"Current density = ",es17.2," statA/cm^2", 4x,es11.2)') &
+WRITE(stdout,'("Current density = ",es17.2," statA/cm^2", 3x,es11.2)') &
                                    barcurcgserr, barcurcgserr/barcurcgs
-WRITE(stdout,'(5x,"Electric field = ",es18.2," statV/cm",4x,es13.2)') &
+WRITE(stdout,'("Electric field = ",es18.2," statV/cm",3x,es13.2)') &
                                    barecgserr, barecgserr/barecgs
-WRITE(stdout,'(5x,"Electric potential = ",es14.2," statV", 4x,es16.2)') &
+WRITE(stdout,'("Electric potential = ",es14.2," statV", 3x,es16.2)') &
                                    barphicgserr, barphicgserr/barphicgs
-WRITE(stdout,'(5x,"Capacitance = ",2x,es19.2," cm", 4x,es19.2)') &
+WRITE(stdout,'("Capacitance = ",2x,es19.2," cm", 3x,es19.2)') &
                                    barcapcgserr, barcapcgserr/barcapcgs
-WRITE(stdout,'(5x,"Dipole moment = ",es19.2," statC cm", 4x,es13.2)') &
+WRITE(stdout,'("Dipole moment = ",es19.2," statC cm", 3x,es13.2)') &
                                    bardipcgserr, bardipcgserr/bardipcgs
-WRITE(stdout,'(5x,"Electric Polarization = ",es11.2," statC/cm^2", &
-                      &4x,es11.2)') barpolarcgserr, barpolarcgserr/barpolarcgs
-WRITE(stdout,'(5x,"Electric displacement = ",es11.2," statC/cm^2 4pi", &
-                      &es11.2)') bardcgserr, bardcgserr/bardcgs
-WRITE(stdout,'(5x,"Resistance = ",3x,es19.2," s/cm",4x,es17.2)') &
+WRITE(stdout,'("Electric Polarization = ",es11.2," statC/cm^2", &
+                      &3x,es11.2)') barpolarcgserr, barpolarcgserr/barpolarcgs
+WRITE(stdout,'("Electric displacement = ",es11.2," statC/cm^2 4pi", &
+                      &es10.2)') bardcgserr, bardcgserr/bardcgs
+WRITE(stdout,'("Resistance = ",3x,es19.2," s/cm",3x,es17.2)') &
                                  barohmcgserr, barohmcgserr/barohmcgs
-WRITE(stdout,'(5x,"Magnetic induction = ",es14.2," G",4x,es20.2)') &
+WRITE(stdout,'("Magnetic induction = ",es14.2," G",3x,es20.2)') &
                                  barbcgserr, barbcgserr/barbcgs
-WRITE(stdout,'(5x,"Vector potential = ",es16.2," G cm",1x,es20.2)') &
+WRITE(stdout,'("Vector potential = ",es16.2," G cm",es20.2)') &
                                  baravcgserr, baravcgserr/baravcgs
-WRITE(stdout,'(5x,"Magnetic field flux = ",es13.2," Mx",3x,es20.2)') &
+WRITE(stdout,'("Magnetic field flux = ",es13.2," Mx",2x,es20.2)') &
                                  barwbcgserr, barwbcgserr/barwbcgs
-WRITE(stdout,'(5x,"Inductance = ",2x,es20.2," statH",es20.2)') &
+WRITE(stdout,'("Inductance = ",2x,es20.2," statH",es19.2)') &
                                  barycgserr, barycgserr/barycgs
-WRITE(stdout,'(5x,"Magnetic dipole = ",es17.2," statC cm",4x,es13.2)') &
+WRITE(stdout,'("Magnetic dipole = ",es17.2," statC cm",3x,es13.2)') &
                                  barmucgserr, barmucgserr/barmucgs
-WRITE(stdout,'(5x,"Magnetization = ",es19.2," statC/cm^2",es15.2)') &
+WRITE(stdout,'("Magnetization = ",es19.2," statC/cm^2",es14.2)') &
                                  barmagcgserr, barmagcgserr/barmagcgs
-WRITE(stdout,'(5x,"Magnetic strength = ",es15.2," statC/cm^2 4pi",es11.2)') &
+WRITE(stdout,'("Magnetic strength = ",es15.2," statC/cm^2 4pi",es10.2)') &
                                  barhcgserr, barhcgserr/barhcgs
 
 barmryerr= meerr / me * barmry
@@ -970,63 +970,63 @@ barmuryerr=barmuerr/barmu * barmury
 barmagryerr=barmagerr / barmag * barmagry
 barhryerr=barherr / barh * barhry
 
-WRITE(stdout,'(/,5x,"Errors of conversion factors &
+WRITE(stdout,'(/,"Errors of conversion factors &
                                           &(Rydberg atomic units - SI):")') 
-WRITE(stdout,'(5x,"\l_R = ",8x,es20.2," m", 4x,es20.2)') abohrerr, &
+WRITE(stdout,'("\l_R = ",8x,es20.2," m", 3x,es20.2)') abohrerr, &
                                                           abohrerr/barl
-WRITE(stdout,'(5x,"\m_R = ",8x,es20.2," kg", 3x,es20.2)') barmryerr, &
+WRITE(stdout,'("\m_R = ",8x,es20.2," kg", 2x,es20.2)') barmryerr, &
                                                           barmryerr/barmry
-WRITE(stdout,'(5x,"\t_R = ",8x,es20.2," s", 4x,es20.2)') bartryerr, &
+WRITE(stdout,'("\t_R = ",8x,es20.2," s", 3x,es20.2)') bartryerr, &
                                                           bartryerr/bart
-WRITE(stdout,'(5x,"\nu_R = ",7x,es20.2," s", 4x,es20.2)') barnuryerr, &
+WRITE(stdout,'("\nu_R = ",7x,es20.2," s", 3x,es20.2)') barnuryerr, &
                                                           barnuryerr/barnury
-WRITE(stdout,'(5x,"\v_R = ",8x,es20.2," m/s", 4x,es18.2)') barvryerr, &
+WRITE(stdout,'("\v_R = ",8x,es20.2," m/s", 3x,es18.2)') barvryerr, &
                                                           barvryerr/barvry
-WRITE(stdout,'(5x,"\a_R = ",8x,es20.2," m/s^2", 4x,es16.2)') bararyerr, &
+WRITE(stdout,'("\a_R = ",8x,es20.2," m/s^2", 3x,es16.2)') bararyerr, &
                                                           bararyerr/barary
-WRITE(stdout,'(5x,"\p_R = ",8x,es20.2," kg m/s", 4x,es15.2)') barperr, &
+WRITE(stdout,'("\p_R = ",8x,es20.2," kg m/s", 3x,es15.2)') barperr, &
                                                           barperr/barp
-WRITE(stdout,'(5x,"\L_R = ",8x,es20.2," kg m^2/s",es17.2)') zero, zero
-WRITE(stdout,'(5x,"\f_R = ",8x,es20.2," N", 4x,es20.2)') barfryerr, &
+WRITE(stdout,'("\L_R = ",8x,es20.2," kg m^2/s",es16.2)') zero, zero
+WRITE(stdout,'("\f_R = ",8x,es20.2," N", 3x,es20.2)') barfryerr, &
                                                           barfryerr/barfry
-WRITE(stdout,'(5x,"\U_R = ",8x,es20.2," J", 4x,es20.2)') baruryerr, &
+WRITE(stdout,'("\U_R = ",8x,es20.2," J", 3x,es20.2)') baruryerr, &
                                                           baruryerr/barury
-WRITE(stdout,'(5x,"\W_R = ",8x,es20.2," W", 4x,es20.2)') barwryerr, &
+WRITE(stdout,'("\W_R = ",8x,es20.2," W", 3x,es20.2)') barwryerr, &
                                                           barwryerr/barwry
-WRITE(stdout,'(5x,"\pr_R = ",7x,es20.2," Pa", 4x,es19.2)') barprryerr, &
+WRITE(stdout,'("\pr_R = ",7x,es20.2," Pa", 3x,es19.2)') barprryerr, &
                                                           barprryerr/barprry
-WRITE(stdout,'(5x,"\I_R = ",8x,es20.2," A", 4x,es20.2)') bariryerr, &
+WRITE(stdout,'("\I_R = ",8x,es20.2," A", 3x,es20.2)') bariryerr, &
                                                           bariryerr/bariry
-WRITE(stdout,'(5x,"\C_R = ",8x,es20.2," C", 4x,es20.2)') zero, zero
-WRITE(stdout,'(5x,"\rho_R = ",6x,es20.2," C/m^3", 4x,es16.2)') barrhoryerr, &
+WRITE(stdout,'("\C_R = ",8x,es20.2," C", 3x,es20.2)') zero, zero
+WRITE(stdout,'("\rho_R = ",6x,es20.2," C/m^3", 3x,es16.2)') barrhoryerr, &
                                                           barrhoryerr/barrhory
-WRITE(stdout,'(5x,"\J_R = ",9x,es19.2," A/m^2", 4x,es16.2)') barcurryerr, &
+WRITE(stdout,'("\J_R = ",9x,es19.2," A/m^2", 3x,es16.2)') barcurryerr, &
                                                           barcurryerr/barcurry
-WRITE(stdout,'(5x,"\E_R = ",8x,es20.2," V/m", 4x,es18.2)') bareryerr, &
+WRITE(stdout,'("\E_R = ",8x,es20.2," V/m", 3x,es18.2)') bareryerr, &
                                                           bareryerr/barery
-WRITE(stdout,'(5x,"\V_R = ",8x,es20.2," V", 4x,es20.2)') barphiryerr, &
+WRITE(stdout,'("\V_R = ",8x,es20.2," V", 3x,es20.2)') barphiryerr, &
                                                           barphiryerr/barphiry
-WRITE(stdout,'(5x,"\F_R = ",8x,es20.2," F", 4x,es20.2)') barcaperr, &
+WRITE(stdout,'("\F_R = ",8x,es20.2," F", 3x,es20.2)') barcaperr, &
                                                         barcaperr/barcap
-WRITE(stdout,'(5x,"\dip_R = ",4x,es22.2," C m", 4x,es18.2)') bardipryerr, &
+WRITE(stdout,'("\dip_R = ",4x,es22.2," C m", 3x,es18.2)') bardipryerr, &
                                                         bardipryerr/bardipry
-WRITE(stdout,'(5x,"\P_R = ",8x,es20.2," C/m^2", 4x,es16.2)') barpolarryerr, &
+WRITE(stdout,'("\P_R = ",8x,es20.2," C/m^2", 3x,es16.2)') barpolarryerr, &
                                                      barpolarryerr/barpolarry
-WRITE(stdout,'(5x,"\D_R = ",8x,es20.2," C/m^2",4x, es16.2)') bardryerr, &
+WRITE(stdout,'("\D_R = ",8x,es20.2," C/m^2",3x, es16.2)') bardryerr, &
                                                         bardryerr/bardry
-WRITE(stdout,'(5x,"\R_R = ",8x,es20.2," Ohm", 2x,es20.2)') zero, zero
-WRITE(stdout,'(5x,"\B_R = ",8x,es20.2," T", 4x,es20.2)') barbryerr, &
+WRITE(stdout,'("\R_R = ",8x,es20.2," Ohm", 1x,es20.2)') zero, zero
+WRITE(stdout,'("\B_R = ",8x,es20.2," T", 3x,es20.2)') barbryerr, &
                                                         barbryerr/barbry
-WRITE(stdout,'(5x,"\A_R = ",8x,es20.2," T m", 2x,es20.2)') baravryerr, &
+WRITE(stdout,'("\A_R = ",8x,es20.2," T m", 1x,es20.2)') baravryerr, &
                                                           baravryerr/baravry
-WRITE(stdout,'(5x,"\phi_R = ",6x,es20.2," Wb", 3x,es20.2)') zero, zero
-WRITE(stdout,'(5x,"\Y_R = ",8x,es20.2," H", 4x,es20.2)') baryryerr, &
+WRITE(stdout,'("\phi_R = ",6x,es20.2," Wb", 2x,es20.2)') zero, zero
+WRITE(stdout,'("\Y_R = ",8x,es20.2," H", 3x,es20.2)') baryryerr, &
                                                           baryryerr/baryry
-WRITE(stdout,'(5x,"\mu_R = ",7x,es20.2," J/T", 4x,es18.2)') barmuryerr, &
+WRITE(stdout,'("\mu_R = ",7x,es20.2," J/T", 3x,es18.2)') barmuryerr, &
                                                         barmuryerr/barmury
-WRITE(stdout,'(5x,"\M_R = ",8x,es20.2," A/m", 4x,es18.2)') barmagryerr, &
+WRITE(stdout,'("\M_R = ",8x,es20.2," A/m", 3x,es18.2)') barmagryerr, &
                                                         barmagryerr/barmagry
-WRITE(stdout,'(5x,"\H_R = ",8x,es20.2," A/m", 4x,es18.2)') barhryerr, &
+WRITE(stdout,'("\H_R = ",8x,es20.2," A/m", 3x,es18.2)') barhryerr, &
                                                         barhryerr/barhry
 WRITE(stdout,*)
 
@@ -1038,19 +1038,19 @@ barmaggerr=(barmagerr/barmag+alphaerr/alphaf)*barmagg
 barhgerr=(barherr/barh+alphaerr/alphaf)*barhg
 
 
-WRITE(stdout,'(/,5x,"Errors of conversion factors &
+WRITE(stdout,'(/,"Errors of conversion factors &
                                           &(Gaussian atomic units - SI):")') 
-WRITE(stdout,'(5x,"\B_G = ",8x,es20.2," T", 4x,es20.2)') barbgerr, &
+WRITE(stdout,'("\B_G = ",8x,es20.2," T", 3x,es20.2)') barbgerr, &
                                                         barbgerr/barbg
-WRITE(stdout,'(5x,"\A_G = ",8x,es20.2," T m", 2x,es20.2)') baravgerr, &
+WRITE(stdout,'("\A_G = ",8x,es20.2," T m", 1x,es20.2)') baravgerr, &
                                                           baravgerr/baravg
-WRITE(stdout,'(5x,"\phi_G = ",6x,es20.2," Wb", 3x,es20.2)') barwbgerr, &
+WRITE(stdout,'("\phi_G = ",6x,es20.2," Wb", 2x,es20.2)') barwbgerr, &
                                                           barwbgerr/barwbg
-WRITE(stdout,'(5x,"\mu_G = ",7x,es20.2," J/T", 4x,es18.2)') barmugerr, &
+WRITE(stdout,'("\mu_G = ",7x,es20.2," J/T", 3x,es18.2)') barmugerr, &
                                                         barmugerr/barmug
-WRITE(stdout,'(5x,"\M_G = ",8x,es20.2," A/m", 4x,es18.2)') barmaggerr, &
+WRITE(stdout,'("\M_G = ",8x,es20.2," A/m", 3x,es18.2)') barmaggerr, &
                                                         barmaggerr/barmagg
-WRITE(stdout,'(5x,"\H_G = ",8x,es20.2," A/m", 4x,es18.2)') barhgerr, &
+WRITE(stdout,'("\H_G = ",8x,es20.2," A/m", 3x,es18.2)') barhgerr, &
                                                         barhgerr/barhg
 WRITE(stdout,*)
 
