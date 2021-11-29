@@ -21,14 +21,19 @@ SUBROUTINE deallocate_thermo()
                              phf_b_fact, phf_e0, phf_ce
   USE el_thermodynamics, ONLY : el_ener, el_free_ener, el_entr, el_mu, &
                            el_ce
-  USE anharmonic,     ONLY : vmin_t, b0_t, b01_t, free_e_min_t, a_t, &
-                             alpha_t, beta_t, gamma_t, cv_t, ce_t, cp_t, &
-                             b0_s, ener_t, free_ener_t, entropy_t, &
+  USE anharmonic,     ONLY : vmin_t, b0_t, b01_t, b02_t, free_e_min_t, a_t,      &
+                             alpha_t, beta_t, gamma_t, cv_t, ce_t, cp_t,  &
+                             b0_s, ener_t, free_ener_t, entropy_t,        &
                              celldm_t, alpha_anis_t, cpmce_anis, el_cons_t, &
-                             el_comp_t, macro_el_t, bths_t, ggamma_t, &
-                             el_cons_s, el_comp_s, macro_el_s, v_t, v_s, &
-                             bfact_t, el_con_geo_t
-  USE ph_freq_anharmonic, ONLY : vminf_t, b0f_t, free_e_minf_t, &
+                             el_comp_t, macro_el_t, bths_t, ggamma_t,     &
+                             el_cons_s, el_comp_s, macro_el_s, v_t, v_s,  &
+                             bfact_t, el_con_geo_t, betap,                &
+                             vmin_pt, b0_pt, b01_pt, b02_pt, emin_pt,     &
+                             beta_pt, ce_pt, &
+                             cp_pt, gamma_pt, b0_s_pt, vmin_ptt, b0_ptt,  &
+                             b01_ptt, b02_ptt, gamma_ptt, ce_ptt
+  USE el_anharmonic, ONLY :  vmine_t, b0e_t, b01e_t, b02e_t, free_e_mine_t
+  USE ph_freq_anharmonic, ONLY : vminf_t, b0f_t, b01f_t, b02f_t, free_e_minf_t, &
                              alphaf_t, betaf_t, gammaf_t, cvf_t, cef_t, &
                              cpf_t, b0f_s, enerf_t, free_enerf_t, entropyf_t, &
                              celldmf_t, alphaf_anis_t, cpmcef_anis, &
@@ -48,14 +53,19 @@ SUBROUTINE deallocate_thermo()
   USE equilibrium_conf, ONLY : tau0, tau0_crys
   USE control_thermo,   ONLY : all_geometries_together
   USE control_grun,     ONLY : vgrun_t, b0_grun_t, celldm_grun_t
-  USE temperature,      ONLY : temp
+  USE temperature,      ONLY : temp, temp_plot, itemp_plot
 
   USE control_conv,     ONLY : ke, keden, nk_test, sigma_test
+  USE control_mur_p,    ONLY : vmin_p, b0_p, b01_p, b02_p, emin_p
+  USE control_mur,      ONLY : p0
+  USE control_ev,       ONLY : e0, v0
   USE elastic_constants, ONLY : epsilon_geo, sigma_geo, epsilon_voigt
   USE control_elastic_constants, ONLY : rot_mat, el_con_geo, &
                              el_con_ibrav_geo, el_con_celldm_geo, &
                              el_con_tau_crys_geo, el_con_omega_geo, &
                              epsil_geo
+  USE control_pressure, ONLY : press_plot, ipress_plot
+  USE control_vol,      ONLY : ivol_plot
   USE control_debye,    ONLY : deb_energy, deb_free_energy, deb_entropy, &
                                deb_cv, deb_b_fact, deb_bfact
   USE control_quadratic_energy, ONLY : p2, hessian_v, hessian_e, x_pos_min
@@ -106,6 +116,7 @@ SUBROUTINE deallocate_thermo()
 
   IF ( ALLOCATED (b0_t) )            DEALLOCATE(b0_t) 
   IF ( ALLOCATED (b01_t) )           DEALLOCATE(b01_t) 
+  IF ( ALLOCATED (b02_t) )           DEALLOCATE(b02_t) 
   IF ( ALLOCATED (b0_s) )            DEALLOCATE(b0_s) 
   IF ( ALLOCATED (cv_t) )            DEALLOCATE(cv_t) 
   IF ( ALLOCATED (ce_t) )            DEALLOCATE(ce_t) 
@@ -134,7 +145,35 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (v_s) )             DEALLOCATE(v_s)
   IF ( ALLOCATED (el_con_geo_t) )    DEALLOCATE(el_con_geo_t) 
 
+  IF ( ALLOCATED (vmin_p) )          DEALLOCATE(vmin_p) 
+  IF ( ALLOCATED (p0) )              DEALLOCATE(p0) 
+  IF ( ALLOCATED (b0_p) )            DEALLOCATE(b0_p) 
+  IF ( ALLOCATED (b01_p) )           DEALLOCATE(b01_p) 
+  IF ( ALLOCATED (b02_p) )           DEALLOCATE(b02_p) 
+  IF ( ALLOCATED (emin_p) )          DEALLOCATE(emin_p) 
+  IF ( ALLOCATED (betap) )           DEALLOCATE(betap) 
+  IF ( ALLOCATED (vmin_ptt) )        DEALLOCATE(vmin_ptt) 
+  IF ( ALLOCATED (b0_ptt) )          DEALLOCATE(b0_ptt) 
+  IF ( ALLOCATED (b01_ptt) )         DEALLOCATE(b01_ptt) 
+  IF ( ALLOCATED (b02_ptt) )         DEALLOCATE(b02_ptt) 
+  IF ( ALLOCATED (ce_ptt) )          DEALLOCATE(ce_ptt) 
+  IF ( ALLOCATED (gamma_ptt) )       DEALLOCATE(gamma_ptt) 
+  IF ( ALLOCATED (vmin_pt) )         DEALLOCATE(vmin_pt) 
+  IF ( ALLOCATED (b0_pt) )           DEALLOCATE(b0_pt) 
+  IF ( ALLOCATED (b01_pt) )          DEALLOCATE(b01_pt) 
+  IF ( ALLOCATED (b02_pt) )          DEALLOCATE(b02_pt) 
+  IF ( ALLOCATED (emin_pt) )         DEALLOCATE(emin_pt) 
+  IF ( ALLOCATED (beta_pt) )         DEALLOCATE(beta_pt) 
+  IF ( ALLOCATED (ce_pt) )           DEALLOCATE(ce_pt) 
+  IF ( ALLOCATED (cp_pt) )           DEALLOCATE(cp_pt) 
+  IF ( ALLOCATED (gamma_pt) )        DEALLOCATE(gamma_pt) 
+  IF ( ALLOCATED (b0_s_pt) )         DEALLOCATE(b0_s_pt) 
+  IF ( ALLOCATED (e0) )              DEALLOCATE(e0)
+  IF ( ALLOCATED (v0) )              DEALLOCATE(v0)
+
   IF ( ALLOCATED (b0f_t) )           DEALLOCATE(b0f_t) 
+  IF ( ALLOCATED (b01f_t) )          DEALLOCATE(b01f_t) 
+  IF ( ALLOCATED (b02f_t) )          DEALLOCATE(b02f_t) 
   IF ( ALLOCATED (b0f_s) )           DEALLOCATE(b0f_s) 
   IF ( ALLOCATED (cvf_t) )           DEALLOCATE(cvf_t) 
   IF ( ALLOCATED (enerf_t) )         DEALLOCATE(enerf_t)
@@ -161,6 +200,12 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (vf_t) )            DEALLOCATE(vf_t)
   IF ( ALLOCATED (vf_s) )            DEALLOCATE(vf_s)
   IF ( ALLOCATED (el_conf_geo_t) )   DEALLOCATE(el_conf_geo_t) 
+
+  IF ( ALLOCATED (vmine_t) )  DEALLOCATE(vmine_t) 
+  IF ( ALLOCATED (b0e_t) )    DEALLOCATE(b0e_t) 
+  IF ( ALLOCATED (b01e_t) )   DEALLOCATE(b01e_t) 
+  IF ( ALLOCATED (b02e_t) )   DEALLOCATE(b02e_t) 
+  IF ( ALLOCATED (free_e_mine_t) ) DEALLOCATE(free_e_mine_t) 
 
   IF ( ALLOCATED (betab) )           DEALLOCATE(betab) 
   IF ( ALLOCATED (alpha_an_g) )      DEALLOCATE(alpha_an_g) 
@@ -205,6 +250,11 @@ SUBROUTINE deallocate_thermo()
   CALL clean_poly(p4)
 
   IF ( ALLOCATED (temp) )            DEALLOCATE(temp)
+  IF ( ALLOCATED (temp_plot) )       DEALLOCATE(temp_plot)
+  IF ( ALLOCATED (itemp_plot) )      DEALLOCATE(itemp_plot)
+  IF ( ALLOCATED (press_plot) )      DEALLOCATE(press_plot)
+  IF ( ALLOCATED (ipress_plot) )     DEALLOCATE(ipress_plot)
+  IF ( ALLOCATED (ivol_plot) )       DEALLOCATE(ivol_plot)
 
   IF ( ALLOCATED (nrap_plot_in) )    DEALLOCATE(nrap_plot_in)
   IF ( ALLOCATED (rap_plot_in) )     DEALLOCATE(rap_plot_in)

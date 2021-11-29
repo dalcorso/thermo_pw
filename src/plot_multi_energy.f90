@@ -22,7 +22,7 @@ SUBROUTINE plot_multi_energy()
   USE postscript_files,     ONLY : flpsenergy
   USE control_energy_plot,  ONLY : ncontours, ene_levels, color_levels
   USE control_quadratic_energy, ONLY : x_pos_min, hessian_v, nvar, show_fit
-  USE control_mur,          ONLY : nvol
+  USE control_vol,          ONLY : nvol
   USE control_pressure,     ONLY : pressure, pressure_kb
   USE mp_images,            ONLY : my_image_id, root_image
   USE io_global,            ONLY : ionode, stdout

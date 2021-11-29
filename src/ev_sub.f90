@@ -6,7 +6,7 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !-----------------------------------------------------------------------
-SUBROUTINE ev_sub(vmin,b0,b01,emin_out,inputfile)
+SUBROUTINE ev_sub(vmin,b0,b01,b02,emin_out,inputfile)
 !-----------------------------------------------------------------------
 !
 !      fit of E(v) or H(V) at finite pressure to an equation of state (EOS)
@@ -60,10 +60,10 @@ SUBROUTINE ev_sub(vmin,b0,b01,emin_out,inputfile)
       USE mp_images, ONLY : my_image_id, root_image, intra_image_comm
 
       IMPLICIT NONE
-      REAL(DP), INTENT(OUT)  :: vmin, b0, b01, emin_out
+      REAL(DP), INTENT(OUT)  :: vmin, b0, b01, b02, emin_out
       CHARACTER(LEN=*) :: inputfile
       INTEGER, PARAMETER:: nmaxpar=4, nmaxpt=100, nseek=10000, nmin=8
-      INTEGER :: npar,npt,istat, ierr
+      INTEGER :: npar,npt,ieos, ierr
       CHARACTER :: bravais*3, au_unit*3, filin*256
       REAL(DP) :: par(nmaxpar), deltapar(nmaxpar), parmin(nmaxpar), &
              parmax(nmaxpar), v0(nmaxpt), etot(nmaxpt), efit(nmaxpt), &
@@ -100,13 +100,13 @@ SUBROUTINE ev_sub(vmin,b0,b01,emin_out,inputfile)
          CALL errore('ev_sub','ev: unexpected lattice '//TRIM(bravais), 1)
       ENDIF
 !
-      READ (iu_ev,*) istat
-      IF(istat==1 .or. istat==4) THEN
+      READ (iu_ev,*) ieos
+      IF(ieos==1 .or. ieos==4) THEN
          npar=3
-      ELSEIF(istat==2 .or. istat==3) THEN
+      ELSEIF(ieos==2 .or. ieos==3) THEN
          npar=4
       ELSE
-         CALL errore('ev_sub', 'Unexpected eq. of state', istat)
+         CALL errore('ev_sub', 'Unexpected eq. of state', ieos)
       ENDIF
       READ(iu_ev, '(a)') filin
       READ(iu_ev, '(a)') fileout
@@ -165,15 +165,16 @@ SUBROUTINE ev_sub(vmin,b0,b01,emin_out,inputfile)
       deltapar(3) = 1.0d0
       deltapar(4) = 0.01d0
 !
-      CALL find_minimum &
-           (npar,par,deltapar,parmin,parmax,nseek,nmin,chisq)
+!      CALL find_minimum &
+!           (npar,par,deltapar,parmin,parmax,nseek,nmin,chisq)
+      CALL find_minimum (npar,par,chisq)
 !
       CALL write_results &
-           (npt,in_angstrom,fac,v0,etot,efit,istat,par,npar,emin,chisq, &
+           (npt,in_angstrom,fac,v0,etot,efit,ieos,par,npar,emin,chisq, &
             fileout)
 !
       CALL write_evdata_xml  &
-           (npt,fac,v0,etot,efit,istat,par,npar,emin,pressure_kb,&
+           (npt,fac,v0,etot,efit,ieos,par,npar,emin,pressure_kb,&
                                                         chisq,fileout, ierr)
 
       IF (ierr /= 0) GO TO 99
@@ -194,21 +195,22 @@ SUBROUTINE ev_sub(vmin,b0,b01,emin_out,inputfile)
     vmin=par(1)
     b0=par(2)
     b01=par(3)
+    b02=par(4)
     emin_out=emin
-    
 
     RETURN
 
     CONTAINS
 !
 !-----------------------------------------------------------------------
-      SUBROUTINE eqstate(npar,par,chisq)
+      SUBROUTINE eqstate(npar,par,chisq,ediff)
 !-----------------------------------------------------------------------
 !
       IMPLICIT NONE
       INTEGER, INTENT(in) :: npar
       REAL(DP), INTENT(in) :: par(npar)
       REAL(DP), INTENT(out):: chisq
+      REAL(DP), OPTIONAL, INTENT(out):: ediff(npt)
       INTEGER :: i
       REAL(DP) :: k0, dk0, d2k0, c0, c1, x, vol0, ddk
 !
@@ -217,11 +219,11 @@ SUBROUTINE ev_sub(vmin,b0,b01,emin_out,inputfile)
       dk0  = par(3)
       d2k0 = par(4)*ry_kbar ! and d2k0/dp2 to (Ry a.u.)^(-1)
 !
-      IF(istat==1.or.istat==2) THEN
-         IF(istat==1) THEN
-            c0 = 0.0d0
+      IF(ieos==1.or.ieos==2) THEN
+         IF(ieos==1) THEN
+           c0 = 0.0d0
          ELSE
-            c0 = ( 9.d0*k0*d2k0 + 9.d0*dk0**2-63.d0*dk0+143.d0 )/48.d0
+           c0 = ( 9.d0*k0*d2k0 + 9.d0*dk0**2-63.d0*dk0+143.d0 )/48.d0
          ENDIF
          c1 = 3.d0*(dk0-4.d0)/8.d0
          DO i=1,npt
@@ -233,7 +235,7 @@ SUBROUTINE ev_sub(vmin,b0,b01,emin_out,inputfile)
                          -(-1.d0/8.d0+c1/6.d0-c0/8.d0) )
          ENDDO
       ELSE
-         IF(istat==3) THEN
+         IF(ieos==3) THEN
             ddk = dk0 + k0*d2k0/dk0
          ELSE
             ddk = dk0
@@ -257,11 +259,13 @@ SUBROUTINE ev_sub(vmin,b0,b01,emin_out,inputfile)
       DO i = 1,npt
           efit(i) = efit(i)+emin
           chisq   = chisq + (etot(i)-efit(i))**2
-      ENDDO
+          IF(present(ediff)) ediff(i) = efit(i)-etot(i)
+       ENDDO
       chisq = chisq/npt
 !
       RETURN
     END SUBROUTINE eqstate
+
 !
 !-----------------------------------------------------------------------
       SUBROUTINE write_results &
@@ -414,53 +418,52 @@ SUBROUTINE ev_sub(vmin,b0,b01,emin_out,inputfile)
       IF(filout/=' ') CLOSE(UNIT=iun)
  99   RETURN
     END SUBROUTINE write_results
-!
+
+    SUBROUTINE EOSDIFF(m_, n_, par_, f_, i_)
+       IMPLICIT NONE
+       INTEGER, INTENT(in)  :: m_, n_
+       INTEGER, INTENT(inout)   :: i_
+       REAL(DP),INTENT(in)    :: par_(n_)
+       REAL(DP),INTENT(out)   :: f_(m_)
+       REAL(DP) :: chisq_
+       !
+         CALL eqstate(n_,par_,chisq_, f_)
+      END SUBROUTINE
+
+
 !-----------------------------------------------------------------------
-      SUBROUTINE find_minimum &
-         (npar,par,deltapar,parmin,parmax,nseek,nmin,chisq)
+      SUBROUTINE find_minimum(npar,par,chisq)
 !-----------------------------------------------------------------------
 !
-!     Very Stupid Minimization
-!
-      USE random_numbers, ONLY : randy
+      USE lmdif_module, ONLY : lmdif0
       IMPLICIT NONE
-      INTEGER maxpar, nseek, npar, nmin, n,j,i
-      PARAMETER (maxpar=4)
-      REAL(DP) :: par(npar), deltapar(npar), parmin(npar), parmax(npar), &
-             parnew(maxpar), chisq, chinew, bidon
-!
-!      various initializations
-!
-      chisq = 1.0d30
-      chinew= 1.0d30
+      INTEGER ,INTENT(in)  :: npar
+      REAL(DP),INTENT(out) :: par(nmaxpar)
+      REAL(DP),INTENT(out) :: chisq
+      !
+      REAL(DP) :: vchisq(npar)
+      REAL(DP) :: ediff(npt)
+      INTEGER :: i
+      !
+      par(1) = v0(npt/2)
+      par(2) = 500.0d0
+      par(3) = 5.0d0
+      par(4) = -0.01d0 ! unused for some eos
+      !      
+      CALL lmdif0(EOSDIFF, npt, npar, par, ediff, 1.d-12, i)
+      !
+      IF(i>0 .and. i<5) THEN
+!         PRINT*, "Minimization succeeded"
+      ELSEIF(i>=5) THEN
+         CALL errore("find_minimum", "Minimization stopped before convergence",1)
+      ELSEIF(i<=0) THEN 
+        CALL errore("find_minimum", "Minimization error", 1)
+      ENDIF
+      !
       CALL eqstate(npar,par,chisq)
-      DO j = 1,nmin
-         DO i = 1,nseek
-            DO n = 1,npar
-  10           parnew(n) = par(n) + (0.5d0 - randy())*deltapar(n)
-               IF(parnew(n)>parmax(n) .or. parnew(n)<parmin(n)) &
-               GOTO 10
-            ENDDO
-!
-            CALL eqstate(npar,parnew,chinew)
-!
-            IF(chinew<chisq) THEN
-               DO n = 1,npar
-                  par(n) = parnew(n)
-               ENDDO
-               chisq = chinew
-            ENDIF
-         ENDDO
-         DO n = 1,npar
-            deltapar(n) = deltapar(n)/10.d0
-         ENDDO
-      ENDDO
-!
-      CALL eqstate(npar,par,chisq)
-!
-      RETURN
-    END SUBROUTINE find_minimum
-!
+
+      END SUBROUTINE find_minimum
+
   END SUBROUTINE ev_sub
 
       FUNCTION birch(x,k0,dk0,d2k0)
@@ -494,3 +497,212 @@ SUBROUTINE ev_sub(vmin,b0,b01,emin_out,inputfile)
 
       RETURN
     END FUNCTION keane
+
+!-----------------------------------------------------------------------
+SUBROUTINE ev_sub_nodisk(vmin,b0,b01,b02,emin_out)
+!-----------------------------------------------------------------------
+!
+!  This routine is similar to ev_sub, but it receives the input data
+!  directly from the shared variable without the need to write on
+!  disk. It does not write any output.
+!  
+!  Before calling this routine the user must set in the module control_ev
+!  ieos : the equation of state to use
+!         1 - Birch-Murnaghan first order
+!         2 - Birch-Murnaghan third order
+!         3 - Keane
+!         4 - Murnaghan
+!  npt : the number of points
+!  v0(npt)  : the volume for each point
+!  e0(npt)  : the energy or enthalpy for each point
+!
+!  v0 and e0 must be allocated and deallocated by the user of this routine
+!
+USE kinds, ONLY: DP
+USE constants, ONLY: bohr_radius_angs, ry_kbar
+USE control_ev, ONLY : ieos, npt, v0, etot => e0
+USE mp,        ONLY : mp_bcast
+USE io_global, ONLY : ionode, ionode_id, stdout
+USE mp_images, ONLY : my_image_id, root_image, intra_image_comm
+
+IMPLICIT NONE
+REAL(DP), INTENT(OUT)  :: vmin, b0, b01, b02, emin_out
+INTEGER, PARAMETER:: nmaxpar=4, nmaxpt=100, nseek=20000, nmin=8
+INTEGER :: npar,ipt,ierr
+REAL(DP) :: par(nmaxpar), deltapar(nmaxpar), parmin(nmaxpar), &
+            parmax(nmaxpar), efit(nmaxpt), emin, chisq
+
+IF (my_image_id /= root_image) RETURN
+
+IF (ieos==1 .OR. ieos==4) THEN
+   npar=3
+ELSEIF(ieos==2 .OR. ieos==3) THEN
+   npar=4
+ELSE
+   CALL errore('ev_sub_nodisk', 'Unexpected eq. of state', ieos)
+ENDIF
+!
+!  find emin and the initial guess for the volume
+!
+emin=1d10
+DO ipt=1,npt
+   IF (etot(ipt)<emin) THEN
+      par(1) = v0(ipt)
+      emin = etot(ipt)
+   ENDIF
+ENDDO
+!
+! par(1) = V, Volume of the unit cell in (a.u.^3)
+! par(2) = B, Bulk Modulus (in KBar)
+! par(3) = dB/dP (adimensional)
+! par(4) = d^2B/dP^2 (in KBar^(-1), used only by 2nd order formulae)
+!
+par(2) = 500.0d0
+par(3) = 5.0d0
+par(4) = -0.01d0
+!
+parmin(1) = 0.0d0
+parmin(2) = 0.0d0
+parmin(3) = 1.0d0
+parmin(4) = -1.0d0
+!
+parmax(1) = 100000.d0
+parmax(2) = 100000.d0
+parmax(3) = 15.0d0
+parmax(4) = 0.0d0
+!
+deltapar(1) = 0.1d0
+deltapar(2) = 100.d0
+deltapar(3) = 1.0d0
+deltapar(4) = 0.01d0
+!
+!CALL find_minimum (npar,par,deltapar,parmin,parmax,nseek,nmin,chisq)
+CALL find_minimum (npar,par,chisq)
+!
+CALL mp_bcast(par, ionode_id, intra_image_comm)
+CALL mp_bcast(emin, ionode_id, intra_image_comm)
+    
+vmin=par(1)
+b0=par(2)
+b01=par(3)
+b02=par(4)
+emin_out=emin
+
+RETURN
+
+CONTAINS
+!
+!-----------------------------------------------------------------------
+      SUBROUTINE eqstate(npar,par,chisq,ediff)
+!-----------------------------------------------------------------------
+!
+      IMPLICIT NONE
+      INTEGER, INTENT(in) :: npar
+      REAL(DP), INTENT(in) :: par(npar)
+      REAL(DP), INTENT(out):: chisq
+      REAL(DP), OPTIONAL, INTENT(out):: ediff(npt)
+      INTEGER :: i
+      REAL(DP) :: k0, dk0, d2k0, c0, c1, x, vol0, ddk
+!
+      vol0 = par(1)
+      k0   = par(2)/ry_kbar ! converts k0 to Ry atomic units...
+      dk0  = par(3)
+      d2k0 = par(4)*ry_kbar ! and d2k0/dp2 to (Ry a.u.)^(-1)
+!
+      IF(ieos==1.or.ieos==2) THEN
+         IF(ieos==1) THEN
+           c0 = 0.0d0
+         ELSE
+           c0 = ( 9.d0*k0*d2k0 + 9.d0*dk0**2-63.d0*dk0+143.d0 )/48.d0
+         ENDIF
+         c1 = 3.d0*(dk0-4.d0)/8.d0
+         DO i=1,npt
+            x = vol0/v0(i)
+            efit(i) = 9.d0*k0*vol0*( (-0.5d0+c1-c0)*x**(2.d0/3.d0)/2.d0 &
+                         +( 0.50-2.d0*c1+3.d0*c0)*x**(4.d0/3.d0)/4.d0 &
+                         +(       c1-3.d0*c0)*x**(6.d0/3.d0)/6.d0 &
+                         +(            c0)*x**(8.d0/3.d0)/8.d0 &
+                         -(-1.d0/8.d0+c1/6.d0-c0/8.d0) )
+         ENDDO
+      ELSE
+         IF(ieos==3) THEN
+            ddk = dk0 + k0*d2k0/dk0
+         ELSE
+            ddk = dk0
+         ENDIF
+         DO i=1,npt
+            efit(i) = - k0*dk0/ddk*vol0/(ddk-1.d0) &
+            + v0(i)*k0*dk0/ddk**2*( (vol0/v0(i))**ddk/(ddk-1.d0)+1.d0) &
+            - k0*(dk0-ddk)/ddk*( v0(i)*log(vol0/v0(i)) + v0(i)-vol0 )
+         ENDDO
+      ENDIF
+!
+!      emin = equilibrium energy obtained by minimizing chi**2
+!
+      emin = 0.0d0
+      DO i = 1,npt
+         emin = emin + etot(i)-efit(i)
+      ENDDO
+      emin = emin/npt
+!
+      chisq = 0.0d0
+      DO i = 1,npt
+          efit(i) = efit(i)+emin
+          chisq   = chisq + (etot(i)-efit(i))**2
+          IF(present(ediff)) ediff(i) = efit(i)-etot(i)
+       ENDDO
+      chisq = chisq/npt
+!
+      RETURN
+    END SUBROUTINE eqstate
+    !
+    ! This subroutine is passed to LMDIF to be minimized
+    ! LMDIF takes as input the difference between f_fit and f_real
+    !       and computes the chi^2 internally.
+    !
+    SUBROUTINE EOSDIFF(m_, n_, par_, f_, i_)
+       IMPLICIT NONE
+       INTEGER, INTENT(in)  :: m_, n_
+       INTEGER, INTENT(inout)   :: i_
+       REAL(DP),INTENT(in)    :: par_(n_)
+       REAL(DP),INTENT(out)   :: f_(m_)
+       REAL(DP) :: chisq_
+       !
+         CALL eqstate(n_,par_,chisq_, f_)
+      END SUBROUTINE
+!
+!-----------------------------------------------------------------------
+      SUBROUTINE find_minimum(npar,par,chisq)
+!-----------------------------------------------------------------------
+!
+      USE lmdif_module, ONLY : lmdif0
+      IMPLICIT NONE
+      INTEGER ,INTENT(in)  :: npar
+      REAL(DP),INTENT(out) :: par(nmaxpar)
+      REAL(DP),INTENT(out) :: chisq
+      !
+      REAL(DP) :: vchisq(npar)
+      REAL(DP) :: ediff(npt)
+      INTEGER :: i
+      !
+      par(1) = v0(npt/2)
+      par(2) = 500.0d0
+      par(3) = 5.0d0
+      par(4) = -0.01d0 ! unused for some eos
+      !      
+      CALL lmdif0(EOSDIFF, npt, npar, par, ediff, 1.d-12, i)
+      !
+      IF(i>0 .and. i<5) THEN
+!         PRINT*, "Minimization succeeded"
+      ELSEIF(i>=5) THEN
+         CALL errore("find_minimum", "Minimization stopped before &
+                                                           &convergence",1)
+      ELSEIF(i<=0) THEN 
+        CALL errore("find_minimum", "Minimization error", 1)
+      ENDIF
+      !
+      CALL eqstate(npar,par,chisq)
+
+      END SUBROUTINE find_minimum
+!
+  END SUBROUTINE ev_sub_nodisk

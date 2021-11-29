@@ -71,7 +71,7 @@
 
 \newpage
 
-{\color{dark-blue}\chapter*{Introduction}}
+{\color{dark-blue}\chapter{Introduction}}
 \color{black}
 This guide discusses the internal organization of \tpw. It is not necessary
 to read it to use \tpw. It contains some technical information not 
@@ -325,6 +325,62 @@ Average Gruneisen parameter                    mur_lc_t
 Generalized Average Gruneisen parameters       mur_lc_t     
 Frequency dependent reflectivity               scf_ph, mur_lc_ph
 (insulators only)
+
+When lmurn=.TRUE.
+
+Volume as a function of pressure               mur_lc
+Bulk modulus as a function of pressure         mur_lc
+Pressure derivative of the bulk modulus 
+as a function of pressure                      mur_lc
+Second pressure derivative of the
+bulk modulus as a function of pressure         mur_lc (ieos=2)
+
+A set of plots at selected pressures:
+
+Volume as a function of temperature            mur_lc_t
+Volume/V(300K) as a function of temperature    mur_lc_t
+Bulk modulus as a function of temperature      mur_lc_t
+Pressure derivative of the bulk modulus        
+as a function of temperature                   mur_lc_t
+Second pressure derivative of the              
+bulk modulus as a function of pressure         mur_lc_t (ieos=2)
+Thermal expansion as a function of             
+temperature                                    mur_lc_t
+Isochoric heat capacity as a function of       
+temperature                                    mur_lc_t
+Isobaric heat capacity as a function of        
+temperature                                    mur_lc_t
+Difference between isobaric and isothermal     
+heat capacities as a function of temperature   mur_lc_t
+Difference between isobaric and isothermal     
+bulk modulus as a function of temperature      mur_lc_t
+Average Gruneisen parameter as a function     
+of temperature                                 mur_lc_t
+
+A set of plots at selected temperatures:
+
+Helmholtz free energy as a function of         
+volume                                         mur_lc_t
+Pressure as a function of volume               mur_lc_t
+Thermal pressure as a function of volume       mur_lc_t
+Vibrational (+ electronic) free energy         
+as a function of volume                        mur_lc_t
+Electronic free energy as a function of        
+volume                                         mur_lc_t
+Gibbs free energy as a function of pressure    mur_lc_t
+Bulk modulus as a function of pressure         mur_lc_t
+Pressure derivative of the bulk modulus        
+as a function of pressure                      mur_lc_t
+Thermal expansion as a function of pressure    mur_lc_t
+Average Gruneisen parameter as a function of   
+pressure                                       mur_lc_t
+Product of thermal expansion and bulk modulus
+as a function of pressure                      mur_lc_t
+
+A set of plots at selected volumes:
+
+Thermal pressure as a function of temperature  mur_lc_t
+
 \end{verbatim}
 \end{footnotesize}
 
@@ -396,6 +452,10 @@ mur_lc           do_ev           flevdat        (input_ev)
                  write_mur       flevdat(_mur)
                                  flevdat(_mur1)
                  plot_mur                       flgnuplot(_mur)     flpsmur
+                 write_mur_p     flevdat(_mur_press)
+                 plot_mur_p                     flgnuplot(_mur_press) 
+                                                                flpsmur(_press)
+
                  write_gnuplot_energy
                                  flenergy
                  plot_multi_energy              flgnuplot(_energy)  flpsenergy
@@ -408,6 +468,7 @@ mur_lc_t
                                  flanhar(.dbulk_mod)
                                  flanhar(.heat)
                                  flanhar(.gamma)
+                                 flanhar(.therm)
                                  flanhar(.#na.dw)
                  write_ph_freq_anharmonic
                                  flanhar(_ph)
@@ -415,13 +476,37 @@ mur_lc_t
                                  flanhar(.dbulk_mod_ph)
                                  flanhar(.heat_ph)
                                  flanhar(.gamma_ph)
+                                 flanhar(.therm_ph)
                                  flanhar(_ph.#na.dw)
                  write_grun_anharmonic
                                  flanhar(.aux_grun)
                                  flanhar(.gamma_grun)
+                 write_anhar_p
+                                 flanhar(.press.#pressure)
+                                 flanhar(.bulk_press.#pressure)
+                                 flanhar(.heat_press.#pressure)
+                                 flanhar(.gamma_press.#pressure)
+                 write_anhar_t
+                                 flanhar(.temp.#temp)
+                                 flanhar(.dbulk_temp.#temp)
+                                 flanhar(.gamma_temp.#temp)
+                 write_anhar_v
+                                 flanhar(.vol.#volume)
+                 write_mur_pol
+                                 flevdat(_mur.#temp)
+                                 flevdat(_poly_free.#temp)
+                 write_free_ener
+                                 flevdat(_mur_free.#temp)
                  plot_anhar                     flgnuplot(_anhar)  flpsanhar
                                                 flgnuplot(_anhar_dw) 
                                                             flpsanhar(.dw)
+                                                
+                 plot_anhar_p                   flgnuplot(_anhar_press)
+                                                            flpsanhar(.press)
+                 plot_anhar_t                   flgnuplot(_anhar_temp)
+                                                            flpsanhar(.temp)
+                 plot_anhar_v                   flgnuplot(_anhar_vol)
+                                                            flpsanhar(.vol)
                  write_gruneisen_bands
                                  flgrun
                                  flgrun(_freq)
@@ -693,7 +778,8 @@ but not before each task.
 
 Many data files produced by \texttt{thermo\_pw} are in a form readable
 by the \texttt{gnuplot} program and are therefore arranged in columns.
-Usually the first column is the temperature and the other columns are
+Usually the first column is the temperature, the pressure, or the volume
+and the other columns are
 the physical quantities. Several other files are in a format exported
 from the \qe\ package and are usually readable by its 
 programs. In this section we report a short list of the files produced
@@ -713,7 +799,7 @@ space groups.
 
 \item 
 \texttt{band\_files/flpband(.\#)(.\#)} 
-(default name \texttt{output\_pband.dat(.\#)(.\#)})
+(default name \texttt{output\_pband.dat(.\#)(.\#)}).
 These files contain the band eigenvalues along a line of the path 
 (and for one irreducible representation). 
 The format is readable by \texttt{gnuplot} and are similar to the files written
@@ -722,15 +808,15 @@ the filename indicate the number of the line along the path and the number
 of the irreducible representation.
 
 \item 
-\texttt{band\_files/info\_data} (default name \texttt{info\_data}) This
+\texttt{band\_files/info\_data} (default name \texttt{info\_data}). This
 file contains the information needed by \texttt{thermo\_pw}
 to redo the plot without reading the files produced by \texttt{pw.x}
-when\\ \texttt{only\_bands\_plot=.TRUE.}. It is written
+when \texttt{only\_bands\_plot=.TRUE.}. It is written
 in a form readable by \texttt{thermo\_pw}. Among other things it
 contains the Fermi level.
 
 \item 
-\texttt{energy\_files/flevdat} (default name \texttt{output\_ev.dat})
+\texttt{energy\_files/flevdat} (default name \texttt{output\_ev.dat}).
 This file contains the total energy as a function of the volume for the
 points actually calculated by \texttt{thermo\_pw}. It has the format
 \begin{verbatim}
@@ -741,20 +827,35 @@ finite pressure).
 
 \item 
 \texttt{energy\_files/flevdat(\_mur)} 
-(default name \texttt{output\_ev.dat\_mur})
+(default name \texttt{output\_ev.dat\_mur}).
 This file contains the Murnaghan interpolation of the input data on a 
 mesh of volumes and the pressure that corresponds to each volume. It has
 the format:
 \begin{verbatim}
-# omega (a.u.)**3       energy (Ry)      pressure (kbar)
+# omega (a.u.)**3       energy (Ry)     enthalpy(p) (Ry)  pressure (kbar)
 \end{verbatim}
-where $\Omega$ is the volume, energy the total energy (or enthalpy at finite
-pressure).
+where $\Omega$ is the volume, energy the total energy 
+(or enthalpy as a function of volume at finite pressure) and 
+enthalpy(p) is the enthalpy as a function of pressure. 
+
+\item 
+\texttt{energy\_files/flevdat(\_mur\_press)} 
+(default name \texttt{output\_ev.dat\_mur\_press}).
+This file contains the parameters of the equation of state 
+computed as a function of pressure. It has the format: 
+\begin{verbatim}
+#  press (kbar)    v0 (a.u.)^3    b0 (kbar)    b01     b02 (1/kbar)
+\end{verbatim}
+where \texttt{v0}, \texttt{b0}, \texttt{b01}, and \texttt{b02} are the
+volume, the bulk modulus, the pressure derivative of the bulk modulus,
+and the second pressure derivative of the bulk modulus with respect to
+pressure. \texttt{b02} is present only if the Birch-Murnaghan equation
+of fourth order is chosen for interpolation.
 
 \item 
 \texttt{energy\_files/flevdat(.ev.out)} 
-(default name \texttt{output\_ev.dat.ev.out})
-This file contains the output information on the Murnaghan interpolation 
+(default name \texttt{output\_ev.dat.ev.out}).
+This file contains the output information on the energy interpolation 
 in the same format as the output of the \texttt{ev.x} program of 
 \qe\ package. This file is written in two formats.
 There is also an \texttt{.xml} file where the same quantities are written 
@@ -788,7 +889,7 @@ For all other systems a file is produced with the format:
 \end{verbatim}
 
 \item 
-\texttt{therm\_files/fleldos} (default name \texttt{output\_eldos.dat})
+\texttt{therm\_files/fleldos} (default name \texttt{output\_eldos.dat}).
 This file contains the electron density of states. It has the format
 \begin{verbatim}
 #  E (eV)   dos(E)     Int dos(E)
@@ -802,7 +903,7 @@ with the density of states for spin up and for spin down. The integrated
 density of states refers to the sum of spin up and spin down states.
 
 \item 
-\texttt{therm\_files/fleltherm} (default name \texttt{output\_eltherm.dat})
+\texttt{therm\_files/fleltherm} (default name \texttt{output\_eltherm.dat}).
 This file contains the electron thermodynamic properties as a function of
 temperature. It has the format:
 \begin{verbatim}
@@ -812,7 +913,7 @@ and contains the electron excitation energy, free energy, entropy,
 isochoric specific heat and chemical potential.
 
 \item 
-\texttt{phdisp\_files/flfrc.g\#} (default name \texttt{output\_frc.dat.g\#})
+\texttt{phdisp\_files/flfrc.g\#} (default name \texttt{output\_frc.dat.g\#}).
 For each geometry for which a phonon dispersion is calculated this file
 contains the interatomic force constants. It is in a format readable by
 the code \texttt{matdyn.f90} of the QE distribution. \texttt{g\#} indicates 
@@ -826,7 +927,7 @@ along the path. It is in a format defined by the \texttt{matdyn.f90} routine
 of the QE distribution.
 
 \item 
-\texttt{phdisp\_files/flfrq.g\#} (default name \texttt{output\_frq.dat.g\#})
+\texttt{phdisp\_files/flfrq.g\#} (default name \texttt{output\_frq.dat.g\#}).
 For each geometry for which a phonon dispersion is calculated this file
 contains the frequencies along the path. It is in a format which is a 
 generalization of the file produced by the code \texttt{plotband.f90} of 
@@ -834,7 +935,7 @@ the QE distribution.
 
 \item 
 \texttt{phdisp\_files/flpband.g\#(.\#)(.\#)} 
-(default name \texttt{output\_pband.dat.} \texttt{g\#(.\#)(.\#)})
+(default name \texttt{output\_pband.dat.} \texttt{g\#(.\#)(.\#)}).
 For each geometry for which a phonon dispersion is calculated these files
 contain the frequencies along the path. They are in a format readable by
 \texttt{gnuplot} as produced by the \texttt{plotband.f90} code of \qe.
@@ -848,7 +949,7 @@ density of states is calculated this file contains the vibrational
 frequencies in all the {\bf q} vectors used for the phonon density of states.
 The files contain, for each {\bf q} vector, its weight and the frequencies,
 an information sufficient to recalculate the density of states.
-The file is readable only by \texttt{thermo\_pw}.
+The file is unformatted and readable only by \texttt{thermo\_pw}.
 
 \item 
 \texttt{phdisp\_files/fldos.g\#} (default name 
@@ -888,7 +989,8 @@ of states.
 
 \item 
 \texttt{therm\_files/fltherm.debye\_g\#} (default name 
-\texttt{output\_therm.dat.}\\ \texttt{debye\_g\#}). For each geometry for which 
+\texttt{output\_therm.dat.}\\ \texttt{debye\_g\#}). For each geometry 
+for which 
 the elastic constants are calculated (and whose number is given
 by \texttt{g\#}) the code produces a file that contains 
 the harmonic thermodynamic quantities as a function of temperature computed
@@ -927,8 +1029,52 @@ the atomic $B$ factor calculated within the Debye model. It contains:
 \end{verbatim}
 
 \item 
+\texttt{anhar\_files/flevdat(\_mur.\#temperature)} (default name \texttt{output\_ev.} \texttt{dat\_mur.\#temperature}).
+This file contains the following quantities:
+\begin{verbatim}
+# omega  Helm. energy, Gibbs energy(p), press, press(T = 0K)
+\end{verbatim}
+The volume, the Helmholtz free energy (or the Gibbs free
+energy at finite pressure), the Gibbs free energy as a function of pressure,
+the pressure and the pressure at $T = 0$ K.
+These quantities are calculated at the temperature 
+\texttt{\#temperature} written in the filename.
+These files are produced only if \texttt{ntemp\_plot>0} for each
+\texttt{temp\_plot}. Moreover the files require \texttt{lmurn=.TRUE.}.
+
+\item
+\texttt{anhar\_files/flevdat(\_free.\#temperature)} (default name \texttt{output\_ev.} \texttt{dat\_free.\#temperature}).
+This file contains the following quantities:
+\begin{verbatim}
+# Volume    energy   ph free-energy   el free energy
+\end{verbatim}
+The volume, the Helmholtz free energy (or the Gibbs free
+energy at finite pressure), the vibrational free energy,
+and the electronic free energy if available.
+These quantities are calculated at the temperature \texttt{\#temperature} 
+written in the filename. In these files we report the actual calculated data
+at the geometries where the phonon frequencies have been calculated.
+These files are produced only if \texttt{ntemp\_plot>0} for each
+\texttt{temp\_plot}. Moreover the files require \texttt{lmurn=.TRUE.}.
+
+\item
+\texttt{anhar\_files/flevdat(\_poly\_free.\#temperature)} (default name \texttt{output} \texttt{\_ev.dat\_poly\_free.\#temperature}).
+This file contains the following quantities:
+\begin{verbatim}
+#  Volume     free energy      thermal pressure 
+\end{verbatim}
+The volume, the Helmholtz free energy (or the Gibbs free
+energy at finite pressure), the thermal pressure.
+These quantities are calculated at the temperature \texttt{\#temperature} 
+written in the filename.
+In these files we report the intepolated data obtained from the
+polynomial interpolation of the calculated free energy.
+These files are produced only if \texttt{ntemp\_plot>0} for each
+\texttt{temp\_plot}. Moreover the files require \texttt{lmurn=.TRUE.}.
+
+\item 
 \texttt{anhar\_files/flanhar(\_ph)} (default name \texttt{output\_anhar.dat}).
-This file contains the following quantities
+This file contains the following quantities:
 \begin{verbatim}
 #   T      V(T)        F (T)        beta 
 \end{verbatim}
@@ -941,8 +1087,46 @@ these quantities have been calculated from the free energy obtained from
 direct integration over the Brilluoin zone (computing the phonon density
 of states). 
 
-\item \texttt{anharm\_files/flanhar(.bulk\_mod)(\_ph)} 
-(default name \texttt{output\_anharm.} \texttt{dat.aux})
+\item
+\texttt{anhar\_files/flanhar(\.press.\#pressure)} (default name \texttt{output\_anhar.} \texttt{dat.press.\#pressure}).
+This file contains the following quantities:
+\begin{verbatim}
+#   T (K)    V(T)    V(T)/V0     F (T)     beta(T) 
+\end{verbatim}
+The temperature, the volume, the volume divided by the volume at $T=300$ K,
+the Gibbs free energy (as a function of volume) and the thermal expansion
+at the pressure \texttt{\#pressure} given in the name of the file.
+These files are produced only if \texttt{npress\_plot>0} for each
+\texttt{press\_plot}. Moreover the files require \texttt{lmurn=.TRUE.}.
+
+\item
+\texttt{anhar\_files/flanhar(\.temp.\#temperature)} (default name \texttt{output\_anhar.} \texttt{dat.temp.\#temperature}).
+This file contains the following quantities:
+\begin{verbatim}
+#   p (kbar)      Volume(p)     B_T (p)        beta(p)
+\end{verbatim}
+The pressure, the volume, the isothermal bulk modulus, and the thermal 
+expansion at the temperature \texttt{\#temperature} given in the name 
+of the file.
+These files are produced only if \texttt{ntemp\_plot>0} for each
+\texttt{temp\_plot}. Moreover the files require \texttt{lmurn=.TRUE.}.
+
+\item
+\texttt{anhar\_files/flanhar(\.vol.\#volume)} (default name \texttt{output\_anhar.dat} \texttt{vol.\#volume}).
+This file contains the following quantities:
+\begin{verbatim}
+#    T (K)            pressure         pressure (T=0 K) 
+\end{verbatim}
+The temperature, the pressure at this volume for each temperature, the
+pressure at $T=0$ K to be subtracted to the pressure to obtain the
+thermal pressure.
+These quantities are calculated at the \texttt{\#volume} given in the name 
+of the file.
+These files are produced only if \texttt{nvol\_plot>0} for each
+\texttt{ivol\_plot}. Moreover the files require \texttt{lmurn=.TRUE.}.
+
+\item \texttt{anhar\_files/flanhar(.bulk\_mod)(\_ph)} 
+(default name \texttt{output\_anharm.} \texttt{dat.aux}).
 This file is present when \texttt{lmurn=.TRUE.} or when the elastic
 constants are on file and \texttt{lb0\_t=.FALSE.}. It contains:
 \begin{verbatim}
@@ -955,17 +1139,60 @@ these quantities have been calculated from the free energy obtained from
 direct integration over the Brilluoin zone (computing the phonon density
 of states). 
 
-\item \texttt{anharm\_files/flanhar(.dbulk\_mod)(\_ph)} 
-(default name \texttt{output\_}\\ \texttt{anharm.dat.aux})
+\item \texttt{anhar\_files/flanhar(.bulk\_press.\#pressure)}
+(default name \texttt{output} \texttt{\_anharm.dat.bulk\_press.\#pressure}).
+These files contain:
+\begin{verbatim}
+   T        B_T(T)     B_S(T)     (B_S - B_T) (T) 
+\end{verbatim}
+The temperature, the isothermal bulk modulus, the isoentropic bulk modulus,
+and the difference between isoentropic and isothermal bulk moduli.
+All these quantities are calculated at the \texttt{\#pressure} given
+in the name of the file.
+These files are produced only if \texttt{npress\_plot>0} for each
+\texttt{press\_plot}. Moreover the files require \texttt{lmurn=.TRUE.}.
+
+
+\item \texttt{anhar\_files/flanhar(.dbulk\_mod)(\_ph)} 
+(default name \texttt{output\_}\\ \texttt{anharm.dat.aux}).
 This file is present when \texttt{lmurn=.TRUE.}. It contains:
 \begin{verbatim}
-   T          dB / dp  (T)  
+   T          dB / dp  (T)      d^2B/dp^2 (T) 
 \end{verbatim}
 The temperature and the derivative of the bulk modulus with respect 
-to pressure. 
+to pressure. The second derivative of the bulk modulus with respect
+to pressure is present only when \texttt{ieos=2}.
 The presence (absence) of the \texttt{(\_ph)} extension indicates that these 
 quantities have been calculated from the free energy obtained from direct 
 integration over the Brilluoin zone (computing the phonon density of states). 
+
+\item \texttt{anhar\_files/flanhar(.dbulk\_press.\#pressure)} 
+(default name \texttt{output\_}\\ \texttt{anharm.dat.dbulk\_press.\#pressure}).
+These files contain:
+\begin{verbatim}
+   T          dB / dp  (T)      d^2B/dp^2 (T) 
+\end{verbatim}
+The temperature and the derivative of the bulk modulus with respect 
+to pressure. The second derivative of the bulk modulus with respect
+to pressure is present only when \texttt{ieos=2}.
+All these quantities are calculated at the \texttt{\#pressure} given
+in the name of the file.
+These files are produced only if \texttt{npress\_plot>0} for each
+\texttt{press\_plot}. Moreover the files require \texttt{lmurn=.TRUE.}.
+
+\item \texttt{anhar\_files/flanhar(.dbulk\_temp.\#temperature)}
+(default name \texttt{out-} \texttt{put\_anharm.dat.dbulk\_temp.\#temperature}).
+These files contain:
+\begin{verbatim}
+#   p (kbar)      dB/dp        d2B/dp2 (1/kbar)
+\end{verbatim}
+The pressure, the derivative of the bulk modulus with respect to pressure,
+and the second derivative of the bulk modulus with respect to pressure
+(only if \texttt{ieos=2}).
+All these quantities are calculated at the \texttt{\#temperature} given
+in the name of the file.
+These files are produced only if \texttt{ntemp\_plot>0} for each
+\texttt{temp\_plot}. Moreover the files require \texttt{lmurn=.TRUE.}.
 
 \item 
 \texttt{anhar\_files/flanhar(.heat)(\_ph)}
@@ -989,8 +1216,25 @@ when the elastic constants of one configuration or of many configurations
 are on file. 
 
 \item 
+\texttt{anhar\_files/flanhar(.heat\_press.\#pressure)}
+(default name \texttt{output} \texttt{\_anhar.heat\_press.\#pressure)}). 
+This file contains the following quantities:
+\begin{verbatim}
+#   T       C_e(T)     (C_P-C_V)(T)    
+\end{verbatim}
+the temperature, the constant strain heat capacity calculated 
+by interpolating the heat capacity calculated at several geometries 
+at the geometry corresponding to a given temperature, the
+difference between isobaric and isochoric heat capacities. 
+All these quantities are calculated at the \texttt{\#pressure} given
+in the name of the file.
+These files are produced only if \texttt{npress\_plot>0} for each
+\texttt{press\_plot}. Moreover the files require \texttt{lmurn=.TRUE.}.
+
+\item 
 \texttt{anhar\_files/flanhar(.aux\_grun)} 
-(default name \texttt{output\_anhar.dat.} \texttt{aux\_grun}). This file is printed
+(default name \texttt{output\_anhar.dat.} \texttt{aux\_grun}). 
+This file is printed
 when \texttt{lmurn=.TRUE.} or when the elastic
 constants are on file and \texttt{lb0\_t=.FALSE.}. It contains
 \begin{verbatim}
@@ -1042,7 +1286,8 @@ from the generalized phonon density of states.
 \item
 \texttt{anhar\_files/flanhar.tstress(\_ph)} (default name 
 \texttt{output\_therm.dat.} \texttt{tstress(\_ph)}).
-This file is printed when \texttt{lmurn=} \texttt{.FALSE.} and the elastic constants 
+This file is printed when \texttt{lmurn=} \texttt{.FALSE.} and the 
+elastic constants 
 of one or more configurations are on file.
 The thermal stresses are computed as a function of temperature from the
 elastic constants and the thermal expansion.
@@ -1077,6 +1322,36 @@ free energy calculated from phonon density of states,
 a three dimensional Brillouin zone integration, or using the
 mode Gr\"uneisen parameters is used to calculate the quantities 
 contained in the file.
+
+\item 
+\texttt{anhar\_files/flanhar(.gamma\_press.\#pressure)} 
+(default name \\ \texttt{output\_anhar.gamma\_press.\#pressure}). 
+This file contains the following quantities:
+\begin{verbatim}
+#   T       gamma(T)        C_V(T)        beta B_T (T)    
+\end{verbatim}
+the temperature, the average Gr\"uneisen parameter, the isochoric
+heat capacity and the product of the volume thermal expansion and the
+isothermal bulk modulus.
+All these quantities are calculated at the \texttt{\#pressure} given
+in the name of the file.
+These files are produced only if \texttt{npress\_plot>0} for each
+\texttt{press\_plot}. Moreover the files require \texttt{lmurn=.TRUE.}.
+
+\item 
+\texttt{anhar\_files/flanhar(.gamma\_temp.\#temperature)} 
+(default name \\ \texttt{output\_anhar.gamma\_temp.\#temperature}). 
+This file contains the following quantities:
+\begin{verbatim}
+#   p (kbar)   gamma(p)      Cv_T (p)        beta(p)*B_T(p) 
+\end{verbatim}
+the pressure, the average Gr\"uneisen parameter, the isochoric
+heat capacity and the product of the volume thermal expansion and the
+isothermal bulk modulus.
+All these quantities are calculated at the \texttt{\#temperature} given
+in the name of the file.
+These files are produced only if \texttt{ntemp\_plot>0} for each
+\texttt{temp\_plot}. Moreover the files require \texttt{lmurn=.TRUE.}.
 
 \item
 \texttt{anhar\_files/flanhar.ggamma(\_ph)} (default name
@@ -1143,7 +1418,7 @@ If both are \texttt{.TRUE.} the second is used.
 
 \item 
 \texttt{anhar\_files/flgrun(\_\#)}(default name 
-\texttt{output\_grun.dat(\_\#)}) This file contains the mode Gr\"uneisen
+\texttt{output\_grun.dat(\_\#)}). This file contains the mode Gr\"uneisen
 parameters. In anisotropic crystal systems with \texttt{lmurn=.FALSE.} this
 file contains the derivative of the frequencies with respect to the
 crystal parameters. The optional number in the filename indicates which
@@ -1159,7 +1434,7 @@ temperature or volume. The format of the file is readable by the program
 
 \item 
 \texttt{anhar\_files/flpgrun(.\#)(.\#)} 
-(default name \texttt{output\_pgrun.dat(.\#)(.\#)})
+(default name \texttt{output\_pgrun.dat(.\#)(.\#)}).
 These files contains the mode Gr\"uneisen parameters along the path.
 They are in a format readable by \texttt{gnuplot} as produced by 
 the \texttt{plotband.f90} code of \qe. The numbers after the geometry indicate the number of the line 
@@ -1167,7 +1442,8 @@ along the path and the number of the irreducible representation.
 
 \item
 \texttt{anhar\_files/flanhar.el\_cons(.g\#g)(\_s)(\_ph)}
-(default name \texttt{output\_} \texttt{anhar.dat.el\_cons(\_s)(\_ph)}). This file
+(default name \texttt{output\_} \texttt{anhar.dat.el\_cons(\_s)(\_ph)}). 
+This file
 contains the elastic constants as a functions of temperature. The number
 of columns depends on the Laue class. The first column is the 
 temperature and the second is the bulk modulus. The others are the
@@ -1234,7 +1510,8 @@ and \texttt{\#g} is the number of the geometry.
 
 \item
 \texttt{anhar\_files/flanhar.el\_comp(.g\#g)(\_s)(\_ph)}
-(default name \texttt{output\_} \texttt{anhar.dat.el\_comp(\_s)(\_ph)}). This file
+(default name \texttt{output\_} \texttt{anhar.dat.el\_comp(\_s)(\_ph)}). 
+This file
 contains the elastic compliances as a functions of temperature. 
 The number of columns depends on the Laue class. The first column is the 
 temperature and the second is the compressibility. The others are the

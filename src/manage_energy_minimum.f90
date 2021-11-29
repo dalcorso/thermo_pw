@@ -17,7 +17,7 @@ SUBROUTINE manage_energy_minimum(nwork)
 USE kinds,            ONLY : DP
 USE thermo_mod,       ONLY : celldm_geo, omega_geo, central_geo, density, &
                              energy_geo
-USE control_mur,      ONLY : vmin, b0, b01, emin, lmurn
+USE control_mur,      ONLY : vmin, b0, b01, b02, emin, lmurn
 USE equilibrium_conf, ONLY : celldm0, omega0, tau0, at0, tau0_crys
 USE initial_conf,     ONLY : ibrav_save, tau_save_crys
 USE control_xrdp,     ONLY : lxrdp
@@ -44,8 +44,10 @@ energy_geo=energy_geo / nproc_image
 
 IF (lmurn) THEN
    CALL do_ev()
-   CALL write_mur(vmin,b0,b01,emin,0)
+   CALL write_mur(vmin,b0,b01,b02,emin)
+   CALL write_mur_p()
    CALL plot_mur()
+   CALL plot_mur_p()
    CALL compute_celldm_geo(vmin, celldm0, &
                    celldm_geo(1,central_geo), omega_geo(central_geo))
 ELSE

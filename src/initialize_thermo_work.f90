@@ -38,7 +38,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
   USE control_elastic_constants, ONLY : rot_mat, ngeom, use_free_energy,   &
                                    elalgen, work_base, start_geometry_qha, &
                                    last_geometry_qha, elastic_algorithm,   &
-                                   el_con_omega_geo
+                                   el_con_omega_geo, el_con_geo
   USE control_eldos, ONLY : lel_free_energy
   USE gvecw,          ONLY : ecutwfc
   USE gvect,          ONLY : ecutrho
@@ -319,6 +319,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            last_geometry=MIN(last_geometry_qha*work_base, last_geometry)
            tot_ngeo=nwork
            ALLOCATE(energy_geo(tot_ngeo))
+           IF (.NOT.lph) ALLOCATE(el_con_geo(6,6,ngeom))
            ALLOCATE(no_ph(tot_ngeo))
            IF (lel_free_energy) ALLOCATE(ef_geo(tot_ngeo))
            energy_geo=0.0_DP
@@ -683,8 +684,14 @@ SUBROUTINE initialize_mur(nwork)
 !   in each task.
 !
 USE kinds,         ONLY : DP
-USE thermo_mod,    ONLY : ibrav_geo, celldm_geo, energy_geo, ef_geo, omega_geo
+USE thermo_mod,    ONLY : ibrav_geo, ngeo, celldm_geo, energy_geo, ef_geo, &
+                          omega_geo
+USE control_vol,   ONLY : nvol, vmin_input, vmax_input, deltav
 USE initial_conf,  ONLY : ibrav_save
+USE temperature,   ONLY : ntemp_plot
+USE control_pressure, ONLY : npress, npress_plot
+USE control_mur_p, ONLY : vmin_p, b0_p, b01_p, b02_p, emin_p
+USE control_mur,   ONLY : p0
 
 IMPLICIT NONE
 
@@ -706,6 +713,29 @@ DO igeom = 1, nwork
 ENDDO
 energy_geo=0.0_DP
 ibrav_geo=ibrav_save
+
+IF (vmin_input == 0.0_DP) vmin_input=omega_geo(1) * 0.98_DP
+IF (vmax_input == 0.0_DP) vmax_input=omega_geo(ngeo(1)) * 1.02_DP
+IF (nvol > 1) THEN
+   deltav = (vmax_input - vmin_input)/(nvol-1)
+ELSE
+   IF (deltav > 0.0_DP) THEN
+      nvol = NINT ( ( vmax_input - vmin_input ) / deltav + 1.51d0 )
+   ELSE
+      nvol = 51
+      deltav = (vmax_input - vmin_input)/(nvol-1)
+   ENDIF
+ENDIF
+ALLOCATE(p0(nvol))
+
+
+IF (ntemp_plot>0.OR.npress_plot>0) THEN
+   ALLOCATE(vmin_p(npress)) 
+   ALLOCATE(b0_p(npress)) 
+   ALLOCATE(b01_p(npress)) 
+   ALLOCATE(b02_p(npress)) 
+   ALLOCATE(emin_p(npress)) 
+ENDIF
 
 RETURN
 END SUBROUTINE initialize_mur

@@ -35,13 +35,14 @@ SUBROUTINE thermo_setup()
   USE constants,            ONLY : ry_kbar
   USE constants,            ONLY : k_boltzmann_ry
   USE thermo_mod,           ONLY : what, ngeo, fact_ngeo, ngeo_ph    
-  USE temperature,          ONLY : tmin
+  USE temperature,          ONLY : tmin, ntemp_plot
   USE control_thermo,       ONLY : continue_zero_ibrav, find_ibrav, &
                                    set_internal_path, set_2d_path
   USE control_elastic_constants, ONLY : ngeo_strain, elastic_algorithm, &
                                   elcpvar, poly_degree, elalgen
   USE control_eldos,        ONLY : deltae, ndose, lel_free_energy
-  USE control_mur,          ONLY : lmurn, press_min, press_max
+  USE control_mur,          ONLY : lmurn
+  USE control_pressure,     ONLY : pmin, pmax, deltap, npress_plot
   USE equilibrium_conf,     ONLY : tau0, tau0_crys
   USE control_paths,        ONLY : npk_label, lbar_label
   USE control_grun,         ONLY : temp_ph, volume_ph, celldm_ph
@@ -90,13 +91,23 @@ SUBROUTINE thermo_setup()
   REAL(DP), PARAMETER :: eps1=1D-8
   REAL(DP) :: ur(3,3), global_s(3,3), rd_ht(3,3), celldm_(6), alat_save, zero
   REAL(DP), ALLOCATABLE :: tau_aux(:,:)
+  LOGICAL :: cubic
   !
   !
   with_asyn_images=(nimage>1)
   !
+  !  
+  cubic=(ibrav==1.OR.ibrav==2.OR.ibrav==3) 
+  IF ((npress_plot>0.OR.ntemp_plot>0).AND.(.NOT.cubic)) &
+    CALL errore('thermo_setup','npress_plot and ntemp_plot need cubic solids',1) 
+  IF ((npress_plot>0.OR.ntemp_plot>0).AND.(.NOT.lmurn)) &
+    CALL errore('thermo_setup','npress_plot and ntemp_plot need lmurn=.TRUE.',1) 
+  !
   CALL set_temperature()
   !
   CALL set_pressure()
+  !
+  CALL set_pressure_kb()
   !
   !   ngeo_strain cannot be too small and the energy algorithm requires a
   !   few more points
@@ -131,8 +142,9 @@ SUBROUTINE thermo_setup()
 !
 !  the pressure must be in Ry/(a.u.)^3 but in input it was given in kbar
 !
-    press_max=press_max/ry_kbar
-    press_min=press_min/ry_kbar
+    pmax=pmax/ry_kbar
+    pmin=pmin/ry_kbar
+    deltap=deltap/ry_kbar
 !
 !   here deal with ibrav=0. The code finds ibrav and celldm and
 !   writes them on output or change them and continue the calculation
@@ -279,7 +291,7 @@ SUBROUTINE thermo_setup()
 !   calculation compatible with lmurn=.TRUE.
 !
            ngeo=5
-           IF (ibrav==1.OR.ibrav==2.OR.ibrav==3) ngeo(1)=9
+           IF (cubic) ngeo(1)=9
         ENDIF
      ENDIF
   END IF

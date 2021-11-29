@@ -18,7 +18,7 @@ USE kinds,          ONLY : DP
 USE data_files,     ONLY : flevdat
 USE thermo_mod,     ONLY : ngeo, celldm_geo
 USE cell_base,      ONLY : ibrav
-USE control_mur,    ONLY : nvol
+USE control_vol,    ONLY : nvol
 USE control_quadratic_energy, ONLY : p2
 USE control_quartic_energy, ONLY : p4, lquartic
 USE control_pressure,   ONLY : pressure_kb

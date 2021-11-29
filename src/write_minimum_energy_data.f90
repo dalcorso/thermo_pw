@@ -13,7 +13,8 @@ SUBROUTINE write_minimum_energy_data()
   !  minimization.
   !
   USE kinds,            ONLY : DP
-  USE control_mur,      ONLY : b0, b01, emin, lmurn
+  USE control_ev,       ONLY : ieos
+  USE control_mur,      ONLY : b0, b01, b02, emin, lmurn
   USE equilibrium_conf, ONLY : celldm0
   USE control_pressure, ONLY : pressure_kb
   USE io_global,        ONLY : stdout
@@ -34,6 +35,9 @@ SUBROUTINE write_minimum_energy_data()
      WRITE(stdout,'(5x, "The bulk modulus is ",24x,f12.3,"  kbar")') b0
      WRITE(stdout,'(5x, "The pressure derivative of the bulk modulus is ",&
                                   &f9.3)')  b01
+     IF (ieos==2) &
+        WRITE(stdout,'(5x, "The second derivative of the bulk &
+                           &modulus is ",f13.5," 1/kbar")')  b02
   ELSE
      WRITE(stdout,'(5x,"The equilibrium celldm is:")')
      WRITE(stdout,'(5x,6f12.5)') celldm0(:)

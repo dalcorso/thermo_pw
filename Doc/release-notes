@@ -5,6 +5,19 @@ Added a plot of the crystal parameters as a function of pressure.
 Added a plot of the Murnaghan fit and of the pressure as a function 
 of volume at several temperatures.
 
+Added plots of the anharmonic quantities as a function of temperature
+for several pressures.
+
+Added plots of the bulk modulus, thermal expansion, isobaric and isochoric
+heat capacities and average Gruneisen parameter as a function of pressure
+for several temperatures (in collaboration with X. Gong)
+
+Added the possibility to use also the Birch-Murnaghan of third or fourth 
+order to fit the energy as a function of volume 
+(in collaboration with X. Gong)
+
+ev_sub updated to the changes of the QE routine.
+
 New in version 1.5.1
 22/07/2021 Version 1.5.1 is now frozen
 

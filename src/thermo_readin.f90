@@ -40,8 +40,10 @@ SUBROUTINE thermo_readin()
                                    flpgrun, fl_el_cons, flpband, flvec,    &
                                    flepsilon, floptical, fleldos, fleltherm, &
                                    fldosfrq, flelanhar
-  USE temperature,          ONLY : tmin, tmax, deltat, ntemp, temp_nstep
-  USE control_pressure,     ONLY : pressure
+  USE temperature,          ONLY : tmin, tmax, deltat, ntemp, ntemp_plot,  &
+                                   temp_plot_=>temp_plot, itemp_plot
+  USE control_pressure,     ONLY : pressure, pmax, pmin, deltap, npress_plot, &
+                                   press_plot_=> press_plot, ipress_plot
   USE control_dosq,         ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq,&
                                    freqmin_input, freqmax_input, phdos_sigma
   USE control_paths,        ONLY : xqaux, wqaux, wqauxr, npk_label, letter, &
@@ -72,10 +74,12 @@ SUBROUTINE thermo_readin()
   USE control_grun,         ONLY : grunmin_input, grunmax_input, &
                                    temp_ph, volume_ph, celldm_ph, lv0_t, &
                                    lb0_t
+  USE control_ev,           ONLY : ieos
   USE control_conv,         ONLY : nke, deltake, nkeden, deltakeden, &
                                    nnk, deltank, nsigma, deltasigma
-  USE control_mur,          ONLY : vmin_input, vmax_input, deltav, nvol, &
-                                   press_min, press_max, npress, lmurn
+  USE control_mur,          ONLY : lmurn
+  USE control_vol,          ONLY : vmin_input, vmax_input, deltav, nvol, &
+                                   nvol_plot, ivol_plot_=>ivol_plot
   USE control_elastic_constants, ONLY : delta_epsilon, ngeo_strain, &
                                    frozen_ions, elastic_algorithm, &
                                    poly_degree, epsilon_0, use_free_energy, &
@@ -88,6 +92,7 @@ SUBROUTINE thermo_readin()
   USE control_quartic_energy, ONLY : lquartic, poly_degree_ph,     &
                                    poly_degree_elc, poly_degree_thermo, &
                                    poly_degree_bfact, lsolve
+  
   USE piezoelectric_tensor, ONLY : nppl
   USE grun_anharmonic,      ONLY : poly_degree_grun
   USE images_omega,         ONLY : omega_group
@@ -119,6 +124,9 @@ SUBROUTINE thermo_readin()
              nch, nrp, i, j, k, ios
   INTEGER :: iun_input
   INTEGER :: find_free_unit
+  INTEGER, PARAMETER :: max_opt=20
+  REAL(DP) :: press_plot(max_opt), temp_plot(max_opt)
+  INTEGER :: ivol_plot(max_opt)
   LOGICAL :: tend, terr, read_paths, exst, has_xml
   CHARACTER(LEN=6) :: int_to_char
   CHARACTER(LEN=512) :: dummy
@@ -135,7 +143,6 @@ SUBROUTINE thermo_readin()
 !  temperature and pressure
 !
                             tmin, tmax, deltat, ntemp,      &
-                            temp_nstep,                     &
                             pressure,                       &
 !
 !   structure
@@ -243,11 +250,14 @@ SUBROUTINE thermo_readin()
 !   mur_lc
 !
                             ngeo, step_ngeo,                &
+                            ieos,                           &
                             lmurn,                          &
                             reduced_grid,                   &
                             show_fit,                       &
                             vmin_input, vmax_input, deltav, &
-                            press_min, press_max, npress,   &
+                            pmin, pmax, deltap,             &
+                            npress_plot, press_plot,        &
+                            nvol_plot, ivol_plot,           &
                             nvol,                           &
                             lquartic, lsolve,               &
                             flevdat,                        &
@@ -265,6 +275,7 @@ SUBROUTINE thermo_readin()
                             grunmin_input, grunmax_input,   &
                             volume_ph, celldm_ph, temp_ph,  &
                             with_eigen,                     &
+                            ntemp_plot, temp_plot,          &
                             poly_degree_ph,                 &
                             poly_degree_thermo,             &
                             poly_degree_bfact,              &
@@ -320,7 +331,6 @@ SUBROUTINE thermo_readin()
 
   tmin=1.0_DP
   tmax=800.0_DP
-  temp_nstep=1000000
   deltat=3.0_DP
   ntemp=1
   pressure=0.0_DP
@@ -469,13 +479,18 @@ SUBROUTINE thermo_readin()
   step_ngeo(5) = 0.5_DP
   step_ngeo(6) = 0.5_DP
   lmurn=.TRUE.
+  ieos=4
   reduced_grid =.FALSE.
   show_fit=.FALSE.
   vmin_input=0.0_DP
   vmax_input=0.0_DP
-  press_min=-50.0_DP 
-  press_max=100.0_DP 
-  npress=150
+  pmin=-50.0_DP 
+  pmax=100.0_DP 
+  deltap=5.0_DP
+  npress_plot=0
+  press_plot=0.0_DP
+  nvol_plot=0
+  ivol_plot=0
   deltav=0.0_DP
   nvol=1
   lquartic=.TRUE.
@@ -495,6 +510,8 @@ SUBROUTINE thermo_readin()
   celldm_ph=0.0_DP
   temp_ph=0.0_DP
   with_eigen=.FALSE.
+  ntemp_plot=0
+  temp_plot=0.0_DP
   poly_degree_ph=4
   poly_degree_thermo=4
   poly_degree_bfact=4
@@ -528,9 +545,13 @@ SUBROUTINE thermo_readin()
   CALL errore( 'thermo_readin', 'reading input_thermo namelist', ABS( ios ) )
 !
   CALL bcast_thermo_input()
+  CALL mp_bcast( temp_plot, meta_ionode_id, world_comm )
+  CALL mp_bcast( press_plot, meta_ionode_id, world_comm )
+  CALL mp_bcast( ivol_plot, meta_ionode_id, world_comm )
 !
 !   Here a few consistency check on the input variables
 !
+
   IF (what==' ') CALL errore('thermo_readin','''what'' must be initialized',1)
 
   IF (what/='mur_lc_t'.AND.what/='elastic_constants_t'&
@@ -553,6 +574,35 @@ SUBROUTINE thermo_readin()
      lb0_t=.FALSE.
   ENDIF
 
+  IF (npress_plot> max_opt) CALL errore('thermo_readin', &
+                                             'npress_plot too large',1) 
+
+  IF (ntemp_plot> max_opt) CALL errore('thermo_readin', &
+                                             'ntemp_plot too large',1) 
+
+  IF (ntemp_plot>0) THEN
+     ALLOCATE(temp_plot_(ntemp_plot))
+     ALLOCATE(itemp_plot(ntemp_plot))
+     temp_plot_(1:ntemp_plot)=temp_plot(1:ntemp_plot)
+  ENDIF
+
+  IF (npress_plot>0) THEN
+     ALLOCATE(press_plot_(npress_plot))
+     ALLOCATE(ipress_plot(npress_plot))
+     press_plot_(1:npress_plot)=press_plot(1:npress_plot)
+  ENDIF
+
+  IF (nvol_plot > ngeo(1)) &
+     CALL errore('thermo_readin','wrong nvol_plot',1)
+
+  IF (nvol_plot>0) THEN
+     ALLOCATE(ivol_plot_(nvol_plot))
+     ivol_plot_(1:nvol_plot)=ivol_plot(1:nvol_plot)
+  ENDIF
+
+  IF ((ieos /= 1) .AND. (ieos /= 2) .AND. (ieos /= 4) ) &
+     CALL errore('thermo_readin','wrong equation of state (ieos)',1)
+
   IF (poly_degree_ph<1 .OR. poly_degree_ph>4) &
             CALL errore('thermo_readin','poly_degree_ph must be between &
                                                               & 1 and 4',1)
@@ -565,7 +615,6 @@ SUBROUTINE thermo_readin()
   IF (poly_degree_elc<1 .OR. poly_degree_elc>4) &
             CALL errore('thermo_readin','poly_degree_elc must be between &
                                                                &1 and 4',1)
-
   IF (elastic_algorithm/='standard'.AND.elastic_algorithm/='advanced'.AND. &
       elastic_algorithm/='energy'.AND.elastic_algorithm/='energy_std') &
       CALL errore('thermo_readin','Unrecognized elastic algorithm',1)

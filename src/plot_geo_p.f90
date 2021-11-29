@@ -28,7 +28,8 @@ USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,  &
                              gnuplot_write_command,       &
                              gnuplot_write_file_mul_data
 USE data_files,       ONLY : flevdat
-USE control_mur,      ONLY : press_min, press_max, omegap0
+USE control_mur,      ONLY : omegap0
+USE control_pressure, ONLY : pmin, pmax
 USE initial_conf,     ONLY : ibrav_save
 USE mp_images,        ONLY : my_image_id, root_image
 USE io_global,        ONLY : ionode
@@ -48,7 +49,7 @@ filename=TRIM(filename)//TRIM(flext)
 
 CALL gnuplot_start(gnu_filename)
 
-CALL gnuplot_write_header(filename, press_min*ry_kbar, press_max*ry_kbar, &
+CALL gnuplot_write_header(filename, pmin*ry_kbar, pmax*ry_kbar, &
                      0.0_DP, 0.0_DP, 1.0_DP, flext ) 
 
 CALL gnuplot_xlabel('pressure (kbar)',.FALSE.) 
@@ -113,7 +114,7 @@ CALL gnuplot_write_file_mul_data(filename2,4,1,'color_red',.TRUE.,.TRUE.,&
 !  plot V/V_0 as a function of the
 !
 IF (omegap0>0.0_DP) THEN
-   WRITE(label,'("set xrange [0:",f12.5,"]")') press_max*ry_kbar
+   WRITE(label,'("set xrange [0:",f12.5,"]")') pmax*ry_kbar
    CALL gnuplot_write_command(TRIM(label),.FALSE.)
    CALL gnuplot_set_gfact(1.0_DP/omegap0,.FALSE.)
    CALL gnuplot_ylabel('V/V_0',.FALSE.) 
@@ -155,8 +156,9 @@ USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,  &
                              gnuplot_write_command,       &
                              gnuplot_write_file_mul_data
 USE data_files,       ONLY : flevdat
-USE control_mur,      ONLY : press_min, press_max, omegap0
-USE temperature,      ONLY : ntemp, temp_nstep
+USE control_mur,      ONLY : omegap0
+USE control_pressure, ONLY : pmin, pmax
+USE temperature,      ONLY : ntemp, ntemp_plot, itemp_plot
 USE color_mod,        ONLY : color
 USE initial_conf,     ONLY : ibrav_save
 USE mp_images,        ONLY : my_image_id, root_image
@@ -166,10 +168,12 @@ IMPLICIT NONE
 
 CHARACTER(LEN=256) :: filename, gnu_filename, label
 CHARACTER(LEN=6) :: int_to_char
-INTEGER :: istep, itemp, ierr, system
+INTEGER :: istep, itemp, itempp, ierr, system
 LOGICAL :: first_step, last_step
 
 IF ( my_image_id /= root_image ) RETURN
+
+IF (ntemp_plot==0) RETURN
 
 gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//'_mur_celldm_t'
 CALL add_pressure(gnu_filename)
@@ -179,7 +183,7 @@ filename=TRIM(filename)//TRIM(flext)
 
 CALL gnuplot_start(gnu_filename)
 
-CALL gnuplot_write_header(filename, press_min*ry_kbar, press_max*ry_kbar, &
+CALL gnuplot_write_header(filename, pmin*ry_kbar, pmax*ry_kbar, &
                      0.0_DP, 0.0_DP, 1.0_DP, flext ) 
 
 CALL gnuplot_xlabel('pressure (kbar)',.FALSE.) 
@@ -190,9 +194,10 @@ CALL gnuplot_xlabel('pressure (kbar)',.FALSE.)
 CALL gnuplot_ylabel('a (a.u.)',.FALSE.) 
 
 istep=0
-DO itemp=1,ntemp,temp_nstep
-   first_step=(itemp==1)
-   last_step=((itemp+temp_nstep)>ntemp)
+DO itempp=1,ntemp_plot
+   first_step=(itempp==1)
+   last_step=(itempp==ntemp_plot)
+   itemp=itemp_plot(itempp)
    istep=MOD(istep,8)+1
    filename="anhar_files/"//TRIM(flevdat)//'_mur_celldm'//&
                                                TRIM(int_to_char(itemp))
@@ -206,9 +211,10 @@ ENDDO
 IF (ABS(ibrav_save)>7) THEN
    CALL gnuplot_ylabel('b/a',.FALSE.) 
    istep=0
-   DO itemp=1,ntemp,temp_nstep
-      first_step=(itemp==1)
-      last_step=((itemp+temp_nstep)>ntemp)
+   DO itempp=1,ntemp_plot
+      first_step=(itempp==1)
+      last_step=(itempp==ntemp_plot)
+      itemp=itemp_plot(itempp)
       istep=MOD(istep,8)+1
       filename="anhar_files/"//TRIM(flevdat)//'_mur_celldm'//&
                                                TRIM(int_to_char(itemp))
@@ -223,9 +229,10 @@ ENDIF
 IF (ibrav_save==4.OR.ABS(ibrav_save)>5) THEN
    CALL gnuplot_ylabel('c/a',.FALSE.) 
    istep=0
-   DO itemp=1,ntemp,temp_nstep
-      first_step=(itemp==1)
-      last_step=((itemp+temp_nstep)>ntemp)
+   DO itempp=1,ntemp_plot
+      first_step=(itempp==1)
+      last_step=(itempp==ntemp_plot)
+      itemp=itemp_plot(itempp)
       istep=MOD(istep,8)+1
       filename="anhar_files/"//TRIM(flevdat)//'_mur_celldm'//&
                                                TRIM(int_to_char(itemp))
@@ -240,9 +247,10 @@ ENDIF
 IF (ibrav_save==5.OR.ibrav_save==12.OR.ibrav_save==13.OR.ibrav_save==14) THEN
    CALL gnuplot_ylabel('cos({\Symbol a})',.FALSE.) 
    istep=0
-   DO itemp=1,ntemp,temp_nstep
-      first_step=(itemp==1)
-      last_step=((itemp+temp_nstep)>ntemp)
+   DO itempp=1,ntemp_plot
+      first_step=(itempp==1)
+      last_step=(itempp==ntemp_plot)
+      itemp=itemp_plot(itempp)
       istep=MOD(istep,8)+1
       filename="anhar_files/"//TRIM(flevdat)//'_mur_celldm'//&
                                                TRIM(int_to_char(itemp))
@@ -257,9 +265,10 @@ ENDIF
 IF (ibrav_save==-12.OR.ibrav_save==-13.OR.ibrav_save==14) THEN
    CALL gnuplot_ylabel('cos({\Symbol b})',.FALSE.) 
    istep=0
-   DO itemp=1,ntemp,temp_nstep
-      first_step=(itemp==1)
-      last_step=((itemp+temp_nstep)>ntemp)
+   DO itempp=1,ntemp_plot
+      first_step=(itempp==1)
+      last_step=(itempp==ntemp_plot)
+      itemp=itemp_plot(itempp)
       istep=MOD(istep,8)+1
       filename="anhar_files/"//TRIM(flevdat)//'_mur_celldm'//&
                                                TRIM(int_to_char(itemp))
@@ -274,9 +283,11 @@ ENDIF
 IF (ibrav_save==14) THEN
    CALL gnuplot_ylabel('cos({\Symbol c})',.FALSE.) 
    istep=0
-   DO itemp=1,ntemp,temp_nstep
-      first_step=(itemp==1)
-      last_step=((itemp+temp_nstep)>ntemp)
+   DO itempp=1,ntemp_plot
+      first_step=(itempp==1)
+      last_step=(itempp==ntemp_plot)
+      itemp=itemp_plot(itempp)
+
       istep=MOD(istep,8)+1
       filename="anhar_files/"//TRIM(flevdat)//'_mur_celldm'//&
                                                TRIM(int_to_char(itemp))
@@ -290,9 +301,10 @@ ENDIF
 !
 CALL gnuplot_ylabel('Volume ((a.u.)^3)',.FALSE.) 
 istep=0
-DO itemp=1,ntemp,temp_nstep
-   first_step=(itemp==1)
-   last_step=((itemp+temp_nstep)>ntemp)
+DO itempp=1,ntemp_plot
+   first_step=(itempp==1)
+   last_step=(itempp==ntemp_plot)
+   itemp=itemp_plot(itempp)
    istep=MOD(istep,8)+1
    filename="anhar_files/"//TRIM(flevdat)//'_mur'//&
                                                TRIM(int_to_char(itemp))
@@ -304,14 +316,15 @@ ENDDO
 !  plot V/V_0 as a function of the
 !
 IF (omegap0>0.0_DP) THEN
-   WRITE(label,'("set xrange [0:",f12.5,"]")') press_max*ry_kbar
+   WRITE(label,'("set xrange [0:",f12.5,"]")') pmax*ry_kbar
    CALL gnuplot_write_command(TRIM(label),.FALSE.)
    CALL gnuplot_set_gfact(1.0_DP/omegap0,.FALSE.)
    CALL gnuplot_ylabel('V/V_0',.FALSE.) 
    istep=0
-   DO itemp=1,ntemp,temp_nstep
-      first_step=(itemp==1)
-      last_step=((itemp+temp_nstep)>ntemp)
+   DO itempp=1,ntemp_plot
+      first_step=(itempp==1)
+      last_step=(itempp==ntemp_plot)
+      itemp=itemp_plot(itempp)
       istep=MOD(istep,8)+1
       filename="anhar_files/"//TRIM(flevdat)//'_mur'//&
                                                TRIM(int_to_char(itemp))

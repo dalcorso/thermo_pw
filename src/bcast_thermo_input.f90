@@ -25,8 +25,8 @@ SUBROUTINE bcast_thermo_input()
                               flpsnkconv, flpsgrun, flpsenergy, flpsepsilon,  &
                               flpseldos, flpseltherm
   USE control_gnuplot, ONLY : flgnuplot, lgnuplot, gnuplot_command, flext
-  USE temperature,     ONLY : tmin, tmax, deltat, ntemp, temp_nstep
-  USE control_pressure, ONLY : pressure
+  USE temperature,     ONLY : tmin, tmax, deltat, ntemp, ntemp_plot
+  USE control_pressure, ONLY : pressure, pmin, pmax, deltap, npress_plot
   USE control_conv,    ONLY : nke, deltake, nkeden, deltakeden,               &
                               nnk, deltank, nsigma, deltasigma
   USE control_bands,   ONLY : emin_input, emax_input, nbnd_bands, lsym,       &
@@ -64,8 +64,10 @@ SUBROUTINE bcast_thermo_input()
   USE control_quartic_energy, ONLY : lquartic, poly_degree_ph, &
                                      poly_degree_thermo, poly_degree_bfact, &
                                      poly_degree_elc, lsolve
-  USE control_mur,     ONLY : vmin_input, vmax_input, deltav, nvol, &
-                              press_min, press_max, npress, lmurn
+  USE control_vol,     ONLY : vmin_input, vmax_input, deltav, nvol, &
+                              nvol_plot
+  USE control_mur,     ONLY : lmurn
+  USE control_ev,      ONLY : ieos
   USE control_energy_plot, ONLY : ncontours
   USE control_grun,    ONLY : temp_ph, volume_ph, celldm_ph, lv0_t, lb0_t,    &
                               grunmin_input, grunmax_input
@@ -259,15 +261,18 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( ngeo, meta_ionode_id, world_comm )
   CALL mp_bcast( step_ngeo, meta_ionode_id, world_comm )
   CALL mp_bcast( lmurn, meta_ionode_id, world_comm )
+  CALL mp_bcast( ieos, meta_ionode_id, world_comm )
   CALL mp_bcast( reduced_grid, meta_ionode_id, world_comm )
   CALL mp_bcast( show_fit, meta_ionode_id, world_comm )
   CALL mp_bcast( vmin_input, meta_ionode_id, world_comm )
   CALL mp_bcast( vmax_input, meta_ionode_id, world_comm )
-  CALL mp_bcast( press_min, meta_ionode_id, world_comm )
-  CALL mp_bcast( press_max, meta_ionode_id, world_comm )
-  CALL mp_bcast( npress, meta_ionode_id, world_comm )
+  CALL mp_bcast( pmin, meta_ionode_id, world_comm )
+  CALL mp_bcast( pmax, meta_ionode_id, world_comm )
+  CALL mp_bcast( deltap, meta_ionode_id, world_comm )
+  CALL mp_bcast( npress_plot, meta_ionode_id, world_comm )
   CALL mp_bcast( deltav, meta_ionode_id, world_comm )
   CALL mp_bcast( nvol, meta_ionode_id, world_comm )
+  CALL mp_bcast( nvol_plot, meta_ionode_id, world_comm )
   CALL mp_bcast( lquartic, meta_ionode_id, world_comm )
   CALL mp_bcast( lsolve, meta_ionode_id, world_comm )
   CALL mp_bcast( flevdat, meta_ionode_id, world_comm )
@@ -288,6 +293,7 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( celldm_ph, meta_ionode_id, world_comm )
   CALL mp_bcast( temp_ph, meta_ionode_id, world_comm )
   CALL mp_bcast( with_eigen, meta_ionode_id, world_comm )
+  CALL mp_bcast( ntemp_plot, meta_ionode_id, world_comm )
   CALL mp_bcast( poly_degree_ph, meta_ionode_id, world_comm )
   CALL mp_bcast( poly_degree_thermo, meta_ionode_id, world_comm )
   CALL mp_bcast( poly_degree_bfact, meta_ionode_id, world_comm )
@@ -296,7 +302,6 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( lb0_t, meta_ionode_id, world_comm )
   CALL mp_bcast( all_geometries_together, meta_ionode_id, world_comm )
   CALL mp_bcast( ngeo_ph, meta_ionode_id, world_comm )
-  CALL mp_bcast( temp_nstep, meta_ionode_id, world_comm )
   CALL mp_bcast( fact_ngeo, meta_ionode_id, world_comm )
   CALL mp_bcast( poly_degree_grun, meta_ionode_id, world_comm )
   CALL mp_bcast( flpgrun, meta_ionode_id, world_comm )

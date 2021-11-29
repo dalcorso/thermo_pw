@@ -24,9 +24,9 @@ USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,  &
                              gnuplot_write_file_mul_data, &
                              gnuplot_write_file_mul_point
 USE data_files,       ONLY : flevdat
-USE control_mur,      ONLY : lmurn, vmin_input, vmax_input, press_max, &
-                             press_min
-USE control_pressure, ONLY : pressure_kb
+USE control_mur,      ONLY : lmurn
+USE control_vol,      ONLY : vmin_input, vmax_input
+USE control_pressure, ONLY : pressure_kb, pmax, pmin
 USE mp_images,        ONLY : my_image_id, root_image
 USE io_global,        ONLY : ionode
 
@@ -82,8 +82,8 @@ CALL gnuplot_write_file_mul_data(filename1,1,4,'color_red',.TRUE.,.TRUE.,&
 !  Enthalpy as a function of pressure
 !
 CALL gnuplot_xlabel('pressure (kbar)',.FALSE.) 
-WRITE(label,'("set xrange [",f12.5,":",f12.5,"]")') press_min*ry_kbar, &
-                                                    press_max*ry_kbar
+WRITE(label,'("set xrange [",f12.5,":",f12.5,"]")') pmin*ry_kbar, &
+                                                    pmax*ry_kbar
 CALL gnuplot_write_command(TRIM(label),.FALSE.)
 CALL gnuplot_ylabel('Enthalpy (Ry)',.FALSE.) 
 CALL gnuplot_write_file_mul_data(filename1,4,3,'color_red',.TRUE.,.TRUE.,&
@@ -102,167 +102,85 @@ RETURN
 END SUBROUTINE plot_mur
 
 !-------------------------------------------------------------------
-SUBROUTINE plot_mur_t()
+SUBROUTINE plot_mur_p()
 !-------------------------------------------------------------------
 !
 !  This is a driver to plot the energy and pressure as a function of volume
 !
 USE kinds,            ONLY : DP
-USE constants,        ONLY : ry_kbar, rytoev
+USE constants,        ONLY : ry_kbar
 USE control_gnuplot,  ONLY : flgnuplot, lgnuplot, gnuplot_command, flext
 USE postscript_files, ONLY : flpsmur
 USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,  &
                              gnuplot_write_header,        &
                              gnuplot_ylabel,              &
                              gnuplot_xlabel,              &
-                             gnuplot_set_fact,            &
                              gnuplot_write_command,       &
-                             gnuplot_write_horizontal_line, &
-                             gnuplot_write_file_mul_data, &
-                             gnuplot_write_file_mul_line_point, &
-                             gnuplot_write_file_mul_point
+                             gnuplot_write_file_mul_data
+USE control_ev,       ONLY : ieos
 USE data_files,       ONLY : flevdat
-USE control_mur,      ONLY : lmurn, vmin_input, vmax_input, press_max, &
-                             press_min
-USE control_eldos,    ONLY : lel_free_energy
-USE temperature,      ONLY : ntemp, temp_nstep
-USE control_pressure, ONLY : pressure_kb
-USE color_mod,        ONLY : color
+USE temperature,      ONLY : ntemp_plot
+USE control_pressure, ONLY : press, npress, npress_plot
+USE control_pressure, ONLY : pressure_kb, pmax, pmin
 USE mp_images,        ONLY : my_image_id, root_image
 USE io_global,        ONLY : ionode
 
 IMPLICIT NONE
 
-CHARACTER(LEN=256) :: filename, filename1, filename2, gnu_filename, label
+CHARACTER(LEN=256) :: filename, filename1, gnu_filename, label
 CHARACTER(LEN=8) :: float_to_char
-CHARACTER(LEN=6) :: int_to_char
-INTEGER :: itemp, istep
 INTEGER :: ierr, system
-LOGICAL :: first_step, last_step
 
 IF ( my_image_id /= root_image ) RETURN
+IF (npress_plot==0.AND.ntemp_plot==0) RETURN
 
-IF (temp_nstep>ntemp) RETURN
-
-gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//'_mur_t'
+gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_mur_press'
 CALL add_pressure(gnu_filename)
-filename=TRIM(flpsmur)//'_t'
+filename=TRIM(flpsmur)//'_press'
 CALL add_pressure(filename)
 filename=TRIM(filename)//TRIM(flext)
 
 CALL gnuplot_start(gnu_filename)
 
-CALL gnuplot_write_header(filename, vmin_input, vmax_input, &
-                                0.0_DP, 0.0_DP, 1.0_DP, flext ) 
+CALL gnuplot_write_header(filename, press(1), press(npress), 0.0_DP, 0.0_DP, &
+                          1.0_DP, flext ) 
 
-CALL gnuplot_xlabel('Volume ((a.u.)^3)',.FALSE.) 
+CALL gnuplot_xlabel('Pressure (kbar)',.FALSE.) 
 !
-!  Energy or enthalpy as a function of the volume.
+!  Volume as a function of pressure
 !
-istep=0
-DO itemp=1,ntemp,temp_nstep
-   first_step=(itemp==1)
-   last_step=((itemp+temp_nstep)>ntemp)
-   istep=MOD(istep,8)+1
-   filename1="anhar_files/"//TRIM(flevdat)//'_mur'//TRIM(int_to_char(itemp))
-   CALL add_pressure(filename1)
-   IF (first_step) THEN
-      IF (pressure_kb /= 0.0_DP) THEN
-         label='Gibbs free-energy (Ry)    p= '//&
-                    &TRIM(float_to_char(pressure_kb,1))//' kbar'
-         CALL gnuplot_ylabel(TRIM(label),.FALSE.) 
-      ELSE
-         CALL gnuplot_ylabel('Helmholtz Free Energy (Ry)',.FALSE.) 
-      END IF
-   ENDIF
-   CALL gnuplot_write_file_mul_data(filename1,1,2,color(istep),first_step, &
-                                                        last_step, .FALSE.)
-ENDDO
+filename1="energy_files/"//TRIM(flevdat)//'_mur_press'
+CALL add_pressure(filename1)
+CALL gnuplot_ylabel('Volume (a.u.)^3',.FALSE.) 
+CALL gnuplot_write_file_mul_data(filename1,1,2,'color_red',.TRUE.,.TRUE., &
+                                                                  .FALSE.)
 !
-!  Pressure as a function of the volume
+!  Bulk modulus as a function of pressure
 !
-istep=0
-DO itemp=1,ntemp,temp_nstep
-   first_step=(itemp==1)
-   last_step=((itemp+temp_nstep)>ntemp)
-   istep=MOD(istep,8)+1
-
-   filename1="anhar_files/"//TRIM(flevdat)//'_mur'//TRIM(int_to_char(itemp))
-   CALL add_pressure(filename1)
-   IF (first_step) THEN
-      CALL gnuplot_ylabel('Pressure (kbar)',.FALSE.) 
-      CALL gnuplot_write_horizontal_line(0.0_DP, 2, 'front', 'color_black', &
-                                          .FALSE.)
-   ENDIF
-   CALL gnuplot_write_file_mul_data(filename1,1,4,color(istep),first_step, &
-                                                        last_step, .FALSE.)
-ENDDO
+CALL gnuplot_ylabel('Bulk modulus B_0 (kbar)',.FALSE.) 
+CALL gnuplot_write_file_mul_data(filename1,1,3,'color_red',.TRUE.,.TRUE., &
+                                                                  .FALSE.)
 !
-!   Vibrational free energy as a function of the volume
+!  Pressure derivative of the bulk modulus as a function of pressure
 !
-istep=0
-CALL gnuplot_set_fact(rytoev, .FALSE.)
-DO itemp=1,ntemp,temp_nstep
-   first_step=(itemp==1)
-   last_step=((itemp+temp_nstep)>ntemp)
-   istep=MOD(istep,8)+1
-
-   filename1="anhar_files/"//TRIM(flevdat)//'_free.'//TRIM(int_to_char(itemp))
-   CALL add_pressure(filename1)
-   IF (first_step) THEN
-      CALL gnuplot_ylabel('Vibrational free energy (eV)',.FALSE.) 
-   ENDIF
-   CALL gnuplot_write_file_mul_line_point(filename1,1,2,color(istep), &
-                                        first_step, last_step, .FALSE.)
-ENDDO
+CALL gnuplot_ylabel('Pressure derivative of B_0',.FALSE.) 
+WRITE(label,'("set yrange [3.5:5.0]")') 
+CALL gnuplot_write_command(TRIM(label),.FALSE.)
+CALL gnuplot_write_file_mul_data(filename1,1,4,'color_red',.TRUE.,.TRUE., &
+                                                                  .FALSE.)
 !
-!   Electronic free energy as a function of the volume if computed
+!  Second pressure derivative of the bulk modulus as a function of pressure
 !
-IF (lel_free_energy) THEN
-   istep=0
-   CALL gnuplot_set_fact(rytoev, .FALSE.)
-   DO itemp=1,ntemp,temp_nstep
-      first_step=(itemp==1)
-      last_step=((itemp+temp_nstep)>ntemp)
-      istep=MOD(istep,8)+1
-
-      filename1="anhar_files/"//TRIM(flevdat)//'_free.'// &
-                                           TRIM(int_to_char(itemp))
-      CALL add_pressure(filename1)
-      IF (first_step) THEN
-         CALL gnuplot_ylabel('Electronic free energy (eV)',.FALSE.) 
-      ENDIF
-      CALL gnuplot_write_file_mul_line_point(filename1,1,3,color(istep), &
-                                        first_step, last_step, .FALSE.)
-   ENDDO
+IF (ieos==2) THEN
+   CALL gnuplot_ylabel('Second pressure derivative of B_0',.FALSE.) 
+   WRITE(label,'("set yrange [-0.1:0.1]")') 
+   CALL gnuplot_write_command(TRIM(label),.FALSE.)
+   CALL gnuplot_write_file_mul_data(filename1,1,5,'color_red',.TRUE.,.TRUE., &
+                                                                  .FALSE.)
 ENDIF
-!
-!  Enthalpy as a function of pressure
-!
-istep=0
-CALL gnuplot_set_fact(1.0_DP, .FALSE.)
-DO itemp=1,ntemp,temp_nstep
-   first_step=(itemp==1)
-   last_step=((itemp+temp_nstep)>ntemp)
-   istep=MOD(istep,8)+1
-   filename1="anhar_files/"//TRIM(flevdat)//'_mur'//TRIM(int_to_char(itemp))
-   CALL add_pressure(filename1)
 
-   IF (first_step) THEN
-      CALL gnuplot_xlabel('pressure (kbar)',.FALSE.) 
-      WRITE(label,'("set xrange [",f12.5,":",f12.5,"]")') press_min*ry_kbar, &
-                                                    press_max*ry_kbar
-      CALL gnuplot_write_command(TRIM(label),.FALSE.)
-
-      CALL gnuplot_ylabel('Gibbs free-energy (Ry)',.FALSE.) 
-   ENDIF
-   CALL gnuplot_write_file_mul_data(filename1,4,3,color(istep),first_step, &
-                                                  last_step, .FALSE.)
-ENDDO
 CALL gnuplot_end()
-!
-!   close the file and make the plot
-!
+
 IF (lgnuplot.AND.ionode) &
    ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
 
@@ -271,5 +189,4 @@ IF (lgnuplot.AND.ionode) &
 !                                       //TRIM(gnu_filename), WAIT=.FALSE.)
 
 RETURN
-END SUBROUTINE plot_mur_t
-
+END SUBROUTINE plot_mur_p

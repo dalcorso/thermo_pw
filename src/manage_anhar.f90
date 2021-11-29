@@ -15,22 +15,26 @@ USE thermo_mod,            ONLY : tot_ngeo
 USE control_thermo,        ONLY : ltherm_dos, ltherm_freq
 USE control_eldos,         ONLY : lel_free_energy
 USE control_quartic_energy, ONLY : poly_degree_ph
-USE temperature,           ONLY : temp, ntemp, temp_nstep
+USE temperature,           ONLY : temp, ntemp, ntemp_plot, itemp_plot
 USE internal_files_names,  ONLY : flfrq_thermo, flvec_thermo
 USE el_thermodynamics,     ONLY : el_ener, el_free_ener, el_entr, &
                                   el_ce
 USE data_files,            ONLY : flanhar, fleltherm
 
-USE control_mur,           ONLY : vmin, b0, b01, emin
-USE anharmonic,            ONLY : vmin_t, b0_t, b01_t, free_e_min_t, a_t
-USE ph_freq_anharmonic,    ONLY : vminf_t, b0f_t, b01f_t, free_e_minf_t
+USE control_mur,           ONLY : vmin, b0, b01, b02, emin
+USE control_vol,           ONLY : nvol_plot
+USE control_pressure,      ONLY : npress_plot
+USE anharmonic,            ONLY : vmin_t, b0_t, b01_t, b02_t, free_e_min_t, &
+                              a_t, vmin_pt, b0_pt, b01_pt, b02_pt, emin_pt, &
+                              press_vt
+USE ph_freq_anharmonic,    ONLY : vminf_t, b0f_t, b01f_t, b02f_t, free_e_minf_t
 USE io_global,             ONLY : stdout
 USE mp_images,             ONLY : inter_image_comm
 USE mp,                    ONLY : mp_sum
 
 IMPLICIT NONE
 
-INTEGER :: itemp, igeom, m1
+INTEGER :: itemp, itempp, igeom, ivol, ivolp, m1
 CHARACTER(LEN=256) :: filedata, filerap, fileout, gnu_filename, filenameps
 LOGICAL :: all_geometry_done, all_el_free, ldummy
 
@@ -63,24 +67,65 @@ IF (ltherm_dos) THEN
    vmin_t=0.0_DP
    b0_t=0.0_DP
    b01_t=0.0_DP
+   b02_t=0.0_DP
    free_e_min_t=0.0_DP
+   a_t=0.0_DP
    DO itemp=1, ntemp
       CALL do_ev_t(itemp)
+      CALL do_ev_pt(itemp)
+      CALL do_ev_vt(itemp)
    ENDDO
    CALL mp_sum(vmin_t, inter_image_comm)
    CALL mp_sum(b0_t, inter_image_comm)
    CALL mp_sum(b01_t, inter_image_comm)
+   CALL mp_sum(b02_t, inter_image_comm)
    CALL mp_sum(free_e_min_t, inter_image_comm)
-   IF (temp_nstep<=ntemp) THEN
+   CALL mp_sum(a_t, inter_image_comm)
+   IF (npress_plot>0) THEN
+      CALL mp_sum(vmin_pt, inter_image_comm)
+      CALL mp_sum(b0_pt, inter_image_comm)
+      CALL mp_sum(b01_pt, inter_image_comm)
+      CALL mp_sum(b02_pt, inter_image_comm)
+      CALL mp_sum(emin_pt, inter_image_comm)
+   ENDIF
+   IF (nvol_plot>0) THEN
+      CALL mp_sum(press_vt, inter_image_comm)
+   ENDIF
+!
+!  Then write on file the free energies at several temperatures if required
+!  from input
+!
+   IF (ntemp_plot>0) THEN
       m1=poly_degree_ph+1
-      DO itemp=1,ntemp,temp_nstep
-         CALL write_mur_pol(vmin, b0, b01, emin, a_t(:,itemp), m1, itemp)
+      DO itempp=1,ntemp_plot
+         itemp=itemp_plot(itempp)
+         CALL write_mur_pol(vmin, b0, b01, b02, emin, a_t(:,itemp), m1, itemp)
+!
+!  If required from input computes the thermal expansion as a function of 
+!  pressure at this temperature
+!
+         CALL write_anhar_t(itempp) 
       ENDDO
    ENDIF
 !
 !    calculate several anharmonic quantities 
 !
    CALL write_anharmonic()
+!
+!   if requested in input writes on files also the anharmonic quantities
+!   at several pressures
+!
+   CALL write_anhar_p()
+!
+!   Write on output the thermal pressure as a function of temperature
+!   if requested on input
+!
+   CALL write_anhar_v()
+!
+!  for diagnostic purposes write on file only the vibrational free energy
+!  and the electronic one if available
+!
+   CALL write_free_energy()
 ENDIF
 
 IF (ltherm_freq) THEN
@@ -95,6 +140,7 @@ IF (ltherm_freq) THEN
    vminf_t=0.0_DP
    b0f_t=0.0_DP
    b01f_t=0.0_DP
+   b02f_t=0.0_DP
    free_e_minf_t=0.0_DP
    DO itemp = 1, ntemp
       CALL do_ev_t_ph(itemp)
@@ -102,6 +148,7 @@ IF (ltherm_freq) THEN
    CALL mp_sum(vminf_t, inter_image_comm)
    CALL mp_sum(b0f_t, inter_image_comm)
    CALL mp_sum(b01f_t, inter_image_comm)
+   CALL mp_sum(b02f_t, inter_image_comm)
    CALL mp_sum(free_e_minf_t, inter_image_comm)
 !
 !    calculate several anharmonic quantities 
@@ -134,7 +181,9 @@ CALL fit_frequencies()
 CALL set_volume_b0_grun()
 CALL write_grun_anharmonic()
 CALL plot_anhar() 
-CALL plot_mur_t()
+CALL plot_anhar_p() 
+CALL plot_anhar_t()
+CALL plot_anhar_v()
 
 RETURN
 END SUBROUTINE manage_anhar
@@ -145,7 +194,7 @@ SUBROUTINE manage_anhar_anis()
 
 USE kinds,                 ONLY : DP
 USE thermo_mod,            ONLY : reduced_grid, what, tot_ngeo
-USE temperature,           ONLY : ntemp, temp, temp_nstep
+USE temperature,           ONLY : ntemp, temp, ntemp_plot, itemp_plot
 USE control_pressure,      ONLY : pressure_kb
 USE control_thermo,        ONLY : ltherm_dos, ltherm_freq
 USE control_elastic_constants, ONLY : el_cons_qha_available, &
@@ -164,7 +213,7 @@ USE mp,                    ONLY : mp_sum
 USE mp_world,              ONLY : world_comm
 
 IMPLICIT NONE
-INTEGER :: itemp, igeom, startt, lastt, idata, ndata
+INTEGER :: itemp, itempp, igeom, startt, lastt, idata, ndata
 CHARACTER(LEN=256) :: filedata, filerap, fileout, gnu_filename, filenameps
 REAL(DP), ALLOCATABLE :: phf(:)
 LOGICAL :: all_geometry_done, all_el_free, ldummy
@@ -217,12 +266,13 @@ IF (ltherm_dos) THEN
    CALL mp_sum(celldm_t, world_comm)
    CALL mp_sum(free_e_min_t, world_comm)
 
-   DO itemp=1,ntemp,temp_nstep
+   DO itempp=1,ntemp_plot
       DO idata=1,ndata
-         phf(idata)=ph_free_ener(itemp,idata)
-         IF (lel_free_energy) phf(idata)=phf(idata)+el_free_ener(itemp, idata)
+         phf(idata)=ph_free_ener(itemp_plot(itempp),idata)
+         IF (lel_free_energy) phf(idata)=phf(idata)+ &
+                                    el_free_ener(itemp_plot(itempp), idata)
       ENDDO
-      CALL write_e_omega_t(itemp, phf, ndata)
+      CALL write_e_omega_t(itemp_plot(itempp), phf, ndata)
    ENDDO
 ENDIF
 
@@ -307,7 +357,7 @@ ENDIF
 !
 CALL write_grun_anhar_anis()
 CALL plot_anhar_anis()
-CALL plot_mur_t()
+CALL plot_anhar_t()
 CALL plot_geo_p_t()
 
 RETURN
@@ -320,7 +370,8 @@ SUBROUTINE manage_el_anhar()
 USE kinds,                 ONLY : DP
 USE temperature,           ONLY : ntemp
 USE data_files,            ONLY : flelanhar
-USE el_anharmonic,         ONLY : vmine_t, b0e_t, b01e_t, free_e_mine_t
+USE el_anharmonic,         ONLY : vmine_t, b0e_t, b01e_t, b02e_t, &
+                                  free_e_mine_t
 USE io_global,             ONLY : stdout
 USE mp_images,             ONLY : inter_image_comm
 USE mp,                    ONLY : mp_sum
@@ -340,6 +391,7 @@ WRITE(stdout,'(2x,76("-"),/)')
 vmine_t=0.0_DP
 b0e_t=0.0_DP
 b01e_t=0.0_DP
+b02e_t=0.0_DP
 free_e_mine_t=0.0_DP
 DO itemp=1, ntemp
    CALL do_ev_t_el(itemp)
@@ -347,6 +399,7 @@ ENDDO
 CALL mp_sum(vmine_t, inter_image_comm)
 CALL mp_sum(b0e_t, inter_image_comm)
 CALL mp_sum(b01e_t, inter_image_comm)
+CALL mp_sum(b02e_t, inter_image_comm)
 CALL mp_sum(free_e_mine_t, inter_image_comm)
 !
 !    calculate several anharmonic quantities 

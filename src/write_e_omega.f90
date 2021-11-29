@@ -30,9 +30,10 @@ USE constants,        ONLY : ry_kbar
 USE data_files,       ONLY : flevdat
 USE cell_base,        ONLY : ibrav
 USE thermo_mod,       ONLY : omega_geo, celldm_geo, energy_geo
-USE control_mur,      ONLY : vmin_input, vmax_input, press_min, press_max, &
-                             npress, omegap0
-USE control_pressure, ONLY : pressure, pressure_kb
+USE control_mur,      ONLY : omegap0
+USE control_vol,      ONLY : vmin_input, vmax_input
+USE control_pressure, ONLY : pressure, pressure_kb, pmin, pmax, deltap, &
+                             npress, press
 USE control_quartic_energy, ONLY : lquartic, lsolve
 USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_quadratic_extremum, &
                              print_chisq_quadratic
@@ -48,9 +49,9 @@ IMPLICIT NONE
 CHARACTER(LEN=256) :: filename, filename1
 INTEGER  :: i, iu_mur, ipress, idata, nvar, ndata
 INTEGER  :: find_free_unit, compute_nwork
-REAL(DP) :: deltap, ymin, ymin4
+REAL(DP) :: ymin, ymin4
 REAL(DP) :: compute_omega_geo
-REAL(DP), ALLOCATABLE :: f(:), x(:,:), x_pos_min(:), x_min_4(:), p(:), e(:), &
+REAL(DP), ALLOCATABLE :: f(:), x(:,:), x_pos_min(:), x_min_4(:), e(:), &
                          omega(:), celldmp(:,:) 
 TYPE(poly2) :: p2
 TYPE(poly4) :: p4
@@ -67,12 +68,11 @@ CALL add_pressure(filename)
 filename1="energy_files/"//TRIM(flevdat)//'_mur_celldm'
 CALL add_pressure(filename1)
 ndata=compute_nwork()
-deltap= ( press_max - press_min ) / npress
 
 WRITE(stdout,'(/,2x,76("*"))')
 WRITE(stdout,'(5x,"Computing the volume as a function of pressure")')
 WRITE(stdout,'(5x,"From p_min=",f10.5," kbar to p_max=",f10.5," kbar")') &
-       press_min*ry_kbar, press_max*ry_kbar    
+       pmin*ry_kbar, pmax*ry_kbar    
 WRITE(stdout,'(5x,"Computing",i5," pressures, deltap=",f10.5," kbar")') &
                                                      npress, deltap*ry_kbar
 WRITE(stdout,'(/,2x,76("*"))')
@@ -83,7 +83,6 @@ nvar=crystal_parameters(ibrav)
 ALLOCATE(x(nvar,ndata))
 ALLOCATE(x_pos_min(nvar))
 ALLOCATE(f(ndata))
-ALLOCATE(p(npress))
 ALLOCATE(e(npress))
 ALLOCATE(omega(npress))
 ALLOCATE(celldmp(6,npress))
@@ -95,12 +94,11 @@ DO idata=1, ndata
 END DO
 
 DO ipress=1, npress
-   p(ipress) = press_min + ( ipress - 1 ) * deltap
 !
 !  fit the enthalpy with a quadratic polynomial and find the minimum
 !
    DO idata=1, ndata
-     f(idata)=energy_geo(idata) + p(ipress) * omega_geo(idata)
+     f(idata)=energy_geo(idata) + press(ipress) * omega_geo(idata) / ry_kbar
    END DO
    CALL fit_multi_quadratic(ndata,nvar,lsolve,x,f,p2)
 !   CALL print_chisq_quadratic(ndata, nvar, x, f, p2)
@@ -120,15 +118,15 @@ DO ipress=1, npress
 !   find the volume that corresponds to the minimum geometry at this pressure
 !
       omega(ipress)=compute_omega_geo(ibrav,celldmp(1,ipress))
-      e(ipress)=ymin4 - p(ipress) * omega(ipress)
+      e(ipress)=ymin4 - press(ipress) * omega(ipress) / ry_kbar
       CALL clean_poly(p4)
    ELSE
       CALL expand_celldm(celldmp(1,ipress), x_pos_min, nvar, ibrav)
       omega(ipress)=compute_omega_geo(ibrav,celldmp(1,ipress))
-      e(ipress) = ymin - p(ipress) * omega(ipress)
+      e(ipress) = ymin - press(ipress) * omega(ipress) / ry_kbar
    ENDIF
 ENDDO
-CALL find_omega0(p,omega,npress,omegap0)
+CALL find_omega0(press/ry_kbar,omega,npress,omegap0)
 
 IF (vmin_input == 0.0_DP) vmin_input=omega(npress) * 0.98_DP
 IF (vmax_input == 0.0_DP) vmax_input=omega(1) * 1.02_DP
@@ -148,8 +146,8 @@ IF (ionode) THEN
    END IF
    DO ipress=1,npress
       WRITE(iu_mur,'(f18.10,3f20.10)') omega(ipress), e(ipress)+ &
-            pressure*omega(ipress), e(ipress)+p(ipress)*omega(ipress), &
-            p(ipress) * ry_kbar
+            pressure*omega(ipress), e(ipress)+&
+                         press(ipress)*omega(ipress)/ry_kbar, press(ipress) 
    ENDDO 
    CLOSE(UNIT=iu_mur, STATUS='KEEP')
 !
@@ -159,7 +157,7 @@ IF (ionode) THEN
    WRITE(iu_mur,'( "# pressure (kbar)",3x,"celldm(1)",7x,"celldm(2)",7x,&
               &"celldm(3)",7x,"celldm(4)",7x,"celldm(5)",7x,"celldm(6)" )')
    DO ipress=1,npress
-      WRITE(iu_mur,'(7f15.8)') p(ipress)*ry_kbar, celldmp(1, ipress), &
+      WRITE(iu_mur,'(7f15.8)') press(ipress), celldmp(1, ipress), &
                celldmp(2, ipress), celldmp(3, ipress), celldmp(4, ipress), &
                celldmp(5, ipress), celldmp(6, ipress)
    ENDDO 
@@ -169,7 +167,6 @@ END IF
 DEALLOCATE(x)
 DEALLOCATE(x_pos_min)
 DEALLOCATE(f)
-DEALLOCATE(p)
 DEALLOCATE(e)
 DEALLOCATE(omega)
 DEALLOCATE(celldmp)
@@ -205,10 +202,11 @@ USE constants,        ONLY : ry_kbar
 USE data_files,       ONLY : flevdat
 USE cell_base,        ONLY : ibrav
 USE thermo_mod,       ONLY : omega_geo, celldm_geo, energy_geo, no_ph
-USE control_mur,      ONLY : vmin_input, vmax_input, press_min, press_max, &
-                             npress, omegap0
+USE control_vol,      ONLY : vmin_input, vmax_input
+USE control_mur,      ONLY : omegap0
 USE temperature,      ONLY : temp
-USE control_pressure, ONLY : pressure, pressure_kb
+USE control_pressure, ONLY : pressure, pressure_kb, pmin, pmax, npress, &
+                             press, deltap
 USE control_quartic_energy, ONLY : lquartic, lsolve
 USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_quadratic_extremum, &
                              print_chisq_quadratic
@@ -229,9 +227,9 @@ CHARACTER(LEN=256) :: filename, filename1
 CHARACTER(LEN=6) :: int_to_char
 INTEGER  :: i, iu_mur, ipress, idata, nvar, ndata
 INTEGER  :: find_free_unit, compute_nwork
-REAL(DP) :: deltap, ymin, ymin4
+REAL(DP) :: ymin, ymin4
 REAL(DP) :: compute_omega_geo
-REAL(DP), ALLOCATABLE :: f(:), x(:,:), x_pos_min(:), x_min_4(:), p(:), e(:), &
+REAL(DP), ALLOCATABLE :: f(:), x(:,:), x_pos_min(:), x_min_4(:), e(:), &
                          omega(:), celldmp(:,:), f1(:), ome(:)
 TYPE(poly2) :: p2
 TYPE(poly4) :: p4
@@ -241,21 +239,20 @@ IF (itemp<=0) RETURN
 !
 !  The name of the output files that will contain the volume, energy, pressure
 !
-filename="anhar_files/"//TRIM(flevdat)//'_mur'//TRIM(int_to_char(itemp))
+filename="anhar_files/"//TRIM(flevdat)//'_mur.'//TRIM(int_to_char(itemp))
 CALL add_pressure(filename)
 
-filename1="anhar_files/"//TRIM(flevdat)//'_mur_celldm'//&
+filename1="anhar_files/"//TRIM(flevdat)//'_mur_celldm.'//&
                                                 TRIM(int_to_char(itemp))
 CALL add_pressure(filename1)
 
 ndata=compute_nwork()
-deltap= ( press_max - press_min ) / npress
 
 WRITE(stdout,'(/,2x,76("*"))')
 WRITE(stdout,'(5x,"Computing the volume as a function of pressure at &
                             &T=",f8.2," K")') temp(itemp)
 WRITE(stdout,'(5x,"From p_min=",f10.5," kbar to p_max=",f10.5," kbar")') &
-       press_min*ry_kbar, press_max*ry_kbar    
+                                              pmin*ry_kbar, pmax*ry_kbar    
 WRITE(stdout,'(5x,"Computing",i5," pressures, deltap=",f10.5," kbar")') &
                                                      npress, deltap*ry_kbar
 WRITE(stdout,'(/,2x,76("*"))')
@@ -267,7 +264,6 @@ ALLOCATE(x(nvar,ndata))
 ALLOCATE(x_pos_min(nvar))
 ALLOCATE(f(ndata))
 ALLOCATE(f1(ndata))
-ALLOCATE(p(npress))
 ALLOCATE(e(npress))
 ALLOCATE(ome(ndata))
 ALLOCATE(omega(npress))
@@ -285,12 +281,11 @@ DO idata=1,ndatatot
 END DO
 
 DO ipress=1, npress
-   p(ipress) = press_min + ( ipress - 1 ) * deltap
 !
 !  fit the enthalpy with a quadratic polynomial and find the minimum
 !
    DO idata=1, ndata
-     f(idata)=f1(idata) + p(ipress) * ome(idata)
+     f(idata)=f1(idata) + press(ipress) * ome(idata)/ry_kbar
    END DO
    CALL fit_multi_quadratic(ndata,nvar,lsolve,x,f,p2)
 !   CALL print_chisq_quadratic(ndata, nvar, x, f, p2)
@@ -310,12 +305,12 @@ DO ipress=1, npress
 !   find the volume that corresponds to the minimum geometry at this pressure
 !
       omega(ipress)=compute_omega_geo(ibrav,celldmp(1,ipress))
-      e(ipress)=ymin4 - p(ipress) * omega(ipress)
+      e(ipress)=ymin4 - press(ipress) * omega(ipress)/ry_kbar
       CALL clean_poly(p4)
    ELSE
       CALL expand_celldm(celldmp(1,ipress), x_pos_min, nvar, ibrav)
       omega(ipress)=compute_omega_geo(ibrav,celldmp(1,ipress))
-      e(ipress) = ymin - p(ipress) * omega(ipress)
+      e(ipress) = ymin - press(ipress) * omega(ipress)/ry_kbar
    ENDIF
 ENDDO
 
@@ -331,8 +326,8 @@ IF (ionode) THEN
    CALL write_mur_start_line(itemp, iu_mur)
    DO ipress=1,npress
       WRITE(iu_mur,'(f18.10,3f20.10)') omega(ipress), e(ipress)+ &
-            pressure*omega(ipress), e(ipress)+p(ipress)*omega(ipress), &
-            p(ipress) * ry_kbar
+            pressure*omega(ipress), e(ipress)+press(ipress)*omega(ipress), &
+            press(ipress) * ry_kbar
    ENDDO 
    CLOSE(UNIT=iu_mur, STATUS='KEEP')
 !
@@ -343,7 +338,7 @@ IF (ionode) THEN
               &"celldm(3)",7x,"celldm(4)",7x,"celldm(5)",7x,"celldm(6) T=",&
                        &f8.2," K" )') temp(itemp)
    DO ipress=1,npress
-      WRITE(iu_mur,'(7f15.8)') p(ipress)*ry_kbar, celldmp(1, ipress), &
+      WRITE(iu_mur,'(7f15.8)') press(ipress), celldmp(1, ipress), &
                celldmp(2, ipress), celldmp(3, ipress), celldmp(4, ipress), &
                celldmp(5, ipress), celldmp(6, ipress)
    ENDDO 
@@ -354,7 +349,6 @@ DEALLOCATE(x)
 DEALLOCATE(x_pos_min)
 DEALLOCATE(f)
 DEALLOCATE(f1)
-DEALLOCATE(p)
 DEALLOCATE(e)
 DEALLOCATE(omega)
 DEALLOCATE(ome)

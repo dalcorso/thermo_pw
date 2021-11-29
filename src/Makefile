@@ -157,6 +157,7 @@ write_el_thermo.o \
 write_elastic_t.o \
 write_elastic_t_qha.o \
 write_ev_input.o \
+write_free_energy.o \
 write_gnuplot_energy.o \
 write_gruneisen_band.o \
 write_gruneisen_band_anis.o \
