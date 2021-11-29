@@ -40,7 +40,7 @@
 \def\configure{\texttt{configure}}
 \def\PWscf{\texttt{PWscf}}
 \def\PHonon{\texttt{PHonon}}
-\def\thermo{\texttt{thermo\_pw}}
+\def\thermo{{\sc Thermo\_pw}}
 \def\make{\texttt{make}}
 
 \begin{document} 
@@ -121,7 +121,7 @@ You can just cut and paste these quantities in the input of \texttt{pw.x}
 or you can set the flag \texttt{find\_ibrav=.TRUE.} in the \thermo\ input
 and \thermo\ will make the conversion for you before runnig the job. 
 After setting the correct
-\texttt{ibrav} and \texttt{celldm}, \texttt{thermo\_pw} might still tell you
+\texttt{ibrav} and \texttt{celldm}, \thermo\ might still tell you
 that the Bravais lattice is not compatible with the point group. This
 can happen, for instance, if you have isolated molecules, amorphous solids,
 defects, or supercells. In these cases you can still continue but symmetry 
@@ -167,7 +167,7 @@ and on the accuracy of your calculation. You can
 find some hints about the required cut-offs inside the pseudopotentials files,
 but you need to check the convergence of your results with the cut-off 
 energies. Many tests of the kinetic energy cut-offs can be found also at 
-\texttt{https://www.materialscloud.org/discover/sssp/}. \\
+\texttt{https://www.materials} \texttt{cloud.org/discover/sssp/}. \\
 
 The {\bf k}-point mesh is given by three integer numbers and possible
 shifts (0 or 1) in the three directions. The convergence of the results
@@ -261,7 +261,7 @@ Use \texttt{what='plot\_bz'}. See \texttt{example12}. With this option
 \thermo\ does not call \texttt{pw.x}, it just produces a script for
 the \texttt{asymptote} code with the instructions to plot the Brillouin
 zone and the standard path (or the path that you have given in the \thermo\ 
-input). Starting from version 1.5.0 \texttt{thermo\_pw} produces also a
+input). Starting from version 1.5.0 \thermo\ produces also a
 script to plot the Brillouin zone using the \texttt{freeCAD} software
 (version 0.18). See more details in the user's guide.
 
@@ -287,7 +287,7 @@ which can also be changed in the \thermo\ input.
 Use \texttt{what='plot\_bz'} and look at the output. The space group is
 identified. In the case you have a structure with \texttt{ibrav=0} and
 the primitive lattice vectors use the option \texttt{find\_ibrav=.TRUE.} 
-in the \texttt{thermo\_pw} input (see the \texttt{thermo\_pw} user's guide 
+in the \thermo\ input (see the \thermo\ user's guide 
 in the subsection
 {\it Coordinates and structure}). This option has presently some limitations.
 It does not work for noncollinear magnetic system, or for supercells, or
@@ -390,7 +390,7 @@ found at the given pressure (see above).
 {\color{coral}\section{How do I specify the temperature range}} 
 \color{black}
 See the subsection {\it Temperature and Pressure} in the 
-\texttt{thermo\_pw} user's guide. 
+\thermo\ user's guide. 
 
 \newpage
 {\color{coral}\section{How do I calculate the crystal parameters as a function
@@ -467,7 +467,7 @@ constants at $T=0$ K for all the geometries used by
 \texttt{what='mur\_lc\_t'} and
 saves them in the directory \texttt{elastic\_constants}.  
 In the second step, using the same input, run again 
-\texttt{thermo\_pw} with \texttt{what='mur\_lc\_t'} after copying in your
+\thermo\ with \texttt{what='mur\_lc\_t'} after copying in your
 working directory the directory \texttt{elastic\_constants} obtained 
 in the previous step. Elastic constants are read only when
 \texttt{lmurn=.FALSE.}.
@@ -483,7 +483,7 @@ temperature dependent elastic constants taking as unperturbed geometries
 those used by \texttt{what='mur\_lc\_t'} and saves them in the directory 
 \texttt{anhar\_files}.  
 In the second step, using the same input, run again 
-\texttt{thermo\_pw} with \texttt{what=} \texttt{'mur\_lc\_t'} after 
+\thermo\ with \texttt{what=} \texttt{'mur\_lc\_t'} after 
 copying in your
 working directory the directory \texttt{anhar\_files} obtained 
 in the previous step. Elastic constants are read only when

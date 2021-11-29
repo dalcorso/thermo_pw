@@ -45,7 +45,7 @@
 \def\configure{\texttt{configure}}
 \def\PWscf{\texttt{PWscf}}
 \def\PHonon{\texttt{PHonon}}
-\def\thermo{\texttt{thermo\_pw}}
+\def\thermo{{\sc Thermo\_pw}}
 \def\make{\texttt{make}}
 
 \begin{document} 
@@ -54,7 +54,7 @@
 \date{}
 
 \title{
-  \includegraphics[width=5cm]{thermo_pw.jpg} \\
+  \includegraphics[width=8cm]{thermo_pw.jpg} \\
   \vspace{3truecm}
   % title
   \Huge \color{dark-blue} {\sc Thermo}\_{\sc pw} User's Guide \\
@@ -69,16 +69,16 @@
 
 \newpage
 
-{\color{dark-blue}\chapter*{Introduction}}
+{\color{dark-blue}\chapter{Introduction}}
 \color{black}
 This guide covers the installation and usage of the \thermo\ package. 
-It assumes some familiarity with the \qe\ package. 
+It assumes some familiarity with \qe. 
 For this please consult the web site: \texttt{http://www.quantum-espresso.org}.
 
 \thermo\ computes material properties.
 At low level, it calls \qe\ routines and, at high level, it has pre-processing
 tools to reduce the information provided by the user and
-post-processing tools to convert the output of \qe\ into plots of material 
+post-processing tools that use the output of \qe\ to produce plots of material 
 properties directly comparable with experiment. 
 
 \thermo\ has the following directory structure, contained in a directory 
@@ -88,7 +88,7 @@ properties directly comparable with experiment.
 \texttt{Doc/}      & : contains this user's guide and other documentation\\
 \texttt{examples/} & : some examples \\
 \texttt{examples\_qe/} & : \qe\ examples run using 
-\texttt{thermo\_pw} \\
+\thermo \\
 \texttt{inputs/}   & : a collection of useful inputs \\
 \texttt{pseudo\_test/} & : a collection of inputs to test a pseudopotential library\\
 \texttt{space\_groups/} & : a collection of structures for many space groups \\
@@ -142,7 +142,8 @@ unperturbed geometry.
 
 \item Fit of the total energy as a function of the lattice parameters with
 a quadratic or quartic polynomial and determination of equilibrium lattice 
-parameters. Murnaghan fit. Enthalpy as a function of pressure. Crystal
+parameters. Murnaghan or (third or fourth order) Birch-Murnaghan fit. 
+Enthalpy as a function of pressure. Crystal
 parameters and volume as a function of pressure. 
 
 \item Electronic band structure at the minimum of the total energy.
@@ -233,7 +234,7 @@ like to mention M. Palumbo, O. Motornyi, A. Urru, C. Malica, and X. Gong.
 \begin{tabular}{lll}
 \hline
 \hline
-\texttt{thermo\_pw} & \qe & release date \\
+\thermo\ & \qe & release date \\
 \hline
 1.6.0 & 6.8 & \\
 1.5.1 & 6.8 & 22/07/2021 \\
@@ -265,7 +266,7 @@ like to mention M. Palumbo, O. Motornyi, A. Urru, C. Malica, and X. Gong.
 \hline
 \end{tabular}
 \caption{Compatibility between the versions of 
-\texttt{thermo\_pw} and of \texttt{QE}.}
+\thermo\ and of \texttt{QE}.}
 \end{center}
 \end{table}
 
@@ -281,17 +282,17 @@ The main distribution page of \texttt{Thermo\_pw} is
 \texttt{https://dalcorso.github.io/thermo\_pw/} 
 \end{center}
 where you can download one of the \texttt{.tar.gz} files.
-Please match carefully \texttt{thermo\_pw} and \qe\ versions
+Please match carefully \thermo\ and \qe\ versions
 as illustrated in Table 1. 
-For the versions of \qe\ not listed here, there is no \texttt{thermo\_pw} 
-package. The source files of \texttt{thermo\_pw} can be obtained by
+For the versions of \qe\ not listed here, there is no \thermo\ 
+package. The source files of \thermo\ can be obtained by
 unpacking the \texttt{.tar.gz} file in the root \qe\ directory, for
 instance with the command \texttt{tar -xzvf thermo\_pw.1.4.1.tar.gz}.\\
 You can also download the \texttt{git} version of 
-\texttt{thermo\_pw} as described at
+\thermo\ as described at
 the web page: 
 \texttt{https://dal} \texttt{corso.github.io/thermo\_pw/thermo\_pw\_help.html}.
-The \texttt{git} version of \texttt{thermo\_pw} contains the most recent
+The \texttt{git} version of \thermo\ contains the most recent
 features and bug fixes but it might work only with the \texttt{git} 
 version of \qe\ and its use for production is not recommended. \\
 Please read the web page: 
@@ -299,11 +300,12 @@ Please read the web page:
 \texttt{http://dalcorso.github.io/thermo\_pw/thermo\_pw\_help.html} 
 \end{center}
 for updated information about the compatibility between the \texttt{git} 
-version of \texttt{thermo\_pw} and \qe. 
+version of \thermo\ and \qe. 
 This web page contains also information on critical bugs found in the 
-\texttt{thermo\_pw} package and should be consulted before using 
-\texttt{thermo\_pw}.
+\thermo\ package and should be consulted before using 
+\thermo.
 
+\newpage
 {\color{coral}\section{Compiling}}
 \color{black}
 
@@ -335,6 +337,7 @@ but it is supposed to run on the same systems where \qe\ runs. If
 you have a machine in which you can compile and run \qe\ but not 
 \texttt{thermo\_pw}, please report the problem.
 
+\newpage
 {\color{coral}\section{Searching help and reporting bugs}}
 \color{black}
 For problems installing \texttt{thermo\_pw} or for help
@@ -347,6 +350,7 @@ found a bug
 in \texttt{thermo\_pw}, you can report it to the mailing list or 
 write me: \texttt{dalcorso.at.sissa.it}.
 
+\newpage
 {\color{coral}\section{Uninstalling}}
 \color{black}
 
@@ -354,6 +358,7 @@ In order to remove \thermo, give the command \texttt{make leave\_qe} in the
 \texttt{thermo\_pw} directory. Then just remove the directory. Note that 
 the command \texttt{make leave\_qe} is needed to restore the original \qe\ files.
 
+\newpage
 {\color{coral}\section{Running \thermo}}
 \color{black}
 
@@ -465,6 +470,7 @@ you can disable the production of the \texttt{postscript} or
 \texttt{pdf} files and use other
 graphical tools to plot the output data. 
 
+\newpage
 {\color{coral}\section{Temperature and pressure}}
 \color{black}
 Several quantities in \thermo\ can be calculated as a function of temperature
@@ -476,7 +482,7 @@ of pressure at zero temperature or at selected temperatures.
 There is therefore the necessity to specify uniform meshes of temperatures
 (pressures) or to choose selected temperatures (pressures). 
 The meshes are specified giving the minimum and maximum temperatures 
-(pressures) and the inteval between temperature (pressure) points.
+(pressures) and the interval between temperature (pressure) points.
 Selected temperatures (pressures) are instead defined giving their number 
 and their values. The code will choose these temperatures (pressures) on 
 the uniform mesh taking the point closest to the specified temperature 
@@ -508,27 +514,31 @@ pmax       : maximum pressure for the mesh of pressures.
              Default: real 100.0 kbar
 deltap     : Interval between two pressures in the mesh of pressures.
              Default: real 1.0 kbar
-ntemp_plot : number of temperatures in the plots where the temperature 
-             is a parameter. When 0 these plots are not produced.
+ntemp_plot : number of temperatures in the plots where the 
+             temperature is a parameter. When 0 these plots are 
+             not produced.
              Default: integer 0
 temp_plot(ntemp_plot)  : A real array of dimension ntemp_plot with 
              the values of the temperature.
              No Default value, must be given when ntemp_plot is 
              not zero.
-npress_plot : number of pressures in the plots where the pressure is
-             a parameter. When 0 these plots are not produced.
+npress_plot : number of pressures in the plots where the 
+             pressure is a parameter. When 0 these plots are 
+             not produced.
              Default: integer 0
-press_plot(npress_plot) : A real array of dimension npress_plot with 
-             the values of the pression.
+press_plot(npress_plot) : A real array of dimension npress_plot 
+             with the values of the pressure.
              No Default value, must be given when npress_plot is 
              not zero.
-nvol_plot : number of volumes in the plots where the volume is a parameter.
-            When 0 these plots are not produced.
+nvol_plot : number of volumes in the plots where the volume is a 
+            parameter. When 0 these plots are not produced.
             Default: integer 0
-ivol_plot(nvol_plot) : an integer array with the volumes to consider 
-            in the plots where the volume is a parameter. The chosen 
-            volumes can be only among one of the ngeo(1) geometries.
-            No Default value, must be given when nvol_plot is not zero.
+ivol_plot(nvol_plot) : an integer array with the volumes to 
+            consider in the plots where the volume is a parameter. 
+            The chosen volumes can be only among one of the ngeo(1) 
+            geometries.
+            No Default value, must be given when nvol_plot 
+            is not zero.
 \end{verbatim}
 %\end{tcolorbox}
 
@@ -536,8 +546,9 @@ Note that when you fix the external pressure, the geometries chosen to
 fit the enthalpy must be about the minimum geometry at that pressure.
 Similarly, when using pressure ranges, the number of simulated geometries 
 must be large enough to cover the selected range of pressures, otherwise 
-the plotted quantities might be inacurate.
+the plotted quantities might be inaccurate.
 
+\newpage
 {\color{coral}\section{Coordinates and structure}}
 \color{black}
 The \texttt{thermo\_pw} code requires the Bravais lattice of the solid. 
@@ -583,6 +594,7 @@ find_ibrav : This variable is active only when continue_zero_
 \end{verbatim}
 %\end{tcolorbox}
 
+\newpage
 {\color{coral}\section{what='scf'}}
 \color{black}
 With this option the code computes only the total energy. This is a single
@@ -591,6 +603,7 @@ No other input variable is necessary.
 An example for this option can be found in \texttt{example01}. \\
 Number of tasks for this option: \texttt{1}.
 
+\newpage
 {\color{coral}\section{what='scf\_ke'}}
 \color{black}
 With this option the code makes several self-consistent calculations, 
@@ -632,6 +645,7 @@ flpskeconv : name of the postscript file with the plot
 An example for this option can be found in \texttt{example10}. \\
 Number of tasks for this option: \texttt{nke * nkedens}.
 
+\newpage
 {\color{coral}\section{what='scf\_nk'}}
 \color{black}
 With this option the code makes several self-consistent calculations, 
@@ -667,6 +681,7 @@ flpsnkconv : name of the postscript file with the k points
 An example for this option can be found in \texttt{example11}. \\
 Number of tasks for this option: \texttt{nnk * nsigma}.
 
+\newpage
 {\color{coral}\section{what='scf\_bands'}}
 \color{black}
 With this option the code makes a self-consistent calculation followed 
@@ -786,6 +801,7 @@ You cannot however run twice \texttt{thermo\_pw.x} on the same
 directory using \texttt{what='scf\_bands'} and two different paths, you
 must use two different working directories.
 
+\newpage
 {\color{coral}\section{what='scf\_2d\_bands'}}
 \color{black}
 With this option the code makes a self-consistent calculation followed
@@ -984,6 +1000,7 @@ plot. To change the defaults you can modify directly the \texttt{gnuplot}
 script, it is written in such a way that a change of a few variables can
 control the entire plot.
 
+\newpage
 {\color{coral}\section{what='scf\_dos'}}
 \color{black}
 With this option the code makes a self-consistent calculation followed
@@ -1046,6 +1063,7 @@ required in input when it is lower than $4$ K or $4$ K. \\
 
 Number of tasks for this option: 1.
 
+\newpage
 {\color{coral}\section{what='plot\_bz'}}
 \color{black}
 With this option the code writes a script to make a plot
@@ -1201,6 +1219,7 @@ flpsformf   : name of the postscript file with the atomic
 \end{verbatim}
 %\end{tcolorbox}
 
+\newpage
 {\color{coral}\section{what='scf\_ph'}}
 \color{black}
 With this option the code makes a self-consistent calculation followed
@@ -1384,6 +1403,7 @@ sym_for_diago : When .TRUE. use symmetry to calculate the
 \end{verbatim}
 %\end{tcolorbox}
 
+\newpage
 {\color{coral}\section{what='scf\_disp'}}
 \color{black}
 With this option the code makes a self-consistent calculation followed by
@@ -1485,6 +1505,7 @@ Number of tasks for this option: number of parallelizable tasks of the
 phonon code (smaller but of the order of number of {\bf q} points times 
 $3 N_{at}$, where $N_{at}$ is the number of atoms in the unit cell).
 
+\newpage
 {\color{coral}\section{what='scf\_elastic\_constants'}}
 \color{black}
 With this option the code calculates the elastic constants of the solid
@@ -1635,6 +1656,8 @@ of temperature.
 %independent strains. \\
 %This feature is still incomplete and experimental.
 %
+
+\newpage
 {\color{coral}\section{what='mur\_lc'}}
 \color{black}
 With this option the code runs several self-consistent calculations
@@ -1709,7 +1732,7 @@ step_ngeo(1),...,step_ngeo(6) : The step between the lattice
              constants at different geometries. step_ngeo(1) is, 
              in atomic units, the change of a, step_ngeo(2), 
              step_ngeo(3) are dimensionless and are the changes 
-             of the ratios b/a, c/a, step_ngeo(4), step_ngeo(5), &
+             of the ratios b/a, c/a, step_ngeo(4), step_ngeo(5), 
              step_ngeo(6) are the changes in degree of the 
              angles alpha, beta, and gamma. The cosine of the 
              angle is calculated by the program.
@@ -1724,7 +1747,8 @@ lmurn       : if .TRUE. the Murnaghan fit is done. Only ngeo(1)
              case only the minimum energy and the optimal celldm 
              are given in output. 
              Default: .TRUE. 
-ieos        : choose the equation of state to use (only when lmurn=.TRUE.)
+ieos        : choose the equation of state to use (only when 
+              lmurn=.TRUE.):
               1 - Birch-Murnaghan third order
               2 - Birch-Murnaghan fourth order
               4 - Murnaghan
@@ -1813,6 +1837,7 @@ Number of tasks for this option: \\
 \texttt{ngeo(1)}$\times$\texttt{ngeo(2)}$\times$\texttt{ngeo(3)}$\times$\texttt{ngeo(4)}$\times$\texttt{ngeo(5)}$\times$\texttt{ngeo(6)} when 
 \texttt{lmurn=.FALSE.}. 
 
+\newpage
 {\color{coral}\section{what='mur\_lc\_bands'}}
 \color{black}
 With this option the code computes the band structure at the geometry 
@@ -1823,6 +1848,7 @@ An example for this option can be found in \texttt{example06}. \\
 Number of tasks for this option: see \texttt{what='mur\_lc'} and
 \texttt{what='scf\_bands'}.
 
+\newpage
 {\color{coral}\section{what='mur\_lc\_dos'}}
 \color{black}
 With this option the code computes the electronic dos at the geometry 
@@ -1832,6 +1858,7 @@ the variables that control these two options.\\
 Number of tasks for this option: see \texttt{what='mur\_lc'} and 
 \texttt{what='scf\_dos'}.
 
+\newpage
 {\color{coral}\section{what='mur\_lc\_ph'}}
 \color{black}
 This option is similar to \texttt{what='scf\_ph'} but the phonon calculation
@@ -1844,6 +1871,7 @@ Number of tasks for this option: Maximum between the number of tasks
 needed by the \texttt{what='mur\_lc'} option and the number
 of tasks of the phonon code (see above the option \texttt{what='scf\_ph'}).
 
+\newpage
 {\color{coral}\section{what='mur\_lc\_disp'}}
 \color{black}
 This option is similar to \texttt{what='scf\_disp'} but the phonon calculation
@@ -1856,6 +1884,7 @@ Number of tasks for this option: Maximum between the number of tasks
 needed by the \texttt{what='mur\_lc'} option and the number
 of tasks of the phonon code (see above the option \texttt{what='scf\_ph'}).
 
+\newpage
 {\color{coral}\section{what='mur\_lc\_elastic\_constants'}}
 \color{black}
 As \texttt{what='scf\_elastic\_constants'} but the calculation is made at the
@@ -1874,6 +1903,7 @@ needed for the \texttt{what='scf\_elastic\_constants'} option.
 %energy minimization is made as described for \texttt{what='mur\_lc'}. \\
 %This feature is still incomplete and experimental.
 
+\newpage
 {\color{coral}\section{what='mur\_lc\_t'}}
 \color{black}
 With this option the code calculates the anharmonic 
@@ -2157,6 +2187,7 @@ of tasks of the phonon code (see above the option \texttt{what='scf\_ph'}). \\
 When \texttt{all\_geometries\_together=.TRUE.}: number of tasks of the
 phonon code times the number of geometries. \\
 
+\newpage
 {\color{coral}\section{what='elastic\_constants\_t'}}
 \color{black}
 
@@ -2609,7 +2640,7 @@ For a detailed description of the input variables please look at the beginning
 of the \texttt{fortran} sources of each code.
 
 \newpage
-{\color{dark-blue}\chapter{Examples, examples\_qe, inputs, pseudo\_test, space\_groups, tools\_inputs}}
+{\color{dark-blue}\chapter{Examples, examples\_qe, inputs, pseudo\_test, space\_groups, \\ tools\_inputs}}
 \color{black}
 
 The directories \texttt{examples}, \texttt{examples\_qe}, \texttt{inputs}, 
@@ -2991,6 +3022,18 @@ are more than eight geometries the sequence is repeated.
 The same colors are used for the elastic compliances obtained with the
 phonon density of states or from the integration over the Brillouin zone.
 
+\item
+Anharmonic quantities as a function of temperature (pressure)
+plotted for several pressures (temperatures) chosen using 
+\texttt{npress\_plot} (\texttt{ntemp\_plot}). 
+Each pressure (temperature) is
+plotted with a different color, in the sequence \texttt{red}, 
+\texttt{green}, \texttt{blue}, \texttt{yellow},
+\texttt{pink}, \texttt{cyan}, \texttt{orange}, \texttt{black} from
+\texttt{press\_plot}$(1)$ to \texttt{press\_plot}$($\texttt{npress\_plot}$)$.
+If there are more than eight pressures (temperatures)
+the sequence of colors is repeated.
+
 \end{itemize}
 
 \newpage
@@ -3015,19 +3058,19 @@ and phonon dispersion plots.
 
 \item
 \texttt{thermo.pdf}: some notes on the thermodynamic expressions implemented
-in \texttt{thermo\_pw}.
+in \thermo.
 
 \item
 \texttt{developer\_guide.pdf}: some notes on the internal logic of
-\texttt{thermo\_pw}.
+\thermo.
 
 \item
 \texttt{unit.pdf}: some notes on the atomic units used in 
-\texttt{thermo\_pw}.
+\thermo.
 
 \item
 \texttt{equilibrium.pdf}: some notes on the atomic units used in 
-\texttt{thermo\_pw} for the equilibrium thermodynamic tensors.
+\thermo\ for the equilibrium thermodynamic tensors.
 
 \end{itemize}
 

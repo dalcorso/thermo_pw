@@ -8,7 +8,7 @@ OUTS = $(PDFS:.pdf=.out)
 TOCS = $(PDFS:.pdf=.toc)
 
 
-doc:  all
+doc:  pdf
 all:  pdf html
 pdf: $(PDFS)
 html: user_guide developer_guide tutorial
