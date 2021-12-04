@@ -58,8 +58,8 @@ patches given below.</p>
 <br>
 * tools/epsilon_tpw.f90 was not updated to the QE68 conventions.
 Please change as in commit <a href="https://github.com/dalcorso/thermo_pw/commit/cd4353f48263e6015b770ef7488337f75a3184c4">commit_cd4353f</a> of 13/08/2021.
-* At line 170 of atomic/src/imput_upf.f90 exchange the calls to
-call set_pawsetup and CALL radial_grid_copy to have the atomic
+* At line 170 of atomic/src/import_upf.f90 exchange the calls to
+set_pawsetup and radial_grid_copy to have the atomic
 paw tests working again in QE6.8.
 
 
@@ -73,8 +73,8 @@ as in commit <a href="https://github.com/dalcorso/thermo_pw/commit/3e3953152e2c8
 PP_AEWFC_REL.
 * I usually change line 400 of Modules/read_namelists.f90 of QE6.7
 restoring the old default diago_david_ndim=4.
-* At line 170 of atomic/src/imput_upf.f90 exchange the calls to
-call set_pawsetup and CALL radial_grid_copy to have the atomic
+* At line 170 of atomic/src/import_upf.f90 exchange the calls to
+set_pawsetup and radial_grid_copy to have the atomic
 paw tests working again in QE6.7.
 
 **Patches for thermo_pw.1.4.0**:
@@ -90,8 +90,8 @@ file PW/src/pw_restart_new.f90 of QE6.6 as explained for version 1.3.0.
 PP_AEWFC_REL.
 * I usually change line 400 of Modules/read_namelists.f90 of QE6.6 
 restoring the old default diago_david_ndim=4.
-* At line 170 of atomic/src/imput_upf.f90 exchange the calls to
-call set_pawsetup and CALL radial_grid_copy to have the atomic
+* At line 170 of atomic/src/import_upf.f90 exchange the calls to
+set_pawsetup and radial_grid_copy to have the atomic
 paw tests working again in QE6.6.
 
 **Patches for thermo_pw.1.3.1 and thermo_pw.1.3.2**:
@@ -109,8 +109,8 @@ is not working in this case. See in the FAQ 24 to solve this problem.
 of this file and recompile.
 * I usually change line 400 of Modules/read_namelists.f90 of QE6.6 restoring 
 the old default diago_david_ndim=4.
-* At line 170 of atomic/src/imput_upf.f90 exchange the calls to
-call set_pawsetup and CALL radial_grid_copy to have the atomic
+* At line 170 of atomic/src/import_upf.f90 exchange the calls to
+set_pawsetup and radial_grid_copy to have the atomic
 paw tests working again in QE6.6.
 
 **Patches for thermo_pw.1.3.0**:
@@ -120,8 +120,8 @@ as in commit <a href="https://github.com/dalcorso/thermo_pw/commit/3e3953152e2c8
 * To reproduce ph_example07 it is necessary to change line 999 of 
 file PW/src/pw_restart_new.f90 of QE6.5. Substitute angle1, angle2,
 starting_magnetization with starting_magnetization, angle1, angle2.
-* At line 170 of atomic/src/imput_upf.f90 exchange the calls to 
-call set_pawsetup and CALL radial_grid_copy to have the atomic
+* At line 170 of atomic/src/import_upf.f90 exchange the calls to 
+set_pawsetup and radial_grid_copy to have the atomic
 paw tests working again in QE6.5.
 
 **Patches for thermo_pw.1.2.1**:
