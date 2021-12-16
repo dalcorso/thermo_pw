@@ -526,7 +526,7 @@ Bravais lattices compatible with the symmetry. If you think that the
 symmetry of your system is correct, then you should use one of the 
 Bravais lattices suggested by <code>thermo_pw</code>. Instead if some 
 symmetry is missing for other reasons (see the Quantum Espresso PW 
-user''s guide for possible reasons), 
+user's guide for possible reasons), 
 then correct the problem before running the elastic constant calculation.
 * If you are using supercells or you have a low dimensional system in a 
 supercell, then probably thermo_pw is not yet suited to compute automatically
