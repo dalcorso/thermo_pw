@@ -514,3 +514,21 @@ zero temperature.
 * Note also that the quasi-harmonic calculation is very time consuming.
 As an order of magnitude it requires hundreds of phonon dispersion 
 calculations.
+<br><br>
+31. Laue class not available when computing elastic constants.
+* This error usually means that your system has less symmetry than 
+expected from the Bravais lattice. For instance there is no Laue class 
+available for a solid with a cubic Bravais lattice and point group symmetry 
+different from T, T_d, T_h, O, or O_h.
+* In this case the <code>thermo_pw</code> output writes that the point 
+group and the Bravais lattice are not compatible and gives a set of 
+Bravais lattices compatible with the symmetry. If you think that the 
+symmetry of your system is correct, then you should use one of the 
+Bravais lattices suggested by <code>thermo_pw</code>. Instead if some 
+symmetry is missing for other reasons (see the Quantum Espresso PW 
+user''s guide for possible reasons), 
+then correct the problem before running the elastic constant calculation.
+* If you are using supercells or you have a low dimensional system in a 
+supercell, then probably thermo_pw is not yet suited to compute automatically
+the elastic constants of your system.
+
