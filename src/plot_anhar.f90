@@ -291,6 +291,8 @@ LOGICAL  :: first_step, last_step
 !
 IF ( my_image_id /= root_image ) RETURN
 !
+IF ( npress_plot==0 ) RETURN
+!
 gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//'_anhar_press'
 CALL gnuplot_start(gnu_filename)
 
