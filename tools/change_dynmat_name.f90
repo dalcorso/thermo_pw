@@ -19,6 +19,7 @@ PROGRAM change_dynmat_name
 !
 ! Note that all changes are simultaneous, so orig# must be all different
 ! and the order of the changes is not relevant.
+! If new# is zero the dynamical matrix orig# is removed.
 !
 USE io_global, ONLY : stdout
 IMPLICIT NONE
@@ -72,20 +73,28 @@ ALLOCATE(save_name(nfiles_tot))
 nfiles=0
 DO i=1,n
    fildyn_in=TRIM(filename)//'.g'//TRIM(int_to_char(orig(i)))//'.0'
-   fildyn_out=TRIM(filename)//'.g'//TRIM(int_to_char(new(i)))//'.0_b'
-   ierr=system('mv '//TRIM(fildyn_in)//' '//TRIM(fildyn_out))
-   nfiles=nfiles+1
-   save_name(nfiles)=fildyn_out
+   IF (new(i)==0) THEN
+      ierr=system('rm '//TRIM(fildyn_in))
+   ELSE   
+      fildyn_out=TRIM(filename)//'.g'//TRIM(int_to_char(new(i)))//'.0_b'
+      ierr=system('mv '//TRIM(fildyn_in)//' '//TRIM(fildyn_out))
+      nfiles=nfiles+1
+      save_name(nfiles)=fildyn_out
+   ENDIF
    DO j=1,ndyn(i)
       fildyn_in=TRIM(filename)//'.g'//TRIM(int_to_char(orig(i)))//'.'//&
                                 &TRIM(int_to_char(j))//TRIM(ext)
-      fildyn_out=TRIM(filename)//'.g'//TRIM(int_to_char(new(i)))//'.'&
+      IF (new(i)==0) THEN
+         ierr=system('rm '//TRIM(fildyn_in))
+      ELSE
+         fildyn_out=TRIM(filename)//'.g'//TRIM(int_to_char(new(i)))//'.'&
                                  &//TRIM(int_to_char(j))//TRIM(ext)//'_b'
-      ierr=system('mv '//TRIM(fildyn_in)//' '//TRIM(fildyn_out))
-      nfiles=nfiles+1
-      IF (nfiles>nfiles_tot) CALL errore('change_name',&
+         ierr=system('mv '//TRIM(fildyn_in)//' '//TRIM(fildyn_out))
+         nfiles=nfiles+1
+         IF (nfiles>nfiles_tot) CALL errore('change_name',&
                                                 'wrong number of files',1)
-      save_name(nfiles)=fildyn_out
+         save_name(nfiles)=fildyn_out
+      ENDIF
    ENDDO
 ENDDO
 

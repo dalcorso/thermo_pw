@@ -19,6 +19,7 @@ PROGRAM change_e_name
 !
 ! Note that all changes are simultaneous, so orig# must be all different
 ! and the order of the changes is not relevant.
+! If new# is zero the file orig# is removed.
 !
 IMPLICIT NONE
 CHARACTER(LEN=256) :: filename, file_in, file_out
@@ -44,10 +45,14 @@ ENDDO
 nfiles=0
 DO i=1,n
    file_in=TRIM(filename)//'.g'//TRIM(int_to_char(orig(i)))
-   file_out=TRIM(filename)//'.g'//TRIM(int_to_char(new(i)))//'.b'
-   ierr=system('mv '//TRIM(file_in)//' '//TRIM(file_out))
-   nfiles=nfiles+1
-   save_name(nfiles)=file_out
+   IF (new(i)==0) THEN
+      ierr=system('rm '//TRIM(file_in))
+   ELSE
+      file_out=TRIM(filename)//'.g'//TRIM(int_to_char(new(i)))//'.b'
+      ierr=system('mv '//TRIM(file_in)//' '//TRIM(file_out))
+      nfiles=nfiles+1
+      save_name(nfiles)=file_out
+   ENDIF
 ENDDO
 
 DO i=1,nfiles
