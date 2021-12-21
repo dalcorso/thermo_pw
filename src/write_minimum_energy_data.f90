@@ -22,6 +22,15 @@ SUBROUTINE write_minimum_energy_data()
   CHARACTER(LEN=20) :: quantity
   !
   WRITE(stdout,'(/,2x,76("-"))')
+  IF (ieos==1) THEN
+     WRITE(stdout,'(/,5x,"Birch-Murnaghan 3 order equation of state")')
+  ELSEIF (ieos==2) THEN
+     WRITE(stdout,'(/,5x,"Birch-Murnaghan 4 order equation of state")')
+  ELSEIF (ieos==4) THEN
+     WRITE(stdout,'(/,5x,"Murnaghan equation of state")')
+  ELSE
+     CALL errore("write_minimum_energy_data","wrong ieos",1)
+  ENDIF
   IF (pressure_kb /= 0.0_DP) THEN
      WRITE(stdout,'(5x,"At pressure ",f15.6," kbar")') pressure_kb
      quantity='enthalpy'
