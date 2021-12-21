@@ -18,9 +18,8 @@ features implemented in <code>thermo_pw</code>:</p>
 12. C. Malica and A. Dal Corso,
 Quasi-harmonic thermoelasticity of palladium, platinum, copper and gold
 from first principles,
-Journal of Physics: Condensed Matter, to appear.
 <a href="https://iopscience.iop.org/article/10.1088/1361-648X/ac2041">
-preprint.</a>
+J. of Phys.: Condens. Matter <B>33</B>, 475901 (2021)</a>
 
 11. O. Motornyi, N. Vast, I. Timrov, O. Baseggio, S. Baroni, and A. Dal Corso,
 Electron energy loss spectroscopy of bulk gold with ultrasoft pseudopotentials and the Liouville-Lanczos method,
