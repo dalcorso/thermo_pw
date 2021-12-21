@@ -127,8 +127,7 @@ SUBROUTINE pheqscf()
         DO iu=start_freq, last_freq
            CALL calc_chi(fru(iu),fiu(iu),chirr(iu))
            chirr(iu)=chirr(iu) / omega
-           epsm1(iu)=CMPLX(1.0_DP,0.0_DP)+ chirr(iu)*fpi*e2/&
-                                                 qnorm**2/tpiba2
+           epsm1(iu)=CMPLX(1.0_DP,0.0_DP)+ chirr(iu)*fpi*e2/qnorm**2
            CALL write_chi_on_disk(iu)
         ENDDO
         CALL deallocate_lanczos()

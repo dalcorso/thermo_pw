@@ -61,7 +61,8 @@ Please change as in commit <a href="https://github.com/dalcorso/thermo_pw/commit
 * At line 170 of atomic/src/import_upf.f90 exchange the calls to
 set_pawsetup and radial_grid_copy to have the atomic
 paw tests working again in QE6.8.
-
+* At line 131 of thermo_pw/qe/pheqscf.f90 remove tpiba2 to have example21
+working again.
 
 **Patches for thermo_pw.1.5.0**:
 <br>
@@ -76,6 +77,8 @@ restoring the old default diago_david_ndim=4.
 * At line 170 of atomic/src/import_upf.f90 exchange the calls to
 set_pawsetup and radial_grid_copy to have the atomic
 paw tests working again in QE6.7.
+* At line 131 of thermo_pw/qe/pheqscf.f90 remove tpiba2 to have example21
+working again.
 
 **Patches for thermo_pw.1.4.0**:
 <br>
@@ -93,6 +96,8 @@ restoring the old default diago_david_ndim=4.
 * At line 170 of atomic/src/import_upf.f90 exchange the calls to
 set_pawsetup and radial_grid_copy to have the atomic
 paw tests working again in QE6.6.
+* At line 131 of thermo_pw/qe/pheqscf.f90 remove tpiba2 to have example21
+working again.
 
 **Patches for thermo_pw.1.3.1 and thermo_pw.1.3.2**:
 <br>
@@ -112,6 +117,8 @@ the old default diago_david_ndim=4.
 * At line 170 of atomic/src/import_upf.f90 exchange the calls to
 set_pawsetup and radial_grid_copy to have the atomic
 paw tests working again in QE6.6.
+* At line 131 of thermo_pw/qe/pheqscf.f90 remove tpiba2 to have example21
+working again.
 
 **Patches for thermo_pw.1.3.0**:
 <br>
