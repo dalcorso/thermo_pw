@@ -90,6 +90,12 @@ Clean Ir(111) and Pt(111) electronic surface states: a first-principle fully rel
 
 <p align="justify">The following works contain some calculations made by <code>thermo_pw</code>:</p>
 <br>
+5. C. Malica,
+From ab-initio thermodynamics to quasi-harmonic thermoelastic properties 
+of crystals: A new workflow and selected applications,
+<a href="https://iris.sissa.it/retrieve/handle/20.500.11767/125489/148394/Cristiano_Malica_Thesis.pdf">PhD thesis.</a>
+<br>
+<br>
 4. A. Urru,
 Lattice dynamics with Fully Relativistic Pseudopotentials for magnetic systems,
 with selected applications,
