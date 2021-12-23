@@ -716,10 +716,37 @@ manage_elastic_cons_qha.f90, manage_elastic_cons_qha_2.f90
 \end{verbatim}
 coordinates the calculation of the temperature dependent elastic constants,
 \begin{verbatim}
-../src/manage_el_free_energy.f90      
+manage_el_free_energy.f90      
 \end{verbatim}
 coordinates the calculation of the electronic thermodynamic properties for
 many geometries.
+
+Presently the managers are called in the sequence:
+\begin{verbatim}
+a.r.  (part 1)
+               -> manage_energy_minimum -> manage_xrdp
+manage_syn_1   -> manage_elastic_cons
+
+               -> manage_bands -> manage_surface_states
+manage_sync_pw -> manage_xrdp
+
+a.r.  (part 2)
+               -> manage_el_free_energy
+manage_syn_2   -> manage_elastic_cons
+
+                                           -> manage_collection
+               -> manage_ph_all_geometries (a.r. part 2) 
+                                           -> manage_ph_postproc
+manage_ph_run  -> manage_ph (a.r. part 2) -> manage_collection
+                                          -> manage_ph_postproc
+
+                      -> manage_anhar
+manage_anhar_routines -> manage_anhar_anis
+
+manage_elastic_cons_qha -> manage_elastic_cons_qha_2
+
+a.r. means asynchronous run.
+\end{verbatim}
 
 \newpage
 {\color{dark-blue}\chapter{How to insert a new flow-chart}}
@@ -1829,7 +1856,7 @@ does not link the \texttt{thermo\_pw} variables and cannot use them, while
 \texttt{thermo\_pw} links the library produced in this directory and can
 call these routines instead of those of \qe. The routines in this directory
 can call all the routines or use the variables of all the libraries
-of \qe: \texttt{pwlib}, \texttt{librlmodule},
+of \qe: \texttt{pwlib}, \texttt{liblrmodule},
 \texttt{phlib}, \texttt{pplib} and all lower level libraries.
 As a rule the routines here should have the same names of those in \qe\ with
 the extension \texttt{\_tpw}. This directory contains also many routines
