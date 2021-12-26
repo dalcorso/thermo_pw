@@ -18,7 +18,7 @@ $ECHO "at the equilibrium lattice constant."
 . ../../../environment_variables
 
 # required executables and pseudopotentials
-BIN_LIST="thermo_pw.x plotband.x"
+BIN_LIST="thermo_pw.x"
 PSEUDO_LIST="Si.pz-vbc.UPF"
 
 $ECHO
