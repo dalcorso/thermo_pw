@@ -251,7 +251,11 @@ DO is = 1, nspin_lsda
    !  collect all the quantity to symmetrize in all processors
    !
    DO ipol = 1, 3
+#if defined(__MPI)
       CALL cgather_sym( dfftp, dvsym(:, is, ipol), aux(:, ipol))
+#else
+      aux(:,ipol)= dvsym(:, is, ipol)
+#endif
       dvsym(:,is,ipol) = (0.0_DP, 0.0_DP)
    ENDDO
    !
@@ -287,7 +291,11 @@ IF (noncolin.AND.domag) THEN
    DO ipol = 1, 3
       CALL ccryst_to_cart_t (dfftp%nnr, dvsym(:,2:4,ipol), bg, -1)
       DO is = 2, nspin_mag
+#if defined(__MPI)
          CALL cgather_sym( dfftp, dvsym(:, is, ipol), aux_nc(:, is-1, ipol))
+#else
+         aux_nc(:, is-1, ipol)=dvsym(:, is, ipol)
+#endif
          dvsym(:,is,ipol) = (0.0_DP, 0.0_DP)
       ENDDO
    ENDDO
@@ -412,7 +420,11 @@ DO is = 1, nspin_lsda
    !
    !  collect all the quantity to symmetrize in all processors
    !
+#if defined(__MPI)
    CALL cgather_sym(dfftp, dvsym(:, is), aux(:))
+#else
+   aux(:) = dvsym(:, is)
+#endif
    dvsym(:,is)=(0.0_DP, 0.0_DP)
    !
    !  symmmetrize. Each processor symmetrizes only the points that it has
@@ -452,7 +464,11 @@ IF (noncolin.AND.domag) THEN
 !
    CALL ccryst_to_cart_t (dfftp%nnr, dvsym(:,2:4), bg, -1)
    DO is = 2, nspin_mag
+#if defined(__MPI)
       CALL cgather_sym( dfftp, dvsym(:, is), aux_nc(:, is-1))
+#else
+      aux_nc(:, is-1)= dvsym(:, is)
+#endif
       dvsym(:,is) = (0.0_DP, 0.0_DP)
    ENDDO
    !
@@ -599,7 +615,11 @@ IF (minus_q) THEN
       !  collect all the quantity to symmetrize in all processors
       !
       DO ipert = 1, npe
+#if defined(__MPI)
          CALL cgather_sym( dfftp, dvsym(:, is, ipert), aux(:, ipert))
+#else
+         aux(:, ipert)= dvsym(:, is, ipert)
+#endif
       ENDDO
       !
       !  symmmetrize. Each processor symmetrizes only the points that it has
@@ -642,7 +662,11 @@ DO is=1, nspin_lsda
    !  collect all the quantities to symmetrize in all processors
    !
    DO ipert = 1, npe
+#if defined(__MPI)
       CALL cgather_sym( dfftp, dvsym(:, is, ipert), aux(:, ipert))
+#else
+      aux(:, ipert)=dvsym(:, is, ipert)
+#endif
    ENDDO
    !
    !  symmmetrize. Each processor symmetrizes only the points that it has
@@ -703,7 +727,11 @@ IF (noncolin.AND.domag) THEN
    DO ipert = 1, npe
       CALL ccryst_to_cart_t (dfftp%nnr, dvsym(:,2:4,ipert), bg, -1)
       DO is = 2, nspin_mag
+#if defined(__MPI)
          CALL cgather_sym( dfftp, dvsym(:, is, ipert), aux_nc(:, is-1, ipert))
+#else
+         aux_nc(:, is-1, ipert)=dvsym(:, is, ipert)
+#endif
          dvsym(:,is,ipert) = (0.0_DP, 0.0_DP)
       ENDDO
    ENDDO

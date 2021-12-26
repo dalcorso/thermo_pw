@@ -169,7 +169,11 @@ SUBROUTINE rotate_all_psi_tpw(ik,psic_nc,evcr,s,ftau,d_spin,has_e,gk)
      psir = ( 0.D0, 0.D0 )
      psir_collect=(0.d0,0.d0)
      DO ipol=1,npol
+#if defined(__MPI)
         CALL cgather_sym( dfftp, psic_nc(:,ipol,ibnd), psir_collect)
+#else
+        psir_collect(:)=psic_nc(:,ipol,ibnd)
+#endif
         IF (zone_border) THEN
            DO ir = 1, my_nrxx
               IF (rir(ir)==0) CYCLE
