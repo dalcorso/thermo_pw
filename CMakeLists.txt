@@ -3,11 +3,13 @@ set(src_tpw_lib
     lib/atomic_pos.f90
     lib/bz_2d_form.f90
     lib/bz_asy.f90
+    lib/color.f90
     lib/cubic_surfaces.f90
     lib/debye_module.f90
     lib/diagonalize.f90
     lib/elastic_const.f90
     lib/eldos_module.f90
+    lib/eos.f90
     lib/freecad.f90
     lib/gnuplot.f90
     lib/gnuplot_color.f90
@@ -273,6 +275,7 @@ set(src_tpw
     src/plot_elastic_t.f90
     src/plot_epsilon_omega.f90
     src/plot_formf.f90
+    src/plot_geo_p.f90
     src/plot_gruneisen_band_anis.f90
     src/plot_macro_el_t.f90
     src/plot_multi_energy.f90
@@ -325,6 +328,7 @@ set(src_tpw
     src/write_elastic_t.f90
     src/write_elastic_t_qha.f90
     src/write_ev_input.f90
+    src/write_free_energy.f90
     src/write_gnuplot_energy.f90
     src/write_gruneisen_band.f90
     src/write_gruneisen_band_anis.f90
