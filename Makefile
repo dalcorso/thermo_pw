@@ -63,7 +63,7 @@ examples_qe_clean:
 
 space_groups_clean:
 	if test -d space_groups ; then \
-	( cd space_groups ; ./clean_all ) ; fi
+	( cd space_groups/examples ; ./clean_all ) ; fi
 
 doc_clean:
 	if test -d Doc ; then \

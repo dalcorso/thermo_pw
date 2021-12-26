@@ -1,0 +1,3 @@
+#!/bin/bash
+
+\rm -rf ./res_* 2> /dev/null
