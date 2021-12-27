@@ -25,7 +25,7 @@ then
            PHonon/Gamma PHonon/PH PHonon/FD HP/src atomic/src \
            EPW/src XSpectra/src NEB/src TDDFPT/src \
            GWW/pw4gww GWW/gww GWW/head GWW/bse GWW/simple \
-           GWW/simple_bse GWW/simple_ip QEHeat/src thermo_pw/src \
+	   GWW/simple_bse GWW/simple_ip QEHeat/src thermo_pw/src \
            thermo_pw/lib thermo_pw/tools thermo_pw/qe" 
           
 elif
@@ -62,7 +62,7 @@ for dir in $dirs; do
     DEPENDS="$LEVEL1/include" 
     # for convenience, used later
     DEPEND1="$LEVEL1/include $LEVEL1/FFTXlib $LEVEL1/XClib $LEVEL1/LAXlib \
-	   $LEVEL1/UtilXlib $LEVEL1/upflib"
+	     $LEVEL1/UtilXlib $LEVEL1/upflib"
     DEPEND3="$LEVEL2/include $LEVEL2/FFTXlib $LEVEL2/LAXlib $LEVEL2/UtilXlib"
     DEPEND2="$DEPEND3 $LEVEL2/upflib $LEVEL2/XClib $LEVEL2/Modules"
     case $DIR in 
@@ -169,7 +169,7 @@ EOF
 	   notfound=1
 	   $ECHO "\nWARNING! dependencies not found in directory $DIR:"
 	   grep @ make.depend
- 	   $ECHO "File $DIR/make.depend is broken"
+	   $ECHO "File $DIR/make.depend is broken"
        else
            $ECHO -n "\rdirectory $DIR : ok"
        fi
