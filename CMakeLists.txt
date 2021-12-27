@@ -92,6 +92,7 @@ set(src_tpw_qe
     qe/dvpsi_e.f90
     qe/dvqpsi_us.f90
     qe/dyndiag.f90
+    qe/ef_shift.f90
     qe/electrons.f90
     qe/ev_xml.f90
     qe/find_band_sym.f90
@@ -160,6 +161,7 @@ set(src_tpw_qe
     qe/star_q.f90
     qe/summarize_alpha.f90
     qe/sym_and_write_magnetic_charges.f90
+    qe/sym_def.f90
     qe/symmetrize_drho.f90
     qe/tra_write_zstar.f90
     qe/transform_intq_nc.f90
@@ -220,6 +222,7 @@ set(src_tpw
     src/dynmatrix_tpw.f90
     src/elastic_constants_t.f90
     src/ev_sub.f90
+    src/ev_mod.f90
     src/evaluate_celldm.f90
     src/evaluate_vm.f90
     src/fast_phq_readin.f90

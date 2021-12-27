@@ -55,6 +55,7 @@ dvkb3.o \
 dvpsi_e.o \
 dvqpsi_us.o \
 dyndiag.o \
+ef_shift.o \
 electrons.o \
 ev_xml.o \
 find_band_sym.o \
@@ -123,6 +124,7 @@ solve_linear_system.o \
 star_q.o \
 summarize_alpha.o \
 sym_and_write_magnetic_charges.o \
+sym_def.o \
 symmetrize_drho.o \
 transform_intq_nc.o \
 transform_intq_so.o \
