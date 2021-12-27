@@ -1,4 +1,11 @@
-New in version 1.6
+New in version 1.6.1
+
+This version is identical to 1.6.0 but it is compatible with QE7.0.
+
+27/12/2021 Version 1.6.0 is now frozen
+New in version 1.6.0
+
+This version is compatible with QE6.8.
 
 Added a plot of the enthalpy as a function of pressure. 
 Added a plot of the crystal parameters as a function of pressure.
