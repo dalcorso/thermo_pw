@@ -45,13 +45,13 @@ SUBROUTINE sym_band_sub(filband, spin_component)
                                    rap_plot, dkmod_save
   USE data_files,           ONLY : flprojlayer
   USE uspp,                 ONLY : nkb, vkb
-  USE spin_orb,             ONLY : domag
-  USE noncollin_module,     ONLY : noncolin
+  USE noncollin_module,     ONLY : noncolin, domag
   USE wavefunctions,        ONLY : evc
   USE io_bands,             ONLY : write_representations
   USE io_global,            ONLY : ionode, ionode_id, stdout
   USE mp,                   ONLY : mp_bcast
   USE mp_images,            ONLY : intra_image_comm
+  USE uspp_init,            ONLY : init_us_2
   !
   IMPLICIT NONE
   !
@@ -591,9 +591,8 @@ SUBROUTINE find_aux_ind_xk(xk1, xk2, aux_ind)
 USE kinds, ONLY : DP
 USE cell_base, ONLY : at, bg
 USE symm_base, ONLY : s, t_rev, ft, sname, nsym
-USE noncollin_module, ONLY : noncolin
+USE noncollin_module, ONLY : noncolin, domag
 USE fft_base,        ONLY : dfftp
-USE spin_orb,        ONLY : domag
 USE rap_point_group, ONLY : code_group
 USE rap_point_group_so, ONLY : d_spin
 USE rap_point_group_is, ONLY : code_group_is, nsym_is

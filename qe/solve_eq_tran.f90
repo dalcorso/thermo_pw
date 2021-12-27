@@ -36,14 +36,13 @@ subroutine solve_eq_tran(iu, flag)
   USE gvecs,                 ONLY : doublegrid
   USE fft_base,              ONLY : dfftp, dffts
   USE lsda_mod,              ONLY : lsda, nspin, current_spin, isk
-  USE spin_orb,              ONLY : domag
   USE wvfct,                 ONLY : nbnd, npwx, g2kin,  et
   USE check_stop,            ONLY : check_stop_now
   USE buffers,               ONLY : get_buffer, save_buffer
   USE wavefunctions,         ONLY : evc
   USE uspp,                  ONLY : okvan, vkb
   USE uspp_param,            ONLY : nhm
-  USE noncollin_module,      ONLY : noncolin, npol, nspin_mag
+  USE noncollin_module,      ONLY : noncolin, npol, nspin_mag, domag
   USE scf,                   ONLY : rho, v_of_0
   USE gvect,                 ONLY : gg
   USE paw_variables,         ONLY : okpaw
@@ -51,8 +50,8 @@ subroutine solve_eq_tran(iu, flag)
   USE paw_add_symmetry,      ONLY : paw_deqsymmetrize
 
   USE eqv,                   ONLY : dpsi, dvpsi, evq
-  USE units_ph,              ONLY : lrdwf, iudwf, lrdrho, iudrho, lrbar, iubar
-  USE units_lr,              ONLY : lrwfc, iuwfc
+  USE units_ph,              ONLY : lrdrho, iudrho, lrbar, iubar
+  USE units_lr,              ONLY : lrdwf, iudwf, lrwfc, iuwfc
   USE output,                ONLY : fildrho
   USE control_ph,            ONLY : ext_recover, rec_code, &
                                     lnoloc, convt, tr2_ph, nmix_ph, &
@@ -75,6 +74,7 @@ subroutine solve_eq_tran(iu, flag)
   USE mp,                    ONLY : mp_sum
   USE fft_helper_subroutines, ONLY : fftx_ntgrp
   USE fft_interfaces,        ONLY : fft_interpolate
+  USE uspp_init,             ONLY : init_us_2
 
   implicit none
 

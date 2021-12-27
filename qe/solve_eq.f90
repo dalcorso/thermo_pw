@@ -38,7 +38,6 @@ subroutine solve_eq(iu, flag)
   USE gvecs,                 ONLY : doublegrid
   USE fft_base,              ONLY : dfftp, dffts
   USE lsda_mod,              ONLY : lsda, nspin, current_spin, isk
-  USE spin_orb,              ONLY : domag
   USE wvfct,                 ONLY : nbnd, npwx, g2kin,  et
   USE klist,                 ONLY : ngk, igk_k
   USE check_stop,            ONLY : check_stop_now
@@ -46,7 +45,7 @@ subroutine solve_eq(iu, flag)
   USE wavefunctions,         ONLY : evc
   USE uspp,                  ONLY : okvan, vkb
   USE uspp_param,            ONLY : nhm
-  USE noncollin_module,      ONLY : noncolin, npol, nspin_mag
+  USE noncollin_module,      ONLY : noncolin, npol, nspin_mag, domag
   USE scf,                   ONLY : rho, v_of_0
   USE gvect,                 ONLY : gg
   USE paw_variables,         ONLY : okpaw
@@ -54,8 +53,8 @@ subroutine solve_eq(iu, flag)
   USE paw_add_symmetry,      ONLY : paw_deqsymmetrize
 
   USE eqv,                   ONLY : dpsi, dvpsi, evq
-  USE units_lr,              ONLY : lrwfc, iuwfc
-  USE units_ph,              ONLY : lrdwf, iudwf, lrdrho, iudrho, lrbar, iubar
+  USE units_lr,              ONLY : lrdwf, iudwf, lrwfc, iuwfc
+  USE units_ph,              ONLY : lrdrho, iudrho, lrbar, iubar
   USE output,                ONLY : fildrho
   USE control_ph,            ONLY : ext_recover, rec_code, &
                                     lnoloc, convt, tr2_ph, &
@@ -78,6 +77,7 @@ subroutine solve_eq(iu, flag)
   USE mp_images,             ONLY : root_image, my_image_id
   USE mp,                    ONLY : mp_sum
   USE fft_helper_subroutines, ONLY : fftx_ntgrp
+  USE uspp_init,            ONLY : init_us_2
 
 
   implicit none

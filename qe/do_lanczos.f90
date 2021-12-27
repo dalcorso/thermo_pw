@@ -42,8 +42,7 @@ SUBROUTINE do_lanczos()
   USE fft_helper_subroutines, ONLY : fftx_ntgrp
   USE fft_interfaces,        ONLY : fft_interpolate
   USE lsda_mod,              ONLY : lsda, nspin, current_spin, isk
-  USE spin_orb,              ONLY : domag
-  USE noncollin_module,      ONLY : noncolin, npol, nspin_mag
+  USE noncollin_module,      ONLY : noncolin, npol, nspin_mag, domag
   USE wvfct,                 ONLY : nbnd, npwx,  et
   USE wavefunctions,         ONLY : evc
   USE eqv,                   ONLY : dpsi, dvpsi, evq
@@ -70,6 +69,7 @@ SUBROUTINE do_lanczos()
   USE mp_pools,              ONLY : inter_pool_comm
   USE mp_bands,              ONLY : intra_bgrp_comm, ntask_groups
   USE mp,                    ONLY : mp_sum
+  USE uspp_init,            ONLY : init_us_2
 
   IMPLICIT NONE
 

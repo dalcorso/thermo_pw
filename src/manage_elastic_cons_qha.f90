@@ -16,7 +16,8 @@ USE kinds,             ONLY : DP
 USE thermo_mod,        ONLY : energy_geo, tot_ngeo 
 USE control_elastic_constants, ONLY : ngeo_strain, elcpvar, ngeom, &
                               work_base, el_con_omega_geo,         &
-                              start_geometry_qha, last_geometry_qha
+                              start_geometry_qha, last_geometry_qha, &
+                              lelastic, lelasticf
 USE initial_conf,      ONLY : ibrav_save
 USE thermo_sym,        ONLY : laue
 USE elastic_constants, ONLY : epsilon_geo, el_con, el_compliances,         &
@@ -25,8 +26,8 @@ USE elastic_constants, ONLY : epsilon_geo, el_con, el_compliances,         &
 USE thermodynamics,    ONLY : ph_free_ener
 USE ph_freq_thermodynamics, ONLY : phf_free_ener
 USE el_thermodynamics, ONLY : el_ener, el_free_ener, el_entr, el_ce
-USE anharmonic,        ONLY : el_cons_t, el_comp_t, b0_t, lelastic
-USE ph_freq_anharmonic,ONLY : el_consf_t, el_compf_t, b0f_t, lelasticf
+USE anharmonic,        ONLY : el_cons_t, el_comp_t, b0_t
+USE ph_freq_anharmonic,ONLY : el_consf_t, el_compf_t, b0f_t
 USE control_thermo,    ONLY : ltherm_dos, ltherm_freq
 USE control_eldos,     ONLY : lel_free_energy
 USE temperature,       ONLY : ntemp, temp

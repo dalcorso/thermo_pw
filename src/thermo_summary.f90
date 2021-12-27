@@ -63,8 +63,7 @@ SUBROUTINE thermo_summary()
 !
   USE rap_point_group,      ONLY : code_group
   USE fft_base,             ONLY : dfftp
-  USE noncollin_module,     ONLY : noncolin
-  USE spin_orb,             ONLY : domag
+  USE noncollin_module,     ONLY : noncolin, domag
   USE cell_base,            ONLY : ibrav, at, bg, celldm, omega
   USE ions_base,            ONLY : tau, nat, ityp, nsp, atm
   USE symm_base,            ONLY : nsym, sr, ft
@@ -517,8 +516,7 @@ FUNCTION check_group_ibrav(code_group, ibrav)
 USE kinds, ONLY : DP
 USE io_global, ONLY : stdout
 USE lattices, ONLY : lattice_name, is_compatible_group_ibrav
-USE noncollin_module, ONLY : noncolin
-USE spin_orb,         ONLY : domag
+USE noncollin_module, ONLY : noncolin, domag
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: code_group, ibrav
 

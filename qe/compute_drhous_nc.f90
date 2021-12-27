@@ -38,6 +38,7 @@ SUBROUTINE compute_drhous_nc_tpw (drhous, dbecsum, wgg, becq, alpq)
   USE partial,    ONLY : done_irr, comp_irr
   USE mp_bands,   ONLY : intra_bgrp_comm
   USE mp,         ONLY : mp_sum
+  USE uspp_init,  ONLY : init_us_2
 
   IMPLICIT NONE
   !

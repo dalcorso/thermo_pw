@@ -69,7 +69,7 @@ PROGRAM epsilon_tpw
   USE ions_base,   ONLY : ntyp => nsp
   USE uspp_param,  ONLY : nhm
   USE uspp,        ONLY : okvan
-  USE spin_orb,    ONLY : lspinorb
+  USE noncollin_module,  ONLY : lspinorb
   USE lsda_mod,    ONLY : nspin
   USE lrus,        ONLY : dpqq, dpqq_so
   USE klist,       ONLY : lgauss, ltetra
@@ -518,6 +518,7 @@ SUBROUTINE dipole_calc( ik, dipole_aux, nbndmin, nbndmax, shift )
   USE io_global,            ONLY : stdout
   USE mp_global,            ONLY : intra_bgrp_comm
   USE mp,                   ONLY : mp_sum
+  USE uspp_init,            ONLY : init_us_2
 
   IMPLICIT NONE
   !

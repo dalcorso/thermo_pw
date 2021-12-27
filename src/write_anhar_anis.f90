@@ -16,16 +16,19 @@ USE kinds,          ONLY : DP
 USE temperature,    ONLY : ntemp, temp
 USE thermo_mod,     ONLY : ibrav_geo
 USE thermo_sym,     ONLY : laue
-USE thermodynamics, ONLY : ph_e0, ph_ce, ph_b_fact, ph_ener, ph_free_ener, ph_entropy
+USE thermodynamics, ONLY : ph_e0, ph_ce, ph_b_fact, ph_ener, ph_free_ener, &
+                           ph_entropy
 USE el_thermodynamics, ONLY : el_ener, el_free_ener, el_entr, el_ce
 USE anharmonic,     ONLY : alpha_anis_t, vmin_t, b0_t, celldm_t, beta_t, &
-                           gamma_t, cv_t, ce_t, cp_t, ener_t, free_ener_t, entropy_t, b0_s, & 
-                           cpmce_anis, el_cons_t, el_comp_t, free_e_min_t, bths_t, ggamma_t, &
-                           bfact_t, lelastic, el_cons_s, el_comp_s, macro_el_t, macro_el_s, &
-                           v_t, v_s
+                           gamma_t, cv_t, ce_t, cp_t, ener_t, free_ener_t, &
+                           entropy_t, b0_s, cpmce_anis, el_cons_t, el_comp_t, &
+                           free_e_min_t, bths_t, ggamma_t, &
+                           bfact_t, el_cons_s, el_comp_s, macro_el_t, &
+                           macro_el_s, v_t, v_s
 USE initial_conf,   ONLY : ibrav_save
 USE control_thermo, ONLY : with_eigen
 USE control_eldos,  ONLY : lel_free_energy
+USE control_elastic_constants, ONLY : lelastic
 USE elastic_constants, ONLY : compute_elastic_compliances, &
                               write_el_cons_on_file, print_macro_elasticity,  &                 
                               write_macro_el_on_file, print_sound_velocities, & 
@@ -272,10 +275,11 @@ USE el_thermodynamics,  ONLY : el_ener, el_free_ener, el_entr, el_ce
 USE ph_freq_anharmonic, ONLY : alphaf_anis_t, vminf_t, b0f_t, celldmf_t, &
                                betaf_t, gammaf_t, cvf_t, cef_t, cpf_t,   &
                                enerf_t, free_enerf_t, entropyf_t, b0f_s, &
-                               cpmcef_anis, el_consf_t, el_compf_t, lelasticf, &
+                               cpmcef_anis, el_consf_t, el_compf_t, &
                                free_e_minf_t, bthsf_t, ggammaf_t, bfactf_t, &
-                               el_consf_s, el_compf_s, macro_elf_t, macro_elf_s,&
-                               vf_s, vf_t
+                               el_consf_s, el_compf_s, macro_elf_t, &
+                               macro_elf_s, vf_s, vf_t
+USE control_elastic_constants, ONLY : lelasticf
 USE elastic_constants, ONLY : compute_elastic_compliances, &
                               write_el_cons_on_file, print_macro_elasticity, &
                               write_macro_el_on_file, print_sound_velocities, &  
@@ -1099,8 +1103,7 @@ END SUBROUTINE write_generalized_gamma
 SUBROUTINE set_elastic_grun()
 !-----------------------------------------------------------------------
 
-USE anharmonic,         ONLY : lelastic
-USE ph_freq_anharmonic, ONLY : lelasticf
+USE control_elastic_constants, ONLY : lelastic, lelasticf
 USE grun_anharmonic,    ONLY : el_cons_grun_t, el_comp_grun_t, lelastic_grun
 USE temperature,        ONLY : ntemp
 USE anharmonic,         ONLY : el_cons_t, el_comp_t

@@ -29,7 +29,7 @@ SUBROUTINE c_bands_nscf_tpw( )
   USE basis,                ONLY : starting_wfc
   USE fft_base,             ONLY : dfftp
   USE klist,                ONLY : nkstot, nks, xk, ngk, igk_k
-  USE uspp,                 ONLY : vkb, nkb, using_vkb
+  USE uspp,                 ONLY : vkb, nkb
   USE gvect,                ONLY : g, gg, ngm
   USE fft_interfaces,       ONLY : invfft
   USE wvfct,                ONLY : et, nbnd, npwx, current_k
@@ -50,11 +50,11 @@ SUBROUTINE c_bands_nscf_tpw( )
   USE io_global,            ONLY : ionode
   USE check_stop,           ONLY : check_stop_now
   USE band_computation,     ONLY : diago_bands, ik_origin, sym_for_diago
-  USE noncollin_module,     ONLY : noncolin, npol
-  USE spin_orb,             ONLY : domag
+  USE noncollin_module,     ONLY : noncolin, npol, domag
 
   USE wavefunctions_gpum, ONLY : using_evc
   USE wvfct_gpum,                ONLY : using_et
+  USE uspp_init,            ONLY : init_us_2
 
   !
   IMPLICIT NONE
@@ -104,15 +104,6 @@ SUBROUTINE c_bands_nscf_tpw( )
   ELSE
      CALL errore ( 'c_bands', 'invalid type of diagonalization', isolve )
   ENDIF
-  IF (tmp_dir /= tmp_dir_save) THEN
-     iuawfc = 20
-     lrawfc = nbnd * npwx * npol
-     CALL open_buffer (iuawfc, 'wfc', lrawfc, io_level, exst_mem, exst, &
-                                                         tmp_dir_save)
-     IF (.NOT.exst.AND..NOT.exst_mem) THEN
-        CALL errore ('c_bands_tpw', 'file '//trim(prefix)//'.wfc not found', 1)
-     ENDIF
-  ENDIF
 !
 !  find the minimum number of k points diagonalized in all pools
 !
@@ -146,7 +137,6 @@ SUBROUTINE c_bands_nscf_tpw( )
         ! 
         ! ... More stuff needed by the hamiltonian: nonlocal projectors
         !
-        IF ( nkb > 0 ) CALL using_vkb(1)
         IF ( nkb > 0 ) CALL init_us_2( ngk(ik), igk_k(1,ik), xk(1,ik), vkb )
         !
         ! ... Needed for LDA+U
@@ -482,7 +472,6 @@ SUBROUTINE c_bands_nscf_tpw( )
   WRITE( stdout, '(/,5X,"Total points",I5)' ) nkstot
   WRITE( stdout, '(5X,"Diagonalized points",I5,3X,"Symmetrized points", I5)' )&
                                               ik_diago, ik_sym
-  IF (tmp_dir /= tmp_dir_save) CALL close_buffer(iuawfc,'keep')
   !
   CALL stop_clock( 'c_bands' )
  
@@ -553,9 +542,8 @@ USE wavefunctions, ONLY : evc
 USE fft_interfaces,       ONLY : fwfft
 USE io_files,          ONLY : iunwfc, nwordwfc
 USE band_computation,  ONLY : isym_bands
-USE noncollin_module,  ONLY : noncolin, npol
+USE noncollin_module,  ONLY : noncolin, npol, domag
 USE control_lr,        ONLY : lgamma
-USE spin_orb,          ONLY : domag
 USE buffers,           ONLY : save_buffer
 
 IMPLICIT NONE

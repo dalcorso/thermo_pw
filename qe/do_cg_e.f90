@@ -32,8 +32,7 @@ SUBROUTINE do_cg_e(drhoscfs)
   USE fft_base,              ONLY : dfftp, dffts
   USE fft_helper_subroutines, ONLY : fftx_ntgrp
   USE lsda_mod,              ONLY : lsda, nspin, current_spin, isk
-  USE spin_orb,              ONLY : domag
-  USE noncollin_module,      ONLY : noncolin, npol, nspin_mag
+  USE noncollin_module,      ONLY : noncolin, npol, nspin_mag, domag
   USE wvfct,                 ONLY : nbnd, npwx, g2kin, et
   USE wavefunctions,         ONLY : evc
   USE eqv,                   ONLY : dpsi, dvpsi, evq
@@ -53,8 +52,8 @@ SUBROUTINE do_cg_e(drhoscfs)
   USE lr_global,             ONLY : rpert, evc0, evq0, sevq0, &
                                     d0psi, d0psi2
   USE lr_cg,                 ONLY : evc1, res, pres, dir, dir_new, prec_vec
-  USE units_ph,              ONLY : lrdwf, iudwf
-  USE units_lr,              ONLY : lrwfc, iuwfc
+  USE units_lr,              ONLY : lrwfc, iuwfc, lrdwf, iudwf
+  USE uspp_init,             ONLY : init_us_2
   USE buffers,               ONLY : get_buffer, save_buffer
   USE mp_pools,              ONLY : inter_pool_comm
   USE mp_bands,              ONLY : intra_bgrp_comm, ntask_groups

@@ -23,13 +23,12 @@ USE cubic_surfaces, ONLY : fit_multi_cubic
 USE quartic_surfaces, ONLY : fit_multi_quartic
 
 USE elastic_constants, ONLY : write_el_cons_on_file
-USE control_elastic_constants, ONLY : el_con_geo
+USE control_elastic_constants, ONLY : el_con_geo, lelastic, lelasticf
 USE lattices,       ONLY : crystal_parameters
 USE control_thermo, ONLY : ltherm_dos, ltherm_freq
 USE control_macro_elasticity, ONLY: macro_el
-USE anharmonic,     ONLY : celldm_t, el_cons_t, el_comp_t, b0_t, lelastic
-USE ph_freq_anharmonic, ONLY : celldmf_t, el_consf_t, el_compf_t, b0f_t, &
-                           lelasticf
+USE anharmonic,     ONLY : celldm_t, el_cons_t, el_comp_t, b0_t
+USE ph_freq_anharmonic, ONLY : celldmf_t, el_consf_t, el_compf_t, b0f_t
 USE polynomial, ONLY : poly1, poly2, poly3, poly4, init_poly, clean_poly
 USE data_files, ONLY : flanhar
 USE temperature, ONLY : ntemp, temp

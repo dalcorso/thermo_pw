@@ -68,7 +68,7 @@ USE control_2d_bands, ONLY : nkz, gap_thr, sym_divide
 USE data_files, ONLY : flpbs
 USE gnuplot,  ONLY : gnuplot_polygon, gnuplot_line, gnuplot_write_command
 USE point_group, ONLY : convert_rap
-USE spin_orb, ONLY : lspinorb
+USE noncollin_module, ONLY : lspinorb
 USE io_global, ONLY : ionode, ionode_id, stdout
 USE mp_images, ONLY : intra_image_comm
 USE mp, ONLY : mp_bcast

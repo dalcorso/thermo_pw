@@ -24,13 +24,12 @@ SUBROUTINE set_int3q(irr, imode0, rpert, drhoscf, int3_paw0, dvscfin)
   USE gvecs,            ONLY : doublegrid
   USE fft_base,         ONLY : dfftp, dffts
   USE fft_interfaces,   ONLY : fft_interpolate
-  USE spin_orb,         ONLY : domag
   USE lr_symm_base,     ONLY : irotmq, minus_q, nsymq, rtau
   USE modes,            ONLY : npertx, u, t, tmq
   USE buffers,          ONLY : get_buffer
   USE units_ph,         ONLY : iudrhous, lrdrhous
   USE control_ph,       ONLY : lgamma_gamma
-  USE noncollin_module, ONLY : noncolin, nspin_mag
+  USE noncollin_module, ONLY : noncolin, nspin_mag, domag
   USE scf,              ONLY : rho
   USE uspp,             ONLY : okvan, nlcc_any
   USE uspp_param,       ONLY : nhm

@@ -31,21 +31,20 @@ subroutine solve_e_tpw(drhoscf)
   USE gvecs,                 ONLY : doublegrid
   USE fft_base,              ONLY : dfftp, dffts
   USE lsda_mod,              ONLY : lsda, nspin, current_spin, isk
-  USE spin_orb,              ONLY : domag
   USE wvfct,                 ONLY : nbnd, npwx, g2kin, et
   USE check_stop,            ONLY : check_stop_now
   USE buffers,               ONLY : get_buffer, save_buffer
   USE wavefunctions,         ONLY : evc
   USE uspp,                  ONLY : okvan, vkb, nlcc_any
   USE uspp_param,            ONLY : nhm
-  USE noncollin_module,      ONLY : noncolin, npol, nspin_mag
+  USE noncollin_module,      ONLY : noncolin, npol, nspin_mag, domag
   USE scf,                   ONLY : rho
   USE paw_variables,         ONLY : okpaw
   USE paw_onecenter,         ONLY : paw_dpotential
   USE paw_symmetry,          ONLY : paw_desymmetrize
 
-  USE units_ph,              ONLY : lrdwf, iudwf, lrdrho,  iudrho
-  USE units_lr,              ONLY : lrwfc, iuwfc
+  USE units_ph,              ONLY : lrdrho,  iudrho
+  USE units_lr,              ONLY : lrdwf, iudwf, lrwfc, iuwfc
   USE output,                ONLY : fildrho
   USE control_ph,            ONLY : ext_recover, rec_code, &
                                     lnoloc, convt, tr2_ph, nmix_ph, zeu, &
@@ -68,6 +67,7 @@ subroutine solve_e_tpw(drhoscf)
   USE magnetic_charges,      ONLY : alpha_me
   USE cell_base,             ONLY : bg
   USE gvect,                 ONLY : gg
+  USE uspp_init,            ONLY : init_us_2
 
   implicit none
 

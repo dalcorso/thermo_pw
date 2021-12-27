@@ -27,9 +27,8 @@ USE kinds,          ONLY : DP
 USE fft_base,       ONLY : dffts
 USE wvfct,          ONLY : nbnd, npwx
 USE wavefunctions,  ONLY : evc
-USE noncollin_module,  ONLY : noncolin, npol, nspin_mag
+USE noncollin_module,  ONLY : noncolin, npol, nspin_mag, domag
 USE control_lr,     ONLY : nbnd_occ
-USE spin_orb,       ONLY : domag
 USE lsda_mod,       ONLY : lsda, current_spin, isk
 USE uspp,           ONLY : okvan
 USE lrus,           ONLY : int3_nc, becp1
@@ -117,14 +116,14 @@ CALL stop_clock ('vpsifft')
 !  V_{eff} on the bare change of the potential
 !
 IF (isolv==1) THEN
-   CALL adddvscf_ph_mag (ipert, ik, becp1)
+   CALL adddvscf_ (ipert, ik, becp1(ik))
    !
    ! DFPT+U: add to dvpsi the scf part of the response
    ! Hubbard potential dV_hub
    !
    IF (lda_plus_u) call adddvhubscf (ipert, ik)
 ELSE
-   CALL adddvscf_ph_mag (ipert, ik, becpt)
+   CALL adddvscf_ (ipert, ik, becpt(ik))
 ENDIF
 !
 !  reset the original magnetic field if it was changed

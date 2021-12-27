@@ -41,7 +41,7 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
   USE control_gnuplot, ONLY : gnuplot_command, lgnuplot
   USE gnuplot,         ONLY : gnuplot_end, gnuplot_print_objects
   USE ions_base,     ONLY : nat
-  USE spin_orb,      ONLY : lspinorb
+  USE noncollin_module, ONLY : lspinorb
   USE thermo_sym,    ONLY : code_group_save
   USE io_bands,      ONLY : read_parameters, read_representations, read_bands
   USE mp,            ONLY : mp_bcast

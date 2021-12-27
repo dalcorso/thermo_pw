@@ -10,9 +10,10 @@ USE kinds,            ONLY : DP
 USE cell_base,        ONLY : ibrav
 USE thermo_sym,       ONLY : laue
 USE temperature,      ONLY : ntemp, temp
-USE control_elastic_constants,  ONLY : el_cons_qha_available
-USE anharmonic,         ONLY : lelastic, el_cons_t, el_comp_t, b0_t
-USE ph_freq_anharmonic, ONLY : lelasticf, el_consf_t, el_compf_t, b0f_t 
+USE control_elastic_constants,  ONLY : el_cons_qha_available, lelastic, &
+                               lelasticf
+USE anharmonic,         ONLY : el_cons_t, el_comp_t, b0_t
+USE ph_freq_anharmonic, ONLY : el_consf_t, el_compf_t, b0f_t 
 USE data_files,       ONLY : flanhar
 USE control_thermo,   ONLY : ltherm_freq, ltherm_dos
 

@@ -31,12 +31,11 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   USE gvecs,                ONLY : doublegrid
   USE fft_base,             ONLY : dfftp, dffts
   USE lsda_mod,             ONLY : lsda, nspin, current_spin, isk
-  USE spin_orb,             ONLY : domag
   USE wvfct,                ONLY : nbnd, npwx
   USE scf,                  ONLY : rho, vrs
-  USE uspp,                 ONLY : okvan, nkb, vkb, deeq_nc, using_vkb
+  USE uspp,                 ONLY : okvan, nkb, vkb, deeq_nc
   USE uspp_param,           ONLY : nhm
-  USE noncollin_module,     ONLY : noncolin, npol, nspin_mag
+  USE noncollin_module,     ONLY : noncolin, npol, nspin_mag, domag
   USE paw_variables,        ONLY : okpaw
   USE paw_onecenter,        ONLY : paw_dpotential
   USE buffers,              ONLY : save_buffer, get_buffer
@@ -46,9 +45,9 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   USE el_phon,              ONLY : elph
   USE modes,                ONLY : u
   USE uspp,                 ONLY : nlcc_any
-  USE units_ph,             ONLY : iudrho, lrdrho, iudwf, lrdwf, iubar, lrbar, &
+  USE units_ph,             ONLY : iudrho, lrdrho, iubar, lrbar, &
                                    iudvscf, iuint3paw, lint3paw
-  USE units_lr,             ONLY : iuwfc, lrwfc
+  USE units_lr,             ONLY : iuwfc, lrwfc, iudwf, lrdwf
   USE output,               ONLY : fildrho, fildvscf
   USE phus,                 ONLY : becsumort, alphap, int1_nc
   USE recover_mod,          ONLY : write_rec
@@ -62,8 +61,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   USE mp_asyn,              ONLY : asyn_master, with_asyn_images
   USE mp_images,            ONLY : my_image_id, root_image
   USE mp,                   ONLY : mp_sum
-  USE efermi_shift,         ONLY : ef_shift, ef_shift_paw,  def
-
+  USE efermi_shift_tpw,     ONLY : ef_shift_tpw, ef_shift_paw_tpw,  def
   USE lrus,         ONLY : int3_paw, becp1
   USE eqv,          ONLY : dvpsi, dpsi, evq
   USE qpoint,       ONLY : xq, nksq, ikks, ikqs
@@ -75,7 +73,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   USE ldaU,         ONLY : lda_plus_u
   USE magnetic_charges,     ONLY : mag_charge_mode
   USE gvect,                ONLY : gg
-
+  USE uspp_init,            ONLY : init_us_2
 
   IMPLICIT NONE
 
@@ -261,7 +259,6 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
         ! needed by h_psi, called by ch_psi_all, called by cgsolve_all
         !
         IF ( nkb > 0 ) THEN
-           CALL using_vkb(2)
            CALL init_us_2( npwq, igk_k(1,ikq), xk(1,ikq), vkb )
         ENDIF
         CALL g2_kin (ikq) 
@@ -372,7 +369,6 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
               !
               CALL solve_linear_system(dvpsi, dpsi, h_diag, thresh, ik, &
                                                             isolv, lter)
-
               ltaver = ltaver + lter
               lintercall = lintercall + 1
               !
@@ -447,14 +443,14 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
      !
      IF (okpaw) THEN
         IF (lmetq0) &
-           CALL ef_shift_paw (drhoscfh, dbecsum, ldos, ldoss, becsum1, &
+           CALL ef_shift_paw_tpw (drhoscfh, dbecsum, ldos, ldoss, becsum1, &
                                                   dos_ef, irr, npe, .false.)
         DO ipert=1,npe
            dbecsum(:,:,:,ipert)=2.0_DP *dbecsum(:,:,:,ipert) &
                                +becsumort(:,:,:,imode0+ipert)
         ENDDO
      ELSE
-        IF (lmetq0) call ef_shift(drhoscfh,ldos,ldoss,dos_ef,irr,npe,.false.)
+        IF (lmetq0) call ef_shift_tpw(drhoscfh,ldos,ldoss,dos_ef,irr,npe,.false.)
      ENDIF
      !
      !   After the loop over the perturbations we have the linear change
@@ -498,10 +494,10 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
      !
      IF (lmetq0.AND.convt) THEN
         IF (okpaw) THEN
-           call ef_shift_paw (drhoscf, dbecsum, ldos, ldoss, becsum1, &
+           call ef_shift_paw_tpw (drhoscf, dbecsum, ldos, ldoss, becsum1, &
                                                   dos_ef, irr, npe, .true.)
         ELSE
-            call ef_shift (drhoscf, ldos, ldoss, dos_ef, irr, npe, .true.)
+            call ef_shift_tpw (drhoscf, ldos, ldoss, dos_ef, irr, npe, .true.)
         ENDIF
      ENDIF
      !

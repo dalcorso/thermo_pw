@@ -27,8 +27,7 @@ subroutine phq_summary_tpw
   USE gvecs,         ONLY : doublegrid, dual, gcutms, ngms
   USE fft_base,      ONLY : dffts
   USE symm_base,     ONLY : s, sr, ft, sname, t_rev
-  USE noncollin_module, ONLY : noncolin
-  USE spin_orb,      ONLY : lspinorb, domag
+  USE noncollin_module, ONLY : noncolin, lspinorb, domag
   USE funct,         ONLY : write_dft_name
   USE run_info,      ONLY : title
   USE gamma_gamma,   ONLY : with_symmetry, nasr
@@ -45,7 +44,7 @@ subroutine phq_summary_tpw
   USE qpoint,        ONLY : xq
   USE lr_symm_base,  ONLY : irotmq, minus_q, nsymq
   USE constants,     ONLY : rytoev
-  USE ldaU_ph,       ONLY : effU
+  USE ldaU_lr,       ONLY : effU
   USE ldaU,          ONLY : lda_plus_u, Hubbard_U, Hubbard_J0, &
                             lda_plus_u_kind, is_hubbard
  

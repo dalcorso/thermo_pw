@@ -20,8 +20,8 @@ USE kinds, ONLY : DP
 USE control_thermo,        ONLY : ltherm_dos, ltherm_freq
 USE control_grun,          ONLY : lb0_t
 USE control_mur,           ONLY : b0
-USE anharmonic,            ONLY : el_cons_t, el_comp_t, b0_t, lelastic
-USE ph_freq_anharmonic,    ONLY : el_consf_t, el_compf_t, b0f_t, lelasticf
+USE anharmonic,            ONLY : el_cons_t, el_comp_t, b0_t
+USE ph_freq_anharmonic,    ONLY : el_consf_t, el_compf_t, b0f_t
 USE control_macro_elasticity, ONLY: macro_el
 USE temperature,           ONLY : ntemp
 USE elastic_constants,     ONLY : el_con, el_compliances
@@ -29,7 +29,8 @@ USE control_elastic_constants, ONLY : el_cons_available, el_cons_t_available, &
                                   el_cons_qha_available,                 &
                                   el_cons_qha_geo_available,             &
                                   el_consf_qha_available,                &
-                                  el_consf_qha_geo_available
+                                  el_consf_qha_geo_available, lelastic,  &
+                                  lelasticf
 IMPLICIT NONE
 
 INTEGER :: itemp

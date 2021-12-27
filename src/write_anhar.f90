@@ -724,9 +724,9 @@ SUBROUTINE write_anhar_p()
 USE kinds,          ONLY : DP
 USE constants,      ONLY : ry_kbar
 USE temperature,    ONLY : ntemp, temp, itemp300
-USE anharmonic,     ONLY : vmin_pt, emin_pt, beta_pt, b0_pt, b01_pt, &
-                           b02_pt, ce_pt, cp_pt, gamma_pt, b0_s_pt,  &
-                           celldm_t
+USE anharmonic_pt,  ONLY : vmin_pt, emin_pt, beta_pt, b0_pt, b01_pt, &
+                           b02_pt, ce_pt, cp_pt, gamma_pt, b0_s_pt
+USE anharmonic,     ONLY : celldm_t   ! not used in this routine
 USE thermodynamics, ONLY : ph_ce
 USE data_files,     ONLY : flanhar
 USE control_pressure, ONLY : press, ipress_plot, npress_plot
@@ -807,8 +807,9 @@ USE temperature,    ONLY : temp, deltat, itemp_plot
 USE thermodynamics, ONLY : ph_ce
 USE eos,            ONLY : eos_bulk_pol
 USE control_ev,     ONLY : ieos
-USE anharmonic,     ONLY : betap, vmin_ptt, b0_ptt, b01_ptt, b02_ptt, &
-                           gamma_ptt, ce_ptt, a_t
+USE anharmonic,     ONLY : a_t
+USE anharmonic_ptt, ONLY : beta_ptt, vmin_ptt, b0_ptt, b01_ptt, b02_ptt, &
+                           gamma_ptt, ce_ptt
 USE control_quartic_energy, ONLY : poly_degree_ph
 USE control_pressure,  ONLY : press, npress
 USE control_mur_p,  ONLY : vmin_p, b0_p, b01_p, b02_p, emin_p
@@ -839,7 +840,7 @@ DO ipress=1, npress
    CALL find_min_mur_pol(vmin_p(ipress), b0_p(ipress) / ry_kbar, &
                          b01_p(ipress), b02_p(ipress) * ry_kbar, &
                          a_t(:,itemp+1), m1, vmp1)
-   betap(ipress, itempp) = (vmp1 - vmm1) / 2.0_DP / deltat / vm
+   beta_ptt(ipress, itempp) = (vmp1 - vmm1) / 2.0_DP / deltat / vm
 
    vmin_ptt(ipress,itempp) = vm
    b0_ptt(ipress,itempp) = aux * ry_kbar
@@ -850,7 +851,7 @@ END DO
 CALL interpolate_thermo_p(vmin_ptt(:,itempp), ph_ce, ce_ptt(:,itempp), &
                                                itemp_plot(itempp))
 DO ipress=1, npress
-   gamma_ptt(ipress,itempp)=betap(ipress, itempp)*b0_ptt(ipress,itempp)* &
+   gamma_ptt(ipress,itempp)=beta_ptt(ipress, itempp)*b0_ptt(ipress,itempp)* &
                    vmin_ptt(ipress,itempp)/ce_ptt(ipress,itempp)/ry_kbar
 ENDDO 
 
@@ -864,7 +865,7 @@ IF (ionode) THEN
                                                                temp(itemp)
    DO ipress=1,npress
       WRITE(iu_mur,'(4e20.10)') press(ipress), vmin_ptt(ipress,itempp), &
-                        b0_ptt(ipress,itempp), betap(ipress,itempp)*1.D6
+                        b0_ptt(ipress,itempp), beta_ptt(ipress,itempp)*1.D6
    ENDDO
    CLOSE(UNIT=iu_mur, STATUS='KEEP')
 
@@ -896,7 +897,7 @@ IF (ionode) THEN
    DO ipress=1,npress
       WRITE(iu_mur,'(4e20.10)') press(ipress), gamma_ptt(ipress,itempp), &
                         ce_ptt(ipress,itempp), b0_ptt(ipress,itempp)* &
-                        betap(ipress,itempp) 
+                        beta_ptt(ipress,itempp) 
    ENDDO
    CLOSE(UNIT=iu_mur, STATUS='KEEP')
 ENDIF
@@ -912,7 +913,7 @@ USE kinds,          ONLY : DP
 USE thermo_mod,     ONLY : omega_geo
 USE control_vol,    ONLY : nvol_plot, ivol_plot
 USE temperature,    ONLY : temp, ntemp
-USE anharmonic,     ONLY : press_vt
+USE anharmonic_vt,  ONLY : press_vt
 USE data_files,     ONLY : flanhar
 USE io_global,      ONLY : meta_ionode
 

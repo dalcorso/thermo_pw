@@ -68,3 +68,6 @@ NB: These examples requires the LDA pseudopotentials of pslibrary.1.0.0
 You need to install the library and to change the PSEUDO_DIR variable in
 the environment_variables file of QE to point to 
 pslibrary.1.0.0/pz/PSEUDOPOTENTIALS.
+
+To generate the pdf file from the asy script the command is:
+asy -f pdf -noprc asy_tmp.asy

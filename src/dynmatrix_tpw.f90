@@ -41,7 +41,7 @@ SUBROUTINE dynmatrix_tpw(iq_)
   USE ph_restart,    ONLY : ph_writefile
   USE partial,       ONLY : all_comp, comp_irr, done_irr, nat_todo_input
   USE units_ph,      ONLY : iudyn
-  USE noncollin_module, ONLY : m_loc, nspin_mag
+  USE noncollin_module, ONLY : m_loc, nspin_mag, domag
   USE proj_rap_point_group, ONLY : code_groupq_ext
   USE output,        ONLY : fildyn
   USE io_dyn_mat,    ONLY : write_dyn_mat_header
@@ -51,7 +51,6 @@ SUBROUTINE dynmatrix_tpw(iq_)
   USE ph_symmetry,   ONLY : manage_ph_symmetry
   USE qpoint,        ONLY : xq
   USE control_lr,    ONLY : lgamma
-  USE spin_orb,      ONLY : domag
   USE magnetic_charges, ONLY : mag_charge
 
   IMPLICIT NONE

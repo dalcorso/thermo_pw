@@ -43,10 +43,11 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   USE ions_base,            ONLY : if_pos
   USE control_flags,        ONLY : conv_elec, gamma_only, ethr, lscf, treinit_gvecs
   USE control_flags,        ONLY : conv_ions, istep, nstep, restart, lmd, &
-                                   lbfgs, io_level, lensemb
+                                   lbfgs, io_level, lensemb, lforce=>tprnfor, &
+                                   tstress
   USE cellmd,               ONLY : lmovecell
   USE command_line_options, ONLY : command_line
-  USE force_mod,            ONLY : lforce, lstres, sigma, force
+  USE force_mod,            ONLY : sigma, force
   USE check_stop,           ONLY : check_stop_init, check_stop_now
   USE basis,                ONLY : starting_pot, starting_wfc, startingconfig
   USE mp_images,            ONLY : intra_image_comm
@@ -101,7 +102,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
      lscf=.FALSE.
      lbfgs=.FALSE.
      lforce=.FALSE.
-     lstres=.FALSE.
+     tstress=.FALSE.
 !
 !   in the nscf case we save the wavefunctions to allow restart
 !
@@ -181,7 +182,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
      !
      ! ... stress calculation
      !
-     IF ( lstres ) CALL stress( sigma )
+     IF ( tstress ) CALL stress( sigma )
      !
      IF ( lmd .OR. lbfgs ) THEN
         !

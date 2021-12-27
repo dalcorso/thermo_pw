@@ -11,7 +11,8 @@ SUBROUTINE write_elastic_qha()
 !
 USE kinds,             ONLY : DP
 USE thermo_mod,        ONLY : energy_geo, tot_ngeo
-USE control_elastic_constants, ONLY : ngeo_strain, frozen_ions, elcpvar
+USE control_elastic_constants, ONLY : ngeo_strain, frozen_ions, elcpvar, &
+                               lelastic, lelasticf
 USE initial_conf,      ONLY : ibrav_save
 USE thermo_sym,        ONLY : laue
 USE elastic_constants, ONLY : print_elastic_constants, epsilon_geo,        &
@@ -28,8 +29,8 @@ USE mp_world,          ONLY : world_comm
 USE mp,                ONLY : mp_sum
 USE thermodynamics,        ONLY : ph_free_ener
 USE ph_freq_thermodynamics,  ONLY : phf_free_ener
-USE anharmonic,        ONLY : el_cons_t, el_comp_t, b0_t, lelastic
-USE ph_freq_anharmonic,ONLY : el_consf_t, el_compf_t, b0f_t, lelasticf
+USE anharmonic,        ONLY : el_cons_t, el_comp_t, b0_t
+USE ph_freq_anharmonic,ONLY : el_consf_t, el_compf_t, b0f_t
 USE control_thermo,    ONLY : ltherm_dos, ltherm_freq
 
 IMPLICIT NONE

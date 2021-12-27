@@ -9,22 +9,24 @@
 SUBROUTINE plot_macro_el_t
 !-------------------------------------------------------------------------
 !
-!  This is a driver to plot the macro-elasticity variables (MEVs) as a function of
-!  temperature. It plots both the MEVs computed from isothermal elastic constants (ECs)
-!  and from adiabatic ECs in two separated files. It compares the results obtained
+!  This is a driver to plot the macro-elasticity variables (MEVs) as a 
+!  function of temperature. It plots both the MEVs computed from 
+!  isothermal elastic constants (ECs) and from adiabatic ECs in two 
+!  separated files. It compares the results obtained
 !  from Voigt average (color red), Reuss average (color blue) and
 !  Voigt-Reuss-Hill average (color green).
-!  It also plots the three sound velocities (V_P, V_B, V_G) by comparing the isothermal 
+!  It also plots the three sound velocities (V_P, V_B, V_G) by 
+!  comparing the isothermal 
 !  (red) with the adiabatic (blue) result in the single plot. 
-!  It is used by both quasi-static or quasi-harmonic temperature dependent ECs. 
-!  If both lelastic and lelasticf are .TRUE. it uses only the ECs obtained from the 
-!  free energy calculated from the phonon dos.
+!  It is used by both quasi-static or quasi-harmonic temperature 
+!  dependent ECs. 
+!  If both lelastic and lelasticf are .TRUE. it uses only the ECs 
+!  obtained from the free energy calculated from the phonon dos.
 !
 USE control_gnuplot,  ONLY : flgnuplot, flext
 USE data_files,       ONLY : flanhar
 USE postscript_files, ONLY : flpsanhar
-USE anharmonic,       ONLY : lelastic
-USE ph_freq_anharmonic,  ONLY : lelasticf
+USE control_elastic_constants, ONLY : lelastic, lelasticf
 USE control_grun,     ONLY : lb0_t
 USE mp_images,        ONLY : root_image, my_image_id
 
@@ -151,8 +153,7 @@ USE kinds,               ONLY : DP
 USE temperature,         ONLY : tmin, tmax
 USE data_files,          ONLY : flanhar
 USE postscript_files,    ONLY : flpsanhar
-USE anharmonic,          ONLY : lelastic
-USE ph_freq_anharmonic,  ONLY : lelasticf
+USE control_elastic_constants, ONLY : lelastic, lelasticf
 USE control_gnuplot,     ONLY : gnuplot_command, flgnuplot, lgnuplot, flext
 USE gnuplot,             ONLY : gnuplot_start, gnuplot_end,           &
                                 gnuplot_write_header, gnuplot_xlabel, &

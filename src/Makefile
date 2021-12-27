@@ -49,6 +49,7 @@ do_phonon.o \
 dos_sub.o \
 dynmatrix_tpw.o \
 elastic_constants_t.o \
+ev_mod.o \
 ev_sub.o \
 evaluate_celldm.o \
 evaluate_vm.o \
@@ -178,18 +179,13 @@ PWOBJS = ../../PHonon/PH/libph.a \
 #library modules of QE
 QEMODS = ../../Modules/libqemod.a \
          ../../KS_Solvers/libks_solvers.a \
-         ../../upflib/libupf.a    \
-         ../../XClib/xc_lib.a     \
-         ../../FFTXlib/libqefft.a \
-         ../../LAXlib/libqela.a   \
-         ../../UtilXlib/libutil.a \
          ../../dft-d3/libdftd3qe.a
 
 #libraries of thermo_pw
 LIBTHERMO = ../qe/thermo_qe.a \
             ../lib/thermo_lib.a 
 
-MODULES = $(LIBTHERMO) $(PWOBJS) $(QEMODS) $(LIBOBJS)
+MODULES = $(LIBTHERMO) $(LRMODS) $(PWOBJS) $(QEMODS) $(BASEMODS)
 
 all : thermo_pw.x 
 

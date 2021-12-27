@@ -35,9 +35,9 @@ SUBROUTINE find_symmetry(fft_fact)
   USE gvecw,              ONLY : ecutwfc
   USE symm_base,          ONLY : s, t_rev, irt, nrot, nsym, invsym, nosym, &
                                  set_sym_bl, find_sym, allfrac, remove_sym
-  USE noncollin_module, ONLY : m_loc, noncolin, i_cons, npol, angle1, angle2
+  USE noncollin_module, ONLY : m_loc, noncolin, i_cons, npol, angle1, angle2, &
+                               domag, lspinorb
   USE lsda_mod,         ONLY : starting_magnetization, nspin
-  USE spin_orb,         ONLY : domag, lspinorb
   USE mp_bands,         ONLY : intra_bgrp_comm
   !
   IMPLICIT NONE

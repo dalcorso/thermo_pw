@@ -14,12 +14,12 @@ SUBROUTINE openfilq_tpw()
   !
   USE kinds,            ONLY : DP
   USE control_flags,    ONLY : io_level, modenum
-  USE units_ph,         ONLY : iudwf, iubar, iucom, iudvkb3, &
+  USE units_ph,         ONLY : iubar, iucom, iudvkb3, &
                               iudrhous, iuebar, iudrho, iudyn, iudvscf, &
-                              lrdwf, lrbar, lrcom, lrdvkb3, &
+                              lrbar, lrcom, lrdvkb3, &
                               lrdrhous, lrebar, lrdrho, lint3paw, iuint3paw, &
                               iundnsscf, iudvpsi, lrdvpsi, iugauge
-  USE units_lr,         ONLY : iuwfc, lrwfc
+  USE units_lr,         ONLY : iuwfc, lrwfc, iudwf, lrdwf
   USE io_files,         ONLY : tmp_dir, diropn, seqopn, nwordwfcU
   USE control_ph,       ONLY : epsil, zue, ext_recover, trans, &
                               tmp_dir_phq, start_irr, last_irr, xmldyn, &
@@ -34,10 +34,9 @@ SUBROUTINE openfilq_tpw()
   USE uspp,            ONLY : nkb, okvan
   USE uspp_param,      ONLY : nhm
   USE io_files,        ONLY : prefix
-  USE noncollin_module,ONLY : npol, nspin_mag, noncolin
+  USE noncollin_module,ONLY : npol, nspin_mag, noncolin, domag
   USE paw_variables,   ONLY : okpaw
   USE mp_bands,        ONLY : me_bgrp
-  USE spin_orb,        ONLY : domag
   USE io_global,       ONLY : ionode,stdout
   USE buffers,         ONLY : open_buffer, close_buffer
   USE ramanm,          ONLY : lraman, elop, iuchf, iud2w, iuba2, lrchf, lrd2w, lrba2
@@ -101,13 +100,13 @@ SUBROUTINE openfilq_tpw()
   lrwfc = nbnd * npwx * npol
   CALL open_buffer (iuwfc, 'wfc', lrwfc, io_level, exst_mem, exst, tmp_dir)
   IF (.NOT.exst.AND..NOT.exst_mem.and..not.all_done) THEN
-     tmp_dir = tmp_dir_phq
      !FIXME in case the starting computation has been done twfcollect=.true.
      ! run_nscf saves the wave functions in tmp_dir_phq and not in tmp_dir 
      ! we have to find a way to have them in the same place in both cases
      ! not now because release is tomorrow (29 june 2018). Dirty fix if
      ! open_buffer fails in tmp_dir go back to tmp_dir_phq and try again. 
      CALL close_buffer(iuwfc, 'delete')
+     tmp_dir = tmp_dir_phq
      CALL open_buffer (iuwfc, 'wfc', lrwfc, io_level, exst_mem, exst, tmp_dir)
      IF (.NOT.exst.AND..NOT.exst_mem) CALL errore ('openfilq', 'file '//trim(prefix)//'.wfc not found', 1)
   END IF

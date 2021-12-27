@@ -18,18 +18,13 @@ PWOBJS = ../../PHonon/PH/libph.a \
 
 #library modules of QE
 QEMODS = ../../Modules/libqemod.a \
-         ../../KS_Solvers/libks_solvers.a \
-         ../../upflib/libupf.a    \
-         ../../XClib/xc_lib.a     \
-         ../../FFTXlib/libqefft.a \
-         ../../LAXlib/libqela.a \
-         ../../UtilXlib/libutil.a
+         ../../KS_Solvers/libks_solvers.a 
 
 #libraries of thermo_pw
 LIBTHERMO= ../lib/thermo_lib.a \
            ../qe/thermo_qe.a 
 
-MODULES = $(LIBTHERMO) $(PWOBJS) $(QEMODS) $(LIBOBJS)
+MODULES = $(LIBTHERMO) $(PWOBJS) $(QEMODS) $(LIBOBJS) $(BASEMODS)
 
 all : space_groups.x crystal_point_group.x mag_point_group.x units.x \
       hex_trig.x bravais_lattices.x kovalev.x supercell.x translate.x \

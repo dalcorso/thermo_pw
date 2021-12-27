@@ -22,6 +22,7 @@ SUBROUTINE lr_apply_s(vect, svect)
     USE lr_global,          ONLY : rpert
     USE qpoint,             ONLY : nksq, ikks, ikqs
     USE control_lr,         ONLY : nbnd_occ
+    USE uspp_init,          ONLY : init_us_2
     
     IMPLICIT NONE
     !

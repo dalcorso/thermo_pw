@@ -20,8 +20,7 @@ USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,           &
                              gnuplot_set_fact
 USE data_files,       ONLY : flanhar
 USE postscript_files, ONLY : flpsanhar
-USE anharmonic,       ONLY : lelastic
-USE ph_freq_anharmonic,  ONLY : lelasticf
+USE control_elastic_constants,  ONLY : lelastic, lelasticf
 USE control_grun,     ONLY : lb0_t
 USE temperature,      ONLY : tmin, tmax
 USE thermo_sym,       ONLY : laue

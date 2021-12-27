@@ -65,8 +65,7 @@ subroutine phq_setup_tpw
                             sr, invs, inverse_s, sname, d1, d2, d3, check_grid_sym
   USE uspp_param,    ONLY : upf
   USE uspp,          ONLY : nlcc_any, deeq_nc, okvan
-  USE spin_orb,      ONLY : domag
-  USE noncollin_module, ONLY : noncolin, m_loc, angle1, angle2, ux
+  USE noncollin_module, ONLY : noncolin, m_loc, angle1, angle2, ux, domag
   USE nlcc_ph,       ONLY : drc
   USE control_ph,    ONLY : rec_code, lgamma_gamma, search_sym, start_irr, &
                             last_irr, niter_ph, alpha_mix, all_done,  &
@@ -102,7 +101,7 @@ subroutine phq_setup_tpw
   USE nc_mag_aux,    ONLY : deeq_nc_save
   USE control_lr,    ONLY : lgamma
   USE ldaU,          ONLY : lda_plus_u, Hubbard_U, Hubbard_J0
-  USE ldaU_ph,       ONLY : effU
+  USE ldaU_lr,       ONLY : effU
   USE constants,     ONLY : rytoev
   USE dvscf_interpolate, ONLY : ldvscf_interpolate, dvscf_interpol_setup
   USE ahc,           ONLY : elph_ahc, elph_ahc_setup

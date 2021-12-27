@@ -25,8 +25,7 @@ USE lr_symm_base,     ONLY : irotmq, minus_q, nsymq, rtau
 USE paw_symmetry,     ONLY : paw_dusymmetrize, paw_dumqsymmetrize, &
                              paw_desymmetrize
 USE paw_add_symmetry, ONLY : paw_deqsymmetrize
-USE noncollin_module, ONLY : noncolin, nspin_mag
-USE spin_orb,         ONLY : domag
+USE noncollin_module, ONLY : noncolin, nspin_mag, domag
 USE uspp,             ONLY : okvan
 USE paw_variables,    ONLY : okpaw
 USE control_ph,       ONLY : lgamma_gamma

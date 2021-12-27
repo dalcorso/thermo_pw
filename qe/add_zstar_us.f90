@@ -36,6 +36,7 @@ SUBROUTINE add_zstar_us_tpw()
   USE buffers,   ONLY : get_buffer
   USE units_ph,  ONLY : lrcom, iucom
   USE units_lr,  ONLY : iuwfc, lrwfc
+  USE uspp_init, ONLY : init_us_2
   USE partial,   ONLY : done_irr, comp_irr
   USE io_global, ONLY : stdout
 

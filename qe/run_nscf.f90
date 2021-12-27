@@ -13,11 +13,11 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   ! ... phonon code.
   !
   !
-  USE control_flags,   ONLY : conv_ions
+  USE control_flags,   ONLY : conv_ions, lforce=>tprnfor, tstress
   USE basis,           ONLY : starting_wfc, starting_pot, startingconfig
   USE io_files,        ONLY : prefix, tmp_dir, wfc_dir, seqopn
   USE lsda_mod,        ONLY : nspin
-  USE control_flags,   ONLY : restart, lscf
+  USE control_flags,   ONLY : restart, lscf, io_level
   USE check_stop,      ONLY : check_stop_now
   USE fft_base,        ONLY : dffts, dfftp
   !!!
@@ -37,13 +37,11 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   USE scf,             ONLY : vrs
   USE mp_bands,        ONLY : intra_bgrp_comm, nyfft
   USE mp_pools,        ONLY : kunit
-  USE force_mod,       ONLY : lforce, lstres
 
   USE lr_symm_base,    ONLY : minus_q, nsymq, invsymq
   USE control_lr,      ONLY : ethr_nscf
   USE qpoint,          ONLY : xq
-  USE noncollin_module,ONLY : noncolin
-  USE spin_orb,        ONLY : domag
+  USE noncollin_module,ONLY : noncolin, domag
   USE el_phon,         ONLY : elph_mat
   USE ahc,             ONLY : elph_ahc
   !
@@ -57,6 +55,7 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   !
   CALL start_clock( 'PWSCF' )
   !
+  io_level=1
   IF (done_bands(iq)) THEN
      WRITE (stdout,'(/,5x,"Bands found: reading from ",a)') TRIM(tmp_dir_phq)
      CALL clean_pw( .TRUE. )
@@ -90,7 +89,7 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   starting_wfc      = 'atomic'
   lscf              = .FALSE.
   lforce            = .FALSE.
-  lstres            = .FALSE.
+  tstress           = .FALSE.
   restart = ext_restart
   conv_ions=.true.
   ethr_nscf      = 1.0D-9 / nelec 

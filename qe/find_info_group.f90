@@ -16,8 +16,7 @@ SUBROUTINE find_info_group_tpw(nsym,s,t_rev,ft,d_spink,gk,sname,  &
   USE kinds,                ONLY : DP
   USE cell_base,            ONLY : at, bg
   USE fft_base,             ONLY : dfftp
-  USE noncollin_module,     ONLY : noncolin
-  USE spin_orb,             ONLY : domag
+  USE noncollin_module,     ONLY : noncolin, domag
   USE rap_point_group,      ONLY : code_group, nclass, nelem, elem, which_irr, &
        char_mat, name_rap, name_class, gname, ir_ram
   USE rap_point_group_so,   ONLY : nrap, nelem_so, elem_so, has_e, &

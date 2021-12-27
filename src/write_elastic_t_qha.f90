@@ -22,15 +22,15 @@ USE quadratic_surfaces, ONLY : fit_multi_quadratic, evaluate_fit_quadratic
 USE cubic_surfaces,   ONLY : fit_multi_cubic, evaluate_fit_cubic
 USE quartic_surfaces, ONLY : fit_multi_quartic, evaluate_fit_quartic
 USE control_elastic_constants, ONLY : el_cons_qha_geo_available, &
-                             el_consf_qha_geo_available  
+                             el_consf_qha_geo_available, lelastic, lelasticf  
 USE lattices,       ONLY : compress_celldm
 USE elastic_constants, ONLY : el_con, el_compliances, write_el_cons_on_file
 USE lattices,       ONLY : crystal_parameters
 USE control_thermo, ONLY : ltherm_dos, ltherm_freq
-USE anharmonic,     ONLY : celldm_t, el_cons_t, el_comp_t, b0_t, lelastic, &
+USE anharmonic,     ONLY : celldm_t, el_cons_t, el_comp_t, b0_t, &
                            el_con_geo_t
 USE ph_freq_anharmonic, ONLY : celldmf_t, el_consf_t, el_compf_t, b0f_t, &
-                           lelasticf, el_conf_geo_t
+                           el_conf_geo_t
 USE polynomial, ONLY : poly1, poly2, poly3, poly4, init_poly, clean_poly
 USE data_files, ONLY : flanhar
 USE temperature, ONLY : ntemp, temp

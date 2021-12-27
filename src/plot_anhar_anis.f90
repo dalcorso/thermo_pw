@@ -33,8 +33,7 @@ USE data_files,  ONLY : flanhar
 USE grun_anharmonic, ONLY : done_grun
 USE initial_conf,  ONLY : ibrav_save
 USE control_thermo,  ONLY : ltherm_dos, ltherm_freq, with_eigen
-USE anharmonic, ONLY : lelastic
-USE ph_freq_anharmonic, ONLY : lelasticf
+USE control_elastic_constants, ONLY : lelastic, lelasticf
 USE temperature,     ONLY : tmin, tmax
 USE control_pressure, ONLY : pressure_kb
 USE mp_images,       ONLY : my_image_id, root_image

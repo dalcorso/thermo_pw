@@ -37,7 +37,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
 !
   USE input_parameters, ONLY : electron_maxstep, k_points, xk, wk, k1, k2, &
                                k3, nkstot
-  USE control_flags,    ONLY : niter, lbands
+  USE control_flags,    ONLY : niter, lbands, tstress
   USE cell_base,        ONLY : cell_base_init, at
   USE ions_base,        ONLY : tau, nat
   USE gvecw,            ONLY : ecutwfc
@@ -45,7 +45,6 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
   USE gvecs,            ONLY : dual
   USE wvfct,            ONLY : nbnd
   USE ener,             ONLY : ef
-  USE force_mod,        ONLY : lstres
   USE start_k,          ONLY : init_start_k
   USE klist,            ONLY : degauss
 
@@ -132,7 +131,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
 !    so lstress(iwork) is .FALSE. but here we set lstres=.TRUE.
 !    To save time or if stress is not available comment this command.
 !
-           lstres=.NOT.frozen_ions
+           tstress=.NOT.frozen_ions
 !
 !   now set the celldm
 !
@@ -264,14 +263,13 @@ SUBROUTINE set_work_for_relaxation(iwork)
 USE control_thermo,   ONLY : lstress
 USE control_elastic_constants, ONLY : frozen_ions 
 USE input_parameters, ONLY : etot_conv_thr, forc_conv_thr
-USE control_flags,    ONLY : lbfgs, nstep
-USE force_mod,        ONLY : lforce, lstres
+USE control_flags,    ONLY : lbfgs, nstep, lforce=>tprnfor, tstress
 USE relax,            ONLY : epse, epsf
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: iwork
 
-lstres=lstress(iwork)
+tstress=lstress(iwork)
 IF (frozen_ions) THEN
    lbfgs=.FALSE.
 ELSE

@@ -25,8 +25,9 @@ USE control_mur,           ONLY : vmin, b0, b01, b02, emin
 USE control_vol,           ONLY : nvol_plot
 USE control_pressure,      ONLY : npress_plot
 USE anharmonic,            ONLY : vmin_t, b0_t, b01_t, b02_t, free_e_min_t, &
-                              a_t, vmin_pt, b0_pt, b01_pt, b02_pt, emin_pt, &
-                              press_vt
+                              a_t 
+USE anharmonic_pt,         ONLY : vmin_pt, b0_pt, b01_pt, b02_pt, emin_pt
+USE anharmonic_vt,         ONLY : press_vt
 USE ph_freq_anharmonic,    ONLY : vminf_t, b0f_t, b01f_t, b02f_t, free_e_minf_t
 USE io_global,             ONLY : stdout
 USE mp_images,             ONLY : inter_image_comm

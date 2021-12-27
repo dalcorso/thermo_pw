@@ -17,8 +17,8 @@ USE elastic_constants, ONLY : epsilon_geo, el_con,           &
                               compute_elastic_constants_ene, &
                               write_el_cons_on_file
 USE control_elastic_constants, ONLY : ngeo_strain, elcpvar, ngeom, &
-                           work_base, el_con_omega_geo, epsil_geo
-USE anharmonic,        ONLY : el_cons_t, el_comp_t, b0_t, lelastic
+                           work_base, el_con_omega_geo, epsil_geo, lelastic
+USE anharmonic,        ONLY : el_cons_t, el_comp_t, b0_t
 USE control_quartic_energy, ONLY : poly_degree_elc
 USE linear_surfaces,   ONLY : evaluate_fit_linear
 USE quadratic_surfaces, ONLY : evaluate_fit_quadratic

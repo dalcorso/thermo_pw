@@ -12,8 +12,7 @@ USE ions_base,        ONLY : nat
 USE fft_base,         ONLY : dfftp
 USE uspp_param,       ONLY : nhm
 USE scf,              ONLY : rho
-USE noncollin_module, ONLY : noncolin, nspin_mag
-USE spin_orb,         ONLY : domag
+USE noncollin_module, ONLY : noncolin, nspin_mag, domag
 USE uspp,             ONLY : okvan
 USE paw_variables,    ONLY : okpaw
 USE paw_onecenter,    ONLY : paw_dpotential

@@ -42,8 +42,7 @@ SUBROUTINE do_lanczos_psh()
   USE fft_helper_subroutines, ONLY : fftx_ntgrp
   USE fft_interfaces,        ONLY : fft_interpolate
   USE lsda_mod,              ONLY : lsda, nspin, current_spin, isk
-  USE spin_orb,              ONLY : domag
-  USE noncollin_module,      ONLY : noncolin, npol, nspin_mag
+  USE noncollin_module,      ONLY : noncolin, npol, nspin_mag, domag
   USE wvfct,                 ONLY : nbnd, npwx,  et
   USE wavefunctions,         ONLY : evc
   USE eqv,                   ONLY : dpsi, dvpsi, evq
@@ -64,6 +63,7 @@ SUBROUTINE do_lanczos_psh()
   USE lr_global,             ONLY : rpert, evc0, evq0, sevq0, d0psi, d0psi2
   USE lr_lanczos,            ONLY : lanczos_steps, evc1, sevc1, evc1_new,    &
                                     lanczos_restart_step
+  USE uspp_init,             ONLY : init_us_2
   USE recover_mod,           ONLY : read_rec, write_rec
   USE units_lr,              ONLY : lrwfc, iuwfc
   USE buffers,               ONLY : get_buffer

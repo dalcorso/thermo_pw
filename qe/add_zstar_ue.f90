@@ -24,8 +24,8 @@ SUBROUTINE add_zstar_ue_tpw (imode0, npe)
   USE eqv,      ONLY: dpsi, dvpsi
   USE efield_mod, ONLY: zstarue0_rec, zstarue0
   USE control_lr, ONLY : nbnd_occ
-  USE units_ph,   ONLY : iudwf, lrdwf
-  USE units_lr,   ONLY : iuwfc, lrwfc
+  USE units_lr,   ONLY : iuwfc, lrwfc, iudwf, lrdwf
+  USE uspp_init,  ONLY : init_us_2
 
   USE mp_global,  ONLY : inter_pool_comm, intra_bgrp_comm
   USE mp,         ONLY : mp_sum

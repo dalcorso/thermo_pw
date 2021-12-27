@@ -31,7 +31,7 @@ CONTAINS
     USE fft_interfaces, ONLY : fft_interpolate
     USE uspp,  ONLY : okvan, nlcc_any
     USE lsda_mod, ONLY : nspin
-    USE noncollin_module, ONLY : noncolin, nspin_mag
+    USE noncollin_module, ONLY : noncolin, nspin_mag, domag
     USE units_ph, ONLY : this_pcxpsi_is_on_file
     USE control_ph, ONLY : ext_recover, convt
     USE efield_mod, ONLY : zstareu0, zstarue0
@@ -40,7 +40,6 @@ CONTAINS
 
     USE lrus, ONLY : int3
     USE eqv,  ONLY : drhoscfs
-    USE spin_orb, ONLY : domag
 
     IMPLICIT NONE
     INTEGER, INTENT(OUT) :: iter0

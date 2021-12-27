@@ -19,7 +19,7 @@ SUBROUTINE phescf_tpw()
   USE uspp_param,      ONLY : nhm
   USE fft_base,        ONLY : dffts
   USE ions_base,       ONLY : nat
-  USE noncollin_module,ONLY : noncolin, nspin_mag, npol
+  USE noncollin_module,ONLY : noncolin, nspin_mag, npol, domag
   USE lsda_mod,        ONLY : nspin
   USE control_ph,      ONLY : convt, zeu, rec_code, rec_code_read, lnoloc, &
                               where_rec, done_epsil, done_zeu, epsil
@@ -45,10 +45,10 @@ SUBROUTINE phescf_tpw()
   USE mp_images,       ONLY : intra_image_comm
   USE mp,              ONLY : mp_bcast
   USE ldaU,            ONLY : lda_plus_u, Hubbard_lmax
-  USE ldaU_ph,         ONLY : dnsscf, dnsscf_all_modes
+  USE ldaU_lr,         ONLY : dnsscf
+  USE ldaU_ph,         ONLY : dnsscf_all_modes
   USE control_flags,   ONLY : iverbosity
   USE magnetic_charges, ONLY : alpha_me
-  USE spin_orb,         ONLY : domag
   USE control_lr,       ONLY : lgamma
   USE write_hub
 

@@ -40,9 +40,8 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
                                  noinv, use_para_diag
 !  USE el_phon,            ONLY : elph_mat
   USE mp_pools,           ONLY : kunit
-  USE spin_orb,           ONLY : domag
   USE control_lr,         ONLY : lgamma
-  USE noncollin_module,   ONLY : noncolin
+  USE noncollin_module,   ONLY : noncolin, domag
   USE start_k,            ONLY : nks_start, xk_start, wk_start, &
                                  nk1, nk2, nk3, k1, k2, k3
   USE optical,            ONLY : lmagnon

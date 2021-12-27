@@ -44,11 +44,10 @@ SUBROUTINE phq_init_tpw()
   USE io_global,            ONLY : stdout
   USE atom,                 ONLY : msh, rgrid
   USE vlocal,               ONLY : strf
-  USE spin_orb,             ONLY : lspinorb, domag
   USE wvfct,                ONLY : npwx, nbnd
   USE gvecw,                ONLY : gcutw
   USE wavefunctions,        ONLY : evc
-  USE noncollin_module,     ONLY : noncolin, npol
+  USE noncollin_module,     ONLY : noncolin, npol, lspinorb, domag
   USE uspp,                 ONLY : okvan, vkb, nlcc_any, nkb
   USE uspp_param,           ONLY : upf
   USE m_gth,                ONLY : setlocq_gth
@@ -72,6 +71,7 @@ SUBROUTINE phq_init_tpw()
   USE eqv,                  ONLY : vlocq, evq
   USE control_lr,           ONLY : nbnd_occ, lgamma
   USE ldaU,                 ONLY : lda_plus_u
+  USE uspp_init,            ONLY : init_us_2
   !
   IMPLICIT NONE
   !

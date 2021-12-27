@@ -32,8 +32,7 @@ SUBROUTINE zstar_eu_tpw(drhoscf)
   USE eqv,       ONLY : dvpsi, dpsi
   USE efield_mod,   ONLY : zstareu0, zstareu
   USE zstar_add, ONLY : zstareu0_rec
-  USE units_ph,  ONLY : iudwf, lrdwf
-  USE units_lr,  ONLY : lrwfc, iuwfc
+  USE units_lr,  ONLY : lrwfc, iuwfc, iudwf, lrdwf
   USE control_ph,ONLY : done_zeu
   USE control_lr,ONLY : nbnd_occ
   USE phus,      ONLY : alphap
@@ -45,6 +44,7 @@ SUBROUTINE zstar_eu_tpw(drhoscf)
   USE mp_bands,  ONLY : intra_bgrp_comm
   USE mp,        ONLY : mp_sum
   USE ldaU,      ONLY : lda_plus_u
+  USE uspp_init, ONLY : init_us_2
 
   IMPLICIT NONE
 

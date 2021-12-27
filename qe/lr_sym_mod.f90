@@ -214,8 +214,7 @@ USE kinds,     ONLY : DP
 USE cell_base, ONLY : at, bg
 USE fft_base,  ONLY : dfftp
 USE symm_base, ONLY : nsym, s, sname, invs, t_rev
-USE noncollin_module, ONLY : noncolin, nspin_lsda, nspin_mag
-USE spin_orb,  ONLY : domag
+USE noncollin_module, ONLY : noncolin, nspin_lsda, nspin_mag, domag
 USE scatter_mod, ONLY : cgather_sym
 IMPLICIT NONE
 
@@ -364,8 +363,7 @@ USE kinds,     ONLY : DP
 USE cell_base, ONLY : at, bg
 USE fft_base,  ONLY : dfftp
 USE symm_base, ONLY : s, sname, invs, t_rev
-USE noncollin_module, ONLY : noncolin, nspin_lsda, nspin_mag
-USE spin_orb,  ONLY : domag
+USE noncollin_module, ONLY : noncolin, nspin_lsda, nspin_mag, domag
 USE lr_symm_base, ONLY : nsymq, gi
 USE scatter_mod, ONLY : cgather_sym
 IMPLICIT NONE
@@ -544,8 +542,7 @@ USE kinds,     ONLY : DP
 USE cell_base, ONLY : at, bg
 USE fft_base,  ONLY : dfftp
 USE symm_base, ONLY : nsym, s, ft, invs, sname, t_rev
-USE noncollin_module, ONLY : noncolin, nspin_lsda, nspin_mag
-USE spin_orb,  ONLY : domag
+USE noncollin_module, ONLY : noncolin, nspin_lsda, nspin_mag, domag
 USE modes,     ONLY : t, tmq
 USE lr_symm_base, ONLY : nsymq, gi, minus_q, irotmq, gimq
 USE scatter_mod,  ONLY : cgather_sym

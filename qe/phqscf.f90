@@ -28,7 +28,7 @@ SUBROUTINE phqscf_tpw
   USE uspp_param,       ONLY : nhm
   USE eqv,              ONLY : drhoscfs
   USE paw_variables,    ONLY : okpaw
-  USE noncollin_module, ONLY : noncolin, nspin_mag
+  USE noncollin_module, ONLY : noncolin, nspin_mag, domag
   USE lr_cg,            ONLY : lcg
   USE recover_mod,      ONLY : write_rec
 
@@ -37,12 +37,12 @@ SUBROUTINE phqscf_tpw
   USE mp,               ONLY : mp_sum
   USE dynmat,           ONLY : dyn_hub_scf
   USE ldaU,             ONLY : lda_plus_u, Hubbard_lmax
-  USE ldaU_ph,          ONLY : dnsscf, dnsscf_all_modes
+  USE ldaU_lr,          ONLY : dnsscf
+  USE ldaU_ph,          ONLY : dnsscf_all_modes
   USE units_ph,         ONLY : iundnsscf
   USE control_flags,    ONLY : iverbosity
   USE write_hub
   USE magnetic_charges, ONLY : mag_charge_mode, mag_charge
-  USE spin_orb,         ONLY : domag
   USE control_lr,       ONLY : lgamma
 
 

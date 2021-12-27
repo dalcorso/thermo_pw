@@ -37,6 +37,7 @@ SUBROUTINE compute_drhous_tpw (drhous, dbecsum, wgg, becq, alpq)
   USE units_lr,   ONLY : iuwfc, lrwfc
   USE becmod,     ONLY : bec_type
   USE partial,    ONLY : done_irr, comp_irr
+  USE uspp_init,  ONLY : init_us_2
   USE io_global,  ONLY : stdout
   USE mp_bands,   ONLY : intra_bgrp_comm
   USE mp,         ONLY : mp_sum

@@ -18,11 +18,10 @@ SUBROUTINE add_dkmds_tpw(ik,uact,jpol,becp2,alphadk,bedp,alphapp,weight,zstar)
 
   USE kinds,     ONLY : DP
   USE constants, ONLY : eps12
-  USE spin_orb,  ONLY : lspinorb
   USE uspp,      ONLY : nkb, qq_nt, qq_so
   USE cell_base, ONLY : at
   USE ions_base, ONLY : nat, ityp, ntyp => nsp
-  USE noncollin_module, ONLY : noncolin, npol
+  USE noncollin_module, ONLY : noncolin, npol, lspinorb
   USE uspp_param, ONLY: nh
   USE phus,       ONLY: alphap
   USE lrus,      ONLY : becp1, dpqq, dpqq_so

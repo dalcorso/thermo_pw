@@ -18,7 +18,7 @@ IMPLICIT NONE
   !
   PRIVATE
   !
-  PUBLIC :: write_evdata_xml
+  PUBLIC :: write_evdata_xml, birch, keane
 
   INTEGER :: iunout
   !
@@ -43,7 +43,6 @@ IMPLICIT NONE
   REAL(DP) :: p(npt), volume(2), a0(2), alldata(6,npt)
   INTEGER :: i, iun
   CHARACTER(len=256) :: filename
-  REAL(DP), EXTERNAL :: birch, keane
 
   IF (filout/=' ') THEN
      filename = TRIM(filout) // '.xml'
@@ -140,6 +139,41 @@ IMPLICIT NONE
   
   RETURN
 END SUBROUTINE write_evdata_xml
+!
+!---------------------------------------------------------------------------
+    FUNCTION birch(x,k0,dk0,d2k0)
+!---------------------------------------------------------------------------
+    USE kinds, ONLY : DP
+    IMPLICIT NONE
+    REAL(DP) birch, x, k0,dk0, d2k0
+    REAL(DP) c0, c1
+
+    IF(d2k0/=0.d0) THEN
+       c0 = (9.d0*k0*d2k0 + 9.d0*dk0**2 - 63.d0*dk0 + 143.d0 )/48.d0
+    ELSE
+       c0 = 0.0d0
+    ENDIF
+    c1 = 3.d0*(dk0-4.d0)/8.d0
+    birch = 3.d0*k0*( (-0.5d0+  c1-  c0)*x**( -5.d0/3.d0) &
+         +( 0.5d0-2.d0*c1+3.0d0*c0)*x**( -7.d0/3.d0) &
+         +(       c1-3.d0*c0)*x**( -9.0d0/3d0) &
+         +(            c0)*x**(-11.0d0/3d0) )
+    RETURN
+    END FUNCTION birch
+!
+!---------------------------------------------------------------------------
+    FUNCTION keane(x,k0,dk0,d2k0)
+!---------------------------------------------------------------------------
+!
+    USE kinds, ONLY : DP
+    IMPLICIT NONE
+    REAL(DP) keane, x, k0, dk0, d2k0, ddk
+
+    ddk = dk0 + k0*d2k0/dk0
+    keane = k0*dk0/ddk**2*( x**(-ddk) - 1d0 ) + (dk0-ddk)/ddk*log(x)
+
+    RETURN
+    END FUNCTION keane
 
 !
 END MODULE ev_xml

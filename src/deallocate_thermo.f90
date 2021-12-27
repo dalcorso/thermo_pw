@@ -21,17 +21,17 @@ SUBROUTINE deallocate_thermo()
                              phf_b_fact, phf_e0, phf_ce
   USE el_thermodynamics, ONLY : el_ener, el_free_ener, el_entr, el_mu, &
                            el_ce
-  USE anharmonic,     ONLY : vmin_t, b0_t, b01_t, b02_t, free_e_min_t, a_t,      &
-                             alpha_t, beta_t, gamma_t, cv_t, ce_t, cp_t,  &
-                             b0_s, ener_t, free_ener_t, entropy_t,        &
+  USE anharmonic,     ONLY : vmin_t, b0_t, b01_t, b02_t, free_e_min_t, a_t, &
+                             alpha_t, beta_t, gamma_t, cv_t, ce_t, cp_t,   &
+                             b0_s, ener_t, free_ener_t, entropy_t,         &
                              celldm_t, alpha_anis_t, cpmce_anis, el_cons_t, &
-                             el_comp_t, macro_el_t, bths_t, ggamma_t,     &
-                             el_cons_s, el_comp_s, macro_el_s, v_t, v_s,  &
-                             bfact_t, el_con_geo_t, betap,                &
-                             vmin_pt, b0_pt, b01_pt, b02_pt, emin_pt,     &
-                             beta_pt, ce_pt, &
-                             cp_pt, gamma_pt, b0_s_pt, vmin_ptt, b0_ptt,  &
-                             b01_ptt, b02_ptt, gamma_ptt, ce_ptt
+                             el_comp_t, macro_el_t, bths_t, ggamma_t,      &
+                             el_cons_s, el_comp_s, macro_el_s, v_t, v_s,   &
+                             bfact_t, el_con_geo_t
+  USE anharmonic_pt,  ONLY : vmin_pt, b0_pt, b01_pt, b02_pt, emin_pt,      &
+                             beta_pt, ce_pt, cp_pt, gamma_pt, b0_s_pt
+  USE anharmonic_ptt, ONLY : beta_ptt, vmin_ptt, b0_ptt, b01_ptt, b02_ptt, &
+                             gamma_ptt, ce_ptt
   USE el_anharmonic, ONLY :  vmine_t, b0e_t, b01e_t, b02e_t, free_e_mine_t
   USE ph_freq_anharmonic, ONLY : vminf_t, b0f_t, b01f_t, b02f_t, free_e_minf_t, &
                              alphaf_t, betaf_t, gammaf_t, cvf_t, cef_t, &
@@ -151,13 +151,15 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (b01_p) )           DEALLOCATE(b01_p) 
   IF ( ALLOCATED (b02_p) )           DEALLOCATE(b02_p) 
   IF ( ALLOCATED (emin_p) )          DEALLOCATE(emin_p) 
-  IF ( ALLOCATED (betap) )           DEALLOCATE(betap) 
+
   IF ( ALLOCATED (vmin_ptt) )        DEALLOCATE(vmin_ptt) 
   IF ( ALLOCATED (b0_ptt) )          DEALLOCATE(b0_ptt) 
   IF ( ALLOCATED (b01_ptt) )         DEALLOCATE(b01_ptt) 
   IF ( ALLOCATED (b02_ptt) )         DEALLOCATE(b02_ptt) 
+  IF ( ALLOCATED (beta_ptt) )        DEALLOCATE(beta_ptt) 
   IF ( ALLOCATED (ce_ptt) )          DEALLOCATE(ce_ptt) 
   IF ( ALLOCATED (gamma_ptt) )       DEALLOCATE(gamma_ptt) 
+
   IF ( ALLOCATED (vmin_pt) )         DEALLOCATE(vmin_pt) 
   IF ( ALLOCATED (b0_pt) )           DEALLOCATE(b0_pt) 
   IF ( ALLOCATED (b01_pt) )          DEALLOCATE(b01_pt) 

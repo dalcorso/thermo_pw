@@ -37,6 +37,7 @@ SUBROUTINE lr_sm1_psi_tpw (ik, lda, n, m, psi, spsi)
   USE mp,               ONLY : mp_sum
   USE mp_global,        ONLY : intra_bgrp_comm
   USE noncollin_module, ONLY : noncolin, npol, nspin_mag
+  USE uspp_init,        ONLY : init_us_2
   !
   IMPLICIT NONE
   INTEGER, INTENT(in)      :: lda, n, m, ik
@@ -189,8 +190,9 @@ SUBROUTINE sm1_psi_nc()
     ! Noncollinear case
     !
     USE uspp,       ONLY : qq_so
-    USE spin_orb,   ONLY : lspinorb
+    USE noncollin_module,   ONLY : lspinorb
     USE lr_lanczos, ONLY : bbnc
+    USE uspp_init,  ONLY : init_us_2
     !
     IMPLICIT NONE
     !
@@ -278,6 +280,7 @@ USE mp,               ONLY : mp_sum
 USE mp_global,        ONLY : intra_bgrp_comm
 USE noncollin_module, ONLY : noncolin, npol
 USE matrix_inversion, ONLY : invmat
+USE uspp_init,        ONLY : init_us_2
 
 IMPLICIT NONE
 !

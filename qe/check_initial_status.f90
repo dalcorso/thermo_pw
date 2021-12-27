@@ -102,8 +102,7 @@ SUBROUTINE check_initial_status_tpw(auxdyn, iflag)
   USE mp,              ONLY : mp_bcast
   USE mp_global,       ONLY : mp_global_end
   USE el_phon,         ONLY : elph_mat
-  USE noncollin_module, ONLY : noncolin
-  USE spin_orb,        ONLY : domag
+  USE noncollin_module, ONLY : noncolin, domag
 
   ! YAMBO >
   USE YAMBO,           ONLY : elph_yambo,dvscf_yambo

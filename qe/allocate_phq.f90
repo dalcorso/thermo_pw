@@ -19,8 +19,7 @@ SUBROUTINE allocate_phq_tpw
   USE magnetic_charges, ONLY : mag_charge_mode, mag_charge, alpha_me
   USE qpoint_aux,       ONLY : becpt, alphapt
   USE becmod,           ONLY : allocate_bec_type
-  USE noncollin_module, ONLY : noncolin, npol
-  USE spin_orb,         ONLY : domag
+  USE noncollin_module, ONLY : noncolin, npol, domag
   USE lsda_mod,         ONLY : nspin
   USE qpoint,           ONLY : nksq
   USE wvfct,            ONLY : nbnd

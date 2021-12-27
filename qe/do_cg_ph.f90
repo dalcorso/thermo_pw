@@ -30,8 +30,7 @@ SUBROUTINE do_cg_ph(irr, imode0, drhoscfs)
   USE fft_base,              ONLY : dfftp, dffts
   USE fft_helper_subroutines, ONLY : fftx_ntgrp
   USE lsda_mod,              ONLY : lsda, nspin, current_spin, isk
-  USE spin_orb,              ONLY : domag
-  USE noncollin_module,      ONLY : noncolin, npol, nspin_mag
+  USE noncollin_module,      ONLY : noncolin, npol, nspin_mag, domag
   USE wvfct,                 ONLY : nbnd, npwx, g2kin, et
   USE wavefunctions,         ONLY : evc
   USE eqv,                   ONLY : dpsi, dvpsi, evq
@@ -52,9 +51,9 @@ SUBROUTINE do_cg_ph(irr, imode0, drhoscfs)
   USE lr_global,             ONLY : rpert, evc0, evq0, sevq0, d0psi
   USE lr_cg,                 ONLY : evc1, res, pres, dir, dir_new, prec_vec
   USE lr_symm_base,          ONLY : irotmq, minus_q, nsymq, rtau
-  USE efermi_shift,          ONLY : ef_shift, ef_shift_paw,  def
-  USE units_ph,              ONLY : lrdwf, iudwf, iubar, lrbar
-  USE units_lr,              ONLY : lrwfc, iuwfc
+  USE efermi_shift_tpw,      ONLY : ef_shift_tpw, ef_shift_paw_tpw,  def
+  USE units_ph,              ONLY : iubar, lrbar
+  USE units_lr,              ONLY : lrdwf, iudwf, lrwfc, iuwfc
   USE buffers,               ONLY : get_buffer, save_buffer
   USE mp_pools,              ONLY : inter_pool_comm
   USE mp_bands,              ONLY : intra_bgrp_comm, ntask_groups
@@ -62,6 +61,7 @@ SUBROUTINE do_cg_ph(irr, imode0, drhoscfs)
   USE mp_images,             ONLY : my_image_id, root_image
   USE mp,                    ONLY : mp_sum
   USE fft_interfaces,        ONLY : fft_interpolate
+  USE uspp_init,             ONLY : init_us_2
 
   IMPLICIT NONE
   INTEGER, INTENT(IN) :: irr, imode0
@@ -431,13 +431,13 @@ SUBROUTINE do_cg_ph(irr, imode0, drhoscfs)
      IF (okpaw) THEN
         CALL mp_sum ( dbecsum, inter_pool_comm )
         IF (lmetq0) &
-           CALL ef_shift_paw (drhoscf, dbecsum, ldos, ldoss, becsum1, &
+           CALL ef_shift_paw_tpw (drhoscf, dbecsum, ldos, ldoss, becsum1, &
                                                   dos_ef, irr, rpert, .FALSE.)
         DO ipol=1,rpert
            dbecsum(:,:,:,ipol)=2.0_DP *dbecsum(:,:,:,ipol) 
         ENDDO
      ELSE
-        IF (lmetq0) CALL ef_shift(drhoscf,ldos,ldoss,dos_ef,irr,rpert,.FALSE.)
+        IF (lmetq0) CALL ef_shift_tpw(drhoscf,ldos,ldoss,dos_ef,irr,rpert,.FALSE.)
      ENDIF
      !
      !   After the loop over the perturbations we have the linear change
@@ -464,10 +464,10 @@ SUBROUTINE do_cg_ph(irr, imode0, drhoscfs)
 
      IF (lmetq0.and.convt) THEN
         IF (okpaw) THEN
-           CALL ef_shift_paw (drhoscfs, dbecsum, ldos, ldoss, becsum1, &
+           CALL ef_shift_paw_tpw (drhoscfs, dbecsum, ldos, ldoss, becsum1, &
                                                  dos_ef, irr, rpert, .TRUE.)
         ELSE
-           CALL ef_shift (drhoscfs, ldos, ldoss, dos_ef, irr, rpert, .TRUE.)
+           CALL ef_shift_tpw (drhoscfs, ldos, ldoss, dos_ef, irr, rpert, .TRUE.)
         ENDIF
      ENDIF
      !

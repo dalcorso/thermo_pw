@@ -22,7 +22,8 @@ SUBROUTINE polarizc ( iu )
   USE kinds,        ONLY : DP
   USE control_lr,   ONLY : nbnd_occ
   USE lsda_mod,     ONLY : lsda
-  USE units_ph,     ONLY : lrdwf, iudwf, lrebar, iuebar
+  USE units_lr,     ONLY : lrdwf, iudwf 
+  USE units_ph,     ONLY : lrebar, iuebar
   USE buffers,      ONLY : get_buffer
   USE freq_ph,      ONLY : done_iu, comp_iu, fiu
   USE optical,      ONLY : iu1dwf, lr1dwf, current_w, epsilonc, fru

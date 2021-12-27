@@ -28,8 +28,8 @@ SUBROUTINE local_dos1d_so (ik, kband, plan)
   USE uspp_param, ONLY: upf, nh, nhm
   USE wvfct, ONLY: npwx, wg
   USE klist, ONLY : ngk, igk_k
-  USE noncollin_module, ONLY: noncolin, npol
-  USE spin_orb, ONLY: lspinorb, fcoef
+  USE noncollin_module, ONLY: noncolin, npol, lspinorb
+  USE upf_spinorb, ONLY : fcoef
   USE wavefunctions,  ONLY: evc, psic, psic_nc
   USE becmod, ONLY: bec_type, becp
   USE fft_interfaces,        ONLY : fft_interpolate

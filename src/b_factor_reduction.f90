@@ -17,9 +17,8 @@ USE symme,            ONLY : symtensor
 USE cell_base,        ONLY : ibrav
 USE symm_base,        ONLY : s, t_rev, irt, nrot, nsym, invsym, nosym, &
                              set_sym_bl, find_sym
-USE noncollin_module, ONLY : m_loc, noncolin
+USE noncollin_module, ONLY : m_loc, noncolin, domag
 USE random_numbers,   ONLY : randy
-USE spin_orb,         ONLY : domag
 USE mp_images,        ONLY : root_image, my_image_id
 USE io_global,        ONLY : ionode, stdout
 

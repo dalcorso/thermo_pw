@@ -389,7 +389,8 @@ USE control_ev,     ONLY : ieos
 USE eos,            ONLY : eos_bulk_pol, eos_energy_pol
 USE control_quartic_energy, ONLY : poly_degree_ph
 USE control_mur_p,  ONLY : vmin_p, b0_p, b01_p, b02_p, emin_p
-USE anharmonic,     ONLY : vmin_pt, b0_pt, b01_pt, b02_pt, emin_pt, a_t
+USE anharmonic,     ONLY : a_t
+USE anharmonic_pt,  ONLY : vmin_pt, b0_pt, b01_pt, b02_pt, emin_pt
 USE io_global,      ONLY : stdout
 USE mp_images,      ONLY : my_image_id, root_image
 
@@ -439,7 +440,8 @@ USE thermo_mod,       ONLY : omega_geo
 USE constants,        ONLY : ry_kbar
 USE control_pressure, ONLY : npress, npress_plot, ipress_plot
 USE control_quartic_energy, ONLY : poly_degree_ph
-USE anharmonic,       ONLY : a_t, press_vt
+USE anharmonic,       ONLY : a_t
+USE anharmonic_vt,    ONLY : press_vt
 USE polyfit_mod,      ONLY : compute_poly_deriv
 USE control_vol,      ONLY : nvol_plot, ivol_plot
 USE io_global,        ONLY : stdout

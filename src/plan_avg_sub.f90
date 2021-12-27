@@ -333,6 +333,7 @@ SUBROUTINE do_plan_avg (ik, averag, vacuum, plan, zdim, ninter, i1, &
   USE io_files, ONLY: iunwfc, nwordwfc
   USE io_global, ONLY : stdout
   USE becmod, ONLY: becp, calbec
+  USE uspp_init, ONLY : init_us_2
 
   IMPLICIT NONE
   INTEGER, INTENT(OUT) :: ninter, surface1, surface2
