@@ -83,6 +83,8 @@ SUBROUTINE do_berry ( exit_status, polar, nppl )
      !
      polar_at(idir) = pdl_tot 
      !
+     CALL laxlib_end()
+     !
      CALL close_files(.TRUE.)
      !
      CALL clean_pw( .FALSE. )

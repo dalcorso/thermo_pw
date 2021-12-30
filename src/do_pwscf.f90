@@ -299,6 +299,8 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   !
   IF ( .NOT. conv_ions .OR. optimizer_failed )  exit_status =  3
   !
+  CALL laxlib_end()
+  !
   CALL close_files(.TRUE.)
   !
   CALL clean_pw( .FALSE. )

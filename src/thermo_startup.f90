@@ -41,8 +41,6 @@ CHARACTER(LEN=*), INTENT(IN) :: code
    !
    CALL deallocate_thermo()
    !
-   CALL laxlib_end()
-   !
    CALL environment_end( code )
    !
    CALL mp_global_end ()
