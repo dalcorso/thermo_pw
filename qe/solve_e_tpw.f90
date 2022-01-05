@@ -35,7 +35,7 @@ subroutine solve_e_tpw(drhoscf)
   USE check_stop,            ONLY : check_stop_now
   USE buffers,               ONLY : get_buffer, save_buffer
   USE wavefunctions,         ONLY : evc
-  USE uspp,                  ONLY : okvan, vkb, nlcc_any
+  USE uspp,                  ONLY : okvan, nkb, vkb, nlcc_any
   USE uspp_param,            ONLY : nhm
   USE noncollin_module,      ONLY : noncolin, npol, nspin_mag, domag
   USE scf,                   ONLY : rho
@@ -46,6 +46,7 @@ subroutine solve_e_tpw(drhoscf)
   USE units_ph,              ONLY : lrdrho,  iudrho
   USE units_lr,              ONLY : lrdwf, iudwf, lrwfc, iuwfc
   USE output,                ONLY : fildrho
+  USE control_flags,         ONLY : use_gpu
   USE control_ph,            ONLY : ext_recover, rec_code, &
                                     lnoloc, convt, tr2_ph, nmix_ph, zeu, &
                                     alpha_mix, lgamma_gamma, niter_ph, &
@@ -111,7 +112,7 @@ subroutine solve_e_tpw(drhoscf)
   real(DP) :: tcpu, get_clock
   ! timing variables
 
-  external ch_psi_all, cg_psi
+  external ch_psi_all_tpw, cg_psi
 
   call start_clock ('solve_e')
   !
@@ -222,8 +223,13 @@ subroutine solve_e_tpw(drhoscf)
         ! compute beta functions and kinetic energy for k-point ik
         ! needed by h_psi, called by ch_psi_all, called by cgsolve_all
         !
-        CALL init_us_2 (npw, igk_k(1,ikk), xk (1, ikk), vkb)
+        IF ( nkb>0 ) THEN
+           CALL init_us_2 (npw, igk_k(1,ikk), xk (1, ikk), vkb, use_gpu)
+           IF (iter==1.AND.use_gpu) CALL init_us_2 (npw, igk_k(1,ikk), &
+                                                        xk (1, ikk), vkb)
+        ENDIF
         CALL g2_kin(ikk)
+        IF (use_gpu) CALL g2_kin_gpu(ikk)
         !
         ! compute preconditioning matrix h_diag used by cgsolve_all
         !
@@ -313,7 +319,7 @@ subroutine solve_e_tpw(drhoscf)
 
            conv_root = .true.
 
-           call cgsolve_all (ch_psi_all,cg_psi,et(1,ikk),dvpsi,dpsi, &
+           call cgsolve_all (ch_psi_all_tpw,cg_psi,et(1,ikk),dvpsi,dpsi, &
               h_diag,npwx,npw,thresh,ik,lter,conv_root,anorm,&
               nbnd_occ(ikk),npol)
 

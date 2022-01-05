@@ -7,31 +7,35 @@
 !  
 !
 !-----------------------------------------------------------------------
-  SUBROUTINE non_scf_tpw ( )
+SUBROUTINE non_scf_tpw( )
   !-----------------------------------------------------------------------
-  !
   !! Diagonalization of the KS hamiltonian in the non-scf case.
   !
   USE kinds,                ONLY : DP
   USE bp,                   ONLY : lelfield, lberry, lorbm
   USE check_stop,           ONLY : stopped_by_user
-  USE control_flags,        ONLY : io_level, conv_elec, lbands
+  USE control_flags,        ONLY : io_level, conv_elec, lbands, ethr
   USE ener,                 ONLY : ef, ef_up, ef_dw
   USE io_global,            ONLY : stdout, ionode
   USE io_files,             ONLY : iunwfc, nwordwfc
   USE buffers,              ONLY : save_buffer
-  USE klist,                ONLY : xk, wk, nks, nkstot
+  USE klist,                ONLY : xk, wk, nks, nkstot, two_fermi_energies
   USE lsda_mod,             ONLY : lsda, nspin
   USE wvfct,                ONLY : nbnd, et, npwx
   USE wavefunctions,        ONLY : evc
+  USE add_dmft_occ,         ONLY : dmft
+  !
+  USE wavefunctions_gpum, ONLY : using_evc
+  USE wvfct_gpum,                ONLY : using_et
   !
   IMPLICIT NONE
   !
   ! ... local variables
   !
-  INTEGER :: iter, i
+  INTEGER :: iter, i, dr2 = 0.0_dp
   REAL(dp):: ef_scf, ef_scf_up, ef_scf_dw
   REAL(DP), EXTERNAL :: get_clock
+  CALL using_evc(0) ! This may not be needed. save buffer is intent(in)
   !
   !
   CALL start_clock( 'electrons' )
@@ -46,7 +50,7 @@
      !
   ELSE
      !
-     CALL c_bands_nscf_tpw( )
+     CALL c_bands_nscf_tpw()
      !
   ENDIF
   !
@@ -63,6 +67,7 @@
   ! ... explicitly collected to the first node
   ! ... this is done here for et, in weights () for wg
   !
+  CALL using_et(1)
   CALL poolrecover( et, nbnd, nkstot, nks )
   !
   ! ... calculate weights of Kohn-Sham orbitals (only weights, not Ef,
@@ -92,11 +97,13 @@
   ! ... if Ef is re-computed: print original Ef as well
   !
   conv_elec = .TRUE.
-  CALL print_ks_energies_nonscf ( ef_scf, ef_scf_up, ef_scf_dw )
+  CALL print_ks_energies_nonscf ( ef_scf, ef_scf_up, ef_scf_dw ) 
   !
   ! ... save converged wfc if they have not been written previously
   ! ... FIXME: it shouldn't be necessary to do this here
   !
+  IF ( nks == 1 .AND. (io_level < 2) .AND. (io_level > -1) ) &
+        CALL using_evc(0) ! save buffer is intent(in)
   IF ( nks == 1 .AND. (io_level < 2) .AND. (io_level > -1) ) &
         CALL save_buffer( evc, nwordwfc, iunwfc, nks )
   !
@@ -107,6 +114,14 @@
   ! ... do an orbital magnetization (Kubo terms) calculation
   !
   IF ( lorbm ) CALL orbm_kubo()
+  !
+  ! ... for DMFT write everything to file to restart next scf step from here
+  !
+  IF ( dmft ) THEN
+     CALL using_et(0)
+     CALL save_in_electrons( iter-1, dr2, ethr, et )
+     RETURN
+  ENDIF
   !
   CALL stop_clock( 'electrons' )
   !

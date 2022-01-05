@@ -33,7 +33,8 @@ SUBROUTINE c_bands_nscf_tpw( )
   USE gvect,                ONLY : g, gg, ngm
   USE fft_interfaces,       ONLY : invfft
   USE wvfct,                ONLY : et, nbnd, npwx, current_k
-  USE control_flags,        ONLY : ethr, restart, isolve, io_level, iverbosity
+  USE control_flags,        ONLY : ethr, restart, isolve, io_level, &
+                                   iverbosity, use_gpu
   USE save_ph,              ONLY : tmp_dir_save
   USE io_files,             ONLY : tmp_dir, prefix
   USE ldaU,                 ONLY : lda_plus_u, lda_plus_u_kind, U_projection, &
@@ -133,11 +134,12 @@ SUBROUTINE c_bands_nscf_tpw( )
         !
         IF ( lsda ) current_spin = isk(ik)
         !
-        call g2_kin( ik )
+        IF (.NOT.use_gpu) CALL g2_kin( ik )
+        IF (use_gpu) CALL g2_kin_gpu( ik )
         ! 
         ! ... More stuff needed by the hamiltonian: nonlocal projectors
         !
-        IF ( nkb > 0 ) CALL init_us_2( ngk(ik), igk_k(1,ik), xk(1,ik), vkb )
+        IF ( nkb > 0 ) CALL init_us_2( ngk(ik), igk_k(1,ik), xk(1,ik), vkb, .TRUE. )
         !
         ! ... Needed for LDA+U
         !
@@ -159,7 +161,8 @@ SUBROUTINE c_bands_nscf_tpw( )
            !
         ELSE
            !
-           CALL init_wfc ( ik )
+           IF (.NOT.use_gpu) CALL init_wfc ( ik )
+           IF (use_gpu) CALL init_wfc_gpu ( ik )
            !
         ENDIF
         !

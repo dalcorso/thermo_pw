@@ -39,6 +39,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   USE paw_variables,        ONLY : okpaw
   USE paw_onecenter,        ONLY : paw_dpotential
   USE buffers,              ONLY : save_buffer, get_buffer
+  USE control_flags,        ONLY : use_gpu
   USE control_ph,           ONLY : rec_code, niter_ph, convt, &
                                    alpha_mix, rec_code_read, &
                                    where_rec, ext_recover
@@ -259,9 +260,15 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
         ! needed by h_psi, called by ch_psi_all, called by cgsolve_all
         !
         IF ( nkb > 0 ) THEN
-           CALL init_us_2( npwq, igk_k(1,ikq), xk(1,ikq), vkb )
+           CALL init_us_2( npwq, igk_k(1,ikq), xk(1,ikq), vkb, use_gpu)
+        !
+        !  This is needed to build the right hand side
+        !
+           IF (use_gpu.AND.iter==1) CALL init_us_2( npwq, igk_k(1,ikq), &
+                                                  xk(1,ikq), vkb)
         ENDIF
         CALL g2_kin (ikq) 
+        IF (use_gpu) CALL g2_kin_gpu (ikq) 
         !
         ! Start the loop on the two linear systems, one at B and one at
         ! -B
