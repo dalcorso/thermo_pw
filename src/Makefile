@@ -45,7 +45,7 @@ deallocate_q2r.o \
 decorated_write.o \
 do_pwscf.o \
 do_berry.o \
-do_phonon.o \
+do_phonon_tpw.o \
 dos_sub.o \
 dynmatrix_tpw.o \
 elastic_constants_t.o \
