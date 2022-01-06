@@ -48,91 +48,90 @@ target_link_libraries(qe_tpw_lib
         qe_xclib)
 
 set(src_tpw_qe
-    qe/add_dkmds.f90
+    qe/add_dkmds_tpw.f90
     qe/add_dvscf_rhs.f90
-    qe/add_zstar_ue.f90
+    qe/add_zstar_ue_tpw.f90
     qe/add_zstar_us.f90
     qe/adddvscf_tran.f90
-    qe/addnlcc_zstar_eu_us.f90
-    qe/addusddenseq.f90
+    qe/addnlcc_zstar_eu_us_tpw.f90
     qe/allocate_cg.f90
     qe/allocate_lanczos.f90
-    qe/allocate_phq.f90
+    qe/allocate_phq_tpw.f90
     qe/apply_ac.f90
     qe/apply_trev_r.f90
-    qe/c_bands.f90
+    qe/c_bands_tpw.f90
     qe/calc_chi.f90
     qe/ccg_psi.f90
     qe/check_bands.f90
     qe/check_initial_geometry.f90
-    qe/check_initial_status.f90
-    qe/ch_psi_all.f90
+    qe/check_initial_status_tpw.f90
+    qe/ch_psi_all_tpw.f90
     qe/clean_all_pw.f90
     qe/collect_grid_files.f90
-    qe/compute_drhous.f90
-    qe/compute_drhous_nc.f90
+    qe/compute_drhous_tpw.f90
+    qe/compute_drhous_nc_tpw.f90
     qe/compute_int3_coeff.f90
     qe/compute_intq.f90
     qe/control_qe.f90
     qe/deallocate_ph_tpw.f90
-    qe/dielec.f90
+    qe/dielec_tpw.f90
     qe/divide_class.f90
     qe/divide_class_so.f90
     qe/do_cg_e.f90
     qe/do_cg_ph.f90
     qe/do_lanczos.f90
     qe/do_lanczos_psh.f90
-    qe/drho.f90
+    qe/drho_tpw.f90
     qe/drhodvus.f90
     qe/dv_of_drho_clf.f90
     qe/dv_of_drho_tran.f90
     qe/dveqpsi_us.f90
     qe/dveqpsi_us_only.f90
-    qe/dvkb3.f90
-    qe/dvpsi_e.f90
-    qe/dvqpsi_us.f90
+    qe/dvkb3_tpw.f90
+    qe/dvpsi_e_tpw.f90
+    qe/dvqpsi_us_tpw.f90
     qe/dyndiag.f90
     qe/ef_shift.f90
-    qe/electrons.f90
+    qe/electrons_tpw.f90
     qe/ev_xml.f90
     qe/find_band_sym.f90
     qe/find_info_group.f90
     qe/find_inverse_s.f90
-    qe/find_irrep.f90
+    qe/find_irrep_tpw.f90
     qe/find_mode_sym.f90
     qe/h_pcg_step.f90
-    qe/init_representations.f90
-    qe/initialize_ph.f90
+    qe/init_representations_tpw.f90
+    qe/initialize_ph_tpw.f90
     qe/irrek.f90
     qe/kpoint_grid.f90
     qe/lanczos_write_restart.f90
-    qe/lr_dot.f90
+    qe/lr_dot_tpw.f90
     qe/lr_restart.f90
-    qe/lr_sm1_psi.f90
-    qe/lr_sym_mod.f90
+    qe/lr_sm1_psi_tpw.f90
+    qe/lr_sym_mod_tpw.f90
     qe/lr_us.f90
     qe/manage_mixing.f90
     qe/mix_pot.f90
     qe/nh_lanczos_step.f90
-    qe/non_scf.f90
-    qe/openfilq.f90
+    qe/non_scf_tpw.f90
+    qe/openfilq_tpw.f90
     qe/orthogonalize_omega.f90
     qe/paw_add_onecenter.f90
     qe/paw_add_symmetry.f90
     qe/pheqscf.f90
-    qe/phescf.f90
-    qe/phq_init.f90
-    qe/phq_readin.f90
-    qe/phq_setup.f90
-    qe/phq_summary.f90
-    qe/phqscf.f90
+    qe/phescf_tpw.f90
+    qe/phq_init_tpw.f90
+    qe/phq_readin_tpw.f90
+    qe/phq_setup_tpw.f90
+    qe/phq_summary_tpw.f90
+    qe/phqscf_tpw.f90
     qe/polarizc.f90
-    qe/prepare_q.f90
+    qe/prepare_q_tpw.f90
     qe/prepare_sym_analysis.f90
     qe/print_symmetries.f90
     qe/psh_lanczos_step.f90
     qe/q2qstar_ph.f90
-    qe/q_points.f90
+    qe/q_points_tpw.f90
     qe/read_dyn_from_file.f90
     qe/read_lanczos_chain.f90
     qe/realspace_grid_init.f90
@@ -140,24 +139,24 @@ set(src_tpw_qe
     qe/rotate_all_psi_r.f90
     qe/rotate_and_add_dyn.f90
     qe/rotate_charges.f90
-    qe/run_nscf.f90
+    qe/run_nscf_tpw.f90
     qe/scal_prod.f90
     qe/set_defaults_pw.f90
     qe/set_fxc_tran.f90
     qe/set_int3q.f90
     qe/set_intq_nc.f90
-    qe/set_irr.f90
-    qe/set_irr_sym.f90
+    qe/set_irr_tpw.f90
+    qe/set_irr_sym_tpw.f90
     qe/set_kplusq.f90
     qe/set_kplusq_nc.f90
     qe/set_kup_and_kdw.f90
-    qe/setup.f90
-    qe/solve_e.f90
+    qe/setup_tpw.f90
+    qe/solve_e_tpw.f90
     qe/solve_e_fpolc.f90
     qe/solve_eq.f90
     qe/solve_eq_tran.f90
     qe/solve_linear_system.f90
-    qe/solve_linter.f90
+    qe/solve_linter_tpw.f90
     qe/star_q.f90
     qe/summarize_alpha.f90
     qe/sym_and_write_magnetic_charges.f90
@@ -167,10 +166,10 @@ set(src_tpw_qe
     qe/transform_intq_nc.f90
     qe/transform_intq_so.f90
     qe/write_group_info_ph.f90
-    qe/write_rec.f90
-    qe/zstar_eu.f90
+    qe/write_rec_tpw.f90
+    qe/zstar_eu_tpw.f90
     qe/zstar_eu_loc.f90
-    qe/zstar_eu_us.f90)
+    qe/zstar_eu_us_tpw.f90)
 
 qe_add_library(qe_tpw_qe ${src_tpw_qe})
 target_link_libraries(qe_tpw_qe
@@ -216,7 +215,7 @@ set(src_tpw
     src/deallocate_thermo.f90
     src/decorated_write.f90
     src/do_berry.f90
-    src/do_phonon.f90
+    src/do_phonon_tpw.f90
     src/do_pwscf.f90
     src/dos_sub.f90
     src/dynmatrix_tpw.f90
