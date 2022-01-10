@@ -23,6 +23,7 @@ SUBROUTINE manage_ph_all_geometries()
 !   pw.x and ph.x variables
 !
   USE io_global,             ONLY : stdout
+  USE control_flags,         ONLY : io_level
   USE control_ph,            ONLY : always_run
   USE output,                ONLY : fildyn
 !
@@ -37,7 +38,11 @@ IMPLICIT NONE
 INTEGER           :: part, nwork, igeom
 CHARACTER(LEN=80) :: message
 LOGICAL           :: something_todo, check_dyn_file_exists
-
+!
+! We need io_level at least one in all phonon for running with many geometries
+!
+IF (io_level<1) io_level=1
+!
 always_run=.TRUE.
 CALL start_clock( 'PHONON' )
 !
