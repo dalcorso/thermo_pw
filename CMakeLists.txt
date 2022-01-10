@@ -36,6 +36,7 @@ set(src_tpw_lib
     lib/vector.f90
     lib/voigt.f90
     lib/xrdp.f90)
+qe_enable_cuda_fortran("${src_tpw_lib}")
 
 qe_add_library(qe_tpw_lib ${src_tpw_lib})
 target_link_libraries(qe_tpw_lib
@@ -170,6 +171,7 @@ set(src_tpw_qe
     qe/zstar_eu_tpw.f90
     qe/zstar_eu_loc.f90
     qe/zstar_eu_us_tpw.f90)
+qe_enable_cuda_fortran("${src_tpw_qe}")
 
 qe_add_library(qe_tpw_qe ${src_tpw_qe})
 target_link_libraries(qe_tpw_qe
@@ -182,7 +184,10 @@ target_link_libraries(qe_tpw_qe
         qe_fftx
         qe_dftd3
         qe_devxlib
-        qe_xclib)
+        qe_xclib
+        qe_mbd
+    PUBLIC
+        qe_openacc_fortran)
 
 set(src_tpw
     src/addusdens1d_so.f90
@@ -341,6 +346,7 @@ set(src_tpw
     src/write_phdos.f90
     src/write_quadratic.f90
     src/write_thermo.f90)
+qe_enable_cuda_fortran("${src_tpw}")
 
 qe_add_library(qe_tpw ${src_tpw})
 target_link_libraries(qe_tpw
@@ -354,7 +360,11 @@ target_link_libraries(qe_tpw
         qe_fftx
         qe_devxlib
         qe_upflib
-        qe_xclib)
+        qe_xclib
+        qe_mbd
+    PUBLIC
+        qe_openacc_fortran)
+
 
 ###########################################################
 # thermo_pw.x
@@ -375,7 +385,11 @@ target_link_libraries(qe_tpw_exe
         qe_phonon_ph
         qe_pw
         qe_pp
-        qe_modules)
+        qe_modules
+        qe_mbd
+    PUBLIC
+        qe_openacc_fortran)
+
 
 ###########################################################
 # space_groups.x
