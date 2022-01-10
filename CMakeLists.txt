@@ -46,7 +46,10 @@ target_link_libraries(qe_tpw_lib
         qe_modules
         qe_fftx
         qe_upflib
-        qe_xclib)
+        qe_xclib
+        qe_openmp_fortran
+        qe_mpi_fortran)
+
 
 set(src_tpw_qe
     qe/add_dkmds_tpw.f90
@@ -182,6 +185,8 @@ target_link_libraries(qe_tpw_qe
         qe_lr_modules
         qe_modules
         qe_fftx
+        qe_openmp_fortran
+        qe_mpi_fortran
         qe_dftd3
         qe_devxlib
         qe_xclib
@@ -355,11 +360,14 @@ target_link_libraries(qe_tpw
         qe_tpw_lib
         qe_pw
         qe_phonon_ph
-        qe_lr_modules
         qe_modules
+        qe_lr_modules
+	qe_scalapack
         qe_fftx
-        qe_devxlib
         qe_upflib
+        qe_openmp_fortran
+        qe_mpi_fortran
+        qe_devxlib
         qe_xclib
         qe_mbd
     PUBLIC
