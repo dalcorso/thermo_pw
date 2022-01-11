@@ -359,8 +359,7 @@ SUBROUTINE do_plan_avg (ik, averag, vacuum, plan, zdim, ninter, i1, &
   ! starting point of each plane
   ! the number of tau per plane
 
-  REAL(DP) :: sp_min, avg (nat), z1 (nat), zdim
-  ! minimum plane distance
+  REAL(DP) :: avg (nat), z1 (nat), zdim
   ! the average position of each plane
   ! auxiliary for coordinates
   ! length in a.u. of the cell along z

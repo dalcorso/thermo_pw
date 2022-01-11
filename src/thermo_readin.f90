@@ -106,7 +106,6 @@ SUBROUTINE thermo_readin()
                                    calculation
   USE control_ph,           ONLY : xmldyn
   USE ifc,                  ONLY : zasr
-  USE cell_base,            ONLY : alat
   USE output,               ONLY : fildyn
   USE mp_world,             ONLY : world_comm
   USE mp_images,            ONLY : nimage, my_image_id, root_image
@@ -120,7 +119,7 @@ SUBROUTINE thermo_readin()
   IMPLICIT NONE
   REAL(DP) :: wq0, save_max_seconds
   INTEGER, ALLOCATABLE :: iun_image(:)
-  INTEGER :: image, iq, ipol, jpol, icont, iun_thermo, parse_unit_save, &
+  INTEGER :: image, iq, icont, iun_thermo, parse_unit_save, &
              nch, nrp, i, j, k, ios
   INTEGER :: iun_input
   INTEGER :: find_free_unit
@@ -884,14 +883,6 @@ SUBROUTINE thermo_readin()
         CALL errore('thermo_readin','thermo_pw requires scf or relax in &
                                                &pw input',1)
   ENDIF
-!
-!  default value of sp_min if not given in input
-!
-  IF (sp_min==0.0_DP) THEN
-     sp_min=2.0_DP/alat
-  ELSE
-     sp_min=sp_min/alat
-  ENDIF
 
   DEALLOCATE(input)
   DEALLOCATE(iun_image)
@@ -919,7 +910,6 @@ SUBROUTINE thermo_ph_readin()
   !
   IMPLICIT NONE
   INTEGER :: ios
-  CHARACTER(LEN=512) :: dummy
   !
   !  Only the meta_io_node reads the input and sends it to all images
   !  the input is read from file ph_control. This routine searches the
@@ -942,7 +932,7 @@ SUBROUTINE thermo_ph_readin()
 !
   outdir_in_ph=TRIM(outdir)
   CALL phq_readin_tpw()
-  IF (meta_ionode) CLOSE(5,STATUS='KEEP')
+  IF (meta_ionode) CLOSE(UNIT=5,STATUS='KEEP')
   IF (.NOT.ldisp.AND. what /= 'scf_ph' .AND. what /= 'mur_lc_ph' ) &
         CALL errore('thermo_ph_readin','ldisp should be .TRUE.',1)
   fildyn_thermo="dynamical_matrices/"//TRIM(fildyn)

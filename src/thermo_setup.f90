@@ -47,7 +47,8 @@ SUBROUTINE thermo_setup()
   USE control_paths,        ONLY : npk_label, lbar_label
   USE control_grun,         ONLY : temp_ph, volume_ph, celldm_ph
   USE control_xrdp,         ONLY : lambda, lambda_elem
-  USE control_2d_bands,     ONLY : lprojpbs, nkz, sur_layers, identify_sur
+  USE control_2d_bands,     ONLY : lprojpbs, nkz, sur_layers, identify_sur, &
+                                   sp_min
 !
 !  variables modified by this routine
 !
@@ -69,7 +70,8 @@ SUBROUTINE thermo_setup()
 !  ibrav, celldm, tau, dfftp parameters.
 !  This routine sets also the point group variables of QE.
 !
-  USE cell_base,            ONLY : at, bg, ibrav, celldm, omega, cell_base_init
+  USE cell_base,            ONLY : at, bg, ibrav, celldm, omega, &
+                                   cell_base_init, alat
   USE ions_base,            ONLY : nat, tau, ntyp => nsp, ityp, amass, atm, &
                                    if_pos
 
@@ -318,6 +320,14 @@ SUBROUTINE thermo_setup()
      lprojpbs=.FALSE.
   ELSE
      lbar_label=.TRUE.
+  ENDIF
+!
+!  default value of sp_min if not given in input
+!
+  IF (sp_min==0.0_DP) THEN
+     sp_min=2.0_DP/alat
+  ELSE
+     sp_min=sp_min/alat
   ENDIF
 
   IF (what=='scf_2d_bands'.AND.identify_sur) THEN

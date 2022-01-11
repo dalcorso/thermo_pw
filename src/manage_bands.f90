@@ -10,7 +10,7 @@ SUBROUTINE manage_bands()
 !--------------------------------------------------------------------------
 !
 !   this is a driver that controls the band structure / electronic dos
-!   calculation. It manage also the recovering of the bands from file.
+!   calculation. It manages also the recovering of the bands from file.
 !
 USE control_thermo,   ONLY : ldos_syn_1, spin_component
 USE control_bands,    ONLY : nbnd_bands

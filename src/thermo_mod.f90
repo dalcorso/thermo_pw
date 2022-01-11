@@ -803,9 +803,9 @@ MODULE control_conv
   !
   SAVE
 
-  REAL(DP), ALLOCATABLE :: ke(:)    ! the kinetic energy that are tested
-  REAL(DP), ALLOCATABLE :: keden(:) ! the kinetic energy of the charge
-  REAL(DP), ALLOCATABLE :: sigma_test(:) ! the smearing value
+  REAL(DP), ALLOCATABLE :: ke(:)    ! the kinetic energies that are tested
+  REAL(DP), ALLOCATABLE :: keden(:) ! the kinetic energies of the charge
+  REAL(DP), ALLOCATABLE :: sigma_test(:) ! the smearing values
   INTEGER,  ALLOCATABLE :: nk_test(:,:) ! the nk to calculate
   REAL(DP) :: deltake               ! the interval between kinetic energies
   INTEGER  :: nke                   ! the number of kinetic energies

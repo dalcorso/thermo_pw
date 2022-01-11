@@ -98,7 +98,7 @@ SUBROUTINE thermo_summary()
   WRITE(stdout,'(/)')
   SELECT CASE (TRIM(what))
      CASE ('plot_bz') 
-          WRITE(stdout,'(5x,"Plotting the Brillouin Zone and k points path")')
+          WRITE(stdout,'(5x,"Plotting the Brillouin Zone and k point path")')
      CASE ('scf') 
           WRITE(stdout,'(5x,"Doing a single scf calculation")')
      CASE ('scf_bands') 
@@ -116,8 +116,7 @@ SUBROUTINE thermo_summary()
           WRITE(stdout,'(5x,"Calculating the volume that minimizes the &
                                                                   &energy")')
      CASE ('mur_lc_bands') 
-          WRITE(stdout,'(5x,"Calculating the bands at the Murnaghan minimum &
-                                                                   &volume")')
+          WRITE(stdout,'(5x,"Calculating the bands at the minimum volume")')
           WRITE(stdout,'(5x,"Use what=''plot_bz'' to visualize the BZ path")')
      CASE ('mur_lc_dos')
           WRITE(stdout,'(5x,"Calculating the electronic dos at the minimum &
@@ -135,12 +134,8 @@ SUBROUTINE thermo_summary()
           WRITE(stdout,'(5x,"Computing the lattice constant and the bulk" )')
           WRITE(stdout,'(5x,"modulus as a function of temperature ")')
      CASE ('scf_elastic_constants') 
-          IF (frozen_ions) THEN
-             WRITE(stdout,'(5x,"Computing the frozen ions elastic &
-                                                               &constants ")')
-          ELSE
-             WRITE(stdout,'(5x,"Computing the elastic constants ")')
-          ENDIF
+          WRITE(stdout,'(5x,"Computing the elastic constants ")')
+          IF (frozen_ions) WRITE(stdout,'(5x,"The ions are frozen" )')
           lelc = .TRUE.
      CASE ('mur_lc_elastic_constants') 
           WRITE(stdout,'(5x,"Computing the elastic constants at the &
@@ -150,7 +145,7 @@ SUBROUTINE thermo_summary()
      CASE ('elastic_constants_t')
           WRITE(stdout,'(5x,"Computing the temperature dependent elastic" )')
           WRITE(stdout,'(5x,"constants within quasi-harmonic approximation" )')
-          WRITE(stdout,'(5x,"for all geometries" )')
+          WRITE(stdout,'(5x,"for several geometries" )')
           IF (frozen_ions) WRITE(stdout,'(5x,"The ions are frozen" )')
           lelc = .TRUE.
      CASE ('scf_piezoelectric_tensor') 
@@ -171,7 +166,7 @@ SUBROUTINE thermo_summary()
           lpolar=.TRUE.
      CASE ('scf_nk')
           WRITE(stdout,'(5x,"Testing the total energy convergence with the k &
-                         &points sampling")')
+                         &points mesh")')
      CASE ('scf_ke')
           WRITE(stdout,'(5x,"Testing the total energy convergence with the &
                          &kinetic energy cutoff ")')
@@ -390,7 +385,6 @@ SUBROUTINE thermo_summary()
        ENDIF
     ENDIF
  ENDIF
-
 !
 !  B factor matrix
 ! 
