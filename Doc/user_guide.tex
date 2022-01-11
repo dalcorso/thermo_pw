@@ -1666,7 +1666,8 @@ With this option the code runs several self-consistent calculations
 at different geometries. The runs can be done in parallel when several images 
 are available. This option has two working modes controlled by the 
 logical variable \texttt{lmurn}. When \texttt{lmurn=.TRUE.} the total energy as 
-a function of the volume is interpolated by a Murnaghan equation and 
+a function of the volume is interpolated by an equation of state
+(Murnaghan or Birch-Murnaghan) and 
 a plot of the energy as a function of the volume, of the pressure 
 as a function of the volume and of the enthalpy as a function of
 pressure are produced. The volume is changed by 
@@ -1739,8 +1740,9 @@ step_ngeo(1),...,step_ngeo(6) : The step between the lattice
              angles alpha, beta, and gamma. The cosine of the 
              angle is calculated by the program.
              Default: real 0.05 a.u., 0.02, 0.02, 0.5, 0.5, 0.5
-lmurn       : if .TRUE. the Murnaghan fit is done. Only ngeo(1) 
-             values of the energy are fitted, the other values 
+lmurn       : if .TRUE. the fit with an equation of state
+             is done. Only ngeo(1) values of the energy are 
+             fitted, the other values 
              of ngeo are not used. if .FALSE. use a quadratic 
              or quartic function to interpolate the energy as 
              a function of all celldm parameters. The number of 
@@ -1777,7 +1779,7 @@ vmax_input : maximum volume for the plot of the energy as a
 deltav     : distance between two volumes in the plot of the 
              energy as a function of the volume.
              Default: real calculated from nvol.
-nvol       : number of volumes in Murnaghan plot.
+nvol       : number of volumes in equation of state plot.
              Default: integer 51
 lquartic   : if .TRUE. fit the energy with a quartic polynomial.
              Default: logical .TRUE.
@@ -1790,11 +1792,11 @@ lsolve     : choose the algorithm used to fit the quartic
              routine dgels) 3 Use the SVD algorithm to minimize 
              chi^2 (lapack routine dgelss).
              Default: integer 2
-flevdat    : file where the Murnaghan equation is written. The 
-             results of the Murnaghan fit are then written in 
+flevdat    : file where the equation of state is written. The 
+             results of the fit are then written in 
              flevdat.ev.out.
              Default: character(len=*) 'output_ev.dat'
-flpsmur    : postscript file of the Murnaghan plot.
+flpsmur    : postscript file of the equation of state plot.
              Default: character(len=*) 'output_mur'
 lel_free_energy : if .TRUE. computes the electronic thermodynamic 
              properties (energy, free energy, entropy, and constant 
@@ -1931,7 +1933,7 @@ are shown on the same path used for the phonon dispersions.
 In addition to the frequencies the code produces also several plots of
 the derivatives of the frequencies with respect to the crystal parameters
 multiplied by the crystal parameters. \\
-When the Murnaghan equation is used to interpolate the
+When an equation of state is used to interpolate the
 Helmholtz free energy (\texttt{lmurn=.TRUE.}), in addition to the volume, 
 the bulk modulus and the pressure derivative of the bulk modulus are 
 plotted as a function of 
@@ -1989,7 +1991,7 @@ With this option the pressure control is active. You can specify a
 finite pressure and the Gibbs energy is minimized instead of the
 Helmholtz free energy. Note however that if the minimum is distant from 
 the starting configuration its associated error can be large, larger for the
-quadratic than for the Murnaghan interpolation. \\
+quadratic than for the equation of state interpolation. \\
 By using the variables \texttt{ntemp\_plot} and \texttt{temp\_plot} (see
 the Section Temperature and pressure) the code produces also plots
 of the thermal expansion, of the bulk modulus, of the average 
