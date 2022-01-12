@@ -19,7 +19,7 @@ SUBROUTINE plot_anhar()
 USE kinds,            ONLY : DP
 USE constants,        ONLY : rydberg_si, avogadro
 USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
-USE control_thermo,   ONLY : ltherm, ltherm_dos, ltherm_freq, with_eigen
+USE control_thermo,   ONLY : ltherm, ltherm_dos, ltherm_freq
 USE postscript_files, ONLY : flpsanhar
 USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,  &
                              gnuplot_write_header,        &
@@ -247,10 +247,6 @@ IF (lgnuplot.AND.ionode) &
 !IF (lgnuplot.AND.ionode) &
 !   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
 !                                       //TRIM(gnu_filename), WAIT=.FALSE.)
-
-CALL plot_thermo_anhar()
-
-IF (with_eigen) CALL plot_dw_anhar()
 
 RETURN
 END SUBROUTINE plot_anhar
@@ -1001,7 +997,7 @@ SUBROUTINE plot_thermo_anhar()
 USE kinds,            ONLY : DP
 USE constants,        ONLY : rydberg_si, avogadro
 USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
-USE control_thermo,   ONLY : ltherm_dos, ltherm_freq, with_eigen
+USE control_thermo,   ONLY : ltherm_dos, ltherm_freq
 USE postscript_files, ONLY : flpsanhar
 USE gnuplot,          ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
                              gnuplot_ylabel, &
@@ -1102,7 +1098,7 @@ SUBROUTINE plot_dw_anhar()
 USE kinds,            ONLY : DP
 USE ions_base,        ONLY : nat
 USE cell_base,        ONLY : ibrav
-USE control_thermo,   ONLY : ltherm_dos, ltherm_freq
+USE control_thermo,   ONLY : ltherm_dos, ltherm_freq, with_eigen
 USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
 USE postscript_files, ONLY : flpsanhar
 USE gnuplot,          ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
@@ -1121,6 +1117,7 @@ INTEGER :: ierr, system, na
 CHARACTER(LEN=6) :: int_to_char
 
 IF ( my_image_id /= root_image ) RETURN
+IF (.NOT.with_eigen) RETURN
 
 gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'_anhar_dw'
 CALL gnuplot_start(gnu_filename)

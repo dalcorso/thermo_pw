@@ -32,7 +32,7 @@ USE gnuplot,         ONLY : gnuplot_start, gnuplot_end,  &
 USE data_files,  ONLY : flanhar
 USE grun_anharmonic, ONLY : done_grun
 USE initial_conf,  ONLY : ibrav_save
-USE control_thermo,  ONLY : ltherm_dos, ltherm_freq, with_eigen
+USE control_thermo,  ONLY : ltherm_dos, ltherm_freq
 USE control_elastic_constants, ONLY : lelastic, lelasticf
 USE temperature,     ONLY : tmin, tmax
 USE control_pressure, ONLY : pressure_kb
@@ -423,15 +423,6 @@ IF (lgnuplot.AND.ionode) &
 !  CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
 !                                       //TRIM(gnu_filename), WAIT=.FALSE.)
 
-CALL plot_thermo_anhar()
-
-IF (with_eigen) CALL plot_dw_anhar_anis()
-
-IF (isoent_avail) THEN
-   CALL plot_thermal_stress()
-   CALL plot_generalized_gruneisen()
-ENDIF
-
 RETURN
 END SUBROUTINE plot_anhar_anis
 
@@ -451,6 +442,7 @@ USE gnuplot,          ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
                              gnuplot_ylabel, &
                              gnuplot_xlabel, &
                              gnuplot_write_file_mul_data
+USE control_elastic_constants, ONLY : lelastic, lelasticf
 USE gnuplot_color,    ONLY : gnuplot_set_greens
 USE data_files,       ONLY : flanhar
 USE temperature,      ONLY : tmin, tmax
@@ -462,6 +454,7 @@ CHARACTER(LEN=256) :: gnu_filename, filename, psfilename, filenameph
 INTEGER :: ierr, system, na
 
 IF ( my_image_id /= root_image ) RETURN
+IF (.NOT.(lelastic.OR.lelasticf)) RETURN
 
 IF (.NOT.(ltherm_freq.OR.ltherm_dos)) RETURN
 
@@ -558,6 +551,7 @@ USE gnuplot,          ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
                              gnuplot_ylabel, &
                              gnuplot_xlabel, &
                              gnuplot_write_file_mul_data
+USE control_elastic_constants, ONLY : lelastic, lelasticf
 USE gnuplot_color,    ONLY : gnuplot_set_greens
 USE data_files,       ONLY : flanhar
 USE temperature,      ONLY : tmin, tmax
@@ -570,6 +564,7 @@ INTEGER :: ierr, system, na
 
 IF ( my_image_id /= root_image ) RETURN
 IF (.NOT.(ltherm_freq.OR.ltherm_dos)) RETURN
+IF (.NOT.(lelastic.OR.lelasticf)) RETURN
 
 gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'.ggamma'
 CALL gnuplot_start(gnu_filename)
@@ -658,7 +653,7 @@ SUBROUTINE plot_dw_anhar_anis()
 USE kinds,            ONLY : DP
 USE ions_base,        ONLY : nat
 USE cell_base,        ONLY : ibrav
-USE control_thermo,   ONLY : ltherm_dos, ltherm_freq
+USE control_thermo,   ONLY : ltherm_dos, ltherm_freq, with_eigen
 USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
 USE postscript_files, ONLY : flpsanhar
 USE gnuplot,          ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
@@ -677,6 +672,7 @@ INTEGER :: ierr, system, na
 CHARACTER(LEN=6) :: int_to_char
 
 IF ( my_image_id /= root_image ) RETURN
+IF (.NOT.with_eigen) RETURN
 
 gnu_filename='gnuplot_files/'//TRIM(flgnuplot)//'.anhar_anis_dw'
 CALL gnuplot_start(gnu_filename)
