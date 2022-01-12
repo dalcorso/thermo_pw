@@ -23,7 +23,7 @@ USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,  &
                              gnuplot_xlabel,              &
                              gnuplot_write_file_mul_data
 USE data_files,      ONLY : flkeconv
-USE control_conv,    ONLY : ke, nke, nkeden, ncutoffene
+USE control_conv,    ONLY : ke, nkeden, ncutoffene
 USE thermo_mod,      ONLY : energy_geo
 USE mp_images,       ONLY : my_image_id, root_image
 USE io_global,       ONLY : ionode
@@ -32,6 +32,8 @@ IMPLICIT NONE
 
 CHARACTER(LEN=256) :: gnu_filename, filename
 CHARACTER(LEN=6), EXTERNAL :: int_to_char
+CHARACTER(LEN=12), ALLOCATABLE :: color(:)
+LOGICAL :: first_step, last_step
 INTEGER :: iden
 INTEGER :: ierr, system
 
@@ -48,27 +50,19 @@ CALL gnuplot_ylabel('Total energy (mRy)',.FALSE.)
 CALL gnuplot_set_eref(energy_geo(ncutoffene),.FALSE.) 
 CALL gnuplot_set_gfact(1000._DP,.FALSE.) 
 
+ALLOCATE(color(nkeden))
+color='color_green'
+color(1)='color_red'
+IF (nkeden>1) color(nkeden)='color_blue'
 DO iden=1,nkeden
-   IF (nkeden > 1) THEN
-      filename='energy_files/'//TRIM(flkeconv)//TRIM(int_to_char(iden))&
+   first_step=(iden==1)
+   last_step=(iden==nkeden)
+   filename='energy_files/'//TRIM(flkeconv)//TRIM(int_to_char(iden))&
                                                 //'/'//TRIM(flkeconv)
-      IF (iden==1) THEN
-         CALL gnuplot_write_file_mul_data(filename,1,2,'color_red',.TRUE.,&
-                                          .FALSE.,.FALSE.)
-      ELSEIF (iden==nkeden) THEN
-         CALL gnuplot_write_file_mul_data(filename,1,2,'color_blue',.FALSE.,&
-                                          .TRUE.,.FALSE.)
-      ELSE
-         CALL gnuplot_write_file_mul_data(filename,1,2,'color_green',.FALSE.,&
-                                          .FALSE.,.FALSE.)
-      ENDIF
-   ELSE
-      filename='energy_files/'//TRIM(flkeconv)
-      CALL gnuplot_write_file_mul_data(filename,1,2,'color_red',.TRUE.,.TRUE.,&
-                                                 .FALSE.)
-   ENDIF
+   CALL gnuplot_write_file_mul_data(filename,1,2,color(iden),first_step,&
+                                          last_step,.FALSE.)
 ENDDO
-
+DEALLOCATE(color)
 CALL gnuplot_end()
 
 IF (lgnuplot.AND.ionode) &

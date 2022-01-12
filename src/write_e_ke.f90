@@ -40,13 +40,9 @@ IF (ionode) iu_eke=find_free_unit()
 icount = 0
 DO iden=1, nkeden
    kedenv=ecutrho0 + (iden-1) * deltakeden
-   IF (nkeden > 1) THEN
-      filename='energy_files/'//TRIM(flkeconv)//int_to_char(iden)
-      CALL check_tempdir ( filename, exst, parallelfs )     
-      filename=TRIM(filename)//'/'//TRIM(flkeconv)
-   ELSE
-      filename='energy_files/'//TRIM(flkeconv)
-   END IF
+   filename='energy_files/'//TRIM(flkeconv)//int_to_char(iden)
+   CALL check_tempdir ( filename, exst, parallelfs )     
+   filename=TRIM(filename)//'/'//TRIM(flkeconv)
    IF (ionode) THEN
       OPEN(UNIT=iu_eke, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
       WRITE(iu_eke,'("#   E_kin (Ry)       E_tot (Ry) ")' )

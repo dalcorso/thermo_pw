@@ -37,13 +37,9 @@ IF (my_image_id /= root_image) RETURN
 !
 iu_enk=find_free_unit()
 DO isigma=1, nsigma
-   IF (nsigma > 1) THEN
-      filename='energy_files/'//TRIM(flnkconv)//int_to_char(isigma)
-      CALL check_tempdir ( filename, exst, parallelfs )     
-      filename=TRIM(filename)//'/'//TRIM(flnkconv)
-   ELSE
-      filename='energy_files/'//TRIM(flnkconv)
-   ENDIF
+   filename='energy_files/'//TRIM(flnkconv)//int_to_char(isigma)
+   CALL check_tempdir ( filename, exst, parallelfs )     
+   filename=TRIM(filename)//'/'//TRIM(flnkconv)
    IF (ionode) THEN
       OPEN(UNIT=iu_enk, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
       WRITE(iu_enk,'("#   nk1   nk2    nk3          E_tot (Ry) ")' )

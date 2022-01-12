@@ -31,9 +31,11 @@ IMPLICIT NONE
 
 CHARACTER(LEN=256) :: gnu_filename, filename
 CHARACTER(LEN=6), EXTERNAL :: int_to_char
+CHARACTER(LEN=12), ALLOCATABLE :: color(:)
 INTEGER :: isigma
-REAL(DP) :: xmin, xmax
 INTEGER :: ierr, system
+REAL(DP) :: xmin, xmax
+LOGICAL :: first_step, last_step
 
 IF ( my_image_id /= root_image ) RETURN
 
@@ -50,32 +52,24 @@ CALL gnuplot_ylabel('Total energy error (mRy)',.FALSE.)
 CALL gnuplot_set_eref(energy_geo(nnk),.FALSE.) 
 CALL gnuplot_set_gfact(1000._DP,.FALSE.) 
 
+ALLOCATE(color(nsigma))
+color='color_green'
+color(1)='color_red'
+IF (nsigma>1) color(nsigma)='color_blue'
 DO isigma=1,nsigma
-   IF (nsigma > 1) THEN
-      filename='energy_files/'//TRIM(flnkconv)//TRIM(int_to_char(isigma))&
+   first_step=(isigma==1)
+   last_step=(isigma==nsigma)
+   filename='energy_files/'//TRIM(flnkconv)//TRIM(int_to_char(isigma))&
                                                       //'/'//TRIM(flnkconv)
-      IF (isigma==1) THEN
-         CALL gnuplot_write_file_mul_data(filename,1,4,'color_red',.TRUE., &
-                                                          .FALSE.,.FALSE.)
-      ELSEIF (isigma==nsigma) THEN
-         CALL gnuplot_write_file_mul_data(filename,1,4,'color_blue',.FALSE.,&
-                                                          .TRUE.,.FALSE.)
-      ELSE
-         CALL gnuplot_write_file_mul_data(filename,1,4,'color_green',.FALSE.,&
-                                            .FALSE.,.FALSE.)
-      ENDIF
-   ELSE
-      filename=TRIM(flnkconv)
-      CALL gnuplot_write_file_mul_data(filename,1,4,'color_red',.TRUE.,.TRUE.,&
-                                                                       .FALSE.)
-   END IF
+   CALL gnuplot_write_file_mul_data(filename,1,4,color(isigma),first_step, &
+                                                  last_step,.FALSE.)
 ENDDO
+DEALLOCATE(color)
 
 CALL gnuplot_end()
 
 IF (lgnuplot.AND.ionode) &
-   ierr=system(TRIM(gnuplot_command)//' '&
-                                       //TRIM(gnu_filename))
+   ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
 
 !IF (lgnuplot.AND.ionode) &
 !   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
