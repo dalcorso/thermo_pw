@@ -67,7 +67,7 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
   USE eqv,          ONLY : dvpsi, dpsi, evq
   USE qpoint,       ONLY : xq, nksq, ikks, ikqs
   USE qpoint_aux,   ONLY : ikmks, ikmkmqs, becpt, alphapt
-  USE control_lr,   ONLY : lgamma
+  USE control_lr,   ONLY : lgamma, alpha_pv
   USE nc_mag_aux,   ONLY : int1_nc_save, deeq_nc_save, int3_save
   USE dv_of_drho_lr, ONLY : dv_of_drho
   USE fft_interfaces, ONLY : fft_interpolate, fwfft
@@ -264,8 +264,8 @@ SUBROUTINE solve_linter_tpw (irr, imode0, npe, drhoscf)
         !
         !  This is needed to build the right hand side
         !
-           IF (use_gpu.AND.iter==1) CALL init_us_2( npwq, igk_k(1,ikq), &
-                                                  xk(1,ikq), vkb)
+           IF (use_gpu.AND.(iter==1.OR.alpha_pv>0.0_DP)) &
+                      CALL init_us_2( npwq, igk_k(1,ikq), xk(1,ikq), vkb)
         ENDIF
         CALL g2_kin (ikq) 
         IF (use_gpu) CALL g2_kin_gpu (ikq) 
