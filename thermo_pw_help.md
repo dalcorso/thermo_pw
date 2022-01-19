@@ -56,6 +56,9 @@ patches given below.</p>
 
 **Patches for thermo_pw.1.6.1**:
 <br>
+* There is a problem with the GPU version and metals. Correct as in commit 
+<code>7d344d0</code> of 18/01/2022.
+
 **Patches for thermo_pw.1.6.0**:
 <br>
 **Patches for thermo_pw.1.5.1**:
