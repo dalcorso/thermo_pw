@@ -545,4 +545,9 @@ then correct the problem before running the elastic constant calculation.
 * If you are using supercells or you have a low dimensional system in a 
 supercell, then probably thermo_pw is not yet suited to compute automatically
 the elastic constants of your system.
+<br><br>
+32. <code>Thermo_pw</code> does not compile (with Quantum ESPRESSO version 7.0 or later). There is an error no rule to make file <code>make.depend</code>.
+* After writing <code>make join_qe</code> and returning to QE root directory
+you need to rerun <code>./configure</code> before <code>make thermo_pw</code>.
+(Thanks to H. Zhao for reporting the problem).
 
