@@ -31,6 +31,7 @@ SUBROUTINE thermo_readin()
                                    ngeo_ph
   USE control_thermo,       ONLY : outdir_thermo, after_disp, with_eigen,  &
                                    do_scf_relax, ltherm_dos, ltherm_freq,  &
+                                   ltherm_glob,                            &
                                    continue_zero_ibrav, find_ibrav,        &
                                    set_internal_path, set_2d_path,         &
                                    all_geometries_together, max_seconds_tpw
@@ -94,6 +95,7 @@ SUBROUTINE thermo_readin()
                                    poly_degree_bfact, lsolve
   
   USE piezoelectric_tensor, ONLY : nppl
+  USE anharmonic,           ONLY : noelcvg
   USE grun_anharmonic,      ONLY : poly_degree_grun
   USE images_omega,         ONLY : omega_group
   USE control_qe,           ONLY : force_band_calculation, use_ph_images
@@ -280,6 +282,8 @@ SUBROUTINE thermo_readin()
                             poly_degree_bfact,              &
                             poly_degree_elc,                &
                             lv0_t, lb0_t,                   &
+                            noelcvg,                        &
+                            ltherm_glob,                    &
                             poly_degree_grun,               &
                             flpgrun, flgrun, flpsgrun,      &
                             flanhar, flelanhar, flpsanhar,  &
@@ -466,6 +470,7 @@ SUBROUTINE thermo_readin()
   poly_degree=0
   fl_el_cons='output_el_cons.dat'
 
+  ltherm_glob=.FALSE.
   poly_degree_grun=4
 
   nppl=51
@@ -517,6 +522,7 @@ SUBROUTINE thermo_readin()
   poly_degree_elc=4
   lv0_t=.TRUE.
   lb0_t=.TRUE.
+  noelcvg=.FALSE.
   flpgrun='output_pgrun.dat'
   flgrun='output_grun.dat'
   flpsgrun='output_grun'

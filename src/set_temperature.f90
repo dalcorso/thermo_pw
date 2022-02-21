@@ -150,3 +150,20 @@ IF (pressure_kb /= 0.0_DP) &
 
 RETURN
 END SUBROUTINE add_pressure
+
+!------------------------------------------------------------------
+SUBROUTINE add_value(filename, press)
+!------------------------------------------------------------------
+!
+USE kinds, ONLY : DP
+
+IMPLICIT NONE
+REAL(DP) :: press
+CHARACTER(LEN=256) :: filename
+CHARACTER(LEN=8) :: float_to_char
+
+IF (ABS(press) > 1.D-8) &
+   filename=TRIM(filename) //'.'//TRIM(float_to_char(press,1))
+
+RETURN
+END SUBROUTINE add_value

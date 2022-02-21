@@ -82,6 +82,7 @@ manage_elastic_cons_qha.o \
 manage_elastic_cons_qha_2.o \
 manage_energy_minimum.o \
 manage_piezo_tensor.o \
+manage_plot_anhar.o \
 manage_ph.o \
 manage_ph_all_geometries.o \
 manage_ph_postproc.o \
@@ -100,6 +101,7 @@ plot_bz.o \
 plot_2d_bz.o \
 plot_dispersion.o \
 plot_dos.o \
+plot_dw_anhar.o \
 plot_e_ke.o \
 plot_e_nk.o \
 plot_ef.o \
@@ -150,6 +152,8 @@ thermo_setup.o \
 thermo_startup.o \
 thermo_summary.o \
 write_anhar.o \
+write_anhar_glob.o \
+write_anhar_aux.o \
 write_anhar_anis.o \
 write_e_ke.o  \
 write_e_nk.o \

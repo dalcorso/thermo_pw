@@ -158,7 +158,7 @@ IF (meta_ionode) THEN
       !
       !   here the bulk modulus and the gruneisen parameter
       !
-      filename="anhar_files/"//TRIM(flanhar)//'.bulk_mod'
+      filename="anhar_files/"//TRIM(flanhar)//'.bulk'
       CALL add_pressure(filename)
 
       CALL write_bulk_anharm(temp, b0_t, b0_s, ntemp, filename)
@@ -168,7 +168,7 @@ IF (meta_ionode) THEN
       filename="anhar_files/"//TRIM(flanhar)//'.heat'
       CALL add_pressure(filename)
 
-      CALL write_heat_anharm(temp, ce_t, cv_t, cp_t, ntemp, filename)
+      CALL write_heat_anhar(temp, ce_t, cv_t, cp_t, ntemp, filename)
 
 !  Here we write on output the anharmonic properties computed for
 !  anisotropic solids, using the thermal expansion tensor, as opposed
@@ -176,7 +176,7 @@ IF (meta_ionode) THEN
 !
       filename='anhar_files/'//TRIM(flanhar)//'.heat_anis'
       CALL add_pressure(filename)
-      CALL write_heat_anharm_anis(temp, ce_t, cv_t, cp_t, ntemp, filename)
+      CALL write_heat_anhar_anis(temp, ce_t, cv_t, cp_t, ntemp, filename)
 !
 !   Here the thermal stresses
 !
@@ -203,7 +203,7 @@ IF (meta_ionode) THEN
 !
       filename="anhar_files/"//TRIM(flanhar)//'.heat'
       CALL add_pressure(filename)
-      CALL write_heat_anharm_small(temp, ce_t, ntemp, filename)
+      CALL write_heat_anhar_small(temp, ce_t, ntemp, filename)
    ENDIF
 ENDIF
 IF (lelastic) THEN
@@ -411,7 +411,7 @@ IF (meta_ionode) THEN
       !
       !   here the bulk modulus and the gruneisen parameter
       !
-      filename="anhar_files/"//TRIM(flanhar)//'.bulk_mod_ph'
+      filename="anhar_files/"//TRIM(flanhar)//'.bulk_ph'
       CALL add_pressure(filename)
 
       CALL write_bulk_anharm(temp, b0f_t, b0f_s, ntemp, filename)
@@ -421,7 +421,7 @@ IF (meta_ionode) THEN
       filename="anhar_files/"//TRIM(flanhar)//'.heat_ph'
       CALL add_pressure(filename)
 
-      CALL write_heat_anharm(temp, cef_t, cvf_t, cpf_t, ntemp, filename)
+      CALL write_heat_anhar(temp, cef_t, cvf_t, cpf_t, ntemp, filename)
 !
 !   Here the thermal stresses
 !
@@ -443,7 +443,7 @@ IF (meta_ionode) THEN
 !
       filename='anhar_files/'//TRIM(flanhar)//'.heat_anis_ph'
       CALL add_pressure(filename)
-      CALL write_heat_anharm_anis(temp, cef_t, cvf_t, cpf_t, ntemp, filename)
+      CALL write_heat_anhar_anis(temp, cef_t, cvf_t, cpf_t, ntemp, filename)
 !
 !   Here the generalized Gruneisen parameters
 !
@@ -456,7 +456,7 @@ IF (meta_ionode) THEN
 !
       filename="anhar_files/"//TRIM(flanhar)//'.heat_ph'
       CALL add_pressure(filename)
-      CALL write_heat_anharm_small(temp, cef_t, ntemp, filename)
+      CALL write_heat_anhar_small(temp, cef_t, ntemp, filename)
    ENDIF
 ENDIF
 
@@ -738,7 +738,7 @@ IF (meta_ionode) THEN
 !
    filename='anhar_files/'//TRIM(flanhar)//'.heat_anis_grun'
    CALL add_pressure(filename)
-   CALL write_heat_anharm_anis(temp, ce_grun_t, cv_grun_t, cp_grun_t, &
+   CALL write_heat_anhar_anis(temp, ce_grun_t, cv_grun_t, cp_grun_t, &
                                                            ntemp, filename)
 ENDIF
 
@@ -975,7 +975,7 @@ RETURN
 END SUBROUTINE convert_ac_alpha
 
 !-----------------------------------------------------------------------
-SUBROUTINE write_heat_anharm_anis(temp, cet, cvt, cpt, ntemp, filename)
+SUBROUTINE write_heat_anhar_anis(temp, cet, cvt, cpt, ntemp, filename)
 !-----------------------------------------------------------------------
 USE kinds,     ONLY : DP
 USE io_global, ONLY : meta_ionode
@@ -1003,10 +1003,10 @@ IF (meta_ionode) THEN
 ENDIF
 
 RETURN
-END SUBROUTINE write_heat_anharm_anis
+END SUBROUTINE write_heat_anhar_anis
 
 !-----------------------------------------------------------------------
-SUBROUTINE write_heat_anharm_small(temp, cet, ntemp, filename)
+SUBROUTINE write_heat_anhar_small(temp, cet, ntemp, filename)
 !-----------------------------------------------------------------------
 USE kinds,     ONLY : DP
 USE io_global, ONLY : meta_ionode
@@ -1032,7 +1032,7 @@ IF (meta_ionode) THEN
 ENDIF
 
 RETURN
-END SUBROUTINE write_heat_anharm_small
+END SUBROUTINE write_heat_anhar_small
 
 !-----------------------------------------------------------------------
 SUBROUTINE write_thermal_stress(temp, bths_t, ntemp, filename)

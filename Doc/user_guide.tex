@@ -2013,6 +2013,13 @@ use of these variables is limited to cubic solids.
 By using the variables \texttt{nvol\_plot} and \texttt{ivol\_plot} the
 code produces a plot of the thermal pressure as a function of temperature
 for several volumes. \\
+The Helmholtz (or Gibbs at finite pressure) free-energy can be interpolated
+in two ways depending on the variable \texttt{ltherm\_glob}. 
+When \texttt{ltherm\_glob=.FALSE.} (default) the vibrational (plus 
+the electronic) free energy is fitted separately by a polynomial, while
+only the static energy is fitted by an equation of state. When
+ \texttt{ltherm\_glob=.TRUE.} a different equation of state is used 
+at each temperature and no polynomial interpolation is needed.
 The input variables that control these plots are those described in the option
 \texttt{what='mur\_lc'} and \texttt{what='mur\_lc\_disp'} in addition to the 
 following:
@@ -2059,6 +2066,11 @@ with_eigen    : if .TRUE. use the eigenvectors of the
                 the plotted Gruneisen bands (both in cubic 
                 and anisotropic solids).
                 Default: logical .FALSE. 
+ltherm_glob   : when .FALSE. the vibrational (plus electronic) free energy
+                is fitted by a polynomial, while only the static energy is
+                fitted by an equation of state. When .TRUE. a different
+                equation of state is fitted at each temperature.
+                Default: logical .FALSE.
 poly_degree_ph : degree of the polynomial used to interpolate 
                 the vibrational free energy. Presently only the 
                 values 1, 2, 3, or 4 are available for anisotropic 
@@ -2834,17 +2846,6 @@ entropy, and isochoric heat capacity. This plot is composed of four
 figures, one for each quantity. The curves are in \texttt{blue}
 and the word Debye appears in the $y$ axis label.
 
-\item
-Free (or Gibbs) energy as a function of volume at several temperatures,
-pressure as a function of volume at several temperatures, Gibbs
-energy as a function of pressure at several temperatures,
-vibrational free energy as a function of volume at several temperatures,
-for metals also electronic free energy as a function of volume at several
-temperatures (if requested in input). In all these plots the first
-temperature is red, the others follow in the order green, blue, yellow, 
-pink, cyan, orange, black. If there are more temperatures the sequence is 
-repeated.
-
 \item Crystal parameters as a function of pressure at several temperatures.
 Volume as a function of pressure at several temperatures.
 The number of plots depends on the crystal system.
@@ -2854,35 +2855,122 @@ If there are more temperatures the sequence is
 repeated.
 
 \item
-Equilibrium volume, Helmholtz (or Gibbs at finite pressure) free energy, 
-bulk modulus, pressure derivative of the bulk
-modulus, volume thermal expansion, isochoric heat capacity, 
-isobaric heat capacity, isobaric-isochoric difference of the heat capacity,    
-isoentropic-isothermal difference of the bulk modulus, and 
-average Gr\"uneisen parameter as a function of temperature 
+Helmholtz free energy as a function of volume (\texttt{lmurn=.TRUE.}). 
+The free energy calculated using the phonon dos (integral over
+the Brillouin zone) is \texttt{red} (\texttt{blue}).
+When required in input this figure contains also the
+free energy as a function of volume for several temperatures.
+The color sequence \texttt{red}, \texttt{green}, \texttt{blue},
+\texttt{yellow}, \texttt{pink}, \texttt{cyan}, \texttt{orange},
+\texttt{black} indicates the different temperatures.
+In this case the same figure contains also the Gibbs energy as
+a function of pressure for several temperatures,
+the vibrational (plus electronic if available) free energy as a function 
+of volume for several temperatures and the electronic free energy as 
+a function of volume for several temperatures.
+
+\item
+The equilibrium volume as a function of temperature (\texttt{lmurn=.TRUE.}). 
+The equilibrium volume obtained from the free energy calculated
+using the phonon dos (integral over
+the Brillouin zone) is \texttt{red} (\texttt{blue}).
+When required in input this figure contains also the
+volume as a function of temperature at several pressures.
+The color sequence \texttt{red}, \texttt{green}, \texttt{blue},
+\texttt{yellow}, \texttt{pink}, \texttt{cyan}, \texttt{orange},
+\texttt{black} indicates the different pressures.
+In this figure there is also the equilibrium volume divided by the 
+equilibrium volume at $T= 300$ K (and the same pressure)
+is plotted as a function of temperature.
+When required in input this figure contains also the
+equilibrium volume as a function of pressure at
+several temperatures with the same color sequence.
+In this case also the equilibrium volume divided by the 
+equilibrium volume at $T= 300$ K and zero pressure
+is plotted as a function of pressure for several temperatures.
+
+\item
+When requested in input, the pressure as a function of volume at 
+several temperatures (\texttt{lmurn=.TRUE.}). 
+The color sequence \texttt{red}, \texttt{green}, \texttt{blue},
+\texttt{yellow}, \texttt{pink}, \texttt{cyan}, \texttt{orange},
+\texttt{black}, indicates the different pressures.
+In the same figure there is also the thermal pressure as a function
+of volume for several temperatures with the same color sequence.
+
+\item
+The isothermal bulk modulus as a function of 
+temperature (\texttt{lmurn=.TRUE.}). 
+The isothermal bulk modulus obtained interpolating the free 
+energy calculated using the phonon dos (integral over
+the Brillouin zone) is \texttt{red} (\texttt{blue}).
+When required in input this figure contains also the
+isothermal bulk modulus as a function of temperature at 
+several pressures.
+The color sequence \texttt{red}, \texttt{green}, \texttt{blue},
+\texttt{yellow}, \texttt{pink}, \texttt{cyan}, \texttt{orange},
+\texttt{black}, indicates the different pressures.
+When required in input this figure contains also the
+isothermal bulk modulus as a function of pressure at
+several temperatures with the same color sequence.
+The same figure contains also the isoentropic bulk modulus
+as a function of temperature and the difference between isothermal
+and isoentropic bulk moduli. When required in input this figure 
+contains also the isoentropic bulk modulus and the difference
+isoentropic-isothermal bulk moduli as a function of temperature for
+several pressures or as a function of pressure for several temperatures.
+
+\item
+Volume thermal expansion as a function of temperature (\texttt{lmurn=.TRUE.}). 
+The thermal expansion obtained from the free energy
+calculated using the phonon dos (integral over
+the Brillouin zone) is \texttt{red} (\texttt{blue}).
+The one obtained from the mode Gr\"uneisen parameters is 
+\texttt{green}. When required in input this figure contains also the
+thermal expansion as a function of temperature at several pressures.
+The color sequence \texttt{red}, \texttt{green}, \texttt{blue},
+\texttt{yellow}, \texttt{pink}, \texttt{cyan}, \texttt{orange}, 
+\texttt{black}, indicates the different pressures.
+When required in input this figure contains also the
+thermal expansion as a function of pressure at several temperatures
+with the same color sequence.
+
+\item
+The isochoric heat capacity as a function of temperature 
 (\texttt{lmurn=.TRUE.}). 
-This plot is composed of ten figures, one for each 
-quantity in the order given above. The quantities 
-calculated using the phonon dos are in \texttt{red}, those
-obtained by an integral over the Brillouin zone are in \texttt{blue}.
-The volume thermal expansion can be calculated using the mode Gr\"uneisen 
-parameters and is plotted in \texttt{green}. 
-The isobaric-isochoric difference of the heat capacity, the
-isoentropic-isothermal difference of the bulk modulus, and
-average Gr\"uneisen parameter calculated with this volume thermal expansion 
-are plotted in \texttt{green}. The volume and the bulk modulus used to
-compute the volume thermal expansion via the mode Gr\"uneisen parameters
-are the \texttt{blue} ones if \texttt{ltherm\_freq=.TRUE.}
-or the \texttt{red} ones if \texttt{ltherm\_freq=.FALSE.} and 
-\texttt{ltherm\_dos=.TRUE.}.
-When both \texttt{ltherm\_freq=.FALSE.} and \texttt{ltherm\_}
-\texttt{dos=.FALSE.}
-the equilibrium values of the volume and of the bulk modulus calculated 
-at $T=0$ K are used at all temperatures.
-The equilibrium volume at $T=0$ K is used at all temperatures also when
-\texttt{lv0\_t=.FALSE.}.
-The equilibrium bulk modulus at $T=0$ K is used all temperatures also
-when \texttt{lb0\_t=.FALSE.}
+The isochoric heat capacity calculated using the phonon dos (integral over
+the Brillouin zone) is \texttt{red} (\texttt{blue}).
+When required in input this figure contains also the
+isochoric heat capacity as a function of temperature for
+several pressures.
+The color sequence \texttt{red}, \texttt{green}, \texttt{blue},
+\texttt{yellow}, \texttt{pink}, \texttt{cyan}, \texttt{orange},
+\texttt{black}, indicates the different pressures.
+When required in input this figure contains also the
+isochoric heat capacity as a function of pressure at
+several temperatures with the same color sequence.
+The same figure contains also the isobaric heat capacity
+as a function of temperature and the difference 
+isobaric-isochoric heat capacity. When required in input this figure 
+contains also the isobaric heat capacity and the difference
+isobaric-isochoric heat capacity as a function of temperature for
+several pressures or as a function of pressure for several temperatures.
+
+\item
+Average Gr\"uneisen parameter as a function of temperature 
+(\texttt{lmurn=.TRUE.}).
+The parameter obtained from phonon dos (integral over
+the Brillouin zone) is \texttt{red} (\texttt{blue}).
+The one obtained from the mode Gr\"uneisen parameters is 
+\texttt{green}. When required in input this figure contains also the
+average Gr\"uneisen parameter as a function of temperature at 
+several pressures.
+The color sequence \texttt{red}, \texttt{green}, \texttt{blue},
+\texttt{yellow}, \texttt{pink}, \texttt{cyan}, \texttt{orange}, 
+\texttt{black}, indicates the different pressures.
+When required in input this figure contains also the
+average Gr\"uneisen parameter as a function of pressure at 
+several temperatures with the same color sequence.
 
 \item
 Crystallographic parameters, volume, Helmholtz (or Gibbs at finite pressure)

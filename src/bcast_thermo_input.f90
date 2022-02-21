@@ -14,7 +14,8 @@ SUBROUTINE bcast_thermo_input()
   !
   USE control_thermo,  ONLY : after_disp, with_eigen, do_scf_relax,           &
                               ltherm_dos, ltherm_freq, continue_zero_ibrav,   &
-                              find_ibrav, all_geometries_together
+                              find_ibrav, all_geometries_together,            &
+                              ltherm_glob
   USE data_files,      ONLY : flevdat, flfrc, flfrq, fldos, fltherm, flanhar, &
                               filband, flkeconv, flnkconv, flgrun, flpband,   &
                               flpgrun, flenergy, flprojlayer, flpbs, flvec,   &
@@ -72,6 +73,7 @@ SUBROUTINE bcast_thermo_input()
   USE control_grun,    ONLY : temp_ph, volume_ph, celldm_ph, lv0_t, lb0_t,    &
                               grunmin_input, grunmax_input
   USE grun_anharmonic, ONLY : poly_degree_grun
+  USE anharmonic,      ONLY : noelcvg
   USE images_omega,    ONLY : omega_group
 !
 !   and a few  QE variables
@@ -300,6 +302,7 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( poly_degree_elc, meta_ionode_id, world_comm )
   CALL mp_bcast( lv0_t, meta_ionode_id, world_comm )
   CALL mp_bcast( lb0_t, meta_ionode_id, world_comm )
+  CALL mp_bcast( noelcvg, meta_ionode_id, world_comm )
   CALL mp_bcast( all_geometries_together, meta_ionode_id, world_comm )
   CALL mp_bcast( ngeo_ph, meta_ionode_id, world_comm )
   CALL mp_bcast( fact_ngeo, meta_ionode_id, world_comm )

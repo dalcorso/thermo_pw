@@ -220,6 +220,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
+           CALL allocate_el_thermodynamics(1)
         CASE ('mur_lc_ph') 
            do_punch=.FALSE.
            lev_syn_1=.TRUE.
@@ -303,7 +304,6 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            IF (meta_ionode) ios = f_mkdir_safe( 'phdisp_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
-           IF (lel_free_energy) CALL allocate_el_thermodynamics(tot_ngeo)
         CASE ('elastic_constants_t')
            lectqha=.TRUE.
            lph=use_free_energy
@@ -341,7 +341,6 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               IF (meta_ionode) ios = f_mkdir_safe( 'phdisp_files' )
               IF (meta_ionode) ios = f_mkdir_safe( 'anhar_files' )
            ENDIF
-           IF (lel_free_energy) CALL allocate_el_thermodynamics(tot_ngeo)
 
         CASE DEFAULT
            CALL errore('initialize_thermo_work','what not recognized',1)

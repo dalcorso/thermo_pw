@@ -215,7 +215,7 @@ DO igeo=1, tot_ngeo
    ENDIF
 ENDDO
 !
-!  Divide temperatures among processors
+!  Divide pressures among processors
 !
 CALL divide(world_comm, npress, startp, lastp)
 thermo_p=0.0_DP

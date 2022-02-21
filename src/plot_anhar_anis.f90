@@ -11,7 +11,7 @@ SUBROUTINE plot_anhar_anis()
 !
 !  This is a driver to plot the quantities written inside flanhar,
 !  flanhar//'_ph', flanhar//'.celldm', flanhar//'.celldm_ph', 
-!  flanhar//'.bulk_mod', flanhar//'.bulk_mod_ph', 
+!  flanhar//'.bulk', flanhar//'.bulk_ph', 
 !  flanhar//'.heat', flanhar//'.heat_ph', and flanhar//'.aux_grun'.
 !  flanhar//'.heat_anis', flanhar//'.heat_anis_ph', flanhar//'.heat_anis_grun'
 !  flanhar//'.gamma', flanhar//'.gamma_ph', flanhar//'.gamma_grun'
@@ -81,9 +81,9 @@ filename3='anhar_files/'//TRIM(flanhar)//'.celldm_ph'
 CALL add_pressure(filename3)
 filename4='anhar_files/'//TRIM(flanhar)//'.celldm_grun'
 CALL add_pressure(filename4)
-filename_bulk='anhar_files/'//TRIM(flanhar)//'.bulk_mod'
+filename_bulk='anhar_files/'//TRIM(flanhar)//'.bulk'
 CALL add_pressure(filename_bulk)
-filename_bulk_ph='anhar_files/'//TRIM(flanhar)//'.bulk_mod_ph'
+filename_bulk_ph='anhar_files/'//TRIM(flanhar)//'.bulk_ph'
 CALL add_pressure(filename_bulk_ph)
 filename_heat='anhar_files/'//TRIM(flanhar)//'.heat'
 CALL add_pressure(filename_heat)

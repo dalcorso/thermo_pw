@@ -19,7 +19,7 @@ USE temperature,       ONLY : ntemp, temp, ntemp_plot, itemp_plot
 USE thermodynamics,    ONLY : ph_free_ener
 USE el_thermodynamics, ONLY : el_free_ener
 USE control_eldos,     ONLY : lel_free_energy
-USE data_files,        ONLY : flevdat
+USE data_files,        ONLY : flanhar
 USE io_global,         ONLY : ionode
 
 IMPLICIT NONE
@@ -30,8 +30,8 @@ INTEGER :: find_free_unit
 
 DO itempp=1,ntemp_plot
    itemp=itemp_plot(itempp)
-   filedata="anhar_files/"//TRIM(flevdat)//"_free."//&
-                                      TRIM(float_to_char(temp(itemp),1))
+   filedata="anhar_files/"//TRIM(flanhar)//".free_temp"
+   CALL add_value(filedata, temp(itemp))
    CALL add_pressure(filedata)
 
    IF (ionode) THEN

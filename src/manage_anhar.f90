@@ -12,23 +12,16 @@ SUBROUTINE manage_anhar()
 USE kinds,                 ONLY : DP
 USE temperature,           ONLY : ntemp
 USE thermo_mod,            ONLY : tot_ngeo
-USE control_thermo,        ONLY : ltherm_dos, ltherm_freq
+USE control_thermo,        ONLY : ltherm_dos, ltherm_freq, ltherm_glob
 USE control_eldos,         ONLY : lel_free_energy
 USE control_quartic_energy, ONLY : poly_degree_ph
 USE temperature,           ONLY : temp, ntemp, ntemp_plot, itemp_plot
 USE internal_files_names,  ONLY : flfrq_thermo, flvec_thermo
-USE el_thermodynamics,     ONLY : el_ener, el_free_ener, el_entr, &
-                                  el_ce
+USE anharmonic,            ONLY : a_t
+USE el_thermodynamics,     ONLY : el_ener, el_free_ener, el_entr, el_ce
 USE data_files,            ONLY : flanhar, fleltherm
 
 USE control_mur,           ONLY : vmin, b0, b01, b02, emin
-USE control_vol,           ONLY : nvol_plot
-USE control_pressure,      ONLY : npress_plot
-USE anharmonic,            ONLY : vmin_t, b0_t, b01_t, b02_t, free_e_min_t, &
-                              a_t 
-USE anharmonic_pt,         ONLY : vmin_pt, b0_pt, b01_pt, b02_pt, emin_pt
-USE anharmonic_vt,         ONLY : press_vt
-USE ph_freq_anharmonic,    ONLY : vminf_t, b0f_t, b01f_t, b02f_t, free_e_minf_t
 USE io_global,             ONLY : stdout
 USE mp_images,             ONLY : inter_image_comm
 USE mp,                    ONLY : mp_sum
@@ -54,6 +47,11 @@ IF (lel_free_energy) THEN
                        el_ce(:,igeom), ldummy, filedata)
    ENDDO
    CALL restore_el_file_names()
+ELSE
+   el_ener=0.0_DP
+   el_free_ener=0.0_DP
+   el_entr=0.0_DP
+   el_ce=0.0_DP
 ENDIF
 
 IF (ltherm_dos) THEN
@@ -62,66 +60,81 @@ IF (ltherm_dos) THEN
    WRITE(stdout,'(5x,"the QHA approximation using phonon dos.")') 
    WRITE(stdout,'(5x,"Writing on file ",a)') TRIM(flanhar)
    WRITE(stdout,'(2x,76("-"),/)')
-   !
-   !  first the crystal parameters as a function of temperature
-   !
-   vmin_t=0.0_DP
-   b0_t=0.0_DP
-   b01_t=0.0_DP
-   b02_t=0.0_DP
-   free_e_min_t=0.0_DP
-   a_t=0.0_DP
-   DO itemp=1, ntemp
-      CALL do_ev_t(itemp)
-      CALL do_ev_pt(itemp)
-      CALL do_ev_vt(itemp)
-   ENDDO
-   CALL mp_sum(vmin_t, inter_image_comm)
-   CALL mp_sum(b0_t, inter_image_comm)
-   CALL mp_sum(b01_t, inter_image_comm)
-   CALL mp_sum(b02_t, inter_image_comm)
-   CALL mp_sum(free_e_min_t, inter_image_comm)
-   CALL mp_sum(a_t, inter_image_comm)
-   IF (npress_plot>0) THEN
-      CALL mp_sum(vmin_pt, inter_image_comm)
-      CALL mp_sum(b0_pt, inter_image_comm)
-      CALL mp_sum(b01_pt, inter_image_comm)
-      CALL mp_sum(b02_pt, inter_image_comm)
-      CALL mp_sum(emin_pt, inter_image_comm)
+!
+!  Fit the vibrational (and possibly electronic free energy) with a polynomial
+!  fit_free_energy_noe fits only the vibrational part.
+!
+   CALL fit_free_energy()
+   CALL fit_free_energy_noe()
+!
+!  first the crystal parameters as a function of temperature
+!  at the input pressure. Then write the parameters on output, 
+!  and interpolate the harmonic quantities at the temperature 
+!  dependent crystal parameters
+!
+   IF (ltherm_glob) THEN
+      CALL anhar_ev_glob_t()
+      CALL anhar_ev_glob_noe_t()
+   ELSE
+      CALL anhar_ev_t()
+      CALL anhar_ev_noe_t()
    ENDIF
-   IF (nvol_plot>0) THEN
-      CALL mp_sum(press_vt, inter_image_comm)
+   CALL summarize_anhar_param()
+   CALL interpolate_harmonic()
+   CALL interpolate_harmonic_noe_t()
+!
+!  then the crystal parameters as a function of temperature 
+!  at several pressures
+!
+   IF (ltherm_glob) THEN
+      CALL anhar_ev_glob_pt()
+   ELSE
+      CALL anhar_ev_pt()
    ENDIF
+   CALL interpolate_harmonic_pt()
 !
-!  Then write on file the free energies at several temperatures if required
-!  from input
+!  then the crystal parameters as a function of pressure 
+!  at several temperatures
 !
-   IF (ntemp_plot>0) THEN
-      m1=poly_degree_ph+1
-      DO itempp=1,ntemp_plot
-         itemp=itemp_plot(itempp)
-         CALL write_mur_pol(vmin, b0, b01, b02, emin, a_t(:,itemp), m1, itemp)
-!
-!  If required from input computes the thermal expansion as a function of 
-!  pressure at this temperature
-!
-         CALL write_anhar_t(itempp) 
-      ENDDO
+   IF (ltherm_glob) THEN
+      CALL anhar_ev_glob_ptt()
+   ELSE
+      CALL anhar_ev_ptt()
    ENDIF
+   CALL interpolate_harmonic_ptt()
 !
-!    calculate several anharmonic quantities 
+!  some quantities as a function of temperature are needed 
+!  at constant volume, they are computed here
 !
-   CALL write_anharmonic()
+   CALL anhar_ev_vt()
 !
-!   if requested in input writes on files also the anharmonic quantities
+!  calculate several anharmonic quantities at the input pressure
+!
+   CALL write_anhar()
+!
+!   if requested in input writes on files the anharmonic quantities
 !   at several pressures
 !
    CALL write_anhar_p()
 !
-!   Write on output the thermal pressure as a function of temperature
-!   if requested on input
+!  if requested in input writes on files anharmonic quantities 
+!  at several temperatures
+!
+   IF (ltherm_glob) THEN
+      CALL write_anhar_glob_t() 
+   ELSE
+      CALL write_anhar_t() 
+   ENDIF
+!
+!   if requested in input writes on files the anharmonic quantities
+!   at several volumes
 !
    CALL write_anhar_v()
+!
+!   write on output the electronic contributions if computed
+!
+   CALL write_anhar_el()
+   CALL write_anhar_el_pt()
 !
 !  for diagnostic purposes write on file only the vibrational free energy
 !  and the electronic one if available
@@ -135,33 +148,30 @@ IF (ltherm_freq) THEN
    WRITE(stdout,'(5x,"the QHA approximation using phonon frequencies.")') 
    WRITE(stdout,'(5x,"Writing on file ",a)') TRIM(flanhar)//'_ph'
    WRITE(stdout,'(2x,76("+"),/)')
-   !
-   !  first the crystal parameters as a function of temperature
-   !
-   vminf_t=0.0_DP
-   b0f_t=0.0_DP
-   b01f_t=0.0_DP
-   b02f_t=0.0_DP
-   free_e_minf_t=0.0_DP
-   DO itemp = 1, ntemp
-      CALL do_ev_t_ph(itemp)
-   ENDDO
-   CALL mp_sum(vminf_t, inter_image_comm)
-   CALL mp_sum(b0f_t, inter_image_comm)
-   CALL mp_sum(b01f_t, inter_image_comm)
-   CALL mp_sum(b02f_t, inter_image_comm)
-   CALL mp_sum(free_e_minf_t, inter_image_comm)
 !
-!    calculate several anharmonic quantities 
+!  Fit the vibrational (and possibly electronic free energy) with a polynomial
 !
-   CALL write_ph_freq_anharmonic()
+   CALL fit_free_energy_ph()
+!
+!  the crystal parameters as a function of temperature
+!
+   IF (ltherm_glob) THEN
+      CALL anhar_ev_glob_t_ph()
+   ELSE
+      CALL anhar_ev_t_ph()
+   ENDIF
+   CALL summarize_anhar_param_ph()
+   CALL interpolate_harmonic_ph()
+!
+!  calculate several anharmonic quantities 
+!
+   CALL write_ph_freq_anhar()
 ENDIF
 
 WRITE(stdout,'(/,2x,76("-"))')
 WRITE(stdout,'(5x,"Computing the anharmonic properties within ")')
 WRITE(stdout,'(5x,"the QHA approximation using Gruneisen parameters.")') 
 WRITE(stdout,'(2x,76("-"),/)')
-   !
 !
 !    calculate and plot the Gruneisen parameters along the given path
 !
@@ -181,12 +191,10 @@ CALL fit_frequencies()
 !
 CALL set_volume_b0_grun()
 CALL write_grun_anharmonic()
-CALL plot_anhar() 
-CALL plot_thermo_anhar()
-CALL plot_dw_anhar()
-CALL plot_anhar_p() 
-CALL plot_anhar_t()
-CALL plot_anhar_v()
+!
+!   now plot all the computed quantities
+!
+CALL manage_plot_anhar()
 
 RETURN
 END SUBROUTINE manage_anhar
@@ -409,9 +417,9 @@ CALL mp_sum(b01e_t, inter_image_comm)
 CALL mp_sum(b02e_t, inter_image_comm)
 CALL mp_sum(free_e_mine_t, inter_image_comm)
 !
-!    calculate several anharmonic quantities 
+!    fit some electronic harmonic quantities 
 !
-CALL write_el_anharmonic()
+CALL write_el_fit_harmonic()
 
 !CALL plot_el_anhar() 
 
