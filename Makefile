@@ -18,26 +18,31 @@ thermo_qe:
 	( cd qe ; $(MAKE) all || exit 1 )
 
 join_qe:
-	if test -f main_Makefile ; then mv ../Makefile Makefile_qe ; \
-           mv main_Makefile ../Makefile ; fi
-	if test -f plugins_makefile ; then mv ../install/plugins_makefile \
-           plugins_makefile_qe ; mv plugins_makefile ../install ; fi
-	if test -f makedeps.sh ; then mv ../install/makedeps.sh \
-           makedeps.sh_qe ; mv makedeps.sh ../install/ ; fi
-	if test -f main_CMakeLists.txt ; then mv ../CMakeLists.txt \
-           CMakeLists.txt_qe ; mv main_CMakeLists.txt ../CMakeLists.txt ; fi
+	if test -f ./main_Makefile ; then mv ../Makefile Makefile_qe ; \
+           mv ./main_Makefile ../Makefile ; fi
+	if test -f ./plugins_makefile ; then mv ../install/plugins_makefile \
+           ./plugins_makefile_qe ; mv ./plugins_makefile ../install ; fi
+	if test -f ./makedeps.sh ; then mv ../install/makedeps.sh \
+           ./makedeps.sh_qe ; mv ./makedeps.sh ../install/ ; fi
+	if test -f ./main_CMakeLists.txt ; then mv ../CMakeLists.txt \
+          ./CMakeLists.txt_qe ; mv ./main_CMakeLists.txt ../CMakeLists.txt ; fi
+	if test -f ./lmdif.f90 ; then mv ../Modules/lmdif.f90 \
+           ./lmdif.90_qe ; mv ./lmdif.f90 ../Modules ; fi
 
 leave_qe:
-	if test -f Makefile_qe ; then mv ../Makefile main_Makefile ; \
-           mv Makefile_qe ../Makefile ; fi
-	if test -f plugins_makefile_qe ; then \
+	if test -f ./Makefile_qe ; then mv ../Makefile ./main_Makefile ; \
+           mv ./Makefile_qe ../Makefile ; fi
+	if test -f ./plugins_makefile_qe ; then \
            mv ../install/plugins_makefile . ; \
-           mv plugins_makefile_qe ../install/plugins_makefile ; fi
-	if test -f makedeps.sh_qe ; then mv ../install/makedeps.sh . ; \
-           mv makedeps.sh_qe ../install/makedeps.sh ; fi
-	if test -f CMakeLists.txt_qe ; then mv ../CMakeLists.txt \
-           main_CMakeLists.txt ; \
-           mv CMakeLists.txt_qe ../CMakeLists.txt ; fi
+           mv ./plugins_makefile_qe ../install/plugins_makefile ; fi
+	if test -f ./makedeps.sh_qe ; then mv ../install/makedeps.sh . ; \
+           mv ./makedeps.sh_qe ../install/makedeps.sh ; fi
+	if test -f ./CMakeLists.txt_qe ; then mv ../CMakeLists.txt \
+           ./main_CMakeLists.txt ; \
+           mv ./CMakeLists.txt_qe ../CMakeLists.txt ; fi
+	if test -f lmdif.f90_qe ; then mv ../Modules/lmdif.f90 \
+           ./lmdif.f90 ; \
+           mv ./lmdif.f90_qe ../Modules ; fi
 
 clean: thermo_tools_clean thermo_pw_clean thermo_lib_clean thermo_qe_clean examples_clean examples_qe_clean space_groups_clean doc_clean
 

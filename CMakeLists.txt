@@ -268,6 +268,7 @@ set(src_tpw
     src/manage_ph_run.f90
     src/manage_ph_symmetry.f90
     src/manage_piezo_tensor.f90
+    src/manage_plot_anhar.f90
     src/manage_surface_states.f90
     src/manage_syn_1.f90
     src/manage_syn_2.f90
@@ -281,6 +282,7 @@ set(src_tpw
     src/plot_bz.f90
     src/plot_dispersion.f90
     src/plot_dos.f90
+    src/plot_dw_anhar.f90
     src/plot_e_ke.f90
     src/plot_e_nk.f90
     src/plot_ef.f90
@@ -332,6 +334,8 @@ set(src_tpw
     src/thermo_summary.f90
     src/write_anhar.f90
     src/write_anhar_anis.f90
+    src/write_anhar_aux.f90
+    src/write_anhar_glob.f90
     src/write_e_ke.f90
     src/write_e_nk.f90
     src/write_e_omega.f90
