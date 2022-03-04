@@ -442,6 +442,7 @@ SUBROUTINE electrons_scf_tpw ( printout, exxen )
   USE wvfct_gpum,           ONLY : using_et
   USE scf_gpum,             ONLY : using_vrs
   USE device_fbuff_m,             ONLY : dev_buf, pin_buf
+  USE pwcom,                ONLY : report_mag
   !
   IMPLICIT NONE
   !
