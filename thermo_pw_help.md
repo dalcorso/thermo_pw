@@ -58,6 +58,8 @@ patches given below.</p>
 <br>
 * There is a problem with the GPU version and metals. Correct as in commit 
 <code>7d344d0</code> of 18/01/2022.
+* Correct as in the commit of 04/03/2022 if you have problem with
+magnetic systems.
 
 **Patches for thermo_pw.1.6.0**:
 <br>
