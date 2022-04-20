@@ -537,6 +537,7 @@ ENDDO
 
 WRITE(label,'("set xrange [",f12.5,":",f12.5,"]")') tmin, tmax
 CALL gnuplot_write_command(TRIM(label),.FALSE.)
+CALL gnuplot_xlabel('T (K)',.FALSE.)
 
 CALL gnuplot_set_fact(1._DP,.FALSE.)
 CALL gnuplot_ylabel('B_S (kbar)',.FALSE.)
@@ -594,6 +595,7 @@ ENDDO
 
 WRITE(label,'("set xrange [",f12.5,":",f12.5,"]")') tmin, tmax
 CALL gnuplot_write_command(TRIM(label),.FALSE.)
+CALL gnuplot_xlabel('T (K)',.FALSE.)
 
 CALL gnuplot_set_fact(1.0_DP,.FALSE.)
 CALL gnuplot_ylabel('B_S - B_T (kbar)',.FALSE.)
