@@ -41,6 +41,7 @@ quartic_surfaces.o \
 rotate.o \
 space_groups.o \
 strain.o \
+thermodynamics.o \
 vector.o \
 voigt.o \
 xrdp.o 
