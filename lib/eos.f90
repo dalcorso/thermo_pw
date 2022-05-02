@@ -40,6 +40,10 @@ MODULE eos
 !   supposed to interpolate the free energy and gives the given quantity 
 !   assuming the eos is the given function plus the polynomial.
 !
+!   In input the volume is in (a.u.)^3, the bulk modulus is in kbar
+!   and the output energy is in Ry.
+!
+!
   USE kinds, ONLY : DP
   USE io_global, ONLY : stdout
   IMPLICIT NONE
