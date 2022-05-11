@@ -27,6 +27,7 @@ lattices.o \
 linear_solvers.o \
 linear_surfaces.o \
 magnetic_point_group.o \
+model_free_energy.o \
 mp_asyn.o \
 nye.o \
 optical.o \
