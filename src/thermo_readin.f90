@@ -42,7 +42,8 @@ SUBROUTINE thermo_readin()
                                    flepsilon, floptical, fleldos, fleltherm, &
                                    fldosfrq, flelanhar
   USE temperature,          ONLY : tmin, tmax, deltat, ntemp, ntemp_plot,  &
-                                   temp_plot_=>temp_plot, itemp_plot
+                                   temp_plot_=>temp_plot, itemp_plot,      &
+                                   sigma_ry_=>sigma_ry
   USE control_pressure,     ONLY : pressure, pmax, pmin, deltap, npress_plot, &
                                    press_plot_=> press_plot, ipress_plot
   USE control_dosq,         ONLY : nq1_d, nq2_d, nq3_d, ndos_input, deltafreq,&
@@ -71,7 +72,7 @@ SUBROUTINE thermo_readin()
                                    enhance_plot
   USE control_eldos,        ONLY : deltae, ndose, nk1_d, nk2_d, nk3_d, &
                                    k1_d, k2_d, k3_d, sigmae, legauss,  &
-                                   lel_free_energy
+                                   lel_free_energy, hot_electrons
   USE control_grun,         ONLY : grunmin_input, grunmax_input, &
                                    temp_ph, volume_ph, celldm_ph, lv0_t, &
                                    lb0_t
@@ -127,8 +128,9 @@ SUBROUTINE thermo_readin()
              nch, nrp, i, j, k, ios
   INTEGER :: iun_input
   INTEGER :: find_free_unit
-  INTEGER, PARAMETER :: max_opt=20
+  INTEGER, PARAMETER :: max_opt=20, max_sigma=1000
   REAL(DP) :: press_plot(max_opt), temp_plot(max_opt)
+  REAL(DP) :: sigma_ry(max_sigma)
   INTEGER :: ivol_plot(max_opt)
   LOGICAL :: tend, terr, read_paths, exst, has_xml
   CHARACTER(LEN=6) :: int_to_char
@@ -164,6 +166,7 @@ SUBROUTINE thermo_readin()
                             nnk, deltank,                   &
                             nsigma, deltasigma,             &
                             flnkconv, flpsnkconv,           &
+                            sigma_ry,                       &
 !
 !  scf_bands
 !
@@ -267,7 +270,8 @@ SUBROUTINE thermo_readin()
                             flpsmur,                        &
                             ncontours,                      &
                             flenergy, flpsenergy,           &
-                            lel_free_energy,                 &
+                            lel_free_energy,                &
+                            hot_electrons,                  &
 !
 !   mur_lc_elastic_constants
 !
@@ -355,6 +359,7 @@ SUBROUTINE thermo_readin()
   nnk=5
   deltank=2 
   nsigma=1  
+  sigma_ry=0.0_DP
   deltasigma=0.005_DP
   flnkconv='output_nkconv.dat'
   flpsnkconv='output_nkconv'
@@ -507,6 +512,7 @@ SUBROUTINE thermo_readin()
   flpsmur='output_mur'
   ncontours=0
   lel_free_energy=.FALSE.
+  hot_electrons=.FALSE.
   flenergy='output_energy'
   flpsenergy='output_energy'
 
@@ -563,6 +569,7 @@ SUBROUTINE thermo_readin()
   CALL mp_bcast( temp_plot, meta_ionode_id, world_comm )
   CALL mp_bcast( press_plot, meta_ionode_id, world_comm )
   CALL mp_bcast( ivol_plot, meta_ionode_id, world_comm )
+  CALL mp_bcast( sigma_ry, meta_ionode_id, world_comm )
 !
 !   Here a few consistency check on the input variables
 !
@@ -579,6 +586,8 @@ SUBROUTINE thermo_readin()
   IF (max_geometries /= 1000000 .AND.all_geometries_together) &
           CALL errore('thermo_readin','all_geometries_together not compatible &
                                           &with max_geometries',1)
+
+  IF (nsigma > max_sigma) CALL errore('thermo_readin','nsigma too large', 1)
   !
   IF (lmurn.AND.reduced_grid) CALL errore('thermo_readin',&
                              'lmurn and reduced_grid cannot be both .TRUE.',1)
@@ -605,6 +614,11 @@ SUBROUTINE thermo_readin()
      ALLOCATE(press_plot_(npress_plot))
      ALLOCATE(ipress_plot(npress_plot))
      press_plot_(1:npress_plot)=press_plot(1:npress_plot)
+  ENDIF
+
+  IF (nsigma>0) THEN
+     ALLOCATE(sigma_ry_(nsigma))
+     sigma_ry_(1:nsigma)=sigma_ry(1:nsigma)
   ENDIF
 
   IF (nvol_plot > ngeo(1)) &

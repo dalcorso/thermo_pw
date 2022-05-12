@@ -13,7 +13,7 @@ USE kinds,                 ONLY : DP
 USE temperature,           ONLY : ntemp
 USE thermo_mod,            ONLY : tot_ngeo
 USE control_thermo,        ONLY : ltherm_dos, ltherm_freq, ltherm_glob
-USE control_eldos,         ONLY : lel_free_energy
+USE control_eldos,         ONLY : lel_free_energy, hot_electrons
 USE control_quartic_energy, ONLY : poly_degree_ph
 USE control_emp_free_ener, ONLY : add_empirical, emp_ener, emp_free_ener, &
                                   emp_entr, emp_ce
@@ -37,7 +37,7 @@ LOGICAL :: all_geometry_done, all_el_free, ldummy
 CALL check_all_geometries_done(all_geometry_done)
 IF (.NOT.all_geometry_done) RETURN
 
-IF (lel_free_energy) THEN
+IF (lel_free_energy.AND..NOT.hot_electrons) THEN
    CALL check_all_el_free_ener_done(all_el_free)
    IF (.NOT.all_el_free) CALL errore('manage_anhar',&
                         'missing electron thermodynamics',1)
@@ -64,6 +64,8 @@ ELSE
    emp_entr=0.0_DP
    emp_ce=0.0_DP
 ENDIF
+
+IF (hot_electrons) CALL manage_hot_electrons()
 
 IF (ltherm_dos) THEN
    WRITE(stdout,'(/,2x,76("-"))')

@@ -64,7 +64,7 @@ SUBROUTINE deallocate_thermo()
   USE equilibrium_conf, ONLY : tau0, tau0_crys
   USE control_thermo,   ONLY : all_geometries_together
   USE control_grun,     ONLY : vgrun_t, b0_grun_t, celldm_grun_t
-  USE temperature,      ONLY : temp, temp_plot, itemp_plot
+  USE temperature,      ONLY : temp, temp_plot, itemp_plot, sigma_ry
 
   USE control_conv,     ONLY : ke, keden, nk_test, sigma_test
   USE control_mur_p,    ONLY : vmin_p, b0_p, b01_p, b02_p, emin_p
@@ -348,6 +348,7 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (press_plot) )      DEALLOCATE(press_plot)
   IF ( ALLOCATED (ipress_plot) )     DEALLOCATE(ipress_plot)
   IF ( ALLOCATED (ivol_plot) )       DEALLOCATE(ivol_plot)
+  IF ( ALLOCATED (sigma_ry) )        DEALLOCATE(sigma_ry)
 
   IF ( ALLOCATED (nrap_plot_in) )    DEALLOCATE(nrap_plot_in)
   IF ( ALLOCATED (rap_plot_in) )     DEALLOCATE(rap_plot_in)

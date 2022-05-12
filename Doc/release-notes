@@ -1,5 +1,10 @@
 New in version 1.7.0
 
+Added a plot of entropy, energy and free energy as a function of 
+temperature for several pressures.
+
+Added the possibility to compute the electronic free energy
+from the total energy as a function of smearing (still experimental).
 
 10/01/2022 Version 1.6.1 is now frozen
 New in version 1.6.1
@@ -76,7 +81,7 @@ Added a plot of the sound velocities as a function
 of temperature (in collaboration with C. Malica).
 
 Added a calculation of the spin component of the
-dynamical magnetic charges and magnetoelectic
+dynamical magnetic charges and magnetoelectric
 tensor (in collaboration with A. Urru).
 
 23/01/2020 Version 1.2.1 is now frozen.

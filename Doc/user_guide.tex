@@ -2020,6 +2020,16 @@ the electronic) free energy is fitted separately by a polynomial, while
 only the static energy is fitted by an equation of state. When
  \texttt{ltherm\_glob=.TRUE.} a different equation of state is used 
 at each temperature and no polynomial interpolation is needed.
+The electronic free energy is added if the flag 
+\texttt{lel\_free\_energy=.TRUE.}. This electronic free energy can be 
+calculated in two ways. When \texttt{hot\_electrons=.FALSE.} the code 
+expects to find in the directory \texttt{therm\_files} the file with 
+the electronic free energy computed with the option \texttt{what=mur\_lc}.
+When \texttt{hot\_electrons=.TRUE.} the free energy due to excited
+electrons is calculated from the total energy evaluated as a function
+of sigma. The total energy for several values of \texttt{sigma} must
+be put in directories called \texttt{restart2}, \texttt{restart3} ...
+\texttt{restart\#nsigma}. \\
 The input variables that control these plots are those described in the option
 \texttt{what='mur\_lc'} and \texttt{what='mur\_lc\_disp'} in addition to the 
 following:
@@ -2135,6 +2145,20 @@ alpha2        : parameter of the empirical free energy (see above)
 v0p           : parameter of the empirical free energy (equilibrium volume)
                 in (a.u.)^3
                 Default: 0.0
+hot_electrons : If .TRUE. the electronic free energy is computed from the
+                energy as a function of smearing, otherwise it is
+                read from files computed from electron dos. Must be
+                used together with lel_free_energy=.TRUE..
+                Default: .FALSE.
+nsigma        : The number of smearing values for which there are
+                restart files. Note that nsigma includes the present
+                restart, so the code expects to find restart2, 
+                restart3, ..., restart#nsigma.
+                Default: 0 (option not used). Minimum value 3 to
+                make a quadratic fit of the energy.
+sigma_ry      : the value of the smearing for each directory restart.
+                In Ry units.
+                Default: Must be set of each nsigma by the user.
 flgrun        : file where the Gruneisen parameters are written. 
                 Default: character(len=*) 'output_pgrun.dat'
 flpgrun       : file where the Gruneisen parameters in a plotable 

@@ -41,7 +41,7 @@ SUBROUTINE bcast_thermo_input()
                                sp_min
   USE control_eldos,   ONLY : deltae, ndose, nk1_d, nk2_d, nk3_d, &
                               k1_d, k2_d, k3_d, sigmae, legauss,  &
-                              lel_free_energy
+                              lel_free_energy, hot_electrons
   USE control_asy,     ONLY : flasy, lasymptote, asymptote_command
   USE control_freecad, ONLY : freecadfile, fcfact, fc_red, fc_green, fc_blue, &
                               fc_transparency
@@ -178,6 +178,7 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( sigmae, meta_ionode_id, world_comm )
   CALL mp_bcast( legauss, meta_ionode_id, world_comm )
   CALL mp_bcast( lel_free_energy, meta_ionode_id, world_comm )
+  CALL mp_bcast( hot_electrons, meta_ionode_id, world_comm )
   CALL mp_bcast( fleldos, meta_ionode_id, world_comm )
   CALL mp_bcast( flpseldos, meta_ionode_id, world_comm )
   CALL mp_bcast( fleltherm, meta_ionode_id, world_comm )

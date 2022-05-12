@@ -82,6 +82,7 @@ manage_elastic_cons.o \
 manage_elastic_cons_qha.o \
 manage_elastic_cons_qha_2.o \
 manage_energy_minimum.o \
+manage_hot_electrons.o \
 manage_piezo_tensor.o \
 manage_plot_anhar.o \
 manage_ph.o \
