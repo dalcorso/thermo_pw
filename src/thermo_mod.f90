@@ -263,6 +263,40 @@ MODULE el_thermodynamics
   REAL(DP), ALLOCATABLE :: el_ce(:,:)        ! electronic heat capacity, &
                                              ! T, geometry
 END MODULE el_thermodynamics
+!
+!----------------------------------------------------------------------------
+MODULE emp_anharmonic
+!----------------------------------------------------------------------------
+!
+!   here all the quantities obtained adding the free energy of the
+!   electrons
+!
+  USE kinds, ONLY: DP
+  SAVE
+!
+!  Interpolated empirical quantities
+!
+  REAL(DP), ALLOCATABLE :: emp_energy_t(:) ! empirical energy 
+  REAL(DP), ALLOCATABLE :: emp_free_energy_t(:) ! empirical free energy
+  REAL(DP), ALLOCATABLE :: emp_entropy_t(:) !  empirical entropy
+  REAL(DP), ALLOCATABLE :: emp_ce_t(:) ! empirical heat capacity
+!
+!  Empirical quantities interpolated at the temperature dependent geometry 
+!  at selected pressures 
+!
+  REAL(DP), ALLOCATABLE :: emp_free_ener_pt(:,:) ! empirical free energy
+  REAL(DP), ALLOCATABLE :: emp_ener_pt(:,:) ! empirical energy
+  REAL(DP), ALLOCATABLE :: emp_entr_pt(:,:) ! empirical entropy
+  REAL(DP), ALLOCATABLE :: emp_ce_pt(:,:) ! empirical heat capacity at
+                                          ! several pressures
+!
+!  Empirical quantities interpolated at the pressure dependent geometries
+!  at selected temperatures
+!
+  REAL(DP), ALLOCATABLE :: emp_ce_ptt(:,:) ! empirical heat capacity at
+                                           ! several temperatures
+!
+END MODULE emp_anharmonic
 
 MODULE anharmonic
 !

@@ -82,6 +82,11 @@ SUBROUTINE deallocate_thermo()
   USE el_anharmonic, ONLY : el_energy_t, el_free_energy_t, el_entropy_t, &
                             el_ce_t, el_energyf_t, el_free_energyf_t,    &
                             el_entropyf_t, el_cef_t
+  USE control_emp_free_ener, ONLY : emp_ener, emp_free_ener, emp_entr, &
+                           emp_ce
+  USE emp_anharmonic, ONLY : emp_energy_t, emp_free_energy_t, emp_entropy_t, &
+                            emp_ce_t, emp_free_ener_pt, emp_ener_pt, &
+                            emp_entr_pt, emp_ce_pt, emp_ce_ptt
   USE collect_info,  ONLY : destroy_collect_info_type
   USE control_eldos, ONLY : dos_k, dos_wk
   USE polynomial,    ONLY : clean_poly
@@ -121,6 +126,11 @@ SUBROUTINE deallocate_thermo()
   IF (ALLOCATED(el_entr))            DEALLOCATE(el_entr)
   IF (ALLOCATED(el_mu))              DEALLOCATE(el_mu)
   IF (ALLOCATED(el_ce))              DEALLOCATE(el_ce)
+
+  IF (ALLOCATED(emp_free_ener))      DEALLOCATE(emp_free_ener)
+  IF (ALLOCATED(emp_ener))           DEALLOCATE(emp_ener)
+  IF (ALLOCATED(emp_entr))           DEALLOCATE(emp_entr)
+  IF (ALLOCATED(emp_ce))             DEALLOCATE(emp_ce)
 
   IF ( ALLOCATED (vmin_t) )          DEALLOCATE(vmin_t) 
   IF ( ALLOCATED (b0_t) )            DEALLOCATE(b0_t) 
@@ -173,6 +183,12 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (beta_noe_t) )       DEALLOCATE(beta_noe_t)
   IF ( ALLOCATED (gamma_noe_t) )      DEALLOCATE(gamma_noe_t) 
 
+  IF (ALLOCATED (emp_free_energy_t) ) DEALLOCATE(emp_free_energy_t)
+  IF (ALLOCATED (emp_energy_t) )      DEALLOCATE(emp_energy_t)
+  IF (ALLOCATED (emp_entropy_t) )     DEALLOCATE(emp_entropy_t)
+  IF (ALLOCATED (emp_ce_t) )          DEALLOCATE(emp_ce_t)
+
+
   IF ( ALLOCATED (vmin_ptt) )        DEALLOCATE(vmin_ptt) 
   IF ( ALLOCATED (b0_ptt) )          DEALLOCATE(b0_ptt) 
   IF ( ALLOCATED (b01_ptt) )         DEALLOCATE(b01_ptt) 
@@ -200,6 +216,12 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (beta_pt) )         DEALLOCATE(beta_pt) 
   IF ( ALLOCATED (b0_s_pt) )         DEALLOCATE(b0_s_pt) 
   IF ( ALLOCATED (gamma_pt) )        DEALLOCATE(gamma_pt) 
+
+  IF (ALLOCATED (emp_free_ener_pt) ) DEALLOCATE(emp_free_ener_pt)
+  IF (ALLOCATED (emp_ener_pt) )      DEALLOCATE(emp_ener_pt)
+  IF (ALLOCATED (emp_entr_pt) )      DEALLOCATE(emp_entr_pt)
+  IF (ALLOCATED (emp_ce_pt) )        DEALLOCATE(emp_ce_pt)
+  IF (ALLOCATED (emp_ce_ptt) )       DEALLOCATE(emp_ce_ptt)
 
   IF ( ALLOCATED (vmin_p) )          DEALLOCATE(vmin_p) 
   IF ( ALLOCATED (p0) )              DEALLOCATE(p0) 

@@ -22,6 +22,10 @@ SUBROUTINE allocate_thermodynamics()
   USE el_thermodynamics, ONLY : el_ener, el_free_ener, el_entr, el_mu, &
                            el_ce
   USE el_anharmonic,  ONLY : vmine_t, b0e_t, b01e_t, b02e_t, free_e_mine_t
+
+  USE control_emp_free_ener, ONLY : emp_ener, emp_free_ener, emp_entr, &
+                           emp_ce
+
   IMPLICIT NONE
 
   IF (.NOT.ALLOCATED(ph_free_ener))  ALLOCATE(ph_free_ener(ntemp,tot_ngeo))
@@ -58,6 +62,14 @@ SUBROUTINE allocate_thermodynamics()
   IF (.NOT. ALLOCATED (b01e_t) )         ALLOCATE(b01e_t(ntemp))
   IF (.NOT. ALLOCATED (b02e_t) )         ALLOCATE(b02e_t(ntemp))
   IF (.NOT. ALLOCATED (free_e_mine_t) )  ALLOCATE(free_e_mine_t(ntemp))
+!
+!  Allocate the variables for the empirical free energy
+!
+  IF (.NOT.ALLOCATED(emp_free_ener))   ALLOCATE(emp_free_ener(ntemp,tot_ngeo))
+  IF (.NOT.ALLOCATED(emp_ener))        ALLOCATE(emp_ener(ntemp,tot_ngeo))
+  IF (.NOT.ALLOCATED(emp_entr))        ALLOCATE(emp_entr(ntemp,tot_ngeo))
+  IF (.NOT.ALLOCATED(emp_ce))          ALLOCATE(emp_ce(ntemp,tot_ngeo))
+
 
   RETURN
   !

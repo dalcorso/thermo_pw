@@ -15,6 +15,8 @@ USE thermo_mod,            ONLY : tot_ngeo
 USE control_thermo,        ONLY : ltherm_dos, ltherm_freq, ltherm_glob
 USE control_eldos,         ONLY : lel_free_energy
 USE control_quartic_energy, ONLY : poly_degree_ph
+USE control_emp_free_ener, ONLY : add_empirical, emp_ener, emp_free_ener, &
+                                  emp_entr, emp_ce
 USE temperature,           ONLY : temp, ntemp, ntemp_plot, itemp_plot
 USE internal_files_names,  ONLY : flfrq_thermo, flvec_thermo
 USE anharmonic,            ONLY : a_t
@@ -52,6 +54,15 @@ ELSE
    el_free_ener=0.0_DP
    el_entr=0.0_DP
    el_ce=0.0_DP
+ENDIF
+
+IF (add_empirical) THEN
+   CALL empirical_free_energy()
+ELSE
+   emp_ener=0.0_DP
+   emp_free_ener=0.0_DP
+   emp_entr=0.0_DP
+   emp_ce=0.0_DP
 ENDIF
 
 IF (ltherm_dos) THEN

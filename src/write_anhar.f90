@@ -1014,8 +1014,12 @@ USE kinds,          ONLY : DP
 USE thermodynamics, ONLY : ph_e0, ph_ce, ph_b_fact, ph_ener, ph_free_ener, &
                                                              ph_entropy
 USE el_thermodynamics, ONLY : el_ener, el_free_ener, el_entr, el_ce
+USE control_emp_free_ener,  ONLY : add_empirical, emp_ener, emp_free_ener, &
+                           emp_entr, emp_ce
 USE el_anharmonic,  ONLY : el_energy_t, el_free_energy_t, el_entropy_t,    &
                            el_ce_t
+USE emp_anharmonic,  ONLY : emp_energy_t, emp_free_energy_t, emp_entropy_t, &
+                           emp_ce_t
 USE anharmonic,     ONLY : vmin_t, celldm_t, cv_t, ce_t, ener_t,           &
                            free_ener_t, entropy_t, e0_t, bfact_t
 USE control_thermo, ONLY : with_eigen
@@ -1058,6 +1062,23 @@ ELSE
    el_ce_t=0.0_DP
 ENDIF
 
+IF (add_empirical) THEN
+   CALL interpolate_thermo(vmin_t, celldm_t, emp_ener, emp_energy_t)
+   ener_t = ener_t + emp_energy_t
+   CALL interpolate_thermo(vmin_t, celldm_t, emp_free_ener, emp_free_energy_t)
+   free_ener_t = free_ener_t + emp_free_energy_t
+   CALL interpolate_thermo(vmin_t, celldm_t, emp_entr, emp_entropy_t)
+   entropy_t = entropy_t + emp_entropy_t
+   CALL interpolate_thermo(vmin_t, celldm_t, emp_ce, emp_ce_t)
+   ce_t=ce_t+emp_ce_t
+   cv_t=ce_t
+ELSE
+   emp_energy_t=0.0_DP
+   emp_free_energy_t=0.0_DP
+   emp_entropy_t=0.0_DP
+   emp_ce_t=0.0_DP
+ENDIF
+
 RETURN
 END SUBROUTINE interpolate_harmonic
 
@@ -1073,10 +1094,14 @@ USE kinds,    ONLY : DP
 USE ph_freq_thermodynamics, ONLY : phf_e0, phf_ce, phf_b_fact, phf_ener, &
                                    phf_free_ener, phf_entropy
 USE el_thermodynamics,  ONLY : el_ener, el_free_ener, el_entr, el_ce
+USE control_emp_free_ener,  ONLY : add_empirical, emp_ener, emp_free_ener, &
+                               emp_entr, emp_ce
 USE ph_freq_anharmonic, ONLY : vminf_t, celldmf_t, cvf_t, cef_t, enerf_t,&
                                free_enerf_t, entropyf_t, e0f_t, bfactf_t
 USE el_anharmonic,  ONLY : el_energyf_t, el_free_energyf_t, el_entropyf_t, &
                            el_cef_t
+USE emp_anharmonic,  ONLY : emp_energyf_t, emp_free_energyf_t, &
+                           emp_entropyf_t, emp_cef_t
 USE control_thermo, ONLY : with_eigen
 USE control_eldos,  ONLY : lel_free_energy
 
@@ -1118,6 +1143,23 @@ ELSE
    el_cef_t=0.0_DP
 ENDIF
 
+IF (add_empirical) THEN
+   CALL interpolate_thermo(vminf_t, celldmf_t, emp_ener, emp_energyf_t)
+   enerf_t = enerf_t + emp_energyf_t
+   CALL interpolate_thermo(vminf_t, celldmf_t, emp_free_ener, emp_free_energyf_t)
+   free_enerf_t = free_enerf_t + emp_free_energyf_t
+   CALL interpolate_thermo(vminf_t, celldmf_t, emp_entr, emp_entropyf_t)
+   entropyf_t = entropyf_t + emp_entropyf_t
+   CALL interpolate_thermo(vminf_t, celldmf_t, emp_ce, emp_cef_t)
+   cef_t=cef_t+emp_cef_t
+   cvf_t=cef_t
+ELSE
+   emp_energyf_t=0.0_DP
+   emp_free_energyf_t=0.0_DP
+   emp_entropyf_t=0.0_DP
+   emp_cef_t=0.0_DP
+ENDIF
+
 RETURN
 END SUBROUTINE interpolate_harmonic_ph
 !
@@ -1133,7 +1175,10 @@ SUBROUTINE interpolate_harmonic_pt()
 USE kinds,          ONLY : DP
 USE thermodynamics, ONLY : ph_ce
 USE el_thermodynamics, ONLY : el_ce
+USE control_emp_free_ener, ONLY : add_empirical, emp_ener, emp_ce, emp_entr
 USE el_anharmonic,  ONLY : el_ce_pt
+USE emp_anharmonic, ONLY : emp_free_ener_pt, emp_ener_pt, emp_ce_pt, &
+                           emp_entr_pt
 USE anharmonic,     ONLY : celldm_t ! this is not used yet, must become pt
 USE anharmonic_pt,  ONLY : vmin_pt, cv_pt, ce_pt
 USE control_eldos,  ONLY : lel_free_energy
@@ -1162,6 +1207,29 @@ IF (lel_free_energy) THEN
    cv_pt=ce_pt
 ELSE
    el_ce_pt=0.0_DP
+ENDIF
+
+!
+!  If requested interpolate the empirical part and add it
+!  to the vibrational one
+!
+IF (add_empirical) THEN
+   DO ipressp=1,npress_plot
+      CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_t, emp_ener, &
+                                                    emp_ener_pt(:,ipressp))
+      CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_t, emp_entr, &
+                                                    emp_entr_pt(:,ipressp))
+      CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_t, emp_ce, &
+                                                    emp_ce_pt(:,ipressp))
+   ENDDO
+   ener_pt=ener_pt+emp_ener_pt
+   entr_pt=entr_pt+emp_entr_pt
+   ce_pt=ce_pt+emp_ce_pt
+   cv_pt=ce_pt
+ELSE
+   emp_ener_pt=0.0_DP
+   emp_entr_pt=0.0_DP
+   emp_ce_pt=0.0_DP
 ENDIF
 
 RETURN
@@ -1205,8 +1273,10 @@ USE kinds,             ONLY : DP
 USE thermodynamics,    ONLY : ph_ce
 USE el_thermodynamics, ONLY : el_ce
 USE el_anharmonic,     ONLY : el_ce_ptt
+USE control_emp_free_ener, ONLY : add_empirical, emp_ce
 USE anharmonic,        ONLY : celldm_t ! this is not used yet, must become ptt
 USE anharmonic_ptt,    ONLY : vmin_ptt, cv_ptt, ce_ptt
+USE emp_anharmonic,    ONLY : emp_ce_ptt
 USE temperature,       ONLY : ntemp_plot, itemp_plot
 USE control_eldos,     ONLY : lel_free_energy
 
@@ -1235,6 +1305,21 @@ IF (lel_free_energy) THEN
    cv_ptt=ce_ptt
 ELSE
    el_ce_ptt=0.0_DP
+ENDIF
+!
+!  If requested in input interpolate the empirical part and add it
+!  to the vibrational one
+!
+IF (add_empirical) THEN
+   DO itempp=1,ntemp_plot
+      itemp=itemp_plot(itempp)
+      CALL interpolate_thermo_p(vmin_ptt(:,itempp), emp_ce, &
+                                              emp_ce_ptt(:,itempp), itemp)
+   ENDDO
+   ce_ptt=ce_ptt+emp_ce_ptt
+   cv_ptt=ce_ptt
+ELSE
+   emp_ce_ptt=0.0_DP
 ENDIF
 
 RETURN
@@ -1614,6 +1699,7 @@ USE control_eldos,  ONLY : lel_free_energy
 USE anharmonic,     ONLY : a_t
 USE thermodynamics, ONLY : ph_free_ener
 USE el_thermodynamics, ONLY : el_free_ener
+USE control_emp_free_ener, ONLY : add_empirical, emp_free_ener
 USE temperature,    ONLY : ntemp
 USE polyfit_mod,    ONLY : polyfit
 USE mp,             ONLY : mp_sum
@@ -1635,6 +1721,7 @@ DO itemp = startt, lastt
       x(ndata)=omega_geo(idata)
       y(ndata)=ph_free_ener(itemp,idata)
       IF (lel_free_energy) y(ndata)=y(ndata)+el_free_ener(itemp,idata)
+      IF (add_empirical) y(ndata)=y(ndata)+emp_free_ener(itemp,idata)
 !      IF (MOD(itemp,100)==0) WRITE(stdout,'(2f25.14)') x(ndata), y(ndata)
    ENDDO
    CALL polyfit(x, y, ndata, a_t(:,itemp), poly_degree_ph)
@@ -1706,6 +1793,7 @@ USE thermo_mod,     ONLY : ngeo, omega_geo, no_ph
 USE control_quartic_energy, ONLY : poly_degree_ph
 USE ph_freq_thermodynamics, ONLY : phf_free_ener
 USE el_thermodynamics,      ONLY : el_free_ener
+USE control_emp_free_ener, ONLY : add_empirical, emp_free_ener
 USE ph_freq_anharmonic,     ONLY : af_t
 USE control_eldos,  ONLY : lel_free_energy
 USE temperature,    ONLY : ntemp
@@ -1728,6 +1816,7 @@ DO itemp=startt, lastt
       x(ndata)=omega_geo(idata)
       y(ndata)=phf_free_ener(itemp,idata) 
       IF (lel_free_energy) y(ndata)=y(ndata)+el_free_ener(itemp,idata)
+      IF (add_empirical) y(ndata)=y(ndata)+emp_free_ener(itemp,idata)
 !     WRITE(stdout,'(2f25.14)') x(ndata), y(ndata)
    ENDDO
    CALL polyfit(x, y, ndata, af_t(:,itemp), poly_degree_ph)

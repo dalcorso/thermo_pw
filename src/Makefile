@@ -49,6 +49,7 @@ do_phonon_tpw.o \
 dos_sub.o \
 dynmatrix_tpw.o \
 elastic_constants_t.o \
+empirical_free_energy.o \
 ev_mod.o \
 ev_sub.o \
 evaluate_celldm.o \

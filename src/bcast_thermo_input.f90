@@ -70,6 +70,7 @@ SUBROUTINE bcast_thermo_input()
   USE control_mur,     ONLY : lmurn
   USE control_ev,      ONLY : ieos
   USE control_energy_plot, ONLY : ncontours
+  USE control_emp_free_ener, ONLY : add_empirical, efe, alpha1, alpha2, v0p
   USE control_grun,    ONLY : temp_ph, volume_ph, celldm_ph, lv0_t, lb0_t,    &
                               grunmin_input, grunmax_input
   USE grun_anharmonic, ONLY : poly_degree_grun
@@ -303,6 +304,12 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( lv0_t, meta_ionode_id, world_comm )
   CALL mp_bcast( lb0_t, meta_ionode_id, world_comm )
   CALL mp_bcast( noelcvg, meta_ionode_id, world_comm )
+  CALL mp_bcast( anhar_std, meta_ionode_id, world_comm )
+  CALL mp_bcast( add_empirical, meta_ionode_id, world_comm )
+  CALL mp_bcast( efe, meta_ionode_id, world_comm )
+  CALL mp_bcast( alpha1, meta_ionode_id, world_comm )
+  CALL mp_bcast( alpha2, meta_ionode_id, world_comm )
+  CALL mp_bcast( v0p, meta_ionode_id, world_comm )
   CALL mp_bcast( all_geometries_together, meta_ionode_id, world_comm )
   CALL mp_bcast( ngeo_ph, meta_ionode_id, world_comm )
   CALL mp_bcast( fact_ngeo, meta_ionode_id, world_comm )

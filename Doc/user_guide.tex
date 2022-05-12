@@ -2118,6 +2118,23 @@ poly_degree_grun : degree of the polynomial used to interpolate
                 the frequencies (Used only when lmurn=.TRUE. 
                 otherwise it is 2).
                 Default: 4
+add_empirical : If .TRUE. adds to the free energy an empirical term
+                that can represent the anharmonic contribution 
+                or the electronic contribution.
+                Default: .FALSE.
+efe           : The type of empirical free energy
+                1) (alpha1+alpha2 * V) T^2
+                2) -2/3 k_B nat alpha1 (v/v0p)^alpha2 T^2
+                Default: 0 (must be explicitely given)
+alpha1        : parameter of the empirical free energy (see above)
+                in eV/K^2 in 1), in 1/K in 2). 
+                Default: 0.0
+alpha2        : parameter of the empirical free energy (see above)
+                in eV / K^2 / A^3 in 1), adimensional in 2)
+                Default: 0.0
+v0p           : parameter of the empirical free energy (equilibrium volume)
+                in (a.u.)^3
+                Default: 0.0
 flgrun        : file where the Gruneisen parameters are written. 
                 Default: character(len=*) 'output_pgrun.dat'
 flpgrun       : file where the Gruneisen parameters in a plotable 

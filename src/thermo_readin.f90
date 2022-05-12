@@ -96,6 +96,8 @@ SUBROUTINE thermo_readin()
   
   USE piezoelectric_tensor, ONLY : nppl
   USE anharmonic,           ONLY : noelcvg
+  USE control_emp_free_ener, ONLY : add_empirical, efe, alpha1, alpha2, v0p
+
   USE grun_anharmonic,      ONLY : poly_degree_grun
   USE images_omega,         ONLY : omega_group
   USE control_qe,           ONLY : force_band_calculation, use_ph_images
@@ -283,6 +285,8 @@ SUBROUTINE thermo_readin()
                             poly_degree_elc,                &
                             lv0_t, lb0_t,                   &
                             noelcvg,                        &
+                            add_empirical, efe, alpha1,     &
+                            alpha2, v0p,                    &
                             ltherm_glob,                    &
                             poly_degree_grun,               &
                             flpgrun, flgrun, flpsgrun,      &
@@ -533,6 +537,12 @@ SUBROUTINE thermo_readin()
   ngeo_ph=0
   omega_group=1
   all_geometries_together=.FALSE.
+
+  add_empirical=.FALSE.
+  efe=0
+  alpha1=0.0_DP
+  alpha2=0.0_DP
+  v0p=0.0_DP
 
   use_free_energy=.FALSE.
   start_geometry_qha=1
