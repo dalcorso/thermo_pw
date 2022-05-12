@@ -129,7 +129,7 @@ SUBROUTINE allocate_anharmonic()
                                   cp_noe_t, b0_noe_s, gamma_noe_t           
   USE anharmonic_pt,       ONLY : vmin_pt, b0_pt, b01_pt, b02_pt, emin_pt,   &
                                   ce_pt, cv_pt, cp_pt, beta_pt, b0_s_pt,     &
-                                  gamma_pt
+                                  gamma_pt, free_ener_pt, ener_pt, entr_pt
   USE anharmonic_ptt,      ONLY : vmin_ptt, b0_ptt, b01_ptt, b02_ptt,        &
                                   emin_ptt, ce_ptt, cv_ptt, cp_ptt,          &
                                   beta_ptt, b0_s_ptt, gamma_ptt
@@ -151,8 +151,14 @@ SUBROUTINE allocate_anharmonic()
   USE el_anharmonic, ONLY : el_energy_t, el_free_energy_t, el_entropy_t,     &
                             el_ce_t, el_energyf_t, el_free_energyf_t,        &
                             el_entropyf_t, el_cef_t, el_ce_pt, el_ce_ptt,    &
+                            el_free_ener_pt, el_ener_pt, el_entr_pt,         &
                             el_b0_t, el_beta_t, el_betaf_t, el_cp_t,         &
                             el_cpf_t, el_gamma_t, el_gammaf_t
+  USE emp_anharmonic, ONLY : emp_energy_t, emp_free_energy_t, emp_entropy_t, &
+                            emp_ce_t, emp_energyf_t, emp_free_energyf_t,     &
+                            emp_entropyf_t, emp_cef_t, emp_free_ener_pt,     &
+                            emp_ener_pt, emp_entr_pt, emp_ce_pt, emp_ce_ptt
+
   USE control_quartic_energy, ONLY : poly_degree_ph
   USE control_vol,         ONLY : nvol_plot, nvol
   USE control_grun,        ONLY : vgrun_t, celldm_grun_t, b0_grun_t
@@ -240,6 +246,10 @@ SUBROUTINE allocate_anharmonic()
      IF (.NOT. ALLOCATED (b02_pt) )     ALLOCATE(b02_pt(ntemp,npress_plot)) 
      IF (.NOT. ALLOCATED (emin_pt) )    ALLOCATE(emin_pt(ntemp,npress_plot)) 
 
+     IF (.NOT. ALLOCATED (free_ener_pt) ) ALLOCATE(free_ener_pt(ntemp,&
+                                                               npress_plot)) 
+     IF (.NOT. ALLOCATED (ener_pt) )    ALLOCATE(ener_pt(ntemp,npress_plot)) 
+     IF (.NOT. ALLOCATED (entr_pt) )    ALLOCATE(entr_pt(ntemp,npress_plot)) 
      IF (.NOT. ALLOCATED (ce_pt) )      ALLOCATE(ce_pt(ntemp,npress_plot)) 
      IF (.NOT. ALLOCATED (cv_pt) )      ALLOCATE(cv_pt(ntemp,npress_plot)) 
 
@@ -310,11 +320,31 @@ SUBROUTINE allocate_anharmonic()
   IF (.NOT. ALLOCATED (el_ce_t) )       ALLOCATE(el_ce_t(ntemp))
   IF (.NOT. ALLOCATED (el_b0_t) )       ALLOCATE(el_b0_t(ntemp))
 
+  IF (.NOT. ALLOCATED (emp_energy_t) )   ALLOCATE(emp_energy_t(ntemp))
+  IF (.NOT. ALLOCATED (emp_free_energy_t) ) ALLOCATE(emp_free_energy_t(ntemp))
+  IF (.NOT. ALLOCATED (emp_entropy_t) )  ALLOCATE(emp_entropy_t(ntemp))
+  IF (.NOT. ALLOCATED (emp_ce_t) )       ALLOCATE(emp_ce_t(ntemp))
+
+  IF (.NOT. ALLOCATED (emp_energyf_t) )   ALLOCATE(emp_energyf_t(ntemp))
+  IF (.NOT. ALLOCATED (emp_free_energyf_t) ) ALLOCATE(emp_free_energyf_t(ntemp))
+  IF (.NOT. ALLOCATED (emp_entropyf_t) )  ALLOCATE(emp_entropyf_t(ntemp))
+  IF (.NOT. ALLOCATED (emp_cef_t) )       ALLOCATE(emp_cef_t(ntemp))
+
   IF (npress_plot>0) THEN
+     IF (.NOT. ALLOCATED (el_free_ener_pt) ) ALLOCATE(el_free_ener_pt(ntemp,&
+                                                                 npress_plot))
+     IF (.NOT. ALLOCATED (el_ener_pt) ) ALLOCATE(el_ener_pt(ntemp,npress_plot))
+     IF (.NOT. ALLOCATED (el_entr_pt) ) ALLOCATE(el_entr_pt(ntemp,npress_plot))
      IF (.NOT. ALLOCATED (el_ce_pt) )   ALLOCATE(el_ce_pt(ntemp,npress_plot))
+     IF (.NOT. ALLOCATED (emp_ener_pt) )  &
+                                      ALLOCATE(emp_ener_pt(ntemp,npress_plot))
+     IF (.NOT. ALLOCATED (emp_entr_pt) )  &
+                                      ALLOCATE(emp_entr_pt(ntemp,npress_plot))
+     IF (.NOT. ALLOCATED (emp_ce_pt) )  ALLOCATE(emp_ce_pt(ntemp,npress_plot))
   ENDIF
   IF (ntemp_plot>0) THEN
      IF (.NOT. ALLOCATED (el_ce_ptt) )  ALLOCATE(el_ce_ptt(npress,ntemp_plot))
+     IF (.NOT. ALLOCATED (emp_ce_ptt) ) ALLOCATE(emp_ce_ptt(npress,ntemp_plot))
   ENDIF
 
   IF (.NOT. ALLOCATED (el_energyf_t) )  ALLOCATE(el_energyf_t(ntemp))

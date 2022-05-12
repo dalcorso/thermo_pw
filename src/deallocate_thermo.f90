@@ -32,13 +32,15 @@ SUBROUTINE deallocate_thermo()
                              free_e_min_noe_t, a_noe_t, ce_noe_t, cv_noe_t, &
                              cp_noe_t, b0_noe_s, beta_noe_t, gamma_noe_t
   USE anharmonic_pt,  ONLY : vmin_pt, b0_pt, b01_pt, b02_pt, emin_pt,       &
-                             ce_pt, cv_pt, cp_pt, b0_s_pt, beta_pt, gamma_pt 
+                             ce_pt, cv_pt, cp_pt, b0_s_pt, beta_pt,         &
+                             gamma_pt, free_ener_pt, ener_pt, entr_pt
   USE anharmonic_ptt, ONLY : vmin_ptt, b0_ptt, b01_ptt, b02_ptt, emin_ptt,  &
                              ce_ptt, cv_ptt, cp_ptt, beta_ptt, b0_s_ptt,    &
                              gamma_ptt 
   USE anharmonic_vt,  ONLY : press_vt, press_vtt
   USE el_anharmonic, ONLY :  vmine_t, b0e_t, b01e_t, b02e_t, free_e_mine_t, &
-                             el_ce_pt, el_ce_ptt, el_b0_t, el_beta_t,       &
+                             el_free_ener_pt, el_ener_pt, el_ce_pt,         &
+                             el_entr_pt, el_ce_ptt, el_b0_t, el_beta_t,     &
                              el_betaf_t, el_gamma_t, el_gammaf_t,           &
                              el_cp_t, el_cpf_t
   USE ph_freq_anharmonic, ONLY : vminf_t, b0f_t, b01f_t, b02f_t,            &
@@ -85,8 +87,9 @@ SUBROUTINE deallocate_thermo()
   USE control_emp_free_ener, ONLY : emp_ener, emp_free_ener, emp_entr, &
                            emp_ce
   USE emp_anharmonic, ONLY : emp_energy_t, emp_free_energy_t, emp_entropy_t, &
-                            emp_ce_t, emp_free_ener_pt, emp_ener_pt, &
-                            emp_entr_pt, emp_ce_pt, emp_ce_ptt
+                            emp_ce_t, emp_energyf_t, emp_free_energyf_t, &
+                            emp_entropyf_t, emp_cef_t, emp_free_ener_pt,  &
+                            emp_ener_pt, emp_entr_pt, emp_ce_pt, emp_ce_ptt
   USE collect_info,  ONLY : destroy_collect_info_type
   USE control_eldos, ONLY : dos_k, dos_wk
   USE polynomial,    ONLY : clean_poly
@@ -188,6 +191,13 @@ SUBROUTINE deallocate_thermo()
   IF (ALLOCATED (emp_entropy_t) )     DEALLOCATE(emp_entropy_t)
   IF (ALLOCATED (emp_ce_t) )          DEALLOCATE(emp_ce_t)
 
+  IF (ALLOCATED (emp_free_energyf_t) ) DEALLOCATE(emp_free_energyf_t)
+  IF (ALLOCATED (emp_energyf_t) )      DEALLOCATE(emp_energyf_t)
+  IF (ALLOCATED (emp_entropyf_t) )     DEALLOCATE(emp_entropyf_t)
+  IF (ALLOCATED (emp_cef_t) )          DEALLOCATE(emp_cef_t)
+
+  IF (ALLOCATED (el_ener_pt) )       DEALLOCATE(el_ener_pt)
+  IF (ALLOCATED (el_entr_pt) )       DEALLOCATE(el_entr_pt)
 
   IF ( ALLOCATED (vmin_ptt) )        DEALLOCATE(vmin_ptt) 
   IF ( ALLOCATED (b0_ptt) )          DEALLOCATE(b0_ptt) 
@@ -195,6 +205,8 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (b02_ptt) )         DEALLOCATE(b02_ptt) 
   IF ( ALLOCATED (emin_ptt) )        DEALLOCATE(emin_ptt) 
 
+  IF ( ALLOCATED (ener_pt) )         DEALLOCATE(ener_pt) 
+  IF ( ALLOCATED (entr_pt) )         DEALLOCATE(entr_pt) 
   IF ( ALLOCATED (ce_ptt) )          DEALLOCATE(ce_ptt) 
   IF ( ALLOCATED (cv_ptt) )          DEALLOCATE(cv_ptt) 
 

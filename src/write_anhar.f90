@@ -1190,6 +1190,12 @@ INTEGER :: ipressp
 IF (npress_plot==0) RETURN
 
 DO ipressp=1,npress_plot
+   CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_t, ph_ener, &
+                                                         ener_pt(:,ipressp))
+   CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_t, ph_free_ener, &
+                                                    free_ener_pt(:,ipressp))
+   CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_t, ph_entropy, &
+                                                         entr_pt(:,ipressp))
    CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_t, ph_ce, &
                                                          ce_pt(:,ipressp))
 ENDDO
@@ -1200,15 +1206,26 @@ cv_pt=ce_pt
 !
 IF (lel_free_energy) THEN
    DO ipressp=1,npress_plot
+      CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_t, el_ener, &
+                                                    el_ener_pt(:,ipressp))
+      CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_t, el_free_ener, &
+                                                 el_free_ener_pt(:,ipressp))
+      CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_t, el_entr, &
+                                                    el_entr_pt(:,ipressp))
       CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_t, el_ce, &
                                                     el_ce_pt(:,ipressp))
    ENDDO
+   free_ener_pt=free_ener_pt+el_free_ener_pt
+   ener_pt=ener_pt+el_ener_pt
+   entr_pt=entr_pt+el_entr_pt
    ce_pt=ce_pt+el_ce_pt
    cv_pt=ce_pt
 ELSE
+   el_free_ener_pt=0.0_DP
+   el_ener_pt=0.0_DP
+   el_entr_pt=0.0_DP
    el_ce_pt=0.0_DP
 ENDIF
-
 !
 !  If requested interpolate the empirical part and add it
 !  to the vibrational one
@@ -1338,7 +1355,8 @@ SUBROUTINE write_anhar_p()
 USE kinds,          ONLY : DP
 USE temperature,    ONLY : ntemp, temp, itemp300
 USE anharmonic_pt,  ONLY : vmin_pt, emin_pt, beta_pt, b0_pt, b01_pt, &
-                           b02_pt, ce_pt, cp_pt, gamma_pt, b0_s_pt
+                           b02_pt, ce_pt, cp_pt, gamma_pt, b0_s_pt,  &
+                           free_ener_pt, ener_pt, entr_pt
 USE anharmonic,     ONLY : noelcvg  
 USE control_eldos,  ONLY : lel_free_energy
 USE data_files,     ONLY : flanhar
@@ -1413,6 +1431,15 @@ DO ipressp=1,npress_plot
 
    CALL write_gamma_anharm(temp, gamma_pt(:,ipressp), ce_pt(:,ipressp), &
               beta_pt(:,ipressp), b0_pt(:,ipressp), ntemp, filename)
+!
+!   here all the interpolated harmonic quantities
+!
+   filename="anhar_files/"//TRIM(flanhar)//'.therm_press'
+   CALL add_value(filename, press(ipress))
+   CALL write_thermo_anharm(temp, ntemp, e0_t, ener_pt(:,ipressp), &
+             free_ener_pt(:,ipressp), entr_pt(:,ipressp), cv_pt(:,ipressp), &
+             filename)
+
 ENDDO
 
 RETURN

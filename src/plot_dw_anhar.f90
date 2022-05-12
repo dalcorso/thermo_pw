@@ -1,5 +1,6 @@
 !
 ! Copyright (C) 2018 Cristiano Malica
+!               2022 Andrea Dal Corso
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -16,6 +17,7 @@ USE kinds,            ONLY : DP
 USE constants,        ONLY : rydberg_si, avogadro
 USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
 USE control_thermo,   ONLY : ltherm_dos, ltherm_freq
+USE control_pressure, ONLY : npress_plot, ipress_plot, press
 USE postscript_files, ONLY : flpsanhar
 USE gnuplot,          ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
                              gnuplot_ylabel, &
@@ -23,13 +25,16 @@ USE gnuplot,          ONLY : gnuplot_start, gnuplot_end, gnuplot_write_header, &
                              gnuplot_write_file_mul_data, &
                              gnuplot_set_fact
 USE data_files,      ONLY : flanhar 
+USE color_mod,       ONLY : color
 USE temperature,     ONLY : tmin, tmax
 USE mp_images,       ONLY : root_image, my_image_id
 USE io_global,       ONLY : ionode
 
 IMPLICIT NONE
 INTEGER :: ierr, system
-CHARACTER(LEN=256) :: gnu_filename, filename, filetherm, filepstherm
+CHARACTER(LEN=256) :: gnu_filename, filename, filename1, filetherm, filepstherm
+LOGICAL :: first_step, last_step
+INTEGER :: istep, ipressp, ipress
 REAL(DP) :: factor
 
 IF ( my_image_id /= root_image ) RETURN
@@ -58,7 +63,7 @@ ELSE
 ENDIF
 
 CALL gnuplot_xlabel('T (K)', .FALSE.)
-CALL gnuplot_ylabel('Vibrational energy (kJ / (N mol))',.FALSE.)
+CALL gnuplot_ylabel('Thermal Energy (kJ / (N mol))',.FALSE.)
 factor = rydberg_si*avogadro / 1.D3
 CALL gnuplot_set_fact(factor, .FALSE.)
 
@@ -68,6 +73,29 @@ IF (ltherm_dos) &
 IF (ltherm_freq) &
    CALL gnuplot_write_file_mul_data(filename,1,2,'color_blue', &
                                                 .NOT.ltherm_dos,.TRUE.,.FALSE.)
+!
+! ADC addition
+!
+istep=0
+factor = rydberg_si*avogadro/1.D3 
+DO ipressp=1,npress_plot
+   first_step=(ipressp==1)
+   last_step=(ipressp==npress_plot)
+   ipress=ipress_plot(ipressp)
+   istep=MOD(istep,8)+1
+   filename1="anhar_files/"//TRIM(flanhar)//'.therm_press'
+   CALL add_value(filename1,press(ipress))
+   IF (first_step) THEN
+      CALL gnuplot_xlabel('T (K)',.FALSE.)
+      CALL gnuplot_set_fact(factor,.FALSE.)
+      CALL gnuplot_ylabel('Thermal Energy (kJ / (N mol))',.FALSE.)
+   ENDIF
+   CALL gnuplot_write_file_mul_data(filename1,1,2,color(istep),first_step, &
+                                                        last_step, .FALSE.)
+ENDDO
+!
+! End ADC addition
+!
 
 CALL gnuplot_ylabel('Vibrational free energy (kJ / (N mol))', .FALSE.)
 IF (ltherm_dos) &
@@ -76,7 +104,30 @@ IF (ltherm_dos) &
 IF (ltherm_freq) &
    CALL gnuplot_write_file_mul_data(filename,1,3,'color_blue',&
                                                 .NOT.ltherm_dos,.TRUE.,.FALSE.)
-
+!
+! ADC addition
+!
+istep=0
+factor = rydberg_si*avogadro/1.D3 
+DO ipressp=1,npress_plot
+   first_step=(ipressp==1)
+   last_step=(ipressp==npress_plot)
+   ipress=ipress_plot(ipressp)
+   istep=MOD(istep,8)+1
+   filename1="anhar_files/"//TRIM(flanhar)//'.therm_press'
+   CALL add_value(filename1,press(ipress))
+   IF (first_step) THEN
+      CALL gnuplot_xlabel('T (K)',.FALSE.)
+      CALL gnuplot_set_fact(factor,.FALSE.)
+      CALL gnuplot_ylabel('Thermal Free Energy (kJ / (N mol))',.FALSE.)
+   ENDIF
+   CALL gnuplot_write_file_mul_data(filename1,1,3,color(istep),first_step, &
+                                                        last_step, .FALSE.)
+ENDDO
+!
+! End ADC addition
+!
+ 
 CALL gnuplot_set_fact(factor*1.D3, .FALSE.)
 CALL gnuplot_ylabel('Entropy (J / K / (N mol))',.FALSE.)
 IF (ltherm_dos) &
@@ -85,7 +136,29 @@ IF (ltherm_dos) &
 IF (ltherm_freq) &
    CALL gnuplot_write_file_mul_data(filename,1,4,'color_blue',.NOT.ltherm_dos,&
                                                              .TRUE.,.FALSE.)
-
+!
+! ADC addition
+!
+istep=0
+factor = rydberg_si*avogadro 
+DO ipressp=1,npress_plot
+   first_step=(ipressp==1)
+   last_step=(ipressp==npress_plot)
+   ipress=ipress_plot(ipressp)
+   istep=MOD(istep,8)+1
+   filename1="anhar_files/"//TRIM(flanhar)//'.therm_press'
+   CALL add_value(filename1,press(ipress))
+   IF (first_step) THEN
+      CALL gnuplot_xlabel('T (K)',.FALSE.)
+      CALL gnuplot_set_fact(factor,.FALSE.)
+      CALL gnuplot_ylabel('Entropy (J / K / (N mol))',.FALSE.)
+   ENDIF
+   CALL gnuplot_write_file_mul_data(filename1,1,4,color(istep),first_step, &
+                                                        last_step, .FALSE.)
+ENDDO
+!
+! End ADC addition
+!
 CALL gnuplot_ylabel('Heat capacity C_v (J / K / (N mol))',.FALSE.)
 IF (ltherm_dos) &
    CALL gnuplot_write_file_mul_data(filetherm,1,5,'color_red',.TRUE.,&
