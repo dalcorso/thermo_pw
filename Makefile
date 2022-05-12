@@ -27,7 +27,7 @@ join_qe:
 	if test -f ./main_CMakeLists.txt ; then mv ../CMakeLists.txt \
           ./CMakeLists.txt_qe ; mv ./main_CMakeLists.txt ../CMakeLists.txt ; fi
 	if test -f ./lmdif.f90 ; then mv ../Modules/lmdif.f90 \
-           ./lmdif.90_qe ; mv ./lmdif.f90 ../Modules ; fi
+           ./lmdif.f90_qe ; mv ./lmdif.f90 ../Modules ; fi
 
 leave_qe:
 	if test -f ./Makefile_qe ; then mv ../Makefile ./main_Makefile ; \
@@ -40,7 +40,7 @@ leave_qe:
 	if test -f ./CMakeLists.txt_qe ; then mv ../CMakeLists.txt \
            ./main_CMakeLists.txt ; \
            mv ./CMakeLists.txt_qe ../CMakeLists.txt ; fi
-	if test -f lmdif.f90_qe ; then mv ../Modules/lmdif.f90 \
+	if test -f ./lmdif.f90_qe ; then mv ../Modules/lmdif.f90 \
            ./lmdif.f90 ; \
            mv ./lmdif.f90_qe ../Modules ; fi
 
