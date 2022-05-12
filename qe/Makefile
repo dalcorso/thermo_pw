@@ -62,6 +62,7 @@ find_irrep_tpw.o \
 find_info_group.o \
 find_inverse_s.o \
 find_mode_sym.o \
+float_to_char.o \
 h_pcg_step.o \
 initialize_ph_tpw.o \
 init_representations_tpw.o \

@@ -303,6 +303,13 @@ MODULE emp_anharmonic
   REAL(DP), ALLOCATABLE :: emp_entropy_t(:) !  empirical entropy
   REAL(DP), ALLOCATABLE :: emp_ce_t(:) ! empirical heat capacity
 !
+!  Interpolated empirical quantities
+!
+  REAL(DP), ALLOCATABLE :: emp_energyf_t(:) ! empirical energy 
+  REAL(DP), ALLOCATABLE :: emp_free_energyf_t(:) ! empirical free energy
+  REAL(DP), ALLOCATABLE :: emp_entropyf_t(:) !  empirical entropy
+  REAL(DP), ALLOCATABLE :: emp_cef_t(:) ! empirical heat capacity
+!
 !  Empirical quantities interpolated at the temperature dependent geometry 
 !  at selected pressures 
 !

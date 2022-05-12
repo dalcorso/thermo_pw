@@ -1173,14 +1173,15 @@ SUBROUTINE interpolate_harmonic_pt()
 !   is interpolated.
 !
 USE kinds,          ONLY : DP
-USE thermodynamics, ONLY : ph_ce
-USE el_thermodynamics, ONLY : el_ce
+USE thermodynamics, ONLY : ph_ener, ph_free_ener, ph_entropy, ph_ce
+USE el_thermodynamics, ONLY : el_ener, el_free_ener, el_entr, el_ce
 USE control_emp_free_ener, ONLY : add_empirical, emp_ener, emp_ce, emp_entr
-USE el_anharmonic,  ONLY : el_ce_pt
+USE el_anharmonic,  ONLY : el_ener_pt, el_free_ener_pt, el_entr_pt, el_ce_pt
 USE emp_anharmonic, ONLY : emp_free_ener_pt, emp_ener_pt, emp_ce_pt, &
                            emp_entr_pt
 USE anharmonic,     ONLY : celldm_t ! this is not used yet, must become pt
-USE anharmonic_pt,  ONLY : vmin_pt, cv_pt, ce_pt
+USE anharmonic_pt,  ONLY : vmin_pt, ener_pt, free_ener_pt, entr_pt, cv_pt, &
+                           ce_pt
 USE control_eldos,  ONLY : lel_free_energy
 USE control_pressure, ONLY : npress_plot
 
@@ -1355,9 +1356,9 @@ SUBROUTINE write_anhar_p()
 USE kinds,          ONLY : DP
 USE temperature,    ONLY : ntemp, temp, itemp300
 USE anharmonic_pt,  ONLY : vmin_pt, emin_pt, beta_pt, b0_pt, b01_pt, &
-                           b02_pt, ce_pt, cp_pt, gamma_pt, b0_s_pt,  &
+                           b02_pt, cv_pt, ce_pt, cp_pt, gamma_pt, b0_s_pt,  &
                            free_ener_pt, ener_pt, entr_pt
-USE anharmonic,     ONLY : noelcvg  
+USE anharmonic,     ONLY : noelcvg, e0_t  
 USE control_eldos,  ONLY : lel_free_energy
 USE data_files,     ONLY : flanhar
 USE control_pressure, ONLY : press, ipress_plot, npress_plot
