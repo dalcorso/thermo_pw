@@ -2565,6 +2565,17 @@ poly-crystalline averages. It uses the \thermo\ library so the output is the
 same. 
 For an example of its use see \texttt{tools\_input/elastic.in}.
 
+\item \texttt{emp\_f.x} reads a set of parameters for the construction of
+the Helmholtz free energy of a solid as a function of volume and 
+temperature and prints the thermodynamic quantities. Presently it 
+supports the models of Dorogokupets, Litasov, Mie-Gruneisen-Debye, 
+and high temperature Birch-Murnaghan equations (still in experimental form).
+
+\item \texttt{emp\_g.x} reads a set of parameters for the construction of
+the Gibbs free energy of a solid as a function of pressure and temperature and
+prints the thermodynamic quantities. Presently it supports only the model
+of Gustafson for tungsten.
+
 \item \texttt{eos\_test.x} reads the parameters of an equation of state,
 and optionally the coefficients of a polynomial. Produces in output
 a file with the energy, the pressure, the bulk modulus, and its first
