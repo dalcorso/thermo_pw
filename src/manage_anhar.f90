@@ -208,7 +208,10 @@ CALL write_grun_anharmonic()
 !   now plot all the computed quantities
 !
 CALL manage_plot_anhar()
-
+!
+!   summarize the main anharmonic quantities of a solid
+!
+CALL summarize_anhar()
 RETURN
 END SUBROUTINE manage_anhar
 
