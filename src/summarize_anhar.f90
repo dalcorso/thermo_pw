@@ -10,7 +10,7 @@ SUBROUTINE summarize_anhar()
 !---------------------------------------------------------------------
 !
 !  This routine writes on output a few thermodynamic quantities
-!  at T=0 K, at the lower and at the higher available temperatures
+!  at T=0 K, at the lower and at the higher available temperatures 
 !  and at the temperature closer to T=300 K.
 !
 USE kinds,                 ONLY : DP
@@ -71,11 +71,15 @@ IF (ieos==2) WRITE(stdout,'(5x,"d^2B_0/dp^2 =",f9.5," 1/kbar")') &
 
 WRITE(stdout,'(5x,"beta =",f19.8," x10^-6 1/K")') beta_t(itemp300)*1.D6
 WRITE(stdout,'(5x,"d beta/dT=",f15.8," x10^-8 1/K^2")') dbetadt*1.D8
+WRITE(stdout,'(5x,"d beta/dp=",f15.8," x10^-7 1/kbar/K")') &
+                                           dbtdt*1.D7/b0_t(itemp300)**2
 WRITE(stdout,'(5x,"B_s =",f17.5," kbar")') b0_s(itemp300)
 WRITE(stdout,'(5x,"d B_s/dT =",f12.5," kbar / K")') dbsdt
 WRITE(stdout,'(5x,"Cv =",f21.8," J / K / mol")') cv_t(itemp300) * cv_fact
 WRITE(stdout,'(5x,"Cp =",f21.8," J / K / mol")') cp_t(itemp300) * cv_fact
 WRITE(stdout,'(5x,"gamma =",f16.6)') gamma_t(itemp300)
+WRITE(stdout,'(5x,"delta_T =",f14.6)') -dbtdt/beta_t(itemp300)/b0_t(itemp300)
+WRITE(stdout,'(5x,"delta_S =",f14.6)') -dbsdt/beta_t(itemp300)/b0_s(itemp300)
 !
 !  The maximum calculated temperature
 !
@@ -95,11 +99,15 @@ IF (ieos==2) WRITE(stdout,'(5x,"d^2B_0/dp^2 =",f9.5," 1/kbar")') b02_t(ntemp-2)
 
 WRITE(stdout,'(5x,"beta =",f19.8," x10^-6 1/K")') beta_t(ntemp-2)*1.D6
 WRITE(stdout,'(5x,"d beta/dT=",f15.8," x10^-8 1/K^2")') dbetadt*1.D8
+WRITE(stdout,'(5x,"d beta/dp=",f15.8," x10^-7 1/kbar/K")') &
+                                           dbtdt*1.D7/b0_t(ntemp-2)**2
 WRITE(stdout,'(5x,"B_s =",f17.5," kbar")') b0_s(ntemp-2)
 WRITE(stdout,'(5x,"d B_s/dT =",f12.5," kbar / K")') dbsdt
 WRITE(stdout,'(5x,"Cv =",f21.8," J / K / mol")') cv_t(ntemp-2) * cv_fact
 WRITE(stdout,'(5x,"Cp =",f21.8," J / K / mol")') cp_t(ntemp-2) * cv_fact
 WRITE(stdout,'(5x,"gamma =",f16.6)') gamma_t(ntemp-2)
+WRITE(stdout,'(5x,"delta_T =",f14.6)') -dbtdt/beta_t(ntemp-2)/b0_t(ntemp-2)
+WRITE(stdout,'(5x,"delta_S =",f14.6)') -dbsdt/beta_t(ntemp-2)/b0_s(ntemp-2)
 
 RETURN
 END SUBROUTINE summarize_anhar

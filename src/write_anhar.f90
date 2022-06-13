@@ -1864,11 +1864,13 @@ SUBROUTINE anhar_ev_t()
 !
 USE kinds,          ONLY : DP
 USE constants,      ONLY : ry_kbar
+USE thermo_mod,     ONLY : celldm_geo, central_geo, omega_geo
 USE control_mur,    ONLY : vmin, b0, b01, b02, emin
 USE control_ev,     ONLY : ieos
 USE eos,            ONLY : eos_bulk_pol, eos_energy_pol
 USE control_quartic_energy, ONLY : poly_degree_ph
-USE anharmonic,     ONLY : vmin_t, b0_t, b01_t, b02_t, free_e_min_t, a_t
+USE anharmonic,     ONLY : vmin_t, b0_t, b01_t, b02_t, free_e_min_t, a_t, &
+                           celldm_t
 USE temperature,    ONLY : ntemp
 USE mp,             ONLY : mp_sum
 USE mp_world,       ONLY : world_comm
@@ -1884,6 +1886,7 @@ b0_t=0.0_DP
 b01_t=0.0_DP
 b02_t=0.0_DP
 free_e_min_t=0.0_DP
+celldm_t=0.0_DP
 
 CALL divide(world_comm, ntemp, startt, lastt)
 
@@ -1899,6 +1902,8 @@ DO itemp=startt,lastt
    b01_t(itemp)=aux1 
    b02_t(itemp)=aux2 / ry_kbar
    free_e_min_t(itemp)=emin+ aux3
+   CALL compute_celldm_geo(vm, celldm_t(1,itemp), &
+                   celldm_geo(1,central_geo), omega_geo(central_geo))
 ENDDO
 
 CALL mp_sum(vmin_t, world_comm)
@@ -1906,6 +1911,7 @@ CALL mp_sum(b0_t,   world_comm)
 CALL mp_sum(b01_t,  world_comm)
 CALL mp_sum(b02_t,  world_comm)
 CALL mp_sum(free_e_min_t, world_comm)
+CALL mp_sum(celldm_t, world_comm)
 
 RETURN
 END SUBROUTINE anhar_ev_t

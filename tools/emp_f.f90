@@ -7,9 +7,9 @@
 !
 PROGRAM emp_f
 !
-!   This program thermodynamic properties of W starting from the 
+!   This program computes the thermodynamic properties of W starting from the 
 !   empirical expression of the free energy given in the paper
-!   P.I. Dorogokupets and A.R. Oganov, Phys. Rev. B 75, 024115 (2007).
+!   P.I. Dorogokupets and A.R. Oganov, Phys. Rev. B 75, 024115 (2007),
 !   or those given in the paper
 !   K.D. Litasov et al. Journ. of Appl. Phys. 113, 093507 (2013).
 !   The parameters for the different elements are given in input.
