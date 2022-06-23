@@ -60,6 +60,8 @@ patches given below.</p>
 <code>7d344d0</code> of 18/01/2022.
 * Correct as in the commit of 04/03/2022 if you have problem with
 magnetic systems.
+* Problems with spin-orbit. Correct the routine PW/src/v_of_rho.f90 
+adding the instruction v(:,:)=0.0_DP after line 208 and 476 and recompile.
 
 **Patches for thermo_pw.1.6.0**:
 <br>
@@ -72,6 +74,8 @@ set_pawsetup and radial_grid_copy to have the atomic
 paw tests working again in QE6.8.
 * At line 131 of thermo_pw/qe/pheqscf.f90 remove tpiba2 to have example21
 working again.
+* At line 723 of upflib/write_upf_new.f90 of QE7.0 change PP_AEWFC_rel with
+PP_AEWFC_REL. See also the FAQ 34.
 
 **Patches for thermo_pw.1.5.0**:
 <br>
@@ -85,7 +89,7 @@ PP_AEWFC_REL.
 restoring the old default diago_david_ndim=4.
 * At line 170 of atomic/src/import_upf.f90 exchange the calls to
 set_pawsetup and radial_grid_copy to have the atomic
-paw tests working again in QE6.7.
+paw tests working again in QE6.7. First call radial_grid_copy.
 * At line 131 of thermo_pw/qe/pheqscf.f90 remove tpiba2 to have example21
 working again.
 
@@ -104,7 +108,7 @@ PP_AEWFC_REL.
 restoring the old default diago_david_ndim=4.
 * At line 170 of atomic/src/import_upf.f90 exchange the calls to
 set_pawsetup and radial_grid_copy to have the atomic
-paw tests working again in QE6.6.
+paw tests working again in QE6.6. First call radial_grid_copy.
 * At line 131 of thermo_pw/qe/pheqscf.f90 remove tpiba2 to have example21
 working again.
 
@@ -125,7 +129,7 @@ of this file and recompile.
 the old default diago_david_ndim=4.
 * At line 170 of atomic/src/import_upf.f90 exchange the calls to
 set_pawsetup and radial_grid_copy to have the atomic
-paw tests working again in QE6.6.
+paw tests working again in QE6.6. First call radial_grid_copy.
 * At line 131 of thermo_pw/qe/pheqscf.f90 remove tpiba2 to have example21
 working again.
 
@@ -138,7 +142,7 @@ file PW/src/pw_restart_new.f90 of QE6.5. Substitute angle1, angle2,
 starting_magnetization with starting_magnetization, angle1, angle2.
 * At line 170 of atomic/src/import_upf.f90 exchange the calls to 
 set_pawsetup and radial_grid_copy to have the atomic
-paw tests working again in QE6.5.
+paw tests working again in QE6.5. First call radial_grid_copy.
 
 **Patches for thermo_pw.1.2.1**:
 <br>
@@ -552,4 +556,24 @@ the elastic constants of your system.
 * After writing <code>make join_qe</code> and returning to QE root directory
 you need to rerun <code>./configure</code> before <code>make thermo_pw</code>.
 (Thanks to H. Zhao for reporting the problem).
-
+33. <code>Thermo_pw</code> has problems with fully relativistic PAW. 
+* Before reporting such problems check the correct matching of the 
+PP_AEWFC_REL tag in the UPF file and in the upf reading routine. 
+Starting from version 6.5 of QE and until version 6.7 the xml tag for 
+the small component of the all electron partial waves has been called 
+PP_AEWFC_rel, while in previous versions of QE it was called PP_AEWFC_REL. 
+As such the fully relativistic
+pseudopotentials created with a version of QE older than 6.5 (as many of 
+the PPs distributed in the QE site) were no more read correctly. The code
+does not stop and most of the time produces only slightly uncorrect results 
+expecially in the PP test. To read a PP that contains the 
+PP_AEWFC_REL tag you can change the file upflib/read_upf_new.f90 and 
+upflib/write_upf_new.f90 searching
+for the string PP_AEWFC_rel in both files and changing it into PP_AEWFC_REL.
+In QE6.8, QE7.0, and QE7.1 the routine upflib/read_upf_new.f90 
+has been corrected and these versions of QE read correctly UPF PPs with the tag
+PP_AEWFC_REL, but unfortunately continue to write UPF PP with the tag 
+PP_AEWFC_rel. The routine upflib/write_upf_new.f90 must be changed to 
+make the code consistent and to read correctly the pseudopotential generated
+by the same version of QE. For versions QE7.0 apply also the correction to
+PW/src/v_of_rho.f90 described above.
