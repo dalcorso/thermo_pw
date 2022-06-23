@@ -61,7 +61,8 @@ patches given below.</p>
 * Correct as in the commit of 04/03/2022 if you have problem with
 magnetic systems.
 * Problems with spin-orbit. Correct the routine PW/src/v_of_rho.f90 
-adding the instruction v(:,:)=0.0_DP after line 208 and 476 and recompile.
+adding the instruction v(:,:)=0.0_DP after line 208 and after line
+476 and recompile.
 
 **Patches for thermo_pw.1.6.0**:
 <br>
@@ -575,5 +576,5 @@ has been corrected and these versions of QE read correctly UPF PPs with the tag
 PP_AEWFC_REL, but unfortunately continue to write UPF PP with the tag 
 PP_AEWFC_rel. The routine upflib/write_upf_new.f90 must be changed to 
 make the code consistent and to read correctly the pseudopotential generated
-by the same version of QE. For versions QE7.0 apply also the correction to
+by the same version of QE. For version QE7.0 apply also the correction to
 PW/src/v_of_rho.f90 described above.
