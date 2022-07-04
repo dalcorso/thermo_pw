@@ -769,25 +769,34 @@ add_custom_target(tpw_tools
         qe_tpw_lib
         qe_tpw_qe
         qe_tpw
-        qe_tpw_space_groups_exe
-        qe_tpw_crystal_point_group_exe
-        qe_tpw_mag_point_group_exe
-        qe_tpw_units_exe
-        qe_tpw_hex_trig_exe
+        qe_tpw_average_grun_exe
         qe_tpw_bravais_lattices_exe
-        qe_tpw_kovalev_exe
-        qe_tpw_supercell_exe
-        qe_tpw_translate_exe
+        qe_tpw_change_dynmat_name_exe
+        qe_tpw_change_e_name_exe
+        qe_tpw_change_tel_name_exe
+        qe_tpw_crystal_point_group_exe
+        qe_tpw_debye_exe
         qe_tpw_elastic_exe
-        qe_tpw_plot_sur_states_exe
+        qe_tpw_emp_f_exe
+        qe_tpw_emp_g_exe
+        qe_tpw_epsilon_tpw_exe
+        qe_tpw_eos_test_exe
         qe_tpw_gener_2d_slab_exe
         qe_tpw_gener_3d_slab_exe
         qe_tpw_gener_nanowire_exe
-        qe_tpw_debye_exe
-        qe_tpw_rotate_tensor_exe
-        qe_tpw_test_colors_exe
-        qe_tpw_epsilon_tpw_exe
+        qe_tpw_hex_trig_exe
+        qe_tpw_kovalev_exe
+        qe_tpw_mag_point_group_exe
+        qe_tpw_merge_interp_exe
+        qe_tpw_optical_exe
         qe_tpw_pdec_exe
+        qe_tpw_plot_sur_states_exe
+        qe_tpw_rotate_tensor_exe
+        qe_tpw_space_groups_exe
+        qe_tpw_supercell_exe
+        qe_tpw_test_colors_exe
+        qe_tpw_translate_exe
+        qe_tpw_units_exe
     COMMENT
         "Tools provided with the thermo_pw package")
 

@@ -19,6 +19,7 @@ set(src_tpw_lib
     lib/linear_solvers.f90
     lib/linear_surfaces.f90
     lib/magnetic_point_group.f90
+    lib/model_free_energy.f90
     lib/mp_asyn.f90
     lib/nye.f90
     lib/optical.f90
@@ -33,6 +34,7 @@ set(src_tpw_lib
     lib/rotate.f90
     lib/space_groups.f90
     lib/strain.f90
+    lib/thermodynamics.f90
     lib/vector.f90
     lib/voigt.f90
     lib/xrdp.f90)
@@ -92,7 +94,6 @@ set(src_tpw_qe
     qe/dveqpsi_us.f90
     qe/dveqpsi_us_only.f90
     qe/dvkb3_tpw.f90
-    qe/dvpsi_e_tpw.f90
     qe/dvqpsi_us_tpw.f90
     qe/dyndiag.f90
     qe/ef_shift.f90
@@ -103,6 +104,7 @@ set(src_tpw_qe
     qe/find_inverse_s.f90
     qe/find_irrep_tpw.f90
     qe/find_mode_sym.f90
+    qe/float_to_char.f90
     qe/h_pcg_step.f90
     qe/init_representations_tpw.f90
     qe/initialize_ph_tpw.f90
@@ -230,6 +232,7 @@ set(src_tpw
     src/dos_sub.f90
     src/dynmatrix_tpw.f90
     src/elastic_constants_t.f90
+    src/empirical_free_energy.f90
     src/ev_sub.f90
     src/ev_mod.f90
     src/evaluate_celldm.f90
@@ -240,7 +243,6 @@ set(src_tpw
     src/find_representations_mode_q.f90
     src/find_symmetry.f90
     src/fit_frequencies.f90
-    src/float_to_char.f90
     src/gen_qpoints.f90
     src/generalized_phdos.f90
     src/generate_k_along_lines_kz.f90
@@ -262,6 +264,7 @@ set(src_tpw
     src/manage_elastic_cons_qha.f90
     src/manage_elastic_cons_qha_2.f90
     src/manage_energy_minimum.f90
+    src/manage_hot_electrons.f90
     src/manage_ph.f90
     src/manage_ph_all_geometries.f90
     src/manage_ph_postproc.f90
@@ -325,6 +328,7 @@ set(src_tpw
     src/set_work_for_elastic_const.f90
     src/simple_nonanal.f90
     src/simple_plot.f90
+    src/summarize_anhar.f90
     src/surface.f90
     src/sym_band_sub.f90
     src/thermo_mod.f90
@@ -698,6 +702,121 @@ target_link_libraries(qe_tpw_pdec_exe
         qe_tpw_lib
         qe_modules)
 
+
+###########################################################
+# average_grun.x
+###########################################################
+set(src_average_grun_x tools/average_grun.f90)
+qe_enable_cuda_fortran("${src_average_grun_x}")
+qe_add_executable(qe_tpw_average_grun_exe ${src_average_grun_x})
+set_target_properties(qe_tpw_average_grun_exe
+    PROPERTIES
+        OUTPUT_NAME average_grun.x)
+target_link_libraries(qe_tpw_average_grun_exe
+    PRIVATE
+        qe_tpw_lib
+        qe_modules)
+
+###########################################################
+# change_dynmat_name.x
+###########################################################
+set(src_change_dynmat_name_x tools/change_dynmat_name.f90)
+qe_enable_cuda_fortran("${src_change_dynmat_name_x}")
+qe_add_executable(qe_tpw_change_dynmat_name_exe ${src_change_dynmat_name_x})
+set_target_properties(qe_tpw_change_dynmat_name_exe
+    PROPERTIES
+        OUTPUT_NAME change_dynmat_name.x)
+target_link_libraries(qe_tpw_change_dynmat_name_exe
+    PRIVATE
+        qe_tpw_lib
+        qe_modules)
+
+###########################################################
+# change_e_name.x
+###########################################################
+set(src_change_e_name_x tools/change_e_name.f90)
+qe_enable_cuda_fortran("${src_change_e_name_x}")
+qe_add_executable(qe_tpw_change_e_name_exe ${src_change_e_name_x})
+set_target_properties(qe_tpw_change_e_name_exe
+    PROPERTIES
+        OUTPUT_NAME change_e_name.x)
+target_link_libraries(qe_tpw_change_e_name_exe
+    PRIVATE
+        qe_tpw_lib
+        qe_modules)
+
+###########################################################
+# change_tel_name.x
+###########################################################
+set(src_change_tel_name_x tools/change_tel_name.f90)
+qe_enable_cuda_fortran("${src_change_tel_name_x}")
+qe_add_executable(qe_tpw_change_tel_name_exe ${src_change_tel_name_x})
+set_target_properties(qe_tpw_change_tel_name_exe
+    PROPERTIES
+        OUTPUT_NAME change_tel_name.x)
+target_link_libraries(qe_tpw_change_tel_name_exe
+    PRIVATE
+        qe_tpw_lib
+        qe_modules)
+
+###########################################################
+# emp_f.x
+###########################################################
+set(src_emp_f_x tools/emp_f.f90)
+qe_enable_cuda_fortran("${src_emp_f_x}")
+qe_add_executable(qe_tpw_emp_f_exe ${src_emp_f_x})
+set_target_properties(qe_tpw_emp_f_exe
+    PROPERTIES
+        OUTPUT_NAME emp_f.x)
+target_link_libraries(qe_tpw_emp_f_exe
+    PRIVATE
+        qe_tpw_lib
+        qe_tpw_qe
+        qe_modules)
+
+###########################################################
+# emp_g.x
+###########################################################
+set(src_emp_g_x tools/emp_g.f90)
+qe_enable_cuda_fortran("${src_emp_g_x}")
+qe_add_executable(qe_tpw_emp_g_exe ${src_emp_g_x})
+set_target_properties(qe_tpw_emp_g_exe
+    PROPERTIES
+        OUTPUT_NAME emp_g.x)
+target_link_libraries(qe_tpw_emp_g_exe
+    PRIVATE
+        qe_tpw_lib
+        qe_tpw_qe
+        qe_modules)
+
+###########################################################
+# eos_test.x
+###########################################################
+set(src_eos_test_x tools/eos_test.f90)
+qe_enable_cuda_fortran("${src_eos_test_x}")
+qe_add_executable(qe_tpw_eos_test_exe ${src_eos_test_x})
+set_target_properties(qe_tpw_eos_test_exe
+    PROPERTIES
+        OUTPUT_NAME eos_test.x)
+target_link_libraries(qe_tpw_eos_test_exe
+    PRIVATE
+        qe_tpw_lib
+        qe_modules)
+
+###########################################################
+# merge_interp.x
+###########################################################
+set(src_merge_interp_x tools/merge_interp.f90)
+qe_enable_cuda_fortran("${src_merge_interp_x}")
+qe_add_executable(qe_tpw_merge_interp_exe ${src_merge_interp_x})
+set_target_properties(qe_tpw_merge_interp_exe
+    PROPERTIES
+        OUTPUT_NAME merge_interp.x)
+target_link_libraries(qe_tpw_merge_interp_exe
+    PRIVATE
+        qe_tpw_lib
+        qe_modules)
+
 ###########################################################
 
 qe_install_targets(
@@ -705,23 +824,33 @@ qe_install_targets(
     qe_tpw_qe
     qe_tpw
     qe_tpw_exe
-    qe_tpw_space_groups_exe
-    qe_tpw_crystal_point_group_exe
-    qe_tpw_mag_point_group_exe
-    qe_tpw_units_exe
-    qe_tpw_hex_trig_exe
+    qe_tpw_average_grun_exe
     qe_tpw_bravais_lattices_exe
-    qe_tpw_kovalev_exe
-    qe_tpw_supercell_exe
-    qe_tpw_translate_exe
+    qe_tpw_change_dynmat_name_exe
+    qe_tpw_change_e_name_exe
+    qe_tpw_change_tel_name_exe
+    qe_tpw_crystal_point_group_exe
+    qe_tpw_debye_exe
     qe_tpw_elastic_exe
-    qe_tpw_optical_exe
-    qe_tpw_plot_sur_states_exe
+    qe_tpw_emp_f_exe
+    qe_tpw_emp_g_exe
+    qe_tpw_eos_test_exe
+    qe_tpw_epsilon_tpw_exe
     qe_tpw_gener_2d_slab_exe
     qe_tpw_gener_3d_slab_exe
     qe_tpw_gener_nanowire_exe
-    qe_tpw_debye_exe
+    qe_tpw_hex_trig_exe
+    qe_tpw_kovalev_exe
+    qe_tpw_mag_point_group_exe
+    qe_tpw_merge_interp_exe
+    qe_tpw_optical_exe
+    qe_tpw_pdec_exe
+    qe_tpw_plot_sur_states_exe
     qe_tpw_rotate_tensor_exe
+    qe_tpw_supercell_exe
+    qe_tpw_space_groups_exe
     qe_tpw_test_colors_exe
-    qe_tpw_epsilon_tpw_exe
-    qe_tpw_pdec_exe)
+    qe_tpw_translate_exe
+    qe_tpw_units_exe)
+
+
