@@ -94,9 +94,10 @@ thermodynamic anharmonic properties.</p>
 
 <p align="justify">The following works contain some calculations made by <code>thermo_pw</code>:</p>
 <br>
-6. C. Malica and A. Dal Corso
+6. C. Malica and A. Dal Corso,
 Finite-temperature atomic relaxations: Effect on the temperature-dependent C<sub>44</sub> elastic constants of Si and BAs,
-Jour. Chem. Phys. <B>156</B>, 194111 (2022). 
+<a href="https://doi.org/10.1063/5.0093376">
+Jour. Chem. Phys. <B>156</B>, 194111 (2022)</a>. 
 <br>
 <br>
 5. C. Malica,
