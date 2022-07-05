@@ -11,8 +11,8 @@ set(src_tpw_lib
     lib/eldos_module.f90
     lib/eos.f90
     lib/freecad.f90
-    lib/gnuplot.f90
     lib/gnuplot_color.f90
+    lib/gnuplot.f90
     lib/isoentropic.f90
     lib/latgen_2d.f90
     lib/lattices.f90
@@ -23,8 +23,8 @@ set(src_tpw_lib
     lib/mp_asyn.f90
     lib/nye.f90
     lib/optical.f90
-    lib/ph_freq_module.f90
     lib/phdos_module.f90
+    lib/ph_freq_module.f90
     lib/piezoelectric_tensor.f90
     lib/point_group.f90
     lib/polyfit.f90
@@ -56,17 +56,17 @@ target_link_libraries(qe_tpw_lib
 set(src_tpw_qe
     qe/add_dkmds_tpw.f90
     qe/add_dvscf_rhs.f90
-    qe/add_zstar_ue_tpw.f90
-    qe/add_zstar_us.f90
     qe/adddvscf_tran.f90
     qe/addnlcc_zstar_eu_us_tpw.f90
+    qe/add_zstar_ue_tpw.f90
+    qe/add_zstar_us.f90
     qe/allocate_cg.f90
     qe/allocate_lanczos.f90
     qe/allocate_phq_tpw.f90
     qe/apply_ac.f90
     qe/apply_trev_r.f90
-    qe/c_bands_tpw.f90
     qe/calc_chi.f90
+    qe/c_bands_tpw.f90
     qe/ccg_psi.f90
     qe/check_bands.f90
     qe/check_initial_geometry.f90
@@ -74,8 +74,8 @@ set(src_tpw_qe
     qe/ch_psi_all_tpw.f90
     qe/clean_all_pw.f90
     qe/collect_grid_files.f90
-    qe/compute_drhous_tpw.f90
     qe/compute_drhous_nc_tpw.f90
+    qe/compute_drhous_tpw.f90
     qe/compute_int3_coeff.f90
     qe/compute_intq.f90
     qe/control_qe.f90
@@ -87,13 +87,13 @@ set(src_tpw_qe
     qe/do_cg_ph.f90
     qe/do_lanczos.f90
     qe/do_lanczos_psh.f90
-    qe/drho_tpw.f90
     qe/drhodvus.f90
-    qe/dv_of_drho_clf.f90
-    qe/dv_of_drho_tran.f90
+    qe/drho_tpw.f90
     qe/dveqpsi_us.f90
     qe/dveqpsi_us_only.f90
     qe/dvkb3_tpw.f90
+    qe/dv_of_drho_clf.f90
+    qe/dv_of_drho_tran.f90
     qe/dvqpsi_us_tpw.f90
     qe/dyndiag.f90
     qe/ef_shift.f90
@@ -106,8 +106,8 @@ set(src_tpw_qe
     qe/find_mode_sym.f90
     qe/float_to_char.f90
     qe/h_pcg_step.f90
-    qe/init_representations_tpw.f90
     qe/initialize_ph_tpw.f90
+    qe/init_representations_tpw.f90
     qe/irrek.f90
     qe/kpoint_grid.f90
     qe/lanczos_write_restart.f90
@@ -128,9 +128,9 @@ set(src_tpw_qe
     qe/phescf_tpw.f90
     qe/phq_init_tpw.f90
     qe/phq_readin_tpw.f90
+    qe/phqscf_tpw.f90
     qe/phq_setup_tpw.f90
     qe/phq_summary_tpw.f90
-    qe/phqscf_tpw.f90
     qe/polarizc.f90
     qe/prepare_q_tpw.f90
     qe/prepare_sym_analysis.f90
@@ -151,16 +151,16 @@ set(src_tpw_qe
     qe/set_fxc_tran.f90
     qe/set_int3q.f90
     qe/set_intq_nc.f90
-    qe/set_irr_tpw.f90
     qe/set_irr_sym_tpw.f90
+    qe/set_irr_tpw.f90
     qe/set_kplusq.f90
     qe/set_kplusq_nc.f90
     qe/set_kup_and_kdw.f90
     qe/setup_tpw.f90
-    qe/solve_e_tpw.f90
     qe/solve_e_fpolc.f90
     qe/solve_eq.f90
     qe/solve_eq_tran.f90
+    qe/solve_e_tpw.f90
     qe/solve_linear_system.f90
     qe/solve_linter_tpw.f90
     qe/star_q.f90
@@ -168,13 +168,13 @@ set(src_tpw_qe
     qe/sym_and_write_magnetic_charges.f90
     qe/sym_def.f90
     qe/symmetrize_drho.f90
-    qe/tra_write_zstar.f90
     qe/transform_intq_nc.f90
     qe/transform_intq_so.f90
+    qe/tra_write_zstar.f90
     qe/write_group_info_ph.f90
     qe/write_rec_tpw.f90
-    qe/zstar_eu_tpw.f90
     qe/zstar_eu_loc.f90
+    qe/zstar_eu_tpw.f90
     qe/zstar_eu_us_tpw.f90)
 qe_enable_cuda_fortran("${src_tpw_qe}")
 
@@ -200,9 +200,9 @@ set(src_tpw
     src/addusdens1d_so.f90
     src/adjust_tau.f90
     src/allocate_thermo.f90
-    src/b_factor_reduction.f90
     src/bands_sub.f90
     src/bcast_thermo_input.f90
+    src/b_factor_reduction.f90
     src/check_all_geometries_done.f90
     src/check_dynmat_all_geo_on_file.f90
     src/check_el_cons.f90
@@ -233,19 +233,19 @@ set(src_tpw
     src/dynmatrix_tpw.f90
     src/elastic_constants_t.f90
     src/empirical_free_energy.f90
-    src/ev_sub.f90
-    src/ev_mod.f90
     src/evaluate_celldm.f90
     src/evaluate_vm.f90
+    src/ev_mod.f90
+    src/ev_sub.f90
     src/fast_phq_readin.f90
     src/find_band_sym_proj.f90
     src/find_mode_sym_proj.f90
     src/find_representations_mode_q.f90
     src/find_symmetry.f90
     src/fit_frequencies.f90
-    src/gen_qpoints.f90
     src/generalized_phdos.f90
     src/generate_k_along_lines_kz.f90
+    src/gen_qpoints.f90
     src/initialize_elastic_cons.f90
     src/initialize_thermo_work.f90
     src/interpolate_bfact.f90
@@ -259,14 +259,14 @@ set(src_tpw
     src/manage_anhar_routines.f90
     src/manage_bands.f90
     src/manage_collection.f90
-    src/manage_el_free_energy.f90
     src/manage_elastic_cons.f90
-    src/manage_elastic_cons_qha.f90
     src/manage_elastic_cons_qha_2.f90
+    src/manage_elastic_cons_qha.f90
+    src/manage_el_free_energy.f90
     src/manage_energy_minimum.f90
     src/manage_hot_electrons.f90
-    src/manage_ph.f90
     src/manage_ph_all_geometries.f90
+    src/manage_ph.f90
     src/manage_ph_postproc.f90
     src/manage_ph_run.f90
     src/manage_ph_symmetry.f90
@@ -280,16 +280,17 @@ set(src_tpw
     src/matdyn_sub.f90
     src/plan_avg_sub.f90
     src/plot_2d_bz.f90
-    src/plot_anhar.f90
     src/plot_anhar_anis.f90
+    src/plot_anhar.f90
+    src/plotband_sub.f90
     src/plot_bz.f90
     src/plot_dispersion.f90
     src/plot_dos.f90
     src/plot_dw_anhar.f90
-    src/plot_e_ke.f90
-    src/plot_e_nk.f90
     src/plot_ef.f90
+    src/plot_e_ke.f90
     src/plot_elastic_t.f90
+    src/plot_e_nk.f90
     src/plot_epsilon_omega.f90
     src/plot_formf.f90
     src/plot_geo_p.f90
@@ -301,7 +302,6 @@ set(src_tpw
     src/plot_phdos.f90
     src/plot_thermo.f90
     src/plot_xrdp.f90
-    src/plotband_sub.f90
     src/prepare_do_phonon.f90
     src/print_polarization.f90
     src/proj_band_structure.f90
@@ -309,8 +309,8 @@ set(src_tpw
     src/quadratic_fit.f90
     src/read_elastic_qha.f90
     src/read_minimal_info.f90
-    src/read_state_densities.f90
     src/readmodes.f90
+    src/read_state_densities.f90
     src/run_iwork.f90
     src/run_thermo_asyncronously.f90
     src/save_ph_variables.f90
@@ -332,31 +332,32 @@ set(src_tpw
     src/surface.f90
     src/sym_band_sub.f90
     src/thermo_mod.f90
+    src/thermo_pw.f90
     src/thermo_readin.f90
     src/thermo_setup.f90
     src/thermo_startup.f90
     src/thermo_summary.f90
-    src/write_anhar.f90
     src/write_anhar_anis.f90
     src/write_anhar_aux.f90
+    src/write_anhar.f90
     src/write_anhar_glob.f90
     src/write_e_ke.f90
-    src/write_e_nk.f90
-    src/write_e_omega.f90
-    src/write_el_thermo.f90
     src/write_elastic_qha.f90
     src/write_elastic_t.f90
     src/write_elastic_t_qha.f90
+    src/write_el_thermo.f90
+    src/write_e_nk.f90
+    src/write_e_omega.f90
     src/write_ev_input.f90
     src/write_free_energy.f90
     src/write_gnuplot_energy.f90
-    src/write_gruneisen_band.f90
     src/write_gruneisen_band_anis.f90
+    src/write_gruneisen_band.f90
     src/write_minimum_energy_data.f90
     src/write_mur.f90
     src/write_ph_dispersions.f90
-    src/write_ph_freq.f90
     src/write_phdos.f90
+    src/write_ph_freq.f90
     src/write_quadratic.f90
     src/write_thermo.f90)
 qe_enable_cuda_fortran("${src_tpw}")
@@ -702,7 +703,6 @@ target_link_libraries(qe_tpw_pdec_exe
         qe_tpw_lib
         qe_modules)
 
-
 ###########################################################
 # average_grun.x
 ###########################################################
@@ -819,6 +819,7 @@ target_link_libraries(qe_tpw_merge_interp_exe
 
 ###########################################################
 
+
 qe_install_targets(
     qe_tpw_lib
     qe_tpw_qe
@@ -852,5 +853,3 @@ qe_install_targets(
     qe_tpw_test_colors_exe
     qe_tpw_translate_exe
     qe_tpw_units_exe)
-
-
