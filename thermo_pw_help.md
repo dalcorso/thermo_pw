@@ -5,11 +5,11 @@ working version of the <a href="http://www.quantum-espresso.org/">Quantum
 ESPRESSO (QE)</a> package. <code>Thermo_pw</code> can be downloaded from its 
 <a href="http://dalcorso.github.io/thermo_pw/">main page</a> as 
 a <code>.tar.gz</code> file. The current production version is 
-<code>1.6.1</code> compatible with 
-<code>QE-7.0</code>. The <code>thermo_pw</code> file should be copied
+<code>1.7.1</code> compatible with 
+<code>QE-7.1</code>. The <code>thermo_pw</code> file should be copied
 in the main (QE) directory and unpacked with the command:</p>
 <p align="center">
-<code>tar -xzvf thermo_pw.1.6.1.tar.gz</code>
+<code>tar -xzvf thermo_pw.1.7.1.tar.gz</code>
 </p>
 <p align="justify">This command produces a directory called 
 <code>thermo_pw</code>. To compile the code you need a Fortran compiler, for 
@@ -41,12 +41,12 @@ package. Then you can give the command:</p>
 <code>git clone https://github.com/dalcorso/thermo_pw</code>
 </p>
 <p align="justify"> and you should get a directory called <code>thermo_pw</code> that contains the source code.
-The <code>git</code> version can be used only together with the version of <code>QE</code> reported here: <code>7.0</code>. Please note that sometimes the <code>git</code> version is not working properly and in any case its use is not recommended.</p> 
+The <code>git</code> version can be used only together with the version of <code>QE</code> reported here: <code>7.1</code>. Please note that sometimes the <code>git</code> version is not working properly and in any case its use is not recommended.</p> 
 
 <p align="justify"> Although <code>thermo_pw</code> has been 
 used for several years and can be considered reasonably stable, it remains an 
 experimental code given as it is.
-A version of <code>QE</code> older than <code>7.0</code>
+A version of <code>QE</code> older than <code>7.1</code>
 can still be used with <code>thermo_pw</code> matching carefully the
 versions of <code>thermo_pw</code> and of <code>QE</code> as explained in the
 main <code>thermo_pw</code> page.</p>
@@ -54,6 +54,9 @@ main <code>thermo_pw</code> page.</p>
 <p align="justify"> Before using <code>thermo_pw</code>, please apply the 
 patches given below.</p>
 
+**Patches for thermo_pw.1.7.1**:
+**Patches for thermo_pw.1.7.0**:
+<br>
 **Patches for thermo_pw.1.6.1**:
 <br>
 * There is a problem with the GPU version and metals. Correct as in commit 
@@ -388,7 +391,7 @@ This is not a problem of <code>thermo_pw</code>. In order to compile the
 documentation <code>thermo_pw</code> needs a quite complete 
 <code>latex</code> package. You can find <code>html.sty</code> on
 the web and copy it inside <code>thermo_pw/Doc</code> directory and you
-can install <code>latex2html</code>. Even if you do not solve this problem, 
+can install the package <code>latex2html</code>. Even if you do not solve this problem, 
 <code>thermo_pw.x</code> will be available in the <code>bin</code> directory 
 of QE. Only the documentation will be missing. 
 <br><br>
@@ -577,4 +580,4 @@ PP_AEWFC_REL, but unfortunately continue to write UPF PP with the tag
 PP_AEWFC_rel. The routine upflib/write_upf_new.f90 must be changed to 
 make the code consistent and to read correctly the pseudopotential generated
 by the same version of QE. For version QE7.0 apply also the correction to
-PW/src/v_of_rho.f90 described above.
+PW/src/v_of_rho.f90 described above. 

@@ -1,4 +1,7 @@
+05/07/2022 Version 1.7.0 is now frozen
 New in version 1.7.0
+
+This version is compatible with QE 7.0.
 
 Added a plot of entropy, energy and free energy as a function of 
 temperature for several pressures.

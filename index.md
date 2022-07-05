@@ -1,7 +1,7 @@
-<p align="justify"> Thermo_pw is a set of Fortran drivers for the parallel and/or automatic 
-computation of materials properties using Quantum ESPRESSO (QE) routines 
-as the underlying engine. It provides an alternative organization of the 
-QE work-flow for the most common tasks exploiting, when possible, 
+<p align="justify"> Thermo_pw is a Fortran driver for the parallel and/or automatic 
+computation of materials properties that uses Quantum ESPRESSO (QE) routines 
+as the underlying engine. For the most common tasks, it provides an alternative organization of the 
+QE work-flow exploiting, when possible, 
 an asynchronous image parallelization. Moreover, the code has a set of 
 pre-processing tools to reduce the input information given by the user 
 and a set of 
@@ -9,7 +9,7 @@ post-processing tools to produce plots directly comparable with experiment.</p>
 <p align="justify"> A quick introduction to the <code>thermo_pw</code> code can be found 
 <a href="https://dalcorso.github.io/thermo_pw/thermo_pw_help.html">here</a>,
 a brief tutorial is available <a href="https://people.sissa.it/dalcorso/thermo_pw/tutorial/tutorial.html">here</a>,
-while the user's guide of <code>thermo_pw</code> version <code>1.6.1</code> 
+while the user's guide of <code>thermo_pw</code> version <code>1.7.1</code> 
 can be found <a href="https://people.sissa.it/dalcorso/thermo_pw/user_guide/index.html">here</a>.</p>
 <p align="justify"> Presently there is no reference work for citing <code>thermo_pw</code>. If you want to mention it in your work, you can put a reference to this web page.</p>
 <p align="justify">The following papers describe new
@@ -94,6 +94,11 @@ thermodynamic anharmonic properties.</p>
 
 <p align="justify">The following works contain some calculations made by <code>thermo_pw</code>:</p>
 <br>
+6. C. Malica and A. Dal Corso
+Finite-temperature atomic relaxations: Effect on the temperature-dependent C<sub>44</sub> elastic constants of Si and BAs,
+Jour. Chem. Phys. <B>156</B>, 194111 (2022). 
+<br>
+<br>
 5. C. Malica,
 From ab-initio thermodynamics to quasi-harmonic thermoelastic properties 
 of crystals: A new workflow and selected applications,
@@ -163,6 +168,10 @@ You can also find help in the QE user guide, at the
 in the examples directories.</p>
 
 **Thermo_pw downloads**:
+<br>
+<br>
+- <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.7.0.tar.gz">
+thermo_pw.1.7.0.tar.gz</a>  (released 05-07-2022) compatible with QE-7.0.
 <br>
 <br>
 - <a href="http://people.sissa.it/%7Edalcorso/thermo_pw/thermo_pw.1.6.1.tar.gz">
