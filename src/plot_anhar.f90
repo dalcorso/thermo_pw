@@ -543,13 +543,10 @@ CALL gnuplot_set_fact(1._DP,.FALSE.)
 CALL gnuplot_ylabel('B_S (kbar)',.FALSE.)
 IF (ltherm_dos) &
    CALL gnuplot_write_file_mul_data(filename1,1,3,'color_red',.TRUE.,&
-                                             .FALSE.,.FALSE.)
+                                             .NOT.ltherm_freq,.FALSE.)
 IF (ltherm_freq) &
    CALL gnuplot_write_file_mul_data(filename2,1,3,'color_blue',&
-                                           .NOT.ltherm_dos,.FALSE.,.FALSE.)
-
-CALL gnuplot_write_file_mul_data(filename_aux_grun,1,3,'color_green', &
-                              .NOT.(ltherm_dos.OR.ltherm_freq),.TRUE.,.FALSE.)
+                                           .NOT.ltherm_dos,.TRUE.,.FALSE.)
 !
 !  B_S as a function of temperature, at several pressures
 !
