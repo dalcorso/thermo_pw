@@ -23,7 +23,12 @@ directory and compile <code>thermo_pw</code> with the command:</p>
 <p align="center"><code>
 make thermo_pw
 </code></p>
-<p align="justify"> If you use <code>cmake</code>, the command 
+<p align="justify"> Instead, to use <code>cmake</code>, you 
+create the directory <code>build</code> enter there and give the command:</p>
+<p align="center"><code>
+cmake -DCMAKE_C_COMPILER=c_compiler -DCMAKE_Fortran_COMPILER=fortran_compiler ../
+</code></p>
+<p align="justify"> Then the command 
 <code>make</code> produces also the <code>thermo_pw.x</code> executable.</p>
 <p align="justify"> To run <code>thermo_pw</code> it is useful to have the 
 <a href="http://www.gnuplot.info/">gnuplot</a> package, and to plot 
@@ -55,7 +60,9 @@ main <code>thermo_pw</code> page.</p>
 patches given below.</p>
 
 **Patches for thermo_pw.1.7.1**:
+<br>
 **Patches for thermo_pw.1.7.0**:
+<br>
 <br>
 **Patches for thermo_pw.1.6.1**:
 <br>
