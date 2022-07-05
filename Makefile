@@ -28,9 +28,6 @@ join_qe:
           ./CMakeLists.txt_qe ; mv ./main_CMakeLists.txt ../CMakeLists.txt ; fi
 	if test -f ./QESUB/lmdif.f90 ; then mv ../Modules/lmdif.f90 \
            ./QESUB/lmdif.f90_qe ; mv ./QESUB/lmdif.f90 ../Modules ; fi
-	if test -f ./QESUB/environment_variables ; then mv \
-           ../environment_variables ./QESUB/environment_variables_qe ; \
-           mv ./QESUB/environment_variables ../environment_variables ; fi
 	if test -f ./QESUB/v_of_rho.f90 ; then mv ../PW/src/v_of_rho.f90 \
            ./QESUB/v_of_rho.f90_qe ; \
            mv ./QESUB/v_of_rho.f90 ../PW/src/v_of_rho.f90 ; fi
@@ -51,9 +48,6 @@ leave_qe:
 	if test -f ./QESUB/lmdif.f90_qe ; then mv ../Modules/lmdif.f90 \
            ./QESUB/lmdif.f90 ; \
            mv ./QESUB/lmdif.f90_qe ../Modules/lmdif.f90 ; fi
-	if test -f ./QESUB/environment_variables_qe ; then mv \
-           ../environment_variables ./QESUB/environment_variables ; \
-           mv ./QESUB/environment_variables_qe ../environment_variables ; fi
 	if test -f ./QESUB/v_of_rho.f90_qe ; then mv ../PW/src/v_of_rho.f90 \
            ./QESUB/v_of_rho.f90 ; \
            mv ./QESUB/v_of_rho.f90_qe ../PW/src/v_of_rho.f90 ; fi
