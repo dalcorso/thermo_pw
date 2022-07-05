@@ -194,9 +194,9 @@ REAL(DP) :: a(poly_degree_ph+1), x(ngeo(1)), y(ngeo(1)), aux, aux1, aux2, aux3
                                         b02 * ry_kbar, a, m1)
 
   vmine_t(itemp)=vm
-  b0e_t(itemp)=aux
-  b01e_t(itemp)=aux1
-  b02e_t(itemp)=aux2
+  b0e_t(itemp)=aux * ry_kbar
+  b01e_t(itemp)=aux1 
+  b02e_t(itemp)=aux2 / ry_kbar
   free_e_mine_t(itemp) = emin + aux3
   !
   CALL compute_celldm_geo(vmine_t(itemp), celldm_, celldm_geo(1,central_geo), &

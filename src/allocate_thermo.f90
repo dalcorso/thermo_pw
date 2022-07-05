@@ -85,7 +85,7 @@ SUBROUTINE allocate_el_thermodynamics(tot_ngeo)
   USE temperature,    ONLY : ntemp
   USE el_thermodynamics, ONLY : el_ener, el_free_ener, el_entr, el_mu, &
                            el_ce
-  USE el_anharmonic,  ONLY : vmine_t, b0e_t, b01e_t, free_e_mine_t
+  USE el_anharmonic,  ONLY : vmine_t, b0e_t, b01e_t, b02e_t, free_e_mine_t
   IMPLICIT NONE
 
 INTEGER, INTENT(IN) :: tot_ngeo
@@ -104,6 +104,7 @@ INTEGER, INTENT(IN) :: tot_ngeo
   IF (.NOT. ALLOCATED (vmine_t) )        ALLOCATE(vmine_t(ntemp))
   IF (.NOT. ALLOCATED (b0e_t) )          ALLOCATE(b0e_t(ntemp))
   IF (.NOT. ALLOCATED (b01e_t) )         ALLOCATE(b01e_t(ntemp))
+  IF (.NOT. ALLOCATED (b02e_t) )         ALLOCATE(b02e_t(ntemp))
   IF (.NOT. ALLOCATED (free_e_mine_t) )  ALLOCATE(free_e_mine_t(ntemp))
 
   RETURN
