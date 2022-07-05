@@ -9,19 +9,20 @@
 SUBROUTINE openfilq_tpw()
   !----------------------------------------------------------------------------
   !
-  ! ... This subroutine opens all the files necessary for the phononq
-  ! ... calculation.
+  !! This subroutine opens all the files necessary for the phononq
+  !! calculation.
   !
-  USE kinds,            ONLY : DP
-  USE control_flags,    ONLY : io_level, modenum
-  USE units_ph,         ONLY : iubar, iucom, iudvkb3, &
+  USE kinds,           ONLY : DP
+  USE control_flags,   ONLY : io_level, modenum
+  USE units_ph,        ONLY : iubar, iucom, iudvkb3, &
                               iudrhous, iuebar, iudrho, iudyn, iudvscf, &
                               lrbar, lrcom, lrdvkb3, &
                               lrdrhous, lrebar, lrdrho, lint3paw, iuint3paw, &
                               iundnsscf, iudvpsi, lrdvpsi, iugauge
-  USE units_lr,         ONLY : iuwfc, lrwfc, iudwf, lrdwf
-  USE io_files,         ONLY : tmp_dir, diropn, seqopn, nwordwfcU
-  USE control_ph,       ONLY : epsil, zue, ext_recover, trans, &
+  USE units_lr,        ONLY : iuwfc, lrwfc, iudwf, lrdwf
+  USE io_files,        ONLY : prefix, tmp_dir, diropn, seqopn, iunhub, &
+                              iunhub_noS, nwordwfcU
+  USE control_ph,      ONLY : epsil, zue, ext_recover, trans, &
                               tmp_dir_phq, start_irr, last_irr, xmldyn, &
                               all_done, newgrid
   USE save_ph,         ONLY : tmp_dir_save
@@ -33,10 +34,8 @@ SUBROUTINE openfilq_tpw()
   USE lsda_mod,        ONLY : nspin, lsda
   USE uspp,            ONLY : nkb, okvan
   USE uspp_param,      ONLY : nhm
-  USE io_files,        ONLY : prefix
   USE noncollin_module,ONLY : npol, nspin_mag, noncolin, domag
   USE paw_variables,   ONLY : okpaw
-  USE mp_bands,        ONLY : me_bgrp
   USE io_global,       ONLY : ionode,stdout
   USE buffers,         ONLY : open_buffer, close_buffer
   USE ramanm,          ONLY : lraman, elop, iuchf, iud2w, iuba2, lrchf, lrd2w, lrba2
@@ -52,9 +51,13 @@ SUBROUTINE openfilq_tpw()
   USE ldaU,            ONLY : lda_plus_u, Hubbard_lmax, nwfcU
   USE ldaU_ph,         ONLY : dnsscf_all_modes
   USE mp_pools,        ONLY : me_pool, root_pool
+  USE mp,              ONLY : mp_bcast
   USE dvscf_interpolate, ONLY : ldvscf_interpolate, nrbase, nrlocal, &
                                 wpot_dir, iunwpot, lrwpot
-  USE ahc,              ONLY : elph_ahc, ahc_nbnd_gauge
+  USE ahc,             ONLY : elph_ahc, ahc_nbnd_gauge
+  USE output,          ONLY : fildrho
+  USE mp_bands,        ONLY : intra_bgrp_comm,me_bgrp
+  USE io_global,       ONLY : ionode_id
   !
   IMPLICIT NONE
   !
@@ -63,11 +66,11 @@ SUBROUTINE openfilq_tpw()
   CHARACTER (len=256) :: filint, fildvscf_rot, filwpot
   ! the name of the file
   INTEGER :: ir, irlocal
-  !! Real space unit cell index
+  ! Real space unit cell index
   INTEGER :: unf_lrwpot, direct_io_factor
-  !! record length for opening wpot file
+  ! record length for opening wpot file
   REAL(DP) :: dummy
-  !! dummy variable for calculating direct_io_factor
+  ! dummy variable for calculating direct_io_factor
   LOGICAL :: exst, exst_mem
   ! logical variable to check file exists
   ! logical variable to check file exists in memory
@@ -84,7 +87,7 @@ SUBROUTINE openfilq_tpw()
   !     written by pw.x. In the other cases those calculated by ph.x
   !
   tmp_dir=tmp_dir_phq
- !!!!!!!!!!!!!!!!!!!!!!!! ACFDT TEST !!!!!!!!!!!!!!!!
+ !************************ ACFDT TEST ********************
   IF (acfdt_is_active) THEN
      ! ACFDT -test always the wfc is read/written from/to file in tmp_dir_phq
      IF (.not.acfdt_num_der)  then 
@@ -93,23 +96,24 @@ SUBROUTINE openfilq_tpw()
   ELSE  
      ! this is the standard treatment
      IF (lgamma.AND.modenum==0.AND..NOT.newgrid ) tmp_dir=tmp_dir_save
+     ! FIXME: why this case?
      IF ((noncolin.AND.domag).OR.lsda) tmp_dir=tmp_dir_phq
   ENDIF
-!!!!!!!!!!!!!!!!!!!!!!!! END OF ACFDT TEST !!!!!!!!!!!!!!!!
+!************************* END OF ACFDT TEST *******************
   iuwfc = 20
   lrwfc = nbnd * npwx * npol
-  CALL open_buffer (iuwfc, 'wfc', lrwfc, io_level, exst_mem, exst, tmp_dir)
-  IF (.NOT.exst.AND..NOT.exst_mem.and..not.all_done) THEN
-     !FIXME in case the starting computation has been done twfcollect=.true.
-     ! run_nscf saves the wave functions in tmp_dir_phq and not in tmp_dir 
-     ! we have to find a way to have them in the same place in both cases
-     ! not now because release is tomorrow (29 june 2018). Dirty fix if
-     ! open_buffer fails in tmp_dir go back to tmp_dir_phq and try again. 
-     CALL close_buffer(iuwfc, 'delete')
-     tmp_dir = tmp_dir_phq
+  IF (io_level > 0) THEN
      CALL open_buffer (iuwfc, 'wfc', lrwfc, io_level, exst_mem, exst, tmp_dir)
-     IF (.NOT.exst.AND..NOT.exst_mem) CALL errore ('openfilq', 'file '//trim(prefix)//'.wfc not found', 1)
-  END IF
+     IF (.NOT.exst.AND..NOT.exst_mem.and..not.all_done) THEN
+        CALL close_buffer(iuwfc, 'delete')
+        !FIXME Dirty fix for obscure case
+        tmp_dir = tmp_dir_phq
+        CALL open_buffer (iuwfc, 'wfc', lrwfc, io_level, exst_mem, exst, tmp_dir)
+        IF (.NOT.exst.AND..NOT.exst_mem) CALL errore ('openfilq', 'file '//trim(prefix)//'.wfc not found', 1)
+     END IF
+  ELSE
+     iuwfc = 10
+  ENDIF
   IF (elph_mat) then
      iunwfcwann=733
      lrwfcr= 2 * dffts%nr1x*dffts%nr2x*dffts%nr3x *npol
@@ -156,6 +160,17 @@ SUBROUTINE openfilq_tpw()
   !
   iudrho = 23
   lrdrho = 2 * dfftp%nr1x * dfftp%nr2x * dfftp%nr3x * nspin_mag
+  if(elph_mat)then
+    IF ( ionode .AND. fildrho /= ' ') THEN
+      INQUIRE (UNIT = iudrho, OPENED = exst)
+      IF (exst) CLOSE (UNIT = iudrho, STATUS='keep')
+      CALL diropn (iudrho, TRIM(fildrho)//'.E', lrdrho, exst, dvscf_star%dir)
+      IF (.not.exst) then
+        write(stdout,*)  'openfilq,file '//TRIM(fildrho)//'.E'//' not found in '//dvscf_star%dir
+        iudrho = 0
+      end if
+    end if
+  end if
   !
   !   a formatted file which contains the dynamical matrix in cartesian
   !   coordinates is opened in the current directory
@@ -182,27 +197,37 @@ SUBROUTINE openfilq_tpw()
   !
 400 IF (trim(fildvscf).NE.' ') THEN
      iudvscf = 27
-     IF ( me_bgrp == 0 ) THEN
+     IF ( ionode ) THEN
         IF (trim(dvscf_star%ext).NE.' ' .and. elph_mat) THEN
            fildvscf_rot = dfile_name(xq, at, TRIM(dvscf_star%ext), &
                    TRIM(dvscf_star%dir)//prefix, &
                    generate=.false., index_q=iq_dummy, equiv=.false. )
               
+           CALL diropn (iudvscf, fildvscf_rot, -1, exst, dvscf_star%dir)
+           if(.not.exst) then
+             WRITE(stdout,'(5x,5a)') "There is not a dvscf file '",TRIM(fildvscf_rot), &
+               "' in directory '",trim(dvscf_star%dir),"'"
+             iudvscf = 0
+           else
+
            WRITE(stdout,'(5x,5a)') "Opening dvscf file '",TRIM(fildvscf_rot), &
                    "' (for reading) in directory '",trim(dvscf_star%dir),"'"
               
            CALL diropn (iudvscf, fildvscf_rot, lrdrho, exst, dvscf_star%dir)
+         end if
         ELSE
            CALL diropn (iudvscf, fildvscf, lrdrho, exst )
         ENDIF
         IF (okpaw) THEN
            filint=TRIM(fildvscf)//'_paw'
            lint3paw = 2 * nhm * nhm * nat * nspin_mag
-           iuint3paw=34
+           iuint3paw=43
            CALL diropn (iuint3paw, filint, lint3paw, exst)
         ENDIF
         END IF
      END IF
+     CALL mp_bcast(iudvscf, ionode_id,intra_bgrp_comm)
+
   !
   !    In the USPP case we need two files for the Commutator, the first is
   !    given by filbar and a second which just contains P_c x |psi>,
@@ -263,6 +288,14 @@ SUBROUTINE openfilq_tpw()
      !    
      iuatswfc = 35
      CALL open_buffer (iuatswfc, 'satwfc', nwordwfcU, io_level, exst_mem, exst, tmp_dir)
+     IF (lgamma) THEN
+        !
+        ! If q = Gamma, open units iunhub and iunhub_noS which are needed in
+        ! commutator_Vhubx_psi.f90. They contain atomic wfcs phi and S * phi at k.
+        !
+        CALL open_buffer(iunhub, 'hub', nwordwfcU, io_level, exst_mem, exst, tmp_dir)
+        CALL open_buffer(iunhub_noS, 'hubnoS', nwordwfcU, io_level, exst_mem, exst, tmp_dir)
+     ENDIF
      !
      ! Open a file to write dnsscf_all_modes
      !

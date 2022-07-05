@@ -9,7 +9,7 @@
 !----------------------------------------------------------------------------
 SUBROUTINE setup_tpw()
   !----------------------------------------------------------------------------
-  !! This routine is called at the beginning of the calculation and:
+  !! This routine is called once at the beginning of the calculation and:
   !
   !! 1) determines various parameters of the calculation:
   !
@@ -35,8 +35,8 @@ SUBROUTINE setup_tpw()
   !! 3) generates k-points corresponding to the actual crystal symmetry;
   !
   !! 4) calculates various quantities used in magnetic, spin-orbit, PAW
-  !!    electric-field, DFT+U(+V) calculations, and for parallelism.
-  !
+  !!    electric-field, DFT+U(+V) calculations
+  !!
   USE kinds,              ONLY : DP
   USE constants,          ONLY : eps8, e2, fpi, pi, degspin
   USE parameters,         ONLY : npk
@@ -45,6 +45,7 @@ SUBROUTINE setup_tpw()
   USE cell_base,          ONLY : at, bg, alat, tpiba, tpiba2, ibrav
   USE ions_base,          ONLY : nat, tau, ntyp => nsp, ityp, zv
   USE basis,              ONLY : starting_pot, natomwfc
+  USE fft_support,        ONLY : good_fft_order
   USE gvect,              ONLY : gcutm, ecutrho
   USE gvecw,              ONLY : gcutw, ecutwfc
   USE gvecs,              ONLY : doublegrid, gcutms, dual
@@ -63,20 +64,18 @@ SUBROUTINE setup_tpw()
                                  allfrac
   USE wvfct,              ONLY : nbnd, nbndx
   USE control_flags,      ONLY : tr2, ethr, lscf, lbfgs, lmd, david, lecrpa,  &
-                                 isolve, niter, noinv, ts_vdw, &
-                                 lbands, use_para_diag, gamma_only, &
-                                 restart, use_gpu
+                                 isolve, niter, noinv, ts_vdw, tstress, &
+                                 lbands, gamma_only, restart
   USE cellmd,             ONLY : calc
   USE upf_ions,           ONLY : n_atom_wfc
   USE uspp_param,         ONLY : upf
   USE uspp,               ONLY : okvan
-  USE ldaU,               ONLY : lda_plus_u, init_lda_plus_u
+  USE ldaU,               ONLY : lda_plus_u, init_hubbard
   USE bp,                 ONLY : gdir, lberry, nppstr, lelfield, lorbm, nx_el,&
                                  nppstr_3d,l3dstring, efield
   USE fixed_occ,          ONLY : f_inp, tfixed_occ, one_atom_occupations
+  USE mp_pools,           ONLY : kunit, npool
   USE mp_images,          ONLY : intra_image_comm
-  USE mp_pools,           ONLY : kunit
-  USE mp_bands,           ONLY : intra_bgrp_comm, nyfft
   USE mp,                 ONLY : mp_bcast
   USE lsda_mod,           ONLY : lsda, nspin, current_spin, isk, &
                                  starting_magnetization
@@ -88,31 +87,23 @@ SUBROUTINE setup_tpw()
   USE qes_libs_module,    ONLY : qes_reset
   USE qes_types_module,   ONLY : output_type
   USE exx,                ONLY : ecutfock
-  USE exx_base,           ONLY : exx_grid_init, exx_mp_init, exx_div_check
   USE xc_lib,             ONLY : xclib_dft_is
   USE paw_variables,      ONLY : okpaw
+  USE extfield,           ONLY : gate
   USE esm,                ONLY : esm_z_inv
   USE fcp_module,         ONLY : lfcp
   USE gcscf_module,       ONLY : lgcscf
-  USE extfield,           ONLY : gate
+  USE rism_module,        ONLY : lrism, rism_calc1d
   USE additional_kpoints, ONLY : add_additional_kpoints
   !
   IMPLICIT NONE
   !
-  INTEGER  :: na, is, ierr, ibnd, ik, nrot_
+  INTEGER  :: na, is, ierr, ibnd, ik, nrot_, nbnd_, nr3, nk_ 
   LOGICAL  :: magnetic_sym, skip_equivalence=.FALSE.
   REAL(DP) :: iocc, ionic_charge, one
   !
-  LOGICAL, EXTERNAL  :: check_gpu_support
-  !
   TYPE(output_type)  :: output_obj 
   !  
-#if defined(__MPI)
-  LOGICAL :: lpara = .true.
-#else
-  LOGICAL :: lpara = .false.
-#endif
-
   !
   ! ... okvan/okpaw = .TRUE. : at least one pseudopotential is US/PAW
   !
@@ -139,8 +130,8 @@ SUBROUTINE setup_tpw()
                          'hybrid XC and electric fields untested',1 )
      IF ( allfrac ) CALL errore( 'setup ', &
                          'option use_all_frac incompatible with hybrid XC', 1 )
-     IF (.NOT. lscf) CALL errore( 'setup ', &
-                         'hybrid XC not allowed in non-scf calculations', 1 )
+!     IF (.NOT. lscf) CALL errore( 'setup ', &
+!                         'hybrid XC not allowed in non-scf calculations', 1 )
      IF ( ANY (upf(1:ntyp)%nlcc) ) CALL infomsg( 'setup ', 'BEWARE:' // &
                & ' nonlinear core correction is not consistent with hybrid XC')
      IF (okvan) THEN
@@ -180,13 +171,14 @@ SUBROUTINE setup_tpw()
   IF ( .NOT. lscf .OR. ( (lfcp .OR. lgcscf) .AND. restart ) ) THEN
      !
      ! ... in these cases, we need (or it is useful) to read the Fermi energy
+     ! ... also, number of bands is needed for FCP/GC-SCF
      !
      IF (ionode) CALL qexsd_readschema ( xmlfile(), ierr, output_obj )
      CALL mp_bcast(ierr, ionode_id, intra_image_comm)
      IF ( ierr > 0 ) CALL errore ( 'setup', 'problem reading ef from file ' //&
           & TRIM(xmlfile()), ierr )
      IF (ionode) CALL qexsd_copy_efermi ( output_obj%band_structure, &
-          nelec, ef, two_fermi_energies, ef_up, ef_dw )
+          nelec, ef, two_fermi_energies, ef_up, ef_dw, nbnd_ )
      ! convert to Ry a.u. 
      ef = ef*e2
      ef_up = ef_up*e2
@@ -196,12 +188,14 @@ SUBROUTINE setup_tpw()
      CALL mp_bcast(two_fermi_energies, ionode_id, intra_image_comm)
      CALL mp_bcast(ef_up, ionode_id, intra_image_comm)
      CALL mp_bcast(ef_dw, ionode_id, intra_image_comm)
+     CALL mp_bcast(nbnd_, ionode_id, intra_image_comm)
      CALL qes_reset  ( output_obj )
      !
   END IF
   !
   IF ( (lfcp .OR. lgcscf) .AND. restart ) THEN
      tot_charge = ionic_charge - nelec
+     nbnd = nbnd_
   END IF
   !
   ! ... magnetism-related quantities
@@ -422,10 +416,8 @@ SUBROUTINE setup_tpw()
   ! ... set the max number of bands used in iterative diagonalization
   !
   nbndx = nbnd
-  IF ( isolve == 0 ) nbndx = david * nbnd
-  IF (isolve == 4) nbndx = 2 *nbnd
-  !
-  use_gpu       = check_gpu_support( )
+  IF ( isolve == 0  ) nbndx = david * nbnd 
+  IF (isolve == 4 ) nbndx = 2 *nbnd 
   !
   ! ... Set the units in real and reciprocal space
   !
@@ -436,7 +428,8 @@ SUBROUTINE setup_tpw()
   !
   doublegrid = ( dual > 4.0_dp + eps8 )
   IF ( doublegrid .AND. ( .NOT.okvan .AND. .NOT.okpaw .AND. &
-                          .NOT. ANY (upf(1:ntyp)%nlcc)      ) ) &
+                          .NOT. ANY (upf(1:ntyp)%nlcc) .AND. &
+                          .NOT. lrism ) ) &
        CALL infomsg ( 'setup', 'no reason to have ecutrho>4*ecutwfc' )
   IF ( ecutwfc > 10000.d0 .OR. ecutwfc < 1.d0 ) THEN
        WRITE(stdout,*) 'ECUTWFC = ', ecutwfc
@@ -551,8 +544,8 @@ SUBROUTINE setup_tpw()
      !
      ! ... eliminate rotations that are not symmetry operations
      !
-     CALL find_sym ( nat, tau, ityp, magnetic_sym, m_loc, gate .OR. &
-                     (.NOT. esm_z_inv()) )
+     CALL find_sym ( nat, tau, ityp, magnetic_sym, m_loc, &
+                   & gate .OR. (.NOT. esm_z_inv(lrism)) )
      !
      ! ... do not force FFT grid to be commensurate with fractional translations
      !
@@ -638,19 +631,6 @@ SUBROUTINE setup_tpw()
   END IF
   !
   IF ( nkstot > npk ) CALL errore( 'setup', 'too many k points', nkstot )
-  !
-  ! ... distribute k-points (and their weights and spin indices)
-  !
-  kunit = 1
-  CALL divide_et_impera ( nkstot, xk, wk, isk, nks )
-  IF (nks==0) CALL errore('setup_tpw','some pools have no k point',1)
-  !
-  IF ( xclib_dft_is('hybrid') ) THEN
-     IF ( nks == 0 ) CALL errore('setup','pools with no k-points not allowed for hybrid functionals',1)
-     CALL exx_grid_init()
-     CALL exx_mp_init()
-     CALL exx_div_check()
-  ENDIF
 
   IF (one_atom_occupations) THEN
      DO ik=1,nkstot
@@ -661,17 +641,51 @@ SUBROUTINE setup_tpw()
      ENDDO
   ENDIF
   !
-  ! ... Set up Hubbard parameters for DFT+U(+V) calculation
+  ! ... Set up Hubbard parameters for DFT+Hubbard
   !
-  CALL init_lda_plus_u ( upf(1:ntyp)%psd, nspin, noncolin )
+  CALL init_hubbard ( upf(1:ntyp)%psd, nspin, noncolin )
   !
   ! ... initialize d1 and d2 to rotate the spherical harmonics
   !
   IF (lda_plus_u .or. okpaw .or. (okvan.and.xclib_dft_is('hybrid')) ) CALL d_matrix( d1, d2, d3 )
   !
-  ! ... set linear-lagebra diagonalization
+  ! ... set parallelization strategy: need an estimate of FFT dimension along z
   !
-  CALL set_para_diag( nbnd, use_para_diag )
+  nr3 = int ( sqrt(gcutms)*sqrt (at(1, 3)**2 + at(2, 3)**2 + at(3, 3)**2) ) + 1
+  nr3 = good_fft_order( 2*nr3, fft_fact(3) )
+  !
+  ! ... nk_ = number of k-points usable for k-point parallelization
+  !           (set to 1 if k-point parallelization is not implemented)
+  nk_ = nkstot
+  IF ( lberry .OR. lelfield .OR. lorbm .OR. &
+       ( xclib_dft_is('hybrid') .AND. tstress ) ) nk_ = 1
+  !
+  CALL setup_para ( nr3, nk_, nbnd )
+  !
+  ! ... distribute k-points across processors of a pool
+  !
+  kunit   = 1
+  CALL divide_et_impera ( nkstot, xk, wk, isk, nks )
+  !
+  ! ... checks and initializations to be performed after parallelization setup
+  !
+  IF ( lberry .OR. lelfield .OR. lorbm ) THEN
+     IF ( npool > 1 ) CALL errore( 'iosys', &
+          'Berry Phase/electric fields not implemented with pools', 1 )
+  END IF
+  IF ( xclib_dft_is('hybrid') ) THEN
+     IF ( nks == 0 ) CALL errore('setup','pools with no k-points' &
+          & // ' not allowed for hybrid functionals',1)
+     IF ( tstress .and. npool > 1 )  CALL errore('setup', &
+         'stress for hybrid functionals not available with pools', 1)
+     !
+     CALL setup_exx  ()
+     !
+  END IF
+  !
+  ! ... calculate solvent-solvent interaction (1D-RISM).
+  !
+  IF (lrism) CALL rism_calc1d()
   !
   !
   RETURN

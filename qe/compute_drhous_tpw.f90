@@ -10,8 +10,8 @@
 SUBROUTINE compute_drhous_tpw (drhous, dbecsum, wgg, becq, alpq)
   !-----------------------------------------------------------------------
   !
-  !    This routine computes the part of the change of the charge density
-  !    which is due to the orthogonalization constraint on wavefunctions
+  !! This routine computes the part of the change of the charge density
+  !! which is due to the orthogonalization constraint on wavefunctions.
   !
   
   USE kinds,      ONLY : DP

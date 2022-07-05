@@ -9,8 +9,8 @@
 SUBROUTINE run_nscf_tpw(do_band, iq)
   !-----------------------------------------------------------------------
   !
-  ! ... This is the main driver of the pwscf program called from the
-  ! ... phonon code.
+  !! This is the main driver of the \(\texttt{pwscf}\) program called from
+  !! the \(\texttt{PHonon}\) code.
   !
   !
   USE control_flags,   ONLY : conv_ions, lforce=>tprnfor, tstress
@@ -37,6 +37,8 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   USE scf,             ONLY : vrs
   USE mp_bands,        ONLY : intra_bgrp_comm, nyfft
   USE mp_pools,        ONLY : kunit
+  USE mp_images,       ONLY : intra_image_comm
+  USE mp,              ONLY : mp_barrier
 
   USE lr_symm_base,    ONLY : minus_q, nsymq, invsymq
   USE control_lr,      ONLY : ethr_nscf
@@ -44,6 +46,7 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   USE noncollin_module,ONLY : noncolin, domag
   USE el_phon,         ONLY : elph_mat
   USE ahc,             ONLY : elph_ahc
+  USE rism_module,     ONLY : lrism, rism_set_restart
   !
  !
   IMPLICIT NONE
@@ -56,16 +59,20 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   CALL start_clock( 'PWSCF' )
   !
   io_level=1
+  ! FIXME: following section does not belong to this subroutine
   IF (done_bands(iq)) THEN
      WRITE (stdout,'(/,5x,"Bands found: reading from ",a)') TRIM(tmp_dir_phq)
      CALL clean_pw( .TRUE. )
      CALL close_files(.true.)
      wfc_dir=tmp_dir_phq
      tmp_dir=tmp_dir_phq
-     kunit=2
-     IF (lgamma_iq(iq)) kunit=1
-     IF ((noncolin.AND.domag)) THEN
-        kunit=4
+     ! FIXME: kunit is set here: in this case we do not go through setup_nscf
+     ! FIXME: and read_file calls divide_et_impera that needs kunit
+     ! FIXME: qnorm (also set in setup_nscf) is needed by allocate_nlpot
+     kunit = 2
+     IF ( lgamma_iq(iq) ) kunit = 1
+     IF (noncolin.AND.domag) THEN
+        kunit = 4
         IF (lgamma_iq(iq)) kunit=2
      ENDIF
      qnorm = SQRT(xq(1)**2+xq(2)**2+xq(3)**2) * tpiba
@@ -93,7 +100,9 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   restart = ext_restart
   conv_ions=.true.
   ethr_nscf      = 1.0D-9 / nelec 
+  !
   ! threshold for diagonalization ethr_nscf - should be good for all cases
+  IF (lrism) CALL rism_set_restart()
   !
   CALL fft_type_allocate ( dfftp, at, bg, gcutm,  intra_bgrp_comm, nyfft=nyfft )
   CALL fft_type_allocate ( dffts, at, bg, gcutms, intra_bgrp_comm, nyfft=nyfft)
@@ -101,12 +110,12 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   CALL setup_nscf_tpw ( newgrid, xq, elph_mat .OR. elph_ahc )
   !
   CALL init_run()
-!!!!!!!!!!!!!!!!!!!!!!!! ACFDT TEST !!!!!!!!!!!!!!!!
+!°°°°°°°°°°°°°°°°°°°° ACFDT TEST °°°°°°°°°°°°°°°°°°°°°°°°°
   IF (acfdt_is_active) THEN
     ! ACFDT mumerical derivative test: modify the potential
     IF (acfdt_num_der) vrs(ir_point,1)=vrs(ir_point,1) + delta_vrs
   ENDIF
-!!!!!!!!!!!!!!!!!!!!!!!!END OF ACFDT TEST !!!!!!!!!!!!!!!!
+!°°°°°°°°°°°°°°°°°END OF ACFDT TEST °°°°°°°°°°°°°°°°°°°°°°
 !
   IF (do_band) CALL non_scf_tpw ( )
 
@@ -137,7 +146,11 @@ SUBROUTINE run_nscf_tpw(do_band, iq)
   CLOSE( UNIT = 4, STATUS = 'DELETE' )
   ext_restart=.FALSE.
   !
-  CALL close_files(.true.)
+  IF (io_level > 0) THEN
+     CALL close_files(.true.)
+  ELSE
+     CALL mp_barrier( intra_image_comm )  
+  ENDIF
   !
 
   bands_computed=.TRUE.

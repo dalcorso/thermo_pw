@@ -10,10 +10,10 @@
 SUBROUTINE phqscf_tpw
   !-----------------------------------------------------------------------
   !
-  !     This subroutine is the main driver of the self consistent cycle
-  !     which gives as output the change of the wavefunctions and the
-  !     change of the self-consistent potential due to a phonon of
-  !     fixed q.
+  !! This subroutine is the main driver of the self consistent cycle
+  !! which gives as output the change of the wavefunctions and the
+  !! change of the self-consistent potential due to a phonon of
+  !! fixed q.
   !
   USE kinds,            ONLY : DP
   USE ions_base,        ONLY : nat
@@ -90,10 +90,10 @@ SUBROUTINE phqscf_tpw
            imode0 = imode0 + npert (irr1)
         ENDDO
         IF (npe == 1) THEN
-           WRITE( stdout, '(//,5x,"Representation #", i3," mode # ",i3)') &
+           WRITE( stdout, '(//,5x,"Representation #",i4," mode #",i4)') &
                               irr, imode0 + 1
         ELSE
-           WRITE( stdout, '(//,5x,"Representation #", i3," modes # ",8i3)') &
+           WRITE( stdout, '(//,5x,"Representation #",i4," modes #",8i4)') &
                               irr, (imode0+irr1, irr1=1,npe)
         ENDIF
         !

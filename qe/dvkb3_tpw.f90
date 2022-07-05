@@ -20,6 +20,7 @@ subroutine dvkb3_tpw(ik,dvkb)
   USE wvfct,     ONLY : npwx
   USE wavefunctions,    ONLY : evc
   USE uspp,      ONLY: nkb
+  USE uspp_init, ONLY : gen_us_dj, gen_us_dy
   USE uspp_param,ONLY: nh
   USE qpoint,    ONLY : ikks
   USE units_ph,  ONLY: this_dvkb3_is_on_file, lrdvkb3, iudvkb3

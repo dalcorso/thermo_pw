@@ -9,11 +9,11 @@
 subroutine init_representations_tpw()
   !-----------------------------------------------------------------------
   !
-  !  This subroutine initializes the modes of all irreducible representations
-  !  for all q points. It writes the files patterns.#q.xml in the outdir 
-  !  directory. It is used by unrecovered  phonon runs. The small group of 
-  !  q must be calculated for each q. Note that all images receives the 
-  !  same modes calculated by the root processor and save them on file. 
+  !! This subroutine initializes the modes of all irreducible representations
+  !! for all q points. It writes the files patterns.#q.xml in the outdir 
+  !! directory. It is used by unrecovered  phonon runs. The small group of 
+  !! q must be calculated for each q. Note that all images receives the 
+  !! same modes calculated by the root processor and save them on file. 
   !
   USE kinds,         ONLY : DP
   USE ions_base,     ONLY : tau, nat

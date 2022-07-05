@@ -7,17 +7,20 @@
 !
 !------------------------------------------------
 SUBROUTINE q_points_tpw ( )
-!----------========------------------------------
-
-  USE kinds,          ONLY : DP
-  USE io_global,      ONLY : stdout, meta_ionode, meta_ionode_id
-  USE disp,           ONLY : nq1, nq2, nq3, x_q, nqs, lgamma_iq
-  USE output,         ONLY : fildyn
-  USE symm_base,      ONLY : nsym, s, t_rev, invs
-  USE cell_base,      ONLY : at, bg
-  USE control_ph,     ONLY : search_sym
-  USE mp_world,       ONLY : world_comm
-  USE mp,             ONLY : mp_bcast
+  !----------========------------------------------
+  !! Calculate the Monkhorst-Pack grid and write the information on
+  !! the grid of q-points.
+  !
+  USE kinds, only : dp
+  USE io_global,  ONLY :  stdout, meta_ionode, meta_ionode_id
+  USE disp,  ONLY : nq1, nq2, nq3, x_q, nqs, lgamma_iq
+  USE output, ONLY : fildyn
+  USE symm_base, ONLY : nsym, s, time_reversal, t_rev, invs
+  USE cell_base, ONLY : at, bg
+  USE control_ph, ONLY : search_sym
+  USE mp_images,  ONLY : intra_image_comm
+  USE mp_world,   ONLY : world_comm
+  USE mp,         ONLY : mp_bcast
   USE elph_tetra_mod, ONLY : lshift_q
 
   IMPLICIT NONE

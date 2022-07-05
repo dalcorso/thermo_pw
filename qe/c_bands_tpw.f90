@@ -37,8 +37,8 @@ SUBROUTINE c_bands_nscf_tpw( )
                                    iverbosity, use_gpu
   USE save_ph,              ONLY : tmp_dir_save
   USE io_files,             ONLY : tmp_dir, prefix
-  USE ldaU,                 ONLY : lda_plus_u, lda_plus_u_kind, U_projection, &
-                                   wfcU
+  USE ldaU,                 ONLY : lda_plus_u, lda_plus_u_kind, &
+                                   hubbard_projectors, wfcU
   USE lsda_mod,             ONLY : current_spin, lsda, isk
   USE wavefunctions,        ONLY : evc
   USE control_lr,           ONLY : lgamma
@@ -102,6 +102,8 @@ SUBROUTINE c_bands_nscf_tpw( )
      WRITE( stdout, '(5X,"PPCG style diagonalization")' )
   ELSEIF ( isolve == 3 ) THEN
      WRITE( stdout, '(5X,"ParO style diagonalization")')
+  ELSEIF ( isolve == 4 ) THEN
+     WRITE( stdout, '(5X,"RMM-DIIS diagonalization")')
   ELSE
      CALL errore ( 'c_bands', 'invalid type of diagonalization', isolve )
   ENDIF
@@ -141,9 +143,10 @@ SUBROUTINE c_bands_nscf_tpw( )
         !
         IF ( nkb > 0 ) CALL init_us_2( ngk(ik), igk_k(1,ik), xk(1,ik), vkb, .TRUE. )
         !
-        ! ... Needed for LDA+U
+        ! ... Needed for DFT+Hubbard
         !
-        IF ( nks > 1 .AND. lda_plus_u .AND. (U_projection .NE. 'pseudo') ) &
+        IF ( nks > 1 .AND. lda_plus_u .AND. &
+                                    (hubbard_projectors .NE. 'pseudo') ) &
             CALL get_buffer ( wfcU, nwordwfcU, iunhub, ik )
         !
         ! ... calculate starting  wavefunctions
@@ -192,7 +195,7 @@ SUBROUTINE c_bands_nscf_tpw( )
         IF ( io_level > -1 ) CALL save_buffer ( evc, nwordwfc, iunwfc, ik )
         !
         !
-        IF (ik_diago .LE. nkdum) THEN
+        IF (ik_diago <= nkdum) THEN
            !
            ! ... stop requested by user: save restart information,
            ! ... save wavefunctions to file
@@ -527,7 +530,9 @@ IF (t_rev==1) gk=-gk
 RETURN
 END SUBROUTINE compute_gk
 
+!---------------------------------------------------------------------
 SUBROUTINE rotate_and_save_psic(psic, evcr, aux_xk, ik, ikk, iko) 
+!---------------------------------------------------------------------
 !
 !  Input variables: psic with the wavefunction to rotate in real space
 !  evcr : where the rotated function is written in reciprocal space

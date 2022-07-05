@@ -10,9 +10,9 @@
 SUBROUTINE phq_readin_tpw()
   !----------------------------------------------------------------------------
   !
-  !    This routine reads the control variables for the program phononq.
-  !    A second routine, read_file, reads the variables saved to file
-  !    by the self-consistent program.
+  !! This routine reads the control variables for the program \(\texttt{phononq}\).
+  !! A second routine, \(\texttt{read_file}\), reads the variables saved to file
+  !! by the self-consistent program.
   !
   !
   USE kinds,         ONLY : DP
@@ -21,11 +21,11 @@ SUBROUTINE phq_readin_tpw()
   USE mp,            ONLY : mp_bcast
   USE mp_world,      ONLY : world_comm
   USE ions_base,     ONLY : amass, atm
-  USE input_parameters, ONLY : nk1, nk2, nk3, k1, k2, k3, outdir
+  USE input_parameters, ONLY : outdir
   USE start_k,       ONLY : reset_grid
   USE klist,         ONLY : xk, nks, nkstot, lgauss, two_fermi_energies, ltetra
   USE control_flags, ONLY : gamma_only, tqr, restart, io_level, &
-                            ts_vdw, ldftd3, lxdm, isolve
+                            ts_vdw, ldftd3, lxdm, isolve, dfpt_hub
   USE xc_lib,        ONLY : xclib_dft_is
   USE uspp,          ONLY : okvan
   USE fixed_occ,     ONLY : tfixed_occ
@@ -41,7 +41,7 @@ SUBROUTINE phq_readin_tpw()
                             ext_recover, ext_restart, u_from_file, ldiag, &
                             search_sym, lqdir, electron_phonon, tmp_dir_phq, &
                             rec_code_read, qplot, only_init, only_wfc, &
-                            low_directory_check
+                            low_directory_check, nk1, nk2, nk3, k1, k2, k3
   USE control_lr,    ONLY : lgamma, lrpa
 
   USE save_ph,       ONLY : tmp_dir_save, save_ph_input_variables
@@ -51,7 +51,7 @@ SUBROUTINE phq_readin_tpw()
   USE disp,          ONLY : nq1, nq2, nq3, x_q, wq, nqs, lgamma_iq
   USE io_files,      ONLY : tmp_dir, prefix, postfix, create_directory, &
                             check_tempdir, xmlpun_schema
-  USE noncollin_module, ONLY : i_cons, noncolin, domag
+  USE noncollin_module, ONLY : domag, i_cons, noncolin, lspinorb
   USE control_flags, ONLY : iverbosity, modenum
   USE io_global,     ONLY : meta_ionode, meta_ionode_id, ionode, ionode_id, &
                             qestdin, stdout
@@ -73,7 +73,8 @@ SUBROUTINE phq_readin_tpw()
   ! YAMBO <
   USE elph_tetra_mod,ONLY : elph_tetra, lshift_q, in_alpha2f
   USE ktetra,        ONLY : tetra_type
-  USE ldaU,          ONLY : lda_plus_u, U_projection, lda_plus_u_kind
+  USE ldaU,          ONLY : lda_plus_u, hubbard_projectors, lda_plus_u_kind, &
+                            is_hubbard_back
   USE ldaU_ph,       ONLY : read_dns_bare, d2ns_type
 
   USE dvscf_interpolate, ONLY : ldvscf_interpolate, do_long_range, &
@@ -616,7 +617,7 @@ SUBROUTINE phq_readin_tpw()
      ALLOCATE(wqaux(nqaux))
      IF (meta_ionode) THEN
         DO iq=1, nqaux
-           READ (5, *, iostat = ios) (xqaux (ipol,iq), ipol = 1, 3), wqaux(iq)
+           READ (qestdin, *, iostat = ios) (xqaux (ipol,iq), ipol = 1, 3), wqaux(iq)
         ENDDO
      ENDIF
      CALL mp_bcast(ios, meta_ionode_id, world_comm )
@@ -852,6 +853,8 @@ SUBROUTINE phq_readin_tpw()
      END DO
   ENDIF
   !
+  IF (reduce_io) io_level=0
+  !
   ! DFPT+U: the occupation matrix ns is read via read_file
   !
   CALL read_file ( )
@@ -862,7 +865,12 @@ SUBROUTINE phq_readin_tpw()
   ! read from input (this happens if nk1*nk2*nk3 > 0; otherwise reset_grid
   ! returns .false., leaves the current values, read in read_file, unchanged)
   !
-  newgrid = reset_grid (nk1, nk2, nk3, k1, k2, k3) 
+  newgrid = reset_grid (nk1, nk2, nk3, k1, k2, k3)
+  if(newgrid.and.elph_mat)then
+    WRITE(stdout, '(//5x,"WARNING: Wannier elph do not use explicit new grid: nk1 nk2 nk3 ignored")')
+    newgrid=.false.
+  end if
+
   !
   tmp_dir=tmp_dir_save
   !
@@ -878,10 +886,13 @@ SUBROUTINE phq_readin_tpw()
      WRITE(stdout,'(5x,a)')  "A. Floris et al., Phys. Rev. B 101, 064305 (2020)"
      WRITE(stdout,'(5x,a)')  "in publications or presentations arising from this work."
      ! 
-     IF (U_projection.NE."atomic") CALL errore("phq_readin", &
-          " The phonon code for this U_projection_type is not implemented",1)
+     !
+     IF (Hubbard_projectors.NE."atomic") CALL errore("phq_readin", &
+          " The phonon code for this Hubbard projectors type is not implemented",1)
      IF (lda_plus_u_kind.NE.0) CALL errore("phq_readin", &
           " The phonon code for this lda_plus_u_kind is not implemented",1)
+     IF (ANY(is_hubbard_back(:))) CALL errore ("phq_readin", &
+          " Two (or more) Hubbard channels per atomic type is not implemented", 1)
      IF (elph) CALL errore("phq_readin", &
           " Electron-phonon with Hubbard U is not supported",1)
      IF (lraman) CALL errore("phq_readin", &
@@ -907,7 +918,7 @@ SUBROUTINE phq_readin_tpw()
   IF ( xclib_dft_is('meta') ) CALL errore('phq_readin',&
      'The phonon code with meta-GGA functionals is not yet available',1)
 
-  IF ( xclib_dft_is('hybrid')  ) CALL errore('phq_readin',&
+  IF ( xclib_dft_is('hybrid') ) CALL errore('phq_readin',&
      'The phonon code with hybrid functionals is not yet available',1)
 
   IF (okpaw.and.(lraman.or.elop)) CALL errore('phq_readin',&
@@ -928,11 +939,11 @@ SUBROUTINE phq_readin_tpw()
 
   IF (noncolin.and.(lraman.or.elop)) CALL errore('phq_readin', &
       'lraman, elop, and noncolin not programed',1)
+  IF ( (noncolin.or.lspinorb) .and. elph ) CALL errore('phq_readin', &
+      'el-ph coefficient calculation disabled in noncolinear/spinorbit case',1)
 
   IF (lmovecell) CALL errore('phq_readin', &
       'The phonon code is not working after vc-relax',1)
-
-  IF (reduce_io) io_level=1
 
   if(elph_mat.and.fildvscf.eq.' ') call errore('phq_readin',&
        'el-ph with wannier requires fildvscf',1)
@@ -1005,6 +1016,11 @@ SUBROUTINE phq_readin_tpw()
      IF ((nat_todo /= 0) .and. lgamma_gamma) CALL errore( &
         'phq_readin', 'gamma_gamma tricks with nat_todo &
        & not available. Use nogg=.true.', 1)
+     IF (lda_plus_u .AND. lgamma_gamma) THEN
+        WRITE(stdout,'(5x,a)')  "DFPT+U does not support k=gamma and q=gamma tricks: disabling them..."
+        lgamma_gamma=.FALSE.
+     ENDIF
+
      !
      IF (nimage > 1 .AND. lgamma_gamma) CALL errore( &
         'phq_readin','gamma_gamma tricks with images not implemented',1)
@@ -1022,7 +1038,7 @@ SUBROUTINE phq_readin_tpw()
   !
   !YAMBO >
   IF (elph .AND. .NOT.(lgauss .OR. ltetra) &
-      .AND. .NOT. (elph_yambo .OR. elph_ahc)) &
+      .AND. .NOT. (elph_yambo .OR. elph_ahc).and..not.elph_mat) &
           CALL errore ('phq_readin', 'Electron-phonon only for metals', 1)
   !YAMBO <
   IF (elph .AND. fildvscf.EQ.' ' .AND. .NOT. ldvscf_interpolate) &
@@ -1042,7 +1058,7 @@ SUBROUTINE phq_readin_tpw()
   ENDIF
   nat_todo_input=nat_todo
   !
-  ! end of reading, close unit qestdin, remove tenporary input file if existing
+  ! end of reading, close unit qestdin, remove temporary input file if existing
   !
   IF (meta_ionode) ios = close_input_file () 
 

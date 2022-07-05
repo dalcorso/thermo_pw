@@ -78,8 +78,8 @@ SUBROUTINE irreducible_BZ_tpw( nrot, s, nsym, minus_q, magnetic_sym, at, bg, &
      sym(nsym+1:)= .FALSE.
      call coset( nrot, table, sym, nsym, irg )
      !
-     !    here we set the k-points in the irreducible wedge of the point grou
-     !    of the crystal
+     ! ... here we set the k-points in the irreducible wedge of the point grou
+     !     of the crystal
      !
      nks0=nks
      call irrek_tpw (at, bg, nrot, invs, nsym, irg, minus_q, npk, nks, xk, &

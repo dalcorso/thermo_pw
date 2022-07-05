@@ -5,8 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-!
+!-------------------------------------------------------------------------
 SUBROUTINE summarize_alpha()
+!-------------------------------------------------------------------------
 !
 !  This routine converts the magnetoelectric tensor from atomic units
 !  to the SI units (ps/m) and prints the results.

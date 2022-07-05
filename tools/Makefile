@@ -8,6 +8,7 @@ MODFLAGS= $(BASEMOD_FLAGS) \
           $(MOD_FLAG)../../LR_Modules \
           $(MOD_FLAG)../../PHonon/PH \
           $(MOD_FLAG)../lib \
+          $(MOD_FLAG)../../dft-d3/ \
           $(MOD_FLAG). 
 
 #libraries of QE
@@ -18,7 +19,8 @@ PWOBJS = ../../PHonon/PH/libph.a \
 
 #library modules of QE
 QEMODS = ../../Modules/libqemod.a \
-         ../../KS_Solvers/libks_solvers.a 
+         ../../KS_Solvers/libks_solvers.a \
+         ../../dft-d3/libdftd3qe.a
 
 #libraries of thermo_pw
 LIBTHERMO= ../lib/thermo_lib.a \
@@ -30,8 +32,9 @@ all : space_groups.x crystal_point_group.x mag_point_group.x units.x \
       hex_trig.x bravais_lattices.x kovalev.x supercell.x translate.x \
       elastic.x plot_sur_states.x gener_2d_slab.x gener_3d_slab.x \
       gener_nanowire.x debye.x rotate_tensors.x test_colors.x epsilon_tpw.x \
-      pdec.x optical.x change_e_name.x change_tel_name.x change_dynmat_name.x \
-      merge_interp.x template.x eos_test.x emp_f.x emp_g.x average_grun.x
+      pdec.x optical.x change_e_name.x change_tel_name.x \
+      change_dynmat_name.x merge_interp.x template.x eos_test.x emp_f.x \
+      emp_g.x average_grun.x
       
 
 space_groups.x : space_groups.o $(MODULES)

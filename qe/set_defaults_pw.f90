@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2008 Quantum ESPRESSO group
+! Copyright (C) 2001-2018 Quantum ESPRESSO group
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -31,14 +31,12 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
   USE force_mod,          ONLY : force
   USE basis,              ONLY : natomwfc
   USE klist,              ONLY : xk, wk, nks, nelec, degauss, lgauss, &
-                                 nkstot, qnorm
+                                 ltetra, nkstot, qnorm
   USE lsda_mod,           ONLY : lsda, nspin, current_spin, isk
-  USE symm_base,          ONLY : s, t_rev, irt, nrot, nsym, &
-                                 time_reversal
+  USE symm_base,          ONLY : s, t_rev, nrot, nsym, time_reversal
   USE wvfct,              ONLY : nbnd, nbndx
   USE control_flags,      ONLY : ethr, isolve, david, max_cg_iter, &
                                  noinv, use_para_diag
-!  USE el_phon,            ONLY : elph_mat
   USE mp_pools,           ONLY : kunit
   USE control_lr,         ONLY : lgamma
   USE noncollin_module,   ONLY : noncolin, domag
@@ -48,6 +46,7 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
   USE paw_variables,      ONLY : okpaw
   USE lr_symm_base,       ONLY : nsymq, invsymq, minus_q
   USE upf_ions,           ONLY : n_atom_wfc
+  USE ktetra,             ONLY : tetra, tetra_type, opt_tetra_init
   USE band_computation,   ONLY : diago_bands, isym_bands, ik_origin, &
                                  sym_for_diago, nks0
  
@@ -71,9 +70,15 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
   ethr= 1.0D-9 / nelec
   !
   ! ... variables for iterative diagonalization
-  ! ... Davdson: isolve=0, david=4 ; CG: isolve=1, david=1
-  isolve = 0
-  david  = 4
+  ! ... Davidson: isolve=0, david=4 ; CG: isolve=1, david=1
+  IF (isolve == 0) THEN
+     david = 4
+  ELSE IF (isolve == 1) THEN
+     david = 1
+  ELSE
+     call errore('setup_nscf_tpw','erroneous value for diagonalization method. Should be isolve=0 (david) or 1 (cg)',1)
+  END IF
+
   nbndx = david*nbnd
   max_cg_iter=20
   natomwfc = n_atom_wfc( nat, ityp, noncolin )
@@ -106,8 +111,8 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
      !
      ! In this case I generate a new set of k-points
      !
-     ! In the case of electron-phonon matrix element with
-     ! wannier functions the k-points should not be reduced
+     ! In the case of electron-phonon matrix element with wannier functions 
+     ! (and possibly in other cases as well) the k-points should not be reduced
      !
      skip_equivalence = elph_mat
      t_rev_eff=0
@@ -174,6 +179,29 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
      diago_bands(1:nkstot)=.TRUE.
      nks0=nkstot
   ENDIF
+  !
+  ! ... set the granularity for k-point distribution
+  !
+  IF ( lgamma  ) THEN
+     !
+     kunit = 1
+     IF (noncolin.AND.domag) kunit = 2
+     !
+  ELSE
+     !
+     kunit = 2
+     IF (noncolin.AND.domag) kunit = 4
+     !
+  ENDIF
+  !
+  ! ... Map each k point in the irr.-BZ into tetrahedra
+  !
+  IF ( ltetra .AND. (tetra_type /= 0) ) THEN
+     IF (ALLOCATED(tetra)) DEALLOCATE(tetra)
+     CALL opt_tetra_init(nsymq, s, time_reversal .AND. minus_q, t_rev, at, bg,&
+          npk, k1, k2, k3, nk1, nk2, nk3, nkstot, xk, kunit)
+  END IF
+  !
 !
 !   use in any case set_kplusq_tpw. Needed for magnons.
 !
@@ -222,20 +250,6 @@ SUBROUTINE setup_nscf_tpw ( newgrid, xq, elph_mat )
   qnorm = sqrt(xq(1)**2 + xq(2)**2 + xq(3)**2) * tpiba
   !
 #if defined(__MPI)
-  !
-  ! ... set the granularity for k-point distribution
-  !
-  IF ( lgamma  ) THEN
-     !
-     kunit = 1
-     IF ((noncolin.AND.domag).OR.(lsda.AND.lmagnon)) kunit = 2
-     !
-  ELSE
-     !
-     kunit = 2
-     IF ((noncolin.AND.domag).OR.(lsda.AND.lmagnon)) kunit = 4
-     !
-  ENDIF
   !
   ! ... distribute k-points (and their weights and spin indices)
   !

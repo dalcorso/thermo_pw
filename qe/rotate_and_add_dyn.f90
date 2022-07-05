@@ -9,32 +9,35 @@
 SUBROUTINE rotate_and_add_dyn_tpw (phi, phi2, nat, isym, s, invs, irt, &
      rtau, sxq)
   !-----------------------------------------------------------------------
-  !  Rotates a dynamical matrix (phi) in crystal coordinates according
-  !  to the specified symmetry operation and add the rotated matrix
-  !  to phi2.   phi is left unmodified.
+  !! Rotates a dynamical matrix (\(\text{phi}\)) in crystal coordinates
+  !! according to the specified symmetry operation and add the rotated
+  !! matrix to \(\text{phi2}\). \(\text{phi}\) is left unmodified.
   !
   USE kinds, ONLY : DP
   USE constants, ONLY : tpi
   USE symm_base, ONLY : t_rev
   IMPLICIT NONE
   ! input variables
-
-  INTEGER :: nat, isym, s (3, 3, 48), invs (48), irt (48, nat)
-  ! number of atoms in the unit cell
-  ! index of the symm.op.
-  ! the symmetry operations
-  ! index of the inverse operations
-  ! index of the rotated atom
-
-  COMPLEX(DP) :: phi (3, 3, nat, nat), phi2 (3, 3, nat, nat)
-  ! the input dyn.mat. in crystal coordinates
-  ! the rotated dyn.mat. in crystal coordinates
-
-  REAL(DP) :: rtau (3, 48, nat), sxq (3)
-  ! for eaxh atom and rotation gives the R vector
-  !involved
-  ! the rotated q involved in this sym.op.
-  !  local variables
+  integer :: nat
+  !! number of atoms in the unit cell
+  integer :: isym
+  !! index of the symm.op.
+  integer :: s(3,3,48)
+  !! the symmetry operations
+  integer :: invs(48)
+  !! index of the inverse operations
+  integer :: irt(48,nat)
+  !! index of the rotated atom
+  complex(DP) :: phi(3,3,nat,nat)
+  !! the input dyn.mat. in crystal coordinates
+  complex(DP) :: phi2(3,3,nat,nat)
+  !! the rotated dyn.mat. in crystal coordinates
+  real(DP) :: rtau(3,48,nat)
+  !! for eaxh atom and rotation gives the R vector involved
+  real(DP) :: sxq(3)
+  !! the rotated q involved in this sym.op.
+  !
+  ! ... local variables
   INTEGER :: na, nb, sna, snb, ism1, i, j, k, l
   ! counters on atoms
   ! indices of rotated atoms

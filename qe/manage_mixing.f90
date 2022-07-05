@@ -5,9 +5,10 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
-!
+!--------------------------------------------------------------------------
 SUBROUTINE manage_mixing(dvscfout, dvscfin, dbecsum, mixin, npe, iter, kter, &
                                                             dr2, convt )
+!--------------------------------------------------------------------------
 !
 !   This routines is called by all the solve_xx routines to mix the
 !   induced potential and possibly the derivatives of the partial

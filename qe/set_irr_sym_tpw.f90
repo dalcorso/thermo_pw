@@ -9,11 +9,12 @@
 !---------------------------------------------------------------------
 subroutine set_irr_sym_tpw ( t, tmq, npertx )
 !---------------------------------------------------------------------
-!
-!     This subroutine computes: 
-!     1) the matrices which represent the small group of q on the
-!        pattern basis.
-!
+  !
+  !---------------------------------------------------------------------
+  !! This subroutine computes the matrices which represent the small
+  !! group of q on the pattern basis.
+  !
+  !
   USE kinds, ONLY : DP
   USE constants, ONLY: tpi
   USE ions_base, ONLY : nat
@@ -29,18 +30,15 @@ subroutine set_irr_sym_tpw ( t, tmq, npertx )
   USE lr_symm_base, ONLY : nsymq, irotmq, rtau, minus_q
 
   implicit none
-!
-!   first the dummy variables
-!
-  integer, intent(in) ::  npertx
-! input: maximum dimension of the irreducible representations 
-!
-  complex(DP), intent(out) :: t(npertx, npertx, 48, 3*nat), &
-                              tmq (npertx, npertx, 3*nat)
-! output: the symmetry matrices
-! output: the matrice sending q -> -q+G
-!
-!   here the local variables
+  !
+  integer, intent(in) :: npertx
+  !! maximum dimension of the irreducible representations
+  complex(DP), intent(out) :: t(npertx,npertx,48,3*nat)
+  !! the symmetry matrices
+  complex(DP), intent(out) :: tmq (npertx,npertx,3*nat)
+  !! the matrices sending \(q \rightarrow -q+G\)
+  !
+  ! ... the local variables
 !
   integer :: na, imode, jmode, ipert, jpert, kpert, nsymtot, imode0, &
        irr, ipol, jpol, isymq, irot, sna

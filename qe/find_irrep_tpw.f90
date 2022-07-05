@@ -10,10 +10,10 @@
 SUBROUTINE find_irrep_tpw()
   !---------------------------------------------------------------------
   !
-  !  Computes the variables needed to pass to the pattern representation
-  !     u      the patterns
-  !     nirr   the number of irreducible representation
-  !     npert  the dimension of each irreducible representation
+  !! Computes the variables needed to pass to the pattern representation:  
+  !! - \(u\):            the patterns;  
+  !! - \(\text{nirr}\):  the number of irreducible representation;  
+  !! - \(\text{npert}\): the dimension of each irreducible representation.
   !
   !
   USE kinds,         ONLY : DP
@@ -41,9 +41,9 @@ SUBROUTINE find_irrep_tpw()
 SUBROUTINE find_irrep_sym_tpw()
   !-----------------------------------------------------------------------
   !
-  !   Computes the variables needed to symmetrize in the pattern representation
-  !     t      the matrices of the small group of q on the pattern basis
-  !     tmq    the matrix of the symmetry which sends q -> -q + G
+  !! Computes the variables needed to symmetrize in the pattern representation:  
+  !! \(t\):          the matrices of the small group of q on the pattern basis;  
+  !! \(\text{tmq}\): the matrix of the symmetry which sends \(q \rightarrow -q+G\).
   !
   !
   USE kinds,         ONLY : DP

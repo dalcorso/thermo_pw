@@ -10,35 +10,35 @@
 SUBROUTINE compute_drhous_nc_tpw (drhous, dbecsum, wgg, becq, alpq)
   !-----------------------------------------------------------------------
   !
-  !    This routine computes the part of the change of the charge density
-  !    which is due to the orthogonalization constraint on wavefunctions
+  !! This routine computes the part of the change of the charge density
+  !! which is due to the orthogonalization constraint on wavefunctions.
   !
-  USE kinds,      ONLY : DP
-  USE ions_base,  ONLY : nat
-  USE lsda_mod,   ONLY : lsda, nspin, current_spin, isk
-  USE klist,      ONLY : xk, wk, ngk, igk_k
-  USE buffers,    ONLY : get_buffer
-  USE fft_base,   ONLY : dffts, dfftp
-  USE fft_interfaces, ONLY : invfft
-  USE wvfct,      ONLY : npwx, nbnd
+  USE kinds,            ONLY : DP
+  USE ions_base,        ONLY : nat
+  USE lsda_mod,         ONLY : lsda, nspin, current_spin, isk
+  USE klist,            ONLY : xk, wk, ngk, igk_k
+  USE buffers,          ONLY : get_buffer
+  USE fft_base,         ONLY : dffts, dfftp
+  USE fft_interfaces,   ONLY : invfft
+  USE wvfct,            ONLY : npwx, nbnd
   USE noncollin_module, ONLY : npol, nspin_mag
-  USE wavefunctions,  ONLY: evc
-  USE uspp,       ONLY: okvan, nkb, vkb
-  USE uspp_param, ONLY: nhm
+  USE wavefunctions,    ONLY : evc
+  USE uspp,             ONLY : okvan, nkb, vkb
+  USE uspp_param,       ONLY : nhm
 
-  USE qpoint,     ONLY : nksq, ikks, ikqs
-  USE eqv,        ONLY : evq, dvpsi, dpsi
-  USE control_lr, ONLY : lgamma, nbnd_occ
-  USE control_ph, ONLY : zeu, zue
-  USE zstar_add,  ONLY : done_start_zstar
+  USE qpoint,           ONLY : nksq, ikks, ikqs
+  USE eqv,              ONLY : evq, dvpsi, dpsi
+  USE control_lr,       ONLY : lgamma, nbnd_occ
+  USE control_ph,       ONLY : zeu, zue
+  USE zstar_add,        ONLY : done_start_zstar
 
-  USE efield_mod, ONLY : zstarue0
-  USE units_lr,   ONLY : lrwfc, iuwfc
-  USE becmod,     ONLY : bec_type
-  USE partial,    ONLY : done_irr, comp_irr
-  USE mp_bands,   ONLY : intra_bgrp_comm
-  USE mp,         ONLY : mp_sum
-  USE uspp_init,  ONLY : init_us_2
+  USE efield_mod,       ONLY : zstarue0
+  USE units_lr,         ONLY : lrwfc, iuwfc
+  USE becmod,           ONLY : bec_type
+  USE partial,          ONLY : done_irr, comp_irr
+  USE mp_bands,         ONLY : intra_bgrp_comm
+  USE mp,               ONLY : mp_sum
+  USE uspp_init,        ONLY : init_us_2
 
   IMPLICIT NONE
   !
