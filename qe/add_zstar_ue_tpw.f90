@@ -60,7 +60,7 @@ SUBROUTINE add_zstar_ue_tpw (imode0, npe)
         !
         ! read/compute DeltaV*psi(bare) for electric field
         !
-        CALL dvpsi_e_tpw (ik, jpol)
+        CALL dvpsi_e (ik, jpol)
         !
         DO ipert = 1, npe
            mode = imode0 + ipert

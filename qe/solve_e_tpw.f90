@@ -239,7 +239,7 @@ subroutine solve_e_tpw(drhoscf)
            !
            ! computes/reads P_c^+ x psi_kpoint into dvpsi array
            !
-           call dvpsi_e_tpw (ik, ipol)
+           call dvpsi_e (ik, ipol)
            !
            if (iter > 1) then
               !
