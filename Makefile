@@ -26,9 +26,17 @@ join_qe:
            ./makedeps.sh_qe ; mv ./makedeps.sh ../install/ ; fi
 	if test -f ./main_CMakeLists.txt ; then mv ../CMakeLists.txt \
           ./CMakeLists.txt_qe ; mv ./main_CMakeLists.txt ../CMakeLists.txt ; fi
-	if test -f ./lmdif.f90 ; then mv ../Modules/lmdif.f90 \
-           ./lmdif.f90_qe ; mv ./lmdif.f90 ../Modules ; fi
-
+	if test -f ./QESUB/lmdif.f90 ; then mv ../Modules/lmdif.f90 \
+           ./QESUB/lmdif.f90_qe ; mv ./QESUB/lmdif.f90 ../Modules ; fi
+	if test -f ./QESUB/environment_variables ; then mv \
+           ../environment_variables ./QESUB/environment_variables_qe ; \
+           mv ./QESUB/environment_variables ../environment_variables ; fi
+	if test -f ./QESUB/v_of_rho.f90 ; then mv ../PW/src/v_of_rho.f90 \
+           ./QESUB/v_of_rho.f90_qe ; \
+           mv ./QESUB/v_of_rho.f90 ../PW/src/v_of_rho.f90 ; fi
+	if test -f ./QESUB/write_upf_new.f90 ; then \
+           mv ../upflib/write_upf_new.f90 ./QESUB/write_upf_new.f90_qe ; \
+           mv ./QESUB/write_upf_new.f90 ../upflib/write_upf_new.f90 ; fi
 leave_qe:
 	if test -f ./Makefile_qe ; then mv ../Makefile ./main_Makefile ; \
            mv ./Makefile_qe ../Makefile ; fi
@@ -40,9 +48,18 @@ leave_qe:
 	if test -f ./CMakeLists.txt_qe ; then mv ../CMakeLists.txt \
            ./main_CMakeLists.txt ; \
            mv ./CMakeLists.txt_qe ../CMakeLists.txt ; fi
-	if test -f ./lmdif.f90_qe ; then mv ../Modules/lmdif.f90 \
-           ./lmdif.f90 ; \
-           mv ./lmdif.f90_qe ../Modules ; fi
+	if test -f ./QESUB/lmdif.f90_qe ; then mv ../Modules/lmdif.f90 \
+           ./QESUB/lmdif.f90 ; \
+           mv ./QESUB/lmdif.f90_qe ../Modules/lmdif.f90 ; fi
+	if test -f ./QESUB/environment_variables_qe ; then mv \
+           ../environment_variables ./QESUB/environment_variables ; \
+           mv ./QESUB/environment_variables_qe ../environment_variables ; fi
+	if test -f ./QESUB/v_of_rho.f90_qe ; then mv ../PW/src/v_of_rho.f90 \
+           ./QESUB/v_of_rho.f90 ; \
+           mv ./QESUB/v_of_rho.f90_qe ../PW/src/v_of_rho.f90 ; fi
+	if test -f ./QESUB/write_upf_new.f90_qe ; then \
+           mv ../upflib/write_upf_new.f90 ./QESUB/write_upf_new.f90 ; \
+           mv ./QESUB/write_upf_new.f90_qe ../upflib/write_upf_new.f90 ; fi
 
 clean: thermo_tools_clean thermo_pw_clean thermo_lib_clean thermo_qe_clean examples_clean examples_qe_clean space_groups_clean doc_clean
 
