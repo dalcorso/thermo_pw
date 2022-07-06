@@ -153,7 +153,7 @@ CALL divide (intra_image_comm, ntemp, nstart, nlast)
 DO itemp = nstart, nlast
    IF (MOD(itemp,50)==0.OR.itemp==ntemp) &
                   WRITE(stdout,'(5x, "Computing temperature ", i8,&
-                       &" /",i8, " Total" i8)') itemp, nlast-nstart+1, ntemp
+                       &" /",i8, " Total", i8)') itemp, nlast-nstart+1, ntemp
    CALL el_chem_pot(eldos, temp(itemp), nelec, el_mu(itemp,igeom))
    CALL el_free_energy(eldos, temp(itemp), el_mu(itemp,igeom),  &
                                                 el_free_ener(itemp,igeom))

@@ -32,7 +32,7 @@ ELSE
 ENDIF
 
 WRITE(stdout,'(/,5x,"The Berry phase polarization of this solid in &
-                     cartesian coordinates is:")')
+                     &cartesian coordinates is:")')
 
 WRITE(stdout,'(/,5x,"(", 2(f10.5,","), f10.5, "   ) phase ")')  polar(:)
 fact= alat / omega

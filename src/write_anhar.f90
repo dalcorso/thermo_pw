@@ -1653,7 +1653,7 @@ IF (meta_ionode) THEN
    OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
    WRITE(iu_therm,'("#",5x,"   T (K)", 10x, " Cv (Ry/K)", 9x,    &
                   &" energy (Ry)", 5x, "  free energy (Ry)", 5x, &
-                   " entropy (Ry/K)"  )') 
+                  &" entropy (Ry/K)"  )') 
    DO itemp = 1, ntemp
       WRITE(iu_therm, '(e16.8,4e20.12)') temp(itemp), &
              el_ce_t(itemp), el_energy_t(itemp), el_free_energy_t(itemp), &

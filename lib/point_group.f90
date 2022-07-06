@@ -469,7 +469,7 @@ CONTAINS
        ndeg = sub_table(irap, 1)
        IF (ndeg==0) THEN
           WRITE(stdout,'(5x, "case not programmed group in",i5," group_out", i5, &
-        " ptype in",3i5," ptype out", 3i5," rap",i5)') group_ext_in, &
+        &" ptype in",3i5," ptype out", 3i5," rap",i5)') group_ext_in, &
                         group_ext_out, ptype_in, ptype_out, rap
           CALL errore('convert_one_rap_proj','problem representation not found',1)
        END IF
@@ -14973,12 +14973,12 @@ SUBROUTINE find_projection_type(code_group, code_group_ext, argument,  &
  
      IF (verbose) THEN
         WRITE(stdout,'(/,5x,"Input i        phi= ",f11.6, 2x, " aii =   ",&
-                         2f14.6)')  arg_i*180._DP/pi, COS(arg_i), SIN(arg_i)
+                         &2f14.6)')  arg_i*180._DP/pi, COS(arg_i), SIN(arg_i)
         WRITE(stdout,'(5x,"Input betai    phi= ",f11.6, 2x, " betai  =",&
-                         2f14.6)')  arg_alphai*180._DP/pi, COS(arg_alphai), &
+                         &2f14.6)')  arg_alphai*180._DP/pi, COS(arg_alphai), &
                                                            SIN(arg_alphai)
         WRITE(stdout,'(5x,"Input gammai   phi= ",f11.6, 2x, " gammai =",&
-                         2f14.6)')  arg_betai*180._DP/pi, COS(arg_betai), &
+                         &2f14.6)')  arg_betai*180._DP/pi, COS(arg_betai), &
                                                           SIN(arg_betai)
      END IF
 
@@ -14996,10 +14996,10 @@ SUBROUTINE find_projection_type(code_group, code_group_ext, argument,  &
         WRITE(stdout,'(/,5x,"Final phase_i", 29x, 2f14.6)') COS(gauge_i), &
                                                             SIN(gauge_i)
         WRITE(stdout,'(5x,"Output betai   phi= ",f11.6, 2x, " betai  =",&
-                         2f14.6)')  arg_alphai*180._DP/pi, COS(arg_alphai), &
+                         &2f14.6)')  arg_alphai*180._DP/pi, COS(arg_alphai), &
                                                            SIN(arg_alphai)
         WRITE(stdout,'(5x,"Output gammai  phi= ",f11.6, 2x, " gammai =",&
-                         2f14.6)')  arg_betai*180._DP/pi, COS(arg_betai), &
+                         &2f14.6)')  arg_betai*180._DP/pi, COS(arg_betai), &
                                                            SIN(arg_betai)
      END IF
      IF (ABS(COS(arg_alphai)+1.0_DP)<1.D-6) ptype(2)=-1
@@ -16655,7 +16655,7 @@ IF (ptype(1)==1.AND.ptype(2)==1.AND.ptype(3)==-1) THEN
 END IF
 IF (ptype(1)==1.AND.ptype(2)==-1.AND.ptype(3)==-1) THEN
    WRITE(stdout,'(5x,"the projective irreducible representations with &
-             beta=-1 and gamma=-1")')
+             &beta=-1 and gamma=-1")')
    WRITE(stdout,'(5x,"point group number ", i3,2x,a)') cge, TRIM(gname)
 END IF
 IF (ptype(1)==-1.AND.ptype(2)==-1.AND.ptype(3)==1) THEN

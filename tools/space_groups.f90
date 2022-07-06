@@ -101,7 +101,7 @@ ELSEIF (work_choice==2) THEN
       IF (sgc > 15 .AND. sgc < 75) THEN
         WRITE(stdout,'(5x,"Orthorombic group.")')
         WRITE(stdout,'(5x,"Apply the second transformation to the coordinates &
-                                and")')
+                                &and")')
          WRITE(stdout,'(5x,"to celldm to pass to the ITA group, and the first &
                     &transformation")')
          WRITE(stdout,'(5x,"to return to the given group.")')

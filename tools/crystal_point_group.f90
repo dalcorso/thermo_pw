@@ -84,7 +84,7 @@ ELSEIF (work_choice == 2) THEN
       WRITE(stdout,'(5x,i3,5x,a8,2x,a41)') (isym, sym_label(isym), &
                                                sym_jones(isym), isym=1,64)
       WRITE(stdout,'(/,5x,"The number indicates the angle (2-180, 3-120, &
-                                             4-90, 6-60)")')
+                                             &4-90, 6-60)")')
       WRITE(stdout,'(5x,"The letters indicate the rotation axis")')
       WRITE(stdout,'(5x,"i means multiplication by inversion")')
       WRITE(stdout,'(5x,"QE indicates the hexagonal axes of Quantum ESPRESSO")')
@@ -112,7 +112,7 @@ ELSEIF (work_choice == 3) THEN
       WRITE(stdout,'(5x,3f8.2)') (mat(i,j),j=1,3)
    ENDDO
    WRITE(stdout,'(/,5x,"A minus in front of the operation name means &
-                                multiplication by -E")')
+                                &multiplication by -E")')
    WRITE(stdout,'(5x,"a and b are the Cayley-Klein parameters")')
    WRITE(stdout,*)
 ELSEIF (work_choice == 4) THEN
@@ -238,7 +238,7 @@ ELSEIF (work_choice == 13 .OR. work_choice == 14 .OR. work_choice==15) THEN
       CALL read_group_index(group_desc,nsym,giout_ext)
    IF (work_choice==13.AND..NOT.is_subgroup(giin_ext, giout_ext)) THEN
       WRITE(stdout,'(/,5x,"Group ",i3,&
-                " is not a subgroup of group ",i3)') giout_ext, giin_ext
+                &" is not a subgroup of group ",i3)') giout_ext, giin_ext
       WRITE(stdout,'(/,5x,"Elements list of group ",i3,":")') giin_ext
       CALL print_element_list(giin_ext)
       WRITE(stdout,'(/,5x,"Elements list of group ",i3,":")') giout_ext
@@ -367,7 +367,7 @@ ELSEIF (work_choice == 16) THEN
       CALL read_group_index(group_desc,nsym,group_index_ext)
 
       WRITE(stdout,'(5x,"Angular momentum j (0, 1, 2, 3, ... for s,p,d,f... &
-             or 0.5, 1.5, 2.5, ...) ?")')
+             &or 0.5, 1.5, 2.5, ...) ?")')
       READ(stdin,*) jang
 
       WRITE(stdout,'(/,5x,"Parity of D(j): + or - ?")') 
@@ -417,7 +417,7 @@ ELSEIF (work_choice == 16) THEN
          IF (ptype1(1)/=1.AND.ptype1(1)/=-1) ptype1(1)=1
 
          WRITE(stdout,'(5x,"Angular momentum j (0, 1, 2, 3, ... for s,p,d,f... &
-             or 0.5, 1.5, 2.5, ...) ?")')
+             &or 0.5, 1.5, 2.5, ...) ?")')
          READ(stdin,*) jang
 
          WRITE(stdout,'(5x,"Parity of D(j): + or - ?")')

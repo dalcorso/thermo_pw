@@ -103,8 +103,8 @@ DO ip=1,npp
    filename='data_p'//float_to_char(press(ip)/1.D8,0)
    OPEN(UNIT=iu_out, FILE=TRIM(filename), STATUS='unknown', FORM='formatted')
    WRITE(iu_out,'("# T (K)",8x,"G (J/mol)",8x,"H (J/mol)",8x,&
-                "S (J/mol/K)",8x,"V (m^3)",8x,"B (kbar)",8x,&
-                "beta*10^6",8x,"Cp (J/mol/K)" )') 
+                &"S (J/mol/K)",8x,"V (m^3)",8x,"B (kbar)",8x,&
+                &"beta*10^6",8x,"Cp (J/mol/K)" )') 
    DO i=3,npt-2
       WRITE(iu_out,'(8e19.10)') temp(i), g(i,ip), g(i,ip)+temp(i)*s(i,ip),  &
                            s(i,ip), v(i,ip), b(i,ip)/1.D8, beta(i,ip)*1.D6, &

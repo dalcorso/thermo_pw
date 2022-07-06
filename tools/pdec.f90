@@ -312,7 +312,7 @@ IF (meta_ionode) THEN
    SELECT CASE (laue)
       CASE(29,32)
          WRITE(iu_el_cons,'("#",2x,"P  ", 10x, " B ", 13x, " C_11 ", &
-                            13x, "     C_12 ", 13x, "   C_44")')
+                            &13x, "     C_12 ", 13x, "   C_44")')
          DO ipress=1,npress
             WRITE(iu_el_cons,'(f6.1,4e20.12)') p(ipress), b0_p(ipress),&
                  el_cons_p(1,1,ipress), el_cons_p(1,2,ipress), &
@@ -324,8 +324,8 @@ IF (meta_ionode) THEN
 !     D_3d
 !            
          WRITE(iu_el_cons,'("#",2x,"P  ", 10x, " B ", 13x, " C_11 ", &
-                   13x, " C_12 ", 13x, " C_13 ", 13x, " C_33 ", 13x, &
-                                             " C_44 ", 13x, " C_14")')
+                   &13x, " C_12 ", 13x, " C_13 ", 13x, " C_33 ", 13x, &
+                                             &" C_44 ", 13x, " C_14")')
          DO ipress=1,npress
             WRITE(iu_el_cons,'(e16.8,7e20.12)') p(ipress), b0_p(ipress),&
                   el_cons_p(1,1,ipress), el_cons_p(1,2,ipress), &
@@ -338,8 +338,8 @@ IF (meta_ionode) THEN
 !     S_6
 !            
          WRITE(iu_el_cons,'("#",2x,"P  ", 10x, " B ", " C_11 ", 13x, &
-                   " C_12 ", 13x, " C_13 ", 13x, " C_33 ", 13x, "C_44",13x, &
-                   " C_14", 13x, "C_25" )')
+                   &" C_12 ", 13x, " C_13 ", 13x, " C_33 ", 13x, "C_44",13x, &
+                   &" C_14", 13x, "C_25" )')
          DO ipress=1,npress
             WRITE(iu_el_cons,'(e16.8,8e20.12)')  p(ipress), b0_p(ipress), &
                   el_cons_p(1,1,ipress), el_cons_p(1,2,ipress), &
@@ -350,7 +350,7 @@ IF (meta_ionode) THEN
 
      CASE(19,23)
          WRITE(iu_el_cons,'("#",2x,"P  ", 10x, " B ", 13x, " C_11 ",13x,&
-                  " C_12 ", 13x, " C_13 ", 13x, " C_33 ", 13x, "C_44")')
+                  &" C_12 ", 13x, " C_13 ", 13x, " C_33 ", 13x, "C_44")')
          DO ipress=1,npress
             WRITE(iu_el_cons,'(e16.8,6e20.12)') p(ipress), b0_p(ipress), &
                   el_cons_p(1,1,ipress), el_cons_p(1,2,ipress), &
@@ -360,8 +360,8 @@ IF (meta_ionode) THEN
 
      CASE(22)
          WRITE(iu_el_cons,'("#",2x,"P  ", 10x, " B ", 13x, " C_11 ",13x,&
-                  " C_12 ", 13x, " C_13 ", 13x, " C_33 ", 13x, "C_44",13x,& 
-                  " C_66 " )')
+                  &" C_12 ", 13x, " C_13 ", 13x, " C_33 ", 13x, "C_44",13x,& 
+                  &" C_66 " )')
          DO ipress=1,npress
             WRITE(iu_el_cons,'(e16.8,7e20.12)') p(ipress), b0_p(ipress),&
                   el_cons_p(1,1,ipress), el_cons_p(1,2,ipress), &
@@ -371,8 +371,8 @@ IF (meta_ionode) THEN
 
      CASE(20)
          WRITE(iu_el_cons,'("#",2x,"P  ", 10x, " B", 13x, " C_11 ", 13x,&
-                   " C_12 ", 13x, " C_13 ", 13x, " C_22 ", 13x, " C_23", 13x,&
-                   " C_33 ", 13x, " C_44 ", 13x, " C_55 ", 13x, " C_66")')
+                   &" C_12 ", 13x, " C_13 ", 13x, " C_22 ", 13x, " C_23", 13x,&
+                   &" C_33 ", 13x, " C_44 ", 13x, " C_55 ", 13x, " C_66")')
          DO ipress=1,npress
             WRITE(iu_el_cons,'(e16.8,10e20.12)') p(ipress), b0_p(ipress), &
                   el_cons_p(1,1,ipress), el_cons_p(1,2,ipress), &
@@ -384,8 +384,8 @@ IF (meta_ionode) THEN
 
      CASE(18)
          WRITE(iu_el_cons,'("#",2x,"P  ", 10x, " B ", 13x, " C_11 ", &
-                  13x, " C_12 ", 13x, " C_13 ", 13x, " C_33 ", 13x,"C_44", &
-                  13x, " C_66 ", 13x, " C_16 ")')
+                  &13x, " C_12 ", 13x, " C_13 ", 13x, " C_33 ", 13x,"C_44", &
+                  &13x, " C_66 ", 13x, " C_16 ")')
          DO ipress=1,npress
             WRITE(iu_el_cons,'(e16.8,8e20.12)') p(ipress), b0_p(ipress),&
                   el_cons_p(1,1,ipress), el_cons_p(1,2,ipress), &

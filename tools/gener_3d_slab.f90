@@ -500,7 +500,7 @@ IF (lfound) THEN
    min_j= m * p + n * q + o * s
 !   WRITE(stdout,'(/,5x,"Found R vector parallel to G",3i8)') p, q, s 
    WRITE(stdout,'(/,5x,"In this direction the bulk has lattice planes of",i8,&
-                                                  " types")') ABS(min_j)
+                                                  &" types")') ABS(min_j)
 ENDIF
 !
 !  Now find two Bravais lattice vectors on the plane passing through 
@@ -724,7 +724,7 @@ END DO
 
 IF (min_j < 100000000) &
    WRITE(stdout,'(/,5x,"In this direction the bulk has lattice planes of",i8,&
-                                                  " types")') min_j
+                                                  &" types")') min_j
 !
 !  Adjust vacuum if requested by the user.
 !
@@ -1146,7 +1146,7 @@ CALL hpsort(nvicinals, angle, ind)
 !
 WRITE(stdout,*)
 DO ivic=1,3
-   WRITE(stdout,'(5x,"The miscut angle with the (",3i1") surface is", f13.7, &
+   WRITE(stdout,'(5x,"The miscut angle with the (",3i1,") surface is", f13.7, &
                  &" deg")') gvic(:,ind(ivic)), angle(ivic)
 ENDDO
 

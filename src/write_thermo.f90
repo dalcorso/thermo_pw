@@ -64,7 +64,7 @@ ph_entropy(:,igeom)=0.0_DP
 ph_b_fact(:,:,:,:,igeom)=0.0_DP
 DO itemp = startt, lastt
    IF (MOD(itemp-startt+1,30)==0) &
-                     WRITE(6,'(5x,"Computing temperature ", i5 " / ",&
+                     WRITE(6,'(5x,"Computing temperature ", i5, " / ",&
        & i5, 4x," T=",f12.2," K")') itemp-startt+1, lastt-startt+1, temp(itemp)
 
    CALL fecv(phdos_save(igeom), temp(itemp), ph_free_ener(itemp, igeom), &
@@ -158,7 +158,7 @@ phf_ce(:,igeom)=0.0_DP
 phf_entropy(:,igeom)=0.0_DP
 DO itemp = 1, ntemp
    IF (MOD(itemp,30)==0) &
-        WRITE(stdout,'(5x,"Computing temperature ", i5 " / ",&
+        WRITE(stdout,'(5x,"Computing temperature ", i5, " / ",&
         & i5,4x," T=",f12.2," K")') itemp, ntemp, temp(itemp)
    CALL fecv_ph(ph_freq_save(igeom), temp(itemp), phf_free_ener(itemp,igeom), &
                       phf_ener(itemp, igeom), phf_ce(itemp, igeom))

@@ -798,7 +798,7 @@ DO itempp=1,ntemp_plot
       CALL gnuplot_write_command(TRIM(label),.FALSE.)
 
       CALL gnuplot_ylabel('Thermal expansion ({/Symbol b} x 10^{6}) &
-                                                    (K^{-1})',.FALSE.)
+                                                    &(K^{-1})',.FALSE.)
    ENDIF
    CALL gnuplot_write_file_mul_data(filename,1,5,color(istep),first_step,&
                                                             last_step,.FALSE.)
@@ -1962,7 +1962,7 @@ DO itempp=1,ntemp_plot
       CALL gnuplot_write_command(TRIM(label),.FALSE.)
 
       CALL gnuplot_ylabel('Thermal expansion ({/Symbol b} x 10^{6}) &
-                                                    (K^{-1})',.FALSE.)
+                                                    &(K^{-1})',.FALSE.)
    ENDIF
    CALL gnuplot_write_file_mul_data(filename,1,4,color(istep),first_step,&
                                                             last_step,.FALSE.)

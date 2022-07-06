@@ -66,7 +66,7 @@ SUBROUTINE check_el_cons_qha()
         el_cons_t(:,:,:)=el_con_geo_t(:,:,:,igeo)
 
         WRITE(stdout,'(/,5x,"Geometry number",i5," of elastic constants &
-                   computed via ltherm_dos found")') igeo
+                   &computed via ltherm_dos found")') igeo
         
         el_cons_qha_available=.TRUE.
      END DO
@@ -90,7 +90,7 @@ SUBROUTINE check_el_cons_qha()
         el_consf_t(:,:,:)=el_conf_geo_t(:,:,:,igeo)
 
         WRITE(stdout,'(/,5x,"Geometry number",i5," of elastic constants &
-                   computed via ltherm_freq found")') igeo
+                   &computed via ltherm_freq found")') igeo
     
         el_consf_qha_available=.TRUE.
      END DO 

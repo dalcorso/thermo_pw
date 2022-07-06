@@ -54,7 +54,7 @@ LOGICAL :: lgnuplot
 CHARACTER(LEN=20) :: color
 REAL(DP) :: x(4), y(4), xmin, xmax, ymin, ymax, deltax, xm
 INTEGER  :: icolor, system, stdin
-CHARACTER(LEN=9) :: code='test_colors'
+CHARACTER(LEN=9) :: code='test_col'
 
 CALL mp_startup ( start_images=.true. )
 CALL environment_start ( code )

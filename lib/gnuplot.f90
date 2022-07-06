@@ -551,7 +551,7 @@ string=" """//TRIM(data_file)//""" u ($1*xscale-xshift):($2" &
             //"*fact-eref)*gfact w l lw "//TRIM(lw)//" lc rgb "//TRIM(color)
 
 IF (start) string="plot "//TRIM(string)
-#if defined (__PGI)
+#if defined (__PGI) || defined (__XLF)
 IF (.NOT.last) string=TRIM(string)//", \\"
 #else
 IF (.NOT.last) string=TRIM(string)//", \"
@@ -588,7 +588,7 @@ string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//"*xscale-xshi
             //")*fact-eref)*gfact w l lw 3 lc rgb "//TRIM(color)
 
 IF (start) string="plot "//TRIM(string)
-#if defined (__PGI)
+#if defined (__PGI) || defined (__XLF)
 IF (.NOT.last) string=TRIM(string)//", \\"
 #else
 IF (.NOT.last) string=TRIM(string)//", \"
@@ -625,7 +625,7 @@ string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//"*xscale-xshi
             //")*fact-eref)*gfact w l lw 3 lc rgb "//TRIM(color)
 
 IF (start) string="plot "//TRIM(string)
-#if defined (__PGI)
+#if defined (__PGI) || defined (__XLF)
 IF (.NOT.last) string=TRIM(string)//", \\"
 #else
 IF (.NOT.last) string=TRIM(string)//", \"
@@ -662,7 +662,7 @@ string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//"*xscale-xshi
       //")*fact-eref)*gfact w p pt 82 ps point_size lc rgb "//TRIM(color)
 
 IF (start) string="plot "//TRIM(string)
-#if defined (__PGI)
+#if defined (__PGI) || defined (__XLF)
 IF (.NOT.last) string=TRIM(string)//", \\"
 #else
 IF (.NOT.last) string=TRIM(string)//", \"
@@ -699,7 +699,7 @@ string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//"*xscale-xshi
             //")*fact-eref)*gfact w l lw 3 lc rgb "//TRIM(color)
 
 IF (start) string="plot "//TRIM(string)
-#if defined (__PGI)
+#if defined (__PGI) || defined (__XLF)
 IF (.NOT.last) string=TRIM(string)//", \\"
 #else
 IF (.NOT.last) string=TRIM(string)//", \"
@@ -736,7 +736,7 @@ string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//&
             //"*fact-eref)*gfact w l lw 3 lc rgb "//TRIM(color)
 
 IF (start) string="plot "//TRIM(string)
-#if defined (__PGI)
+#if defined (__PGI) || defined (__XLF)
 IF (.NOT.last) string=TRIM(string)//", \\"
 #else
 IF (.NOT.last) string=TRIM(string)//", \"
@@ -773,7 +773,7 @@ string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//&
             //"*fact-eref)*gfact) w l lw 3 lc rgb "//TRIM(color)
 
 IF (start) string="plot "//TRIM(string)
-#if defined (__PGI)
+#if defined (__PGI) || defined (__XLF)
 IF (.NOT.last) string=TRIM(string)//", \\"
 #else
 IF (.NOT.last) string=TRIM(string)//", \"
@@ -810,7 +810,7 @@ string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//&
             //"*fact-eref)*gfact w l lw 3 lc rgb "//TRIM(color)
 
 IF (start) string="plot "//TRIM(string)
-#if defined (__PGI)
+#if defined (__PGI) || defined (__XLF)
 IF (.NOT.last) string=TRIM(string)//", \\"
 #else
 IF (.NOT.last) string=TRIM(string)//", \"
@@ -847,7 +847,7 @@ string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//"*xscale-xshi
             //"*fact-eref)*gfact w p pt 82 ps point_size lc rgb "//TRIM(color)
 
 IF (start) string="plot "//TRIM(string)
-#if defined (__PGI)
+#if defined (__PGI) || defined (__XLF)
 IF (.NOT.last) string=TRIM(string)//", \\"
 #else
 IF (.NOT.last) string=TRIM(string)//", \"
@@ -885,7 +885,7 @@ string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//"*xscale-xshi
             //TRIM(color)
 
 IF (start) string="plot "//TRIM(string)
-#if defined (__PGI)
+#if defined (__PGI) || defined (__XLF)
 IF (.NOT.last) string=TRIM(string)//", \\"
 #else
 IF (.NOT.last) string=TRIM(string)//", \"

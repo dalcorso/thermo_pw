@@ -352,7 +352,7 @@ WRITE(stdout,'("Frequency: Hz=",13x,"1.0E+00",11x,"  Hz")')
 WRITE(stdout,'("Speed: m/s=",3x,es20.1,10x,"   cm/s")') 1.0_DP/cmtom
 WRITE(stdout,'("Acceleration: m/s^2=",es14.1,10x,"   cm/s^2")') &
                                                               1.0_DP/cmtom
-WRITE(stdout,'("Momentum: kg m/s=",es17.1,10x"   g cm/s")') 1.0_DP/ptop
+WRITE(stdout,'("Momentum: kg m/s=",es17.1,10x,"   g cm/s")') 1.0_DP/ptop
 WRITE(stdout,'("Angular momentum: kg m^2/s=",es7.1,10x,"   g cm^2/s")')&
                                                                 1.0_DP/ltol
 WRITE(stdout,'("Force: N=",5x,es20.1,10x,"   dyne")') 1.0_DP/ftof

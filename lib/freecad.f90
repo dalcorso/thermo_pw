@@ -528,7 +528,7 @@ INTEGER :: ipol
 IF (ionode) THEN
    CALL create_index(npoint, al)
    WRITE(strin,'("point",a,"=FreeCAD.Vector(",f13.8,",",f13.8,",&
-                           ",f13.8,")")') TRIM(al), (xk(ipol)*fcfact,ipol=1,3)
+                           &",f13.8,")")') TRIM(al), (xk(ipol)*fcfact,ipol=1,3)
    WRITE(fcu,'(a)') TRIM(strin)
 ENDIF
 

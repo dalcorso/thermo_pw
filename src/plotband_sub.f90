@@ -600,7 +600,7 @@ SUBROUTINE plotband_sub(icode, filedata, filerap, fileout, &
         IF (nrap(ilines) > 12) CALL errore("plotband_sub",&
                                            "Too many representations",1)
         WRITE(stdout,'(5x, "Line ", i4, " maximum repres. number", i4, &
-                     " point group ", i4, 2x, a11)') ilines, nrap(ilines),    &
+                     &" point group ", i4, 2x, a11)') ilines, nrap(ilines),  &
                        code_group_ext_line, TRIM(group_name(code_group_line))
 
         IF (icode==3.AND.norap) with_lines(ilines)=.FALSE.

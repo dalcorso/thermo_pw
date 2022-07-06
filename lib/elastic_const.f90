@@ -2973,7 +2973,7 @@ IF (meta_ionode) &
 
 IF (meta_ionode) THEN
    WRITE(iu_macro_el,'("#",2x,"b0: bulk modulus (kbar), e0: Young modulus (kbar), g0: & 
-                                  shear modulus (kbar), nu: Poisson ratio")')
+                                  &shear modulus (kbar), nu: Poisson ratio")')
    WRITE(iu_macro_el,'("#",2x,"v: Voigt average, r: Reuss average")')
    WRITE(iu_macro_el,'("#",2x,"T  ", 20x, "b0v ", 13x, "e0v ", 13x, "g0v ",  &
                & 13x, "  nuv", 13x, "   b0r", 13x, "e0r ", 13x, "g0r ", 13x, "nur ")')
@@ -3005,9 +3005,9 @@ IF (meta_ionode) &
 
 IF (meta_ionode) THEN
    WRITE(iu_macro_el,'("#",2x,"Macro-elasticity variable within the Voigt-Reuss-Hill &
-                                                            approximation")')
+                                                            &approximation")')
    WRITE(iu_macro_el,'("#",2x,"b0: bulk modulus (kbar), e0: Young modulus (kbar), g0: & 
-                                  shear modulus (kbar), nu: Poisson ratio")')
+                                  &shear modulus (kbar), nu: Poisson ratio")')
    WRITE(iu_macro_el,'("#",2x,"v: Voigt average, r: Reuss average")')
    WRITE(iu_macro_el,'("#",2x,"T  ", 20x, "b0 ", 13x, "e0 ", 13x, "g0 ",  &
                                                              & 13x, "  nu")')
@@ -3054,7 +3054,7 @@ IF (meta_ionode) &
 
 IF (meta_ionode) THEN
    WRITE(iu_sound,'("#",2x,"V_P: compressional velocity (m/s), V_B: bulk &
-                      velocity (m/s), V_G: shear velocity (m/s)")')
+                      &velocity (m/s), V_G: shear velocity (m/s)")')
    WRITE(iu_sound,'("#",2x,"T  ", 20x, "V_P ", 13x, "V_B ", 13x, "V_G ")')
    DO itemp=2,ntemp-1
       WRITE(iu_sound,'(e16.8, 8e18.10)') temp(itemp), v_t(1,itemp), &

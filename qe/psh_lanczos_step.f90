@@ -54,7 +54,7 @@ SUBROUTINE psh_lanczos_step(iter, flag)
        !
        WRITE(stdout,'(5x,"lr_lanczos: Left and right Lanczos vectors &
                       &are orthogonal, this is a violation of oblique &
-                                                              projection")')
+                                                              &projection")')
        !
     ELSEIF ( beta<0.0D0 ) THEN
        !

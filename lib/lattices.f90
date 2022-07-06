@@ -319,7 +319,7 @@ CONTAINS
   WRITE(stdout,'(/,5x,"Point group of the at ",a11,/)') gname_at
   IF (gname /= gname_at) &
      WRITE(stdout,'(5x,"Searching the ibrav among the lattices &
-                   compatible with ",a11)') gname
+                   &compatible with ",a11)') gname
 !
 !  set the three cartesian directions
 !

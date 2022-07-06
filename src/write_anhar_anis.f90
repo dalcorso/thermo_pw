@@ -608,7 +608,7 @@ END DO
 alpha_an_g=0.0_DP
 DO itemp = 1, ntemp
    IF (MOD(itemp,30)==0) &
-             WRITE(6,'(5x,"Computing temperature ", i5 " / ",&
+             WRITE(6,'(5x,"Computing temperature ", i5, " / ",&
        & i5, 4x," T=",f12.2," K")') itemp, ntemp, temp(itemp)
 !
 !  Computes the volume at which the Gruneisen parameters and the frequencies
@@ -1053,7 +1053,7 @@ IF (meta_ionode) THEN
 
    WRITE(iu_therm,'("# Thermal stresses in (kbar)      ")')
    WRITE(iu_therm,'("# T (K)",5x," b_11", 9x," b_12", 9x," b_13", 9x,&
-                       " b_22", 9x, " b_23", 9x, " b_33")')
+                      &" b_22", 9x, " b_23", 9x, " b_33")')
 
    DO itemp = 2, ntemp-1
       WRITE(iu_therm, '(e12.5,6e14.6)') temp(itemp), bths_t(1,1,itemp),   &
@@ -1086,7 +1086,7 @@ IF (meta_ionode) THEN
 
    WRITE(iu_therm,'("# Generalized Gruneisen parameter      ")')
    WRITE(iu_therm,'("# T (K)",5x," g_11", 9x," g_12", 9x," g_13", 9x,&
-                       " g_22", 9x, " g_23", 9x, " g_33")')
+                       &" g_22", 9x, " g_23", 9x, " g_33")')
 
    DO itemp = 2, ntemp-1
       WRITE(iu_therm, '(e12.5,6e14.6)') temp(itemp),   ggamma_t(1,1,itemp), &

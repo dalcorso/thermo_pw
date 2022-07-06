@@ -216,7 +216,7 @@ REAL(DP) :: a(poly_degree_ph+1), x(ngeo(1)), y(ngeo(1)), aux, aux1, aux2, aux3
                                &f9.3)')  b02e_t(itemp)
   IF (pressure_kb /= 0.0_DP) THEN
      WRITE(stdout,'(5x,"The Gibbs energy at the minimum is    ",&
-                                    6x,f20.9," Ry")') free_e_mine_t(itemp)
+                                    &6x,f20.9," Ry")') free_e_mine_t(itemp)
   ELSE
      WRITE(stdout,'(5x,"The free energy at the minimum is",6x,f20.9," Ry")') &
                                                  free_e_mine_t(itemp)
@@ -258,7 +258,7 @@ IF (ieos==2) &
                      &modulus is ", f13.5," 1/kbar")')  b02
 IF (pressure_kb /= 0.0_DP) THEN
    WRITE(stdout,'(5x,"The Gibbs energy at the minimum is    ",&
-                                    6x,f20.9," Ry")') free_e_min
+                                    &6x,f20.9," Ry")') free_e_min
 ELSE
    WRITE(stdout,'(5x,"The free energy at the minimum is",6x,f20.9," Ry")') &
                                                  free_e_min
