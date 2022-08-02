@@ -1,4 +1,5 @@
 1                                  ! which free energy 
+5                                  ! ieos 5=Vinet
 9.545E-6    3060.     4.17         ! v0 (cm^3), b0 (kbar), b01
 0.513       13.27     182.8        ! mb1, db1, thetab
 0.174        3.305    172.5        ! mb2, db2, thetab 
@@ -16,19 +17,19 @@
 2000.0
 3000.0                             ! temp_plot(ntemp_plot)
 0.5            1.1    601          ! vmin, vmax, nvol (in v0 units)
-0.0         3000.0    1001         ! pmin, pmax, npress
 3                                  ! nvol_plot
 1.0                                ! vol_plot(1)  
 0.8 
 0.6                                ! vol_plot(3) in v0 units
+0.0         3000.0    1001         ! pmin, pmax, npress
 4                                  ! npress_plot
 0.0                                ! press_plot(1)    (kbar)
 1000.0
 2000.0
 3000.0                             ! press_plot(npress_plot) (kbar)
+3                                  ! Write no info on output
 
 These parameters are for W from Phys. Rev. B 75, 024115 (2007).
 
-Available which free energy
-1 P.I. Dorogokupets and A.R. Oganov, Phys. Rev. B 75, 024115 (2007).
-2 K.D. Litasov et al. Journ. of Appl. Phys. 113, 093507 (2013).
+For the available free energies please check the comments at
+the beginning of the code tools/emp_f.f90.
