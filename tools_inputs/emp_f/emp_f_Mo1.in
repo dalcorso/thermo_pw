@@ -1,0 +1,33 @@
+3                                  ! which free energy 
+7                                  ! cold equation of state (7=Holzaper)
+1.0  42.0                          ! enne and Z
+9.369E-6    2605.     4.05         ! v0 (cm^3), b0 (kbar), b01
+1.5         356.                   ! me1, thetae1
+1.5         218.                   ! me2, thetae2
+-0.735     -0.755                  ! t, delta
+0.0         0.0                    ! a, m 
+123.9E-6    3.5                    ! e, g        
+3.0         3009.0    1002         ! tmin, tmax, ntemp
+5                                  ! ntemp_plot
+3.0                                ! temp_plot(1)
+300.0
+1000.0
+2000.0
+3000.0                             ! temp_plot(ntemp_plot)
+0.5            1.3   5001          ! vmin, vmax, nvol (in v0 units)
+3                                  ! nvol_plot
+1.0                                ! vol_plot(1)  
+0.8 
+0.6                                ! vol_plot(3) in v0 units
+0.0         3010.0    1001         ! pmin, pmax, npress
+4                                  ! npress_plot
+0.0                                ! press_plot(1)    (kbar)
+1000.0
+2000.0
+3000.0                             ! press_plot(npress_plot) (kbar)
+1
+3000     2004.16
+
+These parameters are for Mo are from:
+
+T.S. Sokolova, P.I. Dorogokupets, K.D. Litasov, Russian Geology and Geophysics 54, 181 (2013) (In the text at page 193).
