@@ -1,5 +1,5 @@
 !
-! Copyright (C) 2015 Andrea Dal Corso
+! Copyright (C) 2015-2022 Andrea Dal Corso
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -20,35 +20,57 @@ REAL(DP), INTENT(IN) :: a
 INTEGER, INTENT(IN) :: n
 
 CHARACTER(LEN=8) :: buffer
-INTEGER :: i, ai, fai, neff
+INTEGER :: i, ai, neff, leng
 CHARACTER(LEN=6) :: as, fas, int_to_char
-REAL(DP) :: aeff
+REAL(DP) :: aeff, aux
+LOGICAL  :: lsign
+!
+!   If negative set lsign to .TRUE.
+!
+lsign=.FALSE.
+aux=a
+IF (a<0.0_DP) THEN
+   lsign=.TRUE.
+   aux=-a
+ENDIF
 
-IF (a > 999999.) CALL errore('float_to_char','float too large',1)
+IF (aux > 999999.) CALL errore('float_to_char','float too large',1)
 !
 !  find the effective number of decimal digits that can be written in the
 !  string
 !
 DO i = 0,n
-   IF (a*10**i <= 9999999.) neff=i
+   IF (aux*10**i <= 9999999.) neff=i
 ENDDO
 !
 !  round a to that number of digits
 !
-aeff=NINT(a*10**neff)/10.0_DP**neff
+aeff=NINT(aux*10**neff)/10.0_DP**neff
 !
 !  and transform it to a string, first converting the integer part and
 !  then the decimal part
 !
 ai=INT(aeff)
 as=int_to_char(ai)
-fai=NINT((aeff-ai)*10**neff)
-fas=int_to_char(fai)
+ai=NINT((aeff-ai)*10**neff)
+fas=int_to_char(ai)
+!
+!  if the length of the decimal part string has less than neff digits,
+!  there are leading 0 that must be inserted
+!
+leng=LEN(TRIM(fas))
+DO i=1,neff-leng
+   fas='0'//TRIM(fas)
+ENDDO
 buffer=TRIM(as)
 !
 !  finally join the two strings
 !
 IF (neff>0) buffer=TRIM(as)//'.'//TRIM(fas)
+!
+!  and put the negative sign if necessary
+!
+IF (lsign) buffer='-'//TRIM(buffer)
 float_to_char=TRIM(buffer)
 
 RETURN
