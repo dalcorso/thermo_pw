@@ -2281,6 +2281,127 @@ RETURN
 END SUBROUTINE anhar_ev_vt
 !
 !-----------------------------------------------------------------------
+SUBROUTINE write_hugoniot()
+!-----------------------------------------------------------------------
+!
+!  This subroutine computes for each volume in the mesh of volumes
+!  the Hugoniot pressure and temperature if the temperature is within
+!  the range of the temperature mesh.
+!
+USE kinds,            ONLY : DP
+USE constants,        ONLY : ry_kbar
+USE control_mur,      ONLY : vmin, b0, b01, b02, emin
+USE control_quartic_energy, ONLY : poly_degree_ph
+USE anharmonic,       ONLY : vmin_t, ener_t, a_t, celldm_t
+USE control_ev,       ONLY : ieos
+USE control_vol,      ONLY : vmin_input, deltav, nvol
+USE thermodynamics,   ONLY : ph_ener
+USE el_thermodynamics, ONLY : el_ener
+USE el_anharmonic,    ONLY : el_energy_t
+USE temperature,      ONLY : temp, ntemp, itemp300, deltat
+USE control_eldos,    ONLY : lel_free_energy
+USE control_quartic_energy, ONLY : poly_degree_ph
+USE eos,              ONLY : eos_press_pol, eos_energy
+USE data_files,       ONLY : flanhar
+USE io_global,        ONLY : meta_ionode
+USE mp,               ONLY : mp_sum
+USE mp_world,         ONLY : world_comm
+
+IMPLICIT NONE
+CHARACTER(LEN=256) :: filename
+REAL(DP) :: press, omega, ener0, ele300, t_hugo, p_hugo
+REAL(DP), ALLOCATABLE :: omegat(:), enert(:), el_enert(:), presst(:), hugo(:)
+INTEGER  :: m1, itemp, itemp_hugo, iu_hugo, ivol, startt, lastt
+INTEGER  :: find_free_unit 
+
+m1=poly_degree_ph+1
+
+ALLOCATE(omegat(ntemp))
+ALLOCATE(enert(ntemp))
+ALLOCATE(el_enert(ntemp))
+ALLOCATE(hugo(ntemp))
+ALLOCATE(presst(ntemp))
+!
+!   Open the file where the Hugoniot pressure and temperature will be written
+!
+filename="anhar_files/"//TRIM(flanhar)//'.hugoniot'
+CALL add_pressure(filename)
+IF (meta_ionode) THEN
+   iu_hugo=find_free_unit()
+   OPEN(UNIT=iu_hugo, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
+   WRITE(iu_hugo,'(# Volume (a.u.)^3      Pressure (kbar)          T  (K)")')
+ENDIF
+!
+!  For each volume compute the Hugoniot pressure and temperature
+!
+ele300=0.0_DP
+el_enert=0.0_DP
+CALL divide(world_comm, ntemp, startt, lastt)
+DO ivol=1,nvol
+   omega = vmin_input + deltav * (ivol-1)
+   omegat=omega
+!
+!  Interpolate at the volume omega the cold equation of state
+!
+   CALL eos_energy(ieos, omega, ener0, vmin, b0/ry_kbar, b01, b02*ry_kbar)
+!
+!  For all temperatures interpolate the harmonic vibrational energy
+!  and (if available) the electronic energy
+!
+   CALL interpolate_thermo(omegat, celldm_t, ph_ener, enert)
+   IF (lel_free_energy) THEN
+      CALL interpolate_thermo(omegat, celldm_t, el_ener, el_enert)
+      ele300=el_energy_t(itemp300)
+   ENDIF
+!
+!  Now compute the difference between 1/2 P_H (V_0-V) and E_H-E_0
+!
+   presst=0.0_DP
+   hugo=0.0_DP
+   DO itemp=startt,lastt
+      CALL eos_press_pol(ieos, omega, presst(itemp), vmin, b0/ry_kbar, &
+                                     b01, b02*ry_kbar, a_t(:,itemp), m1)
+
+      hugo(itemp)= presst(itemp)*0.5_DP*(vmin_t(itemp300)-omega)  - &
+               (ener0 + enert(itemp) + el_enert(itemp) - ener_t(itemp300) - &
+                                         ele300)
+   ENDDO
+   CALL mp_sum(presst, world_comm)
+   CALL mp_sum(hugo, world_comm)
+!
+!  Find the point in the temperature mesh in which difference changes sign. 
+!   
+   itemp_hugo=0
+   DO itemp=1,ntemp
+      IF (hugo(itemp)>0.0_DP) itemp_hugo=itemp
+   ENDDO
+!
+!   Write the Hugoniot pressure and temperature only if the temperature
+!   is in the range of the temperature mesh
+!
+   IF (meta_ionode) THEN
+      IF (itemp_hugo > 0 .AND. itemp_hugo < ntemp) THEN
+         t_hugo=temp(itemp_hugo) - deltat * hugo(itemp_hugo) /            &
+                             (hugo(itemp_hugo+1)-hugo(itemp_hugo))
+         p_hugo=presst(itemp_hugo) + (presst(itemp_hugo+1)-               &
+                                               presst(itemp_hugo)) *      &
+                             (t_hugo-temp(itemp_hugo)) / deltat
+         WRITE(iu_hugo,'(3e20.10)') omega, p_hugo*ry_kbar, t_hugo
+      ENDIF
+   ENDIF
+ENDDO
+IF (meta_ionode) CLOSE (UNIT=iu_hugo, STATUS='KEEP')
+
+DEALLOCATE(enert)
+DEALLOCATE(el_enert)
+DEALLOCATE(omegat)
+DEALLOCATE(hugo)
+DEALLOCATE(presst)
+
+RETURN
+END SUBROUTINE write_hugoniot
+!
+!-----------------------------------------------------------------------
 SUBROUTINE find_min_mur_pol(v0, b0, b01, b02, a, m1, vm)
 !-----------------------------------------------------------------------
 !

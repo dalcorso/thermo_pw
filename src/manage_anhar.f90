@@ -153,6 +153,11 @@ IF (ltherm_dos) THEN
 !  and the electronic one if available
 !
    CALL write_free_energy()
+!
+!  write on output the Hugoniot
+!   
+   CALL write_hugoniot()
+!
 ENDIF
 
 IF (ltherm_freq) THEN
