@@ -30,6 +30,10 @@ INTEGER, INTENT(IN)             :: iwork, part, iq, irr, igeom
 INTEGER                         :: igeom1
 LOGICAL                         :: run, exit_status
 !
+! Initialize run for the band calculation
+!
+run=.TRUE.
+!
 !  Start with a message of what is computed
 !
 IF (lphonon(iwork).AND..NOT.fpol) THEN

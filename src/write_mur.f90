@@ -22,7 +22,7 @@ USE kinds,            ONLY : DP
 USE data_files,       ONLY : flevdat
 USE thermo_mod,       ONLY : ngeo, omega_geo
 USE control_mur,      ONLY : p0
-USE control_vol,      ONLY : nvol, vmin_input, vmax_input, deltav
+USE control_vol,      ONLY : nvol, vmin_input, deltav
 USE control_ev,       ONLY : ieos
 USE eos,              ONLY : eos_energy, eos_press
 USE control_pressure, ONLY : pressure_kb, pressure

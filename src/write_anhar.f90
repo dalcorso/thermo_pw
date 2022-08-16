@@ -2329,7 +2329,7 @@ CALL add_pressure(filename)
 IF (meta_ionode) THEN
    iu_hugo=find_free_unit()
    OPEN(UNIT=iu_hugo, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
-   WRITE(iu_hugo,'(# Volume (a.u.)^3      Pressure (kbar)          T  (K)")')
+   WRITE(iu_hugo,'("# Volume (a.u.)^3      Pressure (kbar)          T  (K)")')
 ENDIF
 !
 !  For each volume compute the Hugoniot pressure and temperature
