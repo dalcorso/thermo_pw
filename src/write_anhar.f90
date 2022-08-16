@@ -1933,6 +1933,7 @@ USE control_quartic_energy, ONLY : poly_degree_ph
 USE anharmonic,     ONLY : vmin_noe_t, b0_noe_t, b01_noe_t, b02_noe_t, &
                            free_e_min_noe_t, a_noe_t
 USE temperature,    ONLY : ntemp
+USE control_eldos,  ONLY : lel_free_energy
 USE mp,             ONLY : mp_sum
 USE mp_world,       ONLY : world_comm
 
@@ -1947,6 +1948,8 @@ b0_noe_t=0.0_DP
 b01_noe_t=0.0_DP
 b02_noe_t=0.0_DP
 free_e_min_noe_t=0.0_DP
+
+IF (.NOT.lel_free_energy) RETURN
 
 CALL divide(world_comm, ntemp, startt, lastt)
 
