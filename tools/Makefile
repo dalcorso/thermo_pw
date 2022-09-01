@@ -33,7 +33,7 @@ all : space_groups.x crystal_point_group.x mag_point_group.x units.x \
       elastic.x plot_sur_states.x gener_2d_slab.x gener_3d_slab.x \
       gener_nanowire.x debye.x rotate_tensors.x test_colors.x epsilon_tpw.x \
       pdec.x optical.x change_e_name.x change_tel_name.x \
-      change_dynmat_name.x merge_interp.x template.x eos_test.x emp_f.x \
+      change_dynmat_name.x merge_interp.x template.x test_eos.x emp_f.x \
       emp_g.x average_grun.x
       
 
@@ -138,9 +138,9 @@ template.x : template.o $(MODULES)
 	$(LD) $(LDFLAGS) -o $@ template.o $(MODULES) $(QELIBS)
 	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/template.x . )
 
-eos_test.x : eos_test.o $(MODULES)
-	$(LD) $(LDFLAGS) -o $@ eos_test.o $(MODULES) $(QELIBS)
-	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/eos_test.x . )
+test_eos.x : test_eos.o $(MODULES)
+	$(LD) $(LDFLAGS) -o $@ test_eos.o $(MODULES) $(QELIBS)
+	- ( cd ../../bin ; ln -fs ../thermo_pw/tools/test_eos.x . )
 
 emp_f.x : emp_f.o $(MODULES)
 	$(LD) $(LDFLAGS) -o $@ emp_f.o $(MODULES) $(QELIBS)
@@ -179,7 +179,7 @@ clean :
 	- /bin/rm -rf ../../bin/change_dynmat_name.x 
 	- /bin/rm -rf ../../bin/change_e_name.x 
 	- /bin/rm -rf ../../bin/change_tel_name.x 
-	- /bin/rm -rf ../../bin/eos_test.x 
+	- /bin/rm -rf ../../bin/test_eos.x 
 	- /bin/rm -rf ../../bin/emp_f.x 
 	- /bin/rm -rf ../../bin/emp_g.x 
 	- /bin/rm -rf ../../bin/average_grun.x 

@@ -6,7 +6,7 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !--------------------------------------------------------------------
-PROGRAM eos_test
+PROGRAM test_eos
 !--------------------------------------------------------------------
 !
 !  This program tests the module eos.f90 of the library.
@@ -121,27 +121,31 @@ deltav= (vmax-vmin)/npt
 IF (lpoly) THEN
    DO j=1,npt
       vm(j)=vmin+(j-1)*deltav
-      CALL eos_energy_pol(ieos, vm(j), eout(j), v0, b0, b01, b02, a, m1)
-      CALL eos_press_pol(ieos, vm(j), pout(j), v0, b0, b01, b02, a, m1)
-      CALL eos_dpress_pol(ieos, vm(j), dpout(j), v0, b0, b01, b02, a, m1)
-      CALL eos_bulk_pol(ieos, vm(j), bulkout(j), dbulkout(j), d2bulkout(j), &
-                        v0, b0, b01, b02, a, m1)
+      CALL eos_energy_pol(ieos, vm(j), eout(j), v0, b0/ry_kbar, b01,  &
+                                                   b02*ry_kbar, a, m1)
+      CALL eos_press_pol(ieos, vm(j), pout(j), v0, b0/ry_kbar, b01,   &
+                                                   b02*ry_kbar, a, m1)
+      CALL eos_dpress_pol(ieos, vm(j), dpout(j), v0, b0/ry_kbar, b01, &
+                                                   b02*ry_kbar, a, m1)
+      CALL eos_bulk_pol(ieos, vm(j), bulkout(j), dbulkout(j),         &
+                        d2bulkout(j), v0, b0/ry_kbar, b01,            &
+                                                   b02*ry_kbar, a, m1)
    ENDDO
 ELSE
    DO j=1,npt
       vm(j)=vmin+(j-1)*deltav
-      CALL eos_energy(ieos, vm(j), eout(j), v0, b0, b01, b02)
-      CALL eos_press(ieos, vm(j), pout(j), v0, b0, b01, b02)
-      CALL eos_dpress(ieos, vm(j), dpout(j), v0, b0, b01, b02)
+      CALL eos_energy(ieos, vm(j), eout(j), v0, b0/ry_kbar, b01, b02*ry_kbar)
+      CALL eos_press(ieos, vm(j), pout(j), v0, b0/ry_kbar, b01, b02*ry_kbar)
+      CALL eos_dpress(ieos, vm(j), dpout(j), v0, b0/ry_kbar, b01, b02*ry_kbar)
       CALL eos_bulk(ieos, vm(j), bulkout(j), dbulkout(j), d2bulkout(j), &
-                                                      v0, b0, b01, b02)
+                                    v0, b0/ry_kbar, b01, b02*ry_kbar)
    ENDDO
 ENDIF
 
 OPEN(UNIT=28, FILE='outdata', STATUS='UNKNOWN')
 
-WRITE(28,'("#",2x,"Volume(a.u.)^3",5x,"Energy",10x,"Press",10x,"dPress",&
-                                          &11x,"B0",13x,"B01",13x,"B02")')
+WRITE(28,'("#",2x,"Volume(a.u.)^3",5x,"Energy (Ry)",5x,"Press (kbar)",3x,&
+                     "dPress",11x,"B0 (kbar)",9x,"B01",9x,"B02 (1/kbar)")')
 DO j=1,npt
     WRITE(28,'(7e16.6)') vm(j), eout(j), pout(j)*ry_kbar, dpout(j)*ry_kbar,&
                          bulkout(j)*ry_kbar, dbulkout(j), d2bulkout(j)/ry_kbar
@@ -159,17 +163,16 @@ DO j=2,npt-1
    d2bulk_num(j)= (dbulkout(j+1)-dbulkout(j-1))/(pout(j+1)-pout(j-1))
 ENDDO
 
-WRITE(28,'("#",2x,"Volume(a.u.)^3",5x,"delta Press",5x,"delta dPress",&
-                         &5x,"delta B0",5x,"delta B01",5x,"delta B02")')
-
-! DO j=2,npt-1
-!     WRITE(28,'(7e16.6)') vm(j), pout(j)*ry_kbar-p_num(j)*ry_kbar, &
+IF (ieos==2) THEN
+   WRITE(28,'("#",2x,"Volume(a.u.)^3",5x,"dP/P",11x,"d dP/dP",&
+                    &10x,"dB0/B0",8x," dB01/B01",8x,"dB02/B02")')
+!  DO j=2,npt-1
+!     WRITE(28,'(6e16.6)') vm(j), pout(j)*ry_kbar-p_num(j)*ry_kbar, &
 !                          dpout(j)*ry_kbar-dp_num(j)*ry_kbar, &
 !     bulkout(j)*ry_kbar-bulk_num(j)*ry_kbar, dbulkout(j)-dbulk_num(j), &
 !     d2bulkout(j)/ry_kbar-d2bulk_num(j)/ry_kbar
-! ENDDO
+!  ENDDO
 
-IF (ieos==2) THEN
    DO j=2,npt-1
       WRITE(28,'(6e16.6)') vm(j), (pout(j)-p_num(j))/pout(j),         &
                            (dpout(j)-dp_num(j))/dpout(j),             &
@@ -178,6 +181,14 @@ IF (ieos==2) THEN
                            (d2bulkout(j)-d2bulk_num(j))/d2bulk_num(j)
    ENDDO
 ELSE
+   WRITE(28,'("#",2x,"Volume(a.u.)^3",5x,"dP/P",11x,"d dP/dP",&
+                    &10x,"dB0/B0",8x," dB01/B01")')
+!  DO j=2,npt-1
+!     WRITE(28,'(5e16.6)') vm(j), pout(j)*ry_kbar-p_num(j)*ry_kbar, &
+!                          dpout(j)*ry_kbar-dp_num(j)*ry_kbar, &
+!     bulkout(j)*ry_kbar-bulk_num(j)*ry_kbar, dbulkout(j)-dbulk_num(j)
+!  ENDDO
+
   DO j=2,npt-1
       WRITE(28,'(5e16.6)') vm(j), (pout(j)-p_num(j))/pout(j),    &
                            (dpout(j)-dp_num(j))/dpout(j),        &
@@ -206,5 +217,5 @@ IF (lpoly) DEALLOCATE(a)
 CALL environment_end( code )
 CALL mp_global_end ()
 
-END PROGRAM eos_test
+END PROGRAM test_eos
 
