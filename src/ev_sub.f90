@@ -187,8 +187,9 @@ SUBROUTINE ev_sub_nodisk(vmin,b0,b01,b02,emin_out)
 !-----------------------------------------------------------------------
 !
 !  This routine is similar to ev_sub, but it receives the input data
-!  directly from the shared variable without the need to write on
-!  disk. It does not write any output.
+!  directly from the shared variables without the need to write on
+!  disk. It does not write any output. It can be called by any processor.
+!  This routine is not parallel. The CPU that calls it receive the result.
 !  
 !  Before calling this routine the user must set in the module control_ev
 !  ieos : the equation of state to use
@@ -205,9 +206,6 @@ SUBROUTINE ev_sub_nodisk(vmin,b0,b01,b02,emin_out)
 USE kinds, ONLY: DP
 USE control_ev, ONLY : ieos, npt, v0, etot => e0
 USE ev_mod,    ONLY : initialize_data_ev, find_minimum, emin
-USE mp,        ONLY : mp_bcast
-USE io_global, ONLY : ionode, ionode_id, stdout
-USE mp_images, ONLY : my_image_id, root_image, intra_image_comm
 
 IMPLICIT NONE
 REAL(DP), INTENT(OUT)  :: vmin, b0, b01, b02, emin_out
@@ -215,43 +213,36 @@ INTEGER, PARAMETER:: nmaxpar=4
 INTEGER :: npar,ipt,ierr
 REAL(DP) :: par(nmaxpar), chisq
 
-IF (my_image_id /= root_image) RETURN
-
-IF (ionode) THEN
-   IF (ieos==1 .OR. ieos==4) THEN
-      npar=3
-   ELSEIF(ieos==2) THEN
-      npar=4
-   ELSE
-      CALL errore('ev_sub_nodisk', 'Unexpected eq. of state', ieos)
-   ENDIF
+IF (ieos==1 .OR. ieos==4) THEN
+   npar=3
+ELSEIF(ieos==2) THEN
+   npar=4
+ELSE
+   CALL errore('ev_sub_nodisk', 'Unexpected eq. of state', ieos)
+ENDIF
 !
 !  find emin and the initial guess for the volume
 !
-   emin=1.d10
-   DO ipt=1,npt
-      IF (etot(ipt)<emin) THEN
-         par(1) = v0(ipt)
-         emin = etot(ipt)
-      ENDIF
-   ENDDO
+emin=1.d10
+DO ipt=1,npt
+   IF (etot(ipt)<emin) THEN
+      par(1) = v0(ipt)
+      emin = etot(ipt)
+   ENDIF
+ENDDO
 !
 ! par(1) = V, Volume of the unit cell in (a.u.^3)
 ! par(2) = B, Bulk Modulus (in KBar)
 ! par(3) = dB/dP (adimensional)
 ! par(4) = d^2B/dP^2 (in KBar^(-1), used only by 2nd order formulae)
 !
-   par(2) = 500.0d0
-   par(3) = 5.0d0
-   par(4) = -0.01d0
+par(2) = 500.0d0
+par(3) = 5.0d0
+par(4) = -0.01d0
 
-   CALL initialize_data_ev(v0, etot, npt, ieos)
+CALL initialize_data_ev(v0, etot, npt, ieos)
    !
-   CALL find_minimum (npar,par,chisq)
-ENDIF
-!
-CALL mp_bcast(par, ionode_id, intra_image_comm)
-CALL mp_bcast(emin, ionode_id, intra_image_comm)
+CALL find_minimum (npar,par,chisq)
     
 vmin=par(1)
 b0=par(2)

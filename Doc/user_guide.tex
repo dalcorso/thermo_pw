@@ -2582,13 +2582,6 @@ the Gibbs free energy of a solid as a function of pressure and temperature and
 prints the thermodynamic quantities. Presently it supports only the model
 of Gustafson for tungsten.
 
-\item \texttt{eos\_test.x} reads the parameters of an equation of state,
-and optionally the coefficients of a polynomial. Produces in output
-a file with the energy, the pressure, the bulk modulus, and its first
-and possibly second derivative with respect to pressure.
-It also checks the analytic results with those obtained by numerical
-finite differences.
-
 \item \texttt{epsilon\_tpw.x} generalizes the routine
 \texttt{epsilon.f90} of the \qe\ distribution. It calculates the 
 complex dielectric
@@ -2699,6 +2692,13 @@ For an example of its use see \texttt{tools\_input/supercell.in}.
 
 \item \texttt{test\_colors.x} produces a postscript file with the 
 \texttt{gnuplot} colors that can be used in the plots.   
+
+\item \texttt{test\_eos.x} reads the parameters of an equation of state,
+and optionally the coefficients of a polynomial. Produces in output
+a file with the energy, the pressure, the bulk modulus, and its first
+and possibly second derivative with respect to pressure.
+It also checks the analytic results with those obtained by numerical
+finite differences writing on file the relative errors.
 
 \item \texttt{template.x} This is an example on how to write a tool
 code that can interface with the \texttt{QE} routines and all the
