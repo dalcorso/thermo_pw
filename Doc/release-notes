@@ -1,5 +1,7 @@
 New in version 1.8.0
 
+Added the possibility to plot the Hugoniot curves T(p) and V(p).
+(in collaboration with X. Gong)
 
 05/07/2022 Version 1.7.1 is now frozen
 New in version 1.7.1

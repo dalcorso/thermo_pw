@@ -1308,6 +1308,96 @@ RETURN
 END SUBROUTINE plot_anhar_gamma
 
 !-----------------------------------------------------------------------
+SUBROUTINE plot_hugoniot()
+!-----------------------------------------------------------------------
+!
+!  This routine plots the hugoniot curves (T(p), and V(p))
+!  several forms 
+!
+USE kinds,            ONLY : DP
+USE constants,        ONLY : ry_kbar
+USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
+USE control_thermo,   ONLY : ltherm_dos, lhugoniot
+USE postscript_files, ONLY : flpsanhar
+USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,   &
+                             gnuplot_write_header,         &
+                             gnuplot_ylabel,               &
+                             gnuplot_xlabel,               &
+                             gnuplot_write_file_mul_data,  &
+                             gnuplot_set_fact
+USE data_files,       ONLY : flanhar
+
+USE control_pressure, ONLY : pmin, pmax
+USE mp_images,        ONLY : my_image_id, root_image
+USE io_global,        ONLY : ionode
+
+IMPLICIT NONE
+
+CHARACTER(LEN=256) :: gnu_filename, filename, filename1
+
+INTEGER :: ierr, system
+REAL(DP) :: factor
+
+IF ( my_image_id /= root_image ) RETURN
+
+IF (.NOT.ltherm_dos) RETURN
+IF (.NOT.lhugoniot) RETURN
+!
+!   gnuplot script
+!
+gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//'_anhar_hugoniot'
+CALL add_pressure(gnu_filename)
+!
+!  name of the postcript file
+!
+filename=TRIM(flpsanhar)//'.hugoniot'
+CALL add_pressure(filename)
+filename=TRIM(filename)//TRIM(flext)
+!
+!  Files with the data
+!
+filename1="anhar_files/"//TRIM(flanhar)//'.hugoniot'
+CALL add_pressure(filename1)
+!
+!  open the script
+!
+CALL gnuplot_start(gnu_filename)
+!
+!  set the ranges and axis
+!
+CALL gnuplot_write_header(filename, pmin*ry_kbar, pmax*ry_kbar, &
+                                 0.0_DP, 0.0_DP, 1.0_DP, flext ) 
+!
+CALL gnuplot_xlabel('p (kbar)',.FALSE.) 
+CALL gnuplot_set_fact(1.0_DP,.FALSE.)
+!
+! Temperature as a function of pressure
+!
+CALL gnuplot_ylabel('Hugoniot T (K)',.FALSE.)
+
+CALL gnuplot_write_file_mul_data(filename1,2,3,'color_red',.TRUE.,&
+                                            .TRUE.,.FALSE.)
+!
+! Volume as a function of pressure
+!
+CALL gnuplot_ylabel('Volume ((a.u.)^3)',.FALSE.)
+factor = 1.0_DP
+CALL gnuplot_set_fact(factor,.FALSE.)
+CALL gnuplot_write_file_mul_data(filename1,2,1,'color_red',.TRUE.,&
+                                            .TRUE.,.FALSE.)
+CALL gnuplot_end()
+
+IF (lgnuplot.AND.ionode) &
+   ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+
+!IF (lgnuplot.AND.ionode) &
+!   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
+!                                       //TRIM(gnu_filename), WAIT=.FALSE.)
+
+RETURN
+END SUBROUTINE plot_hugoniot
+
+!-----------------------------------------------------------------------
 SUBROUTINE plot_anhar_press()
 !-----------------------------------------------------------------------
 !

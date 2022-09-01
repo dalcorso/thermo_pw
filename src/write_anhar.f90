@@ -2295,6 +2295,7 @@ USE kinds,            ONLY : DP
 USE constants,        ONLY : ry_kbar
 USE control_mur,      ONLY : vmin, b0, b01, b02, emin
 USE control_quartic_energy, ONLY : poly_degree_ph
+USE control_thermo,   ONLY : lhugoniot
 USE anharmonic,       ONLY : vmin_t, ener_t, a_t, celldm_t
 USE control_ev,       ONLY : ieos
 USE control_vol,      ONLY : vmin_input, deltav, nvol
@@ -2316,6 +2317,8 @@ REAL(DP) :: press, omega, ener0, ele300, t_hugo, p_hugo
 REAL(DP), ALLOCATABLE :: omegat(:), enert(:), el_enert(:), presst(:), hugo(:)
 INTEGER  :: m1, itemp, itemp_hugo, iu_hugo, ivol, startt, lastt
 INTEGER  :: find_free_unit 
+
+IF (.NOT. lhugoniot) RETURN
 
 m1=poly_degree_ph+1
 

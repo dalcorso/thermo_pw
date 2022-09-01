@@ -846,6 +846,8 @@ MODULE control_thermo
                                   ! at each temperature with an eos, 
                                   ! otherwise fit the temperature dependent 
                                   ! part of the free energy with a polynomial
+  LOGICAL :: lhugoniot=.FALSE.    ! if .true. the code plots T(p) and V(p)
+                                  ! along the Hugoniot
   LOGICAL :: lconv_ke_test=.FALSE.! if .true. this writes the ke test on file
   LOGICAL :: lconv_nk_test=.FALSE.! if .true. this writes the k-point on file
   LOGICAL :: lelastic_const=.FALSE. ! if .true. compute elastic constants

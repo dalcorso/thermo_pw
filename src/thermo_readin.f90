@@ -34,7 +34,8 @@ SUBROUTINE thermo_readin()
                                    ltherm_glob,                            &
                                    continue_zero_ibrav, find_ibrav,        &
                                    set_internal_path, set_2d_path,         &
-                                   all_geometries_together, max_seconds_tpw
+                                   all_geometries_together, max_seconds_tpw, &
+                                   lhugoniot
   USE data_files,           ONLY : flevdat, flfrc, flfrq, fldos, fltherm,  &
                                    flanhar, filband, flkeconv, flenergy,   &
                                    flpbs, flprojlayer, flnkconv, flgrun,   &
@@ -292,6 +293,7 @@ SUBROUTINE thermo_readin()
                             add_empirical, efe, alpha1,     &
                             alpha2, v0p,                    &
                             ltherm_glob,                    &
+                            lhugoniot,                      &
                             poly_degree_grun,               &
                             flpgrun, flgrun, flpsgrun,      &
                             flanhar, flelanhar, flpsanhar,  &
@@ -480,6 +482,7 @@ SUBROUTINE thermo_readin()
   fl_el_cons='output_el_cons.dat'
 
   ltherm_glob=.FALSE.
+  lhugoniot=.FALSE.
   poly_degree_grun=4
 
   nppl=51

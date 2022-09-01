@@ -21,6 +21,7 @@ CALL plot_anhar_dbulk()
 CALL plot_anhar_beta()
 CALL plot_anhar_heat()
 CALL plot_anhar_gamma()
+CALL plot_hugoniot()
 !
 CALL plot_thermo_anhar()
 CALL plot_dw_anhar()
