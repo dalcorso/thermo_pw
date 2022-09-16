@@ -13,13 +13,16 @@ SUBROUTINE write_minimum_energy_data()
   !  minimization.
   !
   USE kinds,            ONLY : DP
+  USE constants,        ONLY : bohr_radius_si
   USE control_ev,       ONLY : ieos
   USE control_mur,      ONLY : b0, b01, b02, emin, lmurn
   USE equilibrium_conf, ONLY : celldm0
+  USE initial_conf,     ONLY : ibrav_save
   USE control_pressure, ONLY : pressure_kb
   USE io_global,        ONLY : stdout
   IMPLICIT NONE
   CHARACTER(LEN=20) :: quantity
+  REAL(DP) :: omega0, compute_omega_geo
   !
   WRITE(stdout,'(/,2x,76("-"))')
   IF (ieos==1) THEN
@@ -54,6 +57,9 @@ SUBROUTINE write_minimum_energy_data()
  
   WRITE(stdout,'(5x,"The ",a," at the minimum is:   ",6x,f20.9," Ry")') &
                                                    TRIM(quantity), emin
+  omega0=compute_omega_geo(ibrav_save,celldm0)
+  WRITE(stdout,'(5x, "The volume is ",9x,f13.5," (a.u.)^3",&
+          f15.5,"(A)^3")') omega0, omega0*bohr_radius_si**3/1.D-30
   WRITE(stdout,'(2x,76("-"),/)')
   RETURN
 END SUBROUTINE write_minimum_energy_data

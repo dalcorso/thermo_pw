@@ -600,7 +600,8 @@ END SUBROUTINE set_celldm_geo
 !-----------------------------------------------------------------------
 SUBROUTINE summarize_geometries(nwork)
 !-----------------------------------------------------------------------
-USE thermo_mod,    ONLY : ibrav_geo, celldm_geo, no_ph
+USE constants,     ONLY : bohr_radius_si
+USE thermo_mod,    ONLY : ibrav_geo, omega_geo, celldm_geo, no_ph
 USE initial_conf,  ONLY : celldm_save, ibrav_save
 USE io_global,     ONLY : stdout
 
@@ -622,6 +623,11 @@ WRITE(stdout,'(12x, i3, 6f10.5,/)') ibrav_save, celldm_save(:)
 DO igeo=1,nwork
    WRITE(stdout,'(5x,i5,": ", i3,6f10.5,l2)') igeo, ibrav_geo(igeo), &
                                    celldm_geo(:,igeo), .NOT.no_ph(igeo)
+ENDDO
+WRITE(stdout,'(/,5x,"Volumes: ",10x,"(a.u.)^3",10x,"(A)^3")')
+DO igeo=1,nwork
+   WRITE(stdout,'(5x,i5,2f20.10)') igeo, omega_geo(igeo), &
+                            omega_geo(igeo)*(bohr_radius_si)**3/1.D-30
 ENDDO
 WRITE(stdout,'(/,5x,70("-"))')
 
