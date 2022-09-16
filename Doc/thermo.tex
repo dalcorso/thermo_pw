@@ -135,11 +135,14 @@ For metals the electronic contribution to the heat capacity is not
 completely negligible. \tpw\ allows its estimate for a gas of 
 independent electrons with the density of states given by the DFT bands.
 Similarly the Helmholtz free energy is $F=U_0+F_{el}+F_{ph}$ with:
-\begin{equation}
-F_{ph} = k_B T \sum_{{\bf q},\nu} \ln \left[ 2 \sinh \left({\beta \hbar 
-\omega_{{\bf q},\nu} \over 2}\right) \right].
+\begin{eqnarray}
+F_{ph} &=& k_B T \sum_{{\bf q},\nu} \ln \left[ 2 \sinh \left({\beta \hbar 
+\omega_{{\bf q},\nu} \over 2}\right) \right] \nonumber \\
+&=& \sum_{{\bf q},\nu} {\hbar \omega_{{\bf q},\nu} \over 2}
++ k_B T \sum_{{\bf q},\nu} \ln \left [ 1-
+e^{-\beta \hbar \omega_{{\bf q},\nu}} \right]
 \nonumber
-\end{equation}
+\end{eqnarray}
 Having the internal energy and the Helmholtz free energy, the entropy can 
 be calculated as $S=(U-F)/T$.
 
@@ -1823,7 +1826,13 @@ C_\epsilon= T {d S \over dT}\Big|_\epsilon = { d U \over d T}\Big|_\epsilon.
 \end{equation}
 The terms in $U$ that depend on temperature are $U_{el}$ and $U_{ph}$. 
 Once the phonon dispersions 
-have been calculated $U_{ph}$ can be obtained by deriving Eq.~\ref{uvib}.
+have been calculated $U_{ph}$ can be obtained from Eq.~\ref{uvib} and
+we have the vibrational contribution to the heat capacity:
+\begin{equation}
+C_{\epsilon} =  k_B \sum_{{\bf q},\nu} {(\beta\hbar \omega_{{\bf q},\nu})^2\over
+e^{\beta \hbar \omega_{{\bf q},\nu}} \left(1-
+e^{-\beta \hbar \omega_{{\bf q},\nu}}\right)^2}
+\end{equation}
 
 For metals the electronic contribution coming from $U_{el}$, while not large, 
 is important 
@@ -3263,6 +3272,49 @@ dependence of the chemical potential, and
 \end{equation}
 
 \newpage
+
+{\color{dark-blue}\chapter{Debye model}}
+\color{black}
+The Debye model provides an expression of the thermodynamic functions,
+(energy, free energy, entropy, and heat capacity) in terms 
+the Debye temperature $\theta_D$.
+These expressions are obtained taking $\omega_{{\bf q},\nu}=\bar c q$ where
+$\bar c$ is an average speed of sound and $q$ is the modulus of ${\bf q}$.
+Taking all ${\bf q}$ vectors inside a sphere of radius $q_D$ which
+contains $N$ {\bf q} points, we get 
+$q_D^3= {6 \pi^2 \over \Omega}$. The Debye temperature is related
+to $\bar c$ and $q_D$ by the equation: $k_B \theta_D = \hbar \bar c q_D$.
+Defining the function:
+\begin{equation}
+D(y) = {3 \over y^3} \int_0^y {x^3 \over e^x - 1 } dx,
+\end{equation}
+we have the Debye vibrational energy:
+\begin{equation}
+E_{Debye} = N_{at} k_B T \left [ {9\over 8} {\theta_D \over T} + 3 D \left({\theta_D \over T}\right) \right],
+\end{equation}
+the Debye vibrational free energy:
+\begin{equation}
+F_{Debye} = N_{at} k_B T \left [ {9\over 8} {\theta_D \over T} +3 \ln(1-e^{-\theta_D/T})- D \left({\theta_D \over T}\right) \right],
+\end{equation}
+the Debye entropy:
+\begin{equation}
+S_{Debye} = N_{at} k_B \left [- 3 \ln(1-e^{-\theta_D/T})+ 4 D \left({\theta_D \over T}\right) \right],
+\end{equation}
+and the Debye heat capacity:
+\begin{equation}
+C_V = N_{at} k_B \left [ 12 D \left({\theta_D \over T}\right) - { 9\theta_D/T \over 
+e^{\theta_D/T} -1 } \right].
+\end{equation}
+\newpage
+Given the elastic constants we can calculate the speed of sound 
+$c_s({\bf \hat q})$ of the three acoustic modes along an
+arbitrary direction ${\bf \hat q}={{\bf q} \over q}$ and 
+averaging over all angles
+we determine $\bar c$ as 
+\begin{equation}
+{1\over \bar c^3} = {1\over 3} \sum_s \int {d \Omega_{\bf q} \over 4 \pi }
+{1\over c_s({\bf \hat q})^3}.
+\end{equation}
 
 {\color{dark-blue}\chapter{Bibliography}}
 \color{black}
