@@ -91,7 +91,7 @@ fileeldos='therm_files/'//TRIM(fleldos)
 CALL read_eldos_data(eldos, lsda, fileeldos)
 
 !
-!  The energy at very low temperature is consider as the zero of the energy
+!  The energy at very low temperature is considered as the zero of the energy
 !  The default low temperature is 4. K or the lowest temperature
 !  required in input.
 !

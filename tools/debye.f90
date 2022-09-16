@@ -118,7 +118,10 @@ SUBROUTINE write_thermo_info(e0, tot_states, ntemp, temp, energy, &
 !----------------------------------------------------------------------
 !
 USE kinds, ONLY : DP
+USE constants,    ONLY : rytoev, electronvolt_si, rydberg_si, avogadro
+
 IMPLICIT NONE
+REAL(DP), PARAMETER :: caltoj=4.184_DP
 INTEGER, INTENT(IN) :: ntemp, iflag
 REAL(DP), INTENT(IN) :: e0, tot_states, temp(ntemp), energy(ntemp),  &
                         free_energy(ntemp), entropy(ntemp), cv(ntemp)
@@ -147,12 +150,14 @@ ENDIF
 WRITE(iu_therm,'("# Energy and free energy in Ry/cell,")')
 WRITE(iu_therm,'("# Entropy in Ry/cell/K,")')
 WRITE(iu_therm,'("# Heat capacity Cv in Ry/cell/K.")')
-WRITE(iu_therm,'("# Multiply by 13.6058 to have energies in &
-                       &eV/cell etc..")')
-WRITE(iu_therm,'("# Multiply by 13.6058 x 23060.35 = 313 754.5 to have &
-                  &energies in cal/(N mol).")')
-WRITE(iu_therm,'("# Multiply by 13.6058 x 96526.0 = 1 313 313 to &
-                  &have energies in J/(N mol).")')
+WRITE(iu_therm,'("# Multiply by ",f7.4," to have energies in &
+                       &eV/cell etc..")') rytoev
+WRITE(iu_therm,'("# Multiply by ",f7.4," x ",f8.2," = ",f9.1," to have &
+                  &energies in cal/(N mol).")') rytoev, electronvolt_si &
+                         * avogadro / caltoj, rydberg_si*avogadro/caltoj
+WRITE(iu_therm,'("# Multiply by ",f7.4," x ",f8.2," = ",f9.1," to &
+                  &have energies in J/(N mol).")') rytoev, electronvolt_si&
+                         * avogadro, rydberg_si*avogadro
 WRITE(iu_therm,'("# N is the number of formula units per cell.")')
 WRITE(iu_therm,'("# For instance in silicon N=2. Divide by N to have &
                 &energies in cal/mol etc. ")')
