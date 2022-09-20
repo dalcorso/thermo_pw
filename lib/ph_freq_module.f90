@@ -251,7 +251,7 @@ REAL(DP), INTENT(IN) :: temp
 REAL(DP), INTENT(OUT) :: free_ener
 
 INTEGER :: nq_eff, iq, nat, imode, counter
-REAL(DP) :: nu, arg, wg, temp1, onesixth, one24
+REAL(DP) :: nu, arg, wg, temp1, onesixth, one24, one120
 
 free_ener=0.0_DP
 IF (temp <= 1.E-9_DP) RETURN
@@ -363,12 +363,15 @@ REAL(DP), INTENT(IN) :: temp
 REAL(DP), INTENT(OUT) :: cv
 
 INTEGER :: nq_eff, iq, imode, nat
-REAL(DP) :: nu, temp1, arg, wg, onesixth, one24, earg
+REAL(DP) :: nu, temp1, arg, wg, onesixth, one12, one24, earg, one120, one360
 
 cv=0.0_DP
 IF (temp <= 1.E-9_DP) RETURN
 onesixth=1.0_DP / 6.0_DP
+one12 = 1.0_DP / 12.0_DP
 one24 = 1.0_DP / 24.0_DP
+one120= 1.0_DP/ 120.0_DP
+one360= 1.0_DP/ 360.0_DP
 temp1 = 1.0_DP / temp
 nq_eff=ph_freq%nq_eff
 nat=ph_freq%nat
@@ -381,9 +384,10 @@ DO iq=1,nq_eff
       IF (arg > thr_taylor ) THEN
           cv = cv + wg * earg * ( arg / ( 1.0_DP - earg  ) ) ** 2 
       ELSEIF (nu > thr_ph) THEN
-          cv = cv + wg * earg *  &
-                  (arg /( arg - arg**2*0.5_DP + arg**3 * onesixth &
-                             - arg**4 * one24))**2
+          cv = cv + wg / (1.0_DP + arg**2 *(one12 + arg**2 * one360))
+!          cv = cv + wg * earg *  &
+!                  (arg /( arg - arg**2*0.5_DP + arg**3 * onesixth &
+!                             - arg**4 * one24 + arg**5 * one120))**2
       ENDIF
    ENDDO
 ENDDO
@@ -459,7 +463,7 @@ REAL(DP), INTENT(IN) :: temp
 REAL(DP), INTENT(OUT) :: free_ener, ener, cv
 
 INTEGER :: nq_eff, iq, nat, imode, counter
-REAL(DP) :: nu, arg, earg, wg, temp1, onesixth, one24
+REAL(DP) :: nu, arg, earg, wg, temp1, onesixth, one24, one12, one360
 
 free_ener=0.0_DP
 ener=0.0_DP
@@ -469,6 +473,8 @@ temp1 = 1.0_DP / temp
 nq_eff=ph_freq%nq_eff
 nat=ph_freq%nat
 onesixth=1.0_DP / 6.0_DP
+one12=1.0_DP / 12.0_DP
+one360=1.0_DP / 360.0_DP
 one24=1.0_DP /24.0_DP
 counter=0
 DO iq=1,nq_eff
@@ -484,9 +490,10 @@ DO iq=1,nq_eff
       ELSEIF (nu > thr_ph) THEN
          free_ener = free_ener+temp*wg*(LOG( arg* (1.0_DP + arg*(-0.5_DP + &
                                   arg* (onesixth - arg * one24))) )) 
-         cv = cv + wg * earg *  &
-                  (1.0_DP /( 1.0_DP + arg*(-0.5_DP + arg *( onesixth &
-                             - arg* one24))))**2 / arg
+         cv = cv + wg / (1.0_DP + arg**2 *(one12 + arg**2 * one360))
+!         cv = cv + wg * earg *  &
+!                  (1.0_DP /( 1.0_DP + arg*(-0.5_DP + arg *( onesixth &
+!                             - arg* one24 ))))**2 / arg
          ener = ener +  wg*nu*earg/arg/(1.0_DP+arg*(-0.5_DP+arg*(onesixth &
                                                     - arg * one24)))
       ELSE 
