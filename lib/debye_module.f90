@@ -33,7 +33,8 @@ INTEGER, PARAMETER :: npt=1000  ! the number of points used to make
 
 PUBLIC  compute_debye_temperature, compute_average_sound, debye_vib_energy, &
         debye_free_energy, debye_entropy, debye_cv, debye_e0, &
-        compute_debye_temperature_poisson, debye_b_factor
+        compute_debye_temperature_poisson, debye_b_factor, &
+        debye_free_energy_0d, debye_cv_0d, debye_energy_0d
 
 CONTAINS
 
@@ -103,7 +104,6 @@ ENDIF
 RETURN
 END SUBROUTINE compute_average_sound
 
-
 !-------------------------------------------------------------------------
 SUBROUTINE compute_debye_temperature(el_con, density, nat, omega, debye_t)
 !-------------------------------------------------------------------------
@@ -161,12 +161,36 @@ DO i=1,ntemp
 ENDDO
 
 DO i=1,ntemp
-   deb_energy(i) = 9.0_DP * nat * deb_int_ene(theta_over_t(i)) * &
+   deb_energy(i) = 3.0_DP * nat * deb_int_ene(theta_over_t(i)) * &
                    k_boltzmann_ry * temp(i)
 END DO
 
 RETURN
 END SUBROUTINE debye_vib_energy
+!
+!-------------------------------------------------------------------------
+SUBROUTINE debye_energy_0d(debye_t, tt, nat, deb_energy)
+!-------------------------------------------------------------------------
+!
+! This routine receives in input the Debye temperature and a set of
+! temperatures and computes the Debye vibrational energy in this set
+! of temperatures.
+! NB: the output energy has not the zero point contribution which
+!     is calculated separately by debye_e0
+!
+IMPLICIT NONE
+INTEGER :: nat
+REAL(DP), INTENT(IN) :: debye_t
+REAL(DP), INTENT(IN) :: tt
+REAL(DP), INTENT(INOUT) :: deb_energy
+
+REAL(DP) :: theta_over_t
+
+theta_over_t = debye_t / tt
+deb_energy = 3.0_DP * nat * deb_int_ene(theta_over_t) * k_boltzmann_ry * tt
+
+RETURN
+END SUBROUTINE debye_energy_0d
 
 !-------------------------------------------------------------------------
 SUBROUTINE debye_free_energy(debye_t, temp, ntemp, nat, deb_free_energy)
@@ -200,13 +224,38 @@ DO i=1,ntemp
 !  can be used for debugging purposes.
 !
    deb_free_energy(i) = nat * k_boltzmann_ry * temp(i) * &
-                        ( - 3.0_DP * deb_int_ene(theta_over_t(i)) &
+                        ( - deb_int_ene(theta_over_t(i)) &
            + 3.0_DP * LOG ( 1.0_DP - EXP (- theta_over_t(i)) ) )
 
 END DO
 
 RETURN
 END SUBROUTINE debye_free_energy
+
+!-------------------------------------------------------------------------
+SUBROUTINE debye_free_energy_0d(debye_t, tt, nat, deb_free_energy)
+!-------------------------------------------------------------------------
+!
+! This routine receives the Debye temperature and one temperature T
+! and computes the Debye vibrational free energy at this temperature.
+!
+! NB: the output free energy has not the zero point contribution which
+!     is calculated separately by debye_e0
+!
+IMPLICIT NONE
+INTEGER :: nat
+REAL(DP), INTENT(IN) :: debye_t
+REAL(DP), INTENT(IN) :: tt
+REAL(DP), INTENT(INOUT) :: deb_free_energy
+
+REAL(DP) :: theta_over_t
+
+theta_over_t = debye_t / tt
+deb_free_energy = nat * k_boltzmann_ry * tt * (- deb_int_ene(theta_over_t)  &
+                + 3.0_DP * LOG (1.0_DP - EXP (-theta_over_t)))
+
+RETURN
+END SUBROUTINE debye_free_energy_0d
 
 !-------------------------------------------------------------------------
 SUBROUTINE debye_entropy(debye_t, temp, ntemp, nat, deb_entropy)
@@ -230,7 +279,7 @@ ENDDO
 
 DO i=1,ntemp
    deb_entropy(i) = nat * k_boltzmann_ry * &
-           (12.0_DP * deb_int_ene(theta_over_t(i)) &
+           (4.0_DP * deb_int_ene(theta_over_t(i)) &
            -3.0_DP * LOG ( 1.0_DP - EXP (- theta_over_t(i))) )
 END DO
 !
@@ -273,19 +322,50 @@ DO i=1,ntemp
 END DO
 
 DO i=1,ntemp
-   deb_cv(i) = 9.0_DP * nat * deb_int_cv(theta_over_t(i)) * k_boltzmann_ry
+!   deb_cv(i) = 9.0_DP * nat * deb_int_cv(theta_over_t(i)) * k_boltzmann_ry
+!
+!  Alternative expression for the specific heat that use 
+!  deb_int_ene without introducing deb_int_cv. Only for debug purposes.
+!  From Comp. Phys. Comm. 158, 57 (2004).
+!
+   deb_cv(i) = nat * k_boltzmann_ry * (                          &
+               12.0_DP * deb_int_ene(theta_over_t(i)) - 9.0_DP * &
+               theta_over_t(i) / (EXP(theta_over_t(i))-1.0_DP) )
+END DO
+
+RETURN
+END SUBROUTINE debye_cv
+!
+!-------------------------------------------------------------------------
+SUBROUTINE debye_cv_0d (debye_t, tt, nat, deb_cv)
+!-------------------------------------------------------------------------
+!
+!  The Debye temperature is in K, the temperature is in K, deb_cv is
+!  the heat capacity in Ry / K / cell 
+!
+IMPLICIT NONE
+INTEGER :: ntemp, nat
+REAL(DP), INTENT(IN) :: debye_t
+REAL(DP), INTENT(IN) :: tt
+REAL(DP), INTENT(INOUT) :: deb_cv
+
+INTEGER :: i
+REAL(DP) :: theta_over_t
+
+theta_over_t = debye_t / tt
+
+!deb_cv = 9.0_DP * nat * deb_int_cv(theta_over_t) * k_boltzmann_ry
 !
 !  Alternative expression for the specific heat that use 
 !  deb_int_ene without introducing deb_int_cv. Only for debug purposes.
 !  From Comp. Phys. Comm. 158, 57 (2004)
 !
-!   deb_cv(i) = 3.0_DP * nat * k_boltzmann_ry * ( &
-!               12.0_DP * deb_int_ene(theta_over_t(i)) - 3.0_DP * &
-!               theta_over_t(i) / ( EXP(theta_over_t(i))-1.0_DP ) )
-END DO
+   deb_cv = nat * k_boltzmann_ry * (                          &
+               12.0_DP * deb_int_ene(theta_over_t) - 9.0_DP * &
+               theta_over_t / (EXP(theta_over_t)-1.0_DP) )
 
 RETURN
-END SUBROUTINE debye_cv
+END SUBROUTINE debye_cv_0d
 
 !-------------------------------------------------------------------------
 SUBROUTINE debye_e0(debye_t, nat, deb_e0)
@@ -309,7 +389,7 @@ FUNCTION deb_int_cv(y)
 IMPLICIT NONE
 REAL(DP) :: y, deb_int_cv
 
-REAL(DP) :: deltax, integral, x
+REAL(DP) :: deltax, integral, din, x
 INTEGER :: i
 !
 deltax=y/npt
@@ -317,8 +397,10 @@ deltax=y/npt
 integral=0.0_DP
 DO i=1,npt
    x = deltax * i
-   integral = integral + x**4 / EXP(x) / ( 1.0_DP - EXP(-x ) )**2
+   din= x**4 / EXP(x) / ( 1.0_DP - EXP(-x ) )**2
+   integral = integral + din
 END DO
+integral=integral - 0.5_DP * din
 
 deb_int_cv = integral * deltax / y**3
 
@@ -333,19 +415,29 @@ FUNCTION deb_int_ene(y)
 IMPLICIT NONE
 REAL(DP) :: y, deb_int_ene
 
-REAL(DP) :: deltax, integral, x, expo
+REAL(DP) :: deltax, integral, din, x, expo
 INTEGER :: i
 !
+IF (y>40.0_DP) THEN
+!
+!  In this case we compute analytically the integral
+!
+   deb_int_ene= pi**4/5.0_DP/y**3 - exp(-y) * 3.0_DP *     &
+              (6.0_DP/y**3 + 6.0_DP/y**2 +3.0_DP/y+1.0_DP)
+   RETURN
+ENDIF
 deltax=y/npt
 
 integral=0.0_DP
 DO i=1,npt
    x = deltax * i
    expo=EXP( -x)
-   integral = integral + x**3 * expo / ( 1.0_DP - expo )
+   din= x**3 * expo / ( 1.0_DP - expo )
+   integral = integral + din
 END DO
+integral= integral-0.5_DP*din
 
-deb_int_ene = integral * deltax / y**3 
+deb_int_ene = 3.0_DP * integral * deltax / y**3 
 
 RETURN 
 END FUNCTION deb_int_ene
@@ -356,7 +448,7 @@ FUNCTION deb_int_free_ene(y)
 IMPLICIT NONE
 REAL(DP) :: y, deb_int_free_ene
 
-REAL(DP) :: deltax, integral, x
+REAL(DP) :: deltax, integral, din, x
 INTEGER :: i
 !
 deltax=y/npt
@@ -364,8 +456,10 @@ deltax=y/npt
 integral=0.0_DP
 DO i=1,npt
    x = deltax * i
-   integral = integral + x**2 *(LOG( 1.0_DP - EXP( -x ) ) ) 
+   din=x**2 *(LOG( 1.0_DP - EXP( -x ) ) )
+   integral = integral + din
 END DO
+integral=integral-0.5_DP * din
 
 deb_int_free_ene = integral * deltax / y**3 
 
