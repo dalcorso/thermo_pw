@@ -233,6 +233,7 @@ MODULE thermodynamics
   REAL(DP), ALLOCATABLE :: ph_ener(:,:)      ! phonon total energy, T, geometry
   REAL(DP), ALLOCATABLE :: ph_free_ener(:,:) ! phonon free_energy, T, geometry
   REAL(DP), ALLOCATABLE :: ph_entropy(:,:)   ! phonon entropy, T, geometry
+  REAL(DP), ALLOCATABLE :: ph_t_debye(:,:)   ! debye temperature, T, geometry
   REAL(DP), ALLOCATABLE :: ph_e0(:)          ! zero point energy, geometry
   REAL(DP), ALLOCATABLE :: ph_ce(:,:)        ! phonon heat capacity, T, geometry
   REAL(DP), ALLOCATABLE :: ph_b_fact(:,:,:,:,:)! atomic B factor
@@ -258,6 +259,7 @@ MODULE ph_freq_thermodynamics
   REAL(DP), ALLOCATABLE :: phf_ener(:,:)      ! phonon total energy, T, geometry
   REAL(DP), ALLOCATABLE :: phf_free_ener(:,:) ! phonon free_energy, T, geometry
   REAL(DP), ALLOCATABLE :: phf_entropy(:,:)   ! phonon entropy, T, geometry
+  REAL(DP), ALLOCATABLE :: phf_t_debye(:,:)   ! debye temperature, T, geometry
   REAL(DP), ALLOCATABLE :: phf_e0(:)          ! zero point energy, geometry
   REAL(DP), ALLOCATABLE :: phf_ce(:,:)        ! phonon specific heat, T, geometry
   REAL(DP), ALLOCATABLE :: phf_b_fact(:,:,:,:,:) ! atomic B factor
@@ -1346,6 +1348,12 @@ MODULE control_debye
                            deb_cv(:),           &  ! Debye cv
                            deb_b_fact(:,:,:,:), &  ! axiliary B factor
                            deb_bfact(:)            ! Debye atomic B factors
+
+  INTEGER :: idebye                            ! find the debye temperature
+                                               ! 1 free energy
+                                               ! 2 energy
+                                               ! 3 isochoric heat capacity
+                                               ! 0 none
 
 END MODULE control_debye
 

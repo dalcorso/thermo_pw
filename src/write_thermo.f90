@@ -19,8 +19,10 @@ USE phdos_module,   ONLY : zero_point_energy, fecv, integrated_dos, &
 USE thermo_mod,     ONLY : tot_ngeo
 USE temperature,    ONLY : ntemp, temp
 USE thermodynamics, ONLY : ph_ener, ph_free_ener, ph_entropy, ph_ce, &
-                           ph_e0, ph_b_fact, phdos_save, gen_phdos_save
+                           ph_e0, ph_t_debye, ph_b_fact, phdos_save, &
+                           gen_phdos_save
 USE control_thermo, ONLY : with_eigen
+USE control_debye,  ONLY : idebye
 USE data_files,     ONLY : fltherm
 USE mp_world,       ONLY : world_comm
 USE mp,             ONLY : mp_sum
@@ -69,8 +71,8 @@ DO itemp = startt, lastt
 
    CALL fecv(phdos_save(igeom), temp(itemp), ph_free_ener(itemp, igeom), &
                                   ph_ener(itemp,igeom), ph_ce(itemp, igeom))
-   ph_free_ener(itemp,igeom)=ph_free_ener(itemp,igeom)+e0
-   ph_ener(itemp,igeom)=ph_ener(itemp,igeom)+e0
+   ph_free_ener(itemp,igeom)=ph_free_ener(itemp,igeom)!+e0
+   ph_ener(itemp,igeom)=ph_ener(itemp,igeom)!+e0
    ph_entropy(itemp,igeom)=(ph_ener(itemp, igeom)-ph_free_ener(itemp,igeom))/&
                             temp(itemp)
    IF (with_eigen) THEN
@@ -87,11 +89,27 @@ CALL mp_sum(ph_ener(1:ntemp,igeom),world_comm)
 CALL mp_sum(ph_ce(1:ntemp,igeom),world_comm)
 CALL mp_sum(ph_entropy(1:ntemp,igeom),world_comm)
 IF (with_eigen) CALL mp_sum(ph_b_fact(1:3,1:3,1:nat,1:ntemp,igeom),world_comm)
+IF (idebye==1) THEN
+   CALL find_t_debye(ph_free_ener(1:ntemp,igeom), temp, ntemp, &
+                                             ph_t_debye(1:ntemp,igeom))
+ELSEIF(idebye==2) THEN
+   CALL find_t_debye_ene(ph_ener(1:ntemp,igeom), temp, ntemp, &
+                                             ph_t_debye(1:ntemp,igeom))
+ELSEIF(idebye==3) THEN
+   CALL find_t_debye_cv(ph_ce(1:ntemp,igeom), temp, ntemp, &
+                                             ph_t_debye(1:ntemp,igeom))
+ENDIF
+ph_free_ener(1:ntemp,igeom) = ph_free_ener(1:ntemp,igeom)+e0
+ph_ener(1:ntemp,igeom) = ph_ener(1:ntemp,igeom)+e0
 
-IF (meta_ionode) &
+IF (meta_ionode) THEN
    CALL write_thermo_info(e0, tot_states, ntemp, temp, ph_ener(1,igeom), &
               ph_free_ener(1,igeom), ph_entropy(1,igeom), ph_ce(1,igeom),&
                                                              1,filetherm)
+   IF (idebye/=0) CALL write_thermo_info_deb(temp, ph_t_debye(1,igeom),  &
+                                                          ntemp, filetherm)
+ENDIF
+
 IF (meta_ionode.AND.with_eigen) &
    CALL write_dw_info(ntemp, temp, ph_b_fact(1,1,1,1,igeom), nat, filetherm)
 
@@ -112,9 +130,12 @@ USE ph_freq_module,   ONLY : ph_freq_type, zero_point_energy_ph, fecv_ph, &
                              specific_heat_cv_ph, debye_waller_factor
 USE temperature,      ONLY : ntemp, temp
 USE ph_freq_thermodynamics, ONLY : phf_ener, phf_free_ener, phf_entropy, &
-                             phf_e0, phf_ce, phf_b_fact, ph_freq_save
+                             phf_e0, phf_ce, phf_b_fact, ph_freq_save,   &
+                             phf_t_debye
+USE control_debye,    ONLY : idebye
 USE thermo_mod,       ONLY : tot_ngeo
 USE control_thermo,   ONLY : with_eigen
+USE control_debye,    ONLY : idebye
 USE data_files,       ONLY : fltherm
 USE mp,               ONLY : mp_sum
 USE mp_world,         ONLY : world_comm
@@ -162,8 +183,8 @@ DO itemp = 1, ntemp
         & i5,4x," T=",f12.2," K")') itemp, ntemp, temp(itemp)
    CALL fecv_ph(ph_freq_save(igeom), temp(itemp), phf_free_ener(itemp,igeom), &
                       phf_ener(itemp, igeom), phf_ce(itemp, igeom))
-   phf_free_ener(itemp,igeom)=phf_free_ener(itemp,igeom)+e0
-   phf_ener(itemp,igeom)=phf_ener(itemp,igeom)+e0
+   phf_free_ener(itemp,igeom)=phf_free_ener(itemp,igeom)!+e0
+   phf_ener(itemp,igeom)=phf_ener(itemp,igeom)!+e0
    phf_entropy(itemp,igeom)=(phf_ener(itemp, igeom) - &
                              phf_free_ener(itemp, igeom))/temp(itemp)
    IF (with_eigen) THEN
@@ -181,13 +202,31 @@ CALL mp_sum(phf_free_ener(1:ntemp,igeom),world_comm)
 CALL mp_sum(phf_ener(1:ntemp,igeom),world_comm)
 CALL mp_sum(phf_ce(1:ntemp,igeom),world_comm)
 CALL mp_sum(phf_entropy(1:ntemp,igeom),world_comm)
+CALL mp_sum(e0,world_comm)
 IF (with_eigen) CALL mp_sum(phf_b_fact(1:3,1:3,1:nat,1:ntemp,igeom),world_comm)
 
-IF (meta_ionode) &
+IF (idebye==1) THEN
+   CALL find_t_debye(phf_free_ener(1:ntemp,igeom), temp, ntemp, &
+                                             phf_t_debye(1:ntemp,igeom))
+ELSEIF(idebye==2) THEN
+   CALL find_t_debye_ene(phf_ener(1:ntemp,igeom), temp, ntemp, &
+                                             phf_t_debye(1:ntemp,igeom))
+ELSEIF(idebye==3) THEN
+   CALL find_t_debye_cv(phf_ce(1:ntemp,igeom), temp, ntemp, &
+                                             phf_t_debye(1:ntemp,igeom))
+ENDIF
+
+phf_free_ener(1:ntemp,igeom) = phf_free_ener(1:ntemp,igeom)+e0
+phf_ener(1:ntemp,igeom) = phf_ener(1:ntemp,igeom)+e0
+
+IF (meta_ionode) THEN
    CALL write_thermo_info(phf_e0(igeom), 0.0_DP, ntemp, temp, &
               phf_ener(1,igeom), &
               phf_free_ener(1,igeom), phf_entropy(1,igeom), phf_ce(1,igeom),& 
                                                             2,filename)
+   IF (idebye/=0) CALL write_thermo_info_deb(temp, phf_t_debye(1,igeom), &
+                                                   ntemp, filename)
+ENDIF
 IF (meta_ionode.AND.with_eigen) &
    CALL write_dw_info(ntemp, temp, phf_b_fact(1,1,1,1,igeom), nat, filename)
 
@@ -324,6 +363,34 @@ CLOSE(UNIT=iu_therm, STATUS='KEEP')
 
 RETURN
 END SUBROUTINE write_thermo_info
+!
+!-----------------------------------------------------------------------
+SUBROUTINE write_thermo_info_deb(temp, debye_t, ntemp, filename)
+!-----------------------------------------------------------------------
+!
+!
+USE kinds,        ONLY : DP
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ntemp
+REAL(DP), INTENT(IN) :: temp(ntemp), debye_t(ntemp)
+CHARACTER(LEN=*) :: filename
+
+INTEGER :: iu_therm, itemp
+INTEGER :: find_free_unit
+
+iu_therm=find_free_unit()
+OPEN (UNIT=iu_therm, FILE=TRIM(filename)//".tdeb", STATUS='unknown', FORM='formatted')
+!
+!  Debye temperature on the first point is not reliable.
+!
+DO itemp = 2, ntemp
+   WRITE(iu_therm, '(e16.8,e20.12)') temp(itemp), debye_t(itemp)
+ENDDO
+
+CLOSE(UNIT=iu_therm, STATUS='KEEP')
+
+RETURN
+END SUBROUTINE write_thermo_info_deb
 
 !-----------------------------------------------------------------------
 SUBROUTINE write_dw_info(ntemp, temp, b_fact, nat, filename)

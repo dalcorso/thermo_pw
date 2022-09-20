@@ -1456,6 +1456,11 @@ nq1_d, nq2_d, nq3_d : thick mesh for phonon dos calculation.
 phdos_sigma   : the smearing used for phonon dos calculation 
                 (in cm^-1).
                 Default: real 2. cm^-1
+idebye        : if 1, 2, or 3 the code computes the Debye 
+                temperature as a function of temperature from 
+                the free energy, the vibrational energy, or the 
+                heat capacity respectively.
+                Default: integer 0
 after_disp    : if .TRUE. the dynamical matrices are supposed 
                 to be already available in files in the current 
                 directory. This option is needed to restart when 
@@ -2138,7 +2143,7 @@ add_empirical : If .TRUE. adds to the free energy an empirical term
 efe           : The type of empirical free energy
                 1) (alpha1+alpha2 * V) T^2
                 2) -2/3 k_B nat alpha1 (v/v0p)^alpha2 T^2
-                Default: 0 (must be explicitely given)
+                Default: 0 (must be explicitly given)
 alpha1        : parameter of the empirical free energy (see above)
                 in eV/K^2 in 1), in 1/K in 2). 
                 Default: 0.0

@@ -56,6 +56,7 @@ evaluate_celldm.o \
 evaluate_vm.o \
 fast_phq_readin.o \
 find_band_sym_proj.o \
+find_t_debye.o \
 find_mode_sym_proj.o \
 find_representations_mode_q.o \
 find_symmetry.o \

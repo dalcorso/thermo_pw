@@ -2120,3 +2120,91 @@ IF (lgnuplot.AND.ionode) &
 RETURN
 END SUBROUTINE plot_anhar_t
 
+!-----------------------------------------------------------------------
+SUBROUTINE plot_t_debye()
+!-----------------------------------------------------------------------
+!
+!  This routine plots the debye temperatures at the volumes nvol_plot chosen 
+!  for the plot.
+!
+USE kinds,            ONLY : DP
+USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
+USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,  &
+                             gnuplot_write_header,        &
+                             gnuplot_ylabel,              &
+                             gnuplot_xlabel,              &
+                             gnuplot_write_file_mul_data
+USE internal_files_names, ONLY : fltherm_thermo, flpstherm_thermo
+USE temperature,      ONLY : temp, tmin, tmax
+USE control_vol,      ONLY : nvol_plot, ivol_plot
+USE color_mod,        ONLY : color
+USE mp_images,        ONLY : my_image_id, root_image
+USE io_global,        ONLY : ionode
+
+IMPLICIT NONE
+
+CHARACTER(LEN=256) :: gnu_filename, filename, filename1, filename2, &
+                      filename_aux, filename_gamma_grun, label
+
+INTEGER :: ierr, system, istep, ipress, ipressp, itemp, itempp, ivol, ivolp
+REAL(DP) :: factor, omega
+LOGICAL :: first_step, last_step
+CHARACTER(LEN=6) :: int_to_char
+
+IF ( my_image_id /= root_image ) RETURN
+IF ( nvol_plot==0 ) RETURN
+!
+!   gnuplot script
+!
+gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//'.t_debye'
+CALL add_pressure(gnu_filename)
+!
+!  name of the postcript file
+!
+filename=TRIM(flpstherm_thermo)//'.t_debye'
+CALL add_pressure(filename)
+filename=TRIM(filename)//TRIM(flext)
+!
+!  open the script
+!
+CALL gnuplot_start(gnu_filename)
+!
+!  set the ranges of volumes
+!
+CALL gnuplot_write_header(filename, tmin, tmax, 0.0_DP, &
+                                                0.0_DP, 1.0_DP, flext ) 
+!
+CALL gnuplot_xlabel('T (K)',.FALSE.) 
+!
+!   Debye temperature determined from the ab-initio Helmholtz free energy
+!   as a function of temperature
+!
+istep=0
+DO ivolp=1,nvol_plot
+   first_step=(ivolp==1)
+   last_step=(ivolp==nvol_plot)
+   ivol=ivol_plot(ivolp)
+   istep=MOD(istep,8)+1
+   filename="therm_files/"//TRIM(fltherm_thermo)//'.g'//&
+                            TRIM(int_to_char(ivol))//'.tdeb'
+   CALL add_pressure(filename)
+   IF (first_step) THEN
+      CALL gnuplot_xlabel('Temperature (K)',.FALSE.)
+      CALL gnuplot_ylabel('Debye temperature (K)',.FALSE.)
+   ENDIF
+   CALL gnuplot_write_file_mul_data(filename,1,2,color(istep),first_step,&
+                                             last_step,.FALSE.)
+ENDDO
+
+CALL gnuplot_end()
+
+IF (lgnuplot.AND.ionode) &
+   ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+
+!IF (lgnuplot.AND.ionode) &
+!   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
+!                                       //TRIM(gnu_filename), WAIT=.FALSE.)
+
+RETURN
+END SUBROUTINE plot_t_debye
+

@@ -77,6 +77,7 @@ SUBROUTINE thermo_readin()
   USE control_grun,         ONLY : grunmin_input, grunmax_input, &
                                    temp_ph, volume_ph, celldm_ph, lv0_t, &
                                    lb0_t
+  USE control_debye,        ONLY : idebye
   USE control_ev,           ONLY : ieos
   USE control_conv,         ONLY : nke, deltake, nkeden, deltakeden, &
                                    nnk, deltank, nsigma, deltasigma
@@ -289,6 +290,7 @@ SUBROUTINE thermo_readin()
                             poly_degree_bfact,              &
                             poly_degree_elc,                &
                             lv0_t, lb0_t,                   &
+                            idebye,                         &
                             noelcvg,                        &
                             add_empirical, efe, alpha1,     &
                             alpha2, v0p,                    &
@@ -535,6 +537,7 @@ SUBROUTINE thermo_readin()
   poly_degree_elc=4
   lv0_t=.TRUE.
   lb0_t=.TRUE.
+  idebye=0
   noelcvg=.FALSE.
   flpgrun='output_pgrun.dat'
   flgrun='output_grun.dat'

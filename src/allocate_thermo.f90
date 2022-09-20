@@ -16,9 +16,10 @@ SUBROUTINE allocate_thermodynamics()
   USE thermo_mod,     ONLY : tot_ngeo
   USE temperature,    ONLY : ntemp
   USE thermodynamics, ONLY : ph_free_ener, ph_ener, ph_entropy, ph_e0, &
-                             ph_ce, ph_b_fact
+                             ph_t_debye, ph_ce, ph_b_fact
   USE ph_freq_thermodynamics, ONLY : phf_free_ener, phf_ener, phf_entropy, &
-                                     phf_e0, phf_ce, phf_b_fact, ph_freq_save
+                                     phf_e0, phf_ce, phf_b_fact,           &
+                                     ph_freq_save, phf_t_debye
   USE el_thermodynamics, ONLY : el_ener, el_free_ener, el_entr, el_mu, &
                            el_ce
   USE el_anharmonic,  ONLY : vmine_t, b0e_t, b01e_t, b02e_t, free_e_mine_t
@@ -31,6 +32,7 @@ SUBROUTINE allocate_thermodynamics()
   IF (.NOT.ALLOCATED(ph_free_ener))  ALLOCATE(ph_free_ener(ntemp,tot_ngeo))
   IF (.NOT.ALLOCATED(ph_ener))       ALLOCATE(ph_ener(ntemp,tot_ngeo))
   IF (.NOT.ALLOCATED(ph_entropy))    ALLOCATE(ph_entropy(ntemp,tot_ngeo))
+  IF (.NOT.ALLOCATED(ph_t_debye))    ALLOCATE(ph_t_debye(ntemp,tot_ngeo))
   IF (.NOT.ALLOCATED(ph_e0))         ALLOCATE(ph_e0(tot_ngeo))
   IF (.NOT.ALLOCATED(ph_ce))         ALLOCATE(ph_ce(ntemp,tot_ngeo))
   IF (.NOT.ALLOCATED(ph_b_fact))     ALLOCATE(ph_b_fact(3,3,nat,ntemp,tot_ngeo))
@@ -38,6 +40,7 @@ SUBROUTINE allocate_thermodynamics()
   IF (.NOT.ALLOCATED(phf_free_ener)) ALLOCATE(phf_free_ener(ntemp,tot_ngeo))
   IF (.NOT.ALLOCATED(phf_ener))      ALLOCATE(phf_ener(ntemp,tot_ngeo))
   IF (.NOT.ALLOCATED(phf_entropy))   ALLOCATE(phf_entropy(ntemp,tot_ngeo))
+  IF (.NOT.ALLOCATED(phf_t_debye))   ALLOCATE(phf_t_debye(ntemp,tot_ngeo))
   IF (.NOT.ALLOCATED(phf_e0))        ALLOCATE(phf_e0(tot_ngeo))
   IF (.NOT.ALLOCATED(phf_ce))        ALLOCATE(phf_ce(ntemp,tot_ngeo))
   IF (.NOT.ALLOCATED(phf_b_fact))    ALLOCATE(phf_b_fact(3,3,nat,ntemp,tot_ngeo))

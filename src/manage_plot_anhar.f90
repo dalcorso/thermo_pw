@@ -25,6 +25,7 @@ CALL plot_hugoniot()
 !
 CALL plot_thermo_anhar()
 CALL plot_dw_anhar()
+CALL plot_t_debye()
 
 RETURN
 END SUBROUTINE manage_plot_anhar

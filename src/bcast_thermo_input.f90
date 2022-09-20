@@ -73,6 +73,7 @@ SUBROUTINE bcast_thermo_input()
   USE control_emp_free_ener, ONLY : add_empirical, efe, alpha1, alpha2, v0p
   USE control_grun,    ONLY : temp_ph, volume_ph, celldm_ph, lv0_t, lb0_t,    &
                               grunmin_input, grunmax_input
+  USE control_debye,   ONLY : idebye
   USE grun_anharmonic, ONLY : poly_degree_grun
   USE anharmonic,      ONLY : noelcvg
   USE images_omega,    ONLY : omega_group
@@ -304,6 +305,7 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( poly_degree_elc, meta_ionode_id, world_comm )
   CALL mp_bcast( lv0_t, meta_ionode_id, world_comm )
   CALL mp_bcast( lb0_t, meta_ionode_id, world_comm )
+  CALL mp_bcast( idebye, meta_ionode_id, world_comm )
   CALL mp_bcast( noelcvg, meta_ionode_id, world_comm )
   CALL mp_bcast( add_empirical, meta_ionode_id, world_comm )
   CALL mp_bcast( efe, meta_ionode_id, world_comm )

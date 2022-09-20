@@ -16,9 +16,9 @@ SUBROUTINE deallocate_thermo()
                              no_ph, tot_ngeo, in_degree, dynmat_on_file,    &
                              ef_geo
   USE thermodynamics, ONLY : ph_free_ener, ph_ener, ph_entropy, ph_ce,      &
-                             ph_e0, ph_b_fact
+                             ph_t_debye, ph_e0, ph_b_fact
   USE ph_freq_thermodynamics, ONLY : phf_free_ener, phf_ener, phf_entropy,  &
-                             phf_b_fact, phf_e0, phf_ce
+                             phf_b_fact, phf_e0, phf_ce, phf_t_debye
   USE el_thermodynamics, ONLY : el_ener, el_free_ener, el_entr, el_mu,      &
                                 el_ce
   USE anharmonic,     ONLY : vmin_t, b0_t, b01_t, b02_t, free_e_min_t, a_t, &
@@ -114,12 +114,14 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED(ph_free_ener) )     DEALLOCATE(ph_free_ener)
   IF ( ALLOCATED(ph_ener) )          DEALLOCATE(ph_ener)
   IF ( ALLOCATED(ph_entropy) )       DEALLOCATE(ph_entropy)
+  IF ( ALLOCATED(ph_t_debye) )       DEALLOCATE(ph_t_debye)
   IF ( ALLOCATED(ph_e0) )            DEALLOCATE(ph_e0)
   IF ( ALLOCATED(ph_ce) )            DEALLOCATE(ph_ce)
   IF ( ALLOCATED(ph_b_fact) )        DEALLOCATE(ph_b_fact)
   IF ( ALLOCATED(phf_free_ener) )    DEALLOCATE(phf_free_ener)
   IF ( ALLOCATED(phf_ener) )         DEALLOCATE(phf_ener)
   IF ( ALLOCATED(phf_entropy) )      DEALLOCATE(phf_entropy)
+  IF ( ALLOCATED(phf_t_debye) )      DEALLOCATE(phf_t_debye)
   IF ( ALLOCATED(phf_e0) )           DEALLOCATE(phf_e0)
   IF ( ALLOCATED(phf_ce) )           DEALLOCATE(phf_ce)
   IF ( ALLOCATED(phf_b_fact) )       DEALLOCATE(phf_b_fact)
