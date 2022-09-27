@@ -125,7 +125,7 @@ SUBROUTINE write_phdos(igeom)
      ndos = ndos_input
   ELSE
      ndos = NINT ( (emax - emin) / deltafreq + 1.51d0 )
-     ndos_input = ndos
+!     ndos_input = ndos
   END IF
 !
 ! initialize the phdos_save space 
