@@ -1,4 +1,4 @@
-! Copyright (C) 2016-2019 Andrea Dal Corso
+! Copyright (C) 2016-2022 Andrea Dal Corso
 ! This file is distributed under the terms of the
 ! GNU General Public License. See the file `License'
 ! in the root directory of the present distribution,
@@ -26,10 +26,13 @@ SUBROUTINE write_ph_freq(igeom)
   USE control_dosq,  ONLY : nq1_d, nq2_d, nq3_d
   USE data_files,    ONLY : fldosfrq
   USE ph_freq_thermodynamics, ONLY : ph_freq_save
+  USE symm_base,      ONLY : nrot
   USE control_thermo, ONLY : with_eigen
   USE ph_freq_module, ONLY : init_ph_freq
   USE matdyn_mod,     ONLY : matdyn_interp
-  USE mp_world,       ONLY : world_comm
+  USE io_global,      ONLY : meta_ionode, meta_ionode_id
+  USE mp_world,       ONLY : world_comm, nproc
+  USE mp,             ONLY : mp_bcast
   !
   IMPLICIT NONE
   !
@@ -37,7 +40,8 @@ SUBROUTINE write_ph_freq(igeom)
 
   CHARACTER(LEN=256) :: filename
   INTEGER :: iq, nq, nqx, startq, lastq
-  REAL(DP), ALLOCATABLE :: q(:,:), wq(:), dos_q(:,:)
+  REAL(DP), ALLOCATABLE :: q(:,:), wq(:), dos_q(:,:), wg_q(:)
+  REAL(DP) :: nqxr
   LOGICAL :: file_exist
   LOGICAL :: check_file_exists
   !
@@ -62,25 +66,64 @@ SUBROUTINE write_ph_freq(igeom)
 !   Otherwise computes the q points, the weights and the frequencies.
 !   First generates the q points
 !
-     nqx = nq1_d * nq2_d * nq3_d
-     ALLOCATE(q(3,nqx))
-     ALLOCATE(wq(nqx))
-     CALL gen_qpoints_tpw (ibrav, at, bg, nat, tau, ityp, &
-          nq1_d, nq2_d, nq3_d, nqx, nq, q, wq)
+     nqx = nq1_d * nq2_d * 2 / MIN(2,nrot) * nq3_d 
+     IF (nqx<0) CALL errore('write_ph_freq','nq1_d*nq2_d*nq3_d too large',1)
+     nqxr=nqx
+     IF (nqxr*32<1.D9/nproc) THEN
+!
+!   In this case the size of q and wq is small enough that we can
+!   allocate it on all processors and run gen_qpoints_tpw in parallel
+!
+        ALLOCATE(q(3,nqx))
+        ALLOCATE(wq(nqx))
+        CALL gen_qpoints_tpw (ibrav, at, bg, nat, tau, ityp, &
+             nq1_d, nq2_d, nq3_d, nqx, nq, q, wq)
+        ALLOCATE ( dos_q(3, nq) )
+        dos_q(1:3,1:nq)=q(:,1:nq)
+
+        CALL divide(world_comm, nq, startq, lastq)
+        CALL init_ph_freq(ph_freq_save(igeom), nat, nq1_d, nq2_d, nq3_d, &
+                                         startq, lastq, nq, with_eigen)
+        ph_freq_save(igeom)%wg(:)=wq(startq:lastq)
+        DEALLOCATE(q)
+        DEALLOCATE(wq)
+     ELSE
+!
+!   In this case only one CPU allocates q and wq, computes the q point mesh
+!   and broacast the symmetry inequivalent points and weights to all 
+!   other processors
+!
+        IF (meta_ionode) THEN
+           ALLOCATE(q(3,nqx))
+           ALLOCATE(wq(nqx))
+           CALL gen_qpoints_serial_tpw (ibrav, at, bg, nat, tau, ityp, &
+                nq1_d, nq2_d, nq3_d, nqx, nq, q, wq)
+        ENDIF
+        CALL mp_bcast(nq,meta_ionode_id,world_comm)
 !
 !  To avoid to keep allocated too much memory we copy the q points in 
 !  dos_q and their weight in ph_freq_save (note that this quantity is
 !  distributed among all processors). 
 !
-     ALLOCATE ( dos_q(3, nq) )
-     dos_q(1:3,1:nq)=q(:,1:nq)
+        ALLOCATE ( dos_q(3, nq) )
+        ALLOCATE ( wg_q(nq) )
+        IF (meta_ionode) THEN
+           dos_q(1:3,1:nq)=q(:,1:nq)
+           wg_q(1:nq)=wq(1:nq)
+        ENDIF
+        CALL mp_bcast(dos_q,meta_ionode_id,world_comm)
+        CALL mp_bcast(wg_q,meta_ionode_id,world_comm)
 
-     CALL divide(world_comm, nq, startq, lastq)
-     CALL init_ph_freq(ph_freq_save(igeom), nat, nq1_d, nq2_d, nq3_d, &
-                                         startq, lastq, nq, with_eigen)
-     ph_freq_save(igeom)%wg(:)=wq(startq:lastq)
-     DEALLOCATE(q)
-     DEALLOCATE(wq)
+        CALL divide(world_comm, nq, startq, lastq)
+        CALL init_ph_freq(ph_freq_save(igeom), nat, nq1_d, nq2_d, nq3_d, &
+                                            startq, lastq, nq, with_eigen)
+        ph_freq_save(igeom)%wg(:)=wg_q(startq:lastq)
+        IF (meta_ionode) THEN
+           DEALLOCATE(q)
+           DEALLOCATE(wq)
+        ENDIF
+        DEALLOCATE(wg_q)
+     ENDIF
 !
 !   here computes the frequencies
 !
@@ -173,52 +216,103 @@ SUBROUTINE cwrite_ph_freq(ph_freq_data, filename)
 !   This routine collects the data of a ph_freq_type and writes them on file.
 !   The data are written only by the meta_ionode. 
 !   All processors of the world communicator are assumed to have a 
-!   piece of data
+!   piece of data which is collected on meta_ionode.
 !
+USE parallel_include
 USE kinds,          ONLY : DP
 USE ions_base,      ONLY : nat
 USE control_thermo, ONLY : with_eigen
 USE ph_freq_module, ONLY : write_ph_freq_data, init_ph_freq, destroy_ph_freq, &
                            ph_freq_type
 USE control_dosq,   ONLY : nq1_d, nq2_d, nq3_d
-USE io_global,      ONLY : meta_ionode
-USE mp_world,       ONLY : world_comm
+USE io_global,      ONLY : meta_ionode, meta_ionode_id
+USE mp_world,       ONLY : world_comm, nproc, mpime
 USE mp,             ONLY : mp_sum
 IMPLICIT NONE
 
 TYPE(ph_freq_type) :: ph_freq_data
 CHARACTER(LEN=256) :: filename
 
+INTEGER :: nq, iproc, ierr
+#if defined(__MPI) 
 TYPE(ph_freq_type) :: buffer
-INTEGER :: nq, startq, lastq
-!
-!  Initialize a buffer with the correct dinension
-!
-nq=ph_freq_data%nq
-CALL init_ph_freq(buffer, nat, nq1_d, nq2_d, nq3_d, 1, nq, nq, with_eigen)
-!
-!  find which q belong to this processor
-!
-CALL divide(world_comm, nq, startq, lastq)
-!
-!  copy them into buffer
-!
-buffer%nu=0.0_DP
-buffer%wg=0.0_DP
-buffer%nu(:,startq:lastq)=ph_freq_data%nu
-buffer%wg(startq:lastq)=ph_freq_data%wg
-IF (with_eigen) buffer%displa(:,:,startq:lastq)=ph_freq_data%displa(:,:,:)
-!
-!  and collect buffer on all processors
-!
-CALL mp_sum(buffer%nu,world_comm)
-CALL mp_sum(buffer%wg,world_comm)
-!
-!  meta_ionode saves the collected data on file
-!
-IF (meta_ionode) CALL write_ph_freq_data(buffer,filename)
-!
-CALL destroy_ph_freq(buffer)
+INTEGER, ALLOCATABLE :: startq(:), lastq(:)
 
+INTEGER :: istatus(MPI_STATUS_SIZE)
+
+nq=ph_freq_data%nq
+ALLOCATE(startq(0:nproc-1))
+ALLOCATE(lastq(0:nproc-1))
+!
+!  find which q belong to this processor and tell all other processors
+!
+startq=0
+lastq=0
+CALL divide(world_comm, nq, startq(mpime), lastq(mpime))
+CALL mp_sum(startq,world_comm)
+CALL mp_sum(lastq,world_comm)
+
+IF (meta_ionode) THEN
+!
+!  Initialize a buffer that can contain all the arrays
+!
+   CALL init_ph_freq(buffer, nat, nq1_d, nq2_d, nq3_d, 1, nq, nq, with_eigen)
+   buffer%nu=0.0_DP
+   buffer%wg=0.0_DP
+   IF (with_eigen) buffer%displa=(0.0_DP,0.0_DP)
+!
+!  meta_ionode receives from all processors the data and copy its part
+!  on the buffer
+!
+   DO iproc=0,nproc-1
+      IF (iproc==meta_ionode_id) THEN
+         buffer%nu(:,startq(iproc):lastq(iproc))=ph_freq_data%nu
+         buffer%wg(startq(iproc):lastq(iproc))=ph_freq_data%wg
+         IF (with_eigen) buffer%displa(:,:,startq(iproc):lastq(iproc))=&
+                                              ph_freq_data%displa(:,:,:)
+      ELSE
+         CALL MPI_RECV(buffer%nu(1,startq(iproc)), 3*nat*(lastq(iproc)-   &
+                            startq(iproc) + 1), MPI_DOUBLE_PRECISION, &
+                            iproc, iproc, world_comm, istatus, ierr)
+         CALL MPI_RECV(buffer%wg(startq(iproc)), (lastq(iproc)-       &
+                            startq(iproc) + 1), MPI_DOUBLE_PRECISION, &
+                            iproc, nproc+iproc, world_comm, istatus, ierr)
+         IF (with_eigen) &
+            CALL MPI_RECV(buffer%displa(1,1,startq(iproc)), 2*3*nat*3*nat*  &
+                 (lastq(iproc)- startq(iproc) + 1),                   &
+                 MPI_DOUBLE_PRECISION, iproc, 2*nproc+iproc, world_comm, &
+                                                          istatus, ierr)
+      ENDIF
+   ENDDO
+ELSE
+!
+!  all other processors send their data to meta_ionode.
+!
+   CALL MPI_SEND(ph_freq_data%nu, 3*nat*(lastq(mpime)-                    &
+                            startq(mpime) + 1), MPI_DOUBLE_PRECISION, &
+                            meta_ionode_id, mpime, world_comm, istatus, ierr)
+   CALL MPI_SEND(ph_freq_data%wg, (lastq(mpime)-                      &
+                            startq(mpime) + 1), MPI_DOUBLE_PRECISION, &
+                            meta_ionode_id, nproc+mpime, world_comm, &
+                                                               istatus, ierr)
+   IF (with_eigen) &
+      CALL MPI_SEND(ph_freq_data%displa, 2*3*nat*3*nat*               &
+           (lastq(mpime)- startq(mpime) + 1), MPI_DOUBLE_PRECISION,   &
+            meta_ionode_id, 2*nproc+mpime, world_comm, istatus, ierr)
+ENDIF
+!
+!  meta_ionode saves the collected data on file and deallocate the buffer
+!
+IF (meta_ionode) THEN
+   CALL write_ph_freq_data(buffer,filename)
+   !
+   CALL destroy_ph_freq(buffer)
+ENDIF
+DEALLOCATE(lastq)
+DEALLOCATE(startq)
+
+#else
+    CALL write_ph_freq_data(ph_freq_data,filename)
+#endif
 RETURN
 END SUBROUTINE cwrite_ph_freq
