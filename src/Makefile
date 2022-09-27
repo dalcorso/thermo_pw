@@ -72,6 +72,7 @@ interpolate_free_ener_strain.o \
 interpolate_freq.o \
 interpolate_thermo.o \
 io_bands.o \
+kpoint_grid_serial_tpw.o \
 local_dos1d_so.o \
 manage_anhar.o \
 manage_anhar_routines.o \
