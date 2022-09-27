@@ -16,7 +16,7 @@ PUBLIC matdyn_interp
 CONTAINS
 !
 !---------------------------------------------------------------------
-SUBROUTINE matdyn_interp(nq, disp_q, freq_save, startq, lastq, z_save)
+SUBROUTINE matdyn_interp(nq, q, freq_save, startq, lastq, z_save)
   !-----------------------------------------------------------------------
   !  this program calculates the phonon frequencies for a list of generic
   !  q vectors starting from the interatomic force constants generated
@@ -49,7 +49,7 @@ SUBROUTINE matdyn_interp(nq, disp_q, freq_save, startq, lastq, z_save)
   !  The input variables are:
   !  nq           The number of q vectors in which the interpolation must
   !               be done
-  !  disp_q(3,nq) ! the cartesian coordinates in units of 2 pi / a 
+  !  q(3,nq)      ! the cartesian coordinates in units of 2 pi / a 
   !               of the q vectors for which the dynamical matrix needs
   !               to be computed
   !  If q = 0, the direction qhat (q=>0) for the non-analytic part
@@ -87,7 +87,7 @@ SUBROUTINE matdyn_interp(nq, disp_q, freq_save, startq, lastq, z_save)
   IMPLICIT NONE
   !
   INTEGER, INTENT(IN) :: nq, startq, lastq
-  REAL(DP), INTENT(IN) :: disp_q(3,nq)
+  REAL(DP), INTENT(IN) :: q(3,nq)
   REAL(DP), INTENT(INOUT) :: freq_save(3*nat,startq:lastq)
   COMPLEX(DP), OPTIONAL, INTENT(INOUT) :: z_save(3*nat,3*nat,startq:lastq)
 
@@ -97,7 +97,7 @@ SUBROUTINE matdyn_interp(nq, disp_q, freq_save, startq, lastq, z_save)
   COMPLEX(DP), ALLOCATABLE :: dyn(:,:,:,:)
   COMPLEX(DP), ALLOCATABLE :: z(:,:)
   !
-  REAL(DP), ALLOCATABLE:: q(:,:), w2(:,:)
+  REAL(DP), ALLOCATABLE:: w2(:,:)
   REAL(DP) ::     atws(3,3),      &! lattice vector for WS initialization
                   rws(0:3,nrwsx)   ! nearest neighbor list, rws(0,*) = norm^2
   REAL(DP) :: qhat(3), qh, masst
@@ -137,12 +137,9 @@ SUBROUTINE matdyn_interp(nq, disp_q, freq_save, startq, lastq, z_save)
   ! copy the q-point list in the local variables
   !
   nqtot=nq
-  ALLOCATE ( q(3,nqtot) )
   ALLOCATE ( dyn(3,3,nat,nat) )
   ALLOCATE ( z(3*nat,3*nat) )
-  ALLOCATE ( w2(3*nat,nqtot) )
-
-  q(:,1:nqtot)=disp_q(:,1:nqtot)
+  ALLOCATE ( w2(3*nat,startq:lastq) )
 
   do_init=.TRUE.
   IF (PRESENT(z_save)) z_save=(0.0_DP,0.0_DP)
@@ -225,7 +222,6 @@ SUBROUTINE matdyn_interp(nq, disp_q, freq_save, startq, lastq, z_save)
   DEALLOCATE (z) 
   DEALLOCATE (w2) 
   DEALLOCATE (dyn) 
-  DEALLOCATE (q)
   IF (ALLOCATED(wscache)) DEALLOCATE(wscache)
   !
   RETURN
