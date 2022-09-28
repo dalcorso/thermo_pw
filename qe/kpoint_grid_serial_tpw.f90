@@ -101,11 +101,11 @@ SUBROUTINE kpoint_grid_serial_tpw( nrot, time_reversal, skip_equivalence, &
         DO kl=1,nk3
            !  this is nothing but consecutive ordering
            nk = (kl-1) + (jl-1)*nk3 + (il-1)*nk2*nk3 + 1
-           !  xkg are the components of the complete grid in crystal axis
-  !  equiv(nk) =nk : k-point nk is not equivalent to any previous k-point
-  !  equiv(nk)!=nk : k-point nk is equivalent to k-point equiv(nk)
+  !  equiv(nk) =.FALSE. : k-point nk is not equivalent to any previous k-point
+  !  equiv(nk) =.TRUE. : k-point nk is equivalent to one previous k-point
   !  check if this k-point has already been found equivalent to another
            IF (.NOT.equiv(nk)) THEN
+           !  xkg are the components of this new k point in crystal axis
               xkg(1) = DBLE(il-1)/nk1 + DBLE(k1)/2/nk1
               xkg(2) = DBLE(jl-1)/nk2 + DBLE(k2)/2/nk2
               xkg(3) = DBLE(kl-1)/nk3 + DBLE(k3)/2/nk3

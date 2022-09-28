@@ -43,6 +43,7 @@ deallocate_asyn.o \
 deallocate_thermo.o \
 deallocate_q2r.o \
 decorated_write.o \
+dos_ph.o \
 do_pwscf.o \
 do_berry.o \
 do_phonon_tpw.o \
@@ -72,7 +73,6 @@ interpolate_free_ener_strain.o \
 interpolate_freq.o \
 interpolate_thermo.o \
 io_bands.o \
-kpoint_grid_serial_tpw.o \
 local_dos1d_so.o \
 manage_anhar.o \
 manage_anhar_routines.o \

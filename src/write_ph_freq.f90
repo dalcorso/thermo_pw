@@ -66,7 +66,7 @@ SUBROUTINE write_ph_freq(igeom)
 !   Otherwise computes the q points, the weights and the frequencies.
 !   First generates the q points
 !
-     nqx = nq1_d * nq2_d * 2 / MIN(2,nrot) * nq3_d 
+     nqx = nq1_d * nq2_d * 2 / MAX(2,nrot) * nq3_d 
      IF (nqx<0) CALL errore('write_ph_freq','nq1_d*nq2_d*nq3_d too large',1)
      nqxr=nqx
      IF (nqxr*32<1.D9/nproc) THEN

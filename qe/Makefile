@@ -67,6 +67,7 @@ initialize_ph_tpw.o \
 init_representations_tpw.o \
 irrek.o \
 kpoint_grid.o \
+kpoint_grid_serial_tpw.o \
 lanczos_write_restart.o \
 lr_dot_tpw.o \
 lr_restart.o \
