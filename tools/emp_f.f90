@@ -778,7 +778,7 @@ DO ivol=1, nvol
 ENDDO
 !
 !-------------------------------------------------------------------------
-!  Write the computed quatities on output
+!  Write the computed quantities on output
 !  Free energy as a function of V for a few T:
 !
 iu_p=58
