@@ -2137,6 +2137,7 @@ USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,  &
 USE internal_files_names, ONLY : fltherm_thermo, flpstherm_thermo
 USE temperature,      ONLY : temp, tmin, tmax
 USE control_vol,      ONLY : nvol_plot, ivol_plot
+USE control_debye,    ONLY : idebye
 USE color_mod,        ONLY : color
 USE mp_images,        ONLY : my_image_id, root_image
 USE io_global,        ONLY : ionode
@@ -2152,7 +2153,7 @@ LOGICAL :: first_step, last_step
 CHARACTER(LEN=6) :: int_to_char
 
 IF ( my_image_id /= root_image ) RETURN
-IF ( nvol_plot==0 ) RETURN
+IF ( (nvol_plot==0) .OR. (idebye <1) .OR. (idebye >3) ) RETURN
 !
 !   gnuplot script
 !
