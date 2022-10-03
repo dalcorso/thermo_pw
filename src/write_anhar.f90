@@ -2412,7 +2412,7 @@ SUBROUTINE find_min_mur_pol(v0, b0, b01, b02, a, m1, vm)
 !-----------------------------------------------------------------------
 !
 !  This routine minimizes a function equal to an equation os state
-!  (Birch-Murnaghan third or fourth order, or Munaghan)
+!  (Birch-Murnaghan third or fourth order, or Murnaghan)
 !  with parameters v0, b0, b01, and b02 and a polynomial of degree m1-1 of
 !  the form a(1) + a(2) * v + a(3) * v**2 +... a(m1) * v**(m1-1)
 !  NB: b0 must be in atomic units not kbar
