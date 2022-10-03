@@ -2084,10 +2084,11 @@ with_eigen    : if .TRUE. use the eigenvectors of the
                 the plotted Gruneisen bands (both in cubic 
                 and anisotropic solids).
                 Default: logical .FALSE. 
-ltherm_glob   : when .FALSE. the vibrational (plus electronic) free energy
-                is fitted by a polynomial, while only the static energy is
-                fitted by an equation of state. When .TRUE. a different
-                equation of state is fitted at each temperature.
+ltherm_glob   : when .FALSE. the vibrational (plus electronic) 
+                free energy is fitted by a polynomial, while 
+                only the static energy is fitted by an equation 
+                of state. When .TRUE. a different equation of 
+                state is fitted at each temperature.
                 Default: logical .FALSE.
 poly_degree_ph : degree of the polynomial used to interpolate 
                 the vibrational free energy. Presently only the 
@@ -2106,6 +2107,10 @@ poly_degree_bfact : degree of the polynomial used to interpolate
 poly_degree_elc : degree of the polynomial used to interpolate 
                 the elastic constants. Presently only the values 
                 1, 2, 3, or 4 are available for anisotropic solids.
+                Default: integer 4
+poly_degree_grun : degree of the polynomial used to interpolate 
+                the frequencies (Used only when lmurn=.TRUE. 
+                otherwise it is 2).
                 Default: integer 4
 lv0_t         : if .TRUE.  the calculation of the thermal 
                 expansion with Gruneisen parameters uses the 
@@ -2132,10 +2137,6 @@ lb0_t         : if .TRUE. the calculation of the thermal expansion
                 elastic constants file all the quantities that 
                 depend on elastic properties are not computed.
                 Default: logical .TRUE.
-poly_degree_grun : degree of the polynomial used to interpolate 
-                the frequencies (Used only when lmurn=.TRUE. 
-                otherwise it is 2).
-                Default: 4
 add_empirical : If .TRUE. adds to the free energy an empirical term
                 that can represent the anharmonic contribution 
                 or the electronic contribution.
@@ -2164,9 +2165,9 @@ nsigma        : The number of smearing values for which there are
                 restart3, ..., restart#nsigma.
                 Default: 0 (option not used). Minimum value 3 to
                 make a quadratic fit of the energy.
-sigma_ry      : the value of the smearing for each directory restart.
+sigma_ry(nsigma): the value of the smearing for each directory restart.
                 In Ry units.
-                Default: Must be set of each nsigma by the user.
+                Default: Must be set for each nsigma by the user.
 lhugoniot     : If .TRUE. the code plots T(p) and V(p) along the 
                 Hugoniot curve.
                 Default: .FALSE.
@@ -2508,7 +2509,9 @@ In this case you can set \texttt{start\_geometry=last\_geometry},
 \texttt{max\_seconds} in the \texttt{thermo\_pw} input,
 and \texttt{recover=.TRUE.} in the \texttt{ph.x} input. You need to
 repeat this for all the geometries and finally you can collect the results
-and compute the anharmonic properties.
+and compute the anharmonic properties. Note that when
+\texttt{start\_geometry} or \texttt{last\_geometry} are set by the
+user the anharmonic calculation is skipped.
 
 
 \newpage

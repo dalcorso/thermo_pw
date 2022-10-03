@@ -14,10 +14,11 @@ SUBROUTINE check_all_geometries_done(all_geometry_done)
 !  If this is the case, it verifies that all the harmonic
 !  thermodynamic properties are on file or recomputes them if
 !  they are not. It is called before starting any anharmonic 
-!  calculation.
+!  calculation. If start_geometry or last_geometry are set by
+!  the user, the anharmonic calculation is not done.
 !
 
-USE thermo_mod, ONLY : tot_ngeo, no_ph
+USE thermo_mod, ONLY : tot_ngeo, no_ph, start_geometry, last_geometry
 USE control_elastic_constants, ONLY : start_geometry_qha, last_geometry_qha, &
                        ngeom
 USE output, ONLY : fildyn
@@ -29,8 +30,12 @@ LOGICAL, INTENT(OUT) :: all_geometry_done
 INTEGER :: igeom, igeom_qha, iwork, work_base
 LOGICAL  :: check_dyn_file_exists
 
-all_geometry_done=.TRUE.
+all_geometry_done=.FALSE.
 work_base=tot_ngeo/ngeom
+IF ((start_geometry/=((start_geometry_qha-1)*work_base+1)) &
+   .OR.(last_geometry/=(last_geometry_qha*work_base))) RETURN
+
+all_geometry_done=.TRUE.
 DO igeom_qha=start_geometry_qha, last_geometry_qha
    DO iwork=1,work_base
       igeom=(igeom_qha-1)*work_base+iwork
@@ -42,11 +47,11 @@ DO igeom_qha=start_geometry_qha, last_geometry_qha
    ENDDO
 ENDDO
 !
-!  When start_geometry and last_geometry are used and we arrive here the
-!  dynamical matrices for the missing geometries are on file and
-!  we read the thermal properties of the geometries not computed in this run
-!
-CALL check_thermo_all_geo()
+!!  When start_geometry and last_geometry are used and we arrive here the
+!!  dynamical matrices for the missing geometries are on file and
+!!  we read the thermal properties of the geometries not computed in this run
+!!
+!CALL check_thermo_all_geo()
 
 RETURN
 END SUBROUTINE check_all_geometries_done
