@@ -92,6 +92,7 @@ SUBROUTINE deallocate_thermo()
                             emp_ener_pt, emp_entr_pt, emp_ce_pt, emp_ce_ptt
   USE collect_info,  ONLY : destroy_collect_info_type
   USE control_eldos, ONLY : dos_k, dos_wk
+  USE geometry_file, ONLY : deallocate_geometry_file
   USE polynomial,    ONLY : clean_poly
 
   IMPLICIT NONE
@@ -402,6 +403,7 @@ SUBROUTINE deallocate_thermo()
      ENDIF
      DEALLOCATE(collect_info_save)
   ENDIF
+  CALL deallocate_geometry_file()
 
   RETURN
   !

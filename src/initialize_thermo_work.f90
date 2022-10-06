@@ -532,9 +532,11 @@ SUBROUTINE set_celldm_geo(celldm_geo, nwork)
 !   This routine sets the grid of values on celldm_geo.
 !
 USE kinds,         ONLY : DP
+USE control_thermo, ONLY : lgeo_from_file
 USE constants,     ONLY : pi
 USE thermo_mod,    ONLY : step_ngeo, ngeo, reduced_grid
 USE initial_conf,  ONLY : celldm_save
+USE geometry_file, ONLY : set_celldm_geo_from_file
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: nwork
@@ -543,6 +545,11 @@ REAL(DP), INTENT(INOUT) :: celldm_geo(6,nwork)
 INTEGER  :: igeo1, igeo2, igeo3, igeo4, igeo5, igeo6
 INTEGER  :: iwork, i, total_work
 REAL(DP) :: angle1, angle2, angle3, delta(6)
+
+IF (lgeo_from_file) THEN
+   CALL set_celldm_geo_from_file(celldm_geo, ngeo(1))
+   RETURN
+ENDIF
 
 delta=0.0_DP
 DO i=1,6
@@ -697,6 +704,8 @@ USE thermo_mod,    ONLY : ibrav_geo, ngeo, celldm_geo, energy_geo, ef_geo, &
 USE control_vol,   ONLY : nvol, vmin_input, vmax_input, deltav
 USE initial_conf,  ONLY : ibrav_save
 USE temperature,   ONLY : ntemp_plot
+USE geometry_file, ONLY : read_geometry_file
+USE control_thermo, ONLY : lgeo_from_file
 USE control_pressure, ONLY : npress, npress_plot
 USE control_mur_p, ONLY : vmin_p, b0_p, b01_p, b02_p, emin_p
 USE control_mur,   ONLY : p0
@@ -709,6 +718,7 @@ INTEGER              :: igeom
 INTEGER              :: compute_nwork
 REAL(DP)             :: compute_omega_geo
 
+IF (lgeo_from_file) CALL read_geometry_file(ngeo)
 nwork=compute_nwork()
 ALLOCATE(ibrav_geo(nwork))
 ALLOCATE(celldm_geo(6,nwork))

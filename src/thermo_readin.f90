@@ -35,13 +35,13 @@ SUBROUTINE thermo_readin()
                                    continue_zero_ibrav, find_ibrav,        &
                                    set_internal_path, set_2d_path,         &
                                    all_geometries_together, max_seconds_tpw, &
-                                   lhugoniot
+                                   lhugoniot, lgeo_from_file, lgeo_to_file
   USE data_files,           ONLY : flevdat, flfrc, flfrq, fldos, fltherm,  &
                                    flanhar, filband, flkeconv, flenergy,   &
                                    flpbs, flprojlayer, flnkconv, flgrun,   &
                                    flpgrun, fl_el_cons, flpband, flvec,    &
                                    flepsilon, floptical, fleldos, fleltherm, &
-                                   fldosfrq, flelanhar
+                                   fldosfrq, flelanhar, flgeom
   USE temperature,          ONLY : tmin, tmax, deltat, ntemp, ntemp_plot,  &
                                    temp_plot_=>temp_plot, itemp_plot,      &
                                    sigma_ry_=>sigma_ry
@@ -296,9 +296,12 @@ SUBROUTINE thermo_readin()
                             alpha2, v0p,                    &
                             ltherm_glob,                    &
                             lhugoniot,                      &
+                            lgeo_from_file,                 &
+                            lgeo_to_file,                   &
                             poly_degree_grun,               &
                             flpgrun, flgrun, flpsgrun,      &
                             flanhar, flelanhar, flpsanhar,  &
+                            flgeom,                         &
                             fact_ngeo, ngeo_ph,             &
                             all_geometries_together,        &
 !
@@ -485,6 +488,8 @@ SUBROUTINE thermo_readin()
 
   ltherm_glob=.FALSE.
   lhugoniot=.FALSE.
+  lgeo_from_file=.FALSE.
+  lgeo_to_file=.FALSE.
   poly_degree_grun=4
 
   nppl=51
@@ -545,6 +550,7 @@ SUBROUTINE thermo_readin()
   flanhar='output_anhar.dat'
   flelanhar='output_elanhar.dat'
   flpsanhar='output_anhar'
+  flgeom='output_geometry'
   fact_ngeo=1
   ngeo_ph=0
   omega_group=1

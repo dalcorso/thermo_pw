@@ -1833,10 +1833,24 @@ do_scf_relax : if .TRUE. the code makes a self-consistent relax
              If .FALSE. the coordinates of the input geometry 
              are strained uniformly to the equilibrium geometry.
              Default: logical .FALSE. 
+lgeo_from_file : if .TRUE. the input geometries are read from file.
+             ngeo(1) must have the total number of geometries 
+             and lmurn must be .TRUE..
+             Default : .FALSE.
+lgeo_to_file : if .TRUE. at the end of the calculation the code
+             writes in a file the geometries that correspond to
+             the optimized crystal parameters for each value of 
+             celldm(1) of the grid of geometries.
+             Default : .FALSE.
 flenergy   : name of the file that contains the energy in a 
              form that can be used by gnuplot to make contour 
              plots.
              Default: character(len=*) 'output_energy'
+flgeom     : name of the file that contains the geometries  
+             requested with the flags lgeo_to_file or 
+             lgeo_from_file. The file is in the directory 
+             energy files.
+             Default: character(len=*) 'output_geometry'
 flpsenergy : file with the contour plots of the energy as a 
              function of the crystal parameters.
              Default: character(len=*) 'output_energy'

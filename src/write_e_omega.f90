@@ -32,9 +32,11 @@ USE cell_base,        ONLY : ibrav
 USE thermo_mod,       ONLY : omega_geo, celldm_geo, energy_geo
 USE control_mur,      ONLY : omegap0
 USE control_vol,      ONLY : vmin_input, vmax_input
+USE control_thermo,   ONLY : lgeo_to_file
 USE control_pressure, ONLY : pressure, pressure_kb, pmin, pmax, deltap, &
                              npress, press
 USE control_quartic_energy, ONLY : lquartic, lsolve
+USE geometry_file,      ONLY : write_geometry_output
 USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_quadratic_extremum, &
                              print_chisq_quadratic
 USE quartic_surfaces, ONLY : fit_multi_quartic, find_quartic_extremum, &
@@ -127,6 +129,8 @@ DO ipress=1, npress
    ENDIF
 ENDDO
 CALL find_omega0(press/ry_kbar,omega,npress,omegap0)
+
+IF (lgeo_to_file) CALL write_geometry_output(npress, press, celldmp)
 
 IF (vmin_input == 0.0_DP) vmin_input=omega(npress) * 0.98_DP
 IF (vmax_input == 0.0_DP) vmax_input=omega(1) * 1.02_DP

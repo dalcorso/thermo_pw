@@ -850,6 +850,8 @@ MODULE control_thermo
                                   ! part of the free energy with a polynomial
   LOGICAL :: lhugoniot=.FALSE.    ! if .true. the code plots T(p) and V(p)
                                   ! along the Hugoniot
+  LOGICAL :: lgeo_from_file=.FALSE. ! geometries for mur_lc read from file
+  LOGICAL :: lgeo_to_file=.FALSE. ! geometries for mur_lc written to file
   LOGICAL :: lconv_ke_test=.FALSE.! if .true. this writes the ke test on file
   LOGICAL :: lconv_nk_test=.FALSE.! if .true. this writes the k-point on file
   LOGICAL :: lelastic_const=.FALSE. ! if .true. compute elastic constants
@@ -1517,6 +1519,7 @@ MODULE data_files
                                   ! of the wavefunctions on each layer
   CHARACTER(LEN=256) :: fl_el_cons ! the file where the elastic constants are
                                    ! written
+  CHARACTER(LEN=256) :: flgeom   ! the file with the saved geometries 
 
 END MODULE data_files
 
