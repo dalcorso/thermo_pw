@@ -193,6 +193,9 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            lev_syn_1=.TRUE.
            lpwscf_syn_1=do_scf_relax
            CALL initialize_mur(nwork)
+           ALLOCATE(no_ph(nwork))
+           no_ph=.TRUE.
+           CALL summarize_geometries(nwork)
            IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
            IF (lel_free_energy) THEN
