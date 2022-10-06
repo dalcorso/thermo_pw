@@ -100,8 +100,6 @@ SUBROUTINE thermo_setup()
   !
   !  
   cubic=(ibrav==1.OR.ibrav==2.OR.ibrav==3) 
-  IF ((npress_plot>0.OR.ntemp_plot>0).AND.(.NOT.cubic)) &
-    CALL errore('thermo_setup','npress_plot and ntemp_plot need cubic solids',1) 
   IF ((npress_plot>0.OR.ntemp_plot>0).AND.(.NOT.lmurn)) &
     CALL errore('thermo_setup','npress_plot and ntemp_plot need lmurn=.TRUE.',1) 
   !
