@@ -208,7 +208,7 @@ IF (lel_free_energy) THEN
          CALL gnuplot_ylabel('Electronic free energy (eV)',.FALSE.) 
       ENDIF
       CALL gnuplot_write_file_mul_line_point(filename,1,4,color(istep), &
-                                        first_step, last_step, .FALSE.)
+                                  first_step, .FALSE., last_step, .FALSE.)
    ENDDO
 ENDIF
 
@@ -1930,7 +1930,7 @@ IF (lel_free_energy) THEN
          CALL gnuplot_ylabel('Electronic free energy (eV)',.FALSE.) 
       ENDIF
       CALL gnuplot_write_file_mul_line_point(filename,1,4,color(istep), &
-                                        first_step, last_step, .FALSE.)
+                                   first_step, .FALSE., last_step, .FALSE.)
    ENDDO
 ENDIF
 !

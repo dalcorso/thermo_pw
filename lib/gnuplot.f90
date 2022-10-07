@@ -862,7 +862,7 @@ END SUBROUTINE gnuplot_write_file_mul_point
 
 !--------------------------------------------------------------------------
 SUBROUTINE gnuplot_write_file_mul_line_point(data_file, col1, col2, color, &
-                                  start, last, comment)
+                                  start, continue, last, comment)
 !--------------------------------------------------------------------------
 !
 !   This subroutine plots the data contained in a file with line and
@@ -873,7 +873,7 @@ IMPLICIT NONE
 CHARACTER(LEN=*), INTENT(IN) :: data_file
 INTEGER, INTENT(IN) :: col1, col2
 CHARACTER(LEN=*), INTENT(IN) :: color
-LOGICAL, INTENT(IN) :: start, last
+LOGICAL, INTENT(IN) :: start, continue, last
 
 CHARACTER(LEN=256) :: string
 CHARACTER(LEN=6) :: int_to_char
@@ -885,6 +885,7 @@ string=" """//TRIM(data_file)//""" u ($"//TRIM(int_to_char(col1))//"*xscale-xshi
             //TRIM(color)
 
 IF (start) string="plot "//TRIM(string)
+IF (continue) string="replot "//TRIM(string)
 #if defined (__PGI) || defined (__XLF)
 IF (.NOT.last) string=TRIM(string)//", \\"
 #else
