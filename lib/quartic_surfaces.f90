@@ -26,6 +26,10 @@ MODULE quartic_surfaces
 !   evaluate_quartic_hessian evaluates the Hessian of the quartic polynomial
 !   on a given input point.
 !
+!   write_quartic_hessian writes the Hessian on output and computes 
+!   eigenvalues and eigenvectors of the Hessian of the quartic 
+!   polynomial in a given input point.
+!
 !   find_quartic_extremum finds the extremum of the quartic polynomial 
 !   closest to a given input point.
 !
@@ -81,6 +85,7 @@ MODULE quartic_surfaces
   PUBLIC :: fit_multi_quartic, evaluate_fit_quartic,         &
             evaluate_quartic_grad, evaluate_quartic_hessian, &
             find_quartic_extremum,                           &
+            write_quartic_hessian,                           &
             print_quartic_polynomial, introduce_quartic_fit, &
             print_chisq_quartic,                             &
             evaluate_two_quartic,                            &
@@ -359,6 +364,45 @@ ENDDO
 
 RETURN
 END SUBROUTINE evaluate_quartic_hessian
+!
+!--------------------------------------------------------------------
+SUBROUTINE write_quartic_hessian(nvar, x, p4, v, e)
+!--------------------------------------------------------------------
+!
+!  This routine writes the Hessian of the quartic polynomial and
+!  its eigenvalues and eigenvectors.
+!
+USE diagonalize, ONLY : diagonalize_r
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: nvar
+TYPE(poly4), INTENT(IN) :: p4
+REAL(DP), INTENT(IN) :: x(nvar)
+REAL(DP), INTENT(INOUT) :: e(nvar), v(nvar,nvar)
+INTEGER ::  ideg
+
+REAL(DP) :: amat(nvar, nvar)
+
+CALL evaluate_quartic_hessian(nvar,x,amat,p4)
+
+WRITE(stdout,'(/,5x,"Hessian:")')
+DO ideg=1,nvar
+   WRITE(stdout,'(5x,6f18.8)') amat(ideg,:)
+ENDDO
+
+IF (nvar > 1) THEN
+   CALL diagonalize_r(nvar,nvar,amat,e,v)
+   WRITE(stdout,'(/,5x,"Hessian eigenvalues:")')
+   WRITE(stdout,'(5x,6f18.8)') e(1:nvar)
+
+   WRITE(stdout,'(/,5x,"Hessian eigenvectors (columns):")')
+   DO ideg=1,nvar
+      WRITE(stdout,'(5x,6f18.8)') v(ideg,1:nvar)
+   ENDDO
+ENDIF
+WRITE(stdout,*)
+
+RETURN
+END SUBROUTINE write_quartic_hessian
 
 !--------------------------------------------------------------------
 SUBROUTINE find_quartic_extremum(nvar,x,f,p4)
