@@ -18,10 +18,12 @@ SUBROUTINE plot_multi_energy()
   USE thermo_mod,           ONLY : ngeo, celldm_geo, energy_geo, omega_geo
   USE initial_conf,         ONLY : ibrav_save
   USE control_gnuplot,      ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
-  USE data_files,           ONLY : flenergy, flevdat
+  USE data_files,           ONLY : flenergy, flevdat, flgeom
   USE postscript_files,     ONLY : flpsenergy
+  USE control_thermo,       ONLY : lgeo_to_file
   USE control_energy_plot,  ONLY : ncontours, ene_levels, color_levels
   USE control_quadratic_energy, ONLY : x_pos_min, hessian_v, nvar, show_fit
+  USE control_quartic_energy, ONLY : x_min_4, hessian4_v, lquartic
   USE control_vol,          ONLY : nvol
   USE control_pressure,     ONLY : pressure, pressure_kb
   USE mp_images,            ONLY : my_image_id, root_image
@@ -35,12 +37,13 @@ SUBROUTINE plot_multi_energy()
                                    gnuplot_write_file_mul_data,            &
                                    gnuplot_write_file_mul_point,           &
                                    gnuplot_write_horizontal_line,          &
+                                   gnuplot_write_file_mul_line_point,      &
                                    gnuplot_ylabel, gnuplot_close_2dplot_prep, &
                                    gnuplot_line_v
 
   IMPLICIT NONE
   CHARACTER(LEN=256) :: gnu_filename, filename, filename1, label, filenameps, &
-                        tablefile, fileout
+                        tablefile, fileout, filename2
   CHARACTER(LEN=6) :: int_to_char
   CHARACTER(LEN=8) :: float_to_char
   CHARACTER(LEN=50) :: xlabel, ylabel
@@ -176,7 +179,14 @@ SUBROUTINE plot_multi_energy()
         CALL gnuplot_do_2dplot(filenameps, xmin, xmax, ymin, ymax, xlabel, &
                                                   ylabel, tablefile, flext)
 
-        IF (nvar==2) THEN
+        IF (lquartic) THEN
+           x2=x_min_4(2)
+           IF (ibrav_save==5) x2=COS(x_min_4(2))
+           CALL gnuplot_line_v(hessian4_v(1,1), hessian4_v(2,1),              &
+                                   x_min_4(1), x2, .FALSE., 'color_blue')
+           CALL gnuplot_line_v(hessian4_v(1,2), hessian4_v(2,2), x_min_4(1),  &
+                                       x2, .FALSE., 'color_blue')
+        ELSE
            x2=x_pos_min(2)
            IF (ibrav_save==5) x2=COS(x_pos_min(2))
            CALL gnuplot_line_v(hessian_v(1,1), hessian_v(2,1), x_pos_min(1),  &
@@ -184,6 +194,16 @@ SUBROUTINE plot_multi_energy()
            CALL gnuplot_line_v(hessian_v(1,2), hessian_v(2,2), x_pos_min(1),  &
                                        x2,.FALSE.,'color_blue')
         ENDIF
+        IF (lgeo_to_file) THEN
+!
+!   In this case a set of geometries is written on file. Here we plot
+!   this set with points in the energy contour plot.
+!
+           filename2='./'//TRIM(flgeom)//'.dat'
+           CALL gnuplot_write_file_mul_line_point(filename2, 2, 4, &
+                           'color_orange', .FALSE., .TRUE., .TRUE., .FALSE.)
+
+        ENDIF   
      CASE (8,9,91,10,11) 
         IF (ncontours==0) RETURN
         ene_levels_int(:)=ene_levels(:)

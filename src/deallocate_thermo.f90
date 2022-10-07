@@ -80,7 +80,7 @@ SUBROUTINE deallocate_thermo()
   USE control_debye,    ONLY : deb_energy, deb_free_energy, deb_entropy, &
                                deb_cv, deb_b_fact, deb_bfact
   USE control_quadratic_energy, ONLY : p2, hessian_v, hessian_e, x_pos_min
-  USE control_quartic_energy, ONLY :  p4, x_min_4
+  USE control_quartic_energy, ONLY :  p4, x_min_4, hessian4_v, hessian4_e
   USE el_anharmonic, ONLY : el_energy_t, el_free_energy_t, el_entropy_t, &
                             el_ce_t, el_energyf_t, el_free_energyf_t,    &
                             el_entropyf_t, el_cef_t
@@ -342,6 +342,8 @@ SUBROUTINE deallocate_thermo()
   IF ( ALLOCATED (hessian_v) )       DEALLOCATE( hessian_v )
   IF ( ALLOCATED (hessian_e) )       DEALLOCATE( hessian_e )
   IF ( ALLOCATED (x_pos_min) )       DEALLOCATE( x_pos_min )
+  IF ( ALLOCATED (hessian4_v) )      DEALLOCATE( hessian4_v )
+  IF ( ALLOCATED (hessian4_e) )      DEALLOCATE( hessian4_e )
   IF ( ALLOCATED (x_min_4) )         DEALLOCATE( x_min_4 )
   CALL clean_poly(p4)
 

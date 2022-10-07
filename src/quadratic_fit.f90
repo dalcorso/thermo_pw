@@ -28,7 +28,8 @@ SUBROUTINE quadratic_fit()
   USE control_pressure, ONLY : pressure, pressure_kb
   USE control_quadratic_energy, ONLY : hessian_v, hessian_e, x_pos_min, &
                                        p2, nvar
-  USE control_quartic_energy, ONLY : p4, x_min_4, lquartic, lsolve
+  USE control_quartic_energy, ONLY : p4, x_min_4, lquartic, lsolve,     &
+                                     hessian4_v, hessian4_e
   USE lattices,     ONLY : expand_celldm, crystal_parameters
   USE quadratic_surfaces, ONLY : fit_multi_quadratic,  &
                           find_quadratic_extremum,     &
@@ -39,7 +40,8 @@ SUBROUTINE quadratic_fit()
                           introduce_quadratic_fit, print_chisq_quadratic
   USE quartic_surfaces, ONLY : fit_multi_quartic, &
                           find_quartic_extremum, print_quartic_polynomial, &
-                          print_chisq_quartic, introduce_quartic_fit
+                          print_chisq_quartic, introduce_quartic_fit,      &
+                          write_quartic_hessian
   USE polynomial,   ONLY : init_poly
   USE vector_mod,       ONLY : write_vector
   USE io_global,    ONLY : stdout
@@ -115,6 +117,8 @@ SUBROUTINE quadratic_fit()
   !
   IF (lquartic) THEN
      ALLOCATE(x_min_4(nvar))
+     ALLOCATE(hessian4_e(nvar))
+     ALLOCATE(hessian4_v(nvar, nvar))
      CALL init_poly(nvar,p4)
      tncoeff4=1+nvar+p4%ncoeff2+p4%ncoeff3+p4%ncoeff4
      CALL introduce_quartic_fit(nvar,tncoeff4,ndata)
@@ -133,6 +137,7 @@ SUBROUTINE quadratic_fit()
      WRITE(stdout,'(/,5x,"Extremum of the quartic found at:")')
      CALL write_vector(nvar,x_min_4)
      CALL print_energy(ymin4)
+     CALL write_quartic_hessian(nvar, x_min_4, p4, hessian4_v, hessian4_e)
 !
      CALL expand_celldm(celldm0, x_min_4, nvar, ibrav)
      emin=ymin4

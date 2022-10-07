@@ -1415,8 +1415,11 @@ MODULE control_quartic_energy
                                              ! fits the elastic constants
   INTEGER :: ncoeff4                         ! number of coefficients of 
                                              ! the polynomial fit
-  REAL(DP), ALLOCATABLE :: x_min_4(:),   &   ! coordinates of the minimum
-                           coeff4(:)         ! coefficients of quartic fit
+  REAL(DP), ALLOCATABLE ::    &
+             hessian4_v(:,:), &              ! hessian eigenvectors
+             hessian4_e(:),   &              ! hessian eigenvalues
+             x_min_4(:),      &              ! coordinates of the minimum
+             coeff4(:)                       ! coefficients of quartic fit
   INTEGER :: lsolve                          ! 1, 2, 3 controls the method
                                              ! used to find the polynomial
                                              ! coefficients (Default 2)
