@@ -98,12 +98,19 @@ MODULE lattices
   PRIVATE
   SAVE
 
+  CHARACTER(LEN=7) :: &
+           celldm_name(6)
+
+  DATA celldm_name / 'a=     ', 'b/a=   ', 'c/a=   ', &
+                     'cos(a)=', 'cos(b)=', 'cos(c)=' /
+                     
   PUBLIC compute_conventional, find_ibrav_code, find_combination,      &
          is_bravais_lattice, same_lattice, lattice_point_group,        &
          compute_omega, conventional_ibrav, is_centered, lattice_name, &
          zone_border, same_star, is_compatible_group_ibrav,            &
          bravais_dir, print_bravais_description, crystal_parameters,   &
-         compress_celldm, expand_celldm, compress_int_vect
+         compress_celldm, expand_celldm, compress_int_vect, needed_celldm, &
+         celldm_name
 
 CONTAINS
 
@@ -1895,5 +1902,36 @@ END SELECT
 
 RETURN
 END SUBROUTINE expand_celldm
+
+SUBROUTINE needed_celldm(ibrav,celldm_in_use)
+
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ibrav
+LOGICAL, INTENT(OUT) :: celldm_in_use(6)
+
+celldm_in_use=.FALSE.
+celldm_in_use(1)=.TRUE.
+
+SELECT CASE (ibrav)
+   CASE(4,6,7) 
+      celldm_in_use(3)=.TRUE.
+   CASE(5) 
+      celldm_in_use(4)=.TRUE.
+   CASE(8,9,91,10,11) 
+      celldm_in_use(2)=.TRUE.
+      celldm_in_use(3)=.TRUE.
+   CASE(12,13) 
+      celldm_in_use(2)=.TRUE.
+      celldm_in_use(3)=.TRUE.
+      celldm_in_use(4)=.TRUE.
+   CASE(-12,-13) 
+      celldm_in_use(2)=.TRUE.
+      celldm_in_use(3)=.TRUE.
+      celldm_in_use(5)=.TRUE.
+   CASE DEFAULT
+      celldm_in_use=.TRUE.
+END SELECT
+RETURN
+END SUBROUTINE needed_celldm
 
 END MODULE lattices

@@ -196,12 +196,12 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            ALLOCATE(no_ph(nwork))
            no_ph=.TRUE.
            CALL summarize_geometries(nwork)
+           tot_ngeo=nwork
            IF (meta_ionode) ios = f_mkdir_safe( 'energy_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
            IF (lel_free_energy) THEN
               IF (meta_ionode) ios = f_mkdir_safe( 'therm_files' )
               IF (meta_ionode) ios = f_mkdir_safe( 'anhar_files' )
-              tot_ngeo=nwork
               CALL allocate_el_thermodynamics(tot_ngeo)
            ENDIF
         CASE ('mur_lc_bands') 
