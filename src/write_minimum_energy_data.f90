@@ -17,12 +17,15 @@ SUBROUTINE write_minimum_energy_data()
   USE control_ev,       ONLY : ieos
   USE control_mur,      ONLY : b0, b01, b02, emin, lmurn
   USE equilibrium_conf, ONLY : celldm0
+  USE lattices,         ONLY : celldm_name, needed_celldm
   USE initial_conf,     ONLY : ibrav_save
   USE control_pressure, ONLY : pressure_kb
   USE io_global,        ONLY : stdout
   IMPLICIT NONE
   CHARACTER(LEN=20) :: quantity
+  LOGICAL :: celldm_in_use(6)
   REAL(DP) :: omega0, compute_omega_geo
+  INTEGER :: i
   !
   WRITE(stdout,'(/,2x,76("-"))')
   IF (ieos==1) THEN
@@ -42,8 +45,15 @@ SUBROUTINE write_minimum_energy_data()
      quantity='total energy'
   ENDIF
   IF (lmurn) THEN
-     WRITE(stdout,'(5x, "The equilibrium lattice constant is ",9x,f12.4,&
-                                 &" a.u.")') celldm0(1)
+     CALL needed_celldm(ibrav_save, celldm_in_use)
+     WRITE(stdout,'(5x,"The equilibrium celldm is:")')
+     WRITE(stdout,'(44x,a7,f12.5," a.u.")') celldm_name(1), celldm0(1)
+     DO i=2,6
+        IF (celldm_in_use(i)) &
+           WRITE(stdout,'(44x,a7,f12.5)') celldm_name(i), celldm0(i)
+     ENDDO
+!     WRITE(stdout,'(5x, "The equilibrium lattice constant is ",9x,f12.4,&
+!                                 &" a.u.")') celldm0(1)
      WRITE(stdout,'(5x, "The bulk modulus is ",24x,f12.3,"  kbar")') b0
      WRITE(stdout,'(5x, "The pressure derivative of the bulk modulus is ",&
                                   &f9.3)')  b01

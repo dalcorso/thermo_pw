@@ -214,6 +214,23 @@ MODULE control_vol
 END MODULE control_vol
 
 !----------------------------------------------------------------------------
+MODULE uniform_pressure
+!----------------------------------------------------------------------------
+   USE kinds,  ONLY : DP
+   !
+   ! ... The variables needed to save the crystal parameters as a 
+   !     function of pressure in the anisotropic case when lmurn=.FALSE. 
+   !
+   SAVE
+   REAL(DP), ALLOCATABLE :: omega_p(:)    ! npress. The volume.
+   REAL(DP), ALLOCATABLE :: celldm_p(:,:) ! (6 npress) the crystal parameters
+   REAL(DP), ALLOCATABLE :: el_cons_p(:,:,:), & ! elastic constants
+                            el_comp_p(:,:,:), & ! elastic compliances
+                            b0ec_p(:)           ! bulk modulus 
+
+END MODULE uniform_pressure
+!
+!----------------------------------------------------------------------------
 MODULE thermodynamics
 !----------------------------------------------------------------------------
   !

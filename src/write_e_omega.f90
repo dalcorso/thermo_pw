@@ -35,6 +35,7 @@ USE control_vol,      ONLY : vmin_input, vmax_input
 USE control_thermo,   ONLY : lgeo_to_file
 USE control_pressure, ONLY : pressure, pressure_kb, pmin, pmax, deltap, &
                              npress, press
+USE uniform_pressure, ONLY : omega_p, celldm_p
 USE control_quartic_energy, ONLY : lquartic, lsolve
 USE geometry_file,      ONLY : write_geometry_output
 USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_quadratic_extremum, &
@@ -53,8 +54,8 @@ INTEGER  :: i, iu_mur, ipress, idata, nvar, ndata
 INTEGER  :: find_free_unit, compute_nwork
 REAL(DP) :: ymin, ymin4
 REAL(DP) :: compute_omega_geo
-REAL(DP), ALLOCATABLE :: f(:), x(:,:), x_pos_min(:), x_min_4(:), e(:), &
-                         omega(:), celldmp(:,:) 
+REAL(DP), ALLOCATABLE :: f(:), x(:,:), x_pos_min(:), x_min_4(:), e(:)
+
 TYPE(poly2) :: p2
 TYPE(poly4) :: p4
 
@@ -86,8 +87,8 @@ ALLOCATE(x(nvar,ndata))
 ALLOCATE(x_pos_min(nvar))
 ALLOCATE(f(ndata))
 ALLOCATE(e(npress))
-ALLOCATE(omega(npress))
-ALLOCATE(celldmp(6,npress))
+ALLOCATE(omega_p(npress))
+ALLOCATE(celldm_p(6,npress))
 CALL init_poly(nvar,p2)
 
 IF (lquartic) ALLOCATE(x_min_4(nvar))
@@ -115,25 +116,25 @@ DO ipress=1, npress
 !      CALL print_chisq_quartic(ndata, nvar, x, f, p4)
       x_min_4=x_pos_min
       CALL find_quartic_extremum(nvar,x_min_4,ymin4,p4)
-      CALL expand_celldm(celldmp(1,ipress), x_min_4, nvar, ibrav)
+      CALL expand_celldm(celldm_p(1,ipress), x_min_4, nvar, ibrav)
 !
 !   find the volume that corresponds to the minimum geometry at this pressure
 !
-      omega(ipress)=compute_omega_geo(ibrav,celldmp(1,ipress))
-      e(ipress)=ymin4 - press(ipress) * omega(ipress) / ry_kbar
+      omega_p(ipress)=compute_omega_geo(ibrav,celldm_p(1,ipress))
+      e(ipress)=ymin4 - press(ipress) * omega_p(ipress) / ry_kbar
       CALL clean_poly(p4)
    ELSE
-      CALL expand_celldm(celldmp(1,ipress), x_pos_min, nvar, ibrav)
-      omega(ipress)=compute_omega_geo(ibrav,celldmp(1,ipress))
-      e(ipress) = ymin - press(ipress) * omega(ipress) / ry_kbar
+      CALL expand_celldm(celldm_p(1,ipress), x_pos_min, nvar, ibrav)
+      omega_p(ipress)=compute_omega_geo(ibrav,celldm_p(1,ipress))
+      e(ipress) = ymin - press(ipress) * omega_p(ipress) / ry_kbar
    ENDIF
 ENDDO
-CALL find_omega0(press/ry_kbar,omega,npress,omegap0)
+CALL find_omega0(press/ry_kbar,omega_p,npress,omegap0)
 
-IF (lgeo_to_file) CALL write_geometry_output(npress, press, celldmp)
+IF (lgeo_to_file) CALL write_geometry_output(npress, press, celldm_p)
 
-IF (vmin_input == 0.0_DP) vmin_input=omega(npress) * 0.98_DP
-IF (vmax_input == 0.0_DP) vmax_input=omega(1) * 1.02_DP
+IF (vmin_input == 0.0_DP) vmin_input=omega_p(npress) * 0.98_DP
+IF (vmax_input == 0.0_DP) vmax_input=omega_p(1) * 1.02_DP
 
 IF (ionode) THEN
 !
@@ -149,9 +150,9 @@ IF (ionode) THEN
                             &"enthalpy(p)(Ry)",4x,"pressure (kbar)")')
    END IF
    DO ipress=1,npress
-      WRITE(iu_mur,'(f18.10,3f20.10)') omega(ipress), e(ipress)+ &
-            pressure*omega(ipress), e(ipress)+&
-                         press(ipress)*omega(ipress)/ry_kbar, press(ipress) 
+      WRITE(iu_mur,'(f18.10,3f20.10)') omega_p(ipress), e(ipress)+ &
+            pressure*omega_p(ipress), e(ipress)+&
+                         press(ipress)*omega_p(ipress)/ry_kbar, press(ipress) 
    ENDDO 
    CLOSE(UNIT=iu_mur, STATUS='KEEP')
 !
@@ -161,9 +162,9 @@ IF (ionode) THEN
    WRITE(iu_mur,'( "# pressure (kbar)",3x,"celldm(1)",7x,"celldm(2)",7x,&
               &"celldm(3)",7x,"celldm(4)",7x,"celldm(5)",7x,"celldm(6)" )')
    DO ipress=1,npress
-      WRITE(iu_mur,'(7f15.8)') press(ipress), celldmp(1, ipress), &
-               celldmp(2, ipress), celldmp(3, ipress), celldmp(4, ipress), &
-               celldmp(5, ipress), celldmp(6, ipress)
+      WRITE(iu_mur,'(7f15.8)') press(ipress), celldm_p(1, ipress), &
+               celldm_p(2, ipress), celldm_p(3, ipress), celldm_p(4, ipress), &
+               celldm_p(5, ipress), celldm_p(6, ipress)
    ENDDO 
    CLOSE(UNIT=iu_mur, STATUS='KEEP')
 END IF
@@ -172,8 +173,6 @@ DEALLOCATE(x)
 DEALLOCATE(x_pos_min)
 DEALLOCATE(f)
 DEALLOCATE(e)
-DEALLOCATE(omega)
-DEALLOCATE(celldmp)
 CALL clean_poly(p2)
 
 IF (lquartic) DEALLOCATE(x_min_4)

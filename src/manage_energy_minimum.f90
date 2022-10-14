@@ -18,6 +18,8 @@ USE kinds,            ONLY : DP
 USE thermo_mod,       ONLY : celldm_geo, omega_geo, central_geo, density, &
                              energy_geo
 USE control_mur,      ONLY : vmin, b0, b01, b02, emin, lmurn
+USE control_thermo,   ONLY : lgeo_from_file
+USE geometry_file,    ONLY : compute_celldm_geo_file
 USE equilibrium_conf, ONLY : celldm0, omega0, tau0, at0, tau0_crys
 USE initial_conf,     ONLY : ibrav_save, tau_save_crys
 USE control_xrdp,     ONLY : lxrdp
@@ -48,8 +50,12 @@ IF (lmurn) THEN
    CALL write_mur_p()
    CALL plot_mur()
    CALL plot_mur_p()
-   CALL compute_celldm_geo(vmin, celldm0, &
+   IF (lgeo_from_file) THEN
+      CALL compute_celldm_geo_file(vmin, celldm0)
+   ELSE
+      CALL compute_celldm_geo(vmin, celldm0, &
                    celldm_geo(1,central_geo), omega_geo(central_geo))
+   ENDIF
 ELSE
    CALL write_gnuplot_energy(nwork)
    CALL quadratic_fit()

@@ -31,7 +31,7 @@ INTEGER :: ngeo_file
 
 PUBLIC read_geometry_file, write_geometry_file, set_celldm_geo_from_file, &
        ngeo_file, celldm_geo_file, deallocate_geometry_file, &
-       write_geometry_output
+       write_geometry_output, compute_celldm_geo_file
 
 CONTAINS
 !
@@ -60,19 +60,23 @@ IF (meta_ionode) THEN
                                          FORM='formatted', ERR=100, IOSTAT=ios)
    READ(iu_geom,*) ngeo_file
    ALLOCATE(celldm_geo_file(6,ngeo_file))
+   ALLOCATE(press_file(ngeo_file))
    DO igeo=1,ngeo_file
-      READ(iu_geom,*) rdum, celldm_geo_file(:,igeo)
+      READ(iu_geom,*) press_file(igeo), celldm_geo_file(:,igeo)
    ENDDO
    CLOSE(UNIT=iu_geom, STATUS='KEEP')
    CALL mp_bcast(ngeo_file,meta_ionode_id,world_comm)
    CALL mp_bcast(celldm_geo_file,meta_ionode_id,world_comm)
+   CALL mp_bcast(press_file,meta_ionode_id,world_comm)
 ELSE
 !
 !  the other processors receive the data
 !
    CALL mp_bcast(ngeo_file,meta_ionode_id,world_comm)
    ALLOCATE(celldm_geo_file(6,ngeo_file))
+   ALLOCATE(press_file(ngeo_file))
    CALL mp_bcast(celldm_geo_file,meta_ionode_id,world_comm)
+   CALL mp_bcast(press_file,meta_ionode_id,world_comm)
 ENDIF
 100 CALL mp_bcast(ios,meta_ionode_id,world_comm)
 CALL errore('read_geometry_file','Problem with the geometry file',ios)
@@ -185,24 +189,35 @@ DO igeo=1, ngeo(1)
       ENDIF
    ENDDO
 !
+   IF (celldm_geo(1,igeo) > celldmp(1,ip1)) THEN
+      IF (ip1==npress) THEN
+         ip2=npress-1
+      ELSE
+         ip2=ip1+1
+      ENDIF
+   ELSE
+      IF (ip1==1) THEN
+         ip2=2
+      ELSE
+         ip2=ip1-1
+      ENDIF
+   ENDIF
+!
 !  If they exist set celldm_geo_file(1) equal to celldm_geo(1,igeo),
 !  and interpolate linearly celldm_geo_file(2-6) and the pressure
 !
-   IF (ip1>0.AND.ip1<npress) THEN
-      ip2=ip1+1
-      ngeo_file=ngeo_file+1
-      celldm_geo_file(1,ngeo_file)=celldm_geo(1,igeo)
-      DO i=2,6
-         celldm_geo_file(i,ngeo_file)= celldmp(i,ip1) +       &
+   ngeo_file=ngeo_file+1
+   celldm_geo_file(1,ngeo_file)=celldm_geo(1,igeo)
+   DO i=2,6
+      celldm_geo_file(i,ngeo_file)= celldmp(i,ip1) +       &
                  (celldmp(i,ip2)-celldmp(i,ip1)) *            & 
                  (celldm_geo(1,igeo) - celldmp(1,ip1)) /      &
                  (celldmp(1,ip2) - celldmp(1,ip1)) 
-      ENDDO
-      press_file(ngeo_file)=press(ip1) +                      &
+   ENDDO
+   press_file(ngeo_file)=press(ip1) +                      &
                  (press(ip2)-press(ip1)) *                    &
                  (celldm_geo(1,igeo) - celldmp(1,ip1)) /      &
                  (celldmp(1,ip2) - celldmp(1,ip1))
-   ENDIF
 ENDDO
 
 CALL write_geometry_file()
@@ -211,5 +226,60 @@ DEALLOCATE(celldm_geo_file)
 
 RETURN
 END SUBROUTINE write_geometry_output
+!
+!------------------------------------------------------------------------
+SUBROUTINE compute_celldm_geo_file(vmin,celldm0)
+!------------------------------------------------------------------------
+!
+USE initial_conf, ONLY : ibrav_save
+USE control_pressure, ONLY : pressure_kb
+!
+IMPLICIT NONE
+REAL(DP) :: vmin, celldm0(6)
+REAL(DP) :: compute_omega_geo
+REAL(DP) :: volume, pmin_file
+INTEGER  :: ip1, ip2, i, ip
+!
+!  Find the celldm(2-6) at zero pressure and use those as celldm at
+!  vmin. Start by finding the two pressures closest to zero
+!
+ip1=0
+pmin_file=1.D50
+DO ip=1,ngeo_file
+   IF (ABS (press_file(ip)-pressure_kb)< pmin_file) THEN
+      ip1=ip
+      pmin_file=ABS(press_file(ip)-pressure_kb)
+   ENDIF
+ENDDO
+
+IF (press_file(ip) > pressure_kb) THEN
+    IF (ip1==ngeo_file) THEN
+       ip2=ngeo_file-1
+    ELSE
+       ip2=ip1+1
+    ENDIF
+ELSE
+   IF (ip1==1) THEN
+      ip2=2
+   ELSE
+      ip2=ip1-1
+   ENDIF
+ENDIF
+!
+!  Find the celldm(2-6) from the condition that the pressure is zero
+!
+DO i=2,6
+   celldm0(i)=celldm_geo_file(i,ip1)+(pressure_kb-press_file(ip1)) *          &
+             (celldm_geo_file(i,ip2)-celldm_geo_file(i,ip1)) /  &
+             (press_file(ip2)-press_file(ip1))
+END DO
+
+celldm0(1)=1.0_DP
+volume=compute_omega_geo(ibrav_save,celldm0)
+
+celldm0(1)=(vmin/volume)**(1.0_DP/3.0_DP)
+
+RETURN
+END SUBROUTINE compute_celldm_geo_file
 
 END MODULE geometry_file
