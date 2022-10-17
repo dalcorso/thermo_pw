@@ -61,7 +61,7 @@ SUBROUTINE thermo_readin()
                                    flpstherm, flpsanhar, flpskeconv, &
                                    flpsnkconv, flpsgrun,  flpsenergy, &
                                    flpsepsilon, flpsoptical, flpseldos, &
-                                   flpseltherm
+                                   flpseltherm, flps_el_cons
   USE control_2d_bands,     ONLY : lprojpbs, nkz, gap_thr, sym_divide, &
                                    identify_sur, sur_layers, sur_thr, sp_min, &
                                    force_bands, only_bands_plot, dump_states, &
@@ -270,6 +270,7 @@ SUBROUTINE thermo_readin()
                             lquartic, lsolve,               &
                             flevdat,                        &
                             flpsmur,                        &
+                            flps_el_cons,                   &
                             ncontours,                      &
                             flenergy, flpsenergy,           &
                             lel_free_energy,                &
@@ -520,6 +521,7 @@ SUBROUTINE thermo_readin()
   lsolve=2
   flevdat='output_ev.dat'
   flpsmur='output_mur'
+  flps_el_cons='output_elastic'
   ncontours=0
   lel_free_energy=.FALSE.
   hot_electrons=.FALSE.

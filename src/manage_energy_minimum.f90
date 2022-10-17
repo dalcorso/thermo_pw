@@ -62,8 +62,17 @@ ELSE
    CALL write_quadratic()
    CALL plot_multi_energy()
    CALL write_e_omega()
+   !
+   !   If npress>0 the crystal parameters as a function of pressure have
+   !   been calculated. Interpolate the elastic constants at those
+   !   geometries.
+   !
+   CALL write_elastic_p()
+   !
    CALL plot_mur()
    CALL plot_geo_p()
+   CALL plot_elastic_t1(2, .FALSE.)
+   CALL plot_elastic_t1(3, .FALSE.)
 ENDIF
 CALL mp_bcast(celldm0, meta_ionode_id, world_comm)
 CALL mp_bcast(emin, meta_ionode_id, world_comm)

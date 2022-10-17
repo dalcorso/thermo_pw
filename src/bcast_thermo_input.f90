@@ -25,7 +25,7 @@ SUBROUTINE bcast_thermo_input()
   USE postscript_files, ONLY : flpsband, flpsdisp, flpsdos,                   &
                               flpstherm,  flpsanhar, flpsmur, flpskeconv,     &
                               flpsnkconv, flpsgrun, flpsenergy, flpsepsilon,  &
-                              flpseldos, flpseltherm
+                              flpseldos, flpseltherm, flps_el_cons
   USE control_gnuplot, ONLY : flgnuplot, lgnuplot, gnuplot_command, flext
   USE temperature,     ONLY : tmin, tmax, deltat, ntemp, ntemp_plot
   USE control_pressure, ONLY : pressure, pmin, pmax, deltap, npress_plot
@@ -283,6 +283,7 @@ SUBROUTINE bcast_thermo_input()
   CALL mp_bcast( lsolve, meta_ionode_id, world_comm )
   CALL mp_bcast( flevdat, meta_ionode_id, world_comm )
   CALL mp_bcast( flpsmur, meta_ionode_id, world_comm )
+  CALL mp_bcast( flps_el_cons, meta_ionode_id, world_comm )
   CALL mp_bcast( ncontours, meta_ionode_id, world_comm )
   CALL mp_bcast( flenergy, meta_ionode_id, world_comm )
   CALL mp_bcast( flpsenergy, meta_ionode_id, world_comm )

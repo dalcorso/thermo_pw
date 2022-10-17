@@ -967,10 +967,13 @@ MODULE control_elastic_constants
                                 ! that interpolates the elastic constants
                                 ! among different geometries
 
-  LOGICAL :: lelastic=.FALSE.   ! elastic constants available in
-                                ! some approximation
-  LOGICAL :: lelasticf=.FALSE.  ! elastic constants available in
-                                ! some approximation
+  LOGICAL :: lelastic=.FALSE.   ! elastic constants as a function of &
+                                ! temperature available in some approximation
+  LOGICAL :: lelasticf=.FALSE.  ! elastic constants as a function of pressure
+                                ! available in some approximation
+  LOGICAL :: lelastic_p=.FALSE. ! elastic constants as a function of pressure
+                                ! available
+                                !
   LOGICAL :: el_cons_available=.FALSE.  ! when this flag becomes true it
                                 ! means that the elastic constant have been
                                 ! read from file and are available
@@ -1575,6 +1578,8 @@ MODULE postscript_files
                                   ! constant
   CHARACTER(LEN=256) :: flpsepsilon ! the name of the file with the dielectric
                                   ! constant
+  CHARACTER(LEN=256) :: flps_el_cons ! the name of the file with the 
+                                  ! elastic constants
 END MODULE postscript_files
 
 !----------------------------------------------------------------------------

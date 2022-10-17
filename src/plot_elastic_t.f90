@@ -13,15 +13,18 @@ SUBROUTINE plot_elastic_t(iflag, with_s)
 !  temperature
 !
 USE kinds,            ONLY : DP
+USE constants,        ONLY : ry_kbar
 USE thermo_mod,       ONLY : ibrav_geo
 USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
 USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,           &
                              gnuplot_write_header, gnuplot_xlabel, &
                              gnuplot_set_fact
-USE data_files,       ONLY : flanhar
+USE data_files,       ONLY : flanhar, fl_el_cons
 USE postscript_files, ONLY : flpsanhar
-USE control_elastic_constants,  ONLY : lelastic, lelasticf
+USE control_elastic_constants,  ONLY : lelastic, lelasticf, lelastic_p, &
+                             el_cons_t_available
 USE control_grun,     ONLY : lb0_t
+USE control_pressure, ONLY : pmin, pmax
 USE temperature,      ONLY : tmin, tmax
 USE thermo_sym,       ONLY : laue
 USE mp_images,        ONLY : root_image, my_image_id
@@ -35,33 +38,56 @@ INTEGER :: ibrav
 INTEGER :: ierr, system
 
 IF ( my_image_id /= root_image ) RETURN
-IF (.NOT.(lelastic.OR.lelasticf).OR..NOT.lb0_t) RETURN
+IF (.NOT.(lelastic.OR.lelasticf.OR.lelastic_p).OR..NOT.lb0_t) RETURN
 
 ibrav=ibrav_geo(1)
 
-IF (iflag==0) THEN
-   gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_el_cons"
-   filenameps=TRIM(flpsanhar)//".el_cons"//TRIM(flext)
-   filelastic="anhar_files/"//TRIM(flanhar)//".el_cons"
-   filelastic_s="anhar_files/"//TRIM(flanhar)//".el_cons_s"
+IF (MOD(iflag,2)==0) THEN
+   IF (iflag==0) THEN
+      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_el_cons"
+      filenameps=TRIM(flpsanhar)//".el_cons"//TRIM(flext)
+      filelastic="anhar_files/"//TRIM(flanhar)//".el_cons"
+      filelastic_s="anhar_files/"//TRIM(flanhar)//".el_cons_s"
+   ELSE
+!
+!  In this case plot the elastic constants as a function of pressure
+!
+      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//".el_cons_p"
+      filenameps=TRIM(flpsanhar)//".el_cons_p"//TRIM(flext)
+      filelastic="elastic_constants/"//TRIM(fl_el_cons)//".el_cons_p"
+      IF (with_s) CALL errore('plot_elastic_t','Called in the wrong case',1)
+   ENDIF
 ELSE
-   gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_el_comp"
-   filenameps=TRIM(flpsanhar)//".el_comp"//TRIM(flext)
-   filelastic="anhar_files/"//TRIM(flanhar)//".el_comp"
-   filelastic_s="anhar_files/"//TRIM(flanhar)//".el_comp_s"
+   IF (iflag==1) THEN
+      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_el_comp"
+      filenameps=TRIM(flpsanhar)//".el_comp"//TRIM(flext)
+      filelastic="anhar_files/"//TRIM(flanhar)//".el_comp"
+      filelastic_s="anhar_files/"//TRIM(flanhar)//".el_comp_s"
+   ELSE
+      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//".el_comp_p"
+      filenameps=TRIM(flpsanhar)//".el_comp_p"//TRIM(flext)
+      filelastic="elastic_constants/"//TRIM(fl_el_cons)//".el_comp_p"
+      IF (with_s) CALL errore('plot_elastic_t','Called in the wrong case',1)
+   ENDIF
 ENDIF
 CALL gnuplot_start(gnu_filename)
 
-IF (tmin ==1._DP) THEN
-   CALL gnuplot_write_header(filenameps, 0.0_DP, tmax, 0.0_DP, 0.0_DP, &
+IF (iflag<2) THEN
+   IF (tmin ==1._DP) THEN
+      CALL gnuplot_write_header(filenameps, 0.0_DP, tmax, 0.0_DP, 0.0_DP, &
                                                        1.0_DP, flext ) 
+   ELSE
+      CALL gnuplot_write_header(filenameps, tmin, tmax, 0.0_DP, 0.0_DP, &
+                                                       1.0_DP, flext ) 
+   ENDIF
+   CALL gnuplot_xlabel('T (K)', .FALSE.) 
 ELSE
-   CALL gnuplot_write_header(filenameps, tmin, tmax, 0.0_DP, 0.0_DP, &
-                                                       1.0_DP, flext ) 
+   CALL gnuplot_write_header(filenameps, pmin*ry_kbar, pmax*ry_kbar, &
+                                              0.0_DP, 0.0_DP, 1.0_DP, flext ) 
+   CALL gnuplot_xlabel('p (kbar)', .FALSE.) 
 ENDIF
 
-CALL gnuplot_xlabel('T (K)', .FALSE.) 
-IF (iflag==0) THEN
+IF (MOD(iflag,2)==0) THEN
    CALL gnuplot_set_fact(1.0_DP, .FALSE.) 
    CALL plot_one_elastic_constant(1, 3, 'C_{11} (kbar)', lelastic,  & 
              lelasticf, filelastic, filelastic_s, with_s)
@@ -71,7 +97,7 @@ ELSE
              lelasticf, filelastic, filelastic_s, with_s)
 ENDIF
 
-IF (iflag==0) THEN
+IF (MOD(iflag,2)==0) THEN
    CALL plot_one_elastic_constant(1, 4, 'C_{12} (kbar)', lelastic,  & 
              lelasticf, filelastic, filelastic_s, with_s)
 ELSE
@@ -80,7 +106,7 @@ ELSE
 ENDIF
 
 IF (laue==32.OR.laue==29) THEN
-   IF (iflag==0) THEN
+   IF (MOD(iflag,2)==0) THEN
       CALL plot_one_elastic_constant(1, 5, 'C_{44} (kbar)', lelastic,  & 
              lelasticf, filelastic, filelastic_s, with_s)
    ELSE
@@ -94,7 +120,7 @@ IF (laue==2.OR.laue==18.OR.laue==19.OR.laue==20.OR.laue==22.OR.laue==23.OR.&
 !
 !  tetragonal, hexagonal, trigonal, or orthorhombic
 !
-   IF (iflag==0) THEN
+   IF (MOD(iflag,2)==0) THEN
       CALL plot_one_elastic_constant(1, 5, 'C_{13} (kbar)', lelastic,  & 
              lelasticf, filelastic, filelastic_s, with_s)
    ELSE
@@ -107,7 +133,7 @@ IF (laue==18.OR.laue==22.OR.laue==19.OR.laue==23.OR.laue==25.OR.laue==27) THEN
 !
 !  tetragonal or hexagonal
 !
-   IF (iflag==0) THEN
+   IF (MOD(iflag,2)==0) THEN
       CALL plot_one_elastic_constant(1, 6, 'C_{33} (kbar)', lelastic,  & 
              lelasticf, filelastic, filelastic_s, with_s)
    ELSE
@@ -115,7 +141,7 @@ IF (laue==18.OR.laue==22.OR.laue==19.OR.laue==23.OR.laue==25.OR.laue==27) THEN
              lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
 
-   IF (iflag==0) THEN
+   IF (MOD(iflag,2)==0) THEN
       CALL plot_one_elastic_constant(1, 7, 'C_{44} (kbar)', lelastic,  & 
              lelasticf, filelastic, filelastic_s, with_s)
    ELSE
@@ -128,7 +154,7 @@ IF (laue==25.OR.laue==27) THEN
 !
 !  trigonal D_3d or S_6
 !
-   IF (iflag==0) THEN
+   IF (MOD(iflag,2)==0) THEN
       CALL plot_one_elastic_constant(1, 8, 'C_{14} (kbar)', lelastic,  & 
              lelasticf, filelastic, filelastic_s, with_s)
    ELSE
@@ -141,7 +167,7 @@ IF (laue==27) THEN
 !
 !  trigonal S_6
 !
-   IF (iflag==0) THEN
+   IF (MOD(iflag,2)==0) THEN
       CALL plot_one_elastic_constant(1, 9, 'C_{25} (kbar)', lelastic,  & 
              lelasticf, filelastic, filelastic_s, with_s)
    ELSE
@@ -154,7 +180,7 @@ IF (laue==18.OR.laue==22) THEN
 !
 !  tetragonal C_4h or D_4h
 !
-   IF (iflag==0) THEN
+   IF (MOD(iflag,2)==0) THEN
       CALL plot_one_elastic_constant(1, 8, 'C_{66} (kbar)', lelastic,  & 
              lelasticf, filelastic, filelastic_s, with_s)
    ELSE
@@ -167,7 +193,7 @@ IF (laue==18) THEN
 !
 !  tetragonal C_4h
 !
-   IF (iflag==0) THEN
+   IF (MOD(iflag,2)==0) THEN
       CALL plot_one_elastic_constant(1, 9, 'C_{16} (kbar)', lelastic,  & 
              lelasticf, filelastic, filelastic_s, with_s)
    ELSE
@@ -180,7 +206,7 @@ IF (laue==2.OR.laue==16.OR.laue==20) THEN
 !
 !  triclinic C_i, monoclinic C_2h, or orthorhombic D_2h
 !
-   IF (iflag==0) THEN
+   IF (MOD(iflag,2)==0) THEN
       CALL plot_one_elastic_constant(1, 6, 'C_{22} (kbar)', lelastic,  & 
              lelasticf, filelastic, filelastic_s, with_s)
    ELSE
@@ -188,7 +214,7 @@ IF (laue==2.OR.laue==16.OR.laue==20) THEN
              lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
 
-   IF (iflag==0) THEN
+   IF (MOD(iflag,2)==0) THEN
       CALL plot_one_elastic_constant(1, 7, 'C_{23} (kbar)', lelastic,  & 
              lelasticf, filelastic, filelastic_s, with_s)
    ELSE
@@ -196,7 +222,7 @@ IF (laue==2.OR.laue==16.OR.laue==20) THEN
              lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
 
-   IF (iflag==0) THEN
+   IF (MOD(iflag,2)==0) THEN
       CALL plot_one_elastic_constant(1, 8, 'C_{33} (kbar)', lelastic,  & 
              lelasticf, filelastic, filelastic_s, with_s)
    ELSE
@@ -204,7 +230,7 @@ IF (laue==2.OR.laue==16.OR.laue==20) THEN
              lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
 
-   IF (iflag==0) THEN
+   IF (MOD(iflag,2)==0) THEN
       CALL plot_one_elastic_constant(1, 9, 'C_{44} (kbar)', lelastic,  & 
              lelasticf, filelastic, filelastic_s, with_s)
    ELSE
@@ -212,7 +238,7 @@ IF (laue==2.OR.laue==16.OR.laue==20) THEN
              lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
 
-   IF (iflag==0) THEN
+   IF (MOD(iflag,2)==0) THEN
       CALL plot_one_elastic_constant(1, 10, 'C_{55} (kbar)', lelastic,  & 
              lelasticf, filelastic, filelastic_s, with_s)
    ELSE
@@ -220,7 +246,7 @@ IF (laue==2.OR.laue==16.OR.laue==20) THEN
              lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
 
-   IF (iflag==0) THEN
+   IF (MOD(iflag,2)==0) THEN
       CALL plot_one_elastic_constant(1, 11, 'C_{66} (kbar)', lelastic,  & 
              lelasticf, filelastic, filelastic_s, with_s)
    ELSE
@@ -231,7 +257,7 @@ END IF
 
 IF (laue==16) THEN
    IF (ibrav>0) THEN
-      IF (iflag==0) THEN
+      IF (MOD(iflag,2)==0) THEN
          CALL plot_one_elastic_constant(1, 12, 'C_{15} (kbar)', lelastic,  & 
              lelasticf, filelastic, filelastic_s, with_s)
       ELSE
@@ -239,7 +265,7 @@ IF (laue==16) THEN
          lelastic, lelasticf, filelastic, filelastic_s, with_s)
       ENDIF
    ELSE
-      IF (iflag==0) THEN
+      IF (MOD(iflag,2)==0) THEN
          CALL plot_one_elastic_constant(1, 12, 'C_{16} (kbar)', lelastic,  & 
              lelasticf, filelastic, filelastic_s, with_s)
       ELSE
@@ -249,7 +275,7 @@ IF (laue==16) THEN
    ENDIF
 
    IF (ibrav>0) THEN
-      IF (iflag==0) THEN
+      IF (MOD(iflag,2)==0) THEN
          CALL plot_one_elastic_constant(1, 13, 'C_{25} (kbar)', lelastic,  & 
              lelasticf, filelastic, filelastic_s, with_s)
       ELSE
@@ -257,7 +283,7 @@ IF (laue==16) THEN
          lelastic, lelasticf, filelastic, filelastic_s, with_s)
       ENDIF
    ELSE
-      IF (iflag==0) THEN
+      IF (MOD(iflag,2)==0) THEN
          CALL plot_one_elastic_constant(1, 13, 'C_{26} (kbar)', lelastic,  & 
              lelasticf, filelastic, filelastic_s, with_s)
       ELSE
@@ -267,7 +293,7 @@ IF (laue==16) THEN
    ENDIF
   
    IF (ibrav>0) THEN
-      IF (iflag==0) THEN
+      IF (MOD(iflag,2)==0) THEN
          CALL plot_one_elastic_constant(1, 14, 'C_{35} (kbar)', lelastic,  & 
              lelasticf, filelastic, filelastic_s, with_s)
       ELSE
@@ -275,7 +301,7 @@ IF (laue==16) THEN
          lelastic, lelasticf, filelastic, filelastic_s, with_s)
       ENDIF
    ELSE
-      IF (iflag==0) THEN
+      IF (MOD(iflag,2)==0) THEN
          CALL plot_one_elastic_constant(1, 14, 'C_{36} (kbar)', lelastic,  & 
              lelasticf, filelastic, filelastic_s, with_s)
       ELSE
@@ -285,7 +311,7 @@ IF (laue==16) THEN
    ENDIF
 
    IF (ibrav>0) THEN
-      IF (iflag==0) THEN
+      IF (MOD(iflag,2)==0) THEN
          CALL plot_one_elastic_constant(1, 15, 'C_{46} (kbar)', lelastic,  & 
              lelasticf, filelastic, filelastic_s, with_s)
       ELSE
@@ -293,7 +319,7 @@ IF (laue==16) THEN
          lelastic, lelasticf, filelastic, filelastic_s, with_s)
       ENDIF
    ELSE
-      IF (iflag==0) THEN
+      IF (MOD(iflag,2)==0) THEN
          CALL plot_one_elastic_constant(1, 15, 'C_{45} (kbar)', lelastic,  & 
              lelasticf, filelastic, filelastic_s, with_s)
       ELSE
@@ -304,7 +330,7 @@ IF (laue==16) THEN
 ENDIF
 
 IF (laue==2) THEN
-   IF (iflag==0) THEN
+   IF (MOD(iflag,2)==0) THEN
       CALL plot_one_elastic_constant(1, 12, 'C_{14} (kbar)', lelastic,  & 
            lelasticf, filelastic, filelastic_s, with_s)
    ELSE
@@ -312,7 +338,7 @@ IF (laue==2) THEN
            lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
 
-   IF (iflag==0) THEN
+   IF (MOD(iflag,2)==0) THEN
       CALL plot_one_elastic_constant(1, 13, 'C_{15} (kbar)', lelastic,  & 
            lelasticf, filelastic, filelastic_s, with_s)
    ELSE
@@ -320,7 +346,7 @@ IF (laue==2) THEN
            lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
 
-   IF (iflag==0) THEN
+   IF (MOD(iflag,2)==0) THEN
       CALL plot_one_elastic_constant(1, 14, 'C_{16} (kbar)', lelastic,  & 
            lelasticf, filelastic, filelastic_s, with_s)
    ELSE
@@ -328,7 +354,7 @@ IF (laue==2) THEN
            lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
 
-   IF (iflag==0) THEN
+   IF (MOD(iflag,2)==0) THEN
       CALL plot_one_elastic_constant(1, 15, 'C_{24} (kbar)', lelastic,  & 
            lelasticf, filelastic, filelastic_s, with_s)
    ELSE
@@ -336,7 +362,7 @@ IF (laue==2) THEN
            lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
 
-   IF (iflag==0) THEN
+   IF (MOD(iflag,2)==0) THEN
       CALL plot_one_elastic_constant(1, 16, 'C_{25} (kbar)', lelastic,  & 
            lelasticf, filelastic, filelastic_s, with_s)
    ELSE
@@ -344,14 +370,14 @@ IF (laue==2) THEN
            lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
 
-   IF (iflag==0) THEN
+   IF (MOD(iflag,2)==0) THEN
       CALL plot_one_elastic_constant(1, 17, 'C_{26} (kbar)', lelastic,  & 
            lelasticf, filelastic, filelastic_s, with_s)
    ELSE
       CALL plot_one_elastic_constant(1, 17, 'S_{26} (Mbar^{-1})', lelastic, &
            lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
-   IF (iflag==0) THEN
+   IF (MOD(iflag,2)==0) THEN
       CALL plot_one_elastic_constant(1, 18, 'C_{34} (kbar)', lelastic,  & 
            lelasticf, filelastic, filelastic_s, with_s)
    ELSE
@@ -359,7 +385,7 @@ IF (laue==2) THEN
            lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
 
-   IF (iflag==0) THEN
+   IF (MOD(iflag,2)==0) THEN
       CALL plot_one_elastic_constant(1, 19, 'C_{35} (kbar)', lelastic,  & 
            lelasticf, filelastic, filelastic_s, with_s)
    ELSE
@@ -367,14 +393,14 @@ IF (laue==2) THEN
            lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
 
-   IF (iflag==0) THEN
+   IF (MOD(iflag,2)==0) THEN
       CALL plot_one_elastic_constant(1, 20, 'C_{36} (kbar)', lelastic,  & 
            lelasticf, filelastic, filelastic_s, with_s)
    ELSE
       CALL plot_one_elastic_constant(1, 20, 'S_{36} (Mbar^{-1})', lelastic, &
            lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
-   IF (iflag==0) THEN
+   IF (MOD(iflag,2)==0) THEN
       CALL plot_one_elastic_constant(1, 21, 'C_{45} (kbar)', lelastic,  & 
            lelasticf, filelastic, filelastic_s, with_s)
    ELSE
@@ -382,7 +408,7 @@ IF (laue==2) THEN
            lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
 
-   IF (iflag==0) THEN
+   IF (MOD(iflag,2)==0) THEN
       CALL plot_one_elastic_constant(1, 22, 'C_{46} (kbar)', lelastic,  & 
            lelasticf, filelastic, filelastic_s, with_s)
    ELSE
@@ -390,7 +416,7 @@ IF (laue==2) THEN
            lelasticf, filelastic, filelastic_s, with_s)
    ENDIF
 
-   IF (iflag==0) THEN
+   IF (MOD(iflag,2)==0) THEN
       CALL plot_one_elastic_constant(1, 23, 'C_{56} (kbar)', lelastic,  & 
            lelasticf, filelastic, filelastic_s, with_s)
    ELSE
@@ -399,14 +425,14 @@ IF (laue==2) THEN
    ENDIF
 ENDIF
 
-IF (iflag==0) THEN
+IF (MOD(iflag,2)==0) THEN
    CALL gnuplot_set_fact(1.0_DP, .FALSE.)
    CALL plot_one_elastic_constant(1, 2, 'Bulk modulus B (kbar)', lelastic,  & 
         lelasticf, filelastic, filelastic_s, with_s)
 ELSE
+   CALL gnuplot_set_fact(1.D3, .FALSE.)
    CALL plot_one_elastic_constant(1, 2, 'Compressibility K (Mbar^{-1})', &
         lelastic, lelasticf, filelastic, filelastic_s, with_s)
-   CALL gnuplot_set_fact(1.D3, .FALSE.)
 ENDIF
 
 CALL gnuplot_end()
@@ -427,9 +453,8 @@ SUBROUTINE plot_one_elastic_constant(i, j, label, lelastic, lelasticf, &
 !---------------------------------------------------------------------
 USE gnuplot, ONLY : gnuplot_ylabel, &
                     gnuplot_write_file_mul_data
-
+USE color_mod, ONLY : color
 USE control_elastic_constants, ONLY : ngeom
-USE color_mod,    ONLY : color
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: i, j
 LOGICAL, INTENT(IN) :: lelastic, lelasticf, with_s
@@ -483,6 +508,165 @@ IF (lelasticf) THEN
       CALL gnuplot_write_file_mul_data(filename_s,i,j,'color_orange',.FALSE.,&
                                                      .TRUE.,.FALSE.)
 ENDIF
+IF (.NOT.(lelastic.OR.lelasticf)) THEN
+   CALL gnuplot_write_file_mul_data(filelastic,i,j,'color_red',.TRUE.,&
+                                                     .TRUE.,.FALSE.)
+ENDIF
 
 RETURN
 END SUBROUTINE plot_one_elastic_constant
+!
+!---------------------------------------------------------------------
+SUBROUTINE plot_elastic_t1(iflag, with_s)
+!---------------------------------------------------------------------
+!
+!  This is a driver to plot the elastic constants (iflag=0,2),
+!  or the elastic compliance (iflag=1,3) as a function of
+!  temperature (iflag=0,1) or of pressure (iflag=2,3).
+!  It is supposed to substitute plot_elastic_t.
+!
+USE kinds,            ONLY : DP
+USE constants,        ONLY : ry_kbar
+USE thermo_mod,       ONLY : ibrav_geo
+USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
+USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,           &
+                             gnuplot_write_header, gnuplot_xlabel, &
+                             gnuplot_set_fact, gnuplot_ylabel,     &
+                             gnuplot_write_file_mul_data
+USE color_mod,        ONLY : color
+USE data_files,       ONLY : flanhar, fl_el_cons
+USE elastic_constants, ONLY : get_ec_type, ec_present, ect_names, ecm_names
+USE postscript_files, ONLY : flpsanhar, flps_el_cons
+USE control_elastic_constants,  ONLY : lelastic, lelasticf, lelastic_p, &
+                             el_cons_t_available
+USE control_grun,     ONLY : lb0_t
+USE control_pressure, ONLY : pmin, pmax
+USE temperature,      ONLY : tmin, tmax
+USE thermo_sym,       ONLY : laue
+USE mp_images,        ONLY : root_image, my_image_id
+USE io_global,        ONLY : ionode
+
+IMPLICIT NONE
+INTEGER :: iflag
+LOGICAL :: with_s
+CHARACTER(LEN=256) :: gnu_filename, filenameps, filelastic, filelastic_s
+INTEGER :: ibrav, ec_type, iec, ic, ic_last
+INTEGER :: ierr, system
+LOGICAL :: first, last
+
+IF ( my_image_id /= root_image ) RETURN
+IF (.NOT.(lelastic.OR.lelasticf.OR.lelastic_p).OR..NOT.lb0_t) RETURN
+
+ibrav=ibrav_geo(1)
+
+IF (MOD(iflag,2)==0) THEN
+   IF (iflag==0) THEN
+      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_el_cons"
+      filenameps=TRIM(flpsanhar)//".el_cons"//TRIM(flext)
+      filelastic="anhar_files/"//TRIM(flanhar)//".el_cons"
+      filelastic_s="anhar_files/"//TRIM(flanhar)//".el_cons_s"
+   ELSE
+!
+!  In this case plot the elastic constants as a function of pressure
+!
+      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//".el_cons_p"
+      filenameps=TRIM(flps_el_cons)//".el_cons_p"//TRIM(flext)
+      filelastic="elastic_constants/"//TRIM(fl_el_cons)//".el_cons_p"
+      IF (with_s) CALL errore('plot_elastic_t','Called in the wrong case',1)
+   ENDIF
+ELSE
+   IF (iflag==1) THEN
+      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_el_comp"
+      filenameps=TRIM(flpsanhar)//".el_comp"//TRIM(flext)
+      filelastic="anhar_files/"//TRIM(flanhar)//".el_comp"
+      filelastic_s="anhar_files/"//TRIM(flanhar)//".el_comp_s"
+   ELSE
+      gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//".el_comp_p"
+      filenameps=TRIM(flps_el_cons)//".el_comp_p"//TRIM(flext)
+      filelastic="elastic_constants/"//TRIM(fl_el_cons)//".el_comp_p"
+      IF (with_s) CALL errore('plot_elastic_t','Called in the wrong case',1)
+   ENDIF
+ENDIF
+CALL gnuplot_start(gnu_filename)
+
+IF (iflag<2) THEN
+   IF (tmin ==1._DP) THEN
+      CALL gnuplot_write_header(filenameps, 0.0_DP, tmax, 0.0_DP, 0.0_DP, &
+                                                       1.0_DP, flext ) 
+   ELSE
+      CALL gnuplot_write_header(filenameps, tmin, tmax, 0.0_DP, 0.0_DP, &
+                                                       1.0_DP, flext ) 
+   ENDIF
+   CALL gnuplot_xlabel('T (K)', .FALSE.) 
+ELSE
+   CALL gnuplot_write_header(filenameps, pmin*ry_kbar, pmax*ry_kbar, &
+                                              0.0_DP, 0.0_DP, 1.0_DP, flext ) 
+   CALL gnuplot_xlabel('p (kbar)', .FALSE.) 
+ENDIF
+
+ec_type=get_ec_type(laue, ibrav)
+ic=0
+DO iec=1,21
+   IF (ec_present(iec, ec_type)>0) THEN 
+      IF (MOD(iflag,2)==0) THEN
+         ic=ic+1
+         CALL gnuplot_set_fact(1.0_DP, .FALSE.) 
+         CALL plot_one_elastic_constant(1, ec_present(iec, ec_type)+2,    &
+                          ect_names(iec)//' (kbar)', lelastic,           & 
+                          lelasticf, filelastic, filelastic_s, with_s)
+      ELSE
+         ic=ic+1
+         CALL gnuplot_set_fact(1.D3, .FALSE.) 
+         CALL plot_one_elastic_constant(1, ec_present(iec, ec_type)+2,    &
+                         ecm_names(iec)//' (Mbar^{-1})', lelastic,       & 
+                     lelasticf, filelastic, filelastic_s, with_s)
+      ENDIF
+   ENDIF
+ENDDO
+ic_last=ic
+
+IF (MOD(iflag,2)==0) THEN
+   CALL gnuplot_set_fact(1.0_DP, .FALSE.)
+   CALL plot_one_elastic_constant(1, 2, 'Bulk modulus B (kbar)', lelastic,  &
+        lelasticf, filelastic, filelastic_s, with_s)
+ELSE
+   CALL gnuplot_set_fact(1.D3, .FALSE.)
+   CALL plot_one_elastic_constant(1, 2, 'Compressibility K (Mbar^{-1})', &
+        lelastic, lelasticf, filelastic, filelastic_s, with_s)
+ENDIF
+
+IF (iflag>1) THEN
+!
+!  Here make a plot of all elastic constants or compliances in the same plot
+!
+   ic=0
+   IF (MOD(iflag,2)==0) THEN
+      CALL gnuplot_ylabel('C (kbar)',.FALSE.)
+      CALL gnuplot_set_fact(1.0_DP, .FALSE.) 
+   ELSE
+      CALL gnuplot_ylabel('S (Mbar^{-1})',.FALSE.)
+      CALL gnuplot_set_fact(1.D3, .FALSE.) 
+   ENDIF
+   first=.TRUE.
+   DO iec=1,21
+      IF (ec_present(iec, ec_type)>0) THEN 
+         ic=ic+1
+         last=(ic==ic_last)
+         CALL gnuplot_write_file_mul_data(filelastic,1,&
+              ec_present(iec, ec_type)+2,color(MOD(ic,8)),first,last,.FALSE.)
+         first=.FALSE.
+      ENDIF
+   ENDDO
+ENDIF
+
+CALL gnuplot_end()
+
+IF (lgnuplot.AND.ionode) &
+   ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+
+!IF (lgnuplot.AND.ionode) &
+!   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
+!                                       //TRIM(gnu_filename), WAIT=.FALSE.)
+
+RETURN
+END SUBROUTINE plot_elastic_t1

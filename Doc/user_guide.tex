@@ -525,16 +525,16 @@ ntemp_plot : number of temperatures in the plots where the
              Default: integer 0
 temp_plot(ntemp_plot)  : A real array of dimension ntemp_plot with 
              the values of the temperature.
-             No Default value, must be given when ntemp_plot is 
-             not zero.
+             No Default value, must be given (in K) when 
+             ntemp_plot is not zero. 
 npress_plot : number of pressures in the plots where the 
              pressure is a parameter. When 0 these plots are 
              not produced.
              Default: integer 0
 press_plot(npress_plot) : A real array of dimension npress_plot 
              with the values of the pressure.
-             No Default value, must be given when npress_plot is 
-             not zero.
+             No Default value, must be given (in kbar) when 
+             npress_plot is not zero.
 nvol_plot : number of volumes in the plots where the volume is a 
             parameter. When 0 these plots are not produced.
             Default: integer 0
@@ -1680,7 +1680,8 @@ a plot of the energy as a function of the volume, of the pressure
 as a function of the volume and of the enthalpy as a function of
 pressure are produced. The volume is changed by 
 changing only \texttt{celldm(1)}. \texttt{celldm(2)...celldm(6)} remain fixed
-at the values given as input of \texttt{pw.x}. 
+at the values given as input of \texttt{pw.x} or can be read from file
+using the option \texttt{lgeo\_from\_file=.TRUE.}. 
 When \texttt{lmurn=.FALSE.} the energy is calculated in a uniform
 grid of parameters composed of \texttt{ngeo(1)} $\times$ \texttt{ngeo(2)...}
 $\times$ \texttt{ngeo(6)} points.
@@ -1697,7 +1698,13 @@ Presently no graphical tool is implemented to plot the energy
 for monoclinic and triclinic crystal systems. However in all cases
 the enthalpy as a function of pressure is shown. Moreover
 separate plots show the crystal parameters as well as the volume as 
-a function of pressure.
+a function of pressure. When in the directory \texttt{elastic\_constants}
+there are the elastic constants for each geometry (calculated by the option
+\texttt{what=elastic\_constants\_t}), these are interpolated
+at the pressure dependent crystal parameters and shown on output.
+Using the input variable \texttt{lgeo\_to\_file=.TRUE.} the code writes
+on file the crystal parameters that for each \texttt{celldm(1)} 
+of the grid of crystal structures give a uniform pressure.
 When \texttt{lmurn=.FALSE.} the bulk modulus
 is not calculated. To obtain it, you can calculate the elastic constants at the
 minimum geometry (see the option \texttt{what='mur\_lc\_elastic\_constants'}). 
@@ -2314,7 +2321,7 @@ By default, the code computes only the elastic constants at $T=0$ K
 as second derivatives of the energy and writes them on files in the 
 directory \texttt{elastic\_} \texttt{constants}. A run of \texttt{thermo\_pw} using 
 \texttt{what='mur\_lc\_t'} having on files the $T=0$ K elastic constants
-contained in the directory \texttt{elastic\_constants}
+in the directory \texttt{elastic\_constants}
 allows the calculation of the anharmonic properties using temperature
 dependent elastic constants and bulk moduli obtained by interpolating 
 (within the ``quasi-static approximation") the elastic constants computed 
@@ -2327,14 +2334,23 @@ When both \texttt{use\_free\_energy=.TRUE.} and
 \texttt{lel\_free\_energy=.TRUE.} the electronic free energy is
 added to the free energy before computing the elastic constants. In this case 
 the code expects to find on file (in \texttt{therm\_files}) the electronic 
-thermodynamic properties for each perturbed geometry. When 
+thermodynamic properties for each perturbed geometry. These files are
+produced with this same option and the flags 
 \texttt{use\_free\_energy=.FALSE.} and 
-\texttt{lel\_free\_energy=} \texttt{.TRUE.} the code computes the electronic
+\texttt{lel\_free\_energy=} \texttt{.TRUE.}. In this case the code 
+computes the electronic
 thermodynamic properties at each perturbed geometry and writes them on 
-file. In this case the electronic free energy is not added to the free
-energy. Note that the user must be careful to use the same value for the
+file, without calculating the elastic constants.
+Note that the user must be careful to use the same value for the
 \texttt{lel\_free\_energy} flag with this option and in the following
 \texttt{mur\_lc\_t} calculation that interpolates the elastic constants.
+After computing the elastic constants at $T=0$ K with the present option
+one can also run another \texttt{thermo\_pw} calculation with the option
+\texttt{what='mur\_lc'} computing the crystal parameters for a range
+of pressures (using \texttt{pmax} and \texttt{pmin} input variables). If
+the elastic constants are found in the directory \texttt{elastic\_constants} 
+they are interpolated at the pressure dependent crystal parameters and
+plotted on output.
 The variables that control this run are:
 
 %\begin{tcolorbox}
@@ -2831,6 +2847,8 @@ written on output. When the user requests more levels without specifying
 their colors, the code continues with three \texttt{yellow} levels, 
 then \texttt{pink}, \texttt{cyan}, \texttt{orange}, \texttt{black}, and
 when more than $24$ levels are requested the sequence of colors is repeated.
+When \texttt{lgeo\_to\_file=.TRUE.} the path written on file is shown
+in this plot with an \texttt{orange} points connected by a line.
 For orthorhombic solids the code produces many postscript figures, one
 for each value of $c/a$ on the grid. In each figure there is a contour
 plot of the energy as a function of $a$ and $b/a$. The colors of the levels
@@ -2839,6 +2857,14 @@ by the code the entire energy range (for all $c/a$) is divided into nine
 levels so each figure might have less that nine curves.
 For crystal systems with more crystallographic parameters, this figure is
 not available.
+
+\item
+Elastic constants (elastic compliances) as a function of pressure. 
+The elastic constants (elastic compliances) are shown in different
+plots in red. In a final plot all the elastic constants (elastic
+compliances) are shown on the same figure in \texttt{red, green, blue, yellow, 
+pink, cyan, orange and black} with same order of the previous plots.
+When there are more than eight elastic constants the colors are repeated.
 
 \item
 The crystal parameters and the volume as a function of pressure.
