@@ -31,7 +31,7 @@ INTEGER :: ngeo_file
 
 PUBLIC read_geometry_file, write_geometry_file, set_celldm_geo_from_file, &
        ngeo_file, celldm_geo_file, deallocate_geometry_file, &
-       write_geometry_output, compute_celldm_geo_file
+       write_geometry_output, compute_celldm_geo_file, press_file
 
 CONTAINS
 !
@@ -228,31 +228,31 @@ RETURN
 END SUBROUTINE write_geometry_output
 !
 !------------------------------------------------------------------------
-SUBROUTINE compute_celldm_geo_file(vmin,celldm0)
+SUBROUTINE compute_celldm_geo_file(vmin,celldm0,target_press)
 !------------------------------------------------------------------------
 !
 USE initial_conf, ONLY : ibrav_save
-USE control_pressure, ONLY : pressure_kb
 !
 IMPLICIT NONE
 REAL(DP) :: vmin, celldm0(6)
+REAL(DP) :: target_press
 REAL(DP) :: compute_omega_geo
 REAL(DP) :: volume, pmin_file
 INTEGER  :: ip1, ip2, i, ip
 !
-!  Find the celldm(2-6) at zero pressure and use those as celldm at
+!  Find the celldm(2-6) at pressure target_press and use those as celldm at
 !  vmin. Start by finding the two pressures closest to zero
 !
 ip1=0
 pmin_file=1.D50
 DO ip=1,ngeo_file
-   IF (ABS (press_file(ip)-pressure_kb)< pmin_file) THEN
+   IF (ABS (press_file(ip)-target_press)< pmin_file) THEN
       ip1=ip
-      pmin_file=ABS(press_file(ip)-pressure_kb)
+      pmin_file=ABS(press_file(ip)-target_press)
    ENDIF
 ENDDO
 
-IF (press_file(ip) > pressure_kb) THEN
+IF (press_file(ip) > target_press) THEN
     IF (ip1==ngeo_file) THEN
        ip2=ngeo_file-1
     ELSE
@@ -269,8 +269,8 @@ ENDIF
 !  Find the celldm(2-6) from the condition that the pressure is zero
 !
 DO i=2,6
-   celldm0(i)=celldm_geo_file(i,ip1)+(pressure_kb-press_file(ip1)) *          &
-             (celldm_geo_file(i,ip2)-celldm_geo_file(i,ip1)) /  &
+   celldm0(i)=celldm_geo_file(i,ip1)+(target_press-press_file(ip1)) *  &
+             (celldm_geo_file(i,ip2)-celldm_geo_file(i,ip1)) /         &
              (press_file(ip2)-press_file(ip1))
 END DO
 

@@ -23,6 +23,7 @@ USE geometry_file,    ONLY : compute_celldm_geo_file
 USE equilibrium_conf, ONLY : celldm0, omega0, tau0, at0, tau0_crys
 USE initial_conf,     ONLY : ibrav_save, tau_save_crys
 USE control_xrdp,     ONLY : lxrdp
+USE control_pressure, ONLY : pressure_kb
 
 USE ions_base,        ONLY : nat, tau
 USE cell_base,        ONLY : at, bg, omega, cell_base_init
@@ -51,7 +52,7 @@ IF (lmurn) THEN
    CALL plot_mur()
    CALL plot_mur_p()
    IF (lgeo_from_file) THEN
-      CALL compute_celldm_geo_file(vmin, celldm0)
+      CALL compute_celldm_geo_file(vmin, celldm0, pressure_kb)
    ELSE
       CALL compute_celldm_geo(vmin, celldm0, &
                    celldm_geo(1,central_geo), omega_geo(central_geo))
