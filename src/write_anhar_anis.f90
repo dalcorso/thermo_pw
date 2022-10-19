@@ -226,25 +226,25 @@ IF (lelastic) THEN
 !
    filename='anhar_files/'//TRIM(flanhar)//'.macro_el'
    CALL add_pressure(filename)
-   CALL write_macro_el_on_file(temp, ntemp, macro_el_t, filename)
+   CALL write_macro_el_on_file(temp, ntemp, macro_el_t, filename, 0)
 !
 !   Adiabatic macro-elasticity variables
 !
    filename='anhar_files/'//TRIM(flanhar)//'.macro_el_s'
    CALL add_pressure(filename)
-   CALL write_macro_el_on_file(temp, ntemp, macro_el_s, filename)
+   CALL write_macro_el_on_file(temp, ntemp, macro_el_s, filename, 0)
 !
 !   Isothermal sound velocities
 !
    filename='anhar_files/'//TRIM(flanhar)//'.sound_vel'
    CALL add_pressure(filename)
-   CALL write_sound_on_file(temp, ntemp, v_t, filename)
+   CALL write_sound_on_file(temp, ntemp, v_t, filename, 0)
 !
 !   Adiabatic sound velocities
 !
    filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_s'
    CALL add_pressure(filename)
-   CALL write_sound_on_file(temp, ntemp, v_s, filename)
+   CALL write_sound_on_file(temp, ntemp, v_s, filename, 0)
 ENDIF
 
 IF (with_eigen) THEN
@@ -480,25 +480,25 @@ IF (lelasticf) THEN
 !
    filename='anhar_files/'//TRIM(flanhar)//'.macro_el_ph'
    CALL add_pressure(filename)
-   CALL write_macro_el_on_file(temp, ntemp, macro_elf_t, filename)
+   CALL write_macro_el_on_file(temp, ntemp, macro_elf_t, filename,0)
 !
 !   Adiabatic macro-elasticity variables
 !
    filename='anhar_files/'//TRIM(flanhar)//'.macro_el_s_ph'
    CALL add_pressure(filename)
-   CALL write_macro_el_on_file(temp, ntemp, macro_elf_s, filename)
+   CALL write_macro_el_on_file(temp, ntemp, macro_elf_s, filename,0)
 !
 !   Isothermal sound velocities
 !
    filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_ph'
    CALL add_pressure(filename)
-   CALL write_sound_on_file(temp, ntemp, vf_t, filename)
+   CALL write_sound_on_file(temp, ntemp, vf_t, filename, 0)
 !
 !   Adiabatic sound velocities
 !
    filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_s_ph'
    CALL add_pressure(filename)
-   CALL write_sound_on_file(temp, ntemp, vf_s, filename)
+   CALL write_sound_on_file(temp, ntemp, vf_s, filename, 0)
 ENDIF
 
 IF (with_eigen) THEN

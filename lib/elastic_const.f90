@@ -3005,11 +3005,13 @@ RETURN
 END SUBROUTINE expand_el_cons
 
 !-------------------------------------------------------------------------
-SUBROUTINE write_macro_el_on_file(temp, ntemp, macro_el_t, filename)
+SUBROUTINE write_macro_el_on_file(temp, ntemp, macro_el_t, filename, iflag)
 !-------------------------------------------------------------------------
 !
 ! This routine creates a file with macro-elasticity variables as a function 
 ! of temperature.
+! iflag 0 means that temp contains the temperature
+! iflag 1 means that temp contains the pressure
 !
 
 USE kinds,      ONLY : DP
@@ -3017,12 +3019,13 @@ USE io_global,  ONLY : meta_ionode, meta_ionode_id, stdout
 USE mp_world,   ONLY : world_comm
 USE mp,         ONLY : mp_bcast
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: ntemp
+INTEGER, INTENT(IN) :: ntemp, iflag
 REAL(DP), INTENT(IN) :: temp(ntemp), macro_el_t(8,ntemp)
 CHARACTER(LEN=*), INTENT(IN) :: filename
 
 REAL(DP) :: macro_el_t_aver(4,ntemp) !Reuss-Voigt-Hill variables
 INTEGER :: itemp, iu_macro_el, ios
+CHARACTER(LEN=7) :: label
 INTEGER :: find_free_unit
 
 iu_macro_el=find_free_unit()
@@ -3032,13 +3035,18 @@ IF (meta_ionode) &
 30 CALL mp_bcast(ios, meta_ionode_id, world_comm)
    CALL errore('write_macro_el_on_file','opening macro elasticity file',&
                                                              ABS(ios))
+IF (iflag==0) THEN
+   label="T (K)"
+ELSE
+   label="p(kbar)"
+ENDIF
 
 IF (meta_ionode) THEN
    WRITE(iu_macro_el,'("#",2x,"b0: bulk modulus (kbar), e0: Young modulus (kbar), g0: & 
                                   &shear modulus (kbar), nu: Poisson ratio")')
    WRITE(iu_macro_el,'("#",2x,"v: Voigt average, r: Reuss average")')
-   WRITE(iu_macro_el,'("#",2x,"T  ", 20x, "b0v ", 13x, "e0v ", 13x, "g0v ",  &
-               & 13x, "  nuv", 13x, "   b0r", 13x, "e0r ", 13x, "g0r ", 13x, "nur ")')
+   WRITE(iu_macro_el,'("#",2x,a7, 20x, "b0v ", 13x, "e0v ", 13x, "g0v ",  &
+               & 13x, "  nuv", 13x, "   b0r", 13x, "e0r ", 13x, "g0r ", 13x, "nur ")') label
    DO itemp=2,ntemp-1
       
       macro_el_t_aver(1,itemp) = (macro_el_t(1,itemp)+macro_el_t(5,itemp))*0.5_DP
@@ -3071,8 +3079,8 @@ IF (meta_ionode) THEN
    WRITE(iu_macro_el,'("#",2x,"b0: bulk modulus (kbar), e0: Young modulus (kbar), g0: & 
                                   &shear modulus (kbar), nu: Poisson ratio")')
    WRITE(iu_macro_el,'("#",2x,"v: Voigt average, r: Reuss average")')
-   WRITE(iu_macro_el,'("#",2x,"T  ", 20x, "b0 ", 13x, "e0 ", 13x, "g0 ",  &
-                                                             & 13x, "  nu")')
+   WRITE(iu_macro_el,'("#",2x,a7, 20x, "b0 ", 13x, "e0 ", 13x, "g0 ",  &
+                                                  & 13x, "  nu")') label
    DO itemp=2,ntemp-1
 
       WRITE(iu_macro_el,'(e16.8, 8e18.10)') temp(itemp), macro_el_t_aver(1,itemp), &
@@ -3087,11 +3095,11 @@ RETURN
 END SUBROUTINE write_macro_el_on_file
 
 !-------------------------------------------------------------------------
-SUBROUTINE write_sound_on_file(temp, ntemp, v_t, filename)
+SUBROUTINE write_sound_on_file(temp, ntemp, v_t, filename, iflag)
 !-------------------------------------------------------------------------
 !
 ! This routine creates a file with sound velocities as a function 
-! of temperature.
+! of temperature or of pressure.
 !
 
 USE kinds,      ONLY : DP
@@ -3099,12 +3107,13 @@ USE io_global,  ONLY : meta_ionode, meta_ionode_id, stdout
 USE mp_world,   ONLY : world_comm
 USE mp,         ONLY : mp_bcast
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: ntemp
+INTEGER, INTENT(IN) :: ntemp, iflag
 REAL(DP), INTENT(IN) :: temp(ntemp), v_t(3,ntemp)
 CHARACTER(LEN=*), INTENT(IN) :: filename
 
 INTEGER :: itemp, iu_sound, ios
 INTEGER :: find_free_unit
+CHARACTER(LEN=7) :: label
 
 iu_sound=find_free_unit()
 IF (meta_ionode) &
@@ -3113,11 +3122,16 @@ IF (meta_ionode) &
 30 CALL mp_bcast(ios, meta_ionode_id, world_comm)
    CALL errore('write_sound_on_file','opening sound velocities file',&
                                                              ABS(ios))
+IF (iflag==0) THEN
+   label='T (K)  '
+ELSE
+   label='p(kbar)'
+ENDIF
 
 IF (meta_ionode) THEN
    WRITE(iu_sound,'("#",2x,"V_P: compressional velocity (m/s), V_B: bulk &
                       &velocity (m/s), V_G: shear velocity (m/s)")')
-   WRITE(iu_sound,'("#",2x,"T  ", 20x, "V_P ", 13x, "V_B ", 13x, "V_G ")')
+   WRITE(iu_sound,'("#",2x,a7, 20x, "V_P ", 13x, "V_B ", 13x, "V_G ")') label
    DO itemp=2,ntemp-1
       WRITE(iu_sound,'(e16.8, 8e18.10)') temp(itemp), v_t(1,itemp), &
                                                 v_t(2,itemp), v_t(3,itemp)
