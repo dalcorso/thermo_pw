@@ -405,7 +405,7 @@ IF (density > 0.0_DP) THEN
 !  print the Voigt-Reuss-Hill average sound velocities
 !
    CALL print_sound_velocities( ibrav, el_con, el_compliances, &
-                                               density, vp, vb, vg )
+                                               density, vp, vb, vg, .TRUE. )
 !
 !  compute the Debye temperature
 !

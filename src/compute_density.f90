@@ -6,12 +6,14 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !-------------------------------------------------------------------
-SUBROUTINE compute_density(omega,density)
+SUBROUTINE compute_density(omega,density,flag)
 !-------------------------------------------------------------------
 !
 !  This routine receives the volume of a unit cell in (a.u.)^3,
 !  the number of atoms inside the unit cell and the mass (in a.m.u.) of
 !  each atom and gives as output the density in Kg/m^3 of the solid.
+!  flag .TRUE. prints the calculated density
+!       .FALSE. prints only error messages if needed
 !
 USE kinds, ONLY : DP
 USE constants, ONLY : amu_si, bohr_radius_si
@@ -22,6 +24,7 @@ USE io_global, ONLY : stdout
 IMPLICIT NONE
 REAL(DP), INTENT(IN) :: omega
 REAL(DP), INTENT(OUT) :: density 
+LOGICAL, INTENT(IN) :: flag
 
 REAL(DP) :: total_mass, total_expected_mass, expected_mass
 REAL(DP) :: current_mass, fact
@@ -65,7 +68,8 @@ IF (ABS(total_mass - total_expected_mass) > 1.0_DP) THEN
                    &f13.4," g/cm^3")') total_expected_mass *fact / omega, &
                          total_expected_mass * fact / omega / 1000._DP
 
-ELSE
+ELSEIF (flag) THEN
+   
    WRITE(stdout,'(/,5x,"Total mass of this unit cell ",f15.4," a.m.u.")') &
                                     total_mass  
    WRITE(stdout,'(5x,"Density of this solid ",7x,f15.2," kg/m^3",&

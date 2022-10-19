@@ -1913,6 +1913,7 @@ celldm_in_use=.FALSE.
 celldm_in_use(1)=.TRUE.
 
 SELECT CASE (ibrav)
+   CASE(1,2,3)
    CASE(4,6,7) 
       celldm_in_use(3)=.TRUE.
    CASE(5) 

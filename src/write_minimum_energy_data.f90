@@ -54,12 +54,12 @@ SUBROUTINE write_minimum_energy_data()
      ENDDO
 !     WRITE(stdout,'(5x, "The equilibrium lattice constant is ",9x,f12.4,&
 !                                 &" a.u.")') celldm0(1)
-     WRITE(stdout,'(5x, "The bulk modulus is ",24x,f12.3,"  kbar")') b0
-     WRITE(stdout,'(5x, "The pressure derivative of the bulk modulus is ",&
+     WRITE(stdout,'(5x, "The bulk modulus is:",24x,f12.3,"  kbar")') b0
+     WRITE(stdout,'(5x, "The pressure derivative of the bulk modulus is:",&
                                   &f9.3)')  b01
      IF (ieos==2) &
         WRITE(stdout,'(5x, "The second derivative of the bulk &
-                           &modulus is ",f13.5," 1/kbar")')  b02
+                           &modulus is:",f13.5," 1/kbar")')  b02
   ELSE
      WRITE(stdout,'(5x,"The equilibrium celldm is:")')
      WRITE(stdout,'(5x,6f12.5)') celldm0(:)
@@ -69,7 +69,7 @@ SUBROUTINE write_minimum_energy_data()
                                                    TRIM(quantity), emin
   omega0=compute_omega_geo(ibrav_save,celldm0)
   WRITE(stdout,'(5x, "The volume is ",9x,f13.5," (a.u.)^3",&
-          f15.5,"(A)^3")') omega0, omega0*bohr_radius_si**3/1.D-30
+          f15.5," (A)^3")') omega0, omega0*bohr_radius_si**3/1.D-30
   WRITE(stdout,'(2x,76("-"),/)')
   RETURN
 END SUBROUTINE write_minimum_energy_data

@@ -109,7 +109,7 @@ DO igeom=start_geometry_qha, last_geometry_qha
 !  the elastic constants
 !
    CALL print_sound_velocities( ibrav_save, el_con, el_compliances, &
-                                       density, vp, vb, vg )
+                                       density, vp, vb, vg, .TRUE.)
 !
 !  here we compute the Debye temperature approximatively from the
 !  poisson ratio and the bulk modulus
@@ -133,6 +133,7 @@ DO igeom=start_geometry_qha, last_geometry_qha
    IF (my_image_id==root_image) CALL write_elastic(filelastic)
 
 ENDDO
+
 DEALLOCATE(sigma_geo_aux)
 
 RETURN

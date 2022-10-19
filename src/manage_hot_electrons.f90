@@ -48,7 +48,7 @@ ALLOCATE(temp_sigma(nsigma))
 degree=nsigma-1
 DO isigma=1,nsigma
    temp_sigma(isigma)= sigma_ry(isigma) * rydberg_si / k_boltzmann_si
-   WRITE(6,*) 'isigma, temp', isigma, temp_sigma(isigma)
+!   WRITE(6,*) 'isigma, temp', isigma, temp_sigma(isigma)
 ENDDO
 
 IF (ionode) THEN
@@ -78,7 +78,7 @@ IF (ionode) THEN
 !   and isochoric heat capacity.
 !
       CALL polyfit(temp_sigma,y,nsigma,a,degree)
-      WRITE(6,*) 'a', a(1), a(2), a(3)
+!      WRITE(6,*) 'a', a(1), a(2), a(3)
       DO itemp=1,ntemp
          CALL compute_poly(temp(itemp), degree, a, el_free_ener(itemp,igeom))
          CALL compute_poly_deriv(temp(itemp), degree, a, &

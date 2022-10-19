@@ -258,7 +258,7 @@ CALL interpolate_el_cons_p(celldm_p, nvar, ibrav, ec_p1, ec_p2, ec_p3, &
 DO ipress=1,npress
    CALL print_sound_velocities(ibrav_save, el_cons_p(:,:,ipress), &
            el_comp_p(:,:,ipress), density_p(ipress), v_p(1,ipress), &
-           v_p(2,ipress), v_p(3,ipress))
+           v_p(2,ipress), v_p(3,ipress),.FALSE.)
 ENDDO
 
 b0ec_p(:)= (macro_el_p(1,:)+macro_el_p(5,:)) * 0.5_DP
@@ -349,11 +349,11 @@ DO igeo=1,ngeo(1)
                                     el_comp_p(:,:,igeo))
    CALL print_macro_elasticity(ibrav,el_cons_p(:,:,igeo), &
               el_comp_p(:,:,igeo),macro_el_p(:,igeo),.FALSE.)
-   CALL compute_density(omega_geo(igeo), density_p(igeo))
+   CALL compute_density(omega_geo(igeo), density_p(igeo),.FALSE.)
 
    CALL print_sound_velocities(ibrav_save, el_cons_p(:,:,igeo), &
            el_comp_p(:,:,igeo), density_p(igeo), v_p(1,igeo), &
-           v_p(2,igeo), v_p(3,igeo))
+           v_p(2,igeo), v_p(3,igeo),.FALSE.)
 ENDDO
 
 b0ec_p(:)= (macro_el_p(1,:)+macro_el_p(5,:)) * 0.5_DP

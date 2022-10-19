@@ -418,7 +418,7 @@ WRITE(stdout,'(5x,70("-"))')
 !  ----------------------------------------------------------------------
 !  Information on the density
 !
-  CALL compute_density(omega,density)
+  CALL compute_density(omega,density,.TRUE.)
 !
 !  ----------------------------------------------------------------------
 !  Brillouin zone plot

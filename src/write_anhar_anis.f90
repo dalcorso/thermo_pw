@@ -54,7 +54,7 @@ CALL compute_alpha_anis(celldm_t, alpha_anis_t, temp, ntemp, ibrav_save)
 !
 DO itemp=1,ntemp
    vmin_t(itemp)=compute_omega_geo(ibrav_save, celldm_t(1,itemp))
-   CALL compute_density(vmin_t(itemp),density(itemp))
+   CALL compute_density(vmin_t(itemp),density(itemp),.TRUE.)
 ENDDO
 !
 !  compute the volume thermal expansion as the derivative of the volume
@@ -111,7 +111,7 @@ IF (lelastic) THEN
 
       CALL print_sound_velocities(ibrav_save, el_cons_s(:,:,itemp), &
            el_comp_s(:,:,itemp), density(itemp), v_s(1,itemp), v_s(2,itemp), &
-                                                               v_s(3,itemp))
+                                                      v_s(3,itemp),.TRUE.)
       !
       ! Compute macro-elasticity variables and sound velocities using 
       ! isothermal 
@@ -123,7 +123,7 @@ IF (lelastic) THEN
 
       CALL print_sound_velocities(ibrav_save, el_cons_t(:,:,itemp), &
            el_comp_t(:,:,itemp), density(itemp), v_t(1,itemp), v_t(2,itemp), &
-                                                               v_t(3,itemp))
+                                                   v_t(3,itemp),.TRUE.)
    ENDDO
 ENDIF
 
@@ -309,7 +309,7 @@ CALL compute_alpha_anis(celldmf_t, alphaf_anis_t, temp, ntemp, ibrav_save)
 !
 DO itemp=1,ntemp
    vminf_t(itemp)=compute_omega_geo(ibrav_save, celldmf_t(1,itemp))
-   CALL compute_density(vminf_t(itemp),densityf(itemp))
+   CALL compute_density(vminf_t(itemp),densityf(itemp),.TRUE.)
 ENDDO
 !
 !  compute the volume thermal expansion as the derivative of the volume
@@ -363,7 +363,8 @@ IF (lelasticf) THEN
                          el_compf_s(:,:,itemp), macro_elf_s(:,itemp), .FALSE.)
 
       CALL print_sound_velocities(ibrav_save, el_consf_s(:,:,itemp), &
-           el_compf_s(:,:,itemp), densityf(itemp), vf_s(1,itemp), vf_s(2,itemp), vf_s(3,itemp))
+           el_compf_s(:,:,itemp), densityf(itemp), vf_s(1,itemp),    &
+           vf_s(2,itemp), vf_s(3,itemp), .TRUE.)
 
 
       ! Compute macro-elasticity variables and sound velocities using isothermal 
@@ -373,7 +374,8 @@ IF (lelasticf) THEN
                           el_compf_t(:,:,itemp), macro_elf_t(:,itemp), .FALSE.)
 
       CALL print_sound_velocities(ibrav_save, el_consf_t(:,:,itemp), &
-           el_compf_t(:,:,itemp), densityf(itemp), vf_t(1,itemp), vf_t(2,itemp), vf_t(3,itemp))
+           el_compf_t(:,:,itemp), densityf(itemp), vf_t(1,itemp),    &
+           vf_t(2,itemp), vf_t(3,itemp), .TRUE.)
 
    ENDDO
 ENDIF

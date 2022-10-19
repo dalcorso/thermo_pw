@@ -134,7 +134,7 @@ CALL find_omega0(press/ry_kbar,omega_p,npress,omegap0)
 
 IF (lgeo_to_file) CALL write_geometry_output(npress, press, celldm_p)
 DO ipress=1, npress
-   CALL compute_density(omega_p(ipress),density_p(ipress))
+   CALL compute_density(omega_p(ipress),density_p(ipress),.FALSE.)
 ENDDO
 
 IF (vmin_input == 0.0_DP) vmin_input=omega_p(npress) * 0.98_DP

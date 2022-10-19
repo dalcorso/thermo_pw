@@ -109,7 +109,7 @@ CALL cryst_to_cart(nat, tau0_crys, bg, -1)
 !
 !  recompute the density at the minimum volume
 !
-     CALL compute_density(omega,density)
+     CALL compute_density(omega,density,.TRUE.)
 !
 !  compute the xrdp at the minimum volume if required by the user
 !

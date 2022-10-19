@@ -2118,46 +2118,51 @@ RETURN
 END SUBROUTINE print_macro_elasticity
 
 !-------------------------------------------------------------------------
-SUBROUTINE print_sound_velocities(ibrav, cmn, smn, density, vp, vb, vg)
+SUBROUTINE print_sound_velocities(ibrav, cmn, smn, density, vp, vb, vg, flag)
 !-------------------------------------------------------------------------
 !
 !  In input the elastic constants are in kbar, the elastic compliances 
 !  in kbar^-1 and the density in Kg/m^3. The sound velocity is printed
 !  in m/sec
+!  
+!  If flag is .true. prints the sound velocities otherwise print 
+!  a message only when the system is unstable
 !
 USE kinds, ONLY : DP
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: ibrav
 REAL(DP), INTENT(IN) :: cmn(6,6), smn(6,6), density
 REAL(DP), INTENT(OUT) :: vp, vb, vg 
+LOGICAL, INTENT(IN) :: flag
 REAL(DP) :: b0v, e0v, g0v, nuv, b0r, e0r, g0r, nur
 
 REAL(DP) :: g0, b0
 
 CALL macro_elasticity( ibrav, cmn, smn, b0v, e0v, g0v, nuv, b0r, e0r, g0r, nur )
 
-WRITE(stdout, '(/,5x, "Voigt-Reuss-Hill average; sound velocities:",/)') 
+IF (flag) WRITE(stdout, '(/,5x, "Voigt-Reuss-Hill average; &
+                                                     &sound velocities:",/)') 
 
 g0 = ( g0r + g0v ) * 0.5_DP
 b0 = ( b0r + b0v ) * 0.5_DP
 
 IF (b0 + 4.0_DP * g0 / 3.0_DP > 0.0_DP) THEN
    vp = SQRT( ( b0 + 4.0_DP * g0 / 3.0_DP ) * 1.D8 / density )
-   WRITE(stdout, '(5x, "Compressional V_P = ",f12.3," m/s")') vp
+   IF (flag) WRITE(stdout, '(5x, "Compressional V_P = ",f12.3," m/s")') vp
 ELSE
    vp=0.0_DP
    WRITE(stdout, '(5x, "The system is unstable for compressional deformations")') 
 ENDIF
 IF (b0 > 0.0_DP) THEN
    vb = SQRT( b0 * 1.D8 / density )
-   WRITE(stdout, '(5x, "Bulk          V_B = ",f12.3," m/s")') vb
+   IF (flag) WRITE(stdout, '(5x, "Bulk          V_B = ",f12.3," m/s")') vb
 ELSE
    vb =0.0_DP
    WRITE(stdout, '(5x, "The system is unstable")') 
 END IF
 IF (g0 > 0.0_DP) THEN
    vg = SQRT( g0 * 1.D8 / density )
-   WRITE(stdout, '(5x, "Shear         V_G = ",f12.3," m/s")') vg
+   IF (flag) WRITE(stdout, '(5x, "Shear         V_G = ",f12.3," m/s")') vg
 ELSE
    vg = 0.0_DP
    WRITE(stdout, '(5x, "The system is unstable for shear deformations")') 

@@ -47,7 +47,7 @@ SUBROUTINE check_el_cons()
      IF (.NOT.exst) CYCLE
      found(igeo)=.TRUE.
      el_con_geo(:,:,igeo)=el_con(:,:)
-     WRITE(stdout,'(/,5x,"Geometry number",i5," elastic constants found")') igeo
+     WRITE(stdout,'(5x,"Geometry number",i5," elastic constants found")') igeo
      el_cons_available=.TRUE.
   ENDDO
   IF (.NOT.el_cons_available) RETURN
