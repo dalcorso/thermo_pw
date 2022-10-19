@@ -87,7 +87,7 @@ END SUBROUTINE interpolate_el_cons
 !
 !----------------------------------------------------------------------------
 SUBROUTINE interpolate_el_cons_p(celldm_p, nvar, ibrav, ec_p1, ec_p2, &
-                    ec_p3, ec_p4, poly_degree_elc, el_cons_p, el_comp_p, b0_p)
+           ec_p3, ec_p4, poly_degree_elc, el_cons_p, el_comp_p, macro_el_p)
 !----------------------------------------------------------------------------
 !
 ! This routine receives as input the coeffients of polynomials which 
@@ -114,7 +114,7 @@ IMPLICIT NONE
 INTEGER :: ibrav, nvar
 INTEGER :: poly_degree_elc
 REAL(DP) :: celldm_p(6, npress), el_cons_p(6,6,npress), &
-            el_comp_p(6,6,npress), b0_p(npress)
+            el_comp_p(6,6,npress), macro_el_p(8,npress)
 TYPE(poly1) :: ec_p1(6,6)
 TYPE(poly2) :: ec_p2(6,6)
 TYPE(poly3) :: ec_p3(6,6)
@@ -123,13 +123,13 @@ TYPE(poly4) :: ec_p4(6,6)
 REAL(DP), ALLOCATABLE :: xfit(:)
 
 INTEGER  :: i, j, ipress, startp, lastp
-REAL(DP) :: aux, macro_el(8)
+REAL(DP) :: aux
 
 ALLOCATE(xfit(nvar))
 CALL divide(world_comm, npress, startp, lastp)
 el_cons_p=0.0_DP
 el_comp_p=0.0_DP
-b0_p=0.0_DP
+macro_el_p=0.0_DP
 DO ipress=startp,lastp
    CALL compress_celldm(celldm_p(:,ipress),xfit,nvar,ibrav)
    DO i=1,6
@@ -154,12 +154,11 @@ DO ipress=startp,lastp
    CALL compute_elastic_compliances(el_cons_p(:,:,ipress), &
                                     el_comp_p(:,:,ipress))
    CALL print_macro_elasticity(ibrav,el_cons_p(:,:,ipress), &
-                          el_comp_p(:,:,ipress),macro_el,.FALSE.)
-   b0_p(ipress)=macro_el(5)
+              el_comp_p(:,:,ipress),macro_el_p(:,ipress),.FALSE.)
 ENDDO
 CALL mp_sum(el_cons_p, world_comm)
 CALL mp_sum(el_comp_p, world_comm)
-CALL mp_sum(b0_p, world_comm)
+CALL mp_sum(macro_el_p, world_comm)
 
 DEALLOCATE(xfit)
 

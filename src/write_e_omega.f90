@@ -35,7 +35,7 @@ USE control_vol,      ONLY : vmin_input, vmax_input
 USE control_thermo,   ONLY : lgeo_to_file
 USE control_pressure, ONLY : pressure, pressure_kb, pmin, pmax, deltap, &
                              npress, press
-USE uniform_pressure, ONLY : omega_p, celldm_p
+USE uniform_pressure, ONLY : omega_p, density_p, celldm_p
 USE control_quartic_energy, ONLY : lquartic, lsolve
 USE geometry_file,      ONLY : write_geometry_output
 USE quadratic_surfaces, ONLY : fit_multi_quadratic, find_quadratic_extremum, &
@@ -88,6 +88,7 @@ ALLOCATE(x_pos_min(nvar))
 ALLOCATE(f(ndata))
 ALLOCATE(e(npress))
 ALLOCATE(omega_p(npress))
+ALLOCATE(density_p(npress))
 ALLOCATE(celldm_p(6,npress))
 CALL init_poly(nvar,p2)
 
@@ -132,6 +133,9 @@ ENDDO
 CALL find_omega0(press/ry_kbar,omega_p,npress,omegap0)
 
 IF (lgeo_to_file) CALL write_geometry_output(npress, press, celldm_p)
+DO ipress=1, npress
+   CALL compute_density(omega_p(ipress),density_p(ipress))
+ENDDO
 
 IF (vmin_input == 0.0_DP) vmin_input=omega_p(npress) * 0.98_DP
 IF (vmax_input == 0.0_DP) vmax_input=omega_p(1) * 1.02_DP

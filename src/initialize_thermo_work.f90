@@ -767,9 +767,12 @@ SUBROUTINE initialize_mur_qha(nwork)
 !   It allocates the variables el_con_ibrav_geo and el_con_celldm_geo. 
 !
 USE kinds,         ONLY : DP
+USE thermo_mod,    ONLY : ngeo
 USE ions_base,     ONLY : nat
 USE control_elastic_constants, ONLY : el_con_ibrav_geo, el_con_celldm_geo, &
                                       el_con_tau_crys_geo, el_con_omega_geo
+USE geometry_file, ONLY : read_geometry_file
+USE control_thermo, ONLY : lgeo_from_file
 USE initial_conf,  ONLY : ibrav_save, tau_save_crys
 USE io_global, ONLY : stdout
 
@@ -781,6 +784,7 @@ INTEGER              :: igeom, iwork
 INTEGER              :: compute_nwork
 REAL(DP)             :: compute_omega_geo
 
+IF (lgeo_from_file) CALL read_geometry_file(ngeo)
 nwork=compute_nwork()
 ALLOCATE(el_con_ibrav_geo(nwork))
 ALLOCATE(el_con_celldm_geo(6,nwork))

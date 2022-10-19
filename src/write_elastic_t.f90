@@ -5,7 +5,9 @@
 ! in the root directory of the present distribution,
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
+!----------------------------------------------------------------------
 SUBROUTINE write_elastic_t( )
+!----------------------------------------------------------------------
 !
 !  This routine writes on file the elastic constants as a function of
 !  temperature intepolating them at the volume that minimizes the
@@ -146,9 +148,10 @@ SUBROUTINE write_elastic_p()
 !  This routine writes on file the elastic constants as a function of
 !  pressure intepolating them at the crystal parameters found at each
 !  pressure.
-!  This is done only if npress>0 and the crystal parameters have 
+!  This is done only if npress>0, the crystal parameters have 
 !  been calculated and the elastic constant for all geometries are 
 !  available on file.
+!  This routine is used when lmurn=.FALSE..
 !
 USE kinds,      ONLY : DP
 USE io_global,  ONLY : stdout
@@ -161,7 +164,9 @@ USE quadratic_surfaces, ONLY : fit_multi_quadratic
 USE cubic_surfaces,     ONLY : fit_multi_cubic
 USE quartic_surfaces,   ONLY : fit_multi_quartic
 
-USE elastic_constants,  ONLY : write_el_cons_on_file
+USE initial_conf,       ONLY : ibrav_save
+USE elastic_constants,  ONLY : write_el_cons_on_file, write_macro_el_on_file, &
+                               write_sound_on_file, print_sound_velocities
 USE control_elastic_constants, ONLY : el_con_geo, lelastic_p, &
                                el_cons_t_available
 USE lattices,           ONLY : crystal_parameters
@@ -170,7 +175,8 @@ USE control_macro_elasticity, ONLY: macro_el
 USE polynomial,         ONLY : poly1, poly2, poly3, poly4, init_poly, &
                                clean_poly
 USE data_files,         ONLY : fl_el_cons
-USE uniform_pressure,   ONLY : celldm_p, el_cons_p, el_comp_p, b0ec_p
+USE uniform_pressure,   ONLY : celldm_p, el_cons_p, el_comp_p, b0ec_p, &
+                               macro_el_p, density_p, v_p
 USE control_pressure,   ONLY : npress, press
 
 IMPLICIT NONE
@@ -181,7 +187,7 @@ TYPE(poly1), ALLOCATABLE :: ec_p1(:,:)
 TYPE(poly2), ALLOCATABLE :: ec_p2(:,:)
 TYPE(poly3), ALLOCATABLE :: ec_p3(:,:)
 TYPE(poly4), ALLOCATABLE :: ec_p4(:,:)
-INTEGER :: i, j, idata, itemp
+INTEGER :: i, j, idata, itemp, ipress
 INTEGER :: compute_nwork
 
 lelastic_p=.FALSE.
@@ -201,6 +207,8 @@ ALLOCATE(ec_p3(6,6))
 ALLOCATE(ec_p4(6,6))
 ALLOCATE(el_cons_p(6,6,npress))
 ALLOCATE(el_comp_p(6,6,npress))
+ALLOCATE(macro_el_p(8,npress))
+ALLOCATE(v_p(3,npress))
 ALLOCATE(b0ec_p(npress))
 
 DO i=1,6
@@ -241,12 +249,19 @@ DO i=1,6
 ENDDO
 !
 !  Part 2: interpolation of the elastic constants at the pressure
-!          dependent geometry and computation of the compliances and
-!          the bulk modulus
+!          dependent geometry and computation of the compliances, 
+!          the bulk, young, and shear moduli 
 !
 CALL interpolate_el_cons_p(celldm_p, nvar, ibrav, ec_p1, ec_p2, ec_p3, &
-            ec_p4, poly_degree_elc, el_cons_p, el_comp_p, b0ec_p)
+            ec_p4, poly_degree_elc, el_cons_p, el_comp_p, macro_el_p)
 
+DO ipress=1,npress
+   CALL print_sound_velocities(ibrav_save, el_cons_p(:,:,ipress), &
+           el_comp_p(:,:,ipress), density_p(ipress), v_p(1,ipress), &
+           v_p(2,ipress), v_p(3,ipress))
+ENDDO
+
+b0ec_p(:)= (macro_el_p(1,:)+macro_el_p(5,:)) * 0.5_DP
 lelastic_p=.TRUE.
 filelastic='elastic_constants/'//TRIM(fl_el_cons)//'.el_cons_p'
 CALL write_el_cons_on_file(press, npress, ibrav, laue, el_cons_p, b0ec_p, &
@@ -255,6 +270,13 @@ CALL write_el_cons_on_file(press, npress, ibrav, laue, el_cons_p, b0ec_p, &
 filelastic='elastic_constants/'//TRIM(fl_el_cons)//'.el_comp_p'
 CALL write_el_cons_on_file(press, npress, ibrav, laue, el_comp_p, b0ec_p, & 
                                                        filelastic, 3)
+
+filelastic='elastic_constants/'//TRIM(fl_el_cons)//'.macro_el_p'
+CALL write_macro_el_on_file(press, npress, macro_el_p, filelastic, 1)
+
+filelastic='elastic_constants/'//TRIM(fl_el_cons)//'.sound_vel_p'
+CALL write_sound_on_file(press, npress, v_p, filelastic, 1)
+
 DEALLOCATE(x)
 DEALLOCATE(f)
 DO i=1,6
@@ -266,6 +288,8 @@ DO i=1,6
    ENDDO
 ENDDO
 DEALLOCATE(b0ec_p)
+DEALLOCATE(v_p)
+DEALLOCATE(macro_el_p)
 DEALLOCATE(el_comp_p) 
 DEALLOCATE(el_cons_p) 
 DEALLOCATE(ec_p1)
@@ -275,3 +299,86 @@ DEALLOCATE(ec_p4)
 
 RETURN
 END SUBROUTINE write_elastic_p
+
+!--------------------------------------------------------------------------
+SUBROUTINE write_elastic_mur_p()
+!--------------------------------------------------------------------------
+!
+!  This routine writes on file the elastic constants as a function of
+!  pressure reading them from the input file and putting them in a 
+!  format that can be plotted.
+!
+USE kinds,      ONLY : DP
+USE io_global,  ONLY : stdout
+USE thermo_mod, ONLY : omega_geo, ngeo
+
+USE initial_conf,       ONLY : ibrav_save
+USE elastic_constants,  ONLY : write_el_cons_on_file, write_macro_el_on_file, &
+                               write_sound_on_file, print_sound_velocities,   &
+                               print_macro_elasticity, &
+                               compute_elastic_compliances
+USE control_elastic_constants, ONLY : el_con_geo, lelastic_p, &
+                               el_cons_t_available
+USE thermo_sym,         ONLY : laue
+USE geometry_file,      ONLY : press_file
+USE control_thermo,     ONLY : lgeo_from_file
+USE data_files,         ONLY : fl_el_cons
+USE uniform_pressure,   ONLY : celldm_p, el_cons_p, el_comp_p, b0ec_p, &
+                               macro_el_p, density_p, v_p
+
+IMPLICIT NONE
+CHARACTER(LEN=256) :: filelastic
+INTEGER :: igeo, ibrav, nvar, ndata
+INTEGER :: i, j, idata, itemp, ipress
+
+lelastic_p=.FALSE.
+IF (.NOT.lgeo_from_file) RETURN
+CALL check_el_cons()
+IF (.NOT.el_cons_t_available) RETURN
+
+ALLOCATE(el_cons_p(6,6,ngeo(1)))
+ALLOCATE(el_comp_p(6,6,ngeo(1)))
+ALLOCATE(density_p(ngeo(1)))
+ALLOCATE(b0ec_p(ngeo(1)))
+ALLOCATE(v_p(3,ngeo(1)))
+ALLOCATE(macro_el_p(8,ngeo(1)))
+
+el_cons_p=el_con_geo
+DO igeo=1,ngeo(1)
+   CALL compute_elastic_compliances(el_cons_p(:,:,igeo), &
+                                    el_comp_p(:,:,igeo))
+   CALL print_macro_elasticity(ibrav,el_cons_p(:,:,igeo), &
+              el_comp_p(:,:,igeo),macro_el_p(:,igeo),.FALSE.)
+   CALL compute_density(omega_geo(igeo), density_p(igeo))
+
+   CALL print_sound_velocities(ibrav_save, el_cons_p(:,:,igeo), &
+           el_comp_p(:,:,igeo), density_p(igeo), v_p(1,igeo), &
+           v_p(2,igeo), v_p(3,igeo))
+ENDDO
+
+b0ec_p(:)= (macro_el_p(1,:)+macro_el_p(5,:)) * 0.5_DP
+lelastic_p=.TRUE.
+filelastic='elastic_constants/'//TRIM(fl_el_cons)//'.el_cons_p'
+CALL write_el_cons_on_file(press_file, ngeo(1), ibrav, laue, el_cons_p, &
+            b0ec_p, filelastic, 2)
+
+filelastic='elastic_constants/'//TRIM(fl_el_cons)//'.el_comp_p'
+CALL write_el_cons_on_file(press_file, ngeo(1), ibrav, laue, el_comp_p, &
+                               b0ec_p, filelastic, 3)
+
+filelastic='elastic_constants/'//TRIM(fl_el_cons)//'.macro_el_p'
+CALL write_macro_el_on_file(press_file, ngeo(1), macro_el_p, filelastic, 1)
+
+filelastic='elastic_constants/'//TRIM(fl_el_cons)//'.sound_vel_p'
+CALL write_sound_on_file(press_file, ngeo(1), v_p, filelastic, 1)
+
+DEALLOCATE(b0ec_p)
+DEALLOCATE(density_p)
+DEALLOCATE(v_p)
+DEALLOCATE(macro_el_p)
+DEALLOCATE(el_comp_p) 
+DEALLOCATE(el_cons_p) 
+
+RETURN
+END SUBROUTINE write_elastic_mur_p
+

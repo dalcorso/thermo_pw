@@ -226,7 +226,11 @@ MODULE uniform_pressure
    REAL(DP), ALLOCATABLE :: celldm_p(:,:) ! (6 npress) the crystal parameters
    REAL(DP), ALLOCATABLE :: el_cons_p(:,:,:), & ! elastic constants
                             el_comp_p(:,:,:), & ! elastic compliances
-                            b0ec_p(:)           ! bulk modulus 
+                            b0ec_p(:),        & ! bulk modulus
+                            macro_el_p(:,:),  & ! bulk modulus, shear modulus
+                                                ! etc.
+                            v_p(:,:),         & ! sound velocities
+                            density_p(:)        ! density
 
 END MODULE uniform_pressure
 !
