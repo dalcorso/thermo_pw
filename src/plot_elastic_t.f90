@@ -670,3 +670,152 @@ IF (lgnuplot.AND.ionode) &
 
 RETURN
 END SUBROUTINE plot_elastic_t1
+
+!---------------------------------------------------------------------
+SUBROUTINE plot_macro_elastic_t1()
+!---------------------------------------------------------------------
+!
+!  This is a driver to plot the elastic constants (iflag=0,2),
+!  or the elastic compliance (iflag=1,3) as a function of
+!  temperature (iflag=0,1) or of pressure (iflag=2,3).
+!  It is supposed to substitute plot_elastic_t.
+!
+USE kinds,            ONLY : DP
+USE constants,        ONLY : ry_kbar
+USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
+USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,           &
+                             gnuplot_write_header, gnuplot_xlabel, &
+                             gnuplot_set_fact, gnuplot_ylabel,     &
+                             gnuplot_write_file_mul_data
+USE data_files,       ONLY : fl_el_cons
+USE postscript_files, ONLY : flps_el_cons
+USE control_elastic_constants,  ONLY : lelastic_p
+USE control_pressure, ONLY : pmin, pmax
+USE mp_images,        ONLY : root_image, my_image_id
+USE io_global,        ONLY : ionode
+
+IMPLICIT NONE
+CHARACTER(LEN=256) :: gnu_filename, filenameps, filelastic
+INTEGER :: ierr, system
+
+IF ( my_image_id /= root_image ) RETURN
+IF (.NOT.lelastic_p) RETURN
+
+gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_macro_el_p"
+filenameps=TRIM(flps_el_cons)//".macro_el_p"//TRIM(flext)
+filelastic="elastic_constants/"//TRIM(fl_el_cons)//".macro_el_p_aver"
+
+CALL gnuplot_start(gnu_filename)
+
+CALL gnuplot_write_header(filenameps, pmin*ry_kbar, pmax*ry_kbar, &
+                                            0.0_DP, 0.0_DP, 1.0_DP, flext ) 
+CALL gnuplot_xlabel('p (kbar)', .FALSE.) 
+
+CALL gnuplot_set_fact(1.0_DP, .FALSE.) 
+CALL gnuplot_ylabel('Bulk modulus (B) (kbar)',.FALSE.)
+CALL gnuplot_write_file_mul_data(filelastic,1,2,'color_red',.TRUE.,.TRUE.,.FALSE.)
+
+CALL gnuplot_set_fact(1.0_DP, .FALSE.) 
+CALL gnuplot_ylabel('Young modulus (E) (kbar)',.FALSE.)
+CALL gnuplot_write_file_mul_data(filelastic,1,3,'color_red',.TRUE.,.TRUE.,.FALSE.)
+
+CALL gnuplot_set_fact(1.0_DP, .FALSE.) 
+CALL gnuplot_ylabel('Shear modulus (G) (kbar)',.FALSE.)
+CALL gnuplot_write_file_mul_data(filelastic,1,4,'color_red',.TRUE.,.TRUE.,.FALSE.)
+
+CALL gnuplot_set_fact(1.0_DP, .FALSE.) 
+CALL gnuplot_ylabel('Poisson ratio ({/Symbol n})',.FALSE.)
+CALL gnuplot_write_file_mul_data(filelastic,1,5,'color_red',.TRUE.,.TRUE.,.FALSE.)
+
+CALL gnuplot_ylabel('B, E, G (kbar)',.FALSE.)
+CALL gnuplot_write_file_mul_data(filelastic,1,2,'color_red',.TRUE.,&
+                                                            .FALSE.,.FALSE.)
+CALL gnuplot_write_file_mul_data(filelastic,1,3,'color_blue',.FALSE.,&
+                                                            .FALSE.,.FALSE.)
+CALL gnuplot_write_file_mul_data(filelastic,1,4,'color_green',.FALSE.,&
+                                                            .TRUE.,.FALSE.)
+
+CALL gnuplot_end()
+
+IF (lgnuplot.AND.ionode) &
+   ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+
+!IF (lgnuplot.AND.ionode) &
+!   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
+!                                       //TRIM(gnu_filename), WAIT=.FALSE.)
+
+RETURN
+END SUBROUTINE plot_macro_elastic_t1
+!
+!---------------------------------------------------------------------
+SUBROUTINE plot_sound_speed_t1()
+!---------------------------------------------------------------------
+!
+!  This is a driver to plot the speed of sounds as a 
+!  function of pressure
+!
+USE kinds,            ONLY : DP
+USE constants,        ONLY : ry_kbar
+USE control_gnuplot,  ONLY : flgnuplot, gnuplot_command, lgnuplot, flext
+USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,           &
+                             gnuplot_write_header, gnuplot_xlabel, &
+                             gnuplot_set_fact, gnuplot_ylabel,     &
+                             gnuplot_write_file_mul_data
+USE data_files,       ONLY : fl_el_cons
+USE postscript_files, ONLY : flps_el_cons
+USE control_elastic_constants,  ONLY : lelastic_p
+USE control_pressure, ONLY : pmin, pmax
+USE mp_images,        ONLY : root_image, my_image_id
+USE io_global,        ONLY : ionode
+
+IMPLICIT NONE
+CHARACTER(LEN=256) :: gnu_filename, filenameps, filelastic
+INTEGER :: ierr, system
+
+IF ( my_image_id /= root_image ) RETURN
+IF (.NOT.lelastic_p) RETURN
+
+gnu_filename="gnuplot_files/"//TRIM(flgnuplot)//"_sound_vel_p"
+filenameps=TRIM(flps_el_cons)//".sound_vel_p"//TRIM(flext)
+filelastic="elastic_constants/"//TRIM(fl_el_cons)//".sound_vel_p"
+
+CALL gnuplot_start(gnu_filename)
+
+CALL gnuplot_write_header(filenameps, pmin*ry_kbar, pmax*ry_kbar, &
+                                            0.0_DP, 0.0_DP, 1.0_DP, flext ) 
+CALL gnuplot_xlabel('p (kbar)', .FALSE.) 
+
+CALL gnuplot_set_fact(1.D-3, .FALSE.) 
+CALL gnuplot_ylabel(' V_P (km/sec)',.FALSE.)
+CALL gnuplot_write_file_mul_data(filelastic,1,2,'color_red',.TRUE.,.TRUE.,.FALSE.)
+
+CALL gnuplot_set_fact(1.D-3, .FALSE.) 
+CALL gnuplot_ylabel('V_B (km/sec)',.FALSE.)
+CALL gnuplot_write_file_mul_data(filelastic,1,3,'color_red',.TRUE.,.TRUE.,.FALSE.)
+
+CALL gnuplot_set_fact(1.D-3, .FALSE.) 
+CALL gnuplot_ylabel('V_S (km/sec)',.FALSE.)
+CALL gnuplot_write_file_mul_data(filelastic,1,4,'color_red',.TRUE.,.TRUE.,.FALSE.)
+!
+!   All three speeds in the same plot.
+!
+CALL gnuplot_set_fact(1.D-3, .FALSE.) 
+CALL gnuplot_ylabel('V_P, V_B, V_S (km/sec)',.FALSE.)
+CALL gnuplot_write_file_mul_data(filelastic,1,2,'color_red',.TRUE.,&
+                                                            .FALSE.,.FALSE.)
+CALL gnuplot_write_file_mul_data(filelastic,1,3,'color_blue',.FALSE.,&
+                                                            .FALSE.,.FALSE.)
+CALL gnuplot_write_file_mul_data(filelastic,1,4,'color_green',.FALSE.,&
+                                                            .TRUE.,.FALSE.)
+
+CALL gnuplot_end()
+
+IF (lgnuplot.AND.ionode) &
+   ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
+
+!IF (lgnuplot.AND.ionode) &
+!   CALL EXECUTE_COMMAND_LINE(TRIM(gnuplot_command)//' '&
+!                                       //TRIM(gnu_filename), WAIT=.FALSE.)
+
+RETURN
+END SUBROUTINE plot_sound_speed_t1
