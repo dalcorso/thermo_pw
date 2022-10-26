@@ -34,6 +34,9 @@ join_qe:
 	if test -f ./QESUB/write_upf_new.f90 ; then \
            mv ../upflib/write_upf_new.f90 ./QESUB/write_upf_new.f90_qe ; \
            mv ./QESUB/write_upf_new.f90 ../upflib/write_upf_new.f90 ; fi
+	if test -f ./QESUB/qexsd_init.f90 ; then \
+           mv ../Modules/qexsd_init.f90 ./QESUB/qexsd_init.f90_qe ; \
+           mv ./QESUB/qexsd_init.f90 ../Modules/qexsd_init.f90 ; fi
 leave_qe:
 	if test -f ./Makefile_qe ; then mv ../Makefile ./main_Makefile ; \
            mv ./Makefile_qe ../Makefile ; fi
@@ -54,6 +57,9 @@ leave_qe:
 	if test -f ./QESUB/write_upf_new.f90_qe ; then \
            mv ../upflib/write_upf_new.f90 ./QESUB/write_upf_new.f90 ; \
            mv ./QESUB/write_upf_new.f90_qe ../upflib/write_upf_new.f90 ; fi
+	if test -f ./QESUB/qexsd_init.f90_qe ; then \
+           mv ../Modules/qexsd_init.f90 ./QESUB/qexsd_init.f90 ; \
+           mv ./QESUB/qexsd_init.f90_qe ../Modules/qexsd_init.f90 ; fi
 
 clean: thermo_tools_clean thermo_pw_clean thermo_lib_clean thermo_qe_clean examples_clean examples_qe_clean space_groups_clean doc_clean
 
