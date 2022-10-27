@@ -313,6 +313,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            IF (.NOT.lph) lpart2_pw=lel_free_energy
            lq2r = use_free_energy
            ltherm = use_free_energy
+           do_punch=use_free_energy
            CALL initialize_mur_qha(ngeom)
            IF (start_geometry_qha<1) start_geometry_qha=1
            IF (last_geometry_qha>ngeom) last_geometry_qha=ngeom

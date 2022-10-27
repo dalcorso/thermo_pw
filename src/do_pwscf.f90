@@ -49,6 +49,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   USE command_line_options, ONLY : command_line
   USE force_mod,            ONLY : sigma, force
   USE check_stop,           ONLY : check_stop_init, check_stop_now
+  USE control_pwrun,        ONLY : do_punch
   USE basis,                ONLY : starting_pot, starting_wfc, startingconfig
   USE mp_images,            ONLY : intra_image_comm
   USE extrapolation,        ONLY : update_file, update_pot
@@ -57,7 +58,7 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   USE fft_base,             ONLY : dfftp
   USE qmmm,                 ONLY : qmmm_initialization, qmmm_shutdown, &
                                    qmmm_update_positions, qmmm_update_forces
-  USE qexsd_module,         ONLY : qexsd_set_status
+  USE qexsd_module,         ONLY : qexsd_set_status, qexsd_reset_steps
   USE xc_lib,               ONLY : xclib_dft_is, stop_exx
   USE beef,                 ONLY : beef_energies
   USE ldaU,                 ONLY : lda_plus_u
@@ -293,7 +294,8 @@ SUBROUTINE do_pwscf ( exit_status, lscf_ )
   !
   CALL qexsd_set_status( exit_status )
   IF ( lensemb ) CALL beef_energies( )
-  IF ( io_level > -1 ) CALL punch( 'all' )
+  IF ( io_level > -1 .AND. do_punch) CALL punch( 'all' )
+  IF (.NOT. do_punch) CALL qexsd_reset_steps()
   !
   CALL qmmm_shutdown()
   !
