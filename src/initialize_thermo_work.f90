@@ -329,7 +329,14 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            energy_geo=0.0_DP
            no_ph=.FALSE.
            IF (elastic_algorithm=='advanced'.OR.elastic_algorithm=='energy') &
+                                                                          THEN
+              ALLOCATE(omega_geo(nwork))
+              DO iwork=1,nwork
+                 omega_geo(iwork)=compute_omega_geo(ibrav_geo(iwork), &
+                                  celldm_geo(:,iwork))
+              ENDDO
               CALL summarize_geometries(nwork)
+           ENDIF
            IF (use_free_energy) THEN
               CALL allocate_thermodynamics()
               CALL allocate_anharmonic()
