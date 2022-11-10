@@ -192,7 +192,8 @@ END SUBROUTINE beta_from_v
 SUBROUTINE b_from_v(v,press,npress,b)
 !-----------------------------------------------------------------------
 !
-!  Note: the bulk modulus in the first and last point is not computed
+!  Note: the bulk modulus in the first and last point is linearly 
+!  extrapolated
 !
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: npress
@@ -206,7 +207,10 @@ DO i=2,npress-1
   b(i) = -(v(i+1) - v(i-1)) / (press(i+1)-press(i-1)) / v(i)
   b(i) = 1.0_DP / b(i)
 ENDDO
-
+b(1)=b(2) + (b(3) - b(2)) * (press(1)-press(2))/ (press(3)-press(2)) 
+b(npress)=b(npress-1) + (b(npress-2) - b(npress-1)) *     &
+                        (press(npress)-press(npress-1))   &
+                      / (press(npress-2)-press(npress-1))
 RETURN
 END SUBROUTINE b_from_v
 !
