@@ -103,6 +103,14 @@ MODULE lattices
 
   DATA celldm_name / 'a=     ', 'b/a=   ', 'c/a=   ', &
                      'cos(a)=', 'cos(b)=', 'cos(c)=' /
+
+  CHARACTER(LEN=16) :: &
+           celldm_gnuplot_name(6)
+
+  DATA celldm_gnuplot_name / 'a (a.u.)        ', 'b/a             ',   &
+                             'c/a             ',                       &
+                             'cos({/Symbol a})', 'cos({/Symbol b})',   &
+                             'cos({/Symbol c})' /
                      
   PUBLIC compute_conventional, find_ibrav_code, find_combination,      &
          is_bravais_lattice, same_lattice, lattice_point_group,        &
@@ -110,7 +118,7 @@ MODULE lattices
          zone_border, same_star, is_compatible_group_ibrav,            &
          bravais_dir, print_bravais_description, crystal_parameters,   &
          compress_celldm, expand_celldm, compress_int_vect, needed_celldm, &
-         celldm_name
+         celldm_name, celldm_gnuplot_name
 
 CONTAINS
 
