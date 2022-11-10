@@ -16,8 +16,15 @@ MODULE nye
   PRIVATE
   SAVE
 
+  CHARACTER(LEN=16) :: thermal_gnuplot_name(6)
+
+  DATA  thermal_gnuplot_name / '{/Symbol a}_{xx}', '{/Symbol a}_{yy}',  &
+                               '{/Symbol a}_{zz}', '{/Symbol a}_{yz}',  &
+                               '{/Symbol a}_{xz}', '{/Symbol a}_{xy}'   /
+
   PUBLIC print_vectors_shape, print_tensor2_shape, print_piezo_shape, &
-         print_el_cons_shape, print_b_fact_shape
+         print_el_cons_shape, print_b_fact_shape, thermal_gnuplot_name, &
+         needed_tensor2
 
 CONTAINS
 
@@ -192,6 +199,61 @@ END SELECT
 
 RETURN
 END SUBROUTINE print_tensor2_shape
+
+!--------------------------------------------------------------------
+SUBROUTINE needed_tensor2(ibrav, tensor_in_use)
+!--------------------------------------------------------------------
+
+USE io_global, ONLY : stdout
+
+IMPLICIT NONE
+
+INTEGER, INTENT(IN) :: ibrav
+LOGICAL, INTENT(INOUT) :: tensor_in_use(6)   ! use Voigt notation
+
+tensor_in_use=.FALSE.
+tensor_in_use(1)=.TRUE.
+SELECT CASE (ibrav)
+   CASE(1,2,3)
+!
+!  cubic case, only alpha_xx is printed
+!
+   CASE(4,5,6,7)  
+!
+!  hexagonal, trigonal, tetragonal
+!
+      tensor_in_use(3)=.TRUE.
+   CASE(8,9,10,11)  
+!
+!  orthorhombic
+!
+      tensor_in_use(2)=.TRUE.
+      tensor_in_use(3)=.TRUE.
+   CASE(12,13)  
+!
+!   monoclinic unique c
+!
+      tensor_in_use(2)=.TRUE.
+      tensor_in_use(3)=.TRUE.
+      tensor_in_use(6)=.TRUE.
+   CASE(-12,-13)  
+!
+!   monoclinic unique b
+!
+      tensor_in_use(2)=.TRUE.
+      tensor_in_use(3)=.TRUE.
+      tensor_in_use(5)=.TRUE.
+   CASE(14,0)  
+!
+!  triclinc, all printed 
+!
+      tensor_in_use=.TRUE.
+   CASE DEFAULT 
+END SELECT
+
+RETURN
+END SUBROUTINE needed_tensor2
+
 
 !--------------------------------------------------------------------
 SUBROUTINE print_piezo_shape(code_group, ibrav)
