@@ -9,8 +9,8 @@
 SUBROUTINE write_anhar_anis()
 !-----------------------------------------------------------------------
 !
-!   This routine computes the thermal expansion tensor for anisotropic
-!   solids.
+!   This routine computes the thermal expansion tensor and other
+!   related quantities for anisotropic solids. (phdos solids)
 !
 USE kinds,          ONLY : DP
 USE temperature,    ONLY : ntemp, temp
@@ -24,14 +24,14 @@ USE anharmonic,     ONLY : alpha_anis_t, vmin_t, b0_t, celldm_t, beta_t, &
                            entropy_t, b0_s, cpmce_anis, el_cons_t, el_comp_t, &
                            free_e_min_t, bths_t, ggamma_t, &
                            bfact_t, el_cons_s, el_comp_s, macro_el_t, &
-                           macro_el_s, v_t, v_s
+                           macro_el_s, v_t, v_s, density_t, csmct_t
 USE initial_conf,   ONLY : ibrav_save
 USE control_thermo, ONLY : with_eigen
 USE control_eldos,  ONLY : lel_free_energy
 USE control_elastic_constants, ONLY : lelastic
 USE elastic_constants, ONLY : compute_elastic_compliances, &
-                              write_el_cons_on_file, print_macro_elasticity,  &                 
-                              write_macro_el_on_file, print_sound_velocities, & 
+                              write_el_cons_on_file, print_macro_elasticity, &
+                              write_macro_el_on_file, print_sound_velocities,& 
                               write_sound_on_file
 USE isoentropic,    ONLY : isostress_heat_capacity, thermal_stress,      &
                            gen_average_gruneisen, isoentropic_elastic_constants
@@ -44,7 +44,7 @@ IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
 INTEGER :: itemp, iu_therm, ibrav
 INTEGER :: find_free_unit
-REAL(DP) :: compute_omega_geo, csmct(6,6,ntemp), density(ntemp)
+REAL(DP) :: compute_omega_geo
 
 REAL(DP) :: e0
 
@@ -54,7 +54,7 @@ CALL compute_alpha_anis(celldm_t, alpha_anis_t, temp, ntemp, ibrav_save)
 !
 DO itemp=1,ntemp
    vmin_t(itemp)=compute_omega_geo(ibrav_save, celldm_t(1,itemp))
-   CALL compute_density(vmin_t(itemp),density(itemp),.TRUE.)
+   CALL compute_density(vmin_t(itemp),density_t(itemp),.TRUE.)
 ENDDO
 !
 !  compute the volume thermal expansion as the derivative of the volume
@@ -95,10 +95,10 @@ IF (lelastic) THEN
    CALL compute_cv_bs_g(beta_t, vmin_t, b0_t, cv_t, cp_t, b0_s, gamma_t)
 
    CALL thermal_stress(el_cons_t,alpha_anis_t,bths_t,ntemp)
-   CALL gen_average_gruneisen(vmin_t,bths_t,cv_t,temp,ggamma_t,ntemp)
+   CALL gen_average_gruneisen(vmin_t,bths_t,cv_t,ggamma_t,ntemp)
 
-   CALL isoentropic_elastic_constants(vmin_t,bths_t,cv_t,temp,csmct,ntemp)
-   el_cons_s=el_cons_t + csmct
+   CALL isoentropic_elastic_constants(vmin_t,bths_t,cv_t,temp,csmct_t,ntemp)
+   el_cons_s=el_cons_t + csmct_t
    DO itemp=2, ntemp-1
       CALL compute_elastic_compliances(el_cons_s(:,:,itemp), &
                                                    el_comp_s(:,:,itemp))
@@ -110,7 +110,7 @@ IF (lelastic) THEN
                        el_comp_s(:,:,itemp), macro_el_s(:,itemp), .FALSE.)
 
       CALL print_sound_velocities(ibrav_save, el_cons_s(:,:,itemp), &
-           el_comp_s(:,:,itemp), density(itemp), v_s(1,itemp), v_s(2,itemp), &
+           el_comp_s(:,:,itemp), density_t(itemp), v_s(1,itemp), v_s(2,itemp),&
                                                       v_s(3,itemp),.TRUE.)
       !
       ! Compute macro-elasticity variables and sound velocities using 
@@ -122,7 +122,7 @@ IF (lelastic) THEN
                        el_comp_t(:,:,itemp), macro_el_t(:,itemp), .FALSE.)
 
       CALL print_sound_velocities(ibrav_save, el_cons_t(:,:,itemp), &
-           el_comp_t(:,:,itemp), density(itemp), v_t(1,itemp), v_t(2,itemp), &
+           el_comp_t(:,:,itemp), density_t(itemp), v_t(1,itemp), v_t(2,itemp),&
                                                    v_t(3,itemp),.TRUE.)
    ENDDO
 ENDIF
@@ -133,7 +133,7 @@ IF (meta_ionode) THEN
 !   here we write the anharmonic quantities calculated from the phonon dos
 !   on disk
 !
-   filename='anhar_files/'//flanhar
+   filename='anhar_files/'//TRIM(flanhar)
    CALL add_pressure(filename)
 
    CALL write_ener_beta(temp, vmin_t, free_e_min_t, beta_t, ntemp, filename)
@@ -145,7 +145,7 @@ IF (meta_ionode) THEN
    CALL add_pressure(filename)
 
    CALL write_alpha_anis(ibrav_save, celldm_t, alpha_anis_t, temp, ntemp, &
-                                                                   filename )
+                                                              filename, 0 )
 
    filename="anhar_files/"//TRIM(flanhar)//'.therm'
    CALL add_pressure(filename)
@@ -261,9 +261,9 @@ END SUBROUTINE write_anhar_anis
 SUBROUTINE write_ph_freq_anhar_anis()
 !-----------------------------------------------------------------------
 !
-!   This routine computes the thermal expansion tensor for anisotropic
-!   solids using the free energy calculated from direct integration of
-!   the phonon frequencies.
+!   This routine computes the thermal expansion tensor and other related
+!   quantities for anisotropic solids using the free energy calculated 
+!   from direct integration of the phonon frequencies.
 !
 USE kinds,          ONLY : DP
 USE temperature,    ONLY : ntemp, temp
@@ -278,7 +278,7 @@ USE ph_freq_anharmonic, ONLY : alphaf_anis_t, vminf_t, b0f_t, celldmf_t, &
                                cpmcef_anis, el_consf_t, el_compf_t, &
                                free_e_minf_t, bthsf_t, ggammaf_t, bfactf_t, &
                                el_consf_s, el_compf_s, macro_elf_t, &
-                               macro_elf_s, vf_s, vf_t
+                               macro_elf_s, vf_s, vf_t, densityf_t, csmctf_t
 USE control_elastic_constants, ONLY : lelasticf
 USE elastic_constants, ONLY : compute_elastic_compliances, &
                               write_el_cons_on_file, print_macro_elasticity, &
@@ -298,8 +298,7 @@ IMPLICIT NONE
 CHARACTER(LEN=256) :: filename
 INTEGER :: itemp, iu_therm
 INTEGER :: find_free_unit, ibrav
-REAL(DP) :: compute_omega_geo, el_con_t(6,6,ntemp), csmct(6,6,ntemp)
-REAL(DP) :: densityf(ntemp)
+REAL(DP) :: compute_omega_geo, el_con_t(6,6,ntemp)
 
 REAL(DP) :: e0
 
@@ -309,7 +308,7 @@ CALL compute_alpha_anis(celldmf_t, alphaf_anis_t, temp, ntemp, ibrav_save)
 !
 DO itemp=1,ntemp
    vminf_t(itemp)=compute_omega_geo(ibrav_save, celldmf_t(1,itemp))
-   CALL compute_density(vminf_t(itemp),densityf(itemp),.TRUE.)
+   CALL compute_density(vminf_t(itemp),densityf_t(itemp),.TRUE.)
 ENDDO
 !
 !  compute the volume thermal expansion as the derivative of the volume
@@ -349,10 +348,11 @@ IF (lelasticf) THEN
    cpf_t=cef_t+cpmcef_anis
    CALL compute_cv_bs_g(betaf_t, vminf_t, b0f_t, cvf_t, cpf_t, b0f_s, gammaf_t)
    CALL thermal_stress(el_consf_t,alphaf_anis_t,bthsf_t,ntemp)
-   CALL gen_average_gruneisen(vminf_t,bthsf_t,cvf_t,temp,ggammaf_t,ntemp)
+   CALL gen_average_gruneisen(vminf_t,bthsf_t,cvf_t,ggammaf_t,ntemp)
 
-   CALL isoentropic_elastic_constants(vminf_t,bthsf_t,cvf_t,temp,csmct,ntemp)
-   el_consf_s=el_consf_t + csmct
+   CALL isoentropic_elastic_constants(vminf_t,bthsf_t,cvf_t,temp,csmctf_t,&
+                                                                     ntemp)
+   el_consf_s=el_consf_t + csmctf_t
    DO itemp=2, ntemp-1
       CALL compute_elastic_compliances(el_consf_s(:,:,itemp), &
                                                         el_compf_s(:,:,itemp))
@@ -363,7 +363,7 @@ IF (lelasticf) THEN
                          el_compf_s(:,:,itemp), macro_elf_s(:,itemp), .FALSE.)
 
       CALL print_sound_velocities(ibrav_save, el_consf_s(:,:,itemp), &
-           el_compf_s(:,:,itemp), densityf(itemp), vf_s(1,itemp),    &
+           el_compf_s(:,:,itemp), densityf_t(itemp), vf_s(1,itemp),    &
            vf_s(2,itemp), vf_s(3,itemp), .TRUE.)
 
 
@@ -374,7 +374,7 @@ IF (lelasticf) THEN
                           el_compf_t(:,:,itemp), macro_elf_t(:,itemp), .FALSE.)
 
       CALL print_sound_velocities(ibrav_save, el_consf_t(:,:,itemp), &
-           el_compf_t(:,:,itemp), densityf(itemp), vf_t(1,itemp),    &
+           el_compf_t(:,:,itemp), densityf_t(itemp), vf_t(1,itemp),    &
            vf_t(2,itemp), vf_t(3,itemp), .TRUE.)
 
    ENDDO
@@ -399,7 +399,7 @@ IF (meta_ionode) THEN
    CALL add_pressure(filename)
 
    CALL write_alpha_anis(ibrav_save, celldmf_t, alphaf_anis_t, temp, ntemp, &
-                                                                  filename)
+                                                               filename, 0)
 
    filename="anhar_files/"//TRIM(flanhar)//'.therm_ph'
    CALL add_pressure(filename)
@@ -512,9 +512,14 @@ END IF
 
 RETURN
 END SUBROUTINE write_ph_freq_anhar_anis
+!
 !-----------------------------------------------------------------------
 SUBROUTINE write_grun_anhar_anis()
 !-----------------------------------------------------------------------
+!
+!  This routine computes the thermal expansion and other related quantities
+!  using the Gruneisen parameters.
+!
 USE kinds,          ONLY : DP
 USE constants,      ONLY : ry_kbar
 USE ions_base,      ONLY : nat
@@ -717,7 +722,7 @@ IF (meta_ionode) THEN
    CALL add_pressure(filename)
 
    CALL write_alpha_anis(ibrav, celldm_grun_t, alpha_an_g, temp, ntemp, &
-                                                                filename )
+                                                                filename, 0 )
 !
 !  Here the average Gruneisen parameter and the quantities that form it
 !
@@ -766,30 +771,574 @@ DEALLOCATE(x)
 
 RETURN
 END SUBROUTINE write_grun_anhar_anis
+!
+!-----------------------------------------------------------------------
+SUBROUTINE write_anhar_anis_pt()
+!-----------------------------------------------------------------------
+!
+!   This routine computes the thermal expansion tensor and other related
+!   quantities for anisotropic solids as a function of temperature 
+!   for several pressures.
+!
+USE kinds,          ONLY : DP
+USE temperature,    ONLY : ntemp, temp, itemp300
+USE thermo_sym,     ONLY : laue
+USE thermodynamics, ONLY : ph_e0
+USE anharmonic_pt,  ONLY : alpha_anis_pt, vmin_pt, b0_pt, celldm_pt, beta_pt, &
+                           gamma_pt, cv_pt, ce_pt, cp_pt, ener_pt, &
+                           free_ener_pt, entr_pt, b0_s_pt, &
+                           cpmce_anis_pt, el_cons_pt, el_comp_pt, &
+                           emin_pt, bths_pt, ggamma_pt, &
+                           el_cons_pt, el_cons_s_pt, el_comp_pt, &
+                           el_comp_s_pt, macro_el_pt, macro_el_s_pt, &
+                           v_pt, v_s_pt, density_pt, csmct_pt
+USE initial_conf,   ONLY : ibrav_save
+USE control_eldos,  ONLY : lel_free_energy
+USE control_elastic_constants, ONLY : lelastic
+USE control_pressure, ONLY : press, npress_plot, ipress_plot
+USE elastic_constants, ONLY : compute_elastic_compliances, &
+                              write_el_cons_on_file, print_macro_elasticity, &
+                              write_macro_el_on_file, print_sound_velocities,& 
+                              write_sound_on_file
+USE isoentropic,    ONLY : isostress_heat_capacity, thermal_stress,      &
+                           gen_average_gruneisen, isoentropic_elastic_constants
+USE data_files,     ONLY : flanhar
+USE io_global,      ONLY : meta_ionode
+
+IMPLICIT NONE
+CHARACTER(LEN=256) :: filename
+INTEGER :: itemp, ipress, ipressp, iu_therm
+INTEGER :: find_free_unit
+REAL(DP) :: compute_omega_geo, aux(ntemp)
+
+REAL(DP) :: e0
+
+DO ipressp=1, npress_plot
+   ipress=ipress_plot(ipressp)
+   CALL compute_alpha_anis(celldm_pt(:,:,ipressp), &
+                     alpha_anis_pt(:,:,:,ipressp), temp, ntemp, ibrav_save)
+!
+!  compute the volume as a function of temperature
+!
+   DO itemp=1,ntemp
+      vmin_pt(itemp,ipressp)=compute_omega_geo(ibrav_save, &
+                             celldm_pt(1,itemp,ipressp))
+      CALL compute_density(vmin_pt(itemp,ipressp), density_pt(itemp,ipressp),&
+                                                                     .FALSE.)
+      CALL interpolate_e0(vmin_pt(:,ipressp), celldm_pt(:,:,ipressp), &
+                                                                   ph_e0, e0)
+   ENDDO
+!
+!  compute the volume thermal expansion as the derivative of the volume
+!  with respect to temperature
+!
+   CALL compute_beta(vmin_pt(:,ipressp), beta_pt(:,ipressp), temp, ntemp)
+
+
+   IF (lelastic) THEN
+      CALL isostress_heat_capacity(vmin_pt(:,ipressp), &
+            el_cons_pt(:,:,:,ipressp), alpha_anis_pt(:,:,:,ipressp), &
+            temp, cpmce_anis_pt(:,ipressp),ntemp)
+      cp_pt(:,ipressp)=ce_pt(:,ipressp)+cpmce_anis_pt(:,ipressp)
+      CALL compute_cv_bs_g(beta_pt(:,ipressp), vmin_pt(:,ipressp), &
+          b0_pt(:,ipressp), cv_pt(:,ipressp), cp_pt(:,ipressp), &
+          b0_s_pt(:,ipressp), gamma_pt(:,ipressp))
+
+      CALL thermal_stress(el_cons_pt(:,:,:,ipressp),&
+                   alpha_anis_pt(:,:,:,ipressp), bths_pt(:,:,:,ipressp),ntemp)
+      CALL gen_average_gruneisen(vmin_pt(:,ipressp),bths_pt(:,:,:,ipressp), &
+                         cv_pt(:,ipressp),ggamma_pt(:,:,:,ipressp),ntemp)
+      CALL isoentropic_elastic_constants(vmin_pt(:,ipressp), &
+                    bths_pt(:,:,:,ipressp),cv_pt(:,ipressp),temp,&
+                                           csmct_pt(:,:,:,ipressp),ntemp)
+      el_cons_s_pt(:,:,:,ipressp)=el_cons_pt(:,:,:,ipressp) + &
+                                    csmct_pt(:,:,:,ipressp)
+      DO itemp=2, ntemp-1
+         CALL compute_elastic_compliances(el_cons_s_pt(:,:,itemp,ipressp), &
+                                         el_comp_s_pt(:,:,itemp,ipressp))
+     !
+     ! Compute macro-elasticity variables and sound velocities using adiabatic 
+     ! elastic constants end elastic compliances just computed vs. temperature 
+     !
+         CALL print_macro_elasticity(ibrav_save, el_cons_s_pt(:,:,itemp,&
+              ipressp),el_comp_s_pt(:,:,itemp,ipressp), &
+              macro_el_s_pt(:,itemp,ipressp), .FALSE.)
+
+         CALL print_sound_velocities(ibrav_save, &
+              el_cons_s_pt(:,:,itemp,ipressp),   &
+              el_comp_s_pt(:,:,itemp,ipressp), density_pt(itemp,ipressp), &
+              v_s_pt(1,itemp,ipressp), v_s_pt(2,itemp,ipressp), &
+                                           v_s_pt(3,itemp,ipressp),.TRUE.)
+      !
+      ! Compute macro-elasticity variables and sound velocities using 
+      ! isothermal 
+      ! elastic constants and elastic compliances vs. temperature computed in 
+      ! previous routines (set_elastic_constant_t and write_elastic_t_qha).
+      !
+         CALL print_macro_elasticity(ibrav_save, &
+           el_cons_pt(:,:,itemp,ipressp), el_comp_pt(:,:,itemp,ipressp), &
+           macro_el_pt(:,itemp,ipressp),.FALSE.)
+
+         CALL print_sound_velocities(ibrav_save, &
+           el_cons_pt(:,:,itemp,ipressp), el_comp_pt(:,:,itemp,ipressp), &
+           density_pt(itemp,ipressp),                    &
+           v_pt(1,itemp,ipressp), v_pt(2,itemp,ipressp), &
+           v_pt(3,itemp,ipressp), .TRUE.)
+      ENDDO
+   ENDIF
+
+   IF (itemp300 > 0) THEN
+      aux(:)=vmin_pt(:,ipressp)/vmin_pt(itemp300,ipressp)
+   ELSE
+      aux(:)=vmin_pt(:,ipressp)
+   ENDIF
+
+   IF (meta_ionode) THEN
+!
+!   here we write the anharmonic quantities calculated from the phonon dos
+!   on disk
+!
+      filename='anhar_files/'//TRIM(flanhar)//'.press'
+      CALL add_value(filename, press(ipress))
+
+      CALL write_ener_beta_vol(temp, vmin_pt(:,ipressp), aux(:), &
+                  emin_pt(:,ipressp), beta_pt(:,ipressp), ntemp, filename)
+
+!
+!  Here we write on output the celldm parameters and their derivative
+!  with respect to temperature. 
+!
+      filename='anhar_files/'//TRIM(flanhar)//'.celldm_press'
+      CALL add_value(filename,press(ipress))
+
+      CALL write_alpha_anis(ibrav_save, celldm_pt(:,:,ipressp), &
+                 alpha_anis_pt(:,:,:,ipressp), temp, ntemp, filename, 0 )
+
+      filename="anhar_files/"//TRIM(flanhar)//'.therm_press'
+      CALL add_value(filename,press(ipress))
+      CALL write_thermo_anharm(temp, ntemp, e0, ener_pt(:,ipressp), &
+           free_ener_pt(:,ipressp), entr_pt(:,ipressp), ce_pt(:,ipressp), &
+                                                          filename )
+!
+!   here auxiliary quantities calculated from the phonon dos
+!
+      IF (lelastic) THEN
+      !
+      !   here the bulk modulus and the gruneisen parameter
+      !
+         filename="anhar_files/"//TRIM(flanhar)//'.bulk_press'
+         CALL add_value(filename,press(ipress))
+
+         CALL write_bulk_anharm(temp, b0_pt(:,ipressp), b0_s_pt(:,ipressp), &
+                                                        ntemp, filename)
+!
+!   the heat capacities
+!
+         filename="anhar_files/"//TRIM(flanhar)//'.heat_press'
+         CALL add_value(filename,press(ipress))
+
+         CALL write_heat_anhar(temp, ce_pt(:,ipressp), cv_pt(:,ipressp), &
+                     cp_pt(:,ipressp), ntemp, filename)
+
+!  Here we write on output the anharmonic properties computed for
+!  anisotropic solids, using the thermal expansion tensor, as opposed
+!  to the volume thermal expansion used in the file heat
+!
+         filename='anhar_files/'//TRIM(flanhar)//'.heat_anis.press'
+         CALL add_value(filename,press(ipress))
+         CALL write_heat_anhar_anis(temp, ce_pt(:,ipressp), cv_pt(:,ipressp),&
+                                          cp_pt(:,ipressp), ntemp, filename)
+!
+!   Here the thermal stresses
+!
+         filename='anhar_files/'//TRIM(flanhar)//'.tstress_press'
+         CALL add_value(filename,press(ipress))
+         CALL write_thermal_stress(temp, bths_pt(:,:,:,ipressp), ntemp, &
+                                                                  filename)
+!
+!   Here the average Gruneisen paramater and the quantities that contribute
+!   to it
+!
+         filename='anhar_files/'//TRIM(flanhar)//'.gamma_press'
+         CALL add_value(filename,press(ipress))
+         CALL write_gamma_anharm(temp, gamma_pt(:,ipressp), cv_pt(:,ipressp),&
+                   beta_pt(:,ipressp), b0_pt(:,ipressp), ntemp, filename)
+!
+!   Here the generalized Gruneisen parameters
+!
+         filename='anhar_files/'//TRIM(flanhar)//'.ggamma_press'
+         CALL add_value(filename,press(ipress))
+         CALL write_generalized_gamma(temp, ggamma_pt(:,:,:,ipressp), ntemp, &
+                                                                  filename)
+      ELSE
+!
+!   only the interpolated heat capacity is available
+!
+         filename="anhar_files/"//TRIM(flanhar)//'.heat_press'
+         CALL add_value(filename,press(ipress))
+         CALL write_heat_anhar_small(temp, ce_pt(:,ipressp), ntemp, filename)
+      ENDIF
+   ENDIF
+   IF (lelastic) THEN
+!
+!   Here the elastic constants at constant entropy
+!
+      filename='anhar_files/'//TRIM(flanhar)//'.el_cons_s_press'
+      CALL add_value(filename,press(ipress))
+      CALL write_el_cons_on_file(temp, ntemp, ibrav_save, laue,          &
+                 el_cons_s_pt(:,:,:,ipressp), b0_s_pt(:,ipressp), &
+                 filename, 0)
+!
+!  and here the elastic compliances
+!
+      filename='anhar_files/'//TRIM(flanhar)//'.el_comp_s_press'
+      CALL add_value(filename,press(ipress))
+      CALL write_el_cons_on_file(temp, ntemp, ibrav_save, laue, &
+           el_comp_s_pt(:,:,:,ipressp), b0_s_pt(:,ipressp), filename, 1)
+!
+!   Isothermal macro-elasticity variables
+!
+      filename='anhar_files/'//TRIM(flanhar)//'.macro_el_press'
+      CALL add_value(filename,press(ipress))
+      CALL write_macro_el_on_file(temp, ntemp, macro_el_pt(:,:,ipressp), &
+                                                               filename, 0)
+!
+!   Adiabatic macro-elasticity variables
+!
+      filename='anhar_files/'//TRIM(flanhar)//'.macro_el_s_press'
+      CALL add_value(filename,press(ipress))
+      CALL write_macro_el_on_file(temp, ntemp, macro_el_s_pt(:,:,ipressp), &
+                                                                 filename, 0)
+!
+!   Isothermal sound velocities
+!
+      filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_press'
+      CALL add_value(filename,press(ipress))
+      CALL write_sound_on_file(temp, ntemp, v_pt(:,:,ipressp), filename, 0)
+!
+!   Adiabatic sound velocities
+!
+      filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_s_press'
+      CALL add_value(filename,press(ipress))
+      CALL write_sound_on_file(temp, ntemp, v_s_pt(:,:,ipressp), filename, 0)
+   ENDIF
+ENDDO
+
+RETURN
+END SUBROUTINE write_anhar_anis_pt
 
 !-----------------------------------------------------------------------
-SUBROUTINE write_alpha_anis(ibrav, celldmf_t, alpha_t, temp, ntemp, filename)
+SUBROUTINE write_anhar_anis_ptt()
 !-----------------------------------------------------------------------
+!
+!   This routine computes the thermal expansion tensor and other 
+!   related quantities for anisotropic solids as a function of pressure
+!   for selected pressures.
+!
+USE kinds,          ONLY : DP
+USE temperature,    ONLY : ntemp, temp, itemp300
+USE thermo_sym,     ONLY : laue
+USE thermodynamics, ONLY : ph_e0
+USE anharmonic,     ONLY : noelcvg, vmin_t
+USE anharmonic_ptt, ONLY : vmin_ptt, vmin_ptt_p1, vmin_ptt_m1, &
+                           alpha_anis_ptt, celldm_ptt, celldm_ptt_p1, & 
+                           celldm_ptt_m1, beta_ptt, el_cons_ptt,      &
+                           cpmce_anis_ptt, cp_ptt, ce_ptt, cv_ptt, b0_ptt, &
+                           b0_s_ptt, gamma_ptt, bths_ptt, ggamma_ptt, &
+                           el_cons_s_ptt, el_comp_s_ptt, macro_el_s_ptt, &
+                           el_cons_ptt, el_comp_ptt, macro_el_ptt, emin_ptt, &
+                           v_ptt, v_s_ptt, density_ptt, ener_ptt, &
+                           entr_ptt, csmct_ptt
+USE el_anharmonic,  ONLY : el_ce_ptt
+USE control_eldos,  ONLY : lel_free_energy
+USE initial_conf,   ONLY : ibrav_save
+USE control_eldos,  ONLY : lel_free_energy
+USE control_elastic_constants, ONLY : lelastic
+USE control_pressure, ONLY : press, npress
+USE temperature,    ONLY : temp, ntemp_plot, itemp_plot
+USE elastic_constants, ONLY : compute_elastic_compliances, &
+                              write_el_cons_on_file, print_macro_elasticity, &
+                              write_macro_el_on_file, print_sound_velocities,& 
+                              write_sound_on_file
+USE isoentropic,    ONLY : isostress_heat_capacity, thermal_stress_p,      &
+                           gen_average_gruneisen_p,                        &
+                           isoentropic_elastic_constants_p
+USE data_files,     ONLY : flanhar
+USE io_global,      ONLY : meta_ionode
+
+IMPLICIT NONE
+CHARACTER(LEN=256) :: filename
+INTEGER :: itemp, ipress, ipressp, iu_therm
+INTEGER :: find_free_unit
+REAL(DP) :: compute_omega_geo, aux(npress)
+
+INTEGER  :: itempp
+REAL(DP) :: e0_p(npress)
+LOGICAL  :: subtract_el
+
+DO itempp=1, ntemp_plot
+   itemp=itemp_plot(itempp)
+   CALL compute_alpha_anis_p(celldm_ptt(:,:,itempp), &
+                     celldm_ptt_p1(:,:,itempp), celldm_ptt_m1(:,:,itempp), &
+                     alpha_anis_ptt(:,:,:,itempp), press, npress, ibrav_save)
+!
+!  compute the volume as a function of temperature
+!
+   DO ipress=1,npress
+      vmin_ptt(ipress,itempp)=compute_omega_geo(ibrav_save, &
+                             celldm_ptt(1,ipress,itempp))
+      CALL compute_density(vmin_ptt(ipress,itempp), &
+                           density_ptt(ipress,itempp),.FALSE.)
+      CALL interpolate_e0_p(vmin_ptt(:,itempp), celldm_ptt(:,:,itempp), &
+                                                            ph_e0, e0_p)
+      vmin_ptt_p1(ipress,itempp)=compute_omega_geo(ibrav_save, &
+                             celldm_ptt_p1(1,ipress,itempp))
+      vmin_ptt_m1(ipress,itempp)=compute_omega_geo(ibrav_save, &
+                             celldm_ptt_m1(1,ipress,itempp))
+   ENDDO
+!
+!  compute the volume thermal expansion as the derivative of the volume
+!  with respect to temperature
+!
+   CALL compute_beta_p(vmin_ptt(:,itempp), vmin_ptt_p1(:,itempp), &
+                       vmin_ptt_m1(:,itempp), beta_ptt(:,itempp), &
+                       press, npress)
+
+   IF (lelastic) THEN
+      CALL isostress_heat_capacity(vmin_ptt(:,itempp),               &
+            el_cons_ptt(:,:,:,itempp), alpha_anis_ptt(:,:,:,itempp), &
+            temp, cpmce_anis_ptt(:,itempp),npress)
+      cp_ptt(:,itempp)=ce_ptt(:,itempp)+cpmce_anis_ptt(:,itempp)
+      subtract_el=(lel_free_energy.AND.noelcvg)
+      CALL compute_cp_bs_gp(beta_ptt(:,itempp), vmin_ptt(:,itempp),   &
+          b0_ptt(:,itempp), cv_ptt(:,itempp), cp_ptt(:,itempp),       &
+          b0_s_ptt(:,itempp), gamma_ptt(:,itempp), el_ce_ptt, itemp,  &
+          subtract_el)
+
+      CALL thermal_stress_p(el_cons_ptt(:,:,:,itempp),                &
+                   alpha_anis_ptt(:,:,:,itempp), bths_ptt(:,:,:,itempp),npress)
+      CALL gen_average_gruneisen_p(vmin_ptt(:,itempp),bths_ptt(:,:,:,itempp), &
+                       cv_ptt(:,itempp),ggamma_ptt(:,:,:,itempp),npress)
+      CALL isoentropic_elastic_constants_p(vmin_ptt(:,itempp),        &
+            bths_ptt(:,:,:,itempp),cv_ptt(:,itempp),temp,             &
+                            csmct_ptt(:,:,:,itempp),ntemp, npress,itemp)
+      el_cons_s_ptt(:,:,:,itempp)=el_cons_ptt(:,:,:,itempp) + &
+                            csmct_ptt(:,:,:,itempp)
+      DO ipress=1, npress
+         CALL compute_elastic_compliances(el_cons_s_ptt(:,:,ipress,itempp), &
+                                          el_comp_s_ptt(:,:,ipress,itempp))
+     !
+     ! Compute macro-elasticity variables and sound velocities using adiabatic 
+     ! elastic constants end elastic compliances just computed vs. temperature 
+     !
+         CALL print_macro_elasticity(ibrav_save, el_cons_s_ptt(:,:,ipress,&
+              itempp),el_comp_s_ptt(:,:,ipress,itempp), &
+              macro_el_s_ptt(:,ipress,itempp), .FALSE.)
+
+         CALL print_sound_velocities(ibrav_save, &
+              el_cons_s_ptt(:,:,ipress,itempp),   &
+              el_comp_s_ptt(:,:,ipress,itempp), density_ptt(ipress,itempp), &
+              v_s_ptt(1,ipress,itempp), v_s_ptt(2,ipress,itempp), &
+                                           v_s_ptt(3,ipress,itempp),.TRUE.)
+     !
+     ! Compute macro-elasticity variables and sound velocities using 
+     ! isothermal 
+     ! elastic constants and elastic compliances vs. temperature computed in 
+     ! previous routines (set_elastic_constant_t and write_elastic_t_qha).
+     !
+         CALL print_macro_elasticity(ibrav_save, &
+           el_cons_ptt(:,:,ipress,itempp), el_comp_ptt(:,:,ipress,itempp), &
+           macro_el_ptt(:,ipress,itempp),.FALSE.)
+
+         CALL print_sound_velocities(ibrav_save, &
+           el_cons_ptt(:,:,ipress,itempp), el_comp_ptt(:,:,ipress,itempp), &
+           density_ptt(ipress,itempp),                    &
+           v_ptt(1,ipress,itempp), v_ptt(2,ipress,itempp), &
+           v_ptt(3,ipress,itempp), .TRUE.)
+      ENDDO
+   ENDIF
+
+   IF (itemp300 > 0) THEN
+      aux(:)=vmin_ptt(:,itempp)/vmin_t(itemp300)
+   ELSE
+      aux(:)=vmin_ptt(:,itempp)
+   ENDIF
+
+
+   IF (meta_ionode) THEN
+!
+!   here we write the anharmonic quantities calculated from the phonon dos
+!   on disk
+!
+      filename='anhar_files/'//TRIM(flanhar)//'.temp'
+      CALL add_value(filename, temp(itemp))
+
+      CALL write_ener_beta_ptt(press, vmin_ptt(:,itempp),  aux(:),         &
+                  emin_ptt(:,itempp), beta_ptt(:,itempp), npress, itemp, &
+                  filename)
+
+!
+!  Here we write on output the celldm parameters and their derivative
+!  with respect to temperature. 
+!
+      filename='anhar_files/'//TRIM(flanhar)//'.celldm_temp'
+      CALL add_value(filename,temp(itemp))
+
+      CALL write_alpha_anis(ibrav_save, celldm_ptt(:,:,itempp), &
+                 alpha_anis_ptt(:,:,:,itempp), press, npress, filename, 1)
+
+      filename="anhar_files/"//TRIM(flanhar)//'.therm_temp'
+      CALL add_value(filename,temp(itemp))
+      CALL write_thermo_anharm_p(press, npress, e0_p, ener_ptt(:,itempp), &
+           emin_ptt(:,itempp), entr_ptt(:,itempp), ce_ptt(:,itempp), &
+                                         temp, ntemp, itemp, filename )
+!
+!   here auxiliary quantities calculated from the phonon dos
+!
+      IF (lelastic) THEN
+      !
+      !   here the bulk modulus and the gruneisen parameter
+      !
+         filename="anhar_files/"//TRIM(flanhar)//'.bulk_temp'
+         CALL add_value(filename,temp(itemp))
+
+         CALL write_bulk_anharm_ptt(press, b0_ptt(:,itempp), &
+                               b0_s_ptt(:,itempp), npress, itemp, filename)
+!
+!   the heat capacities
+!
+         filename="anhar_files/"//TRIM(flanhar)//'.heat_temp'
+         CALL add_value(filename,temp(itemp))
+
+         CALL write_heat_anhar_t(press, ce_ptt(:,itempp), ce_ptt(:,itempp), &
+              cp_ptt(:,itempp), npress, itemp, filename)
+
+
+!  Here we write on output the anharmonic properties computed for
+!  anisotropic solids, using the thermal expansion tensor, as opposed
+!  to the volume thermal expansion used in the file heat
+!
+         filename='anhar_files/'//TRIM(flanhar)//'.heat_anis.temp'
+         CALL add_value(filename,temp(itemp))
+         CALL write_heat_anhar_anis_p(press, ce_ptt(:,itempp), &
+               cv_ptt(:,itempp), cp_ptt(:,itempp), npress, filename)
+!
+!   Here the thermal stresses
+!
+         filename='anhar_files/'//TRIM(flanhar)//'.tstress_temp'
+         CALL add_value(filename,temp(itemp))
+         CALL write_thermal_stress_p(press, bths_ptt(:,:,:,ipressp), npress, &
+                                                                  filename)
+!
+!   Here the average Gruneisen paramater and the quantities that contribute
+!   to it
+!
+         filename='anhar_files/'//TRIM(flanhar)//'.gamma_temp'
+         CALL add_value(filename,temp(itemp))
+         CALL write_gamma_anharm_t(press, gamma_ptt(:,itempp), &
+            ce_ptt(:,itempp), beta_ptt(:,itempp), b0_ptt(:,itempp), &
+                                           npress, itemp, filename)
+!
+!   Here the generalized Gruneisen parameters
+!
+         filename='anhar_files/'//TRIM(flanhar)//'.ggamma_temp'
+         CALL add_value(filename,temp(itemp))
+         CALL write_generalized_gamma_p(press, ggamma_ptt(:,:,:,itempp), &
+                                                          ntemp, filename)
+      ELSE
+!
+!   only the interpolated heat capacity is available
+!
+         filename="anhar_files/"//TRIM(flanhar)//'.heat_temp'
+         CALL add_value(filename,temp(itemp))
+         CALL write_heat_anhar_small_p(press, ce_ptt(:,itempp), &
+                                                        npress, filename)
+      ENDIF
+   ENDIF
+   IF (lelastic) THEN
+!
+!   Here the elastic constants at constant entropy
+!
+      filename='anhar_files/'//TRIM(flanhar)//'.el_cons_s_temp'
+      CALL add_value(filename,temp(itemp))
+      CALL write_el_cons_on_file(press, npress, ibrav_save, laue,          &
+                 el_cons_s_ptt(:,:,:,itempp), b0_s_ptt(:,itempp), &
+                 filename, 2)
+!
+!  and here the elastic compliances
+!
+      filename='anhar_files/'//TRIM(flanhar)//'.el_comp_s_temp'
+      CALL add_value(filename,temp(itemp))
+      CALL write_el_cons_on_file(press, npress, ibrav_save, laue, &
+           el_comp_s_ptt(:,:,:,itempp), b0_s_ptt(:,itempp), filename, 3)
+!
+!   Isothermal macro-elasticity variables
+!
+      filename='anhar_files/'//TRIM(flanhar)//'.macro_el_temp'
+      CALL add_value(filename,temp(itemp))
+      CALL write_macro_el_on_file(press, npress, macro_el_ptt(:,:,itempp), &
+                                                               filename, 1)
+!
+!   Adiabatic macro-elasticity variables
+!
+      filename='anhar_files/'//TRIM(flanhar)//'.macro_el_s_temp'
+      CALL add_value(filename,temp(itemp))
+      CALL write_macro_el_on_file(press, npress, macro_el_s_ptt(:,:,itempp), &
+                                                                 filename, 1)
+!
+!   Isothermal sound velocities
+!
+      filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_temp'
+      CALL add_value(filename,temp(itemp))
+      CALL write_sound_on_file(press, npress, v_ptt(:,:,itempp), filename, 1)
+!
+!   Adiabatic sound velocities
+!
+      filename='anhar_files/'//TRIM(flanhar)//'.sound_vel_s_temp'
+      CALL add_value(filename,temp(itemp))
+      CALL write_sound_on_file(press, npress, v_s_ptt(:,:,itempp), filename, 1)
+   ENDIF
+ENDDO
+
+RETURN
+END SUBROUTINE write_anhar_anis_ptt
+
+!-----------------------------------------------------------------------
+SUBROUTINE write_alpha_anis(ibrav, celldmf_t, alpha_t, temp, ntemp, &
+                                                         filename, flag)
+!-----------------------------------------------------------------------
+!
+!  This routine writes on file the thermal expansion tensor, as a function
+!  temperature (flag=0) or of pressure (flag=1)
+!
 USE kinds, ONLY : DP
 IMPLICIT NONE
-INTEGER, INTENT(IN) :: ibrav, ntemp
+INTEGER, INTENT(IN) :: ibrav, ntemp, flag
 REAL(DP), INTENT(IN) :: celldmf_t(6,ntemp), alpha_t(6,ntemp), temp(ntemp)
 CHARACTER(LEN=*), INTENT(IN) :: filename
+CHARACTER(LEN=256) :: label
 INTEGER :: itemp, iu_therm
 INTEGER :: find_free_unit
 
 iu_therm=find_free_unit()
 
+IF (flag==0) THEN
+   label='T (K)   '
+ELSE
+   label='p (kbar)'
+ENDIF
+
 OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
 
 IF (ibrav==1 .OR. ibrav==2 .OR. ibrav==3 ) THEN
-   WRITE(iu_therm,'("#   T (K)        celldm(1)         alpha_xx(x10^6)")' )
+   WRITE(iu_therm,'("# ",a,"        celldm(1)         alpha_xx(x10^6)")' ) &
+                   TRIM(label)
    DO itemp = 1, ntemp-1
       WRITE(iu_therm, '(e12.5,4e20.9)') temp(itemp), celldmf_t(1,itemp), &
                                             alpha_t(1,itemp)*1.D6
    END DO
 ELSEIF (ibrav==4 .OR. ibrav==6 .OR. ibrav==7 ) THEN
-   WRITE(iu_therm,'("#   T (K)         celldm(1)          celldm(3)          alpha_xx(x10^6)         alpha_zz (x10^6)")' )
+   WRITE(iu_therm,'("#  ",a,"      celldm(1)          celldm(3)          alpha_xx(x10^6)         alpha_zz (x10^6)")' ) TRIM(label)
    DO itemp = 1, ntemp-1
       WRITE(iu_therm, '(e12.5,4e20.9)') temp(itemp), celldmf_t(1,itemp), &
                                                      celldmf_t(3,itemp), &
@@ -797,7 +1346,7 @@ ELSEIF (ibrav==4 .OR. ibrav==6 .OR. ibrav==7 ) THEN
                                                      alpha_t(3,itemp)*1.D6
    END DO
 ELSEIF ( ibrav==5 ) THEN
-   WRITE(iu_therm,'("#   T (K)   celldm(1)   celldm(4)    alpha_xx(x10^6)   alpha_zz (x10^6)")' )
+   WRITE(iu_therm,'("#  ",a,"  celldm(1)   celldm(4)    alpha_xx(x10^6)   alpha_zz (x10^6)")' ) TRIM(label)
    DO itemp = 1, ntemp-1
       WRITE(iu_therm, '(e12.5,4e20.9)') temp(itemp), celldmf_t(1,itemp), &
                                                      celldmf_t(4,itemp), &
@@ -805,8 +1354,9 @@ ELSEIF ( ibrav==5 ) THEN
                                                      alpha_t(3,itemp)*1.D6
    END DO
 ELSEIF (ibrav==8 .OR. ibrav==9 .OR. ibrav==10 .OR. ibrav==11) THEN
-   WRITE(iu_therm,'("#   T (K)   celldm(1)     celldm(2)    celldm(3) &
-             &alpha_xx(x10^6)  alpha_yy(x10^6)   alpha_zz(x10^6)")' )
+   WRITE(iu_therm,'("# ",a,"     celldm(1)     celldm(2)    celldm(3) &
+             &alpha_xx(x10^6)  alpha_yy(x10^6)   alpha_zz(x10^6)")' ) &
+                               TRIM(label)
    DO itemp = 1, ntemp-1
       WRITE(iu_therm, '(e12.5,6e20.9)') temp(itemp), celldmf_t(1,itemp), &
                                                      celldmf_t(2,itemp), &
@@ -816,7 +1366,7 @@ ELSEIF (ibrav==8 .OR. ibrav==9 .OR. ibrav==10 .OR. ibrav==11) THEN
                                                      alpha_t(3,itemp)*1.D6  
    END DO
 ELSEIF (ibrav==12 .OR. ibrav==13) THEN
-   WRITE(iu_therm,'("#   T (K)       celldm(1)         celldm(2)        celldm(3)        celldm(4)")' )
+   WRITE(iu_therm,'("#  ",a,"       celldm(1)         celldm(2)        celldm(3)        celldm(4)")' ) TRIM(label)
    DO itemp = 1, ntemp
       WRITE(iu_therm, '(e12.5,4e17.9)') temp(itemp), celldmf_t(1,itemp), &
                                                      celldmf_t(2,itemp), &
@@ -824,7 +1374,7 @@ ELSEIF (ibrav==12 .OR. ibrav==13) THEN
                                                      celldmf_t(4,itemp)
    END DO
 ELSEIF (ibrav==-12 .OR. ibrav==-13) THEN
-   WRITE(iu_therm,'("#   T (K)       celldm(1)         celldm(2)        celldm(3)        celldm(5)")' )
+   WRITE(iu_therm,'("#  ",a,"      celldm(1)         celldm(2)        celldm(3)        celldm(5)")' ) TRIM(label)
    DO itemp = 1, ntemp
       WRITE(iu_therm, '(e12.5,4e17.9)') temp(itemp), celldmf_t(1,itemp), &
                                                      celldmf_t(2,itemp), &
@@ -832,8 +1382,8 @@ ELSEIF (ibrav==-12 .OR. ibrav==-13) THEN
                                                      celldmf_t(5,itemp)
    END DO
 ELSEIF (ibrav==14) THEN
-   WRITE(iu_therm,'("#   T (K)       celldm(1)         celldm(2)        &
-               &celldm(3)        celldm(4)        celldm(5)        celldm(6)")' )
+   WRITE(iu_therm,'("#   ",a,"       celldm(1)         celldm(2)        &
+               &celldm(3)        celldm(4)        celldm(5)        celldm(6)")' ) TRIM(label)
    DO itemp = 1, ntemp
       WRITE(iu_therm, '(e12.5,6e15.7)') temp(itemp), celldmf_t(1,itemp), &
                                                      celldmf_t(2,itemp), &
@@ -854,11 +1404,15 @@ CLOSE(iu_therm)
 
 RETURN
 END SUBROUTINE write_alpha_anis
-
+!
 !-----------------------------------------------------------------------
 SUBROUTINE compute_alpha_anis(celldm_t, alpha_anis_t, temp, ntemp, ibrav)
 !-----------------------------------------------------------------------
-
+!
+!  This routine computes the thermal expansion tensor from temperature
+!  derivatives of the crystal parameters. The input and output 
+!  quantities are function of temperature.
+!
 USE kinds, ONLY : DP
 
 IMPLICIT NONE
@@ -921,6 +1475,79 @@ END SELECT
 
 RETURN
 END SUBROUTINE compute_alpha_anis
+!
+!-----------------------------------------------------------------------
+SUBROUTINE compute_alpha_anis_p(celldm_ptt, celldm_p1, celldm_m1, &
+            alpha_anis_ptt, press, npress, ibrav)
+!-----------------------------------------------------------------------
+!
+!  This routine computes the thermal expansion tensor from temperature
+!  derivatives of the crystal parameters. The input and output 
+!  quantities are function of pressure. The input celldm are at temperature
+!  T celldm_ptt, T+dt celldm_p1, T-dt celldm_m1.
+!
+USE kinds, ONLY : DP
+USE temperature, ONLY : deltat
+
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: ibrav, npress
+REAL(DP), INTENT(IN) :: celldm_ptt(6,npress), celldm_p1(6,npress), &
+                        celldm_m1(6,npress), press(npress)
+REAL(DP), INTENT(INOUT) :: alpha_anis_ptt(6,npress)
+
+INTEGER :: ipress
+REAL(DP) :: fact1, fact2, deriv1, deriv2, dt
+
+alpha_anis_ptt=0.0_DP
+dt=2.0_DP * deltat
+SELECT CASE (ibrav) 
+   CASE(1,2,3) 
+      DO ipress = 1, npress
+         alpha_anis_ptt(1,ipress)=(celldm_p1(1,ipress)-celldm_m1(1,ipress))/ &
+                         dt / celldm_ptt(1,ipress)
+         alpha_anis_ptt(2,ipress) = alpha_anis_ptt(1,ipress)
+         alpha_anis_ptt(3,ipress) = alpha_anis_ptt(1,ipress)
+      END DO
+   CASE(4,6,7)
+      DO ipress = 1, npress
+         alpha_anis_ptt(1,ipress) = (celldm_p1(1,ipress)-celldm_m1(1,ipress))/&
+                         dt / celldm_ptt(1,ipress)
+         alpha_anis_ptt(2,ipress) = alpha_anis_ptt(1,ipress)
+         alpha_anis_ptt(3,ipress) = ( celldm_p1(3,ipress)*celldm_p1(1,ipress)-&
+                               celldm_m1(3,ipress)*celldm_m1(1,ipress) )/ &
+                               dt/(celldm_ptt(3,ipress)*celldm_ptt(1,ipress)) 
+      END DO
+   CASE(5)
+      DO ipress = 1, npress
+         fact1 = 2.0_DP * ( 1.0_DP - celldm_ptt(4,ipress) )
+         fact2 = 1.0_DP + 2.0_DP * celldm_ptt(4,ipress)
+         deriv1 = ( celldm_p1(1,ipress) - celldm_m1(1,ipress) ) / dt
+         deriv2 = ( celldm_p1(4,ipress) - celldm_m1(4,ipress))  / dt 
+         alpha_anis_ptt(1,ipress) = deriv1 / celldm_ptt(1, ipress) - &
+                                                        deriv2 / fact1 
+         alpha_anis_ptt(2,ipress) = alpha_anis_ptt(1,ipress)
+         alpha_anis_ptt(3,ipress) = deriv1 / celldm_ptt(1, ipress) + &
+                                    deriv2 / fact2
+      END DO
+   CASE (8,9,10,11)
+      DO ipress = 1, npress
+         alpha_anis_ptt(1,ipress) = (celldm_p1(1,ipress)-celldm_m1(1,ipress))/&
+                        dt / celldm_ptt(1,ipress)
+         alpha_anis_ptt(2,ipress) = ( celldm_p1(2,ipress)*celldm_p1(1,ipress)-&
+                               celldm_m1(2,ipress)*celldm_m1(1,ipress) )/ &
+                            dt/(celldm_ptt(2,ipress)*celldm_ptt(1,ipress)) 
+         alpha_anis_ptt(3,ipress) = ( celldm_p1(3,ipress)*celldm_p1(1,ipress)-&
+                                   celldm_m1(3,ipress)*celldm_m1(1,ipress) )/ &
+                         dt/(celldm_ptt(3,ipress)*celldm_ptt(1,ipress)) 
+      END DO
+   CASE DEFAULT
+! 
+!   In this case do nothing. The thermal expansion tensor is not written later
+!
+END SELECT
+
+RETURN
+END SUBROUTINE compute_alpha_anis_p
 
 !-----------------------------------------------------------------------
 SUBROUTINE convert_ac_alpha(alpha_aux, alpha, cm, ibrav)
@@ -975,10 +1602,11 @@ END SELECT
 
 RETURN
 END SUBROUTINE convert_ac_alpha
-
+!
 !-----------------------------------------------------------------------
 SUBROUTINE write_heat_anhar_anis(temp, cet, cvt, cpt, ntemp, filename)
 !-----------------------------------------------------------------------
+!
 USE kinds,     ONLY : DP
 USE io_global, ONLY : meta_ionode
 IMPLICIT NONE
@@ -1006,6 +1634,37 @@ ENDIF
 
 RETURN
 END SUBROUTINE write_heat_anhar_anis
+!
+!-----------------------------------------------------------------------
+SUBROUTINE write_heat_anhar_anis_p(press, cet, cvt, cpt, npress, filename)
+!-----------------------------------------------------------------------
+USE kinds,     ONLY : DP
+USE io_global, ONLY : meta_ionode
+IMPLICIT NONE
+INTEGER,  INTENT(IN) :: npress
+REAL(DP), INTENT(IN) :: press(npress), cet(npress), cvt(npress), cpt(npress)
+CHARACTER(LEN=*) :: filename
+
+INTEGER :: ipress, iu_therm
+INTEGER :: find_free_unit
+
+IF (meta_ionode) THEN
+   iu_therm=find_free_unit()
+   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
+
+   WRITE(iu_therm,'("# All heat capacities in (Ry/cell/K)")')
+   WRITE(iu_therm,'("# T (K)      (C_s-C_e)(T)              C_P(T) &
+                              &                C_V-C_e(T) ")')
+
+   DO ipress = 1, npress
+      WRITE(iu_therm, '(e12.5,3e22.13)') press(ipress), &
+                 cpt(ipress)-cet(ipress), cpt(ipress), cvt(ipress)-cet(ipress)
+   ENDDO
+   CLOSE(iu_therm)
+ENDIF
+
+RETURN
+END SUBROUTINE write_heat_anhar_anis_p
 
 !-----------------------------------------------------------------------
 SUBROUTINE write_heat_anhar_small(temp, cet, ntemp, filename)
@@ -1035,6 +1694,35 @@ ENDIF
 
 RETURN
 END SUBROUTINE write_heat_anhar_small
+!
+!-----------------------------------------------------------------------
+SUBROUTINE write_heat_anhar_small_p(press, ce_p, npress, filename)
+!-----------------------------------------------------------------------
+USE kinds,     ONLY : DP
+USE io_global, ONLY : meta_ionode
+IMPLICIT NONE
+INTEGER,  INTENT(IN) :: npress
+REAL(DP), INTENT(IN) :: press(npress), ce_p(npress)
+CHARACTER(LEN=*) :: filename
+
+INTEGER :: ipress, iu_therm
+INTEGER :: find_free_unit
+
+IF (meta_ionode) THEN
+   iu_therm=find_free_unit()
+   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
+
+   WRITE(iu_therm,'("# ")')
+   WRITE(iu_therm,'("# p (kbar)     C_e(T) (Ry/cell/K) ")')
+
+   DO ipress = 1, npress
+      WRITE(iu_therm, '(e12.5,e22.13)') press(ipress), ce_p(ipress)
+   ENDDO
+   CLOSE(iu_therm)
+ENDIF
+
+RETURN
+END SUBROUTINE write_heat_anhar_small_p
 
 !-----------------------------------------------------------------------
 SUBROUTINE write_thermal_stress(temp, bths_t, ntemp, filename)
@@ -1067,6 +1755,38 @@ ENDIF
 
 RETURN
 END SUBROUTINE write_thermal_stress
+!
+!-----------------------------------------------------------------------
+SUBROUTINE write_thermal_stress_p(press, bths_p, npress, filename)
+!-----------------------------------------------------------------------
+USE kinds,     ONLY : DP
+USE io_global, ONLY : meta_ionode
+IMPLICIT NONE
+INTEGER,  INTENT(IN) :: npress
+REAL(DP), INTENT(IN) :: press(npress), bths_p(3,3,npress)
+CHARACTER(LEN=*) :: filename
+
+INTEGER :: ipress, iu_therm
+INTEGER :: find_free_unit
+
+IF (meta_ionode) THEN
+   iu_therm=find_free_unit()
+   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
+
+   WRITE(iu_therm,'("# Thermal stresses in (kbar)      ")')
+   WRITE(iu_therm,'("# p (kbar)",5x," b_11", 9x," b_12", 9x," b_13", 9x,&
+                      &" b_22", 9x, " b_23", 9x, " b_33")')
+
+   DO ipress = 1, npress
+      WRITE(iu_therm, '(e12.5,6e14.6)') press(ipress), bths_p(1,1,ipress),   &
+                  bths_p(1,2,ipress), bths_p(1,3,ipress), bths_p(2,2,ipress),&
+                  bths_p(2,3,ipress), bths_p(3,3,ipress) 
+   ENDDO
+   CLOSE(iu_therm)
+ENDIF
+
+RETURN
+END SUBROUTINE write_thermal_stress_p
 
 !-----------------------------------------------------------------------
 SUBROUTINE write_generalized_gamma(temp, ggamma_t, ntemp, filename)
@@ -1100,11 +1820,44 @@ ENDIF
 
 RETURN
 END SUBROUTINE write_generalized_gamma
+!
+!-----------------------------------------------------------------------
+SUBROUTINE write_generalized_gamma_p(press, ggamma_p, npress, filename)
+!-----------------------------------------------------------------------
+USE kinds,     ONLY : DP
+USE io_global, ONLY : meta_ionode
 
+IMPLICIT NONE
+INTEGER,  INTENT(IN) :: npress
+REAL(DP), INTENT(IN) :: press(npress), ggamma_p(3,3,npress)
+CHARACTER(LEN=*) :: filename
+
+INTEGER :: ipress, iu_therm
+INTEGER :: find_free_unit
+
+IF (meta_ionode) THEN
+   iu_therm=find_free_unit()
+   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
+
+   WRITE(iu_therm,'("# Generalized Gruneisen parameter      ")')
+   WRITE(iu_therm,'("# p(kbar)",5x," g_11", 9x," g_12", 9x," g_13", 9x,&
+                       &" g_22", 9x, " g_23", 9x, " g_33")')
+
+   DO ipress = 1, npress
+      WRITE(iu_therm, '(e12.5,6e14.6)') press(ipress), ggamma_p(1,1,ipress),  &
+             ggamma_p(1,2,ipress), ggamma_p(1,3,ipress), ggamma_p(2,2,ipress),&
+             ggamma_p(2,3,ipress), ggamma_p(3,3,ipress) 
+   ENDDO
+   CLOSE(iu_therm)
+ENDIF
+
+RETURN
+END SUBROUTINE write_generalized_gamma_p
+!
 !-----------------------------------------------------------------------
 SUBROUTINE set_elastic_grun()
 !-----------------------------------------------------------------------
-
+!
 USE control_elastic_constants, ONLY : lelastic, lelasticf
 USE grun_anharmonic,    ONLY : el_cons_grun_t, el_comp_grun_t, lelastic_grun
 USE temperature,        ONLY : ntemp
@@ -1132,3 +1885,89 @@ ENDIF
 
 RETURN
 END SUBROUTINE set_elastic_grun
+!
+!-----------------------------------------------------------------------
+SUBROUTINE fit_free_energy_anis_t()
+  !-----------------------------------------------------------------------
+  !
+  !   This routine fits the vibrational free energy (plus possibly the
+  !   electronic one) with a polynomial of degree poly_degree_ph
+  !   at all temperatures.
+  !
+  !   The output of this routine are the polynomial coefficients
+  !   p2t_t, and one among p1t_t, p3t_t, or p4t_t depending on which is 
+  !   poly_degree_ph
+  !
+  USE kinds,       ONLY : DP
+  USE cell_base,   ONLY : ibrav
+  USE thermo_mod,  ONLY : celldm_geo, no_ph
+  USE control_quartic_energy, ONLY :  lquartic, poly_degree_ph, lsolve
+  USE temperature, ONLY : ntemp
+  USE thermodynamics,    ONLY : ph_free_ener
+  USE el_thermodynamics, ONLY : el_free_ener
+  USE control_eldos,     ONLY : lel_free_energy
+  USE anharmonic,  ONLY : p1t_t, p2t_t, p3t_t, p4t_t
+  USE lattices,    ONLY : compress_celldm, crystal_parameters
+  USE io_global,   ONLY : stdout
+
+  USE linear_surfaces,    ONLY : fit_multi_linear
+  USE quadratic_surfaces, ONLY : fit_multi_quadratic
+  USE cubic_surfaces,     ONLY : fit_multi_cubic
+  USE quartic_surfaces,   ONLY : fit_multi_quartic 
+
+  USE polynomial,  ONLY : init_poly
+
+  IMPLICIT NONE
+  REAL(DP), ALLOCATABLE :: x(:,:), f(:)
+  INTEGER  :: itemp, idata, ncoeff, nvar, ndata, ndatatot
+  INTEGER  :: compute_nwork, compute_nwork_ph
+  !
+  nvar=crystal_parameters(ibrav)
+  !
+  ndatatot = compute_nwork()
+  ndata = compute_nwork_ph(no_ph,ndatatot)
+
+  ALLOCATE(x(nvar, ndata))
+  ALLOCATE(f(ndata))
+  DO itemp=1, ntemp
+     CALL init_poly(nvar,p2t_t(itemp))
+     ncoeff=1+nvar+p2t_t(itemp)%ncoeff2
+     ndata=0
+     DO idata=1,ndatatot
+        IF (no_ph(idata)) CYCLE
+        ndata=ndata+1
+        CALL compress_celldm(celldm_geo(1,idata), x(1,ndata), nvar, ibrav)
+        f(ndata)=ph_free_ener(itemp,idata)
+        if (lel_free_energy) f(ndata)=f(ndata)+el_free_ener(itemp,idata)
+     END DO
+  !
+  !    CALL summarize_fitting_data(nvar, ndata, x, f)
+  !
+     CALL fit_multi_quadratic(ndata, nvar, lsolve, x, f, p2t_t(itemp))
+
+!     CALL print_quadratic_polynomial(nvar, p2t_t(itemp))
+
+!  WRITE(stdout,'(/,7x,"Energy (1)      Fitted energy (2)   DeltaE (1)-(2)")') 
+!     CALL print_chisq_quadratic(ndata, nvar, x, f, p2t_t(itemp))
+
+     IF (lquartic) THEN
+        IF (poly_degree_ph==4) THEN
+           CALL init_poly(nvar,p4t_t(itemp))
+           CALL fit_multi_quartic(ndata, nvar, lsolve, x, f, p4t_t(itemp))
+        ELSEIF (poly_degree_ph==3) THEN
+           CALL init_poly(nvar,p3t_t(itemp))
+           CALL fit_multi_cubic(ndata, nvar, lsolve, x, f, p3t_t(itemp))
+        ELSEIF (poly_degree_ph==1) THEN
+           CALL init_poly(nvar,p1t_t(itemp))
+           CALL fit_multi_linear(ndata, nvar, lsolve, x, f, p1t_t(itemp))
+           WRITE(stdout,'(/,5x,"Extremum of the quartic+linear found at:")')
+        ENDIF
+     ENDIF
+  ENDDO
+  DEALLOCATE(f)
+  DEALLOCATE(x)
+  !
+  RETURN
+  !
+END SUBROUTINE fit_free_energy_anis_t
+

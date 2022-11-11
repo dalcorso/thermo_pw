@@ -128,7 +128,7 @@ IF (ltherm_dos) THEN
 !   if requested in input writes on files the anharmonic quantities
 !   at several pressures
 !
-   CALL write_anhar_p()
+   CALL write_anhar_pt()
 !
 !  if requested in input writes on files anharmonic quantities 
 !  at several temperatures
@@ -136,7 +136,7 @@ IF (ltherm_dos) THEN
    IF (ltherm_glob) THEN
       CALL write_anhar_glob_t() 
    ELSE
-      CALL write_anhar_t() 
+      CALL write_anhar_ptt() 
    ENDIF
 !
 !   if requested in input writes on files the anharmonic quantities
@@ -219,7 +219,7 @@ CALL manage_plot_anhar()
 CALL summarize_anhar()
 RETURN
 END SUBROUTINE manage_anhar
-
+!
 !-------------------------------------------------------------------------
 SUBROUTINE manage_anhar_anis()
 !-------------------------------------------------------------------------
@@ -239,10 +239,15 @@ USE el_thermodynamics,     ONLY : el_ener, el_free_ener, el_entr, &
 USE data_files,            ONLY : fleltherm
 USE internal_files_names,  ONLY : flfrq_thermo, flvec_thermo
 USE anharmonic,            ONLY : celldm_t, free_e_min_t
+USE anharmonic_ptt,        ONLY : celldm_ptt, celldm_ptt_p1, &
+                                  celldm_ptt_m1, emin_ptt, emin_ptt_p1, &
+                                  emin_ptt_m1
 USE ph_freq_anharmonic,    ONLY : celldmf_t, free_e_minf_t
 USE io_global,             ONLY : ionode, stdout
 USE mp,                    ONLY : mp_sum
 USE mp_world,              ONLY : world_comm
+
+USE control_elastic_constants, ONLY : lelastic, lelasticf, el_cons_t_available
 
 IMPLICIT NONE
 INTEGER :: itemp, itempp, igeom, startt, lastt, idata, ndata
@@ -298,6 +303,25 @@ IF (ltherm_dos) THEN
    CALL mp_sum(celldm_t, world_comm)
    CALL mp_sum(free_e_min_t, world_comm)
 
+   CALL fit_free_energy_anis_t()
+
+   CALL quadratic_fit_pt()
+   CALL interpolate_harmonic_pt()
+
+   DO itempp=1,ntemp_plot
+!
+!  to obtain the thermal expansion we need the equilibrium celldm at
+!  temperature itemp, itemp+1, and itemp-1
+!
+      itemp=itemp_plot(itempp)
+      CALL quadratic_fit_ptt(celldm_ptt(:,:,itempp), emin_ptt(:,itempp), itemp)
+      CALL quadratic_fit_ptt(celldm_ptt_p1(:,:,itempp), &
+                             emin_ptt_p1(:,itempp), itemp+1)
+      CALL quadratic_fit_ptt(celldm_ptt_m1(:,:,itempp), &
+                             emin_ptt_m1(:,itempp), itemp-1)
+   ENDDO
+   CALL interpolate_harmonic_ptt()
+
    DO itempp=1,ntemp_plot
       DO idata=1,ndata
          phf(idata)=ph_free_ener(itemp_plot(itempp),idata)
@@ -348,8 +372,19 @@ IF (.NOT.(el_cons_qha_available.OR.el_consf_qha_available)) &
 !  at the crystal parameters found in the quadratic/quartic fit
 !
 CALL set_elastic_constants_t()
+CALL write_elastic_pt()
+CALL write_elastic_ptt()
 
-IF (ltherm_dos) CALL write_anhar_anis()
+IF (ltherm_dos) THEN
+   CALL write_anhar_anis()
+   CALL write_anhar_anis_pt()
+   CALL write_anhar_anis_ptt()
+!
+!   write on output the electronic contributions if computed
+!
+   CALL write_anhar_el()
+   CALL write_anhar_el_pt()
+ENDIF
 IF (ltherm_freq) CALL write_ph_freq_anhar_anis()
 !
 !  Plot elastic constants and compliances
@@ -357,8 +392,14 @@ IF (ltherm_freq) CALL write_ph_freq_anhar_anis()
 IF (what=='mur_lc_t') THEN
    CALL plot_elastic_t(0,.TRUE.)
    CALL plot_elastic_t(1,.TRUE.)
+   CALL plot_elastic_pt(0,.TRUE.)
+   CALL plot_elastic_pt(1,.TRUE.)
+   CALL plot_elastic_ptt(0,.TRUE.)
+   CALL plot_elastic_ptt(1,.TRUE.)
 
    CALL plot_macro_el_t()
+!   CALL plot_macro_el_pt()
+!   CALL plot_macro_el_ptt()
 ENDIF
 !
 !    calculate and plot the Gruneisen parameters along the given path.
@@ -388,13 +429,8 @@ ENDIF
 !    and plot them
 !
 CALL write_grun_anhar_anis()
-CALL plot_anhar_anis()
-CALL plot_thermo_anhar()
-CALL plot_dw_anhar_anis()
-CALL plot_thermal_stress()
-CALL plot_generalized_gruneisen()
-CALL plot_anhar_t()
-CALL plot_geo_p_t()
+
+CALL manage_plot_anhar_anis()
 
 RETURN
 END SUBROUTINE manage_anhar_anis

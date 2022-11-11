@@ -7,7 +7,7 @@
 ! or http://www.gnu.org/copyleft/gpl.txt .
 !
 !-----------------------------------------------------------------------
-SUBROUTINE plot_thermo_anhar()
+SUBROUTINE plot_anhar_thermo()
 !-----------------------------------------------------------------------
 !
 !  This is a driver to plot the quantities written inside flanhar.therm
@@ -177,10 +177,10 @@ IF (lgnuplot.AND.ionode) &
 !                                       //TRIM(gnu_filename), WAIT=.FALSE.)
 
 RETURN
-END SUBROUTINE plot_thermo_anhar
+END SUBROUTINE plot_anhar_thermo
 
 !-----------------------------------------------------------------------
-SUBROUTINE plot_dw_anhar()
+SUBROUTINE plot_anhar_dw()
 !-----------------------------------------------------------------------
 !
 !  This is a driver to plot the quantities written inside 
@@ -291,4 +291,4 @@ IF (lgnuplot.AND.ionode) &
    ierr=system(TRIM(gnuplot_command)//' '//TRIM(gnu_filename))
 
 RETURN
-END SUBROUTINE plot_dw_anhar
+END SUBROUTINE plot_anhar_dw

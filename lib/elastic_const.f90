@@ -2453,8 +2453,8 @@ SUBROUTINE write_el_cons_on_file(temp, ntemp, ibrav, laue, el_cons_t, b0, &
 !
 !  iflag=0 writes the elastic constants as a function of temperature
 !  iflag=1 writes the elastic compliances as a function of temperature
-!  iflag=3 writes the elastic constants as a function of pressure
-!  iflag=4 writes the elastic compliances as a function of pressure
+!  iflag=2 writes the elastic constants as a function of pressure
+!  iflag=3 writes the elastic compliances as a function of pressure
 !
 USE kinds,      ONLY : DP
 USE io_global,  ONLY : meta_ionode, meta_ionode_id, stdout
@@ -3105,6 +3105,8 @@ SUBROUTINE write_sound_on_file(temp, ntemp, v_t, filename, iflag)
 !
 ! This routine creates a file with sound velocities as a function 
 ! of temperature or of pressure.
+! flag=0 temp contains the temperature
+! flag=1 temp contains the pressure
 !
 
 USE kinds,      ONLY : DP

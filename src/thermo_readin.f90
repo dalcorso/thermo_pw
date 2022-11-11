@@ -306,7 +306,7 @@ SUBROUTINE thermo_readin()
                             fact_ngeo, ngeo_ph,             &
                             all_geometries_together,        &
 !
-!   elastic_constants_t
+!   elastic_constants_geo
 !
                             use_free_energy,                &
                             start_geometry_qha,             &
@@ -590,10 +590,10 @@ SUBROUTINE thermo_readin()
 
   IF (what==' ') CALL errore('thermo_readin','''what'' must be initialized',1)
 
-  IF (what/='mur_lc_t'.AND.what/='elastic_constants_t'&
+  IF (what/='mur_lc_t'.AND.what/='elastic_constants_geo'&
                              .AND.all_geometries_together) &
           CALL errore('thermo_readin','all_geometries_together requires &
-                          &mur_lc_t or elastic_constants_t',1)
+                          &mur_lc_t or elastic_constants_geo',1)
 
   IF (flext/='.pdf') flext='.ps'
 
@@ -662,7 +662,7 @@ SUBROUTINE thermo_readin()
       elastic_algorithm/='energy'.AND.elastic_algorithm/='energy_std') &
       CALL errore('thermo_readin','Unrecognized elastic algorithm',1)
 
-  IF (what=='elastic_constants_t'.AND.elastic_algorithm/='energy_std' &
+  IF (what=='elastic_constants_geo'.AND.elastic_algorithm/='energy_std' &
       .AND.elastic_algorithm/='energy'.AND.use_free_energy) &
      CALL errore('thermo_readin','Only the energy algorithms are available &
                                           &in this case',1)
@@ -670,7 +670,7 @@ SUBROUTINE thermo_readin()
   read_paths=( what=='scf_bands'.OR.what=='scf_disp'.OR.what=='plot_bz'.OR. &
                what=='mur_lc_bands' .OR. what=='mur_lc_disp' .OR. &
                what=='mur_lc_t' .OR. what=='scf_2d_bands'.OR. &
-               what=='elastic_constants_t')
+               what=='elastic_constants_geo')
 
   IF (nimage==1) save_max_seconds=max_seconds
   max_seconds_tpw=max_seconds

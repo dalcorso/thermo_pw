@@ -72,7 +72,6 @@ SUBROUTINE quadratic_fit()
                                          &parameters.")') 
   ENDIF
 
-
   ALLOCATE(x(nvar,ndata))
   ALLOCATE(x_pos_min(nvar))
   ALLOCATE(hessian_e(nvar))
@@ -283,6 +282,182 @@ SUBROUTINE quadratic_fit_t(itemp, celldm_t, free_e_min_t, ph_free_ener, &
   RETURN
   !
 END SUBROUTINE quadratic_fit_t
+!
+!-----------------------------------------------------------------------
+SUBROUTINE quadratic_fit_pt()
+  !-----------------------------------------------------------------------
+  !
+  !   This uses the polynomial interpolation of the vibrational
+  !   (plus electronic) free energy and the polynomial interpolation 
+  !   of the entalphy to calculate the minimum of the Gibbs energy 
+  !   at all temperatures for the set of pressures specified by press_plot.
+  !   It provides the crystal parameters as a function of temperature
+  !   for the given pressures.
+  !
+  !   The output of this routine is celldm_pt and the Gibbs energy at 
+  !   the minimum emin_pt.
+  !
+  USE kinds,       ONLY : DP
+  USE cell_base,   ONLY : ibrav
+  USE control_quadratic_energy, ONLY : nvar
+  USE control_quartic_energy, ONLY :  lquartic, poly_degree_ph
+  USE lattices,    ONLY : expand_celldm, crystal_parameters
+  USE io_global,   ONLY : stdout
+  USE control_pressure, ONLY : npress_plot, ipress_plot
+  USE temperature, ONLY : ntemp, ntemp_plot, temp_plot
+  USE anharmonic,  ONLY : p1t_t, p2t_t, p3t_t, p4t_t
+  USE anharmonic_pt, ONLY : celldm_pt, emin_pt
+  USE uniform_pressure, ONLY : p2_p, p4_p
+
+  USE linear_surfaces,  ONLY : fit_multi_linear, print_chisq_linear
+  USE quadratic_surfaces, ONLY : find_two_quadratic_extremum
+  USE quartic_surfaces, ONLY : find_quartic_quadratic_extremum,     &
+                      find_two_quartic_extremum, find_quartic_cubic_extremum,&
+                      find_quartic_linear_extremum
+  USE vector_mod, ONLY : write_vector
+
+  IMPLICIT NONE
+  REAL(DP), ALLOCATABLE :: x_pos_min(:)
+  REAL(DP) :: ymin
+  INTEGER  :: itemp, ipress, ipressp
+  INTEGER  :: compute_nwork, compute_nwork_ph
+  !
+  nvar=crystal_parameters(ibrav)
+  !
+  ALLOCATE(x_pos_min(nvar))
+
+  DO ipressp=1, npress_plot
+     ipress=ipress_plot(ipressp)
+     DO itemp=1, ntemp
+        CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
+                                     p2_p(ipress), p2t_t(itemp))
+        WRITE(stdout,'(/,5x,"Extremum of the quadratic found at:")')
+        CALL write_vector(nvar,x_pos_min)
+        CALL print_genergy(ymin)
+
+        IF (lquartic) THEN
+           IF (poly_degree_ph==4) THEN
+              WRITE(stdout,'(/,5x, "Fit improved with a fourth &
+                                                   &order polynomial")') 
+              CALL find_two_quartic_extremum(nvar, x_pos_min, ymin, &
+                                             p4_p(ipress), p4t_t(itemp)) 
+              WRITE(stdout,'(/,5x,"Extremum of the quartic found at:")')
+           ELSEIF (poly_degree_ph==3) THEN
+              WRITE(stdout,'(/,5x, "Fit improved with a third order &
+                                                         &polynomial")') 
+              CALL find_quartic_cubic_extremum(nvar, x_pos_min, ymin, &
+                       p4_p(ipress), p3t_t(itemp))
+              WRITE(stdout,'(/,5x,"Extremum of the quartic+cubic found at:")')
+           ELSEIF (poly_degree_ph==1) THEN
+              WRITE(stdout,'(/,5x, "Fit with a fist order polynomial")') 
+              CALL find_quartic_linear_extremum(nvar, x_pos_min, ymin, &
+                                      p4_p(ipress), p1t_t(itemp))
+              WRITE(stdout,'(/,5x,"Extremum of the quartic+linear found at:")')
+           ELSE
+              WRITE(stdout,'(/,5x,"Quartic fit used only a T=0:")')
+              CALL find_quartic_quadratic_extremum(nvar, x_pos_min, ymin, &
+                        p4_p(ipress), p2t_t(itemp))
+           ENDIF
+           CALL write_vector(nvar,x_pos_min)
+           CALL print_genergy(ymin)
+        ENDIF
+
+        emin_pt(itemp,ipressp)=ymin
+        CALL expand_celldm(celldm_pt(:,itemp,ipressp), x_pos_min, nvar, ibrav)
+
+     ENDDO
+  ENDDO
+  DEALLOCATE(x_pos_min)
+  !
+  RETURN
+  !
+END SUBROUTINE quadratic_fit_pt
+!
+!-----------------------------------------------------------------------
+SUBROUTINE quadratic_fit_ptt(celldm_ptt, emin_ptt, itemp)
+  !-----------------------------------------------------------------------
+  !
+  !   This uses the polynomial interpolation of the vibrational 
+  !   (plus electronic) free energy and the polynomial interpolation 
+  !   of the enthalpy to calculate the minimum of the Gibbs energy 
+  !   at all pressures for the set of temperatures specified by temp_plot.
+  !   It provides the crystal parameters as a function of pressure
+  !   for the given temperatures.
+  !
+  !   The output of this routine is celldm_pt and the gibbs energy at 
+  !   the minimum emin_pt.
+  !
+  USE kinds,       ONLY : DP
+  USE cell_base,   ONLY : ibrav
+  USE control_quadratic_energy, ONLY : nvar
+  USE control_quartic_energy, ONLY :  lquartic, poly_degree_ph
+  USE lattices,    ONLY : expand_celldm, crystal_parameters
+  USE io_global,   ONLY : stdout
+  USE control_pressure, ONLY : npress
+  USE anharmonic,  ONLY : p1t_t, p2t_t, p3t_t, p4t_t
+  USE uniform_pressure, ONLY : p2_p, p4_p
+
+  USE linear_surfaces,  ONLY : fit_multi_linear, print_chisq_linear
+  USE quadratic_surfaces, ONLY : find_two_quadratic_extremum
+  USE quartic_surfaces, ONLY : find_quartic_quadratic_extremum,     &
+                      find_two_quartic_extremum, find_quartic_cubic_extremum,&
+                      find_quartic_linear_extremum
+  USE vector_mod, ONLY : write_vector
+
+  IMPLICIT NONE
+  REAL(DP), INTENT(INOUT) :: celldm_ptt(6,npress), emin_ptt(npress)
+  INTEGER, INTENT(IN) :: itemp
+  REAL(DP), ALLOCATABLE :: x_pos_min(:)
+  REAL(DP) :: ymin
+  INTEGER  :: ipress
+  INTEGER  :: compute_nwork, compute_nwork_ph
+  !
+  nvar=crystal_parameters(ibrav)
+  !
+  ALLOCATE(x_pos_min(nvar))
+
+  DO ipress=1, npress
+     CALL find_two_quadratic_extremum(nvar, x_pos_min, ymin, &
+                                     p2_p(ipress), p2t_t(itemp))
+     WRITE(stdout,'(/,5x,"Extremum of the quadratic found at:")')
+     CALL write_vector(nvar,x_pos_min)
+     CALL print_genergy(ymin)
+
+     IF (lquartic) THEN
+        IF (poly_degree_ph==4) THEN
+           WRITE(stdout,'(/,5x, "Fit improved with a fourth &
+                                                &order polynomial")') 
+           CALL find_two_quartic_extremum(nvar, x_pos_min, ymin, &
+                                          p4_p(ipress), p4t_t(itemp)) 
+           WRITE(stdout,'(/,5x,"Extremum of the quartic found at:")')
+        ELSEIF (poly_degree_ph==3) THEN
+           WRITE(stdout,'(/,5x, "Fit improved with a third order &
+                                                      &polynomial")') 
+           CALL find_quartic_cubic_extremum(nvar, x_pos_min, ymin, &
+                    p4_p(ipress), p3t_t(itemp))
+           WRITE(stdout,'(/,5x,"Extremum of the quartic+cubic found at:")')
+        ELSEIF (poly_degree_ph==1) THEN
+           WRITE(stdout,'(/,5x, "Fit with a fist order polynomial")') 
+           CALL find_quartic_linear_extremum(nvar, x_pos_min, ymin, &
+                                   p4_p(ipress), p1t_t(itemp))
+           WRITE(stdout,'(/,5x,"Extremum of the quartic+linear found at:")')
+        ELSE
+           WRITE(stdout,'(/,5x,"Quartic fit used only a T=0:")')
+           CALL find_quartic_quadratic_extremum(nvar, x_pos_min, ymin, &
+                     p4_p(ipress), p2t_t(itemp))
+        ENDIF
+        CALL write_vector(nvar,x_pos_min)
+        CALL print_genergy(ymin)
+     ENDIF
+
+     emin_ptt(ipress)=ymin
+     CALL expand_celldm(celldm_ptt(:,ipress), x_pos_min, nvar, ibrav)
+
+  ENDDO
+  DEALLOCATE(x_pos_min)
+  !
+  RETURN
+END SUBROUTINE quadratic_fit_ptt
 
 !-------------------------------------------------------------------
 SUBROUTINE set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)

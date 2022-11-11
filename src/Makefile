@@ -101,11 +101,11 @@ matdyn_sub.o \
 plan_avg_sub.o \
 plot_anhar.o \
 plot_anhar_anis.o \
+plot_anhar_dw.o \
 plot_bz.o \
 plot_2d_bz.o \
 plot_dispersion.o \
 plot_dos.o \
-plot_dw_anhar.o \
 plot_e_ke.o \
 plot_e_nk.o \
 plot_ef.o \

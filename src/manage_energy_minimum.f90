@@ -83,8 +83,8 @@ ELSEIF (lgeo_from_file) THEN
 ENDIF
 CALL plot_elastic_t1(2, .FALSE.)
 CALL plot_elastic_t1(3, .FALSE.)
-CALL plot_macro_elastic_t1()
-CALL plot_sound_speed_t1()
+CALL plot_macro_elastic_p()
+CALL plot_sound_speed_p()
 
 trd_ht=.FALSE.
 rd_ht=0.0_DP

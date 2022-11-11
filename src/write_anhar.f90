@@ -449,6 +449,44 @@ CALL mp_sum(beta_t, world_comm)
 RETURN
 END SUBROUTINE compute_beta
 !
+!-------------------------------------------------------------------------
+SUBROUTINE compute_beta_p(vmin_ptt, vmin_p1, vmin_m1, beta_ptt, &
+                                                           press, npress)
+!-------------------------------------------------------------------------
+!
+!  This routine receives as input the volume for npress pressures 
+!  at temperature T, the volumes at T+dT (vmin_p1) and the volumes at
+!  T-dT (vmin_m1) and computes the volume thermal expansion at all
+!  pressures.
+!
+USE kinds,       ONLY : DP
+USE temperature, ONLY : deltat
+USE mp,          ONLY : mp_sum
+USE mp_world,    ONLY : world_comm
+
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: npress
+REAL(DP), INTENT(IN) :: vmin_ptt(npress), press(npress), vmin_p1(npress), &
+                        vmin_m1(npress)
+REAL(DP), INTENT(OUT) :: beta_ptt(npress) 
+
+INTEGER :: ipress, startp, lastp
+REAL(DP) :: dt
+
+beta_ptt=0.0_DP
+CALL divide(world_comm, npress, startp, lastp)
+!
+!  Compute the derivative of the volume by finite difference
+!
+dt=2.0_DP * deltat
+DO ipress = startp, lastp
+   beta_ptt(ipress) = (vmin_p1(ipress)-vmin_m1(ipress))/dt/vmin_ptt(ipress)
+END DO
+CALL mp_sum(beta_ptt, world_comm)
+
+RETURN
+END SUBROUTINE compute_beta_p
+!
 !------------------------------------------------------------------------
 SUBROUTINE write_ener_beta(temp, vmin, emin, beta, ntemp, filename)
 !------------------------------------------------------------------------
@@ -485,7 +523,7 @@ RETURN
 END SUBROUTINE write_ener_beta
 !
 !------------------------------------------------------------------------
-SUBROUTINE write_ener_beta_t(press, vmin, vminv0, emin, beta, npress, &
+SUBROUTINE write_ener_beta_ptt(press, vmin, vminv0, emin, beta, npress, &
                              itemp, filename)
 !------------------------------------------------------------------------
 !
@@ -520,7 +558,7 @@ IF (meta_ionode) THEN
 ENDIF
 
 RETURN
-END SUBROUTINE write_ener_beta_t
+END SUBROUTINE write_ener_beta_ptt
 !
 !------------------------------------------------------------------------
 SUBROUTINE write_ener_beta_vol(temp, vmin, vminv0, emin, beta, ntemp, &
@@ -597,7 +635,7 @@ RETURN
 END SUBROUTINE write_bulk_anharm
 !
 !------------------------------------------------------------------------
-SUBROUTINE write_bulk_anharm_t(press, b0t, b0s, npress, itemp, filename)
+SUBROUTINE write_bulk_anharm_ptt(press, b0t, b0s, npress, itemp, filename)
 !------------------------------------------------------------------------
 !
 !   This routine writes on output the isothermal bulk modulus, the
@@ -633,7 +671,7 @@ IF (meta_ionode) THEN
    CLOSE(iu_press)
 ENDIF
 RETURN
-END SUBROUTINE write_bulk_anharm_t
+END SUBROUTINE write_bulk_anharm_ptt
 !
 !------------------------------------------------------------------------
 SUBROUTINE write_dbulk_anharm(temp, b01t, b02t, ntemp, filename)
@@ -840,6 +878,7 @@ END SUBROUTINE write_heat_anhar
 !------------------------------------------------------------------------
 SUBROUTINE write_heat_anhar_t(press, cet, cvt, cpt, npress, &
                                                          itemp, filename)
+
 !------------------------------------------------------------------------
 !
 !   This routine writes on output the isochoric heat capacity,
@@ -1179,9 +1218,8 @@ USE control_emp_free_ener, ONLY : add_empirical, emp_ener, emp_ce, emp_entr
 USE el_anharmonic,  ONLY : el_ener_pt, el_free_ener_pt, el_entr_pt, el_ce_pt
 USE emp_anharmonic, ONLY : emp_free_ener_pt, emp_ener_pt, emp_ce_pt, &
                            emp_entr_pt
-USE anharmonic,     ONLY : celldm_t ! this is not used yet, must become pt
 USE anharmonic_pt,  ONLY : vmin_pt, ener_pt, free_ener_pt, entr_pt, cv_pt, &
-                           ce_pt
+                           ce_pt, celldm_pt
 USE control_eldos,  ONLY : lel_free_energy
 USE control_pressure, ONLY : npress_plot
 
@@ -1191,14 +1229,14 @@ INTEGER :: ipressp
 IF (npress_plot==0) RETURN
 
 DO ipressp=1,npress_plot
-   CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_t, ph_ener, &
-                                                         ener_pt(:,ipressp))
-   CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_t, ph_free_ener, &
-                                                    free_ener_pt(:,ipressp))
-   CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_t, ph_entropy, &
-                                                         entr_pt(:,ipressp))
-   CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_t, ph_ce, &
-                                                         ce_pt(:,ipressp))
+   CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_pt(:,:,ipressp), &
+                                         ph_ener, ener_pt(:,ipressp))
+   CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_pt(:,:,ipressp), &
+                               ph_free_ener, free_ener_pt(:,ipressp))
+   CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_pt(:,:,ipressp), &
+                                      ph_entropy, entr_pt(:,ipressp))
+   CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_pt(:,:,ipressp), &
+                                      ph_ce, ce_pt(:,ipressp))
 ENDDO
 cv_pt=ce_pt
 !
@@ -1207,14 +1245,14 @@ cv_pt=ce_pt
 !
 IF (lel_free_energy) THEN
    DO ipressp=1,npress_plot
-      CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_t, el_ener, &
-                                                    el_ener_pt(:,ipressp))
-      CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_t, el_free_ener, &
-                                                 el_free_ener_pt(:,ipressp))
-      CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_t, el_entr, &
-                                                    el_entr_pt(:,ipressp))
-      CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_t, el_ce, &
-                                                    el_ce_pt(:,ipressp))
+      CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_pt(:,:,ipressp), &
+                                     el_ener, el_ener_pt(:,ipressp))
+      CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_pt(:,:,ipressp), &
+                                     el_free_ener, el_free_ener_pt(:,ipressp))
+      CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_pt(:,:,ipressp), &
+                                     el_entr, el_entr_pt(:,ipressp))
+      CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_pt(:,:,ipressp), &
+                                     el_ce, el_ce_pt(:,ipressp))
    ENDDO
    free_ener_pt=free_ener_pt+el_free_ener_pt
    ener_pt=ener_pt+el_ener_pt
@@ -1233,12 +1271,12 @@ ENDIF
 !
 IF (add_empirical) THEN
    DO ipressp=1,npress_plot
-      CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_t, emp_ener, &
-                                                    emp_ener_pt(:,ipressp))
-      CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_t, emp_entr, &
-                                                    emp_entr_pt(:,ipressp))
-      CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_t, emp_ce, &
-                                                    emp_ce_pt(:,ipressp))
+      CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_pt(:,:,ipressp), &
+                                      emp_ener, emp_ener_pt(:,ipressp))
+      CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_pt(:,:,ipressp), &
+                                      emp_entr, emp_entr_pt(:,ipressp))
+      CALL interpolate_thermo(vmin_pt(:,ipressp), celldm_pt(:,:,ipressp), &
+                                      emp_ce, emp_ce_pt(:,ipressp))
    ENDDO
    ener_pt=ener_pt+emp_ener_pt
    entr_pt=entr_pt+emp_entr_pt
@@ -1293,7 +1331,7 @@ USE el_thermodynamics, ONLY : el_ce
 USE el_anharmonic,     ONLY : el_ce_ptt
 USE control_emp_free_ener, ONLY : add_empirical, emp_ce
 USE anharmonic,        ONLY : celldm_t ! this is not used yet, must become ptt
-USE anharmonic_ptt,    ONLY : vmin_ptt, cv_ptt, ce_ptt
+USE anharmonic_ptt,    ONLY : vmin_ptt, celldm_ptt, cv_ptt, ce_ptt
 USE emp_anharmonic,    ONLY : emp_ce_ptt
 USE temperature,       ONLY : ntemp_plot, itemp_plot
 USE control_eldos,     ONLY : lel_free_energy
@@ -1305,8 +1343,8 @@ IF (ntemp_plot==0) RETURN
 
 DO itempp=1,ntemp_plot
    itemp=itemp_plot(itempp)
-   CALL interpolate_thermo_p(vmin_ptt(:,itempp), ph_ce, ce_ptt(:,itempp), &
-                                                                   itemp)
+   CALL interpolate_thermo_p(vmin_ptt(:,itempp), celldm_ptt(:,:,itempp), &
+                           ph_ce, ce_ptt(:,itempp), itemp)
 ENDDO
 cv_ptt=ce_ptt
 !
@@ -1316,8 +1354,8 @@ cv_ptt=ce_ptt
 IF (lel_free_energy) THEN
    DO itempp=1,ntemp_plot
       itemp=itemp_plot(itempp)
-      CALL interpolate_thermo_p(vmin_ptt(:,itempp), el_ce, &
-                                              el_ce_ptt(:,itempp), itemp)
+      CALL interpolate_thermo_p(vmin_ptt(:,itempp), celldm_ptt(:,:,itempp), &
+                  el_ce, el_ce_ptt(:,itempp), itemp)
    ENDDO
    ce_ptt=ce_ptt+el_ce_ptt
    cv_ptt=ce_ptt
@@ -1331,8 +1369,8 @@ ENDIF
 IF (add_empirical) THEN
    DO itempp=1,ntemp_plot
       itemp=itemp_plot(itempp)
-      CALL interpolate_thermo_p(vmin_ptt(:,itempp), emp_ce, &
-                                              emp_ce_ptt(:,itempp), itemp)
+      CALL interpolate_thermo_p(vmin_ptt(:,itempp), celldm_ptt(:,:,itempp), &
+                    emp_ce, emp_ce_ptt(:,itempp), itemp)
    ENDDO
    ce_ptt=ce_ptt+emp_ce_ptt
    cv_ptt=ce_ptt
@@ -1344,7 +1382,7 @@ RETURN
 END SUBROUTINE interpolate_harmonic_ptt
 
 !-----------------------------------------------------------------------
-SUBROUTINE write_anhar_p()
+SUBROUTINE write_anhar_pt()
 !-----------------------------------------------------------------------
 !
 !   This routine writes on output the anharmonic quantities calculated
@@ -1444,10 +1482,10 @@ DO ipressp=1,npress_plot
 ENDDO
 
 RETURN
-END SUBROUTINE write_anhar_p
+END SUBROUTINE write_anhar_pt
 !
 !-------------------------------------------------------------------------
-SUBROUTINE write_anhar_t()
+SUBROUTINE write_anhar_ptt()
 !-------------------------------------------------------------------------
 !
 !  This routine computes the volume thermal expansion, the bulk modulus,
@@ -1534,14 +1572,14 @@ IF (meta_ionode) THEN
 !
       filename="anhar_files/"//TRIM(flanhar)//'.temp'
       CALL add_value(filename, temp(itemp))
-      CALL write_ener_beta_t(press, vmin_ptt(:,itempp), aux(:,itempp), & 
+      CALL write_ener_beta_ptt(press, vmin_ptt(:,itempp), aux(:,itempp), & 
              emin_ptt(:,itempp), beta_ptt(:,itempp), npress, itemp, filename)
 !
 !   bulk modulus
 !
       filename="anhar_files/"//TRIM(flanhar)//'.bulk_temp'
       CALL add_value(filename, temp(itemp))
-      CALL write_bulk_anharm_t(press, b0_ptt(:,itempp), b0_s_ptt(:,itempp),  &
+      CALL write_bulk_anharm_ptt(press, b0_ptt(:,itempp), b0_s_ptt(:,itempp), &
                                                      npress, itemp, filename)
 !
 !   pressure derivative of the bulk modulus
@@ -1574,7 +1612,7 @@ ENDIF
 DEALLOCATE(aux)
 
 RETURN
-END SUBROUTINE write_anhar_t
+END SUBROUTINE write_anhar_ptt
 !
 !-----------------------------------------------------------------------
 SUBROUTINE write_anhar_v()
@@ -1645,7 +1683,7 @@ INTEGER :: itemp, iu_therm
 
 INTEGER :: find_free_unit
 
-filename="anhar_files/"//TRIM(flanhar)//".el_press"
+filename="anhar_files/"//TRIM(flanhar)//".el_therm"
 CALL add_pressure(filename)
 
 IF (meta_ionode) THEN
@@ -1690,8 +1728,7 @@ INTEGER :: find_free_unit
 
 DO ipressp=1,npress_plot
    ipress=ipress_plot(ipressp)
-   IF (press(ipress)==pressure_kb) CYCLE
-   filename="anhar_files/"//TRIM(flanhar)//".el_press"
+   filename="anhar_files/"//TRIM(flanhar)//".el_therm_press"
    CALL add_value(filename,press(ipress))
    CALL add_pressure(filename)
 

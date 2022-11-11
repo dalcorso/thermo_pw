@@ -116,12 +116,12 @@ IF (meta_ionode) THEN
       iu_mur=find_free_unit()
       filename="anhar_files/"//TRIM(flanhar)//'.temp'
       CALL add_value(filename, temp(itemp))
-      CALL write_ener_beta_t(press, vmin_ptt(:,itempp), aux(:,itempp), & 
+      CALL write_ener_beta_ptt(press, vmin_ptt(:,itempp), aux(:,itempp), & 
              emin_ptt(:,itempp), beta_ptt(:,itempp), npress, itemp, filename)
 
       filename="anhar_files/"//TRIM(flanhar)//'.bulk_temp'
       CALL add_value(filename, temp(itemp))
-      CALL write_bulk_anharm_t(press, b0_ptt(:,itempp), b0_s_ptt(:,itempp),  &
+      CALL write_bulk_anharm_ptt(press, b0_ptt(:,itempp), b0_s_ptt(:,itempp), &
                                                      npress, itemp, filename)
 
       filename="anhar_files/"//TRIM(flanhar)//'.dbulk_temp'

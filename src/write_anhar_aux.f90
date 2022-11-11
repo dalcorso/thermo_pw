@@ -94,3 +94,55 @@ ENDIF
 RETURN
 END SUBROUTINE write_thermo_anharm
 !
+! Copyright (C) 2022 Andrea Dal Corso
+!
+!------------------------------------------------------------------------
+SUBROUTINE write_thermo_anharm_p(press, npress, e0_p, ener_p, free_e_min_p, &
+                              entropy_p, cv_p, temp, ntemp, itemp, filename)
+
+!------------------------------------------------------------------------
+USE kinds,     ONLY : DP
+USE constants, ONLY : rytoev, electronvolt_si, rydberg_si, avogadro
+USE io_global, ONLY : meta_ionode
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: npress, ntemp, itemp
+REAL(DP), INTENT(IN) :: temp(ntemp)
+REAL(DP), INTENT(IN) :: press(npress), ener_p(npress), free_e_min_p(npress), &
+                        cv_p(npress), entropy_p(npress), e0_p(npress)
+CHARACTER(LEN=*) :: filename
+REAL(DP), PARAMETER :: caltoj=4.184_DP
+INTEGER :: ipress, iu_therm
+INTEGER :: find_free_unit
+
+IF (meta_ionode) THEN
+   iu_therm=find_free_unit()
+   OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
+   WRITE(iu_therm,'("# Temperature T= ",f15.7," K")') temp(itemp)
+   WRITE(iu_therm,'("# Pressure p in kbar, ")')
+   WRITE(iu_therm,'("# Energy and free energy in Ry/cell,")')
+   WRITE(iu_therm,'("# Entropy in Ry/cell/K,")')
+   WRITE(iu_therm,'("# Heat capacity Cv in Ry/cell/K.")')
+   WRITE(iu_therm,'("# Multiply by ",f7.4," to have energies in &
+                       &eV/cell etc..")') rytoev
+   WRITE(iu_therm,'("# Multiply by ",f7.4," x ",f8.2," = ",f9.1," to have &
+                  &energies in cal/(N mol).")') rytoev, electronvolt_si &
+                         * avogadro / caltoj, rydberg_si*avogadro/caltoj
+   WRITE(iu_therm,'("# Multiply by ",f7.4," x ",f8.2," = ",f9.1," to &
+                  &have energies in J/(N mol).")') rytoev, electronvolt_si&
+                         * avogadro, rydberg_si*avogadro
+   WRITE(iu_therm,'("# N is the number of formula units per cell.")')
+   WRITE(iu_therm,'("# For instance in silicon N=2. Divide by N to have &
+                &energies in cal/mol etc. ")')
+   WRITE(iu_therm,'("#",5x,"p(kbar)", 10x, " energy ", 10x, "  free energy ",&
+               & 12x, " entropy ", 17x, " Cv ", 15x, "E_zpe")')
+
+   DO ipress = 1, npress
+      WRITE(iu_therm, '(e12.5,5e23.13)') press(ipress), ener_p(ipress), &
+          free_e_min_p(ipress), entropy_p(ipress), cv_p(ipress), e0_p(ipress)
+   END DO
+
+   CLOSE(iu_therm)
+ENDIF
+RETURN
+END SUBROUTINE write_thermo_anharm_p
+!

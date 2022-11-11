@@ -258,7 +258,7 @@ mur_lc_piezoelectric_tensor
 mur_lc_polarization
              *           *               *               +
 mur_lc_t     *           *                                  *   *  *  *  *
-elastic_constants_t
+elastic_constants_geo
              *                       *  (*)                 *               *   *
 + not yet active or working.
 (*) when lel_free_energy=.TRUE. and use_free_energy=.FALSE.. 
@@ -275,7 +275,7 @@ the \texttt{what} to use:
 \begin{verbatim}
 Brillouin zone                                 plot_bz
 X-ray powder diffraction pattern               plot_bz
-Total energy versus kinetic energy             scf_ke
+Total energy versus kinetic energy cut-off     scf_ke
 Total energy versus k points                   scf_nk
 Total energy as a function of volume           mur_lc
 Total energy as a function of two or three
@@ -300,19 +300,21 @@ Atomic B factors                               scf_disp, mur_lc_disp
 Debye vibrational energy, free energy, 
 entropy, isochoric heat capacity               scf_elastic_constants, 
                                                mur_lc_elastic_constants,
-                                               elastic_constants_t
+                                               elastic_constants_geo
 Debye atomic B factor                          scf_elastic_constants,
                                                mur_lc_elastic_constants,
-                                               elastic_constants_t
+                                               elastic_constants_geo
+Lattice parameters as a function of p          mur_lc
 Lattice parameters as a function of T          mur_lc_t
-Thermal expansion as a function of T           mur_lc_t 
+Volume thermal expansion as a function of T    mur_lc_t 
+Thermal expansion tensor as a function of T    mur_lc_t 
 Mode Gruneisen parameters                      mur_lc_t
 Phonon dispersions at the geometry 
 that corresponds to a given temperature        mur_lc_t
 Elastic constants and bulk modulus
-as a function of temperature                   mur_lc_t, elastic_constants_t
+as a function of temperature                   mur_lc_t, elastic_constants_geo
 Elastic compliances and compressibility
-as a function of temperature                   mur_lc_t, elastic_constants_t
+as a function of temperature                   mur_lc_t, elastic_constants_geo
 
 For cubic systems, or when elastic constants are on file,
 also the following quantities are plotted:
@@ -339,12 +341,18 @@ A set of plots at selected pressures:
 
 Volume as a function of temperature            mur_lc_t
 Volume/V(300K) as a function of temperature    mur_lc_t
+Crystal parameters as a function of temperature mur_lc_t
+
+(lmurn=.FALSE. requires elastic constants on file)
+
 Bulk modulus as a function of temperature      mur_lc_t
 Pressure derivative of the bulk modulus        
-as a function of temperature                   mur_lc_t
+as a function of temperature                   mur_lc_t (lmurn=.TRUE.)
 Second pressure derivative of the              
-bulk modulus as a function of pressure         mur_lc_t (ieos=2)
-Thermal expansion as a function of             
+bulk modulus as a function of pressure         mur_lc_t (lmurn=.TRUE.,ieos=2)
+Volume thermal expansion as a function of             
+temperature                                    mur_lc_t
+Thermal expansion tensor as a function of             
 temperature                                    mur_lc_t
 Isochoric heat capacity as a function of       
 temperature                                    mur_lc_t
@@ -352,13 +360,20 @@ Isobaric heat capacity as a function of
 temperature                                    mur_lc_t
 Difference between isobaric and isothermal     
 heat capacities as a function of temperature   mur_lc_t
-Difference between isobaric and isothermal     
+Difference between adiabatic and isothermal     
 bulk modulus as a function of temperature      mur_lc_t
 Average Gruneisen parameter as a function     
 of temperature                                 mur_lc_t
+Elastic constants and bulk modulus as a 
+function of temperature                        mur_lc_t (lmurn=.FALSE.)
+Elastic compliance and compressibility
+as a function of temperature                   mur_lc_t (lmurn=.FALSE.)
 
 A set of plots at selected temperatures:
 
+Crystal parameters as a function of pressure   mur_lc_t
+Volume as a function of pressure               mur_lc_t
+Volume/V(300K) as a function of pressure       mur_lc_t
 Helmholtz free energy as a function of         
 volume                                         mur_lc_t
 Pressure as a function of volume               mur_lc_t
@@ -368,21 +383,43 @@ as a function of volume                        mur_lc_t
 Electronic free energy as a function of        
 volume                                         mur_lc_t
 Gibbs free energy as a function of pressure    mur_lc_t
+Volume thermal expansion as a function of 
+pressure                                       mur_lc_t
+Thermal expansion tensor as a function of 
+pressure                                       mur_lc_t
+
+(lmurn=.FALSE. requires elastic constants on file)
+
 Bulk modulus as a function of pressure         mur_lc_t
 Pressure derivative of the bulk modulus        
-as a function of pressure                      mur_lc_t
-Thermal expansion as a function of pressure    mur_lc_t
+as a function of pressure                      mur_lc_t (lmurn=.TRUE.)
 Average Gruneisen parameter as a function of   
 pressure                                       mur_lc_t
 Product of thermal expansion and bulk modulus
 as a function of pressure                      mur_lc_t
+Elastic constants and bulk modulus as a 
+function of pressure                           mur_lc_t (lmurn=.FALSE.)
+Elastic compliance and compressibility
+as a function of pressure                      mur_lc_t (lmurn=.FALSE.)
 
 A set of plots at selected volumes:
 
 Thermal pressure as a function of temperature  mur_lc_t
 
+Plots of a few polycrystalline averages:
+(when elastic constants are on file and lmurn=.FALSE.) 
+
+Bulk modulus as a function of temperature (pressure)
+Young modulus as a function of temperature (pressure)
+Shear modulus as a function of temperature (pressure)
+Poisson ration as a function of temperature (pressure)
+Isothermal speed of sound as a function of temperature (pressure)
+Adiabatic speed of sound as a function of temperature (pressure)
+
 \end{verbatim}
 \end{footnotesize}
+
+\newpage
 
 This is the list of the quantities that can be obtained in output
 and the \texttt{what} to use:
@@ -398,7 +435,7 @@ Dielectric constant (insulators only)          scf_ph, mur_lc_ph
 Born effective charges (insulators only)       scf_ph, mur_lc_ph
 Elastic constant tensor                        scf_elastic_constants, 
                                                mur_lc_elastic_constants
-                                               elastic_constants_t
+                                               elastic_constants_geo
 \end{verbatim}
 \end{footnotesize}
 
@@ -459,54 +496,83 @@ mur_lc           do_ev           flevdat        (input_ev)
                  write_gnuplot_energy
                                  flenergy
                  plot_multi_energy              flgnuplot(_energy)  flpsenergy
-
+                 write_elastic_p                
+                                 fl_el_cons(.el_cons_p)              
+                                 fl_el_cons(.el_comp_p)              
+                                 fl_el_cons(.macro_el_p)              
+                                 fl_el_cons(.sound_vel_p)              
+                 plot_elastic_t(2)          flgnuplot(.el_cons_p)
+                                                    flps_el_cons(.el_cons_p)
+                 plot_elastic_t(3)          flgnuplot(.el_comp_p)
+                                                    flps_el_cons(.el_comp_p)
+                 plot_macro_el_p            flgnuplot(.macro_el_p)
+                                                    flps_el_cons(.macro_el_p)
+                 plot_sound_speed_p         flgnuplot(.sound_vel_p)
+                                                    flps_el_cons(.sound_vel_p)
 mur_lc_t        
         When lmurn=.TRUE.: 
-                 write_anharmonic
+                 write_anhar
                                  flanhar
-                                 flanhar(.bulk_mod)
-                                 flanhar(.dbulk_mod)
+                                 flanhar(.bulk)
+                                 flanhar(.dbulk)
                                  flanhar(.heat)
                                  flanhar(.gamma)
                                  flanhar(.therm)
                                  flanhar(.#na.dw)
+                                 flanhar(.el_anhar)
                  write_ph_freq_anharmonic
                                  flanhar(_ph)
-                                 flanhar(.bulk_mod_ph)
-                                 flanhar(.dbulk_mod_ph)
+                                 flanhar(.bulk_ph)
+                                 flanhar(.dbulk_ph)
                                  flanhar(.heat_ph)
                                  flanhar(.gamma_ph)
                                  flanhar(.therm_ph)
                                  flanhar(_ph.#na.dw)
+                                 flanhar(.elf_anhar)
                  write_grun_anharmonic
                                  flanhar(.aux_grun)
                                  flanhar(.gamma_grun)
                  write_anhar_p
                                  flanhar(.press.#pressure)
                                  flanhar(.bulk_press.#pressure)
+                                 flanhar(.dbulk_press.#pressure)
                                  flanhar(.heat_press.#pressure)
+                                 flanhar(.therm_press.#pressure)
                                  flanhar(.gamma_press.#pressure)
                  write_anhar_t
                                  flanhar(.temp.#temp)
+                                 flanhar(.bulk_temp.#temp)
                                  flanhar(.dbulk_temp.#temp)
+                                 flanhar(.heat_temp.#temp)
                                  flanhar(.gamma_temp.#temp)
+                           write_mur_pol
+                                     flanhar(_mur.#temp)
+                           write_thermal_press
+                                     flanhar(_poly_free.#temp)
                  write_anhar_v
                                  flanhar(.vol.#volume)
-                 write_mur_pol
-                                 flevdat(_mur.#temp)
-                                 flevdat(_poly_free.#temp)
                  write_free_ener
-                                 flevdat(_mur_free.#temp)
-                 plot_anhar                     flgnuplot(_anhar)  flpsanhar
-                                                flgnuplot(_anhar_dw) 
-                                                            flpsanhar(.dw)
-                                                
-                 plot_anhar_p                   flgnuplot(_anhar_press)
-                                                            flpsanhar(.press)
-                 plot_anhar_t                   flgnuplot(_anhar_temp)
-                                                            flpsanhar(.temp)
-                 plot_anhar_v                   flgnuplot(_anhar_vol)
-                                                            flpsanhar(.vol)
+                                 flanhar(_free.#temp)
+                 plot_anhar_energy          flgnuplot(_anhar_energy) 
+                                                      flpsanhar(.energy)
+                 plot_anhar_volume          flgnuplot(_anhar_volume) 
+                                                      flpsanhar(.volume)
+                 plot_anhar_bulk            flgnuplot(_anhar_bulk) 
+                                                      flpsanhar(.bulk)
+                 plot_anhar_beta            flgnuplot(_anhar_beta) 
+                                                      flpsanhar(.beta)
+                 plot_anhar_heat            flgnuplot(_anhar_heat) 
+                                                      flpsanhar(.heat)
+                 plot_anhar_gamma           flgnuplot(_anhar_gamma) 
+                                                      flpsanhar(.gamma)
+                 plot_anhar_dbulk           flgnuplot(_anhar_dbulk) 
+                                                      flpsanhar(.dbulk)
+                 plot_anhar_press           flgnuplot(_pressure)
+                                                      flpsanhar(.pressure)
+                 plot_anhar_thermo          flgnuplot(_anhar_therm) 
+                                                      flpsanhar(.therm)
+                 plot_anhar_dw              flgnuplot(_anhar_dw) 
+                                                      flpsanhar(.dw)
                  write_gruneisen_bands
                                  flgrun
                                  flgrun(_freq)
@@ -519,33 +585,103 @@ mur_lc_t
                  write_anhar_anis
                                  flanhar
                                  flanhar(.celldm)
-                                 flanhar(.bulk_mod)
+                                 flanhar(.bulk)
                                  flanhar(.heat)
                                  flanhar(.heat_anis)
                                  flanhar(.tstress)
                                  flanhar(.gamma)
                                  flanhar(.ggamma)
+                                 flanhar(.therm)
                                  flanhar(.anis.#na.dw)
+                                 flanhar(.el_cons_s)
+                                 flanhar(.el_comp_s)
+                                 flanhar(.macro_el)
+                                 flanhar(.macro_el_s)
+                                 flanhar(.sound_vel)
+                                 flanhar(.sound_vel_s)
+                                 flanhar(.anis)
                  write_ph_freq_anhar_anis
                                  flanhar(_ph)
                                  flanhar(.celldm_ph)
-                                 flanhar(.bulk_mod_ph)
+                                 flanhar(.bulk_ph)
                                  flanhar(.heat_ph)
                                  flanhar(.heat_anis_ph)
                                  flanhar(.tstress_ph)
                                  flanhar(.gamma_ph)
                                  flanhar(.ggamma_ph)
                                  flanhar(.anis_ph.#na.dw)
+                                 flanhar(.el_cons_s_ph)
+                                 flanhar(.el_comp_s_ph)
+                                 flanhar(.macro_el_ph)
+                                 flanhar(.macro_el_s_ph)
+                                 flanhar(.sound_vel_ph)
+                                 flanhar(.sound_vel_s_ph)
+                                 flanhar(.anis_ph)
                  write_grun_anharmonic_anis
                                  flanhar(.celldm_grun)
                                  flanhar(.aux_grun)
-                 plot_anhar_anis                flgnuplot(_anhar)   flpsanhar
-                                                flgnuplot(anhar_anis_dw) 
-                                                            flpsanhar.anis_dw
-                                                flgnuplot(.tstress)  
-                                                            flpsanhar.tstress
-                                                flgnuplot(.ggamma)  
-                                                            flpsanhar.ggamma
+                                 flanhar(.gamma_grun)
+                                 flanhar(.heat_anis_grun)
+                 write_anhar_anis_pt
+                                 flanhar(.press.#pressure)
+                                 flanhar(.celldm_press.#pressure)
+                                 flanhar(.therm_press.#pressure)
+                                 flanhar(.bulk_press.#pressure)
+                                 flanhar(.heat_press.#pressure)
+                                 flanhar(.heat_anis_press.#pressure)
+                                 flanhar(.tstress_press.#pressure)
+                                 flanhar(.gamma_press.#pressure)
+                                 flanhar(.ggamma_press.#pressure)
+                                 flanhar(.el_cons_s_press.#pressure)
+                                 flanhar(.el_comp_s_press.#pressure)
+                                 flanhar(.macro_el_press.#pressure)
+                                 flanhar(.macro_el_s_press.#pressure)
+                                 flanhar(.sound_vel_press.#pressure)
+                                 flanhar(.sound_vel_s_press.#pressure)
+                 write_anhar_anis_ptt
+                                 flanhar(.temp.#temp)
+                                 flanhar(.celldm_temp.#temp)
+                                 flanhar(.therm_temp.#temp)
+                                 flanhar(.bulk_temp.#temp)
+                                 flanhar(.heat_temp.#temp)
+                                 flanhar(.heat_anis_temp.#temp)
+                                 flanhar(.tstress_temp.#temp)
+                                 flanhar(.gamma_temp.#temp)
+                                 flanhar(.ggamma_temp.#temp)
+                                 flanhar(.el_cons_s_temp.#temp)
+                                 flanhar(.el_comp_s_temp.#temp)
+                                 flanhar(.macro_el_temp.#temp)
+                                 flanhar(.macro_el_s_temp.#temp)
+                                 flanhar(.sound_vel_temp.#temp)
+                                 flanhar(.sound_vel_s_temp.#temp)
+                 plot_anhar_anis            flgnuplot(_anhar_celldm)   
+                                                        flpsanhar(.celldm)
+                 plot_anhar_anis_alpha      flgnuplot(_anhar_alpha)   
+                                                        flpsanhar(.alpha)
+                 plot_anhar_anis_dw         flgnuplot(anhar_anis_dw) 
+                                                        flpsanhar(.anis_dw)
+                 plot_thermal_stress        flgnuplot(.tstress)  
+                                                        flpsanhar(.tstress)
+                 plot_generalized_gruneisen flgnuplot(.ggamma)  
+                                                        flpsanhar(.ggamma)
+                 plot_anhar_energy          flgnuplot(_anhar_energy) 
+                                                      flpsanhar(.energy)
+                 plot_anhar_volume          flgnuplot(_anhar_volume) 
+                                                      flpsanhar(.volume)
+                 plot_anhar_bulk            flgnuplot(_anhar_bulk) 
+                                                      flpsanhar(.bulk)
+                 plot_anhar_beta            flgnuplot(_anhar_beta) 
+                                                      flpsanhar(.beta)
+                 plot_anhar_heat            flgnuplot(_anhar_heat) 
+                                                      flpsanhar(.heat)
+                 plot_anhar_gamma           flgnuplot(_anhar_gamma) 
+                                                      flpsanhar(.gamma)
+                 plot_anhar_dbulk           flgnuplot(_anhar_dbulk) 
+                                                      flpsanhar(.dbulk)
+                 plot_anhar_press           flgnuplot(_pressure)
+                                                      flpsanhar(.pressure)
+                 plot_anhar_thermo          flgnuplot(_anhar_therm) 
+                                                      flpsanhar(.therm)
                  write_gruneisen_bands_anis
                                  flgrun(_#)
                                  flgrun(_freq)
@@ -559,11 +695,26 @@ mur_lc_t
                                  flanhar(.el_cons_ph)
                                  flanhar(.el_comp)
                                  flanhar(.el_comp_ph)
-                 plot_elastic_t                 flgnuplot(_el_cons)  
-                                                           flpsanhar(.el_cons)
-                                                flgnuplot(_el_comp)  
-                                                           flpsanhar(.el_comp)
-elastic_constants_t
+                 plot_elastic_t(0)          flgnuplot(_el_cons)  
+                                                       flpsanhar(.el_cons)
+                 plot_elastic_t(1)          flgnuplot(_el_comp)  
+                                                       flpsanhar(.el_comp)
+                 write_elastic_pt 
+                                 flanhar(.el_cons_press#pressure)
+                                 flanhar(.el_comp_press#pressure)
+                 plot_elastic_pt(0)         flgnuplot(_el_cons_p)      
+                                                      flpsanhar(.el_cons_p)
+                 plot_elastic_pt(1)         flgnuplot(_el_comp_p)      
+                                                      flpsanhar(.el_comp_p)
+                 write_elastic_ptt 
+                                 flanhar(.el_cons_temp#temp)
+                                 flanhar(.el_comp_temp#temp)
+                 plot_elastic_ptt(0)        flgnuplot(_el_cons_t)      
+                                                      flpsanhar(.el_cons_t)
+                 plot_elastic_ptt(1)        flgnuplot(_el_comp_t)      
+                                                      flpsanhar(.el_comp_t)
+
+elastic_constants_geo
                  write_elastic_t_qha
                                  flanhar.el_cons.g#g
                                  flanhar.el_cons.g#g_ph

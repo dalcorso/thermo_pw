@@ -152,7 +152,7 @@ RETURN
 END SUBROUTINE interpolate_thermo
 
 !-----------------------------------------------------------------------
-SUBROUTINE interpolate_thermo_p(vmin_p, ph_thermo, thermo_p, itemp)
+SUBROUTINE interpolate_thermo_p(vmin_p, celldm_p, ph_thermo, thermo_p, itemp)
 !-----------------------------------------------------------------------
 !
 !  This subroutine receives the desired thermodynamical quantity at 
@@ -180,7 +180,8 @@ USE mp,             ONLY : mp_sum
 
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: itemp
-REAL(DP), INTENT(IN)  :: vmin_p(npress), ph_thermo(ntemp, tot_ngeo)
+REAL(DP), INTENT(IN)  :: vmin_p(npress), ph_thermo(ntemp, tot_ngeo), &
+                         celldm_p(6,npress)
 
 REAL(DP), INTENT(OUT) :: thermo_p(npress)
 
@@ -211,7 +212,7 @@ DO igeo=1, tot_ngeo
    IF (lmurn) THEN
       x(1,ndata)=omega_geo(igeo)
    ELSE
-      CALL errore('intepolate_thermo_p','Not implemented',1)
+      CALL compress_celldm(celldm_geo(1,igeo), x(1,ndata), nvar, ibrav)
    ENDIF
 ENDDO
 !
@@ -235,6 +236,7 @@ DO ipress=startp,lastp
    IF (lmurn) THEN
       x_pos_min(1)=vmin_p(ipress)
    ELSE
+      CALL compress_celldm(celldm_p(1,ipress), x_pos_min, nvar, ibrav)
    ENDIF
 
    IF (poly_degree_thermo == 4) THEN
@@ -296,6 +298,29 @@ DEALLOCATE(x)
 !
 RETURN
 END SUBROUTINE interpolate_thermo_p
+!
+!------------------------------------------------------------------------
+SUBROUTINE interpolate_e0_p(vmin_ptt, celldm_ptt, ph_e0, e0_p)
+!------------------------------------------------------------------------
+!
+USE kinds,             ONLY : DP
+USE control_pressure,  ONLY : npress
+USE thermo_mod,        ONLY : tot_ngeo
+IMPLICIT NONE
+
+REAL(DP), INTENT(IN)  :: vmin_ptt(npress), celldm_ptt(6,npress), &
+                         ph_e0(tot_ngeo)
+REAL(DP), INTENT(OUT) :: e0_p(npress)
+
+INTEGER :: ipress
+
+DO ipress=1, npress
+   CALL interpolate_e0(vmin_ptt(ipress), celldm_ptt(:,ipress), ph_e0, &
+                                  e0_p(ipress))
+ENDDO
+
+RETURN
+END SUBROUTINE interpolate_e0_p
 
 ! Copyright (C) 2019 Cristiano Malica
 

@@ -382,3 +382,266 @@ DEALLOCATE(el_cons_p)
 RETURN
 END SUBROUTINE write_elastic_mur_p
 
+!----------------------------------------------------------------------
+SUBROUTINE write_elastic_pt( )
+!----------------------------------------------------------------------
+!
+!  This routine writes on file the elastic constants as a function of
+!  temperature intepolating them at the volume that minimizes the
+!  Helmholtz (or Gibbs) free energy at temperature T. This routine
+!  does this for selected pressures.
+!
+USE kinds,      ONLY : DP
+USE io_global,  ONLY : stdout
+USE thermo_mod, ONLY : ibrav_geo, celldm_geo
+USE thermo_sym, ONLY : laue
+USE control_quartic_energy, ONLY : lsolve, poly_degree_elc
+
+USE linear_surfaces, ONLY : fit_multi_linear
+USE quadratic_surfaces, ONLY : fit_multi_quadratic
+USE cubic_surfaces, ONLY : fit_multi_cubic
+USE quartic_surfaces, ONLY : fit_multi_quartic
+
+USE elastic_constants, ONLY : write_el_cons_on_file
+USE control_elastic_constants, ONLY : el_con_geo, lelastic, lelasticf
+USE lattices,       ONLY : crystal_parameters
+USE control_pressure, ONLY : npress_plot, ipress_plot, press
+USE control_thermo, ONLY : ltherm_dos, ltherm_freq
+USE anharmonic_pt,     ONLY : celldm_pt, el_cons_pt, el_comp_pt, b0_pt
+USE polynomial, ONLY : poly1, poly2, poly3, poly4, init_poly, clean_poly
+USE data_files, ONLY : flanhar
+USE temperature, ONLY : ntemp, temp
+IMPLICIT NONE
+CHARACTER(LEN=256) :: filelastic
+INTEGER :: igeo, ibrav, nvar, ndata
+REAL(DP), ALLOCATABLE :: x(:,:), f(:)
+TYPE(poly1), ALLOCATABLE :: ec_p1(:,:)
+TYPE(poly2), ALLOCATABLE :: ec_p2(:,:)
+TYPE(poly3), ALLOCATABLE :: ec_p3(:,:)
+TYPE(poly4), ALLOCATABLE :: ec_p4(:,:)
+INTEGER :: i, j, idata, itemp, ipressp, ipress
+INTEGER :: compute_nwork
+
+IF (npress_plot==0) RETURN
+
+ibrav=ibrav_geo(1)
+nvar=crystal_parameters(ibrav)
+
+ndata=compute_nwork()
+ALLOCATE(x(nvar,ndata))
+ALLOCATE(f(ndata))
+ALLOCATE(ec_p1(6,6))
+ALLOCATE(ec_p2(6,6))
+ALLOCATE(ec_p3(6,6))
+ALLOCATE(ec_p4(6,6))
+
+DO i=1,6
+   DO j=i,6
+      CALL init_poly(nvar,ec_p1(i,j))
+      CALL init_poly(nvar,ec_p2(i,j))
+      CALL init_poly(nvar,ec_p3(i,j))
+      CALL init_poly(nvar,ec_p4(i,j))
+   ENDDO
+ENDDO
+!
+!  Part 1 evaluation of the polynomial coefficients
+!
+CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
+
+DO i=1,6
+   DO j=i,6
+      IF (el_con_geo(i,j,1)>0.1_DP) THEN
+         WRITE(stdout,'(/,5x,"Fitting elastic constants C(",i4,",",i4,")")')&
+                       i, j
+         DO idata=1,ndata
+            f(idata)=el_con_geo(i,j,idata)
+         END DO
+
+         IF (poly_degree_elc==4) THEN
+            CALL fit_multi_quartic(ndata,nvar,lsolve,x,f,ec_p4(i,j)) 
+         ELSEIF (poly_degree_elc==3) THEN
+            CALL fit_multi_cubic(ndata,nvar,lsolve,x,f,ec_p3(i,j)) 
+         ELSEIF (poly_degree_elc==2) THEN
+            CALL fit_multi_quadratic(ndata,nvar,lsolve,x,f,ec_p2(i,j))      
+         ELSEIF (poly_degree_elc==1) THEN
+            CALL fit_multi_linear(ndata,nvar,lsolve,x,f,ec_p1(i,j))
+         ELSE
+            CALL errore('write_elastic_t','wrong poly_degree_elc',1)
+         ENDIF
+      ENDIF
+   ENDDO
+ENDDO
+!
+!  Part 2: interpolation of the elastic constants at the temperature 
+!          dependent geometry and computation of the compliances and
+!          bulk modulus
+!
+IF (ltherm_dos) THEN
+   DO ipressp=1, npress_plot
+      ipress=ipress_plot(ipressp)
+      CALL interpolate_el_cons(celldm_pt(:,:,ipressp), nvar, ibrav, ec_p1,  &
+           ec_p2, ec_p3, ec_p4, poly_degree_elc, el_cons_pt(:,:,:,ipressp), &
+           el_comp_pt(:,:,:,ipressp), b0_pt(:,ipressp))
+      lelastic=.TRUE.
+      filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_press'
+      CALL add_value(filelastic, press(ipress))
+      CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, &
+           el_cons_pt(:,:,:,ipressp), b0_pt(:,ipressp), filelastic, 0)
+      filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp_press'
+      CALL add_value(filelastic, press(ipress))
+      CALL write_el_cons_on_file(temp, ntemp, ibrav, laue, &
+           el_comp_pt(:,:,:,ipressp), b0_pt(:,ipressp), filelastic, 1)
+   ENDDO
+ENDIF
+
+DEALLOCATE(x)
+DEALLOCATE(f)
+DO i=1,6
+   DO j=i,6
+      CALL clean_poly(ec_p1(i,j))
+      CALL clean_poly(ec_p2(i,j))
+      CALL clean_poly(ec_p3(i,j))
+      CALL clean_poly(ec_p4(i,j))
+   ENDDO
+ENDDO
+DEALLOCATE(ec_p1)
+DEALLOCATE(ec_p2)
+DEALLOCATE(ec_p3)
+DEALLOCATE(ec_p4)
+
+RETURN
+END SUBROUTINE write_elastic_pt
+!
+!----------------------------------------------------------------------
+SUBROUTINE write_elastic_ptt( )
+!----------------------------------------------------------------------
+!
+!  This routine writes on file the elastic constants as a function of
+!  pressure intepolating them at the volume that minimizes the
+!  Helmholtz (or Gibbs) free energy at temperature T. It does
+!  this at selected temperatures.
+!
+USE kinds,      ONLY : DP
+USE io_global,  ONLY : stdout
+USE thermo_mod, ONLY : ibrav_geo, celldm_geo
+USE thermo_sym, ONLY : laue
+USE control_quartic_energy, ONLY : lsolve, poly_degree_elc
+
+USE linear_surfaces, ONLY : fit_multi_linear
+USE quadratic_surfaces, ONLY : fit_multi_quadratic
+USE cubic_surfaces, ONLY : fit_multi_cubic
+USE quartic_surfaces, ONLY : fit_multi_quartic
+
+USE elastic_constants, ONLY : write_el_cons_on_file
+USE control_elastic_constants, ONLY : el_con_geo, lelastic, lelasticf
+USE lattices,       ONLY : crystal_parameters
+USE temperature,    ONLY : ntemp_plot, itemp_plot
+USE control_pressure,  ONLY : npress, press
+USE control_thermo,    ONLY : ltherm_dos
+USE anharmonic_ptt,    ONLY : celldm_ptt, el_cons_ptt, el_comp_ptt, b0_ptt, &
+                               macro_el_ptt
+USE polynomial, ONLY : poly1, poly2, poly3, poly4, init_poly, clean_poly
+USE data_files, ONLY : flanhar
+USE temperature, ONLY : ntemp, temp
+IMPLICIT NONE
+CHARACTER(LEN=256) :: filelastic
+INTEGER :: igeo, ibrav, nvar, ndata
+REAL(DP), ALLOCATABLE :: x(:,:), f(:)
+TYPE(poly1), ALLOCATABLE :: ec_p1(:,:)
+TYPE(poly2), ALLOCATABLE :: ec_p2(:,:)
+TYPE(poly3), ALLOCATABLE :: ec_p3(:,:)
+TYPE(poly4), ALLOCATABLE :: ec_p4(:,:)
+INTEGER :: i, j, idata, itemp, itempp
+INTEGER :: compute_nwork
+
+IF (ntemp_plot==0) RETURN
+
+ibrav=ibrav_geo(1)
+nvar=crystal_parameters(ibrav)
+
+ndata=compute_nwork()
+ALLOCATE(x(nvar,ndata))
+ALLOCATE(f(ndata))
+ALLOCATE(ec_p1(6,6))
+ALLOCATE(ec_p2(6,6))
+ALLOCATE(ec_p3(6,6))
+ALLOCATE(ec_p4(6,6))
+
+DO i=1,6
+   DO j=i,6
+      CALL init_poly(nvar,ec_p1(i,j))
+      CALL init_poly(nvar,ec_p2(i,j))
+      CALL init_poly(nvar,ec_p3(i,j))
+      CALL init_poly(nvar,ec_p4(i,j))
+   ENDDO
+ENDDO
+!
+!  Part 1 evaluation of the polynomial coefficients
+!
+CALL set_x_from_celldm(ibrav, nvar, ndata, x, celldm_geo)
+
+DO i=1,6
+   DO j=i,6
+      IF (el_con_geo(i,j,1)>0.1_DP) THEN
+         WRITE(stdout,'(/,5x,"Fitting elastic constants C(",i4,",",i4,")")')&
+                       i, j
+         DO idata=1,ndata
+            f(idata)=el_con_geo(i,j,idata)
+         END DO
+
+         IF (poly_degree_elc==4) THEN
+            CALL fit_multi_quartic(ndata,nvar,lsolve,x,f,ec_p4(i,j)) 
+         ELSEIF (poly_degree_elc==3) THEN
+            CALL fit_multi_cubic(ndata,nvar,lsolve,x,f,ec_p3(i,j)) 
+         ELSEIF (poly_degree_elc==2) THEN
+            CALL fit_multi_quadratic(ndata,nvar,lsolve,x,f,ec_p2(i,j))      
+         ELSEIF (poly_degree_elc==1) THEN
+            CALL fit_multi_linear(ndata,nvar,lsolve,x,f,ec_p1(i,j))
+         ELSE
+            CALL errore('write_elastic_t','wrong poly_degree_elc',1)
+         ENDIF
+      ENDIF
+   ENDDO
+ENDDO
+!
+!  Part 2: interpolation of the elastic constants at the temperature 
+!          dependent geometry and computation of the compliances and
+!          bulk modulus
+!
+IF (ltherm_dos) THEN
+   DO itempp=1, ntemp_plot
+      itemp=itemp_plot(itempp)
+      CALL interpolate_el_cons_p(celldm_ptt(:,:,itempp), nvar, ibrav, ec_p1,  &
+           ec_p2, ec_p3, ec_p4, poly_degree_elc, el_cons_ptt(:,:,:,itempp), &
+           el_comp_ptt(:,:,:,itempp), macro_el_ptt(:,:,itempp))
+      lelastic=.TRUE.
+      filelastic='anhar_files/'//TRIM(flanhar)//'.el_cons_temp'
+      b0_ptt(:,itempp)= (macro_el_ptt(1,:,itempp)+&
+                         macro_el_ptt(5,:,itempp)) * 0.5_DP
+      CALL add_value(filelastic, temp(itemp))
+      CALL write_el_cons_on_file(press, npress, ibrav, laue, &
+           el_cons_ptt(:,:,:,itempp), b0_ptt(:,itempp), filelastic, 2)
+      filelastic='anhar_files/'//TRIM(flanhar)//'.el_comp_temp'
+      CALL add_value(filelastic, temp(itemp))
+      CALL write_el_cons_on_file(press, npress, ibrav, laue, &
+           el_comp_ptt(:,:,:,itempp), b0_ptt(:,itempp), filelastic, 3)
+   ENDDO
+ENDIF
+
+DEALLOCATE(x)
+DEALLOCATE(f)
+DO i=1,6
+   DO j=i,6
+      CALL clean_poly(ec_p1(i,j))
+      CALL clean_poly(ec_p2(i,j))
+      CALL clean_poly(ec_p3(i,j))
+      CALL clean_poly(ec_p4(i,j))
+   ENDDO
+ENDDO
+DEALLOCATE(ec_p1)
+DEALLOCATE(ec_p2)
+DEALLOCATE(ec_p3)
+DEALLOCATE(ec_p4)
+
+RETURN
+END SUBROUTINE write_elastic_ptt
