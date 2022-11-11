@@ -462,7 +462,7 @@ as a function of temperature?}}
 There are two ways. Both of them are a two step calculation. 
 The fastest, but less accurate, method uses the ``quasi-static'' approximation.
 First use 
-\texttt{what='elastic\_constants\_t'}. This option computes the elastic
+\texttt{what='elastic\_constants\_geo'}. This option computes the elastic
 constants at $T=0$ K for all the geometries used by 
 \texttt{what='mur\_lc\_t'} and
 saves them in the directory \texttt{elastic\_constants}.  
@@ -477,7 +477,7 @@ minimizes the Helmholtz (or Gibbs at finite pressure) free energy at
 temperature $T$. \\
 The second method uses the ``quasi-harmonic'' approximation and
 requires many phonon calculations at many geometries.
-First use \texttt{what='elastic\_} \texttt{constants\_t'} and set
+First use \texttt{what='elastic\_} \texttt{constants\_geo'} and set
 \texttt{use\_free\_energy=} \texttt{.TRUE.}. This option computes the 
 temperature dependent elastic constants taking as unperturbed geometries 
 those used by \texttt{what='mur\_lc\_t'} and saves them in the directory 

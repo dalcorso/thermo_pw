@@ -278,7 +278,7 @@ SUBROUTINE thermo_setup()
 !
   IF ( ngeo(1)==0 ) THEN
      IF (what(1:4) == 'scf_') ngeo=1
-     IF (what(1:6) == 'mur_lc'.OR.what=='elastic_constants_t') THEN
+     IF (what(1:6) == 'mur_lc'.OR.what=='elastic_constants_geo') THEN
         IF (lmurn) THEN
            ngeo(1)=9
            DO igeo=2,6

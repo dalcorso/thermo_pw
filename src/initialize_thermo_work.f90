@@ -307,7 +307,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
            IF (meta_ionode) ios = f_mkdir_safe( 'phdisp_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'gnuplot_files' )
            IF (meta_ionode) ios = f_mkdir_safe( 'elastic_constants' )
-        CASE ('elastic_constants_t')
+        CASE ('elastic_constants_geo')
            lectqha=.TRUE.
            lph=use_free_energy
            IF (.NOT.lph) lpart2_pw=lel_free_energy
@@ -374,7 +374,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               'mur_lc_disp',   &
               'mur_lc_t')
            CALL initialize_ph_work(nwork)
-        CASE ('elastic_constants_t')
+        CASE ('elastic_constants_geo')
            IF (use_free_energy) THEN
               CALL initialize_ph_work(nwork)
            ELSEIF (lel_free_energy) THEN
@@ -465,7 +465,7 @@ SUBROUTINE initialize_thermo_work(nwork, part)
                  IF (no_ph(iwork)) lpwscf(iwork)=.FALSE.
               ENDDO
            ENDIF
-        CASE ('elastic_constants_t')  
+        CASE ('elastic_constants_geo')  
            DO igeom_qha=start_geometry_qha, last_geometry_qha
               DO iwork=1,work_base
                  iwork_tot= (igeom_qha-1)*work_base + iwork
@@ -501,12 +501,12 @@ SUBROUTINE initialize_thermo_work(nwork, part)
               lpwband(iwork)=.TRUE.
            ENDDO
 !
-!  Here the case of elastic_constants_t. In this case we must
+!  Here the case of elastic_constants_geo. In this case we must
 !  do a el_dos calculation if use_free_energy is .FALSE. and
 !  lel_free_energy is .TRUE. or a phonon calculation is 
 !  use_free_energy is  .TRUE.
 !
-        CASE('elastic_constants_t')
+        CASE('elastic_constants_geo')
            IF (use_free_energy) THEN
               CALL initialize_flags_for_ph(nwork)
            ELSE

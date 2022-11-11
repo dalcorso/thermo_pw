@@ -157,7 +157,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
 !
 !    the case of quasi-harmonic elastic constants
 !
-        CASE ('elastic_constants_t')
+        CASE ('elastic_constants_geo')
            niter=electron_maxstep
            CALL set_work_for_relaxation(iwork)
            CALL set_work_for_elastic_const(iwork)
@@ -176,7 +176,7 @@ SUBROUTINE set_thermo_work_todo(iwork, part, iq_point, irr_value)
               'mur_lc_disp',    &
               'mur_lc_t')       
            CALL set_work_for_ph(iwork, igeom, iq_point, irr_value)
-        CASE('elastic_constants_t')
+        CASE('elastic_constants_geo')
            IF (use_free_energy) THEN
               CALL set_work_for_ph(iwork, igeom, iq_point, irr_value)
            ELSEIF (lel_free_energy) THEN

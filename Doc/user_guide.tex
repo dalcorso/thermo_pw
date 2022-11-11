@@ -1700,7 +1700,7 @@ the enthalpy as a function of pressure is shown. Moreover
 separate plots show the crystal parameters as well as the volume as 
 a function of pressure. When in the directory \texttt{elastic\_constants}
 there are the elastic constants for each geometry (calculated by the option
-\texttt{what=elastic\_constants\_t}), these are interpolated
+\texttt{what=elastic\_constants\_geo}), these are interpolated
 at the pressure dependent crystal parameters and shown on output.
 Using the input variable \texttt{lgeo\_to\_file=.TRUE.} the code writes
 on file the crystal parameters that for each \texttt{celldm(1)} 
@@ -1993,7 +1993,7 @@ the thermal expansion tensor which
 is compared with that obtained from the numerical derivatives of the 
 crystal parameters obtained from the minimization of the Helmholtz free energy.
 If many files with the elastic constants, one for each geometry, as
-produced with the option \texttt{elastic\_constants\_t}, are found
+produced with the option \texttt{elastic\_constants\_geo}, are found
 in the \texttt{elastic\_constants} directory and \texttt{lb0\_t=.TRUE.}, the bulk modulus and 
 the elastic constants
 are computed as a function of temperature within the ``quasi-static
@@ -2004,7 +2004,7 @@ If one or many elastic constants files are found in the
 and elastic constants are computed as a function of temperature 
 within the ``quasi-harmonic approximation" and are used
 to calculate the other thermodynamic properties (see a more detailed
-discussion in the option \texttt{what=elastic\_constants\_t}).
+discussion in the option \texttt{what=elastic\_constants\_geo}).
 In addition to the
 quantities plotted for cubic solids, the code plots also the elastic
 constants and the bulk modulus as a function of the temperature and
@@ -2278,7 +2278,7 @@ When \texttt{all\_geometries\_together=.TRUE.}: number of tasks of the
 phonon code times the number of geometries. \\
 
 \newpage
-{\color{coral}\section{what='elastic\_constants\_t'}}
+{\color{coral}\section{what='elastic\_constants\_geo'}}
 \color{black}
 
 With this option the code can compute the elastic constants and elastic

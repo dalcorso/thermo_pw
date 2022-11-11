@@ -34,7 +34,7 @@ IF (ibrav==91 .OR. ibrav==-13 .OR. ibrav==13 .OR. ibrav==14 .OR. ibrav==0) &
 !
 !  cases in which we need to double gamma
 !
-double_gamma=(what=='mur_lc_t'.OR.what=='elastic_constants_t'.OR.&
+double_gamma=(what=='mur_lc_t'.OR.what=='elastic_constants_geo'.OR.&
               what=='scf_disp'.OR.what=='mur_lc_disp')
 !
 !  first select the Brillouin zone type
