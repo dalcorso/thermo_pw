@@ -22,8 +22,9 @@ SUBROUTINE quadratic_fit()
   !
   USE kinds,        ONLY : DP
   USE cell_base,    ONLY : ibrav
-  USE control_mur,  ONLY : emin
+  USE control_mur,  ONLY : emin, vmin
   USE equilibrium_conf, ONLY : celldm0
+  USE initial_conf, ONLY : ibrav_save
   USE thermo_mod,   ONLY : celldm_geo, omega_geo, energy_geo
   USE control_pressure, ONLY : pressure, pressure_kb
   USE control_quadratic_energy, ONLY : hessian_v, hessian_e, x_pos_min, &
@@ -51,6 +52,7 @@ SUBROUTINE quadratic_fit()
   REAL(DP), ALLOCATABLE :: x(:,:), y(:), f(:)
   REAL(DP) :: ymin, ymin4
   INTEGER  :: compute_nwork
+  REAL(DP) :: compute_omega_geo
   !
   ! Only the first image does the calculation
   !
@@ -141,6 +143,7 @@ SUBROUTINE quadratic_fit()
      CALL expand_celldm(celldm0, x_min_4, nvar, ibrav)
      emin=ymin4
   ENDIF
+  vmin=compute_omega_geo(ibrav_save, celldm0)
 
   DEALLOCATE(f)
   DEALLOCATE(x)

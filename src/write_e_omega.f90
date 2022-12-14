@@ -209,7 +209,7 @@ SUBROUTINE write_e_omega_t(itemp, phf, ndatatot)
 !
 USE kinds,            ONLY : DP
 USE constants,        ONLY : ry_kbar
-USE data_files,       ONLY : flevdat
+USE data_files,       ONLY : flevdat, flanhar
 USE cell_base,        ONLY : ibrav
 USE thermo_mod,       ONLY : omega_geo, celldm_geo, energy_geo, no_ph
 USE control_vol,      ONLY : vmin_input, vmax_input
@@ -249,8 +249,8 @@ IF (itemp<=0) RETURN
 !
 !  The name of the output files that will contain the volume, energy, pressure
 !
-filename="anhar_files/"//TRIM(flevdat)//'_mur.'//TRIM(int_to_char(itemp))
-CALL add_pressure(filename)
+filename="anhar_files/"//TRIM(flanhar)//'.mur_temp'
+CALL add_value(filename,temp(itemp))
 
 filename1="anhar_files/"//TRIM(flevdat)//'_mur_celldm.'//&
                                                 TRIM(int_to_char(itemp))
@@ -329,15 +329,16 @@ IF (vmax_input == 0.0_DP) vmax_input=omega(1) * 1.02_DP
 
 IF (ionode) THEN
 !
-!  Print the energy, enthalpy, and pressure as a function of the volume
+!  Print the free energy, gibbs energy, and pressure as a function 
+!  of the volume
 !
    iu_mur=find_free_unit()
    OPEN(UNIT=iu_mur, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
    CALL write_mur_start_line(itemp, iu_mur)
    DO ipress=1,npress
       WRITE(iu_mur,'(f18.10,3f20.10)') omega(ipress), e(ipress)+ &
-            pressure*omega(ipress), e(ipress)+press(ipress)*omega(ipress), &
-            press(ipress) * ry_kbar
+            pressure*omega(ipress), &
+            e(ipress)+press(ipress)*omega(ipress)/ry_kbar, press(ipress) 
    ENDDO 
    CLOSE(UNIT=iu_mur, STATUS='KEEP')
 !

@@ -155,10 +155,10 @@ USE gnuplot,          ONLY : gnuplot_start, gnuplot_end,  &
                              gnuplot_set_gfact,           &
                              gnuplot_write_command,       &
                              gnuplot_write_file_mul_data
-USE data_files,       ONLY : flevdat
+USE data_files,       ONLY : flevdat, flanhar
 USE control_mur,      ONLY : omegap0
 USE control_pressure, ONLY : pmin, pmax
-USE temperature,      ONLY : ntemp, ntemp_plot, itemp_plot
+USE temperature,      ONLY : temp, ntemp, ntemp_plot, itemp_plot
 USE color_mod,        ONLY : color
 USE initial_conf,     ONLY : ibrav_save
 USE mp_images,        ONLY : my_image_id, root_image
@@ -306,9 +306,8 @@ DO itempp=1,ntemp_plot
    last_step=(itempp==ntemp_plot)
    itemp=itemp_plot(itempp)
    istep=MOD(istep,8)+1
-   filename="anhar_files/"//TRIM(flevdat)//'_mur'//&
-                                               TRIM(int_to_char(itemp))
-   CALL add_pressure(filename)
+   filename="anhar_files/"//TRIM(flanhar)//'.mur_temp'
+   CALL add_value(filename,temp(itemp))
    CALL gnuplot_write_file_mul_data(filename,4,1,color(istep),&
                                           first_step,last_step,.FALSE.)
 ENDDO

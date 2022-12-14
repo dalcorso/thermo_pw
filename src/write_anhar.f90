@@ -508,7 +508,8 @@ IF (meta_ionode) THEN
    iu_therm=find_free_unit()
    OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
 
-   WRITE(iu_therm,'("# beta is the volume thermal expansion ")')
+   WRITE(iu_therm,'("# beta is the volume thermal expansion, F the Helmholtz&
+                    & (or Gibbs) energy ")')
    WRITE(iu_therm,'("#   T (K)         V(T) (a.u.)^3          F (T) (Ry) &
                    &      beta x 10^6 (1/K)")' )
 
@@ -547,8 +548,8 @@ INTEGER :: find_free_unit
 IF (meta_ionode) THEN
    OPEN(UNIT=iu_press, FILE=TRIM(filename), STATUS='UNKNOWN', &
                                                          FORM='FORMATTED')
-   WRITE(iu_press,'("#   p (kbar)      Volume(p) ((a.u.)^3)      V/V(300K) &
-        &    E_min (p) (Ry)         beta(p) x 10^6 (1/K)  T=",f16.4," K")' ) &
+   WRITE(iu_press,'("#   p (kbar)",12x,"Volume(p) ((a.u.)^3)",6x,"V/V(300K)", &
+        &5x,"E_min (p) (Ry)",3x,"beta(p) x 10^6 (1/K)  T=",f16.4," K")' ) &
                                                                temp(itemp)
    DO ipress=1,npress
       WRITE(iu_press,'(5e20.10)') press(ipress), vmin(ipress), vminv0(ipress),&
@@ -584,9 +585,10 @@ IF (meta_ionode) THEN
    iu_therm=find_free_unit()
    OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
 
-   WRITE(iu_therm,'("# beta is the volume thermal expansion ")')
-   WRITE(iu_therm,'("#   T (K)         V(T) (a.u.)^3   V(T)/V0   F (T) (Ry) &
-                   &      beta x 10^6 (1/K)")' )
+   WRITE(iu_therm,'("# beta is the volume thermal expansion, F the Gibbs &
+                                                         &free energy ")')
+   WRITE(iu_therm,'("#   T (K)",9x,"V(T) (a.u.)^3",15x,"V(T)/V0",12x,&
+                    &"F (T) (Ry)",10x,"beta x 10^6 (1/K)")' )
 
    DO itemp = 2, ntemp-1
       WRITE(iu_therm, '(e12.5,3e23.13,e18.8)') temp(itemp), &
@@ -742,14 +744,14 @@ IF (meta_ionode) THEN
 
    WRITE(iu_press,'("#  ")')
    IF (ieos==2) THEN
-      WRITE(iu_press,'("#  p (kbar)",10x,"dB/dp (T)",10x,&
-                       &"d^2B/dp^2 (1/kbar), T=",f16.4," K")') temp(itemp)
+      WRITE(iu_press,'("#  p (kbar)",10x,"dB/dp (p)",7x,&
+                       &"d^2B/dp^2(p) (1/kbar), T=",f16.4," K")') temp(itemp)
       DO ipress = 1, npress
          WRITE(iu_press, '(e12.5,2e23.13)') press(ipress), b01(ipress), &
                                                            b02(ipress)
       ENDDO
    ELSE
-      WRITE(iu_press,'("#   p (kbar)         dB/dp (T)   T=",f16.4," K")') &
+      WRITE(iu_press,'("#   p (kbar)         dB/dp (p)   T=",f16.4," K")') &
                                                                  temp(itemp)
       DO ipress = 1, npress
          WRITE(iu_press, '(e12.5,e23.13)') press(ipress), b01(ipress)
@@ -1534,7 +1536,7 @@ CALL divide(world_comm, npress, startp, lastp)
 DO itempp=1,ntemp_plot
    itemp=itemp_plot(itempp)
    CALL write_mur_pol(vmin, b0, b01, b02, emin, a_t(:,itemp), m1, itempp)
-   CALL write_thermal_press(a_t(:,itemp),m1, itempp)
+   CALL write_thermal_press(a_t(:,itemp), m1, itempp)
 
    DO ipress=startp,lastp
       CALL find_min_mur_pol(vmin_p(ipress), b0_p(ipress) / ry_kbar,    &

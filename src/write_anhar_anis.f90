@@ -1653,8 +1653,8 @@ IF (meta_ionode) THEN
    OPEN(UNIT=iu_therm, FILE=TRIM(filename), STATUS='UNKNOWN', FORM='FORMATTED')
 
    WRITE(iu_therm,'("# All heat capacities in (Ry/cell/K)")')
-   WRITE(iu_therm,'("# T (K)      (C_s-C_e)(T)              C_P(T) &
-                              &                C_V-C_e(T) ")')
+   WRITE(iu_therm,'("# press (kbar)",5x,"(C_s-C_e)(p)",16x, "C_P(p)",5x, &
+                                                        &"C_V-C_e(p) ")')
 
    DO ipress = 1, npress
       WRITE(iu_therm, '(e12.5,3e22.13)') press(ipress), &
