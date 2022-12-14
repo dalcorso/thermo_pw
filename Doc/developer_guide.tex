@@ -1085,7 +1085,7 @@ density of states refers to the sum of spin up and spin down states.
 This file contains the electron thermodynamic properties as a function of
 temperature. It has the format:
 \begin{verbatim}
-#   T     energy   free energy   entropy    C_v     chemical pot
+#   T  energy   free energy   entropy  C_v  chemical pot
 \end{verbatim}
 and contains the electron excitation energy, free energy, entropy, 
 isochoric specific heat and chemical potential.
@@ -1207,10 +1207,10 @@ the atomic $B$ factor calculated within the Debye model. It contains:
 \end{verbatim}
 
 \item 
-\texttt{anhar\_files/flevdat(\_mur.\#temperature)} (default name \texttt{output\_ev.} \texttt{dat\_mur.\#temperature}).
+\texttt{anhar\_files/flanhar(.mur\_temp.\#temperature)} (default name \texttt{output\_anhar.} \texttt{dat.mur\_temp.\#temperature}).
 This file contains the following quantities:
 \begin{verbatim}
-# omega  Helm. energy, Gibbs energy(p), press, press(T = 0K)
+# omega  Helm. energy  Gibbs energy(p) press press(T = 0K)
 \end{verbatim}
 The volume, the Helmholtz free energy (or the Gibbs free
 energy at finite pressure), the Gibbs free energy as a function of pressure,
@@ -1218,10 +1218,11 @@ the pressure and the pressure at $T = 0$ K.
 These quantities are calculated at the temperature 
 \texttt{\#temperature} written in the filename.
 These files are produced only if \texttt{ntemp\_plot>0} for each
-\texttt{temp\_plot}. Moreover the files require \texttt{lmurn=.TRUE.}.
+\texttt{temp\_plot}.
 
 \item
-\texttt{anhar\_files/flevdat(\_free.\#temperature)} (default name \texttt{output\_ev.} \texttt{dat\_free.\#temperature}).
+\texttt{anhar\_files/flanhar(.free\_temp.\#temperature)} (default name \texttt{output\_anhar.} \texttt{dat.free\_temp.\#temperature}).
+
 This file contains the following quantities:
 \begin{verbatim}
 # Volume    energy   ph free-energy   el free energy
@@ -1233,10 +1234,10 @@ These quantities are calculated at the temperature \texttt{\#temperature}
 written in the filename. In these files we report the actual calculated data
 at the geometries where the phonon frequencies have been calculated.
 These files are produced only if \texttt{ntemp\_plot>0} for each
-\texttt{temp\_plot}. Moreover the files require \texttt{lmurn=.TRUE.}.
+\texttt{temp\_plot}. 
 
 \item
-\texttt{anhar\_files/flevdat(\_poly\_free.\#temperature)} (default name \texttt{output} \texttt{\_ev.dat\_poly\_free.\#temperature}).
+\texttt{anhar\_files/flanhar(.poly\_free\_temp.\#temperature)} (default name \texttt{output} \texttt{\_anhar.dat.poly\_free\_temp.\#temperature}).
 This file contains the following quantities:
 \begin{verbatim}
 #  Volume     free energy      thermal pressure 
@@ -1266,7 +1267,7 @@ direct integration over the Brilluoin zone (computing the phonon density
 of states). 
 
 \item
-\texttt{anhar\_files/flanhar(\.press.\#pressure)} (default name \texttt{output\_anhar.} \texttt{dat.press.\#pressure}).
+\texttt{anhar\_files/flanhar(.press.\#pressure)} (default name \texttt{output\_anhar.} \texttt{dat.press.\#pressure}).
 This file contains the following quantities:
 \begin{verbatim}
 #   T (K)    V(T)    V(T)/V0     F (T)     beta(T) 
@@ -1275,22 +1276,23 @@ The temperature, the volume, the volume divided by the volume at $T=300$ K,
 the Gibbs free energy (as a function of volume) and the thermal expansion
 at the pressure \texttt{\#pressure} given in the name of the file.
 These files are produced only if \texttt{npress\_plot>0} for each
-\texttt{press\_plot}. Moreover the files require \texttt{lmurn=.TRUE.}.
+\texttt{press\_plot}. 
 
 \item
-\texttt{anhar\_files/flanhar(\.temp.\#temperature)} (default name \texttt{output\_anhar.} \texttt{dat.temp.\#temperature}).
+\texttt{anhar\_files/flanhar(.temp.\#temperature)} (default name \texttt{output\_anhar.} \texttt{dat.temp.\#temperature}).
 This file contains the following quantities:
 \begin{verbatim}
-#   p (kbar)      Volume(p)     B_T (p)        beta(p)
+#   p (kbar)    Volume(p)  V/V_0(p)  E_min (p)  beta(p)
 \end{verbatim}
-The pressure, the volume, the isothermal bulk modulus, and the thermal 
+The pressure, the volume, the volume divided the volume at $T=300 K$, 
+the free energy at the minimum and the thermal 
 expansion at the temperature \texttt{\#temperature} given in the name 
 of the file.
 These files are produced only if \texttt{ntemp\_plot>0} for each
-\texttt{temp\_plot}. Moreover the files require \texttt{lmurn=.TRUE.}.
+\texttt{temp\_plot}. 
 
 \item
-\texttt{anhar\_files/flanhar(\.vol.\#volume)} (default name \texttt{output\_anhar.dat} \texttt{vol.\#volume}).
+\texttt{anhar\_files/flanhar(.vol.\#volume)} (default name \texttt{output\_anhar.dat} \texttt{vol.\#volume}).
 This file contains the following quantities:
 \begin{verbatim}
 #    T (K)            pressure         pressure (T=0 K) 
@@ -1303,8 +1305,8 @@ of the file.
 These files are produced only if \texttt{nvol\_plot>0} for each
 \texttt{ivol\_plot}. Moreover the files require \texttt{lmurn=.TRUE.}.
 
-\item \texttt{anhar\_files/flanhar(.bulk\_mod)(\_ph)} 
-(default name \texttt{output\_anharm.} \texttt{dat.aux}).
+\item \texttt{anhar\_files/flanhar(.bulk)(\_ph)} 
+(default name \texttt{output\_anharm.} \texttt{dat.bulk}).
 This file is present when \texttt{lmurn=.TRUE.} or when the elastic
 constants are on file and \texttt{lb0\_t=.FALSE.}. It contains:
 \begin{verbatim}
@@ -1319,7 +1321,8 @@ of states).
 
 \item \texttt{anhar\_files/flanhar(.bulk\_press.\#pressure)}
 (default name \texttt{output} \texttt{\_anharm.dat.bulk\_press.\#pressure}).
-These files contain:
+This file is present when \texttt{lmurn=.TRUE.} or when the elastic
+constants are on file and \texttt{lb0\_t=.FALSE.}. It contains:
 \begin{verbatim}
    T        B_T(T)     B_S(T)     (B_S - B_T) (T) 
 \end{verbatim}
@@ -1328,11 +1331,24 @@ and the difference between isoentropic and isothermal bulk moduli.
 All these quantities are calculated at the \texttt{\#pressure} given
 in the name of the file.
 These files are produced only if \texttt{npress\_plot>0} for each
-\texttt{press\_plot}. Moreover the files require \texttt{lmurn=.TRUE.}.
+\texttt{press\_plot}.
 
+\item \texttt{anhar\_files/flanhar(.bulk\_temp.\#temperature)}
+(default name \texttt{output} \texttt{\_anharm.dat.bulk\_temp.\#temperature}).
+This file is present when \texttt{lmurn=.TRUE.} or when the elastic
+constants are on file and \texttt{lb0\_t=.FALSE.}. It contains:
+\begin{verbatim}
+   p (kbar)     B_T(p)     B_S(p)     (B_S - B_T) (p) 
+\end{verbatim}
+The temperature, the isothermal bulk modulus, the isoentropic bulk modulus,
+and the difference between isoentropic and isothermal bulk moduli.
+All these quantities are calculated at the \texttt{\#temperature} given
+in the name of the file.
+These files are produced only if \texttt{ntemp\_plot>0} for each
+\texttt{temp\_plot}.
 
-\item \texttt{anhar\_files/flanhar(.dbulk\_mod)(\_ph)} 
-(default name \texttt{output\_}\\ \texttt{anharm.dat.aux}).
+\item \texttt{anhar\_files/flanhar(.dbulk)(\_ph)} 
+(default name \texttt{output\_}\\ \texttt{anharm.dat.dbulk}).
 This file is present when \texttt{lmurn=.TRUE.}. It contains:
 \begin{verbatim}
    T          dB / dp  (T)      d^2B/dp^2 (T) 
@@ -1346,9 +1362,9 @@ integration over the Brilluoin zone (computing the phonon density of states).
 
 \item \texttt{anhar\_files/flanhar(.dbulk\_press.\#pressure)} 
 (default name \texttt{output\_}\\ \texttt{anharm.dat.dbulk\_press.\#pressure}).
-These files contain:
+This file is present when \texttt{lmurn=.TRUE.}. It contains:
 \begin{verbatim}
-   T          dB / dp  (T)      d^2B/dp^2 (T) 
+   T          dB / dp  (T)      d^2B/dp^2 (T) (1/kbar)
 \end{verbatim}
 The temperature and the derivative of the bulk modulus with respect 
 to pressure. The second derivative of the bulk modulus with respect
@@ -1356,13 +1372,13 @@ to pressure is present only when \texttt{ieos=2}.
 All these quantities are calculated at the \texttt{\#pressure} given
 in the name of the file.
 These files are produced only if \texttt{npress\_plot>0} for each
-\texttt{press\_plot}. Moreover the files require \texttt{lmurn=.TRUE.}.
+\texttt{press\_plot}. 
 
 \item \texttt{anhar\_files/flanhar(.dbulk\_temp.\#temperature)}
 (default name \texttt{out-} \texttt{put\_anharm.dat.dbulk\_temp.\#temperature}).
 These files contain:
 \begin{verbatim}
-#   p (kbar)      dB/dp        d2B/dp2 (1/kbar)
+#   p (kbar)      dB(p)/dp        d2B(p)/dp2 (1/kbar)
 \end{verbatim}
 The pressure, the derivative of the bulk modulus with respect to pressure,
 and the second derivative of the bulk modulus with respect to pressure
@@ -1407,7 +1423,23 @@ difference between isobaric and isochoric heat capacities.
 All these quantities are calculated at the \texttt{\#pressure} given
 in the name of the file.
 These files are produced only if \texttt{npress\_plot>0} for each
-\texttt{press\_plot}. Moreover the files require \texttt{lmurn=.TRUE.}.
+\texttt{press\_plot}. 
+
+\item 
+\texttt{anhar\_files/flanhar(.heat\_temp.\#temperature)}
+(default name \texttt{output} \texttt{\_anhar.heat\_temp.\#temperature)}). 
+This file contains the following quantities:
+\begin{verbatim}
+#   p (kbar)    C_e(p)     (C_P-C_V)(p)    
+\end{verbatim}
+the temperature, the constant strain heat capacity calculated 
+by interpolating the heat capacity calculated at several geometries 
+at the geometry corresponding to a given temperature, the
+difference between isobaric and isochoric heat capacities. 
+All these quantities are calculated at the \texttt{\#temperature} given
+in the name of the file.
+These files are produced only if \texttt{ntemp\_plot>0} for each
+\texttt{temp\_plot}. 
 
 \item 
 \texttt{anhar\_files/flanhar(.aux\_grun)} 
@@ -1428,7 +1460,7 @@ from the free energy derivatives.
 \item 
 \texttt{anhar\_files/flanhar(.heat\_anis)(\_ph)(\_grun)} 
 (default name \\ \texttt{output\_anhar.heat\_anis(\_ph)(\_grun)}). 
-This file is printed when \texttt{lmurn=} \texttt{.FALSE.} and  the elastic
+This file is printed when \texttt{lmurn=} \texttt{.FALSE.} and the elastic
 constants of one or more configurations are on file.
 This file contains the following quantities:
 \begin{verbatim}
@@ -1443,6 +1475,40 @@ free energy calculated from phonon density of states,
 from a three dimensional Brillouin zone integration, or using the
 mode Gr\"uneisen parameters is used to calculate the quantities 
 contained in the file.
+
+\item 
+\texttt{anhar\_files/flanhar(.heat\_anis.press.\#pressure)} 
+(default name \\ \texttt{output\_anhar.heat\_anis.press.\#pressure}). 
+This file is printed when \texttt{lmurn=} \texttt{.FALSE.} and the elastic
+constants of one or more configurations are on file.
+This file contains the following quantities:
+\begin{verbatim}
+#   T       (C_s-C_e)(T)        C_p(T)      (C_V - C_e)(T)    
+\end{verbatim}
+the temperature, the difference between the constant stress and constant
+strain heat capacities, the isobaric heat capacity, and the difference
+between the isochoric and constant strain heat capacities. 
+All these quantities are calculated at the \texttt{\#pressure} given
+in the name of the file.
+These files are produced only if \texttt{npress\_plot>0} for each
+\texttt{press\_plot}.
+
+\item 
+\texttt{anhar\_files/flanhar(.heat\_anis.temp.\#temperature)} 
+(default name \\ \texttt{output\_anhar.heat\_anis.temp.\#temperature}). 
+This file is printed when \texttt{lmurn=} \texttt{.FALSE.} and the elastic
+constants of one or more configurations are on file.
+This file contains the following quantities:
+\begin{verbatim}
+# p (kbar)   (C_s-C_e)(p)     C_p(p)    (C_V - C_e)(p)    
+\end{verbatim}
+the temperature, the difference between the constant stress and constant
+strain heat capacities, the isobaric heat capacity, and the difference
+between the isochoric and constant strain heat capacities. 
+All these quantities are calculated at the \texttt{\#temperature} given
+in the name of the file.
+These files are produced only if \texttt{ntemp\_plot>0} for each
+\texttt{temp\_plot}.
 
 \item
 \texttt{anhar\_files/flanhar.anis(\_ph).\#na.dw} (default name
@@ -1459,7 +1525,6 @@ The extension \texttt{(\_ph)} indicates interpolation of
 quantities calculated from the direct integration over the Brillouin zone,
 while no extension indicates interpolation of quantities obtained
 from the generalized phonon density of states.
-
 
 \item
 \texttt{anhar\_files/flanhar.tstress(\_ph)} (default name 
@@ -1480,6 +1545,40 @@ Brillouin zone,
 while no extension indicates interpolation of the elastic constants at
 the equilibrium geometry obtained from the minimum of the free energy 
 calculated from the phonon density of states.
+
+\item
+\texttt{anhar\_files/flanhar.tstress\_press.\#pressure} (default name \\
+\texttt{output\_therm.dat.tstress\_press.\#pressure}).
+This file is printed when \texttt{lmurn=} \texttt{.FALSE.} and the 
+elastic constants 
+of one or more configurations are on file.
+The thermal stresses are computed as a function of temperature from the
+elastic constants and the thermal expansion.
+The file contains:
+\begin{verbatim}
+#   T   b_{11}  b_{12}  b_{13}  b_{22}  b_{23}  b_{33}
+\end{verbatim}
+All these quantities are calculated at the \texttt{\#pressure} given
+in the name of the file.
+These files are produced only if \texttt{npress\_plot>0} for each
+\texttt{press\_plot}.
+
+\item
+\texttt{anhar\_files/flanhar.tstress\_temp.\#temperature} (default name \\
+\texttt{output\_therm.dat.tstress\_temp.\#temperature}).
+This file is printed when \texttt{lmurn=} \texttt{.FALSE.} and the 
+elastic constants 
+of one or more configurations are on file.
+The thermal stresses are computed as a function of temperature from the
+elastic constants and the thermal expansion.
+The file contains:
+\begin{verbatim}
+#   T   b_{11}  b_{12}  b_{13}  b_{22}  b_{23}  b_{33}
+\end{verbatim}
+All these quantities are calculated at the \texttt{\#temperature} given
+in the name of the file.
+These files are produced only if \texttt{ntemp\_plot>0} for each
+\texttt{temp\_plot}.
 
 \item 
 \texttt{anhar\_files/flanhar(.gamma)(\_ph)(\_grun)} 
@@ -1593,6 +1692,28 @@ calculated from the mode Gr\"uneisen parameters, while the \texttt{celldm}
 parameters are still obtained from the free energy minimization. Which
 one depends from the variable \texttt{ltherm\_dos} and \texttt{ltherm\_freq}.
 If both are \texttt{.TRUE.} the second is used.
+
+\item 
+\texttt{anhar\_files/flanhar.celldm\_press.\#pressure} 
+(default name \\ \texttt{output\_anhar.dat.celldm\_press.\#pressure}). 
+This file is printed
+only when \texttt{lmurn=.FALSE.} and its content depends on the crystal 
+system as described in the previuos point. 
+All these quantities are calculated at the \texttt{\#pressure} given
+in the name of the file.
+These files are produced only if \texttt{npress\_plot>0} for each
+\texttt{press\_plot}. 
+
+\item 
+\texttt{anhar\_files/flanhar.celldm\_temp.\#temperature} 
+(default name \\ \texttt{output\_anhar.dat.celldm\_temp.\#temperature}). 
+This file is printed
+only when \texttt{lmurn=.FALSE.} and its content depends on the crystal 
+system as described in the previuos point. 
+All these quantities are calculated at the \texttt{\#temperature} given
+in the name of the file.
+These files are produced only if \texttt{ntemp\_plot>0} for each
+\texttt{temp\_plot}. 
 
 \item 
 \texttt{anhar\_files/flgrun(\_\#)}(default name 
