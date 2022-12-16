@@ -1733,8 +1733,16 @@ temperature or volume. The format of the file is readable by the program
 
 \item 
 \texttt{anhar\_files/flpgrun(.\#)(.\#)} 
-(default name \texttt{output\_pgrun.dat(.\#)(.\#)}).
+(default name \texttt{output\_pgrun.dat(.\#)} \\ \texttt{(.\#)}).
 These files contains the mode Gr\"uneisen parameters along the path.
+They are in a format readable by \texttt{gnuplot} as produced by 
+the \texttt{plotband.f90} code of \qe. The numbers after the geometry indicate the number of the line 
+along the path and the number of the irreducible representation.
+
+\item 
+\texttt{anhar\_files/flpgrun\_freq(.\#)(.\#)} 
+(default name \texttt{output\_pgrun.} \\ \texttt{dat\_freq(.\#)(.\#)}).
+These files contains the interpolated phonon frequencies along the path.
 They are in a format readable by \texttt{gnuplot} as produced by 
 the \texttt{plotband.f90} code of \qe. The numbers after the geometry indicate the number of the line 
 along the path and the number of the irreducible representation.
@@ -1801,11 +1809,6 @@ No extension or the \texttt{(\_ph)} extension means that the elastic
 constants have been interpolated at the geometry that minimizes the
 free energy calculated by the phonon density of states or by Brillouin
 zone integration, respectively. 
-The \texttt{\_s} extension indicates isoentropic elastic constants.
-No extension means isothermal elastic constants.
-The \texttt{.g\#g} extension means that these are `fixed geometry
-quasi-harmonic' elastic constants calculated on a grid of geometries
-and \texttt{\#g} is the number of the geometry.
 
 \item
 \texttt{anhar\_files/flanhar.el\_comp(.g\#g)(\_s)(\_ph)}
@@ -1865,6 +1868,187 @@ For the Laue class $C_i$, it contains:
         S_{55} S_{66} S_{14} S_{15} S_{16} S_{24} S_{25} 
         S_{26} S_{34} S_{35} S_{36} S_{45} S_{46} S_{56}
 \end{verbatim}
+
+\item
+\texttt{anhar\_files/flanhar.el\_cons(\_s)}
+(default name \texttt{output\_} \texttt{anhar.dat.el\_cons(\_s)}). 
+This file
+contains the elastic constants as a functions of temperature. The number
+of columns depends on the Laue class. The first column is the 
+temperature and the second is the bulk modulus. The others are the
+non zero elements of the elastic constants tensor (see previuos points). \\ 
+These elastic constants are interpolated at the equilibrium geometry at
+temperature $T$. If the code has found the files 
+\texttt{anhar\_files/flanhar.el\_cons(.g\#g)(\_s)(\_ph)} these are
+the elastic constants within the quasi-harmonic approximation, otherwise
+they are the elastic constants within the quasi-static approximation.
+This file is printed only when \texttt{lmurn=.FALSE.}.
+
+\item
+\texttt{anhar\_files/flanhar.el\_cons(\_s)\_press.\#pressure}
+(default name \texttt{output\_} 
+\texttt{anhar.dat.el\_cons(\_s)\_press.\#pressure}). 
+This file contains the elastic constants as a functions of temperature
+at the pressure indicated in the filename. The number
+of columns depends on the Laue class. The first column is the 
+temperature and the second is the bulk modulus. The others are the
+non zero elements of the elastic constants tensor (see previuos points). \\ 
+These elastic constants are interpolated at the equilibrium geometry at
+temperature $T$ and pressure \texttt{\#pressure}. If the code has found 
+the files 
+\texttt{anhar\_files/flanhar.el\_cons(.g\#g)(\_s)(\_ph)} these are
+the elastic constants within the quasi-harmonic approximation, otherwise
+they are the elastic constants within the quasi-static approximation.
+These files are produced only if \texttt{npress\_plot>0} for each
+\texttt{press\_plot}. 
+This file is printed only when \texttt{lmurn=.FALSE.}.
+
+\item
+\texttt{anhar\_files/flanhar.el\_cons\_temp.\#temperature}
+(default name \texttt{output\_} 
+\texttt{anhar.dat.el\_cons\_temp.\#temperature}). 
+This file contains the elastic constants as a functions of pressure
+at the temperature indicated in the filename. The number
+of columns depends on the Laue class. The first column is the 
+pressure and the second is the bulk modulus. The others are the
+non zero elements of the elastic constants tensor (see previuos points). \\ 
+These elastic constants are interpolated at the equilibrium geometry at
+pressure $p$ and temperature \texttt{\#temperature}. If the code has found 
+the files 
+\texttt{anhar\_files/flanhar.el\_cons(.g\#g)(\_s)(\_ph)} these are
+the elastic constants within the quasi-harmonic approximation, otherwise
+they are the elastic constants within the quasi-static approximation.
+These files are produced only if \texttt{ntemp\_plot>0} for each
+\texttt{temp\_plot}. 
+This file is printed only when \texttt{lmurn=.FALSE.}.
+
+\item
+\texttt{anhar\_files/flanhar.el\_comp(\_s)}
+(default name \texttt{output\_} \texttt{anhar.dat.el\_comp(\_s)}). 
+This file
+contains the elastic compliances as a functions of temperature. The number
+of columns depends on the Laue class. The first column is the 
+temperature and the second is the compressibility. The others are the
+non zero elements of the elastic compliance tensor (see previuos points). \\ 
+These elastic compliances are interpolated at the equilibrium geometry at
+temperature $T$. If the code has found the files 
+\texttt{anhar\_files/flanhar.el\_comp(.g\#g)(\_s)(\_ph)} these are
+the elastic compliances within the quasi-harmonic approximation, otherwise
+they are the elastic compliances within the quasi-static approximation.
+This file is printed only when \texttt{lmurn=.FALSE.}.
+
+\item
+\texttt{anhar\_files/flanhar.el\_comp(\_s)\_press.\#pressure}
+(default name \texttt{output\_} 
+\texttt{anhar.dat.el\_comp\_press.\#pressure}). 
+This file contains the elastic compliances as a functions of temperature
+at the pressure indicated in the filename. The number
+of columns depends on the Laue class. The first column is the 
+temperature and the second is the compressibility. The others are the
+non zero elements of the elastic compliance tensor (see previuos points). \\ 
+These elastic compliances are interpolated at the equilibrium geometry at
+temperature $T$ and pressure \texttt{\#pressure}. If the code has found 
+the files 
+\texttt{anhar\_files/flanhar.el\_cons(.g\#g)(\_s)(\_ph)} these are
+the elastic compliances within the quasi-harmonic approximation, otherwise
+they are the elastic compliances within the quasi-static approximation.
+These files are produced only if \texttt{npress\_plot>0} for each
+\texttt{press\_plot}.  
+This file is printed only when \texttt{lmurn=.FALSE.}.
+
+\item
+\texttt{anhar\_files/flanhar.el\_comp(\_s)\_temp.\#temperature}
+(default name \texttt{output\_} 
+\texttt{anhar.dat.el\_cons(\_s)\_temp.\#temperature}). 
+This file contains the elastic compliances as a functions of pressure
+at the temperature indicated in the filename. The number
+of columns depends on the Laue class. The first column is the 
+pressure and the second is the compressibility. The others are the
+non zero elements of the elastic compliances tensor (see previuos points). \\ 
+These elastic compliances are interpolated at the equilibrium geometry at
+pressure $p$ and temperature \texttt{\#temperature}. If the code has found 
+the files 
+\texttt{anhar\_files/flanhar.el\_comp(.g\#g)(\_s)(\_ph)} these are
+the elastic compliances within the quasi-harmonic approximation, otherwise
+they are the elastic compliances within the quasi-static approximation.
+These files are produced only if \texttt{ntemp\_plot>0} for each
+\texttt{temp\_plot}. 
+This file is printed only when \texttt{lmurn=.FALSE.}.
+
+\item
+\texttt{anhar\_files/flanhar.macro\_el(\_s)(\_ph)(\_aver)}
+(default name \texttt{output\_} 
+\texttt{anhar.dat.macro\_el(\_s)(\_ph)(\_aver)}). 
+This file contains the macroscopic elastic properties (bulk modulus,
+Young modulus, shear modulus and poisson ration) as a function of temperature.
+The presence of \texttt{\_aver} on the file name indicates that these
+quantities are calculated by the Voigt-Reuss-Hill approximation, otherwise
+the file contains both the Voigt and the Reuss approximations.
+This file is printed only when \texttt{lmurn=.FALSE.}.
+
+\item
+\texttt{anhar\_files/flanhar.macro\_el(\_s)(\_press.\#pressure)(\_aver)}
+(default name \texttt{output\_} 
+\texttt{anhar.dat.macro\_el(\_s)(\_press.\#pressure)(\_aver)}). 
+This file contains the macroscopic elastic properties (bulk modulus,
+Young modulus, shear modulus, and poisson ration) as a function of 
+temperature calculated at the pressure \texttt{\#pressure} indicated
+in the filename.
+The presence of \texttt{\_aver} on the file name indicates that these
+quantities are calculated by the Voigt-Reuss-Hill approximation, otherwise
+the file contains both the Voigt and the Reuss approximations.
+These files are produced only if \texttt{npress\_plot>0} for each
+\texttt{press\_plot}.
+This file is printed only when \texttt{lmurn=.FALSE.}.
+
+\item
+\texttt{anhar\_files/flanhar.macro\_el(\_s)(\_temp.\#temperature)(\_aver)}
+(default name \texttt{output\_} 
+\texttt{anhar.dat.macro\_el(\_s)(\_temp.\#temperature)(\_aver)}). 
+This file contains the macroscopic elastic properties (bulk modulus,
+Young modulus, shear modulus, and poisson ration) as a function of 
+pressure calculated at the temperature \texttt{\#temperature} indicated
+in the filename.
+The presence of \texttt{\_aver} on the file name indicates that these
+quantities are calculated by the Voigt-Reuss-Hill approximation, otherwise
+the file contains both the Voigt and the Reuss approximations.
+These files are produced only if \texttt{ntemp\_plot>0} for each
+\texttt{temp\_plot}.
+This file is printed only when \texttt{lmurn=.FALSE.}.
+
+\item
+\texttt{anhar\_files/flanhar.sound\_vel(\_s)(\_ph)}
+(default name \texttt{output\_} \\
+\texttt{anhar.dat.sound\_vel(\_s)(\_ph)}). 
+This file contains the sound velocities (compressional velocity,
+bulk velocity, shear velocity) calculated with the macroscopic
+average elastic properties as a function of temperature.
+This file is printed only when \texttt{lmurn=.FALSE.}.
+
+\item
+\texttt{anhar\_files/flanhar.sound\_vel(\_s)(\_press.\#pressure)}
+(default name \texttt{output\_} 
+\texttt{anhar.dat.sound\_vel(\_s)(\_press.\#pressure)}). 
+This file contains the sound velocities (compressional velocity,
+bulk velocity, shear velocity) calculated with the macroscopic
+average elastic properties as a function of temperature at the 
+pressure \texttt{\#pressure} indicated in the filename.
+These files are produced only if \texttt{npress\_plot>0} for each
+\texttt{press\_plot}.
+This file is printed only when \texttt{lmurn=.FALSE.}.
+
+\item
+\texttt{anhar\_files/flanhar.sound\_vel(\_s)(\_temp.\#temperature)}
+(default name \texttt{output\_} 
+\texttt{anhar.dat.sound\_vel(\_s)(\_temp.\#temperature)}). 
+This file contains the sound velocities (compressional velocity,
+bulk velocity, shear velocity) calculated with the macroscopic
+average elastic properties as a function of pressure at the 
+\texttt{\#temperature} indicated in the filename.
+These files are produced only if \texttt{ntemp\_plot>0} for each
+\texttt{temp\_plot}.
+This file is printed only when \texttt{lmurn=.FALSE.}.
+
 
 \end{itemize}
 No extension or the \texttt{(\_ph)} extension means that the elastic
