@@ -330,6 +330,12 @@ IF (ltherm_dos) THEN
       ENDDO
       CALL write_e_omega_t(itemp_plot(itempp), phf, ndata)
    ENDDO
+!
+!  for diagnostic purposes write on file only the vibrational free energy
+!  and the electronic one if available
+!
+   CALL write_free_energy()
+
 ENDIF
 
 IF (ltherm_freq) THEN
@@ -431,7 +437,11 @@ ENDIF
 CALL write_grun_anhar_anis()
 
 CALL manage_plot_anhar_anis()
-
+!
+!   summarize the main anharmonic quantities of a solid
+!
+CALL summarize_anhar()
+!
 RETURN
 END SUBROUTINE manage_anhar_anis
 !

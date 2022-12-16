@@ -35,6 +35,11 @@ SUBROUTINE check_el_cons()
   INTEGER            :: igeo, central_geo
   LOGICAL            :: exst, found(tot_ngeo)
   !
+  !   If this is already allocated the elastic constants are already 
+  !   available and we do not reread them
+  !
+  IF (ALLOCATED(el_con_geo)) RETURN
+
   ALLOCATE( el_con_geo(6,6,tot_ngeo) )
   el_con_geo=0.0_DP
   found=.FALSE.
@@ -50,7 +55,10 @@ SUBROUTINE check_el_cons()
      WRITE(stdout,'(5x,"Geometry number",i5," elastic constants found")') igeo
      el_cons_available=.TRUE.
   ENDDO
-  IF (.NOT.el_cons_available) RETURN
+  IF (.NOT.el_cons_available) THEN
+     DEALLOCATE(el_con_geo)
+     RETURN
+  ENDIF
 !
 !  If there are the elastic constants of the central geometry we
 !  set the el_cons and el_compliances of that geometry. Otherwise
