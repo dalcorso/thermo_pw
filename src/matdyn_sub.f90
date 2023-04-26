@@ -145,7 +145,7 @@ SUBROUTINE matdyn_interp(nq, q, freq_save, startq, lastq, z_save)
   IF (PRESENT(z_save)) z_save=(0.0_DP,0.0_DP)
   freq_save=0.0_DP
   DO n=startq, lastq
-     IF ( MOD(n-nstart+1,20000) == 0 ) WRITE(stdout, '(5x,"Computing q ",&
+     IF ( MOD(n-startq+1,20000) == 0 ) WRITE(stdout, '(5x,"Computing q ",&
                          &   i8, " /", i8 )') n-startq+1, lastq-startq+1
 
      dyn(:,:,:,:) = (0.d0, 0.d0)
