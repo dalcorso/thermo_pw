@@ -81,7 +81,7 @@ $ECHO " done"
 
 cat > thermo_control << EOF
  &INPUT_THERMO
-   what='elastic_constants_t',
+   what='elastic_constants_geo',
    frozen_ions=.FALSE.
    elastic_algorithm='energy'
    use_free_energy=.TRUE.
@@ -128,7 +128,7 @@ cat > ph_control << EOF
 /
 EOF
 
-$ECHO "  running the thermo elastic_constants_t calculation" 
+$ECHO "  running the thermo elastic_constants_geo calculation" 
 $ECHO "  to calculate the elastic constants of silicon as "
 $ECHO "  a function of temperature as derivatives of the free energy "
 $ECHO "  in a regular mesh of geometries ... \c"

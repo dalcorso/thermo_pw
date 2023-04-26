@@ -172,7 +172,7 @@ what=scf_ph : this example computes the inverse of the frequency dependent
               using a Lanczos chain.
 
 example22:
-what=elastic_constants_t:
+what=elastic_constants_geo:
 what=mur_lc_t: this example computes the elastic constants on the
               same set of geometries that would be used with what='mur_lc_t'.
               The files with elastic constants are then used in another run
@@ -181,7 +181,7 @@ what=mur_lc_t: this example computes the elastic constants on the
               "quasi-static approximation". Run run_example first and 
               run_example_mur_lc_t second.
 example23:
-what=elastic_constants_t:
+what=elastic_constants_geo:
 what=mur_lc_t: this example computes the elastic constants as a function
               of temperature within the 'quasi-harmonic approximation' by
               doing the second derivatives of the Helmholtz free energy

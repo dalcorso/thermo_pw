@@ -82,7 +82,7 @@ $ECHO " done"
 
 cat > thermo_control << EOF
  &INPUT_THERMO
-  what='elastic_constants_t',
+  what='elastic_constants_geo',
   frozen_ions=.FALSE.
   lmurn=.FALSE.
  /
@@ -116,7 +116,7 @@ K_POINTS AUTOMATIC
 4 4 4 1 1 1 
 EOF
 
-$ECHO "  Running the thermo elastic_constants_t calculation " 
+$ECHO "  Running the thermo elastic_constants_geo calculation " 
 $ECHO "  to calculate the elastic constants of silicon at "
 $ECHO "  several lattice constant. The results are in si.elastic.out "
 $ECHO "  and in the directory elastic_constants... \c "
