@@ -28,15 +28,10 @@ join_qe:
           ./CMakeLists.txt_qe ; mv ./main_CMakeLists.txt ../CMakeLists.txt ; fi
 	if test -f ./QESUB/lmdif.f90 ; then mv ../Modules/lmdif.f90 \
            ./QESUB/lmdif.f90_qe ; mv ./QESUB/lmdif.f90 ../Modules ; fi
-	if test -f ./QESUB/v_of_rho.f90 ; then mv ../PW/src/v_of_rho.f90 \
-           ./QESUB/v_of_rho.f90_qe ; \
-           mv ./QESUB/v_of_rho.f90 ../PW/src/v_of_rho.f90 ; fi
-	if test -f ./QESUB/write_upf_new.f90 ; then \
-           mv ../upflib/write_upf_new.f90 ./QESUB/write_upf_new.f90_qe ; \
-           mv ./QESUB/write_upf_new.f90 ../upflib/write_upf_new.f90 ; fi
-	if test -f ./QESUB/qexsd_init.f90 ; then \
-           mv ../Modules/qexsd_init.f90 ./QESUB/qexsd_init.f90_qe ; \
-           mv ./QESUB/qexsd_init.f90 ../Modules/qexsd_init.f90 ; fi
+	if test -f ./QESUB/parameters.f90 ; then mv ../Modules/parameters.f90 \
+          ./QESUB/parameters.f90_qe ; mv ./QESUB/parameters.f90 ../Modules ; fi
+	if test -f ./QESUB/clocks_handler.f90 ; then mv ../UtilXlib/clocks_handler.f90 \
+          ./QESUB/clocks_handler.f90_qe ; mv ./QESUB/clocks_handler.f90 ../UtilXlib ; fi
 leave_qe:
 	if test -f ./Makefile_qe ; then mv ../Makefile ./main_Makefile ; \
            mv ./Makefile_qe ../Makefile ; fi
@@ -51,15 +46,12 @@ leave_qe:
 	if test -f ./QESUB/lmdif.f90_qe ; then mv ../Modules/lmdif.f90 \
            ./QESUB/lmdif.f90 ; \
            mv ./QESUB/lmdif.f90_qe ../Modules/lmdif.f90 ; fi
-	if test -f ./QESUB/v_of_rho.f90_qe ; then mv ../PW/src/v_of_rho.f90 \
-           ./QESUB/v_of_rho.f90 ; \
-           mv ./QESUB/v_of_rho.f90_qe ../PW/src/v_of_rho.f90 ; fi
-	if test -f ./QESUB/write_upf_new.f90_qe ; then \
-           mv ../upflib/write_upf_new.f90 ./QESUB/write_upf_new.f90 ; \
-           mv ./QESUB/write_upf_new.f90_qe ../upflib/write_upf_new.f90 ; fi
-	if test -f ./QESUB/qexsd_init.f90_qe ; then \
-           mv ../Modules/qexsd_init.f90 ./QESUB/qexsd_init.f90 ; \
-           mv ./QESUB/qexsd_init.f90_qe ../Modules/qexsd_init.f90 ; fi
+	if test -f ./QESUB/parameters.f90_qe ; then mv ../Modules/parameters.f90 \
+           ./QESUB/parameters.f90 ; \
+           mv ./QESUB/parameters.f90_qe ../Modules/parameters.f90 ; fi
+	if test -f ./QESUB/clocks_handler.f90_qe ; then mv ../UtilXlib/clocks_handler.f90 \
+           ./QESUB/clocks_handler.f90 ; \
+	   mv ./QESUB/clocks_handler.f90_qe ../UtilXlib/clocks_handler.f90 ; fi
 
 clean: thermo_tools_clean thermo_pw_clean thermo_lib_clean thermo_qe_clean examples_clean examples_qe_clean space_groups_clean doc_clean
 
