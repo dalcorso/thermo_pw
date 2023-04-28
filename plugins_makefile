@@ -228,5 +228,5 @@ veryclean: w90_veryclean want_veryclean yambo_veryclean \
 	gipaw_veryclean d3q_veryclean thermo_pw_veryclean
 
 distclean: w90_distclean want_distclean yambo_distclean \
-	gipaw_distclean d3q_distclean thermo_pw_veryclean
+	gipaw_distclean d3q_distclean 
 
